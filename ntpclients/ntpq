@@ -308,7 +308,7 @@ usage: help [ command ]
                     if len(self.chosts) > 1:
                         self.warn("server=%s " % self.session.hostname)
                     self.warn("***No information returned for association %d\n" \
-                                     % associd)
+                                     % peer.associd)
                     continue
                 if len(self.chosts) > 1:
                     self.say(ntp.util.PeerSummary.high_truncate(self.session.hostname, maxhostlen)+ " ")
