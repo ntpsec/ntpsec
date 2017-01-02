@@ -13,12 +13,19 @@ TEST_TEAR_DOWN(hextolfp) {}
 
 #include "lfptest.h"
 
+static l_fp lfpinit(int32_t hi, uint32_t lo)
+{
+    l_fp tmp;
+    setlfpsint(tmp, hi);
+    setlfpfrac(tmp, lo);
+    return tmp;
+}
 
 TEST(hextolfp, PositiveInteger) {
 	const char *str = "00001000.00000000";
 	l_fp actual;
 
-	l_fp expected = {{4096}, 0}; // 16^3, no fraction part.
+	l_fp expected = lfpinit(4096, 0); // 16^3, no fraction part.
 
 	TEST_ASSERT_TRUE(hextolfp(str, &actual));
 	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
@@ -28,7 +35,7 @@ TEST(hextolfp, NegativeInteger) {
 	const char *str = "ffffffff.00000000"; // -1 decimal
 	l_fp actual;
 
-	l_fp expected = {{-1}, 0};
+	l_fp expected = lfpinit(-1, 0);
 
 	TEST_ASSERT_TRUE(hextolfp(str, &actual));
 	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
@@ -38,7 +45,7 @@ TEST(hextolfp, PositiveFraction) {
 	const char *str = "00002000.80000000"; // 8196.5 decimal
 	l_fp actual;
 
-	l_fp expected = {{8192}, HALF};
+	l_fp expected = lfpinit(8192, HALF);
 
 	TEST_ASSERT_TRUE(hextolfp(str, &actual));
 	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
@@ -48,7 +55,7 @@ TEST(hextolfp, NegativeFraction) {
 	const char *str = "ffffffff.40000000"; // -1 + 0.25 decimal
 	l_fp actual;
 
-	l_fp expected = {{-1}, QUARTER}; //-1 + 0.25
+	l_fp expected = lfpinit(-1, QUARTER); //-1 + 0.25
 
 	TEST_ASSERT_TRUE(hextolfp(str, &actual));
 	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
