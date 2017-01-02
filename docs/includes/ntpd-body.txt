@@ -502,17 +502,17 @@ as described in {ntpdconfman}.
 == FILES ==
 
 [options="header"]
-|========================================================================
-|File               |Default                    |Option      |Option
-|configuration file |+{prefixdir}/etc/{ntpconf}+|+-c+        |+conffile+
-|frequency file     |none                       |+-f+        |+driftfile+
-|leapseconds file   |none                       |            |+leapfile+
-|process ID file    |none                       |+-p+        |+pidfile+
-|log file           |system log                 |+-l+        |+logfile+
-|include file       |none                       |none        |+includefile+
-|statistics path    |+/var/NTP+                 |+-s+        |+statsdir+
-|keys path          |+{prefixdir}/etc+          |none        |+keysdir+
-|========================================================================
+|===================================================================
+|File               |Default           |Option      |Option
+|configuration file |+/etc/{ntpconf}+  |+-c+        |+conffile+
+|frequency file     |none              |+-f+        |+driftfile+
+|leapseconds file   |none              |            |+leapfile+
+|process ID file    |none              |+-p+        |+pidfile+
+|log file           |system log        |+-l+        |+logfile+
+|include file       |none              |none        |+includefile+
+|statistics path    |+/var/NTP+        |+-s+        |+statsdir+
+|keys path          |+{prefixdir}/etc+ |none        |+keysdir+
+|===================================================================
 
 [[signals]]
 == SIGNALS ==
