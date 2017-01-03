@@ -4,11 +4,17 @@ statfiles.py - class for digesting and plotting NTP logfiles
 Requires gnuplot and liberation fonts installed.
 
 """
-#SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
 import calendar
-import glob, gzip, os, socket, sys, time
+import glob
+import gzip
+import os
+import socket
+import sys
+import time
+
 
 class NTPStats:
     "Gather statistics for a specified NTP site"
@@ -38,7 +44,7 @@ class NTPStats:
 
             # warning: 32 bit overflows
             time = NTPStats.SecondsInDay * mjd + second - 3506716800
-            if starttime  <= time <= endtime:
+            if starttime <= time <= endtime:
                 # time as integer number milli seconds
                 split[0] = int(time * 1000)
                 # time as string
@@ -75,12 +81,12 @@ class NTPStats:
             self.sitename = socket.getfqdn()
 
         if not os.path.isdir(statsdir):
-            sys.stderr.write("ntpviz: ERROR: %s is not a directory\n" \
-                 % statsdir)
+            sys.stderr.write("ntpviz: ERROR: %s is not a directory\n"
+                             % statsdir)
             raise SystemExit(1)
 
-        for stem in ("clockstats", "peerstats", "loopstats", "rawstats", \
-                 "temps", "gpsd"):
+        for stem in ("clockstats", "peerstats", "loopstats", "rawstats",
+                     "temps", "gpsd"):
             lines = []
             try:
                 pattern = os.path.join(statsdir, stem)
@@ -95,8 +101,8 @@ class NTPStats:
                     else:
                         lines += open(logpart, 'r').readlines()
             except IOError:
-                sys.stderr.write("ntpviz: WARNING: could not read %s\n" \
-                     % logpart)
+                sys.stderr.write("ntpviz: WARNING: could not read %s\n"
+                                 % logpart)
                 pass
 
             lines1 = []
@@ -117,7 +123,7 @@ class NTPStats:
                     if starttime <= t <= endtime:
                         # prefix with int milli sec.
                         split.insert(0, int(t * 1000))
-                        lines1.append( split)
+                        lines1.append(split)
             else:
                 # Morph first fields into Unix time with fractional seconds
                 # ut into nice dictionary of dictionary rows
@@ -139,13 +145,13 @@ class NTPStats:
             if perc == 100:
                 ret["p100"] = values[length - 1]
             else:
-                ret[ "p" + str(perc)] = values[int(length * (perc/100))]
+                ret["p" + str(perc)] = values[int(length * (perc/100))]
         return ret
 
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
         "This is very expensive, so cache the result"
-        if len( self.peermap):
+        if len(self.peermap):
             return self.peermap
 
         for row in self.peerstats:
@@ -209,6 +215,7 @@ class NTPStats:
                 pass
         return key      # Someday, be smarter than this.
 
+
 def iso_to_posix(s):
     "Accept timestamps in ISO 8661 format or numeric POSIX time. UTC only."
     if str(s).isdigit():
@@ -217,6 +224,7 @@ def iso_to_posix(s):
         t = time.strptime(s, "%Y-%m-%dT%H:%M:%S")
         # don't use time.mktime() as that is local tz
         return calendar.timegm(t)
+
 
 def posix_to_iso(t):
     "ISO 8601 string in UTC from Unix time."
