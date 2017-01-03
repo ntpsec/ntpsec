@@ -34,33 +34,42 @@ from __future__ import print_function, division
 #
 # Finally, logging to syslog by default was a design error, violating
 # Unix principles, that has been fixed. To get this behavior when
-# running in a script, redirect standard error to logger(1). 
+# running in a script, redirect standard error to logger(1).
 #
 # The one new option in this version is -p, borrowed from ntpdate.
 
-import sys, socket, select, time, getopt, math
+import sys
+import socket
+import select
+import time
+import getopt
+import math
 
 try:
     import ntp.packet
     import ntp.util
     import ntp.magic
 except ImportError as e:
-    sys.stderr.write("ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.stderr.write(
+        "ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
+
 
 def queryhost(server, concurrent, timeout=5, port=123):
     "Query IP addresses associated with a specified host."
     try:
         iptuples = socket.getaddrinfo(server, port,
-                                      af, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+                                      af, socket.SOCK_DGRAM,
+                                      socket.IPPROTO_UDP)
     except socket.gaierror as e:
         log("lookup of %s failed, errno %d = %s" % (server, e[0], e[1]))
         return []
     sockets = []
     packets = []
     request = ntp.packet.SyncPacket()
-    request.transmit_timestamp = ntp.packet.SyncPacket.posix_to_ntp(time.time())
+    request.transmit_timestamp = ntp.packet.SyncPacket.posix_to_ntp(
+        time.time())
     packet = request.flatten()
     for (family, socktype, proto, canonname, sockaddr) in iptuples:
         if debug:
@@ -84,6 +93,7 @@ def queryhost(server, concurrent, timeout=5, port=123):
         if debug >= 2:
             log("Sent to %s:" % (sockaddr[0],))
             ntp.packet.dump_hex_printable(packet)
+
         def read_append(s, packets):
             d, a = s.recvfrom(1024)
             if debug >= 2:
@@ -94,9 +104,11 @@ def queryhost(server, concurrent, timeout=5, port=123):
                         log("no MAC on reply from %s" % packet.hostname)
                 if not credentials.verify_mac(d):
                     packet.trusted = False
-                    log("MAC verification on reply from %s failed" % sockaddr[0])
+                    log("MAC verification on reply from %s failed"
+                        % sockaddr[0])
                 elif debug:
-                    log("MAC verification on reply from %s succeeded" % sockaddr[0])
+                    log("MAC verification on reply from %s succeeded"
+                        % sockaddr[0])
             pkt = ntp.packet.SyncPacket(d)
             pkt.hostname = server
             pkt.resolved = sockaddr[0]
@@ -119,10 +131,11 @@ def queryhost(server, concurrent, timeout=5, port=123):
                 sockets.remove(s)
     return packets
 
+
 def clock_select(packets):
     "Select the pick-of-the-litter clock from the samples we've got."
     # This is a slightly simplified version of the filter ntpdate used
-    NTP_INFIN     = 15		# max stratum, infinity a la Bellman-Ford 
+    NTP_INFIN = 15          # max stratum, infinity a la Bellman-Ford
 
     # This first chunk of code is supposed to go through all
     # servers we know about to find the servers that
@@ -130,8 +143,8 @@ def clock_select(packets):
     # doing the sanity checks and trying to insert anyone who
     # looks okay. We are at all times aware that we should
     # only keep samples from the top two strata.
-    # 
-    nlist = 0	# none yet
+    #
+    nlist = 0   # none yet
     filtered = []
     for response in packets:
         def drop(msg):
@@ -158,7 +171,7 @@ def clock_select(packets):
         if not response.trusted:
             drop("request was authenticated but server is untrusted")
             continue
-        # Bypass this test if we ever support broadcast-client mode again 
+        # Bypass this test if we ever support broadcast-client mode again
         if response.origin_timestamp == 0:
             drop("unexpected response timestamp")
             continue
@@ -173,6 +186,7 @@ def clock_select(packets):
     # Return the best
     return filtered[:1]
 
+
 def report(packet, json):
     "Report on the SNTP packet selected for display, and its adjustment."
     say = sys.stdout.write
@@ -182,7 +196,7 @@ def report(packet, json):
     # Cheesy way to get local timezone offset
     gmt_time = int(time.time())
     local_time = int(time.mktime(time.gmtime(gmt_time)))
-    tmoffset = (local_time - gmt_time) // 60	# In minutes
+    tmoffset = (local_time - gmt_time) // 60    # In minutes
 
     # The server's idea of the time
     t = time.localtime(int(packet.transmit_timestamp))
@@ -197,29 +211,30 @@ def report(packet, json):
     tz = "%s%02d%02d" % (sgn, tmoffset // 60, tmoffset % 60)
 
     if json:
-        say('{"time":"%sT%s%s","offset":%f,"precision":%f,"host":"%s",ip:"%s","stratum":%s,"leap":"%s","adjusted":%s}\n' % \
-            (date, tod, tz,
-             packet.adjust(), packet.synchd(),
-             packet.hostname, packet.resolved or packet.hostname,
-             packet.stratum, packet.leap(),
-             "true" if adjusted else "false"))
+        say('{"time":"%sT%s%s","offset":%f,"precision":%f,"host":"%s",'
+            'ip:"%s","stratum":%s,"leap":"%s","adjusted":%s}\n'
+            % (date, tod, tz,
+               packet.adjust(), packet.synchd(),
+               packet.hostname, packet.resolved or packet.hostname,
+               packet.stratum, packet.leap(),
+               "true" if adjusted else "false"))
     else:
-        say("%s %s (%s) %+f +/- %f %s" % \
-            (date, tod, tz,
-             packet.adjust(), packet.synchd(),
-             packet.hostname))
+        say("%s %s (%s) %+f +/- %f %s"
+            % (date, tod, tz,
+               packet.adjust(), packet.synchd(),
+               packet.hostname))
         if packet.resolved and packet.resolved != packet.hostname:
             say(" " + packet.resolved)
         say(" s%d %s\n" % (packet.stratum, packet.leap()))
 
 usage = """
 USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
-		[ hostname-or-IP ...]
+                [ hostname-or-IP ...]
   Flg Arg Option-Name     Description
    -4 no  ipv4           Force IPv4 DNS name resolution
-				- prohibits the option 'ipv6'
+                                - prohibits the option 'ipv6'
    -6 no  ipv6           Force IPv6 DNS name resolution
-				- prohibits the option 'ipv4'
+                                - prohibits the option 'ipv4'
    -a Num authentication  Enable authentication with the numbered key
    -c yes concurrent      Hosts to be queried concurrently
    -d no  debug           Increase debug verbosity
@@ -227,12 +242,12 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -g yes gap             Set gap between requests
    -j no  json            Use JSON output format
    -l Str logfile         Log to specified logfile
-				 - prohibits the option 'syslog'
-   -p yes samples         Number of samples to take (default 1) 
+                                 - prohibits the option 'syslog'
+   -p yes samples         Number of samples to take (default 1)
    -S no  step            Set (step) the time with clock_settime()
-				 - prohibits the option 'step'
+                                 - prohibits the option 'step'
    -s no  slew            Set (slew) the time with adjtime()
-				 - prohibits the option 'slew'
+                                 - prohibits the option 'slew'
    -t Num timeout         Request timeout in seconds (default 5)
    -k Str keyfile         Specify a keyfile. ntpdig will look in this file
                           for the key specified with -a
@@ -242,19 +257,20 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "46a:c:dD:g:hjk:l:M:o:p:r:Sst:wWV",
-                                             ["ipv4","ipv6",
-                                              "authentication=",
-                                              "concurrent=",
-                                              "gap=", "help", "json",
-                                              "keyfile=", "logfile=",
-                                              "replay=",
-                                              "samples=", "steplimit=",
-                                              "step", "slew",
-                                              "timeout=",
-                                              "debug", "set-debug-level=",
-                                              "version"])
+        (options, arguments) = getopt.getopt(
+            sys.argv[1:],
+            "46a:c:dD:g:hjk:l:M:o:p:r:Sst:wWV",
+            ["ipv4", "ipv6",
+             "authentication=",
+             "concurrent=",
+             "gap=", "help", "json",
+             "keyfile=", "logfile=",
+             "replay=",
+             "samples=", "steplimit=",
+             "step", "slew",
+             "timeout=",
+             "debug", "set-debug-level=",
+             "version"])
     except getopt.GetoptError as e:
         print(e)
         raise SystemExit(1)
@@ -270,7 +286,7 @@ if __name__ == '__main__':
     gap = 50
     json = False
     keyfile = None
-    steplimit = 0	# Default is intentionally zero
+    steplimit = 0       # Default is intentionally zero
     samples = 1
     step = False
     slew = False
@@ -319,7 +335,8 @@ if __name__ == '__main__':
                 print(ntp.util.stdversion())
                 raise SystemExit(0)
             else:
-                sys.stderr.write("Unknown command line switch or missing argument.\n")
+                sys.stderr.write(
+                    "Unknown command line switch or missing argument.\n")
                 sys.stderr.write(usage)
                 raise SystemExit(1)
     except ValueError:
@@ -344,7 +361,7 @@ if __name__ == '__main__':
         sys.stderr.write("-a option requires -k.\n")
         raise SystemExit(1)
 
-    gap /= 1000	# Scale gap to milliseconds
+    gap /= 1000     # Scale gap to milliseconds
 
     if not arguments:
         arguments = ["localhost"]
@@ -358,7 +375,8 @@ if __name__ == '__main__':
         returned = []
         for server in concurrent_hosts:
             try:
-                returned += queryhost(server=server, concurrent=True, timeout=timeout)
+                returned += queryhost(server=server, concurrent=True,
+                                      timeout=timeout)
             except ntp.packet.SyncException as e:
                 log(str(e))
                 continue
@@ -366,7 +384,8 @@ if __name__ == '__main__':
                 break
         for server in arguments:
             try:
-                returned += queryhost(server=server, concurrent=False, timeout=timeout)
+                returned += queryhost(server=server,
+                                      concurrent=False, timeout=timeout)
             except ntp.packet.SyncException as e:
                 log(str(e))
                 continue
@@ -377,15 +396,18 @@ if __name__ == '__main__':
     if returned:
         pkt = returned[0]
         if debug:
-            #print(repr(pkt))
+            # print(repr(pkt))
             def hexstamp(n):
                 return "%08x.%08x" % (n >> 32, n & 0x00000000ffffffff)
-            print("org t1: %s rec t2: %s" % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
-            print("xmt t3: %s dst t4: %s" % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
+            print("org t1: %s rec t2: %s"
+                  % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
+            print("xmt t3: %s dst t4: %s"
+                  % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
             pkt.posixize()
             print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
             print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
-            print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
+            print("rec-org t21: %f  xmt-dst t34: %f"
+                  % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
         adjusted = step and (not slew or (slew and (abs(offset) > steplimit)))
         report(pkt, json)
         # If we can step but we cannot slew, then step.
@@ -405,4 +427,4 @@ if __name__ == '__main__':
         log("no eligible servers")
         raise SystemExit(1)
 
-#end
+# end
