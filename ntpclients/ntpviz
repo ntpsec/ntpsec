@@ -382,7 +382,8 @@ set rmargin 10
                         # data loss, add a break in the plot line
                         plot_data += '\n'
                     # fields: time, fld, and rtt
-                    plot_data += row[1] + ' ' + row[item1] + ' ' + row[item2] + '\n'
+                    plot_data += row[1] + ' ' + row[item1] + ' ' \
+                        + row[item2] + '\n'
                     last_time = row[0]
                 except IndexError:
                     pass
@@ -441,8 +442,10 @@ set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
- "-" using 1:($2*%(multiplier)s) title "clock offset %(unit)s" with linespoints ls 1, \
- "-" using 1:($3*%(multiplier_f)s) title "frequency offset %(unit_f)s" with linespoints ls 2 axis x1y2
+ "-" using 1:($2*%(multiplier)s) title "clock offset %(unit)s" \
+     with linespoints ls 1, \
+ "-" using 1:($3*%(multiplier_f)s) title "frequency offset %(unit_f)s" \
+     with linespoints ls 2 axis x1y2
 """ % out
 
         exp = """\
@@ -517,7 +520,8 @@ set y2range [%(min_y2)s:%(max_y2)s]
 set key bottom right box
 set style line 1 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
- "-" using 1:($2*%(multiplier_f)s) title "frequency offset %(unit_f)s" with linespoints ls 1 axis x1y2, \
+ "-" using 1:($2*%(multiplier_f)s) title "frequency offset %(unit_f)s" \
+     with linespoints ls 1 axis x1y2, \
 """ % out
 
         for key in tempslist:
@@ -680,7 +684,8 @@ set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
- "-" using 1:($2 * %(multiplier)s) title "local clock error" with linespoints ls 2, \
+ "-" using 1:($2 * %(multiplier)s) title "local clock error" \
+     with linespoints ls 2, \
  %(p99)s title "99th percentile", \
  %(p95)s title "95th percentile", \
  %(p5)s title "5th percentile", \
