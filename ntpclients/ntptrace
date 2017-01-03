@@ -8,7 +8,7 @@ Usage: ntptrace [-n | --numeric] [-m number | --max-hosts=number]
 
 See the manual page for details.
 """
-#SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 from __future__ import print_function
 
@@ -17,6 +17,7 @@ import re
 import subprocess
 import sys
 import ntp.util
+
 
 def get_info(host):
     info = ntp_read_vars(0, [], host)
@@ -55,7 +56,9 @@ def ntp_read_vars(peer, vars, host):
         cmd.append(host)
 
     try:
-        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode('utf-8').splitlines()
+        output = subprocess.check_output(
+            cmd,
+            stderr=subprocess.STDOUT).decode('utf-8').splitlines()
     except subprocess.CalledProcessError as e:
         print("Could not start ntpq: %s" % e.output, file=sys.stderr)
         raise SystemExit(1)
@@ -67,7 +70,8 @@ def ntp_read_vars(peer, vars, host):
         if re.search(r'Connection refused', line):
             return
 
-        match = re.search(r'^asso?c?id=0 status=(\S{4}) (\S+), (\S+),', line, flags=re.IGNORECASE)
+        match = re.search(r'^asso?c?id=0 status=(\S{4}) (\S+), (\S+),', line,
+                          flags=re.IGNORECASE)
         if match:
             outvars['status_line']['status'] = match.group(1)
             outvars['status_line']['leap'] = match.group(2)
@@ -138,12 +142,14 @@ while True:
         host = ntp.util.canonicalize_dns(host)
 
     print("%s: stratum %d, offset %f, synch distance %f" %
-          (host, int(info['stratum']), info['offset'], info['syncdistance']), end='')
+          (host, int(info['stratum']), info['offset'], info['syncdistance']),
+          end='')
     if int(info['stratum']) == 1:
         print(", refid '%s'" % info['refid'], end='')
     print()
 
-    if int(info['stratum']) == 0 or int(info['stratum']) == 1 or int(info['stratum']) == 16:
+    if (int(info['stratum']) == 0 or int(info['stratum']) == 1 or
+            int(info['stratum']) == 16):
         break
 
     if re.search(r'^127\.127\.\d{1,3}\.\d{1,3}$', info['refid']):
