@@ -298,7 +298,7 @@ tspec_intv_to_lfp(
 	)
 {
 	struct timespec	v;
-	l_fp		y = 0;
+	l_fp		y;
 	
 	v = normalize_tspec(x);
 	setlfpfrac(y, TVNTOF(v.tv_nsec));
