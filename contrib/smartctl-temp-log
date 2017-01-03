@@ -38,7 +38,10 @@ temperatures will be hardware specific.
 """
 
 
-import re, subprocess, sys, time
+import re
+import subprocess
+import sys
+import time
 
 # check for device on command line, otherwise use /dev/sda
 device = '/dev/sda'
@@ -47,31 +50,30 @@ if 1 < len(sys.argv):
     device = sys.argv[1]
 
 try:
-    output = subprocess.check_output(["smartctl", "-a", device], \
-        stderr=subprocess.STDOUT, \
-        universal_newlines=True)
+    output = subprocess.check_output(["smartctl", "-a", device],
+                                     stderr=subprocess.STDOUT,
+                                     universal_newlines=True)
 
 except subprocess.CalledProcessError as e:
-    sys.stderr.write( "ERROR: 'smartctl -a %s' failed\n" % device)
-    sys.stderr.write( e.output )
-    sys.stderr.write( "Return code: %s\n" % e.returncode )
+    sys.stderr.write("ERROR: 'smartctl -a %s' failed\n" % device)
+    sys.stderr.write(e.output)
+    sys.stderr.write("Return code: %s\n" % e.returncode)
     raise SystemExit(2)
 except OSError as e:
     sys.stderr.write("ERROR: Could not start smartctl: %s\n" % e.strerror)
     raise SystemExit(2)
 
 
-lines = output.split( '\n' )
+lines = output.split('\n')
 
 # this regex matches temperature output lines from 'sensors -u'
 pat = re.compile('194 Temperature_Celsius\s+\S+\s+(\d+)\s+')
 
 now = int(time.time())
 
-#lines = sys.stdin.readlines()
 line = ''
 for line in lines:
-    match = pat.match( line )
+    match = pat.match(line)
     if match and match.group(1):
         temp = match.group(1)
-        sys.stdout.write( '%d SMART %s\n' % (now, temp))
+        sys.stdout.write('%d SMART %s\n' % (now, temp))
