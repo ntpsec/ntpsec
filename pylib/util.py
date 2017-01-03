@@ -375,10 +375,13 @@ class PeerSummary:
             elif name == "rootdisp" or name == "dispersion":
                 estdisp = value
             elif name == "rec":
+                # FIXME, rec never used.
                 rec = value	# l_fp timestamp
             elif name == "srcport" or name == "peerport":
+                # FIXME, srcport never used.
                 srcport = value
             elif name == "reftime":
+                # FIXME, reftime never used.
                 reftime = value	# l_fp timestamp
         if hmode == ntp.magic.MODE_BCLIENTX:
             # broadcastclient or multicastclient
