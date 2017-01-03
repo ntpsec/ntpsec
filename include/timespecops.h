@@ -297,14 +297,8 @@ tspec_intv_to_lfp(
 	struct timespec	x
 	)
 {
-	struct timespec	v;
-	l_fp		y;
-	
-	v = normalize_tspec(x);
-	setlfpfrac(y, TVNTOF(v.tv_nsec));
-	setlfpsint(y, (int32_t)v.tv_sec);
-
-	return y;
+	struct timespec	v = normalize_tspec(x);
+	return lfpinit((int32_t)v.tv_sec, TVNTOF(v.tv_nsec));
 }
 
 /* x must be UN*X epoch, output will be in NTP epoch */

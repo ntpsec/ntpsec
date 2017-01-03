@@ -35,15 +35,6 @@
 # define TVUTOTSF(tvu)	\
 	(uint32_t)((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) / MICROSECONDS)
 
-/*
- * Convert a struct timeval to a time stamp.
- */
-#define TVTOTS(tv, ts) \
-	do { \
-		setlfpuint(*ts, (u_long)(tv)->tv_sec);   \
-		setlfpfrac(*ts, TVUTOTSF((tv)->tv_usec)); \
-	} while (false)
-
 #define NS_PER_MS_FLOAT	1000.0
 
 /* MUSL port shim */
@@ -338,7 +329,8 @@ main(
 #endif
 		tv.tv_sec = ntv.time.tv_sec;
 		tv.tv_usec = ntv.time.tv_frac_sec;
-		TVTOTS(&tv, &ts);
+		setlfpuint(ts, (u_long)tv.tv_sec);   \
+		setlfpfrac(ts, TVUTOTSF(tv.tv_usec)); \
 		setlfpuint(ts, lfpuint(ts) + JAN_1970);
 		setlfpfrac(ts, lfpfrac(ts) + ts_roundbit);
 		setlfpfrac(ts, lfpfrac(ts) & ts_mask);

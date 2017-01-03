@@ -3088,8 +3088,7 @@ static int validate_nonce(
 	if (3 != sscanf(pnonce, "%08x%08x%08x", &ts_i, &ts_f, &supposed))
 		return false;
 
-	setlfpuint(ts, (uint32_t)ts_i);
-	setlfpfrac(ts, (uint32_t)ts_f);
+	ts = lfpinit((uint32_t)ts_i, (uint32_t)ts_f);
 	derived = derive_nonce(&rbufp->recv_srcadr, lfpuint(ts), lfpfrac(ts));
 	get_systime(&now_delta);
 	L_SUB(&now_delta, &ts);
@@ -3456,8 +3455,7 @@ static void read_mru_list(
 			   (size_t)si < COUNTOF(last)) {
 			if (2 != sscanf(val, "0x%08x.%08x", &ui, &uf))
 				goto blooper;
-			setlfpuint(last[si], ui);
-			setlfpfrac(last[si], uf);
+			last[si] = lfpinit(ui, uf);
 			if (!SOCK_UNSPEC(&addr[si]) && si == priors)
 				priors++;
 		} else if (1 == sscanf(v->text, addr_fmt, &si) &&

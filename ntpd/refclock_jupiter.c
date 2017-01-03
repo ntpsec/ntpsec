@@ -840,8 +840,7 @@ jupiter_receive(struct recvbuf *rbufp)
 				break;
 
 			/* Add the new sample to a median filter */
-			setlfpuint(tstamp, JAN_1970 + (uint32_t)last_timecode);
-			setlfpfrac(tstamp, 0);
+			tstamp = lfpinit(JAN_1970 + (uint32_t)last_timecode, 0);
 
 			refclock_process_offset(pp, tstamp, pp->lastrec, pp->fudgetime1);
 
