@@ -66,6 +66,13 @@ static inline l_fp uint64_to_lfp(uint64_t x) {
  */
 #define	FRACTION_PREC	(32)
 
+static inline l_fp lfpinit(int32_t hi, uint32_t lo)
+{
+    l_fp tmp;
+    setlfpsint(tmp, hi);
+    setlfpfrac(tmp, lo);
+    return tmp;
+}
 
 /*
  * The second fixed point format is 32 bits, with the decimal between

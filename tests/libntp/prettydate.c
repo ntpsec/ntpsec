@@ -15,14 +15,6 @@ TEST_TEAR_DOWN(prettydate) {}
 
 static const u_int32_t HALF = 2147483648UL;
 
-static l_fp lfpinit(int32_t hi, uint32_t lo)
-{
-    l_fp tmp;
-    setlfpsint(tmp, hi);
-    setlfpfrac(tmp, lo);
-    return tmp;
-}
-
 TEST(prettydate, ConstantDate) {
     l_fp time = lfpinit(3485080800UL, HALF); // 2010-06-09 14:00:00.5
 

@@ -28,14 +28,6 @@ static const int THREE_FOURTH = -1073741824;
 static const int HALF_PROMILLE_UP = 2147484; // slightly more than 0.0005
 static const int HALF_PROMILLE_DOWN = 2147483; // slightly less than 0.0005
 
-static l_fp lfpinit(int32_t hi, uint32_t lo)
-{
-    l_fp tmp;
-    setlfpsint(tmp, hi);
-    setlfpfrac(tmp, lo);
-    return tmp;
-}
-
 TEST(lfptostr, PositiveInteger) {
     l_fp test = lfpinit(200, 0); // exact 200.0000000000
 
