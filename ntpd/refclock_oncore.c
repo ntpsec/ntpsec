@@ -152,6 +152,7 @@
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -1678,26 +1679,6 @@ oncore_get_timestamp(
 		instance->ev_serial = pps_i.clear_sequence;
 	}
 
-	/* convert timespec -> ntp l_fp */
-	dmy = tsp->tv_nsec;
-	dmy /= 1e9;
-	setlfpfrac(ts, dmy * 4294967296.0);
-	setlfpuint(ts, tsp->tv_sec);
-
-#if 0
-     alternate code for previous 4 lines is
-	dmy = 1.0e-9*tsp->tv_nsec;	/* fractional part */
-	DTOLFP(dmy, &ts);
-	dmy = tsp->tv_sec;		/* integer part */
-	DTOLFP(dmy, &ts_tmp);
-	L_ADD(&ts, &ts_tmp);
-     or more simply
-	dmy = 1.0e-9*tsp->tv_nsec;	/* fractional part */
-	DTOLFP(dmy, &ts);
-	setlfpuint(ts, tsp->tv_sec);
-#endif	/* 0 */
-
-	/* now have timestamp in ts */
 	/* add in saw_tooth and offset, these will be ZERO if no TRAIM */
 	/* they will be IGNORED if the PPSAPI can't do PPS_OFFSET/ASSERT/CLEAR */
 	/* we just try to add them in and don't test for that here */
@@ -1757,8 +1738,7 @@ oncore_get_timestamp(
 		oncore_log(instance, LOG_ERR, "ONCORE: Error doing time_pps_setparams");
 
 	/* have time from UNIX origin, convert to NTP origin. */
-
-	bumplfpuint(ts, JAN_1970);
+	ts = tspec_stamp_to_lfp(*tsp);
 	instance->pp->lastrec = ts;
 
 	/* print out information about this timestamp (long line) */
