@@ -30,15 +30,17 @@ Sample crontab usage:
 
 from __future__ import print_function
 
-import time, subprocess
+import time
+import subprocess
 
-output = subprocess.check_output(["temper-poll", "-c"], universal_newlines=True)
+output = subprocess.check_output(["temper-poll", "-c"],
+                                 universal_newlines=True)
 
 now = int(time.time())
 
 try:
-    temp = float( output )
-    print( str(now) + ' TEMPER ' + str(temp))
+    temp = float(output)
+    print(str(now) + ' TEMPER ' + str(temp))
 except:
     # bad data, ignore it
     raise SystemExit(1)
