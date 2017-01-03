@@ -11,8 +11,15 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, sys, getopt, cmd, re, resource, time
-import socket, hashlib
+import os
+import sys
+import getopt
+import cmd
+import re
+import resource
+import time
+import socket
+import hashlib
 
 try:
     import ntp.packet
@@ -21,7 +28,8 @@ try:
     import ntp.version
     import ntp.control
 except ImportError as e:
-    sys.stderr.write("ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.stderr.write(
+        "ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
@@ -106,8 +114,10 @@ else:  # Python 3
         # This ensures that the encoding of standard output and standard
         # error on Python 3 matches the master encoding we use to turn
         # bytes to Unicode in polystr above
-        # line_buffering=True ensures that interactive command sessions work as expected
-        return io.TextIOWrapper(stream.buffer, encoding=master_encoding, newline="\n", line_buffering=True)
+        # line_buffering=True ensures that interactive command sessions
+        # work as expected
+        return io.TextIOWrapper(stream.buffer, encoding=master_encoding,
+                                newline="\n", line_buffering=True)
 
     sys.stdin = make_std_wrapper(sys.stdin)
     sys.stdout = make_std_wrapper(sys.stdout)
@@ -116,18 +126,19 @@ else:  # Python 3
 # NTP-specific parts resume here
 
 # Flags for forming descriptors.
-OPT		= 0x80	# this argument is optional, or'd with type */
-NO		= 0x0
-NTP_STR		= 0x1	# string argument
-NTP_UINT	= 0x2	# unsigned integer
-NTP_INT		= 0x3	# signed integer
-NTP_ADD		= 0x4	# IP network address
-IP_VERSION	= 0x5	# IP version
-NTP_ADP		= 0x6	# IP address and port
-NTP_LFP		= 0x7	# NTP timestamp
-NTP_MODE	= 0x8	# peer mode
-NTP_2BIT	= 0x9	# leap bits
-NTP_FLOAT	= 0xa	# Float value
+OPT = 0x80        # this argument is optional, or'd with type */
+NO = 0x0
+NTP_STR = 0x1     # string argument
+NTP_UINT = 0x2    # unsigned integer
+NTP_INT = 0x3     # signed integer
+NTP_ADD = 0x4     # IP network address
+IP_VERSION = 0x5  # IP version
+NTP_ADP = 0x6     # IP address and port
+NTP_LFP = 0x7     # NTP timestamp
+NTP_MODE = 0x8    # peer mode
+NTP_2BIT = 0x9    # leap bits
+NTP_FLOAT = 0xa   # Float value
+
 
 class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
@@ -135,18 +146,18 @@ class Ntpq(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.session = session
         self.prompt = "ntpq> "
-        self.interactive       = False	# set to True when we should prompt
-        #self.auth_keyid   = 0		# Keyid used for authentication.
-        #self.auth_keytype = "NID_md5"	# MD5 (FIXME: string value is a dummy)
-        #self.auth_hashlen = 16		# MD5
-        self.rawmode           = False	# Flag which indicates raw mode output.
-        self.directmode        = False	# Flag for direct MRU output.
-        self.showhostnames     = True	# If false, display numeric IPs
-        self.auth_delay    = 20		# delay time (default 20msec)
-        self.wideremote = False		# show wide remote names?
-        self.ccmds = []			# Queued commands
-        self.chosts = []		# Command-line hosts
-        self.peers = []			# Data from NTP peers.
+        self.interactive = False        # set to True when we should prompt
+        # self.auth_keyid   = 0# Keyid used for authentication.
+        # self.auth_keytype = "NID_md5"# MD5 (FIXME: string value is a dummy)
+        # self.auth_hashlen = 16# MD5
+        self.rawmode = False            # Flag which indicates raw mode output.
+        self.directmode = False         # Flag for direct MRU output.
+        self.showhostnames = True       # If false, display numeric IPs
+        self.auth_delay = 20            # delay time (default 20msec)
+        self.wideremote = False         # show wide remote names?
+        self.ccmds = []                 # Queued commands
+        self.chosts = []                # Command-line hosts
+        self.peers = []                 # Data from NTP peers.
         self.debug = 0
         self.pktversion = ntp.magic.NTP_OLDVERSION + 1
         self.uservars = ntp.util.OrderedDict()
@@ -167,7 +178,8 @@ class Ntpq(cmd.Cmd):
 
         cmd, arg, line = self.parseline(line)
         dotext = 'do_'+cmd
-        cmdprefixlist = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        cmdprefixlist = [a[3:] for a in self.get_names()
+                         if a.startswith(dotext)]
         if len(cmdprefixlist) == 1:
             line = line.replace(cmd, cmdprefixlist[0])
             cmd = cmdprefixlist[0]
@@ -181,7 +193,8 @@ class Ntpq(cmd.Cmd):
         if cmd == "help" and arg:
             helptext = 'help_'+arg
             if helptext not in self.get_names():
-                argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
+                argprefixlist = [a[5:] for a in self.get_names()
+                                 if a.startswith(helptext)]
                 if len(argprefixlist) == 1:
                     line = line.replace(arg, argprefixlist.pop())
                 elif len(argprefixlist) > 1:
@@ -197,7 +210,8 @@ class Ntpq(cmd.Cmd):
         if arg:
             helptext = 'help_'+arg
             if helptext not in self.get_names():
-                argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
+                argprefixlist = [a[5:] for a in self.get_names()
+                                 if a.startswith(helptext)]
                 if len(argprefixlist) == 1:
                     arg = argprefixlist.pop()
                 elif len(argprefixlist) > 1:
@@ -206,13 +220,15 @@ class Ntpq(cmd.Cmd):
         cmd.Cmd.do_help(self, arg)
 
     def do_shell(self, line):
-        "Called when a line that starts with ! is entered in response to the prompt."
+        """
+Called when a line that starts with ! is entered in response to the prompt.
+"""
         self.warn("***Command `!%s' unknown\n" % line)
         return
 
     def say(self, msg):
         sys.stdout.write(polystr(msg))
-        sys.stdout.flush()	# In case we're piping the output
+        sys.stdout.flush()    # In case we're piping the output
 
     def warn(self, msg):
         sys.stderr.write(polystr(msg))
@@ -243,25 +259,27 @@ usage: help [ command ]
 
         if self.debug:
             self.warn("\n%d associations total\n" % len(self.peers))
-        #sortassoc()
+        # sortassoc()
         return True
 
     def __printassoc(self, showall):
         if not self.peers:
             self.say("No association IDs in list\n")
             return
-        self.say("\nind assid status  conf reach auth condition  last_event cnt\n")
-        self.say("===========================================================\n")
+        self.say(
+            "\nind assid status  conf reach auth condition  last_event cnt\n")
+        self.say(
+            "===========================================================\n")
         for (i, peer) in enumerate(self.peers):
             statval = ntp.control.CTL_PEER_STATVAL(peer.status)
-            if not showall and (statval & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)) == 0:
+            if ((not showall
+                 and (statval & (ntp.control.CTL_PST_CONFIG
+                                 | ntp.control.CTL_PST_REACH)) == 0)):
                 continue
             sw = ntp.util.PeerStatusWord(peer.status)
-            display = \
-                     "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
-                     (i + 1, peer.associd,
-                     peer.status, sw.conf, sw.reach, sw.auth,
-                     sw.condition, sw.last_event, sw.event_count)
+            display = "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" \
+                % (i + 1, peer.associd, peer.status, sw.conf, sw.reach,
+                   sw.auth, sw.condition, sw.last_event, sw.event_count)
             self.say(display + "\n")
 
     def __dopeers(self, showall, mode):
@@ -270,7 +288,7 @@ usage: help [ command ]
         if self.showhostnames:
             termwidth = interpreter.termwidth
         else:
-            termwidth = None	# Default width
+            termwidth = None    # Default width
         report = ntp.util.PeerSummary(mode,
                                       self.pktversion,
                                       self.showhostnames,
@@ -281,17 +299,18 @@ usage: help [ command ]
             maxhostlen = 0
             if len(self.chosts) > 1:
                 maxhostlen = max([len(host) for (host, _af) in self.chosts])
-                self.say("%-*.*s " % \
-                                 (maxhostlen, maxhostlen+1, "server"))
+                self.say("%-*.*s "
+                         % (maxhostlen, maxhostlen+1, "server"))
             self.say(report.header() + "\n")
             if len(self.chosts) > 1:
                 maxhostlen = max([len(host) for (host, _af) in self.chosts])
                 self.say("=" * (maxhostlen + 1))
             self.say(("=" * report.width()) + "\n")
             for peer in self.peers:
-                if not showall and \
-                        not (ntp.control.CTL_PEER_STATVAL(peer.status)
-                          & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)):
+                if ((not showall
+                   and not (ntp.control.CTL_PEER_STATVAL(peer.status)
+                            & (ntp.control.CTL_PST_CONFIG
+                               | ntp.control.CTL_PST_REACH)))):
                     if self.debug:
                         self.warn("eliding [%d]\n" % peer.associd)
                     continue
@@ -306,11 +325,12 @@ usage: help [ command ]
                 if not variables:
                     if len(self.chosts) > 1:
                         self.warn("server=%s " % self.session.hostname)
-                    self.warn("***No information returned for association %d\n" \
-                                     % peer.associd)
+                    self.warn("***No information returned for association %d\n"
+                              % peer.associd)
                     continue
                 if len(self.chosts) > 1:
-                    self.say(ntp.util.PeerSummary.high_truncate(self.session.hostname, maxhostlen)+ " ")
+                    self.say(ntp.util.PeerSummary.high_truncate(
+                             self.session.hostname, maxhostlen) + " ")
                 self.say(report.summary(self.session.rstatus,
                                         variables, peer.associd))
         except KeyboardInterrupt:
@@ -348,7 +368,8 @@ usage: help [ command ]
             except:
                 self.warn("Invalid associd literal.\n")
                 return -1
-            if associd != 0 and associd not in [peer.associd for peer in self.peers]:
+            if ((associd != 0
+                 and associd not in [peer.associd for peer in self.peers])):
                 self.warn("Unknown associd.\n")
                 return -1
             else:
@@ -361,7 +382,7 @@ usage: help [ command ]
             return ()
         lo = self.__assoc_valid(tokens[0])
         hi = self.__assoc_valid(tokens[1])
-        if lo < 0 or hi < 0 or hi < lo: 
+        if lo < 0 or hi < 0 or hi < lo:
             return ()
         if lo == hi:
             return(lo,)
@@ -376,12 +397,13 @@ usage: help [ command ]
             # high-half characters.  We won't do that unless somebody
             # files a bug, Mode 6 never seems to generate those in
             # variable fetches.
-            text = polystr(session.response.replace(polybytes(",\r\n"), polybytes(",\n")))
+            text = polystr(session.response.replace(polybytes(",\r\n"),
+                           polybytes(",\n")))
         else:
             if not quiet:
-                self.say("status=%04x %s,\n" % \
-                         (self.session.rstatus,
-                          ntp.ntpc.statustoa(dtype, self.session.rstatus)))
+                self.say("status=%04x %s,\n"
+                         % (self.session.rstatus,
+                            ntp.ntpc.statustoa(dtype, self.session.rstatus)))
             text = ntp.util.cook(variables)
         text = text.replace("'", '"')
         self.say(text)
@@ -400,12 +422,12 @@ usage: help [ command ]
             self.say("server=%s " % self.session.hostname)
         if not variables:
             if associd == 0:
-                self.say("No system%s variables returned\n"%
-                                " clock" if (type == ntp.ntpc.TYPE_CLOCK) else "")
+                self.say("No system%s variables returned\n"
+                         % " clock" if (type == ntp.ntpc.TYPE_CLOCK) else "")
             else:
-                self.say("No information returned for%s association %d\n"%
-                                (" clock" if (type == ntp.ntpc.TYPE_CLOCK) else "",
-                                associd))
+                self.say("No information returned for%s association %d\n"
+                         % (" clock" if (type == ntp.ntpc.TYPE_CLOCK) else "",
+                            associd))
             return True
         if not quiet:
             self.say("associd=%d " % associd)
@@ -469,10 +491,9 @@ usage: timeout [ msec ]
                 statype = ntp.ntpc.TYPE_SYS
             else:
                 statype = ntp.ntpc.TYPE_PEER
-            self.say("associd=%u status=%04x %s,\n" %
-                             (associd,
-                              self.session.rstatus,
-                              ntp.ntpc.statustoa(statype, self.session.rstatus)))
+            self.say("associd=%u status=%04x %s,\n"
+                     % (associd, self.session.rstatus,
+                        ntp.ntpc.statustoa(statype, self.session.rstatus)))
         try:
             for (name, legend, fmt) in variables:
                 if name not in queried:
@@ -482,8 +503,8 @@ usage: timeout [ msec ]
                     if self.showhostnames:
                         if self.debug:
                             self.say("DNS lookup begins...")
-                        value = ntp.util.canonicalize_dns(value,
-                                                          family=self.ai_family)
+                        value = ntp.util.canonicalize_dns(
+                            value, family=self.ai_family)
                         if self.debug:
                             self.say("DNS lookup complete.")
                     self.say("%s  %s\n" % (legend, value))
@@ -495,10 +516,12 @@ usage: timeout [ msec ]
                 elif fmt == NTP_LFP:
                     self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
                 elif fmt == NTP_2BIT:
-                    self.say("%s  %s\n" % (legend, ("00", "01", "10", "11")[value]))
+                    self.say("%s  %s\n"
+                             % (legend, ("00", "01", "10", "11")[value]))
                 elif fmt == NTP_MODE:
                     modes = (
-                        "unspec", "sym_active", "sym_passive", "client", "server",
+                        "unspec", "sym_active", "sym_passive", "client",
+                        "server",
                         "broadcast", "control", "private", "bclient"
                     )
                     try:
@@ -506,7 +529,8 @@ usage: timeout [ msec ]
                     except IndexError:
                         self.say("%s  %s%d\n" % (legend, "mode#", value))
                 else:
-                    self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
+                    self.warn("unexpected vc type %s for %s, value %s\n"
+                              % (fmt, name, value))
         except KeyboardInterrupt:
             self.warn("display interrupted\n")
 
@@ -544,7 +568,8 @@ usage: delay [ msec ]
                 session.ai_family = socket.AF_INET6
                 tokens.pop(0)
             try:
-                if tokens and self.session.openhost(tokens[0], session.ai_family):
+                if ((tokens
+                     and self.session.openhost(tokens[0], session.ai_family))):
                     print("current host set to %s" % self.session.hostname)
                 elif self.session.havehost():
                     print("current host remains %s" % self.session.hostname)
@@ -611,17 +636,18 @@ usage: hostnames [yes|no]
         elif line == "more":
             self.debug += 1
         elif line == "less":
-            if self.debug > 0: self.debug -= 1
+            if self.debug > 0:
+                self.debug -= 1
         elif line == "no":
             self.debug = 0
         else:
             try:
-                self.debug = int(line)	# C version didn't implement this
+                self.debug = int(line)  # C version didn't implement this
             except ValueError:
                 print("What?")
         self.session.debug = self.debug
         if self.debug > 0:
-            self.session.logfp = open("ntpq.log", "a", 1) # 1 => line buffered
+            self.session.logfp = open("ntpq.log", "a", 1)  # 1 => line buffered
         print("debug level is %d" % self.debug)
 
     def help_debug(self):
@@ -740,7 +766,8 @@ usage: authenticate [yes|no]
         else:
             try:
                 newversion = int(line)
-                if newversion >= ntp.magic.NTP_OLDVERSION and newversion <= ntp.magic.NTP_VERSION:
+                if ((newversion >= ntp.magic.NTP_OLDVERSION
+                     and newversion <= ntp.magic.NTP_VERSION)):
                     self.pktversion = newversion
                 else:
                     print("versions %d to %d, please"
@@ -759,7 +786,7 @@ usage: ntpversion [version number]
         "set key type to use for authenticated requests"
         if not line:
             self.say("Keytype: %s\n" % self.session.keytype)
-        elif not line in "DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1":
+        elif line not in "DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1":
             self.warn("Keytype %s is not supported by ntpd.\n" % line)
         elif line not in hashlib.algorithms_available:
             self.warn("Keytype %s is not supported by ntpq.\n" % line)
@@ -806,12 +833,15 @@ usage: lassociations
 """)
 
     def do_lpassociations(self, line):
-        "print last obtained list of associations, including client information"
+        """\
+print last obtained list of associations, including client information
+"""
         self.__printassoc(showall=True)
 
     def help_lpassociations(self):
         self.say("""\
-function: print last obtained list of associations, including client information
+function: print last obtained list of associations, including
+          client information
 usage: lpassociations
 """)
 
@@ -883,7 +913,8 @@ usage: showvars
         associd = self.__assoc_valid(line)
         if associd >= 0:
             qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
-            self.__dolist(self.uservars.keys(), associd, ntp.control.CTL_OP_READVAR, qtype)
+            self.__dolist(self.uservars.keys(), associd,
+                          ntp.control.CTL_OP_READVAR, qtype)
 
     def help_readlist(self):
         self.say("""\
@@ -916,7 +947,8 @@ usage: writelist [ assocID ]
         associd = self.__assoc_valid(line)
         if associd >= 0:
             qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
-            self.__dolist(line.split()[1:], associd, ntp.control.CTL_OP_READVAR, qtype, quiet=True)
+            self.__dolist(line.split()[1:], associd,
+                          ntp.control.CTL_OP_READVAR, qtype, quiet=True)
 
     def help_readvar(self):
         self.say("""\
@@ -956,7 +988,8 @@ usage: writevar assocID name=value,[...]
             if (associd != idrange[0]):
                 self.say("\n")
             if not self.__dolist(self.uservars,
-                                associd, ntp.control.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
+                                 associd, ntp.control.CTL_OP_READVAR,
+                                 ntp.ntpc.TYPE_PEER):
                 return
 
     def help_mreadlist(self):
@@ -981,7 +1014,8 @@ usage: mrl assocIDlow assocIDhigh
     def do_mreadvar(self, line):
         "read peer variables from multiple peers"
         if not line:
-                self.warn("usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]\n")
+                self.warn("usage: mreadvar assocIDlow assocIDhigh  "
+                          "[ name=value[,...] ]\n")
                 return
         idrange = self.__assoc_range_valid(line)
         if not idrange:
@@ -990,7 +1024,9 @@ usage: mrl assocIDlow assocIDhigh
         for associd in idrange:
             if (associd != idrange[0]):
                 self.say("\n")
-            if not self.__dolist(varlist, associd, ntp.control.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
+            if not self.__dolist(varlist, associd,
+                                 ntp.control.CTL_OP_READVAR,
+                                 ntp.ntpc.TYPE_PEER):
                 return
 
     def help_mreadvar(self):
@@ -1002,7 +1038,8 @@ usage: mreadvar assocIDlow assocIDhigh [name=value[,...]]
     def do_mrv(self, line):
         "read peer variables from multiple peers"
         if not line:
-                self.warn("usage: mrv assocIDlow assocIDhigh [name=value[,...]]\n")
+                self.warn(
+                    "usage: mrv assocIDlow assocIDhigh [name=value[,...]]\n")
                 return
         self.do_mreadvar(line)
 
@@ -1017,7 +1054,8 @@ usage: mrv assocIDlow assocIDhigh [name=value[,...]]
         assoc = self.__assoc_valid(line)
         if assoc >= 0:
             self.__dolist(self.uservars.keys(),
-                          assoc, ntp.control.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
+                          assoc, ntp.control.CTL_OP_READCLOCK,
+                          ntp.ntpc.TYPE_CLOCK)
 
     def help_clocklist(self):
         self.say("""\
@@ -1041,7 +1079,8 @@ usage: cl [assocID]
         if assoc == 0:
             self.warn("This command requires the association ID of a clock.\n")
         elif assoc > 0:
-            self.__dolist(line.split()[1:], assoc, ntp.control.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
+            self.__dolist(line.split()[1:], assoc,
+                          ntp.control.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
 
     def help_clockvar(self):
         self.say("""\
@@ -1062,19 +1101,19 @@ usage: cv [ assocID ] [ name=value[,...] ]
     def do_pstats(self, line):
         "show statistics for a peer"
         pstats = (
-            ("srcadr",		"remote host:         ", NTP_ADD),
-            ("dstadr",		"local address:       ", NTP_ADD),
-            ("timerec",		"time last received:  ", NTP_INT),
-            ("timer",		"time until next send:", NTP_INT),
-            ("timereach",	"reachability change: ", NTP_INT),
-            ("sent",		"packets sent:        ", NTP_INT),
-            ("received",	"packets received:    ", NTP_INT),
-            ("badauth",		"bad authentication:  ", NTP_INT),
-            ("bogusorg",	"bogus origin:        ", NTP_INT),
-            ("oldpkt",		"duplicate:           ", NTP_INT),
-            ("seldisp",		"bad dispersion:      ", NTP_INT),
-            ("selbroken",	"bad reference time:  ", NTP_INT),
-            ("candidate",	"candidate order:     ", NTP_INT),
+            ("srcadr", "remote host:         ", NTP_ADD),
+            ("dstadr", "local address:       ", NTP_ADD),
+            ("timerec", "time last received:  ", NTP_INT),
+            ("timer", "time until next send:", NTP_INT),
+            ("timereach", "reachability change: ", NTP_INT),
+            ("sent", "packets sent:        ", NTP_INT),
+            ("received", "packets received:    ", NTP_INT),
+            ("badauth", "bad authentication:  ", NTP_INT),
+            ("bogusorg", "bogus origin:        ", NTP_INT),
+            ("oldpkt", "duplicate:           ", NTP_INT),
+            ("seldisp", "bad dispersion:      ", NTP_INT),
+            ("selbroken", "bad reference time:  ", NTP_INT),
+            ("candidate", "candidate order:     ", NTP_INT),
         )
         if not line:
                 self.warn("usage: pstats assocID\n")
@@ -1101,12 +1140,15 @@ usage: peers
 """)
 
     def do_apeers(self, line):
-        "obtain and print a list of the server's peers and their assocIDs [IP version]"
+        """
+obtain and print a list of the server's peers and their assocIDs [IP version]
+"""
         self.__dopeers(showall=True, mode="apeers")
 
     def help_apeers(self):
         self.say("""\
-function: obtain and print a list of the server's peers and their assocIDs [IP version]
+function: obtain and print a list of the server's peers and their
+          assocIDs [IP version]
 usage: apeers
 """)
 
@@ -1121,22 +1163,27 @@ usage: lpeers
 """)
 
     def do_opeers(self, line):
-        "print peer list the old way, with dstadr shown rather than refid [IP version]"
+        """
+print peer list the old way, with dstadr shown rather than refid [IP version]
+"""
         self.__dopeers(showall=True, mode="opeers")
 
     def help_opeers(self):
         self.say("""\
-function: print peer list the old way, with dstadr shown rather than refid [IP version]
+function: print peer list the old way, with dstadr shown rather than
+          refid [IP version]
 usage: opeers
 """)
 
     def do_lopeers(self, line):
-        "obtain and print a list of all peers and clients showing dstadr [IP version]"
+        """obtain and print a list of all peers and clients showing
+        dstadr [IP version]"""
         self.__dopeers(showall=True, mode="opeers")
 
     def help_lopeers(self):
         self.say("""\
-function: obtain and print a list of all peers and clients showing dstadr [IP version]
+function: obtain and print a list of all peers and clients showing
+          dstadr [IP version]
 usage: lopeers
 """)
 
@@ -1159,7 +1206,7 @@ usage: lopeers
                         self.say("_" * (len(self.prompt) + 2 + col))
                     else:
                         self.say(line + "\n")
-                    self.say("_" * (col- 1))
+                    self.say("_" * (col - 1))
                 self.say("^\n")
             self.say(self.session.response + "\n")
         except ntp.packet.ControlException as e:
@@ -1190,7 +1237,8 @@ usage: config_from_file <configuration filename>
             self.say(self.formatter.summary(entry) + "\n")
 
     def do_mrulist(self, line):
-        "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..."
+        """display the list of most recently seen source addresses,
+           tags mincount=... resall=0x... resany=0x..."""
         cmdvars = {}
         for item in line.split(" "):
             if not item:
@@ -1212,7 +1260,8 @@ usage: config_from_file <configuration filename>
                 cmdvars[var] = val
 
         if not self.directmode:
-            self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
+            self.say("Ctrl-C will stop MRU retrieval and display "
+                     "partial results.\n")
         if self.rawmode:
             mruhook = lambda v: self.printvars(variables=v,
                                                dtype=ntp.ntpc.TYPE_SYS,
@@ -1230,12 +1279,12 @@ usage: config_from_file <configuration filename>
             self.session.slots = 0
             self.session.start = time.time()
             direct = self.printdirect if self.directmode else None
-            span = self.session.mrulist(variables=cmdvars, \
-                    rawhook=mruhook, direct=direct)
+            span = self.session.mrulist(variables=cmdvars,
+                                        rawhook=mruhook, direct=direct)
             if not self.directmode and not self.rawmode:
                 if not span.is_complete():
                     self.say("mrulist retrieval interrupted by operator.\n"
-                         "Displaying partial client list.\n")
+                             "Displaying partial client list.\n")
                     span.now = time.time()
                 try:
                     delta1 = time.time() - self.session.start
@@ -1246,20 +1295,20 @@ usage: config_from_file <configuration filename>
                     formatter.now = span.now
                     for entry in reversed(span.entries):
                         self.say(formatter.summary(entry) + "\n")
-                    self.say("# Collected %d slots in %.3f seconds\n" \
-                            % (self.session.slots, delta1) )
+                    self.say("# Collected %d slots in %.3f seconds\n"
+                             % (self.session.slots, delta1))
                 except KeyboardInterrupt:
                     pass
             delta2 = time.time() - self.session.start
-            self.say("# Processed %d slots in %.3f seconds\n" \
-                    % (self.session.slots, delta2) )
+            self.say("# Processed %d slots in %.3f seconds\n"
+                     % (self.session.slots, delta2))
             usage = resource.getrusage(resource.RUSAGE_SELF)
             rusage_denom = 1024.
             if sys.platform == 'darwin':
                 # OSX uses bytes, while every other platform uses kilobytes
                 rusage_denom = rusage_denom * rusage_denom
-            self.say("# Used %d megabytes of memory\n" % \
-                    (usage.ru_maxrss/rusage_denom) )
+            self.say("# Used %d megabytes of memory\n"
+                     % (usage.ru_maxrss/rusage_denom))
         except ntp.packet.ControlException as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
@@ -1269,7 +1318,8 @@ usage: config_from_file <configuration filename>
 
     def help_mrulist(self):
         self.say("""\
-function: display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x...
+function: display the list of most recently seen source addresses,
+          tags mincount=... resall=0x... resany=0x...
 usage: mrulist [tag=value] [tag=value] [tag=value] [tag=value]
 """)
 
@@ -1323,20 +1373,20 @@ usage: reslist
     def do_sysinfo(self, _line):
         "display system summary"
         sysinfo = (
-            ("peeradr",		"system peer:      ", NTP_ADP),
-            ("peermode",	"system peer mode: ", NTP_MODE),
-            ("leap",		"leap indicator:   ", NTP_2BIT),
-            ("stratum",		"stratum:          ", NTP_INT),
-            ("precision",	"log2 precision:   ", NTP_INT),
-            ("rootdelay",	"root delay:       ", NTP_FLOAT),
-            ("rootdisp",	"root dispersion:  ", NTP_FLOAT),
-            ("refid",		"reference ID:     ", NTP_STR),
-            ("reftime",		"reference time:   ", NTP_LFP),
-            ("sys_jitter",	"system jitter:    ", NTP_FLOAT),
-            ("clk_jitter",	"clock jitter:     ", NTP_FLOAT),
-            ("clk_wander",	"clock wander:     ", NTP_FLOAT),
-            ("bcastdelay",	"broadcast delay:  ", NTP_FLOAT),
-            ("authdelay",	"symm. auth. delay:", NTP_FLOAT),
+            ("peeradr", "system peer:      ", NTP_ADP),
+            ("peermode", "system peer mode: ", NTP_MODE),
+            ("leap", "leap indicator:   ", NTP_2BIT),
+            ("stratum", "stratum:          ", NTP_INT),
+            ("precision", "log2 precision:   ", NTP_INT),
+            ("rootdelay", "root delay:       ", NTP_FLOAT),
+            ("rootdisp", "root dispersion:  ", NTP_FLOAT),
+            ("refid", "reference ID:     ", NTP_STR),
+            ("reftime", "reference time:   ", NTP_LFP),
+            ("sys_jitter", "system jitter:    ", NTP_FLOAT),
+            ("clk_jitter", "clock jitter:     ", NTP_FLOAT),
+            ("clk_wander", "clock wander:     ", NTP_FLOAT),
+            ("bcastdelay", "broadcast delay:  ", NTP_FLOAT),
+            ("authdelay", "symm. auth. delay:", NTP_FLOAT),
         )
         self.collect_display(associd=0, variables=sysinfo, decodestatus=True)
 
@@ -1349,22 +1399,22 @@ usage: sysinfo
     def do_kerninfo(self, _line):
         "display kernel loop and PPS statistics"
         kerninfo = (
-            ("koffset",		"pll offset:          ", NTP_FLOAT),
-            ("kfreq",		"pll frequency:       ", NTP_FLOAT),
-            ("kmaxerr",		"maximum error:       ", NTP_FLOAT),
-            ("kesterr",		"estimated error:     ", NTP_FLOAT),
-            ("kstflags",	"kernel status:       ", NTP_STR),
-            ("ktimeconst",	"pll time constant:   ", NTP_INT),
-            ("kprecis",		"precision:           ", NTP_FLOAT),
-            ("kfreqtol",	"frequency tolerance: ", NTP_INT),
-            ("kppsfreq",	"pps frequency:       ", NTP_INT),
-            ("kppsstab",	"pps stability:       ", NTP_INT),
-            ("kppsjitter",	"pps jitter:          ", NTP_INT),
-            ("kppscalibdur",	"calibration interval ", NTP_INT),
-            ("kppscalibs",	"calibration cycles:  ", NTP_INT),
-            ("kppsjitexc",	"jitter exceeded:     ", NTP_INT),
-            ("kppsstbexc",	"stability exceeded:  ", NTP_INT),
-            ("kppscaliberrs",	"calibration errors:  ", NTP_INT),
+            ("koffset", "pll offset:          ", NTP_FLOAT),
+            ("kfreq", "pll frequency:       ", NTP_FLOAT),
+            ("kmaxerr", "maximum error:       ", NTP_FLOAT),
+            ("kesterr", "estimated error:     ", NTP_FLOAT),
+            ("kstflags", "kernel status:       ", NTP_STR),
+            ("ktimeconst", "pll time constant:   ", NTP_INT),
+            ("kprecis", "precision:           ", NTP_FLOAT),
+            ("kfreqtol", "frequency tolerance: ", NTP_INT),
+            ("kppsfreq", "pps frequency:       ", NTP_INT),
+            ("kppsstab", "pps stability:       ", NTP_INT),
+            ("kppsjitter", "pps jitter:          ", NTP_INT),
+            ("kppscalibdur", "calibration interval ", NTP_INT),
+            ("kppscalibs", "calibration cycles:  ", NTP_INT),
+            ("kppsjitexc", "jitter exceeded:     ", NTP_INT),
+            ("kppsstbexc", "stability exceeded:  ", NTP_INT),
+            ("kppscaliberrs", "calibration errors:  ", NTP_INT),
         )
         self.collect_display(associd=0, variables=kerninfo, decodestatus=True)
 
@@ -1377,18 +1427,18 @@ usage: kerninfo
     def do_sysstats(self, _line):
         "display system uptime and packet counts"
         sysstats = (
-            ("ss_uptime",	"uptime:               ", NTP_INT),
-            ("ss_reset",	"sysstats reset:       ", NTP_INT),
-            ("ss_received",	"packets received:     ", NTP_INT),
-            ("ss_thisver",	"current version:      ", NTP_INT),
-            ("ss_oldver",	"older version:        ", NTP_INT),
-            ("ss_badformat",	"bad length or format: ", NTP_INT),
-            ("ss_badauth",	"authentication failed:", NTP_INT),
-            ("ss_declined",	"declined:             ", NTP_INT),
-            ("ss_restricted",	"restricted:           ", NTP_INT),
-            ("ss_limited",	"rate limited:         ", NTP_INT),
-            ("ss_kodsent",	"KoD responses:        ", NTP_INT),
-            ("ss_processed",	"processed for time:   ", NTP_INT),
+            ("ss_uptime", "uptime:               ", NTP_INT),
+            ("ss_reset", "sysstats reset:       ", NTP_INT),
+            ("ss_received", "packets received:     ", NTP_INT),
+            ("ss_thisver", "current version:      ", NTP_INT),
+            ("ss_oldver", "older version:        ", NTP_INT),
+            ("ss_badformat", "bad length or format: ", NTP_INT),
+            ("ss_badauth", "authentication failed:", NTP_INT),
+            ("ss_declined", "declined:             ", NTP_INT),
+            ("ss_restricted", "restricted:           ", NTP_INT),
+            ("ss_limited", "rate limited:         ", NTP_INT),
+            ("ss_kodsent", "KoD responses:        ", NTP_INT),
+            ("ss_processed", "processed for time:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
 
@@ -1401,21 +1451,21 @@ usage: sysstats
     def do_monstats(self, _line):
         "display monitor (mrulist) counters and limits"
         monstats = (
-            ("mru_enabled",	"enabled:              ", NTP_INT),
-            ("mru_depth",	"addresses:            ", NTP_INT),
-            ("mru_deepest",	"peak addresses:       ", NTP_INT),
-            ("mru_maxdepth",	"maximum addresses:    ", NTP_INT),
-            ("mru_mindepth",	"reclaim above count:  ", NTP_INT),
-            ("mru_maxage",	"reclaim maxage:       ", NTP_INT),
-            ("mru_minage",	"reclaim minage:       ", NTP_INT),
-            ("mru_mem",		"kilobytes:            ", NTP_INT),
-            ("mru_maxmem",	"maximum kilobytes:    ", NTP_INT),
-            ("mru_exists", 	"alloc: exists:        ", NTP_INT),
-            ("mru_new", 	"alloc: new:           ", NTP_INT),
-            ("mru_recycleold", 	"alloc: recycle old:   ", NTP_INT),
+            ("mru_enabled", "enabled:              ", NTP_INT),
+            ("mru_depth", "addresses:            ", NTP_INT),
+            ("mru_deepest", "peak addresses:       ", NTP_INT),
+            ("mru_maxdepth", "maximum addresses:    ", NTP_INT),
+            ("mru_mindepth", "reclaim above count:  ", NTP_INT),
+            ("mru_maxage", "reclaim maxage:       ", NTP_INT),
+            ("mru_minage", "reclaim minage:       ", NTP_INT),
+            ("mru_mem", "kilobytes:            ", NTP_INT),
+            ("mru_maxmem", "maximum kilobytes:    ", NTP_INT),
+            ("mru_exists", "alloc: exists:        ", NTP_INT),
+            ("mru_new", "alloc: new:           ", NTP_INT),
+            ("mru_recycleold", "alloc: recycle old:   ", NTP_INT),
             ("mru_recyclefull", "alloc: recycle full:  ", NTP_INT),
-            ("mru_none", 	"alloc: none:          ", NTP_INT),
-            ("mru_oldest_age", 	"age of oldest slot:   ", NTP_INT),
+            ("mru_none", "alloc: none:          ", NTP_INT),
+            ("mru_oldest_age", "age of oldest slot:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=monstats, decodestatus=False)
 
@@ -1428,15 +1478,15 @@ usage: monstats
     def do_authinfo(self, _line):
         "display symmetric authentication counters"
         authinfo = (
-            ("authreset",	"time since reset:", NTP_INT),
-            ("authkeys",	"stored keys:     ", NTP_INT),
-            ("authfreek",	"free keys:       ", NTP_INT),
-            ("authklookups",	"key lookups:     ", NTP_INT),
-            ("authknotfound",	"keys not found:  ", NTP_INT),
-            ("authkuncached",	"uncached keys:   ", NTP_INT),
-            ("authkexpired",	"expired keys:    ", NTP_INT),
-            ("authencrypts",	"encryptions:     ", NTP_INT),
-            ("authdecrypts",	"decryptions:     ", NTP_INT),
+            ("authreset", "time since reset:", NTP_INT),
+            ("authkeys", "stored keys:     ", NTP_INT),
+            ("authfreek", "free keys:       ", NTP_INT),
+            ("authklookups", "key lookups:     ", NTP_INT),
+            ("authknotfound", "keys not found:  ", NTP_INT),
+            ("authkuncached", "uncached keys:   ", NTP_INT),
+            ("authkexpired", "expired keys:    ", NTP_INT),
+            ("authencrypts", "encryptions:     ", NTP_INT),
+            ("authdecrypts", "decryptions:     ", NTP_INT),
         )
         self.collect_display(associd=0, variables=authinfo, decodestatus=False)
 
@@ -1449,18 +1499,18 @@ usage: authinfo
     def do_iostats(self, _line):
         "display network input and output counters"
         iostats = (
-            ("iostats_reset",	"time since reset:     ", NTP_INT),
-            ("total_rbuf",	"receive buffers:      ", NTP_INT),
-            ("free_rbuf",	"free receive buffers: ", NTP_INT),
-            ("used_rbuf",	"used receive buffers: ", NTP_INT),
-            ("rbuf_lowater",	"low water refills:    ", NTP_INT),
-            ("io_dropped",	"dropped packets:      ", NTP_INT),
-            ("io_ignored",	"ignored packets:      ", NTP_INT),
-            ("io_received",	"received packets:     ", NTP_INT),
-            ("io_sent",		"packets sent:         ", NTP_INT),
-            ("io_sendfailed",	"packet send failures: ", NTP_INT),
-            ("io_wakeups",	"input wakeups:        ", NTP_INT),
-            ("io_goodwakeups",	"useful input wakeups: ", NTP_INT),
+            ("iostats_reset", "time since reset:     ", NTP_INT),
+            ("total_rbuf", "receive buffers:      ", NTP_INT),
+            ("free_rbuf", "free receive buffers: ", NTP_INT),
+            ("used_rbuf", "used receive buffers: ", NTP_INT),
+            ("rbuf_lowater", "low water refills:    ", NTP_INT),
+            ("io_dropped", "dropped packets:      ", NTP_INT),
+            ("io_ignored", "ignored packets:      ", NTP_INT),
+            ("io_received", "received packets:     ", NTP_INT),
+            ("io_sent", "packets sent:         ", NTP_INT),
+            ("io_sendfailed", "packet send failures: ", NTP_INT),
+            ("io_wakeups", "input wakeups:        ", NTP_INT),
+            ("io_goodwakeups", "useful input wakeups: ", NTP_INT),
         )
         self.collect_display(associd=0, variables=iostats, decodestatus=False)
 
@@ -1473,11 +1523,12 @@ usage: iostats
     def do_timerstats(self, line):
         "display interval timer counters"
         timerstats = (
-            ("timerstats_reset",	"time since reset:  ", NTP_INT),
-            ("timer_overruns",		"timer overruns:    ", NTP_INT),
-            ("timer_xmts",		"calls to transmit: ", NTP_INT),
+            ("timerstats_reset", "time since reset:  ", NTP_INT),
+            ("timer_overruns", "timer overruns:    ", NTP_INT),
+            ("timer_xmts", "calls to transmit: ", NTP_INT),
         )
-        self.collect_display(associd=0, variables=timerstats, decodestatus=False)
+        self.collect_display(associd=0, variables=timerstats,
+                             decodestatus=False)
 
     def help_timerstats(self):
         self.say("""\
@@ -1486,7 +1537,7 @@ usage: timerstats
 """)
 
 # Default values we use.
-DEFHOST 	= "localhost"	# default host name
+DEFHOST = "localhost"    # default host name
 
 #
 # main - parse arguments and handle options
@@ -1524,7 +1575,7 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
                                              "46c:dD:hinpVwW:",
-                                             ["ipv4","ipv6", "command=",
+                                             ["ipv4", "ipv6", "command=",
                                               "debug", "set-debug-level=",
                                               "help", "interactive", "numeric",
                                               "peers", "version",
@@ -1549,7 +1600,7 @@ if __name__ == '__main__':
         elif switch in ("-d", "--debug"):
             interpreter.debug += 1
             session.debug += 1
-            session.logfp = open("ntpq.log", "a", 1) # 1 => line buffered
+            session.logfp = open("ntpq.log", "a", 1)    # 1 => line buffered
         elif switch in ("-D", "--set-debug-level"):
             try:
                 session.debug = interpreter.debug = int(val)
@@ -1585,7 +1636,8 @@ if __name__ == '__main__':
             elif '6' == token[-1]:
                 session.ai_family = socket.AF_INET6
             else:
-                interpreter.warn("%s: unexpected option-like thing.\n" % progname)
+                interpreter.warn("%s: unexpected option-like thing.\n"
+                                 % progname)
                 raise SystemExit(1)
             arguments.pop(0)
         else:
@@ -1594,15 +1646,18 @@ if __name__ == '__main__':
     if len(arguments) == 0:
         interpreter.chosts.append((DEFHOST, session.ai_family))
 
-
-
-    if len(interpreter.ccmds) == 0 and not interpreter.interactive and os.isatty(0) and os.isatty(1):
+    if ((len(interpreter.ccmds) == 0
+            and not interpreter.interactive
+            and os.isatty(0)
+            and os.isatty(1)
+         )):
         interpreter.interactive = True
 
     try:
         if len(interpreter.ccmds) == 0:
             if len(interpreter.chosts) > 1:
-                interpreter.warn("ntpq can only work interactively on one host.\n")
+                interpreter.warn(
+                    "ntpq can only work interactively on one host.\n")
                 interpreter.chosts = interpreter.chosts[:1]
             session.openhost(*interpreter.chosts[0])
             interpreter.cmdloop()
