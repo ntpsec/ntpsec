@@ -13,14 +13,6 @@ TEST_TEAR_DOWN(hextolfp) {}
 
 #include "lfptest.h"
 
-static l_fp lfpinit(int32_t hi, uint32_t lo)
-{
-    l_fp tmp;
-    setlfpsint(tmp, hi);
-    setlfpfrac(tmp, lo);
-    return tmp;
-}
-
 TEST(hextolfp, PositiveInteger) {
 	const char *str = "00001000.00000000";
 	l_fp actual;

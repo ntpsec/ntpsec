@@ -83,15 +83,6 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 // This should be easy enough...
 //----------------------------------------------------------------------
 
-static l_fp l_fp_init(int32_t i, uint32_t f)
-{
-	l_fp temp;
-	setlfpsint(temp, i);
-	setlfpfrac(temp, f);
-
-	return temp;
-}
-
 static l_fp l_fp_add(const l_fp first, const l_fp second)
 {
 	l_fp temp = first;
@@ -231,9 +222,9 @@ TEST(lfpfunc, AdditionLR) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp op2 = l_fp_init(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp e_res = l_fp_init(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op2 = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
+		l_fp e_res = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		l_fp res = l_fp_add(op1, op2);
 
 		TEST_ASSERT_EQUAL_l_fp(e_res, res);
@@ -245,9 +236,9 @@ TEST(lfpfunc, AdditionRL) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op2 = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp op1 = l_fp_init(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp e_res = l_fp_init(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
+		l_fp op2 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
+		l_fp e_res = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		l_fp res = l_fp_add(op1, op2);
 
 		TEST_ASSERT_EQUAL_l_fp(e_res, res);
@@ -263,9 +254,9 @@ TEST(lfpfunc, SubtractionLR) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op2 = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp e_res = l_fp_init(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp op1 = l_fp_init(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
+		l_fp op2 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp e_res = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		l_fp res = l_fp_subtract(op1, op2);
 
 		TEST_ASSERT_EQUAL_l_fp(e_res, res);
@@ -277,9 +268,9 @@ TEST(lfpfunc, SubtractionRL) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp e_res = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp op2 = l_fp_init(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp op1 = l_fp_init(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
+		l_fp e_res = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op2 = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		l_fp res = l_fp_subtract(op1, op2);
 
 		TEST_ASSERT_EQUAL_l_fp(e_res, res);
@@ -295,11 +286,11 @@ TEST(lfpfunc, Negation) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		l_fp op2 = l_fp_negate(op1);
 		l_fp sum = l_fp_add(op1, op2);
 
-		l_fp zero = l_fp_init(0, 0);
+		l_fp zero = lfpinit(0, 0);
 
 		TEST_ASSERT_EQUAL_l_fp(zero, sum);
 	}
@@ -315,7 +306,7 @@ TEST(lfpfunc, Absolute) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		l_fp op2 = l_fp_abs(op1);
 
 		TEST_ASSERT_TRUE(l_fp_signum(op2) >= 0);
@@ -325,7 +316,7 @@ TEST(lfpfunc, Absolute) {
 		else
 			op1 = l_fp_add(op1, op2);
 
-		l_fp zero = l_fp_init(0, 0);
+		l_fp zero = lfpinit(0, 0);
 
 		TEST_ASSERT_EQUAL_l_fp(zero, op1);
 	}
@@ -333,7 +324,7 @@ TEST(lfpfunc, Absolute) {
 	// There is one special case we have to check: the minimum
 	// value cannot be negated, or, to be more precise, the
 	// negation reproduces the original pattern.
-	l_fp minVal = l_fp_init(0x80000000, 0x00000000);
+	l_fp minVal = lfpinit(0x80000000, 0x00000000);
 	l_fp minAbs = l_fp_abs(minVal);
 	TEST_ASSERT_EQUAL(-1, l_fp_signum(minVal));
 
@@ -357,7 +348,7 @@ TEST(lfpfunc, FDF_RoundTrip) {
 	// that limit.
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		double op2 = lfptod(op1);
 		l_fp op3 = dtolfp(op2);
 
@@ -381,8 +372,8 @@ TEST(lfpfunc, SignedRelOps) {
 	size_t lc ;
 
 	for (lc = addsub_tot - 1; lc; --lc, ++tv) {
-		l_fp op1 = l_fp_init(tv[0].h, tv[0].l);
-		l_fp op2 = l_fp_init(tv[1].h, tv[1].l);
+		l_fp op1 = lfpinit(tv[0].h, tv[0].l);
+		l_fp op2 = lfpinit(tv[1].h, tv[1].l);
 		int cmp = l_fp_scmp(op1, op2);
 
 		switch (cmp) {
@@ -423,8 +414,8 @@ TEST(lfpfunc, UnsignedRelOps) {
 	size_t lc;
 
 	for (lc = addsub_tot - 1; lc; --lc, ++tv) {
-		l_fp op1 = l_fp_init(tv[0].h, tv[0].l);
-		l_fp op2 = l_fp_init(tv[1].h, tv[1].l);
+		l_fp op1 = lfpinit(tv[0].h, tv[0].l);
+		l_fp op2 = lfpinit(tv[1].h, tv[1].l);
 		int cmp = l_fp_ucmp(op1, op2);
 
 		switch (cmp) {
