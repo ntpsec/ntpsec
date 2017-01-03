@@ -121,12 +121,6 @@ def build(ctx):
 		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
 	]
 
-	# XXX: This really sucks, we need to get rid of all these refclock
-	#      defines littered everywhere and segment it to their own source files.
-	refclock_define = []
-	if ctx.env.REFCLOCK_ENABLE:
-		refclock_define = ["REFCLOCK=1"]
-
 	if ctx.env.SBINDIR:
 		ntpd_install_path = ctx.env.SBINDIR
 	else:

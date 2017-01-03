@@ -139,7 +139,6 @@ def refclock_config(ctx):
 		# XXX: better error checking
 		ids = ctx.options.refclocks.split(",")
 
-	ctx.env.REFCLOCK_DEFINES = []
 	ctx.env.REFCLOCK_SOURCE = []
 
 	# Remove duplicate IDs while preserving order.
