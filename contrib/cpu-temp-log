@@ -37,27 +37,30 @@ temperatures will be hardware specific.
 """
 
 
-import sys, re, time, subprocess
+import sys
+import re
+import time
+import subprocess
 
 try:
-    output = subprocess.check_output(["sensors", "-u"], universal_newlines=True)
+    output = subprocess.check_output(["sensors", "-u"],
+                                     universal_newlines=True)
 except:
     print("Unable to run 'sensors -u'")
     exit(0)
 
-lines = output.split( '\n' )
+lines = output.split('\n')
 
 # this regex matches temperature output lines from 'sensors -u'
 pat = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
 
 now = int(time.time())
 
-#lines = sys.stdin.readlines()
 line = ''
 index = 0
 for line in lines:
-    match = pat.match( line )
+    match = pat.match(line)
     if match and match.group(1):
         temp = match.group(1)
-        sys.stdout.write( '%d LM%d %s\n' % (now, index, temp))
+        sys.stdout.write('%d LM%d %s\n' % (now, index, temp))
         index += 1
