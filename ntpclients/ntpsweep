@@ -5,8 +5,9 @@ USAGE: ntpsweep [-<flag> [<val>] | --<name>[{=| }<val>]]... [hostfile]
 
     -l, --host-list=str        Host to execute actions on
                                    - may appear multiple times
-    -p, --peers                Recursively list all peers a host synchronizes to
-    -m, --maxlevel=num         Traverse peers up to this level (4 is a reasonable number)
+    -p, --peers                Recursively list all peers a host syncs to
+    -m, --maxlevel=num         Traverse peers up to this level
+                                   (4 is a reasonable number)
     -s, --strip=str            Strip this string from hostnames
 
 Options are specified by doubled hyphens and their name or by a single
@@ -22,18 +23,26 @@ hyphen and the flag character.
 
 from __future__ import print_function
 
-import os, sys, getopt
-import ntp.packet, ntp.util
+import os
+import sys
+import getopt
+import ntp.packet
+import ntp.util
+
 
 def ntp_peers(host):
-    "Return a list of peer IP addrs for a specified host, empty list if query failed."
+    """Return: a list of peer IP addrs for a specified host,
+            empty list if query failed.
+    """
     try:
         with os.popen("ntpq -npw " + host) as rp:
-            hostlines = rp.readlines()[2:]	# Drop display header
+            hostlines = rp.readlines()[2:]      # Drop display header
             # Strip tally mark from first field
-            return [ln.split()[0][1:] for ln in hostlines if ln[0] in " x.-+#*o"]
+            return [ln.split()[0][1:] for
+                    ln in hostlines if ln[0] in " x.-+#*o"]
     except OSError:
         return []
+
 
 def scan_host(host, level):
     stratum = 0
@@ -53,14 +62,14 @@ def scan_host(host, level):
 
         # got answers ? If so, go on.
         if isinstance(sysvars, dict):
-            stratum       = sysvars['stratum']
-            offset        = sysvars['offset']
+            stratum = sysvars['stratum']
+            offset = sysvars['offset']
             daemonversion = sysvars['version']
-            system        = sysvars['system']
-            processor     = sysvars['processor']
+            system = sysvars['system']
+            processor = sysvars['processor']
 
             # Shorten daemon_version string.
-            #daemonversion =~ s/(|Mon|Tue|Wed|Thu|Fri|Sat|Sun).*$//
+            # daemonversion =~ s/(|Mon|Tue|Wed|Thu|Fri|Sat|Sun).*$//
             daemonversion = daemonversion.replace("version=", "")
             daemonversion = daemonversion.replace("ntpd ", "")
             daemonversion = daemonversion.replace("(", "").replace(")", "")
@@ -93,13 +102,14 @@ def scan_host(host, level):
             # Stratum level 0 is considered invalid
             known_host_info[host] = " ?"
 
-    if stratum or known_host: # Valid or known host
+    if stratum or known_host:   # Valid or known host
         printhost = (' ' * level) + (ntp.util.canonicalize_dns(host) or host)
         # Shorten host string
         if strip:
             printhost = printhost.replace(strip, "")
         # append number of peers in brackets if requested and valid
-        if recurse and known_host_info[host] != " ?" and host in known_host_peers:
+        if (recurse and (known_host_info[host] != " ?") and
+           (host in known_host_peers)):
             printhost += " (%d)" % len(known_host_peers[host])
         # Finally print complete host line
         print("%-32s %s" % (printhost[:32], known_host_info[host]))
@@ -122,7 +132,7 @@ def scan_host(host, level):
                     # NTPsec-style clock IDs.
                     if peer[0].isdigit() and not peer.startswith("127"):
                         scan_host(peer, level + 1)
-    else: # We did not get answers from this host
+    else:   # We did not get answers from this host
         printhost = (' ' * level) + (ntp.util.canonicalize_dns(host) or host)
         if strip:
             printhost = printhost.replace(strip, "")
