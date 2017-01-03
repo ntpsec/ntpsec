@@ -1090,7 +1090,7 @@ class ControlSession:
             if rpkt.is_error():
                 if rpkt.more():
                     warn("Error %d received on non-final fragment\n"
-                         rpkt.errcode())
+                         % rpkt.errcode())
                 self.keyid = self.passwd = None
                 raise ControlException(
                     SERR_SERVER
