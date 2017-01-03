@@ -106,7 +106,7 @@
  */
 struct mx4200unit {
 	u_int  pollcnt;			/* poll message counter */
-	u_int  polled;			/* Hand in a time sample? */
+	bool   polled;			/* Hand in a time sample? */
 	u_int  lastserial;		/* last pps serial number */
 	double avg_lat;			/* average latitude */
 	double avg_lon;			/* average longitude */
@@ -282,7 +282,7 @@ mx4200_config(
 		up->moving   = false;	/* Static Installation */
 	}
 	up->pollcnt     	= 2;
-	up->polled      	= 0;
+	up->polled      	= false;
 	up->known       	= false;
 	up->avg_lat     	= 0.0;
 	up->avg_lon     	= 0.0;
@@ -614,7 +614,7 @@ mx4200_poll(
 	 * polled every 64 seconds. Ask mx4200_receive to hand in
 	 * a timestamp.
 	 */
-	up->polled = 1;
+	up->polled = true;
 	pp->polls++;
 
 	/*
@@ -870,7 +870,7 @@ mx4200_receive(
 		 * We have succeeded in answering the poll.
 		 * Turn off the flag and return
 		 */
-		up->polled = 0;
+		up->polled = false;
 		break;
 
 	/*
