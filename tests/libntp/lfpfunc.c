@@ -216,6 +216,23 @@ eps(double d)
 }
 
 //----------------------------------------------------------------------
+// test extractor functions
+//----------------------------------------------------------------------
+
+TEST(lfpfunc, Extraction) {
+    const uint32_t hi = 0xFFEEDDBB;
+    const uint32_t lo = 0x66554433;
+    l_fp lfp = lfpinit(hi, lo);
+    TEST_ASSERT_EQUAL(lfpuint(lfp), hi);
+    TEST_ASSERT_EQUAL(lfpfrac(lfp), lo);
+    TEST_ASSERT_EQUAL(lfpsint(lfp), -1122885);
+    l_fp bumpable = lfpinit(333, 444);
+    bumplfpuint(bumpable, 1);
+    TEST_ASSERT_EQUAL(lfpuint(bumpable), 334);
+    TEST_ASSERT_EQUAL(lfpfrac(bumpable), 444);
+}
+
+//----------------------------------------------------------------------
 // test addition
 //----------------------------------------------------------------------
 TEST(lfpfunc, AdditionLR) {
@@ -453,6 +470,7 @@ TEST(lfpfunc, UnsignedRelOps) {
 //----------------------------------------------------------------------
 
 TEST_GROUP_RUNNER(lfpfunc) {
+	RUN_TEST_CASE(lfpfunc, Extraction);
 	RUN_TEST_CASE(lfpfunc, AdditionLR);
 	RUN_TEST_CASE(lfpfunc, AdditionRL);
 	RUN_TEST_CASE(lfpfunc, SubtractionLR);
