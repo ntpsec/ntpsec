@@ -50,7 +50,6 @@ def scan_host(host, level):
     daemonversion = ""
     system = ""
     processor = ""
-    peers = []
     known_host = False
 
     if host in known_host_info:
