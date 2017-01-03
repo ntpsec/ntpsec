@@ -29,11 +29,13 @@ OLD_CTL_PST_SEL_SELCAND = 1
 OLD_CTL_PST_SEL_SYNCCAND = 2
 OLD_CTL_PST_SEL_SYSPEER = 3
 
+
 def stdversion():
     return "%s-%s+%s %s" % (ntp.version.VCS_BASENAME,
                             ntp.version.VERSION,
                             ntp.version.VCS_TICK,
                             ntp.version.VCS_DATE)
+
 
 def rfc3339(t):
     "RFC 3339 string from Unix time, including fractional second."
@@ -46,22 +48,24 @@ def rfc3339(t):
     rep += "Z"
     return rep
 
+
 def portsplit(hostname):
     portsuffix = ""
-    if hostname.count(":") == 1:		# IPv4 with appended port
+    if hostname.count(":") == 1:                # IPv4 with appended port
         (hostname, portsuffix) = hostname.split(":")
         portsuffix = ":" + portsuffix
-    elif ']' in hostname:			# IPv6
+    elif ']' in hostname:                       # IPv6
         rbrak = hostname.rindex("]")
         if ":" in hostname[rbrak:]:
-            portsep =  hostname.rindex(":")
+            portsep = hostname.rindex(":")
             portsuffix = hostname[portsep:]
             hostname = hostname[:portsep]
-            hostname = hostname[1:-1]	# Strip brackets
+            hostname = hostname[1:-1]   # Strip brackets
     return (hostname, portsuffix)
 
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = {}
+
 
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
@@ -73,7 +77,8 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
         raise TypeError
     (hostname, portsuffix) = portsplit(inhost)
     try:
-        ai = socket.getaddrinfo(hostname, None, family, 0, 0, socket.AI_CANONNAME)
+        ai = socket.getaddrinfo(hostname, None, family, 0, 0,
+                                socket.AI_CANONNAME)
     except socket.gaierror as e:
         print('getaddrinfo failed: %s' % e, file=sys.stderr)
         raise SystemExit(1)
@@ -91,6 +96,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
 
 TermSize = collections.namedtuple("TermSize", ["width", "height"])
 
+
 def termsize():
     "Return the current terminal size."
     # Alternatives at http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
@@ -103,14 +109,18 @@ def termsize():
         except AttributeError:
             try:
                 # OK, Python version < 3.3, cope
-                import fcntl, termios, struct
-                h, w, hp, wp = struct.unpack('HHHH',
+                import fcntl
+                import termios
+                import struct
+                h, w, hp, wp = struct.unpack(
+                    'HHHH',
                     fcntl.ioctl(2, termios.TIOCGWINSZ,
-                    struct.pack('HHHH', 0, 0, 0, 0)))
+                                struct.pack('HHHH', 0, 0, 0, 0)))
                 size = (w, h)
             except IOError:
                 pass
     return TermSize(*size)
+
 
 class PeerStatusWord:
     "A peer status word from readstats(), dissected for display"
@@ -177,9 +187,13 @@ class PeerStatusWord:
             ntp.magic.PEVNT_NEWPEER: "sys_peer",
             ntp.magic.PEVNT_CLOCK: "clock_alarm",
             }
-        self.last_event = event_dict.get(ntp.magic.PEER_EVENT|self.event, "")
+        self.last_event = event_dict.get(ntp.magic.PEER_EVENT | self.event, "")
+
     def __str__(self):
-        return "conf=%(conf)s, reach=%(reach)s, auth=%(auth)s, cond=%(condition)s, event=%(last_event)s ec=%(event_count)s" % self.__dict__
+        return ("conf=%(conf)s, reach=%(reach)s, auth=%(auth)s, "
+                "cond=%(condition)s, event=%(last_event)s ec=%(event_count)s"
+                % self.__dict__)
+
 
 def cook(variables):
     "Cooked-mode variable display."
@@ -209,19 +223,19 @@ def cook(variables):
             else:
                 # flasher bits
                 tstflagnames = (
-                    "pkt_dup",		# BOGON1
-                    "pkt_bogus",	# BOGON2
-                    "pkt_unsync",	# BOGON3
-                    "pkt_denied",	# BOGON4
-                    "pkt_auth",		# BOGON5
-                    "pkt_stratum",	# BOGON6
-                    "pkt_header",	# BOGON7
-                    "pkt_autokey",	# BOGON8
-                    "pkt_crypto",	# BOGON9
-                    "peer_stratum",	# BOGON10
-                    "peer_dist",	# BOGON11
-                    "peer_loop",	# BOGON12
-                    "peer_unreach"	# BOGON13
+                    "pkt_dup",          # BOGON1
+                    "pkt_bogus",        # BOGON2
+                    "pkt_unsync",       # BOGON3
+                    "pkt_denied",       # BOGON4
+                    "pkt_auth",         # BOGON5
+                    "pkt_stratum",      # BOGON6
+                    "pkt_header",       # BOGON7
+                    "pkt_autokey",      # BOGON8
+                    "pkt_crypto",       # BOGON9
+                    "peer_stratum",     # BOGON10
+                    "peer_dist",        # BOGON11
+                    "peer_loop",        # BOGON12
+                    "peer_unreach"      # BOGON13
                 )
                 for (i, n) in enumerate(tstflagnames):
                     if (1 << i) & value:
@@ -242,13 +256,16 @@ def cook(variables):
     text = text[:-2] + "\n"
     return text
 
+
 class PeerSummary:
     "Reusable report generator for peer statistics"
-    def __init__(self, displaymode, pktversion, showhostnames, wideremote, termwidth=None, debug=0):
-        self.displaymode = displaymode		# peers/apeers/opeers
-        self.pktversion = pktversion		# interpretation of flash bits
-        self.showhostnames = showhostnames	# If false, display numeric IPs
-        self.wideremote = wideremote		# show wide remote names?
+
+    def __init__(self, displaymode, pktversion, showhostnames,
+                 wideremote, termwidth=None, debug=0):
+        self.displaymode = displaymode          # peers/apeers/opeers
+        self.pktversion = pktversion            # interpretation of flash bits
+        self.showhostnames = showhostnames      # If false, display numeric IPs
+        self.wideremote = wideremote            # show wide remote names?
         self.debug = debug
         self.termwidth = termwidth
         # By default, the peer spreadsheet layout is designed so lines just
@@ -263,7 +280,7 @@ class PeerSummary:
         # possible IPV6 numeric address.
         self.namewidth = 15 + self.horizontal_slack
         self.refidwidth = 15
-        # Compute peer spreadsheet headers 
+        # Compute peer spreadsheet headers
         self.__remote = "     remote    ".ljust(self.namewidth)
         self.__common = "st t when poll reach   delay   offset  "
         self.__header = None
@@ -303,16 +320,16 @@ class PeerSummary:
         "Column headers for peer display"
         if self.displaymode == "apeers":
             self.__header = self.__remote + \
-                             "   refid   assid  ".ljust(self.refidwidth) + \
-                             self.__common + "jitter"
+                "   refid   assid  ".ljust(self.refidwidth) + \
+                self.__common + "jitter"
         elif self.displaymode == "opeers":
             self.__header = self.__remote + \
-                             "       local      ".ljust(self.refidwidth) + \
-                             self.__common + "  disp"
+                "       local      ".ljust(self.refidwidth) + \
+                self.__common + "  disp"
         else:
-            self.__header  = self.__remote + \
-                             "       refid      ".ljust(self.refidwidth) + \
-                             self.__common + "jitter"
+            self.__header = self.__remote + \
+                "       refid      ".ljust(self.refidwidth) + \
+                self.__common + "jitter"
         return self.__header
 
     def width(self):
@@ -376,35 +393,35 @@ class PeerSummary:
                 estdisp = value
             elif name == "rec":
                 # FIXME, rec never used.
-                rec = value	# l_fp timestamp
+                rec = value     # l_fp timestamp
             elif name == "srcport" or name == "peerport":
                 # FIXME, srcport never used.
                 srcport = value
             elif name == "reftime":
                 # FIXME, reftime never used.
-                reftime = value	# l_fp timestamp
+                reftime = value   # l_fp timestamp
         if hmode == ntp.magic.MODE_BCLIENTX:
             # broadcastclient or multicastclient
             ptype = 'b'
         elif hmode == ntp.magic.MODE_BROADCAST:
             # broadcast or multicast server
-            if srcadr.startswith("224."):	# IANA multicast address prefix
+            if srcadr.startswith("224."):       # IANA multicast address prefix
                 ptype = 'M'
             else:
                 ptype = 'B'
         elif hmode == ntp.magic.MODE_CLIENT:
             if PeerSummary.is_clock(variables):
-                ptype = 'l'	# local refclock
+                ptype = 'l'     # local refclock
             elif dstadr_refid == "POOL":
-                ptype = 'p'	# pool
+                ptype = 'p'     # pool
             elif srcadr.startswith("224."):
-                ptype = 'a'	# manycastclient
+                ptype = 'a'     # manycastclient
             else:
-                ptype = 'u'	# unicast
+                ptype = 'u'     # unicast
         elif hmode == ntp.magic.MODE_ACTIVE:
-            ptype = 's'		# symmetric active
+            ptype = 's'         # symmetric active
         elif hmode == ntp.magic.MODE_PASSIVE:
-            ptype = 'S'		# symmetric passive
+            ptype = 'S'         # symmetric passive
 
         #
         # Got everything, format the line
@@ -417,7 +434,7 @@ class PeerSummary:
         else:
             c = " .+*"[ntp.control.CTL_PEER_STATVAL(rstatus) & 0x3]
         # Source host or clockname
-        if srchost != None:
+        if srchost is not None:
             clock_name = srchost
         elif self.showhostnames:
             try:
@@ -434,8 +451,8 @@ class PeerSummary:
             line += ("%c%s\n" % (c, clock_name))
             line += (" " * (self.namewidth + 2))
         else:
-            line += ("%c%-*.*s " % \
-                             (c, self.namewidth, self.namewidth, clock_name[:self.namewidth]))
+            line += ("%c%-*.*s " % (c, self.namewidth, self.namewidth,
+                                    clock_name[:self.namewidth]))
         # Destination address, assoc ID or refid.
         assocwidth = 7 if self.displaymode == "apeers" else 0
         if "." not in dstadr_refid and ":" not in dstadr_refid:
@@ -456,13 +473,15 @@ class PeerSummary:
         jd = "      -" if jd >= 999 else ("%7.3f" % jd)
         try:
             line += (
-                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n" % \
-                (variables.get("stratum", 0),
-                 ptype,
-                 PeerSummary.prettyinterval(now if last_sync is None else int(now - ntp.ntpc.lfptofloat(last_sync))),
-                 PeerSummary.prettyinterval(poll_sec),
-                 reach, estdelay, estoffset,
-                 jd))
+                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n"
+                % (variables.get("stratum", 0),
+                   ptype,
+                   PeerSummary.prettyinterval(
+                    now if last_sync is None
+                    else int(now - ntp.ntpc.lfptofloat(last_sync))),
+                   PeerSummary.prettyinterval(poll_sec),
+                   reach, estdelay, estoffset,
+                   jd))
             return line
         except TypeError:
             # This can happen when ntpd ships a corrupt varlist
@@ -474,10 +493,11 @@ class PeerSummary:
         self.polls = []
         return res
 
+
 class MRUSummary:
     "Reusable class for MRU entry summary generation."
     def __init__(self, showhostnames):
-        self.showhostnames = showhostnames	# If false, display numeric IPs
+        self.showhostnames = showhostnames      # If false, display numeric IPs
         self.now = None
         self.logfp = sys.stderr
         self.debug = 0
@@ -493,7 +513,7 @@ class MRUSummary:
             stats = "%7d" % lstint
         else:
             # direct mode doesn't have a reference time
-            MJD_1970 = 40587 # MJD for 1 Jan 1970, Unix epoch
+            MJD_1970 = 40587     # MJD for 1 Jan 1970, Unix epoch
             days = int(last) / 86400
             seconds = last - days*86400
             lstint = int(seconds)
@@ -531,6 +551,7 @@ class MRUSummary:
             # This can happen when ntpd ships a corrupt varlist
             return ''
 
+
 class ReslistSummary:
     "Reusable class for reslist entry summary generation."
     header = """\
@@ -538,6 +559,7 @@ class ReslistSummary:
            restrictions
 """
     width = 72
+
     @staticmethod
     def __getPrefix(mask):
         if not mask:
@@ -548,8 +570,10 @@ class ReslistSummary:
         else:
             sep = '.'
             base = 10
-        prefix = sum([bin(int(x, base)).count('1') for x in mask.split(sep) if x])
+        prefix = sum([bin(int(x, base)).count('1')
+                      for x in mask.split(sep) if x])
         return '/' + str(prefix)
+
     def summary(self, variables):
         hits = variables.get("hits", "?")
         address = variables.get("addr", "?")
@@ -563,9 +587,10 @@ class ReslistSummary:
         # Throw away corrupted entries.  This is a shim - we really
         # want to make ntpd stop generating garbage
         for c in s:
-            if not c.isalnum() and not c in "/.: \n":
+            if not c.isalnum() and c not in "/.: \n":
                 return ''
         return s
+
 
 class IfstatsSummary:
     "Reusable class for ifstats entry summary generation."
@@ -574,27 +599,28 @@ class IfstatsSummary:
  #  address/broadcast     drop flag ttl mc received sent failed peers   uptime
  """
     width = 72
+
     def summary(self, i, variables):
         try:
-            s = "%3u %-24.24s %c %4x %3d %2d %6d %6d %6d %5d %8d\n    %s\n" % \
-               (i, variables['name'],
-	       '.' if variables['en'] else 'D',
-		variables.get('flags', '?'),
-                variables.get('tl', '?'),
-                variables.get('mc', '?'),
-		variables.get('rx', '?'),
-                variables.get('tx', '?'),
-                variables.get('txerr', '?'),
-		variables.get('pc', '?'),
-                variables.get('up', '?'),
-                variables.get('addr', '?'))
+            s = ("%3u %-24.24s %c %4x %3d %2d %6d %6d %6d %5d %8d\n    %s\n"
+                 % (i, variables['name'],
+                    '.' if variables['en'] else 'D',
+                     variables.get('flags', '?'),
+                     variables.get('tl', '?'),
+                     variables.get('mc', '?'),
+                     variables.get('rx', '?'),
+                     variables.get('tx', '?'),
+                     variables.get('txerr', '?'),
+                     variables.get('pc', '?'),
+                     variables.get('up', '?'),
+                     variables.get('addr', '?')))
             if variables.get("bcast"):
                 s += "    %s\n" % variables['bcast']
         except TypeError:
             # Can happen when ntpd ships a corrupted response
             return ''
         for c in s:
-            if not c.isalnum() and not c in "/.:[] \n":
+            if not c.isalnum() and c not in "/.:[] \n":
                 return ''
         return s
 
@@ -604,6 +630,7 @@ try:
 except ImportError:
     class OrderedDict(dict):
         "A stupid simple implementation in order to be back-portable to 2.6"
+
         # This can be simple because it doesn't need to be fast.
         # The programs that use it only have to run at human speed,
         # and the collections are small.
@@ -613,16 +640,21 @@ except ImportError:
             if items:
                 for (k, v) in items:
                     self[k] = v
+
         def __setitem__(self, key, val):
             dict.__setitem__(self, key, val)
             self.__keys.append(key)
+
         def __delitem__(self, key):
             dict.__delitem__(self, key)
             self.__keys.remove(key)
+
         def keys(self):
             return self.__keys
+
         def items(self):
             return tuple([(k, self[k]) for k in self.__keys])
+
         def __iter__(self):
             for key in self.__keys:
                 yield key
