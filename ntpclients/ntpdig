@@ -407,13 +407,12 @@ if __name__ == '__main__':
             print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
             print("rec-org t21: %f  xmt-dst t34: %f"
                   % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
-        # FIXME!! offset used before defined. 
+        offset = pkt.adjust()
         adjusted = step and (not slew or (slew and (abs(offset) > steplimit)))
         report(pkt, json)
         # If we can step but we cannot slew, then step.
         # If we can step or slew and |offset| > steplimit, then step.
         rc = True
-        offset = pkt.adjust()
         ntp.ntpc.setprogname("ntpdig")
         if adjusted:
             rc = ntp.ntpc.step_systime(offset)
