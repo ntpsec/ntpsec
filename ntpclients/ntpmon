@@ -15,7 +15,7 @@ Any keystroke causes a poll and update. Keystroke commands:
 's': Toggle display of only reachable hosts (default is all hosts).
 'w': Toggle wide mode.
 'x': Cleanly terminate the program.
-' ': Rotate through a/n/o/p display modes. 
+' ': Rotate through a/n/o/p display modes.
 '+': Increase debugging level.  Output goes to ntpmon.log
 '-': Decrease debugging level.
 '?': Display helpscreen.
@@ -23,7 +23,9 @@ Any keystroke causes a poll and update. Keystroke commands:
 
 from __future__ import print_function, division
 
-import sys, time, getopt
+import sys
+import time
+import getopt
 
 try:
     import ntp.packet
@@ -33,22 +35,26 @@ try:
     import ntp.control
     import ntp.magic
 except ImportError as e:
-    sys.stderr.write("ntpmon: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.stderr.write(
+        "ntpmon: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
 try:
     import curses
 except ImportError as e:
-    sys.stderr.write("ntpmon: can't find Python curses library -- check PYTHONPATH.\n")
+    sys.stderr.write(
+        "ntpmon: can't find Python curses library -- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
 stdscr = None
 
+
 def iso8601(t):
     "ISO8601 string from Unix time, including fractional second."
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time.time()))
+
 
 def statline(_peerlist, _mrulist, nyquist):
     "Generate a status line"
@@ -56,11 +62,13 @@ def statline(_peerlist, _mrulist, nyquist):
     leader = sysvars['version']
     if span.entries:
         trailer = "Last update: %s (%s)" \
-                  % (iso8601(span.entries[0].last), ntp.util.PeerSummary.prettyinterval(nyquist))
+                  % (iso8601(span.entries[0].last),
+                     ntp.util.PeerSummary.prettyinterval(nyquist))
     else:
         trailer = ""
     spacer = (peer_report.termwidth - len(leader) - len(trailer)) * " "
     return leader + spacer + trailer
+
 
 def peer_detail(variables):
     "Show the things a peer summary doesn't, cooked slightly differently"
@@ -69,7 +77,8 @@ def peer_detail(variables):
     # on the 2D display, so that changes in the details are easier to spot.
     vcopy = {}
     vcopy.update(variables)
-    vcopy["leap"] = ("no-leap", "add-leap", "del-leap", "unsync")[vcopy["leap"]]
+    vcopy["leap"] = ("no-leap", "add-leap", "del-leap",
+                     "unsync")[vcopy["leap"]]
     for fld in ('xmt', 'rec', 'reftime'):
         if fld not in vcopy:
             vcopy[fld] = "***missing***"
@@ -90,13 +99,16 @@ filtdisp   = %(filtdisp)s
 """
     return peerfmt % vcopy
 
+
 class Fatal(Exception):
     "Unrecoverable error."
     def __init__(self, msg):
         Exception.__init__(self)
         self.msg = msg
+
     def __str__(self):
         return self.msg
+
 
 class OutputContext:
     def __enter__(self):
@@ -114,6 +126,7 @@ class OutputContext:
         # Design decision: The most important info is nearer the
         # top of the display. Therefore, prevent scrolling.
         stdscr.scrollok(False)
+
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()
 
@@ -173,18 +186,21 @@ if __name__ == '__main__':
                             raise Fatal(e.message)
                         except IOError as e:
                             raise Fatal(e.strerror)
-                        stdscr.addstr(peer_report.header() + "\n", curses.A_BOLD)
+                        stdscr.addstr(peer_report.header()
+                                      + "\n", curses.A_BOLD)
                     else:
-                        peer_report.polls = [1]	# Kluge!
+                        peer_report.polls = [1]  # Kluge!
                         peers = []
                     if showpeers and len(peers) == 0:
                         raise Fatal("no peers reported")
                     try:
                         initphase = False
                         for (i, peer) in enumerate(peers):
-                            if not showall and \
-                                    not (ntp.control.CTL_PEER_STATVAL(peer.status)
-                                      & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)):
+                            if (not showall
+                                and not (
+                                    ntp.control.CTL_PEER_STATVAL(peer.status)
+                                    & (ntp.control.CTL_PST_CONFIG |
+                                       ntp.control.CTL_PST_REACH))):
                                 continue
                             try:
                                 variables = session.readvar(peer.associd)
@@ -193,7 +209,8 @@ if __name__ == '__main__':
                             except IOError as e:
                                 raise Fatal(e.strerror)
                             except IndexError:
-                                raise Fatal("no 'hpoll' variable in peer response")
+                                raise Fatal(
+                                    "no 'hpoll' variable in peer response")
                             if not variables:
                                 continue
                             if selectmode and selected == i:
@@ -202,14 +219,14 @@ if __name__ == '__main__':
                             else:
                                 hilite = curses.A_NORMAL
                             stdscr.addstr(peer_report.summary(session.rstatus,
-                                                    variables, peer.associd),
+                                          variables, peer.associd),
                                           hilite)
                             if 'INIT' in variables['refid']:
                                 initphase = True
 
                         # Now the MRU report
                         limit = stdscr.getmaxyx()[0] - len(peers)
-                        span = session.mrulist(variables={'recent':limit})
+                        span = session.mrulist(variables={'recent': limit})
                         mru_report.now = time.time()
 
                         # After init phase use Nyquist-interval
@@ -220,10 +237,12 @@ if __name__ == '__main__':
                             nyquist = int(min(peer_report.intervals()) / 2)
                             nyquist = 1 if nyquist == 0 else nyquist
                             if session.debug:
-                                session.logfp.write("nyquist is %d\n" % nyquist)
+                                session.logfp.write("nyquist is %d\n" %
+                                                    nyquist)
                         # The status line
                         sl = statline(peer_report, mru_report, nyquist)
-                        stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
+                        stdscr.addstr(sl + "\n",
+                                      curses.A_REVERSE | curses.A_DIM)
                         if detailmode:
                             if ntp.util.PeerSummary.is_clock(retained):
                                 dtype = ntp.ntpc.TYPE_CLOCK
@@ -231,11 +250,13 @@ if __name__ == '__main__':
                                 dtype = ntp.ntpc.TYPE_PEER
                             sw = ntp.ntpc.statustoa(dtype,
                                                     peers[selected].status)
-                            stdscr.addstr("assoc=%d: %s\n" \
+                            stdscr.addstr("assoc=%d: %s\n"
                                           % (peers[selected].associd, sw))
                             stdscr.addstr(peer_detail(retained))
                             try:
-                                clockvars = session.readvar(peers[selected].associd, opcode=ntp.control.CTL_OP_READCLOCK)
+                                clockvars = session.readvar(
+                                    peers[selected].associd,
+                                    opcode=ntp.control.CTL_OP_READCLOCK)
                                 stdscr.addstr(ntp.util.cook(clockvars))
                             except ntp.packet.ControlException as e:
                                 pass
@@ -265,7 +286,8 @@ if __name__ == '__main__':
                     elif key == 'm':
                         showpeers = not showpeers
                     elif key == 'n':
-                        peer_report.showhostnames = not peer_report.showhostnames
+                        peer_report.showhostnames = \
+                            not peer_report.showhostnames
                         mru_report.showhostnames = not mru_report.showhostnames
                     elif key == 'o':
                         peer_report.displaymode = 'opeers'
