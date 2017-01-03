@@ -29,35 +29,33 @@
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  */
-typedef struct {
-	union {
-		uint32_t Xl_ui;
-		int32_t Xl_i;
-	} Ul_i;
-	uint32_t	l_uf;
-} l_fp;
+typedef uint64_t l_fp;
+#define LOW32	0x00000000ffffffffUL
+#define HIGH32	0xffffffff00000000UL
+#define BUMP	0x0000000100000000UL
+#define lfpfrac(n)		((uint32_t)((n) & LOW32))
+#define setlfpfrac(n, v)	(n) = (((n) & HIGH32) | ((v) & LOW32))
+#define lfpsint(n)		(int32_t)(((n) & HIGH32) >> 32)
+#define setlfpsint(n, v)	(n) = (int64_t)((((int64_t)(v)) << 32) | ((n) & LOW32))
+#define bumplfpsint(n, i)	(n) += (i)*BUMP
+#define lfpuint(n)		(uint32_t)(((n) & HIGH32) >> 32)
+#define setlfpuint(n, v)	(n) = (uint64_t)((((uint64_t)(v)) << 32) | ((n) & LOW32))
+#define bumplfpuint(n, i)	(n) += (i)*BUMP
 
-#define l_ui	Ul_i.Xl_ui		/* unsigned integral part */
-#define	l_i	Ul_i.Xl_i		/* signed integral part */
-
-#define lfpfrac(n)		((n).l_uf)
-#define setlfpfrac(n, v)	(n).l_uf = (v)
-#define lfpsint(n)		(n).l_i
-#define setlfpsint(n, v)	(n).l_i = (v)
-#define bumplfpsint(n, i)	(n).l_i += (i)
-#define lfpuint(n)		(n).l_ui
-#define setlfpuint(n, v)	(n).l_ui = (v)
-#define bumplfpuint(n, i)	(n).l_ui += (i)
+static inline l_fp lfpinit(int32_t hi, uint32_t lo)
+{
+    l_fp tmp = 0;
+    setlfpsint(tmp, hi);
+    setlfpfrac(tmp, lo);
+    return tmp;
+}
 
 static inline uint64_t lfp_to_uint64(const l_fp lfp) {
-    return (uint64_t)lfpuint(lfp) << 32 | (uint64_t)lfpfrac(lfp);
+    return lfp;
 }
 
 static inline l_fp uint64_to_lfp(uint64_t x) {
-    l_fp fp;
-    setlfpuint(fp, x >> 32);
-    setlfpfrac(fp, x & 0xFFFFFFFFUL);
-    return fp;
+    return x;
 }
 
 /*
@@ -65,14 +63,6 @@ static inline l_fp uint64_to_lfp(uint64_t x) {
  * bits in an int32_t/uint32_t.
  */
 #define	FRACTION_PREC	(32)
-
-static inline l_fp lfpinit(int32_t hi, uint32_t lo)
-{
-    l_fp tmp;
-    setlfpsint(tmp, hi);
-    setlfpfrac(tmp, lo);
-    return tmp;
-}
 
 /*
  * The second fixed point format is 32 bits, with the decimal between
@@ -197,7 +187,7 @@ static inline l_fp dtolfp(double d)
 	double	d_tmp;
 	uint64_t	q_tmp;
 	int	M_isneg;
-	l_fp	r;
+	l_fp	r = 0;
 
 	d_tmp = (d);
 	M_isneg = (d_tmp < 0.);
