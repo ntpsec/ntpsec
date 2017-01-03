@@ -14,12 +14,20 @@ TEST_TEAR_DOWN(strtolfp) {}
 
 /* This class tests both atolfp and mstolfp */
 
+static l_fp l_fp_init(int32_t i, uint32_t f)
+{
+	l_fp temp;
+	setlfpsint(temp, i);
+	setlfpfrac(temp, f);
+
+	return temp;
+}
 
 TEST(strtolfp, PositiveInteger) {
 	const char *str = "500";
 	const char *str_ms = "500000";
 
-	l_fp expected = {{500},0};
+	l_fp expected = l_fp_init(500, 0);
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
@@ -33,10 +41,7 @@ TEST(strtolfp, NegativeInteger) {
 	const char *str = "-300";
 	const char *str_ms = "-300000";
 
-	l_fp expected;
-	setlfpsint(expected, -300);
-	setlfpfrac(expected, 0);
-
+	l_fp expected = l_fp_init(-300, 0);
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
@@ -50,7 +55,7 @@ TEST(strtolfp, PositiveFraction) {
 	const char *str = "+500.5";
 	const char *str_ms = "500500.0";
 
-	l_fp expected = {{500}, HALF};
+	l_fp expected = l_fp_init(500, HALF);
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
@@ -64,10 +69,7 @@ TEST(strtolfp, NegativeFraction) {
 	const char *str = "-300.75";
 	const char *str_ms = "-300750";
 
-	l_fp expected;
-	setlfpsint(expected, -301);
-	setlfpfrac(expected, QUARTER);
-
+	l_fp expected = l_fp_init(-301, QUARTER);
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
@@ -81,7 +83,7 @@ TEST(strtolfp, PositiveMsFraction) {
 	const char *str = "300.00025";
 	const char *str_ms = "300000.25";
 
-	l_fp expected = {{300}, QUARTER_PROMILLE_APPRX};
+	l_fp expected = l_fp_init(300, QUARTER_PROMILLE_APPRX);
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
@@ -95,10 +97,7 @@ TEST(strtolfp, NegativeMsFraction) {
 	const char *str = "-199.99975";
 	const char *str_ms = "-199999.75";
 
-	l_fp expected;
-	setlfpsint(expected, -200);
-	setlfpfrac(expected, QUARTER_PROMILLE_APPRX);
-
+	l_fp expected = l_fp_init(-200, QUARTER_PROMILLE_APPRX);
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
