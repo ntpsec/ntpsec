@@ -131,14 +131,11 @@ mfp_mul(
       M_NEG(i, f);
     }
 
-  setlfpsint(out, i);
-  setlfpfrac(out, f);
+  out = lfpinit(i, f);
 
 #ifdef DEBUG
   if (debug > 6) {
-    l_fp b;
-    setlfpsint(b, b_i);
-    setlfpfrac(b, b_f);
+    l_fp b = lfpinit(b_i, b_f);
     printf("mfp_mul: %s * %s => %s\n",
 	   mfptoa(a_op, 6), mfptoa(b, 6), mfptoa(out, 6));
   }

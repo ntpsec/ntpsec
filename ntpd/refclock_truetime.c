@@ -498,8 +498,7 @@ true_receive(
 				refclock_report(peer, CEVNT_BADTIME);
 				return;
 			}
-			setlfpuint(off, sec);
-			setlfpfrac(off, 0);
+			off = lfpinut(sec, 0);
 #endif
 
 			pp->usec = true_sample720();

@@ -105,23 +105,15 @@ typedef uint32_t u_fp;
 #define	NTOHS_FP(x)	(ntohl(x))
 
 static inline l_fp htonl_fp(l_fp lfp) {
-    setlfpuint(lfp, htonl(lfpuint(lfp)));
-    setlfpfrac(lfp, htonl(lfpfrac(lfp)));
-    return lfp;
+    return lfpinit(htonl(lfpuint(lfp)), htonl(lfpfrac(lfp)));
 }
 
 static inline l_fp ntohl_fp(l_fp lfp) {
-    setlfpuint(lfp, ntohl(lfpuint(lfp)));
-    setlfpfrac(lfp, ntohl(lfpfrac(lfp)));
-    return lfp;
+    return lfpinit(ntohl(lfpuint(lfp)), ntohl(lfpfrac(lfp)));
 }
 
 /* Convert unsigned ts fraction to net order ts */
-#define	HTONL_UF(uf, nts)					\
-	do {							\
-		setlfpuint(*nts, 0);					\
-		setlfpfrac(*nts, htonl(uf));			\
-	} while (false)
+#define	HTONL_UF(uf, nts)	*nts = lfpint(0, htonl(uf))
 
 /*
  * Conversions between the two fixed point types
@@ -131,11 +123,11 @@ static inline l_fp ntohl_fp(l_fp lfp) {
 				(((x_i)<<16) | (((x_f)>>16)&0xffff))))
 #define	LFPTOFP(v)		MFPTOFP(lfpsint(*v), lfprac(*v))
 
-#define UFPTOLFP(x, v) (setlfpuint(*v, (u_fp)(x)>>16), setlfpfrac(*v, (x)<<16))
+#define UFPTOLFP(x, v) (*v = lfpinit((u_fp)(x)>>16, (x)<<16))
 #define FPTOLFP(x, v)  (UFPTOLFP((x), (v)), (x) < 0 ? setlfpuint(*v, getlfpuint(*v) - 0x10000) : 0)
 
-#define MAXLFP(v) (setlfpuint(*v, 0x7fffffffu), setlfpfrac(*v, 0xffffffffu))
-#define MINLFP(v) (selfpuint(*v, 0x80000000u), setlfpfrac(*v, 0u))
+#define MAXLFP(v) *v = lfpinit(0x7fffffffu, 0xffffffffu)
+#define MINLFP(v) *v = lfpinit(0x80000000u, 0u)
 
 /*
  * Primitive operations on long fixed point values.  If these are
@@ -161,7 +153,7 @@ static inline l_fp ntohl_fp(l_fp lfp) {
 #define L_ADDUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) + (uf))
 #define L_SUBUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) - (uf))
 #define	L_ADDF(r, f)	(*r) = uint64_to_lfp((int64_t)lfp_to_uint64(*r) + (int64_t)(uf))
-#define	L_CLR(v)	(setlfpuint(*v, 0), setlfpfrac(*v, 0))
+#define	L_CLR(v)	*v = lfpinit(0, 0)
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
 #define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
 #define	L_ISGT(a, b)	((int64_t)lfp_to_uint64(*a) > (int64_t)lfp_to_uint64(*b))
@@ -197,7 +189,6 @@ static inline l_fp dtolfp(double d)
 	double	d_tmp;
 	uint64_t	q_tmp;
 	int	M_isneg;
-	l_fp	r;
 
 	d_tmp = (d);
 	M_isneg = (d_tmp < 0.);
@@ -208,9 +199,7 @@ static inline l_fp dtolfp(double d)
 	if (M_isneg) {
 		q_tmp = ~q_tmp + 1;
 	}
-	setlfpfrac(r, (uint32_t)q_tmp);
-	setlfpuint(r, (uint32_t)(q_tmp >> 32));
-	return r;
+	return lfpinit((uint32_t)(q_tmp >> 32) , (uint32_t)q_tmp);
 }
 
 static inline double lfptod(l_fp r)
