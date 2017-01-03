@@ -41,7 +41,7 @@ mfp_mul(
   unsigned long carry;
   int32_t   a_i = lfpsint(a_op);
   uint32_t  a_f = lfpfrac(a_op);
-  l_fp out = 0;
+  l_fp out;
   
   int neg = 0;
 
@@ -136,7 +136,7 @@ mfp_mul(
 
 #ifdef DEBUG
   if (debug > 6) {
-    l_fp b = 0;
+    l_fp b;
     setlfpsint(b, b_i);
     setlfpfrac(b, b_f);
     printf("mfp_mul: %s * %s => %s\n",

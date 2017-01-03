@@ -613,7 +613,7 @@ jupiter_pps(struct instance *instance)
 	pps_info_t pps_info;
 	struct timespec timeout, ts;
 	double dtemp;
-	l_fp tstmp = 0;
+	l_fp tstmp;
 
 	/*
 	 * Convert the timespec nanoseconds field to ntp l_fp units.
