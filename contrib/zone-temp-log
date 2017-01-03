@@ -46,4 +46,3 @@ while True:
         print('{0} ZONE{1} {2}'.format(now, zone, temp))
     f.close()
     zone = zone + 1
-
