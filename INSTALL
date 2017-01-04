@@ -52,7 +52,7 @@ gnuplot::
    SLES: gnuplot
 
 argarse::
-   Required for ntpviz when with Python version 2.6
+   Required for ntpviz when using Python version 2.6
    Install with pip: pip install argparse
 
 psutils::
