@@ -8,17 +8,18 @@ int main(void) {
 }
 """
 
+
 @conf
 def check_type(ctx, typename, headers=[], mandatory=False):
-        name = "HAVE_%s" % typename.upper().replace(" ", "_")
-        src = ""
-        for hdr in headers:
-                src += "#include <%s>\n" % hdr
-        ctx.check_cc(
-                fragment        = src + TYPE_FRAG % (typename),
-                define_name = name,
-                execute     = False,
-                msg         = "Checking for type %s" % (typename),
-                mandatory       = mandatory,
-                comment         = "Whether type '%s' exists." % typename
-        )
+    name = "HAVE_%s" % typename.upper().replace(" ", "_")
+    src = ""
+    for hdr in headers:
+        src += "#include <%s>\n" % hdr
+    ctx.check_cc(
+        fragment=src + TYPE_FRAG % (typename),
+        define_name=name,
+        execute=False,
+        msg="Checking for type %s" % (typename),
+        mandatory=mandatory,
+        comment="Whether type '%s' exists." % typename
+    )
