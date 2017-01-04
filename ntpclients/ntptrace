@@ -56,9 +56,13 @@ def ntp_read_vars(peer, vars, host):
         cmd.append(host)
 
     try:
-        output = subprocess.check_output(
+        # sadly subprocess.check_output() is not in Python 2.6
+        proc = subprocess.Popen(
             cmd,
-            stderr=subprocess.STDOUT).decode('utf-8').splitlines()
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT)
+        out = proc.communicate()[0]
+        output = out.decode('utf-8').splitlines()
     except subprocess.CalledProcessError as e:
         print("Could not start ntpq: %s" % e.output, file=sys.stderr)
         raise SystemExit(1)
