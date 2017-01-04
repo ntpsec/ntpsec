@@ -33,19 +33,20 @@ int main(void)
 }
 '''
 
+
 def check_vsprintfm(ctx):
-        "Check for %m expanding to strerror(error) in glibc style."
-        ctx.check_cc(
-                fragment='''
+    "Check for %m expanding to strerror(error) in glibc style."
+    ctx.check_cc(
+        fragment='''
 #include <features.h>
 int main(void)
 {
-#ifndef __GLIBC__
-# error __GLIBC__ is not defined
-#endif
+        #ifndef __GLIBC__
+        # error __GLIBC__ is not defined
+        #endif
 }
 ''',
-                define_name="VSNPRINTF_PERCENT_M",
-                msg = "Checking for %m expansion in vsnprintf(3)",
-                mandatory = False,
-                comment="%m expanding to strerror(error) in glibc style")
+        define_name="VSNPRINTF_PERCENT_M",
+        msg="Checking for %m expansion in vsnprintf(3)",
+        mandatory=False,
+        comment="%m expanding to strerror(error) in glibc style")
