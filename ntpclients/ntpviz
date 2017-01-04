@@ -227,8 +227,9 @@ class VizStats(ntp.statfiles.NTPStats):
         self.percs["pstd"] = pstdev(values, mu=self.percs["mu"])
 
         # range the data
-        self.percs.update({k: v * self.multiplier
-                           for k, v in list(self.percs.items())})
+        self.percs.update(
+            {k: v * self.multiplier for k, v in list(self.percs.items())}
+        )
 
         self.title = title
 
