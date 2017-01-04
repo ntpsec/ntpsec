@@ -33,8 +33,12 @@ from __future__ import print_function
 import time
 import subprocess
 
-output = subprocess.check_output(["temper-poll", "-c"],
-                                 universal_newlines=True)
+# sadly subprocess.check_output() is not in Python 2.6
+proc = subprocess.Popen(["temper-poll", "-c"],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        universal_newlines=True)
+output = proc.communicate()[0]
 
 now = int(time.time())
 
