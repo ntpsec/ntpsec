@@ -12,7 +12,9 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, re, sys
+import os
+import re
+import sys
 
 boxanchor_re = re.compile(r"\[\[([a-z0-9_-]*)\]\]")
 linkanchor_re = re.compile(r"anchor:([a-z0-9_-]*)\[\]")
@@ -22,6 +24,7 @@ if len(sys.argv) > 1:
     prefix = sys.argv[1]
 else:
     prefix = ""
+
 
 def tabulate(path):
     iostack.append((0, open(path)))
@@ -49,12 +52,12 @@ def tabulate(path):
                 sys.stderr.write("linkcheck: Can't open %s\n" % newpath)
                 raise SystemExit(1)
             continue
-        # Ordinary processing 
+        # Ordinary processing
         # This is the tricky part. Because we're reference-checking the
         # generated HTML, the file part of a stored anchor name needs to be
         # the original path from the top of the include stack, not
         # whatever inclusion we might be walking through now.
-        html = path[len(prefix):].replace(".txt", ".html") 
+        html = path[len(prefix):].replace(".txt", ".html")
         m = boxanchor_re.search(line)
         if m:
             anchor = "link:" + html + "#" + m.group(1)
@@ -74,20 +77,20 @@ if __name__ == '__main__':
     for dirpath, dnames, fnames in os.walk(prefix):
         for f in fnames:
             fullpath = os.path.join(dirpath, f)
-            if fullpath.endswith(".txt") and not "includes" in fullpath:
+            if fullpath.endswith(".txt") and "includes" not in fullpath:
                 tabulate(fullpath)
-    #print("References: %s" % references)
-    #print("Anchors: %s" % anchors)
+    # print("References: %s" % references)
+    # print("Anchors: %s" % anchors)
     hanging = []
     for ref in references:
         if ref not in anchors:
             hanging.append(ref)
-    print("%d anchors, %d references, %d references unsatisfied" % \
-          (len(anchors), len(references), len(hanging)))
+    print("%d anchors, %d references, %d references unsatisfied"
+          % (len(anchors), len(references), len(hanging)))
     unsatisfied = list(hanging)
     unsatisfied.sort()
     for item in unsatisfied:
-        print('"%s", line %d: %s' % \
-              (references[item][0], references[item][1], item))
+        print('"%s", line %d: %s'
+              % (references[item][0], references[item][1], item))
 
 # end
