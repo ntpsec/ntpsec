@@ -43,8 +43,12 @@ import time
 import subprocess
 
 try:
-    output = subprocess.check_output(["sensors", "-u"],
-                                     universal_newlines=True)
+    # sadly subprocess.check_output() is not in Python 2.6
+    proc = subprocess.Popen(["sensors", "-u"],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
+    output = proc.communicate()[0]
 except:
     print("Unable to run 'sensors -u'")
     exit(0)
