@@ -522,7 +522,7 @@ check_leapsec(
 	 * we let the normal clock correction take over, even if a jump
 	 * is involved.
          * Also make sure the alarming events are edge-triggered, that is,
-         * ceated only when the threshold is crossed.
+         * created only when the threshold is crossed.
          */
 	if (  (leapsec > 0 || lsprox < LSPROX_ALERT)
 	    && leapsec < lsprox                     ) {

@@ -266,7 +266,7 @@ arb_receive(
 	if (up->tcswitch == 0) {
 
 		/*
-		 * Collect statistics. If nothing is recogized, just
+		 * Collect statistics. If nothing is recognized, just
 		 * ignore; sometimes the clock doesn't stop spewing
 		 * timecodes for awhile after the B0 command.
 		 *

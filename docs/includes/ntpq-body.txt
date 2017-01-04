@@ -181,7 +181,7 @@ following.
 
 +raw+::
   Display server messages as received and without reformatting.
-  The only formating/interpretation done on the data is
+  The only formatting/interpretation done on the data is
   to transform nonascii data into a printable (but barely
   understandable) form.
 

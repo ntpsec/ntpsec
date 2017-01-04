@@ -671,7 +671,7 @@ gpsd log file is created by the gps-log program.</p>
 
         # grab and sort the values, no need for the timestamp, etc.
 
-        # compute freqency offset
+        # compute frequency offset
         values = [float(line[2]) for line in self.loopstats]
         stats = VizStats(values, "Local Clock Frequency Offset", freq=1,)
 
@@ -746,7 +746,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
             exp = """\
 <p>This shows the RMS Frequency Jitter (aka wander) of the local
 clock's frequency.  In other words, how fast the local clock changes
-freqency.</p>
+frequency.</p>
 
 <p>Lower is better.  An ideal clock would be a horizontal line at
 0ppm.</p>

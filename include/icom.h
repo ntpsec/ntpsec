@@ -7,7 +7,7 @@
  * Common definitions
  */
 #define P_ERMSG	0x1		/* trace bus error messages */
-#define P_TRACE 0x2		/* trace CI-V messges */
+#define P_TRACE 0x2		/* trace CI-V messages */
 #define RETRY	3		/* max packet retries */
 #define IBAUD	B1200		/* autotune port speed */
 

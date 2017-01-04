@@ -574,7 +574,7 @@ jjy_receive ( struct recvbuf *rbufp )
 		/* To avoid its claim, pass the value BMAX-1. */
 
 		/*
-		 * Append received charaters to temporary buffer
+		 * Append received characters to temporary buffer
 		 */
 		for ( i = 0 ;
 		      i < pp->lencode && up->iRawBufLen < MAX_RAWBUF - 2 ;
@@ -658,7 +658,7 @@ jjy_receive ( struct recvbuf *rbufp )
 				iBreakPosition = up->iRawBufLen - 1 ;
 			}
 
-			/* Copy charaters from temporary buffer to process buffer */
+			/* Copy characters from temporary buffer to process buffer */
 			up->iLineBufLen = up->iTextBufLen = 0 ;
 			for ( i = iReadRawBuf ; i <= iBreakPosition ; i ++ ) {
 
@@ -1266,7 +1266,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 
 		if ( up->iTimestamp[1] - 2 <= up->iTimestamp[0]
 		  && up->iTimestamp[0]     <= up->iTimestamp[1] ) {
-			/* 3 commands (time,date,stim) was excuted in two seconds */
+			/* 3 commands (time,date,stim) was executed in two seconds */
 			jjy_synctime( peer, pp, up ) ;
 			return JJY_RECEIVE_DONE ;
 		} else if ( up->iTimestamp[0] > up->iTimestamp[1] ) {
@@ -2151,7 +2151,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 
 		if ( up->iTimestamp[1] - 2 <= up->iTimestamp[0]
 		  && up->iTimestamp[0]     <= up->iTimestamp[1] ) {
-			/* 3 commands (time,date,stim) was excuted in two seconds */
+			/* 3 commands (time,date,stim) was executed in two seconds */
 			jjy_synctime( peer, pp, up ) ;
 			return JJY_RECEIVE_DONE ;
 		} else if ( up->iTimestamp[0] > up->iTimestamp[1] ) {

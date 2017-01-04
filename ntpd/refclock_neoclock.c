@@ -240,7 +240,7 @@ neoclock4x_start(int unit,
    * no fudge time is given by user!
    * use 169.583333 ms to compensate the serial line delay
    * formula is:
-   * 2400 Baud / 11 bit = 218.18 charaters per second
+   * 2400 Baud / 11 bit = 218.18 characters per second
    *  (NeoClock4X timecode len)
    */
   pp->fudgetime1 = (NEOCLOCK4X_TIMECODELEN * 11) / 2400.0;
@@ -1029,7 +1029,7 @@ neol_check_firmware(int unit,
  *
  * 2006/01/11 cjh
  * Revision 1.15
- * - remove some unsued #ifdefs
+ * - remove some unused #ifdefs
  * - fix nsec calculation, closes #499
  *
  * 2009/12/04 cjh

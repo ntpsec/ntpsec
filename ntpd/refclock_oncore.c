@@ -1136,12 +1136,12 @@ oncore_read_config(
  *
  *	There is an optional line, starting with DELAY, followed
  *	   by 1 or two fields.	The first is a number (a time) the second is
- *	   'MS', 'US' or 'NS' for miliseconds, microseconds or nanoseconds.
+ *	   'MS', 'US' or 'NS' for milliseconds, microseconds or nanoseconds.
  *	    DELAY  is cable delay, typically a few tens of ns.
  *
  *	There is an optional line, starting with OFFSET, followed
  *	   by 1 or two fields.	The first is a number (a time) the second is
- *	   'MS', 'US' or 'NS' for miliseconds, microseconds or nanoseconds.
+ *	   'MS', 'US' or 'NS' for milliseconds, microseconds or nanoseconds.
  *	   OFFSET is the offset of the PPS pulse from 0. (only fully implemented
  *		with the PPSAPI, we need to be able to tell the Kernel about this
  *		offset if the Kernel PLL is in use, but can only do this presently
@@ -1283,7 +1283,7 @@ oncore_read_config(
 				f1 = -f1;
 				sign = -1;
 			}
-			instance->ss_lat = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*miliseconds*/
+			instance->ss_lat = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*milliseconds*/
 			lat_flg++;
 		} else if (!strncmp(cc, "LON", (size_t) 3)) {
 			f1 = f2 = f3 = 0;
@@ -1293,7 +1293,7 @@ oncore_read_config(
 				f1 = -f1;
 				sign = -1;
 			}
-			instance->ss_long = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*miliseconds*/
+			instance->ss_long = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*milliseconds*/
 			long_flg++;
 		} else if (!strncmp(cc, "HT", (size_t) 2)) {
 			f1 = 0;

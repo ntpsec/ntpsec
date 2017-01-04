@@ -562,7 +562,7 @@ gpsd_start(
 	return true;
 
 dev_fail:
-	/* On failure, remove all UNIT ressources and declare defeat. */
+	/* On failure, remove all UNIT resources and declare defeat. */
 
 	INSIST (up);
 	if (!--up->refcount) {
@@ -799,7 +799,7 @@ timer_primary(
 	int rc;
 
 	/* This is used for timeout handling. Nothing that needs
-	 * sub-second precison happens here, so receive/connect/retry
+	 * sub-second precision happens here, so receive/connect/retry
 	 * timeouts are simply handled by a count down, and then we
 	 * decide what to do by the socket values.
 	 *
@@ -1126,7 +1126,7 @@ json_token_skip(
 	if (tid >= 0 && tid < ctx->ntok) {
 		int len = ctx->tok[tid].size;
 		/* For arrays and objects, the size is the number of
-		 * ITEMS in the compound. Thats the number of objects in
+		 * ITEMS in the compound. That's the number of objects in
 		 * the array, and the number of key/value pairs for
 		 * objects. In theory, the key must be a string, and we
 		 * could simply skip one token before skipping the
@@ -1605,7 +1605,7 @@ process_pps(
 	++up->tc_pps_recv;
 
 	/* Bail out if there's indication that time sync is bad or
-	 * if we're explicitely requested to ignore PPS data.
+	 * if we're explicitly requested to ignore PPS data.
 	 */
 	if (up->fl_nosync)
 		return;

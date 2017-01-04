@@ -550,7 +550,7 @@ TEST(leapsec, ls2009limdata) {
 	rc = setup_load_table(leap1, 1);
 	TEST_ASSERT_TRUE(rc);
 
-	// test on-spot with limted table - does not work if build before 2013!
+	// test on-spot with limited table - does not work if build before 2013!
 	rc = leapsec_query(&qr, lsec2009, NULL);
 	TEST_ASSERT_FALSE(rc);
 	TEST_ASSERT_EQUAL(35, qr.tai_offs);
