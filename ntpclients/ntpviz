@@ -1116,7 +1116,7 @@ plot \\
     for stats in statlist:
         # speed up by only sending gnuplot the data it will actually use
         # fields: time, offset
-        plot_data += self.plot_slice(stats.loopstats, 2)
+        plot_data += NTPViz.plot_slice(stats.loopstats, 2)
 
     ret = {'html': '', 'stats': []}
     ret['title'] = "Multiplot"
