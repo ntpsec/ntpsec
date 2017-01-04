@@ -199,6 +199,11 @@ back-compatibility issues that trying to make them run is probably
 doomed.  The first 3.x version under which our Python has been
 extensively tested is 3.5.
 
+Please check your Python code with the Pyflakes.  If your code fails
+a Pyflakes test, we probably will not merge it.
+
+https://pypi.python.org/pypi/pyflakes
+
 == General notes ==
 
 === Build system ===
