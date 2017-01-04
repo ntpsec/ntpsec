@@ -51,6 +51,10 @@ gnuplot::
    Ubuntu package: gnuplot5
    SLES: gnuplot
 
+argarse::
+   Required for ntpviz when with Python version 2.6
+   Install with pip: pip install argparse
+
 psutils::
    Optional for ntpviz.  Allows running with ionice()
    Debian package: python-psutil or python3-psutil

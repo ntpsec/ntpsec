@@ -33,7 +33,6 @@ Python by ESR, concept and gnuplot code by Dan Drown.
 # SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import argparse
 import csv
 import datetime
 import re
@@ -45,6 +44,16 @@ import socket
 import sys
 import subprocess
 import tempfile
+try:
+    import argparse
+except ImportError as e:
+    sys.stderr.write("""
+ntpviz: can't find Python argparse module
+        If your Python < 2.7, then manual installation is needed:
+        # pip install argparse
+%s
+""")
+    sys.exit(1)
 
 
 # Gack, python before 3.2 has no defined tzinfo for utc...
@@ -65,7 +74,7 @@ try:
     import ntp.statfiles
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("ntpviz: can't find Python NTP library "
+    sys.stderr.write("ntpviz: can't find Python NTP modules "
                      "-- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
