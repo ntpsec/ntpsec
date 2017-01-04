@@ -378,6 +378,23 @@ C was the minor.  They also use release-candidate suffixes.
 
 == Contribution workflow and conventions ==
 
+Please work on one piece of conceptual work at a time.
+
+Please make sure your code builds and passes the test suite before you
+commit it, and especially before you push it.
+
+Before starting significant work, propose it first in the
+mailto:devel@ntpsec.org mailing list.  Other people may have
+suggestions, will want to collaborate, and will wish to review your
+code.
+
+=== Git ===
+
+We use Git as our distributed version control system.
+
+If you ever get stuck or confused while using Git, please consult
+http://ohshitgit.com/
+
 === GitLab.com ===
 
 We use GitLab.com as our forge.
@@ -397,14 +414,6 @@ Granting other levels of GitLab project team access is at discretion
 of the Project Manager, after consulting with the existing core team.
 Generally, other levels of access will not be granted, as they are not
 necessary to be a welcome and effective contributor.
-
-Please work on one piece of conceptual work at a time.  Keep each
-narrative of work each in a different branch.
-
-Before starting significant work, propose it first in the
-mailto:devel@ntpsec.org mailing list.  Other people may have
-suggestions, will want to collaborate, and will wish to review your
-code.
 
 === Optional: Send patches by email ===
 
