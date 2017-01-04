@@ -60,7 +60,7 @@ Days ( int Year )		/* return number of days since year "0" */
 {
     long  Return;
 		/* this is a known to be good algorithm */
-    Return = Year * 365;	/* first aproximation to the value */
+    Return = Year * 365;	/* first approximation to the value */
     if ( Year >= 1 )
     {		/* see notes in libparse/parse.c if you want a PROPER
 		 * **generic algorithm. */

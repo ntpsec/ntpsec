@@ -422,7 +422,7 @@ modem_message(
 	/*
 	 * We are waiting for the CONNECT response to the dial
 	 * command. When this happens, listen for timecodes. If
-	 * somthing other than CONNECT is received, like BUSY
+	 * something other than CONNECT is received, like BUSY
 	 * or NO CARRIER, abort the call.
 	 */
 	case S_CONNECT:
@@ -705,7 +705,7 @@ modem_timer(
 	UNUSED_ARG(unit);
 
 	/*
-	 * This routine implments a timeout which runs for a programmed
+	 * This routine implements a timeout which runs for a programmed
 	 * interval. The counter is initialized by the state machine and
 	 * counts down to zero. Upon reaching zero, the state machine is
 	 * called. If flag1 is set while timer is zero, force a call.

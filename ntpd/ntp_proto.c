@@ -193,7 +193,7 @@ is_control_packet(
 
 /* Free a parsed_pkt structure allocated by parsed_packet(). In the
    event of a parse error, this function may be called from within
-   parse_packet() while the structure is only partially initalized, so
+   parse_packet() while the structure is only partially initialized, so
    we must be careful not to dereference uninitialized pointers.  This
    is achieved by making sure we use calloc() everywhere in
    parse_packet(), and then comparing to NULL before dereferencing.

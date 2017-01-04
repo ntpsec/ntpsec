@@ -38,7 +38,7 @@
  */
 /*
  * We will use two lists, one for IPv4 addresses and one for IPv6
- * addresses. This is not protocol-independant but for now I can't
+ * addresses. This is not protocol-independent but for now I can't
  * find a way to respect this. We'll check this later... JFB 07/2001
  */
 #define MASK_IPV6_ADDR(dst, src, msk)					\

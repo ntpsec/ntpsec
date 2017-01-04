@@ -45,7 +45,7 @@ void precision(const iomode mode)
  *      ELSE    this machine has resolution < time to read clock
  *
  * SO: if it exits on the first loop, assume "full accuracy" (1us)
- *     otherwise, take the log2(observered difference, rounded UP)
+ *     otherwise, take the log2(observed difference, rounded UP)
  *
  * MINLOOPS > 1 ensures that even if there is a STEP between the initial call
  * and the first loop, it doesn't stop too early.

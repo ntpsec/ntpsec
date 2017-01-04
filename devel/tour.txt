@@ -443,7 +443,7 @@ and time-out/panic logic.
 
 ntpmon is simpler.  It's a basic TUI modeled on Unix top(1), mutt(1)
 and similar programs.  It just calls some of the ControlSession
-methods repeatedly, formating what it gets back as a live display.
+methods repeatedly, formatting what it gets back as a live display.
 
 The code for making the actual displays in htpq and ntpmon mostly
 doesn't live in the front end.  It's in ntp.util, well separated from

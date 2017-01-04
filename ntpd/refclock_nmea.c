@@ -318,7 +318,7 @@ static void     save_ltc        (struct refclockproc * const, const char * const
 				 size_t);
 
 /*
- * If we want the driver to ouput sentences, too: re-enable the send
+ * If we want the driver to output sentences, too: re-enable the send
  * support functions by defining NMEA_WRITE_SUPPORT to non-zero...
  */
 #if NMEA_WRITE_SUPPORT

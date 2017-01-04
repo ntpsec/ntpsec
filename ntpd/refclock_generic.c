@@ -4479,8 +4479,8 @@ trimbletaip_event(
  * sendcmd, sendbyte, sendetx, sendflt, sendint implement the command
  * interface to the receiver.
  *
- * CAVEAT: the sendflt, sendint routines are byte order dependend and
- * float implementation dependend - these must be converted to portable
+ * CAVEAT: the sendflt, sendint routines are byte order dependent and
+ * float implementation dependent - these must be converted to portable
  * versions !
  *
  * CURRENT LIMITATION: float implementation. This runs only on systems
