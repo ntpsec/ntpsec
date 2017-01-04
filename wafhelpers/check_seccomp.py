@@ -1,9 +1,10 @@
 import sys
 from waflib.Logs import pprint
 
+
 def check_seccomp(ctx):
 
-    if  not ctx.options.enable_seccomp:
+    if not ctx.options.enable_seccomp:
         return
     if not sys.platform.startswith("linux"):
         return
