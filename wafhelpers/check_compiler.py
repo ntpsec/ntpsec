@@ -14,53 +14,54 @@ COMPILER_FRAG = """
 
 int main(void) {
 #ifdef __clang__
-	printf("1");
+    printf("1");
 #elif __INTEL_COMPILER
-	printf("2");
+    printf("2");
 #elif __GNUC__
-	printf("3");
+    printf("3");
 #elif __SUNPRO_C
-	printf("4");
+    printf("4");
 #else
-	printf("255");
+    printf("255");
 #endif
-	return 0;
+    return 0;
 }
 """
 
 
 def check_compiler(ctx):
 
-	if ctx.env.ENABLE_CROSS:
-		return
+    if ctx.env.ENABLE_CROSS:
+        return
 
-	defines = {
-		1: ("COMPILER_CLANG",	"clang"),
-		2: ("COMPILER_ICC",		"ICC"),
-		3: ("COMPILER_GCC",		"GCC"),
-		4: ("COMPILER_SUNCC",	"SUNCC"),
-		255: ("COMPILER_GCC",	"Unknown (Defaulting to GCC)"),
-	}
+    defines = {
+        1: ("COMPILER_CLANG",   "clang"),
+        2: ("COMPILER_ICC",     "ICC"),
+        3: ("COMPILER_GCC",     "GCC"),
+        4: ("COMPILER_SUNCC",   "SUNCC"),
+        255: ("COMPILER_GCC",   "Unknown (Defaulting to GCC)"),
+    }
 
-	ctx.check_cc(
-		fragment	= COMPILER_FRAG,
-		msg			= "Checking compiler",
-		define_name = "COMPILER_INT",
-		quote		= False,
-		execute		= True,
-		define_ret  = True,
-		mandatory	= True,
-	)
+    ctx.check_cc(
+        fragment=COMPILER_FRAG,
+        msg="Checking compiler",
+        define_name="COMPILER_INT",
+        quote=False,
+        execute=True,
+        define_ret=True,
+        mandatory=True,
+    )
 
-	compiler_int = int(ctx.get_define("COMPILER_INT"))
+    compiler_int = int(ctx.get_define("COMPILER_INT"))
 
-	ctx.undefine("COMPILER_INT") # Not needed.
+    ctx.undefine("COMPILER_INT")    # Not needed.
 
-	define, name = defines[compiler_int]
+    define, name = defines[compiler_int]
 
-	ctx.start_msg("Compiler found")
+    ctx.start_msg("Compiler found")
 
-	ctx.define(define, 1, comment="Compiler detected during configure.") # config.h
-	ctx.env[define] = True # Build system.
+    # config.h
+    ctx.define(define, 1, comment="Compiler detected during configure.")
+    ctx.env[define] = True    # Build system.
 
-	ctx.end_msg(name)
+    ctx.end_msg(name)
