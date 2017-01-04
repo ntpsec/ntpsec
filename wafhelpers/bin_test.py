@@ -17,8 +17,6 @@ cmd_map = {
         br'.*ntp_gettime\(\) returns code 0 \(OK\).*',
     ("main/attic/sht", "2:r"): br'.*reader.*',
 
-    # XXX: Need to figure out how to test this.
-    #       ("main/attic/hist", ""): br'',
     # Perl library
     #       ("main/ntpclients/ntptrace", ""): br'',
     #       ("main/ntpclients/ntpwait", ""): br'',
