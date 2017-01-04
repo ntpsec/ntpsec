@@ -5,32 +5,33 @@ SIZE_FRAG = """
 %s
 #include <stdio.h>
 int main(void) {
-	printf("%%lu", sizeof(%s));
-	return 0;
+    printf("%%lu", sizeof(%s));
+    return 0;
 }
 """
 
+
 def check_sizeof_host(ctx, header, sizeof, mandatory=True):
-	sizeof_ns = sizeof.replace(" ", "_")
-	name = "NTP_SIZEOF_%s" % sizeof_ns.upper()
+    sizeof_ns = sizeof.replace(" ", "_")
+    name = "NTP_SIZEOF_%s" % sizeof_ns.upper()
 
-	header_snippet = ""
-	if header:
-		ctx.start_msg("Checking sizeof %s (%s)" % (sizeof, header))
-		header_snippet = "#include <%s>" % header
-	else:
-		ctx.start_msg("Checking sizeof %s" % (sizeof))
+    header_snippet = ""
+    if header:
+        ctx.start_msg("Checking sizeof %s (%s)" % (sizeof, header))
+        header_snippet = "#include <%s>" % header
+    else:
+        ctx.start_msg("Checking sizeof %s" % (sizeof))
 
-	ctx.check_cc(
-		fragment	= SIZE_FRAG % (header_snippet, sizeof),
-		define_name = name,
-		execute     = True,
-		define_ret  = True,
-		quote		= False,
-		mandatory	= mandatory,
-		comment		= "Size of %s from <%s>" % (sizeof, header)
-	)
-	ctx.end_msg(ctx.get_define(name))
+    ctx.check_cc(
+        fragment=SIZE_FRAG % (header_snippet, sizeof),
+        define_name=name,
+        execute=True,
+        define_ret=True,
+        quote=False,
+        mandatory=mandatory,
+        comment="Size of %s from <%s>" % (sizeof, header)
+    )
+    ctx.end_msg(ctx.get_define(name))
 
 
 # Cross compile check.  Much slower so we do not run it all the time.
@@ -45,37 +46,40 @@ int main(void) {
 }
 """
 
+
 def check_sizeof_cross(ctx, header, sizeof, mandatory=True):
-	sizeof_ns = sizeof.replace(" ", "_")
-	name = "NTP_SIZEOF_%s" % sizeof_ns.upper()
+    sizeof_ns = sizeof.replace(" ", "_")
+    name = "NTP_SIZEOF_%s" % sizeof_ns.upper()
 
-	header_snippet = ""
-	if header:
-		ctx.start_msg("Checking sizeof %s (%s)" % (sizeof, header))
-		header_snippet = "#include <%s>" % header
-	else:
-		ctx.start_msg("Checking sizeof %s" % (sizeof))
+    header_snippet = ""
+    if header:
+        ctx.start_msg("Checking sizeof %s (%s)" % (sizeof, header))
+        header_snippet = "#include <%s>" % header
+    else:
+        ctx.start_msg("Checking sizeof %s" % (sizeof))
 
-	for size in range(2, 13):
+    for size in range(2, 13):
 
-		try:
-			ctx.check_cc(
-				fragment	= SIZE_FRAG_CROSS % (header_snippet, sizeof, size),
-				features	= "c",
-				execute     = False,
-				mandatory	= mandatory,
-			)
-			ctx.define(name, size, comment="Size of %s from <%s>" % (sizeof, header))
-			ctx.end_msg(ctx.get_define(name))
-			return
-		except Errors.ConfigurationError:
-			pass
+        try:
+            ctx.check_cc(
+                fragment=SIZE_FRAG_CROSS % (header_snippet, sizeof, size),
+                features="c",
+                execute=False,
+                mandatory=mandatory,
+            )
+            ctx.define(name, size, comment="Size of %s from <%s>"
+                       % (sizeof, header))
+            ctx.end_msg(ctx.get_define(name))
+            return
+        except Errors.ConfigurationError:
+            pass
 
-	raise # never reached.
+    raise     # never reached.
+
 
 @conf
 def check_sizeof(*kwargs):
-	if kwargs[0].env.ENABLE_CROSS:
-		return check_sizeof_cross(*kwargs)
-	else:
-		return check_sizeof_host(*kwargs)
+    if kwargs[0].env.ENABLE_CROSS:
+        return check_sizeof_cross(*kwargs)
+    else:
+        return check_sizeof_host(*kwargs)
