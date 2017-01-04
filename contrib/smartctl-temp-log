@@ -50,9 +50,12 @@ if 1 < len(sys.argv):
     device = sys.argv[1]
 
 try:
-    output = subprocess.check_output(["smartctl", "-a", device],
-                                     stderr=subprocess.STDOUT,
-                                     universal_newlines=True)
+    # sadly subprocess.check_output() is not in Python 2.6
+    proc = subprocess.Popen(["smartctl", "-a", device],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
+    output = proc.communicate()[0]
 
 except subprocess.CalledProcessError as e:
     sys.stderr.write("ERROR: 'smartctl -a %s' failed\n" % device)
