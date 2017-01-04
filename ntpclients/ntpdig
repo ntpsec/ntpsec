@@ -331,7 +331,7 @@ if __name__ == '__main__':
                 print(usage)
                 raise SystemExit(0)
             elif switch in ("-V", "--version"):
-                print(ntp.util.stdversion())
+                print("ntpdig %s" % ntp.util.stdversion())
                 raise SystemExit(0)
             else:
                 sys.stderr.write(
