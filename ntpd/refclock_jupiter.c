@@ -819,7 +819,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			 * (i.e. before limit, a.k.a. fudgetime2) in
 			 * the second.
 			 */
-			if (tstamp - pp->lastrec < instance->limit))
+			if (tstamp - pp->lastrec < instance->limit)
 				bumplfpuint(pp->lastrec, 1);
 
 			/* Parse timecode (even when there's no pps) */

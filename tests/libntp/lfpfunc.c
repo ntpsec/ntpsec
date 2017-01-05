@@ -118,11 +118,6 @@ static bool l_isgtu(const l_fp first, const l_fp second)
 	return L_ISGTU(first, second);
 }
 
-static bool l_isgeq(const l_fp first, const l_fp second)
-{
-	return L_ISGEQ(first, second);
-}
-
 //----------------------------------------------------------------------
 // test data table for add/sub and compare
 //----------------------------------------------------------------------
@@ -291,16 +286,10 @@ TEST(lfpfunc, SignedRelOps) {
 		case 1:
 			TEST_ASSERT_TRUE (l_isgt(op1, op2));
 			TEST_ASSERT_FALSE(l_isgt(op2, op1));
-
-			TEST_ASSERT_TRUE (l_isgeq(op1, op2));
-			TEST_ASSERT_FALSE(l_isgeq(op2, op1));
 			break;
 		case 0:
 			TEST_ASSERT_FALSE(l_isgt(op1, op2));
 			TEST_ASSERT_FALSE(l_isgt(op2, op1));
-
-			TEST_ASSERT_TRUE (l_isgeq(op1, op2));
-			TEST_ASSERT_TRUE (l_isgeq(op2, op1));
 			break;
 		default:
 			TEST_FAIL_MESSAGE("unexpected UCMP result: ");

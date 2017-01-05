@@ -130,7 +130,6 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(v))
 #define	L_ISGT(a, b)	((int64_t)(a) > (int64_t)(b))
 #define	L_ISGTU(a, b)	((a) > (b))
-#define	L_ISGEQ(a, b)	((int64_t)(a) >= (int64_t)(b))
 
 /*
  * s_fp/double and u_fp/double conversions
