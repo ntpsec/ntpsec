@@ -15,21 +15,6 @@ TEST_SETUP(lfpfunc) {}
 
 TEST_TEAR_DOWN(lfpfunc) {}
 
-/*
-   replaced:	TEST_ASSERT_EQUAL_MEMORY(&a, &b, sizeof(a))
-   with:	TEST_ASSERT_EQUAL_l_fp(a, b).
-   It's safer this way, because structs can be compared even if they
-   aren't initiated with memset (due to padding bytes).
-*/
-#define TEST_ASSERT_EQUAL_l_fp(a, b) {					\
-	TEST_ASSERT_EQUAL_MESSAGE(lfpsint(a), lfpsint(b), "Integer part");		\
-	TEST_ASSERT_EQUAL_UINT_MESSAGE(lfpfrac(a), lfpfrac(b), "Fractional part");	\
-}
-
-typedef struct  {
-	uint32_t h, l;
-} lfp_hl;
-
 //----------------------------------------------------------------------
 // reference comparison
 // This is implemented as a full signed MP-subtract in 3 limbs, where
@@ -148,7 +133,7 @@ static bool l_isgeq(const l_fp first, const l_fp second)
 //----------------------------------------------------------------------
 
 
-static const lfp_hl addsub_tab[][3] = {
+static const l_fp_w addsub_tab[][3] = {
 	// trivial identity:
 	{{0 ,0         }, { 0,0         }, { 0,0}},
 	// with carry from fraction and sign change:
@@ -189,7 +174,6 @@ static const size_t addsub_tot = (sizeof(addsub_tab)/sizeof(addsub_tab[0][0]));
 double
 eps(double d)
 {
-
 	return fmax(ldexp(1.0, -31), ldexp(fabs(d), -53));
 }
 
@@ -218,13 +202,11 @@ TEST(lfpfunc, Negation) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][0].l_ui, addsub_tab[idx][0].l_uf);
 		l_fp op2 = l_fp_negate(op1);
 		l_fp sum = op1 + op2;
 
-		l_fp zero = lfpinit(0, 0);
-
-		TEST_ASSERT_EQUAL_l_fp(zero, sum);
+		TEST_ASSERT_EQUAL(0, sum);
 	}
 	return;
 }
@@ -238,7 +220,7 @@ TEST(lfpfunc, Absolute) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][0].l_ui, addsub_tab[idx][0].l_uf);
 		l_fp op2 = l_fp_abs(op1);
 
 		TEST_ASSERT_TRUE(l_fp_signum(op2) >= 0);
@@ -248,9 +230,7 @@ TEST(lfpfunc, Absolute) {
 		else
 			op1 = op1 + op2;
 
-		l_fp zero = lfpinit(0, 0);
-
-		TEST_ASSERT_EQUAL_l_fp(zero, op1);
+		TEST_ASSERT_EQUAL(0, op1);
 	}
 
 	// There is one special case we have to check: the minimum
@@ -260,7 +240,7 @@ TEST(lfpfunc, Absolute) {
 	l_fp minAbs = l_fp_abs(minVal);
 	TEST_ASSERT_EQUAL(-1, l_fp_signum(minVal));
 
-	TEST_ASSERT_EQUAL_l_fp(minVal, minAbs);
+	TEST_ASSERT_EQUAL(minVal, minAbs);
 
 	return;
 }
@@ -272,7 +252,7 @@ TEST(lfpfunc, Absolute) {
 TEST(lfpfunc, FDF_RoundTrip) {
 	size_t idx = 0;
 
-	// since a l_fp has 64 bits in it's mantissa and a double has
+	// since a l_fp has 64 bits in its mantissa and a double has
 	// only 54 bits available (including the hidden '1') we have to
 	// make a few concessions on the roundtrip precision. The 'eps()'
 	// function makes an educated guess about the available precision
@@ -280,7 +260,7 @@ TEST(lfpfunc, FDF_RoundTrip) {
 	// that limit.
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
+		l_fp op1 = lfpinit(addsub_tab[idx][0].l_ui, addsub_tab[idx][0].l_uf);
 		double op2 = lfptod(op1);
 		l_fp op3 = dtolfp(op2);
 
@@ -300,12 +280,12 @@ TEST(lfpfunc, FDF_RoundTrip) {
 // macros in 'ntp_fp.h' produce mathing results.
 // ----------------------------------------------------------------------
 TEST(lfpfunc, SignedRelOps) {
-	const lfp_hl * tv = (&addsub_tab[0][0]);
+	const l_fp_w * tv = (&addsub_tab[0][0]);
 	size_t lc ;
 
 	for (lc = addsub_tot - 1; lc; --lc, ++tv) {
-		l_fp op1 = lfpinit(tv[0].h, tv[0].l);
-		l_fp op2 = lfpinit(tv[1].h, tv[1].l);
+		l_fp op1 = lfpinit(tv[0].l_ui, tv[0].l_uf);
+		l_fp op2 = lfpinit(tv[1].l_ui, tv[1].l_uf);
 		int cmp = l_fp_scmp(op1, op2);
 
 		switch (cmp) {
@@ -336,12 +316,12 @@ TEST(lfpfunc, SignedRelOps) {
 }
 
 TEST(lfpfunc, UnsignedRelOps) {
-	const lfp_hl * tv =(&addsub_tab[0][0]);
+	const l_fp_w *tv = (&addsub_tab[0][0]);
 	size_t lc;
 
 	for (lc = addsub_tot - 1; lc; --lc, ++tv) {
-		l_fp op1 = lfpinit(tv[0].h, tv[0].l);
-		l_fp op2 = lfpinit(tv[1].h, tv[1].l);
+		l_fp op1 = lfpinit(tv[0].l_ui, tv[0].l_uf);
+		l_fp op2 = lfpinit(tv[1].l_ui, tv[1].l_uf);
 		int cmp = l_fp_ucmp(op1, op2);
 
 		switch (cmp) {
