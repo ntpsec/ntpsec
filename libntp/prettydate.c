@@ -14,7 +14,7 @@
 # error sizeof(time_t) < 4 -- this will not work!
 #endif
 
-static char *common_prettydate(l_fp *, bool);
+static char *common_prettydate(const l_fp, bool);
 
 /* Helper function to handle possible wraparound of the ntp epoch.
  *
@@ -116,7 +116,7 @@ get_struct_tm(
 
 static char *
 common_prettydate(
-	l_fp *ts,
+	const l_fp ts,
 	bool local
 	)
 {
@@ -132,8 +132,8 @@ common_prettydate(
 	LIB_GETBUF(bp);
 
 	/* get & fix milliseconds */
-	ntps = lfpuint(*ts);
-	msec = lfpfrac(*ts) / 4294967;	/* fract / (2 ** 32 / 1000) */
+	ntps = lfpuint(ts);
+	msec = lfpfrac(ts) / 4294967;	/* fract / (2 ** 32 / 1000) */
 	if (msec >= 1000u) {
 		msec -= 1000u;
 		ntps++;
@@ -148,13 +148,13 @@ common_prettydate(
 		struct calendar jd;
 		ntpcal_time_to_date(&jd, sec);
 		snprintf(bp, LIB_BUFLENGTH, pfmt,
-			 (u_long)lfpuint(*ts), (u_long)lfpfrac(*ts),
+			 (u_long)lfpuint(ts), (u_long)lfpfrac(ts),
 			 jd.year, jd.month, jd.monthday,
 			 jd.hour, jd.minute, jd.second, msec);
 		strncat(bp, "Z",  LIB_BUFLENGTH);
 	} else {
 		snprintf(bp, LIB_BUFLENGTH, pfmt,
-			 (u_long)lfpuint(*ts), (u_long)lfpfrac(*ts),
+			 (u_long)lfpuint(ts), (u_long)lfpfrac(ts),
 			 1900 + tm->tm_year, tm->tm_mon+1, tm->tm_mday,
 			 tm->tm_hour, tm->tm_min, tm->tm_sec, msec);
 		if (!local)
@@ -166,7 +166,7 @@ common_prettydate(
 
 char *
 prettydate(
-	l_fp *ts
+	const l_fp ts
 	)
 {
 	return common_prettydate(ts, true);
@@ -175,7 +175,7 @@ prettydate(
 
 char *
 rfc3339date(
-	l_fp *ts
+	const l_fp ts
 	)
 {
 	return common_prettydate(ts, false) + 18; /* skip past hex time */
@@ -184,7 +184,7 @@ rfc3339date(
 
 char *
 gmprettydate(
-	l_fp *ts
+	const l_fp ts
 	)
 {
 	return common_prettydate(ts, false);

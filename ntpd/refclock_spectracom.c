@@ -282,12 +282,10 @@ spectracom_receive(
 	 */
 	if (temp == 0) {
 		if (up->prev_eol_cr) {
-			DPRINTF(2, ("wwvb: <LF> @ %s\n",
-				    prettydate(&trtmp)));
+			DPRINTF(2, ("wwvb: <LF> @ %s\n", prettydate(trtmp)));
 		} else {
 			up->laststamp = trtmp;
-			DPRINTF(2, ("wwvb: <CR> @ %s\n", 
-				    prettydate(&trtmp)));
+			DPRINTF(2, ("wwvb: <CR> @ %s\n", prettydate(trtmp)));
 		}
 		up->prev_eol_cr = !up->prev_eol_cr;
 		return;
@@ -298,7 +296,7 @@ spectracom_receive(
 	up->prev_eol_cr = true;
 	DPRINTF(2, ("wwvb: code @ %s\n"
 		    "       using %s minus one char\n",
-		    prettydate(&trtmp), prettydate(&pp->lastrec)));
+		    prettydate(trtmp), prettydate(pp->lastrec)));
 	if (pp->lastrec == 0)
 		return;
 
@@ -469,7 +467,7 @@ spectracom_timer(
 #ifdef DEBUG
 	get_systime(&now);
 	if (debug)
-		printf("%c poll at %s\n", pollchar, prettydate(&now));
+		printf("%c poll at %s\n", pollchar, prettydate(now));
 #endif
 #ifdef HAVE_PPSAPI
 	if (up->ppsapi_lit &&

@@ -78,7 +78,7 @@ ntpc_prettydate(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &s))
 	return NULL;
     if (hextolfp(s+2, &ts))
-	return Py_BuildValue("s", prettydate(&ts));
+	return Py_BuildValue("s", prettydate(ts));
     else {
 	PyErr_SetString(PyExc_ValueError, "ill-formed hex date");
 	return NULL;
