@@ -71,7 +71,7 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 static l_fp l_fp_negate(const l_fp first)
 {
 	l_fp temp = first;
-	L_NEG(&temp);
+	L_NEG(temp);
 
 	return temp;
 }
@@ -79,8 +79,8 @@ static l_fp l_fp_negate(const l_fp first)
 static l_fp l_fp_abs(const l_fp first)
 {
 	l_fp temp = first;
-	if (L_ISNEG(&temp))
-		L_NEG(&temp);
+	if (L_ISNEG(temp))
+		L_NEG(temp);
 	return temp;
 }
 
@@ -110,17 +110,17 @@ static void l_fp_swap(l_fp * first, l_fp *second)
 
 static bool l_isgt (const l_fp first, const l_fp second)
 {
-	return L_ISGT(&first, &second);
+	return L_ISGT(first, second);
 }
 
 static bool l_isgtu(const l_fp first, const l_fp second)
 {
-	return L_ISGTU(&first, &second);
+	return L_ISGTU(first, second);
 }
 
 static bool l_isgeq(const l_fp first, const l_fp second)
 {
-	return L_ISGEQ(&first, &second);
+	return L_ISGEQ(first, second);
 }
 
 //----------------------------------------------------------------------

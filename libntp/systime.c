@@ -196,7 +196,7 @@ normalize_time(
 	 * determined.
 	 */
 	if (lfp_prev != 0 && !lamport_violated) {
-		if (!L_ISGTU(&result, &lfp_prev) &&
+		if (!L_ISGTU(result, lfp_prev) &&
 		    sys_fuzz > 0.) {
 			msyslog(LOG_ERR, "ts_prev %s ts_min %s",
 				tspectoa(ts_prev_log),

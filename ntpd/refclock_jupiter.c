@@ -716,8 +716,8 @@ jupiter_control(
 
 	instance->limit = dtolfp(pp->fudgetime2);
 	/* Force positive value. */
-	if (L_ISNEG(&instance->limit))
-		L_NEG(&instance->limit);
+	if (L_ISNEG(instance->limit))
+		L_NEG(instance->limit);
 
 #ifdef HAVE_PPSAPI
 	instance->assert = !(pp->sloppyclockflag & CLK_FLAG3);
@@ -820,7 +820,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			 * the second.
 			 */
 			tstamp -= pp->lastrec;
-			if (!L_ISGEQ(&tstamp, &instance->limit))
+			if (!L_ISGEQ(tstamp, instance->limit))
 				bumplfpuint(pp->lastrec, 1);
 
 			/* Parse timecode (even when there's no pps) */

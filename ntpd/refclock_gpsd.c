@@ -1648,7 +1648,7 @@ process_pps(
 	 * primary channel. Sanity checks are done in evaluation step.
 	 */
 	up->pps_stamp = up->pps_recvt;
-	L_ADDUF(&up->pps_stamp, 0x80000000u);
+	up->pps_stamp += 0x80000000u;
 	setlfpfrac(up->pps_stamp, 0);
 
 	if (NULL != up->pps_peer)
