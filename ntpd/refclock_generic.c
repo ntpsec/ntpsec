@@ -3046,7 +3046,7 @@ parse_control(
 		if (PARSE_PPS(parse->timedata.parse_state))
 		{
 			tt = add_var(&out->kv_list, 80, RO|DEF);
-			snprintf(tt, 80, "refclock_ppstime=\"%s\"", gmprettydate(&parse->timedata.parse_ptime.fp));
+			snprintf(tt, 80, "refclock_ppstime=\"%s\"", gmprettydate(parse->timedata.parse_ptime.fp));
 		}
 
 		start = tt = add_var(&out->kv_list, 128, RO|DEF);
@@ -3059,7 +3059,7 @@ parse_control(
 		else
 		{
 			ap(start, 128, tt, "%s\"",
-			    gmprettydate(&parse->timedata.parse_time.fp));
+			    gmprettydate(parse->timedata.parse_time.fp));
 		}
 
 		if (!PARSE_GETTIMECODE(parse, &tmpctl))
@@ -3475,8 +3475,8 @@ parse_process(
 		if (debug > 3)
 			printf("PARSE receiver #%d: Reftime %s, Recvtime %s - initial offset %s\n",
 			       parse->peer->refclkunit,
-			       prettydate(&reftime),
-			       prettydate(&rectime),
+			       prettydate(reftime),
+			       prettydate(rectime),
 			       lfptoa(off,6));
 #endif
 	}
@@ -3505,7 +3505,7 @@ parse_process(
 		if (debug > 3)
 			printf("PARSE receiver #%d: PPStime %s\n",
 				parse->peer->refclkunit,
-				prettydate(&offset));
+				prettydate(offset));
 #endif
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
@@ -3586,8 +3586,8 @@ parse_process(
 	if (debug > 3)
 		printf("PARSE receiver #%d: Reftime %s, Recvtime %s - final offset %s\n",
 			parse->peer->refclkunit,
-			prettydate(&reftime),
-			prettydate(&rectime),
+			prettydate(reftime),
+			prettydate(rectime),
 			lfptoa(off,6));
 #endif
 
@@ -3599,8 +3599,8 @@ parse_process(
 	if (debug > 3)
 		printf("PARSE receiver #%d: calculated Reftime %s, Recvtime %s\n",
 			parse->peer->refclkunit,
-			prettydate(&reftime),
-			prettydate(&rectime));
+			prettydate(reftime),
+			prettydate(rectime));
 #endif
 
 	if ((parsetime->parse_status & CVT_ADDITIONAL) &&
@@ -3670,8 +3670,8 @@ parse_process(
 			{
 				       printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
 				       parse->peer->refclkunit,
-				       prettydate(&reftime),
-				       prettydate(&rectime),
+				       prettydate(reftime),
+				       prettydate(rectime),
 				       fudge);
 			}
 #endif

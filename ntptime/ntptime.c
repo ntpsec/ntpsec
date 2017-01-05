@@ -334,7 +334,7 @@ main(
 		setlfpuint(ts, lfpuint(ts) + JAN_1970);
 		setlfpfrac(ts, lfpfrac(ts) + ts_roundbit);
 		setlfpfrac(ts, lfpfrac(ts) & ts_mask);
-		printf(json ? jfmt2 : ofmt2,  json ? rfc3339date(&ts) : prettydate(&ts), fdigits, (int)time_frac);
+		printf(json ? jfmt2 : ofmt2,  json ? rfc3339date(&ts) : prettydate(ts), fdigits, (int)time_frac);
 		printf(json ? jfmt3 : ofmt3,  (u_long)ntv.maxerror, (u_long)ntv.esterror);
 		if (rawtime)
 			printf(json ? jfmt4 : ofmt4,

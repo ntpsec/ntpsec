@@ -862,7 +862,7 @@ mx4200_receive(
 		mx4200_debug(peer, "mx4200_receive: process time: ");
 		mx4200_debug(peer, "%4d-%03d %02d:%02d:%02d at %s, %.6f\n",
 		    pp->year, pp->day, pp->hour, pp->minute, pp->second,
-		    prettydate(&pp->lastrec), pp->offset);
+		    prettydate(pp->lastrec), pp->offset);
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
 
