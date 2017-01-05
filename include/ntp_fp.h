@@ -163,12 +163,6 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
  */
 #define FRAC		4294967296.0 		/* 2^32 as a double */
 
-/*
- * Use 64 bit integers if available.
- * XSCALE generates bad code for these, at least with GCC 3.3.5.
- */
-#if !(defined(__arm__) && defined(__XSCALE__) && defined(__GNUC__))
-
 #include <math.h>	/* ldexp() */
 
 static inline l_fp dtolfp(double d)
@@ -208,39 +202,6 @@ static inline double lfptod(l_fp r)
 	}
 	return d;
 }
-
-#else /* use only 32 bit unsigned values */
-
-static inline l_fp dtolfp(double d)
-/* double to l_fp */
-{
-	double d_tmp;
-	l_fp r;
-	if ((d_tmp = (d)) < 0) {
-		setlfpuint(r, (uint32_t)(-d_tmp));
-		setlfpfrac(r, (uint32_t)(-(d_tmp + (double)lfpuint(r)) * FRAC));
-		M_NEG((r_ui), (r_uf));
-	} else { \
-		setlfpuint(r, (uint32_t)d_tmp);
-		setlfpfrac(r, (uint32_t)((d_tmp - (double)lfpuint(r)) * FRAC));
-	}
-	return r;
-}
-
-static inline double lfptod(l_fp r)
-/* l_fp to double */
-{
-	uint32_t l_thi, l_tlo;
-	l_thi = lfpuint(r); l_tlo = lfpfrac(r);
-	if (M_ISNEG(l_thi)) {
-		M_NEG(l_thi, l_tlo);
-		(d) = -((double)l_thi + (double)l_tlo / FRAC);
-	} else {
-		(d) = (double)l_thi + (double)l_tlo / FRAC;
-	}
-	return d;
-}
-#endif
 
 /*
  * Prototypes
