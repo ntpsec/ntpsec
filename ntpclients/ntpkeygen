@@ -75,7 +75,7 @@ def fheader(file,       # file name id
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "hM:", ["help"])
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hM", ["help"])
     except getopt.GetoptError as e:
         print(e)
         raise SystemExit(1)
