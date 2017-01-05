@@ -23,7 +23,10 @@ hyphen and the flag character.
 
 from __future__ import print_function, division
 
-import sys, getopt, re, os
+import getopt
+import os
+import re
+import sys
 
 if __name__ == '__main__':
     try:
