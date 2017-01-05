@@ -17,7 +17,7 @@
 l_fp
 convertRefIDToLFP(uint32_t r)
 {
-	l_fp temp;
+	l_fp temp = 0;
 
 	r = ntohl(r);
 

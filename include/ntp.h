@@ -494,10 +494,10 @@ struct pkt {
 	u_fp	rootdelay;	/* roundtrip delay to primary source */
 	u_fp	rootdisp;	/* dispersion to primary source*/
 	uint32_t	refid;		/* reference id */
-	l_fp	reftime;	/* last update time */
-	l_fp	org;		/* originate time stamp */
-	l_fp	rec;		/* receive time stamp */
-	l_fp	xmt;		/* transmit time stamp */
+	l_fp_w	reftime;	/* last update time */
+	l_fp_w	org;		/* originate time stamp */
+	l_fp_w	rec;		/* receive time stamp */
+	l_fp_w	xmt;		/* transmit time stamp */
 
 #define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
 #define MAX_MD5_LEN	(5 * sizeof(uint32_t))	/* MD5 */
