@@ -42,14 +42,6 @@ typedef uint64_t l_fp;
 #define setlfpuint(n, v)	(n) = (uint64_t)((((uint64_t)(v)) << 32) | ((n) & LOW32))
 #define bumplfpuint(n, i)	(n) += (i)*BUMP
 
-static inline uint64_t lfp_to_uint64(const l_fp lfp) {
-    return lfp;
-}
-
-static inline l_fp uint64_to_lfp(uint64_t x) {
-    return x;
-}
-
 static inline l_fp lfpinit(int32_t hi, uint32_t lo)
 {
     l_fp tmp = 0;
@@ -147,20 +139,20 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 /*
  * Operations on the long fp format
  */
-#define	L_ADD(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)+lfp_to_uint64(*a))
-#define	L_SUB(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)-lfp_to_uint64(*a))
-#define	L_NEG(v)	(*v) = uint64_to_lfp(-1 * (int64_t)lfp_to_uint64(*v))
-#define L_ADDUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) + (uf))
-#define L_SUBUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) - (uf))
-#define	L_ADDF(r, f)	(*r) = uint64_to_lfp((int64_t)lfp_to_uint64(*r) + (int64_t)(uf))
+#define	L_ADD(r, a)	(*r) = ((*r)+(*a))
+#define	L_SUB(r, a)	(*r) = ((*r)-(*a))
+#define	L_NEG(v)	(*v) = (-1 * (int64_t)(*v))
+#define L_ADDUF(r, uf)	(*r) = ((*r) + (uf))
+#define L_SUBUF(r, uf)	(*r) = ((*r) - (uf))
+#define	L_ADDF(r, f)	(*r) = ((int64_t)(*r) + (int64_t)(uf))
 #define	L_CLR(v)	*v = lfpinit(0, 0)
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
 #define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
-#define	L_ISGT(a, b)	((int64_t)lfp_to_uint64(*a) > (int64_t)lfp_to_uint64(*b))
-#define	L_ISGTU(a, b)	(lfp_to_uint64(*a) > lfp_to_uint64(*b))
-#define	L_ISGEQ(a, b)	((int64_t)lfp_to_uint64(*a) >= (int64_t)lfp_to_uint64(*b))
-#define L_ISGEQU(a, b)  (lfp_to_uint64(*a) >= lfp_to_uint64(*b))
-#define	L_ISEQU(a, b)	(lfp_to_uint64(*a) == lfp_to_uint64(*b))
+#define	L_ISGT(a, b)	((int64_t)(*a) > (int64_t)(*b))
+#define	L_ISGTU(a, b)	((*a) > (*b))
+#define	L_ISGEQ(a, b)	((int64_t)(*a) >= (int64_t)(*b))
+#define L_ISGEQU(a, b)  ((*a) >= (*b))
+#define	L_ISEQU(a, b)	((*a) == (*b))
 
 /*
  * s_fp/double and u_fp/double conversions
