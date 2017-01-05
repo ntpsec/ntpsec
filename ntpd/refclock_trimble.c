@@ -1057,7 +1057,7 @@ trimble_receive (
 #ifdef DEBUG
 	if (debug)
 		printf("trimble_receive: unit %d: %s\n",
-		       up->unit, prettydate(&pp->lastrec));
+		       up->unit, prettydate(pp->lastrec));
 #endif
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
