@@ -86,7 +86,6 @@ typedef uint32_t u_fp;
 #define	HTONS_FP(x)	(htonl(x))
 #define	NTOHS_FP(x)	(ntohl(x))
 
-
 typedef struct {
          uint32_t        l_ui;
          uint32_t        l_uf;
@@ -105,20 +104,6 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 
 /* Convert unsigned ts fraction to net order ts */
 #define	HTONL_UF(uf, nts)	*nts = lfpint(0, htonl(uf))
-
-/*
- * Conversions between the two fixed point types
- */
-#define	MFPTOFP(x_i, x_f)	(((x_i) >= 0x00010000) ? 0x7fffffff : \
-				(((x_i) <= -0x00010000) ? 0x80000000 : \
-				(((x_i)<<16) | (((x_f)>>16)&0xffff))))
-#define	LFPTOFP(v)		MFPTOFP(lfpsint(*v), lfprac(*v))
-
-#define UFPTOLFP(x, v) (*v = lfpinit((u_fp)(x)>>16, (x)<<16))
-#define FPTOLFP(x, v)  (UFPTOLFP((x), (v)), (x) < 0 ? setlfpuint(*v, getlfpuint(*v) - 0x10000) : 0)
-
-#define MAXLFP(v) *v = lfpinit(0x7fffffffu, 0xffffffffu)
-#define MINLFP(v) *v = lfpinit(0x80000000u, 0u)
 
 /*
  * Primitive operations on long fixed point values.  If these are
