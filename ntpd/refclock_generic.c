@@ -3037,7 +3037,7 @@ parse_control(
 				 * WARNING: assumes on TIMECODE == PULSE (timecode after pulse)
 				 */
 				off = parse->timedata.parse_stime.fp;
-				L_SUB(&off, &parse->timedata.parse_ptime.fp); /* true offset */
+				off -= parse->timedata.parse_ptime.fp; /* true offset */
 				tt = add_var(&out->kv_list, 80, RO);
 				snprintf(tt, 80, "refclock_ppsskew=%s", lfptoms(off, 6));
 			}
@@ -3469,7 +3469,7 @@ parse_process(
 		rectime = parsetime->parse_stime.fp;
 		off = reftime = parsetime->parse_time.fp;
 
-		L_SUB(&off, &rectime); /* prepare for PPS adjustments logic */
+		off -= rectime; /* prepare for PPS adjustments logic */
 
 #ifdef DEBUG
 		if (debug > 3)
@@ -3542,7 +3542,7 @@ parse_process(
 					 */
 					reftime = off = parsetime->parse_time.fp;
 
-					L_SUB(&off, &offset); /* true offset */
+					off -= offset; /* true offset */
 				}
 			}
 			/*
@@ -3593,7 +3593,7 @@ parse_process(
 
 
 	rectime = reftime;
-	L_SUB(&rectime, &off);	/* just to keep the ntp interface happy */
+	rectime -= off;	/* just to keep the ntp interface happy */
 
 #ifdef DEBUG
 	if (debug > 3)

@@ -306,8 +306,7 @@ findpeer(
                 if (MODE_SERVER == pkt_mode && AM_PROCPKT == *action) {
                         pkt = &rbufp->recv_pkt;
                         pkt_org = ntohl_fp(pkt->org);
-                        if (!L_ISEQU(&p->org, &pkt_org) &&
-                            findmanycastpeer(rbufp))
+                        if (p->org != pkt_org && findmanycastpeer(rbufp))
                                 *action = AM_ERR;
                 }
 
@@ -859,7 +858,7 @@ findmanycastpeer(
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		if (MDF_SOLICIT_MASK & peer->cast_flags) {
 			p_org = ntohl_fp(pkt->org);
-			if (L_ISEQU(&p_org, &peer->org))
+			if (p_org == peer->org)
 				break;
 		}
 

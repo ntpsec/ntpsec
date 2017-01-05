@@ -97,7 +97,6 @@ static inline l_fp_w htonl_fp(l_fp lfp) {
     lfpw.l_ui = htonl(lfpuint(lfp));
     lfpw.l_uf = htonl(lfpfrac(lfp));
     return lfpw;
-//  return lfpinit(htonl(lfpuint(lfp)), htonl(lfpfrac(lfp)));
 }
 
 static inline l_fp ntohl_fp(l_fp_w lfpw) {
@@ -137,22 +136,19 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 	(((v_i) & 0x80000000) != 0)
 
 /*
- * Operations on the long fp format
+ * Operations on the long fp format.  The only reason these aren't
+ * native operations is to be independent of whether the l_fp
+ * type is signed ot unsigned.
  */
-#define	L_ADD(r, a)	(*r) = ((*r)+(*a))
-#define	L_SUB(r, a)	(*r) = ((*r)-(*a))
 #define	L_NEG(v)	(*v) = (-1 * (int64_t)(*v))
 #define L_ADDUF(r, uf)	(*r) = ((*r) + (uf))
 #define L_SUBUF(r, uf)	(*r) = ((*r) - (uf))
 #define	L_ADDF(r, f)	(*r) = ((int64_t)(*r) + (int64_t)(uf))
-#define	L_CLR(v)	*v = lfpinit(0, 0)
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
-#define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
 #define	L_ISGT(a, b)	((int64_t)(*a) > (int64_t)(*b))
 #define	L_ISGTU(a, b)	((*a) > (*b))
 #define	L_ISGEQ(a, b)	((int64_t)(*a) >= (int64_t)(*b))
 #define L_ISGEQU(a, b)  ((*a) >= (*b))
-#define	L_ISEQU(a, b)	((*a) == (*b))
 
 /*
  * s_fp/double and u_fp/double conversions

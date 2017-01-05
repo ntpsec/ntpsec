@@ -1092,7 +1092,7 @@ clock_update(
 		memcpy(&sys_refid, "STEP", REFIDLEN);
 		sys_rootdelay = 0;
 		sys_rootdisp = 0;
-		L_CLR(&sys_reftime);
+		sys_reftime = 0;
 		sys_jitter = LOGTOD(sys_precision);
 		leapsec_reset_frame();
 		break;
@@ -2215,7 +2215,7 @@ peer_xmit(
 static void
 leap_smear_add_offs(l_fp *t, l_fp *t_recv) {
 	UNUSED_ARG(t_recv);
-	L_ADD(t, &leap_smear.offset);
+	t += leap_smear.offset;
 }
 
 #endif	/* ENABLE_LEAP_SMEAR */
@@ -2367,7 +2367,7 @@ fast_xmit(
 	sendlen += authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 	get_systime(&xmt_ty);
-	L_SUB(&xmt_ty, &xmt_tx);
+	xmt_ty -= xmt_tx;
 	sys_authdelay = xmt_ty;
 #ifdef DEBUG
 	if (debug)
@@ -2674,7 +2674,7 @@ measure_tick_fuzz(void)
 	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
 		get_systime(&val);
 		ldiff = val;
-		L_SUB(&ldiff, &last);
+		ldiff -= last;
 		last = val;
 		if (L_ISGT(&ldiff, &minstep)) {
 			max_repeats = max(repeats, max_repeats);
@@ -2757,7 +2757,7 @@ init_proto(const bool verbose)
 	sys_peer = NULL;
 	sys_rootdelay = 0;
 	sys_rootdisp = 0;
-	L_CLR(&sys_reftime);
+	sys_reftime = 0;
 	sys_jitter = 0;
 	measure_precision(verbose);
 	get_systime(&dummy);

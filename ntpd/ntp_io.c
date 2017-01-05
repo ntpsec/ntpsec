@@ -2582,7 +2582,7 @@ input_handler(
 	 * (ts_e - ts) is the amount of time we spent processing this
 	 * gob of file descriptors.  Log it.
 	 */
-	L_SUB(&ts_e, &ts);
+	ts_e -= ts;
 	collect_timing(NULL, "input handler", 1, &ts_e);
 	if (debug > 3)
 		msyslog(LOG_DEBUG,

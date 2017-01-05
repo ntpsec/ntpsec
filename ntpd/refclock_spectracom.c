@@ -299,7 +299,7 @@ spectracom_receive(
 	DPRINTF(2, ("wwvb: code @ %s\n"
 		    "       using %s minus one char\n",
 		    prettydate(&trtmp), prettydate(&pp->lastrec)));
-	if (L_ISZERO(&pp->lastrec))
+	if (pp->lastrec == 0)
 		return;
 
 	/*

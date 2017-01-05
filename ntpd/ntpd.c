@@ -924,7 +924,7 @@ static void mainloop(void)
 # ifdef ENABLE_DEBUG_TIMING
 					l_fp dts = pts;
 
-					L_SUB(&dts, &rbuf->recv_time);
+					dts -= rbuf->recv_time;
 					DPRINTF(2, ("processing timestamp delta %s (with prec. fuzz)\n", lfptoa(&dts, 9)));
 					collect_timing(rbuf, "buffer processing delay", 1, &dts);
 					bufcount++;
@@ -940,7 +940,7 @@ static void mainloop(void)
 			}
 # ifdef ENABLE_DEBUG_TIMING
 			get_systime(&tsb);
-			L_SUB(&tsb, &tsa);
+			tsb -= tsa;
 			if (bufcount) {
 				collect_timing(NULL, "processing", bufcount, &tsb);
 				DPRINTF(2, ("processing time for %d buffers %s\n", bufcount, lfptoa(&tsb, 9)));

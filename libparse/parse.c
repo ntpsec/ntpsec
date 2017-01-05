@@ -36,7 +36,7 @@ parse_timedout(
 	l_fp delt;
 
 	delt = tstamp->fp;
-	L_SUB(&delt, &parseio->parse_lastchar.fp);
+	delt -= parseio->parse_lastchar.fp;
 	delta = lfp_uintv_to_tspec(delt);
 	if (cmp_tspec(delta, *del) == TIMESPEC_GREATER_THAN)
 	{

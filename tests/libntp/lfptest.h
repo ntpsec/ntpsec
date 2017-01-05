@@ -4,7 +4,7 @@
 #include "ntp_fp.h"
 
 static bool IsEqual(const l_fp *expected, const l_fp *actual) {
-	if (L_ISEQU(expected, actual)) {
+	if (expected == actual) {
 		return true;
 	} else {
 		printf("Expected: %s (%d.%d) but was: %s (%d.%d)\n", lfptoa(*expected, FRACTION_PREC), lfpuint(*expected), lfpfrac(*expected), lfptoa(*actual, FRACTION_PREC), lfpuint(*actual), lfpfrac(*actual));

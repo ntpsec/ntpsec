@@ -819,7 +819,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			 * (i.e. before limit, a.k.a. fudgetime2) in
 			 * the second.
 			 */
-			L_SUB(&tstamp, &pp->lastrec);
+			tstamp -= pp->lastrec;
 			if (!L_ISGEQ(&tstamp, &instance->limit))
 				bumplfpuint(pp->lastrec, 1);
 

@@ -510,7 +510,7 @@ calc_usecdiff(
 
 	delt = ref->fp;
 	setlfpsint(delt, lfpsint(delt) + offset);
-	L_SUB(&delt, &base->fp);
+	delt -= base->fp;
 	delta = lfp_stamp_to_tspec(delt, NULL);
 
 	delta_usec = 1000000 * (int32_t)delta.tv_sec + delta.tv_nsec/1000;
