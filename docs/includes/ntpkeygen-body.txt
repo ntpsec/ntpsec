@@ -41,6 +41,12 @@ systems, as NFS clients may not be able to write to the shared keys
 directory, even as root. In this case, NFS clients can specify the files
 in another directory such as +/etc+ using the _keysdir_ command.
 
+WARNING: +ntpkeygen+ uses the system randomness source.  On a POSIX
+system this is usually /dev/urandom.  Immediately after a reboot, on any
+OS, there may not be sufficient entropy available for this program to
+perform well.  Do not run this program from any startup scripts.  Only
+run this program on an active host with a lot of available entropy.
+
 [[access]]
 == Key file access and location ==
 
