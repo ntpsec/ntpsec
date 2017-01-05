@@ -29,39 +29,30 @@
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  */
-typedef struct {
-	union {
-		uint32_t Xl_ui;		/* unsigned integral part */
-		int32_t Xl_i;		/* signed integral part */
-	} Ul_i;
-	uint32_t	l_uf;
-} l_fp;
+typedef uint64_t l_fp;
+#define LOW32	0x00000000ffffffffUL
+#define HIGH32	0xffffffff00000000UL
+#define BUMP	0x0000000100000000UL
+#define lfpfrac(n)		((uint32_t)((n) & LOW32))
+#define setlfpfrac(n, v)	(n) = (((n) & HIGH32) | ((v) & LOW32))
+#define lfpsint(n)		(int32_t)(((n) & HIGH32) >> 32)
+#define setlfpsint(n, v)	(n) = (int64_t)((((int64_t)(v)) << 32) | ((n) & LOW32))
+#define bumplfpsint(n, i)	(n) += (i)*BUMP
+#define lfpuint(n)		(uint32_t)(((n) & HIGH32) >> 32)
+#define setlfpuint(n, v)	(n) = (uint64_t)((((uint64_t)(v)) << 32) | ((n) & LOW32))
+#define bumplfpuint(n, i)	(n) += (i)*BUMP
 
-#define lfpfrac(n)		((n).l_uf)
-#define setlfpfrac(n, v)	(n).l_uf = (v)
-#define lfpsint(n)		(n).Ul_i.Xl_i
-#define setlfpsint(n, v)	(n).Ul_i.Xl_i = (v)
-#define bumplfpsint(n, i)	(n).Ul_i.Xl_i += (i)
-#define lfpuint(n)		(n).Ul_i.Xl_ui
-#define setlfpuint(n, v)	(n).Ul_i.Xl_ui = (v)
-#define bumplfpuint(n, i)	(n).Ul_i.Xl_ui += (i)
-
-static inline uint64_t lfp_to_uint64(const l_fp lfp)
-{
-    return (uint64_t)lfpuint(lfp) << 32 | (uint64_t)lfpfrac(lfp);
+static inline uint64_t lfp_to_uint64(const l_fp lfp) {
+    return lfp;
 }
 
-static inline l_fp uint64_to_lfp(uint64_t x)
-{
-    l_fp fp;
-    setlfpuint(fp, x >> 32);
-    setlfpfrac(fp, x & 0xFFFFFFFFUL);
-    return fp;
+static inline l_fp uint64_to_lfp(uint64_t x) {
+    return x;
 }
 
 static inline l_fp lfpinit(int32_t hi, uint32_t lo)
 {
-    l_fp tmp;
+    l_fp tmp = 0;
     setlfpsint(tmp, hi);
     setlfpfrac(tmp, lo);
     return tmp;
@@ -103,12 +94,22 @@ typedef uint32_t u_fp;
 #define	HTONS_FP(x)	(htonl(x))
 #define	NTOHS_FP(x)	(ntohl(x))
 
-static inline l_fp htonl_fp(l_fp lfp) {
-    return lfpinit(htonl(lfpuint(lfp)), htonl(lfpfrac(lfp)));
+
+typedef struct {
+         uint32_t        l_ui;
+         uint32_t        l_uf;
+} l_fp_w;
+
+static inline l_fp_w htonl_fp(l_fp lfp) {
+    l_fp_w lfpw;
+    lfpw.l_ui = htonl(lfpuint(lfp));
+    lfpw.l_uf = htonl(lfpfrac(lfp));
+    return lfpw;
+//  return lfpinit(htonl(lfpuint(lfp)), htonl(lfpfrac(lfp)));
 }
 
-static inline l_fp ntohl_fp(l_fp lfp) {
-    return lfpinit(ntohl(lfpuint(lfp)), ntohl(lfpfrac(lfp)));
+static inline l_fp ntohl_fp(l_fp_w lfpw) {
+    return lfpinit(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));
 }
 
 /* Convert unsigned ts fraction to net order ts */
