@@ -404,13 +404,13 @@ Our GitLab group is at https://gitlab.com/groups/NTPsec
 Please used the issue tracker and the pull request process at GitLab.com.
 
 If you wish, you can request to join the GitLab project team at
-https://gitlab.com/groups/NTPsec/group_members and we will add you the
+https://gitlab.com/groups/NTPsec/group_members and we will add you to the
 team with Guest access.  This will cause GitLab to send issue tracker
 updates and pipeline updates to your email address.  You do not have
 to formally be a member of the GitLab team to participate, contribute,
 or send issues, patches, or pull requests.
 
-Granting other levels of GitLab project team access is at discretion
+Granting other levels of GitLab project team access is at the discretion
 of the Project Manager, after consulting with the existing core team.
 Generally, other levels of access will not be granted, as they are not
 necessary to be a welcome and effective contributor.

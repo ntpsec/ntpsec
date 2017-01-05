@@ -138,7 +138,7 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 /*
  * Operations on the long fp format.  The only reason these aren't
  * native operations is to be independent of whether the l_fp
- * type is signed ot unsigned.
+ * type is signed or unsigned.
  */
 #define	L_NEG(v)	(*v) = (-1 * (int64_t)(*v))
 #define L_ADDUF(r, uf)	(*r) = ((*r) + (uf))
