@@ -106,9 +106,6 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
     return lfpinit(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));
 }
 
-/* Convert unsigned ts fraction to net order ts */
-#define	HTONL_UF(uf, nts)	*nts = lfpint(0, htonl(uf))
-
 /*
  * Primitive operations on long fixed point values.  If these are
  * reminiscent of assembler op codes it's only because some may
@@ -129,14 +126,11 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
  * native operations is to be independent of whether the l_fp
  * type is signed or unsigned.
  */
-#define	L_NEG(v)	(*v) = (-1 * (int64_t)(*v))
-#define L_ADDUF(r, uf)	(*r) = ((*r) + (uf))
-#define L_SUBUF(r, uf)	(*r) = ((*r) - (uf))
-#define	L_ADDF(r, f)	(*r) = ((int64_t)(*r) + (int64_t)(uf))
-#define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
-#define	L_ISGT(a, b)	((int64_t)(*a) > (int64_t)(*b))
-#define	L_ISGTU(a, b)	((*a) > (*b))
-#define	L_ISGEQ(a, b)	((int64_t)(*a) >= (int64_t)(*b))
+#define	L_NEG(v)	(v) = (-1 * (int64_t)(v))
+#define	L_ISNEG(v)	M_ISNEG(lfpuint(v))
+#define	L_ISGT(a, b)	((int64_t)(a) > (int64_t)(b))
+#define	L_ISGTU(a, b)	((a) > (b))
+#define	L_ISGEQ(a, b)	((int64_t)(a) >= (int64_t)(b))
 
 /*
  * s_fp/double and u_fp/double conversions

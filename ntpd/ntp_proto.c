@@ -2676,7 +2676,7 @@ measure_tick_fuzz(void)
 		ldiff = val;
 		ldiff -= last;
 		last = val;
-		if (L_ISGT(&ldiff, &minstep)) {
+		if (L_ISGT(ldiff, minstep)) {
 			max_repeats = max(repeats, max_repeats);
 			repeats = 0;
 			changes++;

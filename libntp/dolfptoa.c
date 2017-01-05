@@ -164,10 +164,10 @@ mfptoa(
 	short	ndec
 	)
 {
-	bool	isneg = L_ISNEG(&lfp);
+	bool	isneg = L_ISNEG(lfp);
 
 	if (isneg) {
-		L_NEG(&lfp);
+		L_NEG(lfp);
 	}
 
 	return dolfptoa(lfp, isneg, ndec, false);
@@ -180,10 +180,10 @@ mfptoms(
 	short	ndec
 	)
 {
-	bool	isneg = L_ISNEG(&lfp);
+	bool	isneg = L_ISNEG(lfp);
 
 	if (isneg) {
-		L_NEG(&lfp);
+		L_NEG(lfp);
 	}
 
 	return dolfptoa(lfp, isneg, ndec, true);

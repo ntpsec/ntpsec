@@ -294,7 +294,7 @@ int mon_get_oldest_age(l_fp now)
     oldest = TAIL_DLIST(mon_mru_list, mru);
     now -= oldest->last;
     /* add one-half second to round up */
-    L_ADDUF(&now, 0x80000000);
+    now += 0x80000000;
     return lfpsint(now);
 }
 /*
@@ -355,7 +355,7 @@ ntp_monitor(
 		interval_fp = rbufp->recv_time;
 		interval_fp -= mon->last;
 		/* add one-half second to round up */
-		L_ADDUF(&interval_fp, 0x80000000);
+		interval_fp += 0x80000000;
 		interval = lfpsint(interval_fp);
 		mon->last = rbufp->recv_time;
 		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);

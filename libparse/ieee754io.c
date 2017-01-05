@@ -359,7 +359,7 @@ fetch_ieee754(
 	       */
 	      if (sign)
 		{
-		  L_NEG(lfpp);
+		  L_NEG(*lfpp);
 		}
 	      
 	      return IEEE_OK;
@@ -425,9 +425,9 @@ put_ieee754(
   /*
    * find sign
    */
-  if (L_ISNEG(&outlfp))
+  if (L_ISNEG(outlfp))
     {
-      L_NEG(&outlfp);
+      L_NEG(outlfp);
 #ifdef DEBUG_PARSELIB
       sign = 1;
 #endif
