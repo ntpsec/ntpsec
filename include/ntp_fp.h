@@ -91,6 +91,10 @@ typedef struct {
          uint32_t        l_uf;
 } l_fp_w;
 
+/*
+ * Generate the wire-format version (that is, big-endian all the way down)
+ * of a timestamp expressed as a 64-bit scalar.
+ */
 static inline l_fp_w htonl_fp(l_fp lfp) {
     l_fp_w lfpw;
     lfpw.l_ui = htonl(lfpuint(lfp));
@@ -133,7 +137,6 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 #define	L_ISGT(a, b)	((int64_t)(*a) > (int64_t)(*b))
 #define	L_ISGTU(a, b)	((*a) > (*b))
 #define	L_ISGEQ(a, b)	((int64_t)(*a) >= (int64_t)(*b))
-#define L_ISGEQU(a, b)  ((*a) >= (*b))
 
 /*
  * s_fp/double and u_fp/double conversions
