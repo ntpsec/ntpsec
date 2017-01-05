@@ -3091,7 +3091,7 @@ static int validate_nonce(
 	ts = lfpinit((uint32_t)ts_i, (uint32_t)ts_f);
 	derived = derive_nonce(&rbufp->recv_srcadr, lfpuint(ts), lfpfrac(ts));
 	get_systime(&now_delta);
-	L_SUB(&now_delta, &ts);
+	now_delta -= ts;
 
 	return (supposed == derived && lfpuint(now_delta) < NONCE_TIMEOUT);
 }
@@ -3515,7 +3515,7 @@ static void read_mru_list(
 			if (ADDR_PORT_EQ(&mon->rmtadr, &addr[i]))
 				break;
 		if (mon != NULL) {
-			if (L_ISEQU(&mon->last, &last[i]))
+			if (mon->last == last[i])
 				break;
 			mon = NULL;
 		}

@@ -517,7 +517,7 @@ true_receive(
 			/*
 			 * Create a true offset for feeding to pps_sample()
 			 */
-			L_SUB(&off, &pp->lastrec);
+			off -= pp->lastrec;
 
 			pps_sample(peer, &off);
 #endif

@@ -363,7 +363,7 @@ refclock_process_offset(
 
 	pp->lastrec = lastrec;
 	lftemp = lasttim;
-	L_SUB(&lftemp, &lastrec);
+	lftemp -= lastrec;
 	doffset = lfptod(lftemp);
 	SAMPLE(doffset + fudge);
 }
@@ -391,7 +391,7 @@ refclock_process_f(
 	double fudge
 	)
 {
-	l_fp offset, ltemp;
+	l_fp offset = 0, ltemp = 0;
 	uint32_t sec;
 
 	/*
@@ -409,7 +409,7 @@ refclock_process_f(
 	setlfpuint(offset, sec);
 	setlfpfrac(offset, 0);
 	ltemp = dtolfp(pp->nsec / 1e9);
-	L_ADD(&offset, &ltemp);
+	offset += ltemp;
 	refclock_process_offset(pp, offset, pp->lastrec, fudge);
 	return true;
 }

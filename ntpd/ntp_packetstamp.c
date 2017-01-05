@@ -191,10 +191,10 @@ fetch_packetstamp(
 			}
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			lfpfuzz = dtolfp(fuzz);
-			L_ADD(&nts, &lfpfuzz);
+			nts += lfpfuzz;
 #ifdef ENABLE_DEBUG_TIMING
 			dts = ts;
-			L_SUB(&dts, &nts);
+			dts -= nts;
 			collect_timing(rb, "input processing delay", 1,
 				       &dts);
 			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",

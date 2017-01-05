@@ -188,14 +188,14 @@ normalize_time(
 	 */
 	dfuzz = rand * 2. / FRAC * sys_fuzz;
 	lfpfuzz = dtolfp(dfuzz);
-	L_ADD(&result, &lfpfuzz);
+	result += lfpfuzz;
 
 	/*
 	 * Ensure result is strictly greater than prior result (ignoring
 	 * sys_residual's effect for now) once sys_fuzz has been
 	 * determined.
 	 */
-	if (!L_ISZERO(&lfp_prev) && !lamport_violated) {
+	if (lfp_prev != 0 && !lamport_violated) {
 		if (!L_ISGTU(&result, &lfp_prev) &&
 		    sys_fuzz > 0.) {
 			msyslog(LOG_ERR, "ts_prev %s ts_min %s",
@@ -207,7 +207,7 @@ normalize_time(
 			msyslog(LOG_ERR, "this fuzz %.9f",
 				dfuzz);
 			lfpdelta = lfp_prev;
-			L_SUB(&lfpdelta, &result);
+			lfpdelta -= result;
 			ddelta = lfptod(lfpdelta);
 			msyslog(LOG_ERR,
 				"prev get_systime 0x%x.%08x is %.9f later than 0x%x.%08x",
@@ -364,7 +364,7 @@ step_systime(
 	/* get the complete jump distance as l_fp */
 	fp_sys = dtolfp(sys_residual);
 	fp_ofs = dtolfp(step);
-	L_ADD(&fp_ofs, &fp_sys);
+	fp_ofs += fp_sys;
 
 	/* ---> time-critical path starts ---> */
 
@@ -377,7 +377,7 @@ step_systime(
 	tslast.tv_nsec = timets.tv_nsec;
 
 	/* get the target time as l_fp */
-	L_ADD(&fp_sys, &fp_ofs);
+	fp_sys += fp_ofs;
 
 	/* unfold the new system time */
 	timets = lfp_stamp_to_tspec(fp_sys, &pivot);

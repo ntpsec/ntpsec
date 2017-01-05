@@ -86,7 +86,7 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 static l_fp l_fp_add(const l_fp first, const l_fp second)
 {
 	l_fp temp = first;
-	L_ADD(&temp, &second);
+	temp += second;
 
 	return temp;
 }
@@ -94,7 +94,7 @@ static l_fp l_fp_add(const l_fp first, const l_fp second)
 static l_fp l_fp_subtract(const l_fp first, const l_fp second)
 {
 	l_fp temp = first;
-	L_SUB(&temp, &second);
+	temp -= second;
 
 	return temp;
 }
@@ -161,7 +161,7 @@ static bool l_isgeq(const l_fp first, const l_fp second)
 
 static bool l_isequ(const l_fp first, const l_fp second)
 {
-	return L_ISEQU(&first, &second);
+	return first == second;
 }
 
 

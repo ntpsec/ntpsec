@@ -292,7 +292,7 @@ int mon_get_oldest_age(l_fp now)
     if (mru_entries == 0)
 	return 0;
     oldest = TAIL_DLIST(mon_mru_list, mru);
-    L_SUB(&now, &oldest->last);
+    now -= oldest->last;
     /* add one-half second to round up */
     L_ADDUF(&now, 0x80000000);
     return lfpsint(now);
@@ -353,7 +353,7 @@ ntp_monitor(
 	if (mon != NULL) {
 		mru_exists++;
 		interval_fp = rbufp->recv_time;
-		L_SUB(&interval_fp, &mon->last);
+		interval_fp -= mon->last;
 		/* add one-half second to round up */
 		L_ADDUF(&interval_fp, 0x80000000);
 		interval = lfpsint(interval_fp);

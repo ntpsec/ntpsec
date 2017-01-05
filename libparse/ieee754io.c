@@ -275,7 +275,7 @@ fetch_ieee754(
        * collect real numbers
        */
 
-      L_CLR(lfpp);
+      *lfpp = 0;
 
       /*
        * check for overflows
@@ -439,7 +439,7 @@ put_ieee754(
 #endif
     }
 
-  if (L_ISZERO(&outlfp))
+  if (outlfp == 0)
     {
 #ifdef DEBUG_PARSELIB
       exponent = mantissa_high = mantissa_low = 0; /* true zero */

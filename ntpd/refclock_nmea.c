@@ -720,7 +720,7 @@ refclock_ppsrelate(
 	/* get delta between receive time and PPS time */
 	pp_stamp = tspec_stamp_to_lfp(timeout);
 	pp_delta = *rd_stamp;
-	L_SUB(&pp_delta, &pp_stamp);
+	pp_delta -= pp_stamp;
 	delta = lfptod(pp_delta);
 	delta += pp_fudge - *rd_fudge;
 	if (fabs(delta) > 1.5)
@@ -743,7 +743,7 @@ refclock_ppsrelate(
 
 	/* check against reftime if PPS PLL can be used */
 	pp_delta = *reftime;
-	L_SUB(&pp_delta, &pp_stamp);
+	pp_delta-= pp_stamp;
 	delta = lfptod(pp_delta);
 	delta += pp_fudge;
 	if (fabs(delta) > 0.45)
@@ -1026,7 +1026,7 @@ nmea_receive(
 	 * Discard sentence if reference time did not change.
 	 */
 	rd_reftime = eval_gps_time(peer, &date, &tofs, &rd_timestamp);
-	if (L_ISEQU(&up->last_reftime, &rd_reftime)) {
+	if (up->last_reftime == rd_reftime) {
 		/* Do not touch pp->a_lastcode on purpose! */
 		up->tally.filtered++;
 		return;

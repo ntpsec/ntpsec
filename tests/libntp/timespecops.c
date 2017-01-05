@@ -63,10 +63,10 @@ static bool AssertFpClose(const l_fp m, const l_fp n, const l_fp limit)
 
 	if (L_ISGEQ(&m, &n)) {
 		diff = m;
-		L_SUB(&diff, &n);
+		diff -= n;
 	} else {
 		diff = n;
-		L_SUB(&diff, &m);
+		diff -= m;
 	}
 	if (L_ISGEQ(&limit, &diff)) {
 		return true;

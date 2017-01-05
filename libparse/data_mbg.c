@@ -295,12 +295,12 @@ get_mbg_utc(
 
   if (fetch_ieee754(buffpp, IEEE_DOUBLE, &utcp->A0, mbg_double) != IEEE_OK)
     {
-      L_CLR(&utcp->A0);
+      utcp->A0 = 0;
     }
 
   if (fetch_ieee754(buffpp, IEEE_DOUBLE, &utcp->A1, mbg_double) != IEEE_OK)
     {
-      L_CLR(&utcp->A1);
+      utcp->A1 = 0;
     }
 
   utcp->WNlsf      = get_lsb_uint16(buffpp);
@@ -321,7 +321,7 @@ get_mbg_lla(
     {
       if  (fetch_ieee754(buffpp, IEEE_DOUBLE, &lla[i], mbg_double) != IEEE_OK)
 	{
-	  L_CLR(&lla[i]);
+	  lla[i] = 0;
 	}
       else
 	if (i != ALT)
@@ -343,7 +343,7 @@ get_mbg_xyz(
     {
       if  (fetch_ieee754(buffpp, IEEE_DOUBLE, &xyz[i], mbg_double) != IEEE_OK)
 	{
-	  L_CLR(&xyz[i]);
+	  xyz[i] = 0;
 	}
     }
 }
@@ -385,7 +385,7 @@ get_mbg_portparam(
 #define FETCH_DOUBLE(src, addr)							\
 	if  (fetch_ieee754(src, IEEE_DOUBLE, addr, mbg_double) != IEEE_OK)	\
 	{									\
-	  L_CLR(addr);								\
+	  *addr = 0;								\
 	}
 
 void

@@ -1565,7 +1565,7 @@ process_tpv(
 			 */
 			up->ibt_local = *rtime;
 			up->ibt_recvt = *rtime;
-			L_SUB(&up->ibt_recvt, &up->ibt_fudge);
+			up->ibt_recvt -= up->ibt_fudge;
 			up->fl_ibt = -1;
 		} else {
 			++up->tc_breply;
@@ -1640,8 +1640,8 @@ process_pps(
 	
 	/* Get fudged receive times for primary & secondary unit */
 	up->pps_recvt = up->pps_recvt2;
-	L_SUB(&up->pps_recvt , &up->pps_fudge );
-	L_SUB(&up->pps_recvt2, &up->pps_fudge2);
+	up->pps_recvt -= up->pps_fudge;
+	up->pps_recvt2 -= up->pps_fudge2;
 	pp->lastrec = up->pps_recvt;
 
 	/* Map to nearest full second as reference time stamp for the
@@ -1696,7 +1696,7 @@ process_toff(
 	if ( ! get_binary_time(&up->ibt_stamp, jctx,
 			       "real_sec", "real_nsec", 1))
 			goto fail;
-	L_SUB(&up->ibt_recvt, &up->ibt_fudge);
+	up->ibt_recvt -= up->ibt_fudge;
 	up->ibt_local = *rtime;
 	up->fl_ibt    = -1;
 
@@ -1772,7 +1772,7 @@ gpsd_parse(
 	if (up->fl_pps && up->fl_ibt) {
 		l_fp diff;
 		diff = up->ibt_local;
-		L_SUB(&diff, &up->pps_local);
+		diff -= up->pps_local;
 		if (lfpsint(diff) > 0)
 			up->fl_pps = 0; /* pps too old */
 		else if (lfpsint(diff) < 0)
