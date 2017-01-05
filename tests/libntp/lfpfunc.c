@@ -83,22 +83,6 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 // This should be easy enough...
 //----------------------------------------------------------------------
 
-static l_fp l_fp_add(const l_fp first, const l_fp second)
-{
-	l_fp temp = first;
-	temp += second;
-
-	return temp;
-}
-
-static l_fp l_fp_subtract(const l_fp first, const l_fp second)
-{
-	l_fp temp = first;
-	temp -= second;
-
-	return temp;
-}
-
 static l_fp l_fp_negate(const l_fp first)
 {
 	l_fp temp = first;
@@ -158,12 +142,6 @@ static bool l_isgeq(const l_fp first, const l_fp second)
 {
 	return L_ISGEQ(&first, &second);
 }
-
-static bool l_isequ(const l_fp first, const l_fp second)
-{
-	return first == second;
-}
-
 
 //----------------------------------------------------------------------
 // test data table for add/sub and compare
@@ -233,69 +211,6 @@ TEST(lfpfunc, Extraction) {
 }
 
 //----------------------------------------------------------------------
-// test addition
-//----------------------------------------------------------------------
-TEST(lfpfunc, AdditionLR) {
-	size_t idx = 0;
-
-	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp op2 = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp e_res = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
-		l_fp res = l_fp_add(op1, op2);
-
-		TEST_ASSERT_EQUAL_l_fp(e_res, res);
-	}
-	return;
-}
-
-TEST(lfpfunc, AdditionRL) {
-	size_t idx = 0;
-
-	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op2 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp op1 = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp e_res = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
-		l_fp res = l_fp_add(op1, op2);
-
-		TEST_ASSERT_EQUAL_l_fp(e_res, res);
-	}
-	return;
-}
-
-
-//----------------------------------------------------------------------
-// test subtraction
-//----------------------------------------------------------------------
-TEST(lfpfunc, SubtractionLR) {
-	size_t idx = 0;
-
-	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op2 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp e_res = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp op1 = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
-		l_fp res = l_fp_subtract(op1, op2);
-
-		TEST_ASSERT_EQUAL_l_fp(e_res, res);
-	}
-	return;
-}
-
-TEST(lfpfunc, SubtractionRL) {
-	size_t idx = 0;
-
-	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp e_res = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		l_fp op2 = lfpinit(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
-		l_fp op1 = lfpinit(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
-		l_fp res = l_fp_subtract(op1, op2);
-
-		TEST_ASSERT_EQUAL_l_fp(e_res, res);
-	}
-	return;
-}
-
-//----------------------------------------------------------------------
 // test negation
 //----------------------------------------------------------------------
 
@@ -305,7 +220,7 @@ TEST(lfpfunc, Negation) {
 	for (idx = 0; idx < addsub_cnt; ++idx) {
 		l_fp op1 = lfpinit(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		l_fp op2 = l_fp_negate(op1);
-		l_fp sum = l_fp_add(op1, op2);
+		l_fp sum = op1 + op2;
 
 		l_fp zero = lfpinit(0, 0);
 
@@ -329,9 +244,9 @@ TEST(lfpfunc, Absolute) {
 		TEST_ASSERT_TRUE(l_fp_signum(op2) >= 0);
 
 		if (l_fp_signum(op1) >= 0)
-			op1 = l_fp_subtract(op1, op2);
+			op1 = op1 - op2;
 		else
-			op1 = l_fp_add(op1, op2);
+			op1 = op1 + op2;
 
 		l_fp zero = lfpinit(0, 0);
 
@@ -369,7 +284,7 @@ TEST(lfpfunc, FDF_RoundTrip) {
 		double op2 = lfptod(op1);
 		l_fp op3 = dtolfp(op2);
 
-		l_fp temp = l_fp_subtract(op1, op3);
+		l_fp temp = op1 - op3;
 		double d = lfptod(temp);
 		TEST_ASSERT_DOUBLE_WITHIN(eps(op2), 0.0, fabs(d));
 	}
@@ -404,9 +319,6 @@ TEST(lfpfunc, SignedRelOps) {
 
 			TEST_ASSERT_TRUE (l_isgeq(op1, op2));
 			TEST_ASSERT_FALSE(l_isgeq(op2, op1));
-
-			TEST_ASSERT_FALSE(l_isequ(op1, op2));
-			TEST_ASSERT_FALSE(l_isequ(op2, op1));
 			break;
 		case 0:
 			TEST_ASSERT_FALSE(l_isgt(op1, op2));
@@ -414,9 +326,6 @@ TEST(lfpfunc, SignedRelOps) {
 
 			TEST_ASSERT_TRUE (l_isgeq(op1, op2));
 			TEST_ASSERT_TRUE (l_isgeq(op2, op1));
-
-			TEST_ASSERT_TRUE (l_isequ(op1, op2));
-			TEST_ASSERT_TRUE (l_isequ(op2, op1));
 			break;
 		default:
 			TEST_FAIL_MESSAGE("unexpected UCMP result: ");
@@ -471,10 +380,6 @@ TEST(lfpfunc, UnsignedRelOps) {
 
 TEST_GROUP_RUNNER(lfpfunc) {
 	RUN_TEST_CASE(lfpfunc, Extraction);
-	RUN_TEST_CASE(lfpfunc, AdditionLR);
-	RUN_TEST_CASE(lfpfunc, AdditionRL);
-	RUN_TEST_CASE(lfpfunc, SubtractionLR);
-	RUN_TEST_CASE(lfpfunc, SubtractionRL);
 	RUN_TEST_CASE(lfpfunc, Negation);
 	RUN_TEST_CASE(lfpfunc, Absolute);
 	RUN_TEST_CASE(lfpfunc, FDF_RoundTrip);
