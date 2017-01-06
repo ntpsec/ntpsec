@@ -172,7 +172,7 @@ class VizStats(ntp.statfiles.NTPStats):
 
     stats_html = ''
 
-    def __init__(self, values, title, freq=0):
+    def __init__(self, values, title, freq=0, units=''):
 
         values.sort()
         self.percs = self.percentiles((100, 99, 95, 50, 5, 1, 0), values)
@@ -188,7 +188,12 @@ class VizStats(ntp.statfiles.NTPStats):
             target = max(self.percs["p99"], -self.percs["p1"],
                          self.percs["p100"]/5, -self.percs["p0"]/5)
 
-        if 1 <= target:
+        if len(units):
+            # fixed scale
+            self.multiplier = 1
+            self.unit = units
+
+        elif 1 <= target:
             self.multiplier = 1
             if freq:
                 # go to ppm
@@ -374,6 +379,8 @@ set rmargin 10
                                         starttime=starttime,
                                         endtime=endtime)
 
+    # FIXME: plot_slice can also gather the values and
+    # save yet another loop over the data
     def plot_slice(self, rows, item1, item2=None):
         "slice 0,item1, maybe item2, from rows, ready for gnuplot"
         # speed up by only sending gnuplot the data it will actually use
@@ -619,21 +626,47 @@ component of frequency drift.</p>
                 sys.stderr.write("ntpviz: INFO: no GPS data to graph\n")
             return ''
 
-        stats = []
+        # build the output dictionary, because Python can not format
+        # complex objects.
         gps_data = ()
+        values_nsat = []
+        values_tdop = []
         plot_data = ""
         for key in gpslist:
             # fields: time, TDOP, nSats
-            plot_data += self.plot_slice(gpsmap[key], 3, 4)
+            ps = self.plot_slice(gpsmap[key], 3, 4)
+            for line in ps.splitlines():
+                l = line.split()
+                if 3 != len(l):
+                    continue
+                try:
+                    values_tdop.append(float(l[1]))
+                    values_nsat.append(float(l[2]))
+                except:
+                    continue
+            plot_data += ps
 
-        out = {}
+        stats = VizStats(values_nsat, "nSats", units='nSat')
+        stats_tdop = VizStats(values_tdop, "TDOP", units=' ')
+
+        out = stats_tdop.percs
         out['sitename'] = sitename
         out['size'] = args.png_size
+        if out['min_y'] == out['max_y']:
+            # some GPS always output the same TDOP
+            if 0 == out['min_y']:
+                # scale 0:1
+                out['max_y'] = 1
+            else:
+                # scale +/- 20%
+                out['min_y'] = out['max_y'] * 0.8
+                out['max_y'] = out['max_y'] * 1.2
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
 set title "%(sitename)s: Local GPS
 set ytics format "%%1.1f TDOP" nomirror textcolor rgb '#0060ad'
+set yrange [%(min_y)s:%(max_y)s]
 set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -653,8 +686,14 @@ plot \\
 The number of visible satellites (nSat) is plotted in red.</p>
 <p>TDOP is field 3, and nSats is field 4, from the gpsd log file.  The
 gpsd log file is created by the gps-log program.</p>
+<p>TDOP is a dimensionless error factor.  TDOP ranges from 1 to greater
+than 20.  1 denotes the highest possible confidence level.  2 to 5 is good.
+Greater than 20 means there will be significant inaccuracy and error.</p>
 """
-        ret = {'html': exp, 'stats': stats}
+
+        ret = {}
+        ret['html'] = stats.stats_html + stats_tdop.stats_html + exp
+        ret['stats'] = [stats, stats_tdop]
         ret['title'] = "Local GPS"
         ret['plot'] = plot_template + plot_data + plot_data
         return ret
@@ -1306,7 +1345,7 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         type=int)
     parser.add_argument('-V', '--version',
                         action="version",
-                        version= "ntpviz %s" % ntp.util.stdversion())
+                        version="ntpviz %s" % ntp.util.stdversion())
 
     args = parser.parse_args()
 
