@@ -48,8 +48,8 @@ try:
     import argparse
 except ImportError as e:
     sys.stderr.write("""
-ntpviz: can't find Python argparse module
-        If your Python < 2.7, then manual installation is needed:
+ntpviz: can't find the Python argparse module
+        If your Python version is < 2.7, then manual installation is needed:
         # pip install argparse
 %s
 """)
@@ -1205,7 +1205,6 @@ Python by ESR, concept and gnuplot code by Dan Drown.
 
     parser.add_argument('-c', '--clip',
                         action="store_true",
-                        default=None,
                         dest='clip',
                         help="Clip plots at 1%% and 99%%")
     parser.add_argument('-d', '--datadir',
@@ -1214,13 +1213,11 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         help="one or more logfile directories to read",
                         type=str)
     parser.add_argument('-e', '--endtime',
-                        default=None,
                         dest='endtime',
                         help="End time in POSIX (seconds) or ISO 8601",
                         type=str)
     parser.add_argument('-g', '--generate',
                         action="store_true",
-                        default=False,
                         dest='generate',
                         help="Run plot through gnuplot to make png")
     parser.add_argument('-n', '--name',
@@ -1239,7 +1236,6 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         help="period in days to graph (float)",
                         type=float)
     parser.add_argument('-s', '--starttime',
-                        default=None,
                         dest='starttime',
                         help="Start time in POSIX (seconds) or ISO 8601",
                         type=str)
@@ -1250,7 +1246,6 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         help="PNG width: s, m, or l",
                         type=str)
     group.add_argument('--all-peer-jitters',
-                       default=False,
                        action="store_true",
                        dest='show_peer_jitters',
                        help="Plot all peer jitters")
@@ -1260,7 +1255,6 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                        help="Plot peer jitters.  Comma separated host list.",
                        type=str)
     group.add_argument('--all-peer-offsets',
-                       default=False,
                        action="store_true",
                        dest='show_peer_offsets',
                        help="Plot all peer offsets")
@@ -1270,48 +1264,39 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                        help="Plot peer offsets.  Comma separated host list.",
                        type=str)
     group.add_argument('--local-error',
-                       default=False,
                        action="store_true",
                        dest='show_local_error',
                        help="Plot local clock frequency offsets")
     group.add_argument('--local-freq-temps',
-                       default=False,
                        action="store_true",
                        dest='show_freq_temps',
                        help="Plot local frequency vs temperature data")
     group.add_argument('--local-gps',
-                       default=False,
                        action="store_true",
                        dest='show_gps',
                        help="Plot gpsd TDOP and nSats")
     group.add_argument('--local-jitter',
-                       default=False,
                        action="store_true",
                        dest='show_local_jitter',
                        help="Plot clock time jitter")
     group.add_argument('--local-offset',
-                       default=False,
                        action="store_true",
                        dest='show_local_offset',
                        help="Plot Clock frequency offset")
     group.add_argument('--local-offset-histogram',
-                       default=False,
                        action="store_true",
                        dest='show_local_offset_histogram',
                        help="Plot histogram of loopstats time offsets")
     group.add_argument('--local-offset-multiplot',
-                       default=False,
                        action="store_true",
                        dest='show_local_offset_multiplot',
                        help="Plot comparative local offsets for "
                             "multiple directories")
     group.add_argument('--local-stability',
-                       default=False,
                        action="store_true",
                        dest='show_local_stability',
                        help="Plot RMS frequency-jitter")
     group.add_argument('--local-temps',
-                       default=False,
                        action="store_true",
                        dest='show_temps',
                        help="Plot local temperature data")
@@ -1321,18 +1306,10 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         help="debug level, 0 (none) to 9 (most)",
                         type=int)
     parser.add_argument('-V', '--version',
-                        action="store_true",
-                        default=False,
-                        dest='version',
-                        help="Print version and exit")
+                        action="version",
+                        version= "ntpviz %s" % ntp.util.stdversion())
 
     args = parser.parse_args()
-
-    version = ntp.util.stdversion()
-
-    if args.version:
-        print(version)
-        raise SystemExit(1)
 
     if 's' == args.width:
         # fit in 1024x768 browser
