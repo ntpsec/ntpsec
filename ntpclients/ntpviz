@@ -1348,7 +1348,7 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     if 0 < args.debug_level:
         sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" %
                          args.debug_level)
-        sys.stderr.write("ntpviz: INFO: Version: %s\n" % version)
+        sys.stderr.write("ntpviz: INFO: Version: %s\n" % ntp.util.stdversion())
         sys.stderr.write("ntpviz: INFO: Parsed Options %s\n" % args)
 
         if 9 == args.debug_level:
