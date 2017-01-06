@@ -3509,7 +3509,7 @@ parse_process(
 #endif
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
-			if (abs(lfptod(off)) <= 0.5)
+			if (fabs(lfptod(off)) <= 0.5)
 			{
 				fudge = ppsphaseadjust; /* pick PPS fudge factor */
 
