@@ -1,5 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""\
+usage: gps-log [-h] [-o] [-l LOGFILE] [-v] [-V]
+
+gpsd log file generator
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LOGFILE, --logfile LOGFILE
+                        append log data to FILE instead of stdout
+  -o, --once            log one line, then exit
+  -v, --verbose         be verbose
+  -V, --version         show program's version number and exit
+
+See the manual page for details.
+"""
 
 from __future__ import print_function
 
@@ -34,15 +49,15 @@ parser = argparse.ArgumentParser(description="gpsd log file generator",
 See the manual page for details.
 """)
 
-parser.add_argument('-o', '--once',
-                    action="store_true",
-                    dest='once',
-                    help="log one line, then exit")
-
 parser.add_argument('-l', '--logfile',
                     dest='logfile',
                     help="append log data to FILE instead of stdout",
                     nargs=1)
+
+parser.add_argument('-o', '--once',
+                    action="store_true",
+                    dest='once',
+                    help="log one line, then exit")
 
 parser.add_argument('-v', '--verbose',
                     action="store_true",
