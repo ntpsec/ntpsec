@@ -174,11 +174,9 @@ def build(ctx):
         if ctx.env.ENABLE_DOC_ONLY:
                 return
 
-
         if ctx.variant == "host":
                 ctx.recurse("ntpd")
                 return
-
 
         ctx.recurse("libisc")
         if ctx.env.REFCLOCK_GENERIC: # Only required by the generic refclock
