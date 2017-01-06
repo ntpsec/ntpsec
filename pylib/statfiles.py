@@ -141,11 +141,22 @@ class NTPStats:
         "assuming values are already split and sorted"
         ret = {}
         length = len(values)
-        for perc in percents:
-            if perc == 100:
-                ret["p100"] = values[length - 1]
+        if 1 >= length:
+            # uh, oh...
+            if 1 == length:
+                # just one data value, set all to that one value
+                v = values[0]
             else:
-                ret["p" + str(perc)] = values[int(length * (perc/100))]
+                # no data, set all to zero
+                v = 0
+            for perc in percents:
+                ret["p" + str(perc)] = v
+        else:
+            for perc in percents:
+                if perc == 100:
+                    ret["p100"] = values[length - 1]
+                else:
+                    ret["p" + str(perc)] = values[int(length * (perc/100))]
         return ret
 
     def peersplit(self):
