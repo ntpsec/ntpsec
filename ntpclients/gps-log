@@ -8,7 +8,7 @@ gpsd log file generator
 optional arguments:
   -h, --help            show this help message and exit
   -l LOGFILE, --logfile LOGFILE
-                        append log data to FILE instead of stdout
+                        append log data to LOGFILE instead of stdout
   -o, --once            log one line, then exit
   -v, --verbose         be verbose
   -V, --version         show program's version number and exit
@@ -51,7 +51,7 @@ See the manual page for details.
 
 parser.add_argument('-l', '--logfile',
                     dest='logfile',
-                    help="append log data to FILE instead of stdout",
+                    help="append log data to LOGFILE instead of stdout",
                     nargs=1)
 
 parser.add_argument('-o', '--once',

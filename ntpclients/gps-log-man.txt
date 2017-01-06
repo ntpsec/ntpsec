@@ -1,0 +1,19 @@
+= gps-log(1) =
+:doctype: manpage
+
+== NAME ==
+gps-log - log gpsd data
+
+include::../docs/includes/gps-log-body.txt[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+// end
+
