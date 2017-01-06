@@ -19,6 +19,7 @@ config = {
         "OPT_STORE": {}
 }
 
+
 def help(ctx):
     "Be helpful, give a usage"
     print('''
@@ -35,15 +36,19 @@ def options(ctx):
         options_cmd(ctx, config)
         ctx.recurse("pylib")
 
+
 def configure(ctx):
         from wafhelpers.configure import cmd_configure
         cmd_configure(ctx, config)
         ctx.recurse("pylib")
 
 from waflib.Build import BuildContext
+
+
 class check(BuildContext):
         cmd = 'check'
         variant = "main"
+
 
 def bin_test(ctx):
         """Run binary check, use after tests."""
@@ -67,6 +72,7 @@ for v in ["host", "main"]:
             __doc__ = "%s %s" % (cmd, v)
             cmd = "%s_%s" % (cmd, v)
             variant = v
+
 
 def init_handler(ctx):
         cmd = ctx.cmd
@@ -107,6 +113,7 @@ for command, func, descr in commands:
                         execute = Scripting.autoconfigure(Context.Context.execute)
 # end borrowed code
 
+
 def afterparty(ctx):
     # Make magic links to support in-tree testing.
     # The idea is that all directories where the Python tools
@@ -146,6 +153,7 @@ python_scripts = [
         "ntpclients/ntpviz",
         "ntpclients/ntpwait",
 ]
+
 
 def build(ctx):
         ctx.load('waf', tooldir='wafhelpers/')
@@ -238,18 +246,23 @@ def build(ctx):
 # Miscellaneous utility productions
 #
 
+
 def ifdex(ctx):
     "Get a report on configuration symbols not accounted for."
     ctx.exec_command("ifdex -X build/config.h -X devel/ifdex-ignores .")
 
 # See https://gitlab.com/esr/loccount
+
+
 def loccount(ctx):
     "Report the SLOC count of the source tree."
     ctx.exec_command("loccount -x=build .")
 
+
 def cxfreeze(ctx):
     "Create standalone binaries from Python scripts."
     ctx.exec_command("for prog in " + " ".join(python_scripts) + "; do cxfreeze $prog; done")
+
 
 def linkcheck(ctx):
     "Report references without anchors in the documentation."
