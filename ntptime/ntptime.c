@@ -329,9 +329,7 @@ main(
 #endif
 		tv.tv_sec = ntv.time.tv_sec;
 		tv.tv_usec = ntv.time.tv_frac_sec;
-		setlfpuint(ts, (u_long)tv.tv_sec);   \
-		setlfpfrac(ts, TVUTOTSF(tv.tv_usec)); \
-		setlfpuint(ts, lfpuint(ts) + JAN_1970);
+		ts = tspec_stamp_to_lfp(tval_to_tspec(tv));
 		setlfpfrac(ts, lfpfrac(ts) + ts_roundbit);
 		setlfpfrac(ts, lfpfrac(ts) & ts_mask);
 		printf(json ? jfmt2 : ofmt2,  json ? rfc3339date(ts) : prettydate(ts), fdigits, (int)time_frac);
