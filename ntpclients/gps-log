@@ -10,6 +10,7 @@ optional arguments:
   -l LOGFILE, --logfile LOGFILE
                         append log data to LOGFILE instead of stdout
   -o, --once            log one line, then exit
+  -w WAIT, --wait WAIT  wait WAIT seconds after each log line, default 5
   -v, --verbose         be verbose
   -V, --version         show program's version number and exit
 
@@ -34,12 +35,11 @@ except ImportError as e:
 
 try:
     import argparse
-except ImportError as e:
+except ImportError:
     sys.stderr.write("""
 gps-log: can't find the Python argparse module
          If your Python version is < 2.7, then manual installation is needed:
          # pip install argparse
-%s
 """)
     sys.exit(1)
 
@@ -58,6 +58,13 @@ parser.add_argument('-o', '--once',
                     action="store_true",
                     dest='once',
                     help="log one line, then exit")
+
+parser.add_argument('-w', '--wait',
+                    default=5,
+                    dest='wait',
+                    help="wait WAIT seconds after each log line, default 5",
+                    nargs=1,
+                    type=int)
 
 parser.add_argument('-v', '--verbose',
                     action="store_true",
@@ -132,7 +139,8 @@ if __name__ == '__main__':
                 print('parse error\n')
 
             out.flush()
-            time.sleep(5)        # set to whatever
+            # wait a bit before next log
+            time.sleep(args.wait[0])
 
     except (KeyboardInterrupt, SystemExit):    # when you press ctrl+c
         if args.verbose:
