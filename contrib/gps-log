@@ -3,10 +3,73 @@
 
 from __future__ import print_function
 
-import time
+import io
 import sys
 import threading
-import gps
+import time
+
+try:
+    import gps
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write("gps-log: can't find Python NTP modules "
+                     "-- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
+
+try:
+    import argparse
+except ImportError as e:
+    sys.stderr.write("""
+gps-log: can't find the Python argparse module
+         If your Python version is < 2.7, then manual installation is needed:
+         # pip install argparse
+%s
+""")
+    sys.exit(1)
+
+
+parser = argparse.ArgumentParser(description="gpsd log file generator",
+                                 epilog="""
+See the manual page for details.
+""")
+
+parser.add_argument('-o', '--once',
+                    action="store_true",
+                    dest='once',
+                    help="log one line, then exit")
+
+parser.add_argument('-l', '--logfile',
+                    dest='logfile',
+                    help="append log data to FILE instead of stdout",
+                    nargs=1)
+
+parser.add_argument('-v', '--verbose',
+                    action="store_true",
+                    dest='verbose',
+                    help="be verbose")
+
+parser.add_argument('-V', '--version',
+                    action="version",
+                    version="gps-out %s" % ntp.util.stdversion())
+
+args = parser.parse_args()
+
+if args.logfile:
+    # log to logfile
+    try:
+        out = open(args.logfile[0], mode='a')
+    except io.UnsupportedOperation as e:
+        sys.stderr.write("gps-log: can't open logfile %s\n" % args.logfile)
+        sys.stderr.write("%s\n" % e)
+        sys.exit(1)
+
+    if args.verbose:
+        print("gps-log: opened log file %s" % args.logfile[0])
+
+else:
+    # log to stdout
+    out = sys.stdout
 
 
 class GpsPoller(threading.Thread):
@@ -26,20 +89,18 @@ class GpsPoller(threading.Thread):
 
     def display(self):
         "Displays the time, device, TDOP, and nSat data collected"
-        # print(gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc)
-        print('%s %s %f %d'
-              % (gps.isotime(self.get_time()),
-                 self.gpsd.device,
-                 self.gpsd.tdop,
-                 self.gpsd.satellites_used))
+        out.write('%s %s %f %d\n' % (gps.isotime(self.get_time()),
+                                     self.gpsd.device,
+                                     self.gpsd.tdop,
+                                     self.gpsd.satellites_used))
 
 if __name__ == '__main__':
     gpsp = GpsPoller()    # create the thread
     try:
         gpsp.start()      # start it up
         last_time = 0
-        print("")         # print blank line to prevent log corruption
-        print("# Time       Device     TDOP     nSat")
+        out.write("\n")         # print blank line to prevent log corruption
+        out.write("# Time       Device     TDOP     nSat\n")
         while True:
             # It may take a second or two to get good data
 
@@ -48,17 +109,31 @@ if __name__ == '__main__':
                     if last_time != gpsp.get_time():
                         gpsp.display()
                     last_time = gpsp.get_time()
+                    if args.once:
+                        # just once
+                        break
+
             except AttributeError as e:
                 print('parse error\n')
 
-            sys.stdout.flush()
+            out.flush()
             time.sleep(5)        # set to whatever
 
     except (KeyboardInterrupt, SystemExit):    # when you press ctrl+c
-        print("\nKilling Thread...")
+        if args.verbose:
+            print("\nKilling Thread...")
+        else:
+            print("")
     except Exception as e:       # any error, signal
         print(e)
 
+    # tell the thread to die
     gpsp.running = False
-    gpsp.join()      # wait for the thread to finish what it's doing
-    print("Done.\nExiting.")
+    # mom says:  be nice and flush
+    out.flush()
+    out.close()
+    # wait for the thread to finish what it's doing
+    gpsp.join()
+
+    if args.verbose:
+        print("gps-log Done -- Exiting.")
