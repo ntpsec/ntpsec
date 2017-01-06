@@ -7,7 +7,7 @@ import os
 
 pprint.__doc__ = None
 
-out="build"
+out = "build"
 
 from wafhelpers.configure import cmd_configure
 from waflib.Tools import waf_unit_test
