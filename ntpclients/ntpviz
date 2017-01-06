@@ -226,11 +226,6 @@ class VizStats(ntp.statfiles.NTPStats):
         self.percs["mu"] = mean(values)
         self.percs["pstd"] = pstdev(values, mu=self.percs["mu"])
 
-        # range the data
-        self.percs.update(
-            {k: v * self.multiplier for k, v in list(self.percs.items())}
-        )
-
         self.title = title
 
         # calculate ranges
@@ -244,6 +239,8 @@ class VizStats(ntp.statfiles.NTPStats):
         # pretty print the values
         self.percs_f = {}
         for k, v in self.percs.items():
+            # range the data
+            v *= self.multiplier
             self.percs[k] = round(v, 3)
             self.percs_f[k] = format(v, ",.3f")
 
