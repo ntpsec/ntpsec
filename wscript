@@ -136,6 +136,7 @@ def afterparty(ctx):
         os.system("cd %s/pylib; ln -sf ../libntp/ntpc.so ntpc.so " % (bldnode,))
 
 python_scripts = [
+        "ntpclients/gps-log",
         "ntpclients/ntpdig",
         "ntpclients/ntpkeygen",
         "ntpclients/ntpmon",
@@ -206,6 +207,7 @@ def build(ctx):
         ctx.manpage(1, "ntpclients/ntptrace-man.txt")
         ctx.manpage(1, "ntpclients/ntpviz-man.txt")
         ctx.manpage(8, "ntpclients/ntpwait-man.txt")
+        ctx.manpage(1, "ntpclients/gps-log-man.txt")
 
         # Skip running unit tests on a cross compile build
         if not ctx.env.ENABLE_CROSS:

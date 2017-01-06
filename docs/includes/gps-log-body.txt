@@ -1,0 +1,76 @@
+// This is the body of the manual page for gps-log
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
+
+== SYNOPSIS ==
+[verse]
+gps-log [-h] [-l LOGFILE] [-o] [-v] [-V]
+
+== DESCRIPTION ==
+
+gps-log connects to a local gpsd daemon and logs the number of satellites
+in use and the Time Dilution of Precision (TDOP).  gps-log can run as
+any user, no special priviledges are required.
+
+The default is to write the data to stdout about one every fice seconds.
+The log file looks like:
+
+-----------------------------------------------------
+# Time       Device     TDOP     nSat
+1483668619.0 /dev/ttyS0 0.820000 7
+1483668624.0 /dev/ttyS0 0.820000 7
+1483668629.0 /dev/ttyS0 0.820000 7
+-----------------------------------------------------
+
++Time+ is the POSIX time of when the log line is written.
+
++Device+ is the GPS device the data came from.
+
++TDOP+ is the Time Dilution of Precision as reported by the GPS.  Some
+GPS always output a static TDOP.
+
++nSat+ is the number of satellites in use.
+
+== OPTIONS ==
+
++-h, --help+::
+  Displays usage information and exits.
+
++-l LOGFILE, --logfile LOGFILE+::
+  Append log data to LOGFILE instead of stdout
+
++-o, --once+::
+  Log one line, then exit.
+
++-v, --verbose+::
+  Be verbose
+
++-V, --version+::
+ show program's version number and exit
+
+
+== USAGE ==
+
++gps-log+::
+  This the simplest use of this program. It can be used to check the
+  status of the local gpsd daemon.
+
++gps-log -f /var/log/ntpstats/gpsd+ &::
+  This will continuous log te gpsd data in the background to the file
+  /var/log/ntpstats/gpsd.
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+== AUTHORS ==
+
+Gary E. miller
+
+// end
+

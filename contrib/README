@@ -6,9 +6,6 @@ cpu-temp-log is a tool to use the output of 'sensors -u' and write the
 motherboard temperatures to stdout.  Useful to create a log that can be used
 by 'ntpviz --local-temps'
 
-gps-log is a tool to log gpsd data and write the data to stdout.  Useful
-to create a log that can be used by 'ntpviz --local-gps'
-
 smartctl-temp-log for hard drives.  It is a tool to read a hard drive's
 SMART data to get the disk temperature and write the temperature
 to stdout.  Useful to create a log that can be used by 'ntpviz
