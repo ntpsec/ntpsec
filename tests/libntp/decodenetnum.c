@@ -18,8 +18,8 @@ TEST(decodenetnum, IPv4AddressOnly) {
 	sockaddr_u actual;
 
 	sockaddr_u expected;
-	expected.sa4.sin_family = AF_INET;
-	expected.sa4.sin_addr.s_addr = inet_addr("192.0.2.1");
+	SET_AF(&expected, AF_INET);
+	PSOCK_ADDR4(&expected)->s_addr = inet_addr("192.0.2.1");
 	SET_PORT(&expected, NTP_PORT);
 
 	TEST_ASSERT_TRUE(decodenetnum(str, &actual));
@@ -31,8 +31,8 @@ TEST(decodenetnum, IPv4AddressWithPort) {
 	sockaddr_u actual;
 
 	sockaddr_u expected;
-	expected.sa4.sin_family = AF_INET;
-	expected.sa4.sin_addr.s_addr = inet_addr("192.0.2.2");
+	SET_AF(&expected, AF_INET);
+	PSOCK_ADDR4(&expected)->s_addr = inet_addr("192.0.2.2");
 	SET_PORT(&expected, 2000);
 
 	TEST_ASSERT_TRUE(decodenetnum(str, &actual));
@@ -51,8 +51,8 @@ TEST(decodenetnum, IPv6AddressOnly) {
 	sockaddr_u actual;
 
 	sockaddr_u expected;
-	expected.sa6.sin6_family = AF_INET6;
-	expected.sa6.sin6_addr = address;
+	SET_AF(&expected, AF_INET6);
+	SET_SOCK_ADDR6(&expected, address);
 	SET_PORT(&expected, NTP_PORT);
 
 	TEST_ASSERT_TRUE(decodenetnum(str, &actual));
@@ -71,8 +71,8 @@ TEST(decodenetnum, IPv6AddressWithPort) {
 	sockaddr_u actual;
 
 	sockaddr_u expected;
-	expected.sa6.sin6_family = AF_INET6;
-	expected.sa6.sin6_addr = address;
+	SET_AF(&expected, AF_INET6);
+	SET_SOCK_ADDR6(&expected, address);
 	SET_PORT(&expected, 3000);
 
 	TEST_ASSERT_TRUE(decodenetnum(str, &actual));
@@ -94,8 +94,8 @@ TEST(decodenetnum, IllegalCharInPort) {
 	sockaddr_u actual;
 
 	sockaddr_u expected;
-	expected.sa4.sin_family = AF_INET;
-	expected.sa4.sin_addr.s_addr = inet_addr("192.0.2.1");
+	SET_AF(&expected, AF_INET);
+	PSOCK_ADDR4(&expected)->s_addr = inet_addr("192.0.2.1");
 	SET_PORT(&expected, NTP_PORT);
 
 	TEST_ASSERT_FALSE(decodenetnum(str, &actual));

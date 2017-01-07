@@ -94,13 +94,13 @@ TEST(socktoa, IgnoreIPv6Fields) {
 
 	sockaddr_u input1, input2;
 
-	input1.sa6.sin6_family = AF_INET6;
-	input1.sa6.sin6_addr = address;
+	SET_AF(&input1, AF_INET6);
+	SET_SOCK_ADDR6(&input1, address);
 	input1.sa6.sin6_flowinfo = 30L; // This value differs from input2.
 	SET_PORT(&input1, NTP_PORT);
 
-	input2.sa6.sin6_family = AF_INET6;
-	input2.sa6.sin6_addr = address;
+	SET_AF(&input2, AF_INET6);
+	SET_SOCK_ADDR6(&input2, address);
 	input2.sa6.sin6_flowinfo = 10L; // This value differs from input1.
 	SET_PORT(&input2, NTP_PORT);
 

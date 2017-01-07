@@ -24,24 +24,29 @@ typedef union {
  * Utilities for manipulating sockaddr_u v4/v6 unions
  */
 #define SOCK_ADDR4(psau)	((psau)->sa4.sin_addr)
+#define SET_SOCK_ADDR4(psau, a)	((psau)->sa4.sin_addr = (a))
 #define SOCK_ADDR6(psau)	((psau)->sa6.sin6_addr)
+#define SET_SOCK_ADDR6(psau, a)	((psau)->sa6.sin6_addr = (a))
 
 #define PSOCK_ADDR4(psau)	(&SOCK_ADDR4(psau))
 #define PSOCK_ADDR6(psau)	(&SOCK_ADDR6(psau))
 
 #define AF(psau)		((psau)->sa.sa_family)
+#define SET_AF(psau, f)		((psau)->sa.sa_family = (f))
 
 #define IS_IPV4(psau)		(AF_INET == AF(psau))
 #define IS_IPV6(psau)		(AF_INET6 == AF(psau))
 
 /* sockaddr_u v4 address in network byte order */
 #define	NSRCADR(psau)		(SOCK_ADDR4(psau).s_addr)
+#define	SET_NSRCADR(psau, a)	(SOCK_ADDR4(psau).s_addr - (a))
 
 /* sockaddr_u v4 address in host byte order */
 #define	SRCADR(psau)		(ntohl(NSRCADR(psau)))
 
 /* sockaddr_u v6 address in network byte order */
 #define NSRCADR6(psau)		(SOCK_ADDR6(psau).s6_addr)
+#define SET_NSRCADR6(psau)	(SOCK_ADDR6(psau).s6_addr = (a))
 
 /* assign sockaddr_u v4 address from host byte order */
 #define	SET_ADDR4(psau, addr4)	(NSRCADR(psau) = htonl(addr4))
@@ -50,11 +55,11 @@ typedef union {
 #define SET_ADDR4N(psau, addr4n) (NSRCADR(psau) = (addr4n));
 
 /* assign sockaddr_u v6 address from network byte order */
-#define SET_ADDR6N(psau, s6_addr)				\
-	(SOCK_ADDR6(psau) = (s6_addr))
+#define SET_ADDR6N(psau, s6_addr)	(SOCK_ADDR6(psau) = (s6_addr))
 
 /* sockaddr_u v4/v6 port in network byte order */
 #define	NSRCPORT(psau)		((psau)->sa4.sin_port)
+#define	SET_NSRCPORT(psau, a)	((psau)->sa4.sin_port = (a))
 
 /* sockaddr_u v4/v6 port in host byte order */
 #define	SRCPORT(psau)		(ntohs(NSRCPORT(psau)))

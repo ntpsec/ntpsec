@@ -1284,13 +1284,13 @@ sau_from_netaddr(
 	switch (pna->family) {
 
 	case AF_INET:
-		memcpy(&psau->sa4.sin_addr, &pna->type.in,
-		       sizeof(psau->sa4.sin_addr));
+		memcpy(&SOCK_ADDR4(psau), &pna->type.in,
+		       sizeof(SOCK_ADDR4(psau)));
 		break;
 
 	case AF_INET6:
-		memcpy(&psau->sa6.sin6_addr, &pna->type.in6,
-		       sizeof(psau->sa6.sin6_addr));
+		memcpy(&SOCK_ADDR6(psau), &pna->type.in6,
+		       sizeof(SOCK_ADDR6(psau)));
 		break;
 	}
 }
@@ -1354,7 +1354,7 @@ check_flags6(
 	struct in6_ifreq ifr6;
 	int fd;
 
-	if (psau->sa.sa_family != AF_INET6)
+	if (AF(psau) != AF_INET6)
 		return false;
 	if ((fd = socket(AF_INET6, SOCK_DGRAM, 0)) < 0)
 		return false;
