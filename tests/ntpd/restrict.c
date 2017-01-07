@@ -13,10 +13,10 @@ create_sockaddr_u(unsigned short sin_port, const char* ip_addr)
 {
 	sockaddr_u sockaddr;
 
-	sockaddr.sa4.sin_family = AF_INET;
-	sockaddr.sa4.sin_port = htons(sin_port);
-	memset(sockaddr.sa4.sin_zero, 0, 8);
-	sockaddr.sa4.sin_addr.s_addr = inet_addr(ip_addr);
+	memset(&sockaddr, 0, sizeof(sockaddr));
+	SET_AF(&sockaddr, AF_INET);
+	NSRCPORT(&sockaddr) = htons(sin_port);
+	PSOCK_ADDR4(&sockaddr)->s_addr = inet_addr(ip_addr);
 
 	return sockaddr;
 }

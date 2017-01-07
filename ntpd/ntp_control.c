@@ -3765,17 +3765,17 @@ sockaddrs_from_restrict_u(
 	ZERO(*psaA);
 	ZERO(*psaM);
 	if (!ipv6) {
-		psaA->sa.sa_family = AF_INET;
-		psaA->sa4.sin_addr.s_addr = htonl(pres->u.v4.addr);
-		psaM->sa.sa_family = AF_INET;
-		psaM->sa4.sin_addr.s_addr = htonl(pres->u.v4.mask);
+		SET_AF(psaA, AF_INET);
+		PSOCK_ADDR4(psaA)->s_addr = htonl(pres->u.v4.addr);
+		SET_AF(psaM, AF_INET);
+		PSOCK_ADDR4(psaM)->s_addr = htonl(pres->u.v4.mask);
 	} else {
-		psaA->sa.sa_family = AF_INET6;
-		memcpy(&psaA->sa6.sin6_addr, &pres->u.v6.addr,
-		       sizeof(psaA->sa6.sin6_addr));
-		psaM->sa.sa_family = AF_INET6;
-		memcpy(&psaM->sa6.sin6_addr, &pres->u.v6.mask,
-		       sizeof(psaA->sa6.sin6_addr));
+		SET_AF(psaA, AF_INET6);
+		memcpy(&SOCK_ADDR6(psaA), &pres->u.v6.addr,
+		       sizeof(SOCK_ADDR6(psaA)));
+		SET_AF(psaM, AF_INET6);
+		memcpy(&SOCK_ADDR6(psaM), &pres->u.v6.mask,
+		       sizeof(SOCK_ADDR6(psaA)));
 	}
 }
 

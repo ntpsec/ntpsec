@@ -63,11 +63,10 @@ TEST(a_md5encrypt, DecryptInvalid) {
 
 TEST(a_md5encrypt, IPv4AddressToRefId) {
 	sockaddr_u addr;
-	addr.sa4.sin_family = AF_INET;
-	addr.sa4.sin_port = htons(80);
-
-	u_int32_t address = inet_addr("192.0.2.1");
-	addr.sa4.sin_addr.s_addr = address;
+	SET_AF(&addr, AF_INET);
+	SET_NSRCPORT(&addr, htons(80));
+	uint32_t address = inet_addr("192.0.2.1");
+	PSOCK_ADDR4(&addr)->s_addr = address;
 
 	TEST_ASSERT_EQUAL(address, addr2refid(&addr));
 }
@@ -82,9 +81,8 @@ TEST(a_md5encrypt, IPv6AddressToRefId) {
 
 
 	sockaddr_u addr;
-	addr.sa6.sin6_family = AF_INET6;
-
-	addr.sa6.sin6_addr = address;
+	SET_AF(&addr, AF_INET6);
+	SET_SOCK_ADDR6(&addr, address);
 
 	const int expected = 0x75cffd52;
 

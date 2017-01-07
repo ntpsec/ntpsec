@@ -8,24 +8,24 @@
 #include "ntp.h"
 
 bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
-	if (expected->sa.sa_family != actual->sa.sa_family) {
+	if (AF(expected) != AF(actual)) {
 		printf("Expected sa_family: %" PRIuMAX " but got: %" PRIuMAX "\n",
-		       (uintmax_t)expected->sa.sa_family, (uintmax_t)actual->sa.sa_family);
+		       (uintmax_t)AF(expected), (uintmax_t)AF(actual));
 		return false;
 	}
 
-	if (actual->sa.sa_family == AF_INET) { // IPv4
-		if (expected->sa4.sin_port == actual->sa4.sin_port &&
-			memcmp(&expected->sa4.sin_addr, &actual->sa4.sin_addr,
+	if (AF(actual) == AF_INET) { // IPv4
+		if (NSRCPORT(expected) == NSRCPORT(actual) &&
+		    memcmp(&SOCK_ADDR4(expected), &SOCK_ADDR4(actual),
 				   sizeof(in_addr_t)) == 0) {
 			return true;
 		} else {
-			printf("IPv4 comparison failed, expected: %u (%s) but was: %u (%s)\n", expected->sa4.sin_addr.s_addr, socktoa(expected), actual->sa4.sin_addr.s_addr, socktoa(actual));
+			printf("IPv4 comparison failed, expected: %u (%s) but was: %u (%s)\n", SOCK_ADDR4(expected).s_addr, socktoa(expected), SOCK_ADDR4(actual).s_addr, socktoa(actual));
 			return false;
 		}
-	} else if (actual->sa.sa_family == AF_INET6) { //IPv6
+	} else if (AF(actual) == AF_INET6) { //IPv6
 		if (expected->sa6.sin6_port == actual->sa6.sin6_port &&
-			memcmp(&expected->sa6.sin6_addr, &actual->sa6.sin6_addr,
+			memcmp(&SOCK_ADDR6(expected), &SOCK_ADDR6(actual),
 				   sizeof(struct in6_addr)) == 0) {
 			return true;
 		} else {
@@ -33,29 +33,29 @@ bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
 			return false;
 		}
 	} else { // Unknown family
-		printf("Unknown sa_family: %" PRIuMAX "\n", (uintmax_t)actual->sa.sa_family);
+		printf("Unknown sa_family: %" PRIuMAX "\n", (uintmax_t)AF(actual));
 		return false;
 	}
 }
 
 /* Similar to IsEqualS, but doesn't print misleading messages */
 bool IsDiffS(const sockaddr_u *expected, const sockaddr_u *actual) {
-	if (expected->sa.sa_family != actual->sa.sa_family) {
+	if (AF(expected) != AF(actual)) {
 		return true;
 	}
 
-	if (actual->sa.sa_family == AF_INET) { // IPv4
-		if (expected->sa4.sin_port == actual->sa4.sin_port &&
-			memcmp(&expected->sa4.sin_addr, &actual->sa4.sin_addr,
+	if (AF(actual) == AF_INET) { // IPv4
+		if (NSRCPORT(expected) == NSRCPORT(actual) &&
+			memcmp(&SOCK_ADDR4(expected), &SOCK_ADDR4(actual),
 				   sizeof(in_addr_t)) == 0) {
-			printf("IPv4 address matches: %u (%s)\n", expected->sa4.sin_addr.s_addr, socktoa(expected));
+			printf("IPv4 address matches: %u (%s)\n", SOCK_ADDR4(expected).s_addr, socktoa(expected));
 			return false;
 		} else {
 			return true;
 		}
-	} else if (actual->sa.sa_family == AF_INET6) { //IPv6
+	} else if (AF(actual) == AF_INET6) { //IPv6
 		if (expected->sa6.sin6_port == actual->sa6.sin6_port &&
-			memcmp(&expected->sa6.sin6_addr, &actual->sa6.sin6_addr,
+			memcmp(&SOCK_ADDR6(expected), &SOCK_ADDR6(actual),
 				   sizeof(struct in6_addr)) == 0) {
 			printf("IPv6 address matches\n");
 			return false;
@@ -70,8 +70,8 @@ bool IsDiffS(const sockaddr_u *expected, const sockaddr_u *actual) {
 
 sockaddr_u CreateSockaddr4(const char* address, unsigned int port) {
 	sockaddr_u s;
-	s.sa4.sin_family = AF_INET;
-	s.sa4.sin_addr.s_addr = inet_addr(address);
+	SET_AF(&s, AF_INET);
+	PSOCK_ADDR4(&s)->s_addr = inet_addr(address);
 	SET_PORT(&s, port);
 	return s;
 }
