@@ -258,7 +258,8 @@ class VizStats(ntp.statfiles.NTPStats):
             self.percs["max_y"] = self.percs["p99"]
             self.percs["clipped"] = " (clipped)"
         else:
-            self.percs["min_y"] = self.percs["max_y"] = '*'
+            self.percs["min_y"] = self.percs["p0"]
+            self.percs["max_y"] = self.percs["p100"]
             self.percs["clipped"] = ""
 
         self.stats_html = """\
