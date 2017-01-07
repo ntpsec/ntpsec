@@ -60,7 +60,7 @@ parser.add_argument('-o', '--once',
                     help="log one line, then exit")
 
 parser.add_argument('-w', '--wait',
-                    default=5,
+                    default=[5],
                     dest='wait',
                     help="wait WAIT seconds after each log line, default 5",
                     nargs=1,
@@ -76,6 +76,10 @@ parser.add_argument('-V', '--version',
                     version="gps-log %s" % ntp.util.stdversion())
 
 args = parser.parse_args()
+
+if args.verbose:
+    print("gps-log: arguments:")
+    print(args)
 
 if args.logfile:
     # log to logfile
@@ -117,6 +121,9 @@ class GpsPoller(threading.Thread):
                                      self.gpsd.satellites_used))
 
 if __name__ == '__main__':
+    if args.verbose:
+        print("gps-log: creating poll thread")
+
     gpsp = GpsPoller()    # create the thread
     try:
         gpsp.start()      # start it up
@@ -159,4 +166,4 @@ if __name__ == '__main__':
     gpsp.join()
 
     if args.verbose:
-        print("gps-log Done -- Exiting.")
+        print("gps-log: Done -- Exiting.")
