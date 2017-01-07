@@ -379,22 +379,25 @@ set rmargin 10
                                         starttime=starttime,
                                         endtime=endtime)
 
-    # FIXME: plot_slice can also gather the values and
-    # save yet another loop over the data
     def plot_slice(self, rows, item1, item2=None):
         "slice 0,item1, maybe item2, from rows, ready for gnuplot"
         # speed up by only sending gnuplot the data it will actually use
         # WARNING: this is hot code, only modify if you profile
+        # since we are looping the data, get the values too
         plot_data = ''
         last_time = 0
+        values1 = []
+        values2 = []
         if item2:
             for row in rows:
                 try:
+                    values1.append(float(row[item1]))
+                    values2.append(float(row[item2]))
                     if 2200000 < row[0] - last_time:
                         # more than 2,200 seconds between points
                         # data loss, add a break in the plot line
                         plot_data += '\n'
-                    # fields: time, fld, and rtt
+                    # fields: time, fld1, and fld2
                     plot_data += row[1] + ' ' + row[item1] + ' ' \
                         + row[item2] + '\n'
                     last_time = row[0]
@@ -403,6 +406,7 @@ set rmargin 10
         else:
             for row in rows:
                 try:
+                    values1.append(float(row[item1]))
                     if 2200000 < row[0] - last_time:
                         # more than 2,200 seconds between points
                         # data loss, add a break in the plot line
@@ -412,11 +416,15 @@ set rmargin 10
                     last_time = row[0]
                 except IndexError:
                     pass
+
         # I know you want to replace the plot_data string concat with
         # or more join()s, do not do it, it is slower
         # next you'll want to try %-substitution.  it too is slower
         plot_data += "e\n"
-        return plot_data
+        if item2:
+            return (plot_data, values1, values2)
+
+        return (plot_data, values1)
 
     def local_offset_gnuplot(self):
         "Generate gnuplot code graphing local clock loop statistics"
@@ -426,14 +434,12 @@ set rmargin 10
 
         # speed up by only sending gnuplot the data it will actually use
         # fields: time, time offset, freq offset
-        plot_data = self.plot_slice(self.loopstats, 2, 3)
+        (plot_data, values, values_f) = self.plot_slice(self.loopstats, 2, 3)
 
         # compute clock offset
-        values = [float(line[2]) for line in self.loopstats]
         stats = VizStats(values, "Local Clock Time Offset")
 
         # compute frequency offset
-        values_f = [float(line[3]) for line in self.loopstats]
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         out = stats.percs
@@ -495,10 +501,9 @@ file.</p>
 
         # speed up by only sending gnuplot the data it will actually use
         # fields: time, freq offset
-        plot_data = self.plot_slice(self.loopstats, 3)
+        (plot_data, values_f) = self.plot_slice(self.loopstats, 3)
 
         # compute frequency offset
-        values_f = [float(line[3]) for line in self.loopstats]
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         stats = []
@@ -506,7 +511,8 @@ file.</p>
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
             # fields: time, temp
-            plot_data_t += self.plot_slice(tempsmap[key], 3)
+            (p, v) = self.plot_slice(tempsmap[key], 3)
+            plot_data_t += p
 
         # out = stats.percs
         out = {}
@@ -580,7 +586,8 @@ file, and field 3 from the temp log .</p>
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
             # fields: time, temp
-            plot_data += self.plot_slice(tempsmap[key], 3)
+            (p, v) = self.plot_slice(tempsmap[key], 3)
+            plot_data += p
 
         out = {}
         out['sitename'] = sitename
@@ -634,16 +641,7 @@ component of frequency drift.</p>
         plot_data = ""
         for key in gpslist:
             # fields: time, TDOP, nSats
-            ps = self.plot_slice(gpsmap[key], 3, 4)
-            for line in ps.splitlines():
-                l = line.split()
-                if 3 != len(l):
-                    continue
-                try:
-                    values_tdop.append(float(l[1]))
-                    values_nsat.append(float(l[2]))
-                except:
-                    continue
+            (ps, values_tdop, values_nsat) = self.plot_slice(gpsmap[key], 3, 4)
             plot_data += ps
 
         stats = VizStats(values_nsat, "nSats", units='nSat')
@@ -706,8 +704,11 @@ Greater than 20 means there will be significant inaccuracy and error.</p>
 
         # grab and sort the values, no need for the timestamp, etc.
 
+        # speed up by only sending gnuplot the data it will actually use
+        # fields: time, freq error
+        (plot_data, values) = self.plot_slice(self.loopstats, 3)
+
         # compute frequency offset
-        values = [float(line[2]) for line in self.loopstats]
         stats = VizStats(values, "Local Clock Frequency Offset", freq=1,)
 
         # build the output dictionary, because Python can not format
@@ -715,10 +716,6 @@ Greater than 20 means there will be significant inaccuracy and error.</p>
         out = stats.percs
         out["sitename"] = self.sitename
         out['size'] = args.png_size
-
-        # speed up by only sending gnuplot the data it will actually use
-        # fields: time, freq error
-        plot_data = self.plot_slice(self.loopstats, 3)
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
@@ -762,10 +759,9 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 
         # speed up by only sending gnuplot the data it will actually use
         # fields: time, fld
-        plot_data = self.plot_slice(self.loopstats, fld)
+        (plot_data, values) = self.plot_slice(self.loopstats, fld)
 
-        # grab and process the values
-        values = [float(line[fld]) for line in self.loopstats]
+        # process the values
         stats = VizStats(values, title, freq=freq)
 
         # build the output dictionary, because Python can not format
@@ -981,10 +977,12 @@ at 0s.</p>
             # actually use
             if rtt:
                 # fields: time, fld, and rtt
-                plot_data += self.plot_slice(peerdict[ip], fld, 5)
+                (p, v1, v2) = self.plot_slice(peerdict[ip], fld, 5)
+                plot_data += p
             else:
                 # fields: time, fld
-                plot_data += self.plot_slice(peerdict[ip], fld)
+                (p, v1) = self.plot_slice(peerdict[ip], fld)
+                plot_data += p
 
         out = stats.percs
         out['sitename'] = self.sitename
@@ -1161,7 +1159,8 @@ plot \\
     for stats in statlist:
         # speed up by only sending gnuplot the data it will actually use
         # fields: time, offset
-        plot_data += NTPViz.plot_slice(stats.loopstats, 2)
+        (p, v) = NTPViz.plot_slice(stats.loopstats, 2)
+        plot_data += p
 
     ret = {'html': '', 'stats': []}
     ret['title'] = "Multiplot"
