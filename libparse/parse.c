@@ -35,8 +35,8 @@ parse_timedout(
 
 	l_fp delt;
 
-	delt = tstamp->fp;
-	delt -= parseio->parse_lastchar.fp;
+	delt = *tstamp;
+	delt -= parseio->parse_lastchar;
 	delta = lfp_uintv_to_tspec(delt);
 	if (cmp_tspec(delta, *del) == TIMESPEC_GREATER_THAN)
 	{
@@ -481,7 +481,7 @@ updatetimeinfo(
 
 	parseprintf(DD_PARSE, ("updatetimeinfo status=0x%lx, time=%x\n",
 			       (long)parseio->parse_dtime.parse_state,
-	                       lfpuint(parseio->parse_dtime.parse_time.fp)));
+	                       lfpuint(parseio->parse_dtime.parse_time)));
 
 	return CVT_OK;		/* everything fine and dandy... */
 }
@@ -621,7 +621,7 @@ timepacket(
 	 * time stamp
 	 */
 	struct timespec ts = {t, clock_time.usecond * 1000};
-	parseio->parse_dtime.parse_time.fp = tspec_stamp_to_lfp(ts);
+	parseio->parse_dtime.parse_time = tspec_stamp_to_lfp(ts);
 	
 	parseio->parse_dtime.parse_format       = format;
 

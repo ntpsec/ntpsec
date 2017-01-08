@@ -508,9 +508,9 @@ calc_usecdiff(
 	long delta_usec = 0;
 	l_fp delt;
 
-	delt = ref->fp;
-	setlfpsint(delt, lfpsint(delt) + offset);
-	delt -= base->fp;
+	delt = *ref;
+	bumplfpsint(delt, offset);
+	delt -= *base;
 	delta = lfp_stamp_to_tspec(delt, NULL);
 
 	delta_usec = 1000000 * (int32_t)delta.tv_sec + delta.tv_nsec/1000;
@@ -532,7 +532,18 @@ snt_rawdcf(
 	last_tcode_t  *t = (last_tcode_t *)parseio->parse_pdata;
 	long delta_usec = -1;
 
-	if (t != NULL && t->tminute.tv.tv_sec != 0) {
+	/*
+	 * 2017-01-07: Emergency repair. This guard used to test
+	 * t->tminute.tv.tv_sec, but that cannot have been right as
+	 * that tv_sec field was never set anywhere outside the
+	 * in-kernel Sun module (long discarded) while this code was
+	 * reached in userspace.  It is unknown whether replacing that
+	 * test with the analogous one on an l_fp is correct.  This
+	 * problem was discovered when reducing the timestamp_t union
+	 * - this was one of two references to the UNIX timestamp
+	 * member.
+	 */
+	if (t != NULL && lfpuint(t->tminute) != 0) {
 		delta_usec = calc_usecdiff(ptime, &t->tminute, parseio->parse_index - 1);
 		if (delta_usec < 0)
 			delta_usec = -delta_usec;
@@ -546,7 +557,7 @@ snt_rawdcf(
 	{
 		parseio->parse_dtime.parse_stime = *ptime;
 
-		bumplfpuint(parseio->parse_dtime.parse_time.fp, 1);
+		bumplfpuint(parseio->parse_dtime.parse_time, 1);
 
 		parseprintf(DD_RAWDCF,("parse: snt_rawdcf: time stamp synthesized offset %d seconds\n", parseio->parse_index - 1));
 
@@ -585,7 +596,18 @@ inp_rawdcf(
 		if (t != NULL)
 		{
 			/* remember minute start sample time if timeouts occur in minute raster */
-			if (t->timeout.tv.tv_sec != 0)
+			/*
+			 * 2017-01-07: Emergency repair.  This used to test
+			 * t->timeout.tv.tv_sec != 0, but that cannot have been
+			 * right as the tv.tv_sec part of (what used to be) the
+			 * timestamp_t union was only set in the long-discarded
+			 * Sun kernel driver, and this could always be called
+			 * from userspace.  Problem discovered while eliminating
+			 * the timestamp_t union; this was one of only two
+			 * referebces to the timrspec member. It is unknown
+			 * whether this change actually corrects the code.
+			 */
+			if (lfpuint(t->timeout) != 0)
 			{
 				delta_usec = calc_usecdiff(tstamp, &t->timeout, 60);
 				if (delta_usec < 0)

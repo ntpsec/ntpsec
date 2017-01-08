@@ -1812,7 +1812,7 @@ local_input(
 	 */
 	count = rbufp->recv_length;
 	s = (unsigned char *)rbufp->recv_buffer;
-	ts.fp = rbufp->recv_time;
+	ts = rbufp->recv_time;
 
 	while (count--)
 	{
@@ -1851,18 +1851,18 @@ local_input(
 							else
 							  pts = pps_info.assert_timestamp;
 
-							setlfpuint(parse->parseio.parse_dtime.parse_ptime.fp, (uint32_t) (pts.tv_sec + JAN_1970));
+							setlfpuint(parse->parseio.parse_dtime.parse_ptime, (uint32_t) (pts.tv_sec + JAN_1970));
 
 							dtemp = (double) pts.tv_nsec / 1e9;
 							if (dtemp < 0.) {
 								dtemp += 1;
-								bumplfpuint(parse->parseio.parse_dtime.parse_ptime.fp, -1);
+								bumplfpuint(parse->parseio.parse_dtime.parse_ptime, -1);
 							}
 							if (dtemp > 1.) {
 								dtemp -= 1;
-								bumplfpuint(parse->parseio.parse_dtime.parse_ptime.fp, 1);
+								bumplfpuint(parse->parseio.parse_dtime.parse_ptime, 1);
 							}
-							setlfpfrac(parse->parseio.parse_dtime.parse_ptime.fp, (uint32_t)(dtemp * FRAC));
+							setlfpfrac(parse->parseio.parse_dtime.parse_ptime, (uint32_t)(dtemp * FRAC));
 
 							parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
 #ifdef DEBUG
@@ -1872,7 +1872,7 @@ local_input(
 								       "parse: local_receive: fd %d PPSAPI seq %ld - PPS %s\n",
 								       rbufp->fd,
 								       (long)pps_info.assert_sequence + (long)pps_info.clear_sequence,
-								       lfptoa(parse->parseio.parse_dtime.parse_ptime.fp, 6));
+								       lfptoa(parse->parseio.parse_dtime.parse_ptime, 6));
 							}
 #endif
 						}
@@ -1975,12 +1975,12 @@ local_receive(
 		   parse->peer->refclkunit,
 		   (unsigned int)parsetime.parse_status,
 		   (unsigned int)parsetime.parse_state,
-		   (unsigned long)lfpuint(parsetime.parse_time.fp),
-		   (unsigned long)lfpfrac(parsetime.parse_time.fp),
-		   (unsigned long)lfpuint(parsetime.parse_stime.fp),
-		   (unsigned long)lfpfrac(parsetime.parse_stime.fp),
-		   (unsigned long)lfpuint(parsetime.parse_ptime.fp),
-		   (unsigned long)lfpfrac(parsetime.parse_ptime.fp));
+		   (unsigned long)lfpuint(parsetime.parse_time),
+		   (unsigned long)lfpfrac(parsetime.parse_time),
+		   (unsigned long)lfpuint(parsetime.parse_stime),
+		   (unsigned long)lfpfrac(parsetime.parse_stime),
+		   (unsigned long)lfpuint(parsetime.parse_ptime),
+		   (unsigned long)lfpfrac(parsetime.parse_ptime));
 	  }
 #endif
 
@@ -3037,8 +3037,8 @@ parse_control(
 				 * we have a PPS and RS232 signal - calculate the skew
 				 * WARNING: assumes on TIMECODE == PULSE (timecode after pulse)
 				 */
-				off = parse->timedata.parse_stime.fp;
-				off -= parse->timedata.parse_ptime.fp; /* true offset */
+				off = parse->timedata.parse_stime;
+				off -= parse->timedata.parse_ptime; /* true offset */
 				tt = add_var(&out->kv_list, 80, RO);
 				snprintf(tt, 80, "refclock_ppsskew=%s", lfptoms(off, 6));
 			}
@@ -3047,20 +3047,20 @@ parse_control(
 		if (PARSE_PPS(parse->timedata.parse_state))
 		{
 			tt = add_var(&out->kv_list, 80, RO|DEF);
-			snprintf(tt, 80, "refclock_ppstime=\"%s\"", gmprettydate(parse->timedata.parse_ptime.fp));
+			snprintf(tt, 80, "refclock_ppstime=\"%s\"", gmprettydate(parse->timedata.parse_ptime));
 		}
 
 		start = tt = add_var(&out->kv_list, 128, RO|DEF);
 		tt = ap(start, 128, tt, "refclock_time=\"");
 
-		if (lfpuint(parse->timedata.parse_time.fp) == 0)
+		if (lfpuint(parse->timedata.parse_time) == 0)
 		{
 			ap(start, 128, tt, "<UNDEFINED>\"");
 		}
 		else
 		{
 			ap(start, 128, tt, "%s\"",
-			    gmprettydate(parse->timedata.parse_time.fp));
+			    gmprettydate(parse->timedata.parse_time));
 		}
 
 		if (!PARSE_GETTIMECODE(parse, &tmpctl))
@@ -3467,8 +3467,8 @@ parse_process(
 
 	if (PARSE_TIMECODE(parsetime->parse_state))
 	{
-		rectime = parsetime->parse_stime.fp;
-		off = reftime = parsetime->parse_time.fp;
+		rectime = parsetime->parse_stime;
+		off = reftime = parsetime->parse_time;
 
 		off -= rectime; /* prepare for PPS adjustments logic */
 
@@ -3500,7 +3500,7 @@ parse_process(
 		/*
 		 * we have a PPS signal - much better than the RS232 stuff (we hope)
 		 */
-		offset = parsetime->parse_ptime.fp;
+		offset = parsetime->parse_ptime;
 
 #ifdef DEBUG
 		if (debug > 3)
@@ -3537,7 +3537,7 @@ parse_process(
 					/*
 					 * time code describes pulse
 					 */
-					reftime = off = parsetime->parse_time.fp;
+					reftime = off = parsetime->parse_time;
 
 					off -= offset; /* true offset */
 				}
