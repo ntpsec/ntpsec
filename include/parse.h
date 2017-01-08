@@ -109,11 +109,7 @@
  */
 #define PARSE_TCMAX	    400	  /* maximum addition data size */
 
-typedef union
-{
-  struct timeval tv;		/* timeval - kernel view */
-  l_fp           fp;		/* fixed point - ntp view */
-} timestamp_t;
+typedef l_fp timestamp_t;
 
 /*
  * standard time stamp structure
