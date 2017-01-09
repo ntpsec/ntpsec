@@ -1,0 +1,125 @@
+= Preliminary design notes for the NTPv5 protocol =
+
+NTPv4 is showing its age.  There are functional capabilities that
+would be very useful if they could be standardized, but are not.
+
+This document will first list these missing bits, then discuss
+ways to incopporate them.
+
+== The missing data: a semantic view ==
+
+=== REFIDs ===
+
+Reference IDs are used by Stratum 1 sources to identify clocks and
+clock types, and by hosts at higher strata to perform loop detection.
+
+The REFID field is 4 octets long, sufficient to hold an IPv4 address
+for loop detection. This is inadequate for IPV6, so the reference ID of
+an IPv6 host is a 4-octet hash of itscactual address. Hash collisions
+have been observed in the wild, possiblty resulting in false-positive
+loop detection.
+
+The new protocol should support REFIDs at least as long as an IPv6
+address (8 octets).
+
+=== Timescale ===
+
+Most servers ship UTC.  Some ship TAI. Some perform leap-second
+smearing, some do not.
+
+The new protocol should enable a server to advertise its timescale,
+including its current leapsecond offset.
+
+=== Era ===
+
+NTP dates are 64-bit counters based on an epoch.
+
+The new protocol should enable a server to ship a year identifying its
+epoch.
+
+=== NTS ===
+
+The IETF is attempting to develop a new cryptographic standard for
+secure/authenticated time exchange: Network Time Security.
+
+The new protocol needs to allow a block of data of as-yet unspecified
+and possibly variable size to be dedicated to NTS use.
+
+== Extensions vs. replacement ==
+
+There are three possible scenarios for NTPv5 design.
+
+=== NTPv4+ ===
+
+In this incremental approach, the NTP port number (123) is retained
+and the 48-byte header v4 header is preserved. New data fields are
+passed in RFC7822 extension blocks.  The NTP version number is
+not incremented; "v5" becomes a set of required extension blocks.
+
+A difficulty with this approach is that some firewalls and routers are
+known to silently discard RFC7822 extension blocks as a way of
+preventing DoS attacks.  This would create propagation issues
+difficult to diagnose.
+
+=== NTPNG ===
+
+In this approach, a new port number is allocated. The protocol is
+design is unconstrained except that it must carry the semantic
+content of the v4 header minus the unused Reference Timestamp
+field.
+
+The principal difficulty with this approach is that getting all the world's
+firewalls to pass through a new port is not easy.
+
+=== Newmode ===
+
+In this approach, the the NTP port number is retained.  So is the
+first 32 bytes of the v4 packet header structure, so that the version
+number and packet mode are at the same offset as in v4. The version
+field *is* incremented to 5.
+
+The following payload is design is unconstrained except that it must
+carry the semantic content of the v4 header minus the unused Reference
+Timestamp field.
+
+implementations might not reject Version 5 packets, and therefore
+mis-parse the header.  NP Classic and NTPsec *do* perform this check.
+
+== Payload format design for the NTPNG and Newmode cases ==
+
+NTP is running out of version numbers.  The version field is only 3
+bits wide.  Accordingly, the Newmode payload should be structured like
+PNG, as a sequence of self-describing chunks that can be retired and
+replaced as needed to change payload semantics.
+
+Though NTPNG is not constrained by the width of the v4 mode field,
+the versionless semantics of a PNG-style chunk stream would confer a
+desirable degree of flexibility.
+
+The PNG standard can be found at https://www.w3.org/TR/PNG/
+
+A chunk system appropriate for NTP can be summarized as follows:
+
+* Each chunk begins with a four-octet big-endian length.  The length
+  does not count itself.
+
+* Each chunk continues with a 4-octet type identifier composed of
+  printable ASCII characters.
+
+* If the first character is uppercase, the chunk is *critical*; that
+  is, implementations encountering a critical chunk type they do not
+  recognize should treat the packet as erroneous.
+
+* If the first character is not uppercase, the chunk is non-critical
+  and may be skipped.
+
+* Chunk content is not constrained and is interpreted based in the
+  chunk type.
+
+Note that this is not identical to PNG chunk layout; one difference is
+that PNG chunks have only two-byte lengths and always end with a CRC.
+This chunk system is deliberately more similar to RFC7822 extension
+blocks.
+
+// end
+
