@@ -4,7 +4,7 @@ NTPv4 is showing its age.  There are functional capabilities that
 would be very useful if they could be standardized, but are not.
 
 This document will first list these missing bits, then discuss
-ways to incopporate them.
+ways to incorporate them.
 
 == The missing data: a semantic view ==
 
@@ -68,13 +68,13 @@ design is unconstrained except that it must carry the semantic
 content of the v4 header minus the unused Reference Timestamp
 field.
 
-The principal difficulty with this approach is that getting all the world's
-firewalls to pass through a new port is not easy.
+The principal difficulty with this approach is that getting all the
+world's firewalls to pass through a new port is not easy.
 
 === Newmode ===
 
-In this approach, the the NTP port number is retained.  So is the
-first 32 bytes of the v4 packet header structure, so that the version
+In this approach, the the NTP port number is retained.  So is at least
+the first byte of the v4 packet header structure, so that the version
 number and packet mode are at the same offset as in v4. The version
 field *is* incremented to 5.
 
@@ -82,8 +82,9 @@ The following payload is design is unconstrained except that it must
 carry the semantic content of the v4 header minus the unused Reference
 Timestamp field.
 
-implementations might not reject Version 5 packets, and therefore
-mis-parse the header.  NP Classic and NTPsec *do* perform this check.
+The principal difficulty with this approach is that implementations
+might not reject Version 5 packets, and therefore mis-parse the
+header.  NP Classic and NTPsec *do* perform this check.
 
 == Payload format design for the NTPNG and Newmode cases ==
 
