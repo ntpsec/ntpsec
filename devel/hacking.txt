@@ -114,7 +114,7 @@ The file "dot.emacs" has the emacs C-mode indentation style that Dave
 likes. It's a bit archaic, but we've stuck with it to preserve
 continuity; you should, too.
 
-A discussion about using uncrustfy to mass convert all the C sources
+A discussion about using uncrustify to mass convert all the C sources
 to a more modern indentation and format style is ongoing.  As it will
 result in a coordinated flag day in ongoing development, it will be
 carefully announced in the devel@ntpsec.org mailing list before being merged and
