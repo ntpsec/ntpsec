@@ -6,7 +6,7 @@ Annoying but necessary legalese:
     redistributed under the project's license according to the normal
     forms and usages of the open-source community.
 
-If you want to learn more about the code internals, find tour.txt.
+If you want to learn more about the code internals, consult the .../devel/tour.txt file.
 This document is about development practices and project conventions.
 
 You may also find the articles at https://blog.ntpsec.org/
@@ -43,15 +43,18 @@ coexist with distributions that use C89 conventions.
 You can download the C99 standard for free from here:
     http://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
 
-Only POSIX-1.2001/SuSv3 library functions should be used (a few
+Only POSIX-1.2001/SUSv3 library functions should be used (a few
 specific exceptions are noted below).  If a library
-function not in POSIX 2001 is required, then a wrapper function for back
+function not in that standard is required, then a wrapper function for back
 compatibility must be provided.  One notable case is clock_gettime()
 which is used, when available, for increased accuracy, and has a
 fallback implementation using native time calls.
 
 You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
     http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
+
+You can view POSIX.1-2001, SUSv3, online for free here:
+    http://www.unix-systems.org/version3/
 
 POSIX threads *are* considered part of the standardized API and may be used.
 
@@ -111,6 +114,12 @@ The file "dot.emacs" has the emacs C-mode indentation style that Dave
 likes. It's a bit archaic, but we've stuck with it to preserve
 continuity; you should, too.
 
+A discussion about using uncrustfy to mass convert all the C sources
+to a more modern indentation and format style is ongoing.  As it will
+result in a coordinated flag day in ongoing development, it will be
+carefully announced in the devel@ntpsec.org mailing list before being merged and
+pushed.
+
 === Conventions for #ifdef guard names ===
 
 Parts of this code are a thicket of C preprocessor conditionals.
@@ -157,7 +166,8 @@ USE_*::
 
 Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
 to assume the code will never run on a 16-bit machine.  When in doubt,
-use the fixed-width integral types from <stdint.h>.
+and whenever possible, use the fixed-width integral types from
+<stdint.h>.
 
 You *may* assume that the compiler supports POSIX 64-bit integral types
 (int64_t, uint64_t and friends) even if the target hardware is 32-bit.
@@ -324,7 +334,7 @@ including both HTML and Unix manual pages
 
 If you're going to write in anything else you need to have a good
 reason, and the bar for "good" will be set high.  "I like Markdown",
-in particular, does not qualify - it doesn't have good enough table
+in particular, does not qualify - Markdown doesn't have good enough table
 support for our needs.  ReST does, but the hassle costs of supporting
 two different master markups are too high.
 
@@ -384,7 +394,7 @@ Please make sure your code builds and passes the test suite before you
 commit it, and especially before you push it.
 
 Before starting significant work, propose it first in the
-mailto:devel@ntpsec.org mailing list.  Other people may have
+devel@ntpsec.org mailing list.  Other people may have
 suggestions, will want to collaborate, and will wish to review your
 code.
 
@@ -426,7 +436,7 @@ If for some reason it is impossible for you to use git format-patch,
 at least send context (-c) or unified (-u) diffs rather than the
 default ed (-e) style, which is very brittle.
 
-You can email your patch to mailto:devel@ntpsec.org if are a member of
+You can email your patch to mailto:devel@ntpsec.org if you are a member of
 that mailing list, or you can email your patch to
 mailto:contact@ntpsec.org if you are not.
 
@@ -522,15 +532,15 @@ should be able to use "git stash" to get around that.
 This is the release checklist to be used by the project manager to cut
 each 0.9.X release.
 
-. Decide that it's time to cut a release.  This can be driven by landing
+. Decide that it is time to cut a release.  This decision can be driven by landing
   a significant new feature, landing a critical fix, or just that enough
   time has passed with ongoing improvements and fixes.
 
-. Email a warning message to the devel list, and ask each of the major
+. Email a warning message to the devel@ntpsec.org list, and ask the major
   contributors to chime in, and to each assure that the .../NEWS file
-  and the ../devel/TODO file is up to date.
+  and the .../devel/TODO file is up to date.
 
-. Wait for the contributors to check in and for the discussion
+. Wait for the contributors to answer and for the discussion
   to settle down.  If the discussion suggests that now is not a good
   time to cut a release, wait until the raised issues are resolved.
 
