@@ -99,15 +99,26 @@ else:
 
 
 class GpsPoller(threading.Thread):
+    running = False       # True when thread is running. Quit when set False
+
     def __init__(self):
         threading.Thread.__init__(self)
         # start the streaming of gps data
-        self.gpsd = gps.gps(mode=gps.WATCH_ENABLE)
+        try:
+            self.gpsd = gps.gps(mode=gps.WATCH_ENABLE)
+        except BaseException as e:
+            sys.stderr.write("gps-log: Can't connect to gpsd, %s\n"
+                             "         Is gpsd running?\n" % e)
+            sys.exit(1)
         self.running = True
 
     def run(self):
         while gpsp.running:
-            self.gpsd.next()     # loop and grab each set of gpsd info
+            try:
+                self.gpsd.next()     # loop and grab each set of gpsd info
+            except:
+                self.running = False
+                break
 
     def get_time(self):
         "Return the gpsd time fix"
@@ -121,6 +132,7 @@ class GpsPoller(threading.Thread):
                                      self.gpsd.satellites_used))
 
 if __name__ == '__main__':
+    # this is the main thread
     if args.verbose:
         print("gps-log: creating poll thread")
 
@@ -130,13 +142,14 @@ if __name__ == '__main__':
         last_time = 0
         out.write("\n")         # print blank line to prevent log corruption
         out.write("# Time       Device     TDOP     nSat\n")
-        while True:
+        while gpsp.running:
             # It may take a second or two to get good data
 
             try:
                 if 'nan' != gpsp.get_time() and not gps.isnan(gpsp.get_time()):
                     if last_time != gpsp.get_time():
                         gpsp.display()
+                        out.flush()
                     last_time = gpsp.get_time()
                     if args.once:
                         # just once
@@ -145,25 +158,28 @@ if __name__ == '__main__':
             except AttributeError as e:
                 print('parse error\n')
 
-            out.flush()
             # wait a bit before next log
             time.sleep(args.wait[0])
 
     except (KeyboardInterrupt, SystemExit):    # when you press ctrl+c
+        args.once = True        # stop the retry loop
         if args.verbose:
             print("\nKilling Thread...")
         else:
+            # print a blank line to make bash happy
             print("")
     except Exception as e:       # any error, signal
         print(e)
 
     # tell the thread to die
     gpsp.running = False
-    # mom says:  be nice and flush
-    out.flush()
-    out.close()
+
     # wait for the thread to finish what it's doing
     gpsp.join()
 
     if args.verbose:
         print("gps-log: Done -- Exiting.")
+
+    # mom says: be nice and flush
+    out.flush()
+    out.close()
