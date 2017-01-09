@@ -96,8 +96,12 @@ Neither is ideal, easy pickings for someone to code on.
 * Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
   -du' is the traditional approach."  Hal's straw man is a new program
   rather than trying to make ntpdig do this.  Eric's proposed answer:
-  ntpshark, a command interpreter written around the ntp Python module and
-  loosely modeled on wireshark.
+  ntpshark, a command interpreter written around the ntp Python module
+  (or scapy) and loosely modeled on wireshark.
+
+* Measure time from the clock reading to transmission for outbound
+  packets.  Use the distribution to correct for computation time
+  before transmission.
 
 * We might be able to eliminate a lot of the Linux runtime
   droproot code by using file capabilities.
