@@ -160,10 +160,11 @@ class VizStats(ntp.statfiles.NTPStats):
                 "90% Range", "98% Range", "StdDev", "", "Mean", "Units"]
 
     table_head = """\
-<table style="text-align:right;">
+<br>
+<table style="text-align:right;width:1024px;">
 <thead>
   <tr style="font-weight:bold;text-align:left;">
-    <td ></td>
+    <td style="width:300px;"></td>
     <td colspan=8> Percentiles......</td>
     <td colspan=3> Ranges......</td>
     <td colspan=2></td>
@@ -178,8 +179,9 @@ class VizStats(ntp.statfiles.NTPStats):
   </tr>
 </thead>
 """
-
-    stats_html = ''
+    table_tail = """\
+</table>
+"""
 
     def __init__(self, values, title, freq=0, units=''):
 
@@ -270,34 +272,6 @@ class VizStats(ntp.statfiles.NTPStats):
             self.percs["min_y"] = self.percs["p0"]
             self.percs["max_y"] = self.percs["p100"]
             self.percs["clipped"] = ""
-
-        self.stats_html = """\
-<br>
-%(title)s:<br>
-<table style="margin-left:20px;border-spacing: 10px 0;">
-  <tr style="text-align:left;font-weight:bold;">
-    <td colspan=8> Percentiles......</td>
-    <td colspan=3> Ranges......</td>
-    <td colspan=2></td>
-    <td ></td>
-  </tr>
-  <tr style="font-weight:bold;font-weight:bold;text-align:right;">
-    <td style="min-width:55px;">Min</td><td style="min-width:55px;">1%%</td>
-    <td style="min-width:55px;">5%%</td><td style="min-width:55px;">50%%</td>
-    <td style="min-width:55px;">95%%</td><td style="min-width:55px;">99%%</td>
-    <td style="min-width:55px;">Max</td><td>&nbsp;</td>
-    <td style="min-width:55px;">90%%</td><td style="min-width:55px;">98%%</td>
-    <td style="min-width:55px;">StdDev</td>
-    <td>&nbsp;</td><td style="min-width:55px;">Mean</td><td>Units</td>
-  </tr>
-  <tr style="text-align:right;">
-    <td>%(p0)s</td><td>%(p1)s</td><td>%(p5)s</td><td>%(p50)s</td>
-    <td>%(p95)s</td><td>%(p95)s</td><td>%(p100)s</td><td>&nbsp;</td>
-    <td>%(r90)s</td><td>%(r98)s</td><td>%(pstd)s</td><td>&nbsp;</td>
-    <td>%(mu)s</td><td>%(unit)s</td>
-  </tr>
-</table>
-""" % self.percs_f
 
         s = ["%(title)s", "%(p0)s", "%(p1)s", "%(p5)s", "%(p50)s", "%(p95)s",
              " %(p99)s", "%(p100)s", "", "%(r90)s", "%(r98)s", "%(pstd)s",
@@ -490,11 +464,11 @@ file.</p>
 
 """
 
-        ret = {}
-        ret['html'] = stats.stats_html + stats_f.stats_html + exp
-        ret['stats'] = [stats, stats_f]
-        ret['title'] = "Local Clock Time/Frequency Offsets"
-        ret['plot'] = plot_template + plot_data + plot_data
+        ret = {'html': VizStats.table_head + stats.table
+               + stats_f.table + VizStats.table_tail + exp,
+               'plot': plot_template + plot_data + plot_data,
+               'stats': [stats, stats_f],
+               'title': "Local Clock Time/Frequency Offsets"}
         return ret
 
     def local_freq_temps_plot(self):
@@ -518,7 +492,7 @@ file.</p>
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         stats = [stats_f]
-        stats_html = ''
+        table = ''
         plot_data_t = ''
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
@@ -526,7 +500,7 @@ file.</p>
             (p, v) = self.plot_slice(tempsmap[key], 3)
             plot_data_t += p
             s = VizStats(v, 'Temp %s' % key, units='°C')
-            stats_html += s.stats_html
+            table += s.table
             stats.append(s)
 
         # out = stats.percs
@@ -576,7 +550,8 @@ file, and field 3 from the temp log .</p>
 
 """
 
-        ret = {'html': stats_f.stats_html + stats_html + exp,
+        ret = {'html': VizStats.table_head + stats_f.table
+               + table + VizStats.table_tail + exp,
                'plot': plot_template + plot_data + plot_data_t,
                'stats': stats,
                'title': "Local Frequency/Temp"}
@@ -701,11 +676,11 @@ than 20.  1 denotes the highest possible confidence level.  2 to 5 is good.
 Greater than 20 means there will be significant inaccuracy and error.</p>
 """
 
-        ret = {}
-        ret['html'] = stats.stats_html + stats_tdop.stats_html + exp
-        ret['stats'] = [stats, stats_tdop]
-        ret['title'] = "Local GPS"
-        ret['plot'] = plot_template + plot_data + plot_data
+        ret = {'html': VizStats.table_head + stats.table
+               + stats_tdop.table + VizStats.table_tail + exp,
+               'stats': [stats, stats_tdop],
+               'title': "Local GPS",
+               'plot': plot_template + plot_data + plot_data}
         return ret
 
     def local_error_gnuplot(self):
@@ -758,9 +733,11 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 
 <p>The Frequency Offset comes from field 4 of the loopstats log file.</p>
 """
-        ret = {'html': stats.stats_html + exp, 'stats': [stats]}
-        ret['title'] = "Local Clock Frequency Offset"
-        ret['plot'] = plot_template + plot_data
+        ret = {'html': VizStats.table_head + stats.table
+               + VizStats.table_tail + exp,
+               'plot': plot_template + plot_data,
+               'stats': [stats],
+               'title': "Local Clock Frequency Offset"}
         return ret
 
     def loopstats_gnuplot(self, fld, title, legend, freq):
@@ -822,9 +799,11 @@ plot \
  %(p1)s title "1st percentile"
 """ % out
 
-        ret = {'html': stats.stats_html + exp, 'stats': [stats],
+        ret = {'html': VizStats.table_head + stats.table
+               + VizStats.table_tail + exp,
+               'plot': plot_template + plot_data,
+               'stats': [stats],
                'title': title}
-        ret['plot'] = plot_template + plot_data
         return ret
 
     def local_offset_jitter_gnuplot(self):
@@ -992,7 +971,7 @@ at 0s.</p>
         else:
             # skip stats on peers/offsets plots
             stats.skip_summary = True
-            stats.stats_html = ''
+            stats.table = ''
 
         out = stats.percs
         out['sitename'] = self.sitename
@@ -1032,10 +1011,17 @@ plot \
             # strip the trailing ", \n"
             plot_template = plot_template[:-4] + "\n"
 
-        ret = {'html': stats.stats_html + exp,
+        if len(peerlist) == 1:
+            # skip stats for multiplots
+            html = VizStats.table_head + stats.table \
+                + VizStats.table_tail + exp,
+        else:
+            html = exp
+
+        ret = {'html': html,
+               'plot': plot_template + plot_data,
                'stats': [stats],
-               'title': title,
-               'plot': plot_template + plot_data}
+               'title': title}
         return ret
 
     def peer_offsets_gnuplot(self, peerlist=None):
@@ -1138,9 +1124,11 @@ plot \
 <p>The Local Clock Offset is field 3 from the loopstats log file.</p>
 """
         # don't return stats, it's just a dupe
-        ret = {'html': stats.stats_html + exp, 'stats': []}
-        ret['title'] = "Local Clock Time Offset Histogram"
-        ret['plot'] = plot_template + "".join(histogram_data) + "e\n"
+        ret = {'html': VizStats.table_head + stats.table
+               + VizStats.table_tail + exp,
+               'plot': plot_template + "".join(histogram_data) + "e\n",
+               'stats': [],
+               'title': "Local Clock Time Offset Histogram"}
         return ret
 
 # Multiplotting can't live inside NTPViz because it consumes a list
@@ -1772,8 +1760,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 csvs.append(sta.csv)
         # RFC 4180 specifies the mime-type of a csv
         # your webserver should be programmed the same
+        index_buffer += VizStats.table_tail
         index_buffer += """\
-</table>
 <a href="summary.csv" target="_blank"
   type="text/csv;charset=UTF-8;header=present;">Summary as CSV file</a><br>
 </div>
