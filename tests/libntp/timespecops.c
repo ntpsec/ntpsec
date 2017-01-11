@@ -60,7 +60,7 @@ static struct timespec timespec_init(time_t hi, long lo)
 static bool AssertFpClose(const l_fp m, const l_fp n, const l_fp limit)
 {
 	int64_t diff = m - n;
-	if ((l_fp)labs(diff) <= limit)
+	if ((l_fp)llabs(diff) <= limit)
 		return true;
 	else {
 		printf("m_expr which is %s \nand\nn_expr which is %s\nare not close; diff=%susec\n", lfptoa(m, 10), lfptoa(n, 10), lfptoa(diff, 10));
