@@ -1559,6 +1559,13 @@ dd {
     margin-top: 4px;
     margin-bottom: 10px;
 }
+.section {
+    color: #000000;
+    text-decoration: none;
+    .site-title:visited {
+        color: #000000; }
+        text-decoration: none;
+}
 </style>
 </head>
 <body>
@@ -1736,7 +1743,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             id = image['title'].lower()
             id = id.replace(' ', '_').replace(':', '_')
             index_buffer += """\
-<div id="%s">\n<h2><a href="#%s">%s</a></h2>
+<div id="%s">\n<h2><a class="section" href="#%s">%s</a></h2>
 """ % (id, id, image['title'])
 
             div_name = imagename.replace('-', ' ')
@@ -1752,8 +1759,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     # dump stats
     csvs = []
     if True:
-        index_buffer += \
-            '<div id="Summary"><h2><a href="#Summary">Summary</a></h2>\n'
+        index_buffer += '<div id="Summary">\n' \
+            '<h2><a class="section" href="#Summary">Summary</a></h2>\n'
         index_buffer += VizStats.table_head
         for stat in stats:
             if [] == stat:
