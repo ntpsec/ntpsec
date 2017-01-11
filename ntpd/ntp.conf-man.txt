@@ -6,32 +6,4 @@ ntp.conf - Network Time Protocol (NTP) daemon configuration file format
 
 include::../docs/includes/ntp-conf-body.txt[]
 
-== FILES ==
-
-`/etc/ntp.conf`::
-  the default name of the configuration file
-_ntp.keys_::
-  private MD5 keys
-
-One of the following exit values will be returned:
-
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
-
-== SEE ALSO ==
-
-{ntpdman}, {ntpqman}.
-
-In addition to the manual pages provided, comprehensive documentation is
-available on the world wide web at {project-website}. A snapshot of
-this documentation is available in HTML format in `/usr/share/doc/ntp`.
-David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
-
-== BUGS ==
-
-The syntax checking is not picky; some combinations of ridiculous and
-even hilarious options and modes may not be detected.
-
 // end
