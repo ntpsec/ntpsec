@@ -324,7 +324,7 @@ rarely strays more than 128 ms even under extreme cases of network path
 congestion and jitter. Sometimes, in particular when +ntpd+ is first
 started without a valid drift file on a system with a large intrinsic
 drift the error might grow to exceed 128 ms, which would cause the clock
-to be set backwards if the local clock time is more than 128 s in the
+to be set backwards if the local clock time is more than 128 ms in the
 future relative to the server. In some applications, this behavior may
 be unacceptable. There are several solutions, however. If the +-x+
 option is included on the command line, the clock will never be stepped
