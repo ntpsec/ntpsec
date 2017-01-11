@@ -55,6 +55,13 @@ ntpviz: can't find the Python argparse module
     sys.exit(1)
 
 
+# table to translate refclock names
+refclock_name = {'127.127.28.0': 'SHM(0)',
+                 '127.127.28.1': 'SHM(1)',
+                 '127.127.28.2': 'SHM(2)',
+                 '127.127.28.3': 'SHM(3)'}
+
+
 # Gack, python before 3.2 has no defined tzinfo for utc...
 # define our own
 class UTC(datetime.tzinfo):
@@ -144,6 +151,8 @@ class VizStats(ntp.statfiles.NTPStats):
     percs = {}          # dictionary of percentages
     title = ''          # title
     unit = 's'          # display units: s, ppm, etc.
+    skip_summary = False
+    clipped = False
     multiplier = 1
 
     # observe RFC 4180, end lines with CRLF
@@ -927,41 +936,27 @@ at 0s.</p>
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
 
-            # grab and sort the values, no need for the timestamp, etc.
-            values = [float(line[fld]) for line in peerdict[ip]]
-
-            stats = VizStats(values, title)
-
             if len(namelist[0]) and peerlist[0] != namelist[0]:
                 # append hostname, if we have it
                 # after stats to keep summary short
                 title += " (%s)" % namelist[0]
 
-            percentages = " %(p50)s title '50th percentile', " % stats.percs
-
-            exp = stats.stats_html + exp
-
         else:
             # many peers
             title += "s"
-            # grab and sort the values, no need for the timestamp, etc.
-            values = [float(line[fld]) for line in self.peerstats]
 
-            stats = VizStats(values, title)
-
-            exp = stats.stats_html
             if "offset" == type:
                 title = "Peer Offsets"
-                exp += """\
-<p>This shows the offset of all refclocks, peers and servers in
-%(unit)s.  This can be useful to see if offset changes are happening in
+                exp = """\
+<p>This shows the offset of all refclocks, peers and servers.
+This can be useful to see if offset changes are happening in
 a single clock or all clocks together.</p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
-""" % stats.percs
+"""
             else:
                 title = "Peer Jitters"
-                exp += """\
+                exp = """\
 <p>This shows the RMS Jitter of all refclocks, peers and servers.
 Jitter is the current estimated dispersion; the variation in offset
 between samples.</p>
@@ -971,6 +966,10 @@ at 0s.</p>
 
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
+
+        if len(peerlist) == 1:
+            if peerlist[0] in refclock_name:
+                title += ' ' + refclock_name[peerlist[0]]
 
         plot_data = ""
         for ip in ip_todo:
@@ -984,6 +983,14 @@ at 0s.</p>
                 # fields: time, fld
                 (p, v1) = self.plot_slice(peerdict[ip], fld)
                 plot_data += p
+
+        stats = VizStats(v1, title)
+        if len(peerlist) == 1:
+            percentages = " %(p50)s title '50th percentile', " % stats.percs
+        else:
+            # skip stats on peers/offsets plots
+            stats.skip_summary = True
+            stats.stats_html = ''
 
         out = stats.percs
         out['sitename'] = self.sitename
@@ -1023,8 +1030,10 @@ plot \
             # strip the trailing ", \n"
             plot_template = plot_template[:-4] + "\n"
 
-        ret = {'html': exp, 'stats': [stats], 'title': title}
-        ret['plot'] = plot_template + plot_data
+        ret = {'html': stats.stats_html + exp,
+               'stats': [stats],
+               'title': title,
+               'plot': plot_template + plot_data}
         return ret
 
     def peer_offsets_gnuplot(self, peerlist=None):
@@ -1747,6 +1756,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             if [] == stat:
                 continue
             for sta in stat:
+                if sta.skip_summary:
+                    continue
                 index_buffer += str(sta.table)
                 csvs.append(sta.csv)
         # RFC 4180 specifies the mime-type of a csv
