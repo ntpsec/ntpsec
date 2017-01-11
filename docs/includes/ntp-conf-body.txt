@@ -6,7 +6,7 @@
 == SYNOPSIS ==
 /etc/ntp.conf
 
-[[desc]]
+[[descr]]
 == DESCRIPTION ==
 
 The `ntp.conf` configuration file is read at initial startup by the
@@ -77,6 +77,7 @@ include::../includes/assoc-auxcommands.txt[]
 
 include::../includes/auth-commands.txt[]
 
+[[monit]]
 == Monitoring Support ==
 
 {ntpdman} includes a comprehensive monitoring facility suitable
@@ -220,4 +221,34 @@ include::../includes/clock-options.txt[]
 == Miscellaneous Options ==
 
 include::../includes/misc-options.txt[]
+
+[[files]]
+== FILES ==
+
+`/etc/ntp.conf`::
+  the default name of the configuration file
+_ntp.keys_::
+  private MD5 keys
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+== SEE ALSO ==
+
+{ntpdman}, {ntpqman}.
+
+In addition to the manual pages provided, comprehensive documentation is
+available on the world wide web at {project-website}. A snapshot of
+this documentation is available in HTML format in `/usr/share/doc/ntp`.
+David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
+
+[[bugs]]
+== BUGS ==
+
+The syntax checking is not picky; some combinations of ridiculous and
+even hilarious options and modes may not be detected.
 

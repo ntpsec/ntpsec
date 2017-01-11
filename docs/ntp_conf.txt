@@ -13,6 +13,7 @@ Racoon is shooting configuration bugs.
 
 * link:#synop[Synopsis]
 * link:#descr[Description]
+* link:#monit[Monitoring Support]
 * link:#files[Files]
 * link:#bugs[Bugs]
 
