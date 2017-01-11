@@ -88,7 +88,9 @@ if __name__ == '__main__':
             print("usage: ntpkeygen [-M]")
             raise SystemExit(0)
 
-    randomizer = random.SystemRandom(time.time() + os.getpid())
+    # The seed is ignored per
+    # https://docs.python.org/library/random.html#alternative-generator
+    randomizer = random.SystemRandom()
     gen_md5("md5", socket.gethostname())
     raise SystemExit(0)
 

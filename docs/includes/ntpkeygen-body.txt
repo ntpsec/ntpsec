@@ -88,9 +88,10 @@ predictable. Various means dependent on external events, such as
 keystroke intervals, can be used to do this and some systems have
 built-in entropy sources.
 
-This implementation uses Python's PRNG, seeded with a combination
-of the system time and the current process ID.  The core of this
-is based on the Mersenne Twister, with a period of 2^19937^-1.
+This implementation uses Python's PRNG.  The core of this is based on the
+Mersenne Twister, with a period of 2^19937^-1.  The security of the PRNG
+initialization is improved in
+https://docs.python.org/library/os.html#os.urandom[Python 3.5+].
 
 [[crypto]]
 == Cryptographic Data Files ==
