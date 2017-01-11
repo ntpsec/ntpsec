@@ -525,7 +525,7 @@ file.</p>
             # fields: time, temp
             (p, v) = self.plot_slice(tempsmap[key], 3)
             plot_data_t += p
-            s = VizStats(v, key, units='°C')
+            s = VizStats(v, 'Temp %s' % key, units='°C')
             stats_html += s.stats_html
             stats.append(s)
 
@@ -1736,8 +1736,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             id = image['title'].lower()
             id = id.replace(' ', '_').replace(':', '_')
             index_buffer += """\
-<div>\n<h2 id="%s">%s:</h2>
-""" % (id, image['title'])
+<div id="%s">\n<h2><a href="#%s">%s</a></h2>
+""" % (id, id, image['title'])
 
             div_name = imagename.replace('-', ' ')
             index_buffer += imagewrapper % \
@@ -1752,7 +1752,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     # dump stats
     csvs = []
     if True:
-        index_buffer += '<div id="Summary"><h2>Summary</h2>\n'
+        index_buffer += \
+            '<div id="Summary"><h2><a href="#Summary">Summary</a></h2>\n'
         index_buffer += VizStats.table_head
         for stat in stats:
             if [] == stat:
