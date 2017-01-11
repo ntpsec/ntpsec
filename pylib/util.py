@@ -625,8 +625,7 @@ class IfstatsSummary:
         return s
 
 try:
-    import collections
-    OrderedDict = collections.OrderedDict
+    from collections import OrderedDict
 except ImportError:
     class OrderedDict(dict):
         "A stupid simple implementation in order to be back-portable to 2.6"

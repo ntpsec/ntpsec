@@ -38,7 +38,6 @@ def options(ctx):
 
 
 def configure(ctx):
-        from wafhelpers.configure import cmd_configure
         cmd_configure(ctx, config)
         ctx.recurse("pylib")
 

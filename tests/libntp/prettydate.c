@@ -13,7 +13,7 @@ TEST_TEAR_DOWN(prettydate) {}
 
 #include "ntp_fp.h"
 
-static const u_int32_t HALF = 2147483648UL;
+static const uint32_t HALF = 2147483648UL;
 
 TEST(prettydate, ConstantDate) {
     l_fp time = lfpinit(3485080800UL, HALF); // 2010-06-09 14:00:00.5
