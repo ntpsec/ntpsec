@@ -273,6 +273,7 @@ class VizStats(ntp.statfiles.NTPStats):
 
         self.stats_html = """\
 <br>
+%(title)s:<br>
 <table style="margin-left:20px;border-spacing: 10px 0;">
   <tr style="text-align:left;font-weight:bold;">
     <td colspan=8> Percentiles......</td>
@@ -516,20 +517,24 @@ file.</p>
         # compute frequency offset
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
-        stats = []
+        stats = [stats_f]
+        stats_html = ''
         plot_data_t = ''
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
             # fields: time, temp
             (p, v) = self.plot_slice(tempsmap[key], 3)
             plot_data_t += p
+            s = VizStats(v, key, units='°C')
+            stats_html += s.stats_html
+            stats.append(s)
 
         # out = stats.percs
         out = {}
         out["min_y2"] = stats_f.percs["min_y"]
         out["max_y2"] = stats_f.percs["max_y"]
         out["unit_f"] = stats_f.percs["unit"]
-        out["unit"] = 'C'
+        out["unit"] = '°C'
         out["multiplier_f"] = stats_f.percs["multiplier"]
         out["sitename"] = self.sitename
         out['size'] = args.png_size
@@ -571,13 +576,10 @@ file, and field 3 from the temp log .</p>
 
 """
 
-        ret = {}
-        # ret['html'] = stats.stats_html + stats_f.stats_html + exp
-        ret['html'] = stats_f.stats_html + exp
-        ret['stats'] = [stats, stats_f]
-        ret['stats'] = [stats_f]
-        ret['title'] = "Local Frequency/Temp"
-        ret['plot'] = plot_template + plot_data + plot_data_t
+        ret = {'html': stats_f.stats_html + stats_html + exp,
+               'plot': plot_template + plot_data + plot_data_t,
+               'stats': stats,
+               'title': "Local Frequency/Temp"}
         return ret
 
     def local_temps_gnuplot(self):
