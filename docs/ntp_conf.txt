@@ -1,4 +1,4 @@
-= Configuration File Definition (Advanced) =
+= ntpd Configuration File
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
