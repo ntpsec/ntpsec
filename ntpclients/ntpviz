@@ -349,9 +349,8 @@ set grid
 set autoscale xfixmin
 set autoscale xfixmax
 set xdata time
-set xtic rotate by -35 scale 0
-set xlabel "Time (DDMM hh:mm UTC)"
-set format x "%d%b %H:%M"
+set xlabel "Time UTC"
+set xtics format "%d %b\\n%H:%MZ"
 set timefmt "%s"
 set lmargin 10
 set rmargin 10
@@ -443,7 +442,7 @@ set ytics format "%%1.1f %(unit)s" nomirror textcolor rgb '#0060ad'
 set yrange [%(min_y)s:%(max_y)s]
 set y2tics format "%%2.1f %(unit_f)s" nomirror textcolor rgb '#dd181f'
 set y2range [%(min_y2)s:%(max_y2)s]
-set key bottom right box
+set key top right
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
@@ -526,7 +525,7 @@ set title "%(sitename)s: Local Frequency Offset/Temps%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror textcolor rgb '#0060ad'
 set y2tics format "%%2.1f %(unit_f)s" nomirror textcolor rgb '#dd181f'
 set y2range [%(min_y2)s:%(max_y2)s]
-set key bottom right box
+set key top right
 set style line 1 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
  "-" using 1:($2*%(multiplier_f)s) title "frequency offset %(unit_f)s" \
@@ -583,9 +582,10 @@ file, and field 3 from the temp log .</p>
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
-set title "%(sitename)s: Local Temparatures"
+set title "%(sitename)s: Local Temperatures"
 set ytics format "%%1.1f °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
+set key top right
 plot \\
 """ % out
 
@@ -656,6 +656,7 @@ set yrange [%(min_y)s:%(max_y)s]
 set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
+set key top right
 plot \\
 """ % out
 
@@ -710,7 +711,7 @@ set terminal png size %(size)s
 set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
-set key bottom right box
+set key bottom right
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
@@ -789,7 +790,7 @@ set terminal png size %(size)s
 set title "%(sitename)s: %(title)s%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
-set key top right box
+set key top right
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
@@ -980,7 +981,7 @@ at 0s.</p>
         out['size'] = args.png_size
 
         if 6 >= len(peerlist):
-            out['set_key'] = "set key top right box"
+            out['set_key'] = "set key top right"
         else:
             # too many keys to show
             out['set_key'] = "set key off"
@@ -1092,7 +1093,6 @@ set terminal png size %(size)s
 set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set grid
 set boxwidth %(boxwidth)s
-set xtic rotate by -35 scale 0
 set xtics format "%%1.1f %(unit)s" nomirror
 set xrange [%(min_x)s:%(max_x)s]
 set yrange [0:*]
