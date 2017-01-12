@@ -1747,18 +1747,25 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     # dump stats
     csvs = []
     if True:
-        index_buffer += '<div id="Summary">\n' \
-            '<h2><a class="section" href="#Summary">Summary</a></h2>\n'
-        index_buffer += VizStats.table_head
+        stats_to_output = {}
         for stat in stats:
             if [] == stat:
                 continue
             for sta in stat:
                 if sta.skip_summary:
                     continue
-                index_buffer += str(sta.table)
-                csvs.append(sta.csv)
-        # RFC 4180 specifies the mime-type of a csv
+                # This removes duplicates
+                stats_to_output[sta.title] = sta
+
+        index_buffer += '<div id="Summary">\n' \
+            '<h2><a class="section" href="#Summary">Summary</a></h2>\n'
+        index_buffer += VizStats.table_head
+
+        for key in sorted(stats_to_output.keys()):
+            index_buffer += str(stats_to_output[key].table)
+            csvs.append(stats_to_output[key].csv)
+
+        # RFC 4180 specifies the mime-type of a csv: text/csv
         # your webserver should be programmed the same
         index_buffer += VizStats.table_tail
         index_buffer += """\
