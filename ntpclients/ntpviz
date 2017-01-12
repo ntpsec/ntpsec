@@ -23,6 +23,7 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
           --peer-offsets=hosts |
          ]
          [-D DLVL | --debug DLVL]
+         [-N | --nice]
          [-V | --version]
          [@OPTIONFILE]
 
@@ -1342,11 +1343,27 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         dest='debug_level',
                         help="debug level, 0 (none) to 9 (most)",
                         type=int)
+    # some OS do not support os.nice()
+    try:
+        os.nice(0)
+        parser.add_argument('-N','--nice',
+                           action="store_true",
+                           dest='nice',
+                           help="Run as lowest priority")
+    except:
+        pass
+
     parser.add_argument('-V', '--version',
                         action="version",
                         version="ntpviz %s" % ntp.util.stdversion())
 
     args = parser.parse_args()
+
+    if args.nice:
+        # run at lowest possible priority
+        nice = os.nice(19)
+        if args.debug_level:
+            sys.stderr.write("ntpviz: INFO: Now running at nice %s\n" % nice)
 
     if 's' == args.width:
         # fit in 1024x768 browser

@@ -24,6 +24,7 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
           --peer-jitters=hosts |
           --peer-offsets=hosts]
          [-D DLVL | --debug DLVL]
+         [-N | --nice]
          [-V | --version]
          [@OPTIONFILE]
 
@@ -89,6 +90,9 @@ subset of comparative plots for multiple directories.
     1 shows some environment info and basic program progress. +
     2 leaves the plot file in the system temp directory. +
     9 is painfully verbose. 9 also includes profile data.
+
+-N or --nice::
+    Run at the lowest possible priority.  Only available on UNIX.
 
 -V or --version:
     Print program version and exit.
