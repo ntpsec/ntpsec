@@ -1,430 +1,315 @@
-#!/bin/bash
+#!/usr/bin/env python
+"""\
+ntpleapfetch - leap-seconds file manager/updater
 
-# Copyright (C) 2014 Timothe Litt litt at acm dot org
-#
-# SPDX-License-Identifier: BSD-2-clause
-#
-# Bugfixes and improvements would be appreciated by the author.
+Usage: ntpleapfetch [-46] [-c command] [-e expiry] [-f config] [-F]
+                    [-h|--help] [-i interval] [-l] [-L] [-p 4|6]
+                    [-P log_facilityility] [-q] [-r retries] [-s source-url]
+                    [-t tmpfile] [-v] [-z path] [-Z] [localfile]
 
-VERSION="1.003"
+See the manual page for details.
+"""
+# SPDX-License-Identifier: BSD-2-Clause
+# This code runs identically under Python 2 and Python 3. Keep it that way!
+# Python translation of a bash script written by Timothe Litt (litt at acm dot
+# org)
 
-# leap-seconds file manager/updater
+# The follow getopt flags are legacy will generate a warning to stderr, if
+# used:
+# -4, -6, -c, -l, -L, -p, -P, -t, -z, -Z
 
-# Depends on:
-#  wget sed, tr, shasum, logger
+# Finally, logging to syslog by default was a design error, violating
+# Unix principles; that has been fixed. To get this behavior when
+# running in a script, redirect standard error to logger(1).
 
-# ########## Default configuration ##########
-#
+from __future__ import absolute_import, division, print_function
+
+import getopt
+import hashlib
+import os
+import os.path
+import sys
+import tempfile
+import time
+
+try:
+    from urllib.request import urlopen, URLError
+except ImportError:
+    from urllib2 import urlopen, URLError
+try:
+    import selinux
+    HAS_SELINUX = selinux.is_selinux_enabled()
+except ImportError:
+    HAS_SELINUX = False
+
+try:
+    options, arguments = getopt.getopt(sys.argv[1:],
+                                       "46c:e:f:Fhi:lLp:P:qr:s:t:vz:Z",
+                                       ["help"])
+except getopt.GetoptError as e:
+    sys.stderr.write("%s\n" % e)
+    raise SystemExit(1)
+
 # Where to get the file
-LEAPSRC="ftp://time.nist.gov/pub/leap-seconds.list"
+leapsrc = "https://hpiers.obspm.fr/iers/bul/bulc/ntp/leap-seconds.list"
+# Alternatives: ftp://time.nist.gov/pub/leap-seconds.list,
+#             https://www.ietf.org/timezones/data/leap-seconds.list
 
 # How many times to try to download new file
-MAXTRIES=6
-INTERVAL=10
+maxtries = 6
+interval = 10
 
 # Where to find ntp config file
-NTPCONF=/etc/ntp.conf
-
-# How long before expiration to get updated file
-PREFETCH="60 days"
-
-# How to restart NTP - older NTP: service ntpd? try-restart | condrestart
-# Recent NTP checks for new file daily, so there's nothing to do
-RESTART=
-
-# Where to put temporary copy before it's validated
-TMPFILE="/tmp/leap-seconds.$$.tmp"
-
-# Syslog facility
-LOGFAC=daemon
-# ###########################################
-
-# Places to look for commands.  Allows for CRON having path to
-# old utilities on embedded systems
-
-PATHLIST="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:"
-
-REQUIREDCMDS=" wget logger tr sed shasum"
-
-SELF="`basename $0`"
-
-function displayHelp {
-            cat <<EOF
-Usage: $SELF [options] [leapfile]
-
-Verifies and if necessary, updates leap-second definition file
-
-All arguments are optional:  Default (or current value) shown:
-    -s    Specify the URL of the master copy to download
-          $LEAPSRC
-    -4    Use only IPv4
-    -6    Use only IPv6
-    -p 4|6
-          Prefer IPv4 or IPv6 (as specified) addresses, but use either
-    -d    Specify the filename on the local system
-    -e    Specify how long before expiration the file is to be refreshed
-          Units are required, e.g. "-e 60 days"  Note that larger values
-          imply more frequent refreshes.
-          "$PREFETCH"
-    -f    Specify location of ntp.conf (used to make sure leapfile directive is
-          present and to default  leapfile)
-          $NTPCONF
-    -F    Force update even if current file is OK and not close to expiring.
-    -c    Command to restart NTP after installing a new file
-          <none> - ntpd checks file daily
-    -r    Specify number of times to retry on get failure
-          $MAXTRIES
-    -i    Specify number of minutes between retries
-          $INTERVAL
-    -l    Use syslog for output (Implied if CRONJOB is set)
-    -L    Don't use syslog for output
-    -P    Specify the syslog facility for logging
-          $LOGFAC
-    -t    Name of temporary file used in validation
-    -q    Only report errors to stdout
-    -v    Verbose output
-    -z    Specify path for utilities
-          $PATHLIST
-    -Z    Only use system path
-
-$SELF will validate the file currently on the local system
-
-Ordinarily, the file is found using the "leapfile" directive in $NTPCONF.
-However, an alternate location can be specified on the command line.
-
-If the file does not exist, is not valid, has expired, or is expiring soon,
-a new copy will be downloaded.  If the new copy validates, it is installed and
-NTP is (optionally) restarted.
-
-If the current file is acceptable, no download or restart occurs.
-
--c can also be used to invoke another script to perform administrative
-functions, e.g. to copy the file to other local systems.
-
-This can be run as a cron job.  As the file is rarely updated, and leap
-seconds are announced at least one month in advance (usually longer), it
-need not be run more frequently than about once every three weeks.
-
-For cron-friendly behavior, define CRONJOB=1 in the crontab.
-
-This script depends on:$REQUIREDCMDS
-
-Version $VERSION
-EOF
-   return 0
-}
-
-# Default: Use syslog for logging if running under cron
-
-SYSLOG="$CRONJOB"
-
-if [ "$1" = "--help" ]; then
-    displayHelp
-    exit 0
-fi
-
-# Parse options
-
-while getopts 46p:P:s:e:f:Fc:r:i:lLt:hqvz:Z opt; do
-    case $opt in
-        4)
-            PROTO="-4"
-            ;;
-        6)
-            PROTO="-6"
-            ;;
-        p)
-            if [ "$OPTARG" = '4' -o "$OPTARG" = '6' ]; then
-                PREFER="--prefer-family=IPv$OPTARG"
-            else
-                echo "Invalid -p $OPTARG" >&2
-                exit 1;
-            fi
-            ;;
-	P)
-	    LOGFAC="$OPTARG"
-	    ;;
-        s)
-            LEAPSRC="$OPTARG"
-            ;;
-        e)
-            PREFETCH="$OPTARG"
-            ;;
-	f)
-	    NTPCONF="$OPTARG"
-	    ;;
-        F)
-            FORCE="Y"
-            ;;
-        c)
-            RESTART="$OPTARG"
-            ;;
-        r)
-            MAXTRIES="$OPTARG"
-            ;;
-        i)
-            INTERVAL="$OPTARG"
-            ;;
-        t)
-            TMPFILE="$OPTARG"
-            ;;
-	l)
-	    SYSLOG="y"
-	    ;;
-	L)
-	    SYSLOG=
-	    ;;
-        h)
-            displayHelp
-            exit 0
-            ;;
-	q)
-	    QUIET="Y"
-	    ;;
-        v)
-            VERBOSE="Y"
-            ;;
-	z)
-	    PATHLIST="$OPTARG:"
-	    ;;
-	Z)
-	    PATHLIST=
-	    ;;
-        *)
-            echo "$SELF -h for usage" >&2
-            exit 1
-            ;;
-    esac
-done
-shift $((OPTIND-1))
-
-export PATH="$PATHLIST$PATH"
-
-# Add to path to deal with embedded systems
-#
-for P in $REQUIREDCMDS ; do
-    if >/dev/null 2>&1 which "$P" ; then
-	continue
-    fi
-    [ "$P" = "logger" ] && continue
-    echo "FATAL: missing $P command, please install"
-    exit 1
-done
-
-# Handle logging
-
-if ! LOGGER="`2>/dev/null which logger`" ; then
-    LOGGER=
-fi
-
-function log {
-    # "priority" "message"
-    #
-    # Stdout unless syslog specified or logger isn't available
-    #
-    if [ -z "$SYSLOG" -o -z "$LOGGER" ]; then
-	if [ -n "$QUIET" -a \( "$1" = "info" -o "$1" = "notice" -o "$1" = "debug" \) ]; then
-	    return 0
-	fi
-	echo "`echo \"$1\" | tr a-z A-Z`: $2"
-	return 0
-    fi
-
-    # Also log to stdout if cron job && notice or higher
-    local S
-    if [ -n "$CRONJOB" -a \( "$1" != "info" \) -a \( "$1" != "debug" \) ] || [ -n "$VERBOSE" ]; then
-	S="-s"
-    fi
-    $LOGGER $S -t "$SELF[$$]" -p "$LOGFAC.$1" "$2"
-}
-
-# Verify interval
-INTERVAL=$(( $INTERVAL *1 ))
-
-# Validate a leap-seconds file checksum
-#
-# File format: (full description in files)
-# # marks comments, except:
-# #$ number : the NTP date of the last update
-# #@ number : the NTP date that the file expires
-# Date (seconds since 1900) leaps : leaps is the # of seconds to add for times >= Date
-# Date lines have comments.
-# #h hex hex hex hex hex is the SHA-1 checksum of the data & dates, excluding whitespace w/o leading zeroes
-
-function verifySHA {
-
-    if [ ! -f "$1" ]; then
-        return 1
-    fi
-
-    # Remove comments, except those that are markers for last update, expires and hash
-
-    local RAW="`sed $1 -e'/^\\([0-9]\\|#[\$@h]\)/!d' -e'/^#[\$@h]/!s/#.*\$//g'`"
-
-    # Extract just the data, removing all whitespace
-
-    local DATA="`echo \"$RAW\" | sed -e'/^#h/d' -e's/^#[\$@]//g' | tr -d '[:space:]'`"
-
-    # Compute the SHA hash of the data, removing the marker and filename
-    # Computed in binary mode, which shouldn't matter since whitespace has been removed
-    # shasum comes in several flavors; a portable one is available in Perl (with Digest::SHA)
-
-    local DSHA="`echo -n \"$DATA\" | shasum | sed -e's/[? *].*$//'`"
-
-    # Extract the file's hash. Restore any leading zeroes in hash segments.
-
-    # The sed [] includes a tab (\t) and space; #h is followed by a tab and space
-    local FSHA="`echo \"$RAW\" | sed -e'/^#h/!d' -e's/^#h//' -e's/[ 	] */ 0x/g'`"
-    FSHA=`printf '%08x%08x%08x%08x%08x' $FSHA`
-
-    if [ -n "$FSHA" -a \( "$FSHA" = "$DSHA" \) ]; then
-        if [ -n "$2" ]; then
-            log "info" "Checksum of $1 validated"
-        fi
-    else
-        log "error" "Checksum of $1 is invalid:"
-	[ -z "$FSHA" ] && FSHA="(no checksum record found in file)"
-        log "error" "EXPECTED: $FSHA"
-        log "error" "COMPUTED: $DSHA"
-        return 1
-    fi
-
-    # Check the expiration date, converting NTP epoch to Unix epoch used by date
-
-    EXPIRES="`echo \"$RAW\" | sed -e'/^#@/!d' -e's/^#@//' | tr -d '[:space:]'`"
-    EXPIRES="$(($EXPIRES - 2208988800 ))"
-
-    if [ $EXPIRES -lt `date -u +%s` ]; then
-        log "notice" "File expired on `date -u -d \"Jan 1, 1970 00:00:00 +0000 + $EXPIRES seconds\"`"
-        return 2
-    fi
-
-}
-
-# Verify ntp.conf
-
-if ! [ -f "$NTPCONF" ]; then
-    log "critical" "Missing ntp configuration $NTPCONF"
-    exit 1
-fi
-
-# Parse ntp.conf for leapfile directive
-
-LEAPFILE="`sed $NTPCONF -e'/^ *leapfile  *.*$/!d' -e's/^ *leapfile  *//'`"
-if [ -z "$LEAPFILE" ]; then
-    log "error" "$NTPCONF does not specify a leapfile"
-fi
-
-# Allow placing the file someplace else - testing
-
-if [ -n "$1" ]; then
-    if [ "$1" != "$LEAPFILE" ]; then
-	log "notice" "Requested install to $1, but $NTPCONF specifies $LEAPFILE"
-    fi
-    LEAPFILE="$1"
-fi
-
-# Verify the current file
-# If it is missing, doesn't validate or expired
-# Or is expiring soon
-#  Download a new one
-
-if [ -n "$FORCE" ] || ! verifySHA $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date -d "NOW + $PREFETCH" +%s` ] ; then
-    TRY=0
-    while true; do
-        TRY=$(( $TRY + 1 ))
-        if [ -n "$VERBOSE" ]; then
-            log "info" "Attempting download from $LEAPSRC, try $TRY.."
-        fi
-        if wget $PROTO $PREFER -o ${TMPFILE}.log $LEAPSRC -O $TMPFILE ; then
-            log "info" "Download of $LEAPSRC succeeded"
-            if [ -n "$VERBOSE" ]; then
-                cat ${TMPFILE}.log
-            fi
-
-            if ! verifySHA $TMPFILE "$VERBOSE" ; then
-		# There is no point in retrying, as the file on the server is almost
-		# certainly corrupt.
-
-                log "warning" "Downloaded file $TMPFILE rejected -- saved for diagnosis"
-                cat ${TMPFILE}.log
-                rm -f ${TMPFILE}.log
-                exit 1
-            fi
-            rm -f ${TMPFILE}.log
-
-	    # Set correct permissions on temporary file
-
-	    REFFILE="$LEAPFILE"
-            if [ ! -f $LEAPFILE ]; then
-		log "notice" "$LEAPFILE was missing, creating new copy - check permissions"
-                touch $LEAPFILE
-		# Can't copy permissions from old file, copy from NTPCONF instead
-		REFFILE="$NTPCONF"
-            fi
-            chmod --reference $REFFILE $TMPFILE
-            chown --reference $REFFILE $TMPFILE
-	    ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1
-            if  [ $? == 0 ] ; then
-                chcon --reference $REFFILE $TMPFILE
-            fi
-
-	    # Replace current file with validated new one
-
-            if mv -f $TMPFILE $LEAPFILE ; then
-                log "notice" "Installed new $LEAPFILE from $LEAPSRC"
-            else
-                log "error" "Install $TMPFILE => $LEAPFILE failed -- saved for diagnosis"
-                exit 1
-            fi
-
-	    # Restart NTP (or whatever else is specified)
-
-	    if [ -n "$RESTART" ]; then
-		if [ -n "$VERBOSE" ]; then
-		    log "info" "Attempting restart action: $RESTART"
-		fi
-		R="$( 2>&1 $RESTART )"
-		if [ $? -eq 0 ]; then
-		    log "notice" "Restart action succeeded"
-		    if [ -n "$VERBOSE" -a -n "$R" ]; then
-			log "info" "$R"
-		    fi
-		else
-		    log "error" "Restart action failed"
-		    if [ -n "$R" ]; then
-			log "error" "$R"
-		    fi
-		    exit 2
-		fi
-	    fi
-            exit 0
-	fi
-
-	# Failed to download.  See about trying again
-
-        rm -f $TMPFILE
-        if [ $TRY -ge $MAXTRIES ]; then
-            break;
-        fi
-        if [ -n "$VERBOSE" ]; then
-            cat ${TMPFILE}.log
-            log "info" "Waiting $INTERVAL minutes before retrying..."
-        fi
-        sleep $(( $INTERVAL * 60))
-    done
+ntpconf = "/etc/ntp.conf"
+
+# How long before expiration to get updated file (in days)
+prefetch = 60
+
+# Where to put temporary copy before it's moved into place
+tmpfile = tempfile.NamedTemporaryFile(delete=False)
+
+cronjob = os.getenv("CRONJOB", False)
+if cronjob == "1":
+    sys.stderr.write("WARNING: environment variable CRONJOB is ignored\n")
+
+# Quiet mode
+quiet = False
+
+# Path to leapfile, determine from ntp.conf if possible
+leapfile = None
+
+# Force updates no matter what
+force = False
+
+# Verbose output
+verbose = False
+
+for (switch, val) in options:
+    try:
+        if switch in ["-4", "-6", "-c", "-l", "-L", "-p", "-P", "-t", "-z",
+                      "-Z"]:
+            sys.stderr.write("legacy flag %s is ignored\n" % switch)
+        elif switch == "-e":
+            prefetch = int(val)
+        elif switch == "-f":
+            ntpconf = val
+        elif switch == "-F":
+            force = True
+        elif switch == "-i":
+            interval = int(val)
+        elif switch == "-q":
+            quiet = True
+        elif switch == "-r":
+            maxtries = int(val)
+        elif switch == "-s":
+            leapsrc = val
+        elif switch == "-v":
+            verbose = True
+        elif switch == "-h" or switch == "--help":
+            print(__doc__, file=sys.stderr)
+            raise SystemExit(0)
+    except ValueError:
+        sys.stderr.write("Invalid argument.\n")
+        sys.stderr.write(__doc__)
+        raise SystemExit(1)
+
+if len(arguments):
+    leapfile = arguments[0]
+
+
+def verify_leapfile(filename, expiration_prefetch):
+    """
+    Validate a leap-seconds file checksum
+
+    File format: (full description in files)
+    # marks comments, except:
+    #$ number : the NTP date of the last update
+    #@ number : the NTP date that the file expires
+    Date (seconds since 1900) leaps : leaps is the # of seconds to add for
+      times >= Date
+    Date lines have comments.
+    #h hex hex hex hex hex is the SHA-1 checksum of the data & dates, excluding
+      whitespace w/o leading zeroes
+    """
+    data = ''
+    lastupdate = None
+    expiration = None
+    filehash = None
+
+    try:
+        for line in open(filename):
+            if '#$' in line:
+                lastupdate = line.partition('#$')[2].strip()
+                data += lastupdate
+            elif '#@' in line:
+                expiration = line.partition('#@')[2].strip()
+                data += expiration
+            elif '#h' in line:
+                filehash = line.partition('#h')[2].strip().replace(' ', '')
+            else:
+                data += line.partition('#')[0]
+    except IOError as e:
+        sys.stderr.write("Unable to open %s: %s\n" % (filename, e))
+        return False
+
+    data = data.replace(' ', '').replace('\t', '')
+
+    datahash = hashlib.sha1(data).hexdigest()
+
+    if filehash == datahash:
+        if verbose:
+            sys.stderr.write("Checksum of %s validated\n" % filename)
+    else:
+        sys.stderr.write("Checksum of %s is invalid\n" % filename)
+        if not filehash:
+            filehash = "(no checksum record found in file)"
+        sys.stderr.write("EXPECTED: %s\n" % filehash)
+        sys.stderr.write("COMPUTED: %s\n" % datahash)
+        return False
+
+    # Convert from NTP epoch to Unix epoch (70 year offset)
+    expiration = int(expiration) - 2208988800
+    # Convert days to seconds
+    expiration_prefetch *= 86400
+    # Check expiration date
+    if expiration < time.mktime(time.gmtime()):
+        sys.stderr.write("File expired on %s\n" %
+                         time.strftime("%a, %d %b %Y %H:%M:%S +0000",
+                                       time.gmtime(expiration)))
+        return False
+    elif expiration < time.mktime(time.gmtime()) + expiration_prefetch:
+        sys.stderr.write("File will expire on %s\n" %
+                         time.strftime("%a, %d %b %Y %H:%M:%S +0000",
+                                       time.gmtime(expiration)))
+        return False
+
+    return True
+
+if __name__ == '__main__':
+    # Parse ntp.conf for leapfile directive
+    ntpleapfile = None
+    try:
+        for line in open(ntpconf):
+            if 'leapfile' in line:
+                ntpleapfile = line.partition('leapfile')[2].strip()
+    except IOError as e:
+        sys.stderr.write("Unable to open ntp configuration file %s: %s\n" %
+                         (ntpconf, e))
+        raise SystemExit(1)
+
+    if not ntpleapfile:
+        sys.stderr.write("%s does not specify a leapfile\n" % ntpconf)
+
+    # Allow placing the file someplace else - testing
+    if leapfile:
+        if leapfile != ntpleapfile:
+            sys.stderr.write("Requested install to %s, but %s specifies %s\n" %
+                             (leapfile, ntpconf, ntpleapfile))
+        ntpleapfile = leapfile
+    else:
+        if ntpleapfile:
+            leapfile = ntpleapfile
+        else:
+            sys.stderr.write("No leapfile target location specified\n")
+            raise SystemExit(1)
+
+    # Verify the current file
+    # If it validates and is not expired/is not expiring soon, exit
+    # Otherwise, download a new one
+    if not force and os.path.exists(ntpleapfile) and verify_leapfile(ntpleapfile, prefetch):
+        if not quiet:
+            sys.stderr.write("Not time to replace %s\n" % ntpleapfile)
+        raise SystemExit(0)
+
+    iteration = 0
+    while True:
+        iteration += 1
+        if verbose:
+            sys.stderr.write("Attempting download from %s, try %d..\n" %
+                             (leapsrc, iteration))
+
+        try:
+            urldata = urlopen(leapsrc)
+        except URLError as e:
+            if iteration > maxtries:
+                break
+            if verbose:
+                if hasattr(e, 'reason'):
+                    sys.stderr.write("Download failed: %s\n" % e.reason)
+                elif hasattr(e, 'code'):
+                    sys.stderr.write("Download failed: error code %s\n" %
+                                     e.code)
+                if not quiet:
+                    sys.stderr.write("Waiting %d minutes before retrying...\n" %
+                                     interval)
+            time.sleep(interval * 60)
+
+        if not quiet:
+            sys.stderr.write("Download of %s succeeded\n" % leapsrc)
+
+        tmpfile.write(urldata.read())
+        tmpfile.close()
+        if not verify_leapfile(tmpfile.name, prefetch):
+            # There is no point in retrying, as the file on the server is
+            # almost certainly corrupt.
+            sys.stderr.write("Downloaded file %s rejected -- saved for diagnosis\n" %
+                             tmpfile.name)
+            raise SystemExit(1)
+
+        # Set correct permissions on temporary file
+        reference_file = ntpleapfile
+        if not os.path.exists(ntpleapfile):
+            if not quiet:
+                sys.stderr.write("%s was missing, creating new copy - check permissions\n" %
+                                 leapfile)
+            open(leapfile, 'w').close()
+            # Can't copy permissions from old file, copy from ntpconf instead
+            reference_file = ntpconf
+        statinfo = os.stat(reference_file)
+        try:
+            os.chmod(tmpfile.name, statinfo.st_mode)
+        except OSError as e:
+            sys.stderr.write("chmod of %s failed: %s\n" %
+                             (tmpfile.name, e.strerror))
+            raise SystemExit(1)
+        try:
+            os.chown(tmpfile.name, statinfo.st_uid, statinfo.st_gid)
+        except OSError as e:
+            sys.stderr.write("chown of %s failed: %s\n" %
+                             (tmpfile.name, e.strerror))
+            raise SystemExit(1)
+        if HAS_SELINUX:
+            try:
+                status, context = selinux.getfilecon(reference_file)
+            except OSError as e:
+                sys.stderr.write("Unable to get SELINUX context for %s: %s" %
+                                 (reference_file, e.strerror))
+                raise SystemExit(1)
+            try:
+                selinux.setfilecon(tmpfile.name, context)
+            except OSError as e:
+                sys.stderr.write("Unable to set SELINUX context for %s: %s" %
+                                 (tmpfile.name, e.strerror))
+                raise SystemExit(1)
+
+        # Replace current file with validated new one
+        try:
+            os.rename(tmpfile.name, leapfile)
+            sys.stderr.write("Installed new %s from %s\n" %
+                             (leapfile, leapsrc))
+        except OSError:
+            sys.stderr.write("Install %s => %s failed -- saved for diagnosis\n" %
+                             (tmpfile.name, leapfile))
+            raise SystemExit(1)
+
+        raise SystemExit(0)
 
     # Failed and out of retries
-
-    log "warning" "Download from $LEAPSRC failed after $TRY attempts"
-    if [ -f ${TMPFILE}.log ]; then
-        cat ${TMPFILE}.log
-        rm -f ${TMPFILE}.log $TMPFILE
-    fi
-    exit 1
-fi
-log "info" "Not time to replace $LEAPFILE"
-
-exit 0
-
+    sys.stderr.write("Download from %s failed after %d attempts\n" %
+                     (leapsrc, iteration))
+    try:
+        os.remove(tmpfile.name)
+    except OSError:
+        pass
+    raise SystemExit(1)
 # EOF

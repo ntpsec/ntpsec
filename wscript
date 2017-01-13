@@ -145,6 +145,7 @@ python_scripts = [
         "ntpclients/gps-log",
         "ntpclients/ntpdig",
         "ntpclients/ntpkeygen",
+        "ntpclients/ntpleapfetch",
         "ntpclients/ntpmon",
         "ntpclients/ntpq",
         "ntpclients/ntpsweep",
@@ -189,12 +190,10 @@ def build(ctx):
         ctx.recurse("attic")
         ctx.recurse("tests")
 
-        scripts = ["ntpclients/ntpleapfetch"] + python_scripts
-
         ctx(
                 features      = "subst",
-                source        = scripts,
-                target        = scripts,
+                source        = python_scripts,
+                target        = python_scripts,
                 chmod         = Utils.O755,
                 install_path  = "${PREFIX}/bin/"
         )
