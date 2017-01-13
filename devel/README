@@ -28,6 +28,9 @@ ntpv5.txt::
 packaging.txt::
 	Guidance for binary package builders.
 
+pre-release.txt::
+	A collection of ideas about testing before a release.
+
 release::
 	Script for shipping a release.
 
