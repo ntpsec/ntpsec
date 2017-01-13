@@ -57,9 +57,9 @@ below or above specified stratum levels. By default, servers of all
 strata are acceptable; however, the +tos+ command can be used to
 restrict the acceptable range from the +floor+ option, inclusive, to the
 +ceiling+ option, exclusive. Potential servers operating at the same
-stratum as the client will be avoided, unless the +cohort+ option is
-present. Additional filters can be supplied using the methods described
-on the link:authentic.html[Authentication Support] page.
+stratum as the client will be avoided.  Additional filters can be
+supplied using the methods described on the
+link:authentic.html[Authentication Support] page.
 
 The pruning process uses a set of unreach counters, one for each
 association created by the configuration or discovery processes. At each

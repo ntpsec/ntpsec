@@ -23,7 +23,7 @@ include::includes/misc-options.txt[]
 // If you change this, be very sure to keep that synchronized.
 
 [[tos]]
-+tos+ [+ceiling+ 'ceiling' | +cohort+ {+0+ | +1+} | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
++tos+ [+ceiling+ 'ceiling' | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
   This command alters certain system variables used by the clock
   selection and clustering algorithms. The default values of these
   variables have been carefully optimized for a wide range of network
@@ -36,11 +36,6 @@ include::includes/misc-options.txt[]
     Specify the maximum stratum (exclusive) for acceptable server
     packets. The default is 16. See the link:discover.html[Automatic
     Server Discovery] page for further details.
-  +cohort+ { +0+ | +1+ };;
-    Specify whether (1) or whether not (0) a server packet will be
-    accepted for the same stratum as the client. The default is 0. See
-    the link:discover.html[Automatic Server Discovery] page for further
-    details.
   +floor+ 'floor';;
     Specify the minimum stratum (inclusive) for acceptable server
     packets. The default is 1. See the link:discover.html[Automatic

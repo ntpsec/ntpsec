@@ -97,7 +97,6 @@ int	sys_ceiling = STRATUM_UNSPEC - 1; /* cluster stratum ceiling */
 int	sys_minsane = 1;	/* minimum candidates */
 int	sys_minclock = NTP_MINCLOCK; /* minimum candidates */
 int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
-int	sys_cohort = 0;		/* cohort switch */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
 int	sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 int	sys_ttlmax;		/* max ttl mapping vector index */
@@ -2836,10 +2835,6 @@ proto_config(
 
 	case PROTO_CEILING:	/* stratum ceiling (ceiling) */
 		sys_ceiling = (int)dvalue;
-		break;
-
-	case PROTO_COHORT:	/* cohort switch (cohort) */
-		sys_cohort = (int)dvalue;
 		break;
 
 	case PROTO_FLOOR:	/* stratum floor (floor) */
