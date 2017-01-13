@@ -22,39 +22,33 @@ command line.
 
 If the file does not exist, is not valid, has expired, or is expiring
 soon, a new copy will be downloaded. If the new copy validates, it is
-installed and NTP is (optionally) restarted.
+installed.
 
 If the current file is acceptable, no download or restart occurs.
-
--c can also be used to invoke another script to perform administrative
-functions, e.g. to copy the file to other local systems.
 
 This can be run as a cron job. As the file is rarely updated, and leap
 seconds are announced at least one month in advance (usually longer), it
 need not be run more frequently than about once every three weeks.
 
-For cron-friendly behavior, define CRONJOB=1 in the crontab.
-
 == OPTIONS ==
 
 +-4+::
   Use only IPv4 addresses for DNS name resolution. This option must not
-  appear in combination with any of the following options: +-6+.
+  appear in combination with any of the following options: +-6+. (unused)
 
 +-6+::
   Use only IPv6 addresses for DNS name resolution. This option must not
-  appear in combination with any of the following options: +-4+.
+  appear in combination with any of the following options: +-4+. (unused)
 
 +-c+::
   Command to restart ntpd after installing a new file. Without such a
-  command. ntpd checks the file daily.
+  command. ntpd checks the file daily. (unused)
 
 +-e+ 'expiry'::
   Refresh the leapfile this long before it expires.
 +
-Specify how long before expiration the file is to be refreshed. Units
-are required, e.g. "-e 60 days". Note that larger values imply more
-frequent refreshes.
+Specify how many days before expiration the file is to be refreshed. Note that
+larger values imply more frequent refreshes.
 
 +-f+ 'config'::
   Location of the {ntpconf} file.
@@ -72,16 +66,16 @@ present and to default leapfile) /etc/{ntpconf}
   Display inline help.
 
 +-l+::
-  Use syslog for output (Implied if CRONJOB is set).
+  Use syslog for output (Implied if CRONJOB is set). (unused)
 
 +-L+::
-  Don't use syslog for output
+  Don't use syslog for output. (unused)
 
 +-p+ {+4+|+6+}::
-  Prefer IPv4 or IPv6 (as specified) addresses, but use either.
+  Prefer IPv4 or IPv6 (as specified) addresses, but use either. (unused)
 
 +-P+ 'logfacility'::
-  Specify the syslog facility for logging.
+  Specify the syslog facility for logging. (unused)
   
 +-q+::
   Only report errors to stdout.
@@ -93,15 +87,15 @@ present and to default leapfile) /etc/{ntpconf}
   The URL of the master copy of the leapseconds file.
 
 +-t+ 'path'::
-  Name of temporary file used in validation.
+  Name of temporary file used in validation. (unused)
 
 +-v+::
   Verbose output.
 
 +-z+ 'path'::
-  Specify path for utilities.
+  Specify path for utilities. (unused)
 
 +-Z+::
-  Use system path only.
+  Use system path only. (unused)
 
 // end

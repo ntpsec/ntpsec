@@ -116,9 +116,6 @@ Local copy of DocBook stylesheets:
    Gentoo: app-text/docbook-xsl-stylesheets
    SLES: docbook-xsl-stylesheets - pulled in by `asciidoc`
 
-wget:
-   Optional, used by ntpleapfetch
-
 === Apple ===
 
 The OS X build has been tested in this environment:

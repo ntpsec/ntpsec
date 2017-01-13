@@ -158,6 +158,7 @@ python_scripts = [
     "ntpclients/ntplogtemp",
 ]
 
+python_scripts.append("ntpclients/ntpleapfetch.py")
 
 def build(ctx):
     ctx.load('waf', tooldir='wafhelpers/')
