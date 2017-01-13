@@ -1262,10 +1262,6 @@ config_tos(
 			item = PROTO_FLOOR;
 			break;
 
-		case T_Cohort:
-			item = PROTO_COHORT;
-			break;
-
 		case T_Orphan:
 			item = PROTO_ORPHAN;
 			break;

@@ -169,7 +169,7 @@ Discovery" page (available as part of the HTML documentation).
 // It omits the more general tinkering options.  If you change this,
 // be very sure to keep docs/miscopt.txt synchronized.
 
-`tos` [`ceiling` _ceiling_ | `cohort` \{ `0` | `1` } | `floor` _floor_ | `minclock` _minclock_ | `minsane` _minsane_]::
+`tos` [`ceiling` _ceiling_ | `floor` _floor_ | `minclock` _minclock_ | `minsane` _minsane_]::
   This command affects the clock selection and clustering algorithms. It
   can be used to select the quality and quantity of peers used to
   synchronize the system clock and is most useful in manycast mode. The
@@ -179,12 +179,6 @@ Discovery" page (available as part of the HTML documentation).
     Peers with strata above _ceiling_ will be discarded if there are at
     least _minclock_ peers remaining. This value defaults to 15, but can
     be changed to any number from 1 to 15.
-  `cohort` \{0 | 1 };;
-    This is a binary flag which enables (0) or disables (1) manycast
-    server replies to manycast clients with the same stratum level. This
-    is useful to reduce implosions where large numbers of clients with
-    the same stratum level are present. The default is to enable these
-    replies.
   `floor` _floor_;;
     Peers with strata below _floor_ will be discarded if there are at
     least _minclock_ peers remaining. This value defaults to 1, but can
