@@ -75,6 +75,8 @@ main (
 	progname = argv[0];
 
 	init_lib();
+	srandom(3);  /* Squash warning from OpenBSD 6.0 */
+	/* warning: random() may return deterministic values... */
 
 	if (argc<=1) {
 	  usage:
