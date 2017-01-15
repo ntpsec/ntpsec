@@ -514,7 +514,7 @@ def cmd_configure(ctx, config):
     from wafhelpers.check_vsprintfm import check_vsprintfm
     check_vsprintfm(ctx)
 
-    # Define CFLAGS/LDCFLAGS for -vv support.
+    # Define CFLAGS/LDFLAGS for -vv support.
     ctx.define("NTPSEC_CFLAGS",
                " ".join(ctx.env.CFLAGS).replace("\"", "\\\""),
                comment="CFLAGS used when compiled")
