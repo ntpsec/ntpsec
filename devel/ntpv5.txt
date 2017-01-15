@@ -20,7 +20,7 @@ have been observed in the wild, possiblty resulting in false-positive
 loop detection.
 
 The new protocol should support REFIDs at least as long as an IPv6
-address (8 octets).
+address (16 octets).
 
 === Timescale ===
 
@@ -84,7 +84,7 @@ Timestamp field.
 
 The principal difficulty with this approach is that implementations
 might not reject Version 5 packets, and therefore mis-parse the
-header.  NP Classic and NTPsec *do* perform this check.
+header.  NTP Classic and NTPsec *do* perform this check.
 
 == Payload format design for the NTPNG and Newmode cases ==
 
