@@ -54,6 +54,7 @@ PY_MAJOR_VERSION
 
 # This is from a library header
 MOD_TIMETICK
+NTP_API
 
 # Things WAF sets that don't get #undefs if they're not set
 ENABLE_EARLY_DROPROOT
@@ -111,6 +112,7 @@ TEST_NTPDIG
 
 # Purely internal symbols
 CONFIG_H
+AUTOREVISION_H
 BITSPERCHAR		# Only used in the Arcron refclock
 BACKTRACE_MAXFRAME	# Internal to the ISC backtrace code
 BACKTRACE_LIBC
