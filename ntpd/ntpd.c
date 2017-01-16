@@ -544,7 +544,7 @@ ntpdmain(
 		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
 
-		msyslog(LOG_NOTICE, "ntpd %s: Starting", ntpd_version());
+		msyslog(LOG_NOTICE, "%s: Starting", ntpd_version());
 
 		/* Note that every arg has an initial space character */
 		snprintf(cp, sizeof(buf), "Command line:");
