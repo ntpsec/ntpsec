@@ -563,6 +563,10 @@ def cmd_configure(ctx, config):
         from wafhelpers.check_mdns import check_mdns_run
         check_mdns_run(ctx)
 
+    # Solaris needs -lsocket and -lnsl for socket code
+    ctx.check(features="c cshlib", lib="socket", mandatory=False)
+    ctx.check(features="c cshlib", lib="nsl", mandatory=False)
+
     if ctx.options.enable_classic_mode:
         ctx.define("ENABLE_CLASSIC_MODE", 1)
     else:
