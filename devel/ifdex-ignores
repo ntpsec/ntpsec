@@ -91,8 +91,8 @@ ULONG_LONG_MAX
 OVERRIDE_BINTIME_CTLMSGBUF_SIZE
 OVERRIDE_FD_CHUNK
 OVERRIDE_FD_PREFERRED_SOCKBOUNDARY
-MAXASSOC		# Can't change this bofore ntpq library refactoring
-MAXLIST			# Can't change this bofore ntpq library refactoring
+MAXASSOC		# Can't change this before ntpq library refactoring
+MAXLIST			# Can't change this before ntpq library refactoring
 OVERRIDE_NTIME_MSG
 OVERRIDE_OTIME_MSG
 OVERRIDE_THREAD_MINSTACKSIZE
