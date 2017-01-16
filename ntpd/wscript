@@ -132,7 +132,7 @@ def build(ctx):
 		target		= "ntpd",
 		features	= "c rtems_trace cprogram bld_include src_include libisc_include libisc_pthread_include",
 		source		= ntpd_source,
-		use		= "libntpd_obj isc ntp sodium M parse RT CAP SECCOMP PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s SOCKET NSL" % use_refclock,
+		use		= "libntpd_obj isc ntp sodium M parse RT CAP SECCOMP PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s SOCKET NSL SCF" % use_refclock,
 		includes	= [
 					"%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
 					"%s/ntpd/" % srcnode,

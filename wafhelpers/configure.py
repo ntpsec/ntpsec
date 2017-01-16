@@ -377,7 +377,6 @@ def cmd_configure(ctx, config):
         ("arpa/nameser.h", ["sys/types.h"]),
         "dns_sd.h",         # NetBSD, Apple, mDNS
         ("ifaddrs.h", ["sys/types.h"]),
-        ("libscf.h", ["sys/time.h"]),  # Solaris
         ("linux/if_addr.h", ["sys/socket.h"]),
         ("linux/rtnetlink.h", ["sys/socket.h"]),
         "linux/serial.h",
@@ -423,6 +422,10 @@ def cmd_configure(ctx, config):
 
     from wafhelpers.check_sockaddr import check_sockaddr
     check_sockaddr(ctx)
+
+    # Check for Solaris's service configuration facility library
+    ctx.check_cc(header_name="libscf.h", lib="scf", mandatory=False,
+                 uselib_store="SCF")
 
     # Some systems don't have sys/timex.h eg OS X, OpenBSD...
     if ctx.get_define("HAVE_SYS_TIMEX_H"):
