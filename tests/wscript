@@ -62,7 +62,7 @@ def build(ctx):
 					"%s/tests/ntpdig/" % srcnode,
 					"%s/tests/common/" % srcnode
 				],
-		use		= "unity ntp isc M PTHREAD CRYPTO RT",
+		use		= "unity ntp isc M PTHREAD CRYPTO RT SOCKET NSL",
 		source		= libntp_source,
 	)
 
@@ -82,6 +82,6 @@ def build(ctx):
 					"%s/tests/libntp/" % srcnode,
 					"%s/tests/common/" % srcnode
 				],
-		use		= "ntpd_lib libntpd_obj unity ntp isc M PTHREAD CRYPTO RT",
+		use		= "ntpd_lib libntpd_obj unity ntp isc M PTHREAD CRYPTO RT SOCKET NSL",
         	source		= ntpd_source,
 	)
