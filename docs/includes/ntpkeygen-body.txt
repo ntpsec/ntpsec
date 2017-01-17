@@ -88,9 +88,8 @@ predictable. Various means dependent on external events, such as
 keystroke intervals, can be used to do this and some systems have
 built-in entropy sources.
 
-This implementation uses Python's random module.  The function used
-calls the underlying OS's urandom syscall.  The security of the 
-module is improved in
+This implementation uses Python's random.SystemRandom class, which relies on
+os.urandom().  The security of os.urandom() is improved in
 https://docs.python.org/library/os.html#os.urandom[Python 3.5+].
 
 [[crypto]]
