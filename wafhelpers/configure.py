@@ -261,6 +261,10 @@ def cmd_configure(ctx, config):
         ctx.define("__APPLE_USE_RFC_3542", 1,
                    comment="Needed for IPv6 support")
 
+    if sys.platform.startswith("sunos"):
+        ctx.define("_POSIX_PTHREAD_SEMANTICS", "1", quote=False,
+                   comment="Needed for POSIX function definitions on Solaris")
+
     ctx.define("PLATFORM_FULL", platform.platform())
 
     # int32_t and uint32_t probes aren't really needed, POSIX guarantees
