@@ -232,7 +232,6 @@ parse_cmdline_opts(
 	)
 {
 	static bool	parsed = false;
-	bool sawV = false;
 
 	if (parsed)
 	    return;
@@ -378,9 +377,8 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
-		sawV = true;
 		printf("%s\n", ntpd_version());
-		break;
+		exit(0);
 	    case 'w':
 		wait_sync = strtod(ntp_optarg, NULL);
 		break;
@@ -417,9 +415,6 @@ parse_cmdline_opts(
 		cmdline_server_count = argc - ntp_optind;
 		cmdline_servers = argv + ntp_optind;
 	}
-
-	if (sawV)
-		exit(0);
 }
 
 #ifdef NO_MAIN_ALLOWED
