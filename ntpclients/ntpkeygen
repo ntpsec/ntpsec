@@ -89,7 +89,7 @@ if __name__ == '__main__':
             raise SystemExit(0)
 
     # The seed is ignored by random.SystemRandom, 
-    # even though the docs does not say so.
+    # even though the docs do not say so.
     randomizer = random.SystemRandom()
     gen_md5("md5", socket.gethostname())
     raise SystemExit(0)
