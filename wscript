@@ -181,7 +181,6 @@ def build(ctx):
         if ctx.env.REFCLOCK_GENERIC: # Only required by the generic refclock
                 ctx.recurse("libparse")
         ctx.recurse("libntp")
-        ctx.recurse("libsodium")
         ctx.recurse("ntpd")
         ctx.recurse("ntpfrob")
         ctx.recurse("ntptime")

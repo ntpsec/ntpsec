@@ -552,6 +552,9 @@ def cmd_configure(ctx, config):
     from wafhelpers.check_cap import check_cap
     check_cap(ctx)
 
+    from wafhelpers.check_sodium import check_sodium
+    check_sodium(ctx)
+
     from wafhelpers.check_seccomp import check_seccomp
     check_seccomp(ctx)
 
