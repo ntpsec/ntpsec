@@ -117,7 +117,7 @@ continuity; you should, too.
 A discussion about using uncrustify to mass convert all the C sources
 to a more modern indentation and format style is ongoing.  As it will
 result in a coordinated flag day in ongoing development, it will be
-carefully announced in the devel@ntpsec.org mailing list before being merged and
+carefully announced in the mailto:devel@ntpsec.org mailing list before being merged and
 pushed.
 
 === Conventions for #ifdef guard names ===
@@ -394,7 +394,7 @@ Please make sure your code builds and passes the test suite before you
 commit it, and especially before you push it.
 
 Before starting significant work, propose it first in the
-devel@ntpsec.org mailing list.  Other people may have
+mailto:devel@ntpsec.org mailing list.  Other people may have
 suggestions, will want to collaborate, and will wish to review your
 code.
 
@@ -536,7 +536,7 @@ each 0.9.X release.
   a significant new feature, landing a critical fix, or just that enough
   time has passed with ongoing improvements and fixes.
 
-. Email a warning message to the devel@ntpsec.org list, and ask the major
+. Email a warning message to the mailto:devel@ntpsec.org list, and ask the major
   contributors to chime in, and to each assure that the .../NEWS file
   and the .../devel/TODO file is up to date.
 
