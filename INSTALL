@@ -36,6 +36,14 @@ bison::
    Gentoo package: sys-devel/bison
    SLES: bison . Included in pattern `basis-devel`, which includes gcc, etc.
 
+libsodium::
+   Required to build.
+   Debian: libsodium
+   Fedora: libsodium
+   Gentoo package: dev-libs/libsodium
+   CentOS: libsodium in the epel ("Extra Packages for Enterprise Linux") repo.
+   Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
+
 libcap::
    Required on Linux, to support dropping root.
    Fedora: libcap and libcap-devel
