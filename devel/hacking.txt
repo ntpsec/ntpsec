@@ -291,7 +291,7 @@ When you create a new file, mark it as follows (updating the year)
 as required:
 
 ------------------------------------------------
-/* Copyright 2015 by the NTPsec project contributors
+/* Copyright 2017 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  */
 ------------------------------------------------
@@ -299,7 +299,7 @@ as required:
 For documentation:
 
 ------------------------------------------------
-// Copyright 2015 by the NTPsec project contributors
+// Copyright 2017 by the NTPsec project contributors
 // SPDX-License-Identifier: CC-BY-4.0
 ------------------------------------------------
 
@@ -315,7 +315,7 @@ You *may* add a project copyright and replace the inline license
 with an SPDX tag. For example:
 
 ------------------------------------------------
-/* Copyright 2015 by the NTPsec project contributors
+/* Copyright 2017 by the NTPsec project contributors
  * SPDX-License-Identifier: NTP
  */
 ------------------------------------------------
