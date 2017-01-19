@@ -28,6 +28,11 @@ On Debian only::
 On Ubuntu only::
    apt-get gnuplot5
 
+On Fedora/Centos::
+   yum install python-dev bison libsodium libcap libcap-devel gnuplot
+   yum install python-psutil libseccomp-devel openssl-libs openssl-devel
+   yum install pps-tools-devel pps-tools
+
 === Details ===
 
 Python 2.x, x >= 6, or Python 3.x, x >= 3::
@@ -89,7 +94,7 @@ psutils::
    Debian: python-psutil or python3-psutil
    Ubuntu: python-psutil or python3-psutil
    Fedora/CentOS: python-psutil
-   CentOS 6: python-psutils in epel ("Extra Packages for Enterprise Linux").
+   CentOS 6: python-psutil in epel ("Extra Packages for Enterprise Linux").
    Gentoo: dev-python/psutil
    SLES: python-psutil
 
