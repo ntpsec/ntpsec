@@ -33,6 +33,5 @@ def run_a2x(self, node):
     n_file = node.path_from(self.bld.bldnode)
     out = "%s.%s" % (n_file.replace("-man.txt.man-tmp", ""), self.section)
     out_n = self.bld.path.find_or_declare(out)
-    # FIXME: pyflakes says tsk never used...
-    tsk = self.create_task('a2x', node, out_n)
+    self.create_task('a2x', node, out_n)
     self.bld.install_files("${PREFIX}/man/man%s/" % self.section, out_n)

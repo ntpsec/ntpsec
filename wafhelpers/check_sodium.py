@@ -1,5 +1,3 @@
-import sys
-from waflib.Logs import pprint
 
 
 def check_sodium(ctx):
