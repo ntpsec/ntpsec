@@ -16,6 +16,20 @@ https://docs.ntpsec.org/latest/ntpsec.html
 There are some prerequisites.  Libraries need the binary installed
 to run and in addition, the development headers installed to build.
 
+=== The short version ===
+
+On Debian/Ubuntu::
+   apt-get python-dev bison libsodium libcap2 libcap-dev python-psutils
+   apt-get libseccomp-dev libssl1.0.0 libssl-dev ppstools
+
+On Debian only::
+   apt-get gnuplot 
+
+On Ubuntu only::
+   apt-get gnuplot5
+
+=== Details ===
+
 Python 2.x, x >= 6, or Python 3.x, x >= 3::
    Required to build, and for various scripts such as ntpviz (but see
    the guidance for packagers in devel/packaging.txt).  Our Python code
@@ -25,39 +39,45 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
    distinction.
 
    Required to build.
-   Debian: python-dev
-   Fedora: python-devel
+   Debian/Ubuntu: python-dev
+   Fedora/CentOS: python-devel
    SLES: python-devel
 
 bison::
    Required to build.
-   Debian: bison
-   Fedora: bison
+   Debian/Ubuntu: bison
+   Fedora/CentOS: bison
    Gentoo package: sys-devel/bison
-   SLES: bison . Included in pattern `basis-devel`, which includes gcc, etc.
+   SLES: bison. Included in pattern `basis-devel`, which includes gcc, etc.
 
 libsodium::
-   Required to build.
-   Debian: libsodium18 (or libsodium13) and libsodium-dev
-   Fedora: libsodium and libsodium-devel
-   Gentoo package: dev-libs/libsodium
-   CentOS: libsodium in the epel ("Extra Packages for Enterprise Linux") repo.
-   Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
+   Required to build.  Used for cryptographic-quality random-number generation.
+   This is a relatively recent library and is a bit tricky to install on
+   older distributions. We used to carry it in-tree to avoid this problem,
+   but we judge this creates an unacceptable risk should a CVE be issued
+   against it
+
+   Debian/Ubuntu: libsodium-dev
+   Fedora: libsodium
+   Gentoo: dev-libs/libsodium
    SLES: libsodium13 and libsodium-devel
+   CentOS: libsodium in epel ("Extra Packages for Enterprise Linux").
+   Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
+   Debian Wheezy and older: https://sourceforge.net/projects/debiannoofficial/files/wheezy/
 
 libcap::
    Required on Linux, to support dropping root.
-   Fedora: libcap and libcap-devel
-   Debian: libcap2 and libcap-dev
+   Debian/Ubuntu: libcap2 and libcap-dev
+   Fedora/CentOS: libcap and libcap-devel
    Gentoo package: sys-libs/libcap
    SLES: libcap2 and libcap-devel
 
 gnuplot::
    Required for ntpviz.
    Debian: gnuplot
-   Fedora: gnuplot
-   Gentoo package: sci-visualization/gnuplot
-   Ubuntu package: gnuplot5
+   Ubuntu: gnuplot5
+   Fedora/CentOS: gnuplot
+   Gentoo: sci-visualization/gnuplot
    SLES: gnuplot
 
 argarse::
@@ -66,24 +86,26 @@ argarse::
 
 psutils::
    Optional for ntpviz.  Allows running with ionice()
-   Debian package: python-psutil or python3-psutil
-   Gentoo package: dev-python/psutil
-   Ubuntu package: python-psutil or python3-psutil
+   Debian: python-psutil or python3-psutil
+   Ubuntu: python-psutil or python3-psutil
+   Fedora/CentOS: python-psutil
+   CentOS 6: python-psutils in epel ("Extra Packages for Enterprise Linux").
+   Gentoo: dev-python/psutil
    SLES: python-psutil
 
 seccomp::
    Optional on Linux to support restricting syscalls
-   Debian: libseccomp-dev (gets libseccomp2)
-   Fedora: libseccomp-devel
-   Gentoo package: sys-libs/libseccomp
+   Debian/Ubuntu: libseccomp-dev (gets libseccomp2)
+   Fedora/CentOS: libseccomp-devel
+   Gentoo: sys-libs/libseccomp
    SLES: libseccomp-devel
 
 OpenSSL::
    Optional, required for --enable-crypto.
    Enables encryption and authentication.
-   Debian: libssl1.0.0 and libssl-dev
-   Fedora: openssl-libs and openssl-devel
-   Gentoo package: dev-libs/openssl
+   Debian/Ubuntu: libssl1.0.0 and libssl-dev
+   Fedora/CentOS: openssl-libs and openssl-devel
+   Gentoo: dev-libs/openssl
    SLES: openssl-libs and openssl-devel
 
 sys/timepps.h::
@@ -92,32 +114,32 @@ sys/timepps.h::
    file to be installed, depending on which refclocks you enable.
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
-   Debian: pps-tools
-   Fedora: pps-tools-devel (pps-tools may be useful for debugging)
-   Gentoo package: net-misc/pps-tools
+   Debian/Ubuntu: pps-tools
+   Fedora/CentOS: pps-tools-devel (pps-tools may be useful for debugging)
+   Gentoo: net-misc/pps-tools
    SLES: SLES 12 and earlier do not seem to have this available.
 
 asciidoc, a2x::
    You will need asciidoc to make HTML and a2x to make manual pages from the
    documentation masters.  Only required if you configured with --enable-doc.
    Note, you need asciidoc 8.6.0 at minimum.
-   Debian: asciidoc
-   Fedora: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
-   Gentoo package: app-text/asciidoc
+   Debian/Ubuntu: asciidoc
+   Fedora/CentOS: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
+   Gentoo: app-text/asciidoc
    SLES: asciidoc
 
 Local copy of DocBook stylesheets:
    Optional: Prevents documentation build failures when your Internet is down
-   Debian: docbook-xsl
-   Fedora: docbook-xsl-stylesheets
-   Gentoo package: app-text/docbook-xsl-stylesheets
-   SLES: docbook-xsl-stylesheets .  Pulled in by `asciidoc`
+   Debian/Ubuntu: docbook-xsl
+   Fedora/CentOS: docbook-xsl-stylesheets
+   Gentoo: app-text/docbook-xsl-stylesheets
+   SLES: docbook-xsl-stylesheets - pulled in by `asciidoc`
 
 liberation::
    Optional, improves font quality in ntpviz renderings.
-   Debian: liberation
-   Fedora: liberation
-   Gentoo package: media-fonts/liberation-fonts
+   Debian/Ubuntu: liberation
+   Fedora/CentOS: liberation
+   Gentoo: media-fonts/liberation-fonts
    SLES: liberation-fonts
 
 The OS X build has been tested in this environment:
