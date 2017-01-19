@@ -43,6 +43,7 @@ libsodium::
    Gentoo package: dev-libs/libsodium
    CentOS: libsodium in the epel ("Extra Packages for Enterprise Linux") repo.
    Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
+   SLES: libsodium13 and libsodium-devel
 
 libcap::
    Required on Linux, to support dropping root.
