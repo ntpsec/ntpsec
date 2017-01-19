@@ -24,6 +24,8 @@ attic/:: 	Directory containing source code that is *not* part of a
 		normal installation. Things can disappear from here at any
 		time.
 
+buildprep::	Executable script for fetching installation prerequisites.
+
 contrib/::	Directory containing contributed scripts, dragons dwell here.
 		Some of this might eventually move to being supported code.
 
