@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+# buildprep - prepare your system for an NTPsec source build.
+#
+# Use the -n option to dry-run this command, showing what would be done
+# without actually doing it
+
+cat <<EOF 
+# Preparing your system for ntpsec source build...
+# This script presently knows about Debian, Ubuntu, CentOS, and Fedora.
+# If you are running something else, please follow the directions for 
+# by-hand installation in INSTALL.
+#
+EOF
+
+if [ "$1" = "-n" ]
+then
+    do=echo
+    echo "# Run this without -n, as root, for actual installation."
+else
+    do=""
+fi
+
+if [ "$do" = "" -a "$UI" != 0 ]
+then
+    echo "#You must be running as root for your installer to do its thing."
+    exit 1
+fi
+
+installer=""
+if yum version 2>/dev/null
+then
+    installer=yum
+elif apt --version 2>/dev/null
+then
+    installer=apt
+else
+    installer=unknown
+fi
+echo "# Your package installer is ${installer}."
+
+# In order to have a single point of truth about prerequisite package names,
+# these package name lists have been *removed* from INSTALL.
+case $installer in
+    apt)
+	$do apt-get install bison libcap-dev libcap2 liberation libseccomp-dev
+	$do apt-get install libssl-dev libssl1.0.0 ppstools python-dev
+	distro=`lsb_release -i -s`
+	if [ "$distro" = "Ubuntu" ]
+	then
+	    echo "# Looks like an Ubuntu system"
+	    $do apt-get install gnuplot5
+	else
+	    echo "# Looks like a generic Debian system"
+	    $do apt-get install gnuplot
+	fi
+	;;
+    yum)
+	$do yum install bison gnuplot libcap libcap-devel liberation
+	$do yum libseccomp-devel install openssl-devel openssl-libs
+	$do yum pps-tools pps-tools-devel install python python-dev
+	;;
+esac
+
+echo "# libsodium is a point of pain; older distributions don't carry it."
+echo "# Watch these installations closely; if you get a failure message,"
+echo "# see INSTALL for instructions."
+case $installer in
+    apt)
+	$do apt-get install libsodium-dev
+	;;
+    yum)
+	$do yum install libsodium-dev libsodium-devel
+	;;
+esac
+echo ""
+echo " Done."
