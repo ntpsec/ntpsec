@@ -2011,7 +2011,8 @@ ctl_putsys(
 		break;
 
 	case CS_FUZZ:
-		ctl_putdbl(sys_var[varid].text, sys_fuzz * 1e3);
+		/* a.k.a. fuzz (s), output in us */
+		ctl_putdbl6(sys_var[varid].text, sys_fuzz * 1e3);
 		break;
 	case CS_WANDER_THRESH:
 		ctl_putdbl(sys_var[varid].text, wander_threshold * 1e6);
