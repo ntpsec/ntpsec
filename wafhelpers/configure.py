@@ -252,7 +252,8 @@ def cmd_configure(ctx, config):
         ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
         ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
     elif ctx.env.PLATFORM_TARGET == "netbsd":
-        ctx.env.PLATFORM_LIBPATH = ["/usr/lib"]
+        ctx.env.PLATFORM_INCLUDES = ["/usr/pkg/include"]
+        ctx.env.PLATFORM_LIBPATH = ["/usr/lib", "/usr/pkg/lib"]
     elif ctx.env.PLATFORM_TARGET == "win":
         ctx.load("msvc")
 
