@@ -20,7 +20,7 @@ to run and in addition, the development headers installed to build.
 
 If you are on a Debian or Ubuntu distribution that uses apt-get, or on
 a Fedora or RedHat distribution that uses yum, you can use the
-./builprep script.  If you are using other distributions or OSes, such
+./buildprep script.  If you are using other distributions or OSes, such
 as Gento, SuSE SLES, MacOS, Solaris, or BSD, you will have to install the
 build prerequisites by hand on your system.
 
