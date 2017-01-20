@@ -7,7 +7,7 @@
 
 cat <<EOF 
 # Preparing your system for ntpsec source build...
-# This script presently knows about Debian, Ubuntu, CentOS, and Fedora.
+# This script presently knows about Debian, Ubuntu, CentOS, Fedora, and SLES.
 # If you are running something else, such as MacOS or Solaris, please
 # follow the directions for by-hand installation in INSTALL.
 #
@@ -16,7 +16,7 @@ EOF
 if [ "$1" = "-n" ]
 then
     do=echo
-    echo "# Run this without -n, as root, for actual installation."
+    echo "# Run this without -n, as root, for actual installation.\n#"
 else
     do=""
 fi
@@ -33,10 +33,10 @@ then
     installer=yum
 elif apt-get --version >/dev/null 2>&1
 then
-    # FIXME, on MacOS and Solaris systems, apt is part of Java
-    # http://java.sun.com/j2se/1.5.0/docs/guide/apt/GettingStarted.html
-    # need a better way to determine the local system uses Debian Advanced Packaging Tool installer
     installer=apt
+elif yast -h >/dev/null 2>&1
+then
+    installer=yast
 else
     installer=unknown
 fi
@@ -63,9 +63,16 @@ case $installer in
 	$do yum libseccomp-devel install openssl-devel openssl-libs
 	$do yum pps-tools pps-tools-devel install python python-dev
 	;;
+    yast)
+	echo "# SLES versions 12 and earlier do not have pps-tools"
+	$do yast --install basis-devel gnuplot libcap-devel libcap2
+	$do yast --install liberation-fonts libseccomp-devel libsodium-devel
+	$do yast --install libsodium13 openssl-libs and openssl-devel
+	$do yast --install python-devel
+	;;
 esac
 
-echo "# libsodium is a point of pain; older distributions don't carry it."
+echo "# libsodium is a point of pain; some older distributions don't carry it."
 echo "# Watch these installations closely; if you get a failure message,"
 echo "# see INSTALL for instructions."
 case $installer in
@@ -77,4 +84,4 @@ case $installer in
 	;;
 esac
 echo ""
-echo " Done."
+echo "# Done."
