@@ -19,10 +19,11 @@ to run and in addition, the development headers installed to build.
 === The short version ===
 
 If you are on a Debian or Ubuntu distribution that uses apt-get, or on
-a Fedora or RedHat distribution that uses yum, you can use the
-./buildprep script.  If you are using other distributions or OSes, such
-as Gento, SuSE SLES, MacOS, Solaris, or BSD, you will have to install the
-build prerequisites by hand on your system.
+a Fedora or RedHat distribution that uses yum, or a Suse distribution
+that uses yast, you can use the ./buildprep script.  If you are using
+other distributions or OSes, such as Gentoo, MacOS, Solaris, or BSD,
+you will have to install the build prerequisites by hand on your
+system.
 
 Run ./buildprep -n to see what needs to be installed as prerequisites
 on your system.  In order that we have a single point of truth about
@@ -45,13 +46,9 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
    installation and Python dev tools, if your OS makes such a
    distinction.
 
-   Required to build.
-   SLES: python-devel
-
 bison::
    Required to build.
    Gentoo package: sys-devel/bison
-   SLES: bison. Included in pattern `basis-devel`, which includes gcc, etc.
 
 libsodium::
    Required to build.  Used for cryptographic-quality random-number generation.
@@ -61,7 +58,6 @@ libsodium::
    against it
 
    Gentoo: dev-libs/libsodium
-   SLES: libsodium13 and libsodium-devel
    CentOS: libsodium in epel ("Extra Packages for Enterprise Linux").
    Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
    Debian Wheezy and older: https://sourceforge.net/projects/debiannoofficial/files/wheezy/
@@ -69,12 +65,10 @@ libsodium::
 libcap::
    Required on Linux, to support dropping root.
    Gentoo package: sys-libs/libcap
-   SLES: libcap2 and libcap-devel
 
 gnuplot::
    Required for ntpviz.
    Gentoo: sci-visualization/gnuplot
-   SLES: gnuplot
 
 argarse::
    Required for ntpviz when using Python version 2.6
@@ -92,13 +86,11 @@ psutils::
 seccomp::
    Optional on Linux to support restricting syscalls
    Gentoo: sys-libs/libseccomp
-   SLES: libseccomp-devel
 
 OpenSSL::
    Optional, required for --enable-crypto.
    Enables encryption and authentication.
    Gentoo: dev-libs/openssl
-   SLES: openssl-libs and openssl-devel
 
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
@@ -107,12 +99,10 @@ sys/timepps.h::
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
    Gentoo: net-misc/pps-tools
-   SLES: SLES 12 and earlier do not seem to have this available.
 
 liberation::
    Optional, improves font quality in ntpviz renderings.
    Gentoo: media-fonts/liberation-fonts
-   SLES: liberation-fonts
 
 asciidoc, a2x::
    You will need asciidoc to make HTML and a2x to make manual pages from the
