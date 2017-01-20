@@ -1506,7 +1506,7 @@ ctl_putsys(
 		break;
 
 	case CS_ERROR:
-		/* a.k.a clk_jitter (s).  output as us */
+		/* a.k.a clk_jitter (s).  output as ms */
 		ctl_putdbl6(sys_var[CS_ERROR].text, clock_jitter * 1e3);
 		break;
 
@@ -2011,7 +2011,7 @@ ctl_putsys(
 		break;
 
 	case CS_FUZZ:
-		/* a.k.a. fuzz (s), output in us */
+		/* a.k.a. fuzz (s), output in ms */
 		ctl_putdbl6(sys_var[varid].text, sys_fuzz * 1e3);
 		break;
 	case CS_WANDER_THRESH:
