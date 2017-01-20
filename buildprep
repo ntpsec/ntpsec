@@ -8,8 +8,8 @@
 cat <<EOF 
 # Preparing your system for ntpsec source build...
 # This script presently knows about Debian, Ubuntu, CentOS, and Fedora.
-# If you are running something else, please follow the directions for 
-# by-hand installation in INSTALL.
+# If you are running something else, such as MacOS or Solaris, please
+# follow the directions for by-hand installation in INSTALL.
 #
 EOF
 
@@ -33,6 +33,9 @@ then
     installer=yum
 elif apt --version 2>/dev/null
 then
+    # FIXME, on MacOS and Solaris systems, apt is part of Java
+    # http://java.sun.com/j2se/1.5.0/docs/guide/apt/GettingStarted.html
+    # need a better way to determine the local system uses Debian Advanced Packaging Tool installer
     installer=apt
 else
     installer=unknown
