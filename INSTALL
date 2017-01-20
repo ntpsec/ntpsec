@@ -18,6 +18,12 @@ to run and in addition, the development headers installed to build.
 
 === The short version ===
 
+If you are on a Debian or Ubuntu distribution that uses apt-get, or on
+a Fedora or RedHat distribution that uses yum, you can use the
+./builprep script.  If you are using other distributions or OSes, such
+as Gento, SuSE SLES, MacOS, Solaris, or BSD, you will have to install the
+build prerequisites by hand on your system.
+
 Run ./buildprep -n to see what needs to be installed as prerequisites
 on your system.  In order that we have a single point of truth about
 package requirements, much information about installable-package names
