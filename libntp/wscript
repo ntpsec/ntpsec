@@ -50,8 +50,7 @@ def build(ctx):
 	includes = [
 		"%s/libisc/include/" % srcnode,
 		"%s/libisc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
-		"%s/libsodium/include/" % srcnode,
-	]
+		] + ctx.env.PLATFORM_INCLUDES
 
 	# C library
 	ctx(

@@ -136,8 +136,7 @@ def build(ctx):
 		includes	= [
 					"%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
 					"%s/ntpd/" % srcnode,
-                        "%s/libsodium/include" % srcnode
-		],
+				] + ctx.env.PLATFORM_INCLUDES,
 		install_path	= ntpd_install_path,
 	)
 
