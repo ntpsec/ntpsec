@@ -2,10 +2,11 @@
 # temp-log.py: A script that will be run eventually as a daemon
 #              to log temperature of a system
 # Usage:
-# temp-log.py [-h] [-V] [-s] [-m]
+# temp-log.py [-h] [-V] [-l]
 # Writes logs to /var/log/ntpstats
 # Requires root to run
 
+<<<<<<< Updated upstream
 import logging
 import logging.handlers
 import os
@@ -14,6 +15,12 @@ import subprocess
 import sys
 import time
 
+=======
+import sys, re, time, subprocess, os, logging, logging.handlers, argparse
+
+# Global vars
+version = 1.0
+>>>>>>> Stashed changes
 
 class CpuTemp:
     "Sensors on the CPU Core"
@@ -30,18 +37,19 @@ class CpuTemp:
         "Collects the data and return the output as an array"
         _index = 0
         _data = []
-        self._record_temp()
-        # grab the needed output and format it to log
-        for record in self.sensors_output:
+        # grab the needed output
+        _output = subprocess.check_output([self._sensors_path, "-u"], universal_newlines=True).split('\n')
+        for record in _output:
             match = self._pattern.match(record)
             if match and match.group(1):
                 _now = int(time.time())
                 _cpu_temprature = match.group(1)
-                _data.append('{} {} {}'.format(_now, _index, _cpu_temprature))
+                _data.append('{},{},{}'.format(_now, _index, _cpu_temprature))
                 _index += 1
 
         return _data
 
+<<<<<<< Updated upstream
     def _record_temp(self):
         "Call the external command 'sensors -u' and get the data"
         # grab the data from the "sensors -u" command
@@ -50,18 +58,24 @@ class CpuTemp:
         self.sensors_output = output.split('\n')
 
 
+=======
+>>>>>>> Stashed changes
 class SmartCtl:
     "Sensor on the Hard Drive"
-    def __init__(self, device):
+    def __init__(self):
         if os.getuid() != 0:
             raise IOError("You must be root!")
         # Which drive to watch
-        self._device = device
+        self._drives = []
+        for child in os.listdir('/dev/'):
+            if re.compile('sd[a-z]$').match(child):
+                self._drives.append("/dev/"+str(child))
         # this regex matches temperature output lines from smartctl -a
         self._pat = re.compile('194 Temperature_Celsius\s+\S+\s+(\d+)\s+')
 
     def get_data(self):
         "Collects the data and return the output as an array"
+<<<<<<< Updated upstream
         _output = subprocess.check_output(["smartctl", "-a", self._device],
                                           universal_newlines=True)
         _lines = _output.split('\n')
@@ -71,6 +85,16 @@ class SmartCtl:
             if match and match.group(1):
                 temp = match.group(1)
                 return ('%d SMART %s' % (now, temp))
+=======
+        for _device in self._drives:
+            _output = subprocess.check_output(["smartctl", "-a", _device], universal_newlines=True).split('\n')
+            for line in _output:
+                match = self._pat.match(line)
+                now = int(time.time())
+                if match and match.group(1):
+                    temp = match.group(1)
+                    return ('%d,%s,%s' % (now, _device, temp))
+>>>>>>> Stashed changes
 
 
 class ZoneTemp:
@@ -92,11 +116,12 @@ class ZoneTemp:
             for line in _zone_data:
                 temp = float(line) / 1000
                 _now = int(time.time())
-                _data.append('{} {} {}'.format(_now, _zone, temp))
+                _data.append('{},{},{}'.format(_now, _zone, temp))
                 _zone = _zone+1
             _zone_data.close()
         return _data
 
+<<<<<<< Updated upstream
 # Global vars
 version = 1.0
 # Create objects
@@ -109,6 +134,11 @@ def logging_setup(fileName, levelName, logLevel):
     "Create logging object with midnight rotation"
     logFormat = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+=======
+def logging_setup(fileName, levelName, logLevel):
+    "Create logging object"
+    logFormat = logging.Formatter('%(asctime)s,%(name)s,%(levelname)s,%(message)s')
+>>>>>>> Stashed changes
     # Create logger for cpuTemp
     tempLogger = logging.getLogger(levelName)
     tempLogger.setLevel(logLevel)
@@ -125,18 +155,38 @@ def logging_setup(fileName, levelName, logLevel):
     _file.setFormatter(logFormat)
     # Add the handler to the logger
     tempLogger.addHandler(_file)
-    # Logging rotate
     return tempLogger
 
+<<<<<<< Updated upstream
 
 def log_data(logger, data):
     "Write data to the log"
+=======
+def console_log_setup(levelName, logLevel):
+    "Create logging object that writes to STDOUT"
+    logFormat = logging.Formatter('%(asctime)s,%(name)s,%(levelname)s,%(message)s')
+    # Create the logging object
+    tempLog = logging.getLogger(levelName)
+    tempLog.setLevel(logLevel)
+    # Create the output handler
+    ch = logging.StreamHandler()
+    ch.setLevel(logLevel)
+    # Apply the format to the handler
+    ch.setFormatter(logFormat)
+    # Apply the handler object to the logging object
+    tempLog.addHandler(ch)
+    return tempLog
+
+def logData(log, data):
+    "log the data"
+>>>>>>> Stashed changes
     if type(data) in (tuple, list):
         for _item in data:
-            logger.info(_item)
+            log.info(_item)
     else:
-        logger.info(data)
+        log.info(data)
 
+<<<<<<< Updated upstream
 
 def log_with_multiple_files():
     "Write the logs to individual files depending on sensor"
@@ -147,15 +197,32 @@ def log_with_multiple_files():
                               'cpu_levelname', logging.INFO)
     hddLogger = logging_setup('/var/log/ntpstats/hddTemp.log',
                               'hdd_levelname', logging.INFO)
+=======
+def log_data():
+    "Write all temperature readings to one file"
+    try:
+        # Create objects
+        cpu  = CpuTemp()
+        zone = ZoneTemp()
+        hdd  = SmartCtl()
+    except IOError as ioe:
+        sys.stderr.write("Unable to run: " + str(ioe) + "\n")
+        sys.exit(1)
+    # Create the logger instance
+    zoneLogger = logging_setup(log, 'zone', logging.INFO)
+    cpuLogger  = logging_setup(log, 'cpu', logging.INFO)
+    hddLogger  = logging_setup(log, 'hdd', logging.INFO)
+>>>>>>> Stashed changes
 
     # Write data to their respective logs forever
     while True:
-        log_data(zoneLogger, zone.get_data())
-        log_data(cpuLogger, cpu.get_data())
-        log_data(hddLogger, hdd.get_data())
+        logData(zoneLogger, zone.get_data())
+        logData(cpuLogger, cpu.get_data())
+        logData(hddLogger, hdd.get_data())
         # Sleep 15 seconds
         time.sleep(15)
 
+<<<<<<< Updated upstream
 
 def log_with_one_file():
     "Write all temperature readings to one file"
@@ -168,13 +235,29 @@ def log_with_one_file():
                               'hdd_levelname', logging.INFO)
 
     # Write data to their respective logs forever
+=======
+def display():
+    try:
+        # Create objects
+        cpu  = CpuTemp()
+        zone = ZoneTemp()
+        hdd  = SmartCtl()
+    except IOError as ioe:
+        sys.stderr.write("Unable to run: " + str(ioe) + "\n")
+        sys.exit(1)
+
+    zoneLogger = console_log_setup('zone', logging.INFO)
+    cpuLogger  = console_log_setup('cpu', logging.INFO)
+    hddLogger  = console_log_setup('hdd', logging.INFO)
+>>>>>>> Stashed changes
     while True:
-        log_data(zoneLogger, zone.get_data())
-        log_data(cpuLogger, cpu.get_data())
-        log_data(hddLogger, hdd.get_data())
+        logData(zoneLogger, zone.get_data())
+        logData(cpuLogger, cpu.get_data())
+        logData(hddLogger, hdd.get_data())
         # Sleep 15 seconds
         time.sleep(15)
 
+<<<<<<< Updated upstream
 
 def help_text():
     "Help message"
@@ -211,3 +294,32 @@ except KeyboardInterrupt:
 except:
     help_text()
     sys.exit(1)
+=======
+# Work with argvars
+parser = argparse.ArgumentParser(description="Temperature sensor daemon",
+                                 epilog="""See the manual page for details.""")
+parser.add_argument('-l', '--logfile',
+                    dest='logfile',
+                    help="append log data to LOGFILE instead of stdout",
+                    nargs=1)
+parser.add_argument('-V', '--version',
+                    dest='version',
+                    help="Display the version and exit",
+                    action='store_true')
+
+args = parser.parse_args()
+if args.version:
+    print("temp-log v. " + str(version))
+
+elif args.logfile:
+    try:
+        log = args.logfile[0]
+        log_data()
+    except (KeyboardInterrupt, SystemExit):
+        sys.exit(0)
+else:
+    try:
+        display()
+    except (KeyboardInterrupt, SystemExit):
+        sys.exit(0)
+>>>>>>> Stashed changes
