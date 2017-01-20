@@ -67,7 +67,7 @@ case $installer in
 	echo "# SLES versions 12 and earlier do not have pps-tools"
 	$do yast --install basis-devel gnuplot libcap-devel libcap2
 	$do yast --install liberation-fonts libseccomp-devel libsodium-devel
-	$do yast --install libsodium13 openssl-libs and openssl-devel
+	$do yast --install libsodium13 openssl-libs openssl-devel
 	$do yast --install python-devel
 	;;
 esac
