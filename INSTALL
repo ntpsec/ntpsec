@@ -57,10 +57,11 @@ libsodium::
    but we judge this creates an unacceptable risk should a CVE be issued
    against it
 
-   Gentoo: dev-libs/libsodium
    CentOS: libsodium in epel ("Extra Packages for Enterprise Linux").
-   Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
    Debian Wheezy and older: https://sourceforge.net/projects/debiannoofficial/files/wheezy/
+   Gentoo: dev-libs/libsodium
+   MacOS, macports: libsodium
+   Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
 
 libcap::
    Required on Linux, to support dropping root.
