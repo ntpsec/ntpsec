@@ -248,7 +248,7 @@ def cmd_configure(ctx, config):
                comment="Operating system detected by Python (%s)" % platform)
 
     # XXX: hack
-    if ctx.env.PLATFORM_TARGET in ["freebsd", "osx", "openbsd"]:
+    if ctx.env.PLATFORM_TARGET in ["freebsd", "openbsd"]:
         ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
         ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
     elif ctx.env.PLATFORM_TARGET == "netbsd":
@@ -256,13 +256,14 @@ def cmd_configure(ctx, config):
         ctx.env.PLATFORM_LIBPATH = ["/usr/lib", "/usr/pkg/lib"]
     elif ctx.env.PLATFORM_TARGET == "win":
         ctx.load("msvc")
-
-    # OS X needs this for IPv6
-    if ctx.env.PLATFORM_TARGET == "osx":
+    elif ctx.env.PLATFORM_TARGET == "osx":
+        # macports location
+        ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
+        ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
+	# OS X needs this for IPv6
         ctx.define("__APPLE_USE_RFC_3542", 1,
                    comment="Needed for IPv6 support")
-
-    if sys.platform.startswith("sunos"):
+    elif sys.platform.startswith("sunos"):
         ctx.define("_POSIX_PTHREAD_SEMANTICS", "1", quote=False,
                    comment="Needed for POSIX function definitions on Solaris")
 
