@@ -1506,7 +1506,8 @@ ctl_putsys(
 		break;
 
 	case CS_ERROR:
-		ctl_putdbl(sys_var[CS_ERROR].text, clock_jitter * 1e3);
+		/* a.k.a clk_jitter (s).  output as us */
+		ctl_putdbl6(sys_var[CS_ERROR].text, clock_jitter * 1e3);
 		break;
 
 	case CS_CLOCK:
@@ -1531,7 +1532,8 @@ ctl_putsys(
 		break;
 
 	case CS_STABIL:
-		ctl_putdbl(sys_var[CS_STABIL].text, clock_stability *
+		/* a.k.a clk_wander (s/s), output as us/s */
+		ctl_putdbl6(sys_var[CS_STABIL].text, clock_stability *
 			   1e6);
 		break;
 
