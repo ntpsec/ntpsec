@@ -183,6 +183,10 @@ Python import error when trying to run ntpq or other Python tools.
 If this happens, just do ./waf build again.  This is a known bug
 which will be fixed in a future release.
 
+waf has been observed to fail under Python 3.6.0 and might under other
+Python 3 version as well.  The problem has been filed as an upstream
+bug. The workaround is simple: Configure and build with python2.
+
 The configuration system occasionally acts up during builds on new
 platforms.  If you see the message "Compilation check failed but
 include exists!" this means that an attempt to compile a small test
