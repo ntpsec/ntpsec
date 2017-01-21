@@ -132,37 +132,3 @@ make_socket_nonblocking(
 	}
 }
 
-#if 0
-
-/* The following subroutines should probably be moved here */
-
-static SOCKET
-open_socket(
-	sockaddr_u *	addr,
-	int		bcast,
-	int		turn_off_reuse,
-	endpt *		interf
-	)
-void
-sendpkt(
-	sockaddr_u *		dest,
-	endpt *			ep,
-	int			ttl,
-	struct pkt *		pkt,
-	int			len
-	)
-
-static inline int
-read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
-
-static inline int
-read_network_packet(
-	SOCKET			fd,
-	endpt *			itf,
-	l_fp			ts
-	)
-
-void
-kill_asyncio(int startfd)
-
-#endif /* 0 */
