@@ -51,18 +51,16 @@ case $installer in
     apt)
 	$do apt-get install bison libcap-dev libcap2 libseccomp-dev
 	$do apt-get install libssl-dev libssl1.0.0 python-dev
+	$do apt-get install pps-tools
+	$do apt-get install fonts-liberation
 	distro=`lsb_release -i -s`
 	if [ "$distro" = "Ubuntu" ]
 	then
 	    echo "# Looks like an Ubuntu system"
 	    $do apt-get install gnuplot5
-	    $do apt-get install ppstools
-	    $do apt-get install liberation
 	else
 	    echo "# Looks like a generic Debian system"
 	    $do apt-get install gnuplot
-	    $do apt-get install pps-tools
-	    $do apt-get install fonts-liberation
 	fi
 	;;
     yum)
