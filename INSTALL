@@ -76,7 +76,7 @@ gnuplot::
    Required for ntpviz.
    Gentoo: sci-visualization/gnuplot
 
-argarse::
+argparse::
    Required for ntpviz when using Python version 2.6
    Install with pip: pip install argparse
 
