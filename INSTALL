@@ -57,8 +57,13 @@ libsodium::
    but we judge this creates an unacceptable risk should a CVE be issued
    against it
 
+   Tarballs: https://download.libsodium.org/libsodium/releases/
+
    CentOS: libsodium in epel ("Extra Packages for Enterprise Linux").
-   Debian Wheezy and older: https://sourceforge.net/projects/debiannoofficial/files/wheezy/
+   Debian Wheezy and older: libdevel/libsodium-dev
+       i386 deb available from:
+	   https://sourceforge.net/projects/debiannoofficial/files/wheezy/
+       amd64: use a tarball
    Gentoo: dev-libs/libsodium
    MacOS/OS X, macports: libsodium
    Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
