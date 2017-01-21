@@ -49,7 +49,7 @@ echo "# Your package installer is ${installer}."
 # these package name lists have been *removed* from INSTALL.
 case $installer in
     apt)
-	$do apt-get install bison libcap-dev libcap2 ibseccomp-dev
+	$do apt-get install bison libcap-dev libcap2 libseccomp-dev
 	$do apt-get install libssl-dev libssl1.0.0 python-dev
 	distro=`lsb_release -i -s`
 	if [ "$distro" = "Ubuntu" ]
