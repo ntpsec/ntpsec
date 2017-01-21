@@ -60,7 +60,7 @@ libsodium::
    CentOS: libsodium in epel ("Extra Packages for Enterprise Linux").
    Debian Wheezy and older: https://sourceforge.net/projects/debiannoofficial/files/wheezy/
    Gentoo: dev-libs/libsodium
-   MacOS, macports: libsodium
+   MacOS/OS X, macports: libsodium
    Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
 
 libcap::
@@ -121,11 +121,19 @@ Local copy of DocBook stylesheets:
    Gentoo: app-text/docbook-xsl-stylesheets
    SLES: docbook-xsl-stylesheets - pulled in by `asciidoc`
 
+wget:
+   Optional, used by ntpleapfetch
+
 The OS X build has been tested in this environment:
 
  OS X Version             : 10.11.x (El Capitan)
  Xcode Version            : 7.1
  Xcode Command Line Tools : 7.2-beta
+
+The MacOS build has been tested in this environment:
+
+ MacOS Version            : 16.3.0
+ Xcode Version            : 8.2.1
 
 All you will require is the Xcode command line tools with no additions.
 There is currently no support for using Xcode's builder. NTPsec's standard
