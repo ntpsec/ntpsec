@@ -74,7 +74,7 @@ case $installer in
 	$do $installer install liberation-sans-fonts.noarch
 	$do $installer install liberation-serif-fonts.noarch
 	$do $installer install libseccomp-devel openssl-devel openssl-libs
-	$do $installer install pps-tools pps-tools-devel python python-dev
+	$do $installer install pps-tools pps-tools-devel python python-devel
 	;;
     yast|zypper)
 	echo "# SLES versions 12 and earlier do not have pps-tools"
