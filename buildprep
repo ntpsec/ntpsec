@@ -96,7 +96,7 @@ case $installer in
 	;;
     yum|dnf)
 	# no libsodium on CentOS 7
-	$do $installer install libsodium-dev libsodium-devel
+	$do $installer install libsodium libsodium-devel
 	;;
 esac
 echo ""
