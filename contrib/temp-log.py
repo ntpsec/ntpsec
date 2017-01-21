@@ -42,7 +42,7 @@ class CpuTemp:
             if match and match.group(1):
                 _now = int(time.time())
                 _cpu_temprature = match.group(1)
-                _data.append('{},{},{}'.format(_now, _index, _cpu_temprature))
+                _data.append('%d %s %s' % (_now, _index, _cpu_temprature))
                 _index += 1
 
         return _data
@@ -73,7 +73,7 @@ class SmartCtl:
                 now = int(time.time())
                 if match and match.group(1):
                     temp = match.group(1)
-                    return ('%d,%s,%s' % (now, _device, temp))
+                    return ('%d %s %s' % (now, _device, temp))
 
 
 class ZoneTemp:
@@ -95,7 +95,7 @@ class ZoneTemp:
             for line in _zone_data:
                 temp = float(line) / 1000
                 _now = int(time.time())
-                _data.append('{},{},{}'.format(_now, _zone, temp))
+                _data.append('%d %s %s' % (_now, _zone, temp))
                 _zone = _zone+1
             _zone_data.close()
         return _data
@@ -104,7 +104,7 @@ class ZoneTemp:
 def logging_setup(fileName, levelName, logLevel):
     "Create logging object"
     logFormat = logging.Formatter(
-        '%(asctime)s,%(name)s,%(levelname)s,%(message)s')
+        '%(asctime)s %(name)s %(levelname)s %(message)s')
     # Create logger for cpuTemp
     tempLogger = logging.getLogger(levelName)
     tempLogger.setLevel(logLevel)
@@ -127,7 +127,7 @@ def logging_setup(fileName, levelName, logLevel):
 def console_log_setup(levelName, logLevel):
     "Create logging object that writes to STDOUT"
     logFormat = logging.Formatter(
-        '%(asctime)s,%(name)s,%(levelname)s,%(message)s')
+        '%(asctime)s %(name)s %(levelname)s %(message)s')
     # Create the logging object
     tempLog = logging.getLogger(levelName)
     tempLog.setLevel(logLevel)
