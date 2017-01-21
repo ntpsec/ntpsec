@@ -21,7 +21,7 @@ else
     do=""
 fi
 
-if [ "$do" = "" -a "$UID" != 0 ]
+if [ "$do" = "" -a `id -u` != 0 ]
 then
     echo "#You must be running as root for your installer to do its thing."
     exit 1
