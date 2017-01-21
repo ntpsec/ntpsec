@@ -31,6 +31,9 @@ installer=""
 if yum version 2>/dev/null
 then
     installer=yum
+elif dnf --version >/dev/null 2>&1
+then
+    installer=dnf
 elif apt-get --version >/dev/null 2>&1
 then
     installer=apt
@@ -63,15 +66,15 @@ case $installer in
 	    $do apt-get install gnuplot
 	fi
 	;;
-    yum)
-	$do yum install bison gnuplot libcap libcap-devel
-        $do yum install liberation-fonts-common.noarch
-	$do yum install liberation-mono-fonts.noarch
-	$do yum install liberation-narrow-fonts.noarch
-        $do yum install liberation-sans-fonts.noarch
-        $do yum install liberation-serif-fonts.noarch
-	$do yum install libseccomp-devel install openssl-devel openssl-libs
-	$do yum install pps-tools pps-tools-devel install python python-dev
+    yum|dnf)
+	$do $installer install bison gnuplot libcap libcap-devel
+	$do $installer install liberation-fonts-common.noarch
+	$do $installer install liberation-mono-fonts.noarch
+	$do $installer install liberation-narrow-fonts.noarch
+	$do $installer install liberation-sans-fonts.noarch
+	$do $installer install liberation-serif-fonts.noarch
+	$do $installer install libseccomp-devel openssl-devel openssl-libs
+	$do $installer install pps-tools pps-tools-devel python python-dev
 	;;
     yast|zypper)
 	echo "# SLES versions 12 and earlier do not have pps-tools"
@@ -91,9 +94,9 @@ case $installer in
 	# no libsodium on Debian wheezy
 	$do apt-get install libsodium-dev
 	;;
-    yum)
-        # no libsodium on CentOS 7
-	$do yum install libsodium-dev libsodium-devel
+    yum|dnf)
+	# no libsodium on CentOS 7
+	$do $installer install libsodium-dev libsodium-devel
 	;;
 esac
 echo ""
