@@ -49,16 +49,20 @@ echo "# Your package installer is ${installer}."
 # these package name lists have been *removed* from INSTALL.
 case $installer in
     apt)
-	$do apt-get install bison libcap-dev libcap2 liberation libseccomp-dev
-	$do apt-get install libssl-dev libssl1.0.0 ppstools python-dev
+	$do apt-get install bison libcap-dev libcap2 ibseccomp-dev
+	$do apt-get install libssl-dev libssl1.0.0 python-dev
 	distro=`lsb_release -i -s`
 	if [ "$distro" = "Ubuntu" ]
 	then
 	    echo "# Looks like an Ubuntu system"
 	    $do apt-get install gnuplot5
+	    $do apt-get install ppstools
+	    $do apt-get install liberation
 	else
 	    echo "# Looks like a generic Debian system"
 	    $do apt-get install gnuplot
+	    $do apt-get install pps-tools
+	    $do apt-get install fonts-liberation
 	fi
 	;;
     yum)
@@ -81,6 +85,7 @@ echo "# Watch these installations closely; if you get a failure message,"
 echo "# see INSTALL for instructions."
 case $installer in
     apt)
+	# no libsodium on wheezy
 	$do apt-get install libsodium-dev
 	;;
     yum)
