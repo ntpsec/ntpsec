@@ -15,8 +15,14 @@ import subprocess
 import sys
 import time
 
-# Global vars
-version = 1.0
+try:
+    import gps
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write("temp-log: can't find Python NTP modules "
+                     "-- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 
 
 class CpuTemp:
@@ -25,9 +31,9 @@ class CpuTemp:
         # pattern that matches the string that has the cpu temp
         self._pattern = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
         # Find the sensors binary and stores the path
-        self._sensors_path = subprocess.check_output(
+        _sensors_path = subprocess.check_output(
             ["which", "sensors"], universal_newlines=False).replace('\n', '')
-        if self._sensors_path is None:
+        if _sensors_path is None:
             raise Exception("Unable to find sensors binary")
 
     def get_data(self):
@@ -35,7 +41,7 @@ class CpuTemp:
         _index = 0
         _data = []
         # grab the needed output
-        _output = subprocess.check_output([self._sensors_path, "-u"],
+        _output = subprocess.check_output(['sensors', "-u"],
                                           universal_newlines=True).split('\n')
         for record in _output:
             match = self._pattern.match(record)
@@ -77,7 +83,7 @@ class SmartCtl:
 
 
 class ZoneTemp:
-    "Sensors on the CPU Zones"
+    "Zone sensors"
     def __init__(self):
         self._base_dir = '/sys/class/thermal/'
         self.zone_directories = []
@@ -99,6 +105,33 @@ class ZoneTemp:
                 _zone = _zone+1
             _zone_data.close()
         return _data
+
+
+# Work with argvars
+parser = argparse.ArgumentParser(description="Temperature sensor daemon",
+                                 epilog="""See the manual page for details.""")
+parser.add_argument('-l', '--logfile',
+                    dest='logfile',
+                    help="append log data to LOGFILE instead of stdout",
+                    nargs=1)
+parser.add_argument('-o', '--once',
+                    dest='once',
+                    help="Run the output once and exit",
+                    action='store_true')
+parser.add_argument('-v', '--verbose',
+                    action="store_true",
+                    dest='verbose',
+                    help="be verbose")
+parser.add_argument('-V', '--version',
+                    action="version",
+                    version="temp-log %s" % ntp.util.stdversion())
+parser.add_argument('-w', '--wait',
+                    default=[5],
+                    dest='wait',
+                    help="Set delay time in seconds, default is 5",
+                    nargs=1,
+                    type=int)
+args = parser.parse_args()
 
 
 def logging_setup(fileName, logLevel):
@@ -156,8 +189,18 @@ def log_data():
         zone = ZoneTemp()
         hdd = SmartCtl()
     except IOError as ioe:
-        sys.stderr.write("Unable to run: " + str(ioe) + "\n")
-        sys.exit(1)
+        if args.verbose:
+            sys.stderr.write("Unable to run: " + str(ioe) + "\n")
+            sys.exit(1)
+        else:
+            sys.exit(1)
+    except Exception as e:
+        if args.verbose:
+            sys.stderr.write("Unable to run: " + str(e) + "\n")
+            sys.exit(1)
+        else:
+            sys.exit(1)
+
     # Create the logger instance
     Logger = logging_setup(log, logging.INFO)
 
@@ -170,8 +213,7 @@ def log_data():
         logData(Logger, zone.get_data())
         logData(Logger, cpu.get_data())
         logData(Logger, hdd.get_data())
-        # Sleep 15 seconds
-        time.sleep(15)
+        time.sleep(args.wait[0])
 
 
 def display():
@@ -181,9 +223,19 @@ def display():
         zone = ZoneTemp()
         hdd = SmartCtl()
     except IOError as ioe:
-        sys.stderr.write("Unable to run: " + str(ioe) + "\n")
-        sys.exit(1)
+        if args.verbose:
+            sys.stderr.write("Unable to run: " + str(ioe) + "\n")
+            sys.exit(1)
+        else:
+            sys.exit(1)
+    except Exception as e:
+        if args.verbose:
+            sys.stderr.write("Unable to run: " + str(e) + "\n")
+            sys.exit(1)
+        else:
+            sys.exit(1)
 
+    # Create the logger instance
     Logger = console_log_setup(logging.INFO)
     # Create data layout
     logData(Logger, "# Values are space seperated")
@@ -194,32 +246,38 @@ def display():
         logData(Logger, zone.get_data())
         logData(Logger, cpu.get_data())
         logData(Logger, hdd.get_data())
-        # Sleep 15 seconds
-        time.sleep(15)
+        time.sleep(args.wait[0])
 
 
-# Work with argvars
-parser = argparse.ArgumentParser(description="Temperature sensor daemon",
-                                 epilog="""See the manual page for details.""")
-parser.add_argument('-l', '--logfile',
-                    dest='logfile',
-                    help="append log data to LOGFILE instead of stdout",
-                    nargs=1)
-parser.add_argument('-V', '--version',
-                    dest='version',
-                    help="Display the version and exit",
-                    action='store_true')
+def one_output():
+    "Run the output once"
+    try:
+        # Create objects
+        cpu = CpuTemp()
+        zone = ZoneTemp()
+        hdd = SmartCtl()
+    except IOError as ioe:
+        sys.stderr.write("Unable to run: " + str(ioe) + "\n")
+        sys.exit(1)
+    Logger = console_log_setup(logging.INFO)
+    # Create data layout
+    logData(Logger, "# Values are space seperated")
+    logData(Logger, "# seconds since epoc, sensor, sensor value")
+    logData(Logger, zone.get_data())
+    logData(Logger, cpu.get_data())
+    logData(Logger, hdd.get_data())
+
 
 args = parser.parse_args()
-if args.version:
-    print("temp-log v. " + str(version))
-
-elif args.logfile:
+if args.logfile:
     try:
         log = args.logfile[0]
         log_data()
     except (KeyboardInterrupt, SystemExit):
         sys.exit(0)
+elif args.once:
+    one_output()
+    sys.exit(0)
 else:
     try:
         display()
