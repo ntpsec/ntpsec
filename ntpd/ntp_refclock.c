@@ -861,7 +861,7 @@ refclock_control(
 	/*
 	 * Check for valid address and running peer
 	 */
-	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);
+	peer = findexistingpeer(srcadr, NULL, NULL, -1);
 
 	if (NULL == peer)
 		return;
