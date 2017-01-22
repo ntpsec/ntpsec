@@ -114,8 +114,7 @@ static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 static struct peer *	findexistingpeer_name(const char *, u_short,
 					      struct peer *, int);
 static struct peer *	findexistingpeer_addr(sockaddr_u *,
-					      struct peer *, int,
-					      uint8_t);
+					      struct peer *, int);
 static void		free_peer(struct peer *, int);
 static void		getmorepeermem(void);
 static int		score(struct peer *);
@@ -200,18 +199,17 @@ struct peer *
 findexistingpeer_addr(
 	sockaddr_u *	addr,
 	struct peer *	start_peer,
-	int		mode,
-	uint8_t		cast_flags
+	int		mode
 	)
 {
 	struct peer *peer;
 
-	DPRINTF(2, ("findexistingpeer_addr(%s, %s, %d, 0x%x)\n",
+	DPRINTF(2, ("findexistingpeer_addr(%s, %s, %d)\n",
 		sockporttoa(addr),
 		(start_peer)
 		    ? sockporttoa(&start_peer->srcadr)
 		    : "NULL",
-		mode, (u_int)cast_flags));
+		    mode));
 
 	/*
 	 * start_peer is included so we can locate instances of the
@@ -225,9 +223,9 @@ findexistingpeer_addr(
 		peer = start_peer->adr_link;
 	
 	while (peer != NULL) {
-		DPRINTF(3, ("%s %s %d %d 0x%x 0x%x ", sockporttoa(addr),
+		DPRINTF(3, ("%s %s %d %d 0x%x ", sockporttoa(addr),
 			sockporttoa(&peer->srcadr), mode, peer->hmode,
-			(u_int)cast_flags, (u_int)peer->cast_flags));
+			(u_int)peer->cast_flags));
 		if ((-1 == mode || peer->hmode == mode) &&
 		    ADDR_PORT_EQ(addr, &peer->srcadr)) {
 			DPRINTF(3, ("found.\n"));
@@ -249,16 +247,13 @@ findexistingpeer(
 	sockaddr_u *	addr,
 	const char *	hostname,
 	struct peer *	start_peer,
-	int		mode,
-	uint8_t		cast_flags
-	)
+	int		mode)
 {
 	if (hostname != NULL)
 		return findexistingpeer_name(hostname, AF(addr),
 					     start_peer, mode);
 	else
-		return findexistingpeer_addr(addr, start_peer, mode,
-					     cast_flags);
+		return findexistingpeer_addr(addr, start_peer, mode);
 }
 
 
@@ -649,8 +644,7 @@ newpeer(
 	 * structure.
 	 */
 	if (dstadr != NULL) {
-		peer = findexistingpeer(srcadr, hostname, NULL, hmode,
-					cast_flags);
+		peer = findexistingpeer(srcadr, hostname, NULL, hmode);
 		while (peer != NULL) {
 			if (peer->dstadr == dstadr ||
 			    ((MDF_BCLNT & cast_flags) &&
@@ -661,13 +655,11 @@ newpeer(
 			    peer->dstadr == findinterface(srcadr))
 				break;
 
-			peer = findexistingpeer(srcadr, hostname, peer,
-						hmode, cast_flags);
+			peer = findexistingpeer(srcadr, hostname, peer,	hmode);
 		}
 	} else {
 		/* no endpt address given */
-		peer = findexistingpeer(srcadr, hostname, NULL, hmode,
-					cast_flags);
+		peer = findexistingpeer(srcadr, hostname, NULL, hmode);
 	}
 
 	/*
