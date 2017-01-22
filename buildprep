@@ -7,7 +7,8 @@
 
 cat <<EOF 
 # Preparing your system for ntpsec source build...
-# This script presently knows about Debian, Ubuntu, CentOS, Fedora, and SLES.
+# This script presently knows about:
+#   CentOS, Debian, Fedora, Gentoo, SLES and Ubuntu
 # If you are running something else, such as MacOS or Solaris, please
 # follow the directions for by-hand installation in INSTALL.
 #
@@ -28,7 +29,10 @@ then
 fi
 
 installer=""
-if yum version 2>/dev/null
+if emerge --version 2>/dev/null
+then
+    installer=emerge
+elif yum version 2>/dev/null
 then
     installer=yum
 elif dnf --version >/dev/null 2>&1
@@ -66,6 +70,11 @@ case $installer in
 	    $do apt-get install gnuplot
 	fi
 	;;
+    emerge)
+        $do emerge -q y media-fonts/liberation-fonts
+        $do emerge -q y sci-visualization/gnuplot
+        $do emerge -q y net-misc/pps-tools
+        ;;
     yum|dnf)
 	$do $installer install bison gnuplot libcap libcap-devel
 	$do $installer install liberation-fonts-common.noarch
@@ -94,6 +103,9 @@ case $installer in
 	# no libsodium on Debian wheezy
 	$do apt-get install libsodium-dev
 	;;
+    emerge)
+        $do emerge -q y dev-libs/libsodium
+        ;;
     yum|dnf)
 	# no libsodium on CentOS 7
 	$do $installer install libsodium libsodium-devel
