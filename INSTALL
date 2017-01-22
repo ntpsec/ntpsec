@@ -19,11 +19,11 @@ to run and in addition, the development headers installed to build.
 === The short version ===
 
 If you are on a Debian or Ubuntu distribution that uses apt-get, or on
-a Fedora or RedHat distribution that uses yum, or a Suse distribution
-that uses yast, you can use the ./buildprep script.  If you are using
-other distributions or OSes, such as Gentoo, MacOS, Solaris, or BSD,
-you will have to install the build prerequisites by hand on your
-system.
+a Fedora or RedHat distribution that uses yum or dnf, or a Suse
+distribution that uses yast or zypper, or Gentoo, you can use the
+./buildprep script.  If you are using other distributions or OSes,
+such as MacOS, Solaris, or BSD, you will have to install the build
+prerequisites by hand on your system.
 
 Run ./buildprep -n to see what needs to be installed as prerequisites
 on your system.  In order that we have a single point of truth about
@@ -64,7 +64,6 @@ libsodium::
        i386 deb available from:
 	   https://sourceforge.net/projects/debiannoofficial/files/wheezy/
        amd64: use a tarball
-   Gentoo: dev-libs/libsodium
    MacOS/OS X, macports: libsodium
    Ubuntu 14.04 LTS: and older: https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
 
@@ -74,7 +73,6 @@ libcap::
 
 gnuplot::
    Required for ntpviz.
-   Gentoo: sci-visualization/gnuplot
 
 argarse::
    Required for ntpviz when using Python version 2.6
@@ -104,11 +102,9 @@ sys/timepps.h::
    file to be installed, depending on which refclocks you enable.
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
-   Gentoo: net-misc/pps-tools
 
 liberation::
    Optional, improves font quality in ntpviz renderings.
-   Gentoo: media-fonts/liberation-fonts
 
 asciidoc, a2x::
    You will need asciidoc to make HTML and a2x to make manual pages from the
