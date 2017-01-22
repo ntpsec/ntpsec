@@ -84,7 +84,7 @@ TEST(a_md5encrypt, IPv6AddressToRefId) {
 	SET_AF(&addr, AF_INET6);
 	SET_SOCK_ADDR6(&addr, address);
 
-	const int expected = 0x75cffd52;
+	const int expected = htonl(0x52fdcf75);
 
 	TEST_ASSERT_EQUAL(expected, addr2refid(&addr));
 }
