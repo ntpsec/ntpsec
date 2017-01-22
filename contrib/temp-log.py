@@ -16,7 +16,6 @@ import sys
 import time
 
 try:
-    import gps
     import ntp.util
 except ImportError as e:
     sys.stderr.write("temp-log: can't find Python NTP modules "
