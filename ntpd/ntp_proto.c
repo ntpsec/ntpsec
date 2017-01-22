@@ -99,8 +99,6 @@ int	sys_minclock = NTP_MINCLOCK; /* minimum candidates */
 int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
 int	sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
-int	sys_ttlmax;		/* max ttl mapping vector index */
-uint8_t	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 
 /*
  * Statistics counters - first the good, then the bad
@@ -2153,8 +2151,7 @@ peer_xmit(
 		peer->org = xmt_tx;
 		xpkt.xmt = htonl_fp(xmt_tx);
 		peer->t21_bytes = sendlen;
-		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
-		    &xpkt, sendlen);
+		sendpkt(&peer->srcadr, peer->dstadr, &xpkt, sendlen);
 		peer->sent++;
 		peer->outcount++;
 		peer->throttle += (1 << peer->minpoll) - 2;
@@ -2194,7 +2191,7 @@ peer_xmit(
 		exit(1);
 	}
 	peer->t21_bytes = sendlen;
-	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
+	sendpkt(&peer->srcadr, peer->dstadr, &xpkt,
 	    sendlen);
 	peer->sent++;
         peer->outcount++;
@@ -2344,8 +2341,7 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
-		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
-		    sendlen);
+		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, sendlen);
 #ifdef DEBUG
 		if (debug)
 			printf(
@@ -2364,7 +2360,7 @@ fast_xmit(
 	 */
 	get_systime(&xmt_tx);
 	sendlen += authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
-	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
+	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, sendlen);
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
 	sys_authdelay = xmt_ty;
@@ -2450,7 +2446,7 @@ pool_xmit(
 	get_systime(&xmt_tx);
 	pool->org = xmt_tx;
 	xpkt.xmt = htonl_fp(xmt_tx);
-	sendpkt(rmtadr, lcladr, sys_ttl[pool->ttl], &xpkt, LEN_PKT_NOMAC);
+	sendpkt(rmtadr, lcladr, &xpkt, LEN_PKT_NOMAC);
 	pool->sent++;
 	pool->throttle += (1 << pool->minpoll) - 2;
 #ifdef DEBUG
@@ -2744,7 +2740,6 @@ void
 init_proto(const bool verbose)
 {
 	l_fp	dummy;
-	int	i;
 
 	/*
 	 * Fill in the sys_* stuff.  Default is don't listen to
@@ -2766,10 +2761,6 @@ init_proto(const bool verbose)
 	orphwait = current_time + sys_orphwait;
 	proto_clr_stats();
 	use_stattime = current_time;
-	for (i = 0; i < MAX_TTL; i++) {
-		sys_ttl[i] = (uint8_t)((i * 256) / MAX_TTL);
-		sys_ttlmax = i;
-	}
 	hardpps_enable = false;
 	stats_control = true;
 }

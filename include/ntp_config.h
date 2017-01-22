@@ -223,7 +223,6 @@ struct config_tree_tag {
 	attr_val_fifo *	logconfig;
 	string_fifo *	phone;
 	setvar_fifo *	setvar;
-	int_fifo *	ttl;
 	attr_val_fifo *	vars;
 	nic_rule_fifo *	nic_rules;
 	int_fifo *	reset_counters;

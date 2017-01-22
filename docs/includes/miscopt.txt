@@ -13,6 +13,5 @@
 * link:miscopt.html#tinker[tinker - modify sacred system parameters (dangerous)]
 * link:miscopt.html#rlimit[rlimit - alters certain process storage allocation limits]
 * link:miscopt.html#tos[tos - modify service parameters]
-* link:miscopt.html#ttl[ttl - set time to live]
 * link:comdex.html[Command Index]
 

@@ -2117,7 +2117,6 @@ open_socket(
 }
 
 
-/* XXX ELIMINATE sendpkt similar in ntpq.c, ntp_io.c, ntptrace.c */
 /*
  * sendpkt - send a packet to the specified destination. Maintain a
  * send error cache so that only the first consecutive error for a
@@ -2127,7 +2126,6 @@ void
 sendpkt(
 	sockaddr_u *		dest,
 	endpt *	ep,
-	int			ttl,
 	void *			pkt,
 	int			len
 	)
@@ -2141,13 +2139,13 @@ sendpkt(
 		 * unbound peer - drop request and wait for better
 		 * network conditions
 		 */
-		DPRINTF(2, ("sendpkt(dst=%s, ttl=%d, len=%d): no interface - IGNORED\n",
-			    socktoa(dest), ttl, len));
+		DPRINTF(2, ("sendpkt(dst=%s, len=%d): no interface - IGNORED\n",
+			    socktoa(dest), len));
 		return;
 	}
 
-	DPRINTF(2, ("sendpkt(%d, dst=%s, src=%s, ttl=%d, len=%d)\n",
-		    src->fd, socktoa(dest), socktoa(&src->sin), ttl, len));
+	DPRINTF(2, ("sendpkt(%d, dst=%s, src=%s, len=%d)\n",
+		    src->fd, socktoa(dest), socktoa(&src->sin), len));
 
 	cc = sendto(src->fd, pkt, (u_int)len, 0,
 		    &dest->sa, SOCKLEN(dest));

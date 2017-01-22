@@ -86,6 +86,9 @@ a build-time switch, not a run-time one).
   has been removed from the NTPsec code as part of
   getting it fully IPv6-ready.
 
+* The ttl-hop option for broadcast mode has been removed from the
+  configuration grammar.  It was never actually implemented.
+
 [[security]]
 == Security Improvements ==
 
