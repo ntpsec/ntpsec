@@ -6,6 +6,7 @@
 # Writes logs to /var/log/ntpstats
 # Requires root to run
 
+import argparse
 import logging
 import logging.handlers
 import os
@@ -13,7 +14,6 @@ import re
 import subprocess
 import sys
 import time
-import argparse
 
 # Global vars
 version = 1.0
@@ -42,7 +42,7 @@ class CpuTemp:
             if match and match.group(1):
                 _now = int(time.time())
                 _cpu_temprature = match.group(1)
-                _data.append('%d %s %s' % (_now, _index, _cpu_temprature))
+                _data.append('%d LM%s %s' % (_now, _index, _cpu_temprature))
                 _index += 1
 
         return _data
@@ -95,18 +95,17 @@ class ZoneTemp:
             for line in _zone_data:
                 temp = float(line) / 1000
                 _now = int(time.time())
-                _data.append('%d %s %s' % (_now, _zone, temp))
+                _data.append('%d ZONE%s %s' % (_now, _zone, temp))
                 _zone = _zone+1
             _zone_data.close()
         return _data
 
 
-def logging_setup(fileName, levelName, logLevel):
+def logging_setup(fileName, logLevel):
     "Create logging object"
-    logFormat = logging.Formatter(
-        '%(asctime)s %(name)s %(levelname)s %(message)s')
+    logFormat = logging.Formatter('%(message)s')
     # Create logger for cpuTemp
-    tempLogger = logging.getLogger(levelName)
+    tempLogger = logging.getLogger()
     tempLogger.setLevel(logLevel)
     # Create file handler
     _file = logging.handlers.TimedRotatingFileHandler(fileName,
@@ -124,12 +123,11 @@ def logging_setup(fileName, levelName, logLevel):
     return tempLogger
 
 
-def console_log_setup(levelName, logLevel):
+def console_log_setup(logLevel):
     "Create logging object that writes to STDOUT"
-    logFormat = logging.Formatter(
-        '%(asctime)s %(name)s %(levelname)s %(message)s')
+    logFormat = logging.Formatter('%(message)s')
     # Create the logging object
-    tempLog = logging.getLogger(levelName)
+    tempLog = logging.getLogger()
     tempLog.setLevel(logLevel)
     # Create the output handler
     ch = logging.StreamHandler()
@@ -161,15 +159,17 @@ def log_data():
         sys.stderr.write("Unable to run: " + str(ioe) + "\n")
         sys.exit(1)
     # Create the logger instance
-    zoneLogger = logging_setup(log, 'zone', logging.INFO)
-    cpuLogger = logging_setup(log, 'cpu', logging.INFO)
-    hddLogger = logging_setup(log, 'hdd', logging.INFO)
+    Logger = logging_setup(log, logging.INFO)
+
+    # Create data layout
+    logData(Logger, "# Values are space seperated")
+    logData(Logger, "# seconds since epoc, sensor, sensor value")
 
     # Write data to their respective logs forever
     while True:
-        logData(zoneLogger, zone.get_data())
-        logData(cpuLogger, cpu.get_data())
-        logData(hddLogger, hdd.get_data())
+        logData(Logger, zone.get_data())
+        logData(Logger, cpu.get_data())
+        logData(Logger, hdd.get_data())
         # Sleep 15 seconds
         time.sleep(15)
 
@@ -184,13 +184,16 @@ def display():
         sys.stderr.write("Unable to run: " + str(ioe) + "\n")
         sys.exit(1)
 
-    zoneLogger = console_log_setup('zone', logging.INFO)
-    cpuLogger = console_log_setup('cpu', logging.INFO)
-    hddLogger = console_log_setup('hdd', logging.INFO)
+    Logger = console_log_setup(logging.INFO)
+    # Create data layout
+    logData(Logger, "# Values are space seperated")
+    logData(Logger, "# seconds since epoc, sensor, sensor value")
+
+    # Write data to their respective logs forever
     while True:
-        logData(zoneLogger, zone.get_data())
-        logData(cpuLogger, cpu.get_data())
-        logData(hddLogger, hdd.get_data())
+        logData(Logger, zone.get_data())
+        logData(Logger, cpu.get_data())
+        logData(Logger, hdd.get_data())
         # Sleep 15 seconds
         time.sleep(15)
 
