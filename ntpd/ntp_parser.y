@@ -252,7 +252,6 @@
 %type	<Integer>	fudge_factor_bool_keyword
 %type	<Integer>	fudge_factor_dbl_keyword
 %type	<Attr_val_fifo>	fudge_factor_list
-%type	<Attr_val_fifo>	integer_list
 %type	<Attr_val_fifo>	integer_list_range
 %type	<Attr_val>	integer_list_range_elt
 %type	<Attr_val>	integer_range
@@ -1206,8 +1205,6 @@ miscellaneous_command
 			{ CONCAT_G_FIFOS(cfgt.phone, $2); }
 	|	T_Setvar variable_assign
 			{ APPEND_G_FIFO(cfgt.setvar, $2); }
-	|	T_Ttl integer_list
-			{ CONCAT_G_FIFOS(cfgt.ttl, $2); }
 	;
 
 misc_cmd_dbl_keyword
@@ -1385,19 +1382,6 @@ counter_set_keyword
 /* Miscellaneous Rules
  * -------------------
  */
-
-integer_list
-	:	integer_list T_Integer
-		{
-			$$ = $1;
-			APPEND_G_FIFO($$, create_int_node($2));
-		}
-	|	T_Integer
-		{
-			$$ = NULL;
-			APPEND_G_FIFO($$, create_int_node($1));
-		}
-	;
 
 integer_list_range
 	:	integer_list_range integer_list_range_elt

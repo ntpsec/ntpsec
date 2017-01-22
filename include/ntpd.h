@@ -114,7 +114,7 @@ extern	void	init_io 	(void);
 extern  SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
-extern	void	sendpkt 	(sockaddr_u *, endpt *, int, void *, int);
+extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, int);
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif
@@ -408,8 +408,6 @@ extern int	sys_minclock;		/* minimum survivors */
 extern int	sys_minsane;		/* minimum candidates */
 extern int	sys_floor;		/* cluster stratum floor */
 extern int	sys_ceiling;		/* cluster stratum ceiling */
-extern uint8_t	sys_ttl[MAX_TTL];	/* ttl mapping vector */
-extern int	sys_ttlmax;		/* max ttl mapping vector index */
 
 /*
  * Statistics counters

@@ -85,12 +85,6 @@ include::includes/misc-options.txt[]
     and selectable before using backup sources, and avoids transient use
     of the backup sources at startup.
 
-[[ttl]]
-+ttl+ 'hop ...'::
-  This command specifies a list of TTL values in increasing order. up to
-  8 values can be specified. In manycast mode these values are used in
-  turn in an expanding-ring search. The default is eight multiples of 32
-  starting at 31.
 +dscp+ 'dscp'::
   This command specifies the Differentiated Services Code Point (DSCP)
   value that is used in sent NTP packets. The default value is 46 for

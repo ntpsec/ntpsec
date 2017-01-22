@@ -712,9 +712,9 @@ ctl_error(
 	if (res_authenticate) {
 		maclen = authencrypt(res_keyid, (uint32_t *)&rpkt,
 				     CTL_HEADER_LEN);
-		sendpkt(rmt_addr, lcl_inter, -2, &rpkt,	CTL_HEADER_LEN + maclen);
+		sendpkt(rmt_addr, lcl_inter, &rpkt, CTL_HEADER_LEN + maclen);
 	} else
-		sendpkt(rmt_addr, lcl_inter, -3, &rpkt, CTL_HEADER_LEN);
+		sendpkt(rmt_addr, lcl_inter, &rpkt, CTL_HEADER_LEN);
 }
 
 /*
@@ -995,9 +995,9 @@ ctl_flushpkt(
 		memcpy(datapt, &keyid, sizeof(keyid));
 		maclen = authencrypt(res_keyid,
 				     (uint32_t *)&rpkt, totlen);
-		sendpkt(rmt_addr, lcl_inter, -5, &rpkt, totlen + maclen);
+		sendpkt(rmt_addr, lcl_inter, &rpkt, totlen + maclen);
 	} else {
-		sendpkt(rmt_addr, lcl_inter, -6, &rpkt, sendlen);
+		sendpkt(rmt_addr, lcl_inter, &rpkt, sendlen);
 	}
 	if (more)
 		numctlfrags++;
@@ -2180,9 +2180,6 @@ ctl_putpeer(
 			break;
 		}
 #endif
-		if (p->ttl > 0 && p->ttl < COUNTOF(sys_ttl))
-			ctl_putint(peer_var[id].text,
-				   sys_ttl[p->ttl]);
 		break;
 
 	case CP_UNREACH:

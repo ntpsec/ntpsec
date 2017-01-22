@@ -196,11 +196,6 @@ Discovery" page (available as part of the HTML documentation).
     for legacy purposes. However, according to principles of Byzantine
     agreement, _minsane_ should be at least 4 in order to detect and
     discard a single falseticker.
-`ttl` _hop_ `...`::
-  This command specifies a list of TTL values in increasing order, up to
-  8 values can be specified. In manycast mode these values are used in
-  turn in an expanding-ring search. The default is eight multiples of 32
-  starting at 31.
 
 == Reference Clock Support ==
 

@@ -221,7 +221,6 @@ static void free_config_setvar(config_tree *);
 static void free_config_system_opts(config_tree *);
 static void free_config_tinker(config_tree *);
 static void free_config_tos(config_tree *);
-static void free_config_ttl(config_tree *);
 static void free_config_unpeers(config_tree *);
 static void free_config_vars(config_tree *);
 
@@ -288,7 +287,6 @@ static void config_access(config_tree *);
 static void config_mdnstries(config_tree *);
 static void config_phone(config_tree *);
 static void config_setvar(config_tree *);
-static void config_ttl(config_tree *);
 static void config_fudge(config_tree *);
 static void config_peers(config_tree *);
 static void config_unpeers(config_tree *);
@@ -388,7 +386,6 @@ free_config_tree(
 	free_config_logconfig(ptree);
 	free_config_phone(ptree);
 	free_config_setvar(ptree);
-	free_config_ttl(ptree);
 	free_config_fudge(ptree);
 	free_config_vars(ptree);
 	free_config_peers(ptree);
@@ -2349,36 +2346,6 @@ free_config_setvar(
 
 
 static void
-config_ttl(
-	config_tree *ptree
-	)
-{
-	size_t i = 0;
-	int_node *curr_ttl;
-
-	curr_ttl = HEAD_PFIFO(ptree->ttl);
-	for (; curr_ttl != NULL; curr_ttl = curr_ttl->link) {
-		if (i < COUNTOF(sys_ttl))
-			sys_ttl[i++] = (uint8_t)curr_ttl->i;
-		else
-			msyslog(LOG_INFO,
-				"ttl: Number of TTL entries exceeds %zu. Ignoring TTL %d...",
-				COUNTOF(sys_ttl), curr_ttl->i);
-	}
-	sys_ttlmax = i - 1;
-}
-
-
-static void
-free_config_ttl(
-	config_tree *ptree
-	)
-{
-	FREE_INT_FIFO(ptree->ttl);
-}
-
-
-static void
 config_fudge(
 	config_tree *ptree
 	)
@@ -3242,7 +3209,6 @@ config_ntpd(
 	config_phone(ptree);
 	config_mdnstries(ptree);
 	config_setvar(ptree);
-	config_ttl(ptree);
 	config_vars(ptree);
 
 	io_open_sockets();
