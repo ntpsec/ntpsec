@@ -47,7 +47,7 @@ mkdir .tmp
 cd .tmp
 tar -xzf ../ntpsec-${V}.tar.gz
 cd ntpsec-${V}
-./waf configure --refclock=all --enable-crypto --enable-doc
+./waf configure --refclock=all --enable-doc
 ./waf build
 cd ../..
 rm -fr .tmp

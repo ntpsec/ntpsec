@@ -15,7 +15,7 @@ let
     ;
     enableParallelBuilding = true;
     doCheck = false; #XXX: set this to 'true' once we have a test suite
-    configureFlags = "--enable-ipv6 --enable-crypto";
+    configureFlags = "--enable-ipv6";
   };
 in with derivationOptions; rec {
   tarball = pkgs.releaseTools.sourceTarball (derivationOptions // rec {

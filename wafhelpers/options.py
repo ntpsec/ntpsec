@@ -13,8 +13,6 @@ def options_cmd(ctx, config):
                    default=False, help="Disable debugging code")
     grp.add_option('--enable-debug-gdb', action='store_true',
                    default=False, help="Enable GDB debugging symbols")
-    grp.add_option('--enable-crypto', action='store_true',
-                   default=False, help="Enable OpenSSL.")
     grp.add_option('--disable-droproot', action='store_true',
                    default=False, help="Disable dropping root.")
     grp.add_option('--enable-early-droproot', action='store_true',
