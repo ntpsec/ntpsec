@@ -17,7 +17,6 @@ def build(ctx):
 		"gpstolfp.c",
 		"ieee754io.c",
 		"info_trimble.c",
-		"mfp_mul.c",
 		"parse.c",
 		"parse_conf.c",
 		"trim_info.c",
