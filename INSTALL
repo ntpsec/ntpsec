@@ -58,6 +58,11 @@ bison::
    Required to build.
    Gentoo package: sys-devel/bison
 
+OpenSSL::
+   Required to build.
+   Enables encryption and authentication.
+   Gentoo: dev-libs/openssl
+
 libsodium::
    Required to run and build.
    Used for cryptographic-quality random-number generation.
@@ -116,11 +121,6 @@ psutils::
 seccomp::
    Optional on Linux to support restricting syscalls
    Gentoo: sys-libs/libseccomp
-
-OpenSSL::
-   Optional, required for --enable-crypto.
-   Enables encryption and authentication.
-   Gentoo: dev-libs/openssl
 
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
