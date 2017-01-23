@@ -114,8 +114,11 @@ atolfp(
 	}
 
 	if (isneg)
-	    M_NEG(dec_i, dec_f);
-	
+	{
+		(dec_f) = ~(dec_f) + 1u;
+		(dec_i) = ~(dec_i) + ((dec_f) == 0);
+	}
+
 	*lfp = lfpinit(dec_i, dec_f);
 	return true;
 }

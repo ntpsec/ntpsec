@@ -106,18 +106,6 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
     return lfpinit(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));
 }
 
-/*
- * Primitive operations on long fixed point values.  If these are
- * reminiscent of assembler op codes it's only because some may
- * be replaced by inline assembler for particular machines someday.
- * These are the (kind of inefficient) run-anywhere versions.
- */
-#define	M_NEG(v_i, v_f)		/* v = -v */ \
-	do { \
-		(v_f) = ~(v_f) + 1u; \
-		(v_i) = ~(v_i) + ((v_f) == 0); \
-	} while (false)
-
 #define	M_ISNEG(v_i)			/* v < 0 */ \
 	(((v_i) & 0x80000000) != 0)
 
