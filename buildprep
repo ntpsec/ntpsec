@@ -85,13 +85,21 @@ case $installer in
 	$do $installer install libseccomp-devel openssl-devel openssl-libs
 	$do $installer install pps-tools pps-tools-devel python python-devel
 	;;
-    yast|zypper)
+    yast)
 	echo "# SLES versions 12 and earlier do not have pps-tools"
 	$do $installer --install basis-devel gnuplot libcap-devel libcap2
 	$do $installer --install liberation-fonts libseccomp-devel
 	$do $installer --install libsodium-devel libsodium13
 	$do $installer --install openssl-libs openssl-devel
 	$do $installer --install python-devel
+	;;
+    zypper)
+	echo "# SLES versions 12 and earlier do not have pps-tools"
+	$do $installer install basis-devel gnuplot libcap-devel libcap2
+	$do $installer install liberation-fonts libseccomp-devel
+	$do $installer install libsodium-devel libsodium13
+	$do $installer install openssl-libs openssl-devel
+	$do $installer install python-devel
 	;;
 esac
 
