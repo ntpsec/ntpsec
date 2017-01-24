@@ -63,8 +63,6 @@ class SmartCtl:
         for child in os.listdir('/dev/'):
             if re.compile('sd[a-z]$').match(child):
                 self._drives.append("/dev/"+str(child))
-        # this regex matches temperature output lines from smartctl -l
-        self._pat = re.compile('194 Temperature_Celsius\s+\S+\s+\d+\s+\d+\s+\d+\s+\S+\s+\S+\s+\S+\s+(\d+)')
 
     def get_data(self):
         "Collects the data and return the output as an array"
@@ -74,10 +72,9 @@ class SmartCtl:
                                               universal_newlines=True
                                               ).split('\n')
             for line in _output:
-                match = self._pat.match(line)
-                now = int(time.time())
-                if match and match.group(1):
-                    temp = match.group(1)
+                if line.startswith('194 '):
+                    now = int(time.time())
+                    temp = line.split()[9]
                     return ('%d %s %s' % (now, _device, temp))
 
 
