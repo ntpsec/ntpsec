@@ -99,6 +99,7 @@ case $installer in
 	$do zypper install -y libsodium-devel libsodium13
 	$do zypper install -y openssl-devel
 	$do zypper install -y python-devel
+	$do zypper install -y gcc6 gcc6-info gcc6-locale
 	echo "# SLES versions 12 and earlier do not have pps-tools"
         $do zypper install -y pps-tools pps-tools-devel
 	;;
