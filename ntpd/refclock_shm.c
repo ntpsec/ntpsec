@@ -217,7 +217,7 @@ shm_control(
 	UNUSED_ARG(out_st);
 	if (NULL == up)
 		return;
-	if (pp->sloppyclockflag & CLK_FLAG1)
+	if (!(pp->sloppyclockflag & CLK_FLAG1))
 		up->max_delta = 0;
 	else if (pp->fudgetime2 < 1. || pp->fudgetime2 > 86400.)
 		up->max_delta = 4*3600;
