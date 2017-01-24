@@ -331,9 +331,8 @@ def cmd_configure(ctx, config):
     ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
 
     # Find OpenSSL. Must happen before function checks
-    if ctx.options.enable_crypto:
-        from wafhelpers.check_openssl import configure_ssl
-        configure_ssl(ctx)
+    from wafhelpers.check_openssl import configure_ssl
+    configure_ssl(ctx)
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
