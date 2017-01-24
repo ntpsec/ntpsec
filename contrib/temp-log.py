@@ -121,9 +121,9 @@ parser.add_argument('-V', '--version',
                     action="version",
                     version="temp-log %s" % ntp.util.stdversion())
 parser.add_argument('-w', '--wait',
-                    default=[5],
+                    default=[60],
                     dest='wait',
-                    help="Set delay time in seconds, default is 5",
+                    help="Set delay time in seconds, default is 60",
                     nargs=1,
                     type=int)
 args = parser.parse_args()
@@ -203,11 +203,13 @@ def log_data():
     logData(Logger, "# Values are space seperated")
     logData(Logger, "# seconds since epoc, sensor, sensor value")
 
-    # Write data to their respective logs forever
+    # Write data to their respective logs
     while True:
         logData(Logger, zone.get_data())
         logData(Logger, cpu.get_data())
         logData(Logger, hdd.get_data())
+        if args.once:
+            sys.exit(0)
         time.sleep(args.wait[0])
 
 
@@ -241,26 +243,9 @@ def display():
         logData(Logger, zone.get_data())
         logData(Logger, cpu.get_data())
         logData(Logger, hdd.get_data())
+        if args.once:
+            sys.exit(0)
         time.sleep(args.wait[0])
-
-
-def one_output():
-    "Run the output once"
-    try:
-        # Create objects
-        cpu = CpuTemp()
-        zone = ZoneTemp()
-        hdd = SmartCtl()
-    except IOError as ioe:
-        sys.stderr.write("Unable to run: " + str(ioe) + "\n")
-        sys.exit(1)
-    Logger = console_log_setup(logging.INFO)
-    # Create data layout
-    logData(Logger, "# Values are space seperated")
-    logData(Logger, "# seconds since epoc, sensor, sensor value")
-    logData(Logger, zone.get_data())
-    logData(Logger, cpu.get_data())
-    logData(Logger, hdd.get_data())
 
 
 args = parser.parse_args()
@@ -270,9 +255,6 @@ if args.logfile:
         log_data()
     except (KeyboardInterrupt, SystemExit):
         sys.exit(0)
-elif args.once:
-    one_output()
-    sys.exit(0)
 else:
     try:
         display()
