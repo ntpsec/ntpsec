@@ -38,7 +38,6 @@ temperatures will be hardware specific.
 """
 
 
-import re
 import subprocess
 import sys
 import time
@@ -66,17 +65,11 @@ except OSError as e:
     sys.stderr.write("ERROR: Could not start smartctl: %s\n" % e.strerror)
     raise SystemExit(2)
 
-
 lines = output.split('\n')
-
-# this regex matches temperature output lines from 'sensors -u'
-pat = re.compile('194 Temperature_Celsius\s+\S+\s+\d+\s+\d+\s+\d+\s+\S+\s+\S+\s+\S+\s+(\d+)')
-
-now = int(time.time())
 
 line = ''
 for line in lines:
-    match = pat.match(line)
-    if match and match.group(1):
-        temp = match.group(1)
+    if line.startswith('194 '):
+        now = int(time.time())
+        temp = line.split()[9]
         sys.stdout.write('%d %s %s\n' % (now, device, temp))
