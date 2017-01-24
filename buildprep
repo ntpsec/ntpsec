@@ -41,12 +41,13 @@ then
 elif apt-get --version >/dev/null 2>&1
 then
     installer=apt
+elif zypper -h >/dev/null 2>&1
+then
+    # OpenSUSE prefers zypper over yast
+    installer=zypper
 elif yast -h >/dev/null 2>&1
 then
     installer=yast
-elif zypper -h >/dev/null 2>&1
-then
-    installer=zypper
 else
     installer=unknown
 fi
