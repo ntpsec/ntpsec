@@ -9,6 +9,9 @@ on user-visible changes.
 
 == Repository Head ==
 
+The SHM refclok no longer limits the value of SHM time by default.
+This allows SHM to work on systems with no RTC by default.
+
 == 2016-12-30: 0.9.6 ==
 
 ntpkeygen has been moved from C to Python.  This is not a functional
