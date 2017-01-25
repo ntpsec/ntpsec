@@ -170,7 +170,7 @@ for the specific unit.
    _Check_ the difference limit check if set. _Skip_ the difference limit
    if not set (default).  There is really no need for this flag, just let
    the upper level logic prune out false tickers.  NOTE:  this flag is
-   the opposite of flag1 in NTp Classic.
+   the opposite of flag1 in NTP Classic.
 +flag2 {0 | 1}+::
    Not used by this driver.
 +flag3 {0 | 1}+::
