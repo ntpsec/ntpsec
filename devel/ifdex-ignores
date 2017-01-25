@@ -76,18 +76,6 @@ PLATFORM_OPENBSD
 WORDS_BIGENDIAN
 PLATFORM_FULL
 
-# libsodium
-SODIUM_DLL_EXPORT
-SODIUM_STATIC
-sodium_H
-sodium_core_H
-sodium_export_H
-sodium_utils_H
-SYS_getrandom
-randombytes_H
-randombytes_sysrandom_H
-ULONG_LONG_MAX
-
 # Overrides
 OVERRIDE_BINTIME_CTLMSGBUF_SIZE
 OVERRIDE_FD_CHUNK
