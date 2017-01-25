@@ -355,26 +355,25 @@ step_systime(
 	 * 1969-12-31/23:59:59 UTC and gives us additional two years,
 	 * from the change of NTP era in 2036 to the UNIX rollover in
 	 * 2038. (Minus one second, but that won't hurt.) We *really*
-	 * need a longer 'time_t' after that!  Or a different baseline,
-	 * but that would cause other serious trouble, too.
+	 * need a 64-bit 'time_t' after that!  Or a different
+	 * baseline, but that would cause other serious trouble, too.
+	 *
+	 * 2017 update: The comment above was written before the
+	 * 2008-2009 64-bit transition and assumed a 32-bit time_t
+	 * It now appears much less likely that there still be 
+	 * platforms with 32-bit time running in 2038.
 	 */
 	pivot = 0x7FFFFFFF;
 #endif
 
 	/* get the complete jump distance as l_fp */
-	fp_sys = dtolfp(sys_residual);
-	fp_ofs = dtolfp(step);
-	fp_ofs += fp_sys;
+	fp_ofs = dtolfp(step) + dtolfp(sys_residual);
 
 	/* ---> time-critical path starts ---> */
 
 	/* get the current time as l_fp (without fuzz) and as struct timespec */
 	get_ostime(&timets);
 	fp_sys = tspec_stamp_to_lfp(timets);
-
-	/* only used for utmp/wtmpx time-step recording */
-	tslast.tv_sec = timets.tv_sec;
-	tslast.tv_nsec = timets.tv_nsec;
 
 	/* get the target time as l_fp */
 	fp_sys += fp_ofs;
@@ -388,7 +387,11 @@ step_systime(
 		return false;
 	}
 
-	/* <--- time-critical path ended with 'ntp_set_tod()' <--- */
+	/* <--- time-critical path ended with call to the settime hook <--- */
+
+	/* only used for utmp/wtmpx time-step recording */
+	tslast.tv_sec = timets.tv_sec;
+	tslast.tv_nsec = timets.tv_nsec;
 
 	sys_residual = 0;
 	lamport_violated = (step < 0);
