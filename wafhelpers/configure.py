@@ -575,8 +575,9 @@ def cmd_configure(ctx, config):
         check_mdns_run(ctx)
 
     # Solaris needs -lsocket and -lnsl for socket code
-    ctx.check(features="c cshlib", lib="socket", mandatory=False)
-    ctx.check(features="c cshlib", lib="nsl", mandatory=False)
+    if sys.platform.startswith("sunos"):
+        ctx.check(features="c cshlib", lib="socket", mandatory=False)
+        ctx.check(features="c cshlib", lib="nsl", mandatory=False)
 
     if ctx.options.enable_classic_mode:
         ctx.define("ENABLE_CLASSIC_MODE", 1)
