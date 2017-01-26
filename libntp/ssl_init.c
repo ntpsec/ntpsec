@@ -95,8 +95,20 @@ keytype_from_text(
 
 	if (NULL != pdigest_len) {
 #ifdef HAVE_OPENSSL
-		EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
-		EVP_DigestFinal(&ctx, digest, &digest_len);
+		if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type))) {
+			fprintf(stderr,
+				"keytype_from_text: digest init failed\n");
+			msyslog(LOG_ERR,
+				"keytype_from_text: digest init failed");
+			return 0;
+		}
+		if (!EVP_DigestFinal(&ctx, digest, &digest_len)) {
+			fprintf(stderr,
+				"keytype_from_text: digest final failed\n");
+			msyslog(LOG_ERR,
+				"keytype_from_text: digest final failed");
+			return 0;
+		}
 		if (digest_len > max_digest_len) {
 			fprintf(stderr,
 				"key type %s %u octet digests are too big, max %lu\n",
