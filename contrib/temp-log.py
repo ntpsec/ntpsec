@@ -205,8 +205,7 @@ def log_data():
     Logger = logging_setup(log, logging.INFO)
 
     # Create data layout
-    logData(Logger, "# Values are space seperated")
-    logData(Logger, "# seconds since epoc, sensor, sensor value")
+    logData(Logger, "# seconds since epoch, sensor, sensor value")
 
     # Write data to their respective logs
     while True:
