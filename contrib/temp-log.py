@@ -65,16 +65,21 @@ class SmartCtl:
 
     def get_data(self):
         "Collects the data and return the output as an array"
-        for _device in self._drives:
-            _output = subprocess.check_output(["smartctl", "-a",
-                                              _device],
-                                              universal_newlines=True
-                                              ).split('\n')
-            for line in _output:
-                if line.startswith('194 '):
-                    now = int(time.time())
-                    temp = line.split()[9]
-                    return ('%d %s %s' % (now, _device, temp))
+        out = ""
+        for _device in self._drives[:]:
+            try:
+                _output = subprocess.check_output(["smartctl", "-a",
+                                                  _device],
+                                                  universal_newlines=True
+                                                  ).split('\n')
+                for line in _output:
+                    if line.startswith('194 '):
+                        now = int(time.time())
+                        temp = line.split()[9]
+                        out += ('%d %s %s\n' % (now, _device, temp))
+            except:
+                self._drives.remove(_device)
+        return out.rstrip()
 
 
 class ZoneTemp:
