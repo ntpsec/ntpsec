@@ -8,6 +8,7 @@
 
 import argparse
 import logging
+import logging.handlers
 import os
 import re
 import subprocess
@@ -141,13 +142,18 @@ def logging_setup(fileName, logLevel):
     tempLogger = logging.getLogger()
     tempLogger.setLevel(logLevel)
     # Create file handler
-    _file = logging.handlers.TimedRotatingFileHandler(fileName,
-                                                      when='midnight',
-                                                      interval=1,
-                                                      backupCount=5,
-                                                      encoding=None,
-                                                      delay=False,
-                                                      utc=False)
+    if args.logfile:
+        _file = logging.handlers.TimedRotatingFileHandler(
+            fileName,
+            when='midnight',
+            interval=1,
+            backupCount=5,
+            encoding=None,
+            delay=False,
+            utc=False)
+    else:
+        _file = logging.StreamHandler(sys.stdout)
+
     _file.setLevel(logLevel)
     # Create the formatter and add it to the handler
     _file.setFormatter(logFormat)
@@ -217,50 +223,12 @@ def log_data():
         time.sleep(args.wait[0])
 
 
-def display():
-    try:
-        # Create objects
-        cpu = CpuTemp()
-        zone = ZoneTemp()
-        hdd = SmartCtl()
-    except IOError as ioe:
-        if args.verbose:
-            sys.stderr.write("Unable to run: " + str(ioe) + "\n")
-            sys.exit(1)
-        else:
-            sys.exit(1)
-    except Exception as e:
-        if args.verbose:
-            sys.stderr.write("Unable to run: " + str(e) + "\n")
-            sys.exit(1)
-        else:
-            sys.exit(1)
-
-    # Create the logger instance
-    Logger = console_log_setup(logging.INFO)
-    # Create data layout
-    logData(Logger, "# Values are space seperated")
-    logData(Logger, "# seconds since epoc, sensor, sensor value")
-
-    # Write data to their respective logs forever
-    while True:
-        logData(Logger, zone.get_data())
-        logData(Logger, cpu.get_data())
-        logData(Logger, hdd.get_data())
-        if args.once:
-            sys.exit(0)
-        time.sleep(args.wait[0])
-
-
 args = parser.parse_args()
-if args.logfile:
-    try:
+try:
+    if args.logfile:
         log = args.logfile[0]
-        log_data()
-    except (KeyboardInterrupt, SystemExit):
-        sys.exit(0)
-else:
-    try:
-        display()
-    except (KeyboardInterrupt, SystemExit):
-        sys.exit(0)
+    else:
+        log = sys.stdout
+    log_data()
+except (KeyboardInterrupt, SystemExit):
+    sys.exit(0)
