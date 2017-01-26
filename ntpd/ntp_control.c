@@ -218,7 +218,8 @@ static const struct ctl_proc control_codes[] = {
 #define CS_MRU_OLDEST_AGE	95
 #define	CS_LEAPSMEARINTV	96
 #define	CS_LEAPSMEAROFFS	97
-#define	CS_MAXCODE		CS_LEAPSMEAROFFS
+#define	CS_TICK                 98
+#define	CS_MAXCODE		CS_TICK
 
 /*
  * Peer variables we understand
@@ -396,7 +397,8 @@ static const struct ctl_var sys_var[] = {
 	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },	/* 95 */
 	{ CS_LEAPSMEARINTV,	RO, "leapsmearinterval" },    /* 96 */
 	{ CS_LEAPSMEAROFFS,	RO, "leapsmearoffset" },      /* 97 */
-	{ 0,		EOV, "" }		/* 97 */
+	{ CS_TICK,		RO, "tick" },		/* 98 */
+	{ 0,                    EOV, "" }		/* 98 */
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -2016,6 +2018,10 @@ ctl_putsys(
 		break;
 	case CS_WANDER_THRESH:
 		ctl_putdbl(sys_var[varid].text, wander_threshold * 1e6);
+		break;
+	case CS_TICK:
+		/* a.k.a. sys_tick (s), output in ms */
+		ctl_putdbl6(sys_var[varid].text, sys_tick * 1e3);
 		break;
 	}
 }
