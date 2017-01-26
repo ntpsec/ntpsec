@@ -22,9 +22,12 @@ command line.
 
 If the file does not exist, is not valid, has expired, or is expiring
 soon, a new copy will be downloaded. If the new copy validates, it is
-installed.
+installed and NTP is (optionally) restarted.
 
 If the current file is acceptable, no download or restart occurs.
+
+-c can also be used to invoke another script to perform administrative
+functions, e.g. to copy the file to other local systems.
 
 This can be run as a cron job. As the file is rarely updated, and leap
 seconds are announced at least one month in advance (usually longer), it
@@ -42,7 +45,7 @@ need not be run more frequently than about once every three weeks.
 
 +-c+::
   Command to restart ntpd after installing a new file. Without such a
-  command. ntpd checks the file daily. (unused)
+  command, ntpd checks the file daily.
 
 +-e+ 'expiry'::
   Refresh the leapfile this long before it expires.

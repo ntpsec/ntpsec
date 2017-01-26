@@ -16,7 +16,7 @@ See the manual page for details.
 
 # The follow getopt flags are legacy will generate a warning to stderr, if
 # used:
-# -4, -6, -c, -l, -L, -p, -P, -t, -z, -Z
+# -4, -6, -l, -L, -p, -P, -t, -z, -Z
 
 # Finally, logging to syslog by default was a design error, violating
 # Unix principles; that has been fixed. To get this behavior when
@@ -28,6 +28,8 @@ import getopt
 import hashlib
 import os
 import os.path
+import shlex
+import subprocess
 import sys
 import tempfile
 import time
@@ -84,11 +86,16 @@ force = False
 # Verbose output
 verbose = False
 
+# Command to run when leapsecond file changes
+command = None
+
 for (switch, val) in options:
     try:
-        if switch in ["-4", "-6", "-c", "-l", "-L", "-p", "-P", "-t", "-z",
+        if switch in ["-4", "-6", "-l", "-L", "-p", "-P", "-t", "-z",
                       "-Z"]:
             sys.stderr.write("legacy flag %s is ignored\n" % switch)
+        elif switch == "-c":
+            command = val
         elif switch == "-e":
             prefetch = int(val)
         elif switch == "-f":
@@ -301,6 +308,33 @@ if __name__ == '__main__':
             sys.stderr.write("Install %s => %s failed -- saved for diagnosis\n" %
                              (tmpfile.name, leapfile))
             raise SystemExit(1)
+
+        # Restart NTP (or whatever else is specified)
+        if command is not None:
+            if verbose:
+                sys.stderr.write("Attempting restart action: %s\n" % command)
+            subprocess.Popen
+
+            try:
+                print(shlex.split(command))
+                proc = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+#                                        stderr=subprocess.STDOUT)
+                output = proc.communicate()[0]
+            except subprocess.CalledProcessError as e:
+                # FIXME: if the process has non-zero exit, we want this path
+                sys.stderr.write("Could not start command: %s\n" % e.output)
+                sys.stderr.write("Restart action failed\n")
+                if output:
+                    sys.stderr.write("%s\n" % output)
+                raise SystemExit(2)
+            except OSError as e:
+                sys.stderr.write("Restart action failed: %s\n" % e.strerror)
+                raise SystemExit(2)
+
+            sys.stderr.write("Restart action succeeded\n")
+            if verbose and output:
+                sys.stderr.write("%s\n" % output)
 
         raise SystemExit(0)
 
