@@ -59,7 +59,7 @@ bison::
    Gentoo package: sys-devel/bison
 
 OpenSSL::
-   Required to build.
+   Required to run and build.
    Enables encryption and authentication.
    Gentoo: dev-libs/openssl
 
