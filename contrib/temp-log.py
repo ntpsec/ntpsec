@@ -19,8 +19,7 @@ try:
     import ntp.util
 except ImportError as e:
     sys.stderr.write("temp-log: can't find Python NTP modules "
-                     "-- check PYTHONPATH.\n")
-    sys.stderr.write("%s\n" % e)
+                     "-- check PYTHONPATH.\n%s\n" % e)
     sys.exit(1)
 
 
@@ -80,7 +79,7 @@ class SmartCtl:
 
     def get_data(self):
         "Collects the data and return the output as an array"
-        out = ""
+        data = []
         for _device in self._drives[:]:
             try:
                 _output = subprocess.check_output(["smartctl", "-A",
@@ -91,11 +90,11 @@ class SmartCtl:
                     if line.startswith('194 '):
                         now = int(time.time())
                         temp = line.split()[9]
-                        out += ('%d %s %s\n' % (now, _device, temp))
+                        data.append('%d %s %s' % (now, _device, temp))
             except:
                 # do not keep trying on failure
                 self._drives.remove(_device)
-        return out
+        return data
 
 
 class ZoneTemp:
@@ -185,31 +184,22 @@ def logData(log, data):
     "log the data"
     if data is None:
         return
-    if data is "":
-        return
 
     if type(data) in (tuple, list):
         for _item in data:
             log.info(_item)
     else:
-        log.info(data)
+        if data is not "":
+            log.info(data)
+
 
 
 def log_data():
     "Write all temperature readings to one file"
-    try:
-        # Create objects
-        cpu = CpuTemp()
-        zone = ZoneTemp()
-        hdd = SmartCtl()
-    except IOError as ioe:
-        if not args.quiet:
-            sys.stderr.write("Unable to run: " + str(ioe) + "\n")
-        sys.exit(1)
-    except Exception as e:
-        if not args.quiet:
-            sys.stderr.write("Unable to run: " + str(e) + "\n")
-        sys.exit(1)
+    # Create objects
+    cpu = CpuTemp()
+    zone = ZoneTemp()
+    hdd = SmartCtl()
 
     # Create the logger instance
     Logger = logging_setup(log, logging.INFO)
