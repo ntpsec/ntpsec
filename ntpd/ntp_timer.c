@@ -479,7 +479,7 @@ check_leapsec(
 		/*
 		 * Update the current leap smear offset, eventually 0.0 if outside smear interval.
 		 */
-		DTOLFP(leap_smear.doffset, &leap_smear.offset);
+		leap_smear.offset = dtolfp(leap_smear.doffset);
 #endif	/* ENABLE_LEAP_SMEAR */
 
 		/* Full hit. Eventually step the clock, but always

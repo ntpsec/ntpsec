@@ -2298,7 +2298,7 @@ fast_xmit(
 			xpkt.refid = convertLFPToRefID(leap_smear.offset);
 			DPRINTF(2, ("fast_xmit: leap_smear.in_progress: refid %8x, smear %s\n",
 				ntohl(xpkt.refid),
-				lfptoa(&leap_smear.offset, 8)
+				lfptoa(leap_smear.offset, 8)
 				));
 		}
 		xpkt.reftime = htonl_fp(this_ref_time);
