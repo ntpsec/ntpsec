@@ -1,9 +1,21 @@
 #!/usr/bin/env python
-# temp-log.py: A script that will be run eventually as a daemon
-#              to log temperatures of a system
-# Usage:
-# temp-log.py [-h] [-q] [-v] [-V] [-l LOGFILE]
-# Requires root to run
+"""\
+usage: temp-log.py [-h] [-l LOGFILE] [-o] [-q] [-v] [-w WAIT] [-V]
+
+Program to log system temperatures
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LOGFILE, --logfile LOGFILE
+                        append log data to LOGFILE instead of stdout
+  -o, --once            Run the output once and exit
+  -q, --quiet           be quite
+  -v, --verbose         be verbose
+  -w WAIT, --wait WAIT  Set delay time in seconds, default is 60
+  -V, --version         show program's version number and exit
+
+See the manual page for details.
+"""
 
 import argparse
 import glob
@@ -186,15 +198,15 @@ parser.add_argument('-v', '--verbose',
                     action="store_true",
                     dest='verbose',
                     help="be verbose")
-parser.add_argument('-V', '--version',
-                    action="version",
-                    version="temp-log %s" % ntp.util.stdversion())
 parser.add_argument('-w', '--wait',
                     default=[60],
                     dest='wait',
                     help="Set delay time in seconds, default is 60",
                     nargs=1,
                     type=int)
+parser.add_argument('-V', '--version',
+                    action="version",
+                    version="temp-log %s" % ntp.util.stdversion())
 args = parser.parse_args()
 
 
