@@ -25,9 +25,9 @@
     Specify the message digest algorithm, with default MD5. If the
     OpenSSL library is installed, +digest+ can be be any message digest
     algorithm supported by the library. The current selections are:
-    +MD2+, +MD4+, +MD5,+ +MDC2+, +RIPEMD160+, +SHA+ and +SHA1+.
+    +MD2+, +MD4+, +MD5,+ +MDC2+, +RIPEMD160+, +SHA-0+ and +SHA1+.
     Note: If compliance with FIPS 140-2 is required, the algorithm
-    must be ether +SHA+ or +SHA1+.
+    must be ether +SHA-0+ or +SHA1+.
   +gqpar+ _file_;;
     Specifies the location of the optional GQ parameters file. This
     overrides the link _ntpkey_gq_hostname_ in the keys directory.
