@@ -181,15 +181,11 @@ def log_data():
     except IOError as ioe:
         if args.verbose:
             sys.stderr.write("Unable to run: " + str(ioe) + "\n")
-            sys.exit(1)
-        else:
-            sys.exit(1)
+        sys.exit(1)
     except Exception as e:
         if args.verbose:
             sys.stderr.write("Unable to run: " + str(e) + "\n")
-            sys.exit(1)
-        else:
-            sys.exit(1)
+        sys.exit(1)
 
     # Create the logger instance
     Logger = logging_setup(log, logging.INFO)
