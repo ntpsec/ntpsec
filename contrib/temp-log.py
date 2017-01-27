@@ -55,21 +55,23 @@ class CpuTemp:
 
 class SmartCtl:
     "Sensor on the Hard Drive"
+    _drives = []
+
     def __init__(self):
         if os.getuid() != 0:
             raise IOError("You must be root!")
         # Which drive to watch
-        self._drives = []
         for child in os.listdir('/dev/'):
             if re.compile('sd[a-z]$').match(child):
                 self._drives.append("/dev/"+str(child))
+        self._drives = sorted(self._drives)
 
     def get_data(self):
         "Collects the data and return the output as an array"
         out = ""
         for _device in self._drives[:]:
             try:
-                _output = subprocess.check_output(["smartctl", "-a",
+                _output = subprocess.check_output(["smartctl", "-A",
                                                   _device],
                                                   universal_newlines=True
                                                   ).split('\n')
@@ -119,6 +121,10 @@ parser.add_argument('-o', '--once',
                     dest='once',
                     help="Run the output once and exit",
                     action='store_true')
+parser.add_argument('-q', '--quiet',
+                    action="store_true",
+                    dest='quiet',
+                    help="be quite")
 parser.add_argument('-v', '--verbose',
                     action="store_true",
                     dest='verbose',
@@ -179,11 +185,11 @@ def log_data():
         zone = ZoneTemp()
         hdd = SmartCtl()
     except IOError as ioe:
-        if args.verbose:
+        if not args.quiet:
             sys.stderr.write("Unable to run: " + str(ioe) + "\n")
         sys.exit(1)
     except Exception as e:
-        if args.verbose:
+        if not quiet:
             sys.stderr.write("Unable to run: " + str(e) + "\n")
         sys.exit(1)
 
