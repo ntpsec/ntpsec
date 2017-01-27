@@ -211,11 +211,7 @@ def logging_setup(fileName, logLevel):
         _file = logging.handlers.TimedRotatingFileHandler(
             fileName,
             when='midnight',
-            interval=1,
-            backupCount=5,
-            encoding=None,
-            delay=False,
-            utc=False)
+            interval=1)
     else:
         _file = logging.StreamHandler(sys.stdout)
 
