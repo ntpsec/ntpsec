@@ -162,22 +162,6 @@ def logging_setup(fileName, logLevel):
     return tempLogger
 
 
-def console_log_setup(logLevel):
-    "Create logging object that writes to STDOUT"
-    logFormat = logging.Formatter('%(message)s')
-    # Create the logging object
-    tempLog = logging.getLogger()
-    tempLog.setLevel(logLevel)
-    # Create the output handler
-    ch = logging.StreamHandler()
-    ch.setLevel(logLevel)
-    # Apply the format to the handler
-    ch.setFormatter(logFormat)
-    # Apply the handler object to the logging object
-    tempLog.addHandler(ch)
-    return tempLog
-
-
 def logData(log, data):
     "log the data"
     if type(data) in (tuple, list):
