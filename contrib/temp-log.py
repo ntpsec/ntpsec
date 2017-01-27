@@ -35,37 +35,57 @@ except ImportError as e:
     sys.exit(1)
 
 
+def run_binary(cmd):
+    """\
+Run a binary
+Return output if good, None if bad
+"""
+
+    try:
+        # sadly subprocess.check_output() is not in Python 2.6
+        # so use Popen()
+        # this throws an exception if not found
+        proc = subprocess.Popen( cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
+        output = proc.communicate()[0]
+
+        if proc.returncode:
+            # non-zero return code, fail
+            return None
+
+    except:
+        if args.verbose:
+            sys.stderr.write("Unable to run %s binary\n" % cmd[0])
+        # throws exceptoin
+        return None
+    return output
+
 class CpuTemp:
     "Sensors on the CPU Core"
-    no_sensors = False
+    has_sensors = False
 
     def __init__(self):
         # check for sensors binary
-        try:
-            # sadly subprocess.check_output() is not in Python 2.6
-            subprocess.check_output(["which", "sensors"],
-                                    stderr=subprocess.STDOUT,)
-        except:
-            # skip sensors, many systems can not use sensors
-            self.no_sensors = True
-            if args.verbose:
-                sys.stderr.write("Unable to find sensors binary")
+        ret = run_binary(["sensors", "-h"])
+        if ret is not None:
+            self.has_sensors = True
 
         # pattern that matches the string that has the cpu temp
         self._pattern = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
 
     def get_data(self):
         "Collects the data and return the output as an array"
-        if self.no_sensors:
+        if not self.has_sensors:
             return None
 
         _index = 0
         _data = []
         # grab the needed output
-        # sadly subprocess.check_output() is not in Python 2.6
-        _output = subprocess.check_output(['sensors', "-u"],
-                                          universal_newlines=True).split('\n')
-        for record in _output:
+        output = run_binary(["sensors", "-u"])
+
+        for record in output.split("\n"):
             match = self._pattern.match(record)
             if match and match.group(1):
                 _now = int(time.time())
@@ -79,31 +99,37 @@ class CpuTemp:
 class SmartCtl:
     "Sensor on the Hard Drive"
     _drives = []
+    has_smartctl = False
 
     def __init__(self):
-        # Which drive to watch
-        for child in glob.glob('/dev/sd?'):
-            self._drives.append(child)
-        self._drives = sorted(self._drives)
+        ret = run_binary(["smartctl", "-h"])
+        if ret is not None:
+            self.has_smartctl = True
+
+        if self.has_smartctl:
+            # Which drive to watch
+            for child in glob.glob('/dev/sd?'):
+                self._drives.append(child)
+            self._drives = sorted(self._drives)
 
     def get_data(self):
         "Collects the data and return the output as an array"
+        if not self.has_smartctl:
+            return None
+
         data = []
         for _device in self._drives[:]:
-            try:
-                # sadly subprocess.check_output() is not in Python 2.6
-                _output = subprocess.check_output(["smartctl", "-A",
-                                                  _device],
-                                                  universal_newlines=True
-                                                  ).split('\n')
-                for line in _output:
+            output = run_binary(["smartctl", "-A", _device])
+
+            if output is None:
+                # do not keep trying on failure
+                self._drives.remove(_device)
+            else:
+                for line in output.split("\n"):
                     if line.startswith('194 '):
                         now = int(time.time())
                         temp = line.split()[9]
                         data.append('%d %s %s' % (now, _device, temp))
-            except:
-                # do not keep trying on failure
-                self._drives.remove(_device)
         return data
 
 
@@ -115,42 +141,31 @@ class Temper:
     plugged in, and the temper-python package must be installed and configured.
     See their documentation for that procedure.
 """
-    no_temper = False
+    has_temper = False
 
     def __init__(self):
-        # check for temper-poll binary
-        try:
-            # sadly subprocess.check_output() is not in Python 2.6
-            subprocess.check_output(["which", "temper-poll"],
-                                    stderr=subprocess.STDOUT,)
-        except:
-            # skip temper, many systems do not have it
-            self.no_temper = True
-            if args.verbose:
-                sys.stderr.write("Unable to find temper-poll binary")
+        # check for sensors binary
+        ret = run_binary(["temper-poll", "-h"])
+        if ret is not None:
+            self.has_temper = True
 
     def get_data(self):
         "Collects the data and return the output as an array"
-        if self.no_temper:
+        if not self.has_temper:
             return None
 
         data = []
         _device = 'TEMPER0'
         # grab the needed output
-        # sadly subprocess.check_output() is not in Python 2.6
+        output = run_binary(["temper-poll", "-c"])
         try:
-            proc = subprocess.Popen(["temper-poll", "-c"],
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.STDOUT,
-                                    universal_newlines=True)
-            temp = proc.communicate()[0]
             # make sure it is a temperature
-            temp = float(temp)
+            temp = float(output)
             now = int(time.time())
             data.append('%d %s %s' % (now, _device, temp))
         except:
-            # bad data, ignore it
-            self.no_temper = True
+            # bad data, ignore it, forever
+            self.has_temper = False
         return data
 
 
@@ -283,4 +298,5 @@ try:
         log = sys.stdout
     log_data()
 except (KeyboardInterrupt, SystemExit):
+    print("")    # be nice to bash
     sys.exit(0)
