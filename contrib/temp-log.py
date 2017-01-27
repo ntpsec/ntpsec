@@ -26,17 +26,29 @@ except ImportError as e:
 
 class CpuTemp:
     "Sensors on the CPU Core"
+    no_sensors = False
+
+
     def __init__(self):
+        # Find the sensors binary
+        try:
+            subprocess.check_output(["which",
+                                     "sensors"],
+                                     stderr=subprocess.STDOUT,)
+        except:
+            # skip sensors, many systems can not use sensors
+            self.no_sensors = True
+            if args.verbose:
+                sys.stderr.write("Unable to find sensors binary")
+
         # pattern that matches the string that has the cpu temp
         self._pattern = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
-        # Find the sensors binary and stores the path
-        _sensors_path = subprocess.check_output(
-            ["which", "sensors"], universal_newlines=False).replace('\n', '')
-        if _sensors_path is None:
-            raise Exception("Unable to find sensors binary")
 
     def get_data(self):
         "Collects the data and return the output as an array"
+        if self.no_sensors:
+            return None
+
         _index = 0
         _data = []
         # grab the needed output
@@ -81,8 +93,9 @@ class SmartCtl:
                         temp = line.split()[9]
                         out += ('%d %s %s\n' % (now, _device, temp))
             except:
+                # do not keep trying on failure
                 self._drives.remove(_device)
-        return out.rstrip()
+        return out
 
 
 class ZoneTemp:
@@ -170,6 +183,11 @@ def logging_setup(fileName, logLevel):
 
 def logData(log, data):
     "log the data"
+    if data is None:
+        return
+    if data is "":
+        return
+
     if type(data) in (tuple, list):
         for _item in data:
             log.info(_item)
@@ -189,7 +207,7 @@ def log_data():
             sys.stderr.write("Unable to run: " + str(ioe) + "\n")
         sys.exit(1)
     except Exception as e:
-        if not quiet:
+        if not args.quiet:
             sys.stderr.write("Unable to run: " + str(e) + "\n")
         sys.exit(1)
 
