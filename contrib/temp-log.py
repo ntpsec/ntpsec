@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # temp-log.py: A script that will be run eventually as a daemon
-#              to log temperature of a system
+#              to log temperatures of a system
 # Usage:
-# temp-log.py [-h] [-V] [-l]
-# Writes logs to /var/log/ntpstats
+# temp-log.py [-h] [-q] [-v] [-V] [-l LOGFILE]
 # Requires root to run
 
 import argparse
@@ -27,13 +26,12 @@ class CpuTemp:
     "Sensors on the CPU Core"
     no_sensors = False
 
-
     def __init__(self):
-        # Find the sensors binary
+        # check for sensors binary
         try:
-            subprocess.check_output(["which",
-                                     "sensors"],
-                                     stderr=subprocess.STDOUT,)
+            # sadly subprocess.check_output() is not in Python 2.6
+            subprocess.check_output(["which", "sensors"],
+                                    stderr=subprocess.STDOUT,)
         except:
             # skip sensors, many systems can not use sensors
             self.no_sensors = True
@@ -51,6 +49,7 @@ class CpuTemp:
         _index = 0
         _data = []
         # grab the needed output
+        # sadly subprocess.check_output() is not in Python 2.6
         _output = subprocess.check_output(['sensors', "-u"],
                                           universal_newlines=True).split('\n')
         for record in _output:
@@ -82,6 +81,7 @@ class SmartCtl:
         data = []
         for _device in self._drives[:]:
             try:
+                # sadly subprocess.check_output() is not in Python 2.6
                 _output = subprocess.check_output(["smartctl", "-A",
                                                   _device],
                                                   universal_newlines=True
@@ -94,6 +94,53 @@ class SmartCtl:
             except:
                 # do not keep trying on failure
                 self._drives.remove(_device)
+        return data
+
+
+class Temper:
+    """\
+    Reads 'temper-poll -c' for room temperature data.
+
+    Before you can use this class you must have a TEMPer USB thermometer
+    plugged in, and the temper-python package must be installed and configured.
+    See their documentation for that procedure.
+"""
+    no_temper = False
+
+    def __init__(self):
+        # check for temper-poll binary
+        try:
+            # sadly subprocess.check_output() is not in Python 2.6
+            subprocess.check_output(["which", "temper-poll"],
+                                    stderr=subprocess.STDOUT,)
+        except:
+            # skip temper, many systems do not have it
+            self.no_temper = True
+            if args.verbose:
+                sys.stderr.write("Unable to find temper-poll binary")
+
+    def get_data(self):
+        "Collects the data and return the output as an array"
+        if self.no_temper:
+            return None
+
+        data = []
+        _device = 'TEMPER0'
+        # grab the needed output
+        # sadly subprocess.check_output() is not in Python 2.6
+        try:
+            proc = subprocess.Popen(["temper-poll", "-c"],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT,
+                                    universal_newlines=True)
+            temp = proc.communicate()[0]
+            # make sure it is a temperature
+            temp = float(temp)
+            now = int(time.time())
+            data.append('%d %s %s' % (now, _device, temp))
+        except:
+            # bad data, ignore it
+            self.no_temper = True
         return data
 
 
@@ -193,13 +240,13 @@ def logData(log, data):
             log.info(data)
 
 
-
 def log_data():
     "Write all temperature readings to one file"
     # Create objects
     cpu = CpuTemp()
     zone = ZoneTemp()
     hdd = SmartCtl()
+    temper = Temper()
 
     # Create the logger instance
     Logger = logging_setup(log, logging.INFO)
@@ -212,12 +259,17 @@ def log_data():
         logData(Logger, zone.get_data())
         logData(Logger, cpu.get_data())
         logData(Logger, hdd.get_data())
+        logData(Logger, temper.get_data())
         if args.once:
             sys.exit(0)
         time.sleep(args.wait[0])
 
 
 args = parser.parse_args()
+if os.getuid():
+    sys.stderr.write("You must be root!")
+    sys.exit(1)
+
 try:
     if args.logfile:
         log = args.logfile[0]
