@@ -23,7 +23,7 @@
     directory.
   +digest+ _digest_;;
     Specify the message digest algorithm, with default MD5. If the
-    OpenSSL library is installed, +digest+ can be be any message digest
+    OpenSSL library is installed, +digest+ can be any message digest
     algorithm supported by the library.
     Note: If compliance with FIPS 140-2 is required, the algorithm
     must be +SHA1+.

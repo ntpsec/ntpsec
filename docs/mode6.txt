@@ -392,7 +392,7 @@ fly).
 This request is used for two purposes: to retrieve restriction lists
 and to retrieve interface statistics.  For the former use, the request
 payload should be the string "addr_restrictions"; for the latter case,
-the request payload should be be "ifstats" or empty.  Both uses
+the request payload should be "ifstats" or empty.  Both uses
 require authentication.  The response payload is, in both cases, a
 textual varlist.
 
