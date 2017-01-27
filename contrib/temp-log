@@ -58,7 +58,7 @@ Return output if good, None if bad
     except:
         if args.verbose:
             sys.stderr.write("Unable to run %s binary\n" % cmd[0])
-        # throws exceptoin
+        # throws exception
         return None
     return output
 
