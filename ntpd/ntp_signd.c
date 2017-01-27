@@ -209,7 +209,7 @@ send_via_ntp_signd(
 			if (ntohl(samba_reply.op) == 3 && reply_len >  offsetof(struct samba_key_out, pkt)) {
 				sendlen = reply_len - offsetof(struct samba_key_out, pkt);
 				xpkt = &samba_reply.pkt;
-				sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, xpkt0, sendlen);
+				sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, xpkt, sendlen);
 #ifdef DEBUG
 				if (debug)
 					printf(
