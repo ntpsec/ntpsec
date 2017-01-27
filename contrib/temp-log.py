@@ -6,6 +6,7 @@
 # Requires root to run
 
 import argparse
+import glob
 import logging
 import logging.handlers
 import os
@@ -68,12 +69,9 @@ class SmartCtl:
     _drives = []
 
     def __init__(self):
-        if os.getuid() != 0:
-            raise IOError("You must be root!")
         # Which drive to watch
-        for child in os.listdir('/dev/'):
-            if re.compile('sd[a-z]$').match(child):
-                self._drives.append("/dev/"+str(child))
+        for child in glob.glob('/dev/sd?'):
+            self._drives.append(child)
         self._drives = sorted(self._drives)
 
     def get_data(self):
