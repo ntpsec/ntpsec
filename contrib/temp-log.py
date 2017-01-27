@@ -172,19 +172,17 @@ class Temper:
 class ZoneTemp:
     "Zone sensors"
     def __init__(self):
-        self._base_dir = '/sys/class/thermal/'
-        self.zone_directories = []
-        for child in os.listdir(self._base_dir):
-            if re.compile('thermal_zone').match(child):
-                self.zone_directories.append(child)
+        base_dir = '/sys/class/thermal/thermal_zone?/'
+        self.zones = []
+        for child in glob.glob(base_dir):
+            self.zones.append(child)
 
     def get_data(self):
         "Collects the data and return the output as an array"
         _zone = 0
         _data = []
-        for zone in self.zone_directories:
-            _zone_data = open(os.path.join(os.path.join(self._base_dir, zone),
-                                           'temp'))
+        for zone in self.zones:
+            _zone_data = open(os.path.join(zone, 'temp'))
             for line in _zone_data:
                 temp = float(line) / 1000
                 _now = int(time.time())
