@@ -2,6 +2,12 @@ The following tools are not production-ready. They are included only as
 conveniences, examples or rudimentary starting points for other development
 efforts.
 
+temp-log is a program to collect temperatures on the local host and
+log them for use by ntpviz.  Soon this program will move in ntpclients
+and replace all the other termperature loggers.  temp-log will detect
+and automatically log values from 'sensors -u', 'smartctl -A', 
+'temper-poll' and /sys/class/thermal/thermal_zone*/temp.
+
 cpu-temp-log is a tool to use the output of 'sensors -u' and write the
 motherboard temperatures to stdout.  Useful to create a log that can be used
 by 'ntpviz --local-temps'
