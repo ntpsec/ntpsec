@@ -598,12 +598,15 @@ plot \\
         plot_template = plot_template[:-4] + "\n"
         exp = """\
 <p>Local temperatures.  These will be site specific depending on what
-temperature sensors you have and collect data from.  Temperature
-changes change the local clock crystal frequency and stability.  Crystals
-oscillate faster when warmer. This the single most important
+temperature sensors you have and collect data from.
+Temperature changes affect the local clock crystal frequency and
+stability.  The math of how temperature changes frequency is
+complex, and also depends on crystal aging.  So there is no easy
+way to correct for it in software.  This the single most important
 component of frequency drift.</p>
 <p>The Local Termperatures are from field 3 from the tempstats log file.</p>
 """
+
         ret = {'html': exp, 'stats': stats}
         ret['title'] = "Local Temperatures"
         ret['plot'] = plot_template + plot_data
@@ -1346,10 +1349,10 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     # some OS do not support os.nice()
     try:
         os.nice(0)
-        parser.add_argument('-N','--nice',
-                           action="store_true",
-                           dest='nice',
-                           help="Run as lowest priority")
+        parser.add_argument('-N', '--nice',
+                            action="store_true",
+                            dest='nice',
+                            help="Run as lowest priority")
     except:
         pass
 
