@@ -11,11 +11,10 @@ TEST_SETUP(a_md5encrypt) {}
 TEST_TEAR_DOWN(a_md5encrypt) {}
 
 
-#ifdef HAVE_OPENSSL
 # include "openssl/err.h"
 # include "openssl/rand.h"
 # include "openssl/evp.h"
-#endif
+
 #include "ntp.h"
 
 /*

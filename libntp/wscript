@@ -12,7 +12,6 @@ def build(ctx):
 		"dolfptoa.c",
 		"getopt.c",
 		"initnetwork.c",
-		"md5.c",
 		"mstolfp.c",
 		"netof.c",
 		"ntp_endian.c",
@@ -67,6 +66,6 @@ def build(ctx):
 		features	= "c cshlib bld_include src_include pyext",
 		source		= ["pymodule.c"] + libntp_source_sharable,
 		install_path	= '${PYTHONDIR}/ntp',
-		use		= "M RT",
+		use		= "M RT SSL CRYPTO",
 		includes	= includes,
 	)

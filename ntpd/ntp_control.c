@@ -11,6 +11,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "openssl/evp.h"	/* provides OpenSSL digest API */
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -21,7 +23,6 @@
 #include "ntp_crypto.h"
 #include "ntp_assert.h"
 #include "ntp_leapsec.h"
-#include "ntp_md5.h"	/* provides OpenSSL digest API */
 #include "lib_strbuf.h"
 #include "ntp_syscall.h"
 
