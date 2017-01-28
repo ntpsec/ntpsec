@@ -25,7 +25,7 @@ def configure_ssl(ctx):
     )
 
     for hdr in headers:
-        if not ctx.check_cc(header_name=hdr, mandatory=False,
+        if not ctx.check_cc(header_name=hdr, mandatory=True,
                             comment="<%s> header" % hdr):
             OPENSSL_HEADERS = False
 
@@ -39,7 +39,6 @@ def configure_ssl(ctx):
         ctx.check_cc(
             fragment=OPENSSL_FRAG % "\n".join(["#include <%s>" % x
                                                for x in headers]),
-            define_name="HAVE_OPENSSL",
             execute=True,
             mandatory=False,
             use="SSL CRYPTO",
@@ -47,5 +46,3 @@ def configure_ssl(ctx):
             comment="OpenSSL support"
         )
 
-    if ctx.get_define("HAVE_OPENSSL"):
-        ctx.define("USE_OPENSSL_HASH", 1, comment="Use OpenSSL for hashing")

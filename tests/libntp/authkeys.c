@@ -5,11 +5,10 @@
 #include "unity_fixture.h"
 
 
-#ifdef HAVE_OPENSSL
 # include "openssl/err.h"
 # include "openssl/rand.h"
 # include "openssl/evp.h"
-#endif
+
 #include "ntp.h"
 
 TEST_GROUP(authkeys);

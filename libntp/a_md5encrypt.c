@@ -8,10 +8,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "openssl/evp.h"	/* provides OpenSSL digest API */
+
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 #include "ntp.h"
-#include "ntp_md5.h"	/* provides OpenSSL digest API */
 
 /* ctmemeq - test two blocks memory for equality without leaking
  * timing information.
@@ -60,15 +61,11 @@ MD5authencrypt(
 	 * was created.
 	 */
 	INIT_SSL();
-#if defined(HAVE_OPENSSL)
 	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
 		msyslog(LOG_ERR,
 		    "MAC encrypt: digest init failed");
 		return (0);
 	}
-#else
-	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
-#endif
 	EVP_DigestUpdate(&ctx, key, cache_secretsize);
 	EVP_DigestUpdate(&ctx, (uint8_t *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
@@ -102,15 +99,11 @@ MD5authdecrypt(
 	 * was created.
 	 */
 	INIT_SSL();
-#if defined(HAVE_OPENSSL)
 	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: digest init failed");
 		return (0);
 	}
-#else
-	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
-#endif
 	EVP_DigestUpdate(&ctx, key, cache_secretsize);
 	EVP_DigestUpdate(&ctx, (uint8_t *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
@@ -141,7 +134,6 @@ addr2refid(sockaddr_u *addr)
 
 	INIT_SSL();
 
-#if defined(HAVE_OPENSSL)
 	EVP_MD_CTX_init(&ctx);
 #ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
 	/* MD5 is not used as a crypto hash here. */
@@ -152,9 +144,6 @@ addr2refid(sockaddr_u *addr)
 		    "MD5 init failed");
 		exit(1);
 	}
-#else
-	EVP_DigestInit(&ctx, EVP_md5());
-#endif
 
 	EVP_DigestUpdate(&ctx, (uint8_t *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
