@@ -1,28 +1,61 @@
 #!/usr/bin/env python
 #
 # generate some heat!
-# 
+#
 # Wrap your RasPi in bubble wrap.  Then run makeheat in the background.
 # It will try to stabilize the CPU temperature at 60C.
 
+import argparse
 import hashlib
+import sys
 import time
+
+try:
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write("temp-log: can't find Python NTP modules "
+                     "-- check PYTHONPATH.\n%s\n" % e)
+    sys.exit(1)
+
+# Work with argvars
+parser = argparse.ArgumentParser(description="make heat")
+parser.add_argument('-t', '--temp',
+                    default=[65.0],
+                    dest='target_temp',
+                    help="Temperature to hold.  Default is 65.0",
+                    nargs=1,
+                    type=float)
+parser.add_argument('-w', '--wait',
+                    default=[0.1],
+                    dest='wait',
+                    help="Set delay time in seconds, default is 0.1",
+                    nargs=1,
+                    type=float)
+parser.add_argument('-V', '--version',
+                    action="version",
+                    version="temp-log %s" % ntp.util.stdversion())
+args = parser.parse_args()
+
+# this is the temperature we target
+target_temp = 65
 
 zone0 = '/sys/class/thermal/thermal_zone0/temp'
 cnt = 0
 
 m = hashlib.md5()
 temp = 0
+max_cnt = args.wait[0] / 200000
+
 while True:
     # on a RasPi 3, 200,000 of the m.update() can be one second
-    if 60 > temp:
+    if args.target_temp[0] > temp:
         m.update("Nobody inspects the spammish repetition")
     else:
-        cnt = 25000
-        time.sleep(0.125)
+        cnt = max_cnt
+        time.sleep(args.wait[0])
 
     cnt += 1
-    if 25000 < cnt:
+    if max_cnt < cnt:
         cnt = 0
 
         zone_data = open(zone0, 'r')
@@ -30,5 +63,5 @@ while True:
             temp = float(line) / 1000
 
         zone_data.close()
-        if 60 < temp:
-            time.sleep(0.125)
+        if args.target_temp < temp:
+            time.sleep(args.wait[0])
