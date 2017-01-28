@@ -11,6 +11,6 @@ def build(ctx):
 			includes	= [
 						"%s/%s/" % (bldnode, name)
 					],
-			use		= "ntp isc M RT THR PTHREAD",
+			use		= "ntp isc M SSL CRYPTO RT THR PTHREAD",
 			install_path    = None,
 		)

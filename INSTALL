@@ -53,7 +53,6 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
     export PYTHONPATH=/usr/local/lib/python2.6/site-packages
   (I put it in my .bashrc)
 
-
 bison::
    Required to build.
    Gentoo package: sys-devel/bison
@@ -62,41 +61,6 @@ OpenSSL::
    Required to run and build.
    Enables encryption and authentication.
    Gentoo: dev-libs/openssl
-
-libsodium::
-   Required to run and build.
-   Used for cryptographic-quality random-number generation.
-   This is a relatively recent library and is a bit tricky to install on
-   older distributions. We used to carry it in-tree to avoid this problem,
-   but we judge this creates an unacceptable risk should a CVE be issued
-   against it
-
-   Tarballs: https://download.libsodium.org/libsodium/releases/
-
-   NetBSD:
-     pkgin install libsodium
-     The runtime loader/linker doesn't look in /usr/pkg/lib/
-     The following link makes things work.  (adjust both 18s as needed)
-     # ls -s  /usr/pkg/lib/libsodium.so.18 /usr/lib/libsodium.so.18
-   FreeBSD:
-     # pkg install libsodium
-   CentOS:
-       libsodium comes from epel ("Extra Packages for Enterprise Linux").
-       https://fedoraproject.org/wiki/EPEL
-    # yum install epel-release
-    now use buildprep
-   Debian
-    Jessie: use buildprep
-    Wheezy:
-      i386 deb available from:
-        https://sourceforge.net/projects/debiannoofficial/files/wheezy/
-      amd64: use a tarball (URL above)
-        $ ./configure; make; make check; sudo make install
-        # ln -s /usr/local/lib/libsodium.so.18  /lib/x86_64-linux-gnu/libsodium.so.18
-
-   MacOS/OS X, macports: libsodium
-   Ubuntu 14.04 LTS: and older:
-      https://gist.github.com/jonathanpmartins/2510f38abee1e65c6d92
 
 libcap::
    Required on Linux to support dropping root.

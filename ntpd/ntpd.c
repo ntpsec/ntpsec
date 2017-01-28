@@ -52,8 +52,6 @@ static	void		finish_safe	(int);
 DNSServiceRef mdns;
 #endif
 
-#include <sodium.h>
-
 static void check_minsane(void);
 
 static bool need_priority = false;
@@ -644,14 +642,6 @@ ntpdmain(
 		sigaction(SIGDANGER, &sa, NULL);
 #  endif	/* SIGDANGER */
 # endif		/* HAVE_WORKING_FORK */
-	}
-
-        /*
-	 * Initialize libsodium and its RNG
-	 */
-	if (sodium_init() < 0) {
-		msyslog(LOG_ERR, "sodium_init() failed");
-		exit(1);
 	}
 
 	/*
