@@ -341,10 +341,8 @@ def cmd_configure(ctx, config):
         ('closefrom', ["stdlib.h"]),
         ('clock_gettime', ["time.h"], "RT"),
         ('clock_settime', ["time.h"], "RT"),
-        ('EVP_MD_do_all_sorted', ["openssl/evp.h"], "CRYPTO"),
         ('getdtablesize', ["unistd.h"]),
         ('getrusage', ["sys/time.h", "sys/resource.h"]),
-        ('MD5Init', ["md5.h"], "CRYPTO"),
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('res_init', ["resolv.h"]),
@@ -385,7 +383,6 @@ def cmd_configure(ctx, config):
         ("linux/if_addr.h", ["sys/socket.h"]),
         ("linux/rtnetlink.h", ["sys/socket.h"]),
         "linux/serial.h",
-        ("md5.h", ["sys/types.h"]),
         "net/if6.h",
         ("net/route.h", ["sys/types.h", "sys/socket.h", "net/if.h"]),
         "netinfo/ni.h",     # Apple
