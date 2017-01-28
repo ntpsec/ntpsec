@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "openssl/evp.h"	/* provides OpenSSL digest API */
+#include <openssl/evp.h>	/* provides OpenSSL digest API */
 
 #include "ntpd.h"
 #include "ntp_io.h"

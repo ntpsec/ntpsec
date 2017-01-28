@@ -13,8 +13,8 @@
 #include <ntp_debug.h>
 #include <lib_strbuf.h>
 
-#include "openssl/err.h"
-#include "openssl/evp.h"
+#include <openssl/err.h>
+#include <openssl/evp.h>
 
 void	atexit_ssl_cleanup(void);
 
