@@ -12,7 +12,7 @@ int main(void) {
 """
 
 
-def configure_ssl(ctx):
+def configure_openssl(ctx):
 
     OPENSSL_HEADERS = True
     OPENSSL_LIB = True
@@ -29,11 +29,8 @@ def configure_ssl(ctx):
                             comment="<%s> header" % hdr):
             OPENSSL_HEADERS = False
 
-    libs = ["ssl", "crypto"]
-
-    for lib in libs:
-        if not ctx.check_cc(lib=lib, mandatory=False):
-            OPENSSL_LIB = False
+    if not ctx.check_cc(lib="crypto", mandatory=False):
+        OPENSSL_LIB = False
 
     if OPENSSL_HEADERS and OPENSSL_LIB:
         ctx.check_cc(
@@ -41,7 +38,7 @@ def configure_ssl(ctx):
                                                for x in headers]),
             execute=True,
             mandatory=False,
-            use="SSL CRYPTO",
+            use="CRYPTO",
             msg="Checking if OpenSSL works",
             comment="OpenSSL support"
         )

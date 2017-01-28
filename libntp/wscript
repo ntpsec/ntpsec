@@ -65,6 +65,6 @@ def build(ctx):
 		features	= "c cshlib bld_include src_include pyext",
 		source		= ["pymodule.c"] + libntp_source_sharable,
 		install_path	= '${PYTHONDIR}/ntp',
-		use		= "M RT SSL CRYPTO",
+		use		= "M RT CRYPTO",
 		includes	= includes,
 	)
