@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+#
+# generate some heat!
+# 
+# Wrap your RasPi in bubble wrap.  Then run makeheat in the background.
+# It will try to stabilize the CPU temperature at 60C.
+
+import hashlib
+import time
+
+zone0 = '/sys/class/thermal/thermal_zone0/temp'
+cnt = 0
+
+m = hashlib.md5()
+temp = 0
+while True:
+    # on a RasPi 3, 200,000 of the m.update() can be one second
+    if 60 > temp:
+        m.update("Nobody inspects the spammish repetition")
+    else:
+        cnt = 25000
+        time.sleep(0.125)
+
+    cnt += 1
+    if 25000 < cnt:
+        cnt = 0
+
+        zone_data = open(zone0, 'r')
+        for line in zone_data:
+            temp = float(line) / 1000
+
+        zone_data.close()
+        if 60 < temp:
+            time.sleep(0.125)
