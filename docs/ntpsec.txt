@@ -2,7 +2,7 @@
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
-|image:pic/clocktower128.png[]|The NTPsec logo
+|image:pic/clocktower128.png[alt="The NTPsec logo"]|
 
 Accept no imitations.
 |==============================
