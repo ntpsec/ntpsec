@@ -45,11 +45,11 @@ Return output if good, None if bad
         # sadly subprocess.check_output() is not in Python 2.6
         # so use Popen()
         # this throws an exception if not found
-        proc = subprocess.Popen( cmd,
+        proc = subprocess.Popen(cmd,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 universal_newlines=True)
-        output = proc.communicate()[0]
+        output = proc.communicate()[0].split("\n")
 
         if proc.returncode:
             # non-zero return code, fail
@@ -61,6 +61,7 @@ Return output if good, None if bad
         # throws exceptoin
         return None
     return output
+
 
 class CpuTemp:
     "Sensors on the CPU Core"
@@ -85,7 +86,7 @@ class CpuTemp:
         # grab the needed output
         output = run_binary(["sensors", "-u"])
 
-        for record in output.split("\n"):
+        for record in output:
             match = self._pattern.match(record)
             if match and match.group(1):
                 _now = int(time.time())
@@ -125,7 +126,7 @@ class SmartCtl:
                 # do not keep trying on failure
                 self._drives.remove(_device)
             else:
-                for line in output.split("\n"):
+                for line in output:
                     if line.startswith('194 '):
                         now = int(time.time())
                         temp = line.split()[9]
@@ -160,7 +161,7 @@ class Temper:
         output = run_binary(["temper-poll", "-c"])
         try:
             # make sure it is a temperature
-            temp = float(output)
+            temp = float(output[0])
             now = int(time.time())
             data.append('%d %s %s' % (now, _device, temp))
         except:
@@ -187,7 +188,7 @@ class ZoneTemp:
                 temp = float(line) / 1000
                 _now = int(time.time())
                 _data.append('%d ZONE%s %s' % (_now, _zone, temp))
-                _zone = _zone+1
+                _zone += 1
             _zone_data.close()
         return _data
 
@@ -223,40 +224,36 @@ parser.add_argument('-V', '--version',
 args = parser.parse_args()
 
 
-def logging_setup(fileName, logLevel):
+def logging_setup():
     "Create logging object"
     logFormat = logging.Formatter('%(message)s')
     # Create logger for cpuTemp
     tempLogger = logging.getLogger()
-    tempLogger.setLevel(logLevel)
+    tempLogger.setLevel(logging.INFO)
     # Create file handler
     if args.logfile:
-        _file = logging.handlers.TimedRotatingFileHandler(
-            fileName,
+        # log to logfile
+        file = logging.handlers.TimedRotatingFileHandler(
+            args.logfile[0],
             when='midnight',
             interval=1)
     else:
-        _file = logging.StreamHandler(sys.stdout)
+        # log to stdout
+        file = logging.StreamHandler(sys.stdout)
 
-    _file.setLevel(logLevel)
+    file.setLevel(logging.INFO)
     # Create the formatter and add it to the handler
-    _file.setFormatter(logFormat)
+    file.setFormatter(logFormat)
     # Add the handler to the logger
-    tempLogger.addHandler(_file)
+    tempLogger.addHandler(file)
     return tempLogger
 
 
 def logData(log, data):
     "log the data"
-    if data is None:
-        return
-
-    if type(data) in (tuple, list):
+    if data is not None:
         for _item in data:
             log.info(_item)
-    else:
-        if data is not "":
-            log.info(data)
 
 
 def log_data():
@@ -268,10 +265,10 @@ def log_data():
     temper = Temper()
 
     # Create the logger instance
-    Logger = logging_setup(log, logging.INFO)
+    Logger = logging_setup()
 
     # Create data layout
-    logData(Logger, "# seconds since epoch, sensor, sensor value")
+    logData(Logger, ["# seconds since epoch, sensor, sensor value"])
 
     # Write data to their respective logs
     while True:
@@ -290,10 +287,6 @@ if os.getuid():
     sys.exit(1)
 
 try:
-    if args.logfile:
-        log = args.logfile[0]
-    else:
-        log = sys.stdout
     log_data()
 except (KeyboardInterrupt, SystemExit):
     print("")    # be nice to bash
