@@ -43,7 +43,7 @@ TEST(ssl_init, SHA1KeyTypeWithDigestLength) {
 	size_t digestLength;
 	size_t expected = TEST_SHA1_DIGEST_LENGTH;
 
-	TEST_ASSERT_EQUAL(NID_sha, keytype_from_text("SHA", &digestLength));
+	TEST_ASSERT_EQUAL(NID_sha1, keytype_from_text("SHA1", &digestLength));
 	TEST_ASSERT_EQUAL(expected, digestLength);
 }
 #endif	/* HAVE_OPENSSL */
@@ -55,7 +55,7 @@ TEST(ssl_init, MD5KeyName) {
 
 #ifdef HAVE_OPENSSL
 TEST(ssl_init, SHA1KeyName) {
-	TEST_ASSERT_EQUAL_STRING("SHA", keytype_name(NID_sha));
+	TEST_ASSERT_EQUAL_STRING("SHA1", keytype_name(NID_sha1));
 }
 #endif	/* HAVE_OPENSSL */
 
