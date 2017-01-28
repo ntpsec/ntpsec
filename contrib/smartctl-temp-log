@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 """\
-Usage: smartctl-temper-log [device]
+Usage: smartctl-temp-log [device]
 
 Reads 'smartctl -a device' for temperature data.  If a device is not
-sepecified on the commline line then /dev/sda is used.  Writes the
-temperature found to stdout.  Each line contains the unix time in
-seconds since the epoch, the identifier, and the temperature in Celcius.
+specified on the commline line then /dev/sda is used.  Writes the
+temperature found to stdout.  Each line contains the Unix time in
+seconds since the epoch, the identifier, and the temperature in Celsius.
 
 Before you can use this utility smartctl must be installed and
 configured.  See their documentation for that procedure.
@@ -15,13 +15,13 @@ Sample log from a typical hard disk.
 
 1471573103 SMART 37.000
 
-Field 1: unix time in seconds since the star of the epoch
+Field 1: Unix time in seconds since the star of the epoch
 Field 2: Log source (SMART)
 Field 3: temperature in degrees C
 
 Sample crontab usage:
 
-# take and log disk temp every 5 mins
+# take and log disk temp every 5 minutes
 */5 * * * * /usr/local/sbin/smart-temp-log >> /var/log/ntpstats/temps
 
 Note, many distributions put smartctl in /usr/sbin, and do not

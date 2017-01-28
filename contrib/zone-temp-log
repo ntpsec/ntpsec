@@ -5,7 +5,7 @@ Usage: zone-temper-log
 
 Reads /sys/class/thermal/thermal_zone*/temp to find the CPU temperature.
 Writes all temperatures found to stdout on one line, preceded by the
-unix UTC time in seconds.
+Unix UTC time in seconds.
 
 
 Sample log:
@@ -16,16 +16,16 @@ Sample log:
 1471582086 ZONE0 56.92
 
 
-Field 1: unix UTC time in seconds
+Field 1: Unix UTC time in seconds
 Field 2: Log source (ZONE)
 Field 3: CPU Temperature
 
-ntpviz will read akll file temps* by default. Do not step on
+ntpviz will read all file temps* by default. Do not step on
 temps used by temper-temp-log.
 
 Sample crontab usage:
 
-# take and log cpu temp every 5 mins
+# take and log CPU temp every 5 minutes
 */5 * * * * /usr/local/sbin/zone-temp-log >> /var/log/ntpstats/tempsz
 """
 
