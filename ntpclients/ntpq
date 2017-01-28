@@ -786,7 +786,7 @@ usage: ntpversion [version number]
         "set key type to use for authenticated requests"
         if not line:
             self.say("Keytype: %s\n" % self.session.keytype)
-        elif line not in "DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1":
+        elif line not in "DSA, MD4, MD5, MDC2, RIPEMD160, SHA1":
             self.warn("Keytype %s is not supported by ntpd.\n" % line)
         elif line not in hashlib.algorithms_available:
             self.warn("Keytype %s is not supported by ntpq.\n" % line)
@@ -796,7 +796,7 @@ usage: ntpversion [version number]
     def help_keytype(self):
         self.say("""\
 function: set key type to use for authenticated requests, one of:
-    DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1
+    DSA, MD4, MD5, MDC2, RIPEMD160, SHA1
 usage: keytype [digest-name]
 """)
 

@@ -129,7 +129,7 @@ direction.
 
 The RFC 5905 diagram is slightly out of date in that the digest header assumes
 a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
-160-bit (20-octet) SHA-1 hash.
+160-bit (20-octet) SHA1 hash.
 
 An extension field consists of a 16-bit network-order type field
 length, followed by a 16-bit network-order payload length in octets,
@@ -429,7 +429,7 @@ class SyncPacket(Packet):
         # 0, no MAC is present and the packet is not authenticated. If
         # 1, the packet is a crypto-NAK; if 3, the packet is
         # authenticated with DES; if 5, the packet is authenticated
-        # with MD5; if 6, the packet is authenticated with SHA. If 2
+        # with MD5; if 6, the packet is authenticated with SHA1. If 2
         # or 4, the packet is a runt and discarded forthwith. If
         # greater than 6, an extension field is present, so we
         # subtract the length of the field and go around again.
