@@ -258,8 +258,10 @@ def cmd_configure(ctx, config):
         ctx.load("msvc")
     elif ctx.env.PLATFORM_TARGET == "osx":
         # macports location
-        ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
-        ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
+        if os.path.isdir("/opt/local/include"):
+            ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
+        if os.path.isdir("/opt/local/lib"):
+            ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
 	# OS X needs this for IPv6
         ctx.define("__APPLE_USE_RFC_3542", 1,
                    comment="Needed for IPv6 support")
