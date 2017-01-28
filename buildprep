@@ -90,14 +90,12 @@ case $installer in
 	echo "# SLES versions 12 and earlier do not have pps-tools"
 	$do $installer --install basis-devel gnuplot libcap-devel libcap2
 	$do $installer --install liberation-fonts libseccomp-devel
-	$do $installer --install libsodium-devel libsodium13
 	$do $installer --install openssl-libs openssl-devel
 	$do $installer --install python-devel
 	;;
     zypper)
 	$do zypper install -y gnuplot libcap-devel libcap2
 	$do zypper install -y liberation-fonts libseccomp-devel
-	$do zypper install -y libsodium-devel libsodium13
 	$do zypper install -y openssl-devel
 	$do zypper install -y python-devel bison
 	$do zypper install -y gcc6 gcc6-info gcc6-locale
@@ -106,21 +104,5 @@ case $installer in
 	;;
 esac
 
-echo "# libsodium is a point of pain; some older distributions don't carry it."
-echo "# Watch these installations closely; if you get a failure message,"
-echo "# see INSTALL for instructions."
-case $installer in
-    apt)
-	# no libsodium on Debian wheezy
-	$do apt-get install libsodium-dev
-	;;
-    emerge)
-        $do emerge -q y dev-libs/libsodium
-        ;;
-    yum|dnf)
-	# no libsodium on CentOS 7
-	$do $installer install libsodium libsodium-devel
-	;;
-esac
 echo ""
 echo "# Done."

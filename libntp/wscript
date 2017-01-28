@@ -55,7 +55,6 @@ def build(ctx):
 	ctx(
 		target		= "ntp",
 		features	= "c cstlib bld_include src_include",
-		use		= "SODIUM",
 		source		= libntp_source + libntp_source_sharable,
 		includes	= includes,
 	)

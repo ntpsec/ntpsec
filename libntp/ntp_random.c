@@ -5,14 +5,16 @@
  * SPDX-License-Identifier: BSD-4-clause
  */
 
-#include "config.h"
 #include <stdint.h>
-#include <sodium.h>
 
-long
-ntp_random( void )
+#include <openssl/rand.h>
+
+#include "ntp_endian.h"
+
+int32_t
+ntp_random(void)
 {
-	uint32_t rnd;
-	randombytes_buf(&rnd, sizeof rnd);
-	return (long)(rnd & 0x7fffffff);
+	unsigned char rnd[sizeof(uint32_t)];
+	RAND_bytes(rnd, sizeof(rnd));
+	return (int32_t)ntp_be32dec(rnd);
 }

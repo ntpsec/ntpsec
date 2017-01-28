@@ -1,1 +1,1 @@
-long ntp_random (void);
+int32_t ntp_random (void);
