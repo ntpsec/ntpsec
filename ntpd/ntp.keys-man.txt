@@ -31,14 +31,14 @@ The `key` may be given in a format controlled by the `type` field. The
 `type` MD5 is always supported.  If ntpd was built with the OpenSSL
 library then any digest library supported by that library may be
 specified. However, if compliance with FIPS 140-2 is required the
-`type` must be either 'SHA' or 'SHA1'.
+`type` must be 'SHA1'.
 
 What follows are some key types, and corresponding formats:
 
 _MD5_::
   The key is 1 to 16 printable characters terminated by an EOL,
   whitespace, or a _#_ (which is the "start of comment" character).
-_SHA_; _SHA1_; _RMD160_::
+_SHA1_; _RMD160_::
   The key is a hex-encoded ASCII string of 40 characters, which is
   truncated as necessary.
 +

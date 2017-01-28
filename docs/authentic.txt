@@ -153,7 +153,7 @@ distribution can be freely exported.
 
 If the OpenSSL cryptographic library is installed prior to building the
 distribution, all message digest algorithms included in the library may
-be used, including SHA-0 and SHA1. However, if conformance to FIPS 140-2
+be used, including MD5 and SHA1. However, if conformance to FIPS 140-2
 is required, only a limited subset of these algorithms can be used. This
 library is available from http://www.openssl.org and can be installed
 using the procedures outlined in the link:build.html[Building and
@@ -191,7 +191,7 @@ ID, to authenticate an association. The servers and clients involved
 must agree on the key ID, key type and key to authenticate NTP packets.
 
 The message digest is a cryptographic hash computed by an algorithm such
-as MD5 or SHA-1. When authentication is specified, a message
+as MD5 or SHA1. When authentication is specified, a message
 authentication code (MAC) is appended to the NTP packet header. The MAC
 consists of a 32-bit key identifier (key ID) followed by a 128- or
 160-bit message digest. The algorithm computes the digest as the hash of
