@@ -10,8 +10,8 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
-#include "openssl/objects.h"
-#include "openssl/evp.h"
+#include <openssl/objects.h>
+#include <openssl/evp.h>
 
 /* Forwards */
 static char *nexttok (char **);

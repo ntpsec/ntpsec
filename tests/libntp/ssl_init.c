@@ -12,9 +12,9 @@ TEST_SETUP(ssl_init) {}
 TEST_TEAR_DOWN(ssl_init) {}
 
 
-# include "openssl/err.h"
-# include "openssl/rand.h"
-# include "openssl/evp.h"
+#include <openssl/err.h>
+#include <openssl/rand.h>
+#include <openssl/evp.h>
 
 #include "ntp.h"
 

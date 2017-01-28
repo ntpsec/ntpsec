@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "openssl/evp.h"	/* provides OpenSSL digest API */
+#include <openssl/evp.h>	/* provides OpenSSL digest API */
 
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"

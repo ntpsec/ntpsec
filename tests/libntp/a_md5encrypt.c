@@ -11,9 +11,9 @@ TEST_SETUP(a_md5encrypt) {}
 TEST_TEAR_DOWN(a_md5encrypt) {}
 
 
-# include "openssl/err.h"
-# include "openssl/rand.h"
-# include "openssl/evp.h"
+#include <openssl/err.h>
+#include <openssl/rand.h>
+#include <openssl/evp.h>
 
 #include "ntp.h"
 
