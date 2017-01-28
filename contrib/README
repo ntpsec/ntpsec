@@ -18,5 +18,5 @@ log that can be used by 'ntpviz --local-temps'
 
 zone-temp-log reads /sys/class/thermal/thermal_zone*/temp to find the CPU
 temperature.  Writes all temperatures found to stdout on one line, preceded by
-the unix UTC time in seconds.  This is useful on any Linux system that
+the Unix UTC time in seconds.  This is useful on any Linux system that
 supports the /sys/class/thermal/thermal_zone*/temp interface.

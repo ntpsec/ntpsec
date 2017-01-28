@@ -4,7 +4,7 @@
 Usage: temper-temper-log
 
 Reads 'temper-poll -c' for room temperature data.  Writes the temperature
-found to stdout on one line, preceded by the unix UTC time in seconds
+found to stdout on one line, preceded by the Unix UTC time in seconds
 and the Log source ID.
 
 Before you can use this utility you must have a TEMPer USB thermometer
@@ -17,13 +17,13 @@ Sample log from a TEMPer:
 1471573104 TEMPER 37.000
 1471573105 TEMPER 37.000
 
-Field 1: unix UTC time in seconds
+Field 1: Unix UTC time in seconds
 Field 1: Log source (TEMPER)
 Field 3: CPU temperature in degrees C
 
 Sample crontab usage:
 
-# take and log cpu temp every 5 mins
+# take and log CPU temp every 5 minutes
 */5 * * * * /usr/local/sbin/temper-temp-log >> /var/log/ntpstats/temps
 
 """
