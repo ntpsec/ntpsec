@@ -511,7 +511,7 @@ def cmd_configure(ctx, config):
                "same sockets on alternate interfaces, required "
                "by Linux at least")
 
-    # These are required by the SHA2 code and various refclocks
+    # These are required by the SHA1 code and various refclocks
     if sys.byteorder == "little":
         pass
     elif sys.byteorder == "big":
