@@ -35,6 +35,7 @@ def build(ctx):
 		"hextolfp.c",
 		"humandate.c",
 		"lib_strbuf.c",
+		"libssl_compat.c",
 		"msyslog.c",
 		"ntp_calendar.c",
 		"prettydate.c",
