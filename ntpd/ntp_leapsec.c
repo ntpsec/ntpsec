@@ -30,41 +30,7 @@
 
 #include <openssl/evp.h>
 
-typedef EVP_MD_CTX isc_sha1_t;
-
 #define ISC_SHA1_DIGESTLENGTH 20U
-#define ISC_SHA1_BLOCK_LENGTH 64U
-
-static void
-isc_sha1_init(isc_sha1_t *context)
-{
-	INSIST(context != NULL);
-
-	EVP_DigestInit(context, EVP_sha1());
-}
-
-static void
-isc_sha1_invalidate(isc_sha1_t *context) {
-	EVP_MD_CTX_cleanup(context);
-}
-
-static void
-isc_sha1_update(isc_sha1_t *context, const unsigned char *data,
-		unsigned int len)
-{
-	INSIST(context != 0);
-	INSIST(data != 0);
-
-	EVP_DigestUpdate(context, (const void *) data, (size_t) len);
-}
-
-static void
-isc_sha1_final(isc_sha1_t *context, unsigned char *digest) {
-	INSIST(digest != 0);
-	INSIST(context != 0);
-
-	EVP_DigestFinal(context, digest, NULL);
-}
 
 static const char * const logPrefix = "leapsecond file";
 
@@ -962,7 +928,7 @@ do_leap_hash(
  */
 static void
 do_hash_data(
-	isc_sha1_t * mdctx,
+	EVP_MD_CTX * mdctx,
 	char const * cp   )
 {
 	unsigned char  text[32]; // must be power of two!
@@ -974,12 +940,12 @@ do_hash_data(
 			text[tlen++] = ch;
 			tlen &= (sizeof(text)-1);
 			if (0 == tlen)
-				isc_sha1_update(
-					mdctx, text, sizeof(text));
+				EVP_DigestUpdate(
+				    mdctx, (const void *)text, sizeof(text));
 		}
 	
 	if (0 < tlen)
-		isc_sha1_update(mdctx, text, tlen);
+		EVP_DigestUpdate(mdctx, (const void *)text, (size_t)tlen);
 }
 
 /* given a reader and a reader arg, calculate and validate the hash
@@ -990,12 +956,12 @@ leapsec_validate(
 	leapsec_reader func,
 	void *         farg)
 {
-	isc_sha1_t     mdctx;
+	EVP_MD_CTX     mdctx;
 	sha1_digest    rdig, ldig; /* remote / local digests */
 	char           line[50];
 	int            hlseen = -1;
 
-	isc_sha1_init(&mdctx);
+	EVP_DigestInit(&mdctx, EVP_sha1());
 	while (get_line(func, farg, line, sizeof(line))) {
 		if (!strncmp(line, "#h", 2))
 			hlseen = do_leap_hash(&rdig, line+2);
@@ -1006,8 +972,8 @@ leapsec_validate(
 		else if (isdigit((unsigned char)line[0]))
 			do_hash_data(&mdctx, line);
 	}
-	isc_sha1_final(&mdctx, ldig.hv);
-	isc_sha1_invalidate(&mdctx);
+	EVP_DigestFinal(&mdctx, ldig.hv, NULL);
+	EVP_MD_CTX_cleanup(&mdctx);
 
 	if (0 > hlseen)
 		return LSVALID_NOHASH;
