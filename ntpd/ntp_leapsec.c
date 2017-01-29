@@ -28,7 +28,43 @@
 #include "ntp.h"
 #include "lib_strbuf.h"
 
-#include "isc/sha1.h"
+#include <openssl/evp.h>
+
+typedef EVP_MD_CTX isc_sha1_t;
+
+#define ISC_SHA1_DIGESTLENGTH 20U
+#define ISC_SHA1_BLOCK_LENGTH 64U
+
+static void
+isc_sha1_init(isc_sha1_t *context)
+{
+	INSIST(context != NULL);
+
+	EVP_DigestInit(context, EVP_sha1());
+}
+
+static void
+isc_sha1_invalidate(isc_sha1_t *context) {
+	EVP_MD_CTX_cleanup(context);
+}
+
+static void
+isc_sha1_update(isc_sha1_t *context, const unsigned char *data,
+		unsigned int len)
+{
+	INSIST(context != 0);
+	INSIST(data != 0);
+
+	EVP_DigestUpdate(context, (const void *) data, (size_t) len);
+}
+
+static void
+isc_sha1_final(isc_sha1_t *context, unsigned char *digest) {
+	INSIST(digest != 0);
+	INSIST(context != 0);
+
+	EVP_DigestFinal(context, digest, NULL);
+}
 
 static const char * const logPrefix = "leapsecond file";
 
