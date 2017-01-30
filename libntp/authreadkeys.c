@@ -136,7 +136,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		 * the OpenSSL database. We attempt to discover them
 		 * here and prevent use of inconsistent data later.
 		 */
-		keytype = keytype_from_text(token, NULL);
+		keytype = keytype_from_text(token);
 		if (keytype == 0) {
 			msyslog(LOG_ERR,
 			    "authreadkeys: invalid type for key %d", keyno);
