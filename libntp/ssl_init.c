@@ -52,21 +52,16 @@ atexit_ssl_cleanup(void)
  * keytype_from_text	returns OpenSSL NID for digest by name, and
  *			optionally the associated digest length.
  *
- * Used by ntpd authreadkeys(), ntpq keytype()
+ * Used by ntpd authreadkeys()
  */
 int
 keytype_from_text(
-	const char *text,
-	size_t *pdigest_len
+	const char *text
 	)
 {
 	int		key_type;
-	u_int		digest_len;
-	const u_long	max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
-	uint8_t		digest[EVP_MAX_MD_SIZE];
 	char *		upcased;
 	char *		pch;
-	EVP_MD_CTX	ctx;
 
 	/*
 	 * OpenSSL digest short names are capitalized, so uppercase the
@@ -87,44 +82,5 @@ keytype_from_text(
 	if (!key_type)
 		return 0;
 
-	if (NULL != pdigest_len) {
-		EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
-		EVP_DigestFinal(&ctx, digest, &digest_len);
-		if (digest_len > max_digest_len) {
-			fprintf(stderr,
-				"key type %s %u octet digests are too big, max %lu\n",
-				keytype_name(key_type), digest_len,
-				max_digest_len);
-			msyslog(LOG_ERR,
-				"key type %s %u octet digests are too big, max %lu",
-				keytype_name(key_type), digest_len,
-				max_digest_len);
-			return 0;
-		}
-		*pdigest_len = digest_len;
-	}
-
 	return key_type;
 }
-
-
-/*
- * keytype_name		returns OpenSSL short name for digest by NID.
- *
- * Used by ntpq keytype()
- */
-const char *
-keytype_name(
-	int nid
-	)
-{
-	static const char unknown_type[] = "(unknown key type)";
-	const char *name;
-
-	ssl_init();
-	name = OBJ_nid2sn(nid);
-	if (NULL == name)
-		name = unknown_type;
-	return name;
-}
-
