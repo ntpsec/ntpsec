@@ -167,6 +167,13 @@ server 3.uk.pool.ntp.org
 If you know your ISO country code, it is often possible to find an
 analogous group of servers by pinging them.
 
+Recent versions of NTP, (and NTPsec is recent enough), know of the
+pool concept, so you can replace the above with:
+
+------------------------------------------------------------------
+pool uk.pool.ntp.org
+------------------------------------------------------------------
+
 Ideally, one would like one's servers to use multiple different kinds
 of timesources (as opposed to, say, all being GPS-based) and be split
 across different autonomous networks as a hedge against outages and
