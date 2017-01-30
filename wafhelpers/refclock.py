@@ -97,12 +97,6 @@ refclock_map = {
         "file":     "jupiter"
     },
 
-    "dumbclock": {
-        "descr":    "Dumb Clock",
-        "define":   "CLOCK_DUMBCLOCK",
-        "file":     "dumbclock"
-    },
-
     "jjy": {
         "descr":    "JJY Receivers",
         "define":   "CLOCK_JJY",
