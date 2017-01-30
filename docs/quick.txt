@@ -225,9 +225,13 @@ The following configuration lines tell your +ntpd+ to accept time
 from GPSD:
 
 ------------------------------------------------------------------
-refclock shm unit 0 refid GPS
 refclock shm unit 1 prefer refid PPS
+refclock shm unit 0 refid GPS
 ------------------------------------------------------------------
+
+Note the order above; +ntpd+ prefers earlier defined refclocks
+to later.  Your PPS is likely to be more accurate than the
+in-band stream.
 
 For details on setting up the GPSD end, see the
 http://catb.org/gpsd/gpsd-time-service-howto.html[GPSD Time Service
