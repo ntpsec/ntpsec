@@ -2,7 +2,6 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 
 	libntp_source = [
-		"a_md5encrypt.c",
 		"atolfp.c",
 		"authkeys.c",
 		"authreadkeys.c",
@@ -12,6 +11,7 @@ def build(ctx):
 		"dolfptoa.c",
 		"getopt.c",
 		"initnetwork.c",
+		"macencrypt.c",
 		"mstolfp.c",
 		"netof.c",
 		"ntp_endian.c",

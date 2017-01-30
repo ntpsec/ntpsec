@@ -486,7 +486,7 @@ authistrusted(
 
 
 void
-MD5auth_setkey(
+mac_setkey(
 	keyid_t keyno,
 	int	keytype,
 	const uint8_t *key,
@@ -594,7 +594,7 @@ authencrypt(
 		return 0;
 	}
 
-	return MD5authencrypt(cache_type, cache_secret, pkt, length);
+	return mac_authencrypt(cache_type, cache_secret, pkt, length);
 }
 
 
@@ -621,6 +621,5 @@ authdecrypt(
 		return false;
 	}
 
-	return MD5authdecrypt(cache_type, cache_secret, pkt, length,
-			      size);
+	return mac_authdecrypt(cache_type, cache_secret, pkt, length, size);
 }

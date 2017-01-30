@@ -38,12 +38,12 @@ static bool ctmemeq(const void *s1, const void *s2, size_t n) {
 }
 
 /*
- * MD5authencrypt - generate message digest
+ * mac_authencrypt - generate message digest
  *
  * Returns length of MAC including key ID and digest.
  */
 int
-MD5authencrypt(
+mac_authencrypt(
 	int	type,		/* hash algorithm */
 	uint8_t	*key,		/* key pointer */
 	uint32_t *pkt,		/* packet pointer */
@@ -74,12 +74,12 @@ MD5authencrypt(
 
 
 /*
- * MD5authdecrypt - verify MD5 message authenticator
+ * mac_authdecrypt - verify MD5 message authenticator
  *
  * Returns one if digest valid, zero if invalid.
  */
 int
-MD5authdecrypt(
+mac_authdecrypt(
 	int	type,		/* hash algorithm */
 	uint8_t	*key,		/* key pointer */
 	uint32_t	*pkt,		/* packet pointer */
@@ -138,8 +138,7 @@ addr2refid(sockaddr_u *addr)
 	EVP_MD_CTX_set_flags(&ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
 #endif
 	if (!EVP_DigestInit_ex(&ctx, EVP_md5(), NULL)) {
-		msyslog(LOG_ERR,
-		    "MD5 init failed");
+		msyslog(LOG_ERR, "MD5 init failed");
 		exit(1);
 	}
 
