@@ -101,12 +101,6 @@ extern	struct refclock refclock_jupiter;
 #define refclock_jupiter refclock_none
 #endif
 
-#if defined(CLOCK_DUMBCLOCK)
-extern struct refclock refclock_dumbclock;
-#else
-#define refclock_dumbclock refclock_none
-#endif
-
 #ifdef CLOCK_JJY
 extern	struct refclock	refclock_jjy;
 #else
@@ -175,7 +169,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_oncore,	/* 30 REFCLK_ONCORE */
 	&refclock_jupiter,	/* 31 REFCLK_GPS_JUPITER */
 	&refclock_none,		/* 32 was: REFCLK_CHRONOLOG */
-	&refclock_dumbclock,	/* 33 REFCLK_DUMBCLOCK */
+	&refclock_none,		/* 33 was: REFCLK_DUMBCLOCK */
 	&refclock_none,		/* 34 was: REFCLOCK_ULINK */
 	&refclock_none,		/* 35 was: REFCLOCK_PCF */
 	&refclock_none,		/* 36 was: REFCLOCK_WWV_AUDIO */

@@ -176,7 +176,6 @@ parse driver.
 |link:driver_trimble.html[trimble]      | T | Trimble Palisade/Thunderbolt/Acutime GPSes
 |link:driver_oncore.html[oncore]        | - | Motorola UT Oncore GPS
 |link:driver_jupiter.html[jupiter]      | D | Rockwell Jupiter GPS
-|link:driver_dumbclock.html[dumbclock]  | D | Dumb Clock
 |link:driver_jjy.html[jjy]              | T | JJY Receivers
 |link:driver_zyfer.html[zyfer]          | - | Zyfer GPStarplus Receiver
 |link:driver_neoclock.html[neoclock]    | - | NeoClock4X DCF77 / TDF Receiver
