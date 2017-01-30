@@ -88,7 +88,7 @@ authreadkeys(
 		    file);
 		return false;
 	}
-	INIT_SSL();
+	ssl_init();
 msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 
 	/*

@@ -671,7 +671,7 @@ ntpdmain(
 	 *
 	 * Exactly what command-line options are we expecting here?
 	 */
-	INIT_SSL();
+	ssl_init();
 	init_auth();
 	init_util();
 	init_restrict();

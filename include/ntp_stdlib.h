@@ -192,12 +192,6 @@ extern pset_tod_using	set_tod_using;
 
 /* ssl_init.c */
 extern	void	ssl_init		(void);
-extern	bool	ssl_init_done;
-#define	INIT_SSL()				\
-	do {					\
-		if (!ssl_init_done)		\
-			ssl_init();		\
-	} while (0)
 extern	int	keytype_from_text	(const char *,	size_t *);
 extern	const char *keytype_name	(int);
 

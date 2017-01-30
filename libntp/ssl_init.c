@@ -18,15 +18,15 @@
 
 void	atexit_ssl_cleanup(void);
 
-bool ssl_init_done;
+static bool ssl_init_done;
 
 void
 ssl_init(void)
 {
-	init_lib();
-
 	if (ssl_init_done)
 		return;
+
+	init_lib();
 
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_algorithms();
@@ -74,7 +74,7 @@ keytype_from_text(
 	 * recognized but begins with 'M' use NID_md5 to be consistent
 	 * with past behavior.
 	 */
-	INIT_SSL();
+	ssl_init();
 	LIB_GETBUF(upcased);
 	strlcpy(upcased, text, LIB_BUFLENGTH);
 	for (pch = upcased; '\0' != *pch; pch++)
@@ -121,7 +121,7 @@ keytype_name(
 	static const char unknown_type[] = "(unknown key type)";
 	const char *name;
 
-	INIT_SSL();
+	ssl_init();
 	name = OBJ_nid2sn(nid);
 	if (NULL == name)
 		name = unknown_type;
