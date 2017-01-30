@@ -4,11 +4,11 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-TEST_GROUP(a_md5encrypt);
+TEST_GROUP(macencrypt);
 
-TEST_SETUP(a_md5encrypt) {}
+TEST_SETUP(macencrypt) {}
 
-TEST_TEAR_DOWN(a_md5encrypt) {}
+TEST_TEAR_DOWN(macencrypt) {}
 
 
 #include <openssl/err.h>
@@ -30,37 +30,37 @@ const int digestLength = 16;
 const int totalLength = 36; //error: initializer element is not constant packetLength + keyIdLength + digestLength;
 const char *expectedPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
 
-TEST(a_md5encrypt, Encrypt) {
+TEST(macencrypt, Encrypt) {
 	char *packetPtr[totalLength];
 	memset(packetPtr+packetLength, 0, keyIdLength);
 	memcpy(packetPtr, packet, packetLength);
 
 	cache_secretsize = keyLength;
 
-	int length =  MD5authencrypt(keytype, (u_char*)key, (uint32_t*)packetPtr, packetLength);
+	int length =  mac_authencrypt(keytype, (u_char*)key, (uint32_t*)packetPtr, packetLength);
 
-	TEST_ASSERT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (uint32_t*)packetPtr, packetLength, length));
+	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (u_char*)key, (uint32_t*)packetPtr, packetLength, length));
 
 	TEST_ASSERT_EQUAL(20, length);
 //XXX	TEST_ASSERT_TRUE(memcmp(expectedPacket, packetPtr, totalLength) == 0);  Does not pass
 
 }
 
-TEST(a_md5encrypt, DecryptValid) {
+TEST(macencrypt, DecryptValid) {
 	cache_secretsize = keyLength;
 
-	TEST_ASSERT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (uint32_t*)expectedPacket, packetLength, 20));
+	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (u_char*)key, (uint32_t*)expectedPacket, packetLength, 20));
 }
 
-TEST(a_md5encrypt, DecryptInvalid) {
+TEST(macencrypt, DecryptInvalid) {
 	cache_secretsize = keyLength;
 
 	const char *invalidPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
 
-	TEST_ASSERT_FALSE(MD5authdecrypt(keytype, (u_char*)key, (uint32_t*)invalidPacket, packetLength, 20));
+	TEST_ASSERT_FALSE(mac_authdecrypt(keytype, (u_char*)key, (uint32_t*)invalidPacket, packetLength, 20));
 }
 
-TEST(a_md5encrypt, IPv4AddressToRefId) {
+TEST(macencrypt, IPv4AddressToRefId) {
 	sockaddr_u addr;
 	SET_AF(&addr, AF_INET);
 	SET_NSRCPORT(&addr, htons(80));
@@ -70,7 +70,7 @@ TEST(a_md5encrypt, IPv4AddressToRefId) {
 	TEST_ASSERT_EQUAL(address, addr2refid(&addr));
 }
 
-TEST(a_md5encrypt, IPv6AddressToRefId) {
+TEST(macencrypt, IPv6AddressToRefId) {
 	const struct in6_addr address = {{{
 		0x20, 0x01, 0x0d, 0xb8,
         0x85, 0xa3, 0x08, 0xd3,
@@ -88,10 +88,10 @@ TEST(a_md5encrypt, IPv6AddressToRefId) {
 	TEST_ASSERT_EQUAL(expected, addr2refid(&addr));
 }
 
-TEST_GROUP_RUNNER(a_md5encrypt) {
-	RUN_TEST_CASE(a_md5encrypt, Encrypt);
-	RUN_TEST_CASE(a_md5encrypt, DecryptValid);
-	RUN_TEST_CASE(a_md5encrypt, DecryptInvalid);
-	RUN_TEST_CASE(a_md5encrypt, IPv4AddressToRefId);
-	RUN_TEST_CASE(a_md5encrypt, IPv6AddressToRefId);
+TEST_GROUP_RUNNER(macencrypt) {
+	RUN_TEST_CASE(macencrypt, Encrypt);
+	RUN_TEST_CASE(macencrypt, DecryptValid);
+	RUN_TEST_CASE(macencrypt, DecryptInvalid);
+	RUN_TEST_CASE(macencrypt, IPv4AddressToRefId);
+	RUN_TEST_CASE(macencrypt, IPv6AddressToRefId);
 }

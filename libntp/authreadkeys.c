@@ -162,7 +162,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		}
 		len = strlen(token);
 		if (len <= 20) {	/* Bug 2537 */
-			MD5auth_setkey(keyno, keytype, (uint8_t *)token, len);
+			mac_setkey(keyno, keytype, (uint8_t *)token, len);
 			keys++;
 		} else {
 			char	hex[] = "0123456789abcdef";
@@ -186,7 +186,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 					"authreadkeys: invalid hex digit for key %d", keyno);
 				continue;
 			}
-			MD5auth_setkey(keyno, keytype, keystr, jlim / 2);
+			mac_setkey(keyno, keytype, keystr, jlim / 2);
 			keys++;
 		}
 	}

@@ -39,7 +39,6 @@ static void RunAllTests(void)
 #endif
 
 #ifdef TEST_LIBNTP
-	RUN_TEST_GROUP(a_md5encrypt);
 	RUN_TEST_GROUP(authkeys);
 	RUN_TEST_GROUP(calendar);
 	RUN_TEST_GROUP(clocktime);
@@ -48,6 +47,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(humandate);
 	RUN_TEST_GROUP(lfpfunc);
 	RUN_TEST_GROUP(lfptostr);
+	RUN_TEST_GROUP(macencrypt);
 	RUN_TEST_GROUP(msyslog);
 	RUN_TEST_GROUP(netof);
 	RUN_TEST_GROUP(numtoa);

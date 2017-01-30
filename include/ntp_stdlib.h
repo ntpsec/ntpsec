@@ -86,9 +86,9 @@ int ntp_getopt_long(int argc, char* const argv[], const char *optstring,
 		    const struct option *longopts, int *longindex);
 
 /* a_md5encrypt.c */
-extern	int	MD5authdecrypt	(int, uint8_t *, uint32_t *, int, int);
-extern	int	MD5authencrypt	(int, uint8_t *, uint32_t *, int);
-extern	void	MD5auth_setkey	(keyid_t, int, const uint8_t *, size_t);
+extern	int	mac_authdecrypt	(int, uint8_t *, uint32_t *, int, int);
+extern	int	mac_authencrypt	(int, uint8_t *, uint32_t *, int);
+extern	void	mac_setkey	(keyid_t, int, const uint8_t *, size_t);
 extern	uint32_t	addr2refid	(sockaddr_u *);
 
 /* emalloc.c */
