@@ -123,14 +123,15 @@ want to change them.
 [[pool]]
 == Configuring Pool Servers ==
 
-The NTP pool is a worldwide federation of public-facing NTP servers,
-many equipped with their own local reference clocks, that
-have volunteered to provide time service to anyone who requests it
-through a pool dispatcher machine. The +server+ declarations in your
-+ntp.conf+ normally point at several of these pool dispatchers.
-When your +ntpd+ send a request to one, it picks a random server
-from its part of the pool and hands that address back to your
-+ntpd+.
+The NTP pool is a dynamic collection of networked computers that
+provide highly accurate time via the Network Time
+Protocol to clients worldwide. The machines that are "in the pool"
+are part of the pool.ntp.org domain as well as of several
+subdomains divided by geographical zone and are distributed
+to NTP clients via round robin DNS.
+
+The +server+ declarations in your +ntp.conf+ normally point at
+several of these DNS names.  These are resolved via DNS to Pool servers.
 
 Note: while you could in theory request time service from any specific
 time server in the world, it is considered bad form to use a non-pool
@@ -141,10 +142,10 @@ or academic institutions and intended to be used by their members.
 For high-quality time service it is advantageous if your upstream
 servers are located where packet-transit times to you are short and
 there is little random variation in them.  Because the NTP pool is
-worldwide, accepting a random assignment from it may give you a
+worldwide, asking for a random assignment from it may give you a
 timeserver on the other side of the world.  Thus, the pool is divided
-into subsections, each with its own dispatchers.  To improve your
-service, pick a pool section near you on the network.
+into subsections.  To improve your service, pick a pool section near 
+you on the network.
 
 Unfortunately, "near you on the network" is often difficult to map
 and changes unpredictably over time.  However, there is a very
@@ -225,10 +226,9 @@ For details on setting up the GPSD end, see the
 http://catb.org/gpsd/gpsd-time-service-howto.html[GPSD Time Service
 HOWTO].
 
-If you are looking to set up a Stratum 1 timeserver, independent of
-external dependencies, you may find 
+If you are looking to set up a Stratum 1 timeserver, you may find
 https://www.ntpsec.org/white-papers/stratum-1-microserver-howto/
-helpful.
+very helpful.
 
 [[dhcp]]
 == Special considerations when using DHCP ==
