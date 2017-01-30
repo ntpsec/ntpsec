@@ -59,7 +59,7 @@ mac_authencrypt(
 	 * key type and digest type have been verified when the key
 	 * was created.
 	 */
-	INIT_SSL();
+	ssl_init();
 	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
 		msyslog(LOG_ERR,
 		    "MAC encrypt: digest init failed");
@@ -96,7 +96,7 @@ mac_authdecrypt(
 	 * key type and digest type have been verified when the key
 	 * was created.
 	 */
-	INIT_SSL();
+	ssl_init();
 	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: digest init failed");
@@ -130,7 +130,7 @@ addr2refid(sockaddr_u *addr)
 	if (IS_IPV4(addr))
 		return (NSRCADR(addr));
 
-	INIT_SSL();
+	ssl_init();
 
 	EVP_MD_CTX_init(&ctx);
 #ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
