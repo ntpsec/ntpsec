@@ -56,7 +56,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(refidsmear);
 	RUN_TEST_GROUP(sfptostr);
 	RUN_TEST_GROUP(socktoa);
-	RUN_TEST_GROUP(ssl_init);
 	RUN_TEST_GROUP(statestr);
 	RUN_TEST_GROUP(strtolfp);
 	RUN_TEST_GROUP(timespecops);
