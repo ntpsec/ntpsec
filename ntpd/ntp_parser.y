@@ -20,7 +20,6 @@
   #include "ntp_filegen.h"
   #include "ntp_scanner.h"
   #include "ntp_config.h"
-  #include "ntp_crypto.h"
 
   #define YYMALLOC	emalloc
   #define YYFREE	free
