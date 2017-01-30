@@ -9,6 +9,7 @@
 #include "ntp.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
+#include "lib_strbuf.h"
 
 #include <openssl/objects.h>
 #include <openssl/evp.h>
@@ -135,8 +136,22 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		 * algorithm. There are a number of inconsistencies in
 		 * the OpenSSL database. We attempt to discover them
 		 * here and prevent use of inconsistent data later.
+		 *
+		 * OpenSSL digest short names are capitalized, so uppercase the
+		 * digest name before passing to OBJ_sn2nid().  If it is not
+		 * recognized but begins with 'M' use NID_md5 to be consistent
+		 * with past behavior.
 		 */
-		keytype = keytype_from_text(token);
+		char *upcased;
+		char *pch;
+		LIB_GETBUF(upcased);
+		strlcpy(upcased, token, LIB_BUFLENGTH);
+		for (pch = upcased; '\0' != *pch; pch++)
+			*pch = (char)toupper((unsigned char)*pch);
+
+		keytype = OBJ_sn2nid(upcased);
+		if (!keytype && 'm' == tolower((unsigned char)token[0]))
+			keytype = NID_md5;
 		if (keytype == 0) {
 			msyslog(LOG_ERR,
 			    "authreadkeys: invalid type for key %d", keyno);
