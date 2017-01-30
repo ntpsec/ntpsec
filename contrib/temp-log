@@ -268,7 +268,7 @@ def log_data():
     Logger = logging_setup()
 
     # Create data layout
-    logData(Logger, ["# seconds since epoch, sensor, sensor value"])
+    logData(Logger, ["# time, sensor, value"])
 
     # Write data to their respective logs
     while True:
