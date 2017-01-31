@@ -69,7 +69,6 @@
 #include <config.h>
 #include "ntp.h"
 #include "ntp_types.h"
-#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 /* =====================================================================
  * Get the little JSMN library directly into our guts. Use the 'parent

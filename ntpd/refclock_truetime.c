@@ -12,7 +12,6 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
-#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 /* This should be an atom clock but those are very hard to build.
  *

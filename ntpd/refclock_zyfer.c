@@ -10,7 +10,6 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
-#include "ntp_control.h"
 
 #include <stdio.h>
 #include <ctype.h>

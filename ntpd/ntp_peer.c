@@ -9,7 +9,6 @@
 #include "ntpd.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
-#include "ntp_control.h"
 #include "ntp_random.h"
 
 /*
