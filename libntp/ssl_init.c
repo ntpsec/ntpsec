@@ -29,7 +29,7 @@ ssl_init(void)
 	init_lib();
 
 	ERR_load_crypto_strings();
-	OpenSSL_add_all_algorithms();
+	OpenSSL_add_all_digests();
 	atexit(&atexit_ssl_cleanup);
 
 	ssl_init_done = true;
