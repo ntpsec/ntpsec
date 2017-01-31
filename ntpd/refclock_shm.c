@@ -20,7 +20,6 @@
 #undef fileno
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
-#include "ntp_control.h"
 
 #undef fileno
 #include <ctype.h>

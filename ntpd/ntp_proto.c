@@ -7,7 +7,6 @@
 #include "ntpd.h"
 #include "ntp_endian.h"
 #include "ntp_stdlib.h"
-#include "ntp_control.h"
 #include "ntp_leapsec.h"
 #include "refidsmear.h"
 
