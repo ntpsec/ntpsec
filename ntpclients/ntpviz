@@ -1790,7 +1790,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         index_buffer += VizStats.table_tail
         index_buffer += """\
 <a href="summary.csv" target="_blank"
-  type="text/csv;charset=UTF-8;header=present;">Summary as CSV file</a><br>
+  type="text/csv;charset=UTF-8;header=present">Summary as CSV file</a><br>
 </div>
 """
 
