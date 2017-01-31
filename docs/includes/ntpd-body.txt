@@ -511,7 +511,7 @@ as described in {ntpdconfman}.
 |log file           |system log        |+-l+        |+logfile+
 |include file       |none              |none        |+includefile+
 |statistics path    |+/var/NTP+        |+-s+        |+statsdir+
-|keys path          |+{prefixdir}/etc+ |none        |+keysdir+
+|keys file          |none              |+-k+        |+keys+
 |===================================================================
 
 [[signals]]

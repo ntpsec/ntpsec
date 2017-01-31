@@ -314,8 +314,6 @@ def cmd_configure(ctx, config):
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
 
-    ctx.define("NTP_KEYSDIR", "%s/etc" % ctx.env.PREFIX,
-               comment="NTP key file directory")
     ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False,
                comment="socklen type")
     ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")

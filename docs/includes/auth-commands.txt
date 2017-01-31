@@ -7,63 +7,12 @@
   RFC 5905. The _key_ argument is the key identifier for a trusted key,
   where the value can be in the range 1 to 65,534, inclusive.
 
-+crypto+ [+cert+ _file_] [+leap+ _file_] [+randfile+ _file_] [+host+ _file_] [+sign+ _file_] [+gq+ _file_] [+gqpar+ _file_] [+iffpar+ _file_] [+mvpar+ _file_] [+pw+ _password_]::
-  This command requires the OpenSSL library. It activates public key
-  cryptography, selects the message digest and signature encryption
-  scheme and loads the required private and public values described
-  above. If one or more files are left unspecified, the default names
-  are used as described above. Unless the complete path and name of the
-  file are specified, the location of a file is relative to the keys
-  directory specified in the +keysdir+ command or default
-  +{prefixdir}/etc+. Following are the subcommands:
-
-  +cert+ _file_;;
-    Specifies the location of the required host public certificate file.
-    This overrides the link _ntpkey_cert_hostname_ in the keys
-    directory.
-  +digest+ _digest_;;
-    Specify the message digest algorithm, with default MD5. If the
-    OpenSSL library is installed, +digest+ can be any message digest
-    algorithm supported by the library.
-    Note: If compliance with FIPS 140-2 is required, the algorithm
-    must be +SHA1+.
-  +gqpar+ _file_;;
-    Specifies the location of the optional GQ parameters file. This
-    overrides the link _ntpkey_gq_hostname_ in the keys directory.
-  +host+ _file_;;
-    Specifies the location of the required host key file. This overrides
-    the link _ntpkey_key_hostname_ in the keys directory.
-  +iffpar+ _file_;;
-    Specifies the location of the optional IFF parameters file.This
-    overrides the link _ntpkey_iff_hostname_ in the keys directory.
-  +leap+ _file_;;
-    Specifies the location of the optional leapsecond file. This
-    overrides the link _ntpkey_leap_ in the keys directory.
-  +mvpar+ _file_;;
-    Specifies the location of the optional MV parameters file. This
-    overrides the link _ntpkey_mv_hostname_ in the keys directory.
-  +pw+ _password_;;
-    Specifies the password to decrypt files containing private keys and
-    identity parameters. This is required only if these files have been
-    encrypted.
-  +randfile+ _file_;;
-    Specifies the location of the random seed file used by the OpenSSL
-    library. The defaults are described in the main text above.
-  +sign+ _file_;;
-    Specifies the location of the optional sign key file. This overrides
-    the link _ntpkey_sign_hostname_ in the keys directory. If this file
-    is not found, the host key is also the sign key.
-
 [[keys]]
 +keys+ _keyfile_::
-  Specifies the complete path and location of the MD5 key file
+  Specifies the complete path and location of the MD5/SHA1 key file
   containing the keys and key identifiers used by {ntpdman},
   and {ntpqman} when operating with symmetric-key cryptography.
   This is the same operation as the +-k+ command line option.
-
-+keysdir+ _path_::
-  This command specifies the default directory path for cryptographic
-  keys, parameters and certificates. The default is +{prefixdir}/etc/+.
 
 [[trustedkey]]
 +trustedkey+ _key..._ ::

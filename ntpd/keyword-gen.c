@@ -68,11 +68,8 @@ struct key_tok ntp_keywords[] = {
 /* authentication_command */
 { "controlkey",		T_ControlKey,		FOLLBY_TOKEN },
 { "requestkey",		T_Requestkey,		FOLLBY_TOKEN }, /* dummy */
-{ "crypto",		T_Crypto,		FOLLBY_TOKEN },
 { "keys",		T_Keys,			FOLLBY_STRING },
-{ "keysdir",		T_Keysdir,		FOLLBY_STRING },
 { "ntpsigndsocket",	T_NtpSignDsocket,	FOLLBY_STRING },
-{ "revoke",		T_Revoke,		FOLLBY_TOKEN },
 { "trustedkey",		T_Trustedkey,		FOLLBY_TOKEN },
 /* IPv4/IPv6 protocol override flag */
 { "-4",			T_Ipv4_flag,		FOLLBY_TOKEN },
@@ -92,11 +89,6 @@ struct key_tok ntp_keywords[] = {
 { "subtype",		T_Subtype,		FOLLBY_TOKEN },
 { "ttl",		T_Ttl,			FOLLBY_TOKEN },
 { "version",		T_Version,		FOLLBY_TOKEN },
-/* crypto_command */
-{ "host",		T_Host,			FOLLBY_STRING },
-{ "pw",			T_Pw,			FOLLBY_STRING },
-{ "randfile",		T_Randfile,		FOLLBY_STRING },
-{ "digest",		T_Digest,		FOLLBY_STRING },
 /*** MONITORING COMMANDS ***/
 /* stat */
 { "clockstats",		T_Clockstats,		FOLLBY_TOKEN },

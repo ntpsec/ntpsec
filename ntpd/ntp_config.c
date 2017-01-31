@@ -157,8 +157,6 @@ extern int yydebug;			/* ntp_parser.c (.y) */
 config_tree cfgt;			/* Parser output stored here */
 struct config_tree_tag *cfg_tree_history;	/* History of configs */
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
-char	default_keysdir[] = NTP_KEYSDIR;
-char	*keysdir = default_keysdir;	/* crypto keys directory */
 
 static char default_ntp_signd_socket[] =
 #ifdef MSSNTP_PATH
@@ -192,7 +190,6 @@ bool old_config_style = true;	/* A boolean flag, which when set,
 		   		 * format with a newline at the end of
 		  		 * every command is being used
 			 	 */
-int	cryptosw;		/* crypto command called */
 
 extern char *stats_drift_file;	/* name of the driftfile */
 
@@ -328,11 +325,6 @@ free_auth_node(
 	if (ptree->auth.keys) {
 		free(ptree->auth.keys);
 		ptree->auth.keys = NULL;
-	}
-
-	if (ptree->auth.keysdir) {
-		free(ptree->auth.keysdir);
-		ptree->auth.keysdir = NULL;
 	}
 
 	if (ptree->auth.ntp_signd_socket) {
@@ -1138,14 +1130,6 @@ config_auth(
 	int		i;
 	int		count;
 
-	/* Keysdir Command */
-	if (ptree->auth.keysdir) {
-		if (keysdir != default_keysdir)
-			free(keysdir);
-		keysdir = estrdup(ptree->auth.keysdir);
-	}
-
-
 	/* ntp_signd_socket Command */
 	if (ptree->auth.ntp_signd_socket) {
 		if (ntp_signd_socket != default_ntp_signd_socket)
@@ -1219,8 +1203,6 @@ free_config_auth(
 	config_tree *ptree
 	)
 {
-	destroy_attr_val_fifo(ptree->auth.crypto_cmd_list);
-	ptree->auth.crypto_cmd_list = NULL;
 	destroy_attr_val_fifo(ptree->auth.trusted_key_list);
 	ptree->auth.trusted_key_list = NULL;
 }

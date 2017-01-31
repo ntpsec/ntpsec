@@ -39,7 +39,7 @@ root. The recommended procedure is change to the keys directory, usually
 Installing the keys as root might not work in NFS-mounted shared file
 systems, as NFS clients may not be able to write to the shared keys
 directory, even as root. In this case, NFS clients can specify the files
-in another directory such as +/etc+ using the _keysdir_ command.
+in another directory such as +/etc+ using the _keys_ command.
 
 WARNING: +ntpkeygen+ uses the system randomness source.  On a POSIX
 system this is usually /dev/urandom.  Immediately after a reboot, on any
