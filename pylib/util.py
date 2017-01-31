@@ -470,10 +470,10 @@ class PeerSummary:
         # The rest of the story
         last_sync = variables.get("rec") or variables.get("reftime")
         jd = estjitter if have_jitter else estdisp
-        jd = "      -" if jd >= 999 else ("%7.3f" % jd)
+        jd = "      -" if jd >= 999 else ("%7.4f" % jd)
         try:
             line += (
-                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n"
+                " %2ld %c %4.4s %4.4s  %3lo  %7.4f %8.4f %s\n"
                 % (variables.get("stratum", 0),
                    ptype,
                    PeerSummary.prettyinterval(
