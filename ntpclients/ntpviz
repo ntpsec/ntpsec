@@ -1057,7 +1057,8 @@ plot \
         rnd1 = 7        # round to 100 ns boxes
         out['boxwidth'] = 1e-7
 
-        if 1e-6 > stats.percs["p99"] and -1e-6 < stats.percs["p1"]:
+        # between -10us and 10us
+        if 1e-5 > stats.percs["p99"] and -1e-5 < stats.percs["p1"]:
             # go to nanosec
             rnd1 = 9        # round to 1 ns boxes
             out['boxwidth'] = 1e-9
