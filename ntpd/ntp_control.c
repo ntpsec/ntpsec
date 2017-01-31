@@ -3036,7 +3036,7 @@ static uint32_t derive_nonce(
 		last_salt_update = current_time;
 	}
 
-	EVP_DigestInit(&ctx, EVP_get_digestbynid(NID_md5));
+	EVP_DigestInit(&ctx, EVP_md5());
 	EVP_DigestUpdate(&ctx, salt, sizeof(salt));
 	EVP_DigestUpdate(&ctx, &ts_i, sizeof(ts_i));
 	EVP_DigestUpdate(&ctx, &ts_f, sizeof(ts_f));
