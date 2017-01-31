@@ -4,8 +4,6 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-
-#include <openssl/err.h>
 #include <openssl/evp.h>
 
 #include "ntp.h"

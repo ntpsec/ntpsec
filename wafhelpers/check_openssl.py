@@ -5,7 +5,6 @@ int main(void) {
 #if OPENSSL_VERSION_NUMBER < 0x0090704fL
 #error OpenSSL is too old.
 #endif
-    ERR_load_BIO_strings();
     OpenSSL_add_all_digests();
     return 0;
 }
@@ -18,7 +17,6 @@ def configure_openssl(ctx):
     OPENSSL_LIB = True
 
     headers = (
-        "openssl/err.h",
         "openssl/evp.h",
         "openssl/rand.h",
         "openssl/objects.h",
