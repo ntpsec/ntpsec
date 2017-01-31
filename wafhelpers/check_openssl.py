@@ -6,7 +6,7 @@ int main(void) {
 #error OpenSSL is too old.
 #endif
     ERR_load_BIO_strings();
-    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
     return 0;
 }
 """
