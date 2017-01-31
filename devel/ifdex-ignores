@@ -56,6 +56,9 @@ PY_MAJOR_VERSION
 MOD_TIMETICK
 NTP_API
 
+# OpenSSL
+OPENSSL_VERSION_NUMBER
+
 # Things WAF sets that don't get #undefs if they're not set
 ENABLE_EARLY_DROPROOT
 ENABLE_LEAP_SMEAR
