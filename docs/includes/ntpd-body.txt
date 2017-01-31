@@ -141,7 +141,7 @@ configuration file _interface_ command, which is more versatile.
   path to symmetric keys.
 +
 Specify the name and path of the symmetric key file. +/etc/ntp.keys+
-is the default. This is the same operation as the _keys_
+is a common location. This is the same operation as the _keys_
 configuration file directive.
 
 +-l+ _string_, +--logfile+=_string_::
