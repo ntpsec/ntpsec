@@ -956,24 +956,25 @@ leapsec_validate(
 	leapsec_reader func,
 	void *         farg)
 {
-	EVP_MD_CTX     mdctx;
+	EVP_MD_CTX     *mdctx;
 	sha1_digest    rdig, ldig; /* remote / local digests */
 	char           line[50];
 	int            hlseen = -1;
 
-	EVP_DigestInit(&mdctx, EVP_sha1());
+	mdctx = EVP_MD_CTX_create();
+	EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
 	while (get_line(func, farg, line, sizeof(line))) {
 		if (!strncmp(line, "#h", 2))
 			hlseen = do_leap_hash(&rdig, line+2);
 		else if (!strncmp(line, "#@", 2))
-			do_hash_data(&mdctx, line+2);
+			do_hash_data(mdctx, line+2);
 		else if (!strncmp(line, "#$", 2))
-			do_hash_data(&mdctx, line+2);
+			do_hash_data(mdctx, line+2);
 		else if (isdigit((unsigned char)line[0]))
-			do_hash_data(&mdctx, line);
+			do_hash_data(mdctx, line);
 	}
-	EVP_DigestFinal(&mdctx, ldig.hv, NULL);
-	EVP_MD_CTX_cleanup(&mdctx);
+	EVP_DigestFinal_ex(mdctx, ldig.hv, NULL);
+	EVP_MD_CTX_destroy(mdctx);
 
 	if (0 > hlseen)
 		return LSVALID_NOHASH;
