@@ -20,16 +20,15 @@ def configure_openssl(ctx):
     headers = (
         "openssl/err.h",
         "openssl/evp.h",
-        "openssl/rand.h",    # only used in tests/libntp
+        "openssl/rand.h",
         "openssl/objects.h",
     )
 
     for hdr in headers:
-        if not ctx.check_cc(header_name=hdr, mandatory=True,
-                            comment="<%s> header" % hdr):
+        if not ctx.check_cc(header_name=hdr, comment="<%s> header" % hdr):
             OPENSSL_HEADERS = False
 
-    if not ctx.check_cc(lib="crypto", mandatory=False):
+    if not ctx.check_cc(lib="crypto"):
         OPENSSL_LIB = False
 
     if OPENSSL_HEADERS and OPENSSL_LIB:
@@ -37,7 +36,6 @@ def configure_openssl(ctx):
             fragment=OPENSSL_FRAG % "\n".join(["#include <%s>" % x
                                                for x in headers]),
             execute=True,
-            mandatory=False,
             use="CRYPTO",
             msg="Checking if OpenSSL works",
             comment="OpenSSL support"
