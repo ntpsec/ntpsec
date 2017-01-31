@@ -17,7 +17,7 @@ TEST_TEAR_DOWN(macencrypt) {}
 /*
  * Example packet with MD5 hash calculated manually.
  */
-const int keytype = KEY_TYPE_MD5;
+const int keytype = NID_md5;
 const char *key = "abcdefgh";
 const u_short keyLength = 8;
 const char *packet = "ijklmnopqrstuvwx";

@@ -132,7 +132,6 @@ typedef unsigned int	u_int;
  * Miscellaneous stuff
  */
 #define NTP_MAXKEY	65535	/* max authentication key number */
-#define	KEY_TYPE_MD5	NID_md5	/* MD5 digest NID */
 /*
  * Limits of things
  */
