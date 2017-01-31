@@ -1,0 +1,85 @@
+// This is the body of the manual page for temp-log
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
+
+== SYNOPSIS ==
+[verse]
+temp-log [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
+
+  -h, --help            show this help message and exit
+  -l LOGFILE, --logfile LOGFILE
+                        append log data to LOGFILE instead of stdout
+  -o, --once            log one line, then exit
+  -w WAIT, --wait WAIT  wait WAIT seconds after each log line, default 60
+  -v, --verbose         be verbose
+  -V, --version         show program's version number and exit
+
+== DESCRIPTION ==
+
+temp-log gathers temperature readings across a system.  temp-log must be
+run as root to be able to run sensor commands.
+
+The default is to write the data to stdout once every 60 seconds.
+The log file looks like:
+
+-----------------------------------------------------
+# time, sensor, value
+1485816568 ZONE0 39.0
+1485816568 ZONE1 20.0
+1485816568 ZONE2 42.0
+1485816568 ZONE3 0.0
+-----------------------------------------------------
+
++Time+ is the POSIX time of when the log line is written.
+
++Sensor+ is the sensor the temperature reading was obtained from.
+
++Value+ is the temperature reading in celsius.
+
+== OPTIONS ==
+
++-h, --help+::
+  Displays usage information and exits.
+
++-l LOGFILE, --logfile LOGFILE+::
+  Append log data to LOGFILE instead of stdout
+
++-o, --once+::
+  Log the data once, then exit
+
++-v, --verbose+::
+  Be verbose
+
++-w WAIT, --wait WAIT+::
+  Wait WAIT seconds after each log line.  The default is 60 seconds.  The
+  minimum wait time is 5 seconds.
+
++-V, --version+::
+ show program's version number and exit
+
+== USAGE ==
+
++temp-log+::
+  This the simplest use of this program. It can be used to check the
+  temperature readings of Zones, CPU, and disk drives every minute.
+
++gps-log -l /var/log/ntpstats/temperature -w 60 &::
+  This will continuously log the temperature data in the background
+  to the file /var/log/ntpstats/temperature.  Only log every 60 seconds.
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+== AUTHORS ==
+
+Gary E. Miller
+Keane S. Wolter
+
+// end
+
