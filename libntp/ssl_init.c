@@ -12,7 +12,6 @@
 #include <ntp.h>
 #include <ntp_debug.h>
 
-#include <openssl/err.h>
 #include <openssl/evp.h>
 
 void	atexit_ssl_cleanup(void);
@@ -27,7 +26,6 @@ ssl_init(void)
 
 	init_lib();
 
-	ERR_load_crypto_strings();
 	OpenSSL_add_all_digests();
 	atexit(&atexit_ssl_cleanup);
 
@@ -43,5 +41,4 @@ atexit_ssl_cleanup(void)
 
 	ssl_init_done = false;
 	EVP_cleanup();
-	ERR_free_strings();
 }
