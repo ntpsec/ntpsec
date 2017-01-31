@@ -6,7 +6,6 @@
 
 
 #include <openssl/err.h>
-#include <openssl/rand.h>
 #include <openssl/evp.h>
 
 #include "ntp.h"
