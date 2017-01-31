@@ -9,6 +9,7 @@ temp-log [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
   -h, --help            show this help message and exit
   -l LOGFILE, --logfile LOGFILE
                         append log data to LOGFILE instead of stdout
+  -q, --quiet				be quiet
   -o, --once            log one line, then exit
   -w WAIT, --wait WAIT  wait WAIT seconds after each log line, default 60
   -v, --verbose         be verbose
@@ -43,6 +44,9 @@ The log file looks like:
 
 +-l LOGFILE, --logfile LOGFILE+::
   Append log data to LOGFILE instead of stdout
+
++-q, --quiet+::
+  Quiet output, will not display errors
 
 +-o, --once+::
   Log the data once, then exit
