@@ -64,12 +64,10 @@
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
 %token	<Integer>	T_ControlKey
-%token	<Integer>	T_Crypto
 %token	<Integer>	T_Cryptostats
 %token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
-%token	<Integer>	T_Digest
 %token	<Integer>	T_Disable
 %token	<Integer>	T_Discard
 %token	<Integer>	T_Dispersion
@@ -93,7 +91,6 @@
 %token	<Integer>	T_Freq
 %token	<Integer>	T_Fudge
 %token	<Integer>	T_Holdover
-%token	<Integer>	T_Host
 %token	<Integer>	T_Huffpuff
 %token	<Integer>	T_Iburst
 %token	<Integer>	T_Ignore
@@ -113,7 +110,6 @@
 %token	<Integer>	T_Kernel
 %token	<Integer>	T_Key
 %token	<Integer>	T_Keys
-%token	<Integer>	T_Keysdir
 %token	<Integer>	T_Kod
 %token	<Integer>	T_Mssntp
 %token	<Integer>	T_Leapfile
@@ -176,15 +172,12 @@
 %token	<Integer>	T_Preempt
 %token	<Integer>	T_Prefer
 %token	<Integer>	T_Protostats
-%token	<Integer>	T_Pw
-%token	<Integer>	T_Randfile
 %token	<Integer>	T_Rawstats
 %token	<Integer>	T_Refclock
 %token	<Integer>	T_Refid
 %token	<Integer>	T_Requestkey
 %token	<Integer>	T_Reset
 %token	<Integer>	T_Restrict
-%token	<Integer>	T_Revoke
 %token	<Integer>	T_Rlimit
 %token	<Integer>	T_Saveconfigdir
 %token	<Integer>	T_Server
@@ -237,9 +230,6 @@
 %type	<Integer>	client_type
 %type	<Integer>	counter_set_keyword
 %type	<Int_fifo>	counter_set_list
-%type	<Attr_val>	crypto_command
-%type	<Attr_val_fifo>	crypto_command_list
-%type	<Integer>	crypto_str_keyword
 %type	<Attr_val>	discard_option
 %type	<Integer>	discard_option_keyword
 %type	<Attr_val_fifo>	discard_option_list
@@ -519,23 +509,14 @@ other_mode_command
 authentication_command
 	:	T_ControlKey T_Integer
 			{ cfgt.auth.control_key = $2; }
-	|	T_Crypto crypto_command_list
-		{ 
-			cfgt.auth.cryptosw++;
-			CONCAT_G_FIFOS(cfgt.auth.crypto_cmd_list, $2);
-		}
 	|	T_Keys T_String
 			{ cfgt.auth.keys = $2; }
-	|	T_Keysdir T_String
-			{ cfgt.auth.keysdir = $2; }
 	|	T_Requestkey T_Integer
 			{
 			    msyslog(LOG_WARNING,
 				    "requestkey is a no-op because "
 				    "ntpdc has been removed.");
 			}
-	|	T_Revoke T_Integer
-			{ cfgt.auth.revoke = $2; }
 	|	T_Trustedkey integer_list_range
 		{
 			cfgt.auth.trusted_key_list = $2;
@@ -547,37 +528,6 @@ authentication_command
 		}
 	|	T_NtpSignDsocket T_String
 			{ cfgt.auth.ntp_signd_socket = $2; }
-	;
-
-crypto_command_list
-	:	/* empty list */
-			{ $$ = NULL; }
-	|	crypto_command_list crypto_command
-		{
-			$$ = $1;
-			APPEND_G_FIFO($$, $2);
-		}
-	;
-
-crypto_command
-	:	crypto_str_keyword T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Revoke T_Integer
-		{
-			$$ = NULL;
-			cfgt.auth.revoke = $2;
-			msyslog(LOG_WARNING,
-				"'crypto revoke %d' is deprecated, "
-				"please use 'revoke %d' instead.",
-				cfgt.auth.revoke, cfgt.auth.revoke);
-		}
-	;
-
-crypto_str_keyword
-	:	T_Host
-	|	T_Pw
-	|	T_Randfile
-	|	T_Digest
 	;
 
 

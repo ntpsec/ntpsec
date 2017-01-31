@@ -133,11 +133,7 @@ typedef DECL_FIFO_ANCHOR(unpeer_node) unpeer_fifo;
 typedef struct auth_node_tag auth_node;
 struct auth_node_tag {
 	int		control_key;
-	int		cryptosw;
-	attr_val_fifo *	crypto_cmd_list;
 	char *		keys;
-	char *		keysdir;
-	int		revoke;
 	attr_val_fifo *	trusted_key_list;
 	char *		ntp_signd_socket;
 };
