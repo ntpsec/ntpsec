@@ -52,7 +52,7 @@ mac_authencrypt(
 {
 	uint8_t	digest[EVP_MAX_MD_SIZE];
 	u_int	len;
-	EVP_MD_CTX ctx;
+	EVP_MD_CTX *ctx;
 
 	/*
 	 * Compute digest of key concatenated with packet. Note: the
@@ -60,14 +60,16 @@ mac_authencrypt(
 	 * was created.
 	 */
 	ssl_init();
-	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
+	ctx = EVP_MD_CTX_create();
+	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC encrypt: digest init failed");
 		return (0);
 	}
-	EVP_DigestUpdate(&ctx, key, cache_secretsize);
-	EVP_DigestUpdate(&ctx, (uint8_t *)pkt, (u_int)length);
-	EVP_DigestFinal(&ctx, digest, &len);
+	EVP_DigestUpdate(ctx, key, cache_secretsize);
+	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (u_int)length);
+	EVP_DigestFinal_ex(ctx, digest, &len);
+	EVP_MD_CTX_destroy(ctx);
 	memmove((uint8_t *)pkt + length + 4, digest, len);
 	return (len + 4);
 }
@@ -89,7 +91,7 @@ mac_authdecrypt(
 {
 	uint8_t	digest[EVP_MAX_MD_SIZE];
 	u_int	len;
-	EVP_MD_CTX ctx;
+	EVP_MD_CTX *ctx;
 
 	/*
 	 * Compute digest of key concatenated with packet. Note: the
@@ -97,14 +99,16 @@ mac_authdecrypt(
 	 * was created.
 	 */
 	ssl_init();
-	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
+	ctx = EVP_MD_CTX_create();
+	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: digest init failed");
 		return (0);
 	}
-	EVP_DigestUpdate(&ctx, key, cache_secretsize);
-	EVP_DigestUpdate(&ctx, (uint8_t *)pkt, (u_int)length);
-	EVP_DigestFinal(&ctx, digest, &len);
+	EVP_DigestUpdate(ctx, key, cache_secretsize);
+	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (u_int)length);
+	EVP_DigestFinal_ex(ctx, digest, &len);
+	EVP_MD_CTX_destroy(ctx);
 	if ((u_int)size != len + 4) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: MAC length error");
@@ -124,7 +128,7 @@ addr2refid(sockaddr_u *addr)
 {
 	uint8_t		digest[20];
 	uint32_t		addr_refid;
-	EVP_MD_CTX	ctx;
+	EVP_MD_CTX	*ctx;
 	u_int		len;
 
 	if (IS_IPV4(addr))
@@ -132,19 +136,20 @@ addr2refid(sockaddr_u *addr)
 
 	ssl_init();
 
-	EVP_MD_CTX_init(&ctx);
+	ctx = EVP_MD_CTX_create();
 #ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
 	/* MD5 is not used as a crypto hash here. */
-	EVP_MD_CTX_set_flags(&ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
 #endif
-	if (!EVP_DigestInit_ex(&ctx, EVP_md5(), NULL)) {
+	if (!EVP_DigestInit_ex(ctx, EVP_md5(), NULL)) {
 		msyslog(LOG_ERR, "MD5 init failed");
 		exit(1);
 	}
 
-	EVP_DigestUpdate(&ctx, (uint8_t *)PSOCK_ADDR6(addr),
+	EVP_DigestUpdate(ctx, (uint8_t *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
-	EVP_DigestFinal(&ctx, digest, &len);
+	EVP_DigestFinal_ex(ctx, digest, &len);
+	EVP_MD_CTX_destroy(ctx);
 	memcpy(&addr_refid, digest, sizeof(addr_refid));
 	return (addr_refid);
 }
