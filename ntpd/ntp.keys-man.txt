@@ -50,7 +50,7 @@ format.
 == FILES ==
 
 `/etc/ntp.keys`::
-  the default name of the configuration file
+  a common location of the configuration file
 
 == SEE ALSO ==
 
