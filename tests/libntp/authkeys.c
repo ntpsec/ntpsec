@@ -34,7 +34,7 @@ TEST_TEAR_DOWN(authkeys) {}
 
 
 
-static const int KEYTYPE = KEY_TYPE_MD5;
+static const int KEYTYPE = NID_md5;
 
 
 void AddTrustedKey(keyid_t keyno) {
