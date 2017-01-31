@@ -349,6 +349,7 @@ class PeerSummary:
         ptype = '?'
         have_jitter = False
         clock_name = ''
+        self.logfp = sys.stderr
 
         now = time.time()
 
