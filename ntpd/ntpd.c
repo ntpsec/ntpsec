@@ -143,6 +143,8 @@ static const struct option longoptions[] = {
     { "novirtualips",	    0, 0, 'L' },
     { "nofork",		    0, 0, 'n' },
     { "nice",		    0, 0, 'N' },
+    { "pidfile",	    1, 0, 'p' },
+    { "priority",	    1, 0, 'P' },
     { "quit",		    0, 0, 'q' },
     { "dumpopts",	    0, 0, 'R' },
     { "statsdir",	    1, 0, 's' },
