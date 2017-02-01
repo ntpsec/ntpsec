@@ -167,7 +167,6 @@ static void ntpd_usage(void)
     P("				- prohibits the option 'ipv6'\n");
     P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
     P("				- prohibits the option 'ipv4'\n");
-    P("   -b no  bcastsync      Allow us to sync to broadcast servers\n");
     P("   -c Str configfile     configuration file name\n");
     P("   -d no  debug-level    Increase output debug message level\n");
     P("				- may appear multiple times\n");
