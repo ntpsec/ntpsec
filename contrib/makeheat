@@ -26,7 +26,7 @@ parser.add_argument('-t', '--temp',
                     nargs=1,
                     type=float)
 parser.add_argument('-w', '--wait',
-                    default=[0.1],
+                    default=[0.001],
                     dest='wait',
                     help="Set delay time in seconds, default is 0.1",
                     nargs=1,
@@ -36,25 +36,26 @@ parser.add_argument('-V', '--version',
                     version="temp-log %s" % ntp.util.stdversion())
 args = parser.parse_args()
 
-# this is the temperature we target
-target_temp = 65
-
 zone0 = '/sys/class/thermal/thermal_zone0/temp'
 cnt = 0
 
 m = hashlib.md5()
 temp = 0
 max_cnt = args.wait[0] * 200000
+# on a RasPi 3 the temp steps seem to be about 0.537 to 0.539C
+temp_gate = args.target_temp[0] - 0.6
 
 while True:
     # on a RasPi 3, 200,000 of the m.update() can be one second
-    if args.target_temp[0] > temp:
+    if temp_gate > temp:
         m.update("Nobody inspects the spammish repetition")
     else:
         cnt = max_cnt
-        time.sleep(args.wait[0])
+        # cools off slower than it heats up.
+        time.sleep(args.wait[0] * 8)
 
     cnt += 1
+    # read the temperature every max_cnt
     if max_cnt < cnt:
         cnt = 0
 
@@ -63,5 +64,3 @@ while True:
             temp = float(line) / 1000
 
         zone_data.close()
-        if args.target_temp < temp:
-            time.sleep(args.wait[0])
