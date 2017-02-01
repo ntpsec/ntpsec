@@ -263,8 +263,7 @@ discipline is disabled with this option.
   number of times.
 
 +-V, --version+::
-  Output version of program and exit. -VV gives more detailed version
-  information.
+  Output version of program and exit.
 
 Any arguments given after options are interpreted as server addresses
 or hostnames, with the _iburst_ option implied. Associations with
