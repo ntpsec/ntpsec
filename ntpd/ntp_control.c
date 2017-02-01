@@ -2198,19 +2198,19 @@ ctl_putpeer(
 		break;
 
 	case CP_DELAY:
-		ctl_putdbl(peer_var[id].text, p->delay * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->delay * 1e3);
 		break;
 
 	case CP_OFFSET:
-		ctl_putdbl(peer_var[id].text, p->offset * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->offset * 1e3);
 		break;
 
 	case CP_JITTER:
-		ctl_putdbl(peer_var[id].text, p->jitter * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->jitter * 1e3);
 		break;
 
 	case CP_DISPERSION:
-		ctl_putdbl(peer_var[id].text, p->disp * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->disp * 1e3);
 		break;
 
 	case CP_KEYID:
