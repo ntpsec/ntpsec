@@ -26,7 +26,7 @@ parser.add_argument('-t', '--temp',
                     nargs=1,
                     type=float)
 parser.add_argument('-w', '--wait',
-                    default=[0.001],
+                    default=[0.01],
                     dest='wait',
                     help="Set delay time in seconds, default is 0.1",
                     nargs=1,
@@ -47,12 +47,14 @@ temp_gate = args.target_temp[0] - 0.6
 
 while True:
     # on a RasPi 3, 200,000 of the m.update() can be one second
-    if temp_gate > temp:
+    delta  = temp_gate - temp
+    if 0 < delta:
+        # heat it up
         m.update("Nobody inspects the spammish repetition")
     else:
         cnt = max_cnt
         # cools off slower than it heats up.
-        time.sleep(args.wait[0] * 8)
+        time.sleep(args.wait[0] * 20.0 * -delta)
 
     cnt += 1
     # read the temperature every max_cnt
