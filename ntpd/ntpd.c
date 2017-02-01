@@ -125,7 +125,7 @@ static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 
-#define ALL_OPTIONS "46c:dD:f:gGhi:I:k:l:LmnNp:PqRs:t:u:UVw:xyYzZ"
+#define ALL_OPTIONS "46c:dD:f:gGhi:I:k:l:LmnNp:PqRs:t:u:UVw:xzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -151,8 +151,6 @@ static const struct option longoptions[] = {
     { "trustedkey",	    1, 0, 't' },
     { "user",		    1, 0, 'u' },
     { "updateinterval",	    1, 0, 'U' },
-    { "capture",	    1, 0, 'y' },
-    { "replay",		    1, 0, 'Y' },
     { "var",		    1, 0, 'z' },
     { "dvar",		    1, 0, 'Z' },
     { "slew",		    0, 0, 'x' },
@@ -378,14 +376,6 @@ parse_cmdline_opts(
 		break;
 	    case 'x':
 		/* defer */
-		break;
-	    case 'y':
-		nofork = true;
-		/* further processed by interception code */
-		break;
-	    case 'Y':
-		nofork = true;
-		/* further processed by interception code */
 		break;
 	    case 'z':
 		/* defer */
