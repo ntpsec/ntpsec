@@ -129,7 +129,6 @@ static void	library_unexpected_error(const char *, int,
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
-    { "noauthreq",	    0, 0, 'A' },
     { "configfile",	    1, 0, 'c' },
     { "debug",		    0, 0, 'd' },
     { "set-debug-level",    1, 0, 'D' },
@@ -168,10 +167,6 @@ static void ntpd_usage(void)
     P("				- prohibits the option 'ipv6'\n");
     P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
     P("				- prohibits the option 'ipv4'\n");
-    P("   -a no  authreq        Require crypto authentication\n");
-    P("				- prohibits the option 'authnoreq'\n");
-    P("   -A no  authnoreq      Do not require crypto authentication\n");
-    P("				- prohibits the option 'authreq'\n");
     P("   -b no  bcastsync      Allow us to sync to broadcast servers\n");
     P("   -c Str configfile     configuration file name\n");
     P("   -d no  debug-level    Increase output debug message level\n");
