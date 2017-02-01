@@ -17,8 +17,8 @@ temp-log [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
 
 == DESCRIPTION ==
 
-temp-log gathers temperature readings across a system.  temp-log must be
-run as root to be able to run sensor commands.
+temp-log gathers temperature readings across a system. The standard user
+is ntpuser and should have permissions to execute lm_sensors and smartctl.
 
 The default is to write the data to stdout once every 60 seconds.
 The log file looks like:
