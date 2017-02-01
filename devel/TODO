@@ -88,6 +88,9 @@ Neither is ideal, easy pickings for someone to code on.
   (and multiple inbound NTP connections, and a hole in your firewall) even when
   it has a known-good local timesource like a GPS.  This should be fixed.
 
+* We could open only V6 sockets and allow them to handle mapped PV4 addresses,
+  as described at http://man7.org/linux/man-pages/man7/ipv6.7.html
+
 * The code used for asynchronous DNS lookup is more general, more complex,
   and more bug-prone than it should be.  Either our version should be
   rewritten and simplified or (better idea!) it should be replaced by
@@ -100,7 +103,7 @@ Neither is ideal, easy pickings for someone to code on.
   (or scapy) and loosely modeled on wireshark.
 
 * Measure time from the clock reading to transmission for outbound
-  packets.  Use the distribution to correct for computation time
+  packets.  Use the measurement to correct for computation time
   before transmission.
 
 * We might be able to eliminate a lot of the Linux runtime
