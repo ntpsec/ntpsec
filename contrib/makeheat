@@ -26,7 +26,7 @@ parser.add_argument('-t', '--temp',
                     nargs=1,
                     type=float)
 parser.add_argument('-w', '--wait',
-                    default=[0.01],
+                    default=[0.001],
                     dest='wait',
                     help="Set delay time in seconds, default is 0.1",
                     nargs=1,
@@ -43,7 +43,7 @@ m = hashlib.md5()
 temp = 0
 max_cnt = args.wait[0] * 200000
 # on a RasPi 3 the temp steps seem to be about 0.537 to 0.539C
-temp_gate = args.target_temp[0] - 0.6
+temp_gate = args.target_temp[0] - 1.2
 
 while True:
     # on a RasPi 3, 200,000 of the m.update() can be one second
@@ -54,7 +54,11 @@ while True:
     else:
         cnt = max_cnt
         # cools off slower than it heats up.
-        time.sleep(args.wait[0] * 20.0 * -delta)
+        # undocumented Pythong 'feature', no sleep less than 1 milli Sec
+        sleep = args.wait[0] * 10.0 * -delta
+        if 0.001 > sleep:
+            sleep = 0.001
+        time.sleep(sleep)
 
     cnt += 1
     # read the temperature every max_cnt
