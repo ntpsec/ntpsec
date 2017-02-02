@@ -247,6 +247,11 @@ typedef struct __endpt {
  * The peer structure. Holds state information relating to the guys
  * we are peering with. Most of this stuff is from section 3.2 of the
  * spec.
+ *
+ * The ttl field is overloaded; it's used in the refclock case to pass
+ * in a mode byte that may contain a baud rate or subtype. Splitting
+ * this fields would complicate some call sequences that are already
+ * unpleasantly intricate.
  */
 struct peer {
 	struct peer *p_link;	/* link pointer in free & peer lists */
@@ -268,7 +273,7 @@ struct peer {
 	uint8_t	cast_flags;	/* additional flags */
 	uint8_t	last_event;	/* last peer error code */
 	uint8_t	num_events;	/* number of error events */
-	uint32_t	ttl;	/* ttl/refclock mode */
+	uint32_t ttl;		/* time-to-live/refclock mode */
 
 	/*
 	 * Variables used by reference clock support
