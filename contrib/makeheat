@@ -43,7 +43,7 @@ m = hashlib.md5()
 temp = 0
 max_cnt = args.wait[0] * 200000
 # on a RasPi 3 the temp steps seem to be about 0.537 to 0.539C
-temp_gate = args.target_temp[0] - 1.2
+temp_gate = args.target_temp[0]
 
 while True:
     # on a RasPi 3, 200,000 of the m.update() can be one second
