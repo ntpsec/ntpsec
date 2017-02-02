@@ -114,14 +114,12 @@ def cmd_configure(ctx, config):
     if ctx.env.BIN_ASCIIDOC and ctx.env.BIN_XSLTPROC and ctx.env.BIN_A2X:
         ctx.env.ENABLE_DOC = True
 
-    if (((ctx.options.enable_doc or ctx.options.enable_doc_only)
-         and not ctx.env.ENABLE_DOC)):
+    if ctx.options.enable_doc and not ctx.env.ENABLE_DOC:
         ctx.fatal("asciidoc and xsltproc are required in order "
                   "to build documentation")
-    elif (ctx.options.enable_doc or ctx.options.enable_doc_only):
+    elif ctx.options.enable_doc:
         ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf"
                                   % ctx.srcnode.abspath()]
-        ctx.env.ENABLE_DOC_ONLY = ctx.options.enable_doc_only
         ctx.env.ENABLE_DOC_USER = ctx.options.enable_doc
         ctx.env.HTMLDIR = ctx.options.htmldir
 
@@ -167,13 +165,6 @@ def cmd_configure(ctx, config):
 
     msg("--- Configuring main ---")
     ctx.setenv("main", ctx.env.derive())
-
-    # XXX: temp hack to fix --enable-doc-only
-    ctx.env.ENABLE_DOC_ONLY = ctx.options.enable_doc_only
-
-    # The rest is not needed for documentation building.
-    if ctx.options.enable_doc_only:
-        return
 
     from wafhelpers.check_type import check_type
     from wafhelpers.check_sizeof import check_sizeof
