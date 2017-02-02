@@ -93,8 +93,6 @@ def options_cmd(ctx, config):
     grp = ctx.add_option_group("NTP documentation configure options")
     grp.add_option('--enable-doc', action='store_true',
                    default=False, help="Build NTP documentation")
-    grp.add_option('--enable-doc-only', action='store_true',
-                   default=False, help="Only build NTP documentation")
     grp.add_option('--enable-a2x-xmllint', action='store_true',
                    default=False,
                    help="Build NTP documentation with a2x XML lint")
