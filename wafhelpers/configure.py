@@ -76,7 +76,7 @@ def cmd_configure(ctx, config):
             "-f", "-I%s" % bldnode,
             "-f", "-I%s/include/" % srcnode,
             "-f", "-I%s/libisc/include/" % srcnode,
-            "-f", "-I%s/libisc/unix/include/" % srcnode]
+        ]
 
     # Not needed to build.  Used by utility scripts.
     ctx.find_program("awk", var="BIN_AWK", mandatory=False)
