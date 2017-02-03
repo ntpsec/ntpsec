@@ -254,11 +254,11 @@ option can be used with the +-g+ and +-q+ options. See the _tinker_
 configuration file directive for other options. Note: The kernel time
 discipline is disabled with this option.
 
-+-z+ _nvar_, --var+=_nvar_::
++-z+ _nvar_, +--var+=_nvar_::
   make ARG an ntp variable (RW). This option may appear an unlimited
   number of times.
 
-+-Z+ _nvar_, --dvar+=_ndvar_::
++-Z+ _nvar_, +--dvar+=_ndvar_::
   make ARG an ntp variable (RW|DEF). This option may appear an unlimited
   number of times.
 
