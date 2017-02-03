@@ -63,9 +63,31 @@ def portsplit(hostname):
             hostname = hostname[1:-1]   # Strip brackets
     return (hostname, portsuffix)
 
+def f8dot4(f):
+    "Scaled floating point formatting to fit in 8 characters"
+    if f >= 0:
+      if f < 1000.0:
+        return "%8.4f" % f    # xxx.xxxx  normal case
+      elif f < 10000.0:
+        return "%8.3f" % f    # xxxx.xxx
+      elif f < 100000.0:
+        return "%8.2f" % f    # xxxxx.xx
+      elif f < 1000000.0:
+        return "%8.1f" % f    # xxxxxx.x
+      return "%8d" % f        # xxxxxxxx
+    if f > -100.0:
+      return "%8.4f" % f      # -xx.xxxx  normal case
+    elif f > -1000.0:
+      return "%8.3f" % f      # -xxx.xxx
+    elif f > -10000.0:
+      return "%8.2f" % f      # -xxxx.xx
+    elif f > -100000.0:
+      return "%8.1f" % f      # -xxxxx.x
+    return "%8d" % f          # -xxxxxxx
+
+
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = {}
-
 
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
@@ -282,7 +304,7 @@ class PeerSummary:
         self.refidwidth = 15
         # Compute peer spreadsheet headers
         self.__remote = "     remote    ".ljust(self.namewidth)
-        self.__common = "st t when poll reach   delay   offset  "
+        self.__common = "st t when poll reach   delay   offset   "
         self.__header = None
         self.polls = []
 
@@ -334,7 +356,7 @@ class PeerSummary:
 
     def width(self):
         "Width of display"
-        return 78 + self.horizontal_slack
+        return 79 + self.horizontal_slack
 
     def summary(self, rstatus, variables, associd):
         "Peer status summary line."
@@ -471,18 +493,17 @@ class PeerSummary:
         # The rest of the story
         last_sync = variables.get("rec") or variables.get("reftime")
         jd = estjitter if have_jitter else estdisp
-        jd = "      -" if jd >= 999 else ("%7.4f" % jd)
         try:
             line += (
-                " %2ld %c %4.4s %4.4s  %3lo  %7.4f %8.4f %s\n"
+                " %2ld %c %4.4s %4.4s  %3lo %s %s %s\n"
                 % (variables.get("stratum", 0),
                    ptype,
                    PeerSummary.prettyinterval(
                     now if last_sync is None
                     else int(now - ntp.ntpc.lfptofloat(last_sync))),
                    PeerSummary.prettyinterval(poll_sec),
-                   reach, estdelay, estoffset,
-                   jd))
+                   reach, f8dot4(estdelay), f8dot4(estoffset),
+                   f8dot4(jd)))
             return line
         except TypeError:
             # This can happen when ntpd ships a corrupt varlist
