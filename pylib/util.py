@@ -85,6 +85,24 @@ def f8dot4(f):
       return "%8.1f" % f      # -xxxxx.x
     return "%8d" % f          # -xxxxxxx
 
+def f8dot3(f):
+    "Scaled floating point formatting to fit in 8 characters"
+    if f >= 0:
+      if f < 10000.0:
+        return "%8.3f" % f    # xxxx.xxx  normal case
+      elif f < 100000.0:
+        return "%8.2f" % f    # xxxxx.xx
+      elif f < 1000000.0:
+        return "%8.1f" % f    # xxxxxx.x
+      return "%8d" % f        # xxxxxxxx
+    if f > -1000.0:
+      return "%8.3f" % f      # -xxx.xxx  normal case
+    elif f > -10000.0:
+      return "%8.2f" % f      # -xxxx.xx
+    elif f > -100000.0:
+      return "%8.1f" % f      # -xxxxx.x
+    return "%8d" % f          # -xxxxxxx
+
 
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = {}
@@ -369,6 +387,7 @@ class PeerSummary:
         hpoll = 0
         reach = 0
         ptype = '?'
+        saw6 = False        # x.6 floats for delay and friends
         have_jitter = False
         clock_name = ''
         self.logfp = sys.stderr
@@ -406,6 +425,9 @@ class PeerSummary:
                 reach = value
             elif name == "delay":
                 estdelay = value
+            elif name == "delay-s":
+                if len(value) > 6 and value[-7] == ".":
+                    saw6 = True
             elif name == "offset":
                 estoffset = value
             elif name == "jitter":
@@ -495,15 +517,24 @@ class PeerSummary:
         jd = estjitter if have_jitter else estdisp
         try:
             line += (
-                " %2ld %c %4.4s %4.4s  %3lo %s %s %s\n"
+                " %2ld %c %4.4s %4.4s  %3lo"
                 % (variables.get("stratum", 0),
                    ptype,
                    PeerSummary.prettyinterval(
                     now if last_sync is None
                     else int(now - ntp.ntpc.lfptofloat(last_sync))),
-                   PeerSummary.prettyinterval(poll_sec),
-                   reach, f8dot4(estdelay), f8dot4(estoffset),
-                   f8dot4(jd)))
+                   PeerSummary.prettyinterval(poll_sec), reach))
+            if saw6:
+                line += (
+                    " %s %s %s" %
+                    (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
+            else:
+                # old servers only have 3 digits of fraction
+                # don't print a fake 4th digit
+                line += (
+                    " %s %s %s" %
+                    (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
+            line += "\n"
             return line
         except TypeError:
             # This can happen when ntpd ships a corrupt varlist
