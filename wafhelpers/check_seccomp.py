@@ -6,7 +6,7 @@ def check_seccomp(ctx):
 
     if not ctx.options.enable_seccomp:
         return
-    if not sys.platform.startswith("linux"):
+    if ctx.env.DEST_OS != "linux":
         return
 
     ctx.check_cc(header_name="seccomp.h", mandatory=False)

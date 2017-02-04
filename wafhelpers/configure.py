@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import sys
 import os
-import platform
 from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
 from wafhelpers.util import msg, msg_setting
@@ -216,48 +215,31 @@ def cmd_configure(ctx, config):
     else:
         ctx.env.CFLAGS += ["-std=gnu99"]
 
-    # Check target platform.
-    ctx.start_msg("Checking build target")
-    if sys.platform == "win32":
-        ctx.env.PLATFORM_TARGET = "win"
-    elif sys.platform == "darwin":
-        ctx.env.PLATFORM_TARGET = "osx"
-    elif sys.platform.startswith("freebsd"):
-        ctx.env.PLATFORM_TARGET = "freebsd"
-    elif sys.platform.startswith("netbsd"):
-        ctx.env.PLATFORM_TARGET = "netbsd"
-    elif sys.platform.startswith("openbsd"):
-        ctx.env.PLATFORM_TARGET = "openbsd"
-    else:
-        ctx.env.PLATFORM_TARGET = "unix"
-    ctx.end_msg(ctx.env.PLATFORM_TARGET)
-
-    ctx.define("PLATFORM_%s" % ctx.env.PLATFORM_TARGET.upper(), 1,
-               comment="Operating system detected by Python (%s)" % platform)
-
     # XXX: hack
-    if ctx.env.PLATFORM_TARGET in ["freebsd", "openbsd"]:
+    if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
         ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
         ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
-    elif ctx.env.PLATFORM_TARGET == "netbsd":
+    elif ctx.env.DEST_OS == "netbsd":
         ctx.env.PLATFORM_INCLUDES = ["/usr/pkg/include"]
         ctx.env.PLATFORM_LIBPATH = ["/usr/lib", "/usr/pkg/lib"]
-    elif ctx.env.PLATFORM_TARGET == "win":
+    elif ctx.env.DEST_OS == "win32":
         ctx.load("msvc")
-    elif ctx.env.PLATFORM_TARGET == "osx":
+    elif ctx.env.DEST_OS == "darwin":
         # macports location
         if os.path.isdir("/opt/local/include"):
             ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
         if os.path.isdir("/opt/local/lib"):
             ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
-	# OS X needs this for IPv6
+        # OS X needs this for IPv6
         ctx.define("__APPLE_USE_RFC_3542", 1,
                    comment="Needed for IPv6 support")
-    elif sys.platform.startswith("sunos"):
+    elif ctx.env.DEST_OS == "sunos":
         ctx.define("_POSIX_PTHREAD_SEMANTICS", "1", quote=False,
                    comment="Needed for POSIX function definitions on Solaris")
 
-    ctx.define("PLATFORM_FULL", platform.platform())
+    # XXX: needed for ntp_worker, for now
+    if ctx.env.DEST_OS == "openbsd":
+        ctx.define("PLATFORM_OPENBSD", "1", quote=False)
 
     # int32_t and uint32_t probes aren't really needed, POSIX guarantees
     # them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
@@ -406,7 +388,7 @@ def cmd_configure(ctx, config):
         ctx.define("HAVE_PPSAPI", 1, comment="Enable the PPS API")
 
     # Check for Solaris capabilities
-    if ctx.get_define("HAVE_PRIV_H") and sys.platform.startswith("sunos"):
+    if ctx.get_define("HAVE_PRIV_H") and ctx.env.DEST_OS == "sunos":
         ctx.define("HAVE_SOLARIS_PRIVS", 1,
                    comment="Enable Solaris Privileges (Solaris only)")
 
@@ -516,7 +498,7 @@ def cmd_configure(ctx, config):
                comment="LDFLAGS used when compiled")
 
     # Check for directory separator
-    if ctx.env.PLATFORM_TARGET == "win":
+    if ctx.env.DEST_OS == "win32":
         sep = "\\"
     else:
         sep = "/"
@@ -557,7 +539,7 @@ def cmd_configure(ctx, config):
         check_mdns_run(ctx)
 
     # Solaris needs -lsocket and -lnsl for socket code
-    if sys.platform.startswith("sunos"):
+    if ctx.env.DEST_OS == "sunos":
         ctx.check(features="c cshlib", lib="socket", mandatory=False)
         ctx.check(features="c cshlib", lib="nsl", mandatory=False)
 
