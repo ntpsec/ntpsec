@@ -1271,7 +1271,12 @@ class ControlSession:
                         val = int(val, 0)
                     except ValueError:
                         try:
-                            val = float(val)
+                            valf = float(val)
+                            if var == "delay":
+                                # hack to pass string version
+                                # so printout can handle .3f vs .6f
+                                items.append(("delay-s", val))
+                            val = valf
                         except ValueError:
                             if val[0] == '"' and val[-1] == '"':
                                 val = val[1:-1]
