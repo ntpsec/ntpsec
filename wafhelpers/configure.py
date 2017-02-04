@@ -61,9 +61,6 @@ def cmd_configure(ctx, config):
     for opt in opt_map:
         ctx.env[opt] = opt_map[opt]
 
-    from wafhelpers.check_compiler import check_compiler
-    check_compiler(ctx)
-
     if ctx.options.enable_rtems_trace:
         ctx.find_program("rtems-tld", var="BIN_RTEMS_TLD",
                          path_list=[ctx.options.rtems_trace_path,
@@ -214,7 +211,7 @@ def cmd_configure(ctx, config):
     # We require some things that C99 doesn't enable, like pthreads.
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
     # it.
-    if ctx.env.COMPILER_SUNCC:
+    if ctx.env.CC_NAME == "sun":
         ctx.env.CFLAGS += ["-std=c99"]
     else:
         ctx.env.CFLAGS += ["-std=gnu99"]
