@@ -58,6 +58,7 @@ NTP_API
 
 # OpenSSL
 OPENSSL_VERSION_NUMBER
+LIBRESSL_VERSION_NUMBER
 
 # Things WAF sets that don't get #undefs if they're not set
 ENABLE_EARLY_DROPROOT

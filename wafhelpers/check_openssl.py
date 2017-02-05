@@ -5,7 +5,7 @@ int main(void) {
 #if OPENSSL_VERSION_NUMBER < 0x0090704fL
 #error OpenSSL is too old.
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
     OpenSSL_add_all_digests();
 #endif
     return 0;
