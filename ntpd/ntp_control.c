@@ -1500,7 +1500,7 @@ ctl_putsys(
 		break;
 
 	case CS_DRIFT:
-		ctl_putdbl(sys_var[CS_DRIFT].text, drift_comp * 1e6);
+		ctl_putdbl6(sys_var[CS_DRIFT].text, drift_comp * 1e6);
 		break;
 
 	case CS_JITTER:
