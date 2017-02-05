@@ -1500,6 +1500,7 @@ ctl_putsys(
 		break;
 
 	case CS_DRIFT:
+                /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
 		ctl_putdbl6(sys_var[CS_DRIFT].text, drift_comp * 1e6);
 		break;
 
