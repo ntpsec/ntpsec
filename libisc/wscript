@@ -1,29 +1,28 @@
 
 def build(ctx):
 
-	libisc_source = [
-		"assertions.c",
-		"backtrace-emptytbl.c",
-		"backtrace.c",
-		"error.c",
-		"netaddr.c",
-		"errno2result.c",
-		"interfaceiter.c",
-		"net.c"
-	]
+    libisc_source = [
+        "assertions.c",
+        "backtrace-emptytbl.c",
+        "backtrace.c",
+        "error.c",
+        "netaddr.c",
+        "errno2result.c",
+        "interfaceiter.c",
+        "net.c"
+    ]
 
-	ctx(
-		target		= "libisc_obj",
-		features	= "c bld_include src_include",
-		source		= libisc_source,
-		includes	= [
-				"%s/libisc/include/" % ctx.srcnode.abspath(),
-				],
+    ctx(
+        features="c bld_include src_include",
+        includes=[
+            "%s/libisc/include/" % ctx.srcnode.abspath(),
+        ],
+        source=libisc_source,
+        target="libisc_obj",
+    )
 
-	)
-
-	ctx(
-		target		= "isc",
-		features	= "c cstlib bld_include src_include",
-		use			= "libisc_obj"
-	)
+    ctx(
+        target="isc",
+        features="c cstlib bld_include src_include",
+        use="libisc_obj"
+    )
