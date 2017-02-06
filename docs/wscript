@@ -1,43 +1,45 @@
 def build(ctx):
 
-	doc_source = ctx.path.ant_glob("*.txt", excl='*-body.txt')
+    doc_source = ctx.path.ant_glob("*.txt", excl='*-body.txt')
 
-	ctx(
-		target	= "doc",
-		source	= doc_source
-	)
+    ctx(
+        source=doc_source
+        target="doc",
+    )
 
-	image_source = []
-	ctx.path.get_bld().make_node("hints").mkdir() # create 'hints' directory
-	for dir in ["icons", "pic"]:
+    image_source = []
+    ctx.path.get_bld().make_node("hints").mkdir()    # create 'hints' directory
+    for dir in ["icons", "pic"]:
 
-		files = ctx.path.ant_glob('%s/*' % dir) # Find images
-		ctx.path.get_bld().make_node(dir).mkdir() # create 'pic' directory
-		image_source += files
+        files = ctx.path.ant_glob('%s/*' % dir)      # Find images
+        ctx.path.get_bld().make_node(dir).mkdir()    # create 'pic' directory
+        image_source += files
 
-		# Copy images
-		ctx(
-			features	= "subst",
-			is_copy		= True,
-			source		= files,
-			target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in files]
-		)
+        # Copy images
+        ctx(
+            features="subst",
+            is_copy=True,
+            source=files,
+            target=[ctx.path.find_node(dir).get_bld().make_node(x.name)
+                    for x in files]
+        )
 
-	extra = ["asciidoc.js", "asciidoc.css"]
+    extra = ["asciidoc.js", "asciidoc.css"]
 
-	# Copy extra files
-	ctx(
-		features	= "subst",
-		is_copy		= True,
-		source		= extra,
-		target		= extra
-	)
+    # Copy extra files
+    ctx(
+        features="subst",
+        is_copy=True,
+        source=extra,
+        target=extra
+    )
 
-	# Install HTML
-	if ctx.env.HTMLDIR:
-		install_prefix = ctx.env.HTMLDIR
-	else:
-		install_prefix = "%s/share/ntpsec/docs/" % ctx.env.PREFIX
+    # Install HTML
+    if ctx.env.HTMLDIR:
+        install_prefix = ctx.env.HTMLDIR
+    else:
+        install_prefix = "%s/share/ntpsec/docs/" % ctx.env.PREFIX
 
-	ctx.install_files(install_prefix, extra + [x.change_ext(".html").name for x in doc_source])
-	ctx.install_files(install_prefix, image_source, relative_trick=True)
+    ctx.install_files(install_prefix, extra
+                      + [x.change_ext(".html").name for x in doc_source])
+    ctx.install_files(install_prefix, image_source, relative_trick=True)
