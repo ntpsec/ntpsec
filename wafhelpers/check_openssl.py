@@ -26,8 +26,8 @@ def configure_openssl(ctx):
 
     for hdr in headers:
         if not ctx.check_cc(header_name=hdr, comment="<%s> header" % hdr,
-            includes=ctx.env.PLATFORM_INCLUDES,
-            ):
+                            includes=ctx.env.PLATFORM_INCLUDES,
+                            ):
             OPENSSL_HEADERS = False
 
     if not ctx.check_cc(lib="crypto"):
@@ -43,4 +43,3 @@ def configure_openssl(ctx):
             msg="Checking if OpenSSL works",
             use="CRYPTO",
         )
-

@@ -1,4 +1,3 @@
-import sys
 from waflib.Logs import pprint
 
 
