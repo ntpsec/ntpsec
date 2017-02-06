@@ -1,86 +1,85 @@
 def build(ctx):
-	srcnode = ctx.srcnode.abspath()
+    srcnode = ctx.srcnode.abspath()
 
-	# Unity source
-	unity_source = [
-		"unity/unity.c",
-		"unity/unity_fixture.c",
-	]
+    # Unity source
+    unity_source = [
+        "unity/unity.c",
+        "unity/unity_fixture.c",
+    ]
 
-	unity_config = ["UNITY_INCLUDE_DOUBLE"]
+    unity_config = ["UNITY_INCLUDE_DOUBLE"]
 
-	ctx(
-		defines	    = unity_config,
-		features    = "c",
-		target      = "unity",
-		source      = unity_source
-	)
+    ctx(
+        defines=unity_config,
+        features="c",
+        target="unity",
+        source=unity_source
+    )
 
-	# Test main.
-	common_source = [
-		"common/tests_main.c",
-		"common/caltime.c",
-		"common/sockaddrtest.c",
-		"common/file_handling.c"
-	]
+    # Test main.
+    common_source = [
+        "common/tests_main.c",
+        "common/caltime.c",
+        "common/sockaddrtest.c",
+        "common/file_handling.c"
+    ]
 
-	# libntp/
-	libntp_source = [
-		"libntp/authkeys.c",
-		"libntp/calendar.c",
-		"libntp/clocktime.c",
-		"libntp/decodenetnum.c",
-		"libntp/hextolfp.c",
-		"libntp/humandate.c",
-		"libntp/lfpfunc.c",
-		"libntp/lfptostr.c",
-		"libntp/macencrypt.c",
-		"libntp/msyslog.c",
-		"libntp/netof.c",
-		"libntp/numtoa.c",
-		"libntp/prettydate.c",
-		"libntp/recvbuff.c",
-		"libntp/refidsmear.c",
-		"libntp/sfptostr.c",
-		"libntp/socktoa.c",
-		"libntp/statestr.c",
-		"libntp/strtolfp.c",
-		"libntp/timespecops.c",
-		"libntp/vi64ops.c",
-		"libntp/ymd2yd.c"
-	] + common_source
+    # libntp/
+    libntp_source = [
+        "libntp/authkeys.c",
+        "libntp/calendar.c",
+        "libntp/clocktime.c",
+        "libntp/decodenetnum.c",
+        "libntp/hextolfp.c",
+        "libntp/humandate.c",
+        "libntp/lfpfunc.c",
+        "libntp/lfptostr.c",
+        "libntp/macencrypt.c",
+        "libntp/msyslog.c",
+        "libntp/netof.c",
+        "libntp/numtoa.c",
+        "libntp/prettydate.c",
+        "libntp/recvbuff.c",
+        "libntp/refidsmear.c",
+        "libntp/sfptostr.c",
+        "libntp/socktoa.c",
+        "libntp/statestr.c",
+        "libntp/strtolfp.c",
+        "libntp/timespecops.c",
+        "libntp/vi64ops.c",
+        "libntp/ymd2yd.c"
+    ] + common_source
 
-	ctx.ntp_test(
-		features	= "c cprogram bld_include src_include libisc_include test",
-        	target		= "test_libntp",
-		install_path	= None,
-		defines		= unity_config + ["TEST_LIBNTP=1"],
-		includes	= [
-					"%s/tests/unity/" % srcnode,
-					"%s/tests/libntp/" % srcnode,
-					"%s/tests/ntpdig/" % srcnode,
-					"%s/tests/common/" % srcnode
-				] + ctx.env.PLATFORM_INCLUDES,
-		use		= "unity ntp isc M PTHREAD CRYPTO RT SOCKET NSL",
-		source		= libntp_source,
-	)
+    ctx.ntp_test(
+        features="c cprogram bld_include src_include libisc_include test",
+        target="test_libntp",
+        install_path=None,
+        defines=unity_config + ["TEST_LIBNTP=1"],
+        includes=["%s/tests/unity/" % srcnode,
+                  "%s/tests/libntp/" % srcnode,
+                  "%s/tests/ntpdig/" % srcnode,
+                  "%s/tests/common/" % srcnode
+                  ] + ctx.env.PLATFORM_INCLUDES,
+        use="unity ntp isc M PTHREAD CRYPTO RT SOCKET NSL",
+        source=libntp_source,
+    )
 
-	ntpd_source = [
-		"ntpd/leapsec.c",
-		"ntpd/restrict.c",
-	] + common_source
+    ntpd_source = [
+        "ntpd/leapsec.c",
+        "ntpd/restrict.c",
+    ] + common_source
 
-	ctx.ntp_test(
-		features	= "c cprogram bld_include src_include libisc_include test",
-        	target		= "test_ntpd",
-		install_path	= None,
-		defines		= unity_config + ["TEST_NTPD=1"],
-		includes	= [
-					"%s/tests/unity/" % srcnode,
-					"%s/ntpd/" % srcnode,
-					"%s/tests/libntp/" % srcnode,
-					"%s/tests/common/" % srcnode
-				],
-		use		= "ntpd_lib libntpd_obj unity ntp isc M PTHREAD CRYPTO RT SOCKET NSL",
-        	source		= ntpd_source,
-	)
+    ctx.ntp_test(
+        defines=unity_config + ["TEST_NTPD=1"],
+        features="c cprogram bld_include src_include libisc_include test",
+        includes=["%s/tests/unity/" % srcnode,
+                  "%s/ntpd/" % srcnode,
+                  "%s/tests/libntp/" % srcnode,
+                  "%s/tests/common/" % srcnode
+                  ],
+        install_path=None,
+        source=ntpd_source,
+        target="test_ntpd",
+        use="ntpd_lib libntpd_obj unity ntp isc "
+            "M PTHREAD CRYPTO RT SOCKET NSL",
+    )
