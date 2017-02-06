@@ -1,146 +1,145 @@
 
 def build(ctx):
-	srcnode = ctx.srcnode.abspath()
-	bldnode = ctx.bldnode.abspath()
-	target3 = ctx.srcnode.make_node('ntpd/version.h')
-	target4 = ctx.srcnode.make_node('wafhelpers/.autorevision-cache')
+    srcnode = ctx.srcnode.abspath()
+    bldnode = ctx.bldnode.abspath()
+    target3 = ctx.srcnode.make_node('ntpd/version.h')
+    target4 = ctx.srcnode.make_node('wafhelpers/.autorevision-cache')
 
-	if ctx.variant == "host":
-		bison_source = [
-			"ntp_parser.y"
-		]
+    if ctx.variant == "host":
+        bison_source = ["ntp_parser.y"]
 
-		ctx(
-			target		= "bison_obj",
-			features	= "c src_include bld_include libisc_include",
-			source		= bison_source,
-			includes    = [
-							"%s/ntpd/" % srcnode,
-							"%s/" % ctx.bldnode.parent.abspath()
-			]
-		)
+        ctx(
+            features="c src_include bld_include libisc_include",
+            includes=["%s/ntpd/" % srcnode,
+                      "%s/" % ctx.bldnode.parent.abspath()
+                      ],
+            source=bison_source,
+            target="bison_obj",
+        )
 
-		ctx(
-		    cwd         = srcnode,
-		    rule        = 'VCS_EXTRA=`cat ${SRC[0]}` wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -e VERSION -t h >${TGT[0].abspath()}',
-		    source      = ["../VERSION", '../wafhelpers/autorevision.sh'],
-		    target      = [target3, target4],
-		)
+        ctx(
+            cwd=srcnode,
+            rule='VCS_EXTRA=`cat ${SRC[0]}` wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -e VERSION -t h >${TGT[0].abspath()}',
+            source=["../VERSION", '../wafhelpers/autorevision.sh'],
+            target=[target3, target4],
+        )
 
-		ctx.add_group() # Generate Bison and version.h files first.
+        # Generate Bison and version.h files first.
+        ctx.add_group()
 
-		keyword_gen_source = [
-			"keyword-gen.c",
-		]
+        keyword_gen_source = ["keyword-gen.c", ]
 
-		ctx(
-			target      = "keyword-gen",
-			features    = "c cprogram bld_include src_include libisc_include",
-			source      = keyword_gen_source,
-			includes    = [
-							"%s/ntpd/" % bldnode,
-							"%s/" % ctx.bldnode.parent.abspath()
-			],
-			install_path= None,
-		)
+        ctx(
+            features="c cprogram bld_include src_include libisc_include",
+            includes=["%s/ntpd/" % bldnode,
+                      "%s/" % ctx.bldnode.parent.abspath()
+                      ],
+            install_path=None,
+            source=keyword_gen_source,
+            target="keyword-gen",
+        )
 
-		# XXX: needs a dependency to rebuild ntp_keyword.h when keyword-gen is rebuilt
+        # XXX: needs a dependency to rebuild ntp_keyword.h
+        #      when keyword-gen is rebuilt
 
-		ctx.add_group() # Make sure keyword-gen is created next.
+        # Make sure keyword-gen is created next.
+        ctx.add_group()
 
-		ctx(
-			rule        = "%s/ntpd/keyword-gen ${SRC} > ${TGT}" % bldnode,
-			features    = "c bld_include src_include",
-			source      = "ntp_parser.tab.h",
-			target      = "ntp_keyword.h"
-		)
+        ctx(
+            features="c bld_include src_include",
+            rule="%s/ntpd/keyword-gen ${SRC} > ${TGT}" % bldnode,
+            source="ntp_parser.tab.h",
+            target="ntp_keyword.h"
+        )
 
-		ctx.add_group() # Make sure ntp_keyword.h is created last.
+        # Make sure ntp_keyword.h is created last.
+        ctx.add_group()
 
-		return
+        return
 
-	libntpd_source = [
-		"ntp_control.c",
-		"ntp_filegen.c",
-		"ntp_leapsec.c",
-		"ntp_monitor.c",	# Needed by the restrict code
-		"ntp_restrict.c",
-		"ntp_util.c",
-	]
+    libntpd_source = [
+        "ntp_control.c",
+        "ntp_filegen.c",
+        "ntp_leapsec.c",
+        "ntp_monitor.c",    # Needed by the restrict code
+        "ntp_restrict.c",
+        "ntp_util.c",
+    ]
 
-	ctx(
-		features	= "c bld_include src_include libisc_include",
-		includes	= ctx.env.PLATFORM_INCLUDES,
-		source		= libntpd_source,
-		target		= "libntpd_obj",
-	)
+    ctx(
+        features="c bld_include src_include libisc_include",
+        includes=ctx.env.PLATFORM_INCLUDES,
+        source=libntpd_source,
+        target="libntpd_obj",
+    )
 
-	ctx(
-		target		= "ntpd_lib",
-		features	= "c cstlib",
-		use			= "libntpd_obj",
-#		use			= "libntpd_obj bison_obj",
-	)
+    ctx(
+        target="ntpd_lib",
+        features="c cstlib",
+        use="libntpd_obj",
+        # use="libntpd_obj bison_obj",
+    )
 
-	use_refclock = "" #XXX: there must be a better way to do this
-	if ctx.env.REFCLOCK_ENABLE:
+    use_refclock = ""      # XXX: there must be a better way to do this
+    if ctx.env.REFCLOCK_ENABLE:
 
-		refclock_source = [
-			"ntp_refclock.c",
-			"refclock_conf.c"
-		]
+        refclock_source = ["ntp_refclock.c",
+                           "refclock_conf.c"
+                           ]
 
-		ctx(
-			target		= "refclock",
-			features	= "c bld_include src_include libisc_include",
-			source		= refclock_source,
-		)
-		use_refclock += "refclock"
+        ctx(
+            target="refclock",
+            features="c bld_include src_include libisc_include",
+            source=refclock_source,
+        )
+        use_refclock += "refclock"
 
-		for file, define in ctx.env.REFCLOCK_SOURCE:
-			ctx(
-				target		= "refclock_%s" % file,
-				features	= "c bld_include src_include libisc_include",
-				source		= "refclock_%s.c" % file,
-				# XXX: These need to go into config.h rather than the command line for the individual drivers
-				defines		= ["%s=1" % define],
-			)
-			use_refclock += " refclock_%s" % file
+        for file, define in ctx.env.REFCLOCK_SOURCE:
+            ctx(
+                defines=["%s=1" % define],
+                features="c bld_include src_include libisc_include",
+                # XXX: These need to go into config.h
+                #      rather than the command line for the individual drivers
+                source="refclock_%s.c" % file,
+                target="refclock_%s" % file,
+            )
+            use_refclock += " refclock_%s" % file
 
-	ntpd_source = [
-		"ntp_config.c",
-		"ntp_io.c",
-		"ntp_loopfilter.c",
-		"ntp_packetstamp.c",
-		"ntp_peer.c",
-		"ntp_proto.c",
-		"ntp_sandbox.c",
-		"ntp_scanner.c",
-		"ntp_signd.c",
-		"ntp_timer.c",
-		"ntpd.c",
-		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
-	]
+    ntpd_source = [
+        "ntp_config.c",
+        "ntp_io.c",
+        "ntp_loopfilter.c",
+        "ntp_packetstamp.c",
+        "ntp_peer.c",
+        "ntp_proto.c",
+        "ntp_sandbox.c",
+        "ntp_scanner.c",
+        "ntp_signd.c",
+        "ntp_timer.c",
+        "ntpd.c",
+        ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
+    ]
 
-	if ctx.env.SBINDIR:
-		ntpd_install_path = ctx.env.SBINDIR
-	else:
-		ntpd_install_path = "${PREFIX}/sbin/"
-	if not ntpd_install_path.endswith("/"):
-		ntpd_install_path += "/"
+    if ctx.env.SBINDIR:
+        ntpd_install_path = ctx.env.SBINDIR
+    else:
+        ntpd_install_path = "${PREFIX}/sbin/"
+    if not ntpd_install_path.endswith("/"):
+        ntpd_install_path += "/"
 
-	ctx(
-		target		= "ntpd",
-		features	= "c rtems_trace cprogram bld_include src_include libisc_include libisc_pthread_include",
-		source		= ntpd_source,
-		use		= "libntpd_obj isc ntp M parse RT CAP SECCOMP PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s SOCKET NSL SCF" % use_refclock,
-		includes	= [
-					"%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
-					"%s/ntpd/" % srcnode,
-				] + ctx.env.PLATFORM_INCLUDES,
-		install_path	= ntpd_install_path,
-	)
+    ctx(
+        features="c rtems_trace cprogram bld_include src_include "
+                 "libisc_include libisc_pthread_include",
+        includes=["%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
+                  "%s/ntpd/" % srcnode,
+                  ] + ctx.env.PLATFORM_INCLUDES,
+        install_path=ntpd_install_path,
+        source=ntpd_source,
+        target="ntpd",
+        use="libntpd_obj isc ntp M parse RT CAP SECCOMP PTHREAD "
+            "CRYPTO DNS_SD DNS_SD_INCLUDES %s SOCKET NSL SCF" % use_refclock,
+    )
 
-	ctx.manpage(8, "ntpd-man.txt")
-	ctx.manpage(5, "ntp.conf-man.txt")
-	ctx.manpage(5, "ntp.keys-man.txt")
+    ctx.manpage(8, "ntpd-man.txt")
+    ctx.manpage(5, "ntp.conf-man.txt")
+    ctx.manpage(5, "ntp.keys-man.txt")
