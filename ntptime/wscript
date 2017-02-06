@@ -1,20 +1,19 @@
 def build(ctx):
-	if ctx.env.HEADER_SYS_TIMEX_H:
-		srcnode = ctx.srcnode.abspath()
-		bldnode = ctx.bldnode.abspath()
+    if ctx.env.HEADER_SYS_TIMEX_H:
+        srcnode = ctx.srcnode.abspath()
+        bldnode = ctx.bldnode.abspath()
 
-		ctx(
-			target		= "ntptime",
-			features	= "c cprogram bld_include src_include libisc_include",
-			source		= ["ntptime.c"],
-			includes	= [
-						"%s/ntptime/" % bldnode,
-						"%s/ntptime/" % srcnode,
-					  ],
-			use		= "ntp isc M RT",
-			install_path = "${PREFIX}/bin/"
-		)
+        ctx(
+            target="ntptime",
+            features="c cprogram bld_include src_include libisc_include",
+            source=["ntptime.c"],
+            includes=["%s/ntptime/" % bldnode,
+                      "%s/ntptime/" % srcnode,
+                      ],
+            use="ntp isc M RT",
+            install_path="${PREFIX}/bin/"
+        )
 
-	ctx.manpage(8, "ntptime-man.txt")
+    ctx.manpage(8, "ntptime-man.txt")
 
 # end
