@@ -3,7 +3,7 @@ def build(ctx):
     doc_source = ctx.path.ant_glob("*.txt", excl='*-body.txt')
 
     ctx(
-        source=doc_source
+        source=doc_source,
         target="doc",
     )
 
