@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import sys
 import os
 from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
@@ -478,13 +477,9 @@ def cmd_configure(ctx, config):
                "same sockets on alternate interfaces, required "
                "by Linux at least")
 
-    # These are required by the SHA1 code and various refclocks
-    if sys.byteorder == "little":
-        pass
-    elif sys.byteorder == "big":
+    # These are required by various refclocks
+    if ctx.check_endianness() == "big":
         ctx.define("WORDS_BIGENDIAN", 1)
-    else:
-        print("Can't determine byte order!")
 
     from wafhelpers.check_vsprintfm import check_vsprintfm
     check_vsprintfm(ctx)
