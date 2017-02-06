@@ -1,6 +1,7 @@
 from waflib import Utils
-from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext, StepContext, ListContext
-from waflib import Context, Errors
+from waflib.Build import (BuildContext, CleanContext, InstallContext,
+                          StepContext, ListContext)
+from waflib import Context
 from waflib import Scripting
 from waflib.Logs import pprint
 import os
@@ -15,8 +16,8 @@ from wafhelpers.test import test_write_log, test_print_log
 from wafhelpers.options import options_cmd
 
 config = {
-        "out": out,
-        "OPT_STORE": {}
+    "out": out,
+    "OPT_STORE": {}
 }
 
 
@@ -41,8 +42,6 @@ def configure(ctx):
         cmd_configure(ctx, config)
         ctx.recurse("pylib")
 
-from waflib.Build import BuildContext
-
 
 class check(BuildContext):
         cmd = 'check'
@@ -56,12 +55,12 @@ def bin_test(ctx):
 
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
-        ("build",   BuildContext),
-        ("clean",   CleanContext),
-        ("install", InstallContext),
-        ("step",    StepContext),
-        ("list",    ListContext),
-#       ("check",   BuildContext)
+    ("build", BuildContext),
+    ("clean", CleanContext),
+    ("install", InstallContext),
+    ("step", StepContext),
+    ("list", ListContext),
+    # ("check", BuildContext)
 )
 
 for v in ["host", "main"]:
@@ -92,24 +91,26 @@ def init_handler(ctx):
                 obj.execute()
 
 commands = (
-        ("install",     "init_handler", None),
-        ("uninstall",   "init_handler", None),
-        ("build",       "init_handler", None),
-        ("clean",       "init_handler", None),
-        ("list",        "init_handler", None),
-        ("step",        "init_handler", None),
-#       ("info",        "cmd_info",     "Show build information / configuration.")
+    ("install", "init_handler", None),
+    ("uninstall", "init_handler", None),
+    ("build", "init_handler", None),
+    ("clean", "init_handler", None),
+    ("list", "init_handler", None),
+    ("step", "init_handler", None),
+    # ("info", "cmd_info", "Show build information / configuration.")
 )
 
 
 for command, func, descr in commands:
-        class tmp(Context.Context):
+        class tmp1(Context.Context):
                 if descr:
                         __doc__ = descr
                 cmd = command
                 fun = func
-                if command in 'install uninstall build clean list step docs bsp info':
-                        execute = Scripting.autoconfigure(Context.Context.execute)
+                if ((command in
+                    'install uninstall build clean list step docs bsp info'
+                     )):
+                    execute = Scripting.autoconfigure(Context.Context.execute)
 # end borrowed code
 
 
@@ -122,12 +123,14 @@ def afterparty(ctx):
     # module built in libntp.
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
         ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc ntpd/version.h")
-    for x in ("ntpclients",):	# List used to be longer...
+    for x in ("ntpclients",):
+            # List used to be longer...
             path_build = ctx.bldnode.make_node("pylib")
             path_source = ctx.srcnode.make_node(x + "/ntp")
             relpath = "../" + path_build.path_from(ctx.srcnode)
             if ctx.cmd in ('install', 'build'):
-                if not path_source.exists() or os.readlink(path_source.abspath()) != relpath:
+                if ((not path_source.exists()
+                     or os.readlink(path_source.abspath()) != relpath)):
                     try:
                         os.remove(path_source.abspath())
                     except OSError:
@@ -135,105 +138,107 @@ def afterparty(ctx):
                     os.symlink(relpath, path_source.abspath())
             elif ctx.cmd == 'clean':
                 if path_source.exists():
-                    #print "removing", path_source.abspath()
+                    # print "removing", path_source.abspath()
                     os.remove(path_source.abspath())
     bldnode = ctx.bldnode.abspath()
     if ctx.cmd in ('install', 'build'):
-        os.system("cd %s/pylib; ln -sf ../libntp/ntpc.so ntpc.so " % (bldnode,))
+        os.system("cd %s/pylib; ln -sf ../libntp/ntpc.so ntpc.so "
+                  % (bldnode,))
 
 python_scripts = [
-        "ntpclients/gps-log",
-        "ntpclients/ntpdig",
-        "ntpclients/ntpkeygen",
-        "ntpclients/ntpmon",
-        "ntpclients/ntpq",
-        "ntpclients/ntpsweep",
-        "ntpclients/ntptrace",
-        "ntpclients/ntpviz",
-        "ntpclients/ntpwait",
+    "ntpclients/gps-log",
+    "ntpclients/ntpdig",
+    "ntpclients/ntpkeygen",
+    "ntpclients/ntpmon",
+    "ntpclients/ntpq",
+    "ntpclients/ntpsweep",
+    "ntpclients/ntptrace",
+    "ntpclients/ntpviz",
+    "ntpclients/ntpwait",
 ]
 
 
 def build(ctx):
-        ctx.load('waf', tooldir='wafhelpers/')
-        ctx.load('bison')
-        ctx.load('asciidoc', tooldir='wafhelpers/')
-        ctx.load('rtems_trace', tooldir='wafhelpers/')
+    ctx.load('waf', tooldir='wafhelpers/')
+    ctx.load('bison')
+    ctx.load('asciidoc', tooldir='wafhelpers/')
+    ctx.load('rtems_trace', tooldir='wafhelpers/')
 
-        if ctx.cmd == "build":
-                # It's a waf gotcha that if there are object files (including
-                # .pyc and .pyo files) in a source directory, compilation to
-                # the build directory never happens.  This is how we foil that.
-                ctx.add_pre_fun(lambda ctx: ctx.exec_command("rm -f pylib/*.py[co]"))
+    if ctx.cmd == "build":
+        # It's a waf gotcha that if there are object files (including
+        # .pyc and .pyo files) in a source directory, compilation to
+        # the build directory never happens.  This is how we foil that.
+        ctx.add_pre_fun(lambda ctx: ctx.exec_command("rm -f pylib/*.py[co]"))
 
-        if ctx.env.ENABLE_DOC_USER:
-                if ctx.variant != "main":
-                        ctx.recurse("docs")
+    if ctx.env.ENABLE_DOC_USER:
+        if ctx.variant != "main":
+            ctx.recurse("docs")
 
-        if ctx.variant == "host":
-                ctx.recurse("ntpd")
-                return
-
-        ctx.recurse("libisc")
-        if ctx.env.REFCLOCK_GENERIC: # Only required by the generic refclock
-                ctx.recurse("libparse")
-        ctx.recurse("libntp")
+    if ctx.variant == "host":
         ctx.recurse("ntpd")
-        ctx.recurse("ntpfrob")
-        ctx.recurse("ntptime")
-        ctx.recurse("pylib")
-        ctx.recurse("attic")
-        ctx.recurse("tests")
+        return
 
-        scripts = ["ntpclients/ntpleapfetch"] + python_scripts
+    ctx.recurse("libisc")
+    if ctx.env.REFCLOCK_GENERIC:
+        # Only required by the generic refclock
+        ctx.recurse("libparse")
+    ctx.recurse("libntp")
+    ctx.recurse("ntpd")
+    ctx.recurse("ntpfrob")
+    ctx.recurse("ntptime")
+    ctx.recurse("pylib")
+    ctx.recurse("attic")
+    ctx.recurse("tests")
 
-        ctx(
-                features      = "subst",
-                source        = scripts,
-                target        = scripts,
-                chmod         = Utils.O755,
-                install_path  = "${PREFIX}/bin/"
-        )
+    scripts = ["ntpclients/ntpleapfetch"] + python_scripts
 
-        ctx.add_post_fun(afterparty)
-        if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
-            afterparty(ctx)
+    ctx(
+        features="subst",
+        source=scripts,
+        target=scripts,
+        chmod=Utils.O755,
+        install_path="${PREFIX}/bin/"
+    )
 
-        ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
-        ctx.manpage(1, "ntpclients/ntpdig-man.txt")
-        ctx.manpage(8, "ntpclients/ntpkeygen-man.txt")
-        ctx.manpage(1, "ntpclients/ntpmon-man.txt")
-        ctx.manpage(1, "ntpclients/ntpq-man.txt")
-        ctx.manpage(1, "ntpclients/ntpsweep-man.txt")
-        ctx.manpage(1, "ntpclients/ntptrace-man.txt")
-        ctx.manpage(1, "ntpclients/ntpviz-man.txt")
-        ctx.manpage(8, "ntpclients/ntpwait-man.txt")
-        ctx.manpage(1, "ntpclients/gps-log-man.txt")
+    ctx.add_post_fun(afterparty)
+    if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
+        afterparty(ctx)
 
-        # Skip running unit tests on a cross compile build
-        if not ctx.env.ENABLE_CROSS:
-                # Force re-running of tests.  Same as 'waf --alltests'
-                if ctx.cmd == "check":
-                        ctx.options.all_tests = True
+    ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
+    ctx.manpage(1, "ntpclients/ntpdig-man.txt")
+    ctx.manpage(8, "ntpclients/ntpkeygen-man.txt")
+    ctx.manpage(1, "ntpclients/ntpmon-man.txt")
+    ctx.manpage(1, "ntpclients/ntpq-man.txt")
+    ctx.manpage(1, "ntpclients/ntpsweep-man.txt")
+    ctx.manpage(1, "ntpclients/ntptrace-man.txt")
+    ctx.manpage(1, "ntpclients/ntpviz-man.txt")
+    ctx.manpage(8, "ntpclients/ntpwait-man.txt")
+    ctx.manpage(1, "ntpclients/gps-log-man.txt")
 
-                        # Print log if -v is supplied
-                        if ctx.options.verbose:
-                                ctx.add_post_fun(test_print_log)
+    # Skip running unit tests on a cross compile build
+    if not ctx.env.ENABLE_CROSS:
+        # Force re-running of tests.  Same as 'waf --alltests'
+        if ctx.cmd == "check":
+            ctx.options.all_tests = True
 
-                # Write test log to a file
-                ctx.add_post_fun(test_write_log)
+            # Print log if -v is supplied
+            if ctx.options.verbose:
+                ctx.add_post_fun(test_print_log)
 
-                # Print a summary at the end
-                ctx.add_post_fun(waf_unit_test.summary)
-        else:
-                pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
-                from waflib import Options
-                Options.options.no_tests = True
+        # Write test log to a file
+        ctx.add_post_fun(test_write_log)
 
-        if ctx.cmd == "build":
-                if not "PYTHONPATH" in os.environ:
-                        print("--- PYTHONPATH is not set, "
-                                "loading the Python ntp library may be troublesome ---")
+        # Print a summary at the end
+        ctx.add_post_fun(waf_unit_test.summary)
+    else:
+        pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
+        from waflib import Options
+        Options.options.no_tests = True
+
+    if ctx.cmd == "build":
+        if "PYTHONPATH" not in os.environ:
+            print("--- PYTHONPATH is not set, "
+                  "loading the Python ntp library may be troublesome ---")
 
 #
 # Miscellaneous utility productions
@@ -254,7 +259,8 @@ def loccount(ctx):
 
 def cxfreeze(ctx):
     "Create standalone binaries from Python scripts."
-    ctx.exec_command("for prog in " + " ".join(python_scripts) + "; do cxfreeze $prog; done")
+    ctx.exec_command("for prog in " + " ".join(python_scripts)
+                     + "; do cxfreeze $prog; done")
 
 
 def linkcheck(ctx):
