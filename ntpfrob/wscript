@@ -1,18 +1,16 @@
 def build(ctx):
-	bldnode = ctx.bldnode.abspath()
+    bldnode = ctx.bldnode.abspath()
 
-	frob_sources = ['main.c', 'bumpclock.c', 'jitter.c', 'precision.c',
-			'pps-api.c', 'tickadj.c']
+    frob_sources = ['main.c', 'bumpclock.c', 'jitter.c', 'precision.c',
+                    'pps-api.c', 'tickadj.c']
 
-	ctx(
-		target		= "ntpfrob",
-		features	= "c cprogram bld_include src_include libisc_include",
-		source		= frob_sources,
-		includes	= [
-					"%s/ntpfrob/" % bldnode
-				],
-		use		= "M RT",
-		install_path = "${PREFIX}/bin/"
-	)
+    ctx(
+        features="c cprogram bld_include src_include libisc_include",
+        includes=["%s/ntpfrob/" % bldnode],
+        install_path="${PREFIX}/bin/",
+        source=frob_sources,
+        target="ntpfrob",
+        use="M RT",
+    )
 
-	ctx.manpage(8, "ntpfrob-man.txt")
+    ctx.manpage(8, "ntpfrob-man.txt")
