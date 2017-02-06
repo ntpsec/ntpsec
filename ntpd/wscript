@@ -69,9 +69,10 @@ def build(ctx):
 	]
 
 	ctx(
-		target		= "libntpd_obj",
 		features	= "c bld_include src_include libisc_include",
+		includes	= ctx.env.PLATFORM_INCLUDES,
 		source		= libntpd_source,
+		target		= "libntpd_obj",
 	)
 
 	ctx(
