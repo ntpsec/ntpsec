@@ -13,12 +13,14 @@ def probe_header_with_prerequisites(ctx, header, prerequisites, use=None):
         have_name = "HAVE_%s" \
             % header.replace(".", "_").replace("/", "_").upper()
         ctx.check_cc(
-            fragment=src,
+            comment="<%s> header" % header,
             define_name=have_name,
+            fragment=src,
+            includes=ctx.env.PLATFORM_INCLUDES,
+            mandatory=False,
             msg="Checking for header %s" % header,
             use=use or [],
-            mandatory=False,
-            comment="<%s> header" % header)
+        )
         return ctx.get_define(have_name)
 
 
@@ -34,12 +36,14 @@ def probe_function_with_prerequisites(ctx, function, prerequisites, use=None):
 """ % function
         have_name = "HAVE_%s" % function.upper()
         ctx.check_cc(
-            fragment=src,
+            comment="Whether %s() exists" % function,
             define_name=have_name,
+            fragment=src,
+            includes=ctx.env.PLATFORM_INCLUDES,
+            mandatory=False,
             msg="Checking for function %s" % function,
             use=use or [],
-            mandatory=False,
-            comment="Whether %s() exists" % function)
+        )
         return ctx.get_define(have_name)
 
 # end

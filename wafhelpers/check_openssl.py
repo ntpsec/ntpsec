@@ -25,7 +25,9 @@ def configure_openssl(ctx):
     )
 
     for hdr in headers:
-        if not ctx.check_cc(header_name=hdr, comment="<%s> header" % hdr):
+        if not ctx.check_cc(header_name=hdr, comment="<%s> header" % hdr,
+            includes=ctx.env.PLATFORM_INCLUDES,
+            ):
             OPENSSL_HEADERS = False
 
     if not ctx.check_cc(lib="crypto"):
@@ -33,11 +35,12 @@ def configure_openssl(ctx):
 
     if OPENSSL_HEADERS and OPENSSL_LIB:
         ctx.check_cc(
+            comment="OpenSSL support",
+            execute=True,
             fragment=OPENSSL_FRAG % "\n".join(["#include <%s>" % x
                                                for x in headers]),
-            execute=True,
-            use="CRYPTO",
+            includes=ctx.env.PLATFORM_INCLUDES,
             msg="Checking if OpenSSL works",
-            comment="OpenSSL support"
+            use="CRYPTO",
         )
 
