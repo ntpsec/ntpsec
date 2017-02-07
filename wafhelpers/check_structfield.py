@@ -25,5 +25,5 @@ def check_structfield(ctx, fld, type, hdrs, mandatory=False):
         execute=False,
         msg="Checking for %s in struct %s" % (fld, type),
         mandatory=mandatory,
-        comment="Whether struct '%s' has field '%s'" % (fld, type)
+        comment="Whether struct '%s' has field '%s'" % (type, fld)
     )
