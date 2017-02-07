@@ -47,7 +47,7 @@ temp_gate = args.target_temp[0]
 
 while True:
     # on a RasPi 3, 200,000 of the m.update() can be one second
-    delta  = temp_gate - temp
+    delta = temp_gate - temp
     if 0 < delta:
         # heat it up
         m.update("Nobody inspects the spammish repetition")
