@@ -255,6 +255,10 @@ def cmd_configure(ctx, config):
     for (s, h) in structures:
         ctx.check_cc(type_name=s, header_name=h, mandatory=False)
 
+    # waf's SNIP_FIELD should likely include these headers itself
+    ctx.check_cc(header_name="stdint.h", auto_add_header_name=True, mandatory=False)
+    ctx.check_cc(header_name="sys/types.h", auto_add_header_name=True, mandatory=False)
+
     structure_fields = (
         ("time_tick", "struct timex", ["sys/time.h", "sys/timex.h"]),
         ("modes", "struct timex", ["sys/time.h", "sys/timex.h"]),
