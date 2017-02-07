@@ -477,14 +477,6 @@ def cmd_configure(ctx, config):
     from wafhelpers.check_vsprintfm import check_vsprintfm
     check_vsprintfm(ctx)
 
-    # Define CFLAGS/LDFLAGS for -vv support.
-    ctx.define("NTPSEC_CFLAGS",
-               " ".join(ctx.env.CFLAGS).replace("\"", "\\\""),
-               comment="CFLAGS used when compiled")
-    ctx.define("NTPSEC_LDFLAGS",
-               " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""),
-               comment="LDFLAGS used when compiled")
-
     # Check for directory separator
     if ctx.env.DEST_OS == "win32":
         sep = "\\"
