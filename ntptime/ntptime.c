@@ -20,7 +20,7 @@
 #include <setjmp.h>
 #include <stdbool.h>
 
-#ifdef STRUCT_NTPTIMEVAL_HAS_TIME_TV_NSEC
+#ifdef HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
 #define tv_frac_sec tv_nsec
 #else
 #define tv_frac_sec tv_usec
@@ -49,7 +49,7 @@ int ntp_gettime(struct ntptimeval *ntv)
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;
 	ntv->esterror = tntx.esterror;
-#if defined(STRUCT_NTPTIMEVAL_HAS_TAI)
+#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
 	ntv->tai = tntx.tai;
 #endif
 	return result;
@@ -341,11 +341,11 @@ main(
 			       (int)time_frac,
 
 			       ctime_r((time_t *)&ntv.time.tv_sec, ascbuf));
-#if defined(STRUCT_NTPTIMEVAL_HAS_TAI)
+#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
 		printf(json ? jfmt5 : ofmt5, (long)ntv.tai);
 #else
 		fputs(json ? jfmt6 : ofmt6, stdout);
-#endif /* STRUCT_NTPTIMEVAL_HAS_TAI */
+#endif /* HAVE_STRUCT_NTPTIMEVAL_TAI */
 	}
 	status = ntp_adjtime_ns(&ntx);
 	if (status < 0) {

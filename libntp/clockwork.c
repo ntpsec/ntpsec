@@ -120,7 +120,7 @@ int ntp_gettime(struct ntptimeval *ntv)
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;
 	ntv->esterror = tntx.esterror;
-#if defined(STRUCT_NTPTIMEVAL_HAS_TAI)
+#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
 	ntv->tai = tntx.tai;
 #endif
 	return result;
