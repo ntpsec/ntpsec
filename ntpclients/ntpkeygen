@@ -88,7 +88,7 @@ if __name__ == '__main__':
             print("usage: ntpkeygen [-M]")
             raise SystemExit(0)
 
-    # The seed is ignored by random.SystemRandom, 
+    # The seed is ignored by random.SystemRandom,
     # even though the docs do not say so.
     randomizer = random.SystemRandom()
     gen_md5("md5", socket.gethostname())
