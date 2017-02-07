@@ -161,7 +161,6 @@ def cmd_configure(ctx, config):
     msg("--- Configuring main ---")
     ctx.setenv("main", ctx.env.derive())
 
-    from wafhelpers.check_type import check_type
     from wafhelpers.check_sizeof import check_sizeof
     from wafhelpers.check_structfield import check_structfield
 
@@ -246,21 +245,16 @@ def cmd_configure(ctx, config):
     types = ["uint64_t"]
 
     for inttype in sorted(types):
-        check_type(ctx, inttype, ["stdint.h", "sys/types.h"])
-
-    net_types = (
-        ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
-        ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
-    )
-    for (f, h) in net_types:
-        check_type(ctx, f, h)
+        ctx.check_cc(type_name=inttype, header_name=["stdint.h", "sys/types.h"], mandatory=False)
 
     structures = (
+        ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
+        ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
         ("struct timex", ["sys/time.h", "sys/timex.h"]),
         ("struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
     )
     for (s, h) in structures:
-        check_type(ctx, s, h)
+        ctx.check_cc(type_name=s, header_name=h, mandatory=False)
 
     structure_fields = (
         ("time_tick", "timex", ["sys/time.h", "sys/timex.h"]),
