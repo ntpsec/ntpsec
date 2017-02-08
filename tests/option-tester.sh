@@ -49,7 +49,6 @@ fi
 if [ `which asciidoc` != "" -a `which xsltproc` != "" ]
 then
 doit doc     "--enable-doc"
-doit doconly "--enable-doc-only"
 fi
 
 echo
