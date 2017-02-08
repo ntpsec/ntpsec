@@ -25,6 +25,12 @@
 #include "refclock_pps.h"
 #endif /* HAVE_PPSAPI */
 
+
+#define SAMPLE(x)	pp->coderecv = (pp->coderecv + 1) % MAXSTAGE; \
+			pp->filter[pp->coderecv] = (x); \
+			if (pp->coderecv == pp->codeproc) \
+				pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
+
 /*
  * Reference clock support is provided here by maintaining the fiction
  * that the clock is actually a peer.  As no packets are exchanged with
