@@ -206,7 +206,7 @@ typedef struct addrinfo     addrinfoT;
  * We use the same device name scheme as does the NMEA driver; since
  * GPSD supports the same links, we can select devices by a fixed name.
  */
-static const char * s_dev_stem = "/dev/gps";
+#define	DEVICE		"/dev/gps%u"	/* GPS serial device */
 
 /* =====================================================================
  * forward declarations for transfer vector and the vector itself
@@ -254,7 +254,7 @@ struct gpsd_unit {
 	int      unit;
 	int      mode;
 	char    *logname;	/* cached name for log/print */
-	char    * device;	/* device name of unit */
+	char    *device;	/* device name of unit */
 
 	/* current line protocol version */
 	uint32_t proto_version;
@@ -478,6 +478,7 @@ gpsd_start(
 	gpsd_unitT ** uscan    = &s_clock_units;
 
 	struct stat sb;
+        int ret;
 
 	/* check if we can proceed at all or if init failed */
 	if ( ! gpsd_init_check())
@@ -506,8 +507,14 @@ gpsd_start(
 		 * practicable, we will have to read the symlink, if
 		 * any, so we can get the true device file.)
 		 */
-		if (-1 == myasprintf(&up->device, "%s%u",
-				     s_dev_stem, up->unit)) {
+                if ( peer->path ) {
+                    /* use the ntp.conf path name */
+		    ret = myasprintf(&up->device, "%s", peer->path);
+                } else {
+                    ret = myasprintf(&up->device, DEVICE, up->unit);
+                }
+		if (-1 == ret ) {
+                        /* more likely out of RAM */
 			msyslog(LOG_ERR, "%s: clock device name too long",
 				up->logname);
 			goto dev_fail;

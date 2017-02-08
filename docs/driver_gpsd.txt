@@ -223,7 +223,7 @@ since the last poll.
 +mode+::
   Synonym for subtype, retained for backward compatibility.
 +path+ 'filename'::
-  Not used by this driver.
+  Overrides the default device path.
 +ppspath+ 'filename'::
   Not used by this driver.
 +baud+ 'number'::
@@ -248,6 +248,7 @@ control loop. You do not want to use sloppy data for that.
 
 ----------------------------------------------------------------------------
 refclock gpsd mode 2
+refclock gpsd mode 2 path /dev/tty.usbserial
 ----------------------------------------------------------------------------
 
 This is configured for the experimental automatic mode.
