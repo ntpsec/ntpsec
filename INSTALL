@@ -115,6 +115,8 @@ Local copy of DocBook stylesheets:
 wget:
    Optional, used by ntpleapfetch
 
+=== Apple ===
+
 The OS X build has been tested in this environment:
 
  OS X Version             : 10.11.x (El Capitan)
@@ -129,6 +131,12 @@ The MacOS build has been tested in this environment:
 All you will require is the Xcode command line tools with no additions.
 There is currently no support for using Xcode's builder. NTPsec's standard
 waf based build system is used.
+
+On MacOS you can use this command to turn off the Apple version of NTP:
+
+----
+sudo launchctl unload /System/Library/LaunchDaemons/org.ntp.ntpd.plist
+----
 
 == Basic Installation ==
 
