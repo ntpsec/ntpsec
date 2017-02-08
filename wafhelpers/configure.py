@@ -259,13 +259,13 @@ def cmd_configure(ctx, config):
     ctx.check_cc(header_name="stddef.h", auto_add_header_name=True, mandatory=False)
 
     structure_fields = (
-        ("time_tick", "struct timex", ["sys/time.h", "sys/timex.h"]),
-        ("modes", "struct timex", ["sys/time.h", "sys/timex.h"]),
-        ("time.tv_nsec", "struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
-        ("tai", "struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
+        ("struct timex", "time_tick", ["sys/time.h", "sys/timex.h"]),
+        ("struct timex", "modes", ["sys/time.h", "sys/timex.h"]),
+        ("struct ntptimeval", "time.tv_nsec", ["sys/time.h", "sys/timex.h"]),
+        ("struct ntptimeval", "tai", ["sys/time.h", "sys/timex.h"]),
         # first in glibc 2.12
     )
-    for (f, s, h) in structure_fields:
+    for (s, f, h) in structure_fields:
         ctx.check_cc(type_name=s, field_name=f, header_name=h, mandatory=False)
 
     # mostly used by timetoa.h and timespecops.h
