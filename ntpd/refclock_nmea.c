@@ -289,7 +289,7 @@ static	void	nmea_control	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
 #define		NMEA_CONTROL	nmea_control
 #else
-#define		NMEA_CONTROL	noentry
+#define		NMEA_CONTROL	NULL
 #endif /* HAVE_PPSAPI */
 static	void	nmea_timer	(int, struct peer *);
 

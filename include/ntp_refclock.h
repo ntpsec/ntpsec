@@ -155,7 +155,6 @@ struct refclockproc {
  * ntp_refclock.c and particular clock drivers. This must agree with the
  * structure defined in the driver.
  */
-#define	noentry	NULL		/* flag for null routine */
 
 struct refclock {
 	const char *basename;

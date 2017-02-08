@@ -411,9 +411,9 @@ struct	refclock refclock_oncore = {
 	oncore_start,		/* start up driver */
 	oncore_shutdown,	/* shut down driver */
 	oncore_poll,		/* transmit poll message */
-	noentry,		/* control - not used */
-	noentry,		/* init - not used */
-	noentry 		/* timer - not used */
+	NULL,			/* control - not used */
+	NULL,			/* init - not used */
+	NULL 			/* timer - not used */
 };
 
 /*

@@ -163,9 +163,9 @@ struct	refclock refclock_true = {
 	true_start,		/* start up driver */
 	true_shutdown,		/* shut down driver */
 	true_poll,		/* transmit poll message */
-	noentry,		/* not used (old true_control) */
-	noentry,		/* initialize driver (not used) */
-	noentry			/* timer - not used */
+	NULL,			/* not used (old true_control) */
+	NULL,			/* initialize driver (not used) */
+	NULL			/* timer - not used */
 };
 
 

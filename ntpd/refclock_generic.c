@@ -134,12 +134,12 @@ static	void	parse_control	(int, const struct refclockstat *, struct refclockstat
 
 struct	refclock refclock_parse = {
 	"GENERIC",			/* basename of driver */
-	parse_start,
-	parse_shutdown,
-	parse_poll,
-	parse_control,
-	noentry,
-	noentry
+	parse_start,                    /* start up driver */
+	parse_shutdown,                 /* shut down driver */
+	parse_poll,          		/* transmit poll message */
+	parse_control,       		/* control settings */
+	NULL,				/* init */
+	NULL,				/* timer */
 };
 
 /*

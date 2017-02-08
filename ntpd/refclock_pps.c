@@ -104,8 +104,8 @@ struct	refclock refclock_pps = {
 	pps_start,		/* start up driver */
 	pps_shutdown,		/* shut down driver */
 	pps_poll,		/* transmit poll message */
-	noentry,		/* control (not used) */
-	noentry,		/* initialize driver (not used) */
+	NULL,			/* control (not used) */
+	NULL,			/* initialize driver (not used) */
 	pps_timer,		/* called once per second */
 };
 

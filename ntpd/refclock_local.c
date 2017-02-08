@@ -84,11 +84,11 @@ static	u_long poll_time;	/* last time polled */
 struct	refclock refclock_local = {
 	NAME,			/* basename of driver */
 	local_start,		/* start up driver */
-	noentry,		/* shut down driver (not used) */
+	NULL,			/* shut down driver (not used) */
 	local_poll,	 	/* transmit poll message */
-	noentry,		/* not used (old lcl_control) */
-	noentry,		/* initialize driver (not used) */
-	noentry 		/* timer - not used */
+	NULL,			/* not used (old lcl_control) */
+	NULL,			/* initialize driver (not used) */
+	NULL 			/* timer - not used */
 };
 
 

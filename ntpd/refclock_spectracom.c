@@ -136,7 +136,7 @@ static	void	spectracom_control	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
 #define		SPECTRACOM_CONTROL	spectracom_control
 #else
-#define		SPECTRACOM_CONTROL	noentry
+#define		SPECTRACOM_CONTROL	NULL
 #endif /* HAVE_PPSAPI */
 
 /*
@@ -148,7 +148,7 @@ struct	refclock refclock_spectracom = {
 	spectracom_shutdown,		/* shut down driver */
 	spectracom_poll,		/* transmit poll message */
 	SPECTRACOM_CONTROL,		/* fudge set/change notification */
-	noentry,		/* initialize driver (not used) */
+	NULL,				/* initialize driver (not used) */
 	spectracom_timer		/* called once per second */
 };
 

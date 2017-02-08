@@ -156,9 +156,9 @@ struct	refclock refclock_magnavox = {
 	mx4200_start,		/* start up driver */
 	mx4200_shutdown,	/* shut down driver */
 	mx4200_poll,		/* transmit poll message */
-	noentry,		/* not used (old mx4200_control) */
-	noentry,		/* initialize driver (not used) */
-	noentry			/* timer - not used */
+	NULL,			/* not used (old mx4200_control) */
+	NULL,			/* initialize driver (not used) */
+	NULL			/* timer - not used */
 };
 
 

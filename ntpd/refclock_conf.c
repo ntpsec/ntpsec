@@ -14,7 +14,13 @@
 #include "ntp_stdlib.h"
 
 static struct refclock refclock_none = {
-    NULL, noentry, noentry, noentry, noentry, noentry, noentry
+	NULL,		/* basename of driver */
+	NULL,		/* start up driver */
+	NULL,		/* shut down driver */
+	NULL,		/* transmit poll message */
+	NULL,		/* not used (old hpgps_control) */
+	NULL,		/* initialize driver */
+	NULL,		/* timer - not used */
 };
 
 #ifdef CLOCK_LOCAL
