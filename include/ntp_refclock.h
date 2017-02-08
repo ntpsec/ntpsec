@@ -13,12 +13,6 @@
 #include "ntp_tty.h"
 #include "recvbuff.h"
 
-
-#define SAMPLE(x)	pp->coderecv = (pp->coderecv + 1) % MAXSTAGE; \
-			pp->filter[pp->coderecv] = (x); \
-			if (pp->coderecv == pp->codeproc) \
-				pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
-
 /*
  * Configuration flag values
  */
@@ -37,13 +31,6 @@
 #define	CLK_HAVEFLAG2	0x20
 #define	CLK_HAVEFLAG3	0x40
 #define	CLK_HAVEFLAG4	0x80
-
-/*
- * Constant for disabling event reporting in
- * refclock_receive. ORed in leap
- * parameter
- */
-#define REFCLOCK_OWN_STATES	0x80
 
 /*
  * Structure for returning clock status
