@@ -123,9 +123,9 @@ struct	refclock refclock_arbiter = {
 	arb_start,		/* start up driver */
 	arb_shutdown,		/* shut down driver */
 	arb_poll,		/* transmit poll message */
-	noentry,		/* not used (old arb_control) */
-	noentry,		/* initialize driver (not used) */
-	noentry			/* timer - not used */
+	NULL,			/* not used (old arb_control) */
+	NULL,			/* initialize driver (not used) */
+	NULL			/* timer - not used */
 };
 
 

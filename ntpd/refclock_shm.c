@@ -74,7 +74,7 @@ struct  refclock refclock_shm = {
 	shm_shutdown,           /* shut down driver */
 	shm_poll,		/* transmit poll message */
 	shm_control,		/* control settings */
-	noentry,		/* not used: init */
+	NULL,			/* not used: init */
 	shm_timer,              /* once per second */
 };
 
@@ -159,7 +159,7 @@ shm_start(
 	struct refclockproc * const pp = peer->procptr;
 	struct shmunit *      const up = emalloc_zero(sizeof(*up));
 
-	pp->io.clock_recv = noentry;
+	pp->io.clock_recv = NULL;
 	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = -1;

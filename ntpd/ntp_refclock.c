@@ -148,7 +148,7 @@ init_refclock(void)
 	int i;
 
 	for (i = 0; i < (int)num_refclock_conf; i++)
-		if (refclock_conf[i]->clock_init != noentry)
+		if (refclock_conf[i]->clock_init)
 			(refclock_conf[i]->clock_init)();
 }
 
@@ -174,7 +174,7 @@ refclock_newpeer(
 	struct refclockproc *pp;
 
 	if (clktype >= num_refclock_conf ||
-		refclock_conf[clktype]->clock_start == noentry) {
+		refclock_conf[!clktype]->clock_start) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock type %d invalid\n",
 			clktype);
@@ -243,7 +243,7 @@ refclock_unpeer(
 		return;
 
 	unit = peer->refclkunit;
-	if (peer->procptr->conf->clock_shutdown != noentry)
+	if (peer->procptr->conf->clock_shutdown)
 		(peer->procptr->conf->clock_shutdown)(unit, peer);
 	free(peer->procptr);
 	peer->procptr = NULL;
@@ -263,7 +263,7 @@ refclock_timer(
 
 	unit = p->refclkunit;
 	pp = p->procptr;
-	if (pp->conf->clock_timer != noentry)
+	if (pp->conf->clock_timer)
 		(*pp->conf->clock_timer)(unit, p);
 	if (pp->action != NULL && pp->nextaction <= current_time)
 		(*pp->action)(p);
@@ -323,7 +323,7 @@ refclock_transmit(
 	} else {
 		peer->burst--;
 	}
-	if (peer->procptr->conf->clock_poll != noentry)
+	if (peer->procptr->conf->clock_poll)
 		(peer->procptr->conf->clock_poll)(unit, peer);
 	poll_update(peer, peer->hpoll);
 }
@@ -948,7 +948,7 @@ refclock_control(
 	/*
 	 * Give the stuff to the clock
 	 */
-	if (peer->procptr->conf->clock_control != noentry)
+	if (peer->procptr->conf->clock_control)
 		(peer->procptr->conf->clock_control)(unit, in, out, peer);
 }
 

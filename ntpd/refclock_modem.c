@@ -231,8 +231,8 @@ struct refclock refclock_modem = {
 	modem_start,		/* start up driver */
 	modem_shutdown,		/* shut down driver */
 	modem_poll,		/* transmit poll message */
-	noentry,		/* control - not used */
-	noentry,		/* init - not used */
+	NULL,			/* control - not used */
+	NULL,			/* init - not used */
 	modem_timer		/* housekeeping timer */
 };
 

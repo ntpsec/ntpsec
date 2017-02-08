@@ -204,9 +204,9 @@ struct refclock refclock_trimble = {
 	trimble_start,		/* start up driver */
 	trimble_shutdown,	/* shut down driver */
 	trimble_poll,		/* transmit poll message */
-	noentry,		/* control - not used  */
-	noentry,		/* initialize driver (not used) */
-	noentry			/* timer - not used */
+	NULL,			/* control - not used  */
+	NULL,			/* initialize driver (not used) */
+	NULL			/* timer - not used */
 };
 
 int day_of_year (char *dt);

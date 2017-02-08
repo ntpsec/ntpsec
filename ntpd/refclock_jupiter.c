@@ -380,8 +380,8 @@ struct	refclock refclock_jupiter = {
 	jupiter_shutdown,	/* shut down driver */
 	jupiter_poll,		/* transmit poll message */
 	jupiter_control,	/* (clock control) */
-	noentry,		/* (clock init) */
-	noentry			/* timer - not used */
+	NULL,			/* (clock init) */
+	NULL			/* timer - not used */
 };
 
 /*

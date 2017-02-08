@@ -101,9 +101,9 @@ struct	refclock refclock_zyfer = {
 	zyfer_start,		/* start up driver */
 	zyfer_shutdown,		/* shut down driver */
 	zyfer_poll,		/* transmit poll message */
-	noentry,		/* not used (old zyfer_control) */
-	noentry,		/* initialize driver (not used) */
-	noentry			/* timer - not used */
+	NULL,			/* not used (old zyfer_control) */
+	NULL,			/* initialize driver (not used) */
+	NULL			/* timer - not used */
 };
 
 

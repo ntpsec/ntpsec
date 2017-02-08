@@ -115,8 +115,8 @@ struct refclock refclock_neoclock4x = {
   neoclock4x_shutdown,	/* shut down driver */
   neoclock4x_poll,	/* transmit poll message */
   neoclock4x_control,	/* device control */
-  noentry,		/* initialize driver (not used) */
-  noentry,		/* tiner - not used */
+  NULL,			/* initialize driver (not used) */
+  NULL,			/* tiner - not used */
 };
 
 static bool
