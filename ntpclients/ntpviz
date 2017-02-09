@@ -260,11 +260,6 @@ class VizStats(ntp.statfiles.NTPStats):
             self.percs[k] = round(v, 3)
             self.percs_f[k] = format(v, ",.3f")
 
-        # Python is stupid about nested objects, so add in some other stuff
-        self.percs_f["multiplier"] = self.percs["multiplier"] = self.multiplier
-        self.percs_f["title"] = self.percs["title"] = self.title
-        self.percs_f["unit"] = self.percs["unit"] = self.unit
-
         if args.clip:
             self.percs["min_y"] = self.percs["p1"]
             self.percs["max_y"] = self.percs["p99"]
@@ -273,6 +268,22 @@ class VizStats(ntp.statfiles.NTPStats):
             self.percs["min_y"] = self.percs["p0"]
             self.percs["max_y"] = self.percs["p100"]
             self.percs["clipped"] = ""
+
+        span = self.percs["max_y"] - self.percs["min_y"]
+        if 10 <= span:
+            self.fmt = '%.0f'
+        elif 0.7 <= span:
+            self.fmt = '%.1f'
+        elif 0.1 <= span:
+            self.fmt = '%.2f'
+        else:
+            self.fmt = '%.2f'
+
+        # Python is stupid about nested objects, so add in some other stuff
+        self.percs_f["fmt"] = self.percs["fmt"] = self.fmt
+        self.percs_f["multiplier"] = self.percs["multiplier"] = self.multiplier
+        self.percs_f["title"] = self.percs["title"] = self.title
+        self.percs_f["unit"] = self.percs["unit"] = self.unit
 
         s = ["%(title)s", "%(p0)s", "%(p1)s", "%(p5)s", "%(p50)s", "%(p95)s",
              " %(p99)s", "%(p100)s", "", "%(r90)s", "%(r98)s", "%(pstd)s",
@@ -428,9 +439,11 @@ set rmargin 10
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         out = stats.percs
+        out["fmt"] = stats.percs["fmt"]
         out["min_y2"] = stats_f.percs["min_y"]
         out["max_y2"] = stats_f.percs["max_y"]
         out["unit_f"] = stats_f.percs["unit"]
+        out["fmt_f"] = stats_f.percs["fmt"]
         out["multiplier_f"] = stats_f.percs["multiplier"]
         out["sitename"] = self.sitename
         out['size'] = args.png_size
@@ -438,9 +451,9 @@ set rmargin 10
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
 set title "%(sitename)s: Local Clock Time/Frequency Offsets%(clipped)s"
-set ytics format "%%1.1f %(unit)s" nomirror textcolor rgb '#0060ad'
+set ytics format "%(fmt)s %(unit)s" nomirror textcolor rgb '#0060ad'
 set yrange [%(min_y)s:%(max_y)s]
-set y2tics format "%%2.1f %(unit_f)s" nomirror textcolor rgb '#dd181f'
+set y2tics format "%(fmt_f)s %(unit_f)s" nomirror textcolor rgb '#dd181f'
 set y2range [%(min_y2)s:%(max_y2)s]
 set key top right
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
@@ -494,35 +507,44 @@ file.</p>
         stats = [stats_f]
         table = ''
         plot_data_t = ''
+        max_temp = -300
+        min_temp = 1000
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
             # fields: time, temp
             (p, v) = self.plot_slice(tempsmap[key], 3)
             plot_data_t += p
             s = VizStats(v, 'Temp %s' % key, units='°C')
+            max_temp = max(s.percs["max_y"], max_temp)
+            min_temp = min(s.percs["min_y"], min_temp)
             table += s.table
             stats.append(s)
 
         # out = stats.percs
         out = {}
-        out["min_y2"] = stats_f.percs["min_y"]
         out["max_y2"] = stats_f.percs["max_y"]
-        out["unit_f"] = stats_f.percs["unit"]
-        out["unit"] = '°C'
+        out["min_y2"] = stats_f.percs["min_y"]
         out["multiplier_f"] = stats_f.percs["multiplier"]
         out["sitename"] = self.sitename
         out['size'] = args.png_size
+        out["unit"] = '°C'
+        out["unit_f"] = stats_f.percs["unit"]
         if args.clip:
             out["clipped"] = " (clipped)"
         else:
             out["clipped"] = ""
+        span = max_temp - min_temp
+        if 10 < span:
+            out["fmt"] = '%.0f'
+        else:
+            out["fmt"] = '%.1f'
 
         # let temp autoscale
         # set yrange [%(min_y)s:%(max_y)s]
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
 set title "%(sitename)s: Local Frequency Offset/Temps%(clipped)s"
-set ytics format "%%1.1f %(unit)s" nomirror textcolor rgb '#0060ad'
+set ytics format "%(fmt)s %(unit)s" nomirror textcolor rgb '#0060ad'
 set y2tics format "%%2.1f %(unit_f)s" nomirror textcolor rgb '#dd181f'
 set y2range [%(min_y2)s:%(max_y2)s]
 set key top right
@@ -570,20 +592,31 @@ file, and field 3 from the temp log .</p>
 
         stats = []
         plot_data = ''
+        max_temp = -300
+        min_temp = 1000
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
             # fields: time, temp
             (p, v) = self.plot_slice(tempsmap[key], 3)
+            s = VizStats(v, 'Temp %s' % key, units='°C')
+            max_temp = max(s.percs["max_y"], max_temp)
+            min_temp = min(s.percs["min_y"], min_temp)
             plot_data += p
 
         out = {}
         out['sitename'] = sitename
         out['size'] = args.png_size
+        span = max_temp - min_temp
+        if 10 < span:
+            out["fmt"] = '%.0f'
+        else:
+            out["fmt"] = '%.1f'
+
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
 set title "%(sitename)s: Local Temperatures"
-set ytics format "%%1.1f °C" nomirror textcolor rgb '#0060ad'
+set ytics format "%(fmt)s °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set key top right
 plot \\
@@ -761,10 +794,11 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         # build the output dictionary, because Python can not format
         # complex objects.
         out = stats.percs
-        out["sitename"] = self.sitename
         out["fld"] = fld
+        out["fmt"] = stats.percs["fmt"]
         out["legend"] = legend
         out["min_y"] = '0'
+        out["sitename"] = self.sitename
         out['size'] = args.png_size
 
         if freq:
@@ -791,7 +825,7 @@ how fast the local clock offset is changing.</p>
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
 set title "%(sitename)s: %(title)s%(clipped)s"
-set ytics format "%%1.1f %(unit)s" nomirror
+set ytics format "%(fmt)s %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
 set key top right
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
@@ -980,8 +1014,9 @@ at 0s.</p>
 
         out = stats.percs
         out['sitename'] = self.sitename
-        out['title'] = title
         out['size'] = args.png_size
+        out['title'] = title
+        out["fmt"] = stats.percs["fmt"]
 
         if 6 >= len(peerlist):
             out['set_key'] = "set key top right"
@@ -993,7 +1028,7 @@ at 0s.</p>
 set terminal png size %(size)s
 set title "%(sitename)s: %(title)s%(clipped)s"
 set ylabel ""
-set ytics format "%%1.1f %(unit)s" nomirror
+set ytics format "%(fmt)s %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
 %(set_key)s
 plot \
@@ -1049,6 +1084,7 @@ plot \
         values = [float(row[2]) for row in self.loopstats]
         stats = VizStats(values, 'Local Clock Offset')
         out = stats.percs
+        out["fmt_x"] = stats.percs["fmt"]
         out['sitename'] = self.sitename
         # flip the axis
         out['min_x'] = out['min_y']
@@ -1097,7 +1133,7 @@ set terminal png size %(size)s
 set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set grid
 set boxwidth %(boxwidth)s
-set xtics format "%%1.1f %(unit)s" nomirror
+set xtics format "%(fmt_x)s %(unit)s" nomirror
 set xrange [%(min_x)s:%(max_x)s]
 set yrange [0:*]
 set style arrow 3 nohead
