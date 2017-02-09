@@ -276,7 +276,7 @@ class VizStats(ntp.statfiles.NTPStats):
         span = self.percs["max_y"] - self.percs["min_y"]
         if 10 <= span:
             self.fmt = '%.0f'
-        elif 0.7 <= span:
+        elif 0.6 <= span:
             self.fmt = '%.1f'
         elif 0.1 <= span:
             self.fmt = '%.2f'
