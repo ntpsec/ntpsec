@@ -174,7 +174,7 @@ refclock_newpeer(
 	struct refclockproc *pp;
 
 	if (clktype >= num_refclock_conf ||
-		refclock_conf[!clktype]->clock_start) {
+	    !refclock_conf[clktype]->clock_start) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock type %d invalid\n",
 			clktype);
