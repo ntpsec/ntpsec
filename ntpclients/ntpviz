@@ -273,15 +273,7 @@ class VizStats(ntp.statfiles.NTPStats):
             self.percs["max_y"] = self.percs["p100"]
             self.percs["clipped"] = ""
 
-        span = self.percs["max_y"] - self.percs["min_y"]
-        if 6 <= span:
-            self.fmt = '%.0f'
-        elif 0.6 <= span:
-            self.fmt = '%.1f'
-        elif 0.1 <= span:
-            self.fmt = '%.2f'
-        else:
-            self.fmt = '%.2f'
+        self.fmt = gnuplot_fmt(self.percs["min_y"], self.percs["max_y"])
 
         # Python is stupid about nested objects, so add in some other stuff
         self.percs_f["fmt"] = self.percs["fmt"] = self.fmt
@@ -305,6 +297,20 @@ class VizStats(ntp.statfiles.NTPStats):
 ''' % self.table
 
         return
+
+
+def gnuplot_fmt(min, max):
+    "return optimal gnuplot format"
+    span = max - min
+    if 6 <= span:
+        fmt = '%.0f'
+    elif 0.6 <= span:
+        fmt = '%.1f'
+    elif 0.1 <= span:
+        fmt = '%.2f'
+    else:
+        fmt = '%.2f'
+    return fmt
 
 
 # end calc things now
@@ -526,6 +532,11 @@ file.</p>
 
         # out = stats.percs
         out = {}
+        if args.clip:
+            out["clipped"] = " (clipped)"
+        else:
+            out["clipped"] = ""
+        out['fmt'] = gnuplot_fmt(min_temp, max_temp)
         out["fmt_f"] = stats_f.percs["fmt"]
         out["max_y2"] = stats_f.percs["max_y"]
         out["min_y2"] = stats_f.percs["min_y"]
@@ -534,15 +545,6 @@ file.</p>
         out['size'] = args.png_size
         out["unit"] = '°C'
         out["unit_f"] = stats_f.percs["unit"]
-        if args.clip:
-            out["clipped"] = " (clipped)"
-        else:
-            out["clipped"] = ""
-        span = max_temp - min_temp
-        if 6 < span:
-            out["fmt"] = '%.0f'
-        else:
-            out["fmt"] = '%.1f'
 
         # let temp autoscale
         # set yrange [%(min_y)s:%(max_y)s]
@@ -609,14 +611,9 @@ file, and field 3 from the temp log .</p>
             plot_data += p
 
         out = {}
+        out['fmt'] = gnuplot_fmt(min_temp, max_temp)
         out['sitename'] = sitename
         out['size'] = args.png_size
-        span = max_temp - min_temp
-        if 10 < span:
-            out["fmt"] = '%.0f'
-        else:
-            out["fmt"] = '%.1f'
-
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
@@ -677,7 +674,6 @@ component of frequency drift.</p>
         stats_tdop = VizStats(values_tdop, "TDOP", units=' ')
 
         out = stats_tdop.percs
-        out["fmt"] = stats_tdop.percs["fmt"]
         out['sitename'] = sitename
         out['size'] = args.png_size
         if out['min_y'] == out['max_y']:
@@ -689,6 +685,12 @@ component of frequency drift.</p>
                 # scale +/- 20%
                 out['min_y'] = out['max_y'] * 0.8
                 out['max_y'] = out['max_y'] * 1.2
+        elif 2 > out['min_y']:
+                # scale 0:max_x
+                out['min_y'] = 0
+
+        # recalc fmt
+        out['fmt'] = gnuplot_fmt(out["min_y"], out["max_y"])
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
