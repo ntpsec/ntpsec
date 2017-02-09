@@ -86,6 +86,10 @@ seccomp::
    Optional on Linux to support restricting syscalls
    Gentoo: sys-libs/libseccomp
 
+libdnssd::
+   Optional for ntpd. Support for mDNS Service Discovery registration
+   Debian: libavahi-compat-libdnssd-dev
+
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
    refclocks linked in) you may find that you need the sys/timepps.h
