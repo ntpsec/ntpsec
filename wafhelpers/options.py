@@ -102,7 +102,3 @@ def options_cmd(ctx, config):
                    default=None, help="Force HTML installation directory.")
     grp.add_option('--mandir', type='string', action='store',
                    default=None, help="Force man page installation directory.")
-
-    grp = ctx.add_option_group("Not for general use")
-    grp.add_option('--build-snapshot', action='store_true',
-                   default=False, help="Generate source snapshot.")
