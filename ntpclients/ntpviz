@@ -60,7 +60,11 @@ ntpviz: can't find the Python argparse module
 refclock_name = {'127.127.28.0': 'SHM(0)',
                  '127.127.28.1': 'SHM(1)',
                  '127.127.28.2': 'SHM(2)',
-                 '127.127.28.3': 'SHM(3)'}
+                 '127.127.28.3': 'SHM(3)',
+                 '127.127.46.0': 'GPS(0)',
+                 '127.127.46.1': 'GPS(1)',
+                 '127.127.46.2': 'GPS(2)',
+                 '127.127.46.3': 'GPS(3)'}
 
 
 # Gack, python before 3.2 has no defined tzinfo for utc...
