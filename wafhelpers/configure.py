@@ -296,8 +296,28 @@ def cmd_configure(ctx, config):
     ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
 
     # Find OpenSSL. Must happen before function checks
-    from wafhelpers.check_openssl import configure_openssl
-    configure_openssl(ctx)
+    # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
+    SNIP_OPENSSL_VERSION_CHECK = """
+    #include <openssl/evp.h>
+    int main(void) {
+    #if OPENSSL_VERSION_NUMBER < 0x0090704fL
+    #error OpenSSL must be at least 0.9.7
+    #endif
+        return 0;
+    }
+    """
+
+    openssl_headers = (
+        "openssl/evp.h",
+        "openssl/rand.h",
+        "openssl/objects.h",
+    )
+    for hdr in openssl_headers:
+        ctx.check_cc(header_name=hdr, includes=ctx.env.PLATFORM_INCLUDES)
+    ctx.check_cc(lib="crypto")
+    ctx.check_cc(comment="OpenSSL support", fragment=SNIP_OPENSSL_VERSION_CHECK,
+        includes=ctx.env.PLATFORM_INCLUDES, msg="Checking OpenSSL >= 0.9.7",
+    )
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
