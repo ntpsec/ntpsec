@@ -59,6 +59,7 @@ case $installer in
     apt)
 	$do apt-get install bison libcap-dev libcap2 libseccomp-dev
 	$do apt-get install libssl-dev libssl1.0.0 python-dev
+	$do apt-get install libavahi-compat-libdnssd-dev
 	$do apt-get install pps-tools
 	$do apt-get install fonts-liberation
 	distro=`lsb_release -i -s`
@@ -85,6 +86,7 @@ case $installer in
 	$do $installer install liberation-serif-fonts.noarch
 	$do $installer install libseccomp-devel openssl-devel openssl-libs
 	$do $installer install pps-tools pps-tools-devel python python-devel
+	$do $installer install avahi-compat-libdns_sd-devel
 	;;
     yast)
 	echo "# SLES versions 12 and earlier do not have pps-tools"
