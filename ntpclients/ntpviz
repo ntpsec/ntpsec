@@ -274,9 +274,9 @@ class VizStats(ntp.statfiles.NTPStats):
             self.percs["clipped"] = ""
 
         span = self.percs["max_y"] - self.percs["min_y"]
-        if 7 <= span:
+        if 6 <= span:
             self.fmt = '%.0f'
-        elif 0.7 <= span:
+        elif 0.6 <= span:
             self.fmt = '%.1f'
         elif 0.1 <= span:
             self.fmt = '%.2f'
@@ -526,6 +526,7 @@ file.</p>
 
         # out = stats.percs
         out = {}
+        out["fmt_f"] = stats_f.percs["fmt"]
         out["max_y2"] = stats_f.percs["max_y"]
         out["min_y2"] = stats_f.percs["min_y"]
         out["multiplier_f"] = stats_f.percs["multiplier"]
@@ -538,7 +539,7 @@ file.</p>
         else:
             out["clipped"] = ""
         span = max_temp - min_temp
-        if 10 < span:
+        if 6 < span:
             out["fmt"] = '%.0f'
         else:
             out["fmt"] = '%.1f'
@@ -549,7 +550,7 @@ file.</p>
 set terminal png size %(size)s
 set title "%(sitename)s: Local Frequency Offset/Temps%(clipped)s"
 set ytics format "%(fmt)s %(unit)s" nomirror textcolor rgb '#0060ad'
-set y2tics format "%%2.1f %(unit_f)s" nomirror textcolor rgb '#dd181f'
+set y2tics format "%(fmt_f)s %(unit_f)s" nomirror textcolor rgb '#dd181f'
 set y2range [%(min_y2)s:%(max_y2)s]
 set key top right
 set style line 1 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -676,6 +677,7 @@ component of frequency drift.</p>
         stats_tdop = VizStats(values_tdop, "TDOP", units=' ')
 
         out = stats_tdop.percs
+        out["fmt"] = stats_tdop.percs["fmt"]
         out['sitename'] = sitename
         out['size'] = args.png_size
         if out['min_y'] == out['max_y']:
@@ -690,8 +692,8 @@ component of frequency drift.</p>
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
-set title "%(sitename)s: Local GPS
-set ytics format "%%1.1f TDOP" nomirror textcolor rgb '#0060ad'
+set title "%(sitename)s: Local GPS%(clipped)s
+set ytics format "%(fmt)s TDOP" nomirror textcolor rgb '#0060ad'
 set yrange [%(min_y)s:%(max_y)s]
 set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
@@ -743,13 +745,14 @@ Greater than 20 means there will be significant inaccuracy and error.</p>
         # build the output dictionary, because Python can not format
         # complex objects.
         out = stats.percs
+        out["fmt"] = stats.percs["fmt"]
         out["sitename"] = self.sitename
         out['size'] = args.png_size
 
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
 set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
-set ytics format "%%1.1f %(unit)s" nomirror
+set ytics format "%(fmt)s %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
 set key bottom right
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
