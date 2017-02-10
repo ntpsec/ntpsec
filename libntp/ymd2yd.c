@@ -4,7 +4,7 @@
  * A thin wrapper around a more general calendar function.
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
 

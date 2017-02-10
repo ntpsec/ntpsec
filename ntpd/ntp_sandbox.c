@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <signal.h>
 
-#include <config.h>
+#include "config.h"
 
 #ifdef ENABLE_DROPROOT
 # include <ctype.h>

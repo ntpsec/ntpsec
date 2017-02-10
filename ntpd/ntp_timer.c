@@ -1,7 +1,7 @@
 /*
  * ntp_timer.c - event timer support routines
  */
-#include <config.h>
+#include "config.h"
 
 #include "ntp_machine.h"
 #include "ntpd.h"

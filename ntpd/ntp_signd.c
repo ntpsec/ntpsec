@@ -2,7 +2,7 @@
    Copyright 2008, Andrew Tridgell.
    Licensed under the same terms as NTP itself.
  */
-#include <config.h>
+#include "config.h"
 
 #ifdef ENABLE_MSSNTP
 

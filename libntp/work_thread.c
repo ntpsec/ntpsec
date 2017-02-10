@@ -1,7 +1,7 @@
 /*
  * work_thread.c - threads implementation for blocking worker child.
  */
-#include <config.h>
+#include "config.h"
 #include "ntp_workimpl.h"
 
 #ifdef USE_WORK_THREAD

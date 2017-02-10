@@ -1,7 +1,7 @@
 /*
  * ntp_util.c - stuff I didn't have any other place for
  */
-#include <config.h>
+#include "config.h"
 
 #include "ntpd.h"
 #include "ntp_filegen.h"

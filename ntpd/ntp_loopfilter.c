@@ -4,7 +4,7 @@
  * ATTENTION: Get approval from Dave Mills on all changes to this file!
  *
  */
-#include <config.h>
+#include "config.h"
 
 #include <limits.h>
 #include <stdio.h>

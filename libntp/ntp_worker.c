@@ -1,7 +1,7 @@
 /*
  * ntp_worker.c
  */
-#include <config.h>
+#include "config.h"
 #include "ntp_workimpl.h"
 
 #ifdef USE_WORKER

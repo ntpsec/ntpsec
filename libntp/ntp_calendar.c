@@ -8,7 +8,7 @@
  * There is more about these types and calculations in the internals tour
  * document distributed with the code.
  */
-#include <config.h>
+#include "config.h"
 #include <sys/types.h>
 
 #include "ntp_types.h"

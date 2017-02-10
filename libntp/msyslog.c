@@ -5,7 +5,7 @@
  * Converted to use varargs, much better ... jks
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <sys/types.h>
 #include <unistd.h>

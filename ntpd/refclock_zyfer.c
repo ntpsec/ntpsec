@@ -4,7 +4,7 @@
  * Harlan Stenn, Jan 2002
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"

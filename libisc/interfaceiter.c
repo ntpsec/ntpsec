@@ -7,7 +7,7 @@
 
 /*! \file */
 
-#include <config.h>
+#include "config.h"
 
 #include <sys/types.h>
 #include <sys/ioctl.h>

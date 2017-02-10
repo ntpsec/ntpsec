@@ -30,7 +30,7 @@
  * platform-independent code.  A wrinkle is the request needs to be
  * available to the requestor during response processing.
  */
-#include <config.h>
+#include "config.h"
 
 #include "ntp_workimpl.h"
 

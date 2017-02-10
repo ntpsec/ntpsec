@@ -2,7 +2,7 @@
  * netof - return the net address part of an ip address in a sockaddr_storage structure
  *         (zero out host part)
  */
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <syslog.h>
 

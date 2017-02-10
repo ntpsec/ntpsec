@@ -1,7 +1,7 @@
 /*
  * decodenetnum - convert text IP address and port to sockaddr_u
  */
-#include <config.h>
+#include "config.h"
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>

@@ -4,7 +4,7 @@
  * One of our serious platform dependencies (things POSIX doesn't
  * specify a facility for) is isolated here.
  */
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>

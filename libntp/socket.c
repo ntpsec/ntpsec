@@ -2,7 +2,7 @@
  * socket.c - low-level socket operations
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 

@@ -2,7 +2,7 @@
  * ntp_monitor - monitor ntpd statistics
  */
 
-#include <config.h>
+#include "config.h"
 
 #include "ntpd.h"
 #include "ntp_io.h"

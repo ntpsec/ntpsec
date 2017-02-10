@@ -1,7 +1,7 @@
 /*
  * lib_strbuf - library string storage
  */
-#include <config.h>
+#include "config.h"
 
 #include <isc/net.h>
 

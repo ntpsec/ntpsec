@@ -3,7 +3,7 @@
  *		   Provides service to ntpq and others.
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <ctype.h>

@@ -4,7 +4,7 @@
  *
  * This program is run to generate ntp_keyword.h
  */
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

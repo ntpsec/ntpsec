@@ -1,7 +1,7 @@
 /*
  * authkeys.c - routines to manage the storage of authentication keys
  */
-#include <config.h>
+#include "config.h"
 
 #include <math.h>
 #include <stdio.h>

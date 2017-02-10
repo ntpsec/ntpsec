@@ -6,7 +6,7 @@
  * it to round-trip through atolfp(). 1444359386.1798776096, for example, may
  * dump as ...095 or ...097.
  */
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 

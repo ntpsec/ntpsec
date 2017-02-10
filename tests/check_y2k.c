@@ -27,7 +27,7 @@
 /* { definitions lifted from ntpd.c to allow us to complie with 
      "#include ntp.h".  I have not taken the time to reduce the clutter. */
 
-#include <config.h>
+#include "config.h"
 
 #include "ntpd.h"
 
