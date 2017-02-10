@@ -516,11 +516,11 @@ setup_logfile(
 }
 
 /*
- *  * reopen_logfile()
- *   *
- *    * reopen current logfile in case the old file has been renamed by logrotate
- *     *
- *      */
+ * reopen_logfile()
+ *
+ * reopen current logfile in case the old file has been renamed by logrotate
+ *
+ */
 
 void
 reopen_logfile(void)
@@ -533,7 +533,8 @@ reopen_logfile(void)
 
 	new_file = fopen(syslog_fname, "a");
 	if (NULL == new_file) {
-		msyslog(LOG_ERR, "reopen_logfile: couldn't open %s %m", syslog_fname);
+		msyslog(LOG_ERR, "reopen_logfile: couldn't open %s %m", 
+                        syslog_fname);
 		return;
 	}
 
