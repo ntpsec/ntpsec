@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 #
-# generate some heat!
+# Generate some heat!
 #
 # Wrap your RasPi in bubble wrap.  Then run makeheat in the background.
-# It will try to stabilize the CPU temperature at 60C.
+# It will try to stabilize the CPU temperature at 65C.
 
-# sometimes once copy of makeheat can use 100% of one CPU and
-# still not heat up your RasPi as much as you want.  The temptation
-# is to add more insulation to your RasPi, but then will overshoot
+# Sometimes one copy of makeheat can use 100% of one CPU and
+# still not heat up your RasPi as much as you want. The temptation
+# is to add more insulation to your RasPi, but then it will overshoot
 # your target temperature if your load factor goes high.
 #
-# The solution is to run more than one copy of makeheat.  This is
+# The solution is to run more than one copy of makeheat. This is
 # easy to do with the -c option.
 #
-# to run 3 copies of makeheat; makeheat -c 2
+# to run 3 copies of makeheat; makeheat -c 3
 
 import argparse
 import hashlib
@@ -79,7 +79,7 @@ while True:
     else:
         cnt = max_cnt
         # cools off slower than it heats up.
-        # undocumented Pythong 'feature', no sleep less than 1 milli Sec
+        # undocumented Python 'feature', no sleep less than 1 millisec
         sleep = args.wait[0] * 10.0 * -delta
         if 0.001 > sleep:
             sleep = 0.001
