@@ -3,7 +3,7 @@
  *	Controlled Clock
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"

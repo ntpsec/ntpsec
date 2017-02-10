@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: BSD-2-clause
 */
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_NETINFO_NI_H
 # include <netinfo/ni.h>

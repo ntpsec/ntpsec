@@ -14,7 +14,7 @@
  * (e.g. libisc-nosymbol.a).
  */
 
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 
 #include <isc/backtrace.h>

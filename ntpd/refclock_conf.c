@@ -4,7 +4,7 @@
  * This is the only place in the code that knows how to map driver numeric types
  * to driver method tables and their attributes.
  */
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <sys/types.h>

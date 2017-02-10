@@ -1,7 +1,7 @@
 /*
  *	digest support for NTP, MD5 and with OpenSSL more
  */
-#include <config.h>
+#include "config.h"
 
 #include <string.h>
 #include <stddef.h>

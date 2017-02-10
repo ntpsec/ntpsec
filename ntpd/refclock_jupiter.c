@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-4-clause
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"

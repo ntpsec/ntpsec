@@ -2,7 +2,7 @@
  * socktoa.c	socktoa(), sockporttoa(), and sock_hash()
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>

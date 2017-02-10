@@ -18,7 +18,7 @@
 
 #define NMEA_WRITE_SUPPORT 0 /* no write support at the moment */
 
-#include <config.h>
+#include "config.h"
 #include "ntp_types.h"
 #include <sys/stat.h>
 #include <stdio.h>

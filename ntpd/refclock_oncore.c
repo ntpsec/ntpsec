@@ -146,7 +146,7 @@
  * See separate HTML documentation for this option.
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"

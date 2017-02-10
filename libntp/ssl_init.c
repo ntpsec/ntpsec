@@ -5,7 +5,7 @@
  * Moved from ntpd/ntp_crypto.c crypto_setup()
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <unistd.h>
 #include <ctype.h>

@@ -2,7 +2,7 @@
  * refclock_hpgps - clock driver for HP GPS receivers
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"

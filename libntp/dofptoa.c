@@ -1,7 +1,7 @@
 /*
  * dofptoa - do the grunge work to convert an fp number to ascii
  */
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 

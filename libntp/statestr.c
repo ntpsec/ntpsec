@@ -2,7 +2,7 @@
  * pretty printing of status information
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <string.h>

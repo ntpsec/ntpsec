@@ -1,7 +1,7 @@
 /*
  * refclock_pps - clock driver for 1-pps signals
  */
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <ctype.h>
 

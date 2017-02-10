@@ -1,7 +1,7 @@
 /*
  * ntp_refclock - processing support for reference clocks
  */
-#include <config.h>
+#include "config.h"
 
 #include "ntpd.h"
 #include "ntp_io.h"

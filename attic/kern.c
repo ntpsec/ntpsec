@@ -4,7 +4,7 @@
  * Ultrix and OSF/1 kernels. These segments do not use any licensed code.
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <ctype.h>

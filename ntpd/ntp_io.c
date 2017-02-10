@@ -2,7 +2,7 @@
  * ntp_io.c - input/output routines for ntpd.
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <signal.h>

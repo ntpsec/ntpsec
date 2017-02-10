@@ -2,7 +2,7 @@
 /*
  * refclock_local - local pseudo-clock driver
  */
-#include <config.h>
+#include "config.h"
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_refclock.h"

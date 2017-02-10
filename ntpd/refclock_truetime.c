@@ -3,7 +3,7 @@
  *	Receiver Version 3.0C - tested plain, with CLKLDISC
  */
 
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <ctype.h>
 

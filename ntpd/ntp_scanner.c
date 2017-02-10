@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <ctype.h>

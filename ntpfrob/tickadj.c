@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include <config.h>
+#include "config.h"
 
 #include "ntp_types.h"
 #include "ntp_syscall.h"

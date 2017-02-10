@@ -1,7 +1,7 @@
 /*
  * emalloc - return new memory obtained from the system.  Belch if none.
  */
-#include <config.h>
+#include "config.h"
 #include "ntp_types.h"
 #include "ntp_malloc.h"
 #include "ntp_syslog.h"

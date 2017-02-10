@@ -7,7 +7,7 @@
  *
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntp_fp.h"
 #include "timespecops.h"
 #include "ntp_calendar.h"

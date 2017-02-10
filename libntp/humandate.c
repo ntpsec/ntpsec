@@ -1,7 +1,7 @@
 /*
  * humandate.c - convert an NTP (or the current) time to something readable
  */
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 
 #include "ntp_fp.h"

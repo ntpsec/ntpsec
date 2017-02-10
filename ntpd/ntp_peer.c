@@ -1,7 +1,7 @@
 /*
  * ntp_peer.c - management of data maintained for peer associations
  */
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <sys/types.h>

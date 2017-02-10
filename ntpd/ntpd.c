@@ -2,7 +2,7 @@
  * ntpd.c - main program for the fixed point NTP daemon
  */
 
-#include <config.h>
+#include "config.h"
 
 #include "ntp_machine.h"
 #include "ntpd.h"

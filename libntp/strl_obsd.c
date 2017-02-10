@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: ISC
  */
 
-#include <config.h>		/* + marks local changes */
+#include "config.h"		/* + marks local changes */
 #include <sys/types.h>
 #include <string.h>
 

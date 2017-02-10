@@ -7,7 +7,7 @@
  * PB 18.3.97
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntp_types.h"
 #include "ntp.h"
 #include "ntpd.h"

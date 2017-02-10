@@ -1,7 +1,7 @@
 /*
  * authreadkeys.c - routines to support the reading of the key file
  */
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <ctype.h>
 

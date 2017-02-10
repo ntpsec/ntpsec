@@ -2,7 +2,7 @@
  * ntp_proto.c - NTP version 4 protocol machinery
  *
  */
-#include <config.h>
+#include "config.h"
 
 #include "ntpd.h"
 #include "ntp_endian.h"

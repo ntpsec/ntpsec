@@ -2,7 +2,7 @@
  * refclock_spectracom.c - clock driver for Spectracom GPS receivers
  */
 
-#include <config.h>
+#include "config.h"
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"

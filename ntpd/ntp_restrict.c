@@ -2,7 +2,7 @@
  * ntp_restrict.c - determine host restrictions
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <sys/types.h>

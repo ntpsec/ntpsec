@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include "ntp_types.h"
 #include "ntp_stdlib.h"
