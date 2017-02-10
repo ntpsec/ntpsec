@@ -1126,11 +1126,13 @@ plot \
             # plus/minus of one sigma range
             out['sigma'] = """\
 set style arrow 1 nohead
-set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1
-set style arrow 2 nohead
-set arrow from %(p1sigma)s,graph 0 to %(p1sigma)s,graph 0.90 as 2
-set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
-set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
+set linestyle 1 linecolor rgb "#009900"
+set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1 ls 1
+set arrow from %(p1sigma)s,graph 0 to %(p1sigma)s,graph 0.90 as 1 ls 1
+set label 1 "-1σ" at %(m1sigma)s, graph 0.96 left front offset -1,-1 \
+    textcolor rgb "#009900"
+set label 2 "+1σ" at %(p1sigma)s, graph 0.96 left front offset -1,-1 \
+    textcolor rgb "#009900"
 """ % out
 
         out['size'] = args.png_size
