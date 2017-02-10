@@ -5,8 +5,19 @@
 # Wrap your RasPi in bubble wrap.  Then run makeheat in the background.
 # It will try to stabilize the CPU temperature at 60C.
 
+# sometimes once copy of makeheat can use 100% of one CPU and
+# still not heat up your RasPi as much as you want.  The temptation
+# is to add more insulation to your RasPi, but then will overshoot
+# your target temperature if your load factor goes high.
+#
+# The solution is to run more than one copy of makeheat.  This is
+# easy to do with the -c option.
+#
+# to run 3 copies of makeheat; makeheat -c 2
+
 import argparse
 import hashlib
+import os
 import sys
 import time
 
@@ -19,6 +30,12 @@ except ImportError as e:
 
 # Work with argvars
 parser = argparse.ArgumentParser(description="make heat")
+parser.add_argument('-c', '--copies',
+                    default=[1],
+                    dest='copies',
+                    help="Number of copies to run.  Default is 1",
+                    nargs=1,
+                    type=int)
 parser.add_argument('-t', '--temp',
                     default=[65.0],
                     dest='target_temp',
@@ -35,6 +52,14 @@ parser.add_argument('-V', '--version',
                     action="version",
                     version="temp-log %s" % ntp.util.stdversion())
 args = parser.parse_args()
+
+args.copies[0] -= 1
+while args.copies[0]:
+    args.copies[0] -= 1
+    pid = os.fork()
+    if pid:
+        # I am the fork
+        break
 
 zone0 = '/sys/class/thermal/thermal_zone0/temp'
 cnt = 0
