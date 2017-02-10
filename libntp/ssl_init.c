@@ -9,8 +9,8 @@
 
 #include <unistd.h>
 #include <ctype.h>
-#include <ntp.h>
-#include <ntp_debug.h>
+#include "ntp.h"
+#include "ntp_debug.h"
 
 #include <openssl/evp.h>
 

@@ -22,12 +22,12 @@ typedef unsigned short	u_short;
 typedef unsigned int	u_int;
 #endif
 
-#include <ntp_fp.h>
-#include <ntp_types.h>
-#include <ntp_lists.h>
-#include <ntp_stdlib.h>
-#include <ntp_random.h>
-#include <ntp_net.h>
+#include "ntp_fp.h"
+#include "ntp_types.h"
+#include "ntp_lists.h"
+#include "ntp_stdlib.h"
+#include "ntp_random.h"
+#include "ntp_net.h"
 
 /*
  * Calendar arithmetic - contributed by G. Healton

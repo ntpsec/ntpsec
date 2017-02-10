@@ -20,7 +20,7 @@
 #include <isc/lang.h>
 #include <isc/types.h>
 
-#include <ntp_stdlib.h>
+#include "ntp_stdlib.h"
 
 
 #define ISC_MEM_UNUSED_ARG(a)		((void)(a))

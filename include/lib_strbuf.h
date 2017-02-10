@@ -4,8 +4,8 @@
 #ifndef GUARD_LIB_STRBUF_H
 #define GUARD_LIB_STRBUF_H
 
-#include <ntp_types.h>
-#include <ntp_malloc.h>			/* for ZERO() */
+#include "ntp_types.h"
+#include "ntp_malloc.h"			/* for ZERO() */
 
 /*
  * Sizes of things
