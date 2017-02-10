@@ -13,7 +13,7 @@
 
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/time.h>	/* prerequisite on NetBSD */
-# include "sys/timex.h"
+# include <sys/timex.h>
 #endif
 
 /*
