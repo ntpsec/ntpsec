@@ -13,7 +13,7 @@
 # The solution is to run more than one copy of makeheat.  This is
 # easy to do with the -c option.
 #
-# to run 3 copies of makeheat; makeheat -c 2
+# to run 3 copies of makeheat; makeheat -c 3
 
 import argparse
 import hashlib
