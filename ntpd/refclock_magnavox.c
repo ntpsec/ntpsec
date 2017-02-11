@@ -1578,7 +1578,9 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 	ck = mx4200_cksum(cp, n);
 	cp += n;
 	++n;
-	n += snprintf(cp, sizeof(buf) - n - 5, "*%02X\r\n", ck);
+	/* should always fire, it's only here to make overrun impossible */ 
+	if (sizeof(buf) - n >= 5)
+	    n += snprintf(cp, sizeof(buf) - n - 5, "*%02X\r\n", ck);
 
 	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)
