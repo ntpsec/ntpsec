@@ -2983,6 +2983,11 @@ config_unpeers(
 			continue;
 		}
 
+		if (curr_unpeer->addr == NULL) {
+			msyslog(LOG_ERR, "invalid address in unpeer command");
+			continue;
+		}
+		
 		ZERO(peeraddr);
 		AF(&peeraddr) = curr_unpeer->addr->type;
 		name = curr_unpeer->addr->address;
