@@ -1565,22 +1565,19 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 	register char *cp;
 	register int n, m;
 	va_list ap;
-	char buf[1024];
+	char buf1[1024];
+	char buf[sizeof(buf1)  + 10];
 	uint8_t ck;
 
 	va_start(ap, fmt);
 
 	pp = peer->procptr;
 
-	cp = buf;
-	*cp++ = '$';
-	n = vsnprintf(cp, sizeof(buf) - 1, fmt, ap);
-	ck = mx4200_cksum(cp, n);
-	cp += n;
-	++n;
-	/* should always fire, it's only here to make overrun impossible */ 
-	if (sizeof(buf) - n >= 5)
-	    n += snprintf(cp, sizeof(buf) - n - 5, "*%02X\r\n", ck);
+	vsnprintf(buf1, sizeof(buf1) - 1, fmt, ap);
+        buf1[sizeof(buf1) - 1 ] = '\0';
+	ck = mx4200_cksum(cp, strlen(buf1));
+        /* buf can never overrun */
+	n = snprintf(buf, sizeof(buf) - 1, "$%1024s*%02X\r\n", cp, ck);
 
 	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)
