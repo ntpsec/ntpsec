@@ -185,7 +185,7 @@ standard error on, for example, missing logfile data required for a plot.
 
 Any command line options can also be placed into a command file.  The
 command file name (OPTIONFILE) is prefixed on the command line with an
-ampersand (@).
+atsign (@).
 
 Each line in the command file should contain just one option.  Multiple
 options per line are allowed, but discouraged.  Blank lines are allowed.
