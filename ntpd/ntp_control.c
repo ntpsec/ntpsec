@@ -1069,6 +1069,8 @@ ctl_putdata(
  *
  *		len is the data length excluding the NUL terminator,
  *		as in ctl_putstr("var", "value", strlen("value"));
+ *		The write will be truncated if data contains  a NUL,
+ *		so don't do that.
  *
  * ESR, 2016: Whoever wrote this should be *hurt*.  If the string value is 
  * empty, no "=" and no value literal is written, just the bare tag.  
@@ -1081,21 +1083,14 @@ ctl_putstr(
 	)
 {
 	char buffer[512];
-	char *cp;
-	size_t tl;
+	size_t tl = strlen(tag);
 
-	tl = strlen(tag);
+	if (tl >= sizeof(buffer))
+	    return;
 	memcpy(buffer, tag, tl);
-	cp = buffer + tl;
-	if (len > 0) {
-		NTP_INSIST(tl + 3 + len <= sizeof(buffer));
-		*cp++ = '=';
-		*cp++ = '"';
-		memcpy(cp, data, len);
-		cp += len;
-		*cp++ = '"';
-	}
-	ctl_putdata(buffer, (u_int)(cp - buffer), false);
+	if (len > 0)
+	    snprintf(buffer + tl, sizeof(buffer) - tl, "=\"%s\"", data);
+	ctl_putdata(buffer, (u_int)strlen(buffer), false);
 }
 
 
