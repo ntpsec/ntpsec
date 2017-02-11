@@ -166,7 +166,7 @@ void drift_write(char *driftfile, double drift)
 	    msyslog(LOG_ERR, "frequency file %s: %m", tmpfile);
 	    return;
 	}
-	snprintf(driftval, sizeof(driftval), "%.3f\n", drift);
+	snprintf(driftval, sizeof(driftval), "%.6f\n", drift);
 	IGNORE(write(fd, driftval, strlen(driftval)));
 	(void)close(fd);
 	/* atomic */

@@ -920,7 +920,7 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: offset %.9f jit %.9f freq %.3f stab %.3f poll %d\n",
+		    "local_clock: offset %.9f jit %.9f freq %.6f stab %.3f poll %d\n",
 		    clock_offset, clock_jitter, drift_comp * MICROSECONDS,
 		    clock_stability * MICROSECONDS, sys_poll);
 #endif /* DEBUG */
@@ -1095,7 +1095,7 @@ set_freq(
 		}
 	}
 #endif /* HAVE_KERNEL_PLL */
-	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
+	mprintf_event(EVNT_FSET, NULL, "%s %.6f PPM", loop_desc,
 	    drift_comp * MICROSECONDS);
 }
 #endif /* HAVE_LOCKCLOCK */
