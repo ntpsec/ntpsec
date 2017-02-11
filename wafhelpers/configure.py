@@ -203,7 +203,18 @@ def cmd_configure(ctx, config):
         ctx.define("DEBUG", 1, comment="Enable debug mode")
         ctx.env.BISONFLAGS += ["--debug"]
 
-    ctx.env.CFLAGS += ["-Wall", "-Wextra", "-Wstrict-prototypes"]
+    # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
+    ctx.env.CFLAGS += [
+        "-fPIE",
+        "-fstack-protector-all",
+        "-O1",
+        "-pie",
+        "-Wall",
+        "-Wextra",
+        "-Wl,-z,relro,-z,now",
+        "-Wstrict-prototypes",
+        ]
+
     # We require some things that C99 doesn't enable, like pthreads.
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
     # it.
