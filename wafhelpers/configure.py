@@ -214,6 +214,10 @@ def cmd_configure(ctx, config):
         "-Wl,-z,relro,-z,now",
         "-Wstrict-prototypes",
         ]
+    # older gcc needs this explicit
+    ctx.env.LDFLAGS += [
+        "-fPIE",
+        ]
 
     # We require some things that C99 doesn't enable, like pthreads.
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
