@@ -203,15 +203,9 @@ def cmd_configure(ctx, config):
         ctx.define("DEBUG", 1, comment="Enable debug mode")
         ctx.env.BISONFLAGS += ["--debug"]
 
-    # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
     ctx.env.CFLAGS += [
-        "-fPIE",
-        "-fstack-protector-all",
-        "-O1",
-        "-pie",
         "-Wall",
         "-Wextra",
-        "-Wl,-z,relro,-z,now",
         "-Wstrict-prototypes",
         ]
 
@@ -220,8 +214,48 @@ def cmd_configure(ctx, config):
     # it.
     if ctx.env.CC_NAME == "sun":
         ctx.env.CFLAGS += ["-std=c99"]
+    elif ctx.env.CC_NAME == "clang":
+        # used on macOS, FreeBSD,
+        # FORTIFY needs LTO to work well
+        ctx.env.CFLAGS += [
+                        "-fstack-protector-all",    # hardening
+                        "-std=gnu99",
+                        "-D_FORTIFY_SOURCE=2",      # hardening
+                        ]
+        if ctx.env.DEST_OS != "darwin":
+            # -flto breaks tests on macOS
+            ctx.env.CFLAGS += [
+                "-flto",                    # hardening, needed for sanitize
+                "-fsanitize=cfi",           # hardening
+                "-fsanitize=safe-stack",    # hardening
+                ]
+            ctx.env.LDFLAGS += [
+                    "-Wl,-z,now",    # hardening, no deferred symbol resolution
+                    "-Wl,-z,relro",  # hardening, marks some section read only,
+                    ]
+	    if ctx.options.disable_debug:
+		# not debugging
+		ctx.env.LDFLAGS += [
+			"-Wl,--strip-all",    # Strip binaries
+			]
     else:
-        ctx.env.CFLAGS += ["-std=gnu99"]
+        # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
+        ctx.env.CFLAGS += [
+                        "-fPIE",                    # hardening
+                        "-fstack-protector-all",    # hardening
+                        "-O1",
+                        "-pie",                     # hardening
+                        "-std=gnu99"
+                        ]
+        ctx.env.LDFLAGS += [
+                "-Wl,-z,now",      # hardening, no deferred symbol resolution
+                "-Wl,-z,relro",    # hardening, marks some section read only,
+                ]
+	if ctx.options.disable_debug:
+            # not debugging
+            ctx.env.LDFLAGS += [
+                    "-Wl,-z,strip-all",    # Strip binaries
+                    ]
 
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
