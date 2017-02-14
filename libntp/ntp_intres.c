@@ -146,10 +146,10 @@ typedef struct dnsworker_ctx_tag {
 
 
 /* === variables === */
-dnschild_ctx **		dnschild_contexts;		/* parent */
-u_int			dnschild_contexts_alloc;
-dnsworker_ctx **	dnsworker_contexts;		/* child */
-u_int			dnsworker_contexts_alloc;
+static dnschild_ctx **	dnschild_contexts;		/* parent */
+static u_int		dnschild_contexts_alloc;
+static dnsworker_ctx **	dnsworker_contexts;		/* child */
+static u_int		dnsworker_contexts_alloc;
 
 #ifdef HAVE_RES_INIT
 static	time_t		next_res_init;
