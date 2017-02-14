@@ -122,7 +122,7 @@ fetch_packetstamp(
 	unsigned long		ticks;
 	double			fuzz;
 	l_fp			lfpfuzz;
-	l_fp			nts;
+	l_fp			nts = 0;
 #ifdef ENABLE_DEBUG_TIMING
 	l_fp			dts;
 #endif
