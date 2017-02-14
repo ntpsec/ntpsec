@@ -55,7 +55,7 @@ static void catchTrap(int sig);
 #endif
 
 bool sandbox(const bool droproot,
-	     const char *user, const char *group,
+	     char *user, const char *group,
 	     const char *chrootdir,
 	     bool want_dynamic_interface_tracking)
 {
@@ -85,7 +85,7 @@ bool sandbox(const bool droproot,
 			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
 			exit(-1);
 		}
-#  elif HAVE_SOLARIS_PRIVS
+#  elif defined(HAVE_SOLARIS_PRIVS)
 		/* Nothing to do here */
 #  else
 		/* we need a user to switch to */
@@ -174,7 +174,7 @@ getgroup:
 			exit(-1);
 		}
 #  endif /* HAVE_SOLARIS_PRIVS */
-		if (user && initgroups(user, sw_gid)) {
+		if (user && initgroups(user, (int)sw_gid)) {
 			msyslog(LOG_ERR, "Cannot initgroups() to user `%s': %m", user);
 			exit (-1);
 		}
@@ -193,7 +193,7 @@ getgroup:
 			}
 		}
 		else if (pw)
-			if (0 != initgroups(pw->pw_name, pw->pw_gid)) {
+			if (0 != initgroups(pw->pw_name, (int)pw->pw_gid)) {
 				msyslog(LOG_ERR, "initgroups(<%s>, %d) filed: %m", pw->pw_name, pw->pw_gid);
 				exit (-1);
 			}
