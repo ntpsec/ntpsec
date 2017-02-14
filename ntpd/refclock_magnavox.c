@@ -1562,7 +1562,6 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 {
 	struct refclockproc *pp;
 
-	register char *cp;
 	register int n, m;
 	va_list ap;
 	char buf1[1024];
@@ -1575,9 +1574,9 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 
 	vsnprintf(buf1, sizeof(buf1) - 1, fmt, ap);
         buf1[sizeof(buf1) - 1 ] = '\0';
-	ck = mx4200_cksum(cp, strlen(buf1));
+	ck = mx4200_cksum(buf1, strlen(buf1));
         /* buf can never overrun */
-	n = snprintf(buf, sizeof(buf) - 1, "$%1024s*%02X\r\n", cp, ck);
+	n = snprintf(buf, sizeof(buf) - 1, "$%1024s*%02X\r\n", buf1, ck);
 
 	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)
