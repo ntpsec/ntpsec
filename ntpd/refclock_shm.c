@@ -176,7 +176,7 @@ shm_start(
 	if (up->shm != 0) {
 		pp->unitptr = up;
 		up->shm->precision = PRECISION;
-		peer->precision = up->shm->precision;
+		peer->precision = (int8_t)up->shm->precision;
 		up->shm->valid = 0;
 		up->shm->nsamples = NSAMPLES;
 		pp->clockname = NAME;
@@ -554,8 +554,8 @@ shm_timer(
 	DPRINTF(2, ("%s: SHM(%d) feeding data\n", refclock_name(peer), unit));
 	tsrcv = tspec_stamp_to_lfp(shm_stat.tvr);
 	tsref = tspec_stamp_to_lfp(shm_stat.tvt);
-	pp->leap = shm_stat.leap;
-	peer->precision = shm_stat.precision;
+	pp->leap = (uint8_t)shm_stat.leap;
+	peer->precision = (int8_t)shm_stat.precision;
 	refclock_process_offset(pp, tsref, tsrcv, pp->fudgetime1);
 	up->good++;
 }
