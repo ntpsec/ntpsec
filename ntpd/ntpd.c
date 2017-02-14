@@ -33,11 +33,6 @@
 
 #include "version.h"
 
-extern bool sandbox(const bool droproot,
-		    const char *user, const char *group,
-		    const char *chrootdir,
-		    bool want_dynamic_interface_tracking);
-
 void catchQuit (int sig);
 static volatile int signo = 0;
 /* In an ideal world, 'finish_safe()' would declared as noreturn... */
