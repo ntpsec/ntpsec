@@ -909,7 +909,7 @@ modem_timecode(
 		return;
 
 	strlcpy(pp->a_lastcode, str, sizeof(pp->a_lastcode));
-	pp->lencode = strlen(pp->a_lastcode);
+	pp->lencode = (int)strlen(pp->a_lastcode);
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;

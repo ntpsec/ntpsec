@@ -254,7 +254,7 @@ neoclock4x_start(int unit,
   peer->sstclktype = CTL_SST_TS_UHF;
 
   up->leap_status = 0;
-  up->unit = unit;
+  up->unit = (short)unit;
   strlcpy(up->firmware, "?", sizeof(up->firmware));
   up->firmwaretag = '?';
   strlcpy(up->serial, "?", sizeof(up->serial));
@@ -565,7 +565,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   up->utc_hour   = pp->hour;
   up->utc_minute = pp->minute;
   up->utc_second = pp->second;
-  up->utc_msec   = pp->nsec/NSEC_TO_MILLI;
+  up->utc_msec   = (int)pp->nsec/NSEC_TO_MILLI;
 
   if(!refclock_process(pp))
     {
@@ -918,7 +918,7 @@ neol_query_firmware(int fd,
 		  tmpbuf[len++] = ' ';
 		  tmpbuf[len++] = '/';
 		  tmpbuf[len++] = ' ';
-		  lastsearch = len;
+		  lastsearch = (int)len;
 		}
 	      last_c_was_crlf = true;
 	    }
