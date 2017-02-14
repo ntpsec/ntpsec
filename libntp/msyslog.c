@@ -141,7 +141,7 @@ addto_syslog(
 	else
 		if (syslog_file != NULL)
 			log_to_file = true;
-#if DEBUG
+#if defined(DEBUG) && DEBUG
 	if (debug > 0)
 		log_to_term = true;
 #endif
