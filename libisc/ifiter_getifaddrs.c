@@ -174,7 +174,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 	memset(&iter->current, 0, sizeof(iter->current));
 
-	namelen = strlen(ifa->ifa_name);
+	namelen = (unsigned int)strlen(ifa->ifa_name);
 	if (namelen > sizeof(iter->current.name) - 1)
 		namelen = sizeof(iter->current.name) - 1;
 
