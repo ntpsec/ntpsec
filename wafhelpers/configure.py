@@ -222,7 +222,7 @@ def cmd_configure(ctx, config):
                         "-std=gnu99",
                         "-D_FORTIFY_SOURCE=2",      # hardening
                         ]
-        if ctx.env.DEST_OS != "darwin":
+        if ctx.env.DEST_OS not in ["darwin","freebsd"]:
             # -flto breaks tests on macOS
             ctx.env.CFLAGS += [
                 "-flto",                    # hardening, needed for sanitize
