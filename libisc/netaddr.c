@@ -150,7 +150,7 @@ isc_netaddr_getzone(const isc_netaddr_t *netaddr) {
 void
 isc_netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
 	int family = s->type.sa.sa_family;
-	t->family = family;
+	t->family = (unsigned int)family;
 	switch (family) {
 	case AF_INET:
 		t->type.in = s->type.sin.sin_addr;

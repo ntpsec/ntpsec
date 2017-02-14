@@ -260,13 +260,15 @@ isc_backtrace_getsymbol(const void *addr, const char **symbolp,
 	 * Search the table for the entry that meets:
 	 * entry.addr <= addr < next_entry.addr.
 	 */
-	found = bsearch(addr, isc__backtrace_symtable, isc__backtrace_nsymbols,
+	found = bsearch(addr, isc__backtrace_symtable,
+                        (size_t) isc__backtrace_nsymbols,
 			sizeof(isc__backtrace_symtable[0]), symtbl_compare);
 	if (found == NULL)
 		result = ISC_R_NOTFOUND;
 	else {
 		*symbolp = found->symbol;
-		*offsetp = (const char *)addr - (char *)found->addr;
+		*offsetp = (unsigned long)((const char *)addr \
+                                           - (char *)found->addr);
 	}
 
 	return (result);

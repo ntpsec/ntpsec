@@ -200,22 +200,25 @@ internal_current(isc_interfaceiter_t *iter) {
 		iter->current.flags |= INTERFACE_F_MULTICAST;
 #endif
 
-	iter->current.af = family;
+	iter->current.af = (unsigned int)family;
 
-	get_addr(family, &iter->current.address, ifa->ifa_addr, ifa->ifa_name);
+	get_addr((unsigned int)family, &iter->current.address,
+                  ifa->ifa_addr, ifa->ifa_name);
 
 	if (ifa->ifa_netmask != NULL)
-		get_addr(family, &iter->current.netmask, ifa->ifa_netmask,
+		get_addr((unsigned int)family, &iter->current.netmask, ifa->ifa_netmask,
 			 ifa->ifa_name);
 
 	if (ifa->ifa_dstaddr != NULL &&
 	    (iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0)
-		get_addr(family, &iter->current.dstaddress, ifa->ifa_dstaddr,
+		get_addr((unsigned int)family, &iter->current.dstaddress,
+                         ifa->ifa_dstaddr,
 			 ifa->ifa_name);
 
 	if (ifa->ifa_broadaddr != NULL &&
 	    (iter->current.flags & INTERFACE_F_BROADCAST) != 0)
-		get_addr(family, &iter->current.broadcast, ifa->ifa_broadaddr,
+		get_addr((unsigned int)family, &iter->current.broadcast,
+                         ifa->ifa_broadaddr,
 			 ifa->ifa_name);
 
 	iter->current.ifindex = if_nametoindex(iter->current.name);
