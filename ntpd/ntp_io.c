@@ -43,11 +43,12 @@
 /*
  * setsockopt does not always have the same arg declaration
  * across all platforms. If it's not defined we make it empty
+ * UNUSED
+ *
+ * #ifndef SETSOCKOPT_ARG_CAST
+ * #define SETSOCKOPT_ARG_CAST
+ * #endif
  */
-
-#ifndef SETSOCKOPT_ARG_CAST
-#define SETSOCKOPT_ARG_CAST
-#endif
 
 extern int listen_to_virtual_ips;
 

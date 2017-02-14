@@ -20,7 +20,11 @@
 #include "ntp_stdlib.h"
 #include "ntp_syscall.h"
 
-#define NANOSECONDS	1e9
+#ifdef HAVE_KERNEL_PLL
+# define NANOSECONDS	1e9
+# define FREQTOD(x)	((x) / 65536e6)            /* NTP to double */
+# define DTOFREQ(x)	((int32_t)((x) * 65536e6)) /* double to NTP */
+#endif
 #define MICROSECONDS	1e6
 
 /*
@@ -41,9 +45,7 @@
 #define	CLOCK_ALLAN	11	/* Allan intercept (log2 s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
-#define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */
-#define	FREQTOD(x)	((x) / 65536e6) /* NTP to double */
-#define	DTOFREQ(x)	((int32_t)((x) * 65536e6)) /* double to NTP */
+/* #define PPS_MAXAGE	120	* kernel pps signal timeout (s) UNUSED */
 
 /*
  * Clock discipline state machine. This is used to control the

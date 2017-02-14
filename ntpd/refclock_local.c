@@ -51,7 +51,7 @@
 /*
  * Local interface definitions
  */
-#define PRECISION	(-7)	/* about 10 ms precision */
+/* #define PRECISION	(-7)	* about 10 ms precision UNUSED */
 #define NAME		"LOCAL"	/* shortname */
 #define DESCRIPTION	"Undisciplined local clock" /* WRU */
 #define STRATUM 	5	/* default stratum */

@@ -106,7 +106,7 @@ static struct rawdcfcode
 	{ 33 }, { 35 }, { 36 }, { 40 }, { 42 }, { 45 }, { 49 }, { 50 }, { 54 }, { 58 }, { 59 }
 };
 
-#define DCF_M	0
+/* #define DCF_M 0      UNUSED */
 #define DCF_R	1
 #define DCF_A1	2
 #define DCF_Z	3
@@ -114,18 +114,18 @@ static struct rawdcfcode
 #define DCF_S	5
 #define DCF_M1	6
 #define DCF_M10	7
-#define DCF_P1	8
+/* #define DCF_P1 8     UNUSED */
 #define DCF_H1	9
 #define DCF_H10	10
-#define DCF_P2	11
+/* #define DCF_P2 11    UNUSED */
 #define DCF_D1	12
 #define DCF_D10	13
-#define DCF_DW	14
+/* #define DCF_DW 14    UNUSED */
 #define DCF_MO	15
 #define DCF_MO0	16
 #define DCF_Y1	17
 #define DCF_Y10	18
-#define DCF_P3	19
+/* #define DCF_P3 19    UNUSED */
 
 static struct partab
 {

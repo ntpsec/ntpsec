@@ -59,7 +59,7 @@
  * identified as a refclock by having a non-NULL procptr member. 
  */
 #define FUDGEFAC	.1	/* fudge correction factor */
-#define LF		0x0a	/* ASCII LF */
+/* #define LF		0x0a	* ASCII LF UNUSED */
 
 bool	cal_enable;		/* enable refclock calibrate */
 

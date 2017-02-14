@@ -135,8 +135,8 @@
 #define NAME		"MODEM"	/* shortname */
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
 #define REFID		"NONE"	/* default reference ID */
-#define MSGCNT		20	/* max message count */
-#define	MAXPHONE	10	/* max number of phone numbers */
+/* #define MSGCNT	20	* max message count UNUSED */
+/* #define MAXPHONE	10	* max number of phone numbers UNUSED */
 
 /*
  * Calling program modes (mode)

@@ -17,8 +17,10 @@
 #include "ntp_syscall.h"
 #endif /* HAVE_KERNEL_PLL */
 
+#ifdef HAVE_TIMER_CREATE
 /* TC_ERR represents the timer_create() error return value. */
-#define	TC_ERR	(-1)
+# define	TC_ERR	(-1)
+#endif
 
 static void check_leapsec(uint32_t, const time_t*, bool);
 

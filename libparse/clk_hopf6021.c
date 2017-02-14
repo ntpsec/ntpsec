@@ -86,7 +86,7 @@
 #define  HOPF_RADIOHP	0x0C	/* high precision radio clock */
 
 #define HOPF_UTC	0x08	/* time code in UTC */
-#define HOPF_WMASK	0x07	/* mask for weekday code */
+/* #define HOPF_WMASK	0x07	* mask for weekday code UNUSED */
 
 static struct format hopf6021_fmt =
 {

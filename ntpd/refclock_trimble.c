@@ -118,16 +118,18 @@
  * 	TRIMBLE_UTC_TIME set   and TRIMBLE_LEAP_PENDING set: INSERT leap
  */
 
-#define TRIMBLE_LEAP_INPROGRESS 0x08 /* This is the leap flag			*/
-#define TRIMBLE_LEAP_WARNING    0x04 /* GPS Leap Warning (see ICD-200) */
+/* #define TRIMBLE_LEAP_INPROGRESS 0x08 * This is the leap flag	UNUSED */
+/* #define TRIMBLE_LEAP_WARNING    0x04 * GPS Leap Warning (ICD-200) UNUSED */
 #define TRIMBLE_LEAP_PENDING    0x02 /* Leap Pending (24 hours)		*/
 #define TRIMBLE_UTC_TIME        0x01 /* UTC time available				*/
 
 #define mb(_X_) (up->rpt_buf[(_X_ + 1)]) /* shortcut for buffer access	*/
 
 /* Conversion Definitions */
-#define GPS_PI 		(3.1415926535898)
-#define	R2D		(180.0/GPS_PI)
+#ifdef DEBUG
+# define GPS_PI 	(3.1415926535898)
+# define R2D		(180.0/GPS_PI)
+#endif
 
 /*
  * Structure for build data packets for send (thunderbolt uses it only)
@@ -219,7 +221,7 @@ int day_of_year (char *dt);
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
-#define CLK_ACUTIMEB    4	/* Trimble Actutime Gold Port B */
+/* #define CLK_ACUTIMEB 4	* Trimble Actutime Gold Port B UNUSED */
 
 bool praecis_msg;
 static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
