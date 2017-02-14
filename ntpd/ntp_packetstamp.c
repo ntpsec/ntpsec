@@ -62,7 +62,7 @@ enable_packetstamps(
 #ifdef USE_SCM_TIMESTAMP
 	{
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
-			       (char*)&on, sizeof(on)))
+			       (const char*)&on, sizeof(on)))
 			msyslog(LOG_DEBUG,
 				"setsockopt SO_TIMESTAMP on fails on address %s: %m",
 				socktoa(addr));
