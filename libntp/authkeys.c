@@ -54,22 +54,22 @@ static void		freesymkey(symkey *, symkey **);
 static void		free_auth_mem(void);
 #endif
 
-symkey key_listhead;		/* list of all in-use keys */
+static symkey key_listhead;		/* list of all in-use keys */
 /*
  * The hash table. This is indexed by the low order bits of the
  * keyid. This gets updated in auth_resize_hashtable
  */
 #define KEYHASH(keyid)	((keyid) & authhashmask)
 #define INIT_AUTHHASHSIZE 64
-unsigned short authhashbuckets = INIT_AUTHHASHSIZE;
-unsigned short authhashmask = INIT_AUTHHASHSIZE - 1;
-symkey **key_hash;
+static unsigned short authhashbuckets = INIT_AUTHHASHSIZE;
+static unsigned short authhashmask = INIT_AUTHHASHSIZE - 1;
+static symkey **key_hash;
 
 unsigned int authkeynotfound;		/* keys not found */
 unsigned int authkeylookups;		/* calls to lookup keys */
 unsigned int authnumkeys;		/* number of active keys */
 unsigned int authkeyuncached;		/* cache misses */
-unsigned int authnokey;		/* calls to encrypt with no key */
+static unsigned int authnokey;		/* calls to encrypt with no key */
 unsigned int authencryptions;		/* calls to encrypt */
 unsigned int authdecryptions;		/* calls to decrypt */
 
@@ -77,7 +77,7 @@ unsigned int authdecryptions;		/* calls to decrypt */
  * Storage for free symkey structures.  We malloc() such things but
  * never free them.
  */
-symkey *authfreekeys;
+static symkey *authfreekeys;
 int authnumfreekeys;
 
 #define	MEMINC	16		/* number of new free ones to get */
