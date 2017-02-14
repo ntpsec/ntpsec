@@ -4828,7 +4828,7 @@ trimbletsip_event(
  * to avoid floating point operations at all!
  */
 
-static float
+static double
 getflt(
 	uint8_t *bp
 	)
@@ -4846,7 +4846,7 @@ getflt(
 	uval.bd[1] = *bp++;
 	uval.bd[0] = *bp;
 #endif /* ! WORDS_BIGENDIAN */
-	return uval.fv;
+	return (double)uval.fv;
 }
 
 static double
