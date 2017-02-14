@@ -7,9 +7,9 @@
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
 
-const int no_argument = 0;
-const int required_argument = 1;
-const int optional_argument = 2;
+#define no_argument 0
+#define required_argument 1
+/* const int optional_argument = 2; UNUSED */
 
 char* ntp_optarg;
 int ntp_optopt;
