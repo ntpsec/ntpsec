@@ -666,7 +666,7 @@ gpsd_receive(
 				--pdst;
 			*pdst = '\0';
 			/* process data and reset buffer */
-			up->buflen = pdst - up->buffer;
+			up->buflen = (int)(pdst - up->buffer);
 			gpsd_parse(peer, &rbufp->recv_time);
 			pdst = up->buffer;
 		} else if (pdst != edst) {
@@ -675,7 +675,7 @@ gpsd_receive(
 				*pdst++ = ch;
 		}
 	}
-	up->buflen   = pdst - up->buffer;
+	up->buflen = (int)(pdst - up->buffer);
 	up->tickover = TICKOVER_LOW;
 }
 
@@ -827,7 +827,7 @@ timer_primary(
 			DPRINTF(2, ("%s: timer livecheck: '%s'\n",
 				    up->logname, s_req_version));
 			log_data(peer, "send", s_req_version, rlen);
-			rc = write(pp->io.fd, s_req_version, rlen);
+			rc = write(pp->io.fd, s_req_version, (int)rlen);
 			(void)rc;
 		} else if (-1 != up->fdt) {
 			gpsd_test_socket(peer);
@@ -956,7 +956,7 @@ eval_strict(
 	if (up->fl_ibt && up->fl_pps) {
 		/* use TPV reference time + PPS receive time */
 		add_clock_sample(peer, pp, up->ibt_stamp, up->pps_recvt);
-		peer->precision = up->pps_prec;
+		peer->precision = (int8_t)up->pps_prec;
 		/* both packets consumed now... */
 		up->fl_pps = 0;
 		up->fl_ibt = 0;
@@ -979,7 +979,7 @@ eval_pps_secondary(
 	if (up->fl_pps2) {
 		/* feed data */
 		add_clock_sample(peer, pp, up->pps_stamp2, up->pps_recvt2);
-		peer->precision = up->pps_prec;
+		peer->precision = (int8_t)up->pps_prec;
 		/* PPS peer flag logic */
 		up->ppscount2 = min(PPS2_MAXCOUNT, (up->ppscount2 + 2));
 		if ((PPS2_MAXCOUNT == up->ppscount2) &&
@@ -1001,7 +1001,7 @@ eval_serial(
 {
 	if (up->fl_ibt) {
 		add_clock_sample(peer, pp, up->ibt_stamp, up->ibt_recvt);
-		peer->precision = up->ibt_prec;
+		peer->precision = (int8_t)up->ibt_prec;
 		/* mark time stamp as burned... */
 		up->fl_ibt = 0;
 		++up->tc_ibt_used;
@@ -1150,6 +1150,8 @@ json_token_skip(
 				tid = json_token_skip(ctx, tid);
 			break;
 			
+                case JSMN_PRIMITIVE:
+                case JSMN_STRING:
 		default:
 			++tid;
 			break;
@@ -1441,7 +1443,7 @@ process_version(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	int    len;
+	int len;
 	char * buf;
 	const char *revision;
 	const char *release;
@@ -1503,7 +1505,7 @@ process_version(
 		 s_req_watch[up->pf_toff != 0], up->device);
 	buf = up->buffer;
 	len = strlen(buf);
-	log_data(peer, "send", buf, len);
+	log_data(peer, "send", buf, (size_t)len);
 	if (len != write(pp->io.fd, buf, len) && (syslogok(pp, up))) {
 		/* Note: if the server fails to read our request, the
 		 * resulting data timeout will take care of the
@@ -1640,7 +1642,7 @@ process_pps(
 	/* Try to read the precision field from the PPS record. If it's
 	 * not there, take the precision from the serial data.
 	 */
-	xlog2 = json_object_lookup_int_default(
+	xlog2 = (int)json_object_lookup_int_default(
 			jctx, 0, "precision", up->ibt_prec);
 	up->pps_prec = clamped_precision(xlog2);
 	
@@ -1738,7 +1740,8 @@ gpsd_parse(
 	/* See if we can grab anything potentially useful. JSMN does not
 	 * need a trailing NUL, but it needs the number of bytes to
 	 * process. */
-	if (!json_parse_record(&up->json_parse, up->buffer, up->buflen)) {
+	if (!json_parse_record(&up->json_parse, up->buffer,
+                               (size_t)up->buflen)) {
 		++up->tc_breply;
 		return;
 	}
