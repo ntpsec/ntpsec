@@ -218,11 +218,11 @@ def cmd_configure(ctx, config):
         # used on macOS, FreeBSD,
         # FORTIFY needs LTO to work well
         ctx.env.CFLAGS += [
-                        "-fstack-protector-all",    # hardening
-                        "-std=gnu99",
-                        "-D_FORTIFY_SOURCE=2",      # hardening
-                        ]
-        if ctx.env.DEST_OS not in ["darwin","freebsd"]:
+            "-fstack-protector-all",    # hardening
+            "-std=gnu99",
+            "-D_FORTIFY_SOURCE=2",      # hardening
+            ]
+        if ctx.env.DEST_OS not in ["darwin", "freebsd"]:
             # -flto breaks tests on macOS
             ctx.env.CFLAGS += [
                 "-flto",                    # hardening, needed for sanitize
@@ -230,32 +230,32 @@ def cmd_configure(ctx, config):
                 "-fsanitize=safe-stack",    # hardening
                 ]
             ctx.env.LDFLAGS += [
-                    "-Wl,-z,now",    # hardening, no deferred symbol resolution
-                    "-Wl,-z,relro",  # hardening, marks some section read only,
+                "-Wl,-z,now",    # hardening, no deferred symbol resolution
+                "-Wl,-z,relro",  # hardening, marks some section read only,
+                ]
+            if ctx.options.disable_debug:
+                # not debugging
+                ctx.env.LDFLAGS += [
+                    "-Wl,--strip-all",    # Strip binaries
                     ]
-        if ctx.options.disable_debug:
-            # not debugging
-            ctx.env.LDFLAGS += [
-                "-Wl,--strip-all",    # Strip binaries
-        ]
     else:
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
         ctx.env.CFLAGS += [
-                        "-fPIE",                    # hardening
-                        "-fstack-protector-all",    # hardening
-                        "-O1",
-                        "-pie",                     # hardening
-                        "-std=gnu99"
-                        ]
+            "-fPIE",                    # hardening
+            "-fstack-protector-all",    # hardening
+            "-O1",
+            "-pie",                     # hardening
+            "-std=gnu99"
+            ]
         ctx.env.LDFLAGS += [
-                "-Wl,-z,now",      # hardening, no deferred symbol resolution
-                "-Wl,-z,relro",    # hardening, marks some section read only,
-                ]
+            "-Wl,-z,now",      # hardening, no deferred symbol resolution
+            "-Wl,-z,relro",    # hardening, marks some section read only,
+            ]
         if ctx.options.disable_debug:
             # not debugging
             ctx.env.LDFLAGS += [
-                    "-Wl,-z,strip-all",    # Strip binaries
-                    ]
+                "-Wl,-z,strip-all",    # Strip binaries
+                ]
 
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
@@ -289,7 +289,9 @@ def cmd_configure(ctx, config):
     types = ["uint64_t"]
 
     for inttype in sorted(types):
-        ctx.check_cc(type_name=inttype, header_name=["stdint.h", "sys/types.h"], mandatory=False)
+        ctx.check_cc(header_name=["stdint.h", "sys/types.h"],
+                     mandatory=False,
+                     type_name=inttype)
 
     structures = (
         ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
@@ -301,7 +303,9 @@ def cmd_configure(ctx, config):
         ctx.check_cc(type_name=s, header_name=h, mandatory=False)
 
     # waf's SNIP_FIELD should likely include this header itself
-    ctx.check_cc(header_name="stddef.h", auto_add_header_name=True, mandatory=False)
+    ctx.check_cc(auto_add_header_name=True,
+                 header_name="stddef.h",
+                 mandatory=False)
 
     structure_fields = (
         ("struct timex", "time_tick", ["sys/time.h", "sys/timex.h"]),
@@ -360,9 +364,11 @@ def cmd_configure(ctx, config):
     for hdr in openssl_headers:
         ctx.check_cc(header_name=hdr, includes=ctx.env.PLATFORM_INCLUDES)
     ctx.check_cc(lib="crypto")
-    ctx.check_cc(comment="OpenSSL support", fragment=SNIP_OPENSSL_VERSION_CHECK,
-        includes=ctx.env.PLATFORM_INCLUDES, msg="Checking OpenSSL >= 0.9.7",
-    )
+    ctx.check_cc(comment="OpenSSL support",
+                 fragment=SNIP_OPENSSL_VERSION_CHECK,
+                 includes=ctx.env.PLATFORM_INCLUDES,
+                 msg="Checking OpenSSL >= 0.9.7",
+                 )
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
