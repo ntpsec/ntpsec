@@ -45,7 +45,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	isc_interfaceiter_t *iter;
 	isc_result_t result;
 	char strbuf[BUFSIZ];
-	int trys, ret;
+	int trys, ret = 0;
 
 	REQUIRE(mctx != NULL);
 	REQUIRE(iterp != NULL);
