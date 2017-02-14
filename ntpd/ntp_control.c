@@ -2082,9 +2082,9 @@ ctl_putpeer(
 				   strlen(p->hostname));
 #ifdef REFCLOCK
 		if (p->procptr != NULL) {
-		    char buf[NI_MAXHOST];
-		    strlcpy(buf, refclock_name(p), sizeof(buf));
-		    ctl_putstr(peer_var[id].text, buf, strlen(buf));
+		    char buf1[NI_MAXHOST];
+		    strlcpy(buf1, refclock_name(p), sizeof(buf1));
+		    ctl_putstr(peer_var[id].text, buf1, strlen(buf1));
 		}
 #endif /* REFCLOCK */
 		break;
@@ -4200,7 +4200,7 @@ report_event(
 			msyslog(LOG_INFO, "%s", statstr);
 	}
 	record_proto_stats(statstr);
-#if DEBUG
+#if defined(DEBUG) && DEBUG
 	if (debug)
 		printf("event at %lu %s\n", current_time, statstr);
 #endif
