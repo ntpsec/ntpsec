@@ -86,7 +86,7 @@
 #define NMEA_DATETRUST_MASK	0x02000000U
 
 #define NMEA_PROTO_IDLEN	5	/* tag name must be at least 5 chars */
-#define NMEA_PROTO_MINLEN	6	/* min chars in sentence, excluding CS */
+/* #define NMEA_PROTO_MINLEN 6 * min chars in sentence, excluding CS UNUSED */
 #define NMEA_PROTO_MAXLEN	80	/* max chars in sentence, excluding CS */
 #define NMEA_PROTO_FIELDS	32	/* not official; limit on fields per record */
 
@@ -139,28 +139,30 @@
  * Definitions
  */
 #define	DEVICE		"/dev/gps%d"	/* GPS serial device */
-#define	PPSDEV		"/dev/gpspps%d"	/* PPSAPI device override */
+#ifdef HAVE_PPSAPI
+# define	PPSDEV		"/dev/gpspps%d"	/* PPSAPI device override */
+# define	PPS_PRECISION	(-20)		/* precision assumed (~ 1 us) */
+# ifndef O_NOCTTY
+#  define M_NOCTTY	0
+# else
+#  define M_NOCTTY	O_NOCTTY
+# endif
+# ifndef O_NONBLOCK
+#  define M_NONBLOCK	0
+# else
+#  define M_NONBLOCK	O_NONBLOCK
+# endif
+# define PPSOPENMODE	(O_RDWR | M_NOCTTY | M_NONBLOCK)
+#endif
 #ifdef ENABLE_CLASSIC_MODE
 #define	SPEED232	B4800		/* uart speed (4800 bps) */
 #else
 #define	SPEED232	B9600		/* uart speed (9600 bps) */
 #endif
 #define	PRECISION	(-9)		/* precision assumed (about 2 ms) */
-#define	PPS_PRECISION	(-20)		/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"		/* reference id */
 #define	NAME		"NMEA"		/* shortname */
 #define	DESCRIPTION	"NMEA GPS Clock" /* who we are */
-#ifndef O_NOCTTY
-#define M_NOCTTY	0
-#else
-#define M_NOCTTY	O_NOCTTY
-#endif
-#ifndef O_NONBLOCK
-#define M_NONBLOCK	0
-#else
-#define M_NONBLOCK	O_NONBLOCK
-#endif
-#define PPSOPENMODE	(O_RDWR | M_NOCTTY | M_NONBLOCK)
 
 /* NMEA sentence array indexes for those we use */
 #define NMEA_GPRMC	0	/* recommended min. nav. */

@@ -96,7 +96,9 @@
 #define	DEVICE		"/dev/spectracom%d" /* device name and unit */
 #define	SPEED232	B9600		/* uart speed (9600 baud) */
 #define	PRECISION	(-13)		/* precision assumed (about 100 us) */
-#define	PPS_PRECISION	(-13)		/* precision assumed (about 100 us) */
+#ifdef HAVE_PPSAPI
+# define PPS_PRECISION	(-13)		/* precision assumed (about 100 us) */
+#endif
 #define	REFID		"GPS\0"		/* reference ID */
 #define NAME		"SPECTRACOM"	/* shortname */
 #define	DESCRIPTION	"Spectracom GPS Receiver" /* WRU */

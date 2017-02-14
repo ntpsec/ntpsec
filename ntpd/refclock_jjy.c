@@ -345,7 +345,7 @@ struct	refclock refclock_jjy = {
 
 /* Local constants definition for the 2nd parameter of the jjy_write_clockstats */
 
-#define	JJY_CLOCKSTATS_MARK_NONE	0
+/* #define	JJY_CLOCKSTATS_MARK_NONE 0   UNUSED */
 #define	JJY_CLOCKSTATS_MARK_JJY 	1
 #define	JJY_CLOCKSTATS_MARK_SEND	2
 #define	JJY_CLOCKSTATS_MARK_RECEIVE	3
@@ -359,7 +359,9 @@ struct	refclock refclock_jjy = {
 #define	JJY_CLOCKSTATS_MESSAGE_ECHOBACK         	"* Echoback"
 #define	JJY_CLOCKSTATS_MESSAGE_IGNORE_REPLY     	"* Ignore replay : [%s]"
 #define	JJY_CLOCKSTATS_MESSAGE_OVER_MIDNIGHT_2  	"* Over midnight : timestamp=%d, %d"
-#define	JJY_CLOCKSTATS_MESSAGE_OVER_MIDNIGHT_3  	"* Over midnight : timestamp=%d, %d, %d"
+/* UNUSED
+ * #define	JJY_CLOCKSTATS_MESSAGE_OVER_MIDNIGHT_3  	"* Over midnight : timestamp=%d, %d, %d"
+ */
 #define	JJY_CLOCKSTATS_MESSAGE_TIMESTAMP_UNSURE 	"* Unsure timestamp : %s"
 #define	JJY_CLOCKSTATS_MESSAGE_LOOPBACK_DELAY   	"* Loopback delay : %d.%03d mSec."
 #define	JJY_CLOCKSTATS_MESSAGE_DELAY_ADJUST     	"* Delay adjustment : %d mSec. ( valid=%hd/%d )"
@@ -370,12 +372,16 @@ struct	refclock refclock_jjy = {
 #define	JJY_CLOCKSTATS_MESSAGE_TOO_MANY_REPLY     	"# Too many reply : count=%d"
 #define	JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY      	"# Invalid reply : [%s]"
 #define	JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_2       	"# Slow reply : timestamp=%d, %d"
-#define	JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_3       	"# Slow reply : timestamp=%d, %d, %d"
+/* UNUSED
+ * #define	JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_3       	"# Slow reply : timestamp=%d, %d, %d"
+ */
 #define	JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE	"# Invalid date : rc=%d year=%d month=%d day=%d"
 #define	JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME	"# Invalid time : rc=%d hour=%d minute=%d second=%d"
 #define	JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME	"# Invalid time : rc=%d year=%d month=%d day=%d hour=%d minute=%d second=%d"
 #define	JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_LEAP	"# Invalid leap : leapsecond=[%s]"
-#define	JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_STATUS	"# Invalid status : status=[%s]"
+/* UNUSED
+ * #define	JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_STATUS	"# Invalid status : status=[%s]"
+ */
 
 /* Debug print macro */
 
@@ -1057,8 +1063,8 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 #define	TS_JJY01_COMMAND_NUMBER_STUS	4
 #define	TS_JJY01_COMMAND_NUMBER_DCST	5
 
-#define	TS_JJY01_REPLY_DATE     	"yyyy/mm/dd www"
-#define	TS_JJY01_REPLY_STIM     	"hh:mm:ss"
+/* #define	TS_JJY01_REPLY_DATE     	"yyyy/mm/dd www" UNUSED */
+/* #define	TS_JJY01_REPLY_STIM     	"hh:mm:ss" UNUSED */
 #define	TS_JJY01_REPLY_STUS_ADJUSTED	"adjusted"
 #define	TS_JJY01_REPLY_STUS_UNADJUSTED	"unadjusted"
 #define	TS_JJY01_REPLY_DCST_VALID	"valid"
@@ -1550,8 +1556,8 @@ jjy_poll_cdex_jst2000 ( int unit, struct peer *peer )
 #define	ECHOKEISOKUKI_LT2000_MODE_SWITCHING_CONTINUOUS	3
 
 #define	ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND 	"#"
-#define	ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_TIME 	"T"
-#define	ECHOKEISOKUKI_LT2000_COMMAND_CONTINUOUS 	"C"
+/* #define	ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_TIME  "T" UNUSED */
+/* #define	ECHOKEISOKUKI_LT2000_COMMAND_CONTINUOUS  "C" UNUSED */
 
 /**************************************************************************************************/
 
@@ -1926,8 +1932,8 @@ jjy_poll_citizentic_jjy200 ( int unit, struct peer *peer )
 #define	TS_GPS01_COMMAND_NUMBER_TIME	2
 #define	TS_GPS01_COMMAND_NUMBER_STUS	4
 
-#define	TS_GPS01_REPLY_DATE		"yyyy/mm/dd"
-#define	TS_GPS01_REPLY_TIME		"hh:mm:ss"
+/* #define	TS_GPS01_REPLY_DATE		"yyyy/mm/dd" UNUSED */
+/* #define	TS_GPS01_REPLY_TIME		"hh:mm:ss"   UNUSED */
 #define	TS_GPS01_REPLY_STUS_RTC		"*R"
 #define	TS_GPS01_REPLY_STUS_GPS		"*G"
 #define	TS_GPS01_REPLY_STUS_UTC		"*U"
@@ -2614,7 +2620,7 @@ static short iTeljjyStateTimeout  [ 5 ] = { 0, 120, 60, 60, 40 } ;
 #define	TELJJY_REPLY_TIME	2
 #define	TELJJY_REPLY_LEAPSEC	3
 #define	TELJJY_REPLY_LOOP	4
-#define	TELJJY_REPLY_PROMPT	5
+/* #define	TELJJY_REPLY_PROMPT 5 UNUSED */
 #define	TELJJY_REPLY_LOOPBACK	6
 #define	TELJJY_REPLY_COM	7
 

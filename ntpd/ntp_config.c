@@ -140,13 +140,15 @@ typedef struct peer_resolved_ctx_tag {
 
 /* Limits */
 #define MAXPHONE	10	/* maximum number of phone strings */
-#define MAXPPS		20	/* maximum length of PPS device string */
+/* #define MAXPPS	20	* maximum length of PPS device string UNUSED */
 
 /*
  * Miscellaneous macros
  */
-#define ISEOL(c)	((c) == '#' || (c) == '\n' || (c) == '\0')
-#define ISSPACE(c)	((c) == ' ' || (c) == '\t')
+#ifdef HAVE_NETINFO_NI_H
+# define ISEOL(c)	((c) == '#' || (c) == '\n' || (c) == '\0')
+# define ISSPACE(c)	((c) == ' ' || (c) == '\t')
+#endif
 
 #define _UC(str)	((char *)(intptr_t)(str))
 

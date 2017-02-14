@@ -42,8 +42,10 @@
 #define NEOCLOCK4X_FIRMWARE                NEOCLOCK4X_FIRMWARE_VERSION_A
 #endif
 
+#if defined(NEOCLOCK4X_FIRMWARE)
 /* at this time only firmware version A is known */
-#define NEOCLOCK4X_FIRMWARE_VERSION_A      'A'
+# define NEOCLOCK4X_FIRMWARE_VERSION_A      'A'
+#endif
 
 #define NEOCLOCK4X_TIMECODELEN 37
 
@@ -56,7 +58,7 @@
 #define NEOCLOCK4X_OFFSET_MINUTE           20
 #define NEOCLOCK4X_OFFSET_SECOND           22
 #define NEOCLOCK4X_OFFSET_HSEC             24
-#define NEOCLOCK4X_OFFSET_DOW              26
+/* #define NEOCLOCK4X_OFFSET_DOW              26  UNUSED */
 #define NEOCLOCK4X_OFFSET_TIMESOURCE       28
 #define NEOCLOCK4X_OFFSET_DSTSTATUS        29
 #define NEOCLOCK4X_OFFSET_QUARZSTATUS      30

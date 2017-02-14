@@ -20,27 +20,33 @@
 #if defined(SO_BINTIME) && defined(SCM_BINTIME) && defined(CMSG_FIRSTHDR)
 #  define USE_PACKET_TIMESTAMP
 #  define USE_SCM_BINTIME
-#  ifdef OVERRIDE_BINTIME_CTLMSGBUF_SIZE
-#   define CMSG_BUFSIZE OVERRIDE_BINTIME_CTLMSGBUF_SIZE
-#  else
-#   define CMSG_BUFSIZE  1536 /* moderate default */
-#  endif
+/* UNUSED
+ * #  ifdef OVERRIDE_BINTIME_CTLMSGBUF_SIZE
+ * #   define CMSG_BUFSIZE OVERRIDE_BINTIME_CTLMSGBUF_SIZE
+ * #  else
+ * #   define CMSG_BUFSIZE  1536 * moderate default *
+ * #  endif
+ */
 #elif defined(SO_TIMESTAMPNS) && defined(SCM_TIMESTAMPNS) && defined(CMSG_FIRSTHDR)
 #  define USE_PACKET_TIMESTAMP
 #  define USE_SCM_TIMESTAMPNS
-#  ifdef OVERRIDE_TIMESTAMPNS_CTLMSGBUF_SIZE
-#   define CMSG_BUFSIZE OVERRIDE_TIMESTAMPNS_CTLMSGBUF_SIZE
-#  else
-#   define CMSG_BUFSIZE  1536 /* moderate default */
-#  endif
+/* UNUSED
+ * #  ifdef OVERRIDE_TIMESTAMPNS_CTLMSGBUF_SIZE
+ * #   define CMSG_BUFSIZE OVERRIDE_TIMESTAMPNS_CTLMSGBUF_SIZE
+ * #  else
+ * #   define CMSG_BUFSIZE  1536 * moderate default *
+ * #  endif
+ */
 #elif defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP) && defined(CMSG_FIRSTHDR)
 #  define USE_PACKET_TIMESTAMP
 #  define USE_SCM_TIMESTAMP
-#  ifdef OVERRIDE_TIMESTAMP_CTLMSGBUF_SIZE
-#   define CMSG_BUFSIZE OVERRIDE_TIMESTAMP_CTLMSGBUF_SIZE
-#  else
-#   define CMSG_BUFSIZE  1536 /* moderate default */
-#  endif
+/* UNUSED
+ * #  ifdef OVERRIDE_TIMESTAMP_CTLMSGBUF_SIZE
+ * #   define CMSG_BUFSIZE OVERRIDE_TIMESTAMP_CTLMSGBUF_SIZE
+ * #  else
+ * #   define CMSG_BUFSIZE  1536 * moderate default *
+ * #  endif
+ */
 #else
 /* fill in for old/other timestamp interfaces */
 #endif
