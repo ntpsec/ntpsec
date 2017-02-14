@@ -192,6 +192,12 @@ extern	size_t	refclock_gtraw	(struct recvbuf *, char *, size_t, l_fp *);
 extern	bool	indicate_refclock_packet(struct refclockio *,
 					 struct recvbuf *);
 extern	void	process_refclock_packet(struct recvbuf *);
+extern struct   refclock refclock_gpsdjson;
+extern struct	refclock refclock_hpgps;
+extern struct   refclock refclock_jjy;
+extern struct   refclock refclock_neoclock4x;
+extern struct   refclock refclock_nmea;
+extern struct   refclock refclock_parse;
 #endif /* REFCLOCK */
 
 #endif /* GUARD_NTP_REFCLOCK_H */

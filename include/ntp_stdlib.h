@@ -227,4 +227,7 @@ extern bool	trunc_os_clock;		/* sys_tick > measured_tick */
 #define COMPARE_EQUAL		0
 #define COMPARE_LESSTHAN	-1
 
+extern bool sandbox(const bool droproot, char *user, const char *group,
+	     const char *chrootdir, bool want_dynamic_interface_tracking);
+
 #endif	/* GUARD_NTP_STDLIB_H */

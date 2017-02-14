@@ -264,7 +264,20 @@ struct clockformat
 };
 
 typedef struct clockformat clockformat_t;
+
+extern clockformat_t *clockformats[];
 extern clockformat_t clock_computime;
+extern clockformat_t clock_meinberg[];
+extern clockformat_t clock_rawdcf;
+extern clockformat_t clock_rcc8000;
+extern clockformat_t clock_schmid;
+extern clockformat_t clock_sel240x;
+extern clockformat_t clock_trimtaip;
+extern clockformat_t clock_varitext;
+extern clockformat_t clock_wharton_400a;
+extern unsigned short nformats;
+
+
 
 /*
  * parse interface
