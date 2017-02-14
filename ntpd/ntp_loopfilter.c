@@ -158,13 +158,13 @@ bool	pll_control = false;	/* kernel support available */
 bool	kern_enable = true;	/* kernel support enabled */
 bool	hardpps_enable;		/* kernel PPS discipline enabled */
 bool	ext_enable;		/* external clock enabled */
-int	pps_stratum;		/* pps stratum */
-int	kernel_status;		/* from ntp_adjtime */
+/* static int pps_stratum;		* pps stratum UNUSED  */
+static int kernel_status;		/* from ntp_adjtime */
 bool	allow_panic = false;	/* allow panic correction (-g) */
 bool	force_step_once = false; /* always step time once at startup (-G) */
 bool	mode_ntpdate = false;	/* exit on first clock set (-q) */
 int	freq_cnt;		/* initial frequency clamp */
-int	freq_set;		/* initial set frequency switch */
+static int freq_set;		/* initial set frequency switch */
 
 /*
  * Clock state machine variables
@@ -1323,7 +1323,7 @@ loop_config(
 			freq = HUFFPUFF;
 		sys_hufflen = (int)(freq / HUFFPUFF);
 		sys_huffpuff = emalloc(sizeof(sys_huffpuff[0]) *
-		    sys_hufflen);
+		    (unsigned long)sys_hufflen);
 		for (i = 0; i < sys_hufflen; i++)
 			sys_huffpuff[i] = 1e9;
 		sys_mindly = 1e9;
