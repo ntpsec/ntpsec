@@ -233,11 +233,11 @@ def cmd_configure(ctx, config):
                     "-Wl,-z,now",    # hardening, no deferred symbol resolution
                     "-Wl,-z,relro",  # hardening, marks some section read only,
                     ]
-	    if ctx.options.disable_debug:
-		# not debugging
-		ctx.env.LDFLAGS += [
-			"-Wl,--strip-all",    # Strip binaries
-			]
+        if ctx.options.disable_debug:
+            # not debugging
+            ctx.env.LDFLAGS += [
+                "-Wl,--strip-all",    # Strip binaries
+        ]
     else:
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
         ctx.env.CFLAGS += [
@@ -251,7 +251,7 @@ def cmd_configure(ctx, config):
                 "-Wl,-z,now",      # hardening, no deferred symbol resolution
                 "-Wl,-z,relro",    # hardening, marks some section read only,
                 ]
-	if ctx.options.disable_debug:
+        if ctx.options.disable_debug:
             # not debugging
             ctx.env.LDFLAGS += [
                     "-Wl,-z,strip-all",    # Strip binaries
