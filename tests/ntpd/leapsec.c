@@ -239,7 +239,7 @@ static const char leap_gthash [] = {
 static uint32_t lsec2009 = 3439756800u; // 1 Jan 2009, 00:00:00 utc
 static uint32_t lsec2012 = 3550089600u; // 1 Jul 2012, 00:00:00 utc
 
-int stringreader(void* farg)
+static int stringreader(void* farg)
 {
 	const char ** cpp = (const char**)farg;
 	if (**cpp)
@@ -942,7 +942,7 @@ TEST(leapsec, lsEmptyTableElectric) {
 	const time_t   tE = lsec2012 + 10;
 
 	for (t = t0; t != tE; ++t) {
-		rc = leapsec_query(&qr, t, &pivot);
+		rc = leapsec_query(&qr, (uint32_t)t, &pivot);
 		TEST_ASSERT_FALSE(rc);
 		TEST_ASSERT_EQUAL(0,             qr.warped   );
 		TEST_ASSERT_EQUAL(LSPROX_NOWARN, qr.proximity);
