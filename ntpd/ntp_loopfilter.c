@@ -158,8 +158,6 @@ bool	pll_control = false;	/* kernel support available */
 bool	kern_enable = true;	/* kernel support enabled */
 bool	hardpps_enable;		/* kernel PPS discipline enabled */
 bool	ext_enable;		/* external clock enabled */
-/* static int pps_stratum;		* pps stratum UNUSED  */
-static int kernel_status;		/* from ntp_adjtime */
 bool	allow_panic = false;	/* allow panic correction (-g) */
 bool	force_step_once = false; /* always step time once at startup (-G) */
 bool	mode_ntpdate = false;	/* exit on first clock set (-q) */
@@ -754,6 +752,7 @@ local_clock(
 	 * lad set the step threshold to something ridiculous.
 	 */
 	if (pll_control && kern_enable && freq_cnt == 0) {
+		static int kernel_status;	/* from ntp_adjtime */
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
