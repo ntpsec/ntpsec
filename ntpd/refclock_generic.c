@@ -3232,7 +3232,7 @@ parse_process(
 	parsetime_t      *parsetime
 	)
 {
-	l_fp off, rectime, reftime;
+	l_fp off, rectime = 0, reftime = 0;
 	double fudge;
 
 	/* silence warning: integral part may be used uninitialized in this function */
