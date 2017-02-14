@@ -264,6 +264,7 @@ struct clockformat
 };
 
 typedef struct clockformat clockformat_t;
+extern clockformat_t clock_computime;
 
 /*
  * parse interface
