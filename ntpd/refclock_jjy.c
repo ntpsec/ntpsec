@@ -4467,7 +4467,7 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 	strlcpy( sLog, pMark, sizeof( sLog )) ;
 	printableString( sLog+iMarkLen, sizeof(sLog)-iMarkLen, pData, iDataLen ) ;
 
-#ifdef DEBUG
+#if defined(DEBUG) && DEBUG
 	if ( debug ) {
 		printf( "refclock_jjy.c : clockstats : %s\n", sLog ) ;
 	}
