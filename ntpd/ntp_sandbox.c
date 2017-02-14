@@ -37,12 +37,12 @@ static priv_set_t *highprivs = NULL;
 #endif /* HAVE_SECCOMP_H */
 
 #ifdef ENABLE_DROPROOT
-bool root_dropped;
-uid_t sw_uid;
-gid_t sw_gid;
-char *endp;
-struct group *gr;
-struct passwd *pw;
+static bool root_dropped;
+static uid_t sw_uid;
+static gid_t sw_gid;
+static char *endp;
+static struct group *gr;
+static struct passwd *pw;
 #endif /* ENABLE_DROPROOT */
 
 #include "ntp_syslog.h"
