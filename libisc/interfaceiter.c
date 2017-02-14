@@ -135,23 +135,23 @@ static void linux_if_inet6_first(isc_interfaceiter_t *iter);
 bool
 isc_interfaceiter_next_bool(isc_interfaceiter_t *iter) {
   return (ISC_R_SUCCESS == isc_interfaceiter_next(iter));
-};
+}
 
 bool
 isc_interfaceiter_create_bool(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
   return (ISC_R_SUCCESS == isc_interfaceiter_create(mctx, iterp));
-};
+}
 
 bool
 isc_interfaceiter_first_bool(isc_interfaceiter_t *iter) {
   return (ISC_R_SUCCESS == isc_interfaceiter_first(iter));
-};
+}
 
 bool
 isc_interfaceiter_current_bool(isc_interfaceiter_t *iter,
                           isc_interface_t *ifdata) {
   return (ISC_R_SUCCESS == isc_interfaceiter_current(iter, ifdata));
-};
+}
 
 
 #if HAVE_IFADDRS_H
