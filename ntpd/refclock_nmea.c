@@ -1858,7 +1858,7 @@ eval_gps_time(
 	/* - check if we should log a GPS epoch warp */
 	weeks = (adj_day - gps_day) / 7;
 	if (weeks != up->epoch_warp) {
-		up->epoch_warp = weeks;
+		up->epoch_warp = (short)weeks;
 		LOGIF(CLOCKINFO, (LOG_INFO,
 				  "%s Changed GPS epoch warp to %d weeks",
 				  refclock_name(peer), weeks));
