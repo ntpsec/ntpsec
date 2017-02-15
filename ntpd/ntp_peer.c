@@ -36,7 +36,7 @@
 #define AM_MODES	7	/* number of rows and columns */
 #define NO_PEER		0	/* action when no peer is found */
 
-int AM[AM_MODES][AM_MODES] = {
+static int AM[AM_MODES][AM_MODES] = {
 /*			packet->mode					    */
 /* peer { UNSPEC,   ACTIVE,     PASSIVE,    CLIENT,     SERVER,     BCAST } */
 /* mode */
@@ -623,7 +623,7 @@ newpeer(
 	uint8_t		cast_flags,
 	uint32_t		ttl,
 	keyid_t		key,
-	bool		initializing
+	bool		initializing1
 	)
 {
 	struct peer *	peer;
@@ -736,11 +736,11 @@ newpeer(
 	peer->precision = sys_precision;
 	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_POOL)
-		peer_clear(peer, "POOL", initializing);
+		peer_clear(peer, "POOL", initializing1);
 	else if (cast_flags & MDF_BCAST)
-		peer_clear(peer, "BCST", initializing);
+		peer_clear(peer, "BCST", initializing1);
 	else
-		peer_clear(peer, "INIT", initializing);
+		peer_clear(peer, "INIT", initializing1);
 	if (mode_ntpdate)
 		peer_ntpdate++;
 
