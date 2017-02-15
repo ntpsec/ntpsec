@@ -50,7 +50,6 @@
  * #endif
  */
 
-extern int listen_to_virtual_ips;
 
 #ifndef IPTOS_DSCP_EF
 #define IPTOS_DSCP_EF 0xb8

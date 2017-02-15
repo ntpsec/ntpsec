@@ -100,6 +100,7 @@ typedef struct interface_info {
 
 typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 
+extern  bool listen_to_virtual_ips;
 extern	void	interface_enumerate	(interface_receiver_t, void *);
 extern	endpt *	getinterface		(sockaddr_u *, uint32_t);
 extern	endpt *	select_peerinterface	(struct peer *, sockaddr_u *,
