@@ -44,7 +44,7 @@ typedef struct peer_select_tag {
  * times are in seconds.
  */
 uint8_t	sys_leap;		/* system leap indicator */
-uint8_t	xmt_leap;		/* leap indicator sent in client requests */
+static uint8_t	xmt_leap;		/* leap indicator sent in client requests */
 uint8_t	sys_stratum;		/* system stratum */
 int8_t	sys_precision;		/* local clock precision (log2 s) */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
@@ -84,7 +84,7 @@ static int leap_vote_del;	/* leap consensus for delete */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
-int	sys_survivors;		/* truest of the truechimers */
+static int sys_survivors;		/* truest of the truechimers */
 
 /*
  * TOS and multicast mapping stuff
@@ -95,7 +95,7 @@ int	sys_minsane = 1;	/* minimum candidates */
 int	sys_minclock = NTP_MINCLOCK; /* minimum candidates */
 int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
-int	sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
+static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 
 /*
  * Statistics counters - first the good, then the bad
@@ -192,7 +192,7 @@ is_control_packet(
    is achieved by making sure we use calloc() everywhere in
    parse_packet(), and then comparing to NULL before dereferencing.
 */
-void
+static void
 free_packet(
 	struct parsed_pkt *pkt
 	)
@@ -208,9 +208,9 @@ free_packet(
 		pkt->extensions = NULL;
 	}
 	free(pkt);
-};
+}
 
-struct parsed_pkt*
+static struct parsed_pkt*
 parse_packet(
 	struct recvbuf const* rbufp
 	)
@@ -277,7 +277,7 @@ parse_packet(
 			ext_count++;
 		}
 
-		pkt->num_extensions = ext_count;
+		pkt->num_extensions = (unsigned int)ext_count;
 		pkt->extensions = calloc(ext_count, sizeof (struct exten));
 		if(pkt->extensions == NULL) { goto fail; }
 
@@ -473,8 +473,8 @@ handle_fastxmit(
 	   (pkt->keyid_present &&
 	    authdecrypt(pkt->keyid,
 			(uint32_t*)rbufp->recv_space.X_recv_buffer,
-			rbufp->recv_length - (pkt->mac_len + 4),
-			pkt->mac_len + 4))) {
+			(int)(rbufp->recv_length - (pkt->mac_len + 4)),
+			(int)(pkt->mac_len + 4)))) {
 		xkeyid = pkt->keyid;
 	} else {
 		xkeyid = 0;
@@ -783,9 +783,9 @@ receive(
 			   have to do this screwy buffer-length
 			   arithmetic in order to call it. */
 			!authdecrypt(pkt->keyid,
-				     (uint32_t*)rbufp->recv_space.X_recv_buffer,
-				     rbufp->recv_length - (pkt->mac_len + 4),
-				     pkt->mac_len + 4)) {
+				 (uint32_t*)rbufp->recv_space.X_recv_buffer,
+				 (int)(rbufp->recv_length - (pkt->mac_len + 4)),
+				 (int)(pkt->mac_len + 4))) {
 
 			sys_badauth++;
 			if(peer != NULL) {
@@ -1253,7 +1253,7 @@ void
 peer_clear(
 	struct peer *peer,		/* peer structure */
 	const char *ident,		/* tally lights */
-	const bool initializing
+	const bool initializing1
 	)
 {
 	uint8_t	u;
@@ -1291,10 +1291,10 @@ peer_clear(
 	 * avoid implosion.
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
-	if (initializing) {
-		peer->nextdate += peer_associations;
+	if (initializing1) {
+		peer->nextdate += (unsigned long)peer_associations;
 	} else if (MODE_PASSIVE == peer->hmode) {
-		peer->nextdate += ntp_minpkt;
+		peer->nextdate += (unsigned long)ntp_minpkt;
 	} else {
 	    /*
 	     * Randomizing the next poll interval used to be done with
@@ -1478,7 +1478,7 @@ clock_filter(
 	 * packets.
 	 */
 	if (peer->filter_epoch[k] <= peer->epoch) {
-#if DEBUG
+#if defined(DEBUG) && DEBUG
 	if (debug > 1)
 		printf("clock_filter: old sample %lu\n", current_time -
 		    peer->filter_epoch[k]);
@@ -1563,9 +1563,10 @@ clock_select(void)
 	nlist = 1;
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		nlist++;
-	endpoint_size = ALIGNED_SIZE(nlist * 2 * sizeof(*endpoint));
-	peers_size = ALIGNED_SIZE(nlist * sizeof(*peers));
-	indx_size = ALIGNED_SIZE(nlist * 2 * sizeof(*indx));
+	endpoint_size = ALIGNED_SIZE(
+                             (unsigned long)(nlist * 2 * sizeof(*endpoint)));
+	peers_size = ALIGNED_SIZE((unsigned long)(nlist * sizeof(*peers)));
+	indx_size = ALIGNED_SIZE((unsigned long)(nlist * 2 * sizeof(*indx)));
 	octets = endpoint_size + peers_size + indx_size;
 	endpoint = erealloc(endpoint, octets);
 	peers = INC_ALIGNED_PTR(endpoint, endpoint_size);
@@ -2147,8 +2148,8 @@ peer_xmit(
 		get_systime(&xmt_tx);
 		peer->org = xmt_tx;
 		xpkt.xmt = htonl_fp(xmt_tx);
-		peer->t21_bytes = sendlen;
-		sendpkt(&peer->srcadr, peer->dstadr, &xpkt, sendlen);
+		peer->t21_bytes = (int)sendlen;
+		sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
 		peer->sent++;
 		peer->outcount++;
 		peer->throttle += (1 << peer->minpoll) - 2;
