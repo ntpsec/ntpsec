@@ -580,7 +580,7 @@ true_send(
 
 	pp = peer->procptr;
 	if (!(pp->sloppyclockflag & CLK_FLAG1)) {
-		size_t len = strlen(cmd);
+		ssize_t len = strlen(cmd);
 
 		true_debug(peer, "Send '%s'\n", cmd);
 		if (write(pp->io.fd, cmd, len) != len)

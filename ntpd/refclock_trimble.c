@@ -223,7 +223,7 @@ int day_of_year (char *dt);
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
 /* #define CLK_ACUTIMEB 4	* Trimble Actutime Gold Port B UNUSED */
 
-bool praecis_msg;
+static bool praecis_msg;
 static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
 
 /* These routines are for sending packets to the Thunderbolt receiver
@@ -298,7 +298,7 @@ sendetx (
 	int fd
 	)
 {
-	int result;
+	ssize_t result;
 	
 	*(buffer->data+buffer->size++) = DLE;
 	*(buffer->data+buffer->size++) = ETX;
@@ -588,13 +588,14 @@ TSIP_decode (
 		/* 
 		 * Superpackets
 		 */
+		int GPS_UTC_Offset;
+
 		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
 		if (!((pp->sloppyclockflag & CLK_FLAG2) || event)) 
 			/* Ignore Packet */
 			return 0;	   
 	
 		switch (mb(0) & 0xff) {
-			int GPS_UTC_Offset;
 
 		    case PACKET_8F0B: 
 
@@ -640,9 +641,9 @@ TSIP_decode (
 			pp->nsec = (long) (secfrac * 1000000000); 
 
 			secint %= 86400;    /* Only care about today */
-			pp->hour = secint / 3600;
+			pp->hour = (int)(secint / 3600);
 			secint %= 3600;
-			pp->minute = secint / 60;
+			pp->minute = (int)(secint / 60);
 			secint %= 60;
 			pp->second = secint % 60;
 		
