@@ -3,7 +3,8 @@
  */
 #include "config.h"
 
-#include <isc/net.h>
+#include "isc/net.h"
+#include "include/ntp_stdlib.h"
 
 /*
  * Storage declarations
