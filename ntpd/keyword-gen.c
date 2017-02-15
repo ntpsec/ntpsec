@@ -220,8 +220,8 @@ typedef struct big_scan_state_tag {
 #define MAX_TOK_LEN	63
 
 const char *	current_keyword;/* for error reporting */
-big_scan_state	sst[MAXSTATES];	/* scanner FSM state entries */
-u_short		sst_highwater;	/* next entry index to consider */
+static big_scan_state	sst[MAXSTATES];	/* scanner FSM state entries */
+static u_short		sst_highwater;	/* next entry index to consider */
 char *		symb[1024];	/* map token ID to symbolic name */
 
 /* for libntp */
