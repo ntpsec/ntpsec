@@ -36,7 +36,8 @@
 void catchQuit (int sig);
 static volatile int signo = 0;
 /* In an ideal world, 'finish_safe()' would declared as noreturn... */
-static	void		finish_safe	(int);
+static	void	finish_safe	(int)
+			__attribute__	((__noreturn__));
 
 #ifdef SIGDANGER
 # include <ulimit.h>
@@ -44,7 +45,7 @@ static	void		finish_safe	(int);
 
 #if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 # include <dns_sd.h>
-DNSServiceRef mdns;
+static DNSServiceRef mdns;
 #endif
 
 static void check_minsane(void);
@@ -71,7 +72,7 @@ static const char *driftfile, *pidfile;
  * attempt fails, then try again once per minute for up to 5
  * times. After all, we may be starting before mDNS.
  */
-bool mdnsreg = false;
+static bool mdnsreg = false;
 int mdnstries = 5;
 #endif  /* ENABLE_MDNS_REGISTRATION */
 
@@ -103,11 +104,12 @@ static	void	lessdebug	(int);
 static	void	no_debug	(int);
 # endif	/* !DEBUG */
 
-int	saved_argc;
-char **	saved_argv;
+static int	saved_argc;
+static char **	saved_argv;
 
 int		ntpdmain		(int, char **);
-static void	mainloop		(void);
+static void	mainloop		(void)
+			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
 static void	assertion_failed	(const char *, int,
 					 isc_assertiontype_t,
@@ -115,7 +117,8 @@ static void	assertion_failed	(const char *, int,
 			__attribute__	((__noreturn__));
 static void	library_fatal_error	(const char *, int,
 					 const char *, va_list)
-					ISC_FORMAT_PRINTF(3, 0);
+					ISC_FORMAT_PRINTF(3, 0)
+			__attribute__	((__noreturn__));
 static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
@@ -340,7 +343,7 @@ parse_cmdline_opts(
 			size_t	len;
 
 			*group++ = '\0'; /* get rid of the ':' */
-			len = group - user;
+			len = (size_t)(group - user);
 			group = estrdup(group);
 			user = erealloc(user, len);
 		}
@@ -351,7 +354,7 @@ parse_cmdline_opts(
 		    long val = atol(argv[ntp_optind]);
 
 		    if (val >= 0)
-			    interface_interval = val;
+			    interface_interval = (int)val;
 		    else {
 			    fprintf(stderr,
 				    "command line interface update interval %ld must not be negative\n",
@@ -367,7 +370,7 @@ parse_cmdline_opts(
 		printf("%s\n", ntpd_version());
 		exit(0);
 	    case 'w':
-		wait_sync = strtod(ntp_optarg, NULL);
+		wait_sync = (long)strtod(ntp_optarg, NULL);
 		break;
 	    case 'x':
 		/* defer */
@@ -530,7 +533,7 @@ ntpdmain(
 		cp += strlen(cp);
 
 		for (int i = 0; i < saved_argc ; ++i) {
-			snprintf(cp, sizeof(buf) - (cp - buf),
+			snprintf(cp, sizeof(buf) - (size_t)(cp - buf),
 				" %s", saved_argv[i]);
 			cp += strlen(cp);
 		}
@@ -701,14 +704,14 @@ ntpdmain(
 		break;
 	    case 't':
 		{
-		    u_long tkey = (int)atol(ntp_optarg);
+		    u_long tkey = (u_long)atol(ntp_optarg);
 		    if (tkey == 0 || tkey > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
 				"command line trusted key %s is invalid",
 				ntp_optarg);
 			exit(0);
 		    } else {
-			authtrust(tkey, true);
+			authtrust((keyid_t)tkey, true);
 		    }
 	        }
 		break;
@@ -1008,7 +1011,7 @@ static void catchHUP(int sig)
 static int
 wait_child_sync_if(
 	int	pipe_read_fd,
-	long	wait_sync
+	long	wait_sync1
 	)
 {
 	int	rc;
@@ -1019,12 +1022,12 @@ wait_child_sync_if(
 	fd_set	readset;
 	struct timespec wtimeout;
 
-	if (0 == wait_sync)
+	if (0 == wait_sync1)
 		return 0;
 
 	/* waitsync_fd_to_close used solely by child */
 	close(waitsync_fd_to_close);
-	wait_end_time = time(NULL) + wait_sync;
+	wait_end_time = time(NULL) + wait_sync1;
 	do {
 		cur_time = time(NULL);
 		wait_rem = (wait_end_time > cur_time)
@@ -1066,7 +1069,7 @@ wait_child_sync_if(
 	} while (wait_rem > 0);
 
 	fprintf(stderr, "%s: -w/--wait-sync %ld timed out.\n",
-		progname, wait_sync);
+		progname, wait_sync1);
 	return ETIMEDOUT;
 }
 # endif	/* HAVE_WORKING_FORK */
@@ -1106,7 +1109,7 @@ static void check_minsane()
     else if (servers == 4)
         msyslog(LOG_ERR, "Found 4 servers, suggest minsane of 2");
 
-};
+}
 
 
 /*
@@ -1158,7 +1161,7 @@ library_fatal_error(
  * library_unexpected_error - Handle non fatal errors from our libraries.
  */
 # define MAX_UNEXPECTED_ERRORS 100
-int unexpected_error_cnt = 0;
+static int unexpected_error_cnt = 0;
 static void
 library_unexpected_error(
 	const char *file,
