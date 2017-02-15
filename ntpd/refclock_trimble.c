@@ -185,7 +185,7 @@ static  void	init_acutime		(int fd);
 
 
 /* Table to get from month to day of the year */
-const int days_of_year [12] = {
+static const int days_of_year [12] = {
 	0,  31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334
 };
 
