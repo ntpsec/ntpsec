@@ -835,6 +835,7 @@ ntpdmain(
 #endif
 	
 	mainloop();
+        /* unreachable, mainloop() never returns */
 	return 1;
 }
 
