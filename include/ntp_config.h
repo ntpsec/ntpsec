@@ -280,6 +280,8 @@ extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(sockaddr_u *);
 
 extern bool have_interface_option;
+extern char *stats_drift_file;	/* name of the driftfile */
+
 
 void ntp_rlimit(int, rlim_t, int, const char *);
 

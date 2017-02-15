@@ -193,8 +193,6 @@ bool old_config_style = true;	/* A boolean flag, which when set,
 		  		 * every command is being used
 			 	 */
 
-extern char *stats_drift_file;	/* name of the driftfile */
-
 /* FUNCTION PROTOTYPES */
 
 static void init_syntax_tree(config_tree *);
