@@ -3,13 +3,14 @@
  */
 #include "config.h"
 
-#include "ntpd.h"
-#include "ntp_filegen.h"
-#include "ntp_stdlib.h"
+#include "lib_strbuf.h"
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
+#include "ntp_config.h"
+#include "ntp_filegen.h"
 #include "ntp_leapsec.h"
-#include "lib_strbuf.h"
+#include "ntp_stdlib.h"
+#include "ntpd.h"
 
 #include <stdio.h>
 #include <libgen.h>
@@ -153,7 +154,7 @@ init_util(void)
  */
 #define IGNORE(r) do{if(r){}}while(0)
 
-void drift_write(char *driftfile, double drift)
+static void drift_write(char *driftfile, double drift)
 {
 	int fd;
 	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
@@ -211,7 +212,7 @@ write_stats(void)
 /*
  * stats_config - configure the stats operation
  */
-bool drift_read(const char *drift_file, double *drift)
+static bool drift_read(const char *drift_file, double *drift)
 {
 	FILE *fp;
 	if ((fp = fopen(drift_file, "r")) == NULL) {
@@ -236,7 +237,7 @@ stats_config(
 {
 	FILE	*fp;
 	const char *value;
-	int	len;
+	size_t	len;
 	double	new_drift = 0;
 	l_fp	now;
 	time_t  ttnow;
@@ -253,7 +254,7 @@ stats_config(
 			break;
 
 		stats_drift_file = erealloc(stats_drift_file, len + 1);
-		memcpy(stats_drift_file, value, (size_t)(len+1));
+		memcpy(stats_drift_file, value, len+1);
 
 		/*
 		 * Open drift file and read frequency. If the file is
@@ -277,7 +278,7 @@ stats_config(
 			    (int)sizeof(statsdir) - 2);
 		} else {
 			bool add_dir_sep;
-			int value_l;
+			size_t value_l;
 
 			/* Add a DIR_SEP unless we already have one. */
 			value_l = strlen(value);
@@ -795,7 +796,7 @@ getauthkeys(
 	const char *keyfile
 	)
 {
-	int len;
+	size_t len;
 
 	len = strlen(keyfile);
 	if (!len)
@@ -869,6 +870,6 @@ ntpd_time_stepped(void)
 	if (MON_OFF != mon_enabled) {
 		saved_mon_enabled = mon_enabled;
 		mon_stop(MON_OFF);
-		mon_start(saved_mon_enabled);
+		mon_start((int)saved_mon_enabled);
 	}
 }
