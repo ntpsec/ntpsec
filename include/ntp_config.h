@@ -226,6 +226,7 @@ struct config_tree_tag {
 	sim_fifo *	sim_details;
 	int		mdnstries;
 };
+extern int mdnstries;
 
 
 /* Structure for holding a remote configuration command */
