@@ -72,7 +72,7 @@ typedef struct itimerspec intervaltimer;
 typedef struct itimerval intervaltimer;
 #define	itv_frac	tv_usec
 #endif
-intervaltimer itimer;
+static intervaltimer itimer;
 
 void	set_timer_or_die(const intervaltimer *);
 
@@ -299,7 +299,7 @@ timer(void)
 	 */
 	if (interface_interval && interface_timer <= current_time) {
 		timer_interfacetimeout(current_time +
-		    interface_interval);
+		    (unsigned long)interface_interval);
 		DPRINTF(2, ("timer: interface update\n"));
 		interface_update(NULL, NULL);
 	}
@@ -511,10 +511,10 @@ check_leapsec(
 			report_event(EVNT_LEAP, NULL, NULL);
 			lsprox  = LSPROX_NOWARN;
 			leapsec = LSPROX_NOWARN;
-			sys_tai = lsdata.tai_offs;
+			sys_tai = (u_int)lsdata.tai_offs;
 		} else {
 			lsprox  = lsdata.proximity;
-			sys_tai = lsdata.tai_offs;
+			sys_tai = (u_int)lsdata.tai_offs;
 		}
 	}
 
