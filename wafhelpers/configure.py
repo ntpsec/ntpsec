@@ -241,16 +241,26 @@ def cmd_configure(ctx, config):
     else:
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
         ctx.env.CFLAGS += [
-            "-fPIE",                    # hardening
             "-fstack-protector-all",    # hardening
             "-O1",
-            "-pie",                     # hardening
-            "-std=gnu99"
+            "-std=gnu99",
             ]
         ctx.env.LDFLAGS += [
             "-Wl,-z,now",      # hardening, no deferred symbol resolution
-            "-Wl,-z,relro",    # hardening, marks some section read only,
             ]
+
+        if 5 <=ctx.env.CC_VERSION[0]:
+            # gcc >= 5.0
+            ctx.env.CFLAGS += [
+                "-fPIE",                    # hardening
+                "-O1",
+                "-pie",                     # hardening
+                ]
+            ctx.env.LDFLAGS += [
+                "-fPIE",           # hardening
+                "-Wl,-z,relro",    # hardening, marks some section read only,
+                ]
+
         if ctx.options.disable_debug:
             # not debugging
             ctx.env.LDFLAGS += [
