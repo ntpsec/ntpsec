@@ -140,5 +140,6 @@ extern bool lex_pop_file(void);
 extern size_t      lex_level(void);
 extern bool lex_from_file(void);
 extern struct FILE_INFO * lex_current(void);
+extern const char * const keyword_text[];
 
 #endif	/* GUARD_NTP_SCANNER_H */
