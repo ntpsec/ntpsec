@@ -252,7 +252,7 @@ def cmd_configure(ctx, config):
             "-Wl,-z,now",      # hardening, no deferred symbol resolution
             ]
 
-        if 5 <= ctx.env.CC_VERSION[0]:
+        if 5 <= int(ctx.env.CC_VERSION[0]):
             # gcc >= 5.0
             ctx.env.CFLAGS += [
                 "-fPIE",                    # hardening
