@@ -231,10 +231,6 @@ def cmd_configure(ctx, config):
                 "-fsanitize=cfi",           # hardening
                 "-fsanitize=safe-stack",    # hardening
                 ]
-            ctx.env.LDFLAGS += [
-                "-Wl,-z,now",    # hardening, no deferred symbol resolution
-                "-Wl,-z,relro",  # hardening, marks some section read only,
-                ]
             if ctx.options.disable_debug:
                 # not debugging
                 ctx.env.LDFLAGS += [
@@ -248,9 +244,6 @@ def cmd_configure(ctx, config):
             "-O1",
             "-std=gnu99",
             ]
-        ctx.env.LDFLAGS += [
-            "-Wl,-z,now",      # hardening, no deferred symbol resolution
-            ]
 
         if 5 <= int(ctx.env.CC_VERSION[0]):
             # gcc >= 5.0
@@ -261,7 +254,6 @@ def cmd_configure(ctx, config):
                 ]
             ctx.env.LDFLAGS += [
                 "-fPIE",           # hardening
-                "-Wl,-z,relro",    # hardening, marks some section read only,
                 ]
 
         if ctx.options.disable_debug:
@@ -269,6 +261,24 @@ def cmd_configure(ctx, config):
             ctx.env.LDFLAGS += [
                 "-Wl,-z,strip-all",    # Strip binaries
                 ]
+
+    # Check which linker flags are supported
+    ld_hardening_flags = (
+        ("now", "-Wl,-z,now"), # no deferred symbol resolution
+        ("relro", "-Wl,-z,relro"), # marks some sections read only
+    )
+    for (name, ldflag) in ld_hardening_flags:
+        cmd = ["ld", "-z"] + [name]
+        #print("cmd: %s" % cmd)
+        ctx.start_msg("Checking if linker supports hardening flag: -z %s" % name)
+        try:
+            ctx.cmd_and_log(cmd)
+        except Exception as e:
+            if not any(word in e.stderr for word in ["unrecognized", "unknown", "illegal"]):
+                ctx.env.LDFLAGS += [ldflag]
+                ctx.end_msg("yes")
+            else:
+                ctx.end_msg("no", color="YELLOW")
 
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
