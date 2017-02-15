@@ -596,7 +596,8 @@ gps_input(
 	}
 
       parseio->parse_dtime.parse_msglen = 1; /* reset buffer pointer */
-      parseio->parse_dtime.parse_msg[0] = ch; /* fill in first character */
+      /* fill in first character */
+      parseio->parse_dtime.parse_msg[0] = (unsigned char)ch;
       parseio->parse_dtime.parse_stime  = *tstamp; /* collect timestamp */
       return PARSE_INP_SKIP;
     }
@@ -608,7 +609,8 @@ gps_input(
       (parseio->parse_index < parseio->parse_dsize))
     parseio->parse_data[parseio->parse_index++] = ch;
 
-  parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = ch;
+  parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] \
+     = (unsigned char)ch;
 
   if (parseio->parse_dtime.parse_msglen > sizeof(parseio->parse_dtime.parse_msg))
     {
