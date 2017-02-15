@@ -111,18 +111,18 @@
  */
 enum true_event	{e_Init, e_Huh, e_F18, e_F50, e_F51, e_Satellite,
 		 e_Poll, e_Location, e_TS, e_Max};
-const char *events[] = {"Init", "Huh", "F18", "F50", "F51", "Satellite",
+static const char *events[] = {"Init", "Huh", "F18", "F50", "F51", "Satellite",
 			"Poll", "Location", "TS"};
 #define eventStr(x) (((int)x<(int)e_Max) ? events[(int)x] : "?")
 
 enum true_state	{s_Base, s_InqTM, s_InqTCU, s_InqGOES,
 		 s_Init, s_F18, s_F50, s_Start, s_Auto, s_Max};
-const char *states[] = {"Base", "InqTM", "InqTCU", "InqGOES",
+static const char *states[] = {"Base", "InqTM", "InqTCU", "InqGOES",
 			"Init", "F18", "F50", "Start", "Auto"};
 #define stateStr(x) (((int)x<(int)s_Max) ? states[(int)x] : "?")
 
 enum true_type	{t_unknown, t_goes, t_tm, t_tcu, t_omega, t_tl3, t_Max};
-const char *types[] = {"unknown", "goes", "tm", "tcu", "omega", "tl3"};
+static const char *types[] = {"unknown", "goes", "tm", "tcu", "omega", "tl3"};
 #define typeStr(x) (((int)x<(int)t_Max) ? types[(int)x] : "?")
 
 /*
@@ -331,7 +331,7 @@ true_receive(
 	/*
 	 * Read clock output.  Automatically handles CLKLDISC.
 	 */
-	rd_lencode = refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
+	rd_lencode = (u_short)refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
 	rd_lastcode[rd_lencode] = '\0';
 
 	/*
@@ -580,10 +580,10 @@ true_send(
 
 	pp = peer->procptr;
 	if (!(pp->sloppyclockflag & CLK_FLAG1)) {
-		int len = strlen(cmd);
+		size_t len = strlen(cmd);
 
 		true_debug(peer, "Send '%s'\n", cmd);
-		if (write(pp->io.fd, cmd, (unsigned)len) != len)
+		if (write(pp->io.fd, cmd, len) != len)
 			refclock_report(peer, CEVNT_FAULT);
 		else
 			pp->polls++;
