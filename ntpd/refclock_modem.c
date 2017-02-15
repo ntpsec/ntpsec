@@ -174,8 +174,8 @@
  * V1	return result codes as English words
  * Y1	enable long-space disconnect
  */
-const char def_modem_setup[] = "ATB1&C0&D2E0L1M1Q0V1Y1";
-const char *modem_setup = def_modem_setup;
+static const char def_modem_setup[] = "ATB1&C0&D2E0L1M1Q0V1Y1";
+static const char *modem_setup = def_modem_setup;
 
 /*
  * Timeouts (all in seconds)
@@ -329,7 +329,7 @@ modem_receive(
 	peer = rbufp->recv_peer;
 	pp = peer->procptr;
 	up = pp->unitptr;
-	octets = sizeof(up->buf) - (up->bufptr - up->buf);
+	octets = sizeof(up->buf) - (size_t)(up->bufptr - up->buf);
 	refclock_gtraw(rbufp, tbuf, octets, &pp->lastrec);
 	for (tptr = tbuf; *tptr != '\0'; tptr++) {
 		if (*tptr == LF) {
@@ -468,7 +468,7 @@ modem_timeout(
 	struct modemunit *up;
 	struct refclockproc *pp;
 	int	fd;
-	int	rc;
+	ssize_t	rc;
 	char	device[20];
 	char	lockfile[128], pidbuf[8];
 
@@ -719,7 +719,7 @@ modem_timer(
 	} else {
 		up->timer--;
 		if (up->timer == 0)
-			modem_timeout(peer, up->state);
+			modem_timeout(peer, (teModemState)up->state);
 	}
 }
 
