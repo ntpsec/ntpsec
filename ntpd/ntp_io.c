@@ -83,7 +83,7 @@ struct nic_rule_tag {
  * NIC rule listhead.  Entries are added at the head so that the first
  * match in the list is the last matching rule specified.
  */
-nic_rule *nic_rule_list;
+static nic_rule *nic_rule_list;
 
 /*
  * This code is a remnant from when ntpd did asynchronous input using
@@ -125,7 +125,7 @@ endpt *	any6_interface;		/* wildcard ipv6 interface */
 endpt *	loopback_interface;	/* loopback ipv4 interface */
 
 u_int sys_ifnum;			/* next .ifnum to assign */
-int ninterfaces;			/* total # of interfaces */
+static int ninterfaces;			/* total # of interfaces */
 
 bool disable_dynamic_updates;	/* if true, scan interfaces once only */
 
@@ -182,7 +182,7 @@ struct vsock {
 	enum desc_type	type;
 };
 
-vsock_t	*fd_list;
+static vsock_t	*fd_list;
 
 #if defined(USE_ROUTING_SOCKET)
 /*
@@ -199,7 +199,7 @@ struct asyncio_reader {
 	void (*receiver)(struct asyncio_reader *);  /* input handler */
 };
 
-struct asyncio_reader *asyncio_reader_list;
+static struct asyncio_reader *asyncio_reader_list;
 
 static void delete_asyncio_reader (struct asyncio_reader *);
 static struct asyncio_reader *new_asyncio_reader (void);
@@ -227,13 +227,13 @@ struct remaddr {
 	endpt *			ep;
 };
 
-remaddr_t *	remoteaddr_list;
+static remaddr_t * remoteaddr_list;
 endpt *		ep_list;	/* complete endpt list */
 
 static endpt *	wildipv4;
 static endpt *	wildipv6;
 
-const int accept_wildcard_if_for_winnt = false;
+static const int accept_wildcard_if_for_winnt = false;
 
 static void	add_fd_to_list		(SOCKET, enum desc_type);
 static endpt *	find_addr_in_list	(sockaddr_u *);
@@ -1150,9 +1150,9 @@ convert_isc_if(
 	strlcpy(itf->name, isc_if->name, sizeof(itf->name));
 	itf->ifindex = isc_if->ifindex;
 	itf->family = (u_short)isc_if->af;
-	AF(&itf->sin) = itf->family;
-	AF(&itf->mask) = itf->family;
-	AF(&itf->bcast) = itf->family;
+	AF(&itf->sin) = (sa_family_t)itf->family;
+	AF(&itf->mask) = (sa_family_t)itf->family;
+	AF(&itf->bcast) = (sa_family_t)itf->family;
 	SET_PORT(&itf->sin, port);
 	SET_PORT(&itf->mask, port);
 	SET_PORT(&itf->bcast, port);
@@ -1281,7 +1281,7 @@ sau_from_netaddr(
 	)
 {
 	ZERO_SOCK(psau);
-	AF(psau) = (u_short)pna->family;
+	AF(psau) = (sa_family_t)pna->family;
 	switch (pna->family) {
 
 	case AF_INET:
@@ -2132,7 +2132,7 @@ sendpkt(
 	)
 {
 	endpt *	src;
-	int	cc;
+	ssize_t	cc;
 
 	src = ep;
 	if (NULL == src) {
@@ -2205,14 +2205,14 @@ read_refclock_packet(
 		saved_errno = errno;
 		freerecvbuf(rb);
 		errno = saved_errno;
-		return buflen;
+		return (int)buflen;
 	}
 
 	/*
 	 * Got one. Mark how and when it got here,
 	 * put it on the full list and do bookkeeping.
 	 */
-	rb->recv_length = buflen;
+	rb->recv_length = (size_t)buflen;
 	rb->recv_peer = rp->srcclock;
 	rb->dstadr = 0;
 	rb->cast_flags = 0;
@@ -2227,7 +2227,7 @@ read_refclock_packet(
 		packets_received++;
 	}
 
-	return buflen;
+	return (int)buflen;
 }
 #endif	/* REFCLOCK */
 
@@ -2244,7 +2244,7 @@ read_network_packet(
 	)
 {
 	GETSOCKNAME_SOCKLEN_TYPE fromlen;
-	int buflen;
+	ssize_t buflen;
 	register struct recvbuf *rb;
 #ifdef USE_PACKET_TIMESTAMP
 	struct msghdr msghdr;
@@ -2269,7 +2269,7 @@ read_network_packet(
 
 		fromlen = sizeof(from);
 		buflen = recvfrom(fd, buf, sizeof(buf), 0,
-				  &from.sa, &fromlen);
+				       &from.sa, &fromlen);
 		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
 			(itf->ignore_packets)
 			    ? "ignore"
@@ -2285,9 +2285,9 @@ read_network_packet(
 	fromlen = sizeof(rb->recv_srcadr);
 
 #ifndef USE_PACKET_TIMESTAMP
-	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
-				   sizeof(rb->recv_space), 0,
-				   &rb->recv_srcadr.sa, &fromlen);
+	rb->recv_length = (size_t)recvfrom(fd, (char *)&rb->recv_space,
+				           sizeof(rb->recv_space), 0,
+				           &rb->recv_srcadr.sa, &fromlen);
 #else
 	iovec.iov_base        = &rb->recv_space;
 	iovec.iov_len         = sizeof(rb->recv_space);
@@ -2321,7 +2321,7 @@ read_network_packet(
 	}
 
 	DPRINTF(3, ("read_network_packet: fd=%d length %d from %s\n",
-		    fd, buflen, socktoa(&rb->recv_srcadr)));
+		    fd, (int)buflen, socktoa(&rb->recv_srcadr)));
 
 	/*
 	 * We used to drop network packets with addresses matching the magic
@@ -2740,7 +2740,7 @@ findlocalinterface(
 	DPRINTF(4, ("findlocalinterface: kernel maps %s to %s\n",
 		    socktoa(addr), socktoa(&saddr)));
 
-	iface = getinterface(&saddr, flags);
+	iface = getinterface(&saddr, (uint32_t)flags);
 
 	/*
 	 * if we didn't find an exact match on saddr, find the closest
@@ -3253,7 +3253,8 @@ static void
 process_routing_msgs(struct asyncio_reader *reader)
 {
 	char buffer[5120];
-	int cnt, msg_type;
+	ssize_t cnt;
+        int msg_type;
 #ifdef HAVE_LINUX_RTNETLINK_H
 	struct nlmsghdr *nh;
 #else
