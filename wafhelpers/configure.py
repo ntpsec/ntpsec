@@ -54,6 +54,8 @@ def cmd_configure(ctx, config):
     ctx.setenv('host', ctx.env.derive())
 
     ctx.load('compiler_c')
+    ctx.start_msg('Checking compiler version')
+    ctx.end_msg('%s.%s.%s' % ctx.env.CC_VERSION)
     ctx.load('bison')
 
     for opt in opt_map:
@@ -239,6 +241,7 @@ def cmd_configure(ctx, config):
                     "-Wl,--strip-all",    # Strip binaries
                     ]
     else:
+        # gcc, probably
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
         ctx.env.CFLAGS += [
             "-fstack-protector-all",    # hardening
@@ -249,7 +252,7 @@ def cmd_configure(ctx, config):
             "-Wl,-z,now",      # hardening, no deferred symbol resolution
             ]
 
-        if 5 <=ctx.env.CC_VERSION[0]:
+        if 5 <= ctx.env.CC_VERSION[0]:
             # gcc >= 5.0
             ctx.env.CFLAGS += [
                 "-fPIE",                    # hardening
