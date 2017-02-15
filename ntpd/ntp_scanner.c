@@ -36,7 +36,7 @@
  */
 
 #define MAX_LEXEME (1024 + 1)	/* The maximum size of a lexeme */
-char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
+static char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
 uint32_t conf_file_sum;		/* Simple sum of characters read */
 
 static struct FILE_INFO * lex_stack = NULL;
@@ -51,7 +51,7 @@ static struct FILE_INFO * lex_stack = NULL;
 /* SCANNER GLOBAL VARIABLES 
  * ------------------------
  */
-const char special_chars[] = "{}(),;|=";
+static const char special_chars[] = "{}(),;|=";
 
 
 /* FUNCTIONS
@@ -75,7 +75,7 @@ keyword(
 	size_t i;
 	const char *text;
 
-	i = token - LOWEST_KEYWORD_ID;
+	i = (size_t)(token - LOWEST_KEYWORD_ID);
 
 	if (i < COUNTOF(keyword_text))
 		text = keyword_text[i];
@@ -167,13 +167,13 @@ lex_getch(
 		ch = stream->backch;
 		stream->backch = EOF;
 		if (stream->fpi)
-			conf_file_sum += ch;
+			conf_file_sum += (unsigned int)ch;
 	} else if (stream->fpi) {
 		/* fetch next 7-bit ASCII char (or EOF) from file */
 		while ((ch = fgetc(stream->fpi)) != EOF && ch > SCHAR_MAX)
 			stream->curpos.ncol++;
 		if (EOF != ch) {
-			conf_file_sum += ch;
+			conf_file_sum += (unsigned int)ch;
 			stream->curpos.ncol++;
 		}
 	} else {
@@ -229,7 +229,7 @@ lex_ungetch(
 	/* keep for later reference and update checksum */
 	stream->backch = (uint8_t)ch;
 	if (stream->fpi)
-		conf_file_sum -= stream->backch;
+		conf_file_sum -= (unsigned int)stream->backch;
 
 	/* update position */
 	if (stream->backch == '\n') {
@@ -820,7 +820,8 @@ yylex(void)
 		} else if (is_integer(yytext)) {
 			yylval_was_set = true;
 			errno = 0;
-			if ((yylval.Integer = strtol(yytext, NULL, 10)) == 0
+			yylval.Integer = (int)strtol(yytext, NULL, 10);
+			if (yylval.Integer == 0
 			    && ((errno == EINVAL) || (errno == ERANGE))) {
 				msyslog(LOG_ERR, 
 					"Integer cannot be represented: %s",
@@ -838,7 +839,7 @@ yylex(void)
 		} else if (is_u_int(yytext)) {
 			yylval_was_set = true;
 			if ('0' == yytext[0] &&
-			    'x' == tolower((unsigned long)yytext[1]))
+			    'x' == tolower((int)yytext[1]))
 				converted = sscanf(&yytext[2], "%x",
 						   &yylval.U_int);
 			else
