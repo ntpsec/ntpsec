@@ -211,76 +211,46 @@ def cmd_configure(ctx, config):
         "-Wstrict-prototypes",
         ]
 
-    # Check which linker flags are supported
-    ld_hardening_flags = [
-        ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
-    ]
-    if not ctx.options.disable_debug:
-        # not debugging
-        ld_hardening_flags += [
-            ('--strip-all', "-Wl,--strip-all"),    # Strip binaries
-            ]
-
-    # old gcc takes -z,relro, but then barfs is -fPIE available and used.
-    # ("relro", "-Wl,-z,relro"), # marks some sections read only
-
-    for (name, ldflag) in ld_hardening_flags:
-        cmd = [ctx.env.CC_NAME, ldflag]
-        #print("cmd: %s" % cmd)
-        ctx.start_msg("Checking if linker supports hardening flag: %s" % name)
-        try:
-            ctx.cmd_and_log(cmd)
-        except Exception as e:
-            if not any(word in e.stderr for word
-                       in ['ignored', 'illegal', 'unknown', 'unrecognized']):
-                ctx.env.LDFLAGS += [ldflag]
-                ctx.end_msg("yes")
-            else:
-                ctx.end_msg("no", color="YELLOW")
-
     # We require some things that C99 doesn't enable, like pthreads.
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
     # it.
     if ctx.env.CC_NAME == "sun":
         ctx.env.CFLAGS += ["-std=c99"]
-    elif ctx.env.CC_NAME == "clang":
-        # used on macOS, FreeBSD,
-        # FORTIFY needs LTO to work well
-        ctx.env.CFLAGS += [
-            "-fstack-protector-all",    # hardening
-            "-std=gnu99",
-            "-D_FORTIFY_SOURCE=2",      # hardening
-            ]
-        if ctx.env.DEST_OS not in ["darwin", "freebsd"]:
-            # -flto breaks tests on macOS
-            ctx.env.CFLAGS += [
-                "-flto",                    # hardening, needed for sanitize
-                "-fsanitize=cfi",           # hardening
-                "-fsanitize=safe-stack",    # hardening
-                ]
-            ctx.env.LDFLAGS += [
-                "-Wl,-z,relro",  # hardening, marks some section read only,
-                ]
     else:
-        # gcc, probably
-        # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
-        ctx.env.CFLAGS += [
-            "-fstack-protector-all",    # hardening
-            "-O1",
-            "-std=gnu99",
-            ]
+        ctx.env.CFLAGS += ["-std=gnu99"]
 
-        if 5 <= int(ctx.env.CC_VERSION[0]):
-            # gcc >= 5.0
-            ctx.env.CFLAGS += [
-                "-fPIE",                    # hardening
-                "-O1",
-                "-pie",                     # hardening
-                ]
-            ctx.env.LDFLAGS += [
-                "-fPIE",           # hardening
-                "-Wl,-z,relro",    # hardening, marks some section read only,
-                ]
+    # Check which compiler flags are supported
+    cc_hardening_flags = [
+        "-fstack-protector-all",
+        "-D_FORTIFY_SOURCE=2",
+        "-flto",
+        "-fsanitize=cfi",
+        "-fsanitize=safe-stack",
+        "-O1",
+        "-fPIE",
+        "-pie",
+    ]
+
+    for cflag in cc_hardening_flags:
+        ctx.check_cc(cflags=cflag, uselib_store="TMP", mandatory=False)
+    ctx.env.CFLAGS += ctx.env.CFLAGS_TMP
+
+    # Check which linker flags are supported
+    ld_hardening_flags = [
+        "-Wl,-z,now",
+        "-Wl,-z,relro",
+        "-fPIE",
+    ]
+    if ctx.options.disable_debug:
+        # not debugging
+        ld_hardening_flags += [
+            "--strip-all", # Strip binaries
+            "-Wl,-z,strip-all", # Strip binaries
+        ]
+
+    for ldflag in ld_hardening_flags:
+        ctx.check_cc(linkflags=ldflag, uselib_store="TMP", mandatory=False)
+    ctx.env.LDFLAGS += ctx.env.LINKFLAGS_TMP
 
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
