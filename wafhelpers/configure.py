@@ -228,6 +228,8 @@ def cmd_configure(ctx, config):
 
     # check if C compiler supports some flags
     for (name, ccflag) in cc_test_flags:
+        # FIXME??: on macOS can get this warning:
+        # clang: warning: argument unused during compilation: '-pie'
         ctx.check_cc(define_name='HAS_' + name,
                      cflags=ccflag,
                      fragment='int main() {}\n',
