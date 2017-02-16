@@ -211,6 +211,33 @@ def cmd_configure(ctx, config):
         "-Wstrict-prototypes",
         ]
 
+    # Check which linker flags are supported
+    ld_hardening_flags = [
+        ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
+    ]
+    if not ctx.options.disable_debug:
+        # not debugging
+        ld_hardening_flags += [
+            ('--strip-all', "-Wl,--strip-all"),    # Strip binaries
+            ]
+
+    # old gcc takes -z,relro, but then barfs is -fPIE available and used.
+    # ("relro", "-Wl,-z,relro"), # marks some sections read only
+
+    for (name, ldflag) in ld_hardening_flags:
+        cmd = [ctx.env.CC_NAME, ldflag]
+        #print("cmd: %s" % cmd)
+        ctx.start_msg("Checking if linker supports hardening flag: %s" % name)
+        try:
+            ctx.cmd_and_log(cmd)
+        except Exception as e:
+            if not any(word in e.stderr for word
+                       in ['ignored', 'illegal', 'unknown', 'unrecognized']):
+                ctx.env.LDFLAGS += [ldflag]
+                ctx.end_msg("yes")
+            else:
+                ctx.end_msg("no", color="YELLOW")
+
     # We require some things that C99 doesn't enable, like pthreads.
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
     # it.
@@ -232,14 +259,8 @@ def cmd_configure(ctx, config):
                 "-fsanitize=safe-stack",    # hardening
                 ]
             ctx.env.LDFLAGS += [
-                "-Wl,-z,now",    # hardening, no deferred symbol resolution
                 "-Wl,-z,relro",  # hardening, marks some section read only,
                 ]
-            if ctx.options.disable_debug:
-                # not debugging
-                ctx.env.LDFLAGS += [
-                    "-Wl,--strip-all",    # Strip binaries
-                    ]
     else:
         # gcc, probably
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
@@ -247,9 +268,6 @@ def cmd_configure(ctx, config):
             "-fstack-protector-all",    # hardening
             "-O1",
             "-std=gnu99",
-            ]
-        ctx.env.LDFLAGS += [
-            "-Wl,-z,now",      # hardening, no deferred symbol resolution
             ]
 
         if 5 <= int(ctx.env.CC_VERSION[0]):
@@ -262,12 +280,6 @@ def cmd_configure(ctx, config):
             ctx.env.LDFLAGS += [
                 "-fPIE",           # hardening
                 "-Wl,-z,relro",    # hardening, marks some section read only,
-                ]
-
-        if ctx.options.disable_debug:
-            # not debugging
-            ctx.env.LDFLAGS += [
-                "-Wl,-z,strip-all",    # Strip binaries
                 ]
 
     # XXX: hack
