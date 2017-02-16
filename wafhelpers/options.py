@@ -70,8 +70,6 @@ def options_cmd(ctx, config):
     grp.add_option('--ldflags', type='string', action="callback",
                    callback=callback_flags,
                    help="Users should use LDFLAGS in their environment.")
-    grp.add_option('--enable-fortify', action='store_true',
-                   help="Enable HP Fortify.")
     grp.add_option('--fortify-flags', type='string', action='store',
                    help="Fortify flags.")
     grp.add_option('--check', action='store_true', default=False,

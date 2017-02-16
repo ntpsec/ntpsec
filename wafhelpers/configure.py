@@ -3,7 +3,7 @@ from __future__ import print_function
 import os
 from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
-from wafhelpers.util import msg, msg_setting
+from wafhelpers.util import msg, msg_setting, parse_version
 
 
 def cmd_configure(ctx, config):
@@ -14,7 +14,6 @@ def cmd_configure(ctx, config):
     ctx.load('waf', tooldir='wafhelpers/')
     ctx.load('waf_unit_test')
 
-    from wafhelpers.util import parse_version
     parse_version(config)
 
     ctx.env.NTPSEC_VERSION_MAJOR = config["NTPSEC_VERSION_MAJOR"]
@@ -197,11 +196,6 @@ def cmd_configure(ctx, config):
     # needs to be tested before CFLAGS are set
     if ctx.check_endianness() == "big":
         ctx.define("WORDS_BIGENDIAN", 1)
-
-    # This needs to be at the top since it modifies CC and AR
-    if ctx.options.enable_fortify:
-        from wafhelpers.check_fortify import check_fortify
-        check_fortify(ctx)
 
     cc_test_flags = [
         ('PIE', '-pie -fPIE'),
