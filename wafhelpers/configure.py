@@ -200,6 +200,8 @@ def cmd_configure(ctx, config):
     cc_test_flags = [
         ('PIE', '-pie -fPIE'),
         ('gnu99', '-std=gnu99'),
+        # this quiets most of macOS warnings on -fpie
+        ('unused', '-Qunused-arguments'),
         ]
 
     if ctx.options.enable_debug_gdb:
@@ -228,8 +230,6 @@ def cmd_configure(ctx, config):
 
     # check if C compiler supports some flags
     for (name, ccflag) in cc_test_flags:
-        # FIXME??: on macOS can get this warning:
-        # clang: warning: argument unused during compilation: '-pie'
         ctx.check_cc(define_name='HAS_' + name,
                      cflags=ccflag,
                      fragment='int main() {}\n',
@@ -256,6 +256,11 @@ def cmd_configure(ctx, config):
         ld_hardening_flags += [
             ('PIE', "-fPIE"),           # hardening
             ('relrow', "-Wl,-z,relro"),  # hardening, marks some read only,
+            ]
+
+    if ctx.env.HAS_unused:
+        ctx.env.CFLAGS += [
+            '-Qunused-arguments',
             ]
 
     # XXX: -flto currently breaks link of ntpd
