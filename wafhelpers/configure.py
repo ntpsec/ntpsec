@@ -193,6 +193,11 @@ def cmd_configure(ctx, config):
 
         return
 
+    # These are required by various refclocks
+    # needs to be tested before CFLAGS are set
+    if ctx.check_endianness() == "big":
+        ctx.define("WORDS_BIGENDIAN", 1)
+
     # This needs to be at the top since it modifies CC and AR
     if ctx.options.enable_fortify:
         from wafhelpers.check_fortify import check_fortify
@@ -242,7 +247,7 @@ def cmd_configure(ctx, config):
             ('relrow', "-Wl,-z,relro"),  # hardening, marks some read only,
             ]
 
-    # XXX: -flto breaks endianness test???
+    # XXX: -flto currently breaks link of ntpd
     if ctx.env.HAS_LTO and False:
         ctx.env.CFLAGS += [
             "-flto",
@@ -589,10 +594,6 @@ def cmd_configure(ctx, config):
                comment="Whether SO_REUSEADDR is needed to open "
                "same sockets on alternate interfaces, required "
                "by Linux at least")
-
-    # These are required by various refclocks
-    if ctx.check_endianness() == "big":
-        ctx.define("WORDS_BIGENDIAN", 1)
 
     from wafhelpers.check_vsprintfm import check_vsprintfm
     check_vsprintfm(ctx)
