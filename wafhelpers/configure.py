@@ -199,6 +199,7 @@ def cmd_configure(ctx, config):
 
     cc_test_flags = [
         ('PIE', '-pie -fPIE'),
+        ('gnu99', '-std=gnu99'),
         ]
 
     if ctx.options.enable_debug_gdb:
@@ -213,6 +214,8 @@ def cmd_configure(ctx, config):
         ctx.env.BISONFLAGS += ["--debug"]
 
     ctx.env.CFLAGS += [
+        # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
+        "-O1",
         "-Wall",
         "-Wextra",
         "-Wstrict-prototypes",
@@ -230,6 +233,18 @@ def cmd_configure(ctx, config):
                      fragment='int main() {}\n',
                      mandatory=False,
                      msg='Checking if C compiler supports ' + name,)
+
+    # We require some things that C99 doesn't enable, like pthreads.
+    # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
+    # it.
+    if ctx.env.HAS_gnu99:
+        ctx.env.CFLAGS += [
+            "-std=gnu99",
+            ]
+    else:
+        ctx.env.CFLAGS += [
+            "-std=c99",
+            ]
 
     if ctx.env.HAS_PIE:
         ctx.env.CFLAGS += [
@@ -270,17 +285,14 @@ def cmd_configure(ctx, config):
             else:
                 ctx.end_msg("no", color="YELLOW")
 
-    # We require some things that C99 doesn't enable, like pthreads.
-    # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
-    # it.
     if ctx.env.CC_NAME == "sun":
-        ctx.env.CFLAGS += ["-std=c99"]
+        # we are sun, placeholder
+        ctx.env.CFLAGS += []
     elif ctx.env.CC_NAME == "clang":
         # used on macOS, FreeBSD,
         # FORTIFY needs LTO to work well
         ctx.env.CFLAGS += [
             "-fstack-protector-all",    # hardening
-            "-std=gnu99",
             "-D_FORTIFY_SOURCE=2",      # hardening
             ]
         if ctx.env.DEST_OS not in ["darwin", "freebsd"]:
@@ -296,10 +308,7 @@ def cmd_configure(ctx, config):
     else:
         # gcc, probably
         ctx.env.CFLAGS += [
-            # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
             "-fstack-protector-all",    # hardening
-            "-O1",
-            "-std=gnu99",
             ]
 
     # XXX: hack
