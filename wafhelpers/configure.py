@@ -215,6 +215,24 @@ def cmd_configure(ctx, config):
     ld_hardening_flags = [
         ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
+
+    # check if C compiler supports -fPIE
+    ctx.check_cc(define_name='HAS_PIE',
+                 cflags='-pie -fPIEX',
+                 fragment='int main() {}\n',
+                 mandatory=False,
+                 msg='Checking if C compiler supports -fPIE',)
+
+    if ctx.env.HAS_PIE:
+        ctx.env.CFLAGS += [
+            "-FPIE",
+            "-pie",
+            ]
+        ld_hardening_flags = [
+            "-fPIE",           # hardening
+            "-Wl,-z,relro",    # hardening, marks some section read only,
+            ]
+
     if ctx.options.disable_debug:
         # not debugging
         ld_hardening_flags += [
@@ -263,24 +281,12 @@ def cmd_configure(ctx, config):
                 ]
     else:
         # gcc, probably
-        # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
         ctx.env.CFLAGS += [
+            # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
             "-fstack-protector-all",    # hardening
             "-O1",
             "-std=gnu99",
             ]
-
-        if 5 <= int(ctx.env.CC_VERSION[0]):
-            # gcc >= 5.0
-            ctx.env.CFLAGS += [
-                "-fPIE",                    # hardening
-                "-O1",
-                "-pie",                     # hardening
-                ]
-            ctx.env.LDFLAGS += [
-                "-fPIE",           # hardening
-                "-Wl,-z,relro",    # hardening, marks some section read only,
-                ]
 
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
