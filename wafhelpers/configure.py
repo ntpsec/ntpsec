@@ -248,7 +248,7 @@ def cmd_configure(ctx, config):
 
     if ctx.env.HAS_PIE:
         ctx.env.CFLAGS += [
-            "-FPIE",
+            "-fPIE",
             "-pie",
             ]
         ld_hardening_flags += [
