@@ -215,7 +215,7 @@ def cmd_configure(ctx, config):
     ld_hardening_flags = [
         ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
-    if not ctx.options.disable_debug:
+    if ctx.options.disable_debug:
         # not debugging
         ld_hardening_flags += [
             ('--strip-all', "-Wl,--strip-all"),    # Strip binaries
@@ -226,7 +226,7 @@ def cmd_configure(ctx, config):
 
     for (name, ldflag) in ld_hardening_flags:
         cmd = [ctx.env.CC_NAME, ldflag]
-        #print("cmd: %s" % cmd)
+        # print("cmd: %s" % cmd)
         ctx.start_msg("Checking if linker supports hardening flag: %s" % name)
         try:
             ctx.cmd_and_log(cmd)
