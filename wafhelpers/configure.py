@@ -55,7 +55,7 @@ def cmd_configure(ctx, config):
 
     ctx.load('compiler_c')
     ctx.start_msg('Checking compiler version')
-    ctx.end_msg('%s.%s.%s' % ctx.env.CC_VERSION)
+    ctx.end_msg("%s" % ".".join(ctx.env.CC_VERSION))
     ctx.load('bison')
 
     for opt in opt_map:
