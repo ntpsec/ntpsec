@@ -198,8 +198,16 @@ def cmd_configure(ctx, config):
         from wafhelpers.check_fortify import check_fortify
         check_fortify(ctx)
 
+    cc_test_flags = [
+        ('PIE', '-pie -fPIE'),
+        ]
+
     if ctx.options.enable_debug_gdb:
         ctx.env.CFLAGS += ["-g"]
+    else:
+        cc_test_flags += [
+            ('LTO', '-flto'),
+            ]
 
     if not ctx.options.disable_debug:
         ctx.define("DEBUG", 1, comment="Enable debug mode")
@@ -216,21 +224,28 @@ def cmd_configure(ctx, config):
         ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
 
-    # check if C compiler supports -fPIE
-    ctx.check_cc(define_name='HAS_PIE',
-                 cflags='-pie -fPIEX',
-                 fragment='int main() {}\n',
-                 mandatory=False,
-                 msg='Checking if C compiler supports -fPIE',)
+    # check if C compiler supports some flags
+    for (name, ccflag) in cc_test_flags:
+        ctx.check_cc(define_name='HAS_' + name,
+                     cflags=ccflag,
+                     fragment='int main() {}\n',
+                     mandatory=False,
+                     msg='Checking if C compiler supports ' + name,)
 
     if ctx.env.HAS_PIE:
         ctx.env.CFLAGS += [
             "-FPIE",
             "-pie",
             ]
-        ld_hardening_flags = [
-            "-fPIE",           # hardening
-            "-Wl,-z,relro",    # hardening, marks some section read only,
+        ld_hardening_flags += [
+            ('PIE', "-fPIE"),           # hardening
+            ('relrow', "-Wl,-z,relro"),  # hardening, marks some read only,
+            ]
+
+    # XXX: -flto breaks endianness test???
+    if ctx.env.HAS_LTO and False:
+        ctx.env.CFLAGS += [
+            "-flto",
             ]
 
     if ctx.options.disable_debug:
