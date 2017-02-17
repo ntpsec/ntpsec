@@ -255,7 +255,7 @@ def cmd_configure(ctx, config):
             ]
         ld_hardening_flags += [
             ('PIE', "-fPIE"),           # hardening
-            ('relrow', "-Wl,-z,relro"),  # hardening, marks some read only,
+            ('relro', "-Wl,-z,relro"),  # hardening, marks some read only,
             ]
 
     if ctx.env.HAS_unused:
