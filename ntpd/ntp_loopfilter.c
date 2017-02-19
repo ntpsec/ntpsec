@@ -16,7 +16,6 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_calendar.h"
-#include "ntp_proto.h"
 #include "ntp_stdlib.h"
 #include "ntp_syscall.h"
 
