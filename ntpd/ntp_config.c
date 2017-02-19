@@ -52,6 +52,11 @@
 #endif
 
 /*
+ * Selection algorithm tuning parameters
+ */
+#define MAX_TTL		8	/* max ttl mapping vector size */
+
+/*
  * In the past, we told reference clocks from network peers by giving
  * the reference clocks magic address of a particular special form
  * ntpd itself, the filtering that used to be done based on this magic

@@ -39,9 +39,20 @@
 #define NTP_FWEIGHT	.5	/* clock filter weight */
 
 /*
+ * Selection algorithm tuning parameters
+ */
+#define	NTP_MINCLOCK	3	/* min survivors */
+#define	NTP_MAXCLOCK	10	/* max candidates */
+#define MINDISPERSE	.001	/* min distance */
+#define CLOCK_SGATE	3.	/* popcorn spike gate */
+#define	NTP_ORPHWAIT	300	/* orphan wair (s) */
+
+/*
  * pool soliciting restriction duration (s)
  */
 #define	POOL_SOLICIT_WINDOW	8
+
+#define DIFF(x, y) (SQUARE((x) - (y)))
 
 /*
  * peer_select groups statistics for a peer used by clock_select() and

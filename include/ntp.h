@@ -100,16 +100,8 @@ typedef unsigned int	u_int;
 /*
  * Selection algorithm tuning parameters
  */
-#define	NTP_MINCLOCK	3	/* min survivors */
-#define	NTP_MAXCLOCK	10	/* max candidates */
-#define MINDISPERSE	.001	/* min distance */
 #define MAXDISTANCE	1.5	/* max root distance (select threshold) */
-#define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
-#define MAXHOP		2	/* anti-clockhop threshold */
-#define MAX_TTL		8	/* max ttl mapping vector size */
-#define NTP_MAXEXTEN	2048	/* max extension field size */
-#define	NTP_ORPHWAIT	300	/* orphan wair (s) */
 
 /*
  * Miscellaneous stuff
@@ -119,7 +111,6 @@ typedef unsigned int	u_int;
  * Limits of things
  */
 #define	MAXFILENAME	256	/* max length of file name */
-#define MAXHOSTNAME	512	/* max length of host/node name */
 #define NTP_MAXSTRLEN	256	/* max string length */
 
 /*
@@ -135,9 +126,7 @@ typedef unsigned int	u_int;
  */
 #define SQUARE(x) ((x) * (x))
 #define SQRT(x) (sqrt(x))
-#define DIFF(x, y) (SQUARE((x) - (y)))
 #define LOGTOD(a)	ldexp(1., (int)(a)) /* log2 to double */
-#define UNIVAR(x)	(SQUARE(.28867513 * LOGTOD(x))) /* std uniform distr */
 #define ULOGTOD(a)	ldexp(1., (int)(a)) /* ulog2 to double */
 
 #define	EVENT_TIMEOUT	0	/* one second, that is */
