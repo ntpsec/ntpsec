@@ -230,11 +230,20 @@ def cmd_configure(ctx, config):
 
     # check if C compiler supports some flags
     for (name, ccflag) in cc_test_flags:
-        ctx.check_cc(define_name='HAS_' + name,
-                     cflags=ccflag,
-                     fragment='int main() {}\n',
-                     mandatory=False,
-                     msg='Checking if C compiler supports ' + name,)
+        cmd = [ctx.env.CC_NAME, ccflag]
+        # print("cmd: %s" % cmd)
+        ctx.start_msg("Checking for compiler hardening flag: %s" % name)
+        try:
+            ctx.cmd_and_log(cmd)
+        except Exception as e:
+            if not any(word in e.stderr for word
+                       in ['ignored', 'illegal', 'unknown', 'unrecognized']):
+                ctx.env.CFLAGS += [ccflag]
+                ctx.end_msg("yes")
+                ctx.env['HAS_' + name] = True
+            else:
+                ctx.env['HAS_' + name] = False
+                ctx.end_msg("no", color="YELLOW")
 
     # We require some things that C99 doesn't enable, like pthreads.
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
@@ -281,7 +290,7 @@ def cmd_configure(ctx, config):
     for (name, ldflag) in ld_hardening_flags:
         cmd = [ctx.env.CC_NAME, ldflag]
         # print("cmd: %s" % cmd)
-        ctx.start_msg("Checking if linker supports hardening flag: %s" % name)
+        ctx.start_msg("Checking for linker hardening flag: %s" % name)
         try:
             ctx.cmd_and_log(cmd)
         except Exception as e:
