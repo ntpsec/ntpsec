@@ -93,11 +93,9 @@ typedef unsigned int	u_int;
 #define	NTP_MINPKT	2	/* guard time (s) */
 
 /*
- * Clock filter algorithm tuning parameters
+ * Clock filter algorithm tuning parameter
  */
-#define MAXDISPERSE	16.	/* max dispersion */
 #define	NTP_SHIFT	8	/* clock filter stages */
-#define NTP_FWEIGHT	.5	/* clock filter weight */
 
 /*
  * Selection algorithm tuning parameters

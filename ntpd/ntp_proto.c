@@ -33,6 +33,12 @@
 #define	RESP_DELAY	1	/* refclock burst delay (s) */
 
 /*
+ * Clock filter algorithm tuning parameters
+ */
+#define MAXDISPERSE	16.	/* max dispersion */
+#define NTP_FWEIGHT	.5	/* clock filter weight */
+
+/*
  * pool soliciting restriction duration (s)
  */
 #define	POOL_SOLICIT_WINDOW	8
