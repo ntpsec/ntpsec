@@ -47,35 +47,6 @@ typedef time_t (*systime_func_ptr)(time_t *);
 extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 
 /*
- * days-of-week
- */
-#define CAL_SUNDAY	0
-#define CAL_MONDAY	1
-#define CAL_TUESDAY	2
-#define CAL_WEDNESDAY	3
-#define CAL_THURSDAY	4
-#define CAL_FRIDAY	5
-#define CAL_SATURDAY	6
-#define CAL_SUNDAY7	7	/* also sunday */
-
-/*
- * Days in each month.	30 days hath September...
- */
-#define	JAN	31
-#define	FEB	28
-#define	FEBLEAP	29
-#define	MAR	31
-#define	APR	30
-#define	MAY	31
-#define	JUN	30
-#define	JUL	31
-#define	AUG	31
-#define	SEP	30
-#define	OCT	31
-#define	NOV	30
-#define	DEC	31
-
-/*
  * We deal in a 4 year cycle starting at March 1, 1900.	 We assume
  * we will only want to deal with dates since then, and not to exceed
  * the rollover day in 2036.
