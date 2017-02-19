@@ -443,9 +443,6 @@ struct peer {
 #define	CLEAR_TO_ZERO(p)	((char *)&((p)->clear_to_zero))
 #define	END_CLEAR_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
 #define	LEN_CLEAR_TO_ZERO(p)	(END_CLEAR_TO_ZERO(p) - CLEAR_TO_ZERO(p))
-#define CRYPTO_TO_ZERO(p)	((char *)&((p)->clear_to_zero))
-#define END_CRYPTO_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
-#define LEN_CRYPTO_TO_ZERO	(END_CRYPTO_TO_ZERO((struct peer *)0) \
 
 /*
  * It's ugly that refid is sometimes treated as a  uint32_t and sometimes
