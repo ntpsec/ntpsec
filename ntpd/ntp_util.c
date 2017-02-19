@@ -27,12 +27,7 @@
 /*
  * Defines used by the leapseconds stuff
  */
-/* #define	MAX_TAI	100			* max TAI offset (s) UNUSED */
-/* #define	L_DAY	86400UL			* seconds per day UNUSED */
-/* #define	L_YEAR	(L_DAY * 365)		* days per year UNUSED */
-/* #define	L_LYEAR	(L_YEAR + L_DAY)	* days per leap year UNUSED */
-/* #define	L_4YEAR	(L_LYEAR + 3 * L_YEAR)	* days per leap cycle UNUSED */
-/* #define	L_CENT	(L_4YEAR * 25)		* days per century UNUSED */
+#define MJD_1900		15020	/* MJD for 1 Jan 1900 */
 
 /*
  * This contains odds and ends, including the hourly stats, various

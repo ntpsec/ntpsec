@@ -486,19 +486,6 @@ struct pkt {
 #define VN_MODE(v, m)		((((v) & 7) << 3) | ((m) & 0x7))
 #define	PKT_LI_VN_MODE(l, v, m) ((((l) & 3) << 6) | VN_MODE((v), (m)))
 
-
-/* pythonize-header: start ignoring */
-/*
- * Dealing with stratum.  0 gets mapped to 16 incoming, and back to 0
- * on output.
- */
-#define	PKT_TO_STRATUM(s)	((uint8_t)(((s) == (STRATUM_PKT_UNSPEC)) ?\
-				(STRATUM_UNSPEC) : (s)))
-
-#define	STRATUM_TO_PKT(s)	((uint8_t)(((s) == (STRATUM_UNSPEC)) ?\
-				(STRATUM_PKT_UNSPEC) : (s)))
-
-/* pythonize-header: stop ignoring */
 /*
  * Event codes. Used for reporting errors/events to the control module
  */
@@ -565,12 +552,11 @@ struct pkt {
 #define	NTP_HASH_ADDR(src)	(sock_hash(src) & NTP_HASH_MASK)
 
 /*
- * min, min3 and max.  Makes it easier to transliterate the spec without
+ * min, and max.  Makes it easier to transliterate the spec without
  * thinking about it.
  */
 #define	min(a,b)	(((a) < (b)) ? (a) : (b))
 #define	max(a,b)	(((a) > (b)) ? (a) : (b))
-#define	min3(a,b,c)	min(min((a),(b)), (c))
 
 
 /*
@@ -630,8 +616,6 @@ struct pkt {
 #define STATS_STATSDIR		2	/* directory prefix for stats files */
 #define	STATS_PID_FILE		3	/* configure ntpd PID file */
 #define	STATS_LEAP_FILE		4	/* configure ntpd leapseconds file */
-
-#define MJD_1900		15020	/* MJD for 1 Jan 1900 */
 
 /*
  * Default parameters.  We use these in the absence of something better.

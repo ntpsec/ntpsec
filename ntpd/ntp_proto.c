@@ -55,6 +55,16 @@
 #define DIFF(x, y) (SQUARE((x) - (y)))
 
 /*
+ * Dealing with stratum.  0 gets mapped to 16 incoming, and back to 0
+ * on output.
+ */
+#define	PKT_TO_STRATUM(s)	((uint8_t)(((s) == (STRATUM_PKT_UNSPEC)) ?\
+				(STRATUM_UNSPEC) : (s)))
+
+#define	STRATUM_TO_PKT(s)	((uint8_t)(((s) == (STRATUM_UNSPEC)) ?\
+				(STRATUM_PKT_UNSPEC) : (s)))
+
+/*
  * peer_select groups statistics for a peer used by clock_select() and
  * clock_cluster().
  */
