@@ -18,6 +18,15 @@
 #include <unistd.h>
 
 /*
+ * Definitions for the clear() routine.  We use memset() to clear
+ * the parts of the peer structure which go to zero.  These are
+ * used to calculate the start address and length of the area.
+ */
+#define	CLEAR_TO_ZERO(p)	((char *)&((p)->clear_to_zero))
+#define	END_CLEAR_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
+#define	LEN_CLEAR_TO_ZERO(p)	(END_CLEAR_TO_ZERO(p) - CLEAR_TO_ZERO(p))
+
+/*
  * traffic shaping parameters
  */
 #define	NTP_IBURST	6	/* packets in iburst */

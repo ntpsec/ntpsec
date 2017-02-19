@@ -435,14 +435,6 @@ struct peer {
 #define	FLAG_TRUE	0x0400	/* force truechimer */
 #define FLAG_TSTAMP_PPS	0x4cd000	/* PPS source provides absolute timestamp */
 
-/*
- * Definitions for the clear() routine.  We use memset() to clear
- * the parts of the peer structure which go to zero.  These are
- * used to calculate the start address and length of the area.
- */
-#define	CLEAR_TO_ZERO(p)	((char *)&((p)->clear_to_zero))
-#define	END_CLEAR_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
-#define	LEN_CLEAR_TO_ZERO(p)	(END_CLEAR_TO_ZERO(p) - CLEAR_TO_ZERO(p))
 
 /*
  * It's ugly that refid is sometimes treated as a  uint32_t and sometimes
