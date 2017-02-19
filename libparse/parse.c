@@ -19,6 +19,11 @@
 
 # include <stdio.h>
 
+/*
+ * PPS edge info
+ */
+#define SYNC_ONE	0x01
+
 extern clockformat_t *clockformats[];
 extern unsigned short nformats;
 

@@ -10,6 +10,8 @@
 #include "ntp_calendar.h"
 #include "parse.h"
 
+#define GPSORIGIN       2524953600u  /* GPS origin - NTP origin in seconds */
+
 void
 gpstolfp(
 	 int weeks,

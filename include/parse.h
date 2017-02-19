@@ -24,7 +24,6 @@
 /*
  * some constants useful for GPS time conversion
  */
-#define GPSORIGIN       2524953600u                /* GPS origin - NTP origin in seconds */
 #define GPSWRAP         990                        /* assume week count less than this in the previous epoch */
 #define GPSWEEKS        1024                       /* number of weeks until the GPS epch rolls over */
 
@@ -235,12 +234,6 @@ typedef struct clocktime clocktime_t;
 #define PARSE_INP_PARSE 0x02	/* parse data using normal algorithm */
 #define PARSE_INP_DATA  0x04	/* additional data to pass up */
 #define PARSE_INP_SYNTH 0x08	/* just pass up synthesized time */
-
-/*
- * PPS edge info
- */
-#define SYNC_ZERO	0x00
-#define SYNC_ONE	0x01
 
 typedef unsigned long parse_inp_fnc_t(parse_t *, char, timestamp_t *);
 typedef unsigned long parse_cvt_fnc_t(unsigned char *, int, struct format *, clocktime_t *, void *);
