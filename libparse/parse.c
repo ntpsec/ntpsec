@@ -43,7 +43,7 @@ parse_timedout(
 	delt = *tstamp;
 	delt -= parseio->parse_lastchar;
 	delta = lfp_uintv_to_tspec(delt);
-	if (cmp_tspec(delta, *del) == TIMESPEC_GREATER_THAN)
+       if (cmp_tspec(delta, *del) > 0)
 	{
 		parseprintf(DD_PARSE, ("parse: timedout: TRUE\n"));
 		return true;
