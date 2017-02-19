@@ -49,26 +49,10 @@ typedef unsigned int	u_int;
 			    400)) : 0))
 
 /*
- * Number of days since start of NTP time to 1 January of given year
- */
-#define ntp0(year)	(julian0(year) - julian0(1900))
-
-/*
- * Number of days since start of UNIX time to 1 January of given year
- */
-#define unix0(year)	(julian0(year) - julian0(1970))
-
-/*
  * LEAP YEAR test for full 4-digit years (e.g, 1999, 2010)
  */
 #define isleap_4(y)	((y) % 4 == 0 && !((y) % 100 == 0 && !(y % \
 			    400 == 0)))
-
-/*
- * LEAP YEAR test for tm_year (struct tm) years (e.g, 99, 110)
- */
-#define isleap_tm(y)	((y) % 4 == 0 && !((y) % 100 == 0 && !(((y) \
-			    + 1900) % 400 == 0)))
 
 /*
  * to convert simple two-digit years to tm_year style years:

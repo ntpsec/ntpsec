@@ -200,12 +200,6 @@ main( void )
 	fprintf( stdout, "isleap_4(1999) REPORTED TRUE\n" );
 	exit(2);
     }
-
-    if ( !isleap_tm(2000-1900) )
-    {
-	fprintf( stdout, "isleap_tm(100) REPORTED FALSE\n" );
-	exit(2);
-    }
   }
 
     Fatals = Warnings = 0;
