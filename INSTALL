@@ -280,7 +280,7 @@ it will need its own binaries for the OpenSSL library.
 
 Configure NTPSec with:
 
-  waf configure --enable-cross=/path/to/your/cross/cc
+  waf configure --cross-compiler=/path/to/your/cross/cc
 
 There are also --cross-cflags and --cross-ldflags to supply the cross compiler 
 with appropriate values.
