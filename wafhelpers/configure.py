@@ -228,11 +228,18 @@ def cmd_configure(ctx, config):
         ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
 
+    FRAGMENT='''
+int main(int argc, char **argv) {
+        (void)argc; (void)argv;
+        return 0;
+}
+'''
+
     # check if C compiler supports some flags
     for (name, ccflag) in cc_test_flags:
         ctx.check_cc(define_name='HAS_' + name,
-                     cflags=ccflag,
-                     fragment='int main() {}\n',
+                     cflags=ccflag + ' -Werror',
+                     fragment=FRAGMENT,
                      mandatory=False,
                      msg='Checking if C compiler supports ' + name,)
 
