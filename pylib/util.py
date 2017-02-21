@@ -583,12 +583,6 @@ class MRUSummary:
         else:
             favgint = active / (entry.ct-1)
         avgint = int(favgint + 0.5)
-        if 5.0 < favgint or 1 == entry.ct:
-            stats += " %6d" % avgint
-        elif 1.0 <= favgint:
-            stats += " %6.2f" % favgint
-        else:
-            stats += " %6.3f" % favgint
         if entry.rs & ntp.magic.RES_KOD:
             rscode = 'K'
         elif entry.rs & ntp.magic.RES_LIMITED:
@@ -599,8 +593,8 @@ class MRUSummary:
         try:
             if self.showhostnames:
                 dns = canonicalize_dns(dns)
-            stats += " %4hx %c %d %d %6d %5s %s" % \
-                     (entry.rs, rscode,
+            stats += " %6d %4hx %c %d %d %6d %5s %s" % \
+                     (avgint, entry.rs, rscode,
                       ntp.magic.PKT_MODE(entry.mv),
                       ntp.magic.PKT_VERSION(entry.mv),
                       entry.ct, port[1:], dns)
