@@ -11,13 +11,22 @@
     form to the file generation set named _clockstats_:
 +
 -----------------------------------------------
-49213 525.624 SPECTRACOM(4) 93 226 00:08:29.606 D
+49213 525.624 SPECTRACOM(1) 93 226 00:08:29.606
 -----------------------------------------------
 +
+[width="100%",cols="<34%,<33%,<33%"]
+|====================================================================
+|Item                |Units     |Description
+|49213               |MJD       |modified Julian day number
+|525.624             |s         |time of day (s) past midnight UTC
+|SPECTRACOM(1)       |          |receiver identifier (Spectracom unit 1)
+|93 226 00:08:29.606 |          |timecode (format varies by refclock)
+|====================================================================
+
 The first two fields show the date (Modified Julian Day) and time
-(seconds and fraction past UTC midnight). The next field shows the
+(seconds and fraction past UTC midnight). The next
 normally shows clock type and unit (but if you are running in strict
-Classic compatibility it will show the magic clock address in
+Classic compatibility mode it will show the magic clock address in
 dotted-quad notation). The final field last timecode received from the
 clock in decoded ASCII format, where meaningful. In some clock drivers
 a good deal of additional information can be gathered and displayed as
@@ -87,12 +96,12 @@ The event message code and _message_ field are described on the
 |Item            |Units   |Description
 |+48773+         |MJD     |date
 |+10847.650+     |s       |time past midnight
-|+SPECTRACOM(4)+ |IP      |clock name(unit) or source address
+|+SPECTRACOM(4)+ |        |clock name (unit) or source address
 |+9714+          |hex     |status word
 |+-0.001605376+  |s       |clock offset
 |+0.000000000+   |s       |roundtrip delay
 |+0.001424877+   |s       |dispersion
-|+0.000958674+  |s       |RMS jitter
+|+0.000958674+   |s       |RMS jitter
 |===================================================
 +
 The first two fields show the date (Modified Julian Day) and time

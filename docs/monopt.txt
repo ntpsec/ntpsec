@@ -43,10 +43,8 @@ _suffix_::
   A string of elements beginning with . (dot) followed by a number of
   elements depending on the file set type.
 
-For more details on the format of statistics files, see
-link:statfiles.html[Statistics file formats].  There is a
-visualization tool, link:ntpviz.html[ntpviz], which assists
-in making sense of these.
+There is a visualization tool, link:ntpviz.html[ntpviz], which assists
+in making sense of statistics files.
 
 [[cmd]]
 == Monitoring Commands and Options ==
