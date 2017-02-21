@@ -64,7 +64,6 @@
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
 %token	<Integer>	T_ControlKey
-%token	<Integer>	T_Cryptostats
 %token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
@@ -619,7 +618,6 @@ stats_list
 
 stat
 	:	T_Clockstats
-	|	T_Cryptostats
 	|	T_Loopstats
 	|	T_Peerstats
 	|	T_Rawstats

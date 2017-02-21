@@ -23,34 +23,6 @@ clock in decoded ASCII format, where meaningful. In some clock drivers
 a good deal of additional information can be gathered and displayed as
 well. See information specific to each clock for further details.
 
-  +cryptostats+;;
-    This option requires the OpenSSL cryptographic software library. It
-    enables recording of cryptographic public key protocol information.
-    Each message received by the protocol module appends a line of the
-    following form to the file generation set named _cryptostats_:
-+
----------------------------------
-49213 525.624 SPECTRACOM(4) message
----------------------------------
-+
-[width="100%",cols="<34%,<33%,<33%"]
-|================================================
-|Item           | Units  |Description
-|+49213+        |MJD     |date
-|+525.624+      |s       |time past midnight
-|+SPECTRACOM(4)+|IP      |reference clock type and unit
-|_message_      |text    |log message
-|===============================================
-+
-The first two fields show the date (Modified Julian Day) and time
-(seconds and fraction past UTC midnight). The next field normally
-shows the clock driver type and unit (but if you have built in Classic
-compatibility mode it will show a magic clock address in dotted-quad
-notation). The final message field includes the message type and
-certain ancillary information. See the 'Authentication Options'
-section for further information.
-
-
   +loopstats+;;
     Enables recording of loop filter statistics information. Each update
     of the local clock outputs a line of the following form to the file

@@ -54,7 +54,6 @@ double	wander_threshold = 1e-7;	/* initial frequency threshold */
 
 char statsdir[MAXFILENAME] = NTP_VAR;
 static FILEGEN clockstats;
-static FILEGEN cryptostats;
 static FILEGEN loopstats;
 static FILEGEN peerstats;
 static FILEGEN protostats;
@@ -105,7 +104,6 @@ uninit_util(void)
 		key_file_name = NULL;
 	}
 	filegen_unregister("clockstats");
-	filegen_unregister("cryptostats");
 	filegen_unregister("loopstats");
 	filegen_unregister("rawstats");
 	filegen_unregister("sysstats");
@@ -124,7 +122,6 @@ void
 init_util(void)
 {
 	filegen_register(statsdir, "clockstats",  &clockstats);
-	filegen_register(statsdir, "cryptostats", &cryptostats);
 	filegen_register(statsdir, "loopstats",	  &loopstats);
 	filegen_register(statsdir, "rawstats",	  &rawstats);
 	filegen_register(statsdir, "sysstats",	  &sysstats);
