@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
     # check if C compiler supports some flags
     for (name, ccflag) in cc_test_flags:
         ctx.check_cc(define_name='HAS_' + name,
-                     cflags=ccflag + ' -Werror',
+                     cflags=ccflag,
                      fragment=FRAGMENT,
                      mandatory=False,
                      msg='Checking if C compiler supports ' + name,)
@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
             ('--strip-all', "-Wl,--strip-all"),    # Strip binaries
             ]
 
-    # old gcc takes -z,relro, but then barfs is -fPIE available and used.
+    # old gcc takes -z,relro, but then barfs if -fPIE available and used.
     # ("relro", "-Wl,-z,relro"), # marks some sections read only
 
     for (name, ldflag) in ld_hardening_flags:
