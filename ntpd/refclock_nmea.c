@@ -412,7 +412,7 @@ nmea_start(
 	switch (rate) {
 	case 0:
 	case 4800:
-		baudrate = SPEED232;
+		baudrate = 4800;
 		baudtext = "4800";
 		break;
 	case 1:
@@ -446,7 +446,11 @@ nmea_start(
 #endif
 	default:
 		baudrate = SPEED232;
+#ifdef ENABLE_CLASSIC_MODE
 		baudtext = "4800 (fallback)";
+#else
+		baudtext = "9600 (fallback)";
+#endif
 		break;
 	}
 
