@@ -1,10 +1,10 @@
-= temp-log(1) =
+= ntplogtemp-(1) =
 :doctype: manpage
 
 == NAME ==
-temp-log - log temperature data
+ntplogtemp - log temperature data
 
-include::../docs/includes/temp-log-body.txt[]
+include::../docs/includes/ntplogtemp-body.txt[]
 
 == EXIT STATUS ==
 

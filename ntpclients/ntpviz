@@ -716,7 +716,7 @@ plot \\
 <p>Local GPS.  The Time Dilution of Precision (TDOP) is plotted in blue.
 The number of visible satellites (nSat) is plotted in red.</p>
 <p>TDOP is field 3, and nSats is field 4, from the gpsd log file.  The
-gpsd log file is created by the gps-log program.</p>
+gpsd log file is created by the ntploggps program.</p>
 <p>TDOP is a dimensionless error factor.  TDOP ranges from 1 to greater
 than 20.  1 denotes the highest possible confidence level.  2 to 5 is good.
 Greater than 20 means there will be significant inaccuracy and error.</p>

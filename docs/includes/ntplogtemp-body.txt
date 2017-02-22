@@ -1,43 +1,41 @@
-// This is the body of the manual page for gps-log
+// This is the body of the manual page for ntplogtemp
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
 == SYNOPSIS ==
 [verse]
-gps-log [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
+ntplogtemp [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
 
   -h, --help            show this help message and exit
   -l LOGFILE, --logfile LOGFILE
                         append log data to LOGFILE instead of stdout
+  -q, --quiet				be quiet
   -o, --once            log one line, then exit
-  -w WAIT, --wait WAIT  wait WAIT seconds after each log line, default 5
+  -w WAIT, --wait WAIT  wait WAIT seconds after each log line, default 60
   -v, --verbose         be verbose
   -V, --version         show program's version number and exit
 
 == DESCRIPTION ==
 
-gps-log connects to a local gpsd daemon and logs the number of satellites
-in use and the Time Dilution of Precision (TDOP).  gps-log can run as
-any user, no special privileges are required.
+ntplogtemp gathers temperature readings across a system. The standard user
+is ntpuser and should have permissions to execute lm_sensors and smartctl.
 
-The default is to write the data to stdout about once every 5 seconds.
+The default is to write the data to stdout once every 60 seconds.
 The log file looks like:
 
 -----------------------------------------------------
-# Time       Device     TDOP     nSat
-1483668619.0 /dev/ttyS0 0.820000 7
-1483668624.0 /dev/ttyS0 0.820000 7
-1483668629.0 /dev/ttyS0 0.820000 7
+# time, sensor, value
+1485816568 ZONE0 39.0
+1485816568 ZONE1 20.0
+1485816568 ZONE2 42.0
+1485816568 ZONE3 0.0
 -----------------------------------------------------
 
 +Time+ is the POSIX time of when the log line is written.
 
-+Device+ is the GPS device the data came from.
++Sensor+ is the sensor the temperature reading was obtained from.
 
-+TDOP+ is the Time Dilution of Precision as reported by the GPS.  Some
-GPS always output a static TDOP.
-
-+nSat+ is the number of satellites in use.
++Value+ is the temperature reading in celsius.
 
 == OPTIONS ==
 
@@ -47,29 +45,31 @@ GPS always output a static TDOP.
 +-l LOGFILE, --logfile LOGFILE+::
   Append log data to LOGFILE instead of stdout
 
++-q, --quiet+::
+  Quiet output, will not display errors
+
 +-o, --once+::
-  Log one line, then exit.
+  Log the data once, then exit
 
 +-v, --verbose+::
   Be verbose
 
 +-w WAIT, --wait WAIT+::
-  Wait WAIT seconds after each log line.  The default is 5 seconds.  This
-  is just the minimum wait time.  gpsd may be reporting data at a much
-  slower interval.
+  Wait WAIT seconds after each log line.  The default is 60 seconds.  The
+  minimum wait time is 5 seconds.
 
 +-V, --version+::
  show program's version number and exit
 
 == USAGE ==
 
-+gps-log+::
++ntplogtemp+::
   This the simplest use of this program. It can be used to check the
-  status of the local gpsd daemon.
+  temperature readings of Zones, CPU, and disk drives every minute.
 
-+gps-log -l /var/log/ntpstats/gpsd -w 60+ &::
-  This will continuously log the gpsd data in the background to the file
-  /var/log/ntpstats/gpsd.  Only log every 60 seconds.
++ntplogtemp -l /var/log/ntpstats/temperature -w 60 &::
+  This will continuously log the temperature data in the background
+  to the file /var/log/ntpstats/temperature.  Only log every 60 seconds.
 
 == EXIT STATUS ==
 
@@ -83,6 +83,7 @@ One of the following exit values will be returned:
 == AUTHORS ==
 
 Gary E. Miller
+Keane S. Wolter
 
 // end
 

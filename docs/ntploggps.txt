@@ -1,4 +1,4 @@
-= gps-log - log gpsd data for use by ntpviz =
+= ntploggps - log gpsd data for use by ntpviz =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
@@ -11,7 +11,7 @@ S is for snakeoil.
 
 '''''
 
-include::includes/gps-log-body.txt[]
+include::includes/ntploggps-body.txt[]
 
 '''''
 

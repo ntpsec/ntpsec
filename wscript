@@ -146,7 +146,7 @@ def afterparty(ctx):
                   % (bldnode,))
 
 python_scripts = [
-    "ntpclients/gps-log",
+    "ntpclients/ntploggps",
     "ntpclients/ntpdig",
     "ntpclients/ntpkeygen",
     "ntpclients/ntpmon",
@@ -155,7 +155,7 @@ python_scripts = [
     "ntpclients/ntptrace",
     "ntpclients/ntpviz",
     "ntpclients/ntpwait",
-    "ntpclients/temp-log",
+    "ntpclients/ntplogtemp",
 ]
 
 
@@ -205,14 +205,14 @@ def build(ctx):
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
         afterparty(ctx)
 
-    ctx.manpage(1, "ntpclients/gps-log-man.txt")
+    ctx.manpage(1, "ntpclients/ntploggps-man.txt")
     ctx.manpage(1, "ntpclients/ntpdig-man.txt")
     ctx.manpage(1, "ntpclients/ntpmon-man.txt")
     ctx.manpage(1, "ntpclients/ntpq-man.txt")
     ctx.manpage(1, "ntpclients/ntpsweep-man.txt")
     ctx.manpage(1, "ntpclients/ntptrace-man.txt")
     ctx.manpage(1, "ntpclients/ntpviz-man.txt")
-    ctx.manpage(1, "ntpclients/temp-log-man.txt")
+    ctx.manpage(1, "ntpclients/ntplogtemp-man.txt")
     ctx.manpage(8, "ntpclients/ntpkeygen-man.txt")
     ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
     ctx.manpage(8, "ntpclients/ntpwait-man.txt")

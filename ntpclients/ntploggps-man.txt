@@ -1,10 +1,10 @@
-= gps-log(1) =
+= ntploggps(1) =
 :doctype: manpage
 
 == NAME ==
-gps-log - log gpsd data
+ntploggps - log gpsd data
 
-include::../docs/includes/gps-log-body.txt[]
+include::../docs/includes/ntploggps-body.txt[]
 
 == EXIT STATUS ==
 

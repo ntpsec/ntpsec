@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 """\
-usage: gps-log [-h] [-o] [-l LOGFILE] [-v] [-V]
+usage: ntploggps [-h] [-o] [-l LOGFILE] [-v] [-V]
 
 gpsd log file generator
 
@@ -28,7 +28,7 @@ try:
     import gps
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("gps-log: can't find Python NTP modules "
+    sys.stderr.write("ntploggps: can't find Python NTP modules "
                      "-- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
@@ -37,7 +37,7 @@ try:
     import argparse
 except ImportError:
     sys.stderr.write("""
-gps-log: can't find the Python argparse module
+ntpologgps: can't find the Python argparse module
          If your Python version is < 2.7, then manual installation is needed:
          # pip install argparse
 """)
@@ -73,12 +73,12 @@ parser.add_argument('-v', '--verbose',
 
 parser.add_argument('-V', '--version',
                     action="version",
-                    version="gps-log %s" % ntp.util.stdversion())
+                    version="ntploggps %s" % ntp.util.stdversion())
 
 args = parser.parse_args()
 
 if args.verbose:
-    print("gps-log: arguments:")
+    print("ntploggps: arguments:")
     print(args)
 
 if args.logfile:
@@ -86,12 +86,12 @@ if args.logfile:
     try:
         out = open(args.logfile[0], mode='a')
     except io.UnsupportedOperation as e:
-        sys.stderr.write("gps-log: can't open logfile %s\n" % args.logfile)
+        sys.stderr.write("ntploggps: can't open logfile %s\n" % args.logfile)
         sys.stderr.write("%s\n" % e)
         sys.exit(1)
 
     if args.verbose:
-        print("gps-log: opened log file %s" % args.logfile[0])
+        print("ntploggps: opened log file %s" % args.logfile[0])
 
 else:
     # log to stdout
@@ -107,7 +107,7 @@ class GpsPoller(threading.Thread):
         try:
             self.gpsd = gps.gps(mode=gps.WATCH_ENABLE)
         except BaseException as e:
-            sys.stderr.write("gps-log: Can't connect to gpsd, %s\n"
+            sys.stderr.write("ntploggps: Can't connect to gpsd, %s\n"
                              "         Is gpsd running?\n" % e)
             sys.exit(1)
         self.running = True
@@ -134,7 +134,7 @@ class GpsPoller(threading.Thread):
 if __name__ == '__main__':
     # this is the main thread
     if args.verbose:
-        print("gps-log: creating poll thread")
+        print("ntploggps: creating poll thread")
 
     gpsp = GpsPoller()    # create the thread
     try:
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     gpsp.join()
 
     if args.verbose:
-        print("gps-log: Done -- Exiting.")
+        print("ntploggps: Done -- Exiting.")
 
     # mom says: be nice and flush
     out.flush()

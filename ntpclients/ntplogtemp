@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """\
-usage: temp-log.py [-h] [-l LOGFILE] [-o] [-q] [-v] [-w WAIT] [-V]
+usage: ntplogtemp [-h] [-l LOGFILE] [-o] [-q] [-v] [-w WAIT] [-V]
 
 Program to log system temperatures
 
@@ -30,7 +30,7 @@ import time
 try:
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("temp-log: can't find Python NTP modules "
+    sys.stderr.write("ntplogtemp: can't find Python NTP modules "
                      "-- check PYTHONPATH.\n%s\n" % e)
     sys.exit(1)
 
@@ -220,7 +220,7 @@ parser.add_argument('-w', '--wait',
                     type=int)
 parser.add_argument('-V', '--version',
                     action="version",
-                    version="temp-log %s" % ntp.util.stdversion())
+                    version="ntplogtemp %s" % ntp.util.stdversion())
 args = parser.parse_args()
 
 

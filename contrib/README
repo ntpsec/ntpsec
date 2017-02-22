@@ -3,7 +3,7 @@ conveniences, examples or rudimentary starting points for other development
 efforts.
 
 cpu-temp-log, smartctl-temp-log, temper-temp-log and zone-temp-log
-have been replaced by temp-log.  Those programs will stay in contrib for
+have been replaced by ntplogtemp.  Those programs will stay in contrib for
 a while to give users a chance to migrate.
 
 cpu-temp-log is a tool to use the output of 'sensors -u' and write the

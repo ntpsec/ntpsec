@@ -1,5 +1,5 @@
 === Manual Pages ===
-* link:gps-log.html[+gps-log+ - log gpsd data for use by ntpviz]
+* link:ntploggps.html[+ntploggps+ - log gpsd data for use by ntpviz]
 * link:ntp_conf.html[+ntp.conf+ - ntpd Configuration File]
 * link:ntpd.html[+ntpd+ - Network Time Protocol (NTP) daemon]
 * link:ntpdig.html[+ntpdig+ - Simple Network Time Protocol (SNTP) client]
