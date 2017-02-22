@@ -24,7 +24,7 @@ import time
 try:
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("temp-log: can't find Python NTP modules "
+    sys.stderr.write("makeheat: can't find Python NTP modules "
                      "-- check PYTHONPATH.\n%s\n" % e)
     sys.exit(1)
 
@@ -50,7 +50,7 @@ parser.add_argument('-w', '--wait',
                     type=float)
 parser.add_argument('-V', '--version',
                     action="version",
-                    version="temp-log %s" % ntp.util.stdversion())
+                    version="makeheat %s" % ntp.util.stdversion())
 args = parser.parse_args()
 
 args.copies[0] -= 1
