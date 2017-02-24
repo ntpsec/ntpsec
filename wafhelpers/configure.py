@@ -21,7 +21,7 @@ class oc(Build.BuildContext):
             self.logger.debug('WafError')
             return e.returncode
         if (len(out) and any(word in out for word
-                             in ['ignored', 'illegal', 'unknown',
+                             in ['err', 'ignored', 'illegal', 'unknown',
                                  'unrecognized', 'warning'])):
             self.logger.debug('noooo %r' % out)
             return 1
@@ -286,12 +286,11 @@ int main(int argc, char **argv) {
             ]
 
     if ctx.env.HAS_PIE:
-        ctx.env.CFLAGS += [
+        ctx.env.CFLAGS_bin += [
             "-fPIE",
             "-pie",
             ]
         ld_hardening_flags += [
-            ('PIE', "-fPIE"),           # hardening
             ('relro', "-Wl,-z,relro"),  # hardening, marks some read only,
             ]
 
@@ -314,21 +313,24 @@ int main(int argc, char **argv) {
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.
     # ("relro", "-Wl,-z,relro"), # marks some sections read only
-
     for (name, ldflag) in ld_hardening_flags:
         cmd = [ctx.env.CC_NAME, ldflag]
         # print("cmd: %s" % cmd)
         ctx.start_msg("Checking if linker supports hardening flag: %s" % name)
+        err = 0
         try:
-            ctx.cmd_and_log(cmd)
+            err, out = ctx.cmd_and_log(cmd)
         except Exception as e:
-            if not any(word in e.stderr for word
-                       in ['ignored', 'illegal', 'unknown', 'unrecognized',
-                           'warning']):
-                ctx.env.LDFLAGS += [ldflag]
-                ctx.end_msg("yes")
-            else:
-                ctx.end_msg("no", color="YELLOW")
+            if any(word in e.stderr for word
+                       in ['err', 'ignored', 'illegal', 'unknown',
+                           'unrecognized', 'warning']):
+                err = 1
+
+        if err:
+            ctx.end_msg("no", color="YELLOW")
+        else:
+            ctx.env.LDFLAGS += [ldflag]
+            ctx.end_msg("yes")
 
     if ctx.env.CC_NAME == "sun":
         # we are sun, placeholder
