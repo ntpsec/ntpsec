@@ -323,7 +323,8 @@ int main(int argc, char **argv) {
             ctx.cmd_and_log(cmd)
         except Exception as e:
             if not any(word in e.stderr for word
-                       in ['ignored', 'illegal', 'unknown', 'unrecognized']):
+                       in ['ignored', 'illegal', 'unknown', 'unrecognized',
+                           'warning']):
                 ctx.env.LDFLAGS += [ldflag]
                 ctx.end_msg("yes")
             else:
