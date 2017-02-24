@@ -5,6 +5,31 @@ from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
 from wafhelpers.util import msg, msg_setting, parse_version
 
+from waflib.Errors import WafError
+from waflib import Build
+from waflib.Context import BOTH
+
+
+class oc(Build.BuildContext):
+    cmd = 'oc'
+
+    def exec_command(self, cmd, **kw):
+        kw['output'] = BOTH
+        try:
+            err, out = self.cmd_and_log(cmd, **kw)
+        except WafError as e:
+            self.logger.debug('WafError')
+            return e.returncode
+        if (len(out) and any(word in out for word
+                             in ['ignored', 'illegal', 'unknown',
+                                 'unrecognized', 'warning'])):
+            self.logger.debug('noooo %r' % out)
+            return 1
+        if err:
+            self.logger.debug('noooo %r' % err)
+            return 1
+        return 0
+
 
 def cmd_configure(ctx, config):
     srcnode = ctx.srcnode.abspath()
@@ -228,7 +253,7 @@ def cmd_configure(ctx, config):
         ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
 
-    FRAGMENT='''
+    FRAGMENT = '''
 int main(int argc, char **argv) {
         (void)argc; (void)argv;
         return 0;
@@ -236,12 +261,17 @@ int main(int argc, char **argv) {
 '''
 
     # check if C compiler supports some flags
+    old_run_build_cls = ctx.run_build_cls
+    ctx.run_build_cls = 'oc'
     for (name, ccflag) in cc_test_flags:
-        ctx.check_cc(define_name='HAS_' + name,
-                     cflags=ccflag,
-                     fragment=FRAGMENT,
-                     mandatory=False,
-                     msg='Checking if C compiler supports ' + name,)
+        ctx.check(cflags=ccflag,
+                  define_name='HAS_' + name,
+                  fragment=FRAGMENT,
+                  mandatory=False,
+                  msg='Checking if C compiler supports ' + name,
+                  run_build_cls='oc')
+
+    ctx.run_build_cls = old_run_build_cls
 
     # We require some things that C99 doesn't enable, like pthreads.
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
