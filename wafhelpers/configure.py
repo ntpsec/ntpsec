@@ -718,6 +718,7 @@ int main(int argc, char **argv) {
     msg_setting("CC", " ".join(ctx.env.CC))
     msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
     msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
+    msg_setting("LINKFLAGS", " ".join(ctx.env.LINKFLAGS))
     msg_setting("PREFIX", ctx.env.PREFIX)
     msg_setting("Debug Support", yesno(not ctx.options.disable_debug))
     msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
