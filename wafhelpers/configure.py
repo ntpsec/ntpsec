@@ -316,19 +316,16 @@ int main(int argc, char **argv) {
     old_run_build_cls = ctx.run_build_cls
     ctx.run_build_cls = 'oc'
     for (name, ldflag) in ld_hardening_flags:
-        ctx.check(
-                  define_name='HAS_' + name,
+        ctx.check(define_name='HAS_' + name,
                   fragment=FRAGMENT,
                   ldflags=ldflag,
                   mandatory=False,
                   msg='Checking if ld compiler supports ' + name,
                   run_build_cls='oc')
         if ctx.env['HAS_' + name]:
-             ctx.env.LDFLAGS += [ldflag]
-
+            ctx.env.LDFLAGS += [ldflag]
 
     ctx.run_build_cls = old_run_build_cls
-
 
     if ctx.env.CC_NAME == "sun":
         # we are sun, placeholder
