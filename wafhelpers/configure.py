@@ -250,7 +250,7 @@ def cmd_configure(ctx, config):
 
     # Check which linker flags are supported
     ld_hardening_flags = [
-        ("-z now", "-Wl,-z,now"),     # no deferred symbol resolution
+        ("z_now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
 
     FRAGMENT = '''
@@ -308,29 +308,27 @@ int main(int argc, char **argv) {
     if ctx.options.disable_debug:
         # not debugging
         ld_hardening_flags += [
-            ('--strip-all', "-Wl,--strip-all"),    # Strip binaries
+            ('stripall', "-Wl,--strip-all"),    # Strip binaries
             ]
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.
     # ("relro", "-Wl,-z,relro"), # marks some sections read only
+    old_run_build_cls = ctx.run_build_cls
+    ctx.run_build_cls = 'oc'
     for (name, ldflag) in ld_hardening_flags:
-        cmd = [ctx.env.CC_NAME, ldflag]
-        # print("cmd: %s" % cmd)
-        ctx.start_msg("Checking if linker supports hardening flag: %s" % name)
-        err = 0
-        try:
-            err, out = ctx.cmd_and_log(cmd)
-        except Exception as e:
-            if any(word in e.stderr for word
-                       in ['err', 'ignored', 'illegal', 'unknown',
-                           'unrecognized', 'warning']):
-                err = 1
+        ctx.check(
+                  define_name='HAS_' + name,
+                  fragment=FRAGMENT,
+                  ldflags=ldflag,
+                  mandatory=False,
+                  msg='Checking if ld compiler supports ' + name,
+                  run_build_cls='oc')
+        if ctx.env['HAS_' + name]:
+             ctx.env.LDFLAGS += [ldflag]
 
-        if err:
-            ctx.end_msg("no", color="YELLOW")
-        else:
-            ctx.env.LDFLAGS += [ldflag]
-            ctx.end_msg("yes")
+
+    ctx.run_build_cls = old_run_build_cls
+
 
     if ctx.env.CC_NAME == "sun":
         # we are sun, placeholder
