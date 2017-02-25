@@ -229,7 +229,7 @@ abs_tspec(
 
 /*
  * compare previously-normalised a and b
- * return 1 / 0 / -1 if a < / == / > b
+ * return -1 / 0 / 1 if a < / == / > b
  */
 
 static inline int
@@ -250,7 +250,7 @@ cmp_tspec(
 
 /*
  * compare possibly-denormal a and b
- * return 1 / 0 / -1 if a < / == / > b
+ * return -1 / 0 / 1 if a < / == / > b
  */
 static inline int
 cmp_tspec_denorm(
@@ -263,7 +263,7 @@ cmp_tspec_denorm(
 
 /*
  * test previously-normalised a
- * return 1 / 0 / -1 if a < / == / > 0
+ * return -1 / 0 / 1 if a < / == / > 0
  */
 static inline int
 test_tspec(
@@ -281,7 +281,7 @@ test_tspec(
 
 /*
  * test possibly-denormal a
- * return 1 / 0 / -1 if a < / == / > 0
+ * return -1 / 0 / 1 if a < / == / > 0
  */
 static inline int
 test_tspec_denorm(
