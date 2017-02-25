@@ -30,17 +30,16 @@
  *
  */
 typedef uint64_t l_fp;
-#define LOW32	0x00000000ffffffffUL
-#define HIGH32	0xffffffff00000000UL
-#define BUMP	0x0000000100000000UL
-#define lfpfrac(n)		((uint32_t)((n) & LOW32))
-#define setlfpfrac(n, v)	(n) = (((n) & HIGH32) | ((v) & LOW32))
-#define lfpsint(n)		(int32_t)(((n) & HIGH32) >> 32)
-#define setlfpsint(n, v)	(n) = (int64_t)((((int64_t)(v)) << 32) | ((n) & LOW32))
-#define bumplfpsint(n, i)	(n) += (i)*BUMP
-#define lfpuint(n)		(uint32_t)(((n) & HIGH32) >> 32)
-#define setlfpuint(n, v)	(n) = (uint64_t)((((uint64_t)(v)) << 32) | ((n) & LOW32))
-#define bumplfpuint(n, i)	(n) += (i)*BUMP
+#define lfpfrac(n)		((uint32_t)(n))
+#define lfptosint(n)	        (( int64_t)((uint64_t)(n) << 32))
+#define lfptouint(n)	        ((uint64_t)((uint64_t)(n) << 32))
+#define lfpsint(n)		(( int32_t)((n) >> 32))
+#define lfpuint(n)		((uint32_t)((n) >> 32))
+#define bumplfpsint(n, i)       ((n) += lfptosint(i))
+#define bumplfpuint(n, i)       ((n) += lfptouint(i))
+#define setlfpfrac(n, v)        ((n)  = (lfptouint(lfpuint(n)) | lfpfrac(v)))
+#define setlfpsint(n, v)        ((n)  = (lfptosint(v) | lfpfrac(n)))
+#define setlfpuint(n, v)        ((n)  = (lfptouint(v) | lfpfrac(n)))
 
 static inline l_fp lfpinit(int32_t hi, uint32_t lo)
 {
