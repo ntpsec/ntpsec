@@ -223,6 +223,7 @@ def cmd_configure(ctx, config):
         ctx.define("WORDS_BIGENDIAN", 1)
 
     cc_test_flags = [
+        ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
         ('gnu99', '-std=gnu99'),
         # this quiets most of macOS warnings on -fpie
@@ -285,7 +286,15 @@ int main(int argc, char **argv) {
             "-std=c99",
             ]
 
+    if ctx.env.HAS_PIC:
+        ctx.env.CFLAGS += [
+            "-fPIC",
+            ]
+
     if ctx.env.HAS_PIE:
+        ctx.env.LINKFLAGS_NTPD += [
+            "-pie",
+            ]
         ctx.env.CFLAGS_bin += [
             "-fPIE",
             "-pie",
@@ -713,7 +722,7 @@ int main(int argc, char **argv) {
     msg_setting("CC", " ".join(ctx.env.CC))
     msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
     msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
-    msg_setting("LINKFLAGS", " ".join(ctx.env.LINKFLAGS))
+    msg_setting("LINKFLAGS_NTPD", " ".join(ctx.env.LINKFLAGS_NTPD))
     msg_setting("PREFIX", ctx.env.PREFIX)
     msg_setting("Debug Support", yesno(not ctx.options.disable_debug))
     msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
