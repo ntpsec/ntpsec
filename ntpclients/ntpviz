@@ -261,8 +261,11 @@ class VizStats(ntp.statfiles.NTPStats):
         for k, v in self.percs.items():
             # range the data
             v *= self.multiplier
-            self.percs[k] = round(v, 3)
-            self.percs_f[k] = format(v, ",.3f")
+            self.percs[k] = round(v, 4)
+            if 'ppm' == self.unit and  0.020 >  abs(self.percs[k]):
+                self.percs_f[k] = format(v, ",.4f")
+            else:
+                self.percs_f[k] = format(v, ",.3f")
 
         if args.clip:
             self.percs["min_y"] = self.percs["p1"]
@@ -309,7 +312,7 @@ def gnuplot_fmt(min, max):
     elif 0.1 <= span:
         fmt = '%.2f'
     else:
-        fmt = '%.2f'
+        fmt = '%.3f'
     return fmt
 
 
