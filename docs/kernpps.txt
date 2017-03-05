@@ -29,7 +29,7 @@ systems a parallel port can be used for the same purpose.
 
 The PPSAPI interface defined in RFC 2783 is the only PPS interface
 supported in NTP Version 4. The PPSAPI is supported in stock FreeBSD
-and, with the addition of the +PPSkit+ kernel module, in Linux.
+and in Linux.
 
 The special header file +/usr/include/sys/timepps.h+ implements the
 PPSAPI using whatever primitives are available in each architecture and
