@@ -142,7 +142,7 @@ ntp_set_tod(
 	saved_errno = errno;
 	TRACE(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
 #else
-#error POSIX clock_gettime(2) is required
+#error POSIX clock_settime(2) is required
 #endif /* HAVE_CLOCK_SETTIME */
 	errno = saved_errno;	/* for %m below */
 	TRACE(1, ("ntp_set_tod: Final result: clock_settime: %d %m\n", rc));
