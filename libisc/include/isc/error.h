@@ -39,7 +39,8 @@ ISC_FORMAT_PRINTF(3, 4) ISC_PLATFORM_NORETURN_POST;
 
 /*% runtimecheck error */
 void
-isc_error_runtimecheck(const char *, int, const char *);
+isc_error_runtimecheck(const char *, int, const char *)
+			__attribute__	((__noreturn__));
 
 #define ISC_ERROR_RUNTIMECHECK(cond) \
 	((void) ((cond) || \
