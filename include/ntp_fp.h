@@ -28,6 +28,14 @@
  *   |			       Fractional Part			     |
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
+ * All the seconds we need fit in 31 bits.  At least until 2038.
+ * 7FFFFFFFu is 2147483647 which is "Mon Jan 18 19:14:07 PST 2038".
+ *
+ * With the caveat they must be POSIX seconds.  NTP seconds are
+ * based on 12/1/1 BC.  Thus they overflowed 32 bits of seconds a
+ * long time ago.  All the places that stuff NTP epoch time in l_fp
+ * are overflowing.
+ *
  */
 typedef uint64_t l_fp;
 #define lfpfrac(n)		((uint32_t)(n))
