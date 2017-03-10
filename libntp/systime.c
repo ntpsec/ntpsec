@@ -206,8 +206,7 @@ normalize_time(
 	}
 	lfp_prev = result;
 	dfuzz_prev = dfuzz;
-	if (lamport_violated)
-		lamport_violated = false;
+	lamport_violated = false;
 	*now = result;
 }
 
