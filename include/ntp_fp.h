@@ -13,11 +13,22 @@
  * NTP uses two fixed point formats.  The first (l_fp) is the "long"
  * format and is 64 bits wide with the decimal between bits 31 and 32.
  * This is used for time stamps in the NTP packet header (in network
- * byte order) and for internal computations of offsets (in local host
- * byte order). We use the same structure for both signed and unsigned
- * values, which is a big hack but saves rewriting all the operators
- * twice. Just to confuse this, we also sometimes just carry the
- * fractional part in calculations, in both signed and unsigned forms.
+ * byte order).  It is defined in RFC 5905 in Section 6 (Data Types).
+ *
+ * The integral part is unsigned seconds since 0 h 1 January 1900 UTC.
+ * It will overflow in 2036.
+ *
+ * The fractional part is jusr float seconds divided by 32.  Each LSB
+ * is 232 pico seconds.
+ *
+ * For internal computations of offsets (in local host byte order)
+ * the same structure is used, but signed, to allow for positive and
+ * negative offsets. We use the same structure for both signed and
+ * unsigned values, which is a big hack but saves rewriting all the
+ * operators twice. Just to confuse this, we also sometimes just carry
+ * the fractional part in calculations, in both signed and unsigned
+ * forms.
+ *
  * Anyway, an l_fp looks like:
  *
  *    0			  1		      2			  3
@@ -28,15 +39,10 @@
  *   |			       Fractional Part			     |
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
- * All the seconds we need fit in 31 bits.  At least until 2038.
- * 7FFFFFFFu is 2147483647 which is "Mon Jan 18 19:14:07 PST 2038".
- *
- * With the caveat they must be POSIX seconds.  NTP seconds are
- * based on 12/1/1 BC.  Thus they overflowed 32 bits of seconds a
- * long time ago.  All the places that stuff NTP epoch time in l_fp
- * are overflowing.
- *
- * NTP time stamps will next overflow 32 bits in 2036
+ * NTP time stamps will overflow 32 bits in 2036.  Until then we are in
+ * NTP Epoch 0.  After that NTP timestamps will be in Epoch 1.  Negative
+ * Epochs can be used to represent time before Jan 1900.  The NTP Date
+ * Format is used on the wire to transfer the NTP Epoch.
  *
  */
 typedef uint64_t l_fp;
