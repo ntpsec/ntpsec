@@ -114,6 +114,22 @@ normalize_tspec(
 	return x;
 }
 
+/* convert a double to a rounded and normalized timespec */
+static inline struct timespec
+d_to_tspec(
+	double d
+	)
+{
+	struct timespec	x;
+
+	d += 0.5e-9;	/* round on LSB */
+	x.tv_sec = (time_t) d;
+	x.tv_nsec = (long)((d - (double)x.tv_sec) * 1e9);
+
+        /* unlikely, but ensure it is normalized */
+	return normalize_tspec(x);
+}
+
 /* x = a + b */
 static inline struct timespec
 add_tspec(
