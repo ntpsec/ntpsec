@@ -61,7 +61,6 @@ typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX
 typedef uint32_t keyid_t;	/* cryptographic key ID */
 #define KEYID_T_MAX	(0xffffffff)
-typedef uint32_t tstamp_t;	/* NTP seconds timestamp */
 
 /*
  * Cloning malloc()'s behavior of always returning pointers suitably

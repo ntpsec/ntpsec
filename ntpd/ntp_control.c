@@ -68,6 +68,7 @@ static	void	ctl_putrefid	(const char *, uint32_t);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
+typedef uint32_t tstamp_t;	/* NTP seconds timestamp */
 static	void	ctl_putfs	(const char *, tstamp_t);
 #ifdef REFCLOCK
 static	void	ctl_putclock	(int, struct refclockstat *, int);
