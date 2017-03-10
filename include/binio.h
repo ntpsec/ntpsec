@@ -12,7 +12,7 @@
 
 long get_lsb_short (unsigned char **);
 void put_lsb_short (unsigned char **, long);
-long get_lsb_long (unsigned char **);
+unsigned long get_lsb_ulong (unsigned char **);
 void put_lsb_long (unsigned char **, long);
 
 #define get_lsb_int16( _x_ )   ((int16_t) get_lsb_short( _x_ ))
