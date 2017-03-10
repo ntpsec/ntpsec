@@ -112,20 +112,9 @@ get_ostime(
 }
 
 
-/*
- * get_systime - return system time in NTP timestamp format.
- */
-void
-get_systime(
-	l_fp *now		/* system time */
-	)
-{
-	struct timespec ts;	/* seconds and nanoseconds */
-	get_ostime(&ts);
-	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
-}
+static	void	normalize_time	(struct timespec, long, l_fp *);
 
-void
+static void
 normalize_time(
 	struct timespec ts,		/* seconds and nanoseconds */
 	long rand,
@@ -220,6 +209,19 @@ normalize_time(
 	if (lamport_violated)
 		lamport_violated = false;
 	*now = result;
+}
+
+/*
+ * get_systime - return system time in NTP timestamp format.
+ */
+void
+get_systime(
+	l_fp *now		/* system time */
+	)
+{
+	struct timespec ts;	/* seconds and nanoseconds */
+	get_ostime(&ts);
+	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
 }
 
 
