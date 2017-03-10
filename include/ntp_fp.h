@@ -36,6 +36,8 @@
  * long time ago.  All the places that stuff NTP epoch time in l_fp
  * are overflowing.
  *
+ * NTP time stamps will next overflow 32 bits in 2036
+ *
  */
 typedef uint64_t l_fp;
 #define lfpfrac(n)		((uint32_t)(n))
