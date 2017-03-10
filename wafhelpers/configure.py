@@ -247,6 +247,7 @@ def cmd_configure(ctx, config):
         "-Wall",
         "-Wextra",
         "-Wstrict-prototypes",
+        "-Wunused",
         ]
 
     # Check which linker flags are supported
