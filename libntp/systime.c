@@ -318,7 +318,7 @@ step_systime(
 	time_t pivot; /* for ntp era unfolding */
 	struct timespec timets, tslast, tsdiff;
 	struct calendar jd;
-	l_fp fp_ofs, fp_sys; /* offset and target system time in FP */
+	struct timespec ofs_ts; /* desired offset as teimspec */
 
 	/*
 	 * Get pivot time for NTP era unfolding. Since we don't step
@@ -366,20 +366,16 @@ step_systime(
 	pivot = 0x7FFFFFFF;
 #endif
 
-	/* get the complete jump distance as l_fp */
-	fp_ofs = dtolfp(step) + dtolfp(sys_residual);
+	/* get the complete jump distance as timespec */
+        ofs_ts = d_to_tspec((step + sys_residual + 0.5e-9) * 1e9);
 
 	/* ---> time-critical path starts ---> */
 
-	/* get the current time as l_fp (without fuzz) and as struct timespec */
+	/* get the current time as, without fuzz, as struct timespec */
 	get_ostime(&timets);
-	fp_sys = tspec_stamp_to_lfp(timets);
 
-	/* get the target time as l_fp */
-	fp_sys += fp_ofs;
-
-	/* unfold the new system time */
-	timets = lfp_stamp_to_tspec(fp_sys, &pivot);
+	/* add offset */
+	timets = add_tspec(timets, ofs_ts);
 
 	/* now set new system time */
 	if (settime(&timets) != 0) {
