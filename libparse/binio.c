@@ -32,8 +32,8 @@ put_lsb_short(
   *((*bufpp)++) = (unsigned char) ((val >> 8) & 0xFF);
 }
 
-long
-get_lsb_long(
+unsigned long
+get_lsb_ulong(
 	unsigned char **bufpp
 	)
 {
@@ -44,7 +44,7 @@ get_lsb_long(
   retval |= *((*bufpp)++) << 16;
   retval |= *((*bufpp)++) << 24;
 
-  return retval;
+  return (unsigned long)retval;
 }
 
 void
