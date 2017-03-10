@@ -307,6 +307,9 @@ adj_systime(
 
 /*
  * step_systime - step the system clock.
+ *
+ * if your timespec has a 64 bit time_t then you are 2038 ready.
+ * if your timespec has a 32 bit time_t, be sure to duck in 2038
  */
 
 bool
@@ -315,56 +318,8 @@ step_systime(
 	int (*settime)(struct timespec *)
 	)
 {
-	time_t pivot; /* for ntp era unfolding */
 	struct timespec timets, tslast, tsdiff;
-	struct calendar jd;
 	struct timespec ofs_ts; /* desired offset as teimspec */
-
-	/*
-	 * Get pivot time for NTP era unfolding. Since we don't step
-	 * very often, we can afford to do the whole calculation from
-	 * scratch. And we're not in the time-critical path yet.
-	 */
-#if NTP_SIZEOF_TIME_T > 4
-	/*
-	 * This code makes sure the resulting time stamp for the new
-	 * system time is in the 2^32 seconds starting at 1970-01-01,
-	 * 00:00:00 UTC.
-	 */
-	pivot = 0x80000000;
-#if USE_COMPILETIME_PIVOT
-	/*
-	 * Add the compile time minus 10 years to get a possible target
-	 * area of (compile time - 10 years) to (compile time + 126
-	 * years).  This should be sufficient for a given binary of
-	 * NTPD.
-	 */
-	if (ntpcal_get_build_date(&jd)) {
-		jd.year -= 10;
-		pivot += ntpcal_date_to_time(&jd);
-	} else {
-		msyslog(LOG_ERR,
-			"step_systime: assume 1970-01-01 as build date");
-	}
-#else
-	UNUSED_LOCAL(jd);
-#endif /* USE_COMPILETIME_PIVOT */
-#else
-	UNUSED_LOCAL(jd);
-	/* This makes sure the resulting time stamp is on or after
-	 * 1969-12-31/23:59:59 UTC and gives us additional two years,
-	 * from the change of NTP era in 2036 to the UNIX rollover in
-	 * 2038. (Minus one second, but that won't hurt.) We *really*
-	 * need a 64-bit 'time_t' after that!  Or a different
-	 * baseline, but that would cause other serious trouble, too.
-	 *
-	 * 2017 update: The comment above was written before the
-	 * 2008-2009 64-bit transition and assumed a 32-bit time_t
-	 * It now appears much less likely that there still be 
-	 * platforms with 32-bit time running in 2038.
-	 */
-	pivot = 0x7FFFFFFF;
-#endif
 
 	/* get the complete jump distance as timespec */
         ofs_ts = d_to_tspec((step + sys_residual + 0.5e-9) * 1e9);
