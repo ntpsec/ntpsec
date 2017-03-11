@@ -1630,7 +1630,8 @@ mkreadable(
 				}
 				else
 				{
-					snprintf(buffer, blen, "\\x%02x", *src++);
+					snprintf(buffer, (size_t)blen,
+                                                 "\\x%02x", *src++);
 					blen   -= 4;
 					buffer += 4;
 				}
@@ -2018,7 +2019,7 @@ ap(char *buffer, size_t len, char *pos, const char *fmt, ...)
 {
 	va_list va;
 	int l;
-	size_t rem = len - (pos - buffer);
+	size_t rem = len - (size_t)(pos - buffer);
 
 	if (rem == 0)
 		return pos;
@@ -2093,8 +2094,9 @@ parsestate(
 		if (flagstrings[i].bit & lstate)
 		{
 			if (s != t)
-				t = ap(buffer, size, t, "; ");
-			t = ap(buffer, size, t, "%s", flagstrings[i].name);
+				t = ap(buffer, (size_t)size, t, "; ");
+			t = ap(buffer, (size_t)size, t, "%s",
+                               flagstrings[i].name);
 		}
 		i++;
 	}
@@ -2102,9 +2104,9 @@ parsestate(
 	if (lstate & (PARSEB_S_LEAP|PARSEB_S_CALLBIT|PARSEB_S_PPS|PARSEB_S_POSITION))
 	{
 		if (s != t)
-			t = ap(buffer, size, t, "; ");
+			t = ap(buffer, (size_t)size, t, "; ");
 
-		t = ap(buffer, size, t, "(");
+		t = ap(buffer, (size_t)size, t, "(");
 
 		s = t;
 
@@ -2115,15 +2117,15 @@ parsestate(
 			{
 				if (t != s)
 				{
-					t = ap(buffer, size, t, "; ");
+					t = ap(buffer, (size_t)size, t, "; ");
 				}
 
-				t = ap(buffer, size, t, "%s",
+				t = ap(buffer, (size_t)size, t, "%s",
 				    sflagstrings[i].name);
 			}
 			i++;
 		}
-		ap(buffer, size, t, ")");
+		ap(buffer, (size_t)size, t, ")");
 	}
 	return buffer;
 }
@@ -2165,8 +2167,9 @@ parsestatus(
 		if (flagstrings[i].bit & lstate)
 		{
 			if (t != buffer)
-				t = ap(buffer, size, t, "; ");
-			t = ap(buffer, size, t, "%s", flagstrings[i].name);
+				t = ap(buffer, (size_t)size, t, "; ");
+			t = ap(buffer, (size_t)size, t, "%s",
+                               flagstrings[i].name);
 		}
 		i++;
 	}
@@ -3749,17 +3752,22 @@ mk_utcinfo(
 		tm = gmtime_r( &t_ls, &tmbuf );
 		if (tm == NULL)  // gmtime_r() failed
 		{
-			snprintf( t, size, "** (gmtime_r() failed in mk_utcinfo())" );
+			snprintf( t, (size_t)size,
+                                 "** (gmtime_r() failed in mk_utcinfo())" );
 			return;
 		}
 
-		n += snprintf( t, size, "UTC offset transition from %is to %is due to leap second %s",
-				dtls, dtlsf, ( dtls < dtlsf ) ? "insertion" : "deletion" );
-		n += snprintf( t + n, size - n, " at UTC midnight at the end of %04i-%02i-%02i",
-				tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday );
+		n += snprintf( t, (size_t)size,
+                  "UTC offset transition from %is to %is due to leap second %s",
+		  dtls, dtlsf, ( dtls < dtlsf ) ? "insertion" : "deletion" );
+		n += snprintf(t + n, (size_t)(size - n),
+                              " at UTC midnight at the end of %04i-%02i-%02i",
+			      tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
 	}
 	else
-		snprintf( t, size, "UTC offset parameter: %is, no leap second announced.\n", dtls );
+		snprintf( t, (size_t)size,
+                    "UTC offset parameter: %is, no leap second announced.\n",
+                    dtls );
 
 }
 
@@ -4261,7 +4269,7 @@ poll_dpoll(
 	const char *ps = ((poll_info_t *)parse->parse_type->cl_data)->string;
 	long ct = ((poll_info_t *)parse->parse_type->cl_data)->count;
 
-	rtc = write(parse->generic->io.fd, ps, ct);
+	rtc = write(parse->generic->io.fd, ps, (size_t)ct);
 	if (rtc < 0)
 	{
 		ERR(ERR_BADIO)
