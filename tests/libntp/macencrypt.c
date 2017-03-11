@@ -29,12 +29,13 @@ const char *expectedPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\x
 
 TEST(macencrypt, Encrypt) {
 	char *packetPtr[totalLength];
-	memset(packetPtr+packetLength, 0, keyIdLength);
-	memcpy(packetPtr, packet, packetLength);
+	memset(packetPtr+packetLength, 0, (size_t)keyIdLength);
+	memcpy(packetPtr, packet, (size_t)packetLength);
 
 	cache_secretsize = keyLength;
 
-	int length =  mac_authencrypt(keytype, (u_char*)key, (uint32_t*)packetPtr, packetLength);
+	int length = mac_authencrypt(keytype, (u_char*)key,
+                                     (uint32_t*)packetPtr, packetLength);
 
 	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (u_char*)key, (uint32_t*)packetPtr, packetLength, length));
 
