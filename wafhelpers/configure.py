@@ -246,7 +246,7 @@ def cmd_configure(ctx, config):
         "-O1",
         "-Wall",
         "-Wextra",
-        "-Wsign-conversion",
+        # "-Wsign-conversion", # debug only
         "-Wstrict-prototypes",
         "-Wunused",
         ]
