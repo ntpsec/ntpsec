@@ -4084,7 +4084,7 @@ read_clockstatus(
 	}
 
 	if (gotvar) {
-		for (i = 1; i <= CC_MAXCODE; i++)
+	    for (i = 1; i <= (int)CC_MAXCODE; i++)
 			if (wants[i])
 				ctl_putclock(i, &cs, true);
 		if (kv != NULL)
