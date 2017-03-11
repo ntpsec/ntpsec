@@ -929,7 +929,8 @@ jupiter_receive(struct recvbuf *rbufp)
 			fprintf(stderr, "jupiter_recv: negative ssize!\n");
 			abort();
 		} else if (instance->ssize > 0)
-			memcpy(instance->sbuf, (uint8_t *)instance->sbuf + cc, instance->ssize);
+			memcpy(instance->sbuf, (uint8_t *)instance->sbuf + cc,
+                               (size_t) instance->ssize);
 	}
 }
 
@@ -1312,7 +1313,7 @@ jupiter_recv(struct instance *instance)
 		*/
 		/* Shuffle data to front of input buffer */
 		if (n > 0)
-			memcpy(sp, bp, n);
+			memcpy(sp, bp, (size_t)n);
 		size = n;
 		instance->ssize = size;
 		if (size < cc || hp->sync != JUPITER_SYNC)
