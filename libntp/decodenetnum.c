@@ -101,7 +101,7 @@ decodenetnum(
 	if(ip_end - ip_start + 1 > (int)sizeof(ip)) {
 		return false;
 	} else {
-		memcpy(ip, ip_start, ip_end - ip_start);
+		memcpy(ip, ip_start, (size_t)(ip_end - ip_start));
 		ip[ip_end - ip_start] = '\0';
 	}
 
