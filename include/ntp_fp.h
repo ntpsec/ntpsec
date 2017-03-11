@@ -46,8 +46,14 @@
  *
  * NTP time stamps will overflow in 2036.  Until then we are in
  * NTP Epoch 0.  After that NTP timestamps will be in Epoch 1.  Negative
- * epochs can be used to represent time before Jan 1900.  The epoch number
- * is not explicit on the wire.
+ * epochs can be used to represent time before Jan 1900.
+ *
+ * The epoch number is not explicit on the wire. It will seldom be an
+ * issue: timestamp differences between two adjacent epochs are still
+ * valid as long as the true time difference is less than half an
+ * epoch.  In other words, you don't have to explicitly check for the
+ * epoch of either timestamp if you assume that these are less than 68
+ * years apart.
  */
 typedef uint64_t l_fp;
 #define lfpfrac(n)		((uint32_t)(n))
