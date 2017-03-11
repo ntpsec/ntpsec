@@ -2302,7 +2302,7 @@ oncore_msg_BaEaHa(
 	/* copy the record to the (extra) location in SHMEM */
 
 	if (instance->shmem) {
-		int	i;
+		size_t	i;
 		uint8_t	*smp;	 /* pointer to start of shared mem for Ba/Ea/Ha */
 
 		switch(instance->chan) {
@@ -3520,7 +3520,7 @@ oncore_load_almanac(
 		if (!strncmp((char *) cp, "@@Cb", 4) &&
 		    oncore_checksum_ok(cp, 33) &&
 		    (*(cp+4) == 4 || *(cp+4) == 5)) {
-			IGNORE(write(instance->ttyfd, cp, n));
+			IGNORE(write(instance->ttyfd, cp, (size_t)n));
 			oncore_print_Cb(instance, cp);
 		}
 	}
