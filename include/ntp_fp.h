@@ -10,24 +10,29 @@
 #include "ntp_types.h"
 
 /*
- * NTP uses two fixed point formats.  The first (l_fp) is the "long"
- * format and is 64 bits wide with the decimal between bits 31 and 32.
- * This is used for time stamps in the NTP packet header (in network
- * byte order).  It is defined in RFC 5905 in Section 6 (Data Types).
+ * NTP uses two fixed point formats.
  *
- * The integral part is unsigned seconds since 0 h 1 January 1900 UTC.
- * It will overflow in 2036.
+ * The first (l_fp) is the "long" format and is 64 bits wide in units
+ * of 1/2e32 seconds (which is between 232 and 233 decimal
+ * picoseconds).  The zero value signifies the zero date of the
+ * current NTP era; era zero began on the date 1900-00-00T00:00:00 in
+ * proleptic UTC (leap second correction was not introduced until
+ * 1972).
  *
- * The fractional part is jusr float seconds divided by 32.  Each LSB
- * is 232 pico seconds.
+ * The long format is used for timestamps in the NTP packet header (in
+ * network byte order).  It is defined in RFC 5905 in Section 6 (Data
+ * Types). In the on-the-wire context, it is always unsigned.
  *
- * For internal computations of offsets (in local host byte order)
- * the same structure is used, but signed, to allow for positive and
- * negative offsets. We use the same structure for both signed and
- * unsigned values, which is a big hack but saves rewriting all the
- * operators twice. Just to confuse this, we also sometimes just carry
- * the fractional part in calculations, in both signed and unsigned
- * forms.
+ * When it is convenient to compute in float seconds, this type can
+ * be interpreted as a fixed-point float with the radix point between
+ * bits 31 and 32. This is why there are macros to extract the low and
+ * high halves.
+ *
+ * Internally, this type is sometimes used for time offsets.  In that 
+ * context it is interpreted as signed and can only express offsets
+ * up to a half cycle. Offsets are normally much, much smaller than that;
+ * for an offset to have a value even as large as 1 second would be 
+ * highly unusual.
  *
  * Anyway, an l_fp looks like:
  *
@@ -39,11 +44,10 @@
  *   |			       Fractional Part			     |
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
- * NTP time stamps will overflow 32 bits in 2036.  Until then we are in
+ * NTP time stamps will overflow in 2036.  Until then we are in
  * NTP Epoch 0.  After that NTP timestamps will be in Epoch 1.  Negative
- * Epochs can be used to represent time before Jan 1900.  The NTP Date
- * Format is used on the wire to transfer the NTP Epoch.
- *
+ * epochs can be used to represent time before Jan 1900.  The epoch number
+ * is not explicit on the wire.
  */
 typedef uint64_t l_fp;
 #define lfpfrac(n)		((uint32_t)(n))
