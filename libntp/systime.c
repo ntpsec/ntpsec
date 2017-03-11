@@ -323,7 +323,7 @@ step_systime(
 	struct timespec ofs_ts; /* desired offset as teimspec */
 
 	/* get the complete jump distance as timespec */
-        ofs_ts = d_to_tspec((step + sys_residual + 0.5e-9) * 1e9);
+        ofs_ts = d_to_tspec(step + sys_residual + 0.5e-9);
 
 	/* ---> time-critical path starts ---> */
 
@@ -331,10 +331,10 @@ step_systime(
 	get_ostime(&timets);
 
 	/* add offset */
-	timets = add_tspec(timets, ofs_ts);
+	tslast = add_tspec(timets, ofs_ts);
 
 	/* now set new system time */
-	if (settime(&timets) != 0) {
+	if (settime(&tslast) != 0) {
 		msyslog(LOG_ERR, "step_systime: %m");
 		return false;
 	}
@@ -342,8 +342,6 @@ step_systime(
 	/* <--- time-critical path ended with call to the settime hook <--- */
 
 	/* only used for utmp/wtmpx time-step recording */
-	tslast.tv_sec = timets.tv_sec;
-	tslast.tv_nsec = timets.tv_nsec;
 
 	sys_residual = 0;
 	lamport_violated = (step < 0);
