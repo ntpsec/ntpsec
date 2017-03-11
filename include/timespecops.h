@@ -49,8 +49,15 @@
 #include "timetoa.h"
 
 
+/* microseconds per second */
+#define MICROSECONDS 1000000
+/* sconds per microsecond */
+#define MICROSECOND 1.0e-6
+
 /* nanoseconds per second */
 #define NANOSECONDS 1000000000
+/* seconds per nanosecond */
+#define NANOSECOND 1.0e-9
 
 /* predicate: returns true if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) \

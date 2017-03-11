@@ -26,9 +26,6 @@
 #define tv_frac_sec tv_usec
 #endif
 
-/* microseconds per second */
-#define MICROSECONDS 1000000
-
 /*
  * Convert usec to a time stamp fraction.
  */
