@@ -211,10 +211,12 @@ mbg_time_status_str(
 			{
 				if (p != *buffpp)
 				{
-					strlcpy(p, ", ", size - (p - start));
+					strlcpy(p, ", ",
+                                                (size_t)(size - (p - start)));
 					p += 2;
 				}
-				strlcpy(p, s->string, size - (p - start));
+				strlcpy(p, s->string,
+                                        (size_t)(size - (p - start)));
 				p += strlen(p);
 			}
 		}
