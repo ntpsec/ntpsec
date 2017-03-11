@@ -63,6 +63,12 @@ static inline l_fp lfpinit(int32_t sec, uint32_t frac)
     return tmp;
 }
 
+static inline l_fp lfpinit_u(uint32_t sec, uint32_t frac)
+{
+    l_fp tmp = lfptouint(sec) | lfpfrac(frac);
+    return tmp;
+}
+
 /*
  * Fractional precision (of an l_fp) is actually the number of
  * bits in an int32_t/uint32_t.
@@ -116,7 +122,7 @@ static inline l_fp_w htonl_fp(l_fp lfp) {
 }
 
 static inline l_fp ntohl_fp(l_fp_w lfpw) {
-    return lfpinit(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));
+    return lfpinit_u(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));
 }
 
 #define	M_ISNEG(v_i)			/* v < 0 */ \
@@ -163,7 +169,7 @@ static inline l_fp dtolfp(double d)
 	if (M_isneg) {
 		q_tmp = ~q_tmp + 1;
 	}
-	return lfpinit((uint32_t)(q_tmp >> 32) , (uint32_t)q_tmp);
+	return lfpinit_u(q_tmp >> 32, (uint32_t)q_tmp);
 }
 
 static inline double lfptod(l_fp r)
