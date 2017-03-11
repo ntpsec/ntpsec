@@ -164,41 +164,19 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 #include <math.h>	/* ldexp() */
 
 static inline l_fp dtolfp(double d)
-/* double to l_fp */
+/* double to l_fp
+ * assumes signed l_fp, i.e. a time offset
+ */
 {
-	double	d_tmp;
-	uint64_t	q_tmp;
-	int	M_isneg;
-
-	d_tmp = (d);
-	M_isneg = (d_tmp < 0.);
-	if (M_isneg) {
-		d_tmp = -d_tmp;
-	}
-	q_tmp = (uint64_t)ldexp(d_tmp, 32);
-	if (M_isneg) {
-		q_tmp = ~q_tmp + 1;
-	}
-	return lfpinit_u(q_tmp >> 32, (uint32_t)q_tmp);
+	return (l_fp)((int64_t)ldexp(d, 32));
 }
 
 static inline double lfptod(l_fp r)
-/* l_fp to double */
+/* l_fp to double
+ * assumes signed l_fp, i.e. a time offset
+ */
 {
-	double	d;
-	uint64_t	q_tmp;
-	int	M_isneg;
-
-	q_tmp = ((uint64_t)lfpuint(r) << 32) + lfpfrac(r);
-	M_isneg = M_ISNEG(lfpuint(r));
-	if (M_isneg) {
-		q_tmp = ~q_tmp + 1;
-	}
-	d = ldexp((double)q_tmp, -32);
-	if (M_isneg) {
-		d = -d;
-	}
-	return d;
+	return ldexp((double)((int64_t)r), -32);
 }
 
 /*
