@@ -323,7 +323,7 @@ step_systime(
 	struct timespec ofs_ts; /* desired offset as teimspec */
 
 	/* get the complete jump distance as timespec */
-        ofs_ts = d_to_tspec(step + sys_residual + 0.5e-9);
+        ofs_ts = d_to_tspec(step + sys_residual);
 
 	/* ---> time-critical path starts ---> */
 
