@@ -77,25 +77,23 @@ normalize_tspec(
 	)
 {
 #if NTP_SIZEOF_LONG > 4
-	long	z;
-
 	/* 
 	 * tv_nsec is of type 'long', and on a 64-bit machine using only
 	 * loops becomes prohibitive once the upper 32 bits get
 	 * involved. On the other hand, division by constant should be
 	 * fast enough; so we do a division of the nanoseconds in that
-	 * case. The floor adjustment step follows with the standard
-	 * normalisation loops. And labs() is intentionally not used
-	 * here: it has implementation-defined behaviour when applied
-	 * to LONG_MIN.
+	 * case.
 	 */
-	if (x.tv_nsec < NANOSECONDS ||
-	    x.tv_nsec > NANOSECONDS) {
-		z = x.tv_nsec / NANOSECONDS;
-		x.tv_nsec -= z * NANOSECONDS;
-		x.tv_sec += z;
+	if (x.tv_nsec < 0 || x.tv_nsec >= NANOSECONDS) {
+		ldiv_t	z = ldiv( x.tv_nsec, NANOSECONDS);
+		if (z.rem < 0) {
+			z.quot--;
+			z.rem  += NANOSECONDS;
+		}
+		x.tv_sec  += z.quot;
+		x.tv_nsec  = z.rem;
 	}
-#endif
+#else
 	/* since 10**9 is close to 2**32, we don't divide but do a
 	 * normalisation in a loop; this takes 3 steps max, and should
 	 * outperform a division even if the mul-by-inverse trick is
@@ -110,6 +108,7 @@ normalize_tspec(
 			x.tv_nsec -= NANOSECONDS;
 			x.tv_sec++;
 		} while (x.tv_nsec >= NANOSECONDS);
+#endif
 
 	return x;
 }
