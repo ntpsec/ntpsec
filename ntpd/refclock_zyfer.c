@@ -237,7 +237,7 @@ zyfer_receive(
 			return;
 	} else {
 		memcpy(pp->a_lastcode + pp->lencode, p, rbufp->recv_length);
-		pp->lencode += rbufp->recv_length;
+		pp->lencode += (int)rbufp->recv_length;
 		pp->a_lastcode[pp->lencode] = '\0';
 	}
 

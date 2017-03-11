@@ -827,7 +827,7 @@ timer_primary(
 			DPRINTF(2, ("%s: timer livecheck: '%s'\n",
 				    up->logname, s_req_version));
 			log_data(peer, "send", s_req_version, rlen);
-			rc = write(pp->io.fd, s_req_version, (int)rlen);
+			rc = write(pp->io.fd, s_req_version, rlen);
 			(void)rc;
 		} else if (-1 != up->fdt) {
 			gpsd_test_socket(peer);
@@ -1443,7 +1443,8 @@ process_version(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	int len;
+	size_t len;
+	ssize_t ret;
 	char * buf;
 	const char *revision;
 	const char *release;
@@ -1505,8 +1506,9 @@ process_version(
 		 s_req_watch[up->pf_toff != 0], up->device);
 	buf = up->buffer;
 	len = strlen(buf);
-	log_data(peer, "send", buf, (size_t)len);
-	if (len != write(pp->io.fd, buf, len) && (syslogok(pp, up))) {
+	log_data(peer, "send", buf, len);
+	ret = write(pp->io.fd, buf, len);
+	if ( (ret < 0 || (size_t)ret != len) && (syslogok(pp, up))) {
 		/* Note: if the server fails to read our request, the
 		 * resulting data timeout will take care of the
 		 * connection!

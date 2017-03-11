@@ -218,7 +218,7 @@ static const struct ctl_proc control_codes[] = {
 #define CS_MRU_OLDEST_AGE	95
 #define	CS_LEAPSMEARINTV	96
 #define	CS_LEAPSMEAROFFS	97
-#define	CS_TICK                 98
+#define	CS_TICK                 98U
 #define	CS_MAXCODE		CS_TICK
 
 /*
@@ -291,7 +291,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CC_FUDGEVAL2	10
 #define	CC_FLAGS	11
 #define	CC_DEVICE	12
-#define	CC_VARLIST	13
+#define	CC_VARLIST	13U
 #define	CC_MAXCODE	CC_VARLIST
 
 /*
@@ -815,7 +815,7 @@ process_control(
 	/* round up proper len to a 8 octet boundary */
 
 	properlen = (properlen + 7) & ~7;
-	maclen = rbufp->recv_length - properlen;
+	maclen = rbufp->recv_length - (size_t)properlen;
 	if ((rbufp->recv_length & 3) == 0 &&
 	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN) {
 		res_authenticate = true;
@@ -967,7 +967,7 @@ ctl_flushpkt(
 	 * which means Python mode 6 clients might actually see the trailing
 	 * garbage.
 	 */
-	memset(rpkt.data + sendlen, '\0', sizeof(rpkt.data) - sendlen);
+	memset(rpkt.data + sendlen, '\0', sizeof(rpkt.data) - (size_t)sendlen);
 	
 	/*
 	 * Pad to a multiple of 32 bits
@@ -1161,7 +1161,8 @@ ctl_putdblf(
 		*cp++ = *cq++;
 	*cp++ = '=';
 	NTP_INSIST((size_t)(cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), use_f ? "%.*f" : "%.*g",
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
+                 use_f ? "%.*f" : "%.*g",
 	    precision, d);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
@@ -1187,7 +1188,7 @@ ctl_putuint(
 
 	*cp++ = '=';
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "%lu", uval);
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%lu", uval);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
@@ -1221,7 +1222,7 @@ ctl_putfs(
 	if (NULL ==  tm)
 		return;
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer),
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
 		 "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
 		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
 	cp += strlen(cp);
@@ -1250,7 +1251,7 @@ ctl_puthex(
 
 	*cp++ = '=';
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%lx", uval);
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%lx", uval);
 	cp += strlen(cp);
 	ctl_putdata(buffer,(unsigned)( cp - buffer ), false);
 }
@@ -1276,7 +1277,7 @@ ctl_putint(
 
 	*cp++ = '=';
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "%ld", ival);
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%ld", ival);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
@@ -1302,7 +1303,7 @@ ctl_putts(
 
 	*cp++ = '=';
 	NTP_INSIST((size_t)(cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%08x.%08x",
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%08x.%08x",
 		 (u_int)lfpuint(*ts), (u_int)lfpfrac(*ts));
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
@@ -1334,7 +1335,7 @@ ctl_putadr(
 	else
 		cq = socktoa(addr);
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "%s", cq);
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%s", cq);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
 }
@@ -1405,7 +1406,7 @@ ctl_putarray(
 			i = NTP_SHIFT;
 		i--;
 		NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
-		snprintf(cp, sizeof(buffer) - (cp - buffer),
+		snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
 			 " %.2f", arr[i] * 1e3);
 		cp += strlen(cp);
 	} while (i != start);
@@ -1558,7 +1559,7 @@ ctl_putsys(
 		char *buffp, *buffend;
 		bool firstVarName;
 		const char *ss1;
-		int len;
+		size_t len;
 		const struct ctl_var *k;
 
 		buffp = buf;
@@ -1592,14 +1593,14 @@ ctl_putsys(
 			if (NULL == ss1)
 				len = strlen(k->text);
 			else
-				len = ss1 - k->text;
+				len = (size_t)(ss1 - k->text);
 			if (buffp + len + 1 >= buffend)
 				break;
 			if (firstVarName) {
 				*buffp++ = ',';
 				firstVarName = false;
 			}
-			memcpy(buffp, k->text,(unsigned)len);
+			memcpy(buffp, k->text, len);
 			buffp += len;
 		}
 		if (buffp + 2 >= buffend)
@@ -2052,7 +2053,7 @@ ctl_putpeer(
 	char *s;
 	char *t;
 	char *be;
-	int i;
+	size_t sz;
 	const struct ctl_var *k;
 
 	switch (id) {
@@ -2271,13 +2272,13 @@ ctl_putpeer(
 		for (k = peer_var; !(EOV & k->flags); k++) {
 			if (PADDING & k->flags)
 				continue;
-			i = strlen(k->text);
-			if (s + i + 1 >= be)
+			sz = strlen(k->text);
+			if (s + sz + 1 >= be)
 				break;
 			if (s != t)
 				*s++ = ',';
-			memcpy(s, k->text, i);
-			s += i;
+			memcpy(s, k->text, sz);
+			s += sz;
 		}
 		if (s + 2 < be) {
 			*s++ = '"';
@@ -2340,7 +2341,7 @@ ctl_putclock(
 	char buf[CTL_MAX_DATA_LEN];
 	char *s, *t, *be;
 	const char *ss;
-	int i;
+	size_t sz;
 	const struct ctl_var *k;
 
 	switch (id) {
@@ -2444,14 +2445,14 @@ ctl_putclock(
 			if (PADDING & k->flags)
 				continue;
 
-			i = strlen(k->text);
-			if (s + i + 1 >= be)
+			sz = strlen(k->text);
+			if (s + sz + 1 >= be)
 				break;
 
 			if (s != t)
 				*s++ = ',';
-			memcpy(s, k->text, i);
-			s += i;
+			memcpy(s, k->text, sz);
+			s += sz;
 		}
 
 		for (k = pcs->kv_list; k && !(EOV & k->flags); k++) {
@@ -2464,14 +2465,14 @@ ctl_putclock(
 
 			while (*ss && *ss != '=')
 				ss++;
-			i = ss - k->text;
-			if (s + i + 1 >= be)
+			sz = (size_t)(ss - k->text);
+			if (s + sz + 1 >= be)
 				break;
 
 			if (s != t)
 				*s++ = ',';
-			memcpy(s, k->text, (unsigned)i);
-			s += i;
+			memcpy(s, k->text, sz);
+			s += sz;
 			*s = '\0';
 		}
 		if (s + 2 >= be)
@@ -2952,7 +2953,7 @@ static void configure(
 	}
 
 	/* Initialize the remote config buffer */
-	data_count = reqend - reqpt;
+	data_count = (size_t)(reqend - reqpt);
 
 	if (data_count > sizeof(remote_config.buffer) - 2) {
 		snprintf(remote_config.err_msg,
