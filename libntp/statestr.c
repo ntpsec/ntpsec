@@ -327,7 +327,7 @@ decode_bitflags(
 
 	for (b = 0; b < tab_ct; b++) {
 		if (tab[b].code & bits) {
-			rc = snprintf(pch, (lim - pch), "%s%s", sep,
+			rc = snprintf(pch, (size_t)(lim - pch), "%s%s", sep,
 				      tab[b].string);
 			if (rc < 0)
 				goto toosmall;
@@ -433,9 +433,9 @@ statustoa(
 			 getevents(CTL_PEER_NEVNT(st)));
 		if (CTL_PEER_EVENT(st) != EVNT_UNSPEC) {
 			cc = cb + strlen(cb);
-			snprintf(cc, LIB_BUFLENGTH - (cc - cb), ", %s",
-				 getcode(CTL_PEER_EVENT(st),
-					 peer_codes));
+			snprintf(cc, (size_t)(LIB_BUFLENGTH - (cc - cb)),
+                                 ", %s",
+				 getcode(CTL_PEER_EVENT(st), peer_codes));
 		}
 		break;
 	
