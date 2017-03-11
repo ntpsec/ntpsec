@@ -120,13 +120,11 @@ d_to_tspec(
 	)
 {
 	struct timespec	x;
+	double s = floor(d);
 
-	d += 0.5e-9;	/* round on LSB */
-	x.tv_sec = (time_t) d;
-	x.tv_nsec = (long)((d - (double)x.tv_sec) * 1e9);
-
-        /* unlikely, but ensure it is normalized */
-	return normalize_tspec(x);
+	x.tv_sec  = (time_t) s;
+	x.tv_nsec = (long) (((d - s) * NANOSECONDS) + 0.5);
+	return x;
 }
 
 /* x = a + b */
