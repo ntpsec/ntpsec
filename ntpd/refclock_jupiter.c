@@ -770,7 +770,7 @@ jupiter_receive(struct recvbuf *rbufp)
 
 	/* Append to input buffer */
 	memcpy((uint8_t *)instance->sbuf + instance->ssize, bp, bpcnt);
-	instance->ssize += bpcnt;
+	instance->ssize += (ssize_t)bpcnt;
 
 	/* While there's at least a header and we parse an intact message */
 	while (instance->ssize > (int)sizeof(*hp) && (cc = jupiter_recv(instance)) > 0) {
