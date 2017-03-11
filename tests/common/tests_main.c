@@ -54,7 +54,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(prettydate);
 	RUN_TEST_GROUP(recvbuff);
 	RUN_TEST_GROUP(refidsmear);
-	RUN_TEST_GROUP(sfptostr);
 	RUN_TEST_GROUP(socktoa);
 	RUN_TEST_GROUP(statestr);
 	RUN_TEST_GROUP(strtolfp);

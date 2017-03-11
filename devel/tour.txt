@@ -23,13 +23,29 @@ home-brews three fixed-point types of its own.  Of these l_fp is the
 most common, with 32 bits of precision in both integer and fractional
 parts. Gory details are in include/ntp_fp.h.
 
-One point not covered there is that when used to represent dates
-internally an l_fp is normally interpreted as a pair consisting of
-an *unsigned* number of seconds since 1900-01-01T00:00:00Z (the
-NTP epoch) and unsigned decimal fractional seconds.  Just to complicate
-matters, however, some uses of l_fp are time offsets with a signed
-seconds part - how it's interpreted depends on which member of a union
-is used.
+One point not covered there is that an l_fp is actually a symmetrical
+truncation of the full NTP date (for which no data type exists) about
+the fixed point location.  The full NTP date has 64 bits for both the
+integer and fractional part, which get truncated to the right 32bit
+for the fractional and the left 32bit for the fractional part to
+become an l_fp.  For most calculations with l_fp it's easier to
+envision it as a 64bit integer that represents time with a unit of
+2^-32s, slightly short of 233 ps.
+
+When used to represent dates internally an l_fp must be interpreted in
+relation to the NTP era (the left 32 bits of the integer part of the
+NTP date that got cut off).  The NTP prime epoch (or epoch 0) is then
+an *unsigned* number of seconds since 1900-01-01T00:00:00Z and
+unsigned decimal fractional seconds.  Just to complicate matters,
+however, some uses of l_fp are time offsets with a signed seconds
+part.  Under the assumption that only adjacent epochs get compared,
+the offset calculations work correctly without taking the era number
+into account.
+
+Most time offsets are much smaller than the NTP epoch, so a 32 bit
+representation is used for these.  Actually, there were two of these:
+s_fp for signed offsets and u_fp for strictly non-negative ones.  The
+signed version has already been removed in NTPsec.
 
 The comments in libntp/ntp_calendar.c are pretty illuminating about
 calendar representations.  A high-level point they don't make is

@@ -2164,7 +2164,7 @@ peer_xmit(
 	xpkt.ppoll = peer->hpoll;
 	xpkt.precision = sys_precision;
 	xpkt.refid = sys_refid;
-	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+	xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
 	xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_rootdisp));
 	xpkt.reftime = htonl_fp(sys_reftime);
 	xpkt.org = htonl_fp(peer->rec);
@@ -2324,7 +2324,7 @@ fast_xmit(
 		xpkt.ppoll = max(rpkt->ppoll, ntp_minpoll);
 		xpkt.precision = sys_precision;
 		xpkt.refid = sys_refid;
-		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
 		xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
 
 #ifdef ENABLE_LEAP_SMEAR
@@ -2474,7 +2474,7 @@ pool_xmit(
 	xpkt.ppoll = pool->hpoll;
 	xpkt.precision = sys_precision;
 	xpkt.refid = sys_refid;
-	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+	xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
 	xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
 	xpkt.reftime = htonl_fp(sys_reftime);
 	get_systime(&xmt_tx);

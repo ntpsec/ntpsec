@@ -101,7 +101,6 @@ static inline l_fp lfpinit_u(uint32_t sec, uint32_t frac)
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  */
-typedef int32_t s_fp;
 typedef uint32_t u_fp;
 
 /*
@@ -149,12 +148,9 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 #define	L_ISGTU(a, b)	((a) > (b))
 
 /*
- * s_fp/double and u_fp/double conversions
+ * double to u_fp conversion
  */
-#define FRIC		65536.0			/* 2^16 as a double */
-#define DTOFP(r)	((s_fp)((r) * FRIC))
-#define DTOUFP(r)	((u_fp)((r) * FRIC))
-#define FPTOD(r)	((double)(r) / FRIC)
+#define DTOUFP(r)	((u_fp)ldexp((double)(r), 16))
 
 /*
  * l_fp/double conversions
@@ -188,8 +184,6 @@ extern	char *	mfptoa		(l_fp, short);
 extern	char *	mfptoms		(l_fp, short);
 
 extern	bool	atolfp		(const char *, l_fp *);
-extern	char *	fptoa		(s_fp, short);
-extern	char *	fptoms		(s_fp, short);
 extern	bool	hextolfp	(const char *, l_fp *);
 extern  void	gpstolfp	(int, int, unsigned long, l_fp *);
 extern	bool	mstolfp		(const char *, l_fp *);

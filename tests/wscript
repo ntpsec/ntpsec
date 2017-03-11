@@ -41,7 +41,6 @@ def build(ctx):
         "libntp/prettydate.c",
         "libntp/recvbuff.c",
         "libntp/refidsmear.c",
-        "libntp/sfptostr.c",
         "libntp/socktoa.c",
         "libntp/statestr.c",
         "libntp/strtolfp.c",
