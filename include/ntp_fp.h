@@ -57,11 +57,9 @@ typedef uint64_t l_fp;
 #define setlfpsint(n, v)        ((n)  = (lfptosint(v) | lfpfrac(n)))
 #define setlfpuint(n, v)        ((n)  = (lfptouint(v) | lfpfrac(n)))
 
-static inline l_fp lfpinit(int32_t hi, uint32_t lo)
+static inline l_fp lfpinit(int32_t sec, uint32_t frac)
 {
-    l_fp tmp = 0;
-    setlfpsint(tmp, hi);
-    setlfpfrac(tmp, lo);
+    l_fp tmp = lfptouint(sec) | lfpfrac(frac);
     return tmp;
 }
 
