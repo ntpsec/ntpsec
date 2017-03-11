@@ -303,7 +303,7 @@ hpgps_receive(
 	if (up->linecnt-- > 0) {
 		if ((int)(pp->lencode + 2) <= (SMAX - (up->lastptr - up->statscrn))) {
 			*up->lastptr++ = '\n';
-			memcpy(up->lastptr, pp->a_lastcode, pp->lencode);
+			memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
 			up->lastptr += pp->lencode;
 		}
 		if (up->linecnt == 0) 

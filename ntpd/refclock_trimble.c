@@ -1118,7 +1118,7 @@ praecis_parse (
 	)
 {
 	static char buf[100];
-	static int p = 0;
+	static size_t p = 0;
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
