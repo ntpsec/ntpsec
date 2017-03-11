@@ -558,7 +558,8 @@ nmea_control(
 	/* Light up the PPSAPI interface if not yet attempted. */
 	if ((CLK_FLAG1 & pp->sloppyclockflag) && !up->ppsapi_tried) {
 		up->ppsapi_tried = true;
-		devlen = snprintf(device, sizeof(device), PPSDEV, unit);
+                /* FIXME: snprintf() can return negative on error */
+		devlen = (size_t)snprintf(device, sizeof(device), PPSDEV, unit);
 		if (devlen < sizeof(device)) {
 		    up->ppsapi_fd = open(peer->ppspath ? peer->ppspath : device,
 					 PPSOPENMODE, S_IRUSR | S_IWUSR);
@@ -1007,7 +1008,7 @@ nmea_receive(
 		checkres = -1;
 
 	if (checkres != -1) {
-		save_ltc(pp, rd_lastcode, rd_lencode);
+		save_ltc(pp, rd_lastcode, (size_t)rd_lencode);
 		refclock_report(peer, checkres);
 		return;
 	}
@@ -1044,7 +1045,7 @@ nmea_receive(
 
 	/* Data will be accepted. Update stats & log data. */
 	up->tally.accepted++;
-	save_ltc(pp, rd_lastcode, rd_lencode);
+	save_ltc(pp, rd_lastcode, (size_t)rd_lencode);
 	pp->lastrec = rd_timestamp;
 
 #ifdef HAVE_PPSAPI
