@@ -84,7 +84,7 @@ set_sys_fuzz(
 	sys_fuzz = fuzz_val;
 	//INSIST(sys_fuzz >= 0);
 	//INSIST(sys_fuzz <= 1.0);
-	sys_fuzz_nsec = (long)(sys_fuzz * 1e9 + 0.5);
+	sys_fuzz_nsec = (long)(sys_fuzz * NANOSECONDS + 0.5);
 }
 
 
@@ -106,8 +106,8 @@ get_ostime(
 	}
 
 	if (trunc_os_clock) {
-		ticks = (long)((tsp->tv_nsec * 1e-9) / sys_tick);
-		tsp->tv_nsec = (long)(ticks * 1e9 * sys_tick);
+		ticks = (long)((tsp->tv_nsec * NANOSECOND) / sys_tick);
+		tsp->tv_nsec = (long)(ticks * NANOSECONDS * sys_tick);
 	}
 }
 
@@ -160,7 +160,7 @@ normalize_time(
 			msyslog(LOG_ERR,
 				"get_systime Lamport advance exceeds one second (%.9f)",
 				ts_lam.tv_sec +
-				    1e-9 * ts_lam.tv_nsec);
+				    NANOSECOND * ts_lam.tv_nsec);
 			exit(1);
 		}
 		if (!lamport_violated)
@@ -271,20 +271,20 @@ adj_systime(
 	if (sys_tick > sys_fuzz)
 		quant = sys_tick;
 	else
-		quant = 1e-6;
+		quant = MICROSECOND;
 	ticks = (long)(dtemp / quant + .5);
-	adjtv.tv_usec = (long)(ticks * quant * 1.e6 + .5);
+	adjtv.tv_usec = (long)(ticks * quant * MICROSECONDS + .5);
 	/* The rounding in the conversions could push us over the
 	 * limits: make sure the result is properly normalised!
 	 * note: sign comes later, all numbers non-negative here.
 	 */
-	if (adjtv.tv_usec >= 1000000) {
+	if (adjtv.tv_usec >= MICROSECONDS) {
 		adjtv.tv_sec  += 1;
-		adjtv.tv_usec -= 1000000;
+		adjtv.tv_usec -= MICROSECONDS;
 		dtemp         -= 1.;
 	}
 	/* set the new residual with leftover from correction */
-	sys_residual = dtemp - adjtv.tv_usec * 1.e-6;
+	sys_residual = dtemp - adjtv.tv_usec * MICROSECOND;
 
 	/*
 	 * Convert to signed seconds and microseconds for the Unix
