@@ -920,8 +920,8 @@ typedef struct
 
 
 
-void mbg_tm_str (char **, TM_GPS *, int, int);
-void mbg_tgps_str (char **, T_GPS *, int);
+void mbg_tm_str (char **, TM_GPS *, size_t, int);
+void mbg_tgps_str (char **, T_GPS *, size_t);
 void get_mbg_header (unsigned char **, GPS_MSG_HDR *);
 void put_mbg_header (unsigned char **, GPS_MSG_HDR *);
 void get_mbg_sw_rev (unsigned char **, SW_REV *);

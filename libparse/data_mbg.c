@@ -17,7 +17,7 @@
 #include "ieee754io.h"
 
 static void get_mbg_tzname (unsigned char **, char *);
-static void mbg_time_status_str (char **, unsigned int, int);
+static void mbg_time_status_str (char **, unsigned int, size_t);
 
 #if 0				/* no actual floats on Meinberg binary interface */
 static offsets_t mbg_float  = { 1, 0, 3, 2, 0, 0, 0, 0 }; /* byte order for meinberg floats */
@@ -180,7 +180,7 @@ static void
 mbg_time_status_str(
 	char **buffpp,
 	unsigned int status,
-	int size
+	size_t size
 	)
 {
 	static struct state
@@ -212,11 +212,11 @@ mbg_time_status_str(
 				if (p != *buffpp)
 				{
 					strlcpy(p, ", ",
-                                                (size_t)(size - (p - start)));
+                                                size - (size_t)(p - start));
 					p += 2;
 				}
 				strlcpy(p, s->string,
-                                        (size_t)(size - (p - start)));
+                                        size - (size_t)(p - start));
 				p += strlen(p);
 			}
 		}
@@ -228,7 +228,7 @@ void
 mbg_tm_str(
 	char **buffpp,
 	TM_GPS *tmp,
-	int size,
+	size_t size,
 	int print_status
 	)
 {
@@ -250,7 +250,7 @@ void
 mbg_tgps_str(
 	char **buffpp,
 	T_GPS *tgpsp,
-	int size
+	size_t size
 	)
 {
 	snprintf(*buffpp, size, "week %d + %ld days + %ld.%07ld sec",
