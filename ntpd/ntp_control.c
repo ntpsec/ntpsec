@@ -58,7 +58,7 @@ static	void	ctl_putdblf	(const char *, int, int, double);
 #define	ctl_putdbl(tag, d)	ctl_putdblf(tag, 1, 3, d)
 #define	ctl_putdbl6(tag, d)	ctl_putdblf(tag, 1, 6, d)
 #define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, 0, -1, \
-					    ldexp((double)(sfp), -16))
+					    FP_UNSCALE(sfp))
 static	void	ctl_putuint	(const char *, u_long);
 static	void	ctl_puthex	(const char *, u_long);
 static	void	ctl_putint	(const char *, long);

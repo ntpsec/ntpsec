@@ -63,8 +63,6 @@ int ntp_gettime(struct ntptimeval *ntv)
 \11PPSSIGNAL\12PPSJITTER\13PPSWANDER\14PPSERROR\15CLOCKERR\
 \16NANO\17MODE\20CLK"
 
-#define SCALE_FREQ 65536		/* frequency scale */
-
 /*
  * These constants are used to round the time stamps computed from
  * a struct timeval to the microsecond (more or less).  This keeps
@@ -152,7 +150,7 @@ main(
 
 		case 'f':
 			ntx.modes |= MOD_FREQUENCY;
-			ntx.freq = (long)(atof(ntp_optarg) * SCALE_FREQ);
+			ntx.freq = (long)FP_SCALE(atof(ntp_optarg));
 			break;
 
 		case 'j':
@@ -378,14 +376,14 @@ main(
 		       snprintb(sizeof(binbuf), binbuf, ntx.modes, TIMEX_MOD_BITS));
 		ftemp = (double)ntx.offset/NS_PER_MS_FLOAT;
 		printf(json ? jfmt9 : ofmt9, ftemp);
-		ftemp = (double)ntx.freq / SCALE_FREQ;
+		ftemp = FP_UNSCALE(ntx.freq);
 		printf(json ? jfmt10 : ofmt10, ftemp, 1 << ntx.shift);
 		printf(json ? jfmt11 : ofmt11,
 		     (u_long)ntx.maxerror, (u_long)ntx.esterror);
 		printf(json ? jfmt12 : ofmt12,
 		       snprintb(sizeof(binbuf), binbuf,
 			       (u_int)ntx.status, TIMEX_STA_BITS));
-		ftemp = (double)ntx.tolerance / SCALE_FREQ;
+		ftemp = FP_UNSCALE(ntx.tolerance);
 		/*
 		 * Before the introduction of ntp_adjtime_ns() the
 		 * ntptime code divided this by 1000 when the STA_NANO
@@ -397,8 +395,8 @@ main(
 		printf(json ? jfmt13 : ofmt13,
 			(u_long)ntx.constant, gtemp, ftemp);
 		if (ntx.shift != 0) {
-			ftemp = (double)ntx.ppsfreq / SCALE_FREQ;
-			gtemp = (double)ntx.stabil / SCALE_FREQ;
+		  ftemp = FP_UNSCALE(ntx.ppsfreq);
+		  gtemp = FP_UNSCALE(ntx.stabil);
 			htemp = (double)ntx.jitter/NS_PER_MS_FLOAT;
 			printf(json ? jfmt14 : ofmt14,
 			    ftemp, gtemp, htemp);

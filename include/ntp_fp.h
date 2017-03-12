@@ -148,9 +148,12 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 #define	L_ISGTU(a, b)	((a) > (b))
 
 /*
+ * scaling to 32bit FP format
  * double to u_fp conversion
  */
-#define DTOUFP(r)	((u_fp)ldexp((double)(r), 16))
+#define FP_SCALE(r)	(ldexp((double)(r),  16))
+#define FP_UNSCALE(r)	(ldexp((double)(r), -16))
+#define DTOUFP(r)	((u_fp)FP_SCALE(r))
 
 /*
  * l_fp/double conversions
