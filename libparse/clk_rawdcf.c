@@ -142,14 +142,14 @@ static struct partab
 #define DCF_Z_MET 0x2
 #define DCF_Z_MED 0x1
 
-static unsigned long
+static long
 ext_bf(
 	unsigned char *buf,
 	int   idx,
 	const unsigned char *zero
 	)
 {
-	unsigned long sum = 0;
+	long sum = 0;
 	int i, first;
 
 	first = rawdcfcode[idx].offset;
@@ -509,11 +509,11 @@ calc_usecdiff(
 	l_fp delt;
 
 	delt = *ref;
-       bumplfpsint(delt, -offset);
+	bumplfpsint(delt, -offset);
 	delt -= *base;
-       delta = lfp_uintv_to_tspec(delt);
+	delta = lfp_uintv_to_tspec(delt);
 
-       delta_usec = (NANOSECONDS/1000)*(int32_t)delta.tv_sec + delta.tv_nsec/1000;
+	delta_usec = MICROSECONDS*(int32_t)delta.tv_sec + delta.tv_nsec/1000;
 	return delta_usec;
 }
 
