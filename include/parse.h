@@ -30,42 +30,42 @@
 /*
  * state flags
  */
-#define PARSEB_POWERUP            0x00000001 /* no synchronisation */
-#define PARSEB_NOSYNC             0x00000002 /* timecode currently not confirmed */
+#define PARSEB_POWERUP            0x00000001U /* no synchronisation */
+#define PARSEB_NOSYNC             0x00000002U /* timecode currently not confirmed */
 
 /*
  * time zone information
  */
-#define PARSEB_ANNOUNCE           0x00000010 /* switch time zone warning (DST switch) */
-#define PARSEB_DST                0x00000020 /* DST in effect */
-#define PARSEB_UTC		  0x00000040 /* UTC time */
+#define PARSEB_ANNOUNCE           0x00000010U /* switch time zone warning (DST switch) */
+#define PARSEB_DST                0x00000020U /* DST in effect */
+#define PARSEB_UTC		  0x00000040U /* UTC time */
 
 /*
  * leap information
  */
-#define PARSEB_LEAPDEL		  0x00000100 /* LEAP deletion warning */
-#define PARSEB_LEAPADD		  0x00000200 /* LEAP addition warning */
-#define PARSEB_LEAPS		  0x00000300 /* LEAP warnings */
-#define PARSEB_LEAPSECOND	  0x00000400 /* actual leap second */
+#define PARSEB_LEAPDEL		  0x00000100U /* LEAP deletion warning */
+#define PARSEB_LEAPADD		  0x00000200U /* LEAP addition warning */
+#define PARSEB_LEAPS		  0x00000300U /* LEAP warnings */
+#define PARSEB_LEAPSECOND	  0x00000400U /* actual leap second */
 /*
  * optional status information
  */
-#define PARSEB_CALLBIT		  0x00001000 /* "call bit" used to signalize irregularities in the control facilities */
-#define PARSEB_POSITION		  0x00002000 /* position available */
-#define PARSEB_MESSAGE            0x00004000 /* addtitional message data */
+#define PARSEB_CALLBIT		  0x00001000U /* "call bit" used to signalize irregularities in the control facilities */
+#define PARSEB_POSITION		  0x00002000U /* position available */
+#define PARSEB_MESSAGE            0x00004000U /* addtitional message data */
 /*
  * feature information
  */
-#define PARSEB_S_LEAP		  0x00010000 /* supports LEAP */
-#define PARSEB_S_CALLBIT	  0x00020000 /* supports callbit information */
-#define PARSEB_S_PPS     	  0x00040000 /* supports PPS time stamping */
-#define PARSEB_S_POSITION	  0x00080000 /* supports position information (GPS) */
+#define PARSEB_S_LEAP		  0x00010000U /* supports LEAP */
+#define PARSEB_S_CALLBIT	  0x00020000U /* supports callbit information */
+#define PARSEB_S_PPS     	  0x00040000U /* supports PPS time stamping */
+#define PARSEB_S_POSITION	  0x00080000U /* supports position information (GPS) */
 
 /*
  * time stamp availability
  */
-#define PARSEB_TIMECODE		  0x10000000 /* valid time code sample */
-#define PARSEB_PPS		  0x20000000 /* valid PPS sample */
+#define PARSEB_TIMECODE		  0x10000000U /* valid time code sample */
+#define PARSEB_PPS		  0x20000000U /* valid PPS sample */
 
 #define PARSE_TCINFO		(PARSEB_ANNOUNCE|PARSEB_POWERUP|PARSEB_NOSYNC|PARSEB_DST|\
 				 PARSEB_UTC|PARSEB_LEAPS|PARSEB_CALLBIT|PARSEB_S_LEAP|\
@@ -208,7 +208,7 @@ struct clocktime		/* clock time broken up from time code */
   long usecond;
   long utcoffset;	/* in seconds */
   time_t utctime;	/* the actual time - alternative to date/time */
-  unsigned long flags;		/* current clock status */
+  unsigned long flags;	/* current clock status */
 };
 
 typedef struct clocktime clocktime_t;
