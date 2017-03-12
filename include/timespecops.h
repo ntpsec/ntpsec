@@ -49,6 +49,11 @@
 #include "timetoa.h"
 
 
+/* milliseconds per second */
+#define MILLISECONDS 1000
+/* sconds per microsecond */
+#define MILLISECOND 1.0e-3
+
 /* microseconds per second */
 #define MICROSECONDS 1000000
 /* sconds per microsecond */

@@ -1407,7 +1407,7 @@ ctl_putarray(
 		i--;
 		NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 		snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
-			 " %.2f", arr[i] * 1e3);
+			 " %.2f", arr[i] * MILLISECONDS);
 		cp += strlen(cp);
 	} while (i != start);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
@@ -1461,12 +1461,12 @@ ctl_putsys(
 
 	case CS_ROOTDELAY:
 		ctl_putdbl(sys_var[CS_ROOTDELAY].text, sys_rootdelay *
-			   1e3);
+			   MILLISECONDS);
 		break;
 
 	case CS_ROOTDISPERSION:
 		ctl_putdbl(sys_var[CS_ROOTDISPERSION].text,
-			   sys_rootdisp * 1e3);
+			   sys_rootdisp * MILLISECONDS);
 		break;
 
 	case CS_REFID:
@@ -1508,21 +1508,21 @@ ctl_putsys(
 		break;
 
 	case CS_OFFSET:
-		ctl_putdbl6(sys_var[CS_OFFSET].text, last_offset * 1e3);
+		ctl_putdbl6(sys_var[CS_OFFSET].text, last_offset * MILLISECONDS);
 		break;
 
 	case CS_DRIFT:
                 /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
-		ctl_putdbl6(sys_var[CS_DRIFT].text, drift_comp * 1e6);
+		ctl_putdbl6(sys_var[CS_DRIFT].text, drift_comp * MICROSECONDS);
 		break;
 
 	case CS_JITTER:
-		ctl_putdbl6(sys_var[CS_JITTER].text, sys_jitter * 1e3);
+		ctl_putdbl6(sys_var[CS_JITTER].text, sys_jitter * MILLISECONDS);
 		break;
 
 	case CS_ERROR:
 		/* a.k.a clk_jitter (s).  output as ms */
-		ctl_putdbl6(sys_var[CS_ERROR].text, clock_jitter * 1e3);
+		ctl_putdbl6(sys_var[CS_ERROR].text, clock_jitter * MILLISECONDS);
 		break;
 
 	case CS_CLOCK:
@@ -1549,7 +1549,7 @@ ctl_putsys(
 	case CS_STABIL:
 		/* a.k.a clk_wander (s/s), output as us/s */
 		ctl_putdbl6(sys_var[CS_STABIL].text, clock_stability *
-			   1e6);
+			   MICROSECONDS);
 		break;
 
 	case CS_VARLIST:
@@ -1645,7 +1645,7 @@ ctl_putsys(
 	case CS_LEAPSMEAROFFS:
 		if (leap_smear_intv > 0)
 			ctl_putdbl(sys_var[CS_LEAPSMEAROFFS].text,
-				   leap_smear.doffset * 1e3);
+				   leap_smear.doffset * MILLISECONDS);
 		break;
 #endif	/* ENABLE_LEAP_SMEAR */
 
@@ -1775,7 +1775,7 @@ ctl_putsys(
 
 	case CS_AUTHDELAY:
 		dtemp = lfptod(sys_authdelay);
-		ctl_putdbl(sys_var[varid].text, dtemp * 1e3);
+		ctl_putdbl(sys_var[varid].text, dtemp * MILLISECONDS);
 		break;
 
 	case CS_AUTHKEYS:
@@ -2027,14 +2027,14 @@ ctl_putsys(
 
 	case CS_FUZZ:
 		/* a.k.a. fuzz (s), output in ms */
-		ctl_putdbl6(sys_var[varid].text, sys_fuzz * 1e3);
+		ctl_putdbl6(sys_var[varid].text, sys_fuzz * MILLISECONDS);
 		break;
 	case CS_WANDER_THRESH:
-		ctl_putdbl(sys_var[varid].text, wander_threshold * 1e6);
+		ctl_putdbl(sys_var[varid].text, wander_threshold * MICROSECONDS);
 		break;
 	case CS_TICK:
 		/* a.k.a. sys_tick (s), output in ms */
-		ctl_putdbl6(sys_var[varid].text, sys_tick * 1e3);
+		ctl_putdbl6(sys_var[varid].text, sys_tick * MILLISECONDS);
 		break;
 	}
 }
@@ -2109,12 +2109,12 @@ ctl_putpeer(
 
 	case CP_IN:
 		if (p->r21 > 0.)
-			ctl_putdbl(peer_var[id].text, p->r21 / 1e3);
+			ctl_putdbl(peer_var[id].text, p->r21 / MILLISECONDS);
 		break;
 
 	case CP_OUT:
 		if (p->r34 > 0.)
-			ctl_putdbl(peer_var[id].text, p->r34 / 1e3);
+			ctl_putdbl(peer_var[id].text, p->r34 / MILLISECONDS);
 		break;
 
 	case CP_RATE:
@@ -2146,11 +2146,11 @@ ctl_putpeer(
 		break;
 
 	case CP_ROOTDELAY:
-		ctl_putdbl(peer_var[id].text, p->rootdelay * 1e3);
+		ctl_putdbl(peer_var[id].text, p->rootdelay * MILLISECONDS);
 		break;
 
 	case CP_ROOTDISPERSION:
-		ctl_putdbl(peer_var[id].text, p->rootdisp * 1e3);
+		ctl_putdbl(peer_var[id].text, p->rootdisp * MILLISECONDS);
 		break;
 
 	case CP_REFID:
@@ -2181,7 +2181,7 @@ ctl_putpeer(
 
 	case CP_BIAS:
 		if (p->bias != 0.)
-			ctl_putdbl(peer_var[id].text, p->bias * 1e3);
+			ctl_putdbl(peer_var[id].text, p->bias * MILLISECONDS);
 		break;
 
 	case CP_REACH:
@@ -2211,19 +2211,19 @@ ctl_putpeer(
 		break;
 
 	case CP_DELAY:
-		ctl_putdbl6(peer_var[id].text, p->delay * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->delay * MILLISECONDS);
 		break;
 
 	case CP_OFFSET:
-		ctl_putdbl6(peer_var[id].text, p->offset * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->offset * MILLISECONDS);
 		break;
 
 	case CP_JITTER:
-		ctl_putdbl6(peer_var[id].text, p->jitter * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->jitter * MILLISECONDS);
 		break;
 
 	case CP_DISPERSION:
-		ctl_putdbl6(peer_var[id].text, p->disp * 1e3);
+		ctl_putdbl6(peer_var[id].text, p->disp * MILLISECONDS);
 		break;
 
 	case CP_KEYID:
@@ -2386,13 +2386,13 @@ ctl_putclock(
 	case CC_FUDGETIME1:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME1))
 			ctl_putdbl(clock_var[id].text,
-				   pcs->fudgetime1 * 1e3);
+				   pcs->fudgetime1 * MILLISECONDS);
 		break;
 
 	case CC_FUDGETIME2:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME2))
 			ctl_putdbl(clock_var[id].text,
-				   pcs->fudgetime2 * 1e3);
+				   pcs->fudgetime2 * MILLISECONDS);
 		break;
 
 	case CC_FUDGEVAL1:
