@@ -24,6 +24,7 @@
 #include "ntp_leapsec.h"
 #include "lib_strbuf.h"
 #include "ntp_syscall.h"
+#include "timespecops.h"
 
 /* undefine to suppress random tags and get fixed emission order */
 #define USE_RANDOMIZE_RESPONSES
