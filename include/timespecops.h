@@ -371,7 +371,7 @@ lfp_uintv_to_tspec(
 	struct timespec	out;
 	
 	out.tv_nsec = FTOTVN(lfpfrac(x));
-	out.tv_sec = lfpuint(x);
+	out.tv_sec  = lfpsint(x);
 
 	return out;
 }

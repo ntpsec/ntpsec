@@ -61,7 +61,7 @@ typedef uint64_t l_fp;
 #define lfptouint(n)	        ((uint64_t)((uint64_t)(n) << 32))
 #define lfpsint(n)		(( int32_t)((n) >> 32))
 #define lfpuint(n)		((uint32_t)((n) >> 32))
-#define bumplfpsint(n, i)       ((n) += lfptosint(i))
+#define bumplfpsint(n, i)       ((n) += lfptouint(i))
 #define bumplfpuint(n, i)       ((n) += lfptouint(i))
 #define setlfpfrac(n, v)        ((n)  = (lfptouint(lfpuint(n)) | lfpfrac(v)))
 #define setlfpsint(n, v)        ((n)  = (lfptosint(v) | lfpfrac(n)))
@@ -142,7 +142,7 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
  * native operations is to be independent of whether the l_fp
  * type is signed or unsigned.
  */
-#define	L_NEG(v)	(v) = (-1 * (int64_t)(v))
+#define	L_NEG(v)	(v) = (l_fp)(-1 * (int64_t)(v))
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(v))
 #define	L_ISGT(a, b)	((int64_t)(a) > (int64_t)(b))
 #define	L_ISGTU(a, b)	((a) > (b))

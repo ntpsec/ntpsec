@@ -248,7 +248,7 @@ cvt_trimtsip(
 
 				    setlfpfrac(gpstime, lfpfrac(secs));
 
-				    clock_time->utctime = lfpuint(gpstime) - JAN_1970;
+				    clock_time->utctime = (time_t)(lfpuint(gpstime) - JAN_1970);
 
 				    clock_time->usecond = lfp_intv_to_tspec(gpstime).tv_nsec / 1000;
 
