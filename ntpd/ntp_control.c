@@ -1129,6 +1129,8 @@ ctl_putunqstr(
 	size_t tl;
 
 	tl = strlen(tag);
+	if (tl >= sizeof(buffer))
+	    return;
 	memcpy(buffer, tag, tl);
 	cp = buffer + tl;
 	if (len > 0) {
@@ -1158,7 +1160,7 @@ ctl_putdblf(
 
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 	*cp++ = '=';
 	NTP_INSIST((size_t)(cp - buffer) < sizeof(buffer));
@@ -1184,7 +1186,7 @@ ctl_putuint(
 
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 
 	*cp++ = '=';
@@ -1212,7 +1214,7 @@ ctl_putfs(
 
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 
 	*cp++ = '=';
@@ -1247,7 +1249,7 @@ ctl_puthex(
 
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 
 	*cp++ = '=';
@@ -1273,7 +1275,7 @@ ctl_putint(
 
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 
 	*cp++ = '=';
@@ -1299,7 +1301,7 @@ ctl_putts(
 
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 
 	*cp++ = '=';
@@ -1327,7 +1329,7 @@ ctl_putadr(
 
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 
 	*cp++ = '=';
@@ -1398,7 +1400,7 @@ ctl_putarray(
 	int i;
 	cp = buffer;
 	cq = tag;
-	while (*cq != '\0')
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 	*cp++ = '=';
 	i = start;
