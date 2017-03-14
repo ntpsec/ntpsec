@@ -46,7 +46,8 @@ then
 doit linux   "--enable-classic-mode --enable-early-droproot --enable-seccomp"
 fi
 
-if [ `which asciidoc` != "" -a `which xsltproc` != "" ]
+if [ "`which asciidoc 2>/dev/null`" != "" -a \
+     "`which xsltproc 2>/dev/null`" != "" ]
 then
 doit doc     "--enable-doc"
 fi
