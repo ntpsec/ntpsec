@@ -55,17 +55,6 @@ extern	bool	authreadkeys	(const char *);
 extern	void	authtrust	(keyid_t, bool);
 extern	bool	authusekey	(keyid_t, int, const uint8_t *);
 
-/*
- * Based on the NTP timestamp, calculate the NTP timestamp of
- * the corresponding calendar unit. Use the pivot time to unfold
- * the NTP timestamp properly, or the current system time if the
- * pivot pointer is NULL.
- */
-extern	uint32_t	calyearstart	(uint32_t ntptime, const time_t *pivot);
-extern	uint32_t	calmonthstart	(uint32_t ntptime, const time_t *pivot);
-extern	uint32_t	calweekstart	(uint32_t ntptime, const time_t *pivot);
-extern	uint32_t	caldaystart	(uint32_t ntptime, const time_t *pivot);
-
 extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, uint32_t, uint32_t *, uint32_t *);
 extern	void	init_auth	(void);
