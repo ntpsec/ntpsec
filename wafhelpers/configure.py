@@ -450,6 +450,10 @@ int main(int argc, char **argv) {
 
     ctx.check_cc(lib="m", comment="Math library")
     ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
+    ret = ctx.check_cc(lib="bsd", mandatory=False,
+                 comment="BSD compatibility library")
+    if ret:
+        ctx.env.LDFLAGS += ["-lbsd"]
 
     # Find OpenSSL. Must happen before function checks
     # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
@@ -470,6 +474,7 @@ int main(int argc, char **argv) {
     )
     for hdr in openssl_headers:
         ctx.check_cc(header_name=hdr, includes=ctx.env.PLATFORM_INCLUDES)
+    # FIXME! Ignoring the result...
     ctx.check_cc(lib="crypto")
     ctx.check_cc(comment="OpenSSL support",
                  fragment=SNIP_OPENSSL_VERSION_CHECK,
@@ -503,6 +508,19 @@ int main(int argc, char **argv) {
                                               prerequisites=ft[1],
                                               use=ft[2])
 
+    # check for BSD versions outside of libc
+    if not ctx.get_define("HAVE_STRLCAT"):
+        ret = probe_function_with_prerequisites(ctx, function='strlcat',
+                                                prerequisites=['bsd/string.h'])
+        if ret:
+            ctx.define("HAVE_STRLCAT", 1, comment="Using bsd/strlcat")
+
+    if not ctx.get_define("HAVE_STRLCPY"):
+        ret = probe_function_with_prerequisites(ctx, function='strlcpy',
+                                                prerequisites=['bsd/string.h'])
+        if ret:
+            ctx.define("HAVE_STRLCPY", 1, comment="Using bsd/strlcpy")
+
     # Nobody uses the symbol, but this seems like a good sanity check.
     ctx.check_cc(header_name="stdbool.h", mandatory=True,
                  comment="Sanity check.")
@@ -522,6 +540,7 @@ int main(int argc, char **argv) {
         "alloca.h",
         ("arpa/nameser.h", ["sys/types.h"]),
         "dns_sd.h",         # NetBSD, Apple, mDNS
+        "bsd/string.h",     # bsd emulation
         ("ifaddrs.h", ["sys/types.h"]),
         ("linux/if_addr.h", ["sys/socket.h"]),
         ("linux/rtnetlink.h", ["sys/socket.h"]),

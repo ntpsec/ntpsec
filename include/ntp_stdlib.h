@@ -16,6 +16,10 @@
 #include "ntp_malloc.h"
 #include "ntp_syslog.h"
 
+#ifdef HAVE_BSD_STRING_H
+#include <bsd/string.h>
+#endif
+
 #ifdef __GNUC__
 #define NTP_PRINTF(fmt, args) __attribute__((__format__(__printf__, fmt, args)))
 #else
