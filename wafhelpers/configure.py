@@ -426,10 +426,8 @@ int main(int argc, char **argv) {
 
     # mostly used by timetoa.h and timespecops.h
     sizeofs = [
-        ("time.h",          "time_t"),
-        (None,          "int"),
+        ("time.h",      "time_t"),
         (None,          "long"),
-        (None,          "long long"),
     ]
 
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
