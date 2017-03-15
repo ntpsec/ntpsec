@@ -326,11 +326,11 @@ stats_config(
 			mprintf_event(EVNT_TAI, NULL,
 				"%d leap %s %s %s",
 				lsig.taiof,
-				fstostr(lsig.ttime),
+				rfc3339time(lsig.ttime),
 				leapsec_expired(ttnow)
 					? "expired"
 					: "expires",
-				fstostr(lsig.etime));
+				rfc3339time(lsig.etime));
 			have_leapfile = true;
 
 			/* force an immediate daily expiration check of
@@ -820,9 +820,9 @@ ntp_exit(int retval)
 #endif
 
 /*
- * fstostr - prettyprint time stamp - POSIX epoch
+ * rfc3339time - prettyprint time stamp - POSIX epoch
  */
-char * fstostr(
+char * rfc3339time(
 	time_t	posix_stamp
 	)
 {
@@ -832,7 +832,7 @@ char * fstostr(
 	LIB_GETBUF(buf);
 	tm2 = gmtime_r(&posix_stamp, &tm);
 	if (tm2 == NULL || tm.tm_year > 9999)
-		snprintf(buf, LIB_BUFLENGTH, "fstostr: %ld: range error",
+		snprintf(buf, LIB_BUFLENGTH, "rfc3339time: %ld: range error",
 			 (long)posix_stamp);
 	// if (ntpcal_ntp_to_date(&tm, (uint32_t)ntp_stamp, NULL) < 0)
 	//	snprintf(buf, LIB_BUFLENGTH, "ntpcal_ntp_to_date: %ld: range error",
