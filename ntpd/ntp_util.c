@@ -838,7 +838,7 @@ char * rfc3339time(
 	//	snprintf(buf, LIB_BUFLENGTH, "ntpcal_ntp_to_date: %ld: range error",
 	//		 (long)ntp_stamp);
 	else
-		snprintf(buf, LIB_BUFLENGTH, "%04d%02d%02d%02d%02d",
+		snprintf(buf, LIB_BUFLENGTH, "%04d-%02d-%02dT%02d:%02dZ",
 			tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
 			tm.tm_hour, tm.tm_min);
 	return buf;
