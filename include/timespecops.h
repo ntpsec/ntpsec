@@ -50,7 +50,7 @@
 
 
 /* milliseconds per second */
-#define MILLISECONDS 1000
+#define MS_PER_S 1000
 /* sconds per microsecond */
 #define MILLISECOND 1.0e-3
 

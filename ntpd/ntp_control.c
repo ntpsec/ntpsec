@@ -660,7 +660,7 @@ static	char *reqend;
 #define MIN(a, b) (((a) <= (b)) ? (a) : (b))
 #endif
 
-#define MILLISECONDS	1000	/* milliseconds per second -magic numbers suck */
+#define MS_PER_S	1000	/* milliseconds per second -magic numbers suck */
 
 /*
  * init_control - initialize request data
@@ -1406,7 +1406,7 @@ ctl_putarray(
 		i--;
 		NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 		snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
-			 " %.2f", arr[i] * MILLISECONDS);
+			 " %.2f", arr[i] * MS_PER_S);
 		cp += strlen(cp);
 	} while (i != start);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
@@ -1459,13 +1459,12 @@ ctl_putsys(
 		break;
 
 	case CS_ROOTDELAY:
-		ctl_putdbl(sys_var[CS_ROOTDELAY].text, sys_rootdelay *
-			   MILLISECONDS);
+		ctl_putdbl(sys_var[CS_ROOTDELAY].text, sys_rootdelay * MS_PER_S);
 		break;
 
 	case CS_ROOTDISPERSION:
 		ctl_putdbl(sys_var[CS_ROOTDISPERSION].text,
-			   sys_rootdisp * MILLISECONDS);
+			   sys_rootdisp * MS_PER_S);
 		break;
 
 	case CS_REFID:
@@ -1507,7 +1506,7 @@ ctl_putsys(
 		break;
 
 	case CS_OFFSET:
-		ctl_putdbl6(sys_var[CS_OFFSET].text, last_offset * MILLISECONDS);
+		ctl_putdbl6(sys_var[CS_OFFSET].text, last_offset * MS_PER_S);
 		break;
 
 	case CS_DRIFT:
@@ -1516,12 +1515,12 @@ ctl_putsys(
 		break;
 
 	case CS_JITTER:
-		ctl_putdbl6(sys_var[CS_JITTER].text, sys_jitter * MILLISECONDS);
+		ctl_putdbl6(sys_var[CS_JITTER].text, sys_jitter * MS_PER_S);
 		break;
 
 	case CS_ERROR:
 		/* a.k.a clk_jitter (s).  output as ms */
-		ctl_putdbl6(sys_var[CS_ERROR].text, clock_jitter * MILLISECONDS);
+		ctl_putdbl6(sys_var[CS_ERROR].text, clock_jitter * MS_PER_S);
 		break;
 
 	case CS_CLOCK:
@@ -1644,7 +1643,7 @@ ctl_putsys(
 	case CS_LEAPSMEAROFFS:
 		if (leap_smear_intv > 0)
 			ctl_putdbl(sys_var[CS_LEAPSMEAROFFS].text,
-				   leap_smear.doffset * MILLISECONDS);
+				   leap_smear.doffset * MS_PER_S);
 		break;
 #endif	/* ENABLE_LEAP_SMEAR */
 
@@ -1774,7 +1773,7 @@ ctl_putsys(
 
 	case CS_AUTHDELAY:
 		dtemp = lfptod(sys_authdelay);
-		ctl_putdbl(sys_var[varid].text, dtemp * MILLISECONDS);
+		ctl_putdbl(sys_var[varid].text, dtemp * MS_PER_S);
 		break;
 
 	case CS_AUTHKEYS:
@@ -1847,7 +1846,7 @@ ctl_putsys(
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
 			(sys_var[varid].text, 0, -1,
-			 ntp_error_in_seconds(ntx.offset)*MILLISECONDS)
+			 ntp_error_in_seconds(ntx.offset) * MS_PER_S)
 		);
 		break;
 
@@ -1862,7 +1861,7 @@ ctl_putsys(
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
 			(sys_var[varid].text, 0, 6,
-			 ntp_error_in_seconds(ntx.maxerror)*MILLISECONDS)
+			 ntp_error_in_seconds(ntx.maxerror) * MS_PER_S)
 		);
 		break;
 
@@ -1870,7 +1869,7 @@ ctl_putsys(
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
 			(sys_var[varid].text, 0, 6,
-			 ntp_error_in_seconds(ntx.esterror)*MILLISECONDS)
+			 ntp_error_in_seconds(ntx.esterror) * MS_PER_S)
 		);
 		break;
 
@@ -1894,7 +1893,7 @@ ctl_putsys(
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
 			(sys_var[varid].text, 0, 6,
-			 ntp_error_in_seconds(ntx.precision)*MILLISECONDS)
+			 ntp_error_in_seconds(ntx.precision) * MS_PER_S)
 		);
 		break;
 
@@ -1923,7 +1922,7 @@ ctl_putsys(
 		CTL_IF_KERNPPS(
 			ctl_putdbl,
 			(sys_var[varid].text,
-			 ntp_error_in_seconds(ntx.jitter)*MILLISECONDS)
+			 ntp_error_in_seconds(ntx.jitter) * MS_PER_S)
 		);
 		break;
 
@@ -2026,14 +2025,14 @@ ctl_putsys(
 
 	case CS_FUZZ:
 		/* a.k.a. fuzz (s), output in ms */
-		ctl_putdbl6(sys_var[varid].text, sys_fuzz * MILLISECONDS);
+		ctl_putdbl6(sys_var[varid].text, sys_fuzz * MS_PER_S);
 		break;
 	case CS_WANDER_THRESH:
 		ctl_putdbl(sys_var[varid].text, wander_threshold * MICROSECONDS);
 		break;
 	case CS_TICK:
 		/* a.k.a. sys_tick (s), output in ms */
-		ctl_putdbl6(sys_var[varid].text, sys_tick * MILLISECONDS);
+		ctl_putdbl6(sys_var[varid].text, sys_tick * MS_PER_S);
 		break;
 	}
 }
@@ -2108,12 +2107,12 @@ ctl_putpeer(
 
 	case CP_IN:
 		if (p->r21 > 0.)
-			ctl_putdbl(peer_var[id].text, p->r21 / MILLISECONDS);
+			ctl_putdbl(peer_var[id].text, p->r21 / MS_PER_S);
 		break;
 
 	case CP_OUT:
 		if (p->r34 > 0.)
-			ctl_putdbl(peer_var[id].text, p->r34 / MILLISECONDS);
+			ctl_putdbl(peer_var[id].text, p->r34 / MS_PER_S);
 		break;
 
 	case CP_RATE:
@@ -2145,11 +2144,11 @@ ctl_putpeer(
 		break;
 
 	case CP_ROOTDELAY:
-		ctl_putdbl(peer_var[id].text, p->rootdelay * MILLISECONDS);
+		ctl_putdbl(peer_var[id].text, p->rootdelay * MS_PER_S);
 		break;
 
 	case CP_ROOTDISPERSION:
-		ctl_putdbl(peer_var[id].text, p->rootdisp * MILLISECONDS);
+		ctl_putdbl(peer_var[id].text, p->rootdisp * MS_PER_S);
 		break;
 
 	case CP_REFID:
@@ -2180,7 +2179,7 @@ ctl_putpeer(
 
 	case CP_BIAS:
 		if (p->bias != 0.)
-			ctl_putdbl(peer_var[id].text, p->bias * MILLISECONDS);
+			ctl_putdbl(peer_var[id].text, p->bias * MS_PER_S);
 		break;
 
 	case CP_REACH:
@@ -2210,19 +2209,19 @@ ctl_putpeer(
 		break;
 
 	case CP_DELAY:
-		ctl_putdbl6(peer_var[id].text, p->delay * MILLISECONDS);
+		ctl_putdbl6(peer_var[id].text, p->delay * MS_PER_S);
 		break;
 
 	case CP_OFFSET:
-		ctl_putdbl6(peer_var[id].text, p->offset * MILLISECONDS);
+		ctl_putdbl6(peer_var[id].text, p->offset * MS_PER_S);
 		break;
 
 	case CP_JITTER:
-		ctl_putdbl6(peer_var[id].text, p->jitter * MILLISECONDS);
+		ctl_putdbl6(peer_var[id].text, p->jitter * MS_PER_S);
 		break;
 
 	case CP_DISPERSION:
-		ctl_putdbl6(peer_var[id].text, p->disp * MILLISECONDS);
+		ctl_putdbl6(peer_var[id].text, p->disp * MS_PER_S);
 		break;
 
 	case CP_KEYID:
@@ -2385,13 +2384,13 @@ ctl_putclock(
 	case CC_FUDGETIME1:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME1))
 			ctl_putdbl(clock_var[id].text,
-				   pcs->fudgetime1 * MILLISECONDS);
+				   pcs->fudgetime1 * MS_PER_S);
 		break;
 
 	case CC_FUDGETIME2:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME2))
 			ctl_putdbl(clock_var[id].text,
-				   pcs->fudgetime2 * MILLISECONDS);
+				   pcs->fudgetime2 * MS_PER_S);
 		break;
 
 	case CC_FUDGEVAL1:
