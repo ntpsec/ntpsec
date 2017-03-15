@@ -553,7 +553,7 @@ snt_rawdcf(
 			       parseio->parse_index - 1, delta_usec));
 
 	if (((parseio->parse_dtime.parse_status & CVT_MASK) == CVT_OK) &&
-           (delta_usec < (NANOSECONDS/2000) && delta_usec >= 0)) /* only if minute marker is available */
+           (delta_usec < (NS_PER_S/2000) && delta_usec >= 0)) /* only if minute marker is available */
 	{
 		parseio->parse_dtime.parse_stime = *ptime;
 
@@ -578,7 +578,7 @@ inp_rawdcf(
 	  timestamp_t  *tstamp
 	  )
 {
-       static struct timespec timeout = { 1, (NANOSECONDS/2) }; /* 1.5 seconds denote second #60 */
+       static struct timespec timeout = { 1, (NS_PER_S/2) }; /* 1.5 seconds denote second #60 */
 
 	parseprintf(DD_PARSE, ("inp_rawdcf(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
 
@@ -618,7 +618,7 @@ inp_rawdcf(
 				delta_usec = -1;
 			}
 
-                       if (delta_usec < (NANOSECONDS/2000) && delta_usec >= 0)
+                       if (delta_usec < (NS_PER_S/2000) && delta_usec >= 0)
 			{
 				parseprintf(DD_RAWDCF, ("inp_rawdcf: timeout time difference %ld usec - minute marker set\n", delta_usec));
 				/* collect minute markers only if spaced by 60 seconds */

@@ -10,7 +10,7 @@
 #include <string.h>
 #include <time.h>
 
-#define NANOSECONDS	1000000000
+#define NS_PER_S	1000000000
 
 void bumpclock(int bump)
 {
@@ -27,12 +27,12 @@ void bumpclock(int bump)
     bump *= 1000;
     /* coverity[tainted_data] */
     set.tv_nsec += bump;
-    while (set.tv_nsec >= NANOSECONDS ) {
-	set.tv_nsec -= NANOSECONDS;
+    while (set.tv_nsec >= NS_PER_S ) {
+	set.tv_nsec -= NS_PER_S;
 	set.tv_sec +=1;
     }
     while (set.tv_nsec <= 0 ) {
-	set.tv_nsec += NANOSECONDS;
+	set.tv_nsec += NS_PER_S;
 	set.tv_sec -=1;
     }
     rc2 = clock_settime(CLOCK_REALTIME, &set);

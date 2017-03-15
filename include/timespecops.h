@@ -60,13 +60,13 @@
 #define MICROSECOND 1.0e-6
 
 /* nanoseconds per second */
-#define NANOSECONDS 1000000000
+#define NS_PER_S 1000000000
 /* seconds per nanosecond */
 #define NANOSECOND 1.0e-9
 
 /* predicate: returns true if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) \
-	((x)->tv_nsec >= 0 && (x)->tv_nsec < NANOSECONDS)
+	((x)->tv_nsec >= 0 && (x)->tv_nsec < NS_PER_S)
 
 /* predicate: returns true if the nanoseconds are out-of-bounds */
 #define timespec_isdenormal(x)	(!timespec_isnormal(x))
@@ -74,11 +74,11 @@
 /* conversion between l_fp fractions and nanoseconds */
 # define FTOTVN(tsf)						\
 	((int32_t)						\
-	 (((uint64_t)(tsf) * NANOSECONDS + 0x80000000) >> 32))
+	 (((uint64_t)(tsf) * NS_PER_S + 0x80000000) >> 32))
 # define TVNTOF(tvu)						\
 	((uint32_t)						\
-	 ((((uint64_t)(tvu) << 32) + NANOSECONDS / 2) /		\
-	  NANOSECONDS))
+	 ((((uint64_t)(tvu) << 32) + NS_PER_S / 2) /		\
+	  NS_PER_S))
 
 
 
@@ -96,11 +96,11 @@ normalize_tspec(
 	 * fast enough; so we do a division of the nanoseconds in that
 	 * case.
 	 */
-	if (x.tv_nsec < 0 || x.tv_nsec >= NANOSECONDS) {
-		ldiv_t	z = ldiv( x.tv_nsec, NANOSECONDS);
+	if (x.tv_nsec < 0 || x.tv_nsec >= NS_PER_S) {
+		ldiv_t	z = ldiv( x.tv_nsec, NS_PER_S);
 		if (z.rem < 0) {
 			z.quot--;
-			z.rem  += NANOSECONDS;
+			z.rem  += NS_PER_S;
 		}
 		x.tv_sec  += z.quot;
 		x.tv_nsec  = z.rem;
@@ -112,14 +112,14 @@ normalize_tspec(
 	 * employed. */
 	if (x.tv_nsec < 0)
 		do {
-			x.tv_nsec += NANOSECONDS;
+			x.tv_nsec += NS_PER_S;
 			x.tv_sec--;
 		} while (x.tv_nsec < 0);
-	else if (x.tv_nsec >= NANOSECONDS)
+	else if (x.tv_nsec >= NS_PER_S)
 		do {
-			x.tv_nsec -= NANOSECONDS;
+			x.tv_nsec -= NS_PER_S;
 			x.tv_sec++;
-		} while (x.tv_nsec >= NANOSECONDS);
+		} while (x.tv_nsec >= NS_PER_S);
 #endif
 
 	return x;
@@ -135,7 +135,7 @@ d_to_tspec(
 	double s = floor(d);
 
 	x.tv_sec  = (time_t) s;
-	x.tv_nsec = (long) (((d - s) * NANOSECONDS) + 0.5);
+	x.tv_nsec = (long) (((d - s) * NS_PER_S) + 0.5);
 	return x;
 }
 
@@ -227,7 +227,7 @@ abs_tspec(
 	if (c.tv_sec < 0) {
 		if (c.tv_nsec != 0) {
 			c.tv_sec = -c.tv_sec - 1;
-			c.tv_nsec = NANOSECONDS - c.tv_nsec;
+			c.tv_nsec = NS_PER_S - c.tv_nsec;
 		} else {
 			c.tv_sec = -c.tv_sec;
 		}

@@ -319,7 +319,7 @@ TEST(timespecops, AddNsecOflow1) {
 		struct timespec E = timespec_init(i + 1, 100);
 		struct timespec c;
 
-		c = add_tspec_ns(a, NANOSECONDS - 100);
+		c = add_tspec_ns(a, NS_PER_S - 100);
 		TEST_ASSERT_EQUAL_timespec(E, c);
 	}
 
@@ -390,7 +390,7 @@ TEST(timespecops, SubNsecOflow) {
 		struct timespec E = timespec_init(i-1, 200);
 		struct timespec c;
 
-		c = sub_tspec_ns(a, NANOSECONDS - 100);
+		c = sub_tspec_ns(a, NS_PER_S - 100);
 		TEST_ASSERT_EQUAL_timespec(E, c);
 	}
 

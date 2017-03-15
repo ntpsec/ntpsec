@@ -22,7 +22,7 @@
 #define NTP_MAXFREQ	500e-6
 
 #ifdef HAVE_KERNEL_PLL
-# define NANOSECONDS	1e9
+# define NS_PER_S	1000000
 # define FREQTOD(x)	((x) / 65536e6)            /* NTP to double */
 # define DTOFREQ(x)	((int32_t)((x) * 65536e6)) /* double to NTP */
 #endif
@@ -779,7 +779,7 @@ local_clock(
 				dtemp = -.5;
 			else
 				dtemp = .5;
-			ntv.offset = (long)(clock_offset * NANOSECONDS + dtemp);
+			ntv.offset = (long)(clock_offset * NS_PER_S + dtemp);
 #ifdef STA_NANO
 			ntv.constant = sys_poll;
 #else /* STA_NANO */
@@ -828,14 +828,14 @@ local_clock(
 			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, false, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
-		clock_offset = ntv.offset / NANOSECONDS;
+		clock_offset = ntv.offset / NS_PER_S;
 		clock_frequency = FREQTOD(ntv.freq);
 
 		/*
 		 * If the kernel PPS is lit, monitor its performance.
 		 */
 		if (ntv.status & STA_PPSTIME) {
-			clock_jitter = ntv.jitter / NANOSECONDS;
+			clock_jitter = ntv.jitter / NS_PER_S;
 		}
 
 #if defined(STA_NANO) && NTP_API == 4
