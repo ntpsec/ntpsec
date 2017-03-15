@@ -56,13 +56,6 @@
 #endif
 int qos = IPTOS_DSCP_EF;	/* QoS RFC 3246 */
 
-#ifdef ENABLE_LEAP_SMEAR
-/* TODO burnicki: This should be moved to ntp_timer.c, but if we do so
- * we get a linker error. Since we're running out of time before the leap
- * second occurs, we let it here where it just works.
- */
-int leap_smear_intv;
-#endif
 
 /*
  * NIC rule entry
