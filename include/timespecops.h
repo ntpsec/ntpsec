@@ -65,21 +65,16 @@
 #define S_PER_NS 1.0e-9
 
 /* predicate: returns true if the nanoseconds are in nominal range */
-#define timespec_isnormal(x) \
-	((x)->tv_nsec >= 0 && (x)->tv_nsec < NS_PER_S)
+#define timespec_isnormal(x) ((x)->tv_nsec >= 0 && (x)->tv_nsec < NS_PER_S)
 
 /* predicate: returns true if the nanoseconds are out-of-bounds */
 #define timespec_isdenormal(x)	(!timespec_isnormal(x))
 
 /* conversion between l_fp fractions and nanoseconds */
-# define FTOTVN(tsf)						\
-	((int32_t)						\
-	 (((uint64_t)(tsf) * NS_PER_S + 0x80000000) >> 32))
-# define TVNTOF(tvu)						\
-	((uint32_t)						\
-	 ((((uint64_t)(tvu) << 32) + NS_PER_S / 2) /		\
-	  NS_PER_S))
-
+#define FTOTVN(tsf) \
+    ((int32_t)(((uint64_t)(tsf) * NS_PER_S + 0x80000000) >> 32))
+#define TVNTOF(tvu) \
+    ((uint32_t) ((((uint64_t)(tvu) << 32) + NS_PER_S / 2) / NS_PER_S))
 
 
 /* make sure nanoseconds are in nominal range */
@@ -89,7 +84,7 @@ normalize_tspec(
 	)
 {
 #if NTP_SIZEOF_LONG > 4
-	/* 
+	/*
 	 * tv_nsec is of type 'long', and on a 64-bit machine using only
 	 * loops becomes prohibitive once the upper 32 bits get
 	 * involved. On the other hand, division by constant should be
