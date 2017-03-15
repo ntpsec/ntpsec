@@ -51,13 +51,13 @@
 
 /* milliseconds per second */
 #define MS_PER_S 1000
-/* sconds per microsecond */
+/* seconds per microsecond */
 #define MILLISECOND 1.0e-3
 
 /* microseconds per second */
 #define US_PER_S 1000000
-/* sconds per microsecond */
-#define MICROSECOND 1.0e-6
+/* seconds per microsecond */
+#define S_PER_US 1.0e-6
 
 /* nanoseconds per second */
 #define NS_PER_S 1000000000
