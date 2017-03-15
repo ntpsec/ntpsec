@@ -55,7 +55,7 @@
 #define MILLISECOND 1.0e-3
 
 /* microseconds per second */
-#define MICROSECONDS 1000000
+#define US_PER_S 1000000
 /* sconds per microsecond */
 #define MICROSECOND 1.0e-6
 

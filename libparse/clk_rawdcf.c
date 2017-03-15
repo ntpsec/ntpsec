@@ -513,7 +513,7 @@ calc_usecdiff(
 	delt -= *base;
 	delta = lfp_uintv_to_tspec(delt);
 
-	delta_usec = MICROSECONDS*(int32_t)delta.tv_sec + delta.tv_nsec/1000;
+	delta_usec = US_PER_S * (int32_t)delta.tv_sec + delta.tv_nsec / 1000;
 	return delta_usec;
 }
 

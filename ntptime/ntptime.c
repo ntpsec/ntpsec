@@ -30,7 +30,7 @@
  * Convert usec to a time stamp fraction.
  */
 # define TVUTOTSF(tvu)	\
-	(uint32_t)((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) / MICROSECONDS)
+	(uint32_t)((((uint64_t)(tvu) << 32) + US_PER_S / 2) / US_PER_S)
 
 #define NS_PER_MS_FLOAT	1000.0
 

@@ -26,7 +26,7 @@
 # define FREQTOD(x)	((x) / 65536e6)            /* NTP to double */
 # define DTOFREQ(x)	((int32_t)((x) * 65536e6)) /* double to NTP */
 #endif
-#define MICROSECONDS	1e6
+#define US_PER_S	1e6
 
 /*
  * This is an implementation of the clock discipline algorithm described
@@ -788,9 +788,9 @@ local_clock(
 			if (ntv.constant < 0)
 				ntv.constant = 0;
 
-			ntv.esterror = (long)(clock_jitter * MICROSECONDS);
+			ntv.esterror = (long)(clock_jitter * US_PER_S);
 			ntv.maxerror = (long)((sys_rootdelay / 2 +
-			    sys_rootdisp) * MICROSECONDS);
+			    sys_rootdisp) * US_PER_S);
 			ntv.status = STA_PLL;
 
 			/*
@@ -861,7 +861,7 @@ local_clock(
 	if (fabs(clock_frequency) > NTP_MAXFREQ)
 		msyslog(LOG_NOTICE,
 		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
-		    clock_frequency * MICROSECONDS, NTP_MAXFREQ * MICROSECONDS);
+		    clock_frequency * US_PER_S, NTP_MAXFREQ * US_PER_S);
 	dtemp = SQUARE(clock_frequency - drift_comp);
 	if (clock_frequency > NTP_MAXFREQ)
 		drift_comp = NTP_MAXFREQ;
@@ -923,8 +923,8 @@ local_clock(
 	if (debug)
 		printf(
 		    "local_clock: offset %.9f jit %.9f freq %.6f stab %.3f poll %d\n",
-		    clock_offset, clock_jitter, drift_comp * MICROSECONDS,
-		    clock_stability * MICROSECONDS, sys_poll);
+		    clock_offset, clock_jitter, drift_comp * US_PER_S,
+		    clock_stability * US_PER_S, sys_poll);
 #endif /* DEBUG */
 	return (rval);
 #endif /* ENABLE_LOCKCLOCK */
@@ -1098,7 +1098,7 @@ set_freq(
 	}
 #endif /* HAVE_KERNEL_PLL */
 	mprintf_event(EVNT_FSET, NULL, "%s %.6f PPM", loop_desc,
-	    drift_comp * MICROSECONDS);
+	    drift_comp * US_PER_S);
 }
 #endif /* HAVE_LOCKCLOCK */
 
@@ -1267,7 +1267,7 @@ loop_config(
 		 * calibration phase.
 		 */
 		{
-			double ftemp = init_drift_comp / MICROSECONDS;
+			double ftemp = init_drift_comp / US_PER_S;
 			if (ftemp > NTP_MAXFREQ)
 				ftemp = NTP_MAXFREQ;
 			else if (ftemp < -NTP_MAXFREQ)
@@ -1310,7 +1310,7 @@ loop_config(
 		break;
 
 	case LOOP_PHI:		/* dispersion threshold (dispersion) */
-		clock_phi = freq / MICROSECONDS;
+		clock_phi = freq / US_PER_S;
 		break;
 
 	case LOOP_FREQ:		/* initial frequency (freq) */

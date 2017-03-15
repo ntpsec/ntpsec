@@ -272,14 +272,14 @@ adj_systime(
 	else
 		quant = MICROSECOND;
 	ticks = (long)(dtemp / quant + .5);
-	adjtv.tv_usec = (long)(ticks * quant * MICROSECONDS + .5);
+	adjtv.tv_usec = (long)(ticks * quant * US_PER_S + .5);
 	/* The rounding in the conversions could push us over the
 	 * limits: make sure the result is properly normalised!
 	 * note: sign comes later, all numbers non-negative here.
 	 */
-	if (adjtv.tv_usec >= MICROSECONDS) {
+	if (adjtv.tv_usec >= US_PER_S) {
 		adjtv.tv_sec  += 1;
-		adjtv.tv_usec -= MICROSECONDS;
+		adjtv.tv_usec -= US_PER_S;
 		dtemp         -= 1.;
 	}
 	/* set the new residual with leftover from correction */

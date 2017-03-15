@@ -1511,7 +1511,7 @@ ctl_putsys(
 
 	case CS_DRIFT:
                 /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
-		ctl_putdbl6(sys_var[CS_DRIFT].text, drift_comp * MICROSECONDS);
+		ctl_putdbl6(sys_var[CS_DRIFT].text, drift_comp * US_PER_S);
 		break;
 
 	case CS_JITTER:
@@ -1546,8 +1546,7 @@ ctl_putsys(
 
 	case CS_STABIL:
 		/* a.k.a clk_wander (s/s), output as us/s */
-		ctl_putdbl6(sys_var[CS_STABIL].text, clock_stability *
-			   MICROSECONDS);
+		ctl_putdbl6(sys_var[CS_STABIL].text, clock_stability * US_PER_S);
 		break;
 
 	case CS_VARLIST:
@@ -2028,7 +2027,7 @@ ctl_putsys(
 		ctl_putdbl6(sys_var[varid].text, sys_fuzz * MS_PER_S);
 		break;
 	case CS_WANDER_THRESH:
-		ctl_putdbl(sys_var[varid].text, wander_threshold * MICROSECONDS);
+		ctl_putdbl(sys_var[varid].text, wander_threshold * US_PER_S);
 		break;
 	case CS_TICK:
 		/* a.k.a. sys_tick (s), output in ms */
