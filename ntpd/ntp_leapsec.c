@@ -26,6 +26,7 @@
 #include "ntp_calendar.h"
 #include "ntp_leapsec.h"
 #include "ntp.h"
+#include "ntpd.h"	/* for rfc3339time() only */ 
 #include "lib_strbuf.h"
 
 #include <openssl/evp.h>
@@ -81,7 +82,6 @@ static void   reload_limits(leap_table_t*, time_t);
 static void   reset_times(leap_table_t*);
 static bool   leapsec_add(leap_table_t*, time_t, int);
 static bool   leapsec_raw(leap_table_t*, time_t, int, bool);
-static char * lstostr(time_t ts);
 
 /* time_t is unsigned.  This is used for infinity in tables */
 #if NTP_SIZEOF_TIME_T == 8
@@ -431,12 +431,12 @@ leapsec_load_stream(
 
 	if (pt->head.size)
 		msyslog(LOG_NOTICE, "%s ('%s'): loaded, expire=%s last=%s ofs=%d",
-			logPrefix, fname, lstostr(pt->head.expire),
-			lstostr(pt->info[0].ttime), pt->info[0].taiof);
+			logPrefix, fname, rfc3339time(pt->head.expire),
+			rfc3339time(pt->info[0].ttime), pt->info[0].taiof);
 	else
 		msyslog(LOG_NOTICE,
 			"%s ('%s'): loaded, expire=%s ofs=%d (no entries after build date)",
-			logPrefix, fname, lstostr(pt->head.expire),
+			logPrefix, fname, rfc3339time(pt->head.expire),
 			pt->head.base_tai);
 	
 	return leapsec_set_table(pt);
@@ -950,23 +950,6 @@ leapsec_validate(
 	if (0 != memcmp(&rdig, &ldig, sizeof(sha1_digest)))
 		return LSVALID_BADHASH;
 	return LSVALID_GOODHASH;
-}
-
-/*
- * lstostr - prettyprint POSIX seconds
- */
-static char * lstostr(
-	const time_t ts)
-{
-	char *	buf;
-	struct tm tm;
-
-	LIB_GETBUF(buf);
-	gmtime_r(&ts, &tm);
-	snprintf(buf, LIB_BUFLENGTH, "%04d-%02d-%02dT%02d:%02dZ",
-			 tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
-			 tm.tm_hour, tm.tm_min);
-	return buf;
 }
 
 /* reset the global state for unit tests */

@@ -193,6 +193,7 @@ extern	bool	mstolfp		(const char *, l_fp *);
 extern	char *	prettydate	(const l_fp);
 extern	char *	gmprettydate	(const l_fp);
 extern	char *	rfc3339date	(const l_fp);
+extern	char *	rfc3339time     (time_t);
 
 extern	void	set_sys_fuzz	(double);
 extern  void	get_ostime	(struct timespec *tsp);

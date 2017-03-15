@@ -190,3 +190,29 @@ gmprettydate(
 	return common_prettydate(ts, false);
 }
 
+/*
+ * rfc3339time - prettyprint time stamp - POSIX epoch
+ */
+char * rfc3339time(
+	time_t	posix_stamp
+	)
+{
+	char *		buf;
+	struct tm tm, *tm2;
+
+	LIB_GETBUF(buf);
+	tm2 = gmtime_r(&posix_stamp, &tm);
+	if (tm2 == NULL || tm.tm_year > 9999)
+		snprintf(buf, LIB_BUFLENGTH, "rfc3339time: %ld: range error",
+			 (long)posix_stamp);
+	// if (ntpcal_ntp_to_date(&tm, (uint32_t)ntp_stamp, NULL) < 0)
+	//	snprintf(buf, LIB_BUFLENGTH, "ntpcal_ntp_to_date: %ld: range error",
+	//		 (long)ntp_stamp);
+	else
+		snprintf(buf, LIB_BUFLENGTH, "%04d-%02d-%02dT%02d:%02dZ",
+			tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
+			tm.tm_hour, tm.tm_min);
+	return buf;
+}
+
+/* end */

@@ -234,7 +234,6 @@ extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);
 #endif
-extern	char *	rfc3339time(time_t);
 
 /* packetstamp.c */
 extern void	enable_packetstamps(int, sockaddr_u *);
