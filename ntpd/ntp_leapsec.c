@@ -44,7 +44,7 @@ struct leap_info {
 	time_t   ttime;	/* transition time (after the step, POSIX epoch) */
 	time_t   stime;	/* schedule limit (a month before transition)  */
 	int16_t  taiof;	/* TAI offset on and after the transition      */
-	uint8_t  dynls; /* dynamic: inserted on peer/clock request     */
+	bool     dynls; /* dynamic: inserted on peer/clock request     */
 };
 typedef struct leap_info leap_info_t;
 
@@ -59,7 +59,7 @@ struct leap_head {
 	time_t   ttime;	 /* nominal transition time (next era start)   */
 	time_t   stime;	 /* schedule time (when we take notice)        */
 	time_t   ebase;	 /* base time of this leap era                 */
-	uint8_t  dynls;	 /* next leap is dynamic (by peer request)     */
+	bool     dynls;	 /* next leap is dynamic (by peer request)     */
 };
 typedef struct leap_head leap_head_t;
 
@@ -253,7 +253,7 @@ leapsec_dump(
 
 		(*func)(farg, "%04u-%02u-%02u [%c] (%04u-%02u-%02u) - %d\n",
 			ttb.tm_year+1900, ttb.tm_mon+1, ttb.tm_mday,
-			"-*"[pt->info[idx].dynls != 0],
+			"-*"[pt->info[idx].dynls],
 			atb.tm_year+1900, atb.tm_mon+1, atb.tm_mday,
 			pt->info[idx].taiof);
 	}
@@ -745,7 +745,7 @@ reload_limits(
 		pt->head.stime    = pt->head.ttime;
 		pt->head.dtime    = pt->head.ttime;
 		pt->head.next_tai = pt->head.this_tai;
-		pt->head.dynls    = 0;
+		pt->head.dynls    = false;
 	}
 }
 
