@@ -55,56 +55,80 @@ echo "# Your package installer is ${installer}."
 
 # In order to have a single point of truth about prerequisite package names,
 # these package name lists have been *removed* from INSTALL.
-case $installer in
-    apt)
-	$do apt-get install bison libcap-dev libcap2 libseccomp-dev
-	$do apt-get install libssl-dev libssl1.0.0 python-dev
-	$do apt-get install libavahi-compat-libdnssd-dev
-	$do apt-get install pps-tools
-	$do apt-get install fonts-liberation
-	distro=`lsb_release -i -s`
-	if [ "$distro" = "Ubuntu" ]
-	then
-	    echo "# Looks like an Ubuntu system"
-	    $do apt-get install gnuplot5
-	else
-	    echo "# Looks like a generic Debian system"
-	    $do apt-get install gnuplot
-	fi
-	;;
-    emerge)
-        $do emerge -q y media-fonts/liberation-fonts
-        $do emerge -q y sci-visualization/gnuplot
-        $do emerge -q y net-misc/pps-tools
-        ;;
-    yum|dnf)
-	$do $installer install bison gnuplot libcap libcap-devel
-	$do $installer install liberation-fonts-common.noarch
-	$do $installer install liberation-mono-fonts.noarch
-	$do $installer install liberation-narrow-fonts.noarch
-	$do $installer install liberation-sans-fonts.noarch
-	$do $installer install liberation-serif-fonts.noarch
-	$do $installer install libseccomp-devel openssl-devel openssl-libs
-	$do $installer install pps-tools pps-tools-devel python python-devel
-	$do $installer install avahi-compat-libdns_sd-devel
-	;;
-    yast)
-	echo "# SLES versions 12 and earlier do not have pps-tools"
-	$do $installer --install basis-devel gnuplot libcap-devel libcap2
-	$do $installer --install liberation-fonts libseccomp-devel
-	$do $installer --install openssl-libs openssl-devel
-	$do $installer --install python-devel
-	;;
-    zypper)
-	$do zypper install -y gnuplot libcap-devel libcap2
-	$do zypper install -y liberation-fonts libseccomp-devel
-	$do zypper install -y openssl-devel
-	$do zypper install -y python-devel bison
-	$do zypper install -y gcc6 gcc6-info gcc6-locale
-	echo "# SLES versions 12 and earlier do not have pps-tools"
-        $do zypper install -y pps-tools pps-tools-devel
-	;;
-esac
+
+daemon () {
+    # Prerequisites to build the daemon
+    case $installer in
+	apt)
+	    $do apt-get install bison libcap-dev libcap2 libseccomp-dev
+	    $do apt-get install libssl-dev libssl1.0.0 python-dev
+	    $do apt-get install libavahi-compat-libdnssd-dev
+	    $do apt-get install pps-tools
+	    ;;
+	emerge)
+	    $do emerge -q y net-misc/pps-tools
+	    ;;
+	yum|dnf)
+	    $do $installer install bison libcap libcap-devel
+	    $do $installer install libseccomp-devel openssl-devel openssl-libs
+	    $do $installer install pps-tools pps-tools-devel python python-devel
+	    $do $installer install avahi-compat-libdns_sd-devel
+	    ;;
+	yast)
+	    echo "# SLES versions 12 and earlier do not have pps-tools"
+	    $do $installer --install basis-devel gnuplot libcap-devel libcap2
+	    $do $installer --install libseccomp-devel openssl-libs openssl-devel
+	    $do $installer --install python-devel
+	    ;;
+	zypper)
+	    $do zypper install -y libcap-devel libcap2
+	    $do zypper install -y openssl-devel libseccomp-devel
+	    $do zypper install -y python-devel bison
+	    $do zypper install -y gcc6 gcc6-info gcc6-locale
+	    echo "# SLES versions 12 and earlier do not have pps-tools"
+	    $do zypper install -y pps-tools pps-tools-devel
+	    ;;
+    esac
+}
+
+ntpviz () {
+    # Prerequisites to build ntpviz
+    case $installer in
+	apt)
+	    distro=`lsb_release -i -s`
+	    if [ "$distro" = "Ubuntu" ]
+	    then
+		echo "# Looks like an Ubuntu system"
+		$do apt-get install gnuplot5
+	    else
+		echo "# Looks like a generic Debian system"
+		$do apt-get install gnuplot
+	    fi
+	    $do apt-get install fonts-liberation
+	    ;;
+	emerge)
+	    $do emerge -q y sci-visualization/gnuplot
+	    $do emerge -q y media-fonts/liberation-fonts
+	    ;;
+	yum|dnf)
+	    $do $installer install gnuplot
+	    $do $installer install liberation-fonts-common.noarch
+	    $do $installer install liberation-mono-fonts.noarch
+	    $do $installer install liberation-narrow-fonts.noarch
+	    $do $installer install liberation-sans-fonts.noarch
+	    $do $installer install liberation-serif-fonts.noarch
+	    ;;
+	yast)
+	    $do $installer --install gnuplot liberation-fonts
+	    ;;
+	zypper)
+	    $do zypper install -y gnuplot liberation-fonts
+	    ;;
+    esac
+}
+
+daemon
+ntpviz
 
 echo ""
 echo "# Done."
