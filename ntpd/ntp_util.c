@@ -37,10 +37,10 @@
  * File names
  */
 static	char *key_file_name;		/* keys file name */
-static char	  *leapfile_name;		/* leapseconds file name */
+static char *leapfile_name;		/* leapseconds file name */
 static struct stat leapfile_stat;	/* leapseconds file stat() buffer */
-static bool        have_leapfile = false;
-char	*stats_drift_file;		/* frequency file name */
+static bool have_leapfile = false;
+char *stats_drift_file;			/* frequency file name */
 static double wander_resid;		/* last frequency update */
 double	wander_threshold = 1e-7;	/* initial frequency threshold */
 
@@ -79,7 +79,7 @@ static double prev_drift_comp;		/* last frequency update */
 static	void	record_sys_stats(void);
 static	void	record_use_stats(void);
 	void	ntpd_time_stepped(void);
-static  void	check_leap_expiration(int, uint32_t, const time_t*);
+static  void	check_leap_expiration(bool, time_t);
 
 /* 
  * Prototypes
@@ -231,7 +231,6 @@ stats_config(
 	const char *value;
 	size_t	len;
 	double	new_drift = 0;
-	l_fp	now;
 	time_t  ttnow;
 
 	value = invalue;
@@ -322,23 +321,22 @@ stats_config(
 		{
 			leap_signature_t lsig;
 
-			get_systime(&now);
 			time(&ttnow);
 			leapsec_getsig(&lsig);
 			mprintf_event(EVNT_TAI, NULL,
-				      "%d leap %s %s %s",
-				      lsig.taiof,
-				      fstostr(lsig.ttime),
-				      leapsec_expired(lfpuint(now), NULL)
-					  ? "expired"
-					  : "expires",
-				      fstostr(lsig.etime));
+				"%d leap %s %s %s",
+				lsig.taiof,
+				fstostr(lsig.ttime),
+				leapsec_expired(ttnow)
+					? "expired"
+					: "expires",
+				fstostr(lsig.etime));
 			have_leapfile = true;
 
 			/* force an immediate daily expiration check of
 			 * the leap seconds table
 			 */
-			check_leap_expiration(true, lfpuint(now), &ttnow);
+			check_leap_expiration(true, ttnow);
 		}
 		break;
 
@@ -522,7 +520,6 @@ record_raw_stats(
 	double	root_dispersion,/* seconds */
 	uint32_t	refid,
 	u_int	outcount
-
 	)
 {
 	l_fp	now;
@@ -632,11 +629,11 @@ void record_use_stats(void)
 		    "%lu %s %lu %.3f %.3f %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    day, ulfptoa(now, 3), current_time - use_stattime,
 		    utime, stime,
-		    usage.ru_minflt -  oldusage.ru_minflt,
-		    usage.ru_majflt -  oldusage.ru_majflt,
-		    usage.ru_nswap -   oldusage.ru_nswap,
-		    usage.ru_inblock - oldusage.ru_inblock,
-		    usage.ru_oublock - oldusage.ru_oublock,
+		    usage.ru_minflt -   oldusage.ru_minflt,
+		    usage.ru_majflt -   oldusage.ru_majflt,
+		    usage.ru_nswap -    oldusage.ru_nswap,
+		    usage.ru_inblock -  oldusage.ru_inblock,
+		    usage.ru_oublock -  oldusage.ru_oublock,
 		    usage.ru_nvcsw -    oldusage.ru_nvcsw,
 		    usage.ru_nivcsw -   oldusage.ru_nivcsw,
 		    usage.ru_nsignals - oldusage.ru_nsignals,
@@ -725,9 +722,8 @@ record_timing_stats(
  */
 void
 check_leap_file(
-	int           is_daily_check,
-	uint32_t      ntptime       ,
-	const time_t *systime
+	bool   is_daily_check,
+	time_t systime
 	)
 {
 	/* just do nothing if there is no leap file */
@@ -742,7 +738,7 @@ check_leap_file(
 	else if (!have_leapfile)
 		return;
 
-	check_leap_expiration(is_daily_check, ntptime, systime);
+	check_leap_expiration(is_daily_check, systime);
 }
 
 /*
@@ -750,9 +746,8 @@ check_leap_file(
  */
 static void
 check_leap_expiration(
-	int           is_daily_check,
-	uint32_t      ntptime       ,
-	const time_t *systime
+	bool   is_daily_check,
+	time_t systime
 	)
 {
 	static const char * const logPrefix = "leapsecond file";
@@ -762,7 +757,7 @@ check_leap_expiration(
 	 * level and frequency (once/hour or once/day, depending on the
 	 * state.
 	 */
-	rc = leapsec_daystolive(ntptime, systime);	
+	rc = leapsec_daystolive(systime);
 	if (rc == 0) {
 		msyslog(LOG_WARNING,
 			"%s ('%s'): will expire in less than one day",
@@ -825,23 +820,27 @@ ntp_exit(int retval)
 #endif
 
 /*
- * fstostr - prettyprint NTP seconds
+ * fstostr - prettyprint time stamp - POSIX epoch
  */
 char * fstostr(
-	time_t	ntp_stamp
+	time_t	posix_stamp
 	)
 {
 	char *		buf;
-	struct calendar tm;
+	struct tm tm, *tm2;
 
 	LIB_GETBUF(buf);
-	if (ntpcal_ntp_to_date(&tm, (uint32_t)ntp_stamp, NULL) < 0)
-		snprintf(buf, LIB_BUFLENGTH, "ntpcal_ntp_to_date: %ld: range error",
-			 (long)ntp_stamp);
+	tm2 = gmtime_r(&posix_stamp, &tm);
+	if (tm2 == NULL || tm.tm_year > 9999)
+		snprintf(buf, LIB_BUFLENGTH, "fstostr: %ld: range error",
+			 (long)posix_stamp);
+	// if (ntpcal_ntp_to_date(&tm, (uint32_t)ntp_stamp, NULL) < 0)
+	//	snprintf(buf, LIB_BUFLENGTH, "ntpcal_ntp_to_date: %ld: range error",
+	//		 (long)ntp_stamp);
 	else
 		snprintf(buf, LIB_BUFLENGTH, "%04d%02d%02d%02d%02d",
-			 tm.year, tm.month, tm.monthday,
-			 tm.hour, tm.minute);
+			tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
+			tm.tm_hour, tm.tm_min);
 	return buf;
 }
 

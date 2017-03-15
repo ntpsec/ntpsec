@@ -69,7 +69,7 @@ static	void	ctl_putrefid	(const char *, uint32_t);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
-static	void	ctl_putfs	(const char *, uint32_t);
+static	void	ctl_putfs	(const char *, time_t);
 #ifdef REFCLOCK
 static	void	ctl_putclock	(int, struct refclockstat *, int);
 #endif	/* REFCLOCK */
@@ -1202,15 +1202,14 @@ ctl_putuint(
 static void
 ctl_putfs(
 	const char *tag,
-	uint32_t uval
+	time_t uval
 	)
 {
 	register char *cp;
 	register const char *cq;
 	char buffer[200];
 	struct tm tmbuf, *tm = NULL;
-	uint32_t fstamp_u;
-	time_t fstamp;
+	time_t fstamp = uval;
 
 	cp = buffer;
 	cq = tag;
@@ -1218,11 +1217,8 @@ ctl_putfs(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-        /* Convert seconds from modulo NTP Epoch to POSIX Epoch */
-	fstamp_u = uval - JAN_1970;
-        fstamp = fstamp_u;          /* just in case time_t is not 32 bits */
 	tm = gmtime_r(&fstamp, &tmbuf);
-	if (NULL ==  tm)
+	if (NULL == tm)
 		return;
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),

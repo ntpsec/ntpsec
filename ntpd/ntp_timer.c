@@ -22,7 +22,7 @@
 # define	TC_ERR	(-1)
 #endif
 
-static void check_leapsec(uint32_t, const time_t*, bool);
+static void check_leapsec(time_t, bool);
 
 /*
  * These routines provide support for the event timer.  The timer is
@@ -197,8 +197,7 @@ timer(void)
 {
 	struct peer *	p;
 	struct peer *	next_peer;
-	l_fp		now;
-	time_t          tnow;
+	time_t          now;
 
 	/*
 	 * The basic timerevent is one second.  This is used to adjust the
@@ -265,15 +264,14 @@ timer(void)
 		sys_rootdisp = 0;
 	}
 
-	get_systime(&now);
-	time(&tnow);
+	time(&now);
 
 	/*
 	 * Leapseconds. Get time and defer to worker if either something
 	 * is imminent or every 8th second.
 	 */
 	if (leapsec > LSPROX_NOWARN || 0 == (current_time & 7))
-		check_leapsec(lfpuint(now), &tnow,
+		check_leapsec(now,
                                 (sys_leap == LEAP_NOTINSYNC));
         if (sys_leap != LEAP_NOTINSYNC) {
                 if (leapsec >= LSPROX_ANNOUNCE && leapdif) {
@@ -316,9 +314,9 @@ timer(void)
 		write_stats();
 		if (leapf_timer <= current_time) {
 			leapf_timer += SECSPERDAY;
-			check_leap_file(true, lfpuint(now), &tnow);
+			check_leap_file(true, now);
 		} else {
-			check_leap_file(false, lfpuint(now), &tnow);
+			check_leap_file(false, now);
 		}
 	}
 }
@@ -384,9 +382,8 @@ check_leap_sec_in_progress( const leap_result_t *lsdata ) {
 
 static void
 check_leapsec(
-	uint32_t        now  ,
-	const time_t * tpiv ,
-        bool           reset)
+	time_t now,
+        bool   reset)
 {
 	static const char leapmsg_p_step[] =
 	    "Positive leap second, stepped backward.";
@@ -402,7 +399,6 @@ check_leapsec(
 
 	leap_result_t lsdata;
 	uint32_t       lsprox;
-	
 #ifdef HAVE_KERNEL_PLL
 	leapsec_electric((pll_control && kern_enable) ? electric_on : electric_off);
 #else
@@ -416,10 +412,10 @@ check_leapsec(
 		leapsec_reset_frame();
 		memset(&lsdata, 0, sizeof(lsdata));
 	} else {
-		int fired = leapsec_query(&lsdata, now, tpiv);
+		int fired = leapsec_query(&lsdata, now);
 
-		DPRINTF(1, ("*** leapsec_query: fired %i, now %u (0x%08X), tai_diff %i, ddist %u\n",
-		      fired, now, now, lsdata.tai_diff, lsdata.ddist));
+		DPRINTF(1, ("*** leapsec_query: fired %i, now %lli (0x%llX), tai_diff %i, ddist %u\n",
+		      fired, (long long)now, (long long)now, lsdata.tai_diff, lsdata.ddist));
 #ifdef ENABLE_LEAP_SMEAR
 		leap_smear.in_progress = false;
 		leap_smear.doffset = 0.0;
@@ -428,7 +424,7 @@ check_leapsec(
 		      if (lsdata.tai_diff) {
 			      if (leap_smear.interval == 0) {
 				      leap_smear.interval = leap_smear_intv;
-				      leap_smear.intv_end = time64u(lsdata.ttime);
+				      leap_smear.intv_end = lsdata.ttime;
 				      leap_smear.intv_start = leap_smear.intv_end - leap_smear.interval;
 				      DPRINTF(1, ("*** leapsec_query: setting leap_smear interval %li, begin %.0f, end %.0f\n",
 					      leap_smear.interval, leap_smear.intv_start, leap_smear.intv_end));
@@ -467,9 +463,9 @@ check_leapsec(
 					      leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
 					      now, leap_smear_time, leap_smear.doffset);
 #else
-				      DPRINTF(1, ("*** leapsec_query: [%.0f:%.0f] (%li), now %u (%.0f), smear offset %.6f ms\n",
+				      DPRINTF(1, ("*** leapsec_query: [%.0f:%.0f] (%li), now %lld (%.0f), smear offset %.6f ms\n",
 					      leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
-					      now, leap_smear_time, leap_smear.doffset));
+					      (long long)now, leap_smear_time, leap_smear.doffset));
 #endif
 
 			      }

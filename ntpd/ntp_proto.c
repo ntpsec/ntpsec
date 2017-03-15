@@ -1021,7 +1021,7 @@ clock_update(
 	)
 {
 	double	dtemp;
-	l_fp	now;
+	time_t	now;
 #ifdef HAVE_LIBSCF_H
 	char	*fmri;
 #endif /* HAVE_LIBSCF_H */
@@ -1164,13 +1164,13 @@ clock_update(
 		if (leapsec == LSPROX_NOWARN) {
 			if (leap_vote_ins > leap_vote_del
 			    && leap_vote_ins > sys_survivors / 2) {
-				get_systime(&now);
-				leapsec_add_dyn(true, lfpuint(now), NULL);
+				time(&now);
+				leapsec_add_dyn(true, now);
 			}
 			if (leap_vote_del > leap_vote_ins
 			    && leap_vote_del > sys_survivors / 2) {
-				get_systime(&now);
-				leapsec_add_dyn(false, lfpuint(now), NULL);
+				time(&now);
+				leapsec_add_dyn(false, now);
 			}
 		}
 		break;

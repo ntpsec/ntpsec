@@ -928,11 +928,9 @@ static void mainloop(void)
 			reopen_logfile();
 
 			{
-			l_fp snow;
 			time_t tnow;
-			get_systime(&snow);
 			time(&tnow);
-			check_leap_file(false, lfpuint(snow), &tnow);
+			check_leap_file(false, tnow);
 			}
 		}
 

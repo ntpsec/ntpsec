@@ -85,7 +85,7 @@ extern bool leapsec_electric(electric_mode el);
  * 'dynamic' != 0 if entry was requested by clock/peer
  */ 
 struct leap_result {
-	time64_t   ttime;
+	time_t   ttime;
 	uint32_t ddist;
 	int16_t  tai_offs;
 	int16_t  tai_diff;
@@ -96,9 +96,9 @@ struct leap_result {
 typedef struct leap_result leap_result_t;
 
 struct leap_signature {
-	uint32_t etime;	/* expiration time	*/
-	uint32_t ttime;	/* transition time	*/
-	int16_t  taiof;	/* total offset to TAI	*/
+	time_t   etime;  /* expiration time */
+	time_t   ttime;  /* transition time */
+	int16_t  taiof;  /* total offset to TAI	*/
 };
 typedef struct leap_signature leap_signature_t;
 
@@ -128,7 +128,7 @@ typedef struct leap_smear_info leap_smear_info_t;
  * pointer will automatically copy the primary table, so it can be
  * subsequently modified.
  */
-extern leap_table_t *leapsec_get_table(int alternate);
+extern leap_table_t *leapsec_get_table(bool alternate);
 
 /* Set the current leap table. Accepts only return values from
  * 'leapsec_get_table()', so it's hard to do something wrong. Returns
@@ -143,8 +143,7 @@ extern void leapsec_clear(leap_table_t*);
  * register with their TAI offset) leap entries before the build date.
  * Update the leap signature data on the fly.
  */
-extern bool leapsec_load(leap_table_t*, leapsec_reader,
-				void*, int blimit);
+extern bool leapsec_load(leap_table_t*, leapsec_reader, void*);
 
 /* Dump the current leap table in readable format, using the provided
  * dump formatter function.
@@ -176,13 +175,13 @@ extern void        leapsec_getsig(leap_signature_t * psig);
 
 /* Check if the leap table is expired at the given time.
  */
-extern bool leapsec_expired(uint32_t when, const time_t * pivot);
+extern bool leapsec_expired(time_t when);
 
 /* Get the distance to expiration in days.
  * Returns negative values if expired, zero if there are less than 24hrs
  * left, and positive numbers otherwise.
  */
-extern int32_t leapsec_daystolive(uint32_t when, const time_t * pivot);
+extern int32_t leapsec_daystolive(time_t limit);
 
 /* Reset the current leap frame, so the next query will do proper table
  * lookup from fresh. Suppresses a possible leap era transition detection
@@ -195,8 +194,7 @@ extern void leapsec_reset_frame(void);
  * works if the existing table is extended. On success, updates the
  * signature data.
  */
-extern bool leapsec_add_fix(int offset, uint32_t ttime, uint32_t etime,
-				   const time_t * pivot);
+extern bool leapsec_add_fix(int offset, time_t ttime, time_t etime);
 
 /* Take a time stamp and create a leap second frame for it. This will
  * schedule a leap second for the beginning of the next month, midnight
@@ -210,8 +208,7 @@ extern bool leapsec_add_fix(int offset, uint32_t ttime, uint32_t etime,
  * 'ntp_now' is subject to era unfolding. The entry is marked
  * dynamic. The leap signature is NOT updated.
  */
-extern bool leapsec_add_dyn(bool insert, uint32_t ntp_now,
-				   const time_t * pivot);
+extern bool leapsec_add_dyn(bool insert, time_t ntp_now);
 
 /* Take a time stamp and get the associated leap information. The time
  * stamp is subject to era unfolding around the pivot or the current
@@ -220,8 +217,7 @@ extern bool leapsec_add_dyn(bool insert, uint32_t ntp_now,
  * last and the current query. In that case, qr->warped contains the
  * required clock stepping, which is always zero in electric mode.
  */
-extern bool leapsec_query(leap_result_t *qr, uint32_t ntpts,
-				 const time_t * pivot);
+extern bool leapsec_query(leap_result_t *qr, time_t when);
 
 /* Get the current leap frame info. Returns true if the result contains
  * useable data, false if there is currently no leap second frame.
