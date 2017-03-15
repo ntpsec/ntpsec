@@ -106,7 +106,7 @@ get_ostime(
 	}
 
 	if (trunc_os_clock) {
-		ticks = (long)((tsp->tv_nsec * NANOSECOND) / sys_tick);
+		ticks = (long)((tsp->tv_nsec * S_PER_NS) / sys_tick);
 		tsp->tv_nsec = (long)(ticks * NS_PER_S * sys_tick);
 	}
 }
@@ -157,11 +157,10 @@ normalize_time(
 	if (cmp_tspec(ts, ts_min) < 0) {
 		ts_lam = sub_tspec(ts_min, ts);
 		if (ts_lam.tv_sec > 0 && !lamport_violated) {
-			msyslog(LOG_ERR,
-				"get_systime Lamport advance exceeds one second (%.9f)",
-				ts_lam.tv_sec +
-				    NANOSECOND * ts_lam.tv_nsec);
-			exit(1);
+		    msyslog(LOG_ERR,
+			"get_systime Lamport advance exceeds one second (%.9f)",
+			ts_lam.tv_sec + S_PER_NS * ts_lam.tv_nsec);
+		    exit(1);
 		}
 		if (!lamport_violated)
 			ts = ts_min;

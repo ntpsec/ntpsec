@@ -62,7 +62,7 @@
 /* nanoseconds per second */
 #define NS_PER_S 1000000000
 /* seconds per nanosecond */
-#define NANOSECOND 1.0e-9
+#define S_PER_NS 1.0e-9
 
 /* predicate: returns true if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) \
