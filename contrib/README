@@ -25,7 +25,7 @@ temperature.  Writes all temperatures found to stdout on one line, preceded by
 the Unix UTC time in seconds.  This is useful on any Linux system that
 supports the /sys/class/thermal/thermal_zone*/temp interface.
 
-makeheat is a program to exercise a CPU until the CPU reachs a certain
+ntpheat is a program to exercise a CPU until the CPU reachs a certain
 temperature.  The idea if to get the temperature around the system
 oscillator to be near the zero TC point.  Tested on RasPi wrapped
-in bubble wrap.
+in bubble wrap.  Formerly known as makeheat.
