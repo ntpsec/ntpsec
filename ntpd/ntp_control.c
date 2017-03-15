@@ -660,8 +660,6 @@ static	char *reqend;
 #define MIN(a, b) (((a) <= (b)) ? (a) : (b))
 #endif
 
-#define MS_PER_S	1000	/* milliseconds per second -magic numbers suck */
-
 /*
  * init_control - initialize request data
  */

@@ -18,15 +18,14 @@
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 #include "ntp_syscall.h"
+#include "timespecops.h"
 
 #define NTP_MAXFREQ	500e-6
 
 #ifdef HAVE_KERNEL_PLL
-# define NS_PER_S	1000000
 # define FREQTOD(x)	((x) / 65536e6)            /* NTP to double */
 # define DTOFREQ(x)	((int32_t)((x) * 65536e6)) /* double to NTP */
 #endif
-#define US_PER_S	1e6
 
 /*
  * This is an implementation of the clock discipline algorithm described
