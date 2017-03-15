@@ -69,7 +69,7 @@ static	void	ctl_putrefid	(const char *, uint32_t);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
-static	void	ctl_putfs	(const char *, time_t);
+static	void	ctl_puttime	(const char *, time_t);
 #ifdef REFCLOCK
 static	void	ctl_putclock	(int, struct refclockstat *, int);
 #endif	/* REFCLOCK */
@@ -1197,10 +1197,10 @@ ctl_putuint(
 }
 
 /*
- * ctl_putfs - write a decoded filestamp into the response
+ * ctl_puttime - write a decoded filestamp into the response
  */
 static void
-ctl_putfs(
+ctl_puttime(
 	const char *tag,
 	time_t uval
 	)
@@ -1222,7 +1222,7 @@ ctl_putfs(
 		return;
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
-		 "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+		 "%04d-%02d-%02dT%02d:%02dZ", tm->tm_year + 1900,
 		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
@@ -1622,7 +1622,7 @@ ctl_putsys(
 		leap_signature_t lsig;
 		leapsec_getsig(&lsig);
 		if (lsig.ttime > 0)
-			ctl_putfs(sys_var[CS_LEAPTAB].text, lsig.ttime);
+			ctl_puttime(sys_var[CS_LEAPTAB].text, lsig.ttime);
 		break;
 	}
 
@@ -1631,7 +1631,7 @@ ctl_putsys(
 		leap_signature_t lsig;
 		leapsec_getsig(&lsig);
 		if (lsig.etime > 0)
-			ctl_putfs(sys_var[CS_LEAPEND].text, lsig.etime);
+			ctl_puttime(sys_var[CS_LEAPEND].text, lsig.etime);
 		break;
 	}
 
