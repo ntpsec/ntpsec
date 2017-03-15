@@ -22,6 +22,7 @@
 # define	TC_ERR	(-1)
 #endif
 
+
 static void check_leapsec(time_t, bool);
 
 /*
@@ -46,7 +47,7 @@ static	u_long leapf_timer;	/* Report leapfile problems once/day */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
-int     leapdif;                /* TAI difference step at next leap second*/
+int	leapdif;		/* TAI difference step at next leap second*/
 u_long	orphwait; 		/* orphan wait time */
 
 /*
@@ -442,14 +443,9 @@ check_leapsec(
 				      double leap_smear_time = dtemp - leap_smear.intv_start;
 				      /*
 				       * For now we just do a linear interpolation over the smear interval
+				       * https://developers.google.com/time/smear
 				       */
-#if 0
-				      // linear interpolation
 				      leap_smear.doffset = -(leap_smear_time * lsdata.tai_diff / leap_smear.interval);
-#else
-				      // Google approach: lie(t) = (1.0 - cos(pi * t / w)) / 2.0
-				      leap_smear.doffset = -((double) lsdata.tai_diff - cos( M_PI * leap_smear_time / leap_smear.interval)) / 2.0;
-#endif
 				      /*
 				       * TODO see if we're inside an
 				       * inserted leap second, so we
