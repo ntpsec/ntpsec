@@ -12,6 +12,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
+#include "timespecops.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -643,7 +644,7 @@ jupiter_pps(struct instance *instance)
 	instance->ts = ts;
 
 	setlfpuint(tstmp, (uint32_t)ts.tv_sec + JAN_1970);
-	dtemp = ts.tv_nsec * FRAC / 1e9;
+	dtemp = ts.tv_nsec * FRAC * S_PER_NS;
 	setlfpfrac(tstmp, (uint32_t)dtemp);
 	instance->peer->procptr->lastrec = tstmp;
 	return false;

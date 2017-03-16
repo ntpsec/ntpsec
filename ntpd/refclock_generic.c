@@ -19,6 +19,7 @@
 
 #include "config.h"
 #include "ntp_types.h"
+#include "timespecops.h"
 
 /*
  * This driver currently provides the support for
@@ -1855,7 +1856,7 @@ local_input(
 
 							setlfpuint(parse->parseio.parse_dtime.parse_ptime, (uint32_t) (pts.tv_sec + JAN_1970));
 
-							dtemp = (double) pts.tv_nsec / 1e9;
+							dtemp = (double) pts.tv_nsec * S_PER_NS;
 							if (dtemp < 0.) {
 								dtemp += 1;
 								bumplfpuint(parse->parseio.parse_dtime.parse_ptime, -1);

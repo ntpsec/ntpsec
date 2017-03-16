@@ -11,6 +11,7 @@
 #include "ntp_assert.h"
 #include "lib_strbuf.h"
 #include "ntp_calendar.h"
+#include "timespecops.h"
 
 #include <stdio.h>
 
@@ -414,7 +415,7 @@ refclock_process_f(
 
 	setlfpuint(offset, sec);
 	setlfpfrac(offset, 0);
-	ltemp = dtolfp(pp->nsec / 1e9);
+	ltemp = dtolfp(pp->nsec * S_PER_NS);
 	offset += ltemp;
 	refclock_process_offset(pp, offset, pp->lastrec, fudge);
 	return true;
@@ -1093,7 +1094,7 @@ refclock_catcher(
 	 * Convert to signed fraction offset and stuff in median filter.
 	 */
 	setlfpuint(pp->lastrec, (uint32_t)ap->ts.tv_sec + JAN_1970);
-	dtemp = ap->ts.tv_nsec / 1e9;
+	dtemp = ap->ts.tv_nsec * S_PER_NS;
 	setlfpfrac(pp->lastrec, (uint32_t)(dtemp * FRAC));
 	if (dtemp > .5)
 		dtemp -= 1.;

@@ -21,6 +21,7 @@
 
 #include "ntp_fp.h"
 #include "ntp_calendar.h"
+#include "timespecops.h"
 
 #define NBUF	800002
 #define NSAMPLES 10
@@ -45,7 +46,7 @@ get_clocktime(
 	 */
 	clock_gettime(CLOCK_REALTIME, &ts);
 	setlfpsint(*now, ts.tv_sec + JAN_1970);
-	dtemp = ts.tv_nsec / 1e9;
+	dtemp = ts.tv_nsec * S_PER_NS;
 
 	/*
 	 * Renormalize to seconds past 1900 and fraction.

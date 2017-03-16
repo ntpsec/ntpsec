@@ -18,6 +18,8 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include "timespecops.h"
+
 #ifdef HAVE_SYS_TIMEPPS_H
 #include <sys/timepps.h>
 
@@ -31,7 +33,7 @@
                 (vvp)->tv_nsec -= (uvp)->tv_nsec;                       \
                 if ((vvp)->tv_nsec < 0) {                               \
                         (vvp)->tv_sec--;                                \
-                        (vvp)->tv_nsec += 1000000000;                   \
+                        (vvp)->tv_nsec += NS_PER_S;                   \
                 }                                                       \
         } while (0)
 
@@ -47,7 +49,7 @@ Chew(struct timespec *tsa, struct timespec *tsc, unsigned sa, unsigned sc)
 
 	ts = *tsc;
 	timespecsub(&ts,tsa);
-	printf("%.9f ", ts.tv_sec + ts.tv_nsec / 1e9);
+	printf("%.9f ", ts.tv_sec + ts.tv_nsec * S_PER_NS);
 	printf("\n");
 	fflush(stdout);
 }
