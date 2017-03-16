@@ -55,6 +55,11 @@ ntpviz: can't find the Python argparse module
 """)
     sys.exit(1)
 
+# believe it or not, Python has not way to make a simple constant!
+NS_PER_S = 1e9          # nano seconds per second
+S_PER_MS = 1.0e-3       # seconds per microsecond
+S_PER_NS = 1.0e-9       # seconds per nanosecond
+S_PER_US = 1.0e-6       # seconds per microsecond
 
 # table to translate refclock names
 refclock_name = {'127.127.28.0': 'SHM(0)',
@@ -218,8 +223,8 @@ class VizStats(ntp.statfiles.NTPStats):
                 # go to seconds
                 self.unit = "s"
 
-        elif 1e-3 <= target:
-            self.multiplier = 1e3
+        elif S_PER_MS <= target:
+            self.multiplier = MS_PER_S
             if freq:
                 # go to ppb
                 self.unit = "ppb"
@@ -227,8 +232,8 @@ class VizStats(ntp.statfiles.NTPStats):
                 # go to millisec
                 self.unit = "ms"
 
-        elif 1e-6 <= target:
-            self.multiplier = 1e6
+        elif S_PER_US <= target:
+            self.multiplier = US_PER_S
             if freq:
                 self.unit = "10e-12"
             else:
@@ -236,7 +241,7 @@ class VizStats(ntp.statfiles.NTPStats):
                 self.unit = "µs"
 
         else:
-            self.multiplier = 1e9
+            self.multiplier = NS_PER_S
             if freq:
                 self.unit = "10e-15"
             else:
@@ -1109,7 +1114,7 @@ plot \
         if 1e-5 > stats.percs["p99"] and -1e-5 < stats.percs["p1"]:
             # go to nanosec
             rnd1 = 9        # round to 1 ns boxes
-            out['boxwidth'] = 1e-9
+            out['boxwidth'] = S_PER_NS
 
         cnt = collections.Counter()
         for value in values:

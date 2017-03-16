@@ -51,7 +51,7 @@
 
 /* milliseconds per second */
 #define MS_PER_S 1000
-/* seconds per microsecond */
+/* seconds per millisecond */
 #define S_PER_MS 1.0e-3
 
 /* microseconds per second */
