@@ -11,6 +11,7 @@
 #include "ntp_leapsec.h"
 #include "ntp_stdlib.h"
 #include "ntpd.h"
+#include "timespecops.h"
 
 #include <stdio.h>
 #include <libgen.h>
@@ -187,8 +188,8 @@ write_stats(void)
 #ifdef DEBUG
 		if (debug)
 			printf("write_stats: frequency %.6lf thresh %.6lf, freq %.6lf\n",
-			    (prev_drift_comp - drift_comp) * 1e6, wander_resid *
-			    1e6, drift_comp * 1e6);
+			    (prev_drift_comp - drift_comp) * US_PER_S,
+                             wander_resid * US_PER_S, drift_comp * US_PER_S);
 #endif
 		if (fabs(prev_drift_comp - drift_comp) < wander_resid) {
 			wander_resid *= 0.5;
@@ -196,7 +197,7 @@ write_stats(void)
 		}
 		prev_drift_comp = drift_comp;
 		wander_resid = wander_threshold;
-		drift_write(stats_drift_file, drift_comp * 1e6);
+		drift_write(stats_drift_file, drift_comp * US_PER_S);
 	}
 }
 
@@ -428,8 +429,8 @@ record_loop_stats(
 	setlfpuint(now, lfpuint(now) % 86400);
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %s %.9f %.6f %.9f %.6f %d\n",
-		    day, ulfptoa(now, 3), offset, freq * 1e6, jitter,
-		    wander * 1e6, spoll);
+		    day, ulfptoa(now, 3), offset, freq * US_PER_S, jitter,
+		    wander * US_PER_S, spoll);
 		fflush(loopstats.fp);
 	}
 }

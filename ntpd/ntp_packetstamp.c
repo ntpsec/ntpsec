@@ -186,7 +186,7 @@ fetch_packetstamp(
 				    sys_tick > 1e-6) {
 					ticks = (unsigned long)((tvp->tv_usec * 1e-6) /
 						       sys_tick);
-					tvp->tv_usec = (long)(ticks * 1e6 *
+					tvp->tv_usec = (long)(ticks * US_PER_S *
 							      sys_tick);
 				}
 				DPRINTF(4, ("fetch_timestamp: system usec network time stamp: %jd.%06ld\n",

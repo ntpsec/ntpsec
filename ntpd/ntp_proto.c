@@ -9,6 +9,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_leapsec.h"
 #include "refidsmear.h"
+#include "timespecops.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -2664,10 +2665,10 @@ measure_precision(const bool verbose)
 	set_sys_tick_precision(measured_tick);
 	if (verbose) {
 		msyslog(LOG_INFO, "proto: precision = %.3f usec (%d)",
-			sys_tick * 1e6, sys_precision);
+			sys_tick * US_PER_S, sys_precision);
 		if (sys_fuzz < sys_tick) {
 			msyslog(LOG_NOTICE, "proto: fuzz beneath %.3f usec",
-				sys_fuzz * 1e6);
+				sys_fuzz * US_PER_S);
 		}
 	}
 }
