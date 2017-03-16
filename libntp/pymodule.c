@@ -100,7 +100,7 @@ ntpc_lfptofloat(PyObject *self, PyObject *args)
 	return NULL;
     }
     tt = lfp_stamp_to_tspec(ts, NULL);
-    return Py_BuildValue("d", tt.tv_sec + tt.tv_nsec * 1e-9);
+    return Py_BuildValue("d", tt.tv_sec + tt.tv_nsec * S_PER_NS);
 }
 
 static PyObject *

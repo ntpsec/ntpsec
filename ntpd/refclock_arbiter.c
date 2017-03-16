@@ -8,6 +8,7 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -357,7 +358,7 @@ arb_receive(
 		break;
 
 	    case '4':		/* unlock accuracy < 1 us */
-		pp->disp = 1e-6;
+		pp->disp = S_PER_US;
 		break;
 
 	    case '5':		/* unlock accuracy < 10 us */
@@ -369,7 +370,7 @@ arb_receive(
 		break;
 
 	    case '7':		/* unlock accuracy < 1 ms */
-		pp->disp = .001;
+		pp->disp = S_PER_MS;
 		break;
 
 	    case '8':		/* unlock accuracy < 10 ms */

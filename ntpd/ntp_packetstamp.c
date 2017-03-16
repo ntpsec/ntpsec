@@ -156,7 +156,7 @@ fetch_packetstamp(
 				setlfpuint(nts, btp->sec + JAN_1970);
 				setlfpfrac(nts, (uint32_t)(btp->frac >> 32));
 				if (sys_tick > measured_tick &&
-				    sys_tick > 1e-9) {
+				    sys_tick > S_PER_NS) {
 				    ticks = (unsigned long)(lfpfrac(nts) / (unsigned long)(sys_tick * FRAC));
 				    setlfpfrac(nts, (unsigned long)(ticks * (unsigned long)(sys_tick * FRAC)));
 				}
@@ -168,10 +168,11 @@ fetch_packetstamp(
 			case SCM_TIMESTAMPNS:
 				tsp = (struct timespec *)CMSG_DATA(cmsghdr);
 				if (sys_tick > measured_tick &&
-				    sys_tick > 1e-9) {
-					ticks = (unsigned long)((tsp->tv_nsec * 1e-9) /
+				    sys_tick > S_PER_NS) {
+					ticks = (unsigned long)
+                                            ((tsp->tv_nsec * S_PER_NS) /
 						       sys_tick);
-					tsp->tv_nsec = (long)(ticks * 1e9 *
+					tsp->tv_nsec = (long)(ticks * S_PER_NS *
 							      sys_tick);
 				}
 				DPRINTF(4, ("fetch_timestamp: system nsec network time stamp: %ld.%09ld\n",
