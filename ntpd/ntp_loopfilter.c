@@ -827,14 +827,14 @@ local_clock(
 			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, false, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
-		clock_offset = ntv.offset / NS_PER_S;
+		clock_offset = ntv.offset * S_PER_NS;
 		clock_frequency = FREQTOD(ntv.freq);
 
 		/*
 		 * If the kernel PPS is lit, monitor its performance.
 		 */
 		if (ntv.status & STA_PPSTIME) {
-			clock_jitter = ntv.jitter / NS_PER_S;
+			clock_jitter = ntv.jitter * S_PER_NS;
 		}
 
 #if defined(STA_NANO) && NTP_API == 4
