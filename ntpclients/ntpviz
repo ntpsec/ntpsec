@@ -55,11 +55,11 @@ ntpviz: can't find the Python argparse module
 """)
     sys.exit(1)
 
-# believe it or not, Python has not way to make a simple constant!
-MS_PER_S = 1e3          # micro seconds per second
-NS_PER_S = 1e9          # nano seconds per second
-US_PER_S = 1e6          # micro seconds per second
-S_PER_MS = 1.0e-3       # seconds per microsecond
+# believe it or not, Python has no way to make a simple constant!
+MS_PER_S = 1e3          # milliseconds per second
+NS_PER_S = 1e9          # nanoseconds per second
+US_PER_S = 1e6          # microseconds per second
+S_PER_MS = 1.0e-3       # seconds per millisecond
 S_PER_NS = 1.0e-9       # seconds per nanosecond
 S_PER_US = 1.0e-6       # seconds per microsecond
 

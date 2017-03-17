@@ -172,7 +172,7 @@ fetch_packetstamp(
 					ticks = (unsigned long)
                                             ((tsp->tv_nsec * S_PER_NS) /
 						       sys_tick);
-					tsp->tv_nsec = (long)(ticks * S_PER_NS *
+					tsp->tv_nsec = (long)(ticks * NS_PER_S *
 							      sys_tick);
 				}
 				DPRINTF(4, ("fetch_timestamp: system nsec network time stamp: %ld.%09ld\n",
