@@ -783,13 +783,14 @@ leapsec_add(
 	/* To guard against dangling leap flags: do not accept leap
 	 * second request on the 1st hour of the 1st day of the month.
 	 */
+#ifndef ENABLE_LEAP_TESTING
 	if (fts.tm_mday == 1 && fts.tm_hour == 0) {
 		errno = EINVAL;
 		return false;
 	}
+#endif
 
 	/* Ok, do the remaining calculations */
-	fts.tm_mday = 1;
 	fts.tm_hour = 0;
 	fts.tm_min  = 0;
 	fts.tm_sec  = 0;
@@ -831,11 +832,13 @@ leapsec_raw(
 	}
 
 	gmtime_r(&ttime, &fts);
+#ifndef ENABLE_LEAP_TESTING
 	/* If this does not match the exact month start, bail out. */
 	if (fts.tm_mday != 1 || fts.tm_hour || fts.tm_min || fts.tm_sec) {
 		errno = EINVAL;
 		return false;
 	}
+#endif
 	/* Start 28 days earler.  Avoids month arithmetic.  */
 	starttime = ttime - 28*SECSPERDAY;
 	li.ttime = ttime;

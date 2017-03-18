@@ -222,6 +222,13 @@ def cmd_configure(ctx, config):
     if ctx.check_endianness() == "big":
         ctx.define("WORDS_BIGENDIAN", 1)
 
+    if ctx.options.enable_leap_testing:
+        ctx.define("ENABLE_LEAP_TESTING", 1,
+                   comment="Enable leap seconds on other than 1st of month.")
+    if ctx.options.enable_leap_smear:
+        ctx.define("ENABLE_LEAP_SMEAR", 1,
+                   comment="Enable experimental leap smearing code")
+
     cc_test_flags = [
         ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
