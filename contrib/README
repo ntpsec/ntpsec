@@ -2,9 +2,17 @@ The following tools are not production-ready. They are included only as
 conveniences, examples or rudimentary starting points for other development
 efforts.
 
-cpu-temp-log, smartctl-temp-log, temper-temp-log and zone-temp-log
-have been replaced by ntplogtemp.  Those programs will stay in contrib for
-a while to give users a chance to migrate.
+ntpheat is a program to exercise a CPU until the CPU reachs a certain
+temperature.  The idea if to get the temperature around the system
+oscillator to be near the zero TC point.  Tested on RasPi wrapped
+in bubble wrap.  Formerly known as makeheat.
+
+ntpheatusb is a program to control an external USB relayto maintain
+a stable temperature.  See the blog post "More Heat" for details.
+
+The next 4 tools cpu-temp-log, smartctl-temp-log, temper-temp-log and
+zone-temp-log have been replaced by ntplogtemp.  Those programs will stay
+ in contrib for a while to give users a chance to migrate.
 
 cpu-temp-log is a tool to use the output of 'sensors -u' and write the
 motherboard temperatures to stdout.  Useful to create a log that can be used
@@ -24,8 +32,3 @@ zone-temp-log reads /sys/class/thermal/thermal_zone*/temp to find the CPU
 temperature.  Writes all temperatures found to stdout on one line, preceded by
 the Unix UTC time in seconds.  This is useful on any Linux system that
 supports the /sys/class/thermal/thermal_zone*/temp interface.
-
-ntpheat is a program to exercise a CPU until the CPU reachs a certain
-temperature.  The idea if to get the temperature around the system
-oscillator to be near the zero TC point.  Tested on RasPi wrapped
-in bubble wrap.  Formerly known as makeheat.
