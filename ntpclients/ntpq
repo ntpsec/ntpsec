@@ -1623,7 +1623,12 @@ if __name__ == '__main__':
         elif switch in ("-w", "--wide"):
             interpreter.wideremote = True
         elif switch in ("-W", "--width"):
-            interpreter.termwidth = int(val)
+            try:
+                interpreter.termwidth = int(val)
+            except ValueError as e:
+                sys.stderr.write("'%s' is not a recognizable number\n" % val)
+                sys.stderr.write(usage)
+                raise SystemExit(1)
 
     if interpreter.interactive and len(interpreter.ccmds) > 0:
         interpreter.warn("%s: invalid option combination.\n" % progname)
