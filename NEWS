@@ -11,6 +11,10 @@ on user-visible changes.
 
 == 2017-03-21: 0.9.7 ==
 
+A shell script, buildprep, has been added to the top level source directory.
+It prepares your system for an NTPsec source build by installing all required
+dependencies on the build host.
+
 Four contrib programs: cpu-temp-log; smartctl-temp-log, temper-temp-log,
 and zone-temp-log; have been combined into the new ntplogtemp.  The new
 program allows for easy logging os system temperaturesand is installed
