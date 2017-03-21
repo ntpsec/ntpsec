@@ -9,6 +9,13 @@ on user-visible changes.
 
 == Repository Head ==
 
+== 2017-03-21: 0.9.7 ==
+
+Four contrib programs: cpu-temp-log; smartctl-temp-log, temper-temp-log,
+and zone-temp-log; have been combined into the new ntplogtemp.  The new
+program allows for easy logging os system temperaturesand is installed
+by default.
+
 The SHM refclock no longer limits the value of SHM time by default.
 This allows SHM to work on systems with no RTC by default.
 

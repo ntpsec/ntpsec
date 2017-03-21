@@ -115,6 +115,10 @@ parser.add_argument('-p', '--pid',
                     action="store_true",
                     dest='pid',
                     help="Use PID controller instead of simple P controller.")
+parser.add_argument('-s', '--step',
+                    action="store_true",
+                    dest='step',
+                    help="Step up 1C every hour for 10 hours, then back down.")
 parser.add_argument('-t', '--temp',
                     default=[45.0],
                     dest='target_temp',
@@ -140,6 +144,7 @@ zone0 = '/sys/class/thermal/thermal_zone0/temp'
 cnt = 0
 
 temp_gate = args.target_temp[0]
+start_temp_gate = temp_gate
 period = float(args.wait[0])
 
 # you will need to personalize these to your relay ID:
@@ -158,8 +163,27 @@ usbrelay_off = ['usbrelay', '959BI_1=0']
 #
 pid = PID(setpoint=temp_gate, P=35.0, I=10.0, D=5.0)
 
+start_time = gmtime()
+step_time = start_time
+step = 0
+
 try:
     while True:
+        if args.step:
+            now = gmtime()
+            if 3600 < (now - step_time):
+                # time to step
+                step_time = now
+                step += 1
+                if 0 <= step:
+                    # step up
+                    temp_gate += 1.0
+                else:
+                    # step down
+                    temp_gate -= 1.0
+                if 9 < step:
+                    step = 10-
+
         # grab the needed output
         output = run_binary(["temper-poll", "-c"])
         try:
