@@ -31,6 +31,26 @@ installed by default.
 The SHM refclock no longer limits the value of SHM time by default.
 This allows SHM to work on systems with no RTC by default.
 
+The following CVEs revealed by a Mozilla penetration test and reported in
+CERT VU#325339 have been resolved:
+
+CVE-2017-6464: Denial of Service via Malformed Config
+CVE-2017-6463: Authenticated DoS via Malicious Config Option
+CVE-2017-6458: Potential Overflows in ctl_put() functions
+CVE-2017-6451: Improper use of snprintf() in mx4200_send()
+
+The following CVEs, announced simultaneously, affected NTP Classic but
+not NTPsec, because we had already removed the attack surface:
+
+CVE-2017-6462: Buffer Overflow in DPTS Clock
+CVE-2017-6455: Privileged execution of User Library code
+CVE-2017-6452: Stack Buffer Overflow from Command Line
+CVE-2017-6459: Data Structure terminated insufficiently
+CVE-2017-6460: Buffer Overflow in ntpq when fetching reslist
+
+We gratefully acknowledge the work of of Dr.-Ing. Mario Hederich
+at cure53 in detecting these problems and his cooperation in resolving them.
+
 == 2016-12-30: 0.9.6 ==
 
 ntpkeygen has been moved from C to Python.  This is not a functional
