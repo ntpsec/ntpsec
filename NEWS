@@ -15,10 +15,16 @@ A shell script, buildprep, has been added to the top level source directory.
 It prepares your system for an NTPsec source build by installing all required
 dependencies on the build host.
 
+Extra digits of precision are now output in numerous places.  The
+driftfile now output 6 digits past the decimal point instead of 3.  The
+stats files now output 9 digits past the decimal point instead of 6 for
+some fields. ntpq and ntpmon also report extra digits of precision in
+multiple places.  These changes may break simple parsing scripts.
+
 Four contrib programs: cpu-temp-log; smartctl-temp-log, temper-temp-log,
-and zone-temp-log; have been combined into the new ntplogtemp.  The new
-program allows for easy logging os system temperaturesand is installed
-by default.
+and zone-temp-log; have been combined into the new program ntplogtemp.
+The new program allows for easy logging of system temperatures and is
+installed by default.
 
 The SHM refclock no longer limits the value of SHM time by default.
 This allows SHM to work on systems with no RTC by default.
