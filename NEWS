@@ -11,6 +11,8 @@ on user-visible changes.
 
 == 2017-03-21: 0.9.7 ==
 
+The code size has been further reduced, to 60KLOC.
+
 A shell script, buildprep, has been added to the top level source directory.
 It prepares your system for an NTPsec source build by installing all required
 dependencies on the build host.

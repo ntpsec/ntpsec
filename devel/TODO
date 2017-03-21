@@ -2,11 +2,6 @@
 
 == Checklist for a quality 1.0 release ==
 
-== Build recipe ==
-
-* After a fresh clone, it may take *two* ./waf builds to force the
-  compiled versions of the Python libraries.
-
 === Code ===
 
 * All the code relating to iteration over interfaces can and should be removed
