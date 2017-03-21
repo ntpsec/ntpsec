@@ -6,8 +6,9 @@ Annoying but necessary legalese:
     redistributed under the project's license according to the normal
     forms and usages of the open-source community.
 
-If you want to learn more about the code internals, consult the .../devel/tour.txt file.
-This document is about development practices and project conventions.
+If you want to learn more about the code internals, consult the
+../devel/tour.txt file.  This document is about development practices
+and project conventions.
 
 You may also find the articles at https://blog.ntpsec.org/
 interesting.
@@ -42,6 +43,8 @@ coexist with distributions that use C89 conventions.
 
 You can download the C99 standard for free from here:
     http://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
+
+You *may* use C11-style anonymous unions.
 
 Only POSIX-1.2001/SUSv3 library functions should be used (a few
 specific exceptions are noted below).  If a library
