@@ -180,7 +180,7 @@ start_time = time.time()
 step_time = start_time
 step = 0
 
-start_time = gmtime()
+start_time = time.time()
 step_time = start_time
 step = 0
 
