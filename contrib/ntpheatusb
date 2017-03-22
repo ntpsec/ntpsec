@@ -6,16 +6,22 @@
 # an incadescent light bulb in the box.  Heat to 45C.  profit.
 #
 # This code depends on the program 'usbrelay' to manage your usbrelay
-# conencted device. Get it here:  git@github.com:darrylb123/usbrelay.git
+# connected device.
+#   Get it here:  git@github.com:darrylb123/usbrelay.git
+#   Update the usbrelay_on/off variables below with your device ID
 #
-# makeheatusb will use a lot less CPU than ntpheat, and more directly
+# This code depends on the program 'temper-poll' to read the box temp
+# from an attached TEMPer device.
+#   Get it here: git@github.com:padelt/temper-python.git
+#
+# ntpheatusb will use a lot less CPU than ntpheat, and more directly
 # heats the XTAL rather than the CPU.
 #
-# Avoid the desire to increase the wait time.  The realy clocks twice
+# Avoid the desire to decrease the wait time.  The relay clocks twice
 # per cycle, and those cycles add up.  Minimize wear on your relay.
 #
-# Try the simple P controller (the defaul) before tyring the PID controller.
-# the PID controller may take some fiddling with the constants to get
+# Try the simple P controller (the default) before trying the PID controller.
+# The PID controller may take some fiddling with the constants to get
 # it working better than the simple P controller.
 
 import argparse
@@ -26,7 +32,7 @@ import time
 try:
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("makeheatusb: can't find Python NTP modules "
+    sys.stderr.write("ntpheatusb: can't find Python NTP modules "
                      "-- check PYTHONPATH.\n%s\n" % e)
     sys.exit(1)
 
@@ -137,7 +143,7 @@ parser.add_argument('-v', '--verbose',
                     help="be verbose")
 parser.add_argument('-V', '--version',
                     action="version",
-                    version="makeheatusb %s" % ntp.util.stdversion())
+                    version="ntpheatusb %s" % ntp.util.stdversion())
 args = parser.parse_args()
 
 zone0 = '/sys/class/thermal/thermal_zone0/temp'
@@ -151,7 +157,7 @@ period = float(args.wait[0])
 usbrelay_on = ['usbrelay', '959BI_1=1']
 usbrelay_off = ['usbrelay', '959BI_1=0']
 
-# to adjsut the PID variables
+# to adjust the PID variables
 # set I and D to zero
 #
 # increase P until you get a small overshoot, and mostly damped response,
@@ -195,7 +201,7 @@ try:
             print("temper read failed: %s" % output)
             sys.exit(1)
 
-        # the +2- is to create and 80/20 band around the setpoint
+        # the +20 is to create an 80/20 band around the setpoint
         p_val = pid.update(temp) + 20
         p_val1 = p_val
         if p_val > 100:
