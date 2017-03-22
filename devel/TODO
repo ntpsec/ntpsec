@@ -2,6 +2,12 @@
 
 == Checklist for a quality 1.0 release ==
 
+* Units as an option in ntpq/ntpmon.
+
+* Easier assembly of config file snippets - ntpconf.d.
+
+* Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
+
 === Testing ===
 
 * We need to live-test various refclocks.  It would be nice
@@ -9,10 +15,6 @@
   much work.  We should probably test as many refclocks as we can
   on at least one platform and test the NMEA, Atom, and SHM drivers
   on most platforms.
-
-=== Packaging ===
-
-* Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
 == After 1.0 release ==
 
@@ -78,12 +80,16 @@ Neither is ideal, easy pickings for someone to code on.
   (and multiple inbound NTP connections, and a hole in your firewall) even when
   it has a known-good local timesource like a GPS.  This should be fixed.
 
+* Full support for NTS, once IETF has the spec ready
+
 * All the code relating to iteration over interfaces can and should be removed
   in favor of binding to wildcard addresses.  Information on how to do this
   us here: https://blog.powerdns.com/2012/10/08/on-binding-datagram-udp-sockets-to-the-any-addresses/
 
 * We could open only V6 sockets and allow them to handle mapped PV4 addresses,
   as described at http://man7.org/linux/man-pages/man7/ipv6.7.html
+
+* A clock driver or auxiliary daemon for PTP.
 
 * The code used for asynchronous DNS lookup is more general, more complex,
   and more bug-prone than it should be.  Either our version should be
@@ -107,7 +113,9 @@ Neither is ideal, easy pickings for someone to code on.
   codes and use it systematically to make reports more readable.
 
 * Timer events need, as much as possible, to be eliminated - they eat
-  power on laptops and mobile devices, usually unnecessarily.
+  power on laptops and mobile devices, usually unnecessarily. To fix this,
+  go to an event-queue architecture that wakes the daemon up just in time
+  for the next scheduled event (rather than a once-per-second timer tick).
 
 * Richer signal semantics: HUP for close/reopen of any files (logrotate…),
   USR1 for re-read of config and maybe USR2 for re-read of an alternate
@@ -142,9 +150,9 @@ __________
 970318: in hourly_stats(?), squawk if the magnitude of the drift is,
 	say, >400.
 
-== Simple tasks for an intern ==
+== Simple tasks for an intern/trainee ==
 
-[quote, ESR 2015-09-30]
+* A conformant SNMP subagent in Python - see RFC 5907.
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
