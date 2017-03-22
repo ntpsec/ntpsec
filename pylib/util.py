@@ -335,10 +335,11 @@ class PeerSummary:
     "Reusable report generator for peer statistics"
 
     def __init__(self, displaymode, pktversion, showhostnames,
-                 wideremote, termwidth=None, debug=0):
+                 wideremote, showunits=False, termwidth=None, debug=0):
         self.displaymode = displaymode          # peers/apeers/opeers
         self.pktversion = pktversion            # interpretation of flash bits
         self.showhostnames = showhostnames      # If false, display numeric IPs
+        self.showunits = showunits              # If False show old style float
         self.wideremote = wideremote            # show wide remote names?
         self.debug = debug
         self.termwidth = termwidth
@@ -559,15 +560,17 @@ class PeerSummary:
                     else int(now - ntp.ntpc.lfptofloat(last_sync))),
                    PeerSummary.prettyinterval(poll_sec), reach))
             if saw6:
+                renderer = (i8unit if self.showunits else f8dot4)
                 line += (
                     " %s %s %s" %
-                    (i8unit(estdelay), i8unit(estoffset), i8unit(jd)))
+                    (renderer(estdelay), renderer(estoffset), renderer(jd)))
             else:
                 # old servers only have 3 digits of fraction
                 # don't print a fake 4th digit
+                renderer = (i8unit if self.showunits else f8dot3)
                 line += (
                     " %s %s %s" %
-                    (i8unit(estdelay), i8unit(estoffset), i8unit(jd)))
+                    (renderer(estdelay), renderer(estoffset), renderer(jd)))
             line += "\n"
             return line
         except TypeError:

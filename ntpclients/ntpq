@@ -153,6 +153,7 @@ class Ntpq(cmd.Cmd):
         self.rawmode = False            # Flag which indicates raw mode output.
         self.directmode = False         # Flag for direct MRU output.
         self.showhostnames = True       # If false, display numeric IPs
+        self.showunits = False          # If False, show old style float
         self.auth_delay = 20            # delay time (default 20msec)
         self.wideremote = False         # show wide remote names?
         self.ccmds = []                 # Queued commands
@@ -240,7 +241,7 @@ usage: help [ command ]
 """)
 
     # Unexposed helper tables and functions begin here
-
+    
     def __dogetassoc(self):
         try:
             self.peers = self.session.readstat()
@@ -293,6 +294,7 @@ usage: help [ command ]
                                       self.pktversion,
                                       self.showhostnames,
                                       self.wideremote,
+                                      self.showunits,
                                       termwidth=termwidth,
                                       debug=interpreter.debug)
         try:
@@ -435,6 +437,10 @@ usage: help [ command ]
         return True
 
     # Unexposed helper tables and functions end here
+    
+    def do_units(self, _unused):
+        "toggle unit display"
+        self.showunits = not self.showunits
 
     def do_EOF(self, _unused):
         "exit ntpq"
@@ -1569,17 +1575,18 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
                          on a separate line
    -W no  width          force output width to this value instead of
                          querying the terminal size
+   -u no  units          Display time with units.
 '''
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "46c:dD:hinpVwW:",
+                                             "46c:dD:hinpVwW:u",
                                              ["ipv4", "ipv6", "command=",
                                               "debug", "set-debug-level=",
                                               "help", "interactive", "numeric",
                                               "peers", "version",
-                                              "wide", "width="])
+                                              "wide", "width=", "units"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1630,6 +1637,8 @@ if __name__ == '__main__':
                                  % val)
                 sys.stderr.write(usage)
                 raise SystemExit(1)
+        elif switch in ("-u", "--units"):
+            interpreter.showunits = True
 
     if interpreter.interactive and len(interpreter.ccmds) > 0:
         interpreter.warn("%s: invalid option combination.\n" % progname)
