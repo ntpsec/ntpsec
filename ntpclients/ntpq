@@ -1626,7 +1626,8 @@ if __name__ == '__main__':
             try:
                 interpreter.termwidth = int(val)
             except ValueError as e:
-                sys.stderr.write("'%s' is not a recognizable number\n" % val)
+                sys.stderr.write("Error: -W parameter '%s' not a number\n"
+                                 % val)
                 sys.stderr.write(usage)
                 raise SystemExit(1)
 
