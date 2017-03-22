@@ -64,6 +64,35 @@ def portsplit(hostname):
     return (hostname, portsuffix)
 
 
+def i8unit(f):
+    "Integer formatting to fit in 8 characters with sign and unit, expects ms"
+    fmt = "%+6i" # have 5 digits to work with, so up to 99,999 of a unit
+    fail = "%+8d"
+    if f >= 0:
+        if f < 0.100: # <100k nanoseconds
+            return (fmt % (f * 1000000.0)) + "ns"
+        elif f < 100.0: # <100k microseconds
+            return (fmt % (f * 1000.0)) + "us"
+        elif f < 100000.0: # <100k miliseconds, native unit
+            return (fmt % f) + "ms"
+        elif f < 100000000.0: # <100k seconds
+            return (fmt % (f / 1000.0)) + "s "
+        elif f < 100000000000.: # <100k kiloseconds
+            return (fmt % (f / 1000000.0)) + "ks"
+        return fail % f
+    if f > -0.100: # >-100k nanoseconds
+        return (fmt % (f * 1000000.0)) + "ns"
+    elif f > -100.0: # >-100k microseconds
+        return (fmt % (f * 1000.0)) + "us"
+    elif f > -100000.0: # >-100k miliseconds, native unit
+        return (fmt % f) + "ms"
+    elif f > -100000000.0: # >-100k seconds
+        return (fmt % (f / 1000.0)) + "s "
+    elif f > -100000000000.0: # >-100k kiloseconds
+        return (fmt % (1 / 1000000.0)) + "ks"
+    return fail % f
+
+
 def f8dot4(f):
     "Scaled floating point formatting to fit in 8 characters"
     if f >= 0:
@@ -532,13 +561,13 @@ class PeerSummary:
             if saw6:
                 line += (
                     " %s %s %s" %
-                    (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
+                    (i8unit(estdelay), i8unit(estoffset), i8unit(jd)))
             else:
                 # old servers only have 3 digits of fraction
                 # don't print a fake 4th digit
                 line += (
                     " %s %s %s" %
-                    (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
+                    (i8unit(estdelay), i8unit(estoffset), i8unit(jd)))
             line += "\n"
             return line
         except TypeError:
