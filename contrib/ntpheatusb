@@ -91,6 +91,13 @@ Discrete PID control
     def __repr__(self):
         return ("D_value=%s, I_value=%s" % (self.D_value, self.I_value))
 
+
+    def setPoint(self,set_point):
+            """
+            Initilize the setpoint of PID
+            """
+            self.set_point = set_point
+
     def update(self, current_value):
         """
         Calculate PID output value for given reference input and feedback
@@ -124,7 +131,7 @@ parser.add_argument('-p', '--pid',
 parser.add_argument('-s', '--step',
                     action="store_true",
                     dest='step',
-                    help="Step up 1C every hour for 10 hours, then back down.")
+                    help="Step up 1C every 2 hours for 20 hours, then back down.")
 parser.add_argument('-t', '--temp',
                     default=[45.0],
                     dest='target_temp',
@@ -167,7 +174,11 @@ usbrelay_off = ['usbrelay', '959BI_1=0']
 #
 # if the temp oscillates then increase D
 #
-pid = PID(setpoint=temp_gate, P=35.0, I=10.0, D=5.0)
+pid = PID(setpoint=temp_gate, P=35.0, I=10.0, D=10.0)
+
+start_time = time.time()
+step_time = start_time
+step = 0
 
 start_time = gmtime()
 step_time = start_time
@@ -176,8 +187,8 @@ step = 0
 try:
     while True:
         if args.step:
-            now = gmtime()
-            if 3600 < (now - step_time):
+            now = time.time()
+            if 7200 < (now - step_time):
                 # time to step
                 step_time = now
                 step += 1
@@ -188,7 +199,8 @@ try:
                     # step down
                     temp_gate -= 1.0
                 if 9 < step:
-                    step = 10-
+                    step = -11
+            pid.setPoint(temp_gate)
 
         # grab the needed output
         output = run_binary(["temper-poll", "-c"])
