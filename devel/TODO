@@ -8,6 +8,8 @@
 
 * Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
+* Add .tar.xz tarball.
+
 === Testing ===
 
 * We need to live-test various refclocks.  It would be nice
