@@ -13,7 +13,7 @@
  * NTP uses two fixed point formats.
  *
  * The first (l_fp) is the "long" format and is 64 bits wide in units
- * of 1/2e32 seconds (which is between 232 and 233 decimal
+ * of 1/2^32 seconds (which is between 232 and 233 decimal
  * picoseconds).  The zero value signifies the zero date of the
  * current NTP era; era zero began on the date 1900-00-00T00:00:00 in
  * proleptic UTC (leap second correction was not introduced until
@@ -23,7 +23,7 @@
  * network byte order).  It is defined in RFC 5905 in Section 6 (Data
  * Types). In the on-the-wire context, it is always unsigned.
  *
- * When it is convenient to compute in float seconds, this type can
+ * When it is convenient to compute in seconds, this type can
  * be interpreted as a fixed-point float with the radix point between
  * bits 31 and 32. This is why there are macros to extract the low and
  * high halves.
@@ -32,7 +32,7 @@
  * context it is interpreted as signed and can only express offsets
  * up to a half cycle. Offsets are normally much, much smaller than that;
  * for an offset to have a value even as large as 1 second would be 
- * highly unusual.
+ * highly unusual after ntpd initialization.
  *
  * Anyway, an l_fp looks like:
  *

@@ -34,6 +34,10 @@
   Old name for the PPS driver.  Origin lost in the mists of history,
   but probably related in some way to cesium atomic clocks.
 
+[[cycle]] cycle::
+  An <<era>>; code comments sometimes use tjis term to emphasize that
+  modular arithmetic is going on.
+
 [[drift]] drift::
   In an NTP context, drift refers to the frequency offset of a clock crystal
   in an NTP host that causes the system time to slowly drift.  It is
@@ -52,6 +56,19 @@
   problem with the timeserver itself but rather with highly variable
   and asymmetric network delays between server and client, but firmware
   bugs in GPS receivers have produced falsetickers.
+
+[[epoch]] epoch::
+  1. The zero date of an NTP era.  The "prime epoch" (of era 0) was
+  1900-00-00T00:00:00 in proleptic UTC (leap second correction was not
+  introduced until 1972). 2. Other calendar systems have other
+  definitions; notably, the Unix epoch is 1970-00-00T00:00:00.
+
+[[era]] era::
+  One complete revolution of a 64-bit NTP 64-bit timestamp; approximately
+  136 years. Eras are numbered from 0, but this era number is not
+  represented internally in NTP code because modular-arithmetic
+  trickery is used to deduce the nearest time that could fit a given
+  timestamp.
 
 [[fudge]] fudge::
   Can have one of two senses.  Either (1) an offset configured for a
@@ -97,7 +114,7 @@
    interface.
 
 [[holdover]] holdover::
-   In connection with a <<GPSD0>> or <<time radio>> that may lose
+   In connection with a <<GPSDO>> or <<time radio>> that may lose
    signal from its time source, holdover is its ability to continue
    delivering accurate time from an internal oscillator. Due to
    <<drift>> in the oscillator, accuracy drops as holdover time (time
