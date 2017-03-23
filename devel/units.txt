@@ -1,0 +1,50 @@
+This document is a list of the important time variables and what units they represent in various areas throughout the program.
+
+System Variables
+
+Name                  | internal  | mode 6
+=================================================
+leap                  | seconds   | seconds (* presumed seconds)
+precision             | UNKNOWN   | UNKNOWN
+rootdelay             | seconds   | milliseconds
+rootdisp              | seconds   | milliseconds
+offset                | seconds   | milliseconds
+frequency (aka drift) | seconds/s | microseconds/s (aka ppm)
+sys_jitter            | seconds   | milliseconds
+clk_jitter            | seconds   | milliseconds
+clk_wander            | seconds/s | microseconds/s
+leapsmearinterval     | UNKNOWN   | UNKNOWN
+leapsmearoffset       | seconds   | milliseconds
+mintc (aka CR_RATE)   | UNKNOWN   | UNKNOWN
+authdelay             | seconds   | milliseconds
+koffset               | seconds   | milliseconds
+kmaxerr               | seconds   | milliseconds
+kesterr               | seconds   | milliseconds
+kprecis               | seconds   | milliseconds
+kppsjitter            | seconds   | milliseconds
+fuzz                  | seconds   | milliseconds
+clk_wander_threshold  | seconds   | microseconds
+tick                  | seconds   | milliseconds
+
+
+Peer Variables
+
+Name       | internal | mode 6
+=====================================
+in         | seconds  | milliseconds
+out        | seconds  | milliseconds
+rootdelay  | seconds  | milliseconds
+rootdisp   | seconds  | milliseconds
+bias       | seconds  | milliseconds
+delay      | seconds  | milliseconds
+offset     | seconds  | milliseconds
+jitter     | seconds  | milliseconds
+dispersion | seconds  | milliseconds
+
+
+Clock Variables
+
+Name       | internal | mode 6
+====================================
+fudgetime1 | seconds  | milliseconds
+fudgetime2 | seconds  | milliseconds
