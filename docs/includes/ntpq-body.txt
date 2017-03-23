@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+ntpq+ [+-46dhinpwW+] [+-c+ 'command'] ['host'] [...]
++ntpq+ [+-46dhinpwWu+] [+-c+ 'command'] ['host'] [...]
 
 == Description ==
 
@@ -88,6 +88,9 @@ attempt to read interactive format commands from the standard input.
 +-W+, +--width+::
   Force the terminal width.  Only relevant for composition of the
   peers display.
++-u+, +--units+::
+  Display timing information with units. Only relevant for the
+  composition of the peers display.
 
 == Internal Commands ==
 
@@ -189,6 +192,9 @@ following.
   is about 5000 milliseconds. Note that since +ntpq+ retries each query
   once after a timeout, the total waiting time for a timeout will be
   twice the timeout value set.
+
++units+::
+  Toggle whether times in the peers display are shown with units.
 
 +version+::
   Print the version of the +ntpq+ program.
