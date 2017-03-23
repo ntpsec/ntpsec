@@ -351,8 +351,7 @@ lex_flush_stack()
  * Returns true if a new info record was pushed onto the stack.
  */
 bool lex_push_file(
-	const char * path,
-	const char * mode
+	const char * path
 	)
 {
 	struct FILE_INFO * next = NULL;
@@ -370,7 +369,7 @@ bool lex_push_file(
 		}
 		strlcat(fullpath, path, sizeof(fullpath));
 		fprintf(stderr, "Opening %s\n", fullpath);
-		next = lex_open(fullpath, mode);
+		next = lex_open(fullpath, "r");
 		if (NULL != next) {
 			next->st_next = lex_stack;
 			lex_stack = next;

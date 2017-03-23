@@ -1135,7 +1135,7 @@ miscellaneous_command
 				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
 			} else {
 				const char * path = $2;
-				if (!lex_push_file(path, "r")) {
+				if (!lex_push_file(path)) {
 					fprintf(stderr, "getconfig: Couldn't open <%s>\n", path);
 					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", path);
 				}

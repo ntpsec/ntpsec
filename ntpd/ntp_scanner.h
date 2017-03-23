@@ -133,7 +133,7 @@ extern void        lex_drop_stack(void);
 extern bool lex_flush_stack(void);
 
 /* add/remove a nested input source */
-extern bool lex_push_file(const char * path, const char * mode);
+extern bool lex_push_file(const char * path);
 extern bool lex_pop_file(void);
 
 /* input stack state query functions */
