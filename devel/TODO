@@ -2,7 +2,7 @@
 
 == Checklist for a quality 1.0 release ==
 
-* Units as an option in ntpq/ntpmon.
+* Units as an option in ntpmon.
 
 * Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
@@ -34,45 +34,6 @@ Also see https://gitlab.com/NTPsec/ntpsec/issues/68 where the dubiousness
 of the current startup logic gets discussed.
 
 == User interface ==
-
-[quote, Gary Miller]
-__________
-'ntpq -p' is user hostile compared to 'chronyc sources'.  chronyc adds
-units to the display, so you do not have to keep referring to the
-manual, and it makes it easy to deal with jitter and delay that
-varies by orders of magnitude.
-
-So, instead of this:
-
-     remote           refid      st t when poll reach   delay   offset  jitter
-==============================================================================
--india.colorado. .NIST.           1 u   33   64  377   79.023  -11.071  10.247
- 140.142.16.34   .INIT.          16 u    -  256    0    0.000    0.000   0.000
-+clepsydra.labs. .GPS.            1 u   28   64  377   26.473   15.307   4.261
-+catbert.rellim. .GPS1.           1 u   31   64  377    0.200   22.061   6.440
--SHM(0)          .GPS.            0 l   45   64  377    0.000  151.500  15.858
-*SHM(1)          .GPS1.           0 l   44   64  377    0.000   20.870   7.680
-+131.107.13.100  .ACTS.           1 u   25   64  337   14.746   18.469   6.634
-
-I see this:
-
-dagwood ~ # chronyc sources
-210 Number of sources = 11
-MS Name/IP address         Stratum Poll Reach LastRx Last sample
-===============================================================================
-#- SHM0                          0   4   377    19   +119ms[ +119ms] +/-  501ms
-#- SHM1                          0   4   377    21   +276us[ +276us] +/-   13us
-#* SOC2                          0   4   377    22   +260us[ +291us] +/-   24us
-#? SOC3                          0   4     0  247d  +7275ms[  +99us] +/-  230ms
-^x catbert.rellim.com            1   8   377     0  -1566us[-1566us] +/- 1564us
-^- spidey.rellim.com             1   6   377    54    +18ms[  +18ms] +/-   27ms
-^- kong.rellim.com               2  10   377   177   -722us[ -735us] +/- 2004us
-^- ha2.smatwebdesign.com         2  10   177   492  -2890us[-2905us] +/-  103ms
-^- soft-sea-01.servers.octos     2  10   377   775  -5897us[-5843us] +/-   83ms
-^- gw-kila-wl0.ipv6.avioc.or     2  10   377   17m   -519us[ -640us] +/-   64ms
-^- 66.241.101.63                 2  10   377   449  +7966us[+7973us] +/-   52ms
-
-Neither is ideal, easy pickings for someone to code on.
 
 === Future plans ===
 
