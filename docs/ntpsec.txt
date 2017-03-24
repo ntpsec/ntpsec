@@ -214,6 +214,13 @@ codebase has been outright removed, with less than 5% new code added.
   in /etc/ntp.conf finding /etc/foo rather than looking for foo in
   your current directory.
 
+* If there is an /etc/ntp.d directory, its subfiles are scanned
+  for more configuration declarations. Only files with the extensions
+  ".ntpd" and ".refclockd" are interpreted; others are ignored.  This
+  feature is intended to make assembling configuration easier for
+  administration and package-configuration scripts.  See {ntpdman}
+  for details.
+
 * It is now possible to set the peer maximum dispersion with "tos
   maxdisp". See RFC 5905 for discussion of this synchronization
   parameter.

@@ -4,8 +4,6 @@
 
 * Units as an option in ntpq/ntpmon.
 
-* Easier assembly of config file snippets - ntpconf.d.
-
 * Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
 * Add .tar.xz tarball.

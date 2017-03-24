@@ -20,6 +20,7 @@
 #ifndef CONFIG_FILE
 #  define	CONFIG_FILE "/etc/ntp.conf"
 #endif /* not CONFIG_FILE */
+#define CONFIG_DIR	"ntp.d"
 
 /* Limits */
 #define MAXLINE 1024

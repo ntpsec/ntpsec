@@ -3265,6 +3265,7 @@ getconfig(const char *explicit_config)
 void readconfig(const char *config_file)
 {
 	char	line[256];
+	char	dirpath[PATH_MAX];
 	/*
 	 * install a non default variable with this daemon version
 	 */
@@ -3279,7 +3280,7 @@ void readconfig(const char *config_file)
 		&& check_netinfo && !(config_netinfo = get_netinfo_config())
 #endif /* HAVE_NETINFO_NI_H */
 		) {
-		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", config_file);
+		msyslog(LOG_INFO, "readconfig: Couldn't open <%s>: %m", config_file);
 		io_open_sockets();
 
 		return;
@@ -3292,7 +3293,15 @@ void readconfig(const char *config_file)
 #ifdef DEBUG
 	yydebug = !!(debug >= 5);
 #endif
+
+	/* parse the plain config file if it exists */
 	yyparse();
+
+	/* parse configs in parallel subdirectory if that exists */
+	reparent(dirpath, sizeof(dirpath), config_file, CONFIG_DIR);
+	if (is_directory(dirpath) && lex_push_file(dirpath))
+	    yyparse();
+
 	lex_drop_stack();
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
