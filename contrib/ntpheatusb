@@ -91,8 +91,7 @@ Discrete PID control
     def __repr__(self):
         return ("D_value=%s, I_value=%s" % (self.D_value, self.I_value))
 
-
-    def setPoint(self,set_point):
+    def setPoint(self, set_point):
             """
             Initilize the setpoint of PID
             """
@@ -131,7 +130,8 @@ parser.add_argument('-p', '--pid',
 parser.add_argument('-s', '--step',
                     action="store_true",
                     dest='step',
-                    help="Step up 1C every 2 hours for 20 hours, then back down.")
+                    help="Step up 1C every 2 hours for 20 hours, "
+                         "then back down.")
 parser.add_argument('-t', '--temp',
                     default=[45.0],
                     dest='target_temp',
