@@ -26,9 +26,9 @@
 #endif
 
 /*
- * Defines used by the leapseconds stuff
+ * Defines used by file logging
  */
-#define MJD_1900		15020	/* MJD for 1 Jan 1900 */
+#define MJD_1970        40587           /* MJD for 1 Jan 1970 */
 
 /*
  * This contains odds and ends, including the hourly stats, various
@@ -202,9 +202,6 @@ write_stats(void)
 }
 
 
-/*
- * stats_config - configure the stats operation
- */
 static bool drift_read(const char *drift_file, double *drift)
 {
 	FILE *fp;
@@ -222,6 +219,9 @@ static bool drift_read(const char *drift_file, double *drift)
 	return true;
 }
 
+/*
+ * stats_config - configure the stats operation
+ */
 void
 stats_config(
 	int item,
@@ -347,6 +347,26 @@ stats_config(
 	}
 }
 
+/* timespec_to_MJDtime
+ */
+
+char *
+timespec_to_MJDtime(const struct timespec *time)
+{
+	char *buf;
+	u_long	day, sec, msec;
+
+	LIB_GETBUF(buf);
+
+	day = time->tv_sec / 86400 + MJD_1970;
+	sec = time->tv_sec % 86400;
+	msec = time->tv_nsec/1000000;  /* nano seconds to milliseconds */
+	snprintf(buf, LIB_BUFLENGTH, "%lu %lu.%03ld", day, sec, msec);
+
+	return buf;
+}
+
+
 /*
  * record_peer_stats - write peer statistics to file
  *
@@ -366,20 +386,18 @@ record_peer_stats(
 	int	status
 	)
 {
-	l_fp	now;
-	u_long	day;
+	struct timespec now;
 
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&peerstats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&peerstats, now.tv_sec);
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
-		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
-		    ulfptoa(now, 3), socktoa(&peer->srcadr), status, peer->offset,
+		    "%s %s %x %.9f %.9f %.9f %.9f\n",
+		    timespec_to_MJDtime(&now),
+		    socktoa(&peer->srcadr), status, peer->offset,
 		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
@@ -417,19 +435,17 @@ record_loop_stats(
 	int spoll
 	)
 {
-	l_fp	now;
-	u_long	day;
+	struct timespec	now;
 
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&loopstats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&loopstats, now.tv_sec);
 	if (loopstats.fp != NULL) {
-		fprintf(loopstats.fp, "%lu %s %.9f %.6f %.9f %.6f %d\n",
-		    day, ulfptoa(now, 3), offset, freq * US_PER_S, jitter,
+		fprintf(loopstats.fp, "%s %.9f %.6f %.9f %.6f %d\n",
+		    timespec_to_MJDtime(&now),
+		    offset, freq * US_PER_S, jitter,
 		    wander * US_PER_S, spoll);
 		fflush(loopstats.fp);
 	}
@@ -451,19 +467,16 @@ record_clock_stats(
 	const char *text	/* timecode string */
 	)
 {
-	l_fp	now;
-	u_long	day;
+	struct timespec	now;
 
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&clockstats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&clockstats, now.tv_sec);
 	if (clockstats.fp != NULL) {
-		fprintf(clockstats.fp, "%lu %s %s %s\n", day,
-		    ulfptoa(now, 3), peerlabel(peer), text);
+		fprintf(clockstats.fp, "%s %s %s\n",
+		    timespec_to_MJDtime(&now), peerlabel(peer), text);
 		fflush(clockstats.fp);
 	}
 }
@@ -523,19 +536,16 @@ record_raw_stats(
 	u_int	outcount
 	)
 {
-	l_fp	now;
-	u_long	day;
+	struct timespec	now;
 
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&rawstats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&rawstats, now.tv_sec);
 	if (rawstats.fp != NULL) {
-		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
-		    day, ulfptoa(now, 3),
+		fprintf(rawstats.fp, "%s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
+		    timespec_to_MJDtime(&now),
 		    socktoa(srcadr), dstadr ?  socktoa(dstadr) : "-",
 		    ulfptoa(*t1, 9), ulfptoa(*t2, 9),
 		    ulfptoa(*t3, 9), ulfptoa(*t4, 9),
@@ -568,20 +578,17 @@ record_raw_stats(
 void
 record_sys_stats(void)
 {
-	l_fp	now;
-	u_long	day;
+	struct timespec	now;
 
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&sysstats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&sysstats, now.tv_sec);
 	if (sysstats.fp != NULL) {
 		fprintf(sysstats.fp,
-		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		    day, ulfptoa(now, 3), current_time - sys_stattime,
+		    "%s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    timespec_to_MJDtime(&now), current_time - sys_stattime,
 		    sys_received, sys_processed, sys_newversion,
 		    sys_oldversion, sys_restricted, sys_badlength,
 		    sys_badauth, sys_declined, sys_limitrejected,
@@ -603,8 +610,7 @@ record_sys_stats(void)
 void record_use_stats(void)
 {
 #ifdef HAVE_GETRUSAGE
-	l_fp	now;
-	u_long	day;
+	struct timespec	now;
 	struct rusage usage;
 	static struct rusage oldusage;
 	/* Descriptions in NetBSD and FreeBSD are better than Linux
@@ -613,10 +619,8 @@ void record_use_stats(void)
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&usestats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&usestats, now.tv_sec);
 	if (usestats.fp != NULL) {
 		double utime, stime;
 		getrusage(RUSAGE_SELF, &usage);
@@ -627,8 +631,8 @@ void record_use_stats(void)
 		stime /= 1E6;
 		stime += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
-		    "%lu %s %lu %.3f %.3f %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		    day, ulfptoa(now, 3), current_time - use_stattime,
+		    "%s %lu %.3f %.3f %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    timespec_to_MJDtime(&now), current_time - use_stattime,
 		    utime, stime,
 		    usage.ru_minflt -   oldusage.ru_minflt,
 		    usage.ru_majflt -   oldusage.ru_majflt,
@@ -660,19 +664,16 @@ record_proto_stats(
 	char	*str		/* text string */
 	)
 {
-	l_fp	now;
-	u_long	day;
+	struct timespec	now;
 
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&protostats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&protostats, now.tv_sec);
 	if (protostats.fp != NULL) {
-		fprintf(protostats.fp, "%lu %s %s\n", day,
-		    ulfptoa(now, 3), str);
+		fprintf(protostats.fp, "%s %s\n",
+		    timespec_to_MJDtime(&now), str);
 		fflush(protostats.fp);
 	}
 }
@@ -692,19 +693,16 @@ record_timing_stats(
 	)
 {
 	static unsigned int flshcnt;
-	l_fp	now;
-	u_long	day;
+	struct timespec	now;
 
 	if (!stats_control)
 		return;
 
-	get_systime(&now);
-	filegen_setup(&timingstats, lfpuint(now));
-	day = lfpuint(now) / 86400 + MJD_1900;
-	setlfpuint(now, lfpuint(now) % 86400);
+	clock_gettime(CLOCK_REALTIME, &now);
+	filegen_setup(&timingstats, now.tv_sec);
 	if (timingstats.fp != NULL) {
-		fprintf(timingstats.fp, "%lu %s %s\n", day, lfptoa(now,
-		    3), text);
+		fprintf(timingstats.fp, "%s %s\n",
+		    timespec_to_MJDtime(&now), text);
 		if (++flshcnt % 100 == 0)
 			fflush(timingstats.fp);
 	}

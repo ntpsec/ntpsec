@@ -39,7 +39,7 @@
  */
 #define SUFFIX_SEP '.'
 
-static	void	filegen_open	(FILEGEN *, uint32_t, const time_t*);
+static	void	filegen_open	(FILEGEN *, const time_t);
 static	int	valid_fileref	(const char *, const char *);
 static	void	filegen_init	(const char *, const char *, FILEGEN *);
 #ifdef	DEBUG
@@ -91,8 +91,7 @@ filegen_uninit(
 static void
 filegen_open(
 	FILEGEN *	gen,
-	uint32_t		stamp,
-	const time_t *	pivot
+	const time_t 	stamp
 	)
 {
 	char *savename;	/* temp store for name collision handling */
@@ -101,8 +100,7 @@ filegen_open(
 	char *suffix;	/* where to print suffix extension */
 	u_int len, suflen;
 	FILE *fp;
-	struct calendar cal;
-	struct isodate	iso;
+	struct tm tm;
 
 	/* get basic filename in buffer, leave room for extensions */
 	len = strlen(gen->dir) + strlen(gen->fname) + 65;
@@ -146,44 +144,42 @@ filegen_open(
 		 * would assume it to be easier for humans to interpret
 		 * dates in a format they are used to in everyday life.
 		 */
-		ntpcal_ntp_to_date(&cal, stamp, pivot);
+		gmtime_r(&stamp, &tm);
 		snprintf(suffix, suflen, "%c%04d%02d%02d",
-			 SUFFIX_SEP, cal.year, cal.month, cal.monthday);
-		cal.hour = cal.minute = cal.second = 0;
-		gen->id_lo = ntpcal_date_to_ntp(&cal); 
-		gen->id_hi = (uint32_t)(gen->id_lo + SECSPERDAY);
+			 SUFFIX_SEP, tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday);
+		gen->id_lo = stamp - (stamp % SECSPERDAY);
+		gen->id_hi = gen->id_lo + SECSPERDAY;
 		break;
 
 	case FILEGEN_WEEK:
-		isocal_ntp_to_date(&iso, stamp, pivot);
+		/* week number is day-of-year mod 7 */
+		gmtime_r(&stamp, &tm);
 		snprintf(suffix, suflen, "%c%04dw%02d",
-			 SUFFIX_SEP, iso.year, iso.week);
-		iso.hour = iso.minute = iso.second = 0;
-		iso.weekday = 1;
-		gen->id_lo = isocal_date_to_ntp(&iso);
-		gen->id_hi = (uint32_t)(gen->id_lo + 7 * SECSPERDAY);
+			 SUFFIX_SEP, tm.tm_year+1900, tm.tm_yday % 7);
+		/* See comment below at MONTH */
+		gen->id_lo = stamp - (stamp % SECSPERDAY);
+		gen->id_hi = gen->id_lo + SECSPERDAY;
 		break;
 
 	case FILEGEN_MONTH:
-		ntpcal_ntp_to_date(&cal, stamp, pivot);
+		gmtime_r(&stamp, &tm);
 		snprintf(suffix, suflen, "%c%04d%02d",
-			 SUFFIX_SEP, cal.year, cal.month);
-		cal.hour = cal.minute = cal.second = 0;
-		cal.monthday = 1;
-		gen->id_lo = ntpcal_date_to_ntp(&cal); 
-		cal.month++;
-		gen->id_hi = ntpcal_date_to_ntp(&cal); 
+			 SUFFIX_SEP, tm.tm_year+1900, tm.tm_mon+1);
+		/* If we had a mktime that didn't use the local time zone
+		 * we could setup id_lo and id_hi to bracket the month.
+		 * This will have to recalculate things each day.
+		 */
+		gen->id_lo = stamp - (stamp % SECSPERDAY);
+		gen->id_hi = gen->id_lo + SECSPERDAY;
 		break;
 
 	case FILEGEN_YEAR:
-		ntpcal_ntp_to_date(&cal, stamp, pivot);
+		gmtime_r(&stamp, &tm);
 		snprintf(suffix, suflen, "%c%04d",
-			 SUFFIX_SEP, cal.year);
-		cal.hour = cal.minute = cal.second = 0;
-		cal.month = cal.monthday = 1;
-		gen->id_lo = ntpcal_date_to_ntp(&cal); 
-		cal.year++;
-		gen->id_hi = ntpcal_date_to_ntp(&cal); 
+			 SUFFIX_SEP, tm.tm_year+1900);
+		/* See comment above at MONTH */
+		gen->id_lo = stamp - (stamp % SECSPERDAY);
+		gen->id_hi = gen->id_lo + SECSPERDAY;
 		break;
 
 	case FILEGEN_AGE:
@@ -269,8 +265,8 @@ filegen_open(
 	/*
 	 * now, try to open new file generation...
 	 */
-	DPRINTF(4, ("opening filegen (type=%d/stamp=%u) \"%s\"\n",
-		    gen->type, stamp, fullname));
+	DPRINTF(4, ("opening filegen (type=%d/stamp=%lld) \"%s\"\n",
+		    gen->type, (long long)stamp, fullname));
 
 	fp = fopen(fullname, "a");
   
@@ -320,19 +316,15 @@ filegen_open(
 /*
  * this function sets up gen->fp to point to the correct
  * generation of the file for the time specified by 'now'
- *
- * 'now' usually is interpreted as second part of a l_fp as is in the cal...
- * library routines
  */
 
 void
 filegen_setup(
-	FILEGEN *	gen,
-	uint32_t		now
+	FILEGEN * gen,
+	time_t now
 	)
 {
 	bool	current;
-	time_t	pivot;
 
 	if (!(gen->flag & FGEN_FLAG_ENABLED)) {
 		if (NULL != gen->fp) {
@@ -354,8 +346,8 @@ filegen_setup(
 		break;
 
 	case FILEGEN_AGE:
-		current = (gen->id_lo <= current_time) &&
-			  (gen->id_hi > current_time);
+		current = (gen->id_lo <= (long)current_time) &&
+			  (gen->id_hi > (long)current_time);
 		break;
 
 	case FILEGEN_DAY:
@@ -371,9 +363,8 @@ filegen_setup(
 	 * reopen new file generation file on change of generation id
 	 */
 	if (NULL == gen->fp || !current) {
-		DPRINTF(1, ("filegen  %0x %u\n", gen->type, now));
-		pivot = time(NULL);
-		filegen_open(gen, now, &pivot);
+		DPRINTF(1, ("filegen  %0x %lld\n", gen->type, (long long)now));
+		filegen_open(gen, now);
 	}
 }
 
@@ -391,7 +382,6 @@ filegen_config(
 	)
 {
 	bool file_existed;
-	l_fp now;
 
 
 	/*
@@ -444,8 +434,7 @@ filegen_config(
 	 * otherwise the new settings will be used anyway at the next open
 	 */
 	if (file_existed) {
-		get_systime(&now);
-		filegen_setup(gen, lfpuint(now));
+		filegen_setup(gen, time(NULL));
 	}
 }
 
