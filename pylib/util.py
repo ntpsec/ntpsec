@@ -93,15 +93,17 @@ def f8unit(f, startingunit, strip=False):
     try:
         unit = UNITS[startingunit + unitsmoved]
     except IndexError:  # out of defined units revert to original, very ugly
-        rendered = ("%+6f" % oldf) + UNITS[startingunit]  # but few options
-    if abs(f) >= 100.0:  # +xxx.x
-        rendered = ("%+6.1f" % f) + unit
+        rendered = ("%6f" % oldf) + UNITS[startingunit]  # but few options
+    if abs(f).is_integer():
+        rendered = ("%6d" % f) + unit
+    elif abs(f) >= 100.0:  # +xxx.x
+        rendered = ("%6.1f" % f) + unit
     elif abs(f) >= 10.0:  # +xx.xx
-        rendered = ("%+6.2f" % f) + unit
+        rendered = ("%6.2f" % f) + unit
     elif abs(f) >= 1.0:  # +x.xxx
-        rendered = ("%+6.3f" % f) + unit
-    else:  # should not be possible
-        rendered = ("%8f" % oldf)
+        rendered = ("%6.3f" % f) + unit
+    else:  # zero, if it weren't then scaleforunit would have moved it up
+        rendered = ("%6.3f" % oldf) + unit
     if strip:
         return rendered.lstrip().rstrip()
     return rendered
