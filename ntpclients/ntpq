@@ -241,7 +241,7 @@ usage: help [ command ]
 """)
 
     # Unexposed helper tables and functions begin here
-    
+
     def __dogetassoc(self):
         try:
             self.peers = self.session.readstat()
@@ -437,7 +437,7 @@ usage: help [ command ]
         return True
 
     # Unexposed helper tables and functions end here
-    
+
     def do_units(self, _unused):
         "toggle unit display"
         self.showunits = not self.showunits

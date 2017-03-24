@@ -29,6 +29,14 @@ OLD_CTL_PST_SEL_SELCAND = 1
 OLD_CTL_PST_SEL_SYNCCAND = 2
 OLD_CTL_PST_SEL_SYSPEER = 3
 
+# Units for formatting
+UNIT_NS = 0
+UNIT_US = 1
+UNIT_MS = 2
+UNIT_S = 3
+UNIT_KS = 4
+UNITS = ["ns", "us", "ms", "s ", "ks"]
+
 
 def stdversion():
     return "%s-%s+%s %s" % (ntp.version.VCS_BASENAME,
@@ -64,33 +72,39 @@ def portsplit(hostname):
     return (hostname, portsuffix)
 
 
-def i8unit(f):
-    "Integer formatting to fit in 8 characters with sign and unit, expects ms"
-    fmt = "%+6i" # have 5 digits to work with, so up to 99,999 of a unit
-    fail = "%+8d"
-    if f >= 0:
-        if f < 0.100: # <100k nanoseconds
-            return (fmt % (f * 1000000.0)) + "ns"
-        elif f < 100.0: # <100k microseconds
-            return (fmt % (f * 1000.0)) + "us"
-        elif f < 100000.0: # <100k miliseconds, native unit
-            return (fmt % f) + "ms"
-        elif f < 100000000.0: # <100k seconds
-            return (fmt % (f / 1000.0)) + "s "
-        elif f < 100000000000.: # <100k kiloseconds
-            return (fmt % (f / 1000000.0)) + "ks"
-        return fail % f
-    if f > -0.100: # >-100k nanoseconds
-        return (fmt % (f * 1000000.0)) + "ns"
-    elif f > -100.0: # >-100k microseconds
-        return (fmt % (f * 1000.0)) + "us"
-    elif f > -100000.0: # >-100k miliseconds, native unit
-        return (fmt % f) + "ms"
-    elif f > -100000000.0: # >-100k seconds
-        return (fmt % (f / 1000.0)) + "s "
-    elif f > -100000000000.0: # >-100k kiloseconds
-        return (fmt % (1 / 1000000.0)) + "ks"
-    return fail % f
+def scaleforunit(f):
+    "Scales a number by units to keep it in the range 0.000-999.9"
+    if f == 0.0:  # guard against looping forever
+        return (f, 0)
+    unitsmoved = 0
+    while abs(f) < 1.0:
+        f *= 1000.0  # shift up by one unit
+        unitsmoved += 1
+    while abs(f) >= 1000.0:
+        f /= 1000.0  # shift down by one unit
+        unitsmoved -= 1
+    return (f, unitsmoved)
+
+
+def f8unit(f, startingunit, strip=False):
+    "Floating point formatting to show sign and unit in 8 characters"
+    oldf = f
+    f, unitsmoved = scaleforunit(f)
+    try:
+        unit = UNITS[startingunit + unitsmoved]
+    except IndexError:  # out of defined units revert to original, very ugly
+        rendered = ("%+6f" % oldf) + UNITS[startingunit]  # but few options
+    if abs(f) >= 100.0:  # +xxx.x
+        rendered = ("%+6.1f" % f) + unit
+    elif abs(f) >= 10.0:  # +xx.xx
+        rendered = ("%+6.2f" % f) + unit
+    elif abs(f) >= 1.0:  # +x.xxx
+        rendered = ("%+6.3f" % f) + unit
+    else:  # should not be possible
+        rendered = ("%8f" % oldf)
+    if strip:
+        return rendered.lstrip().rstrip()
+    return rendered
 
 
 def f8dot4(f):
@@ -560,17 +574,29 @@ class PeerSummary:
                     else int(now - ntp.ntpc.lfptofloat(last_sync))),
                    PeerSummary.prettyinterval(poll_sec), reach))
             if saw6:
-                renderer = (i8unit if self.showunits else f8dot4)
-                line += (
-                    " %s %s %s" %
-                    (renderer(estdelay), renderer(estoffset), renderer(jd)))
+                if self.showunits:
+                    line += (
+                        " %s %s %s" %
+                        (f8unit(estdelay, UNIT_MS),
+                         f8unit(estoffset, UNIT_MS),
+                         f8unit(jd, UNIT_MS)))
+                else:
+                    line += (
+                        " %s %s %s" %
+                        (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
             else:
                 # old servers only have 3 digits of fraction
                 # don't print a fake 4th digit
-                renderer = (i8unit if self.showunits else f8dot3)
-                line += (
-                    " %s %s %s" %
-                    (renderer(estdelay), renderer(estoffset), renderer(jd)))
+                if self.showunits:
+                    line += (
+                        " %s %s %s" %
+                        (f8unit(estdelay, UNIT_MS),
+                         f8unit(estoffset, UNIT_MS),
+                         f8unit(jd, UNIT_MS)))
+                else:
+                    line += (
+                        " %s %s %s" %
+                        (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
             line += "\n"
             return line
         except TypeError:
