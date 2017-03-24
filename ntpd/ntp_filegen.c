@@ -134,8 +134,8 @@ filegen_open(
 	case FILEGEN_PID:
 		gen->id_lo = getpid();
 		gen->id_hi = 0;
-		snprintf(suffix, suflen, "%c#%ld",
-			 SUFFIX_SEP, gen->id_lo);
+		snprintf(suffix, suflen, "%c#%lld",
+			 SUFFIX_SEP, (long long)gen->id_lo);
 		break;
 
 	case FILEGEN_DAY:
@@ -185,8 +185,8 @@ filegen_open(
 	case FILEGEN_AGE:
 		gen->id_lo = current_time - (current_time % SECSPERDAY);
 		gen->id_hi = gen->id_lo + SECSPERDAY;
-		snprintf(suffix, suflen, "%ca%08ld",
-			 SUFFIX_SEP, gen->id_lo);
+		snprintf(suffix, suflen, "%ca%08lld",
+			 SUFFIX_SEP, (long long)gen->id_lo);
 	}
   
 	/* check possible truncation */
