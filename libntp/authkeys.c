@@ -8,7 +8,6 @@
 #include <string.h>
 
 #include "ntp.h"
-#include "ntp_fp.h"
 #include "ntpd.h"
 #include "ntp_lists.h"
 #include "ntp_malloc.h"

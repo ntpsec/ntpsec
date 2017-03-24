@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"

@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <syslog.h>
 
-#include "ntp_fp.h"
 #include "ntp_net.h"
 #include "ntp_stdlib.h"
 #include "ntp.h"
