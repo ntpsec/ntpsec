@@ -79,10 +79,10 @@ def scaleforunit(f):
     unitsmoved = 0
     while abs(f) < 1.0:
         f *= 1000.0  # shift up by one unit
-        unitsmoved += 1
+        unitsmoved -= 1
     while abs(f) >= 1000.0:
         f /= 1000.0  # shift down by one unit
-        unitsmoved -= 1
+        unitsmoved += 1
     return (f, unitsmoved)
 
 
