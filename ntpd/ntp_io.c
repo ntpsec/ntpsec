@@ -302,8 +302,8 @@ maintain_activefds(
  * collect timing information for various processing
  * paths. currently we only pass them on to the file
  * for later processing. this could also do histogram
- * based analysis in other to reduce the load (and skew)
- * dur to the file output
+ * based analysis in order to reduce the load (and skew)
+ * due to the file output
  */
 void
 collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp dts)
