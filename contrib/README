@@ -3,12 +3,13 @@ conveniences, examples or rudimentary starting points for other development
 efforts.
 
 ntpheat is a program to exercise a CPU until the CPU reachs a certain
-temperature.  The idea if to get the temperature around the system
+temperature.  The idea is to get the temperature around the system
 oscillator to be near the zero TC point.  Tested on RasPi wrapped
 in bubble wrap.  Formerly known as makeheat.
 
-ntpheatusb is a program to control an external USB relayto maintain
-a stable temperature.  See the blog post "More Heat" for details.
+ntpheatusb is a program to control an external USB relay to maintain
+a stable temperature.  See the blog post "More Heat" for details:
+    https://blog.ntpsec.org/2017/03/21/More_Heat.html
 
 The next 4 tools cpu-temp-log, smartctl-temp-log, temper-temp-log and
 zone-temp-log have been replaced by ntplogtemp.  Those programs will stay

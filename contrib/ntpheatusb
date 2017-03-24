@@ -23,6 +23,8 @@
 # Try the simple P controller (the default) before trying the PID controller.
 # The PID controller may take some fiddling with the constants to get
 # it working better than the simple P controller.
+#
+# More info on the blog post: https://blog.ntpsec.org/2017/03/21/More_Heat.html
 
 import argparse
 import subprocess
