@@ -306,7 +306,7 @@ maintain_activefds(
  * dur to the file output
  */
 void
-collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
+collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp dts)
 {
 	char buf[256];
 
@@ -2574,11 +2574,11 @@ input_handler(
 	 * gob of file descriptors.  Log it.
 	 */
 	ts_e -= ts;
-	collect_timing(NULL, "input handler", 1, &ts_e);
+	collect_timing(NULL, "input handler", 1, ts_e);
 	if (debug > 3)
 		msyslog(LOG_DEBUG,
 			"input_handler: Processed a gob of fd's in %s msec",
-			lfptoms(&ts_e, 6));
+			lfptoms(ts_e, 6));
 #endif /* ENABLE_DEBUG_TIMING */
 	/* We're done... */
 	return;

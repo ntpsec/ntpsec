@@ -202,10 +202,9 @@ fetch_packetstamp(
 #ifdef ENABLE_DEBUG_TIMING
 			dts = ts;
 			dts -= nts;
-			collect_timing(rb, "input processing delay", 1,
-				       &dts);
+			collect_timing(rb, "input processing delay", 1, dts);
 			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",
-				    lfptoa(&dts, 9)));
+				    lfptoa(dts, 9)));
 #endif	/* ENABLE_DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;

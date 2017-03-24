@@ -115,8 +115,8 @@ extern  SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
 extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, int);
-#ifdef DEBUG
-extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
+#ifdef ENABLE_DEBUG_TIMING
+extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp);
 #endif
 #define		latoa(pif)	localaddrtoa(pif)
 extern const char * localaddrtoa(endpt *);
@@ -231,7 +231,7 @@ extern	int	mprintf_clock_stats(struct peer *, const char *, ...)
 extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int ppoll, int precision, double root_delay, double root_dispersion, uint32_t refid, u_int outcount);
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 extern	void	record_crypto_stats (sockaddr_u *, const char *);
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG_TIMING
 extern	void	record_timing_stats (const char *);
 #endif
 
