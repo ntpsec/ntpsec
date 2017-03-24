@@ -88,7 +88,7 @@ Neither is ideal, easy pickings for someone to code on.
   in favor of binding to wildcard addresses.  Information on how to do this
   us here: https://blog.powerdns.com/2012/10/08/on-binding-datagram-udp-sockets-to-the-any-addresses/
 
-* We could open only V6 sockets and allow them to handle mapped PV4 addresses,
+* We could open only IPv6 sockets and allow them to handle mapped IPv4 addresses,
   as described at http://man7.org/linux/man-pages/man7/ipv6.7.html
 
 * A clock driver or auxiliary daemon for PTP.

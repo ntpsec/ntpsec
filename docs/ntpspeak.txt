@@ -35,7 +35,7 @@
   but probably related in some way to cesium atomic clocks.
 
 [[cycle]] cycle::
-  An <<era>>; code comments sometimes use tjis term to emphasize that
+  An <<era>>; code comments sometimes use this term to emphasize that
   modular arithmetic is going on.
 
 [[drift]] drift::
