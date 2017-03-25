@@ -64,6 +64,7 @@ def build(ctx):
     )
 
     ntpd_source = [
+#        "ntpd/filegen.c",
         "ntpd/leapsec.c",
         "ntpd/restrict.c",
     ] + common_source
