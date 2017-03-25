@@ -49,7 +49,8 @@ static struct FILE_INFO * lex_stack = NULL;
 /* CONSTANTS AND MACROS
  * --------------------
  */
-#define CONF_ENABLE(s)	(strcmp(s + strlen(s) - 5, ".ntpd") == 0)
+#define ENDSWITH(str, suff) (strcmp(str + strlen(str) - strlen(suff), suff)==0) 
+#define CONF_ENABLE(s)	(ENDSWITH(s, ".ntpd") || ENDSWITH(s, ".refclockd"))
 
 
 /* SCANNER GLOBAL VARIABLES 
