@@ -444,9 +444,6 @@ int main(int argc, char **argv) {
                comment="socklen type")
     ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
 
-    ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False,
-               comment="Multicast loop type")   # XXX: check for mcast type
-
     # These are helpful and don't break Linux or *BSD
     ctx.define("OPEN_BCAST_SOCKET", 1,
                comment="Whether to open a broadcast socket")
