@@ -20,16 +20,6 @@ struct calendar {
 	uint8_t  weekday;	/* 0..7, 0=Sunday */
 };
 
-/* ISO week calendar date */
-struct isodate {
-	uint16_t year;		/* year (A.D.) */
-	uint8_t	 week;		/* 1..53, week in year */
-	uint8_t	 weekday;	/* 1..7, 1=Monday */
-	uint8_t	 hour;		/* hour of day, midnight = 0 */
-	uint8_t	 minute;	/* minute of hour */
-	uint8_t	 second;	/* second of minute */
-};
-
 /* general split representation */
 typedef struct {
 	int32_t hi;

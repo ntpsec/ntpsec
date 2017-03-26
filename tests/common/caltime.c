@@ -30,10 +30,3 @@ const char *CalendarToString(const struct calendar *cal) {
 	return str;
 }
 
-
-const char *CalendarToStringISO(const struct isodate *iso) {
-	char *str = malloc(255);
-	snprintf(str, 255, "%hu-%u-%u %u:%u:%u\n", iso->year, (u_int)iso->week, (u_int)iso->weekday, (u_int)iso->hour, (u_int)iso->minute, (u_int)iso->second);
-	return str;
-}
-

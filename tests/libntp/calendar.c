@@ -45,35 +45,12 @@ bool IsEqualCA(const struct calendar *expected, const struct calendar *actual) {
 }
 
 
-bool IsEqualISO(const struct isodate *expected, const struct isodate *actual) {
-	if (expected->year == actual->year &&
-	    expected->week == actual->week &&
-	    expected->weekday == actual->weekday &&
-	    expected->hour == actual->hour &&
-	    expected->minute == actual->minute &&
-	    expected->second == actual->second) {
-		return true;
-	} else {
-		/* coverity[leaked_storage] */
-		printf("Expected: %s but was %s\n", CalendarToStringISO(expected), CalendarToStringISO(actual));
-		return false;
-	}
-}
-
-
 const char *DateToString(const struct calendar *cal) {
 	char *str = malloc(255);
 	snprintf(str, 255, "%hu-%u-%u(%u)\n", cal->year, (u_int)cal->month, (u_int)cal->monthday, cal->yearday);
 	return str;
 }
 
-
-const char *DateToStringISO(const struct isodate *iso) {
-	char *str = malloc(255);
-	snprintf(str, 255, "%hu-%u-%u\n", iso->year, (u_int)iso->week, (u_int)iso->weekday);
-	return str;
-
-}
 
 bool IsEqualDate(const struct calendar *expected, const struct calendar *actual) {
 	if (expected->year == actual->year &&
@@ -84,19 +61,6 @@ bool IsEqualDate(const struct calendar *expected, const struct calendar *actual)
 	} else {
 		/* coverity[leaked_storage] */
 		printf("Expected: %s but was %s\n", DateToString(expected), DateToString(actual));
-		return false;
-	}
-}
-
-
-bool IsEqualDateISO(const struct isodate *expected, const struct isodate *actual) {
-	if (expected->year == actual->year &&
-	    expected->week == actual->week &&
-	    expected->weekday == actual->weekday) {
-		return true;
-	} else {
-		/* coverity[leaked_storage] */
-		printf("Expected: %s but was %s\n", DateToStringISO(expected), DateToStringISO(actual));
 		return false;
 	}
 }
