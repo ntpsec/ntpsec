@@ -90,22 +90,31 @@ def f8unit(f, startingunit, strip=False):
     "Floating point formatting to show sign and unit in 8 characters"
     oldf = f
     f, unitsmoved = scaleforunit(f)
-    try:
-        unit = UNITS[startingunit + unitsmoved]
-    except IndexError:  # out of defined units revert to original, very ugly
-        rendered = ("%6f" % oldf) + UNITS[startingunit]  # but few options
-    if abs(f).is_integer():
-        rendered = ("%6d" % f) + unit
-    elif abs(f) >= 100.0:  # +xxx.x
-        rendered = ("%6.1f" % f) + unit
-    elif abs(f) >= 10.0:  # +xx.xx
-        rendered = ("%6.2f" % f) + unit
-    elif abs(f) >= 1.0:  # +x.xxx
-        rendered = ("%6.3f" % f) + unit
-    else:  # zero, if it weren't then scaleforunit would have moved it up
-        rendered = ("%6.3f" % oldf) + unit
+    unitget = startingunit + unitsmoved
+    if (0 <= unitget < len(UNITS)):
+        unit = UNITS[unitget]
+        if abs(f).is_integer():
+            rendered = ("%6d" % f) + unit
+        elif abs(f) >= 100.0:  # +xxx.x
+            rendered = ("%6.1f" % f) + unit
+        elif abs(f) >= 10.0:  # +xx.xx
+            rendered = ("%6.2f" % f) + unit
+        elif abs(f) >= 1.0:  # +x.xxx
+            rendered = ("%6.3f" % f) + unit
+        else:  # zero, if it weren't then scaleforunit would have moved it up
+            rendered = ("%6d" % oldf) + unit
+    else:  # Out of units so revert to the original. Ugly but there are very
+        rendered = repr(oldf) + UNITS[startingunit]  # few options here.
     if strip:
-        return rendered.lstrip().rstrip()
+        return rendered.strip()
+    return rendered
+
+
+def ppmformathack(f, strip=False):
+    "Format a float as ppm, a hack until the Great Unit Hunt is ended."
+    rendered = ("%5f" % f) + "ppm"
+    if strip:
+        rendered = rendered.strip()
     return rendered
 
 
@@ -335,11 +344,17 @@ def cook(variables, showunits=False):
                       "clk_jitter", "leapsmearoffset", "authdelay",
                       "koffset", "kmaxerr", "kesterr", "kprecis",
                       "kppsjitter", "fuzz", "clk_wander_threshold",
-                      "tick"):
+                      "tick", "in", "out", "bias", "delay", "jitter",
+                      "dispersion", "fudgetime1", "fudgetime2"):
+            #  Note that this is *not* complete, there are definitely
+            #   missing variables here, and other units (ppm).
+            #  Completion cannot occur until all units are tracked down.
             if showunits:
                 item += f8unit(value, UNIT_MS, True)
             else:
                 item += repr(value)
+        elif name in ("frequency", "clk_wander", "clk_wander_threshold"):
+            item += ppmformathack(value, True)
         else:
             item += repr(value)
         item += ", "
