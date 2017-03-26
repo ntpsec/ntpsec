@@ -285,7 +285,7 @@ class PeerStatusWord:
                 % self.__dict__)
 
 
-def cook(variables):
+def cook(variables, showunits=False):
     "Cooked-mode variable display."
     width = ntp.util.termsize().width - 2
     text = ""
@@ -331,6 +331,15 @@ def cook(variables):
                     if (1 << i) & value:
                         item += tstflagnames[i] + " "
                 item = item[:-1]
+        elif name in ("rootdelay", "rootdisp", "offset", "sys_jitter",
+                      "clk_jitter", "leapsmearoffset", "authdelay",
+                      "koffset", "kmaxerr", "kesterr", "kprecis",
+                      "kppsjitter", "fuzz", "clk_wander_threshold",
+                      "tick"):
+            if showunits:
+                item += f8unit(value, UNIT_MS, True)
+            else:
+                item += repr(value)
         else:
             item += repr(value)
         item += ", "
