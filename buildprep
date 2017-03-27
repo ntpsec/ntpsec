@@ -14,7 +14,27 @@ cat <<EOF
 #
 EOF
 
-if [ "$1" = "-n" ]
+# Set the defaults
+DRYRUN="no"
+NTPVIZ="no"
+
+# Loop through option flags
+for optflag in "$@"
+do
+	case "$optflag" in
+	 -n)
+		DRYRUN="yes"
+		;;
+	 --ntpviz)
+		NTPVIZ="yes"
+		;;
+	 *)
+		echo "# Unknown argument: $optflag"
+		;;
+	esac
+done
+
+if [ "$DRYRUN" = "yes" ]
 then
     do=echo
     echo "# Run this without -n, as root, for actual installation.\n#"
@@ -161,7 +181,14 @@ ntpviz () {
 # Main sequence
 daemon
 tools
-ntpviz
+
+if [ "$NTPVIZ" = "yes" ]
+then
+	ntpviz
+else
+	echo ""
+	echo "# Skipping ntpviz dependencies [--ntpviz]"
+fi
 
 echo ""
 echo "# Done."
