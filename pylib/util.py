@@ -102,16 +102,17 @@ def f8unit(f, startingunit, strip=False):
     unitget = startingunit + unitsmoved
     if (0 <= unitget < len(UNITS)):
         unit = UNITS[unitget]
-        if abs(f).is_integer():
+        af = abs(f)
+        if af.is_integer():
             rendered = ("%6d" % f) + unit
-        elif abs(f) >= 100.0:  # xxx.xx
+        elif af >= 100.0:  # xxx.xx
             rendered = ("%6.2f" % f) + unit
-        elif abs(f) >= 10.0:  # xx.xxx
+        elif af >= 10.0:  # xx.xxx
             rendered = ("%6.3f" % f) + unit
-        elif abs(f) >= 1.0:  # x.xxxx
+        elif af >= 1.0:  # x.xxxx
             rendered = ("%6.4f" % f) + unit
         else:  # zero, if it weren't then scaleforunit would have moved it up
-            rendered = "0ns"  # This is *simple*, and asking for trouble
+            rendered = "0ns"
     else:  # Out of units so revert to the original. Ugly but there are very
         rendered = repr(oldf) + UNITS[startingunit]  # few options here.
     if strip:
