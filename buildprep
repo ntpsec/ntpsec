@@ -17,6 +17,7 @@ EOF
 # Set the defaults
 DRYRUN="no"
 NTPVIZ="no"
+DOC="no"
 
 # Loop through option flags
 for optflag in "$@"
@@ -27,6 +28,9 @@ do
 		;;
 	 --ntpviz)
 		NTPVIZ="yes"
+		;;
+	 --doc)
+		DOC="yes"
 		;;
 	 *)
 		echo "# Unknown argument: $optflag"
@@ -176,6 +180,24 @@ ntpviz () {
     esac
 }
 
+doc () {
+	# prerequisites to build documentation
+	case $installer in
+	 apt)
+		$install asciidoc
+		;;
+	 emerge)
+		$install app-text/asciidoc
+		;;
+	 yum|dnf)
+		$install asciidoc
+		;;
+	 yast|zypper)
+		$install asciidoc
+		;;
+	esac
+}
+
 # Main sequence
 daemon
 tools
@@ -186,6 +208,14 @@ then
 else
 	echo ""
 	echo "# Skipping ntpviz dependencies [--ntpviz]"
+fi
+
+if [ "$DOC" = "yes" ]
+then
+	doc
+else
+	echo ""
+	echo "# Skipping documentation dependencies [--doc]"
 fi
 
 echo ""
