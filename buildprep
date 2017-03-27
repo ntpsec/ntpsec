@@ -55,7 +55,8 @@ then
     installer=yast
     install="$do $installer --install"
 else
-    installer=unknown
+    echo "# ERROR: Package manager unidentified - Unsupported operating system"
+    exit 1
 fi
 echo "# Your package installer is ${installer}."
 echo ""
