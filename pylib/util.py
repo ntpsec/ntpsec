@@ -104,14 +104,14 @@ def f8unit(f, startingunit, strip=False):
         unit = UNITS[unitget]
         if abs(f).is_integer():
             rendered = ("%6d" % f) + unit
-        elif abs(f) >= 100.0:  # +xxx.x
-            rendered = ("%6.1f" % f) + unit
-        elif abs(f) >= 10.0:  # +xx.xx
+        elif abs(f) >= 100.0:  # xxx.xx
             rendered = ("%6.2f" % f) + unit
-        elif abs(f) >= 1.0:  # +x.xxx
+        elif abs(f) >= 10.0:  # xx.xxx
             rendered = ("%6.3f" % f) + unit
+        elif abs(f) >= 1.0:  # x.xxxx
+            rendered = ("%6.4f" % f) + unit
         else:  # zero, if it weren't then scaleforunit would have moved it up
-            rendered = ("%6d" % oldf) + unit
+            rendered = "0ns"  # This is *simple*, and asking for trouble
     else:  # Out of units so revert to the original. Ugly but there are very
         rendered = repr(oldf) + UNITS[startingunit]  # few options here.
     if strip:
@@ -358,7 +358,10 @@ def cook(variables, showunits=False):
             else:
                 item += repr(value)
         elif name in PPM_VARS:
-            item += ppmformathack(value, True)
+            if showunits:
+                item += ppmformathack(value, True)
+            else:
+                item += repr(value)
         else:
             item += repr(value)
         item += ", "
