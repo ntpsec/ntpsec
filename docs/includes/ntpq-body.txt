@@ -89,8 +89,7 @@ attempt to read interactive format commands from the standard input.
   Force the terminal width.  Only relevant for composition of the
   peers display.
 +-u+, +--units+::
-  Display timing information with units. Only relevant for the
-  composition of the peers display.
+  Display timing information with units.
 
 == Internal Commands ==
 
