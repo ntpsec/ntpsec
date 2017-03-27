@@ -48,7 +48,6 @@ then
     exit 1
 fi
 
-inst=""
 if emerge --version 2>/dev/null
 then
     installer=emerge
