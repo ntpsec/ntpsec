@@ -38,6 +38,15 @@ UNIT_KS = 4
 UNITS = ["ns", "us", "ms", "s ", "ks"]
 
 
+# Variables that have units
+MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
+           "leapsmearoffset", "authdelay", "koffset", "kmaxerr", "kesterr",
+           "kprecis", "kppsjitter", "fuzz", "clk_wander_threshold", "tick",
+           "in", "out", "bias", "delay", "jitter", "dispersion",
+           "fudgetime1", "fudgetime2")
+PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
+
+
 def stdversion():
     return "%s-%s+%s %s" % (ntp.version.VCS_BASENAME,
                             ntp.version.VERSION,
@@ -340,12 +349,7 @@ def cook(variables, showunits=False):
                     if (1 << i) & value:
                         item += tstflagnames[i] + " "
                 item = item[:-1]
-        elif name in ("rootdelay", "rootdisp", "offset", "sys_jitter",
-                      "clk_jitter", "leapsmearoffset", "authdelay",
-                      "koffset", "kmaxerr", "kesterr", "kprecis",
-                      "kppsjitter", "fuzz", "clk_wander_threshold",
-                      "tick", "in", "out", "bias", "delay", "jitter",
-                      "dispersion", "fudgetime1", "fudgetime2"):
+        elif name in MS_VARS:
             #  Note that this is *not* complete, there are definitely
             #   missing variables here, and other units (ppm).
             #  Completion cannot occur until all units are tracked down.
@@ -353,7 +357,7 @@ def cook(variables, showunits=False):
                 item += f8unit(value, UNIT_MS, True)
             else:
                 item += repr(value)
-        elif name in ("frequency", "clk_wander", "clk_wander_threshold"):
+        elif name in PPM_VARS:
             item += ppmformathack(value, True)
         else:
             item += repr(value)
