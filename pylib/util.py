@@ -86,6 +86,17 @@ def portsplit(hostname):
     return (hostname, portsuffix)
 
 
+def filtcooker(data):
+    "Cooks the string of space seperated numbers with units"
+    parts = data.split()
+    cooked = []
+    for part in parts:
+        part = float(part)
+        cooked.append(unitformatter(part, UNITS_SEC, UNIT_MS))
+    rendered = "".join(cooked)
+    return rendered
+
+
 def scaleforunit(f):
     "Scales a number by units to keep it in the range 0.000-999.9"
     if f == 0.0:  # guard against looping forever
@@ -100,9 +111,13 @@ def scaleforunit(f):
     return (f, unitsmoved)
 
 
-def f8unit(f, unitgroup, startingunit, baseunit=None, strip=False):
+def unitformatter(f, unitgroup, startingunit, baseunit=None,
+                  strip=False, width=8):
     "Formatting for unit associated values in 8 characters."
-    padder = (lambda x: (" " * (8 - len(x))) + x)  # For padding to 8 chars
+    if width is not None:  # For padding to n characters
+        padder = (lambda x: (" " * (width - len(x))) + x)
+    else:
+        strip = True
     if baseunit is None:
         baseunit = 0  # Assume that the lowest unit is equal to LSB
     if f == 0.0:  # Zero, don't show decimals, and show that it is zero
@@ -115,8 +130,12 @@ def f8unit(f, unitgroup, startingunit, baseunit=None, strip=False):
     f, unitsmoved = scaleforunit(f)
     unitget = startingunit + unitsmoved
     if (0 <= unitget < len(unitgroup)):
+        # CATCH HERE: width==None, then render at full size
         unit = unitgroup[unitget]
-        displaysize = 8 - len(unit)
+        if width is None:
+            rendered = repr(f) + unit
+            return rendered
+        displaysize = width - len(unit)
         af = abs(f)
         if af.is_integer():
             # No decimal places, so don't show any.
@@ -331,8 +350,14 @@ def cook(variables, showunits=False):
     "Cooked-mode variable display."
     width = ntp.util.termsize().width - 2
     text = ""
+    specials = ("filtdelay", "filtoffset", "filtdisp", "filterror")
+    longestspecial = len(max(specials, key=len))
     for (name, value) in variables.items():
-        item = "%s=" % name
+        if name in specials:  # need special formatting for column alignment
+            formatter = "%" + str(longestspecial) + "s="
+            item = formatter % name
+        else:
+            item = "%s=" % name
         if name in ("reftime", "clock", "org", "rec", "xmt"):
             item += ntp.ntpc.prettydate(value)
         elif name in ("srcadr", "peeradr", "dstadr", "refid"):
@@ -346,8 +371,11 @@ def cook(variables, showunits=False):
             item += ("00", "01", "10", "11")[value]
         elif name == "reach":
             item += "%03lo" % value
-        elif name in("filtdelay", "filtoffset", "filtdisp", "filterror"):
-            item += "\t".join(value.split())
+        elif name in ("filtdelay", "filtoffset", "filtdisp", "filterror"):
+            if showunits:
+                item += filtcooker(value)
+            else:
+                item += "\t".join(value.split())
         elif name == "flash":
             item += "%02x" % value
             if value == 0:
@@ -378,12 +406,14 @@ def cook(variables, showunits=False):
             #   missing variables here.
             #  Completion cannot occur until all units are tracked down.
             if showunits:
-                item += f8unit(value, UNITS_SEC, UNIT_MS, UNIT_NS, True)
+                item += unitformatter(value, UNITS_SEC, UNIT_MS, UNIT_NS,
+                                      True, width=None)
             else:
                 item += repr(value)
         elif name in PPM_VARS:
             if showunits:
-                item += f8unit(value, UNITS_PPX, UNIT_PPM, strip=True)
+                item += unitformatter(value, UNITS_PPX, UNIT_PPM,
+                                      strip=True, width=None)
             else:
                 item += repr(value)
         else:
@@ -634,9 +664,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (f8unit(estdelay, UNITS_SEC, UNIT_MS),
-                         f8unit(estoffset, UNITS_SEC, UNIT_MS),
-                         f8unit(jd, UNITS_SEC, UNIT_MS)))
+                        (unitformatter(estdelay, UNITS_SEC, UNIT_MS),
+                         unitformatter(estoffset, UNITS_SEC, UNIT_MS),
+                         unitformatter(jd, UNITS_SEC, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %
@@ -647,9 +677,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (f8unit(estdelay, UNITS_SEC, UNIT_MS),
-                         f8unit(estoffset, UNITS_SEC, UNIT_MS),
-                         f8unit(jd, UNITS_SEC, UNIT_MS)))
+                        (unitformatter(estdelay, UNITS_SEC, UNIT_MS),
+                         unitformatter(estoffset, UNITS_SEC, UNIT_MS),
+                         unitformatter(jd, UNITS_SEC, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %
