@@ -8,7 +8,7 @@
 #include "ntp_stdlib.h"
 
 static ctrl_c_fn	ctrl_c_hook;
-void sigint_handler(int);
+static void sigint_handler(int);
 
 # ifdef SA_RESTART
 #  define Z_SA_RESTART		SA_RESTART
@@ -52,7 +52,7 @@ signal_no_reset(
 /*
  * POSIX implementation of set_ctrl_c_hook()
  */
-void
+static void
 sigint_handler(
 	int	signum
 	)
