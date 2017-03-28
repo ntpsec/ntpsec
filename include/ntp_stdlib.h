@@ -42,8 +42,6 @@ extern	void	reopen_logfile  (void);
 extern	void	setup_logfile	(const char *);
 extern	void	errno_to_str(int, char *, size_t);
 
-typedef void (*ctrl_c_fn)(void);
-
 /* authkeys.c */
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
