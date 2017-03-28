@@ -351,7 +351,7 @@ parse_cmdline_opts(
 		break;
 	    case 'U':
 		{
-		    long val = atol(argv[ntp_optind]);
+		    long val = atol(ntp_optarg);
 
 		    if (val >= 0)
 			    interface_interval = (int)val;
