@@ -29,13 +29,18 @@ OLD_CTL_PST_SEL_SELCAND = 1
 OLD_CTL_PST_SEL_SYNCCAND = 2
 OLD_CTL_PST_SEL_SYSPEER = 3
 
+
 # Units for formatting
 UNIT_NS = 0
 UNIT_US = 1
 UNIT_MS = 2
 UNIT_S = 3
 UNIT_KS = 4
-UNITS = ["ns", "us", "ms", "s ", "ks"]
+UNITS_SEC = ["ns", "us", "ms", "s", "ks"]
+UNIT_PPB = 0
+UNIT_PPM = 1
+UNIT_PPT = 2
+UNITS_PPX = ["ppb", "ppm", "ppt"]
 
 
 # Variables that have units
@@ -95,37 +100,55 @@ def scaleforunit(f):
     return (f, unitsmoved)
 
 
-def f8unit(f, startingunit, strip=False):
-    "Floating point formatting to show sign and unit in 8 characters"
+def f8unit(f, unitgroup, startingunit, baseunit=None, strip=False):
+    "Formatting for unit associated values in 8 characters."
+    padder = (lambda x: (" " * (8 - len(x))) + x)  # For padding to 8 chars
+    if baseunit is None:
+        baseunit = 0  # Assume that the lowest unit is equal to LSB
+    if f == 0.0:  # Zero, don't show decimals, and show that it is zero
+        unit = unitgroup[baseunit]  # all the way to the lsb
+        rendered = "0" + unit
+        if not strip:
+            rendered = padder(rendered)
+        return rendered
     oldf = f
     f, unitsmoved = scaleforunit(f)
     unitget = startingunit + unitsmoved
-    if (0 <= unitget < len(UNITS)):
-        unit = UNITS[unitget]
+    if (0 <= unitget < len(unitgroup)):
+        unit = unitgroup[unitget]
+        displaysize = 8 - len(unit)
         af = abs(f)
         if af.is_integer():
-            rendered = ("%6d" % f) + unit
-        elif af >= 100.0:  # xxx.xx
-            rendered = ("%6.2f" % f) + unit
-        elif af >= 10.0:  # xx.xxx
-            rendered = ("%6.3f" % f) + unit
-        elif af >= 1.0:  # x.xxxx
-            rendered = ("%6.4f" % f) + unit
-        else:  # zero, if it weren't then scaleforunit would have moved it up
-            rendered = "0ns"
+            # No decimal places, so don't show any.
+            formatstring = "%" + str(displaysize) + "d"
+            rendered = (formatstring % f) + unit
+            if not strip:
+                rendered = padder(rendered)
+            return rendered
+        # Ok, not zero, not int, and in unit range. Can finally format
+        # We need to know how many chars are taken by the point and what
+        # is above it. Hence, maxdigits.
+        if af >= 100.0:
+            maxdigits = displaysize - 4  # xxx.
+        elif af >= 10.0:
+            maxdigits = displaysize - 3  # xx.
+        elif af >= 1.0:
+            maxdigits = displaysize - 2  # x.
+        if f < 0.0:
+            maxdigits -= 1  # need to fit a negative symbol
+        # How many sub-decimal digits do we have / need?
+        sigdigits = len(str(af).split(".")[1])  # count digits after point
+        formatdigits = min(sigdigits, maxdigits)  # don't add fake data
+        formatter = "%" + str(displaysize) + "." + str(formatdigits) + "f"
+        rendered = (formatter % f) + unit
+        if strip:
+            rendered = rendered.strip()
+        return rendered
     else:  # Out of units so revert to the original. Ugly but there are very
-        rendered = repr(oldf) + UNITS[startingunit]  # few options here.
-    if strip:
-        return rendered.strip()
-    return rendered
-
-
-def ppmformathack(f, strip=False):
-    "Format a float as ppm, a hack until the Great Unit Hunt is ended."
-    rendered = ("%5f" % f) + "ppm"
-    if strip:
-        rendered = rendered.strip()
-    return rendered
+        rendered = repr(oldf) + unitgroup[startingunit]  # few options here
+        if not strip:
+            rendered = padder(rendered)
+        return rendered
 
 
 def f8dot4(f):
@@ -352,15 +375,15 @@ def cook(variables, showunits=False):
                 item = item[:-1]
         elif name in MS_VARS:
             #  Note that this is *not* complete, there are definitely
-            #   missing variables here, and other units (ppm).
+            #   missing variables here.
             #  Completion cannot occur until all units are tracked down.
             if showunits:
-                item += f8unit(value, UNIT_MS, True)
+                item += f8unit(value, UNITS_SEC, UNIT_MS, UNIT_NS, True)
             else:
                 item += repr(value)
         elif name in PPM_VARS:
             if showunits:
-                item += ppmformathack(value, True)
+                item += f8unit(value, UNITS_PPX, UNIT_PPM, strip=True)
             else:
                 item += repr(value)
         else:
@@ -611,9 +634,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (f8unit(estdelay, UNIT_MS),
-                         f8unit(estoffset, UNIT_MS),
-                         f8unit(jd, UNIT_MS)))
+                        (f8unit(estdelay, UNITS_SEC, UNIT_MS),
+                         f8unit(estoffset, UNITS_SEC, UNIT_MS),
+                         f8unit(jd, UNITS_SEC, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %
@@ -624,9 +647,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (f8unit(estdelay, UNIT_MS),
-                         f8unit(estoffset, UNIT_MS),
-                         f8unit(jd, UNIT_MS)))
+                        (f8unit(estdelay, UNITS_SEC, UNIT_MS),
+                         f8unit(estoffset, UNITS_SEC, UNIT_MS),
+                         f8unit(jd, UNITS_SEC, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %
