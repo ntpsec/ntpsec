@@ -52,7 +52,8 @@ cat <<EOF
 # This script presently knows about:
 #   CentOS, Debian, Fedora, Gentoo, SLES and Ubuntu
 # If you are running something else, such as MacOS or Solaris, please
-# follow the directions for by-hand installation in INSTALL.
+# read the source for this buildprep script to get an idea of what packages
+# are required.
 #
 EOF
 

@@ -34,11 +34,12 @@ or *BSD, you will have to install the build prerequisites by hand on
 your system.  Read the buildprep script to get an idea what packages
 are required.
 
-buildprep does not attempt to install either asciidoc or psutils (both
-optional). asciidoc has a huge tail of dependencies and you probably
-don't want it unless you're planning to modify the documentation.
-psutils may require different packages depending on whether your base
-Python version is 2 or 3.
+buildprep does not attempt to install dependencies for optional
+components like ntpviz or building documentation unless asked. See
+buildprep --help for details on available options.  asciidoc has a
+huge tail of dependencies and you probably don't want it unless you're
+planning to modify the documentation.  psutils may require different
+packages depending on whether your base Python version is 2 or 3.
 
 === Details ===
 
