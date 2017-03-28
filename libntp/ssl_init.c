@@ -6,11 +6,9 @@
  */
 
 #include "config.h"
+#include "ntp_stdlib.h"
 
-#include <unistd.h>
-#include <ctype.h>
-#include "ntp.h"
-
+#include <stdbool.h>
 #include <openssl/evp.h>
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
