@@ -48,12 +48,14 @@ def cmd_configure(ctx, config):
     ctx.env.NTPSEC_VERSION = "%s.%s.%s" % (ctx.env.NTPSEC_VERSION_MAJOR,
                                            ctx.env.NTPSEC_VERSION_MINOR,
                                            ctx.env.NTPSEC_VERSION_REV)
-    ctx.define("NTPSEC_VERSION_MAJOR", ctx.env.NTPSEC_VERSION_MAJOR,
-               comment="Major version number")
-    ctx.define("NTPSEC_VERSION_MINOR", ctx.env.NTPSEC_VERSION_MINOR,
-               comment="Minor version number")
-    ctx.define("NTPSEC_VERSION_REV", ctx.env.NTPSEC_VERSION_REV,
-               comment="Revision version number")
+# These are not currently used via config.h so remove clutter.
+# Leave as comments in case we want them tomorrow.
+#    ctx.define("NTPSEC_VERSION_MAJOR", ctx.env.NTPSEC_VERSION_MAJOR,
+#               comment="Major version number")
+#    ctx.define("NTPSEC_VERSION_MINOR", ctx.env.NTPSEC_VERSION_MINOR,
+#               comment="Minor version number")
+#    ctx.define("NTPSEC_VERSION_REV", ctx.env.NTPSEC_VERSION_REV,
+#               comment="Revision version number")
 
     ctx.env.OPT_STORE = config["OPT_STORE"]
 
