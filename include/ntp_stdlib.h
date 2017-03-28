@@ -143,7 +143,6 @@ extern	const char *refid_str	(uint32_t, int);
 extern	bool	decodenetnum	(const char *, sockaddr_u *);
 
 extern	void	signal_no_reset (int, void (*func)(int));
-extern	void	set_ctrl_c_hook (ctrl_c_fn);
 
 extern	void	getauthkeys 	(const char *);
 extern	void	rereadkeys	(void);

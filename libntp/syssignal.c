@@ -61,20 +61,3 @@ sigint_handler(
 	if (ctrl_c_hook != NULL)
 		(*ctrl_c_hook)();
 }
-
-void
-set_ctrl_c_hook(
-	ctrl_c_fn	c_hook
-	)
-{
-	void (*handler)(int);
-
-	if (NULL == c_hook) {
-		handler = SIG_DFL;
-		ctrl_c_hook = NULL;
-	} else {
-		handler = &sigint_handler;
-		ctrl_c_hook = c_hook;
-	}
-	signal_no_reset(SIGINT, handler);
-}
