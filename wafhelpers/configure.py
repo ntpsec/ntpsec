@@ -397,16 +397,6 @@ int main(int argc, char **argv) {
     if ctx.env.DEST_OS == "openbsd":
         ctx.define("PLATFORM_OPENBSD", "1", quote=False)
 
-    # int32_t and uint32_t probes aren't really needed, POSIX guarantees
-    # them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
-    # machines.  The calendar and ISC code needs them.
-    types = ["uint64_t"]
-
-    for inttype in sorted(types):
-        ctx.check_cc(header_name=["stdint.h", "sys/types.h"],
-                     mandatory=False,
-                     type_name=inttype)
-
     structures = (
         ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
         ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
@@ -442,7 +432,6 @@ int main(int argc, char **argv) {
 
     ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False,
                comment="socklen type")
-    ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
 
     # These are helpful and don't break Linux or *BSD
     ctx.define("OPEN_BCAST_SOCKET", 1,
