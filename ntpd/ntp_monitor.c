@@ -55,7 +55,7 @@ mon_entry	mon_mru_list;	/* mru listhead */
 u_int		mru_entries;	/* mru list count */
 
 /*
- * List of free structures structures, and counters of in-use and total
+ * List of free structures, and counters of in-use and total
  * structures. The free structures are linked with the hash_next field.
  */
 static  mon_entry *mon_free;		/* free list or null if none */
