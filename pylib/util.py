@@ -89,12 +89,43 @@ def portsplit(hostname):
 def filtcooker(data):
     "Cooks the string of space seperated numbers with units"
     parts = data.split()
-    cooked = []
+    floatyparts = []
+    oomcount = {}
+    # Find out what the 'natural' unit of each value is
     for part in parts:
         part = float(part)
-        cooked.append(unitformatter(part, UNITS_SEC, UNIT_MS))
-    rendered = "".join(cooked)
+        floatyparts.append(part)
+        value, oom = scaleforunit(part)
+        oomcount[oom] = oomcount.get(oom, 0) + 1
+    # Find the most common unit
+    mostcommon = None
+    highestcount = 0
+    for key in oomcount.keys():
+        count = oomcount[key]
+        if count > highestcount:
+            mostcommon = key
+            highestcount = count
+    newunit = mostcommon + UNIT_MS
+    # Shift all values to the new unit
+    cooked = []
+    for part in floatyparts:
+        fmt = formatdigitsplit(part, 7)
+        temp = fmt % rescaleunit(part, mostcommon)
+        cooked.append(temp)
+    rendered = " ".join(cooked) + " " + UNITS_SEC[newunit]
     return rendered
+
+
+def rescaleunit(f, ooms):
+    "Rescale a number by enough orders of magnitude for N units"
+    count = abs(ooms)
+    shiftup = (True if (f > 0.0) else False)  # up or down the unit list?
+    for i in range(count):
+        if shiftup:
+            f /= 1000.0
+        else:
+            f *= 1000.0
+    return f
 
 
 def scaleforunit(f):
@@ -111,9 +142,28 @@ def scaleforunit(f):
     return (f, unitsmoved)
 
 
+def formatdigitsplit(f, fieldsize):
+    "Create a format string for a float without adding fake precision."
+    if f.is_integer():  # This also catches f == 0.0
+        return "%" + str(fieldsize) + "d"
+    af = abs(f)
+    if af >= 100.0:
+        maxdigits = fieldsize - 4  # xxx.
+    elif af >= 10.0:
+        maxdigits = fieldsize - 3  # xx.
+    elif af >= 1.0:
+        maxdigits = fieldsize - 2  # x.
+    if f < 0.0:
+        maxdigits -= 1  # need to fit a negative symbol
+    sig = len(str(f).split(".")[1])  # count digits after the decimal point
+    subdigits = min(sig, maxdigits)  # use min so we don't add fake data
+    formatter = "%" + str(fieldsize) + "." + str(subdigits) + "f"
+    return formatter
+
+
 def unitformatter(f, unitgroup, startingunit, baseunit=None,
                   strip=False, width=8):
-    "Formatting for unit associated values in 8 characters."
+    "Formatting for unit associated values in N characters."
     if width is not None:  # For padding to n characters
         padder = (lambda x: (" " * (width - len(x))) + x)
     else:
@@ -130,35 +180,14 @@ def unitformatter(f, unitgroup, startingunit, baseunit=None,
     f, unitsmoved = scaleforunit(f)
     unitget = startingunit + unitsmoved
     if (0 <= unitget < len(unitgroup)):
-        # CATCH HERE: width==None, then render at full size
         unit = unitgroup[unitget]
         if width is None:
             rendered = repr(f) + unit
             return rendered
         displaysize = width - len(unit)
         af = abs(f)
-        if af.is_integer():
-            # No decimal places, so don't show any.
-            formatstring = "%" + str(displaysize) + "d"
-            rendered = (formatstring % f) + unit
-            if not strip:
-                rendered = padder(rendered)
-            return rendered
-        # Ok, not zero, not int, and in unit range. Can finally format
-        # We need to know how many chars are taken by the point and what
-        # is above it. Hence, maxdigits.
-        if af >= 100.0:
-            maxdigits = displaysize - 4  # xxx.
-        elif af >= 10.0:
-            maxdigits = displaysize - 3  # xx.
-        elif af >= 1.0:
-            maxdigits = displaysize - 2  # x.
-        if f < 0.0:
-            maxdigits -= 1  # need to fit a negative symbol
-        # How many sub-decimal digits do we have / need?
-        sigdigits = len(str(af).split(".")[1])  # count digits after point
-        formatdigits = min(sigdigits, maxdigits)  # don't add fake data
-        formatter = "%" + str(displaysize) + "." + str(formatdigits) + "f"
+        # Ok, not zero, and in unit range. Can finally format
+        formatter = formatdigitsplit(f, displaysize)
         rendered = (formatter % f) + unit
         if strip:
             rendered = rendered.strip()
@@ -354,7 +383,7 @@ def cook(variables, showunits=False):
     longestspecial = len(max(specials, key=len))
     for (name, value) in variables.items():
         if name in specials:  # need special formatting for column alignment
-            formatter = "%" + str(longestspecial) + "s="
+            formatter = "%" + str(longestspecial) + "s ="
             item = formatter % name
         else:
             item = "%s=" % name
@@ -371,7 +400,7 @@ def cook(variables, showunits=False):
             item += ("00", "01", "10", "11")[value]
         elif name == "reach":
             item += "%03lo" % value
-        elif name in ("filtdelay", "filtoffset", "filtdisp", "filterror"):
+        elif name in specials:
             if showunits:
                 item += filtcooker(value)
             else:
