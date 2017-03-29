@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import collections
+import math
 
 import ntp.ntpc
 import ntp.version
@@ -29,6 +30,8 @@ OLD_CTL_PST_SEL_SELCAND = 1
 OLD_CTL_PST_SEL_SYNCCAND = 2
 OLD_CTL_PST_SEL_SYSPEER = 3
 
+
+timefuzz = 1e-9  # Time variables have max precision of 1ns. Use for x==0.0.
 
 # Units for formatting
 UNIT_NS = 0
@@ -118,27 +121,28 @@ def filtcooker(data):
 
 def rescaleunit(f, ooms):
     "Rescale a number by enough orders of magnitude for N units"
-    count = abs(ooms)
-    shiftup = (True if (f > 0.0) else False)  # up or down the unit list?
-    for i in range(count):
-        if shiftup:
-            f /= 1000.0
-        else:
-            f *= 1000.0
+    multiplier = 10 ** ooms
+    if ooms > 0:  # Shift down the unit list
+        f /= multiplier
+    else:
+        f *= multiplier
     return f
 
 
 def scaleforunit(f):
     "Scales a number by units to keep it in the range 0.000-999.9"
-    if f == 0.0:  # guard against looping forever
+    if f < timefuzz:
         return (f, 0)
     unitsmoved = 0
-    while abs(f) < 1.0:
-        f *= 1000.0  # shift up by one unit
-        unitsmoved -= 1
-    while abs(f) >= 1000.0:
-        f /= 1000.0  # shift down by one unit
-        unitsmoved += 1
+    oom = int(math.log10(abs(f)))  # Orders Of Magnitude
+    oom -= oom % 3  # We only want to move in groups of 3 ooms
+    multiplier = 10 ** oom
+    unitsmoved = oom // 3
+    if f < 1.0:  # Shift upwards
+        f *= multiplier
+        unitsmoved = -unitsmoved
+    else:
+        f /= multiplier
     return (f, unitsmoved)
 
 
@@ -185,7 +189,6 @@ def unitformatter(f, unitgroup, startingunit, baseunit=None,
             rendered = repr(f) + unit
             return rendered
         displaysize = width - len(unit)
-        af = abs(f)
         # Ok, not zero, and in unit range. Can finally format
         formatter = formatdigitsplit(f, displaysize)
         rendered = (formatter % f) + unit
