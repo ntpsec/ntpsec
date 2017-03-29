@@ -448,6 +448,19 @@ int main(int argc, char **argv) {
     if ret:
         ctx.env.LDFLAGS += ["-lbsd"]
 
+    # -lssp and -lssp_nonshared may be needed by older gcc to
+    # support "-fstack-protector-all"
+    ret = ctx.check_cc(lib="ssp", mandatory=False,
+                 comment="libssp")
+    if ret:
+        ctx.env.LDFLAGS += ["-lssp"]
+
+    ret = ctx.check_cc(lib="ssp_nonshared", mandatory=False,
+                 comment="libssp_nonshared")
+    if ret:
+        ctx.env.LDFLAGS += ["-lssp_nonshared"]
+
+
     # Find OpenSSL. Must happen before function checks
     # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
     SNIP_OPENSSL_VERSION_CHECK = """
