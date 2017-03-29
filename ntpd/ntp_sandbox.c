@@ -350,15 +350,16 @@ int scmp_sc[] = {
         SCMP_SYS(unlink),
 
 #ifdef ENABLE_DNS_LOOKUP
-	/* Needed for threads */
-	SCMP_SYS(clone),
+	SCMP_SYS(clone),	/* threads */
+	SCMP_SYS(exit),
+	SCMP_SYS(futex),	/* sem_xxx */
 	SCMP_SYS(madvise),
 	SCMP_SYS(mprotect),
 	SCMP_SYS(set_robust_list),
-	SCMP_SYS(exit),
-	SCMP_SYS(futex),	/* sem_xxx */
 	SCMP_SYS(sendmmsg),	/* DNS lookup */
 	SCMP_SYS(socketpair),
+	SCMP_SYS(statfs),
+	SCMP_SYS(uname),
 #endif
 
 #ifdef HAVE_UTMPX_H
@@ -420,7 +421,7 @@ int scmp_sc[] = {
 static void catchTrap(int sig)
 {
 	UNUSED_ARG(sig);	/* signal number */
-	msyslog(LOG_ERR, "SIGSYS: got a trap.  Bailing.");
+	msyslog(LOG_ERR, "SIGSYS: got a trap. Probably seccomp omission. Bailing.");
 	exit(1);
 }
 #endif /* HAVE_SECCOMP */
