@@ -27,6 +27,7 @@
 # More info on the blog post: https://blog.ntpsec.org/2017/03/21/More_Heat.html
 
 import argparse
+import atexit
 import subprocess
 import sys
 import time
@@ -166,6 +167,9 @@ period = float(args.wait[0])
 usbrelay_on = ['usbrelay', '959BI_1=1']
 usbrelay_off = ['usbrelay', '959BI_1=0']
 
+# turn off the usb relay on exit.  no need to cook..
+atexit.register(run_binary, usbrelay_off)
+
 # to adjust the PID variables
 # set I and D to zero
 #
@@ -204,15 +208,25 @@ try:
                     step = -11
             pid.setPoint(temp_gate)
 
-        # grab the needed output
-        output = run_binary(["temper-poll", "-c"])
-        try:
-            # make sure it is a temperature
-            temp = float(output[0])
-        except:
-            # bad data, exit
-            # FIXME, should try to recover?
-            print("temper read failed: %s" % output)
+        # only one device can read the TEMPer at a time
+        # collisions will happen, so retry a few times
+        for attempt in range(0, 3):
+            # grab the needed output
+            fail = False
+            output = run_binary(["temper-poll", "-c"])
+            try:
+                # make sure it is a temperature
+                temp = float(output[0])
+                break
+            except:
+                # bad data, try aagin
+                fail = True
+                if args.verbose:
+                    print("temper read failed: %s" % output)
+
+        if fail:
+            # give up
+            print("temper fatal error")
             sys.exit(1)
 
         # the +20 is to create an 80/20 band around the setpoint
