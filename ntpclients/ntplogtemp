@@ -157,15 +157,23 @@ class Temper:
 
         data = []
         _device = 'TEMPER0'
-        # grab the needed output
-        output = run_binary(["temper-poll", "-c"])
-        try:
-            # make sure it is a temperature
-            temp = float(output[0])
-            now = int(time.time())
-            data.append('%d %s %s' % (now, _device, temp))
-        except:
-            # bad data, ignore it, forever
+        # only one device can read the TEMPer at a time
+        # collisions will happen, so retry a few times
+        for attempt in range(0, 3):
+            # grab the needed output
+            output = run_binary(["temper-poll", "-c"])
+            try:
+                # make sure it is a temperature
+                temp = float(output[0])
+                now = int(time.time())
+                data.append('%d %s %s' % (now, _device, temp))
+                break
+            except:
+                # bad data, ignore it, for a bit
+                if args.verbose:
+                    sys.stderr.write("TEMPer-poll failed\n")
+
+        if 0 == len(data):
             self.has_temper = False
         return data
 
