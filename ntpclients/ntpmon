@@ -71,17 +71,6 @@ def statline(_peerlist, _mrulist, nyquist):
     return leader + spacer + trailer
 
 
-def filtcooker(data):
-    "Cooks the string of space seperated numbers with units"
-    parts = data.split()
-    cooked = []
-    for part in parts:
-        part = float(part)
-        cooked.append(ntp.util.f8unit(part, ntp.util.UNIT_MS))
-    rendered = "".join(cooked)
-    return rendered
-
-
 def peer_detail(variables, showunits=False):
     "Show the things a peer summary doesn't, cooked slightly differently"
     # All of an rv display except refid, reach, delay, offset, jitter.
@@ -99,15 +88,19 @@ def peer_detail(variables, showunits=False):
     if showunits:
         for name in ntp.util.MS_VARS:
             if name in vcopy:
-                vcopy[name] = ntp.util.f8unit(vcopy[name],
-                                              ntp.util.UNIT_MS,
-                                              True)
+                vcopy[name] = ntp.util.unitformatter(vcopy[name],
+                                                     ntp.util.UNITS_SEC,
+                                                     ntp.util.UNIT_MS,
+                                                     strip=True)
         for name in ntp.util.PPM_VARS:
             if name in vcopy:
-                vcopy[name] = ntp.util.ppmformathack(vcopy[name], True)
-        vcopy['filtdelay'] = filtcooker(vcopy['filtdelay'])
-        vcopy['filtoffset'] = filtcooker(vcopy['filtoffset'])
-        vcopy['filtdisp'] = filtcooker(vcopy['filtdisp'])
+                vcopy[name] = ntp.util.unitformatter(vcopy[name],
+                                                     ntp.util.UNIT_PPM,
+                                                     ntp.util.UNITS_PPX,
+                                                     strip=True)
+        vcopy['filtdelay'] = ntp.util.filtcooker(vcopy['filtdelay'])
+        vcopy['filtoffset'] = ntp.util.filtcooker(vcopy['filtoffset'])
+        vcopy['filtdisp'] = ntp.util.filtcooker(vcopy['filtdisp'])
     else:
         vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
         vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
@@ -162,7 +155,7 @@ USAGE: ntpmon [-V] [host]
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "V", ["version"])
+                                             "Vu", ["version", "units"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -180,6 +173,8 @@ if __name__ == '__main__':
         if switch in ("-V", "--version"):
             print("ntpmon %s" % ntp.util.stdversion())
             raise SystemExit(0)
+        elif switch in ("-u", "--units"):
+            showunits = True
 
     poll_interval = 1
     helpmode = selectmode = detailmode = False
