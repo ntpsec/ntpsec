@@ -2,6 +2,8 @@ The following tools are not production-ready. They are included only as
 conveniences, examples or rudimentary starting points for other development
 efforts.
 
+ntpconfigtest: Check your linux configuration for the proper entries.
+
 ntpheat is a program to exercise a CPU until the CPU reachs a certain
 temperature.  The idea is to get the temperature around the system
 oscillator to be near the zero TC point.  Tested on RasPi wrapped
