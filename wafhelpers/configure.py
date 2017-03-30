@@ -409,8 +409,10 @@ int main(int argc, char **argv) {
         ctx.check_cc(type_name=s, header_name=h, mandatory=False)
 
     # waf's SNIP_FIELD should likely include this header itself
+    # This is needed on some systems to get size_t for following checks
     ctx.check_cc(auto_add_header_name=True,
                  header_name="stddef.h",
+                 define_name="",           # omit from config.h
                  mandatory=False)
 
     structure_fields = (
