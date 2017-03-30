@@ -6,7 +6,6 @@
 from __future__ import print_function
 
 import gzip
-import string
 import sys
 
 config_file_name = '/proc/config.gz'
@@ -20,11 +19,17 @@ except:
 
 tests = (
     ('CONFIG_CPU_FREQ_GOV_PERFORMANCE', 'For best performance'),
-    ('CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y', 'For best performance'),
-    ('CONFIG_PPS', 'Needed for PPS support' ),
-    ('CONFIG_PPS_CLIENT_LDISC', 'For PPS support on serial lines' ),
-    ('CONFIG_PPS_CLIENT_GPIO', 'For PPS support on GPIO lines' ),
-    )
+    ('CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE', 'For best performance'),
+    ('CONFIG_SECCOMP', 'For extra security'),
+    ('CONFIG_THERMAL', 'For thermal monitoring'),
+    ('CONFIG_PPS', 'Needed for PPS support'),
+    ('CONFIG_PPS_CLIENT_LDISC', 'For PPS support on serial lines'),
+    ('CONFIG_PPS_CLIENT_GPIO', 'For PPS support on GPIO lines'),
+)
+
+# when this figures out how to test for platform, add these
+# for Pi:
+# CONFIG_THERMAL_BCM2835
 
 for test in tests:
     print("Checking: %s, %s: " % (test[0], test[1]), end='')
@@ -35,8 +40,3 @@ for test in tests:
         print("Missing")
 
 sys.exit(0)
-
-
-
-
-
