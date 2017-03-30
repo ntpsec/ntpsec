@@ -25,6 +25,8 @@ tests = (
     ('CONFIG_PPS', 'Needed for PPS support'),
     ('CONFIG_PPS_CLIENT_LDISC', 'For PPS support on serial lines'),
     ('CONFIG_PPS_CLIENT_GPIO', 'For PPS support on GPIO lines'),
+    ('CONFIG_USB_SERIAL_GARMIN', 'For Garmin USB GPS support'),
+    ('CONFIG_USB_SERIAL_PL2303', 'For PL2303 USB GPS support'),
 )
 
 # when this figures out how to test for platform, add these
