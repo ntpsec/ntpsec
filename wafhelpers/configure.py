@@ -434,9 +434,6 @@ int main(int argc, char **argv) {
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
 
-    ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False,
-               comment="socklen type")
-
     # These are helpful and don't break Linux or *BSD
     ctx.define("OPEN_BCAST_SOCKET", 1,
                comment="Whether to open a broadcast socket")

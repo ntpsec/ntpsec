@@ -2235,7 +2235,7 @@ read_network_packet(
 	l_fp			ts
 	)
 {
-	GETSOCKNAME_SOCKLEN_TYPE fromlen;
+	socklen_t fromlen;
 	ssize_t buflen;
 	register struct recvbuf *rb;
 #ifdef USE_PACKET_TIMESTAMP
@@ -2688,12 +2688,12 @@ findlocalinterface(
 	int		bcast
 	)
 {
-	GETSOCKNAME_SOCKLEN_TYPE	sockaddrlen;
-	endpt *				iface;
-	sockaddr_u			saddr;
-	SOCKET				s;
-	int				rtn;
-	int				on;
+	socklen_t	sockaddrlen;
+	endpt *		iface;
+	sockaddr_u	saddr;
+	SOCKET		s;
+	int		rtn;
+	int		on;
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
 		    socktoa(addr)));
