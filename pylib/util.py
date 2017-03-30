@@ -131,19 +131,19 @@ def rescaleunit(f, ooms):
 
 def scaleforunit(f):
     "Scales a number by units to keep it in the range 0.000-999.9"
-    if f < timefuzz:
+    if -timefuzz < f < timefuzz:  # if sufficiently close to zero do nothing
         return (f, 0)
     unitsmoved = 0
-    oom = int(math.log10(abs(f)))  # Orders Of Magnitude
-    oom -= oom % 3  # We only want to move in groups of 3 ooms
-    multiplier = 10 ** oom
-    unitsmoved = oom // 3
-    if f < 1.0:  # Shift upwards
-        f *= multiplier
-        unitsmoved = -unitsmoved
+    af = abs(f)
+    if af < 1.0:
+        oom = math.floor(math.log10(af))
     else:
-        f /= multiplier
-    return (f, unitsmoved)
+        oom = math.log10(af)  # Orders Of Magnitude
+    oom -= oom % 3  # We only want to move in groups of 3 ooms
+    multiplier = 10 ** -oom  # Reciprocol because floating * more accurate
+    unitsmoved = oom // 3
+    f *= multiplier
+    return (f, int(unitsmoved))
 
 
 def formatdigitsplit(f, fieldsize):
@@ -174,7 +174,7 @@ def unitformatter(f, unitgroup, startingunit, baseunit=None,
         strip = True
     if baseunit is None:
         baseunit = 0  # Assume that the lowest unit is equal to LSB
-    if f == 0.0:  # Zero, don't show decimals, and show that it is zero
+    if -timefuzz < f < timefuzz:  # Zero, don't show decimals
         unit = unitgroup[baseunit]  # all the way to the lsb
         rendered = "0" + unit
         if not strip:
