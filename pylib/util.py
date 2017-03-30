@@ -40,10 +40,11 @@ UNIT_MS = 2
 UNIT_S = 3
 UNIT_KS = 4
 UNITS_SEC = ["ns", "us", "ms", "s", "ks"]
-UNIT_PPB = 0
-UNIT_PPM = 1
-UNIT_PPT = 2
-UNITS_PPX = ["ppb", "ppm", "ppt"]
+UNIT_PPT = 0
+UNIT_PPB = 1
+UNIT_PPM = 2
+UNIT_PPT = 3
+UNITS_PPX = ["ppt", "ppb", "ppm", "ppt"]
 
 
 # Variables that have units
@@ -112,8 +113,10 @@ def filtcooker(data):
     # Shift all values to the new unit
     cooked = []
     for part in floatyparts:
+        # The scaled values aren't being saved for the formatter <<<<<<<<<
+        part = rescaleunit(part, mostcommon)
         fmt = formatdigitsplit(part, 7)
-        temp = fmt % rescaleunit(part, mostcommon)
+        temp = fmt % part
         cooked.append(temp)
     rendered = " ".join(cooked) + " " + UNITS_SEC[newunit]
     return rendered
@@ -148,21 +151,27 @@ def scaleforunit(f):
 
 def formatdigitsplit(f, fieldsize):
     "Create a format string for a float without adding fake precision."
-    if f.is_integer():  # This also catches f == 0.0
-        return "%" + str(fieldsize) + "d"
     af = abs(f)
+    if f.is_integer() or (af < timefuzz):
+        return "%" + str(fieldsize) + "d"
     if af >= 100.0:
         maxdigits = fieldsize - 4  # xxx.
     elif af >= 10.0:
         maxdigits = fieldsize - 3  # xx.
     elif af >= 1.0:
         maxdigits = fieldsize - 2  # x.
+    else:  # Yes, this can happen with filts
+        maxdigits = fieldsize - 2  # 0.
     if f < 0.0:
         maxdigits -= 1  # need to fit a negative symbol
     sig = len(str(f).split(".")[1])  # count digits after the decimal point
     subdigits = min(sig, maxdigits)  # use min so we don't add fake data
     formatter = "%" + str(fieldsize) + "." + str(subdigits) + "f"
     return formatter
+
+
+def oomsbetweenunits(a, b):
+    return abs((a - b) * 3)
 
 
 def unitformatter(f, unitgroup, startingunit, baseunit=None,
@@ -180,21 +189,32 @@ def unitformatter(f, unitgroup, startingunit, baseunit=None,
         if not strip:
             rendered = padder(rendered)
         return rendered
-    oldf = f
+    oldf = f  # keep this in case we don't fit in the units
     f, unitsmoved = scaleforunit(f)
     unitget = startingunit + unitsmoved
+    rounddigits = oomsbetweenunits(unitget, baseunit)
+    f = round(f, rounddigits)
     if (0 <= unitget < len(unitgroup)):
         unit = unitgroup[unitget]
-        if width is None:
-            rendered = repr(f) + unit
+        if width is None:  # Don't care about size, just display everything
+            if unitget == baseunit:  # Don't want fake decimals
+                formatter = "%d"
+                rendered = (formatter % f) + unit
+            else:
+                rendered = repr(f) + unit
+            if strip:
+                rendered = rendered.strip()
             return rendered
-        displaysize = width - len(unit)
-        # Ok, not zero, and in unit range. Can finally format
-        formatter = formatdigitsplit(f, displaysize)
-        rendered = (formatter % f) + unit
-        if strip:
-            rendered = rendered.strip()
-        return rendered
+        else:  # Do care about size, crop value so it will fit
+            displaysize = width - len(unit)
+            if unitget == baseunit:  # Don't want fake decimals
+                formatter = "%" + str(displaysize) + "d"
+            else:
+                formatter = formatdigitsplit(f, displaysize)
+            rendered = (formatter % f) + unit
+            if strip:
+                rendered = rendered.strip()
+            return rendered
     else:  # Out of units so revert to the original. Ugly but there are very
         rendered = repr(oldf) + unitgroup[startingunit]  # few options here
         if not strip:
