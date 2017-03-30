@@ -231,6 +231,27 @@ def cmd_configure(ctx, config):
         ctx.define("ENABLE_LEAP_SMEAR", 1,
                    comment="Enable experimental leap smearing code")
 
+    # check for some libs first.  some options, like stack protector,
+    # may depend on some libs, like -lssp
+    ctx.check_cc(lib="m", comment="Math library")
+    ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
+    ret = ctx.check_cc(lib="bsd", mandatory=False,
+                 comment="BSD compatibility library")
+    if ret:
+        ctx.env.LDFLAGS += ["-lbsd"]
+
+    # -lssp and -lssp_nonshared may be needed by older gcc to
+    # support "-fstack-protector-all"
+    ret = ctx.check_cc(lib="ssp", mandatory=False,
+                 comment="libssp")
+    if ret:
+        ctx.env.LDFLAGS += ["-lssp"]
+
+    ret = ctx.check_cc(lib="ssp_nonshared", mandatory=False,
+                 comment="libssp_nonshared")
+    if ret:
+        ctx.env.LDFLAGS += ["-lssp_nonshared"]
+
     cc_test_flags = [
         ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
@@ -439,25 +460,6 @@ int main(int argc, char **argv) {
                comment="Whether to open a broadcast socket")
     ctx.define("HAS_ROUTING_SOCKET", 1,
                comment="Whether a routing socket exists")
-
-    ctx.check_cc(lib="m", comment="Math library")
-    ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
-    ret = ctx.check_cc(lib="bsd", mandatory=False,
-                 comment="BSD compatibility library")
-    if ret:
-        ctx.env.LDFLAGS += ["-lbsd"]
-
-    # -lssp and -lssp_nonshared may be needed by older gcc to
-    # support "-fstack-protector-all"
-    ret = ctx.check_cc(lib="ssp", mandatory=False,
-                 comment="libssp")
-    if ret:
-        ctx.env.LDFLAGS += ["-lssp"]
-
-    ret = ctx.check_cc(lib="ssp_nonshared", mandatory=False,
-                 comment="libssp_nonshared")
-    if ret:
-        ctx.env.LDFLAGS += ["-lssp_nonshared"]
 
 
     # Find OpenSSL. Must happen before function checks
