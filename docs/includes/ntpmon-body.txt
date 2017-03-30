@@ -81,6 +81,8 @@ x:: Cleanly terminate the program.
 
 == Options ==
 
+-u:: Show units
+
 -V:: Display version and exit.
 
 == Known Bugs ==
