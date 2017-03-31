@@ -629,7 +629,11 @@ TEST(leapsec, addFixed) {
 		insns[idx].of,
 		insns[idx].tt - 20*SECSPERDAY - 100,
 		insns[idx].tt + SECSPERDAY);
+#ifdef ENABLE_LEAP_TESTING
+		TEST_ASSERT_TRUE(rc);
+#else
 		TEST_ASSERT_FALSE(rc);
+#endif
 	}
 	// no do it right
 	for (idx=0; insns[idx].tt; ++idx) {
@@ -637,7 +641,11 @@ TEST(leapsec, addFixed) {
 		    insns[idx].of,
 		    insns[idx].tt,
 		    insns[idx].tt + SECSPERDAY);
+#ifdef ENABLE_LEAP_TESTING
+		TEST_ASSERT_FALSE(rc);
+#else
 		TEST_ASSERT_TRUE(rc);
+#endif
 	}
 	// try to slip in a previous entry
 	rc = leapsec_add_fix(
