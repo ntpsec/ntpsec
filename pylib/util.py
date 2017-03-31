@@ -113,7 +113,6 @@ def filtcooker(data):
     # Shift all values to the new unit
     cooked = []
     for part in floatyparts:
-        # The scaled values aren't being saved for the formatter <<<<<<<<<
         part = rescaleunit(part, mostcommon)
         fmt = formatdigitsplit(part, 7)
         temp = fmt % part
