@@ -21,5 +21,25 @@ class TestPylibUtilMethods(unittest.TestCase):
             "[0000:1111:2222:3333:4444:5555:6666:7777]:123"),
             ("0000:1111:2222:3333:4444:5555:6666:7777", ":123"))
 
+    def test_rescaleunit(self):
+        self.assertEqual(ntp.util.rescaleunit(1.0, 0),
+                         1.0)
+        self.assertEqual(ntp.util.rescaleunit(10.0, 1),
+                         10000.0)
+        self.assertEqual(ntp.util.rescaleunit(0.1, 1),
+                         100.0)
+        self.assertEqual(ntp.util.rescaleunit(10.0, -1),
+                         0.01)
+        self.assertEqual(ntp.util.rescaleunit(0.1, -1),
+                         0.0001)
+        self.assertEqual(ntp.util.rescaleunit(-100.0, 1),
+                         -100000.0)
+        self.assertEqual(ntp.util.rescaleunit(-.001, 1),
+                         -1.0)
+        self.assertEqual(ntp.util.rescaleunit(-100.0, -1),
+                         -0.1)
+        self.assertEqual(ntp.util.rescaleunit(-.001, -1),
+                         -0.000001)
+
 if __name__ == '__main__':
     unittest.main()

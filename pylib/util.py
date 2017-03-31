@@ -43,8 +43,8 @@ UNITS_SEC = ["ns", "us", "ms", "s", "ks"]
 UNIT_PPT = 0
 UNIT_PPB = 1
 UNIT_PPM = 2
-UNIT_PPT = 3
-UNITS_PPX = ["ppt", "ppb", "ppm", "ppt"]
+UNIT_PPK = 3
+UNITS_PPX = ["ppt", "ppb", "ppm", "ppk"]
 
 
 # Variables that have units
@@ -122,13 +122,10 @@ def filtcooker(data):
     return rendered
 
 
-def rescaleunit(f, ooms):
+def rescaleunit(f, units):
     "Rescale a number by enough orders of magnitude for N units"
-    multiplier = 10 ** ooms
-    if ooms > 0:  # Shift down the unit list
-        f /= multiplier
-    else:
-        f *= multiplier
+    multiplier = 10 ** (units * 3)
+    f *= multiplier
     return f
 
 
