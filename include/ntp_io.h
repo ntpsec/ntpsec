@@ -15,8 +15,6 @@
 
 #include <isc/netaddr.h>
 
-#include "libntp.h"	/* This needs Something above for GETDTABLESIZE */
-
 /*
  * NIC rule match types
  */
@@ -47,5 +45,7 @@ extern void	add_nic_rule(nic_rule_match match_type,
 			     const char *if_name, int prefixlen,
 			     nic_rule_action action);
 extern	void	maintain_activefds(int fd, int closing);
+extern void	make_socket_nonblocking( SOCKET fd );
+extern SOCKET	move_fd( SOCKET fd );
 
 #endif	/* GUARD_NTP_IO_H */
