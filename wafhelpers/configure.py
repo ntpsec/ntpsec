@@ -496,7 +496,6 @@ int main(int argc, char **argv) {
         ('closefrom', ["stdlib.h"]),
         ('clock_gettime', ["time.h"], "RT"),
         ('clock_settime', ["time.h"], "RT"),
-        ('getdtablesize', ["unistd.h"]),
         ('getrusage', ["sys/time.h", "sys/resource.h"]),
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
