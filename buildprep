@@ -209,6 +209,8 @@ doc () {
 		$install app-text/asciidoc
 		;;
 	 yum|dnf)
+                echo "# Please check that you asciidoc is at least 8.6.0"
+		echo "# You may nee to enable EPEL repositories"
 		$install asciidoc
 		;;
 	 yast|zypper)
