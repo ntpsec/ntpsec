@@ -69,5 +69,11 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(ntp.util.oomsbetweenunits(2, 3),
                          3)
 
+    def test_filtcooker(self):
+        self.assertEqual(ntp.util.filtcooker(
+            "1.02 34.5 0.67835 -23.0 9 6.7 1.0 .1"),
+                         "   1.02    34.5 0.67835     -23       9     6.7       1     0.1 ms")
+
+
 if __name__ == '__main__':
     unittest.main()
