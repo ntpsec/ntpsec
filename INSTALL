@@ -83,7 +83,7 @@ asciidoc, a2x::
    documentation masters.  Only required if you configured with --enable-doc.
    Note, you need asciidoc 8.6.0 at minimum.
    Debian/Ubuntu: asciidoc
-   Fedora/CentOS: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
+   Fedora/CentOS: asciidoc  (CentOS/RHEL6 has only 8.4.5, you must upgrade)
    Gentoo: app-text/asciidoc
    SLES: asciidoc
 
@@ -128,7 +128,7 @@ Under Unix, the simplest way to compile this package is:
 
   1. `cd' to the directory containing the package's source code and
 
-  2. Run `./buildprep' as root to get your prerequisites installed. 
+  2. Run `./buildprep' as root to get your prerequisites installed.
 
   3. Run `./waf configure' to configure the package for your system.
   You may want to add configuration options after the verb 'configure';
@@ -177,7 +177,6 @@ exists on your system.
 When this happens, it is likely that the header has prerequisites
 on your system that waf configure doesn't know about - that is,
 other headers always need to be included before it in C programs.
-
 Please report this as a bug, along with your platform details.
 
 == Installation Names ==
@@ -260,7 +259,7 @@ Configure NTPSec with:
 
   waf configure --cross-compiler=/path/to/your/cross/cc
 
-There are also --cross-cflags and --cross-ldflags to supply the cross compiler 
+There are also --cross-cflags and --cross-ldflags to supply the cross compiler
 with appropriate values.
 
 == Statistics ==
