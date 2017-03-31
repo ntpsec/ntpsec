@@ -41,5 +41,27 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(ntp.util.rescaleunit(-.001, -1),
                          -0.000001)
 
+    def test_scaleforunit(self):
+        self.assertEqual(ntp.util.scaleforunit(1.0),
+                         (1.0, 0))
+        self.assertEqual(ntp.util.scaleforunit(999.2342),
+                         (999.2342, 0))
+        self.assertEqual(ntp.util.scaleforunit(5042.7),
+                         (5.0427, 1))
+        self.assertEqual(ntp.util.scaleforunit(0.1912),
+                         (191.2, -1))
+        self.assertEqual(ntp.util.scaleforunit(0.00000042),
+                         (420.0, -3))
+        self.assertEqual(ntp.util.scaleforunit(-1.0),
+                         (-1.0, 0))
+        self.assertEqual(ntp.util.scaleforunit(-999.2342),
+                         (-999.2342, 0))
+        self.assertEqual(ntp.util.scaleforunit(-5042.7),
+                         (-5.0427, 1))
+        self.assertEqual(ntp.util.scaleforunit(-0.1912),
+                         (-191.2, -1))
+        self.assertEqual(ntp.util.scaleforunit(-0.00000042),
+                         (-420.0, -3))
+
 if __name__ == '__main__':
     unittest.main()

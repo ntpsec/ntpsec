@@ -143,6 +143,7 @@ def scaleforunit(f):
     multiplier = 10 ** -oom  # Reciprocol because floating * more accurate
     unitsmoved = oom // 3
     f *= multiplier
+    f = round(f, 13)  # Min round to catch something like 191.20000000000002
     return (f, int(unitsmoved))
 
 
