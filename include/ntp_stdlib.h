@@ -217,6 +217,9 @@ extern bool	trunc_os_clock;		/* sys_tick > measured_tick */
 #define COMPARE_EQUAL		0
 #define COMPARE_LESSTHAN	-1
 
+/* hack to ignore GCC Unused Result */
+#define IGNORE(r) do{if(r){}}while(0)
+
 extern bool sandbox(const bool droproot, char *user, const char *group,
 	     const char *chrootdir, bool want_dynamic_interface_tracking);
 

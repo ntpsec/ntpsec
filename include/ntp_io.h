@@ -48,7 +48,4 @@ extern void	add_nic_rule(nic_rule_match match_type,
 			     nic_rule_action action);
 extern	void	maintain_activefds(int fd, int closing);
 
-/* hack to ignore GCC Unused Result */
-#define IGNORE(r) do{if(r){}}while(0)
-
 #endif	/* GUARD_NTP_IO_H */

@@ -10,6 +10,7 @@
 #include "ntp_filegen.h"
 #include "ntp_leapsec.h"
 #include "ntp_stdlib.h"
+#include "ntp_stdlib.h"
 #include "ntpd.h"
 #include "timespecops.h"
 
@@ -145,8 +146,6 @@ init_util(void)
 /*
  * hourly_stats - print some interesting stats
  */
-#define IGNORE(r) do{if(r){}}while(0)
-
 static void drift_write(char *driftfile, double drift)
 {
 	int fd;
