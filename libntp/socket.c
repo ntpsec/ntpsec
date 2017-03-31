@@ -24,7 +24,7 @@
  * and may exceed the current file descriptor limits.
  * We are using following strategy:
  * - keep a current socket fd boundary initialized with
- *   max(0, min(GETDTABLESIZE() - FD_CHUNK, FOPEN_MAX))
+ *   max(0, min(sysconf(_SC_OPEN_MAX) - FD_CHUNK, FOPEN_MAX))
  * - attempt to move the descriptor to the boundary or
  *   above.
  *   - if that fails and boundary > 0 set boundary
@@ -77,11 +77,11 @@ move_fd(
 	 * already
 	 */
 	if (socket_boundary == -1) {
-		socket_boundary = max(0, min(GETDTABLESIZE() - FD_CHUNK,
+		socket_boundary = max(0, min(sysconf(_SC_OPEN_MAX) - FD_CHUNK,
 					     min(FOPEN_MAX, FD_PREFERRED_SOCKBOUNDARY)));
 		TRACE(1, ("move_fd: estimated max descriptors: %d, "
 			  "initial socket boundary: %d\n",
-			  GETDTABLESIZE(), socket_boundary));
+			  (int)sysconf(_SC_OPEN_MAX), socket_boundary));
 	}
 
 	/*
