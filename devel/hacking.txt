@@ -22,8 +22,8 @@ to a minimum.
 Time-critical code must be written in C. Use Python for any code that
 is not time-critical, as this reduces line count and complexity (thus,
 also, expected defect rates). If you need a NTP-specific C function
-not available in Python, try to improve the libntpc extension to
-expose it.
+not available in Python, try to improve the libntpc extension
+in ../libntp/pymodule.c to expose it.
 
 The only scripting language allowed and supported other than Python is
 POSIX sh (this is more restricted than bash!).  Python is preferred, as
@@ -42,7 +42,7 @@ C99 is a coding standard, not an ABI standard, so it can happily
 coexist with distributions that use C89 conventions.
 
 You can download the C99 standard for free from here:
-    http://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
+    https://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
 
 You *may* use C11-style anonymous unions.
 
@@ -83,9 +83,9 @@ cause buffer overruns and (all too often) exploitable security holes:
 * strtok: use strtok_r() or unroll this into the obvious loop.
 * gets: Use fgets instead.
 * gmtime(), localtime(), asctime(), ctime(): use the reentrant *_r variants.
-* tmpnam() - use mkstemp() or tmpfile() instead.
+* tmpnam(): use mkstemp() or tmpfile() instead.
 
-Do not rely on dirname() being re-entrant, and assume it will modify
+Do not rely on dirname() being reentrant, and assume it will modify
 (truncate) its argument. The Linux version is re-entrant, but this
 property is not portable.
 
@@ -268,7 +268,7 @@ object.
 You can read about JSON at http://www.json.org/
 
 Be aware that if you present a tool design with a messy output format
-and no JSON option it is quite likely to be rejected.
+and no JSON option, it is quite likely to be rejected.
 
 Our preferred format for dates is RFC 3339 (a version of ISO 8601 for
 UTC with some options frozen; full year required, medial T required,
@@ -291,7 +291,7 @@ to contribute a patch to the project.
 We use the SPDX convention for inclusion by reference.  You can read
 about this at
 
-      http://spdx.org/licenses
+      https://spdx.org/licenses
 
 When you create a new file, mark it as follows (updating the year)
 as required:
@@ -538,13 +538,13 @@ should be able to use "git stash" to get around that.
 This is the release checklist to be used by the project manager to cut
 each 0.9.X release.
 
-. Decide that it is time to cut a release.  This decision can be driven by landing
-  a significant new feature, landing a critical fix, or just that enough
-  time has passed with ongoing improvements and fixes.
+. Decide that it is time to cut a release.  This decision can be driven
+  by landing a significant new feature, landing a critical fix, or just
+  that enough time has passed with ongoing improvements and fixes.
 
-. Email a warning message to the mailto:devel@ntpsec.org list, and ask the major
-  contributors to chime in, and to each assure that the .../NEWS file
-  and the .../devel/TODO file is up to date.
+. Email a warning message to the mailto:devel@ntpsec.org list,
+  and ask the major contributors to chime in, and to each assure
+  that the .../NEWS file and the .../devel/TODO file is up to date.
 
 . Wait for the contributors to answer and for the discussion
   to settle down.  If the discussion suggests that now is not a good
@@ -559,6 +559,6 @@ each 0.9.X release.
 . Modify the .../NEWS file, changing the "Repository head".
   to the current date and the version string.
 
-. Run the "release" script in this directory.
+. Run the "release" script in this (devel) directory.
 
 //end
