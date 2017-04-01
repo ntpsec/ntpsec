@@ -2670,209 +2670,205 @@ config_peers(
 	config_tree *ptree
 	)
 {
-	sockaddr_u		peeraddr;
-	struct addrinfo		hints;
-	peer_node *		curr_peer;
-	peer_resolved_ctx *	ctx;
-	uint8_t			hmode;
+    sockaddr_u		peeraddr;
+    struct addrinfo		hints;
+    peer_node *		curr_peer;
+    peer_resolved_ctx *	ctx;
+    uint8_t			hmode;
 
-	/* add servers named on the command line with iburst implied */
-	for (;
-	    cmdline_server_count > 0;
-	    cmdline_server_count--, cmdline_servers++) {
-		struct peer_ctl client_ctl = {
-		    .version = NTP_VERSION,
-		    .minpoll = NTP_MINDPOLL,
-		    .maxpoll = NTP_MAXPOLL_UNK,
-		    .flags = FLAG_IBURST,
-		    .ttl = 0,
-		    .peerkey = 0,
-		};
+    /* add servers named on the command line with iburst implied */
+    for ( ; cmdline_server_count > 0;
+	cmdline_server_count--, cmdline_servers++) {
+	    struct peer_ctl client_ctl = {
+		.version = NTP_VERSION,
+		.minpoll = NTP_MINDPOLL,
+		.maxpoll = NTP_MAXPOLL_UNK,
+		.flags = FLAG_IBURST,
+		.ttl = 0,
+		.peerkey = 0,
+	    };
 
-		ZERO_SOCK(&peeraddr);
-		/*
-		 * If we have a numeric address, we can safely
-		 * proceed in the mainline with it.  Otherwise, hand
-		 * the hostname off to the blocking child.
-		 */
-		if (is_ip_address(*cmdline_servers, AF_UNSPEC,
-				  &peeraddr)) {
-
-			SET_PORT(&peeraddr, NTP_PORT);
-			if (is_sane_resolved_address(&peeraddr,
-						     T_Server))
-				peer_config(
-					&peeraddr,
-					NULL,
-					NULL,
-					MODE_CLIENT,
-					&client_ctl);
-		} else if (force_synchronous_dns) {
-			if (getaddrinfo_now(*cmdline_servers, &peeraddr)) {
-				peer_config(
-					&peeraddr,
-					NULL,
-					NULL,
-					MODE_CLIENT,
-					&client_ctl);
-			}
-		} else {
-			/* we have a hostname to resolve */
-# ifdef USE_WORKER
-			ctx = emalloc_zero(sizeof(*ctx));
-			ctx->family = AF_UNSPEC;
-			ctx->host_mode = T_Server;
-			ctx->hmode = MODE_CLIENT;
-			ctx->ctl.flags   = FLAG_IBURST;
-			ctx->ctl.maxpoll = NTP_MAXPOLL_UNK;
-			ctx->ctl.minpoll = NTP_MINDPOLL;
-			ctx->ctl.peerkey = 0;
-			ctx->ctl.ttl     = 0;
-			ctx->ctl.version = NTP_VERSION;
-
-			ZERO(hints);
-			hints.ai_family = (u_short)ctx->family;
-			hints.ai_socktype = SOCK_DGRAM;
-			hints.ai_protocol = IPPROTO_UDP;
-
-			getaddrinfo_sometime(*cmdline_servers,
-					     "ntp", &hints,
-					     INITIAL_DNS_RETRY,
-					     &peer_name_resolved,
-					     (void *)ctx);
-# else	/* !USE_WORKER follows */
-			msyslog(LOG_ERR,
-				"hostname %s can not be used (%s), please use IP address instead.",
-				curr_peer->addr->address, gai_strerror(a_info));
-# endif
-		}
-	}
-
-	/* add associations from the configuration file */
-	curr_peer = HEAD_PFIFO(ptree->peers);
-	for (; curr_peer != NULL; curr_peer = curr_peer->link) {
-		ZERO_SOCK(&peeraddr);
-		/* Find the correct host-mode */
-		hmode = get_correct_host_mode(curr_peer->host_mode);
-		INSIST(hmode != 0);
-
-		if (T_Pool == curr_peer->host_mode) {
-			AF(&peeraddr) = curr_peer->addr->type;
+	    ZERO_SOCK(&peeraddr);
+	    /*
+	     * If we have a numeric address, we can safely
+	     * proceed in the mainline with it.  Otherwise, hand
+	     * the hostname off to the blocking child.
+	     */
+	    if (is_ip_address(*cmdline_servers, AF_UNSPEC, &peeraddr)) {
+		SET_PORT(&peeraddr, NTP_PORT);
+		if (is_sane_resolved_address(&peeraddr,
+					     T_Server))
 			peer_config(
 				&peeraddr,
-				curr_peer->addr->address,
+				NULL,
+				NULL,
+				MODE_CLIENT,
+				&client_ctl);
+	    } else if (force_synchronous_dns) {
+		if (getaddrinfo_now(*cmdline_servers, &peeraddr)) {
+			peer_config(
+				&peeraddr,
+				NULL,
+				NULL,
+				MODE_CLIENT,
+				&client_ctl);
+		}
+	    } else {
+		/* we have a hostname to resolve */
+# ifdef USE_WORKER
+		ctx = emalloc_zero(sizeof(*ctx));
+		ctx->family = AF_UNSPEC;
+		ctx->host_mode = T_Server;
+		ctx->hmode = MODE_CLIENT;
+		ctx->ctl.flags   = FLAG_IBURST;
+		ctx->ctl.maxpoll = NTP_MAXPOLL_UNK;
+		ctx->ctl.minpoll = NTP_MINDPOLL;
+		ctx->ctl.peerkey = 0;
+		ctx->ctl.ttl     = 0;
+		ctx->ctl.version = NTP_VERSION;
+
+		ZERO(hints);
+		hints.ai_family = (u_short)ctx->family;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+
+		getaddrinfo_sometime(*cmdline_servers,
+				     "ntp", &hints,
+				     INITIAL_DNS_RETRY,
+				     &peer_name_resolved,
+				     (void *)ctx);
+# else	/* !USE_WORKER follows */
+		msyslog(LOG_ERR,
+		    "hostname %s can not be used (%s), use IP address instead.",
+		    curr_peer->addr->address, gai_strerror(a_info));
+# endif
+	    }
+    }
+
+    /* add associations from the configuration file */
+    curr_peer = HEAD_PFIFO(ptree->peers);
+    for (; curr_peer != NULL; curr_peer = curr_peer->link) {
+	ZERO_SOCK(&peeraddr);
+	/* Find the correct host-mode */
+	hmode = get_correct_host_mode(curr_peer->host_mode);
+	INSIST(hmode != 0);
+
+	if (T_Pool == curr_peer->host_mode) {
+	    AF(&peeraddr) = curr_peer->addr->type;
+	    peer_config(
+		    &peeraddr,
+		    curr_peer->addr->address,
+		    NULL,
+		    hmode,
+		    &curr_peer->ctl);
+	/*
+	 * If we have a numeric address, we can safely
+	 * proceed in the mainline with it.
+	 */
+	} else if (is_ip_address(curr_peer->addr->address,
+			  curr_peer->addr->type, &peeraddr)) {
+
+	    SET_PORT(&peeraddr, NTP_PORT);
+	    if (is_sane_resolved_address(&peeraddr, curr_peer->host_mode)) {
+#ifdef REFCLOCK
+		/* save maxpoll from config line
+		 * newpeer smashes it
+		 */
+		uint8_t maxpoll = curr_peer->ctl.maxpoll;
+#endif
+		struct peer *peer = peer_config(
+			&peeraddr,
+			NULL,
+			NULL,
+			hmode,
+			&curr_peer->ctl);
+		if ( NULL == peer )
+		{
+		    /* duplicate peer !?, ignore */
+		    msyslog(LOG_INFO, "configpeers: Ignoring duplicate '%s'",
+			socktoa(&peeraddr));
+		    continue;
+		}
+		if (ISREFCLOCKADR(&peeraddr))
+		{
+#ifdef REFCLOCK
+		    uint8_t clktype;
+		    int unit;
+		    /*
+		     * We let the reference clock
+		     * support do clock dependent
+		     * initialization.  This
+		     * includes setting the peer
+		     * timer, since the clock may
+		     * have requirements for this.
+		     */
+		    if (NTP_MAXPOLL_UNK == maxpoll)
+			    /* default maxpoll for
+			     * refclocks is minpoll
+			     */
+			    peer->maxpoll = peer->minpoll;
+		    clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
+		    unit = REFCLOCKUNIT(&peer->srcadr);
+
+		    peer->path = curr_peer->ctl.path;
+		    peer->ppspath = curr_peer->ctl.ppspath;
+		    peer->baud = curr_peer->ctl.baud;
+		    if (refclock_newpeer(clktype,
+					  unit,
+					  peer))
+			    refclock_control(&peeraddr,
+					     &curr_peer->clock_stat,
+					     NULL);
+		    else
+			    /*
+			     * Dump it, something screwed up
+			     */
+			    unpeer(peer);
+#else /* REFCLOCK */
+		    msyslog(LOG_ERR,
+			 "ntpd was compiled without refclock support.");
+		    unpeer(peer);
+#endif /* REFCLOCK */
+		}
+
+	    }
+	/*
+	 * synchronous lookup may be forced.
+	 */
+	} else if (force_synchronous_dns) {
+		if (getaddrinfo_now(curr_peer->addr->address, &peeraddr)) {
+			peer_config(
+				&peeraddr,
+				NULL,
 				NULL,
 				hmode,
 				&curr_peer->ctl);
-		/*
-		 * If we have a numeric address, we can safely
-		 * proceed in the mainline with it.
-		 */
-		} else if (is_ip_address(curr_peer->addr->address,
-				  curr_peer->addr->type, &peeraddr)) {
-
-			SET_PORT(&peeraddr, NTP_PORT);
-			if (is_sane_resolved_address(&peeraddr,
-						     curr_peer->host_mode)) {
-#ifdef REFCLOCK
-				/* save maxpoll from config line
-				 * newpeer smashes it
-				 */
-				uint8_t maxpoll = curr_peer->ctl.maxpoll;
-#endif
-				struct peer *peer = peer_config(
-					&peeraddr,
-					NULL,
-					NULL,
-					hmode,
-					&curr_peer->ctl);
-                                if ( NULL == peer )
-                                {
-				    /* duplicate peer !?, ignore */
-				    msyslog(LOG_INFO,
-                                      "configpeers: Ignoring duplicate '%s'",
-				      socktoa(&peeraddr));
-				    continue;
-                                }
-				if (ISREFCLOCKADR(&peeraddr))
-				{
-#ifdef REFCLOCK
-					uint8_t clktype;
-					int unit;
-					/*
-					 * We let the reference clock
-					 * support do clock dependent
-					 * initialization.  This
-					 * includes setting the peer
-					 * timer, since the clock may
-					 * have requirements for this.
-					 */
-					if (NTP_MAXPOLL_UNK == maxpoll)
-						/* default maxpoll for
-						 * refclocks is minpoll
-						 */
-						peer->maxpoll = peer->minpoll;
-					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
-					unit = REFCLOCKUNIT(&peer->srcadr);
-
-					peer->path = curr_peer->ctl.path;
-					peer->ppspath = curr_peer->ctl.ppspath;
-					peer->baud = curr_peer->ctl.baud;
-					if (refclock_newpeer(clktype,
-							      unit,
-							      peer))
-						refclock_control(&peeraddr,
-								 &curr_peer->clock_stat,
-								 NULL);
-					else
-						/*
-						 * Dump it, something screwed up
-						 */
-						unpeer(peer);
-#else /* REFCLOCK */
-					msyslog(LOG_ERR, "ntpd was compiled without refclock support.");
-					unpeer(peer);
-#endif /* REFCLOCK */
-				}
-
-			}
-		/*
-		 * synchronous lookup may be forced.
-		 */
-		} else if (force_synchronous_dns) {
-			if (getaddrinfo_now(curr_peer->addr->address, &peeraddr)) {
-				peer_config(
-					&peeraddr,
-					NULL,
-					NULL,
-					hmode,
-					&curr_peer->ctl);
-			}
-		} else {
-			/* hand the hostname off to the blocking child */
-# ifdef USE_WORKER
-			ctx = emalloc_zero(sizeof(*ctx));
-			ctx->family = curr_peer->addr->type;
-			ctx->host_mode = curr_peer->host_mode;
-			ctx->hmode = hmode;
-			ctx->ctl = curr_peer->ctl;
-
-			ZERO(hints);
-			hints.ai_family = ctx->family;
-			hints.ai_socktype = SOCK_DGRAM;
-			hints.ai_protocol = IPPROTO_UDP;
-
-			getaddrinfo_sometime(curr_peer->addr->address,
-					     "ntp", &hints,
-					     INITIAL_DNS_RETRY,
-					     &peer_name_resolved, ctx);
-# else	/* !USE_WORKER follows */
-			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use IP address instead.",
-				curr_peer->addr->address);
-# endif
 		}
+	} else {
+	    /* hand the hostname off to the blocking child */
+# ifdef USE_WORKER
+	    ctx = emalloc_zero(sizeof(*ctx));
+	    ctx->family = curr_peer->addr->type;
+	    ctx->host_mode = curr_peer->host_mode;
+	    ctx->hmode = hmode;
+	    ctx->ctl = curr_peer->ctl;
+
+	    ZERO(hints);
+	    hints.ai_family = ctx->family;
+	    hints.ai_socktype = SOCK_DGRAM;
+	    hints.ai_protocol = IPPROTO_UDP;
+
+	    getaddrinfo_sometime(curr_peer->addr->address,
+				 "ntp", &hints,
+				 INITIAL_DNS_RETRY,
+				 &peer_name_resolved, ctx);
+# else	/* !USE_WORKER follows */
+	    msyslog(LOG_ERR,
+		"hostname %s can not be used, please use IP address instead.",
+		curr_peer->addr->address);
+# endif
 	}
+    }
 }
 
 /*
