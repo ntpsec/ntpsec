@@ -90,5 +90,27 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(ntp.util.formatdigitsplit(-1.23456789, 6),
                          "%6.3f")
 
+    def test_unitformatter(self):
+        f = ntp.util.unitformatter
+        usec = ntp.util.UNITS_SEC
+        self.assertEqual(f(0.0000000005, usec, ntp.util.UNIT_MS),
+                         "     0ns")  # Checking timefuzz
+        self.assertEqual(f(0.0000000005, usec, ntp.util.UNIT_MS, strip=True),
+                         "0ns")  # Checking timefuzz, strip
+        self.assertEqual(f(12.45, usec, ntp.util.UNIT_MS),
+                         " 12.45ms")  # Checking normal
+        self.assertEqual(f(12.45, usec, ntp.util.UNIT_MS, strip=True),
+                         "12.45ms")  # Checking normal, strip
+        self.assertEqual(f(123456789.1234, usec, ntp.util.UNIT_MS, width=None),
+                         "123.4567891234ks")  # Checking normal, no width
+        self.assertEqual(f(0.000005, usec, ntp.util.UNIT_MS),
+                         "     5ns")  # Unit == base
+        self.assertEqual(f(0.000005, usec, ntp.util.UNIT_MS, strip=True),
+                         "5ns")  # Unit == base, strip
+        self.assertEqual(f(0.000005, usec, ntp.util.UNIT_MS, width=None),
+                         "5ns")  # Unit == base, no width
+        self.assertEqual(f(10000.1, usec, ntp.util.UNIT_KS),
+                         "10000.1ks")  # Value outside of unit ranges
+
 if __name__ == '__main__':
     unittest.main()
