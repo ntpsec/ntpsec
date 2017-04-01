@@ -22,11 +22,11 @@ TEST_TEAR_DOWN(lfptostr) {}
 static const int LFP_MAX_PRECISION = 10;
 static const int LFP_MAX_PRECISION_MS = 7;
 
-static const int ONE_FOURTH = 1073741824; // (1 << 30)
-static const int HALF = (1 << 31);
-static const int THREE_FOURTH = -1073741824;
-static const int HALF_PROMILLE_UP = 2147484; // slightly more than 0.0005
-static const int HALF_PROMILLE_DOWN = 2147483; // slightly less than 0.0005
+static const uint32_t ONE_FOURTH = 1073741824U;     // (1 << 30)
+static const uint32_t HALF = 2147483648U;           // (1 << 31)
+static const uint32_t THREE_FOURTH = 3221225472U;
+static const uint32_t HALF_PROMILLE_UP = 2147484;   // slightly more than 0.0005
+static const uint32_t HALF_PROMILLE_DOWN = 2147483; // slightly less than 0.0005
 
 TEST(lfptostr, PositiveInteger) {
     l_fp test = lfpinit(200, 0); // exact 200.0000000000
@@ -103,17 +103,17 @@ TEST(lfptostr, MillisecondsRoundingDown) {
 }
 
 TEST(lfptostr, UnsignedInteger) {
-	l_fp test1 = lfpinit(3000000000UL, 0);
-	l_fp test2 = lfpinit(3000000UL, 0x80000000);
-	l_fp test3 = lfpinit(13UL, 0xC0000000);
-	l_fp test4 = lfpinit(13UL, 0x028F5C28);
+	l_fp test1 = lfpinit(3000000000L, 0);
+	l_fp test2 = lfpinit(3000000L, 0x80000000);
+	l_fp test3 = lfpinit(13L, 0xC0000000);
+	l_fp test4 = lfpinit(13L, 0x028F5C28);
 
-	l_fp test5 = lfpinit(4212665562UL, 0x3C6BE7E6);
-	l_fp test6 = lfpinit(4212665562UL, 0x36222683);
-	l_fp test7 = lfpinit(4212665562UL, 0xBD3F2F5A);
-	l_fp test8a = lfpinit(1444359386UL, 0x2E0C7582);
-	l_fp test8b = lfpinit(1444359386UL, 0x2E0C7583);
-	l_fp test9 = lfpinit(3660323067UL, 0x1CD3101C);
+	l_fp test5 = lfpinit(4212665562L, 0x3C6BE7E6);
+	l_fp test6 = lfpinit(4212665562L, 0x36222683);
+	l_fp test7 = lfpinit(4212665562L, 0xBD3F2F5A);
+	l_fp test8a = lfpinit(1444359386L, 0x2E0C7582);
+	l_fp test8b = lfpinit(1444359386L, 0x2E0C7583);
+	l_fp test9 = lfpinit(3660323067L, 0x1CD3101C);
 
 	TEST_ASSERT_EQUAL_STRING("3000000000.0", ulfptoa(test1, 1));
 	TEST_ASSERT_EQUAL_STRING("3000000000.000000", ulfptoa(test1, 6));
