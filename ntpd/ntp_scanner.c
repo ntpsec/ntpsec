@@ -417,9 +417,10 @@ bool lex_push_file(
 			    	continue;
 			    baselist[basecount++] = strdup(dp->d_name);
 			    baselist = realloc(baselist,
-					       (basecount+1) * sizeof(char *));
+                                       (size_t)(basecount+1) * sizeof(char *));
 			}
-			qsort(baselist, basecount, sizeof(char *), rcmpstring);
+			qsort(baselist, (size_t)basecount, sizeof(char *),
+                              rcmpstring);
 			for (int i = 0; i < basecount; i++) {
 				char subpath[PATH_MAX];
 				strlcpy(subpath, fullpath, PATH_MAX);
@@ -533,7 +534,7 @@ is_keyword(
 
 	for (i = 0; lexeme[i]; i++) {
 		while (curr_s && (lexeme[i] != SS_CH(sst[curr_s])))
-			curr_s = SS_OTHER_N(sst[curr_s]);
+			curr_s = (int)SS_OTHER_N(sst[curr_s]);
 
 		if (curr_s && (lexeme[i] == SS_CH(sst[curr_s]))) {
 			if ('\0' == lexeme[i + 1]
