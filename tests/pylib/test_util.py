@@ -74,6 +74,21 @@ class TestPylibUtilMethods(unittest.TestCase):
             "1.02 34.5 0.67835 -23.0 9 6.7 1.0 .1"),
                          "   1.02    34.5 0.67835     -23       9     6.7       1     0.1 ms")
 
+    def test_formatdigitsplit(self):
+        self.assertEqual(ntp.util.formatdigitsplit(10.0, 5),
+                         "%5d")
+        self.assertEqual(ntp.util.formatdigitsplit(100.52, 5),
+                         "%5.1f")
+        self.assertEqual(ntp.util.formatdigitsplit(10.123456789, 8),
+                         "%8.5f")
+        self.assertEqual(ntp.util.formatdigitsplit(1.123456789, 8),
+                         "%8.6f")
+        self.assertEqual(ntp.util.formatdigitsplit(0.123456789, 8),
+                         "%8.6f")
+        self.assertEqual(ntp.util.formatdigitsplit(1.234, 10),
+                         "%10.3f")
+        self.assertEqual(ntp.util.formatdigitsplit(-1.23456789, 6),
+                         "%6.3f")
 
 if __name__ == '__main__':
     unittest.main()
