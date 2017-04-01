@@ -44,7 +44,6 @@ typedef enum {
 	FOLLBY_NON_ACCEPTING
 } follby;
 
-#define MAXLINE		1024	/* maximum length of line */
 #define MAXINCLUDELEVEL	5	/* maximum include file levels */
 
 /* STRUCTURES
