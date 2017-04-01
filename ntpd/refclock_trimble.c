@@ -407,7 +407,7 @@ trimble_start (
 	}
 
 	tio.c_cflag |= (PARENB|PARODD);
-	tio.c_iflag &= ~ICRNL;
+	tio.c_iflag &= (unsigned)~ICRNL;
 
 	/*
 	 * Allocate and initialize unit structure
