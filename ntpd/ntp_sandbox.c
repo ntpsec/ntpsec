@@ -174,7 +174,7 @@ getgroup:
 			exit(-1);
 		}
 #  endif /* HAVE_SOLARIS_PRIVS */
-		if (user && initgroups(user, (int)sw_gid)) {
+		if (user && initgroups(user, (gid_t)sw_gid)) {
 			msyslog(LOG_ERR, "Cannot initgroups() to user `%s': %m", user);
 			exit (-1);
 		}
@@ -193,7 +193,7 @@ getgroup:
 			}
 		}
 		else if (pw)
-			if (0 != initgroups(pw->pw_name, (int)pw->pw_gid)) {
+			if (0 != initgroups(pw->pw_name, (gid_t)pw->pw_gid)) {
 				msyslog(LOG_ERR, "initgroups(<%s>, %d) filed: %m", pw->pw_name, pw->pw_gid);
 				exit (-1);
 			}
