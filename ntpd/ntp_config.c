@@ -2786,6 +2786,14 @@ config_peers(
 					NULL,
 					hmode,
 					&curr_peer->ctl);
+                                if ( NULL == peer )
+                                {
+				    /* duplicate peer !?, ignore */
+				    msyslog(LOG_INFO,
+                                      "configpeers: Ignoring duplicate '%s'",
+				      socktoa(&peeraddr));
+				    continue;
+                                }
 				if (ISREFCLOCKADR(&peeraddr))
 				{
 #ifdef REFCLOCK
