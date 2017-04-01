@@ -2593,6 +2593,9 @@ is_sane_resolved_address(
 
 /*
  * peer_config - configure a new association
+ *
+ * RETURN: a pointer to the new peer structure
+ *         NULL if this would duplicate an existing peer
  */
 struct peer *
 peer_config(

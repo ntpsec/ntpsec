@@ -609,6 +609,9 @@ refresh_all_peerinterfaces(void)
 
 /*
  * newpeer - initialize a new peer association
+ *
+ * RETURN: a pointer to the new peer structure
+ *         NULL if this would duplicate an existing peer
  */
 struct peer *
 newpeer(
