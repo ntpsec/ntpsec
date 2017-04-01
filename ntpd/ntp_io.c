@@ -2293,7 +2293,7 @@ read_network_packet(
 	rb->recv_length       = recvmsg(fd, &msghdr, 0);
 #endif
 
-	buflen = rb->recv_length;
+	buflen = (ssize_t)rb->recv_length;
 
 	if (buflen == 0 || (buflen == -1 &&
 	    (EWOULDBLOCK == errno
@@ -2744,7 +2744,7 @@ findlocalinterface(
 	 */
 	if (NULL == iface || iface->ignore_packets)
 		iface = findclosestinterface(&saddr,
-					     flags | INT_LOOPBACK);
+					     (int)(flags | (int)INT_LOOPBACK));
 
 	/* Don't use an interface which will ignore replies */
 	if (iface != NULL && iface->ignore_packets)
@@ -2786,7 +2786,7 @@ findclosestinterface(
 	for (ep = ep_list; ep != NULL; ep = ep->elink) {
 		if (ep->ignore_packets ||
 		    AF(addr) != ep->family ||
-		    flags & ep->flags)
+		    (unsigned int)flags & ep->flags)
 			continue;
 
 		calc_addr_distance(&addr_dist, addr, &ep->sin);
