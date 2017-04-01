@@ -127,7 +127,7 @@ static const l_fp_w addsub_tab[][3] = {
 	// trivial identity:
 	{{0 ,0         }, { 0,0         }, { 0,0}},
 	// with carry from fraction and sign change:
-	{{-1,0x80000000}, { 0,0x80000000}, { 0,0}},
+	{{(uint32_t)-1,0x80000000}, { 0,0x80000000}, { 0,0}},
 	// without carry from fraction
 	{{ 1,0x40000000}, { 1,0x40000000}, { 2,0x80000000}},
 	// with carry from fraction:
@@ -174,7 +174,7 @@ eps(double d)
 TEST(lfpfunc, Extraction) {
     const uint32_t hi = 0xFFEEDDBB;
     const uint32_t lo = 0x66554433;
-    l_fp lfp = lfpinit(hi, lo);
+    l_fp lfp = lfpinit_u(hi, lo);
     TEST_ASSERT_EQUAL(lfpuint(lfp), hi);
     TEST_ASSERT_EQUAL(lfpfrac(lfp), lo);
     TEST_ASSERT_EQUAL(lfpsint(lfp), -1122885);
@@ -192,7 +192,8 @@ TEST(lfpfunc, Negation) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = lfpinit(addsub_tab[idx][0].l_ui, addsub_tab[idx][0].l_uf);
+		l_fp op1 = lfpinit_u(addsub_tab[idx][0].l_ui,
+                                     addsub_tab[idx][0].l_uf);
 		l_fp op2 = l_fp_negate(op1);
 		l_fp sum = op1 + op2;
 
@@ -210,7 +211,8 @@ TEST(lfpfunc, Absolute) {
 	size_t idx = 0;
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = lfpinit(addsub_tab[idx][0].l_ui, addsub_tab[idx][0].l_uf);
+		l_fp op1 = lfpinit_u(addsub_tab[idx][0].l_ui,
+                                     addsub_tab[idx][0].l_uf);
 		l_fp op2 = l_fp_abs(op1);
 
 		TEST_ASSERT_TRUE(l_fp_signum(op2) >= 0);
@@ -226,7 +228,7 @@ TEST(lfpfunc, Absolute) {
 	// There is one special case we have to check: the minimum
 	// value cannot be negated, or, to be more precise, the
 	// negation reproduces the original pattern.
-	l_fp minVal = lfpinit(0x80000000, 0x00000000);
+	l_fp minVal = lfpinit_u(0x80000000, 0x00000000);
 	l_fp minAbs = l_fp_abs(minVal);
 	TEST_ASSERT_EQUAL(-1, l_fp_signum(minVal));
 
@@ -250,7 +252,8 @@ TEST(lfpfunc, FDF_RoundTrip) {
 	// that limit.
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
-		l_fp op1 = lfpinit(addsub_tab[idx][0].l_ui, addsub_tab[idx][0].l_uf);
+		l_fp op1 = lfpinit_u(addsub_tab[idx][0].l_ui,
+                                     addsub_tab[idx][0].l_uf);
 		double op2 = lfptod(op1);
 		l_fp op3 = dtolfp(op2);
 
@@ -274,8 +277,8 @@ TEST(lfpfunc, SignedRelOps) {
 	size_t lc ;
 
 	for (lc = addsub_tot - 1; lc; --lc, ++tv) {
-		l_fp op1 = lfpinit(tv[0].l_ui, tv[0].l_uf);
-		l_fp op2 = lfpinit(tv[1].l_ui, tv[1].l_uf);
+		l_fp op1 = lfpinit_u(tv[0].l_ui, tv[0].l_uf);
+		l_fp op2 = lfpinit_u(tv[1].l_ui, tv[1].l_uf);
 		int cmp = l_fp_scmp(op1, op2);
 
 		switch (cmp) {
@@ -304,8 +307,8 @@ TEST(lfpfunc, UnsignedRelOps) {
 	size_t lc;
 
 	for (lc = addsub_tot - 1; lc; --lc, ++tv) {
-		l_fp op1 = lfpinit(tv[0].l_ui, tv[0].l_uf);
-		l_fp op2 = lfpinit(tv[1].l_ui, tv[1].l_uf);
+		l_fp op1 = lfpinit_u(tv[0].l_ui, tv[0].l_uf);
+		l_fp op2 = lfpinit_u(tv[1].l_ui, tv[1].l_uf);
 		int cmp = l_fp_ucmp(op1, op2);
 
 		switch (cmp) {
