@@ -469,7 +469,7 @@ snprintb(
 		*cp++ = '(';
 		any = false;
 		while ((i = *bits++) != 0) {
-			if (v & (1 << (i - 1))) {
+			if (v & (u_int)(1 << (i - 1))) {
 				if (any) {
 					*cp++ = ',';
 					if (cp >= cplim)
