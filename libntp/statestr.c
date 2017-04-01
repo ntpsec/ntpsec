@@ -394,7 +394,7 @@ k_st_flags(
 	uint32_t st
 	)
 {
-	return decode_bitflags(st, " ", k_st_bits, COUNTOF(k_st_bits));
+	return decode_bitflags((int)st, " ", k_st_bits, COUNTOF(k_st_bits));
 }
 #endif	/* HAVE_KERNEL_PLL */
 
