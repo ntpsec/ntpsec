@@ -349,10 +349,10 @@ ntpcal_periodic_extend(
 		diff %= (uint32_t)cycle;
 		if (diff) {
 			if (cpl)
-				diff = cycle - diff;
+				diff = (uint32_t)cycle - diff;
 			if (neg)
 				diff = ~diff + 1;
-			pivot += diff;
+			pivot += (int32_t)diff;
 		}
 	}
 	return pivot;
