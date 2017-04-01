@@ -87,7 +87,7 @@ void UnityTestRunner(unityfunction* setup,
         Unity.CurrentTestFailed = 0;
         Unity.TestFile = file;
         Unity.CurrentTestName = printableName;
-        Unity.CurrentTestLineNumber = line;
+        Unity.CurrentTestLineNumber = (_U_UINT)line;
         if (!UnityFixture.Verbose)
             UNITY_OUTPUT_CHAR('.');
         else
@@ -374,7 +374,7 @@ int UnityGetCommandLineOptions(int argc, const char* argv[])
             {
                 if (*(argv[i]) >= '0' && *(argv[i]) <= '9')
                 {
-                    UnityFixture.RepeatCount = atoi(argv[i]);
+                    UnityFixture.RepeatCount = (unsigned int)atoi(argv[i]);
                     i++;
                 }
             }
