@@ -14,6 +14,10 @@
 #include "ieee754io.h"
 
 static unsigned char get_byte (unsigned char *, offsets_t, int *);
+#if defined(DEBUG) && defined(DEBUG_PARSELIB)
+static int put_ieee754 (unsigned char **bufpp, int size, l_fp *lfpp,
+                        offsets_t offsets);
+#endif
 #ifdef __UNUSED__
 static void put_byte (unsigned char *, offsets_t, int *, unsigned char);
 #endif
@@ -368,7 +372,10 @@ fetch_ieee754(
     }
 }
   
-int
+#if defined(DEBUG) && defined(DEBUG_PARSELIB)
+#include <stdlib.h>
+
+static int
 put_ieee754(
 	    unsigned char **bufpp,
 	    int size,
@@ -511,10 +518,6 @@ put_ieee754(
     }
   return IEEE_OK;
 }
-
-
-#if defined(DEBUG) && defined(DEBUG_PARSELIB)
-#include <stdlib.h>
 
 int main(
 	 int argc,

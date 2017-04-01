@@ -26,7 +26,6 @@
 typedef unsigned char offsets_t[IEEE_OFFSETS];
 
 int fetch_ieee754 (unsigned char **bufp, int size, l_fp *lfpp, offsets_t offsets);
-int put_ieee754 (unsigned char **bufpp, int size, l_fp *lfpp, offsets_t offsets);
 
 #endif
 /*
