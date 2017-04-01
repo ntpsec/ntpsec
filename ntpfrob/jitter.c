@@ -45,7 +45,7 @@ get_clocktime(
 	 * Convert Unix clock from seconds and nanoseconds to seconds.
 	 */
 	clock_gettime(CLOCK_REALTIME, &ts);
-	setlfpsint(*now, ts.tv_sec + JAN_1970);
+	*now = lfptouint(ts.tv_sec + JAN_1970);  /* no fraction, yet */
 	dtemp = ts.tv_nsec * S_PER_NS;
 
 	/*
