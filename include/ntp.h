@@ -400,7 +400,7 @@ struct peer {
 #define	FLAG_BC_VOL	0x0010	/* broadcast client volleying */
 #define	FLAG_PREFER	0x0020	/* prefer peer */
 #define	FLAG_BURST	0x0040	/* burst mode */
-#define	FLAG_PPS	0x0080	/* steered by PPS */
+#define	FLAG_PPS	0x0080U	/* steered by PPS */
 #define	FLAG_IBURST	0x0100	/* initial burst mode */
 #define	FLAG_NOSELECT	0x0200	/* never select */
 #define	FLAG_TRUE	0x0400	/* force truechimer */
