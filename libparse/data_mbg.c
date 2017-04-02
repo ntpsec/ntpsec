@@ -106,13 +106,13 @@ get_mbg_tm(
 	)
 {
   tmp->year = get_lsb_int16(buffpp);
-  tmp->month = *(*buffpp)++;
-  tmp->mday = *(*buffpp)++;
+  tmp->month = (int8_t)(*(*buffpp)++);
+  tmp->mday = (int8_t)(*(*buffpp)++);
   tmp->yday = get_lsb_int16(buffpp);
-  tmp->wday = *(*buffpp)++;
-  tmp->hour = *(*buffpp)++;
-  tmp->min = *(*buffpp)++;
-  tmp->sec = *(*buffpp)++;
+  tmp->wday = (int8_t)(*(*buffpp)++);
+  tmp->hour = (int8_t)(*(*buffpp)++);
+  tmp->min = (int8_t)(*(*buffpp)++);
+  tmp->sec = (int8_t)(*(*buffpp)++);
   tmp->frac = get_lsb_ulong(buffpp);
   tmp->offs_from_utc = get_lsb_ulong(buffpp);
   tmp->status = get_lsb_uint16(buffpp);
@@ -207,7 +207,7 @@ mbg_time_status_str(
 
 		for (s = states; s->flag; s++)
 		{
-			if (s->flag & status)
+			if ( (unsigned int)s->flag & status)
 			{
 				if (p != *buffpp)
 				{
@@ -243,7 +243,8 @@ mbg_tm_str(
 	*buffpp += strlen(*buffpp);
 
 	if (print_status)
-		mbg_time_status_str(buffpp, tmp->status, size - (*buffpp - s));
+		mbg_time_status_str(buffpp, tmp->status,
+                                    size - (size_t)(*buffpp - s));
 }
 
 void
@@ -307,8 +308,8 @@ get_mbg_utc(
 
   utcp->WNlsf      = get_lsb_uint16(buffpp);
   utcp->DNt        = get_lsb_int16(buffpp);
-  utcp->delta_tls  = *(*buffpp)++;
-  utcp->delta_tlsf = *(*buffpp)++;
+  utcp->delta_tls  = (int8_t)(*(*buffpp)++);
+  utcp->delta_tlsf = (int8_t)(*(*buffpp)++);
 }
 
 void
@@ -357,7 +358,7 @@ get_mbg_comparam(
   comparamp->baud_rate = get_lsb_ulong(buffpp);
   for (i = 0; i < sizeof(comparamp->framing); i++)
     {
-      comparamp->framing[i] = *(*buffpp)++;
+      comparamp->framing[i] = (char)(*(*buffpp)++);
     }
   comparamp->handshake = get_lsb_int16(buffpp);
 }
