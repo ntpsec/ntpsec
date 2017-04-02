@@ -59,6 +59,7 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 /*
  * GPS Definitions
@@ -640,7 +641,7 @@ TSIP_decode (
 
 			pp->nsec = (long) (secfrac * 1000000000); 
 
-			secint %= 86400;    /* Only care about today */
+			secint %= S_PER_DAY;    /* Only care about today */
 			pp->hour = (int)(secint / 3600);
 			secint %= 3600;
 			pp->minute = (int)(secint / 60);

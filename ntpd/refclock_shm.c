@@ -218,7 +218,7 @@ shm_control(
 		return;
 	if (!(pp->sloppyclockflag & CLK_FLAG1))
 		up->max_delta = 0;
-	else if (pp->fudgetime2 < 1. || pp->fudgetime2 > 86400.)
+	else if (pp->fudgetime2 < 1. || pp->fudgetime2 > S_PER_DAY)
 		up->max_delta = 4*3600;
 	else
 		up->max_delta = (time_t)floor(pp->fudgetime2 + 0.5);

@@ -49,6 +49,9 @@
 #include "timetoa.h"
 
 
+/* seconds per day */
+#define S_PER_DAY 86400
+
 /* milliseconds per second */
 #define MS_PER_S 1000
 /* seconds per millisecond */
@@ -63,6 +66,9 @@
 #define NS_PER_S 1000000000
 /* seconds per nanosecond */
 #define S_PER_NS 1.0e-9
+
+/* nano seconds per millisecond */
+#define NS_PER_MS 1000000;
 
 /* predicate: returns true if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) ((x)->tv_nsec >= 0 && (x)->tv_nsec < NS_PER_S)
