@@ -169,7 +169,7 @@ typedef unsigned long int json_uint;
 #define MAX_PDU_LEN	1600
 #define TICKOVER_LOW	10
 #define TICKOVER_HIGH	120
-#define LOGTHROTTLE	3600
+#define LOGTHROTTLE	S_PER_H
 
 /* Primary channel PPS avilability dance:
  * Every good PPS sample gets us a credit of PPS_INCCOUNT points, every

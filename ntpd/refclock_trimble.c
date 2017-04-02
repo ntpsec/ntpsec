@@ -639,11 +639,11 @@ TSIP_decode (
 			secint = (long) secs;
 			secfrac = secs - secint; /* 0.0 <= secfrac < 1.0 */
 
-			pp->nsec = (long) (secfrac * 1000000000); 
+			pp->nsec = (long) (secfrac * NS_PER_S);
 
 			secint %= S_PER_DAY;    /* Only care about today */
-			pp->hour = (int)(secint / 3600);
-			secint %= 3600;
+			pp->hour = (int)(secint / S_PER_H);
+			secint %= S_PER_H;
 			pp->minute = (int)(secint / 60);
 			secint %= 60;
 			pp->second = secint % 60;

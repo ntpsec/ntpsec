@@ -51,6 +51,8 @@
 
 /* seconds per day */
 #define S_PER_DAY 86400
+/* seconds per hour */
+#define S_PER_H 3600
 
 /* milliseconds per second */
 #define MS_PER_S 1000

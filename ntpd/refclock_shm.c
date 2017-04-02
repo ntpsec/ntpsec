@@ -183,7 +183,7 @@ shm_start(
 		pp->clockdesc = DESCRIPTION;
 		/* items to be changed later in 'shm_control()': */
 		up->max_delay = 5;
-		up->max_delta = 4*3600;
+		up->max_delta = 4 * S_PER_H;
 		return true;
 	} else {
 		free(up);
@@ -219,7 +219,7 @@ shm_control(
 	if (!(pp->sloppyclockflag & CLK_FLAG1))
 		up->max_delta = 0;
 	else if (pp->fudgetime2 < 1. || pp->fudgetime2 > S_PER_DAY)
-		up->max_delta = 4*3600;
+		up->max_delta = 4 * S_PER_H;
 	else
 		up->max_delta = (time_t)floor(pp->fudgetime2 + 0.5);
 }
