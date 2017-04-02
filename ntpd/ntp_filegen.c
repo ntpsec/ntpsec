@@ -183,10 +183,10 @@ filegen_open(
 		break;
 
 	case FILEGEN_AGE:
-		gen->id_lo = current_time - (current_time % SECSPERDAY);
-		gen->id_hi = gen->id_lo + SECSPERDAY;
-		snprintf(suffix, suflen, "%ca%08lld",
-			 SUFFIX_SEP, (long long)gen->id_lo);
+	    gen->id_lo = (time_t)(current_time - (current_time % SECSPERDAY));
+	    gen->id_hi = gen->id_lo + SECSPERDAY;
+	    snprintf(suffix, suflen, "%ca%08lld",
+		     SUFFIX_SEP, (long long)gen->id_lo);
 	}
   
 	/* check possible truncation */
