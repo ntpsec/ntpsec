@@ -413,7 +413,7 @@ option_int
 	:	option_int_keyword T_Integer
 			{ $$ = create_attr_ival($1, $2); }
 	|	option_int_keyword T_U_int
-			{ $$ = create_attr_uval($1, $2); }
+			{ $$ = create_attr_uval($1, (u_int)$2); }
 	|	T_Stratum T_Integer
 		{
 			if ($2 >= 0 && $2 <= STRATUM_UNSPEC) {
@@ -1405,7 +1405,7 @@ yyerror(
 	if (!lex_from_file()) {
 		/* Save the error message in the correct buffer */
 		retval = snprintf(remote_config.err_msg + remote_config.err_pos,
-				  MAXLINE - remote_config.err_pos,
+				  (size_t)(MAXLINE - remote_config.err_pos),
 				  "column %d %s",
 				  ip_ctx->errpos.ncol, msg);
 
