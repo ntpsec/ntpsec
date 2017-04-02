@@ -1228,7 +1228,7 @@ poll_update(
 	 * slink away. If called from the poll process, delay 1 s for a
 	 * reference clock, otherwise 2 s.
 	 */
-	utemp = current_time + max(peer->throttle - (NTP_SHIFT - 1) *
+	utemp = current_time + (u_long)max(peer->throttle - (NTP_SHIFT - 1) *
 	    (1 << peer->minpoll), ntp_minpkt);
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
@@ -1257,7 +1257,7 @@ poll_update(
 			hpoll = min(peer->ppoll, peer->hpoll);
 #ifdef REFCLOCK
 		if (peer->flags & FLAG_REFCLOCK)
-			next = 1 << hpoll;
+			next = 1U << hpoll;
 		else
 #endif /* REFCLOCK */
 			/*
@@ -1272,7 +1272,7 @@ poll_update(
 		else
 			peer->nextdate = utemp;
 		if (peer->throttle > (1 << peer->minpoll))
-			peer->nextdate += ntp_minpkt;
+			peer->nextdate += (u_long)ntp_minpkt;
 	}
 	DPRINTF(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
 		    current_time, socktoa(&peer->srcadr), peer->hpoll,
@@ -1344,7 +1344,7 @@ peer_clear(
 	     * association ID fits the bill.
 	     */
 	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
-	    peer->nextdate += pseudorandom % (1 << peer->minpoll);
+	    peer->nextdate += (u_long)(pseudorandom % (1 << peer->minpoll));
 	}
 #ifdef DEBUG
 	if (debug)
@@ -1600,10 +1600,9 @@ clock_select(void)
 	nlist = 1;
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		nlist++;
-	endpoint_size = ALIGNED_SIZE(
-                             (unsigned long)(nlist * 2 * sizeof(*endpoint)));
-	peers_size = ALIGNED_SIZE((unsigned long)(nlist * sizeof(*peers)));
-	indx_size = ALIGNED_SIZE((unsigned long)(nlist * 2 * sizeof(*indx)));
+	endpoint_size = ALIGNED_SIZE((uint)nlist * 2 * sizeof(*endpoint));
+	peers_size = ALIGNED_SIZE((uint)nlist * sizeof(*peers));
+	indx_size = ALIGNED_SIZE((uint)nlist * 2 * sizeof(*indx));
 	octets = endpoint_size + peers_size + indx_size;
 	endpoint = erealloc(endpoint, octets);
 	peers = INC_ALIGNED_PTR(endpoint, endpoint_size);
@@ -2046,7 +2045,7 @@ clock_select(void)
 	if (typesystem == NULL) {
 		if (osys_peer != NULL) {
 			if (sys_orphwait > 0)
-				orphwait = current_time + sys_orphwait;
+			    orphwait = current_time + (u_long)sys_orphwait;
 			report_event(EVNT_NOPEER, NULL, NULL);
 		}
 		sys_peer = NULL;
@@ -2213,7 +2212,7 @@ peer_xmit(
 	peer->org = xmt_tx;
 	xpkt.xmt = htonl_fp(xmt_tx);
 	xkeyid = peer->keyid;
-	authlen = authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
+	authlen = (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 	if (authlen == 0) {
 		report_event(PEVNT_AUTH, peer, "no key");
 		peer->flash |= BOGON5;		/* auth error */
@@ -2394,7 +2393,7 @@ fast_xmit(
 	 * cryptosum.
 	 */
 	get_systime(&xmt_tx);
-	sendlen += authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
+	sendlen += (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, sendlen);
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
@@ -2793,7 +2792,7 @@ init_proto(const bool verbose)
 	sys_survivors = 0;
 	sys_manycastserver = 0;
 	sys_stattime = current_time;
-	orphwait = current_time + sys_orphwait;
+	orphwait = current_time + (u_long)sys_orphwait;
 	proto_clr_stats();
 	use_stattime = current_time;
 	hardpps_enable = false;
@@ -2899,9 +2898,9 @@ proto_config(
 		break;
 
 	case PROTO_ORPHWAIT:	/* orphan wait (orphwait) */
-		orphwait -= sys_orphwait;
+		orphwait -= (u_long)sys_orphwait;
 		sys_orphwait = (int)dvalue;
-		orphwait += sys_orphwait;
+		orphwait += (u_long)sys_orphwait;
 		break;
 
 	default:
