@@ -277,6 +277,7 @@ def cmd_configure(ctx, config):
         "-Wall",
         "-Wextra",
         # "-Wfloat-equal",   # Not Ready For Prime Time
+        # "-Wmissing-prototypes",  # Not Ready For Prime Time
         # "-Wsign-conversion", # Not Ready For Prime Time
         "-Wshadow",
         "-Wstrict-prototypes",
