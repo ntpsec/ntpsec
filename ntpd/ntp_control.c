@@ -713,7 +713,8 @@ ctl_error(
 	if (res_authenticate) {
 		maclen = authencrypt(res_keyid, (uint32_t *)&rpkt,
 				     CTL_HEADER_LEN);
-		sendpkt(rmt_addr, lcl_inter, &rpkt, CTL_HEADER_LEN + maclen);
+		sendpkt(rmt_addr, lcl_inter, &rpkt,
+                        (int)CTL_HEADER_LEN + maclen);
 	} else
 		sendpkt(rmt_addr, lcl_inter, &rpkt, CTL_HEADER_LEN);
 }
@@ -810,7 +811,7 @@ process_control(
 		return;
 	}
 
-	properlen = req_count + CTL_HEADER_LEN;
+	properlen = req_count + (int)CTL_HEADER_LEN;
 	/* round up proper len to a 8 octet boundary */
 
 	properlen = (properlen + 7) & ~7;
@@ -957,7 +958,7 @@ ctl_flushpkt(
 		*datapt++ = '\n';
 		dlen += 2;
 	}
-	sendlen = dlen + CTL_HEADER_LEN;
+	sendlen = dlen + (int)CTL_HEADER_LEN;
 
 	/*
 	 * Zero-fill the unused part of the packet.  This wasn't needed
@@ -1025,26 +1026,26 @@ ctl_putdata(
 	bool bin		/* set to true when data is binary */
 	)
 {
-	int overhead;
+	unsigned int overhead;
 	unsigned int currentlen;
 	const uint8_t * dataend = &rpkt.data[CTL_MAX_DATA_LEN];
 
 	overhead = 0;
 	if (!bin) {
-		datanotbinflag = true;
-		overhead = 3;
-		if (datasent) {
-			*datapt++ = ',';
+	    datanotbinflag = true;
+	    overhead = 3;
+	    if (datasent) {
+		*datapt++ = ',';
+		datalinelen++;
+		if ((dlen + (unsigned int)datalinelen + 1) >= MAXDATALINELEN) {
+			*datapt++ = '\r';
+			*datapt++ = '\n';
+			datalinelen = 0;
+		} else {
+			*datapt++ = ' ';
 			datalinelen++;
-			if ((dlen + datalinelen + 1) >= MAXDATALINELEN) {
-				*datapt++ = '\r';
-				*datapt++ = '\n';
-				datalinelen = 0;
-			} else {
-				*datapt++ = ' ';
-				datalinelen++;
-			}
 		}
+	    }
 	}
 
 	/*
@@ -1061,14 +1062,14 @@ ctl_putdata(
 		datapt += currentlen;
 		dp += currentlen;
 		dlen -= currentlen;
-		datalinelen += currentlen;
+		datalinelen += (int)currentlen;
 
 		ctl_flushpkt(CTL_MORE);
 	}
 
 	memcpy(datapt, dp, dlen);
 	datapt += dlen;
-	datalinelen += dlen;
+	datalinelen += (int)dlen;
 	datasent = true;
 }
 
@@ -1715,7 +1716,8 @@ ctl_putsys(
 	case CS_MRU_OLDEST_AGE: {
 		l_fp now;
 		get_systime(&now);
-		ctl_putuint(sys_var[varid].text, mon_get_oldest_age(now));
+		ctl_putuint(sys_var[varid].text,
+                            (u_long)mon_get_oldest_age(now));
 		break;
 		}
 
@@ -1778,7 +1780,7 @@ ctl_putsys(
 		break;
 
 	case CS_AUTHFREEK:
-		ctl_putuint(sys_var[varid].text, authnumfreekeys);
+		ctl_putuint(sys_var[varid].text, (u_long)authnumfreekeys);
 		break;
 
 	case CS_AUTHKLOOKUPS:
@@ -1874,7 +1876,7 @@ ctl_putsys(
 #ifndef HAVE_KERNEL_PLL
 		ss = "";
 #else
-		ss = k_st_flags(ntx.status);
+		ss = k_st_flags((uint32_t)ntx.status);
 #endif
 		ctl_putstr(sys_var[varid].text, ss, strlen(ss));
 		break;
@@ -2113,7 +2115,7 @@ ctl_putpeer(
 		break;
 
 	case CP_RATE:
-		ctl_putuint(peer_var[id].text, p->throttle);
+		ctl_putuint(peer_var[id].text, (u_long)p->throttle);
 		break;
 
 	case CP_LEAP:
@@ -2184,7 +2186,7 @@ ctl_putpeer(
 		break;
 
 	case CP_FLASH:
-		ctl_puthex(peer_var[id].text, p->flash);
+		ctl_puthex(peer_var[id].text, (u_long)p->flash);
 		break;
 
 	case CP_TTL:
@@ -2197,7 +2199,7 @@ ctl_putpeer(
 		break;
 
 	case CP_UNREACH:
-		ctl_putuint(peer_var[id].text, p->unreach);
+		ctl_putuint(peer_var[id].text, (u_long)p->unreach);
 		break;
 
 	case CP_TIMER:
@@ -2771,7 +2773,7 @@ read_sysvars(void)
 	if (gotvar) {
 		for (n = 1; n <= CS_MAXCODE; n++)
 			if (wants[n])
-				ctl_putsys(n);
+				ctl_putsys((int)n);
 		for (n = 0; n + CS_MAXCODE + 1 < wants_count; n++)
 			if (wants[n + CS_MAXCODE + 1]) {
 				pch = ext_sys_var[n].text;
@@ -3005,7 +3007,8 @@ static void configure(
 			remote_config.err_pos += retval;
 	}
 
-	ctl_putdata(remote_config.err_msg, remote_config.err_pos, false);
+	ctl_putdata(remote_config.err_msg, (unsigned int)remote_config.err_pos,
+                    false);
 	ctl_flushpkt(0);
 
 	DPRINTF(1, ("Reply: %s\n", remote_config.err_msg));
@@ -3037,11 +3040,11 @@ static uint32_t derive_nonce(
 	u_int		len;
 
 	while (!salt[0] || current_time - last_salt_update >= S_PER_H) {
-	    salt[0] = ntp_random();
-		salt[1] = ntp_random();
-		salt[2] = ntp_random();
-		salt[3] = ntp_random();
-		last_salt_update = current_time;
+            salt[0] = (uint32_t)ntp_random();
+            salt[1] = (uint32_t)ntp_random();
+            salt[2] = (uint32_t)ntp_random();
+            salt[3] = (uint32_t)ntp_random();
+            last_salt_update = current_time;
 	}
 
 	ctx = EVP_MD_CTX_create();
@@ -3104,7 +3107,7 @@ static int validate_nonce(
 	if (3 != sscanf(pnonce, "%08x%08x%08x", &ts_i, &ts_f, &supposed))
 		return false;
 
-	ts = lfpinit((uint32_t)ts_i, (uint32_t)ts_f);
+	ts = lfpinit_u(ts_i, (uint32_t)ts_f);
 	derived = derive_nonce(&rbufp->recv_srcadr, lfpuint(ts), lfpfrac(ts));
 	get_systime(&now_delta);
 	now_delta -= ts;
@@ -3143,7 +3146,7 @@ send_random_tag_value(
 	noise >>= 5;
 	buf[3] = '.';
 	snprintf(&buf[4], sizeof(buf) - 4, "%d", indx);
-	ctl_putuint(buf, noise);
+	ctl_putuint(buf, (u_long)noise);
 }
 #endif /* USE_RANDOMIZE_RESPONSE */
 
@@ -3175,7 +3178,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	noise = ntp_random();
+	noise = (uint32_t)ntp_random();
 	while (remaining > 0) {
 #ifdef USE_RANDOMIZE_RESPONSES
 	 	which = (noise & 7) % COUNTOF(sent);
@@ -3471,7 +3474,7 @@ static void read_mru_list(
 			   (size_t)si < COUNTOF(last)) {
 			if (2 != sscanf(val, "0x%08x.%08x", &ui, &uf))
 				goto blooper;
-			last[si] = lfpinit(ui, uf);
+			last[si] = lfpinit_u(ui, uf);
 			if (!SOCK_UNSPEC(&addr[si]) && si == priors)
 				priors++;
 		} else if (1 == sscanf(v->text, addr_fmt, &si) &&
@@ -3586,7 +3589,7 @@ static void read_mru_list(
 			continue;
 		if (recent != 0 && countdown-- > recent)
 			continue;
-		send_mru_entry(mon, count);
+		send_mru_entry(mon, (int)count);
 #ifdef USE_RANDOMIZE_RESPONSES
 		if (!count)
 			send_random_tag_value(0);
@@ -3602,7 +3605,7 @@ static void read_mru_list(
 	if (NULL == mon) {
 #ifdef USE_RANDOMIZE_RESPONSES
 		if (count > 1)
-			send_random_tag_value(count - 1);
+			send_random_tag_value((int)count - 1);
 #endif /* USE_RANDOMIZE_RESPONSES */
 		ctl_putts("now", &now);
 		/* if any entries were returned confirm the last */
@@ -3652,7 +3655,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			noise = ntp_random();
+			noise = (uint32_t)ntp_random();
 			noisebits = 31;
 		}
 #ifdef USE_RANDOMIZE_RESPONSES
@@ -3835,7 +3838,7 @@ send_restrict_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 2) {
-			noise = ntp_random();
+			noise = (uint32_t)ntp_random();
 			noisebits = 31;
 		}
 #ifdef USE_RANDOMIZE_RESPONSES
@@ -4084,7 +4087,7 @@ read_clockstatus(
 				ctl_putclock(i, &cs, true);
 		if (kv != NULL)
 			for (i = 0; !(EOV & kv[i].flags); i++)
-				if (wants[i + CC_MAXCODE + 1])
+				if (wants[(unsigned int)i + CC_MAXCODE + 1])
 					ctl_putdata(kv[i].text,
 						    strlen(kv[i].text),
 						    false);
@@ -4286,7 +4289,7 @@ add_var(
 	char *		buf;
 
 	c = count_var(*kv);
-	*kv  = erealloc(*kv, (c + 2) * sizeof(**kv));
+	*kv  = erealloc(*kv, (c + 2U) * sizeof(**kv));
 	k = *kv;
 	buf = emalloc(size);
 	k[c].code  = c;
