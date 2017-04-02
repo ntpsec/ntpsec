@@ -331,7 +331,7 @@ init_thunderbolt (
 	sendetx      (&tx, fd);
 	
 	/* activate packets 0x8F-AB and 0x8F-AC */
-	sendsupercmd (&tx, 0x8F, 0xA5);
+	sendsupercmd (&tx, 0x8E, 0xA5);
 	sendint      (&tx, 0x5);
 	sendetx      (&tx, fd);
 
