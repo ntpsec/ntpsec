@@ -1179,7 +1179,7 @@ config_auth(
 		if (T_Integer == my_val->type) {
 			first = my_val->value.i;
 			if (first >= 1 && first <= NTP_MAXKEY) {
-				authtrust(first, true);
+				authtrust((keyid_t)first, true);
 			} else {
 				msyslog(LOG_NOTICE,
 					"Ignoring invalid trustedkey %d, min 1 max %d.",
@@ -1195,7 +1195,7 @@ config_auth(
 					first, last, NTP_MAXKEY);
 			} else {
 				for (i = first; i <= last; i++) {
-					authtrust(i, true);
+					authtrust((keyid_t)i, true);
 				}
 			}
 		}
@@ -1341,7 +1341,7 @@ config_monitor(
 		filegen_flag = filegen->flag;
 		filegen_flag |= FGEN_FLAG_ENABLED;
 		filegen_config(filegen, statsdir, filegen_string,
-			       filegen->type, filegen_flag);
+			       filegen->type, (u_int)filegen_flag);
 	}
 
 	/* Configure the statistics with the options */
@@ -1444,7 +1444,7 @@ config_monitor(
 			}
 		}
 		filegen_config(filegen, statsdir, filegen_file,
-			       filegen_type, filegen_flag);
+			       (u_int)filegen_type, (u_int)filegen_flag);
 	}
 }
 
@@ -2168,23 +2168,23 @@ apply_enable_disable(
 			break;
 
 		case T_Calibrate:
-			proto_config(PROTO_CAL, enable, 0.);
+			proto_config(PROTO_CAL, (u_long)enable, 0.);
 			break;
 
 		case T_Kernel:
-			proto_config(PROTO_KERNEL, enable, 0.);
+			proto_config(PROTO_KERNEL, (u_long)enable, 0.);
 			break;
 
 		case T_Monitor:
-			proto_config(PROTO_MONITOR, enable, 0.);
+			proto_config(PROTO_MONITOR, (u_long)enable, 0.);
 			break;
 
 		case T_Ntp:
-			proto_config(PROTO_NTP, enable, 0.);
+			proto_config(PROTO_NTP, (u_long)enable, 0.);
 			break;
 
 		case T_Stats:
-			proto_config(PROTO_FILEGEN, enable, 0.);
+			proto_config(PROTO_FILEGEN, (u_long)enable, 0.);
 			break;
 
 		}
@@ -2641,7 +2641,7 @@ peer_config(
 	if (MDF_POOL & cast_flags)
 		ctl->flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
-		       ctl->minpoll, ctl->maxpoll, ctl->flags,
+		       ctl->minpoll, ctl->maxpoll, (u_int)ctl->flags,
 		       cast_flags, ctl->ttl, ctl->peerkey, true);
 }
 
@@ -3673,7 +3673,7 @@ ntp_rlimit(
 		 * not be enough. 
 		 */
 		DPRINTF(2, ("ntp_rlimit: NOFILE: %d %s\n",
-			(int)(rl_value / rl_scale), rl_sstr));
+			(int)rl_value / rl_scale, rl_sstr));
 		rl.rlim_cur = rl.rlim_max = rl_value;
 		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_NOFILE: %m");
@@ -3688,7 +3688,7 @@ ntp_rlimit(
 		 * stack memory.
 		 */
 		DPRINTF(2, ("ntp_rlimit: STACK: %d %s pages\n",
-			    (int)(rl_value / rl_scale), rl_sstr));
+			    (int)rl_value / rl_scale, rl_sstr));
 		if (-1 == getrlimit(RLIMIT_STACK, &rl)) {
 			msyslog(LOG_ERR, "getrlimit(RLIMIT_STACK) failed: %m");
 		} else {
