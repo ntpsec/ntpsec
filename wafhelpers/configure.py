@@ -276,8 +276,10 @@ def cmd_configure(ctx, config):
         "-O1",
         "-Wall",
         "-Wextra",
-        # "-Wsign-conversion", # debug only
+        # "-Wfloat-equal",   # Not Ready For Prime Time
+        # "-Wsign-conversion", # Not Ready For Prime Time
         "-Wstrict-prototypes",
+        "-Wundef",
         "-Wunused",
         ]
 

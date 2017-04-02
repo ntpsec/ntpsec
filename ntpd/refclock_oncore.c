@@ -2670,7 +2670,7 @@ oncore_msg_CaFaIa(
 
 		instance->timeout = 0;
 
-#if ONCORE_VERBOSE_SELF_TEST
+#ifdef ONCORE_VERBOSE_SELF_TEST
 		if (debug > 2) {
 			if (buf[2] == 'I')
 				oncore_log_f(instance, LOG_DEBUG,
