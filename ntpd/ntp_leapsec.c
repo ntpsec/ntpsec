@@ -191,20 +191,20 @@ leapsec_load(
 				ntp = strtoull(cp, &ep, 10);
 				if (parsefail(cp, ep))
 					goto fail_read;
-				pt->head.expire = ntp - JAN_1970;
+				pt->head.expire = (time_t)(ntp - JAN_1970);
 				pt->lsig.etime = pt->head.expire;
 			} else if (*cp == '$') {
 				cp = skipws(cp+1);
 				ntp = strtoull(cp, &ep, 10);
 				if (parsefail(cp, ep))
 					goto fail_read;
-				pt->head.update = ntp - JAN_1970;
+				pt->head.update = (time_t)(ntp - JAN_1970);
 			}
 		} else if (isdigit((uint8_t)*cp)) {
 			ntp = strtoull(cp, &ep, 10);
 			if (parsefail(cp, ep))
 				goto fail_read;
-			ttime = ntp - JAN_1970;
+			ttime = (time_t)(ntp - JAN_1970);
 			cp = skipws(ep);
 			taiof = strtol(cp, &ep, 10);
 			if (   parsefail(cp, ep)
@@ -294,7 +294,7 @@ leapsec_query(
 		 */
 		last = pt->head.ttime;
 		// FIXME warped is only 16 bits.  ????
-		qr->warped = (uint16_t)(last - pt->head.dtime);
+		qr->warped = (int16_t)(last - pt->head.dtime);
 		next = when + qr->warped;
 		reload_limits(pt, next);
 		fired = (pt->head.ebase == last);
@@ -905,7 +905,7 @@ do_hash_data(
 	unsigned int   tlen =  0;
 	unsigned char  ch;
 
-	while ('\0' != (ch = *cp++) && '#' != ch)
+	while ('\0' != (ch = (unsigned char)(*cp++)) && '#' != ch)
 		if (isdigit(ch)) {
 			text[tlen++] = ch;
 			tlen &= (sizeof(text)-1);
