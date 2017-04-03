@@ -74,7 +74,8 @@ class TestPylibUtilMethods(unittest.TestCase):
     def test_filtcooker(self):
         self.assertEqual(ntp.util.filtcooker(
             "1.02 34.5 0.67835 -23.0 9 6.7 1.0 .1"),
-                         "   1.02    34.5 0.67835     -23       9     6.7       1     0.1 ms")
+            "   1.02    34.5 0.67835     -23       9     6.7       1     0.1 ms"
+        )
 
     def test_formatdigitsplit(self):
         self.assertEqual(ntp.util.formatdigitsplit(10.0, 5),
@@ -96,24 +97,21 @@ class TestPylibUtilMethods(unittest.TestCase):
         f = ntp.util.unitformatter
         usec = ntp.util.UNITS_SEC
 
-        # 1.0000000005 s rounds to 1s
-        self.assertEqual(f(1.0000000005, usec, ntp.util.UNIT_S),
-                         "1.00000s")  # Checking timefuzz
+        sec_t = [
+            # 1.0000000005 s rounds to 1s
+            [1.0000000005, "1.00000s"],
+            # -1.0000000005 s rounds to 1s
+            [-1.0000000005, "-1.0000s"],
+            # 0.999999 s round to 1s
+            [0.999999, "1.00000s"],
+            # 0.00000000049 s rounds to 0ns
+            [0.00000000049, "     0ns"],
+            # 0.00000000051 s rounds to 1ns
+            [0.00000000051, "     1ns"],
+        ]
 
-        # -1.0000000005 s rounds to 1s
-        self.assertEqual(f(-1.0000000005, usec, ntp.util.UNIT_S),
-                         "-1.0000s")  # Checking timefuzz
-
-        # 0.999999 s round to 1s
-        self.assertEqual(f(0.999999, usec, ntp.util.UNIT_S),
-                         "1.00000s")  # Checking timefuzz
-
-        # 0.00000000049 s rounds to 0ns
-        self.assertEqual(f(0.00000000049, usec, ntp.util.UNIT_S),
-                         "     0ns")  # Checking timefuzz
-        # 0.0000000005 s rounds to 1ns
-        self.assertEqual(f(0.0000000005, usec, ntp.util.UNIT_S),
-                         "     1ns")  # Checking timefuzz
+        for t in sec_t:
+            self.assertEqual(f(t[0], usec, ntp.util.UNIT_S), t[1])
 
         # 0.4 ms rounds to 0ns
         self.assertEqual(f(0.0000004, usec, ntp.util.UNIT_MS),
