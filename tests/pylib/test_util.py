@@ -95,13 +95,44 @@ class TestPylibUtilMethods(unittest.TestCase):
     def test_unitformatter(self):
         f = ntp.util.unitformatter
         usec = ntp.util.UNITS_SEC
-        self.assertEqual(f(0.0000000005, usec, ntp.util.UNIT_MS),
+
+        # 1.0000000005 s rounds to 1s
+        self.assertEqual(f(1.0000000005, usec, ntp.util.UNIT_S),
+                         "1.00000s")  # Checking timefuzz
+
+        # -1.0000000005 s rounds to 1s
+        self.assertEqual(f(-1.0000000005, usec, ntp.util.UNIT_S),
+                         "-1.0000s")  # Checking timefuzz
+
+        # 0.999999 s round to 1s
+        self.assertEqual(f(0.999999, usec, ntp.util.UNIT_S),
+                         "1.00000s")  # Checking timefuzz
+
+        # 0.00000000049 s rounds to 0ns
+        self.assertEqual(f(0.00000000049, usec, ntp.util.UNIT_S),
                          "     0ns")  # Checking timefuzz
-        self.assertEqual(f(0.0000000005, usec, ntp.util.UNIT_MS, strip=True),
+        # 0.0000000005 s rounds to 1ns
+        self.assertEqual(f(0.0000000005, usec, ntp.util.UNIT_S),
+                         "     1ns")  # Checking timefuzz
+
+        # 0.4 ms rounds to 0ns
+        self.assertEqual(f(0.0000004, usec, ntp.util.UNIT_MS),
+                         "     0ns")  # Checking timefuzz
+        # 0.5 ms rounds to 1ns
+        self.assertEqual(f(0.0000005, usec, ntp.util.UNIT_MS),
+                         "     1ns")  # Checking timefuzz
+        # 0.5 ms rounds to 1ns
+        self.assertEqual(f(0.0000005, usec, ntp.util.UNIT_MS, strip=True),
                          "0ns")  # Checking timefuzz, strip
         self.assertEqual(f(12.45, usec, ntp.util.UNIT_MS),
                          " 12.45ms")  # Checking normal
         self.assertEqual(f(12.45, usec, ntp.util.UNIT_MS, strip=True),
+                         "12.45ms")  # Checking normal, strip
+        # 12.499999 ms rounds to 12.45 ms
+        self.assertEqual(f(12.499999, usec, ntp.util.UNIT_MS, strip=True),
+                         "12.45ms")  # Checking normal, strip
+        # 12.451 ms rounds to 12.45 ms
+        self.assertEqual(f(12.451, usec, ntp.util.UNIT_MS, strip=True),
                          "12.45ms")  # Checking normal, strip
         self.assertEqual(f(123456789.1234, usec, ntp.util.UNIT_MS, width=None),
                          "123.4567891234ks")  # Checking normal, no width
