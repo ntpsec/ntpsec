@@ -83,7 +83,7 @@ args = sys.argv[1:]
 
 leap = time.time()
 days = int(leap/86400)
-leap = days*86400
+leap = (days+1)*86400
 
 if len(args) > 0:
   leapdate = datetime.datetime.strptime(args[0], "%Y-%m-%d")
@@ -97,13 +97,16 @@ if len(args) > 0:
   expire = (expiredate - epoch).total_seconds()
   expire = int(expire)
   args = args[1:]
+leap_txt = time.asctime(time.gmtime(leap))
 leap = str(leap+JAN_1970)
+expire_txt = time.asctime(time.gmtime(expire))
 expire=str(expire+JAN_1970)
 
-update = time.time()
-days = int(update/86400)
-update = days*86400
+update = int(time.time())
+update_txt = time.asctime(time.gmtime(update))
 update = str(update+JAN_1970)
+
+
 tai = "40"          # hardwired
 
 # File format
@@ -121,13 +124,13 @@ tai = "40"          # hardwired
 #  All dates use NTP epoch of 1900-01-01
 
 sha1 = sha.new()
-print("%s %s" % (leap, tai))
+print("%s %s  # %s" % (leap, tai, leap_txt))
 sha1.update(leap)
 sha1.update(tai)
-print("#$ %s" % update)
-sha1.update(update)
-print("#@ %s" % expire)
+print("#@ %s  # %s" % (expire, expire_txt))
 sha1.update(expire)
+print("#$ %s  # %s" % (update, update_txt))
+sha1.update(update)
 digest = sha1.hexdigest()
 print("#h %s %s %s %s %s" % \
  (digest[0:8], digest[8:16], digest[16:24], digest[24:32], digest[32:40]))
