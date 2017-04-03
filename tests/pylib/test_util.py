@@ -9,8 +9,10 @@ class TestPylibUtilMethods(unittest.TestCase):
                          '2016-12-06T04:49:46Z')
         self.assertEqual(ntp.util.rfc3339(1480999786.5),
                          '2016-12-06T04:49:46.5Z')
+        # RFC 3339, 2 digits of seconds.
+        # we round, but the spec is silent on rounding
         self.assertEqual(ntp.util.rfc3339(1480999786.025),
-                         '2016-12-06T04:49:46.025Z')
+                         '2016-12-06T04:49:46.03Z')
 
     def test_portsplit(self):
         self.assertEqual(ntp.util.portsplit("host.invalid"),
