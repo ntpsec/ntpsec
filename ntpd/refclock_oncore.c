@@ -558,7 +558,7 @@ static uint8_t oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
 
 	/* to buffer, int w, uint8_t *buf */
 #define w32_buf(buf,w)	{ u_int i_tmp;			   \
-			  i_tmp = (w<0) ? (~(-w)+1) : (w); \
+			  i_tmp = (u_int)((w<0) ? (~(-w)+1) : (w)); \
 			  (buf)[0] = (i_tmp >> 24) & 0xff; \
 			  (buf)[1] = (i_tmp >> 16) & 0xff; \
 			  (buf)[2] = (i_tmp >>	8) & 0xff; \
@@ -663,7 +663,7 @@ oncore_start(
 	}
 
 	if (stat(device2, &stat2)) {
-		stat2.st_dev = stat2.st_ino = -2;
+		stat2.st_dev = stat2.st_ino = (unsigned long)-2;
 		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %m",
 			     device2, errno);
 	}
@@ -1508,7 +1508,7 @@ oncore_consume(
 			continue;
 		}
 
-		l = oncore_messages[m].len;
+		l = (unsigned int)oncore_messages[m].len;
 #ifdef ONCORE_VERBOSE_CONSUME
 		if (debug > 3)
 			oncore_log_f(instance, LOG_DEBUG,
@@ -1529,13 +1529,14 @@ oncore_consume(
 				oncore_log(instance, LOG_DEBUG, "NO <CR><LF> at end of message");
 #endif
 		} else {	/* check the CheckSum */
-			if (oncore_checksum_ok(rcvbuf, l)) {
+			if (oncore_checksum_ok(rcvbuf, (int)l)) {
 				if (instance->shmem != NULL) {
 					instance->shmem[oncore_messages[m].shmem + 2]++;
 					memcpy(instance->shmem + oncore_messages[m].shmem + 3,
 					    rcvbuf, (size_t) l);
 				}
-				oncore_msg_any(instance, rcvbuf, (size_t) (l-3), m);
+				oncore_msg_any(instance, rcvbuf,
+                                               (size_t)(l-3), (int)m);
 				if (oncore_messages[m].handler)
 					oncore_messages[m].handler(instance, rcvbuf, (size_t) (l-3));
 			}
@@ -2025,7 +2026,7 @@ oncore_msg_Ay(
 
 	instance->saw_Ay = 1;
 
-	instance->offset = buf_w32(&buf[4]);
+	instance->offset = (u_long)buf_w32(&buf[4]);
 
 	oncore_log_f(instance, LOG_INFO, "PPS Offset is set to %ld ns",
 		     instance->offset);
@@ -2051,7 +2052,7 @@ oncore_msg_Az(
 
 	instance->saw_Az = 1;
 
-	instance->delay = buf_w32(&buf[4]);
+	instance->delay = (u_long)buf_w32(&buf[4]);
 
 	oncore_log_f(instance, LOG_INFO, "Cable delay is set to %ld ns",
 		     instance->delay);
@@ -2095,7 +2096,7 @@ oncore_msg_BaEaHa(
 		instance->count3 = 0;
 
 		if (instance->chan_in != -1)	/* set in Input */
-			instance->chan = instance->chan_in;
+			instance->chan = (uint8_t)instance->chan_in;
 		else				/* set from test */
 			instance->chan = instance->chan_ck;
 
@@ -2750,8 +2751,9 @@ oncore_msg_Cb(
 	}
 
 	i *= 36;
-	instance->shmem[instance->shmem_Cb + i + 2]++;
-	memcpy(instance->shmem + instance->shmem_Cb + i + 3, buf, (size_t) (len + 3));
+	instance->shmem[(int)instance->shmem_Cb + i + 2]++;
+	memcpy(instance->shmem + instance->shmem_Cb + i + 3, buf,
+               (size_t)(len + 3));
 
 #ifdef ONCORE_VERBOSE_MSG_CB
 	oncore_log_f(instance, LOG_DEBUG, "See Cb [%d,%d]", buf[4],
@@ -2883,8 +2885,8 @@ oncore_msg_Cj_id(
 
 	/* next, the Firmware Version and Revision numbers */
 
-	instance->version  = atoi((char *) &instance->Cj[83]);
-	instance->revision = atoi((char *) &instance->Cj[111]);
+	instance->version  = (u_int)atoi((char *) &instance->Cj[83]);
+	instance->revision = (u_int)atoi((char *) &instance->Cj[111]);
 
 	/* from model number decide which Oncore this is,
 		and then the number of channels */
@@ -3068,7 +3070,8 @@ oncore_msg_Cj_init(
 		oncore_sendmsg(instance, oncore_cmd_Ea0, sizeof(oncore_cmd_Ea0));
 		oncore_sendmsg(instance, oncore_cmd_En0, sizeof(oncore_cmd_En0));
 		oncore_sendmsg(instance, oncore_cmd_Ha, sizeof(oncore_cmd_Ha ));
-		oncore_cmd_Gc[2] = (instance->pps_control < 0) ? 1 : instance->pps_control;
+		oncore_cmd_Gc[2] = (uint8_t)((instance->pps_control < 0) ?
+                                    1 : instance->pps_control);
 		oncore_sendmsg(instance, oncore_cmd_Gc, sizeof(oncore_cmd_Gc)); /* PPS off/continuous/Tracking 1+sat/TRAIM */
 	}
 
@@ -3840,7 +3843,7 @@ oncore_set_traim(
 	if (instance->traim_in != -1)	/* set in Input */
 		instance->traim = instance->traim_in;
 	else
-		instance->traim = instance->traim_ck;
+		instance->traim = (int8_t)instance->traim_ck;
 
 	oncore_log_f(instance, LOG_INFO, "Input   says TRAIM = %d",
 		     instance->traim_in);
