@@ -2,8 +2,6 @@
 
 == Checklist for a quality 1.0 release ==
 
-* Units as an option in ntpmon.
-
 * Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
 * Add .tar.xz tarball.
@@ -32,8 +30,6 @@ __________
 
 Also see https://gitlab.com/NTPsec/ntpsec/issues/68 where the dubiousness
 of the current startup logic gets discussed.
-
-== User interface ==
 
 === Future plans ===
 

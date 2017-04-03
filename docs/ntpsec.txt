@@ -159,6 +159,9 @@ codebase has been outright removed, with less than 5% new code added.
 * A new tool, +ntpmon+, performs real-time monitoring of your
   peer and MRU status with efficient (least-cost) querying.
 
+* Both +ntpq+ and +ntpmon+ can now optionally do display with time
+  units shown and scaled, in the manner of "chrony sources".
+
 * There is a new data-visualization tool,
   link:ntpviz.html[+ntpviz+], which can produce various useful and
   interesting plots from the NTP statistics logs.  These should assist in
