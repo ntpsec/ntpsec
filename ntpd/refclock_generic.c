@@ -96,8 +96,8 @@
 #  include <linux/serial.h>
 #endif
 
-# define BUFFER_SIZE(_BUF, _PTR)       ((int)((_BUF) + sizeof(_BUF) - (_PTR)))
-# define BUFFER_SIZES(_BUF, _PTR, _SZ) ((int)((_BUF) + (_SZ) - (_PTR)))
+#define BUFFER_SIZE(_BUF, _PTR)     ((size_t)((_BUF) + sizeof(_BUF) - (_PTR)))
+#define BUFFER_SIZES(_BUF, _PTR, _SZ) ((int)((_BUF) + (_SZ) - (_PTR)))
 
 /*
  * COND_DEF can be conditionally defined as DEF or 0. If defined as DEF
@@ -1819,7 +1819,7 @@ local_input(
 
 	while (count--)
 	{
-		if (parse_ioread(&parse->parseio, (unsigned int)(*s++), &ts))
+		if (parse_ioread(&parse->parseio, (char)(*s++), &ts))
 		{
 			struct recvbuf *buf;
 
@@ -2545,7 +2545,7 @@ parse_start(
 	peer->refclkunit = peer->refclkunit & 0x03;
 #endif /* ENABLE_CLASSIC_MODE */
 
-	type = CLK_TYPE(peer);
+	type = (u_int)CLK_TYPE(peer);
 	unit = peer->refclkunit;
 
 	if ((type == (u_int)~0) || (parse_clockinfo[type].cl_description == (char *)0))
@@ -2691,11 +2691,11 @@ parse_start(
 			if (ioctl(parse->ppsfd, TIOCGSERIAL, &ss) < 0 ||
 			    (
 #ifdef ASYNC_LOW_LATENCY
-			     ss.flags |= ASYNC_LOW_LATENCY,
+			     ss.flags |= (int)ASYNC_LOW_LATENCY,
 #endif
 #ifndef HAVE_PPSAPI
 #ifdef ASYNC_PPS_CD_NEG
-			     ss.flags |= ASYNC_PPS_CD_NEG,
+			     ss.flags |= (int)ASYNC_PPS_CD_NEG,
 #endif
 #endif
 			     ioctl(parse->ppsfd, TIOCSSERIAL, &ss)) < 0) {
@@ -3525,17 +3525,22 @@ parse_process(
 
 				if (parse->parse_type->cl_flags & PARSE_F_PPSONSECOND)
 				{
-					reftime = off = offset;
-					if (lfpfrac(reftime) & 0x80000000)
-						bumplfpuint(reftime, 1);
-					setlfpfrac(reftime, 0);
+				    reftime = off = offset;
+				    if (lfpfrac(reftime) & 0x80000000)
+					    bumplfpuint(reftime, 1);
+				    setlfpfrac(reftime, 0);
 
 
-					/*
-					 * implied on second offset
-					 */
-					setlfpfrac(off, ~lfpfrac(off)); /* map [0.5..1[ -> [-0.5..0[ */
-					setlfpsint(off, (lfpfrac(off) & 0x80000000) ? -1 : 0); /* sign extend */
+				    /*
+				     * implied on second offset
+				     */
+                                    /* map [0.5..1[ -> [-0.5..0[ */
+				    setlfpfrac(off, ~lfpfrac(off));
+                                    /* sign extend */
+				    setlfpuint(off,
+                                      (unsigned long int)(
+                                          (lfpfrac(off) & 0x80000000) ?
+                                          -1 : 0));
 				}
 				else
 				{
@@ -3566,8 +3571,11 @@ parse_process(
 			/*
 			 * implied on second offset
 			 */
-			setlfpfrac(off, ~lfpfrac(off)); /* map [0.5..1[ -> [-0.5..0[ */
-			setlfpsint(off, (lfpfrac(off) & 0x80000000) ? -1 : 0); /* sign extend */
+                        /* map [0.5..1[ -> [-0.5..0[ */
+			setlfpfrac(off, ~lfpfrac(off));
+                        /* sign extend */
+			setlfpuint(off, ((lfpfrac(off) & 0x80000000) ?
+                                         (unsigned long int)-1 : 0));
 		}
 	}
 	else
@@ -3746,9 +3754,9 @@ mk_utcinfo(
 		if (wnt < GPSWRAP)
 			wnt += GPSWEEKS;
 
-		t_ls = (time_t) wnlsf * SECSPERWEEK
-			+ (time_t) dn * SECSPERDAY
-			+ GPS_SEC_BIAS - 1;
+		t_ls = (time_t)(wnlsf * SECSPERWEEK +
+			        dn * SECSPERDAY +
+			        (int)GPS_SEC_BIAS - 1);
 
 		tm = gmtime_r( &t_ls, &tmbuf );
 		if (tm == NULL)  // gmtime_r() failed
@@ -4186,7 +4194,7 @@ gps16x_poll(
 	put_mbg_header(&outp, header);
 	outp = cmd_buffer + 1;
 
-	header->hdr_csum = (short)mbg_csum(outp, 6);
+	header->hdr_csum = (CSUM)mbg_csum(outp, 6);
 	put_mbg_header(&outp, header);
 
 #ifdef DEBUG
@@ -4268,7 +4276,7 @@ poll_dpoll(
 {
 	long rtc;
 	const char *ps = ((poll_info_t *)parse->parse_type->cl_data)->string;
-	long ct = ((poll_info_t *)parse->parse_type->cl_data)->count;
+	long ct = (long)(((poll_info_t *)parse->parse_type->cl_data)->count);
 
 	rtc = write(parse->generic->io.fd, ps, (size_t)ct);
 	if (rtc < 0)
@@ -4571,7 +4579,8 @@ sendetx(
 	  {
 		  char buffer[256];
 
-		  mkreadable(buffer, sizeof(buffer), (char *)buf->txt, (unsigned)buf->idx, 1);
+		  mkreadable(buffer, sizeof(buffer), (char *)buf->txt,
+                             (u_long)buf->idx, 1);
 		  printf("PARSE receiver #%d: transmitted message (%d bytes) >%s<\n",
 			 parse->peer->refclkunit,
 			 buf->idx, buffer);
@@ -4709,13 +4718,13 @@ trimble_check(
 			int i;
 
 			for (i = 0; oldsats; i++) {
-				if (oldsats & (1 << i))
+				if (oldsats & (1U << i))
 					{
 						sendcmd(&buf, CMD_CSTATTRACK);
 						sendbyte(&buf, i+1);	/* old sat */
 						sendetx(&buf, parse);
 					}
-				oldsats &= ~(1 << i);
+				oldsats &= ~(1U << i);
 			}
 		}
 
@@ -5239,7 +5248,7 @@ trimbletsip_message(
 			{
 				t = ap(pbuffer, sizeof(pbuffer), t, "%s%02d", i ? ", " : "", mb(17+i));
 				if (tr)
-					tr->ctrack |= (1 << (mb(17+i)-1));
+					tr->ctrack |= (1U << (mb(17+i)-1));
 			}
 
 			if (tr)
