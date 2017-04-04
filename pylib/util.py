@@ -31,8 +31,6 @@ OLD_CTL_PST_SEL_SYNCCAND = 2
 OLD_CTL_PST_SEL_SYSPEER = 3
 
 
-timefuzz = 1e-9  # Time variables have max precision of 1ns. Use for x==0.0.
-
 # Units for formatting
 UNIT_NS = 0
 UNIT_US = 1
@@ -90,6 +88,11 @@ def portsplit(hostname):
     return (hostname, portsuffix)
 
 
+def zerowiggle(ooms):
+    "Generate a wiggle value for float==0 comparisons"
+    return 10 ** -ooms
+
+
 def filtcooker(data):
     "Cooks the string of space seperated numbers with units"
     parts = data.split()
@@ -99,7 +102,7 @@ def filtcooker(data):
     for part in parts:
         part = float(part)
         floatyparts.append(part)
-        value, oom = scaleforunit(part)
+        value, oom = scaleforunit(part, oomsbetweenunits(UNIT_MS, UNIT_NS))
         oomcount[oom] = oomcount.get(oom, 0) + 1
     # Find the most common unit
     mostcommon = None
@@ -109,15 +112,16 @@ def filtcooker(data):
         if count > highestcount:
             mostcommon = key
             highestcount = count
-    newunit = mostcommon + UNIT_MS
+    newunit = UNITS_SEC[mostcommon + UNIT_MS]
+    oomstobase = (mostcommon * 3) + 6  # 6 == UNIT_MS distance from base
     # Shift all values to the new unit
     cooked = []
     for part in floatyparts:
         part = rescaleunit(part, mostcommon)
-        fmt = formatdigitsplit(part, 7)
+        fmt = formatdigitsplit(part, 7, oomstobase)
         temp = fmt % part
         cooked.append(temp)
-    rendered = " ".join(cooked) + " " + UNITS_SEC[newunit]
+    rendered = " ".join(cooked) + " " + newunit
     return rendered
 
 
@@ -128,9 +132,11 @@ def rescaleunit(f, units):
     return f
 
 
-def scaleforunit(f):
+def scaleforunit(f, oomstobase):
     "Scales a number by units to keep it in the range 0.000-999.9"
-    if -timefuzz < f < timefuzz:  # if sufficiently close to zero do nothing
+    f = round(f, oomstobase)  # pre-round to base unit to filter float folly
+    wiggle = zerowiggle(oomstobase)
+    if -wiggle < f < wiggle:  # if sufficiently close to zero do nothing
         return (f, 0)
     unitsmoved = 0
     af = abs(f)
@@ -140,29 +146,33 @@ def scaleforunit(f):
         oom = math.log10(af)  # Orders Of Magnitude
     oom -= oom % 3  # We only want to move in groups of 3 ooms
     multiplier = 10 ** -oom  # Reciprocol because floating * more accurate
-    unitsmoved = oom // 3
+    unitsmoved = int(oom // 3)
     f *= multiplier
-    f = round(f, 13)  # Min round to catch something like 191.20000000000002
-    return (f, int(unitsmoved))
+    roundooms = (unitsmoved * 3) + oomstobase
+    f = round(f, roundooms)  # Filter out any float folly we introduced here
+    return (f, unitsmoved)
 
 
-def formatdigitsplit(f, fieldsize):
+def roundsubzero(f, oomstobase):
+    "Rounds a number at it's base unit"
+    mul = 10 ** oomstobase
+    f *= mul
+    f = round(f)
+    return f
+
+
+def formatdigitsplit(f, fieldsize, oomstobase):
     "Create a format string for a float without adding fake precision."
     af = abs(f)
-    if f.is_integer() or (af < timefuzz):
-        return "%" + str(fieldsize) + "d"
     if af >= 100.0:
         maxdigits = fieldsize - 4  # xxx.
     elif af >= 10.0:
         maxdigits = fieldsize - 3  # xx.
-    elif af >= 1.0:
+    else:
         maxdigits = fieldsize - 2  # x.
-    else:  # Yes, this can happen with filts
-        maxdigits = fieldsize - 2  # 0.
     if f < 0.0:
         maxdigits -= 1  # need to fit a negative symbol
-    sig = len(str(f).split(".")[1])  # count digits after the decimal point
-    subdigits = min(sig, maxdigits)  # use min so we don't add fake data
+    subdigits = min(oomstobase, maxdigits)  # use min so we don't add fake data
     formatter = "%" + str(fieldsize) + "." + str(subdigits) + "f"
     return formatter
 
@@ -180,17 +190,19 @@ def unitformatter(f, unitgroup, startingunit, baseunit=None,
         strip = True
     if baseunit is None:
         baseunit = 0  # Assume that the lowest unit is equal to LSB
-    if -timefuzz < f < timefuzz:  # Zero, don't show decimals
-        unit = unitgroup[baseunit]  # all the way to the lsb
-        rendered = "0" + unit
+    oomsfrombase = oomsbetweenunits(startingunit, baseunit)
+    wiggle = zerowiggle(oomsfrombase)
+    if -wiggle < f < wiggle:  # Zero, don't show decimals
+        unit = unitgroup[baseunit]  # go all the way to the lsb
+        f = roundsubzero(f, oomsfrombase)
+        rendered = ("%d" % f) + unit
         if not strip:
             rendered = padder(rendered)
         return rendered
     oldf = f  # keep this in case we don't fit in the units
-    f, unitsmoved = scaleforunit(f)
+    f, unitsmoved = scaleforunit(f, oomsfrombase)
     unitget = startingunit + unitsmoved
-    rounddigits = oomsbetweenunits(unitget, baseunit)
-    f = round(f, rounddigits)
+    oomsfrombase = oomsbetweenunits(unitget, baseunit)  # will need this later
     if (0 <= unitget < len(unitgroup)):
         unit = unitgroup[unitget]
         if width is None:  # Don't care about size, just display everything
@@ -207,7 +219,7 @@ def unitformatter(f, unitgroup, startingunit, baseunit=None,
             if unitget == baseunit:  # Don't want fake decimals
                 formatter = "%" + str(displaysize) + "d"
             else:
-                formatter = formatdigitsplit(f, displaysize)
+                formatter = formatdigitsplit(f, displaysize, oomsfrombase)
             rendered = (formatter % f) + unit
             if strip:
                 rendered = rendered.strip()
