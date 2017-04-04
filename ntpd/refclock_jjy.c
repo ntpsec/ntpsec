@@ -3492,7 +3492,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		up->iTimestampCount++ ;
 
 		if ( up->iTimestampCount == 6 && ! up->bLineError ) {
-#if DEBUG
+#ifdef DEBUG
 			printf( "refclock_jjy.c : teljjy_conn_data : bLineError=%d iTimestamp=%d, %d, %d\n",
 				up->bLineError,
 				up->iTimestamp[3], up->iTimestamp[4], up->iTimestamp[5] ) ;

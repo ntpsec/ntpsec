@@ -589,7 +589,7 @@ jupiter_ppsapi(
 	}
 /*	instance->peer->precision = PPS_PRECISION; */
 
-#if DEBUG
+#ifdef DEBUG
 	if (debug) {
 		time_pps_getparams(instance->pps_handle, &instance->pps_params);
 		jupiter_debug(instance->peer, __func__,
