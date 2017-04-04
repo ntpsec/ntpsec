@@ -1,4 +1,42 @@
-This document is a list of the important time variables and what units they represent in various areas throughout the program.
+This document is a one stop shop of the important time variables and what
+units they represent in various areas throughout the program.
+
+Important note: This document is very incomplete, and may have the same
+variable listed more than once. Categorization is haphazard as well.
+
+Outstanding general questions:
+
+* Are all seconds-per-second units the same thing as parts-per-million?
+* How many of these are just different names for the same value?
+
+# The following were harvested from ntpd.h
+
+ntp_loopfilter.c
+
+Name            | internal  | Comment
+=============================================
+drift_comp      | seconds/s | clock frequency
+clock_stability | seconds/s |
+clock_max_back  | seconds   | max backward offset before step
+clock_max_fwd   | seconds   | max forward offset before step
+clock_panic     | seconds   | max offset before panic
+clock_phi       | seconds/s | dispersion rate (this is jitter, right?)
+clock_minstep   | seconds   | step timeout
+
+Clock state machine variables
+
+Name         | internal     | Comment
+========================================
+sys_poll     | log2 seconds | system poll interval
+last_time    | seconds      | time of last clock update
+last_offset  | seconds      | last clock offset
+allan_xpt    | log2 seconds | Allan intercept
+clock_jitter | seconds      |
+cyc_offset   | seconds      |
+sys_jitter   | seconds      |
+
+
+# The following were harvested from ntp_control.c
 
 System Variables
 
@@ -12,8 +50,8 @@ offset                | seconds   | milliseconds
 frequency (aka drift) | seconds/s | microseconds/s (aka ppm)
 sys_jitter            | seconds   | milliseconds
 clk_jitter            | seconds   | milliseconds
-clk_wander            | seconds/s | microseconds/s (probably ppm)
-leapsmearinterval     | seconds   | seconds
+clk_wander            | seconds/s | microseconds/s
+leapsmearinterval     | UNKNOWN   | UNKNOWN
 leapsmearoffset       | seconds   | milliseconds
 mintc (aka CR_RATE)   | UNKNOWN   | UNKNOWN
 authdelay             | seconds   | milliseconds
@@ -23,7 +61,7 @@ kesterr               | seconds   | milliseconds
 kprecis               | seconds   | milliseconds
 kppsjitter            | seconds   | milliseconds
 fuzz                  | seconds   | milliseconds
-clk_wander_threshold  | seconds   | microseconds (probably ppm)
+clk_wander_threshold  | seconds   | microseconds
 tick                  | seconds   | milliseconds
 
 
