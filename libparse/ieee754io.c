@@ -149,6 +149,7 @@ fetch_ieee754(
   unsigned long mantissa_high;
   unsigned long characteristic;
   long exponent;
+  unsigned int maxexp_lfp;  /* maximum exponent that fits in an l_fp */
 #ifdef DEBUG_PARSELIB
   int length;
 #endif
@@ -164,6 +165,7 @@ fetch_ieee754(
 #ifdef DEBUG_PARSELIB
       length = 8;
 #endif
+      maxexp_lfp = 31;
       mbits  = 52;
       bias   = 1023;
       maxexp = 2047;
@@ -173,6 +175,7 @@ fetch_ieee754(
 #ifdef DEBUG_PARSELIB
       length = 4;
 #endif
+      maxexp_lfp = 127;
       mbits  = 23;
       bias   = 127;
       maxexp = 255;
@@ -287,7 +290,7 @@ fetch_ieee754(
        */
       exponent = characteristic - bias;
 
-      if (exponent > 31)	/* sorry - hardcoded */
+      if (exponent > maxexp_lfp)	/* sorry an l_fp only so long */
 	{
 	  /*
 	   * overflow only in respect to NTP-FP representation
