@@ -75,7 +75,7 @@ def build(ctx):
         includes=["%s/tests/unity/" % srcnode,
                   "%s/ntpd/" % srcnode,
                   "%s/tests/libntp/" % srcnode,
-                  "%s/tests/common/" % srcnode
+                  "%s/tests/common/" % srcnode,
                   ],
         install_path=None,
         source=ntpd_source,
@@ -83,3 +83,6 @@ def build(ctx):
         use="ntpd_lib libntpd_obj unity ntp isc "
             "M PTHREAD CRYPTO RT SOCKET NSL",
     )
+
+    ctx.exec_command("%s/tests/pylib/test_statfiles.py" % srcnode)
+    ctx.exec_command("%s/tests/pylib/test_util.py" % srcnode)
