@@ -62,15 +62,37 @@ TEST(ieee754io, test_negone64) {
 
 TEST(ieee754io, test_nan64) {
         int ret;
-        unsigned char negone[8] = { 0x7f, 0xf0, 0, 0, 0, 0, 0, 0 };
-	unsigned char *bp = &negone[0];
+        unsigned char buf[8] = { 0x7f, 0xF0, 0, 0, 0, 0, 0, 0 };
+	unsigned char *bp = &buf[0];
         l_fp fp;
 
+        /* +INF */
 	ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
-        printf("%d\n", ret);
 	TEST_ASSERT( IEEE_POSINFINITY == ret);
-	// TEST_ASSERT_EQUAL_INT64( 0x7FFFFFFFFFFFFFFFLL, (long)fp );
+        /* not IEEE754, but check for 0 anyway */
+	TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+
+        /* -INF */
+        buf[0] = 0xff;
+	bp = &buf[0];
+	ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
+
+        printf("\n%d\n", ret);
+	TEST_ASSERT( IEEE_NEGINFINITY == ret);
+        /* not IEEE754, but check for 0 anyway */
+	TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+
+        /* NAN */
+        buf[0] = 0x7f;
+        buf[1] = 0xf8;
+	bp = &buf[0];
+	ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
+
+        printf("\n%d\n", ret);
+	TEST_ASSERT( IEEE_NAN == ret);
+        /* not IEEE754, but check for 0 anyway */
+	TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
 }
 
 TEST_GROUP_RUNNER(ieee754io) {
