@@ -7,7 +7,6 @@ def build(ctx):
         "authreadkeys.c",
         "clocktime.c",
         "decodenetnum.c",
-        "dofptoa.c",
         "dolfptoa.c",
         "getopt.c",
         "initnetwork.c",

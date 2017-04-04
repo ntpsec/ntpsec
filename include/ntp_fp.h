@@ -181,7 +181,6 @@ static inline double lfptod(l_fp r)
 /*
  * Prototypes
  */
-extern	char *	dofptoa		(u_fp, bool, short, bool);
 extern	char *	dolfptoa	(l_fp, bool, short, bool);
 extern	char *	mfptoa		(l_fp, short);
 extern	char *	mfptoms		(l_fp, short);
@@ -204,8 +203,6 @@ extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct t
 #define	lfptoa(fpv, ndec)	mfptoa((fpv), (ndec))
 #define	lfptoms(fpv, ndec)	mfptoms((fpv), (ndec))
 
-#define	ufptoa(fpv, ndec)	dofptoa((fpv), false, (ndec), false)
-#define	ufptoms(fpv, ndec)	dofptoa((fpv), false, (ndec), true)
 #define	ulfptoa(fpv, ndec)	dolfptoa((fpv), false, (ndec), false)
 #define	ulfptoms(fpv, ndec)	dolfptoa((fpv), false, (ndec), true)
 #define	umfptoa(lfp, ndec)	dolfptoa((lfp), false, (ndec), false)
