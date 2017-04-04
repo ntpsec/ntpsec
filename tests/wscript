@@ -107,5 +107,5 @@ def build(ctx):
             "M PTHREAD CRYPTO RT SOCKET NSL",
     )
 
-    ctx.exec_command("%s/tests/pylib/test_statfiles.py" % srcnode)
-    ctx.exec_command("%s/tests/pylib/test_util.py" % srcnode)
+    # ctx.exec_command("%s/tests/pylib/test_statfiles.py" % srcnode)
+    # ctx.exec_command("%s/tests/pylib/test_util.py" % srcnode)
