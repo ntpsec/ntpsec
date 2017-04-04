@@ -68,9 +68,9 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(ntp.util.scaleforunit(-0.00000042, 9),
                          (-420.0, -3))
         self.assertEqual(ntp.util.scaleforunit(1.0000004, 6),
-                          (1.0, 0))
+                         (1.0, 0))
         self.assertEqual(ntp.util.scaleforunit(1.0000005, 6),
-                          (1.000001, 0))
+                         (1.000001, 0))
 
     def test_oomsbetweenunits(self):
         self.assertEqual(ntp.util.oomsbetweenunits(3, 2),
