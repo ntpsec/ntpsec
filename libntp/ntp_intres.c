@@ -350,7 +350,7 @@ blocking_getaddrinfo(
 	 * structs followed by the canonical names.
 	 */
 	gai_resp->octets = sizeof(*gai_resp)
-			    + gai_resp->ai_count
+			    + (unsigned int)gai_resp->ai_count
 				* (sizeof(gai_req->hints)
 				   + sizeof(sockaddr_u))
 			    + canons_octets;
@@ -526,8 +526,8 @@ getaddrinfo_sometime_complete(
 		next_ai = &ai[i];
 	}
 
-	psau = (void *)((char *)ai + gai_resp->ai_count * sizeof(*ai));
-	canon_start = (char *)psau + gai_resp->ai_count * sizeof(*psau);
+	psau = (void *)((char *)ai + gai_resp->ai_count * (int)sizeof(*ai));
+	canon_start = (char *)psau + gai_resp->ai_count * (int)sizeof(*psau);
 
 	for (i = 0; i < gai_resp->ai_count; i++) {
 		if (NULL != ai[i].ai_addr)
@@ -898,7 +898,7 @@ get_worker_context(
 	if (dnsworker_contexts_alloc <= idx) {
 		min_new_alloc = 1 + idx;
 		/* round new_alloc up to nearest multiple of 4 */
-		new_alloc = (min_new_alloc + 4) & ~(4 - 1);
+		new_alloc = (min_new_alloc + 4) & (unsigned int)~(4 - 1);
 		new_octets = new_alloc * ps;
 		octets = dnsworker_contexts_alloc * ps;
 		dnsworker_contexts = erealloc_zero(dnsworker_contexts,

@@ -24,7 +24,7 @@ extern int lib_nextbuf;
 	do {							\
 		ZERO(lib_stringbuf[lib_nextbuf]);		\
 		(bufp) = &lib_stringbuf[lib_nextbuf++][0];	\
-		lib_nextbuf %= COUNTOF(lib_stringbuf);		\
+		lib_nextbuf %= (int)COUNTOF(lib_stringbuf);		\
 	} while (false)
 
 #endif	/* GUARD_LIB_STRBUF_H */

@@ -63,7 +63,31 @@ def build(ctx):
         source=libntp_source,
     )
 
+    if ctx.env.REFCLOCK_GENERIC:
+        # libparse only available/required wth generic refclock
+
+	# libparse/
+	libparse_source = [
+	    "libparse/ieee754io.c",
+	] + common_source
+
+	ctx.ntp_test(
+	    defines=unity_config + ["TEST_LIBPARSE=1"],
+	    features="c cprogram bld_include src_include libisc_include test",
+	    includes=["%s/tests/unity/" % srcnode,
+		      "%s/tests/libparse/" % srcnode,
+		      "%s/tests/common/" % srcnode
+		      ] + ctx.env.PLATFORM_INCLUDES,
+	    install_path=None,
+	    lib=["parse"],
+	    libpath=["libparse"],
+	    source=libparse_source,
+	    target="test_libparse",
+	    use="unity ntp isc parse M PTHREAD CRYPTO RT SOCKET NSL",
+	)
+
     ntpd_source = [
+#        "ntpd/filegen.c",
         "ntpd/leapsec.c",
         "ntpd/restrict.c",
     ] + common_source
@@ -74,7 +98,7 @@ def build(ctx):
         includes=["%s/tests/unity/" % srcnode,
                   "%s/ntpd/" % srcnode,
                   "%s/tests/libntp/" % srcnode,
-                  "%s/tests/common/" % srcnode
+                  "%s/tests/common/" % srcnode,
                   ],
         install_path=None,
         source=ntpd_source,
@@ -82,3 +106,6 @@ def build(ctx):
         use="ntpd_lib libntpd_obj unity ntp isc "
             "M PTHREAD CRYPTO RT SOCKET NSL",
     )
+
+    # ctx.exec_command("%s/tests/pylib/test_statfiles.py" % srcnode)
+    # ctx.exec_command("%s/tests/pylib/test_util.py" % srcnode)

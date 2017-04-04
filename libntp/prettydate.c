@@ -44,7 +44,7 @@ static char *common_prettydate(const l_fp, bool);
 /*
  * solar cycle in unsigned secs and years, and the cycle limits.
  */
-#define SOLAR_CYCLE_SECS   0x34AADC80UL	/* 7*1461*86400*/
+#define SOLAR_CYCLE_SECS   (time_t)0x34AADC80	/* 7*1461*86400*/
 #define SOLAR_CYCLE_YEARS  28
 #define MINFOLD -3
 #define MAXFOLD	 3

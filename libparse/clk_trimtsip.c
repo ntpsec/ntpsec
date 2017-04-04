@@ -130,7 +130,7 @@ inp_tsip(
 			parseio->parse_index = 0;
 			parseio->parse_data[parseio->parse_index++] = ch;
 			parseio->parse_dtime.parse_msglen = 0;
-			parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = ch;
+			parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = (unsigned char)ch;
 			parseio->parse_dtime.parse_stime = *tstamp; /* pick up time stamp at packet start */
 		} else if (t->t_dle) {
 			/* Double DLE -> insert a DLE */
@@ -149,7 +149,7 @@ inp_tsip(
 			parseio->parse_ldsize = (unsigned short) (parseio->parse_index + 1);
 			memcpy(parseio->parse_ldata, parseio->parse_data, parseio->parse_ldsize);
 			parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = DLE;
-			parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = ch;
+			parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = (unsigned char)ch;
 			t->t_in_pkt = t->t_dle = 0;
 			return PARSE_INP_TIME|PARSE_INP_DATA;
 		}
@@ -158,7 +158,7 @@ inp_tsip(
 	    default:		/* collect data */
 		t->t_dle = 0;
 		parseio->parse_data[parseio->parse_index++] = ch;
-		parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = ch;
+		parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = (unsigned char)ch;
 	}
 
   return PARSE_INP_SKIP;

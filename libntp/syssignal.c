@@ -7,9 +7,6 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
-static ctrl_c_fn	ctrl_c_hook;
-void sigint_handler(int);
-
 # ifdef SA_RESTART
 #  define Z_SA_RESTART		SA_RESTART
 # else
@@ -47,34 +44,4 @@ signal_no_reset(
 		perror("sigaction");
 		exit(1);
 	}
-}
-
-/*
- * POSIX implementation of set_ctrl_c_hook()
- */
-void
-sigint_handler(
-	int	signum
-	)
-{
-	UNUSED_ARG(signum);
-	if (ctrl_c_hook != NULL)
-		(*ctrl_c_hook)();
-}
-
-void
-set_ctrl_c_hook(
-	ctrl_c_fn	c_hook
-	)
-{
-	void (*handler)(int);
-
-	if (NULL == c_hook) {
-		handler = SIG_DFL;
-		ctrl_c_hook = NULL;
-	} else {
-		handler = &sigint_handler;
-		ctrl_c_hook = c_hook;
-	}
-	signal_no_reset(SIGINT, handler);
 }

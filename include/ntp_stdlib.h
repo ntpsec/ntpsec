@@ -42,8 +42,6 @@ extern	void	reopen_logfile  (void);
 extern	void	setup_logfile	(const char *);
 extern	void	errno_to_str(int, char *, size_t);
 
-typedef void (*ctrl_c_fn)(void);
-
 /* authkeys.c */
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
@@ -143,7 +141,6 @@ extern	const char *refid_str	(uint32_t, int);
 extern	bool	decodenetnum	(const char *, sockaddr_u *);
 
 extern	void	signal_no_reset (int, void (*func)(int));
-extern	void	set_ctrl_c_hook (ctrl_c_fn);
 
 extern	void	getauthkeys 	(const char *);
 extern	void	rereadkeys	(void);
@@ -219,6 +216,9 @@ extern bool	trunc_os_clock;		/* sys_tick > measured_tick */
 #define COMPARE_GREATERTHAN	1
 #define COMPARE_EQUAL		0
 #define COMPARE_LESSTHAN	-1
+
+/* hack to ignore GCC Unused Result */
+#define IGNORE(r) do{if(r){}}while(0)
 
 extern bool sandbox(const bool droproot, char *user, const char *group,
 	     const char *chrootdir, bool want_dynamic_interface_tracking);

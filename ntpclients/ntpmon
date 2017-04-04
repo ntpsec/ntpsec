@@ -13,6 +13,7 @@ Any keystroke causes a poll and update. Keystroke commands:
 'p': Change peer display to default mode, showing refid.
 'q': Cleanly terminate the program.
 's': Toggle display of only reachable hosts (default is all hosts).
+'u': Toggle display of units.
 'w': Toggle wide mode.
 'x': Cleanly terminate the program.
 ' ': Rotate through a/n/o/p display modes.
@@ -70,7 +71,7 @@ def statline(_peerlist, _mrulist, nyquist):
     return leader + spacer + trailer
 
 
-def peer_detail(variables):
+def peer_detail(variables, showunits=False):
     "Show the things a peer summary doesn't, cooked slightly differently"
     # All of an rv display except refid, reach, delay, offset, jitter.
     # One of the goals here is to emit field values at fixed positions
@@ -84,14 +85,31 @@ def peer_detail(variables):
             vcopy[fld] = "***missing***"
         else:
             vcopy[fld] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy[fld]))
-    vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
-    vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
-    vcopy['filtdisp'] = vcopy['filtdisp'].replace(' ', '\t')
+    if showunits:
+        for name in ntp.util.MS_VARS:
+            if name in vcopy:
+                vcopy[name] = ntp.util.unitformatter(vcopy[name],
+                                                     ntp.util.UNITS_SEC,
+                                                     ntp.util.UNIT_MS,
+                                                     strip=True)
+        for name in ntp.util.PPM_VARS:
+            if name in vcopy:
+                vcopy[name] = ntp.util.unitformatter(vcopy[name],
+                                                     ntp.util.UNIT_PPM,
+                                                     ntp.util.UNITS_PPX,
+                                                     strip=True)
+        vcopy['filtdelay'] = ntp.util.filtcooker(vcopy['filtdelay'])
+        vcopy['filtoffset'] = ntp.util.filtcooker(vcopy['filtoffset'])
+        vcopy['filtdisp'] = ntp.util.filtcooker(vcopy['filtdisp'])
+    else:
+        vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
+        vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
+        vcopy['filtdisp'] = vcopy['filtdisp'].replace(' ', '\t')
     peerfmt = """\
 srcadr=%(srcadr)s, srcport=%(srcport)d, dstadr=%(dstadr)s, dstport=%(dstport)s
 leap=%(leap)s\treftime=%(reftime)s\trootdelay=%(rootdelay)s
 stratum=%(stratum)2d\trec=%(rec)s\trootdisp=%(rootdisp)s
-precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)6.6f
+precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)s
 unreach=%(unreach)d, hmode=%(hmode)d, pmode=%(pmode)d, hpoll=%(hpoll)d, ppoll=%(ppoll)d, headway=%(headway)s, flash=%(flash)s, keyid=%(keyid)s
 filtdelay  = %(filtdelay)s
 filtoffset = %(filtoffset)s
@@ -137,7 +155,7 @@ USAGE: ntpmon [-V] [host]
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "V", ["version"])
+                                             "Vu", ["version", "units"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -148,12 +166,15 @@ if __name__ == '__main__':
     wideremote = False
     showall = True
     showpeers = True
+    showunits = False
     nyquist = 1
 
     for (switch, val) in options:
         if switch in ("-V", "--version"):
             print("ntpmon %s" % ntp.util.stdversion())
             raise SystemExit(0)
+        elif switch in ("-u", "--units"):
+            showunits = True
 
     poll_interval = 1
     helpmode = selectmode = detailmode = False
@@ -162,6 +183,7 @@ if __name__ == '__main__':
                                        pktversion=ntp.magic.NTP_VERSION,
                                        showhostnames=showhostnames,
                                        wideremote=wideremote,
+                                       showunits=showunits,
                                        termwidth=80,
                                        debug=0)
     mru_report = ntp.util.MRUSummary(showhostnames)
@@ -252,7 +274,7 @@ if __name__ == '__main__':
                                                     peers[selected].status)
                             stdscr.addstr("assoc=%d: %s\n"
                                           % (peers[selected].associd, sw))
-                            stdscr.addstr(peer_detail(retained))
+                            stdscr.addstr(peer_detail(retained, showunits))
                             try:
                                 clockvars = session.readvar(
                                     peers[selected].associd,
@@ -295,6 +317,9 @@ if __name__ == '__main__':
                         peer_report.displaymode = 'peers'
                     elif key == 's':
                         showall = not showall
+                    elif key == 'u':
+                        showunits = not showunits
+                        peer_report.showunits = showunits
                     elif key == 'w':
                         peer_report.wideremote = not peer_report.wideremote
                     elif key == " ":

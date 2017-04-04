@@ -59,6 +59,7 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 /*
  * GPS Definitions
@@ -330,7 +331,7 @@ init_thunderbolt (
 	sendetx      (&tx, fd);
 	
 	/* activate packets 0x8F-AB and 0x8F-AC */
-	sendsupercmd (&tx, 0x8F, 0xA5);
+	sendsupercmd (&tx, 0x8E, 0xA5);
 	sendint      (&tx, 0x5);
 	sendetx      (&tx, fd);
 
@@ -407,7 +408,7 @@ trimble_start (
 	}
 
 	tio.c_cflag |= (PARENB|PARODD);
-	tio.c_iflag &= ~ICRNL;
+	tio.c_iflag &= (unsigned)~ICRNL;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -638,11 +639,11 @@ TSIP_decode (
 			secint = (long) secs;
 			secfrac = secs - secint; /* 0.0 <= secfrac < 1.0 */
 
-			pp->nsec = (long) (secfrac * 1000000000); 
+			pp->nsec = (long) (secfrac * NS_PER_S);
 
-			secint %= 86400;    /* Only care about today */
-			pp->hour = (int)(secint / 3600);
-			secint %= 3600;
+			secint %= S_PER_DAY;    /* Only care about today */
+			pp->hour = (int)(secint / S_PER_H);
+			secint %= S_PER_H;
 			pp->minute = (int)(secint / 60);
 			secint %= 60;
 			pp->second = secint % 60;

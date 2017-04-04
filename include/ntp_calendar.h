@@ -20,16 +20,6 @@ struct calendar {
 	uint8_t  weekday;	/* 0..7, 0=Sunday */
 };
 
-/* ISO week calendar date */
-struct isodate {
-	uint16_t year;		/* year (A.D.) */
-	uint8_t	 week;		/* 1..53, week in year */
-	uint8_t	 weekday;	/* 1..7, 1=Monday */
-	uint8_t	 hour;		/* hour of day, midnight = 0 */
-	uint8_t	 minute;	/* minute of hour */
-	uint8_t	 second;	/* second of minute */
-};
-
 /* general split representation */
 typedef struct {
 	int32_t hi;
@@ -195,17 +185,10 @@ extern int
 ntpcal_rd_to_date(struct calendar * /* jt */, int32_t /* rd */);
 
 /*
- * Convert a RataDie number into the date part of a 'struct
- * tm'. Return false if the year is regular year, true if the year is a leap
- * year.
- */
-extern bool
-ntpcal_rd_to_tm(struct tm * /* utm */, int32_t /* rd */);
-
-/*
  * Take a value of seconds since midnight and split it into hhmmss in
  * a 'struct calendar'. Return excessive days.
  */
+/* used by ntpd/refclock_nmea.c */
 extern int32_t
 ntpcal_daysec_to_date(struct calendar * /* jt */, int32_t /* secs */);
 
@@ -213,31 +196,14 @@ ntpcal_daysec_to_date(struct calendar * /* jt */, int32_t /* secs */);
  * Take the time part of a 'struct calendar' and return the seconds
  * since midnight.
  */
+/* used by ntpd/refclock_nmea.c */
 extern int32_t
 ntpcal_date_to_daysec(const struct calendar *);
 
-/*
- * Take a value of seconds since midnight and split it into hhmmss in
- * a 'struct tm'. Return excessive days.
- */
-extern int32_t
-ntpcal_daysec_to_tm(struct tm * /* utm */, int32_t /* secs */);
-
+/* used by ntpd/refclock_gpsd.c */
 extern int32_t
 ntpcal_tm_to_daysec(const struct tm * /* utm */);
 
-/*
- * convert a year number to rata die of year start
- */
-extern int32_t
-ntpcal_year_to_ystart(int32_t /* year */);
-
-/*
- * For a given RataDie, get the RataDie of the associated year start,
- * that is, the RataDie of the last January,1st on or before that day.
- */
-extern int32_t
-ntpcal_rd_to_ystart(int32_t /* rd */);
 
 /*
  * convert a RataDie to the RataDie of start of the calendar month.
@@ -246,17 +212,11 @@ extern int32_t
 ntpcal_rd_to_mstart(int32_t /* year */);
 
 
-extern int
-ntpcal_daysplit_to_date(struct calendar * /* jt */,
-			const ntpcal_split * /* ds */, int32_t /* dof */);
-
-extern int
-ntpcal_daysplit_to_tm(struct tm * /* utm */, const ntpcal_split * /* ds */,
-		      int32_t /* dof */);
 
 extern int
 ntpcal_time_to_date(struct calendar * /* jd */, const time64_t /* ts */);
 
+/* used by ntpd/refclock_nmea.c */
 extern int32_t
 ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
 		       int32_t /* cycle */);
@@ -264,63 +224,12 @@ ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
 extern int
 ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
 
+/* used by ntpd/refclock_nmea.c */
 extern int
 ntpcal_ntp_to_date(struct calendar * /* jd */,	uint32_t /* ntp */,
 		   const time_t * /* pivot */);
 
-extern time64_t
-ntpcal_date_to_ntp64(const struct calendar * /* jd */);
 
-extern uint32_t
-ntpcal_date_to_ntp(const struct calendar * /* jd */);
-
-extern time_t
-ntpcal_date_to_time(const struct calendar * /* jd */);
-
-/*
- * ISO week-calendar conversions
- */
-extern int32_t
-isocal_weeks_in_years(int32_t  /* years */);
-
-extern ntpcal_split
-isocal_split_eraweeks(int32_t /* weeks */);
-
-extern int
-isocal_ntp64_to_date(struct isodate * /* id */, const time64_t /* ntp */);
-
-extern int
-isocal_ntp_to_date(struct isodate * /* id */, uint32_t /* ntp */,
-		   const time_t * /* pivot */);
-
-extern time64_t
-isocal_date_to_ntp64(const struct isodate * /* id */);
-
-extern uint32_t
-isocal_date_to_ntp(const struct isodate * /* id */);
-
-
-/*
- * day-of-week calculations
- *
- * Given a RataDie and a day-of-week, calculate a RDN that is reater-than,
- * greater-or equal, closest, less-or-equal or less-than the given RDN
- * and denotes the given day-of-week
- */
-extern int32_t
-ntpcal_weekday_gt(int32_t  /* rdn */, int32_t /* dow */);
-
-extern int32_t
-ntpcal_weekday_ge(int32_t /* rdn */, int32_t /* dow */);
-
-extern int32_t
-ntpcal_weekday_close(int32_t /* rdn */, int32_t  /* dow */);
-
-extern int32_t
-ntpcal_weekday_le(int32_t /* rdn */, int32_t /* dow */);
-
-extern int32_t
-ntpcal_weekday_lt(int32_t /* rdn */, int32_t /* dow */);
 
 /*
  * Additional support stuff for Ed Rheingold's calendrical calculations

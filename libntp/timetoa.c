@@ -69,7 +69,7 @@ format_time_fraction(
 	
 	/* check if we need signed or unsigned mode */
 	notneg = (prec < 0);
-	prec_u = abs(prec);
+	prec_u = (u_int)abs(prec);
 	/* fraclimit = (long)pow(10, prec_u); */
 	for (fraclimit = 10, u = 1; u < prec_u; u++) {
 		//DEBUG_INSIST(fraclimit < fraclimit * 10);
@@ -87,7 +87,7 @@ format_time_fraction(
 			qr.quot--;
 			qr.rem += fraclimit;
 		}
-		secs_u += (time_t)qr.quot;
+		secs_u += (u_time)qr.quot;
 		frac = qr.rem;
 	}
 

@@ -65,6 +65,8 @@ q:: Cleanly terminate the program.
 
 s:: Toggle display of only reachable hosts (default is all hosts).
 
+u:: Toggle display of units for time values. (default is off)
+
 w:: Toggle wide mode.
 
 x:: Cleanly terminate the program.
@@ -78,6 +80,8 @@ x:: Cleanly terminate the program.
 ?:: List these commands.
 
 == Options ==
+
+-u:: Show units
 
 -V:: Display version and exit.
 

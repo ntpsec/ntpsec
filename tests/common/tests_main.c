@@ -62,6 +62,10 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(ymd2yd);
 #endif
 
+#ifdef TEST_LIBPARSE
+	RUN_TEST_GROUP(ieee754io);
+#endif
+
 #ifdef TEST_NTPD
 	RUN_TEST_GROUP(leapsec);
 	RUN_TEST_GROUP(hackrestrict);

@@ -413,7 +413,7 @@ option_int
 	:	option_int_keyword T_Integer
 			{ $$ = create_attr_ival($1, $2); }
 	|	option_int_keyword T_U_int
-			{ $$ = create_attr_uval($1, $2); }
+			{ $$ = create_attr_uval($1, (u_int)$2); }
 	|	T_Stratum T_Integer
 		{
 			if ($2 >= 0 && $2 <= STRATUM_UNSPEC) {
@@ -1135,7 +1135,7 @@ miscellaneous_command
 				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
 			} else {
 				const char * path = $2;
-				if (!lex_push_file(path, "r")) {
+				if (!lex_push_file(path)) {
 					fprintf(stderr, "getconfig: Couldn't open <%s>\n", path);
 					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", path);
 				}
@@ -1405,7 +1405,7 @@ yyerror(
 	if (!lex_from_file()) {
 		/* Save the error message in the correct buffer */
 		retval = snprintf(remote_config.err_msg + remote_config.err_pos,
-				  MAXLINE - remote_config.err_pos,
+				  (size_t)(MAXLINE - remote_config.err_pos),
 				  "column %d %s",
 				  ip_ctx->errpos.ncol, msg);
 

@@ -48,12 +48,14 @@ def cmd_configure(ctx, config):
     ctx.env.NTPSEC_VERSION = "%s.%s.%s" % (ctx.env.NTPSEC_VERSION_MAJOR,
                                            ctx.env.NTPSEC_VERSION_MINOR,
                                            ctx.env.NTPSEC_VERSION_REV)
-    ctx.define("NTPSEC_VERSION_MAJOR", ctx.env.NTPSEC_VERSION_MAJOR,
-               comment="Major version number")
-    ctx.define("NTPSEC_VERSION_MINOR", ctx.env.NTPSEC_VERSION_MINOR,
-               comment="Minor version number")
-    ctx.define("NTPSEC_VERSION_REV", ctx.env.NTPSEC_VERSION_REV,
-               comment="Revision version number")
+# These are not currently used via config.h so remove clutter.
+# Leave as comments in case we want them tomorrow.
+#    ctx.define("NTPSEC_VERSION_MAJOR", ctx.env.NTPSEC_VERSION_MAJOR,
+#               comment="Major version number")
+#    ctx.define("NTPSEC_VERSION_MINOR", ctx.env.NTPSEC_VERSION_MINOR,
+#               comment="Minor version number")
+#    ctx.define("NTPSEC_VERSION_REV", ctx.env.NTPSEC_VERSION_REV,
+#               comment="Revision version number")
 
     ctx.env.OPT_STORE = config["OPT_STORE"]
 
@@ -229,6 +231,27 @@ def cmd_configure(ctx, config):
         ctx.define("ENABLE_LEAP_SMEAR", 1,
                    comment="Enable experimental leap smearing code")
 
+    # check for some libs first.  some options, like stack protector,
+    # may depend on some libs, like -lssp
+    ctx.check_cc(lib="m", comment="Math library")
+    ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
+    ret = ctx.check_cc(lib="bsd", mandatory=False,
+                 comment="BSD compatibility library")
+    if ret:
+        ctx.env.LDFLAGS += ["-lbsd"]
+
+    # -lssp and -lssp_nonshared may be needed by older gcc to
+    # support "-fstack-protector-all"
+    ret = ctx.check_cc(lib="ssp", mandatory=False,
+                 comment="libssp")
+    if ret:
+        ctx.env.LDFLAGS += ["-lssp"]
+
+    ret = ctx.check_cc(lib="ssp_nonshared", mandatory=False,
+                 comment="libssp_nonshared")
+    if ret:
+        ctx.env.LDFLAGS += ["-lssp_nonshared"]
+
     cc_test_flags = [
         ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
@@ -253,8 +276,13 @@ def cmd_configure(ctx, config):
         "-O1",
         "-Wall",
         "-Wextra",
-        # "-Wsign-conversion", # debug only
+        # "-Wfloat-equal",   # Not Ready For Prime Time
+        # "-Wmissing-prototypes",  # Not Ready For Prime Time
+        # "-Wmissing-declarations", # Not Ready For Primt Time
+        # "-Wsign-conversion", # Not Ready For Prime Time
+        "-Wshadow",
         "-Wstrict-prototypes",
+        "-Wundef",
         "-Wunused",
         ]
 
@@ -397,16 +425,6 @@ int main(int argc, char **argv) {
     if ctx.env.DEST_OS == "openbsd":
         ctx.define("PLATFORM_OPENBSD", "1", quote=False)
 
-    # int32_t and uint32_t probes aren't really needed, POSIX guarantees
-    # them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
-    # machines.  The calendar and ISC code needs them.
-    types = ["uint64_t"]
-
-    for inttype in sorted(types):
-        ctx.check_cc(header_name=["stdint.h", "sys/types.h"],
-                     mandatory=False,
-                     type_name=inttype)
-
     structures = (
         ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
         ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
@@ -417,8 +435,10 @@ int main(int argc, char **argv) {
         ctx.check_cc(type_name=s, header_name=h, mandatory=False)
 
     # waf's SNIP_FIELD should likely include this header itself
+    # This is needed on some systems to get size_t for following checks
     ctx.check_cc(auto_add_header_name=True,
                  header_name="stddef.h",
+                 define_name="",           # omit from config.h
                  mandatory=False)
 
     structure_fields = (
@@ -440,25 +460,12 @@ int main(int argc, char **argv) {
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
 
-    ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False,
-               comment="socklen type")
-    ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
-
-    ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False,
-               comment="Multicast loop type")   # XXX: check for mcast type
-
     # These are helpful and don't break Linux or *BSD
     ctx.define("OPEN_BCAST_SOCKET", 1,
                comment="Whether to open a broadcast socket")
     ctx.define("HAS_ROUTING_SOCKET", 1,
                comment="Whether a routing socket exists")
 
-    ctx.check_cc(lib="m", comment="Math library")
-    ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
-    ret = ctx.check_cc(lib="bsd", mandatory=False,
-                 comment="BSD compatibility library")
-    if ret:
-        ctx.env.LDFLAGS += ["-lbsd"]
 
     # Find OpenSSL. Must happen before function checks
     # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
@@ -494,7 +501,6 @@ int main(int argc, char **argv) {
         ('closefrom', ["stdlib.h"]),
         ('clock_gettime', ["time.h"], "RT"),
         ('clock_settime', ["time.h"], "RT"),
-        ('getdtablesize', ["unistd.h"]),
         ('getrusage', ["sys/time.h", "sys/resource.h"]),
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD

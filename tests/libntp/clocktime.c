@@ -171,7 +171,7 @@ TEST(clocktime, AlwaysInLimit) {
 	for (cyc = 0; cyc < 5; cyc++) {
 		settime(1900 + cyc * 65, 1, 1, 0, 0, 0);
 		for (yday = -26000; yday < 26000; yday += ydayinc) {
-			whichprime = abs(yday) % COUNTOF(prime_incs);
+			whichprime = abs(yday) % (int)COUNTOF(prime_incs);
 			ydayinc = prime_incs[whichprime];
 			for (hour = -204; hour < 204; hour += 2) {
 				for (minute = -60; minute < 60; minute++) {

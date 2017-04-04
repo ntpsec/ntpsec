@@ -22,6 +22,7 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 #define NAME		"NEOCLOCK"
 #define DESCRIPTION	"NeoClock4X"
@@ -537,10 +538,10 @@ neoclock4x_receive(struct recvbuf *rbufp)
 
   /* adjust NeoClock4X local time to UTC */
   calc_utc = neol_mktime(pp->year, month, day, pp->hour, pp->minute, pp->second);
-  calc_utc -= 3600;
+  calc_utc -= S_PER_H;
   /* adjust NeoClock4X daylight saving time if needed */
   if('S' == up->dststatus)
-    calc_utc -= 3600;
+    calc_utc -= S_PER_H;
   neol_localtime(calc_utc, &pp->year, &month, &day, &pp->hour, &pp->minute, &pp->second);
 
   /*
@@ -769,10 +770,10 @@ neol_mktime(int year,
   }
   return (((
             (unsigned long)(year/4 - year/100 + year/400 + 367*mon/12 + day) +
-            year*365 - 719499
-            )*24 + hour /* now have hours */
-           )*60 + min /* now have minutes */
-          )*60 + sec; /* finally seconds */
+            (uint)year*365 - 719499
+            )*24 + (uint)hour /* now have hours */
+           )*60 + (uint)min /* now have minutes */
+          )*60 + (uint)sec; /* finally seconds */
 }
 
 static void

@@ -27,10 +27,10 @@
 static struct timex txc;
 #endif /* HAVE_ADJTIMEX */
 
-void tickadj(const bool json, const int newtick)
+void tickadj(const bool json_b, const int newtick)
 {
 #ifndef HAVE_ADJTIMEX
-	UNUSED_ARG(json);
+	UNUSED_ARG(json_b);
 	UNUSED_ARG(newtick);
 	fputs("ntpfrob: \n", stderr);
 	exit(1);
@@ -76,14 +76,14 @@ void tickadj(const bool json, const int newtick)
 	else
 	{
 #ifdef HAVE_STRUCT_TIMEX_TIME_TICK
-		if (json)
+		if (json_b)
 			printf("{\"tick\":%ld,\"tick_adj\":%ld}\n",
 			       txc.time_tick, txc.tickadj);
 		else
 			printf("tick = %ld\ntick_adj = %ld\n",
 			       txc.time_tick, txc.tickadj);
 #else
-		if (json)
+		if (json_b)
 			printf("{\"tick\":%ld}\n", txc.tick);
 		else
 			printf("tick = %ld\n", txc.tick);

@@ -174,7 +174,7 @@ getgroup:
 			exit(-1);
 		}
 #  endif /* HAVE_SOLARIS_PRIVS */
-		if (user && initgroups(user, (int)sw_gid)) {
+		if (user && initgroups(user, (gid_t)sw_gid)) {
 			msyslog(LOG_ERR, "Cannot initgroups() to user `%s': %m", user);
 			exit (-1);
 		}
@@ -193,7 +193,7 @@ getgroup:
 			}
 		}
 		else if (pw)
-			if (0 != initgroups(pw->pw_name, (int)pw->pw_gid)) {
+			if (0 != initgroups(pw->pw_name, (gid_t)pw->pw_gid)) {
 				msyslog(LOG_ERR, "initgroups(<%s>, %d) filed: %m", pw->pw_name, pw->pw_gid);
 				exit (-1);
 			}
@@ -350,15 +350,16 @@ int scmp_sc[] = {
         SCMP_SYS(unlink),
 
 #ifdef ENABLE_DNS_LOOKUP
-	/* Needed for threads */
-	SCMP_SYS(clone),
+	SCMP_SYS(clone),	/* threads */
+	SCMP_SYS(exit),
+	SCMP_SYS(futex),	/* sem_xxx */
 	SCMP_SYS(madvise),
 	SCMP_SYS(mprotect),
 	SCMP_SYS(set_robust_list),
-	SCMP_SYS(exit),
-	SCMP_SYS(futex),	/* sem_xxx */
 	SCMP_SYS(sendmmsg),	/* DNS lookup */
 	SCMP_SYS(socketpair),
+	SCMP_SYS(statfs),
+	SCMP_SYS(uname),
 #endif
 
 #ifdef HAVE_UTMPX_H
@@ -420,7 +421,7 @@ int scmp_sc[] = {
 static void catchTrap(int sig)
 {
 	UNUSED_ARG(sig);	/* signal number */
-	msyslog(LOG_ERR, "SIGSYS: got a trap.  Bailing.");
+	msyslog(LOG_ERR, "SIGSYS: got a trap. Probably seccomp omission. Bailing.");
 	exit(1);
 }
 #endif /* HAVE_SECCOMP */

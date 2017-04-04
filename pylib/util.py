@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import collections
+import math
 
 import ntp.ntpc
 import ntp.version
@@ -28,6 +29,29 @@ OLD_CTL_PST_SEL_REJECT = 0
 OLD_CTL_PST_SEL_SELCAND = 1
 OLD_CTL_PST_SEL_SYNCCAND = 2
 OLD_CTL_PST_SEL_SYSPEER = 3
+
+
+# Units for formatting
+UNIT_NS = 0
+UNIT_US = 1
+UNIT_MS = 2
+UNIT_S = 3
+UNIT_KS = 4
+UNITS_SEC = ["ns", "us", "ms", "s", "ks"]
+UNIT_PPT = 0
+UNIT_PPB = 1
+UNIT_PPM = 2
+UNIT_PPK = 3
+UNITS_PPX = ["ppt", "ppb", "ppm", "ppk"]
+
+
+# Variables that have units
+MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
+           "leapsmearoffset", "authdelay", "koffset", "kmaxerr", "kesterr",
+           "kprecis", "kppsjitter", "fuzz", "clk_wander_threshold", "tick",
+           "in", "out", "bias", "delay", "jitter", "dispersion",
+           "fudgetime1", "fudgetime2")
+PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
 
 
 def stdversion():
@@ -62,6 +86,149 @@ def portsplit(hostname):
             hostname = hostname[:portsep]
             hostname = hostname[1:-1]   # Strip brackets
     return (hostname, portsuffix)
+
+
+def zerowiggle(ooms):
+    "Generate a wiggle value for float==0 comparisons"
+    return 10 ** -ooms
+
+
+def filtcooker(data):
+    "Cooks the string of space seperated numbers with units"
+    parts = data.split()
+    floatyparts = []
+    oomcount = {}
+    # Find out what the 'natural' unit of each value is
+    for part in parts:
+        part = float(part)
+        floatyparts.append(part)
+        value, oom = scaleforunit(part, oomsbetweenunits(UNIT_MS, UNIT_NS))
+        oomcount[oom] = oomcount.get(oom, 0) + 1
+    # Find the most common unit
+    mostcommon = None
+    highestcount = 0
+    for key in oomcount.keys():
+        count = oomcount[key]
+        if count > highestcount:
+            mostcommon = key
+            highestcount = count
+    newunit = UNITS_SEC[mostcommon + UNIT_MS]
+    oomstobase = (mostcommon * 3) + 6  # 6 == UNIT_MS distance from base
+    # Shift all values to the new unit
+    cooked = []
+    for part in floatyparts:
+        part = rescaleunit(part, mostcommon)
+        fmt = formatdigitsplit(part, 7, oomstobase)
+        temp = fmt % part
+        cooked.append(temp)
+    rendered = " ".join(cooked) + " " + newunit
+    return rendered
+
+
+def rescaleunit(f, units):
+    "Rescale a number by enough orders of magnitude for N units"
+    multiplier = 10 ** (units * 3)
+    f *= multiplier
+    return f
+
+
+def scaleforunit(f, oomstobase):
+    "Scales a number by units to keep it in the range 0.000-999.9"
+    f = round(f, oomstobase)  # pre-round to base unit to filter float folly
+    wiggle = zerowiggle(oomstobase)
+    if -wiggle < f < wiggle:  # if sufficiently close to zero do nothing
+        return (f, 0)
+    unitsmoved = 0
+    af = abs(f)
+    if af < 1.0:
+        oom = math.floor(math.log10(af))
+    else:
+        oom = math.log10(af)  # Orders Of Magnitude
+    oom -= oom % 3  # We only want to move in groups of 3 ooms
+    multiplier = 10 ** -oom  # Reciprocol because floating * more accurate
+    unitsmoved = int(oom // 3)
+    f *= multiplier
+    roundooms = (unitsmoved * 3) + oomstobase
+    f = round(f, roundooms)  # Filter out any float folly we introduced here
+    return (f, unitsmoved)
+
+
+def roundsubzero(f, oomstobase):
+    "Rounds a number at it's base unit"
+    mul = 10 ** oomstobase
+    f *= mul
+    f = round(f)
+    return f
+
+
+def formatdigitsplit(f, fieldsize, oomstobase):
+    "Create a format string for a float without adding fake precision."
+    af = abs(f)
+    if af >= 100.0:
+        maxdigits = fieldsize - 4  # xxx.
+    elif af >= 10.0:
+        maxdigits = fieldsize - 3  # xx.
+    else:
+        maxdigits = fieldsize - 2  # x.
+    if f < 0.0:
+        maxdigits -= 1  # need to fit a negative symbol
+    subdigits = min(oomstobase, maxdigits)  # use min so we don't add fake data
+    formatter = "%" + str(fieldsize) + "." + str(subdigits) + "f"
+    return formatter
+
+
+def oomsbetweenunits(a, b):
+    return abs((a - b) * 3)
+
+
+def unitformatter(f, unitgroup, startingunit, baseunit=None,
+                  strip=False, width=8):
+    "Formatting for unit associated values in N characters."
+    if width is not None:  # For padding to n characters
+        padder = (lambda x: (" " * (width - len(x))) + x)
+    else:
+        strip = True
+    if baseunit is None:
+        baseunit = 0  # Assume that the lowest unit is equal to LSB
+    oomsfrombase = oomsbetweenunits(startingunit, baseunit)
+    wiggle = zerowiggle(oomsfrombase)
+    if -wiggle < f < wiggle:  # Zero, don't show decimals
+        unit = unitgroup[baseunit]  # go all the way to the lsb
+        f = roundsubzero(f, oomsfrombase)
+        rendered = ("%d" % f) + unit
+        if not strip:
+            rendered = padder(rendered)
+        return rendered
+    oldf = f  # keep this in case we don't fit in the units
+    f, unitsmoved = scaleforunit(f, oomsfrombase)
+    unitget = startingunit + unitsmoved
+    oomsfrombase = oomsbetweenunits(unitget, baseunit)  # will need this later
+    if (0 <= unitget < len(unitgroup)):
+        unit = unitgroup[unitget]
+        if width is None:  # Don't care about size, just display everything
+            if unitget == baseunit:  # Don't want fake decimals
+                formatter = "%d"
+                rendered = (formatter % f) + unit
+            else:
+                rendered = repr(f) + unit
+            if strip:
+                rendered = rendered.strip()
+            return rendered
+        else:  # Do care about size, crop value so it will fit
+            displaysize = width - len(unit)
+            if unitget == baseunit:  # Don't want fake decimals
+                formatter = "%" + str(displaysize) + "d"
+            else:
+                formatter = formatdigitsplit(f, displaysize, oomsfrombase)
+            rendered = (formatter % f) + unit
+            if strip:
+                rendered = rendered.strip()
+            return rendered
+    else:  # Out of units so revert to the original. Ugly but there are very
+        rendered = repr(oldf) + unitgroup[startingunit]  # few options here
+        if not strip:
+            rendered = padder(rendered)
+        return rendered
 
 
 def f8dot4(f):
@@ -240,12 +407,18 @@ class PeerStatusWord:
                 % self.__dict__)
 
 
-def cook(variables):
+def cook(variables, showunits=False):
     "Cooked-mode variable display."
     width = ntp.util.termsize().width - 2
     text = ""
+    specials = ("filtdelay", "filtoffset", "filtdisp", "filterror")
+    longestspecial = len(max(specials, key=len))
     for (name, value) in variables.items():
-        item = "%s=" % name
+        if name in specials:  # need special formatting for column alignment
+            formatter = "%" + str(longestspecial) + "s ="
+            item = formatter % name
+        else:
+            item = "%s=" % name
         if name in ("reftime", "clock", "org", "rec", "xmt"):
             item += ntp.ntpc.prettydate(value)
         elif name in ("srcadr", "peeradr", "dstadr", "refid"):
@@ -259,8 +432,11 @@ def cook(variables):
             item += ("00", "01", "10", "11")[value]
         elif name == "reach":
             item += "%03lo" % value
-        elif name in("filtdelay", "filtoffset", "filtdisp", "filterror"):
-            item += "\t".join(value.split())
+        elif name in specials:
+            if showunits:
+                item += filtcooker(value)
+            else:
+                item += "\t".join(value.split())
         elif name == "flash":
             item += "%02x" % value
             if value == 0:
@@ -286,6 +462,21 @@ def cook(variables):
                     if (1 << i) & value:
                         item += tstflagnames[i] + " "
                 item = item[:-1]
+        elif name in MS_VARS:
+            #  Note that this is *not* complete, there are definitely
+            #   missing variables here.
+            #  Completion cannot occur until all units are tracked down.
+            if showunits:
+                item += unitformatter(value, UNITS_SEC, UNIT_MS, UNIT_NS,
+                                      True, width=None)
+            else:
+                item += repr(value)
+        elif name in PPM_VARS:
+            if showunits:
+                item += unitformatter(value, UNITS_PPX, UNIT_PPM,
+                                      strip=True, width=None)
+            else:
+                item += repr(value)
         else:
             item += repr(value)
         item += ", "
@@ -306,10 +497,11 @@ class PeerSummary:
     "Reusable report generator for peer statistics"
 
     def __init__(self, displaymode, pktversion, showhostnames,
-                 wideremote, termwidth=None, debug=0):
+                 wideremote, showunits=False, termwidth=None, debug=0):
         self.displaymode = displaymode          # peers/apeers/opeers
         self.pktversion = pktversion            # interpretation of flash bits
         self.showhostnames = showhostnames      # If false, display numeric IPs
+        self.showunits = showunits              # If False show old style float
         self.wideremote = wideremote            # show wide remote names?
         self.debug = debug
         self.termwidth = termwidth
@@ -530,15 +722,29 @@ class PeerSummary:
                     else int(now - ntp.ntpc.lfptofloat(last_sync))),
                    PeerSummary.prettyinterval(poll_sec), reach))
             if saw6:
-                line += (
-                    " %s %s %s" %
-                    (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
+                if self.showunits:
+                    line += (
+                        " %s %s %s" %
+                        (unitformatter(estdelay, UNITS_SEC, UNIT_MS),
+                         unitformatter(estoffset, UNITS_SEC, UNIT_MS),
+                         unitformatter(jd, UNITS_SEC, UNIT_MS)))
+                else:
+                    line += (
+                        " %s %s %s" %
+                        (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
             else:
                 # old servers only have 3 digits of fraction
                 # don't print a fake 4th digit
-                line += (
-                    " %s %s %s" %
-                    (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
+                if self.showunits:
+                    line += (
+                        " %s %s %s" %
+                        (unitformatter(estdelay, UNITS_SEC, UNIT_MS),
+                         unitformatter(estoffset, UNITS_SEC, UNIT_MS),
+                         unitformatter(jd, UNITS_SEC, UNIT_MS)))
+                else:
+                    line += (
+                        " %s %s %s" %
+                        (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
             line += "\n"
             return line
         except TypeError:

@@ -20,6 +20,8 @@ See the manual page for details.
 from __future__ import print_function
 
 import io
+import logging
+import logging.handlers
 import sys
 import threading
 import time
@@ -42,6 +44,31 @@ ntpologgps: can't find the Python argparse module
          # pip install argparse
 """)
     sys.exit(1)
+
+
+def logging_setup():
+    "Create logging object"
+    logFormat = logging.Formatter('%(message)s')
+    # Create logger for gpsd
+    Logger = logging.getLogger()
+    Logger.setLevel(logging.INFO)
+    # Create file handler
+    if args.logfile:
+        # log to logfile
+        file = logging.handlers.TimedRotatingFileHandler(
+            args.logfile[0],
+            when='midnight',
+            interval=1)
+    else:
+        # log to stdout
+        file = logging.StreamHandler(sys.stdout)
+
+    file.setLevel(logging.INFO)
+    # Create the formatter and add it to the handler
+    file.setFormatter(logFormat)
+    # Add the handler to the logger
+    Logger.addHandler(file)
+    return Logger
 
 
 parser = argparse.ArgumentParser(description="gpsd log file generator",
@@ -124,12 +151,13 @@ class GpsPoller(threading.Thread):
         "Return the gpsd time fix"
         return self.gpsd.fix.time
 
-    def display(self):
+    def log_line(self):
         "Displays the time, device, TDOP, and nSat data collected"
-        out.write('%s %s %f %d\n' % (gps.isotime(self.get_time()),
-                                     self.gpsd.device,
-                                     self.gpsd.tdop,
-                                     self.gpsd.satellites_used))
+        s = '%s %s %f %d' % (gps.isotime(self.get_time()),
+                             self.gpsd.device,
+                             self.gpsd.tdop,
+                             self.gpsd.satellites_used)
+        return s
 
 if __name__ == '__main__':
     # this is the main thread
@@ -138,18 +166,21 @@ if __name__ == '__main__':
 
     gpsp = GpsPoller()    # create the thread
     try:
+        # Create the logger instance
+        Logger = logging_setup()
+
+        # Create data layout
+        Logger.info("# Time       Device     TDOP     nSat")
+
         gpsp.start()      # start it up
         last_time = 0
-        out.write("\n")         # print blank line to prevent log corruption
-        out.write("# Time       Device     TDOP     nSat\n")
         while gpsp.running:
             # It may take a second or two to get good data
 
             try:
                 if 'nan' != gpsp.get_time() and not gps.isnan(gpsp.get_time()):
                     if last_time != gpsp.get_time():
-                        gpsp.display()
-                        out.flush()
+                        Logger.info(gpsp.log_line())
                     last_time = gpsp.get_time()
                     if args.once:
                         # just once
@@ -179,7 +210,3 @@ if __name__ == '__main__':
 
     if args.verbose:
         print("ntploggps: Done -- Exiting.")
-
-    # mom says: be nice and flush
-    out.flush()
-    out.close()

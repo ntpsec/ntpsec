@@ -35,13 +35,13 @@ typedef struct filegen_tag {
 	char *	dir;	/* currently always statsdir */
 	char *	fname;	/* filename prefix of generation file */
 			/* must be malloced, will be fed to free() */
-	u_long	id_lo;	/* lower bound of ident value */
-	u_long	id_hi;	/* upper bound of ident value */
+	time_t	id_lo;	/* lower bound of ident value */
+	time_t	id_hi;	/* upper bound of ident value */
 	uint8_t	type;	/* type of file generation */
 	uint8_t	flag;	/* flags modifying processing of file generation */
 } FILEGEN;
 
-extern	void	filegen_setup	(FILEGEN *, uint32_t);
+extern	void	filegen_setup	(FILEGEN *, time_t);
 extern	void	filegen_config	(FILEGEN *, const char *, const char *,
 				 u_int, u_int);
 extern	void	filegen_statsdir(void);

@@ -8,7 +8,6 @@
 #include <string.h>
 
 #include "ntp.h"
-#include "ntp_fp.h"
 #include "ntpd.h"
 #include "ntp_lists.h"
 #include "ntp_malloc.h"
@@ -166,7 +165,7 @@ auth_moremem(
 	i = (keycount > 0)
 		? keycount
 		: MEMINC;
-	sk = emalloc_zero(i * sizeof(*sk) + MOREMEM_EXTRA_ALLOC);
+	sk = emalloc_zero((unsigned int)i * sizeof(*sk) + MOREMEM_EXTRA_ALLOC);
 #ifdef DEBUG
 	base = sk;
 #endif
@@ -195,7 +194,7 @@ auth_prealloc_symkeys(
 	int	allocated;
 	int	additional;
 
-	allocated = authnumkeys + authnumfreekeys;
+	allocated = (int)authnumkeys + authnumfreekeys;
 	additional = keycount - allocated;
 	if (additional > 0)
 		auth_moremem(additional);
@@ -226,7 +225,7 @@ auth_resize_hashtable(void)
 	size_t		newalloc;
 	symkey *	sk;
 
-	totalkeys = authnumkeys + authnumfreekeys;
+	totalkeys = authnumkeys + (unsigned int)authnumfreekeys;
 	hashbits = auth_log2(totalkeys / 4.0) + 1;
 	hashbits = max(4, hashbits);
 	hashbits = min(15, hashbits);

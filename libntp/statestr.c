@@ -8,7 +8,6 @@
 #include <string.h>
 
 #include "ntp_stdlib.h"
-#include "ntp_fp.h"
 #include "ntp.h"
 #include "lib_strbuf.h"
 #include "ntp_refclock.h"
@@ -395,7 +394,7 @@ k_st_flags(
 	uint32_t st
 	)
 {
-	return decode_bitflags(st, " ", k_st_bits, COUNTOF(k_st_bits));
+	return decode_bitflags((int)st, " ", k_st_bits, COUNTOF(k_st_bits));
 }
 #endif	/* HAVE_KERNEL_PLL */
 

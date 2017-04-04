@@ -5,30 +5,71 @@
 # Use the -n option to dry-run this command, showing what would be done
 # without actually doing it
 
-cat <<EOF 
+# Set the defaults
+DRYRUN="no"
+NTPVIZ="no"
+DOC="no"
+
+# Loop through option flags
+for optflag in "$@"
+do
+	case "$optflag" in
+	 -h|--help)
+		cat <<EOF
+$0 - prepare your system for an NTPsec source build
+
+  Options:
+    -h --help    Show usage information and exit
+    -n --dry-run Only show what would be done instead of doing it
+       --ntpviz  Install dependencies for ntpviz tool
+       --doc     Install dependencies for building documentation
+    -a --all     Install all possible dependencies
+EOF
+		exit 0
+		;;
+	 -n|--dry-run)
+		DRYRUN="yes"
+		;;
+	 --ntpviz)
+		NTPVIZ="yes"
+		;;
+	 --doc)
+		DOC="yes"
+		;;
+	 -a|--all)
+		NTPVIZ="yes"
+		DOC="yes"
+		;;
+	 *)
+		echo "# WARNING: Unknown argument: $optflag"
+		echo "#"
+		;;
+	esac
+done
+
+cat <<EOF
 # Preparing your system for ntpsec source build...
 # This script presently knows about:
 #   CentOS, Debian, Fedora, Gentoo, SLES and Ubuntu
 # If you are running something else, such as MacOS or Solaris, please
-# follow the directions for by-hand installation in INSTALL.
+# read the source for this buildprep script to get an idea of what packages
+# are required.
 #
 EOF
 
-if [ "$1" = "-n" ]
+if [ "$DRYRUN" = "yes" ]
 then
-    do=echo
-    echo "# Run this without -n, as root, for actual installation.\n#"
+	do=echo
+	echo "# Run this without -n|--dry-run, as root, for actual installation.\n#"
 else
-    do=""
+	do=""
+	if [ "$(id -u)" != 0 ]
+	then
+		echo "# ERROR: You must be running as root for your installer to do its thing."
+		exit 1
+	fi
 fi
 
-if [ "$do" = "" -a `id -u` != 0 ]
-then
-    echo "#You must be running as root for your installer to do its thing."
-    exit 1
-fi
-
-inst=""
 if emerge --version 2>/dev/null
 then
     installer=emerge
@@ -55,7 +96,8 @@ then
     installer=yast
     install="$do $installer --install"
 else
-    installer=unknown
+    echo "# ERROR: Package manager unidentified - Unsupported operating system"
+    exit 1
 fi
 echo "# Your package installer is ${installer}."
 echo ""
@@ -157,10 +199,43 @@ ntpviz () {
     esac
 }
 
+doc () {
+	# prerequisites to build documentation
+	case $installer in
+	 apt)
+		$install asciidoc
+		;;
+	 emerge)
+		$install app-text/asciidoc
+		;;
+	 yum|dnf)
+		$install asciidoc
+		;;
+	 yast|zypper)
+		$install asciidoc
+		;;
+	esac
+}
+
 # Main sequence
 daemon
 tools
-ntpviz
+
+if [ "$NTPVIZ" = "yes" ]
+then
+	ntpviz
+else
+	echo ""
+	echo "# Skipping ntpviz dependencies [--ntpviz]"
+fi
+
+if [ "$DOC" = "yes" ]
+then
+	doc
+else
+	echo ""
+	echo "# Skipping documentation dependencies [--doc]"
+fi
 
 echo ""
 echo "# Done."

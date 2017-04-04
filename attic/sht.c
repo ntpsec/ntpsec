@@ -189,10 +189,10 @@ again:
 		p->mode=0;
 		if (!p->valid) {
 			p->clockTimeStampSec    = clk_sec;
-			p->clockTimeStampUSec   = clk_frc / 1000; /* truncate! */
+			p->clockTimeStampUSec   = (int)(clk_frc / 1000); /* truncate! */
 			p->clockTimeStampNSec   = clk_frc;
 			p->receiveTimeStampSec  = rcv_sec;
-			p->receiveTimeStampUSec = rcv_frc / 1000; /* truncate! */
+			p->receiveTimeStampUSec = (int)(rcv_frc / 1000); /* truncate! */
 			p->receiveTimeStampNSec = rcv_frc;
 			printf ("%ld.%09u %ld.%09u\n",
 				(long)p->clockTimeStampSec  , p->clockTimeStampNSec  ,

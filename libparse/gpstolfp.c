@@ -25,7 +25,11 @@ gpstolfp(
       weeks += GPSWEEKS;
     }
 
-  setlfpuint(*lfp, (uint32_t)(weeks * SECSPERWEEK + days * SECSPERDAY + seconds + GPSORIGIN)); /* convert to NTP time */
+   /* convert to NTP time, note no fractional seconds */
+  *lfp = lfptouint((uint64_t)weeks * SECSPERWEEK
+                   + (uint64_t)days * SECSPERDAY
+                   + (uint64_t)seconds
+                   + GPSORIGIN);
   setlfpfrac(*lfp, 0);
 }
 

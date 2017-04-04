@@ -57,10 +57,10 @@ enable_packetstamps(
     sockaddr_u *	addr
     )
 {
-	const int	on = 1;
 
 #ifdef USE_SCM_TIMESTAMP
 	{
+		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
 			       (const char*)&on, sizeof(on)))
 			msyslog(LOG_DEBUG,
@@ -73,6 +73,7 @@ enable_packetstamps(
 #endif
 #ifdef USE_SCM_TIMESTAMPNS
 	{
+		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
 			       (char*)&on, sizeof(on)))
 			msyslog(LOG_DEBUG,
@@ -85,6 +86,7 @@ enable_packetstamps(
 #endif
 #ifdef USE_SCM_BINTIME
 	{
+		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_BINTIME,
 			       (char*)&on, sizeof(on)))
 			msyslog(LOG_DEBUG,
@@ -202,10 +204,9 @@ fetch_packetstamp(
 #ifdef ENABLE_DEBUG_TIMING
 			dts = ts;
 			dts -= nts;
-			collect_timing(rb, "input processing delay", 1,
-				       &dts);
+			collect_timing(rb, "input processing delay", 1, dts);
 			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",
-				    lfptoa(&dts, 9)));
+				    lfptoa(dts, 9)));
 #endif	/* ENABLE_DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;

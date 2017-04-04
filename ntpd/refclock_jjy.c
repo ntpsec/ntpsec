@@ -480,7 +480,8 @@ jjy_start ( int unit, struct peer *peer )
 	}
 
 	/* Open the device */
-	fd = refclock_open ( sDeviceName, up->linespeed, up->linediscipline ) ;
+	fd = refclock_open ( sDeviceName, (u_int)up->linespeed,
+                            (u_int)up->linediscipline ) ;
 	if ( fd <= 0 ) {
 		free ( (void*) up ) ;
 		/* coverity[leaked_handle] */
@@ -812,8 +813,8 @@ getRawDataBreakPosition ( struct jjyunit *up, int iStart )
 			if ( i + up->pRawBreak[j].iLength <= up->iRawBufLen ) {
 
 				if ( strncmp( up->sRawBuf + i,
-					up->pRawBreak[j].pString,
-					up->pRawBreak[j].iLength ) == 0 ) {
+				    up->pRawBreak[j].pString,
+				    (size_t)up->pRawBreak[j].iLength ) == 0 ) {
 
 #ifdef DEBUG
 					printf( "refclock_jjy.c : getRawDataBreakPosition : iStart=%d return=%d\n",
@@ -1305,7 +1306,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 
 	pCmd =  tristate_jjy01_command_sequence[up->iCommandSeq].command ;
 	iCmdLen = tristate_jjy01_command_sequence[up->iCommandSeq].commandLength ;
-	if ( write ( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+	if ( write ( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report ( peer, CEVNT_FAULT ) ;
 	}
 
@@ -1360,7 +1361,7 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 
 	pCmd =  tristate_jjy01_command_sequence[up->iCommandSeq].command ;
 	iCmdLen = tristate_jjy01_command_sequence[up->iCommandSeq].commandLength ;
-	if ( write ( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+	if ( write ( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report ( peer, CEVNT_FAULT ) ;
 	}
 
@@ -1707,14 +1708,16 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 	}
 
 	if (up->operationmode == ECHOKEISOKUKI_LT2000_MODE_SWITCHING_CONTINUOUS ) {
-		/* Switch from mode 2 to mode 1 in order to restraint of useless time stamp. */
+	    /* Switch from mode 2 to mode 1 in order to restraint of
+             * useless time stamp.
+             */
+	    iLen = strlen( ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND ) ;
+	    if ( write ( pp->io.fd, ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND,
+                         (size_t)iLen ) != iLen  ) {
+		    refclock_report ( peer, CEVNT_FAULT ) ;
+	    }
 
-		iLen = strlen( ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND ) ;
-		if ( write ( pp->io.fd, ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND, iLen ) != iLen  ) {
-			refclock_report ( peer, CEVNT_FAULT ) ;
-		}
-
-		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_SEND, ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND ) ;
+	    jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_SEND, ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND ) ;
 
 	}
 
@@ -2197,7 +2200,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 
 	pCmd =  tristate_gps01_command_sequence[up->iCommandSeq].command ;
 	iCmdLen = tristate_gps01_command_sequence[up->iCommandSeq].commandLength ;
-	if ( write ( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+	if ( write ( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report ( peer, CEVNT_FAULT ) ;
 	}
 
@@ -2251,7 +2254,7 @@ jjy_poll_tristate_gpsclock01 ( int unit, struct peer *peer )
 
 	pCmd =  tristate_gps01_command_sequence[up->iCommandSeq].command ;
 	iCmdLen = tristate_gps01_command_sequence[up->iCommandSeq].commandLength ;
-	if ( write ( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+	if ( write ( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report ( peer, CEVNT_FAULT ) ;
 	}
 
@@ -2822,10 +2825,10 @@ jjy_receive_telephone ( struct recvbuf *rbufp )
 
 	if ( up->linediscipline == LDISC_RAW ) {
 		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		iLen = (size_t)up->iTextBufLen ;
 	} else {
 		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		iLen = (size_t)pp->lencode ;
 	}
 
 	up->iTeljjySilentTimer = 0 ;
@@ -3021,7 +3024,7 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 	int	i ;
 	int	minIndex = 0, maxIndex = 0, iAverCount = 0 ;
 	int	iThresholdSecond, iThresholdMicroSecond ;
-	int	iPercent ;
+	unsigned int	iPercent ;
 
 	minTime.tv_sec = minTime.tv_nsec = 0 ;
 	maxTime.tv_sec = maxTime.tv_nsec = 0 ;
@@ -3243,7 +3246,7 @@ teljjy_login_login ( struct peer *peer, struct refclockproc *pp, struct jjyunit 
 
 	/* Send login ID */
 	iCmdLen = strlen( pCmd ) ;
-	if ( write( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+	if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
 
@@ -3368,7 +3371,7 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 	
 	if ( pCmd != NULL ) {
 
-		if ( write( pp->io.fd, pCmd, iLen ) != iLen ) {
+		if ( write( pp->io.fd, pCmd, (size_t)iLen ) != iLen ) {
 			refclock_report( peer, CEVNT_FAULT ) ;
 		}
 
@@ -3434,7 +3437,9 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		up->iLoopbackCount ++ ;
 
 	} else if ( teljjy_command_sequence[up->iClockCommandSeq].iEchobackReplyLength == iLen
-	    && strncmp( pBuf, teljjy_command_sequence[up->iClockCommandSeq].command, iLen ) == 0 ) {
+	    && strncmp( pBuf,
+                teljjy_command_sequence[up->iClockCommandSeq].command,
+                (size_t) iLen ) == 0 ) {
 		/* Maybe echoback */
 
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_INFORMATION, JJY_CLOCKSTATS_MESSAGE_ECHOBACK ) ;
@@ -3487,7 +3492,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		up->iTimestampCount++ ;
 
 		if ( up->iTimestampCount == 6 && ! up->bLineError ) {
-#if DEBUG
+#ifdef DEBUG
 			printf( "refclock_jjy.c : teljjy_conn_data : bLineError=%d iTimestamp=%d, %d, %d\n",
 				up->bLineError,
 				up->iTimestamp[3], up->iTimestamp[4], up->iTimestamp[5] ) ;
@@ -3899,7 +3904,8 @@ modem_receive ( struct recvbuf *rbufp )
 	if ( debug ) {
 		char	sResp [ 40 ] ;
 		size_t	iCopyLen ;
-		iCopyLen = ( iLen <= (int)sizeof(sResp)-1 ? iLen : (int)sizeof(sResp)-1 ) ;
+		iCopyLen = iLen <= (int)sizeof(sResp)-1 ?
+                               (size_t)iLen : sizeof(sResp) - 1U;
 		strlcpy( sResp, pBuf, sizeof(sResp) ) ;
 		printf ( "refclock_jjy.c : modem_receive : iLen=%zd pBuf=[%s] iModemEvent=%d\n", iCopyLen, sResp, up->iModemEvent ) ;
 	}
@@ -4142,7 +4148,7 @@ modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 	if ( pCmd != NULL ) {
 
 		iCmdLen = strlen( pCmd ) ;
-		if ( write( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+		if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 			refclock_report( peer, CEVNT_FAULT ) ;
 		}
 
@@ -4224,7 +4230,7 @@ modem_dial_dialout ( struct peer *peer, struct refclockproc *pp, struct jjyunit 
 
 	/* Send command */
 	iCmdLen = strlen( sCmd ) ;
-	if ( write( pp->io.fd, sCmd, iCmdLen ) != iCmdLen ) {
+	if ( write( pp->io.fd, sCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
 
@@ -4340,7 +4346,7 @@ modem_esc_escape ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	/* Send command */
 	iCmdLen = strlen( pCmd ) ;
-	if ( write( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+	if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
 
@@ -4409,7 +4415,7 @@ modem_esc_disc ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up 
 
 	/* Send command */
 	iCmdLen = strlen( pCmd ) ;
-	if ( write( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+	if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
 
@@ -4465,7 +4471,8 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 	iDataLen = strlen( pData ) ;
 	iMarkLen = strlen( pMark ) ;
 	strlcpy( sLog, pMark, sizeof( sLog )) ;
-	printableString( sLog+iMarkLen, sizeof(sLog)-iMarkLen, pData, iDataLen ) ;
+	printableString( sLog+iMarkLen, (int)sizeof(sLog)-iMarkLen,
+                         pData, iDataLen ) ;
 
 #if defined(DEBUG) && DEBUG
 	if ( debug ) {

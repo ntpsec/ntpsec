@@ -151,7 +151,7 @@ hpgps_start(
 	register struct hpgpsunit *up;
 	struct refclockproc *pp;
 	int fd;
-	int ldisc;
+	unsigned int ldisc;
 	unsigned int speed;
 	char device[20];
 

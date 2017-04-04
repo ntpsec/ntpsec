@@ -20,6 +20,9 @@
 #include <string.h>
 #include <limits.h>
 #include <libgen.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "ntpd.h"
 #include "ntp_config.h"
@@ -43,9 +46,11 @@ static struct FILE_INFO * lex_stack = NULL;
 
 
 
-/* CONSTANTS 
- * ---------
+/* CONSTANTS AND MACROS
+ * --------------------
  */
+#define ENDSWITH(str, suff) (strcmp(str + strlen(str) - strlen(suff), suff)==0) 
+#define CONF_ENABLE(s)	(ENDSWITH(s, ".ntpd") || ENDSWITH(s, ".refclockd"))
 
 
 /* SCANNER GLOBAL VARIABLES 
@@ -299,6 +304,7 @@ lex_init_stack(
 	if (NULL != lex_stack || NULL == path)
 		return false;
 
+	//fprintf(stderr, "lex_init_stack(%s)\n", path);
 	lex_stack = lex_open(path, mode);
 	return (NULL != lex_stack);
 }
@@ -338,10 +344,44 @@ lex_flush_stack()
 	return retv;
 }
 
+/* Reversed string comparison - we want to LIFO directory subfiles so they
+ * actually get evaluated in sort order. 
+ */
+static int rcmpstring(const void *p1, const void *p2)
+{
+    return strcmp(*(const char **)p1, *(const char **)p2);
+}
+
+bool is_directory(const char *path)
+{
+	struct stat sb;
+	return stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
+}
+
+void reparent(char *fullpath, size_t fullpathsize,
+	      const char *dir, const char *base)
+{
+	fullpath[0] = '\0';
+	if (base[0] != DIR_SEP) {
+		char *dirpart = strdup(dir);
+		char *end;
+		strlcpy(fullpath, dirname(dirpart), fullpathsize-2);
+		end = fullpath + strlen(fullpath);
+		*end++ = DIR_SEP;
+		*end++ = '\0';
+		free(dirpart);
+	}
+	strlcat(fullpath, base, fullpathsize);
+}
+
 /* Push another file on the parsing stack. If the mode is NULL, create a
  * FILE_INFO suitable for in-memory parsing; otherwise, create a
  * FILE_INFO that is bound to a local/disc file. Note that 'path' must
  * not be NULL, or the function will fail.
+ *
+ * If the pathname is a directory, push all subfiles and
+ * subdirectories with paths satisying the predicate CONF_ENABLE(),
+ * recursively depth first to be interpreted in ASCII sort order.
  *
  * Relative pathnames are interpreted relative to the directory
  * of the previous entry on the stack, not the current directory.
@@ -351,29 +391,60 @@ lex_flush_stack()
  * Returns true if a new info record was pushed onto the stack.
  */
 bool lex_push_file(
-	const char * path,
-	const char * mode
+	const char * path
 	)
 {
 	struct FILE_INFO * next = NULL;
 
 	if (NULL != path) {
 		char fullpath[PATH_MAX];
-		fullpath[0] = '\0';
-		if (path[0] != DIR_SEP && lex_stack != NULL) {
-			char *end;
-			strlcpy(fullpath,
-				dirname(lex_stack->fname),sizeof(fullpath)-2);
-			end = fullpath + strlen(fullpath);
-			*end++ = DIR_SEP;
-			*end++ = '\0';
-		}
-		strlcat(fullpath, path, sizeof(fullpath));
-		fprintf(stderr, "Opening %s\n", fullpath);
-		next = lex_open(fullpath, mode);
-		if (NULL != next) {
-			next->st_next = lex_stack;
-			lex_stack = next;
+		if (lex_stack != NULL)
+		    reparent(fullpath, sizeof(fullpath), lex_stack->fname, path);
+		else
+		    strlcpy(fullpath, path, sizeof(fullpath));
+		//fprintf(stderr, "lex_push_file(%s)\n", fullpath);
+		if (is_directory(fullpath)) {
+			/* directory scanning */
+			DIR *dfd;
+			struct dirent *dp;
+			char **baselist = (char **)malloc(sizeof(char *));
+			int basecount = 0;
+			if ((dfd = opendir(fullpath)) == NULL)
+				return false;
+			while ((dp = readdir(dfd)) != NULL)
+			{
+			    if (!CONF_ENABLE(dp->d_name))
+			    	continue;
+			    baselist[basecount++] = strdup(dp->d_name);
+			    baselist = realloc(baselist,
+                                       (size_t)(basecount+1) * sizeof(char *));
+			}
+			qsort(baselist, (size_t)basecount, sizeof(char *),
+                              rcmpstring);
+			for (int i = 0; i < basecount; i++) {
+				char subpath[PATH_MAX];
+				strlcpy(subpath, fullpath, PATH_MAX);
+				if (strlen(subpath) < PATH_MAX - 1) {
+				    char *ep = subpath + strlen(subpath);
+				    *ep++ = DIR_SEP;
+				    *ep = '\0';
+				}
+				strlcat(subpath, baselist[i], PATH_MAX);
+				/* This should barf safely if the complete
+				 * filename was too long to fit in the buffer.
+				 */ 
+				lex_push_file(subpath);
+			}
+			for (int i = 0; i < basecount; i++)
+				free(baselist[basecount]);
+			free(baselist);
+			return basecount > 0;
+		} else {
+			next = lex_open(fullpath, "r");
+			if (NULL != next) {
+				next->st_next = lex_stack;
+				lex_stack = next;
+			}
 		}
 	}
 	return (NULL != next);
@@ -463,7 +534,7 @@ is_keyword(
 
 	for (i = 0; lexeme[i]; i++) {
 		while (curr_s && (lexeme[i] != SS_CH(sst[curr_s])))
-			curr_s = SS_OTHER_N(sst[curr_s]);
+			curr_s = (int)SS_OTHER_N(sst[curr_s]);
 
 		if (curr_s && (lexeme[i] == SS_CH(sst[curr_s]))) {
 			if ('\0' == lexeme[i + 1]

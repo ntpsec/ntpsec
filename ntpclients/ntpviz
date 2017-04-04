@@ -269,7 +269,7 @@ class VizStats(ntp.statfiles.NTPStats):
             # range the data
             v *= self.multiplier
             self.percs[k] = round(v, 4)
-            if 'ppm' == self.unit and  0.020 >  abs(self.percs[k]):
+            if 'ppm' == self.unit and 0.020 > abs(self.percs[k]):
                 self.percs_f[k] = format(v, ",.4f")
             else:
                 self.percs_f[k] = format(v, ",.3f")

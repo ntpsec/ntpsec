@@ -59,11 +59,12 @@ static struct timespec timespec_init(time_t hi, long lo)
 
 static bool AssertFpClose(const l_fp m, const l_fp n, const l_fp limit)
 {
-	int64_t diff = m - n;
+	int64_t diff = (int64_t)(m - n);
 	if ((l_fp)llabs(diff) <= limit)
 		return true;
 	else {
-		printf("m_expr which is %s \nand\nn_expr which is %s\nare not close; diff=%susec\n", lfptoa(m, 10), lfptoa(n, 10), lfptoa(diff, 10));
+		printf("m_expr which is %s \nand\nn_expr which is %s\nare not close; diff=%susec\n",
+                       lfptoa(m, 10), lfptoa(n, 10), lfptoa((l_fp)diff, 10));
 		return false;
 	}
 }
@@ -539,7 +540,7 @@ TEST(timespecops, test_ToLFPabs) {
 
 	for (i = 0; i < (int)COUNTOF(fdata); ++i) {
 		struct timespec a = timespec_init(1, fdata[i].nsec);
-		l_fp E = lfpinit(1 + JAN_1970, fdata[i].frac);
+		l_fp E = lfpinit((int)(1 + JAN_1970), fdata[i].frac);
 		l_fp r;
 
 		r = tspec_stamp_to_lfp(a);

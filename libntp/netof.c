@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <syslog.h>
 
-#include "ntp_fp.h"
 #include "ntp_net.h"
 #include "ntp_stdlib.h"
 #include "ntp.h"
@@ -18,11 +17,11 @@ netof(
 {
 	static sockaddr_u	netofbuf[8];
 	static int		next_netofbuf;
-	uint32_t			netnum;
+	uint32_t		netnum;
 	sockaddr_u *		netaddr;
 
 	netaddr = &netofbuf[next_netofbuf];
-	next_netofbuf = (next_netofbuf + 1) % COUNTOF(netofbuf);
+	next_netofbuf = (next_netofbuf + 1) % (int)COUNTOF(netofbuf);
 
 	memcpy(netaddr, hostaddr, sizeof(*netaddr));
 

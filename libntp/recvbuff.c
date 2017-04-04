@@ -63,7 +63,7 @@ create_buffers(int nbufs)
 	register recvbuf_t *bufp;
 	int i, abuf;
 
-	abuf = nbufs + buffer_shortfall;
+	abuf = nbufs + (int)buffer_shortfall;
 	buffer_shortfall = 0;
 
 #ifndef DEBUG

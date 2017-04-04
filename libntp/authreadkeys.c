@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
@@ -108,7 +107,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		/*
 		 * First is key number.  See if it is okay.
 		 */
-		keyno = atoi(token);
+		keyno = (keyid_t)atoi(token);
 		if (keyno == 0) {
 			msyslog(LOG_ERR,
 			    "authreadkeys: cannot change key %s", token);

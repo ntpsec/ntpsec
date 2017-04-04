@@ -302,11 +302,11 @@ maintain_activefds(
  * collect timing information for various processing
  * paths. currently we only pass them on to the file
  * for later processing. this could also do histogram
- * based analysis in other to reduce the load (and skew)
- * dur to the file output
+ * based analysis in order to reduce the load (and skew)
+ * due to the file output
  */
 void
-collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
+collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp dts)
 {
 	char buf[256];
 
@@ -2235,7 +2235,7 @@ read_network_packet(
 	l_fp			ts
 	)
 {
-	GETSOCKNAME_SOCKLEN_TYPE fromlen;
+	socklen_t fromlen;
 	ssize_t buflen;
 	register struct recvbuf *rb;
 #ifdef USE_PACKET_TIMESTAMP
@@ -2293,7 +2293,7 @@ read_network_packet(
 	rb->recv_length       = recvmsg(fd, &msghdr, 0);
 #endif
 
-	buflen = rb->recv_length;
+	buflen = (ssize_t)rb->recv_length;
 
 	if (buflen == 0 || (buflen == -1 &&
 	    (EWOULDBLOCK == errno
@@ -2574,11 +2574,11 @@ input_handler(
 	 * gob of file descriptors.  Log it.
 	 */
 	ts_e -= ts;
-	collect_timing(NULL, "input handler", 1, &ts_e);
+	collect_timing(NULL, "input handler", 1, ts_e);
 	if (debug > 3)
 		msyslog(LOG_DEBUG,
 			"input_handler: Processed a gob of fd's in %s msec",
-			lfptoms(&ts_e, 6));
+			lfptoms(ts_e, 6));
 #endif /* ENABLE_DEBUG_TIMING */
 	/* We're done... */
 	return;
@@ -2688,12 +2688,12 @@ findlocalinterface(
 	int		bcast
 	)
 {
-	GETSOCKNAME_SOCKLEN_TYPE	sockaddrlen;
-	endpt *				iface;
-	sockaddr_u			saddr;
-	SOCKET				s;
-	int				rtn;
-	int				on;
+	socklen_t	sockaddrlen;
+	endpt *		iface;
+	sockaddr_u	saddr;
+	SOCKET		s;
+	int		rtn;
+	int		on;
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
 		    socktoa(addr)));
@@ -2744,7 +2744,7 @@ findlocalinterface(
 	 */
 	if (NULL == iface || iface->ignore_packets)
 		iface = findclosestinterface(&saddr,
-					     flags | INT_LOOPBACK);
+					     (int)(flags | (int)INT_LOOPBACK));
 
 	/* Don't use an interface which will ignore replies */
 	if (iface != NULL && iface->ignore_packets)
@@ -2786,7 +2786,7 @@ findclosestinterface(
 	for (ep = ep_list; ep != NULL; ep = ep->elink) {
 		if (ep->ignore_packets ||
 		    AF(addr) != ep->family ||
-		    flags & ep->flags)
+		    (unsigned int)flags & ep->flags)
 			continue;
 
 		calc_addr_distance(&addr_dist, addr, &ep->sin);

@@ -55,7 +55,7 @@ mon_entry	mon_mru_list;	/* mru listhead */
 u_int		mru_entries;	/* mru list count */
 
 /*
- * List of free structures structures, and counters of in-use and total
+ * List of free structures, and counters of in-use and total
  * structures. The free structures are linked with the hash_next field.
  */
 static  mon_entry *mon_free;		/* free list or null if none */
@@ -204,7 +204,7 @@ mon_start(
 	if (MON_OFF == mode)		/* MON_OFF is 0 */
 		return;
 	if (mon_enabled) {
-		mon_enabled |= mode;
+		mon_enabled |= (u_int)mode;
 		return;
 	}
 	if (0 == mon_mem_increments)
@@ -223,7 +223,7 @@ mon_start(
 	octets = sizeof(*mon_hash) * MON_HASH_SIZE;
 	mon_hash = erealloc_zero(mon_hash, octets, 0);
 
-	mon_enabled = mode;
+	mon_enabled = (u_int)mode;
 }
 
 
@@ -239,10 +239,10 @@ mon_stop(
 
 	if (MON_OFF == mon_enabled)
 		return;
-	if ((mon_enabled & mode) == 0 || mode == MON_OFF)
+	if ((mon_enabled & (u_int)mode) == 0 || mode == MON_OFF)
 		return;
 
-	mon_enabled &= ~mode;
+	mon_enabled &= (u_int)~mode;
 	if (mon_enabled != MON_OFF)
 		return;
 	

@@ -123,7 +123,7 @@ static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 
-#define ALL_OPTIONS "46c:dD:f:gGhi:I:k:l:LmnNp:PqRs:t:u:UVw:xzZ"
+#define ALL_OPTIONS "46c:dD:f:gGhi:I:k:l:LmnNp:PqRs:t:u:U:Vw:xzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -241,7 +241,8 @@ parse_cmdline_opts(
 	    case 'b':
 		break;
 	    case 'c':
-		explicit_config = ntp_optarg;
+		if (ntp_optarg != NULL)
+			explicit_config = ntp_optarg;
 		break;
 	    case 'd':
 #ifdef DEBUG
@@ -251,11 +252,13 @@ parse_cmdline_opts(
 		break;
 	    case 'D':
 #ifdef DEBUG
-		debug = atoi(ntp_optarg);
+		if (ntp_optarg != NULL)
+			debug = atoi(ntp_optarg);
 #endif
 		break;
 	    case 'f':
-		driftfile = ntp_optarg;
+		if (ntp_optarg != NULL)
+			driftfile = ntp_optarg;
 		break;
 	    case 'g':
 		allow_panic = true;
@@ -269,7 +272,8 @@ parse_cmdline_opts(
 	    case 'i':
 #ifdef ENABLE_DROPROOT
 		droproot = true;
-		chrootdir = ntp_optarg;
+		if (ntp_optarg != NULL)
+			chrootdir = ntp_optarg;
 #endif
 		break;
 	    case 'I':
@@ -280,7 +284,8 @@ parse_cmdline_opts(
 		/* defer */
 		break;
 	    case 'l':
-		logfilename = ntp_optarg;
+		if (ntp_optarg != NULL)
+			logfilename = ntp_optarg;
 		break;
 	    case 'L':
 		listen_to_virtual_ips = false;
@@ -300,18 +305,22 @@ parse_cmdline_opts(
 		need_priority = true;
 		break;
 	    case 'p':
-		pidfile = ntp_optarg;
+		if (ntp_optarg != NULL)
+			pidfile = ntp_optarg;
 		break;
 	    case 'P':
-		config_priority = atoi(ntp_optarg);
-		config_priority_override = true;
-		need_priority = true;
+		if (ntp_optarg != NULL) {
+			config_priority = atoi(ntp_optarg);
+			config_priority_override = true;
+			need_priority = true;
+		}
 		break;
 	    case 'q':
 		mode_ntpdate = true;
 		nofork = true;
 		break;
 	    case 'r':
+		if (ntp_optarg != NULL)
 		{
 		    double tmp;
 		    if (sscanf(ntp_optarg, "%lf", &tmp) != 1) {
@@ -327,50 +336,55 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 's':
-		strlcpy(statsdir, ntp_optarg, sizeof(statsdir));
+		if (ntp_optarg != NULL)
+			strlcpy(statsdir, ntp_optarg, sizeof(statsdir));
 		break;
 	    case 't':
 		/* defer */
 		break;
 	    case 'u':
 #ifdef ENABLE_DROPROOT
-		droproot = true;
-		/* coverity[overwrite_var] Leak is real but harmless */
-		user = estrdup(ntp_optarg);
-		/* coverity[overwrite_var] Leak is real but harmless */
-		group = strrchr(user, ':');
-		if (group != NULL) {
-			size_t	len;
+		if (ntp_optarg != NULL) {
+			droproot = true;
+			/* coverity[overwrite_var] Leak is real but harmless */
+			user = estrdup(ntp_optarg);
+			/* coverity[overwrite_var] Leak is real but harmless */
+			group = strrchr(user, ':');
+			if (group != NULL) {
+				size_t	len;
 
-			*group++ = '\0'; /* get rid of the ':' */
-			len = (size_t)(group - user);
-			group = estrdup(group);
-			user = erealloc(user, len);
+				*group++ = '\0'; /* get rid of the ':' */
+				len = (size_t)(group - user);
+				group = estrdup(group);
+				user = erealloc(user, len);
+			}
 		}
 #endif
 		break;
 	    case 'U':
+		if (ntp_optarg != NULL)
 		{
-		    long val = atol(argv[ntp_optind]);
+			long val = atol(ntp_optarg);
 
-		    if (val >= 0)
-			    interface_interval = (int)val;
-		    else {
-			    fprintf(stderr,
-				    "command line interface update interval %ld must not be negative\n",
-				    val);
-			    msyslog(LOG_ERR,
-				    "command line interface update interval %ld must not be negative",
-				    val);
-			    exit(0);
-		    }
+			if (val >= 0)
+				interface_interval = (int)val;
+			else {
+				fprintf(stderr,
+					"command line interface update interval %ld must not be negative\n",
+					val);
+				msyslog(LOG_ERR,
+					"command line interface update interval %ld must not be negative",
+					val);
+				exit(0);
+			}
 		}
 		break;
 	    case 'V':
 		printf("%s\n", ntpd_version());
 		exit(0);
 	    case 'w':
-		wait_sync = (long)strtod(ntp_optarg, NULL);
+		if (ntp_optarg != NULL)
+			wait_sync = (long)strtod(ntp_optarg, NULL);
 		break;
 	    case 'x':
 		/* defer */
@@ -684,6 +698,7 @@ ntpdmain(
 		stats_config(STATS_FREQ_FILE, driftfile);
 		break;
 	    case 'I':
+		if (ntp_optarg != NULL)
 	        {
 		    sockaddr_u	addr;
 		    add_nic_rule(
@@ -694,7 +709,8 @@ ntpdmain(
 	        }
 		break;
 	    case 'k':
-		getauthkeys(ntp_optarg);
+		if (ntp_optarg != NULL)
+			getauthkeys(ntp_optarg);
 		break;
 	    case 'p':
 		stats_config(STATS_PID_FILE, pidfile);
@@ -703,6 +719,7 @@ ntpdmain(
 		stats_config(STATS_STATSDIR, statsdir);
 		break;
 	    case 't':
+		if (ntp_optarg != NULL)
 		{
 		    u_long tkey = (u_long)atol(ntp_optarg);
 		    if (tkey == 0 || tkey > NTP_MAXKEY) {
@@ -719,10 +736,12 @@ ntpdmain(
 		loop_config(LOOP_MAX, 600);
 		break;
 	    case 'z':
-		set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, RW);
+		if (ntp_optarg != NULL)
+			set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, RW);
 		break;
 	    case 'Z':
-		set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, (u_short) (RW | DEF));
+		if (ntp_optarg != NULL)
+			set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, (u_short) (RW | DEF));
 		break;
 	    }
 	}
@@ -895,8 +914,8 @@ static void mainloop(void)
 					l_fp dts = pts;
 
 					dts -= rbuf->recv_time;
-					DPRINTF(2, ("processing timestamp delta %s (with prec. fuzz)\n", lfptoa(&dts, 9)));
-					collect_timing(rbuf, "buffer processing delay", 1, &dts);
+					DPRINTF(2, ("processing timestamp delta %s (with prec. fuzz)\n", lfptoa(dts, 9)));
+					collect_timing(rbuf, "buffer processing delay", 1, dts);
 					bufcount++;
 # endif
 					(*rbuf->receiver)(rbuf);
@@ -912,8 +931,8 @@ static void mainloop(void)
 			get_systime(&tsb);
 			tsb -= tsa;
 			if (bufcount) {
-				collect_timing(NULL, "processing", bufcount, &tsb);
-				DPRINTF(2, ("processing time for %d buffers %s\n", bufcount, lfptoa(&tsb, 9)));
+				collect_timing(NULL, "processing", bufcount, tsb);
+				DPRINTF(2, ("processing time for %d buffers %s\n", bufcount, lfptoa(tsb, 9)));
 			}
 		}
 # endif

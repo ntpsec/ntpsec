@@ -52,7 +52,7 @@ typedef uint64_t time64_t;
 #define time64lo(n)	((uint32_t)((n) & LOW32MASK))
 #define settime64lo(n, v) (n) = (((n) & HIGH32MASK) | ((v) & LOW32MASK))
 #define time64s(n)        ((int64_t)(n))
-#define settime64s(n,v)   (n) = ((int64_t)(v))
+#define settime64s(n,v)   (n) = ((uint64_t)(v))
 #define time64u(n)        (n)
 #define settime64u(n,v)   (n) = (v)
 #define negtime64(n)      ((uint64_t)((((int64_t)(n)) * -1)))

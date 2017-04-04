@@ -169,7 +169,7 @@ typedef unsigned long int json_uint;
 #define MAX_PDU_LEN	1600
 #define TICKOVER_LOW	10
 #define TICKOVER_HIGH	120
-#define LOGTHROTTLE	3600
+#define LOGTHROTTLE	S_PER_H
 
 /* Primary channel PPS avilability dance:
  * Every good PPS sample gets us a credit of PPS_INCCOUNT points, every
@@ -786,7 +786,7 @@ gpsd_control(
 		up->pps_fudge = dtolfp(pp->fudgetime1);
 		up->ibt_fudge = dtolfp(pp->fudgetime2);
 
-		if (MODE_OP_MODE(up->mode ^ peer->ttl)) {
+		if (MODE_OP_MODE((uint32_t)up->mode ^ peer->ttl)) {
 			leave_opmode(peer, up->mode);
 			up->mode = MODE_OP_MODE(peer->ttl);
 			enter_opmode(peer, up->mode);
@@ -1096,9 +1096,9 @@ strtojint(
 	hold = cp;
 	accu = 0;
 	while (isdigit(*(const unsigned char*)cp)) {
-		flags |= (accu > limit_lo);
-		accu = accu * 10 + (*(const unsigned char*)cp++ - '0');
-		flags |= (accu > limit_hi);
+	    flags |= (accu > limit_lo);
+	    accu = accu * 10 + (json_uint)(*(const unsigned char*)cp++ - '0');
+	    flags |= (accu > limit_hi);
 	}
 	/* Check for empty conversion (no digits seen). */
 	if (hold != cp)
@@ -2063,8 +2063,8 @@ convert_ascii_time(
 	if (*ep == '.') {
 		dw = 100000000u;
 		while (isdigit(*(unsigned char*)++ep)) {
-			ts.tv_nsec += (*(unsigned char*)ep - '0') * dw;
-			dw /= 10u;
+		    ts.tv_nsec += (uint32_t)(*(unsigned char*)ep - '0') * dw;
+		    dw /= 10u;
 		}
 	}
 	if (ep[0] != 'Z' || ep[1] != '\0')

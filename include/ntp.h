@@ -168,10 +168,10 @@ typedef struct __endpt {
  */
 #define INT_UP		0x001	/* Interface is up */
 #define	INT_PPP		0x002	/* Point-to-point interface */
-#define	INT_LOOPBACK	0x004	/* the loopback interface */
+#define	INT_LOOPBACK	0x004U	/* the loopback interface */
 #define	INT_BROADCAST	0x008	/* can broadcast out this interface */
 #define INT_MULTICAST	0x010	/* can multicast out this interface */
-#define	INT_BCASTOPEN	0x020	/* broadcast receive socket is open */
+#define	INT_BCASTOPEN	0x020U	/* broadcast receive socket is open */
 #define INT_MCASTOPEN	0x040	/* multicasting enabled */
 #define INT_WILDCARD	0x080	/* wildcard interface - usually skipped */
 #define INT_MCASTIF	0x100	/* bound directly to MCAST address */
@@ -400,7 +400,7 @@ struct peer {
 #define	FLAG_BC_VOL	0x0010	/* broadcast client volleying */
 #define	FLAG_PREFER	0x0020	/* prefer peer */
 #define	FLAG_BURST	0x0040	/* burst mode */
-#define	FLAG_PPS	0x0080	/* steered by PPS */
+#define	FLAG_PPS	0x0080U	/* steered by PPS */
 #define	FLAG_IBURST	0x0100	/* initial burst mode */
 #define	FLAG_NOSELECT	0x0200	/* never select */
 #define	FLAG_TRUE	0x0400	/* force truechimer */

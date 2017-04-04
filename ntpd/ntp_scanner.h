@@ -44,7 +44,6 @@ typedef enum {
 	FOLLBY_NON_ACCEPTING
 } follby;
 
-#define MAXLINE		1024	/* maximum length of line */
 #define MAXINCLUDELEVEL	5	/* maximum include file levels */
 
 /* STRUCTURES
@@ -132,8 +131,12 @@ extern bool lex_init_stack(const char * path, const char * mode);
 extern void        lex_drop_stack(void);
 extern bool lex_flush_stack(void);
 
+/* path management for config directories */
+extern void reparent(char *, size_t, const char *, const char *);
+extern bool is_directory(const char *);
+
 /* add/remove a nested input source */
-extern bool lex_push_file(const char * path, const char * mode);
+extern bool lex_push_file(const char * path);
 extern bool lex_pop_file(void);
 
 /* input stack state query functions */

@@ -84,7 +84,10 @@ cause buffer overruns and (all too often) exploitable security holes:
 * gets: Use fgets instead.
 * gmtime(), localtime(), asctime(), ctime(): use the reentrant *_r variants.
 * tmpnam() - use mkstemp() or tmpfile() instead.
-* dirname() - the Linux version is re-entrant but this property is not portable.
+
+Do not rely on dirname() being re-entrant, and assume it will modify
+(truncate) its argument. The Linux version is re-entrant, but this
+property is not portable.
 
 In general, avoid functions that are non-reentrant.  When in doubt, see
 http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
@@ -120,8 +123,8 @@ continuity; you should, too.
 A discussion about using uncrustify to mass convert all the C sources
 to a more modern indentation and format style is ongoing.  As it will
 result in a coordinated flag day in ongoing development, it will be
-carefully announced in the mailto:devel@ntpsec.org mailing list before being merged and
-pushed.
+carefully announced in the mailto:devel@ntpsec.org mailing list before
+being merged and pushed.
 
 === Conventions for #ifdef guard names ===
 

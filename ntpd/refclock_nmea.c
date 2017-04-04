@@ -1512,7 +1512,7 @@ parse_time(
 	jd->second = (uint8_t)s;
 	/* if we have a fraction, scale it up to nanoseconds. */
 	if (rc == 4)
-		*ns = f * weight[p2 - p1 - 1];
+		*ns = (long)(f * weight[p2 - p1 - 1]);
 	else
 		*ns = 0;
 

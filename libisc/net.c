@@ -60,7 +60,7 @@ try_proto(int domain) {
 
 	if (domain == PF_INET6) {
 		struct sockaddr_in6 sin6;
-		GETSOCKNAME_SOCKLEN_TYPE len;	/* NTP local change */
+		socklen_t len;
 
 		/*
 		 * Check to see if IPv6 is broken, as is common on Linux.

@@ -815,7 +815,7 @@ refclock_setup(
 			    fd, ltemp);
 #endif
 		if (ltemp & TIOCM_DSR && lflags & LDISC_REMOTE)
-			ttyp->c_cflag &= ~CLOCAL;
+			ttyp->c_cflag &= (unsigned int)~CLOCAL;
 #endif /* TIOCMGET */
 	}
 

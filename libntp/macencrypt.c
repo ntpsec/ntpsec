@@ -71,7 +71,7 @@ mac_authencrypt(
 	EVP_DigestFinal_ex(ctx, digest, &len);
 	EVP_MD_CTX_destroy(ctx);
 	memmove((uint8_t *)pkt + length + 4, digest, len);
-	return (len + 4);
+	return (int)(len + 4);
 }
 
 

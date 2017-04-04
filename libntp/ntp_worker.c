@@ -111,7 +111,7 @@ close_all_beyond(
 	int max_fd;
 
 	/* includes POSIX case */
-	max_fd = GETDTABLESIZE();
+	max_fd = sysconf(_SC_OPEN_MAX);
 	for (fd = keep_fd + 1; fd < max_fd; fd++)
 		close(fd);
 # endif	/* !HAVE_CLOSEFROM && !F_CLOSEM */

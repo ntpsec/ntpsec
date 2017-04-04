@@ -23,8 +23,11 @@
 # Try the simple P controller (the default) before trying the PID controller.
 # The PID controller may take some fiddling with the constants to get
 # it working better than the simple P controller.
+#
+# More info on the blog post: https://blog.ntpsec.org/2017/03/21/More_Heat.html
 
 import argparse
+import atexit
 import subprocess
 import sys
 import time
@@ -91,8 +94,7 @@ Discrete PID control
     def __repr__(self):
         return ("D_value=%s, I_value=%s" % (self.D_value, self.I_value))
 
-
-    def setPoint(self,set_point):
+    def setPoint(self, set_point):
             """
             Initilize the setpoint of PID
             """
@@ -131,7 +133,8 @@ parser.add_argument('-p', '--pid',
 parser.add_argument('-s', '--step',
                     action="store_true",
                     dest='step',
-                    help="Step up 1C every 2 hours for 20 hours, then back down.")
+                    help="Step up 1C every 2 hours for 20 hours, "
+                         "then back down.")
 parser.add_argument('-t', '--temp',
                     default=[45.0],
                     dest='target_temp',
@@ -163,6 +166,9 @@ period = float(args.wait[0])
 # you will need to personalize these to your relay ID:
 usbrelay_on = ['usbrelay', '959BI_1=1']
 usbrelay_off = ['usbrelay', '959BI_1=0']
+
+# turn off the usb relay on exit.  no need to cook..
+atexit.register(run_binary, usbrelay_off)
 
 # to adjust the PID variables
 # set I and D to zero
@@ -202,15 +208,25 @@ try:
                     step = -11
             pid.setPoint(temp_gate)
 
-        # grab the needed output
-        output = run_binary(["temper-poll", "-c"])
-        try:
-            # make sure it is a temperature
-            temp = float(output[0])
-        except:
-            # bad data, exit
-            # FIXME, should try to recover?
-            print("temper read failed: %s" % output)
+        # only one device can read the TEMPer at a time
+        # collisions will happen, so retry a few times
+        for attempt in range(0, 3):
+            # grab the needed output
+            fail = False
+            output = run_binary(["temper-poll", "-c"])
+            try:
+                # make sure it is a temperature
+                temp = float(output[0])
+                break
+            except:
+                # bad data, try aagin
+                fail = True
+                if args.verbose:
+                    print("temper read failed: %s" % output)
+
+        if fail:
+            # give up
+            print("temper fatal error")
             sys.exit(1)
 
         # the +20 is to create an 80/20 band around the setpoint

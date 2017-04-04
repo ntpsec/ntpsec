@@ -589,7 +589,7 @@ jupiter_ppsapi(
 	}
 /*	instance->peer->precision = PPS_PRECISION; */
 
-#if DEBUG
+#ifdef DEBUG
 	if (debug) {
 		time_pps_getparams(instance->pps_handle, &instance->pps_params);
 		jupiter_debug(instance->peer, __func__,
@@ -766,8 +766,8 @@ jupiter_receive(struct recvbuf *rbufp)
 	bpcnt = rbufp->recv_length;
 
 	/* This shouldn't happen */
-	if (bpcnt > sizeof(instance->sbuf) - instance->ssize)
-		bpcnt = sizeof(instance->sbuf) - instance->ssize;
+	if (bpcnt > sizeof(instance->sbuf) - (size_t)instance->ssize)
+		bpcnt = sizeof(instance->sbuf) - (size_t)instance->ssize;
 
 	/* Append to input buffer */
 	memcpy((uint8_t *)instance->sbuf + instance->ssize, bp, bpcnt);
@@ -780,7 +780,7 @@ jupiter_receive(struct recvbuf *rbufp)
 		tstamp = rbufp->recv_time;
 		hp = (struct jheader *)instance->sbuf;
 		sp = (u_short *)(hp + 1);
-		size = cc - sizeof(*hp);
+		size = cc - (int)sizeof(*hp);
 		switch (getshort(hp->id)) {
 
 		case JUPITER_O_PULSE:
@@ -803,7 +803,8 @@ jupiter_receive(struct recvbuf *rbufp)
 			 * this one.
 			 */
 			laststime = instance->stime;
-			instance->stime = DS2UI(((struct jpulse *)sp)->stime);
+			instance->stime =
+                                (uint32_t)DS2UI(((struct jpulse *)sp)->stime);
 			if (laststime != 0 && instance->stime - laststime <= 21) {
 				jupiter_debug(peer, __func__,
 				"avoided firmware bug (stime %.2f, laststime %.2f)",
@@ -839,7 +840,7 @@ jupiter_receive(struct recvbuf *rbufp)
 				break;
 
 			/* Add the new sample to a median filter */
-			tstamp = lfpinit(JAN_1970 + (uint32_t)last_timecode, 0);
+			tstamp = lfpinit(JAN_1970 + last_timecode, 0);
 
 			refclock_process_offset(pp, tstamp, pp->lastrec, pp->fudgetime1);
 
@@ -948,7 +949,7 @@ jupiter_parse_t(struct instance *instance, u_short *sp)
 	jp = (struct jpulse *)sp;
 
 	/* The timecode is presented as seconds into the current GPS week */
-	sweek = DS2UI(jp->sweek) % WEEKSECS;
+	sweek = (u_int)DS2UI(jp->sweek) % WEEKSECS;
 
 	/*
 	 * If we don't know the current GPS week, calculate it from the
@@ -1080,7 +1081,7 @@ jupiter_parse_gpos(struct instance *instance, u_short *sp)
 	}
 
 	instance->gpos_gweek = jg->gweek;
-	instance->gpos_sweek = DS2UI(jg->sweek);
+	instance->gpos_sweek = (u_int)DS2UI(jg->sweek);
 	/* coverity[tainted_data] */
 	while(instance->gpos_sweek >= WEEKSECS) {
 		instance->gpos_sweek -= WEEKSECS;
@@ -1321,7 +1322,7 @@ jupiter_recv(struct instance *instance)
 			return (0);
 	}
 
-	if (jupiter_cksum(sp, (cc / sizeof(u_short) - 1)) !=
+	if (jupiter_cksum(sp, ((u_int)cc / sizeof(u_short) - 1U)) !=
 	    getshort(hp->hsum)) {
 	    jupiter_debug(instance->peer, __func__, "bad header checksum!");
 		/* This is drastic but checksum errors should be rare */
@@ -1332,14 +1333,14 @@ jupiter_recv(struct instance *instance)
 	/* Check for a payload */
 	len = getshort(hp->len);
 	if (len > 0) {
-		n = (len + 1) * sizeof(u_short);
+		n = (len + 1) * (int)sizeof(u_short);
 		/* Not enough data yet */
 		if (size < cc + n)
 			return (0);
 
 		/* Check payload checksum */
 		sp = (u_short *)(hp + 1);
-		if (jupiter_cksum(sp, len) != getshort(sp[len])) {
+		if (jupiter_cksum(sp, (u_int)len) != getshort(sp[len])) {
 			jupiter_debug(instance->peer,
 			    __func__, "bad payload checksum!");
 			/* This is drastic but checksum errors should be rare */
