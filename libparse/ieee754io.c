@@ -155,6 +155,9 @@ fetch_ieee754(
   unsigned char val;
   int fieldindex = 0;
   
+
+  *lfpp = 0;           /* return zero for all errors: NAN, +INF, -INF, etc. */
+
   switch (size)
     {
     case IEEE_DOUBLE:
@@ -278,8 +281,6 @@ fetch_ieee754(
       /*
        * collect real numbers
        */
-
-      *lfpp = 0;
 
       /*
        * check for overflows
