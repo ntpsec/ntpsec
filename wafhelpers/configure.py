@@ -279,7 +279,7 @@ def cmd_configure(ctx, config):
         # "-Wfloat-equal",   # Not Ready For Prime Time
         # "-Wmissing-prototypes",  # Not Ready For Prime Time
         # "-Wmissing-declarations", # Not Ready For Primt Time
-        # "-Wsign-conversion", # Not Ready For Prime Time
+        "-Wsign-conversion",
         "-Wshadow",
         "-Wstrict-prototypes",
         "-Wundef",
