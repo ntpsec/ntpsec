@@ -13,7 +13,7 @@
 #include "ntp_fp.h"
 #include "ieee754io.h"
 
-static unsigned long get_byte (unsigned char *, offsets_t, int *);
+static uint64_t get_byte (unsigned char *, offsets_t, int *);
 
 #ifdef DEBUG_PARSELIB
 
@@ -51,18 +51,24 @@ fmt_blong(
 static char *
 fmt_flt(
 	bool sign,
-	unsigned long mh,
-	unsigned long ml,
-	unsigned long ch
+	uint64_t ml,
+	unsigned long ch,
+        int length
 	)
 {
 	char *buf;
 
 	LIB_GETBUF(buf);
-	snprintf(buf, LIB_BUFLENGTH, "%c %s %s %s", sign ? '-' : '+',
-		 fmt_blong(ch, 11),
-		 fmt_blong(mh, 20),
-		 fmt_blong(ml, 32));
+        if ( 8 == length ) {
+	    snprintf(buf, LIB_BUFLENGTH, "%c %s %s %s", sign ? '-' : '+',
+		     fmt_blong(ch, 11),
+		     fmt_blong(ml >> 32, 20),
+		     fmt_blong(ml & 0x0FFFFFFFFULL, 32));
+        } else {
+	    snprintf(buf, LIB_BUFLENGTH, "%c %s %s", sign ? '-' : '+',
+		     fmt_blong(ch, 8),
+		     fmt_blong(ml, 23));
+        }
 
 	return buf;
 }
@@ -89,22 +95,18 @@ fmt_hex(
 
 #endif
 
-static unsigned long
+static uint64_t
 get_byte(
 	 unsigned char *bufp,
 	 offsets_t offset,
 	 int *fieldindex
 	 )
 {
-  unsigned char val;
+    unsigned char val;
 
-  val     = *(bufp + offset[*fieldindex]);
-#ifdef DEBUG_PARSELIB
-  if (debug > 4)
-    printf("fetchieee754: getbyte(0x%08x, %d) = 0x%02x\n", (unsigned int)(bufp)+offset[*fieldindex], *fieldindex, val);
-#endif
-  (*fieldindex)++;
-  return val;
+    val = *(bufp + offset[*fieldindex]);
+    (*fieldindex)++;
+    return val;
 }
 
 /*
@@ -121,20 +123,17 @@ fetch_ieee754(
 {
   unsigned char *bufp = *buffpp;
   bool sign;
-  unsigned int bias;
+  unsigned int bias;               /* bias 127 or 1023 */
   unsigned int maxexp;
-  int mbits;
-  unsigned long mantissa_low;
-  unsigned long mantissa_high;
-  unsigned long characteristic;    /* biased exponent */
-  long exponent;                   /* unbiased exponent */
+  int mbits;                       /* length of mantissa, 23 or 52 */
+  uint64_t mantissa;               /* mantissa, 23 or 52 bits used, +1 */
+  unsigned long characteristic;    /* biased exponent, 0 to 255 or 2047 */
+  int exponent;                    /* unbiased exponent */
   unsigned int maxexp_lfp;         /* maximum exponent that fits in an l_fp */
-  int frac_offset;	           /* where the fraction starts */
-#ifdef DEBUG_PARSELIB
-  int length;
-#endif
   unsigned char val;
   int fieldindex = 0;              /* index into bufp */
+  int fudge;                       /* shift difference of l_fp and IEEE */
+  int shift;                       /* amount to shift IEEE to get l_fp */
   
 
   *lfpp = 0;           /* return zero for all errors: NAN, +INF, -INF, etc. */
@@ -151,9 +150,7 @@ fetch_ieee754(
   switch (size)
     {
     case IEEE_DOUBLE:
-#ifdef DEBUG_PARSELIB
-      length = 8;
-#endif
+      fudge = -20;
       maxexp_lfp = 31;
       mbits  = 52;
       bias   = 1023;
@@ -162,20 +159,18 @@ fetch_ieee754(
       /* grab lower characteristic bits */
       characteristic  |= (val & 0xF0U) >> 4;
 
-      mantissa_high  = (val & 0x0FU) << 16;
-      mantissa_high |= get_byte(bufp, offsets, &fieldindex) << 8;
-      mantissa_high |= get_byte(bufp, offsets, &fieldindex);
+      mantissa  = (val & 0x0FULL) << 48;
+      mantissa |= get_byte(bufp, offsets, &fieldindex) << 40;
+      mantissa |= get_byte(bufp, offsets, &fieldindex) << 32;
 
-      mantissa_low   = get_byte(bufp, offsets, &fieldindex) << 24;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 16;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 8;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
+      mantissa |= get_byte(bufp, offsets, &fieldindex) << 24;
+      mantissa |= get_byte(bufp, offsets, &fieldindex) << 16;
+      mantissa |= get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa |= get_byte(bufp, offsets, &fieldindex);
       break;
 
     case IEEE_SINGLE:
-#ifdef DEBUG_PARSELIB
-      length = 4;
-#endif
+      fudge = 9;
       maxexp_lfp = 127;
       mbits  = 23;
       bias   = 127;
@@ -184,43 +179,27 @@ fetch_ieee754(
       /* grab last characteristic bit from 2nd byte */
       characteristic |= (val & 0x80) ? 1U : 0 ;
 
-      mantissa_high  = 0;
-
-      mantissa_low   = (val & 0x7FU) << 16;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 8;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
+      mantissa   = (val & 0x7FU) << 16;
+      mantissa  |= get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa  |= get_byte(bufp, offsets, &fieldindex);
       break;
 
     default:
       return IEEE_BADCALL;
     }
 
+  exponent = (int)characteristic - (int)bias;
+
 #ifdef DEBUG_PARSELIB
-  if (debug > 4) {
-    double d;
-    float f;
-
-    if (size == IEEE_SINGLE)
-      {
-	int i;
-
-	for (i = 0; i < length; i++)
-	  {
-	    *((unsigned char *)(&f)+i) = *(*buffpp + offsets[i]);
-	  }
-	d = f;
-    } else {
-	int i;
-
-	for (i = 0; i < length; i++)
-	  {
-	    *((unsigned char *)(&d)+i) = *(*buffpp + offsets[i]);
-	  }
+  if ( 1 || debug > 4) {
+    int length = 8;
+    if ( IEEE_SINGLE == size ) {
+	length = 4;
     }
-    
-    printf("fetchieee754: FP: %s -> %s -> %e(=%s)\n", fmt_hex(*buffpp, length),
-	   fmt_flt(sign, mantissa_high, mantissa_low, characteristic),
-	   d, fmt_hex((unsigned char *)&d, length));
+
+    printf("\nfetchieee754: FP: %s -> %s\n", fmt_hex(*buffpp, length),
+	   fmt_flt(sign, mantissa, characteristic, length));
+    printf("fetchieee754: Exp: %d, mbits %d\n", exponent, mbits);
   }
 #endif
 
@@ -233,7 +212,7 @@ fetch_ieee754(
       /*
        * NaN or Infinity
        */
-      if (mantissa_low || mantissa_high) {
+      if (mantissa) {
 	  /*
 	   * NaN
 	   */
@@ -251,9 +230,8 @@ fetch_ieee754(
   /*
    * check for overflows
    */
-  exponent = (long int)characteristic - bias;
 
-  if (exponent > maxexp_lfp) {
+  if (exponent > (int)maxexp_lfp) {
       /*
        * sorry an l_fp only so long
        * overflow only in respect to NTP-FP representation
@@ -261,56 +239,28 @@ fetch_ieee754(
       return sign ? IEEE_NEGOVERFLOW : IEEE_POSOVERFLOW;
   }
 
-  frac_offset = mbits - exponent;
-
-  if (characteristic == 0) {
-      /*
-       * de-normalized or tiny number - fits only as 0
-       */
-      return IEEE_OK;
-  }
-
-  /*
-   * adjust for implied 1
-   */
-  if (mbits > 31)
-    mantissa_high |= 1U << (mbits - 32);
-  else
-    mantissa_low  |= 1U << mbits;
-
-  /*
-   * take mantissa apart - if only all machine would support
-   * 64 bit operations 8-(
-   */
-  if (frac_offset > mbits) {
-      frac_offset -= mbits + 1; /* will now contain right shift count - 1*/
-      if (mbits > 31) {
-	  uint32_t frac;
-	  frac   = mantissa_high << (63 - mbits);
-	  frac  |= mantissa_low  >> (mbits - 33);
-	  frac >>= frac_offset;
-	  *lfpp = lfpfrac(frac);
-      } else {
-	  *lfpp = lfpfrac( mantissa_low >> frac_offset);
-      }
-  } else if (frac_offset > 32) {
+    if (characteristic == 0) {
 	/*
-	 * must split in high word
+	 * de-normalized or tiny number - fits only as 0
 	 */
-	*lfpp = lfptouint(mantissa_high >> (frac_offset - 32));
-	*lfpp |= lfpfrac(((mantissa_high &
-                       ((1U << (frac_offset - 32)) - 1)) << (64 - frac_offset)) |
-                        (mantissa_low  >> (frac_offset - 32)));
-  } else {
-	/*
-	 * must split in low word
-	 */
-	*lfpp = lfptouint((mantissa_high << (32 - frac_offset)) |
-                          (((mantissa_low >> frac_offset) &
-                           ((1U << (32 - frac_offset)) - 1))));
-	/* coverity[large_shift] */
-	*lfpp |= lfpfrac((mantissa_low &
-                        ((1U << frac_offset) - 1)) << (32 - frac_offset));
+	return IEEE_OK;
+    }
+
+    /*
+     * add in implied 1
+     */
+    mantissa  |= 1ULL << mbits;
+
+    shift = exponent + fudge;
+    if ( 0 == shift ) {
+	/* no shift */
+	*lfpp = mantissa;
+    } else if ( 0 > shift ) {
+	/* right shift */
+	*lfpp = mantissa >> -shift;
+    } else {
+	/* left shift */
+	*lfpp = mantissa << shift;
     }
 
     /*
