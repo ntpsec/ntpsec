@@ -103,10 +103,9 @@ TEST(ieee754io, test_nan32) {
 
 TEST(ieee754io, test_max32) {
         int ret;
-        /* not enough precision in a float to get max l_fp */
-        unsigned char buf[4] = { 127, 127, 255, 255};
-        /* not enough precision in a float to get negative max l_fp */
-        unsigned char buf_n[4] = { 255, 127, 255, 255};
+        /* not enough precision in a float to get precision of l_fp */
+        unsigned char buf[4] = { 0x4e, 0xff, 255, 255};
+        unsigned char buf_n[4] = { 0xce, 0xff, 255, 255};
         unsigned char *bp = &buf[0];
         l_fp fp;
 
@@ -114,14 +113,14 @@ TEST(ieee754io, test_max32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFF00UL, fp );
+        TEST_ASSERT_EQUAL_INT64( 0x7FFFFF8000000000UL, fp );
 
         /* negative max that fits */
         bp = &buf_n[0];
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFF00000100UL, fp );
+        TEST_ASSERT_EQUAL_UINT64( 0x8000008000000000UL, fp );
 }
 
 TEST(ieee754io, test_order32) {
@@ -150,7 +149,7 @@ TEST(ieee754io, test_order32) {
 TEST(ieee754io, test_small32) {
         int ret;
         /* small number, one LSB of l_fp */
-        unsigned char buf[4] = { 0x33, 255, 255, 255};
+        unsigned char buf[4] = { 0x2F, 255, 255, 255};
         unsigned char *bp = &buf[0];
         l_fp fp;
 
@@ -299,7 +298,7 @@ TEST(ieee754io, test_order64) {
 TEST(ieee754io, test_small64) {
         int ret;
         /* small number, one LSB of l_fp  */
-        unsigned char buf[8] = { 0x33, 255, 255, 255, 255, 255, 255, 255};
+        unsigned char buf[8] = { 0x3d, 255, 255, 255, 255, 255, 255, 255};
         unsigned char *bp = &buf[0];
         l_fp fp;
 
