@@ -23,7 +23,7 @@ TEST_TEAR_DOWN(ieee754io) {}
 
 static offsets_t native_off = { 0, 1, 2, 3, 4, 5, 6, 7 };
 /* byte order for meinberg doubles */
-// static offsets_t mbg_double = { 1, 0, 3, 2, 5, 4, 7, 6 };
+static offsets_t mbg_double = { 1, 0, 3, 2, 5, 4, 7, 6 };
 
 
 /*
@@ -104,9 +104,9 @@ TEST(ieee754io, test_nan32) {
 TEST(ieee754io, test_max32) {
         int ret;
         /* not enough precision in a float to get max l_fp */
-        unsigned char buf[4] = { 0x7f, 127, 255, 255};
+        unsigned char buf[4] = { 127, 127, 255, 255};
         /* not enough precision in a float to get negative max l_fp */
-        unsigned char buf_n[4] = { 0xff, 127, 255, 255};
+        unsigned char buf_n[4] = { 255, 127, 255, 255};
         unsigned char *bp = &buf[0];
         l_fp fp;
 
@@ -122,6 +122,29 @@ TEST(ieee754io, test_max32) {
 
         TEST_ASSERT( IEEE_OK == ret);
         TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFF00000100UL, fp );
+}
+
+TEST(ieee754io, test_order32) {
+        int ret;
+        /* not enough precision in a double to get max l_fp */
+        unsigned char buf[4] = { 255, 127, 1, 2};
+        /* not enough precision in a double to get negative max l_fp */
+        unsigned char buf_n[4] = { 127, 255, 2, 1};
+        unsigned char *bp = &buf[0];
+        l_fp fp;
+
+        /* normal linear order */
+        ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
+
+        TEST_ASSERT( IEEE_OK == ret);
+        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFF00FEFE00UL, fp );
+
+        /* meinberg order */
+        bp = &buf_n[0];
+        ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, mbg_double);
+
+        TEST_ASSERT( IEEE_OK == ret);
+        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFF00FEFE00UL, fp );
 }
 
 
@@ -237,16 +260,41 @@ TEST(ieee754io, test_max64) {
         TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFFFFFFF000UL, fp );
 }
 
+TEST(ieee754io, test_order64) {
+        int ret;
+        /* not enough precision in a double to get max l_fp */
+        unsigned char buf[8] = { 65, 239, 1, 2, 3, 4, 5, 6 };
+        /* not enough precision in a double to get negative max l_fp */
+        unsigned char buf_n[8] = { 239, 65, 2, 1, 4, 3, 6, 5 };
+        unsigned char *bp = &buf[0];
+        l_fp fp;
+
+        /* normal linear order */
+        ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
+
+        TEST_ASSERT( IEEE_OK == ret);
+        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xF808101820283000UL, fp );
+
+        /* meinberg order */
+        bp = &buf_n[0];
+        ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, mbg_double);
+
+        TEST_ASSERT( IEEE_OK == ret);
+        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xF808101820283000UL, fp );
+}
+
 TEST_GROUP_RUNNER(ieee754io) {
         RUN_TEST_CASE(ieee754io, test_zero32);
         RUN_TEST_CASE(ieee754io, test_one32);
         RUN_TEST_CASE(ieee754io, test_negone32);
         RUN_TEST_CASE(ieee754io, test_nan32);
         RUN_TEST_CASE(ieee754io, test_max32);
+        RUN_TEST_CASE(ieee754io, test_order32);
 
         RUN_TEST_CASE(ieee754io, test_zero64);
         RUN_TEST_CASE(ieee754io, test_one64);
         RUN_TEST_CASE(ieee754io, test_negone64);
         RUN_TEST_CASE(ieee754io, test_nan64);
         RUN_TEST_CASE(ieee754io, test_max64);
+        RUN_TEST_CASE(ieee754io, test_order64);
 }
