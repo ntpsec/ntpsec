@@ -298,16 +298,19 @@ fetch_ieee754(
 	 * must split in high word
 	 */
 	*lfpp = lfptouint(mantissa_high >> (frac_offset - 32));
-	setlfpfrac(*lfpp, ((mantissa_high & ((1 << (frac_offset - 32)) - 1)) << (64 - frac_offset)) | (mantissa_low  >> (frac_offset - 32)));
+	*lfpp |= lfpfrac(((mantissa_high &
+                       ((1U << (frac_offset - 32)) - 1)) << (64 - frac_offset)) |
+                        (mantissa_low  >> (frac_offset - 32)));
   } else {
 	/*
 	 * must split in low word
 	 */
 	*lfpp = lfptouint((mantissa_high << (32 - frac_offset)) |
-            (((mantissa_low >> frac_offset) & ((1 << (32 - frac_offset)) - 1))));
+                          (((mantissa_low >> frac_offset) &
+                           ((1U << (32 - frac_offset)) - 1))));
 	/* coverity[large_shift] */
-	setlfpfrac(*lfpp, (mantissa_low &
-            ((1 << frac_offset) - 1)) << (32 - frac_offset));
+	*lfpp |= lfpfrac((mantissa_low &
+                        ((1U << frac_offset) - 1)) << (32 - frac_offset));
     }
 
     /*
