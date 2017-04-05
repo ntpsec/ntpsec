@@ -126,17 +126,26 @@ fetch_ieee754(
   int mbits;
   unsigned long mantissa_low;
   unsigned long mantissa_high;
-  unsigned long characteristic;
-  long exponent;
-  unsigned int maxexp_lfp;  /* maximum exponent that fits in an l_fp */
+  unsigned long characteristic;    /* biased exponent */
+  long exponent;                   /* unbiased exponent */
+  unsigned int maxexp_lfp;         /* maximum exponent that fits in an l_fp */
 #ifdef DEBUG_PARSELIB
   int length;
 #endif
   unsigned char val;
-  int fieldindex = 0;
+  int fieldindex = 0;              /* index into bufp */
   
 
   *lfpp = 0;           /* return zero for all errors: NAN, +INF, -INF, etc. */
+
+  /* fetch sign byte & first part of characteristic */
+  val = get_byte(bufp, offsets, &fieldindex);
+
+  sign     = (val & 0x80) != 0;
+  characteristic = (val & 0x7F);
+
+  /* fetch rest of characteristic and start of mantissa */
+  val = get_byte(bufp, offsets, &fieldindex);
 
   switch (size)
     {
@@ -148,43 +157,6 @@ fetch_ieee754(
       mbits  = 52;
       bias   = 1023;
       maxexp = 2047;
-      break;
-
-    case IEEE_SINGLE:
-#ifdef DEBUG_PARSELIB
-      length = 4;
-#endif
-      maxexp_lfp = 127;
-      mbits  = 23;
-      bias   = 127;
-      maxexp = 255;
-      break;
-
-    default:
-      return IEEE_BADCALL;
-    }
-  
-  val = get_byte(bufp, offsets, &fieldindex); /* fetch sign byte & first part of characteristic */
-  
-  sign     = (val & 0x80) != 0;
-  characteristic = (val & 0x7F);
-
-  val = get_byte(bufp, offsets, &fieldindex); /* fetch rest of characteristic and start of mantissa */
-  
-  switch (size)
-    {
-    case IEEE_SINGLE:
-      characteristic <<= 1;
-      characteristic  |= (val & 0x80) != 0; /* grab last characteristic bit */
-
-      mantissa_high  = 0;
-
-      mantissa_low   = (val &0x7F) << 16;
-      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
-      break;
-      
-    case IEEE_DOUBLE:
       characteristic <<= 4;
       characteristic  |= (val & 0xF0) >> 4; /* grab lower characteristic bits */
 
@@ -197,10 +169,29 @@ fetch_ieee754(
       mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
-      
+
+    case IEEE_SINGLE:
+#ifdef DEBUG_PARSELIB
+      length = 4;
+#endif
+      maxexp_lfp = 127;
+      mbits  = 23;
+      bias   = 127;
+      maxexp = 255;
+      characteristic <<= 1;
+      characteristic  |= (val & 0x80) != 0; /* grab last characteristic bit */
+
+      mantissa_high  = 0;
+
+      mantissa_low   = (val &0x7F) << 16;
+      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
+      break;
+
     default:
       return IEEE_BADCALL;
     }
+
 #ifdef DEBUG_PARSELIB
   if (debug > 4)
   {
@@ -354,4 +345,3 @@ fetch_ieee754(
 	}
     }
 }
-  
