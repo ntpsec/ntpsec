@@ -147,6 +147,19 @@ TEST(ieee754io, test_order32) {
         TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFF00FEFE00UL, fp );
 }
 
+TEST(ieee754io, test_small32) {
+        int ret;
+        /* small number, one LSB of l_fp */
+        unsigned char buf[4] = { 0x33, 255, 255, 255};
+        unsigned char *bp = &buf[0];
+        l_fp fp;
+
+        ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
+
+        TEST_ASSERT( IEEE_OK == ret);
+        TEST_ASSERT_EQUAL_INT64( 1, fp );
+}
+
 
 TEST(ieee754io, test_zero64) {
         int ret;
@@ -283,10 +296,24 @@ TEST(ieee754io, test_order64) {
         TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xF808101820283000UL, fp );
 }
 
+TEST(ieee754io, test_small64) {
+        int ret;
+        /* small number, one LSB of l_fp  */
+        unsigned char buf[8] = { 0x33, 255, 255, 255, 255, 255, 255, 255};
+        unsigned char *bp = &buf[0];
+        l_fp fp;
+
+        ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
+
+        TEST_ASSERT( IEEE_OK == ret);
+        TEST_ASSERT_EQUAL_INT64( 1, fp );
+}
+
 TEST_GROUP_RUNNER(ieee754io) {
         RUN_TEST_CASE(ieee754io, test_zero32);
         RUN_TEST_CASE(ieee754io, test_one32);
         RUN_TEST_CASE(ieee754io, test_negone32);
+        RUN_TEST_CASE(ieee754io, test_small32);
         RUN_TEST_CASE(ieee754io, test_nan32);
         RUN_TEST_CASE(ieee754io, test_max32);
         RUN_TEST_CASE(ieee754io, test_order32);
@@ -294,6 +321,7 @@ TEST_GROUP_RUNNER(ieee754io) {
         RUN_TEST_CASE(ieee754io, test_zero64);
         RUN_TEST_CASE(ieee754io, test_one64);
         RUN_TEST_CASE(ieee754io, test_negone64);
+        RUN_TEST_CASE(ieee754io, test_small64);
         RUN_TEST_CASE(ieee754io, test_nan64);
         RUN_TEST_CASE(ieee754io, test_max64);
         RUN_TEST_CASE(ieee754io, test_order64);
