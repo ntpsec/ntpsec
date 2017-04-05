@@ -289,7 +289,7 @@ fetch_ieee754(
 	  frac   = mantissa_high << (63 - mbits);
 	  frac  |= mantissa_low  >> (mbits - 33);
 	  frac >>= frac_offset;
-	  setlfpfrac(*lfpp, frac);
+	  *lfpp = lfpfrac(frac);
       } else {
 	  *lfpp = lfpfrac( mantissa_low >> frac_offset);
       }
@@ -297,13 +297,13 @@ fetch_ieee754(
 	/*
 	 * must split in high word
 	 */
-	setlfpuint(*lfpp, mantissa_high >> (frac_offset - 32));
+	*lfpp = lfptouint(mantissa_high >> (frac_offset - 32));
 	setlfpfrac(*lfpp, ((mantissa_high & ((1 << (frac_offset - 32)) - 1)) << (64 - frac_offset)) | (mantissa_low  >> (frac_offset - 32)));
   } else {
 	/*
 	 * must split in low word
 	 */
-	setlfpuint(*lfpp, (mantissa_high << (32 - frac_offset)) |
+	*lfpp = lfptouint((mantissa_high << (32 - frac_offset)) |
             (((mantissa_low >> frac_offset) & ((1 << (32 - frac_offset)) - 1))));
 	/* coverity[large_shift] */
 	setlfpfrac(*lfpp, (mantissa_low &
