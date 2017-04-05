@@ -158,9 +158,10 @@ fetch_ieee754(
       bias   = 1023;
       maxexp = 2047;
       characteristic <<= 4;
-      characteristic  |= (val & 0xF0) >> 4; /* grab lower characteristic bits */
+      /* grab lower characteristic bits */
+      characteristic  |= (val & 0xF0U) >> 4;
 
-      mantissa_high  = (val & 0x0F) << 16;
+      mantissa_high  = (val & 0x0FU) << 16;
       mantissa_high |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_high |= get_byte(bufp, offsets, &fieldindex);
 
@@ -183,7 +184,7 @@ fetch_ieee754(
 
       mantissa_high  = 0;
 
-      mantissa_low   = (val &0x7F) << 16;
+      mantissa_low   = (val & 0x7FU) << 16;
       mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
@@ -258,7 +259,7 @@ fetch_ieee754(
       /*
        * check for overflows
        */
-      exponent = characteristic - bias;
+      exponent = (long int)characteristic - bias;
 
       if (exponent > maxexp_lfp)	/* sorry an l_fp only so long */
 	{
@@ -286,9 +287,9 @@ fetch_ieee754(
 	       * adjust for implied 1
 	       */
 	      if (mbits > 31)
-		mantissa_high |= 1 << (mbits - 32);
+		mantissa_high |= 1U << (mbits - 32);
 	      else
-		mantissa_low  |= 1 << mbits;
+		mantissa_low  |= 1U << mbits;
 
 	      /*
 	       * take mantissa apart - if only all machine would support
