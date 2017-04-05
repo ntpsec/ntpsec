@@ -14,13 +14,6 @@
 #include "ieee754io.h"
 
 static unsigned char get_byte (unsigned char *, offsets_t, int *);
-#if defined(DEBUG) && defined(DEBUG_PARSELIB)
-static int put_ieee754 (unsigned char **bufpp, int size, l_fp *lfpp,
-                        offsets_t offsets);
-#endif
-#ifdef __UNUSED__
-static void put_byte (unsigned char *, offsets_t, int *, unsigned char);
-#endif
 
 #ifdef DEBUG_PARSELIB
 
@@ -113,20 +106,6 @@ get_byte(
   (*fieldindex)++;
   return val;
 }
-
-#ifdef __UNUSED__
-static void
-put_byte(
-	 unsigned char *bufp,
-	 offsets_t offsets,
-	 int *fieldindex,
-	 unsigned char val
-	 )
-{
-  *(bufp + offsets[*fieldindex]) = val;
-  (*fieldindex)++;
-}
-#endif
 
 /*
  * make conversions to and from external IEEE754 formats and internal
