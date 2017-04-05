@@ -50,7 +50,7 @@ fmt_blong(
 
 static char *
 fmt_flt(
-	unsigned int sign,
+	bool sign,
 	unsigned long mh,
 	unsigned long ml,
 	unsigned long ch
@@ -120,7 +120,7 @@ fetch_ieee754(
 	      )
 {
   unsigned char *bufp = *buffpp;
-  unsigned int sign;
+  bool sign;
   unsigned int bias;
   unsigned int maxexp;
   int mbits;
@@ -141,7 +141,7 @@ fetch_ieee754(
   /* fetch sign byte & first part of characteristic */
   val = get_byte(bufp, offsets, &fieldindex);
 
-  sign     = (val & 0x80) != 0;
+  sign = (val & 0x80) != 0;
   characteristic = (val & 0x7F);
 
   /* fetch rest of characteristic and start of mantissa */
@@ -180,7 +180,8 @@ fetch_ieee754(
       bias   = 127;
       maxexp = 255;
       characteristic <<= 1;
-      characteristic  |= (val & 0x80) != 0; /* grab last characteristic bit */
+      /* grab last characteristic bit from 2nd byte */
+      characteristic |= (val & 0x80) ? 1U : 0 ;
 
       mantissa_high  = 0;
 
@@ -336,10 +337,9 @@ fetch_ieee754(
 	      /*
 	       * adjust for sign
 	       */
-	      if (sign)
-		{
+	      if (sign) {
 		  L_NEG(*lfpp);
-		}
+              }
 	      
 	      return IEEE_OK;
 	    }
