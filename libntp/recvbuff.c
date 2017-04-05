@@ -58,12 +58,12 @@ initialise_buffer(recvbuf_t *buff)
 }
 
 static void
-create_buffers(int nbufs)
+create_buffers(u_int nbufs)
 {
 	register recvbuf_t *bufp;
-	int i, abuf;
+	unsigned int i, abuf;
 
-	abuf = nbufs + (int)buffer_shortfall;
+	abuf = nbufs + buffer_shortfall;
 	buffer_shortfall = 0;
 
 #ifndef DEBUG
@@ -89,7 +89,7 @@ create_buffers(int nbufs)
 }
 
 void
-init_recvbuff(int nbufs)
+init_recvbuff(u_int nbufs)
 {
 
 	/*

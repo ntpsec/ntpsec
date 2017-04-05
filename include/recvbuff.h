@@ -60,7 +60,7 @@ struct recvbuf {
 #endif /* REFCLOCK */
 };
 
-extern	void	init_recvbuff(int);
+extern	void	init_recvbuff(u_int);
 
 /* freerecvbuf - make a single recvbuf available for reuse
  */
