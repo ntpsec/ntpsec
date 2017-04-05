@@ -142,7 +142,7 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
  * native operations is to be independent of whether the l_fp
  * type is signed or unsigned.
  */
-#define	L_NEG(v)	(v) = (l_fp)(-1 * (int64_t)(v))
+#define	L_NEG(v)	(v) = (l_fp)(-(int64_t)(v))
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(v))
 #define	L_ISGT(a, b)	((int64_t)(a) > (int64_t)(b))
 #define	L_ISGTU(a, b)	((a) > (b))
