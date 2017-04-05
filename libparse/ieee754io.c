@@ -13,7 +13,7 @@
 #include "ntp_fp.h"
 #include "ieee754io.h"
 
-static unsigned char get_byte (unsigned char *, offsets_t, int *);
+static unsigned long get_byte (unsigned char *, offsets_t, int *);
 
 #ifdef DEBUG_PARSELIB
 
@@ -89,7 +89,7 @@ fmt_hex(
 
 #endif
 
-static unsigned char
+static unsigned long
 get_byte(
 	 unsigned char *bufp,
 	 offsets_t offset,
@@ -162,12 +162,12 @@ fetch_ieee754(
       characteristic  |= (val & 0xF0U) >> 4;
 
       mantissa_high  = (val & 0x0FU) << 16;
-      mantissa_high |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_high |= get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_high |= get_byte(bufp, offsets, &fieldindex);
 
-      mantissa_low   = (unsigned long)get_byte(bufp, offsets, &fieldindex) << 24;
-      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 16;
-      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_low   = get_byte(bufp, offsets, &fieldindex) << 24;
+      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 16;
+      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
 
@@ -186,7 +186,7 @@ fetch_ieee754(
       mantissa_high  = 0;
 
       mantissa_low   = (val & 0x7FU) << 16;
-      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
 
