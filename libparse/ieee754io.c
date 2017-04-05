@@ -129,6 +129,7 @@ fetch_ieee754(
   unsigned long characteristic;    /* biased exponent */
   long exponent;                   /* unbiased exponent */
   unsigned int maxexp_lfp;         /* maximum exponent that fits in an l_fp */
+  int frac_offset;	           /* where the fraction starts */
 #ifdef DEBUG_PARSELIB
   int length;
 #endif
@@ -195,8 +196,7 @@ fetch_ieee754(
     }
 
 #ifdef DEBUG_PARSELIB
-  if (debug > 4)
-  {
+  if (debug > 4) {
     double d;
     float f;
 
@@ -209,16 +209,14 @@ fetch_ieee754(
 	    *((unsigned char *)(&f)+i) = *(*buffpp + offsets[i]);
 	  }
 	d = f;
-      }
-    else
-      {
+    } else {
 	int i;
 
 	for (i = 0; i < length; i++)
 	  {
 	    *((unsigned char *)(&d)+i) = *(*buffpp + offsets[i]);
 	  }
-      }
+    }
     
     printf("fetchieee754: FP: %s -> %s -> %e(=%s)\n", fmt_hex(*buffpp, length),
 	   fmt_flt(sign, mantissa_high, mantissa_low, characteristic),
@@ -231,118 +229,94 @@ fetch_ieee754(
   /*
    * detect funny numbers
    */
-  if (characteristic == maxexp)
-    {
+  if (characteristic == maxexp) {
       /*
        * NaN or Infinity
        */
-      if (mantissa_low || mantissa_high)
-	{
+      if (mantissa_low || mantissa_high) {
 	  /*
 	   * NaN
 	   */
 	  return IEEE_NAN;
-	}
-      else
-	{
-	  /*
-	   * +Inf or -Inf
-	   */
-	  return sign ? IEEE_NEGINFINITY : IEEE_POSINFINITY;
-	}
-    }
+      }
+      /*
+       * +Inf or -Inf
+       */
+      return sign ? IEEE_NEGINFINITY : IEEE_POSINFINITY;
+  }
+  /*
+   * collect real numbers
+   */
+
+  /*
+   * check for overflows
+   */
+  exponent = (long int)characteristic - bias;
+
+  if (exponent > maxexp_lfp) {
+      /*
+       * sorry an l_fp only so long
+       * overflow only in respect to NTP-FP representation
+       */
+      return sign ? IEEE_NEGOVERFLOW : IEEE_POSOVERFLOW;
+  }
+
+  frac_offset = mbits - exponent;
+
+  if (characteristic == 0) {
+      /*
+       * de-normalized or tiny number - fits only as 0
+       */
+      return IEEE_OK;
+  }
+
+  /*
+   * adjust for implied 1
+   */
+  if (mbits > 31)
+    mantissa_high |= 1U << (mbits - 32);
   else
-    {
-      /*
-       * collect real numbers
-       */
+    mantissa_low  |= 1U << mbits;
 
-      /*
-       * check for overflows
-       */
-      exponent = (long int)characteristic - bias;
-
-      if (exponent > maxexp_lfp)	/* sorry an l_fp only so long */
-	{
+  /*
+   * take mantissa apart - if only all machine would support
+   * 64 bit operations 8-(
+   */
+  if (frac_offset > mbits) {
+      setlfpuint(*lfpp, 0); /* only fractional number */
+      frac_offset -= mbits + 1; /* will now contain right shift count - 1*/
+      if (mbits > 31) {
+	  uint32_t frac;
+	  frac   = mantissa_high << (63 - mbits);
+	  frac  |= mantissa_low  >> (mbits - 33);
+	  frac >>= frac_offset;
+	  setlfpfrac(*lfpp, frac);
+      } else {
+	  setlfpfrac(*lfpp, mantissa_low >> frac_offset);
+      }
+  } else {
+      if (frac_offset > 32) {
 	  /*
-	   * overflow only in respect to NTP-FP representation
+	   * must split in high word
 	   */
-	  return sign ? IEEE_NEGOVERFLOW : IEEE_POSOVERFLOW;
-	}
-      else
-	{
-	  int frac_offset;	/* where the fraction starts */
-	  
-	  frac_offset = mbits - exponent;
-
-	  if (characteristic == 0) 
-	    {
-	      /*
-	       * de-normalized or tiny number - fits only as 0
-	       */
-	      return IEEE_OK;
-	    }
-	  else
-	    {
-	      /*
-	       * adjust for implied 1
-	       */
-	      if (mbits > 31)
-		mantissa_high |= 1U << (mbits - 32);
-	      else
-		mantissa_low  |= 1U << mbits;
-
-	      /*
-	       * take mantissa apart - if only all machine would support
-	       * 64 bit operations 8-(
-	       */
-	      if (frac_offset > mbits)
-		{
-		  setlfpuint(*lfpp, 0); /* only fractional number */
-		  frac_offset -= mbits + 1; /* will now contain right shift count - 1*/
-		  if (mbits > 31)
-		    {
-		      uint32_t frac;
-		      frac   = mantissa_high << (63 - mbits);
-		      frac  |= mantissa_low  >> (mbits - 33);
-		      frac >>= frac_offset;
-		      setlfpfrac(*lfpp, frac);
-		    }
-		  else
-		    {
-		      setlfpfrac(*lfpp, mantissa_low >> frac_offset);
-		    }
-		}
-	      else
-		{
-		  if (frac_offset > 32)
-		    {
-		      /*
-		       * must split in high word
-		       */
-		      setlfpuint(*lfpp, mantissa_high >> (frac_offset - 32));
-		      setlfpfrac(*lfpp, ((mantissa_high & ((1 << (frac_offset - 32)) - 1)) << (64 - frac_offset)) | (mantissa_low  >> (frac_offset - 32)));
-		    }
-		  else
-		    {
-		      /*
-		       * must split in low word
-		       */
-			setlfpuint(*lfpp, (mantissa_high << (32 - frac_offset)) | (((mantissa_low >> frac_offset) & ((1 << (32 - frac_offset)) - 1))));
-		      /* coverity[large_shift] */
-		      setlfpfrac(*lfpp, (mantissa_low & ((1 << frac_offset) - 1)) << (32 - frac_offset));
-		    }
-		}
-	      
-	      /*
-	       * adjust for sign
-	       */
-	      if (sign) {
-		  L_NEG(*lfpp);
-              }
-	      
-	      return IEEE_OK;
-	    }
+	  setlfpuint(*lfpp, mantissa_high >> (frac_offset - 32));
+	  setlfpfrac(*lfpp, ((mantissa_high & ((1 << (frac_offset - 32)) - 1)) << (64 - frac_offset)) | (mantissa_low  >> (frac_offset - 32)));
+      } else {
+	  /*
+	   * must split in low word
+	   */
+	    setlfpuint(*lfpp, (mantissa_high << (32 - frac_offset)) | (((mantissa_low >> frac_offset) & ((1 << (32 - frac_offset)) - 1))));
+	  /* coverity[large_shift] */
+	  setlfpfrac(*lfpp, (mantissa_low & ((1 << frac_offset) - 1)) << (32 - frac_offset));
 	}
     }
+
+    /*
+    * adjust for sign
+    */
+    if (sign) {
+      L_NEG(*lfpp);
+    }
+
+    return IEEE_OK;
 }
