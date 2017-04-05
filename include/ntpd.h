@@ -454,7 +454,7 @@ extern u_long	timer_xmtcalls;
 extern bool	leap_sec_in_progress;
 #ifdef ENABLE_LEAP_SMEAR
 extern struct leap_smear_info leap_smear;
-extern int	leap_smear_intv;
+extern u_int	leap_smear_intv;
 #endif
 
 /* ntp_util.c */

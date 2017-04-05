@@ -2525,8 +2525,11 @@ config_vars(
 
 #ifdef ENABLE_LEAP_SMEAR
 		case T_Leapsmearinterval:
-			leap_smear_intv = curr_var->value.i;
-			msyslog(LOG_INFO, "config: leap smear interval %i s", leap_smear_intv);
+			if (curr_var->value.i < 0)
+				msyslog(LOG_ERR, "config: negative leap smear interval ignored: %i", curr_var->value.i);
+				break;
+			leap_smear_intv = curr_var->value.u;
+			msyslog(LOG_INFO, "config: leap smear interval %u sec", leap_smear_intv);
 			break;
 #endif
 

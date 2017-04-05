@@ -47,7 +47,7 @@ static	u_long leapf_timer;	/* Report leapfile problems once/day */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
-int	leap_smear_intv;	/* Duration of smear.  Enables smear mode. */
+u_int	leap_smear_intv;	/* Duration of smear.  Enables smear mode. */
 int	leapdif;		/* TAI difference step at next leap second*/
 u_long	orphwait; 		/* orphan wait time */
 
