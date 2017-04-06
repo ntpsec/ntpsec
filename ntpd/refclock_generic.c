@@ -119,7 +119,6 @@
 #include "trimble.h"
 #include "binio.h"
 #include "ascii.h"
-#include "ieee754io.h"
 #include "recvbuff.h"
 
 #define VERSION "4.81 2009/05/01 10:15:29"
@@ -146,7 +145,6 @@ struct	refclock refclock_parse = {
 /*
  * Definitions
  */
-/* #define MAXUNITS 4	* maximum number of "PARSE" units permitted UNUSED */
 #define PARSEDEVICE	"/dev/refclock-%d" /* device to open %d is unit number */
 #define PARSEPPSDEVICE	"/dev/refclockpps-%d" /* optional pps device to open %d is unit number */
 
@@ -181,8 +179,6 @@ typedef struct bind
 
 #define PARSE_END(_X_)			(*(_X_)->binding->bd_end)(_X_)
 #define PARSE_SETCS(_X_, _CS_)		(*(_X_)->binding->bd_setcs)(_X_, _CS_)
-/* #define PARSE_ENABLE(_X_)  (*(_X_)->binding->bd_enable)(_X_) UNUSED */
-/* #define PARSE_DISABLE(_X_) (*(_X_)->binding->bd_disable)(_X_) UNUSED */
 #define PARSE_GETFMT(_X_, _DCT_)	(*(_X_)->binding->bd_getfmt)(_X_, _DCT_)
 #define PARSE_SETFMT(_X_, _DCT_)	(*(_X_)->binding->bd_setfmt)(_X_, _DCT_)
 #define PARSE_GETTIMECODE(_X_, _DCT_)	(*(_X_)->binding->bd_timecode)(_X_, _DCT_)
@@ -215,7 +211,6 @@ typedef struct bind
 #define ERR_NODATA	(unsigned)1	/* no input data */
 #define ERR_BADIO	(unsigned)2	/* read/write/select errors */
 #define ERR_BADSTATUS	(unsigned)3	/* unsync states */
-/* #define ERR_BADEVENT	(unsigned)4	* non nominal events UNUSED */
 #define ERR_INTERNAL	(unsigned)5	/* internal error */
 #define ERR_CNT		(unsigned)(ERR_INTERNAL+1)
 
@@ -375,31 +370,12 @@ typedef struct poll_info
 #define NO_EVENT	0
 #define NO_LCLDATA	0
 #define NO_MESSAGE	0
-/* #define NO_PPSDELAY     0 UNUSED */
 
 #define DCF_ID		"DCF"	/* generic DCF */
 #define DCF_A_ID	"DCFa"	/* AM demodulation */
 #define DCF_P_ID	"DCFp"	/* pseudo random phase shift */
 #define GPS_ID		"GPS"	/* GPS receiver */
 #define MSF_ID		"MSF"	/* MSF receiver */
-
-/* #define NOCLOCK_ROOTDELAY       0.0         UNUSED */
-/* #define NOCLOCK_BASEDELAY       0.0         UNUSED */
-/* #define NOCLOCK_DESCRIPTION     0           UNUSED */
-/* #define NOCLOCK_MAXUNSYNC       0           UNUSED */
-/* #define NOCLOCK_CFLAG           0           UNUSED */
-/* #define NOCLOCK_IFLAG           0           UNUSED */
-/* #define NOCLOCK_OFLAG           0           UNUSED */
-/* #define NOCLOCK_LFLAG           0           UNUSED */
-/* #define NOCLOCK_ID              "TILT"      UNUSED */
-/* #define NOCLOCK_POLL            NO_POLL     UNUSED */
-/* #define NOCLOCK_INIT            NO_INIT     UNUSED */
-/* #define NOCLOCK_END             NO_END      UNUSED */
-/* #define NOCLOCK_DATA            NO_LCLDATA  UNUSED */
-/* #define NOCLOCK_FORMAT          ""          UNUSED */
-/* #define NOCLOCK_TYPE            CTL_SST_TS_UNSPEC UNUSED */
-/* #define NOCLOCK_SAMPLES         0           UNUSED */
-/* #define NOCLOCK_KEEP            0           UNUSED */
 
 #define DCF_TYPE		CTL_SST_TS_LF
 #define GPS_TYPE		CTL_SST_TS_UHF
@@ -723,7 +699,6 @@ static	void	trimbletsip_event	(struct parseunit *, int);
 #define RCC_CMDSIZE    1
 
 static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE };
-/* #define RCC8000_FLAGS	0 UNUSED */
 #define RCC8000_POLL            poll_dpoll
 #define RCC8000_INIT            poll_init
 #define RCC8000_END             0
