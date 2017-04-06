@@ -41,6 +41,15 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
+
+try:
+    import locale
+except ImportError as e:
+    sys.stderr.write(
+        "ntpmon: can't find Python locale library -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
+
 try:
     import curses
 except ImportError as e:
@@ -133,6 +142,7 @@ class Fatal(Exception):
 class OutputContext:
     def __enter__(self):
         "Begin critical region."
+        locale.setlocale(locale.LC_ALL, '')
         global stdscr
         stdscr = curses.initscr()
         try:
@@ -196,10 +206,11 @@ if __name__ == '__main__':
         with OutputContext() as ctx:
             while True:
                 stdscr.clear()
-                stdscr.addstr(0, 0, "")
+                stdscr.addstr(0, 0, u"".encode('UTF-8'))
                 if helpmode:
-                    stdscr.addstr(__doc__)
-                    stdscr.addstr("\nPress any key to resume monitoring")
+                    stdscr.addstr(unicode(__doc__).encode('UTF-8'))
+                    tempStr = u"\nPress any key to resume monitoring"
+                    stdscr.addstr(tempStr.encode('UTF-8'))
                     stdscr.refresh()
                     stdscr.timeout(-1)
                 else:
@@ -210,8 +221,9 @@ if __name__ == '__main__':
                             raise Fatal(e.message)
                         except IOError as e:
                             raise Fatal(e.strerror)
-                        stdscr.addstr(peer_report.header()
-                                      + "\n", curses.A_BOLD)
+                        strconvert = unicode(peer_report.header() + "\n")
+                        stdscr.addstr(strconvert.encode('UTF-8'),
+                                      curses.A_BOLD)
                     else:
                         peer_report.polls = [1]  # Kluge!
                         peers = []
@@ -242,9 +254,11 @@ if __name__ == '__main__':
                                 hilite = curses.A_REVERSE
                             else:
                                 hilite = curses.A_NORMAL
-                            stdscr.addstr(peer_report.summary(session.rstatus,
-                                          variables, peer.associd),
-                                          hilite)
+                            data = peer_report.summary(session.rstatus,
+                                                       variables,
+                                                       peer.associd)
+                            data = unicode(data).encode('UTF-8')
+                            stdscr.addstr(data, hilite)
                             if 'INIT' in variables['refid']:
                                 initphase = True
 
@@ -265,7 +279,8 @@ if __name__ == '__main__':
                                                     nyquist)
                         # The status line
                         sl = statline(peer_report, mru_report, nyquist)
-                        stdscr.addstr(sl + "\n",
+                        strconvert = unicode(sl + "\n")
+                        stdscr.addstr(strconvert.encode('UTF-8'),
                                       curses.A_REVERSE | curses.A_DIM)
                         if detailmode:
                             if ntp.util.PeerSummary.is_clock(retained):
@@ -274,21 +289,26 @@ if __name__ == '__main__':
                                 dtype = ntp.ntpc.TYPE_PEER
                             sw = ntp.ntpc.statustoa(dtype,
                                                     peers[selected].status)
-                            stdscr.addstr("assoc=%d: %s\n"
+                            strconvert = u"assoc=%d: %s\n".encode('UTF-8')
+                            stdscr.addstr(strconvert
                                           % (peers[selected].associd, sw))
-                            stdscr.addstr(peer_detail(retained, showunits))
+                            strconvert = peer_detail(retained, showunits)
+                            stdscr.addstr(strconvert.encode('UTF-8'))
                             try:
                                 clockvars = session.readvar(
                                     peers[selected].associd,
                                     opcode=ntp.control.CTL_OP_READCLOCK)
-                                stdscr.addstr(ntp.util.cook(clockvars))
+                                strconvert = ntp.util.cook(clockvars)
+                                stdscr.addstr(strconvert.encode('UTF-8'))
                             except ntp.packet.ControlException as e:
                                 pass
                         elif span.entries:
-                            stdscr.addstr(ntp.util.MRUSummary.header + "\n",
+                            strconvert = ntp.util.MRUSummary.header + "\n"
+                            stdscr.addstr(unicode(strconvert).encode('UTF-8'),
                                           curses.A_BOLD)
                             for entry in reversed(span.entries):
-                                stdscr.addstr(mru_report.summary(entry) + "\n")
+                                strcon = mru_report.summary(entry) + "\n"
+                                stdscr.addstr(unicode(strcon).encode('UTF-8'))
                     except curses.error:
                         # An addstr overran the screen, no worries
                         pass
