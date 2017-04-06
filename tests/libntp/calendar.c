@@ -18,7 +18,6 @@ TEST_TEAR_DOWN(calendar) {}
 #define TEST_ASSERT_GREATER_THAN(a, b) TEST_ASSERT_TRUE(a > b)
 
 static int leapdays(int);
-static bool IsEqualCA(const struct calendar *, const struct calendar *);
 static const char *DateToString(const struct calendar *);
 
 static int leapdays(int year) {
@@ -30,25 +29,6 @@ static int leapdays(int year) {
 		return 1;
 	return 0;
 }
-
-
-static
-bool IsEqualCA(const struct calendar *expected, const struct calendar *actual) {
-	if (expected->year == actual->year &&
-	    (!expected->yearday || expected->yearday == actual->yearday) &&
-	    expected->month == actual->month &&
-	    expected->monthday == actual->monthday &&
-	    expected->hour == actual->hour &&
-	    expected->minute == actual->minute &&
-	    expected->second == actual->second) {
-		return true;
-	} else {
-		/* coverity[leaked_storage] */
-		printf("Expected: %s but was %s\n", CalendarToString(expected), CalendarToString(actual));
-		return false;
-	}
-}
-
 
 static const char *DateToString(const struct calendar *cal) {
 	char *str = malloc(255);
