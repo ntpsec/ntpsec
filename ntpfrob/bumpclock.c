@@ -10,6 +10,9 @@
 #include <string.h>
 #include <time.h>
 
+#include "config.h"
+#include "ntpfrob.h"
+
 #define NS_PER_S	1000000000
 
 void bumpclock(int bump)

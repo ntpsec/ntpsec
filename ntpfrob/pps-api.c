@@ -19,6 +19,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "timespecops.h"
+#include "ntpfrob.h"
 
 #ifdef HAVE_SYS_TIMEPPS_H
 #include <sys/timepps.h>
@@ -37,8 +38,9 @@
                 }                                                       \
         } while (0)
 
+static void Chew(struct timespec *, struct timespec *, unsigned, unsigned);
 
-void
+static void
 Chew(struct timespec *tsa, struct timespec *tsc, unsigned sa, unsigned sc)
 {
 	struct timespec ts;

@@ -10,7 +10,9 @@
 #include "config.h"
 #include "ntpfrob.h"
 
-void usage(void)
+static void usage(void);
+
+static void usage(void)
 {
 	fputs(
 "usage:\n"

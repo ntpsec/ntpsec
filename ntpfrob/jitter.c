@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 #include "ntpfrob.h"
 
