@@ -161,7 +161,7 @@ class OutputContext:
         curses.endwin()
 
 usage = '''
-USAGE: ntpmon [-V] [host]
+USAGE: ntpmon [-u] [-V] [host]
 '''
 
 if __name__ == '__main__':
