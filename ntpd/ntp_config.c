@@ -82,6 +82,8 @@
 #define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
 
 
+static bool getaddrinfo_now(char *, sockaddr_u *);
+
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count = 0;
 char **	cmdline_servers;
@@ -1463,6 +1465,7 @@ free_config_monitor(
 	FREE_FILEGEN_FIFO(ptree->filegen_opts);
 }
 
+static
 bool getaddrinfo_now(char *hname, sockaddr_u *peeraddrp)
 {
 	int a_info;
