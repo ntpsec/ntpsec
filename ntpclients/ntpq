@@ -63,7 +63,7 @@ version = ntp.util.stdversion()
 master_encoding = 'latin-1'
 
 if str is bytes:  # Python 2
-    polystr = str
+    polystr = unicode
     polybytes = bytes
 
     def string_escape(s):
