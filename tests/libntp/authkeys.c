@@ -37,7 +37,10 @@ TEST_TEAR_DOWN(authkeys) {}
 static const int KEYTYPE = NID_md5;
 
 
-void AddTrustedKey(keyid_t keyno) {
+static void AddTrustedKey(keyid_t);
+static void AddUntrustedKey(keyid_t);
+
+static void AddTrustedKey(keyid_t keyno) {
 	/*
 	 * We need to add a MD5-key in addition to setting the
 	 * trust, because authhavekey() requires type != 0.
@@ -47,7 +50,7 @@ void AddTrustedKey(keyid_t keyno) {
 	authtrust(keyno, true);
 }
 
-void AddUntrustedKey(keyid_t keyno) {
+static void AddUntrustedKey(keyid_t keyno) {
 	authtrust(keyno, false);
 }
 
