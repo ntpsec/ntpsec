@@ -262,34 +262,43 @@ def cmd_configure(ctx, config):
 
     if ctx.options.enable_debug_gdb:
         ctx.env.CFLAGS += ["-g"]
+        ctx.options.enable_debug = 1
     else:
         cc_test_flags += [
             ('LTO', '-flto'),
             ]
 
-    if not ctx.options.disable_debug:
+    # Check which linker flags are supported
+    ld_hardening_flags = [
+        ("z_now", "-Wl,-z,now"),     # no deferred symbol resolution
+    ]
+
+    if ctx.options.enable_debug:
         ctx.define("DEBUG", 1, comment="Enable debug mode")
         ctx.env.BISONFLAGS += ["--debug"]
+        # turn on some annoying warnings
+        ctx.env.CFLAGS += [
+            "-Wfloat-equal",          # Not Ready For Prime Time
+            "-Wmissing-prototypes",   # Not Ready For Prime Time
+            "-Wmissing-declarations", # Not Ready For Primt Time
+            "-Wsign-conversion",      # fails on Solaris and OpenBSD 6
+        ]
+    else:
+        # not debugging
+        ld_hardening_flags += [
+            ('stripall', "-Wl,--strip-all"),    # Strip binaries
+            ]
 
     ctx.env.CFLAGS += [
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
         "-O1",
         "-Wall",
         "-Wextra",
-        # "-Wfloat-equal",   # Not Ready For Prime Time
-        # "-Wmissing-prototypes",  # Not Ready For Prime Time
-        # "-Wmissing-declarations", # Not Ready For Primt Time
-        # "-Wsign-conversion",      # fails on Solaris and OpenBSD 6
         "-Wshadow",
         "-Wstrict-prototypes",
         "-Wundef",
         "-Wunused",
         ]
-
-    # Check which linker flags are supported
-    ld_hardening_flags = [
-        ("z_now", "-Wl,-z,now"),     # no deferred symbol resolution
-    ]
 
     FRAGMENT = '''
 int main(int argc, char **argv) {
@@ -349,12 +358,6 @@ int main(int argc, char **argv) {
     if ctx.env.HAS_LTO and False:
         ctx.env.CFLAGS += [
             "-flto",
-            ]
-
-    if ctx.options.disable_debug:
-        # not debugging
-        ld_hardening_flags += [
-            ('stripall', "-Wl,--strip-all"),    # Strip binaries
             ]
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.
@@ -756,12 +759,7 @@ int main(int argc, char **argv) {
     msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
     msg_setting("LINKFLAGS_NTPD", " ".join(ctx.env.LINKFLAGS_NTPD))
     msg_setting("PREFIX", ctx.env.PREFIX)
-    msg_setting("Debug Support", yesno(not ctx.options.disable_debug))
+    msg_setting("Debug Support", yesno(ctx.options.enable_debug))
     msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
     msg_setting("Build Manpages",
                 yesno(ctx.env.ENABLE_DOC and not ctx.env.DISABLE_MANPAGE))
-
-    if ctx.options.enable_debug:
-        msg("")
-        msg("*** --enable-debug ignored.  (default on now)")
-        msg("")
