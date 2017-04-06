@@ -1,11 +1,9 @@
-#ifndef GUARD_TESTS_SOCKADDRTEST_H
-#define GUARD_TESTS_SOCKADDRTEST_H
-
 #include <inttypes.h>
 
 #include "config.h"
 
 #include "ntp.h"
+#include "sockaddrtest.h"
 
 bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
 	if (AF(expected) != AF(actual)) {
@@ -75,6 +73,3 @@ sockaddr_u CreateSockaddr4(const char* address, unsigned int port) {
 	SET_PORT(&s, port);
 	return s;
 }
-
-
-#endif // GUARD_TESTS_SOCKADDRTEST_H
