@@ -45,6 +45,7 @@ static bool have_leapfile = false;
 char *stats_drift_file;			/* frequency file name */
 static double wander_resid;		/* last frequency update */
 double	wander_threshold = 1e-7;	/* initial frequency threshold */
+static char *timespec_to_MJDtime(const struct timespec *);
 
 /*
  * Statistics file stuff
@@ -349,7 +350,7 @@ stats_config(
 /* timespec_to_MJDtime
  */
 
-char *
+static char *
 timespec_to_MJDtime(const struct timespec *time)
 {
 	char *buf;
