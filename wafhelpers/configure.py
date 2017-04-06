@@ -279,7 +279,6 @@ def cmd_configure(ctx, config):
         # turn on some annoying warnings
         ctx.env.CFLAGS += [
             "-Wfloat-equal",          # Not Ready For Prime Time
-            "-Wmissing-prototypes",   # Not Ready For Prime Time
             "-Wmissing-declarations", # Not Ready For Primt Time
             "-Wsign-conversion",      # fails on Solaris and OpenBSD 6
         ]
@@ -294,6 +293,7 @@ def cmd_configure(ctx, config):
         "-O1",
         "-Wall",
         "-Wextra",
+        "-Wmissing-prototypes",
         "-Wshadow",
         "-Wstrict-prototypes",
         "-Wundef",
