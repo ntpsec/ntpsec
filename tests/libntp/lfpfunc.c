@@ -9,6 +9,8 @@
 #include <float.h>
 #include <math.h>
 
+static double eps(double);
+
 TEST_GROUP(lfpfunc);
 
 TEST_SETUP(lfpfunc) {}
@@ -161,7 +163,7 @@ static const size_t addsub_tot = (sizeof(addsub_tab)/sizeof(addsub_tab[0][0]));
 // '1'-bit of the l_fp value, the roundtrip *will* create truncation
 // errors. This is an inherent property caused by the 54-bit mantissa of
 // the 'double' type.
-double
+static double
 eps(double d)
 {
 	return fmax(ldexp(1.0, -31), ldexp(fabs(d), -53));
