@@ -91,13 +91,15 @@ def peer_detail(variables, showunits=False):
                 vcopy[name] = ntp.util.unitformatter(vcopy[name],
                                                      ntp.util.UNITS_SEC,
                                                      ntp.util.UNIT_MS,
-                                                     strip=True)
+                                                     strip=True,
+                                                     width=None)
         for name in ntp.util.PPM_VARS:
             if name in vcopy:
                 vcopy[name] = ntp.util.unitformatter(vcopy[name],
                                                      ntp.util.UNIT_PPM,
                                                      ntp.util.UNITS_PPX,
-                                                     strip=True)
+                                                     strip=True,
+                                                     width=None)
         vcopy['filtdelay'] = ntp.util.filtcooker(vcopy['filtdelay'])
         vcopy['filtoffset'] = ntp.util.filtcooker(vcopy['filtoffset'])
         vcopy['filtdisp'] = ntp.util.filtcooker(vcopy['filtdisp'])
