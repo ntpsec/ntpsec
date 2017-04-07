@@ -13,7 +13,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 
-static struct refclock refclock_none = {
+struct refclock refclock_none = {
 	NULL,		/* basename of driver */
 	NULL,		/* start up driver */
 	NULL,		/* shut down driver */
@@ -22,114 +22,6 @@ static struct refclock refclock_none = {
 	NULL,		/* initialize driver */
 	NULL,		/* timer - not used */
 };
-
-#ifdef CLOCK_LOCAL
-extern	struct refclock	refclock_local;
-#else
-#define	refclock_local	refclock_none
-#endif
-
-#ifdef CLOCK_SPECTRACOM
-extern	struct refclock	refclock_spectracom;
-#else
-#define	refclock_spectracom	refclock_none
-#endif
-
-#ifdef CLOCK_GENERIC
-extern	struct refclock	refclock_parse;
-#else
-#define	refclock_parse	refclock_none
-#endif
-
-#if defined(CLOCK_MAGNAVOX) && defined(HAVE_PPSAPI)
-extern	struct refclock	refclock_magnavox;
-#else
-#define	refclock_magnavox	refclock_none
-#endif
-
-#ifdef CLOCK_ARBITER
-extern  struct refclock refclock_arbiter;
-#else
-#define refclock_arbiter refclock_none
-#endif
-
-#ifdef CLOCK_TRUETIME
-extern	struct refclock	refclock_true;
-#else
-#define	refclock_true	refclock_none
-#endif
-
-#ifdef CLOCK_MODEM
-extern	struct refclock	refclock_modem;
-#else
-#define refclock_modem	refclock_none
-#endif
-
-#ifdef CLOCK_NMEA
-extern	struct refclock refclock_nmea;
-#else
-#define	refclock_nmea	refclock_none
-#endif
-
-#if defined (CLOCK_PPS) && defined(HAVE_PPSAPI)
-extern	struct refclock	refclock_pps;
-#else
-#define refclock_pps	refclock_none
-#endif
-
-#ifdef CLOCK_HPGPS
-extern	struct refclock	refclock_hpgps;
-#else
-#define	refclock_hpgps	refclock_none
-#endif
-
-#ifdef CLOCK_SHM
-extern	struct refclock refclock_shm;
-#else
-#define refclock_shm refclock_none
-#endif
-
-#ifdef CLOCK_TRIMBLE
-extern	struct refclock refclock_trimble;
-#else
-#define refclock_trimble refclock_none
-#endif
-
-#if defined(CLOCK_ONCORE)
-extern	struct refclock refclock_oncore;
-#else
-#define refclock_oncore refclock_none
-#endif
-
-#if defined(CLOCK_JUPITER) && defined(HAVE_PPSAPI)
-extern	struct refclock refclock_jupiter;
-#else
-#define refclock_jupiter refclock_none
-#endif
-
-#ifdef CLOCK_JJY
-extern	struct refclock	refclock_jjy;
-#else
-#define	refclock_jjy refclock_none
-#endif
-
-#ifdef CLOCK_ZYFER
-extern	struct refclock	refclock_zyfer;
-#else
-#define	refclock_zyfer refclock_none
-#endif
-
-#ifdef CLOCK_NEOCLOCK
-extern	struct refclock	refclock_neoclock4x;
-#else
-#define	refclock_neoclock4x	refclock_none
-#endif
-
-#if defined(CLOCK_GPSDJSON)
-extern struct refclock refclock_gpsdjson;
-#else
-#define refclock_gpsdjson refclock_none
-#endif
 
 /*
  * This is the only place in the code that knows about the mapping between
