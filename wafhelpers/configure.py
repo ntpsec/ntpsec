@@ -304,7 +304,7 @@ def cmd_configure(ctx, config):
             "-Wpacked",
             # "-Wpadded",             # duck... over 3k warnings
             "-Wpointer-arith",
-            "-Wredundant-decls",
+            # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wshadow",
             "-Wsign-conversion",      # fails on Solaris and OpenBSD 6
             "-Wsuggest-attribute=noreturn",
