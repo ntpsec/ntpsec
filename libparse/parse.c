@@ -24,9 +24,6 @@
  */
 #define SYNC_ONE	0x01
 
-extern clockformat_t *clockformats[];
-extern unsigned short nformats;
-
 static unsigned long timepacket (parse_t *);
 
 bool
