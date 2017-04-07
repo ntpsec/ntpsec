@@ -97,8 +97,6 @@ main(
 	char *argv[]
 	)
 {
-	extern int ntp_optind;
-	extern char *ntp_optarg;
 	struct ntptimeval ntv;
 	struct timeval tv;
 	struct timex ntx, _ntx;
