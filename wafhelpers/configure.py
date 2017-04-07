@@ -260,6 +260,11 @@ def cmd_configure(ctx, config):
         ('unused', '-Qunused-arguments'),
         ]
 
+    # Check which linker flags are supported
+    ld_hardening_flags = [
+        ("z_now", "-Wl,-z,now"),     # no deferred symbol resolution
+    ]
+
     if ctx.options.enable_debug_gdb:
         ctx.env.CFLAGS += ["-g"]
     else:
@@ -270,11 +275,6 @@ def cmd_configure(ctx, config):
         ld_hardening_flags += [
             ('stripall', "-Wl,--strip-all"),    # Strip binaries
             ]
-
-    # Check which linker flags are supported
-    ld_hardening_flags = [
-        ("z_now", "-Wl,-z,now"),     # no deferred symbol resolution
-    ]
 
     if ctx.options.enable_debug:
         ctx.define("DEBUG", 1, comment="Enable debug mode")
