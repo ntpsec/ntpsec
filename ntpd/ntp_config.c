@@ -162,7 +162,6 @@ typedef struct peer_resolved_ctx_tag {
 /*
  * Definitions of things either imported from or exported to outside
  */
-extern int yydebug;			/* ntp_parser.c (.y) */
 config_tree cfgt;			/* Parser output stored here */
 struct config_tree_tag *cfg_tree_history;	/* History of configs */
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
@@ -2283,7 +2282,6 @@ config_mdnstries(
 	)
 {
 #if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
-	extern int mdnstries;
 	mdnstries = ptree->mdnstries;
 #else
 	UNUSED_ARG(ptree);
