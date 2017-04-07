@@ -165,9 +165,10 @@ static inline l_fp ntohl_fp(l_fp_w lfpw) {
 static inline l_fp dtolfp(double d)
 /* double to l_fp
  * assumes signed l_fp, i.e. a time offset
+ * undefined return if d in NaN
  */
 {
-	return (l_fp)((int64_t)ldexp(d, 32));
+	return (l_fp)(llround(ldexp(d, 32)));
 }
 
 static inline double lfptod(l_fp r)
