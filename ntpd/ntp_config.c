@@ -41,11 +41,6 @@
 #include "ntp_scanner.h"
 #include "ntp_parser.tab.h"
 
-/* Bug is Bison 2.5 */
-#ifndef yyparse
-  int yyparse (void);
-#endif
-
 /* NetInfo configuration locations */
 #ifdef HAVE_NETINFO_NI_H
 #define NETINFO_CONFIG_DIR "/config/ntp"
