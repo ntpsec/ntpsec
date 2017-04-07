@@ -44,10 +44,6 @@ extern clockformat_t clock_rcc8000;
 extern clockformat_t clock_hopf6021;
 #endif
 
-#ifdef CLOCK_COMPUTIME
-extern clockformat_t clock_computime;
-#endif
-
 #ifdef CLOCK_WHARTON_400A
 extern clockformat_t clock_wharton_400a;
 #endif
