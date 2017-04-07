@@ -394,7 +394,6 @@ extern l_fp	sys_authdelay;		/* authentication delay */
 extern u_long 	sys_epoch;		/* last clock update time */
 extern keyid_t	sys_private;		/* private value for session seed */
 extern int	sys_manycastserver;	/* respond to manycast client pkts */
-extern int	sys_minclock;		/* minimum survivors */
 extern int	sys_minsane;		/* minimum candidates */
 extern int	sys_floor;		/* cluster stratum floor */
 extern int	sys_ceiling;		/* cluster stratum ceiling */
@@ -408,7 +407,6 @@ extern u_long	sys_processed;		/* packets for this host */
 extern u_long	sys_restricted;	 	/* restricted packets */
 extern u_long	sys_newversion;		/* current version  */
 extern u_long	sys_oldversion;		/* old version */
-extern u_long	sys_restricted;		/* access denied */
 extern u_long	sys_badlength;		/* bad length or format */
 extern u_long	sys_badauth;		/* bad authentication */
 extern u_long	sys_declined;		/* declined */
