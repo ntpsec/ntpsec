@@ -262,10 +262,13 @@ def cmd_configure(ctx, config):
 
     if ctx.options.enable_debug_gdb:
         ctx.env.CFLAGS += ["-g"]
-        ctx.options.enable_debug = 1
     else:
+        # not gdb debugging
         cc_test_flags += [
-            ('LTO', '-flto'),
+            ('LTO', '-flto'),                   # link time optimization
+            ]
+        ld_hardening_flags += [
+            ('stripall', "-Wl,--strip-all"),    # Strip binaries
             ]
 
     # Check which linker flags are supported
@@ -310,11 +313,6 @@ def cmd_configure(ctx, config):
             "-Wwrite-strings",
 
         ]
-    else:
-        # not debugging
-        ld_hardening_flags += [
-            ('stripall', "-Wl,--strip-all"),    # Strip binaries
-            ]
 
     ctx.env.CFLAGS += [
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
