@@ -9,8 +9,9 @@
 
 #include <openssl/rand.h>
 
+#include "config.h"
+#include "ntp.h"
 #include "ntp_endian.h"
-#include "ntp_random.h"
 
 int32_t
 ntp_random(void)

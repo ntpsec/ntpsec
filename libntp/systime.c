@@ -9,7 +9,6 @@
 #include "ntp.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
-#include "ntp_random.h"
 #include "timespecops.h"
 #include "ntp_calendar.h"
 

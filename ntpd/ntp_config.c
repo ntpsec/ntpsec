@@ -32,7 +32,7 @@
 #include "ntp_stdlib.h"
 #include "lib_strbuf.h"
 #include "ntp_assert.h"
-#include "ntp_random.h"
+
 /*
  * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
  * so #include these later.

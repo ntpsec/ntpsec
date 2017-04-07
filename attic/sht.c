@@ -14,7 +14,6 @@
 #include <assert.h>
 
 #include "ntp_stdlib.h"
-#include "ntp_random.h"
 
 char	*progname;
 

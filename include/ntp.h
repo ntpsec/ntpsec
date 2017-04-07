@@ -27,8 +27,9 @@ typedef unsigned int	u_int;
 #include "ntp_types.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
-#include "ntp_random.h"
 #include "ntp_net.h"
+
+extern int32_t ntp_random (void);
 
 /*
  * Calendar arithmetic - contributed by G. Healton
