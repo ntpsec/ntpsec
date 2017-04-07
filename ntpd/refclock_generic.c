@@ -4499,11 +4499,11 @@ struct txbuf
 	uint8_t *txt;			/* pointer to actual data buffer */
 };
 
-void	sendcmd		(struct txbuf *buf, int c);
-void	sendbyte	(struct txbuf *buf, int b);
-void	sendetx		(struct txbuf *buf, struct parseunit *parse);
-void	sendint		(struct txbuf *buf, int a);
-void	sendflt		(struct txbuf *buf, double a);
+static void	sendcmd		(struct txbuf *buf, int c);
+static void	sendbyte	(struct txbuf *buf, int b);
+static void	sendetx		(struct txbuf *buf, struct parseunit *parse);
+static void	sendint		(struct txbuf *buf, int a);
+static void	sendflt		(struct txbuf *buf, double a);
 
 void
 sendcmd(
@@ -4515,12 +4515,6 @@ sendcmd(
 	buf->txt[1] = (uint8_t)c;
 	buf->idx = 2;
 }
-
-void	sendcmd		(struct txbuf *buf, int c);
-void	sendbyte	(struct txbuf *buf, int b);
-void	sendetx		(struct txbuf *buf, struct parseunit *parse);
-void	sendint		(struct txbuf *buf, int a);
-void	sendflt		(struct txbuf *buf, double a);
 
 void
 sendbyte(
