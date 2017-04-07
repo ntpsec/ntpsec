@@ -188,15 +188,6 @@ extern	void	set_sys_tick_precision(double);
 extern	void	proto_config	(int, u_long, double);
 extern	void	proto_clr_stats (void);
 
-/* ntp_refclock.c */
-#ifdef	REFCLOCK
-extern	bool	refclock_newpeer (uint8_t, int, struct peer *);
-extern	void	refclock_unpeer (struct peer *);
-extern	void	refclock_receive (struct peer *);
-extern	void	refclock_transmit (struct peer *);
-extern	void	init_refclock	(void);
-#endif	/* REFCLOCK */
-
 /* ntp_request.c */
 extern	void	reset_auth_stats(void);
 extern u_long	auth_timereset;

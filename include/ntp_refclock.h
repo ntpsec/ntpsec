@@ -174,6 +174,10 @@ extern	bool	io_addclock	(struct refclockio *);
 extern	void	io_closeclock	(struct refclockio *);
 
 #ifdef REFCLOCK
+extern	bool	refclock_newpeer (uint8_t, int, struct peer *);
+extern	void	refclock_unpeer (struct peer *);
+extern	void	refclock_receive (struct peer *);
+extern	void	init_refclock	(void);
 extern	void	refclock_control(sockaddr_u *,
 				 const struct refclockstat *,
 				 struct refclockstat *);
