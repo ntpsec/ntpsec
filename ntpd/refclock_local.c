@@ -58,16 +58,6 @@
 #define DISPERSION	.01	/* default dispersion (10 ms) */
 
 /*
- * Imported from the timer module
- */
-extern u_long current_time;
-
-/*
- * Imported from ntp_proto
- */
-extern int8_t sys_precision;
-
-/*
  * Function prototypes
  */
 static	bool	local_start (int, struct peer *);
