@@ -297,10 +297,10 @@ def cmd_configure(ctx, config):
             "-Winit-self",
             "-Winline",
             "-Winvalid-pch",
-            "-Wmissing-declarations", # Not Ready For Primt Time
+            "-Wmissing-declarations", # Not Ready For Prime Time
             "-Wmissing-format-attribute",
             "-Wmultichar",
-            "-Wnested-externs",
+            # "-Wnested-externs",     # incompatible w/ Unity...
             "-Wpacked",
             # "-Wpadded",             # duck... over 3k warnings
             "-Wpointer-arith",
