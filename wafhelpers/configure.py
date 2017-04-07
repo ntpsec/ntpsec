@@ -278,9 +278,37 @@ def cmd_configure(ctx, config):
         ctx.env.BISONFLAGS += ["--debug"]
         # turn on some annoying warnings
         ctx.env.CFLAGS += [
+            # "-Wall",                # for masochists
+            #"-Wsuggest-attribute=const", # fails build
+            "-Waggregate-return",
+            "-Wbad-function-cast",
+            "-Wcast-align",
+            "-Wcast-qual",
+            "-Wdisabled-optimization",
             "-Wfloat-equal",          # Not Ready For Prime Time
+            "-Wformat",
+            "-Wformat-nonliteral",    # needs -Wformat
+            "-Wformat-security",      # needs -Wformat
+            "-Wformat-signedness",    # needs =Wformat
+            "-Wimplicit-function-declaration",
+            "-Winit-self",
+            "-Winline",
+            "-Winvalid-pch",
             "-Wmissing-declarations", # Not Ready For Primt Time
+            "-Wmissing-format-attribute",
+            "-Wmultichar",
+            "-Wnested-externs",
+            "-Wpacked",
+            # "-Wpadded",             # duck... over 3k warnings
+            "-Wpointer-arith",
+            "-Wredundant-decls",
+            "-Wshadow",
             "-Wsign-conversion",      # fails on Solaris and OpenBSD 6
+            "-Wsuggest-attribute=noreturn",
+            "-Wsuggest-attribute=pure",
+            "-Wswitch-default",
+            "-Wwrite-strings",
+
         ]
     else:
         # not debugging
