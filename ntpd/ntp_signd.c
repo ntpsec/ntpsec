@@ -120,6 +120,9 @@ send_via_ntp_signd(
 	)
 {
 	UNUSED_ARG(flags);
+#ifndef DEBUG
+	UNUSED_ARG(xmode);
+#endif
 	
 	/* We are here because it was detected that the client
 	 * sent an all-zero signature, and we therefore know
