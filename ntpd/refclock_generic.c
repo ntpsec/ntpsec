@@ -4466,10 +4466,10 @@ trimbletaip_event(
 #define D2R		PI/180.0
 
 /*-------------------------------------------------------------------
- * sendcmd, sendbyte, sendetx, sendflt, sendint implement the command
+ * sendcmd, sendbyte, sendetx, sendflt implement the command
  * interface to the receiver.
  *
- * CAVEAT: the sendflt, sendint routines are byte order dependent and
+ * CAVEAT: the sendflt routine is byte order dependent and
  * float implementation dependent - these must be converted to portable
  * versions !
  *
@@ -4502,7 +4502,6 @@ struct txbuf
 static void	sendcmd		(struct txbuf *buf, int c);
 static void	sendbyte	(struct txbuf *buf, int b);
 static void	sendetx		(struct txbuf *buf, struct parseunit *parse);
-static void	sendint		(struct txbuf *buf, int a);
 static void	sendflt		(struct txbuf *buf, double a);
 
 void
@@ -4557,17 +4556,6 @@ sendetx(
 #endif
 		clear_err(parse, ERR_BADIO);
 	}
-}
-
-void
-sendint(
-	struct txbuf *buf,
-	int a
-	)
-{
-	/* send 16bit int, msbyte first */
-	sendbyte(buf, (uint8_t)((a>>8) & 0xff));
-	sendbyte(buf, (uint8_t)(a & 0xff));
 }
 
 void
