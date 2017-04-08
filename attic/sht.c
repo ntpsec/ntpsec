@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "ntp.h"
 #include "ntp_stdlib.h"
 
 char	*progname;
