@@ -182,6 +182,7 @@ def oomsbetweenunits(a, b):
 
 
 def scalestring(value):
+    "Scales a number string to fit in the range 1.0-999.9"
     negative = False
     if value[0] == "-":
         value = value[1:]
@@ -202,7 +203,7 @@ def scalestring(value):
         if i == lolen:  # didn't find anything, this number must equal zero
             newwhole = whole
             newdec = dec
-            negative = False  # -0.000 is meaningless
+            negative = False  # filter our -0.000
             unitsmoved = 0
         else:
             lounits = (i // 3) + 1  # always need to shift one more unit
