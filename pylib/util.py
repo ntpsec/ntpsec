@@ -181,6 +181,21 @@ def oomsbetweenunits(a, b):
     return abs((a - b) * 3)
 
 
+def breaknumberstring(value):
+    "Breaks a number string into (aboveDecimal, belowDecimal, isNegative?)"
+    if value[0] == "-":
+        value = value[1:]
+        negative = True
+    else:
+        negative = False
+    if "." in value:
+        above, below = value.split(".")
+    else:
+        above = value
+        below = ""
+    return (above, below, negative)
+
+
 def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
     if unitsscaled == 0:

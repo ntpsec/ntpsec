@@ -211,5 +211,21 @@ class TestPylibUtilMethods(unittest.TestCase):
         # ditto, negative
         self.assertEqual(f("-1.23456", -2), "-1234560")
 
+    def test_breaknumberstring(self):
+        f = ntp.util.breaknumberstring
+
+        # No decimals, positive
+        self.assertEqual(f("1234567890"), ("1234567890", "", False))
+        # ditto, negative
+        self.assertEqual(f("-1234567890"), ("1234567890", "", True))
+        # No whole, positive
+        self.assertEqual(f(".12345"), ("", "12345", False))
+        # ditto, negative
+        self.assertEqual(f("-.12345"), ("", "12345", True))
+        # Both sides, position
+        self.assertEqual(f("123.456"), ("123", "456", False))
+        # ditto, negative
+        self.assertEqual(f("-123.456"), ("123", "456", True))
+
 if __name__ == '__main__':
     unittest.main()
