@@ -181,6 +181,53 @@ def oomsbetweenunits(a, b):
     return abs((a - b) * 3)
 
 
+def scalestring(value):
+    negative = False
+    if value[0] == "-":
+        value = value[1:]
+        negative = True
+    if "." in value:
+        whole, dec = value.split(".")
+    else:
+        whole = value
+        dec = ""
+    hilen = len(whole)
+    if (hilen == 0) or (whole[0] == "0"):  # Need to shift to smaller units
+        i = 0
+        lolen = len(dec)
+        while i < lolen:  # need to find the actual digits
+            if dec[i] != "0":
+                break
+            i += 1
+        if i == lolen:  # didn't find anything, this number must equal zero
+            newwhole = whole
+            newdec = dec
+            negative = False  # -0.000 is meaningless
+            unitsmoved = 0
+        else:
+            lounits = (i // 3) + 1  # always need to shift one more unit
+            movechars = lounits * 3
+            newwhole = dec[:movechars].lstrip('0')
+            newdec = dec[movechars:]
+            unitsmoved = -lounits
+    else:  # Shift to larger units
+        hiunits = hilen // 3  # How many we have, not how many to move
+        hidigits = hilen % 3
+        if hidigits == 0:  # full unit above the decimal
+            hiunits -= 1  # the unit above the decimal doesn't count
+            hidigits = 3
+        newwhole = whole[:hidigits]
+        newdec = whole[hidigits:] + dec
+        unitsmoved = hiunits
+    if len(newdec) > 0:
+        newvalue = ".".join((newwhole, newdec))
+    else:
+        newvalue = newwhole
+    if negative is True:
+        newvalue = "-" + newvalue
+    return (newvalue, unitsmoved)
+
+
 def unitformatter(f, unitgroup, startingunit, baseunit=None,
                   strip=False, width=8):
     "Formatting for unit associated values in N characters."
