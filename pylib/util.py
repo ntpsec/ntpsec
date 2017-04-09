@@ -181,68 +181,16 @@ def oomsbetweenunits(a, b):
     return abs((a - b) * 3)
 
 
-def breaknumberstring(value):
-    "Breaks a number string into (aboveDecimal, belowDecimal, isNegative?)"
+def scalestring(value):
+    negative = False
     if value[0] == "-":
         value = value[1:]
         negative = True
-    else:
-        negative = False
     if "." in value:
-        above, below = value.split(".")
+        whole, dec = value.split(".")
     else:
-        above = value
-        below = ""
-    return (above, below, negative)
-
-
-def gluenumberstring(above, below, isnegative):
-    "Glues together parts of a number string"
-    if above == "":
-        above = "0"
-    if len(below) > 0:
-        newvalue = ".".join((above, below))
-    else:
-        newvalue = above
-    if isnegative is True:
-        newvalue = "-" + newvalue
-    return newvalue
-
-
-def rescalestring(value, unitsscaled):
-    "Rescale a number string by a given number of units"
-    if unitsscaled == 0:
-        return value
-    whole, dec, negative = breaknumberstring(value)
-    hilen = len(whole)
-    lolen = len(dec)
-    digitsmoved = abs(unitsscaled * 3)
-    if unitsscaled > 0:  # Scale to a larger unit
-        if hilen < digitsmoved:  # Scaling beyond the digits, pad it out
-            padcount = digitsmoved - hilen
-            newwhole = "0"
-            newdec = ("0" * padcount) + whole + dec
-        else:  # Scaling in the digits, no need to pad
-            choppoint = -digitsmoved
-            newdec = whole[choppoint:] + dec
-            newwhole = whole[:choppoint]
-            if newwhole == "":
-                newwhole = "0"
-    elif unitsscaled < 0:  # scale to a smaller unit
-        if lolen < digitsmoved:  # Scaling beyone the digits, pad it out
-            padcount = digitsmoved - lolen
-            newwhole = whole + dec + ("0" * padcount)
-            newdec = ""
-        else:
-            newwhole = whole + dec[:digitsmoved]
-            newdec = dec[digitsmoved:]
-    newvalue = gluenumberstring(newwhole, newdec, negative)
-    return newvalue
-
-
-def scalestring(value):
-    "Scales a number string to fit in the range 1.0-999.9"
-    whole, dec, negative = breaknumberstring(value)
+        whole = value
+        dec = ""
     hilen = len(whole)
     if (hilen == 0) or (whole[0] == "0"):  # Need to shift to smaller units
         i = 0
@@ -254,7 +202,7 @@ def scalestring(value):
         if i == lolen:  # didn't find anything, this number must equal zero
             newwhole = whole
             newdec = dec
-            negative = False  # filter our -0.000
+            negative = False  # -0.000 is meaningless
             unitsmoved = 0
         else:
             lounits = (i // 3) + 1  # always need to shift one more unit
@@ -271,25 +219,13 @@ def scalestring(value):
         newwhole = whole[:hidigits]
         newdec = whole[hidigits:] + dec
         unitsmoved = hiunits
-    newvalue = gluenumberstring(newwhole, newdec, negative)
+    if len(newdec) > 0:
+        newvalue = ".".join((newwhole, newdec))
+    else:
+        newvalue = newwhole
+    if negative is True:
+        newvalue = "-" + newvalue
     return (newvalue, unitsmoved)
-
-
-def fitinfield(value, fieldsize):
-    "Attempt to fit value into a field, preserving as much data as possible"
-    vallen = len(value)
-    if vallen == fieldsize:  # Goldilocks!
-        newvalue = value
-    elif vallen < fieldsize:  # Extra room, pad it out
-        pad = " " * (fieldsize - vallen)
-        newvalue = pad + value
-    else:  # Insufficient room, crop as few digits as possible
-        above, below, neg = breaknumberstring(value)
-        diff = vallen - fieldsize
-        bellen = len(below)
-        croplen = min(bellen, diff)  # Never crop above the decimal point
-        newvalue = value[:-croplen]
-    return newvalue
 
 
 def unitformatter(f, unitgroup, startingunit, baseunit=None,
