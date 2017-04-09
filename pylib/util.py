@@ -275,6 +275,23 @@ def scalestring(value):
     return (newvalue, unitsmoved)
 
 
+def fitinfield(value, fieldsize):
+    "Attempt to fit value into a field, preserving as much data as possible"
+    vallen = len(value)
+    if vallen == fieldsize:  # Goldilocks!
+        newvalue = value
+    elif vallen < fieldsize:  # Extra room, pad it out
+        pad = " " * (fieldsize - vallen)
+        newvalue = pad + value
+    else:  # Insufficient room, crop as few digits as possible
+        above, below, neg = breaknumberstring(value)
+        diff = vallen - fieldsize
+        bellen = len(below)
+        croplen = min(bellen, diff)  # Never crop above the decimal point
+        newvalue = value[:-croplen]
+    return newvalue
+
+
 def unitformatter(f, unitgroup, startingunit, baseunit=None,
                   strip=False, width=8):
     "Formatting for unit associated values in N characters."
