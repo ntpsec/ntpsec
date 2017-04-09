@@ -196,6 +196,19 @@ def breaknumberstring(value):
     return (above, below, negative)
 
 
+def gluenumberstring(above, below, isnegative):
+    "Glues together parts of a number string"
+    if above == "":
+        above = "0"
+    if len(below) > 0:
+        newvalue = ".".join((above, below))
+    else:
+        newvalue = above
+    if isnegative is True:
+        newvalue = "-" + newvalue
+    return newvalue
+
+
 def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
     if unitsscaled == 0:

@@ -227,5 +227,22 @@ class TestPylibUtilMethods(unittest.TestCase):
         # ditto, negative
         self.assertEqual(f("-123.456"), ("123", "456", True))
 
+    def test_gluenumberstring(self):
+        f = ntp.util.gluenumberstring
+
+        # No decimals, positive
+        self.assertEqual(f("123", "", False), "123")
+        # ditto, negative
+        self.assertEqual(f("123", "", True), "-123")
+        # No whole, positive
+        self.assertEqual(f("", "456", False), "0.456")
+        # ditto, negative
+        self.assertEqual(f("", "456", True), "-0.456")
+        # Both sides, positive
+        self.assertEqual(f("123", "456", False), "123.456")
+        # ditto, negative
+        self.assertEqual(f("123", "456", True), "-123.456")
+
+
 if __name__ == '__main__':
     unittest.main()
