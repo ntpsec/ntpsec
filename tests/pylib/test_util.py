@@ -189,5 +189,27 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f("00000000.000000000000"),
                          ("00000000.000000000000", 0))
 
+    def test_rescalestring(self):
+        f = ntp.util.rescalestring
+
+        # No-op
+        self.assertEqual(f("1000.42", 0), "1000.42")
+        # Scale to higher unit
+        self.assertEqual(f("123.456", 1), "0.123456")
+        # ditto, negative
+        self.assertEqual(f("-123.456", 1), "-0.123456")
+        # Scale to higher unit, beyond available digits
+        self.assertEqual(f("12.34", 2), "0.00001234")
+        # ditto, negative
+        self.assertEqual(f("-12.34", 2), "-0.00001234")
+        # Scale to lower unit
+        self.assertEqual(f("1.23456", -1), "1234.56")
+        # ditto, negative
+        self.assertEqual(f("-1.23456", -1), "-1234.56")
+        # Scale to lower unit, beyond available digits
+        self.assertEqual(f("1.23456", -2), "1234560")
+        # ditto, negative
+        self.assertEqual(f("-1.23456", -2), "-1234560")
+
 if __name__ == '__main__':
     unittest.main()
