@@ -181,6 +181,49 @@ def oomsbetweenunits(a, b):
     return abs((a - b) * 3)
 
 
+def rescalestring(value, unitsscaled):
+    if unitsscaled == 0:
+        return value
+    negative = False
+    if value[0] == "-":
+        value = value[1:]
+        negative = True
+    if "." in value:
+        whole, dec = value.split(".")
+    else:
+        whole = value
+        dec = ""
+    hilen = len(whole)
+    lolen = len(dec)
+    digitsmoved = abs(unitsscaled * 3)
+    if unitsscaled > 0:  # Scale to a larger unit
+        if hilen < digitsmoved:  # Scaling beyond the digits, pad it out
+            padcount = digitsmoved - hilen
+            newwhole = "0"
+            newdec = ("0" * padcount) + whole + dec
+        else:  # Scaling in the digits, no need to pad
+            choppoint = -digitsmoved
+            newdec = whole[choppoint:] + dec
+            newwhole = whole[:choppoint]
+            if newwhole == "":
+                newwhole = "0"
+    elif unitsscaled < 0:  # scale to a smaller unit
+        if lolen < digitsmoved:  # Scaling beyone the digits, pad it out
+            padcount = digitsmoved - lolen
+            newwhole = whole + dec + ("0" * padcount)
+            newdec = ""
+        else:
+            newwhole = whole + dec[:digitsmoved]
+            newdec = dec[digitsmoved:]
+    if len(newdec) > 0:
+        newvalue = ".".join((newwhole, newdec))
+    else:
+        newvalue = newwhole
+    if negative is True:
+        newvalue = "-" + newvalue
+    return newvalue
+
+
 def scalestring(value):
     "Scales a number string to fit in the range 1.0-999.9"
     negative = False
