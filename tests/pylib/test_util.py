@@ -152,5 +152,42 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f(10000.1, usec, ntp.util.UNIT_KS),
                          "10000.1ks")  # Value outside of unit ranges
 
+    def test_scalestring(self):
+        f = ntp.util.scalestring
+
+        # Typical length, positive value, no scaling
+        self.assertEqual(f("1.23450"), ("1.23450", 0))
+        # Ditto, negative
+        self.assertEqual(f("-1.23450"), ("-1.23450", 0))
+        # Long, positive value, no scaling
+        self.assertEqual(f("1.234567890123456"), ("1.234567890123456", 0))
+        # ditto, negative
+        self.assertEqual(f("-1.234567890123456"), ("-1.234567890123456", 0))
+        # Zero
+        self.assertEqual(f("0.000000"), ("0.000000", 0))
+        # Negative zero
+        self.assertEqual(f("-0.000"), ("0.000", 0))
+        # Large, positive, non scaled
+        self.assertEqual(f("987.654"), ("987.654", 0))
+        # ditto, negative
+        self.assertEqual(f("-987.654"), ("-987.654", 0))
+        # Scaled to larger unit, positive
+        self.assertEqual(f("12345.67890"), ("12.34567890", 1))
+        # ditto, negative
+        self.assertEqual(f("-12345.67890"), ("-12.34567890", 1))
+        # Scaled to smaller unit, position
+        self.assertEqual(f("0.1234567890"), ("123.4567890", -1))
+        # ditto, negative
+        self.assertEqual(f("-0.1234567890"), ("-123.4567890", -1))
+        # Bizzare 1
+        self.assertEqual(f("-000.000012345678900987654321"),
+                         ("-12.345678900987654321", -2))
+        # Bizzare 2
+        self.assertEqual(f("1234567890987654321000.00000000000042"),
+                           ("1.23456789098765432100000000000000042", 7))
+        # Bizzare 3
+        self.assertEqual(f("00000000.000000000000"),
+                         ("00000000.000000000000", 0))
+
 if __name__ == '__main__':
     unittest.main()
