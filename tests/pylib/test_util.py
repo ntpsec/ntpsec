@@ -243,6 +243,20 @@ class TestPylibUtilMethods(unittest.TestCase):
         # ditto, negative
         self.assertEqual(f("123", "456", True), "-123.456")
 
+    def test_fitinfield(self):
+        f = ntp.util.fitinfield
+
+        # Field too small, crop decimals
+        self.assertEqual(f("123.456", 5), "123.4")
+        # ditto, negative
+        self.assertEqual(f("-123.456", 5), "-123.")
+        # Field too small, blow field
+        self.assertEqual(f("12345.678", 4), "12345.")
+        # Goldilocks
+        self.assertEqual(f("123.456", 7), "123.456")
+        # Field too big
+        self.assertEqual(f("123.456", 10), "   123.456")
+
 
 if __name__ == '__main__':
     unittest.main()
