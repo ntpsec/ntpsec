@@ -213,15 +213,7 @@ def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
     if unitsscaled == 0:
         return value
-    negative = False
-    if value[0] == "-":
-        value = value[1:]
-        negative = True
-    if "." in value:
-        whole, dec = value.split(".")
-    else:
-        whole = value
-        dec = ""
+    whole, dec, negative = breaknumberstring(value)
     hilen = len(whole)
     lolen = len(dec)
     digitsmoved = abs(unitsscaled * 3)
@@ -244,26 +236,13 @@ def rescalestring(value, unitsscaled):
         else:
             newwhole = whole + dec[:digitsmoved]
             newdec = dec[digitsmoved:]
-    if len(newdec) > 0:
-        newvalue = ".".join((newwhole, newdec))
-    else:
-        newvalue = newwhole
-    if negative is True:
-        newvalue = "-" + newvalue
+    newvalue = gluenumberstring(newwhole, newdec, negative)
     return newvalue
 
 
 def scalestring(value):
     "Scales a number string to fit in the range 1.0-999.9"
-    negative = False
-    if value[0] == "-":
-        value = value[1:]
-        negative = True
-    if "." in value:
-        whole, dec = value.split(".")
-    else:
-        whole = value
-        dec = ""
+    whole, dec, negative = breaknumberstring(value)
     hilen = len(whole)
     if (hilen == 0) or (whole[0] == "0"):  # Need to shift to smaller units
         i = 0
@@ -292,12 +271,7 @@ def scalestring(value):
         newwhole = whole[:hidigits]
         newdec = whole[hidigits:] + dec
         unitsmoved = hiunits
-    if len(newdec) > 0:
-        newvalue = ".".join((newwhole, newdec))
-    else:
-        newvalue = newwhole
-    if negative is True:
-        newvalue = "-" + newvalue
+    newvalue = gluenumberstring(newwhole, newdec, negative)
     return (newvalue, unitsmoved)
 
 
