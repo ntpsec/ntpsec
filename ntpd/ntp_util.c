@@ -361,7 +361,7 @@ timespec_to_MJDtime(const struct timespec *time)
 	day = (u_long)time->tv_sec / S_PER_DAY + MJD_1970;
 	sec = (u_long)time->tv_sec % S_PER_DAY;
 	msec = (u_long)time->tv_nsec / NS_PER_MS;  /* nano secs to milli sec */
-	snprintf(buf, LIB_BUFLENGTH, "%lu %lu.%03ld", day, sec, msec);
+	snprintf(buf, LIB_BUFLENGTH, "%lu %lu.%03lu", day, sec, msec);
 
 	return buf;
 }
@@ -397,7 +397,7 @@ record_peer_stats(
 		fprintf(peerstats.fp,
 		    "%s %s %x %.9f %.9f %.9f %.9f\n",
 		    timespec_to_MJDtime(&now),
-		    socktoa(&peer->srcadr), status, peer->offset,
+		    socktoa(&peer->srcadr), (u_int)status, peer->offset,
 		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
@@ -544,7 +544,7 @@ record_raw_stats(
 	clock_gettime(CLOCK_REALTIME, &now);
 	filegen_setup(&rawstats, now.tv_sec);
 	if (rawstats.fp != NULL) {
-		fprintf(rawstats.fp, "%s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
+		fprintf(rawstats.fp, "%s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %u\n",
 		    timespec_to_MJDtime(&now),
 		    socktoa(srcadr), dstadr ?  socktoa(dstadr) : "-",
 		    ulfptoa(*t1, 9), ulfptoa(*t2, 9),
@@ -631,7 +631,7 @@ void record_use_stats(void)
 		stime /= 1E6;
 		stime += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
-		    "%s %lu %.3f %.3f %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    "%s %lu %.3f %.3f %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
 		    timespec_to_MJDtime(&now), current_time - use_stattime,
 		    utime, stime,
 		    usage.ru_minflt -   oldusage.ru_minflt,

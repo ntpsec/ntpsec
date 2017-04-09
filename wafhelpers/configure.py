@@ -292,7 +292,6 @@ def cmd_configure(ctx, config):
             "-Wformat",
             "-Wformat-nonliteral",    # needs -Wformat
             "-Wformat-security",      # needs -Wformat
-            "-Wformat-signedness",    # needs =Wformat
             "-Wimplicit-function-declaration",
             "-Winit-self",
             "-Winline",
@@ -306,13 +305,15 @@ def cmd_configure(ctx, config):
             "-Wpointer-arith",
             # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wshadow",
-            "-Wsign-conversion",      # fails on Solaris and OpenBSD 6
             "-Wsuggest-attribute=noreturn",
             "-Wsuggest-attribute=pure",
             "-Wswitch-default",
             "-Wwrite-strings",
-
         ]
+        cc_test_flags += [
+            ('w_format_signedness', '-Wformat-signedness'), # fails on OpenBSD 6
+            ('w_sign_conversion', "-Wsign-conversion"), # fails on Solaris and OpenBSD 6
+            ]
 
     ctx.env.CFLAGS += [
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
@@ -384,6 +385,16 @@ int main(int argc, char **argv) {
     if ctx.env.HAS_LTO and False:
         ctx.env.CFLAGS += [
             "-flto",
+            ]
+
+    # debug warnings that are not available with all compilers
+    if ctx.env.HAS_w_format_signedness:
+        ctx.env.CFLAGS += [
+            '-Wformat-signedness',
+            ]
+    if ctx.env.HAS_w_sign_conversion:
+        ctx.env.CFLAGS += [
+            '-Wsign-conversion',
             ]
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.

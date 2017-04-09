@@ -655,7 +655,7 @@ TSIP_decode (
 #ifdef DEBUG
 			if (debug > 1)
 				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02d\n",
-				       up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, 
+				       up->unit, (u_int)(mb(0) & 0xff), event, pp->hour, pp->minute, 
 				       pp->second, pp->nsec, mb(12), mb(11), pp->year, GPS_UTC_Offset);
 #endif
 			/* Only use this packet when no
@@ -735,9 +735,9 @@ TSIP_decode (
 #ifdef DEBUG
 			if (debug > 1)
 				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
-				       up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, 
+				       up->unit, (u_int)(mb(0) & 0xff), event, pp->hour, pp->minute, 
 				       pp->second, pp->nsec, mb(15), mb(14), pp->year,
-				       mb(19), *Tracking_Status[st]);
+				       (u_int)mb(19), *Tracking_Status[st]);
 #endif
 			return 1;
 			break;
@@ -771,7 +771,7 @@ TSIP_decode (
 #ifdef DEBUG
 			if (debug > 1) 
 				printf("TSIP_decode: unit %d: 0x%02x leap %d\n",
-				       up->unit, mb(0) & 0xff, pp->leap);
+				       up->unit, (u_int)(mb(0) & 0xff), pp->leap);
 			if (debug > 1) {
 				printf("Receiver MODE: 0x%02X\n", (uint8_t)mb(1));
 				if (mb(1) == 0x00)
@@ -839,7 +839,7 @@ TSIP_decode (
 			pp->nsec = 0;
 #ifdef DEBUG		
 			printf("\nTiming Flags are:\n");
-			printf("Timing flag value is: 0x%X\n", mb(9));
+			printf("Timing flag value is: 0x%X\n", (u_int)mb(9));
 			if ((mb(9) & 0x01) != 0)
 				printf ("	Getting UTC time\n");
 			else
@@ -880,7 +880,9 @@ TSIP_decode (
 
 #ifdef DEBUG
 			if (debug > 1)
-				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d ",up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, pp->second, pp->nsec, mb(14), mb(13), pp->year);
+				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d ",
+				        up->unit, (u_int)(mb(0) & 0xff), event,
+				        pp->hour, pp->minute, pp->second, pp->nsec, mb(14), mb(13), pp->year);
 #endif
 			return 1;
 			break;
@@ -942,6 +944,8 @@ TSIP_decode (
 			    case 0x0C:
 				printf("The Chosen satellite is unusable\n");
 				break;
+			    default:
+				printf("(Status code is invalid)\n");
 			}
 #endif
 		/* Error Codes */
@@ -994,7 +998,7 @@ TSIP_decode (
 	up->polled = -1;
 #ifdef DEBUG
 	printf("TSIP_decode: unit %d: bad packet %02x-%02x event %d len %d\n", 
-	       up->unit, up->rpt_buf[0] & 0xff, mb(0) & 0xff, 
+	       up->unit, (u_int)(up->rpt_buf[0] & 0xff), (u_int)(mb(0) & 0xff),
 	       event, (int)up->rpt_cnt);
 #endif
 	return 0;

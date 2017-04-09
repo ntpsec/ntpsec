@@ -256,7 +256,7 @@ pps_poll(
 	pp->polls++;
 
 	mprintf_clock_stats(peer,
-	    "%ld %d %d %d %d",
+	    "%lu %d %d %d %d",
 	    up->ppsctl.sequence,
 	    up->pcount, up->scount, up->kcount, up->rcount);
 	up->pcount = up->scount = up->kcount = up->rcount = 0;
