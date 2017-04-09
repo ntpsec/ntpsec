@@ -182,6 +182,7 @@ def oomsbetweenunits(a, b):
 
 
 def rescalestring(value, unitsscaled):
+    "Rescale a number string by a given number of units"
     if unitsscaled == 0:
         return value
     negative = False
