@@ -299,7 +299,7 @@ refclock_transmit(
 		uint8_t oreach;
 #ifdef DEBUG
 		if (debug)
-			printf("refclock_transmit: at %ld %s\n",
+			printf("refclock_transmit: at %lu %s\n",
 			    current_time, socktoa(&(peer->srcadr)));
 #endif
 
@@ -643,7 +643,7 @@ refclock_gtraw(
 	lineptr[bmax] = '\0';
 
 	*tsptr = rbufp->recv_time;
-	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %zd %s\n",
+	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %zu %s\n",
 		    rbufp->fd, ulfptoa(rbufp->recv_time, 6), bmax,
 		    lineptr));
 	return (bmax);
@@ -917,10 +917,10 @@ refclock_control(
 		out->fudgeval2 = pp->refid;
 		out->haveflags = CLK_HAVEVAL1 | CLK_HAVEVAL2;
 		out->fudgetime1 = pp->fudgetime1;
-		if (0.0 != out->fudgetime1)
+		if (fabs(out->fudgetime1) > S_PER_NS / 10.)
 			out->haveflags |= CLK_HAVETIME1;
 		out->fudgetime2 = pp->fudgetime2;
-		if (0.0 != out->fudgetime2)
+		if (fabs(out->fudgetime2) > S_PER_NS / 10.)
 			out->haveflags |= CLK_HAVETIME2;
 		out->flags = (uint8_t) pp->sloppyclockflag;
 		if (CLK_FLAG1 & out->flags)
