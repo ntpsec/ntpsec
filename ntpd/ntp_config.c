@@ -77,12 +77,9 @@
 #define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
 
 
-static bool getaddrinfo_now(char *, sockaddr_u *);
-
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count = 0;
 char **	cmdline_servers;
-bool	force_synchronous_dns = false;
 
 /*
  * FIXME: ugly globals, only created to avoid wiring in option-parsing cruft.
@@ -1459,40 +1456,6 @@ free_config_monitor(
 	FREE_FILEGEN_FIFO(ptree->filegen_opts);
 }
 
-static
-bool getaddrinfo_now(char *hname, sockaddr_u *peeraddrp)
-{
-	int a_info;
-	size_t octets;
-	struct addrinfo		hints, *res;
-	ZERO(hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_protocol = IPPROTO_UDP;
-	a_info = getaddrinfo(hname, "ntp", &hints, &res);
-	if (a_info == EAI_NONAME
-#ifdef EAI_NODATA
-	    || a_info == EAI_NODATA
-#endif
-	    ) {
-	    hints.ai_flags = AI_CANONNAME;
-	    hints.ai_flags |= AI_ADDRCONFIG;
-	    a_info = getaddrinfo(hname, "ntp", &hints, &res);
-	}
-	if (a_info != 0) {
-	    msyslog(LOG_ERR,
-		    "hostname %s can not be used (%s), please use IP address.",
-		    hname, gai_strerror(a_info));
-	    return false;
-	} else {
-	    INSIST(res != NULL);
-	    memset(peeraddrp, '\0', sizeof(*peeraddrp));
-	    octets = min(sizeof(*peeraddrp), res->ai_addrlen);
-	    memcpy(peeraddrp, res->ai_addr, octets);
-	    freeaddrinfo(res);
-	    return true;
-	}
-}
 
 static void
 config_access(
@@ -2703,15 +2666,6 @@ config_peers(
 				NULL,
 				MODE_CLIENT,
 				&client_ctl);
-	    } else if (force_synchronous_dns) {
-		if (getaddrinfo_now(*cmdline_servers, &peeraddr)) {
-			peer_config(
-				&peeraddr,
-				NULL,
-				NULL,
-				MODE_CLIENT,
-				&client_ctl);
-		}
 	    } else {
 		/* we have a hostname to resolve */
 # ifdef USE_WORKER
@@ -2834,15 +2788,6 @@ config_peers(
 	/*
 	 * synchronous lookup may be forced.
 	 */
-	} else if (force_synchronous_dns) {
-		if (getaddrinfo_now(curr_peer->addr->address, &peeraddr)) {
-			peer_config(
-				&peeraddr,
-				NULL,
-				NULL,
-				hmode,
-				&curr_peer->ctl);
-		}
 	} else {
 	    /* hand the hostname off to the blocking child */
 # ifdef USE_WORKER

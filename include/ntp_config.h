@@ -33,7 +33,6 @@
 /* list of servers from command line for config_peers() */
 extern	int	cmdline_server_count;
 extern	char **	cmdline_servers;
-extern	bool	force_synchronous_dns;
 
 typedef struct int_range_tag {
 	int	first;
