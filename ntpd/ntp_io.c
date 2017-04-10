@@ -439,7 +439,6 @@ interface_dump(const endpt *itf)
 	printf("flags = 0x%08x\n", itf->flags);
 	printf("last_ttl = %d\n", itf->last_ttl);
 	printf("addr_refid = %08x\n", itf->addr_refid);
-	printf("num_mcast = %d\n", itf->num_mcast);
 	printf("received = %ld\n", itf->received);
 	printf("sent = %ld\n", itf->sent);
 	printf("notsent = %ld\n", itf->notsent);

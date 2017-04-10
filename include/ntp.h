@@ -152,7 +152,6 @@ typedef struct __endpt {
 	uint32_t	flags;		/* interface flags */
 	int		last_ttl;	/* last TTL specified */
 	uint32_t	addr_refid;	/* IPv4 addr or IPv6 hash */
-	int		num_mcast;	/* mcast addrs enabled */
 	u_long		starttime;	/* current_time at creation */
 	volatile long	received;	/* number of incoming packets */
 	long		sent;		/* number of outgoing packets */

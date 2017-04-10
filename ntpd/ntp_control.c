@@ -3635,7 +3635,6 @@ send_ifstats_entry(
 	const char name_fmt[] =		"name.%u";
 	const char flags_fmt[] =	"flags.%u";
 	const char tl_fmt[] =		"tl.%u";	/* ttl */
-	const char mc_fmt[] =		"mc.%u";	/* mcast count */
 	const char rx_fmt[] =		"rx.%u";
 	const char tx_fmt[] =		"tx.%u";
 	const char txerr_fmt[] =	"txerr.%u";
@@ -3705,31 +3704,26 @@ send_ifstats_entry(
 			break;
 
 		case 6:
-			snprintf(tag, sizeof(tag), mc_fmt, ifnum);
-			ctl_putint(tag, la->num_mcast);
-			break;
-
-		case 7:
 			snprintf(tag, sizeof(tag), rx_fmt, ifnum);
 			ctl_putint(tag, la->received);
 			break;
 
-		case 8:
+		case 7:
 			snprintf(tag, sizeof(tag), tx_fmt, ifnum);
 			ctl_putint(tag, la->sent);
 			break;
 
-		case 9:
+		case 8:
 			snprintf(tag, sizeof(tag), txerr_fmt, ifnum);
 			ctl_putint(tag, la->notsent);
 			break;
 
-		case 10:
+		case 9:
 			snprintf(tag, sizeof(tag), pc_fmt, ifnum);
 			ctl_putuint(tag, la->peercnt);
 			break;
 
-		case 11:
+		case 10:
 			snprintf(tag, sizeof(tag), up_fmt, ifnum);
 			ctl_putuint(tag, current_time - la->starttime);
 			break;
