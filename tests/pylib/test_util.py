@@ -316,6 +316,12 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Different units
         self.assertEqual(f("12.345", nu.UNITS_PPX, nu.UNIT_PPM),
                          "12.34ppm")
+        # Strip
+        self.assertEqual(f("1.23", nu.UNITS_SEC, nu.UNIT_MS, strip=True),
+                         "1.23ms")
+        # Different width
+        self.assertEqual(f("1.234", nu.UNITS_SEC, nu.UNIT_MS, width=12),
+                         "     1.234ms")
 
 if __name__ == '__main__':
     unittest.main()

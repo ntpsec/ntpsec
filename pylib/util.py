@@ -332,6 +332,8 @@ def unitify(value, unitgroup, startingunit, baseunit=0,
         newvalue = fitinfield(newvalue, width - len(unit)) + unit
     else:  # don't have a replacement unit, use original
         newvalue = value + unitgroup[startingunit]
+    if strip is True:
+        newvalue = newvalue.strip()
     return newvalue
 
 
