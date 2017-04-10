@@ -127,8 +127,6 @@ extern	void	worker_idle_timer_fired(void);
 extern	void	interrupt_worker_sleep(void);
 extern	int	req_child_exit(blocking_child *);
 extern	int	pipe_socketpair(int fds[2], bool *is_pipe);
-extern	void	close_all_beyond(int);
-extern	void	close_all_except(int);
 extern	void	kill_asyncio	(int);
 
 # ifdef USE_WORK_PIPE

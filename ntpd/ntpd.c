@@ -122,6 +122,10 @@ static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 
+extern  void    close_all_beyond(int);
+extern  void    close_all_except(int);
+
+
 #define ALL_OPTIONS "46c:dD:f:gGhi:I:k:l:LmnNp:PqRs:t:u:U:Vw:xzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
@@ -1259,3 +1263,57 @@ no_debug(
 	errno = saved_errno;
 }
 # endif	/* !DEBUG */
+
+/*
+ * close_all_except()
+ *
+ * Close all file descriptors except the given keep_fd.
+ */
+void
+close_all_except(
+	int keep_fd
+	)
+{
+	int fd;
+
+	for (fd = 0; fd < keep_fd; fd++)
+		close(fd);
+
+	close_all_beyond(keep_fd);
+}
+
+
+/*
+ * close_all_beyond()
+ *
+ * Close all file descriptors after the given keep_fd, which is the
+ * highest fd to keep open.  See
+ *
+ * http://stackoverflow.com/questions/899038/getting-the-highest-allocated-file-descriptor
+ */
+void
+close_all_beyond(
+	int keep_fd
+	)
+{
+# ifdef HAVE_CLOSEFROM
+	closefrom(keep_fd + 1);
+# elif defined(F_CLOSEM)
+	/*
+	 * From 'Writing Reliable AIX Daemons,' SG24-4946-00,
+	 * by Eric Agar (saves us from doing 32767 system
+	 * calls)
+	 */
+	if (fcntl(keep_fd + 1, F_CLOSEM, 0) == -1)
+		msyslog(LOG_ERR, "F_CLOSEM(%d): %m", keep_fd + 1);
+# else  /* !HAVE_CLOSEFROM && !F_CLOSEM follows */
+	int fd;
+	int max_fd;
+
+	/* includes POSIX case */
+	max_fd = sysconf(_SC_OPEN_MAX);
+	for (fd = keep_fd + 1; fd < max_fd; fd++)
+		close(fd);
+# endif /* !HAVE_CLOSEFROM && !F_CLOSEM */
+}
+
