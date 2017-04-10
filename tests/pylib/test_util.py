@@ -257,6 +257,19 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Field too big
         self.assertEqual(f("123.456", 10), "   123.456")
 
+    def test_unitify(self):
+        f = ntp.util.unitify
+        nu = ntp.util
+
+        # Standard, width=8
+        self.assertEqual(f("1.234", nu.UNITS_SEC, nu.UNIT_MS),
+                         " 1.234ms")
+        # ditto, negative
+        self.assertEqual(f("-1.234", nu.UNITS_SEC, nu.UNIT_MS),
+                         "-1.234ms")
+        # Scale to larger unit, width=8
+        self.assertEqual(f("1234.5", nu.UNITS_SEC, nu.UNIT_MS),
+                         u" 1.234")
 
 if __name__ == '__main__':
     unittest.main()
