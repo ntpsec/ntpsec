@@ -116,7 +116,7 @@ static	void	normalize_time	(struct timespec, long, l_fp *);
 static void
 normalize_time(
 	struct timespec ts,		/* seconds and nanoseconds */
-	long rand,
+	long randd,
 	l_fp *now		/* system time */
 	)
 {
@@ -173,7 +173,7 @@ normalize_time(
 	/*
 	 * Add in the fuzz.
 	 */
-	dfuzz = rand * 2. / FRAC * sys_fuzz;
+	dfuzz = randd * 2. / FRAC * sys_fuzz;
 	lfpfuzz = dtolfp(dfuzz);
 	result += lfpfuzz;
 

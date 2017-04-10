@@ -150,24 +150,24 @@ init_util(void)
 static void drift_write(char *driftfile, double drift)
 {
 	int fd;
-	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
+	char tempfile[PATH_MAX], driftcopy[PATH_MAX];
 	char driftval[32];
 	strlcpy(driftcopy, driftfile, PATH_MAX);
-	strlcpy(tmpfile, dirname(driftcopy), sizeof(tmpfile));
-	strlcat(tmpfile, "/driftXXXXXX", sizeof(tmpfile));
+	strlcpy(tempfile, dirname(driftcopy), sizeof(tempfile));
+	strlcat(tempfile, "/driftXXXXXX", sizeof(tempfile));
 	/* coverity[secure_temp] Warning is bogus on POSIX-compliant systems */
-	if ((fd = mkstemp(tmpfile)) < 0) {
-	    msyslog(LOG_ERR, "frequency file %s: %m", tmpfile);
+	if ((fd = mkstemp(tempfile)) < 0) {
+	    msyslog(LOG_ERR, "frequency file %s: %m", tempfile);
 	    return;
 	}
 	snprintf(driftval, sizeof(driftval), "%.6f\n", drift);
 	IGNORE(write(fd, driftval, strlen(driftval)));
 	(void)close(fd);
 	/* atomic */
-	if (rename(tmpfile, driftfile))
+	if (rename(tempfile, driftfile))
 	    msyslog(LOG_WARNING,
 		    "Unable to rename temp drift file %s to %s, %m",
-		    tmpfile, driftfile);
+		    tempfile, driftfile);
 }
 void
 write_stats(void)
@@ -351,16 +351,16 @@ stats_config(
  */
 
 static char *
-timespec_to_MJDtime(const struct timespec *time)
+timespec_to_MJDtime(const struct timespec *ts)
 {
 	char *buf;
 	u_long	day, sec, msec;
 
 	LIB_GETBUF(buf);
 
-	day = (u_long)time->tv_sec / S_PER_DAY + MJD_1970;
-	sec = (u_long)time->tv_sec % S_PER_DAY;
-	msec = (u_long)time->tv_nsec / NS_PER_MS;  /* nano secs to milli sec */
+	day = (u_long)ts->tv_sec / S_PER_DAY + MJD_1970;
+	sec = (u_long)ts->tv_sec % S_PER_DAY;
+	msec = (u_long)ts->tv_nsec / NS_PER_MS;  /* nano secs to milli sec */
 	snprintf(buf, LIB_BUFLENGTH, "%lu %lu.%03lu", day, sec, msec);
 
 	return buf;

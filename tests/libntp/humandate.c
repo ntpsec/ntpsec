@@ -18,11 +18,11 @@ TEST(humandate, RegularTime) {
 
 	struct tm tmbuf;
 
-	struct tm* time;
-	time = localtime_r(&sample, &tmbuf);
-	TEST_ASSERT_TRUE(time != NULL);
+	struct tm* tm;
+	tm = localtime_r(&sample, &tmbuf);
+	TEST_ASSERT_TRUE(tm != NULL);
 
-	snprintf(expected, 255, "%02d:%02d:%02d", time->tm_hour, time->tm_min, time->tm_sec);
+	snprintf(expected, 255, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
 
 	TEST_ASSERT_EQUAL_STRING(expected, humantime(sample));
 }
@@ -35,11 +35,11 @@ TEST(humandate, CurrentTime) {
 
 	time(&sample);
 
-	struct tm* time;
-	time = localtime_r(&sample, &tmbuf);
-	TEST_ASSERT_TRUE(time != NULL);
+	struct tm* tm;
+	tm = localtime_r(&sample, &tmbuf);
+	TEST_ASSERT_TRUE(tm != NULL);
 
-	snprintf(expected, 255, "%02d:%02d:%02d", time->tm_hour, time->tm_min, time->tm_sec);
+	snprintf(expected, 255, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
 
 	TEST_ASSERT_EQUAL_STRING(expected, humantime(sample));
 }
