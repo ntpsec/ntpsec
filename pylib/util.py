@@ -244,7 +244,7 @@ def scalestring(value):
     "Scales a number string to fit in the range 1.0-999.9"
     whole, dec, negative = breaknumberstring(value)
     hilen = len(whole)
-    if (hilen == 0) or (whole[0] == "0"):  # Need to shift to smaller units
+    if (hilen == 0) or isstringzero(whole):  # Need to shift to smaller units
         i = 0
         lolen = len(dec)
         while i < lolen:  # need to find the actual digits
@@ -278,7 +278,9 @@ def scalestring(value):
 def fitinfield(value, fieldsize):
     "Attempt to fit value into a field, preserving as much data as possible"
     vallen = len(value)
-    if vallen == fieldsize:  # Goldilocks!
+    if fieldsize is None:
+        newvalue = value
+    elif vallen == fieldsize:  # Goldilocks!
         newvalue = value
     elif vallen < fieldsize:  # Extra room, pad it out
         pad = " " * (fieldsize - vallen)
@@ -292,14 +294,42 @@ def fitinfield(value, fieldsize):
     return newvalue
 
 
-def unitify(value, unitgroup, startingunit, baseunit=None,
+def cropprecision(value, ooms):
+    if "." not in value:  # No decimals, nothing to crop
+        return value
+    if ooms == 0:  # We are at the baseunit, crop it all
+        return value.split(".")[0]
+    dstart = value.find(".") + 1
+    dsize = len(value) - dstart
+    precision = min(ooms, dsize)
+    cropcount = dsize - precision
+    if cropcount > 0:
+        value = value[:-cropcount]
+    return value
+
+
+def isstringzero(value):
+    for i in value:
+        if i not in ("-", ".", "0"):
+            return False
+    return True
+
+
+def unitify(value, unitgroup, startingunit, baseunit=0,
             strip=False, width=8):
     "Formats a numberstring with relevant units. Attemps to fit in width."
-    newvalue, unitsmoved = scalestring(value)
+    if isstringzero(value) is True:  # display highest precision zero
+        base = unitgroup[baseunit]
+        if strip is False:
+            newvalue = fitinfield("0", width - len(base)) + base
+        return newvalue
+    ooms = oomsbetweenunits(startingunit, baseunit)
+    newvalue = cropprecision(value, ooms)
+    newvalue, unitsmoved = scalestring(newvalue)
     unitget = startingunit + unitsmoved
     if 0 <= unitget < len(unitgroup):  # We have a unit
         unit = unitgroup[unitget]
-        newvalue = fitinfield(value, len(unit)) + unit
+        newvalue = fitinfield(newvalue, width - len(unit)) + unit
     else:  # don't have a replacement unit, use original
         newvalue = value + unitgroup[startingunit]
     return newvalue

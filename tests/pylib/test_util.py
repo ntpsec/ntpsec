@@ -155,6 +155,8 @@ class TestPylibUtilMethods(unittest.TestCase):
     def test_scalestring(self):
         f = ntp.util.scalestring
 
+        # Scale all decimals
+        self.assertEqual(f("0.042"), ("42", -1))
         # Typical length, positive value, no scaling
         self.assertEqual(f("1.23450"), ("1.23450", 0))
         # Ditto, negative
@@ -257,10 +259,33 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Field too big
         self.assertEqual(f("123.456", 10), "   123.456")
 
+    def test_cropprecision(self):
+        f = ntp.util.cropprecision
+
+        # No decimals
+        self.assertEqual(f("1234", 6), "1234")
+        # Decimals, no crop
+        self.assertEqual(f("12.3456", 6), "12.3456")
+        # Decimals, crop
+        self.assertEqual(f("12.3456", 3), "12.345")
+        # At baseunit
+        self.assertEqual(f("1.234", 0), "1")
+
+    def test_isstringzero(self):
+        f = ntp.util.isstringzero
+
+        # Non-zero
+        self.assertEqual(f("0.0000001"), False)
+        # Zero
+        self.assertEqual(f("-0.00"), True)
+
     def test_unitify(self):
         f = ntp.util.unitify
         nu = ntp.util
 
+        # Zero
+        self.assertEqual(f("0.000", nu.UNITS_SEC, nu.UNIT_MS),
+                         "     0ns")
         # Standard, width=8
         self.assertEqual(f("1.234", nu.UNITS_SEC, nu.UNIT_MS),
                          " 1.234ms")
@@ -269,7 +294,28 @@ class TestPylibUtilMethods(unittest.TestCase):
                          "-1.234ms")
         # Scale to larger unit, width=8
         self.assertEqual(f("1234.5", nu.UNITS_SEC, nu.UNIT_MS),
-                         u" 1.234")
+                         " 1.2345s")
+        # ditto, negative
+        self.assertEqual(f("-1234.5", nu.UNITS_SEC, nu.UNIT_MS),
+                         "-1.2345s")
+        # Scale to smaller unit, width=8
+        self.assertEqual(f("0.01234", nu.UNITS_SEC, nu.UNIT_MS),
+                         u" 12.34\u03bcs")
+        # ditto, negative
+        self.assertEqual(f("-0.01234", nu.UNITS_SEC, nu.UNIT_MS),
+                         u"-12.34\u03bcs")
+        # At baseunit
+        self.assertEqual(f("12.0", nu.UNITS_SEC, nu.UNIT_NS),
+                         "    12ns")
+        # Scale to baseunit
+        self.assertEqual(f(".042", nu.UNITS_SEC, nu.UNIT_US),
+                         "    42ns")
+        # Below baseunit
+        self.assertEqual(f("23.42", nu.UNITS_SEC, nu.UNIT_NS),
+                         "    23ns")
+        # Different units
+        self.assertEqual(f("12.345", nu.UNITS_PPX, nu.UNIT_PPM),
+                         "12.34ppm")
 
 if __name__ == '__main__':
     unittest.main()
