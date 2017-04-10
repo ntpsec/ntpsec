@@ -292,6 +292,19 @@ def fitinfield(value, fieldsize):
     return newvalue
 
 
+def unitify(value, unitgroup, startingunit, baseunit=None,
+            strip=False, width=8):
+    "Formats a numberstring with relevant units. Attemps to fit in width."
+    newvalue, unitsmoved = scalestring(value)
+    unitget = startingunit + unitsmoved
+    if 0 <= unitget < len(unitgroup):  # We have a unit
+        unit = unitgroup[unitget]
+        newvalue = fitinfield(value, len(unit)) + unit
+    else:  # don't have a replacement unit, use original
+        newvalue = value + unitgroup[startingunit]
+    return newvalue
+
+
 def unitformatter(f, unitgroup, startingunit, baseunit=None,
                   strip=False, width=8):
     "Formatting for unit associated values in N characters."
