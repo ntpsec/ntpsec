@@ -323,5 +323,17 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f("1.234", nu.UNITS_SEC, nu.UNIT_MS, width=12),
                          "     1.234ms")
 
+    def test_stringfiltcooker(self):
+        # No scale
+        self.assertEqual(ntp.util.stringfiltcooker(
+            "1.02 34.5 0.67835 -23.0 9 6.7 1.00 .1"),
+            "   1.02    34.5 0.67835   -23.0       9     6.7    1.00     0.1 ms"
+        )
+        # Scale
+        self.assertEqual(ntp.util.stringfiltcooker(
+            "1000.02 3400.5 0.67835 -23.0 9001 6.7 1.00 1234"),
+            "1.00002  3.4005 0.00067 -0.0230   9.001  0.0067 0.00100   1.234 s"
+        )
+
 if __name__ == '__main__':
     unittest.main()

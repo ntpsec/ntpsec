@@ -93,6 +93,33 @@ def zerowiggle(ooms):
     return 10 ** -ooms
 
 
+def stringfiltcooker(data):
+    "Cooks a filt* string of space seperated numbers, expects milliseconds"
+    parts = data.split()
+    oomcount = {}
+    # Find out what the 'natural' unit of each value is
+    for part in parts:
+        value, oom = scalestring(part)
+        oomcount[oom] = oomcount.get(oom, 0) + 1
+    # Find the most common unit
+    mostcommon = None
+    highestcount = 0
+    for key in oomcount.keys():
+        count = oomcount[key]
+        if count > highestcount:
+            mostcommon = key
+            highestcount = count
+    newunit = UNITS_SEC[mostcommon + UNIT_MS]
+    # Shift all values to the new unit
+    cooked = []
+    for part in parts:
+        part = rescalestring(part, mostcommon)
+        fitted = fitinfield(part, 7)
+        cooked.append(fitted)
+    rendered = " ".join(cooked) + " " + newunit
+    return rendered
+
+
 def filtcooker(data):
     "Cooks the string of space seperated numbers with units"
     parts = data.split()
@@ -211,9 +238,12 @@ def gluenumberstring(above, below, isnegative):
 
 def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
-    if unitsscaled == 0:
-        return value
     whole, dec, negative = breaknumberstring(value)
+    if unitsscaled == 0:
+        if whole == "":  # render .1 as 0.1
+            whole = "0"
+        value = gluenumberstring(whole, dec, negative)
+        return value
     hilen = len(whole)
     lolen = len(dec)
     digitsmoved = abs(unitsscaled * 3)
