@@ -78,9 +78,9 @@ mac_authencrypt(
 /*
  * mac_authdecrypt - verify MD5 message authenticator
  *
- * Returns one if digest valid, zero if invalid.
+ * Returns true if digest valid, false if invalid.
  */
-int
+bool
 mac_authdecrypt(
 	int	type,		/* hash algorithm */
 	uint8_t	*key,		/* key pointer */
@@ -103,7 +103,7 @@ mac_authdecrypt(
 	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: digest init failed");
-		return (0);
+		return false;
 	}
 	EVP_DigestUpdate(ctx, key, cache_secretsize);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (u_int)length);
@@ -112,9 +112,9 @@ mac_authdecrypt(
 	if ((u_int)size != len + 4) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: MAC length error");
-		return (0);
+		return false;
 	}
-	return (int)ctmemeq(digest, (char *)pkt + length + 4, len);
+	return ctmemeq(digest, (char *)pkt + length + 4, len);
 }
 
 /*
