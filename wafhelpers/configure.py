@@ -305,14 +305,14 @@ def cmd_configure(ctx, config):
             "-Wpointer-arith",
             # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wshadow",
-            "-Wsuggest-attribute=noreturn",
-            "-Wsuggest-attribute=pure",
             "-Wswitch-default",
             "-Wwrite-strings",
         ]
         cc_test_flags += [
             ('w_format_signedness', '-Wformat-signedness'), # fails on OpenBSD 6
             ('w_sign_conversion', "-Wsign-conversion"), # fails on Solaris and OpenBSD 6
+            ('w_suggest_attribute_noreturn', "-Wsuggest-attribute=noreturn"), # fails on clang
+            ('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"), # fails on clang
             ]
 
     ctx.env.CFLAGS += [
