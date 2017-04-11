@@ -41,7 +41,7 @@ TEST(ieee754io, test_zero32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 }
 
 TEST(ieee754io, test_one32) {
@@ -53,7 +53,7 @@ TEST(ieee754io, test_one32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( 1LL << 32, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 1LL << 32, (int64_t)fp );
 }
 
 TEST(ieee754io, test_negone32) {
@@ -65,7 +65,7 @@ TEST(ieee754io, test_negone32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( -(1LL << 32), (long)fp );
+        TEST_ASSERT_EQUAL_INT64( -(1LL << 32), (int64_t)fp );
 }
 
 TEST(ieee754io, test_nan32) {
@@ -79,7 +79,7 @@ TEST(ieee754io, test_nan32) {
 
         TEST_ASSERT( IEEE_POSINFINITY == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 
         /* -INF */
         buf[0] = 0xff;
@@ -88,7 +88,7 @@ TEST(ieee754io, test_nan32) {
 
         TEST_ASSERT( IEEE_NEGINFINITY == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 
         /* NAN */
         buf[0] = 0x7f;
@@ -98,7 +98,7 @@ TEST(ieee754io, test_nan32) {
 
         TEST_ASSERT( IEEE_NAN == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 }
 
 TEST(ieee754io, test_max32) {
@@ -113,14 +113,14 @@ TEST(ieee754io, test_max32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( 0x7FFFFF8000000000UL, fp );
+        TEST_ASSERT_EQUAL_INT64( 0x7FFFFF8000000000ULL, fp );
 
         /* negative max that fits */
         bp = &buf_n[0];
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( 0x8000008000000000UL, fp );
+        TEST_ASSERT_EQUAL_UINT64( 0x8000008000000000ULL, fp );
 }
 
 TEST(ieee754io, test_order32) {
@@ -136,14 +136,16 @@ TEST(ieee754io, test_order32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFF00FEFE00UL, fp );
+        TEST_ASSERT_EQUAL_UINT64((uint64_t)0xFFFFFFFF00FEFE00ULL,
+                                 (uint64_t)fp);
 
         /* meinberg order */
         bp = &buf_n[0];
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, mbg_double);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFF00FEFE00UL, fp );
+        TEST_ASSERT_EQUAL_UINT64((uint64_t)0xFFFFFFFF00FEFE00ULL,
+                                 (uint64_t)fp);
 }
 
 TEST(ieee754io, test_small32) {
@@ -169,7 +171,7 @@ TEST(ieee754io, test_zero64) {
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 }
 
 TEST(ieee754io, test_one64) {
@@ -181,7 +183,7 @@ TEST(ieee754io, test_one64) {
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( 1LL << 32, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 1LL << 32, (int64_t)fp );
 }
 
 TEST(ieee754io, test_negone64) {
@@ -193,7 +195,7 @@ TEST(ieee754io, test_negone64) {
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( -(1LL << 32), (long)fp );
+        TEST_ASSERT_EQUAL_INT64( -(1LL << 32), (int64_t)fp );
 }
 
 TEST(ieee754io, test_nan64) {
@@ -207,7 +209,7 @@ TEST(ieee754io, test_nan64) {
 
         TEST_ASSERT( IEEE_POSINFINITY == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 
         /* -INF */
         buf[0] = 0xff;
@@ -216,7 +218,7 @@ TEST(ieee754io, test_nan64) {
 
         TEST_ASSERT( IEEE_NEGINFINITY == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 
         /* +OVERFLOW */
         buf[0] = 0x41;
@@ -226,7 +228,7 @@ TEST(ieee754io, test_nan64) {
 
         TEST_ASSERT( IEEE_POSOVERFLOW == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 
         /* -OVERFLOW */
         buf[0] = 0xC1;
@@ -236,7 +238,7 @@ TEST(ieee754io, test_nan64) {
 
         TEST_ASSERT( IEEE_NEGOVERFLOW == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 
         /* NAN */
         buf[0] = 0x7f;
@@ -246,7 +248,7 @@ TEST(ieee754io, test_nan64) {
 
         TEST_ASSERT( IEEE_NAN == ret);
         /* not IEEE754, but check for 0 anyway */
-        TEST_ASSERT_EQUAL_INT64( 0, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)fp );
 }
 
 TEST(ieee754io, test_max64) {
@@ -262,14 +264,14 @@ TEST(ieee754io, test_max64) {
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFFFFFFF800UL, fp );
+        TEST_ASSERT_EQUAL_UINT64( (uint64_t)0xFFFFFFFFFFFFF800ULL, fp );
 
         /* negative max that fits */
         bp = &buf_n[0];
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xFFFFFFFFFFFFF000UL, fp );
+        TEST_ASSERT_EQUAL_UINT64( (uint64_t)0xFFFFFFFFFFFFF000ULL, fp );
 }
 
 TEST(ieee754io, test_order64) {
@@ -285,14 +287,14 @@ TEST(ieee754io, test_order64) {
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xF808101820283000UL, fp );
+        TEST_ASSERT_EQUAL_UINT64( (uint64_t)0xF808101820283000ULL, fp );
 
         /* meinberg order */
         bp = &buf_n[0];
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, mbg_double);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_UINT64( (unsigned long)0xF808101820283000UL, fp );
+        TEST_ASSERT_EQUAL_UINT64( (uint64_t)0xF808101820283000ULL, fp );
 }
 
 TEST(ieee754io, test_small64) {
