@@ -53,7 +53,7 @@ TEST(ieee754io, test_one32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( 1L << 32, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 1LL << 32, (long)fp );
 }
 
 TEST(ieee754io, test_negone32) {
@@ -65,7 +65,7 @@ TEST(ieee754io, test_negone32) {
         ret = fetch_ieee754( &bp, IEEE_SINGLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( -(1L << 32), (long)fp );
+        TEST_ASSERT_EQUAL_INT64( -(1LL << 32), (long)fp );
 }
 
 TEST(ieee754io, test_nan32) {
@@ -181,7 +181,7 @@ TEST(ieee754io, test_one64) {
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( 1L << 32, (long)fp );
+        TEST_ASSERT_EQUAL_INT64( 1LL << 32, (long)fp );
 }
 
 TEST(ieee754io, test_negone64) {
@@ -193,7 +193,7 @@ TEST(ieee754io, test_negone64) {
         ret = fetch_ieee754( &bp, IEEE_DOUBLE, &fp, native_off);
 
         TEST_ASSERT( IEEE_OK == ret);
-        TEST_ASSERT_EQUAL_INT64( -(1L << 32), (long)fp );
+        TEST_ASSERT_EQUAL_INT64( -(1LL << 32), (long)fp );
 }
 
 TEST(ieee754io, test_nan64) {
