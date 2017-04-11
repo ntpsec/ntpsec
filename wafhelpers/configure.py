@@ -308,7 +308,7 @@ def cmd_configure(ctx, config):
             "-Wswitch-default",
             "-Wwrite-strings",
         ]
-        cc_test_flags += [
+        cc_test_and_add_flags = [
             ('w_format_signedness', '-Wformat-signedness'), # fails on OpenBSD 6
             ('w_sign_conversion', "-Wsign-conversion"), # fails on Solaris and OpenBSD 6
             ('w_suggest_attribute_noreturn', "-Wsuggest-attribute=noreturn"), # fails on clang
@@ -344,6 +344,16 @@ int main(int argc, char **argv) {
                   mandatory=False,
                   msg='Checking if C compiler supports ' + name,
                   run_build_cls='oc')
+
+    for (name, ccflag) in cc_test_and_add_flags:
+        ctx.check(cflags=ccflag,
+                  define_name='HAS_' + name,
+                  fragment=FRAGMENT,
+                  mandatory=False,
+                  msg='Checking if C compiler supports ' + ccflag,
+                  run_build_cls='oc')
+        if ctx.env['HAS_' + name]:
+            ctx.env.CFLAGS += [ccflag]
 
     ctx.run_build_cls = old_run_build_cls
 
@@ -385,16 +395,6 @@ int main(int argc, char **argv) {
     if ctx.env.HAS_LTO and False:
         ctx.env.CFLAGS += [
             "-flto",
-            ]
-
-    # debug warnings that are not available with all compilers
-    if ctx.env.HAS_w_format_signedness:
-        ctx.env.CFLAGS += [
-            '-Wformat-signedness',
-            ]
-    if ctx.env.HAS_w_sign_conversion:
-        ctx.env.CFLAGS += [
-            '-Wsign-conversion',
             ]
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.
