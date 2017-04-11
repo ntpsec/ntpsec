@@ -63,6 +63,7 @@ kppsjitter            | seconds   | milliseconds
 fuzz                  | seconds   | milliseconds
 clk_wander_threshold  | seconds   | microseconds
 tick                  | seconds   | milliseconds
+tai                   | seconds   | seconds (* presumed)
 
 
 Peer Variables

@@ -46,6 +46,7 @@ UNITS_PPX = ["ppt", "ppb", "ppm", "ppk"]
 
 
 # Variables that have units
+S_VARS = ("tai",)
 MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
            "leapsmearoffset", "authdelay", "koffset", "kmaxerr", "kesterr",
            "kprecis", "kppsjitter", "fuzz", "clk_wander_threshold", "tick",
@@ -654,6 +655,12 @@ def cook(variables, showunits=False):
             #  Completion cannot occur until all units are tracked down.
             if showunits:
                 item += unitformatter(value, UNITS_SEC, UNIT_MS, UNIT_NS,
+                                      True, width=None)
+            else:
+                item += repr(value)
+        elif name in S_VARS:
+            if showunits:
+                item += unitformatter(value, UNITS_SEC, UNIT_S, UNIT_NS,
                                       True, width=None)
             else:
                 item += repr(value)
