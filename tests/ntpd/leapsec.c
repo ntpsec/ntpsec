@@ -354,15 +354,15 @@ TEST(leapsec, tableSelect) {
 
 	pt1 = leapsec_get_table(0);
 	pt2 = leapsec_get_table(0);
-	TEST_ASSERT_EQUAL(pt1, pt2);
+	TEST_ASSERT_POINTERS_EQUAL(pt1, pt2);
 
 	pt1 = leapsec_get_table(1);
 	pt2 = leapsec_get_table(1);
-	TEST_ASSERT_EQUAL(pt1, pt2);
+	TEST_ASSERT_POINTERS_EQUAL(pt1, pt2);
 
 	pt1 = leapsec_get_table(1);
 	pt2 = leapsec_get_table(0);
-	TEST_ASSERT_NOT_EQUAL(pt1, pt2);
+	TEST_ASSERT_POINTERS_EQUAL(pt1, pt2);
 
 	pt1 = leapsec_get_table(0);
 	pt2 = leapsec_get_table(1);
@@ -371,14 +371,14 @@ TEST(leapsec, tableSelect) {
 	leapsec_set_table(pt1);
 	pt2 = leapsec_get_table(0);
 	pt3 = leapsec_get_table(1);
-	TEST_ASSERT_EQUAL(pt1, pt2);
+	TEST_ASSERT_POINTERS_EQUAL(pt1, pt2);
 	TEST_ASSERT_NOT_EQUAL(pt2, pt3);
 
 	pt1 = pt3;
 	leapsec_set_table(pt1);
 	pt2 = leapsec_get_table(0);
 	pt3 = leapsec_get_table(1);
-	TEST_ASSERT_EQUAL(pt1, pt2);
+	TEST_ASSERT_POINTERS_EQUAL(pt1, pt2);
 	TEST_ASSERT_NOT_EQUAL(pt2, pt3);
 }
 
