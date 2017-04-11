@@ -1243,7 +1243,7 @@ class ControlSession:
         idlist.sort(key=lambda a: a.associd)
         return idlist
 
-    def __parse_varlist(self):
+    def __parse_varlist(self, raw=False):
         "Parse a response as a textual varlist."
         # Strip out NULs and binary garbage from text;
         # ntpd seems prone to generate these, especially
@@ -1268,11 +1268,18 @@ class ControlSession:
                     var = pair[:eq].strip()
                     val = pair[eq+1:].strip().replace("\xae", ",")
                     try:
-                        val = int(val, 0)
+                        if raw is True:
+                            val = (int(val, 0), val)
+                        else:
+                            val = int(val, 0)
                     except ValueError:
                         try:
-                            valf = float(val)
-                            if var == "delay":
+                            if raw is True:
+                                valf = (float(val), val)
+                            else:
+                                valf = float(val)
+                            if (var == "delay") and (raw is False):
+                                # raw==false, if true str returned anyway
                                 # hack to pass string version
                                 # so printout can handle .3f vs .6f
                                 items.append(("delay-s", val))
@@ -1280,6 +1287,8 @@ class ControlSession:
                         except ValueError:
                             if val[0] == '"' and val[-1] == '"':
                                 val = val[1:-1]
+                                if raw is True:
+                                    val = (val, val)
                     items.append((var, val))
                 except ValueError:
                     # Yes, ntpd really does emit bare tags for empty
@@ -1288,14 +1297,14 @@ class ControlSession:
         return ntp.util.OrderedDict(items)
 
     def readvar(self, associd=0, varlist=None,
-                opcode=ntp.control.CTL_OP_READVAR):
+                opcode=ntp.control.CTL_OP_READVAR, raw=False):
         "Read system vars from the host as a dict, or throw an exception."
         if varlist is None:
             qdata = ""
         else:
             qdata = ",".join(varlist)
         self.doquery(opcode, associd=associd, qdata=qdata)
-        return self.__parse_varlist()
+        return self.__parse_varlist(raw)
 
     def config(self, configtext):
         "Send configuration text to the daemon. Return True if accepted."
