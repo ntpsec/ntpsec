@@ -119,13 +119,13 @@ fetch_ieee754(
 {
     unsigned char *bufp = *buffpp;
     bool sign;
-    unsigned int bias;              /* bias 127 or 1023 */
-    unsigned int maxexp;
+    int bias;                       /* bias 127 or 1023 */
+    int maxexp;
     int mbits;                      /* length of mantissa, 23 or 52 */
     uint64_t mantissa;              /* mantissa, 23 or 52 bits used, +1 */
-    uint64_t characteristic;        /* biased exponent, 0 to 255 or 2047 */
+    int characteristic;             /* biased exponent, 0 to 255 or 2047 */
     int exponent;                   /* unbiased exponent */
-    unsigned int maxexp_lfp;        /* maximum exponent that fits in an l_fp */
+    int maxexp_lfp;                 /* maximum exponent that fits in an l_fp */
     unsigned char val;
     int fieldindex = 0;             /* index into bufp */
     int fudge;                      /* shift difference of l_fp and IEEE */
@@ -166,7 +166,7 @@ fetch_ieee754(
 
     case IEEE_SINGLE:
         fudge = 9;
-        maxexp_lfp = 127;
+        maxexp_lfp = 30;
         mbits  = 23;
         bias   = 127;
         maxexp = 255;
@@ -183,7 +183,8 @@ fetch_ieee754(
         return IEEE_BADCALL;
     }
 
-      exponent = (int)characteristic - (int)bias;
+    exponent = characteristic - bias;
+    shift = exponent + fudge;
 
 #ifdef DEBUG_PARSELIB
     if ( debug > 4) {
@@ -194,7 +195,8 @@ fetch_ieee754(
 
         printf("\nfetchieee754: FP: %s -> %s\n", fmt_hex(*buffpp, length),
                fmt_flt(sign, mantissa, characteristic, length));
-        printf("fetchieee754: Exp: %d, mbits %d\n", exponent, mbits);
+        printf("fetchieee754: Char: %d, Exp: %d, mbits %d, shift %d\n",
+               characteristic, exponent, mbits, shift);
     }
 #endif
 
@@ -212,7 +214,7 @@ fetch_ieee754(
     }
 
     /* check for overflows */
-    if (exponent > (int)maxexp_lfp) {
+    if (exponent > maxexp_lfp) {
         /*
         * sorry an l_fp only so long
         * overflow only in respect to NTP-FP representation
@@ -230,7 +232,6 @@ fetch_ieee754(
     /* add in implied 1 */
     mantissa  |= 1ULL << mbits;
 
-    shift = exponent + fudge;
     if ( 0 == shift ) {
         /* no shift */
         *lfpp = mantissa;
