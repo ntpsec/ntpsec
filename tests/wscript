@@ -7,7 +7,7 @@ def build(ctx):
         "unity/unity_fixture.c",
     ]
 
-    unity_config = ["UNITY_INCLUDE_DOUBLE"]
+    unity_config = ["UNITY_INCLUDE_DOUBLE","UNITY_SUPPORT_64"]
 
     ctx(
         defines=unity_config,
