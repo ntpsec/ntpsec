@@ -129,13 +129,11 @@ main(
 			ntx.modes |= MOD_NANO;
 			break;
 #endif
-#ifdef NTP_API
-# if NTP_API > 3
+#if defined NTP_API && NTP_API > 3
 		case 'T':
 			ntx.modes = MOD_TAI;
 			ntx.constant = atoi(ntp_optarg);
 			break;
-# endif
 #endif
 		case 'c':
 			cost++;
@@ -210,12 +208,8 @@ main(
 #else
 "",
 #endif
-#ifdef NTP_API
-# if NTP_API > 3
+#if defined NTP_API && NTP_API > 3
 "-T tai_offset	set TAI offset\n",
-# else
-"",
-# endif
 #else
 "",
 #endif
@@ -295,7 +289,7 @@ main(
 		const char *ofmt2 = "  time %s, (.%0*d),\n";
 		const char *ofmt3 = "  maximum error %lu us, estimated error %lu us";
 		const char *ofmt4 = "  ntptime=%x.%x unixtime=%x.%0*d %s";
-#if NTP_API > 3
+#if defined NTP_API && NTP_API > 3
 		const char *ofmt5 = ", TAI offset %ld\n";
 #else
 		const char *ofmt6 = "\n";
@@ -305,7 +299,7 @@ main(
 		const char *jfmt2 = "\"time\":\"%s\",\"fractional-time\":\".%0*d\",";
 		const char *jfmt3 = "\"maximum-error\":%lu,\"estimated-error\":%lu,";
 		const char *jfmt4 = "\"raw-ntp-time\":\"%x.%x\",\"raw-unix-time\":\"%x.%0*d %s\",";
-#if NTP_API > 3
+#if defined NTP_API && NTP_API > 3
 		const char *jfmt5 = "\"TAI-offset\":%d,";
 #else
 		const char *jfmt6 = "";
