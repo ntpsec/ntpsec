@@ -21,7 +21,7 @@ static uint64_t get_byte (unsigned char *, offsets_t, int *);
 
 static char *
 fmt_blong(
-          unsigned long val,
+          uint64_t val,
           int cnt
           )
 {
@@ -48,7 +48,7 @@ static char *
 fmt_flt(
         bool sign,
         uint64_t ml,
-        unsigned long ch,
+        uint64_t ch,
         int length
         )
 {
@@ -123,7 +123,7 @@ fetch_ieee754(
     unsigned int maxexp;
     int mbits;                      /* length of mantissa, 23 or 52 */
     uint64_t mantissa;              /* mantissa, 23 or 52 bits used, +1 */
-    unsigned long characteristic;   /* biased exponent, 0 to 255 or 2047 */
+    uint64_t characteristic;        /* biased exponent, 0 to 255 or 2047 */
     int exponent;                   /* unbiased exponent */
     unsigned int maxexp_lfp;        /* maximum exponent that fits in an l_fp */
     unsigned char val;
