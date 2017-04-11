@@ -93,6 +93,33 @@ def zerowiggle(ooms):
     return 10 ** -ooms
 
 
+def stringfiltcooker(data):
+    "Cooks a filt* string of space seperated numbers, expects milliseconds"
+    parts = data.split()
+    oomcount = {}
+    # Find out what the 'natural' unit of each value is
+    for part in parts:
+        value, oom = scalestring(part)
+        oomcount[oom] = oomcount.get(oom, 0) + 1
+    # Find the most common unit
+    mostcommon = None
+    highestcount = 0
+    for key in oomcount.keys():
+        count = oomcount[key]
+        if count > highestcount:
+            mostcommon = key
+            highestcount = count
+    newunit = UNITS_SEC[mostcommon + UNIT_MS]
+    # Shift all values to the new unit
+    cooked = []
+    for part in parts:
+        part = rescalestring(part, mostcommon)
+        fitted = fitinfield(part, 7)
+        cooked.append(fitted)
+    rendered = " ".join(cooked) + " " + newunit
+    return rendered
+
+
 def filtcooker(data):
     "Cooks the string of space seperated numbers with units"
     parts = data.split()
@@ -179,6 +206,165 @@ def formatdigitsplit(f, fieldsize, oomstobase):
 
 def oomsbetweenunits(a, b):
     return abs((a - b) * 3)
+
+
+def breaknumberstring(value):
+    "Breaks a number string into (aboveDecimal, belowDecimal, isNegative?)"
+    if value[0] == "-":
+        value = value[1:]
+        negative = True
+    else:
+        negative = False
+    if "." in value:
+        above, below = value.split(".")
+    else:
+        above = value
+        below = ""
+    return (above, below, negative)
+
+
+def gluenumberstring(above, below, isnegative):
+    "Glues together parts of a number string"
+    if above == "":
+        above = "0"
+    if len(below) > 0:
+        newvalue = ".".join((above, below))
+    else:
+        newvalue = above
+    if isnegative is True:
+        newvalue = "-" + newvalue
+    return newvalue
+
+
+def rescalestring(value, unitsscaled):
+    "Rescale a number string by a given number of units"
+    whole, dec, negative = breaknumberstring(value)
+    if unitsscaled == 0:
+        if whole == "":  # render .1 as 0.1
+            whole = "0"
+        value = gluenumberstring(whole, dec, negative)
+        return value
+    hilen = len(whole)
+    lolen = len(dec)
+    digitsmoved = abs(unitsscaled * 3)
+    if unitsscaled > 0:  # Scale to a larger unit
+        if hilen < digitsmoved:  # Scaling beyond the digits, pad it out
+            padcount = digitsmoved - hilen
+            newwhole = "0"
+            newdec = ("0" * padcount) + whole + dec
+        else:  # Scaling in the digits, no need to pad
+            choppoint = -digitsmoved
+            newdec = whole[choppoint:] + dec
+            newwhole = whole[:choppoint]
+            if newwhole == "":
+                newwhole = "0"
+    elif unitsscaled < 0:  # scale to a smaller unit
+        if lolen < digitsmoved:  # Scaling beyone the digits, pad it out
+            padcount = digitsmoved - lolen
+            newwhole = whole + dec + ("0" * padcount)
+            newdec = ""
+        else:
+            newwhole = whole + dec[:digitsmoved]
+            newdec = dec[digitsmoved:]
+    newvalue = gluenumberstring(newwhole, newdec, negative)
+    return newvalue
+
+
+def scalestring(value):
+    "Scales a number string to fit in the range 1.0-999.9"
+    whole, dec, negative = breaknumberstring(value)
+    hilen = len(whole)
+    if (hilen == 0) or isstringzero(whole):  # Need to shift to smaller units
+        i = 0
+        lolen = len(dec)
+        while i < lolen:  # need to find the actual digits
+            if dec[i] != "0":
+                break
+            i += 1
+        if i == lolen:  # didn't find anything, this number must equal zero
+            newwhole = whole
+            newdec = dec
+            negative = False  # filter our -0.000
+            unitsmoved = 0
+        else:
+            lounits = (i // 3) + 1  # always need to shift one more unit
+            movechars = lounits * 3
+            newwhole = dec[:movechars].lstrip('0')
+            newdec = dec[movechars:]
+            unitsmoved = -lounits
+    else:  # Shift to larger units
+        hiunits = hilen // 3  # How many we have, not how many to move
+        hidigits = hilen % 3
+        if hidigits == 0:  # full unit above the decimal
+            hiunits -= 1  # the unit above the decimal doesn't count
+            hidigits = 3
+        newwhole = whole[:hidigits]
+        newdec = whole[hidigits:] + dec
+        unitsmoved = hiunits
+    newvalue = gluenumberstring(newwhole, newdec, negative)
+    return (newvalue, unitsmoved)
+
+
+def fitinfield(value, fieldsize):
+    "Attempt to fit value into a field, preserving as much data as possible"
+    vallen = len(value)
+    if fieldsize is None:
+        newvalue = value
+    elif vallen == fieldsize:  # Goldilocks!
+        newvalue = value
+    elif vallen < fieldsize:  # Extra room, pad it out
+        pad = " " * (fieldsize - vallen)
+        newvalue = pad + value
+    else:  # Insufficient room, crop as few digits as possible
+        above, below, neg = breaknumberstring(value)
+        diff = vallen - fieldsize
+        bellen = len(below)
+        croplen = min(bellen, diff)  # Never crop above the decimal point
+        newvalue = value[:-croplen]
+    return newvalue
+
+
+def cropprecision(value, ooms):
+    if "." not in value:  # No decimals, nothing to crop
+        return value
+    if ooms == 0:  # We are at the baseunit, crop it all
+        return value.split(".")[0]
+    dstart = value.find(".") + 1
+    dsize = len(value) - dstart
+    precision = min(ooms, dsize)
+    cropcount = dsize - precision
+    if cropcount > 0:
+        value = value[:-cropcount]
+    return value
+
+
+def isstringzero(value):
+    for i in value:
+        if i not in ("-", ".", "0"):
+            return False
+    return True
+
+
+def unitify(value, unitgroup, startingunit, baseunit=0,
+            strip=False, width=8):
+    "Formats a numberstring with relevant units. Attemps to fit in width."
+    if isstringzero(value) is True:  # display highest precision zero
+        base = unitgroup[baseunit]
+        if strip is False:
+            newvalue = fitinfield("0", width - len(base)) + base
+        return newvalue
+    ooms = oomsbetweenunits(startingunit, baseunit)
+    newvalue = cropprecision(value, ooms)
+    newvalue, unitsmoved = scalestring(newvalue)
+    unitget = startingunit + unitsmoved
+    if 0 <= unitget < len(unitgroup):  # We have a unit
+        unit = unitgroup[unitget]
+        newvalue = fitinfield(newvalue, width - len(unit)) + unit
+    else:  # don't have a replacement unit, use original
+        newvalue = value + unitgroup[startingunit]
+    if strip is True:
+        newvalue = newvalue.strip()
+    return newvalue
 
 
 def unitformatter(f, unitgroup, startingunit, baseunit=None,
