@@ -262,8 +262,10 @@ TEST(lfpfunc, FDF_RoundTrip) {
 
 		l_fp temp = op1 - op3;
 		double d = lfptod(temp);
-                snprintf(msg, sizeof(msg), "%d not %d within %d",
-                         op1, op2, eps(op2));
+                /* cast to long unsgiend int for 32 bit binaries */
+                snprintf(msg, sizeof(msg), "%llx not %llx within %f",
+                         (long long unsigned)op1,
+                         (long long unsigned)op2, eps(op2));
 		TEST_ASSERT_DOUBLE_WITHIN_MESSAGE(eps(op2), 0.0, fabs(d), msg);
 	}
 
