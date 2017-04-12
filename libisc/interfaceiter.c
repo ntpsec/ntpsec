@@ -203,7 +203,9 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 	}
 
 	res = sscanf(iter->entry, "%32[a-f0-9] %x %x %x %x %16s\n",
-		     address, &ifindex, &prefix, &scope, &flags, name);
+		     address, &ifindex, (unsigned int *)&prefix,
+                     (unsigned int *) &scope,
+                     (unsigned int *)&flags, name);
 	if (res != 6) {
 /*		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 			      ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
