@@ -821,7 +821,7 @@ process_control(
 		res_authenticate = true;
 		pkid = (void *)((char *)pkt + properlen);
 		res_keyid = ntohl(*pkid);
-		DPRINTF(3, ("recv_len %zd, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
+		DPRINTF(3, ("recv_len %zu, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
 			    rbufp->recv_length, properlen, res_keyid,
 			    maclen));
 
@@ -4152,7 +4152,7 @@ report_event(
 		ctl_sys_num_events++;
 		snprintf(statstr, sizeof(statstr),
 		    "0.0.0.0 %04x %02x %s",
-		    ctlsysstatus(), err, eventstr(err));
+		    ctlsysstatus(), (unsigned)err, eventstr(err));
 		if (str != NULL) {
 			len = strlen(statstr);
 			snprintf(statstr + len, sizeof(statstr) - len,
@@ -4186,7 +4186,7 @@ report_event(
 
 		snprintf(statstr, sizeof(statstr),
 		    "%s %04x %02x %s", src,
-		    ctlpeerstatus(peer), err, eventstr(err));
+		    ctlpeerstatus(peer), (unsigned)err, eventstr(err));
 		if (str != NULL) {
 			len = strlen(statstr);
 			snprintf(statstr + len, sizeof(statstr) - len,
