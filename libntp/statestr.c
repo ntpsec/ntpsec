@@ -351,7 +351,7 @@ decode_bitflags(
 			   :
 #endif
 			     "",
-		 bits, (int)LIB_BUFLENGTH);
+		 (unsigned)bits, (int)LIB_BUFLENGTH);
 	errno = saved_errno;
 
 	return buf;

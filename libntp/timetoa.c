@@ -103,7 +103,7 @@ format_time_fraction(
 
 	/* finally format the data and return the result */
 	snprintf(cp, LIB_BUFLENGTH, "%s%llu.%0*ld",
-	    notneg? "" : "-", secs_u, prec_u, frac);
+	    notneg? "" : "-", secs_u, (int)prec_u, frac);
 	
 	return cp;
 }

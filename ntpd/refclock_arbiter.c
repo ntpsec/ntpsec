@@ -180,14 +180,14 @@ arb_start(
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
 	if (peer->ttl > 1) {
-		msyslog(LOG_NOTICE, "ARBITER: Invalid mode %d", peer->ttl);
+		msyslog(LOG_NOTICE, "ARBITER: Invalid mode %u", peer->ttl);
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
 		return false;
 	}
 #ifdef DEBUG
-	if(debug) { printf("arbiter: mode = %d.\n", peer->ttl); }
+	if(debug) { printf("arbiter: mode = %u.\n", peer->ttl); }
 #endif
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	return true;

@@ -206,7 +206,7 @@ typedef struct addrinfo     addrinfoT;
  * We use the same device name scheme as does the NMEA driver; since
  * GPSD supports the same links, we can select devices by a fixed name.
  */
-#define	DEVICE		"/dev/gps%u"	/* GPS serial device */
+#define	DEVICE		"/dev/gps%d"	/* GPS serial device */
 
 /* =====================================================================
  * forward declarations for transfer vector and the vector itself
@@ -1563,7 +1563,7 @@ process_tpv(
 		/* now parse the time string */
 		if (convert_ascii_time(&up->ibt_stamp, gps_time)) {
 			DPRINTF(2, ("%s: process_tpv, stamp='%s',"
-				    " recvt='%s' mode=%u\n",
+				    " recvt='%s' mode=%d\n",
 				    up->logname,
 				    gmprettydate(up->ibt_stamp),
 				    gmprettydate(up->ibt_recvt),

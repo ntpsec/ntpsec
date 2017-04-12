@@ -797,7 +797,7 @@ process_control(
 	datapt = rpkt.data;
 
 	if ((rbufp->recv_length & 0x3) != 0)
-		DPRINTF(3, ("Control packet length %zd unrounded\n",
+		DPRINTF(3, ("Control packet length %zu unrounded\n",
 			    rbufp->recv_length));
 
 	/*

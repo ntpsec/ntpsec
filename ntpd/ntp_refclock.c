@@ -299,7 +299,7 @@ refclock_transmit(
 		uint8_t oreach;
 #ifdef DEBUG
 		if (debug)
-			printf("refclock_transmit: at %ld %s\n",
+			printf("refclock_transmit: at %lu %s\n",
 			    current_time, socktoa(&(peer->srcadr)));
 #endif
 
@@ -643,7 +643,7 @@ refclock_gtraw(
 	lineptr[bmax] = '\0';
 
 	*tsptr = rbufp->recv_time;
-	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %zd %s\n",
+	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %zu %s\n",
 		    rbufp->fd, ulfptoa(rbufp->recv_time, 6), bmax,
 		    lineptr));
 	return (bmax);

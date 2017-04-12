@@ -408,7 +408,7 @@ filegen_config(
 	DPRINTF(3, ("configuring filegen:\n"
 		    "\tdir:\t%s -> %s\n"
 		    "\tfname:\t%s -> %s\n"
-		    "\ttype:\t%d -> %d\n"
+		    "\ttype:\t%d -> %u\n"
 		    "\tflag: %x -> %x\n",
 		    gen->dir, dir,
 		    gen->fname, fname,

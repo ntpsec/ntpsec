@@ -415,9 +415,11 @@ hpgps_receive(
 
 	    case '2':
 		m = sscanf(tcp,"%*c%*c%4d%2d%2d%2d%2d%2d%c%c%c%c%c%2hx",
-			   &pp->year, &month, &day, &pp->hour, &pp->minute, &pp->second,
-			   &timequal, &freqqual, &leapchar, &servchar, &syncchar,
-			   &expectedsm);
+			   &pp->year, &month, &day, &pp->hour, &pp->minute,
+                           &pp->second,
+			   &timequal, &freqqual, &leapchar, &servchar,
+                           &syncchar,
+			   (short unsigned int*)&expectedsm);
 		n = NTCODET2;
 
 		if (m != MTCODET2){
