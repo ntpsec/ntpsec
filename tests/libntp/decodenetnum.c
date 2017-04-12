@@ -15,6 +15,7 @@ TEST_TEAR_DOWN(decodenetnum) {}
 
 TEST(decodenetnum, IPv4AddressOnly) {
 	const char *str = "192.0.2.1";
+        bool ret;
 	sockaddr_u actual;
 
 	sockaddr_u expected;
@@ -22,8 +23,9 @@ TEST(decodenetnum, IPv4AddressOnly) {
 	PSOCK_ADDR4(&expected)->s_addr = inet_addr("192.0.2.1");
 	SET_PORT(&expected, NTP_PORT);
 
-	TEST_ASSERT_TRUE(decodenetnum(str, &actual));
+	ret = decodenetnum(str, &actual);
 	TEST_ASSERT_TRUE(IsEqualS(&expected, &actual));
+	TEST_ASSERT_TRUE(ret);
 }
 
 TEST(decodenetnum, IPv4AddressWithPort) {
@@ -40,6 +42,7 @@ TEST(decodenetnum, IPv4AddressWithPort) {
 }
 
 TEST(decodenetnum, IPv6AddressOnly) {
+        bool ret;
 	const struct in6_addr address = {{{
 		0x20, 0x01, 0x0d, 0xb8,
         0x85, 0xa3, 0x08, 0xd3,
@@ -55,8 +58,9 @@ TEST(decodenetnum, IPv6AddressOnly) {
 	SET_SOCK_ADDR6(&expected, address);
 	SET_PORT(&expected, NTP_PORT);
 
-	TEST_ASSERT_TRUE(decodenetnum(str, &actual));
+	ret = decodenetnum(str, &actual);
 	TEST_ASSERT_TRUE(IsEqualS(&expected, &actual));
+	TEST_ASSERT_TRUE(ret);
 }
 
 TEST(decodenetnum, IPv6AddressWithPort) {
