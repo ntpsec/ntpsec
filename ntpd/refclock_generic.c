@@ -2761,7 +2761,9 @@ parse_start(
 
 	if (!PARSE_SETCS(parse, &tmp_ctl))
 	{
-		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: parse_setcs() FAILED.", unit);
+		msyslog(LOG_ERR,
+                    "PARSE receiver #%u: parse_start: parse_setcs() FAILED.",
+                    unit);
 		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 		return false;			/* well, ok - special initialisation broke */
 	}
@@ -2771,7 +2773,9 @@ parse_start(
 
 	if (!PARSE_SETFMT(parse, &tmp_ctl))
 	{
-		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: parse_setfmt() FAILED.", unit);
+		msyslog(LOG_ERR,
+                    "PARSE receiver #%u: parse_start: parse_setfmt() FAILED.",
+                    unit);
 		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 		return false;			/* well, ok - special initialisation broke */
 	}
