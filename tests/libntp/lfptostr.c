@@ -103,17 +103,17 @@ TEST(lfptostr, MillisecondsRoundingDown) {
 }
 
 TEST(lfptostr, UnsignedInteger) {
-	l_fp test1 = lfpinit(3000000000L, 0);
-	l_fp test2 = lfpinit(3000000L, 0x80000000);
-	l_fp test3 = lfpinit(13L, 0xC0000000);
-	l_fp test4 = lfpinit(13L, 0x028F5C28);
+	l_fp test1 = lfpinit((int32_t)3000000000LL, 0);
+	l_fp test2 = lfpinit((int32_t)3000000L, 0x80000000);
+	l_fp test3 = lfpinit((int32_t)13L, 0xC0000000);
+	l_fp test4 = lfpinit((int32_t)13L, 0x028F5C28);
 
-	l_fp test5 = lfpinit(4212665562L, 0x3C6BE7E6);
-	l_fp test6 = lfpinit(4212665562L, 0x36222683);
-	l_fp test7 = lfpinit(4212665562L, 0xBD3F2F5A);
-	l_fp test8a = lfpinit(1444359386L, 0x2E0C7582);
-	l_fp test8b = lfpinit(1444359386L, 0x2E0C7583);
-	l_fp test9 = lfpinit(3660323067L, 0x1CD3101C);
+	l_fp test5 = lfpinit((int32_t)4212665562LL, 0x3C6BE7E6);
+	l_fp test6 = lfpinit((int32_t)4212665562LL, 0x36222683);
+	l_fp test7 = lfpinit((int32_t)4212665562LL, 0xBD3F2F5A);
+	l_fp test8a = lfpinit((int32_t)1444359386LL, 0x2E0C7582);
+	l_fp test8b = lfpinit((int32_t)1444359386LL, 0x2E0C7583);
+	l_fp test9 = lfpinit((int32_t)3660323067LL, 0x1CD3101C);
 
 	TEST_ASSERT_EQUAL_STRING("3000000000.0", ulfptoa(test1, 1));
 	TEST_ASSERT_EQUAL_STRING("3000000000.000000", ulfptoa(test1, 6));
