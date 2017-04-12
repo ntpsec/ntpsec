@@ -283,7 +283,7 @@ def cmd_configure(ctx, config):
         ctx.env.CFLAGS += [
             # "-Wall",                # for masochists
             #"-Wsuggest-attribute=const", # fails build
-            "-Waggregate-return",
+            #"-Waggregate-return",    # breaks ldiv(), ntpcal_daysplit(),  etc.
             "-Wbad-function-cast",
             "-Wcast-align",
             "-Wcast-qual",
