@@ -152,7 +152,7 @@ fetch_ieee754(
         maxexp = 2047;
         characteristic <<= 4;
         /* grab lower characteristic bits */
-        characteristic  |= (val & 0xF0U) >> 4;
+        characteristic  |= (val & 0xF0) >> 4;
 
         mantissa  = (val & 0x0FULL) << 48;
         mantissa |= get_byte(bufp, offsets, &fieldindex) << 40;
@@ -172,7 +172,7 @@ fetch_ieee754(
         maxexp = 255;
         characteristic <<= 1;
         /* grab last characteristic bit from 2nd byte */
-        characteristic |= (val & 0x80) ? 1U : 0 ;
+        characteristic |= (val & 0x80) ? 1 : 0 ;
 
         mantissa   = (val & 0x7FU) << 16;
         mantissa  |= get_byte(bufp, offsets, &fieldindex) << 8;
