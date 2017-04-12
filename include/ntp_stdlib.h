@@ -138,7 +138,7 @@ extern	bool	octtoint	(const char *, unsigned long *);
 extern	unsigned long	ranp2		(int);
 extern	const char *refid_str	(uint32_t, int);
 
-extern	bool	decodenetnum	(const char *, sockaddr_u *);
+extern	int	decodenetnum	(const char *, sockaddr_u *);
 
 extern	void	signal_no_reset (int, void (*func)(int));
 

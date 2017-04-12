@@ -26,8 +26,11 @@
  * [IPv6]:port
  *
  * The IP must be numeric but the port can be symbolic.
+ *
+ * return: 0 for success
+ *         negative numbers for error codes
  */
-bool
+int
 decodenetnum(
 	const char *num,
 	sockaddr_u *netnum
@@ -43,13 +46,13 @@ decodenetnum(
 	ZERO(*netnum);               /* don't return random data on fail */
         /* check num not NULL before using it */
 	if ( NULL == num) {
-                return false;
+                return -1;
         }
 	numlen = strlen(num);
 	/* Quickly reject empty or impossibly long inputs. */
 	if(numlen == 0 ||
 	   numlen > ((sizeof(ip) - 1) + (NI_MAXSERV - 1) + (3 /* "[]:" */))) {
-		return false;
+		return -2;
 	}
 
 	/* Is this a bracketed IPv6 address? */
@@ -70,7 +73,7 @@ decodenetnum(
 		}
 		else {
 			/* Anything else must be invalid. */
-			return false;
+			return -3;
 		}
 	}
 	/* No brackets. Searching backward, see if there's at least one
@@ -104,7 +107,7 @@ decodenetnum(
 	   whether the IP is short enough to possibly be valid and
 	   if so copy it into ip. */
 	if ((ip_end - ip_start + 1) > (int)sizeof(ip)) {
-		return false;
+		return -4;
 	} else {
 		memcpy(ip, ip_start, (size_t)(ip_end - ip_start));
 		ip[ip_end - ip_start] = '\0';
@@ -124,7 +127,7 @@ decodenetnum(
 	   Let getaddrinfo() perform all further validation. */
 	if(getaddrinfo(ip, port_start == NULL ? "ntp" : port_start,
 		       &hints, &ai) != 0) {
-		return false;
+		return -5;
 	}
 
 	NTP_INSIST(ai->ai_addrlen <= sizeof(*netnum));
@@ -132,5 +135,5 @@ decodenetnum(
 		memcpy(netnum, ai->ai_addr, ai->ai_addrlen);
 	}
 	freeaddrinfo(ai);
-	return true;
+	return 0;
 }

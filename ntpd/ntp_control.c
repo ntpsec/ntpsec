@@ -3464,7 +3464,7 @@ static void read_mru_list(
 			if (1 != sscanf(val, "%u", &maxlstint))
 				goto blooper;
 		} else if (!strcmp(laddr_text, v->text)) {
-			if (!decodenetnum(val, &laddr))
+			if (decodenetnum(val, &laddr))
 				goto blooper;
 			lcladr = getinterface(&laddr, 0);
 		} else if (!strcmp(recent_text, v->text)) {
@@ -3479,7 +3479,7 @@ static void read_mru_list(
 				priors++;
 		} else if (1 == sscanf(v->text, addr_fmt, &si) &&
 			   (size_t)si < COUNTOF(addr)) {
-			if (!decodenetnum(val, &addr[si]))
+			if (decodenetnum(val, &addr[si]))
 				goto blooper;
 			if (lfpuint(last[si]) && lfpfrac(last[si]) && si == priors)
 				priors++;
