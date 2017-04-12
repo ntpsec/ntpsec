@@ -1779,17 +1779,22 @@ oncore_get_timestamp(
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d",
 		    lfpuint(ts), j,
 		    instance->pp->year, instance->pp->day,
-		    instance->pp->hour, instance->pp->minute, instance->pp->second,
+		    instance->pp->hour, instance->pp->minute,
+                    instance->pp->second,
 		    (long) tsp->tv_sec % 60,
-		    Rsm, 0.1*(256*instance->BEHa[35]+instance->BEHa[36]),
+		    (unsigned)Rsm,
+                    0.1*(256*instance->BEHa[35]+instance->BEHa[36]),
 		    /*rsat	dop */
-		    instance->BEHa[38], instance->BEHa[39], instance->traim, f1, f2,
+		    instance->BEHa[38], instance->BEHa[39], instance->traim,
+                    f1, f2,
 		    /*	nsat visible,	  nsat tracked,     traim,traim,traim */
 		    f3, f4,
 		    /* sigma neg-sawtooth */
-	  /*sat*/   instance->BEHa[41], instance->BEHa[45], instance->BEHa[49], instance->BEHa[53],
-		    instance->BEHa[57], instance->BEHa[61], instance->BEHa[65], instance->BEHa[69]
-		    );					/* will be 0 for 6 chan */
+	  /*sat*/   instance->BEHa[41], instance->BEHa[45],
+                    instance->BEHa[49], instance->BEHa[53],
+		    instance->BEHa[57], instance->BEHa[61],
+                    instance->BEHa[65], instance->BEHa[69]
+		    );		/* will be 0 for 6 chan */
 	} else if (instance->chan == 12) {
 		char	f1[5], f2[5], f3[5], f4[5];
 		if (instance->traim) {
@@ -1812,17 +1817,23 @@ oncore_get_timestamp(
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d%d%d%d%d",
 		    lfpuint(ts), j,
 		    instance->pp->year, instance->pp->day,
-		    instance->pp->hour, instance->pp->minute, instance->pp->second,
+		    instance->pp->hour, instance->pp->minute,
+                    instance->pp->second,
 		    (long) tsp->tv_sec % 60,
-		    Rsm, 0.1*(256*instance->BEHa[53]+instance->BEHa[54]),
+		    (unsigned)Rsm, 
+                    0.1*(256*instance->BEHa[53]+instance->BEHa[54]),
 		    /*rsat	dop */
-		    instance->BEHa[55], instance->BEHa[56], instance->traim, f1, f2,
+		    instance->BEHa[55], instance->BEHa[56],
+                    instance->traim, f1, f2,
 		    /*	nsat visible,	  nsat tracked	 traim,traim,traim */
 		    f3, f4,
 		    /* sigma neg-sawtooth */
-	  /*sat*/   instance->BEHa[58], instance->BEHa[64], instance->BEHa[70], instance->BEHa[76],
-		    instance->BEHa[82], instance->BEHa[88], instance->BEHa[94], instance->BEHa[100],
-		    instance->BEHa[106], instance->BEHa[112], instance->BEHa[118], instance->BEHa[124]
+	  /*sat*/   instance->BEHa[58], instance->BEHa[64],
+                    instance->BEHa[70], instance->BEHa[76],
+		    instance->BEHa[82], instance->BEHa[88],
+                    instance->BEHa[94], instance->BEHa[100],
+		    instance->BEHa[106], instance->BEHa[112],
+                    instance->BEHa[118], instance->BEHa[124]
 		    );
 	}
 
@@ -2054,7 +2065,7 @@ oncore_msg_Az(
 
 	instance->delay = (u_long)buf_w32(&buf[4]);
 
-	oncore_log_f(instance, LOG_INFO, "Cable delay is set to %ld ns",
+	oncore_log_f(instance, LOG_INFO, "Cable delay is set to %lu ns",
 		     instance->delay);
 }
 
@@ -2414,7 +2425,7 @@ oncore_msg_Bd(
 {
 	UNUSED_ARG(len);
 	oncore_log_f(instance, LOG_NOTICE,
-		     "Bd: Almanac %s, week = %d, t = %d, %d SVs: %x",
+		     "Bd: Almanac %s, week = %d, t = %d, %d SVs: %d",
 		     ((buf[4]) ? "LOADED" : "(NONE)"), buf[5], buf[6],
 		     buf[7], w32(&buf[8]));
 }
@@ -2940,8 +2951,8 @@ oncore_msg_Cj_id(
 	/* use MODEL to set CHAN and TRAIM and possibly zero SHMEM */
 
 	oncore_log_f(instance, LOG_INFO,
-		     "This looks like an Oncore %s with version %d.%d firmware.",
-		     cp, instance->version, instance->revision);
+		   "This looks like an Oncore %s with version %u.%u firmware.",
+		   cp, instance->version, instance->revision);
 
 	instance->chan_id = 8;	   /* default */
 	if (instance->model == ONCORE_BASIC || instance->model == ONCORE_PVT6)
@@ -2999,8 +3010,8 @@ oncore_msg_Cj_init(
 	if (instance->chan == 12) {
 		instance->shmem_bad_Ea = 1;
 		oncore_log_f(instance, LOG_NOTICE,
-			     "*** SHMEM partially enabled for ONCORE M12 s/w v%d.%d ***",
-			     instance->version, instance->revision);
+		   "*** SHMEM partially enabled for ONCORE M12 s/w v%u.%u ***",
+		   instance->version, instance->revision);
 	}
 
 	oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg)); /* Return to  Posn Fix mode */
