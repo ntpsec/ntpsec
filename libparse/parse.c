@@ -134,7 +134,9 @@ parse_addchar(
 		/*
 		 * collect into buffer
 		 */
-		parseprintf(DD_PARSE, ("parse: parse_addchar: buffer[%d] = 0x%x\n", parseio->parse_index, ch));
+		parseprintf(DD_PARSE,
+                            ("parse: parse_addchar: buffer[%d] = 0x%x\n",
+                             parseio->parse_index, (unsigned)ch));
 		parseio->parse_data[parseio->parse_index++] = (char)ch;
 		return PARSE_INP_SKIP;
 	}
@@ -196,7 +198,8 @@ parse_ioread(
 		break;
 	}
 
-	parseprintf(DD_PARSE, ("parse_ioread(0x%lx, char=0x%x, ..., ...)\n", (unsigned long)parseio, ch & 0xFF));
+	parseprintf(DD_PARSE, ("parse_ioread(0x%lx, char=0x%x, ..., ...)\n",
+                    (unsigned long)parseio, (unsigned)(ch & 0xFF)));
 
 	if (!clockformats[parseio->parse_lformat]->convert)
 	{
@@ -482,7 +485,7 @@ updatetimeinfo(
 		parseio->parse_dtime.parse_state = parseio->parse_lstate;
 
 	parseprintf(DD_PARSE, ("updatetimeinfo status=0x%lx, time=%x\n",
-			       (long)parseio->parse_dtime.parse_state,
+			       (unsigned long)parseio->parse_dtime.parse_state,
 	                       lfpuint(parseio->parse_dtime.parse_time)));
 
 	return CVT_OK;		/* everything fine and dandy... */
