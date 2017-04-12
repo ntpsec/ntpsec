@@ -299,9 +299,10 @@ blocking_getaddrinfo(
 	resp = emalloc_zero(resp_octets);
 	gai_resp = (void *)(resp + 1);
 
-	TRACE(2, ("blocking_getaddrinfo given node %s serv %s fam %d flags %x\n", 
-		  node, service, gai_req->hints.ai_family,
-		  gai_req->hints.ai_flags));
+	TRACE(2, 
+            ("blocking_getaddrinfo given node %s serv %s fam %d flags %x\n", 
+	     node, service, gai_req->hints.ai_family,
+	     (unsigned)gai_req->hints.ai_flags));
 #ifdef DEBUG
 	if (debug >= 2)
 		fflush(stdout);
@@ -648,9 +649,10 @@ blocking_getnameinfo(
 	resp = emalloc_zero(resp_octets);
 	gni_resp = (void *)((char *)resp + sizeof(*resp));
 
-	TRACE(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %lu servlen %lu\n",
-		  socktoa(&gni_req->socku), gni_req->flags,
-		  (u_long)gni_req->hostoctets, (u_long)gni_req->servoctets));
+	TRACE(2, 
+          ("blocking_getnameinfo addr %s flags 0x%x hostlen %lu servlen %lu\n",
+	  socktoa(&gni_req->socku), (unsigned)gni_req->flags,
+	  (u_long)gni_req->hostoctets, (u_long)gni_req->servoctets));
 	
 	gni_resp->retcode = getnameinfo(&gni_req->socku.sa,
 					SOCKLEN(&gni_req->socku),

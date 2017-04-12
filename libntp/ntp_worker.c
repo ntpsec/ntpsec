@@ -225,7 +225,8 @@ blocking_child_common(
 			break;
 
 		default:
-			msyslog(LOG_ERR, "unknown req %d to blocking worker", req->rtype);
+			msyslog(LOG_ERR, "unknown req %u to blocking worker",
+                                req->rtype);
 			say_bye = true;
 		}
 
