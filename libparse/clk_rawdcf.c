@@ -364,7 +364,8 @@ cvt_rawdcf(
 		cutoff = 4;	/* doesn't really matter - it'll fail anyway, but gives error output */
 	}
 
-	parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: average bit count: %d\n", cutoff));
+	parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: average bit count: %u\n",
+                    cutoff));
 
 	lowmax = 0;
 	highmax = 0;
@@ -426,7 +427,9 @@ cvt_rawdcf(
 
 	cutoff = (cutoff + span) / 2;
 
-	parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: lower maximum %d, higher maximum %d, cutoff %d\n", lowmax, highmax, cutoff));
+	parseprintf(DD_RAWDCF, ("parse: cvt_rawdcf: "
+                    "lower maximum %u, higher maximum %u, cutoff %u\n",
+                    lowmax, highmax, cutoff));
 
 	s = (unsigned char *)buffer;
 	while (s < e)
@@ -583,7 +586,7 @@ inp_rawdcf(
 	static struct timespec timeout = { 1, (NS_PER_S/2) };
 
 	parseprintf(DD_PARSE, ("inp_rawdcf(0x%lx, 0x%x, ...)\n",
-                    (long)parseio, ch));
+                    (unsigned long)parseio, (unsigned)ch));
 
 	parseio->parse_dtime.parse_stime = *tstamp; /* collect timestamp */
 
