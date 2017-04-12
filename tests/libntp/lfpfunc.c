@@ -245,6 +245,7 @@ TEST(lfpfunc, Absolute) {
 //----------------------------------------------------------------------
 TEST(lfpfunc, FDF_RoundTrip) {
 	size_t idx = 0;
+        char msg[512];
 
 	// since a l_fp has 64 bits in its mantissa and a double has
 	// only 54 bits available (including the hidden '1') we have to
@@ -261,7 +262,9 @@ TEST(lfpfunc, FDF_RoundTrip) {
 
 		l_fp temp = op1 - op3;
 		double d = lfptod(temp);
-		TEST_ASSERT_DOUBLE_WITHIN(eps(op2), 0.0, fabs(d));
+                snprintf(msg, sizeof(msg), "%d not %d within %d",
+                         op1, op2, eps(op2));
+		TEST_ASSERT_DOUBLE_WITHIN_MESSAGE(eps(op2), 0.0, fabs(d), msg);
 	}
 
 	return;
