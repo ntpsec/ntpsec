@@ -127,7 +127,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		token = nexttok(&line);
 		if (token == NULL) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: no key type for key %d", keyno);
+			    "authreadkeys: no key type for key %u", keyno);
 			continue;
 		}
 		/*
@@ -153,12 +153,12 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 			keytype = NID_md5;
 		if (keytype == 0) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: invalid type for key %d", keyno);
+			    "authreadkeys: invalid type for key %u", keyno);
 			continue;
 		}
 		if (EVP_get_digestbynid(keytype) == NULL) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: no algorithm for key %d", keyno);
+			    "authreadkeys: no algorithm for key %u", keyno);
 			continue;
 		}
 
@@ -171,7 +171,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		token = nexttok(&line);
 		if (token == NULL) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: no key for key %d", keyno);
+			    "authreadkeys: no key for key %u", keyno);
 			continue;
 		}
 		len = strlen(token);
@@ -196,9 +196,10 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 					keystr[j / 2] = temp << 4;
 			}
 			if (j < jlim) {
-				msyslog(LOG_ERR,
-					"authreadkeys: invalid hex digit for key %d", keyno);
-				continue;
+			    msyslog(LOG_ERR,
+				"authreadkeys: invalid hex digit for key %u",
+				keyno);
+			    continue;
 			}
 			mac_setkey(keyno, keytype, keystr, jlim / 2);
 			keys++;
