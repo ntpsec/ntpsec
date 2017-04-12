@@ -40,6 +40,7 @@ decodenetnum(
 
 	char ip[INET6_ADDRSTRLEN];
 
+	ZERO(*netnum);               /* don't return random data on fail */
 	NTP_REQUIRE(num != NULL);
 	/* Quickly reject empty or impossibly long inputs. */
 	if(numlen == 0 ||
@@ -124,7 +125,6 @@ decodenetnum(
 
 	NTP_INSIST(ai->ai_addrlen <= sizeof(*netnum));
 	if(netnum) {
-		ZERO(*netnum);
 		memcpy(netnum, ai->ai_addr, ai->ai_addrlen);
 	}
 	freeaddrinfo(ai);
