@@ -1263,10 +1263,10 @@ class ControlSession:
         if response:
             for pair in response.split(","):
                 try:
-                    pair = pair.strip()
+                    pair = pair.strip().replace("\xae", ",")
                     eq = pair.index("=")
                     var = pair[:eq].strip()
-                    val = pair[eq+1:].strip().replace("\xae", ",")
+                    val = pair[eq+1:].strip()
                     try:
                         if raw is True:
                             val = (int(val, 0), val)
