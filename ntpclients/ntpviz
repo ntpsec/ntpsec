@@ -1447,14 +1447,14 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     args.statsdirs = [os.path.expanduser(path)
                       for path in args.statsdirs.split(",")]
 
-    if True == args.show_peer_offsets:
+    if args.show_peer_offsets is True:
         args.show_peer_offsets = []
     elif 0 < len(args.peer_offsets):
         args.show_peer_offsets = args.peer_offsets.split(",")
     else:
         args.show_peer_offsets = None
 
-    if True == args.show_peer_jitters:
+    if args.show_peer_jitters is True:
         args.show_peer_jitters = []
     elif 0 < len(args.peer_jitters):
         args.show_peer_jitters = args.peer_jitters.split(",")
@@ -1541,14 +1541,14 @@ Python by ESR, concept and gnuplot code by Dan Drown.
             elif args.show_local_offset_histogram:
                 plot = stats.local_offset_histogram_gnuplot()
 
-        if None != args.show_peer_offsets or \
-           None != args.show_peer_jitters:
+        if args.show_peer_offsets is not None or \
+           args.show_peer_jitters is not None:
             if not len(stats.peerstats):
                 sys.stderr.write("ntpviz: ERROR:  missing peerstats data\n")
                 raise SystemExit(1)
-            if None != args.show_peer_offsets:
+            if args.show_peer_offsets is not None:
                 plot = stats.peer_offsets_gnuplot(args.show_peer_offsets)
-            if None != args.show_peer_jitters:
+            if args.show_peer_jitters is not None:
                 plot = stats.peer_jitters_gnuplot(args.show_peer_jitters)
 
         if args.show_freq_temps:
@@ -1572,7 +1572,7 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     if args.show_local_offset_multiplot:
         plot = local_offset_multiplot(statlist)
 
-    if None != plot:
+    if plot is not None:
         # finish up the plot, and exit
         if args.generate:
             gnuplot(plot['plot'])
