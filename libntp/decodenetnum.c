@@ -35,16 +35,20 @@ decodenetnum(
 {
 	struct addrinfo hints, *ai = NULL;
 	const char *ip_start, *ip_end, *port_start, *temp;
-	const size_t numlen = strlen(num);
+	size_t numlen;
 	bool have_brackets;
 
 	char ip[INET6_ADDRSTRLEN];
 
 	ZERO(*netnum);               /* don't return random data on fail */
-	NTP_REQUIRE(num != NULL);
+        /* check num not NULL before using it */
+	if ( NULL == num) {
+                return false;
+        }
+	numlen = strlen(num);
 	/* Quickly reject empty or impossibly long inputs. */
 	if(numlen == 0 ||
-	   numlen > (sizeof ip - 1) + (NI_MAXSERV - 1) + (3 /* "[]:" */)) {
+	   numlen > ((sizeof(ip) - 1) + (NI_MAXSERV - 1) + (3 /* "[]:" */))) {
 		return false;
 	}
 
@@ -99,7 +103,7 @@ decodenetnum(
 	   either NULL or pointing to the start of the port. Check
 	   whether the IP is short enough to possibly be valid and
 	   if so copy it into ip. */
-	if(ip_end - ip_start + 1 > (int)sizeof(ip)) {
+	if ((ip_end - ip_start + 1) > (int)sizeof(ip)) {
 		return false;
 	} else {
 		memcpy(ip, ip_start, (size_t)(ip_end - ip_start));
