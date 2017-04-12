@@ -175,7 +175,8 @@ inp_schmid(
 
 	UNUSED_ARG(tstamp);
 
-	parseprintf(DD_PARSE, ("inp_schmid(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
+	parseprintf(DD_PARSE, ("inp_schmid(0x%lx, 0x%x, ...)\n",
+                    (unsigned long)parseio, (unsigned)ch));
 
 	switch ((uint8_t)ch)
 	{
