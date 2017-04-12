@@ -249,15 +249,19 @@ class TestPylibUtilMethods(unittest.TestCase):
         f = ntp.util.fitinfield
 
         # Field too small, crop decimals
-        self.assertEqual(f("123.456", 5), "123.4")
+        self.assertEqual(f("123.456", 5), "123.5")
         # ditto, negative
         self.assertEqual(f("-123.456", 5), "-123.")
         # Field too small, blow field
-        self.assertEqual(f("12345.678", 4), "12345.")
+        self.assertEqual(f("12345.678", 4), "12346.")
         # Goldilocks
         self.assertEqual(f("123.456", 7), "123.456")
         # Field too big
         self.assertEqual(f("123.456", 10), "   123.456")
+        # Rounding test, round down
+        self.assertEqual(f("1.994", 4), "1.99")
+        # Rounding test, round up
+        self.assertEqual(f("1.995", 4), "2.00")
 
     def test_cropprecision(self):
         f = ntp.util.cropprecision
@@ -315,7 +319,7 @@ class TestPylibUtilMethods(unittest.TestCase):
                          "    23ns")
         # Different units
         self.assertEqual(f("12.345", nu.UNITS_PPX, nu.UNIT_PPM),
-                         "12.34ppm")
+                         "12.35ppm")
         # Strip
         self.assertEqual(f("1.23", nu.UNITS_SEC, nu.UNIT_MS, strip=True),
                          "1.23ms")
@@ -332,7 +336,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Scale
         self.assertEqual(ntp.util.stringfiltcooker(
             "1000.02 3400.5 0.67835 -23.0 9001 6.7 1.00 1234"),
-            "1.00002  3.4005 0.00067 -0.0230   9.001  0.0067 0.00100   1.234 s"
+            "1.00002  3.4005 0.00068 -0.0230   9.001  0.0067 0.00100   1.234 s"
         )
 
 if __name__ == '__main__':

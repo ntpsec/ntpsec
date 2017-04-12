@@ -316,12 +316,20 @@ def fitinfield(value, fieldsize):
     elif vallen < fieldsize:  # Extra room, pad it out
         pad = " " * (fieldsize - vallen)
         newvalue = pad + value
-    else:  # Insufficient room, crop as few digits as possible
-        above, below, neg = breaknumberstring(value)
+    else:  # Insufficient room, round as few digits as possible
         diff = vallen - fieldsize
-        bellen = len(below)
-        croplen = min(bellen, diff)  # Never crop above the decimal point
-        newvalue = value[:-croplen]
+        declen = len(value.split(".")[1])  # length of decimals
+        croplen = min(declen, diff)  # Never round above the decimal point
+        roundlen = declen - croplen  # How many digits we round to
+        newvalue = str(round(float(value), roundlen))
+        splitted = newvalue.split(".")
+        declen = len(splitted[1])
+        if roundlen == 0:  # if rounding all the decimals don't display .0
+            # but do display the point, to show that there is more beyond
+            newvalue = splitted[0] + "."
+        elif roundlen > declen:  # some zeros have been cropped, fix that
+            padcount = roundlen - declen
+            newvalue = newvalue + ("0" * padcount)
     return newvalue
 
 
