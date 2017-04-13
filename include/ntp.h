@@ -232,8 +232,6 @@ struct peer {
 	struct peer *ilink;	/* list of peers for interface */
 	sockaddr_u srcadr;	/* address of remote host */
 	char *	hostname;	/* if non-NULL, remote name */
-	struct addrinfo *addrs;	/* hostname query result */
-	struct addrinfo *ai;	/* position within addrs */
 	endpt *	dstadr;		/* local address */
 	associd_t associd;	/* association ID */
 	uint8_t	version;	/* version number */
@@ -359,6 +357,7 @@ struct peer {
  * MODE_BROADCAST and MODE_BCLIENT appear in the transition
  * function. MODE_CONTROL and MODE_PRIVATE can appear in packets,
  * but those never survive to the translation function.
+ * See MATCH_ASSOC in ntp_peer.
  */
 #define	MODE_UNSPEC	0	/* unspecified (old version) */
 #define	MODE_ACTIVE	1	/* symmetric active mode */
@@ -370,8 +369,8 @@ struct peer {
 /*
  * These can appear in packets
  */
-#define	MODE_CONTROL	6	/* control mode */
-#define	MODE_PRIVATE	7	/* Dead: private mode, ntpdc */
+#define	MODE_CONTROL	6	/* control mode, ntpq*/
+#define	MODE_PRIVATE	7	/* Dead: private mode, was ntpdc */
 /*
  * This is a madeup mode for broadcast client.  No longer used by ntpd.
  */
@@ -404,6 +403,7 @@ struct peer {
 #define	FLAG_IBURST	0x0100	/* initial burst mode */
 #define	FLAG_NOSELECT	0x0200	/* never select */
 #define	FLAG_TRUE	0x0400	/* force truechimer */
+#define	FLAG_DNS	0x0800	/* needs DNS lookup */
 #define FLAG_TSTAMP_PPS	0x4cd000	/* PPS source provides absolute timestamp */
 
 
@@ -646,11 +646,11 @@ struct mon_data {
  * only MDF_UCAST and MDF_BCAST.
  */
 #define	MDF_UCAST	0x01	/* unicast client */
-#define	MDF_MCAST	0x02	/* multicast server (not used) */
+/* #define MDF_MCAST	0x02	** multicast server (not used) */
 #define	MDF_BCAST	0x04	/* broadcast server */
 #define	MDF_POOL	0x08	/* pool client solicitor */
-#define MDF_ACAST	0x10	/* manycast client solicitor (not used) */
-#define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client (not used) */
+/* #define MDF_ACAST	0x10	** manycast client solicitor (not used) */
+#define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client */
 #define MDF_UCLNT	0x40	/* preemptible manycast or pool client */
 /*
  * In the context of struct peer in ntpd, one cast_flags bit

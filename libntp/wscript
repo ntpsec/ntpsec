@@ -14,9 +14,8 @@ def build(ctx):
         "mstolfp.c",
         "netof.c",
         "ntp_endian.c",
-        "ntp_intres.c",
         "ntp_random.c",
-        "ntp_worker.c",
+        "ntp_dns.c",
         "numtoa.c",
         "recvbuff.c",
         "refidsmear.c",
@@ -24,7 +23,6 @@ def build(ctx):
         "socktoa.c",
         "ssl_init.c",
         "syssignal.c",
-        "work_thread.c",
         "ymd2yd.c",
     ]
 

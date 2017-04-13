@@ -12,6 +12,7 @@
 #include "ntp_config.h"
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
+#include "ntp_dns.h"
 #include "isc/error.h"
 #include "isc/formatcheck.h"
 
@@ -95,6 +96,7 @@ static int	wait_child_sync_if	(int, long);
 #endif
 
 static	void	catchHUP	(int);
+static	void	catchDNS	(int);
 
 # ifdef	DEBUG
 static	void	moredebug	(int);
@@ -653,6 +655,7 @@ ntpdmain(
 	signal_no_reset(SIGTERM, catchQuit);
 	signal_no_reset(SIGHUP, catchHUP);
 	signal_no_reset(SIGBUS, catchQuit);  /* FIXME: It's broken, can't continue. */
+	signal_no_reset(SIGDNS, catchDNS);
 
 # ifdef DEBUG
 	(void) signal_no_reset(MOREDEBUGSIG, moredebug);
@@ -889,8 +892,13 @@ static void mainloop(void)
 			 * Out here, signals are unblocked.  Call timer routine
 			 * to process expiry.
 			 */
-			timer();
 			sawALRM = false;
+			timer();
+		}
+
+		if (sawDNS) {
+			sawDNS = false;
+			dns_check();
 		}
 
 # ifdef ENABLE_DEBUG_TIMING
@@ -1025,6 +1033,14 @@ static void catchHUP(int sig)
 {
 	UNUSED_ARG(sig);
 	sawHUP = true;
+}
+/*
+ * catchDNS - set flag to process answer DNS lookup
+ */
+static void catchDNS(int sig)
+{
+	UNUSED_ARG(sig);
+	sawDNS = true;
 }
 
 

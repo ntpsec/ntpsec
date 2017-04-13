@@ -8,6 +8,7 @@
 #include "ntp_endian.h"
 #include "ntp_stdlib.h"
 #include "ntp_leapsec.h"
+#include "ntp_dns.h"
 #include "refidsmear.h"
 #include "timespecops.h"
 
@@ -156,17 +157,11 @@ static	double	root_distance	(struct peer *);
 static	void	clock_combine	(peer_select *, int, int);
 static	void	peer_xmit	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
-static	void	pool_xmit	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	void	measure_precision(const bool);
 static	double	measure_tick_fuzz(void);
 static	int	local_refid	(struct peer *);
 static	int	peer_unfit	(struct peer *);
-#ifdef USE_WORKER
-void	pool_name_resolved	(int, int, void *, const char *,
-				 const char *, const struct addrinfo *,
-				 const struct addrinfo *);
-#endif /* USE_WORKER */
 
 
 void
@@ -900,14 +895,26 @@ transmit(
 	 * resulted in 60 associations without the hard limit.
 	 */
 	if (peer->cast_flags & MDF_POOL) {
+		/* FIXME-DNS turn on FLAG_DNS for pool */
 		peer->outdate = current_time;
 		if ((peer_associations <= 2 * sys_maxclock) &&
 		    (peer_associations < sys_maxclock ||
 		     sys_survivors < sys_minclock))
-			pool_xmit(peer);
+			dns_probe(peer);
+		/* FIXME-DNS - need proper backoff */
 		poll_update(peer, hpoll);
 		return;
 	}
+
+	/* Does server need DNS lookup? */
+	if (peer->flags & FLAG_DNS) {
+		peer->outdate = current_time;
+		dns_probe(peer);
+		/* FIXME-DNS - need proper backoff */
+		poll_update(peer, hpoll);
+		return;
+        }
+
 
 	/*
 	 * In unicast modes the dance is much more intricate. It is
@@ -1260,10 +1267,6 @@ poll_update(
 			next = 1U << hpoll;
 		else
 #endif /* REFCLOCK */
-			/*
-			 * Doesn't need to be captured, because the poll interval
-			 * has no effect on replay.
-			 */
 			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<
 			    hpoll) >> 12;
 		next += peer->outdate;
@@ -2409,131 +2412,98 @@ fast_xmit(
 
 
 /*
- * pool_xmit - resolve hostname or send unicast solicitation for pool.
+ * server_take_dns - process DNS query for server.
  */
-static void
-pool_xmit(
-	struct peer *pool	/* pool solicitor association */
+void
+server_take_dns(
+	struct peer *server,
+	struct addrinfo *ai
 	)
 {
-#ifdef USE_WORKER
+	sockaddr_u *		rmtadr;
+	int			restrict_mask;
+	struct peer *		p;
+
+	for ( ; NULL != ai; ai = ai->ai_next)  {
+		rmtadr = (sockaddr_u *)(void *)ai->ai_addr;
+msyslog(LOG_INFO, "Server checking: %s", socktoa(rmtadr));
+		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
+		if (NULL != p) continue;  /* already in use */
+
+msyslog(LOG_INFO, "Server trying: %s", socktoa(rmtadr));
+		
+		restrict_mask = restrictions(rmtadr);
+		if (RES_FLAGS & restrict_mask)
+			restrict_source(rmtadr, false, 0);
+
+		server->srcadr = *rmtadr;
+		server->dstadr = findinterface(rmtadr);
+if (NULL == server->dstadr)
+  msyslog(LOG_ERR, "server_take_dns: can't find interface for %s", server->hostname);
+		server->flags &= ~FLAG_DNS;
+		server->hpoll = server->minpoll;
+		server->nextdate = current_time;
+		peer_update_hash(server);
+		peer_xmit(server);
+
+		DPRINTF(1, ("transmit: at %ld %s->%s pool\n",
+		    current_time, latoa(lcladr), socktoa(rmtadr)));
+		msyslog(LOG_INFO, "Setup server %s", socktoa(rmtadr));
+		return;
+	};
+}
+
+/*
+ pool_take_dns - process DNS query for pool.
+ */
+void
+pool_take_dns(
+	struct peer *pool,	/* pool solicitor association */
+	struct addrinfo *ai	/* answer from getaddrinfo */
+	)
+{
 	struct pkt		xpkt;	/* transmit packet structure */
-	struct addrinfo		hints;
-	int			rc;
 	endpt *			lcladr;
 	sockaddr_u *		rmtadr;
 	int			restrict_mask;
 	struct peer *		p;
 	l_fp			xmt_tx;
 
-	if (NULL == pool->ai) {
-		if (pool->addrs != NULL) {
-			/* free() is used with copy_addrinfo_list() */
-			free(pool->addrs);
-			pool->addrs = NULL;
-		}
-		ZERO(hints);
-		hints.ai_family = AF(&pool->srcadr);
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_protocol = IPPROTO_UDP;
-		/* ignore getaddrinfo_sometime() errors, we will retry */
-		rc = getaddrinfo_sometime(
-			pool->hostname,
-			"ntp",
-			&hints,
-			0,			/* no retry */
-			&pool_name_resolved,
-			(void *)(intptr_t)pool->associd);
-		if (!rc)
-			DPRINTF(1, ("pool DNS lookup %s started\n",
-				pool->hostname));
-		else
-			msyslog(LOG_ERR,
-				"unable to start pool DNS %s %m",
-				pool->hostname);
-		return;
-	}
-
-	do {
-		/* copy_addrinfo_list ai_addr points to a sockaddr_u */
-		rmtadr = (sockaddr_u *)(void *)pool->ai->ai_addr;
-		pool->ai = pool->ai->ai_next;
+	for ( ; NULL != ai; ai = ai->ai_next)  {
+		rmtadr = (sockaddr_u *)(void *)ai->ai_addr;
+msyslog(LOG_INFO, "Pool checking: %s", socktoa(rmtadr));
 		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
-	} while (p != NULL && pool->ai != NULL);
-	if (p != NULL)
-		return;	/* out of addresses, re-query DNS next poll */
-	restrict_mask = restrictions(rmtadr);
-	if (RES_FLAGS & restrict_mask)
-		restrict_source(rmtadr, false,
+		if (NULL != p) continue;  /* already in use */
+
+msyslog(LOG_INFO, "Pool trying: %s", socktoa(rmtadr));
+		restrict_mask = restrictions(rmtadr);
+		/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
+		if (RES_FLAGS & restrict_mask)
+			restrict_source(rmtadr, false,
 				current_time + POOL_SOLICIT_WINDOW + 1);
-	lcladr = findinterface(rmtadr);
-	memset(&xpkt, 0, sizeof(xpkt));
-	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, pool->version,
+		lcladr = findinterface(rmtadr);
+		memset(&xpkt, 0, sizeof(xpkt));
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, pool->version,
 					 MODE_CLIENT);
-	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
-	xpkt.ppoll = pool->hpoll;
-	xpkt.precision = sys_precision;
-	xpkt.refid = sys_refid;
-	xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
-	xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
-	xpkt.reftime = htonl_fp(sys_reftime);
-	get_systime(&xmt_tx);
-	pool->org = xmt_tx;
-	xpkt.xmt = htonl_fp(xmt_tx);
-	sendpkt(rmtadr, lcladr, &xpkt, LEN_PKT_NOMAC);
-	pool->sent++;
-	pool->throttle += (1 << pool->minpoll) - 2;
-#ifdef DEBUG
-	if (debug)
-		printf("transmit: at %lu %s->%s pool\n",
-		    current_time, latoa(lcladr), socktoa(rmtadr));
-#endif
-	msyslog(LOG_INFO, "Soliciting pool server %s", socktoa(rmtadr));
-#endif	/* USE_WORKER */
+		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+		xpkt.ppoll = pool->hpoll;
+		xpkt.precision = sys_precision;
+		xpkt.refid = sys_refid;
+		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
+		xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
+		xpkt.reftime = htonl_fp(sys_reftime);
+		get_systime(&xmt_tx);
+		pool->org = xmt_tx;
+		xpkt.xmt = htonl_fp(xmt_tx);
+		sendpkt(rmtadr, lcladr, &xpkt, LEN_PKT_NOMAC);
+		pool->sent++;
+		pool->throttle += (1 << pool->minpoll) - 2;
+
+		DPRINTF(1, ("transmit: at %ld %s->%s pool\n",
+		    current_time, latoa(lcladr), socktoa(rmtadr)));
+		msyslog(LOG_INFO, "Soliciting pool server %s", socktoa(rmtadr));
+	};
 }
-
-
-#ifdef USE_WORKER
-void
-pool_name_resolved(
-	int			rescode,
-	int			gai_errno,
-	void *			context,
-	const char *		name,
-	const char *		service,
-	const struct addrinfo *	hints,
-	const struct addrinfo *	res
-	)
-{
-	struct peer *	pool;	/* pool solicitor association */
-	associd_t	assoc;
-
-	UNUSED_ARG(gai_errno);
-	UNUSED_ARG(service);
-	UNUSED_ARG(hints);
-
-	if (rescode) {
-		msyslog(LOG_ERR,
-			"error resolving pool %s: %s (%d)",
-			name, gai_strerror(rescode), rescode);
-		return;
-	}
-
-	assoc = (associd_t)(intptr_t)context;
-	pool = findpeerbyassoc(assoc);
-	if (NULL == pool) {
-		msyslog(LOG_ERR,
-			"Could not find assoc %u for pool DNS %s",
-			assoc, name);
-		return;
-	}
-	DPRINTF(1, ("pool DNS %s completed\n", name));
-	pool->addrs = copy_addrinfo_list(res);
-	pool->ai = pool->addrs;
-	pool_xmit(pool);
-
-}
-#endif	/* USE_WORKER */
 
 
 /*

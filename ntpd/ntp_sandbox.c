@@ -356,6 +356,7 @@ int scmp_sc[] = {
 	SCMP_SYS(clone),	/* threads */
 	SCMP_SYS(exit),
 	SCMP_SYS(futex),	/* sem_xxx */
+	SCMP_SYS(kill),		/* generate signal */
 	SCMP_SYS(madvise),
 	SCMP_SYS(mprotect),
 	SCMP_SYS(set_robust_list),

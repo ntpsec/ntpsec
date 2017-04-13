@@ -16,7 +16,6 @@
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
 #include "ntp_control.h"
-#include "ntp_intres.h"
 #include "recvbuff.h"
 
 /*
@@ -154,6 +153,7 @@ extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
 				 uint8_t, uint8_t, u_int, uint8_t, uint32_t,
 				 keyid_t, const bool);
+extern	void	peer_update_hash (struct peer *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	void	peer_reset	(struct peer *);
@@ -235,6 +235,11 @@ extern l_fp	fetch_packetstamp(struct recvbuf *, struct msghdr *, l_fp);
  */
 #define MOREDEBUGSIG	SIGUSR1
 #define LESSDEBUGSIG	SIGUSR2
+
+/* Signal we use for DNS completion
+ * No (forked) children so this should be unused.
+ */
+#define SIGDNS	SIGCHLD
 
 /*
  * Last half: ntpd variables
@@ -417,6 +422,7 @@ extern u_long	use_stattime;		/* time since reset */
 /* Signalling */
 extern volatile bool sawALRM;
 extern volatile bool sawHUP;
+extern volatile bool sawDNS;
 extern volatile bool sawQuit;		/* SIGQUIT, SIGINT, SIGTERM */
 extern sigset_t blockMask;
 

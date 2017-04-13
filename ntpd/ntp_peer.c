@@ -9,6 +9,7 @@
 #include "ntpd.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
+#include "ntp_dns.h"
 
 /*
  *		    Table of valid association combinations
@@ -473,9 +474,6 @@ free_peer(
 	if (p->hostname != NULL)
 		free(p->hostname);
 
-	if (p->addrs != NULL)
-		free(p->addrs);		/* from copy_addrinfo_list() */
-
 	/* Add his corporeal form to peer free list */
 	ZERO(*p);
 	LINK_SLIST(peer_free, p, p_link);
@@ -491,6 +489,7 @@ unpeer(
 	struct peer *peer
 	)
 {
+	dns_cancel(peer);
 	mprintf_event(PEVNT_DEMOBIL, peer, "assoc %u", peer->associd);
 	restrict_source(&peer->srcadr, true, 0);
 	set_peerdstadr(peer, NULL);
@@ -623,7 +622,7 @@ newpeer(
 	uint8_t		maxpoll,
 	u_int		flags,
 	uint8_t		cast_flags,
-	uint32_t		ttl,
+	uint32_t	ttl,
 	keyid_t		key,
 	bool		initializing1
 	)
@@ -631,10 +630,8 @@ newpeer(
 	struct peer *	peer;
 	u_int		hash;
 
-	/*
-	 * For now only pool associations have a hostname.
-	 */
-	NTP_INSIST(NULL == hostname || (MDF_POOL & cast_flags));
+msyslog(LOG_INFO, "newpeer: addr:%s, name:%s, flags:%x",
+  socktoa(srcadr), hostname, cast_flags);
 
 	/*
 	 * First search from the beginning for an association with given
@@ -756,9 +753,11 @@ newpeer(
 	/*
 	 * Put the new peer in the hash tables.
 	 */
-	hash = NTP_HASH_ADDR(&peer->srcadr);
-	LINK_SLIST(peer_hash[hash], peer, adr_link);
-	peer_hash_count[hash]++;
+	if (FLAG_DNS && flags) {
+		hash = NTP_HASH_ADDR(&peer->srcadr);
+		LINK_SLIST(peer_hash[hash], peer, adr_link);
+		peer_hash_count[hash]++;
+	}
 	hash = peer->associd & NTP_HASH_MASK;
 	LINK_SLIST(assoc_hash[hash], peer, aid_link);
 	assoc_hash_count[hash]++;
@@ -773,6 +772,14 @@ newpeer(
 	return peer;
 }
 
+void peer_update_hash (struct peer *peer)
+{
+	u_int	hash;
+
+	hash = NTP_HASH_ADDR(&peer->srcadr);
+	LINK_SLIST(peer_hash[hash], peer, adr_link);
+	peer_hash_count[hash]++;
+}
 
 /*
  * peer_clr_stats - clear peer module statistics counters

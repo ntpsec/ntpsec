@@ -32,6 +32,7 @@
 #include "ntp_stdlib.h"
 #include "lib_strbuf.h"
 #include "ntp_assert.h"
+#include "ntp_dns.h"
 
 /*
  * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
@@ -130,13 +131,6 @@ static struct masks logcfg_class_items[] = {
 	{ NULL,			0 }
 };
 
-typedef struct peer_resolved_ctx_tag {
-	int		host_mode;	/* T_* token identifier */
-	u_short		family;
-	uint8_t		hmode;		/* MODE_* */
-	struct peer_ctl	ctl;
-} peer_resolved_ctx;
-
 /* Limits */
 #define MAXPHONE	10	/* maximum number of phone strings */
 /* #define MAXPPS	20	* maximum length of PPS device string UNUSED */
@@ -200,7 +194,7 @@ static void free_auth_node(config_tree *);
 static void free_all_config_trees(void);
 
 static struct peer *peer_config(sockaddr_u *, const char *,
-				 endpt *, uint8_t, struct peer_ctl *);
+				 endpt *, int, struct peer_ctl *);
 
 static void free_config_access(config_tree *);
 static void free_config_auth(config_tree *);
@@ -287,16 +281,6 @@ static void config_peers(config_tree *);
 static void config_unpeers(config_tree *);
 static void config_nic_rules(config_tree *, bool input_from_file);
 static void config_reset_counters(config_tree *);
-static uint8_t get_correct_host_mode(int token);
-
-#ifdef USE_WORKER
-static void peer_name_resolved(int, int, void *, const char *, const char *,
-			const struct addrinfo *,
-			const struct addrinfo *);
-static void unpeer_name_resolved(int, int, void *, const char *, const char *,
-			  const struct addrinfo *,
-			  const struct addrinfo *);
-#endif
 
 enum gnn_type {
 	t_UNK,		/* Unknown */
@@ -307,8 +291,7 @@ enum gnn_type {
 static uint32_t get_pfxmatch(const char **, struct masks *);
 static uint32_t get_match(const char *, struct masks *);
 static uint32_t get_logmask(const char *);
-static int getnetnum(const char *num, sockaddr_u *addr, int complain,
-		     enum gnn_type a_type);
+static int getnetnum(const char *num, sockaddr_u *addr);
 
 
 /* FUNCTIONS FOR INITIALIZATION
@@ -1733,7 +1716,7 @@ config_access(
 			AF(&addr) = (u_short)my_node->addr->type;
 
 			if (getnetnum(my_node->addr->address,
-				      &addr, 1, t_UNK) != 1) {
+				      &addr) != 1) {
 				/*
 				 * Attempt a blocking lookup.  This
 				 * is in violation of the nonblocking
@@ -1780,7 +1763,7 @@ config_access(
 				ZERO_SOCK(&mask);
 				AF(&mask) = my_node->mask->type;
 				if (getnetnum(my_node->mask->address,
-					      &mask, 1, t_MSK) != 1) {
+					      &mask) != 1) {
 					msyslog(LOG_ERR,
 						"restrict: ignoring line %d, mask '%s' unusable.",
 						my_node->line_no,
@@ -2313,7 +2296,7 @@ config_fudge(
 		 */
 		addr_node = curr_fudge->addr;
 		ZERO_SOCK(&addr_sock);
-		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF)
+		if (getnetnum(addr_node->address, &addr_sock)
 		    != 1) {
 			err_flag = true;
 			msyslog(LOG_ERR,
@@ -2564,30 +2547,40 @@ peer_config(
 	sockaddr_u *	srcadr,
 	const char *	hostname,
 	endpt *		dstadr,
-	uint8_t		hmode,
+	int		htype,
 	struct peer_ctl  *ctl)
 {
 	uint8_t cast_flags;
+	uint8_t hmode;
 
 	/*
 	 * We do a dirty little jig to figure the cast flags. This is
 	 * probably not the best place to do this, at least until the
 	 * configure code is rebuilt. Note only one flag can be set.
 	 */
-	switch (hmode) {
-	case MODE_BROADCAST:
+	switch (htype) {
+	case T_Broadcast:
 		cast_flags = MDF_BCAST;
+		hmode = MODE_BROADCAST;
 		break;
 
-	case MODE_CLIENT:
-		if (hostname != NULL && SOCK_UNSPEC(srcadr))
-			cast_flags = MDF_POOL;
-		else
-			cast_flags = MDF_UCAST;
+	case T_Pool:
+		cast_flags = MDF_POOL;
+		hmode = MODE_CLIENT;
+		ctl->flags &= ~FLAG_PREEMPT;
+		break;
+
+	case T_Server:
+		cast_flags = MDF_UCAST;
+		hmode = MODE_CLIENT;
+		if (NULL != hostname)
+			ctl->flags |= FLAG_DNS;
 		break;
 
 	default:
+msyslog(LOG_ERR, "peer_config, strange htype: %d", htype);
 		cast_flags = MDF_UCAST;
+		hmode = MODE_CLIENT;
 	}
 
 	/*
@@ -2600,32 +2593,11 @@ peer_config(
 	ctl->flags |= FLAG_CONFIG;
 	if (mode_ntpdate)
 		ctl->flags |= FLAG_IBURST;
-	if (MDF_POOL & cast_flags)
-		ctl->flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
 		       ctl->minpoll, ctl->maxpoll, (u_int)ctl->flags,
 		       cast_flags, ctl->ttl, ctl->peerkey, true);
 }
 
-static uint8_t
-get_correct_host_mode(
-	int token
-	)
-{
-	switch (token) {
-
-	case T_Server:
-	case T_Pool:
-	case T_Peer:
-		return MODE_CLIENT;
-
-	case T_Broadcast:
-		return MODE_BROADCAST;
-
-	default:
-		return 0;
-	}
-}
 
 static void
 config_peers(
@@ -2633,10 +2605,7 @@ config_peers(
 	)
 {
     sockaddr_u		peeraddr;
-    struct addrinfo		hints;
     peer_node *		curr_peer;
-    peer_resolved_ctx *	ctx;
-    uint8_t			hmode;
 
     /* add servers named on the command line with iburst implied */
     for ( ; cmdline_server_count > 0;
@@ -2664,37 +2633,16 @@ config_peers(
 				&peeraddr,
 				NULL,
 				NULL,
-				MODE_CLIENT,
+				T_Server,
 				&client_ctl);
 	    } else {
 		/* we have a hostname to resolve */
-# ifdef USE_WORKER
-		ctx = emalloc_zero(sizeof(*ctx));
-		ctx->family = AF_UNSPEC;
-		ctx->host_mode = T_Server;
-		ctx->hmode = MODE_CLIENT;
-		ctx->ctl.flags   = FLAG_IBURST;
-		ctx->ctl.maxpoll = NTP_MAXPOLL_UNK;
-		ctx->ctl.minpoll = NTP_MINDPOLL;
-		ctx->ctl.peerkey = 0;
-		ctx->ctl.ttl     = 0;
-		ctx->ctl.version = NTP_VERSION;
-
-		ZERO(hints);
-		hints.ai_family = (u_short)ctx->family;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_protocol = IPPROTO_UDP;
-
-		getaddrinfo_sometime(*cmdline_servers,
-				     "ntp", &hints,
-				     INITIAL_DNS_RETRY,
-				     &peer_name_resolved,
-				     (void *)ctx);
-# else	/* !USE_WORKER follows */
-		msyslog(LOG_ERR,
-		    "hostname %s can not be used (%s), use IP address instead.",
-		    curr_peer->addr->address, gai_strerror(a_info));
-# endif
+		peer_config(
+			&peeraddr,
+			*cmdline_servers,
+			NULL,
+			T_Server,
+			&client_ctl);
 	    }
     }
 
@@ -2702,9 +2650,6 @@ config_peers(
     curr_peer = HEAD_PFIFO(ptree->peers);
     for (; curr_peer != NULL; curr_peer = curr_peer->link) {
 	ZERO_SOCK(&peeraddr);
-	/* Find the correct host-mode */
-	hmode = get_correct_host_mode(curr_peer->host_mode);
-	INSIST(hmode != 0);
 
 	if (T_Pool == curr_peer->host_mode) {
 	    AF(&peeraddr) = curr_peer->addr->type;
@@ -2712,7 +2657,7 @@ config_peers(
 		    &peeraddr,
 		    curr_peer->addr->address,
 		    NULL,
-		    hmode,
+		    curr_peer->host_mode,
 		    &curr_peer->ctl);
 	/*
 	 * If we have a numeric address, we can safely
@@ -2733,7 +2678,7 @@ config_peers(
 			&peeraddr,
 			NULL,
 			NULL,
-			hmode,
+			curr_peer->host_mode,
 			&curr_peer->ctl);
 		if ( NULL == peer )
 		{
@@ -2785,108 +2730,18 @@ config_peers(
 		}
 
 	    }
-	/*
-	 * synchronous lookup may be forced.
-	 */
+	/* DNS lookup */
 	} else {
-	    /* hand the hostname off to the blocking child */
-# ifdef USE_WORKER
-	    ctx = emalloc_zero(sizeof(*ctx));
-	    ctx->family = curr_peer->addr->type;
-	    ctx->host_mode = curr_peer->host_mode;
-	    ctx->hmode = hmode;
-	    ctx->ctl = curr_peer->ctl;
-
-	    ZERO(hints);
-	    hints.ai_family = ctx->family;
-	    hints.ai_socktype = SOCK_DGRAM;
-	    hints.ai_protocol = IPPROTO_UDP;
-
-	    getaddrinfo_sometime(curr_peer->addr->address,
-				 "ntp", &hints,
-				 INITIAL_DNS_RETRY,
-				 &peer_name_resolved, ctx);
-# else	/* !USE_WORKER follows */
-	    msyslog(LOG_ERR,
-		"hostname %s can not be used, please use IP address instead.",
-		curr_peer->addr->address);
-# endif
+	    AF(&peeraddr) = curr_peer->addr->type;
+	    peer_config(
+		&peeraddr,
+		curr_peer->addr->address,
+		NULL,
+		curr_peer->host_mode,
+		&curr_peer->ctl);
 	}
     }
 }
-
-/*
- * peer_name_resolved()
- *
- * Callback invoked when config_peers()'s DNS lookup completes.
- */
-#ifdef USE_WORKER
-static void
-peer_name_resolved(
-	int			rescode,
-	int			gai_errno,
-	void *			context,
-	const char *		name,
-	const char *		service,
-	const struct addrinfo *	hints,
-	const struct addrinfo *	res
-	)
-{
-	sockaddr_u		peeraddr;
-	peer_resolved_ctx *	ctx;
-	u_short			af;
-	const char *		fam_spec;
-
-	(void)gai_errno;
-	(void)service;
-	(void)hints;
-	ctx = context;
-
-	DPRINTF(1, ("peer_name_resolved(%s) rescode %d\n", name, rescode));
-
-	if (rescode) {
-#ifndef ENABLE_DNS_RETRY
-		free(ctx);
-		msyslog(LOG_ERR,
-			"giving up resolving host %s: %s (%d)",
-			name, gai_strerror(rescode), rescode);
-#else	/* ENABLE_DNS_RETRY follows */
-		getaddrinfo_sometime(name, service, hints,
-				     INITIAL_DNS_RETRY,
-				     &peer_name_resolved, context);
-#endif
-		return;
-	}
-
-	/* Loop to configure a single association */
-	for (; res != NULL; res = res->ai_next) {
-		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-		if (is_sane_resolved_address(&peeraddr,
-					     ctx->host_mode)) {
-			NLOG(NLOG_SYSINFO) {
-				af = ctx->family;
-				fam_spec = (AF_INET6 == af)
-					       ? "(AAAA) "
-					       : (AF_INET == af)
-						     ? "(A) "
-						     : "";
-				msyslog(LOG_INFO, "DNS %s %s-> %s",
-					name, fam_spec,
-					socktoa(&peeraddr));
-			}
-			peer_config(
-				&peeraddr,
-				NULL,
-				NULL,
-				ctx->hmode,
-				&ctx->ctl);
-			break;
-		}
-	}
-	free(ctx);
-}
-#endif	/* USE_WORKER */
-
 
 static void
 free_config_peers(
@@ -2915,7 +2770,6 @@ config_unpeers(
 	)
 {
 	sockaddr_u		peeraddr;
-	struct addrinfo		hints;
 	unpeer_node *		curr_unpeer;
 	struct peer *		p;
 	const char *		name;
@@ -2947,7 +2801,7 @@ config_unpeers(
 		ZERO(peeraddr);
 		AF(&peeraddr) = curr_unpeer->addr->type;
 		name = curr_unpeer->addr->address;
-		rc = getnetnum(name, &peeraddr, 0, t_UNK);
+		rc = getnetnum(name, &peeraddr);
 		/* Do we have a numeric address? */
 		if (rc > 0) {
 			DPRINTF(1, ("unpeer: searching for %s\n",
@@ -2962,94 +2816,15 @@ config_unpeers(
 
 			continue;
 		}
-		/*
-		 * It's not a numeric IP address, it's a hostname.
-		 * Check for associations with a matching hostname.
-		 */
-		for (p = peer_list; p != NULL; p = p->p_link)
-			if (p->hostname != NULL)
-				if (!strcasecmp(p->hostname, name))
-					break;
+		/* It's not a numeric IP address, it's a hostname. */
+		p = findexistingpeer(NULL, name, NULL, -1);
 		if (p != NULL) {
 			msyslog(LOG_NOTICE, "unpeered %s", name);
 			peer_clear(p, "GONE", true);
 			unpeer(p);
 		}
-		/* Resolve the hostname to address(es). */
-# ifdef USE_WORKER
-		ZERO(hints);
-		hints.ai_family = curr_unpeer->addr->type;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_protocol = IPPROTO_UDP;
-		getaddrinfo_sometime(name, "ntp", &hints,
-				     INITIAL_DNS_RETRY,
-				     &unpeer_name_resolved, NULL);
-# else	/* !USE_WORKER follows */
-		msyslog(LOG_ERR,
-			"hostname %s can not be used, please use IP address instead.",
-			name);
-# endif
 	}
 }
-
-
-/*
- * unpeer_name_resolved()
- *
- * Callback invoked when config_unpeers()'s DNS lookup completes.
- */
-#ifdef USE_WORKER
-static void
-unpeer_name_resolved(
-	int			rescode,
-	int			gai_errno,
-	void *			context,
-	const char *		name,
-	const char *		service,
-	const struct addrinfo *	hints,
-	const struct addrinfo *	res
-	)
-{
-	sockaddr_u	peeraddr;
-	struct peer *	peer;
-	u_short		af;
-	const char *	fam_spec;
-
-	(void)gai_errno;
-	(void)context;
-	(void)service;
-	(void)hints;
-	DPRINTF(1, ("unpeer_name_resolved(%s) rescode %d\n", name, rescode));
-
-	if (rescode) {
-		msyslog(LOG_ERR, "giving up resolving unpeer %s: %s (%d)",
-			name, gai_strerror(rescode), rescode);
-		return;
-	}
-	/*
-	 * Loop through the addresses found
-	 */
-	for (; res != NULL; res = res->ai_next) {
-		INSIST(res->ai_addrlen <= sizeof(peeraddr));
-		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-		DPRINTF(1, ("unpeer: searching for peer %s\n",
-			    socktoa(&peeraddr)));
-		peer = findexistingpeer(&peeraddr, NULL, NULL, -1);
-		if (peer != NULL) {
-			af = AF(&peeraddr);
-			fam_spec = (AF_INET6 == af)
-				       ? "(AAAA) "
-				       : (AF_INET == af)
-					     ? "(A) "
-					     : "";
-			msyslog(LOG_NOTICE, "unpeered %s %s-> %s", name,
-				fam_spec, socktoa(&peeraddr));
-			peer_clear(peer, "GONE", true);
-			unpeer(peer);
-		}
-	}
-}
-#endif	/* USE_WORKER */
 
 
 static void
@@ -3560,13 +3335,9 @@ gettokens_netinfo (
 static int
 getnetnum(
 	const char *num,
-	sockaddr_u *addr,
-	int complain,
-	enum gnn_type a_type	/* ignored */
+	sockaddr_u *addr
 	)
 {
-	UNUSED_ARG(complain);
-	UNUSED_ARG(a_type);
 
 	NTP_REQUIRE(AF_UNSPEC == AF(addr) ||
 		    AF_INET == AF(addr) ||

@@ -157,11 +157,6 @@ USE_SCM_BINTIME		# to grab timestamp for recv packet
 USE_SCM_TIMESTAMP	# "
 USE_SCM_TIMESTAMPNS	# "
 
-USE_WORKER		# Asynchronous DNS available, needs pthreads
-USE_WORK_PIPE		# Set in ntp_workimpl.h
-USE_WORK_THREAD
-
-
 USE_IPV6_MULTICAST_SUPPORT
 USE_LIFC_FAMILY
 USE_LIFC_FLAGS

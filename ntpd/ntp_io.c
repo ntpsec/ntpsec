@@ -18,8 +18,8 @@
 #include "ntp_lists.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
-#include "ntp_worker.h"
 #include "ntp_assert.h"
+#include "ntp_dns.h"
 #include "timespecops.h"
 
 #include <isc/mem.h>
@@ -246,12 +246,12 @@ static void		calc_addr_distance(sockaddr_u *,
 					   const sockaddr_u *);
 static int		cmp_addr_distance(const sockaddr_u *,
 					  const sockaddr_u *);
+static void		maintain_activefds(int fd, bool closing);
 
 /*
  * Routines to read the ntp packets
  */
 static inline int	read_network_packet	(SOCKET, endpt *, l_fp);
-static void ntpd_addremove_io_fd (int, int, int);
 static void input_handler (fd_set *, l_fp *);
 #ifdef REFCLOCK
 static int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
@@ -262,13 +262,14 @@ static int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
  */
 volatile bool sawALRM = false;
 volatile bool sawHUP = false;
+volatile bool sawDNS = false;
 volatile bool sawQuit = false;  /* SIGQUIT, SIGINT, SIGTERM */
 sigset_t blockMask;
 
 void
 maintain_activefds(
 	int fd,
-	int closing
+	bool closing
 	)
 {
 	int i;
@@ -374,23 +375,6 @@ init_io(void)
 	sigaddset(&blockMask, SIGTERM);
 	sigaddset(&blockMask, SIGHUP);
 
-
-#ifdef USE_WORK_PIPE
-	addremove_io_fd = &ntpd_addremove_io_fd;
-#endif
-}
-
-
-static void
-ntpd_addremove_io_fd(
-	int	fd,
-	int	is_pipe,
-	int	remove_it
-	)
-{
-	UNUSED_ARG(is_pipe);
-
-	maintain_activefds(fd, remove_it);
 }
 
 
@@ -1262,7 +1246,7 @@ interface_update(
 #ifdef DEBUG
 	msyslog(LOG_DEBUG, "new interface(s) found: waking up resolver");
 #endif
-	interrupt_worker_sleep();
+	dns_new_interface();
 }
 
 
@@ -2396,7 +2380,7 @@ io_handler(void)
 	 * reception of input.
 	 */
 	pthread_sigmask(SIG_BLOCK, &blockMask, &runMask);
-	flag = sawALRM || sawQuit || sawHUP;
+	flag = sawALRM || sawQuit || sawHUP || sawDNS;
 	if (!flag) {
 	  rdfdes = activefds;
 	  nfound = pselect(maxactivefd+1, &rdfdes, NULL, NULL, NULL, &runMask);
@@ -2409,11 +2393,6 @@ io_handler(void)
 	if (nfound > 0) {
 		l_fp ts;
 
-		/*
-		 * Doesn't need to be intercepted, because the time
-		 * algorithms don't use it.  It's strictly internal
-		 * to the I/O handling.
-		 */
 		get_systime(&ts);
 
 		input_handler(&rdfdes, &ts);
@@ -2439,7 +2418,6 @@ input_handler(
 	)
 {
 	int		buflen;
-	u_int		idx;
 	int		doing;
 	SOCKET		fd;
 	l_fp		ts;	/* Timestamp at BOselect() gob */
@@ -2551,19 +2529,6 @@ input_handler(
 		asyncio_reader = next_asyncio_reader;
 	}
 #endif /* USE_ROUTING_SOCKET */
-
-	/*
-	 * Check for a response from a blocking child
-	 */
-	for (idx = 0; idx < blocking_children_alloc; idx++) {
-		blocking_child *c = blocking_children[idx];
-		if (NULL == c || -1 == c->resp_read_pipe)
-			continue;
-		if (FD_ISSET(c->resp_read_pipe, fds)) {
-			select_count++;
-			process_blocking_resp(c);
-		}
-	}
 
 	/*
 	 * Done everything from that select.
@@ -3089,24 +3054,6 @@ io_closeclock(
 #endif	/* REFCLOCK */
 
 
-void
-kill_asyncio(
-	int	startfd
-	)
-{
-	UNUSED_ARG(startfd);
-
-	/*
-	 * In the child process we do not maintain activefds and
-	 * maxactivefd.  Zeroing maxactivefd disables code which
-	 * maintains it in close_and_delete_fd_from_list().
-	 */
-	maxactivefd = 0;
-
-	while (fd_list != NULL)
-		close_and_delete_fd_from_list(fd_list->fd);
-}
-
 /*
  * Add and delete functions for the list of open sockets
  */
@@ -3122,7 +3069,7 @@ add_fd_to_list(
 	lsock->type = type;
 
 	LINK_SLIST(fd_list, lsock, link);
-	maintain_activefds(fd, 0);
+	maintain_activefds(fd, false);
 }
 
 
@@ -3160,7 +3107,7 @@ close_and_delete_fd_from_list(
 	/*
 	 * remove from activefds
 	 */
-	maintain_activefds(fd, 1);
+	maintain_activefds(fd, true);
 }
 
 

@@ -45,7 +45,6 @@ static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
 static	u_long leapf_timer;	/* Report leapfile problems once/day */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
-static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
 u_int	leap_smear_intv;	/* Duration of smear.  Enables smear mode. */
 int	leapdif;		/* TAI difference step at next leap second*/
@@ -169,27 +168,6 @@ init_timer(void)
 }
 
 
-/*
- * intres_timeout_req(s) is invoked in the parent to schedule an idle
- * timeout to fire in s seconds, if not reset earlier by a call to
- * intres_timeout_req(0), which clears any pending timeout.  When the
- * timeout expires, worker_idle_timer_fired() is invoked (again, in the
- * parent).
- *
- * ntpdig and ntpd each provide implementations adapted to their timers.
- */
-void
-intres_timeout_req(
-	u_int	seconds		/* 0 cancels */
-	)
-{
-	if (0 == seconds) {
-		worker_idle_timer = 0;
-		return;
-	}
-	worker_idle_timer = current_time + seconds;
-}
-
 
 /*
  * timer - event timer
@@ -303,9 +281,6 @@ timer(void)
 		DPRINTF(2, ("timer: interface update\n"));
 		interface_update(NULL, NULL);
 	}
-
-	if (worker_idle_timer && worker_idle_timer <= current_time)
-		worker_idle_timer_fired();
 
 	/*
 	 * Finally, write hourly stats and do the hourly
