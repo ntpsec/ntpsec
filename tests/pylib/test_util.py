@@ -315,8 +315,6 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f("1.234", nu.UNIT_MS, width=12), "     1.234ms")
         # Outside of available units
         self.assertEqual(f("1234.5", nu.UNIT_KS), "1234.5ks")
-        # Seconds
-        self.assertEqual(f("42.23", nu.UNIT_S), "  42.23s")
 
     def test_stringfiltcooker(self):
         # No scale
