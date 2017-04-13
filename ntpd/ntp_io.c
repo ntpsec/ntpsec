@@ -475,7 +475,8 @@ sockaddr_dump(const sockaddr_u *psau)
 static void
 print_interface(const endpt *iface, const char *pfx, const char *sfx)
 {
-	printf("%sinterface #%d: fd=%d, bfd=%d, name=%s, flags=0x%x, ifindex=%u, sin=%s",
+	printf("%sinterface #%u: fd=%d, bfd=%d, name=%s, "
+               "flags=0x%x, ifindex=%u, sin=%s",
 	       pfx,
 	       iface->ifnum,
 	       iface->fd,
@@ -758,7 +759,9 @@ remove_interface(
 
 	if (ep->fd != INVALID_SOCKET) {
 		msyslog(LOG_INFO,
-			"Deleting interface #%d %s, %s#%d, interface stats: received=%ld, sent=%ld, dropped=%ld, active_time=%ld secs",
+			"Deleting interface #%u %s, %s#%d, interface stats: "
+                        "received=%ld, sent=%ld, dropped=%ld, "
+                        "active_time=%lu secs",
 			ep->ifnum,
 			ep->name,
 			socktoa(&ep->sin),
@@ -773,7 +776,8 @@ remove_interface(
 
 	if (ep->bfd != INVALID_SOCKET) {
 		msyslog(LOG_INFO,
-			"stop listening for broadcasts to %s on interface #%d %s",
+			"stop listening for broadcasts to %s "
+                        "on interface #%u %s",
 			socktoa(&ep->bcast), ep->ifnum, ep->name);
 		close_and_delete_fd_from_list(ep->bfd);
 		ep->bfd = INVALID_SOCKET;
@@ -795,7 +799,7 @@ log_listen_address(
 	endpt *	ep
 	)
 {
-	msyslog(LOG_INFO, "%s on %d %s %s",
+	msyslog(LOG_INFO, "%s on %u %s %s",
 			(ep->ignore_packets)
 			    ? "Listen and drop"
 			    : "Listen normally",
@@ -961,7 +965,7 @@ action_text(
 
 	default:
 		t = "ERROR";	/* quiet uninit warning */
-		DPRINTF(1, ("fatal: unknown nic_rule_action %d\n",
+		DPRINTF(1, ("fatal: unknown nic_rule_action %u\n",
 			    action));
 		NTP_ENSURE(0);
 		break;
@@ -1762,7 +1766,7 @@ create_interface(
 
 	if (INVALID_SOCKET == iface->fd
 	    && INVALID_SOCKET == iface->bfd) {
-		msyslog(LOG_ERR, "unable to create socket on %s (%d) for %s#%d",
+		msyslog(LOG_ERR, "unable to create socket on %s (%u) for %s#%d",
 			iface->name,
 			iface->ifnum,
 			socktoa((&iface->sin)),
@@ -2022,8 +2026,9 @@ open_socket(
 		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char*)&qos,
 			       sizeof(qos)))
 			msyslog(LOG_ERR,
-				"setsockopt IP_TOS (%02x) fails on address %s: %m",
-				qos, socktoa(addr));
+				"setsockopt IP_TOS (%02x) fails on "
+                                "address %s: %m",
+				(unsigned)qos, socktoa(addr));
 		if (bcast)
 			socket_broadcast_enable(interf, fd, addr);
 	}
@@ -2035,9 +2040,9 @@ open_socket(
 #ifdef IPV6_TCLASS
 		if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, (char*)&qos,
 			       sizeof(qos)))
-			msyslog(LOG_ERR,
-				"setsockopt IPV6_TCLASS (%02x) fails on address %s: %m",
-				qos, socktoa(addr));
+			msyslog(LOG_ERR, "setsockopt IPV6_TCLASS (%02x) "
+                                         "fails on address %s: %m",
+				         (unsigned)qos, socktoa(addr));
 #endif /* IPV6_TCLASS */
 		if (isc_net_probe_ipv6only_bool()
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
@@ -2092,7 +2097,7 @@ open_socket(
 	enable_packetstamps(fd);
 #endif /* USE_PACKET_TIMESTAMP */
 	
-	DPRINTF(4, ("bind(%d) AF_INET%s, addr %s%%%d#%d, flags 0x%x\n",
+	DPRINTF(4, ("bind(%d) AF_INET%s, addr %s%%%u#%d, flags 0x%x\n",
 		   fd, IS_IPV6(addr) ? "6" : "", socktoa(addr),
 		   SCOPE(addr), SRCPORT(addr), interf->flags));
 
@@ -2102,7 +2107,8 @@ open_socket(
 
 #ifdef F_GETFL
 	/* F_GETFL may not be defined if the underlying OS isn't really Unix */
-	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd, fcntl(fd, F_GETFL, 0)));
+	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd,
+                    (unsigned)fcntl(fd, F_GETFL, 0)));
 #endif
 
 	return fd;
@@ -2659,7 +2665,7 @@ findinterface(
 
 		iface = ANY_INTERFACE_CHOOSE(addr);
 	} else
-		DPRINTF(4, ("Found interface #%d %s for address %s\n",
+		DPRINTF(4, ("Found interface #%u %s for address %s\n",
 			    iface->ifnum, iface->name, socktoa(addr)));
 
 	return iface;
@@ -2994,7 +3000,7 @@ findbcastinter(
 			    socktoa(addr)));
 		iface = ANY_INTERFACE_CHOOSE(addr);
 	} else {
-		DPRINTF(4, ("Found bcast-/mcast- interface index #%d %s\n",
+		DPRINTF(4, ("Found bcast-/mcast- interface index #%u %s\n",
 			    iface->ifnum, iface->name));
 	}
 
@@ -3194,7 +3200,8 @@ delete_interface_from_list(
 
 		if (unlinked == NULL)
 			break;
-		DPRINTF(4, ("Deleted addr %s for interface #%d %s from list of addresses\n",
+		DPRINTF(4, ("Deleted addr %s for interface #%u %s "
+                            "from list of addresses\n",
 			    socktoa(&unlinked->addr), iface->ifnum,
 			    iface->name));
 		free(unlinked);
