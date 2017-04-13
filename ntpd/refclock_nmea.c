@@ -1566,7 +1566,7 @@ parse_date(
 		break;
 
 	default:
-		DPRINTF(1, ("nmea: invalid parse format: %d\n", fmt));
+		DPRINTF(1, ("nmea: invalid parse format: %u\n", fmt));
 		return false;
 	}
 
