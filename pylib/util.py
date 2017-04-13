@@ -243,11 +243,14 @@ def fitinfield(value, fieldsize):
         newvalue = pad + value
     else:  # Insufficient room, round as few digits as possible
         diff = vallen - fieldsize
-        declen = len(value.split(".")[1])  # length of decimals
+        if "." in value:
+            declen = len(value.split(".")[1])  # length of decimals
+        else:
+            declen = 0
         croplen = min(declen, diff)  # Never round above the decimal point
         roundlen = declen - croplen  # How many digits we round to
         newvalue = str(round(float(value), roundlen))
-        splitted = newvalue.split(".")
+        splitted = newvalue.split(".")  # If this fails something went wrong
         declen = len(splitted[1])
         if roundlen == 0:  # if rounding all the decimals don't display .0
             # but do display the point, to show that there is more beyond
