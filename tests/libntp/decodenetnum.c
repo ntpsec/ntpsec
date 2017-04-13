@@ -1,3 +1,7 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "config.h"
 #include "ntp_stdlib.h"
 
@@ -12,6 +16,18 @@ TEST_TEAR_DOWN(decodenetnum) {}
 
 #include "sockaddrtest.h"
 
+
+TEST(decodenetnum, Services) {
+	const char *str = "/etc/services";
+        int ret;
+
+        /* try to open /etc/services for read */
+        ret = open(str, O_RDONLY);
+	TEST_ASSERT_NOT_EQUAL(-1, ret);
+        if ( -1 != ret) {
+		close(ret);
+        }
+}
 
 TEST(decodenetnum, IPv4AddressOnly) {
 	const char *str = "192.0.2.1";
@@ -28,6 +44,7 @@ TEST(decodenetnum, IPv4AddressOnly) {
 	TEST_ASSERT_TRUE(IsEqualS(&expected, &actual));
 }
 
+/* test with numeric port */
 TEST(decodenetnum, IPv4AddressWithPort) {
 	const char *str = "192.0.2.2:2000";
 	sockaddr_u actual;
@@ -37,6 +54,22 @@ TEST(decodenetnum, IPv4AddressWithPort) {
 	SET_AF(&expected, AF_INET);
 	PSOCK_ADDR4(&expected)->s_addr = inet_addr("192.0.2.2");
 	SET_PORT(&expected, 2000);
+
+	ret = decodenetnum(str, &actual);
+	TEST_ASSERT_EQUAL_INT(0, ret);
+	TEST_ASSERT_TRUE(IsEqualS(&expected, &actual));
+}
+
+/* test for named port */
+TEST(decodenetnum, IPv4AddressWithPort2) {
+	const char *str = "192.168.2.2:ntp";
+	sockaddr_u actual;
+        int ret;
+
+	sockaddr_u expected;
+	SET_AF(&expected, AF_INET);
+	PSOCK_ADDR4(&expected)->s_addr = inet_addr("192.168.2.2");
+	SET_PORT(&expected, 123);
 
 	ret = decodenetnum(str, &actual);
 	TEST_ASSERT_EQUAL_INT(0, ret);
@@ -115,8 +148,10 @@ TEST(decodenetnum, IllegalCharInPort) {
 }
 
 TEST_GROUP_RUNNER(decodenetnum) {
+	RUN_TEST_CASE(decodenetnum, Services);
 	RUN_TEST_CASE(decodenetnum, IPv4AddressOnly);
 	RUN_TEST_CASE(decodenetnum, IPv4AddressWithPort);
+	RUN_TEST_CASE(decodenetnum, IPv4AddressWithPort2);
 	RUN_TEST_CASE(decodenetnum, IPv6AddressOnly);
 	RUN_TEST_CASE(decodenetnum, IPv6AddressWithPort);
 	RUN_TEST_CASE(decodenetnum, IllegalAddress);
