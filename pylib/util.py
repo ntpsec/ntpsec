@@ -11,7 +11,6 @@ import os
 import re
 import shutil
 import collections
-import math
 
 import ntp.ntpc
 import ntp.version
@@ -91,11 +90,6 @@ def portsplit(hostname):
     return (hostname, portsuffix)
 
 
-def zerowiggle(ooms):
-    "Generate a wiggle value for float==0 comparisons"
-    return 10 ** -ooms
-
-
 def stringfiltcooker(data):
     "Cooks a filt* string of space seperated numbers, expects milliseconds"
     parts = data.split()
@@ -121,90 +115,6 @@ def stringfiltcooker(data):
         cooked.append(fitted)
     rendered = " ".join(cooked) + " " + newunit
     return rendered
-
-
-def filtcooker(data):
-    "Cooks the string of space seperated numbers with units"
-    parts = data.split()
-    floatyparts = []
-    oomcount = {}
-    # Find out what the 'natural' unit of each value is
-    for part in parts:
-        part = float(part)
-        floatyparts.append(part)
-        value, oom = scaleforunit(part, oomsbetweenunits(UNIT_MS, UNIT_NS))
-        oomcount[oom] = oomcount.get(oom, 0) + 1
-    # Find the most common unit
-    mostcommon = None
-    highestcount = 0
-    for key in oomcount.keys():
-        count = oomcount[key]
-        if count > highestcount:
-            mostcommon = key
-            highestcount = count
-    newunit = UNITS_SEC[mostcommon + UNIT_MS]
-    oomstobase = (mostcommon * 3) + 6  # 6 == UNIT_MS distance from base
-    # Shift all values to the new unit
-    cooked = []
-    for part in floatyparts:
-        part = rescaleunit(part, mostcommon)
-        fmt = formatdigitsplit(part, 7, oomstobase)
-        temp = fmt % part
-        cooked.append(temp)
-    rendered = " ".join(cooked) + " " + newunit
-    return rendered
-
-
-def rescaleunit(f, units):
-    "Rescale a number by enough orders of magnitude for N units"
-    multiplier = 10 ** (units * 3)
-    f *= multiplier
-    return f
-
-
-def scaleforunit(f, oomstobase):
-    "Scales a number by units to keep it in the range 0.000-999.9"
-    f = round(f, oomstobase)  # pre-round to base unit to filter float folly
-    wiggle = zerowiggle(oomstobase)
-    if -wiggle < f < wiggle:  # if sufficiently close to zero do nothing
-        return (f, 0)
-    unitsmoved = 0
-    af = abs(f)
-    if af < 1.0:
-        oom = math.floor(math.log10(af))
-    else:
-        oom = math.log10(af)  # Orders Of Magnitude
-    oom -= oom % 3  # We only want to move in groups of 3 ooms
-    multiplier = 10 ** -oom  # Reciprocol because floating * more accurate
-    unitsmoved = int(oom // 3)
-    f *= multiplier
-    roundooms = (unitsmoved * 3) + oomstobase
-    f = round(f, roundooms)  # Filter out any float folly we introduced here
-    return (f, unitsmoved)
-
-
-def roundsubzero(f, oomstobase):
-    "Rounds a number at it's base unit"
-    mul = 10 ** oomstobase
-    f *= mul
-    f = round(f)
-    return f
-
-
-def formatdigitsplit(f, fieldsize, oomstobase):
-    "Create a format string for a float without adding fake precision."
-    af = abs(f)
-    if af >= 100.0:
-        maxdigits = fieldsize - 4  # xxx.
-    elif af >= 10.0:
-        maxdigits = fieldsize - 3  # xx.
-    else:
-        maxdigits = fieldsize - 2  # x.
-    if f < 0.0:
-        maxdigits -= 1  # need to fit a negative symbol
-    subdigits = min(oomstobase, maxdigits)  # use min so we don't add fake data
-    formatter = "%" + str(fieldsize) + "." + str(subdigits) + "f"
-    return formatter
 
 
 def getunitgroup(unit):
@@ -423,56 +333,6 @@ def unitify(value, startingunit, baseunit=None, strip=False, width=8):
     return newvalue
 
 
-def unitformatter(f, unitgroup, startingunit, baseunit=None,
-                  strip=False, width=8):
-    "Formatting for unit associated values in N characters."
-    if width is not None:  # For padding to n characters
-        padder = (lambda x: (" " * (width - len(x))) + x)
-    else:
-        strip = True
-    if baseunit is None:
-        baseunit = 0  # Assume that the lowest unit is equal to LSB
-    oomsfrombase = oomsbetweenunits(startingunit, baseunit)
-    wiggle = zerowiggle(oomsfrombase)
-    if -wiggle < f < wiggle:  # Zero, don't show decimals
-        unit = unitgroup[baseunit]  # go all the way to the lsb
-        f = roundsubzero(f, oomsfrombase)
-        rendered = ("%d" % f) + unit
-        if not strip:
-            rendered = padder(rendered)
-        return rendered
-    oldf = f  # keep this in case we don't fit in the units
-    f, unitsmoved = scaleforunit(f, oomsfrombase)
-    unitget = startingunit + unitsmoved
-    oomsfrombase = oomsbetweenunits(unitget, baseunit)  # will need this later
-    if (0 <= unitget < len(unitgroup)):
-        unit = unitgroup[unitget]
-        if width is None:  # Don't care about size, just display everything
-            if unitget == baseunit:  # Don't want fake decimals
-                formatter = "%d"
-                rendered = (formatter % f) + unit
-            else:
-                rendered = repr(f) + unit
-            if strip:
-                rendered = rendered.strip()
-            return rendered
-        else:  # Do care about size, crop value so it will fit
-            displaysize = width - len(unit)
-            if unitget == baseunit:  # Don't want fake decimals
-                formatter = "%" + str(displaysize) + "d"
-            else:
-                formatter = formatdigitsplit(f, displaysize, oomsfrombase)
-            rendered = (formatter % f) + unit
-            if strip:
-                rendered = rendered.strip()
-            return rendered
-    else:  # Out of units so revert to the original. Ugly but there are very
-        rendered = repr(oldf) + unitgroup[startingunit]  # few options here
-        if not strip:
-            rendered = padder(rendered)
-        return rendered
-
-
 def f8dot4(f):
     "Scaled floating point formatting to fit in 8 characters"
     if f >= 0:
@@ -676,7 +536,7 @@ def cook(variables, showunits=False):
             item += "%03lo" % value
         elif name in specials:
             if showunits:
-                item += filtcooker(value)
+                item += stringfiltcooker(value)
             else:
                 item += "\t".join(value.split())
         elif name == "flash":
