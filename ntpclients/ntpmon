@@ -118,9 +118,9 @@ def peer_detail(variables, showunits=False):
                                                ntp.util.UNIT_S,
                                                strip=True,
                                                width=None)
-        vcopy['filtdelay'] = ntp.util.filtcooker(vcopyraw['filtdelay'])
-        vcopy['filtoffset'] = ntp.util.filtcooker(vcopyraw['filtoffset'])
-        vcopy['filtdisp'] = ntp.util.filtcooker(vcopyraw['filtdisp'])
+        vcopy['filtdelay'] = ntp.util.stringfiltcooker(vcopyraw['filtdelay'])
+        vcopy['filtoffset'] = ntp.util.stringfiltcooker(vcopyraw['filtoffset'])
+        vcopy['filtdisp'] = ntp.util.stringfiltcooker(vcopyraw['filtdisp'])
     else:
         vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
         vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
