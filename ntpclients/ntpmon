@@ -69,7 +69,7 @@ def iso8601(t):
 def statline(_peerlist, _mrulist, nyquist):
     "Generate a status line"
     # We don't use stdversion here because the presence of a date is confusing
-    leader = sysvars['version']
+    leader = sysvars['version'][0]
     if span.entries:
         trailer = "Last update: %s (%s)" \
                   % (iso8601(span.entries[0].last),
@@ -86,7 +86,12 @@ def peer_detail(variables, showunits=False):
     # One of the goals here is to emit field values at fixed positions
     # on the 2D display, so that changes in the details are easier to spot.
     vcopy = {}
+    vcopyraw = {}
     vcopy.update(variables)
+    # Need to seperate the casted from the raw
+    for key in vcopy.keys():
+        vcopyraw[key] = vcopy[key][1]
+        vcopy[key] = vcopy[key][0]
     vcopy["leap"] = ("no-leap", "add-leap", "del-leap",
                      "unsync")[vcopy["leap"]]
     for fld in ('xmt', 'rec', 'reftime'):
@@ -97,28 +102,28 @@ def peer_detail(variables, showunits=False):
     if showunits:
         for name in ntp.util.MS_VARS:
             if name in vcopy:
-                vcopy[name] = ntp.util.unitformatter(vcopy[name],
-                                                     ntp.util.UNITS_SEC,
-                                                     ntp.util.UNIT_MS,
-                                                     strip=True,
-                                                     width=None)
+                vcopy[name] = ntp.util.unitify(vcopyraw[name],
+                                               ntp.util.UNITS_SEC,
+                                               ntp.util.UNIT_MS,
+                                               strip=True,
+                                               width=None)
         for name in ntp.util.PPM_VARS:
             if name in vcopy:
-                vcopy[name] = ntp.util.unitformatter(vcopy[name],
-                                                     ntp.util.UNITS_PPX,
-                                                     ntp.util.UNIT_PPM,
-                                                     strip=True,
-                                                     width=None)
+                vcopy[name] = ntp.util.unitify(vcopyraw[name],
+                                               ntp.util.UNITS_PPX,
+                                               ntp.util.UNIT_PPM,
+                                               strip=True,
+                                               width=None)
         for name in ntp.util.S_VARS:
             if name in vcopy:
-                vcopy[name] = ntp.util.unitformatter(vcopy[name],
-                                                     ntp.util.UNITS_SEC,
-                                                     ntp.util.UNIT_S,
-                                                     strip=True,
-                                                     width=None)
-        vcopy['filtdelay'] = ntp.util.filtcooker(vcopy['filtdelay'])
-        vcopy['filtoffset'] = ntp.util.filtcooker(vcopy['filtoffset'])
-        vcopy['filtdisp'] = ntp.util.filtcooker(vcopy['filtdisp'])
+                vcopy[name] = ntp.util.unitify(vcopyraw[name],
+                                               ntp.util.UNITS_SEC,
+                                               ntp.util.UNIT_S,
+                                               strip=True,
+                                               width=None)
+        vcopy['filtdelay'] = ntp.util.filtcooker(vcopyraw['filtdelay'])
+        vcopy['filtoffset'] = ntp.util.filtcooker(vcopyraw['filtoffset'])
+        vcopy['filtdisp'] = ntp.util.filtcooker(vcopyraw['filtdisp'])
     else:
         vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
         vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
@@ -209,7 +214,7 @@ if __name__ == '__main__':
     try:
         session = ntp.packet.ControlSession()
         session.openhost(arguments[0] if arguments else "localhost")
-        sysvars = session.readvar()
+        sysvars = session.readvar(raw=True)
         with OutputContext() as ctx:
             while True:
                 stdscr.clear()
@@ -246,7 +251,8 @@ if __name__ == '__main__':
                                        ntp.control.CTL_PST_REACH))):
                                 continue
                             try:
-                                variables = session.readvar(peer.associd)
+                                variables = session.readvar(peer.associd,
+                                                            raw=True)
                             except ntp.packet.ControlException as e:
                                 raise Fatal(e.message + "\n")
                             except IOError as e:
@@ -304,7 +310,8 @@ if __name__ == '__main__':
                             try:
                                 clockvars = session.readvar(
                                     peers[selected].associd,
-                                    opcode=ntp.control.CTL_OP_READCLOCK)
+                                    opcode=ntp.control.CTL_OP_READCLOCK,
+                                    raw=True)
                                 strconvert = ntp.util.cook(clockvars)
                                 stdscr.addstr(strconvert.encode('UTF-8'))
                             except ntp.packet.ControlException as e:

@@ -317,7 +317,7 @@ usage: help [ command ]
                         self.warn("eliding [%d]\n" % peer.associd)
                     continue
                 try:
-                    variables = self.session.readvar(peer.associd)
+                    variables = self.session.readvar(peer.associd, raw=True)
                 except ntp.packet.ControlException as e:
                     self.warn(e.message + "\n")
                     return
@@ -413,7 +413,7 @@ usage: help [ command ]
     def __dolist(self, varlist, associd, op, type, quiet=False):
         "List variables associated with a specified peer."
         try:
-            variables = self.session.readvar(associd, varlist, op)
+            variables = self.session.readvar(associd, varlist, op, raw=True)
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return False
@@ -474,8 +474,9 @@ usage: timeout [ msec ]
                 items = []
                 for var in varlist:
                     try:
-                        queried = self.session.readvar(associd, [var])
-                        for (name, value) in queried.items():
+                        queried = self.session.readvar(associd, [var],
+                                                       raw=True)
+                        for (name, (value, rawvalue)) in queried.items():
                             items.append((name, value))
                     except ntp.packet.ControlException as e:
                         if ntp.control.CERR_UNKNOWNVAR == e.errorcode:

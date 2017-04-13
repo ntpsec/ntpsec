@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+
 import socket
 import sys
 import time
@@ -360,15 +361,19 @@ def unitify(value, unitgroup, startingunit, baseunit=0,
     if isstringzero(value) is True:  # display highest precision zero
         base = unitgroup[baseunit]
         if strip is False:
-            newvalue = fitinfield("0", width - len(base)) + base
-        return newvalue
+            value = fitinfield("0", width - len(base)) + base
+        return value
     ooms = oomsbetweenunits(startingunit, baseunit)
     newvalue = cropprecision(value, ooms)
     newvalue, unitsmoved = scalestring(newvalue)
     unitget = startingunit + unitsmoved
     if 0 <= unitget < len(unitgroup):  # We have a unit
         unit = unitgroup[unitget]
-        newvalue = fitinfield(newvalue, width - len(unit)) + unit
+        if width is None:
+            realwidth = None
+        else:
+            realwidth = width - len(unit)
+        newvalue = fitinfield(newvalue, realwidth) + unit
     else:  # don't have a replacement unit, use original
         newvalue = value + unitgroup[startingunit]
     if strip is True:
@@ -608,7 +613,7 @@ def cook(variables, showunits=False):
     text = ""
     specials = ("filtdelay", "filtoffset", "filtdisp", "filterror")
     longestspecial = len(max(specials, key=len))
-    for (name, value) in variables.items():
+    for (name, (value, rawvalue)) in variables.items():
         if name in specials:  # need special formatting for column alignment
             formatter = "%" + str(longestspecial) + "s ="
             item = formatter % name
@@ -662,20 +667,20 @@ def cook(variables, showunits=False):
             #   missing variables here.
             #  Completion cannot occur until all units are tracked down.
             if showunits:
-                item += unitformatter(value, UNITS_SEC, UNIT_MS, UNIT_NS,
-                                      True, width=None)
+                item += unitify(rawvalue, UNITS_SEC, UNIT_MS, UNIT_NS,
+                                True, width=None)
             else:
                 item += repr(value)
         elif name in S_VARS:
             if showunits:
-                item += unitformatter(value, UNITS_SEC, UNIT_S, UNIT_NS,
-                                      True, width=None)
+                item += unitify(rawvalue, UNITS_SEC, UNIT_S, UNIT_NS,
+                                True, width=None)
             else:
                 item += repr(value)
         elif name in PPM_VARS:
             if showunits:
-                item += unitformatter(value, UNITS_PPX, UNIT_PPM,
-                                      strip=True, width=None)
+                item += unitify(rawvalue, UNITS_PPX, UNIT_PPM,
+                                strip=True, width=None)
             else:
                 item += repr(value)
         else:
@@ -792,7 +797,7 @@ class PeerSummary:
 
         now = time.time()
 
-        for (name, value) in variables.items():
+        for (name, (value, rawvalue)) in variables.items():
             if name in ("srcadr", "peeradr"):
                 srcadr = value
             elif name == "srchost":
@@ -822,18 +827,18 @@ class PeerSummary:
                 # Shipped as hex, displayed in octal
                 reach = value
             elif name == "delay":
-                estdelay = value
+                estdelay = rawvalue if self.showunits else value
             elif name == "delay-s":
                 if len(value) > 6 and value[-7] == ".":
                     saw6 = True
             elif name == "offset":
-                estoffset = value
+                estoffset = rawvalue if self.showunits else value
             elif name == "jitter":
                 if "jitter" in self.__header:
-                    estjitter = value
+                    estjitter = rawvalue if self.showunits else value
                     have_jitter = True
             elif name == "rootdisp" or name == "dispersion":
-                estdisp = value
+                estdisp = rawvalue if self.showunits else value
             elif name == "rec":
                 # FIXME, rec never used.
                 rec = value     # l_fp timestamp
@@ -912,11 +917,13 @@ class PeerSummary:
             line += (" " * (self.refidwidth - len(visible)))
         # The rest of the story
         last_sync = variables.get("rec") or variables.get("reftime")
+        if isinstance(last_sync, tuple):
+            last_sync = last_sync[0]
         jd = estjitter if have_jitter else estdisp
         try:
             line += (
                 " %2ld %c %4.4s %4.4s  %3lo"
-                % (variables.get("stratum", 0),
+                % (variables.get("stratum", 0)[0],
                    ptype,
                    PeerSummary.prettyinterval(
                     now if last_sync is None
@@ -926,9 +933,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (unitformatter(estdelay, UNITS_SEC, UNIT_MS),
-                         unitformatter(estoffset, UNITS_SEC, UNIT_MS),
-                         unitformatter(jd, UNITS_SEC, UNIT_MS)))
+                        (unitify(estdelay, UNITS_SEC, UNIT_MS),
+                         unitify(estoffset, UNITS_SEC, UNIT_MS),
+                         unitify(jd, UNITS_SEC, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %
@@ -939,9 +946,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (unitformatter(estdelay, UNITS_SEC, UNIT_MS),
-                         unitformatter(estoffset, UNITS_SEC, UNIT_MS),
-                         unitformatter(jd, UNITS_SEC, UNIT_MS)))
+                        (unitify(estdelay, UNITS_SEC, UNIT_MS),
+                         unitify(estoffset, UNITS_SEC, UNIT_MS),
+                         unitify(jd, UNITS_SEC, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %

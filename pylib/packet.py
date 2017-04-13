@@ -1267,11 +1267,13 @@ class ControlSession:
                     eq = pair.index("=")
                     var = pair[:eq].strip()
                     val = pair[eq+1:].strip()
+                    casted = False
                     try:
                         if raw is True:
                             val = (int(val, 0), val)
                         else:
                             val = int(val, 0)
+                        casted = True
                     except ValueError:
                         try:
                             if raw is True:
@@ -1284,11 +1286,15 @@ class ControlSession:
                                 # so printout can handle .3f vs .6f
                                 items.append(("delay-s", val))
                             val = valf
+                            casted = True
                         except ValueError:
                             if val[0] == '"' and val[-1] == '"':
                                 val = val[1:-1]
                                 if raw is True:
                                     val = (val, val)
+                                casted = True
+                    if (raw is True) and (casted is False):
+                        val = (val, val)
                     items.append((var, val))
                 except ValueError:
                     # Yes, ntpd really does emit bare tags for empty
