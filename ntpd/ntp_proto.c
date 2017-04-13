@@ -1349,7 +1349,7 @@ peer_clear(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "peer_clear: at %ld next %ld associd %d refid %s\n",
+		    "peer_clear: at %lu next %lu associd %d refid %s\n",
 		    current_time, peer->nextdate, peer->associd,
 		    ident);
 #endif
@@ -2192,7 +2192,7 @@ peer_xmit(
 
 #ifdef DEBUG
 		if (debug)
-			printf("transmit: at %ld %s->%s mode %d len %zu\n",
+			printf("transmit: at %lu %s->%s mode %d len %zu\n",
 		    	    current_time, peer->dstadr ?
 			    socktoa(&peer->dstadr->sin) : "-",
 		            socktoa(&peer->srcadr), peer->hmode, sendlen);
@@ -2232,7 +2232,7 @@ peer_xmit(
 	peer->throttle += (1 << peer->minpoll) - 2;
 #ifdef DEBUG
 	if (debug)
-		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
+		printf("transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
 		    current_time, peer->dstadr ?
 		    socktoa(&peer->dstadr->sin) : "-",
 		    socktoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);
@@ -2379,7 +2379,7 @@ fast_xmit(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "transmit: at %ld %s->%s mode %d len %zd\n",
+			    "transmit: at %lu %s->%s mode %d len %zu\n",
 			    current_time, socktoa(&rbufp->dstadr->sin),
 			    socktoa(&rbufp->recv_srcadr), xmode, sendlen);
 #endif
@@ -2401,7 +2401,7 @@ fast_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
+		    "transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
 		    current_time, socktoa(&rbufp->dstadr->sin),
 		    socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif
@@ -2485,7 +2485,7 @@ pool_xmit(
 	pool->throttle += (1 << pool->minpoll) - 2;
 #ifdef DEBUG
 	if (debug)
-		printf("transmit: at %ld %s->%s pool\n",
+		printf("transmit: at %lu %s->%s pool\n",
 		    current_time, latoa(lcladr), socktoa(rmtadr));
 #endif
 	msyslog(LOG_INFO, "Soliciting pool server %s", socktoa(rmtadr));
