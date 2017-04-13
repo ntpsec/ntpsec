@@ -33,21 +33,22 @@ OLD_CTL_PST_SEL_SYSPEER = 3
 
 
 # Units for formatting
-UNIT_NS = 0
-UNIT_US = 1
-UNIT_MS = 2
-UNIT_S = 3
-UNIT_KS = 4
-UNITS_SEC = ["ns", u"\u03bcs", "ms", "s", "ks"]
-UNIT_PPT = 0
-UNIT_PPB = 1
-UNIT_PPM = 2
-UNIT_PPK = 3
-UNITS_PPX = ["ppt", "ppb", "ppm", "ppk"]
+UNIT_NS = "ns"
+UNIT_US = u"\u03bcs"
+UNIT_MS = "ms"
+UNIT_S = "s"
+UNIT_KS = "ks"
+UNITS_SEC = (UNIT_NS, UNIT_US, UNIT_MS, UNIT_S, UNIT_KS)
+UNIT_PPT = "ppt"
+UNIT_PPB = "ppb"
+UNIT_PPM = "ppm"
+UNIT_PPK = "ppk"
+UNITS_PPX = (UNIT_PPT, UNIT_PPB, UNIT_PPM, UNIT_PPK)
+unitgroups = (UNITS_SEC, UNITS_PPX)
 
 
 # Variables that have units
-S_VARS = ("tai",)
+S_VARS = ("tai", "poll")
 MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
            "leapsmearoffset", "authdelay", "koffset", "kmaxerr", "kesterr",
            "kprecis", "kppsjitter", "fuzz", "clk_wander_threshold", "tick",
@@ -111,7 +112,7 @@ def stringfiltcooker(data):
         if count > highestcount:
             mostcommon = key
             highestcount = count
-    newunit = UNITS_SEC[mostcommon + UNIT_MS]
+    newunit = UNITS_SEC[mostcommon + 2]  # 2==UNIT_MS
     # Shift all values to the new unit
     cooked = []
     for part in parts:
@@ -206,8 +207,21 @@ def formatdigitsplit(f, fieldsize, oomstobase):
     return formatter
 
 
+def getunitgroup(unit):
+    for group in unitgroups:
+        if unit in group:
+            return group
+
+
 def oomsbetweenunits(a, b):
-    return abs((a - b) * 3)
+    group = getunitgroup(a)
+    if b is None:  # asking for baseunit
+        return group.index(a)
+    elif b in group:
+        ia = group.index(a)
+        ib = group.index(b)
+        return abs((ia - ib) * 3)
+    return None
 
 
 def breaknumberstring(value):
@@ -355,27 +369,44 @@ def isstringzero(value):
     return True
 
 
-def unitify(value, unitgroup, startingunit, baseunit=0,
+def unitrelativeto(unit, move):
+    "Returns a unit at a different scale from the input unit"
+    for group in unitgroups:
+        if unit in group:
+            if move is None:  # asking for the base unit
+                return group[0]
+            else:
+                index = group.index(unit)
+                index += move  # index of the new unit
+                if 0 <= index < len(group):  # found the new unit
+                    return group[index]
+                else:  # not in range
+                    return None
+    return None  # couldn't find anything
+
+
+def unitify(value, startingunit, baseunit=None,
             strip=False, width=8):
     "Formats a numberstring with relevant units. Attemps to fit in width."
+    if baseunit is None:
+        baseunit = getunitgroup(startingunit)[0]
     if isstringzero(value) is True:  # display highest precision zero
-        base = unitgroup[baseunit]
         if strip is False:
-            value = fitinfield("0", width - len(base)) + base
+            value = fitinfield("0", width - len(baseunit))
+        value = value + baseunit
         return value
     ooms = oomsbetweenunits(startingunit, baseunit)
     newvalue = cropprecision(value, ooms)
     newvalue, unitsmoved = scalestring(newvalue)
-    unitget = startingunit + unitsmoved
-    if 0 <= unitget < len(unitgroup):  # We have a unit
-        unit = unitgroup[unitget]
+    unitget = unitrelativeto(startingunit, unitsmoved)
+    if unitget is not None:  # We have a unit
         if width is None:
             realwidth = None
         else:
-            realwidth = width - len(unit)
-        newvalue = fitinfield(newvalue, realwidth) + unit
+            realwidth = width - len(unitget)
+        newvalue = fitinfield(newvalue, realwidth) + unitget
     else:  # don't have a replacement unit, use original
-        newvalue = value + unitgroup[startingunit]
+        newvalue = value + startingunit
     if strip is True:
         newvalue = newvalue.strip()
     return newvalue
@@ -667,19 +698,19 @@ def cook(variables, showunits=False):
             #   missing variables here.
             #  Completion cannot occur until all units are tracked down.
             if showunits:
-                item += unitify(rawvalue, UNITS_SEC, UNIT_MS, UNIT_NS,
+                item += unitify(rawvalue, UNIT_MS, UNIT_NS,
                                 True, width=None)
             else:
                 item += repr(value)
         elif name in S_VARS:
             if showunits:
-                item += unitify(rawvalue, UNITS_SEC, UNIT_S, UNIT_NS,
+                item += unitify(rawvalue, UNIT_S, UNIT_NS,
                                 True, width=None)
             else:
                 item += repr(value)
         elif name in PPM_VARS:
             if showunits:
-                item += unitify(rawvalue, UNITS_PPX, UNIT_PPM,
+                item += unitify(rawvalue, UNIT_PPM,
                                 strip=True, width=None)
             else:
                 item += repr(value)
@@ -933,9 +964,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (unitify(estdelay, UNITS_SEC, UNIT_MS),
-                         unitify(estoffset, UNITS_SEC, UNIT_MS),
-                         unitify(jd, UNITS_SEC, UNIT_MS)))
+                        (unitify(estdelay, UNIT_MS),
+                         unitify(estoffset, UNIT_MS),
+                         unitify(jd, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %
@@ -946,9 +977,9 @@ class PeerSummary:
                 if self.showunits:
                     line += (
                         " %s %s %s" %
-                        (unitify(estdelay, UNITS_SEC, UNIT_MS),
-                         unitify(estoffset, UNITS_SEC, UNIT_MS),
-                         unitify(jd, UNITS_SEC, UNIT_MS)))
+                        (unitify(estdelay, UNIT_MS),
+                         unitify(estoffset, UNIT_MS),
+                         unitify(jd, UNIT_MS)))
                 else:
                     line += (
                         " %s %s %s" %
