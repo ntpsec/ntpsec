@@ -406,8 +406,8 @@ jjy_start ( int unit, struct peer *peer )
 
 #ifdef DEBUG
 	if ( debug ) {
-		printf( "refclock_jjy.c : jjy_start : %s  mode=%d  dev=%s  unit=%d\n",
-			 socktoa(&peer->srcadr), peer->ttl, DEVICE, unit ) ;
+	    printf("refclock_jjy.c: jjy_start: %s  mode=%u  dev=%s  unit=%d\n",
+		     socktoa(&peer->srcadr), peer->ttl, DEVICE, unit ) ;
 	}
 #endif
 
@@ -432,7 +432,8 @@ jjy_start ( int unit, struct peer *peer )
 	/* Set up the device name */
 	snprintf( sDeviceName, sizeof(sDeviceName), DEVICE, unit ) ;
 
-	snprintf( sLog, sizeof(sLog), "subtype=%d dev=%s", peer->ttl, sDeviceName ) ;
+	snprintf(sLog, sizeof(sLog), "subtype=%u dev=%s", 
+                 peer->ttl, sDeviceName ) ;
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
 	/*
@@ -465,16 +466,18 @@ jjy_start ( int unit, struct peer *peer )
 		if ( 101 <= peer->ttl && peer->ttl <= 180 ) {
 			rc = jjy_start_telephone ( unit, peer, up ) ;
 		} else {
-			msyslog ( LOG_ERR, "JJY receiver [ %s subtype %d ] : Unsupported mode",
-				  socktoa(&peer->srcadr), peer->ttl ) ;
-			free ( (void*) up ) ;
-		return false ;
+		    msyslog (LOG_ERR, 
+			"JJY receiver [ %s subtype %u ] : Unsupported mode",
+			socktoa(&peer->srcadr), peer->ttl ) ;
+		    free ( (void*) up ) ;
+		    return false ;
 		}
 	}
 
 	if ( rc != 0 ) {
-		msyslog ( LOG_ERR, "JJY receiver [ %s subtype %d ] : Initialize error",
-			  socktoa(&peer->srcadr), peer->ttl ) ;
+		msyslog(LOG_ERR,
+                        "JJY receiver [ %s subtype %u ] : Initialize error",
+			socktoa(&peer->srcadr), peer->ttl ) ;
 		free ( (void*) up ) ;
 		return false ;
 	}
@@ -539,7 +542,8 @@ jjy_shutdown ( int unit, struct peer *peer )
 		free ( up ) ;
 	}
 
-	snprintf( sLog, sizeof(sLog), "JJY stopped. unit=%d subtype=%d", unit, peer->ttl ) ;
+	snprintf(sLog, sizeof(sLog), "JJY stopped. unit=%d subtype=%u",
+                 unit, peer->ttl);
 	record_clock_stats(peer, sLog ) ;
 
 }
@@ -600,7 +604,7 @@ jjy_receive ( struct recvbuf *rbufp )
 	printf( "\nrefclock_jjy.c : %s : Len=%d  ", sFunctionName, pp->lencode ) ;
 	for ( i = 0 ; i < pp->lencode ; i ++ ) {
 		if ( iscntrl( pp->a_lastcode[i] & 0x7F ) ) {
-			printf( "<x%02X>", pp->a_lastcode[i] & 0xFF ) ;
+			printf("<x%02X>", (unsigned)(pp->a_lastcode[i] & 0xFF));
 		} else {
 			printf( "%c", pp->a_lastcode[i] ) ;
 		}
@@ -873,7 +877,7 @@ jjy_poll ( int unit, struct peer *peer )
 	sReach[7] = 0 ; /* This poll */
 	sReach[8] = 0 ;
 
-	snprintf( sLog, sizeof(sLog), "polls=%ld reach=%s", pp->polls, sReach ) ;
+	snprintf(sLog, sizeof(sLog), "polls=%lu reach=%s", pp->polls, sReach);
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ATTENTION, sLog ) ;
 
 	up->iProcessState = JJY_PROCESS_STATE_POLL ;
@@ -1347,8 +1351,10 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 
 #ifdef DEBUG
 	if ( debug ) {
-		printf ( "%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X up->iLineCount=%d\n",
-			sFunctionName, pp->sloppyclockflag, CLK_FLAG1,
+		printf ("%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X "
+                        "up->iLineCount=%d\n",
+			sFunctionName, pp->sloppyclockflag, 
+                        (unsigned)CLK_FLAG1,
 			up->iLineCount ) ;
 	}
 #endif
@@ -1636,9 +1642,11 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 		ibcc1 = 0x30 | ( ( ibcc >> 4 ) & 0xF ) ;
 		ibcc2 = 0x30 | ( ( ibcc      ) & 0xF ) ;
 		if ( pBuf[13] != ibcc1 || pBuf[14] != ibcc2 ) {
-			snprintf( sErr, sizeof(sErr)-1, " BCC error : Recv=%02X,%02X / Calc=%02X,%02X ",
-				  pBuf[13] & 0xFF, pBuf[14] & 0xFF,
-				  ibcc1, ibcc2 ) ;
+			snprintf(sErr, sizeof(sErr)-1,
+                               " BCC error : Recv=%02X,%02X / Calc=%02X,%02X ",
+			       (unsigned)(pBuf[13] & 0xFF),
+                               (unsigned)(pBuf[14] & 0xFF),
+			       (unsigned)ibcc1, (unsigned)ibcc2);
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  sErr ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
@@ -2240,8 +2248,10 @@ jjy_poll_tristate_gpsclock01 ( int unit, struct peer *peer )
 
 #ifdef DEBUG
 	if ( debug ) {
-		printf ( "%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X up->iLineCount=%d\n",
-			sFunctionName, pp->sloppyclockflag, CLK_FLAG1,
+		printf("%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X "
+                       "up->iLineCount=%d\n",
+			sFunctionName, pp->sloppyclockflag,
+                        (unsigned)CLK_FLAG1,
 			up->iLineCount ) ;
 	}
 #endif
@@ -3907,7 +3917,9 @@ modem_receive ( struct recvbuf *rbufp )
 		iCopyLen = iLen <= (int)sizeof(sResp)-1 ?
                                (size_t)iLen : sizeof(sResp) - 1U;
 		strlcpy( sResp, pBuf, sizeof(sResp) ) ;
-		printf ( "refclock_jjy.c : modem_receive : iLen=%zd pBuf=[%s] iModemEvent=%d\n", iCopyLen, sResp, up->iModemEvent ) ;
+		printf( "refclock_jjy.c : modem_receive : iLen=%zu "
+                        "pBuf=[%s] iModemEvent=%d\n",
+                        iCopyLen, sResp, up->iModemEvent ) ;
 	}
 #endif
 	modem_control ( peer, pp, up ) ;
@@ -4530,7 +4542,7 @@ printableString ( char *sOutput, int iOutputLen, const char *sInput, int iInputL
 			if ( j + n + 1 >= OutputLen )
 				break ;
 			snprintf( sOutput + j, OutputLen - j, "<x%X>",
-				  sInput[i] & 0xFF ) ;
+				  (unsigned)(sInput[i] & 0xFF) ) ;
 		}
 		j += n ;
 	}
