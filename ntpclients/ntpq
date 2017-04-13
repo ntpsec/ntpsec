@@ -228,7 +228,12 @@ Called when a line that starts with ! is entered in response to the prompt.
         return
 
     def say(self, msg):
-        sys.stdout.write(polystr(msg))
+        try:
+            sys.stdout.write(polystr(msg))
+        except UnicodeEncodeError as e:
+            print("Unicode failure:", e)
+            print("msg:\n", repr(msg))
+            raise e
         sys.stdout.flush()    # In case we're piping the output
 
     def warn(self, msg):
@@ -466,7 +471,9 @@ usage: timeout [ msec ]
     def collect_display(self, associd, variables, decodestatus):
         "Query and display a collection of variables from the system."
         try:
-            queried = self.session.readvar(associd, [v[0] for v in variables])
+            queried = self.session.readvar(associd,
+                                           [v[0] for v in variables],
+                                           raw=True)
         except ntp.packet.ControlException as e:
             if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
                 self.warn("Unknown variable.  Trying one at a time.\n")
@@ -477,7 +484,7 @@ usage: timeout [ msec ]
                         queried = self.session.readvar(associd, [var],
                                                        raw=True)
                         for (name, (value, rawvalue)) in queried.items():
-                            items.append((name, value))
+                            items.append((name, (value, rawvalue)))
                     except ntp.packet.ControlException as e:
                         if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
                             items.append((var, "???"))
@@ -505,7 +512,8 @@ usage: timeout [ msec ]
             for (name, legend, fmt) in variables:
                 if name not in queried:
                     continue
-                value = queried[name]
+                value = queried[name][0]
+                rawvalue = queried[name][1]
                 if fmt in (NTP_ADD, NTP_ADP):
                     if self.showhostnames:
                         if self.debug:
@@ -519,7 +527,12 @@ usage: timeout [ msec ]
                     if value:
                         self.say("%s  %s\n" % (legend, value))
                 elif fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
-                    self.say("%s  %s\n" % (legend, value))
+                    if self.showunits:
+                        displayvalue = ntp.util.unitifyvar(rawvalue, name,
+                                                           strip=True)
+                    else:
+                        displayvalue = value
+                    self.say("%s  %s\n" % (legend, displayvalue))
                 elif fmt == NTP_LFP:
                     self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
                 elif fmt == NTP_2BIT:

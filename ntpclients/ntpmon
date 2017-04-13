@@ -103,21 +103,18 @@ def peer_detail(variables, showunits=False):
         for name in ntp.util.MS_VARS:
             if name in vcopy:
                 vcopy[name] = ntp.util.unitify(vcopyraw[name],
-                                               ntp.util.UNITS_SEC,
                                                ntp.util.UNIT_MS,
                                                strip=True,
                                                width=None)
         for name in ntp.util.PPM_VARS:
             if name in vcopy:
                 vcopy[name] = ntp.util.unitify(vcopyraw[name],
-                                               ntp.util.UNITS_PPX,
                                                ntp.util.UNIT_PPM,
                                                strip=True,
                                                width=None)
         for name in ntp.util.S_VARS:
             if name in vcopy:
                 vcopy[name] = ntp.util.unitify(vcopyraw[name],
-                                               ntp.util.UNITS_SEC,
                                                ntp.util.UNIT_S,
                                                strip=True,
                                                width=None)

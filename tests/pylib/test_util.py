@@ -73,10 +73,10 @@ class TestPylibUtilMethods(unittest.TestCase):
                          (1.000001, 0))
 
     def test_oomsbetweenunits(self):
-        self.assertEqual(ntp.util.oomsbetweenunits(3, 2),
-                         3)
-        self.assertEqual(ntp.util.oomsbetweenunits(2, 3),
-                         3)
+        f = ntp.util.oomsbetweenunits
+
+        self.assertEqual(f(ntp.util.UNIT_KS, ntp.util.UNIT_MS), 6)
+        self.assertEqual(f(ntp.util.UNIT_PPM, ntp.util.UNIT_PPB), 3)
 
     def test_filtcooker(self):
         self.assertEqual(ntp.util.filtcooker(
@@ -288,44 +288,35 @@ class TestPylibUtilMethods(unittest.TestCase):
         nu = ntp.util
 
         # Zero
-        self.assertEqual(f("0.000", nu.UNITS_SEC, nu.UNIT_MS),
-                         "     0ns")
+        self.assertEqual(f("0.000", nu.UNIT_MS), "     0ns")
         # Standard, width=8
-        self.assertEqual(f("1.234", nu.UNITS_SEC, nu.UNIT_MS),
-                         " 1.234ms")
+        self.assertEqual(f("1.234", nu.UNIT_MS), " 1.234ms")
         # ditto, negative
-        self.assertEqual(f("-1.234", nu.UNITS_SEC, nu.UNIT_MS),
-                         "-1.234ms")
+        self.assertEqual(f("-1.234", nu.UNIT_MS), "-1.234ms")
         # Scale to larger unit, width=8
-        self.assertEqual(f("1234.5", nu.UNITS_SEC, nu.UNIT_MS),
-                         " 1.2345s")
+        self.assertEqual(f("1234.5", nu.UNIT_MS), " 1.2345s")
         # ditto, negative
-        self.assertEqual(f("-1234.5", nu.UNITS_SEC, nu.UNIT_MS),
-                         "-1.2345s")
+        self.assertEqual(f("-1234.5", nu.UNIT_MS), "-1.2345s")
         # Scale to smaller unit, width=8
-        self.assertEqual(f("0.01234", nu.UNITS_SEC, nu.UNIT_MS),
-                         u" 12.34\u03bcs")
+        self.assertEqual(f("0.01234", nu.UNIT_MS), u" 12.34\u03bcs")
         # ditto, negative
-        self.assertEqual(f("-0.01234", nu.UNITS_SEC, nu.UNIT_MS),
-                         u"-12.34\u03bcs")
+        self.assertEqual(f("-0.01234", nu.UNIT_MS), u"-12.34\u03bcs")
         # At baseunit
-        self.assertEqual(f("12.0", nu.UNITS_SEC, nu.UNIT_NS),
-                         "    12ns")
+        self.assertEqual(f("12.0", nu.UNIT_NS), "    12ns")
         # Scale to baseunit
-        self.assertEqual(f(".042", nu.UNITS_SEC, nu.UNIT_US),
-                         "    42ns")
+        self.assertEqual(f(".042", nu.UNIT_US), "    42ns")
         # Below baseunit
-        self.assertEqual(f("23.42", nu.UNITS_SEC, nu.UNIT_NS),
-                         "    23ns")
+        self.assertEqual(f("23.42", nu.UNIT_NS), "    23ns")
         # Different units
-        self.assertEqual(f("12.345", nu.UNITS_PPX, nu.UNIT_PPM),
-                         "12.35ppm")
+        self.assertEqual(f("12.345", nu.UNIT_PPM), "12.35ppm")
         # Strip
-        self.assertEqual(f("1.23", nu.UNITS_SEC, nu.UNIT_MS, strip=True),
-                         "1.23ms")
+        self.assertEqual(f("1.23", nu.UNIT_MS, strip=True), "1.23ms")
         # Different width
-        self.assertEqual(f("1.234", nu.UNITS_SEC, nu.UNIT_MS, width=12),
-                         "     1.234ms")
+        self.assertEqual(f("1.234", nu.UNIT_MS, width=12), "     1.234ms")
+        # Outside of available units
+        self.assertEqual(f("1234.5", nu.UNIT_KS), "1234.5ks")
+        # Seconds
+        self.assertEqual(f("42.23", nu.UNIT_S), "  42.23s")
 
     def test_stringfiltcooker(self):
         # No scale
@@ -338,6 +329,22 @@ class TestPylibUtilMethods(unittest.TestCase):
             "1000.02 3400.5 0.67835 -23.0 9001 6.7 1.00 1234"),
             "1.00002  3.4005 0.00068 -0.0230   9.001  0.0067 0.00100   1.234 s"
         )
+
+    def test_unitrelativeto(self):
+        f = ntp.util.unitrelativeto
+
+        # Scale to smaller unit
+        self.assertEqual(f(ntp.util.UNIT_S, -1), ntp.util.UNIT_MS)
+        # Scale to larger unit
+        self.assertEqual(f(ntp.util.UNIT_S, 1), ntp.util.UNIT_KS)
+        # Scale smaller, outside of range
+        self.assertEqual(f(ntp.util.UNIT_S, -10), None)
+        # Scale larger, outside of range
+        self.assertEqual(f(ntp.util.UNIT_NS, 10), None)
+        # Get base unit
+        self.assertEqual(f(ntp.util.UNIT_KS, None), ntp.util.UNIT_NS)
+        # Different unitgroup
+        self.assertEqual(f(ntp.util.UNIT_PPM, -1), ntp.util.UNIT_PPB)
 
 if __name__ == '__main__':
     unittest.main()
