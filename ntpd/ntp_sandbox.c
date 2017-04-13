@@ -188,13 +188,16 @@ getgroup:
 		}
 		if (group) {
 			if (0 != setgroups(1, &sw_gid)) {
-				msyslog(LOG_ERR, "setgroups(1, %d) failed: %m", sw_gid);
+				msyslog(LOG_ERR, "setgroups(1, %u) failed: %m",
+                                        sw_gid);
 				exit (-1);
 			}
 		}
 		else if (pw)
 			if (0 != initgroups(pw->pw_name, (gid_t)pw->pw_gid)) {
-				msyslog(LOG_ERR, "initgroups(<%s>, %d) filed: %m", pw->pw_name, pw->pw_gid);
+				msyslog(LOG_ERR,
+                                        "initgroups(<%s>, %u) filed: %m",
+                                        pw->pw_name, pw->pw_gid);
 				exit (-1);
 			}
 		if (user && setuid(sw_uid)) {
