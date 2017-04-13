@@ -258,6 +258,9 @@ def cmd_configure(ctx, config):
         ('gnu99', '-std=gnu99'),
         # this quiets most of macOS warnings on -fpie
         ('unused', '-Qunused-arguments'),
+        ('w_format', '-Wformat'),
+        # fails on OpenBSD 6
+        ('w_format_signedness', '-Wformat-signedness'),
         ]
 
     # Check which linker flags are supported
@@ -291,7 +294,6 @@ def cmd_configure(ctx, config):
             "-Wcast-qual",
             "-Wdisabled-optimization",
             "-Wfloat-equal",          # Not Ready For Prime Time
-            "-Wformat",
             "-Wformat-nonliteral",    # needs -Wformat
             "-Wformat-security",      # needs -Wformat
             "-Wimplicit-function-declaration",
@@ -311,8 +313,6 @@ def cmd_configure(ctx, config):
             "-Wwrite-strings",
         ] + ctx.env.CFLAGS
         cc_test_flags += [
-            # fails on OpenBSD 6
-            ('w_format_signedness', '-Wformat-signedness'),
             # fails on Solaris and OpenBSD 6
             ('w_sign_conversion', "-Wsign-conversion"),
             # fails on clang
@@ -383,6 +383,8 @@ int main(int argc, char **argv) {
     # debug warnings that are not available with all compilers
     if ctx.env.HAS_w_format_signedness:
         ctx.env.CFLAGS = ['-Wformat-signedness'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_format:
+        ctx.env.CFLAGS = ['-Wformat'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
         ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
 
