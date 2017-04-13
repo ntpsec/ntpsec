@@ -145,8 +145,8 @@ struct	refclock refclock_parse = {
 /*
  * Definitions
  */
-#define PARSEDEVICE	"/dev/refclock-%d" /* device to open %d is unit number */
-#define PARSEPPSDEVICE	"/dev/refclockpps-%d" /* optional pps device to open %d is unit number */
+#define PARSEDEVICE	"/dev/refclock-%u" /* device to open %d is unit number */
+#define PARSEPPSDEVICE	"/dev/refclockpps-%u" /* optional pps device to open %d is unit number */
 
 #undef ABS
 #define ABS(_X_) (((_X_) < 0) ? -(_X_) : (_X_))
@@ -1539,9 +1539,12 @@ list_err(
 
 	if (do_it && err->err_suppressed)
 	{
-		msyslog(LOG_INFO, "PARSE receiver #%d: %ld message%s suppressed, error condition class persists for %s",
-			parse->peer->refclkunit, err->err_suppressed, (err->err_suppressed == 1) ? " was" : "s where",
-			l_mktime(current_time - err->err_started));
+		msyslog(LOG_INFO, 
+                    "PARSE receiver #%d: %lu message%s suppressed, error "
+                    "condition class persists for %s",
+		    parse->peer->refclkunit, err->err_suppressed,
+                    (err->err_suppressed == 1) ? " was" : "s where",
+		    l_mktime(current_time - err->err_started));
 		err->err_suppressed = 0;
 	}
 
@@ -1607,7 +1610,7 @@ mkreadable(
 				else
 				{
 					snprintf(buffer, (size_t)blen,
-                                                 "\\x%02x", *src++);
+                                                 "\\x%02x", (unsigned)(*src++));
 					blen   -= 4;
 					buffer += 4;
 				}
@@ -1935,8 +1938,11 @@ local_receive(
 	if (rbufp->recv_length != sizeof(parsetime_t))
 	{
 		ERR(ERR_BADIO)
-			msyslog(LOG_ERR,"PARSE receiver #%d: local_receive: bad size (got %zd expected %zd)",
-				parse->peer->refclkunit, rbufp->recv_length, sizeof(parsetime_t));
+			msyslog(LOG_ERR,
+				"PARSE receiver #%d: local_receive: bad size "
+				" (got %zu expected %zu)",
+				parse->peer->refclkunit, rbufp->recv_length,
+                                sizeof(parsetime_t));
 		parse_event(parse, CEVNT_BADREPLY);
 		return;
 	}
@@ -2189,7 +2195,7 @@ clockstatus(
 		i++;
 	}
 
-	snprintf(buffer, sizeof(buffer), "unknown #%ld", (u_long)lstate);
+	snprintf(buffer, sizeof(buffer), "unknown #%lu", lstate);
 
 	return buffer;
 }
@@ -2212,7 +2218,7 @@ l_mktime(
 
 	if ((tmp = delta / (60*60*24)) != 0)
 	{
-		t = ap(buffer, sizeof(buffer), t, "%ldd+", (u_long)tmp);
+		t = ap(buffer, sizeof(buffer), t, "%lud+", tmp);
 		delta -= tmp * 60*60*24;
 	}
 
@@ -2267,7 +2273,9 @@ parse_statistics(
 				    percent = 10000;
 
 				if (s_time)
-				    msyslog(LOG_INFO, "PARSE receiver #%d: state %18s: %13s (%3ld.%02ld%%)",
+				    msyslog(LOG_INFO,
+                                        "PARSE receiver #%d: state %18s: "
+                                        "%13s (%3lu.%02lu%%)",
 					    parse->peer->refclkunit,
 					    clockstatus((unsigned int)i),
 					    l_mktime(s_time),
@@ -2453,8 +2461,10 @@ parse_ppsapi(
 		parse->peer->refclkunit, cp);
 
 	if (!(mode_ppsoffset & cap)) {
-	  msyslog(LOG_WARNING, "PARSE receiver #%d: Cannot set PPS_%sCLEAR, this will increase jitter (PPS API capabilities=0x%x)",
-		  parse->peer->refclkunit, cp, cap);
+	  msyslog(LOG_WARNING, 
+		  "PARSE receiver #%u: Cannot set PPS_%sCLEAR, "
+		  " this will increase jitter (PPS API capabilities=0x%x)",
+		  parse->peer->refclkunit, cp, (unsigned)cap);
 		mode_ppsoffset = 0;
 	} else {
 		if (mode_ppsoffset == PPS_OFFSETCLEAR)
@@ -2525,7 +2535,8 @@ parse_start(
 
 	if ((type == (u_int)~0) || (parse_clockinfo[type].cl_description == (char *)0))
 	{
-		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: unsupported clock type %d (max %d)",
+		msyslog(LOG_ERR, "PARSE receiver #%u: parse_start: "
+                                 "unsupported clock type %d (max %d)",
 			unit, CLK_REALTYPE(peer), ncltypes-1);
 		return false;
 	}
@@ -2541,7 +2552,9 @@ parse_start(
 
 	if (fd232 == -1)
 	{
-		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: open of %s failed: %m", unit, parsedev);
+		msyslog(LOG_ERR,
+                        "PARSE receiver #%u: parse_start: open of %s failed: %m",
+                        unit, parsedev);
 		return false;
 	}
 
@@ -2602,8 +2615,11 @@ parse_start(
 	 */
 	if (TTY_GETATTR(fd232, &tio) == -1)
 	{
-		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcgetattr(%d, &tio): %m", unit, fd232);
-		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
+		msyslog(LOG_ERR,
+                    "PARSE receiver #%u: parse_start: tcgetattr(%d, &tio): %m",
+                    unit, fd232);
+		/* let our cleaning staff do the work */
+		parse_shutdown(parse->peer->refclkunit, peer);
 		return false;
 	}
 	else
@@ -2640,9 +2656,13 @@ parse_start(
 		if ((cfsetospeed(&tio, (speed_t) parse_clockinfo[type].cl_speed) == -1) ||
 		    (cfsetispeed(&tio, (speed_t) parse_clockinfo[type].cl_speed) == -1))
 		{
-			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcset{i,o}speed(&tio, speed): %m", unit);
-			parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
-			return false;
+		    msyslog(LOG_ERR,
+			    "PARSE receiver #%u: parse_start: "
+			    " tcset{i,o}speed(&tio, speed): %m",
+			    unit);
+		    /* let our cleaning staff do the work */
+		    parse_shutdown(parse->peer->refclkunit, peer);
+		    return false;
 		}
 
 		/*
@@ -2706,11 +2726,13 @@ parse_start(
 		}
 #endif
 
-		if (TTY_SETATTR(fd232, &tio) == -1)
-		{
-			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcsetattr(%d, &tio): %m", unit, fd232);
-			parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
-			return false;
+		if (TTY_SETATTR(fd232, &tio) == -1) {
+		    msyslog(LOG_ERR,
+		      "PARSE receiver #%u: parse_start: tcsetattr(%d, &tio): %m",
+                      unit, fd232);
+		    /* let our cleaning staff do the work */
+		    parse_shutdown(parse->peer->refclkunit, peer); 
+		    return false;
 		}
 	}
 
@@ -3802,18 +3824,20 @@ gps16x_message(
 			switch (header.cmd)
 			{
 			case GPS_SW_REV:
-				{
-					char buffer[64];
-					SW_REV gps_sw_rev;
+			    {
+				char buffer[64];
+				SW_REV gps_sw_rev;
 
-					get_mbg_sw_rev(&bufp, &gps_sw_rev);
-					snprintf(buffer, sizeof(buffer), "meinberg_gps_version=\"%x.%02x%s%s\"",
-						(gps_sw_rev.code >> 8) & 0xFF,
-						gps_sw_rev.code & 0xFF,
-						gps_sw_rev.name[0] ? " " : "",
-						gps_sw_rev.name);
-					set_var(&parse->kv, buffer, strlen(buffer)+1, RO|DEF);
-				}
+				get_mbg_sw_rev(&bufp, &gps_sw_rev);
+				snprintf(buffer, sizeof(buffer),
+				    "meinberg_gps_version=\"%x.%02x%s%s\"",
+				    (unsigned)((gps_sw_rev.code >> 8) & 0xFF),
+				    (unsigned)(gps_sw_rev.code & 0xFF),
+				    gps_sw_rev.name[0] ? " " : "",
+				    gps_sw_rev.name);
+				set_var(&parse->kv, buffer, strlen(buffer)+1,
+                                        RO|DEF);
+			    }
 			break;
 
 			case GPS_BVAR_STAT:
@@ -3955,7 +3979,7 @@ gps16x_message(
 					default:
 						p = ap(buffer, sizeof(buffer),
 						    p, "bad status 0x%04x",
-						    antinfo.status);
+						    (unsigned)antinfo.status);
 						break;
 					}
 
@@ -4179,14 +4203,15 @@ gps16x_poll(
 #ifdef DEBUG
 	if (debug > 2)
 	{
-		char buffer[128];
+	    char buffer[128];
 
-		mkreadable(buffer, sizeof(buffer), (char *)cmd_buffer, (unsigned)(outp - cmd_buffer), 1);
-		printf("PARSE receiver #%d: transmitted message #%ld (%d bytes) >%s<\n",
-		       parse->peer->refclkunit,
-		       parse->localstate - 1,
-		       (int)(outp - cmd_buffer),
-		       buffer);
+	    mkreadable(buffer, sizeof(buffer), (char *)cmd_buffer, (unsigned)(outp - cmd_buffer), 1);
+	    printf(
+                "PARSE receiver #%d: transmitted message #%lu (%d bytes) >%s<\n",
+		   parse->peer->refclkunit,
+		   parse->localstate - 1,
+		   (int)(outp - cmd_buffer),
+		   buffer);
 	}
 #endif
 
@@ -4889,7 +4914,7 @@ trimbletsip_message(
 		if (debug > 2) {
 			size_t i;
 
-			printf("TRIMBLE BAD packet, size %d:\n	", size);
+			printf("TRIMBLE BAD packet, size %u:\n	", size);
 			for (i = 0; i < size; i++) {
 				printf ("%2.2x, ", buffer[i]&0xff);
 				if (i%16 == 15) printf("\n\t");
@@ -4912,7 +4937,8 @@ trimbletsip_message(
 		if (debug > 3) {
 			size_t i;
 
-			printf("TRIMBLE packet 0x%02x, size %d:\n	", cmd, size);
+			printf("TRIMBLE packet 0x%02x, size %u:\n	",
+                               cmd, size);
 			for (i = 0; i < size; i++) {
 				printf ("%2.2x, ", buffer[i]&0xff);
 				if (i%16 == 15) printf("\n\t");
@@ -4952,7 +4978,7 @@ trimbletsip_message(
 			{
 			default:
 				t = ap(pbuffer, sizeof(pbuffer), t,
-				    "0x%x", mb(0) & 0x7);
+				    "0x%x", (unsigned)(mb(0) & 0x7));
 				break;
 
 			case 1:
@@ -5180,7 +5206,8 @@ trimbletsip_message(
 			switch (mb(0) & 0x7)
 			{
 			default:
-				t = ap(pbuffer, sizeof(pbuffer), t, "0x%x", mb(0) & 0x7);
+				t = ap(pbuffer, sizeof(pbuffer), t, "0x%x",
+                                       (unsigned)(mb(0) & 0x7));
 				break;
 
 			case 3:
