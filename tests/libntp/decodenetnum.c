@@ -1,3 +1,4 @@
+#include <unistd.h>          /* for close() */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
