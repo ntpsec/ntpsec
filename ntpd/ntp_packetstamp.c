@@ -213,8 +213,9 @@ fetch_packetstamp(
 #endif	/* USE_SCM_BINTIME || USE_SCM_TIMESTAMPNS || USE_SCM_TIMESTAMP */
 
 		default:
-			DPRINTF(4, ("fetch_timestamp: skipping control message 0x%x\n",
-				    cmsghdr->cmsg_type));
+			DPRINTF(4,
+                            ("fetch_timestamp: skipping control message 0x%x\n",
+			     (unsigned)cmsghdr->cmsg_type));
 		}
 		cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr);
 	}
