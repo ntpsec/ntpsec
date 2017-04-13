@@ -711,7 +711,7 @@ TEST(leapsec, ls2009seqInsDumb) {
 
 	rc = setup_load_table(leap1);
 	TEST_ASSERT_TRUE(rc);
-	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
+	TEST_ASSERT_FALSE(leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY);
 	TEST_ASSERT_FALSE(rc);
@@ -802,7 +802,7 @@ TEST(leapsec, ls2009seqDelDumb) {
 
 	rc = setup_load_table(leap3);
 	TEST_ASSERT_TRUE(rc);
-	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
+	TEST_ASSERT_FALSE(leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY);
 	TEST_ASSERT_FALSE(rc);
@@ -887,7 +887,7 @@ TEST(leapsec, ls2012seqInsDumb) {
 
 	rc = setup_load_table(leap1);
 	TEST_ASSERT_TRUE(rc);
-	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
+	TEST_ASSERT_FALSE(leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2012 - 60*SECSPERDAY);
 	TEST_ASSERT_FALSE(rc);
@@ -937,7 +937,7 @@ TEST(leapsec, lsEmptyTableDumb) {
 	const uint32_t t0   = lsec2012 - 10;
 	const uint32_t tE   = lsec2012 + 10;
 
-	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
+	TEST_ASSERT_FALSE(leapsec_electric(-1));
 
 	for (t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t);
@@ -955,7 +955,7 @@ TEST(leapsec, lsEmptyTableElectric) {
 	time_t       t;
 
 	leapsec_electric(electric_on);
-	TEST_ASSERT_EQUAL(electric_on, leapsec_electric(electric_query));
+	TEST_ASSERT(electric_on == leapsec_electric(electric_query));
 
 	const time_t   t0 = lsec2012 - 10;
 	const time_t   tE = lsec2012 + 10;
