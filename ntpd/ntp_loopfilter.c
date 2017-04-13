@@ -198,8 +198,8 @@ static void
 sync_status(const char *what, int ostatus, int nstatus)
 {
 	char obuf[256], nbuf[256], tbuf[1024];
-	snprintf(obuf, sizeof(obuf), "%04x", ostatus);
-	snprintf(nbuf, sizeof(nbuf), "%04x", nstatus);
+	snprintf(obuf, sizeof(obuf), "%04x", (unsigned)ostatus);
+	snprintf(nbuf, sizeof(nbuf), "%04x", (unsigned)nstatus);
 	snprintf(tbuf, sizeof(tbuf), "%s status: %s -> %s", what, obuf, nbuf);
 	report_event(EVNT_KERN, NULL, tbuf);
 }
@@ -255,9 +255,10 @@ ntp_adjtime_error_handler(
 	    case -1:
 		switch (saved_errno) {
 		    case EFAULT:
-			msyslog(LOG_ERR, "%s: %s line %d: invalid struct timex pointer: 0x%lx",
+			msyslog(LOG_ERR, "%s: %s line %d: invalid "
+                                         "struct timex pointer: 0x%lx",
 			    caller, file_name(), line,
-			    (long)((void *)ptimex)
+			    (long unsigned)((void *)ptimex)
 			);
 		    break;
 		    case EINVAL:
@@ -403,7 +404,7 @@ or, from ntp_adjtime():
 			report_event(EVNT_KERN, NULL,
 			    "no PPS signal");
 		DPRINTF(1, ("kernel loop status %#x (%s)\n",
-			ptimex->status, des));
+			(unsigned)ptimex->status, des));
 		/*
 		 * This code may be returned when ntp_adjtime() has just
 		 * been called for the first time, quite a while after
@@ -419,7 +420,7 @@ or, from ntp_adjtime():
 		 * msyslog(LOG_INFO, "kernel reports time synchronization lost");
 		 */
 		msyslog(LOG_INFO, "kernel reports TIME_ERROR: %#x: %s",
-			ptimex->status, des);
+			(unsigned)ptimex->status, des);
 	    break;
 #else
 # warning TIME_ERROR is not defined
