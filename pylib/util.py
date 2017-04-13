@@ -385,19 +385,8 @@ def unitrelativeto(unit, move):
     return None  # couldn't find anything
 
 
-def unitifyvar(value, varname, baseunit=None, strip=False, width=8):
-    if varname in S_VARS:
-        start = UNIT_S
-    elif varname in MS_VARS:
-        start = UNIT_MS
-    elif varname in PPM_VARS:
-        start = UNIT_PPM
-    else:
-        return value
-    return unitify(value, start, baseunit, strip, width)
-
-
-def unitify(value, startingunit, baseunit=None, strip=False, width=8):
+def unitify(value, startingunit, baseunit=None,
+            strip=False, width=8):
     "Formats a numberstring with relevant units. Attemps to fit in width."
     if baseunit is None:
         baseunit = getunitgroup(startingunit)[0]
