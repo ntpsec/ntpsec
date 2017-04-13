@@ -6,10 +6,12 @@
 static bool IsEqual(const l_fp *expected, const l_fp *actual) {
 	if (*expected == *actual) {
 		return true;
-	} else {
-		printf("Expected: %s (%d.%d) but was: %s (%d.%d)\n", lfptoa(*expected, FRACTION_PREC), lfpuint(*expected), lfpfrac(*expected), lfptoa(*actual, FRACTION_PREC), lfpuint(*actual), lfpfrac(*actual));
-		return false;
 	}
+	printf("Expected: %s (%u.%u) but was: %s (%u.%u)\n",
+		lfptoa(*expected, FRACTION_PREC), lfpuint(*expected),
+		lfpfrac(*expected), lfptoa(*actual, FRACTION_PREC),
+		lfpuint(*actual), lfpfrac(*actual));
+	return false;
 }
 
 static const uint32_t HALF = 2147483648U;           // (1 << 31)
