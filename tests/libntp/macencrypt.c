@@ -18,14 +18,14 @@ TEST_TEAR_DOWN(macencrypt) {}
  * Example packet with MD5 hash calculated manually.
  */
 const int keytype = NID_md5;
-const char *key = "abcdefgh";
+char *key = "abcdefgh";
 const u_short keyLength = 8;
 const char *packet = "ijklmnopqrstuvwx";
 const int packetLength = 16;
 const int keyIdLength = 4;
 const int digestLength = 16;
 const int totalLength = 36; //error: initializer element is not constant packetLength + keyIdLength + digestLength;
-const char *expectedPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
+char *expectedPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
 
 TEST(macencrypt, Encrypt) {
 	char *packetPtr[totalLength];
@@ -47,15 +47,17 @@ TEST(macencrypt, Encrypt) {
 TEST(macencrypt, DecryptValid) {
 	cache_secretsize = keyLength;
 
-	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (u_char*)key, (uint32_t*)expectedPacket, packetLength, 20));
+	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (u_char*)key,
+                         (uint32_t*)expectedPacket, packetLength, 20));
 }
 
 TEST(macencrypt, DecryptInvalid) {
 	cache_secretsize = keyLength;
 
-	const char *invalidPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
+	char invalidPacket[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
 
-	TEST_ASSERT_FALSE(mac_authdecrypt(keytype, (u_char*)key, (uint32_t*)invalidPacket, packetLength, 20));
+	TEST_ASSERT_FALSE(mac_authdecrypt(keytype, (u_char*)key,
+                          (uint32_t*)invalidPacket, packetLength, 20));
 }
 
 TEST(macencrypt, IPv4AddressToRefId) {
