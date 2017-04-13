@@ -265,8 +265,10 @@ def cmd_configure(ctx, config):
         ("z_now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
 
+    # we prepend our options to CFLAGS, this allows user provided
+    # CFLAGS to override our computed CFLAGS
     if ctx.options.enable_debug_gdb:
-        ctx.env.CFLAGS += ["-g"]
+        ctx.env.CFLAGS = ["-g"] + ctx.env.CFLAGS
     else:
         # not gdb debugging
         cc_test_flags += [
@@ -280,7 +282,7 @@ def cmd_configure(ctx, config):
         ctx.define("DEBUG", 1, comment="Enable debug mode")
         ctx.env.BISONFLAGS += ["--debug"]
         # turn on some annoying warnings
-        ctx.env.CFLAGS += [
+        ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
             #"-Wsuggest-attribute=const", # fails build
             #"-Waggregate-return",    # breaks ldiv(), ntpcal_daysplit(),  etc.
@@ -307,15 +309,19 @@ def cmd_configure(ctx, config):
             "-Wshadow",
             "-Wswitch-default",
             "-Wwrite-strings",
-        ]
+        ] + ctx.env.CFLAGS
         cc_test_flags += [
-            ('w_format_signedness', '-Wformat-signedness'), # fails on OpenBSD 6
-            ('w_sign_conversion', "-Wsign-conversion"), # fails on Solaris and OpenBSD 6
-            ('w_suggest_attribute_noreturn', "-Wsuggest-attribute=noreturn"), # fails on clang
-            ('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"), # fails on clang
+            # fails on OpenBSD 6
+            ('w_format_signedness', '-Wformat-signedness'),
+            # fails on Solaris and OpenBSD 6
+            ('w_sign_conversion', "-Wsign-conversion"),
+            # fails on clang
+            ('w_suggest_attribute_noreturn', "-Wsuggest-attribute=noreturn"),
+            # fails on clang
+            ('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"),
             ]
 
-    ctx.env.CFLAGS += [
+    ctx.env.CFLAGS = [
         # -O1 will turn on -D_FORTIFY_SOURCE=2 for us
         "-O1",
         "-Wall",
@@ -325,7 +331,7 @@ def cmd_configure(ctx, config):
         "-Wstrict-prototypes",
         "-Wundef",
         "-Wunused",
-        ]
+        ] + ctx.env.CFLAGS
 
     FRAGMENT = '''
 int main(int argc, char **argv) {
@@ -351,51 +357,34 @@ int main(int argc, char **argv) {
     # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
     # it.
     if ctx.env.HAS_gnu99:
-        ctx.env.CFLAGS += [
-            "-std=gnu99",
-            ]
+        ctx.env.CFLAGS = ["-std=gnu99"] + ctx.env.CFLAGS
     else:
-        ctx.env.CFLAGS += [
-            "-std=c99",
-            ]
+        ctx.env.CFLAGS = ["-std=c99"] + ctx.env.CFLAGS
 
     if ctx.env.HAS_PIC:
-        ctx.env.CFLAGS += [
-            "-fPIC",
-            ]
+        ctx.env.CFLAGS = ["-fPIC"] + ctx.env.CFLAGS
 
     if ctx.env.HAS_PIE:
         ctx.env.LINKFLAGS_NTPD += [
             "-pie",
             ]
-        ctx.env.CFLAGS_bin += [
-            "-fPIE",
-            "-pie",
-            ]
+        ctx.env.CFLAGS_bin = ["-fPIE", "-pie"] + ctx.env.CFLAGS
         ld_hardening_flags += [
             ('relro', "-Wl,-z,relro"),  # hardening, marks some read only,
             ]
 
     if ctx.env.HAS_unused:
-        ctx.env.CFLAGS += [
-            '-Qunused-arguments',
-            ]
+        ctx.env.CFLAGS = ['-Qunused-arguments'] + ctx.env.CFLAGS
 
     # XXX: -flto currently breaks link of ntpd
     if ctx.env.HAS_LTO and False:
-        ctx.env.CFLAGS += [
-            "-flto",
-            ]
+        ctx.env.CFLAGS = ["-flto"] + ctx.env.CFLAGS
 
     # debug warnings that are not available with all compilers
     if ctx.env.HAS_w_format_signedness:
-        ctx.env.CFLAGS += [
-            '-Wformat-signedness',
-            ]
+        ctx.env.CFLAGS = ['-Wformat-signedness'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
-        ctx.env.CFLAGS += [
-            '-Wsign-conversion',
-            ]
+        ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.
     # ("relro", "-Wl,-z,relro"), # marks some sections read only
@@ -419,25 +408,23 @@ int main(int argc, char **argv) {
     elif ctx.env.CC_NAME == "clang":
         # used on macOS, FreeBSD,
         # FORTIFY needs LTO to work well
-        ctx.env.CFLAGS += [
+        ctx.env.CFLAGS = [
             "-fstack-protector-all",    # hardening
-            "-D_FORTIFY_SOURCE=2",      # hardening
-            ]
+            ] + ctx.env.CFLAGS
         if ctx.env.DEST_OS not in ["darwin", "freebsd"]:
             # -flto breaks tests on macOS
-            ctx.env.CFLAGS += [
-                "-flto",                    # hardening, needed for sanitize
+            ctx.env.CFLAGS = [
                 "-fsanitize=cfi",           # hardening
                 "-fsanitize=safe-stack",    # hardening
-                ]
+                ] + ctx.env.CFLAGS
             ctx.env.LDFLAGS += [
                 "-Wl,-z,relro",  # hardening, marks some section read only,
                 ]
     else:
         # gcc, probably
-        ctx.env.CFLAGS += [
+        ctx.env.CFLAGS = [
             "-fstack-protector-all",    # hardening
-            ]
+            ] + ctx.env.CFLAGS
 
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
