@@ -594,8 +594,8 @@ jupiter_ppsapi(
 		time_pps_getparams(instance->pps_handle, &instance->pps_params);
 		jupiter_debug(instance->peer, __func__,
 			"pps capability 0x%x version %d mode 0x%x kern %d",
-			capability, instance->pps_params.api_version,
-			instance->pps_params.mode, instance->hardpps);
+			(unsigned)capability, instance->pps_params.api_version,
+			(unsigned)instance->pps_params.mode, instance->hardpps);
 	}
 #endif
 
@@ -786,8 +786,8 @@ jupiter_receive(struct recvbuf *rbufp)
 		case JUPITER_O_PULSE:
 			if (size != sizeof(struct jpulse)) {
 				jupiter_debug(peer, __func__,
-				    "pulse: len %d != %u",
-				    size, (int)sizeof(struct jpulse));
+				    "pulse: len %d != %zu",
+				    size, sizeof(struct jpulse));
 				refclock_report(peer, CEVNT_BADREPLY);
 				break;
 			}
@@ -876,8 +876,8 @@ jupiter_receive(struct recvbuf *rbufp)
 		case JUPITER_O_GPOS:
 			if (size != sizeof(struct jgpos)) {
 				jupiter_debug(peer, __func__,
-				    "gpos: len %d != %u",
-				    size, (int)sizeof(struct jgpos));
+				    "gpos: len %d != %zu",
+				    size, sizeof(struct jgpos));
 				refclock_report(peer, CEVNT_BADREPLY);
 				break;
 			}
@@ -892,8 +892,8 @@ jupiter_receive(struct recvbuf *rbufp)
 		case JUPITER_O_ID:
 			if (size != sizeof(struct jid)) {
 				jupiter_debug(peer, __func__,
-				    "id: len %d != %u",
-				    size, (int)sizeof(struct jid));
+				    "id: len %d != %zu",
+				    size, sizeof(struct jid));
 				refclock_report(peer, CEVNT_BADREPLY);
 				break;
 			}
@@ -1004,13 +1004,13 @@ jupiter_parse_t(struct instance *instance, u_short *sp)
 	 */
 	if (instance->lastsweek == sweek)
 		jupiter_debug(instance->peer, __func__,
-		    "gps sweek not incrementing (%d)",
+		    "gps sweek not incrementing (%u)",
 		    sweek);
 	else if (instance->lastsweek != 2 * WEEKSECS &&
 	    instance->lastsweek + 1 != sweek &&
 	    !(sweek == 0 && instance->lastsweek == WEEKSECS - 1))
 		jupiter_debug(instance->peer, __func__,
-		    "gps sweek jumped (was %d, now %d)",
+		    "gps sweek jumped (was %u, now %u)",
 		    instance->lastsweek, sweek);
 	instance->lastsweek = sweek;
 
