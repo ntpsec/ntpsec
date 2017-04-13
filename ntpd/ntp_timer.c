@@ -416,8 +416,10 @@ check_leapsec(
 	} else {
 		int fired = leapsec_query(&lsdata, now);
 
-		DPRINTF(1, ("*** leapsec_query: fired %i, now %lli (0x%llX), tai_diff %i, ddist %u\n",
-		      fired, (long long)now, (long long)now, lsdata.tai_diff, lsdata.ddist));
+		DPRINTF(1, ("*** leapsec_query: fired %i, now %lli (0x%llX), "
+                            "tai_diff %i, ddist %u\n",
+		            fired, (long long)now, (long long unsigned)now,
+                            lsdata.tai_diff, lsdata.ddist));
 #ifdef ENABLE_LEAP_SMEAR
 		leap_smear.in_progress = false;
 		leap_smear.doffset = 0.0;
