@@ -40,19 +40,20 @@ decodenetnum(
 	const char *ip_start, *ip_end, *port_start, *temp;
 	size_t numlen;
 	bool have_brackets;
+        int retcode = 0;
 
 	char ip[INET6_ADDRSTRLEN];
 
 	ZERO(*netnum);               /* don't return random data on fail */
         /* check num not NULL before using it */
 	if ( NULL == num) {
-                return -1;
+                return -4001;
         }
 	numlen = strlen(num);
 	/* Quickly reject empty or impossibly long inputs. */
 	if(numlen == 0 ||
 	   numlen > ((sizeof(ip) - 1) + (NI_MAXSERV - 1) + (3 /* "[]:" */))) {
-		return -2;
+		return -4002;
 	}
 
 	/* Is this a bracketed IPv6 address? */
@@ -73,7 +74,7 @@ decodenetnum(
 		}
 		else {
 			/* Anything else must be invalid. */
-			return -3;
+			return -4003;
 		}
 	}
 	/* No brackets. Searching backward, see if there's at least one
@@ -107,7 +108,7 @@ decodenetnum(
 	   whether the IP is short enough to possibly be valid and
 	   if so copy it into ip. */
 	if ((ip_end - ip_start + 1) > (int)sizeof(ip)) {
-		return -4;
+		return -4004;
 	} else {
 		memcpy(ip, ip_start, (size_t)(ip_end - ip_start));
 		ip[ip_end - ip_start] = '\0';
@@ -125,9 +126,10 @@ decodenetnum(
 	   either the IP address or the port is well-formed, but at
 	   least they're unambiguously delimited from each other.
 	   Let getaddrinfo() perform all further validation. */
-	if(getaddrinfo(ip, port_start == NULL ? "ntp" : port_start,
-		       &hints, &ai) != 0) {
-		return -5;
+	retcode = getaddrinfo(ip, port_start == NULL ? "ntp" : port_start,
+		       &hints, &ai);
+	if(retcode) {
+		return retcode;
 	}
 
 	NTP_INSIST(ai->ai_addrlen <= sizeof(*netnum));

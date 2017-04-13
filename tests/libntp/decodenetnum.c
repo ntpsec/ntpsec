@@ -93,7 +93,7 @@ TEST(decodenetnum, IllegalAddress) {
         int ret;
 
 	ret = decodenetnum(str, &actual);
-	TEST_ASSERT_EQUAL_INT(-5, ret);
+	TEST_ASSERT_NOT_EQUAL(0, ret);
 }
 
 TEST(decodenetnum, IllegalCharInPort) {
@@ -110,7 +110,7 @@ TEST(decodenetnum, IllegalCharInPort) {
 	SET_PORT(&expected, NTP_PORT);
 
 	ret = decodenetnum(str, &actual);
-	TEST_ASSERT_EQUAL_INT(-5, ret);
+	TEST_ASSERT_NOT_EQUAL(0, ret);
 	TEST_ASSERT_TRUE(IsDiffS(&expected, &actual));
 }
 
