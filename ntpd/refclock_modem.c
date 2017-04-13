@@ -502,7 +502,7 @@ modem_timeout(
 				report_event(PEVNT_CLOCK, peer, "modem: port busy");
 				return;
 			}
-			snprintf(pidbuf, sizeof(pidbuf), "%d\n",
+			snprintf(pidbuf, sizeof(pidbuf), "%u\n",
 			    (u_int)getpid());
 			if (write(fd, pidbuf, strlen(pidbuf)) < 0)
 				msyslog(LOG_ERR, "modem: write lock fails %m");
@@ -780,7 +780,7 @@ modem_timecode(
 	 */
 	case LENACTS:
 		if (sscanf(str,
-		    "%5ld %2d-%2d-%2d %2d:%2d:%2d %2d %1d %3lf %5lf %9s %c",
+		    "%5lu %2d-%2d-%2d %2d:%2d:%2d %2u %1u %3lf %5lf %9s %c",
 		    &mjd, &pp->year, &month, &day, &pp->hour,
 		    &pp->minute, &pp->second, &dst, &leap, &dut1,
 		    &msADV, utc, &flag) != 13) {
@@ -805,7 +805,7 @@ modem_timecode(
 	 * USNO format: "jjjjj nnn hhmmss UTC"
 	 */
 	case LENUSNO:
-		if (sscanf(str, "%5ld %3d %2d%2d%2d %3s",
+		if (sscanf(str, "%5lu %3d %2d%2d%2d %3s",
 		    &mjd, &pp->day, &pp->hour, &pp->minute,
 		    &pp->second, utc) != 6) {
 			refclock_report(peer, CEVNT_BADREPLY);
@@ -828,7 +828,7 @@ modem_timecode(
 	 */
 	case LENPTB:
 		if (sscanf(str,
-		    "%*4d-%*2d-%*2d %*2d:%*2d:%2d %*5c%*12c%4d%2d%2d%2d%2d%5ld%2lf%c%2d%3lf%*15c%c",
+		    "%*4d-%*2d-%*2d %*2d:%*2d:%2d %*5c%*12c%4d%2d%2d%2d%2d%5lu%2lf%c%2d%3lf%*15c%c",
 		    &pp->second, &pp->year, &month, &day, &pp->hour,
 		    &pp->minute, &mjd, &dut1, &leapdir, &leapmonth,
 		    &msADV, &flag) != 12) {
