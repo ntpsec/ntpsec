@@ -242,19 +242,22 @@ def fitinfield(value, fieldsize):
         pad = " " * (fieldsize - vallen)
         newvalue = pad + value
     else:  # Insufficient room, round as few digits as possible
-        diff = vallen - fieldsize
-        declen = len(value.split(".")[1])  # length of decimals
-        croplen = min(declen, diff)  # Never round above the decimal point
-        roundlen = declen - croplen  # How many digits we round to
-        newvalue = str(round(float(value), roundlen))
-        splitted = newvalue.split(".")
-        declen = len(splitted[1])
-        if roundlen == 0:  # if rounding all the decimals don't display .0
-            # but do display the point, to show that there is more beyond
-            newvalue = splitted[0] + "."
-        elif roundlen > declen:  # some zeros have been cropped, fix that
-            padcount = roundlen - declen
-            newvalue = newvalue + ("0" * padcount)
+        if "." in value:  # Ok, we *do* have decimals to crop
+            diff = vallen - fieldsize
+            declen = len(value.split(".")[1])  # length of decimals
+            croplen = min(declen, diff)  # Never round above the decimal point
+            roundlen = declen - croplen  # How many digits we round to
+            newvalue = str(round(float(value), roundlen))
+            splitted = newvalue.split(".")  # This should never fail
+            declen = len(splitted[1])
+            if roundlen == 0:  # if rounding all the decimals don't display .0
+                # but do display the point, to show that there is more beyond
+                newvalue = splitted[0] + "."
+            elif roundlen > declen:  # some zeros have been cropped, fix that
+                padcount = roundlen - declen
+                newvalue = newvalue + ("0" * padcount)
+        else:  # No decimals, nothing we can crop
+            newvalue = value
     return newvalue
 
 
