@@ -645,6 +645,7 @@ mx4200_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 	char *cp;
+	const char *ccp;
 	int sentence_type;
 	uint8_t ck;
 
@@ -756,9 +757,9 @@ mx4200_receive(
 		 * indicates the receiver needs to be initialized; thus, it is
 		 * not necessary to decode the status message.
 		 */
-		if ((cp = mx4200_parse_s(peer)) != NULL) {
+		if ((ccp = mx4200_parse_s(peer)) != NULL) {
 			mx4200_debug(peer,
-				     "mx4200_receive: status: %s\n", cp);
+				     "mx4200_receive: status: %s\n", ccp);
 		}
 		mx4200_debug(peer, "mx4200_receive: reset receiver\n");
 		mx4200_config(peer);
@@ -773,8 +774,9 @@ mx4200_receive(
 			/*
 			 * Parse the message, calculating our averaged position.
 			 */
-			if ((cp = mx4200_parse_p(peer)) != NULL) {
-				mx4200_debug(peer, "mx4200_receive: pos: %s\n", cp);
+			if ((ccp = mx4200_parse_p(peer)) != NULL) {
+				mx4200_debug(peer, "mx4200_receive: pos: %s\n",
+                                             ccp);
 				return;
 			}
 			mx4200_debug(peer,
@@ -802,9 +804,9 @@ mx4200_receive(
 	case PMVXG_D_SOFTCONF:
 	case PMVXG_D_TRECOVUSEAGE:
 
-		if ((cp = mx4200_parse_s(peer)) != NULL) {
+		if ((ccp = mx4200_parse_s(peer)) != NULL) {
 			mx4200_debug(peer,
-				     "mx4200_receive: multi-record: %s\n", cp);
+				     "mx4200_receive: multi-record: %s\n", ccp);
 		}
 		break;
 
@@ -828,8 +830,8 @@ mx4200_receive(
 		 * Parse the time recovery message, and keep the info
 		 * to print the pretty billboards.
 		 */
-		if ((cp = mx4200_parse_t(peer)) != NULL) {
-			mx4200_debug(peer, "mx4200_receive: time: %s\n", cp);
+		if ((ccp = mx4200_parse_t(peer)) != NULL) {
+			mx4200_debug(peer, "mx4200_receive: time: %s\n", ccp);
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
