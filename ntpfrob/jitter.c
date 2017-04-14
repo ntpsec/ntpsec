@@ -64,7 +64,7 @@ get_clocktime(
 
 static int doublecmp(const void *a, const void *b)
 {
-    return (int)(*((double *)a) - *((double *)b));
+    return (int)(*((const double *)a) - *((const double *)b));
 }
 
 void jitter(const iomode mode)
