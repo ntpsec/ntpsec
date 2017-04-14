@@ -244,6 +244,7 @@ parse_cmdline_opts(
 		opt_ipv6 = true;
 		break;
 	    case 'b':
+                /* huh?? */
 		break;
 	    case 'c':
 		if (ntp_optarg != NULL)
@@ -325,6 +326,7 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 'r':
+                /* huh? */
 		if (ntp_optarg != NULL)
 		{
 		    double tmp;
@@ -700,9 +702,21 @@ ntpdmain(
 	while ((op = ntp_getopt_long(argc, argv, ALL_OPTIONS,
 				     longoptions, NULL)) != -1) {
 	    switch (op) {
+            case '4':
+            case '6':
+            case 'c':
+            case 'd':
+            case 'D':
+                /* handled elsewhere */
+                break;
 	    case 'f':
 		stats_config(STATS_FREQ_FILE, driftfile);
 		break;
+            case 'g':
+            case 'h':
+            case 'i':
+                /* handled elsewhere */
+                break;
 	    case 'I':
 		if (ntp_optarg != NULL)
 	        {
@@ -718,9 +732,21 @@ ntpdmain(
 		if (ntp_optarg != NULL)
 			getauthkeys(ntp_optarg);
 		break;
+            case 'l':
+            case 'L':
+            case 'm':
+            case 'n':
+            case 'N':
+                /* handled elsewhere */
+                break;
 	    case 'p':
 		stats_config(STATS_PID_FILE, pidfile);
 		break;
+            case 'P':
+            case 'q':
+            case 'R':
+                /* handled elsewhere */
+                break;
 	    case 's':
 		stats_config(STATS_STATSDIR, statsdir);
 		break;
@@ -738,6 +764,12 @@ ntpdmain(
 		    }
 	        }
 		break;
+	    case 'u':
+	    case 'U':
+	    case 'v':
+	    case 'w':
+                /* handled elsewhere */
+                break;
 	    case 'x':
 		loop_config(LOOP_MAX, 600);
 		break;
@@ -747,10 +779,11 @@ ntpdmain(
 		break;
 	    case 'Z':
 		if (ntp_optarg != NULL)
-			set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, (u_short) (RW | DEF));
+			set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1,
+                                    (u_short) (RW | DEF));
                 break;
             default:
-		msyslog(LOG_ERR, "invalid op: %d", op);
+		msyslog(LOG_ERR, "Unknown option: %c", (char)op);
 		exit(1);
 	    }
 	}
