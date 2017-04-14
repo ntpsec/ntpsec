@@ -108,7 +108,7 @@ static	void	no_debug	(int);
 static int	saved_argc;
 static char **	saved_argv;
 
-int		ntpdmain		(int, char **);
+int		ntpdmain(int, char **) __attribute__((noreturn));
 static void	mainloop		(void)
 			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
@@ -910,7 +910,6 @@ ntpdmain(
 	
 	mainloop();
         /* unreachable, mainloop() never returns */
-	return 1;
 }
 
 /*
