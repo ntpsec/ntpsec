@@ -351,7 +351,8 @@ static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat
      * (b) memset compiles to an uninterruptible single-instruction bitblt.
      */
     memory_barrier();
-    memcpy((void *)&shmcopy, (void *)shm, sizeof(struct shmTime));
+    /* structure copy, to preserve volatile */
+    shmcopy = *shm;
     shm->valid = 0;
     memory_barrier();
 
