@@ -1,0 +1,35 @@
+.job_template: &job_definition
+  stage: build
+  artifacts:
+    expire_in: 7d
+    paths:
+      - build/main/attic/sht
+      - build/main/ntpclients/ntpdig
+      - build/main/ntpclients/ntpkeygen
+      - build/main/ntpclients/ntpleapfetch
+      - build/main/ntpclients/ntploggps
+      - build/main/ntpclients/ntplogtemp
+      - build/main/ntpclients/ntpmon
+      - build/main/ntpclients/ntpq
+      - build/main/ntpclients/ntpsweep
+      - build/main/ntpclients/ntptrace
+      - build/main/ntpclients/ntpviz
+      - build/main/ntpclients/ntpwait
+      - build/main/ntpd/ntpd
+      - build/main/ntpfrob/ntpfrob
+
+gitlab-basic:
+  <<: *job_definition
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure build
+  tags:
+    - gitlab-org
+
+gitlab-refclocks:
+  <<: *job_definition
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build
+  tags:
+    - gitlab-org
