@@ -27,8 +27,8 @@ struct isc_netaddr {
 };
 
 bool
-isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
-		     unsigned int prefixlen);
+isc_netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
+		     unsigned int) __attribute__((pure));
 /*%<
  * Compare the 'prefixlen' most significant bits of the network
  * addresses 'a' and 'b'.  If 'b''s scope is zero then 'a''s scope is
@@ -92,7 +92,7 @@ void
 isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone);
 
 uint32_t
-isc_netaddr_getzone(const isc_netaddr_t *netaddr);
+isc_netaddr_getzone(const isc_netaddr_t *netaddr) __attribute__((pure));
 
 void
 isc_netaddr_any(isc_netaddr_t *netaddr);
@@ -119,7 +119,7 @@ isc_netaddr_isexperimental(isc_netaddr_t *na);
  */
 
 bool
-isc_netaddr_islinklocal(isc_netaddr_t *na);
+isc_netaddr_islinklocal(isc_netaddr_t *na) __attribute__((pure));
 /*%<
  * Returns #true if the address is a link local address.
  */
