@@ -185,13 +185,14 @@ def rescalestring(value, unitsscaled):
             if newwhole == "":
                 newwhole = "0"
     elif unitsscaled < 0:  # scale to a smaller unit
-        if lolen < digitsmoved:  # Scaling beyone the digits, pad it out
+        if lolen < digitsmoved:  # Scaling beyond the digits, pad it out
             padcount = digitsmoved - lolen
             newwhole = whole + dec + ("0" * padcount)
             newdec = ""
         else:
             newwhole = whole + dec[:digitsmoved]
             newdec = dec[digitsmoved:]
+    newwhole = newwhole.lstrip("0")
     newvalue = gluenumberstring(newwhole, newdec, negative)
     return newvalue
 
@@ -215,7 +216,9 @@ def scalestring(value):
         else:
             lounits = (i // 3) + 1  # always need to shift one more unit
             movechars = lounits * 3
-            newwhole = dec[:movechars].lstrip('0')
+            if lolen < movechars:  # not enough zeros, pad them
+                dec = dec + ("0" * (movechars - lolen))
+            newwhole = dec[:movechars].lstrip("0")
             newdec = dec[movechars:]
             unitsmoved = -lounits
     else:  # Shift to larger units
@@ -316,8 +319,9 @@ def unitify(value, startingunit, baseunit=None, strip=False, width=8):
         baseunit = getunitgroup(startingunit)[0]
     if isstringzero(value) is True:  # display highest precision zero
         if strip is False:
-            value = fitinfield("0", width - len(baseunit))
-        value = value + baseunit
+            value = fitinfield("0", width - len(baseunit)) + baseunit
+        else:
+            value = "0" + baseunit
         return value
     ooms = oomsbetweenunits(startingunit, baseunit)
     newvalue = cropprecision(value, ooms)

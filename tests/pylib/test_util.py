@@ -37,6 +37,8 @@ class TestPylibUtilMethods(unittest.TestCase):
 
         # Scale all decimals
         self.assertEqual(f("0.042"), ("42", -1))
+        # Scale all decimals 2
+        self.assertEqual(f(".23"), ("230", -1))
         # Typical length, positive value, no scaling
         self.assertEqual(f("1.23450"), ("1.23450", 0))
         # Ditto, negative
@@ -92,6 +94,8 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f("1.23456", -2), "1234560")
         # ditto, negative
         self.assertEqual(f("-1.23456", -2), "-1234560")
+        # Scale from below the decimal
+        self.assertEqual(f("0.42", -1), "420")
 
     def test_breaknumberstring(self):
         f = ntp.util.breaknumberstring
@@ -209,6 +213,10 @@ class TestPylibUtilMethods(unittest.TestCase):
             "1000.02 3400.5 0.67835 -23.0 9001 6.7 1.00 1234"),
             "1.00002  3.4005 0.00068 -0.0230   9.001  0.0067 0.00100   1.234 s"
         )
+        # Bug
+        self.assertEqual(ntp.util.stringfiltcooker(
+            "0.47 0.42 0.43 0.50 0.46 0.42 0.49 0.48"),
+            u"    470     420     430     500     460     420     490     480 \u03bcs")
 
     def test_unitrelativeto(self):
         f = ntp.util.unitrelativeto
