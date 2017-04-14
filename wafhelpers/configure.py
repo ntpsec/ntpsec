@@ -261,6 +261,8 @@ def cmd_configure(ctx, config):
         ('w_format', '-Wformat'),
         # fails on OpenBSD 6
         ('w_format_signedness', '-Wformat-signedness'),
+        ('w_shadow', '-Wshadow'),
+        ('w_init_self', '-Winit-self'),
         ]
 
     # Check which linker flags are supported
@@ -297,7 +299,6 @@ def cmd_configure(ctx, config):
             "-Wformat-nonliteral",    # needs -Wformat
             "-Wformat-security",      # needs -Wformat
             "-Wimplicit-function-declaration",
-            "-Winit-self",
             "-Winline",
             "-Winvalid-pch",
             "-Wmissing-declarations", # Not Ready For Prime Time
@@ -308,7 +309,6 @@ def cmd_configure(ctx, config):
             # "-Wpadded",             # duck... over 3k warnings
             "-Wpointer-arith",
             # "-Wredundant-decls",    # incompatible w/ Unity
-            "-Wshadow",
             "-Wswitch-default",       # warns on Bison bug
             "-Wwrite-strings",
         ] + ctx.env.CFLAGS
@@ -327,7 +327,6 @@ def cmd_configure(ctx, config):
         "-Wall",
         "-Wextra",
         "-Wmissing-prototypes",
-        "-Wshadow",
         "-Wstrict-prototypes",
         "-Wundef",
         "-Wunused",
@@ -385,6 +384,10 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wformat-signedness'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_format:
         ctx.env.CFLAGS = ['-Wformat'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_init_self:
+        ctx.env.CFLAGS = ['-Winit-self'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_shadow:
+        ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
         ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
 
