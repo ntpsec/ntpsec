@@ -75,7 +75,7 @@ enable_packetstamps(
 	{
 		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
-			       (char*)&on, sizeof(on)))
+			       (const void *)&on, sizeof(on)))
 			msyslog(LOG_DEBUG,
 				"setsockopt SO_TIMESTAMPNS on fails on address %s: %m",
 				socktoa(addr));
