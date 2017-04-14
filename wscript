@@ -123,11 +123,12 @@ def afterparty(ctx):
     # module built in libntp.
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
         ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc ntpd/version.h")
-    for x in ("ntpclients",):
+    for x in ("ntpclients", "tests/pylib"):
             # List used to be longer...
             path_build = ctx.bldnode.make_node("pylib")
             path_source = ctx.srcnode.make_node(x + "/ntp")
-            relpath = "../" + path_build.path_from(ctx.srcnode)
+            path_depth = x.count("/") + 1
+            relpath = "../" * path_depth + path_build.path_from(ctx.srcnode)
             if ctx.cmd in ('install', 'build'):
                 if ((not path_source.exists()
                      or os.readlink(path_source.abspath()) != relpath)):

@@ -23,6 +23,7 @@ gitlab-basic:
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
     - python ./waf configure build
+    - python -m unittest discover -s tests/pylib
   tags:
     - gitlab-org
 
@@ -31,5 +32,6 @@ gitlab-refclocks:
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build
+    - python -m unittest discover -s tests/pylib
   tags:
     - gitlab-org
