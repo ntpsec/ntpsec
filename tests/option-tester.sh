@@ -39,7 +39,7 @@ doit ()
 
 doit minimal "--disable-debug --disable-droproot --disable-dns-lookup --disable-kernel-pll --disable-mdns-registration"
 doit nodebug "--disable-debug --refclock=all"
-doit all     "--enable-lockclock --enable-leap-smear --enable-mssntp --enable-debug-timing --refclock=all"
+doit all     "--enable-debug --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp"
 
 if [ `uname -s` = Linux ]
 then
