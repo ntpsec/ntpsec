@@ -258,15 +258,15 @@ TEST(lfpfunc, FDF_RoundTrip) {
                 double op2, d;
 		l_fp op1 = lfpinit_u(addsub_tab[idx][0].l_ui,
                                      addsub_tab[idx][0].l_uf);
-		// op2 = lfptod(op1);
-                op2 = ldexp((double)((int64_t)op1), -32);
+		op2 = lfptod(op1);
 		l_fp op3 = dtolfp(op2);
 
 		l_fp temp = op1 - op3;
 		d = lfptod(temp);
                 /* cast to long unsgiend int for 32 bit binaries */
-                snprintf(msg, sizeof(msg), "op2: %f diff %f not within %e",
-                         op2, d, eps(op2));
+                snprintf(msg, sizeof(msg),
+                         "\nop2: %f op3: %s diff %f not within %e",
+                         op2, mfptoa(op3, 8), d, eps(op2));
 		TEST_ASSERT_DOUBLE_WITHIN_MESSAGE(eps(op2), 0.0, fabs(d), msg);
 	}
 
