@@ -4073,7 +4073,8 @@ static int
 modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 {
 
-	char	*pCmd, cBuf [ 46 ] ;
+	const char *pCmd;
+	char	cBuf [ 46 ] ;
 	int	iCmdLen ;
 	int	iErrorCorrection, iSpeakerSwitch, iSpeakerVolume ;
 	int	iNextModemState = STAY_MODEM_STATE ;
@@ -4110,8 +4111,9 @@ modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 			iSpeakerVolume = 2 ;
 		}
 
+		snprintf(cBuf, sizeof(cBuf), "ATM%dL%d\r\n",
+                         iSpeakerSwitch, iSpeakerVolume ) ;
 		pCmd = cBuf ;
-		snprintf( pCmd, sizeof(cBuf), "ATM%dL%d\r\n", iSpeakerSwitch, iSpeakerVolume ) ;
 		break ;
 
 	case 3 :
@@ -4139,8 +4141,8 @@ modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 			iErrorCorrection = 3 ;
 		}
 
+		snprintf(cBuf, sizeof(cBuf), "AT\\N%d\r\n", iErrorCorrection);
 		pCmd = cBuf ;
-		snprintf( pCmd, sizeof(cBuf), "AT\\N%d\r\n", iErrorCorrection ) ;
 		break ;
 
 	case 7 :
