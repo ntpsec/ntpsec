@@ -119,6 +119,7 @@ void ppscheck(const char *device)
 		oldc = pi.clear_sequence;
 	}
 #endif /* HAVE_SYS_TIMEPPS_H */
+        /* either way, never returns */
 }
 
 /* end */
