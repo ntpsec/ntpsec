@@ -307,28 +307,6 @@ freesymkey(
 
 
 /*
- * auth_havekey - return true if the key id is zero or known
- */
-int
-auth_havekey(
-	keyid_t		id
-	)
-{
-	if (0 == id || cache_keyid == id) {
-		return true;
-	}
-
-	for (symkey * sk = key_hash[KEYHASH(id)]; sk != NULL; sk = sk->hlink) {
-		if (id == sk->keyid) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
-/*
  * authhavekey - return true and cache the key, if zero or both known
  *		 and trusted.
  */

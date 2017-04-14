@@ -79,14 +79,12 @@ TEST(authkeys, HaveKeyCorrect) {
 
 	AddTrustedKey(KEYNO);
 
-	TEST_ASSERT_TRUE(auth_havekey(KEYNO));
 	TEST_ASSERT_TRUE(authhavekey(KEYNO));
 }
 
 TEST(authkeys, HaveKeyIncorrect) {
 	const keyid_t KEYNO = 2;
 
-	TEST_ASSERT_FALSE(auth_havekey(KEYNO));
 	TEST_ASSERT_FALSE(authhavekey(KEYNO));
 }
 

@@ -44,7 +44,6 @@ extern	void	errno_to_str(int, char *, size_t);
 
 /* authkeys.c */
 extern	void	auth_delkeys	(void);
-extern	int	auth_havekey	(keyid_t);
 extern	int	authdecrypt	(keyid_t, uint32_t *, int, int);
 extern	int	authencrypt	(keyid_t, uint32_t *, int);
 extern	int	authhavekey	(keyid_t);
