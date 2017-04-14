@@ -260,8 +260,9 @@ def cmd_configure(ctx, config):
         ('unused', '-Qunused-arguments'),
         ('w_cast_align', "-Wcast-align"),
         ('w_cast_qual', "-Wcast-qual"),
-        ('w_disabled_optimizaation', "-Wdisabled-optimization"),
+        ('w_disabled_optimization', "-Wdisabled-optimization"),
         ('w_format', '-Wformat'),
+        ('w_format_security', '-Wformat-security'),
         # fails on OpenBSD 6
         ('w_format_signedness', '-Wformat-signedness'),
         ('w_implicit_function_declaration', "-Wimplicit-function-declaration"),
@@ -301,10 +302,8 @@ def cmd_configure(ctx, config):
             #"-Wsuggest-attribute=const", # fails build
             #"-Waggregate-return",    # breaks ldiv(), ntpcal_daysplit(),  etc.
             "-Wbad-function-cast",
-            "-Wdisabled-optimization",
             "-Wfloat-equal",          # Not Ready For Prime Time
             "-Wformat-nonliteral",    # needs -Wformat
-            "-Wformat-security",      # needs -Wformat
             "-Wmissing-declarations", # Not Ready For Prime Time
             "-Wmissing-format-attribute",
             # "-Wnested-externs",     # incompatible w/ Unity...
@@ -381,8 +380,11 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ["-flto"] + ctx.env.CFLAGS
 
     # debug warnings that are not available with all compilers
+    if ctx.env.HAS_w_format_security:
+        ctx.env.CFLAGS = ['-Wformat-security'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_format_signedness:
         ctx.env.CFLAGS = ['-Wformat-signedness'] + ctx.env.CFLAGS
+    # should be before other -Wformat-* in CFLAGS
     if ctx.env.HAS_w_format:
         ctx.env.CFLAGS = ['-Wformat'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_init_self:
