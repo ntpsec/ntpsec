@@ -302,7 +302,6 @@ def cmd_configure(ctx, config):
         # turn on some annoying warnings
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
-            #"-Wsuggest-attribute=const", # fails build
             #"-Waggregate-return",    # breaks ldiv(), ntpcal_daysplit(),  etc.
             "-Wbad-function-cast",
             "-Wfloat-equal",          # Not Ready For Prime Time
@@ -315,7 +314,10 @@ def cmd_configure(ctx, config):
         ] + ctx.env.CFLAGS
         cc_test_flags += [
             # fails on Solaris and OpenBSD 6
+            # complains about a Bison bug
             ('w_sign_conversion', "-Wsign-conversion"),
+            # fails on clang
+            ('w_suggest_attribute_const', "-Wsuggest-attribute=const"),
             # fails on clang
             ('w_suggest_attribute_noreturn', "-Wsuggest-attribute=noreturn"),
             # fails on clang
@@ -333,10 +335,13 @@ def cmd_configure(ctx, config):
         "-Wunused",
         ] + ctx.env.CFLAGS
 
+    # gotta be tricky to test for -Wsuggest-attribute=const
     FRAGMENT = '''
+int tmp;
 int main(int argc, char **argv) {
         (void)argc; (void)argv;
-        return 0;
+        tmp = argc;
+        return argc;
 }
 '''
 
@@ -381,6 +386,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ["-flto"] + ctx.env.CFLAGS
 
     # debug warnings that are not available with all compilers
+    if ctx.env.HAS_w_suggest_attribute_const:
+        ctx.env.CFLAGS = ['-Wsuggest-attribute=const'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_suggest_attribute_noreturn:
         ctx.env.CFLAGS = ['-Wsuggest-attribute=noreturn'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_suggest_attribute_pure:
