@@ -261,6 +261,7 @@ def cmd_configure(ctx, config):
         ('w_format', '-Wformat'),
         # fails on OpenBSD 6
         ('w_format_signedness', '-Wformat-signedness'),
+        ('w_inline', '-Winline'),
         ('w_shadow', '-Wshadow'),
         ('w_init_self', '-Winit-self'),
         ]
@@ -299,7 +300,6 @@ def cmd_configure(ctx, config):
             "-Wformat-nonliteral",    # needs -Wformat
             "-Wformat-security",      # needs -Wformat
             "-Wimplicit-function-declaration",
-            "-Winline",
             "-Winvalid-pch",
             "-Wmissing-declarations", # Not Ready For Prime Time
             "-Wmissing-format-attribute",
@@ -386,6 +386,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wformat'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_init_self:
         ctx.env.CFLAGS = ['-Winit-self'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_inline:
+        ctx.env.CFLAGS = ['-Winline'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
