@@ -446,6 +446,10 @@ modem_message(
 		else
 			modem_timeout(peer, S_MSG);
 		return;
+
+        default:
+                /* huh? */
+                break;
 	}
 
 	/*
@@ -584,6 +588,10 @@ modem_timeout(
 			refclock_receive(peer);
 		}
 		break;
+
+        default:
+                /* huh? */
+                break;
 	}
 	modem_close(peer);
 }
@@ -680,6 +688,10 @@ modem_poll(
 			return;
 
 		break;
+
+        default:
+                /* huh? */
+                break;
 	}
 	pp->polls++;
 	if (S_IDLE == up->state) {

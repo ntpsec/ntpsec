@@ -2779,6 +2779,10 @@ parse_start(
 	    case CS8:
 		tmp_ctl.parsesetcs.parse_cs = PARSE_IO_CS8;
 		break;
+
+            default:
+                /* huh? */
+                break;
 	}
 
 	if (!PARSE_SETCS(parse, &tmp_ctl))
@@ -3311,20 +3315,23 @@ parse_process(
 			{
 				parse_event(parse, CEVNT_BADREPLY);
 			}
+			else if (parsetime->parse_status & CVT_BADDATE)
+			{
+				parse_event(parse, CEVNT_BADDATE);
+			}
+			else if (parsetime->parse_status & CVT_BADTIME)
+			{
+				parse_event(parse, CEVNT_BADTIME);
+			}
 			else
-				if (parsetime->parse_status & CVT_BADDATE)
-				{
-					parse_event(parse, CEVNT_BADDATE);
-				}
-				else
-					if (parsetime->parse_status & CVT_BADTIME)
-					{
-						parse_event(parse, CEVNT_BADTIME);
-					}
-					else
-					{
-						parse_event(parse, CEVNT_BADREPLY); /* for the lack of something better */
-					}
+			{
+                                /* for the lack of something better */
+				parse_event(parse, CEVNT_BADREPLY);
+			}
+                        break;
+                default:
+                        /* huh? */
+                        break;
 		}
 		return;			/* skip the rest - useless */
 	}
