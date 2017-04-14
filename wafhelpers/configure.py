@@ -261,6 +261,7 @@ def cmd_configure(ctx, config):
         ('w_format', '-Wformat'),
         # fails on OpenBSD 6
         ('w_format_signedness', '-Wformat-signedness'),
+        ('w_implicit_function_declaration', "-Wimplicit-function-declaration"),
         ('w_init_self', '-Winit-self'),
         ('w_inline', '-Winline'),
         ('w_invalid_pch', '-Winvalid-pch'),
@@ -303,7 +304,6 @@ def cmd_configure(ctx, config):
             "-Wfloat-equal",          # Not Ready For Prime Time
             "-Wformat-nonliteral",    # needs -Wformat
             "-Wformat-security",      # needs -Wformat
-            "-Wimplicit-function-declaration",
             "-Wmissing-declarations", # Not Ready For Prime Time
             "-Wmissing-format-attribute",
             # "-Wnested-externs",     # incompatible w/ Unity...
@@ -394,6 +394,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wpointer-arith'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_invalid_pch:
         ctx.env.CFLAGS = ['-Winvalid-pch'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_implicit_function_declaration:
+        ctx.env.CFLAGS = ['-Wimplicit-function-declaration'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
