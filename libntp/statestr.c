@@ -443,6 +443,10 @@ statustoa(
 			 getevents(CTL_SYS_NEVNT(st)),
 			 getcode((st) & 0xf, clock_codes));
 		break;
+
+        default:
+                /* huh? */
+                break;
 	}
 
 	return cb;

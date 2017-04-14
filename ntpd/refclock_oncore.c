@@ -2201,6 +2201,9 @@ oncore_msg_BaEaHa(
 			else
 				oncore_sendmsg(instance, oncore_cmd_At2,  sizeof(oncore_cmd_At2));  /* not GT, arg not VP */
 			break;
+		default:
+			/* huh? */
+			break;
 		}
 
 		/* Read back PPS Offset for Output */
@@ -2553,6 +2556,9 @@ oncore_msg_Bl(
 				case  1:
 					warn = WARN_PLUS;
 					break;
+				default:
+					/* huh? */
+					break;
 				}
 			}
 		}
@@ -2570,6 +2576,9 @@ oncore_msg_Bl(
 		case WARN_PLUS:
 			instance->peer->leap = LEAP_ADDSECOND;
 			cp = "Set peer.leap to LEAP_ADDSECOND";
+			break;
+		default:
+			/* huh? */
 			break;
 		}
 		oncore_log(instance, LOG_NOTICE, cp);
