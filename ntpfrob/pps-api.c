@@ -63,7 +63,7 @@ static int err(int out, const char *legend)
 }
 #endif /* HAVE_SYS_TIMEPPS_H */
 
-void ppscheck(char *device)
+void ppscheck(const char *device)
 {
 #ifndef HAVE_SYS_TIMEPPS_H
 	(void)device;

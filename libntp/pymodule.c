@@ -25,7 +25,7 @@
 
 #include "python_compatibility.h"
 
-char *progname = "libntpc";
+const char *progname = "libntpc";
 
 /*
  * Client utility functions

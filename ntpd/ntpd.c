@@ -85,7 +85,7 @@ const char *chrootdir;	/* directory to chroot to */
 int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
 #endif
 
-char *progname;
+const char *progname;
 
 #ifdef HAVE_NETINFO_NI_H
 extern bool	check_netinfo;

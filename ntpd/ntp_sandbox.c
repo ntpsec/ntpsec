@@ -229,7 +229,7 @@ getgroup:
 			 *  interface tracking.
 			 */
 			cap_t caps;
-			char *captext;
+			const char *captext;
 			
 			captext = want_dynamic_interface_tracking
 				      ? "cap_sys_nice,cap_sys_time,cap_net_bind_service=pe"
