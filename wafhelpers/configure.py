@@ -271,6 +271,7 @@ def cmd_configure(ctx, config):
         ('w_invalid_pch', '-Winvalid-pch'),
         ('w_missing_declarations', '-Wmissing-declarations'),
         ('w_multichar', '-Wmultichar'),
+        ('w_packed', '-Wpacked'),
         ('w_pointer_arith', '-Wpointer-arith'),
         ('w_shadow', '-Wshadow'),
         ('w_write_strings', '-Wwrite-strings'),
@@ -307,7 +308,6 @@ def cmd_configure(ctx, config):
             # "-Wformat-nonliteral",  # complains about a used feature
             "-Wmissing-format-attribute",
             # "-Wnested-externs",     # incompatible w/ Unity...
-            "-Wpacked",
             # "-Wpadded",             # duck... over 3k warnings
             # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wswitch-default",       # warns on Bison bug
@@ -407,6 +407,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wmissing-declarations'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_cast_qual:
         ctx.env.CFLAGS = ['-Wcast-qual'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_packed:
+        ctx.env.CFLAGS = ['-Wpacked'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
