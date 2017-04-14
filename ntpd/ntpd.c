@@ -128,7 +128,7 @@ extern  void    close_all_beyond(int);
 extern  void    close_all_except(int);
 
 
-#define ALL_OPTIONS "46c:dD:f:gGhi:I:k:l:LmnNp:PqRs:t:u:U:Vw:xzZ"
+#define ALL_OPTIONS "46bc:dD:f:gGhi:I:k:l:LmnNp:Pqr:Rs:t:u:U:Vw:xzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -244,7 +244,10 @@ parse_cmdline_opts(
 		opt_ipv6 = true;
 		break;
 	    case 'b':
-                /* huh?? */
+		fputs("ERROR: Obsolete and unsupported broadcast option -b\n",
+                      stderr);
+		ntpd_usage();
+		exit(1);
 		break;
 	    case 'c':
 		if (ntp_optarg != NULL)
@@ -326,17 +329,10 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 'r':
-                /* huh? */
-		if (ntp_optarg != NULL)
-		{
-		    double tmp;
-		    if (sscanf(ntp_optarg, "%lf", &tmp) != 1) {
-			msyslog(LOG_ERR,
-				"command line broadcast delay value %s undecodable",
-				ntp_optarg);
-			exit(0);
-		    }
-		}
+		fputs("ERROR: Obsolete and unsupported broadcast option -r\n",
+                      stderr);
+		ntpd_usage();
+		exit(1);
 	        break;
 	    case 'R':	/* undocumented -- dump CLI options for testing */
 		dumpopts = true;
@@ -403,7 +399,8 @@ parse_cmdline_opts(
 		/* defer */
 		break;
 	    default:
-		fputs("Unknown command line switch or missing argument.\n", stderr);
+		fputs("Unknown command line switch or missing argument.\n",
+                      stderr);
 		ntpd_usage();
 		exit(1);
 	    } /*switch*/
@@ -704,6 +701,14 @@ ntpdmain(
 	    switch (op) {
             case '4':
             case '6':
+                /* handled elsewhere */
+                break;
+	    case 'b':
+		fputs("ERROR: Obsolete and unsupported broadcast option -b\n",
+                      stderr);
+		ntpd_usage();
+		exit(1);
+		break;
             case 'c':
             case 'd':
             case 'D':
@@ -744,6 +749,14 @@ ntpdmain(
 		break;
             case 'P':
             case 'q':
+                /* handled elsewhere */
+                break;
+	    case 'r':
+		fputs("ERROR: Obsolete and unsupported broadcast option -r\n",
+                      stderr);
+		ntpd_usage();
+		exit(1);
+		break;
             case 'R':
                 /* handled elsewhere */
                 break;
