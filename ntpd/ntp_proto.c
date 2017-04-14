@@ -664,7 +664,7 @@ handle_procpkt(
 			 pkt->ppoll, pkt->precision,
 			 pkt->rootdelay, pkt->rootdisp,
 			 /* FIXME: this cast is disgusting */
-			 *(uint32_t*)pkt->refid,
+			 *(const uint32_t*)pkt->refid,
 			 /* This will always be 0 by the time we get here */
 			 peer->outcount);
 
