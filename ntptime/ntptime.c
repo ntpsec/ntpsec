@@ -342,25 +342,25 @@ main(
 	} else {
 		char binbuf[132];
 		/* oldstyle formats */
-		char *ofmt7 = "ntp_adjtime() returns code %d (%s)\n";
-		char *ofmt8 = "  modes %s,\n";
-		char *ofmt9 = "  offset %.3f";
-		char *ofmt10 = " us, frequency %.3f ppm, interval %d s,\n";
-		char *ofmt11 = "  maximum error %lu us, estimated error %lu us,\n";
-		char *ofmt12 = "  status %s,\n";
-		char *ofmt13 = "  time constant %lu, precision %.3f us, tolerance %.0f ppm,\n";
-		char *ofmt14 = "  pps frequency %.3f ppm, stability %.3f ppm, jitter %.3f us,\n";
-		char *ofmt15 = "  intervals %lu, jitter exceeded %lu, stability exceeded %lu, errors %lu.\n";
+		const char *ofmt7 = "ntp_adjtime() returns code %d (%s)\n";
+		const char *ofmt8 = "  modes %s,\n";
+		const char *ofmt9 = "  offset %.3f";
+		const char *ofmt10 = " us, frequency %.3f ppm, interval %d s,\n";
+		const char *ofmt11 = "  maximum error %lu us, estimated error %lu us,\n";
+		const char *ofmt12 = "  status %s,\n";
+		const char *ofmt13 = "  time constant %lu, precision %.3f us, tolerance %.0f ppm,\n";
+		const char *ofmt14 = "  pps frequency %.3f ppm, stability %.3f ppm, jitter %.3f us,\n";
+		const char *ofmt15 = "  intervals %lu, jitter exceeded %lu, stability exceeded %lu, errors %lu.\n";
 		/* JSON formats */
-		char *jfmt7 = "\"adjtime-code\":%d,\"adjtime-status\":\"%s\",";
-		char *jfmt8 = "\"modes\":\"%s\",";
-		char *jfmt9 = "\"offset\":%.3f,";
-		char *jfmt10 = "\"frequency\":%.3f,\"interval\":%d,";
-		char *jfmt11 = "\"maximum-error\":%lu,\"estimated-error\":%lu,";
-		char *jfmt12 = "\"status\":\"%s\",";
-		char *jfmt13 = "\"time-constant\":%lu,\"precision\":%.3f,\"tolerance\":%.0f,";
-		char *jfmt14 = "\"pps-frequency\":%.3f,\"stability\":%.3f,\"jitter\":%.3f,";
-		char *jfmt15 = "\"intervals\":%lu,\"jitter-exceeded\":%lu,\"stability-exceeded\":%lu,\"errors:%lu\n";
+		const char *jfmt7 = "\"adjtime-code\":%d,\"adjtime-status\":\"%s\",";
+		const char *jfmt8 = "\"modes\":\"%s\",";
+		const char *jfmt9 = "\"offset\":%.3f,";
+		const char *jfmt10 = "\"frequency\":%.3f,\"interval\":%d,";
+		const char *jfmt11 = "\"maximum-error\":%lu,\"estimated-error\":%lu,";
+		const char *jfmt12 = "\"status\":\"%s\",";
+		const char *jfmt13 = "\"time-constant\":%lu,\"precision\":%.3f,\"tolerance\":%.0f,";
+		const char *jfmt14 = "\"pps-frequency\":%.3f,\"stability\":%.3f,\"jitter\":%.3f,";
+		const char *jfmt15 = "\"intervals\":%lu,\"jitter-exceeded\":%lu,\"stability-exceeded\":%lu,\"errors:%lu\n";
 
 		flash = ntx.status;
 		printf(json ? jfmt7 : ofmt7, status, timex_state(status));
