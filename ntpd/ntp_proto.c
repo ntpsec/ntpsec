@@ -2447,10 +2447,10 @@ if (NULL == server->dstadr)
 		peer_xmit(server);
 
 #ifdef HAL_FIXED
-		DPRINTF(1, ("transmit: at %ld %s->%s pool\n",
+		DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
 		    current_time, latoa(lcladr), socktoa(rmtadr)));
 #else
-		DPRINTF(1, ("transmit: at %ld ->%s pool\n",
+		DPRINTF(1, ("transmit: at %lu ->%s pool\n",
 		    current_time, socktoa(rmtadr)));
 #endif
 		msyslog(LOG_INFO, "Setup server %s", socktoa(rmtadr));
