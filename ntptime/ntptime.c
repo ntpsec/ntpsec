@@ -78,7 +78,7 @@ const char *	snprintb	(size_t, char *, u_int, const char *);
 const char *	timex_state	(int);
 
 #ifdef SIGSYS
-void pll_trap		(int);
+void pll_trap(int) __attribute__((noreturn));
 
 static struct sigaction newsigsys;	/* new sigaction status */
 static struct sigaction sigsys;		/* current sigaction status */
