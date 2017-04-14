@@ -134,17 +134,17 @@ static	void	mx4200_shutdown	(int, struct peer *);
 static	void	mx4200_receive	(struct recvbuf *);
 static	void	mx4200_poll	(int, struct peer *);
 
-static	char *	mx4200_parse_t	(struct peer *);
-static	char *	mx4200_parse_p	(struct peer *);
-static	char *	mx4200_parse_s	(struct peer *);
+static	const char *	mx4200_parse_t	(struct peer *);
+static	const char *	mx4200_parse_p	(struct peer *);
+static	const char *	mx4200_parse_s	(struct peer *);
 int	mx4200_cmpl_fp	(const void *, const void *);
 static	bool	mx4200_config	(struct peer *);
 static	void	mx4200_ref	(struct peer *);
-static	void	mx4200_send	(struct peer *, char *, ...)
+static	void	mx4200_send	(struct peer *, const char *, ...)
     __attribute__ ((format (printf, 2, 3)));
 static	uint8_t	mx4200_cksum	(char *, int);
 static	int	mx4200_jday	(int, int, int);
-static	void	mx4200_debug	(struct peer *, char *, ...)
+static	void	mx4200_debug	(struct peer *, const char *, ...)
     __attribute__ ((format (printf, 2, 3)));
 static	bool	mx4200_pps	(struct peer *);
 
@@ -923,7 +923,7 @@ mx4200_receive(
  *			further ahead of UTC time.
  *
  */
-static char *
+static const char *
 mx4200_parse_t(
 	struct peer *peer
 	)
@@ -1206,7 +1206,7 @@ mx4200_jday(
  *			57 = 3 sat startup failed
  *			58 = Command abort
  */
-static char *
+static const char *
 mx4200_parse_p(
 	struct peer *peer
 	)
@@ -1428,7 +1428,7 @@ mx4200_parse_p(
  *	8	Position Known PRN (absent on MX 4200)
  *
  */
-static char *
+static const char *
 mx4200_parse_s(
 	struct peer *peer
 	)
@@ -1532,7 +1532,7 @@ mx4200_pps(
  * mx4200_debug - print debug messages
  */
 static void
-mx4200_debug(struct peer *peer, char *fmt, ...)
+mx4200_debug(struct peer *peer, const char *fmt, ...)
 {
 	UNUSED_ARG(peer);
 #ifndef DEBUG
@@ -1558,7 +1558,7 @@ mx4200_debug(struct peer *peer, char *fmt, ...)
  * Send a character string to the receiver.  Checksum is appended here.
  */
 static void
-mx4200_send(struct peer *peer, char *fmt, ...)
+mx4200_send(struct peer *peer, const char *fmt, ...)
 {
 	struct refclockproc *pp;
 
