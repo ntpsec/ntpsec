@@ -51,7 +51,7 @@ main(int argc, char **argv)
 		    break;
 		case 'c':
 		    jitter(mode);
-		    exit(0);
+                    /* never returns */
 		    break;
 		case 'e':
 		    precision(mode);
@@ -63,6 +63,7 @@ main(int argc, char **argv)
 		case 'p':
 #ifdef HAVE_SYS_TIMEPPS_H
 		    ppscheck(optarg);
+                    /* never returns */
 #else
 		    fputs("ntpfrob: no PPS kernel interface.\n", stderr);
 		    exit(0);

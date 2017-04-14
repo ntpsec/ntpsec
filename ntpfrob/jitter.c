@@ -135,6 +135,7 @@ void jitter(const iomode mode)
 	}
 
 	exit(0);
+        /* never returns */
 }
 
 /* end */

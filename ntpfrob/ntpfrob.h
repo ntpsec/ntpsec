@@ -8,7 +8,7 @@ typedef enum {plain_text, raw, json} iomode;
 
 extern void bumpclock(int);
 extern void get_clocktime(l_fp *now);
-extern void jitter(const iomode mode);
+extern void jitter(const iomode mode) __attribute__((noreturn));
 extern void ppscheck(const char *device) __attribute__((noreturn));
 extern void precision(const iomode mode);
 extern void stepback(void);
