@@ -2000,7 +2000,7 @@ open_socket(
 	 * number on each interface according to turn_off_reuse.
 	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-		       (char *)((turn_off_reuse)
+		       (const void *)((turn_off_reuse)
 				    ? &off
 				    : &on),
 		       sizeof(on))) {
@@ -2050,7 +2050,7 @@ open_socket(
 #endif /* IPV6_TCLASS */
 		if (isc_net_probe_ipv6only_bool()
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
-		    (char*)&on, sizeof(on)))
+		    (const void *)&on, sizeof(on)))
 			msyslog(LOG_ERR,
 				"setsockopt IPV6_V6ONLY on fails on address %s: %m",
 				socktoa(addr));
