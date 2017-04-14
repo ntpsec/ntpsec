@@ -142,6 +142,9 @@ static struct partab
 #define DCF_Z_MET 0x2
 #define DCF_Z_MED 0x1
 
+static long ext_bf(unsigned char *, int, const unsigned char *)
+	__attribute__((pure));
+
 static long
 ext_bf(
 	unsigned char *buf,
