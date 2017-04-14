@@ -258,6 +258,8 @@ def cmd_configure(ctx, config):
         ('gnu99', '-std=gnu99'),
         # this quiets most of macOS warnings on -fpie
         ('unused', '-Qunused-arguments'),
+        ('w_cast_align', "-Wcast-align"),
+        ('w_cast_qual', "-Wcast-qual"),
         ('w_disabled_optimizaation', "-Wdisabled-optimization"),
         ('w_format', '-Wformat'),
         # fails on OpenBSD 6
@@ -299,8 +301,6 @@ def cmd_configure(ctx, config):
             #"-Wsuggest-attribute=const", # fails build
             #"-Waggregate-return",    # breaks ldiv(), ntpcal_daysplit(),  etc.
             "-Wbad-function-cast",
-            "-Wcast-align",
-            "-Wcast-qual",
             "-Wdisabled-optimization",
             "-Wfloat-equal",          # Not Ready For Prime Time
             "-Wformat-nonliteral",    # needs -Wformat
@@ -399,6 +399,10 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wimplicit-function-declaration'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_disabled_optimization:
         ctx.env.CFLAGS = ['-Wdisabled-optimization'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_cast_align:
+        ctx.env.CFLAGS = ['-Wcast-align'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_cast_qual:
+        ctx.env.CFLAGS = ['-Wcast-qual'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
