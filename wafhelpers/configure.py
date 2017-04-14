@@ -275,6 +275,8 @@ def cmd_configure(ctx, config):
         ('w_packed', '-Wpacked'),
         ('w_pointer_arith', '-Wpointer-arith'),
         ('w_shadow', '-Wshadow'),
+        # fails on clang
+        ('w_suggest_attribute_noreturn', "-Wsuggest-attribute=noreturn"),
         ('w_write_strings', '-Wwrite-strings'),
         ]
 
@@ -318,8 +320,6 @@ def cmd_configure(ctx, config):
             ('w_sign_conversion', "-Wsign-conversion"),
             # fails on clang
             ('w_suggest_attribute_const', "-Wsuggest-attribute=const"),
-            # fails on clang
-            ('w_suggest_attribute_noreturn', "-Wsuggest-attribute=noreturn"),
             # fails on clang
             ('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"),
             ]
