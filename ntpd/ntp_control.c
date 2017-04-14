@@ -2033,6 +2033,9 @@ ctl_putsys(
 		/* a.k.a. sys_tick (s), output in ms */
 		ctl_putdbl6(sys_var[varid].text, sys_tick * MS_PER_S);
 		break;
+        default:
+                /* huh? */
+                break;
 	}
 }
 
@@ -2479,6 +2482,10 @@ ctl_putclock(
 		*s = '\0';
 		ctl_putdata(buf, (unsigned)(s - buf), false);
 		break;
+
+        default:
+                /* huh? */
+                break;
 	}
 }
 #endif
@@ -3219,6 +3226,10 @@ send_mru_entry(
 			snprintf(tag, sizeof(tag), rs_fmt, count);
 			ctl_puthex(tag, mon->flags);
 			break;
+
+		default:
+			/* huh? */
+			break;
 		}
 		sent[which] = true;
 		remaining--;
@@ -3727,6 +3738,10 @@ send_ifstats_entry(
 			snprintf(tag, sizeof(tag), up_fmt, ifnum);
 			ctl_putuint(tag, current_time - la->starttime);
 			break;
+
+		default:
+			/* huh? */
+			break;
 		}
 		sent[which] = true;
 		remaining--;
@@ -3876,6 +3891,10 @@ send_restrict_entry(
 				pch = buf;
 			}
 			ctl_putunqstr(tag, pch, strlen(pch));
+			break;
+
+		default:
+			/* huh? */
 			break;
 		}
 		sent[which] = true;

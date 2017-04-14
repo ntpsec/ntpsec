@@ -309,7 +309,7 @@ def cmd_configure(ctx, config):
             "-Wpointer-arith",
             # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wshadow",
-            "-Wswitch-default",
+            "-Wswitch-default",       # warns on Bison bug
             "-Wwrite-strings",
         ] + ctx.env.CFLAGS
         cc_test_flags += [

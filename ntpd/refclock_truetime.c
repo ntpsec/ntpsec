@@ -799,6 +799,9 @@ true_doevent(
 		case s_Max:
 			msyslog(LOG_INFO, "TRUE: state %s is unexpected!",
 				stateStr(up->state));
+		default:
+			/* huh? */
+			break;
 		}
 		break;
 	default:
