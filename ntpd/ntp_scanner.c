@@ -349,7 +349,7 @@ lex_flush_stack()
  */
 static int rcmpstring(const void *p1, const void *p2)
 {
-    return strcmp(*(const char **)p1, *(const char **)p2);
+    return strcmp(*(const char * const *)p1, *(const char * const *)p2);
 }
 
 bool is_directory(const char *path)
