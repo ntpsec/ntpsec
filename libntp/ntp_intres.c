@@ -1041,6 +1041,9 @@ should_retry_dns(
 # endif
 		break;
 #endif
+        default:
+                /* huh? */
+                break;
 	}
 
 	TRACE(2, ("intres: resolver returned: %s (%d), %sretrying\n",

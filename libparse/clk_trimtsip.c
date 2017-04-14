@@ -271,6 +271,9 @@ cvt_trimtsip(
 				      case STATUS_BAD:
 					clock_time->flags |= PARSEB_NOSYNC|PARSEB_POWERUP;
 					break;
+                                      default:
+                                        /* huh? */
+                                        break;
 				      }
 
 				    if (t->t_mode == 0)

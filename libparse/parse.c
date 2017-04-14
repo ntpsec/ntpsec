@@ -196,6 +196,10 @@ parse_ioread(
 	    case PARSE_IO_CS8:
 		ch &= (char) 0xFFU;
 		break;
+
+            default:
+                /* huh? */
+                break;
 	}
 
 	parseprintf(DD_PARSE, ("parse_ioread(0x%lx, char=0x%x, ..., ...)\n",

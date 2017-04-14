@@ -129,6 +129,9 @@ sock_hash(
 		pch = (const void *)&SOCK_ADDR6(addr);
 		len = sizeof(SOCK_ADDR6(addr));
 		break;
+        default:
+                /* huh? */
+                break;
 	}
 
 	for (u_int j = 0; j < len ; j++)

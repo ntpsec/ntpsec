@@ -647,10 +647,11 @@ gps_input(
 	  parseio->parse_index = 0;
 	  return PARSE_INP_TIME;
 	}
-      else
-	{
-	  return PARSE_INP_SKIP;
-	}
+      return PARSE_INP_SKIP;
+
+    default:
+      /* huh? */
+      break;
     }
 
   /* cnt == 0, so the header or the whole message is complete */
