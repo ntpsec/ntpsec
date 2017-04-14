@@ -46,12 +46,15 @@ static jsmnerr_t jsmn_parse_primitive(jsmn_parser *parser, const char *js,
 	for (; parser->pos < len && js[parser->pos] != '\0'; parser->pos++) {
 		switch (js[parser->pos]) {
 #ifndef JSMN_STRICT
-			/* In strict mode primitive must be followed by "," or "}" or "]" */
-			case ':':
+		/* In strict mode primitive must be followed by "," or "}" or "]" */
+		case ':':
 #endif
-			case '\t' : case '\r' : case '\n' : case ' ' :
-			case ','  : case ']'  : case '}' :
-				goto found;
+		case '\t' : case '\r' : case '\n' : case ' ' :
+		case ','  : case ']'  : case '}' :
+			goto found;
+                default:
+                        /* huh? */
+                        break;
 		}
 		if (js[parser->pos] < 32 || js[parser->pos] >= 127) {
 			parser->pos = (unsigned int)start;

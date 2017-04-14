@@ -197,6 +197,9 @@ fetch_packetstamp(
 				nts = tspec_stamp_to_lfp(tval_to_tspec(*tvp));
 				break;
 #endif  /* USE_SCM_TIMESTAMP */
+			default:
+                                /* huh? */
+                                break;
 			}
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			lfpfuzz = dtolfp(fuzz);

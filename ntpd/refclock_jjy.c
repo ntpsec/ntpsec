@@ -1763,6 +1763,9 @@ jjy_poll_echokeisokuki_lt2000 ( int unit, struct peer *peer )
 	case ECHOKEISOKUKI_LT2000_MODE_SWITCHING_CONTINUOUS :
 		sCmd[0] = 'C' ;
 		break ;
+        default:
+		/* huh? */
+		break ;
 	}
 	sCmd[1] = 0 ;
 
