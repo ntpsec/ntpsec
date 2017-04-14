@@ -261,9 +261,10 @@ def cmd_configure(ctx, config):
         ('w_format', '-Wformat'),
         # fails on OpenBSD 6
         ('w_format_signedness', '-Wformat-signedness'),
+        ('w_init_self', '-Winit-self'),
         ('w_inline', '-Winline'),
         ('w_shadow', '-Wshadow'),
-        ('w_init_self', '-Winit-self'),
+        ('w_write_strings', '-Wwrite-strings'),
         ]
 
     # Check which linker flags are supported
@@ -310,7 +311,6 @@ def cmd_configure(ctx, config):
             "-Wpointer-arith",
             # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wswitch-default",       # warns on Bison bug
-            "-Wwrite-strings",
         ] + ctx.env.CFLAGS
         cc_test_flags += [
             # fails on Solaris and OpenBSD 6
@@ -388,6 +388,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Winit-self'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_inline:
         ctx.env.CFLAGS = ['-Winline'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_write_strings:
+        ctx.env.CFLAGS = ['-Wwrite-strings'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
