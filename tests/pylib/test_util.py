@@ -37,8 +37,8 @@ class TestPylibUtilMethods(unittest.TestCase):
 
         # Scale all decimals
         self.assertEqual(f("0.042"), ("42", -1))
-        # Scale all decimals 2
-        self.assertEqual(f(".23"), ("230", -1))
+        # Unscalable
+        self.assertEqual(f(".23"), ("0.23", 0))
         # Typical length, positive value, no scaling
         self.assertEqual(f("1.23450"), ("1.23450", 0))
         # Ditto, negative
@@ -91,11 +91,11 @@ class TestPylibUtilMethods(unittest.TestCase):
         # ditto, negative
         self.assertEqual(f("-1.23456", -1), "-1234.56")
         # Scale to lower unit, beyond available digits
-        self.assertEqual(f("1.23456", -2), "1234560")
+        self.assertEqual(f("1.23456", -2), None)
         # ditto, negative
-        self.assertEqual(f("-1.23456", -2), "-1234560")
+        self.assertEqual(f("-1.23456", -2), None)
         # Scale from below the decimal
-        self.assertEqual(f("0.42", -1), "420")
+        self.assertEqual(f("0.420", -1), "420")
 
     def test_breaknumberstring(self):
         f = ntp.util.breaknumberstring
@@ -208,16 +208,23 @@ class TestPylibUtilMethods(unittest.TestCase):
             "1.02 34.5 0.67835 -23.0 9 6.7 1.00 .1"),
             "   1.02    34.5 0.67835   -23.0       9     6.7    1.00     0.1 ms"
         )
-        # Scale
+        # Scale to larger unit
         self.assertEqual(ntp.util.stringfiltcooker(
             "1000.02 3400.5 0.67835 -23.0 9001 6.7 1.00 1234"),
             "1.00002  3.4005 0.00068 -0.0230   9.001  0.0067 0.00100   1.234 s"
         )
-        # Bug
+        # Scale to smaller unit
+        self.assertEqual(ntp.util.stringfiltcooker(
+            "0.470 0.420 0.430 0.500 0.460 0.4200 0.490 0.480"),
+            u"    470     420     430     500     460   420.0     490     480 \u03bcs")
+        # Can't scale
         self.assertEqual(ntp.util.stringfiltcooker(
             "0.47 0.42 0.43 0.50 0.46 0.42 0.49 0.48"),
-            u"    470     420     430     500     460     420     490     480 \u03bcs")
-
+            "   0.47    0.42    0.43    0.50    0.46    0.42    0.49    0.48 ms")
+        # Can't scale, only one value blocking
+        self.assertEqual(ntp.util.stringfiltcooker(
+            "0.47 0.4200 0.4300 0.5000 0.4600 0.4200 0.4900 0.4800"),
+            "   0.47  0.4200  0.4300  0.5000  0.4600  0.4200  0.4900  0.4800 ms")
     def test_unitrelativeto(self):
         f = ntp.util.unitrelativeto
 
