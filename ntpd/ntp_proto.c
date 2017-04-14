@@ -2440,7 +2440,7 @@ msyslog(LOG_INFO, "Server trying: %s", socktoa(rmtadr));
 		server->dstadr = findinterface(rmtadr);
 if (NULL == server->dstadr)
   msyslog(LOG_ERR, "server_take_dns: can't find interface for %s", server->hostname);
-		server->flags &= ~FLAG_DNS;
+		server->flags &= (unsigned)~FLAG_DNS;
 		server->hpoll = server->minpoll;
 		server->nextdate = current_time;
 		peer_update_hash(server);
