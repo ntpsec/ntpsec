@@ -263,6 +263,8 @@ def cmd_configure(ctx, config):
         ('w_format_signedness', '-Wformat-signedness'),
         ('w_init_self', '-Winit-self'),
         ('w_inline', '-Winline'),
+        ('w_multichar', '-Wmultichar'),
+        ('w_pointer_arith', '-Wpointer-arith'),
         ('w_shadow', '-Wshadow'),
         ('w_write_strings', '-Wwrite-strings'),
         ]
@@ -304,11 +306,9 @@ def cmd_configure(ctx, config):
             "-Winvalid-pch",
             "-Wmissing-declarations", # Not Ready For Prime Time
             "-Wmissing-format-attribute",
-            "-Wmultichar",
             # "-Wnested-externs",     # incompatible w/ Unity...
             "-Wpacked",
             # "-Wpadded",             # duck... over 3k warnings
-            "-Wpointer-arith",
             # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wswitch-default",       # warns on Bison bug
         ] + ctx.env.CFLAGS
@@ -390,6 +390,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Winline'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_write_strings:
         ctx.env.CFLAGS = ['-Wwrite-strings'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_pointer_arith:
+        ctx.env.CFLAGS = ['-Wpointer-arith'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
