@@ -258,6 +258,7 @@ def cmd_configure(ctx, config):
         ('gnu99', '-std=gnu99'),
         # this quiets most of macOS warnings on -fpie
         ('unused', '-Qunused-arguments'),
+        ('w_disabled_optimizaation', "-Wdisabled-optimization"),
         ('w_format', '-Wformat'),
         # fails on OpenBSD 6
         ('w_format_signedness', '-Wformat-signedness'),
@@ -396,6 +397,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Winvalid-pch'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_implicit_function_declaration:
         ctx.env.CFLAGS = ['-Wimplicit-function-declaration'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_disabled_optimization:
+        ctx.env.CFLAGS = ['-Wdisabled-optimization'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
