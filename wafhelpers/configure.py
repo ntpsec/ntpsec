@@ -269,6 +269,7 @@ def cmd_configure(ctx, config):
         ('w_init_self', '-Winit-self'),
         ('w_inline', '-Winline'),
         ('w_invalid_pch', '-Winvalid-pch'),
+        ('w_missing_declarations', '-Wmissing-declarations'),
         ('w_multichar', '-Wmultichar'),
         ('w_pointer_arith', '-Wpointer-arith'),
         ('w_shadow', '-Wshadow'),
@@ -303,8 +304,7 @@ def cmd_configure(ctx, config):
             #"-Waggregate-return",    # breaks ldiv(), ntpcal_daysplit(),  etc.
             "-Wbad-function-cast",
             "-Wfloat-equal",          # Not Ready For Prime Time
-            "-Wformat-nonliteral",    # needs -Wformat
-            "-Wmissing-declarations", # Not Ready For Prime Time
+            # "-Wformat-nonliteral",  # complains about a used feature
             "-Wmissing-format-attribute",
             # "-Wnested-externs",     # incompatible w/ Unity...
             "-Wpacked",
@@ -403,6 +403,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wdisabled-optimization'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_cast_align:
         ctx.env.CFLAGS = ['-Wcast-align'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_missing_declarations:
+        ctx.env.CFLAGS = ['-Wmissing-declarations'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_cast_qual:
         ctx.env.CFLAGS = ['-Wcast-qual'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
