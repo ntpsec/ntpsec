@@ -2504,7 +2504,7 @@ msyslog(LOG_INFO, "Pool trying: %s", socktoa(rmtadr));
 		pool->sent++;
 		pool->throttle += (1 << pool->minpoll) - 2;
 
-		DPRINTF(1, ("transmit: at %ld %s->%s pool\n",
+		DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
 		    current_time, latoa(lcladr), socktoa(rmtadr)));
 		msyslog(LOG_INFO, "Soliciting pool server %s", socktoa(rmtadr));
 	};
