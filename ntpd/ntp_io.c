@@ -254,7 +254,7 @@ static inline int	read_network_packet	(SOCKET, endpt *, l_fp);
 static void ntpd_addremove_io_fd (int, int, int);
 static void input_handler (fd_set *, l_fp *);
 #ifdef REFCLOCK
-static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
+static int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
 
 /*
@@ -2167,8 +2167,10 @@ sendpkt(
  * Routine to read the refclock packets for a specific interface
  * Return the number of bytes read. That way we know if we should
  * read it again or go on to the next one if no bytes returned
+ *
+ * Note: too big to inline
  */
-static inline int
+static int
 read_refclock_packet(
 	SOCKET			fd,
 	struct refclockio *	rp,
