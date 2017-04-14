@@ -508,8 +508,6 @@ int main(int argc, char **argv) {
     # These are helpful and don't break Linux or *BSD
     ctx.define("OPEN_BCAST_SOCKET", 1,
                comment="Whether to open a broadcast socket")
-    ctx.define("HAS_ROUTING_SOCKET", 1,
-               comment="Whether a routing socket exists")
 
 
     # Find OpenSSL. Must happen before function checks
