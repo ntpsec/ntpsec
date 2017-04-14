@@ -253,6 +253,7 @@ def cmd_configure(ctx, config):
         ctx.env.LDFLAGS += ["-lssp_nonshared"]
 
     cc_test_flags = [
+        ('f_stack_protector_all', '-fstack-protector-all'),
         ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
         ('gnu99', '-std=gnu99'),
@@ -413,6 +414,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_sign_conversion:
         ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
+    if ctx.env.HAS_f_stack_protector_all:
+        ctx.env.CFLAGS = ['-fstack-protector-all'] + ctx.env.CFLAGS
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.
     # ("relro", "-Wl,-z,relro"), # marks some sections read only
@@ -436,9 +439,6 @@ int main(int argc, char **argv) {
     elif ctx.env.CC_NAME == "clang":
         # used on macOS, FreeBSD,
         # FORTIFY needs LTO to work well
-        ctx.env.CFLAGS = [
-            "-fstack-protector-all",    # hardening
-            ] + ctx.env.CFLAGS
         if ctx.env.DEST_OS not in ["darwin", "freebsd"]:
             # -flto breaks tests on macOS
             ctx.env.CFLAGS = [
@@ -448,11 +448,7 @@ int main(int argc, char **argv) {
             ctx.env.LDFLAGS += [
                 "-Wl,-z,relro",  # hardening, marks some section read only,
                 ]
-    else:
-        # gcc, probably
-        ctx.env.CFLAGS = [
-            "-fstack-protector-all",    # hardening
-            ] + ctx.env.CFLAGS
+    # else:  # gcc, probably
 
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
