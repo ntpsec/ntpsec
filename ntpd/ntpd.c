@@ -729,7 +729,7 @@ ntpdmain(
 			msyslog(LOG_ERR,
 				"command line trusted key %s is invalid",
 				ntp_optarg);
-			exit(0);
+			exit(1);
 		    } else {
 			authtrust((keyid_t)tkey, true);
 		    }
@@ -745,7 +745,10 @@ ntpdmain(
 	    case 'Z':
 		if (ntp_optarg != NULL)
 			set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, (u_short) (RW | DEF));
-		break;
+                break;
+            default:
+		msyslog(LOG_ERR, "invalid op: %d", op);
+		exit(1);
 	    }
 	}
 
