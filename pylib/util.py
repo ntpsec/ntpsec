@@ -94,14 +94,19 @@ def stringfiltcooker(data):
     "Cooks a filt* string of space seperated numbers, expects milliseconds"
     parts = data.split()
     oomcount = {}
+    minscale = -100000  # Keep track of the maxdownscale for each value
     # Find out what the 'natural' unit of each value is
     for part in parts:
         value, oom = scalestring(part)
+        ds = maxdownscale(part)
+        minscale = max(ds, minscale)
         oomcount[oom] = oomcount.get(oom, 0) + 1
     # Find the most common unit
-    mostcommon = None
+    mostcommon = 0
     highestcount = 0
     for key in oomcount.keys():
+        if key < minscale:
+            continue  # skip any scale that would result in making up data
         count = oomcount[key]
         if count > highestcount:
             mostcommon = key
@@ -162,6 +167,15 @@ def gluenumberstring(above, below, isnegative):
     return newvalue
 
 
+def maxdownscale(value):
+    "Maximum units a value can be scaled down without inventing data"
+    if "." in value:
+        digitcount = len(value.split(".")[1])
+        return -(digitcount // 3)
+    else:
+        return 0
+
+
 def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
     whole, dec, negative = breaknumberstring(value)
@@ -173,8 +187,10 @@ def rescalestring(value, unitsscaled):
     hilen = len(whole)
     lolen = len(dec)
     digitsmoved = abs(unitsscaled * 3)
-    if unitsscaled > 0:  # Scale to a larger unit
-        if hilen < digitsmoved:  # Scaling beyond the digits, pad it out
+    if unitsscaled > 0:  # Scale to a larger unit, move decimal left
+        if hilen < digitsmoved:
+            # Scaling beyond the digits, pad it out. We can pad here
+            # without making up digits that don't exist
             padcount = digitsmoved - hilen
             newwhole = "0"
             newdec = ("0" * padcount) + whole + dec
@@ -184,14 +200,16 @@ def rescalestring(value, unitsscaled):
             newwhole = whole[:choppoint]
             if newwhole == "":
                 newwhole = "0"
-    elif unitsscaled < 0:  # scale to a smaller unit
-        if lolen < digitsmoved:  # Scaling beyone the digits, pad it out
-            padcount = digitsmoved - lolen
-            newwhole = whole + dec + ("0" * padcount)
-            newdec = ""
+    elif unitsscaled < 0:  # scale to a smaller unit, move decimal right
+        if lolen < digitsmoved:
+            # Scaling beyond the digits would force us to make up data
+            # that doesn't exist. So fail.
+            # The caller should have already caught this with maxdownscale()
+            return None
         else:
             newwhole = whole + dec[:digitsmoved]
             newdec = dec[digitsmoved:]
+    newwhole = newwhole.lstrip("0")
     newvalue = gluenumberstring(newwhole, newdec, negative)
     return newvalue
 
@@ -215,7 +233,12 @@ def scalestring(value):
         else:
             lounits = (i // 3) + 1  # always need to shift one more unit
             movechars = lounits * 3
-            newwhole = dec[:movechars].lstrip('0')
+            if lolen < movechars:
+                # Not enough digits to scale all the way down. Inventing
+                # digits is unacceptable, so scale down as much as we can.
+                lounits = (i // 3)  # "always", unless out of digits
+                movechars = lounits * 3
+            newwhole = dec[:movechars].lstrip("0")
             newdec = dec[movechars:]
             unitsmoved = -lounits
     else:  # Shift to larger units
@@ -316,8 +339,9 @@ def unitify(value, startingunit, baseunit=None, strip=False, width=8):
         baseunit = getunitgroup(startingunit)[0]
     if isstringzero(value) is True:  # display highest precision zero
         if strip is False:
-            value = fitinfield("0", width - len(baseunit))
-        value = value + baseunit
+            value = fitinfield("0", width - len(baseunit)) + baseunit
+        else:
+            value = "0" + baseunit
         return value
     ooms = oomsbetweenunits(startingunit, baseunit)
     newvalue = cropprecision(value, ooms)
