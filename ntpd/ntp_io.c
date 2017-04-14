@@ -1012,7 +1012,8 @@ interface_action(
 	for (rule = nic_rule_list; rule != NULL; rule = rule->next) {
 
 		switch (rule->match_type) {
-
+                default:
+                        /* huh? */
 		case MATCH_ALL:
 			/* loopback and wildcard excluded from "all" */
 			if (isloopback || iswildcard)
@@ -1278,7 +1279,6 @@ sau_from_netaddr(
 	ZERO_SOCK(psau);
 	AF(psau) = (sa_family_t)pna->family;
 	switch (pna->family) {
-
 	case AF_INET:
 		memcpy(&SOCK_ADDR4(psau), &pna->type.in,
 		       sizeof(SOCK_ADDR4(psau)));
@@ -1288,6 +1288,9 @@ sau_from_netaddr(
 		memcpy(&SOCK_ADDR6(psau), &pna->type.in6,
 		       sizeof(SOCK_ADDR6(psau)));
 		break;
+        default:
+                /* huh? */
+                break;
 	}
 }
 
@@ -1503,6 +1506,7 @@ update_interfaces(
 		switch (interface_action(enumep.name, &enumep.sin,
 					 enumep.flags)) {
 
+                default:
 		case ACTION_IGNORE:
 			DPRINTF(4, ("ignoring interface %s (%s) - by nic rules\n",
 				    enumep.name, socktoa(&enumep.sin)));
