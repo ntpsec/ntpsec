@@ -58,7 +58,6 @@ extern	int	clocktime	(int, int, int, int, int, uint32_t, uint32_t *, uint32_t *)
 extern	void	init_auth	(void);
 extern	void	init_lib	(void);
 extern	void	init_network	(void);
-extern	struct savekey *auth_findkey (keyid_t);
 extern	void	auth_moremem	(int);
 extern	void	auth_prealloc_symkeys(int);
 extern	int	ymd2yd		(int, int, int);

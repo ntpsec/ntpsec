@@ -307,24 +307,6 @@ freesymkey(
 
 
 /*
- * auth_findkey - find a key in the hash table
- */
-struct savekey *
-auth_findkey(
-	keyid_t		id
-	)
-{
-	for (symkey * sk = key_hash[KEYHASH(id)]; sk != NULL; sk = sk->hlink) {
-		if (id == sk->keyid) {
-			return sk;
-		}
-	}
-
-	return NULL;
-}
-
-
-/*
  * auth_havekey - return true if the key id is zero or known
  */
 int
