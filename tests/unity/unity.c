@@ -1025,7 +1025,7 @@ void UnityAssertEqualStringArray(UNITY_INTERNAL_PTR expected,
 {
     UNITY_UINT32 i = 0;
     UNITY_UINT32 j = 0;
-    const char* exp = NULL;
+    const char* expx = NULL;
     const char* act = NULL;
 
     RETURN_IF_FAIL_OR_IGNORE;
@@ -1048,7 +1048,7 @@ void UnityAssertEqualStringArray(UNITY_INTERNAL_PTR expected,
 
     if (flags != UNITY_ARRAY_TO_ARRAY)
     {
-        exp = (const char*)expected;
+        expx = (const char*)expected;
     }
 
     do
@@ -1056,15 +1056,15 @@ void UnityAssertEqualStringArray(UNITY_INTERNAL_PTR expected,
         act = actual[j];
         if (flags == UNITY_ARRAY_TO_ARRAY)
         {
-            exp = ((const char* const*)expected)[j];
+            expx = ((const char* const*)expected)[j];
         }
 
         /* if both pointers not null compare the strings */
-        if (exp && act)
+        if (expx && act)
         {
-            for (i = 0; exp[i] || act[i]; i++)
+            for (i = 0; expx[i] || act[i]; i++)
             {
-                if (exp[i] != act[i])
+                if (expx[i] != act[i])
                 {
                     Unity.CurrentTestFailed = 1;
                     break;
@@ -1073,7 +1073,7 @@ void UnityAssertEqualStringArray(UNITY_INTERNAL_PTR expected,
         }
         else
         { /* handle case of one pointers being null (if both null, test should pass) */
-            if (exp != act)
+            if (expx != act)
             {
                 Unity.CurrentTestFailed = 1;
             }
@@ -1087,7 +1087,7 @@ void UnityAssertEqualStringArray(UNITY_INTERNAL_PTR expected,
                 UnityPrint(UnityStrElement);
                 UnityPrintNumberUnsigned(j);
             }
-            UnityPrintExpectedAndActualStrings(exp, act);
+            UnityPrintExpectedAndActualStrings(expx, act);
             UnityAddMsgIfSpecified(msg);
             UNITY_FAIL_AND_BAIL;
         }

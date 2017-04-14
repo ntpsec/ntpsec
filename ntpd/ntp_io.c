@@ -251,7 +251,7 @@ static void		maintain_activefds(int fd, bool closing);
 /*
  * Routines to read the ntp packets
  */
-static inline int	read_network_packet	(SOCKET, endpt *, l_fp);
+static int	read_network_packet	(SOCKET, endpt *, l_fp);
 static void input_handler (fd_set *, l_fp *);
 #ifdef REFCLOCK
 static int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
@@ -2223,7 +2223,7 @@ read_refclock_packet(
  * Return the number of bytes read. That way we know if we should
  * read it again or go on to the next one if no bytes returned
  */
-static inline int
+static int
 read_network_packet(
 	SOCKET			fd,
 	endpt *	itf,
