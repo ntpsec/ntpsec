@@ -292,7 +292,8 @@ extern unsigned int parse_restart (parse_t *, char);
 extern unsigned int parse_addchar (parse_t *, char);
 extern unsigned int parse_end (parse_t *);
 
-extern int Strok (const unsigned char *, const unsigned char *);
+extern int Strok (const unsigned char *, const unsigned char *)
+		__attribute__((pure));
 extern int Stoi (const unsigned char *, long *, int);
 
 extern time_t parse_to_unixtime (clocktime_t *, unsigned long *);
