@@ -381,6 +381,10 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ["-flto"] + ctx.env.CFLAGS
 
     # debug warnings that are not available with all compilers
+    if ctx.env.HAS_w_suggest_attribute_noreturn:
+        ctx.env.CFLAGS = ['-Wsuggest-attribute=noreturn'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_suggest_attribute_pure:
+        ctx.env.CFLAGS = ['-Wsuggest-attribute=pure'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_format_security:
         ctx.env.CFLAGS = ['-Wformat-security'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_format_signedness:
