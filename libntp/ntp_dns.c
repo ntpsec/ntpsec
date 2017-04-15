@@ -103,11 +103,6 @@ void dns_check(void)
 	active = NULL;
 };
 
-void dns_cancel(struct peer* pp)
-{
-	UNUSED_ARG(pp);
-};
-
 void dns_new_interface(void)
 {
 };

@@ -489,7 +489,6 @@ unpeer(
 	struct peer *peer
 	)
 {
-	dns_cancel(peer);
 	mprintf_event(PEVNT_DEMOBIL, peer, "assoc %u", peer->associd);
 	restrict_source(&peer->srcadr, true, 0);
 	set_peerdstadr(peer, NULL);
