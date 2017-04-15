@@ -50,52 +50,6 @@ now(void)
 
 /*
  *---------------------------------------------------------------------
- * Convert between 'time_t' and 'time64_t'
- *---------------------------------------------------------------------
- */
-time64_t
-time_to_time64(
-	const time_t tt
-	)
-{
-	time64_t res;
-
-#if NTP_SIZEOF_TIME_T <= 4
-	settime64u(res, 0);
-	if (tt < 0) {
-		settime64lo(res, (uint32_t)-tt);
-		res = negtime64(res);
-	} else {
-		settime64lo(res, (uint32_t)tt);
-	}
-
-#else
-	settime64s(res, tt);
-#endif
-
-	return res;
-}
-
-
-time_t
-time64_to_time(
-	const time64_t tv
-	)
-{
-	time_t res;
-
-#if NTP_SIZEOF_TIME_T <= 4
-	res = (time_t)time64lo(tv);
-
-#else
-	res = (time_t)time64s(tv);
-#endif
-
-	return res;
-}
-
-/*
- *---------------------------------------------------------------------
  * Get the build date & time
  *---------------------------------------------------------------------
  */

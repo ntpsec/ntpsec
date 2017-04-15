@@ -55,7 +55,7 @@ extern	bool	authusekey	(keyid_t, int, const uint8_t *);
 extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, uint32_t, uint32_t *, uint32_t *);
 extern	void	init_auth	(void);
-extern	void	init_lib	(void);
+extern	void	init_lib	(void) __attribute__((const));
 extern	void	init_network	(void);
 extern	void	auth_moremem	(int);
 extern	void	auth_prealloc_symkeys(int);

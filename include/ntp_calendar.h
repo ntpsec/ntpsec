@@ -52,13 +52,7 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 #define	SECSPERWEEK	(DAYSPERWEEK * SECSPERDAY)
 #define	SECSPERYEAR	(365 * SECSPERDAY)	/* regular year */
 #define	SECSPERLEAPYEAR	(366 * SECSPERDAY)	/* leap year */
-#define	SECSPERAVGYEAR	31556952		/* mean year length over 400yrs */
-
-/*
- * Convert between 'time_t' and 'time64_t'
- */
-extern time64_t time_to_time64(const time_t);
-extern time_t time64_to_time(const time64_t);
+#define	SECSPERAVGYEAR	31556952	/* mean year length over 400yrs */
 
 /*
  * Get the build date & time. ATTENTION: The time zone is not specified!
