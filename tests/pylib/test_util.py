@@ -65,13 +65,13 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f("0.1234567890"), ("123.4567890", -1))
         # ditto, negative
         self.assertEqual(f("-0.1234567890"), ("-123.4567890", -1))
-        # Bizzare 1
+        # Bizarre 1
         self.assertEqual(f("-000.000012345678900987654321"),
                          ("-12.345678900987654321", -2))
-        # Bizzare 2
+        # Bizarre 2
         self.assertEqual(f("1234567890987654321000.00000000000042"),
                            ("1.23456789098765432100000000000000042", 7))
-        # Bizzare 3
+        # Bizarre 3
         self.assertEqual(f("00000000.000000000000"),
                          ("0", -4))
 

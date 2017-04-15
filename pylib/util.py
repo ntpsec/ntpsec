@@ -91,7 +91,7 @@ def portsplit(hostname):
 
 
 def stringfiltcooker(data):
-    "Cooks a filt* string of space seperated numbers, expects milliseconds"
+    "Cooks a filt* string of space separated numbers, expects milliseconds"
     parts = data.split()
     oomcount = {}
     minscale = -100000  # Keep track of the maxdownscale for each value

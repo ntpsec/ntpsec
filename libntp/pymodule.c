@@ -165,7 +165,7 @@ PyDoc_STRVAR(module_doc,
 "Python wrapper for selected libntp C library routines.\n\
 ");
 
-/* banishes pointless compiler warnings on verious Python versions */
+/* banishes pointless compiler warnings on various Python versions */
 extern PyMODINIT_FUNC initntpc(void);
 extern PyMODINIT_FUNC PyInit_ntpc(void);
 

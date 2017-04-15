@@ -7,7 +7,7 @@
  * This is an attempt to get the leap second handling into a dedicated
  * module to make the somewhat convoluted logic testable.
  *
- * Note: Ths code assumes that the unsigned long long return value of
+ * Note: This code assumes that the unsigned long long return value of
  * strtoull(3) is large enough to parse any integer literal found in these
  * files, and that C will promote such values to uint64_t properly.
  *
