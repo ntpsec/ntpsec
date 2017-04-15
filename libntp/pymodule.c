@@ -43,7 +43,7 @@ ntpc_setprogname(PyObject *self, PyObject *args)
     /*
      * This function is only called from clients.  Therefore
      * log to stderr rather than syslog, and suppress logfile
-     * impedimenta.  If we ever want finer-grained control, that
+     * impediments.  If we ever want finer-grained control, that
      * will be easily implemented with additional arguments.
      */
     syslogit = false;	/* don't log messages to syslog */
