@@ -141,7 +141,6 @@ static int maxactivefd;
  */
 static  u_short		sys_interphase = 0;
 
-static endpt *	new_interface(endpt *);
 static void	add_interface(endpt *);
 static bool	update_interfaces(u_short, interface_receiver_t,
 				  void *);
@@ -1246,7 +1245,6 @@ interface_update(
 #ifdef DEBUG
 	msyslog(LOG_DEBUG, "new interface(s) found: waking up resolver");
 #endif
-	dns_new_interface();
 }
 
 

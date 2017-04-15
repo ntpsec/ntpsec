@@ -20,6 +20,5 @@ extern void server_take_dns(struct peer*, struct addrinfo*);
 extern void pool_take_dns(struct peer*, struct addrinfo*);
 
 extern void dns_check(void);	/* called by main thread */
-extern void dns_new_interface(void);
 
 #endif	/* GUARD_NTP_DNS_H */

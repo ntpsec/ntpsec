@@ -103,10 +103,6 @@ void dns_check(void)
 	active = NULL;
 };
 
-void dns_new_interface(void)
-{
-};
-
 static void* dns_lookup(void* arg)
 {
 	struct peer *pp = (struct peer *) arg;
