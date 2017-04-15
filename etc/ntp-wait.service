@@ -1,0 +1,18 @@
+[Unit]
+Description=Wait for ntpd to synchronize system clock
+Requires=ntpd.service
+After=ntpd.service
+Conflicts=systemd-timesyncd.service
+Wants=time-sync.target
+Before=time-sync.target
+ConditionVirtualization=!container
+ConditionCapability=CAP_SYS_TIME
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ntpwait -s 1 -n 30000
+RemainAfterExit=yes
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
