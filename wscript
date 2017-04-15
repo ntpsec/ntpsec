@@ -244,6 +244,18 @@ def build(ctx):
                   "loading the Python ntp library may be troublesome ---")
 
 #
+# Boot script setup
+#
+
+def systemdenable(ctx):
+    "Enable boot time start with systemd. Must run as root."
+    ctx.exec_command("cp etc/ntpd.service etc/ntp-wait.service /usr/lib/systemd/system/")
+
+def systemddisable(ctx):
+    "Disable boot time start with systemd. Must run as root."
+    ctx.exec_command("rm -f /usr/lib/systemd/system/ntpd.service /usr/lib/systemd/system/ntp-wait.service")
+
+#
 # Miscellaneous utility productions
 #
 

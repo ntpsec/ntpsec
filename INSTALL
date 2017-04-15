@@ -141,10 +141,14 @@ Under Unix, the simplest way to compile this package is:
 
   6. You can uninstall cleanly by invoking `./waf uninstall' as root.
 
-  7. You can remove the program binaries and object files from the
+  7. Look under "Boot script setup" in wscript for how to set up
+     boot time startup of ntpd; this will vary according to your
+     init system.
+
+  8. You can remove the program binaries and object files from the
      source code directory by typing `./waf clean'.
 
-  8. To also remove the files that `./waf configure' created (so you can
+  9. To also remove the files that `./waf configure' created (so you can
      configure and compile the package for a different kind of
      computer), type `./waf distclean'.
 
