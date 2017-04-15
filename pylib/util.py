@@ -323,10 +323,6 @@ def unitrelativeto(unit, move):
     return None  # couldn't find anything
 
 
-def zeroformatter():
-    pass
-
-
 def unitifyvar(value, varname, baseunit=None, strip=False, width=8):
     if varname in S_VARS:
         start = UNIT_S
