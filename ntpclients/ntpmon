@@ -338,8 +338,10 @@ if __name__ == '__main__':
                             selected = 0
                         selectmode = not selectmode
                         detailmode = not detailmode
+                        showpeers = True  # detail + hide peers == crash
                     elif key == 'm':
                         showpeers = not showpeers
+                        detailmode = False  # detail + hide peers == crash
                     elif key == 'n':
                         peer_report.showhostnames = \
                             not peer_report.showhostnames
