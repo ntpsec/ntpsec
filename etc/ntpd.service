@@ -1,5 +1,9 @@
 [Unit]
 Description=Network Time Service
+Documentation=man:ntpd(1)
+Wants=network.target
+ConditionVirtualization=!container
+ConditionCapability=CAP_SYS_TIME
 After=network.target nss-lookup.target
 Conflicts=systemd-timesyncd.service
 

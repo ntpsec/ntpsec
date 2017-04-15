@@ -297,6 +297,7 @@ int scmp_sc[] = {
 	SCMP_SYS(clock_settime),
 	SCMP_SYS(close),
 	SCMP_SYS(connect),
+	SCMP_SYS(exit),
 	SCMP_SYS(exit_group),
 	SCMP_SYS(fcntl),
 	SCMP_SYS(fstat),
@@ -354,8 +355,7 @@ int scmp_sc[] = {
 
 #ifdef ENABLE_DNS_LOOKUP
 	SCMP_SYS(clone),	/* threads */
-	SCMP_SYS(exit),
-	SCMP_SYS(futex),	/* sem_xxx */
+	SCMP_SYS(futex),	/* sem_xxx, used by threads */
 	SCMP_SYS(kill),		/* generate signal */
 	SCMP_SYS(madvise),
 	SCMP_SYS(mprotect),
