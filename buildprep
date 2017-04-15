@@ -118,17 +118,17 @@ daemon () {
     # Prerequisites to build the daemon: bison, pps-tools, service libraries
     case $installer in
 	apt)
-	    $install bison libssl-dev libsodium-dev	# build
+	    $install bison libssl-dev			# build
 	    $install libcap-dev libseccomp-dev		# build
 	    $install libavahi-compat-libdnssd-dev	# optional build
 	    $install libssl1.0.0 libcap2 pps-tools
 	    ;;
 	emerge)
-	    $install sys-libs/libcap sys-libs/libseccomp dev-libs/libsodium
+	    $install sys-libs/libcap sys-libs/libseccomp
 	    $install sys-devel/bison net-misc/pps-tools
 	    ;;
 	yum|dnf)
-	    $install bison openssl-devel sodium-devel	# build
+	    $install bison openssl-devel 		# build
 	    $install libcap-devel libseccomp-devel	# build
 	    $install pps-tools-devel			# build
 	    $install avahi-compat-libdns_sd-devel	# optional build
@@ -136,7 +136,7 @@ daemon () {
 	    ;;
 	yast)
 	    echo "# SLES versions 12 and earlier do not have pps-tools"
-	    $install basis-devel			# build
+	    $install basis-devel 			# build
 	    $install libcap-devel libseccomp-devel 	# build
 	    $install openssl-devel			# build
 	    $install libcap2 openssl-libs
