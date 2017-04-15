@@ -181,8 +181,11 @@ codebase has been outright removed, with less than 5% new code added.
 
 * When running as root, the ntpq utility looks in /etc/ntp.conf and
   /usr/local/etc/ntp.keys to find credentials for control requests
-  that require authentication. Thus it is not necessary to enter
-  them by hand.
+  that require authentication. Thus it will often not necessary to enter
+  them by hand. Note that your installation's locations for config and
+  key files may differ from these; in that case this convenience
+  feature will fail, as we have elected not to chase it down a
+  complexity rathole.
 
 * A new utility, +ntpfrob+, collects several small diagnostic functions
   for reading and tweaking the local clock hardware, including reading
