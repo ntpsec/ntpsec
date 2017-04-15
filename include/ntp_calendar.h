@@ -92,13 +92,13 @@ ntpcal_daysplit(const time64_t);
  * expressed in 64 bits to avoid overflow.
  */
 extern time64_t
-ntpcal_dayjoin(int32_t /* days */, int32_t /* seconds */);
+ntpcal_dayjoin(int32_t /* days */, int32_t /* seconds */) __attribute__((const));
 
 /*
  * Convert elapsed years in Era into elapsed days in Era.
  */
 extern int32_t
-ntpcal_days_in_years(int32_t /* years */);
+ntpcal_days_in_years(int32_t /* years */) __attribute__((const));
 
 /*
  * Convert a number of elapsed month in a year into elapsed days
@@ -124,7 +124,8 @@ ntpcal_edate_to_eradays(int32_t /* years */, int32_t /* months */, int32_t /* md
  * Convert a time spec to seconds. No range checks done here!
  */
 extern int32_t
-ntpcal_etime_to_seconds(int32_t /* hours */, int32_t /* minutes */, int32_t /* seconds */);
+ntpcal_etime_to_seconds(int32_t /* hours */, int32_t /* minutes */,
+                        int32_t /* seconds */) __attribute__((const));
 
 /*
  * Convert ELAPSED years/months/days of gregorian calendar to elapsed
@@ -213,7 +214,7 @@ ntpcal_time_to_date(struct calendar * /* jd */, const time64_t /* ts */);
 /* used by ntpd/refclock_nmea.c */
 extern int32_t
 ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
-		       int32_t /* cycle */);
+		       int32_t /* cycle */) __attribute__((const));
 
 extern int
 ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
