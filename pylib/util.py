@@ -214,8 +214,16 @@ def rescalestring(value, unitsscaled):
     return newvalue
 
 
+def formatzero(value):
+    scale = maxdownscale(value)
+    newvalue = rescalestring(value, scale).lstrip("-")
+    return (newvalue, scale)
+
+
 def scalestring(value):
     "Scales a number string to fit in the range 1.0-999.9"
+    if isstringzero(value):
+        return formatzero(value)
     whole, dec, negative = breaknumberstring(value)
     hilen = len(whole)
     if (hilen == 0) or isstringzero(whole):  # Need to shift to smaller units
@@ -225,22 +233,16 @@ def scalestring(value):
             if dec[i] != "0":
                 break
             i += 1
-        if i == lolen:  # didn't find anything, this number must equal zero
-            newwhole = whole
-            newdec = dec
-            negative = False  # filter our -0.000
-            unitsmoved = 0
-        else:
-            lounits = (i // 3) + 1  # always need to shift one more unit
+        lounits = (i // 3) + 1  # always need to shift one more unit
+        movechars = lounits * 3
+        if lolen < movechars:
+            # Not enough digits to scale all the way down. Inventing
+            # digits is unacceptable, so scale down as much as we can.
+            lounits = (i // 3)  # "always", unless out of digits
             movechars = lounits * 3
-            if lolen < movechars:
-                # Not enough digits to scale all the way down. Inventing
-                # digits is unacceptable, so scale down as much as we can.
-                lounits = (i // 3)  # "always", unless out of digits
-                movechars = lounits * 3
-            newwhole = dec[:movechars].lstrip("0")
-            newdec = dec[movechars:]
-            unitsmoved = -lounits
+        newwhole = dec[:movechars].lstrip("0")
+        newdec = dec[movechars:]
+        unitsmoved = -lounits
     else:  # Shift to larger units
         hiunits = hilen // 3  # How many we have, not how many to move
         hidigits = hilen % 3
@@ -321,6 +323,10 @@ def unitrelativeto(unit, move):
     return None  # couldn't find anything
 
 
+def zeroformatter():
+    pass
+
+
 def unitifyvar(value, varname, baseunit=None, strip=False, width=8):
     if varname in S_VARS:
         start = UNIT_S
@@ -337,15 +343,12 @@ def unitify(value, startingunit, baseunit=None, strip=False, width=8):
     "Formats a numberstring with relevant units. Attemps to fit in width."
     if baseunit is None:
         baseunit = getunitgroup(startingunit)[0]
-    if isstringzero(value) is True:  # display highest precision zero
-        if strip is False:
-            value = fitinfield("0", width - len(baseunit)) + baseunit
-        else:
-            value = "0" + baseunit
-        return value
     ooms = oomsbetweenunits(startingunit, baseunit)
-    newvalue = cropprecision(value, ooms)
-    newvalue, unitsmoved = scalestring(newvalue)
+    if isstringzero(value):
+        newvalue, unitsmoved = formatzero(value)
+    else:
+        newvalue = cropprecision(value, ooms)
+        newvalue, unitsmoved = scalestring(newvalue)
     unitget = unitrelativeto(startingunit, unitsmoved)
     if unitget is not None:  # We have a unit
         if width is None:

@@ -48,9 +48,11 @@ class TestPylibUtilMethods(unittest.TestCase):
         # ditto, negative
         self.assertEqual(f("-1.234567890123456"), ("-1.234567890123456", 0))
         # Zero
-        self.assertEqual(f("0.000000"), ("0.000000", 0))
+        self.assertEqual(f("0.000000"), ("0", -2))
+        # Zero with point
+        self.assertEqual(f("0.0000"), ("0.0", -1))
         # Negative zero
-        self.assertEqual(f("-0.000"), ("0.000", 0))
+        self.assertEqual(f("-0.000"), ("0", -1))
         # Large, positive, non scaled
         self.assertEqual(f("987.654"), ("987.654", 0))
         # ditto, negative
@@ -71,7 +73,7 @@ class TestPylibUtilMethods(unittest.TestCase):
                            ("1.23456789098765432100000000000000042", 7))
         # Bizzare 3
         self.assertEqual(f("00000000.000000000000"),
-                         ("00000000.000000000000", 0))
+                         ("0", -4))
 
     def test_rescalestring(self):
         f = ntp.util.rescalestring
@@ -172,7 +174,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         nu = ntp.util
 
         # Zero
-        self.assertEqual(f("0.000", nu.UNIT_MS), "     0ns")
+        self.assertEqual(f("0.000", nu.UNIT_MS), u"     0\u03bcs")
         # Standard, width=8
         self.assertEqual(f("1.234", nu.UNIT_MS), " 1.234ms")
         # ditto, negative
