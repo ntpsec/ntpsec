@@ -36,7 +36,7 @@ cyc_offset   | seconds      |
 sys_jitter   | seconds      |
 
 
-# The following were harvested from ntp_control.c
+# The following were mostly harvested from ntp_control.c
 
 System Variables
 
@@ -85,5 +85,6 @@ Clock Variables
 
 Name       | internal | mode 6
 ====================================
+poll       | seconds  | seconds
 fudgetime1 | seconds  | milliseconds
 fudgetime2 | seconds  | milliseconds
