@@ -74,7 +74,6 @@
 
 /* returns true if a time stored as a double is close to zero */
 #define D_ISZERO_NS(t) (fabs(t) < S_PER_NS/10.0)
-#define D_ISZERO_NS_MSG "100ps"
 
 /* predicate: returns true if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) ((x)->tv_nsec >= 0 && (x)->tv_nsec < NS_PER_S)
