@@ -883,10 +883,20 @@ refclock_control(
 	 * Initialize requested data
 	 */
 	if (in != NULL) {
-		if (in->haveflags & CLK_HAVETIME1)
-			pp->fudgetime1 = in->fudgetime1;
-		if (in->haveflags & CLK_HAVETIME2)
-			pp->fudgetime2 = in->fudgetime2;
+		if (in->haveflags & CLK_HAVETIME1) {
+			if (!D_ISZERO_NS(in->fudgetime1))
+				pp->fudgetime1 = in->fudgetime1;
+			else
+				msyslog(LOG_INFO, "fudgetime1 of %es shorter than %s, value ignored",
+				             in->fudgetime1, D_ISZERO_NS_MSG);
+		}
+		if (in->haveflags & CLK_HAVETIME2) {
+			if (!D_ISZERO_NS(in->fudgetime2))
+				pp->fudgetime2 = in->fudgetime2;
+			else
+				msyslog(LOG_INFO, "fudgetime2 of %es shorter than %s, value ignored",
+				             in->fudgetime2, D_ISZERO_NS_MSG);
+		}
 		if (in->haveflags & CLK_HAVEVAL1)
 			peer->stratum = pp->stratum = (uint8_t)in->fudgeval1;
 		if (in->haveflags & CLK_HAVEVAL2)
@@ -916,12 +926,24 @@ refclock_control(
 		out->fudgeval1 = pp->stratum;
 		out->fudgeval2 = pp->refid;
 		out->haveflags = CLK_HAVEVAL1 | CLK_HAVEVAL2;
-		out->fudgetime1 = pp->fudgetime1;
-		if (0.0 != out->fudgetime1)
+
+		/*
+		 * assume that the refclock driver did not change
+		 * fudgetimes to near-zero values
+		 */
+		if (!D_ISZERO_NS(pp->fudgetime1)) {
 			out->haveflags |= CLK_HAVETIME1;
-		out->fudgetime2 = pp->fudgetime2;
-		if (0.0 != out->fudgetime2)
+			out->fudgetime1 = pp->fudgetime1;
+		} else {
+			out->fudgetime1 = 0.0;
+		}
+		if (!D_ISZERO_NS(pp->fudgetime2)) {
 			out->haveflags |= CLK_HAVETIME2;
+			out->fudgetime2 = pp->fudgetime2;
+		} else {
+			out->fudgetime2 = 0.0;
+		}
+		
 		out->flags = (uint8_t) pp->sloppyclockflag;
 		if (CLK_FLAG1 & out->flags)
 			out->haveflags |= CLK_HAVEFLAG1;
