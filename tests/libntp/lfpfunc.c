@@ -263,7 +263,7 @@ TEST(lfpfunc, FDF_RoundTrip) {
 
 		l_fp temp = op1 - op3;
 		d = lfptod(temp);
-                /* cast to long unsgiend int for 32 bit binaries */
+                /* cast to long unsigned int for 32 bit binaries */
                 snprintf(msg, sizeof(msg),
                          "\nop2: %f op3: %s diff %f not within %e",
                          op2, mfptoa(op3, 8), d, eps(op2));
