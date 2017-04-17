@@ -195,23 +195,23 @@ ntpcal_daysec_to_date(struct calendar * /* jt */, int32_t /* secs */);
 extern int32_t
 ntpcal_date_to_daysec(const struct calendar *);
 
-/* used by ntpd/refclock_gpsd.c */
+/*
+ * Take a value of seconds since midnight and split it into hhmmss in
+ * a 'struct tm'. Return excessive days.
+ */
+extern int32_t
+ntpcal_daysec_to_tm(struct tm * /* utm */, int32_t /* secs */);
+
 extern int32_t
 ntpcal_tm_to_daysec(const struct tm * /* utm */);
 
-
-/*
- * convert a RataDie to the RataDie of start of the calendar month.
- */
-extern int32_t
-ntpcal_rd_to_mstart(int32_t /* year */);
-
-
+extern int
+ntpcal_daysplit_to_date(struct calendar * /* jt */,
+			const ntpcal_split * /* ds */, int32_t /* dof */);
 
 extern int
 ntpcal_time_to_date(struct calendar * /* jd */, const time64_t /* ts */);
 
-/* used by ntpd/refclock_nmea.c */
 extern int32_t
 ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
 		       int32_t /* cycle */) __attribute__((const));
@@ -219,11 +219,12 @@ ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
 extern int
 ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
 
-/* used by ntpd/refclock_nmea.c */
 extern int
 ntpcal_ntp_to_date(struct calendar * /* jd */,	uint32_t /* ntp */,
 		   const time_t * /* pivot */);
 
+extern time_t
+ntpcal_date_to_time(const struct calendar * /* jd */);
 
 
 /*

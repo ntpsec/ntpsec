@@ -582,7 +582,6 @@ ntpcal_rd_to_date(
 	return retv ? retv : leaps;
 }
 
-
 /*
  *---------------------------------------------------------------------
  * Take a value of seconds since midnight and split it into hhmmss in a
@@ -606,7 +605,49 @@ ntpcal_daysec_to_date(
 	return days;
 }
 
+/*
+ *---------------------------------------------------------------------
+ * Take a value of seconds since midnight and split it into hhmmss in a
+ * 'struct tm'.
+ *---------------------------------------------------------------------
+ */
+int32_t
+ntpcal_daysec_to_tm(
+	struct tm *utm,
+	int32_t	   sec
+	)
+{
+	int32_t days;
+	int32_t ts[3];
 
+	days = priv_timesplit(ts, sec);
+	utm->tm_hour = ts[0];
+	utm->tm_min  = ts[1];
+	utm->tm_sec  = ts[2];
+
+	return days;
+}
+
+/*
+ *---------------------------------------------------------------------
+ * take a split representation for day/second-of-day and day offset
+ * and convert it to a 'struct calendar'. The seconds will be normalised
+ * into the range of a day, and the day will be adjusted accordingly.
+ *
+ * returns >0 if the result is in a leap year, 0 if in a regular
+ * year and <0 if the result did not fit into the calendar struct.
+ *---------------------------------------------------------------------
+ */
+int
+ntpcal_daysplit_to_date(
+	struct calendar	   *jd,
+	const ntpcal_split *ds,
+	int32_t		    dof
+	)
+{
+	dof += ntpcal_daysec_to_date(jd, ds->lo);
+	return ntpcal_rd_to_date(jd, ds->hi + dof);
+}
 
 /*
  *---------------------------------------------------------------------
@@ -863,25 +904,6 @@ ntpcal_date_to_rd(
 
 /*
  *---------------------------------------------------------------------
- * For a given RD, get the RD of the associated month start.
- *---------------------------------------------------------------------
- */
-int32_t
-ntpcal_rd_to_mstart(
-	int32_t rd
-	)
-{
-	ntpcal_split split;
-	int32_t	     leaps;
-
-	split = ntpcal_split_eradays(rd - 1, &leaps);
-	split = ntpcal_split_yeardays(split.lo, leaps);
-
-	return rd - split.lo;
-}
-
-/*
- *---------------------------------------------------------------------
  * take a 'struct calendar' and get the seconds-of-day from it.
  *---------------------------------------------------------------------
  */
@@ -906,6 +928,27 @@ ntpcal_tm_to_daysec(
 {
 	return ntpcal_etime_to_seconds(utm->tm_hour, utm->tm_min,
 				       utm->tm_sec);
+}
+
+/*
+ *---------------------------------------------------------------------
+ * take a 'struct calendar' and convert it to a 'time_t'
+ *---------------------------------------------------------------------
+ */
+time_t
+ntpcal_date_to_time(
+	const struct calendar *jd
+	)
+{
+	time64_t  join;
+	int32_t days, secs;
+
+	days = ntpcal_date_to_rd(jd) - DAY_UNIX_STARTS;
+	secs = ntpcal_date_to_daysec(jd);
+	join = ntpcal_dayjoin(days, secs);
+
+	/* might truncate if time_t is 32 bits */
+	return (time_t)join;
 }
 
 
@@ -940,6 +983,5 @@ ntpcal_ntp_to_date(
 	ntp64 = ntpcal_ntp_to_ntp(ntp, piv);
 	return ntpcal_ntp64_to_date(jd, ntp64);
 }
-
 
 /* -*-EOF-*- */
