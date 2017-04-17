@@ -1,0 +1,9 @@
+[Unit]
+Description=Run ntpviz for daily data graphing once an hour
+
+[Timer]
+OnCalendar=*:53:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

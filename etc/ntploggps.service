@@ -1,0 +1,8 @@
+[Unit]
+Documentation=man:ntploggps(1)
+Description=GPS information logger for ntpviz
+Requires=gpsd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ntploggps -o -l /var/log/ntpstats/gpsd
