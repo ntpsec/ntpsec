@@ -756,8 +756,7 @@ class PeerSummary:
                 reach = value
             elif name == "delay":
                 estdelay = rawvalue if self.showunits else value
-            elif name == "delay-s":
-                if len(value) > 6 and value[-7] == ".":
+                if len(rawvalue) > 6 and rawvalue[-7] == ".":
                     saw6 = True
             elif name == "offset":
                 estoffset = rawvalue if self.showunits else value
