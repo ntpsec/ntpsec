@@ -161,7 +161,6 @@ python_scripts = [
 
 def build(ctx):
     ctx.load('waf', tooldir='wafhelpers/')
-    ctx.load('bison')
     ctx.load('asciidoc', tooldir='wafhelpers/')
     ctx.load('rtems_trace', tooldir='wafhelpers/')
 
