@@ -58,6 +58,10 @@ If the clock is way off (over 600 seconds), ntpd should panic
 and exit, expecting a human to fix it.  The -g command line switch
 will override that panic and allow one big step.
 
+We should verify that the cx_Freeze recipe for converting
+our Python based utilities to non-Python works.
+Details in devel/packaging.txt
+
 We should test cold-start with no drift file.
 
 xx
