@@ -309,7 +309,8 @@ if __name__ == '__main__':
                                     peers[selected].associd,
                                     opcode=ntp.control.CTL_OP_READCLOCK,
                                     raw=True)
-                                strconvert = ntp.util.cook(clockvars)
+                                strconvert = ntp.util.cook(clockvars,
+                                                           showunits)
                                 stdscr.addstr(strconvert.encode('UTF-8'))
                             except ntp.packet.ControlException as e:
                                 pass
