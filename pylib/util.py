@@ -809,20 +809,28 @@ class PeerSummary:
             c = " x.-+#*o"[ntp.control.CTL_PEER_STATVAL(rstatus) & 0x7]
         else:
             c = " .+*"[ntp.control.CTL_PEER_STATVAL(rstatus) & 0x3]
-        # Source host or clockname
-        if srchost is not None:
-            clock_name = srchost
-        elif self.showhostnames:
-            try:
-                if self.debug:
-                    self.logfp.write("DNS lookup begins...\n")
-                clock_name = canonicalize_dns(srcadr)
-                if self.debug:
-                    self.logfp.write("DNS lookup ends.\n")
-            except TypeError:
-                return ''
+        # Source host or clockname or poolname or servername
+        # After new DNS, 2007-Apr-17
+        # servers setup via numerical IP Address have only srcadr
+        # servers setup via DNS have both srcadr and srchost
+        # refclocks have both srcadr and srchost
+        # pool has "0.0.0.0" and srchost
+        # slots setup via pool have only srcadr
+        if srcadr is not None \
+                and srcadr != "0.0.0.0" and srcadr[:7] != "127.127":
+            if self.showhostnames:
+                try:
+                    if self.debug:
+                        self.logfp.write("DNS lookup begins...\n")
+                    clock_name = canonicalize_dns(srcadr)
+                    if self.debug:
+                        self.logfp.write("DNS lookup ends.\n")
+                except TypeError:
+                    return ''
+            else:
+                clock_name = srcadr
         else:
-            clock_name = srcadr
+            clock_name = srchost
         if self.wideremote and len(clock_name) > self.namewidth:
             line += ("%c%s\n" % (c, clock_name))
             line += (" " * (self.namewidth + 2))
@@ -882,6 +890,9 @@ class PeerSummary:
                         " %s %s %s" %
                         (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
             line += "\n"
+            # for debugging both case
+            # if srcadr != None and srchost != None:
+            #   line += "srcadr: %s, srchost: %s\n" % (srcadr, srchost)
             return line
         except TypeError:
             # This can happen when ntpd ships a corrupt varlist
