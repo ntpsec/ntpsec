@@ -1,4 +1,4 @@
-from wafhelpers.tool import check_sanity
+from waflib.Logs import pprint
 
 PTHREAD_FRAG = """
 #include <pthread.h>
@@ -54,3 +54,16 @@ def check_pthread_run(ctx):
     else:
         ctx.env.PTHREAD_ENABLE = True
         ctx.define("HAVE_PTHREAD", 1, comment="pthread support")
+
+
+def check_sanity(ctx, cond, lib):
+    define = "HAVE_%s" % lib.upper()
+
+    if cond and (not ctx.get_define(define)):
+        pprint("RED",
+               "Warning %s headers detected, binaries do not build/run"
+               % lib)
+    elif (not cond) and ctx.get_define(define):
+        pprint("RED",
+               "Warning %s headers not detected, binaries build/run"
+               % lib)
