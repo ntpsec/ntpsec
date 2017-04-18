@@ -33,3 +33,17 @@ gitlab-refclocks:
     - python ./waf configure --refclock=all build
   tags:
     - gitlab-org
+
+debian-jessie-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - debian-jessie
+
+debian-jessie-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - debian-jessie
