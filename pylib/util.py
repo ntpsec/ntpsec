@@ -810,7 +810,7 @@ class PeerSummary:
         else:
             c = " .+*"[ntp.control.CTL_PEER_STATVAL(rstatus) & 0x3]
         # Source host or clockname or poolname or servername
-        # After new DNS, 2007-Apr-17
+        # After new DNS, 2017-Apr-17
         # servers setup via numerical IP Address have only srcadr
         # servers setup via DNS have both srcadr and srchost
         # refclocks have both srcadr and srchost
