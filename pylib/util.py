@@ -111,7 +111,7 @@ def stringfiltcooker(data):
         if count > highestcount:
             mostcommon = key
             highestcount = count
-    newunit = UNITS_SEC[mostcommon + 2]  # 2==UNIT_MS
+    newunit = UNITS_SEC[mostcommon + 2]  # 2==UNIT_MS, all the filt*s use ms
     # Shift all values to the new unit
     cooked = []
     for part in parts:
@@ -123,15 +123,17 @@ def stringfiltcooker(data):
 
 
 def getunitgroup(unit):
+    "Returns the unit group which contains a given unit"
     for group in unitgroups:
         if unit in group:
             return group
 
 
 def oomsbetweenunits(a, b):
+    "Calculates how many orders of magnitude seperate two units"
     group = getunitgroup(a)
     if b is None:  # asking for baseunit
-        return group.index(a)
+        return (group.index(a) * 3)
     elif b in group:
         ia = group.index(a)
         ib = group.index(b)
@@ -180,8 +182,7 @@ def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
     whole, dec, negative = breaknumberstring(value)
     if unitsscaled == 0:
-        if whole == "":  # render .1 as 0.1
-            whole = "0"
+        # This may seem redundant, but glue forces certian formatting details
         value = gluenumberstring(whole, dec, negative)
         return value
     hilen = len(whole)
@@ -192,14 +193,12 @@ def rescalestring(value, unitsscaled):
             # Scaling beyond the digits, pad it out. We can pad here
             # without making up digits that don't exist
             padcount = digitsmoved - hilen
-            newwhole = "0"
+            newwhole = ""
             newdec = ("0" * padcount) + whole + dec
         else:  # Scaling in the digits, no need to pad
             choppoint = -digitsmoved
             newdec = whole[choppoint:] + dec
             newwhole = whole[:choppoint]
-            if newwhole == "":
-                newwhole = "0"
     elif unitsscaled < 0:  # scale to a smaller unit, move decimal right
         if lolen < digitsmoved:
             # Scaling beyond the digits would force us to make up data
@@ -215,6 +214,7 @@ def rescalestring(value, unitsscaled):
 
 
 def formatzero(value):
+    "Scale a zero value for the unit with the highest available precision"
     scale = maxdownscale(value)
     newvalue = rescalestring(value, scale).lstrip("-")
     return (newvalue, scale)
@@ -287,6 +287,7 @@ def fitinfield(value, fieldsize):
 
 
 def cropprecision(value, ooms):
+    "Crops digits below the maximum precision"
     if "." not in value:  # No decimals, nothing to crop
         return value
     if ooms == 0:  # We are at the baseunit, crop it all
@@ -301,6 +302,7 @@ def cropprecision(value, ooms):
 
 
 def isstringzero(value):
+    "Detects whether a string is equal to zero"
     for i in value:
         if i not in ("-", ".", "0"):
             return False
@@ -324,6 +326,7 @@ def unitrelativeto(unit, move):
 
 
 def unitifyvar(value, varname, baseunit=None, strip=False, width=8):
+    "Call unitify() with the correct units for varname"
     if varname in S_VARS:
         start = UNIT_S
     elif varname in MS_VARS:

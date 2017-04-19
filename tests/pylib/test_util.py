@@ -31,6 +31,7 @@ class TestPylibUtilMethods(unittest.TestCase):
 
         self.assertEqual(f(ntp.util.UNIT_KS, ntp.util.UNIT_MS), 6)
         self.assertEqual(f(ntp.util.UNIT_PPM, ntp.util.UNIT_PPB), 3)
+        self.assertEqual(f(ntp.util.UNIT_S, None), 9)
 
     def test_scalestring(self):
         f = ntp.util.scalestring
@@ -148,6 +149,8 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f("1.994", 4), "1.99")
         # Rounding test, round up
         self.assertEqual(f("1.995", 4), "2.00")
+        # Attempt to catch bug
+        self.assertEqual(f("15937.5", None), "15937.5")
 
     def test_cropprecision(self):
         f = ntp.util.cropprecision
@@ -203,6 +206,9 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f("1234.5", nu.UNIT_KS), "1234.5ks")
         # Seconds
         self.assertEqual(f("42.23", nu.UNIT_S), "  42.23s")
+        # Attempt to catch bug
+        self.assertEqual(f("15937.5", nu.UNIT_MS, strip=True, width=None),
+                         "15.9375s")
 
     def test_stringfiltcooker(self):
         # No scale
@@ -242,6 +248,26 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(f(ntp.util.UNIT_KS, None), ntp.util.UNIT_NS)
         # Different unitgroup
         self.assertEqual(f(ntp.util.UNIT_PPM, -1), ntp.util.UNIT_PPB)
+
+    def test_formatzero(self):
+        f = ntp.util.formatzero
+
+        # No scaling possible
+        self.assertEqual(f("0.00"), ("0.00", 0))
+        # Scaling possible
+        self.assertEqual(f("0.0000000"), ("0.0", -2))
+        # Scaling without a remainder
+        self.assertEqual(f("0.000"), ("0", -1))
+
+    def test_unitifyvar(self):
+        f = ntp.util.unitifyvar
+
+        # Second var
+        self.assertEqual(f("1.234", "tai"), "  1.234s")
+        # Millisecond var
+        self.assertEqual(f("1.234", "offset"), " 1.234ms")
+        # PPM var
+        self.assertEqual(f("1.234", "frequency"), "1.234ppm")
 
 if __name__ == '__main__':
     unittest.main()
