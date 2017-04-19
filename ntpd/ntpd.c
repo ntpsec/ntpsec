@@ -897,6 +897,11 @@ ntpdmain(
 	readconfig(getconfig(explicit_config));
 	check_minsane();
 
+        if ( 8 > sizeof(time_t) ) {
+	    msyslog(LOG_ERR, "This system has a 32-bit time_t.");
+	    msyslog(LOG_ERR, "This ntpd will fail on 2038-01-19T03:14:07Z.");
+        }
+
 	loop_config(LOOP_DRIFTINIT, 0);
 	/* report_event(EVNT_SYSRESTART, NULL, NULL); */
 
