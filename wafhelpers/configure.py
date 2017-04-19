@@ -804,7 +804,7 @@ int main(int argc, char **argv) {
     for sym in ctx.env.DEFINES:
         if sym.startswith("NTP_SIZEOF_TIME_T="):
             timesize = int(sym.split("=")[1])
-            if timesize < 16:
+            if timesize < 8:
                 msg("WARNING: This system has a 32-bit time_t.")
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
