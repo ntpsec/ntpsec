@@ -104,19 +104,16 @@ def peer_detail(variables, showunits=False):
             if name in vcopy:
                 vcopy[name] = ntp.util.unitify(vcopyraw[name],
                                                ntp.util.UNIT_MS,
-                                               strip=True,
                                                width=None)
         for name in ntp.util.PPM_VARS:
             if name in vcopy:
                 vcopy[name] = ntp.util.unitify(vcopyraw[name],
                                                ntp.util.UNIT_PPM,
-                                               strip=True,
                                                width=None)
         for name in ntp.util.S_VARS:
             if name in vcopy:
                 vcopy[name] = ntp.util.unitify(vcopyraw[name],
                                                ntp.util.UNIT_S,
-                                               strip=True,
                                                width=None)
         vcopy['filtdelay'] = ntp.util.stringfiltcooker(vcopyraw['filtdelay'])
         vcopy['filtoffset'] = ntp.util.stringfiltcooker(vcopyraw['filtoffset'])

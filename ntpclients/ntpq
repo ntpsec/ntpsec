@@ -528,8 +528,7 @@ usage: timeout [ msec ]
                         self.say("%s  %s\n" % (legend, value))
                 elif fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
                     if self.showunits:
-                        displayvalue = ntp.util.unitifyvar(rawvalue, name,
-                                                           strip=True)
+                        displayvalue = ntp.util.unitifyvar(rawvalue, name)
                     else:
                         displayvalue = value
                     self.say("%s  %s\n" % (legend, displayvalue))

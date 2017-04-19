@@ -199,7 +199,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Different units
         self.assertEqual(f("12.345", nu.UNIT_PPM), "12.35ppm")
         # Strip
-        self.assertEqual(f("1.23", nu.UNIT_MS, strip=True), "1.23ms")
+        self.assertEqual(f("1.23", nu.UNIT_MS, width=None), "1.23ms")
         # Different width
         self.assertEqual(f("1.234", nu.UNIT_MS, width=12), "     1.234ms")
         # Outside of available units
@@ -207,8 +207,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Seconds
         self.assertEqual(f("42.23", nu.UNIT_S), "  42.23s")
         # Attempt to catch bug
-        self.assertEqual(f("15937.5", nu.UNIT_MS, strip=True, width=None),
-                         "15.9375s")
+        self.assertEqual(f("15937.5", nu.UNIT_MS, width=None), "15.9375s")
 
     def test_stringfiltcooker(self):
         # No scale
@@ -233,6 +232,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(ntp.util.stringfiltcooker(
             "0.47 0.4200 0.4300 0.5000 0.4600 0.4200 0.4900 0.4800"),
             "   0.47  0.4200  0.4300  0.5000  0.4600  0.4200  0.4900  0.4800 ms")
+
     def test_unitrelativeto(self):
         f = ntp.util.unitrelativeto
 

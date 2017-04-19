@@ -325,7 +325,7 @@ def unitrelativeto(unit, move):
     return None  # couldn't find anything
 
 
-def unitifyvar(value, varname, baseunit=None, strip=False, width=8):
+def unitifyvar(value, varname, baseunit=None, width=8):
     "Call unitify() with the correct units for varname"
     if varname in S_VARS:
         start = UNIT_S
@@ -335,10 +335,10 @@ def unitifyvar(value, varname, baseunit=None, strip=False, width=8):
         start = UNIT_PPM
     else:
         return value
-    return unitify(value, start, baseunit, strip, width)
+    return unitify(value, start, baseunit, width)
 
 
-def unitify(value, startingunit, baseunit=None, strip=False, width=8):
+def unitify(value, startingunit, baseunit=None, width=8):
     "Formats a numberstring with relevant units. Attemps to fit in width."
     if baseunit is None:
         baseunit = getunitgroup(startingunit)[0]
@@ -357,7 +357,7 @@ def unitify(value, startingunit, baseunit=None, strip=False, width=8):
         newvalue = fitinfield(newvalue, realwidth) + unitget
     else:  # don't have a replacement unit, use original
         newvalue = value + startingunit
-    if strip is True:
+    if width is None:
         newvalue = newvalue.strip()
     return newvalue
 
@@ -598,20 +598,17 @@ def cook(variables, showunits=False):
             #   missing variables here.
             #  Completion cannot occur until all units are tracked down.
             if showunits:
-                item += unitify(rawvalue, UNIT_MS, UNIT_NS,
-                                True, width=None)
+                item += unitify(rawvalue, UNIT_MS, UNIT_NS, width=None)
             else:
                 item += repr(value)
         elif name in S_VARS:
             if showunits:
-                item += unitify(rawvalue, UNIT_S, UNIT_NS,
-                                True, width=None)
+                item += unitify(rawvalue, UNIT_S, UNIT_NS, width=None)
             else:
                 item += repr(value)
         elif name in PPM_VARS:
             if showunits:
-                item += unitify(rawvalue, UNIT_PPM,
-                                strip=True, width=None)
+                item += unitify(rawvalue, UNIT_PPM, width=None)
             else:
                 item += repr(value)
         else:
