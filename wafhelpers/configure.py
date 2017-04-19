@@ -800,9 +800,18 @@ int main(int argc, char **argv) {
     else:
         ctx.undefine("ENABLE_DEBUG_TIMING")
 
+    # Ugly hack to examine config symbols
+    for sym in ctx.env.DEFINES:
+        if sym.startswith("NTP_SIZEOF_TIME_T="):
+            timesize = int(sym.split("=")[1])
+            if timesize < 16:
+                msg("WARNING: This system has a 32-bit time_t.")
+                msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
+
     ctx.start_msg("Writing configuration header:")
     ctx.write_config_header("config.h")
     ctx.end_msg("config.h", "PINK")
+
 
     def yesno(x):
         if x:
