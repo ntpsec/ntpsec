@@ -917,10 +917,10 @@ refclock_control(
 		out->fudgeval2 = pp->refid;
 		out->haveflags = CLK_HAVEVAL1 | CLK_HAVEVAL2;
 		out->fudgetime1 = pp->fudgetime1;
-		if (0.0 != out->fudgetime1)
+		if (!D_ISZERO_NS(out->fudgetime1))
 			out->haveflags |= CLK_HAVETIME1;
 		out->fudgetime2 = pp->fudgetime2;
-		if (0.0 != out->fudgetime2)
+		if (!D_ISZERO_NS(out->fudgetime2))
 			out->haveflags |= CLK_HAVETIME2;
 		out->flags = (uint8_t) pp->sloppyclockflag;
 		if (CLK_FLAG1 & out->flags)
