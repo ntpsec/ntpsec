@@ -4,4 +4,4 @@ Description=Temperature information logger for ntpviz
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/ntplogtemp -o -l /var/log/ntpstats/temp
+ExecStart=/usr/bin/ntplogtemp -o -l /var/log/ntpstats/temps
