@@ -72,10 +72,13 @@ minimizes distance between now and the timestamp.  This procedure
 is part of the core protocol specification.
 
 An instance's pivot time is constructed from EPOCH defined at configure
-time in config.h.  If EPOCH is set to a known time then the binaries
-are reproducible.  By default the EPOCH is the current configure
-time.  You can override the EPOCH with '-waf --epoch' or using the
-SOURCE_DATE_EPOCH environment variable.
+time in config.h.  If EPOCH is set to a known time then the binaries are
+reproducible.  By default the EPOCH is the time when the last './waf
+configure' was run.  You can override the EPOCH with '-waf --epoch' or
+using the SOURCE_DATE_EPOCH environment variable.
+
+More information on reproduceable builds is at:
+https://reproducible-builds.org/[https://reproducible-builds.org/]
 
 == Disambiguation of NMEA dates ==
 
