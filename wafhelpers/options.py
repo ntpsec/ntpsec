@@ -76,6 +76,8 @@ def options_cmd(ctx, config):
                    help="Run tests")
     grp.add_option('--enable-rtems-trace', action='store_true',
                    default=False, help="Enable RTEMS Trace.")
+    grp.add_option('--enable-warnings', action='store_true',
+                   default=False, help="Enable annoying CC warnings")
     grp.add_option('--rtems-trace-path', type='string', default="",
                    help="Path to rtems-tld.")
     grp.add_option(

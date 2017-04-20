@@ -301,6 +301,8 @@ def cmd_configure(ctx, config):
     if ctx.options.enable_debug:
         ctx.define("DEBUG", 1, comment="Enable debug mode")
         ctx.env.BISONFLAGS += ["--debug"]
+
+    if ctx.options.enable_warnings:
         # turn on some annoying warnings
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
