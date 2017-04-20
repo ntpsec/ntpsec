@@ -176,6 +176,7 @@ mx4200_start(
 	struct refclockproc *pp;
 	int fd;
 	char gpsdev[20];
+	struct calendar date;
 
 	/*
 	 * Open serial port
@@ -212,14 +213,10 @@ mx4200_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_LF;
-	/* 
-	 * __DATE__ is in a format like "Jan 2 2017" or possibly "???
-	 * ?? ????".  Thus it is guaranteed that there will be a
-	 * rightmost space just before the date.  It's OK if atoi()
-	 * barfs on ???? because this is only used in a sanity check
-	 * where that will fail positive.
-	 */
-	year_last_modified = atoi(strrchr(__DATE__, ' ') + 1);
+        /* find the base year for time, can't be before build date,
+         * unless we actually get some tests... */
+	ntpcal_get_build_date(&date);
+	year_last_modified = date.year;
 
 	/* Ensure the receiver is properly configured */
 	return mx4200_config(peer);
