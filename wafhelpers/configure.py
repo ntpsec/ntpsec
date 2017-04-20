@@ -236,19 +236,19 @@ def cmd_configure(ctx, config):
     ctx.check_cc(lib="m", comment="Math library")
     ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
     ret = ctx.check_cc(lib="bsd", mandatory=False,
-                 comment="BSD compatibility library")
+                       comment="BSD compatibility library")
     if ret:
         ctx.env.LDFLAGS += ["-lbsd"]
 
     # -lssp and -lssp_nonshared may be needed by older gcc to
     # support "-fstack-protector-all"
     ret = ctx.check_cc(lib="ssp", mandatory=False,
-                 comment="libssp")
+                       comment="libssp")
     if ret:
         ctx.env.LDFLAGS += ["-lssp"]
 
     ret = ctx.check_cc(lib="ssp_nonshared", mandatory=False,
-                 comment="libssp_nonshared")
+                       comment="libssp_nonshared")
     if ret:
         ctx.env.LDFLAGS += ["-lssp_nonshared"]
 
@@ -306,7 +306,7 @@ def cmd_configure(ctx, config):
         # turn on some annoying warnings
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
-            #"-Waggregate-return",    # breaks ldiv(), ntpcal_daysplit(),  etc.
+            # "-Waggregate-return",   # breaks ldiv(), ntpcal_daysplit(),  etc.
             "-Wbad-function-cast",
             "-Wfloat-equal",          # Not Ready For Prime Time
             # "-Wformat-nonliteral",  # complains about a used feature
@@ -527,7 +527,6 @@ int main(int argc, char **argv) {
     # These are helpful and don't break Linux or *BSD
     ctx.define("OPEN_BCAST_SOCKET", 1,
                comment="Whether to open a broadcast socket")
-
 
     # Find OpenSSL. Must happen before function checks
     # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
@@ -813,7 +812,6 @@ int main(int argc, char **argv) {
     ctx.start_msg("Writing configuration header:")
     ctx.write_config_header("config.h")
     ctx.end_msg("config.h", "PINK")
-
 
     def yesno(x):
         if x:
