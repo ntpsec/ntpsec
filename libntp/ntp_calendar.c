@@ -86,7 +86,7 @@ ntpcal_get_build_date(
 	    (int)jd->year, (int)jd->yearday, (int)jd->month, (int)jd->monthday,
 	    (int)jd->hour, (int)jd->minute, (int)jd->second, (int)jd->weekday);
 #endif
-
+        return true;
 }
 
 
