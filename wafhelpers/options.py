@@ -72,7 +72,7 @@ def options_cmd(ctx, config):
                    help="Users should use CFLAGS in their environment.")
     grp.add_option( '--epoch', type='string', action="callback",
         callback=callback_flags,
-        help="Force epoch, or use SOURCE_DATE_EPOCH in envronment")
+        help="Force epoch, or use SOURCE_DATE_EPOCH in environment")
     grp.add_option('--ldflags', type='string', action="callback",
                    callback=callback_flags,
                    help="Users should use LDFLAGS in their environment.")
