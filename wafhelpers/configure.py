@@ -1,6 +1,8 @@
 from __future__ import print_function
 
 import os
+import sys
+import time
 from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
 from wafhelpers.util import msg, msg_setting, parse_version
@@ -808,6 +810,17 @@ int main(int argc, char **argv) {
             if timesize < 8:
                 msg("WARNING: This system has a 32-bit time_t.")
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
+
+    epoch = os.getenv('SOURCE_DATE_EPOCH', None)
+    if ctx.options.epoch:
+        ctx.define("EPOCH", ctx.options.epoch, comment="Using --epoch")
+    elif epoch:
+        if not epoch.isdigit():
+            msg("ERROR: malformed SOURCE_DATE_EPOCH")
+            sys.exit(1)
+        ctx.define("EPOCH", int(epoch), comment="Using SOURCE_DATE_EPOCH")
+    else:
+        ctx.define("EPOCH", int(time.time()), comment="Using default EPOCH")
 
     ctx.start_msg("Writing configuration header:")
     ctx.write_config_header("config.h")
