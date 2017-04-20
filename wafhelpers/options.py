@@ -49,7 +49,8 @@ def options_cmd(ctx, config):
     grp.add_option('--enable-leap-smear', action='store_true',
                    default=False, help="Enable Leap Smearing.")
     grp.add_option('--enable-leap-testing', action='store_true',
-                   default=False, help="Enable leaps on other than 1st of month.")
+                   default=False,
+                   help="Enable leaps on other than 1st of month.")
     grp.add_option('--enable-mssntp', action='store_true',
                    default=False, help="Enable Samba MS SNTP support.")
     grp.add_option('--enable-lockclock', action='store_true',
