@@ -81,11 +81,7 @@ ntpcal_get_build_date(
 	 * problem.
 	 *
 	 */
-#ifdef MKREPRO_DATE
-	static const char build[] = MKREPRO_TIME "/" MKREPRO_DATE;
-#else
 	static const char build[] = __TIME__ "/" __DATE__;
-#endif
 	static const char mlist[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
 	char		  monstr[4];
@@ -95,25 +91,10 @@ ntpcal_get_build_date(
 	 * so using 'uint16_t' is contra-indicated!
 	 */
 
-#ifdef DEBUG
-	static int        ignore  = 0;
-#endif
-
 	ZERO(*jd);
 	jd->year     = 1970;
 	jd->month    = 1;
 	jd->monthday = 1;
-
-#ifdef DEBUG
-	/* check environment if build date should be ignored */
-	if (0 == ignore) {
-	    const char * envstr;
-	    envstr = getenv("NTPD_IGNORE_BUILD_DATE");
-	    ignore = 1 + (envstr && (!*envstr || !strcasecmp(envstr, "yes")));
-	}
-	if (ignore > 1)
-	    return false;
-#endif
 
 	if (6 == sscanf(build, "%hu:%hu:%hu/%3s %hu %hu",
 			&hour, &minute, &second, monstr, &day, &year)) {
