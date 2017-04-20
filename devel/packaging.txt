@@ -71,22 +71,20 @@ has a pivot date and resolves incoming timestamps to the era that
 minimizes distance between now and the timestamp.  This procedure
 is part of the core protocol specification.
 
-An instance's pivot time is constructed from __TIME__/__DATE__ and
-thus binaries are intrinsically non-reproducible.  Any
-alternative to this most recent possible pivot would decrease
-the span of time in the future over which it can achieve timebase
-synchronization with instances from later eras, degrading function.
+An instance's pivot time is constructed from EPOCH defined at configure
+time in config.h.  If EPOCH is set to a known time then the binaries
+are reproducible.  By default the EPOCH is the current configure
+time.  You can override the EPOCH with '-waf --epoch' or using the
+SOURCE_DATE_EPOCH environment variable.
 
 == Disambiguation of NMEA dates ==
 
-Due to bad design of NMEA0183, the reporting protocol used by many
-GPS sensors, the NMEA driver in NTPsec sometimes has to make an
-assumption about what century it is.  Choice of a base-century
-hits the saame issues; using anything other than __TIME__/__DATE__
-would decrease the future span over which the driver's assumption
-is correct.  The alternative - trusting the system clock to report
-the right century - could produce very bad behavior near century
-boundaries.
+Due to bad design of NMEA0183, the reporting protocol used by many GPS
+sensors, the NMEA driver in NTPsec sometimes has to make an assumption
+about what century it is.  Choice of a base-century hits the same
+issues; so here the year derived from the EPOCH is also used.  The
+alternative - trusting the system clock to report the right century -
+could produce very bad behavior near century boundaries.
 
 == Unpredictable leap seconds ==
 

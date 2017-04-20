@@ -55,10 +55,8 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 #define	SECSPERAVGYEAR	31556952	/* mean year length over 400yrs */
 
 /*
- * Get the build date & time. ATTENTION: The time zone is not specified!
- * This depends entirely on the C compilers' capabilities to properly
- * expand the '__TIME__' and '__DATE__' macros, as required by the C
- * standard.
+ * Get the build date & time in UTC.  This depends on the EPOCH
+ * which is fixed at configure time.
  */
 extern int
 ntpcal_get_build_date(struct calendar * /* jd */);
