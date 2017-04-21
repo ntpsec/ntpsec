@@ -62,7 +62,7 @@ enable_packetstamps(
 	{
 		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
-			       (const char*)&on, sizeof(on)))
+			       (const void*)&on, sizeof(on)))
 			msyslog(LOG_DEBUG,
 				"setsockopt SO_TIMESTAMP on fails on address %s: %m",
 				socktoa(addr));
@@ -88,7 +88,7 @@ enable_packetstamps(
 	{
 		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_BINTIME,
-			       (char*)&on, sizeof(on)))
+			       (const void*)&on, sizeof(on)))
 			msyslog(LOG_DEBUG,
 				"setsockopt SO_BINTIME on fails on address %s: %m",
 				socktoa(addr));
