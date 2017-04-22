@@ -58,6 +58,7 @@
  */
 #define INTERVAL	1	/* Interval between position measurements (s) */
 #define AVGING_TIME	24	/* Number of hours to average */
+/* central meridian is +/- 180 degrees, so -9999 is well out of range */
 #define NOT_INITIALIZED	-9999.	/* initial pivot longitude */
 
 /* records transmitted from extern CDU to MX 4200 */
@@ -521,7 +522,7 @@ mx4200_ref(
 	 * "000" Initialization/Mode Control - Part A
 	 * Fix to our averaged position.
 	 */
-	if (up->central_meridian != NOT_INITIALIZED) {
+	if (up->central_meridian < NOT_INITIALIZED) {
 		up->avg_lon += up->central_meridian;
 		if (up->avg_lon < -180.0) up->avg_lon += 360.0;
 		if (up->avg_lon >  180.0) up->avg_lon -= 360.0;
@@ -1278,7 +1279,7 @@ mx4200_parse_p(
 	 * Normalize longitude to near 0 degrees.
 	 * Assume all data are clustered around first reading.
 	 */
-	if (up->central_meridian == NOT_INITIALIZED) {
+	if (up->central_meridian < (NOT_INITIALIZED - 1.0)) {
 		up->central_meridian = lon;
 		mx4200_debug(peer,
 		    "mx4200_receive: central meridian =  %.9f \n",
