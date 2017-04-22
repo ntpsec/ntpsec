@@ -1335,7 +1335,7 @@ loop_config(
 
 	case LOOP_MAX:		/* step threshold (step) */
 		clock_max_fwd = clock_max_back = freq;
-		if (freq == 0 || freq > 0.5)
+		if ( D_ISZERO_NS(freq) || freq > 0.5)
 			select_loop(false);
 		break;
 
