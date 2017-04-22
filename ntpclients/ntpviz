@@ -1039,6 +1039,9 @@ at 0s.</p>
 
         if 6 >= len(peerlist):
             out['set_key'] = "set key top right"
+        elif 12 >= len(peerlist):
+            # getting crowded
+            out['set_key'] = "set key bmargin"
         else:
             # too many keys to show
             out['set_key'] = "set key off"
