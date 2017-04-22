@@ -93,14 +93,14 @@ default_callback(const char *file, int line, isc_assertiontype_t type,
 		 const char *cond)
 {
 	void *tracebuf[BACKTRACE_MAXFRAME];
-	int i, nframes;
+	int i, nframes = 0;
 	const char *logsuffix = ".";
 	const char *fname;
 	isc_result_t result;
 
 	result = isc_backtrace_gettrace(tracebuf, BACKTRACE_MAXFRAME, &nframes);
-		if (result == ISC_R_SUCCESS && nframes > 0)
-			logsuffix = ", back trace";
+	if (result == ISC_R_SUCCESS && nframes > 0)
+		logsuffix = ", back trace";
 
 	fprintf(stderr, "%s:%d: %s(%s) failed%s\n",
 		file, line, isc_assertion_typetotext(type), cond, logsuffix);

@@ -322,10 +322,10 @@ def cmd_configure(ctx, config):
             # fails on Solaris and OpenBSD 6
             # complains about a Bison bug
             ('w_sign_conversion', "-Wsign-conversion"),
-            # fails on clang
-            ('w_suggest_attribute_const', "-Wsuggest-attribute=const"),
-            # fails on clang
-            ('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"),
+            # fails on clang, lot's of false positives and Unity complaints
+            # ('w_suggest_attribute_const', "-Wsuggest-attribute=const"),
+            # fails on clang, lot's of false positives and Unity complaints
+            #('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"),
             ]
 
     ctx.env.CFLAGS = [

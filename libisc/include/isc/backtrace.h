@@ -49,7 +49,8 @@ extern const isc_backtrace_symmap_t isc__backtrace_symtable[];
 
 ISC_LANG_BEGINDECLS
 isc_result_t
-isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes);
+isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes)
+		       __attribute__((const));
 /*%<
  * Get a back trace of the running process above this function itself.  On
  * success, addrs[i] will store the address of the call point of the i-th

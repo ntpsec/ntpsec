@@ -35,7 +35,8 @@ void
 isc_assertion_setcallback(isc_assertioncallback_t);
 
 const char *
-isc_assertion_typetotext(isc_assertiontype_t type);
+isc_assertion_typetotext(isc_assertiontype_t type)
+			__attribute__((const));
 
 #if defined(ISC_CHECK_ALL) || defined(__COVERITY__)
 #define ISC_CHECK_REQUIRE		1

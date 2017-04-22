@@ -23,6 +23,8 @@ int		lib_nextbuf;
  * refuse to consider a module a candidate to be linked unless it
  * has an executable entry point called from somewhere else that
  * is linked.
+ *
+ * marking this __attribute__((const)) kills thelinker too.
  */
 void
 init_lib(void)

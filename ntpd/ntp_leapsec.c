@@ -76,7 +76,7 @@ static bool  _electric;
 /* Forward decls of local helpers */
 static bool   add_range(leap_table_t*, const leap_info_t*);
 static char * get_line(leapsec_reader, void*, char*, size_t);
-static char * skipws(char*);
+static char * skipws(char*) __attribute__((pure));
 static bool   parsefail(const char * cp, const char * ep);
 static void   reload_limits(leap_table_t*, time_t);
 static void   reset_times(leap_table_t*);

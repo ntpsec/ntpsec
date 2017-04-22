@@ -40,7 +40,8 @@
 #define SUFFIX_SEP '.'
 
 static	void	filegen_open	(FILEGEN *, const time_t);
-static	int	valid_fileref	(const char *, const char *);
+static	int	valid_fileref	(const char *, const char *)
+			         __attribute__((pure));
 static	void	filegen_init	(const char *, const char *, FILEGEN *);
 #ifdef	DEBUG
 static	void	filegen_uninit		(FILEGEN *);

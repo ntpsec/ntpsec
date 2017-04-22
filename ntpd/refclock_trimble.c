@@ -212,7 +212,7 @@ struct refclock refclock_trimble = {
 	NULL			/* timer - not used */
 };
 
-int day_of_year (char *dt);
+static int day_of_year (char *dt) __attribute__((pure));
 
 /* Extract the clock type from the mode setting */
 #define CLK_TYPE(x) ((int)(((x)->ttl) & 0x7F))
@@ -516,7 +516,7 @@ trimble_shutdown (
 /* 
  * unpack_date - get day and year from date
  */
-int
+static int
 day_of_year (
 	char * dt
 	)
