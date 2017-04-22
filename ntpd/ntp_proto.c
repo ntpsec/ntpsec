@@ -1983,7 +1983,7 @@ clock_select(void)
 			sys_clockhop = 0;
 		} else if ((x = fabs(typesystem->offset -
 		    osys_peer->offset)) < sys_mindisp) {
-			if (sys_clockhop == 0)
+			if ( D_ISZERO_NS(sys_clockhop) )
 				sys_clockhop = sys_mindisp;
 			else
 				sys_clockhop *= .5;
