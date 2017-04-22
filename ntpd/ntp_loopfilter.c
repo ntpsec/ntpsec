@@ -1346,15 +1346,15 @@ loop_config(
 		 * limits are massive.  This assumes the reason to stop
 		 * using it is that it's pointless, not that it goes wrong.
 		 */
-		if (  (clock_max_back == 0 || clock_max_back > 0.5)
-		   || (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
+		if ( D_ISZERO_NS(clock_max_back) || (clock_max_back > 0.5)
+		   || D_ISZERO_NS(clock_max_fwd) || (clock_max_fwd  > 0.5))
 			select_loop(false);
 		break;
 
 	case LOOP_MAX_FWD:	/* step threshold (step) */
 		clock_max_fwd = freq;
-		if (  (clock_max_back == 0 || clock_max_back > 0.5)
-		   || (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
+		if ( D_ISZERO_NS(clock_max_back) || (clock_max_back > 0.5)
+		   || D_ISZERO_NS(clock_max_fwd) || (clock_max_fwd  > 0.5))
 			select_loop(false);
 		break;
 
