@@ -2180,7 +2180,7 @@ ctl_putpeer(
 		break;
 
 	case CP_BIAS:
-		if (p->bias != 0.)
+		if ( !D_ISZERO_NS(p->bias) )
 			ctl_putdbl(peer_var[id].text, p->bias * MS_PER_S);
 		break;
 
