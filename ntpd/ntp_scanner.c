@@ -28,6 +28,7 @@
 #include "ntp_config.h"
 #include "ntp_scanner.h"
 #include "ntp_parser.tab.h"
+#include "timespecops.h"      /* for D_ISZERO_NS() */
 
 /* ntp_keyword.h declares finite state machine and token text */
 #include "ntp_keyword.h"
@@ -933,14 +934,16 @@ yylex(void)
 		} else if (is_double(yytext)) {
 			yylval_was_set = true;
 			errno = 0;
-			if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
-				msyslog(LOG_ERR,
-					"Double too large to represent: %s",
-					yytext);
-				exit(1);
+			yylval.Double = atof(yytext);
+			if ( D_ISZERO_NS(yylval.Double) && errno == ERANGE) {
+			    /* FIXME, POSIX says atof() never returns errors */
+			    msyslog(LOG_ERR,
+				    "Double too large to represent: %s",
+				    yytext);
+			    exit(1);
 			} else {
-				token = T_Double;
-				goto normal_return;
+			    token = T_Double;
+			    goto normal_return;
 			}
 		} else {
 			/* Default: Everything is a string */
