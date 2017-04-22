@@ -250,7 +250,7 @@ adj_systime(
 	 * EVNT_NSET adjtime() can be aborted by a tiny adjtime()
 	 * triggered by sys_residual.
 	 */
-	if (0. == now)
+	if ( D_ISZERO_NS(now))
 		return true;
 
 	/*
