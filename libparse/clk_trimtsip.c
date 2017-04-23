@@ -242,7 +242,10 @@ cvt_trimtsip(
 				    if (fetch_ieee754(&bp, IEEE_SINGLE, &utcoffset, trim_offsets) != IEEE_OK)
 					    return CVT_FAIL|CVT_BADFMT;
 
-				    gpstolfp((u_int)week, lfpuint(secs), lfpsint(utcoffset), &gpstime);
+				    secs -= utcoffset; /* adjust GPS time to UTC time */
+
+				    gpstolfp((unsigned short)week, (unsigned short)0,
+					     lfpuint(secs), &gpstime);
 
 				    setlfpfrac(gpstime, lfpfrac(secs));
 

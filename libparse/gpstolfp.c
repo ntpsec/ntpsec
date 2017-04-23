@@ -11,6 +11,27 @@
 
 #define GPSORIGIN (2524953600UL) /* NTP origin - GPS origin in seconds */
 
+void
+gpstolfp(
+	 int weeks,
+	 int days,
+	 unsigned long  seconds,
+	 l_fp * lfp
+	 )
+{
+  if (weeks < GPSWRAP)
+    {
+      weeks += GPSWEEKS;
+    }
+
+   /* convert to NTP time, note no fractional seconds */
+  *lfp = lfptouint((uint64_t)weeks * SECSPERWEEK
+                   + (uint64_t)days * SECSPERDAY
+                   + (uint64_t)seconds
+                   + GPSORIGIN);
+  setlfpfrac(*lfp, 0);
+}
+
 
 void
 gpsweekadj(
@@ -21,26 +42,6 @@ gpsweekadj(
 	/* adjust for rollover */
 	while (*week < build_week)
 		*week += GPSWEEKS;
-}
-
-
-void
-gpstolfp(
-	u_int week,
-	u_long TOW,
-	int UTC_offset,
-	l_fp * lfp
-	)
-{
-	time64_t t;
-	/*
-	 * convert to NTP time, wraps after 2036-02-07 (era 0->1),
-	 * adjusted week must be within 68 years of system's time
-	 */
-	t = (time64_t)((int64_t)GPSORIGIN - UTC_offset);
-	t += TOW + (uint64_t)week * SECSPERWEEK;
-	*lfp = lfptouint(t);
-	setlfpfrac(*lfp, 0);
 }
 
 
