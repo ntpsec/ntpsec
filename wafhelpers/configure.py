@@ -264,6 +264,7 @@ def cmd_configure(ctx, config):
         ('w_cast_align', "-Wcast-align"),
         ('w_cast_qual', "-Wcast-qual"),
         ('w_disabled_optimization', "-Wdisabled-optimization"),
+        ('w_float_equal', "-Wfloat-equal"),
         ('w_format', '-Wformat'),
         ('w_format_security', '-Wformat-security'),
         # fails on OpenBSD 6
@@ -310,7 +311,6 @@ def cmd_configure(ctx, config):
             # "-Wall",                # for masochists
             # "-Waggregate-return",   # breaks ldiv(), ntpcal_daysplit(),  etc.
             "-Wbad-function-cast",
-            "-Wfloat-equal",          # Not Ready For Prime Time
             # "-Wformat-nonliteral",  # complains about a used feature
             "-Wmissing-format-attribute",
             # "-Wnested-externs",     # incompatible w/ Unity...
@@ -403,6 +403,8 @@ int main(int argc, char **argv) {
     # should be before other -Wformat-* in CFLAGS
     if ctx.env.HAS_w_format:
         ctx.env.CFLAGS = ['-Wformat'] + ctx.env.CFLAGS
+    if ctx.env.HAS_w_float_equal:
+        ctx.env.CFLAGS = ['-Wfloat-equal'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_init_self:
         ctx.env.CFLAGS = ['-Winit-self'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_inline:
