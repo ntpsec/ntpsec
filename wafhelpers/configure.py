@@ -310,7 +310,7 @@ def cmd_configure(ctx, config):
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
             # "-Waggregate-return",   # breaks ldiv(), ntpcal_daysplit(),  etc.
-            "-Wbad-function-cast",
+            # "-Wbad-function-cast",  # ntpd casts long<->double a lot
             # "-Wformat-nonliteral",  # complains about a used feature
             "-Wmissing-format-attribute",
             # "-Wnested-externs",     # incompatible w/ Unity...
@@ -325,7 +325,7 @@ def cmd_configure(ctx, config):
             # fails on clang, lot's of false positives and Unity complaints
             # ('w_suggest_attribute_const', "-Wsuggest-attribute=const"),
             # fails on clang, lot's of false positives and Unity complaints
-            #('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"),
+            # ('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"),
             ]
 
     ctx.env.CFLAGS = [
