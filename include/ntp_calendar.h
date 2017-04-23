@@ -55,7 +55,7 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 #define	SECSPERAVGYEAR	31556952	/* mean year length over 400yrs */
 
 /*
- * Get the build date & time in UTC.  This depends on the EPOCH
+ * Get the build date & time in UTC.  This depends on the BUILD_EPOCH
  * which is fixed at configure time.
  */
 extern int

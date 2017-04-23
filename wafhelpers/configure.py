@@ -813,16 +813,18 @@ int main(int argc, char **argv) {
                 msg("WARNING: This system has a 32-bit time_t.")
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
-    epoch = os.getenv('SOURCE_DATE_EPOCH', None)
-    if ctx.options.epoch:
-        ctx.define("EPOCH", ctx.options.epoch, comment="Using --epoch")
-    elif epoch:
-        if not epoch.isdigit():
+    source_date_epoch = os.getenv('SOURCE_DATE_EPOCH', None)
+    if ctx.options.build_epoch:
+        ctx.define("BUILD_EPOCH", ctx.options.build_epoch,
+                   comment="Using --build-epoch")
+    elif source_date_epoch:
+        if not source_date_epoch.isdigit():
             msg("ERROR: malformed SOURCE_DATE_EPOCH")
             sys.exit(1)
-        ctx.define("EPOCH", int(epoch), comment="Using SOURCE_DATE_EPOCH")
+        ctx.define("BUILD_EPOCH", int(source_date_epoch),
+                   comment="Using SOURCE_DATE_EPOCH")
     else:
-        ctx.define("EPOCH", int(time.time()), comment="Using default EPOCH")
+        ctx.define("BUILD_EPOCH", int(time.time()), comment="Using default")
 
     ctx.start_msg("Writing configuration header:")
     ctx.write_config_header("config.h")

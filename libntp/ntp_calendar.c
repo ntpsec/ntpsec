@@ -58,7 +58,7 @@ ntpcal_get_build_date(
 	struct calendar * jd
 	)
 {
-        time_t epoch = (time_t)EPOCH;
+        time_t epoch = (time_t)BUILD_EPOCH;
         struct tm *epoch_tm;
 
 	ZERO(*jd);
