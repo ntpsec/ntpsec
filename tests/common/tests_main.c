@@ -64,6 +64,7 @@ static void RunAllTests(void)
 
 #ifdef TEST_LIBPARSE
 	RUN_TEST_GROUP(ieee754io);
+	RUN_TEST_GROUP(gpstolfp);
 #endif
 
 #ifdef TEST_NTPD

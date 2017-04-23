@@ -69,6 +69,7 @@ def build(ctx):
         # libparse/
         libparse_source = [
             "libparse/ieee754io.c",
+	    "libparse/gpstolfp.c",
         ] + common_source
 
         ctx.ntp_test(
