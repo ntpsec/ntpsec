@@ -71,11 +71,11 @@ has a pivot date and resolves incoming timestamps to the era that
 minimizes distance between now and the timestamp.  This procedure
 is part of the core protocol specification.
 
-An instance's pivot time is constructed from EPOCH defined at configure
-time in config.h.  If EPOCH is set to a known time then the binaries are
-reproducible.  By default the EPOCH is the time when the last './waf
-configure' was run.  You can override the EPOCH with '-waf --epoch' or
-using the SOURCE_DATE_EPOCH environment variable.
+An instance's pivot time is constructed from BUILD_EPOCH defined at configure
+time in config.h.  If BUILD_EPOCH is set to a known time then the binaries are
+reproducible.  By default the BUILD_EPOCH is the time when the last './waf
+configure' was run.  You can override the BUILD_EPOCH with '-waf --build-epoch'
+or using the SOURCE_DATE_EPOCH environment variable.
 
 More information on reproduceable builds is at:
 https://reproducible-builds.org/[https://reproducible-builds.org/]
@@ -85,20 +85,9 @@ https://reproducible-builds.org/[https://reproducible-builds.org/]
 Due to bad design of NMEA0183, the reporting protocol used by many GPS
 sensors, the NMEA driver in NTPsec sometimes has to make an assumption
 about what century it is.  Choice of a base-century hits the same
-issues; so here the year derived from the EPOCH is also used.  The
+issues; so here the year derived from the BUILD_EPOCH is also used.  The
 alternative - trusting the system clock to report the right century -
 could produce very bad behavior near century boundaries.
-
-== Unpredictable leap seconds ==
-
-On first startup (that is, before it can fetch a leapsecond file)
-NTPsec also needs to make an assumption about UTC's offset from TAI.
-To do this it captures that offset at build time, again implying
-nonreproducibility of builds in the prsens of leap-offset bumps.
-
-Again, any attempt to change this would necessarily increase risks 
-by shortening the span over which an ntpd instance will speak correct
-UTC in the future.
 
 // end
 
