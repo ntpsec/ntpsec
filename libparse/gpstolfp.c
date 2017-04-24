@@ -9,7 +9,7 @@
 #include "ntp_fp.h"
 #include "ntp_calendar.h"
 
-#define GPSORIGIN (2524953600UL) /* NTP origin - GPS origin in seconds */
+#define GPSORIGIN       2524953600u  /* GPS origin - NTP origin in seconds */
 
 void
 gpstolfp(
