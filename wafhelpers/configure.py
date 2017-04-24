@@ -5,11 +5,11 @@ import sys
 import time
 from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
-from wafhelpers.util import msg, msg_setting, parse_version
 
 from waflib.Errors import WafError
 from waflib import Build
 from waflib.Context import BOTH
+from waflib.Logs import pprint
 
 
 class oc(Build.BuildContext):
@@ -31,6 +31,28 @@ class oc(Build.BuildContext):
             self.logger.debug('noooo %r' % err)
             return 1
         return 0
+
+
+def msg(str):
+    pprint("YELLOW", str)
+
+
+def msg_setting(name, val):
+    pprint("NORMAL", "  %-30s: " % name, sep="")
+    pprint("YELLOW", val)
+
+
+def parse_version(config):
+    with open("VERSION", "r") as f:
+        version_string = f.read().split(" ")[0].strip()
+        [major, minor, rev] = version_string.split(".")
+        # "NTPS" for NTPSec
+        # this avoids any naming collisions
+        map = {"NTPSEC_VERSION_MAJOR": int(major),
+               "NTPSEC_VERSION_MINOR": int(minor),
+               "NTPSEC_VERSION_REV": int(rev)}
+
+    config.update(map)
 
 
 def cmd_configure(ctx, config):
