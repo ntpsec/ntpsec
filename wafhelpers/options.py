@@ -70,8 +70,8 @@ def options_cmd(ctx, config):
     grp.add_option('--cflags', type='string', action="callback",
                    callback=callback_flags,
                    help="Users should use CFLAGS in their environment.")
-    grp.add_option( '--build-epoch', type='int', default=None,
-        help="Force epoch, or use SOURCE_DATE_EPOCH in environment")
+    grp.add_option('--build-epoch', type='int', default=None,
+                   help="Force epoch, or use SOURCE_DATE_EPOCH in environment")
     grp.add_option('--ldflags', type='string', action="callback",
                    callback=callback_flags,
                    help="Users should use LDFLAGS in their environment.")
