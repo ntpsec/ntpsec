@@ -662,7 +662,10 @@ TSIP_decode (
 			if (up->polled  <= 0) 
 				return 0;
 				
-			if (up->UTC_offset == 0) {
+			/* Praecis produces only 8f-ad with UTC offset applied */
+			if (up->type == CLK_PRAECIS) {
+				up->UTC_offset = 0;
+			} else if (up->UTC_offset == 0) {
 #ifdef DEBUG
 				printf("TSIP_decode 8f-ad: need UTC offset from 8f-0b\n");
 #endif
@@ -848,7 +851,6 @@ TSIP_decode (
 			else
 				printf ("	Time is from GPS\n\n");	
 #endif		
-
 			up->TOW = (uint32_t)getlong((uint8_t *) &mb(1));
 			up->week = (uint32_t)getint((uint8_t *) &mb(5));
 			gpsweekadj(&up->week, up->build_week);
