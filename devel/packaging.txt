@@ -48,14 +48,6 @@ not have Python installed and execute the programs there.
 There appears to be no speed advantage, or disadvantage, to running the
 binaries created by cx_freeze.
 
-== Non-reproducible builds ==
-
-Many Linux distributions now want binary-package builds to be fully
-reproducible - that is, the same sources always produce identical
-output.
-
-NTPsec *cannot* do this.  There are specific reasons it cannot.
-
 == Cross-era interoperability in modular calendar arithmetic ==
 
 The protocol necessarily uses time/date stamps of finite length in
