@@ -75,7 +75,7 @@ caltogps(
 
 	t = ntpcal_dayjoin(ntpcal_date_to_rd(in) - DAY_NTP_STARTS, 
 	                             ntpcal_date_to_daysec(in));
-	t -= (uint64_t)((int64_t)GPSORIGIN + UTC_offset);
+	t -= (uint64_t)((int64_t)GPSORIGIN - UTC_offset);
 	*week = t / SECSPERWEEK;
 	if (NULL != TOW)
 		*TOW = t % SECSPERWEEK;

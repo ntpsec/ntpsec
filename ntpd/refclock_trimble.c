@@ -579,12 +579,12 @@ TSIP_decode (
 		switch (mb(0) & 0xff) {
 
 		    case PACKET_8F0B: 
-
-			if (up->polled <= 0)
-				return 0;
-
 			if (up->rpt_cnt != LENCODE_8F0B)  /* check length */
 				break;
+
+			up->UTC_offset = getint((uint8_t *) &mb(16));
+			if (up->polled <= 0)
+				return 0;
 		
 #ifdef DEBUG
 			if (debug > 1) {
@@ -607,7 +607,6 @@ TSIP_decode (
 			}
 #endif
 
-			up->UTC_offset = getint((uint8_t *) &mb(16));  
 			if (up->UTC_offset == 0) { /* Check UTC offset */ 
 #ifdef DEBUG
 				printf("TSIP_decode: UTC Offset Unknown\n");
@@ -663,6 +662,13 @@ TSIP_decode (
 			if (up->polled  <= 0) 
 				return 0;
 				
+			if (up->UTC_offset == 0) {
+#ifdef DEBUG
+				printf("TSIP_decode 8f-ad: need UTC offset from 8f-0b\n");
+#endif
+				return 0;
+			}
+
 			/* Check Tracking Status */
 			st = mb(18);
 			if (st < 0 || st > 14)
@@ -712,6 +718,7 @@ TSIP_decode (
 			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
+			up->UTC_offset = 0; /* don't re-use offset */
 #ifdef DEBUG
 			if (debug > 1)
 				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
