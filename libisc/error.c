@@ -25,8 +25,10 @@ default_fatal_callback(const char *, int, const char *, va_list)
      ISC_FORMAT_PRINTF(3, 0);
 
 /*% unexpected_callback */
-static isc_errorcallback_t unexpected_callback = default_unexpected_callback;
-static isc_errorcallback_t fatal_callback = default_fatal_callback;
+static isc_errorcallback_t unexpected_callback ISC_FORMAT_PRINTF(3, 0) \
+	 = default_unexpected_callback;
+static isc_errorcallback_t fatal_callback ISC_FORMAT_PRINTF(3, 0) \
+	 = default_fatal_callback;
 
 void
 isc_error_setunexpected(isc_errorcallback_t cb) {
