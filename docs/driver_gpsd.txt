@@ -253,6 +253,29 @@ refclock gpsd mode 2 path /dev/tty.usbserial
 
 This is configured for the experimental automatic mode.
 
+== Known bugs ==
+
+If your GPS has firmware made more than 1024 weeks (19 years and 36
+weeks) in the past, its internal date counter may well wrap around
+and generate spurious timestamps.  Some newer GPSes may have a
+longer wraparound (8192 weeks, or 157 years and 28 weeks) but
+this is almost never documented and not safe to bet on. GPSD
+cannot tell what the device's wraparound time is, nor what
+any base-date assumption in its firmware might be.
+
+This problem is fundamental and cannot be compensated for in code
+without relying on the accuracy of the local system clock, which is
+what GPSD (primarily designed for geospatial location) does.  This
+choice creates a risk of perverse GIGO failure modes (especially at
+startup time). The only remedy is (a) not to use ancient GPS hardware,
+and (b) not to rely on GPSD to manage a time source if there is
+any serious risk that your NTP host might boot with a system clock time
+that is wildly off.
+
+Even with these constraints there is some risk of flaky failures
+in a time window around GPS defined by your host system's worst-case
+clock skew from UTC at boot time.
+
 '''''
 
 include::includes/footer.txt[]

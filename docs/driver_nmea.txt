@@ -261,4 +261,20 @@ link:refclock.html[Reference Clock Drivers]
 
 '''''
 
+== Known bugs ==
+
+If your GPS has firmware made more than 1024 weeks (19 years and 36
+weeks) in the past, its internal date counter may well wrap around and
+generate spurious timestamps.  Beginning in January 2018, newer GPSes
+may have a longer wraparound (8192 weeks, or 157 years and 28 weeks)
+but it is not safe to bet that any given receiver will have firmware
+updated to take advantage of this.
+
+This problem is fundamental and cannot be compensated for in code
+without relying on the accuracy of the local system clock, which
+is exactly what an NTP implementation may not do without risking
+perverse failure modes (especially at startup time). The only
+remedy is not to use ancient GPS hardware.
+
+'''''
 include::includes/footer.txt[]
