@@ -197,7 +197,7 @@ def build(ctx):
         source=scripts,
         target=scripts,
         chmod=Utils.O755,
-        install_path="${PREFIX}/bin/"
+        install_path='${BINDIR}',
     )
 
     ctx.add_post_fun(afterparty)

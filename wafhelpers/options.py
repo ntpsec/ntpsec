@@ -2,6 +2,7 @@ def options_cmd(ctx, config):
     ctx.load("compiler_c")
     ctx.load("msvc")
     ctx.load('waf_unit_test')
+    ctx.load('gnu_dirs')
 
     def callback_flags(option, opt, value, parser):
         config["OPT_STORE"].setdefault(opt, []).append(value)
@@ -90,8 +91,6 @@ def options_cmd(ctx, config):
     grp.add_option('--undefine', type='string', action="callback",
                    callback=callback_flags,
                    help="Force undefinition of symbol.")
-    grp.add_option('--sbindir', type='string', action='store',
-                   default=None, help="Force ntpd installation directory.")
 
     grp = ctx.add_option_group("NTP documentation configure options")
     grp.add_option('--enable-doc', action='store_true',
@@ -101,7 +100,3 @@ def options_cmd(ctx, config):
                    help="Build NTP documentation with a2x XML lint")
     grp.add_option('--disable-manpage', action='store_true',
                    default=False, help="Disable Manpage building.")
-    grp.add_option('--htmldir', type='string', action='store',
-                   default=None, help="Force HTML installation directory.")
-    grp.add_option('--mandir', type='string', action='store',
-                   default=None, help="Force man page installation directory.")

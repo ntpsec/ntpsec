@@ -7,7 +7,7 @@ def build(ctx):
     ctx(
         features="c cprogram bld_include src_include libisc_include",
         includes=["%s/ntpfrob/" % bldnode],
-        install_path="${PREFIX}/bin/",
+        install_path='${BINDIR}',
         source=frob_sources,
         target="ntpfrob",
         use="M RT",

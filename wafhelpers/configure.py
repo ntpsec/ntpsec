@@ -62,6 +62,7 @@ def cmd_configure(ctx, config):
     ctx.run_build_cls = 'check'
     ctx.load('waf', tooldir='wafhelpers/')
     ctx.load('waf_unit_test')
+    ctx.load('gnu_dirs')
 
     parse_version(config)
 
@@ -114,7 +115,7 @@ def cmd_configure(ctx, config):
     if ctx.options.enable_rtems_trace:
         ctx.find_program("rtems-tld", var="BIN_RTEMS_TLD",
                          path_list=[ctx.options.rtems_trace_path,
-                                    ctx.env.BINDIR])
+                                    '${BINDIR}'])
         ctx.env.RTEMS_TEST_ENABLE = True
         ctx.env.RTEMS_TEST_FLAGS = [
             "-C", "%s/devel/trace/ntpsec-trace.ini" % srcnode,
@@ -168,7 +169,6 @@ def cmd_configure(ctx, config):
         ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf"
                                   % ctx.srcnode.abspath()]
         ctx.env.ENABLE_DOC_USER = ctx.options.enable_doc
-        ctx.env.HTMLDIR = ctx.options.htmldir
 
     # XXX: conditionally build this with --disable-man?
     # Should it build without docs enabled?
@@ -181,9 +181,6 @@ def cmd_configure(ctx, config):
     # Disable manpages within build()
     if ctx.options.disable_manpage:
         ctx.env.DISABLE_MANPAGE = True
-
-    ctx.env.SBINDIR = ctx.options.sbindir
-    ctx.env.MANDIR = ctx.options.mandir
 
     from os.path import exists
     from waflib.Utils import subprocess

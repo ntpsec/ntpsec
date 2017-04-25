@@ -35,11 +35,6 @@ def build(ctx):
     )
 
     # Install HTML
-    if ctx.env.HTMLDIR:
-        install_prefix = ctx.env.HTMLDIR
-    else:
-        install_prefix = "%s/share/ntpsec/docs/" % ctx.env.PREFIX
-
-    ctx.install_files(install_prefix, extra
+    ctx.install_files('${HTMLDIR}', extra
                       + [x.change_ext(".html").name for x in doc_source])
-    ctx.install_files(install_prefix, image_source, relative_trick=True)
+    ctx.install_files('${HTMLDIR}', image_source, relative_trick=True)
