@@ -75,18 +75,6 @@ def configure(ctx):
         pprint("NORMAL", "  %-30s: " % name, sep="")
         pprint("YELLOW", val)
 
-    def parse_version(config):
-        with open("VERSION", "r") as f:
-            version_string = f.read().split(" ")[0].strip()
-            [major, minor, rev] = version_string.split(".")
-            # "NTPS" for NTPSec
-            # this avoids any naming collisions
-            map = {"NTPSEC_VERSION_MAJOR": int(major),
-                   "NTPSEC_VERSION_MINOR": int(minor),
-                   "NTPSEC_VERSION_REV": int(rev)}
-
-        config.update(map)
-
     srcnode = ctx.srcnode.abspath()
     bldnode = ctx.bldnode.abspath()
 
@@ -95,11 +83,12 @@ def configure(ctx):
     ctx.load('waf_unit_test')
     ctx.load('gnu_dirs')
 
-    parse_version(config)
-
-    ctx.env.NTPSEC_VERSION_MAJOR = config["NTPSEC_VERSION_MAJOR"]
-    ctx.env.NTPSEC_VERSION_MINOR = config["NTPSEC_VERSION_MINOR"]
-    ctx.env.NTPSEC_VERSION_REV = config["NTPSEC_VERSION_REV"]
+    with open("VERSION", "r") as f:
+        version_string = f.read().split(" ")[0].strip()
+        [major, minor, rev] = version_string.split(".")
+        ctx.env.NTPSEC_VERSION_MAJOR = int(major)
+        ctx.env.NTPSEC_VERSION_MINOR = int(minor)
+        ctx.env.NTPSEC_VERSION_REV = int(rev)
 
     ctx.env.NTPSEC_VERSION = "%s.%s.%s" % (ctx.env.NTPSEC_VERSION_MAJOR,
                                            ctx.env.NTPSEC_VERSION_MINOR,
