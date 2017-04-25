@@ -58,7 +58,7 @@ write_all(int fd, const void *buf, size_t len)
 	while (len) {
 		int n = write(fd, buf, len);
 		if (n <= 0) return total;
-		buf = n + (char *)buf;
+		buf = n + (const char *)buf;
 		len -= (u_int)n;
 		total += (u_int)n;
 	}
@@ -215,7 +215,7 @@ send_via_ntp_signd(
 #ifdef DEBUG
 				if (debug)
 					printf(
-						"transmit ntp_signd packet: at %ld %s->%s mode %d keyid %08x len %d\n",
+						"transmit ntp_signd packet: at %lu %s->%s mode %d keyid %08x len %d\n",
 						current_time, socktoa(&rbufp->dstadr->sin),
 						socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif
