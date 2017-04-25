@@ -43,8 +43,8 @@ Usage: waf <command>
 
 
 def options(ctx):
-        options_cmd(ctx, config)
-        ctx.recurse("pylib")
+    options_cmd(ctx, config)
+    ctx.recurse("pylib")
 
 
 def configure(ctx):
@@ -901,14 +901,14 @@ int main(int argc, char **argv) {
 
 
 class check(BuildContext):
-        cmd = 'check'
-        variant = "main"
+    cmd = 'check'
+    variant = "main"
 
 
 def bin_test(ctx):
-        """Run binary check, use after tests."""
-        from wafhelpers.bin_test import cmd_bin_test
-        cmd_bin_test(ctx, config)
+    """Run binary check, use after tests."""
+    from wafhelpers.bin_test import cmd_bin_test
+    cmd_bin_test(ctx, config)
 
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
@@ -930,22 +930,22 @@ for v in ["host", "main"]:
 
 
 def init_handler(ctx):
-        cmd = ctx.cmd
-        if cmd == 'init_handler':
-                cmd = 'build'
+    cmd = ctx.cmd
+    if cmd == 'init_handler':
+        cmd = 'build'
 
-        def make_context(name):
-                for x in Context.classes:
-                        if x.cmd == name and x.fun != 'init_handler':
-                                return x()
-                ctx.fatal('No class for %r' % cmd)
+    def make_context(name):
+        for x in Context.classes:
+            if x.cmd == name and x.fun != 'init_handler':
+                return x()
+        ctx.fatal('No class for %r' % cmd)
 
-        # By default we want to iterate over each variant.
-        for v in ["host", "main"]:
-                obj = make_context(cmd)
-                obj.variant = v
-                pprint("YELLOW", "--- %sing %s ---" % (cmd, v))
-                obj.execute()
+    # By default we want to iterate over each variant.
+    for v in ["host", "main"]:
+        obj = make_context(cmd)
+        obj.variant = v
+        pprint("YELLOW", "--- %sing %s ---" % (cmd, v))
+        obj.execute()
 
 commands = (
     ("install", "init_handler", None),
@@ -959,15 +959,15 @@ commands = (
 
 
 for command, func, descr in commands:
-        class tmp1(Context.Context):
-                if descr:
-                        __doc__ = descr
-                cmd = command
-                fun = func
-                if ((command in
-                    'install uninstall build clean list step docs bsp info'
-                     )):
-                    execute = Scripting.autoconfigure(Context.Context.execute)
+    class tmp1(Context.Context):
+        if descr:
+            __doc__ = descr
+        cmd = command
+        fun = func
+        if ((command in
+            'install uninstall build clean list step docs bsp info'
+             )):
+            execute = Scripting.autoconfigure(Context.Context.execute)
 # end borrowed code
 
 
@@ -981,22 +981,22 @@ def afterparty(ctx):
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
         ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc ntpd/version.h")
     for x in ("ntpclients",):
-            # List used to be longer...
-            path_build = ctx.bldnode.make_node("pylib")
-            path_source = ctx.srcnode.make_node(x + "/ntp")
-            relpath = "../" + path_build.path_from(ctx.srcnode)
-            if ctx.cmd in ('install', 'build'):
-                if ((not path_source.exists()
-                     or os.readlink(path_source.abspath()) != relpath)):
-                    try:
-                        os.remove(path_source.abspath())
-                    except OSError:
-                        pass
-                    os.symlink(relpath, path_source.abspath())
-            elif ctx.cmd == 'clean':
-                if path_source.exists():
-                    # print "removing", path_source.abspath()
+        # List used to be longer...
+        path_build = ctx.bldnode.make_node("pylib")
+        path_source = ctx.srcnode.make_node(x + "/ntp")
+        relpath = "../" + path_build.path_from(ctx.srcnode)
+        if ctx.cmd in ('install', 'build'):
+            if ((not path_source.exists()
+                 or os.readlink(path_source.abspath()) != relpath)):
+                try:
                     os.remove(path_source.abspath())
+                except OSError:
+                    pass
+                os.symlink(relpath, path_source.abspath())
+        elif ctx.cmd == 'clean':
+            if path_source.exists():
+                # print "removing", path_source.abspath()
+                os.remove(path_source.abspath())
     bldnode = ctx.bldnode.abspath()
     if ctx.cmd in ('install', 'build'):
         os.system("cd %s/pylib; ln -sf ../libntp/ntpc.so ntpc.so "
