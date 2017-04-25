@@ -334,7 +334,7 @@ def cmd_configure(ctx, config):
             # "-Waggregate-return",   # breaks ldiv(), ntpcal_daysplit(),  etc.
             # "-Wbad-function-cast",  # ntpd casts long<->double a lot
             # "-Wformat-nonliteral",  # complains about a used feature
-            "-Wmissing-format-attribute",
+            # "-Wmissing-format-attribute", # false positives
             # "-Wnested-externs",     # incompatible w/ Unity...
             # "-Wpadded",             # duck... over 3k warnings
             # "-Wredundant-decls",    # incompatible w/ Unity
