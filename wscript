@@ -202,9 +202,8 @@ def configure(ctx):
     if ctx.options.disable_manpage:
         ctx.env.DISABLE_MANPAGE = True
 
-    from os.path import exists
     from waflib.Utils import subprocess
-    if ((exists(".git")
+    if ((os.path.exists(".git")
          and ctx.find_program("git", var="BIN_GIT", mandatory=False))):
         ctx.start_msg("DEVEL: Getting revision")
         cmd = ["git", "log", "-1", "--format=%H"]
