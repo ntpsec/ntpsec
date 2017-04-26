@@ -1688,7 +1688,7 @@ in ppm or ppb.
 <dt>mu, mean:</dt>
 <dd>The arithmetic mean: the sum of all the values divided by the
 number of values.
-The formula for mu is: "mu = (∑x<sub>i</sub>) / N ]".
+The formula for mu is: "mu = (∑x<sub>i</sub>) / N".
 Whare x<sub>i</sub> denotes the data points and N is the number of data
 points.</dd>
 
