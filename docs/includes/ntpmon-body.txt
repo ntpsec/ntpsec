@@ -55,7 +55,7 @@ k:: Select previous peer (in select mode); arrow up also works.
 
 m:: Toggle MRUlist-only mode; suppresses peer display when on.
 
-n:: Toggle display of hostnames (vs. IP addresses).
+n:: Toggle display of hostnames vs. IP addresses (default is hostnames).
 
 o:: Change peer display to opeers mode, showing destination address.
 
@@ -80,6 +80,8 @@ x:: Cleanly terminate the program.
 ?:: List these commands.
 
 == Options ==
+
+-n:: Show IP addresses (vs. hostnames)
 
 -u:: Show units
 
