@@ -1683,15 +1683,18 @@ in ppm or ppb.
 </dd>
 
 <dt>ms, millisecond:</dt>
-<dd>One thousandth of a second = 0.001s</dd>
+<dd>One thousandth of a second = 0.001 seconds, 1e-3 seconds</dd>
 
 <dt>mu, mean:</dt>
 <dd>The arithmetic mean: the sum of all the values divided by the
-number of values.</dd>
+number of values.
+The formula for mu is: "mu = (∑x<sub>i</sub>) / N ]".
+Whare x<sub>i</sub> denotes the data points and N is the number of data
+points.</dd>
 
 <dt>ns, nanosecond:</dt>
 <dd>One billionth of a second, also one thousandth of a microsecond,
-0.000000001s.</dd>
+0.000000001 seconds and 1e-9 seconds.</dd>
 
 <dt>percentile:</dt>
 <dd>The value below which a given percentage of values fall.</dd>
