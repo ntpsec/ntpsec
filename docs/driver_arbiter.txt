@@ -153,7 +153,7 @@ without relying on the accuracy of the local system clock, which
 is exactly what an NTP implementation may not do without risking
 perverse failure modes (especially at startup time).
 
-The only sure remedy is to be sure the Arbiter's firmware has been .
+The only sure remedy is to be sure the Arbiter's firmware has been
 updated within the current GPS era.
 
 '''''
