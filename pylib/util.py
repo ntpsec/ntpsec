@@ -33,15 +33,15 @@ OLD_CTL_PST_SEL_SYSPEER = 3
 
 # Units for formatting
 UNIT_NS = "ns"
-UNIT_US = u"\u03bcs"
+UNIT_US = u"µs"
 UNIT_MS = "ms"
 UNIT_S = "s"
 UNIT_KS = "ks"
 UNITS_SEC = (UNIT_NS, UNIT_US, UNIT_MS, UNIT_S, UNIT_KS)
-UNIT_PPT = "ppt"
-UNIT_PPB = "ppb"
-UNIT_PPM = "ppm"
-UNIT_PPK = "ppk"
+UNIT_PPT = u"‰"      # parts per thousand
+UNIT_PPB = "ppb"     # parts per billion
+UNIT_PPM = "ppm"     # parts per million
+UNIT_PPK = "ppk"     # parts per ??
 UNITS_PPX = (UNIT_PPT, UNIT_PPB, UNIT_PPM, UNIT_PPK)
 unitgroups = (UNITS_SEC, UNITS_PPX)
 

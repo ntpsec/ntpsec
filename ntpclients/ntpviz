@@ -1702,9 +1702,9 @@ number of values.</dd>
 <dd>Ratio between two values. These following are all the same:
     1 ppm, one in one million, 1/1,000,000, 0.000,001, and 0.000,1%</dd>
 
-<dt>ppt, parts per thousand:</dt>
+<dt>‰, parts per thousand:</dt>
 <dd>Ratio between two values. These following are all the same:
-    1 ppt, one in one thousand, 1/1,000, 0.001, and 0.1%</dd>
+    1 ‰. one in one thousand, 1/1,000, 0.001, and 0.1%</dd>
 
 <dt>refclock:</dt>
 <dd>Reference clock, a local GPS module or other local source of time.</dd>
