@@ -167,13 +167,14 @@ class OutputContext:
         curses.endwin()
 
 usage = '''
-USAGE: ntpmon [-u] [-V] [host]
+USAGE: ntpmon [-n] [-u] [-V] [host]
 '''
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "Vu", ["version", "units"])
+                                             "Vnu",
+                                             ["version", "numeric", "units"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -191,6 +192,8 @@ if __name__ == '__main__':
         if switch in ("-V", "--version"):
             print("ntpmon %s" % ntp.util.stdversion())
             raise SystemExit(0)
+        elif switch in ("-n", "--numeric"):
+            showhostnames = False
         elif switch in ("-u", "--units"):
             showunits = True
 
