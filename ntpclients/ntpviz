@@ -1677,7 +1677,10 @@ dd {
 system clock frequency (usually in parts per million, ppm)</dd>
 
 <dt>jitter, dispersion:</dt>
-<dd>The short term change in a value</dd>
+<dd>The short term change in a value.  NTP measures Local Time Jitter,
+Refclock Jitter, and Peer Jitter in seconds.  Local Frequency Jitter is
+in ppm or ppb.
+</dd>
 
 <dt>ms, millisecond:</dt>
 <dd>One thousandth of a second = 0.001s</dd>
@@ -1695,7 +1698,7 @@ number of values.</dd>
 
 <dt>ppb, parts per billion:</dt>
 <dd>Ratio between two values. These following are all the same:
-    1 ppb, one in one billion, 1/1,000,000,000, 0.000,000,001, and
+    1 ppb, one in one billion, 1/1,000,000,000, 0.000,000,001, 1e-9 and
     0.000,000,1%</dd>
 
 <dt>ppm, parts per million:</dt>
@@ -1724,11 +1727,14 @@ or server.</dd>
 <dd>Sigma denotes the standard deviation (SD) and is centered on the
 arithmetic mean of the data set. The SD is simply the square root of
 the variance of the data set.  Two sigma is simply twice the standard
-deviation.  Three sigma is three times sigma.  Smaller is better.</dd>
+deviation.  Three sigma is three times sigma.  Smaller is better.<br>
+The formula for sigma is: "σ = √[ ∑(x<sub>i</sub>-mu)^2 / N ]".
+Whare x<sub>i</sub> denotes the data points and N is the number of data
+points.</dd>
 
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
-0.000,001s.</dd>
+0.000,001 seconds, and 1e-6 seconds.</dd>
 </dl>
 
 <br>
