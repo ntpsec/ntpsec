@@ -1689,7 +1689,7 @@ in ppm or ppb.
 <dd>The arithmetic mean: the sum of all the values divided by the
 number of values.
 The formula for mu is: "mu = (∑x<sub>i</sub>) / N".
-Whare x<sub>i</sub> denotes the data points and N is the number of data
+Where x<sub>i</sub> denotes the data points and N is the number of data
 points.</dd>
 
 <dt>ns, nanosecond:</dt>
@@ -1732,7 +1732,7 @@ arithmetic mean of the data set. The SD is simply the square root of
 the variance of the data set.  Two sigma is simply twice the standard
 deviation.  Three sigma is three times sigma.  Smaller is better.<br>
 The formula for sigma is: "σ = √[ ∑(x<sub>i</sub>-mu)^2 / N ]".
-Whare x<sub>i</sub> denotes the data points and N is the number of data
+Where x<sub>i</sub> denotes the data points and N is the number of data
 points.</dd>
 
 <dt>µs, us, microsecond:</dt>
