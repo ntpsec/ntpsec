@@ -2445,6 +2445,7 @@ if (NULL == server->dstadr)
 		server->nextdate = current_time;
 		peer_update_hash(server);
 		peer_xmit(server);
+		poll_update(server, server->hpoll);
 
 		msyslog(LOG_INFO, "Setup server %s", socktoa(rmtadr));
 		return;
