@@ -1,6 +1,8 @@
 from __future__ import print_function
 
+import itertools
 import os
+import shlex
 import sys
 import time
 
@@ -245,10 +247,14 @@ def configure(ctx):
         ctx.env.LINK_CC = [ctx.options.cross_compiler]
 
         if ctx.env["CROSS-CFLAGS"]:
-            ctx.env.CFLAGS = opt_map["CROSS-CFLAGS"]
+            # Lexically split each part of the CFLAGS, then chain the lists
+            iter = [shlex.split(x) for x in opt_map["CROSS-CFLAGS"]]
+            ctx.env.CFLAGS = list(itertools.chain.from_iterable(iter))
 
         if ctx.env["CROSS-LDFLAGS"]:
-            ctx.env.LDFLAGS = opt_map["CROSS-LDFLAGS"]
+            # Lexically split each part of the LDFLAGS, then chain the lists
+            iter = [shlex.split(x) for x in opt_map["CROSS-LDFLAGS"]]
+            ctx.env.LDFLAGS = list(itertools.chain.from_iterable(iter))
 
     if ctx.options.list:
         from wafhelpers.refclock import refclock_map
