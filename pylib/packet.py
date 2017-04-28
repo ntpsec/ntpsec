@@ -1382,7 +1382,7 @@ Receive a nonce that can be replayed - combats source address spoofing
                     if sorter is None:
                         raise ControlException(SERR_BADSORT % sortkey)
             for k in list(variables.keys()):
-                if k in ("mincount", "resall", "resany",
+                if k in ("mincount", "resall", "resany", "kod", "limited",
                          "maxlstint", "laddr", "recent", "sort",
                          "frags", "limit"):
                     continue
