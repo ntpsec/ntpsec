@@ -383,7 +383,7 @@ displayed.
 == Authentication ==
 
 Four commands require authentication to the server: config-from-file,
-:config, ifstats, and reslist.  An authkey file must be in place and
+config, ifstats, and reslist.  An authkey file must be in place and
 a control key declared in ntp.conf for these commands to work.
 
 If you are running as root or otherwise have read access to the

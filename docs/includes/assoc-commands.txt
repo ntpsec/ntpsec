@@ -58,7 +58,7 @@ at the _address_ specified, which is usually the broadcast address on
   This command removes a previously configured association. An address
   or association ID can be used to identify the association. Either an
   IP address or DNS name can be used. This command is most useful when
-  supplied via +ntpq+ runtime configuration commands +:config+ and
+  supplied via +ntpq+ runtime configuration commands +config+ and
   +config-from-file+.
 
 // end
