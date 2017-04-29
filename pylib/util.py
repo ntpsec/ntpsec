@@ -131,7 +131,7 @@ def getunitgroup(unit):
 
 
 def oomsbetweenunits(a, b):
-    "Calculates how many orders of magnitude seperate two units"
+    "Calculates how many orders of magnitude separate two units"
     group = getunitgroup(a)
     if b is None:  # asking for baseunit
         return (group.index(a) * 3)
@@ -183,7 +183,7 @@ def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
     whole, dec, negative = breaknumberstring(value)
     if unitsscaled == 0:
-        # This may seem redundant, but glue forces certian formatting details
+        # This may seem redundant, but glue forces certain formatting details
         value = gluenumberstring(whole, dec, negative)
         return value
     hilen = len(whole)
