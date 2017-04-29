@@ -12,7 +12,10 @@ Defaults are start of tomorrow (UTC), and 28 days after the leap.
 # SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import sha, sys, time, datetime
+import datetime
+import sha
+import sys
+import time
 
 master_encoding = 'latin-1'
 
@@ -86,21 +89,21 @@ days = int(leap/86400)
 leap = (days+1)*86400
 
 if len(args) > 0:
-  leapdate = datetime.datetime.strptime(args[0], "%Y-%m-%d")
-  leap = (leapdate - epoch).total_seconds()
-  leap = int(leap)
-  args = args[1:]
+    leapdate = datetime.datetime.strptime(args[0], "%Y-%m-%d")
+    leap = (leapdate - epoch).total_seconds()
+    leap = int(leap)
+    args = args[1:]
 
 expire = leap + 28*86400
 if len(args) > 0:
-  expiredate = datetime.datetime.strptime(args[0], "%Y-%m-%d")
-  expire = (expiredate - epoch).total_seconds()
-  expire = int(expire)
-  args = args[1:]
+    expiredate = datetime.datetime.strptime(args[0], "%Y-%m-%d")
+    expire = (expiredate - epoch).total_seconds()
+    expire = int(expire)
+    args = args[1:]
 leap_txt = time.asctime(time.gmtime(leap))
 leap = str(leap+JAN_1970)
 expire_txt = time.asctime(time.gmtime(expire))
-expire=str(expire+JAN_1970)
+expire = str(expire+JAN_1970)
 
 update = int(time.time())
 update_txt = time.asctime(time.gmtime(update))
@@ -132,7 +135,7 @@ sha1.update(expire)
 print("#$ %s  # %s" % (update, update_txt))
 sha1.update(update)
 digest = sha1.hexdigest()
-print("#h %s %s %s %s %s" % \
- (digest[0:8], digest[8:16], digest[16:24], digest[24:32], digest[32:40]))
+print("#h %s %s %s %s %s" %
+      (digest[0:8], digest[8:16], digest[16:24], digest[24:32], digest[32:40]))
 
 # end
