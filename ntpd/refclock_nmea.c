@@ -412,7 +412,7 @@ nmea_start(
 	switch (rate) {
 	case 0:
 	case 4800:
-		baudrate = 4800;
+		baudrate = B4800;
 		baudtext = "4800";
 		break;
 	case 1:
