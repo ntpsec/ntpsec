@@ -57,10 +57,9 @@ PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
 
 
 def stdversion():
-    return "%s-%s+%s %s" % (ntp.version.VCS_BASENAME,
-                            ntp.version.VERSION,
-                            ntp.version.VCS_TICK,
-                            ntp.version.VCS_DATE)
+    return "ntpsec-%s+%s %s" % (ntp.version.VERSION,
+                                ntp.version.VCS_TICK,
+                                ntp.version.VCS_DATE)
 
 
 def rfc3339(t):
