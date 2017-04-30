@@ -1408,6 +1408,10 @@ Receive a nonce that can be replayed - combats source address spoofing
             limit = min(3 * MAXFRAGS, self.ntpd_row_limit)
             req_buf = "%s, frags=%d" % (nonce, frags)
             if variables:
+                if 'resall' in variables:
+                    variables['resall'] = hex(variables['resall'])
+                if 'resany' in variables:
+                    variables['resany'] = hex(variables['resany'])
                 parms = ", " + ",".join([("%s=%s" % it)
                                          for it in list(variables.items())])
             else:
