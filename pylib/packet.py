@@ -739,7 +739,7 @@ class MRUEntry:
             addr = addr[:addr.find(':')]
             # prefix with 0s so IPv6 sorts after IPv4
             # Need 16 rather than 12 to catch ::1
-            return '\0'*16 + socket.inet_pton(socket.AF_INET, addr)
+            return b'\0'*16 + socket.inet_pton(socket.AF_INET, addr)
 
     def __repr__(self):
         return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
