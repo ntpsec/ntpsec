@@ -11,7 +11,7 @@ def build(ctx):
                       "%s/ntptime/" % srcnode,
                       ],
             use="ntp isc M RT",
-            install_path="${PREFIX}/bin/"
+            install_path='${BINDIR}',
         )
 
     ctx.manpage(8, "ntptime-man.txt")

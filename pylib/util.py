@@ -33,15 +33,15 @@ OLD_CTL_PST_SEL_SYSPEER = 3
 
 # Units for formatting
 UNIT_NS = "ns"
-UNIT_US = u"\u03bcs"
+UNIT_US = u"µs"
 UNIT_MS = "ms"
 UNIT_S = "s"
 UNIT_KS = "ks"
 UNITS_SEC = (UNIT_NS, UNIT_US, UNIT_MS, UNIT_S, UNIT_KS)
-UNIT_PPT = "ppt"
-UNIT_PPB = "ppb"
-UNIT_PPM = "ppm"
-UNIT_PPK = "ppk"
+UNIT_PPT = u"‰"      # parts per thousand
+UNIT_PPB = "ppb"     # parts per billion
+UNIT_PPM = "ppm"     # parts per million
+UNIT_PPK = "ppk"     # parts per ??
 UNITS_PPX = (UNIT_PPT, UNIT_PPB, UNIT_PPM, UNIT_PPK)
 unitgroups = (UNITS_SEC, UNITS_PPX)
 
@@ -57,10 +57,9 @@ PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
 
 
 def stdversion():
-    return "%s-%s+%s %s" % (ntp.version.VCS_BASENAME,
-                            ntp.version.VERSION,
-                            ntp.version.VCS_TICK,
-                            ntp.version.VCS_DATE)
+    return "ntpsec-%s+%s %s" % (ntp.version.VERSION,
+                                ntp.version.VCS_TICK,
+                                ntp.version.VCS_DATE)
 
 
 def rfc3339(t):
@@ -131,7 +130,7 @@ def getunitgroup(unit):
 
 
 def oomsbetweenunits(a, b):
-    "Calculates how many orders of magnitude seperate two units"
+    "Calculates how many orders of magnitude separate two units"
     group = getunitgroup(a)
     if b is None:  # asking for baseunit
         return (group.index(a) * 3)
@@ -183,7 +182,7 @@ def rescalestring(value, unitsscaled):
     "Rescale a number string by a given number of units"
     whole, dec, negative = breaknumberstring(value)
     if unitsscaled == 0:
-        # This may seem redundant, but glue forces certian formatting details
+        # This may seem redundant, but glue forces certain formatting details
         value = gluenumberstring(whole, dec, negative)
         return value
     hilen = len(whole)

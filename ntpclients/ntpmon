@@ -88,7 +88,7 @@ def peer_detail(variables, showunits=False):
     vcopy = {}
     vcopyraw = {}
     vcopy.update(variables)
-    # Need to seperate the casted from the raw
+    # Need to separate the casted from the raw
     for key in vcopy.keys():
         vcopyraw[key] = vcopy[key][1]
         vcopy[key] = vcopy[key][0]

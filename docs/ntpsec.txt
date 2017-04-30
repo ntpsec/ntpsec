@@ -89,6 +89,8 @@ a build-time switch, not a run-time one).
 * The ttl-hop option for broadcast mode has been removed from the
   configuration grammar.  It was never actually implemented.
 
+* ntpq's ":config" command is now "config".
+
 [[security]]
 == Security Improvements ==
 

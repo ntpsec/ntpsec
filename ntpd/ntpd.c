@@ -487,7 +487,7 @@ const char *ntpd_version(void)
 {
     static char versionbuf[64];
     snprintf(versionbuf, sizeof(versionbuf),
-	     "ntpd %s-%s+%d %s", VCS_BASENAME, VERSION, VCS_TICK, VCS_DATE);
+	     "ntpd ntpsec-%s+%d %s", VERSION, VCS_TICK, VCS_DATE);
     return versionbuf;
 }
 

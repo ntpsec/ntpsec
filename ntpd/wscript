@@ -120,20 +120,13 @@ def build(ctx):
         ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
     ]
 
-    if ctx.env.SBINDIR:
-        ntpd_install_path = ctx.env.SBINDIR
-    else:
-        ntpd_install_path = "${PREFIX}/sbin/"
-    if not ntpd_install_path.endswith("/"):
-        ntpd_install_path += "/"
-
     ctx(
         features="c rtems_trace cprogram bld_include src_include "
                  "libisc_include libisc_pthread_include",
         includes=["%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
                   "%s/ntpd/" % srcnode,
                   ] + ctx.env.PLATFORM_INCLUDES,
-        install_path=ntpd_install_path,
+        install_path='${SBINDIR}',
         source=ntpd_source,
         target="ntpd",
         use="libntpd_obj isc ntp M parse RT CAP SECCOMP PTHREAD NTPD "

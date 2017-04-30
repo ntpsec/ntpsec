@@ -1,5 +1,10 @@
 // Explain the MRU stall problem and why ntpq has 'direct' mode.
 
+Timestamp interpretation in this program is likely to fail in flaky
+ways if the local system clock has not already been approximately
+synchronized to UTC. Querying a server based in a different
+NTP era than the current one is especially likely to fail.
+
 This program will behave in apparently buggy and only semi-predictable
 ways when fetching MRU lists from _any_ server with sufficiently high
 traffic.

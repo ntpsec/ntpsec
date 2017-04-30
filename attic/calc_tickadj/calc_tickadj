@@ -19,7 +19,7 @@ USAGE: calc_tickadj [-t tick] [-d drift-file]
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
 '''
-#SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 from __future__ import print_function, division
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Drift file is in PPM where Million is actually 2**20
-    cvt   = (2 ** 20) / tick
+    cvt = (2 ** 20) / tick
     drift = 0.0
 
     try:

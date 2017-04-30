@@ -38,16 +38,7 @@ def manpage_subst_fun(task, text):
 @conf
 def manpage(ctx, section, source):
 
-        if ctx.env.MANDIR:
-                manprefix = ctx.env.MANDIR
-        elif os.path.isdir("/usr/man"):
-                manprefix = "/usr/man"
-        else:
-                manprefix = "/usr/share/man"
-        if not manprefix.endswith("/"):
-                manprefix += "/"
-
-        # ctx.install_files(manprefix + "man%s/" % section,
+        # ctx.install_files('${MANDIR}' + "/man%s/" % section,
         #                   source.replace("-man.txt", ".%s" % section))
 
         if not ctx.env.ENABLE_DOC or ctx.env.DISABLE_MANPAGE:

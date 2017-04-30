@@ -113,6 +113,20 @@
    a clock source by Stratum 1 sites via the link:driver_shm.html[SHM]
    interface.
 
+[[GPS pivot date]] GPS pivot date::
+   The GPS pivot date is specific fixed arbitrary time.  It is stored in
+   the firmware of a GPS receiver, and is probably the date that firmware
+   was released.  For reasons, a GPS receiver will start reporting
+   incorrect time 512 weeks (9.8 years) or 1024 weeks (19.6 years) after
+   it's pivot date.  There is generally no way to determine what a given
+   GPS receiver's pivot date is, or to determine that it has failed in
+   this manner.
+
+   It is recommended that any critical Stratum 1 NTP server that uses
+   a GPS receiver as a refclock not use one that is more than 9 years
+   old, and to have a peer or nopeer relationship with other NTP
+   servers, so as to detect when the GPS time is no longer sane.
+
 [[holdover]] holdover::
    In connection with a <<GPSDO>> or <<time radio>> that may lose
    signal from its time source, holdover is its ability to continue

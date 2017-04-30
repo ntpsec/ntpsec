@@ -243,7 +243,7 @@ ind assid status conf reach auth condition last_event cnt
   Display a list of link:#clock[clock variables] for those associations
   supporting a reference clock.
 
-+:config [...]+::
++config [...]+::
   Send the remainder of the command line, including whitespace, to the
   server as a run-time configuration command in the same format as the
   configuration file. This command is experimental until further notice
@@ -383,7 +383,7 @@ displayed.
 == Authentication ==
 
 Four commands require authentication to the server: config-from-file,
-:config, ifstats, and reslist.  An authkey file must be in place and
+config, ifstats, and reslist.  An authkey file must be in place and
 a control key declared in ntp.conf for these commands to work.
 
 If you are running as root or otherwise have read access to the
