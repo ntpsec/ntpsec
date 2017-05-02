@@ -366,11 +366,13 @@ if __name__ == '__main__':
                         else:
                             peer_report.displaymode = 'peers'
                     elif key == 'j' or key == "KEY_DOWN":
-                        selected += 1
-                        selected %= len(peers)
+                        if showpeers:
+                            selected += 1
+                            selected %= len(peers)
                     elif key == 'k' or key == "KEY_UP":
-                        selected += len(peers) - 1
-                        selected %= len(peers)
+                        if showpeers:
+                            selected += len(peers) - 1
+                            selected %= len(peers)
                     elif key == '+':
                         if session.debug == 0:
                             session.logfp = open("ntpmon.log", "a", 1)
