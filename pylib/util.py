@@ -1013,12 +1013,11 @@ class IfstatsSummary:
 
     def summary(self, i, variables):
         try:
-            s = ("%3u %-24.24s %c %4x %3d %2d %6d %6d %6d %5d %8d\n    %s\n"
+            s = ("%3u %-24.24s %c %4x %3d %6d %6d %6d %5d %8d\n    %s\n"
                  % (i, variables['name'],
                     '.' if variables['en'] else 'D',
                      variables.get('flags', '?'),
                      variables.get('tl', '?'),
-                     variables.get('mc', '?'),
                      variables.get('rx', '?'),
                      variables.get('tx', '?'),
                      variables.get('txerr', '?'),
