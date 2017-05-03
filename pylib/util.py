@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 # Common utility functions
 # SPDX-License-Identifier: BSD-2-clause
 

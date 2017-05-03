@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 packet.py - definitions and classes for Python querying of NTP
 
