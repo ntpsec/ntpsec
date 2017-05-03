@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """\
 usage: ntplogtemp [-h] [-l LOGFILE] [-o] [-q] [-v] [-w WAIT] [-V]
 
