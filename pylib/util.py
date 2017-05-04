@@ -1007,23 +1007,40 @@ class IfstatsSummary:
     "Reusable class for ifstats entry summary generation."
     header = """\
     interface name                                        send
- #  address/broadcast     drop flag ttl mc received sent failed peers   uptime
+ #  address/broadcast     drop flag ttl received sent failed peers   uptime
  """
-    width = 72
+    width = 74
+    # Numbers are the fieldsize
+    fields = {'name':  '%-24.24s',
+              'flags': '%4x',
+              'tl':    '%3d',
+              'rx':    '%6d',
+              'tx':    '%6d',
+              'txerr': '%6d',
+              'pc':    '%5d',
+              'up':    '%8d'}
 
     def summary(self, i, variables):
+        formatted = {}
+        for name in self.fields.keys():
+            value = variables.get(name, "?")
+            if value == "?":
+                fmt = value
+            else:
+                fmt = self.fields[name] % value
+            formatted[name] = fmt
         try:
-            s = ("%3u %-24.24s %c %4x %3d %6d %6d %6d %5d %8d\n    %s\n"
-                 % (i, variables['name'],
+            s = ("%3u %-24.24s %c %4s %3s %6s %6s %6s %5s %8s\n    %s\n"
+                 % (i, formatted['name'],
                     '.' if variables['en'] else 'D',
-                     variables.get('flags', '?'),
-                     variables.get('tl', '?'),
-                     variables.get('rx', '?'),
-                     variables.get('tx', '?'),
-                     variables.get('txerr', '?'),
-                     variables.get('pc', '?'),
-                     variables.get('up', '?'),
-                     variables.get('addr', '?')))
+                    formatted['flags'],
+                    formatted['tl'],
+                    formatted['rx'],
+                    formatted['tx'],
+                    formatted['txerr'],
+                    formatted['pc'],
+                    formatted['up'],
+                    variables.get('addr', '?')))
             if variables.get("bcast"):
                 s += "    %s\n" % variables['bcast']
         except TypeError:
