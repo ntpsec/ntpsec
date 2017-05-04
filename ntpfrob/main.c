@@ -41,10 +41,18 @@ main(int argc, char **argv)
                 got_one = true;
 		switch (ch) {
 		case 'A':
+#ifndef HAVE_ADJTIMEX
 		    tickadj(mode==json, 0);
+#else
+		    fputs("ntpfrob: no adjtimex(2)\n", stderr);
+#endif /* HAVE_ADJTIMEX */
 		    break;
 		case 'a':
+#ifndef HAVE_ADJTIMEX
 		    tickadj(mode, atoi(optarg));
+#else
+		    fputs("ntpfrob: no adjtimex(2)\n", stderr);
+#endif /* HAVE_ADJTIMEX */
 		    break;
 		case 'b':
 		    bumpclock(atoi(optarg));

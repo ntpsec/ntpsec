@@ -25,16 +25,9 @@
 # include <sys/timex.h>
 
 static struct timex txc;
-#endif /* HAVE_ADJTIMEX */
 
 void tickadj(const bool json_b, const int newtick)
 {
-#ifndef HAVE_ADJTIMEX
-	UNUSED_ARG(json_b);
-	UNUSED_ARG(newtick);
-	fputs("ntpfrob: \n", stderr);
-	exit(1);
-#else
 	if (newtick != 0)
 	{
 #ifdef HAVE_STRUCT_TIMEX_TIME_TICK
@@ -90,7 +83,8 @@ void tickadj(const bool json_b, const int newtick)
 #endif /* HAVE_STRUCT_TIMEX_TIME_TICK */
 	}
 
-#endif /* HAVE_ADJTIMEX */
 }
+
+#endif /* HAVE_ADJTIMEX */
 
 /* end */
