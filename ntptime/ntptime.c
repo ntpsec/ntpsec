@@ -32,7 +32,8 @@
 # define TVUTOTSF(tvu)	\
 	(uint32_t)((((uint64_t)(tvu) << 32) + US_PER_S / 2) / US_PER_S)
 
-#define NS_PER_MS_FLOAT	1000.0
+/* nano seconds per micro second */
+#define NS_PER_US_FLOAT	1000.0
 
 /* MUSL port shim */
 #ifndef HAVE_NTP_GETTIME
@@ -366,7 +367,7 @@ main(
 		printf(json ? jfmt7 : ofmt7, status, timex_state(status));
 		printf(json ? jfmt8 : ofmt8,
 		       snprintb(sizeof(binbuf), binbuf, ntx.modes, TIMEX_MOD_BITS));
-		ftemp = (double)ntx.offset/NS_PER_MS_FLOAT;
+		ftemp = (double)ntx.offset/NS_PER_US_FLOAT;
 		printf(json ? jfmt9 : ofmt9, ftemp);
 		ftemp = FP_UNSCALE(ntx.freq);
 		printf(json ? jfmt10 : ofmt10, ftemp, 1 << ntx.shift);
@@ -389,7 +390,7 @@ main(
 		if (ntx.shift != 0) {
 		  ftemp = FP_UNSCALE(ntx.ppsfreq);
 		  gtemp = FP_UNSCALE(ntx.stabil);
-			htemp = (double)ntx.jitter/NS_PER_MS_FLOAT;
+			htemp = (double)ntx.jitter/NS_PER_US_FLOAT;
 			printf(json ? jfmt14 : ofmt14,
 			    ftemp, gtemp, htemp);
 			printf(json ? jfmt15 : ofmt15,

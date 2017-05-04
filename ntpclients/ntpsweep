@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 ntpsweep - print various information about given NTP servers
 USAGE: ntpsweep [-<flag> [<val>] | --<name>[{=| }<val>]]... [hostfile]

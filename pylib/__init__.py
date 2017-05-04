@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: BSD-2-clause
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.

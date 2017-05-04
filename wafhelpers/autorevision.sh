@@ -609,6 +609,7 @@ pyOutput() {
 		1) PY_VCS_WC_MODIFIED="True" ;;
 	esac
 	tee << EOF
+# -*- coding: utf-8 -*-
 # ${GENERATED_HEADER}
 
 VCS_TYPE = "${VCS_TYPE}"

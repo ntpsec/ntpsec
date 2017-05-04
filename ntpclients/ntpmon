@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # SPDX-License-Identifier: BSD-2-clause
 '''\
 Any keystroke causes a poll and update. Keystroke commands:
@@ -167,13 +169,14 @@ class OutputContext:
         curses.endwin()
 
 usage = '''
-USAGE: ntpmon [-u] [-V] [host]
+USAGE: ntpmon [-n] [-u] [-V] [host]
 '''
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "Vu", ["version", "units"])
+                                             "Vnu",
+                                             ["version", "numeric", "units"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -191,6 +194,8 @@ if __name__ == '__main__':
         if switch in ("-V", "--version"):
             print("ntpmon %s" % ntp.util.stdversion())
             raise SystemExit(0)
+        elif switch in ("-n", "--numeric"):
+            showhostnames = False
         elif switch in ("-u", "--units"):
             showunits = True
 
@@ -363,11 +368,13 @@ if __name__ == '__main__':
                         else:
                             peer_report.displaymode = 'peers'
                     elif key == 'j' or key == "KEY_DOWN":
-                        selected += 1
-                        selected %= len(peers)
+                        if showpeers:
+                            selected += 1
+                            selected %= len(peers)
                     elif key == 'k' or key == "KEY_UP":
-                        selected += len(peers) - 1
-                        selected %= len(peers)
+                        if showpeers:
+                            selected += len(peers) - 1
+                            selected %= len(peers)
                     elif key == '+':
                         if session.debug == 0:
                             session.logfp = open("ntpmon.log", "a", 1)

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 packet.py - definitions and classes for Python querying of NTP
 
@@ -739,7 +741,7 @@ class MRUEntry:
             addr = addr[:addr.find(':')]
             # prefix with 0s so IPv6 sorts after IPv4
             # Need 16 rather than 12 to catch ::1
-            return '\0'*16 + socket.inet_pton(socket.AF_INET, addr)
+            return b'\0'*16 + socket.inet_pton(socket.AF_INET, addr)
 
     def __repr__(self):
         return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
@@ -1382,7 +1384,7 @@ Receive a nonce that can be replayed - combats source address spoofing
                     if sorter is None:
                         raise ControlException(SERR_BADSORT % sortkey)
             for k in list(variables.keys()):
-                if k in ("mincount", "resall", "resany",
+                if k in ("mincount", "resall", "resany", "kod", "limited",
                          "maxlstint", "laddr", "recent", "sort",
                          "frags", "limit"):
                     continue
@@ -1408,6 +1410,10 @@ Receive a nonce that can be replayed - combats source address spoofing
             limit = min(3 * MAXFRAGS, self.ntpd_row_limit)
             req_buf = "%s, frags=%d" % (nonce, frags)
             if variables:
+                if 'resall' in variables:
+                    variables['resall'] = hex(variables['resall'])
+                if 'resany' in variables:
+                    variables['resany'] = hex(variables['resany'])
                 parms = ", " + ",".join([("%s=%s" % it)
                                          for it in list(variables.items())])
             else:

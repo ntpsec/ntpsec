@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # ntpkeygen - generate cryptographic keys for NTP clients and servers
 #
@@ -12,6 +13,8 @@
 # ntpkey_MD5key_<hostname>.<filestamp>
 # MD5 (128-bit) keys used to compute message digests in symmetric
 # key cryptography
+
+from __future__ import print_function
 
 import os
 import sys
@@ -39,7 +42,7 @@ def gen_md5(id, groupname):
                     if r != ord('#'):
                         break
                 md5key += chr(r)
-            wp.write("%2d MD5 %s  # MD5 key\n" % (i,  md5key))
+            wp.write("%2d MD5 %s  # MD5 key\n" % (i, md5key))
         for i in range(1, MD5KEYS+1):
             sha1key = ""
             for j in range(MD5SIZE):
@@ -53,9 +56,9 @@ def gen_md5(id, groupname):
 def fheader(file,       # file name id
             ulink,      # linkname
             owner       # owner name
-            ):
+           ):
     try:
-        filename = "ntpkey_%s_%s.%u" % (file,  owner, int(time.time()))
+        filename = "ntpkey_%s_%s.%u" % (file, owner, int(time.time()))
         orig_umask = os.umask(stat.S_IWGRP | stat.S_IRWXO)
         wp = open(filename, "w")
         os.umask(orig_umask)
