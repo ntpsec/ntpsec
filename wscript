@@ -315,7 +315,6 @@ def configure(ctx):
         ('w_format_signedness', '-Wformat-signedness'),
         ('w_implicit_function_declaration', "-Wimplicit-function-declaration"),
         ('w_init_self', '-Winit-self'),
-        ('w_inline', '-Winline'),
         ('w_invalid_pch', '-Winvalid-pch'),
         ('w_missing_declarations', '-Wmissing-declarations'),
         ('w_multichar', '-Wmultichar'),
@@ -451,8 +450,6 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wfloat-equal'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_init_self:
         ctx.env.CFLAGS = ['-Winit-self'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_inline:
-        ctx.env.CFLAGS = ['-Winline'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_write_strings:
         ctx.env.CFLAGS = ['-Wwrite-strings'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_pointer_arith:
