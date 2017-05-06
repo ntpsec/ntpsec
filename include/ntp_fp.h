@@ -168,7 +168,11 @@ static inline l_fp dtolfp(double d)
  * undefined return if d in NaN
  */
 {
-	return (l_fp)(llround(ldexp(d, 32)));
+/* Please check issue 264 before changing this to use llround
+ * https://gitlab.com/NTPsec/ntpsec/issues/264
+ * llround is broken on NetBSD, 2017-May-05
+ */
+	return (l_fp)(int64_t)(ldexp(d, 32));
 }
 
 static inline double lfptod(l_fp r)
