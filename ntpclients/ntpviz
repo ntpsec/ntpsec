@@ -497,8 +497,8 @@ file.</p>
 
 """
 
-        ret = {'html': VizStats.table_head + stats.table
-               + stats_f.table + VizStats.table_tail + exp,
+        ret = {'html': VizStats.table_head + stats.table +
+               stats_f.table + VizStats.table_tail + exp,
                'plot': plot_template + plot_data + plot_data,
                'stats': [stats, stats_f],
                'title': "Local Clock Time/Frequency Offsets"}
@@ -589,8 +589,8 @@ file, and field 3 from the temp log .</p>
 
 """
 
-        ret = {'html': VizStats.table_head + stats_f.table
-               + table + VizStats.table_tail + exp,
+        ret = {'html': VizStats.table_head + stats_f.table +
+               table + VizStats.table_tail + exp,
                'plot': plot_template + plot_data + plot_data_t,
                'stats': stats,
                'title': "Local Frequency/Temp"}
@@ -732,8 +732,8 @@ than 20.  1 denotes the highest possible confidence level.  2 to 5 is good.
 Greater than 20 means there will be significant inaccuracy and error.</p>
 """
 
-        ret = {'html': VizStats.table_head + stats.table
-               + stats_tdop.table + VizStats.table_tail + exp,
+        ret = {'html': VizStats.table_head + stats.table +
+               stats_tdop.table + VizStats.table_tail + exp,
                'stats': [stats, stats_tdop],
                'title': "Local GPS",
                'plot': plot_template + plot_data + plot_data}
@@ -790,8 +790,8 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 
 <p>The Frequency Offset comes from field 4 of the loopstats log file.</p>
 """
-        ret = {'html': VizStats.table_head + stats.table
-               + VizStats.table_tail + exp,
+        ret = {'html': VizStats.table_head + stats.table +
+               VizStats.table_tail + exp,
                'plot': plot_template + plot_data,
                'stats': [stats],
                'title': "Local Clock Frequency Offset"}
@@ -857,8 +857,8 @@ plot \
  %(p1)s title "1st percentile"
 """ % out
 
-        ret = {'html': VizStats.table_head + stats.table
-               + VizStats.table_tail + exp,
+        ret = {'html': VizStats.table_head + stats.table +
+               VizStats.table_tail + exp,
                'plot': plot_template + plot_data,
                'stats': [stats],
                'title': title}
@@ -1189,8 +1189,8 @@ plot \
 <p>The Local Clock Offset is field 3 from the loopstats log file.</p>
 """
         # don't return stats, it's just a dupe
-        ret = {'html': VizStats.table_head + stats.table
-               + VizStats.table_tail + exp,
+        ret = {'html': VizStats.table_head + stats.table +
+               VizStats.table_tail + exp,
                'plot': plot_template + "".join(histogram_data) + "e\n",
                'stats': [],
                'title': "Local Clock Time Offset Histogram"}
