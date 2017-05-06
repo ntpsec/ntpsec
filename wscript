@@ -205,8 +205,8 @@ def configure(ctx):
         ctx.env.DISABLE_MANPAGE = True
 
     from waflib.Utils import subprocess
-    if ((os.path.exists(".git")
-         and ctx.find_program("git", var="BIN_GIT", mandatory=False))):
+    if ((os.path.exists(".git") and
+            ctx.find_program("git", var="BIN_GIT", mandatory=False))):
         ctx.start_msg("DEVEL: Getting revision")
         cmd = ["git", "log", "-1", "--format=%H"]
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
@@ -693,8 +693,8 @@ int main(int argc, char **argv) {
             # Sanity check...
             print("Compilation check failed but include exists %s" % hdr)
 
-    if ((ctx.get_define("HAVE_TIMEPPS_H")
-         or ctx.get_define("HAVE_SYS_TIMEPPS_H"))):
+    if ((ctx.get_define("HAVE_TIMEPPS_H") or
+            ctx.get_define("HAVE_SYS_TIMEPPS_H"))):
         ctx.define("HAVE_PPSAPI", 1, comment="Enable the PPS API")
 
     # Check for Solaris capabilities
@@ -772,8 +772,8 @@ int main(int argc, char **argv) {
     # file /usr/include/sys/timex.h for the particular
     # architecture to be in place."
     #
-    if ((ctx.get_define("HAVE_SYS_TIMEX_H")
-         and not ctx.options.disable_kernel_pll)):
+    if ((ctx.get_define("HAVE_SYS_TIMEX_H") and
+            not ctx.options.disable_kernel_pll)):
         ctx.define("HAVE_KERNEL_PLL", 1,
                    comment="Whether phase-locked loop for timing "
                    "exists and is enabled")
@@ -971,15 +971,16 @@ def afterparty(ctx):
     # Also, they need to be able to see the Python extension
     # module built in libntp.
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
-        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc ntpd/version.h")
+        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc "
+                         "wafhelpers/__pycache__/*.pyc ntpd/version.h")
     for x in ("ntpclients",):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
         path_source = ctx.srcnode.make_node(x + "/ntp")
         relpath = "../" + path_build.path_from(ctx.srcnode)
         if ctx.cmd in ('install', 'build'):
-            if ((not path_source.exists()
-                 or os.readlink(path_source.abspath()) != relpath)):
+            if ((not path_source.exists() or
+                    os.readlink(path_source.abspath()) != relpath)):
                 try:
                     os.remove(path_source.abspath())
                 except OSError:
@@ -1098,12 +1099,14 @@ def build(ctx):
 
 def systemdenable(ctx):
     "Enable boot time start with systemd. Must run as root."
-    ctx.exec_command("cp etc/ntpd.service etc/ntp-wait.service /usr/lib/systemd/system/")
+    ctx.exec_command("cp etc/ntpd.service etc/ntp-wait.service "
+                     "/usr/lib/systemd/system/")
 
 
 def systemddisable(ctx):
     "Disable boot time start with systemd. Must run as root."
-    ctx.exec_command("rm -f /usr/lib/systemd/system/ntpd.service /usr/lib/systemd/system/ntp-wait.service")
+    ctx.exec_command("rm -f /usr/lib/systemd/system/ntpd.service "
+                     "/usr/lib/systemd/system/ntp-wait.service")
 
 #
 # Miscellaneous utility productions
@@ -1124,8 +1127,8 @@ def loccount(ctx):
 
 def cxfreeze(ctx):
     "Create standalone binaries from Python scripts."
-    ctx.exec_command("for prog in " + " ".join(python_scripts)
-                     + "; do cxfreeze $prog; done")
+    ctx.exec_command("for prog in " + " ".join(python_scripts) +
+                     "; do cxfreeze $prog; done")
 
 
 def linkcheck(ctx):
