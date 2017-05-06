@@ -7,7 +7,7 @@ def build(ctx):
         "unity/unity_fixture.c",
     ]
 
-    unity_config = ["UNITY_INCLUDE_DOUBLE","UNITY_SUPPORT_64"]
+    unity_config = ["UNITY_INCLUDE_DOUBLE", "UNITY_SUPPORT_64"]
 
     ctx(
         defines=unity_config,
@@ -77,7 +77,7 @@ def build(ctx):
             includes=["%s/tests/unity/" % srcnode,
                       "%s/tests/libparse/" % srcnode,
                       "%s/tests/common/" % srcnode
-            ] + ctx.env.PLATFORM_INCLUDES,
+                      ] + ctx.env.PLATFORM_INCLUDES,
             install_path=None,
             lib=["parse"],
             libpath=["libparse"],
@@ -87,7 +87,7 @@ def build(ctx):
         )
 
     ntpd_source = [
-#        "ntpd/filegen.c",
+        # "ntpd/filegen.c",
         "ntpd/leapsec.c",
         "ntpd/restrict.c",
     ] + common_source
