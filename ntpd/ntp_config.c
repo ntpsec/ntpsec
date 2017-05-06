@@ -42,6 +42,12 @@
 #include "ntp_scanner.h"
 #include "ntp_parser.tab.h"
 
+/* Hack to dance around bug in older Bison.  See Issue 287 */
+/* Similar for yydebug below */
+#ifndef yyparse
+  int yyparse (void);
+#endif
+
 /* NetInfo configuration locations */
 #ifdef HAVE_NETINFO_NI_H
 #define NETINFO_CONFIG_DIR "/config/ntp"
@@ -3017,6 +3023,10 @@ void readconfig(const char *config_file)
 
 	/*** BULK OF THE PARSER ***/
 #ifdef DEBUG
+#ifndef yydebug
+  /* See comment above for yyparse */
+  extern int yydebug;
+#endif
 	yydebug = !!(debug >= 5);
 #endif
 
