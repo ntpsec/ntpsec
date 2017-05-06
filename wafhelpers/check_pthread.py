@@ -21,8 +21,8 @@ def check_pthread_header_lib(ctx):
     ctx.check_cc(lib="thr", mandatory=False,
                  comment="thr library, required by some operating systems.")
 
-    if ((ctx.get_define("HAVE_PTHREAD_H")
-         and (ctx.env.LIB_PTHREAD or ctx.env.LIB_THR))):
+    if ((ctx.get_define("HAVE_PTHREAD_H") and
+            (ctx.env.LIB_PTHREAD or ctx.env.LIB_THR))):
         ctx.env.PTHREAD_HEADER_LIB = True
 
 
