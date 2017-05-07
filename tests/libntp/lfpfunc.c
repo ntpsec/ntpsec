@@ -93,16 +93,6 @@ static int l_fp_signum(const l_fp first)
 	return (lfpuint(first) || lfpfrac(first));
 }
 
-static void l_fp_swap(l_fp * first, l_fp *second)
-{
-	l_fp temp = *second;
-
-	*second = *first;
-	*first = temp;
-
-	return;
-}
-
 //----------------------------------------------------------------------
 // testing the relational macros works better with proper predicate
 // formatting functions; it slows down the tests a bit, but makes for
@@ -302,9 +292,9 @@ TEST(lfpfunc, SignedRelOps) {
 
 		switch (cmp) {
 		case -1:
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
-			l_fp_swap(&op1, &op2);
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
+			TEST_ASSERT_TRUE (l_isgt(op2, op1));
+			TEST_ASSERT_FALSE(l_isgt(op1, op2));
+			break;
 		case 1:
 			TEST_ASSERT_TRUE (l_isgt(op1, op2));
 			TEST_ASSERT_FALSE(l_isgt(op2, op1));
@@ -315,6 +305,7 @@ TEST(lfpfunc, SignedRelOps) {
 			break;
 		default:
 			TEST_FAIL_MESSAGE("unexpected UCMP result: ");
+			break;
 		}
 	}
 
@@ -332,9 +323,9 @@ TEST(lfpfunc, UnsignedRelOps) {
 
 		switch (cmp) {
 		case -1:
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
-			l_fp_swap(&op1, &op2);
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
+			TEST_ASSERT_TRUE (l_isgtu(op2, op1));
+			TEST_ASSERT_FALSE(l_isgtu(op1, op2));
+			break;
 		case 1:
 			TEST_ASSERT_TRUE (l_isgtu(op1, op2));
 			TEST_ASSERT_FALSE(l_isgtu(op2, op1));
