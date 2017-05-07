@@ -305,7 +305,7 @@ def configure(ctx):
         ('gnu99', '-std=gnu99'),
         # this quiets most of macOS warnings on -fpie
         ('unused', '-Qunused-arguments'),
-        ('w_cast_align', "-Wcast-align"),
+        # ('w_cast_align', "-Wcast-align"), # fails on RasPi, needs fixing.
         ('w_cast_qual', "-Wcast-qual"),
         ('w_disabled_optimization', "-Wdisabled-optimization"),
         ('w_float_equal', "-Wfloat-equal"),
@@ -353,6 +353,7 @@ def configure(ctx):
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
             # "-Waggregate-return",   # breaks ldiv(), ntpcal_daysplit(),  etc.
+            "-Wcast-align",           # fails on RasPi, needs fixing.
             # "-Wbad-function-cast",  # ntpd casts long<->double a lot
             # "-Wformat-nonliteral",  # complains about a used feature
             "-Winline",               # some OS have inline issues.
