@@ -71,7 +71,7 @@ class TestPylibUtilMethods(unittest.TestCase):
                          ("-12.345678900987654321", -2))
         # Bizarre 2
         self.assertEqual(f("1234567890987654321000.00000000000042"),
-                           ("1.23456789098765432100000000000000042", 7))
+                         ("1.23456789098765432100000000000000042", 7))
         # Bizarre 3
         self.assertEqual(f("00000000.000000000000"),
                          ("0", -4))
@@ -213,25 +213,30 @@ class TestPylibUtilMethods(unittest.TestCase):
         # No scale
         self.assertEqual(ntp.util.stringfiltcooker(
             "1.02 34.5 0.67835 -23.0 9 6.7 1.00 .1"),
-            "   1.02    34.5 0.67835   -23.0       9     6.7    1.00     0.1 ms"
+            "   1.02    34.5 0.67835   -23.0       9     6.7    1.00     "
+            "0.1 ms"
         )
         # Scale to larger unit
         self.assertEqual(ntp.util.stringfiltcooker(
             "1000.02 3400.5 0.67835 -23.0 9001 6.7 1.00 1234"),
-            "1.00002  3.4005 0.00068 -0.0230   9.001  0.0067 0.00100   1.234 s"
+            "1.00002  3.4005 0.00068 -0.0230   9.001  0.0067 0.00100   "
+            "1.234 s"
         )
         # Scale to smaller unit
         self.assertEqual(ntp.util.stringfiltcooker(
             "0.470 0.420 0.430 0.500 0.460 0.4200 0.490 0.480"),
-            u"    470     420     430     500     460   420.0     490     480 \u03bcs")
+            u"    470     420     430     500     460   420.0     490     "
+            "480 \u03bcs")
         # Can't scale
         self.assertEqual(ntp.util.stringfiltcooker(
             "0.47 0.42 0.43 0.50 0.46 0.42 0.49 0.48"),
-            "   0.47    0.42    0.43    0.50    0.46    0.42    0.49    0.48 ms")
+            "   0.47    0.42    0.43    0.50    0.46    0.42    0.49    "
+            "0.48 ms")
         # Can't scale, only one value blocking
         self.assertEqual(ntp.util.stringfiltcooker(
             "0.47 0.4200 0.4300 0.5000 0.4600 0.4200 0.4900 0.4800"),
-            "   0.47  0.4200  0.4300  0.5000  0.4600  0.4200  0.4900  0.4800 ms")
+            "   0.47  0.4200  0.4300  0.5000  0.4600  0.4200  0.4900  "
+            "0.4800 ms")
 
     def test_unitrelativeto(self):
         f = ntp.util.unitrelativeto

@@ -667,12 +667,19 @@ neoclock4x_control(int unit,
       tt = add_var(&out->kv_list, sizeof(tmpbuf)-1, RO|DEF);
       snprintf(tt, sizeof(tmpbuf)-1, "calc_utc=\"%s\"", tmpbuf);
 
-      tt = add_var(&out->kv_list, 40, RO|DEF);
-      snprintf(tt, 39, "radiosignal=\"%s\"", up->radiosignal);
-      tt = add_var(&out->kv_list, 40, RO|DEF);
-      snprintf(tt, 39, "antenna1=\"%d\"", up->antenna1);
-      tt = add_var(&out->kv_list, 40, RO|DEF);
-      snprintf(tt, 39, "antenna2=\"%d\"", up->antenna2);
+#define MAXINTSIZE	20	/* max % of decimal digits in integer */
+#define S_RADIOSIGNAL	sizeof(up->radiosignal) + 15
+      tt = add_var(&out->kv_list, S_RADIOSIGNAL+1, RO|DEF);
+      snprintf(tt, S_RADIOSIGNAL, "radiosignal=\"%s\"", up->radiosignal);
+#undef S_RADIOSIGNAL 
+#define S_ANTENNA1	MAXINTSIZE + 12
+      tt = add_var(&out->kv_list, S_ANTENNA1+1, RO|DEF);
+      snprintf(tt, S_ANTENNA1, "antenna1=\"%d\"", up->antenna1);
+#undef S_ANTENNA1
+#define S_ANTENNA2	MAXINTSIZE + 12
+      tt = add_var(&out->kv_list, S_ANTENNA2+1, RO|DEF);
+      snprintf(tt, S_ANTENNA2, "antenna2=\"%d\"", up->antenna2);
+#undef S_ANTENNA2
       tt = add_var(&out->kv_list, 40, RO|DEF);
       if('A' == up->timesource)
 	snprintf(tt, 39, "timesource=\"radio\"");
@@ -694,14 +701,21 @@ neoclock4x_control(int unit,
         snprintf(tt, 39, "dststatus=\"winter\"");
       else
         snprintf(tt, 39, "dststatus=\"unknown\"");
-      tt = add_var(&out->kv_list, 80, RO|DEF);
-      snprintf(tt, 79, "firmware=\"%s\"", up->firmware);
-      tt = add_var(&out->kv_list, 40, RO|DEF);
-      snprintf(tt, 39, "firmwaretag=\"%c\"", up->firmwaretag);
+#define S_FIRMWARE	sizeof(up->firmware) + 13 
+      tt = add_var(&out->kv_list, S_FIRMWARE+1, RO|DEF);
+      snprintf(tt, S_FIRMWARE, "firmware=\"%s\"", up->firmware);
+#undef S_FIRMWARE
+#define S_FIRMWARETAG	sizeof(up->firmware) + 15 
+      tt = add_var(&out->kv_list, S_FIRMWARETAG+1, RO|DEF);
+      snprintf(tt, S_FIRMWARETAG, "firmwaretag=\"%c\"", up->firmwaretag);
+#undef S_FIRMWARETAG
       tt = add_var(&out->kv_list, 80, RO|DEF);
       snprintf(tt, 79, "driver version=\"%s\"", NEOCLOCK4X_DRIVER_VERSION);
-      tt = add_var(&out->kv_list, 80, RO|DEF);
-      snprintf(tt, 79, "serialnumber=\"%s\"", up->serial);
+#define S_SERIAL	sizeof(up->serial) + 16
+      tt = add_var(&out->kv_list, S_SERIAL+1, RO|DEF);
+      snprintf(tt, S_SERIAL, "serialnumber=\"%s\"", up->serial);
+#undef S_SERIAL
+#undef MAXINTSIZE
     }
 }
 

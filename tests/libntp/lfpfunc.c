@@ -93,16 +93,6 @@ static int l_fp_signum(const l_fp first)
 	return (lfpuint(first) || lfpfrac(first));
 }
 
-static void l_fp_swap(l_fp * first, l_fp *second)
-{
-	l_fp temp = *second;
-
-	*second = *first;
-	*first = temp;
-
-	return;
-}
-
 //----------------------------------------------------------------------
 // testing the relational macros works better with proper predicate
 // formatting functions; it slows down the tests a bit, but makes for
@@ -239,6 +229,19 @@ TEST(lfpfunc, Absolute) {
 	return;
 }
 
+static const l_fp roundtab[] = {
+  0,
+  0x140000000,
+  0x1c0000000,
+  0xffffffff80000000,
+  0x7fffffff7fffffff,
+  0x7fffffffffffffff,
+  0x55555555aaaaaaaa,
+  0x5555555555555555,
+  0x8000000000000001
+};
+static const size_t round_cnt = (sizeof(roundtab)/sizeof(roundtab[0]));
+
 
 //----------------------------------------------------------------------
 // fp -> double -> fp roundtrip test
@@ -254,16 +257,14 @@ TEST(lfpfunc, FDF_RoundTrip) {
 	// and checks the difference in the two 'l_fp' values against
 	// that limit.
 
-	for (idx = 0; idx < addsub_cnt; ++idx) {
-                double op2, d;
-		l_fp op1 = lfpinit_u(addsub_tab[idx][0].l_ui,
-                                     addsub_tab[idx][0].l_uf);
-		op2 = lfptod(op1);
+	for (idx = 0; idx < round_cnt; ++idx) {
+		l_fp op1 = roundtab[idx];
+		double op2 = lfptod(op1);
 		l_fp op3 = dtolfp(op2);
 
 		l_fp temp = op1 - op3;
-		d = lfptod(temp);
-                /* cast to long unsigned int for 32 bit binaries */
+		double d = lfptod(temp);
+
                 snprintf(msg, sizeof(msg),
                          "\nop2: %f op3: %s diff %f not within %e",
                          op2, mfptoa(op3, 8), d, eps(op2));
@@ -291,9 +292,9 @@ TEST(lfpfunc, SignedRelOps) {
 
 		switch (cmp) {
 		case -1:
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
-			l_fp_swap(&op1, &op2);
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
+			TEST_ASSERT_TRUE (l_isgt(op2, op1));
+			TEST_ASSERT_FALSE(l_isgt(op1, op2));
+			break;
 		case 1:
 			TEST_ASSERT_TRUE (l_isgt(op1, op2));
 			TEST_ASSERT_FALSE(l_isgt(op2, op1));
@@ -304,6 +305,7 @@ TEST(lfpfunc, SignedRelOps) {
 			break;
 		default:
 			TEST_FAIL_MESSAGE("unexpected UCMP result: ");
+			break;
 		}
 	}
 
@@ -321,9 +323,9 @@ TEST(lfpfunc, UnsignedRelOps) {
 
 		switch (cmp) {
 		case -1:
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
-			l_fp_swap(&op1, &op2);
-			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
+			TEST_ASSERT_TRUE (l_isgtu(op2, op1));
+			TEST_ASSERT_FALSE(l_isgtu(op1, op2));
+			break;
 		case 1:
 			TEST_ASSERT_TRUE (l_isgtu(op1, op2));
 			TEST_ASSERT_FALSE(l_isgtu(op2, op1));

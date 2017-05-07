@@ -12,8 +12,8 @@ def check_cap(ctx):
     ctx.check_cc(header_name="sys/capability.h", mandatory=False)
     ctx.check_cc(lib="cap", comment="Capability library", mandatory=False)
 
-    if ((ctx.get_define("HAVE_SYS_CAPABILITY_H")
-         and ctx.get_define("HAVE_SYS_PRCTL_H") and ctx.env.LIB_CAP)):
+    if ((ctx.get_define("HAVE_SYS_CAPABILITY_H") and
+            ctx.get_define("HAVE_SYS_PRCTL_H") and ctx.env.LIB_CAP)):
         ctx.define("HAVE_LINUX_CAPABILITY", 1)
     else:
         pprint("RED", "Warning libcap and headers not installed")

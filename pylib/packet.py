@@ -1060,8 +1060,8 @@ class ControlSession:
             except struct.error:
                 raise ControlException(SERR_UNSPEC)
 
-            if ((rpkt.version() > ntp.magic.NTP_VERSION
-                 or rpkt.version() < ntp.magic.NTP_OLDVERSION)):
+            if ((rpkt.version() > ntp.magic.NTP_VERSION or
+                    rpkt.version() < ntp.magic.NTP_OLDVERSION)):
                 if self.debug:
                     warn("Fragment received with version %d\n"
                          % rpkt.version())
@@ -1576,8 +1576,8 @@ Receive a nonce that can be replayed - combats source address spoofing
                 for i in range(len(span.entries)):
                     e = span.entries[len(span.entries) - i - 1]
                     incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
-                    if ((len(req_buf) + len(incr)
-                         >= ntp.control.CTL_MAX_DATA_LEN)):
+                    if ((len(req_buf) + len(incr) >=
+                            ntp.control.CTL_MAX_DATA_LEN)):
                         break
                     else:
                         req_buf += incr
@@ -1637,8 +1637,6 @@ Receive a nonce that can be replayed - combats source address spoofing
         "Retrieve ifstats data."
         return self.__ordlist("ifstats")
 
-DEFAULT_KEYFILE = "/usr/local/etc/ntp.keys"
-
 
 class Authenticator:
     "MAC authentication manager for NTP packets."
@@ -1646,16 +1644,15 @@ class Authenticator:
     def __init__(self, keyfile=None):
         # We allow I/O and permission errors upward deliberately
         self.passwords = {}
-        if keyfile is None:
-            keyfile = DEFAULT_KEYFILE
-        for line in open(keyfile):
-            if '#' in line:
-                line = line[:line.index("#")]
-            line = line.strip()
-            if not line:
-                continue
-            (keyid, keytype, passwd) = line.split()
-            self.passwords[int(keyid)] = (keytype, passwd)
+        if keyfile is not None:
+            for line in open(keyfile):
+                if '#' in line:
+                    line = line[:line.index("#")]
+                line = line.strip()
+                if not line:
+                    continue
+                (keyid, keytype, passwd) = line.split()
+                self.passwords[int(keyid)] = (keytype, passwd)
 
     def __len__(self):
         return len(self.passwords)

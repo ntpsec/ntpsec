@@ -35,6 +35,6 @@ def build(ctx):
     )
 
     # Install HTML
-    ctx.install_files('${HTMLDIR}', extra
-                      + [x.change_ext(".html").name for x in doc_source])
+    ctx.install_files('${HTMLDIR}', extra +
+                      [x.change_ext(".html").name for x in doc_source])
     ctx.install_files('${HTMLDIR}', image_source, relative_trick=True)

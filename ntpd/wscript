@@ -19,7 +19,8 @@ def build(ctx):
 
         ctx(
             cwd=srcnode,
-            rule='VCS_EXTRA=`cat ${SRC[0]}` wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -e VERSION -t h >${TGT[0].abspath()}',
+            rule='VCS_EXTRA=`cat ${SRC[0]}` wafhelpers/autorevision.sh '
+                 '-o ${TGT[1].abspath()} -e VERSION -t h >${TGT[0].abspath()}',
             source=["../VERSION", '../wafhelpers/autorevision.sh'],
             target=[target3, target4],
         )

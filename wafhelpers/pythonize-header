@@ -12,27 +12,29 @@ Yes, SWIG can do something like this.  But it's heavyweight and would introduce
 another dependency.
 """
 
-import sys, re
+import re
+import sys
 
 patterns = (
     (re.compile(r"/\*(.*)\*/"), r"#\1"),
     (re.compile(r"^/\*"), r"#"),
     (re.compile(r"^ *\*/"), r"#"),
     (re.compile(r"^ \*"), r"#"),
-    (re.compile(r"^#define\s+([A-Za-z0-9_]+[ \t]+)(.*)"), r"\1= \2"), 
+    (re.compile(r"^#define\s+([A-Za-z0-9_]+[ \t]+)(.*)"), r"\1= \2"),
     (re.compile(r"^#define\s+([A-Za-z0-9_]+)\(([a-z_, ]*)\)"),
-     r"def \1(\2): return"), 
+     r"def \1(\2): return"),
     )
 
 skipstarters = ("struct", "union", "typedef struct", "typedef union")
 
 skippers = (
-    re.compile(r"^#include"), 
-    re.compile(r"^typedef.*;\s*$"), 
-    re.compile(r"^extern.*;\d*$"), 
+    re.compile(r"^#include"),
+    re.compile(r"^typedef.*;\s*$"),
+    re.compile(r"^extern.*;\d*$"),
     )
 
 impossibles = ("sizeof", "offsetof")
+
 
 def pythonize(rfp, wfp):
     "Pythonize a specified C header file."
