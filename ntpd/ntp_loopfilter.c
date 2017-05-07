@@ -609,7 +609,7 @@ local_clock(
 
 			clock_frequency = direct_freq(fp_offset);
 
-			/* fall through to EVNT_SPIK */
+			/* falls through to EVNT_SPIK */
 
 		/*
 		 * In SPIK state we ignore succeeding outliers until
@@ -620,7 +620,7 @@ local_clock(
 			if (mu < clock_minstep)
 				return (0);
 
-			/* fall through to default */
+			/* falls through to default */
 
 		/*
 		 * We get here by default in NSET and FSET states and
