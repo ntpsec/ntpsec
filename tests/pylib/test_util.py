@@ -177,7 +177,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         nu = ntp.util
 
         # Zero
-        self.assertEqual(f("0.000", nu.UNIT_MS), u"     0\u03bcs")
+        self.assertEqual(f("0.000", nu.UNIT_MS), u"     0µs")
         # Standard, width=8
         self.assertEqual(f("1.234", nu.UNIT_MS), " 1.234ms")
         # ditto, negative
@@ -187,9 +187,9 @@ class TestPylibUtilMethods(unittest.TestCase):
         # ditto, negative
         self.assertEqual(f("-1234.5", nu.UNIT_MS), "-1.2345s")
         # Scale to smaller unit, width=8
-        self.assertEqual(f("0.01234", nu.UNIT_MS), u" 12.34\u03bcs")
+        self.assertEqual(f("0.01234", nu.UNIT_MS), u" 12.34µs")
         # ditto, negative
-        self.assertEqual(f("-0.01234", nu.UNIT_MS), u"-12.34\u03bcs")
+        self.assertEqual(f("-0.01234", nu.UNIT_MS), u"-12.34µs")
         # At baseunit
         self.assertEqual(f("12.0", nu.UNIT_NS), "    12ns")
         # Scale to baseunit
@@ -223,7 +223,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Scale to smaller unit
         self.assertEqual(ntp.util.stringfiltcooker(
             "0.470 0.420 0.430 0.500 0.460 0.4200 0.490 0.480"),
-            u"    470     420     430     500     460   420.0     490     480 \u03bcs")
+            u"    470     420     430     500     460   420.0     490     480 µs")
         # Can't scale
         self.assertEqual(ntp.util.stringfiltcooker(
             "0.47 0.42 0.43 0.50 0.46 0.42 0.49 0.48"),
