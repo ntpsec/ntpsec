@@ -61,7 +61,8 @@ def configure(ctx):
                 self.logger.debug('WafError')
                 return e.returncode
             if (len(out) and any(word in out for word
-                                 in ['err', 'ignored', 'illegal', 'unknown',
+                                 in ['err', 'err:', 'error', 'error:',
+                                     'ignored', 'illegal', 'unknown',
                                      'unrecognized', 'warning'])):
                 self.logger.debug('noooo %r' % out)
                 return 1
