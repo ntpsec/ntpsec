@@ -1,4 +1,7 @@
-// Explain the MRU stall problem and why ntpq has 'direct' mode.
+// Explain failure modes of ntpq and ntpmon
+
+When using the -u option, very old xterms may fail to render &mu;
+correctly.
 
 Timestamp interpretation in this program is likely to fail in flaky
 ways if the local system clock has not already been approximately
