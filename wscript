@@ -756,10 +756,6 @@ int main(int argc, char **argv) {
         ctx.define("ENABLE_DNS_LOOKUP", 1,
                    comment="Enable DNS lookup of hostnames")
 
-    if not ctx.options.disable_dns_retry:
-        ctx.define("ENABLE_DNS_RETRY", 1,
-                   comment="Retry DNS lookups after an initial failure")
-
     # This is true under every Unix-like OS.
     ctx.define("HAVE_WORKING_FORK", 1,
                comment="Whether a working fork() exists")
@@ -825,7 +821,7 @@ int main(int argc, char **argv) {
         from wafhelpers.check_mdns import check_mdns_header
         check_mdns_header(ctx)
 
-    if not ctx.options.disable_dns_retry:
+    if not ctx.options.disable_dns_lookup:
         from wafhelpers.check_pthread import check_pthread_run
         check_pthread_run(ctx)
 
