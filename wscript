@@ -365,6 +365,7 @@ def configure(ctx):
             "-Wswitch-default",       # warns on Bison bug
         ] + ctx.env.CFLAGS
         cc_test_flags += [
+            ('w_implicit_fallthru', "-Wimplicit-fallthrough=3"),
             # fails on Solaris and OpenBSD 6
             # complains about a Bison bug
             ('w_sign_conversion', "-Wsign-conversion"),
@@ -436,6 +437,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ["-flto"] + ctx.env.CFLAGS
 
     # debug warnings that are not available with all compilers
+    if ctx.env.HAS_w_implicit_fallthru:
+        ctx.env.CFLAGS = ['-Wimplicit-fallthrough=3'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_suggest_attribute_const:
         ctx.env.CFLAGS = ['-Wsuggest-attribute=const'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_suggest_attribute_noreturn:
