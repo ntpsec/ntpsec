@@ -614,6 +614,7 @@ int main(int argc, char **argv) {
         ('clock_gettime', ["time.h"], "RT"),
         ('clock_settime', ["time.h"], "RT"),
         ('getrusage', ["sys/time.h", "sys/resource.h"]),
+        ('nanotime', ["sys/time.h"]),     # Old OS X
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('res_init', ["resolv.h"]),
