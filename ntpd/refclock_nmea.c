@@ -481,6 +481,8 @@ nmea_start(
 	pp->io.fd = refclock_open(peer->path ? peer->path : device,
 				  baudrate,
 				  LDISC_CLK);
+	if (-1 == pp->io.fd)
+		return false;
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
 	      refclock_name(peer), device, baudtext));
 
