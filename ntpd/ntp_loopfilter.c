@@ -608,6 +608,7 @@ local_clock(
 				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
+			__attribute__ ((fallthrough));
 			/* FALLTHRU to EVNT_SPIK */
 
 		/*
