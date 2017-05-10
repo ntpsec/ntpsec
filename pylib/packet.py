@@ -1664,7 +1664,7 @@ class Authenticator:
         "Get a keyid/passwd pair that is trusted on localhost"
         if keyid is not None:
             if keyid in self.passwords:
-                return (keyid) + self.passwords[keyid]
+                return (keyid,) + self.passwords[keyid]
             else:
                 return (keyid, None, None)
         for line in open("/etc/ntp.conf"):
