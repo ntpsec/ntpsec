@@ -53,7 +53,7 @@
 #ifdef __clang__
 # define FALLTHRU
 #elif defined __GNUC__
-# define FALLTHRU [[gcc::fallthrough]]
+# define FALLTHRU /* @fallthrough@ */
 #else
 # define FALLTHRU
 #endif
