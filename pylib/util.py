@@ -1046,8 +1046,11 @@ class IfstatsSummary:
         except TypeError:
             # Can happen when ntpd ships a corrupted response
             return ''
+
+        # FIXME, a brutal and slow way to check for invalid chars..
+        # maybe just strip non-printing chars?
         for c in s:
-            if not c.isalnum() and c not in "/.:[] \n":
+            if not c.isalnum() and c not in "/.:[] \%\n":
                 return ''
         return s
 
