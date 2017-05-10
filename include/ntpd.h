@@ -46,6 +46,18 @@
 # define DPRINTF(lvl, arg)	do {} while (0)
 #endif
 
+/*
+ * macro to silence -Wimplicit-fallthrough
+ * of course gcc and clang do it differently
+ */
+#ifdef __clang__
+# define FALLTHRU
+#elif defined __GNUC__
+# define FALLTHRU [[gcc::fallthrough]]
+#else
+# define FALLTHRU
+#endif
+
 
 /* ntp_config.c */
 #define	TAI_1972	10	/* initial TAI offset (s) */
