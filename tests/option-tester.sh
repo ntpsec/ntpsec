@@ -32,6 +32,17 @@ doit ()
   then
     echo                                      | tee -a $DIR/test.log
     echo "Trouble with $DIR"                  | tee -a $DIR/test.log
+  else
+    echo -n "VERSION: "                       | tee -a $DIR/test.log
+    ./$DIR/main/ntpd/ntpd --version           | tee -a $DIR/test.log
+    cd ntpclients
+      echo -n "VERSION: "                     | tee -a ../$DIR/test.log
+      ./ntpq --version                        | tee -a ../$DIR/test.log
+      echo -n "VERSION: "                     | tee -a ../$DIR/test.log
+      ./ntpdig --version                      | tee -a ../$DIR/test.log
+      echo -n "VERSION: "                     | tee -a ../$DIR/test.log
+      ./ntpmon --version                      | tee -a ../$DIR/test.log
+    cd ..
   fi
   echo
   echo
@@ -52,6 +63,10 @@ then
 doit doc     "--enable-doc"
 fi
 
+# should try cross compile
+
+echo
+grep VERSION: test*/test.log
 echo
 grep warning: test*/test.log
 grep error:   test*/test.log
