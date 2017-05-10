@@ -333,7 +333,8 @@ struct	refclock refclock_jjy = {
  * Local constants definition
  */
 
-#define	MAX_LOGTEXT	100
+/* gcc 7 says 100 is too short */
+#define	MAX_LOGTEXT	192
 
 /* Local constants definition for the return code of the jjy_receive_xxxxxxxx */
 
@@ -402,7 +403,7 @@ jjy_start ( int unit, struct peer *peer )
 	struct	jjyunit      *up ;
 	int 	rc ;
 	int 	fd ;
-	char	sDeviceName [ sizeof(DEVICE) + 10 ], sLog [ 60 ] ;
+	char	sDeviceName [ sizeof(DEVICE) + 10 ], sLog [ MAX_LOGTEXT ] ;
 
 #ifdef DEBUG
 	if ( debug ) {
@@ -531,7 +532,7 @@ jjy_shutdown ( int unit, struct peer *peer )
 	struct jjyunit	    *up;
 	struct refclockproc *pp;
 
-	char	sLog [ 60 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 
 	pp = peer->procptr ;
 	up = pp->unitptr ;
@@ -845,7 +846,7 @@ static void
 jjy_poll ( int unit, struct peer *peer )
 {
 
-	char	sLog [ 40 ], sReach [ 9 ] ;
+	char	sLog [ MAX_LOGTEXT ], sReach [ 9 ] ;
 
 	struct jjyunit      *up;
 	struct refclockproc *pp;
@@ -972,7 +973,7 @@ static void
 jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 {
 
-	char	sLog [ 80 ], cStatus ;
+	char	sLog [ MAX_LOGTEXT ], cStatus ;
 	const char	*pStatus ;
 
 	pp->year   = up->year ;
@@ -1127,7 +1128,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer	    *peer;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int 	iLen ;
 	int 	rc ;
 
@@ -1429,7 +1430,7 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer         *peer ;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int 	iLen ;
 	int 	rc ;
 
@@ -1595,7 +1596,7 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer	    *peer;
 
-	char	*pBuf, sLog [ 100 ], sErr [ 60 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ], sErr [ 60 ] ;
 	int 	iLen ;
 	int 	rc ;
 	int	i, ibcc, ibcc1, ibcc2 ;
@@ -1818,7 +1819,7 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 	struct refclockproc	*pp ;
 	struct peer		*peer;
 
-	char	*pBuf, sLog [ 100 ], sMsg [ 16 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ], sMsg [ 16 ] ;
 	int	iLen ;
 	int	rc ;
 	char	cApostrophe, sStatus[3] ;
@@ -2004,7 +2005,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer	    *peer;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int 	iLen ;
 	int 	rc ;
 
@@ -2331,7 +2332,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 	struct refclockproc	*pp ;
 	struct jjyunit		*up ;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int	iLen, i ;
 	int	rc, iWeekday ;
 	time_t	now ;
@@ -2683,7 +2684,7 @@ static bool
 jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 {
 
-	char	sLog [ 80 ], sFirstThreeDigits [ 4 ] ;
+	char	sLog [ MAX_LOGTEXT ], sFirstThreeDigits [ 4 ] ;
 	int	iNumberOfDigitsOfPhoneNumber, iCommaCount, iCommaPosition ;
 	size_t	i;
 	int	iFirstThreeDigitsCount ;
@@ -2997,7 +2998,7 @@ static void
 teljjy_setDelay ( struct peer *peer, struct jjyunit *up )
 {
 
-	char	sLog [ 60 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 	int	milliSecond, microSecond ;
 
 	clock_gettime(CLOCK_REALTIME,
@@ -3425,7 +3426,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	char	*pBuf ;
 	int	iLen, rc ;
-	char	sLog [ 80 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 	char	bAdjustment ;
 
 
@@ -4454,7 +4455,7 @@ static void
 jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 {
 
-	char	sLog [ 100 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 	const char *pMark ;
 	int 	iMarkLen, iDataLen ;
 
