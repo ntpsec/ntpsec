@@ -47,3 +47,22 @@ debian-jessie-refclocks:
     - python ./waf configure --refclock=all build
   tags:
     - debian-jessie
+
+gcc-7-basic:
+  <<: *job_definition
+  image: gcc:7
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure build
+  tags:
+    - gitlab-org
+
+gcc-7-refclocks:
+  <<: *job_definition
+  image: gcc:7
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build
+  tags:
+    - gitlab-org
+
