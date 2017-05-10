@@ -608,8 +608,7 @@ local_clock(
 				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
-
-			/* falls through to EVNT_SPIK */
+			/* FALLTHRU to EVNT_SPIK */
 
 		/*
 		 * In SPIK state we ignore succeeding outliers until
