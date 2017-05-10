@@ -11,7 +11,8 @@
  * Sizes of things
  */
 #define LIB_NUMBUF	16
-#define	LIB_BUFLENGTH	128
+/* gcc 7 showed us that 128 is too short for LIB_BUFLENGTH */
+#define	LIB_BUFLENGTH	192
 
 typedef char libbufstr[LIB_BUFLENGTH];
 extern libbufstr lib_stringbuf[LIB_NUMBUF];
