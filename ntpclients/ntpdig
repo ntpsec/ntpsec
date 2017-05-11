@@ -319,7 +319,8 @@ if __name__ == '__main__':
                     sys.stderr.write("logfile open of %s failed.\n" % val)
                     raise SystemExit(1)
             elif switch in ("-M", "--steplimit"):
-                steplimit = int(val)
+                errmsg = "Error: -M parameter '%s' not a number\n"
+                steplimit = ntp.util.safeargcast(val, int, errmsg, usage)
             elif switch in ("-p", "--samples"):
                 errmsg = "Error: -p parameter '%s' not a number\n"
                 samples = ntp.util.safeargcast(val, int, errmsg, usage)
