@@ -37,14 +37,14 @@ get_lsb_ulong(
 	unsigned char **bufpp
 	)
 {
-  unsigned long retval;
+  long retval;
 
   retval  = *((*bufpp)++);
   retval |= *((*bufpp)++) << 8;
   retval |= *((*bufpp)++) << 16;
   retval |= *((*bufpp)++) << 24;
 
-  return retval;
+  return (unsigned long)retval;
 }
 
 void
