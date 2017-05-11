@@ -105,7 +105,7 @@ USAGE: ntptrace [-<flag> [<val>] | --<name>[{=| }<val>]]... [host]
         --more-help              Pass the extended usage text through a pager
 
 Options are specified by doubled hyphens and their name or by a single
-hyphen and the flag character."""
+hyphen and the flag character.""" + "\n"
 
 try:
     (options, arguments) = getopt.getopt(
@@ -121,7 +121,8 @@ host = '127.0.0.1'
 
 for (switch, val) in options:
     if switch == "-m" or switch == "--max-hosts":
-        maxhosts = int(val)
+        errmsg = "Error: -m parameter '%s' not a number\n"
+        maxhosts = ntp.util.safeargcast(val, int, errmsg, usage)
     elif switch == "-n" or switch == "--numeric":
         numeric = True
     elif switch == "-r" or switch == "--host":

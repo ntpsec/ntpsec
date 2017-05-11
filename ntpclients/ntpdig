@@ -299,13 +299,15 @@ if __name__ == '__main__':
             elif switch in ("-6", "--ipv6"):
                 af = socket.AF_INET6
             elif switch in ("-a", "--authentication"):
-                authkey = int(val)
+                errmsg = "Error: -a parameter '%s' not a number\n"
+                authkey = ntp.util.safeargcast(val, int, errmsg, usage)
             elif switch in ("-c", "--concurrent"):
                 concurrent_hosts.append(val)
             elif switch in ("-d", "--debug"):
                 debug += 1
             elif switch in ("-D", "--set-debug-level"):
-                debug = int(val)
+                errmsg = "Error: -D parameter '%s' not a number\n"
+                debug = ntp.util.safeargcast(val, int, errmsg, usage)
             elif switch in ("-j", "--json"):
                 json = True
             elif switch in ("-k", "--keyfile"):
@@ -319,7 +321,8 @@ if __name__ == '__main__':
             elif switch in ("-M", "--steplimit"):
                 steplimit = int(val)
             elif switch in ("-p", "--samples"):
-                samples = int(val)
+                errmsg = "Error: -p parameter '%s' not a number\n"
+                samples = ntp.util.safeargcast(val, int, errmsg, usage)
             elif switch in ('-r', "--replay"):
                 replay = val
             elif switch in ("-S", "--step"):
@@ -327,7 +330,8 @@ if __name__ == '__main__':
             elif switch in ("-s", "--slew"):
                 slew = True
             elif switch in ("-t", "--timeout"):
-                timeout = int(val)
+                errmsg = "Error: -t parameter '%s' not a number\n"
+                timeout = ntp.util.safeargcast(val, int, errmsg, usage)
             elif switch in ("-h", "--help"):
                 print(usage)
                 raise SystemExit(0)

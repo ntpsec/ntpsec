@@ -138,9 +138,11 @@ if __name__ == "__main__":
     verbose = 0
     for (switch, val) in options:
         if switch in ("-n", "--tries"):
-            tries = int(val)
+            errmsg = "Error: -n parameter '%s' not a number\n"
+            tries = ntp.util.safeargcast(val, int, errmsg, __doc__)
         elif switch in ("-s", "--sleep"):
-            sleep = int(val)
+            errmsg = "Error: -s parameter '%s' not a number\n"
+            sleep = ntp.util.safeargcast(val, int, errmsg, __doc__)
         elif switch in ("-v", "--verbose"):
             verbose += 1
         elif switch in ("-h", "--help"):

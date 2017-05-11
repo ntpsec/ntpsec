@@ -57,6 +57,19 @@ MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
 PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
 
 
+def safeargcast(arg, castfunc, errtext, usage):
+    """Attempts to typecast an argument, prints and dies on failure.
+    errtext must contain a %s for splicing in the argument, and be
+    newline terminated."""
+    try:
+        casted = castfunc(arg)
+    except ValueError:
+        sys.stderr.write(errtext % arg)
+        sys.stderr.write(usage)
+        raise SystemExit(1)
+    return casted
+
+
 def stdversion():
     return "ntpsec-%s+%s %s" % (ntp.version.VERSION,
                                 ntp.version.VCS_TICK,
