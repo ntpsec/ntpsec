@@ -1030,9 +1030,10 @@ class IfstatsSummary:
                 fmt = self.fields[name] % value
             formatted[name] = fmt
         try:
+            enFlag = '.' if variables.get('en', False) else 'D'
             s = ("%3u %-24.24s %c %4s %3s %6s %6s %6s %5s %8s\n    %s\n"
                  % (i, formatted['name'],
-                    '.' if variables['en'] else 'D',
+                    enFlag,
                     formatted['flags'],
                     formatted['tl'],
                     formatted['rx'],
