@@ -1006,7 +1006,7 @@ class ReslistSummary:
 class IfstatsSummary:
     "Reusable class for ifstats entry summary generation."
     header = """\
-    interface name                                        send
+    interface name                                     send
  #  address/broadcast     drop flag ttl received sent failed peers   uptime
  """
     width = 74
