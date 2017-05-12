@@ -18,6 +18,57 @@ TEST_SETUP(binio) {}
 TEST_TEAR_DOWN(binio) {}
 
 
+TEST(binio, get_lsb_short0) {
+        long ret;
+        unsigned char zero[2] = { 0, 0};
+        unsigned char *bp = &zero[0];
+
+        ret = get_lsb_short( &bp);
+
+        TEST_ASSERT_EQUAL_INT64( 0, ret );
+}
+
+TEST(binio, get_lsb_short1) {
+        long ret;
+        unsigned char zero[2] = { 1, 2};
+        unsigned char *bp = &zero[0];
+
+        ret = get_lsb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x0201UL, ret );
+}
+
+TEST(binio, get_lsb_short2) {
+        long ret;
+        unsigned char zero[2] = { 2, 1};
+        unsigned char *bp = &zero[0];
+
+        ret = get_lsb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x0102UL, ret );
+}
+
+TEST(binio, get_lsb_short3) {
+        long ret;
+        unsigned char zero[2] = { 0xff, 0xff};
+        unsigned char *bp = &zero[0];
+
+        ret = get_lsb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( -1L, ret );
+}
+
+TEST(binio, get_lsb_short4) {
+        long ret;
+        unsigned char zero[2] = { 0, 0x80};
+        unsigned char *bp = &zero[0];
+
+        ret = get_lsb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( -0x8000L, ret );
+}
+
+
 TEST(binio, get_lsb_ulong0) {
         unsigned long ret;
         unsigned char zero[4] = { 0, 0, 0, 0};
@@ -25,7 +76,7 @@ TEST(binio, get_lsb_ulong0) {
 
         ret = get_lsb_ulong( &bp);
 
-        TEST_ASSERT_EQUAL_INT64( 0, (int64_t)ret );
+        TEST_ASSERT_EQUAL_UINT64( 0, ret );
 }
 
 
@@ -74,6 +125,12 @@ TEST(binio, get_lsb_ulong4) {
 }
 
 TEST_GROUP_RUNNER(binio) {
+        RUN_TEST_CASE(binio, get_lsb_short0);
+        RUN_TEST_CASE(binio, get_lsb_short1);
+        RUN_TEST_CASE(binio, get_lsb_short2);
+        RUN_TEST_CASE(binio, get_lsb_short3);
+        RUN_TEST_CASE(binio, get_lsb_short4);
+
         RUN_TEST_CASE(binio, get_lsb_ulong0);
         RUN_TEST_CASE(binio, get_lsb_ulong1);
         RUN_TEST_CASE(binio, get_lsb_ulong2);
