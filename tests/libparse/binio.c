@@ -17,6 +17,7 @@ TEST_SETUP(binio) {}
 
 TEST_TEAR_DOWN(binio) {}
 
+/* LSB tests */
 
 TEST(binio, get_lsb_short0) {
         long ret;
@@ -124,7 +125,115 @@ TEST(binio, get_lsb_ulong4) {
         TEST_ASSERT_EQUAL_HEX64( 0x080000000UL, ret );
 }
 
+/* MSB tests */
+
+TEST(binio, get_msb_short0) {
+        long ret;
+        unsigned char zero[2] = { 0, 0};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_short( &bp);
+
+        TEST_ASSERT_EQUAL_INT64( 0, ret );
+}
+
+TEST(binio, get_msb_short1) {
+        long ret;
+        unsigned char zero[2] = { 2, 1};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x0201UL, ret );
+}
+
+TEST(binio, get_msb_short2) {
+        long ret;
+        unsigned char zero[2] = { 1, 2};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x0102UL, ret );
+}
+
+TEST(binio, get_msb_short3) {
+        long ret;
+        unsigned char zero[2] = { 0xff, 0xff};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( -1L, ret );
+}
+
+TEST(binio, get_msb_short4) {
+        long ret;
+        unsigned char zero[2] = { 0x80, 0};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_short( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( -0x8000L, ret );
+}
+
+
+TEST(binio, get_msb_long0) {
+        long ret;
+        unsigned char zero[4] = { 0, 0, 0, 0};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_long( &bp);
+
+        TEST_ASSERT_EQUAL_UINT64( 0, ret );
+}
+
+
+TEST(binio, get_msb_long1) {
+        long ret;
+        unsigned char zero[4] = { 4, 3, 2, 1};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_long( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x04030201UL, ret );
+}
+
+
+TEST(binio, get_msb_long2) {
+        long ret;
+        unsigned char zero[4] = { 1, 2, 3, 4};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_long( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x01020304UL, ret );
+}
+
+
+TEST(binio, get_msb_long3) {
+        long ret;
+        unsigned char zero[4] = { 0xff, 0xff, 0xff, 0xff};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_long( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x0FFFFFFFFUL, ret );
+}
+
+
+TEST(binio, get_msb_long4) {
+        long ret;
+        unsigned char zero[4] = { 0x80, 0, 0, 0};
+        unsigned char *bp = &zero[0];
+
+        ret = get_msb_long( &bp);
+
+        TEST_ASSERT_EQUAL_HEX64( 0x080000000UL, ret );
+}
+
 TEST_GROUP_RUNNER(binio) {
+        /* LSB tests */
         RUN_TEST_CASE(binio, get_lsb_short0);
         RUN_TEST_CASE(binio, get_lsb_short1);
         RUN_TEST_CASE(binio, get_lsb_short2);
@@ -138,4 +247,18 @@ TEST_GROUP_RUNNER(binio) {
         RUN_TEST_CASE(binio, get_lsb_ulong3);
         RUN_TEST_CASE(binio, get_lsb_ulong4);
         */
+
+        /* MSB tests */
+        RUN_TEST_CASE(binio, get_msb_short0);
+        RUN_TEST_CASE(binio, get_msb_short1);
+        RUN_TEST_CASE(binio, get_msb_short2);
+        RUN_TEST_CASE(binio, get_msb_short3);
+        RUN_TEST_CASE(binio, get_msb_short4);
+
+        RUN_TEST_CASE(binio, get_msb_long0);
+        RUN_TEST_CASE(binio, get_msb_long1);
+        RUN_TEST_CASE(binio, get_msb_long2);
+        /* next two tests are good, but the code they test is bad */
+        RUN_TEST_CASE(binio, get_msb_long3);
+        RUN_TEST_CASE(binio, get_msb_long4);
 }
