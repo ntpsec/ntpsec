@@ -258,7 +258,6 @@ TEST_GROUP_RUNNER(binio) {
         RUN_TEST_CASE(binio, get_msb_long0);
         RUN_TEST_CASE(binio, get_msb_long1);
         RUN_TEST_CASE(binio, get_msb_long2);
-        /* next two tests are good, but the code they test is bad */
         RUN_TEST_CASE(binio, get_msb_long3);
         RUN_TEST_CASE(binio, get_msb_long4);
 }
