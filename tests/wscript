@@ -68,6 +68,7 @@ def build(ctx):
 
         # libparse/
         libparse_source = [
+            "libparse/binio.c",
             "libparse/ieee754io.c",
         ] + common_source
 

@@ -63,6 +63,7 @@ static void RunAllTests(void)
 #endif
 
 #ifdef TEST_LIBPARSE
+	RUN_TEST_GROUP(binio);
 	RUN_TEST_GROUP(ieee754io);
 #endif
 
