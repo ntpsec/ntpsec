@@ -1,4 +1,10 @@
-// Explain the MRU stall problem and why ntpq has 'direct' mode.
+// Explain failure modes of ntpq and ntpmon
+
+When using the -u option, very old xterms may fail to render &mu;
+correctly.  If this happens, be sure your xterm is started with the -u8
+option, or the 'utf8' resource', and that your console font contains
+the UTF-8 &mu character.  Also confirm your LANG environment variable is
+set to a UTF-8 language, like this: "export LANG=en_US.utf8".
 
 Timestamp interpretation in this program is likely to fail in flaky
 ways if the local system clock has not already been approximately

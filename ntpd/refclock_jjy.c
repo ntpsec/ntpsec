@@ -87,6 +87,11 @@
 /*    [Fix]    C-DEX JST2000                                          */
 /*             Thanks to Mr. Kuramatsu for the report and the patch.  */
 /*								      */
+/*  2017/04/30							      */
+/*    [Change] Avoid a wrong report of the coverity static analysis   */
+/*             tool. ( The code is harmless and has no bug. )	      */
+/*             teljjy_conn_send()				      */
+/*								      */
 /**********************************************************************/
 
 #include "config.h"
@@ -333,7 +338,8 @@ struct	refclock refclock_jjy = {
  * Local constants definition
  */
 
-#define	MAX_LOGTEXT	100
+/* gcc 7 says 100 is too short */
+#define	MAX_LOGTEXT	192
 
 /* Local constants definition for the return code of the jjy_receive_xxxxxxxx */
 
@@ -353,6 +359,7 @@ struct	refclock refclock_jjy = {
 #define	JJY_CLOCKSTATS_MARK_ATTENTION	5
 #define	JJY_CLOCKSTATS_MARK_WARNING	6
 #define	JJY_CLOCKSTATS_MARK_ERROR	7
+#define	JJY_CLOCKSTATS_MARK_BUG 	8
 
 /* Local constants definition for the clockstats messages */
 
@@ -402,7 +409,7 @@ jjy_start ( int unit, struct peer *peer )
 	struct	jjyunit      *up ;
 	int 	rc ;
 	int 	fd ;
-	char	sDeviceName [ sizeof(DEVICE) + 10 ], sLog [ 60 ] ;
+	char	sDeviceName [ sizeof(DEVICE) + 10 ], sLog [ MAX_LOGTEXT ] ;
 
 #ifdef DEBUG
 	if ( debug ) {
@@ -531,7 +538,7 @@ jjy_shutdown ( int unit, struct peer *peer )
 	struct jjyunit	    *up;
 	struct refclockproc *pp;
 
-	char	sLog [ 60 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 
 	pp = peer->procptr ;
 	up = pp->unitptr ;
@@ -845,7 +852,7 @@ static void
 jjy_poll ( int unit, struct peer *peer )
 {
 
-	char	sLog [ 40 ], sReach [ 9 ] ;
+	char	sLog [ MAX_LOGTEXT ], sReach [ 9 ] ;
 
 	struct jjyunit      *up;
 	struct refclockproc *pp;
@@ -972,7 +979,7 @@ static void
 jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 {
 
-	char	sLog [ 80 ], cStatus ;
+	char	sLog [ MAX_LOGTEXT ], cStatus ;
 	const char	*pStatus ;
 
 	pp->year   = up->year ;
@@ -1127,7 +1134,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer	    *peer;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int 	iLen ;
 	int 	rc ;
 
@@ -1154,7 +1161,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 
 	if ( tristate_jjy01_command_sequence[up->iCommandSeq].command == NULL ) {
 		/* Command sequence has not been started, or has been completed */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -1166,7 +1174,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 	if ( iLen != tristate_jjy01_command_sequence[up->iCommandSeq].iExpectedReplyLength[0]
 	  && iLen != tristate_jjy01_command_sequence[up->iCommandSeq].iExpectedReplyLength[1] ) {
 		/* Unexpected reply length */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -1186,7 +1195,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 		  || up->month < 1 || 12 < up->month
 		  || up->day < 1 || 31 < up->day ) {
 			/* Invalid date */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
 				  rc, up->year, up->month, up->day ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -1200,7 +1210,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 
 		if ( up->iTimestampCount >= 2 ) {
 			/* Too many time reply */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_TOO_MANY_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_TOO_MANY_REPLY,
 				  up->iTimestampCount ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -1213,7 +1224,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 		if ( rc != 3 || up->hour > 23 || up->minute > 59 ||
 		     up->second > 60 ) {
 			/* Invalid time */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -1236,7 +1248,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			     TS_JJY01_REPLY_LENGTH_STUS_UNADJUSTED ) == 0 ) {
 			/* Good */
 		} else {
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -1253,7 +1266,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			     TS_JJY01_REPLY_LENGTH_DCST_INVALID ) == 0 ) {
 			/* Good */
 		} else {
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -1264,7 +1278,8 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 
 	default : /*  Unexpected reply */
 
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -1282,13 +1297,15 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			return JJY_RECEIVE_DONE ;
 		} else if ( up->iTimestamp[0] > up->iTimestamp[1] ) {
 			/* Over midnight, and date is unsure */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_OVER_MIDNIGHT_2,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_OVER_MIDNIGHT_2,
 				  up->iTimestamp[0], up->iTimestamp[1] ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_INFORMATION, sLog ) ;
 			return JJY_RECEIVE_SKIP ;
 		} else {
 			/* Slow reply */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_2,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_2,
 				  up->iTimestamp[0], up->iTimestamp[1] ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -1429,7 +1446,7 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer         *peer ;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int 	iLen ;
 	int 	rc ;
 
@@ -1453,7 +1470,8 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 
 	if ( up->iCommandSeq != 1 ) {
 		/* Command sequence has not been started, or has been completed */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -1470,7 +1488,8 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 
 	if ( iLen != 15 ) {
 		/* Unexpected reply length */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -1488,7 +1507,8 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 	     up->day < 1 || up->day > 31 || up->hour > 23 ||
 	     up->minute > 59 || up->second > 60 ) {
 		/* Invalid date and time */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
 			  rc, up->year, up->month, up->day,
 			  up->hour, up->minute, up->second ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
@@ -1595,7 +1615,7 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer	    *peer;
 
-	char	*pBuf, sLog [ 100 ], sErr [ 60 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ], sErr [ 60 ] ;
 	int 	iLen ;
 	int 	rc ;
 	int	i, ibcc, ibcc1, ibcc2 ;
@@ -1625,7 +1645,8 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 	  || ( up->operationmode == ECHOKEISOKUKI_LT2000_MODE_SWITCHING_CONTINUOUS
 	       && iLen != 17 ) ) {
 		/* Unexpected reply length */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -1642,12 +1663,13 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 		ibcc1 = 0x30 | ( ( ibcc >> 4 ) & 0xF ) ;
 		ibcc2 = 0x30 | ( ( ibcc      ) & 0xF ) ;
 		if ( pBuf[13] != ibcc1 || pBuf[14] != ibcc2 ) {
-			snprintf(sErr, sizeof(sErr)-1,
+			snprintf(sErr, sizeof(sErr),
                                " BCC error : Recv=%02X,%02X / Calc=%02X,%02X ",
 			       (unsigned)(pBuf[13] & 0xFF),
                                (unsigned)(pBuf[14] & 0xFF),
 			       (unsigned)ibcc1, (unsigned)ibcc2);
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  sErr ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -1672,9 +1694,10 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 		  || up->day < 1 || up->day > 31
 		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
 			/* Invalid date and time */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
-				  rc, up->year, up->month, up->day,
-				  up->hour, up->minute, up->second ) ;
+			snprintf( sLog, sizeof(sLog),
+                                 JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
+				 rc, up->year, up->month, up->day,
+				 up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
@@ -1818,7 +1841,7 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 	struct refclockproc	*pp ;
 	struct peer		*peer;
 
-	char	*pBuf, sLog [ 100 ], sMsg [ 16 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ], sMsg [ 16 ] ;
 	int	iLen ;
 	int	rc ;
 	char	cApostrophe, sStatus[3] ;
@@ -1853,7 +1876,8 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 
 	if ( iLen != 23 ) {
 		/* Unexpected reply length */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -1876,7 +1900,8 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 	  || iWeekday > 6
 	  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
 		/* Invalid date and time */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
 			  rc, up->year, up->month, up->day,
 			  up->hour, up->minute, up->second ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
@@ -1885,8 +1910,9 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 	} else if ( strcmp( sStatus, "NG" ) == 0
 		 || strcmp( sStatus, "ER" ) == 0 ) {
 		/* Timestamp is unsure */
-		snprintf( sMsg, sizeof(sMsg)-1, "status=%s", sStatus ) ;
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_TIMESTAMP_UNSURE,
+		snprintf( sMsg, sizeof(sMsg), "status=%s", sStatus ) ;
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_TIMESTAMP_UNSURE,
 			  sMsg ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_WARNING, sLog ) ;
 		return JJY_RECEIVE_SKIP ;
@@ -2004,7 +2030,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 	struct refclockproc *pp ;
 	struct peer	    *peer;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int 	iLen ;
 	int 	rc ;
 
@@ -2068,7 +2094,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 
 	if ( tristate_gps01_command_sequence[up->iCommandSeq].command == NULL ) {
 		/* Command sequence has not been started, or has been completed */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -2079,7 +2106,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 
 	if ( iLen != tristate_gps01_command_sequence[up->iCommandSeq].iExpectedReplyLength ) {
 		/* Unexpected reply length */
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -2098,7 +2126,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 		  || up->month < 1 || 12 < up->month
 		  || up->day < 1 || 31 < up->day ) {
 			/* Invalid date */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
 				  rc, up->year, up->month, up->day ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2111,7 +2140,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 
 		if ( up->iTimestampCount >= 2 ) {
 			/* Too many time reply */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_TOO_MANY_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_TOO_MANY_REPLY,
 				  up->iTimestampCount ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2124,7 +2154,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 		if ( rc != 3
 		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
 			/* Invalid time */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2147,7 +2178,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 		  || strncmp( pBuf, TS_GPS01_REPLY_STUS_PPS, TS_GPS01_REPLY_LENGTH_STUS ) == 0 ) {
 			/* Good */
 		} else {
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2158,7 +2190,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 
 	default : /*  Unexpected reply */
 
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -2176,13 +2209,15 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 			return JJY_RECEIVE_DONE ;
 		} else if ( up->iTimestamp[0] > up->iTimestamp[1] ) {
 			/* Over midnight, and date is unsure */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_OVER_MIDNIGHT_2,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_OVER_MIDNIGHT_2,
 				  up->iTimestamp[0], up->iTimestamp[1] ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_INFORMATION, sLog ) ;
 			return JJY_RECEIVE_SKIP ;
 		} else {
 			/* Slow reply */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_2,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_2,
 				  up->iTimestamp[0], up->iTimestamp[1] ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2331,7 +2366,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 	struct refclockproc	*pp ;
 	struct jjyunit		*up ;
 
-	char	*pBuf, sLog [ 100 ] ;
+	char	*pBuf, sLog [ MAX_LOGTEXT ] ;
 	int	iLen, i ;
 	int	rc, iWeekday ;
 	time_t	now ;
@@ -2381,7 +2416,8 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 		if ( rc != 3
 		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
 			/* Invalid time */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2415,9 +2451,10 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 		  || iWeekday > 6
 		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
 			/* Invalid date and time */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
-				  rc, up->year, up->month, up->day,
-				  up->hour, up->minute, up->second ) ;
+			snprintf(sLog, sizeof(sLog),
+                                 JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
+				 rc, up->year, up->month, up->day,
+				 up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
@@ -2436,9 +2473,10 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 		  || iWeekday > 6
 		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
 			/* Invalid date and time */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
-				  rc, up->year, up->month, up->day,
-				  up->hour, up->minute, up->second ) ;
+			snprintf( sLog, sizeof(sLog),
+                                 JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
+				 rc, up->year, up->month, up->day,
+				 up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
@@ -2450,7 +2488,8 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 
 		if ( ( *pBuf & 0xFF ) != 0xE5 ) {
 			/* Invalid second signal */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  up->sLineBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2461,7 +2500,8 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 			return JJY_RECEIVE_WAIT ;
 		} else if ( up->iReceiveSeq >= 3 ) {
 			/* Unexpected second signal */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 				  up->sLineBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -2472,7 +2512,8 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 
 	default : /* Unexpected reply length */
 
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 		up->bLineError = true ;
@@ -2683,7 +2724,7 @@ static bool
 jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 {
 
-	char	sLog [ 80 ], sFirstThreeDigits [ 4 ] ;
+	char	sLog [ MAX_LOGTEXT ], sFirstThreeDigits [ 4 ] ;
 	int	iNumberOfDigitsOfPhoneNumber, iCommaCount, iCommaPosition ;
 	size_t	i;
 	int	iFirstThreeDigitsCount ;
@@ -2997,7 +3038,7 @@ static void
 teljjy_setDelay ( struct peer *peer, struct jjyunit *up )
 {
 
-	char	sLog [ 60 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 	int	milliSecond, microSecond ;
 
 	clock_gettime(CLOCK_REALTIME,
@@ -3338,6 +3379,7 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	const char	*pCmd ;
 	int	i, iLen, iNextClockState ;
+	char	sLog[120];
 
 	DEBUG_TELJJY_PRINTF( "teljjy_conn_send" ) ;
 
@@ -3366,8 +3408,8 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		/* Loopback character comes */
 #ifdef DEBUG
 		if ( debug ) {
-			printf( "refclock_jjy.c : teljjy_conn_send : iLoopbackCount=%d\n",
-				 up->iLoopbackCount ) ;
+			printf( "refclock_jjy.c : teljjy_conn_send : iClockCommandSeq=%d iLoopbackCount=%d\n",
+				 up->iClockCommandSeq, up->iLoopbackCount ) ;
 		}
 #endif
 
@@ -3390,9 +3432,19 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 		if ( teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK ) {
 			/* Loopback character and timestamp */
-			clock_gettime(CLOCK_REALTIME,
+			if ( up->iLoopbackCount < MAX_LOOPBACK ) {
+				clock_gettime(CLOCK_REALTIME,
 				      &(up->sendTime[up->iLoopbackCount]));
-			up->bLoopbackMode = true ;
+				up->bLoopbackMode = true ;
+			} else {
+				/* This else-block is never come. */
+				/* This code avoid wrong report of the coverity static analysis scan tool. */
+				snprintf( sLog, sizeof(sLog)-1, "refclock_jjy.c ; teljjy_conn_send ; iClockCommandSeq=%d iLoopbackCount=%d MAX_LOOPBACK=%d",
+					  up->iClockCommandSeq, up->iLoopbackCount, MAX_LOOPBACK ) ;
+				jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_BUG, sLog ) ;
+				//msyslog ( LOG_ERR, sLog ) ;
+				up->bLoopbackMode = false ;
+			}
 		} else {
 			/* Regular command */
 			up->bLoopbackMode = false ;
@@ -3425,7 +3477,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	char	*pBuf ;
 	int	iLen, rc ;
-	char	sLog [ 80 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 	char	bAdjustment ;
 
 
@@ -3466,7 +3518,8 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		if ( rc != 3 || up->year < 2000 || 2099 <= up->year
 		  || up->month < 1 || 12 < up->month || up->day < 1 || 31 < up->day ) {
 			/* Invalid date */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
 				  rc, up->year, up->month, up->day ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -3481,7 +3534,8 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 		if ( rc != 1 || up->leapsecond < -1 || 1 < up->leapsecond ) {
 			/* Invalid leap second */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_LEAP,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_LEAP,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -3495,7 +3549,8 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 		if ( rc != 3 || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
 			/* Invalid time */
-			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
+			snprintf( sLog, sizeof(sLog),
+                                  JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 			up->bLineError = true ;
@@ -3553,7 +3608,8 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		 && teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK ) {
 		/* Loopback noise ( Unexpected replay ) */
 
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_IGNORE_REPLY,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_IGNORE_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_WARNING, sLog ) ;
 
@@ -3561,7 +3617,8 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 		up->bLineError = true ;
 
-		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
+		snprintf( sLog, sizeof(sLog),
+                          JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
 
@@ -4454,7 +4511,7 @@ static void
 jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 {
 
-	char	sLog [ 100 ] ;
+	char	sLog [ MAX_LOGTEXT ] ;
 	const char *pMark ;
 	int 	iMarkLen, iDataLen ;
 
@@ -4479,6 +4536,9 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 		break ;
 	case JJY_CLOCKSTATS_MARK_ERROR :
 		pMark = "-X- " ;
+		break ;
+	case JJY_CLOCKSTATS_MARK_BUG :
+		pMark = "!!! " ;
 		break ;
 	default :
 		pMark = "" ;

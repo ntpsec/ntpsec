@@ -1623,12 +1623,9 @@ if __name__ == '__main__':
             session.debug += 1
             session.logfp = open("ntpq.log", "a", 1)    # 1 => line buffered
         elif switch in ("-D", "--set-debug-level"):
-            try:
-                session.debug = interpreter.debug = int(val)
-            except ValueError as e:
-                sys.stderr.write("'%s' is not a recognizable number\n" % val)
-                sys.stderr.write(usage)
-                raise SystemExit(1)
+            errmsg = "Error: -D parameter '%s' not a number\n"
+            cast = ntp.util.safeargcast(val, int, errmsg, usage)
+            session.debug = interpreter.debug = cast
         elif switch in ("-h", "--help"):
             print(usage)
             raise SystemExit(0)
@@ -1644,13 +1641,9 @@ if __name__ == '__main__':
         elif switch in ("-w", "--wide"):
             interpreter.wideremote = True
         elif switch in ("-W", "--width"):
-            try:
-                interpreter.termwidth = int(val)
-            except ValueError as e:
-                sys.stderr.write("Error: -W parameter '%s' not a number\n"
-                                 % val)
-                sys.stderr.write(usage)
-                raise SystemExit(1)
+            errmsg = "Error: -W parameter '%s' not a number\n"
+            interpreter.termwidth = ntp.util.safeargcast(val, int,
+                                                         errmsg, usage)
         elif switch in ("-u", "--units"):
             interpreter.showunits = True
 

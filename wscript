@@ -61,7 +61,8 @@ def configure(ctx):
                 self.logger.debug('WafError')
                 return e.returncode
             if (len(out) and any(word in out for word
-                                 in ['err', 'ignored', 'illegal', 'unknown',
+                                 in ['err', 'err:', 'error', 'error:',
+                                     'ignored', 'illegal', 'unknown',
                                      'unrecognized', 'warning'])):
                 self.logger.debug('noooo %r' % out)
                 return 1
@@ -364,6 +365,7 @@ def configure(ctx):
             "-Wswitch-default",       # warns on Bison bug
         ] + ctx.env.CFLAGS
         cc_test_flags += [
+            ('w_implicit_fallthru', "-Wimplicit-fallthrough=3"),
             # fails on Solaris and OpenBSD 6
             # complains about a Bison bug
             ('w_sign_conversion', "-Wsign-conversion"),
@@ -435,6 +437,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ["-flto"] + ctx.env.CFLAGS
 
     # debug warnings that are not available with all compilers
+    if ctx.env.HAS_w_implicit_fallthru:
+        ctx.env.CFLAGS = ['-Wimplicit-fallthrough=3'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_suggest_attribute_const:
         ctx.env.CFLAGS = ['-Wsuggest-attribute=const'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_suggest_attribute_noreturn:
@@ -610,6 +614,7 @@ int main(int argc, char **argv) {
         ('clock_gettime', ["time.h"], "RT"),
         ('clock_settime', ["time.h"], "RT"),
         ('getrusage', ["sys/time.h", "sys/resource.h"]),
+        ('nanotime', ["sys/time.h"]),     # Old OS X
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('res_init', ["resolv.h"]),
@@ -756,10 +761,6 @@ int main(int argc, char **argv) {
         ctx.define("ENABLE_DNS_LOOKUP", 1,
                    comment="Enable DNS lookup of hostnames")
 
-    if not ctx.options.disable_dns_retry:
-        ctx.define("ENABLE_DNS_RETRY", 1,
-                   comment="Retry DNS lookups after an initial failure")
-
     # This is true under every Unix-like OS.
     ctx.define("HAVE_WORKING_FORK", 1,
                comment="Whether a working fork() exists")
@@ -825,7 +826,7 @@ int main(int argc, char **argv) {
         from wafhelpers.check_mdns import check_mdns_header
         check_mdns_header(ctx)
 
-    if not ctx.options.disable_dns_retry:
+    if not ctx.options.disable_dns_lookup:
         from wafhelpers.check_pthread import check_pthread_run
         check_pthread_run(ctx)
 

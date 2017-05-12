@@ -193,10 +193,12 @@ and so on is suppressed.
 [[phone]]
 +phone+ 'dial ...'::
   This command is used in conjunction with the ACTS modem driver (type
-  18). The arguments consist of a maximum of 10 telephone numbers used
-  to dial USNO, NIST or European time services. The Hayes command
-  ATDT is normally prepended to the number, which can contain other
-  modem control codes as well.
+  modem) or the JJY driver (type jjy). For ACTS, the arguments consist
+  of a maximum of 10 telephone numbers used to dial USNO, NIST or
+  European time services. For the jjy driver in modes 100-180, the
+  argument is one telephone number used to dial the telephone JJY
+  service. The Hayes command ATDT is normally prepended to the number,
+  which can contain other modem control codes as well.
 
 [[reset]]
 +reset [allpeers] [auth] [ctl] [io] [mem] [sys] [timer]+::

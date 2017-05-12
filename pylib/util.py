@@ -57,6 +57,19 @@ MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
 PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
 
 
+def safeargcast(arg, castfunc, errtext, usage):
+    """Attempts to typecast an argument, prints and dies on failure.
+    errtext must contain a %s for splicing in the argument, and be
+    newline terminated."""
+    try:
+        casted = castfunc(arg)
+    except ValueError:
+        sys.stderr.write(errtext % arg)
+        sys.stderr.write(usage)
+        raise SystemExit(1)
+    return casted
+
+
 def stdversion():
     return "ntpsec-%s+%s %s" % (ntp.version.VERSION,
                                 ntp.version.VCS_TICK,
@@ -1006,7 +1019,7 @@ class ReslistSummary:
 class IfstatsSummary:
     "Reusable class for ifstats entry summary generation."
     header = """\
-    interface name                                        send
+    interface name                                     send
  #  address/broadcast     drop flag ttl received sent failed peers   uptime
  """
     width = 74
@@ -1030,9 +1043,10 @@ class IfstatsSummary:
                 fmt = self.fields[name] % value
             formatted[name] = fmt
         try:
+            enFlag = '.' if variables.get('en', False) else 'D'
             s = ("%3u %-24.24s %c %4s %3s %6s %6s %6s %5s %8s\n    %s\n"
                  % (i, formatted['name'],
-                    '.' if variables['en'] else 'D',
+                    enFlag,
                     formatted['flags'],
                     formatted['tl'],
                     formatted['rx'],
@@ -1046,8 +1060,11 @@ class IfstatsSummary:
         except TypeError:
             # Can happen when ntpd ships a corrupted response
             return ''
+
+        # FIXME, a brutal and slow way to check for invalid chars..
+        # maybe just strip non-printing chars?
         for c in s:
-            if not c.isalnum() and c not in "/.:[] \n":
+            if not c.isalnum() and c not in "/.:[] \%\n":
                 return ''
         return s
 

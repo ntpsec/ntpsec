@@ -408,10 +408,11 @@ bool lex_push_file(
 			/* directory scanning */
 			DIR *dfd;
 			struct dirent *dp;
-			char **baselist = (char **)malloc(sizeof(char *));
+			char **baselist;
 			int basecount = 0;
 			if ((dfd = opendir(fullpath)) == NULL)
 				return false;
+			baselist = (char **)malloc(sizeof(char *));
 			while ((dp = readdir(dfd)) != NULL)
 			{
 			    if (!CONF_ENABLE(dp->d_name))
@@ -420,6 +421,7 @@ bool lex_push_file(
 			    baselist = realloc(baselist,
                                        (size_t)(basecount+1) * sizeof(char *));
 			}
+			closedir(dfd);
 			qsort(baselist, (size_t)basecount, sizeof(char *),
                               rcmpstring);
 			for (int i = 0; i < basecount; i++) {

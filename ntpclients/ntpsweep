@@ -156,7 +156,8 @@ if __name__ == '__main__':
         elif switch == "-l" or switch == "--host-list":
             hostlist = val.split(",")
         elif switch == "-m" or switch == "--maxlevel":
-            maxlevel = int(val)
+            errmsg = "Error: -m parameter '%s' not a number\n"
+            maxlevel = ntp.util.safeargcast(val, int, errmsg, __doc__)
         elif switch == "-p" or switch == "--peers":
             recurse = True
         elif switch == "-s" or switch == "--strip":

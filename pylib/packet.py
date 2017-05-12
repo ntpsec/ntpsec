@@ -1620,7 +1620,7 @@ Receive a nonce that can be replayed - combats source address spoofing
                      qdata=listtype, auth=True)
         stanzas = []
         for (key, value) in self.__parse_varlist().items():
-            if key[-1].isdigit() and key[-2] == '.':
+            if key[-1].isdigit() and '.' in key:
                 (stem, stanza) = key.split(".")
                 stanza = int(stanza)
                 if stanza > len(stanzas) - 1:
@@ -1664,7 +1664,7 @@ class Authenticator:
         "Get a keyid/passwd pair that is trusted on localhost"
         if keyid is not None:
             if keyid in self.passwords:
-                return (keyid) + self.passwords[keyid]
+                return (keyid,) + self.passwords[keyid]
             else:
                 return (keyid, None, None)
         for line in open("/etc/ntp.conf"):

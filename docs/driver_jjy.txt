@@ -75,7 +75,7 @@ Time code format::
 Command        -\-> Reply +
 +{ENQ}1J{ETX}+ -\-> +{STX}JYYMMDDWHHMMSSS{ETX}+
 
-* [[subtype-3]]Echo Keisokuki Co.,Ltd. LT-2000 http://www.clock.co.jp/ (domain no longer registered)
+* [[subtype-3]]Echo Keisokuki Co.,Ltd. LT-2000
 +
 NTP configuration ( {ntpconf} )::
 +
@@ -95,6 +95,8 @@ Time code format::
 |( Every second before 0.5 second )|      | +YYMMDDWHHMMSS{ST1}{ST2}{ST3}{ST4}{CR}+
 |#                                 | -\-> | ( Subtype 1 : Request&Send )
 |===================================================================
++
+Note: Echo Keisokuki has been dissolved. Some business of the company was taken over by FreqTime Co., Ltd. in July, 2015.
 
 * [[subtype-4]]CITIZEN T.I.C. CO.,LTD. JJY-200 http://www.tic-citizen.co.jp/ (Japanese only)
 +

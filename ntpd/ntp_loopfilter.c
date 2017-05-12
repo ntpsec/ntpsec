@@ -609,18 +609,16 @@ local_clock(
 
 			clock_frequency = direct_freq(fp_offset);
 
-			/* falls through to EVNT_SPIK */
-
 		/*
 		 * In SPIK state we ignore succeeding outliers until
 		 * either an inlier is found or the stepout threshold is
 		 * exceeded.
 		 */
+		/* FALLTHRU to EVNT_SPIK */
+                        FALLTHRU
 		case EVNT_SPIK:
 			if (mu < clock_minstep)
 				return (0);
-
-			/* falls through to default */
 
 		/*
 		 * We get here by default in NSET and FSET states and
@@ -645,6 +643,8 @@ local_clock(
 		 * step threshold is always suppressed, even with a
 		 * long time constant.
 		 */
+			/* FALLTHRU to default */
+                        FALLTHRU
 		default:
 			snprintf(tbuf, sizeof(tbuf), "%+.6f s",
 			    fp_offset);
