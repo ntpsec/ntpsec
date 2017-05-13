@@ -60,18 +60,6 @@ get_msb_short(
   return (retval & 0x8000) ? (~0xFFFF | retval) : retval;
 }
 
-void
-put_msb_long(
-	unsigned char **bufpp,
-	long val
-	)
-{
-  *((*bufpp)++) = (unsigned char)((val >> 24) & 0xFF);
-  *((*bufpp)++) = (unsigned char)((val >> 16) & 0xFF);
-  *((*bufpp)++) = (unsigned char)((val >> 8 ) & 0xFF);
-  *((*bufpp)++) = (unsigned char)( val        & 0xFF);
-}
-
 /*
  * binio.c,v
  * Revision 4.2  1999/02/21 12:17:34  kardel
