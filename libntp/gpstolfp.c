@@ -13,23 +13,16 @@
 
 void
 gpstolfp(
-	 int weeks,
-	 int days,
-	 unsigned long  seconds,
-	 l_fp * lfp
-	 )
+	u_int week,
+	u_long TOW,
+	int UTC_offset,
+	l_fp * lfp
+	)
 {
-  if (weeks < GPSWRAP)
-    {
-      weeks += GPSWEEKS;
-    }
+	/* convert to NTP time, note no fractional seconds */
+	*lfp = lfpinit_u(week * SECSPERWEEK + TOW
+	                 + (uint32_t)((int64_t)GPSORIGIN - UTC_offset), 0);
 
-   /* convert to NTP time, note no fractional seconds */
-  *lfp = lfptouint((uint64_t)weeks * SECSPERWEEK
-                   + (uint64_t)days * SECSPERDAY
-                   + (uint64_t)seconds
-                   + GPSORIGIN);
-  setlfpfrac(*lfp, 0);
 }
 
 
@@ -48,7 +41,7 @@ gpsweekadj(
 void
 gpstocal(
 	u_int week,
-	u_int TOW,
+	u_long TOW,
 	int UTC_offset,
 	struct calendar * out
 	)
@@ -68,7 +61,7 @@ caltogps(
 	const struct calendar * in,
 	int UTC_offset,
 	u_int * week,
-	u_int * TOW
+	u_long * TOW
 	)
 {
 	time64_t t;

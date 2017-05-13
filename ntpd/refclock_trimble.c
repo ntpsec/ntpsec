@@ -155,7 +155,7 @@ struct trimble_unit {
 	char 		rpt_buf[BMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
 	u_int		week;		/* GPS week number */
-	u_int		TOW;		/* GPS time of week */
+	u_long		TOW;		/* GPS time of week */
 	int		UTC_offset;	/* GPS-UTC offset */
 	struct calendar	date;		/* calendar to avoid leap early announce */
 	u_int		build_week;	/* GPS week number of ntpd build date */
@@ -857,7 +857,7 @@ TSIP_decode (
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 #ifdef DEBUG		
 			if (debug > 1) {
-				printf("TSIP_decode: unit %d: %02X #%d TOW: %u  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d ",
+				printf("TSIP_decode: unit %d: %02X #%d TOW: %lu  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d ",
 				        up->unit, (u_int)(mb(0) & 0xff), event, up->TOW, up->week, 
 					up->date.hour, up->date.minute, up->date.second,
 					up->date.month, up->date.monthday, up->date.year);
