@@ -179,34 +179,37 @@ class Ntpq(cmd.Cmd):
             line = line.replace("config-from-file ", "config_from_file")
 
         cmd, arg, line = self.parseline(line)
-        dotext = 'do_'+cmd
-        cmdprefixlist = [a[3:] for a in self.get_names()
-                         if a.startswith(dotext)]
-        if len(cmdprefixlist) == 1:
-            line = line.replace(cmd, cmdprefixlist[0])
-            cmd = cmdprefixlist[0]
-        elif len(cmdprefixlist) > 1:
-            self.warn("***Command `%s' ambiguous\n" % cmd)
-            return
-        elif len(cmdprefixlist) == 0:
-            self.warn("***Command `%s' unknown\n" % cmd)
-            return
+        try:
+            dotext = 'do_'+cmd
+            cmdprefixlist = [a[3:] for a in self.get_names()
+                             if a.startswith(dotext)]
+            if len(cmdprefixlist) == 1:
+                line = line.replace(cmd, cmdprefixlist[0])
+                cmd = cmdprefixlist[0]
+            elif len(cmdprefixlist) > 1:
+                self.warn("***Command `%s' ambiguous\n" % cmd)
+                return
+            elif len(cmdprefixlist) == 0:
+                self.warn("***Command `%s' unknown\n" % cmd)
+                return
 
-        if cmd == "help" and arg:
-            helptext = 'help_'+arg
-            if helptext not in self.get_names():
-                argprefixlist = [a[5:] for a in self.get_names()
-                                 if a.startswith(helptext)]
-                if len(argprefixlist) == 1:
-                    line = line.replace(arg, argprefixlist.pop())
-                elif len(argprefixlist) > 1:
-                    self.warn("Command `%s' is ambiguous\n" % arg)
-                    return
-                elif len(argprefixlist) == 0:
-                    self.warn("Command `%s' is unknown\n" % arg)
-                    return
+            if cmd == "help" and arg:
+                helptext = 'help_'+arg
+                if helptext not in self.get_names():
+                    argprefixlist = [a[5:] for a in self.get_names()
+                                     if a.startswith(helptext)]
+                    if len(argprefixlist) == 1:
+                        line = line.replace(arg, argprefixlist.pop())
+                    elif len(argprefixlist) > 1:
+                        self.warn("Command `%s' is ambiguous\n" % arg)
+                        return
+                    elif len(argprefixlist) == 0:
+                        self.warn("Command `%s' is unknown\n" % arg)
+                        return
 
-        self.onecmd(line)
+            self.onecmd(line)
+        except TypeError:
+            self.warn("Command `%s' is unknown\n" % line)
 
     def do_help(self, arg):
         if arg:
@@ -217,16 +220,19 @@ class Ntpq(cmd.Cmd):
                 if len(argprefixlist) == 1:
                     arg = argprefixlist.pop()
                 elif len(argprefixlist) > 1:
-                    self.warn("Command `%s' is ambiguous\n" % arg)
+                    self.warn("Command `%s' is ambiguous.\n" % arg)
                     return
         cmd.Cmd.do_help(self, arg)
 
     def do_shell(self, line):
-        """
-Called when a line that starts with ! is entered in response to the prompt.
-"""
-        self.warn("***Command `!%s' unknown\n" % line)
-        return
+        "Execute a shell command."
+        sys.stdout.flush()
+        sys.stderr.flush()
+        if os.system(line):
+            self.warn("'shell %s' returned error.\n" % line)
+
+    def help_shell(self):
+        self.say("function: execute the line as a shell command.\n")
 
     def say(self, msg):
         try:
