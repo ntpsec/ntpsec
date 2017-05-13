@@ -216,10 +216,10 @@ accurate time, provided it has link:ntpspeak.html[PPS] capability.
 want check servers from the pool.)
 
 The easiest way to arrange this is by installing
-http://catb.org/gpsd/[GPSD] to watch the GPS, and configuring your +ntpd+
-to accept time from it.  It is also possible to do this with native
-+ntpd+ drivers (nmea, jupiter, trimble, oncore), though these are
-less flexible and a bit more difficult to configure.
+http://catb.org/gpsd/[GPSD] to watch the GPS, and configuring your
++ntpd+ to accept time from it.  It is also possible to do this with
+native +ntpd+ drivers (nmea, trimble, oncore), though these are less
+flexible and a bit more difficult to configure.
 
 The following configuration lines tell your +ntpd+ to accept time
 from GPSD:

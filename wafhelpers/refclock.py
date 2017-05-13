@@ -3,7 +3,7 @@ from waflib.Logs import pprint
 
 # Note: When you change this list. also check the following files:
 # doc/refclock.txt
-# include/ntp.h
+# include/ntp_refclock.h
 # ntpd/refclock_conf.c
 
 refclock_map = {
@@ -88,13 +88,6 @@ refclock_map = {
         "define":   "CLOCK_ONCORE",
         "require":  ["ppsapi"],
         "file":     "oncore"
-    },
-
-    "jupiter": {
-        "descr":    "Rockwell Jupiter GPS",
-        "define":   "CLOCK_JUPITER",
-        "require":  ["ppsapi"],
-        "file":     "jupiter"
     },
 
     "jjy": {

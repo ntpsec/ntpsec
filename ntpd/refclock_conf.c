@@ -65,7 +65,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_shm,		/* 28 REFCLK_SHM */
 	&refclock_trimble,	/* 29 REFCLK_PALISADE */
 	&refclock_oncore,	/* 30 REFCLK_ONCORE */
-	&refclock_jupiter,	/* 31 REFCLK_GPS_JUPITER */
+	&refclock_none,		/* 31 was: REFCLK_GPS_JUPITER */
 	&refclock_none,		/* 32 was: REFCLK_CHRONOLOG */
 	&refclock_none,		/* 33 was: REFCLK_DUMBCLOCK */
 	&refclock_none,		/* 34 was: REFCLOCK_ULINK */

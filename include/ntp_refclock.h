@@ -229,12 +229,6 @@ extern	struct refclock	refclock_jjy;
 #define	refclock_jjy refclock_none
 #endif
 
-#if defined(CLOCK_JUPITER) && defined(HAVE_PPSAPI)
-extern	struct refclock refclock_jupiter;
-#else
-#define refclock_jupiter refclock_none
-#endif
-
 #ifdef CLOCK_LOCAL
 extern	struct refclock	refclock_local;
 #else
