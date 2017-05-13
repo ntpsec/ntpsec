@@ -1128,12 +1128,11 @@ ctl_putunqstr(
 	size_t tl;
 
 	tl = strlen(tag);
-	if (tl >= sizeof(buffer))
+	if (tl + 1 + len >= sizeof(buffer))
 	    return;
 	memcpy(buffer, tag, tl);
 	cp = buffer + tl;
 	if (len > 0) {
-		NTP_INSIST(tl + 1 + len <= sizeof(buffer));
 		*cp++ = '=';
 		memcpy(cp, data, len);
 		cp += len;
