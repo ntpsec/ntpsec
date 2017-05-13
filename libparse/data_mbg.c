@@ -95,8 +95,8 @@ get_mbg_tgps(
 	)
 {
   tgpsp->wn = get_lsb_uint16(bufpp);
-  tgpsp->sec = get_lsb_ulong(bufpp);
-  tgpsp->tick = get_lsb_ulong(bufpp);
+  tgpsp->sec = get_lsb_uint32(bufpp);
+  tgpsp->tick = get_lsb_uint32(bufpp);
 }
 
 void
@@ -113,8 +113,8 @@ get_mbg_tm(
   tmp->hour = (int8_t)(*(*buffpp)++);
   tmp->min = (int8_t)(*(*buffpp)++);
   tmp->sec = (int8_t)(*(*buffpp)++);
-  tmp->frac = get_lsb_ulong(buffpp);
-  tmp->offs_from_utc = get_lsb_ulong(buffpp);
+  tmp->frac = get_lsb_int32(buffpp);
+  tmp->offs_from_utc = get_lsb_int32(buffpp);
   tmp->status = get_lsb_uint16(buffpp);
 }
 
@@ -156,8 +156,8 @@ get_mbg_tzdl(
 	TZDL *tzdlp
 	)
 {
-  tzdlp->offs = get_lsb_ulong(buffpp);
-  tzdlp->offs_dl = get_lsb_ulong(buffpp);
+  tzdlp->offs = get_lsb_int32(buffpp);
+  tzdlp->offs_dl = get_lsb_int32(buffpp);
   get_mbg_tm(buffpp, &tzdlp->tm_on);
   get_mbg_tm(buffpp, &tzdlp->tm_off);
   get_mbg_tzname(buffpp, (char *)tzdlp->name[0]);
@@ -173,7 +173,7 @@ get_mbg_antinfo(
   antinfop->status = get_lsb_int16(buffpp);
   get_mbg_tm(buffpp, &antinfop->tm_disconn);
   get_mbg_tm(buffpp, &antinfop->tm_reconn);
-  antinfop->delta_t = get_lsb_ulong(buffpp);
+  antinfop->delta_t = get_lsb_int32(buffpp);
 }
 
 static void
@@ -355,7 +355,7 @@ get_mbg_comparam(
 {
   size_t i;
 
-  comparamp->baud_rate = get_lsb_ulong(buffpp);
+  comparamp->baud_rate = get_lsb_int32(buffpp);
   for (i = 0; i < sizeof(comparamp->framing); i++)
     {
       comparamp->framing[i] = (char)(*(*buffpp)++);

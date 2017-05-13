@@ -70,59 +70,58 @@ TEST(binio, get_lsb_short4) {
 }
 
 
-TEST(binio, get_lsb_ulong0) {
-        unsigned long ret;
+TEST(binio, get_lsb_int320) {
+        int32_t ret;
         unsigned char zero[4] = { 0, 0, 0, 0};
         unsigned char *bp = &zero[0];
 
-        ret = get_lsb_ulong( &bp);
+        ret = get_lsb_int32( &bp);
 
-        TEST_ASSERT_EQUAL_UINT64( 0, ret );
+        TEST_ASSERT_EQUAL_INT32( 0, ret );
 }
 
 
-TEST(binio, get_lsb_ulong1) {
-        unsigned long ret;
+TEST(binio, get_lsb_int321) {
+        int32_t ret;
         unsigned char zero[4] = { 1, 2, 3, 4};
         unsigned char *bp = &zero[0];
 
-        ret = get_lsb_ulong( &bp);
+        ret = get_lsb_int32( &bp);
 
-        TEST_ASSERT_EQUAL_HEX64( 0x04030201UL, ret );
+        TEST_ASSERT_EQUAL_HEX32( 0x04030201UL, ret );
 }
 
 
-TEST(binio, get_lsb_ulong2) {
-        unsigned long ret;
+TEST(binio, get_lsb_int322) {
+        int32_t ret;
         unsigned char zero[4] = { 4, 3, 2, 1};
         unsigned char *bp = &zero[0];
 
-        ret = get_lsb_ulong( &bp);
+        ret = get_lsb_int32( &bp);
 
-        TEST_ASSERT_EQUAL_HEX64( 0x01020304UL, ret );
+        TEST_ASSERT_EQUAL_HEX32( 0x01020304UL, ret );
 }
 
 
-TEST(binio, get_lsb_ulong3) {
-        unsigned long ret;
+TEST(binio, get_lsb_int323) {
+        int32_t ret;
         unsigned char zero[4] = { 0xff, 0xff, 0xff, 0xff};
         unsigned char *bp = &zero[0];
 
-        ret = get_lsb_ulong( &bp);
+        ret = get_lsb_int32( &bp);
 
-        printf("ulong: %lx\n", ret);
-        TEST_ASSERT_EQUAL_HEX64( 0x0FFFFFFFFUL, ret );
+        TEST_ASSERT_EQUAL_HEX32( 0x0FFFFFFFFUL, ret );
 }
 
 
-TEST(binio, get_lsb_ulong4) {
-        unsigned long ret;
+TEST(binio, get_lsb_int324) {
+        int32_t ret;
         unsigned char zero[4] = { 0, 0, 0, 0x80};
         unsigned char *bp = &zero[0];
 
-        ret = get_lsb_ulong( &bp);
+        ret = get_lsb_int32( &bp);
 
-        TEST_ASSERT_EQUAL_HEX64( 0x080000000UL, ret );
+        TEST_ASSERT_EQUAL_HEX32( 0x080000000UL, ret );
 }
 
 /* MSB tests */
@@ -240,13 +239,11 @@ TEST_GROUP_RUNNER(binio) {
         RUN_TEST_CASE(binio, get_lsb_short3);
         RUN_TEST_CASE(binio, get_lsb_short4);
 
-        RUN_TEST_CASE(binio, get_lsb_ulong0);
-        RUN_TEST_CASE(binio, get_lsb_ulong1);
-        RUN_TEST_CASE(binio, get_lsb_ulong2);
-        /* next two tests are good, but the code they test is bad
-        RUN_TEST_CASE(binio, get_lsb_ulong3);
-        RUN_TEST_CASE(binio, get_lsb_ulong4);
-        */
+        RUN_TEST_CASE(binio, get_lsb_int320);
+        RUN_TEST_CASE(binio, get_lsb_int321);
+        RUN_TEST_CASE(binio, get_lsb_int322);
+        RUN_TEST_CASE(binio, get_lsb_int323);
+        RUN_TEST_CASE(binio, get_lsb_int324);
 
         /* MSB tests */
         RUN_TEST_CASE(binio, get_msb_short0);
