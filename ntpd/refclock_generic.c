@@ -3867,7 +3867,7 @@ gps16x_message(
 					char buffer[512];
 					char *p, *b;
 
-					status = (BVAR_STAT) get_lsb_short(&bufp);
+					status = (BVAR_STAT)get_lsb_uint16(&bufp);
 					p = b = buffer;
 					p = ap(buffer, sizeof(buffer), p,
 					    "meinberg_gps_status=\"[0x%04x] ",
@@ -4889,12 +4889,12 @@ getdbl(
 	return uval.dv;
 }
 
-static int
+static short
 getshort(
 	 unsigned char *p
 	 )
 {
-	return (int) get_msb_short(&p);
+	return (short) get_msb_short(&p);
 }
 
 /*--------------------------------------------------
@@ -5118,11 +5118,11 @@ trimbletsip_message(
 		case CMD_RUTCPARAM:
 		{
 			float t0t = getflt((unsigned char *)&mb(14));
-			short wnt = (short) getshort((unsigned char *)&mb(18));
-			short dtls = (short) getshort((unsigned char *)&mb(12));
-			short wnlsf = (short) getshort((unsigned char *)&mb(20));
-			short dn = (short) getshort((unsigned char *)&mb(22));
-			short dtlsf = (short) getshort((unsigned char *)&mb(24));
+			short wnt = getshort((unsigned char *)&mb(18));
+			short dtls = getshort((unsigned char *)&mb(12));
+			short wnlsf = getshort((unsigned char *)&mb(20));
+			short dn = getshort((unsigned char *)&mb(22));
+			short dtlsf = getshort((unsigned char *)&mb(24));
 
 			if ((int)t0t != 0)
 			{

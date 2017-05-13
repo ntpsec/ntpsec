@@ -136,10 +136,10 @@ get_mbg_header(
 	       GPS_MSG_HDR *headerp
 	       )
 {
-  headerp->cmd = (GPS_CMD) get_lsb_short(bufpp);
+  headerp->cmd = (GPS_CMD) get_lsb_uint16(bufpp);
   headerp->len = get_lsb_uint16(bufpp);
-  headerp->data_csum = (CSUM) get_lsb_short(bufpp);
-  headerp->hdr_csum  = (CSUM) get_lsb_short(bufpp);
+  headerp->data_csum = (CSUM) get_lsb_uint16(bufpp);
+  headerp->hdr_csum  = (CSUM) get_lsb_uint16(bufpp);
 }
 
 static struct format meinberg_fmt[] =

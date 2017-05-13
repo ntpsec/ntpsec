@@ -36,10 +36,11 @@ def help(ctx):
     "Be helpful, give a usage"
     print('''
 Usage: waf <command>
-    configure   Configure the project
     build       Build the project
-    install     Install the project
+    check       Run tests
+    configure   Configure the project
     dist        Create a release
+    install     Install the project
 
 ''')
 

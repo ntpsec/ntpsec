@@ -32,10 +32,10 @@ put_mbg_header(
 	GPS_MSG_HDR *headerp
 	)
 {
-  put_lsb_short(bufpp, headerp->cmd);
-  put_lsb_short(bufpp, headerp->len);
-  put_lsb_short(bufpp, headerp->data_csum);
-  put_lsb_short(bufpp, headerp->hdr_csum);
+  put_lsb_uint16(bufpp, headerp->cmd);
+  put_lsb_uint16(bufpp, headerp->len);
+  put_lsb_uint16(bufpp, headerp->data_csum);
+  put_lsb_uint16(bufpp, headerp->hdr_csum);
 }
 
 void
@@ -55,7 +55,7 @@ get_mbg_ascii_msg(
 	ASCII_MSG *ascii_msgp
 	)
 {
-  ascii_msgp->csum  = (CSUM) get_lsb_short(bufpp);
+  ascii_msgp->csum  = (CSUM) get_lsb_uint16(bufpp);
   ascii_msgp->valid = get_lsb_int16(bufpp);
   memcpy(ascii_msgp->s, *bufpp, sizeof(ascii_msgp->s));
   *bufpp += sizeof(ascii_msgp->s);
@@ -67,7 +67,7 @@ get_mbg_svno(
 	SVNO *svnop
 	)
 {
-  *svnop = (SVNO) get_lsb_short(bufpp);
+  *svnop = (SVNO) get_lsb_uint16(bufpp);
 }
 
 void
@@ -76,7 +76,7 @@ get_mbg_health(
 	HEALTH *healthp
 	)
 {
-  *healthp = (HEALTH) get_lsb_short(bufpp);
+  *healthp = (HEALTH) get_lsb_uint16(bufpp);
 }
 
 void
@@ -85,7 +85,7 @@ get_mbg_cfg(
 	CFG *cfgp
 	)
 {
-  *cfgp = (CFG) get_lsb_short(bufpp);
+  *cfgp = (CFG) get_lsb_uint16(bufpp);
 }
 
 void
@@ -95,8 +95,8 @@ get_mbg_tgps(
 	)
 {
   tgpsp->wn = get_lsb_uint16(bufpp);
-  tgpsp->sec = get_lsb_ulong(bufpp);
-  tgpsp->tick = get_lsb_ulong(bufpp);
+  tgpsp->sec = get_lsb_uint32(bufpp);
+  tgpsp->tick = get_lsb_uint32(bufpp);
 }
 
 void
@@ -113,8 +113,8 @@ get_mbg_tm(
   tmp->hour = (int8_t)(*(*buffpp)++);
   tmp->min = (int8_t)(*(*buffpp)++);
   tmp->sec = (int8_t)(*(*buffpp)++);
-  tmp->frac = get_lsb_ulong(buffpp);
-  tmp->offs_from_utc = get_lsb_ulong(buffpp);
+  tmp->frac = get_lsb_int32(buffpp);
+  tmp->offs_from_utc = get_lsb_int32(buffpp);
   tmp->status = get_lsb_uint16(buffpp);
 }
 
@@ -156,8 +156,8 @@ get_mbg_tzdl(
 	TZDL *tzdlp
 	)
 {
-  tzdlp->offs = get_lsb_ulong(buffpp);
-  tzdlp->offs_dl = get_lsb_ulong(buffpp);
+  tzdlp->offs = get_lsb_int32(buffpp);
+  tzdlp->offs_dl = get_lsb_int32(buffpp);
   get_mbg_tm(buffpp, &tzdlp->tm_on);
   get_mbg_tm(buffpp, &tzdlp->tm_off);
   get_mbg_tzname(buffpp, (char *)tzdlp->name[0]);
@@ -173,7 +173,7 @@ get_mbg_antinfo(
   antinfop->status = get_lsb_int16(buffpp);
   get_mbg_tm(buffpp, &antinfop->tm_disconn);
   get_mbg_tm(buffpp, &antinfop->tm_reconn);
-  antinfop->delta_t = get_lsb_ulong(buffpp);
+  antinfop->delta_t = get_lsb_int32(buffpp);
 }
 
 static void
@@ -268,7 +268,7 @@ get_mbg_cfgh(
 {
   int i;
 
-  cfghp->csum = (CSUM) get_lsb_short(buffpp);
+  cfghp->csum = (CSUM) get_lsb_uint16(buffpp);
   cfghp->valid = get_lsb_int16(buffpp);
   get_mbg_tgps(buffpp, &cfghp->tot_51);
   get_mbg_tgps(buffpp, &cfghp->tot_63);
@@ -291,7 +291,7 @@ get_mbg_utc(
 	UTC *utcp
 	)
 {
-  utcp->csum  = (CSUM) get_lsb_short(buffpp);
+  utcp->csum  = (CSUM) get_lsb_uint16(buffpp);
   utcp->valid = get_lsb_int16(buffpp);
 
   get_mbg_tgps(buffpp, &utcp->t0t);
@@ -355,7 +355,7 @@ get_mbg_comparam(
 {
   size_t i;
 
-  comparamp->baud_rate = get_lsb_ulong(buffpp);
+  comparamp->baud_rate = get_lsb_int32(buffpp);
   for (i = 0; i < sizeof(comparamp->framing); i++)
     {
       comparamp->framing[i] = (char)(*(*buffpp)++);
@@ -393,13 +393,13 @@ get_mbg_eph(
 	EPH *ephp
 	)
 {
-  ephp->csum   = (CSUM) get_lsb_short(buffpp);
+  ephp->csum   = (CSUM) get_lsb_uint16(buffpp);
   ephp->valid  = get_lsb_int16(buffpp);
 
-  ephp->health = (HEALTH) get_lsb_short(buffpp);
-  ephp->IODC   = (IOD) get_lsb_short(buffpp);
-  ephp->IODE2  = (IOD) get_lsb_short(buffpp);
-  ephp->IODE3  = (IOD) get_lsb_short(buffpp);
+  ephp->health = (HEALTH) get_lsb_uint16(buffpp);
+  ephp->IODC   = (IOD) get_lsb_uint16(buffpp);
+  ephp->IODE2  = (IOD) get_lsb_uint16(buffpp);
+  ephp->IODE3  = (IOD) get_lsb_uint16(buffpp);
 
   get_mbg_tgps(buffpp, &ephp->tt);
   get_mbg_tgps(buffpp, &ephp->t0c);
@@ -438,10 +438,10 @@ get_mbg_alm(
 	ALM *almp
 	)
 {
-  almp->csum   = (CSUM) get_lsb_short(buffpp);
+  almp->csum   = (CSUM) get_lsb_uint16(buffpp);
   almp->valid  = get_lsb_int16(buffpp);
 
-  almp->health = (HEALTH) get_lsb_short(buffpp);
+  almp->health = (HEALTH) get_lsb_uint16(buffpp);
   get_mbg_tgps(buffpp, &almp->t0a);
 
 
@@ -463,7 +463,7 @@ get_mbg_iono(
 	IONO *ionop
 	)
 {
-  ionop->csum   = (CSUM) get_lsb_short(buffpp);
+  ionop->csum   = (CSUM) get_lsb_uint16(buffpp);
   ionop->valid  = get_lsb_int16(buffpp);
 
   FETCH_DOUBLE(buffpp, &ionop->alpha_0);

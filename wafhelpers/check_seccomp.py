@@ -6,6 +6,7 @@ def check_seccomp(ctx):
     if not ctx.options.enable_seccomp:
         return
     if ctx.env.DEST_OS != "linux":
+        pprint("RED", "Warning --enable-seccomp only works on Linux")
         return
 
     ctx.check_cc(header_name="seccomp.h", mandatory=False)
@@ -14,6 +15,6 @@ def check_seccomp(ctx):
     if ctx.get_define("HAVE_SECCOMP_H") and ctx.env.LIB_SECCOMP:
         ctx.define("HAVE_SECCOMP", 1)
     else:
-        pprint("RED", "Warning libseccomp and headers")
+        pprint("RED", "Warning --enable-seccomp needs libseccomp and headers")
         pprint("RED", "Fedora needs libseccomp-devel")
         pprint("RED", "Debian needs libseccomp-dev")

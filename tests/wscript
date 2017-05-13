@@ -55,7 +55,6 @@ def build(ctx):
         target="test_libntp",
         install_path=None,
         defines=unity_config + ["TEST_LIBNTP=1"],
-
         includes=["%s/tests/unity/" % srcnode,
                   "%s/tests/libntp/" % srcnode,
                   "%s/tests/ntpdig/" % srcnode,
@@ -70,7 +69,8 @@ def build(ctx):
 
         # libparse/
         libparse_source = [
-            "libparse/ieee754io.c"
+            "libparse/binio.c",
+            "libparse/ieee754io.c",
         ] + common_source
 
         ctx.ntp_test(
