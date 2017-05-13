@@ -32,10 +32,10 @@ put_mbg_header(
 	GPS_MSG_HDR *headerp
 	)
 {
-  put_lsb_short(bufpp, headerp->cmd);
-  put_lsb_short(bufpp, headerp->len);
-  put_lsb_short(bufpp, headerp->data_csum);
-  put_lsb_short(bufpp, headerp->hdr_csum);
+  put_lsb_uint16(bufpp, headerp->cmd);
+  put_lsb_uint16(bufpp, headerp->len);
+  put_lsb_uint16(bufpp, headerp->data_csum);
+  put_lsb_uint16(bufpp, headerp->hdr_csum);
 }
 
 void

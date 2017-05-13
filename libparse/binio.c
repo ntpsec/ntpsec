@@ -23,9 +23,9 @@ get_lsb_int16(
 }
 
 void
-put_lsb_short(
+put_lsb_uint16(
 	unsigned char **bufpp,
-	long val
+	uint16_t val
 	)
 {
   *((*bufpp)++) = (unsigned char) (val        & 0xFF);

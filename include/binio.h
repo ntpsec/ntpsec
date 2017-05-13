@@ -11,7 +11,7 @@
 #include "ntp_stdlib.h"
 
 int16_t get_lsb_int16 (unsigned char **);
-void put_lsb_short (unsigned char **, long);
+void put_lsb_uint16 (unsigned char **, uint16_t);
 int32_t get_lsb_int32 (unsigned char **);
 
 #define get_lsb_uint16( _x_ )  ((uint16_t) get_lsb_int16( _x_ ))
