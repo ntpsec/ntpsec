@@ -9,12 +9,12 @@
 #include "config.h"
 #include "binio.h"
 
-long
-get_lsb_short(
+int16_t
+get_lsb_int16(
 	unsigned char **bufpp
 	)
 {
-  long retval;
+  int16_t retval;
 
   retval  = *((*bufpp)++);
   retval |= *((*bufpp)++) << 8;

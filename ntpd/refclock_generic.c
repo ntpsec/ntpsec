@@ -3867,7 +3867,7 @@ gps16x_message(
 					char buffer[512];
 					char *p, *b;
 
-					status = (BVAR_STAT) get_lsb_short(&bufp);
+					status = (BVAR_STAT)get_lsb_uint16(&bufp);
 					p = b = buffer;
 					p = ap(buffer, sizeof(buffer), p,
 					    "meinberg_gps_status=\"[0x%04x] ",
