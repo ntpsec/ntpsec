@@ -13,7 +13,6 @@
 long get_lsb_short (unsigned char **);
 void put_lsb_short (unsigned char **, long);
 int32_t get_lsb_int32 (unsigned char **);
-void put_lsb_long (unsigned char **, long);
 
 #define get_lsb_int16( _x_ )   ((int16_t) get_lsb_short( _x_ ))
 #define get_lsb_uint16( _x_ )  ((uint16_t) get_lsb_short( _x_ ))

@@ -47,18 +47,6 @@ get_lsb_int32(
   return retval;
 }
 
-void
-put_lsb_long(
-	unsigned char **bufpp,
-	long val
-	)
-{
-  *((*bufpp)++) = (unsigned char)(val         & 0xFF);
-  *((*bufpp)++) = (unsigned char)((val >> 8)  & 0xFF);
-  *((*bufpp)++) = (unsigned char)((val >> 16) & 0xFF);
-  *((*bufpp)++) = (unsigned char)((val >> 24) & 0xFF);
-}
-
 long
 get_msb_short(
 	unsigned char **bufpp
