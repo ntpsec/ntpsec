@@ -19,7 +19,7 @@ get_lsb_int16(
   retval  = *((*bufpp)++);
   retval |= *((*bufpp)++) << 8;
 
-  return (retval & 0x8000) ? (~0xFFFF | retval) : retval;
+  return retval;
 }
 
 void
