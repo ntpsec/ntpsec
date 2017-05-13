@@ -82,21 +82,6 @@ put_msb_short(
   *((*bufpp)++) = (unsigned char)( val       & 0xFF);
 }
 
-long
-get_msb_long(
-	unsigned char **bufpp
-	)
-{
-  long retval;
-
-  retval  = (long)*((*bufpp)++) << 24;
-  retval |= *((*bufpp)++) << 16;
-  retval |= *((*bufpp)++) << 8;
-  retval |= *((*bufpp)++);
-
-  return retval;
-}
-
 void
 put_msb_long(
 	unsigned char **bufpp,

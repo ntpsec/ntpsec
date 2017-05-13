@@ -21,7 +21,6 @@ void put_lsb_long (unsigned char **, long);
 
 long get_msb_short (unsigned char **);
 void put_msb_short (unsigned char **, long);
-long get_msb_long (unsigned char **);
 void put_msb_long (unsigned char **, long);
 
 #endif
