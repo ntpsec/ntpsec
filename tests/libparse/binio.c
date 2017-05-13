@@ -124,6 +124,58 @@ TEST(binio, get_lsb_int324) {
         TEST_ASSERT_EQUAL_HEX32( 0x080000000UL, ret );
 }
 
+
+TEST(binio, put_lsb_short0) {
+        unsigned char ret[2] = { 0, 0};
+        unsigned char exp[2] = { 0, 0};
+        unsigned char *bp = &ret[0];
+
+        put_lsb_short( &bp, 0);
+
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+}
+
+TEST(binio, put_lsb_short1) {
+        unsigned char ret[2] = { 0, 0};
+        unsigned char exp[2] = { 1, 0};
+        unsigned char *bp = &ret[0];
+
+        put_lsb_short( &bp, 1);
+
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+}
+
+TEST(binio, put_lsb_short2) {
+        unsigned char ret[2] = { 0, 0};
+        unsigned char exp[2] = { 0, 1};
+        unsigned char *bp = &ret[0];
+
+        put_lsb_short( &bp, 256);
+
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+}
+
+TEST(binio, put_lsb_short3) {
+        unsigned char ret[2] = { 0, 0};
+        unsigned char exp[2] = { 0xff, 0xff };
+        unsigned char *bp = &ret[0];
+
+        put_lsb_short( &bp, 0xffff);
+
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+}
+
+TEST(binio, put_lsb_short4) {
+        unsigned char ret[2] = { 0, 0};
+        unsigned char exp[2] = { 1, 0x80};
+        unsigned char *bp = &ret[0];
+
+        put_lsb_short( &bp, 0x8001);
+
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+}
+
+
 /* LSB uint tests */
 
 TEST(binio, get_lsb_uint160) {
@@ -296,6 +348,12 @@ TEST_GROUP_RUNNER(binio) {
         RUN_TEST_CASE(binio, get_lsb_int322);
         RUN_TEST_CASE(binio, get_lsb_int323);
         RUN_TEST_CASE(binio, get_lsb_int324);
+
+        RUN_TEST_CASE(binio, put_lsb_short0);
+        RUN_TEST_CASE(binio, put_lsb_short1);
+        RUN_TEST_CASE(binio, put_lsb_short2);
+        RUN_TEST_CASE(binio, put_lsb_short3);
+        RUN_TEST_CASE(binio, put_lsb_short4);
 
         /* LSB uint tests */
         RUN_TEST_CASE(binio, get_lsb_uint160);
