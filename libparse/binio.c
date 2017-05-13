@@ -61,16 +61,6 @@ get_msb_short(
 }
 
 void
-put_msb_short(
-	unsigned char **bufpp,
-	long val
-	)
-{
-  *((*bufpp)++) = (unsigned char)((val >> 8) & 0xFF);
-  *((*bufpp)++) = (unsigned char)( val       & 0xFF);
-}
-
-void
 put_msb_long(
 	unsigned char **bufpp,
 	long val
