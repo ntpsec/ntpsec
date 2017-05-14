@@ -454,6 +454,12 @@ usage: help [ command ]
         "toggle unit display"
         self.showunits = not self.showunits
 
+    def help_units(self):
+        self.say("""\
+function: toggle unit display
+usage: units
+""")
+
     def do_EOF(self, _unused):
         "exit ntpq"
         self.say("\n")
