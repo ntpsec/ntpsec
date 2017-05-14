@@ -186,10 +186,6 @@ following.
   to transform nonascii data into a printable (but barely
   understandable) form.
 
-+shell+::
-  Execute the remainder of the line as a shell command. '!' is a
-  synonym for this.
-
 +timeout+ 'milliseconds'::
   Specify a timeout period for responses to server queries. The default
   is about 5000 milliseconds. Note that since +ntpq+ retries each query

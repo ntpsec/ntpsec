@@ -224,16 +224,6 @@ class Ntpq(cmd.Cmd):
                     return
         cmd.Cmd.do_help(self, arg)
 
-    def do_shell(self, line):
-        "Execute a shell command."
-        sys.stdout.flush()
-        sys.stderr.flush()
-        if os.system(line):
-            self.warn("'shell %s' returned error.\n" % line)
-
-    def help_shell(self):
-        self.say("function: execute the line as a shell command.\n")
-
     def say(self, msg):
         try:
             sys.stdout.write(polystr(msg))
