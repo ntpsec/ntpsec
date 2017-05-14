@@ -453,8 +453,7 @@ usage: units
     def do_EOF(self, _unused):
         "exit ntpq"
         self.say("\n")
-        self.session.close()
-        raise SystemExit(0)
+        return True
 
     def do_timeout(self, line):
         "set the primary receive time out"
@@ -680,8 +679,7 @@ usage: debug [no|more|less|n]
 
     def do_exit(self, line):
         "exit ntpq"
-        self.session.close()
-        raise SystemExit(0)
+        return True
 
     def help_exit(self):
         self.say("""\
