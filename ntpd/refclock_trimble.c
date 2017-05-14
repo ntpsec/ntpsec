@@ -1006,7 +1006,7 @@ trimble_receive (
 		printf("trimble_receive: unit %d: refclock_process failed!\n",
 		       up->unit);
 #endif
-//		return;
+		return;
 	}
 
 	record_clock_stats(peer, pp->a_lastcode); 
@@ -1093,7 +1093,7 @@ praecis_parse (
 		p = 0;
 		praecis_msg = false;
 
-		if (HW_poll(pp) < 0)
+		if (HW_poll(pp))
 			refclock_report(peer, CEVNT_FAULT);
 
 	}
