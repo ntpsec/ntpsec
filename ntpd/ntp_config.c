@@ -2576,6 +2576,10 @@ peer_config(
 		ctl->flags &= ~FLAG_PREEMPT;
 		break;
 
+	case T_Peer:
+		msyslog(LOG_ERR, "peer depricated, treated as server: %s",
+			NULL != hostname? hostname : socktoa(srcadr) );
+		FALLTHRU
 	case T_Server:
 		cast_flags = MDF_UCAST;
 		hmode = MODE_CLIENT;
