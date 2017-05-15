@@ -421,7 +421,7 @@ ntp_monitor(
 	 *   limit on the total number of entries.
 	 * - mru_maxage ("mru maxage") is a ceiling on the age in
 	 *   seconds of entries.  Entries older than this are
-	 *   reclaimed once mon_mindepth is exceeded.  64s default.
+	 *   reclaimed once mon_mindepth is exceeded.  3600s default.
 	 *   Note that entries older than this can easily survive
 	 *   as they are reclaimed only as needed.
 	 * - mru_maxdepth ("mru maxdepth") is a hard limit on the
