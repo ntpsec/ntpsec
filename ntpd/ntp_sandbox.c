@@ -383,6 +383,13 @@ int scmp_sc[] = {
 	SCMP_SYS(fcntl64),
 	SCMP_SYS(fstat64),
 
+/* Arch Linux */
+	SCMP_SYS(getpid),
+	SCMP_SYS(gettid),
+	SCMP_SYS(geteuid),
+	SCMP_SYS(ppoll),
+	SCMP_SYS(sendmsg),
+
 #ifdef __x86_64__
 	SCMP_SYS(mmap),
 #endif
