@@ -7,6 +7,8 @@
 
 #include "config.h"
 
+#ifdef ENABLE_DNS_LOOKUP
+
 #include <signal.h>
 #include <pthread.h>
 #include <sys/types.h>
@@ -79,7 +81,7 @@ void dns_check(void)
 		return;  /* leaves active set */
 	}
 	if (0 != gai_rc) {
-		msyslog(LOG_INFO, "dns_check: join failed %s",
+		msyslog(LOG_INFO, "dns_check: DNS error %s",
 			gai_strerror(gai_rc));
 		/* FIXME-DNS callback with null? */
 		active = NULL;
@@ -121,4 +123,7 @@ static void* dns_lookup(void* arg)
 	pthread_exit(NULL);
 };
 
+
+
+#endif /* ENABLE_DNS_LOOKUP */
 

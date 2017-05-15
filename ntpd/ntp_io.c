@@ -261,7 +261,11 @@ static int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
  */
 volatile bool sawALRM = false;
 volatile bool sawHUP = false;
+#ifdef ENABLE_DNS_LOOKUP
 volatile bool sawDNS = false;
+#else
+# define sawDNS false
+#endif
 volatile bool sawQuit = false;  /* SIGQUIT, SIGINT, SIGTERM */
 sigset_t blockMask;
 
