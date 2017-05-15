@@ -439,7 +439,7 @@ int scmp_sc[] = {
  * Option one:
  *  use gdb, break on catchTrap, get a trace.
  *
- * Optin two:
+ * Option two:
  *  use strace
  *  sudo strace -t -f -o<filename> <path-to-ntpd> <args>
  *  when it crashes, the last syscall will be at the end of the log file
