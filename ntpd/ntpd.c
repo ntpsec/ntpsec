@@ -1391,6 +1391,8 @@ close_all_beyond(
 
 	/* includes POSIX case */
 	max_fd = sysconf(_SC_OPEN_MAX);
+	if (10000 < max_fd)
+		msyslog(LOG_ERR, "close_all_beyond: closing %d files", max_fd);
 	for (fd = keep_fd + 1; fd < max_fd; fd++)
 		close(fd);
 # endif /* !HAVE_CLOSEFROM && !F_CLOSEM */
