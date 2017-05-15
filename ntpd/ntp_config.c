@@ -2584,7 +2584,7 @@ peer_config(
 		break;
 
 	case T_Peer:
-		msyslog(LOG_ERR, "peer depricated, treated as server: %s",
+		msyslog(LOG_ERR, "peer deprecated, treated as server: %s",
 			NULL != hostname? hostname : socktoa(srcadr) );
 		FALLTHRU
 	case T_Server:
