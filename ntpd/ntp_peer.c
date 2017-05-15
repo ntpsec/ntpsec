@@ -9,7 +9,6 @@
 #include "ntpd.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
-#include "ntp_dns.h"
 
 /*
  *		    Table of valid association combinations
@@ -629,8 +628,8 @@ newpeer(
 	struct peer *	peer;
 	u_int		hash;
 
-msyslog(LOG_INFO, "newpeer: addr:%s, name:%s, flags:%x",
-  socktoa(srcadr), hostname, cast_flags);
+msyslog(LOG_INFO, "newpeer: addr:%s, name:%s, cast_flags:%x, flags:%x",
+  socktoa(srcadr), hostname, cast_flags, flags);
 
 	/*
 	 * First search from the beginning for an association with given
@@ -752,11 +751,8 @@ msyslog(LOG_INFO, "newpeer: addr:%s, name:%s, flags:%x",
 	/*
 	 * Put the new peer in the hash tables.
 	 */
-	if (FLAG_DNS && flags) {
-		hash = NTP_HASH_ADDR(&peer->srcadr);
-		LINK_SLIST(peer_hash[hash], peer, adr_link);
-		peer_hash_count[hash]++;
-	}
+	if ((MDF_UCAST & cast_flags) && !(FLAG_DNS & flags))
+		peer_update_hash(peer);
 	hash = peer->associd & NTP_HASH_MASK;
 	LINK_SLIST(assoc_hash[hash], peer, aid_link);
 	assoc_hash_count[hash]++;

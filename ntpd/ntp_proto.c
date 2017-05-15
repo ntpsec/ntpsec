@@ -894,6 +894,7 @@ transmit(
 	 * This was observed testing with pool, where sys_maxclock == 12
 	 * resulted in 60 associations without the hard limit.
 	 */
+#ifdef ENABLE_DNS_LOOKUP
 	if (peer->cast_flags & MDF_POOL) {
 		/* FIXME-DNS turn on FLAG_DNS for pool */
 		peer->outdate = current_time;
@@ -914,7 +915,7 @@ transmit(
 		poll_update(peer, hpoll);
 		return;
         }
-
+#endif
 
 	/*
 	 * In unicast modes the dance is much more intricate. It is
@@ -2461,18 +2462,16 @@ pool_take_dns(
 	struct addrinfo *ai	/* answer from getaddrinfo */
 	)
 {
-	struct pkt		xpkt;	/* transmit packet structure */
-	endpt *			lcladr;
 	sockaddr_u *		rmtadr;
+	struct peer *		peer;
 	int			restrict_mask;
-	struct peer *		p;
-	l_fp			xmt_tx;
+	endpt *			lcladr;
 
 	for ( ; NULL != ai; ai = ai->ai_next)  {
 		rmtadr = (sockaddr_u *)(void *)ai->ai_addr;
 msyslog(LOG_INFO, "Pool checking: %s", socktoa(rmtadr));
-		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
-		if (NULL != p) continue;  /* already in use */
+		peer = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
+		if (NULL != peer) continue;  /* already in use */
 
 msyslog(LOG_INFO, "Pool trying: %s", socktoa(rmtadr));
 		restrict_mask = restrictions(rmtadr);
@@ -2480,7 +2479,17 @@ msyslog(LOG_INFO, "Pool trying: %s", socktoa(rmtadr));
 		if (RES_FLAGS & restrict_mask)
 			restrict_source(rmtadr, false,
 				current_time + POOL_SOLICIT_WINDOW + 1);
+
 		lcladr = findinterface(rmtadr);
+		peer = newpeer(rmtadr, NULL, lcladr,
+			MODE_CLIENT, pool->version,
+			pool->minpoll, pool->maxpoll,
+			FLAG_PREEMPT | (FLAG_IBURST & pool->flags),
+			MDF_UCAST | MDF_UCLNT, 0, 0, false);
+		peer_xmit(peer);
+		poll_update(peer, peer->hpoll);
+
+#if 0
 		memset(&xpkt, 0, sizeof(xpkt));
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, pool->version,
 					 MODE_CLIENT);
@@ -2497,6 +2506,7 @@ msyslog(LOG_INFO, "Pool trying: %s", socktoa(rmtadr));
 		sendpkt(rmtadr, lcladr, &xpkt, LEN_PKT_NOMAC);
 		pool->sent++;
 		pool->throttle += (1 << pool->minpoll) - 2;
+#endif
 
 		DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
 		    current_time, latoa(lcladr), socktoa(rmtadr)));
