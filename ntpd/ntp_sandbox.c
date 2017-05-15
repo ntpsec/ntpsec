@@ -386,10 +386,11 @@ int scmp_sc[] = {
 #ifdef __x86_64__
 	SCMP_SYS(mmap),
 #endif
-#ifdef __i386__
+#if defined(__i386__) || defined(__arm__)
 	SCMP_SYS(_newselect),
 	SCMP_SYS(_llseek),
 	SCMP_SYS(mmap2),
+	SCMP_SYS(send),
 	SCMP_SYS(stat64),
 #endif
 };
@@ -421,6 +422,21 @@ int scmp_sc[] = {
 /*
  * catchTrap - get here if something missing from list above
  * (or a bad guy finds a way in)
+ *
+ * The list above is a moving target.  Most syscalls will be
+ * obvious but libc (and friends) can remap things and
+ * getaddrinfo does all sorts of syscalls.
+ *
+ * To track down a missing call:
+ *
+ * Option one:
+ *  use gdb, break on catchTrap, get a trace.
+ *
+ * Optin two:
+ *  use strace
+ *  sudo strace -t -f -o<filename> <path-to-ntpd> <args>
+ *  when it crashes, the last syscall will be at the end of the log file
+ *
  */
 static void catchTrap(int sig)
 {
