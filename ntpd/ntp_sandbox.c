@@ -34,7 +34,7 @@ static priv_set_t *highprivs = NULL;
 
 #ifdef HAVE_SECCOMP_H
 # include <seccomp.h>
-#endif /* HAVE_SECCOMP_H */
+#endif
 
 #ifdef ENABLE_DROPROOT
 static bool root_dropped;
@@ -48,10 +48,8 @@ static struct passwd *pw;
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
-#ifdef ENABLE_SECCOMP
-#ifdef HAVE_SECCOMP
+#ifdef HAVE_SECCOMP_H
 static void catchTrap(int sig);
-#endif
 #endif
 
 bool sandbox(const bool droproot,
@@ -265,11 +263,10 @@ getgroup:
 	}	/* if (droproot) */
 # endif	/* ENABLE_DROPROOT */
 
-#ifdef ENABLE_SECCOMP
 /* libssecomp sandboxing */
 // Working on ARM
-// #if defined(HAVE_SECCOMP) && (defined(__x86_64__) || defined(__i386__))
-#if defined(HAVE_SECCOMP)
+// #if defined(__x86_64__) || defined(__i386__)
+#if defined(HAVE_SECCOMP_H)
 
 #ifdef ENABLE_KILL_ON_TRAP
   #define MY_SCMP_ACT SCMP_ACT_KILL
@@ -418,14 +415,12 @@ int scmp_sc[] = {
 	else {
 		msyslog(LOG_DEBUG, "sandbox: seccomp_load() succeeded");
 	}
-#endif /* HAVE_SECCOMP */
-#endif /* ENABLE_SECCOMP */
+#endif /* HAVE_SECCOMP_H */
 
 	return nonroot;
 }
 
-#ifdef ENABLE_SECCOMP
-#ifdef HAVE_SECCOMP
+#ifdef HAVE_SECCOMP_H
 /*
  * catchTrap - get here if something missing from list above
  * (or a bad guy finds a way in)
@@ -451,8 +446,7 @@ static void catchTrap(int sig)
 	msyslog(LOG_ERR, "SIGSYS: got a trap. Probably seccomp omission. Bailing.");
 	exit(1);
 }
-#endif /* HAVE_SECCOMP */
-#endif /* ENABLE_SECCOMP */
+#endif /* HAVE_SECCOMP_H */
 
 
 /* end */

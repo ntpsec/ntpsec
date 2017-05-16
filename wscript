@@ -754,9 +754,6 @@ int main(int argc, char **argv) {
     if ctx.options.enable_early_droproot:
         ctx.define("ENABLE_EARLY_DROPROOT", 1,
                    comment="Enable early drop root")
-    if ctx.options.enable_seccomp:
-        ctx.define("ENABLE_SECCOMP", 1,
-                   comment="Enable seccomp")
 
     if not ctx.options.disable_dns_lookup:
         ctx.define("ENABLE_DNS_LOOKUP", 1,
@@ -817,8 +814,12 @@ int main(int argc, char **argv) {
     from wafhelpers.check_cap import check_cap
     check_cap(ctx)
 
-    from wafhelpers.check_seccomp import check_seccomp
-    check_seccomp(ctx)
+    if ctx.options.enable_seccomp:
+        if ctx.env.DEST_OS != "linux":
+            ctx.fatal("seccomp is only supported on Linux")
+
+        ctx.check_cc(header_name="seccomp.h")
+        ctx.check_cc(lib="seccomp")
 
     from wafhelpers.check_pthread import check_pthread_header_lib
     check_pthread_header_lib(ctx)
