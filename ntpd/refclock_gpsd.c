@@ -2050,7 +2050,7 @@ convert_ascii_time(
 	char           *ep;
 	struct tm       gd;
 	struct timespec ts;
-	uint32_t        dw;
+	long   dw;
 
 	/* Use 'strptime' to take the brunt of the work, then parse
 	 * the fractional part manually, starting with a digit weight of
