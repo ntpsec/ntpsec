@@ -17,7 +17,8 @@ int32_t get_lsb_int32 (unsigned char **);
 #define get_lsb_uint16( _x_ )  ((uint16_t) get_lsb_int16( _x_ ))
 #define get_lsb_uint32( _x_ )  ((uint32_t) get_lsb_int32( _x_ ))
 
-long get_msb_short (unsigned char **);
+unsigned short get_msb_ushort(unsigned char *);
+long get_msb_short(unsigned char **);
 
 #endif
 /*

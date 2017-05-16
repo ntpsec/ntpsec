@@ -47,6 +47,14 @@ get_lsb_int32(
   return retval;
 }
 
+unsigned short
+get_msb_ushort(
+	 unsigned char *p
+	 )
+{
+	return (unsigned short) get_msb_short(&p);
+}
+
 long
 get_msb_short(
 	unsigned char **bufpp
