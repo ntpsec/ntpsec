@@ -303,7 +303,7 @@ sendetx (
 	
 	*(buffer->data+buffer->size++) = DLE;
 	*(buffer->data+buffer->size++) = ETX;
-	result = write(fd, buffer->data, (unsigned long)buffer->size);
+	result = write(fd, buffer->data, (size_t)buffer->size);
 	
 	if (result != -1)
 		return (result);
