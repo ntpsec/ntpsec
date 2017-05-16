@@ -57,14 +57,12 @@
  */
 typedef uint64_t l_fp;
 #define lfpfrac(n)		((uint32_t)(n))
-#define lfptosint(n)	        (( int64_t)((uint64_t)(n) << 32))
 #define lfptouint(n)	        ((uint64_t)((uint64_t)(n) << 32))
 #define lfpsint(n)		(( int32_t)((n) >> 32))
 #define lfpuint(n)		((uint32_t)((n) >> 32))
 #define bumplfpsint(n, i)       ((n) += lfptouint(i))
 #define bumplfpuint(n, i)       ((n) += lfptouint(i))
 #define setlfpfrac(n, v)        ((n)  = (lfptouint(lfpuint(n)) | lfpfrac(v)))
-#define setlfpsint(n, v)        ((n)  = (lfptosint(v) | lfpfrac(n)))
 #define setlfpuint(n, v)        ((n)  = (lfptouint(v) | lfpfrac(n)))
 
 static inline l_fp lfpinit(int32_t sec, uint32_t frac)
