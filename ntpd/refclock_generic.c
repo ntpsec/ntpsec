@@ -1832,7 +1832,8 @@ local_input(
 							else
 							  pts = pps_info.assert_timestamp;
 
-							setlfpuint(parse->parseio.parse_dtime.parse_ptime, (uint32_t) (pts.tv_sec + JAN_1970));
+							setlfpuint(parse->parseio.parse_dtime.parse_ptime,
+                                                                   (uint64_t)pts.tv_sec + JAN_1970);
 
 							dtemp = (double) pts.tv_nsec * S_PER_NS;
 							if (dtemp < 0.) {
