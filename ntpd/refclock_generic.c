@@ -4107,7 +4107,9 @@ gps16x_message(
 					if (utc.valid)
 					{
 						p = ap(buffer, sizeof(buffer), p, "gps_utc_correction=\"");
-						mk_utcinfo(p, utc.t0t.wn, utc.WNlsf, utc.DNt, utc.delta_tls, utc.delta_tlsf, BUFFER_SIZE(buffer, p));
+						mk_utcinfo(p, utc.t0t.wn, utc.WNlsf, utc.DNt,
+                                                           utc.delta_tls, utc.delta_tlsf,
+                                                           (int)BUFFER_SIZE(buffer, p));
 						p += strlen(p);
 						ap(buffer, sizeof(buffer), p, "\"");
 					}
@@ -5071,7 +5073,8 @@ trimbletsip_message(
 		break;
 
 		case CMD_RMESSAGE:
-			mkreadable(t, (int)BUFFER_SIZE(pbuffer, t), (char *)&mb(0), (unsigned)(size - 2 - (&mb(0) - buffer)), 0);
+			mkreadable(t, (int)BUFFER_SIZE(pbuffer, t), (char *)&mb(0),
+                                   (unsigned)(size - 2u - (&mb(0) - buffer)), 0);
 			break;
 
 		case CMD_RMACHSTAT:
@@ -5120,7 +5123,8 @@ trimbletsip_message(
 
 			if ((int)t0t != 0)
 			{
-				mk_utcinfo(t, wnt, wnlsf, dn, dtls, dtlsf, BUFFER_SIZE(pbuffer, t));
+				mk_utcinfo(t, wnt, wnlsf, dn, dtls, dtlsf,
+                                           (int)BUFFER_SIZE(pbuffer, t));
 			}
 			else
 			{
