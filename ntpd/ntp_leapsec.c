@@ -314,7 +314,7 @@ leapsec_query(
 	/* now start to collect the remaining data */
 	qr->tai_diff  = pt->head.next_tai - pt->head.this_tai;
 	qr->ttime     = pt->head.ttime;
-	qr->ddist     = pt->head.dtime - when;
+	qr->ddist     = (uint32_t)(pt->head.dtime - when);
 	qr->dynamic   = pt->head.dynls;
 
 	qr->proximity = LSPROX_SCHEDULE;
