@@ -164,14 +164,6 @@ inp_tsip(
   return PARSE_INP_SKIP;
 }
 
-static short
-getshort(
-	 unsigned char *p
-	 )
-{
-	return (short) get_msb_short(&p);
-}
-
 /*
  * cvt_trimtsip
  *
@@ -216,7 +208,7 @@ cvt_trimtsip(
 		    case CMD_RCURTIME:
 			    {			/* GPS time */
 				    l_fp secs;
-				    int   week = getshort((unsigned char *)&mb(4));
+				    int week = getmsb_short((unsigned char *)&mb(4));
 				    l_fp utcoffset;
 				    l_fp gpstime;
 

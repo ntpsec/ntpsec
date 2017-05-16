@@ -55,6 +55,14 @@ get_msb_ushort(
 	return (unsigned short) get_msb_short(&p);
 }
 
+short
+getmsb_short(
+	 unsigned char *p
+	 )
+{
+	return get_msb_short(&p);
+}
+
 long
 get_msb_short(
 	unsigned char **bufpp

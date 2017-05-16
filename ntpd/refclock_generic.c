@@ -4889,14 +4889,6 @@ getdbl(
 	return uval.dv;
 }
 
-static short
-getshort(
-	 unsigned char *p
-	 )
-{
-	return (short) get_msb_short(&p);
-}
-
 /*--------------------------------------------------
  * trimbletsip_message - process trimble messages
  */
@@ -4975,7 +4967,8 @@ trimbletsip_message(
 		{
 		case CMD_RCURTIME:
 			t = ap(pbuffer, sizeof(pbuffer), t, "%f, %d, %f",
-				 getflt((unsigned char *)&mb(0)), getshort((unsigned char *)&mb(4)),
+				 getflt((unsigned char *)&mb(0)),
+                                        getmsb_short((unsigned char *)&mb(4)),
 				 getflt((unsigned char *)&mb(6)));
 			break;
 
@@ -5118,11 +5111,11 @@ trimbletsip_message(
 		case CMD_RUTCPARAM:
 		{
 			float t0t = getflt((unsigned char *)&mb(14));
-			short wnt = getshort((unsigned char *)&mb(18));
-			short dtls = getshort((unsigned char *)&mb(12));
-			short wnlsf = getshort((unsigned char *)&mb(20));
-			short dn = getshort((unsigned char *)&mb(22));
-			short dtlsf = getshort((unsigned char *)&mb(24));
+			short wnt = getmsb_short((unsigned char *)&mb(18));
+			short dtls = getmsb_short((unsigned char *)&mb(12));
+			short wnlsf = getmsb_short((unsigned char *)&mb(20));
+			short dn = getmsb_short((unsigned char *)&mb(22));
+			short dtlsf = getmsb_short((unsigned char *)&mb(24));
 
 			if ((int)t0t != 0)
 			{
