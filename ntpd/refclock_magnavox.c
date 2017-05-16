@@ -1574,7 +1574,7 @@ mx4200_send(struct peer *peer, const char *fmt, ...)
 
 	vsnprintf(buf1, sizeof(buf1) - 1, fmt, ap);
         buf1[sizeof(buf1) - 1 ] = '\0';
-	ck = mx4200_cksum(buf1, strlen(buf1));
+	ck = mx4200_cksum(buf1, (int)strlen(buf1));
         /* buf can never overrun */
 	n = snprintf(buf, sizeof(buf) - 1, "$%1024s*%02X\r\n", buf1, ck);
 
