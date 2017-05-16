@@ -2718,7 +2718,7 @@ read_peervars(void)
 	if (gotvar) {
 		for (i = 1; i < COUNTOF(wants); i++)
 			if (wants[i])
-				ctl_putpeer(i, peer);
+				ctl_putpeer((int)i, peer);
 	} else
 		for (cp = def_peer_var; *cp != 0; cp++)
 			ctl_putpeer((int)*cp, peer);
