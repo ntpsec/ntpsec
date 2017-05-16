@@ -60,7 +60,7 @@ attempt to read interactive format commands from the standard input.
 +-6+, +--ipv6+::
   Force DNS resolution of following host names on the command line to
   the IPv6 namespace.
-+-+, +--authentication+::
++-a+, +--authentication+::
   Enable authentication with the numbered key.
 +-c+ cmd, +--command+=cmd::
   The following argument is interpreted as an interactive format command
