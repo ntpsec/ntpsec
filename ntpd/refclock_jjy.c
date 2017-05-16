@@ -1742,7 +1742,7 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 	    /* Switch from mode 2 to mode 1 in order to restraint of
              * useless time stamp.
              */
-	    iLen = strlen( ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND ) ;
+	    iLen = (int)strlen( ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND ) ;
 	    if ( write ( pp->io.fd, ECHOKEISOKUKI_LT2000_COMMAND_REQUEST_SEND,
                          (size_t)iLen ) != iLen  ) {
 		    refclock_report ( peer, CEVNT_FAULT ) ;
@@ -2774,7 +2774,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 				return true ;
 			}
 			iFirstThreeDigitsCount = 0 ;
-			iCommaPosition = i ;
+			iCommaPosition = (int)i ;
 		} else if ( *(sys_phone[0]+i) != '-' ) {
 			msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be a number or a hyphen." ) ;
 			up->bInitError = true ;
@@ -3299,7 +3299,7 @@ teljjy_login_login ( struct peer *peer, struct refclockproc *pp, struct jjyunit 
 	pCmd = "TJJY\r" ;
 
 	/* Send login ID */
-	iCmdLen = strlen( pCmd ) ;
+	iCmdLen = (int)strlen( pCmd ) ;
 	if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
@@ -4221,7 +4221,7 @@ modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 
 	if ( pCmd != NULL ) {
 
-		iCmdLen = strlen( pCmd ) ;
+		iCmdLen = (int)strlen( pCmd ) ;
 		if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 			refclock_report( peer, CEVNT_FAULT ) ;
 		}
@@ -4303,7 +4303,7 @@ modem_dial_dialout ( struct peer *peer, struct refclockproc *pp, struct jjyunit 
 	snprintf( sCmd, sizeof(sCmd), "ATDW%c%s\r\n", cToneOrPulse, *sys_phone ) ;
 
 	/* Send command */
-	iCmdLen = strlen( sCmd ) ;
+	iCmdLen = (int)strlen( sCmd ) ;
 	if ( write( pp->io.fd, sCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
@@ -4419,7 +4419,7 @@ modem_esc_escape ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 	pCmd = "+++" ;
 
 	/* Send command */
-	iCmdLen = strlen( pCmd ) ;
+	iCmdLen = (int)strlen( pCmd ) ;
 	if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
@@ -4488,7 +4488,7 @@ modem_esc_disc ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up 
 	pCmd = "ATH0\r\n" ;
 
 	/* Send command */
-	iCmdLen = strlen( pCmd ) ;
+	iCmdLen = (int)strlen( pCmd ) ;
 	if ( write( pp->io.fd, pCmd, (size_t)iCmdLen ) != iCmdLen ) {
 		refclock_report( peer, CEVNT_FAULT ) ;
 	}
@@ -4545,8 +4545,8 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 		break ;
 	}
 
-	iDataLen = strlen( pData ) ;
-	iMarkLen = strlen( pMark ) ;
+	iDataLen = (int)strlen( pData ) ;
+	iMarkLen = (int)strlen( pMark ) ;
 	strlcpy( sLog, pMark, sizeof( sLog )) ;
 	printableString( sLog+iMarkLen, (int)sizeof(sLog)-iMarkLen,
                          pData, iDataLen ) ;
