@@ -1791,7 +1791,7 @@ local_input(
 	/*
 	 * eat all characters, parsing then and feeding complete samples
 	 */
-	count = rbufp->recv_length;
+	count = (int)rbufp->recv_length;
 	s = (unsigned char *)rbufp->recv_buffer;
 	ts = rbufp->recv_time;
 
