@@ -340,9 +340,9 @@ TEST(binio, get_msb_ushort0) {
         uint32_t  ret;
         unsigned char zero[2] = { 0, 0};
 
-        ret = get_msb_short( zero);
+        ret = get_msb_ushort( zero);
 
-        TEST_ASSERT_EQUAL_INT32( 0, ret );
+        TEST_ASSERT_EQUAL_HEX32( 0, ret );
 }
 
 TEST(binio, get_msb_ushort1) {
