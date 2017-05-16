@@ -3078,7 +3078,7 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 	int	i ;
 	int	minIndex = 0, maxIndex = 0, iAverCount = 0 ;
 	int	iThresholdSecond, iThresholdMicroSecond ;
-	unsigned int	iPercent ;
+	int	iPercent ;
 
 	minTime.tv_sec = minTime.tv_nsec = 0 ;
 	maxTime.tv_sec = maxTime.tv_nsec = 0 ;
@@ -3149,7 +3149,7 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 
 	/* subtype 101 = 1%, subtype 150 = 50%, subtype 180 = 80% */
 
-	iPercent = ( peer->ttl - 100 ) ;
+	iPercent = (int)peer->ttl - 100 ;
 
 	/* Average delay time in milli second */
 
