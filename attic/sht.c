@@ -90,7 +90,7 @@ main (
 		exit (0);
 	}
 
-	unit = strtoul(argv[1], &argp, 10);
+	unit = (int)strtoul(argv[1], &argp, 10);
 	if (argp == argv[1])
 		unit = 2;
 	else if (*argp == ':')
