@@ -67,8 +67,8 @@ dolfptoa(
 		dec   += 3;
 		cpdec += 3;
 	}
-	if ((size_t)dec > sizeof(cbuf) - (size_t)(cpend - cbuf))
-		dec = sizeof(cbuf) - (size_t)(cpend - cbuf);
+	if (dec > (long)sizeof(cbuf) - (cpend - cbuf))
+		dec = (long)sizeof(cbuf) - (cpend - cbuf);
 	
 	/*
 	 * If there's a fraction to deal with, do so.
