@@ -280,10 +280,8 @@ getgroup:
 
 	if (NULL == ctx) {
 		msyslog(LOG_ERR, "sandbox: seccomp_init() failed: %m");
-		return nonroot;
+		exit (1);
 		}
-	else
-		msyslog(LOG_DEBUG, "sandbox: seccomp_init() succeeded");
 
 int scmp_sc[] = {
 	SCMP_SYS(adjtimex),
@@ -406,14 +404,17 @@ int scmp_sc[] = {
 			    SCMP_ACT_ALLOW, scmp_sc[i], 0) < 0) {
 				msyslog(LOG_ERR,
 				    "sandbox: seccomp_rule_add() failed: %m");
+			    exit(1);
 			}
 		}
 	}
 
-	if (seccomp_load(ctx) < 0)
-		msyslog(LOG_ERR, "sandbox: seccomp_load() failed: %m");	
+	if (seccomp_load(ctx) < 0) {
+		msyslog(LOG_ERR, "sandbox: seccomp_load() failed: %m");
+		exit(1);
+	}
 	else {
-		msyslog(LOG_DEBUG, "sandbox: seccomp_load() succeeded");
+		msyslog(LOG_NOTICE, "sandbox: seccomp enabled.");
 	}
 #endif /* HAVE_SECCOMP_H */
 
