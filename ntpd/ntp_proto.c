@@ -2216,8 +2216,7 @@ peer_xmit(
 	peer->org = xmt_tx;
 	xpkt.xmt = htonl_fp(xmt_tx);
 	xkeyid = peer->keyid;
-	authlen = (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt,
-                                      (size_t)sendlen);
+	authlen = (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, (int)sendlen);
 	if (authlen == 0) {
 		report_event(PEVNT_AUTH, peer, "no key");
 		peer->flash |= BOGON5;		/* auth error */
@@ -2398,7 +2397,7 @@ fast_xmit(
 	 */
 	get_systime(&xmt_tx);
 	sendlen += (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, (int)sendlen);
-	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, sendlen);
+	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
 	sys_authdelay = xmt_ty;
