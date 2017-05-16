@@ -4571,7 +4571,7 @@ sendetx(
 	buf->txt[buf->idx++] = DLE;
 	buf->txt[buf->idx++] = ETX;
 
-	if (write(parse->generic->io.fd, buf->txt, (unsigned long)buf->idx) != buf->idx)
+	if (write(parse->generic->io.fd, buf->txt, (size_t)buf->idx) != buf->idx)
 	{
 		ERR(ERR_BADIO)
 			msyslog(LOG_ERR, "PARSE receiver #%d: sendetx: failed to send cmd to clock: %m", parse->peer->refclkunit);
