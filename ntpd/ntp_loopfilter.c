@@ -845,7 +845,7 @@ local_clock(
 		if (loop_tai != sys_tai) {
 			loop_tai = sys_tai;
 			ntv.modes = MOD_TAI;
-			ntv.constant = sys_tai;
+			ntv.constant = (long)sys_tai;
 			if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, true, __LINE__ - 1);
 			}
