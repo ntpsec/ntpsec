@@ -2061,10 +2061,10 @@ convert_ascii_time(
 	if (NULL == ep)
 		return false; /* could not parse the mandatory stuff! */
 	if (*ep == '.') {
-		dw = 100000000u;
+		dw = 100000000;
 		while (isdigit(*(unsigned char*)++ep)) {
-		    ts.tv_nsec += (uint32_t)(*(unsigned char*)ep - '0') * dw;
-		    dw /= 10u;
+		    ts.tv_nsec += (long)(*(unsigned char*)ep - '0') * dw;
+		    dw /= 10;
 		}
 	}
 	if (ep[0] != 'Z' || ep[1] != '\0')
