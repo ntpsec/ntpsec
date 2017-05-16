@@ -335,6 +335,50 @@ TEST(binio, get_msb_short4) {
         TEST_ASSERT_EQUAL_HEX64( -0x8000L, ret );
 }
 
+TEST(binio, getmsb_short0) {
+        int  ret;
+        unsigned char zero[2] = { 0, 0};
+
+        ret = getmsb_short( zero);
+
+        TEST_ASSERT_EQUAL_INT( 0, ret );
+}
+
+TEST(binio, getmsb_short1) {
+        int ret;
+        unsigned char zero[2] = { 2, 1};
+
+        ret = getmsb_short( zero);
+
+        TEST_ASSERT_EQUAL_INT( 0x0201L, ret );
+}
+
+TEST(binio, getmsb_short2) {
+        int ret;
+        unsigned char zero[2] = { 1, 2};
+
+        ret = getmsb_short( zero);
+
+        TEST_ASSERT_EQUAL_INT( 0x0102L, ret );
+}
+
+TEST(binio, getmsb_short3) {
+        int ret;
+        unsigned char zero[2] = { 0xff, 0xff};
+
+        ret = getmsb_short( zero);
+
+        TEST_ASSERT_EQUAL_INT( -1, ret );
+}
+
+TEST(binio, getmsb_short4) {
+        int ret;
+        unsigned char zero[2] = { 0x80, 0};
+
+        ret = getmsb_short( zero);
+
+        TEST_ASSERT_EQUAL_INT( -0x8000L, ret );
+}
 
 TEST(binio, get_msb_ushort0) {
         uint32_t  ret;
@@ -420,6 +464,12 @@ TEST_GROUP_RUNNER(binio) {
         RUN_TEST_CASE(binio, get_msb_short2);
         RUN_TEST_CASE(binio, get_msb_short3);
         RUN_TEST_CASE(binio, get_msb_short4);
+
+        RUN_TEST_CASE(binio, getmsb_short0);
+        RUN_TEST_CASE(binio, getmsb_short1);
+        RUN_TEST_CASE(binio, getmsb_short2);
+        RUN_TEST_CASE(binio, getmsb_short3);
+        RUN_TEST_CASE(binio, getmsb_short4);
 
         RUN_TEST_CASE(binio, get_msb_ushort0);
         RUN_TEST_CASE(binio, get_msb_ushort1);
