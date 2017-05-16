@@ -2037,7 +2037,8 @@ oncore_msg_Ay(
 
 	instance->saw_Ay = 1;
 
-	instance->offset = (u_long)buf_w32(&buf[4]);
+        /* @@Ay is between 0 and 999999999 */
+	instance->offset = buf_w32(&buf[4]);
 
 	oncore_log_f(instance, LOG_INFO, "PPS Offset is set to %ld ns",
 		     instance->offset);
