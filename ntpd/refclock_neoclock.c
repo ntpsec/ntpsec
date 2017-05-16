@@ -799,11 +799,11 @@ neol_localtime(unsigned long utc,
 	       int* min,
 	       int* sec)
 {
-  *sec = utc % 60;
+  *sec = (int)(utc % 60);
   utc /= 60;
-  *min = utc % 60;
+  *min = (int)(utc % 60);
   utc /= 60;
-  *hour = utc % 24;
+  *hour = (int)(utc % 24);
   utc /= 24;
 
   /*             JDN Date 1/1/1970 */
