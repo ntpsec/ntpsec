@@ -263,7 +263,7 @@ getgroup:
 	}	/* if (droproot) */
 # endif	/* ENABLE_DROPROOT */
 
-/* libssecomp sandboxing */
+/* libseccomp sandboxing */
 // Working on ARM
 // #if defined(__x86_64__) || defined(__i386__)
 #if defined(HAVE_SECCOMP_H)
