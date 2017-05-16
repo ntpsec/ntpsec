@@ -2216,7 +2216,8 @@ peer_xmit(
 	peer->org = xmt_tx;
 	xpkt.xmt = htonl_fp(xmt_tx);
 	xkeyid = peer->keyid;
-	authlen = (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
+	authlen = (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt,
+                                      (size_t)sendlen);
 	if (authlen == 0) {
 		report_event(PEVNT_AUTH, peer, "no key");
 		peer->flash |= BOGON5;		/* auth error */
@@ -2228,9 +2229,8 @@ peer_xmit(
 		msyslog(LOG_ERR, "proto: buffer overflow %zu", sendlen);
 		exit(1);
 	}
-	peer->t21_bytes = sendlen;
-	sendpkt(&peer->srcadr, peer->dstadr, &xpkt,
-	    sendlen);
+	peer->t21_bytes = (int)sendlen;
+	sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
 	peer->sent++;
         peer->outcount++;
 	peer->throttle += (1 << peer->minpoll) - 2;
@@ -2379,7 +2379,7 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
-		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, sendlen);
+		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 #ifdef DEBUG
 		if (debug)
 			printf(
@@ -2397,7 +2397,7 @@ fast_xmit(
 	 * cryptosum.
 	 */
 	get_systime(&xmt_tx);
-	sendlen += (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
+	sendlen += (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, (int)sendlen);
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, sendlen);
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
@@ -2807,7 +2807,7 @@ proto_config(
 #endif /* REFCLOCK */
 
 	case PROTO_KERNEL:	/* kernel discipline (kernel) */
-		select_loop(value);
+		select_loop((int)value);
 		break;
 
 	case PROTO_MONITOR:	/* monitoring (monitor) */
