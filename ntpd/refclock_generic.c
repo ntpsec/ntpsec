@@ -5073,8 +5073,11 @@ trimbletsip_message(
 		break;
 
 		case CMD_RMESSAGE:
-			mkreadable(t, (int)BUFFER_SIZE(pbuffer, t), (char *)&mb(0),
-                                   (unsigned)(size - 2u - (&mb(0) - buffer)), 0);
+			mkreadable(t, (int)BUFFER_SIZE(pbuffer, t),
+                                   (char *)&mb(0),
+                                   (unsigned)(size - 2u -
+                                              (unsigned)(&mb(0) - buffer)),
+                                   0);
 			break;
 
 		case CMD_RMACHSTAT:
