@@ -577,14 +577,14 @@ TEST(leapsec, addDynamic) {
 	bool           rc;
 	int            idx;
 
-	static const uint32_t insns[] = {
-		2982009600u,	//	29	# 1 Jul 1994
-		3029443200u,	//	30	# 1 Jan 1996
-		3076704000u,	//	31	# 1 Jul 1997
-		3124137600u,	//	32	# 1 Jan 1999
-		3345062400u,	//	33	# 1 Jan 2006
-		3439756800u,	//	34	# 1 Jan 2009
-		3550089600u,	//	35	# 1 Jul 2012
+	static const time_t insns[] = {
+		2982009600,	//	29	# 1 Jul 1994
+		3029443200,	//	30	# 1 Jan 1996
+		3076704000,	//	31	# 1 Jul 1997
+		3124137600,	//	32	# 1 Jan 1999
+		3345062400,	//	33	# 1 Jan 2006
+		3439756800,	//	34	# 1 Jan 2009
+		3550089600,	//	35	# 1 Jul 2012
 		0 // sentinel
 	};
 
@@ -607,16 +607,16 @@ TEST(leapsec, addDynamic) {
 // add fixed leap seconds (like from network packet)
 TEST(leapsec, addFixed) {
 	bool           rc;
-    int            idx;
+	int            idx;
 
-	static const struct { uint32_t tt; int of; } insns[] = {
-		{2982009600u-JAN_1970, 29},//	# 1 Jul 1994
-		{3029443200u-JAN_1970, 30},//	# 1 Jan 1996
-		{3076704000u-JAN_1970, 31},//	# 1 Jul 1997
-		{3124137600u-JAN_1970, 32},//	# 1 Jan 1999
-		{3345062400u-JAN_1970, 33},//	# 1 Jan 2006
-		{3439756800u-JAN_1970, 34},//	# 1 Jan 2009
-		{3550089600u-JAN_1970, 35},//	# 1 Jul 2012
+	static const struct { time_t tt; int of; } insns[] = {
+		{2982009600-JAN_1970, 29},//	# 1 Jul 1994
+		{3029443200-JAN_1970, 30},//	# 1 Jan 1996
+		{3076704000-JAN_1970, 31},//	# 1 Jul 1997
+		{3124137600-JAN_1970, 32},//	# 1 Jan 1999
+		{3345062400-JAN_1970, 33},//	# 1 Jan 2006
+		{3439756800-JAN_1970, 34},//	# 1 Jan 2009
+		{3550089600-JAN_1970, 35},//	# 1 Jul 2012
 		{0,0} // sentinel
 	};
 
@@ -933,9 +933,9 @@ TEST(leapsec, ls2012seqInsDumb) {
 TEST(leapsec, lsEmptyTableDumb) {
 	bool           rc;
 	leap_result_t  qr;
-	uint32_t       t;
-	const uint32_t t0   = lsec2012 - 10;
-	const uint32_t tE   = lsec2012 + 10;
+	time_t       t;
+	const time_t t0   = lsec2012 - 10;
+	const time_t tE   = lsec2012 + 10;
 
 	TEST_ASSERT_FALSE(leapsec_electric(-1));
 
