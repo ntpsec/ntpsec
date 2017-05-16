@@ -920,9 +920,12 @@ class ControlSession:
             self.keyid = key_id
 
         if self.passwd is None:
-            passwd = getpass.getpass("%s Password: " % self.keytype)
-            if passwd is None:
-                raise ControlException(SERR_INVPASS)
+            try:
+                passwd = self.auth[self.keyid][1]
+            except (IndexError, TypeError):
+                passwd = getpass.getpass("%s Password: " % self.keytype)
+                if passwd is None:
+                    raise ControlException(SERR_INVPASS)
             self.passwd = passwd
 
     def sendpkt(self, xdata):

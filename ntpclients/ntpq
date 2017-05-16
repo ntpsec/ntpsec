@@ -151,6 +151,8 @@ class Ntpq(cmd.Cmd):
         # self.auth_keyid   = 0# Keyid used for authentication.
         # self.auth_keytype = "NID_md5"# MD5 (FIXME: string value is a dummy)
         # self.auth_hashlen = 16# MD5
+        # I do not know if the preceding are there for a specific reason
+        #  so I am leaving them, and possibly duplicating them.
         self.rawmode = False            # Flag which indicates raw mode output.
         self.directmode = False         # Flag for direct MRU output.
         self.showhostnames = True       # If false, display numeric IPs
@@ -1562,41 +1564,45 @@ DEFHOST = "localhost"    # default host name
 usage = '''
 USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
   Flg Arg Option-Name    Description
-   -4 no  ipv4           Force IPv4 DNS name resolution
+   -4 no  ipv4            Force IPv4 DNS name resolution
                                 - prohibits the option 'ipv6'
-   -6 no  ipv6           Force IPv6 DNS name resolution
+   -6 no  ipv6            Force IPv6 DNS name resolution
                                 - prohibits the option 'ipv4'
-   -c Str command        run a command and exit
+   -a Num authentication  Enable authentication with the numbered key
+   -c Str command         Run a command and exit
                                 - may appear multiple times
-   -d no  debug-level    Increase output debug message level
+   -d no  debug-level     Increase output debug message level
                                 - may appear multiple times
    -D Int set-debug-level Set the output debug message level
                                 - may appear multiple times
-   -h no  help           Print a usage message.
-   -p no  peers          Print a list of the peers
+   -h no  help            Print a usage message.
+   -p no  peers           Print a list of the peers
                                 - prohibits the option 'interactive'
-   -i no  interactive    Force ntpq to operate in interactive mode
+   -i no  interactive     Force ntpq to operate in interactive mode
                                 - prohibits these options:
                                 command
                                 peers
-   -n no  numeric        numeric host addresses
-   -V opt version        Output version information and exit
-   -w no  wide           enable wide display of addresses / hosts
-                         on a separate line
-   -W no  width          force output width to this value instead of
-                         querying the terminal size
-   -u no  units          Display time with units.
+   -n no  numeric         Numeric host addresses
+   -k Str keyfile         Specify a keyfile. ntpq will look in this file
+                          for the key specified with -a
+   -V opt version         Output version information and exit
+   -w no  wide            Enable wide display of addresses / hosts
+                          on a separate line
+   -W no  width           Force output width to this value instead of
+                          querying the terminal size
+   -u no  units           Display time with units.
 '''
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "46c:dD:hinpVwW:u",
-                                             ["ipv4", "ipv6", "command=",
-                                              "debug", "set-debug-level=",
-                                              "help", "interactive", "numeric",
-                                              "peers", "version",
-                                              "wide", "width=", "units"])
+        (options, arguments) = getopt.getopt(
+            sys.argv[1:],
+            "46a:c:dD:hk:inpVwW:u",
+            ["ipv4", "ipv6", "authentication=",
+             "command=", "debug", "set-debug-level=",
+             "help", "keyfile", "interactive",
+             "numeric", "peers", "version",
+             "wide", "width=", "units"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1607,11 +1613,16 @@ if __name__ == '__main__':
     session = ntp.packet.ControlSession()
     interpreter = Ntpq(session)
 
+    keyid = keyfile = None
+
     for (switch, val) in options:
         if switch in ("-4", "--ipv4"):
             interpreter.ai_family = socket.AF_INET
         elif switch in ("-6", "--ipv6"):
             interpreter.ai_family = socket.AF_INET6
+        elif switch in ("-a", "--authentication"):
+            errmsg = "Error: -a parameter '%s' not a number\n"
+            keyid = ntp.util.safeargcast(val, int, errmsg, usage)
         elif switch in ("-c", "--command"):
             interpreter.ccmds.append(val)
         elif switch in ("-d", "--debug"):
@@ -1631,6 +1642,8 @@ if __name__ == '__main__':
             interpreter.showhostnames = False
         elif switch in ("-p", "--peers"):
             interpreter.ccmds.append("peers")
+        elif switch in ("-k", "--keyfile"):
+            keyfile = val
         elif switch in ("-V", "--version"):
             print("ntpq %s" % version)
             raise SystemExit(0)
@@ -1642,6 +1655,17 @@ if __name__ == '__main__':
                                                          errmsg, usage)
         elif switch in ("-u", "--units"):
             interpreter.showunits = True
+
+    if keyfile is not None:  # Have a -k, setup the auth
+        credentials = None
+        try:
+            credentials = ntp.packet.Authenticator(keyfile)
+        except (OSError, IOError):
+            pass
+        if credentials:
+            session.auth = credentials
+    if keyid is not None:  # Have an -a
+        session.keyid = keyid
 
     if interpreter.interactive and len(interpreter.ccmds) > 0:
         interpreter.warn("%s: invalid option combination.\n" % progname)
