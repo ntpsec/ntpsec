@@ -828,8 +828,8 @@ process_control(
 		if (!authistrusted(res_keyid))
 			DPRINTF(3, ("invalid keyid %08x\n", res_keyid));
 		else if (authdecrypt(res_keyid, (uint32_t *)pkt,
-				     rbufp->recv_length - maclen,
-				     maclen)) {
+				     (int)rbufp->recv_length - (int)maclen,
+				     (int)maclen)) {
 			res_authokay = true;
 			DPRINTF(3, ("authenticated okay\n"));
 		} else {
