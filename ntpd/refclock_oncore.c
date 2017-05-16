@@ -1238,7 +1238,7 @@ oncore_read_config(
 			*cpw = '\0';
 
 		/* Remove trailing space */
-		for (i = strlen(line);
+		for (i = (int)strlen(line);
 		     i > 0 && isascii((unsigned char)line[i - 1]) && isspace((unsigned char)line[i - 1]);
 			)
 			line[--i] = '\0';
