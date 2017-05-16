@@ -8,7 +8,7 @@
 #include "config.h"
 #include "ntp_fp.h"
 #include "ntp_calendar.h"
-#include "parse.h"
+#include "gpstolfp.h"
 
 #define GPSORIGIN       2524953600u  /* GPS origin - NTP origin in seconds */
 
@@ -31,6 +31,55 @@ gpstolfp(
                    + (uint64_t)seconds
                    + GPSORIGIN);
   setlfpfrac(*lfp, 0);
+}
+
+
+void
+gpsweekadj(
+	u_int * week,
+	u_int build_week
+	)
+{
+	/* adjust for rollover */
+	while (*week < build_week)
+		*week += GPSWEEKS;
+}
+
+
+void
+gpstocal(
+	u_int week,
+	u_int TOW,
+	int UTC_offset,
+	struct calendar * out
+	)
+{
+	time64_t t;
+	
+	t = (time64_t)((int64_t)GPSORIGIN - UTC_offset);
+	t += (time64_t)week * SECSPERWEEK;
+	t += TOW;
+
+	ntpcal_ntp64_to_date(out, t);
+}
+
+
+void
+caltogps(
+	const struct calendar * in,
+	int UTC_offset,
+	u_int * week,
+	u_int * TOW
+	)
+{
+	time64_t t;
+
+	t = ntpcal_dayjoin(ntpcal_date_to_rd(in) - DAY_NTP_STARTS, 
+	                             ntpcal_date_to_daysec(in));
+	t -= (uint64_t)((int64_t)GPSORIGIN - UTC_offset);
+	*week = t / SECSPERWEEK;
+	if (NULL != TOW)
+		*TOW = t % SECSPERWEEK;
 }
 
 /*

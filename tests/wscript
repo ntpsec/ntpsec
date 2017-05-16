@@ -30,6 +30,7 @@ def build(ctx):
         "libntp/calendar.c",
         "libntp/clocktime.c",
         "libntp/decodenetnum.c",
+        "libntp/gpstolfp.c",
         "libntp/hextolfp.c",
         "libntp/humandate.c",
         "libntp/lfpfunc.c",

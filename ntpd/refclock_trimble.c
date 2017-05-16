@@ -60,6 +60,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "timespecops.h"
+#include "gpstolfp.h"
 
 /*
  * GPS Definitions
@@ -153,7 +154,11 @@ struct trimble_unit {
 	size_t 		rpt_cnt;	/* TSIP packet length so far */
 	char 		rpt_buf[BMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
-	int		month;		/* for LEAP filter */
+	u_int		week;		/* GPS week number */
+	u_int		TOW;		/* GPS time of week */
+	int		UTC_offset;	/* GPS-UTC offset */
+	struct calendar	date;		/* calendar to avoid leap early announce */
+	u_int		build_week;	/* GPS week number of ntpd build date */
 };
 
 /*
@@ -170,10 +175,7 @@ int 		TSIP_decode		(struct peer *);
 long		HW_poll			(struct refclockproc *);
 static	double	getdbl 			(uint8_t *);
 static	short	getint 			(uint8_t *);
-#ifdef DEBUG		
 static	int32_t	getlong			(uint8_t *);
-#endif
-
 #ifdef __UNUSED__
 static  void	sendcmd			(struct packettx *buffer, int c);
 #endif
@@ -183,12 +185,6 @@ static  void	sendint			(struct packettx *buffer, int a);
 static  int	sendetx			(struct packettx *buffer, int fd);
 static  void	init_thunderbolt	(int fd);
 static  void	init_acutime		(int fd);
-
-
-/* Table to get from month to day of the year */
-static const int days_of_year [12] = {
-	0,  31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334
-};
 
 #ifdef DEBUG
 const char * Tracking_Status[15][15] = { 
@@ -211,8 +207,6 @@ struct refclock refclock_trimble = {
 	NULL,			/* initialize driver (not used) */
 	NULL			/* timer - not used */
 };
-
-static int day_of_year (char *dt) __attribute__((pure));
 
 /* Extract the clock type from the mode setting */
 #define CLK_TYPE(x) ((int)(((x)->ttl) & 0x7F))
@@ -377,6 +371,7 @@ trimble_start (
 	int fd;
 	char gpsdev[20];
 	struct termios tio;
+	struct calendar build_date;
 
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
 
@@ -480,6 +475,21 @@ trimble_start (
 	up->rpt_status = TSIP_PARSED_EMPTY;
 	up->rpt_cnt = 0;
 
+	if (ntpcal_get_build_date(&build_date)) {
+		caltogps(&build_date, 0, &up->build_week, NULL);
+		up->build_week -= 2; /* timezone, UTC offset, build machine clock */
+	} else {
+		up->build_week = 0;
+	}
+	if (up->build_week < MIN_BUILD_GPSWEEK || up->build_week > MAX_BUILD_GPSWEEK) {
+		msyslog(LOG_ERR, "Trimble(%d) ntpcal_get_build_date() failed: %u",
+		        unit, up->build_week);
+		close(fd);
+		pp->io.fd = -1;
+		free(up);
+		return false;
+	}
+
 	if (up->type == CLK_THUNDERBOLT)
 		init_thunderbolt(fd);
 	if (up->type == CLK_ACUTIME)
@@ -509,34 +519,6 @@ trimble_shutdown (
 		io_closeclock(&pp->io);
 	if (NULL != up)
 		free(up);
-}
-
-
-
-/* 
- * unpack_date - get day and year from date
- */
-static int
-day_of_year (
-	char * dt
-	)
-{
-	int day, mon, year;
-
-	mon = dt[1];
-	/* Check month is inside array bounds */
-	if ((mon < 1) || (mon > 12)) 
-		return -1;
-
-	day = dt[0] + days_of_year[mon - 1];
-	year = getint((uint8_t *) (dt + 2)); 
-
-	if ( !(year % 4) && ((year % 100) || 
-			     (!(year % 100) && !(year%400)))
-	     &&(mon > 2))
-		day ++; /* leap year and March or later */
-
-	return day;
 }
 
 
@@ -589,8 +571,6 @@ TSIP_decode (
 		/* 
 		 * Superpackets
 		 */
-		int GPS_UTC_Offset;
-
 		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
 		if (!((pp->sloppyclockflag & CLK_FLAG2) || event)) 
 			/* Ignore Packet */
@@ -599,12 +579,12 @@ TSIP_decode (
 		switch (mb(0) & 0xff) {
 
 		    case PACKET_8F0B: 
-
-			if (up->polled <= 0)
-				return 0;
-
 			if (up->rpt_cnt != LENCODE_8F0B)  /* check length */
 				break;
+
+			up->UTC_offset = getint((uint8_t *) &mb(16));
+			if (up->polled <= 0)
+				return 0;
 		
 #ifdef DEBUG
 			if (debug > 1) {
@@ -627,8 +607,7 @@ TSIP_decode (
 			}
 #endif
 
-			GPS_UTC_Offset = getint((uint8_t *) &mb(16));  
-			if (GPS_UTC_Offset == 0) { /* Check UTC offset */ 
+			if (up->UTC_offset == 0) { /* Check UTC offset */ 
 #ifdef DEBUG
 				printf("TSIP_decode: UTC Offset Unknown\n");
 #endif
@@ -642,21 +621,24 @@ TSIP_decode (
 			pp->nsec = (long) (secfrac * NS_PER_S);
 
 			secint %= SECSPERDAY;    /* Only care about today */
-			pp->hour = (int)(secint / SECSPERHR);
+			up->date.hour = (int)(secint / SECSPERHR);
 			secint %= SECSPERHR;
-			pp->minute = (int)(secint / 60);
+			up->date.minute = (int)(secint / 60);
 			secint %= 60;
-			pp->second = secint % 60;
-		
-			if ((pp->day = day_of_year(&mb(11))) < 0) break;
-
-			pp->year = getint((uint8_t *) &mb(13)); 
-
+			up->date.second = secint % 60;
+			up->date.monthday = (uint8_t)mb(11);
+			up->date.month = (uint8_t)mb(12);
+			up->date.year = (uint16_t)getint((uint8_t *) &mb(13));
+			up->date.yearday = 0;
+			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
+			gpsweekadj(&up->week, up->build_week);
+			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 #ifdef DEBUG
 			if (debug > 1)
 				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02d\n",
-				       up->unit, (u_int)(mb(0) & 0xff), event, pp->hour, pp->minute, 
-				       pp->second, pp->nsec, mb(12), mb(11), pp->year, GPS_UTC_Offset);
+				       up->unit, (u_int)(mb(0) & 0xff), event,
+				       up->date.hour, up->date.minute, up->date.second, pp->nsec,
+				       up->date.month, up->date.monthday, up->date.year, up->UTC_offset);
 #endif
 			/* Only use this packet when no
 			 * 8F-AD's are being received
@@ -681,6 +663,16 @@ TSIP_decode (
 			if (up->polled  <= 0) 
 				return 0;
 				
+			/* Praecis reports only 8f-ad with UTC offset applied */
+			if (up->type == CLK_PRAECIS) {
+				up->UTC_offset = 0;
+			} else if (up->UTC_offset == 0) {
+#ifdef DEBUG
+				printf("TSIP_decode 8f-ad: need UTC offset from 8f-0b\n");
+#endif
+				return 0;
+			}
+
 			/* Check Tracking Status */
 			st = mb(18);
 			if (st < 0 || st > 14)
@@ -696,10 +688,9 @@ TSIP_decode (
 				break;
 			}
 
-			up->month = mb(15);
 			if ( (up->leap_status & TRIMBLE_LEAP_PENDING) &&
 			/* Avoid early announce: https://bugs.ntp.org/2773 */
-				(6 == up->month || 12 == up->month) ) {
+				(6 == up->date.month || 12 == up->date.month) ) {
 				if (up->leap_status & TRIMBLE_UTC_TIME)  
 					pp->leap = LEAP_ADDSECOND;
 				else
@@ -721,22 +712,23 @@ TSIP_decode (
 				return 0;
 			}
 
-			pp->nsec = (long) (getdbl((uint8_t *) &mb(3))
-					   * 1000000000);
-
-			if ((pp->day = day_of_year(&mb(14))) < 0) 
-				break;
-			pp->year = getint((uint8_t *) &mb(16)); 
-			pp->hour = mb(11);
-			pp->minute = mb(12);
-			pp->second = mb(13);
-			up->month = mb(14);  /* Save for LEAP check */
-
+			pp->nsec = (long) (getdbl((uint8_t *) &mb(3)) * NS_PER_S);
+			up->date.year = (uint16_t)getint((uint8_t *) &mb(16)); 
+			up->date.hour = (uint8_t)mb(11);
+			up->date.minute = (uint8_t)mb(12);
+			up->date.second = (uint8_t)mb(13);
+			up->date.month = (uint8_t)mb(15);
+			up->date.monthday = (uint8_t)mb(14);
+			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
+			gpsweekadj(&up->week, up->build_week);
+			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
+			up->UTC_offset = 0; /* don't re-use offset */
 #ifdef DEBUG
 			if (debug > 1)
 				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
-				       up->unit, (u_int)(mb(0) & 0xff), event, pp->hour, pp->minute, 
-				       pp->second, pp->nsec, mb(15), mb(14), pp->year,
+				       up->unit, (u_int)(mb(0) & 0xff), event,
+				       up->date.hour, up->date.minute, up->date.second, pp->nsec,
+				       up->date.month, up->date.monthday, up->date.year,
 				       (u_int)mb(19), *Tracking_Status[st]);
 #endif
 			return 1;
@@ -763,7 +755,7 @@ TSIP_decode (
 #endif
 			if ( (getint((uint8_t *) &mb(10)) & 0x80) &&
 			/* Avoid early announce: https://bugs.ntp.org/2773 */
-			    (6 == up->month || 12 == up->month) )
+			    (6 == up->date.month || 12 == up->date.month) )
 				pp->leap = LEAP_ADDSECOND;  /* we ASSUME addsecond */
 			else 
 				pp->leap = LEAP_NOWARNING;
@@ -816,9 +808,8 @@ TSIP_decode (
 			if (up->polled  <= 0)
 				return 0;
 
-			GPS_UTC_Offset = getint((uint8_t *) &mb(7));
-
-			if (GPS_UTC_Offset == 0){ /* Check UTC Offset */
+			up->UTC_offset = getint((uint8_t *) &mb(7));
+			if (up->UTC_offset == 0){ /* Check UTC Offset */
 #ifdef DEBUG
 				printf("TSIP_decode: UTC Offset Unknown\n");
 #endif
@@ -862,27 +853,17 @@ TSIP_decode (
 				printf ("	Time is from GPS\n\n");	
 #endif		
 
-			if ((pp->day = day_of_year(&mb(13))) < 0)
-				break;
+			up->TOW = (uint32_t)getlong((uint8_t *) &mb(1));
+			up->week = (uint32_t)getint((uint8_t *) &mb(5));
+			gpsweekadj(&up->week, up->build_week);
+			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 #ifdef DEBUG		
 			if (debug > 1) {
-				long tow = getlong((uint8_t *) &mb(1));
-				printf("pp->day: %d\n", pp->day); 
-				printf("TOW: %ld\n", tow);
-				printf("DAY: %d\n", mb(13));
+				printf("TSIP_decode: unit %d: %02X #%d TOW: %u  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
+				        up->unit, (u_int)(mb(0) & 0xff), event, up->TOW, up->week, 
+					up->date.hour, up->date.minute, up->date.second,
+					up->date.month, up->date.monthday, up->date.year);
 			}
-#endif
-			pp->year = getint((uint8_t *) &mb(15));
-			pp->hour = mb(12);
-			pp->minute = mb(11);
-			pp->second = mb(10);
-
-
-#ifdef DEBUG
-			if (debug > 1)
-				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d ",
-				        up->unit, (u_int)(mb(0) & 0xff), event,
-				        pp->hour, pp->minute, pp->second, pp->nsec, mb(14), mb(13), pp->year);
 #endif
 			return 1;
 			break;
@@ -1029,6 +1010,11 @@ trimble_receive (
 
 	up->polled = 0;  /* Poll reply received */
 	pp->lencode = 0; /* clear time code */
+	
+	pp->day = up->date.yearday;
+	pp->hour = up->date.hour;
+	pp->minute = up->date.minute;
+	pp->second = up->date.second;
 #ifdef DEBUG
 	if (debug) 
 		printf(
@@ -1066,6 +1052,10 @@ trimble_receive (
 		printf("trimble_receive: unit %d: %s\n",
 		       up->unit, prettydate(pp->lastrec));
 #endif
+	if (pp->hour == 0 && up->week > up->build_week + 1000)
+		msyslog(LOG_WARNING, "Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
+		        up->unit, up->week, up->build_week);
+
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }
@@ -1357,7 +1347,7 @@ getint (
 	return (short)ntohs(us);
 }
 
-#ifdef DEBUG		
+
 /*
  * copy/swap a big-endian palisade 32-bit int into a host 32-bit int
  */
@@ -1371,5 +1361,3 @@ getlong(
 	memcpy(&u32, bp, sizeof(u32));
 	return (int32_t)(uint32_t)ntohl(u32);
 }
-#endif
-

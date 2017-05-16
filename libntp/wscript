@@ -8,6 +8,7 @@ def build(ctx):
         "decodenetnum.c",
         "dolfptoa.c",
         "getopt.c",
+        "gpstolfp.c",
         "initnetwork.c",
         "macencrypt.c",
         "netof.c",

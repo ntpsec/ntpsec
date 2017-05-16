@@ -24,6 +24,7 @@
 #include "binio.h"
 #include "ieee754io.h"
 #include "trimble.h"
+#include "gpstolfp.h"
 
 /*
  * Trimble low level TSIP parser / time converter
