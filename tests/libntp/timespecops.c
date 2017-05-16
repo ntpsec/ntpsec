@@ -491,7 +491,7 @@ TEST(timespecops, test_ToLFPbittest) {
 	uint32_t i;
 
 	for (i = 0; i < 1000000000; i+=1000) {
-		struct timespec a = timespec_init(1, i);
+		struct timespec a = timespec_init(1, (long)i);
 		l_fp E= lfpinit(1, my_tick_to_tsf(i));
 		l_fp r;
 
@@ -562,7 +562,7 @@ TEST(timespecops, test_FromLFPbittest) {
 	// every 1000 fractional units.
 	uint32_t tsf;
 	for (tsf = 0; tsf < ~((uint32_t)(1000)); tsf += 1000) {
-		struct timespec E = timespec_init(1, my_tsf_to_tick(tsf));
+		struct timespec E = timespec_init(1, (long)my_tsf_to_tick(tsf));
 		l_fp a = lfpinit(1, tsf);
 		struct timespec r;
 
@@ -617,7 +617,7 @@ TEST(timespecops, test_LFProundtrip) {
 
 	for (t = -1; t < 2; ++t)
 		for (i = 4999; i < 1000000000; i += 10007) {
-			struct timespec E = timespec_init(t, i);
+			struct timespec E = timespec_init(t, (long)i);
 			l_fp a;
 			struct timespec r;
 
