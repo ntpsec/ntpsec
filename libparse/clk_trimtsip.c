@@ -316,15 +316,21 @@ cvt_trimtsip(
 				    unsigned char *lbp;
 
 				    /* UTC correction data - derive a leap warning */
-				    int tls   = t->t_gpsutc     = (unsigned short) getshort((unsigned char *)&mb(12)); /* current leap correction (GPS-UTC) */
-				    int tlsf  = t->t_gpsutcleap = (unsigned short) getshort((unsigned char *)&mb(24)); /* new leap correction */
+				    /* current leap correction (GPS-UTC) */
+				    int tls = t->t_gpsutc = get_msb_ushort((unsigned char *)&mb(12));
 
-				    t->t_weekleap   = (unsigned short) getshort((unsigned char *)&mb(20)); /* week no of leap correction */
+                                    /* new leap correction */
+				    int tlsf = t->t_gpsutcleap = get_msb_ushort((unsigned char *)&mb(24));
+
+                                    /* week no of leap correction */
+				    t->t_weekleap = get_msb_ushort((unsigned char *)&mb(20));
 				    if (t->t_weekleap < GPSWRAP)
 				      t->t_weekleap = (unsigned short)(t->t_weekleap + GPSWEEKS);
 
-				    t->t_dayleap    = (unsigned short) getshort((unsigned char *)&mb(22)); /* day in week of leap correction */
-				    t->t_week = (unsigned short) getshort((unsigned char *)&mb(18)); /* current week no */
+                                    /* day in week of leap correction */
+				    t->t_dayleap = get_msb_ushort((unsigned char *)&mb(22));
+                                    /* current week no */
+				    t->t_week = get_msb_ushort((unsigned char *)&mb(18));
 				    if (t->t_week < GPSWRAP)
 				      /* coverity[copy_paste_error] */ 
 				      t->t_week = (unsigned short)(t->t_weekleap + GPSWEEKS);
