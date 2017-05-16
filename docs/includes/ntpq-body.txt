@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+ntpq+ [+-46dhinpwWu+] [+-c+ 'command'] ['host'] [...]
++ntpq+ [+-46adhinpkwWu+] [+-c+ 'command'] ['host'] [...]
 
 == Description ==
 
@@ -60,6 +60,8 @@ attempt to read interactive format commands from the standard input.
 +-6+, +--ipv6+::
   Force DNS resolution of following host names on the command line to
   the IPv6 namespace.
++-+, +--authentication+::
+  Enable authentication with the numbered key.
 +-c+ cmd, +--command+=cmd::
   The following argument is interpreted as an interactive format command
   and is added to the list of commands to be executed on the specified
@@ -79,6 +81,9 @@ attempt to read interactive format commands from the standard input.
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
   their state. This is equivalent to the +peers+ interactive command.
++-k+, +--keyfile+::
+  Specify a keyfile. ntpq will look in this file for the key specified
+  with -a.
 +-V+, +--version+::
   Print the version string and exit.
 +-w+, +--wide+::
