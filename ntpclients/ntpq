@@ -288,16 +288,12 @@ usage: help [ command ]
     def __dopeers(self, showall, mode):
         if not self.__dogetassoc():
             return
-        if self.showhostnames:
-            termwidth = interpreter.termwidth
-        else:
-            termwidth = None    # Default width
         report = ntp.util.PeerSummary(mode,
                                       self.pktversion,
                                       self.showhostnames,
                                       self.wideremote,
                                       self.showunits,
-                                      termwidth=termwidth,
+                                      termwidth=interpreter.termwidth,
                                       debug=interpreter.debug)
         try:
             maxhostlen = 0
