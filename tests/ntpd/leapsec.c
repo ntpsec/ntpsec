@@ -83,7 +83,7 @@ static const char leap2 [] =
     "2950473600	28	# 1 Jul 1993\n"
     "#\n";
 
-// Faked table with a leap second removal at 2009 
+// Faked table with a leap second removal at 2009
 static const char leap3 [] =
     "#\n"
     "#@ 	3610569600\n"
@@ -592,11 +592,14 @@ TEST(leapsec, addDynamic) {
 	TEST_ASSERT_TRUE(rc);
 
 	for (idx=1; insns[idx]; ++idx) {
-	    rc = leapsec_add_dyn(true, insns[idx]-JAN_1970 - 20*SECSPERDAY - 100);
+	    rc = leapsec_add_dyn(true,
+                                 insns[idx] - (time_t)JAN_1970 -
+                                 20*SECSPERDAY - 100);
 	    TEST_ASSERT_TRUE(rc);
 	}
 	// try to slip in a previous entry
-	rc = leapsec_add_dyn(true, insns[0]-JAN_1970 - 20*SECSPERDAY - 100);
+	rc = leapsec_add_dyn(true, insns[0] - (time_t)JAN_1970 -
+                             20*SECSPERDAY - 100);
 	TEST_ASSERT_FALSE(rc);
 	//leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
 	pt = leapsec_get_table(0);
