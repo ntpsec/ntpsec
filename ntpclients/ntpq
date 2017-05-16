@@ -1657,19 +1657,12 @@ if __name__ == '__main__':
             interpreter.showunits = True
 
     if keyfile is not None:  # Have a -k, setup the auth
-        print("keyfile:", keyfile)
         credentials = None
-        print("Baz!")
         try:
-            print("one")
             credentials = ntp.packet.Authenticator(keyfile)
-            print("two")
         except (OSError, IOError):
-            print("three")
             pass
-        print("four")
         if credentials:
-            print("five")
             session.auth = credentials
     if keyid is not None:  # Have an -a
         session.keyid = keyid

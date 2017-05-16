@@ -919,16 +919,11 @@ class ControlSession:
                 raise ControlException(SERR_BADKEY)
             self.keyid = key_id
 
-        print("Boo!")
         if self.passwd is None:
             try:
-                print("one")
                 passwd = self.auth[self.keyid][1]
-                print("two")
             except (IndexError, TypeError):
-                print("three")
                 passwd = getpass.getpass("%s Password: " % self.keytype)
-                print("four", repr(passwd))
                 if passwd is None:
                     raise ControlException(SERR_INVPASS)
             self.passwd = passwd
