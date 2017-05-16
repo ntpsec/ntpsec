@@ -804,7 +804,7 @@ process_control(
 	 * We're set up now. Make sure we've got at least enough
 	 * incoming data space to match the count.
 	 */
-	req_data = rbufp->recv_length - CTL_HEADER_LEN;
+	req_data = (int)rbufp->recv_length - (int)CTL_HEADER_LEN;
 	if (req_data < req_count || rbufp->recv_length & 0x3) {
 		ctl_error(CERR_BADFMT);
 		numctldatatooshort++;
