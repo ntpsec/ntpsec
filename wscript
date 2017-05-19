@@ -811,8 +811,15 @@ int main(int argc, char **argv) {
                    comment="Whether sysctl interface exists")
 
     # Header/library checks
-    from wafhelpers.check_cap import check_cap
-    check_cap(ctx)
+
+    if not ctx.options.disable_droproot and ctx.env.DEST_OS == "linux":
+        ctx.check_cc(header_name="sys/prctl.h", mandatory=False)
+        ctx.check_cc(header_name="sys/capability.h", mandatory=False)
+        ctx.check_cc(lib="cap", comment="Capability library", mandatory=False)
+
+        if ((ctx.get_define("HAVE_SYS_CAPABILITY_H") and
+                ctx.get_define("HAVE_SYS_PRCTL_H") and ctx.env.LIB_CAP)):
+            ctx.define("HAVE_LINUX_CAPABILITY", 1)
 
     if ctx.options.enable_seccomp:
         if ctx.env.DEST_OS != "linux":
