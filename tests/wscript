@@ -126,6 +126,14 @@ def build(ctx):
             pass
         os.symlink(pypath.abspath(), linkpath.abspath())
 
+    ctx(
+        features="subst",
+        source="pylib/test_util.py.in",
+        target="pylib/test_util.py"
+    )
+    # Force early creation of pylib/test_util.py
+    ctx.add_group()
+
     pytests = ["pylib/test_util.py",
                "pylib/test_agentx_packet.py",
                "pylib/test_packet.py",
