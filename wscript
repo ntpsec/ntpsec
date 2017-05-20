@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+from datetime import datetime
 import itertools
 import os
 import shlex
@@ -96,7 +97,7 @@ def configure(ctx):
     ctx.load('gnu_dirs')
 
     with open("VERSION", "r") as f:
-        ctx.env.NTPSEC_VERSION = f.read().split(" ")[0].strip()
+        ntpsec_release = f.read().split(" ")[0].strip()
 
     ctx.env.OPT_STORE = config["OPT_STORE"]
 
@@ -199,24 +200,32 @@ def configure(ctx):
     if ctx.options.disable_manpage:
         ctx.env.DISABLE_MANPAGE = True
 
+    source_date_epoch = os.getenv('SOURCE_DATE_EPOCH', None)
+    if ctx.options.build_epoch is not None:
+        build_epoch = ctx.options.build_epoch
+        ctx.define("BUILD_EPOCH", build_epoch, comment="Using --build-epoch")
+    elif source_date_epoch:
+        if not source_date_epoch.isdigit():
+            ctx.fatal("ERROR: malformed SOURCE_DATE_EPOCH")
+        build_epoch = int(source_date_epoch)
+        ctx.define("BUILD_EPOCH", build_epoch, comment="Using SOURCE_DATE_EPOCH")
+    else:
+        build_epoch = int(time.time())
+        ctx.define("BUILD_EPOCH", build_epoch, comment="Using default")
+
+    build_epoch_formatted = datetime.utcfromtimestamp(build_epoch).strftime("%Y-%m-%dT%H:%M:%SZ")
     if ((os.path.exists(".git") and
             ctx.find_program("git", var="BIN_GIT", mandatory=False))):
-        ctx.start_msg("DEVEL: Getting revision")
-        cmd = shlex.split("git log -1 --format=%H")
-        ctx.env.NTPSEC_REVISION = ctx.cmd_and_log(cmd).strip()
-        ctx.end_msg(ctx.env.NTPSEC_REVISION)
+        cmd = ctx.env.BIN_GIT + shlex.split("log -1 --format=%h")
+        git_short_hash = ctx.cmd_and_log(cmd).strip()
 
-    ctx.start_msg("Building version")
-    ctx.env.NTPSEC_VERSION_STRING = ctx.env.NTPSEC_VERSION
-
-    if ctx.env.NTPSEC_REVISION:
-        ctx.env.NTPSEC_VERSION_STRING += "-%s" % ctx.env.NTPSEC_REVISION[:7]
-
-    if ctx.options.build_version_tag:
-        ctx.env.NTPSEC_VERSION_STRING += "-%s" % ctx.options.build_version_tag
-
-    ctx.define("NTPSEC_VERSION_STRING", ctx.env.NTPSEC_VERSION_STRING)
-    ctx.end_msg(ctx.env.NTPSEC_VERSION_STRING)
+        ctx.env.NTPSEC_VERSION = "%s+" % ntpsec_release
+        ctx.env.NTPSEC_VERSION_EXTENDED = "%s+ %s (git rev %s)" % (ntpsec_release, build_epoch_formatted, git_short_hash)
+    else:
+        ctx.env.NTPSEC_VERSION = "%s" % ntpsec_release
+        ctx.env.NTPSEC_VERSION_EXTENDED = "%s %s" % (ntpsec_release, build_epoch_formatted)
+    ctx.define("NTPSEC_VERSION", ctx.env.NTPSEC_VERSION)
+    ctx.define("NTPSEC_VERSION_EXTENDED", ctx.env.NTPSEC_VERSION_EXTENDED)
 
     # We require some things that C99 doesn't enable, like pthreads.
     # These flags get propagated to both the host and main parts of the build.
@@ -851,19 +860,6 @@ int main(int argc, char **argv) {
                 msg("WARNING: This system has a 32-bit time_t.")
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
-    source_date_epoch = os.getenv('SOURCE_DATE_EPOCH', None)
-    if ctx.options.build_epoch is not None:
-        ctx.define("BUILD_EPOCH", ctx.options.build_epoch,
-                   comment="Using --build-epoch")
-    elif source_date_epoch:
-        if not source_date_epoch.isdigit():
-            msg("ERROR: malformed SOURCE_DATE_EPOCH")
-            sys.exit(1)
-        ctx.define("BUILD_EPOCH", int(source_date_epoch),
-                   comment="Using SOURCE_DATE_EPOCH")
-    else:
-        ctx.define("BUILD_EPOCH", int(time.time()), comment="Using default")
-
     # before write_config()
     droproot_type = ""
     if ctx.is_defined("HAVE_LINUX_CAPABILITY"):
@@ -987,8 +983,6 @@ def afterparty(ctx):
     # Note that this setup is applied to the build tree, not the
     # source tree.  Only the build-tree copies of the programs are
     # expected to work.
-    if ctx.cmd == 'clean':
-        ctx.exec_command("rm -f ntpd/version.h ")
     for x in ("ntpclients", "tests/pylib",):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")

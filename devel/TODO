@@ -104,10 +104,6 @@ Waf detect need configure:
   after a git pull.  (From email on 23 May 2017)
 
 Version string cleanup:
-  This is tangled up with EPOCH
-  configure has --build-version-tag=
-  configure sets up NTPSEC_VERSION_STRING
-  ntptime is the only useage.
   The version string should change if I make an edit and rebuild
     currently it only changes when something in git changes
   We need to be sure not to break the stable checksum feature.

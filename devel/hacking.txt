@@ -377,7 +377,7 @@ a large common include file. These includes live in docs/includes
 and are probably what you need to edit if you're updating anything
 that appears on a man page.
 
-=== Version string ===
+=== Version number ===
 
 We use a variant of three part Semantic Versioning, of the form X.Y.Z.
 X, Y, and Z are non-negative decimal integers.
@@ -404,6 +404,20 @@ bugfixes.  Feel free to discuss it with project management.
 Note that this is a different numbering system from NTP Classic. In
 their A.B.C numbers, A was the protocol version, B was the major, and
 C was the minor.  They also use release-candidate suffixes.
+
+== Version string ==
+
+We use the BUILD_EPOCH as described in packaging/packaging.txt for the
+timestamp (converted to RFC 3339 format) part of the version string reported in
+ntpd and other binaries.
+
+Release builds have version strings of the form:
+
+<base version number> <BUILD_EPOCH in RFC 3339 format>
+
+Development builds have version strings of the form:
+
+<base version number>+ <BUILD_EPOCH in RFC 3339 format> (git rev <git shorthash>)
 
 == Contribution workflow and conventions ==
 

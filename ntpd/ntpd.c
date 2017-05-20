@@ -32,8 +32,6 @@
 
 #include "recvbuff.h"
 
-#include "version.h"
-
 void catchQuit (int sig);
 static volatile int signo = 0;
 /* In an ideal world, 'finish_safe()' would declared as noreturn... */
@@ -485,7 +483,7 @@ const char *ntpd_version(void)
 {
     static char versionbuf[64];
     snprintf(versionbuf, sizeof(versionbuf),
-	     "ntpd ntpsec-%s+%d %s", VERSION, VCS_TICK, VCS_DATE);
+	     "ntpd ntpsec-%s", NTPSEC_VERSION_EXTENDED);
     return versionbuf;
 }
 
