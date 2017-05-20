@@ -14,6 +14,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef HAVE_RES_INIT
+#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
+#endif
+
 #include "ntpd.h"
 #include "ntp_dns.h"
 
@@ -48,17 +54,19 @@ bool dns_probe(struct peer* pp)
         pthread_attr_t  thr_attr;
         sigset_t        block_mask, saved_sig_mask;
 
-	msyslog(LOG_INFO, "dns_probe: %s, 0x%x", pp->hostname, pp->cast_flags);
+	msyslog(LOG_INFO, "dns_probe: %s, cast_flags:%x, flags:%x",
+		pp->hostname, pp->cast_flags, pp->flags);
         if (NULL != active)
 		return false;
 	active = pp;
 
         pthread_attr_init(&thr_attr);
-	/* FIXME-DNS: stack size? */
+	/* might want to set stack size */
         sigfillset(&block_mask);
         pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
 	rc = pthread_create(&worker, &thr_attr, dns_lookup, pp);
         if (rc) {
+		errno = rc;
 		msyslog(LOG_ERR, "dns_probe: error from pthread_create: %s, %m", pp->hostname);
 		return true;  /* don't try again */
 	}
@@ -71,8 +79,11 @@ bool dns_probe(struct peer* pp)
 void dns_check(void)
 {
 	int rc;
-	struct addrinfo *ai;
-	sockaddr_u sockaddr;
+//	struct addrinfo *ai;
+//	sockaddr_u sockaddr;
+
+	msyslog(LOG_INFO, "dns_check: processing %s, %x, %x",
+		active->hostname, active->cast_flags, active->flags);
 
 	msyslog(LOG_INFO, "dns_check: lookup for %s", active->hostname);
 	rc = pthread_join(worker, NULL);
@@ -83,40 +94,47 @@ void dns_check(void)
 	if (0 != gai_rc) {
 		msyslog(LOG_INFO, "dns_check: DNS error %s",
 			gai_strerror(gai_rc));
-		/* FIXME-DNS callback with null? */
+		/* FIXME-DNS callback with null to set retry timer? */
 		active = NULL;
 		return;
 	}
 
-	for (ai = answer; NULL != ai; ai = ai->ai_next) {
-		sockaddr.sa = *ai->ai_addr;
-		msyslog(LOG_INFO, "dns_check: found %s=%s",
-			socktoa(&sockaddr), ai->ai_canonname);
-	}
-
-	msyslog(LOG_INFO, "dns_check: processing %s, %x",
-        	active->hostname, active->cast_flags);
+//	for (ai = answer; NULL != ai; ai = ai->ai_next) {
+//		sockaddr.sa = *ai->ai_addr;
+//		msyslog(LOG_INFO, "dns_check: found %s", socktoa(&sockaddr));
+//	}
 
 	if (active->cast_flags & MDF_POOL)
 		pool_take_dns(active, answer);
 	else
 		server_take_dns(active, answer);
 
+	freeaddrinfo(answer);
 	active = NULL;
 };
 
+/* Beware: no calls to msyslog from here.
+ * It's not thread safe.
+ * This is the only other thread in ntpd.
+ */
 static void* dns_lookup(void* arg)
 {
 	struct peer *pp = (struct peer *) arg;
 	struct addrinfo hints;
 
-	// FIXME-DNS need occasional res_init()
+#ifdef HAVE_RES_INIT
+	/* Reload DNS servers from /etc/resolv.conf in case DHCP has updated it.
+	 * We only need to do this occasionally, but it's not expensive
+	 * and simpler to do it every time than it is to figure out when
+	 * to do it.
+	 */
+	res_init();
+#endif
+
 	ZERO(hints);
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_family = AF(&pp->srcadr);
-	// FIXME-DNS
-	// hints.ai_family = my_node->addr->type;
 	gai_rc = getaddrinfo(pp->hostname, "ntp", &hints, &answer);
 
 	kill(getpid(), SIGDNS);
