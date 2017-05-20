@@ -621,7 +621,7 @@ int main(int argc, char **argv) {
         ('nanotime', ["sys/time.h"]),     # Old OS X
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
-        ('res_init', ["resolv.h"]),
+        ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),
         ('sched_setscheduler', ["sched.h"]),
         ('strlcpy', ["string.h"]),
         ('strlcat', ["string.h"]),
@@ -677,10 +677,9 @@ int main(int argc, char **argv) {
         ("net/route.h", ["sys/types.h", "sys/socket.h", "net/if.h"]),
         "netinfo/ni.h",     # Apple
         "priv.h",           # Solaris
-        ("resolv.h", ["sys/types.h", "netinet/in.h", "arpa/nameser.h"]),
         "semaphore.h",
         "stdatomic.h",
-        "sys/clockctl.h",       # NetBSD
+        "sys/clockctl.h",   # NetBSD
         "sys/ioctl.h",
         "sys/modem.h",      # Apple
         "sys/sockio.h",
