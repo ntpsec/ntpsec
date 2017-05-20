@@ -13,7 +13,6 @@ import socket
 import sys
 import time
 import ntp.ntpc
-import ntp.version
 import ntp.magic
 import ntp.control
 
@@ -107,9 +106,7 @@ def safeargcast(arg, castfunc, errtext, usage):
 
 def stdversion():
     "Returns the NTPsec version string in a standard format"
-    return "ntpsec-%s+%s %s" % (ntp.version.VERSION,
-                                ntp.version.VCS_TICK,
-                                ntp.version.VCS_DATE)
+    return "ntpsec-%s" % "@NTPSEC_VERSION@"
 
 
 def rfc3339(t):
