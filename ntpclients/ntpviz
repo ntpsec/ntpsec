@@ -34,12 +34,13 @@ Python by ESR, concept and gnuplot code by Dan Drown.
 # SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import csv
-import datetime
-import re
 import atexit
 import binascii
 import collections
+import csv
+import datetime
+import math
+import re
 import os
 import socket
 import sys
@@ -123,39 +124,48 @@ def print_profile():
     pr.print_stats('cumtime')
 
 
-# standard deviation functions
+# standard deviation class
 # use this until we can guarantee Python 3.4 and the statistics module
 # http://stackoverflow.com/questions/15389768/standard-deviation-of-a-list#21505523
-def mean(data):
-    """Return the sample arithmetic mean of data."""
-    n = len(data)
-    if n < 1:
-        raise ValueError('mean requires at least one data point')
-    return sum(data)/n   # in Python 2 use sum(data)/float(n)
 
+# class to calc:
+#   Mean, Variance, Standard Deviation, Skewness and Kurtosis
 
-def _ss(data, mu=None):
-    """Return sum of square deviations of sequence data."""
-    if mu is None:
-        c = mean(data)
-    else:
-        c = mu
-    ss = sum((x-c)**2 for x in data)
-    return ss
+class RunningStats:
+    "Calculate mean, variance, sigma, skewness and kurtosis"
 
+    def __init__(self, values):
+        self.num = len(values)     # number of samples
+        self.mu = 0.0              # simple arithmetic mean
+        self.variance = 0.0        # variance
+        self.sigma = 0.0           # aka standard deviation
+        self.skewness = 0.0
+        self.kurtosis = 3.0
 
-# fixme, need to handle mu=mean
-def pstdev(data, mu=None):
-    """Calculates the population standard deviation."""
-    n = len(data)
-    if n < 2:
-        # variance requires at least two data points
-        return 0
-    ss = _ss(data, mu)
-    pvar = ss/n          # the population variance
-    return pvar**0.5
+        if 0 >= self.num:
+            # no data??
+            return
 
-# end standard deviation functions
+        self.mu = sum(values) / self.num
+        self.variance = sum(pow((v-self.mu), 2) for v in values) / self.num
+        self.sigma = math.sqrt(self.variance)
+
+        if math.isnan(self.sigma) or 1e-12 >= abs(self.sigma):
+            # punt
+            self.skewness = float('nan')
+            self.kurtosis = float('nan')
+            return
+
+        m3 = 0
+        m4 = 0
+        for val in values:
+            m3 += pow(val - self.sigma, 3)
+            m4 += pow(val - self.sigma, 4)
+
+        self.skewness = m3 / (self.num * pow(self.sigma, 3))
+        self.kurtosis = m4 / (self.num * pow(self.sigma, 4))
+
+# end standard deviation class
 
 
 # class for calced values
@@ -169,17 +179,20 @@ class VizStats(ntp.statfiles.NTPStats):
 
     # observe RFC 4180, end lines with CRLF
     csv_head = ["Name", "Min", "1%", "5%", "50%", "95%", "99%", "Max", "",
-                "90% Range", "98% Range", "StdDev", "", "Mean", "Units"]
+                "90% Range", "98% Range", "StdDev", "", "Mean", "Units",
+                "Skewness", "Kurtosis"]
 
     table_head = """\
 <br>
-<table style="text-align:right;width:1024px;">
+<table style="text-align:right;width:1300px;">
 <thead>
   <tr style="font-weight:bold;text-align:left;">
     <td style="width:300px;"></td>
     <td colspan=8> Percentiles......</td>
     <td colspan=3> Ranges......</td>
-    <td colspan=2></td>
+    <td colspan=3></td>
+    <td style="text-align:right;">Skew-</td>
+    <td style="text-align:right;">Kurt-</td>
     <td ></td>
   </tr>
   <tr style="font-weight:bold;text-align:right;">
@@ -188,6 +201,7 @@ class VizStats(ntp.statfiles.NTPStats):
     <td>99%</td><td>Max</td> <td style="width:10px;">&nbsp;</td>
     <td>90%</td><td>95%</td><td>StdDev</td>
     <td style="width:10px;">&nbsp;</td><td>Mean</td><td>Units</td>
+    <td>ness</td><td>osis</td>
   </tr>
 </thead>
 """
@@ -250,8 +264,9 @@ class VizStats(ntp.statfiles.NTPStats):
                 # go to nanosec
                 self.unit = "ns"
 
-        self.percs["mu"] = mean(values)
-        self.percs["pstd"] = pstdev(values, mu=self.percs["mu"])
+        sts = RunningStats(values)
+        self.percs["mu"] = sts.mu
+        self.percs["pstd"] = sts.sigma
 
         self.title = title
 
@@ -274,6 +289,17 @@ class VizStats(ntp.statfiles.NTPStats):
             else:
                 self.percs_f[k] = format(v, ",.3f")
 
+        # dan't scale skewness and kurtosis
+        self.percs["skew"] = sts.skewness
+        self.percs["kurt"] = sts.kurtosis
+        if '°C' == units:
+            # skip for temperatures.
+            self.percs_f["skew"] = ''
+            self.percs_f["kurt"] = ''
+        else:
+            self.percs_f["skew"] = format(self.percs["skew"], "6.4g")
+            self.percs_f["kurt"] = format(self.percs["kurt"], "6.4g")
+
         if args.clip:
             self.percs["min_y"] = self.percs["p1"]
             self.percs["max_y"] = self.percs["p99"]
@@ -293,7 +319,7 @@ class VizStats(ntp.statfiles.NTPStats):
 
         s = ["%(title)s", "%(p0)s", "%(p1)s", "%(p5)s", "%(p50)s", "%(p95)s",
              " %(p99)s", "%(p100)s", "", "%(r90)s", "%(r98)s", "%(pstd)s",
-             "", "%(mu)s", "%(unit)s"]
+             "", "%(mu)s", "%(unit)s", "%(skew)s", "%(kurt)s", ]
 
         # csv is raw, html table is autoranged
         self.csv = [x % self.percs for x in s]
@@ -1682,6 +1708,13 @@ Refclock Jitter, and Peer Jitter in seconds.  Local Frequency Jitter is
 in ppm or ppb.
 </dd>
 
+<dt>kurtosis, Kurt:</dt>
+<dd>The kurtosis of a random variable X is the fourth standardized
+moment and is a dimension-less ratio. ntpviz uses the Pearson's moment
+coefficient of kurtosis.  A normal distribution has a kurtosis of three.
+NIST describes a kurtosis over three as "heavy tailed" and one under
+three as "light tailed".</dd>
+
 <dt>ms, millisecond:</dt>
 <dd>One thousandth of a second = 0.001 seconds, 1e-3 seconds</dd>
 
@@ -1723,9 +1756,6 @@ or server.</dd>
 <dd>The difference between the ntpd calculated time and the local system
  clock's time.  Also called phase offset.</dd>
 
-<dt>upstream clock:</dt>
-<dd>Any remote clock or reference clock used as a source of time.</dd>
-
 <dt>σ, sigma:</dt>
 <dd>Sigma denotes the standard deviation (SD) and is centered on the
 arithmetic mean of the data set. The SD is simply the square root of
@@ -1734,6 +1764,16 @@ deviation.  Three sigma is three times sigma.  Smaller is better.<br>
 The formula for sigma is: "σ = √[ ∑(x<sub>i</sub>-mu)^2 / N ]".
 Where x<sub>i</sub> denotes the data points and N is the number of data
 points.</dd>
+
+<dt>skewness, Skew:</dt>
+<dd>The skewness of a random variable X is the third standardized
+moment and is a dimension-less ratio. ntpviz uses the Pearson's moment
+coefficient of skewness.  Wikipedia describes it best: "The qualitative
+interpretation of the skew is complicated and unintuitive."<br> A normal
+distribution has a skewness of zero. </dd>
+
+<dt>upstream clock:</dt>
+<dd>Any remote clock or reference clock used as a source of time.</dd>
 
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
