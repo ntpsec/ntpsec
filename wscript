@@ -825,8 +825,14 @@ int main(int argc, char **argv) {
         if ctx.env.DEST_OS != "linux":
             ctx.fatal("seccomp is only supported on Linux")
 
-        ctx.check_cc(header_name="seccomp.h")
-        ctx.check_cc(lib="seccomp")
+        # Check via pkg-config first, then fall back to a direct search
+        if not ctx.check_cfg(
+            package='libseccomp', args=['--libs', '--cflags'],
+            uselib_store='SECCOMP', define_name='HAVE_SECCOMP_H',
+            mandatory=False
+        ):
+            ctx.check_cc(header_name="seccomp.h")
+            ctx.check_cc(lib="seccomp")
 
     from wafhelpers.check_pthread import check_pthread_header_lib
     check_pthread_header_lib(ctx)
