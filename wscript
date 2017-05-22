@@ -275,9 +275,6 @@ def configure(ctx):
     if ctx.options.enable_leap_testing:
         ctx.define("ENABLE_LEAP_TESTING", 1,
                    comment="Enable leap seconds on other than 1st of month.")
-    if ctx.options.enable_leap_smear:
-        ctx.define("ENABLE_LEAP_SMEAR", 1,
-                   comment="Enable experimental leap smearing code")
 
     # check for some libs first.  some options, like stack protector,
     # may depend on some libs, like -lssp
