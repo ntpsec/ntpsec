@@ -25,6 +25,9 @@
 static systime_func_ptr systime_func = &time;
 static inline time_t now(void);
 
+static int
+ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
+
 
 systime_func_ptr
 ntpcal_set_timefunc(
@@ -908,7 +911,7 @@ ntpcal_date_to_time(
 }
 
 
-int
+static int
 ntpcal_ntp64_to_date(
 	struct calendar *jd,
 	const time64_t  ntp

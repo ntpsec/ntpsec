@@ -215,9 +215,6 @@ ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
 		       int32_t /* cycle */) __attribute__((const));
 
 extern int
-ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
-
-extern int
 ntpcal_ntp_to_date(struct calendar * /* jd */,	uint32_t /* ntp */,
 		   const time_t * /* pivot */);
 
