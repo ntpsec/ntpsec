@@ -12,7 +12,7 @@
 #include <openssl/evp.h>
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-void	atexit_ssl_cleanup(void);
+static void	atexit_ssl_cleanup(void);
 #endif
 
 static bool ssl_init_done;
@@ -35,7 +35,7 @@ ssl_init(void)
 
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-void
+static void
 atexit_ssl_cleanup(void)
 {
 	if (!ssl_init_done)
