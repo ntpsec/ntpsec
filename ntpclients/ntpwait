@@ -163,8 +163,12 @@ if __name__ == "__main__":
                 sys.stdout.write("\bntpd is not running!\n")
             continue
 
+        msg = None
         try:
             msg = session.doquery(2)     # Request system variables
+        except ntp.packet.ControlException as e:
+            sys.stderr.write("localhost: timed out, nothing received\n")
+            sys.stderr.write(e.message)
         except socket.error:
             if verbose:
                 sys.stdout.write("\b" + "*+:."[i % 4])
