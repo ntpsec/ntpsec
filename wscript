@@ -41,6 +41,7 @@ Usage: waf <command>
     configure   Configure the project
     dist        Create a release
     install     Install the project
+    loccount    Show SLOC count of the source tree
 
 ''')
 
