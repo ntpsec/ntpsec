@@ -193,10 +193,10 @@ def report(packet, json):
 
     packet.posixize()
 
-    # Cheesy way to get local timezone offset
-    gmt_time = int(time.time())
-    local_time = int(time.mktime(time.gmtime(gmt_time)))
-    tmoffset = (local_time - gmt_time) // 60    # In minutes
+    if time.daylight:
+        tmoffset = time.altzone // 60  # In minutes
+    else:
+        tmoffset = time.timezone // 60  # In minutes
 
     # The server's idea of the time
     t = time.localtime(int(packet.transmit_timestamp))
@@ -208,7 +208,7 @@ def report(packet, json):
     date = time.strftime("%Y-%m-%d", t)
     tod = time.strftime("%T", t) + (".%*d" % (digits, ms))
     sgn = ("%+d" % tmoffset)[0]
-    tz = "%s%02d%02d" % (sgn, tmoffset // 60, tmoffset % 60)
+    tz = "%s%02d%02d" % (sgn, abs(tmoffset) // 60, tmoffset % 60)
 
     if json:
         say('{"time":"%sT%s%s","offset":%f,"precision":%f,"host":"%s",'
