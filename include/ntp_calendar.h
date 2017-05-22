@@ -180,13 +180,6 @@ ntpcal_daysec_to_date(struct calendar * /* jt */, int32_t /* secs */);
 extern int32_t
 ntpcal_date_to_daysec(const struct calendar *);
 
-/*
- * Take a value of seconds since midnight and split it into hhmmss in
- * a 'struct tm'. Return excessive days.
- */
-extern int32_t
-ntpcal_daysec_to_tm(struct tm * /* utm */, int32_t /* secs */);
-
 extern int32_t
 ntpcal_tm_to_daysec(const struct tm * /* utm */);
 

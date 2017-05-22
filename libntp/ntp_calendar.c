@@ -569,29 +569,6 @@ ntpcal_daysec_to_date(
 
 /*
  *---------------------------------------------------------------------
- * Take a value of seconds since midnight and split it into hhmmss in a
- * 'struct tm'.
- *---------------------------------------------------------------------
- */
-int32_t
-ntpcal_daysec_to_tm(
-	struct tm *utm,
-	int32_t	   sec
-	)
-{
-	int32_t days;
-	int32_t ts[3];
-
-	days = priv_timesplit(ts, sec);
-	utm->tm_hour = ts[0];
-	utm->tm_min  = ts[1];
-	utm->tm_sec  = ts[2];
-
-	return days;
-}
-
-/*
- *---------------------------------------------------------------------
  * Take a UN*X time and convert to a calendar structure.
  *---------------------------------------------------------------------
  */
