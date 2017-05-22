@@ -35,15 +35,3 @@ uint64_t ntp_be64dec(const void *buf) {
 	    ((uint64_t)(b[6]) << 8) +
 	    (uint64_t)(b[7]);
 }
-
-void ntp_be64enc(void *buf, uint64_t x) {
-	uint8_t *b = (uint8_t*)buf;
-	b[0] = (x >> 56) & 0xff;
-	b[1] = (x >> 48) & 0xff;
-	b[2] = (x >> 40) & 0xff;
-	b[3] = (x >> 32) & 0xff;
-	b[4] = (x >> 24) & 0xff;
-	b[5] = (x >> 16) & 0xff;
-	b[6] = (x >> 8) & 0xff;
-	b[7] = x & 0xff;
-}
