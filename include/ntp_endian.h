@@ -12,7 +12,6 @@
 #include <stdint.h>
 
 uint16_t ntp_be16dec(const void *buf) __attribute__((pure));
-void ntp_be16enc(void *buf, uint16_t x);
 uint32_t ntp_be32dec(const void *buf) __attribute__((pure));
 void ntp_be32enc(void *buf, uint32_t x);
 uint64_t ntp_be64dec(const void *buf) __attribute__((pure));
