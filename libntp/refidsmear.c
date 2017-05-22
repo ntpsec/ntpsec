@@ -13,26 +13,6 @@
  *
  */
 
-
-l_fp
-convertRefIDToLFP(uint32_t r)
-{
-	l_fp temp = 0;
-
-	r = ntohl(r);
-
-	// printf("%03d %08x: ", (r >> 24) & 0xFF, (r & 0x00FFFFFF) );
-
-	setlfpfrac(temp, r << 10);	/* 22 fractional bits */
-
-	r = (r >> 22) & 0x3;
-	r |= ~(r & 2) + 1;
-	setlfpuint(temp, r);
-
-	return temp;
-}
-
-
 uint32_t
 convertLFPToRefID(l_fp num)
 {
