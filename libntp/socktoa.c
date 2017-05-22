@@ -139,27 +139,3 @@ sock_hash(
 
 	return (u_short)(hashVal & USHRT_MAX);
 }
-
-
-int
-sockaddr_masktoprefixlen(
-	const sockaddr_u *	psa
-	)
-{
-	isc_netaddr_t	isc_na;
-	isc_sockaddr_t	isc_sa;
-	u_int		pfxlen;
-	bool		result;
-	int		rc;
-
-	ZERO(isc_sa);
-	memcpy(&isc_sa.type, psa,
-	       min(sizeof(isc_sa.type), sizeof(*psa)));
-	isc_netaddr_fromsockaddr(&isc_na, &isc_sa);
-	result = isc_netaddr_masktoprefixlen_bool(&isc_na, &pfxlen);
-	rc = (result)
-		 ? (int)pfxlen
-		 : -1;
-
-	return rc;
-}
