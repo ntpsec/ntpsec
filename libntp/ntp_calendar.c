@@ -28,6 +28,9 @@ static inline time_t now(void);
 static int
 ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
 
+static ntpcal_split
+ntpcal_days_in_months(int32_t /* months */);
+
 
 systime_func_ptr
 ntpcal_set_timefunc(
@@ -712,7 +715,7 @@ ntpcal_days_in_years(
  * conversion is then simply based on the start of the following year.
  *---------------------------------------------------------------------
  */
-ntpcal_split
+static ntpcal_split
 ntpcal_days_in_months(
 	int32_t m
 	)

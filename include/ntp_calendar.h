@@ -99,19 +99,6 @@ extern int32_t
 ntpcal_days_in_years(int32_t /* years */) __attribute__((const));
 
 /*
- * Convert a number of elapsed month in a year into elapsed days
- * in year.
- *
- * The month will be normalized, and 'res.hi' will contain the
- * excessive years that must be considered when converting the years,
- * while 'res.lo' will contain the days since start of the
- * year. (Expect the resulting days to be negative, with a positive
- * excess! But then, we need no leap year flag, either...)
- */
-extern ntpcal_split
-ntpcal_days_in_months(int32_t /* months */);
-
-/*
  * Convert ELAPSED years/months/days of gregorian calendar to elapsed
  * days in Gregorian epoch. No range checks done here!
  */
