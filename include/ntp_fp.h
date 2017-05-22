@@ -198,7 +198,6 @@ extern	char *	rfc3339date	(const l_fp);
 extern	char *	rfc3339time     (time_t);
 
 extern	void	set_sys_fuzz	(double);
-extern  void	get_ostime	(struct timespec *tsp);
 extern	void	get_systime	(l_fp *);
 extern	bool	step_systime	(double, int (*settime)(struct timespec *));
 extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct timeval *));

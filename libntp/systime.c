@@ -75,6 +75,8 @@ static long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
  */
 static bool lamport_violated;	/* clock was stepped back */
 
+static  void	get_ostime	(struct timespec *tsp);
+
 void
 set_sys_fuzz(
 	double	fuzz_val
@@ -87,7 +89,7 @@ set_sys_fuzz(
 }
 
 
-void
+static void
 get_ostime(
 	struct timespec *	tsp
 	)
