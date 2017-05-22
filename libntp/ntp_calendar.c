@@ -592,27 +592,6 @@ ntpcal_daysec_to_tm(
 
 /*
  *---------------------------------------------------------------------
- * take a split representation for day/second-of-day and day offset
- * and convert it to a 'struct calendar'. The seconds will be normalised
- * into the range of a day, and the day will be adjusted accordingly.
- *
- * returns >0 if the result is in a leap year, 0 if in a regular
- * year and <0 if the result did not fit into the calendar struct.
- *---------------------------------------------------------------------
- */
-int
-ntpcal_daysplit_to_date(
-	struct calendar	   *jd,
-	const ntpcal_split *ds,
-	int32_t		    dof
-	)
-{
-	dof += ntpcal_daysec_to_date(jd, ds->lo);
-	return ntpcal_rd_to_date(jd, ds->hi + dof);
-}
-
-/*
- *---------------------------------------------------------------------
  * Take a UN*X time and convert to a calendar structure.
  *---------------------------------------------------------------------
  */

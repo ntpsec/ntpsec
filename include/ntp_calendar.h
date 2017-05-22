@@ -191,10 +191,6 @@ extern int32_t
 ntpcal_tm_to_daysec(const struct tm * /* utm */);
 
 extern int
-ntpcal_daysplit_to_date(struct calendar * /* jt */,
-			const ntpcal_split * /* ds */, int32_t /* dof */);
-
-extern int
 ntpcal_time_to_date(struct calendar * /* jd */, const time64_t /* ts */);
 
 extern int32_t
