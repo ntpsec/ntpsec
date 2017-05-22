@@ -31,6 +31,8 @@ ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
 static ntpcal_split
 ntpcal_days_in_months(int32_t /* months */);
 
+static  int32_t
+ntpcal_edate_to_yeardays(int32_t, int32_t, int32_t);
 
 systime_func_ptr
 ntpcal_set_timefunc(
@@ -742,7 +744,7 @@ ntpcal_edate_to_eradays(
  * even if months & days are off-scale.
  *---------------------------------------------------------------------
  */
-int32_t
+static int32_t
 ntpcal_edate_to_yeardays(
 	int32_t years,
 	int32_t mons,
@@ -902,4 +904,26 @@ ntpcal_ntp_to_date(
 	return ntpcal_ntp64_to_date(jd, ntp64);
 }
 
+/*
+ * ymd2yd - compute the date in the year from y/m/d
+ *
+ * A thin wrapper around a more general calendar function.
+ */
+
+int
+ymd2yd(
+	int y,
+	int m,
+	int d)
+{
+	/*
+	 * convert y/m/d to elapsed calendar units, convert that to
+	 * elapsed days since the start of the given year and convert
+	 * back to unity-based day in year.
+	 *
+	 * This does no further error checking, since the underlying
+	 * function is assumed to work out how to handle the data.
+	 */
+	return ntpcal_edate_to_yeardays(y-1, m-1, d-1) + 1;
+}
 /* -*-EOF-*- */

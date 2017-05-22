@@ -113,16 +113,6 @@ ntpcal_etime_to_seconds(int32_t /* hours */, int32_t /* minutes */,
                         int32_t /* seconds */) __attribute__((const));
 
 /*
- * Convert ELAPSED years/months/days of gregorian calendar to elapsed
- * days in year.
- *
- * Note: This will give the true difference to the start of the given year,
- * even if months & days are off-scale.
- */
-extern int32_t
-ntpcal_edate_to_yeardays(int32_t /* years */, int32_t /* months */, int32_t /* mdays */);
-
-/*
  * Convert the date part of a 'struct tm' (that is, year, month,
  * day-of-month) into the RataDie of that day.
  */

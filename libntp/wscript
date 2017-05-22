@@ -23,7 +23,6 @@ def build(ctx):
         "socktoa.c",
         "ssl_init.c",
         "syssignal.c",
-        "ymd2yd.c",
     ]
 
     libntp_source_sharable = [
