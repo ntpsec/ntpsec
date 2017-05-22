@@ -31,8 +31,9 @@ uint32_t ntp_syslogmask = INIT_NTP_SYSLOGMASK;
 extern	char *	progname;
 
 /* Declare the local functions */
-void	addto_syslog	(int, const char *);
+static void	addto_syslog	(int, const char *);
 #ifndef VSNPRINTF_PERCENT_M
+static	void	errno_to_str(int, char *, size_t);
 void	format_errmsg	(char *, size_t, const char *, int);
 
 /* format_errmsg() is under #ifndef VSNPRINTF_PERCENT_M above */
@@ -75,14 +76,13 @@ format_errmsg(
 	}
 	*n = '\0';
 }
-#endif	/* VSNPRINTF_PERCENT_M */
 
 
 /*
  * errno_to_str() - a thread-safe strerror() replacement.
  *		    Hides the varied signatures of strerror_r().
  */
-void
+static void
 errno_to_str(
 	int	err,
 	char *	buf,
@@ -100,6 +100,7 @@ errno_to_str(
 		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
 			 err, errno);
 }
+#endif	/* VSNPRINTF_PERCENT_M */
 
 
 /*
@@ -107,7 +108,7 @@ errno_to_str(
  * This routine adds the contents of a buffer to the syslog or an
  * application-specific logfile.
  */
-void
+static void
 addto_syslog(
 	int		level,
 	const char *	msg
