@@ -31,6 +31,7 @@ uint32_t ntp_syslogmask = INIT_NTP_SYSLOGMASK;
 extern	char *	progname;
 
 /* Declare the local functions */
+static	int	mvfprintf(FILE *, const char *, va_list) NTP_PRINTF(2, 0);
 static void	addto_syslog	(int, const char *);
 #ifndef VSNPRINTF_PERCENT_M
 static	void	errno_to_str(int, char *, size_t);
@@ -216,7 +217,7 @@ mvsnprintf(
 }
 
 
-int
+static int
 mvfprintf(
 	FILE *		fp,
 	const char *	fmt,
