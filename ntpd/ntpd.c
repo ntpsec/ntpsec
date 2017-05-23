@@ -663,11 +663,11 @@ ntpdmain(
 #endif
 
 # ifdef DEBUG
-	(void) signal_no_reset(MOREDEBUGSIG, moredebug);
-	(void) signal_no_reset(LESSDEBUGSIG, lessdebug);
+	signal_no_reset(MOREDEBUGSIG, moredebug);
+	signal_no_reset(LESSDEBUGSIG, lessdebug);
 # else
-	(void) signal_no_reset(MOREDEBUGSIG, no_debug);
-	(void) signal_no_reset(LESSDEBUGSIG, no_debug);
+	signal_no_reset(MOREDEBUGSIG, no_debug);
+	signal_no_reset(LESSDEBUGSIG, no_debug);
 # endif	/* DEBUG */
 
 	/*
