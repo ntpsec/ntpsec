@@ -60,7 +60,7 @@ getmsb_short(
 	 unsigned char *p
 	 )
 {
-	return get_msb_short(&p);
+	return (short) get_msb_short(&p);
 }
 
 long
