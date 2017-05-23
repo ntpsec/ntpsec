@@ -11,7 +11,6 @@
  */
 
 #include <termios.h>
-#define TTY	struct termios
 
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>

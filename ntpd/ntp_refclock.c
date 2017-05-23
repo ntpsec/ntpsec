@@ -32,6 +32,8 @@
 			if (pp->coderecv == pp->codeproc) \
 				pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
 
+#define TTY	struct termios
+
 /*
  * Reference clock support is provided here by maintaining the fiction
  * that the clock is actually a peer.  As no packets are exchanged with
