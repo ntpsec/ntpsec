@@ -171,7 +171,6 @@ extern	void	peer_cleanup	(void);
 extern	void	transmit	(struct peer *);
 extern	void	receive 	(struct recvbuf *);
 extern	void	peer_clear	(struct peer *, const char *, const bool);
-extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
 extern	void	set_sys_leap	(uint8_t);
 
