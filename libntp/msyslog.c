@@ -21,8 +21,8 @@ bool	termlogit = false;	/* duplicate to stdout/err */
 bool	termlogit_pid = true;
 bool	msyslog_include_timestamp = true;
 FILE *	syslog_file;
-char *	syslog_fname;
-char *	syslog_abs_fname;
+static char *	syslog_fname;
+static char *	syslog_abs_fname;
 
 /* libntp default ntp_syslogmask is all bits lit */
 #define INIT_NTP_SYSLOGMASK	~(uint32_t)0

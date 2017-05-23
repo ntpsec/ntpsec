@@ -16,8 +16,6 @@ extern bool	termlogit_pid;
 extern bool	msyslog_include_timestamp;
 extern FILE *	syslog_file;	/* if syslogit is false, log to
 				   this file and not syslog */
-extern char *	syslog_fname;
-extern char *	syslog_abs_fname;
 
 /*
  * syslog output control
