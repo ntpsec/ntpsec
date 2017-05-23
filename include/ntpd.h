@@ -91,7 +91,6 @@ struct ctl_var {
 #define	EOV		0x80
 
 #define	RO	(CAN_READ)
-#define	WO	(CAN_WRITE)
 #define	RW	(CAN_READ|CAN_WRITE)
 
 extern	char *	add_var (struct ctl_var **, u_long, u_short);
