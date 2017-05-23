@@ -193,7 +193,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 				if (j & 1)
 					keystr[j / 2] |= temp;
 				else
-					keystr[j / 2] = temp << 4;
+					keystr[j / 2] = (uint8_t)(temp << 4);
 			}
 			if (j < jlim) {
 			    msyslog(LOG_ERR,
