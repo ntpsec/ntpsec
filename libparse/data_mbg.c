@@ -295,32 +295,6 @@ get_mbg_xyz(
     }
 }
 
-#define FETCH_DOUBLE(src, addr)							\
-	if  (fetch_ieee754(src, IEEE_DOUBLE, addr, mbg_double) != IEEE_OK)	\
-	{									\
-	  *addr = 0;								\
-	}
-
-void
-get_mbg_iono(
-	unsigned char **buffpp,
-	IONO *ionop
-	)
-{
-  ionop->csum   = (CSUM) get_lsb_uint16(buffpp);
-  ionop->valid  = get_lsb_int16(buffpp);
-
-  FETCH_DOUBLE(buffpp, &ionop->alpha_0);
-  FETCH_DOUBLE(buffpp, &ionop->alpha_1);
-  FETCH_DOUBLE(buffpp, &ionop->alpha_2);
-  FETCH_DOUBLE(buffpp, &ionop->alpha_3);
-
-  FETCH_DOUBLE(buffpp, &ionop->beta_0);
-  FETCH_DOUBLE(buffpp, &ionop->beta_1);
-  FETCH_DOUBLE(buffpp, &ionop->beta_2);
-  FETCH_DOUBLE(buffpp, &ionop->beta_3);
-}
-
 /*
  * data_mbg.c,v
  * Revision 4.8  2006/06/22 18:40:01  kardel

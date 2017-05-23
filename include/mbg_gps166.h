@@ -931,7 +931,6 @@ void get_mbg_cfgh (unsigned char **, CFGH *);
 void get_mbg_utc (unsigned char **, UTC *);
 void get_mbg_lla (unsigned char **, LLA);
 void get_mbg_xyz (unsigned char **, XYZ);
-void get_mbg_iono (unsigned char **, IONO *);
 
 CSUM mbg_csum (unsigned char *, unsigned int) __attribute__((pure));
 
