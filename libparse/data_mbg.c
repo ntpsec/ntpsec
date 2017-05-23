@@ -113,17 +113,6 @@ get_mbg_tm(
   tmp->status = get_lsb_uint16(buffpp);
 }
 
-void
-get_mbg_synth(
-	unsigned char **buffpp,
-	SYNTH *synthp
-	)
-{
-  synthp->freq  = get_lsb_int16(buffpp);
-  synthp->range = get_lsb_int16(buffpp);
-  synthp->phase = get_lsb_int16(buffpp);
-}
-
 static void
 get_mbg_tzname(
 	unsigned char **buffpp,
