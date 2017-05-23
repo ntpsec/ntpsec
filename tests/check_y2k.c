@@ -269,8 +269,7 @@ main( void )
 
     clock_time = &Clock_Time;
 
-	/* first test this #define */
-#define days_per_year(x)  ((x) % 4 ? 365 : ((x % 400) ? ((x % 100) ? 366 : 365) : 366))
+    /* first test #define days_per_year(x) */
 
     for ( year = 1400; year <= 2200; year++ )
     {

@@ -98,6 +98,8 @@ ntpcal_dayjoin(int32_t /* days */, int32_t /* seconds */) __attribute__((const))
 extern int32_t
 ntpcal_days_in_years(int32_t /* years */) __attribute__((const));
 
+#define days_per_year(x)	((x) % 4 ? 365 : ((x % 400) ? ((x % 100) ? 366 : 365) : 366))
+
 /*
  * Convert ELAPSED years/months/days of gregorian calendar to elapsed
  * days in Gregorian epoch. No range checks done here!

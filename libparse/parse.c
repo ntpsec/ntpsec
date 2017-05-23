@@ -276,7 +276,6 @@ parse_iodone(
 /*
  * convert a struct clock to UTC since Jan, 1st 1970 0:00 (the UNIX EPOCH)
  */
-#define days_per_year(x)	((x) % 4 ? 365 : ((x % 400) ? ((x % 100) ? 366 : 365) : 366))
 
 time_t
 parse_to_unixtime(
