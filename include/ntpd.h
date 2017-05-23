@@ -294,7 +294,6 @@ extern int	peer_ntpdate;		/* count of ntpdate peers */
  */
 extern uint8_t	sys_poll;		/* system poll interval (log2 s) */
 extern int	tc_counter;		/* poll-adjust counter */
-extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
 extern uint8_t	allan_xpt;		/* Allan intercept (log2 s) */
 extern double	clock_jitter;		/* clock jitter (s) */
