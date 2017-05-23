@@ -60,8 +60,6 @@
 
 
 /* ntp_config.c */
-#define	TAI_1972	10	/* initial TAI offset (s) */
-
 extern	const char	*getconfig	(const char *);
 extern	void	readconfig(const char *);
 extern	void	ctl_clr_stats	(void);
