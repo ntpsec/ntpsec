@@ -109,24 +109,6 @@ int ntp_adjtime_ns(struct timex *ntx)
 }
 #endif /* HAVE_SYS_TIMEX_H */
 
-#if !defined(HAVE_NTP_GETTIME) && defined(HAVE_NTP_ADJTIME)
-int ntp_gettime(struct ntptimeval *ntv)
-{
-	struct timex tntx;
-	int result;
-
-	ZERO(tntx);
-	result = ntp_adjtime(&tntx);
-	ntv->time = tntx.time;
-	ntv->maxerror = tntx.maxerror;
-	ntv->esterror = tntx.esterror;
-#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
-	ntv->tai = tntx.tai;
-#endif
-	return result;
-}
-#endif	/* !HAVE_NTP_GETTIME */
-
 int
 ntp_set_tod(
 	struct timespec *tvs

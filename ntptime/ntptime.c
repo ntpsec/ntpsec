@@ -35,6 +35,16 @@
 /* nano seconds per micro second */
 #define NS_PER_US_FLOAT	1000.0
 
+#ifndef HAVE_STRUCT_NTPTIMEVAL
+struct ntptimeval
+{
+	struct timeval	time;		/* current time (ro) */
+	long int	maxerror;	/* maximum error (us) (ro) */
+	long int	esterror;	/* estimated error (us) (ro) */
+};
+
+#endif	/* !HAVE_STRUCT_NTPTIMEVAL */
+
 /* MUSL port shim */
 #ifndef HAVE_NTP_GETTIME
 int ntp_gettime(struct ntptimeval *ntv)

@@ -1,11 +1,9 @@
 /*
- * ntp_syscall.h - various ways to perform the ntp_adjtime() and ntp_gettime()
- * 		   system calls.
+ * ntp_syscall.h - various ways to perform the ntp_adjtime() system calls.
  *
  * On most systems including <sys/timex.h> will bring in declarations
- * for the BSD functions ntp_gettime(2) and ntp_adjtime(2). (Linux
- * using glibc has these, though they're not visible in the manual
- * pages.)
+ * for the BSD function ntp_adjtime(2). (Linux using glibc has these,
+ * though they're not visible in the manual pages.)
  */
 
 #ifndef GUARD_NTP_SYSCALL_H
@@ -16,17 +14,6 @@
 # include <sys/timex.h>
 extern int ntp_adjtime_ns(struct timex *);
 #endif
-
-#ifndef HAVE_STRUCT_NTPTIMEVAL
-struct ntptimeval
-{
-	struct timeval	time;		/* current time (ro) */
-	long int	maxerror;	/* maximum error (us) (ro) */
-	long int	esterror;	/* estimated error (us) (ro) */
-};
-
-int ntp_gettime(struct ntptimeval *);
-#endif	/* !HAVE_STRUCT_NTPTIMEVAL */
 
 /*
  * The units of the maxerror and esterror fields vary by platform.  If
