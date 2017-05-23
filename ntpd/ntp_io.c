@@ -644,22 +644,6 @@ is_ip_address(
 
 
 /*
- * interface list enumerator - visitor pattern
- */
-void
-interface_enumerate(
-	interface_receiver_t	receiver,
-	void *			data
-	)
-{
-	interface_info_t ifi;
-
-	ifi.action = IFS_EXISTS;
-	for (ifi.ep = ep_list; ifi.ep != NULL; ifi.ep = ifi.ep->elink)
-		(*receiver)(data, &ifi);
-}
-
-/*
  * do standard initialization of interface structure
  */
 static void
