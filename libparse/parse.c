@@ -502,25 +502,6 @@ pps_one(
 }
 
 /*
- * parse_pps_fnc_t pps_zero
- *
- * handle a pps time stamp in ZERO edge
- */
-/*ARGSUSED*/
-unsigned long
-pps_zero(
-	register parse_t *parseio,
-	register int status,
-	register timestamp_t *ptime
-	)
-{
-	if (!status)
-		return pps_simple(parseio, status, ptime);
-
-	return CVT_NONE;
-}
-
-/*
  * timepacket
  *
  * process a data packet
