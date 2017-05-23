@@ -29,17 +29,7 @@
 
 #include <stdbool.h>
 
-# ifdef CALYSTO 
-/* see: http://www.domagoj-babic.com/index.php/ResearchProjects/Calysto */
-
-extern void calysto_assume(unsigned char cnd); /* assume this always holds */ 
-extern void calysto_assert(unsigned char cnd); /* check whether this holds */ 
-#define ALWAYS_REQUIRE(x)	calysto_assert(x)
-#define ALWAYS_INSIST(x)	calysto_assume(x) /* DLH calysto_assert()? */
-#define ALWAYS_INVARIANT(x)	calysto_assume(x)
-#define ALWAYS_ENSURE(x)	calysto_assert(x)
-
-/* # elif defined(__COVERITY__) */
+/* # if defined(__COVERITY__) */
 /*
  * DH: try letting coverity scan our actual assertion macros, now that
  * isc_assertioncallback_t is marked __attribute__ __noreturn__.
@@ -53,15 +43,7 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
  * that seems to be a reasonable trade-off.
  */
 
-/*
-#define ALWAYS_REQUIRE(x)	assert(x)
-#define ALWAYS_INSIST(x)	assert(x)
-#define ALWAYS_INVARIANT(x)	assert(x)
-#define ALWAYS_ENSURE(x)	assert(x)
-*/
-
-
-#elif defined(__FLEXELINT__)
+#if defined(__FLEXELINT__)
 
 #include <assert.h>
 
@@ -70,7 +52,7 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
 #define ALWAYS_INVARIANT(x)	assert(x)
 #define ALWAYS_ENSURE(x)	assert(x)
 
-# else	/* neither Calysto, Coverity or FlexeLint */
+# else	/* not FlexeLint */
 
 #include "isc/assertions.h"
 
@@ -79,7 +61,7 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
 #define ALWAYS_INVARIANT(x)	ISC_INVARIANT(x)
 #define ALWAYS_ENSURE(x)	ISC_ENSURE(x)
 
-# endif /* neither Coverity nor Calysto */
+# endif /* not FlexeLint */
 
 #define	REQUIRE(x)		ALWAYS_REQUIRE(x)
 #define	INSIST(x)		ALWAYS_INSIST(x)
