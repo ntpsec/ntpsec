@@ -326,14 +326,7 @@ extern struct peer *peer_list;		/* peer structures list */
 /*
  * Miscellaneous statistic counters which may be queried.
  */
-extern u_long	peer_timereset;		/* time stat counters were zeroed */
-extern u_long	findpeer_calls;		/* number of calls to findpeer */
-extern u_long	assocpeer_calls;	/* number of calls to findpeerbyassoc */
-extern u_long	peer_allocations;	/* number of allocations from the free list */
-extern u_long	peer_demobilizations;	/* number of structs freed to free list */
-extern int	total_peer_structs;	/* number of peer structs in circulation */
 extern int	peer_associations;	/* mobilized associations */
-extern int	peer_preempt;		/* preemptable associations */
 
 /* ntp_proto.c */
 /*

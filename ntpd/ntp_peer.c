@@ -99,14 +99,14 @@ static associd_t initial_association_ID; /* association ID */
 /*
  * Miscellaneous statistic counters which may be queried.
  */
-u_long	peer_timereset;			/* time stat counters zeroed */
-u_long	findpeer_calls;			/* calls to findpeer */
-u_long	assocpeer_calls;		/* calls to findpeerbyassoc */
-u_long	peer_allocations;		/* allocations from free list */
-u_long	peer_demobilizations;		/* structs freed to free list */
-int	total_peer_structs;		/* peer structs */
+static u_long	peer_timereset;		/* time stat counters zeroed */
+static u_long	findpeer_calls;		/* calls to findpeer */
+static u_long	assocpeer_calls;	/* calls to findpeerbyassoc */
+static u_long	peer_allocations;	/* allocations from free list */
+static u_long	peer_demobilizations;	/* structs freed to free list */
+static int	total_peer_structs;	/* peer structs */
 int	peer_associations;		/* mobilized associations */
-int	peer_preempt;			/* preemptable associations */
+static int	peer_preempt;		/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static struct peer *	findexistingpeer_name(const char *, u_short,
