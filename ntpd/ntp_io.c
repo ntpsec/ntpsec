@@ -234,6 +234,8 @@ static void	add_addr_to_list	(sockaddr_u *, endpt *);
 static void	create_wildcards	(u_short);
 static endpt *	findlocalinterface	(sockaddr_u *, int, int);
 static endpt *	findclosestinterface	(sockaddr_u *, int);
+static endpt *	findbcastinter		(sockaddr_u *);
+
 #ifdef DEBUG
 static const char *	action_text	(nic_rule_action);
 #endif
@@ -2887,7 +2889,7 @@ getinterface(
 /*
  * findbcastinter - find broadcast interface corresponding to address
  */
-endpt *
+static endpt *
 findbcastinter(
 	sockaddr_u *addr
 	)
