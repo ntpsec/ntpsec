@@ -41,7 +41,7 @@
 
 #define MAX_LEXEME (1024 + 1)	/* The maximum size of a lexeme */
 static char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
-uint32_t conf_file_sum;		/* Simple sum of characters read */
+static uint32_t conf_file_sum;	/* Simple sum of characters read */
 
 static struct FILE_INFO * lex_stack = NULL;
 

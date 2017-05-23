@@ -377,8 +377,7 @@ extern restrict_u *	restrictlist6;	/* IPv6 restriction list */
 extern int		ntp_minpkt;
 extern uint8_t		ntp_minpoll;
 
-/* ntp_scanner.c */
-extern uint32_t		conf_file_sum;	/* Simple sum of characters */
+/* ntp_signd.c */
 
 #ifdef ENABLE_MSSNTP
 /* ntp_signd.c */
