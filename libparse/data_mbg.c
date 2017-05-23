@@ -302,51 +302,6 @@ get_mbg_xyz(
 	}
 
 void
-get_mbg_eph(
-	unsigned char ** buffpp,
-	EPH *ephp
-	)
-{
-  ephp->csum   = (CSUM) get_lsb_uint16(buffpp);
-  ephp->valid  = get_lsb_int16(buffpp);
-
-  ephp->health = (HEALTH) get_lsb_uint16(buffpp);
-  ephp->IODC   = (IOD) get_lsb_uint16(buffpp);
-  ephp->IODE2  = (IOD) get_lsb_uint16(buffpp);
-  ephp->IODE3  = (IOD) get_lsb_uint16(buffpp);
-
-  get_mbg_tgps(buffpp, &ephp->tt);
-  get_mbg_tgps(buffpp, &ephp->t0c);
-  get_mbg_tgps(buffpp, &ephp->t0e);
-
-  FETCH_DOUBLE(buffpp, &ephp->sqrt_A);
-  FETCH_DOUBLE(buffpp, &ephp->e);
-  FETCH_DOUBLE(buffpp, &ephp->M0);
-  FETCH_DOUBLE(buffpp, &ephp->omega);
-  FETCH_DOUBLE(buffpp, &ephp->OMEGA0);
-  FETCH_DOUBLE(buffpp, &ephp->OMEGADOT);
-  FETCH_DOUBLE(buffpp, &ephp->deltan);
-  FETCH_DOUBLE(buffpp, &ephp->i0);
-  FETCH_DOUBLE(buffpp, &ephp->idot);
-  FETCH_DOUBLE(buffpp, &ephp->crc);
-  FETCH_DOUBLE(buffpp, &ephp->crs);
-  FETCH_DOUBLE(buffpp, &ephp->cuc);
-  FETCH_DOUBLE(buffpp, &ephp->cus);
-  FETCH_DOUBLE(buffpp, &ephp->cic);
-  FETCH_DOUBLE(buffpp, &ephp->cis);
-
-  FETCH_DOUBLE(buffpp, &ephp->af0);
-  FETCH_DOUBLE(buffpp, &ephp->af1);
-  FETCH_DOUBLE(buffpp, &ephp->af2);
-  FETCH_DOUBLE(buffpp, &ephp->tgd);
-
-  ephp->URA = get_lsb_uint16(buffpp);
-
-  ephp->L2code = *(*buffpp)++;
-  ephp->L2flag = *(*buffpp)++;
-}
-
-void
 get_mbg_alm(
 	unsigned char **buffpp,
 	ALM *almp
