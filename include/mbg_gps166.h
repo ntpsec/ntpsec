@@ -926,7 +926,6 @@ void get_mbg_header (unsigned char **, GPS_MSG_HDR *);
 void put_mbg_header (unsigned char **, GPS_MSG_HDR *);
 void get_mbg_sw_rev (unsigned char **, SW_REV *);
 void get_mbg_ascii_msg (unsigned char **, ASCII_MSG *);
-void get_mbg_svno (unsigned char **, SVNO *);
 void get_mbg_health (unsigned char **, HEALTH *);
 void get_mbg_cfg (unsigned char **, CFG *);
 void get_mbg_tgps (unsigned char **, T_GPS *);

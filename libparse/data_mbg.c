@@ -62,15 +62,6 @@ get_mbg_ascii_msg(
 }
 
 void
-get_mbg_svno(
-	unsigned char **bufpp,
-	SVNO *svnop
-	)
-{
-  *svnop = (SVNO) get_lsb_uint16(bufpp);
-}
-
-void
 get_mbg_health(
 	unsigned char **bufpp,
 	HEALTH *healthp
