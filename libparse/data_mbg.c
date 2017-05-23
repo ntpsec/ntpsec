@@ -21,7 +21,6 @@ static void get_mbg_comparam( unsigned char **, COM_PARM *);
 static void get_mbg_health (unsigned char **, HEALTH *);
 static void get_mbg_tgps (unsigned char **, T_GPS *);
 static void get_mbg_tm (unsigned char **, TM_GPS *);
-static void get_mbg_tzname (unsigned char **, char *);
 static void mbg_time_status_str (char **, unsigned int, size_t);
 
 #if 0				/* no actual floats on Meinberg binary interface */
@@ -112,16 +111,6 @@ get_mbg_tm(
   tmp->frac = get_lsb_int32(buffpp);
   tmp->offs_from_utc = get_lsb_int32(buffpp);
   tmp->status = get_lsb_uint16(buffpp);
-}
-
-static void
-get_mbg_tzname(
-	unsigned char **buffpp,
-	char *tznamep
-	)
-{
-  strlcpy(tznamep, (char *)*buffpp, sizeof(TZ_NAME));
-  *buffpp += sizeof(TZ_NAME);
 }
 
 void
