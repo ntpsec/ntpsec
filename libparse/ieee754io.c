@@ -135,13 +135,13 @@ fetch_ieee754(
     *lfpp = 0;          /* return zero for all errors: NAN, +INF, -INF, etc. */
 
     /* fetch sign byte & first part of characteristic */
-    val = get_byte(bufp, offsets, &fieldindex);
+    val = (unsigned char)get_byte(bufp, offsets, &fieldindex);
 
     sign = (val & 0x80) != 0;
     characteristic = (val & 0x7F);
 
     /* fetch rest of characteristic and start of mantissa */
-    val = get_byte(bufp, offsets, &fieldindex);
+    val = (unsigned char)get_byte(bufp, offsets, &fieldindex);
 
     switch (size) {
     case IEEE_DOUBLE:
