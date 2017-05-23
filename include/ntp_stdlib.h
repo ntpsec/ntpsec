@@ -125,8 +125,6 @@ extern	char *	numtoa		(uint32_t);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	unsigned short	sock_hash(const sockaddr_u *) __attribute__((pure));
-extern	bool	octtoint	(const char *, unsigned long *);
-extern	unsigned long	ranp2		(int);
 extern	const char *refid_str	(uint32_t, int);
 
 extern	int	decodenetnum	(const char *, sockaddr_u *);
