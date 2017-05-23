@@ -370,7 +370,6 @@ extern volatile bool sawALRM;
 extern volatile bool sawHUP;
 extern volatile bool sawDNS;
 extern volatile bool sawQuit;		/* SIGQUIT, SIGINT, SIGTERM */
-extern sigset_t blockMask;
 
 /* ntp_restrict.c */
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */

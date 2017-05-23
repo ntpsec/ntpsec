@@ -269,7 +269,7 @@ volatile bool sawDNS = false;
 # define sawDNS false
 #endif
 volatile bool sawQuit = false;  /* SIGQUIT, SIGINT, SIGTERM */
-sigset_t blockMask;
+static sigset_t blockMask;
 
 void
 maintain_activefds(
