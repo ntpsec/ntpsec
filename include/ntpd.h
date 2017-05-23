@@ -171,11 +171,8 @@ extern	void	peer_cleanup	(void);
 extern	void	transmit	(struct peer *);
 extern	void	receive 	(struct recvbuf *);
 extern	void	peer_clear	(struct peer *, const char *, const bool);
-extern	void	clock_select	(void);
 extern	void	set_sys_leap	(uint8_t);
 
-extern	u_long	leapsec;	/* seconds to next leap (proximity class) */
-extern  int     leapdif;        /* TAI difference step at next leap second*/
 extern	int	sys_orphan;
 extern	double	sys_mindisp;
 extern	double	sys_maxdist;

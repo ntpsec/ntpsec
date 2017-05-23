@@ -119,6 +119,7 @@ u_long	sys_epoch;		/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
 static int leap_vote_ins;	/* leap consensus for insert */
 static int leap_vote_del;	/* leap consensus for delete */
+static	u_long	leapsec;	/* seconds to next leap (proximity class) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -153,15 +154,16 @@ u_long	use_stattime;		/* elapsed time since reset */
 
 double	measured_tick;		/* non-overridable sys_tick (s) */
 
-static	double	root_distance	(struct peer *);
 static	void	clock_combine	(peer_select *, int, int);
-static	void	peer_xmit	(struct peer *);
-static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
+static	void	clock_select	(void);
 static	void	clock_update	(struct peer *);
+static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
+static	int	local_refid	(struct peer *);
 static	void	measure_precision(const bool);
 static	double	measure_tick_fuzz(void);
-static	int	local_refid	(struct peer *);
+static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
+static	double	root_distance	(struct peer *);
 
 
 void
