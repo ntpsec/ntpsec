@@ -25,9 +25,6 @@
 static systime_func_ptr systime_func = &time;
 static inline time_t now(void);
 
-static int
-ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
-
 static ntpcal_split
 ntpcal_days_in_months(int32_t /* months */);
 
@@ -872,7 +869,7 @@ ntpcal_date_to_time(
 }
 
 
-static int
+int
 ntpcal_ntp64_to_date(
 	struct calendar *jd,
 	const time64_t  ntp
