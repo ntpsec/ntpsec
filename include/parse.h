@@ -288,7 +288,6 @@ extern int  parse_getfmt (parsectl_t *, parse_t *);
 extern bool  parse_setfmt (parsectl_t *, parse_t *);
 extern bool  parse_setcs (parsectl_t *, parse_t *);
 
-extern unsigned int parse_restart (parse_t *, char);
 extern unsigned int parse_addchar (parse_t *, char);
 extern unsigned int parse_end (parse_t *);
 

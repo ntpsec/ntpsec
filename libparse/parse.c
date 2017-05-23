@@ -25,6 +25,7 @@
 #define SYNC_ONE	0x01
 
 static unsigned long timepacket (parse_t *);
+static unsigned int parse_restart (parse_t *, char);
 
 bool
 parse_timedout(
@@ -90,7 +91,7 @@ parse_ioend(
 	    free(parseio->parse_data);
 }
 
-unsigned int
+static unsigned int
 parse_restart(
 	      parse_t *parseio,
 	      char ch
