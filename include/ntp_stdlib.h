@@ -31,8 +31,6 @@ extern const char *ntpd_version(void);
 extern	int	mprintf(const char *, ...) NTP_PRINTF(1, 2);
 extern	int	mvsnprintf(char *, size_t, const char *, va_list)
 			NTP_PRINTF(3, 0);
-extern	int	msnprintf(char *, size_t, const char *, ...)
-			NTP_PRINTF(3, 4);
 extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
 extern	void	init_logging	(const char *, uint32_t, int);
 extern	int	change_logfile	(const char *, int);

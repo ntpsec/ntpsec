@@ -15,6 +15,26 @@ TEST_TEAR_DOWN(msyslog) {}
 #include <string.h>
 #include <errno.h>
 
+static int     msnprintf(char *, size_t, const char *, ...) NTP_PRINTF(3, 4);
+
+static int
+msnprintf(
+	char *		buf,
+	size_t		bufsiz,
+	const char *	fmt,
+	...
+	)
+{
+	va_list	ap;
+	int	rc;
+
+	va_start(ap, fmt);
+	rc = mvsnprintf(buf, bufsiz, fmt, ap);
+	va_end(ap);
+
+	return rc;
+}
+
 #ifndef VSNPRINTF_PERCENT_M
 // format_errmsg() is normally private to msyslog.c
 void	format_errmsg	(char *, size_t, const char *, int);
