@@ -106,8 +106,8 @@
  */
 double	clock_max_back = CLOCK_MAX;	/* step threshold */
 double	clock_max_fwd =  CLOCK_MAX;	/* step threshold */
-double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
-double	clock_panic = CLOCK_PANIC; /* panic threshold */
+static double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
+static double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
 uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
 
@@ -140,7 +140,7 @@ static char relative_path[PATH_MAX + 1]; /* relative path per recursive make */
 static char *this_file = NULL;
 
 static struct timex ntv;	/* ntp_adjtime() parameters */
-int	pll_status;		/* last kernel status bits */
+static int	pll_status;	/* last kernel status bits */
 #ifndef ENABLE_LOCKCLOCK
 #if defined(STA_NANO) && NTP_API == 4
 static u_int loop_tai;		/* last TAI offset */
