@@ -59,7 +59,7 @@ u_int		mru_entries;	/* mru list count */
  * structures. The free structures are linked with the hash_next field.
  */
 static  mon_entry *mon_free;		/* free list or null if none */
-	u_int mru_alloc;		/* mru list + free list count */
+static	u_int mru_alloc;		/* mru list + free list count */
 	u_int mru_peakentries;		/* highest mru_entries seen */
 	u_int mru_initalloc = INIT_MONLIST;/* entries to preallocate */
 	u_int mru_incalloc = INC_MONLIST;/* allocation batch factor */

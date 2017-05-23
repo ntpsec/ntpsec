@@ -305,7 +305,6 @@ extern uint8_t	mon_hash_bits;		/* log2 size of hash table */
 extern mon_entry ** mon_hash;		/* MRU hash table */
 extern mon_entry mon_mru_list;		/* mru listhead */
 extern u_int	mon_enabled;		/* MON_OFF (0) or other MON_* */
-extern u_int	mru_alloc;		/* mru list + free list count */
 extern u_int	mru_entries;		/* mru list count */
 extern u_int	mru_peakentries;	/* highest mru_entries */
 extern u_int	mru_initalloc;		/* entries to preallocate */
