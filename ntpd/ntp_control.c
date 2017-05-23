@@ -600,6 +600,13 @@ static struct utsname utsnamebuf;
 keyid_t ctl_auth_keyid;
 
 /*
+ *  * A hack.  To keep the authentication module clear of ntp-ism's, we
+ *   * include a time reset variable for its stats here.
+ *    */
+static u_long auth_timereset;
+
+
+/*
  * We keep track of the last error reported by the system internally
  */
 static	uint8_t ctl_sys_last_event;
@@ -4419,12 +4426,6 @@ free_varlist(
 
 
 /* from ntp_request.c when ntpdc was nuked */
-
-/*
- *  * A hack.  To keep the authentication module clear of ntp-ism's, we
- *   * include a time reset variable for its stats here.
- *    */
-u_long auth_timereset;
 
 /*
  *  * reset_auth_stats - reset the authentication stat counters.  Done here

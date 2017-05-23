@@ -185,9 +185,6 @@ extern	void	set_sys_tick_precision(double);
 extern	void	proto_config	(int, u_long, double);
 extern	void	proto_clr_stats (void);
 
-/* ntp_request.c */
-extern	void	reset_auth_stats(void);
-extern u_long	auth_timereset;
 
 
 /* ntp_restrict.c */
@@ -251,6 +248,7 @@ extern struct config_tree_tag *cfg_tree_history;
 
 /* ntp_control.c */
 extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
+extern	void	reset_auth_stats(void);
 
 /*
  * Statistic counters to keep track of requests and responses.
