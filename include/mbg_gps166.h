@@ -58,23 +58,11 @@
 
 
 /**
- * @brief Enumeration of handshake modes
- */
-enum COM_HANSHAKE_MODES { HS_NONE, HS_XONXOFF, HS_RTSCTS, N_COM_HS };
-
-/**
  * @brief A data type to configure a serial port's baud rate
  *
  * @see ::MBG_BAUD_RATES
  */
 typedef int32_t BAUD_RATE;
-
-/**
- * @brief Indices used to identify a parameter in the framing string
- *
- * @see ::MBG_FRAMING_STRS
- */
-enum MBG_FRAMING_STR_IDXS { F_DBITS, F_PRTY, F_STBITS };
 
 /**
  * @brief A structure to store the configuration of a serial port
@@ -106,29 +94,6 @@ enum STR_MODES
   STR_ON_REQ_SEC, ///< transmission if second changes and a request has been received before
   N_STR_MODE      ///< the number of known modes
 };
-
-
-/**
- * The number of serial ports which are at least available
- * even with very old GPS receiver models. For devices providing
- * a ::RECEIVER_INFO structure the number of provided COM ports
- * is available in ::RECEIVER_INFO::n_com_ports.
- */
-#define DEFAULT_N_COM   2
-
-
-/**
- * @brief A The structure used to store the configuration of two serial ports
- *
- * @deprecated This structure is deprecated, ::PORT_SETTINGS and related structures
- * should be used instead, if supported by the device.
- */
-typedef struct
-{
-  COM_PARM com[DEFAULT_N_COM];    ///< COM0 and COM1 settings
-  uint8_t mode[DEFAULT_N_COM];    ///< COM0 and COM1 output mode
-
-} PORT_PARM;
 
 
 /**
@@ -441,24 +406,6 @@ enum TM_GPS_STATUS_BIT_MASKS
 };
 
 
-/**
- * @brief A structure used to transmit information on date and time
- *
- * This structure can be used to transfer the current time, in which
- * case the channel field has to be set to -1, or an event capture time
- * retrieved from the on-board FIFO, in which case the channel field
- * contains the index of the time capture input, e.g. 0 or 1.
- */
-typedef struct
-{
-  int16_t channel;  ///< -1: the current on-board time; >= 0 the capture channel number
-  T_GPS t;          ///< time in GPS scale and format
-  TM_GPS tm;        ///< time converted to %UTC and/or local time according to ::TZDL settings
-
-} TTM;
-
-
-
 /* Two types of variables used to store a position. Type XYZ is */
 /* used with a position in earth centered, earth fixed (ECEF) */
 /* coordinates whereas type LLA holds such a position converted */
@@ -557,11 +504,6 @@ typedef l_fp LLA[N_LLA];
 /*   == MAX_SYNTH_FREQ * 10^(MAX_SYNTH_RANGE-1) */
 
 /**
- * @brief The synthesizer's phase is only be synchronized if the frequency is below this limit
- */
-#define SYNTH_PHASE_SYNC_LIMIT   10000UL    ///< 10 kHz
-
-/**
  * A Macro used to determine the position of the decimal point
  * when printing the synthesizer frequency as 4 digit value
  */
@@ -597,14 +539,6 @@ typedef struct
 
 } SYNTH;
 
-#define _mbg_swab_synth( _p )   \
-{                               \
-  _mbg_swab16( &(_p)->freq );   \
-  _mbg_swab16( &(_p)->range );  \
-  _mbg_swab16( &(_p)->phase );  \
-}
-
-
 /**
  * @brief Enumeration of synthesizer states
  */
@@ -629,28 +563,8 @@ typedef struct
 
 } SYNTH_STATE;
 
-#define _mbg_swab_synth_state( _p )  _nop_macro_fnc()
-
-#define SYNTH_FLAG_PHASE_IGNORED  0x01
-
 /** @} defgroup group_synth */
 
-
-
-/**
- * @defgroup group_tzdl Time zone / daylight saving parameters
- *
- * Example: <br>
- * For automatic daylight saving enable/disable in Central Europe,
- * the variables are to be set as shown below: <br>
- *   - offs = 3600L           one hour from %UTC
- *   - offs_dl = 3600L        one additional hour if daylight saving enabled
- *   - tm_on = first Sunday from March 25, 02:00:00h ( year |= ::DL_AUTO_FLAG )
- *   - tm_off = first Sunday from October 25, 03:00:00h ( year |= ::DL_AUTO_FLAG )
- *   - name[0] == "CET  "     name if daylight saving not enabled
- *   - name[1] == "CEST "     name if daylight saving is enabled
- *
- * @{ */
 
 /**
  * @brief The name of a time zone
@@ -658,41 +572,6 @@ typedef struct
  * @note Up to 5 printable characters, plus trailing zero
  */
 typedef char TZ_NAME[6];
-
-/**
- * @brief Time zone / daylight saving parameters
- *
- * This structure is used to specify how a device converts on-board %UTC
- * to local time, including computation of beginning and end of daylight
- * saving time (DST), if required.
- *
- * @note The ::TZDL structure contains members of type ::TM_GPS to specify
- * the times for beginning and end of DST. However, the ::TM_GPS::frac,
- * ::TM_GPS::offs_from_utc, and ::TM_GPS::status fields of these ::TZDL::tm_on
- * and ::TZDL::tm_off members are ignored for the conversion to local time,
- * and thus should be 0.
- */
-typedef struct
-{
-  int32_t offs;      ///< standard offset from %UTC to local time [sec]
-  int32_t offs_dl;   ///< additional offset if daylight saving enabled [sec]
-  TM_GPS tm_on;      ///< date/time when daylight saving starts
-  TM_GPS tm_off;     ///< date/time when daylight saving ends
-  TZ_NAME name[2];   ///< names without and with daylight saving enabled
-
-} TZDL;
-
-/**
- * @brief A flag indicating automatic computation of DST
- *
- * If this flag is or'ed to the year numbers in ::TZDL::tm_on and ::TZDL::tm_off
- * then daylight saving is computed automatically year by year.
- */
-#define DL_AUTO_FLAG  0x8000
-
-/** @} defgroup group_tzdl */
-
-
 
 /**
  * @brief Antenna status and error at reconnect information
@@ -816,107 +695,6 @@ typedef struct
   char s[23];      ///< 22 chars GPS ASCII message plus trailing zero
 
 } ASCII_MSG;
-
-
-/**
- * @brief Ephemeris parameters of one specific satellite
- *
- * Needed to compute the position of a satellite at a given time with
- * high precision. Valid for an interval of 4 to 6 hours from start
- * of transmission.
- */
-typedef struct
-{
-  CSUM csum;       ///<    checksum of the remaining bytes
-  int16_t valid;   ///<    flag data are valid
-
-  HEALTH health;   ///<    health indication of transmitting SV      [---]
-  IOD IODC;        ///<    Issue Of Data, Clock
-  IOD IODE2;       ///<    Issue of Data, Ephemeris (Subframe 2)
-  IOD IODE3;       ///<    Issue of Data, Ephemeris (Subframe 3)
-  T_GPS tt;        ///<    time of transmission
-  T_GPS t0c;       ///<    Reference Time Clock                      [---]
-  T_GPS t0e;       ///<    Reference Time Ephemeris                  [---]
-
-  l_fp sqrt_A;     ///<    Square Root of semi-major Axis        [sqrt(m)]
-  l_fp e;          ///<    Eccentricity                              [---]
-  l_fp M0;         ///< +- Mean Anomaly at Ref. Time                 [rad]
-  l_fp omega;      ///< +- Argument of Perigee                       [rad]
-  l_fp OMEGA0;     ///< +- Longit. of Asc. Node of orbit plane       [rad]
-  l_fp OMEGADOT;   ///< +- Rate of Right Ascension               [rad/sec]
-  l_fp deltan;     ///< +- Mean Motion Diff. from computed value [rad/sec]
-  l_fp i0;         ///< +- Inclination Angle                         [rad]
-  l_fp idot;       ///< +- Rate of Inclination Angle             [rad/sec]
-  l_fp crc;        ///< +- Cosine Corr. Term to Orbit Radius           [m]
-  l_fp crs;        ///< +- Sine Corr. Term to Orbit Radius             [m]
-  l_fp cuc;        ///< +- Cosine Corr. Term to Arg. of Latitude     [rad]
-  l_fp cus;        ///< +- Sine Corr. Term to Arg. of Latitude       [rad]
-  l_fp cic;        ///< +- Cosine Corr. Term to Inclination Angle    [rad]
-  l_fp cis;        ///< +- Sine Corr. Term to Inclination Angle      [rad]
-
-  l_fp af0;        ///< +- Clock Correction Coefficient 0            [sec]
-  l_fp af1;        ///< +- Clock Correction Coefficient 1        [sec/sec]
-  l_fp af2;        ///< +- Clock Correction Coefficient 2      [sec/sec^2]
-  l_fp tgd;        ///< +- estimated group delay differential        [sec]
-
-  uint16_t URA;    ///<    predicted User Range Accuracy
-
-  uint8_t L2code;  ///<    code on L2 channel                         [---]
-  uint8_t L2flag;  ///<    L2 P data flag                             [---]
-
-} EPH;
-
-
-
-/**
- * @brief Almanac parameters of one specific satellite
- *
- * A reduced precision set of parameters used to check if a satellite
- * is in view at a given time. Valid for an interval of more than 7 days
- * from start of transmission.
- */
-typedef struct
-{
-  CSUM csum;       ///<    checksum of the remaining bytes
-  int16_t valid;   ///<    flag data are valid
-
-  HEALTH health;   ///<                                               [---]
-  T_GPS t0a;       ///<    Reference Time Almanac                     [sec]
-
-  l_fp sqrt_A;     ///<    Square Root of semi-major Axis         [sqrt(m)]
-  l_fp e;          ///<    Eccentricity                               [---]
-
-  l_fp M0;         ///< +- Mean Anomaly at Ref. Time                  [rad]
-  l_fp omega;      ///< +- Argument of Perigee                        [rad]
-  l_fp OMEGA0;     ///< +- Longit. of Asc. Node of orbit plane        [rad]
-  l_fp OMEGADOT;   ///< +- Rate of Right Ascension                [rad/sec]
-  l_fp deltai;     ///< +-                                            [rad]
-  l_fp af0;        ///< +- Clock Correction Coefficient 0             [sec]
-  l_fp af1;        ///< +- Clock Correction Coefficient 1         [sec/sec]
-
-} ALM;
-
-
-
-/**
- * @brief Ionospheric correction parameters
- */
-typedef struct
-{
-  CSUM csum;       ///<    checksum of the remaining bytes
-  int16_t valid;   ///<    flag data are valid
-
-  l_fp alpha_0;    ///<    Ionosph. Corr. Coeff. Alpha 0              [sec]
-  l_fp alpha_1;    ///<    Ionosph. Corr. Coeff. Alpha 1          [sec/deg]
-  l_fp alpha_2;    ///<    Ionosph. Corr. Coeff. Alpha 2        [sec/deg^2]
-  l_fp alpha_3;    ///<    Ionosph. Corr. Coeff. Alpha 3        [sec/deg^3]
-
-  l_fp beta_0;     ///<    Ionosph. Corr. Coeff. Beta 0               [sec]
-  l_fp beta_1;     ///<    Ionosph. Corr. Coeff. Beta 1           [sec/deg]
-  l_fp beta_2;     ///<    Ionosph. Corr. Coeff. Beta 2         [sec/deg^2]
-  l_fp beta_3;     ///<    Ionosph. Corr. Coeff. Beta 3         [sec/deg^3]
-
-} IONO;
 
 
 
