@@ -281,7 +281,6 @@ extern unsigned short nformats;
 extern bool  parse_ioinit (parse_t *);
 extern void parse_ioend (parse_t *);
 extern int  parse_ioread (parse_t *, char, timestamp_t *);
-extern int  parse_iopps (parse_t *, int, timestamp_t *);
 extern void parse_iodone (parse_t *);
 extern bool  parse_timecode (parsectl_t *, parse_t *);
 extern int  parse_getfmt (parsectl_t *, parse_t *);

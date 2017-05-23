@@ -254,40 +254,6 @@ parse_ioread(
 }
 
 /*
- * parse_iopps
- *
- * take status line indication and derive synchronisation information
- * from it.
- * It can also be used to decode a serial serial data format (such as the
- * ONE, ZERO, MINUTE sync data stream from DCF77)
- */
-/*ARGSUSED*/
-int
-parse_iopps(
-	register parse_t *parseio,
-	register int status,
-	register timestamp_t *ptime
-	)
-{
-	register unsigned int updated = CVT_NONE;
-
-	/*
-	 * PPS pulse information will only be delivered to ONE clock format
-	 * this is either the last successful conversion module with a ppssync
-	 * routine, or a fixed format with a ppssync routine
-	 */
-	parseprintf(DD_PARSE, ("parse_iopps: STATUS %s\n", (status == SYNC_ONE) ? "ONE" : "ZERO"));
-
-	if (clockformats[parseio->parse_lformat]->syncpps)
-	{
-		updated = (unsigned int) clockformats[parseio->parse_lformat]->syncpps(parseio, status == SYNC_ONE, ptime);
-		parseprintf(DD_PARSE, ("parse_iopps: updated = 0x%x\n", updated));
-	}
-
-	return (updated & CVT_MASK) != CVT_NONE;
-}
-
-/*
  * parse_iodone
  *
  * clean up internal status for new round
