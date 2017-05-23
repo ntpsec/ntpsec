@@ -124,20 +124,6 @@ get_mbg_tzname(
 }
 
 void
-get_mbg_tzdl(
-	unsigned char **buffpp,
-	TZDL *tzdlp
-	)
-{
-  tzdlp->offs = get_lsb_int32(buffpp);
-  tzdlp->offs_dl = get_lsb_int32(buffpp);
-  get_mbg_tm(buffpp, &tzdlp->tm_on);
-  get_mbg_tm(buffpp, &tzdlp->tm_off);
-  get_mbg_tzname(buffpp, (char *)tzdlp->name[0]);
-  get_mbg_tzname(buffpp, (char *)tzdlp->name[1]);
-}
-
-void
 get_mbg_antinfo(
 	unsigned char **buffpp,
 	ANT_INFO *antinfop
