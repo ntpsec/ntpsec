@@ -3173,7 +3173,7 @@ find_addr_in_list(
 }
 
 const char *
-localaddrtoa(
+latoa(
 	endpt *la
 	)
 {

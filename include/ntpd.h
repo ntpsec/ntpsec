@@ -123,8 +123,7 @@ extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, int);
 #ifdef ENABLE_DEBUG_TIMING
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp);
 #endif
-#define		latoa(pif)	localaddrtoa(pif)
-extern const char * localaddrtoa(endpt *);
+extern const char * latoa(endpt *);
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);
