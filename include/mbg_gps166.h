@@ -188,9 +188,6 @@ typedef uint16_t IOD;     ///< Issue-Of-Data code
  */
 typedef uint16_t BVAR_STAT;
 
-#define _mbg_swab_bvar_stat( _p )  _mbg_swab16( (_p) )
-
-
 /**
  * @brief Enumeration of flag bits used to define ::BVAR_FLAGS
  *
