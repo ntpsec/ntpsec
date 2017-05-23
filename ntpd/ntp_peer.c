@@ -75,13 +75,13 @@ static int AM[AM_MODES][AM_MODES] = {
 /*
  * Peer hash tables
  */
-struct peer *peer_hash[NTP_HASH_SIZE];	/* peer hash table */
-int	peer_hash_count[NTP_HASH_SIZE];	/* peers in each bucket */
-struct peer *assoc_hash[NTP_HASH_SIZE];	/* association ID hash table */
-int	assoc_hash_count[NTP_HASH_SIZE];/* peers in each bucket */
-struct peer *peer_list;			/* peer structures list */
-static struct peer *peer_free;		/* peer structures free list */
-int	peer_free_count;		/* count of free structures */
+static struct peer *peer_hash[NTP_HASH_SIZE];	/* peer hash table */
+static int	peer_hash_count[NTP_HASH_SIZE];	/* peers in each bucket */
+static struct peer *assoc_hash[NTP_HASH_SIZE];	/* association ID hash table */
+static int	assoc_hash_count[NTP_HASH_SIZE];/* peers in each bucket */
+struct peer *peer_list;				/* peer structures list */
+static struct peer *peer_free;			/* peer structures free list */
+static int	peer_free_count;		/* count of free structures */
 
 /*
  * Association ID.  We initialize this value randomly, then assign a new

@@ -321,13 +321,7 @@ extern u_long	mru_none;		/* couldn't allocate slot */
 extern int	mon_age;		/* preemption limit */
 
 /* ntp_peer.c */
-extern struct peer *peer_hash[NTP_HASH_SIZE];	/* peer hash table */
-extern int	peer_hash_count[NTP_HASH_SIZE];	/* count of in each bucket */
-extern struct peer *assoc_hash[NTP_HASH_SIZE];	/* association ID hash table */
-extern int	assoc_hash_count[NTP_HASH_SIZE];/* count of in each bucket */
 extern struct peer *peer_list;		/* peer structures list */
-extern int	peer_count;		/* count in peer_list */
-extern int	peer_free_count;	/* count in peer_free */
 
 /*
  * Miscellaneous statistic counters which may be queried.
