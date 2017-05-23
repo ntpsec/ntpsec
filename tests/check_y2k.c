@@ -238,8 +238,7 @@ main( void )
     puts( " include/ntp_calendar.h" );
   {		/* I believe this is good, but just to be sure... */
 
-	/* we are testing this #define */
-#define is_leapyear(y) (y%4 == 0 && !(y%100 == 0 && !(y%400 == 0)))
+    /* we are testing #define is_leapyear(y) */
 
     for ( year = 1400; year <= 2200; year++ )
     {
