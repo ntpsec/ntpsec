@@ -155,7 +155,7 @@ static struct masks logcfg_class_items[] = {
  * Definitions of things either imported from or exported to outside
  */
 config_tree cfgt;			/* Parser output stored here */
-struct config_tree_tag *cfg_tree_history;	/* History of configs */
+static struct config_tree_tag *cfg_tree_history;    /* History of configs */
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 
 static char default_ntp_signd_socket[] =

@@ -243,7 +243,6 @@ extern l_fp	fetch_packetstamp(struct recvbuf *, struct msghdr *, l_fp);
 extern const char *progname;
 extern char	*sys_phone[];		/* ACTS phone numbers */
 extern char *ntp_signd_socket;
-extern struct config_tree_tag *cfg_tree_history;
 
 /* ntp_control.c */
 extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
