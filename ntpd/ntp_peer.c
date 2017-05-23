@@ -115,6 +115,7 @@ static struct peer *	findexistingpeer_addr(sockaddr_u *,
 					      struct peer *, int);
 static void		free_peer(struct peer *, int);
 static void		getmorepeermem(void);
+static	void		peer_reset	(struct peer *);
 static int		score(struct peer *);
 
 
@@ -793,7 +794,7 @@ peer_clr_stats(void)
 /*
  * peer_reset - reset statistics counters
  */
-void
+static void
 peer_reset(
 	struct peer *peer
 	)

@@ -160,7 +160,6 @@ extern	struct peer *newpeer	(sockaddr_u *, const char *,
 extern	void	peer_update_hash (struct peer *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
-extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);
 extern	void	clear_all	(void);
