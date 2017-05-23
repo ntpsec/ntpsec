@@ -18,6 +18,7 @@
 
 static void get_mbg_tzname (unsigned char **, char *);
 static void mbg_time_status_str (char **, unsigned int, size_t);
+static void get_mbg_health (unsigned char **, HEALTH *);
 
 #if 0				/* no actual floats on Meinberg binary interface */
 static offsets_t mbg_float  = { 1, 0, 3, 2, 0, 0, 0, 0 }; /* byte order for meinberg floats */
@@ -61,7 +62,7 @@ get_mbg_ascii_msg(
   *bufpp += sizeof(ascii_msgp->s);
 }
 
-void
+static void
 get_mbg_health(
 	unsigned char **bufpp,
 	HEALTH *healthp
