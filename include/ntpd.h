@@ -399,12 +399,9 @@ extern u_int	leap_smear_intv;
 /* ntp_util.c */
 extern	char	statsdir[MAXFILENAME];
 extern	bool	stats_control;		/* write stats to fileset? */
-extern	int	stats_write_period;	/* # of seconds between writes. */
-extern	double	stats_write_tolerance;
 extern	double	wander_threshold;
 
 /* ntpd.c */
-extern	bool	initializing;	/* initializing flag */
 #ifdef ENABLE_DROPROOT
 extern	bool	droproot;	/* flag: try to drop root privileges after startup */
 /* extern	bool	root_dropped;	* root has been dropped UNUSED */
