@@ -47,7 +47,6 @@ extern	bool	authreadkeys	(const char *);
 extern	void	authtrust	(keyid_t, bool);
 extern	bool	authusekey	(keyid_t, int, const uint8_t *);
 
-extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, uint32_t, uint32_t *, uint32_t *);
 extern	void	init_auth	(void);
 extern	void	init_lib	(void);
