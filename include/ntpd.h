@@ -64,7 +64,6 @@ extern	const char	*getconfig	(const char *);
 extern	void	readconfig(const char *);
 extern	void	ctl_clr_stats	(void);
 extern	u_short ctlpeerstatus	(struct peer *);
-extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *, const char *);

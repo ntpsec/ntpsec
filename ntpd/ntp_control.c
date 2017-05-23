@@ -75,6 +75,7 @@ static	void	ctl_putclock	(int, struct refclockstat *, int);
 #endif	/* REFCLOCK */
 static	const struct ctl_var *ctl_getitem(const struct ctl_var *,
 					  char **);
+static	u_short ctlsysstatus	(void);
 static	u_short	count_var	(const struct ctl_var *);
 static	void	control_unspec	(struct recvbuf *, int);
 static	void	read_status	(struct recvbuf *, int);
@@ -914,7 +915,7 @@ ctlclkstatus(
 /*
  * ctlsysstatus - return the system status word
  */
-u_short
+static u_short
 ctlsysstatus(void)
 {
 	register uint8_t this_clock;
