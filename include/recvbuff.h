@@ -75,8 +75,6 @@ extern	void	freerecvbuf(struct recvbuf *);
 
 /* signal safe - no malloc */
 extern	struct recvbuf *get_free_recv_buffer(void);
-/* signal unsafe - may malloc */
-extern	struct recvbuf *get_free_recv_buffer_alloc(void);
 
 /*   Add a buffer to the full list
  */
