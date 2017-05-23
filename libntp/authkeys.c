@@ -45,6 +45,7 @@ symkey_alloc *	authallocs;
 #endif	/* DEBUG */
 
 static inline unsigned short	auth_log2(double x);
+static void	auth_moremem	(int);
 static void		auth_resize_hashtable(void);
 static void		allocsymkey(symkey **, keyid_t,	unsigned short,
 				    unsigned short, unsigned short, uint8_t *);
@@ -147,7 +148,7 @@ free_auth_mem(void)
 /*
  * auth_moremem - get some more free key structures
  */
-void
+static void
 auth_moremem(
 	int	keycount
 	)
