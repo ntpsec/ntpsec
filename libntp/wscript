@@ -11,7 +11,6 @@ def build(ctx):
         "getopt.c",
         "initnetwork.c",
         "macencrypt.c",
-        "mstolfp.c",
         "netof.c",
         "ntp_endian.c",
         "ntp_random.c",
