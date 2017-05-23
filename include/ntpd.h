@@ -402,13 +402,6 @@ extern	bool	stats_control;		/* write stats to fileset? */
 extern	double	wander_threshold;
 
 /* ntpd.c */
-#ifdef ENABLE_DROPROOT
-extern	bool	droproot;	/* flag: try to drop root privileges after startup */
-/* extern	bool	root_dropped;	* root has been dropped UNUSED */
-extern char *user;		/* user to switch to */
-extern char *group;		/* group to switch to */
-extern const char *chrootdir;	/* directory to chroot() to */
-#endif
 #ifdef HAVE_WORKING_FORK
 extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
 #endif

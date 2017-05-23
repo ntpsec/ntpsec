@@ -78,10 +78,10 @@ static bool mdnsreg = false;
 int mdnstries = 5;
 #endif  /* ENABLE_MDNS_REGISTRATION */
 
-bool droproot = false;
-char *user;		/* User to switch to */
-char *group;		/* group to switch to */
-const char *chrootdir;	/* directory to chroot to */
+static bool droproot = false;
+static char *user;		/* User to switch to */
+static char *group;		/* group to switch to */
+static const char *chrootdir;	/* directory to chroot to */
 
 #ifdef HAVE_WORKING_FORK
 int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
