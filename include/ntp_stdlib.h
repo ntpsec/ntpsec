@@ -173,7 +173,6 @@ extern pset_tod_using	set_tod_using;
 
 /* ssl_init.c */
 extern	void	ssl_init		(void);
-extern	int	keytype_from_text	(const char *);
 
 /* strl-obsd.c */
 #ifndef HAVE_STRLCPY		/* + */
