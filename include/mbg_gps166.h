@@ -56,66 +56,12 @@
  */
 #define GPS_SEC_BIAS   315964800UL     // ( ( ( 10UL * 365UL ) + 2 + 5 ) * SECS_PER_DAY )
 
-
-/**
- * @brief A data type to configure a serial port's baud rate
- *
- * @see ::MBG_BAUD_RATES
- */
-typedef int32_t BAUD_RATE;
-
-/**
- * @brief A structure to store the configuration of a serial port
- */
-typedef struct
-{
-  BAUD_RATE baud_rate;  ///< transmission speed, e.g. 19200L, see ::MBG_BAUD_RATES
-  char framing[4];      ///< ASCIIZ framing string, e.g. "8N1" or "7E2", see ::MBG_FRAMING_STRS
-  int16_t handshake;    ///< handshake mode, yet only ::HS_NONE supported
-
-} COM_PARM;
-
-
-/**
- * @brief Enumeration of modes supported for time string transmission
- *
- * This determines e.g. at which point in time a string starts
- * to be transmitted via the serial port.
- * Used with ::PORT_SETTINGS::mode.
- *
- * @see ::STR_MODE_MASKS
- */
-enum STR_MODES
-{
-  STR_ON_REQ,     ///< transmission on request by received '?' character only
-  STR_PER_SEC,    ///< transmission automatically if second changes
-  STR_PER_MIN,    ///< transmission automatically if minute changes
-  STR_AUTO,       ///< transmission automatically if required, e.g. on capture event
-  STR_ON_REQ_SEC, ///< transmission if second changes and a request has been received before
-  N_STR_MODE      ///< the number of known modes
-};
-
-
 /**
  * @brief The type of a GPS command code
  *
  * @see ::GPS_CMD_CODES
  */
 typedef uint16_t GPS_CMD;
-
-
-/**
- * @brief Control codes to be or'ed with a particular command/type code
- */
-enum GPS_CMD_CTRL_CODES
-{
-  GPS_REQACK = 0x8000,   ///< to device: request acknowledge
-  GPS_ACK    = 0x4000,   ///< from device: acknowledge a command
-  GPS_NACK   = 0x2000,   ///< from device: error evaluating a command
-};
-
-#define GPS_CTRL_MSK  0xF000   ///< bit mask of all ::GPS_CMD_CTRL_CODES
-
 
 /**
  * @brief Command codes for the binary protocol
