@@ -283,7 +283,6 @@ extern bool	ntp_enable;		/* clock discipline enabled */
 extern bool	pll_control;		/* kernel support available */
 extern bool	kern_enable;		/* kernel support enabled */
 extern bool	hardpps_enable;		/* kernel PPS discipline enabled */
-extern bool	ext_enable;		/* external clock enabled */
 extern bool	cal_enable;		/* refclock calibrate enable */
 extern bool	allow_panic;		/* allow panic correction (-g) */
 extern bool	force_step_once;	/* always step time once at startup (-G) */
@@ -294,7 +293,6 @@ extern int	peer_ntpdate;		/* count of ntpdate peers */
  * Clock state machine variables
  */
 extern uint8_t	sys_poll;		/* system poll interval (log2 s) */
-extern int	state;			/* clock discipline state */
 extern int	tc_counter;		/* poll-adjust counter */
 extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
