@@ -302,31 +302,6 @@ get_mbg_xyz(
 	}
 
 void
-get_mbg_alm(
-	unsigned char **buffpp,
-	ALM *almp
-	)
-{
-  almp->csum   = (CSUM) get_lsb_uint16(buffpp);
-  almp->valid  = get_lsb_int16(buffpp);
-
-  almp->health = (HEALTH) get_lsb_uint16(buffpp);
-  get_mbg_tgps(buffpp, &almp->t0a);
-
-
-  FETCH_DOUBLE(buffpp, &almp->sqrt_A);
-  FETCH_DOUBLE(buffpp, &almp->e);
-
-  FETCH_DOUBLE(buffpp, &almp->M0);
-  FETCH_DOUBLE(buffpp, &almp->omega);
-  FETCH_DOUBLE(buffpp, &almp->OMEGA0);
-  FETCH_DOUBLE(buffpp, &almp->OMEGADOT);
-  FETCH_DOUBLE(buffpp, &almp->deltai);
-  FETCH_DOUBLE(buffpp, &almp->af0);
-  FETCH_DOUBLE(buffpp, &almp->af1);
-}
-
-void
 get_mbg_iono(
 	unsigned char **buffpp,
 	IONO *ionop
