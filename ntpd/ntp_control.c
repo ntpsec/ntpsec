@@ -616,21 +616,21 @@ static	uint8_t ctl_sys_num_events;
 /*
  * Statistic counters to keep track of requests and responses.
  */
-u_long ctltimereset;		/* time stats reset */
-u_long numctlreq;		/* number of requests we've received */
-u_long numctlbadpkts;		/* number of bad control packets */
-u_long numctlresponses;		/* number of resp packets sent with data */
-u_long numctlfrags;		/* number of fragments sent */
-u_long numctlerrors;		/* number of error responses sent */
-u_long numctltooshort;		/* number of too short input packets */
-u_long numctlinputresp;		/* number of responses on input */
-u_long numctlinputfrag;		/* number of fragments on input */
-u_long numctlinputerr;		/* number of input pkts with err bit set */
-u_long numctlbadoffset;		/* number of input pkts with nonzero offset */
-u_long numctlbadversion;	/* number of input pkts with unknown version */
-u_long numctldatatooshort;	/* data too short for count */
-u_long numctlbadop;		/* bad op code found in packet */
-u_long numasyncmsgs;		/* number of async messages we've sent */
+static u_long ctltimereset;	/* time stats reset */
+static u_long numctlreq;	/* number of requests we've received */
+static u_long numctlbadpkts;	/* number of bad control packets */
+static u_long numctlresponses;	/* number of resp packets sent with data */
+static u_long numctlfrags;	/* number of fragments sent */
+static u_long numctlerrors;	/* number of error responses sent */
+static u_long numctltooshort;	/* number of too short input packets */
+static u_long numctlinputresp;	/* number of responses on input */
+static u_long numctlinputfrag;	/* number of fragments on input */
+static u_long numctlinputerr;	/* number of input pkts with err bit set */
+static u_long numctlbadoffset;	/* number of input pkts with nonzero offset */
+static u_long numctlbadversion;	/* number of input pkts with unknown version */
+static u_long numctldatatooshort;    /* data too short for count */
+static u_long numctlbadop;	/* bad op code found in packet */
+static u_long numasyncmsgs;	/* number of async messages we've sent */
 
 /*
  * Response packet used by these routines. Also some state information

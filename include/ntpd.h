@@ -249,25 +249,6 @@ extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests 
 extern	void	reset_auth_stats(void);
 
 /*
- * Statistic counters to keep track of requests and responses.
- */
-extern u_long	ctltimereset;		/* time stats reset */
-extern u_long	numctlreq;		/* number of requests we've received */
-extern u_long	numctlbadpkts;		/* number of bad control packets */
-extern u_long	numctlresponses; 	/* number of resp packets sent with data */
-extern u_long	numctlfrags; 		/* number of fragments sent */
-extern u_long	numctlerrors;		/* number of error responses sent */
-extern u_long	numctltooshort;		/* number of too short input packets */
-extern u_long	numctlinputresp; 	/* number of responses on input */
-extern u_long	numctlinputfrag; 	/* number of fragments on input */
-extern u_long	numctlinputerr;		/* number of input pkts with err bit set */
-extern u_long	numctlbadoffset; 	/* number of input pkts with nonzero offset */
-extern u_long	numctlbadversion;	/* number of input pkts with unknown version */
-extern u_long	numctldatatooshort;	/* data too short for count */
-extern u_long	numctlbadop; 		/* bad op code found in packet */
-extern u_long	numasyncmsgs;		/* number of async messages we've sent */
-
-/*
  * Other statistics of possible interest
  */
 extern u_long packets_dropped;	/* total number of packets dropped on reception */
