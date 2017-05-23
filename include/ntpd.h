@@ -342,18 +342,12 @@ extern uint32_t	sys_refid;		/* reference id */
 extern l_fp	sys_reftime;		/* last update time */
 extern struct peer *sys_peer;		/* current peer */
 extern int	sys_maxclock;		/* maximum candidates */
-extern int	sys_minclock;		/* minimum candidates */
 
 /*
  * Nonspecified system state variables.
  */
 extern l_fp	sys_authdelay;		/* authentication delay */
-extern u_long 	sys_epoch;		/* last clock update time */
-extern keyid_t	sys_private;		/* private value for session seed */
-extern int	sys_manycastserver;	/* respond to manycast client pkts */
 extern int	sys_minsane;		/* minimum candidates */
-extern int	sys_floor;		/* cluster stratum floor */
-extern int	sys_ceiling;		/* cluster stratum ceiling */
 
 /*
  * Statistics counters

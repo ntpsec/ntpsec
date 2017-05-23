@@ -115,23 +115,22 @@ double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 static double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_maxdisp = MAXDISPERSE; /* maximum dispersion */
 double	sys_jitter;		/* system jitter */
-u_long	sys_epoch;		/* last clock update time */
+static u_long	sys_epoch;	/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
 static int leap_vote_ins;	/* leap consensus for insert */
 static int leap_vote_del;	/* leap consensus for delete */
 static	u_long	leapsec;	/* seconds to next leap (proximity class) */
-keyid_t	sys_private;		/* private value for session seed */
-int	sys_manycastserver;	/* respond to manycast client pkts */
+static int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 static int sys_survivors;		/* truest of the truechimers */
 
 /*
  * TOS and multicast mapping stuff
  */
-int	sys_floor = 0;		/* cluster stratum floor */
-int	sys_ceiling = STRATUM_UNSPEC - 1; /* cluster stratum ceiling */
+static int	sys_floor = 0;			/* cluster stratum floor */
+static int	sys_ceiling = STRATUM_UNSPEC - 1; /* cluster stratum ceiling */
 int	sys_minsane = 1;	/* minimum candidates */
-int	sys_minclock = NTP_MINCLOCK; /* minimum candidates */
+static int	sys_minclock = NTP_MINCLOCK; /* minimum candidates */
 int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
 static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
