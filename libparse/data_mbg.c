@@ -19,6 +19,7 @@
 static void get_mbg_cfg (unsigned char **, CFG *);
 static void get_mbg_health (unsigned char **, HEALTH *);
 static void get_mbg_tgps (unsigned char **, T_GPS *);
+static void get_mbg_tm (unsigned char **, TM_GPS *);
 static void get_mbg_tzname (unsigned char **, char *);
 static void mbg_time_status_str (char **, unsigned int, size_t);
 
@@ -93,7 +94,7 @@ get_mbg_tgps(
   tgpsp->tick = get_lsb_uint32(bufpp);
 }
 
-void
+static void
 get_mbg_tm(
 	unsigned char **buffpp,
 	TM_GPS *tmp
