@@ -296,7 +296,6 @@ extern int Stoi (const unsigned char *, long *, int);
 
 extern time_t parse_to_unixtime (clocktime_t *, unsigned long *);
 extern unsigned long updatetimeinfo (parse_t *, unsigned long);
-extern void syn_simple (parse_t *, timestamp_t *, struct format *, unsigned long);
 extern parse_pps_fnc_t pps_simple;
 extern parse_pps_fnc_t pps_one;
 extern parse_pps_fnc_t pps_zero;

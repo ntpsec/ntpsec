@@ -461,26 +461,6 @@ updatetimeinfo(
 	return CVT_OK;		/* everything fine and dandy... */
 }
 
-
-/*
- * syn_simple
- *
- * handle a sync time stamp
- */
-/*ARGSUSED*/
-void
-syn_simple(
-	register parse_t *parseio,
-	register timestamp_t *ts,
-	register struct format *format,
-	register unsigned long why
-	)
-{
-	UNUSED_ARG(format);
-	UNUSED_ARG(why);
-	parseio->parse_dtime.parse_stime = *ts;
-}
-
 /*
  * parse_pps_fnc_t pps_simple
  *
