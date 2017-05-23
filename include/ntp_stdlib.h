@@ -167,10 +167,6 @@ extern int	ntp_optind;		/* global argv index */
 extern bool	ipv4_works;
 extern bool	ipv6_works;
 
-/* machines.c */
-typedef void (*pset_tod_using)(const char *);
-extern pset_tod_using	set_tod_using;
-
 /* ssl_init.c */
 extern	void	ssl_init		(void);
 
