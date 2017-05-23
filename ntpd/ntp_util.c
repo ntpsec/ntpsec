@@ -794,30 +794,6 @@ getauthkeys(
 	authreadkeys(key_file_name);
 }
 
-
-/*
- * rereadkeys - read the authentication key file over again.
- */
-void
-rereadkeys(void)
-{
-	if (NULL != key_file_name)
-		authreadkeys(key_file_name);
-}
-
-
-#ifdef __UNUSED__
-/*
- * ntp_exit - document explicitly that ntpd has exited
- */
-void
-ntp_exit(int retval)
-{
-	msyslog(LOG_ERR, "EXITING with return code %d", retval);
-	exit(retval);
-}
-#endif
-
 /*
  * ntpd_time_stepped is called back by step_systime(), allowing ntpd
  * to do any one-time processing necessitated by the step.

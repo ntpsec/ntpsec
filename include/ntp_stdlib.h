@@ -134,7 +134,6 @@ extern	int	decodenetnum	(const char *, sockaddr_u *);
 extern	void	signal_no_reset (int, void (*func)(int));
 
 extern	void	getauthkeys 	(const char *);
-extern	void	rereadkeys	(void);
 
 /*
  * Variable declarations for libntp.
