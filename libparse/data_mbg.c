@@ -17,7 +17,6 @@
 #include "ieee754io.h"
 
 static void get_mbg_cfg (unsigned char **, CFG *);
-static void get_mbg_comparam( unsigned char **, COM_PARM *);
 static void get_mbg_health (unsigned char **, HEALTH *);
 static void get_mbg_tgps (unsigned char **, T_GPS *);
 static void get_mbg_tm (unsigned char **, TM_GPS *);
@@ -294,22 +293,6 @@ get_mbg_xyz(
 	  xyz[i] = 0;
 	}
     }
-}
-
-static void
-get_mbg_comparam(
-	unsigned char **buffpp,
-	COM_PARM *comparamp
-	)
-{
-  size_t i;
-
-  comparamp->baud_rate = get_lsb_int32(buffpp);
-  for (i = 0; i < sizeof(comparamp->framing); i++)
-    {
-      comparamp->framing[i] = (char)(*(*buffpp)++);
-    }
-  comparamp->handshake = get_lsb_int16(buffpp);
 }
 
 #define FETCH_DOUBLE(src, addr)							\
