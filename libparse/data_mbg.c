@@ -114,17 +114,6 @@ get_mbg_tm(
 }
 
 void
-get_mbg_ttm(
-	unsigned char **buffpp,
-	TTM *ttmp
-	)
-{
-  ttmp->channel = get_lsb_int16(buffpp);
-  get_mbg_tgps(buffpp, &ttmp->t);
-  get_mbg_tm(buffpp, &ttmp->tm);
-}
-
-void
 get_mbg_synth(
 	unsigned char **buffpp,
 	SYNTH *synthp
