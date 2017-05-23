@@ -931,7 +931,6 @@ void get_mbg_cfgh (unsigned char **, CFGH *);
 void get_mbg_utc (unsigned char **, UTC *);
 void get_mbg_lla (unsigned char **, LLA);
 void get_mbg_xyz (unsigned char **, XYZ);
-void get_mbg_portparam (unsigned char **, PORT_PARM *);
 void get_mbg_eph (unsigned char **, EPH *);
 void get_mbg_alm (unsigned char **, ALM *);
 void get_mbg_iono (unsigned char **, IONO *);

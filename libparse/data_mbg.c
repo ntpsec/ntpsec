@@ -312,24 +312,6 @@ get_mbg_comparam(
   comparamp->handshake = get_lsb_int16(buffpp);
 }
 
-void
-get_mbg_portparam(
-	unsigned char **buffpp,
-	PORT_PARM *portparamp
-	)
-{
-  int i;
-
-  for (i = 0; i < DEFAULT_N_COM; i++)
-    {
-      get_mbg_comparam(buffpp, &portparamp->com[i]);
-    }
-  for (i = 0; i < DEFAULT_N_COM; i++)
-    {
-      portparamp->mode[i] = *(*buffpp)++;
-    }
-}
-
 #define FETCH_DOUBLE(src, addr)							\
 	if  (fetch_ieee754(src, IEEE_DOUBLE, addr, mbg_double) != IEEE_OK)	\
 	{									\
