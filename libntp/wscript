@@ -2,7 +2,6 @@ def build(ctx):
     srcnode = ctx.srcnode.abspath()
 
     libntp_source = [
-        "atolfp.c",
         "authkeys.c",
         "authreadkeys.c",
         "clocktime.c",

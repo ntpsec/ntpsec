@@ -188,7 +188,6 @@ extern	char *	dolfptoa	(l_fp, bool, short, bool);
 extern	char *	mfptoa		(l_fp, short);
 extern	char *	mfptoms		(l_fp, short);
 
-extern	bool	atolfp		(const char *, l_fp *);
 extern	bool	hextolfp	(const char *, l_fp *);
 extern  void	gpstolfp	(int, int, unsigned long, l_fp *);
 extern	char *	prettydate	(const l_fp);
