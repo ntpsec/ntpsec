@@ -112,7 +112,7 @@ bool leap_sec_in_progress;
 l_fp	sys_authdelay;		/* authentication delay */
 double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
-double	sys_maxdist = MAXDISTANCE; /* selection threshold */
+static double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_maxdisp = MAXDISPERSE; /* maximum dispersion */
 double	sys_jitter;		/* system jitter */
 u_long	sys_epoch;		/* last clock update time */

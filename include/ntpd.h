@@ -175,12 +175,10 @@ extern	void	set_sys_leap	(uint8_t);
 
 extern	int	sys_orphan;
 extern	double	sys_mindisp;
-extern	double	sys_maxdist;
 extern	double	sys_maxdisp;
 
 extern	void	poll_update	(struct peer *, uint8_t);
 
-extern	void	clear		(struct peer *);
 extern	void	clock_filter	(struct peer *, double, double, double);
 extern	void	init_proto	(const bool);
 extern	void	set_sys_tick_precision(double);
