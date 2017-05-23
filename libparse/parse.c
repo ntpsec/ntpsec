@@ -26,6 +26,7 @@
 
 static unsigned long timepacket (parse_t *);
 static unsigned int parse_restart (parse_t *, char);
+static parse_pps_fnc_t pps_simple;
 
 bool
 parse_timedout(
@@ -467,7 +468,7 @@ updatetimeinfo(
  * handle a pps time stamp
  */
 /*ARGSUSED*/
-unsigned long
+static unsigned long
 pps_simple(
 	register parse_t *parseio,
 	register int status,
