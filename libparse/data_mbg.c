@@ -17,6 +17,7 @@
 #include "ieee754io.h"
 
 static void get_mbg_cfg (unsigned char **, CFG *);
+static void get_mbg_comparam( unsigned char **, COM_PARM *);
 static void get_mbg_health (unsigned char **, HEALTH *);
 static void get_mbg_tgps (unsigned char **, T_GPS *);
 static void get_mbg_tm (unsigned char **, TM_GPS *);
