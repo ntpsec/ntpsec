@@ -17,10 +17,9 @@ TEST_TEAR_DOWN(calendar) {}
 
 #define TEST_ASSERT_GREATER_THAN(a, b) TEST_ASSERT_TRUE(a > b)
 
-static const char *DateToString(const struct calendar *);
+static const char *DateToString(char *, const struct calendar *);
 
-static const char *DateToString(const struct calendar *cal) {
-	char *str = malloc(255);
+static const char *DateToString(char *str, const struct calendar *cal) {
 	snprintf(str, 255, "%hu-%u-%u(%u)\n", cal->year, (u_int)cal->month, (u_int)cal->monthday, cal->yearday);
 	return str;
 }
@@ -28,14 +27,17 @@ static const char *DateToString(const struct calendar *cal) {
 
 static bool IsEqualDate(const struct calendar *expected,
                         const struct calendar *actual) {
+	char str[255];
+	char str1[255];
 	if (expected->year == actual->year &&
 	    (!expected->yearday || expected->yearday == actual->yearday) &&
 	    expected->month == actual->month &&
 	    expected->monthday == actual->monthday) {
 			return true;
 	} else {
-		/* coverity[leaked_storage] */
-		printf("Expected: %s but was %s\n", DateToString(expected), DateToString(actual));
+		printf("Expected: %s but was %s\n",
+                       DateToString(str, expected),
+                       DateToString(str1, actual));
 		return false;
 	}
 }
