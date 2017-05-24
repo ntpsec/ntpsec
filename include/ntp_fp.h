@@ -107,10 +107,6 @@ typedef struct {
          uint32_t        l_uf;
 } l_fp_w;
 
-static inline l_fp ntohl_fp(l_fp_w lfpw) {
-    return lfpinit_u(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));
-}
-
 #define	M_ISNEG(v_i)			/* v < 0 */ \
 	(((v_i) & 0x80000000) != 0)
 
