@@ -227,8 +227,8 @@ err_baddata[] =			/* error messages for bad input data */
 {
 	{ 1,       0 },		/* output first message immediately */
 	{ 5,      60 },		/* output next five messages in 60 second intervals */
-	{ 3,    S_PER_H },	/* output next 3 messages in hour intervals */
-	{ 0, 12 * S_PER_H }	/* repeat messages only every 12 hours */
+	{ 3,    SECSPERHR },	/* output next 3 messages in hour intervals */
+	{ 0, 12 * SECSPERHR }	/* repeat messages only every 12 hours */
 };
 
 static struct errorregression
@@ -236,8 +236,8 @@ err_nodata[] =			/* error messages for missing input data */
 {
 	{ 1,       0 },		/* output first message immediately */
 	{ 5,      60 },		/* output next five messages in 60 second intervals */
-	{ 3,    S_PER_H },	/* output next 3 messages in hour intervals */
-	{ 0, 12 * S_PER_H }	/* repeat messages only every 12 hours */
+	{ 3,    SECSPERHR },	/* output next 3 messages in hour intervals */
+	{ 0, 12 * SECSPERHR }	/* repeat messages only every 12 hours */
 };
 
 static struct errorregression
@@ -245,8 +245,8 @@ err_badstatus[] =		/* unsynchronized state messages */
 {
 	{ 1,       0 },		/* output first message immediately */
 	{ 5,      60 },		/* output next five messages in 60 second intervals */
-	{ 3,    S_PER_H },	/* output next 3 messages in hour intervals */
-	{ 0, 12 * S_PER_H }	/* repeat messages only every 12 hours */
+	{ 3,    SECSPERHR },	/* output next 3 messages in hour intervals */
+	{ 0, 12 * SECSPERHR }	/* repeat messages only every 12 hours */
 };
 
 static struct errorregression
@@ -254,8 +254,8 @@ err_badio[] =			/* io failures (bad reads, selects, ...) */
 {
 	{ 1,       0 },		/* output first message immediately */
 	{ 5,      60 },		/* output next five messages in 60 second intervals */
-	{ 5,    S_PER_H },	/* output next 3 messages in hour intervals */
-	{ 0, 12 * S_PER_H }	/* repeat messages only every 12 hours */
+	{ 5,    SECSPERHR },	/* output next 3 messages in hour intervals */
+	{ 0, 12 * SECSPERHR }	/* repeat messages only every 12 hours */
 };
 
 static struct errorregression
@@ -263,8 +263,8 @@ err_badevent[] =		/* non nominal events */
 {
 	{ 20,      0 },		/* output first message immediately */
 	{ 6,      60 },		/* output next five messages in 60 second intervals */
-	{ 5,    S_PER_H },	/* output next 3 messages in hour intervals */
-	{ 0, 12 * S_PER_H }	/* repeat messages only every 12 hours */
+	{ 5,    SECSPERHR },	/* output next 3 messages in hour intervals */
+	{ 0, 12 * SECSPERHR }	/* repeat messages only every 12 hours */
 };
 
 static struct errorregression

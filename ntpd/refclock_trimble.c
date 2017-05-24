@@ -642,8 +642,8 @@ TSIP_decode (
 			pp->nsec = (long) (secfrac * NS_PER_S);
 
 			secint %= SECSPERDAY;    /* Only care about today */
-			pp->hour = (int)(secint / S_PER_H);
-			secint %= S_PER_H;
+			pp->hour = (int)(secint / SECSPERHR);
+			secint %= SECSPERHR;
 			pp->minute = (int)(secint / 60);
 			secint %= 60;
 			pp->second = secint % 60;

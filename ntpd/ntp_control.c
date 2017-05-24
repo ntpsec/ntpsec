@@ -3053,7 +3053,7 @@ static uint32_t derive_nonce(
 	EVP_MD_CTX	*ctx;
 	u_int		len;
 
-	while (!salt[0] || current_time - last_salt_update >= S_PER_H) {
+	while (!salt[0] || current_time - last_salt_update >= SECSPERHR) {
             salt[0] = (uint32_t)ntp_random();
             salt[1] = (uint32_t)ntp_random();
             salt[2] = (uint32_t)ntp_random();
