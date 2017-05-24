@@ -182,7 +182,6 @@ extern	void	refclock_control(sockaddr_u *,
 				 const struct refclockstat *,
 				 struct refclockstat *);
 extern	int	refclock_open	(char *, u_int, u_int);
-extern	bool	refclock_setup	(int, u_int, u_int);
 extern	void	refclock_timer	(struct peer *);
 extern	void	refclock_transmit(struct peer *);
 extern 	bool	refclock_process(struct refclockproc *);
@@ -195,7 +194,6 @@ extern	int	refclock_gtlin	(struct recvbuf *, char *, int, l_fp *);
 extern	size_t	refclock_gtraw	(struct recvbuf *, char *, size_t, l_fp *);
 extern	bool	indicate_refclock_packet(struct refclockio *,
 					 struct recvbuf *);
-extern	void	process_refclock_packet(struct recvbuf *);
 
 extern struct refclock refclock_none;
 

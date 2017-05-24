@@ -71,6 +71,7 @@ bool	cal_enable;		/* enable refclock calibrate */
  */
 static int refclock_cmpl_fp (const void *, const void *);
 static int refclock_sample (struct refclockproc *);
+static bool refclock_setup (int, u_int, u_int);
 
 
 /*
@@ -686,14 +687,6 @@ indicate_refclock_packet(
 
 
 /*
- * process_refclock_packet()
- *
- * Used for deferred processing of 'io_input' on systems where threading
- * is used. This is acting as a trampoline to make the
- * real calls to the refclock functions.
- */
-
-/*
  * refclock_open - open serial port for reference clock
  *
  * This routine opens a serial port for I/O and sets default options. It
@@ -755,7 +748,7 @@ refclock_open(
 /*
  * refclock_setup - initialize terminal interface structure
  */
-bool
+static bool
 refclock_setup(
 	int	fd,		/* file descriptor */
 	u_int	speed,		/* serial port speed (code) */
