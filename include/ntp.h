@@ -106,7 +106,6 @@ extern int32_t ntp_random (void);
  * Limits of things
  */
 #define	MAXFILENAME	256	/* max length of file name */
-#define NTP_MAXSTRLEN	256	/* max string length */
 
 /*
  * Operations for jitter calculations (these use doubles).

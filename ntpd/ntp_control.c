@@ -4157,6 +4157,7 @@ report_event(
 	const char *str		/* protostats string */
 	)
 {
+	#define NTP_MAXSTRLEN	256	/* max string length */
 	char	statstr[NTP_MAXSTRLEN];
 	size_t	len;
 
