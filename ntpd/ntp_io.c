@@ -1238,35 +1238,6 @@ interface_update(
 }
 
 
-/*
- * sau_from_netaddr() - convert network address on-wire formats.
- * Convert from libisc's isc_netaddr_t to NTP's sockaddr_u
- */
-void
-sau_from_netaddr(
-	sockaddr_u *psau,
-	const isc_netaddr_t *pna
-	)
-{
-	ZERO_SOCK(psau);
-	AF(psau) = (sa_family_t)pna->family;
-	switch (pna->family) {
-	case AF_INET:
-		memcpy(&SOCK_ADDR4(psau), &pna->type.in,
-		       sizeof(SOCK_ADDR4(psau)));
-		break;
-
-	case AF_INET6:
-		memcpy(&SOCK_ADDR6(psau), &pna->type.in6,
-		       sizeof(SOCK_ADDR6(psau)));
-		break;
-        default:
-                /* huh? */
-                break;
-	}
-}
-
-
 static bool
 is_wildcard_addr(
 	const sockaddr_u *psau
