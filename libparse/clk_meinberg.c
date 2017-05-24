@@ -22,6 +22,8 @@
 #include "binio.h"
 #include "ascii.h"
 
+#define MBG_EXTENDED	0x00000001
+
 /*
  * The Meinberg receiver every second sends a datagram of the following form
  * (Standard Format)

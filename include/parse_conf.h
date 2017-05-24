@@ -25,7 +25,6 @@
 #define O_UTCSOFFSET 11
 #define O_COUNT (O_UTCSOFFSET+1)
 
-#define MBG_EXTENDED	0x00000001
 
 /*
  * see below for field offsets
