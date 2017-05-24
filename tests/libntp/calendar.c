@@ -95,6 +95,7 @@ TEST(calendar, days_per_year) {
 	TEST_ASSERT_EQUAL(366, days_per_year(2040));
 }
 
+#ifdef REFCLOCK
 TEST(calendar, parse_to_unixtime) {
         /* check is_leapyear() */
         clocktime_t  ct;
@@ -127,6 +128,7 @@ TEST(calendar, parse_to_unixtime) {
         result = parse_to_unixtime( &ct, &Flag );
 	TEST_ASSERT_EQUAL(2114388123L, result);
 }
+#endif
 
 // test the day/sec join & split ops, making sure that 32bit
 // intermediate results would definitely overflow and the hi DWORD of
@@ -263,7 +265,9 @@ TEST_GROUP_RUNNER(calendar) {
 	RUN_TEST_CASE(calendar, is_leapyear);
 	RUN_TEST_CASE(calendar, julian0);
 	RUN_TEST_CASE(calendar, days_per_year);
+#ifdef REFCLOCK
 	RUN_TEST_CASE(calendar, parse_to_unixtime);
+#endif
 	RUN_TEST_CASE(calendar, DaySplitMerge);
 	RUN_TEST_CASE(calendar, SplitYearDays1);
 	RUN_TEST_CASE(calendar, SplitYearDays2);
