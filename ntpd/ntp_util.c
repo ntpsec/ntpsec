@@ -358,8 +358,8 @@ timespec_to_MJDtime(const struct timespec *ts)
 
 	LIB_GETBUF(buf);
 
-	day = (u_long)ts->tv_sec / S_PER_DAY + MJD_1970;
-	sec = (u_long)ts->tv_sec % S_PER_DAY;
+	day = (u_long)ts->tv_sec / SECSPERDAY + MJD_1970;
+	sec = (u_long)ts->tv_sec % SECSPERDAY;
 	msec = (u_long)ts->tv_nsec / NS_PER_MS;  /* nano secs to milli sec */
 	snprintf(buf, LIB_BUFLENGTH, "%lu %lu.%03lu", day, sec, msec);
 
