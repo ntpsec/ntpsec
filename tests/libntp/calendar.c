@@ -17,18 +17,7 @@ TEST_TEAR_DOWN(calendar) {}
 
 #define TEST_ASSERT_GREATER_THAN(a, b) TEST_ASSERT_TRUE(a > b)
 
-static int leapdays(int);
 static const char *DateToString(const struct calendar *);
-
-static int leapdays(int year) {
-	if (year % 400 == 0)
-		return 1;
-	if (year % 100 == 0)
-		return 0;
-	if (year % 4 == 0)
-		return 1;
-	return 0;
-}
 
 static const char *DateToString(const struct calendar *cal) {
 	char *str = malloc(255);
@@ -144,7 +133,7 @@ TEST(calendar, LeapYears1) {
 
 	for (dateIn.year = 1; dateIn.year < 10000; ++dateIn.year) {
 		dateIn.month	= 2;
-		dateIn.monthday = 28 + leapdays(dateIn.year);
+		dateIn.monthday = is_leapyear(dateIn.year) ? 29 : 28;
 		dateIn.yearday	= 31 + dateIn.monthday;
 
 		ntpcal_rd_to_date(&dateOut, ntpcal_date_to_rd(&dateIn));
@@ -160,7 +149,7 @@ TEST(calendar, LeapYears2) {
 	for (dateIn.year = 1; dateIn.year < 10000; ++dateIn.year) {
 		dateIn.month	= 3;
 		dateIn.monthday = 1;
-		dateIn.yearday	= 60 + leapdays(dateIn.year);
+		dateIn.yearday	= is_leapyear(dateIn.year) ? 61 : 60;
 
 		ntpcal_rd_to_date(&dateOut, ntpcal_date_to_rd(&dateIn));
 		TEST_ASSERT_TRUE(IsEqualDate(&dateIn, &dateOut));
@@ -181,7 +170,7 @@ TEST(calendar, RoundTripDate) {
 		expDate.year++;
 		expDate.month	= 0;
 		expDate.yearday = 0;
-		leaps = leapdays(expDate.year);
+		leaps = is_leapyear(expDate.year) ? 1 : 0;
 		while (expDate.month < 12) {
 			expDate.month++;
 			expDate.monthday = 0;
