@@ -96,7 +96,8 @@ void ppscheck(const char *device)
 	pp.mode = PPS_CAPTUREBOTH;
 	/* pp.mode = PPS_CAPTUREASSERT; */
 
-	/* coverity[uninit_use_in_call] */
+        pp.api_version = PPS_API_VERS;
+
 	i = time_pps_setparams(ph, &pp);
 	if (i < 0)
 		err(1, "time_pps_setparams");
