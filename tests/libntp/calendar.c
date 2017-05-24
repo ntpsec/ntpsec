@@ -1,5 +1,7 @@
 #include "config.h"
+#include "ntp.h"
 #include "ntp_stdlib.h"
+#include "parse.h"
 
 #include "unity.h"
 #include "unity_fixture.h"
@@ -60,6 +62,71 @@ static const u_short real_month_days[2][14] = {
 	/* -*- table for leap years -*- */
 	{ 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31 }
 };
+
+TEST(calendar, is_leapyear) {
+        /* check is_leapyear() */
+	TEST_ASSERT_EQUAL(false, is_leapyear(1900));
+	TEST_ASSERT_EQUAL(false, is_leapyear(1970));
+	TEST_ASSERT_EQUAL(false, is_leapyear(1999));
+	TEST_ASSERT_EQUAL(true, is_leapyear(2000));
+	TEST_ASSERT_EQUAL(false, is_leapyear(2001));
+	TEST_ASSERT_EQUAL(true, is_leapyear(2004));
+	TEST_ASSERT_EQUAL(true, is_leapyear(2040));
+}
+
+TEST(calendar, julian0) {
+        /* check julian0() */
+	TEST_ASSERT_EQUAL(693961, julian0(1900));
+	TEST_ASSERT_EQUAL(719528, julian0(1970));
+	TEST_ASSERT_EQUAL(730120, julian0(1999));
+	TEST_ASSERT_EQUAL(730485, julian0(2000));
+	TEST_ASSERT_EQUAL(730851, julian0(2001));
+	TEST_ASSERT_EQUAL(745095, julian0(2040));
+}
+
+TEST(calendar, days_per_year) {
+        /* check is_leapyear() */
+	TEST_ASSERT_EQUAL(365, days_per_year(1900));
+	TEST_ASSERT_EQUAL(365, days_per_year(1970));
+	TEST_ASSERT_EQUAL(365, days_per_year(1999));
+	TEST_ASSERT_EQUAL(366, days_per_year(2000));
+	TEST_ASSERT_EQUAL(365, days_per_year(2001));
+	TEST_ASSERT_EQUAL(366, days_per_year(2004));
+	TEST_ASSERT_EQUAL(366, days_per_year(2040));
+}
+
+TEST(calendar, parse_to_unixtime) {
+        /* check is_leapyear() */
+        clocktime_t  ct;
+        time_t       result;
+        u_long       Flag;
+
+        ct.day = 1;
+        ct.month = 1;
+        ct.year = 1970;
+        ct.hour = ct.minute = ct.second = ct.usecond = 0;
+        ct.utcoffset = 0;
+        ct.utctime = 0;
+        ct.flags = 0;
+
+        Flag = 0;
+        result = parse_to_unixtime( &ct, &Flag );
+
+	TEST_ASSERT_EQUAL(0, result);
+
+        ct.year = 2000;
+        ct.hour = 2;
+        ct.utctime = 0;
+        result = parse_to_unixtime( &ct, &Flag );
+	TEST_ASSERT_EQUAL(946692000L, result);
+
+        ct.year = 2037;
+        ct.minute = 2;
+        ct.second = 3;
+        ct.utctime = 0;
+        result = parse_to_unixtime( &ct, &Flag );
+	TEST_ASSERT_EQUAL(2114388123L, result);
+}
 
 // test the day/sec join & split ops, making sure that 32bit
 // intermediate results would definitely overflow and the hi DWORD of
@@ -193,6 +260,10 @@ TEST(calendar, RoundTripDate) {
 
 
 TEST_GROUP_RUNNER(calendar) {
+	RUN_TEST_CASE(calendar, is_leapyear);
+	RUN_TEST_CASE(calendar, julian0);
+	RUN_TEST_CASE(calendar, days_per_year);
+	RUN_TEST_CASE(calendar, parse_to_unixtime);
 	RUN_TEST_CASE(calendar, DaySplitMerge);
 	RUN_TEST_CASE(calendar, SplitYearDays1);
 	RUN_TEST_CASE(calendar, SplitYearDays2);
