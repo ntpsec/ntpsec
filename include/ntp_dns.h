@@ -9,9 +9,6 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-
-#define	INITIAL_DNS_RETRY	2	/* seconds between queries */
-
 /* start DNS query (unless busy) */
 extern bool dns_probe(struct peer*);
 
