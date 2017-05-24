@@ -322,7 +322,7 @@ parse_to_unixtime(
 	if (clock_time->month < 3 && days_per_year(clock_time->year) == 366)
 	    t--;
 #else								/* Y2KFixes [ */
-	if ( clock_time->month >= 3  &&  isleap_4(clock_time->year) )
+	if ( clock_time->month >= 3  &&  is_leapyear(clock_time->year) )
 	    t++;		/* add one more if within leap year */
 #endif								/* Y2KFixes ] */
 

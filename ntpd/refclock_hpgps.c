@@ -6,6 +6,7 @@
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
+#include "ntp_calendar.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 
@@ -469,7 +470,7 @@ hpgps_receive(
 		return;
 	}
 
-	if ( ! isleap_4(pp->year) ) {				/* Y2KFixes */
+	if ( ! is_leapyear(pp->year) ) {			/* Y2KFixes */
 		/* not a leap year */
 		if (day > day1tab[month - 1]) {
 			refclock_report(peer, CEVNT_BADTIME);
@@ -509,7 +510,7 @@ hpgps_receive(
 		day--;
 		if (day < 1) {
 			pp->year--;
-			if ( isleap_4(pp->year) )		/* Y2KFixes */
+			if ( is_leapyear(pp->year) )		/* Y2KFixes */
 			    day = 366;
 			else
 			    day = 365;

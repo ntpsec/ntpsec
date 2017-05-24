@@ -50,12 +50,6 @@ extern int32_t ntp_random (void);
 			    400)) : 0))
 
 /*
- * LEAP YEAR test for full 4-digit years (e.g, 1999, 2010)
- */
-#define isleap_4(y)	((y) % 4 == 0 && !((y) % 100 == 0 && !(y % \
-			    400 == 0)))
-
-/*
  * to convert simple two-digit years to tm_year style years:
  *
  *	if (year < YEAR_PIVOT)
