@@ -123,8 +123,6 @@ extern int32_t ntp_random (void);
 #define LOGTOD(a)	ldexp(1., (int)(a)) /* log2 to double */
 #define ULOGTOD(a)	ldexp(1., (int)(a)) /* ulog2 to double */
 
-#define	EVENT_TIMEOUT	0	/* one second, that is */
-
 
 /*
  * The endpt structure is used to hold the addresses and socket

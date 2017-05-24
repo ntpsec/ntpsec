@@ -22,6 +22,7 @@
 # define	TC_ERR	(-1)
 #endif
 
+#define	EVENT_TIMEOUT	0	/* one second, that is */
 
 static void check_leapsec(time_t, bool);
 
