@@ -101,32 +101,11 @@ static inline l_fp lfpinit_u(uint32_t sec, uint32_t frac)
  */
 typedef uint32_t u_fp;
 
-/*
- * A unit second in fp format.	Actually 2**(half_the_bits_in_int32)
- */
-#define	FP_SECOND	(0x10000)
-
-/*
- * Byte order conversions
- */
-#define	HTONS_FP(x)	(htonl(x))
-#define	NTOHS_FP(x)	(ntohl(x))
 
 typedef struct {
          uint32_t        l_ui;
          uint32_t        l_uf;
 } l_fp_w;
-
-/*
- * Generate the wire-format version (that is, big-endian all the way down)
- * of a timestamp expressed as a 64-bit scalar.
- */
-static inline l_fp_w htonl_fp(l_fp lfp) {
-    l_fp_w lfpw;
-    lfpw.l_ui = htonl(lfpuint(lfp));
-    lfpw.l_uf = htonl(lfpfrac(lfp));
-    return lfpw;
-}
 
 static inline l_fp ntohl_fp(l_fp_w lfpw) {
     return lfpinit_u(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));

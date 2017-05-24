@@ -20,6 +20,23 @@
 #include <unistd.h>
 
 /*
+ * Byte order conversion
+ */
+#define	HTONS_FP(x)	(htonl(x))
+
+/*
+ * Generate the wire-format version (that is, big-endian all the way down)
+ * of a timestamp expressed as a 64-bit scalar.
+ */
+static inline l_fp_w htonl_fp(l_fp lfp) {
+    l_fp_w lfpw;
+    lfpw.l_ui = htonl(lfpuint(lfp));
+    lfpw.l_uf = htonl(lfpfrac(lfp));
+    return lfpw;
+}
+
+
+/*
  * Definitions for the clear() routine.  We use memset() to clear
  * the parts of the peer structure which go to zero.  These are
  * used to calculate the start address and length of the area.
