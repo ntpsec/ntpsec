@@ -609,12 +609,6 @@ struct pkt {
 #define	STATS_LEAP_FILE		4	/* configure ntpd leapseconds file */
 
 /*
- * Default parameters.  We use these in the absence of something better.
- * (Historical relic - muliticast mode has been removed for security reasons.)
- */
-#define INADDR_NTP	0xe0000101	/* NTP multicast address 224.0.1.1 */
-
-/*
  * Structure used optionally for monitoring when this is turned on.
  */
 typedef struct mon_data	mon_entry;
