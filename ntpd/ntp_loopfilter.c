@@ -157,7 +157,9 @@ bool	ntp_enable = true;	/* clock discipline enabled */
 bool	pll_control = false;	/* kernel support available */
 bool	kern_enable = true;	/* kernel support enabled */
 bool	hardpps_enable;		/* kernel PPS discipline enabled */
+#ifdef HAVE_KERNEL_PLL
 static bool	ext_enable;	/* external clock enabled */
+#endif /* HAVE_KERNEL_PLL */
 bool	allow_panic = false;	/* allow panic correction (-g) */
 bool	force_step_once = false; /* always step time once at startup (-G) */
 bool	mode_ntpdate = false;	/* exit on first clock set (-q) */
@@ -167,7 +169,9 @@ static int freq_set;		/* initial set frequency switch */
 /*
  * Clock state machine variables
  */
+#ifndef ENABLE_LOCKCLOCK
 static int	state = 0;	/* clock discipline state */
+#endif /* ENABLE_LOCKCLOCK */
 uint8_t	sys_poll;		/* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
