@@ -92,11 +92,17 @@ void ppscheck(const char *device)
 	if (i < 0)
 		err(1, "time_pps_getcap");
 
+        memset(&pp, 0, sizeof(pp));
 	/* pp.mode = PPS_CAPTUREASSERT | PPS_ECHOASSERT; */
 	pp.mode = PPS_CAPTUREBOTH;
 	/* pp.mode = PPS_CAPTUREASSERT; */
 
+#ifdef PPS_API_VERS
         pp.api_version = PPS_API_VERS;
+#else
+        /* FreeBSD, NetBSD do not publicly define PPS_ABI_VERS, assume 1 */
+        pp.api_version = 1;
+#endif
 
 	i = time_pps_setparams(ph, &pp);
 	if (i < 0)
