@@ -66,3 +66,17 @@ gcc-7-refclocks:
   tags:
     - gitlab-org
 
+freebsd-11-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - freebsd-11
+
+freebsd-11-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - freebsd-11
+
