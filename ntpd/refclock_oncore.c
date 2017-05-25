@@ -658,6 +658,7 @@ oncore_start(
 	if (stat(device1, &stat1)) {
 		oncore_log_f(instance, LOG_ERR, "Can't stat fd1 (%s)",
 			     device1);
+		free(instance);
 		return false;		/* exit, no file, can't start driver */
 	}
 
