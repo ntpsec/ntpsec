@@ -1300,28 +1300,6 @@ json_object_lookup_int_default(
 }
 
 /* ------------------------------------------------------------------ */
-#if 0 /* currently unused */
-static double
-json_object_lookup_float(
-	const json_ctx * ctx,
-	tok_ref          tid,
-	const char     * key)
-{
-	double       ret;
-	const char * cp;
-	char       * ep;
-
-	cp = json_object_lookup_primitive(ctx, tid, key);
-	if (NULL != cp) {
-		ret = strtod(cp, &ep);
-		if (cp != ep && '\0' == *ep)
-			return ret;
-	} else {
-		errno = EINVAL;
-	}
-	return 0.0;
-}
-#endif
 
 static double
 json_object_lookup_float_default(
