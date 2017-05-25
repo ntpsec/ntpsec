@@ -22,10 +22,8 @@ static void get_mbg_tgps (unsigned char **, T_GPS *);
 static void get_mbg_tm (unsigned char **, TM_GPS *);
 static void mbg_time_status_str (char **, unsigned int, size_t);
 
-#if 0				/* no actual floats on Meinberg binary interface */
-static offsets_t mbg_float  = { 1, 0, 3, 2, 0, 0, 0, 0 }; /* byte order for meinberg floats */
-#endif
-static offsets_t mbg_double = { 1, 0, 3, 2, 5, 4, 7, 6 }; /* byte order for meinberg doubles */
+/* byte order for meinberg doubles */
+static offsets_t mbg_double = { 1, 0, 3, 2, 5, 4, 7, 6 };
 
 #define RAD2DEG	57.2957795131	/* 180/PI */
 
