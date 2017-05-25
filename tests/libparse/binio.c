@@ -127,52 +127,52 @@ TEST(binio, get_lsb_int324) {
 
 TEST(binio, put_lsb_uint160) {
         unsigned char ret[2] = { 0, 0};
-        unsigned char exp[2] = { 0, 0};
+        unsigned char expect[2] = { 0, 0};
         unsigned char *bp = &ret[0];
 
         put_lsb_uint16( &bp, 0);
 
-        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( expect, ret, 2 );
 }
 
 TEST(binio, put_lsb_uint161) {
         unsigned char ret[2] = { 0, 0};
-        unsigned char exp[2] = { 1, 0};
+        unsigned char expect[2] = { 1, 0};
         unsigned char *bp = &ret[0];
 
         put_lsb_uint16( &bp, 1);
 
-        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( expect, ret, 2 );
 }
 
 TEST(binio, put_lsb_uint162) {
         unsigned char ret[2] = { 0, 0};
-        unsigned char exp[2] = { 0, 1};
+        unsigned char expect[2] = { 0, 1};
         unsigned char *bp = &ret[0];
 
         put_lsb_uint16( &bp, 256);
 
-        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( expect, ret, 2 );
 }
 
 TEST(binio, put_lsb_uint163) {
         unsigned char ret[2] = { 0, 0};
-        unsigned char exp[2] = { 0xff, 0xff };
+        unsigned char expect[2] = { 0xff, 0xff };
         unsigned char *bp = &ret[0];
 
         put_lsb_uint16( &bp, 0xffff);
 
-        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( expect, ret, 2 );
 }
 
 TEST(binio, put_lsb_uint164) {
         unsigned char ret[2] = { 0, 0};
-        unsigned char exp[2] = { 1, 0x80};
+        unsigned char expect[2] = { 1, 0x80};
         unsigned char *bp = &ret[0];
 
         put_lsb_uint16( &bp, 0x8001);
 
-        TEST_ASSERT_EQUAL_HEX8_ARRAY( exp, ret, 2 );
+        TEST_ASSERT_EQUAL_HEX8_ARRAY( expect, ret, 2 );
 }
 
 
