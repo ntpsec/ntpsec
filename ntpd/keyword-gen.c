@@ -232,10 +232,10 @@ static void	generate_fsm		(void);
 static void	generate_token_text	(void);
 static u_short	create_keyword_scanner	(void);
 static u_short	create_scan_states	(const char *, u_short, follby, u_short);
-int		compare_key_tok_id	(const void *, const void *);
-int		compare_key_tok_text	(const void *, const void *);
-void		populate_symb		(char *);
-const char *	symbname		(u_short);
+static int	compare_key_tok_id	(const void *, const void *);
+static int	compare_key_tok_text	(const void *, const void *);
+static void	populate_symb		(char *);
+static const char * symbname		(u_short);
 
 
 int main(int argc, char **argv)
@@ -626,7 +626,7 @@ generate_token_text(void)
 }
 
 	
-int
+static int
 compare_key_tok_id(
 	const void *a1,
 	const void *a2
@@ -645,7 +645,7 @@ compare_key_tok_id(
 }
 
 
-int
+static int
 compare_key_tok_text(
 	const void *a1,
 	const void *a2
@@ -662,7 +662,7 @@ compare_key_tok_text(
  * populate_symb() - populate symb[] lookup array with symbolic token
  *		     names such that symb[T_Age] == "T_Age", etc.
  */
-void
+static void
 populate_symb(
 	char *header_file
 	)
@@ -696,7 +696,7 @@ populate_symb(
 }
 
 
-const char *
+static const char *
 symbname(
 	u_short token
 	)
