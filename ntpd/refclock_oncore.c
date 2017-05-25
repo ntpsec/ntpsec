@@ -671,7 +671,7 @@ oncore_start(
 	if (fd1 <= 0) {
 		oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
 			     device1);
-		/* coverity[leaked_storage] */
+		free(instance);
 		return false;		/* exit, can't open file, can't start driver */
 	}
 
@@ -726,6 +726,7 @@ oncore_start(
 		return false;
 	}
 	pp->unitptr = instance;
+        /* can not trivially free instance now */
 
 #ifdef ENABLE_ONCORE_SHMEM
 	/*
