@@ -134,8 +134,7 @@ pps_start(
 	pp->stratum = STRATUM_UNSPEC;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_ATOM;
-	up = emalloc(sizeof(struct ppsunit));
-	memset(up, 0, sizeof(struct ppsunit));
+	up = emalloc_zero(sizeof(struct ppsunit));
 	pp->unitptr = up;
 
 	/*

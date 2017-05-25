@@ -419,12 +419,11 @@ jjy_start ( int unit, struct peer *peer )
 #endif
 
 	/* Allocate memory for the unit structure */
-	up = emalloc( sizeof(*up) ) ;
+	up = emalloc_zero( sizeof(*up) ) ;
 	if ( up == NULL ) {
 		msyslog ( LOG_ERR, "refclock_jjy.c : jjy_start : emalloc" ) ;
 		return false ;
 	}
-	memset ( up, 0, sizeof(*up) ) ;
 
 	up->bInitError = false ;
 	up->iProcessState = JJY_PROCESS_STATE_IDLE ;

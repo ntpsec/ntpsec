@@ -593,8 +593,7 @@ oncore_start(
 
 	/* create instance structure for this unit */
 
-	instance = emalloc(sizeof(*instance));
-	memset(instance, 0, sizeof(*instance));
+	instance = emalloc_zero(sizeof(*instance));
 
 	/* initialize miscellaneous variables */
 
@@ -985,8 +984,7 @@ oncore_init_shmem(
 	}
 	shmem_length = n + 2;
 
-	buf = emalloc(shmem_length);
-	memset(buf, 0, shmem_length);
+	buf = emalloc_zero(shmem_length);
 
 	/* next build the new SHMEM buffer in memory */
 

@@ -138,8 +138,7 @@ zyfer_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(struct zyferunit));
-	memset(up, 0, sizeof(struct zyferunit));
+	up = emalloc_zero(sizeof(struct zyferunit));
 	pp = peer->procptr;
 	pp->io.clock_recv = zyfer_receive;
 	pp->io.srcclock = peer;
