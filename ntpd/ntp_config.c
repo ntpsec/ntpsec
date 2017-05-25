@@ -2814,7 +2814,7 @@ config_unpeers(
 			msyslog(LOG_ERR, "invalid address in unpeer command");
 			continue;
 		}
-		
+
 		ZERO(peeraddr);
 		AF(&peeraddr) = curr_unpeer->addr->type;
 		name = curr_unpeer->addr->address;
@@ -2833,7 +2833,16 @@ config_unpeers(
 
 			continue;
 		}
-		/* It's not a numeric IP address, it's a hostname. */
+
+		/* It's not a numeric IP address... */
+
+		/* Misguided attempt to unpeer by driver type name? */
+		if (strchr(name, '.') == NULL && strchr(name, ':') == NULL) {
+		    msyslog(LOG_NOTICE, "refclocks cannot be unpeered by type.");
+		    continue;
+		}
+
+		/* It's a hostname. */
 		p = findexistingpeer(NULL, name, NULL, -1);
 		if (p != NULL) {
 			msyslog(LOG_NOTICE, "unpeered %s", name);
