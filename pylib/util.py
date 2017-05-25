@@ -844,6 +844,8 @@ class PeerSummary:
                 clock_name = srcadr
         else:
             clock_name = srchost
+        if clock_name is None:
+            clock_name = ""
         if self.wideremote and len(clock_name) > self.namewidth:
             line += ("%c%s\n" % (c, clock_name))
             line += (" " * (self.namewidth + 2))
