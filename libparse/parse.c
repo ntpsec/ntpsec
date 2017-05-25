@@ -317,14 +317,8 @@ parse_to_unixtime(
 		return -1;		/* bad month */
 	}
 
-#if 0								/* Y2KFixes */
-				/* adjust leap year */
-	if (clock_time->month < 3 && days_per_year(clock_time->year) == 366)
-	    t--;
-#else								/* Y2KFixes [ */
 	if ( clock_time->month >= 3  &&  is_leapyear(clock_time->year) )
 	    t++;		/* add one more if within leap year */
-#endif								/* Y2KFixes ] */
 
 	for (i = 1; i < clock_time->month; i++)
 	{
