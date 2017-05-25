@@ -1450,6 +1450,7 @@ static struct parse_clockinfo
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
 #define CLK_REALTYPE(x) ((int)(((x)->ttl) & 0x7F))
+/* carefull, CLK_TYPE() in refclock_trimle.c is different */
 #define CLK_TYPE(x)	((CLK_REALTYPE(x) >= ncltypes) ? ~0 : CLK_REALTYPE(x))
 #define CLK_PPS(x)	(((x)->ttl) & 0x80)
 
@@ -4758,6 +4759,7 @@ trimbletsip_init(
 {
 #if defined(VEOL) || defined(VEOL2)
 	struct termios tio;		/* NEEDED FOR A LONG TIME ! */
+	u_int type;
 	/*
 	 * allocate local data area
 	 */
@@ -4783,9 +4785,9 @@ trimbletsip_init(
 	}
 	else
 	{
-		/* The macro value is actually unsigned */
-		/* coverity[negative_returns] */
-		if ((parse_clockinfo[CLK_TYPE(parse->peer)].cl_lflag & ICANON))
+		type = (u_int)CLK_TYPE(parse->peer);
+		if ( (type != (u_int)~0) &&
+                     (parse_clockinfo[type].cl_lflag & ICANON))
 		{
 #ifdef VEOL
 			tio.c_cc[VEOL]  = ETX;
