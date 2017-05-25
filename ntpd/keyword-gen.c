@@ -373,7 +373,6 @@ generate_fsm(void)
 		}
 
 		if (sst[i].finishes_token) {
-			/* coverity[leaked_storage] */
 			snprintf(token_id_comment, 
 				 sizeof(token_id_comment), "%5d %-17s",
 				 i, symbname(sst[i].finishes_token));
@@ -525,7 +524,6 @@ create_scan_states(
 		sst[my_state].followedby = (char)followedby;
 
 		if (sst[token].finishes_token != (u_short)token) {
-			/* coverity[leaked_storage] */
 			fprintf(stderr,
 				"fatal, sst[%d] not reserved for %s.\n",
 				token, symbname(token));
@@ -614,7 +612,6 @@ generate_token_text(void)
 		}
 		if (i > 0)
 			printf(",");
-		/* coverity[leaked_storage] */
 		printf("\n\t/* %-5d %5d %20s */\t\"%s\"",
 		       id - lowest_id, id, symbname(id), 
 		       ntp_keywords[i].key);
@@ -701,14 +698,14 @@ symbname(
 	u_short token
 	)
 {
-#define BUFLENGTH 20
+	static char buf[20];
 	char *name;
 
 	if (token < COUNTOF(symb) && symb[token] != NULL) {
 		name = symb[token];
 	} else {
-		name = malloc(BUFLENGTH);
-		snprintf(name, BUFLENGTH, "%d", token);
+		snprintf(buf, sizeof(buf), "%d", token);
+		name = buf;
 	}	
 
 	return name;
