@@ -95,7 +95,7 @@ TEST(calendar, days_per_year) {
 	TEST_ASSERT_EQUAL(366, days_per_year(2040));
 }
 
-#ifdef REFCLOCK
+#ifdef CLOCK_GENERIC
 TEST(calendar, parse_to_unixtime) {
         /* check is_leapyear() */
         clocktime_t  ct;
@@ -265,7 +265,7 @@ TEST_GROUP_RUNNER(calendar) {
 	RUN_TEST_CASE(calendar, is_leapyear);
 	RUN_TEST_CASE(calendar, julian0);
 	RUN_TEST_CASE(calendar, days_per_year);
-#ifdef REFCLOCK
+#ifdef CLOCK_GENERIC
 	RUN_TEST_CASE(calendar, parse_to_unixtime);
 #endif
 	RUN_TEST_CASE(calendar, DaySplitMerge);
