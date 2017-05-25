@@ -352,19 +352,18 @@ parse_cmdline_opts(
 	    case 'u':
 #ifdef ENABLE_DROPROOT
 		if (ntp_optarg != NULL) {
-			droproot = true;
-			/* coverity[overwrite_var] Leak is real but harmless */
-			user = estrdup(ntp_optarg);
-			/* coverity[overwrite_var] Leak is real but harmless */
-			group = strrchr(user, ':');
-			if (group != NULL) {
-				size_t	len;
+                        char *gp;
 
-				*group++ = '\0'; /* get rid of the ':' */
-				len = (size_t)(group - user);
-				group = estrdup(group);
-				user = erealloc(user, len);
-			}
+			droproot = true;
+			user = ntp_optarg;
+
+			gp = strrchr(user, ':');
+			if (gp) {
+				*gp++ = '\0'; /* get rid of the ':' */
+				group = gp;
+			} else {
+                                group  = NULL;
+                        }
 		}
 #endif
 		break;
