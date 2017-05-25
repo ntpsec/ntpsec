@@ -661,18 +661,18 @@ oncore_start(
 		return false;		/* exit, no file, can't start driver */
 	}
 
-	if (stat(device2, &stat2)) {
-		stat2.st_dev = stat2.st_ino = (ino_t)-2;
-		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %m",
-			     device2, errno);
-	}
-
 	fd1 = refclock_open(device1, SPEED, LDISC_RAW);
 	if (fd1 <= 0) {
 		oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
 			     device1);
 		free(instance);
 		return false;		/* exit, can't open file, can't start driver */
+	}
+
+	if (stat(device2, &stat2)) {
+		stat2.st_dev = stat2.st_ino = (ino_t)-2;
+		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %m",
+			     device2, errno);
 	}
 
 	/* for LINUX the PPS device is the result of a line discipline.
@@ -683,6 +683,7 @@ oncore_start(
 		fd2 = fd1;
 	else
 	{	/* different devices here */
+		/* coverity[toctou] */
 		if ((fd2=open(device2, O_RDWR, 0777)) < 0) {
 			oncore_log_f(instance, LOG_ERR,
 				     "Can't open fd2 (%s)", device2);
