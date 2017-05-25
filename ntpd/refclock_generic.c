@@ -4765,13 +4765,9 @@ trimbletsip_init(
 	{
 		trimble_t *t;
 
-		t = (trimble_t *)(parse->localdata = emalloc(sizeof(trimble_t)));
-
-		if (t)
-		{
-			memset((char *)t, 0, sizeof(trimble_t));
-			t->last_msg = current_time;
-		}
+		t = emalloc_zero(sizeof(trimble_t));
+		parse->localdata = t;
+		t->last_msg = current_time;
 	}
 
 	parse->peer->procptr->action     = trimble_check;
