@@ -1367,8 +1367,8 @@ oncore_read_config(
 			if (!strcmp(ca, "NO") || !strcmp(ca, "OFF"))    /* Yes/No, On/Off */
 				instance->traim_in = 0;
 		} else if (!strncmp(cc, "MASK", (size_t) 4)) {
-			/* coverity[unchecked_value] */
-			sscanf(ca, "%d", &mask);
+			if ( 1 != sscanf(ca, "%d", &mask) )
+                                mask = -1;
 			if (mask > -1 && mask < 90)
 				instance->Ag = mask;			/* Satellite mask angle */
 		} else if (!strncmp(cc,"PPSCONTROL",10)) {              /* pps control M12 only */
