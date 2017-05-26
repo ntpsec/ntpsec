@@ -851,8 +851,7 @@ class PeerSummary:
         if clock_name is None: # DEBUG #305
             clock_name = ""
             if self.debug:
-                dbg = "clock_name error: srcadr=%s, srchost=%s, dcheck=%s" % \
-                      (srcadr, srchost, dcheck)
+                dbg = "clock_name error: srcadr=%s, srchost=%s, dcheck=%s, varlist=%s\n" % (srcadr, srchost, dcheck, variables.keys())
                 self.logfp.write(dbg)
         if self.wideremote and len(clock_name) > self.namewidth:
             line += ("%c%s\n" % (c, clock_name))
