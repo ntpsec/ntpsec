@@ -186,6 +186,7 @@ mon_getmoremem(void)
 
 		mon_mem_increments++;
 	}
+        /* chunk not free()ed, chunk added to free list */
 	/* coverity[leaked_storage] */
 }
 
