@@ -14,8 +14,7 @@
 #ifndef GUARD_NTP_LEAPSEC_H
 #define GUARD_NTP_LEAPSEC_H
 
-struct stat;
-
+#include <sys/stat.h>      /* for struct stat */
 
 /* function pointer types. Note that 'fprintf' and 'getc' can be casted
  * to the dumper resp. reader type, provided the auxiliary argument is a
