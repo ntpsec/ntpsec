@@ -1278,7 +1278,8 @@ oncore_read_config(
 
 		if (!strncmp(cc, "LAT", (size_t) 3)) {
 			f1 = f2 = f3 = 0;
-			sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3);
+			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3))
+                                continue;
 			sign = 1;
 			if (f1 < 0) {
 				f1 = -f1;
@@ -1288,7 +1289,8 @@ oncore_read_config(
 			lat_flg++;
 		} else if (!strncmp(cc, "LON", (size_t) 3)) {
 			f1 = f2 = f3 = 0;
-			sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3);
+			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3))
+                                continue;
 			sign = 1;
 			if (f1 < 0) {
 				f1 = -f1;
@@ -1299,7 +1301,8 @@ oncore_read_config(
 		} else if (!strncmp(cc, "HT", (size_t) 2)) {
 			f1 = 0;
 			units[0] = '\0';
-			sscanf(ca, "%lf %1s", &f1, units);
+			if ( 2 != sscanf(ca, "%lf %1s", &f1, units))
+                                continue;
 			if (units[0] == 'F')
 				f1 = 0.3048 * f1;
 			instance->ss_ht = 100 * f1;    /* cm */
@@ -1307,7 +1310,8 @@ oncore_read_config(
 		} else if (!strncmp(cc, "DELAY", (size_t) 5)) {
 			f1 = 0;
 			units[0] = '\0';
-			sscanf(ca, "%lf %1s", &f1, units);
+			if ( 2 != sscanf(ca, "%lf %1s", &f1, units))
+                                continue;
 			if (units[0] == 'N')
 				;
 			else if (units[0] == 'U')
@@ -1327,7 +1331,8 @@ oncore_read_config(
 		} else if (!strncmp(cc, "OFFSET", (size_t) 6)) {
 			f1 = 0;
 			units[0] = '\0';
-			sscanf(ca, "%lf %1s", &f1, units);
+			if ( 2 != sscanf(ca, "%lf %1s", &f1, units))
+                                continue;
 			if (units[0] == 'N')
 				;
 			else if (units[0] == 'U')
@@ -1345,7 +1350,8 @@ oncore_read_config(
 			else
 				instance->offset = f1;		/* offset in ns */
 		} else if (!strncmp(cc, "MODE", (size_t) 4)) {
-			sscanf(ca, "%d", &mode);
+			if ( 1 != sscanf(ca, "%d", &mode))
+                                continue;
 			if (mode < 0 || mode > 4)
 				mode = 4;
 		} else if (!strncmp(cc, "ASSERT", (size_t) 6)) {
@@ -1359,7 +1365,8 @@ oncore_read_config(
 		} else if (!strncmp(cc, "POSN3D", (size_t) 6)) {
 			instance->shmem_Posn = 3;
 		} else if (!strncmp(cc, "CHAN", (size_t) 4)) {
-			sscanf(ca, "%d", &i);
+			if ( 1 != sscanf(ca, "%d", &i))
+                                continue;
 			if ((i == 6) || (i == 8) || (i == 12))
 				instance->chan_in = i;
 		} else if (!strncmp(cc, "TRAIM", (size_t) 5)) {
@@ -1368,7 +1375,7 @@ oncore_read_config(
 				instance->traim_in = 0;
 		} else if (!strncmp(cc, "MASK", (size_t) 4)) {
 			if ( 1 != sscanf(ca, "%d", &mask) )
-                                mask = -1;
+                                continue;
 			if (mask > -1 && mask < 90)
 				instance->Ag = mask;			/* Satellite mask angle */
 		} else if (!strncmp(cc,"PPSCONTROL",10)) {              /* pps control M12 only */
