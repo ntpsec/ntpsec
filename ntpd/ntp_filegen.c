@@ -212,6 +212,7 @@ filegen_open(
 #ifndef	S_ISREG
 #define	S_ISREG(mode)	(((mode) & S_IFREG) == S_IFREG)
 #endif
+		/* coverity[toctou] */
 		if (stat(filename, &stats) == 0) {
 			/* Hm, file exists... */
 			if (S_ISREG(stats.st_mode)) {

@@ -670,6 +670,7 @@ oncore_start(
 		return false;		/* exit, can't open file, can't start driver */
 	}
 
+	/* coverity[toctou] */
 	if (stat(device2, &stat2)) {
 		stat2.st_dev = stat2.st_ino = (ino_t)-2;
 		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %m",

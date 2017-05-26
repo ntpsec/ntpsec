@@ -459,6 +459,7 @@ leapsec_load_file(
 		return false;
 	
 	/* try to stat the leapfile */
+	/* coverity[toctou] */
 	if (0 != stat(fname, &sb_new)) {
 		if (logall)
 			msyslog(LOG_ERR, "%s ('%s'): stat failed: %m",
