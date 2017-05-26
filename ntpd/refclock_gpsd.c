@@ -238,9 +238,12 @@ struct refclock refclock_gpsdjson = {
 
 /* =====================================================================
  * our local clock unit and data
- */
+*/
 
-typedef struct gpsd_unit {
+struct gpsd_unit;
+typedef struct gpsd_unit gpsd_unitT;
+
+struct gpsd_unit {
 	/* links for sharing between master/slave units */
 	gpsd_unitT *next_unit;
 	size_t      refcount;
@@ -316,7 +319,7 @@ typedef struct gpsd_unit {
 	/* record assemby buffer and saved length */
 	int  buflen;
 	char buffer[MAX_PDU_LEN];
-} gpsd_unitT;
+};
 
 /* =====================================================================
  * static local helpers forward decls
