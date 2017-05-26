@@ -829,6 +829,7 @@ class PeerSummary:
         # refclocks have both srcadr and srchost
         # pool has "0.0.0.0" and srchost
         # slots setup via pool have only srcadr
+        dcheck = "blank"
         if srcadr is not None \
                 and srcadr != "0.0.0.0" and srcadr[:7] != "127.127":
             if self.showhostnames:
@@ -838,14 +839,21 @@ class PeerSummary:
                     clock_name = canonicalize_dns(srcadr)
                     if self.debug:
                         self.logfp.write("DNS lookup ends.\n")
+                    dcheck = "show"
                 except TypeError:
                     return ''
             else:
                 clock_name = srcadr
+                dcheck = "clock_name==srcadr"
         else:
             clock_name = srchost
-        if clock_name is None:
+            dcheck = "clock_name==srchost"
+        if clock_name is None: # DEBUG #305
             clock_name = ""
+            if self.debug:
+                dbg = "clock_name error: srcadr=%s, srchost=%s, dcheck=%s" % \
+                      (srcadr, srchost, dcheck)
+                self.logfp.write(dbg)
         if self.wideremote and len(clock_name) > self.namewidth:
             line += ("%c%s\n" % (c, clock_name))
             line += (" " * (self.namewidth + 2))
