@@ -166,7 +166,7 @@ static char default_ntp_signd_socket[] =
 #endif
 char *ntp_signd_socket = default_ntp_signd_socket;
 #ifdef HAVE_NETINFO_NI_H
-struct netinfo_config_state *config_netinfo = NULL;
+static struct netinfo_config_state *config_netinfo = NULL;
 static bool check_netinfo = true;
 #endif /* HAVE_NETINFO_NI_H */
 
