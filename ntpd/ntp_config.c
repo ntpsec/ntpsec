@@ -2838,7 +2838,7 @@ config_unpeers(
 
 		/* Misguided attempt to unpeer by driver type name? */
 		if (strchr(name, '.') == NULL && strchr(name, ':') == NULL) {
-		    msyslog(LOG_NOTICE, "refclocks cannot be unpeered by type.");
+		    msyslog(LOG_ERROR, "refclocks cannot be unpeered by type.");
 		    continue;
 		}
 
