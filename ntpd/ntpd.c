@@ -108,7 +108,7 @@ static	void	no_debug	(int);
 static int	saved_argc;
 static char **	saved_argv;
 
-int		ntpdmain(int, char **) __attribute__((noreturn));
+static int	ntpdmain(int, char **) __attribute__((noreturn));
 static void	mainloop		(void)
 			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
@@ -124,8 +124,8 @@ static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 
-extern  void    close_all_beyond(int);
-extern  void    close_all_except(int);
+static  void    close_all_beyond(int);
+static  void    close_all_except(int);
 
 
 #define ALL_OPTIONS "46bc:dD:f:gGhi:I:k:l:LmnNp:Pqr:Rs:t:u:U:Vw:xzZ"
@@ -494,7 +494,7 @@ const char *ntpd_version(void)
  * Main program.  Initialize us, disconnect us from the tty if necessary,
  * and loop waiting for I/O and/or timer expiries.
  */
-int
+static int
 ntpdmain(
 	int argc,
 	char *argv[]
@@ -1343,7 +1343,7 @@ no_debug(
  *
  * Close all file descriptors except the given keep_fd.
  */
-void
+static void
 close_all_except(
 	int keep_fd
 	)
@@ -1365,7 +1365,7 @@ close_all_except(
  *
  * http://stackoverflow.com/questions/899038/getting-the-highest-allocated-file-descriptor
  */
-void
+static void
 close_all_beyond(
 	int keep_fd
 	)
