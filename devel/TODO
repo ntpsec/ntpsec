@@ -48,10 +48,9 @@ of the current startup logic gets discussed.
 
 * A clock driver or auxiliary daemon for PTP.
 
-* The code used for asynchronous DNS lookup is more general, more complex,
-  and more bug-prone than it should be.  Either our version should be
-  rewritten and simplified or (better idea!) it should be replaced by
-  a well-maintained third-party library like c_ares.
+* Invent a syntax for type/unit pairs: use it in the refclock and unpeer
+  directives. Presently it's only possible to unpeer using the deprecated
+  magic address of the driver.
 
 * Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
   -du' is the traditional approach."  Hal's straw man is a new program
