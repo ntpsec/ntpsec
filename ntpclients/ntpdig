@@ -257,179 +257,182 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(
-            sys.argv[1:],
-            "46a:c:dD:g:hjk:l:M:o:p:r:Sst:wWV",
-            ["ipv4", "ipv6",
-             "authentication=",
-             "concurrent=",
-             "gap=", "help", "json",
-             "keyfile=", "logfile=",
-             "replay=",
-             "samples=", "steplimit=",
-             "step", "slew",
-             "timeout=",
-             "debug", "set-debug-level=",
-             "version"])
-    except getopt.GetoptError as e:
-        print(e)
-        raise SystemExit(1)
-    progname = sys.argv[0]
+        try:
+            (options, arguments) = getopt.getopt(
+                sys.argv[1:],
+                "46a:c:dD:g:hjk:l:M:o:p:r:Sst:wWV",
+                ["ipv4", "ipv6",
+                 "authentication=",
+                 "concurrent=",
+                 "gap=", "help", "json",
+                 "keyfile=", "logfile=",
+                 "replay=",
+                 "samples=", "steplimit=",
+                 "step", "slew",
+                 "timeout=",
+                 "debug", "set-debug-level=",
+                 "version"])
+        except getopt.GetoptError as e:
+            print(e)
+            raise SystemExit(1)
+        progname = sys.argv[0]
 
-    logfp = sys.stderr
-    log = lambda m: logfp.write("ntpdig: %s\n" % m)
+        logfp = sys.stderr
+        log = lambda m: logfp.write("ntpdig: %s\n" % m)
 
-    af = socket.AF_UNSPEC
-    authkey = None
-    concurrent_hosts = []
-    debug = 0
-    gap = 50
-    json = False
-    keyfile = None
-    steplimit = 0       # Default is intentionally zero
-    samples = 1
-    step = False
-    slew = False
-    timeout = 5
-    replay = None
-    try:
-        for (switch, val) in options:
-            if switch in ("-4", "--ipv4"):
-                af = socket.AF_INET
-            elif switch in ("-6", "--ipv6"):
-                af = socket.AF_INET6
-            elif switch in ("-a", "--authentication"):
-                errmsg = "Error: -a parameter '%s' not a number\n"
-                authkey = ntp.util.safeargcast(val, int, errmsg, usage)
-            elif switch in ("-c", "--concurrent"):
-                concurrent_hosts.append(val)
-            elif switch in ("-d", "--debug"):
-                debug += 1
-            elif switch in ("-D", "--set-debug-level"):
-                errmsg = "Error: -D parameter '%s' not a number\n"
-                debug = ntp.util.safeargcast(val, int, errmsg, usage)
-            elif switch in ("-j", "--json"):
-                json = True
-            elif switch in ("-k", "--keyfile"):
-                keyfile = val
-            elif switch in ("-l", "--logfile"):
-                try:
-                    logfp = open(val, "w")
-                except OSError:
-                    sys.stderr.write("logfile open of %s failed.\n" % val)
+        af = socket.AF_UNSPEC
+        authkey = None
+        concurrent_hosts = []
+        debug = 0
+        gap = 50
+        json = False
+        keyfile = None
+        steplimit = 0       # Default is intentionally zero
+        samples = 1
+        step = False
+        slew = False
+        timeout = 5
+        replay = None
+        try:
+            for (switch, val) in options:
+                if switch in ("-4", "--ipv4"):
+                    af = socket.AF_INET
+                elif switch in ("-6", "--ipv6"):
+                    af = socket.AF_INET6
+                elif switch in ("-a", "--authentication"):
+                    errmsg = "Error: -a parameter '%s' not a number\n"
+                    authkey = ntp.util.safeargcast(val, int, errmsg, usage)
+                elif switch in ("-c", "--concurrent"):
+                    concurrent_hosts.append(val)
+                elif switch in ("-d", "--debug"):
+                    debug += 1
+                elif switch in ("-D", "--set-debug-level"):
+                    errmsg = "Error: -D parameter '%s' not a number\n"
+                    debug = ntp.util.safeargcast(val, int, errmsg, usage)
+                elif switch in ("-j", "--json"):
+                    json = True
+                elif switch in ("-k", "--keyfile"):
+                    keyfile = val
+                elif switch in ("-l", "--logfile"):
+                    try:
+                        logfp = open(val, "w")
+                    except OSError:
+                        sys.stderr.write("logfile open of %s failed.\n" % val)
+                        raise SystemExit(1)
+                elif switch in ("-M", "--steplimit"):
+                    errmsg = "Error: -M parameter '%s' not a number\n"
+                    steplimit = ntp.util.safeargcast(val, int, errmsg, usage)
+                elif switch in ("-p", "--samples"):
+                    errmsg = "Error: -p parameter '%s' not a number\n"
+                    samples = ntp.util.safeargcast(val, int, errmsg, usage)
+                elif switch in ('-r', "--replay"):
+                    replay = val
+                elif switch in ("-S", "--step"):
+                    step = True
+                elif switch in ("-s", "--slew"):
+                    slew = True
+                elif switch in ("-t", "--timeout"):
+                    errmsg = "Error: -t parameter '%s' not a number\n"
+                    timeout = ntp.util.safeargcast(val, int, errmsg, usage)
+                elif switch in ("-h", "--help"):
+                    print(usage)
+                    raise SystemExit(0)
+                elif switch in ("-V", "--version"):
+                    print("ntpdig %s" % ntp.util.stdversion())
+                    raise SystemExit(0)
+                else:
+                    sys.stderr.write(
+                        "Unknown command line switch or missing argument.\n")
+                    sys.stderr.write(usage)
                     raise SystemExit(1)
-            elif switch in ("-M", "--steplimit"):
-                errmsg = "Error: -M parameter '%s' not a number\n"
-                steplimit = ntp.util.safeargcast(val, int, errmsg, usage)
-            elif switch in ("-p", "--samples"):
-                errmsg = "Error: -p parameter '%s' not a number\n"
-                samples = ntp.util.safeargcast(val, int, errmsg, usage)
-            elif switch in ('-r', "--replay"):
-                replay = val
-            elif switch in ("-S", "--step"):
-                step = True
-            elif switch in ("-s", "--slew"):
-                slew = True
-            elif switch in ("-t", "--timeout"):
-                errmsg = "Error: -t parameter '%s' not a number\n"
-                timeout = ntp.util.safeargcast(val, int, errmsg, usage)
-            elif switch in ("-h", "--help"):
-                print(usage)
-                raise SystemExit(0)
-            elif switch in ("-V", "--version"):
-                print("ntpdig %s" % ntp.util.stdversion())
+        except ValueError:
+            sys.stderr.write("Invalid argument.\n")
+            sys.stderr.write(usage)
+            raise SystemExit(1)
+
+        credentials = keyid = keytype = passwd = None
+        try:
+            credentials = ntp.packet.Authenticator(keyfile)
+        except (OSError, IOError):
+            pass
+        if credentials:
+            try:
+                (keyid, keytype, passwd) = credentials.control(authkey)
+            except ValueError:
+                # There are no trusted keys.  Barf.
+                log("cannot get authentication key")
+                raise SystemExit(1)
+
+        if not credentials and authkey and keyfile is None:
+            sys.stderr.write("-a option requires -k.\n")
+            raise SystemExit(1)
+
+        gap /= 1000     # Scale gap to milliseconds
+
+        if not arguments:
+            arguments = ["localhost"]
+
+        if replay:
+            (pkt, dst) = replay.split(":")
+            packet = ntp.packet.SyncPacket(pkt.decode("hex"))
+            packet.received = ntp.packet.SyncPacket.posix_to_ntp(float(dst))
+            returned = [packet]
+        else:
+            returned = []
+            for server in concurrent_hosts:
+                try:
+                    returned += queryhost(server=server, concurrent=True,
+                                          timeout=timeout)
+                except ntp.packet.SyncException as e:
+                    log(str(e))
+                    continue
+                if len(returned) >= samples:
+                    break
+            for server in arguments:
+                try:
+                    returned += queryhost(server=server,
+                                          concurrent=False, timeout=timeout)
+                except ntp.packet.SyncException as e:
+                    log(str(e))
+                    continue
+                if len(returned) >= samples:
+                    break
+            returned = clock_select(returned)
+
+        if returned:
+            pkt = returned[0]
+            if debug:
+                # print(repr(pkt))
+                def hexstamp(n):
+                    return "%08x.%08x" % (n >> 32, n & 0x00000000ffffffff)
+                print("org t1: %s rec t2: %s"
+                      % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
+                print("xmt t3: %s dst t4: %s"
+                      % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
+                pkt.posixize()
+                print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
+                print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
+                print("rec-org t21: %f  xmt-dst t34: %f"
+                      % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
+            offset = pkt.adjust()
+            adjusted = step and (not slew or (slew and (abs(offset) > steplimit)))
+            report(pkt, json)
+            # If we can step but we cannot slew, then step.
+            # If we can step or slew and |offset| > steplimit, then step.
+            rc = True
+            ntp.ntpc.setprogname("ntpdig")
+            if adjusted:
+                rc = ntp.ntpc.step_systime(offset)
+            elif slew:
+                rc = ntp.ntpc.adj_systime(offset)
+            if rc:
                 raise SystemExit(0)
             else:
-                sys.stderr.write(
-                    "Unknown command line switch or missing argument.\n")
-                sys.stderr.write(usage)
                 raise SystemExit(1)
-    except ValueError:
-        sys.stderr.write("Invalid argument.\n")
-        sys.stderr.write(usage)
-        raise SystemExit(1)
-
-    credentials = keyid = keytype = passwd = None
-    try:
-        credentials = ntp.packet.Authenticator(keyfile)
-    except (OSError, IOError):
-        pass
-    if credentials:
-        try:
-            (keyid, keytype, passwd) = credentials.control(authkey)
-        except ValueError:
-            # There are no trusted keys.  Barf.
-            log("cannot get authentication key")
-            raise SystemExit(1)
-
-    if not credentials and authkey and keyfile is None:
-        sys.stderr.write("-a option requires -k.\n")
-        raise SystemExit(1)
-
-    gap /= 1000     # Scale gap to milliseconds
-
-    if not arguments:
-        arguments = ["localhost"]
-
-    if replay:
-        (pkt, dst) = replay.split(":")
-        packet = ntp.packet.SyncPacket(pkt.decode("hex"))
-        packet.received = ntp.packet.SyncPacket.posix_to_ntp(float(dst))
-        returned = [packet]
-    else:
-        returned = []
-        for server in concurrent_hosts:
-            try:
-                returned += queryhost(server=server, concurrent=True,
-                                      timeout=timeout)
-            except ntp.packet.SyncException as e:
-                log(str(e))
-                continue
-            if len(returned) >= samples:
-                break
-        for server in arguments:
-            try:
-                returned += queryhost(server=server,
-                                      concurrent=False, timeout=timeout)
-            except ntp.packet.SyncException as e:
-                log(str(e))
-                continue
-            if len(returned) >= samples:
-                break
-        returned = clock_select(returned)
-
-    if returned:
-        pkt = returned[0]
-        if debug:
-            # print(repr(pkt))
-            def hexstamp(n):
-                return "%08x.%08x" % (n >> 32, n & 0x00000000ffffffff)
-            print("org t1: %s rec t2: %s"
-                  % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
-            print("xmt t3: %s dst t4: %s"
-                  % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
-            pkt.posixize()
-            print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
-            print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
-            print("rec-org t21: %f  xmt-dst t34: %f"
-                  % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
-        offset = pkt.adjust()
-        adjusted = step and (not slew or (slew and (abs(offset) > steplimit)))
-        report(pkt, json)
-        # If we can step but we cannot slew, then step.
-        # If we can step or slew and |offset| > steplimit, then step.
-        rc = True
-        ntp.ntpc.setprogname("ntpdig")
-        if adjusted:
-            rc = ntp.ntpc.step_systime(offset)
-        elif slew:
-            rc = ntp.ntpc.adj_systime(offset)
-        if rc:
-            raise SystemExit(0)
         else:
+            log("no eligible servers")
             raise SystemExit(1)
-    else:
-        log("no eligible servers")
-        raise SystemExit(1)
+    except KeyboardInterrupt:
+        print("")
 
 # end
