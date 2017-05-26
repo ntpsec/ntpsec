@@ -89,10 +89,6 @@ int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
 
 const char *progname;
 
-#ifdef HAVE_NETINFO_NI_H
-extern bool	check_netinfo;
-#endif
-
 #if defined(HAVE_WORKING_FORK)
 static int	wait_child_sync_if	(int, long);
 #endif
