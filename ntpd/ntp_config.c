@@ -185,12 +185,6 @@ struct netinfo_config_state {
 
 struct REMOTE_CONFIG_INFO remote_config;  /* Remote configuration buffer and
 					     pointer info */
-bool old_config_style = true;	/* A boolean flag, which when set,
-		       		 * indicates that the old configuration
-		   		 * format with a newline at the end of
-		  		 * every command is being used
-			 	 */
-
 /* FUNCTION PROTOTYPES */
 
 static void init_syntax_tree(config_tree *);

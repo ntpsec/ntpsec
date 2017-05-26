@@ -45,8 +45,6 @@ static uint32_t conf_file_sum;	/* Simple sum of characters read */
 
 static struct FILE_INFO * lex_stack = NULL;
 
-
-
 /* CONSTANTS AND MACROS
  * --------------------
  */
@@ -698,8 +696,7 @@ is_EOC(
 	int ch
 	)
 {
-	if ((old_config_style && (ch == '\n')) ||
-	    (!old_config_style && (ch == ';')))
+	if ( ch == '\n')
 		return true;
 	return false;
 }
@@ -801,7 +798,7 @@ yylex(void)
 			 * a single string following as in:
 			 * setvar Owner = "The Boss" default
 			 */
-			if ('=' == ch && old_config_style)
+			if ('=' == ch )
 				followedby = FOLLBY_STRING;
 			yytext[0] = (char)ch;
 			yytext[1] = '\0';
@@ -880,16 +877,6 @@ yylex(void)
 	if (followedby == FOLLBY_TOKEN && !instring) {
 		token = is_keyword(yytext, &followedby);
 		if (token) {
-			/*
-			 * T_Server is exceptional as it forces the
-			 * following token to be a string in the
-			 * non-simulator parts of the configuration,
-			 * but in the simulator configuration section,
-			 * "server" is followed by "=" which must be
-			 * recognized as a token not a string.
-			 */
-			if (T_Server == token && !old_config_style)
-				followedby = FOLLBY_TOKEN;
 			goto normal_return;
 		} else if (is_integer(yytext)) {
 			yylval_was_set = true;

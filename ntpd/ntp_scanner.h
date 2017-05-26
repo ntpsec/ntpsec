@@ -114,11 +114,6 @@ struct FILE_INFO {
  */
 extern config_tree cfgt;	  /* Parser output stored here */
 
-/* VARIOUS EXTERNAL DECLARATIONS
- * -----------------------------
- */
-extern bool old_config_style;
-
 /* VARIOUS SUBROUTINE DECLARATIONS
  * -------------------------------
  */
