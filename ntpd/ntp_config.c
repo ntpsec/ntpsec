@@ -1458,7 +1458,7 @@ config_access(
 	sockaddr_u		addr;
 	sockaddr_u		mask;
 	struct addrinfo		hints;
-	struct addrinfo *	ai_list;
+	struct addrinfo *	ai_list = NULL;
 	struct addrinfo *	pai;
 	int			rc;
 	bool			restrict_default;
@@ -1587,6 +1587,11 @@ config_access(
 	/* Configure the restrict options */
 	my_node = HEAD_PFIFO(ptree->restrict_opts);
 	for (; my_node != NULL; my_node = my_node->link) {
+		if (ai_list != NULL) {
+                        /* we do this here, to not need at every continue */
+			freeaddrinfo(ai_list);
+			ai_list = NULL;
+                }
 		/* Parse the flags */
 		flags = 0;
 		mflags = 0;
@@ -1696,7 +1701,6 @@ config_access(
 		}
 
 		ZERO_SOCK(&addr);
-		ai_list = NULL;
 		pai = NULL;
 		restrict_default = false;
 
@@ -1736,7 +1740,6 @@ config_access(
 				 * protocol machinery until after all
 				 * restrict hosts have been resolved.
 				 */
-				ai_list = NULL;
 				ZERO(hints);
 				hints.ai_protocol = IPPROTO_UDP;
 				hints.ai_socktype = SOCK_DGRAM;
@@ -1806,8 +1809,11 @@ config_access(
 			}
 		} while (pai != NULL);
 
-		if (ai_list != NULL)
-			freeaddrinfo(ai_list);
+	}
+	if (ai_list != NULL) {
+                /* coverity thinks this can happen, so just in case */
+		freeaddrinfo(ai_list);
+		ai_list = NULL;
 	}
 	/* coverity[leaked_storage] */
 }
