@@ -209,68 +209,16 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 }
 #endif
 
-static int
-symtbl_compare(const void *addr, const void *entryarg) {
-	const isc_backtrace_symmap_t *entry = entryarg;
-	const isc_backtrace_symmap_t *end;
-
-        /* wow, this code never runs... */
-	if ( 0 >= isc__backtrace_nsymbols) 
-                  return -1;
-
-	end = &isc__backtrace_symtable[isc__backtrace_nsymbols - 1];
-
-	if (isc__backtrace_nsymbols == 1 || entry == end) {
-		if (addr >= entry->addr) {
-			/*
-			 * If addr is equal to or larger than that of the last
-			 * entry of the table, we cannot be sure if this is
-			 * within a valid range so we consider it valid.
-			 */
-			return (0);
-		}
-		return (-1);
-	}
-
-	/* entry + 1 is a valid entry from now on. */
-	if (addr < entry->addr)
-		return (-1);
-	else if (addr >= (entry + 1)->addr)
-		return (1);
-	return (0);
-}
-
 isc_result_t
 isc_backtrace_getsymbol(const void *addr, const char **symbolp,
 			unsigned long *offsetp)
 {
-	isc_result_t result = ISC_R_SUCCESS;
-	isc_backtrace_symmap_t *found;
-
-	/*
-	 * Validate the arguments: intentionally avoid using REQUIRE().
-	 * See notes in backtrace.h.
-	 */
-	if (symbolp == NULL || *symbolp != NULL || offsetp == NULL)
-		return (ISC_R_FAILURE);
-
-	if (isc__backtrace_nsymbols < 1)
-		return (ISC_R_NOTFOUND);
 
 	/*
 	 * Search the table for the entry that meets:
 	 * entry.addr <= addr < next_entry.addr.
+         *
+         8 since we have no table, always true
 	 */
-	found = bsearch(addr, isc__backtrace_symtable,
-                        (size_t) isc__backtrace_nsymbols,
-			sizeof(isc__backtrace_symtable[0]), symtbl_compare);
-	if (found == NULL)
-		result = ISC_R_NOTFOUND;
-	else {
-		*symbolp = found->symbol;
-		*offsetp = (unsigned long)((const char *)addr \
-                                           - (char *)found->addr);
-	}
-
-	return (result);
+	return ISC_R_NOTFOUND;
 }
