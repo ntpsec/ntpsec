@@ -12,9 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <isc/assertions.h>
-#include <isc/backtrace.h>
-#include <isc/result.h>
+#include "isc/assertions.h"
+#include "isc/backtrace.h"
+#include "isc/result.h"
 
 /*
  * The maximum number of stack frames to dump on assertion failure.

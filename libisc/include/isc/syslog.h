@@ -10,8 +10,8 @@
 
 /*! \file */
 
-#include <isc/lang.h>
-#include <isc/types.h>
+#include "isc/lang.h"
+#include "isc/types.h"
 
 ISC_LANG_BEGINDECLS
 

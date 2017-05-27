@@ -12,8 +12,8 @@
 
 #include <stdarg.h>
 
-#include <isc/formatcheck.h>
-#include <isc/lang.h>
+#include "isc/formatcheck.h"
+#include "isc/lang.h"
 
 ISC_LANG_BEGINDECLS
 

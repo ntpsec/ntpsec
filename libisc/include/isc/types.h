@@ -16,7 +16,7 @@
  * XXXDCL This is just for ISC_LIST and ISC_LINK, but gets all of the other
  * list macros too.
  */
-#include <isc/list.h>
+#include "isc/list.h"
 
 /* Core Types.  Alphabetized by defined type. */
 

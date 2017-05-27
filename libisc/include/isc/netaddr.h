@@ -11,9 +11,9 @@
 /*! \file isc/netaddr.h */
 
 #include <stdbool.h>
-#include <isc/lang.h>
-#include <isc/net.h>
-#include <isc/types.h>
+#include "isc/lang.h"
+#include "isc/net.h"
+#include "isc/types.h"
 
 ISC_LANG_BEGINDECLS
 

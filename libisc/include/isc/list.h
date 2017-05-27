@@ -8,7 +8,7 @@
 #ifndef GUARD_ISC_LIST_H
 #define GUARD_ISC_LIST_H 1
 #include <stdbool.h>
-#include <isc/assertions.h>
+#include "isc/assertions.h"
 
 #ifdef ISC_LIST_CHECKINIT
 #define ISC_LINK_INSIST(x) ISC_INSIST(x)

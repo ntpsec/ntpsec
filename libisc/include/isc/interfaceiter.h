@@ -28,9 +28,9 @@
  *** Imports
  ***/
 
-#include <isc/lang.h>
-#include <isc/netaddr.h>
-#include <isc/types.h>
+#include "isc/lang.h"
+#include "isc/netaddr.h"
+#include "isc/types.h"
 
 /*!
  * \brief Public structure describing a network interface.

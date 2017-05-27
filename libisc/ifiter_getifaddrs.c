@@ -12,7 +12,7 @@
 
 #include <ifaddrs.h>
 
-#include <isc/util.h>	/* for IGNORE */
+#include "isc/util.h"	/* for IGNORE */
 
 /*% Iterator Magic */
 #define IFITER_MAGIC		ISC_MAGIC('I', 'F', 'I', 'G')

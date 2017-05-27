@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 
-#include <isc/netaddr.h>
+#include "isc/netaddr.h"
 
 /*
  * NIC rule match types

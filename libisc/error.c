@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <isc/error.h>
+#include "isc/error.h"
 
 /*% Default unexpected callback. */
 static void

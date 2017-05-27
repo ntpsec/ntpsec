@@ -11,10 +11,10 @@
 
 #include <stdio.h>
 
-#include <isc/net.h>
-#include <isc/netaddr.h>
-#include <isc/sockaddr.h>
-#include <isc/util.h>
+#include "isc/net.h"
+#include "isc/netaddr.h"
+#include "isc/sockaddr.h"
+#include "isc/util.h"
 #include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 #define ISC_TF(x) ((x) ? true : false)

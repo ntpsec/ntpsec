@@ -79,12 +79,12 @@
 #define ISC_UTIL_TRACE(a)
 #endif
 
-#include <isc/result.h>		/* Contractual promise. */
+#include "isc/result.h"		/* Contractual promise. */
 
 /*
  * List Macros.
  */
-#include <isc/list.h>		/* Contractual promise. */
+#include "isc/list.h"		/* Contractual promise. */
 
 #define LIST(type)			ISC_LIST(type)
 #define INIT_LIST(type)			ISC_LIST_INIT(type)

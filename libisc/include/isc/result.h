@@ -10,8 +10,8 @@
 
 /*! \file isc/result.h */
 
-#include <isc/lang.h>
-#include <isc/types.h>
+#include "isc/lang.h"
+#include "isc/types.h"
 
 #define ISC_R_SUCCESS			0	/*%< success */
 #define ISC_R_NOMEMORY			1	/*%< out of memory */

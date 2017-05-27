@@ -14,9 +14,9 @@
 #include <execinfo.h>
 #endif
 
-#include <isc/backtrace.h>
-#include <isc/result.h>
-#include <isc/util.h>
+#include "isc/backtrace.h"
+#include "isc/result.h"
+#include "isc/util.h"
 
 /*
  * Define empty (default) symbol table used in backtrace.c

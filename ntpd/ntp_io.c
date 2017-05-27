@@ -22,10 +22,10 @@
 #include "ntp_dns.h"
 #include "timespecops.h"
 
-#include <isc/mem.h>
-#include <isc/interfaceiter.h>
-#include <isc/netaddr.h>
-#include <isc/sockaddr.h>
+#include "isc/mem.h"
+#include "isc/interfaceiter.h"
+#include "isc/netaddr.h"
+#include "isc/sockaddr.h"
 
 #ifdef HAVE_NET_ROUTE_H
 # define USE_ROUTING_SOCKET

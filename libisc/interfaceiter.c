@@ -20,13 +20,13 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <isc/interfaceiter.h>
-#include <isc/magic.h>
-#include <isc/mem.h>
-#include <isc/net.h>
-#include <isc/result.h>
-#include <isc/types.h>
-#include <isc/util.h>
+#include "isc/interfaceiter.h"
+#include "isc/magic.h"
+#include "isc/mem.h"
+#include "isc/net.h"
+#include "isc/result.h"
+#include "isc/types.h"
+#include "isc/util.h"
 
 /* Must follow <isc/net.h>. */
 #ifdef HAVE_NET_IF6_H
