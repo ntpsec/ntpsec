@@ -81,45 +81,6 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 	return (true);
 }
 
-bool
-isc_netaddr_masktoprefixlen_bool(const isc_netaddr_t *s, unsigned int *lenp) {
-    return (ISC_R_SUCCESS == isc_netaddr_masktoprefixlen(s, lenp));
-}
-isc_result_t
-isc_netaddr_masktoprefixlen(const isc_netaddr_t *s, unsigned int *lenp) {
-	unsigned int nbits = 0, nbytes = 0, ipbytes = 0, i;
-	const unsigned char *p;
-
-	switch (s->family) {
-	case AF_INET:
-		p = (const unsigned char *) &s->type.in;
-		ipbytes = 4;
-		break;
-	case AF_INET6:
-		p = (const unsigned char *) &s->type.in6;
-		ipbytes = 16;
-		break;
-	default:
-		return (ISC_R_NOTIMPLEMENTED);
-	}
-	for (i = 0; i < ipbytes; i++) {
-		if (p[i] != 0xFF)
-			break;
-	}
-	nbytes = i;
-	if (i < ipbytes) {
-		unsigned int c = p[nbytes];
-		while ((c & 0x80) != 0 && nbits < 8) {
-			c <<= 1; nbits++;
-		}
-		if ((c & 0xFF) != 0)
-			return (ISC_R_MASKNONCONTIG);
-		i++;
-	}
-	*lenp = nbytes * 8 + nbits;
-	return (ISC_R_SUCCESS);
-}
-
 void
 isc_netaddr_fromin(isc_netaddr_t *netaddr, const struct in_addr *ina) {
 	memset(netaddr, 0, sizeof(*netaddr));
@@ -140,11 +101,6 @@ isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone) {
 	REQUIRE(netaddr->family == AF_INET6);
 
 	netaddr->zone = zone;
-}
-
-uint32_t
-isc_netaddr_getzone(const isc_netaddr_t *netaddr) {
-	return (netaddr->zone);
 }
 
 void

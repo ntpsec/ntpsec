@@ -30,16 +30,6 @@ bool
 isc_netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
 		     unsigned int) __attribute__((pure));
 /*%<
- * Compare the 'prefixlen' most significant bits of the network
- * addresses 'a' and 'b'.  If 'b''s scope is zero then 'a''s scope is
- * ignored.  Return #true if they are equal, #false if not.
- */
-
-bool
-isc_netaddr_masktoprefixlen_bool(const isc_netaddr_t *s, unsigned int *lenp);
-isc_result_t
-isc_netaddr_masktoprefixlen(const isc_netaddr_t *s, unsigned int *lenp);
-/*%<
  * Convert a netmask in 's' into a prefix length in '*lenp'.
  * The mask should consist of zero or more '1' bits in the most
  * most significant part of the address, followed by '0' bits.
@@ -90,9 +80,6 @@ isc_netaddr_frompath(isc_netaddr_t *netaddr, const char *path);
 
 void
 isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone);
-
-uint32_t
-isc_netaddr_getzone(const isc_netaddr_t *netaddr) __attribute__((pure));
 
 void
 isc_netaddr_any(isc_netaddr_t *netaddr);
