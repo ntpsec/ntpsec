@@ -86,11 +86,10 @@ struct isc_interfaceiter {
 #endif
 #endif
 
-/* Silence a warning when this file is #included */
-int
+static int
 isc_ioctl(int fildes, int req, char *arg);
 
-int
+static int
 isc_ioctl(int fildes, int req, char *arg) {
 	int trys;
 	int ret;
