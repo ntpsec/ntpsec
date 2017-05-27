@@ -204,47 +204,6 @@ initialize_ipv6only(void) {
 	try_ipv6only();
 }
 
-static void
-try_ipv6pktinfo(void) {
-	int s, on;
-	char strbuf[BUFSIZ];
-	isc_result_t result;
-	int optname;
-
-	result = isc_net_probeipv6();
-	if (result != ISC_R_SUCCESS) {
-		ipv6pktinfo_result = result;
-		return;
-	}
-
-	/* we only use this for UDP sockets */
-	s = socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
-	if (s == -1) {
-		ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "socket() failed: %s", strbuf);
-		ipv6pktinfo_result = ISC_R_UNEXPECTED;
-		return;
-	}
-
-#ifdef IPV6_RECVPKTINFO
-	optname = IPV6_RECVPKTINFO;
-#else
-	optname = IPV6_PKTINFO;
-#endif
-	on = 1;
-	if (setsockopt(s, IPPROTO_IPV6, optname, &on, sizeof(on)) < 0) {
-		ipv6pktinfo_result = ISC_R_NOTFOUND;
-		goto close;
-	}
-
-	ipv6pktinfo_result = ISC_R_SUCCESS;
-
-close:
-	close(s);
-	return;
-}
-
 bool
 isc_net_probe_ipv6only_bool(void) {
     return (ISC_R_SUCCESS == isc_net_probe_ipv6only());
