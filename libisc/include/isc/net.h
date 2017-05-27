@@ -50,6 +50,9 @@
  *** Imports.
  ***/
 
+/* for struct sockaddr on *BSD */
+#include <sys/socket.h>                /* Contractual promise. */
+
 #include <netinet/in.h>		/* Contractual promise. */
 #include "isc/types.h"
 
