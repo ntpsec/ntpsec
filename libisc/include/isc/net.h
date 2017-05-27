@@ -50,27 +50,8 @@
  *** Imports.
  ***/
 
-#include <sys/types.h>
-#include <sys/socket.h>		/* Contractual promise. */
-
-#include <net/if.h>
-
 #include <netinet/in.h>		/* Contractual promise. */
-#include <arpa/inet.h>		/* Contractual promise. */
-
 #include "isc/types.h"
-
-/*% IP address. */
-#define ISC__IPADDR(x)	((isc_uint32_t)htonl((isc_uint32_t)(x)))
-
-/*% Is IP address multicast? */
-#define ISC_IPADDR_ISMULTICAST(i) \
-		(((isc_uint32_t)(i) & ISC__IPADDR(0xf0000000)) \
-		 == ISC__IPADDR(0xe0000000))
-
-#define ISC_IPADDR_ISEXPERIMENTAL(i) \
-		(((isc_uint32_t)(i) & ISC__IPADDR(0xf0000000)) \
-		 == ISC__IPADDR(0xf0000000))
 
 /***
  *** Functions.
