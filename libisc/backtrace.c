@@ -209,16 +209,3 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 }
 #endif
 
-isc_result_t
-isc_backtrace_getsymbol(const void *addr, const char **symbolp,
-			unsigned long *offsetp)
-{
-
-	/*
-	 * Search the table for the entry that meets:
-	 * entry.addr <= addr < next_entry.addr.
-         *
-         8 since we have no table, always true
-	 */
-	return ISC_R_NOTFOUND;
-}

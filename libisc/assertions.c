@@ -109,15 +109,8 @@ default_callback(const char *file, int line, isc_assertiontype_t type,
 			unsigned long offset;
 
 			fname = NULL;
-			result = isc_backtrace_getsymbol(tracebuf[i], &fname,
-							 &offset);
-			if (result == ISC_R_SUCCESS) {
-				fprintf(stderr, "#%d %p in %s()+0x%lx\n", i,
-					tracebuf[i], fname, offset);
-			} else {
-				fprintf(stderr, "#%d %p in ??\n", i,
-					tracebuf[i]);
-			}
+			fprintf(stderr, "#%d %p in ??\n", i,
+				tracebuf[i]);
 		}
 	}
 	fflush(stderr);
