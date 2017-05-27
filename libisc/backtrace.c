@@ -26,8 +26,8 @@
  * (e.g. libisc-nosymbol.a).
  */
 
-const int isc__backtrace_nsymbols = 0;
-const isc_backtrace_symmap_t isc__backtrace_symtable[] = { { NULL, "" } };
+static const int isc__backtrace_nsymbols = 0;
+static const isc_backtrace_symmap_t isc__backtrace_symtable[] = { { NULL, "" } };
 
 #ifdef ISC_PLATFORM_USEBACKTRACE
 /*
@@ -212,8 +212,13 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 static int
 symtbl_compare(const void *addr, const void *entryarg) {
 	const isc_backtrace_symmap_t *entry = entryarg;
-	const isc_backtrace_symmap_t *end =
-		&isc__backtrace_symtable[isc__backtrace_nsymbols - 1];
+	const isc_backtrace_symmap_t *end;
+
+        /* wow, this code never runs... */
+	if ( 0 >= isc__backtrace_nsymbols) 
+                  return -1;
+
+	end = &isc__backtrace_symtable[isc__backtrace_nsymbols - 1];
 
 	if (isc__backtrace_nsymbols == 1 || entry == end) {
 		if (addr >= entry->addr) {
