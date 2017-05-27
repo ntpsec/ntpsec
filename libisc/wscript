@@ -6,7 +6,6 @@ def build(ctx):
         "backtrace.c",
         "error.c",
         "netaddr.c",
-        "errno2result.c",
         "interfaceiter.c",
         "net.c"
     ]
