@@ -14,9 +14,7 @@
  * backtrace function).  These functions still perform minimal checks and return
  * ISC_R_FAILURE if they detect an error, but the caller should therefore be
  * very careful about the use of these functions, and generally discouraged to
- * use them except in an exit path.  The exception is
- * isc_backtrace_getsymbolfromindex(), which is expected to be used in a
- * non-error-handling context and validates arguments with assertion checks.
+ * use them except in an exit path.
  *
  * Copyright (C) 2009  Internet Systems Consortium, Inc. ("ISC")
  * Copyright 2015 by the NTPsec project contributors
@@ -71,9 +69,6 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes)
  *\li	#ISC_R_NOTIMPLEMENTED
  */
 
-isc_result_t
-isc_backtrace_getsymbolfromindex(int idx, const void **addrp,
-				 const char **symbolp);
 /*%<
  * Returns the content of the internal symbol table of the given index.
  * On success, *addrsp and *symbolp point to the address and the symbol of

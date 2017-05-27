@@ -198,21 +198,6 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 }
 #endif
 
-isc_result_t
-isc_backtrace_getsymbolfromindex(int idx, const void **addrp,
-				 const char **symbolp)
-{
-	REQUIRE(addrp != NULL && *addrp == NULL);
-	REQUIRE(symbolp != NULL && *symbolp == NULL);
-
-	if (idx < 0 || idx >= isc__backtrace_nsymbols)
-		return (ISC_R_RANGE);
-
-	*addrp = isc__backtrace_symtable[idx].addr;
-	*symbolp = isc__backtrace_symtable[idx].symbol;
-	return (ISC_R_SUCCESS);
-}
-
 static int
 symtbl_compare(const void *addr, const void *entryarg) {
 	const isc_backtrace_symmap_t *entry = entryarg;
