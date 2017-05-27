@@ -177,9 +177,5 @@
 	 ISC_LIST_UNLINK_TYPE(list, elt, link, void)
 #define ISC_LIST_DEQUEUE_TYPE(list, elt, link, type) \
 	 ISC_LIST_UNLINK_TYPE(list, elt, link, type)
-#define __ISC_LIST_DEQUEUEUNSAFE(list, elt, link) \
-	__ISC_LIST_UNLINKUNSAFE_TYPE(list, elt, link, void)
-#define __ISC_LIST_DEQUEUEUNSAFE_TYPE(list, elt, link, type) \
-	__ISC_LIST_UNLINKUNSAFE_TYPE(list, elt, link, type)
 
 #endif /* GUARD_ISC_LIST_H */

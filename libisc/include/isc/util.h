@@ -53,12 +53,6 @@
 #include "isc/result.h"		/* Contractual promise. */
 
 /*
- * List Macros.
- */
-#include "isc/list.h"		/* Contractual promise. */
-
-
-/*
  * Assertions
  */
 #include "isc/assertions.h"	/* Contractual promise. */
