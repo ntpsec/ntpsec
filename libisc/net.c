@@ -262,11 +262,3 @@ isc_net_probe_ipv6only(void) {
 	initialize_ipv6only();
 	return (ipv6only_result);
 }
-
-isc_result_t
-isc_net_probe_ipv6pktinfo(void) {
-	initialize_ipv6pktinfo();
-	return (ipv6pktinfo_result);
-}
-
-
