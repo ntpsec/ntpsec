@@ -469,7 +469,6 @@ internal_current4(isc_interfaceiter_t *iter) {
 	if (family == AF_INET)
 		goto inet;
 
-#if !defined(HAVE_STRUCT_IF_LADDRREQ) && defined(SIOCGLIFADDR)
 	memset(&lifreq, 0, sizeof(lifreq));
 	memcpy(lifreq.lifr_name, iter->current.name, sizeof(lifreq.lifr_name));
 	memcpy(&lifreq.lifr_addr, &iter->current.address.type.in6,
@@ -483,14 +482,6 @@ internal_current4(isc_interfaceiter_t *iter) {
 		return (ISC_R_IGNORE);
 	}
 	prefixlen = lifreq.lifr_addrlen;
-#else
-	isc_netaddr_format(&iter->current.address, sabuf, sizeof(sabuf));
-	isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
-		      ISC_LOGMODULE_INTERFACE,
-		      ISC_LOG_INFO,
-		     "prefix length for %s is unknown (assume 128)", sabuf);
-	prefixlen = 128;
-#endif
 
 	/*
 	 * Netmask already zeroed.
