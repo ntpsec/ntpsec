@@ -18,8 +18,8 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <isc/net.h>
-#include <isc/util.h>
+#include "isc/net.h"
+#include "isc/util.h"
 
 static bool 	once_ipv6only = false;
 static bool 	once_ipv6pktinfo = false;
@@ -243,13 +243,6 @@ try_ipv6pktinfo(void) {
 close:
 	close(s);
 	return;
-}
-
-static void
-initialize_ipv6pktinfo(void) {
-	if (once_ipv6pktinfo) return;
-	once_ipv6pktinfo = true;
-	try_ipv6pktinfo();
 }
 
 bool
