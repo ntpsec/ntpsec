@@ -11,11 +11,8 @@
 /*! \file isc/netaddr.h */
 
 #include <stdbool.h>
-#include "isc/lang.h"
 #include "isc/net.h"
 #include "isc/types.h"
-
-ISC_LANG_BEGINDECLS
 
 struct isc_netaddr {
 	unsigned int family;
@@ -46,7 +43,5 @@ isc_netaddr_islinklocal(isc_netaddr_t *na) __attribute__((pure));
 /*%<
  * Returns #true if the address is a link local address.
  */
-
-ISC_LANG_ENDDECLS
 
 #endif /* GUARD_ISC_NETADDR_H */

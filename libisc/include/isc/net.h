@@ -58,7 +58,6 @@
 #include <netinet/in.h>		/* Contractual promise. */
 #include <arpa/inet.h>		/* Contractual promise. */
 
-#include "isc/lang.h"
 #include "isc/types.h"
 
 /*% IP address. */
@@ -76,8 +75,6 @@
 /***
  *** Functions.
  ***/
-
-ISC_LANG_BEGINDECLS
 
 bool isc_net_probeipv4_bool(void);
 
@@ -124,7 +121,5 @@ isc_net_probe_ipv6only(void);
  * \li	#ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
  * \li	#ISC_R_UNEXPECTED
  */
-
-ISC_LANG_ENDDECLS
 
 #endif /* GUARD_ISC_NET_H */

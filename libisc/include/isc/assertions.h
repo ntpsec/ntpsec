@@ -11,10 +11,6 @@
 #ifndef GUARD_ISC_ASSERTIONS_H
 #define GUARD_ISC_ASSERTIONS_H 1
 
-#include "isc/lang.h"
-
-ISC_LANG_BEGINDECLS
-
 /*% isc assertion type */
 typedef enum {
 	isc_assertiontype_require,
@@ -107,7 +103,5 @@ isc_assertion_typetotext(isc_assertiontype_t type)
 #else
 #define ISC_INVARIANT(cond)	((void) 0)
 #endif /* ISC_CHECK_INVARIANT */
-
-ISC_LANG_ENDDECLS
 
 #endif /* GUARD_ISC_ASSERTIONS_H */

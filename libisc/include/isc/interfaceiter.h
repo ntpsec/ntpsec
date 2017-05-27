@@ -28,7 +28,6 @@
  *** Imports
  ***/
 
-#include "isc/lang.h"
 #include "isc/netaddr.h"
 #include "isc/types.h"
 
@@ -61,8 +60,6 @@ struct isc_interface {
 /***
  *** Functions
  ***/
-
-ISC_LANG_BEGINDECLS
 
 bool
 isc_interfaceiter_create_bool(isc_mem_t *mctx, isc_interfaceiter_t **iterp);
@@ -129,7 +126,5 @@ isc_interfaceiter_destroy(isc_interfaceiter_t **iterp);
 /*!<
  * \brief Destroy the iterator.
  */
-
-ISC_LANG_ENDDECLS
 
 #endif /* GUARD_ISC_INTERFACEITER_H */

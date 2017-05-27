@@ -42,7 +42,6 @@ struct isc_backtrace_symmap {
  *** Functions
  ***/
 
-ISC_LANG_BEGINDECLS
 isc_result_t
 isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes)
 		       __attribute__((const));
@@ -105,6 +104,5 @@ isc_backtrace_getsymbol(const void *addr, const char **symbolp,
  *\li	#ISC_R_FAILURE
  *\li	#ISC_R_NOTFOUND
  */
-ISC_LANG_ENDDECLS
 
 #endif	/* GUARD_ISC_BACKTRACE_H */
