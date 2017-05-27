@@ -30,31 +30,6 @@ bool
 isc_netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
 		     unsigned int) __attribute__((pure));
 /*%<
- * Convert a netmask in 's' into a prefix length in '*lenp'.
- * The mask should consist of zero or more '1' bits in the most
- * most significant part of the address, followed by '0' bits.
- * If this is not the case, #ISC_R_MASKNONCONTIG is returned.
- *
- * Returns:
- *\li	#ISC_R_SUCCESS
- *\li	#ISC_R_MASKNONCONTIG
- */
-
-isc_result_t
-isc_netaddr_totext(const isc_netaddr_t *netaddr, isc_buffer_t *target);
-/*%<
- * Append a text representation of 'sockaddr' to the buffer 'target'.
- * The text is NOT null terminated.  Handles IPv4 and IPv6 addresses.
- *
- * Returns:
- *\li	#ISC_R_SUCCESS
- *\li	#ISC_R_NOSPACE	The text or the null termination did not fit.
- *\li	#ISC_R_FAILURE	Unspecified failure
- */
-
-void
-isc_netaddr_format(const isc_netaddr_t *na, char *array, unsigned int size);
-/*%<
  * Format a human-readable representation of the network address '*na'
  * into the character array 'array', which is of size 'size'.
  * The resulting string is guaranteed to be null-terminated.
