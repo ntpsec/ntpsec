@@ -22,14 +22,12 @@
 #include "isc/util.h"
 
 static bool 	once_ipv6only = false;
-static bool 	once_ipv6pktinfo = false;
 
 static bool 	once = false;
 
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6only_result = ISC_R_NOTFOUND;
-static isc_result_t	ipv6pktinfo_result = ISC_R_NOTFOUND;
 
 static isc_result_t
 try_proto(int domain) {
