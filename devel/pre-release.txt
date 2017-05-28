@@ -28,6 +28,7 @@ know if that is ready yet. (Jan 2017)
 We really need to test on an other-endian platform.
 NetBSD runs Big Endian on some ARM systems.
   https://wiki.netbsd.org/ports/evbarm/allwinner/
+Debian runs Big Endian on MIBSbe (tested May 2017).
 
 We should try as many refclocks as we can on as many
 OS/distros as we can.  This is testing the OS kernel
@@ -45,7 +46,7 @@ We should review any documentation for best-practices and verify
 that any sample code and build recipies work as expected.  In
 particular, we should make sure the pool option works and that
 the Raspberry Pi Stratum 1 server HOWTO works.
-(There are two sample ntp.conf files in contrib/
+(There are two sample ntp.conf files in contrib/ .
 Both use the pool.  Jan 2017)
 
 
@@ -60,7 +61,7 @@ will override that panic and allow one big step.
 
 We should verify that the cx_Freeze recipe for converting
 our Python based utilities to non-Python works.
-Details in devel/packaging.txt
+Details are in devel/packaging.txt
 
 We should test cold-start with no drift file.
 

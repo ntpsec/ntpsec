@@ -3,7 +3,8 @@
 This assumes you have downloaded the source and built a system
 and now you want to test your new ntpd.
 
-For help on getting that far, see ../INSTALL
+For help on getting that far, see the file INSTALL in the top-level
+directory.
 
 == Path problems with the test tools ==
 
@@ -14,7 +15,7 @@ directory to ntpclients/ and run ./ntpq there. If you get a message that says
 ntpq: can't find Python NTP library -- check PYTHONPATH.
 ---------------------------------------------------------------------
 
-you have a problem.  A lot of what was C code in legacy versions
+you *may* have a problem.  A lot of what was C code in legacy versions
 (pretty much everything except ntpd itself, in fact) has been moved to
 Python in order to improve maintainability and decrease attack
 surface.  Most of these tools share a Python library of critical
@@ -58,7 +59,7 @@ For a one-off test:
 
 3. Run ./build/ntpd/ntpd plus the command line parameters from above. 
 
-4. It will daemonize itself and give you back your terminal.
+4. It will daemonize itself and give you back your terminal prompt.
 
 Your current /etc/ntp.conf should work correctly.
 
