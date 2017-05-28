@@ -79,7 +79,8 @@ sensors, the NMEA driver in NTPsec sometimes has to make an assumption
 about what century it is.  Choice of a base-century hits the same
 issues; so here the year derived from the BUILD_EPOCH is also used.  The
 alternative - trusting the system clock to report the right century -
-could produce very bad behavior near century boundaries.
+could produce very bad behavior near century boundaries, and also on
+cold-start of systems without an RTC.
 
 // end
 
