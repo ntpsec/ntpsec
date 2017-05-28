@@ -1,7 +1,8 @@
 = Preliminary design notes for the NTPv5 protocol =
 
 NTPv4 is showing its age.  There are functional capabilities that
-would be very useful if they could be standardized, but are not.
+would be very useful if they could be standardized, but
+currently are not.
 
 This document will first list these missing bits, then discuss
 ways to incorporate them.
@@ -14,8 +15,8 @@ Reference IDs are used by Stratum 1 sources to identify clocks and
 clock types, and by hosts at higher strata to perform loop detection.
 
 The REFID field is 4 octets long, sufficient to hold an IPv4 address
-for loop detection. This is inadequate for IPV6, so the reference ID of
-an IPv6 host is a 4-octet hash of itscactual address. Hash collisions
+for loop detection. This is inadequate for IPv6, so the reference ID of
+an IPv6 host is a 4-octet hash of its actual address. Hash collisions
 have been observed in the wild, possiblty resulting in false-positive
 loop detection.
 
@@ -28,7 +29,7 @@ Most servers ship UTC.  Some ship TAI. Some perform leap-second
 smearing, some do not.
 
 The new protocol should enable a server to advertise its timescale,
-including its current leapsecond offset.
+including, if applicable in its timescale, its current leapsecond offset.
 
 === Era ===
 
@@ -75,7 +76,7 @@ world's firewalls to pass through a new port is not easy.
 
 === Newmode ===
 
-In this approach, the the NTP port number is retained.  So is at least
+In this approach, the NTP port number is retained.  So is at least
 the first byte of the v4 packet header structure, so that the version
 number and packet mode are at the same offset as in v4. The version
 field *is* incremented to 5.
