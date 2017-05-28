@@ -2,6 +2,8 @@
 # and filter reports about #if guards in order to locate configuration symbols
 # and plain old cruft.
 #
+# The ifdex tool is available at http://www.catb.org/~esr/ifdex/
+#
 # Should be used together with waf's config.h output, which ifdex can
 # interpret to exclude most of its config symbols. Thus, from the toplevel
 # directory:
