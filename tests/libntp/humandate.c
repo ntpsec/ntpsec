@@ -20,7 +20,7 @@ TEST(humandate, RegularTime) {
 
 	struct tm* tm;
 	tm = localtime_r(&sample, &tmbuf);
-	TEST_ASSERT_TRUE(tm != NULL);
+	TEST_ASSERT_NOT_NULL(tm);
 
 	snprintf(expected, 255, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
 
@@ -37,7 +37,7 @@ TEST(humandate, CurrentTime) {
 
 	struct tm* tm;
 	tm = localtime_r(&sample, &tmbuf);
-	TEST_ASSERT_TRUE(tm != NULL);
+	TEST_ASSERT_NOT_NULL(tm);
 
 	snprintf(expected, 255, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
 

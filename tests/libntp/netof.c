@@ -19,7 +19,7 @@ TEST(netof, ClassBAddress) {
 
 	sockaddr_u* actual = netof(&input);
 
-	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_NOT_NULL(actual);
 	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
 }
 
@@ -29,7 +29,7 @@ TEST(netof, ClassCAddress) {
 
 	sockaddr_u* actual = netof(&input);
 
-	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_NOT_NULL(actual);
 	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
 }
 
@@ -42,7 +42,7 @@ TEST(netof, ClassAAddress) {
 
 	sockaddr_u* actual = netof(&input);
 
-	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_NOT_NULL(actual);
 	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
 }
 
@@ -74,7 +74,7 @@ TEST(netof, IPv6Address) {
 
 	sockaddr_u* actual = netof(&input);
 
-	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_NOT_NULL(actual);
 	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
 }
 

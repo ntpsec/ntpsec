@@ -19,7 +19,7 @@ TEST(recvbuff, Initialization) {
 	TEST_ASSERT_EQUAL(RECV_INIT, free_recvbuffs());
 	TEST_ASSERT_EQUAL(0, full_recvbuffs());
 	TEST_ASSERT_FALSE(has_full_recv_buffer());
-	TEST_ASSERT_TRUE(get_full_recv_buffer() == NULL);
+	TEST_ASSERT_NULL(get_full_recv_buffer());
 }
 
 TEST(recvbuff, GetAndFree) {
