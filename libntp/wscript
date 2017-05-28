@@ -8,7 +8,6 @@ def build(ctx):
         "decodenetnum.c",
         "dolfptoa.c",
         "getopt.c",
-        "gpstolfp.c",
         "initnetwork.c",
         "isc_error.c",
         "isc_interfaceiter.c",

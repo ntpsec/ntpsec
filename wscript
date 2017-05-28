@@ -1049,8 +1049,8 @@ def build(ctx):
         ctx.recurse("ntpd")
         return
 
-    if ctx.env.REFCLOCK_GENERIC:
-        # Only required by the generic refclock
+    if ctx.env.REFCLOCK_GENERIC or ctx.env.REFCLOCK_TRIMBLE:
+        # required by the generic and Trimble refclocks
         ctx.recurse("libparse")
     ctx.recurse("libntp")
     ctx.recurse("ntpd")

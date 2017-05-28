@@ -43,7 +43,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(calendar);
 	RUN_TEST_GROUP(clocktime);
 	RUN_TEST_GROUP(decodenetnum);
-	RUN_TEST_GROUP(gpstolfp);
 	RUN_TEST_GROUP(hextolfp);
 	RUN_TEST_GROUP(humandate);
 	RUN_TEST_GROUP(lfpfunc);
@@ -65,6 +64,7 @@ static void RunAllTests(void)
 
 #ifdef TEST_LIBPARSE
 	RUN_TEST_GROUP(binio);
+	RUN_TEST_GROUP(gpstolfp);
 	RUN_TEST_GROUP(ieee754io);
 #endif
 

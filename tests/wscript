@@ -30,7 +30,6 @@ def build(ctx):
         "libntp/calendar.c",
         "libntp/clocktime.c",
         "libntp/decodenetnum.c",
-        "libntp/gpstolfp.c",
         "libntp/hextolfp.c",
         "libntp/humandate.c",
         "libntp/lfpfunc.c",
@@ -64,12 +63,13 @@ def build(ctx):
         source=libntp_source,
     )
 
-    if ctx.env.REFCLOCK_GENERIC:
-        # libparse only available/required wth generic refclock
+    if ctx.env.REFCLOCK_GENERIC or ctx.env.REFCLOCK_TRIMBLE:
+        # libparse available/required wth generic and Trimble refclocks
 
         # libparse/
         libparse_source = [
             "libparse/binio.c",
+            "libparse/gpstolfp.c",
             "libparse/ieee754io.c",
         ] + common_source
 
