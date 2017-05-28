@@ -4,10 +4,9 @@
 #ifndef GUARD_NTP_DNS_H
 #define GUARD_NTP_DNS_H
 
-/* Get addrinfo */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#include "ntp_net.h"
+
+typedef enum {DNS_good, DNS_temp, DNS_error} DNS_Status;
 
 /* start DNS query (unless busy) */
 extern bool dns_probe(struct peer*);
@@ -16,7 +15,8 @@ extern bool dns_probe(struct peer*);
 extern void dns_check(void);
 
 /* Callbacks to process answers */
-extern void server_take_dns(struct peer*, struct addrinfo*);
-extern void pool_take_dns(struct peer*, struct addrinfo*);
+extern void dns_take_server(struct peer*, sockaddr_u*);
+extern void dns_take_pool(struct peer*, sockaddr_u*);
+extern void dns_take_status(struct peer*, DNS_Status);
 
 #endif	/* GUARD_NTP_DNS_H */

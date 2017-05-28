@@ -2433,103 +2433,138 @@ fast_xmit(
  * server_take_dns - process DNS query for server.
  */
 void
-server_take_dns(
+dns_take_server(
 	struct peer *server,
-	struct addrinfo *ai
+	sockaddr_u *rmtadr
 	)
 {
-	sockaddr_u *		rmtadr;
-	int			restrict_mask;
-	struct peer *		p;
+	int		restrict_mask;
+	struct peer *	pp;
 
-	for ( ; NULL != ai; ai = ai->ai_next)  {
-		rmtadr = (sockaddr_u *)(void *)ai->ai_addr;
-msyslog(LOG_INFO, "Server checking: %s", socktoa(rmtadr));
-		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
-		if (NULL != p) continue;  /* already in use */
-
-msyslog(LOG_INFO, "Server trying: %s", socktoa(rmtadr));
-		
-		restrict_mask = restrictions(rmtadr);
-		if (RES_FLAGS & restrict_mask)
-			restrict_source(rmtadr, false, 0);
-
-		server->srcadr = *rmtadr;
-		server->dstadr = findinterface(rmtadr);
-if (NULL == server->dstadr)
-  msyslog(LOG_ERR, "server_take_dns: can't find interface for %s", server->hostname);
-		server->flags &= (unsigned)~FLAG_DNS;
-		server->hpoll = server->minpoll;
-		server->nextdate = current_time;
-		peer_update_hash(server);
-		peer_xmit(server);
-		poll_update(server, server->hpoll);
-
-		msyslog(LOG_INFO, "Setup server %s", socktoa(rmtadr));
+	if(!(server->flags & FLAG_DNS))
+		/* Already got an address for this slot. */
 		return;
-	};
+
+	pp = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
+	if (NULL != pp) {
+		/* Already in use. */
+		msyslog(LOG_INFO, "Server skipping: %s", socktoa(rmtadr));
+		return;
+	}
+
+	msyslog(LOG_INFO, "Server taking: %s", socktoa(rmtadr));
+	server->flags &= (unsigned)~FLAG_DNS;
+		
+	restrict_mask = restrictions(rmtadr);
+	if (RES_FLAGS & restrict_mask) {
+		msyslog(LOG_INFO, "Server poking hole in restrictions for: %s",
+			socktoa(rmtadr));
+		restrict_source(rmtadr, false, 0);
+	}
+
+	server->srcadr = *rmtadr;
+	server->dstadr = findinterface(rmtadr);
+if (NULL == server->dstadr)
+  msyslog(LOG_ERR, "dns_take_server: can't find interface for %s", server->hostname);
+	server->hpoll = server->minpoll;
+	server->nextdate = current_time;
+	peer_update_hash(server);
+	peer_xmit(server);
+	poll_update(server, server->hpoll);
 }
 
 /*
  pool_take_dns - process DNS query for pool.
  */
 void
-pool_take_dns(
+dns_take_pool(
 	struct peer *pool,	/* pool solicitor association */
-	struct addrinfo *ai	/* answer from getaddrinfo */
+	sockaddr_u *		rmtadr
 	)
 {
-	sockaddr_u *		rmtadr;
 	struct peer *		peer;
 	int			restrict_mask;
 	endpt *			lcladr;
 
-	for ( ; NULL != ai; ai = ai->ai_next)  {
-		rmtadr = (sockaddr_u *)(void *)ai->ai_addr;
-msyslog(LOG_INFO, "Pool checking: %s", socktoa(rmtadr));
-		peer = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
-		if (NULL != peer) continue;  /* already in use */
+	peer = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
+	if (NULL != peer) {
+		/* This address is already in use. */
+		msyslog(LOG_INFO, "Pool skipping: %s", socktoa(rmtadr));
+		return;
+	}
 
-msyslog(LOG_INFO, "Pool trying: %s", socktoa(rmtadr));
-		restrict_mask = restrictions(rmtadr);
-		/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
-		if (RES_FLAGS & restrict_mask)
-			restrict_source(rmtadr, false,
+	msyslog(LOG_INFO, "Pool taking: %s", socktoa(rmtadr));
+
+	restrict_mask = restrictions(rmtadr);
+	/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
+	if (RES_FLAGS & restrict_mask) {
+		msyslog(LOG_INFO, "Pool poking hole in restrictions for: %s",
+				socktoa(rmtadr));
+		restrict_source(rmtadr, false,
 				current_time + POOL_SOLICIT_WINDOW + 1);
+	}
 
-		lcladr = findinterface(rmtadr);
-		peer = newpeer(rmtadr, NULL, lcladr,
-			MODE_CLIENT, pool->version,
-			pool->minpoll, pool->maxpoll,
-			FLAG_PREEMPT | (FLAG_IBURST & pool->flags),
-			MDF_UCAST | MDF_UCLNT, 0, 0, false);
-		peer_xmit(peer);
-		poll_update(peer, peer->hpoll);
+	lcladr = findinterface(rmtadr);
+	peer = newpeer(rmtadr, NULL, lcladr,
+		MODE_CLIENT, pool->version,
+		pool->minpoll, pool->maxpoll,
+		FLAG_PREEMPT | (FLAG_IBURST & pool->flags),
+		MDF_UCAST | MDF_UCLNT, 0, 0, false);
+	peer_xmit(peer);
+	poll_update(peer, peer->hpoll);
 
-#if 0
-		memset(&xpkt, 0, sizeof(xpkt));
-		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, pool->version,
-					 MODE_CLIENT);
-		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
-		xpkt.ppoll = pool->hpoll;
-		xpkt.precision = sys_precision;
-		xpkt.refid = sys_refid;
-		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
-		xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
-		xpkt.reftime = htonl_fp(sys_reftime);
-		get_systime(&xmt_tx);
-		pool->org = xmt_tx;
-		xpkt.xmt = htonl_fp(xmt_tx);
-		sendpkt(rmtadr, lcladr, &xpkt, LEN_PKT_NOMAC);
-		pool->sent++;
-		pool->throttle += (1 << pool->minpoll) - 2;
-#endif
-
-		DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
-		    current_time, latoa(lcladr), socktoa(rmtadr)));
-		msyslog(LOG_INFO, "Soliciting pool server %s", socktoa(rmtadr));
-	};
+	DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
+	    current_time, latoa(lcladr), socktoa(rmtadr)));
 }
+
+/*
+ * dns_take_status -- setup retry time
+ * There are 2 considerations.
+ * 1) clutter in the log file
+ * 2) the load on the server
+ *   (API is broken, no way to get TTL)
+ */
+void dns_take_status(struct peer* peer, DNS_Status status) {
+	const char *txt;
+	uint8_t hpoll = peer->hpoll;
+	if (hpoll < 8)
+		hpoll = 8;      /* min retry: 256 seconds, ~5 min */
+	switch (status) {
+		case DNS_good:
+			txt = "good";
+			if (FLAG_DNS & peer->flags)
+				/* server: got answer, but didn't like any */
+				/* (all) already in use ?? */
+				hpoll += 1;
+			else
+				/* pool: maybe need more */
+				hpoll = 8;
+			break;
+		case DNS_temp:
+			txt = "temp";
+			hpoll += 1;
+			break;
+		case DNS_error:
+			txt = "error";
+			hpoll += 4;
+			break;
+		default:
+			txt = "default";
+			hpoll += 4;
+	}
+	if (hpoll > 12)
+		hpoll = 12;  /* 4096, a bit over an hour */
+	if ((DNS_good == status) &&
+		(MDF_UCAST & peer->cast_flags) && !(FLAG_DNS & peer->flags))
+		hpoll = 0;  /* server: no more */
+	msyslog(LOG_INFO, "dns_take_status: %s=>%s, %d",
+		peer->hostname, txt, hpoll);
+	if (0 == hpoll)
+		return; /* hpoll already in use by new server */
+	peer->hpoll = hpoll;
+	peer->nextdate = current_time + (1 << hpoll);
+}
+
 
 
 /*

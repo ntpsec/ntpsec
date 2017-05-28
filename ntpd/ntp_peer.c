@@ -633,9 +633,6 @@ newpeer(
 	struct peer *	peer;
 	u_int		hash;
 
-msyslog(LOG_INFO, "newpeer: addr:%s, name:%s, cast_flags:%x, flags:%x",
-  socktoa(srcadr), hostname, cast_flags, flags);
-
 	/*
 	 * First search from the beginning for an association with given
 	 * remote address and mode. If an interface is given, search

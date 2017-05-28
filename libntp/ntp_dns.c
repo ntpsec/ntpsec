@@ -79,13 +79,13 @@ bool dns_probe(struct peer* pp)
 void dns_check(void)
 {
 	int rc;
-//	struct addrinfo *ai;
-//	sockaddr_u sockaddr;
+	struct addrinfo *ai;
+	sockaddr_u sockaddr;
+	DNS_Status status;
 
 	msyslog(LOG_INFO, "dns_check: processing %s, %x, %x",
 		active->hostname, active->cast_flags, active->flags);
 
-	msyslog(LOG_INFO, "dns_check: lookup for %s", active->hostname);
 	rc = pthread_join(worker, NULL);
 	if (0 != rc) {
 		msyslog(LOG_ERR, "dns_check: join failed %m");
@@ -94,22 +94,38 @@ void dns_check(void)
 	if (0 != gai_rc) {
 		msyslog(LOG_INFO, "dns_check: DNS error %s",
 			gai_strerror(gai_rc));
-		/* FIXME-DNS callback with null to set retry timer? */
-		active = NULL;
-		return;
+		answer = NULL;
 	}
 
-//	for (ai = answer; NULL != ai; ai = ai->ai_next) {
-//		sockaddr.sa = *ai->ai_addr;
-//		msyslog(LOG_INFO, "dns_check: found %s", socktoa(&sockaddr));
-//	}
+	for (ai = answer; NULL != ai; ai = ai->ai_next) {
+		sockaddr.sa = *ai->ai_addr;
+		msyslog(LOG_INFO, "dns_check: found %s", socktoa(&sockaddr));
+		if (active->cast_flags & MDF_POOL)
+			dns_take_pool(active, &sockaddr);
+		else
+			dns_take_server(active, &sockaddr);
+	}
 
-	if (active->cast_flags & MDF_POOL)
-		pool_take_dns(active, answer);
-	else
-		server_take_dns(active, answer);
+	switch (gai_rc) {
+		case 0:
+			status = DNS_good;
+			break;
 
-	freeaddrinfo(answer);
+		case EAI_AGAIN:
+			status = DNS_temp;
+			break;
+
+		/* Treat all other errors as permanent.
+		 * Some values from man page weren't in headers.
+		 */
+		default:
+			status = DNS_error;
+	}
+
+	dns_take_status(active, status);
+
+	if (NULL != answer)
+		freeaddrinfo(answer);
 	active = NULL;
 };
 
