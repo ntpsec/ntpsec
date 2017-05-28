@@ -41,6 +41,8 @@ epoch.
 
 The IETF is attempting to develop a new cryptographic standard for
 secure/authenticated time exchange: Network Time Security.
+Further information on this is available at:
+https://tools.ietf.org/wg/ntp/
 
 The new protocol needs to allow a block of data of as-yet unspecified
 and possibly variable size to be dedicated to NTS use.
