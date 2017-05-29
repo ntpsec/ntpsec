@@ -17,7 +17,7 @@ clock types, and by hosts at higher strata to perform loop detection.
 The REFID field is 4 octets long, sufficient to hold an IPv4 address
 for loop detection. This is inadequate for IPv6, so the reference ID of
 an IPv6 host is a 4-octet hash of its actual address. Hash collisions
-have been observed in the wild, possiblty resulting in false-positive
+have been observed in the wild, possibly resulting in false-positive
 loop detection.
 
 The new protocol should support REFIDs at least as long as an IPv6
