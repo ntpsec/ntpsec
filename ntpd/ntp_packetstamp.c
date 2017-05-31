@@ -96,8 +96,8 @@ enable_packetstamps(
 	}
 #else
         /* probably Slowlaris */
-        UNUSED(fd);
-        UNUSED(addr);
+        UNUSED_ARG(fd);
+        UNUSED_ARG(addr);
 #endif
 }
 
