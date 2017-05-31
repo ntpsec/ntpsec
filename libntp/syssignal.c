@@ -13,6 +13,7 @@
 #  define Z_SA_RESTART		0
 # endif
 
+/* set an sa_handler */
 void
 signal_no_reset(
 	int sig,
@@ -21,7 +22,6 @@ signal_no_reset(
 {
 	int n;
 	struct sigaction vec;
-	struct sigaction ovec;
 
 	ZERO(vec);
 	sigemptyset(&vec.sa_mask);
@@ -38,10 +38,32 @@ signal_no_reset(
 # endif
 
 	do
-		n = sigaction(sig, &vec, &ovec);
+		n = sigaction(sig, &vec, NULL);
 	while (-1 == n && EINTR == errno);
 	if (-1 == n) {
-		perror("sigaction");
+		perror("ERROR: signal_no_reset() sigaction");
+		exit(1);
+	}
+}
+
+/* set an sa_sigaction */
+void
+signal_no_reset1(
+	int sig,
+	void (*func)(int, siginfo_t *, void *)
+	)
+{
+	int n;
+	struct sigaction vec;
+
+	ZERO(vec);
+	sigemptyset(&vec.sa_mask);
+	vec.sa_sigaction = func;
+	vec.sa_flags = SA_SIGINFO;
+
+	n = sigaction(sig, &vec, NULL);
+	if (-1 == n) {
+		perror("ERROR: signal_no_reset1() sigaction");
 		exit(1);
 	}
 }

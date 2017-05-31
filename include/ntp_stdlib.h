@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string.h>
+#include <signal.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -129,6 +130,7 @@ extern	const char *refid_str	(uint32_t, int);
 extern	int	decodenetnum	(const char *, sockaddr_u *);
 
 extern	void	signal_no_reset (int, void (*func)(int));
+extern void signal_no_reset1(int, void (*func)(int, siginfo_t *, void *));
 
 extern	void	getauthkeys 	(const char *);
 

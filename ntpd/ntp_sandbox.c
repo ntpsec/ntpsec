@@ -49,7 +49,7 @@ static struct passwd *pw;
 #include "ntp_stdlib.h"
 
 #ifdef HAVE_SECCOMP_H
-static void catchTrap(int sig);
+static void catchTrap(int sig, siginfo_t *, void *);
 #endif
 
 bool sandbox(const bool droproot,
@@ -275,7 +275,7 @@ getgroup:
 #endif
 	scmp_filter_ctx ctx = seccomp_init(MY_SCMP_ACT);
 
-        signal_no_reset(SIGSYS, catchTrap);
+        signal_no_reset1(SIGSYS, catchTrap);
 
 
 	if (NULL == ctx) {
@@ -441,10 +441,12 @@ int scmp_sc[] = {
  *  when it crashes, the last syscall will be at the end of the log file
  *
  */
-static void catchTrap(int sig)
+static void catchTrap(int sig, siginfo_t *si, void *u)
 {
 	UNUSED_ARG(sig);	/* signal number */
-	msyslog(LOG_ERR, "SIGSYS: got a trap. Probably seccomp omission. Bailing.");
+	UNUSED_ARG(u);	        /* unused ucontext_t */
+	msyslog(LOG_ERR, "ERROR: SIGSYS: got a trap.\n");
+	msyslog(LOG_ERR, "ERROR: Bad syscall %d\n", si->si_syscall);
 	exit(1);
 }
 #endif /* HAVE_SECCOMP_H */
