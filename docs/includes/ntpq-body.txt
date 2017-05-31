@@ -90,7 +90,7 @@ attempt to read interactive format commands from the standard input.
   Wide mode: if the host name or IP Address doesn't fit, write the
   full name/address and indent the next line so columns line up.
   The default truncates the name or address.
-+-W+, +--width+::
++-W+ num, +--width+=num::
   Force the terminal width.  Only relevant for composition of the
   peers display.
 +-u+, +--units+::

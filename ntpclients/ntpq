@@ -1588,7 +1588,7 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
    -V opt version         Output version information and exit
    -w no  wide            Enable wide display of addresses / hosts
                           on a separate line
-   -W no  width           Force output width to this value instead of
+   -W Num width           Force output width to this value instead of
                           querying the terminal size
    -u no  units           Display time with units.
 '''
