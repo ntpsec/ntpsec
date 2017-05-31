@@ -79,7 +79,7 @@ isc_assertion_typetotext(isc_assertiontype_t type) {
 		result = "INVARIANT";
 		break;
 	default:
-		result = NULL;
+		result = "(null)";
 	}
 	return (result);
 }
