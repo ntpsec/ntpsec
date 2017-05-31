@@ -70,8 +70,7 @@ enable_packetstamps(
 			DPRINTF(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
 				    fd, socktoa(addr)));
 	}
-#endif
-#ifdef USE_SCM_TIMESTAMPNS
+#elif defined (USE_SCM_TIMESTAMPNS)
 	{
 		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
@@ -83,8 +82,7 @@ enable_packetstamps(
 			DPRINTF(4, ("setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
 				    fd, socktoa(addr)));
 	}
-#endif
-#ifdef USE_SCM_BINTIME
+#elif defined(USE_SCM_BINTIME)
 	{
 		const int	on = 1;
 		if (setsockopt(fd, SOL_SOCKET, SO_BINTIME,
@@ -96,6 +94,10 @@ enable_packetstamps(
 			DPRINTF(4, ("setsockopt SO_BINTIME enabled on fd %d address %s\n",
 				    fd, socktoa(addr)));
 	}
+#else
+        /* probably Slowlaris */
+        UNUSED(fd);
+        UNUSED(addr);
 #endif
 }
 
