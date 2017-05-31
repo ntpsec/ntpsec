@@ -95,7 +95,6 @@ default_callback(const char *file, int line, isc_assertiontype_t type,
 	void *tracebuf[BACKTRACE_MAXFRAME];
 	int i, nframes = 0;
 	const char *logsuffix = ".";
-	const char *fname;
 	isc_result_t result;
 
 	result = isc_backtrace_gettrace(tracebuf, BACKTRACE_MAXFRAME, &nframes);
@@ -106,7 +105,6 @@ default_callback(const char *file, int line, isc_assertiontype_t type,
 		file, line, isc_assertion_typetotext(type), cond, logsuffix);
 	if (result == ISC_R_SUCCESS) {
 		for (i = 0; i < nframes; i++) {
-			fname = NULL;
 			fprintf(stderr, "#%d %p in ??\n", i, tracebuf[i]);
 		}
 	}

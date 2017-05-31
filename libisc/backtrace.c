@@ -18,17 +18,6 @@
 #include "isc/result.h"
 #include "isc/util.h"
 
-/*
- * Define empty (default) symbol table used in backtrace.c
- * If the application wants to have a complete symbol table, it should redefine
- * isc__backtrace_symtable with the complete table in some way, and link the
- * version of the library not including this definition
- * (e.g. libisc-nosymbol.a).
- */
-
-static const int isc__backtrace_nsymbols = 0;
-static const isc_backtrace_symmap_t isc__backtrace_symtable[] = { { NULL, "" } };
-
 #ifdef ISC_PLATFORM_USEBACKTRACE
 /*
  * Getting a back trace of a running process is tricky and highly platform
