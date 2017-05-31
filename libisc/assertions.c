@@ -106,11 +106,8 @@ default_callback(const char *file, int line, isc_assertiontype_t type,
 		file, line, isc_assertion_typetotext(type), cond, logsuffix);
 	if (result == ISC_R_SUCCESS) {
 		for (i = 0; i < nframes; i++) {
-			unsigned long offset;
-
 			fname = NULL;
-			fprintf(stderr, "#%d %p in ??\n", i,
-				tracebuf[i]);
+			fprintf(stderr, "#%d %p in ??\n", i, tracebuf[i]);
 		}
 	}
 	fflush(stderr);
