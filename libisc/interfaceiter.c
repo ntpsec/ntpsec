@@ -156,7 +156,7 @@ isc_interfaceiter_current_bool(isc_interfaceiter_t *iter,
 
 #if HAVE_IFADDRS_H
 #include "ifiter_getifaddrs.c"
-#elif HAVE_IFLIST_SYSCTL
+#elif defined(HAVE_IFLIST_SYSCTL) && HAVE_IFLIST_SYSCTL
 #include "ifiter_sysctl.c"
 #else
 #include "ifiter_ioctl.c"
