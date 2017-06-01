@@ -407,8 +407,8 @@ or, from ntp_adjtime():
 		if (pps_call && !(ptimex->status & STA_PPSSIGNAL))
 			report_event(EVNT_KERN, NULL,
 			    "no PPS signal");
-		DPRINTF(1, ("kernel loop status %#x (%s)\n",
-			(unsigned)ptimex->status, des));
+		DPRINT(1, ("kernel loop status %#x (%s)\n",
+			   (unsigned)ptimex->status, des));
 		/*
 		 * This code may be returned when ntp_adjtime() has just
 		 * been called for the first time, quite a while after

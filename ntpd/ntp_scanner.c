@@ -983,10 +983,10 @@ yylex(void)
 
 normal_return:
 	if (T_EOC == token)
-		DPRINTF(4,("\t<end of command>\n"));
+		DPRINT(4,("\t<end of command>\n"));
 	else
-		DPRINTF(4, ("yylex: lexeme '%s' -> %s\n", yytext,
-			    token_name(token)));
+		DPRINT(4, ("yylex: lexeme '%s' -> %s\n", yytext,
+			   token_name(token)));
 
 	if (!yylval_was_set)
 		yylval.Integer = token;

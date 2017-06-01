@@ -827,8 +827,8 @@ nmea_receive(
 	switch (checkres) {
 
 	case CHECK_INVALID:
-		DPRINTF(1, ("%s invalid data: '%s'\n",
-			refclock_name(peer), rd_lastcode));
+		DPRINT(1, ("%s invalid data: '%s'\n",
+			   refclock_name(peer), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 
@@ -836,9 +836,9 @@ nmea_receive(
 		return;
 
 	default:
-		DPRINTF(1, ("%s gpsread: %d '%s'\n",
-			refclock_name(peer), rd_lencode,
-			rd_lastcode));
+		DPRINT(1, ("%s gpsread: %d '%s'\n",
+			   refclock_name(peer), rd_lencode,
+			   rd_lastcode));
 		break;
 	}
 	up->tally.total++;
@@ -902,8 +902,8 @@ nmea_receive(
 	if (up->cksum_type[sentence] <= (uint8_t)checkres) {
 		up->cksum_type[sentence] = (uint8_t)checkres;
 	} else {
-		DPRINTF(1, ("%s checksum missing: '%s'\n",
-			refclock_name(peer), rd_lastcode));
+		DPRINT(1, ("%s checksum missing: '%s'\n",
+			   refclock_name(peer), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
 		up->tally.malformed++;
 		return;
@@ -919,8 +919,8 @@ nmea_receive(
 		return;
 	}
 
-	DPRINTF(1, ("%s processing %d bytes, timecode '%s'\n",
-		refclock_name(peer), rd_lencode, rd_lastcode));
+	DPRINT(1, ("%s processing %d bytes, timecode '%s'\n",
+		   refclock_name(peer), rd_lencode, rd_lastcode));
 
 	/*
 	 * Grab fields depending on clock string type and possibly wipe
@@ -1015,10 +1015,10 @@ nmea_receive(
 		return;
 	}
 
-	DPRINTF(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
-		refclock_name(peer),
-		date.year, date.month, date.monthday,
-		date.hour, date.minute, date.second));
+	DPRINT(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
+		   refclock_name(peer),
+		   date.year, date.month, date.monthday,
+		   date.hour, date.minute, date.second));
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
@@ -1042,8 +1042,8 @@ nmea_receive(
 	up->last_reftime = rd_reftime;
 	rd_fudge = pp->fudgetime2;
 
-	DPRINTF(1, ("%s using '%s'\n",
-		    refclock_name(peer), rd_lastcode));
+	DPRINT(1, ("%s using '%s'\n",
+		   refclock_name(peer), rd_lastcode));
 
 	/* Data will be accepted. Update stats & log data. */
 	up->tally.accepted++;
@@ -1064,16 +1064,16 @@ nmea_receive(
 			up->ppsapi_gate = true;
 			peer->precision = PPS_PRECISION;
 			peer->flags |= FLAG_PPS;
-			DPRINTF(2, ("%s PPS_RELATE_PHASE\n",
-				    refclock_name(peer)));
+			DPRINT(2, ("%s PPS_RELATE_PHASE\n",
+				   refclock_name(peer)));
 			up->tally.pps_used++;
 			break;
 			
 		case PPS_RELATE_EDGE:
 			up->ppsapi_gate = true;
 			peer->precision = PPS_PRECISION;
-			DPRINTF(2, ("%s PPS_RELATE_EDGE\n",
-				    refclock_name(peer)));
+			DPRINT(2, ("%s PPS_RELATE_EDGE\n",
+				   refclock_name(peer)));
 			break;
 			
 		case PPS_RELATE_NONE:
@@ -1083,8 +1083,8 @@ nmea_receive(
 			 * 'nmea_poll', since it might be a glitch. But
 			 * at the end of the poll cycle we know...
 			 */
-			DPRINTF(2, ("%s PPS_RELATE_NONE\n",
-				    refclock_name(peer)));
+			DPRINT(2, ("%s PPS_RELATE_NONE\n",
+				   refclock_name(peer)));
 			break;
 		}
 #endif /* HAVE_PPSAPI */
@@ -1227,8 +1227,8 @@ gps_send(
 		len = snprintf(buf, sizeof(buf), "$%.*s*%02X\r\n",
 			       len, beg, dcs);
 		if ((size_t)len >= sizeof(buf)) {
-			DPRINTF(1, ("%s gps_send: buffer overflow for command '%s'\n",
-				    refclock_name(peer), cmd));
+			DPRINT(1, ("%s gps_send: buffer overflow for command '%s'\n",
+				   refclock_name(peer), cmd));
 			return;	/* game over player 1 */
 		}
 		cmd = buf;
@@ -1236,8 +1236,8 @@ gps_send(
 		len = strlen(cmd);
 	}
 
-	DPRINTF(1, ("%s gps_send: '%.*s'\n", refclock_name(peer),
-		len - 2, cmd));
+	DPRINT(1, ("%s gps_send: '%.*s'\n", refclock_name(peer),
+		   len - 2, cmd));
 
 	/* send out the whole stuff */
 	if (write(fd, cmd, len) == -1)
@@ -1498,14 +1498,14 @@ parse_time(
 	dp = field_parse(rd, idx);
 	rc = sscanf(dp, "%2u%2u%2u%n.%3lu%n", &h, &m, &s, &p1, &f, &p2);
 	if (rc < 3 || p1 != 6) {
-		DPRINTF(1, ("nmea: invalid time code: '%.6s'\n", dp));
+		DPRINT(1, ("nmea: invalid time code: '%.6s'\n", dp));
 		return false;
 	}
 	
 	/* value sanity check */
 	if (h > 23 || m > 59 || s > 60) {
-		DPRINTF(1, ("nmea: invalid time spec %02u:%02u:%02u\n",
-			    h, m, s));
+		DPRINT(1, ("nmea: invalid time spec %02u:%02u:%02u\n",
+			   h, m, s));
 		return false;
 	}
 
@@ -1552,8 +1552,8 @@ parse_date(
 	case DATE_1_DDMMYY:
 		rc = sscanf(dp, "%2u%2u%2u%n", &d, &m, &y, &p);
 		if (rc != 3 || p != 6) {
-			DPRINTF(1, ("nmea: invalid date code: '%.6s'\n",
-				    dp));
+			DPRINT(1, ("nmea: invalid date code: '%.6s'\n",
+				   dp));
 			return false;
 		}
 		break;
@@ -1561,21 +1561,21 @@ parse_date(
 	case DATE_3_DDMMYYYY:
 		rc = sscanf(dp, "%2u,%2u,%4u%n", &d, &m, &y, &p);
 		if (rc != 3 || p != 10) {
-			DPRINTF(1, ("nmea: invalid date code: '%.10s'\n",
-				    dp));
+			DPRINT(1, ("nmea: invalid date code: '%.10s'\n",
+				   dp));
 			return false;
 		}
 		break;
 
 	default:
-		DPRINTF(1, ("nmea: invalid parse format: %u\n", fmt));
+		DPRINT(1, ("nmea: invalid parse format: %u\n", fmt));
 		return false;
 	}
 
 	/* value sanity check */
 	if (d < 1 || d > 31 || m < 1 || m > 12) {
-		DPRINTF(1, ("nmea: invalid date spec (YMD) %04u:%02u:%02u\n",
-			    y, m, d));
+		DPRINT(1, ("nmea: invalid date spec (YMD) %04u:%02u:%02u\n",
+			   y, m, d));
 		return false;
 	}
 	
@@ -1613,7 +1613,7 @@ parse_weekdata(
 	fcnt += sscanf(field_parse(rd, timeidx), "%lu", &secs);
 	fcnt += sscanf(field_parse(rd, leapidx), "%hd", &wd->wt_leap);
 	if (fcnt != 3 || wd->wt_week >= 1024 || secs >= 7*SECSPERDAY) {
-		DPRINTF(1, ("nmea: parse_weekdata: invalid weektime spec\n"));
+		DPRINT(1, ("nmea: parse_weekdata: invalid weektime spec\n"));
 		return false;
 	}
 	wd->wt_time = (uint32_t)secs;

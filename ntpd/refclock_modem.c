@@ -367,7 +367,7 @@ modem_message(
 	char	tbuf[BMAX], *cp;
 	int		dtr = TIOCM_DTR;
 
-	DPRINTF(1, ("modem: %d %s\n", (int)strlen(msg), msg));
+	DPRINT(1, ("modem: %d %s\n", (int)strlen(msg), msg));
 
 	/*
 	 * What to do depends on the state and the first token in the

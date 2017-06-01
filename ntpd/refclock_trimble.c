@@ -1256,8 +1256,8 @@ HW_poll (
 
 	/* read the current status, so we put things back right */
 	if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
-		DPRINTF(1, ("Trimble HW_poll: unit %d: GET %m\n",
-			up->unit));
+		DPRINT(1, ("Trimble HW_poll: unit %d: GET %m\n",
+			   up->unit));
 		msyslog(LOG_ERR, "Trimble(%d) HW_poll: ioctl(fd,GET): %m", 
 			up->unit);
 		return -1;

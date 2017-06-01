@@ -704,7 +704,7 @@ ctl_error(
 	int		maclen;
 
 	numctlerrors++;
-	DPRINTF(3, ("sending control error %u\n", errcode));
+	DPRINT(3, ("sending control error %u\n", errcode));
 
 	/*
 	 * Fill in the fields. We assume rpkt.sequence and rpkt.associd
@@ -744,7 +744,7 @@ process_control(
 	int properlen;
 	size_t maclen;
 
-	DPRINTF(3, ("in process_control()\n"));
+	DPRINT(3, ("in process_control()\n"));
 
 	/*
 	 * Save the addresses for error responses
@@ -761,7 +761,7 @@ process_control(
 	if (rbufp->recv_length < (int)CTL_HEADER_LEN
 	    || (CTL_RESPONSE | CTL_MORE | CTL_ERROR) & pkt->r_m_e_op
 	    || pkt->offset != 0) {
-		DPRINTF(1, ("invalid format in control packet\n"));
+		DPRINT(1, ("invalid format in control packet\n"));
 		if (rbufp->recv_length < (int)CTL_HEADER_LEN)
 			numctltooshort++;
 		if (CTL_RESPONSE & pkt->r_m_e_op)
@@ -776,8 +776,8 @@ process_control(
 	}
 	res_version = PKT_VERSION(pkt->li_vn_mode);
 	if (res_version > NTP_VERSION || res_version < NTP_OLDVERSION) {
-		DPRINTF(1, ("unknown version %d in control packet\n",
-			    res_version));
+		DPRINT(1, ("unknown version %d in control packet\n",
+			   res_version));
 		numctlbadversion++;
 		return;
 	}
@@ -805,8 +805,8 @@ process_control(
 	datapt = rpkt.data;
 
 	if ((rbufp->recv_length & 0x3) != 0)
-		DPRINTF(3, ("Control packet length %zu unrounded\n",
-			    rbufp->recv_length));
+		DPRINT(3, ("Control packet length %zu unrounded\n",
+			   rbufp->recv_length));
 
 	/*
 	 * We're set up now. Make sure we've got at least enough
@@ -829,20 +829,20 @@ process_control(
 		res_authenticate = true;
 		pkid = (void *)((char *)pkt + properlen);
 		res_keyid = ntohl(*pkid);
-		DPRINTF(3, ("recv_len %zu, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
-			    rbufp->recv_length, properlen, res_keyid,
-			    maclen));
+		DPRINT(3, ("recv_len %zu, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
+			   rbufp->recv_length, properlen, res_keyid,
+			   maclen));
 
 		if (!authistrusted(res_keyid))
-			DPRINTF(3, ("invalid keyid %08x\n", res_keyid));
+			DPRINT(3, ("invalid keyid %08x\n", res_keyid));
 		else if (authdecrypt(res_keyid, (uint32_t *)pkt,
 				     (int)rbufp->recv_length - (int)maclen,
 				     (int)maclen)) {
 			res_authokay = true;
-			DPRINTF(3, ("authenticated okay\n"));
+			DPRINT(3, ("authenticated okay\n"));
 		} else {
 			res_keyid = 0;
-			DPRINTF(3, ("authentication failed\n"));
+			DPRINT(3, ("authentication failed\n"));
 		}
 	}
 
@@ -857,8 +857,8 @@ process_control(
 	 */
 	for (cc = control_codes; cc->control_code != NO_REQUEST; cc++) {
 		if (cc->control_code == res_opcode) {
-			DPRINTF(3, ("opcode %d, found command handler\n",
-				    res_opcode));
+			DPRINT(3, ("opcode %d, found command handler\n",
+				   res_opcode));
 			if (cc->flags == AUTH
 			    && (!res_authokay
 				|| res_keyid != ctl_auth_keyid)) {
@@ -2997,8 +2997,8 @@ static void configure(
 		replace_nl = false;
 	}
 
-	DPRINTF(1, ("Got Remote Configuration Command: %s\n",
-		remote_config.buffer));
+	DPRINT(1, ("Got Remote Configuration Command: %s\n",
+		   remote_config.buffer));
 	msyslog(LOG_NOTICE, "%s config: %s",
 		socktoa(&rbufp->recv_srcadr),
 		remote_config.buffer);
@@ -3025,7 +3025,7 @@ static void configure(
                     false);
 	ctl_flushpkt(0);
 
-	DPRINTF(1, ("Reply: %s\n", remote_config.err_msg));
+	DPRINT(1, ("Reply: %s\n", remote_config.err_msg));
 
 	if (remote_config.no_errors > 0)
 		msyslog(LOG_NOTICE, "%d error in %s config",
@@ -3502,13 +3502,13 @@ static void read_mru_list(
 			if (lfpuint(last[si]) && lfpfrac(last[si]) && si == priors)
 				priors++;
 		} else {
-			DPRINTF(1, ("read_mru_list: invalid key item: '%s' (ignored)\n",
-				    v->text));
+			DPRINT(1, ("read_mru_list: invalid key item: '%s' (ignored)\n",
+				   v->text));
 			continue;
 
 		blooper:
-			DPRINTF(1, ("read_mru_list: invalid param for '%s': '%s' (bailing)\n",
-				    v->text, val));
+			DPRINT(1, ("read_mru_list: invalid param for '%s': '%s' (bailing)\n",
+				   v->text, val));
 			free(pnonce);
 			pnonce = NULL;
 			break;

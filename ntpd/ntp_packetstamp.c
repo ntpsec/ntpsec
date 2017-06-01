@@ -67,8 +67,8 @@ enable_packetstamps(
 				"setsockopt SO_TIMESTAMP on fails on address %s: %m",
 				socktoa(addr));
 		else
-			DPRINTF(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
-				    fd, socktoa(addr)));
+			DPRINT(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
+				   fd, socktoa(addr)));
 	}
 #elif defined (USE_SCM_TIMESTAMPNS)
 	{
@@ -79,8 +79,8 @@ enable_packetstamps(
 				"setsockopt SO_TIMESTAMPNS on fails on address %s: %m",
 				socktoa(addr));
 		else
-			DPRINTF(4, ("setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
-				    fd, socktoa(addr)));
+			DPRINT(4, ("setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
+				   fd, socktoa(addr)));
 	}
 #elif defined(USE_SCM_BINTIME)
 	{
@@ -91,8 +91,8 @@ enable_packetstamps(
 				"setsockopt SO_BINTIME on fails on address %s: %m",
 				socktoa(addr));
 		else
-			DPRINTF(4, ("setsockopt SO_BINTIME enabled on fd %d address %s\n",
-				    fd, socktoa(addr)));
+			DPRINT(4, ("setsockopt SO_BINTIME enabled on fd %d address %s\n",
+				   fd, socktoa(addr)));
 	}
 #else
         /* probably Slowlaris */
@@ -164,8 +164,8 @@ fetch_packetstamp(
 				    ticks = (unsigned long)(lfpfrac(nts) / (unsigned long)(sys_tick * FRAC));
 				    setlfpfrac(nts, (unsigned long)(ticks * (unsigned long)(sys_tick * FRAC)));
 				}
-                                DPRINTF(4, ("fetch_timestamp: system bintime network time stamp: %ld.%09lu\n",
-                                            (long)btp->sec, (unsigned long)((lfpfrac(nts) / FRAC) * 1e9)));
+                                DPRINT(4, ("fetch_timestamp: system bintime network time stamp: %ld.%09lu\n",
+					   (long)btp->sec, (unsigned long)((lfpfrac(nts) / FRAC) * 1e9)));
 				break;
 #endif  /* USE_SCM_BINTIME */
 #ifdef USE_SCM_TIMESTAMPNS
@@ -179,8 +179,8 @@ fetch_packetstamp(
 					tsp->tv_nsec = (long)(ticks * NS_PER_S *
 							      sys_tick);
 				}
-				DPRINTF(4, ("fetch_timestamp: system nsec network time stamp: %ld.%09ld\n",
-					    tsp->tv_sec, tsp->tv_nsec));
+				DPRINT(4, ("fetch_timestamp: system nsec network time stamp: %ld.%09ld\n",
+					   tsp->tv_sec, tsp->tv_nsec));
 				nts = tspec_stamp_to_lfp(*tsp);
 				break;
 #endif	/* USE_SCM_TIMESTAMPNS */
@@ -194,8 +194,8 @@ fetch_packetstamp(
 					tvp->tv_usec = (long)(ticks * US_PER_S *
 							      sys_tick);
 				}
-				DPRINTF(4, ("fetch_timestamp: system usec network time stamp: %jd.%06ld\n",
-					    (intmax_t)tvp->tv_sec, (long)tvp->tv_usec));
+				DPRINT(4, ("fetch_timestamp: system usec network time stamp: %jd.%06ld\n",
+					   (intmax_t)tvp->tv_sec, (long)tvp->tv_usec));
 				nts = tspec_stamp_to_lfp(tval_to_tspec(*tvp));
 				break;
 #endif  /* USE_SCM_TIMESTAMP */
@@ -210,17 +210,17 @@ fetch_packetstamp(
 			dts = ts;
 			dts -= nts;
 			collect_timing(rb, "input processing delay", 1, dts);
-			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",
-				    lfptoa(dts, 9)));
+			DPRINT(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",
+				   lfptoa(dts, 9)));
 #endif	/* ENABLE_DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;
 #endif	/* USE_SCM_BINTIME || USE_SCM_TIMESTAMPNS || USE_SCM_TIMESTAMP */
 
 		default:
-			DPRINTF(4,
-                            ("fetch_timestamp: skipping control message 0x%x\n",
-			     (unsigned)cmsghdr->cmsg_type));
+			DPRINT(4,
+			       ("fetch_timestamp: skipping control message 0x%x\n",
+				(unsigned)cmsghdr->cmsg_type));
 		}
 		cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr);
 	}

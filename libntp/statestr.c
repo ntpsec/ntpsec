@@ -316,7 +316,7 @@ decode_bitflags(
 	char *		lim;
 	size_t		b;
 	int		rc;
-	int		saved_errno;	/* for use in DPRINTF with %m */
+	int		saved_errno;	/* for use in DPRINT/TPRINT with %m */
 
 	saved_errno = errno;
 	LIB_GETBUF(buf);

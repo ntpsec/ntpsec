@@ -4958,7 +4958,7 @@ trimbletsip_message(
 		}
 		else
 		{
-			DPRINTF(1, ("TRIMBLE UNKNOWN COMMAND 0x%02x\n", cmd));
+			DPRINT(1, ("TRIMBLE UNKNOWN COMMAND 0x%02x\n", cmd));
 			return;
 		}
 

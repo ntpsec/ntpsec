@@ -470,7 +470,7 @@ shm_timer(
 		body has ipcrm'ed the old (unaccessible) shared mem segment */
 		shm = up->shm = getShmTime(unit, up->forall);
 		if (shm == NULL) {
-			DPRINTF(1, ("%s: no SHM segment\n",refclock_name(peer)));
+			DPRINT(1, ("%s: no SHM segment\n",refclock_name(peer)));
 			return;
 		}
 	}
@@ -480,33 +480,33 @@ shm_timer(
 
 	switch (status) {
 	case OK:
-	    DPRINTF(2, ("%s: SHM(%d) type %d sample\n",
-			refclock_name(peer), unit, shm_stat.mode));
+	    DPRINT(2, ("%s: SHM(%d) type %d sample\n",
+		       refclock_name(peer), unit, shm_stat.mode));
 	    break;
 	case NO_SEGMENT:
 	    /* should never happen, but is harmless */
 	    return;
 	case NOT_READY:
-	    DPRINTF(1, ("%s: SHM(%d) not ready\n",refclock_name(peer), unit));
+	    DPRINT(1, ("%s: SHM(%d) not ready\n",refclock_name(peer), unit));
 	    up->notready++;
 	    return;
 	case BAD_MODE:
-	    DPRINTF(1, ("%s: SHM(%d) type blooper, mode=%d\n",
-			refclock_name(peer), unit, shm->mode));
+	    DPRINT(1, ("%s: SHM(%d) type blooper, mode=%d\n",
+		       refclock_name(peer), unit, shm->mode));
 	    up->bad++;
 	    msyslog (LOG_ERR, "SHM(%d): bad mode found in shared memory: %d",
 		     unit, shm->mode);
 	    return;
 	case CLASH:
-	    DPRINTF(1, ("%s: type 1 access clash\n",
-			refclock_name(peer)));
+	    DPRINT(1, ("%s: type 1 access clash\n",
+		       refclock_name(peer)));
 	    msyslog (LOG_NOTICE, "SHM(%d): access clash in shared memory",
                         unit);
 	    up->clash++;
 	    return;
 	default:
-	    DPRINTF(1, ("%s: internal error, unknown SHM(%d) fetch status\n",
-			refclock_name(peer), unit));
+	    DPRINT(1, ("%s: internal error, unknown SHM(%d) fetch status\n",
+		       refclock_name(peer), unit));
 	    msyslog (LOG_NOTICE, "internal error, unknown SHM(%d) fetch status",
                         unit);
 	    up->bad++;
@@ -528,8 +528,8 @@ shm_timer(
 	/* check 1: age control of local time stamp */
 	tt = shm_stat.tvc.tv_sec - shm_stat.tvr.tv_sec;
 	if (tt < 0 || tt > up->max_delay) {
-		DPRINTF(1, ("%s:SHM(%d) stale/bad receive time, delay=%llds\n",
-			    refclock_name(peer), unit, (long long)tt));
+		DPRINT(1, ("%s:SHM(%d) stale/bad receive time, delay=%llds\n",
+			   refclock_name(peer), unit, (long long)tt));
 		up->bad++;
 		msyslog (LOG_ERR,
                          "SHM(%d): stale/bad receive time, delay=%llds",
@@ -542,8 +542,8 @@ shm_timer(
 	if (tt < 0)
 		tt = -tt;
 	if (up->max_delta > 0 && tt > up->max_delta) {
-		DPRINTF(1, ("%s: SHM(%d) diff limit exceeded, delta=%llds\n",
-			    refclock_name(peer), unit, (long long)tt));
+		DPRINT(1, ("%s: SHM(%d) diff limit exceeded, delta=%llds\n",
+			   refclock_name(peer), unit, (long long)tt));
 		up->bad++;
 		msyslog (LOG_ERR,
                          "SHM(%d): difference limit exceeded, delta=%llds\n",
@@ -552,7 +552,7 @@ shm_timer(
 	}
 
 	/* if we really made it to this point... we're winners! */
-	DPRINTF(2, ("%s: SHM(%d) feeding data\n", refclock_name(peer), unit));
+	DPRINT(2, ("%s: SHM(%d) feeding data\n", refclock_name(peer), unit));
 	tsrcv = tspec_stamp_to_lfp(shm_stat.tvr);
 	tsref = tspec_stamp_to_lfp(shm_stat.tvt);
 	pp->leap = (uint8_t)shm_stat.leap;

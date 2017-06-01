@@ -1174,7 +1174,7 @@ clock_update(
 			if (waitsync_fd_to_close != -1) {
 				close(waitsync_fd_to_close);
 				waitsync_fd_to_close = -1;
-				DPRINTF(1, ("notified parent --wait-sync is done\n"));
+				DPRINT(1, ("notified parent --wait-sync is done\n"));
 			}
 #endif /* HAVE_WORKING_FORK */
 
@@ -1296,11 +1296,11 @@ poll_update(
 		if (peer->throttle > (1 << peer->minpoll))
 			peer->nextdate += (u_long)ntp_minpkt;
 	}
-	DPRINTF(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
-		    current_time, socktoa(&peer->srcadr), peer->hpoll,
-		    peer->burst, peer->retry, peer->throttle,
-		    utemp - current_time, peer->nextdate -
-		    current_time));
+	DPRINT(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
+		   current_time, socktoa(&peer->srcadr), peer->hpoll,
+		   peer->burst, peer->retry, peer->throttle,
+		   utemp - current_time, peer->nextdate -
+		   current_time));
 }
 
 
@@ -1757,8 +1757,8 @@ clock_select(void)
 		}
 	}
 	for (i = 0; i < nl2; i++)
-		DPRINTF(3, ("select: endpoint %2d %.6f\n",
-			endpoint[indx[i]].type, endpoint[indx[i]].val));
+		DPRINT(3, ("select: endpoint %2d %.6f\n",
+			   endpoint[indx[i]].type, endpoint[indx[i]].val));
 
 	/*
 	 * This is the actual algorithm that cleaves the truechimers
@@ -1885,8 +1885,8 @@ clock_select(void)
 	 */
 	for (i = 0; i < nlist; i++) {
 		peers[i].peer->new_status = CTL_PST_SEL_SELCAND;
-		DPRINTF(2, ("select: survivor %s %f\n",
-			socktoa(&peers[i].peer->srcadr), peers[i].synch));
+		DPRINT(2, ("select: survivor %s %f\n",
+			   socktoa(&peers[i].peer->srcadr), peers[i].synch));
 	}
 
 	/*
@@ -1923,8 +1923,8 @@ clock_select(void)
 		    ((FLAG_TRUE | FLAG_PREFER) & peers[k].peer->flags))
 			break;
 
-		DPRINTF(3, ("select: drop %s seljit %.6f jit %.6f\n",
-			socktoa(&peers[k].peer->srcadr), g, d));
+		DPRINT(3, ("select: drop %s seljit %.6f jit %.6f\n",
+			   socktoa(&peers[k].peer->srcadr), g, d));
 		if (nlist > sys_maxclock)
 			peers[k].peer->new_status = CTL_PST_SEL_EXCESS;
 		for (j = k + 1; j < nlist; j++)
@@ -2006,8 +2006,8 @@ clock_select(void)
 				sys_clockhop = sys_mindisp;
 			else
 				sys_clockhop *= .5;
-			DPRINTF(1, ("select: clockhop %d %.6f %.6f\n",
-				j, x, sys_clockhop));
+			DPRINT(1, ("select: clockhop %d %.6f %.6f\n",
+				   j, x, sys_clockhop));
 			if (fabs(x) < sys_clockhop)
 				typesystem = osys_peer;
 			else
@@ -2034,8 +2034,8 @@ clock_select(void)
 			sys_offset = typesystem->offset;
 			sys_jitter = typesystem->jitter;
 		}
-		DPRINTF(1, ("select: combine offset %.9f jitter %.9f\n",
-			sys_offset, sys_jitter));
+		DPRINT(1, ("select: combine offset %.9f jitter %.9f\n",
+			   sys_offset, sys_jitter));
 	}
 #ifdef REFCLOCK
 	/*
@@ -2054,8 +2054,8 @@ clock_select(void)
 		typesystem->new_status = CTL_PST_SEL_PPS;
 		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
-		DPRINTF(1, ("select: pps offset %.9f jitter %.9f\n",
-			sys_offset, sys_jitter));
+		DPRINT(1, ("select: pps offset %.9f jitter %.9f\n",
+			   sys_offset, sys_jitter));
 	}
 #endif /* REFCLOCK */
 
@@ -2353,10 +2353,10 @@ fast_xmit(
 		if (leap_smear.in_progress) {
 			leap_smear_add_offs(&this_ref_time, NULL);
 			xpkt.refid = convertLFPToRefID(leap_smear.offset);
-			DPRINTF(2, ("fast_xmit: leap_smear.in_progress: refid %8x, smear %s\n",
-				ntohl(xpkt.refid),
-				lfptoa(leap_smear.offset, 8)
-				));
+			DPRINT(2, ("fast_xmit: leap_smear.in_progress: refid %8x, smear %s\n",
+				   ntohl(xpkt.refid),
+				   lfptoa(leap_smear.offset, 8)
+				   ));
 		}
 		xpkt.reftime = htonl_fp(this_ref_time);
 #else
@@ -2483,6 +2483,7 @@ dns_take_pool(
 	sockaddr_u *		rmtadr
 	)
 {
+	sockaddr_u *		rmtadr;
 	struct peer *		peer;
 	int			restrict_mask;
 	endpt *			lcladr;
@@ -2566,6 +2567,11 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	peer->nextdate = current_time + (1 << hpoll);
 }
 
+		DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
+		    current_time, latoa(lcladr), socktoa(rmtadr)));
+		msyslog(LOG_INFO, "Soliciting pool server %s", socktoa(rmtadr));
+	};
+}
 
 
 /*
@@ -2845,8 +2851,8 @@ proto_config(
 	/*
 	 * Figure out what he wants to change, then do it
 	 */
-	DPRINTF(2, ("proto_config: code %d value %lu dvalue %lf\n",
-		    item, value, dvalue));
+	DPRINT(2, ("proto_config: code %d value %lu dvalue %lf\n",
+		   item, value, dvalue));
 
 	switch (item) {
 

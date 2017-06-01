@@ -279,7 +279,7 @@ timer(void)
 	if (interface_interval && interface_timer <= current_time) {
 		timer_interfacetimeout(current_time +
 		    (unsigned long)interface_interval);
-		DPRINTF(2, ("timer: interface update\n"));
+		DPRINT(2, ("timer: interface update\n"));
 		interface_update(NULL, NULL);
 	}
 
@@ -392,10 +392,10 @@ check_leapsec(
 	} else {
 		int fired = leapsec_query(&lsdata, now);
 
-		DPRINTF(1, ("*** leapsec_query: fired %i, now %lli (0x%llX), "
-                            "tai_diff %i, ddist %u\n",
-		            fired, (long long)now, (long long unsigned)now,
-                            lsdata.tai_diff, lsdata.ddist));
+		DPRINT(1, ("*** leapsec_query: fired %i, now %lli (0x%llX), "
+			   "tai_diff %i, ddist %u\n",
+			   fired, (long long)now, (long long unsigned)now,
+			   lsdata.tai_diff, lsdata.ddist));
 #ifdef ENABLE_LEAP_SMEAR
 		leap_smear.in_progress = false;
 		leap_smear.doffset = 0.0;
@@ -406,13 +406,13 @@ check_leapsec(
 				      leap_smear.interval = leap_smear_intv;
 				      leap_smear.intv_end = lsdata.ttime;
 				      leap_smear.intv_start = leap_smear.intv_end - leap_smear.interval;
-				      DPRINTF(1, ("*** leapsec_query: setting leap_smear interval %li, begin %.0f, end %.0f\n",
-					      leap_smear.interval, leap_smear.intv_start, leap_smear.intv_end));
+				      DPRINT(1, ("*** leapsec_query: setting leap_smear interval %li, begin %.0f, end %.0f\n",
+						 leap_smear.interval, leap_smear.intv_start, leap_smear.intv_end));
 			      }
 		      }
 		      else {
 			      if (leap_smear.interval)
-				      DPRINTF(1, ("*** leapsec_query: clearing leap_smear interval\n"));
+				      DPRINT(1, ("*** leapsec_query: clearing leap_smear interval\n"));
 			      leap_smear.interval = 0;
 		      }
 
@@ -438,9 +438,9 @@ check_leapsec(
 					      leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
 					      now, leap_smear_time, leap_smear.doffset);
 #else
-				      DPRINTF(1, ("*** leapsec_query: [%.0f:%.0f] (%li), now %lld (%.0f), smear offset %.6f ms\n",
-					      leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
-					      (long long)now, leap_smear_time, leap_smear.doffset));
+				      DPRINT(1, ("*** leapsec_query: [%.0f:%.0f] (%li), now %lld (%.0f), smear offset %.6f ms\n",
+						 leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
+						 (long long)now, leap_smear_time, leap_smear.doffset));
 #endif
 
 			      }

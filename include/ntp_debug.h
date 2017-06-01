@@ -11,14 +11,26 @@
 /*
  * macro for debugging output - cut down on #ifdef pollution.
  *
- * TRACE() is similar to ntpd's DPRINTF() for utilities and libntp.
+ * DPRINT() is the new one debug logger to rule them all.
  * Uses mprintf() and so supports %m, replaced by strerror(errno).
  *
  * The calling convention is not attractive:
- *     TRACE(debuglevel, (fmt, ...));
- *     TRACE(2, ("this will appear on stdout if debug >= %d\n", 2));
+ *     DPRINT(debuglevel, (fmt, ...));
+ *     DPRINT(2, ("this will appear on stdout if debug >= %d\n", 2));
+ * 
+ * TPRINT is used where the logger needs to remain even when DEBUG is off.
  */
-#define TRACE(lvl, arg)					\
+#ifdef DEBUG
+#define DPRINT(lvl, arg)					\
+	do { 						\
+		if (debug >= (lvl))			\
+			mprintf arg;			\
+	} while (0)
+#else
+#define DPRINT(lvl, arg)	do {} while (0)
+#endif  /* DEBUG */
+
+#define TPRINT(lvl, arg)				\
 	do { 						\
 		if (debug >= (lvl))			\
 			mprintf arg;			\

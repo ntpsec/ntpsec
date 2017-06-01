@@ -267,8 +267,8 @@ filegen_open(
 	/*
 	 * now, try to open new file generation...
 	 */
-	DPRINTF(4, ("opening filegen (type=%d/stamp=%lld) \"%s\"\n",
-		    gen->type, (long long)stamp, fullname));
+	DPRINT(4, ("opening filegen (type=%d/stamp=%lld) \"%s\"\n",
+		   gen->type, (long long)stamp, fullname));
 
 	fp = fopen(fullname, "a");
   
@@ -365,7 +365,7 @@ filegen_setup(
 	 * reopen new file generation file on change of generation id
 	 */
 	if (NULL == gen->fp || !current) {
-		DPRINTF(1, ("filegen  %0x %lld\n", gen->type, (long long)now));
+		DPRINT(1, ("filegen  %0x %lld\n", gen->type, (long long)now));
 		filegen_open(gen, now);
 	}
 }
@@ -407,15 +407,15 @@ filegen_config(
 		file_existed = false;
 	}
 
-	DPRINTF(3, ("configuring filegen:\n"
-		    "\tdir:\t%s -> %s\n"
-		    "\tfname:\t%s -> %s\n"
-		    "\ttype:\t%d -> %u\n"
-		    "\tflag: %x -> %x\n",
-		    gen->dir, dir,
-		    gen->fname, fname,
-		    gen->type, type,
-		    gen->flag, flag));
+	DPRINT(3, ("configuring filegen:\n"
+		   "\tdir:\t%s -> %s\n"
+		   "\tfname:\t%s -> %s\n"
+		   "\ttype:\t%d -> %u\n"
+		   "\tflag: %x -> %x\n",
+		   gen->dir, dir,
+		   gen->fname, fname,
+		   gen->type, type,
+		   gen->flag, flag));
 
 	if (strcmp(gen->dir, dir) != 0) {
 		free(gen->dir);
@@ -505,13 +505,13 @@ filegen_get(
 
 	while (f) {
 		if (f->name == name || strcmp(name, f->name) == 0) {
-			DPRINTF(4, ("filegen_get(%s) = %p\n",
-				    name, f->filegen));
+			DPRINT(4, ("filegen_get(%s) = %p\n",
+				   name, f->filegen));
 			return f->filegen;
 		}
 		f = f->next;
 	}
-	DPRINTF(4, ("filegen_get(%s) = NULL\n", name));
+	DPRINT(4, ("filegen_get(%s) = NULL\n", name));
 	return NULL;
 }
 
@@ -525,7 +525,7 @@ filegen_register(
 {
 	struct filegen_entry **ppfe;
 
-	DPRINTF(4, ("filegen_register(%s, %p)\n", name, filegen));
+	DPRINT(4, ("filegen_register(%s, %p)\n", name, filegen));
 
 	filegen_init(dir, name, filegen);
 
@@ -534,8 +534,8 @@ filegen_register(
 		if ((*ppfe)->name == name 
 		    || !strcmp((*ppfe)->name, name)) {
 
-			DPRINTF(5, ("replacing filegen %p\n",
-				    (*ppfe)->filegen));
+			DPRINT(5, ("replacing filegen %p\n",
+				   (*ppfe)->filegen));
 
 			(*ppfe)->filegen = filegen;
 			return;
@@ -549,7 +549,7 @@ filegen_register(
 	(*ppfe)->name = estrdup(name);
 	(*ppfe)->filegen = filegen;
 
-	DPRINTF(6, ("adding new filegen\n"));
+	DPRINT(6, ("adding new filegen\n"));
 	
 	return;
 }
@@ -583,7 +583,7 @@ filegen_unregister(
 	struct filegen_entry *	pfe;
 	FILEGEN *		fg;
 			
-	DPRINTF(4, ("filegen_unregister(%s)\n", name));
+	DPRINT(4, ("filegen_unregister(%s)\n", name));
 
 	ppfe = &filegen_registry;
 

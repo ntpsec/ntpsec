@@ -605,11 +605,11 @@ refclock_gtlin(
 	if (dlen)
 	    *dp  = '\0';
 	*tsptr = rbufp->recv_time;
-	DPRINTF(2, ("refclock_gtlin: fd %d time %s timecode %d %s\n",
-		    rbufp->fd, ulfptoa(rbufp->recv_time, 6), dlen,
-		    (dlen != 0)
-			? lineptr
-			: ""));
+	DPRINT(2, ("refclock_gtlin: fd %d time %s timecode %d %s\n",
+		   rbufp->fd, ulfptoa(rbufp->recv_time, 6), dlen,
+		   (dlen != 0)
+		   ? lineptr
+		   : ""));
 	return (dlen);
 }
 
@@ -646,9 +646,9 @@ refclock_gtraw(
 	lineptr[bmax] = '\0';
 
 	*tsptr = rbufp->recv_time;
-	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %zu %s\n",
-		    rbufp->fd, ulfptoa(rbufp->recv_time, 6), bmax,
-		    lineptr));
+	DPRINT(2, ("refclock_gtraw: fd %d time %s timecode %zu %s\n",
+		   rbufp->fd, ulfptoa(rbufp->recv_time, 6), bmax,
+		   lineptr));
 	return (bmax);
 }
 

@@ -283,10 +283,10 @@ spectracom_receive(
 	 */
 	if (temp == 0) {
 		if (up->prev_eol_cr) {
-			DPRINTF(2, ("wwvb: <LF> @ %s\n", prettydate(trtmp)));
+			DPRINT(2, ("wwvb: <LF> @ %s\n", prettydate(trtmp)));
 		} else {
 			up->laststamp = trtmp;
-			DPRINTF(2, ("wwvb: <CR> @ %s\n", prettydate(trtmp)));
+			DPRINT(2, ("wwvb: <CR> @ %s\n", prettydate(trtmp)));
 		}
 		up->prev_eol_cr = !up->prev_eol_cr;
 		return;
@@ -295,9 +295,9 @@ spectracom_receive(
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
 	up->prev_eol_cr = true;
-	DPRINTF(2, ("wwvb: code @ %s\n"
-		    "       using %s minus one char\n",
-		    prettydate(trtmp), prettydate(pp->lastrec)));
+	DPRINT(2, ("wwvb: code @ %s\n"
+		   "       using %s minus one char\n",
+		   prettydate(trtmp), prettydate(pp->lastrec)));
 	if (pp->lastrec == 0)
 		return;
 

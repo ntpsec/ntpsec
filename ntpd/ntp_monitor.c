@@ -379,8 +379,8 @@ ntp_monitor(
 		leak = mon->leak + head;
 		limit = NTP_SHIFT * head;
 
-		DPRINTF(2, ("MRU: interval %d headway %d limit %d\n",
-			    interval, leak, limit));
+		DPRINT(2, ("MRU: interval %d headway %d limit %d\n",
+			   interval, leak, limit));
 
 		/*
 		 * If the minimum and average thresholds are not
