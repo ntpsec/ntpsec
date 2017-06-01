@@ -351,7 +351,13 @@ parse_cmdline_opts(
                         char *gp;
 
 			droproot = true;
-			user = ntp_optarg;
+                        if ( user ) {
+			    fputs("ERROR: more than one -u given.\n",
+				  stderr);
+			    ntpd_usage();
+			    exit(1);
+                        }
+                        user = estrdup(ntp_optarg);
 
 			gp = strrchr(user, ':');
 			if (gp) {
