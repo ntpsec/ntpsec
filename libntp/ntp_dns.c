@@ -53,9 +53,12 @@ bool dns_probe(struct peer* pp)
 	int rc;
         pthread_attr_t  thr_attr;
         sigset_t        block_mask, saved_sig_mask;
+	const char	* busy = "";
 
-	msyslog(LOG_INFO, "dns_probe: %s, cast_flags:%x, flags:%x",
-		pp->hostname, pp->cast_flags, pp->flags);
+	if (NULL != active)
+		busy = ", busy";
+	msyslog(LOG_INFO, "dns_probe: %s, cast_flags:%x, flags:%x%s",
+		pp->hostname, pp->cast_flags, pp->flags, busy);
         if (NULL != active)
 		return false;
 	active = pp;
@@ -99,7 +102,7 @@ void dns_check(void)
 
 	for (ai = answer; NULL != ai; ai = ai->ai_next) {
 		sockaddr.sa = *ai->ai_addr;
-		msyslog(LOG_INFO, "dns_check: found %s", socktoa(&sockaddr));
+		/* Both dns_take_pool and dns_take_server log something. */
 		if (active->cast_flags & MDF_POOL)
 			dns_take_pool(active, &sockaddr);
 		else
