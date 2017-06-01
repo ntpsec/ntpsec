@@ -213,9 +213,11 @@ Add the specified key number to the trusted key list.
 +-u+ _string_, +--user+=_string_::
   Run as userid (or userid:groupid).
 +
-Specify a user, and optionally a group, to switch to. This option is
-only available if the OS supports adjusting the clock without full
-root privileges. This option is supported under Linux, NetBSD and Solaris.
+Specify a user, and optionally a group, to switch to.  The user and
+group may be specified by name or numeric id.  If no group is specified,
+then the default group for userid is used. This option is only available
+if the OS supports adjusting the clock without full root privileges. This
+option is supported under Linux, NetBSD, Solaris and other OS.
 
 +-U+ _number_, +--updateinterval+=_number_::
   interval in seconds between scans for new or dropped interfaces. This
