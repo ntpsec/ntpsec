@@ -22,7 +22,8 @@
  * 1. If the system library supports the "backtrace()" function, use it.
  *    OS X support this starting at with SDK 10.5.  glibc since version 2.1
  * 2. Otherwise, if unwind.h exists then use the __Unwind_Backtrace() function.
- *    This function is available on Linux and  OS X.
+ *    This function is available on Linux and OS X.  It is defined in the
+ *    Linux Standard Base from at least version 4.1
  * 3. Otherwise, if the architecture x86 or x86_64, try to unwind the stack
  *    frame following frame pointers.  This assumes the executable binary
  *    compiled with frame pointers; this is not always true for x86_64 (rather,
@@ -81,8 +82,8 @@ typedef struct {
 	int count;
 } trace_arg_t;
 
-static int
-btcallback(void *uc, void *opq) {
+static _Unwind_Reason_Code
+btcallback(struct _Unwind_Context *uc, void *opq) {
 	trace_arg_t *arg = (trace_arg_t *)opq;
 
 	if (arg->skip_count > 0)
