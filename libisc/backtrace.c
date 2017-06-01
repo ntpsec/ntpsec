@@ -10,9 +10,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#ifdef HAVE_BACKTRACE_SYMBOLS_FD
-#include <execinfo.h>
-#endif
 
 #include "isc/backtrace.h"
 #include "isc/result.h"
@@ -49,6 +46,8 @@
 #endif	/* USEBACKTRACE */
 
 #ifdef BACKTRACE_LIBC
+#include <execinfo.h>
+
 isc_result_t
 isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 	int n;
