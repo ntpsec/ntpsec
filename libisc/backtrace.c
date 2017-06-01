@@ -24,9 +24,8 @@
  * dependent.  Our current approach is as follows:
  * 1. If the system library supports the "backtrace()" function, use it.
  *    OS X support this starting at with SDK 10.5.  glibc since version 2.1
- * 2. Otherwise, if the compiler is gcc and the architecture is x86_64 or IA64,
- *    then use gcc's (hidden) Unwind_Backtrace() function.  Note that this
- *    function doesn't work for C programs on many other architectures.
+ * 2. Otherwise, if unwind.h exists then use the __Unwind_Backtrace() function.
+ *    This function is available on Linux and  OS X.
  * 3. Otherwise, if the architecture x86 or x86_64, try to unwind the stack
  *    frame following frame pointers.  This assumes the executable binary
  *    compiled with frame pointers; this is not always true for x86_64 (rather,
@@ -38,8 +37,8 @@
  */
 #ifdef HAVE_BACKTRACE_SYMBOLS_FD
 #define BACKTRACE_LIBC
-#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__ia64__))
-#define BACKTRACE_GCC
+#elif defined(HAVE__UNWIND_BACKTRACE)
+#define BACKTRACE_UNWIND
 #elif defined(__x86_64__) || defined(__i386__)
 #define BACKTRACE_X86STACK
 #else
@@ -73,9 +72,8 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 	*nframes = n;
 	return (ISC_R_SUCCESS);
 }
-#elif defined(BACKTRACE_GCC)
-extern int _Unwind_Backtrace(void* fn, void* a);
-extern void* _Unwind_GetIP(void* ctx);
+#elif defined(BACKTRACE_UNWIND)
+#include <unwind.h>
 
 typedef struct {
 	void **result;

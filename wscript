@@ -608,6 +608,7 @@ int main(int argc, char **argv) {
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
     functions = (
+        ('_Unwind_Backtrace', ["unwind.h"]),
         ('adjtimex', ["sys/time.h", "sys/timex.h"]),
         ('backtrace_symbols_fd', ["execinfo.h"]),
         ('closefrom', ["stdlib.h"]),
