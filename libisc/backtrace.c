@@ -23,6 +23,7 @@
  * Getting a back trace of a running process is tricky and highly platform
  * dependent.  Our current approach is as follows:
  * 1. If the system library supports the "backtrace()" function, use it.
+ *    OS X support this starting at with SDK 10.5.  glibc since version 2.1
  * 2. Otherwise, if the compiler is gcc and the architecture is x86_64 or IA64,
  *    then use gcc's (hidden) Unwind_Backtrace() function.  Note that this
  *    function doesn't work for C programs on many other architectures.
