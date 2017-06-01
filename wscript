@@ -335,6 +335,7 @@ def configure(ctx):
     # CFLAGS to override our computed CFLAGS
     if ctx.options.enable_debug_gdb:
         ctx.env.CFLAGS = ["-g"] + ctx.env.CFLAGS
+        ctx.define("USEBACKTRACE", "1", quote=False)
     else:
         # not gdb debugging
         cc_test_flags += [

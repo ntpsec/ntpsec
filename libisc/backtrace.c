@@ -18,7 +18,7 @@
 #include "isc/result.h"
 #include "isc/util.h"
 
-#ifdef ISC_PLATFORM_USEBACKTRACE
+#ifdef USEBACKTRACE
 /*
  * Getting a back trace of a running process is tricky and highly platform
  * dependent.  Our current approach is as follows:
@@ -44,9 +44,9 @@
 #else
 #define BACKTRACE_DISABLED
 #endif  /* HAVE_BACKTRACE_SYMBOLS_FD */
-#else	/* !ISC_PLATFORM_USEBACKTRACE */
+#else	/* !USEBACKTRACE */
 #define BACKTRACE_DISABLED
-#endif	/* ISC_PLATFORM_USEBACKTRACE */
+#endif	/* USEBACKTRACE */
 
 #ifdef BACKTRACE_LIBC
 isc_result_t
