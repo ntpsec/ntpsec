@@ -68,7 +68,7 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 	if (n < 2)
 		return (ISC_R_NOTFOUND);
 	n--;
-	memmove(addrs, &addrs[1], sizeof(void *) * n);
+	memmove(addrs, &addrs[1], sizeof(void *) * (size_t)n);
 	*nframes = n;
 	return (ISC_R_SUCCESS);
 }
