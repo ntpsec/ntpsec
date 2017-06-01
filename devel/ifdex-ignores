@@ -39,7 +39,6 @@ DEBUG
 ISC_LIST_CHECKINIT	# Debugging flag
 ISC_PLATFORM_USEBACKTRACE	# Use the ISC backtrace code on assertions
 ISC_UTIL_TRACEON	# Enables trace code in ISC service routines.
-HAVE_LIBCTRACE		# Some random C tracing lib - NTP Classic never sets this
 DEBUG_PARSELIB		# Enable debugging in the parse library.
 NTP_DEBUG_LISTS		# Debug list handling
 DEBUG_PPS720		# Only in refclock_true.c

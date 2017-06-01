@@ -609,6 +609,7 @@ int main(int argc, char **argv) {
     # we're likely to duplicate them.
     functions = (
         ('adjtimex', ["sys/time.h", "sys/timex.h"]),
+        ('backtrace_symbols_fd', ["execinfo.h"]),
         ('closefrom', ["stdlib.h"]),
         ('clock_gettime', ["time.h"], "RT"),
         ('clock_settime', ["time.h"], "RT"),

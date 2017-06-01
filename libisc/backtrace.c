@@ -10,7 +10,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#ifdef HAVE_LIBCTRACE
+#ifdef HAVE_BACKTRACE_SYMBOLS_FD
 #include <execinfo.h>
 #endif
 
@@ -35,7 +35,7 @@
  *    due to this problem, the whole package should be rebuilt with
  *    --disable-backtrace.
  */
-#ifdef HAVE_LIBCTRACE
+#ifdef HAVE_BACKTRACE_SYMBOLS_FD
 #define BACKTRACE_LIBC
 #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__ia64__))
 #define BACKTRACE_GCC
@@ -43,7 +43,7 @@
 #define BACKTRACE_X86STACK
 #else
 #define BACKTRACE_DISABLED
-#endif  /* HAVE_LIBCTRACE */
+#endif  /* HAVE_BACKTRACE_SYMBOLS_FD */
 #else	/* !ISC_PLATFORM_USEBACKTRACE */
 #define BACKTRACE_DISABLED
 #endif	/* ISC_PLATFORM_USEBACKTRACE */
