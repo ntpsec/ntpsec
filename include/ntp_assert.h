@@ -71,7 +71,6 @@ typedef void (*isc_assertioncallback_t)(const char *, int, isc_assertiontype_t,
 					const char *);
 
 /* coverity[+kill] */
-ISC_PLATFORM_NORETURN_PRE
 void isc_assertion_failed(const char *, int, isc_assertiontype_t,
 			  const char *) ISC_PLATFORM_NORETURN_POST;
 

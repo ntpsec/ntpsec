@@ -803,7 +803,6 @@ int main(int argc, char **argv) {
 
     # libisc/
     # XXX: Hack that needs to be fixed properly for all platforms
-    ctx.define("ISC_PLATFORM_NORETURN_PRE", "", quote=False)
     ctx.define("ISC_PLATFORM_NORETURN_POST",
                "__attribute__((__noreturn__))", quote=False)
 
