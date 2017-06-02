@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "isc/assertions.h"
+#include "ntp_assert.h"
 #include "isc/backtrace.h"
 #include "isc/result.h"
 
