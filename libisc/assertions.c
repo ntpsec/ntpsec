@@ -20,12 +20,12 @@
 #include "isc/result.h"
 
 static const char *
-isc_assertion_typetotext(isc_assertiontype_t type)
+assertion_typetotext(assertiontype_t type)
 			__attribute__((const));
 
 /*% Type to Text */
 static const char *
-isc_assertion_typetotext(isc_assertiontype_t type) {
+assertion_typetotext(assertiontype_t type) {
 	const char *result;
 
 	/*
@@ -34,16 +34,16 @@ isc_assertion_typetotext(isc_assertiontype_t type) {
 	 * the ISC development environment.
 	 */
 	switch (type) {
-	case isc_assertiontype_require:
+	case assertiontype_require:
 		result = "REQUIRE";
 		break;
-	case isc_assertiontype_ensure:
+	case assertiontype_ensure:
 		result = "ENSURE";
 		break;
-	case isc_assertiontype_insist:
+	case assertiontype_insist:
 		result = "INSIST";
 		break;
-	case isc_assertiontype_invariant:
+	case assertiontype_invariant:
 		result = "INVARIANT";
 		break;
 	default:
@@ -59,7 +59,7 @@ void
 assertion_failed(
 	const char *file,
 	int line,
-	isc_assertiontype_t type,
+	assertiontype_t type,
 	const char *cond
 	)
 {
@@ -68,7 +68,7 @@ assertion_failed(
 	termlogit = true; /* insist log to terminal */
 
 	msyslog(LOG_ERR, "%s:%d: %s(%s) failed",
-		file, line, isc_assertion_typetotext(type), cond);
+		file, line, assertion_typetotext(type), cond);
 	msyslog(LOG_ERR, "exiting (due to assertion failure)");
 
 	abort();

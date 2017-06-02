@@ -47,36 +47,36 @@
 
 /*% isc assertion type */
 typedef enum {
-	isc_assertiontype_require,
-	isc_assertiontype_ensure,
-	isc_assertiontype_insist,
-	isc_assertiontype_invariant
-} isc_assertiontype_t;
+	assertiontype_require,
+	assertiontype_ensure,
+	assertiontype_insist,
+	assertiontype_invariant
+} assertiontype_t;
 
 
 /* our assertion catcher */
 extern void	assertion_failed(const char *, int,
-				 isc_assertiontype_t,
+				 assertiontype_t,
 				 const char *)
 			__attribute__	((__noreturn__));
 
 #define REQUIRE(cond) \
 	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 isc_assertiontype_require, \
+					 assertiontype_require, \
 					 #cond), 0)))
 
 #define ENSURE(cond) \
 	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 isc_assertiontype_ensure, \
+					 assertiontype_ensure, \
 					 #cond), 0)))
 
 #define INSIST(cond) \
 	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 isc_assertiontype_insist, \
+					 assertiontype_insist, \
 					 #cond), 0)))
 #define INVARIANT(cond) \
 	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 isc_assertiontype_invariant, \
+					 assertiontype_invariant, \
 					 #cond), 0)))
 # endif /* not FlexeLint */
 
