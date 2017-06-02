@@ -362,7 +362,7 @@ parse_cmdline_opts(
 			gp = strrchr(user, ':');
 			if (gp) {
 				*gp++ = '\0'; /* get rid of the ':' */
-				group = gp;
+				group = estrdup(gp);
 			} else {
                                 group  = NULL;
                         }
