@@ -48,7 +48,7 @@
 #include <assert.h>
 
 #define ALWAYS_REQUIRE(x)	assert(x)
-#define ALWAYS_INSIST(x)	assert(x)
+#define INSIST(x)		assert(x)
 #define ALWAYS_INVARIANT(x)	assert(x)
 #define ALWAYS_ENSURE(x)	assert(x)
 
@@ -57,14 +57,13 @@
 #include "isc/assertions.h"
 
 #define ALWAYS_REQUIRE(x)	ISC_REQUIRE(x)
-#define ALWAYS_INSIST(x)	ISC_INSIST(x)
+#define INSIST(x)		ISC_INSIST(x)
 #define ALWAYS_INVARIANT(x)	ISC_INVARIANT(x)
 #define ALWAYS_ENSURE(x)	ISC_ENSURE(x)
 
 # endif /* not FlexeLint */
 
 #define	REQUIRE(x)		ALWAYS_REQUIRE(x)
-#define	INSIST(x)		ALWAYS_INSIST(x)
 #define	INVARIANT(x)		ALWAYS_INVARIANT(x)
 #define	ENSURE(x)		ALWAYS_ENSURE(x)
 
