@@ -81,62 +81,28 @@ const char *
 isc_assertion_typetotext(isc_assertiontype_t type)
 			__attribute__((const));
 
-#ifndef ISC_CHECK_REQUIRE
-#define ISC_CHECK_REQUIRE		1
-#endif
-
-#ifndef ISC_CHECK_ENSURE
-#define ISC_CHECK_ENSURE		1
-#endif
-
-#ifndef ISC_CHECK_INSIST
-#define ISC_CHECK_INSIST		1
-#endif
-
-#ifndef ISC_CHECK_INVARIANT
-#define ISC_CHECK_INVARIANT		1
-#endif
-
-#if ISC_CHECK_REQUIRE != 0
 #define ISC_REQUIRE(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_require, \
 					 #cond), 0)))
-#else
-#define ISC_REQUIRE(cond)	((void) 0)
-#endif /* ISC_CHECK_REQUIRE */
 
-#if ISC_CHECK_ENSURE != 0
 #define ISC_ENSURE(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_ensure, \
 					 #cond), 0)))
-#else
-#define ISC_ENSURE(cond)	((void) 0)
-#endif /* ISC_CHECK_ENSURE */
 
-#if ISC_CHECK_INSIST != 0
 #define ISC_INSIST(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_insist, \
 					 #cond), 0)))
-#else
-#define ISC_INSIST(cond)	((void) 0)
-#endif /* ISC_CHECK_INSIST */
-
-#if ISC_CHECK_INVARIANT != 0
 #define ISC_INVARIANT(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_invariant, \
 					 #cond), 0)))
-#else
-#define ISC_INVARIANT(cond)	((void) 0)
-#endif /* ISC_CHECK_INVARIANT */
-
 #define REQUIRE(x)      ISC_REQUIRE(x)
 #define INSIST(x)       ISC_INSIST(x)
 #define INVARIANT(x)    ISC_INVARIANT(x)
