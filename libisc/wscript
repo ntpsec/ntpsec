@@ -2,7 +2,6 @@
 def build(ctx):
 
     libisc_source = [
-        "backtrace.c",
         "error.c",
         "netaddr.c",
         "interfaceiter.c",
