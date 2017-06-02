@@ -165,12 +165,10 @@ isc_assertion_typetotext(isc_assertiontype_t type)
 # ifdef DEBUG
 #define	DEBUG_REQUIRE(x)	REQUIRE(x)
 #define	DEBUG_INSIST(x)		INSIST(x)
-#define	DEBUG_INVARIANT(x)	INVARIANT(x)
 #define	DEBUG_ENSURE(x)		ENSURE(x)
 # else
 #define	DEBUG_REQUIRE(x)	do {} while (false)
 #define	DEBUG_INSIST(x)		do {} while (false)
-#define	DEBUG_INVARIANT(x)	do {} while (false)
 #define	DEBUG_ENSURE(x)		do {} while (false)
 # endif
 
