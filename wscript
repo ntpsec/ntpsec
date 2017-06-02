@@ -281,6 +281,8 @@ def configure(ctx):
     # may depend on some libs, like -lssp
     ctx.check_cc(lib="m", comment="Math library")
     ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
+    ctx.check_cc(lib="execinfo", mandatory=False,
+                 comment="BSD backtrace library")
     ret = ctx.check_cc(lib="bsd", mandatory=False,
                        comment="BSD compatibility library")
     if ret:
