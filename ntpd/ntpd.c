@@ -585,6 +585,7 @@ ntpdmain(
 	    /* -w requires a fork() even with debug > 0 */
 	    nofork = false;
 	    if (pipe(pipe_fds)) {
+		termlogit = true;
 		exit_code = (errno) ? errno : -1;
 		msyslog(LOG_ERR,
 			"Pipe creation failed for --wait-sync: %m");
@@ -620,6 +621,7 @@ ntpdmain(
 		 * close all open files excepting waitsync_fd_to_close.
 		 * msyslog() unreliable until after init_logging().
 		 */
+		termlogit = false;    /* do not use stderr after fork */
 		closelog();
 		if (syslog_file != NULL) {
 			fclose(syslog_file);

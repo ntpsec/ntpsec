@@ -16,8 +16,9 @@
 #include "ntp_debug.h"
 #include "ntp_syslog.h"
 
-bool	syslogit = true;	/* log messages to syslog */
-bool	termlogit = false;	/* duplicate to stdout/err */
+/* start out with syslog and stderr, otherwise startup errors lost */
+bool    syslogit = true;        /* log messages to syslog */
+bool    termlogit = true;       /* duplicate to stdout/err */
 bool	termlogit_pid = true;
 bool	msyslog_include_timestamp = true;
 FILE *	syslog_file;
