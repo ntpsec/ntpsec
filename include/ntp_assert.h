@@ -60,10 +60,6 @@ extern void	assertion_failed(const char *, int,
 				 const char *)
 			__attribute__	((__noreturn__));
 
-/* coverity[+kill] */
-void isc_assertion_failed(const char *, int, isc_assertiontype_t,
-			  const char *) __attribute__((noreturn));
-
 const char *
 isc_assertion_typetotext(isc_assertiontype_t type)
 			__attribute__((const));
