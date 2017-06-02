@@ -55,16 +55,7 @@
 /*
  * Assertions
  */
-#include "isc/assertions.h"	/* Contractual promise. */
-
-/*% Require Assertion */
-#define REQUIRE(e)			ISC_REQUIRE(e)
-/*% Ensure Assertion */
-#define ENSURE(e)			ISC_ENSURE(e)
-/*% Insist Assertion */
-#define INSIST(e)			ISC_INSIST(e)
-/*% Invariant Assertion */
-#define INVARIANT(e)			ISC_INVARIANT(e)
+#include "ntp_assert.h"	/* Contractual promise. */
 
 /*
  * Errors
