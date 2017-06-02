@@ -22,23 +22,14 @@
  * 1. If the system library supports the "backtrace()" function, use it.
  *    OS X support this starting at with SDK 10.5.  glibc since version 2.1
  * 2. Otherwise, if unwind.h exists then use the __Unwind_Backtrace() function.
- *    This function is available on Linux and OS X.  It is defined in the
- *    Linux Standard Base from at least version 4.1
- * 3. Otherwise, if the architecture x86 or x86_64, try to unwind the stack
- *    frame following frame pointers.  This assumes the executable binary
- *    compiled with frame pointers; this is not always true for x86_64 (rather,
- *    compiler optimizations often disable frame pointers).  The validation
- *    checks in getnextframeptr() hopefully rejects bogus values stored in
- *    the RBP register in such a case.  If the backtrace function itself crashes
- *    due to this problem, the whole package should be rebuilt with
- *    --disable-backtrace.
+ *    This function is available on Linux, OS X, and FreeBSD.  It is defined
+ *    in Linux Standard Base since version 4.1
+ * 3. Otherwise, tough luck.
  */
 #ifdef HAVE_BACKTRACE_SYMBOLS_FD
 #define BACKTRACE_LIBC
 #elif defined(HAVE__UNWIND_BACKTRACE)
 #define BACKTRACE_UNWIND
-#elif defined(__x86_64__) || defined(__i386__)
-#define BACKTRACE_X86STACK
 #else
 #define BACKTRACE_DISABLED
 #endif  /* HAVE_BACKTRACE_SYMBOLS_FD */
@@ -111,77 +102,6 @@ isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
 	_Unwind_Backtrace(btcallback, &arg);
 
 	*nframes = arg.count;
-
-	return (ISC_R_SUCCESS);
-}
-#elif defined(BACKTRACE_X86STACK)
-#ifdef __x86_64__
-static unsigned long
-getrbp(void) {
-	__asm("movq %rbp, %rax\n");
-        /* much trickery with __asm()'ed return variable */
-}
-#endif
-
-static void **
-getnextframeptr(void **sp) {
-	void **newsp = (void **)*sp;
-
-	/*
-	 * Perform sanity check for the new frame pointer, derived from
-	 * google glog.  This can actually be bogus depending on compiler.
-	 */
-
-	/* prohibit the stack frames from growing downwards */
-	if (newsp <= sp)
-		return (NULL);
-
-	/* A heuristics to reject "too large" frame: this actually happened. */
-	if ((char *)newsp - (char *)sp > 100000)
-		return (NULL);
-
-	/*
-	 * Not sure if other checks used in glog are needed at this moment.
-	 * For our purposes we don't have to consider non-contiguous frames,
-	 * for example.
-	 */
-
-	return (newsp);
-}
-
-isc_result_t
-isc_backtrace_gettrace(void **addrs, int maxaddrs, int *nframes) {
-	int i = 0;
-	void **sp;
-
-	/* Argument validation: see above. */
-	if (addrs == NULL || nframes == NULL)
-		return (ISC_R_FAILURE);
-
-#ifdef __x86_64__
-	sp = (void **)getrbp();
-	if (sp == NULL)
-		return (ISC_R_NOTFOUND);
-	/*
-	 * sp is the frame ptr of this function itself due to the call to
-	 * getrbp(), so need to unwind one frame for consistency.
-	 */
-	sp = getnextframeptr(sp);
-#else
-	/*
-	 * i386: the frame pointer is stored 2 words below the address for the
-	 * first argument.  Note that the body of this function cannot be
-	 * inlined since it depends on the address of the function argument.
-	 */
-	sp = (void **)&addrs - 2;
-#endif
-
-	while (sp != NULL && i < maxaddrs) {
-		addrs[i++] = *(sp + 1);
-		sp = getnextframeptr(sp);
-	}
-
-	*nframes = i;
 
 	return (ISC_R_SUCCESS);
 }

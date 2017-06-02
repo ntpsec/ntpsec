@@ -103,7 +103,6 @@ BITSPERCHAR		# Only used in the Arcron refclock
 BACKTRACE_MAXFRAME	# Internal to the ISC backtrace code
 BACKTRACE_LIBC
 BACKTRACE_GCC
-BACKTRACE_X86STACK
 BACKTRACE_DISABLED
 CMOCK			# Internal to the Unity test framework
 CONFIG_FILE		# Only used in ntp_config.h
