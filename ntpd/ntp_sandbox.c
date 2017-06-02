@@ -34,6 +34,10 @@ static priv_set_t *highprivs = NULL;
 
 #ifdef HAVE_SECCOMP_H
 # include <seccomp.h>
+# ifdef HAVE_BACKTRACE_SYMBOLS_FD
+#  include <execinfo.h>
+# endif
+static void catchTrap(int sig, siginfo_t *, void *);
 #endif
 
 #ifdef ENABLE_DROPROOT
@@ -48,9 +52,6 @@ static struct passwd *pw;
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
-#ifdef HAVE_SECCOMP_H
-static void catchTrap(int sig, siginfo_t *, void *);
-#endif
 
 bool sandbox(const bool droproot,
 	     char *user, const char *group,
@@ -446,7 +447,31 @@ static void catchTrap(int sig, siginfo_t *si, void *u)
 	UNUSED_ARG(sig);	/* signal number */
 	UNUSED_ARG(u);	        /* unused ucontext_t */
 	msyslog(LOG_ERR, "ERROR: SIGSYS: got a trap.\n");
-	msyslog(LOG_ERR, "ERROR: Bad syscall %d\n", si->si_syscall);
+	if ( si->si_syscall ) {
+	    msyslog(LOG_ERR, "ERROR: SIGSYS/seccomp bad syscall %d/%#x\n",
+		    si->si_syscall, si->si_arch);
+        }
+#ifdef HAVE_BACKTRACE_SYMBOLS_FD
+        {
+#define BT_BUF_SIZE 100
+
+           int j, nptrs;
+           void *buffer[BT_BUF_SIZE];
+           char **strings;
+
+           nptrs = backtrace(buffer, BT_BUF_SIZE);
+           strings = backtrace_symbols(buffer, nptrs);
+	   msyslog(LOG_ERR, "Stack trace:\n");
+           if (strings) {
+               /* skip trace of this shim function */
+	       for (j = 1; j < nptrs; j++)
+		   msyslog(LOG_ERR, "  %s\n", strings[j]);
+
+	       free(strings);
+           }
+        }
+#endif /* HAVE_BACKTRACE_SYMBOLS_FD */
+
 	exit(1);
 }
 #endif /* HAVE_SECCOMP_H */
