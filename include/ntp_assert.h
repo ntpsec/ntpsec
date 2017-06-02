@@ -53,6 +53,13 @@ typedef enum {
 	isc_assertiontype_invariant
 } isc_assertiontype_t;
 
+
+/* our assertion catcher */
+extern void	assertion_failed(const char *, int,
+				 isc_assertiontype_t,
+				 const char *)
+			__attribute__	((__noreturn__));
+
 typedef void (*isc_assertioncallback_t)(const char *, int, isc_assertiontype_t,
 					const char *);
 
@@ -68,25 +75,21 @@ isc_assertion_typetotext(isc_assertiontype_t type)
 			__attribute__((const));
 
 #define REQUIRE(cond) \
-	((void) ((cond) || \
-		 ((isc_assertion_failed)(__FILE__, __LINE__, \
+	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
 					 isc_assertiontype_require, \
 					 #cond), 0)))
 
 #define ENSURE(cond) \
-	((void) ((cond) || \
-		 ((isc_assertion_failed)(__FILE__, __LINE__, \
+	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
 					 isc_assertiontype_ensure, \
 					 #cond), 0)))
 
 #define INSIST(cond) \
-	((void) ((cond) || \
-		 ((isc_assertion_failed)(__FILE__, __LINE__, \
+	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
 					 isc_assertiontype_insist, \
 					 #cond), 0)))
 #define INVARIANT(cond) \
-	((void) ((cond) || \
-		 ((isc_assertion_failed)(__FILE__, __LINE__, \
+	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
 					 isc_assertiontype_invariant, \
 					 #cond), 0)))
 # endif /* not FlexeLint */

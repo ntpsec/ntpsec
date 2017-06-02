@@ -112,10 +112,6 @@ static int	ntpdmain(int, char **) __attribute__((noreturn));
 static void	mainloop		(void)
 			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
-static void	assertion_failed	(const char *, int,
-					 isc_assertiontype_t,
-					 const char *)
-			__attribute__	((__noreturn__));
 static void	library_fatal_error	(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0)
@@ -1212,29 +1208,6 @@ static void check_minsane()
 
 }
 
-
-/*
- * assertion_failed - Redirect assertion failures to msyslog().
- */
-static void
-assertion_failed(
-	const char *file,
-	int line,
-	isc_assertiontype_t type,
-	const char *cond
-	)
-{
-        /* the comment on the next line is not what the line does */
-	isc_assertion_setcallback(NULL);    /* Avoid recursion */
-	/* isc_assertion_setcallback(NULL) just set the default assert()
-         * handler, allowing recursion */
-
-	msyslog(LOG_ERR, "%s:%d: %s(%s) failed",
-		file, line, isc_assertion_typetotext(type), cond);
-	msyslog(LOG_ERR, "exiting (due to assertion failure)");
-
-	abort();
-}
 
 
 /*

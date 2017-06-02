@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ntp.h"
+#include "ntp_debug.h"
+#include "ntp_syslog.h"
 #include "ntp_assert.h"
 #include "isc/backtrace.h"
 #include "isc/result.h"
@@ -109,4 +112,26 @@ default_callback(const char *file, int line, isc_assertiontype_t type,
 		}
 	}
 	fflush(stderr);
+}
+
+/*
+ * assertion_failed - Redirect assertion failures to msyslog().
+ */
+void
+assertion_failed(
+	const char *file,
+	int line,
+	isc_assertiontype_t type,
+	const char *cond
+	)
+{
+        /* Is recursion an issue? */
+
+	termlogit = true; /* insist log to terminal */
+
+	msyslog(LOG_ERR, "%s:%d: %s(%s) failed",
+		file, line, isc_assertion_typetotext(type), cond);
+	msyslog(LOG_ERR, "exiting (due to assertion failure)");
+
+	abort();
 }
