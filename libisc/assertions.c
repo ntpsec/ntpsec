@@ -19,13 +19,6 @@
 #include "isc/backtrace.h"
 #include "isc/result.h"
 
-/*
- * The maximum number of stack frames to dump on assertion failure.
- */
-#ifndef BACKTRACE_MAXFRAME
-#define BACKTRACE_MAXFRAME 128
-#endif
-
 /*%
  * Public.
  */
