@@ -62,7 +62,7 @@ format_time_fraction(
 	int		notneg;	/* flag for non-negative value	*/
 	ldiv_t		qr;
 
-	//DEBUG_REQUIRE(prec != 0);
+	//REQUIRE(prec != 0);
 
 	LIB_GETBUF(cp);
 	secs_u = (u_time)secs;
@@ -72,7 +72,7 @@ format_time_fraction(
 	prec_u = (u_int)abs(prec);
 	/* fraclimit = (long)pow(10, prec_u); */
 	for (fraclimit = 10, u = 1; u < prec_u; u++) {
-		//DEBUG_INSIST(fraclimit < fraclimit * 10);
+		//INSIST(fraclimit < fraclimit * 10);
 		fraclimit *= 10;
 	}
 

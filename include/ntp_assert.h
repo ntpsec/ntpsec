@@ -24,9 +24,6 @@
  *
  * open question: when would we use INVARIANT()?
  *
- * For cases where the overhead for non-debug builds is deemed too high,
- * use DEBUG_REQUIRE(), DEBUG_INSIST(), DEBUG_ENSURE(), and/or
- * DEBUG_INVARIANT().
  */
 
 #ifndef GUARD_NTP_ASSERT_H
@@ -79,15 +76,5 @@ extern void	assertion_failed(const char *, int,
 					 assertiontype_invariant, \
 					 #cond), 0)))
 # endif /* not FlexeLint */
-
-# ifdef DEBUG
-#define	DEBUG_REQUIRE(x)	REQUIRE(x)
-#define	DEBUG_INSIST(x)		INSIST(x)
-#define	DEBUG_ENSURE(x)		ENSURE(x)
-# else
-#define	DEBUG_REQUIRE(x)	do {} while (false)
-#define	DEBUG_INSIST(x)		do {} while (false)
-#define	DEBUG_ENSURE(x)		do {} while (false)
-# endif
 
 #endif	/* GUARD_NTP_ASSERT_H */

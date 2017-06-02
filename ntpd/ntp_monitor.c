@@ -157,7 +157,7 @@ mon_reclaim_entry(
 	mon_entry *m
 	)
 {
-	DEBUG_INSIST(NULL != m);
+	INSIST(NULL != m);
 
 	UNLINK_DLIST(m, mru);
 	remove_from_hash(m);
