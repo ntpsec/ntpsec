@@ -34,20 +34,6 @@
 
 #include <stdbool.h>
 
-/* # if defined(__COVERITY__) */
-/*
- * DH: try letting coverity scan our actual assertion macros, now that
- * isc_assertioncallback_t is marked __attribute__ __noreturn__.
- */
-
-/*
- * Coverity has special knowledge that assert(x) terminates the process
- * if x is not true.  Rather than teach it about our assertion macros,
- * just use the one it knows about for Coverity Prevent scans.  This
- * means our assertion code (and ISC's) escapes Coverity analysis, but
- * that seems to be a reasonable trade-off.
- */
-
 #if defined(__FLEXELINT__)
 
 #include <assert.h>
