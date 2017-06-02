@@ -81,20 +81,6 @@ const char *
 isc_assertion_typetotext(isc_assertiontype_t type)
 			__attribute__((const));
 
-#if defined(ISC_CHECK_ALL) || defined(__COVERITY__)
-#define ISC_CHECK_REQUIRE		1
-#define ISC_CHECK_ENSURE		1
-#define ISC_CHECK_INSIST		1
-#define ISC_CHECK_INVARIANT		1
-#endif
-
-#if defined(ISC_CHECK_NONE) && !defined(__COVERITY__)
-#define ISC_CHECK_REQUIRE		0
-#define ISC_CHECK_ENSURE		0
-#define ISC_CHECK_INSIST		0
-#define ISC_CHECK_INVARIANT		0
-#endif
-
 #ifndef ISC_CHECK_REQUIRE
 #define ISC_CHECK_REQUIRE		1
 #endif
