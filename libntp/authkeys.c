@@ -489,7 +489,7 @@ mac_setkey(
 	allocsymkey(bucket, keyno, 0, (unsigned short)keytype,
 		    (unsigned short)secretsize, secret);
 #ifdef DEBUG
-	if (debug >= 4) {
+	if (debug >= 4) { /* SPECIAL DEBUG */
 		printf("auth_setkey: key %d type %d len %d ", (int)keyno,
 		    keytype, (int)secretsize);
 		for (size_t j = 0; j < secretsize; j++)

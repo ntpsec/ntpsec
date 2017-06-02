@@ -185,12 +185,9 @@ write_stats(void)
 		 * the frequncy file. This minimizes the file writes to
 		 * nonvolaile storage.
 		 */
-#ifdef DEBUG
-		if (debug)
-			printf("write_stats: frequency %.6lf thresh %.6lf, freq %.6lf\n",
-			    (prev_drift_comp - drift_comp) * US_PER_S,
-                             wander_resid * US_PER_S, drift_comp * US_PER_S);
-#endif
+	        DPRINT(1, ("write_stats: frequency %.6lf thresh %.6lf, freq %.6lf\n",
+			   (prev_drift_comp - drift_comp) * US_PER_S,
+			   wander_resid * US_PER_S, drift_comp * US_PER_S));
 		if (fabs(prev_drift_comp - drift_comp) < wander_resid) {
 			wander_resid *= 0.5;
 			return;

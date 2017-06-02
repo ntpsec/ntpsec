@@ -186,9 +186,7 @@ arb_start(
 		free(up);
 		return false;
 	}
-#ifdef DEBUG
-	if(debug) { printf("arbiter: mode = %u.\n", peer->ttl); }
-#endif
+	DPRINT(1, ("arbiter: mode = %u.\n", peer->ttl));
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	return true;
 }
@@ -309,10 +307,7 @@ arb_receive(
 			strlcat(up->latlon, " ", sizeof(up->latlon));
 			strlcat(up->latlon, tbuf + 2, sizeof(up->latlon));
 			record_clock_stats(peer, up->latlon);
-#ifdef DEBUG
-			if (debug)
-				printf("arbiter: %s\n", up->latlon);
-#endif
+			DPRINT(1, ("arbiter: %s\n", up->latlon));
 			IGNORE(write(pp->io.fd, COMMAND_START_BCAST, 2));
 		}
 	}
@@ -460,10 +455,7 @@ arb_poll(
 	}
 	refclock_receive(peer);
 	record_clock_stats(peer, pp->a_lastcode);
-#ifdef DEBUG
-	if (debug)
-		printf("arbiter: timecode %d %s\n",
-		   pp->lencode, pp->a_lastcode);
-#endif
+	DPRINT(1, ("arbiter: timecode %d %s\n",
+		   pp->lencode, pp->a_lastcode));
 }
 

@@ -467,7 +467,7 @@ spectracom_timer(
 		refclock_report(peer, CEVNT_FAULT);
 #ifdef DEBUG
 	get_systime(&now);
-	if (debug)
+	if (debug) /* SPECIAL DEBUG */
 		printf("%c poll at %s\n", pollchar, prettydate(now));
 #endif
 #ifdef HAVE_PPSAPI
@@ -535,11 +535,8 @@ spectracom_poll(
 #endif /* HAVE_PPSAPI */
 	refclock_receive(peer);
 	record_clock_stats(peer, pp->a_lastcode);
-#ifdef DEBUG
-	if (debug)
-		printf("wwvb: timecode %d %s\n", pp->lencode,
-		    pp->a_lastcode);
-#endif
+	DPRINT(1, ("wwvb: timecode %d %s\n", pp->lencode,
+		   pp->a_lastcode));
 }
 
 

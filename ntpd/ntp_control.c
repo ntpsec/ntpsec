@@ -2641,10 +2641,7 @@ read_status(
 
 	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
-#ifdef DEBUG
-	if (debug > 2)
-		printf("read_status: ID %d\n", res_associd);
-#endif
+	DPRINT(3, ("read_status: ID %d\n", res_associd));
 	/*
 	 * Two choices here. If the specified association ID is
 	 * zero we return all known association ID's.  Otherwise
@@ -4223,10 +4220,7 @@ report_event(
 			msyslog(LOG_INFO, "%s", statstr);
 	}
 	record_proto_stats(statstr);
-#if defined(DEBUG) && DEBUG
-	if (debug)
-		printf("event at %lu %s\n", current_time, statstr);
-#endif
+	DPRINT(1, ("event at %lu %s\n", current_time, statstr));
 
 }
 

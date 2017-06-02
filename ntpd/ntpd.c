@@ -457,7 +457,7 @@ static void
 set_process_priority(void)
 {
 # ifdef DEBUG
-	if (debug > 1)
+	if (debug > 1) /* SPECIAL DEBUG */
 		msyslog(LOG_DEBUG, "set_process_priority: %s",
 			((!need_priority)
 			 ? "Leave priority alone"
@@ -1281,7 +1281,7 @@ moredebug(
 	int saved_errno = errno;
 
 	UNUSED_ARG(sig);
-	if (debug < 255)
+	if (debug < 255) /* SPECIAL DEBUG */
 	{
 		debug++;
 		msyslog(LOG_DEBUG, "debug raised to %d", debug);
@@ -1301,7 +1301,7 @@ lessdebug(
 	int saved_errno = errno;
 
 	UNUSED_ARG(sig);
-	if (debug > 0)
+	if (debug > 0) /* SPECIAL DEBUG */
 	{
 		debug--;
 		msyslog(LOG_DEBUG, "debug lowered to %d", debug);

@@ -27,6 +27,7 @@
 #include "ntpd.h"
 #include "ntp_config.h"
 #include "ntp_scanner.h"
+#include "ntp_debug.h"
 #include "ntp_parser.tab.h"
 #include "timespecops.h"      /* for D_ISZERO_NS() */
 

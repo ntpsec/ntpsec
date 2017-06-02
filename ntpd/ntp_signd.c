@@ -212,13 +212,9 @@ send_via_ntp_signd(
 				sendlen = reply_len - offsetof(struct samba_key_out, pkt);
 				xpkt = &samba_reply.pkt;
 				sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, xpkt, sendlen);
-#ifdef DEBUG
-				if (debug)
-					printf(
-						"transmit ntp_signd packet: at %lu %s->%s mode %d keyid %08x len %d\n",
-						current_time, socktoa(&rbufp->dstadr->sin),
-						socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
-#endif
+				DPRINT(1, ("transmit ntp_signd packet: at %lu %s->%s mode %d keyid %08x len %d\n",
+					   current_time, socktoa(&rbufp->dstadr->sin),
+					   socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen));
 			}
 		}
 		

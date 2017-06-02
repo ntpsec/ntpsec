@@ -145,7 +145,7 @@ addto_syslog(
 		if (syslog_file != NULL)
 			log_to_file = true;
 #if defined(DEBUG) && DEBUG
-	if (debug > 0)
+	if (debug > 0) /* SPECIAL DEBUG */
 		log_to_term = true;
 #endif
 	if (!(log_to_file || log_to_term))
@@ -334,7 +334,7 @@ init_logging(
 						    ? LOG_NTP
 						    : 0);
 #  ifdef DEBUG
-	if (debug)
+	if (debug) /* SPECIAL DEBUG */
 		setlogmask(LOG_UPTO(LOG_DEBUG));
 	else
 #  endif /* DEBUG */

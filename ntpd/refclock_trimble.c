@@ -587,7 +587,7 @@ TSIP_decode (
 				return 0;
 		
 #ifdef DEBUG
-			if (debug > 1) {
+			if (debug > 1) { /* SPECIAL DEBUG */
 				int ts;
 				double lat, lon, alt;
 				lat = getdbl((uint8_t *) &mb(42)) * R2D;
@@ -634,7 +634,7 @@ TSIP_decode (
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 #ifdef DEBUG
-			if (debug > 1)
+			if (debug > 1) /* SPECIAL DEBUG */
 				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02d\n",
 				       up->unit, (u_int)(mb(0) & 0xff), event,
 				       up->date.hour, up->date.minute, up->date.second, pp->nsec,
@@ -723,14 +723,11 @@ TSIP_decode (
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 			up->UTC_offset = 0; /* don't re-use offset */
-#ifdef DEBUG
-			if (debug > 1)
-				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
-				       up->unit, (u_int)(mb(0) & 0xff), event,
-				       up->date.hour, up->date.minute, up->date.second, pp->nsec,
-				       up->date.month, up->date.monthday, up->date.year,
-				       (u_int)mb(19), *Tracking_Status[st]);
-#endif
+			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
+				   up->unit, (u_int)(mb(0) & 0xff), event,
+				   up->date.hour, up->date.minute, up->date.second, pp->nsec,
+				   up->date.month, up->date.monthday, up->date.year,
+				   (u_int)mb(19), *Tracking_Status[st]));
 			return 1;
 			break;
 
@@ -742,7 +739,7 @@ TSIP_decode (
 				break;
 
 #ifdef DEBUG
-			if (debug > 1) {
+			if (debug > 1) { /* SPECIAL DEBUG */
 				double lat, lon, alt;
 				lat = getdbl((uint8_t *) &mb(36)) * R2D;
 				lon = getdbl((uint8_t *) &mb(44)) * R2D;
@@ -761,10 +758,10 @@ TSIP_decode (
 				pp->leap = LEAP_NOWARNING;
 
 #ifdef DEBUG
-			if (debug > 1) 
+			if (debug > 1) /* SPECIAL DEBUG */
 				printf("TSIP_decode: unit %d: 0x%02x leap %d\n",
 				       up->unit, (u_int)(mb(0) & 0xff), pp->leap);
-			if (debug > 1) {
+			if (debug > 1) { /* SPECIAL DEBUG */
 				printf("Receiver MODE: 0x%02X\n", (uint8_t)mb(1));
 				if (mb(1) == 0x00)
 					printf("                AUTOMATIC\n");
@@ -857,14 +854,10 @@ TSIP_decode (
 			up->week = (uint32_t)getint((uint8_t *) &mb(5));
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
-#ifdef DEBUG		
-			if (debug > 1) {
-				printf("TSIP_decode: unit %d: %02X #%d TOW: %u  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
-				        up->unit, (u_int)(mb(0) & 0xff), event, up->TOW, up->week, 
-					up->date.hour, up->date.minute, up->date.second,
-					up->date.month, up->date.monthday, up->date.year);
-			}
-#endif
+			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d TOW: %u  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
+				   up->unit, (u_int)(mb(0) & 0xff), event, up->TOW, up->week, 
+				   up->date.hour, up->date.minute, up->date.second,
+				   up->date.month, up->date.monthday, up->date.year));
 			return 1;
 			break;
 
@@ -898,7 +891,7 @@ TSIP_decode (
 	/* Health Status for Acutime Receiver */
 	else if ((up->rpt_buf[0] == PACKET_46) & (up->type == CLK_ACUTIME)) {
 #ifdef DEBUG
-		if (debug > 1)
+		if (debug > 1) /* SPECIAL DEBUG */
 		/* Status Codes */
 			switch (mb(0)) {
 			    case 0x00:
@@ -935,7 +928,7 @@ TSIP_decode (
 			refclock_report(peer, CEVNT_BADTIME);
 			up->polled = -1;
 #ifdef DEBUG
-			if (debug > 1) {
+			if (debug > 1) { /* SPECIAL DEBUG */
 				if (mb(1) & 0x01)
 					printf ("Signal Processor Error, reset unit.\n");
 				if (mb(1) & 0x02)
@@ -1015,13 +1008,9 @@ trimble_receive (
 	pp->hour = up->date.hour;
 	pp->minute = up->date.minute;
 	pp->second = up->date.second;
-#ifdef DEBUG
-	if (debug) 
-		printf(
-			"trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
-			up->unit, pp->year, pp->day, pp->hour, pp->minute, 
-			pp->second, pp->nsec);
-#endif
+	DPRINT(1, ("trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
+		   up->unit, pp->year, pp->day, pp->hour, pp->minute, 
+		   pp->second, pp->nsec));
 
 	/*
 	 * Process the sample
@@ -1047,11 +1036,8 @@ trimble_receive (
 
 	record_clock_stats(peer, pp->a_lastcode); 
 
-#ifdef DEBUG
-	if (debug)
-		printf("trimble_receive: unit %d: %s\n",
-		       up->unit, prettydate(pp->lastrec));
-#endif
+	DPRINT(1, ("trimble_receive: unit %d: %s\n",
+		   up->unit, prettydate(pp->lastrec)));
 	if (pp->hour == 0 && up->week > up->build_week + 1000)
 		msyslog(LOG_WARNING, "Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
 		        up->unit, up->week, up->build_week);
@@ -1082,13 +1068,10 @@ trimble_poll (
 		refclock_report(peer, CEVNT_TIMEOUT);
 
 	up->polled = 2; /* synchronous packet + 1 event */
-	
-#ifdef DEBUG
-	if (debug)
-		printf("trimble_poll: unit %d: polling %s\n", unit,
-		       (pp->sloppyclockflag & CLK_FLAG2) ? 
-		       "synchronous packet" : "event");
-#endif 
+
+	DPRINT(1, ("trimble_poll: unit %d: polling %s\n", unit,
+		   (pp->sloppyclockflag & CLK_FLAG2) ? 
+		   "synchronous packet" : "event"));
 
 	if (pp->sloppyclockflag & CLK_FLAG2) 
 		return;  /* using synchronous packet input */
@@ -1269,11 +1252,8 @@ HW_poll (
 	if (up->type == CLK_ACUTIME)
 		IGNORE(write (pp->io.fd, "", 1));
 		
-	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) { 
-#ifdef DEBUG
-		if (debug)
-			printf("Trimble HW_poll: unit %d: SET \n", up->unit);
-#endif
+	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
+		DPRINT(1, printf("Trimble HW_poll: unit %d: SET \n", up->unit));
 		msyslog(LOG_ERR,
 			"Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
 			up->unit);
@@ -1286,10 +1266,7 @@ HW_poll (
 	get_systime(&pp->lastrec);
 
 	if (ioctl(pp->io.fd, TIOCMSET, &x) == -1) {
-#ifdef DEBUG
-		if (debug)
-			printf("Trimble HW_poll: unit %d: UNSET \n", up->unit);
-#endif
+		DPRINT(1, printf("Trimble HW_poll: unit %d: UNSET \n", up->unit));
 		msyslog(LOG_ERR,
 			"Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m", 
 			up->unit);

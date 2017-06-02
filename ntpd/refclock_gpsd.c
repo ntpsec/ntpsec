@@ -2137,7 +2137,7 @@ log_data(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	if (debug > 1) {
+	if (debug > 1) { /* SPECIAL DEBUG */
 		const char *sptr = buf;
 		const char *stop = buf + len;
 		char       *dptr = s_lbuf;
