@@ -108,10 +108,10 @@ backtrace_log(void) {
 	return (ISC_R_SUCCESS);
 }
 # else
-#  define(BACKTRACE_DISABLED)
+#  define BACKTRACE_DISABLED 1
 # endif
 #else   /* ! USEBACKTRACE */
-# define(BACKTRACE_DISABLED)
+# define BACKTRACE_DISABLED 1
 #endif /* USEBACKTRACE */
 
 static const char *
