@@ -1169,7 +1169,7 @@ ctl_putdblf(
 	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
 		*cp++ = *cq++;
 	*cp++ = '=';
-	NTP_INSIST((size_t)(cp - buffer) < sizeof(buffer));
+	INSIST((size_t)(cp - buffer) < sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
                  use_f ? "%.*f" : "%.*g",
 	    precision, d);
@@ -1196,7 +1196,7 @@ ctl_putuint(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
+	INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%lu", uval);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
@@ -1226,7 +1226,7 @@ ctl_puttime(
 	tm = gmtime_r(&fstamp, &tmbuf);
 	if (NULL == tm)
 		return;
-	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
+	INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
 		 "%04d-%02d-%02dT%02d:%02dZ", tm->tm_year + 1900,
 		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
@@ -1255,7 +1255,7 @@ ctl_puthex(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
+	INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%lx", uval);
 	cp += strlen(cp);
 	ctl_putdata(buffer,(unsigned)( cp - buffer ), false);
@@ -1281,7 +1281,7 @@ ctl_putint(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
+	INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%ld", ival);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
@@ -1307,7 +1307,7 @@ ctl_putts(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	NTP_INSIST((size_t)(cp - buffer) < sizeof(buffer));
+	INSIST((size_t)(cp - buffer) < sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%08x.%08x",
 		 (u_int)lfpuint(*ts), (u_int)lfpfrac(*ts));
 	cp += strlen(cp);
@@ -1339,7 +1339,7 @@ ctl_putadr(
 		cq = numtoa(addr32);
 	else
 		cq = socktoa(addr);
-	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
+	INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%s", cq);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
@@ -1410,7 +1410,7 @@ ctl_putarray(
 		if (i == 0)
 			i = NTP_SHIFT;
 		i--;
-		NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
+		INSIST((cp - buffer) < (int)sizeof(buffer));
 		snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
 			 " %.2f", arr[i] * MS_PER_S);
 		cp += strlen(cp);
@@ -2719,7 +2719,7 @@ read_peervars(void)
 			ctl_error(CERR_UNKNOWNVAR);
 			return;
 		}
-		NTP_INSIST(v->code < COUNTOF(wants));
+		INSIST(v->code < COUNTOF(wants));
 		wants[v->code] = 1;
 		gotvar = true;
 	}
@@ -2762,7 +2762,7 @@ read_sysvars(void)
 	gotvar = false;
 	while (NULL != (v = ctl_getitem(sys_var, &valuep))) {
 		if (!(EOV & v->flags)) {
-			NTP_INSIST(v->code < wants_count);
+			INSIST(v->code < wants_count);
 			wants[v->code] = 1;
 			gotvar = true;
 		} else {
@@ -2779,7 +2779,7 @@ read_sysvars(void)
 				return;
 			}
 			n = v->code + CS_MAXCODE + 1;
-			NTP_INSIST(n < wants_count);
+			INSIST(n < wants_count);
 			wants[n] = 1;
 			gotvar = true;
 		}
@@ -4293,7 +4293,7 @@ count_var(
 	while (!(EOV & (k++)->flags))
 		c++;
 
-	NTP_ENSURE(c <= USHRT_MAX);
+	ENSURE(c <= USHRT_MAX);
 	return (u_short)c;
 }
 

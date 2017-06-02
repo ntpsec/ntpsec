@@ -46,7 +46,7 @@ atolfp(
 	bool isneg;
 	static const char *digits = "0123456789";
 
-	NTP_REQUIRE(str != NULL);
+	REQUIRE(str != NULL);
 
 	isneg = false;
 	dec_i = dec_f = 0;

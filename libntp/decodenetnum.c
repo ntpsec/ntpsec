@@ -132,7 +132,7 @@ decodenetnum(
 		return retcode;
 	}
 
-	NTP_INSIST(ai->ai_addrlen <= sizeof(*netnum));
+	INSIST(ai->ai_addrlen <= sizeof(*netnum));
 	if(netnum) {
 		memcpy(netnum, ai->ai_addr, ai->ai_addrlen);
 	}

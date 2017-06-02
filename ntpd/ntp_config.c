@@ -546,8 +546,8 @@ create_address_node(
 {
 	address_node *my_node;
 
-	NTP_REQUIRE(NULL != addr);
-	NTP_REQUIRE(AF_INET == type ||
+	REQUIRE(NULL != addr);
+	REQUIRE(AF_INET == type ||
 		    AF_INET6 == type || AF_UNSPEC == type);
 	my_node = emalloc_zero(sizeof(*my_node));
 	my_node->address = addr;
@@ -564,7 +564,7 @@ destroy_address_node(
 {
 	if (NULL == my_node)
 		return;
-	NTP_REQUIRE(NULL != my_node->address);
+	REQUIRE(NULL != my_node->address);
 
 	free(my_node->address);
 	free(my_node);
@@ -1070,7 +1070,7 @@ create_nic_rule_node(
 {
 	nic_rule_node *my_node;
 
-	NTP_REQUIRE(match_class != 0 || if_name != NULL);
+	REQUIRE(match_class != 0 || if_name != NULL);
 
 	my_node = emalloc_zero(sizeof(*my_node));
 	my_node->match_class = match_class;
@@ -3369,7 +3369,7 @@ getnetnum(
 	)
 {
 
-	NTP_REQUIRE(AF_UNSPEC == AF(addr) ||
+	REQUIRE(AF_UNSPEC == AF(addr) ||
 		    AF_INET == AF(addr) ||
 		    AF_INET6 == AF(addr));
 
