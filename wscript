@@ -803,11 +803,6 @@ int main(int argc, char **argv) {
     ctx.define("DIR_SEP", "'%s'" % sep, quote=False,
                comment="Directory separator used")
 
-    # libisc/
-    # XXX: Hack that needs to be fixed properly for all platforms
-    ctx.define("ISC_PLATFORM_NORETURN_POST",
-               "__attribute__((__noreturn__))", quote=False)
-
     if ctx.get_define("HAVE_SYS_SYSCTL_H"):
         ctx.define("HAVE_IFLIST_SYSCTL", 1,
                    comment="Whether sysctl interface exists")

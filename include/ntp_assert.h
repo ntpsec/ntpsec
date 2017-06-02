@@ -58,7 +58,7 @@ typedef void (*isc_assertioncallback_t)(const char *, int, isc_assertiontype_t,
 
 /* coverity[+kill] */
 void isc_assertion_failed(const char *, int, isc_assertiontype_t,
-			  const char *) ISC_PLATFORM_NORETURN_POST;
+			  const char *) __attribute__((noreturn));
 
 void
 isc_assertion_setcallback(isc_assertioncallback_t);
