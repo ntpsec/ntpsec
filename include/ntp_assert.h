@@ -52,10 +52,10 @@
 
 #include <assert.h>
 
-#define ALWAYS_REQUIRE(x)	assert(x)
-#define INSIST(x)		assert(x)
-#define ALWAYS_INVARIANT(x)	assert(x)
-#define ENSURE(x)		assert(x)
+#define REQUIRE(x)      assert(x)
+#define INSIST(x)       assert(x)
+#define INVARIANT(x)    assert(x)
+#define ENSURE(x)       assert(x)
 
 # else	/* not FlexeLint */
 
@@ -151,15 +151,12 @@ isc_assertion_typetotext(isc_assertiontype_t type)
 #define ISC_INVARIANT(cond)	((void) 0)
 #endif /* ISC_CHECK_INVARIANT */
 
-#define ALWAYS_REQUIRE(x)	ISC_REQUIRE(x)
-#define INSIST(x)		ISC_INSIST(x)
-#define ALWAYS_INVARIANT(x)	ISC_INVARIANT(x)
-#define ENSURE(x)		ISC_ENSURE(x)
+#define REQUIRE(x)      ISC_REQUIRE(x)
+#define INSIST(x)       ISC_INSIST(x)
+#define INVARIANT(x)    ISC_INVARIANT(x)
+#define ENSURE(x)       ISC_ENSURE(x)
 
 # endif /* not FlexeLint */
-
-#define	REQUIRE(x)		ALWAYS_REQUIRE(x)
-#define	INVARIANT(x)		ALWAYS_INVARIANT(x)
 
 # ifdef DEBUG
 #define	DEBUG_REQUIRE(x)	REQUIRE(x)
