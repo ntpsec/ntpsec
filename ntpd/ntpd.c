@@ -563,7 +563,6 @@ ntpdmain(
 	 * Install trap handlers to log errors and assertion failures.
 	 * Default handlers print to stderr which doesn't work if detached.
 	 */
-	isc_assertion_setcallback(assertion_failed);
 	isc_error_setfatal(library_fatal_error);
 	isc_error_setunexpected(library_unexpected_error);
 
