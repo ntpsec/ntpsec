@@ -81,33 +81,28 @@ const char *
 isc_assertion_typetotext(isc_assertiontype_t type)
 			__attribute__((const));
 
-#define ISC_REQUIRE(cond) \
+#define REQUIRE(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_require, \
 					 #cond), 0)))
 
-#define ISC_ENSURE(cond) \
+#define ENSURE(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_ensure, \
 					 #cond), 0)))
 
-#define ISC_INSIST(cond) \
+#define INSIST(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_insist, \
 					 #cond), 0)))
-#define ISC_INVARIANT(cond) \
+#define INVARIANT(cond) \
 	((void) ((cond) || \
 		 ((isc_assertion_failed)(__FILE__, __LINE__, \
 					 isc_assertiontype_invariant, \
 					 #cond), 0)))
-#define REQUIRE(x)      ISC_REQUIRE(x)
-#define INSIST(x)       ISC_INSIST(x)
-#define INVARIANT(x)    ISC_INVARIANT(x)
-#define ENSURE(x)       ISC_ENSURE(x)
-
 # endif /* not FlexeLint */
 
 # ifdef DEBUG
