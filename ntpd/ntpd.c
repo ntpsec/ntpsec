@@ -1224,7 +1224,10 @@ assertion_failed(
 	const char *cond
 	)
 {
+        /* the comment on the next line is not what the line does */
 	isc_assertion_setcallback(NULL);    /* Avoid recursion */
+	/* isc_assertion_setcallback(NULL) just set the default assert()
+         * handler, allowing recursion */
 
 	msyslog(LOG_ERR, "%s:%d: %s(%s) failed",
 		file, line, isc_assertion_typetotext(type), cond);
