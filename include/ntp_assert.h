@@ -60,10 +60,6 @@ extern void	assertion_failed(const char *, int,
 				 const char *)
 			__attribute__	((__noreturn__));
 
-const char *
-isc_assertion_typetotext(isc_assertiontype_t type)
-			__attribute__((const));
-
 #define REQUIRE(cond) \
 	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
 					 isc_assertiontype_require, \

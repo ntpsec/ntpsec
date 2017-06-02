@@ -19,12 +19,12 @@
 #include "isc/backtrace.h"
 #include "isc/result.h"
 
-/*%
- * Public.
- */
+static const char *
+isc_assertion_typetotext(isc_assertiontype_t type)
+			__attribute__((const));
 
 /*% Type to Text */
-const char *
+static const char *
 isc_assertion_typetotext(isc_assertiontype_t type) {
 	const char *result;
 
