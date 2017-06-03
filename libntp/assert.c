@@ -42,8 +42,6 @@
 # ifdef HAVE_BACKTRACE_SYMBOLS_FD
 #include <execinfo.h>
 
-void backtrace_log(void);
-
 void
 backtrace_log(void) {
 	int j, nptrs;
@@ -107,16 +105,9 @@ backtrace_log(void) {
 
 	return (ISC_R_SUCCESS);
 }
-# else
-#  define BACKTRACE_DISABLED 1
-# endif
-#else   /* ! USEBACKTRACE */
-# define BACKTRACE_DISABLED 1
-#endif /* USEBACKTRACE */
+#endif /* HAVE__UNWIND_BACKTRACE */
 
-static const char *
-assertion_typetotext(assertiontype_t type)
-			__attribute__((const));
+#endif /* USEBACKTRACE */
 
 /*% Type to Text */
 static const char *

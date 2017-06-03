@@ -72,4 +72,15 @@ extern void assertion_failed(const char *, int, assertiontype_t, const char *)
                                          assertiontype_invariant, #cond), 0)))
 # endif /* not FlexeLint */
 
+#if defined(USEBACKTRACE) && \
+	(defined(HAVE_BACKTRACE_SYMBOLS_FD) || defined (HAVE__UNWIND_BACKTRACE))
+    /* doing backtrace */
+
+extern void backtrace_log(void);
+
+#else
+    /* not doing backtrace */
+# define BACKTRACE_DISABLED 1
+#endif   /* ! USEBACKTRACE */
+
 #endif  /* GUARD_NTP_ASSERT_H */
