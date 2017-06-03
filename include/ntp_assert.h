@@ -9,17 +9,17 @@
  * example:
  *
  * int foo(char *a) {
- *	int result;
- *	int value;
+ *      int result;
+ *      int value;
  *
- *	REQUIRE(a != NULL);
- *	...
- *	bar(&value);
- *	INSIST(value > 2);
- *	...
+ *      REQUIRE(a != NULL);
+ *      ...
+ *      bar(&value);
+ *      INSIST(value > 2);
+ *      ...
  *
- *	ENSURE(result != 12);
- *	return result;
+ *      ENSURE(result != 12);
+ *      return result;
  * }
  *
  * open question: when would we use INVARIANT()?
@@ -40,41 +40,36 @@
 #define INVARIANT(x)    assert(x)
 #define ENSURE(x)       assert(x)
 
-# else	/* not FlexeLint */
+# else  /* not FlexeLint */
 
 /*% isc assertion type */
 typedef enum {
-	assertiontype_require,
-	assertiontype_ensure,
-	assertiontype_insist,
-	assertiontype_invariant
+        assertiontype_require,
+        assertiontype_ensure,
+        assertiontype_insist,
+        assertiontype_invariant
 } assertiontype_t;
 
 
 /* our assertion catcher */
-extern void	assertion_failed(const char *, int,
-				 assertiontype_t,
-				 const char *)
-			__attribute__	((__noreturn__));
+extern void assertion_failed(const char *, int, assertiontype_t, const char *)
+                        __attribute__   ((__noreturn__));
 
 #define REQUIRE(cond) \
-	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 assertiontype_require, \
-					 #cond), 0)))
+        ((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
+                                         assertiontype_require, #cond), 0)))
 
 #define ENSURE(cond) \
-	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 assertiontype_ensure, \
-					 #cond), 0)))
+        ((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
+                                         assertiontype_ensure, #cond), 0)))
 
 #define INSIST(cond) \
-	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 assertiontype_insist, \
-					 #cond), 0)))
+        ((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
+                                         assertiontype_insist, #cond), 0)))
+
 #define INVARIANT(cond) \
-	((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
-					 assertiontype_invariant, \
-					 #cond), 0)))
+        ((void) ((cond) || (assertion_failed(__FILE__, __LINE__, \
+                                         assertiontype_invariant, #cond), 0)))
 # endif /* not FlexeLint */
 
-#endif	/* GUARD_NTP_ASSERT_H */
+#endif  /* GUARD_NTP_ASSERT_H */
