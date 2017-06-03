@@ -83,9 +83,8 @@ btcallback(struct _Unwind_Context *uc, void *opq) {
 	return (0); /* _URC_NO_REASON */
 }
 
-isc_result_t backtrace_log(void);
 
-isc_result_t
+void
 backtrace_log(void) {
 	trace_arg_t arg;
 	void *buffer[BACKTRACE_MAXFRAME];
@@ -103,7 +102,6 @@ backtrace_log(void) {
 	    msyslog(LOG_ERR, "#%d %p in ??\n", i, buffer[i]);
 	}
 
-	return (ISC_R_SUCCESS);
 }
 #endif /* HAVE__UNWIND_BACKTRACE */
 
