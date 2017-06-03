@@ -6,9 +6,9 @@
 == SYNOPSIS ==
 [verse]
 ntpd
-    [-46ghLmnNqx] [-c 'conffile'] [-f 'driftfile'] [-i 'jaildir']
-    [-k 'keyfile'] [-l 'logfile'] [-p 'pidfile'] [-P 'priority']
-    [-s 'statsdir']  [-t  'key']
+    [-46aghLmnNqx] [assert] [-c 'conffile'] [-f 'driftfile']
+    [-i 'jaildir'] [-k 'keyfile'] [-l 'logfile'] [-p 'pidfile']
+    [-P 'priority'] [-s 'statsdir']  [-t  'key']
     [-u 'user'[:'group']] [-U 'interface_update_interval']
     [-v 'variable'] [-V 'variable'] [server...]
 
@@ -71,6 +71,9 @@ the IPv4 namespace.
 Force DNS resolution of following host names on the command line to
 the IPv6 namespace.
 
++-a+, +--assert+::
+  REQUIRE(false) to test assert handler.
++
 +-c+ _string_, +--configfile+=_string_::
   configuration file name.
 +

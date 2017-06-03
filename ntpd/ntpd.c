@@ -124,10 +124,11 @@ static  void    close_all_beyond(int);
 static  void    close_all_except(int);
 
 
-#define ALL_OPTIONS "46bc:dD:f:gGhi:I:k:l:LmnNp:Pqr:Rs:t:u:U:Vw:xzZ"
+#define ALL_OPTIONS "46abc:dD:f:gGhi:I:k:l:LmnNp:Pqr:Rs:t:u:U:Vw:xzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
+    { "assert",	            0, 0, 'a' },
     { "configfile",	    1, 0, 'c' },
     { "debug",		    0, 0, 'd' },
     { "set-debug-level",    1, 0, 'D' },
@@ -166,6 +167,7 @@ static void ntpd_usage(void)
     P("				- prohibits the option 'ipv6'\n");
     P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
     P("				- prohibits the option 'ipv4'\n");
+    P("   -a no  assert         REQUIRE(false) to test assert handler\n");
     P("   -c Str configfile     configuration file name\n");
     P("   -d no  debug-level    Increase output debug message level\n");
     P("				- may appear multiple times\n");
@@ -238,6 +240,10 @@ parse_cmdline_opts(
 		break;
 	    case '6':
 		opt_ipv6 = true;
+		break;
+	    case 'a':
+		fputs("Testing assert failure.\n", stderr);
+		REQUIRE(false);
 		break;
 	    case 'b':
 		fputs("ERROR: Obsolete and unsupported broadcast option -b\n",
