@@ -83,7 +83,6 @@ void dns_check(void)
 {
 	int rc;
 	struct addrinfo *ai;
-	sockaddr_u sockaddr;
 	DNS_Status status;
 
 	msyslog(LOG_INFO, "dns_check: processing %s, %x, %x",
@@ -101,8 +100,11 @@ void dns_check(void)
 	}
 
 	for (ai = answer; NULL != ai; ai = ai->ai_next) {
-		sockaddr.sa = *ai->ai_addr;
+		sockaddr_u sockaddr;
+		memcpy(&sockaddr, ai->ai_addr, ai->ai_addrlen);
 		/* Both dns_take_pool and dns_take_server log something. */
+		// msyslog(LOG_INFO, "DNS Take %s=>%s",
+		//		socktoa(ai->ai_addr), socktoa(&sockaddr));
 		if (active->cast_flags & MDF_POOL)
 			dns_take_pool(active, &sockaddr);
 		else
