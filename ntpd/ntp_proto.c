@@ -2455,15 +2455,16 @@ dns_take_server(
 	msyslog(LOG_INFO, "Server taking: %s", socktoa(rmtadr));
 	server->flags &= (unsigned)~FLAG_DNS;
 		
-	restrict_mask = restrictions(rmtadr);
+	server->srcadr = *rmtadr;
+
+	restrict_mask = restrictions(&server->srcadr);
 	if (RES_FLAGS & restrict_mask) {
 		msyslog(LOG_INFO, "Server poking hole in restrictions for: %s",
-			socktoa(rmtadr));
-		restrict_source(rmtadr, false, 0);
+			socktoa(&server->srcadr));
+		restrict_source(&server->srcadr, false, 0);
 	}
 
-	server->srcadr = *rmtadr;
-	server->dstadr = findinterface(rmtadr);
+	server->dstadr = findinterface(&server->srcadr);
 if (NULL == server->dstadr)
   msyslog(LOG_ERR, "dns_take_server: can't find interface for %s", server->hostname);
 	server->hpoll = server->minpoll;
@@ -2495,15 +2496,6 @@ dns_take_pool(
 
 	msyslog(LOG_INFO, "Pool taking: %s", socktoa(rmtadr));
 
-	restrict_mask = restrictions(rmtadr);
-	/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
-	if (RES_FLAGS & restrict_mask) {
-		msyslog(LOG_INFO, "Pool poking hole in restrictions for: %s",
-				socktoa(rmtadr));
-		restrict_source(rmtadr, false,
-				current_time + POOL_SOLICIT_WINDOW + 1);
-	}
-
 	lcladr = findinterface(rmtadr);
 	peer = newpeer(rmtadr, NULL, lcladr,
 		MODE_CLIENT, pool->version,
@@ -2512,6 +2504,15 @@ dns_take_pool(
 		MDF_UCAST | MDF_UCLNT, 0, 0, false);
 	peer_xmit(peer);
 	poll_update(peer, peer->hpoll);
+
+	restrict_mask = restrictions(&peer->srcadr);
+	/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
+	if (RES_FLAGS & restrict_mask) {
+		msyslog(LOG_INFO, "Pool poking hole in restrictions for: %s",
+				socktoa(&peer->srcadr));
+		restrict_source(&peer->srcadr, false,
+				current_time + POOL_SOLICIT_WINDOW + 1);
+	}
 
 	DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
 	    current_time, latoa(lcladr), socktoa(rmtadr)));
