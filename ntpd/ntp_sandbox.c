@@ -12,6 +12,7 @@
 #include <signal.h>
 
 #include "config.h"
+#include "ntp_assert.h"
 
 #ifdef ENABLE_DROPROOT
 # include <ctype.h>
@@ -34,9 +35,6 @@ static priv_set_t *highprivs = NULL;
 
 #ifdef HAVE_SECCOMP_H
 # include <seccomp.h>
-# ifdef HAVE_BACKTRACE_SYMBOLS_FD
-#  include <execinfo.h>
-# endif
 static void catchTrap(int sig, siginfo_t *, void *);
 #endif
 
@@ -451,26 +449,9 @@ static void catchTrap(int sig, siginfo_t *si, void *u)
 	    msyslog(LOG_ERR, "ERROR: SIGSYS/seccomp bad syscall %d/%#x\n",
 		    si->si_syscall, si->si_arch);
         }
-#ifdef HAVE_BACKTRACE_SYMBOLS_FD
-        {
-#define BT_BUF_SIZE 100
-
-           int j, nptrs;
-           void *buffer[BT_BUF_SIZE];
-           char **strings;
-
-           nptrs = backtrace(buffer, BT_BUF_SIZE);
-           strings = backtrace_symbols(buffer, nptrs);
-	   msyslog(LOG_ERR, "Stack trace:\n");
-           if (strings) {
-               /* skip trace of this shim function */
-	       for (j = 1; j < nptrs; j++)
-		   msyslog(LOG_ERR, "  %s\n", strings[j]);
-
-	       free(strings);
-           }
-        }
-#endif /* HAVE_BACKTRACE_SYMBOLS_FD */
+#ifndef BACKTRACE_DISABLED
+        backtrace_log();
+#endif
 
 	exit(1);
 }
