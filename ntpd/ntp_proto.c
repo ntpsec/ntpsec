@@ -1529,8 +1529,8 @@ clock_filter(
 	 * packets.
 	 */
 	if (peer->filter_epoch[k] <= peer->epoch) {
-        DPRINT(2, ("clock_filter: old sample %lu\n", current_time -
-		   peer->filter_epoch[k]));
+	  DPRINT(2, ("clock_filter: old sample %lu\n", current_time -
+		     peer->filter_epoch[k]));
 		return;
 	}
 	peer->epoch = peer->filter_epoch[k];
@@ -1541,10 +1541,9 @@ clock_filter(
 	 * clock select algorithm.
 	 */
 	record_peer_stats(peer, ctlpeerstatus(peer));
-	DRPINT(1, ("clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f\n",
+	DPRINT(1, ("clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f\n",
 		   m, peer->offset, peer->delay, peer->disp,
 		   peer->jitter));
-#endif
 	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
 		clock_select();
 }
