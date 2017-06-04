@@ -263,8 +263,6 @@ getgroup:
 # endif	/* ENABLE_DROPROOT */
 
 /* libseccomp sandboxing */
-// Working on ARM
-// #if defined(__x86_64__) || defined(__i386__)
 #if defined(HAVE_SECCOMP_H)
 
 #ifdef ENABLE_KILL_ON_TRAP
@@ -319,7 +317,10 @@ int scmp_sc[] = {
 	SCMP_SYS(poll),
 	SCMP_SYS(pselect6),
 	SCMP_SYS(read),
-	SCMP_SYS(recvfrom),
+	SCMP_SYS(recvfrom),    /* Comment this out for testing.
+				* It will die on the first reply.
+				* (Or maybe sooner if a request arrives.)
+				*/
 	SCMP_SYS(recvmsg),
 	SCMP_SYS(rename),
 	SCMP_SYS(rt_sigaction),
@@ -348,6 +349,10 @@ int scmp_sc[] = {
         SCMP_SYS(unlink),
 
 #ifdef ENABLE_DNS_LOOKUP
+/* Don't comment out this block for testing.
+ * pthread_create blocks signals so it will crash
+ * rather than generate a trap.
+ */
 	SCMP_SYS(clone),	/* threads */
 	SCMP_SYS(futex),	/* sem_xxx, used by threads */
 	SCMP_SYS(kill),		/* generate signal */
@@ -425,6 +430,9 @@ int scmp_sc[] = {
  * catchTrap - get here if something missing from list above
  * (or a bad guy finds a way in)
  *
+ * You won't get here if SIGSYS is blocked.
+ * That happens in pthread_create()  See above at ENABLE_DNS_LOOKUP
+ *
  * The list above is a moving target.  Most syscalls will be
  * obvious but libc (and friends) can remap things and
  * getaddrinfo does all sorts of syscalls.
@@ -432,12 +440,22 @@ int scmp_sc[] = {
  * To track down a missing call:
  *
  * Option one:
- *  use gdb, break on catchTrap, get a trace.
+ *  The code below should print out the syscall number.
+ *  grep _NR_ /usr/include/ -r | grep <number here> -w
+ *  You will get several hits for various architures/modes.
+ *  You can probably guess the right one.
  *
  * Option two:
  *  use strace
  *  sudo strace -t -f -o<filename> <path-to-ntpd> <args>
- *  when it crashes, the last syscall will be at the end of the log file
+ *  When it crashes, the last syscall will be near the end of the log file
+ *  just before the line with "--- SIGSYS", a page or two from the end
+ *  depending on the stack trace.
+ *
+ * Option three:
+ *  use gdb, break on catchTrap, get a trace.
+ *  If you have the symbols, you can probably guess the syscall.
+ *  You may have to get the sources for libc.
  *
  */
 static void catchTrap(int sig, siginfo_t *si, void *u)
