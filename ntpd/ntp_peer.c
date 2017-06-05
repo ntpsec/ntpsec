@@ -207,12 +207,12 @@ findexistingpeer_addr(
 {
 	struct peer *peer;
 
-	DPRINTF(2, ("findexistingpeer_addr(%s, %s, %d)\n",
-		sockporttoa(addr),
-		(start_peer)
-		    ? sockporttoa(&start_peer->srcadr)
-		    : "NULL",
-		    mode));
+	DPRINT(2, ("findexistingpeer_addr(%s, %s, %d)\n",
+		   sockporttoa(addr),
+		   (start_peer)
+		   ? sockporttoa(&start_peer->srcadr)
+		   : "NULL",
+		   mode));
 
 	/*
 	 * start_peer is included so we can locate instances of the
@@ -226,15 +226,15 @@ findexistingpeer_addr(
 		peer = start_peer->adr_link;
 	
 	while (peer != NULL) {
-		DPRINTF(3, ("%s %s %d %d 0x%x ", sockporttoa(addr),
-			sockporttoa(&peer->srcadr), mode, peer->hmode,
-			(u_int)peer->cast_flags));
+		DPRINT(3, ("%s %s %d %d 0x%x ", sockporttoa(addr),
+			   sockporttoa(&peer->srcadr), mode, peer->hmode,
+			   (u_int)peer->cast_flags));
 		if ((-1 == mode || peer->hmode == mode) &&
 		    ADDR_PORT_EQ(addr, &peer->srcadr)) {
-			DPRINTF(3, ("found.\n"));
+			DPRINT(3, ("found.\n"));
 			break;
 		}
-		DPRINTF(3, ("\n"));
+		DPRINT(3, ("\n"));
 		peer = peer->adr_link;
 	}
 
@@ -356,7 +356,7 @@ clear_all(void)
 		if (!(MDF_TXONLY_MASK & p->cast_flags))
 		    peer_clear(p, "STEP", false);
 
-	DPRINTF(1, ("clear_all: at %lu\n", current_time));
+	DPRINT(1, ("clear_all: at %lu\n", current_time));
 }
 
 
@@ -385,8 +385,8 @@ score_all(
 			if (x < temp)
 				temp = x;
 		}
-	DPRINTF(1, ("score_all: at %lu score %d min %d\n",
-		    current_time, tamp, temp));
+	DPRINT(1, ("score_all: at %lu score %d min %d\n",
+		   current_time, tamp, temp));
 
 	if (tamp != temp)
 		temp = 0;
@@ -562,24 +562,24 @@ peer_refresh_interface(
 
 	niface = select_peerinterface(p, &p->srcadr, NULL);
 
-	DPRINTF(4, (
-	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
-	    p->dstadr == NULL ? "<null>" :
-	    socktoa(&p->dstadr->sin), socktoa(&p->srcadr), p->hmode,
-	    p->version, p->minpoll, p->maxpoll, p->flags, p->cast_flags,
-	    p->ttl, p->keyid));
+	DPRINT(4, (
+		   "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
+		   p->dstadr == NULL ? "<null>" :
+		   socktoa(&p->dstadr->sin), socktoa(&p->srcadr), p->hmode,
+		   p->version, p->minpoll, p->maxpoll, p->flags, p->cast_flags,
+		   p->ttl, p->keyid));
 	if (niface != NULL) {
-		DPRINTF(4, (
-		    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
-		    niface->fd,  niface->bfd, niface->name,
-		    niface->flags, niface->ifindex,
-		    socktoa(&niface->sin)));
+		DPRINT(4, (
+			   "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
+			   niface->fd,  niface->bfd, niface->name,
+			   niface->flags, niface->ifindex,
+			   socktoa(&niface->sin)));
 		if (niface->flags & INT_BROADCAST)
-			DPRINTF(4, (", bcast=%s",
-				socktoa(&niface->bcast)));
-		DPRINTF(4, (", mask=%s\n", socktoa(&niface->mask)));
+			DPRINT(4, (", bcast=%s",
+				   socktoa(&niface->bcast)));
+		DPRINT(4, (", mask=%s\n", socktoa(&niface->mask)));
 	} else {
-		DPRINTF(4, ("<NONE>\n"));
+		DPRINT(4, ("<NONE>\n"));
 	}
 
 	set_peerdstadr(p, niface);
@@ -667,10 +667,10 @@ newpeer(
 	 * associations.
 	 */
 	if (peer != NULL) {
-		DPRINTF(2, ("newpeer(%s) found existing association\n",
-			(hostname)
-			    ? hostname
-			    : socktoa(srcadr)));
+		DPRINT(2, ("newpeer(%s) found existing association\n",
+			   (hostname)
+			   ? hostname
+			   : socktoa(srcadr)));
 		return NULL;
 	}
 
@@ -717,12 +717,12 @@ newpeer(
 		peer->minpoll = peer->maxpoll;
 
 	if (peer->dstadr != NULL)
-		DPRINTF(3, ("newpeer(%s): using fd %d and our addr %s\n",
-			socktoa(srcadr), peer->dstadr->fd,
-			socktoa(&peer->dstadr->sin)));
+		DPRINT(3, ("newpeer(%s): using fd %d and our addr %s\n",
+			   socktoa(srcadr), peer->dstadr->fd,
+			   socktoa(&peer->dstadr->sin)));
 	else
-		DPRINTF(3, ("newpeer(%s): local interface currently not bound\n",
-			socktoa(srcadr)));
+		DPRINT(3, ("newpeer(%s): local interface currently not bound\n",
+			   socktoa(srcadr)));
 
 	/*
 	 * Broadcast needs the socket enabled for broadcast
@@ -762,10 +762,10 @@ newpeer(
 
 	restrict_source(&peer->srcadr, false, 0);
 	mprintf_event(PEVNT_MOBIL, peer, "assoc %d", peer->associd);
-	DPRINTF(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
-	    latoa(peer->dstadr), socktoa(&peer->srcadr), peer->hmode,
-	    peer->version, peer->minpoll, peer->maxpoll, peer->flags,
-	    peer->cast_flags, peer->ttl, peer->keyid));
+	DPRINT(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
+		   latoa(peer->dstadr), socktoa(&peer->srcadr), peer->hmode,
+		   peer->version, peer->minpoll, peer->maxpoll, peer->flags,
+		   peer->cast_flags, peer->ttl, peer->keyid));
 	return peer;
 }
 

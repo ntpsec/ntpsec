@@ -1101,12 +1101,8 @@ clock_update(
 	sys_rootdelay = peer->delay + peer->rootdelay;
 	sys_reftime = peer->dst;
 
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "clock_update: at %lu sample %lu associd %d\n",
-		    current_time, peer->epoch, peer->associd);
-#endif
+	DPRINT(1, ("clock_update: at %lu sample %lu associd %d\n",
+		   current_time, peer->epoch, peer->associd));
 
 	/*
 	 * Comes now the moment of truth. Crank the clock discipline and
@@ -1174,7 +1170,7 @@ clock_update(
 			if (waitsync_fd_to_close != -1) {
 				close(waitsync_fd_to_close);
 				waitsync_fd_to_close = -1;
-				DPRINTF(1, ("notified parent --wait-sync is done\n"));
+				DPRINT(1, ("notified parent --wait-sync is done\n"));
 			}
 #endif /* HAVE_WORKING_FORK */
 
@@ -1296,11 +1292,11 @@ poll_update(
 		if (peer->throttle > (1 << peer->minpoll))
 			peer->nextdate += (u_long)ntp_minpkt;
 	}
-	DPRINTF(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
-		    current_time, socktoa(&peer->srcadr), peer->hpoll,
-		    peer->burst, peer->retry, peer->throttle,
-		    utemp - current_time, peer->nextdate -
-		    current_time));
+	DPRINT(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
+		   current_time, socktoa(&peer->srcadr), peer->hpoll,
+		   peer->burst, peer->retry, peer->throttle,
+		   utemp - current_time, peer->nextdate -
+		   current_time));
 }
 
 
@@ -1368,13 +1364,9 @@ peer_clear(
 	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
 	    peer->nextdate += (u_long)(pseudorandom % (1 << peer->minpoll));
 	}
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "peer_clear: at %lu next %lu associd %d refid %s\n",
-		    current_time, peer->nextdate, peer->associd,
-		    ident);
-#endif
+	DPRINT(1, ("peer_clear: at %lu next %lu associd %d refid %s\n",
+		   current_time, peer->nextdate, peer->associd,
+		   ident));
 }
 
 
@@ -1537,11 +1529,8 @@ clock_filter(
 	 * packets.
 	 */
 	if (peer->filter_epoch[k] <= peer->epoch) {
-#if defined(DEBUG) && DEBUG
-	if (debug > 1)
-		printf("clock_filter: old sample %lu\n", current_time -
-		    peer->filter_epoch[k]);
-#endif
+	  DPRINT(2, ("clock_filter: old sample %lu\n", current_time -
+		     peer->filter_epoch[k]));
 		return;
 	}
 	peer->epoch = peer->filter_epoch[k];
@@ -1552,13 +1541,9 @@ clock_filter(
 	 * clock select algorithm.
 	 */
 	record_peer_stats(peer, ctlpeerstatus(peer));
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f\n",
-		    m, peer->offset, peer->delay, peer->disp,
-		    peer->jitter);
-#endif
+	DPRINT(1, ("clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f\n",
+		   m, peer->offset, peer->delay, peer->disp,
+		   peer->jitter));
 	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
 		clock_select();
 }
@@ -1757,8 +1742,8 @@ clock_select(void)
 		}
 	}
 	for (i = 0; i < nl2; i++)
-		DPRINTF(3, ("select: endpoint %2d %.6f\n",
-			endpoint[indx[i]].type, endpoint[indx[i]].val));
+		DPRINT(3, ("select: endpoint %2d %.6f\n",
+			   endpoint[indx[i]].type, endpoint[indx[i]].val));
 
 	/*
 	 * This is the actual algorithm that cleaves the truechimers
@@ -1885,8 +1870,8 @@ clock_select(void)
 	 */
 	for (i = 0; i < nlist; i++) {
 		peers[i].peer->new_status = CTL_PST_SEL_SELCAND;
-		DPRINTF(2, ("select: survivor %s %f\n",
-			socktoa(&peers[i].peer->srcadr), peers[i].synch));
+		DPRINT(2, ("select: survivor %s %f\n",
+			   socktoa(&peers[i].peer->srcadr), peers[i].synch));
 	}
 
 	/*
@@ -1923,8 +1908,8 @@ clock_select(void)
 		    ((FLAG_TRUE | FLAG_PREFER) & peers[k].peer->flags))
 			break;
 
-		DPRINTF(3, ("select: drop %s seljit %.6f jit %.6f\n",
-			socktoa(&peers[k].peer->srcadr), g, d));
+		DPRINT(3, ("select: drop %s seljit %.6f jit %.6f\n",
+			   socktoa(&peers[k].peer->srcadr), g, d));
 		if (nlist > sys_maxclock)
 			peers[k].peer->new_status = CTL_PST_SEL_EXCESS;
 		for (j = k + 1; j < nlist; j++)
@@ -2006,8 +1991,8 @@ clock_select(void)
 				sys_clockhop = sys_mindisp;
 			else
 				sys_clockhop *= .5;
-			DPRINTF(1, ("select: clockhop %d %.6f %.6f\n",
-				j, x, sys_clockhop));
+			DPRINT(1, ("select: clockhop %d %.6f %.6f\n",
+				   j, x, sys_clockhop));
 			if (fabs(x) < sys_clockhop)
 				typesystem = osys_peer;
 			else
@@ -2034,8 +2019,8 @@ clock_select(void)
 			sys_offset = typesystem->offset;
 			sys_jitter = typesystem->jitter;
 		}
-		DPRINTF(1, ("select: combine offset %.9f jitter %.9f\n",
-			sys_offset, sys_jitter));
+		DPRINT(1, ("select: combine offset %.9f jitter %.9f\n",
+			   sys_offset, sys_jitter));
 	}
 #ifdef REFCLOCK
 	/*
@@ -2054,8 +2039,8 @@ clock_select(void)
 		typesystem->new_status = CTL_PST_SEL_PPS;
 		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
-		DPRINTF(1, ("select: pps offset %.9f jitter %.9f\n",
-			sys_offset, sys_jitter));
+		DPRINT(1, ("select: pps offset %.9f jitter %.9f\n",
+			   sys_offset, sys_jitter));
 	}
 #endif /* REFCLOCK */
 
@@ -2212,13 +2197,10 @@ peer_xmit(
 		peer->outcount++;
 		peer->throttle += (1 << peer->minpoll) - 2;
 
-#ifdef DEBUG
-		if (debug)
-			printf("transmit: at %lu %s->%s mode %d len %zu\n",
-		    	    current_time, peer->dstadr ?
-			    socktoa(&peer->dstadr->sin) : "-",
-		            socktoa(&peer->srcadr), peer->hmode, sendlen);
-#endif
+		DPRINT(1, ("transmit: at %lu %s->%s mode %d len %zu\n",
+			   current_time, peer->dstadr ?
+			   socktoa(&peer->dstadr->sin) : "-",
+			   socktoa(&peer->srcadr), peer->hmode, sendlen));
 		return;
 	}
 
@@ -2251,13 +2233,10 @@ peer_xmit(
 	peer->sent++;
         peer->outcount++;
 	peer->throttle += (1 << peer->minpoll) - 2;
-#ifdef DEBUG
-	if (debug)
-		printf("transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
-		    current_time, peer->dstadr ?
-		    socktoa(&peer->dstadr->sin) : "-",
-		    socktoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);
-#endif
+	DPRINT(1, ("transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
+		   current_time, peer->dstadr ?
+		   socktoa(&peer->dstadr->sin) : "-",
+		   socktoa(&peer->srcadr), peer->hmode, xkeyid, sendlen));
 }
 
 
@@ -2353,7 +2332,7 @@ fast_xmit(
 		if (leap_smear.in_progress) {
 			leap_smear_add_offs(&this_ref_time, NULL);
 			xpkt.refid = convertLFPToRefID(leap_smear.offset);
-			DPRINTF(2, ("fast_xmit: leap_smear.in_progress: refid %8x, smear %s\n",
+			DPRINT(2, ("fast_xmit: leap_smear.in_progress: refid %8x, smear %s\n",
 				ntohl(xpkt.refid),
 				lfptoa(leap_smear.offset, 8)
 				));
@@ -2397,13 +2376,9 @@ fast_xmit(
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
-#ifdef DEBUG
-		if (debug)
-			printf(
-			    "transmit: at %lu %s->%s mode %d len %zu\n",
-			    current_time, socktoa(&rbufp->dstadr->sin),
-			    socktoa(&rbufp->recv_srcadr), xmode, sendlen);
-#endif
+		DPRINT(1, ("transmit: at %lu %s->%s mode %d len %zu\n",
+			   current_time, socktoa(&rbufp->dstadr->sin),
+			   socktoa(&rbufp->recv_srcadr), xmode, sendlen));
 		return;
 	}
 
@@ -2419,13 +2394,9 @@ fast_xmit(
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
 	sys_authdelay = xmt_ty;
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
-		    current_time, socktoa(&rbufp->dstadr->sin),
-		    socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
-#endif
+	DPRINT(1, ("transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
+		   current_time, socktoa(&rbufp->dstadr->sin),
+		   socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen));
 }
 
 
@@ -2514,8 +2485,8 @@ dns_take_pool(
 				current_time + POOL_SOLICIT_WINDOW + 1);
 	}
 
-	DPRINTF(1, ("transmit: at %lu %s->%s pool\n",
-	    current_time, latoa(lcladr), socktoa(rmtadr)));
+	DPRINT(1, ("transmit: at %lu %s->%s pool\n",
+		   current_time, latoa(lcladr), socktoa(rmtadr)));
 }
 
 /*
@@ -2845,8 +2816,8 @@ proto_config(
 	/*
 	 * Figure out what he wants to change, then do it
 	 */
-	DPRINTF(2, ("proto_config: code %d value %lu dvalue %lf\n",
-		    item, value, dvalue));
+	DPRINT(2, ("proto_config: code %d value %lu dvalue %lf\n",
+		   item, value, dvalue));
 
 	switch (item) {
 

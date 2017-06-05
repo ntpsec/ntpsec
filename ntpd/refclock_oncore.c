@@ -1438,7 +1438,7 @@ oncore_receive(
 	p = (uint8_t *) &rbufp->recv_space;
 
 #ifdef ONCORE_VERBOSE_RECEIVE
-	if (debug > 4) {
+	if (debug > 4) { /* SPECIAL DEBUG */
 		int i;
 		char	Msg[120], Msg2[10];
 
@@ -1489,7 +1489,7 @@ oncore_consume(
 				if (rcvbuf[i] == '@' && rcvbuf[i+1] == '@')
 					break;
 #ifdef ONCORE_VERBOSE_CONSUME
-			if (debug > 4)
+			if (debug > 4) /* SPECIAL DEBUG */
 				oncore_log_f(instance, LOG_DEBUG,
 					     ">>> skipping %d chars",
 					     i);
@@ -1507,7 +1507,7 @@ oncore_consume(
 				break;
 		if (m == l) {
 #ifdef ONCORE_VERBOSE_CONSUME
-			if (debug > 4)
+			if (debug > 4) /* SPECIAL DEBUG */
 				oncore_log_f(instance, LOG_DEBUG,
 					     ">>> Unknown MSG, skipping 4 (%c%c)",
 					     rcvbuf[2], rcvbuf[3]);
@@ -1519,7 +1519,7 @@ oncore_consume(
 
 		l = (unsigned int)oncore_messages[m].len;
 #ifdef ONCORE_VERBOSE_CONSUME
-		if (debug > 3)
+		if (debug > 3) /* SPECIAL DEBUG */
 			oncore_log_f(instance, LOG_DEBUG,
 				     "GOT: %c%c  %d of %d entry %d",
 				     instance->unit, rcvbuf[2],
@@ -1534,7 +1534,7 @@ oncore_consume(
 
 		if (rcvbuf[l-2] != '\r' || rcvbuf[l-1] != '\n') {
 #ifdef ONCORE_VERBOSE_CONSUME
-			if (debug)
+			if (debug) /* SPECIAL DEBUG */
 				oncore_log(instance, LOG_DEBUG, "NO <CR><LF> at end of message");
 #endif
 		} else {	/* check the CheckSum */
@@ -1550,7 +1550,7 @@ oncore_consume(
 					oncore_messages[m].handler(instance, rcvbuf, (size_t) (l-3));
 			}
 #ifdef ONCORE_VERBOSE_CONSUME
-			else if (debug) {
+			else if (debug) { /* SPECIAL DEBUG */
 				char	Msg[120], Msg2[10];
 
 				oncore_log(instance, LOG_ERR, "Checksum mismatch!");
@@ -1648,7 +1648,7 @@ oncore_get_timestamp(
 		tsp = &pps_i.assert_timestamp;
 
 #ifdef ONCORE_VERBOSE_GET_TIMESTAMP
-		if (debug > 2) {
+		if (debug > 2) { /* SPECIAL DEBUG */
 			u_long i;
 
 			i = (u_long) pps_i.assert_sequence;
@@ -1670,7 +1670,7 @@ oncore_get_timestamp(
 		tsp = &pps_i.clear_timestamp;
 
 #if 0
-		if (debug > 2) {
+		if (debug > 2) { /* SPECIAL DEBUG */
 			u_long i;
 
 			i = (u_long) pps_i.clear_sequence;
@@ -1896,7 +1896,7 @@ oncore_msg_any(
 	struct timespec ts;
 	char	Msg[120], Msg2[10];
 
-	if (debug > 3) {
+	if (debug > 3) { /* SPECIAL DEBUG */
 		(void) clock_gettime(CLOCK_REALTIME, &ts);
 		oncore_log(instance, LOG_DEBUG, "%ld.%09ld",
 			   (long)tv.tv_sec, tv.tv_nsec);
@@ -2702,7 +2702,7 @@ oncore_msg_CaFaIa(
 		instance->timeout = 0;
 
 #ifdef ONCORE_VERBOSE_SELF_TEST
-		if (debug > 2) {
+		if (debug > 2) { /* SPECIAL DEBUG */
 			if (buf[2] == 'I')
 				oncore_log_f(instance, LOG_DEBUG,
 					     ">>@@%ca %x %x %x", buf[2],
@@ -3782,7 +3782,7 @@ oncore_sendmsg(
 
 	fd = instance->ttyfd;
 #ifdef ONCORE_VERBOSE_SENDMSG
-	if (debug > 4) {
+	if (debug > 4) { /* SPECIAL DEBUG */
 		oncore_log_f(instance, LOG_DEBUG, "ONCORE: Send @@%c%c %d",
 			     ptr[0], ptr[1], (int)len);
 	}

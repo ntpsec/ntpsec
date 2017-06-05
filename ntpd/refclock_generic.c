@@ -1848,21 +1848,15 @@ local_input(
 							setlfpfrac(parse->parseio.parse_dtime.parse_ptime, (uint32_t)(dtemp * FRAC));
 
 							parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
-#ifdef DEBUG
-							if (debug > 3)
-							{
-								printf(
-								       "parse: local_receive: fd %d PPSAPI seq %ld - PPS %s\n",
-								       rbufp->fd,
-								       (long)pps_info.assert_sequence + (long)pps_info.clear_sequence,
-								       lfptoa(parse->parseio.parse_dtime.parse_ptime, 6));
-							}
-#endif
+							DPRINT(4, ("parse: local_receive: fd %d PPSAPI seq %ld - PPS %s\n",
+								   rbufp->fd,
+								   (long)pps_info.assert_sequence + (long)pps_info.clear_sequence,
+								   lfptoa(parse->parseio.parse_dtime.parse_ptime, 6)));
 						}
 #ifdef DEBUG
 						else
 						{
-							if (debug > 3)
+							if (debug > 3) /* SPECIAL DEBUG */
 							{
 								printf(
 								       "parse: local_receive: fd %d PPSAPI seq assert %ld, seq clear %ld - NO PPS event\n",
@@ -1876,7 +1870,7 @@ local_input(
 #ifdef DEBUG
 					else
 					{
-						if (debug > 3)
+						if (debug > 3) /* SPECIAL DEBUG */
 						{
 							printf(
 							       "parse: local_receive: fd %d PPSAPI time_pps_fetch errno = %d\n",
@@ -1954,10 +1948,7 @@ local_receive(
 		(caddr_t)rbufp->recv_buffer,
 		sizeof(parsetime_t));
 
-#ifdef DEBUG
-	if (debug > 3)
-	  {
-	    printf("PARSE receiver #%d: status %06x, state %08x, time(fp) %lx.%08lx, stime(fp) %lx.%08lx, ptime(fp) %lx.%08lx\n",
+	DPRINT(4, ("PARSE receiver #%d: status %06x, state %08x, time(fp) %lx.%08lx, stime(fp) %lx.%08lx, ptime(fp) %lx.%08lx\n",
 		   parse->peer->refclkunit,
 		   (unsigned int)parsetime.parse_status,
 		   (unsigned int)parsetime.parse_state,
@@ -1966,9 +1957,7 @@ local_receive(
 		   (unsigned long)lfpuint(parsetime.parse_stime),
 		   (unsigned long)lfpfrac(parsetime.parse_stime),
 		   (unsigned long)lfpuint(parsetime.parse_ptime),
-		   (unsigned long)lfpfrac(parsetime.parse_ptime));
-	  }
-#endif
+		   (unsigned long)lfpfrac(parsetime.parse_ptime)));
 
 	parse_process(parse, &parsetime);
 }
@@ -3487,14 +3476,11 @@ parse_process(
 
 		off -= rectime; /* prepare for PPS adjustments logic */
 
-#ifdef DEBUG
-		if (debug > 3)
-			printf("PARSE receiver #%d: Reftime %s, Recvtime %s - initial offset %s\n",
-			       parse->peer->refclkunit,
-			       prettydate(reftime),
-			       prettydate(rectime),
-			       lfptoa(off,6));
-#endif
+		DPRINT(4, ("PARSE receiver #%d: Reftime %s, Recvtime %s - initial offset %s\n",
+			   parse->peer->refclkunit,
+			   prettydate(reftime),
+			   prettydate(rectime),
+			   lfptoa(off,6)));
 	}
 
 	if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
@@ -3517,12 +3503,9 @@ parse_process(
 		 */
 		offset = parsetime->parse_ptime;
 
-#ifdef DEBUG
-		if (debug > 3)
-			printf("PARSE receiver #%d: PPStime %s\n",
-				parse->peer->refclkunit,
-				prettydate(offset));
-#endif
+		DPRINT(4, ("PARSE receiver #%d: PPStime %s\n",
+			   parse->peer->refclkunit,
+			   prettydate(offset)));
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
 			if (fabs(lfptod(off)) <= 0.5)
@@ -3602,26 +3585,20 @@ parse_process(
 		}
 	}
 
-#ifdef DEBUG
-	if (debug > 3)
-		printf("PARSE receiver #%d: Reftime %s, Recvtime %s - final offset %s\n",
-			parse->peer->refclkunit,
-			prettydate(reftime),
-			prettydate(rectime),
-			lfptoa(off,6));
-#endif
+	DPRINT(4, ("PARSE receiver #%d: Reftime %s, Recvtime %s - final offset %s\n",
+		   parse->peer->refclkunit,
+		   prettydate(reftime),
+		   prettydate(rectime),
+		   lfptoa(off,6)));
 
 
 	rectime = reftime;
 	rectime -= off;	/* just to keep the ntp interface happy */
 
-#ifdef DEBUG
-	if (debug > 3)
-		printf("PARSE receiver #%d: calculated Reftime %s, Recvtime %s\n",
-			parse->peer->refclkunit,
-			prettydate(reftime),
-			prettydate(rectime));
-#endif
+	DPRINT(4, ("PARSE receiver #%d: calculated Reftime %s, Recvtime %s\n",
+		   parse->peer->refclkunit,
+		   prettydate(reftime),
+		   prettydate(rectime)));
 
 	if ((parsetime->parse_status & CVT_ADDITIONAL) &&
 	    parse->parse_type->cl_message)
@@ -3685,16 +3662,11 @@ parse_process(
 	        /*
 		 * only good/trusted samples are interesting
 		 */
-#ifdef DEBUG
-	        if (debug > 2)
-			{
-				       printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
-				       parse->peer->refclkunit,
-				       prettydate(reftime),
-				       prettydate(rectime),
-				       fudge);
-			}
-#endif
+	        DPRINT(3, ("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
+			   parse->peer->refclkunit,
+			   prettydate(reftime),
+			   prettydate(rectime),
+			   fudge));
 		parse->generic->lastref = reftime;
 
 		refclock_process_offset(parse->generic, reftime, rectime, fudge);
@@ -3810,7 +3782,7 @@ gps16x_message(
 		unsigned char *bufp = (unsigned char *)parsetime->parse_msg + 1;
 
 #ifdef DEBUG
-		if (debug > 2)
+		if (debug > 2) /* SPECIAL DEBUG */
 		{
 			char msgbuffer[600];
 
@@ -4212,7 +4184,7 @@ gps16x_poll(
 	put_mbg_header(&outp, header);
 
 #ifdef DEBUG
-	if (debug > 2)
+	if (debug > 2) /* SPECIAL DEBUG */
 	{
 	    char buffer[128];
 
@@ -4583,7 +4555,7 @@ sendetx(
 	else
 	{
 #ifdef DEBUG
-	  if (debug > 2)
+	  if (debug > 2) /* SPECIAL DEBUG */
 	  {
 		  char buffer[256];
 
@@ -4911,7 +4883,7 @@ trimbletsip_message(
 	    (buffer[size-2] != DLE))
 	{
 #ifdef DEBUG
-		if (debug > 2) {
+		if (debug > 2) { /* SPECIAL DEBUG */
 			size_t i;
 
 			printf("TRIMBLE BAD packet, size %u:\n	", size);
@@ -4934,7 +4906,7 @@ trimbletsip_message(
 		cmd_info_t *s;
 
 #ifdef DEBUG
-		if (debug > 3) {
+		if (debug > 3) { /* SPECIAL DEBUG */
 			size_t i;
 
 			printf("TRIMBLE packet 0x%02x, size %u:\n	",
@@ -4958,7 +4930,7 @@ trimbletsip_message(
 		}
 		else
 		{
-			DPRINTF(1, ("TRIMBLE UNKNOWN COMMAND 0x%02x\n", cmd));
+			DPRINT(1, ("TRIMBLE UNKNOWN COMMAND 0x%02x\n", cmd));
 			return;
 		}
 

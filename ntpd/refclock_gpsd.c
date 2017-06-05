@@ -602,8 +602,8 @@ gpsd_shutdown(
 	/* now check if we must close IO resources */
 	if (peer != up->pps_peer) {
 		if (-1 != pp->io.fd) {
-			DPRINTF(1, ("%s: closing clock, fd=%d\n",
-				    up->logname, pp->io.fd));
+			DPRINT(1, ("%s: closing clock, fd=%d\n",
+				   up->logname, pp->io.fd));
 			io_closeclock(&pp->io);
 			pp->io.fd = -1;
 		}
@@ -825,8 +825,8 @@ timer_primary(
 		 */
 		if (-1 != pp->io.fd) {
 			size_t rlen = strlen(s_req_version);
-			DPRINTF(2, ("%s: timer livecheck: '%s'\n",
-				    up->logname, s_req_version));
+			DPRINT(2, ("%s: timer livecheck: '%s'\n",
+				   up->logname, s_req_version));
 			log_data(peer, "send", s_req_version, rlen);
 			rc = write(pp->io.fd, s_req_version, rlen);
 			(void)rc;
@@ -897,8 +897,8 @@ enter_opmode(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	DPRINTF(1, ("%s: enter operation mode %d\n",
-		    up->logname, MODE_OP_MODE(mode)));
+	DPRINT(1, ("%s: enter operation mode %d\n",
+		   up->logname, MODE_OP_MODE(mode)));
 
 	if (MODE_OP_MODE(mode) == MODE_OP_AUTO) {
 		up->fl_rawibt = 0;
@@ -918,8 +918,8 @@ leave_opmode(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	DPRINTF(1, ("%s: leaving operation mode %d\n",
-		    up->logname, MODE_OP_MODE(mode)));
+	DPRINT(1, ("%s: leaving operation mode %d\n",
+		   up->logname, MODE_OP_MODE(mode)));
 
 	if (MODE_OP_MODE(mode) == MODE_OP_AUTO) {
 		up->fl_rawibt = 0;
@@ -1407,8 +1407,8 @@ process_watch(
 		up->fl_watch = -1;
 	else
 		up->fl_watch = 0;
-	DPRINTF(2, ("%s: process_watch, enabled=%d\n",
-		    up->logname, (up->fl_watch & 1)));
+	DPRINT(2, ("%s: process_watch, enabled=%d\n",
+		   up->logname, (up->fl_watch & 1)));
 }
 
 /* ------------------------------------------------------------------ */
@@ -1541,12 +1541,12 @@ process_tpv(
 		save_ltc(pp, gps_time);
 		/* now parse the time string */
 		if (convert_ascii_time(&up->ibt_stamp, gps_time)) {
-			DPRINTF(2, ("%s: process_tpv, stamp='%s',"
-				    " recvt='%s' mode=%d\n",
-				    up->logname,
-				    gmprettydate(up->ibt_stamp),
-				    gmprettydate(up->ibt_recvt),
-				    gps_mode));
+			DPRINT(2, ("%s: process_tpv, stamp='%s',"
+				   " recvt='%s' mode=%d\n",
+				   up->logname,
+				   gmprettydate(up->ibt_stamp),
+				   gmprettydate(up->ibt_recvt),
+				   gps_mode));
 
 			/* have to use local receive time as substitute
 			 * for the real receive time: TPV does not tell
@@ -1642,19 +1642,19 @@ process_pps(
 
 	if (NULL != up->pps_peer)
 		save_ltc(up->pps_peer->procptr, gmprettydate(up->pps_stamp2));
-	DPRINTF(2, ("%s: PPS record processed,"
-		    " stamp='%s', recvt='%s'\n",
-		    up->logname,
-		    gmprettydate(up->pps_stamp2),
-		    gmprettydate(up->pps_recvt2)));
+	DPRINT(2, ("%s: PPS record processed,"
+		   " stamp='%s', recvt='%s'\n",
+		   up->logname,
+		   gmprettydate(up->pps_stamp2),
+		   gmprettydate(up->pps_recvt2)));
 	
 	up->fl_pps  = (0 != (pp->sloppyclockflag & CLK_FLAG2)) - 1;
 	up->fl_pps2 = -1;
 	return;
 
   fail:
-	DPRINTF(1, ("%s: PPS record processing FAILED\n",
-		    up->logname));
+	DPRINT(1, ("%s: PPS record processing FAILED\n",
+		   up->logname));
 	++up->tc_breply;
 }
 
@@ -1689,16 +1689,16 @@ process_toff(
 	up->fl_ibt    = -1;
 
 	save_ltc(pp, gmprettydate(up->ibt_stamp));
-	DPRINTF(2, ("%s: TOFF record processed,"
-		    " stamp='%s', recvt='%s'\n",
-		    up->logname,
-		    gmprettydate(up->ibt_stamp),
-		    gmprettydate(up->ibt_recvt)));
+	DPRINT(2, ("%s: TOFF record processed,"
+		   " stamp='%s', recvt='%s'\n",
+		   up->logname,
+		   gmprettydate(up->ibt_stamp),
+		   gmprettydate(up->ibt_recvt)));
 	return;
 
   fail:
-	DPRINTF(1, ("%s: TOFF record processing FAILED\n",
-		    up->logname));
+	DPRINT(1, ("%s: TOFF record processing FAILED\n",
+		   up->logname));
 	++up->tc_breply;
 }
 
@@ -1714,9 +1714,9 @@ gpsd_parse(
 
 	const char * clsid;
 
-        DPRINTF(2, ("%s: gpsd_parse: time %s '%.*s'\n",
-                    up->logname, ulfptoa(*rtime, 6),
-		    up->buflen, up->buffer));
+        DPRINT(2, ("%s: gpsd_parse: time %s '%.*s'\n",
+		   up->logname, ulfptoa(*rtime, 6),
+		   up->buflen, up->buffer));
 
 	/* See if we can grab anything potentially useful. JSMN does not
 	 * need a trailing NUL, but it needs the number of bytes to
@@ -1800,8 +1800,8 @@ gpsd_stop_socket(
 				"%s: closing socket to GPSD, fd=%d",
 				up->logname, pp->io.fd);
 		else
-			DPRINTF(1, ("%s: closing socket to GPSD, fd=%d\n",
-				    up->logname, pp->io.fd));
+			DPRINT(1, ("%s: closing socket to GPSD, fd=%d\n",
+				   up->logname, pp->io.fd));
 		io_closeclock(&pp->io);
 		pp->io.fd = -1;
 	}
@@ -1876,8 +1876,8 @@ gpsd_init_socket(
 	rc = connect(up->fdt, ai->ai_addr, ai->ai_addrlen);
 	if (-1 == rc) {
 		if (errno == EINPROGRESS) {
-			DPRINTF(1, ("%s: async connect pending, fd=%d\n",
-				    up->logname, up->fdt));
+			DPRINT(1, ("%s: async connect pending, fd=%d\n",
+				   up->logname, up->fdt));
 			return;
 		}
 
@@ -1893,8 +1893,8 @@ gpsd_init_socket(
 	 * version string and apply the watch command later on, but we
 	 * might as well get the show on the road now.
 	 */
-	DPRINTF(1, ("%s: new socket connection, fd=%d\n",
-		    up->logname, up->fdt));
+	DPRINT(1, ("%s: new socket connection, fd=%d\n",
+		   up->logname, up->fdt));
 
 	pp->io.fd = up->fdt;
 	up->fdt   = -1;
@@ -1935,8 +1935,8 @@ gpsd_test_socket(
 	 * socket for writeability. Use the 'poll()' API if available
 	 * and 'select()' otherwise.
 	 */
-	DPRINTF(2, ("%s: check connect, fd=%d\n",
-		    up->logname, up->fdt));
+	DPRINT(2, ("%s: check connect, fd=%d\n",
+		   up->logname, up->fdt));
 
 	{
 		struct timespec tout;
@@ -1968,13 +1968,13 @@ gpsd_test_socket(
 				" fd=%d, ec=%d(%s)",
 				up->logname, up->fdt, ec, errtxt);
 		else
-			DPRINTF(1, ("%s: async connect to GPSD failed,"
-				" fd=%d, ec=%d(%s)\n",
-				    up->logname, up->fdt, ec, errtxt));
+			DPRINT(1, ("%s: async connect to GPSD failed,"
+				   " fd=%d, ec=%d(%s)\n",
+				   up->logname, up->fdt, ec, errtxt));
 		goto no_socket;
 	} else {
-		DPRINTF(1, ("%s: async connect to GPSD succeeded, fd=%d\n",
-			    up->logname, up->fdt));
+		DPRINT(1, ("%s: async connect to GPSD succeeded, fd=%d\n",
+			   up->logname, up->fdt));
 	}
 
 	/* swap socket FDs, and make sure the clock was added */
@@ -1991,8 +1991,8 @@ gpsd_test_socket(
 
   no_socket:
 	if (-1 != up->fdt) {
-		DPRINTF(1, ("%s: closing socket, fd=%d\n",
-			    up->logname, up->fdt));
+		DPRINT(1, ("%s: closing socket, fd=%d\n",
+			   up->logname, up->fdt));
 		close(up->fdt);
 	}
 	up->fdt      = -1;
@@ -2137,7 +2137,7 @@ log_data(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	if (debug > 1) {
+	if (debug > 1) { /* SPECIAL DEBUG */
 		const char *sptr = buf;
 		const char *stop = buf + len;
 		char       *dptr = s_lbuf;

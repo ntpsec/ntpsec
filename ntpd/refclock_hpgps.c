@@ -275,11 +275,8 @@ hpgps_receive(
 	*pp->a_lastcode = '\0';
 	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
 
-#ifdef DEBUG
-	if (debug)
-	    printf("hpgps: lencode: %d timecode:%s\n",
-		   pp->lencode, pp->a_lastcode);
-#endif
+	DPRINT(1, ("hpgps: lencode: %d timecode:%s\n",
+		   pp->lencode, pp->a_lastcode));
 
 	/*
 	 * If there's no characters in the reply, we can quit now
@@ -350,10 +347,7 @@ hpgps_receive(
 	 * deal with an error indication in the prompt here
 	 */
 	if (strrchr(prompt,'E') > strrchr(prompt,'s')){
-#ifdef DEBUG
-		if (debug)
-		    printf("hpgps: error indicated in prompt: %s\n", prompt);
-#endif
+	        DPRINT(1, ("hpgps: error indicated in prompt: %s\n", prompt));
 		if (write(pp->io.fd, "*CLS\r\r", 6) != 6)
 		    refclock_report(peer, CEVNT_FAULT);
 	}
@@ -365,10 +359,7 @@ hpgps_receive(
 	m = sscanf(tcp,"%c%c", &tcodechar1, &tcodechar2);
 
 	if (m != 2){
-#ifdef DEBUG
-		if (debug)
-		    printf("hpgps: no format indicator\n");
-#endif
+	        DPRINT(1, ("hpgps: no format indicator\n"));
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
@@ -379,20 +370,14 @@ hpgps_receive(
 	    case '-':
 		m = sscanf(tcp,"%d,%d", &up->tzhour, &up->tzminute);
 		if (m != MTZONE) {
-#ifdef DEBUG
-			if (debug)
-			    printf("hpgps: only %d fields recognized in timezone\n", m);
-#endif
+		        DPRINT(1, ("hpgps: only %d fields recognized in timezone\n", m));
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
 		if ((up->tzhour < -12) || (up->tzhour > 13) || 
 		    (up->tzminute < -59) || (up->tzminute > 59)){
-#ifdef DEBUG
-			if (debug)
-			    printf("hpgps: timezone %d, %d out of range\n",
-				   up->tzhour, up->tzminute);
-#endif
+		        DPRINT(1, ("hpgps: timezone %d, %d out of range\n",
+				   up->tzhour, up->tzminute));
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
@@ -402,11 +387,8 @@ hpgps_receive(
 		break;
 
 	    default:
-#ifdef DEBUG
-		if (debug)
-		    printf("hpgps: unrecognized reply format %c%c\n",
-			   tcodechar1, tcodechar2);
-#endif
+	        DPRINT(1, ("hpgps: unrecognized reply format %c%c\n",
+			   tcodechar1, tcodechar2));
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	} /* end of tcodechar1 switch */
@@ -424,21 +406,15 @@ hpgps_receive(
 		n = NTCODET2;
 
 		if (m != MTCODET2){
-#ifdef DEBUG
-			if (debug)
-			    printf("hpgps: only %d fields recognized in timecode\n", m);
-#endif
+		        DPRINT(1, ("hpgps: only %d fields recognized in timecode\n", m));
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
 		break;
 
 	    default:
-#ifdef DEBUG
-		if (debug)
-		    printf("hpgps: unrecognized timecode format %c%c\n",
-			   tcodechar1, tcodechar2);
-#endif
+	        DPRINT(1, ("hpgps: unrecognized timecode format %c%c\n",
+			   tcodechar1, tcodechar2));
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	} /* end of tcodechar2 format switch */
@@ -453,11 +429,8 @@ hpgps_receive(
 	tcodechksm &= 0x00ff;
 
 	if (tcodechksm != expectedsm) {
-#ifdef DEBUG
-		if (debug)
-		    printf("hpgps: checksum %2hX doesn't match %2hX expected\n",
-			   tcodechksm, expectedsm);
-#endif
+	        DPRINT(1, ("hpgps: checksum %2hX doesn't match %2hX expected\n",
+			   tcodechksm, expectedsm));
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
@@ -559,11 +532,8 @@ hpgps_receive(
 			break;
                      
 		    default:
-#ifdef DEBUG
-			if (debug)
-			    printf("hpgps: unrecognized leap indicator: %c\n",
-				   leapchar);
-#endif
+			DPRINT(1, ("hpgps: unrecognized leap indicator: %c\n",
+				   leapchar));
 			refclock_report(peer, CEVNT_BADTIME);
 			return;
 		} /* end of leapchar switch */

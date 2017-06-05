@@ -187,7 +187,7 @@ fetch_ieee754(
     shift = exponent + fudge;
 
 #ifdef DEBUG_PARSELIB
-    if ( debug > 4) {
+    if ( debug > 4) { /* SPECIAL DEBUG */
         int length = 8;
         if ( IEEE_SINGLE == size ) {
             length = 4;

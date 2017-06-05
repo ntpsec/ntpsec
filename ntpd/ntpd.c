@@ -457,7 +457,7 @@ static void
 set_process_priority(void)
 {
 # ifdef DEBUG
-	if (debug > 1)
+	if (debug > 1) /* SPECIAL DEBUG */
 		msyslog(LOG_DEBUG, "set_process_priority: %s",
 			((!need_priority)
 			 ? "Leave priority alone"
@@ -990,7 +990,7 @@ static void mainloop(void)
 					l_fp dts = pts;
 
 					dts -= rbuf->recv_time;
-					DPRINTF(2, ("processing timestamp delta %s (with prec. fuzz)\n", lfptoa(dts, 9)));
+					DPRINT(2, ("processing timestamp delta %s (with prec. fuzz)\n", lfptoa(dts, 9)));
 					collect_timing(rbuf, "buffer processing delay", 1, dts);
 					bufcount++;
 # endif
@@ -1008,7 +1008,7 @@ static void mainloop(void)
 			tsb -= tsa;
 			if (bufcount) {
 				collect_timing(NULL, "processing", bufcount, tsb);
-				DPRINTF(2, ("processing time for %d buffers %s\n", bufcount, lfptoa(tsb, 9)));
+				DPRINT(2, ("processing time for %d buffers %s\n", bufcount, lfptoa(tsb, 9)));
 			}
 		}
 # endif
@@ -1281,7 +1281,7 @@ moredebug(
 	int saved_errno = errno;
 
 	UNUSED_ARG(sig);
-	if (debug < 255)
+	if (debug < 255) /* SPECIAL DEBUG */
 	{
 		debug++;
 		msyslog(LOG_DEBUG, "debug raised to %d", debug);
@@ -1301,7 +1301,7 @@ lessdebug(
 	int saved_errno = errno;
 
 	UNUSED_ARG(sig);
-	if (debug > 0)
+	if (debug > 0) /* SPECIAL DEBUG */
 	{
 		debug--;
 		msyslog(LOG_DEBUG, "debug lowered to %d", debug);

@@ -107,6 +107,7 @@
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#include "ntp_debug.h"
 
 /**********************************************************************/
 
@@ -411,12 +412,8 @@ jjy_start ( int unit, struct peer *peer )
 	int 	fd ;
 	char	sDeviceName [ sizeof(DEVICE) + 10 ], sLog [ MAX_LOGTEXT ] ;
 
-#ifdef DEBUG
-	if ( debug ) {
-	    printf("refclock_jjy.c: jjy_start: %s  mode=%u  dev=%s  unit=%d\n",
-		     socktoa(&peer->srcadr), peer->ttl, DEVICE, unit ) ;
-	}
-#endif
+        DPRINT(1, printf("refclock_jjy.c: jjy_start: %s  mode=%u  dev=%s  unit=%d\n",
+			 socktoa(&peer->srcadr), peer->ttl, DEVICE, unit )) ;
 
 	/* Allocate memory for the unit structure */
 	up = emalloc_zero( sizeof(*up) ) ;
@@ -633,11 +630,7 @@ jjy_receive ( struct recvbuf *rbufp )
 	  || up->iProcessState == JJY_PROCESS_STATE_ERROR ) {
 		/* Discard received data */
 		up->iRawBufLen = 0 ;
-#ifdef DEBUG
-		if ( debug ) {
-			printf( "refclock_jjy.c : %s : Discard received data\n", sFunctionName ) ;
-		}
-#endif
+	        DPRINT(1, ( "refclock_jjy.c : %s : Discard received data\n", sFunctionName )) ;
 		return ;
 	}
 
@@ -940,21 +933,13 @@ jjy_timer ( int unit, struct peer *peer )
 	struct	refclockproc *pp ;
 	struct	jjyunit      *up ;
 
-#ifdef DEBUG
-	if ( debug ) {
-		printf ( "refclock_jjy.c : jjy_timer\n" ) ;
-	}
-#endif
+	DPRINT(1, ( "refclock_jjy.c : jjy_timer\n" )) ;
 
 	pp = peer->procptr ;
 	up = pp->unitptr ;
 
 	if ( up->bReceiveFlag ) {
-#ifdef DEBUG
-		if ( debug ) {
-			printf ( "refclock_jjy.c : jjy_timer : up->bReceiveFlag= true : Timer skipped.\n" ) ;
-		}
-#endif
+	        DPRINT(1, ( "refclock_jjy.c : jjy_timer : up->bReceiveFlag= true : Timer skipped.\n" )) ;
 		return ;
 	}
 
@@ -1365,15 +1350,11 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 		up->iLineCount = 2 ;
 	}
 
-#ifdef DEBUG
-	if ( debug ) {
-		printf ("%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X "
-                        "up->iLineCount=%d\n",
-			sFunctionName, pp->sloppyclockflag, 
-                        (unsigned)CLK_FLAG1,
-			up->iLineCount ) ;
-	}
-#endif
+	DPRINT(1, ("%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X "
+		   "up->iLineCount=%d\n",
+		   sFunctionName, pp->sloppyclockflag, 
+		   (unsigned)CLK_FLAG1,
+		   up->iLineCount )) ;
 
 	/*
 	 * Send a first command
@@ -2056,12 +2037,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 
 	if ( iLen > 5
 	  && ( strncmp( pBuf, "$GP", 3 ) == 0 || strncmp( pBuf, "$PFEC", 5 ) == 0 ) ) {
-#ifdef DEBUG
-		if ( debug ) {
-			printf ( "%s (refclock_jjy.c) : Skip NMEA stream [%s]\n",
-				sFunctionName, pBuf ) ;
-		}
-#endif
+	        DPRINT(1, ( "%s (refclock_jjy.c) : Skip NMEA stream [%s]\n",
+			    sFunctionName, pBuf )) ;
 		return JJY_RECEIVE_WAIT ;
 	}
 
@@ -2080,12 +2057,8 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 	 */
 	if ( iLen > 5
 	  && ( strncmp( pBuf, "$GP", 3 ) == 0 || strncmp( pBuf, "$PFEC", 5 ) == 0 ) ) {
-#ifdef DEBUG
-		if ( debug ) {
-			printf ( "%s (refclock_jjy.c) : Skip NMEA stream [%s]\n",
-				sFunctionName, pBuf ) ;
-		}
-#endif
+	        DPRINT(1, ( "%s (refclock_jjy.c) : Skip NMEA stream [%s]\n",
+			    sFunctionName, pBuf )) ;
 		return JJY_RECEIVE_WAIT ;
 	}
 
@@ -2283,15 +2256,11 @@ jjy_poll_tristate_gpsclock01 ( int unit, struct peer *peer )
 		up->iLineCount = 1 ;
 	}
 
-#ifdef DEBUG
-	if ( debug ) {
-		printf("%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X "
-                       "up->iLineCount=%d\n",
-			sFunctionName, pp->sloppyclockflag,
-                        (unsigned)CLK_FLAG1,
-			up->iLineCount ) ;
-	}
-#endif
+        DPRINT(1, ("%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X "
+		   "up->iLineCount=%d\n",
+		   sFunctionName, pp->sloppyclockflag,
+		   (unsigned)CLK_FLAG1,
+		   up->iLineCount )) ;
 
 	/*
 	 * Send a first command
@@ -2996,12 +2965,8 @@ teljjy_control ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up 
 
 	if ( rc == TELJJY_CHANGE_CLOCK_STATE ) {
 		iPostEvent = iTeljjyPostEvent[up->iClockEvent][up->iClockState] ;
-#ifdef DEBUG
-		if ( debug ) {
-			printf( "refclock_jjy.c : teljjy_control : iClockState=%hd -> %hd  iPostEvent=%hd\n",
-				up->iClockState, iTeljjyNextState[up->iClockEvent][up->iClockState], iPostEvent ) ;
-		}
-#endif
+		DPRINT(1, ( "refclock_jjy.c : teljjy_control : iClockState=%hd -> %hd  iPostEvent=%hd\n",
+			    up->iClockState, iTeljjyNextState[up->iClockEvent][up->iClockState], iPostEvent )) ;
 		up->iTeljjySilentTimer = 0 ;
 		if ( up->iClockState != iTeljjyNextState[up->iClockEvent][up->iClockState] ) {
 			/* Telephone JJY state is changing now */
@@ -3405,12 +3370,8 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		 && teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK
 		 && up->iLoopbackCount < MAX_LOOPBACK ) {
 		/* Loopback character comes */
-#ifdef DEBUG
-		if ( debug ) {
-			printf( "refclock_jjy.c : teljjy_conn_send : iClockCommandSeq=%d iLoopbackCount=%d\n",
-				 up->iClockCommandSeq, up->iLoopbackCount ) ;
-		}
-#endif
+	        DPRINT(1, ( "refclock_jjy.c : teljjy_conn_send : iClockCommandSeq=%d iLoopbackCount=%d\n",
+			    up->iClockCommandSeq, up->iLoopbackCount )) ;
 
 		teljjy_setDelay( peer, up ) ;
 
@@ -3639,11 +3600,7 @@ teljjy_conn_silent ( struct peer *peer, struct refclockproc *pp, struct jjyunit 
 	if ( up->iClockCommandSeq >= 1
 	  && up->iClockCommandSeq < TELJJY_COMMAND_START_SKIP_LOOPBACK ) {
 		/* Loopback */
-#ifdef DEBUG
-		if ( debug ) {
-			printf( "refclock_jjy.c : teljjy_conn_silent : call teljjy_conn_send\n" ) ;
-		}
-#endif
+		DPRINT(1, ( "refclock_jjy.c : teljjy_conn_silent : call teljjy_conn_send\n" )) ;
 		if ( teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK ) {
 			up->bLoopbackTimeout[up->iLoopbackCount] = true ;
 		}
@@ -3970,7 +3927,7 @@ modem_receive ( struct recvbuf *rbufp )
 	else                                                              { up->iModemEvent = MODEM_EVENT_RESP_UNKNOWN     ; }
 
 #ifdef DEBUG
-	if ( debug ) {
+	if ( debug ) { /* SPECIAL DEBUG */
 		char	sResp [ 40 ] ;
 		size_t	iCopyLen ;
 		iCopyLen = iLen <= (int)sizeof(sResp)-1 ?
@@ -4036,12 +3993,8 @@ modem_control ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 
 	if ( rc == CHANGE_MODEM_STATE ) {
 		iPostEvent = iModemPostEvent[up->iModemEvent][up->iModemState] ;
-#ifdef DEBUG
-		if ( debug ) {
-			printf( "refclock_jjy.c : modem_control : iModemState=%d -> %d  iPostEvent=%d\n",
-				 up->iModemState, iModemNextState[up->iModemEvent][up->iModemState], iPostEvent ) ;
-		}
-#endif
+		DPRINT(1, ( "refclock_jjy.c : modem_control : iModemState=%d -> %d  iPostEvent=%d\n",
+			    up->iModemState, iModemNextState[up->iModemEvent][up->iModemState], iPostEvent )) ;
 
 		if ( up->iModemState != iModemNextState[up->iModemEvent][up->iModemState] ) {
 			up->iModemSilentCount = 0 ;
@@ -4114,11 +4067,7 @@ modem_init_start ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	up->iModemCommandSeq = 0 ;
 
-#ifdef DEBUG
-	if ( debug ) {
-		printf( "refclock_jjy.c : modem_init_start : call modem_init_resp00\n" ) ;
-	}
-#endif
+	DPRINT(1, ( "refclock_jjy.c : modem_init_start : call modem_init_resp00\n" )) ;
 
 	return modem_init_resp00( peer, pp, up ) ;
 
@@ -4253,11 +4202,7 @@ modem_init_disc ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up
 	UNUSED_ARG(up);
 
 	DEBUG_MODEM_PRINTF( "modem_init_disc" ) ;
-#ifdef DEBUG
-	if ( debug ) {
-		printf( "refclock_jjy.c : modem_init_disc : call modem_esc_disc\n" ) ;
-	}
-#endif
+	DPRINT(1, ( "refclock_jjy.c : modem_init_disc : call modem_esc_disc\n" )) ;
 
 	return CHANGE_MODEM_STATE ;
 
@@ -4319,11 +4264,7 @@ modem_dial_escape ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 {
 
 	DEBUG_MODEM_PRINTF( "modem_dial_escape" ) ;
-#ifdef DEBUG
-	if ( debug ) {
-		printf( "refclock_jjy.c : modem_dial_escape : call modem_conn_escape\n" ) ;
-	}
-#endif
+	DPRINT(1, ( "refclock_jjy.c : modem_dial_escape : call modem_conn_escape\n" )) ;
 
 	return modem_conn_escape( peer, pp, up ) ;
 
@@ -4349,11 +4290,7 @@ modem_dial_disc ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up
 {
 
 	DEBUG_MODEM_PRINTF( "modem_dial_disc" ) ;
-#ifdef DEBUG
-	if ( debug ) {
-		printf( "refclock_jjy.c : modem_dial_disc : call modem_esc_disc\n" ) ;
-	}
-#endif
+	DPRINT(1, ( "refclock_jjy.c : modem_dial_disc : call modem_esc_disc\n" )) ;
 
 	modem_esc_disc( peer, pp, up ) ;
 
@@ -4453,21 +4390,13 @@ modem_esc_silent ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 	up->iModemSilentCount ++ ;
 
 	if ( up->iModemSilentCount < iModemStateTimeout[up->iModemState] / iModemSilentTimeout[up->iModemState] ) {
-#ifdef DEBUG
-		if ( debug ) {
-			printf( "refclock_jjy.c : modem_esc_silent : call modem_esc_escape\n" ) ;
-		}
-#endif
+		DPRINT(1, ( "refclock_jjy.c : modem_esc_silent : call modem_esc_escape\n" )) ;
 		modem_esc_escape( peer, pp, up ) ;
 		up->iModemSilentTimer = 0 ;
 		return STAY_MODEM_STATE ;
 	}
 
-#ifdef DEBUG
-	if ( debug ) {
-		printf( "refclock_jjy.c : modem_esc_silent : call modem_esc_disc\n" ) ;
-	}
-#endif
+	DPRINT(1, ( "refclock_jjy.c : modem_esc_silent : call modem_esc_disc\n" )) ;
 	return modem_esc_disc( peer, pp, up ) ;
 
 }
@@ -4550,11 +4479,7 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 	printableString( sLog+iMarkLen, (int)sizeof(sLog)-iMarkLen,
                          pData, iDataLen ) ;
 
-#if defined(DEBUG) && DEBUG
-	if ( debug ) {
-		printf( "refclock_jjy.c : clockstats : %s\n", sLog ) ;
-	}
-#endif
+	DPRINT(1, ( "refclock_jjy.c : clockstats : %s\n", sLog )) ;
 	record_clock_stats( peer, sLog ) ;
 
 }

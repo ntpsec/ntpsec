@@ -300,11 +300,8 @@ refclock_transmit(
 	 */
 	if (peer->burst == 0) {
 		uint8_t oreach;
-#ifdef DEBUG
-		if (debug)
-			printf("refclock_transmit: at %lu %s\n",
-			    current_time, socktoa(&(peer->srcadr)));
-#endif
+		DPRINT(1, ("refclock_transmit: at %lu %s\n",
+			   current_time, socktoa(&(peer->srcadr))));
 
 		/*
 		 * Update reachability and poll variables like the
@@ -495,12 +492,8 @@ refclock_sample(
 	}
 	pp->offset /= m;
 	pp->jitter = SQRT(pp->jitter / m);
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "refclock_sample: n %d offset %.6f disp %.6f jitter %.6f\n",
-		    (int)n, pp->offset, pp->disp, pp->jitter);
-#endif
+	DPRINT(1, ("refclock_sample: n %d offset %.6f disp %.6f jitter %.6f\n",
+		   (int)n, pp->offset, pp->disp, pp->jitter));
 	return (int)n;
 }
 
@@ -521,11 +514,8 @@ refclock_receive(
 {
 	struct refclockproc *pp;
 
-#ifdef DEBUG
-	if (debug)
-		printf("refclock_receive: at %lu %s\n",
-		    current_time, socktoa(&peer->srcadr));
-#endif
+	DPRINT(1, ("refclock_receive: at %lu %s\n",
+		   current_time, socktoa(&peer->srcadr)));
 
 	/*
 	 * Do a little sanity dance and update the peer structure. Groom
@@ -605,11 +595,11 @@ refclock_gtlin(
 	if (dlen)
 	    *dp  = '\0';
 	*tsptr = rbufp->recv_time;
-	DPRINTF(2, ("refclock_gtlin: fd %d time %s timecode %d %s\n",
-		    rbufp->fd, ulfptoa(rbufp->recv_time, 6), dlen,
-		    (dlen != 0)
-			? lineptr
-			: ""));
+	DPRINT(2, ("refclock_gtlin: fd %d time %s timecode %d %s\n",
+		   rbufp->fd, ulfptoa(rbufp->recv_time, 6), dlen,
+		   (dlen != 0)
+		   ? lineptr
+		   : ""));
 	return (dlen);
 }
 
@@ -646,9 +636,9 @@ refclock_gtraw(
 	lineptr[bmax] = '\0';
 
 	*tsptr = rbufp->recv_time;
-	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %zu %s\n",
-		    rbufp->fd, ulfptoa(rbufp->recv_time, 6), bmax,
-		    lineptr));
+	DPRINT(2, ("refclock_gtraw: fd %d time %s timecode %zu %s\n",
+		   rbufp->fd, ulfptoa(rbufp->recv_time, 6), bmax,
+		   lineptr));
 	return (bmax);
 }
 
@@ -804,11 +794,8 @@ refclock_setup(
 		if (ioctl(fd, TIOCMGET, (char *)&ltemp) < 0)
 			msyslog(LOG_ERR,
 			    "refclock_setup fd %d TIOCMGET: %m", fd);
-#ifdef DEBUG
-		if (debug)
-			printf("refclock_setup fd %d modem status: 0x%x\n",
-			    fd, ltemp);
-#endif
+		DPRINT(1, ("refclock_setup fd %d modem status: 0x%x\n",
+			   fd, ltemp));
 		if (ltemp & TIOCM_DSR && lflags & LDISC_REMOTE)
 			ttyp->c_cflag &= (unsigned int)~CLOCAL;
 #endif /* TIOCMGET */
@@ -1094,11 +1081,8 @@ refclock_catcher(
 	if (dtemp > .5)
 		dtemp -= 1.;
 	SAMPLE(-dtemp + pp->fudgetime1);
-#ifdef DEBUG
-	if (debug > 1)
-		printf("refclock_pps: %lu %f %f\n", current_time,
-		    dtemp, pp->fudgetime1);
-#endif
+	DPRINT(2, ("refclock_pps: %lu %f %f\n", current_time,
+		   dtemp, pp->fudgetime1));
 	return PPS_OK;
 }
 #endif /* HAVE_PPSAPI */

@@ -1311,9 +1311,9 @@ config_monitor(
 				filegen_string);
 			continue;
 		}
-		DPRINTF(4, ("enabling filegen for %s statistics '%s%s'\n",
-			    filegen_string, filegen->dir,
-			    filegen->fname));
+		DPRINT(4, ("enabling filegen for %s statistics '%s%s'\n",
+			   filegen_string, filegen->dir,
+			   filegen->fname));
 		filegen_flag = filegen->flag;
 		filegen_flag |= FGEN_FLAG_ENABLED;
 		filegen_config(filegen, statsdir, filegen_string,
@@ -1709,8 +1709,8 @@ config_access(
 				restrict_default = true;
 			} else {
 				/* apply "restrict source ..." */
-				DPRINTF(1, ("restrict source template mflags %x flags %x\n",
-					mflags, flags));
+				DPRINT(1, ("restrict source template mflags %x flags %x\n",
+					   mflags, flags));
 				hack_restrict(RESTRICT_FLAGS, NULL,
 					      NULL, mflags, flags, 0);
 				continue;
@@ -2821,8 +2821,8 @@ config_unpeers(
 		rc = getnetnum(name, &peeraddr);
 		/* Do we have a numeric address? */
 		if (rc > 0) {
-			DPRINTF(1, ("unpeer: searching for %s\n",
-				    socktoa(&peeraddr)));
+			DPRINT(1, ("unpeer: searching for %s\n",
+				   socktoa(&peeraddr)));
 			p = findexistingpeer(&peeraddr, NULL, NULL, -1);
 			if (p != NULL) {
 				msyslog(LOG_NOTICE, "unpeered %s",
@@ -2885,8 +2885,8 @@ config_reset_counters(
 	     counter_set = counter_set->link) {
 		switch (counter_set->i) {
 		default:
-			DPRINTF(1, ("config_reset_counters %s (%d) invalid\n",
-				    keyword(counter_set->i), counter_set->i));
+			DPRINT(1, ("config_reset_counters %s (%d) invalid\n",
+				   keyword(counter_set->i), counter_set->i));
 			break;
 
 		case T_Allpeers:
@@ -2985,7 +2985,7 @@ config_remotely(
 	cfgt.timestamp = time(NULL);
 	cfgt.source.value.s = estrdup(socktoa(remote_addr));
 
-	DPRINTF(1, ("Finished Parsing!!\n"));
+	DPRINT(1, ("Finished Parsing!!\n"));
 
 	save_and_apply_config_tree(false);
 }
@@ -3060,7 +3060,7 @@ void readconfig(const char *config_file)
 
 	lex_drop_stack();
 
-	DPRINTF(1, ("Finished Parsing!!\n"));
+	DPRINT(1, ("Finished Parsing!!\n"));
 
 	cfgt.source.attr = CONF_SOURCE_FILE;
 	cfgt.timestamp = time(NULL);
@@ -3384,7 +3384,7 @@ getnetnum(
 # endif
 	SET_PORT(addr, NTP_PORT);
 
-	DPRINTF(2, ("getnetnum given %s, got %s\n", num, socktoa(addr)));
+	DPRINT(2, ("getnetnum given %s, got %s\n", num, socktoa(addr)));
 
 	return 1;
 }
@@ -3417,8 +3417,8 @@ ntp_rlimit(
 		 * For large systems the default file descriptor limit may
 		 * not be enough. 
 		 */
-		DPRINTF(2, ("ntp_rlimit: NOFILE: %d %s\n",
-			(int)rl_value / rl_scale, rl_sstr));
+		DPRINT(2, ("ntp_rlimit: NOFILE: %d %s\n",
+			   (int)rl_value / rl_scale, rl_sstr));
 		rl.rlim_cur = rl.rlim_max = rl_value;
 		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_NOFILE: %m");
@@ -3432,8 +3432,8 @@ ntp_rlimit(
 		 * smaller, so that we don't lock a lot of unused
 		 * stack memory.
 		 */
-		DPRINTF(2, ("ntp_rlimit: STACK: %d %s pages\n",
-			    (int)rl_value / rl_scale, rl_sstr));
+		DPRINT(2, ("ntp_rlimit: STACK: %d %s pages\n",
+			   (int)rl_value / rl_scale, rl_sstr));
 		if (-1 == getrlimit(RLIMIT_STACK, &rl)) {
 			msyslog(LOG_ERR, "getrlimit(RLIMIT_STACK) failed: %m");
 		} else {

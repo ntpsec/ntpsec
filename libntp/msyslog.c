@@ -145,7 +145,7 @@ addto_syslog(
 		if (syslog_file != NULL)
 			log_to_file = true;
 #if defined(DEBUG) && DEBUG
-	if (debug > 0)
+	if (debug > 0) /* SPECIAL DEBUG */
 		log_to_term = true;
 #endif
 	if (!(log_to_file || log_to_term))
@@ -334,7 +334,7 @@ init_logging(
 						    ? LOG_NTP
 						    : 0);
 #  ifdef DEBUG
-	if (debug)
+	if (debug) /* SPECIAL DEBUG */
 		setlogmask(LOG_UPTO(LOG_DEBUG));
 	else
 #  endif /* DEBUG */
@@ -409,7 +409,7 @@ change_logfile(
 				 log_fname);
 		} else
 			abs_fname = estrdup(log_fname);
-		TRACE(1, ("attempting to open log %s\n", abs_fname));
+		TPRINT(1, ("attempting to open log %s\n", abs_fname));
 		new_file = fopen(abs_fname, "a");
 	}
 

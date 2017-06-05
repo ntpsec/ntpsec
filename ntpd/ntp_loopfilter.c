@@ -407,8 +407,8 @@ or, from ntp_adjtime():
 		if (pps_call && !(ptimex->status & STA_PPSSIGNAL))
 			report_event(EVNT_KERN, NULL,
 			    "no PPS signal");
-		DPRINTF(1, ("kernel loop status %#x (%s)\n",
-			(unsigned)ptimex->status, des));
+		DPRINT(1, ("kernel loop status %#x (%s)\n",
+			   (unsigned)ptimex->status, des));
 		/*
 		 * This code may be returned when ntp_adjtime() has just
 		 * been called for the first time, quite a while after
@@ -553,12 +553,8 @@ local_clock(
 		else
 			dtemp = (peer->delay - sys_mindly) / 2;
 		fp_offset += dtemp;
-#ifdef DEBUG
-		if (debug)
-			printf(
-		    "local_clock: size %d mindly %.6f huffpuff %.6f\n",
-			    sys_hufflen, sys_mindly, dtemp);
-#endif
+		DPRINT(1, ("local_clock: size %d mindly %.6f huffpuff %.6f\n",
+			   sys_hufflen, sys_mindly, dtemp));
 	}
 
 	/*
@@ -923,13 +919,9 @@ local_clock(
 	 */
 	record_loop_stats(clock_offset, drift_comp, clock_jitter,
 	    clock_stability, sys_poll);
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "local_clock: offset %.9f jit %.9f freq %.6f stab %.3f poll %d\n",
-		    clock_offset, clock_jitter, drift_comp * US_PER_S,
-		    clock_stability * US_PER_S, sys_poll);
-#endif /* DEBUG */
+	DPRINT(1, ("local_clock: offset %.9f jit %.9f freq %.6f stab %.3f poll %d\n",
+		   clock_offset, clock_jitter, drift_comp * US_PER_S,
+		   clock_stability * US_PER_S, sys_poll));
 	return (rval);
 #endif /* ENABLE_LOCKCLOCK */
 }
@@ -1029,12 +1021,9 @@ rstclock(
 	double	offset		/* new offset */
 	)
 {
-#ifdef DEBUG
-	if (debug > 1)
-		printf("local_clock: mu %lu state %d poll %d count %d\n",
-		    current_time - clock_epoch, trans, sys_poll,
-		    tc_counter);
-#endif
+        DPRINT(2, ("local_clock: mu %lu state %d poll %d count %d\n",
+		   current_time - clock_epoch, trans, sys_poll,
+		   tc_counter));
 	if (trans != state && trans != EVNT_FSET)
 		report_event(trans, NULL, NULL);
 	state = trans;
@@ -1246,10 +1235,7 @@ loop_config(
 {
 	int	i;
 
-#ifdef DEBUG
-	if (debug > 1)
-		printf("loop_config: item %d freq %f\n", item, freq);
-#endif
+	DPRINT(2, ("loop_config: item %d freq %f\n", item, freq));
 	switch (item) {
 
 	/*

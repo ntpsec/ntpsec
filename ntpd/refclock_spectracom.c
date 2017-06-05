@@ -283,10 +283,10 @@ spectracom_receive(
 	 */
 	if (temp == 0) {
 		if (up->prev_eol_cr) {
-			DPRINTF(2, ("wwvb: <LF> @ %s\n", prettydate(trtmp)));
+			DPRINT(2, ("wwvb: <LF> @ %s\n", prettydate(trtmp)));
 		} else {
 			up->laststamp = trtmp;
-			DPRINTF(2, ("wwvb: <CR> @ %s\n", prettydate(trtmp)));
+			DPRINT(2, ("wwvb: <CR> @ %s\n", prettydate(trtmp)));
 		}
 		up->prev_eol_cr = !up->prev_eol_cr;
 		return;
@@ -295,9 +295,9 @@ spectracom_receive(
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
 	up->prev_eol_cr = true;
-	DPRINTF(2, ("wwvb: code @ %s\n"
-		    "       using %s minus one char\n",
-		    prettydate(trtmp), prettydate(pp->lastrec)));
+	DPRINT(2, ("wwvb: code @ %s\n"
+		   "       using %s minus one char\n",
+		   prettydate(trtmp), prettydate(pp->lastrec)));
 	if (pp->lastrec == 0)
 		return;
 
@@ -467,7 +467,7 @@ spectracom_timer(
 		refclock_report(peer, CEVNT_FAULT);
 #ifdef DEBUG
 	get_systime(&now);
-	if (debug)
+	if (debug) /* SPECIAL DEBUG */
 		printf("%c poll at %s\n", pollchar, prettydate(now));
 #endif
 #ifdef HAVE_PPSAPI
@@ -535,11 +535,8 @@ spectracom_poll(
 #endif /* HAVE_PPSAPI */
 	refclock_receive(peer);
 	record_clock_stats(peer, pp->a_lastcode);
-#ifdef DEBUG
-	if (debug)
-		printf("wwvb: timecode %d %s\n", pp->lencode,
-		    pp->a_lastcode);
-#endif
+	DPRINT(1, ("wwvb: timecode %d %s\n", pp->lencode,
+		   pp->a_lastcode));
 }
 
 
