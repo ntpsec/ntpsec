@@ -144,7 +144,6 @@ UNUSED_LOCAL		# Used to quiet compiler warnings
 UPDATE_GRACE		# ntp_io.c only
 USE_COMPILETIME_PIVOT	# Use build date in disambiguating time.
 
-USE_PACKET_TIMESTAMP    # setup and used in ntp_io
 USE_SCM_BINTIME		# to grab timestamp for recv packet
 USE_SCM_TIMESTAMP	# "
 USE_SCM_TIMESTAMPNS	# "

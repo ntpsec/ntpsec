@@ -18,7 +18,6 @@
 #include "timespecops.h"
 
 #if defined(SO_BINTIME) && defined(SCM_BINTIME) && defined(CMSG_FIRSTHDR)
-#  define USE_PACKET_TIMESTAMP
 #  define USE_SCM_BINTIME
 /* UNUSED
  * #  ifdef OVERRIDE_BINTIME_CTLMSGBUF_SIZE
@@ -28,7 +27,6 @@
  * #  endif
  */
 #elif defined(SO_TIMESTAMPNS) && defined(SCM_TIMESTAMPNS) && defined(CMSG_FIRSTHDR)
-#  define USE_PACKET_TIMESTAMP
 #  define USE_SCM_TIMESTAMPNS
 /* UNUSED
  * #  ifdef OVERRIDE_TIMESTAMPNS_CTLMSGBUF_SIZE
@@ -38,7 +36,6 @@
  * #  endif
  */
 #elif defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP) && defined(CMSG_FIRSTHDR)
-#  define USE_PACKET_TIMESTAMP
 #  define USE_SCM_TIMESTAMP
 /* UNUSED
  * #  ifdef OVERRIDE_TIMESTAMP_CTLMSGBUF_SIZE
@@ -48,6 +45,7 @@
  * #  endif
  */
 #else
+# error "Can't get packet timestamp"
 /* fill in for old/other timestamp interfaces */
 #endif
 
@@ -102,7 +100,6 @@ enable_packetstamps(
 }
 
 
-#ifdef USE_PACKET_TIMESTAMP
 /*
  * extract timestamps from control message buffer
  */
@@ -226,6 +223,5 @@ fetch_packetstamp(
 	}
 	return ts;
 }
-#endif	/* USE_PACKET_TIMESTAMP */
 
 // end

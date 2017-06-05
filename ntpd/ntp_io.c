@@ -2040,9 +2040,7 @@ open_socket(
 		return INVALID_SOCKET;
 	}
 
-#ifdef USE_PACKET_TIMESTAMP
-	enable_packetstamps(fd);
-#endif /* USE_PACKET_TIMESTAMP */
+	enable_packetstamps(fd, addr);
 	
 	DPRINT(4, ("bind(%d) AF_INET%s, addr %s%%%u#%d, flags 0x%x\n",
 		   fd, IS_IPV6(addr) ? "6" : "", socktoa(addr),
@@ -2192,11 +2190,9 @@ read_network_packet(
 	socklen_t fromlen;
 	ssize_t buflen;
 	register struct recvbuf *rb;
-#ifdef USE_PACKET_TIMESTAMP
 	struct msghdr msghdr;
 	struct iovec iovec;
-	char control[CMSG_BUFSIZE];
-#endif
+	char control[100];   /* FIXME: Need space for time stamp plus overhead */
 
 	/*
 	 * Get a buffer and read the frame.  If we
@@ -2230,11 +2226,6 @@ read_network_packet(
 
 	fromlen = sizeof(rb->recv_srcadr);
 
-#ifndef USE_PACKET_TIMESTAMP
-	rb->recv_length = (size_t)recvfrom(fd, (char *)&rb->recv_space,
-				           sizeof(rb->recv_space), 0,
-				           &rb->recv_srcadr.sa, &fromlen);
-#else
 	iovec.iov_base        = &rb->recv_space;
 	iovec.iov_len         = sizeof(rb->recv_space);
 	msghdr.msg_name       = &rb->recv_srcadr;
@@ -2245,7 +2236,6 @@ read_network_packet(
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
 	rb->recv_length       = recvmsg(fd, &msghdr, 0);
-#endif
 
 	buflen = (ssize_t)rb->recv_length;
 
@@ -2305,10 +2295,7 @@ read_network_packet(
 	rb->dstadr = itf;
 	rb->cast_flags = (uint8_t)(rb->fd == rb->dstadr->bfd ? MDF_BCAST : MDF_UCAST);
 	rb->fd = fd;
-#ifdef USE_PACKET_TIMESTAMP
-	/* pick up a network time stamp if possible */
 	ts = fetch_packetstamp(rb, &msghdr, ts);
-#endif
 	rb->recv_time = ts;
 	rb->receiver = receive;
 #ifdef REFCLOCK
