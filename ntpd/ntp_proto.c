@@ -2534,7 +2534,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	if (0 == hpoll)
 		return; /* hpoll already in use by new server */
 	peer->hpoll = hpoll;
-	peer->nextdate = current_time + (1 << hpoll);
+	peer->nextdate = current_time + (1U << hpoll);
 }
 
 
