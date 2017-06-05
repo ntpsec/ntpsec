@@ -412,7 +412,7 @@ jjy_start ( int unit, struct peer *peer )
 	int 	fd ;
 	char	sDeviceName [ sizeof(DEVICE) + 10 ], sLog [ MAX_LOGTEXT ] ;
 
-        DPRINT(1, printf("refclock_jjy.c: jjy_start: %s  mode=%u  dev=%s  unit=%d\n",
+        DPRINT(1, ("refclock_jjy.c: jjy_start: %s  mode=%u  dev=%s  unit=%d\n",
 			 socktoa(&peer->srcadr), peer->ttl, DEVICE, unit )) ;
 
 	/* Allocate memory for the unit structure */

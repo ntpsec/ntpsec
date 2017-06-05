@@ -1253,7 +1253,7 @@ HW_poll (
 		IGNORE(write (pp->io.fd, "", 1));
 		
 	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
-		DPRINT(1, printf("Trimble HW_poll: unit %d: SET \n", up->unit));
+		DPRINT(1, ("Trimble HW_poll: unit %d: SET \n", up->unit));
 		msyslog(LOG_ERR,
 			"Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
 			up->unit);
@@ -1266,7 +1266,7 @@ HW_poll (
 	get_systime(&pp->lastrec);
 
 	if (ioctl(pp->io.fd, TIOCMSET, &x) == -1) {
-		DPRINT(1, printf("Trimble HW_poll: unit %d: UNSET \n", up->unit));
+		DPRINT(1, ("Trimble HW_poll: unit %d: UNSET \n", up->unit));
 		msyslog(LOG_ERR,
 			"Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m", 
 			up->unit);
