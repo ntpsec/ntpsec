@@ -430,9 +430,6 @@ int scmp_sc[] = {
  * catchTrap - get here if something missing from list above
  * (or a bad guy finds a way in)
  *
- * You won't get here if SIGSYS is blocked.
- * That happens in pthread_create()  See above at ENABLE_DNS_LOOKUP
- *
  * The list above is a moving target.  Most syscalls will be
  * obvious but libc (and friends) can remap things and
  * getaddrinfo does all sorts of syscalls.
