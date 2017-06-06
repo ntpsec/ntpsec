@@ -58,19 +58,22 @@ typedef struct isc_netaddr	isc_netaddr_t;		/* Net Address */
  ***/
 
 bool isc_net_probeipv4_bool(void);
-
 /*
  * Check if the system's kernel supports IPv4.
  *
  * Returns:
- *
- *	#ISC_R_SUCCESS		IPv4 is supported.
- *	#ISC_R_NOTFOUND		IPv4 is not supported.
- *	#ISC_R_DISABLED		IPv4 is disabled.
- *	#ISC_R_UNEXPECTED
+ *     True    IPv4 is supported.
+ *     False   IPv4 is not supported.
  */
 
 bool isc_net_probeipv6_bool(void);
+/*
+ * Check if the system's kernel supports IPv6.
+ *
+ * Returns:
+ *     True    IPv4 is supported.
+ *     False   IPv4 is not supported.
+ */
 
 isc_result_t
 isc_net_probeipv6(void);
