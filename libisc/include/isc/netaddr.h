@@ -59,8 +59,6 @@ typedef struct isc_netaddr	isc_netaddr_t;		/* Net Address */
 
 bool isc_net_probeipv4_bool(void);
 
-isc_result_t
-isc_net_probeipv4(void);
 /*
  * Check if the system's kernel supports IPv4.
  *

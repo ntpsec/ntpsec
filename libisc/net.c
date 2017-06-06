@@ -116,12 +116,8 @@ initialize(void) {
 
 bool
 isc_net_probeipv4_bool(void) {
-  return (ISC_R_SUCCESS == isc_net_probeipv4());
-}
-isc_result_t
-isc_net_probeipv4(void) {
-	initialize();
-	return (ipv4_result);
+    initialize();
+    return (ISC_R_SUCCESS == ipv4_result);
 }
 
 bool
