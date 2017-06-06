@@ -29,7 +29,7 @@
  ***/
 
 #include "isc/netaddr.h"
-#include "isc/types.h"
+#include "isc/result.h"
 
 typedef struct isc_interface	 isc_interface_t;      /* Interface */
 typedef struct isc_interfaceiter isc_interfaceiter_t;  /* Interface Iterator */

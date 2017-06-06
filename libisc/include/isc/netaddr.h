@@ -15,7 +15,7 @@
 #include <sys/socket.h>                /* Contractual promise. */
 
 #include <netinet/in.h>		/* Contractual promise. */
-#include "isc/types.h"
+#include "isc/result.h"
 
 /*
  * Basic Networking Types

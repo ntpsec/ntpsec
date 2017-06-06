@@ -26,7 +26,6 @@
 #include "isc/mem.h"
 #include "isc/netaddr.h"
 #include "isc/result.h"
-#include "isc/types.h"
 
 /* Must follow <isc/net.h>. */
 #ifdef HAVE_NET_IF6_H
