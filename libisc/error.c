@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ntp_config.h"
+#include "ntp_syslog.h"
+
 #include "isc/error.h"
 
 /*% Default unexpected callback. */
@@ -20,15 +23,16 @@ default_unexpected_callback(const char *, int, const char *, va_list)
      ISC_FORMAT_PRINTF(3, 0);
 
 /*% Default fatal callback. */
-static void
-default_fatal_callback(const char *, int, const char *, va_list)
-     ISC_FORMAT_PRINTF(3, 0);
+static void	library_fatal_error	(const char *, int,
+					 const char *, va_list)
+					ISC_FORMAT_PRINTF(3, 0)
+			__attribute__	((__noreturn__));
 
 /*% unexpected_callback */
 static isc_errorcallback_t unexpected_callback ISC_FORMAT_PRINTF(3, 0) \
 	 = default_unexpected_callback;
 static isc_errorcallback_t fatal_callback ISC_FORMAT_PRINTF(3, 0) \
-	 = default_fatal_callback;
+	 = library_fatal_error;
 
 void
 isc_error_setunexpected(isc_errorcallback_t cb) {
@@ -36,14 +40,6 @@ isc_error_setunexpected(isc_errorcallback_t cb) {
 		unexpected_callback = default_unexpected_callback;
 	else
 		unexpected_callback = cb;
-}
-
-void
-isc_error_setfatal(isc_errorcallback_t cb) {
-	if (cb == NULL)
-		fatal_callback = default_fatal_callback;
-	else
-		fatal_callback = cb;
 }
 
 void
@@ -79,13 +75,27 @@ default_unexpected_callback(const char *file, int line, const char *format,
 	fprintf(stderr, "\n");
 	fflush(stderr);
 }
-
+/*
+ * library_fatal_error - Handle fatal errors from our libraries.
+ */
 static void
-default_fatal_callback(const char *file, int line, const char *format,
-		       va_list args)
+library_fatal_error(
+	const char *file,
+	int line,
+	const char *format,
+	va_list args
+	)
 {
-	fprintf(stderr, "%s:%d: fatal error: ", file, line);
-	vfprintf(stderr, format, args);
-	fprintf(stderr, "\n");
-	fflush(stderr);
+	char errbuf[256];
+        static recurse = 0;
+
+        /* Avoid recursion */
+        if ( recurse++ ) abort();
+
+	msyslog(LOG_ERR, "%s:%d: fatal error:", file, line);
+	vsnprintf(errbuf, sizeof(errbuf), format, args);
+	msyslog(LOG_ERR, "%s", errbuf);
+	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
+
+	abort();
 }

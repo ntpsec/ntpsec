@@ -112,10 +112,6 @@ static int	ntpdmain(int, char **) __attribute__((noreturn));
 static void	mainloop		(void)
 			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
-static void	library_fatal_error	(const char *, int,
-					 const char *, va_list)
-					ISC_FORMAT_PRINTF(3, 0)
-			__attribute__	((__noreturn__));
 static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
@@ -569,7 +565,6 @@ ntpdmain(
 	 * Install trap handlers to log errors and assertion failures.
 	 * Default handlers print to stderr which doesn't work if detached.
 	 */
-	isc_error_setfatal(library_fatal_error);
 	isc_error_setunexpected(library_unexpected_error);
 
 	uid = getuid();
@@ -1216,29 +1211,6 @@ static void check_minsane()
 }
 
 
-
-/*
- * library_fatal_error - Handle fatal errors from our libraries.
- */
-static void
-library_fatal_error(
-	const char *file,
-	int line,
-	const char *format,
-	va_list args
-	)
-{
-	char errbuf[256];
-
-	isc_error_setfatal(NULL);  /* Avoid recursion */
-
-	msyslog(LOG_ERR, "%s:%d: fatal error:", file, line);
-	vsnprintf(errbuf, sizeof(errbuf), format, args);
-	msyslog(LOG_ERR, "%s", errbuf);
-	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
-
-	abort();
-}
 
 
 /*
