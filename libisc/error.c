@@ -25,10 +25,10 @@ isc_error_unexpected(const char *file, int line, const char *format, ...) {
         char errbuf[256];
         static int unexpected_error_cnt = 0;
 
-        va_start(args, format);
-
         if (unexpected_error_cnt >= MAX_UNEXPECTED_ERRORS)
                 return; /* avoid clutter in log */
+
+        va_start(args, format);
 
         msyslog(LOG_ERR, "%s:%d: unexpected error:", file, line);
         vsnprintf(errbuf, sizeof(errbuf), format, args);
