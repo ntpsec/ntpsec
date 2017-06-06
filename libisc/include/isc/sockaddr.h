@@ -13,6 +13,8 @@
 #include "isc/net.h"
 #include "isc/types.h"
 
+#define ISC_LINK(type) struct { type *prev, *next; }
+
 struct isc_sockaddr {
 	union {
 		struct sockaddr		sa;
