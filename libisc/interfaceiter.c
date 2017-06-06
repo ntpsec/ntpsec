@@ -22,7 +22,6 @@
 
 #include "ntp_assert.h"
 #include "isc/interfaceiter.h"
-#include "isc/magic.h"
 #include "isc/mem.h"
 #include "isc/netaddr.h"
 #include "isc/result.h"
@@ -36,6 +35,22 @@
 #ifdef HAVE_LINUX_IF_ADDR_H
 # include <linux/if_addr.h>
 #endif
+
+
+typedef struct {
+	unsigned int magic;
+} isc__magic_t;
+
+/*
+ * To use this macro the magic number MUST be the first thing in the
+ * structure, and MUST be of type "unsigned int".
+ * The intent of this is to allow magic numbers to be checked even though
+ * the object is otherwise opaque.
+ */
+#define ISC_MAGIC_VALID(a,b)	(((a) != NULL) && \
+				 (((const isc__magic_t *)(a))->magic == (b)))
+
+#define ISC_MAGIC(a, b, c, d)	((a) << 24 | (b) << 16 | (c) << 8 | (d))
 
 /* Common utility functions */
 
