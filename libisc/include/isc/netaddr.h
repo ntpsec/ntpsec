@@ -11,8 +11,95 @@
 /*! \file isc/netaddr.h */
 
 #include <stdbool.h>
-#include "isc/net.h"
+/* for struct sockaddr on *BSD */
+#include <sys/socket.h>                /* Contractual promise. */
+
+#include <netinet/in.h>		/* Contractual promise. */
 #include "isc/types.h"
+
+/*
+ * Basic Networking Types
+ *
+ * This module is responsible for defining the following basic networking
+ * types:
+ *
+ *		struct in_addr
+ *		struct in6_addr
+ *		struct in6_pktinfo
+ *		struct sockaddr
+ *		struct sockaddr_in
+ *		struct sockaddr_in6
+ *i		in_port_t
+ *
+ * It declares ntoh[sl]() and hton[sl]().
+ *
+ * MP:
+ *	No impact.
+ *
+ * Reliability:
+ *	No anticipated impact.
+ *
+ * Resources:
+ *	N/A.
+ *
+ * Security:
+ *	No anticipated impact.
+ *
+ * Standards:
+ *	BSD Socket API
+ *	RFC 2553
+ */
+
+/***
+ *** Functions.
+ ***/
+
+bool isc_net_probeipv4_bool(void);
+
+isc_result_t
+isc_net_probeipv4(void);
+/*
+ * Check if the system's kernel supports IPv4.
+ *
+ * Returns:
+ *
+ *	#ISC_R_SUCCESS		IPv4 is supported.
+ *	#ISC_R_NOTFOUND		IPv4 is not supported.
+ *	#ISC_R_DISABLED		IPv4 is disabled.
+ *	#ISC_R_UNEXPECTED
+ */
+
+bool isc_net_probeipv6_bool(void);
+
+isc_result_t
+isc_net_probeipv6(void);
+/*
+ * Check if the system's kernel supports IPv6.
+ *
+ * Returns:
+ *
+ *	#ISC_R_SUCCESS		IPv6 is supported.
+ *	#ISC_R_NOTFOUND		IPv6 is not supported.
+ *	#ISC_R_DISABLED		IPv6 is disabled.
+ *	#ISC_R_UNEXPECTED
+ */
+
+bool
+isc_net_probe_ipv6only_bool(void);
+isc_result_t
+isc_net_probe_ipv6only(void);
+
+/*
+ * Check if the system's kernel supports the IPV6_(RECV)PKTINFO socket option
+ * for UDP sockets.
+ *
+ * Returns:
+ *
+ * 	#ISC_R_SUCCESS		the option is supported.
+ * 	#ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
+ * 	#ISC_R_UNEXPECTED
+ */
+
 
 struct isc_netaddr {
 	unsigned int family;

@@ -10,7 +10,7 @@
 #include <net/if.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include "isc/net.h"    /* use local copy of isc/net.h, not system copy */
+#include "isc/netaddr.h"  /* use local copy of isc/netddr.h, not system copy */
 
 #include "ntp_malloc.h"
 

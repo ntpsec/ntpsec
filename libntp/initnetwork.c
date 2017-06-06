@@ -3,7 +3,7 @@
  */
 #include "config.h"
 
-#include "isc/net.h"
+#include "isc/netaddr.h"
 #include "ntp_stdlib.h"
 
 /*

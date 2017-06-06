@@ -22,7 +22,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-#include "isc/net.h"
+#include "isc/netaddr.h"
 
 #include "ntp.h"
 #include "ntpd.h"

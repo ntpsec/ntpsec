@@ -10,7 +10,7 @@
 
 /*! \file isc/sockaddr.h */
 
-#include "isc/net.h"
+#include "isc/netaddr.h"
 #include "isc/types.h"
 
 #define ISC_LINK(type) struct { type *prev, *next; }

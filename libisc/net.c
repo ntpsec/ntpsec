@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "isc/net.h"
+#include "isc/netaddr.h"
 #include "isc/error.h"
 #include "isc/result.h"
 

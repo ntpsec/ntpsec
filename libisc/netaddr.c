@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 
-#include "isc/net.h"
 #include "isc/netaddr.h"
 #include "isc/sockaddr.h"
 #include "ntp_assert.h"
