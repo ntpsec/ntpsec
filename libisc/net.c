@@ -19,7 +19,8 @@
 #include <string.h>
 
 #include "isc/net.h"
-#include "isc/util.h"
+#include "isc/error.h"
+#include "isc/result.h"
 
 static bool 	once_ipv6only = false;
 

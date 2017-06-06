@@ -12,7 +12,8 @@
 
 #include <ifaddrs.h>
 
-#include "isc/util.h"	/* for IGNORE */
+#include "ntp_assert.h"
+#include "isc/error.h"
 
 /*% Iterator Magic */
 #define IFITER_MAGIC		ISC_MAGIC('I', 'F', 'I', 'G')
