@@ -39,7 +39,7 @@ void
 isc_error_runtimecheck(const char *, int, const char *)
 			__attribute__	((__noreturn__));
 
-#define ISC_ERROR_RUNTIMECHECK(cond) \
+#define RUNTIME_CHECK(cond) \
 	((void) ((cond) || \
 		 (isc_error_runtimecheck(__FILE__, __LINE__, #cond), 0)))
 

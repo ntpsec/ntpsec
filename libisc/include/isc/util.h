@@ -64,8 +64,6 @@
 
 /*% Unexpected Error */
 #define UNEXPECTED_ERROR		isc_error_unexpected
-/*% Runtime Check */
-#define RUNTIME_CHECK(cond)		ISC_ERROR_RUNTIMECHECK(cond)
 
 /* hack to ignore GCC Unused Result */
 #define ISC_IGNORE(r) do{if(r){}}while(0)
