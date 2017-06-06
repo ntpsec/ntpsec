@@ -17,34 +17,15 @@
 
 #include "isc/error.h"
 
-/*% Default unexpected callback. */
-static void	library_unexpected_error(const char *, int,
-					 const char *, va_list)
-					ISC_FORMAT_PRINTF(3, 0);
 
+#define MAX_UNEXPECTED_ERRORS 100
 void
 isc_error_unexpected(const char *file, int line, const char *format, ...) {
 	va_list args;
-
-	va_start(args, format);
-	library_unexpected_error(file, line, format, args);
-	va_end(args);
-}
-
-/*
- * library_unexpected_error - Handle non fatal errors from our libraries.
- */
-#define MAX_UNEXPECTED_ERRORS 100
-static void
-library_unexpected_error(
-	const char *file,
-	int line,
-	const char *format,
-	va_list args
-	)
-{
 	char errbuf[256];
 	static int unexpected_error_cnt = 0;
+
+	va_start(args, format);
 
 	if (unexpected_error_cnt >= MAX_UNEXPECTED_ERRORS)
 		return;	/* avoid clutter in log */
@@ -55,5 +36,4 @@ library_unexpected_error(
 
 	if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
 		msyslog(LOG_ERR, "Too many errors.  Shutting up.");
-
 }
