@@ -21,19 +21,20 @@
 #define MAX_UNEXPECTED_ERRORS 100
 void
 isc_error_unexpected(const char *file, int line, const char *format, ...) {
-	va_list args;
-	char errbuf[256];
-	static int unexpected_error_cnt = 0;
+        va_list args;
+        char errbuf[256];
+        static int unexpected_error_cnt = 0;
 
-	va_start(args, format);
+        va_start(args, format);
 
-	if (unexpected_error_cnt >= MAX_UNEXPECTED_ERRORS)
-		return;	/* avoid clutter in log */
+        if (unexpected_error_cnt >= MAX_UNEXPECTED_ERRORS)
+                return; /* avoid clutter in log */
 
-	msyslog(LOG_ERR, "%s:%d: unexpected error:", file, line);
-	vsnprintf(errbuf, sizeof(errbuf), format, args);
-	msyslog(LOG_ERR, "%s", errbuf);
+        msyslog(LOG_ERR, "%s:%d: unexpected error:", file, line);
+        vsnprintf(errbuf, sizeof(errbuf), format, args);
+        msyslog(LOG_ERR, "%s", errbuf);
 
-	if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
-		msyslog(LOG_ERR, "Too many errors.  Shutting up.");
+        if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
+                msyslog(LOG_ERR, "Too many errors.  Shutting up.");
+        va_end(args);
 }
