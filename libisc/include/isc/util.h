@@ -20,22 +20,6 @@
  * ISC_ or isc_ to the name.
  */
 
-/***
- *** General Macros.
- ***/
-
-/*%
- * Use this to hide unused function arguments.
- * \code
- * int
- * foo(char *bar)
- * {
- *	UNUSED(bar);
- * }
- * \endcode
- */
-#define UNUSED(x)      (void)(x)
-
 /*%
  * We use macros instead of calling the routines directly because
  * the capital letters make the locking stand out.

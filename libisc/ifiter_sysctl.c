@@ -270,7 +270,7 @@ internal_next(isc_interfaceiter_t *iter) {
 
 static void
 internal_destroy(isc_interfaceiter_t *iter) {
-	UNUSED(iter); /* Unused. */
+	UNUSED_ARG(iter); /* Unused. */
 	/*
 	 * Do nothing.
 	 */
