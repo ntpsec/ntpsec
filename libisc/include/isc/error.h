@@ -30,26 +30,22 @@
 
 typedef void (*isc_errorcallback_t)(const char *, int, const char *, va_list);
 
-/*% set unexpected error */
+/* set unexpected error */
 void
 isc_error_setunexpected(isc_errorcallback_t);
 
-/*% set fatal error */
-void
-isc_error_setfatal(isc_errorcallback_t);
-
-/*% unexpected error */
+/* unexpected error */
 void
 isc_error_unexpected(const char *, int, const char *, ...)
      ISC_FORMAT_PRINTF(3, 4);
 
-/*% Unexpected Error */
+/* Unexpected Error */
 #define UNEXPECTED_ERROR		isc_error_unexpected
 
 /* hack to ignore GCC Unused Result */
 #define ISC_IGNORE(r) do{if(r){}}while(0)
 
-/*% fatal error */
+/* fatal error */
 void
 isc_error_fatal(const char *, int, const char *, ...)
 ISC_FORMAT_PRINTF(3, 4) __attribute__	((__noreturn__));
