@@ -112,10 +112,6 @@ static int	ntpdmain(int, char **) __attribute__((noreturn));
 static void	mainloop		(void)
 			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
-static void	library_unexpected_error(const char *, int,
-					 const char *, va_list)
-					ISC_FORMAT_PRINTF(3, 0);
-
 static  void    close_all_beyond(int);
 static  void    close_all_except(int);
 
@@ -560,12 +556,6 @@ ntpdmain(
 		}
 		msyslog(LOG_INFO, "%s", buf);
 	}
-
-	/*
-	 * Install trap handlers to log errors and assertion failures.
-	 * Default handlers print to stderr which doesn't work if detached.
-	 */
-	isc_error_setunexpected(library_unexpected_error);
 
 	uid = getuid();
 	if (uid && !dumpopts) {
@@ -1207,36 +1197,6 @@ static void check_minsane()
 	msyslog(LOG_ERR, "Found %d servers, suggest minsane at least 3", servers);
     else if (servers == 4)
         msyslog(LOG_ERR, "Found 4 servers, suggest minsane of 2");
-
-}
-
-
-
-
-/*
- * library_unexpected_error - Handle non fatal errors from our libraries.
- */
-# define MAX_UNEXPECTED_ERRORS 100
-static int unexpected_error_cnt = 0;
-static void
-library_unexpected_error(
-	const char *file,
-	int line,
-	const char *format,
-	va_list args
-	)
-{
-	char errbuf[256];
-
-	if (unexpected_error_cnt >= MAX_UNEXPECTED_ERRORS)
-		return;	/* avoid clutter in log */
-
-	msyslog(LOG_ERR, "%s:%d: unexpected error:", file, line);
-	vsnprintf(errbuf, sizeof(errbuf), format, args);
-	msyslog(LOG_ERR, "%s", errbuf);
-
-	if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
-		msyslog(LOG_ERR, "Too many errors.  Shutting up.");
 
 }
 
