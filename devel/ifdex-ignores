@@ -36,7 +36,6 @@ NTPD_PRIO		# Priority to set the daemon to
 
 # Fine-grained debugging and tracing, not presently settable from waf
 DEBUG
-ISC_LIST_CHECKINIT	# Debugging flag
 USEBACKTRACE	        # Use backtrace code, set by --enable-debug-gdb
 DEBUG_PARSELIB		# Enable debugging in the parse library.
 NTP_DEBUG_LISTS		# Debug list handling
