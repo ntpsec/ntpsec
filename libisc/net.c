@@ -50,7 +50,7 @@ try_proto(int domain) {
 #endif
 			return (ISC_R_NOTFOUND);
 		default:
-			ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
+			(void)strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR("socket() failed: %s", strbuf);
 			return (ISC_R_UNEXPECTED);
 		}
@@ -156,7 +156,7 @@ try_ipv6only(void) {
 	/* check for TCP sockets */
 	s = socket(PF_INET6, SOCK_STREAM, 0);
 	if (s == -1) {
-		ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
+		(void)strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR("socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
@@ -173,7 +173,7 @@ try_ipv6only(void) {
 	/* check for UDP sockets */
 	s = socket(PF_INET6, SOCK_DGRAM, 0);
 	if (s == -1) {
-		ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
+		(void)strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR("socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;

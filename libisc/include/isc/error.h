@@ -37,9 +37,6 @@ isc_error_unexpected(const char *, int, const char *, ...)
 #define UNEXPECTED_ERROR(fmt, ...) \
 	isc_error_unexpected(__FILE__, __LINE__, fmt, __VA_ARGS__)
 
-/* hack to ignore GCC Unused Result */
-#define ISC_IGNORE(r) do{if(r){}}while(0)
-
 /* fatal error */
 void
 isc_error_fatal(const char *, int, const char *, ...)
