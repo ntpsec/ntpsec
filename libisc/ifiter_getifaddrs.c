@@ -88,8 +88,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	}
 	if (ret < 0) {
 	    ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-                		 "getting interface addresses: getifaddrs: %s",
+		UNEXPECTED_ERROR("getting interface addresses: getifaddrs: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;
 		goto failure;

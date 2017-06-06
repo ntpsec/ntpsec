@@ -70,8 +70,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	bufsize = 0;
 	if (sysctl(mib, 6, NULL, &bufsize, NULL, (size_t) 0) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "getting interface list size: sysctl: %s",
+		UNEXPECTED_ERROR("getting interface list size: sysctl: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;
 		goto failure;
@@ -87,8 +86,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	bufused = bufsize;
 	if (sysctl(mib, 6, iter->buf, &bufused, NULL, (size_t) 0) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "getting interface list: sysctl: %s",
+		UNEXPECTED_ERROR("getting interface list: sysctl: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;
 		goto failure;

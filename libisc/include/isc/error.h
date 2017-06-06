@@ -34,7 +34,8 @@ isc_error_unexpected(const char *, int, const char *, ...)
      ISC_FORMAT_PRINTF(3, 4);
 
 /* Unexpected Error */
-#define UNEXPECTED_ERROR		isc_error_unexpected
+#define UNEXPECTED_ERROR(fmt, ...) \
+	isc_error_unexpected(__FILE__, __LINE__, fmt, __VA_ARGS__)
 
 /* hack to ignore GCC Unused Result */
 #define ISC_IGNORE(r) do{if(r){}}while(0)

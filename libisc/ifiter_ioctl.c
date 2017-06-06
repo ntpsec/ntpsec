@@ -127,9 +127,8 @@ getbuf4(isc_interfaceiter_t *iter) {
 		    == -1) {
 			if (errno != EINVAL) {
 				strerror_r(errno, strbuf, sizeof(strbuf));
-				UNEXPECTED_ERROR(__FILE__, __LINE__,
-							"get interface "
-							"configuration: %s",
+				UNEXPECTED_ERROR("get interface "
+						 "configuration: %s",
 						 strbuf);
 				goto unexpected;
 			}
@@ -151,8 +150,7 @@ getbuf4(isc_interfaceiter_t *iter) {
 				break;
 		}
 		if (iter->bufsize >= IFCONF_BUFSIZE_MAX) {
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "get interface configuration: "
+			UNEXPECTED_ERROR("get interface configuration: "
 					 "maximum buffer size exceeded");
 			goto unexpected;
 		}
@@ -216,9 +214,8 @@ getbuf6(isc_interfaceiter_t *iter) {
 #endif
 			if (errno != EINVAL) {
 				strerror_r(errno, strbuf, sizeof(strbuf));
-				UNEXPECTED_ERROR(__FILE__, __LINE__,
-							"get interface "
-							"configuration: %s",
+				UNEXPECTED_ERROR("get interface "
+						 "configuration: %s",
 						 strbuf);
 				result = ISC_R_UNEXPECTED;
 				goto cleanup;
@@ -241,8 +238,7 @@ getbuf6(isc_interfaceiter_t *iter) {
 				break;
 		}
 		if (iter->bufsize6 >= IFCONF_BUFSIZE_MAX) {
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "get interface configuration: "
+			UNEXPECTED_ERROR("get interface configuration: "
 					 "maximum buffer size exceeded");
 			result = ISC_R_UNEXPECTED;
 			goto cleanup;
@@ -304,8 +300,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 		 */
 		if ((iter->socket6 = socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "making interface scan socket: %s",
+			UNEXPECTED_ERROR("making interface scan socket: %s",
 					 strbuf);
 			result = ISC_R_UNEXPECTED;
 			goto socket6_failure;
@@ -317,8 +312,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 #endif
 	if ((iter->socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "making interface scan socket: %s",
+		UNEXPECTED_ERROR("making interface scan socket: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;
 		goto socket_failure;
@@ -441,8 +435,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	 */
 	if (isc_ioctl(iter->socket, SIOCGIFFLAGS, (char *) &ifreq) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "%s: getting interface flags: %s",
+		UNEXPECTED_ERROR("%s: getting interface flags: %s",
 				 ifreq.ifr_name, strbuf);
 		return (ISC_R_IGNORE);
 	}
@@ -476,8 +469,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 
 	if (isc_ioctl(iter->socket, SIOCGLIFADDR, &lifreq) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "%s: getting interface address: %s",
+		UNEXPECTED_ERROR("%s: getting interface address: %s",
 				 ifreq.ifr_name, strbuf);
 		return (ISC_R_IGNORE);
 	}
@@ -516,8 +508,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		if (isc_ioctl(iter->socket, SIOCGIFDSTADDR, (char *)&ifreq)
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "%s: getting destination address: %s",
+			UNEXPECTED_ERROR("%s: getting destination address: %s",
 					 ifreq.ifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -535,8 +526,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		if (isc_ioctl(iter->socket, SIOCGIFBRDADDR, (char *)&ifreq)
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "%s: getting broadcast address: %s",
+			UNEXPECTED_ERROR("%s: getting broadcast address: %s",
 					 ifreq.ifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -556,8 +546,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	 */
 	if (isc_ioctl(iter->socket, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "%s: getting netmask: %s",
+		UNEXPECTED_ERROR("%s: getting netmask: %s",
 				 ifreq.ifr_name, strbuf);
 		return (ISC_R_IGNORE);
 	}
@@ -637,8 +626,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	 */
 	if (isc_ioctl(fd, SIOCGLIFFLAGS, (char *) &lifreq) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "%s: getting interface flags: %s",
+		UNEXPECTED_ERROR("%s: getting interface flags: %s",
 				 lifreq.lifr_name, strbuf);
 		return (ISC_R_IGNORE);
 	}
@@ -677,8 +665,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		if (isc_ioctl(fd, SIOCGLIFDSTADDR, (char *)&lifreq)
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "%s: getting destination address: %s",
+			UNEXPECTED_ERROR("%s: getting destination address: %s",
 					 lifreq.lifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -698,8 +685,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		if (isc_ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "%s: getting broadcast address: %s",
+			UNEXPECTED_ERROR("%s: getting broadcast address: %s",
 					 lifreq.lifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -743,8 +729,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	 */
 	if (isc_ioctl(fd, SIOCGLIFNETMASK, (char *)&lifreq) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "%s: getting netmask: %s",
+		UNEXPECTED_ERROR("%s: getting netmask: %s",
 				 lifreq.lifr_name, strbuf);
 		return (ISC_R_IGNORE);
 	}
