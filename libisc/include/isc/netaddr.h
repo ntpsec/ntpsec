@@ -90,20 +90,6 @@ isc_net_probeipv6(void);
 
 bool
 isc_net_probe_ipv6only_bool(void);
-isc_result_t
-isc_net_probe_ipv6only(void);
-
-/*
- * Check if the system's kernel supports the IPV6_(RECV)PKTINFO socket option
- * for UDP sockets.
- *
- * Returns:
- *
- * 	#ISC_R_SUCCESS		the option is supported.
- * 	#ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
- * 	#ISC_R_UNEXPECTED
- */
-
 
 struct isc_netaddr {
 	unsigned int family;

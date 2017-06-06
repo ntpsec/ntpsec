@@ -198,11 +198,6 @@ initialize_ipv6only(void) {
 
 bool
 isc_net_probe_ipv6only_bool(void) {
-    return (ISC_R_SUCCESS == isc_net_probe_ipv6only());
-}
-
-isc_result_t
-isc_net_probe_ipv6only(void) {
-	initialize_ipv6only();
-	return (ipv6only_result);
+    initialize_ipv6only();
+    return (ISC_R_SUCCESS == ipv6only_result);
 }
