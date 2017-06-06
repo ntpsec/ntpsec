@@ -28,18 +28,12 @@ static void	library_fatal_error	(const char *, int,
 					ISC_FORMAT_PRINTF(3, 0)
 			__attribute__	((__noreturn__));
 
-/*% unexpected_callback */
-static isc_errorcallback_t unexpected_callback ISC_FORMAT_PRINTF(3, 0) \
-	 = library_unexpected_error;
-static isc_errorcallback_t fatal_callback ISC_FORMAT_PRINTF(3, 0) \
-	 = library_fatal_error;
-
 void
 isc_error_unexpected(const char *file, int line, const char *format, ...) {
 	va_list args;
 
 	va_start(args, format);
-	(unexpected_callback)(file, line, format, args);
+	library_unexpected_error(file, line, format, args);
 	va_end(args);
 }
 
@@ -48,7 +42,7 @@ isc_error_fatal(const char *file, int line, const char *format, ...) {
 	va_list args;
 
 	va_start(args, format);
-	(fatal_callback)(file, line, format, args);
+	library_fatal_error(file, line, format, args);
 	va_end(args);
 	abort();
 }
