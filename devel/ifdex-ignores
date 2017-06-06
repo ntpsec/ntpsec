@@ -38,7 +38,6 @@ NTPD_PRIO		# Priority to set the daemon to
 DEBUG
 ISC_LIST_CHECKINIT	# Debugging flag
 USEBACKTRACE	        # Use backtrace code, set by --enable-debug-gdb
-ISC_UTIL_TRACEON	# Enables trace code in ISC service routines.
 DEBUG_PARSELIB		# Enable debugging in the parse library.
 NTP_DEBUG_LISTS		# Debug list handling
 DEBUG_PPS720		# Only in refclock_true.c

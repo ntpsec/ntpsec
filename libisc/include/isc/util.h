@@ -41,13 +41,6 @@
  * the capital letters make the locking stand out.
  */
 
-#ifdef ISC_UTIL_TRACEON
-#define ISC_UTIL_TRACE(a) a
-#include <stdio.h>		/* Required for fprintf/stderr when tracing. */
-#else
-#define ISC_UTIL_TRACE(a)
-#endif
-
 #include "isc/result.h"		/* Contractual promise. */
 
 /*
