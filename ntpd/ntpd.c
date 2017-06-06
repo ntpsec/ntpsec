@@ -16,7 +16,6 @@
 #include "ntp_dns.h"
 #endif
 #include "isc/error.h"
-#include "isc/formatcheck.h"
 
 #include <unistd.h>
 #include <sys/stat.h>

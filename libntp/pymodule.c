@@ -19,7 +19,6 @@
 #include "ntp_config.h"
 #include "ntp_assert.h"
 #include "isc/error.h"
-#include "isc/formatcheck.h"
 
 #include "ntp_control.h"
 

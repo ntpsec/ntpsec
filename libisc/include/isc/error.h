@@ -12,7 +12,21 @@
 
 #include <stdarg.h>
 
-#include "isc/formatcheck.h"
+/*
+ * ISC_FORMAT_PRINTF().
+ *
+ * fmt is the location of the format string parameter.
+ * args is the location of the first argument (or 0 for no argument checking).
+ * 
+ * Note:
+ * The first parameter is 1, not 0.
+ */
+#ifdef __GNUC__
+#define ISC_FORMAT_PRINTF(fmt, args) __attribute__((__format__(__printf__, fmt, args)))
+#else
+#define ISC_FORMAT_PRINTF(fmt, args)
+#endif
+
 
 typedef void (*isc_errorcallback_t)(const char *, int, const char *, va_list);
 
