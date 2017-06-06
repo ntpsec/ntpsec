@@ -10,8 +10,6 @@
 
 /*! \file isc/error.h */
 
-#include <stdarg.h>
-
 /*
  * ISC_FORMAT_PRINTF().
  *
@@ -36,10 +34,5 @@ isc_error_unexpected(const char *, int, const char *, ...)
 /* Unexpected Error */
 #define UNEXPECTED_ERROR(fmt, ...) \
 	isc_error_unexpected(__FILE__, __LINE__, fmt, __VA_ARGS__)
-
-/* fatal error */
-void
-isc_error_fatal(const char *, int, const char *, ...)
-ISC_FORMAT_PRINTF(3, 4) __attribute__	((__noreturn__));
 
 #endif /* GUARD_ISC_ERROR_H */
