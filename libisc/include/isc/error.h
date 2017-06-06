@@ -34,13 +34,4 @@ void
 isc_error_fatal(const char *, int, const char *, ...)
 ISC_FORMAT_PRINTF(3, 4) __attribute__	((__noreturn__));
 
-/*% runtimecheck error */
-void
-isc_error_runtimecheck(const char *, int, const char *)
-			__attribute__	((__noreturn__));
-
-#define RUNTIME_CHECK(cond) \
-	((void) ((cond) || \
-		 (isc_error_runtimecheck(__FILE__, __LINE__, #cond), 0)))
-
 #endif /* GUARD_ISC_ERROR_H */

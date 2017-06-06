@@ -39,8 +39,6 @@
 /*%
  * We use macros instead of calling the routines directly because
  * the capital letters make the locking stand out.
- * We RUNTIME_CHECK for success since in general there's no way
- * for us to continue if they fail.
  */
 
 #ifdef ISC_UTIL_TRACEON

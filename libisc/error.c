@@ -31,21 +31,6 @@ isc_error_unexpected(const char *file, int line, const char *format, ...) {
 	va_end(args);
 }
 
-void
-isc_error_runtimecheck(const char *file, int line, const char *expression) {
-        static int recurse = 0;
-
-        /* Avoid recursion */
-        if ( recurse++ ) abort();
-
-        termlogit = 1;
-	msyslog(LOG_ERR, "%s:%d: fatal error:", file, line);
-	msyslog(LOG_ERR, "RUNTIME_CHECK(%s) failed", expression);
-	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
-
-	exit(-4);      /* for some reason abort) here does not work */
-}
-
 /*
  * library_unexpected_error - Handle non fatal errors from our libraries.
  */
