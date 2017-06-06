@@ -18,8 +18,6 @@
 typedef struct isc_interface		isc_interface_t;	/*%< Interface */
 typedef struct isc_interfaceiter	isc_interfaceiter_t;	/*%< Interface Iterator */
 typedef struct isc_mem			isc_mem_t;		/*%< Memory */
-typedef struct isc_netaddr		isc_netaddr_t;		/*%< Net Address */
 typedef unsigned int			isc_result_t;		/*%< Result */
-typedef struct isc_sockaddr		isc_sockaddr_t;		/*%< Socket Address */
 
 #endif /* GUARD_ISC_TYPES_H */
