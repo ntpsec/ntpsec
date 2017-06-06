@@ -31,6 +31,10 @@
 #include "isc/netaddr.h"
 #include "isc/types.h"
 
+typedef struct isc_interface	 isc_interface_t;      /* Interface */
+typedef struct isc_interfaceiter isc_interfaceiter_t;  /* Interface Iterator */
+typedef struct isc_mem           isc_mem_t;	       /* Memory */
+
 /*!
  * \brief Public structure describing a network interface.
  */
