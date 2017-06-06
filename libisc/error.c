@@ -22,12 +22,6 @@ static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 
-/*% Default fatal callback. */
-static void	library_fatal_error	(const char *, int,
-					 const char *, va_list)
-					ISC_FORMAT_PRINTF(3, 0)
-			__attribute__	((__noreturn__));
-
 void
 isc_error_unexpected(const char *file, int line, const char *format, ...) {
 	va_list args;
@@ -38,18 +32,18 @@ isc_error_unexpected(const char *file, int line, const char *format, ...) {
 }
 
 void
-isc_error_fatal(const char *file, int line, const char *format, ...) {
-	va_list args;
-
-	va_start(args, format);
-	library_fatal_error(file, line, format, args);
-	va_end(args);
-	abort();
-}
-
-void
 isc_error_runtimecheck(const char *file, int line, const char *expression) {
-	isc_error_fatal(file, line, "RUNTIME_CHECK(%s) failed", expression);
+        static int recurse = 0;
+
+        /* Avoid recursion */
+        if ( recurse++ ) abort();
+
+        termlogit = 1;
+	msyslog(LOG_ERR, "%s:%d: fatal error:", file, line);
+	msyslog(LOG_ERR, "RUNTIME_CHECK(%s) failed", expression);
+	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
+
+	exit(-4);      /* for some reason abort) here does not work */
 }
 
 /*
@@ -77,29 +71,4 @@ library_unexpected_error(
 	if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
 		msyslog(LOG_ERR, "Too many errors.  Shutting up.");
 
-}
-
-/*
- * library_fatal_error - Handle fatal errors from our libraries.
- */
-static void
-library_fatal_error(
-	const char *file,
-	int line,
-	const char *format,
-	va_list args
-	)
-{
-	char errbuf[256];
-        static int recurse = 0;
-
-        /* Avoid recursion */
-        if ( recurse++ ) abort();
-
-	msyslog(LOG_ERR, "%s:%d: fatal error:", file, line);
-	vsnprintf(errbuf, sizeof(errbuf), format, args);
-	msyslog(LOG_ERR, "%s", errbuf);
-	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
-
-	abort();
 }

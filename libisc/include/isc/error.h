@@ -41,6 +41,6 @@ isc_error_runtimecheck(const char *, int, const char *)
 
 #define ISC_ERROR_RUNTIMECHECK(cond) \
 	((void) ((cond) || \
-		 ((isc_error_runtimecheck)(__FILE__, __LINE__, #cond), 0)))
+		 (isc_error_runtimecheck(__FILE__, __LINE__, #cond), 0)))
 
 #endif /* GUARD_ISC_ERROR_H */
