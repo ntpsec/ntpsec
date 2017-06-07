@@ -30,7 +30,6 @@
 
 #include "isc/result.h"
 
-typedef struct isc_interface	 isc_interface_t;      /* Interface */
 typedef struct isc_interfaceiter isc_interfaceiter_t;  /* Interface Iterator */
 typedef struct isc_mem           isc_mem_t;	       /* Memory */
 
@@ -49,16 +48,16 @@ typedef struct isc_netaddr {
  * \brief Public structure describing a network interface.
  */
 
-struct isc_interface {
-	char name[32];			/*%< Interface name, null-terminated. */
-	unsigned int af;		/*%< Address family. */
-	isc_netaddr_t address;		/*%< Local address. */
-	isc_netaddr_t netmask;		/*%< Network mask. */
-	isc_netaddr_t broadcast;	/*&< Broadcast address. */
-	isc_netaddr_t dstaddress; 	/*%< Destination address (point-to-point only). */
-	uint32_t flags;		/*%< Flags; see INTERFACE flags. */
-	unsigned int ifindex;		/*%< Interface index for IP(V6)_MULTICAST_IF. */
-};
+typedef struct isc_interface {
+	char name[32];		   /* Interface name, null-terminated. */
+	unsigned int af;	   /* Address family. */
+	isc_netaddr_t address;	   /* Local address. */
+	isc_netaddr_t netmask;	   /* Network mask. */
+	isc_netaddr_t broadcast;   /* Broadcast address. */
+	isc_netaddr_t dstaddress;  /* Destination address (point-to-point only). */
+	uint32_t flags;		   /* Flags; see INTERFACE flags. */
+	unsigned int ifindex;	   /* Interface index for IP(V6)_MULTICAST_IF. */
+} isc_interface_t;
 
 /*@{*/
 /*! Interface flags. */
