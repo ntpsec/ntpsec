@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 
-#include "isc/result.h"
+#include "isc_result.h"
 
 #include "ntp_stdlib.h"
 

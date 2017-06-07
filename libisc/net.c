@@ -24,7 +24,7 @@
 
 #include "isc/netaddr.h"
 #include "isc/error.h"
-#include "isc/result.h"
+#include "isc_result.h"
 
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6_result = ISC_R_NOTFOUND;

@@ -16,7 +16,7 @@
 #include "ntp_debug.h"
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
-#include "isc/result.h"
+#include "isc_result.h"
 
 #ifdef USEBACKTRACE
 

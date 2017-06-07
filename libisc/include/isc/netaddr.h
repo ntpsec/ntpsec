@@ -8,10 +8,10 @@
 #ifndef GUARD_ISC_NETADDR_H
 #define GUARD_ISC_NETADDR_H 1
 
-/*! \file isc/netaddr.h */
+/* isc_netaddr.h */
 
 #include <stdbool.h>
-#include "isc/result.h"
+#include "isc_result.h"
 
 /*
  * Basic Networking Types

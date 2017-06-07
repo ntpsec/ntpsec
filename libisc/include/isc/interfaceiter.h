@@ -12,8 +12,8 @@
  ***** Module Info
  *****/
 
-/*! \file isc/interfaceiter.h
- * \brief Iterates over the list of network interfaces.
+/* isc/interfaceiter.h
+ * Iterates over the list of network interfaces.
  *
  * Interfaces whose address family is not supported are ignored and never
  * returned by the iterator.  Interfaces whose netmask, interface flags,
@@ -28,7 +28,7 @@
  *** Imports
  ***/
 
-#include "isc/result.h"
+#include "isc_result.h"
 
 typedef struct isc_interfaceiter isc_interfaceiter_t;  /* Interface Iterator */
 typedef struct isc_mem           isc_mem_t;	       /* Memory */

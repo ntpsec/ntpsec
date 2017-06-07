@@ -8,7 +8,7 @@
 #ifndef GUARD_ISC_RESULT_H
 #define GUARD_ISC_RESULT_H 1
 
-/* isc/result.h */
+/* isc_result.h */
 
 typedef unsigned int			isc_result_t;	/* Result */
 
