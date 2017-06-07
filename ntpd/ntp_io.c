@@ -2322,11 +2322,13 @@ read_network_packet(
 
 	iovec.iov_base        = &rb->recv_space;
 	iovec.iov_len         = sizeof(rb->recv_space);
+	zero_mem(&msghdr, sizeof(msghdr));
 	msghdr.msg_name       = &rb->recv_srcadr;
 	msghdr.msg_namelen    = fromlen;
 	msghdr.msg_iov        = &iovec;
 	msghdr.msg_iovlen     = 1;
-	msghdr.msg_flags      = 0;
+	/* msghdr.msg_flags   = 0; Not all msghdr have msg_flags: Solaris */
+        /* Solaris does not have the next two */
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
 	buflen                = recvmsg(fd, &msghdr, 0);
