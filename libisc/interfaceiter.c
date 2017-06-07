@@ -947,23 +947,6 @@ getbuf6(isc_interfaceiter_t *iter) {
                  */
                 if (isc_ioctl(iter->socket6, SIOCGLIFCONF, (char *)&iter->lifc)
                     == -1) {
-#ifdef __hpux
-                        /*
-                         * IPv6 interface scanning is not available on all
-                         * kernels w/ IPv6 sockets.
-                         */
-                        if (errno == ENOENT) {
-                                strerror_r(errno, strbuf, sizeof(strbuf));
-                                isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
-                                              ISC_LOGMODULE_INTERFACE,
-                                              ISC_LOG_DEBUG(1),
-                                                        "get interface "
-                                                        "configuration: %s",
-                                               strbuf);
-                                result = ISC_R_FAILURE;
-                                goto cleanup;
-                        }
-#endif
                         if (errno != EINVAL) {
                                 strerror_r(errno, strbuf, sizeof(strbuf));
                                 UNEXPECTED_ERROR("get interface "
