@@ -67,10 +67,6 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 		unsigned int bytea, byteb, mask;
 		INSIST(nbytes < ipabytes);
 		INSIST(nbits < 8);
-#ifdef __COVERITY__
-		/* head off CID 117240 */
-		assert(nbytes < ipabytes);
-#endif /* __COVERITY__ */
 		bytea = pa[nbytes];
 		byteb = pb[nbytes];
 		mask = (0xFF << (8-nbits)) & 0xFF;
