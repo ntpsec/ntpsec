@@ -547,6 +547,24 @@ remove_asyncio_reader(
 }
 #endif /* defined(USE_ROUTING_SOCKET) */
 
+static void
+netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
+	int family = s->type.sa.sa_family;
+	t->family = (unsigned int)family;
+	switch (family) {
+	case AF_INET:
+		t->type.in = s->type.sin.sin_addr;
+		t->zone = 0;
+		break;
+	case AF_INET6:
+		memcpy(&t->type.in6, &s->type.sin6.sin6_addr, 16);
+		t->zone = s->type.sin6.sin6_scope_id;
+		break;
+	default:
+		INSIST(0);
+	}
+}
+
 
 /* compare two sockaddr prefixes */
 static bool
@@ -562,11 +580,11 @@ addr_eqprefix(
 
 	ZERO(isc_sa);
 	memcpy(&isc_sa.type, a, min(sizeof(isc_sa.type), sizeof(*a)));
-	isc_netaddr_fromsockaddr(&isc_a, &isc_sa);
+	netaddr_fromsockaddr(&isc_a, &isc_sa);
 
 	ZERO(isc_sa);
 	memcpy(&isc_sa.type, b, min(sizeof(isc_sa.type), sizeof(*b)));
-	isc_netaddr_fromsockaddr(&isc_b, &isc_sa);
+	netaddr_fromsockaddr(&isc_b, &isc_sa);
 
 	return isc_netaddr_eqprefix(&isc_a, &isc_b,
 					 (u_int)prefixlen);

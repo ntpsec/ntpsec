@@ -98,24 +98,6 @@ isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone) {
 	netaddr->zone = zone;
 }
 
-void
-isc_netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
-	int family = s->type.sa.sa_family;
-	t->family = (unsigned int)family;
-	switch (family) {
-	case AF_INET:
-		t->type.in = s->type.sin.sin_addr;
-		t->zone = 0;
-		break;
-	case AF_INET6:
-		memcpy(&t->type.in6, &s->type.sin6.sin6_addr, 16);
-		t->zone = s->type.sin6.sin6_scope_id;
-		break;
-	default:
-		INSIST(0);
-	}
-}
-
 bool
 isc_netaddr_islinklocal(isc_netaddr_t *na) {
 	switch (na->family) {
