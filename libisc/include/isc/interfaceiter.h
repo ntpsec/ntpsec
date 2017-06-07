@@ -28,7 +28,6 @@
  *** Imports
  ***/
 
-#include "isc/netaddr.h"
 #include "isc/result.h"
 
 typedef struct isc_interface	 isc_interface_t;      /* Interface */

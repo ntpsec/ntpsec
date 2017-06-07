@@ -11,10 +11,6 @@
 /*! \file isc/netaddr.h */
 
 #include <stdbool.h>
-/* for struct sockaddr on *BSD */
-#include <sys/socket.h>                /* Contractual promise. */
-
-#include <netinet/in.h>		/* Contractual promise. */
 #include "isc/result.h"
 
 /*

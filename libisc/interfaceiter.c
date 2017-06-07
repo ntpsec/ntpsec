@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <netinet/in.h>                /* Contractual promise. */
 
 #include "ntp_assert.h"
 #include "isc/interfaceiter.h"
