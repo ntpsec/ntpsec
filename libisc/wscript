@@ -3,7 +3,6 @@ def build(ctx):
 
     libisc_source = [
         "error.c",
-        "netaddr.c",
         "interfaceiter.c",
         "net.c"
     ]

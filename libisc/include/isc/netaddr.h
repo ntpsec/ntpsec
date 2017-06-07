@@ -100,19 +100,4 @@ struct isc_netaddr {
 	uint32_t zone;
 };
 
-void
-isc_netaddr_fromin(isc_netaddr_t *netaddr, const struct in_addr *ina);
-
-void
-isc_netaddr_fromin6(isc_netaddr_t *netaddr, const struct in6_addr *ina6);
-
-void
-isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone);
-
-bool
-isc_netaddr_islinklocal(isc_netaddr_t *na) __attribute__((pure));
-/*%<
- * Returns #true if the address is a link local address.
- */
-
 #endif /* GUARD_ISC_NETADDR_H */

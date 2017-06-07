@@ -36,6 +36,46 @@
 # include <linux/if_addr.h>
 #endif
 
+#define ISC_TF(x) ((x) ? true : false)
+
+static void
+isc_netaddr_fromin6(isc_netaddr_t *netaddr, const struct in6_addr *ina6);
+
+static void
+isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone);
+
+static bool
+isc_netaddr_islinklocal(isc_netaddr_t *na) __attribute__((pure));
+
+static void
+isc_netaddr_fromin6(isc_netaddr_t *netaddr, const struct in6_addr *ina6) {
+	memset(netaddr, 0, sizeof(*netaddr));
+	netaddr->family = AF_INET6;
+	netaddr->type.in6 = *ina6;
+}
+
+static void
+isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone) {
+	/* we currently only support AF_INET6. */
+	REQUIRE(netaddr->family == AF_INET6);
+
+	netaddr->zone = zone;
+}
+
+/*
+ * Returns #true if the address is a link local address.
+ */
+static bool
+isc_netaddr_islinklocal(isc_netaddr_t *na) {
+	switch (na->family) {
+	case AF_INET:
+		return (false);
+	case AF_INET6:
+		return (ISC_TF(IN6_IS_ADDR_LINKLOCAL(&na->type.in6)));
+	default:
+		return (false);
+	}
+}
 
 typedef struct {
 	unsigned int magic;
