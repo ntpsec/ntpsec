@@ -121,6 +121,14 @@ static int ninterfaces;			/* total # of interfaces */
 
 bool disable_dynamic_updates;	/* if true, scan interfaces once only */
 
+static bool
+netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
+                    unsigned int) __attribute__((pure));
+
+static void
+netaddr_fromsockaddr(isc_netaddr_t *netaddr, const isc_sockaddr_t *source);
+
+
 #ifdef REFCLOCK
 /*
  * Refclock stuff.	We keep a chain of structures with data concerning
@@ -565,6 +573,64 @@ netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
 	}
 }
 
+static bool
+netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
+		     unsigned int prefixlen)
+{
+	const unsigned char *pa = NULL, *pb = NULL;
+	unsigned int ipabytes = 0; /* Length of whole IP address in bytes */
+	unsigned int nbytes;       /* Number of significant whole bytes */
+	unsigned int nbits;        /* Number of significant leftover bits */
+
+	REQUIRE(a != NULL && b != NULL);
+
+	if (a->family != b->family)
+		return (false);
+
+	if (a->zone != b->zone && b->zone != 0)
+		return (false);
+
+	switch (a->family) {
+	case AF_INET:
+		pa = (const unsigned char *) &a->type.in;
+		pb = (const unsigned char *) &b->type.in;
+		ipabytes = 4;
+		break;
+	case AF_INET6:
+		pa = (const unsigned char *) &a->type.in6;
+		pb = (const unsigned char *) &b->type.in6;
+		ipabytes = 16;
+		break;
+	default:
+		return (false);
+	}
+
+	/*
+	 * Don't crash if we get a pattern like 10.0.0.1/9999999.
+	 */
+	if (prefixlen > ipabytes * 8)
+		prefixlen = ipabytes * 8;
+
+	nbytes = prefixlen / 8;
+	nbits = prefixlen % 8;
+
+	if (nbytes > 0) {
+		if (memcmp(pa, pb, nbytes) != 0)
+			return (false);
+	}
+	if (nbits > 0) {
+		unsigned int bytea, byteb, mask;
+		INSIST(nbytes < ipabytes);
+		INSIST(nbits < 8);
+		bytea = pa[nbytes];
+		byteb = pb[nbytes];
+		mask = (0xFF << (8-nbits)) & 0xFF;
+		if ((bytea & mask) != (byteb & mask))
+			return (false);
+	}
+	return (true);
+}
+
 
 /* compare two sockaddr prefixes */
 static bool
@@ -586,7 +652,7 @@ addr_eqprefix(
 	memcpy(&isc_sa.type, b, min(sizeof(isc_sa.type), sizeof(*b)));
 	netaddr_fromsockaddr(&isc_b, &isc_sa);
 
-	return isc_netaddr_eqprefix(&isc_a, &isc_b,
+	return netaddr_eqprefix(&isc_a, &isc_b,
 					 (u_int)prefixlen);
 }
 

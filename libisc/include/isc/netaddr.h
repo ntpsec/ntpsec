@@ -100,10 +100,6 @@ struct isc_netaddr {
 	uint32_t zone;
 };
 
-bool
-isc_netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
-		     unsigned int) __attribute__((pure));
-
 void
 isc_netaddr_fromin(isc_netaddr_t *netaddr, const struct in_addr *ina);
 
