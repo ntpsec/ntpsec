@@ -124,18 +124,16 @@ static bool
 netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
                     unsigned int) __attribute__((pure));
 
-#define ISC_LINK(type) struct { type *prev, *next; }
-
-struct isc_sockaddr {
+/* Socket Address */
+typedef struct isc_sockaddr {
 	union {
 		struct sockaddr		sa;
 		struct sockaddr_in	sin;
 		struct sockaddr_in6	sin6;
 	}				type;
 	unsigned int			length;		/* XXXRTH beginning? */
-	ISC_LINK(struct isc_sockaddr)	link;
-};
-typedef struct isc_sockaddr	isc_sockaddr_t;		/* Socket Address */
+        struct { struct isc_sockaddr *prev, *next; } link;
+} isc_sockaddr_t;
 
 static void
 netaddr_fromsockaddr(isc_netaddr_t *netaddr, const isc_sockaddr_t *source);
