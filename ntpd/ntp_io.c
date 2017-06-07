@@ -24,7 +24,7 @@
 
 #include "isc_mem.h"
 #include "isc/interfaceiter.h"
-#include "isc/netaddr.h"
+#include "isc_netaddr.h"
 
 #ifdef HAVE_NET_ROUTE_H
 # define USE_ROUTING_SOCKET

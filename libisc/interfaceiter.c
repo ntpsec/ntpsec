@@ -22,7 +22,7 @@
 #include "ntp_assert.h"
 #include "isc/interfaceiter.h"
 #include "isc_mem.h"
-#include "isc/netaddr.h"
+#include "isc_netaddr.h"
 #include "isc_result.h"
 #include "isc/error.h"
 

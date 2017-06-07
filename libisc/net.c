@@ -22,7 +22,7 @@
 #include <sys/socket.h>                /* Contractual promise. */
 #include <netinet/in.h>                /* Contractual promise. */
 
-#include "isc/netaddr.h"
+#include "isc_netaddr.h"
 #include "isc/error.h"
 #include "isc_result.h"
 
