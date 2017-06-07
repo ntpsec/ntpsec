@@ -50,7 +50,6 @@
  *	RFC 2553
  */
 
-typedef struct isc_sockaddr	isc_sockaddr_t;		/* Socket Address */
 typedef struct isc_netaddr	isc_netaddr_t;		/* Net Address */
 
 /***
