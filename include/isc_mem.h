@@ -22,25 +22,13 @@
 #include "ntp_stdlib.h"
 #include "ntp_types.h"
 
-#define isc_mem_allocate(c, cnt)	isc_mem_get(c, cnt)
 #define isc_mem_get(c, cnt)		\
 	( UNUSED_ARG(c),	emalloc(cnt) )
-
-#define isc_mem_reallocate(c, mem, cnt)	\
-	( UNUSED_ARG(c),	erealloc((mem), cnt) )
 
 #define isc_mem_put(c, mem, cnt)	\
 	( UNUSED_ARG(cnt),	isc_mem_free(c, (mem)) )
 
 #define isc_mem_free(c, mem)		\
 	( UNUSED_ARG(c),	free(mem) )
-
-#define isc_mem_strdup(c, str)		\
-	( UNUSED_ARG(c),	estrdup(str) )
-
-#define isc__mem_attach(src, ptgt)	do { *(ptgt) = (src); } while (0)
-#define isc__mem_detach(c)		UNUSED_ARG(c)
-#define isc__mem_printallactive(s)	fprintf((s), \
-					"isc_mem_printallactive() stubbed.\n")
 
 #endif /* GUARD_ISC_MEM_H */
