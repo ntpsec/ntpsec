@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include "isc_netaddr.h"
-#include "isc/sockaddr.h"
 
 #include "ntp_fp.h"
 #include "lib_strbuf.h"

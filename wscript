@@ -148,7 +148,6 @@ def configure(ctx):
             "-P", "%s/devel/trace/" % srcnode,
             "-f", "-I%s" % bldnode,
             "-f", "-I%s/include/" % srcnode,
-            "-f", "-I%s/libisc/include/" % srcnode,
         ]
 
     # Not needed to build.  Used by utility scripts.

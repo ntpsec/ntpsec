@@ -20,7 +20,7 @@
 #include <netinet/in.h>                /* Contractual promise. */
 
 #include "ntp_assert.h"
-#include "isc/interfaceiter.h"
+#include "isc_interfaceiter.h"
 #include "isc_mem.h"
 #include "isc_netaddr.h"
 #include "isc_result.h"

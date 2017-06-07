@@ -9,9 +9,6 @@ def build(ctx):
 
     ctx(
         features="c bld_include src_include",
-        includes=[
-            "%s/libisc/include/" % ctx.srcnode.abspath(),
-        ],
         source=libisc_source,
         target="libisc_obj",
     )

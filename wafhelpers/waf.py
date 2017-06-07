@@ -20,14 +20,12 @@ def insert_srcdir(self):
 @feature('libisc_include')
 def insert_libiscdir(self):
         srcnode = self.bld.srcnode.abspath()
-        self.includes += ["%s/libisc/include/" % srcnode]
 
 
 @before_method('apply_incpaths')
 @feature('libisc_pthread_include')
 def insert_libiscpthreaddir(self):
         srcnode = self.bld.srcnode.abspath()
-        self.includes += ["%s/libisc/pthreads/include/" % srcnode]
 
 
 def manpage_subst_fun(task, text):

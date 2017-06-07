@@ -12,7 +12,7 @@
  ***** Module Info
  *****/
 
-/* isc/interfaceiter.h
+/* isc_interfaceiter.h
  * Iterates over the list of network interfaces.
  *
  * Interfaces whose address family is not supported are ignored and never

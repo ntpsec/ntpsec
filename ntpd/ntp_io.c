@@ -23,7 +23,7 @@
 #include "timespecops.h"
 
 #include "isc_mem.h"
-#include "isc/interfaceiter.h"
+#include "isc_interfaceiter.h"
 #include "isc_netaddr.h"
 
 #ifdef HAVE_NET_ROUTE_H
