@@ -22,8 +22,6 @@
 #include "isc/error.h"
 #include "isc/result.h"
 
-static bool 	once_ipv6only = false;
-
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6only_result = ISC_R_NOTFOUND;
@@ -127,11 +125,15 @@ isc_net_probeipv6(void) {
 }
 
 static void
-try_ipv6only(void) {
+initialize_ipv6only(void) {
+        static bool once_ipv6only = false;
 #ifdef IPV6_V6ONLY
 	int s, on;
 	char strbuf[BUFSIZ];
 #endif
+
+        if (once_ipv6only) return;
+        once_ipv6only = true;
 	isc_result_t result;
 
 	result = isc_net_probeipv6();
@@ -182,13 +184,6 @@ close:
 	close(s);
 	return;
 #endif /* IPV6_V6ONLY */
-}
-
-static void
-initialize_ipv6only(void) {
-	if (once_ipv6only) return;
-	once_ipv6only = true;
-	try_ipv6only();
 }
 
 bool
