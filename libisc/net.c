@@ -23,7 +23,7 @@
 #include <netinet/in.h>                /* Contractual promise. */
 
 #include "isc_netaddr.h"
-#include "isc/error.h"
+#include "isc_error.h"
 #include "isc_result.h"
 
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;

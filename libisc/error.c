@@ -15,7 +15,7 @@
 #include "ntp_config.h"
 #include "ntp_syslog.h"
 
-#include "isc/error.h"
+#include "isc_error.h"
 
 
 #define MAX_UNEXPECTED_ERRORS 100

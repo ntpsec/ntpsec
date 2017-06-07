@@ -24,7 +24,7 @@
 #include "isc_mem.h"
 #include "isc_netaddr.h"
 #include "isc_result.h"
-#include "isc/error.h"
+#include "isc_error.h"
 
 
 /* Must follow <isc/net.h>. */

@@ -8,7 +8,7 @@
 #ifndef GUARD_ISC_ERROR_H
 #define GUARD_ISC_ERROR_H 1
 
-/*! \file isc/error.h */
+/* isc_error.h */
 
 /*
  * ISC_FORMAT_PRINTF().

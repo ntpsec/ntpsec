@@ -15,7 +15,7 @@
 #ifdef ENABLE_DNS_LOOKUP
 #include "ntp_dns.h"
 #endif
-#include "isc/error.h"
+#include "isc_error.h"
 
 #include <unistd.h>
 #include <sys/stat.h>
