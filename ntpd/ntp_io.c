@@ -2329,9 +2329,9 @@ read_network_packet(
 	msghdr.msg_flags      = 0;
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
-	rb->recv_length       = recvmsg(fd, &msghdr, 0);
+	buflen                = recvmsg(fd, &msghdr, 0);
 
-	buflen = (ssize_t)rb->recv_length;
+	rb->recv_length = (size_t)buflen;
 
 	if (buflen == 0 || (buflen == -1 &&
 	    (EWOULDBLOCK == errno
