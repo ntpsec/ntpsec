@@ -502,7 +502,7 @@ print_interface(const endpt *iface, const char *pfx, const char *sfx)
 		   ? "Disabled"
 		   : "Enabled",
 	       sfx);
-	if (debug > 4)	/* in-depth debugging only */
+	if (debug > 4)	/* in-depth debugging only */ /* SPECIAL DEBUG */
 		interface_dump(iface);
 }
 #endif
@@ -2119,7 +2119,7 @@ open_socket(
 		 */
 		if (turn_off_reuse == 0
 #ifdef DEBUG
-		    || debug > 1
+		    || debug > 1 /* SPECIAL DEBUG */
 #endif
 		    ) {
 			msyslog(LOG_ERR,
@@ -2440,7 +2440,7 @@ io_handler(void)
 		msyslog(LOG_ERR, "select() error: %m");
 	}
 #   ifdef DEBUG
-	else if (debug > 4) {
+	else if (debug > 4) { /* SPECIAL DEBUG */
 		msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
 	} else {
 		DPRINT(1, ("select() returned %d: %m\n", nfound));
@@ -2577,7 +2577,7 @@ input_handler(
 	 */
 	if (select_count == 0) { /* We really had nothing to do */
 #ifdef DEBUG
-		if (debug)
+		if (debug) /* SPECIAL DEBUG */
 			msyslog(LOG_DEBUG, "input_handler: select() returned 0");
 #endif /* DEBUG */
 		return;
@@ -2591,7 +2591,7 @@ input_handler(
 	 */
 	ts_e -= ts;
 	collect_timing(NULL, "input handler", 1, ts_e);
-	if (debug > 3)
+	if (debug > 3) /* SPECIAL DEBUG */
 		msyslog(LOG_DEBUG,
 			"input_handler: Processed a gob of fd's in %s msec",
 			lfptoms(ts_e, 6));
