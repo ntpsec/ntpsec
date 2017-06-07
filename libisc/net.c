@@ -24,8 +24,6 @@
 
 static bool 	once_ipv6only = false;
 
-static bool 	once = false;
-
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6only_result = ISC_R_NOTFOUND;
@@ -102,16 +100,13 @@ try_proto(int domain) {
 }
 
 static void
-initialize_action(void) {
-	ipv4_result = try_proto(PF_INET);
-	ipv6_result = try_proto(PF_INET6);
-}
-
-static void
 initialize(void) {
+	static bool once = false;
+
 	if (once) return;
 	once = true;
-	initialize_action();
+	ipv4_result = try_proto(PF_INET);
+	ipv6_result = try_proto(PF_INET6);
 }
 
 bool
