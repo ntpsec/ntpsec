@@ -22,7 +22,7 @@
  *   bintime documentation is at
  *   http://phk.freebsd.dk/pubs/timecounter.pdf
  * SO_TIMESTAMPNS/SCM_TIMESTAMPNS  Linux
- * SO_TIMESTAMP/SCM_TIMESTAMP      FreeBSD, NetBSD, OpenBSD, Linux
+ * SO_TIMESTAMP/SCM_TIMESTAMP      FreeBSD, NetBSD, OpenBSD, Linux, macOS
  *
  * Linux supports both SO_TIMESTAMP and SO_TIMESTAMPNS so it's
  * important to check for SO_TIMESTAMPNS first to get the better accuracy.
