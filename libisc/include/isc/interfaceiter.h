@@ -35,6 +35,17 @@ typedef struct isc_interface	 isc_interface_t;      /* Interface */
 typedef struct isc_interfaceiter isc_interfaceiter_t;  /* Interface Iterator */
 typedef struct isc_mem           isc_mem_t;	       /* Memory */
 
+/* Net Address */
+typedef struct isc_netaddr {
+	unsigned int family;
+	union {
+		struct in_addr in;
+		struct in6_addr in6;
+	} type;
+	uint32_t zone;
+} isc_netaddr_t;	      
+
+
 /*!
  * \brief Public structure describing a network interface.
  */

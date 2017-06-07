@@ -50,8 +50,6 @@
  *	RFC 2553
  */
 
-typedef struct isc_netaddr	isc_netaddr_t;		/* Net Address */
-
 /***
  *** Functions.
  ***/
@@ -89,14 +87,5 @@ isc_net_probeipv6(void);
 
 bool
 isc_net_probe_ipv6only_bool(void);
-
-struct isc_netaddr {
-	unsigned int family;
-	union {
-		struct in_addr in;
-		struct in6_addr in6;
-	} type;
-	uint32_t zone;
-};
 
 #endif /* GUARD_ISC_NETADDR_H */
