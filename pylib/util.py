@@ -645,13 +645,15 @@ class PeerSummary:
     "Reusable report generator for peer statistics"
 
     def __init__(self, displaymode, pktversion, showhostnames,
-                 wideremote, showunits=False, termwidth=None, debug=0):
+                 wideremote, showunits=False, termwidth=None,
+                 debug=0, logfp=sys.stderr):
         self.displaymode = displaymode          # peers/apeers/opeers
         self.pktversion = pktversion            # interpretation of flash bits
         self.showhostnames = showhostnames      # If false, display numeric IPs
         self.showunits = showunits              # If False show old style float
         self.wideremote = wideremote            # show wide remote names?
         self.debug = debug
+        self.logfp = logfp
         self.termwidth = termwidth
         # By default, the peer spreadsheet layout is designed so lines just
         # fit in 80 characters. This tells us how much extra horizontal space
@@ -735,7 +737,6 @@ class PeerSummary:
         saw6 = False        # x.6 floats for delay and friends
         have_jitter = False
         clock_name = ''
-        self.logfp = sys.stderr
 
         now = time.time()
 

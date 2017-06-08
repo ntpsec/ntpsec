@@ -163,6 +163,7 @@ class Ntpq(cmd.Cmd):
         self.chosts = []                # Command-line hosts
         self.peers = []                 # Data from NTP peers.
         self.debug = 0
+        self.logfp = sys.stderr
         self.pktversion = ntp.magic.NTP_OLDVERSION + 1
         self.uservars = ntp.util.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
@@ -296,7 +297,8 @@ usage: help [ command ]
                                       self.wideremote,
                                       self.showunits,
                                       termwidth=interpreter.termwidth,
-                                      debug=interpreter.debug)
+                                      debug=interpreter.debug,
+                                      logfp=self.logfp)
         try:
             maxhostlen = 0
             if len(self.chosts) > 1:
@@ -1628,7 +1630,8 @@ if __name__ == '__main__':
         elif switch in ("-d", "--debug"):
             interpreter.debug += 1
             session.debug += 1
-            session.logfp = open("ntpq.log", "a", 1)    # 1 => line buffered
+            logfp = open("ntpq.log", "a", 1)    # 1 => line buffered
+            session.logfp = interpreter.logfp = logfp
         elif switch in ("-D", "--set-debug-level"):
             errmsg = "Error: -D parameter '%s' not a number\n"
             cast = ntp.util.safeargcast(val, int, errmsg, usage)
