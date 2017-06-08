@@ -171,6 +171,7 @@ getgroup:
 			exit(-1);
 		}
 #  endif /* HAVE_SOLARIS_PRIVS */
+                /* FIXME? Apple takes an int as 2nd argument */
 		if (user && initgroups(user, (gid_t)sw_gid)) {
 			msyslog(LOG_ERR, "Cannot initgroups() to user `%s': %m", user);
 			exit (-1);
