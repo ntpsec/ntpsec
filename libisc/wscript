@@ -2,7 +2,6 @@
 def build(ctx):
 
     libisc_source = [
-        "interfaceiter.c",
     ]
 
     ctx(

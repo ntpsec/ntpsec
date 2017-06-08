@@ -12,6 +12,7 @@ def build(ctx):
         "gpstolfp.c",
         "initnetwork.c",
         "isc_error.c",
+        "isc_interfaceiter.c",
         "isc_net.c",
         "macencrypt.c",
         "netof.c",
