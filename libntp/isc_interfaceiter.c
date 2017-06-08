@@ -156,6 +156,17 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 static isc_result_t linux_if_inet6_next(isc_interfaceiter_t *);
 static isc_result_t linux_if_inet6_current(isc_interfaceiter_t *);
 static void linux_if_inet6_first(isc_interfaceiter_t *iter);
+static bool seenv6 = false;
+
+/* IF_NAMESIZE usually defined in net/if.h */
+# ifndef IF_NAMESIZE
+#  ifdef IFNAMSIZ
+#   define IF_NAMESIZE  IFNAMSIZ
+#  else
+#   define IF_NAMESIZE 16
+#  endif
+# endif
+
 #endif
 
 
@@ -202,10 +213,6 @@ isc_interfaceiter_current_bool(isc_interfaceiter_t *iter,
 #define IFITER_MAGIC            ISC_MAGIC('I', 'F', 'I', 'G')
 /*% Valid Iterator */
 #define VALID_IFITER(t)         ISC_MAGIC_VALID(t, IFITER_MAGIC)
-
-#ifdef __linux
-static bool seenv6 = false;
-#endif
 
 /*% Iterator structure */
 struct isc_interfaceiter {
@@ -799,16 +806,6 @@ struct isc_interfaceiter {
  */
 #define IFCONF_BUFSIZE_INITIAL  4096
 #define IFCONF_BUFSIZE_MAX      1048576
-
-#ifdef __linux
-#ifndef IF_NAMESIZE
-# ifdef IFNAMSIZ
-#  define IF_NAMESIZE  IFNAMSIZ
-# else
-#  define IF_NAMESIZE 16
-# endif
-#endif
-#endif
 
 static int
 isc_ioctl(int fildes, int req, char *arg);
