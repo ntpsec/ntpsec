@@ -224,7 +224,7 @@ struct isc_interfaceiter {
         struct ifaddrs          *pos;           /*%< Ptr to current ifaddr */
         isc_interface_t         current;        /*%< Current interface data. */
         isc_result_t            result;         /*%< Last result code. */
-#ifdef  __linux
+#ifdef __linux
         FILE *                  proc;
         char                    entry[ISC_IF_INET6_SZ];
         isc_result_t            valid;
@@ -791,7 +791,7 @@ struct isc_interfaceiter {
         isc_result_t            result6;        /* Last result code. */
         bool            first6;
 #endif
-#ifdef  __linux
+#ifdef __linux
         FILE *                  proc;
         char                    entry[ISC_IF_INET6_SZ];
         isc_result_t            valid;
