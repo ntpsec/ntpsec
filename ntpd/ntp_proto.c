@@ -9,7 +9,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_leapsec.h"
 #include "ntp_dns.h"
-#include "refidsmear.h"
 #include "timespecops.h"
 
 #include <string.h>

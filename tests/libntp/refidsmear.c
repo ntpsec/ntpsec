@@ -2,7 +2,6 @@
 
 #include "ntp.h"
 #include "ntp_fp.h"
-#include "refidsmear.h"
 
 #include "unity.h"
 #include "unity_fixture.h"

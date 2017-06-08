@@ -2,7 +2,6 @@
 
 #include "ntp.h"
 #include "ntp_fp.h"
-#include "refidsmear.h"
 
 /*
  * we want to test a refid format of:

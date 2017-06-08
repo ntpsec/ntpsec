@@ -188,4 +188,6 @@ extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct t
 typedef void (*time_stepped_callback)(void);
 extern time_stepped_callback	step_callback;
 
+extern uint32_t	convertLFPToRefID(l_fp num) __attribute__((const));
+
 #endif /* GUARD_NTP_FP_H */
