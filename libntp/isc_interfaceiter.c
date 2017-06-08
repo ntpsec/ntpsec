@@ -20,8 +20,8 @@
 #include <netinet/in.h>                /* Contractual promise. */
 
 #include "ntp_assert.h"
+#include "ntp_stdlib.h"
 #include "isc_interfaceiter.h"
-#include "isc_mem.h"
 #include "isc_netaddr.h"
 #include "isc_result.h"
 #include "isc_error.h"
@@ -242,7 +242,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         REQUIRE(iterp != NULL);
         REQUIRE(*iterp == NULL);
 
-        iter = isc_mem_get(mctx, sizeof(*iter));
+        iter = emalloc(sizeof(*iter));
         if (iter == NULL)
                 return (ISC_R_NOMEMORY);
 
@@ -302,7 +302,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 #endif
         if (iter->ifaddrs != NULL) /* just in case */
                 freeifaddrs(iter->ifaddrs);
-        isc_mem_put(mctx, iter, sizeof(*iter));
+        free(iter);
         return (result);
 }
 
@@ -513,7 +513,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         REQUIRE(iterp != NULL);
         REQUIRE(*iterp == NULL);
 
-        iter = isc_mem_get(mctx, sizeof(*iter));
+        iter = emalloc(sizeof(*iter));
         if (iter == NULL)
                 return (ISC_R_NOMEMORY);
 
@@ -533,7 +533,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         }
         iter->bufsize = bufsize;
 
-        iter->buf = isc_mem_get(iter->mctx, iter->bufsize);
+        iter->buf = emalloc(iter->bufsize);
         if (iter->buf == NULL) {
                 result = ISC_R_NOMEMORY;
                 goto failure;
@@ -563,8 +563,8 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 
  failure:
         if (iter->buf != NULL)
-                isc_mem_put(mctx, iter->buf, iter->bufsize);
-        isc_mem_put(mctx, iter, sizeof(*iter));
+                free(iter->buf);
+        free(iter);
         return (result);
 }
 
@@ -832,7 +832,7 @@ getbuf4(isc_interfaceiter_t *iter) {
         iter->bufsize = IFCONF_BUFSIZE_INITIAL;
 
         for (;;) {
-                iter->buf = isc_mem_get(iter->mctx, iter->bufsize);
+                iter->buf = emalloc(iter->bufsize);
                 if (iter->buf == NULL)
                         return (ISC_R_NOMEMORY);
 
@@ -875,14 +875,14 @@ getbuf4(isc_interfaceiter_t *iter) {
                                          "maximum buffer size exceeded");
                         goto unexpected;
                 }
-                isc_mem_put(iter->mctx, iter->buf, iter->bufsize);
+                free(iter->buf);
 
                 iter->bufsize *= 2;
         }
         return (ISC_R_SUCCESS);
 
  unexpected:
-        isc_mem_put(iter->mctx, iter->buf, iter->bufsize);
+        free(iter->buf);
         iter->buf = NULL;
         return (ISC_R_UNEXPECTED);
 }
@@ -896,7 +896,7 @@ getbuf6(isc_interfaceiter_t *iter) {
         iter->bufsize6 = IFCONF_BUFSIZE_INITIAL;
 
         for (;;) {
-                iter->buf6 = isc_mem_get(iter->mctx, iter->bufsize6);
+                iter->buf6 = emalloc(iter->bufsize6);
                 if (iter->buf6 == NULL)
                         return (ISC_R_NOMEMORY);
 
@@ -947,7 +947,7 @@ getbuf6(isc_interfaceiter_t *iter) {
                         result = ISC_R_UNEXPECTED;
                         goto cleanup;
                 }
-                isc_mem_put(iter->mctx, iter->buf6, iter->bufsize6);
+                free(iter->buf6);
 
                 iter->bufsize6 *= 2;
         }
@@ -957,7 +957,7 @@ getbuf6(isc_interfaceiter_t *iter) {
         return (ISC_R_SUCCESS);
 
  cleanup:
-        isc_mem_put(iter->mctx, iter->buf6, iter->bufsize6);
+        free(iter->buf6);
         iter->buf6 = NULL;
         return (result);
 }
@@ -973,7 +973,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         REQUIRE(iterp != NULL);
         REQUIRE(*iterp == NULL);
 
-        iter = isc_mem_get(mctx, sizeof(*iter));
+        iter = emalloc(sizeof(*iter));
         if (iter == NULL)
                 return (ISC_R_NOMEMORY);
 
@@ -1041,20 +1041,20 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 
  ioctl_failure:
         if (iter->buf != NULL)
-                isc_mem_put(mctx, iter->buf, iter->bufsize);
+                free(iter->buf);
         (void) close(iter->socket);
 
  socket_failure:
 #if defined(SIOCGLIFCONF) && defined(SIOCGLIFADDR)
         if (iter->buf6 != NULL)
-                isc_mem_put(mctx, iter->buf6, iter->bufsize6);
+                free(iter->buf6);
   ioctl6_failure:
         if (iter->socket6 != -1)
                 (void) close(iter->socket6);
   socket6_failure:
 #endif
 
-        isc_mem_put(mctx, iter, sizeof(*iter));
+        free(iter);
         return (result);
 }
 
@@ -1543,7 +1543,7 @@ internal_destroy(isc_interfaceiter_t *iter) {
         if (iter->socket6 != -1)
                 (void) close(iter->socket6);
         if (iter->buf6 != NULL) {
-                isc_mem_put(iter->mctx, iter->buf6, iter->bufsize6);
+                free(iter->buf6);
         }
 #endif
 #ifdef __linux
@@ -1756,9 +1756,9 @@ isc_interfaceiter_destroy(isc_interfaceiter_t **iterp)
 
         internal_destroy(iter);
         if (iter->buf != NULL)
-                isc_mem_put(iter->mctx, iter->buf, iter->bufsize);
+                free(iter->buf);
 
         iter->magic = 0;
-        isc_mem_put(iter->mctx, iter, sizeof(*iter));
+        free(iter);
         *iterp = NULL;
 }

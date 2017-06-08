@@ -22,7 +22,6 @@
 #include "ntp_dns.h"
 #include "timespecops.h"
 
-#include "isc_mem.h"
 #include "isc_interfaceiter.h"
 #include "isc_netaddr.h"
 
