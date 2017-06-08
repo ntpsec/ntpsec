@@ -363,7 +363,7 @@ static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat
      */
     if (shmcopy.mode > 0 && cnt != shm->count) {
 	shm_stat->status = CLASH;
-	return shm_stat->status;
+	return (enum segstat_t)shm_stat->status;
     }
 
     shm_stat->status = OK;
@@ -437,7 +437,7 @@ static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat
     shm_stat->leap = shmcopy.leap;
     shm_stat->precision = shmcopy.precision;
 
-    return shm_stat->status;
+    return (enum segstat_t)shm_stat->status;
 }
 
 /*
