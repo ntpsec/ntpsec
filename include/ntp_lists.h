@@ -209,6 +209,7 @@ do {								\
 	UNLINK_EXPR_SLIST(punlinked, listhead, (ptounlink) ==	\
 	    U_E_S_CUR(), nextlink, entrytype)
 
+/* might be useful for debug someday
 #define CHECK_SLIST(listhead, nextlink, entrytype)		\
 do {								\
 	entrytype *pentry;					\
@@ -220,6 +221,7 @@ do {								\
 		INSIST((listhead) != pentry->nextlink);	\
 	}							\
 } while (false)
+*/
 
 /*
  * FIFO
@@ -232,9 +234,6 @@ struct {							\
 }
 
 #define HEAD_FIFO(anchor)	((anchor).phead)
-#define TAIL_FIFO(anchor)	((NULL == (anchor).pptail)	\
-					? NULL			\
-					: *((anchor).pptail))
 
 /*
  * For DEBUG builds only, verify both or neither of the anchor pointers
@@ -378,13 +377,6 @@ do {								\
 		    : NULL					\
 	)
 
-#define NEXT_DLIST(listhead, entry, link)			\
-	(							\
-		(&(listhead) != (entry)->link.f)		\
-		    ? (entry)->link.f				\
-		    : NULL					\
-	)
-
 #define PREV_DLIST(listhead, entry, link)			\
 	(							\
 		(&(listhead) != (entry)->link.b)		\
@@ -425,18 +417,6 @@ do {								\
 	     && ((i_dl_nextiter = (iter)->link.f), true);	\
 	     (iter) = i_dl_nextiter) {
 #define ITER_DLIST_END()					\
-	}							\
-}
-
-#define REV_ITER_DLIST_BEGIN(listhead, iter, link, entrytype)	\
-{								\
-	entrytype *i_dl_nextiter;				\
-								\
-	for ((iter) = (listhead).link.b;			\
-	     (iter) != &(listhead)				\
-	     && ((i_dl_nextiter = (iter)->link.b), true);	\
-	     (iter) = i_dl_nextiter) {
-#define REV_ITER_DLIST_END()					\
 	}							\
 }
 
