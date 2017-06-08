@@ -1,9 +1,5 @@
 /*
- * libntp local override of isc/mem.h to stub it out.
- *
- * include/isc is searched before any of the libisc include
- * directories and should be used only for replacement NTP headers
- * overriding headers of the same name under libisc.
+ * libntp local copy of isc/mem.h.
  *
  * NOTE: this assumes the system malloc is thread-safe and does
  *	 not use any normal libisc locking.

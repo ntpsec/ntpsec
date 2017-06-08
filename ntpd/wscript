@@ -9,7 +9,7 @@ def build(ctx):
         bison_source = ["ntp_parser.y"]
 
         ctx(
-            features="c src_include bld_include libisc_include",
+            features="c src_include bld_include",
             includes=["%s/ntpd/" % srcnode,
                       "%s/" % ctx.bldnode.parent.abspath()
                       ],
@@ -31,7 +31,7 @@ def build(ctx):
         keyword_gen_source = ["keyword-gen.c", ]
 
         ctx(
-            features="c cprogram bld_include src_include libisc_include",
+            features="c cprogram bld_include src_include",
             includes=["%s/ntpd/" % bldnode,
                       "%s/" % ctx.bldnode.parent.abspath()
                       ],
@@ -68,7 +68,7 @@ def build(ctx):
     ]
 
     ctx(
-        features="c bld_include src_include libisc_include",
+        features="c bld_include src_include",
         includes=ctx.env.PLATFORM_INCLUDES,
         source=libntpd_source,
         target="libntpd_obj",
@@ -90,7 +90,7 @@ def build(ctx):
 
         ctx(
             target="refclock",
-            features="c bld_include src_include libisc_include",
+            features="c bld_include src_include",
             source=refclock_source,
         )
         use_refclock += "refclock"
@@ -98,7 +98,7 @@ def build(ctx):
         for file, define in ctx.env.REFCLOCK_SOURCE:
             ctx(
                 defines=["%s=1" % define],
-                features="c bld_include src_include libisc_include",
+                features="c bld_include src_include",
                 # XXX: These need to go into config.h
                 #      rather than the command line for the individual drivers
                 source="refclock_%s.c" % file,
@@ -122,8 +122,7 @@ def build(ctx):
     ]
 
     ctx(
-        features="c rtems_trace cprogram bld_include src_include "
-                 "libisc_include libisc_pthread_include",
+        features="c rtems_trace cprogram bld_include src_include",
         includes=["%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
                   "%s/ntpd/" % srcnode,
                   ] + ctx.env.PLATFORM_INCLUDES,

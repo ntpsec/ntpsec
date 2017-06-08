@@ -1049,7 +1049,6 @@ def build(ctx):
         ctx.recurse("ntpd")
         return
 
-    ctx.recurse("libisc")
     if ctx.env.REFCLOCK_GENERIC:
         # Only required by the generic refclock
         ctx.recurse("libparse")

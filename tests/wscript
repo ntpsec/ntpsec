@@ -51,7 +51,7 @@ def build(ctx):
     ] + common_source
 
     ctx.ntp_test(
-        features="c cprogram bld_include src_include libisc_include test",
+        features="c cprogram bld_include src_include test",
         target="test_libntp",
         install_path=None,
         defines=unity_config + ["TEST_LIBNTP=1"],
@@ -75,7 +75,7 @@ def build(ctx):
 
         ctx.ntp_test(
             defines=unity_config + ["TEST_LIBPARSE=1"],
-            features="c cprogram bld_include src_include libisc_include test",
+            features="c cprogram bld_include src_include test",
             includes=["%s/tests/unity/" % srcnode,
                       "%s/tests/libparse/" % srcnode,
                       "%s/tests/common/" % srcnode
@@ -96,7 +96,7 @@ def build(ctx):
 
     ctx.ntp_test(
         defines=unity_config + ["TEST_NTPD=1"],
-        features="c cprogram bld_include src_include libisc_include test",
+        features="c cprogram bld_include src_include test",
         includes=["%s/tests/unity/" % srcnode,
                   "%s/ntpd/" % srcnode,
                   "%s/tests/libntp/" % srcnode,

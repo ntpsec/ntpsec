@@ -23,6 +23,6 @@ def build(ctx):
 
     ctx(
         target="parse",
-        features="c cstlib bld_include src_include libisc_include",
+        features="c cstlib bld_include src_include",
         source=libparse_source,
     )

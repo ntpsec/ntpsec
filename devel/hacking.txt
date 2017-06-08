@@ -69,8 +69,8 @@ Here are the non-standardized APIs that may be used:
 
 * getifaddrs(3) or an equivalent local API for iterating over the
   system's active UDP interfaces. However, the local details should be
-  hidden as an implementation of the interfaceiter.c functions under
-  libisc - not called directly from the rest of the code.
+  hidden as an implementation of the isc_interfaceiter.c functions,
+  not called directly from the rest of the code.
 
 === Banned functions ===
 

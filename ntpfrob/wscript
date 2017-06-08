@@ -5,7 +5,7 @@ def build(ctx):
                     'pps-api.c', 'tickadj.c']
 
     ctx(
-        features="c cprogram bld_include src_include libisc_include",
+        features="c cprogram bld_include src_include",
         includes=["%s/ntpfrob/" % bldnode],
         install_path='${BINDIR}',
         source=frob_sources,

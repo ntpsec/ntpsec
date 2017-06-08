@@ -6,7 +6,7 @@ def build(ctx):
     for name in util:
         ctx(
             target=name,
-            features="c cprogram bld_include src_include libisc_include",
+            features="c cprogram bld_include src_include",
             source=[name + ".c"],
             includes=["%s/%s/" % (bldnode, name)],
             use="ntp isc M SSL CRYPTO RT THR PTHREAD",

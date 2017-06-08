@@ -44,9 +44,6 @@ etc/::		Directory containing a motley collection of configuration files
 include/::	Directory containing include header files used by most
 		programs in the distribution.
 
-libisc/::	Utility code from Internet Systems Consortium.  The local
-		copy has been significantly trimmed and modified.
-
 libjsmn/::	A minimal JSON library used by the GPSD-JSON driver.
 
 libntp/::	Directory containing library source code used by most

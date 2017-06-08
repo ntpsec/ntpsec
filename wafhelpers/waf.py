@@ -16,18 +16,6 @@ def insert_srcdir(self):
         self.includes += ["%s/include" % srcnode]
 
 
-@before_method('apply_incpaths')
-@feature('libisc_include')
-def insert_libiscdir(self):
-        srcnode = self.bld.srcnode.abspath()
-
-
-@before_method('apply_incpaths')
-@feature('libisc_pthread_include')
-def insert_libiscpthreaddir(self):
-        srcnode = self.bld.srcnode.abspath()
-
-
 def manpage_subst_fun(task, text):
         return text.replace("include::../docs/", "include::../../../docs/")
 
