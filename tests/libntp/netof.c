@@ -4,50 +4,19 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-TEST_GROUP(netof);
+TEST_GROUP(netof6);
 
-TEST_SETUP(netof) {}
+TEST_SETUP(netof6) {}
 
-TEST_TEAR_DOWN(netof) {}
+TEST_TEAR_DOWN(netof6) {}
 
 #include "sockaddrtest.h"
 
 
-TEST(netof, ClassBAddress) {
-	sockaddr_u input = CreateSockaddr4("172.16.2.1", NTP_PORT);
-	sockaddr_u expected = CreateSockaddr4("172.16.0.0", NTP_PORT);
-
-	sockaddr_u* actual = netof(&input);
-
-	TEST_ASSERT_NOT_NULL(actual);
-	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
-}
-
-TEST(netof, ClassCAddress) {
-	sockaddr_u input = CreateSockaddr4("192.0.2.255", NTP_PORT);
-	sockaddr_u expected = CreateSockaddr4("192.0.2.0", NTP_PORT);
-
-	sockaddr_u* actual = netof(&input);
-
-	TEST_ASSERT_NOT_NULL(actual);
-	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
-}
-
-TEST(netof, ClassAAddress) {
-	/* Class A addresses are assumed to be classless,
-	 * thus the same address should be returned.
-	 */
-	sockaddr_u input = CreateSockaddr4("10.20.30.40", NTP_PORT);
-	sockaddr_u expected = CreateSockaddr4("10.20.30.40", NTP_PORT);
-
-	sockaddr_u* actual = netof(&input);
-
-	TEST_ASSERT_NOT_NULL(actual);
-	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
-}
-
-TEST(netof, IPv6Address) {
-	/* IPv6 addresses are assumed to have 64-bit host- and 64-bit network parts. */
+TEST(netof6, IPv6Address) {
+	/* IPv6 addresses are assumed to have 64-bit host
+         * and 64-bit network parts.
+         */
 	const struct in6_addr input_address = {{{
 		0x20, 0x01, 0x0d, 0xb8,
         0x85, 0xa3, 0x08, 0xd3,
@@ -72,15 +41,12 @@ TEST(netof, IPv6Address) {
 	SET_SOCK_ADDR6(&expected, expected_address);
 	SET_PORT(&expected, 3000);
 
-	sockaddr_u* actual = netof(&input);
+	sockaddr_u* actual = netof6(&input);
 
 	TEST_ASSERT_NOT_NULL(actual);
 	TEST_ASSERT_TRUE(IsEqualS(&expected, actual));
 }
 
-TEST_GROUP_RUNNER(netof) {
-	RUN_TEST_CASE(netof, ClassBAddress);
-	RUN_TEST_CASE(netof, ClassCAddress);
-	RUN_TEST_CASE(netof, ClassAAddress);
-	RUN_TEST_CASE(netof, IPv6Address);
+TEST_GROUP_RUNNER(netof6) {
+	RUN_TEST_CASE(netof6, IPv6Address);
 }

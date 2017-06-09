@@ -3002,7 +3002,7 @@ findbcastinter(
 			if (SOCK_EQ(&iface->bcast, addr))
 				break;
 
-			if (SOCK_EQ(netof(&iface->sin), netof(addr)))
+			if (SOCK_EQ(netof6(&iface->sin), netof6(addr)))
 				break;
 		}
 	}

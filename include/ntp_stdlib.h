@@ -120,7 +120,7 @@ extern	const char * res_access_flags(unsigned short);
 extern	const char * k_st_flags	(uint32_t);
 #endif
 extern	char *	statustoa	(int, int);
-extern	sockaddr_u * netof	(sockaddr_u *);
+extern	sockaddr_u * netof6	(sockaddr_u *);
 extern	char *	numtoa		(uint32_t);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
