@@ -80,7 +80,7 @@ clocktime(
 	 */
 	if (*yearstart) {
 		/* -- get time stamp of potential solution */
-		test[0] = (uint32_t)(*yearstart) + (uint)tmp;
+		test[0] = (uint32_t)(*yearstart) + (unsigned int)tmp;
 		/* -- calc absolute difference to receive time */
 		diff[0] = test[0] - rec_ui;
 		if (diff[0] >= 0x80000000u)
@@ -102,12 +102,12 @@ clocktime(
 	 * around the guess and select the entry with the minimum
 	 * absolute difference to the receive time stamp.
 	 */
-	y = ntp_to_year(rec_ui - (uint)tmp);
+	y = ntp_to_year(rec_ui - (unsigned int)tmp);
 	for (idx = 0; idx < 3; idx++) {
 		/* -- get year start of potential solution */
 		ystt[idx] = year_to_ntp(y + idx - 1);
 		/* -- get time stamp of potential solution */
-		test[idx] = ystt[idx] + (uint)tmp;
+		test[idx] = ystt[idx] + (unsigned int)tmp;
 		/* -- calc absolute difference to receive time */
 		diff[idx] = test[idx] - rec_ui;
 		if (diff[idx] >= 0x80000000u)

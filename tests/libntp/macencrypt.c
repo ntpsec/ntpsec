@@ -83,7 +83,7 @@ TEST(macencrypt, IPv6AddressToRefId) {
 	SET_AF(&addr, AF_INET6);
 	SET_SOCK_ADDR6(&addr, address);
 
-	const uint expected = htonl(0x52fdcf75);
+	const unsigned int expected = htonl(0x52fdcf75);
 
 	TEST_ASSERT_EQUAL(expected, addr2refid(&addr));
 }

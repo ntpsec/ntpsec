@@ -1606,9 +1606,9 @@ clock_select(void)
 	nlist = 1;
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		nlist++;
-	endpoint_size = ALIGNED_SIZE((uint)nlist * 2 * sizeof(*endpoint));
-	peers_size = ALIGNED_SIZE((uint)nlist * sizeof(*peers));
-	indx_size = ALIGNED_SIZE((uint)nlist * 2 * sizeof(*indx));
+	endpoint_size = ALIGNED_SIZE((unsigned int)nlist * 2 * sizeof(*endpoint));
+	peers_size = ALIGNED_SIZE((unsigned int)nlist * sizeof(*peers));
+	indx_size = ALIGNED_SIZE((unsigned int)nlist * 2 * sizeof(*indx));
 	octets = endpoint_size + peers_size + indx_size;
 	endpoint = erealloc(endpoint, octets);
 	peers = INC_ALIGNED_PTR(endpoint, endpoint_size);

@@ -784,10 +784,10 @@ neol_mktime(int year,
   }
   return (((
             (unsigned long)(year/4 - year/100 + year/400 + 367*mon/12 + day) +
-            (uint)year*365 - 719499
-            )*24 + (uint)hour /* now have hours */
-           )*60 + (uint)min /* now have minutes */
-          )*60 + (uint)sec; /* finally seconds */
+            (unsigned int)year*365 - 719499
+            )*24 + (unsigned int)hour /* now have hours */
+           )*60 + (unsigned int)min /* now have minutes */
+          )*60 + (unsigned int)sec; /* finally seconds */
 }
 
 static void

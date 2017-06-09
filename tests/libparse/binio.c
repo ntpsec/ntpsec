@@ -176,7 +176,7 @@ TEST(binio, put_lsb_uint164) {
 }
 
 
-/* LSB uint tests */
+/* LSB unsigned int tests */
 
 TEST(binio, get_lsb_uint160) {
         long ret;
@@ -445,7 +445,7 @@ TEST_GROUP_RUNNER(binio) {
         RUN_TEST_CASE(binio, put_lsb_uint163);
         RUN_TEST_CASE(binio, put_lsb_uint164);
 
-        /* LSB uint tests */
+        /* LSB unsigned int tests */
         RUN_TEST_CASE(binio, get_lsb_uint160);
         RUN_TEST_CASE(binio, get_lsb_uint161);
         RUN_TEST_CASE(binio, get_lsb_uint162);
