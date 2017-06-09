@@ -4,6 +4,9 @@
 
 * Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
+* Fix ntpq retransmissions.
+  Too many cases don't work.
+
 * Add .tar.xz tarball.
 
 === Testing ===
@@ -11,7 +14,7 @@
 * We need to live-test various refclocks.  It would be nice
   to test the full matrix of refclock x platform, but that's too
   much work.  We should probably test as many refclocks as we can
-  on at least one platform and test the NMEA, Atom, and SHM drivers
+  on at least one platform and test the NMEA, PPS, and SHM drivers
   on most platforms.
 
 == After 1.0 release ==
@@ -81,6 +84,68 @@ of the current startup logic gets discussed.
 * Take another look at SHM.  Hal thinks we can make a version that is
   read-only and solid.  Maybe write a support package that does all the
   work if you call it with the date/time.
+
+Solaris maintenance mode
+  There is code in ntp_proto.c that drops into Solaris maintenance mode
+  if the clock offset exceeds the panic threshold.  We should either
+  drop that code or move it to where it can be used on all fatal errors.
+  (Search for HAVE_LIBSCF_H)
+
+Logging cleanup:
+  Most OSes/distros have a cron job that scans log files and mails
+  a summary to the sysadmin.  They look in /var/log/messages or similar
+  rather than in ntpd's private log files.  We should teach ntpd to
+  log "interesting" messages to syslog as well as its log file.
+  We should review the log messages that those utilities can
+  process and update them to process any new messages we consider
+  to be important.
+
+Remove clock fuzzing:
+  ntpd has code to fuzz the clocks.  It's scattered all over the place.
+  That made sense when clocks were updated in big steps on a scheduler
+  interrupt.  But most modern OSes use something like Intel's TSC to
+  implement fine grained clocks.  We should review this area to verify
+  that fuzzing is still useful.
+
+Cleanup use of HAVE_SYS_SOCKIO_H
+  ntpd/ntp_packetstamp.c has:
+#ifdef HAVE_SYS_SOCKIO_H        /* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
+# include <sys/sockio.h>
+#endif
+  They are not referenced in ntpd/ntp_packetstamp.c but are referenced
+  in ntpd/ntp_io.c and libntp/isc_interfaceiter.c
+
+SIGHUP should do more:
+  reload keys file (easy, it already reloads the leap file)
+  reload ntp.conf (hard, needed to add new keys,
+    we could kludge a partial reload to add/delete servers)
+
+Endian:
+  Investigate using endian.h rather than libntp/ntp_endian.c
+
+Waf detect need configure:
+  There are problems with people forgetting to run configure or clean
+  after a git pull.  (From email on 23 May 2017)
+
+Version string cleanup:
+  This is tangled up with EPOCH
+  configure has --build-version-tag=
+  configure sets up NTPSEC_VERSION_STRING
+  ntptime is the only useage.
+  The version string should change if I make an edit and rebuild
+    currently it only changes when something in git changes
+  We need to be sure not to break the stable checksum feature.
+
+Pivot cleanup:
+  Currently, ntpd does a pivot deep in step_systime in libntp/systime.c
+  That handles the problem of 32 bits of seconds wraping in 2038.
+  Posix is shifting to a 64 bit time_t, but we only have 32 bits
+  of seconds in l_fp.  We can clean up a lot of code if l_fp is
+  only used for offsets except when used in packets.  That requires
+  pushing the pivot logic down close to the packet processing.
+  
+  There may be interactions with ntpq.
+
 
 [quote, Hal]
 __________
