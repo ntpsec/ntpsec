@@ -1580,10 +1580,6 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
    -h no  help            Print a usage message.
    -p no  peers           Print a list of the peers
                                 - prohibits the option 'interactive'
-   -i no  interactive     Force ntpq to operate in interactive mode
-                                - prohibits these options:
-                                command
-                                peers
    -n no  numeric         Numeric host addresses
    -k Str keyfile         Specify a keyfile. ntpq will look in this file
                           for the key specified with -a
@@ -1599,12 +1595,11 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:],
-            "46a:c:dD:hk:inpVwW:u",
+            "46a:c:dD:hk:npVwW:u",
             ["ipv4", "ipv6", "authentication=",
              "command=", "debug", "set-debug-level=",
-             "help", "keyfile", "interactive",
-             "numeric", "peers", "version",
-             "wide", "width=", "units"])
+             "help", "keyfile", "numeric", "peers",
+             "version", "wide", "width=", "units"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1639,8 +1634,6 @@ if __name__ == '__main__':
         elif switch in ("-h", "--help"):
             print(usage)
             raise SystemExit(0)
-        elif switch in ("-i", "--interactive"):
-            interpreter.interactive = True
         elif switch in ("-n", "--numeric"):
             interpreter.showhostnames = False
         elif switch in ("-p", "--peers"):
@@ -1669,10 +1662,6 @@ if __name__ == '__main__':
             session.auth = credentials
     if keyid is not None:  # Have an -a
         session.keyid = keyid
-
-    if interpreter.interactive and len(interpreter.ccmds) > 0:
-        interpreter.warn("%s: invalid option combination.\n" % progname)
-        raise SystemExit(1)
 
     for token in arguments:
         if token.startswith("-"):
