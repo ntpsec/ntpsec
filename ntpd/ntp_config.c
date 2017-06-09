@@ -1716,8 +1716,16 @@ config_access(
 				continue;
 			}
 		} else {
+                        char *mp;
+
 			/* Resolve the specified address */
 			AF(&addr) = (u_short)my_node->addr->type;
+                        /* CIDR notation? */
+                        mp = strrchr(my_node->addr->address, '/');
+                        if (mp) {
+                                *mp++ = '\0'; /* get rid of the '/' */
+                                /* someday convert CIDR to mask */
+                        }
 
 			if (getnetnum(my_node->addr->address,
 				      &addr) != 1) {
