@@ -534,8 +534,10 @@ int main(int argc, char **argv) {
         ctx.define("__APPLE_USE_RFC_3542", 1,
                    comment="Needed for IPv6 support")
     elif ctx.env.DEST_OS == "sunos":
-        ctx.define("_POSIX_PTHREAD_SEMANTICS", "1", quote=False,
-                   comment="Needed for POSIX function definitions on Solaris")
+        # Declare compatibility with the POSIX.1-2001 standard, and any
+        # headers/interfaces not in conflict with that standard
+        ctx.define("_POSIX_C_SOURCE", "200112L", quote=False)
+        ctx.define("__EXTENSIONS__", "1", quote=False)
 
     # XXX: needed for ntp_worker, for now
     if ctx.env.DEST_OS == "openbsd":
