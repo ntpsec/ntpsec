@@ -14,6 +14,7 @@ def build(ctx):
         "clk_varitext.c",
         "clk_wharton.c",
         "data_mbg.c",
+        "gpstolfp.c",
         "ieee754io.c",
         "info_trimble.c",
         "parse.c",
