@@ -81,11 +81,6 @@ of the current startup logic gets discussed.
   go to an event-queue architecture that wakes the daemon up just in time
   for the next scheduled event (rather than a once-per-second timer tick).
 
-* Richer signal semantics: HUP for close/reopen of any files (logrotate…),
-  USR1 for re-read of config and maybe USR2 for re-read of an alternate
-  config file (so you can go back pre ante by just sending USR1 if you
-  messed up). Open for discussion.
-
 * Take another look at SHM.  Hal thinks we can make a version that is
   read-only and solid.  Maybe write a support package that does all the
   work if you call it with the date/time.
@@ -122,7 +117,7 @@ Cleanup use of HAVE_SYS_SOCKIO_H
 
 SIGHUP should do more:
   reload keys file (easy, it already reloads the leap file)
-  reload ntp.conf (hard, needed to add new keys,
+  reload ntp.conf (hard, but needed to add new keys,
     we could kludge a partial reload to add/delete servers)
 
 Endian:
@@ -150,6 +145,16 @@ Pivot cleanup:
   pushing the pivot logic down close to the packet processing.
   
   There may be interactions with ntpq.
+
+Recvbuff cleanup:
+  ntpd currently has a pool of recv buffers.  That made sense
+  when it was using SIGIO to get time stamps.  Now it is useless
+  and just adds useless cycles moving things to/from the free list.
+
+Receive packet processing cleanup:
+  There is an AM table in the top of ntp_peer that does a table lookup
+  to figure out how to process a received packet.  We can eliminate that.
+  I think it's leftover from peer and broadcast modes.
 
 
 [quote, Hal]
