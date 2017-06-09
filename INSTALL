@@ -29,7 +29,7 @@ truth about package requirements, much information about
 installable-package names that used to live in this file has moved to
 that script.
 
-If you are using other distributions or OSes, such as MacOS, Solaris,
+If you are using other distributions or OSes, such as macOS, Solaris,
 or *BSD, you will have to install the build prerequisites by hand on
 your system.  Read the buildprep script to get an idea what packages
 are required.
@@ -105,16 +105,16 @@ The OS X build has been tested in this environment:
  Xcode Version            : 7.1
  Xcode Command Line Tools : 7.2-beta
 
-The MacOS build has been tested in this environment:
+The macOS build has been tested in this environment:
 
- MacOS Version            : 16.3.0
+ macOS Version            : 16.3.0
  Xcode Version            : 8.2.1
 
 All you will require is the Xcode command line tools with no additions.
 There is currently no support for using Xcode's builder. NTPsec's standard
 waf based build system is used.
 
-On MacOS you can use this command to turn off the Apple version of NTP:
+On macOS you can use this command to turn off the Apple version of NTP:
 
 ----
 sudo launchctl unload /System/Library/LaunchDaemons/org.ntp.ntpd.plist

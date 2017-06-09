@@ -51,7 +51,7 @@ cat <<EOF
 # Preparing your system for ntpsec source build...
 # This script presently knows about:
 #   CentOS, Debian, Fedora, Gentoo, SLES and Ubuntu
-# If you are running something else, such as MacOS or Solaris, please
+# If you are running something else, such as macOS or Solaris, please
 # read the source for this buildprep script to get an idea of what packages
 # are required.
 #
