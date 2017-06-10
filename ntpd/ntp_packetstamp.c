@@ -17,10 +17,7 @@
 #include "ntp_stdlib.h"
 #include "timespecops.h"
 
-/* We handle 3 flavors of timestamp:
- * SO_BINTIME/SCM_BINTIME          FreeBSD
- *   bintime documentation is at
- *   http://phk.freebsd.dk/pubs/timecounter.pdf
+/* We handle 2 flavors of timestamp:
  * SO_TIMESTAMPNS/SCM_TIMESTAMPNS  Linux
  * SO_TIMESTAMP/SCM_TIMESTAMP      FreeBSD, NetBSD, OpenBSD, Linux, macOS,
  *                                 Solaris
@@ -34,14 +31,13 @@
  *
  * If SO_xxx exists, we assume that SCM_xxx does too.
  * All flavors assume the CMSG_xxx macros exist.
+ *
+ * FreeBSD has SO_BINTIME/SCM_BINTIME
+ *   It has better resolution, but it doesn't work for IPv6
+ *   bintime documentation is at
+ *   http://phk.freebsd.dk/pubs/timecounter.pdf
  */
 
-#ifdef SO_BINTIME
-/* SO_BINTIME doesn't work for IpV6, FreeBSD 11, 2017-Jan
- * fortunately, FreeBSD also supports SO_TIMESTAMP
- */
-#undef SO_BINTIME
-#endif
 
 void
 enable_packetstamps(
@@ -50,17 +46,13 @@ enable_packetstamps(
     )
 {
 	const int	on = 1;
+	static bool	once = false;
 
-#if defined(SO_BINTIME)
-	if (setsockopt(fd, SOL_SOCKET, SO_BINTIME, (const void*)&on, sizeof(on)))
-		msyslog(LOG_DEBUG,
-			"setsockopt SO_BINTIME on fails on address %s: %m",
-			socktoa(addr));
-	else
-		DPRINT(4, ("setsockopt SO_BINTIME enabled on fd %d address %s\n",
-			    fd, socktoa(addr)));
-		msyslog(LOG_INFO, "Using SO_BINTIME on %s", socktoa(addr));
-#elif defined (SO_TIMESTAMPNS)
+#if defined (SO_TIMESTAMPNS)
+	if (!once) {
+		once = true;
+		msyslog(LOG_INFO, "Using SO_TIMESTAMPNS");
+	}
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
 			       (const void *)&on, sizeof(on)))
 		msyslog(LOG_DEBUG,
@@ -69,8 +61,11 @@ enable_packetstamps(
 	else
 		DPRINT(4, ("setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
 				    fd, socktoa(addr)));
-		msyslog(LOG_INFO, "Using SO_TIMESTAMPNS on %s", socktoa(addr));
 #elif defined(SO_TIMESTAMP)
+	if (!once) {
+		once = true;
+		msyslog(LOG_INFO, "Using SO_TIMESTAMP");
+	}
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
 			       (const void*)&on, sizeof(on)))
 		msyslog(LOG_DEBUG,
@@ -79,7 +74,6 @@ enable_packetstamps(
 	else
 		DPRINT(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
 			    fd, socktoa(addr)));
-		msyslog(LOG_INFO, "Using SO_TIMESTAMP on %s", socktoa(addr));
 #else
 # error "Can't get packet timestamp"
 #endif
@@ -97,9 +91,7 @@ fetch_packetstamp(
 	)
 {
 	struct cmsghdr *	cmsghdr;
-#if defined(SO_BINTIME)
-	struct bintime *	btp;
-#elif defined(SO_TIMESTAMPNS)
+#if defined(SO_TIMESTAMPNS)
 	struct timespec *	tsp;
 #elif defined(SO_TIMESTAMP)
 	struct timeval *	tvp;
@@ -126,9 +118,7 @@ fetch_packetstamp(
 		exit(2);
 		/* return ts;	** Kludge to use time from select. */
 	}
-#if defined(SO_BINTIME)
-	if (SCM_BINTIME != cmsghdr->cmsg_type) {
-#elif defined(SO_TIMESTAMPNS)
+#if defined(SO_TIMESTAMPNS)
 	if (SCM_TIMESTAMPNS != cmsghdr->cmsg_type) {
 #elif defined(SO_TIMESTAMP)
 	if (SCM_TIMESTAMP != cmsghdr->cmsg_type) {
@@ -146,29 +136,9 @@ fetch_packetstamp(
 		/* cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr); */
 	}
 
-/* Debugging hacks */
-{
-  static bool once = false;
-  if (!once) {
-    once = true;
-    msyslog(LOG_INFO, "stamp: sys_tick %.3f, measured_tick: %.3f",
-      sys_tick*1E9, measured_tick*1E9);
-  }
-}
-
 /* cmsghdr now points to a timestamp slot */
 
-#if defined(SO_BINTIME)
-	btp = (struct bintime *)CMSG_DATA(cmsghdr);
-	setlfpuint(nts, btp->sec + JAN_1970);
-	setlfpfrac(nts, (uint32_t)(btp->frac >> 32));
-	if (sys_tick > measured_tick && sys_tick > S_PER_NS) {
-	    ticks = (unsigned long)(lfpfrac(nts) / (unsigned long)(sys_tick * FRAC));
-	    setlfpfrac(nts, (unsigned long)(ticks * (unsigned long)(sys_tick * FRAC)));
-	}
-	DPRINT(4, ("fetch_timestamp: system bintime network time stamp: %ld.%09lu\n",
-		(long)btp->sec, (unsigned long)((lfpfrac(nts) / FRAC) * 1e9)));
-#elif defined(SO_TIMESTAMPNS)
+#if defined(SO_TIMESTAMPNS)
 	tsp = (struct timespec *)CMSG_DATA(cmsghdr);
 	if (sys_tick > measured_tick && sys_tick > S_PER_NS) {
 	    ticks = (unsigned long) ((tsp->tv_nsec * S_PER_NS) / sys_tick);
