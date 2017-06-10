@@ -378,6 +378,7 @@ int scmp_sc[] = {
 #ifdef CLOCK_SHM
         SCMP_SYS(shmget),
         SCMP_SYS(shmat),
+        SCMP_SYS(shmdt),
 #endif
 
 	SCMP_SYS(fcntl64),
