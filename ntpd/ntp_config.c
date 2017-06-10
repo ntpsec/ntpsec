@@ -292,6 +292,7 @@ static uint32_t get_pfxmatch(const char **, struct masks *);
 static uint32_t get_match(const char *, struct masks *);
 static uint32_t get_logmask(const char *);
 static int getnetnum(const char *num, sockaddr_u *addr);
+static void fix_node_cidr(restrict_node *my_node);
 
 
 /* FUNCTIONS FOR INITIALIZATION
@@ -1716,16 +1717,13 @@ config_access(
 				continue;
 			}
 		} else {
-                        char *mp;
 
 			/* Resolve the specified address */
-			AF(&addr) = (u_short)my_node->addr->type;
                         /* CIDR notation? */
-                        mp = strrchr(my_node->addr->address, '/');
-                        if (mp) {
-                                *mp++ = '\0'; /* get rid of the '/' */
-                                /* someday convert CIDR to mask */
-                        }
+                        /* will overwrite my_node->mask-> address with CIDR */
+                        fix_node_cidr(my_node);
+                        /* type is always zero, AF_INET */
+			AF(&addr) = (u_short)my_node->addr->type;
 
 			if (getnetnum(my_node->addr->address,
 				      &addr) != 1) {
@@ -3363,6 +3361,91 @@ gettokens_netinfo (
 }
 #endif /* HAVE_NETINFO_NI_H */
 
+/*
+ * check my_node->addr for CIDR notation
+ * if so, convert to old addr/mask notation and override mask
+ */
+static void
+fix_node_cidr(
+    restrict_node *my_node)
+{
+    address_node *addr;
+    char mask_s[40], *mask_p;
+    char *cidr_p;
+    char *colon_p;
+    char *endptr;
+    long cidr_len;
+    int i;
+    unsigned a[8];
+
+    REQUIRE(my_node);
+    addr = my_node->addr;
+    REQUIRE(addr);
+
+    cidr_p = strrchr(addr->address, '/');
+    if (!cidr_p) {
+        /* not CIDR, leave silently */
+        return;
+    }
+    *cidr_p++ = '\0'; /* remove the '/' and beyond from address */
+    /* get CIDR as int */
+    errno = 0;
+    cidr_len = strtol(cidr_p, &endptr, 10);
+    if ( errno || (endptr == cidr_p) ) {
+        /* conversion fail, leave silently */
+        return;
+    }
+    if ( 0 > cidr_len ) {
+        /* negative?  leave silently */
+        return;
+    }
+    /* sadly, addr->type not previously set, look for colon */
+    colon_p = strrchr(addr->address, ':');
+    if (colon_p) {
+        /* IPv6 */
+        uint64_t mask_top = 0xFFFFFFFFFFFFFFFFU;
+        uint64_t mask_bot = 0xFFFFFFFFFFFFFFFFU;
+
+	if ( 128 < cidr_len ) {
+	    /* out of range, leave silently */
+	    return;
+	}
+        if ( 64 >= cidr_len ) {
+	    mask_bot = 0;
+	    mask_top <<= 64 - cidr_len ;
+        } else {
+	    mask_bot <<= 128 - cidr_len ;
+        }
+        for (i = 0; i < 4; i++)
+                a[i] = mask_top >> (16 * (3 - i)) & 0xffffU;
+        for (i = 0; i < 4; i++)
+                a[i + 4] = mask_bot >> (16 * (3 - i)) & 0xffffU;
+
+        snprintf(mask_s, sizeof(mask_s), "%x:%x:%x:%x:%x:%x:%x:%x",
+                 a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
+    } else {
+        /* must be IPv4 */
+        uint32_t mask_n = 0xFFFFFFFFU;
+
+	if ( 32 < cidr_len ) {
+	    /* out of range, leave silently */
+	    return;
+	}
+
+        mask_n <<= 32 - cidr_len ;
+        for (i = 0; i < 4; i++)
+                a[i] = mask_n >> (8 * (3 - i)) & 0xff;
+
+        snprintf(mask_s, sizeof(mask_s), "%d.%d.%d.%d", a[0], a[1], a[2], a[3]);
+    }
+
+    /* lose old mask */
+    destroy_address_node(my_node->mask);
+
+    /* create mask node, yes AF_UNSPEC is weird... */
+    mask_p = estrdup(mask_s);
+    my_node->mask = create_address_node(mask_p, AF_UNSPEC);
+}
 
 /*
  * getnetnum - return a net number (this is crude, but careful)
@@ -3423,7 +3506,7 @@ ntp_rlimit(
 	    case RLIMIT_NOFILE:
 		/*
 		 * For large systems the default file descriptor limit may
-		 * not be enough. 
+		 * not be enough.
 		 */
 		DPRINT(2, ("ntp_rlimit: NOFILE: %d %s\n",
 			   (int)rl_value / rl_scale, rl_sstr));
