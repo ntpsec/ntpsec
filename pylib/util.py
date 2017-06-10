@@ -740,7 +740,10 @@ class PeerSummary:
 
         now = time.time()
 
-        for (name, (value, rawvalue)) in variables.items():
+        for item in variables.items():
+            if len(item) == 0:
+                continue
+            (name, (value, rawvalue)) = item
             if name in ("srcadr", "peeradr"):
                 srcadr = value
             elif name == "srchost":
