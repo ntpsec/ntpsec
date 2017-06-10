@@ -3436,7 +3436,8 @@ fix_node_cidr(
         for (i = 0; i < 4; i++)
                 a[i] = mask_n >> (8 * (3 - i)) & 0xff;
 
-        snprintf(mask_s, sizeof(mask_s), "%d.%d.%d.%d", a[0], a[1], a[2], a[3]);
+        snprintf(mask_s, sizeof(mask_s), "%u.%u.%u.%u",
+                 a[0], a[1], a[2], a[3]);
     }
 
     /* lose old mask */
