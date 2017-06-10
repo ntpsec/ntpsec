@@ -27,22 +27,25 @@ order with the last match found defining the restriction flags
 associated with the entry.
 
 The ACL is specified as a list of +restrict+ commands in the following
-format:
+formats:
 
-+restrict address [mask mask] [flag][...]+
++restrict address[/cidr] [mask mask] [flag][...]+
 
 The +address+ argument expressed in dotted-quad (for IPv4) or
 :-delimited (for IPv6) form is the address of a
 host or network. Alternatively, the +address+ argument can be a valid
 host DNS name. The +mask+ argument expressed in IPv4 or IPv6 numeric
 address form defaults to all mask bits on, meaning that the +address+ is
-treated as the address of an individual host. A default entry (address
-0.0.0.0, mask 0.0.0.0 for IPv4; and address :: mask :: for IPv6) is
-always the first entry in the list. +restrict default+, with no mask
-option, modifies both IPv4 and IPv6 default entries. +restrict source+
-configures a template restriction automatically added at runtime for
-each association, whether configured, ephemeral, or preemptable, and
-removed when the association is demobilized.
+treated as the address of an individual host.  Instead of an explicit
++mask+ the +address/cidr+ may be specified in CIDR notation.
+
+A default entry (address 0.0.0.0, mask 0.0.0.0 for IPv4; and
+address :: mask :: for IPv6) is always the first entry in the list.
++restrict default+, with no mask option, modifies both IPv4 and IPv6
+default entries. +restrict source+ configures a template restriction
+automatically added at runtime for each association, whether configured,
+ephemeral, or preemptable, and removed when the association is
+demobilized.
 
 Some flags have the effect to deny service, some have the effect to
 enable service and some are conditioned by other flags. The flags. are
