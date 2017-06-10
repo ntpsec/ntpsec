@@ -23,23 +23,25 @@
     1000 packets per second or more.
 
 [[restrict]]
-+restrict+ _address_ [+mask+ _mask_] [+flag+ +...+]::
-  The _address_ argument expressed in dotted-quad form is the address of
-  a host or network. Alternatively, the _address_ argument can be a
-  valid host DNS name. The _mask_ argument expressed in dotted-quad form
-  defaults to +255.255.255.255+, meaning that the _address_ is treated
-  as the address of an individual host. A default entry (address
-  +0.0.0.0+, mask +0.0.0.0+) is always included and is always the first
-  entry in the list. Note that text string _default_, with no mask
-  option, may be used to indicate the default entry. In the current
-  implementation, _flag_ always restricts access, i.e., an entry with no
-  flags indicates that free access to the server is to be given. The
-  flags are not orthogonal, in that more restrictive flags will often
-  make less restrictive ones redundant. The flags can generally be
-  classed into two categories, those which restrict time service and
-  those which restrict informational queries and attempts to do run-time
-  reconfiguration of the server. One or more of the following flags may
-  be specified:
++restrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
+  The _address_ argument expressed in dotted-quad (for IPv4) or
+  :-delimited (for IPv6) form is the address of a
+  host or network. Alternatively, the _address_ argument can be a valid
+  host DNS name. The _mask_ argument expressed in IPv4 or IPv6 numeric
+  address form defaults to all mask bits on, meaning that the _address_ is
+  treated as the address of an individual host.  Instead of an explicit
+  _mask_ the _address/cidr_ may be specified in CIDR notation.  A
+  default entry (address +0.0.0.0+, mask +0.0.0.0+) is always included
+  and is always the first entry in the list. Note that text string
+  _default_, with no mask option, may be used to indicate the default
+  entry. In the current implementation, _flag_ always restricts access,
+  i.e., an entry with no flags indicates that free access to the server
+  is to be given. The flags are not orthogonal, in that more restrictive
+  flags will often make less restrictive ones redundant. The flags can
+  generally be classed into two categories, those which restrict time
+  service and those which restrict informational queries and attempts
+  to do run-time reconfiguration of the server. One or more of the
+  following flags may be specified:
 +
 --
   +flake+;;
