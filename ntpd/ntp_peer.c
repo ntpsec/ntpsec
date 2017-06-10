@@ -113,7 +113,7 @@ static struct peer *	findexistingpeer_name(const char *, u_short,
 					      struct peer *, int);
 static struct peer *	findexistingpeer_addr(sockaddr_u *,
 					      struct peer *, int);
-static void		free_peer(struct peer *, int);
+static void		free_peer(struct peer *);
 static void		getmorepeermem(void);
 static	void		peer_reset	(struct peer *);
 static int		score(struct peer *);
@@ -433,14 +433,14 @@ score(
  */
 static void
 free_peer(
-	struct peer *	p,
-	int		unlink_peer
+	struct peer *	p
 	)
 {
 	struct peer *	unlinked;
 	int		hash;
 
-	if (unlink_peer) {
+
+	if ((MDF_UCAST & p->cast_flags) && !(FLAG_DNS & p->flags)) {
 		hash = NTP_HASH_ADDR(&p->srcadr);
 		peer_hash_count[hash]--;
 
@@ -451,29 +451,27 @@ free_peer(
 			msyslog(LOG_ERR, "peer %s not in address table!",
 				socktoa(&p->srcadr));
 		}
-
-		/*
-		 * Remove him from the association hash as well.
-		 */
-		hash = p->associd & NTP_HASH_MASK;
-		assoc_hash_count[hash]--;
-
-		UNLINK_SLIST(unlinked, assoc_hash[hash], p, aid_link,
-			     struct peer);
-		if (NULL == unlinked) {
-			assoc_hash_count[hash]++;
-			msyslog(LOG_ERR,
-				"peer %s not in association ID table!",
-				socktoa(&p->srcadr));
-		}
-
-		/* Remove him from the overall list. */
-		UNLINK_SLIST(unlinked, peer_list, p, p_link,
-			     struct peer);
-		if (NULL == unlinked)
-			msyslog(LOG_ERR, "%s not in peer list!",
-				socktoa(&p->srcadr));
 	}
+
+	/* Remove him from the association hash as well. */
+	hash = p->associd & NTP_HASH_MASK;
+	assoc_hash_count[hash]--;
+
+	UNLINK_SLIST(unlinked, assoc_hash[hash], p, aid_link,
+		     struct peer);
+	if (NULL == unlinked) {
+		assoc_hash_count[hash]++;
+		msyslog(LOG_ERR,
+			"peer %s not in association ID table!",
+			socktoa(&p->srcadr));
+	}
+
+	/* Remove him from the overall list. */
+	UNLINK_SLIST(unlinked, peer_list, p, p_link,
+		     struct peer);
+	if (NULL == unlinked)
+		msyslog(LOG_ERR, "%s not in peer list!",
+			socktoa(&p->srcadr));
 
 	if (p->hostname != NULL)
 		free(p->hostname);
@@ -508,7 +506,7 @@ unpeer(
 		refclock_unpeer(peer);
 #endif
 
-	free_peer(peer, true);
+	free_peer(peer);
 }
 
 
