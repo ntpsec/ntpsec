@@ -171,6 +171,16 @@ at protocol handling, packets arriving faster than the main loop could
 cycle would pile up in the ring buffer and latecomers would be
 dropped.
 
+(Also, it turns out not to be important at post-Y2K machine speeds to
+get those arrival timestamps from the UDP layer ASAP, rather than
+looking at packet read time in userspace. The cost of the latter,
+naive approach is additional jitter dominated by process-scheduling
+time.  This used to be significant relative to users' accuracy
+expectations for NTP, but scheduler timeslices have since decreased
+by orders of magnitude and squashed the issue. We know this from some
+tests setup having run for six months with packet-timestamp fetching
+accidentally disabled...)
+
 The new organization stops pretending; it simply spins on a select
 across all interfaces.  If inbound traffic is more than the daemon can
 handle, packets will pile up in the UDP layer and be dropped at that
