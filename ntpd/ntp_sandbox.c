@@ -394,12 +394,22 @@ int scmp_sc[] = {
 #ifdef __x86_64__
 	SCMP_SYS(mmap),
 #endif
-#if defined(__i386__) || defined(__arm__)
-	SCMP_SYS(_newselect),
+#if defined(__i386__) || defined(__arm__) || defined(__mips__)
 	SCMP_SYS(_llseek),
 	SCMP_SYS(mmap2),
-	SCMP_SYS(send),
 	SCMP_SYS(stat64),
+#endif
+#if defined(__i386__) || defined(__arm__)
+	SCMP_SYS(_newselect),
+	SCMP_SYS(send),
+#endif
+#ifdef __mips__
+	SCMP_SYS(ipc),
+	SCMP_SYS(prlimit64),
+	SCMP_SYS(readv),
+	SCMP_SYS(timer_create),
+	SCMP_SYS(timer_settime),
+	SCMP_SYS(writev),
 #endif
 };
 	{
