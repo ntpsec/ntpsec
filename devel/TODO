@@ -7,7 +7,7 @@
 * Add .tar.xz tarball.
 
 * Fix ntpq retransmissions.
-  Too many cases don't work.
+  Too many cases don't work well enough.  (maybe inherited from ntp classic.)
 
 * Fix waf quirks:
   waf build doesn't build everything
@@ -68,7 +68,7 @@ of the current startup logic gets discussed.
 
 * Measure time from the clock reading to transmission for outbound
   packets.  Use the measurement to correct for computation time
-  before transmission.
+  before transmission.  This is more interesting for authenticated packets.
 
 * We might be able to eliminate a lot of the Linux runtime
   droproot code by using file capabilities.
@@ -84,6 +84,13 @@ of the current startup logic gets discussed.
 * Take another look at SHM.  Hal thinks we can make a version that is
   read-only and solid.  Maybe write a support package that does all the
   work if you call it with the date/time.
+
+Plug restrict holes:
+  The current code pokes a hole in any restrictions to let servers
+  through if they come from DNS lookups.  We should add something like
+  a nohole flag to prevent this so you can really block pool servers if
+  you know there are some you don't want to use.
+
 
 Solaris maintenance mode
   There is code in ntp_proto.c that drops into Solaris maintenance mode
