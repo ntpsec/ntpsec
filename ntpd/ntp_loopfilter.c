@@ -142,7 +142,7 @@ static char *this_file = NULL;
 static struct timex ntv;	/* ntp_adjtime() parameters */
 static int	pll_status;	/* last kernel status bits */
 #ifndef ENABLE_LOCKCLOCK
-#if defined(STA_NANO) && NTP_API == 4
+#if defined(STA_NANO) && defined(NTP_API) && NTP_API == 4
 static u_int loop_tai;		/* last TAI offset */
 #endif /* STA_NANO */
 #endif /* ENABLE_LOCKCLOCK */
@@ -838,7 +838,7 @@ local_clock(
 			clock_jitter = ntv.jitter * S_PER_NS;
 		}
 
-#if defined(STA_NANO) && NTP_API == 4
+#if defined(STA_NANO) && defined(NTP_API) && NTP_API == 4
 		/*
 		 * If the TAI changes, update the kernel TAI.
 		 */
