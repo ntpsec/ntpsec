@@ -969,7 +969,6 @@ commands = (
     ("clean", "init_handler", None),
     ("list", "init_handler", None),
     ("step", "init_handler", None),
-    # ("info", "cmd_info", "Show build information / configuration.")
 )
 
 
@@ -980,7 +979,7 @@ for command, func, descr in commands:
         cmd = command
         fun = func
         if ((command in
-            'install uninstall build clean list step docs bsp info'
+            'install uninstall build clean list step'
              )):
             execute = Scripting.autoconfigure(Context.Context.execute)
 # end borrowed code
