@@ -391,8 +391,8 @@ int scmp_sc[] = {
 	SCMP_SYS(ppoll),
 	SCMP_SYS(sendmsg),
 
-#ifdef __x86_64__
-	SCMP_SYS(mmap),
+#ifdef SYS_mmap
+	SCMP_SYS(mmap),           /* gentoo 64-bit and 32-bit use this */
 #endif
 #if defined(__i386__) || defined(__arm__)
 	SCMP_SYS(_newselect),
