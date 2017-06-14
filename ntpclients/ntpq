@@ -1575,6 +1575,7 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
                                 - may appear multiple times
    -d no  debug-level     Increase output debug message level
                                 - may appear multiple times
+   -l Str log-to-file     Logs debug messages to the provided filename
    -D Int set-debug-level Set the output debug message level
                                 - may appear multiple times
    -h no  help            Print a usage message.
@@ -1595,11 +1596,12 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:],
-            "46a:c:dD:hk:npVwW:u",
+            "46a:c:dD:hk:npVwW:ul:",
             ["ipv4", "ipv6", "authentication=",
              "command=", "debug", "set-debug-level=",
              "help", "keyfile", "numeric", "peers",
-             "version", "wide", "width=", "units"])
+             "version", "wide", "width=", "units",
+             "log-to-file"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1611,6 +1613,7 @@ if __name__ == '__main__':
     interpreter = Ntpq(session)
 
     keyid = keyfile = None
+    logfp = sys.stderr
 
     for (switch, val) in options:
         if switch in ("-4", "--ipv4"):
@@ -1625,8 +1628,6 @@ if __name__ == '__main__':
         elif switch in ("-d", "--debug"):
             interpreter.debug += 1
             session.debug += 1
-            logfp = open("ntpq.log", "a", 1)    # 1 => line buffered
-            session.logfp = interpreter.logfp = logfp
         elif switch in ("-D", "--set-debug-level"):
             errmsg = "Error: -D parameter '%s' not a number\n"
             cast = ntp.util.safeargcast(val, int, errmsg, usage)
@@ -1651,6 +1652,12 @@ if __name__ == '__main__':
                                                          errmsg, usage)
         elif switch in ("-u", "--units"):
             interpreter.showunits = True
+        elif switch in ("-l", "--log-to-file"):
+            if logfp != sys.stderr:
+                logfp.close()
+            logfp = open(val, "a", 1)  # 1 => line buffered
+
+    session.logfp = interpreter.logfp = logfp
 
     if keyfile is not None:  # Have a -k, setup the auth
         credentials = None
