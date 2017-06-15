@@ -49,10 +49,10 @@ For a simpler near-real-time monitor, see {ntpmonman}.
 
 == Options ==
 
-Command line options are described following. Specifying a command line
-option other than +-i+ or +-n+ will cause the specified query (queries)
-to be sent to the indicated host(s) immediately. Otherwise, +ntpq+ will
-attempt to read interactive format commands from the standard input.
+Command line options are described following. Specifying the command line
+options +-c+ or +-p+ will cause the specified query (queries) to be sent
+to the indicated host(s) immediately. Otherwise, +ntpq+ will attempt to
+read interactive format commands from the standard input.
 
 +-4+, +--ipv4+::
   Force DNS resolution of following host names on the command line to
