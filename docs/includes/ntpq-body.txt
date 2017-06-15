@@ -70,7 +70,7 @@ read interactive format commands from the standard input.
   Increase debugging level by 1.
 +-D+ num, +--set-debug-level+=num::
   The debug level is set to the following integer argument.
-+-l+ filename, +--log-to-file+=filename""
++-l+ filename, +--logfile+=filename::
   Log debugging output to the specified file.
 +-h+, +--help+::
   Print a usage message summarizing options end exit.

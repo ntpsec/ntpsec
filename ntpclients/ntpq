@@ -1575,7 +1575,7 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
                                 - may appear multiple times
    -d no  debug-level     Increase output debug message level
                                 - may appear multiple times
-   -l Str log-to-file     Logs debug messages to the provided filename
+   -l Str logfile         Logs debug messages to the provided filename
    -D Int set-debug-level Set the output debug message level
                                 - may appear multiple times
    -h no  help            Print a usage message.
@@ -1601,7 +1601,7 @@ if __name__ == '__main__':
              "command=", "debug", "set-debug-level=",
              "help", "keyfile", "numeric", "peers",
              "version", "wide", "width=", "units",
-             "log-to-file="])
+             "logfile="])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1652,7 +1652,7 @@ if __name__ == '__main__':
                                                          errmsg, usage)
         elif switch in ("-u", "--units"):
             interpreter.showunits = True
-        elif switch in ("-l", "--log-to-file"):
+        elif switch in ("-l", "--logfile"):
             if logfp != sys.stderr:
                 logfp.close()
             logfp = open(val, "a", 1)  # 1 => line buffered
