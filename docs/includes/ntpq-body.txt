@@ -60,7 +60,7 @@ attempt to read interactive format commands from the standard input.
 +-6+, +--ipv6+::
   Force DNS resolution of following host names on the command line to
   the IPv6 namespace.
-+-a+ num, +--authentication+::
++-a+ num, +--authentication+=num::
   Enable authentication with the numbered key.
 +-c+ cmd, +--command+=cmd::
   The following argument is interpreted as an interactive format command
@@ -80,7 +80,7 @@ attempt to read interactive format commands from the standard input.
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
   their state. This is equivalent to the +peers+ interactive command.
-+-k+ filename, +--keyfile+::
++-k+ filename, +--keyfile+=filename::
   Specify a keyfile. ntpq will look in this file for the key specified
   with -a.
 +-V+, +--version+::

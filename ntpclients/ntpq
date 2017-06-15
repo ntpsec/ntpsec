@@ -1601,7 +1601,7 @@ if __name__ == '__main__':
              "command=", "debug", "set-debug-level=",
              "help", "keyfile", "numeric", "peers",
              "version", "wide", "width=", "units",
-             "log-to-file"])
+             "log-to-file="])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
