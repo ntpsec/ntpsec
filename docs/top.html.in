@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Welcome to the NTPsec documentation site</title>
+<link rel="stylesheet" href="asciidoc.css" type="text/css">
+
+<script type="text/javascript">
+/*<![CDATA[*/
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+
+<body class="article">
+<div id="header">
+<h1>Welcome to the NTPsec documentation site</h1>
+</div>
+
+<div id="content">
+
+<h2>NTP Documentation</h2>
+
+<ul>
+<li><a href="latest/">Latest</a> - Latest documentation from master.  Updated after every commit.</li>
+</ul>
+
+
+</div>
+</body>
+</html>

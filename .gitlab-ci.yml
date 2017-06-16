@@ -1,3 +1,19 @@
+pages:
+  stage: deploy
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison python-dev asciidoc
+    - python ./waf configure --enable-doc --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
+    - cp www/favicon.ico `pwd`/public
+    - cp docs/top.html.in `pwd`/public/index.html
+    - cp docs/top-asciidoc.css `pwd`/public/asciidoc.css
+  artifacts:
+    paths:
+      - public
+#  only:
+#    - master
+  tags:
+    - gitlab-org
+
 .job_template: &job_definition
   stage: build
   artifacts:
