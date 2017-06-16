@@ -34,6 +34,20 @@ gitlab-refclocks:
   tags:
     - gitlab-org
 
+debian-wheezy-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - debian-wheezy
+
+debian-wheezy-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - debian-wheezy
+
 debian-jessie-basic:
   <<: *job_definition
   script:
