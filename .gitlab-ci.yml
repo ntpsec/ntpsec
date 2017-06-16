@@ -80,3 +80,31 @@ freebsd-11-refclocks:
   tags:
     - freebsd-11
 
+centos-6-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - centos-6
+
+centos-6-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - centos-6
+
+centos-7-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - centos-7
+
+centos-7-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - centos-7
+
