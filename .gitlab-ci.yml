@@ -122,3 +122,31 @@ centos-7-refclocks:
   tags:
     - centos-7
 
+fedora-24-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - fedora-24
+
+fedora-24-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - fedora-24
+
+fedora-25-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - fedora-25
+
+fedora-25-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - fedora-25
+
