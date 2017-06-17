@@ -153,6 +153,13 @@ Pivot cleanup:
   
   There may be interactions with ntpq.
 
+ntpq packet dump:
+  debug level 0 (or something similar) should print out the
+  packets and not much else.  This will be handy for verifying
+  what ntpd is actually sending so we can decide whether we need
+  to fix ntpq or ntpd when something goes wrong.  It will be
+  expecially helpful when talking to ntpd classic.
+
 Recvbuff cleanup:
   ntpd currently has a pool of recv buffers.  That made sense
   when it was using SIGIO to get time stamps.  Now it is useless
