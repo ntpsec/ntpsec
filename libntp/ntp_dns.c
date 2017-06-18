@@ -94,8 +94,8 @@ void dns_check(void)
 		return;  /* leaves active set */
 	}
 	if (0 != gai_rc) {
-		msyslog(LOG_INFO, "dns_check: DNS error %s",
-			gai_strerror(gai_rc));
+		msyslog(LOG_INFO, "dns_check: DNS error: %d, %s",
+			gai_rc, gai_strerror(gai_rc));
 		answer = NULL;
 	}
 
