@@ -537,7 +537,7 @@ set_peerdstadr(
 		p->dstadr->peercnt--;
 		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,
 			     struct peer);
-		msyslog(LOG_INFO, "%s local addr %s -> %s",
+		msyslog(LOG_INFO, "%s unlink local addr %s -> %s",
 			socktoa(&p->srcadr), latoa(p->dstadr),
 			latoa(dstadr));
 	}
@@ -551,7 +551,7 @@ set_peerdstadr(
 /*
  * attempt to re-rebind interface if necessary
  */
-static void
+void
 peer_refresh_interface(
 	struct peer *p
 	)
@@ -581,6 +581,7 @@ peer_refresh_interface(
 	}
 
 	set_peerdstadr(p, niface);
+
 }
 
 
@@ -600,8 +601,15 @@ refresh_all_peerinterfaces(void)
 	 * or if the one they have hasn't worked for a while.
 	 */
 	for (p = peer_list; p != NULL; p = p->p_link) {
-		if (!(p->dstadr && (p->reach & 0x3)))	// Bug 2849 XOR 2043
-			peer_refresh_interface(p);
+		if ((p->dstadr) && (p->reach & 0x3))	// Bug 2849 XOR 2043
+			/* either of last 2 tries with this dstadr worked */
+			continue;
+		if (MDF_POOL & p->cast_flags)
+			continue;	/* Pool slots don't get interfaces. */
+		if (FLAG_DNS & p->flags)
+			continue;	/* Still doing DNS lookup. */
+		peer_refresh_interface(p);
+
 	}
 }
 

@@ -913,7 +913,6 @@ transmit(
 	 */
 #ifdef ENABLE_DNS_LOOKUP
 	if (peer->cast_flags & MDF_POOL) {
-		/* FIXME-DNS turn on FLAG_DNS for pool */
 		peer->outdate = current_time;
 		if ((peer_associations <= 2 * sys_maxclock) &&
 		    (peer_associations < sys_maxclock ||
@@ -2426,6 +2425,7 @@ dns_take_server(
 	server->flags &= (unsigned)~FLAG_DNS;
 		
 	server->srcadr = *rmtadr;
+	peer_update_hash(server);
 
 	restrict_mask = restrictions(&server->srcadr);
 	if (RES_FLAGS & restrict_mask) {
@@ -2434,12 +2434,10 @@ dns_take_server(
 		restrict_source(&server->srcadr, false, 0);
 	}
 
-	server->dstadr = findinterface(&server->srcadr);
-if (NULL == server->dstadr)
-  msyslog(LOG_ERR, "dns_take_server: can't find interface for %s", server->hostname);
+	peer_refresh_interface(server);
+
 	server->hpoll = server->minpoll;
 	server->nextdate = current_time;
-	peer_update_hash(server);
 	peer_xmit(server);
 	poll_update(server, server->hpoll);
 }

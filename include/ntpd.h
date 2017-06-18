@@ -138,6 +138,7 @@ extern	void	peer_update_hash (struct peer *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	void	refresh_all_peerinterfaces(void);
+extern  void	peer_refresh_interface(struct peer *);
 extern	void	unpeer		(struct peer *);
 extern	void	clear_all	(void);
 extern	int	score_all	(struct peer *);
