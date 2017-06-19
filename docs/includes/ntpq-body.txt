@@ -140,6 +140,10 @@ following.
 +debug more | less | off+::
   Turns internal query program debugging on and off.
 
++logfile <stderr> | filename+::
+  Displays or sets the file for debug logging. <stderr> will send logs
+  to standard error.
+
 +delay+ 'milliseconds'::
   Specify a time interval to be added to timestamps included in requests
   which require authentication. This is used to enable (unreliable)
