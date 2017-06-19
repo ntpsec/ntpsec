@@ -669,6 +669,23 @@ usage: hostnames [yes|no]
         self.session.debug = self.debug
         print("debug level is %d" % self.debug)
 
+    def do_logfile(self, line):
+        "view/change logfile. \"<stderr>\" will log to stderr instead of a file"
+        if not line:
+            print(repr(self.logfp.name))
+            return
+        if self.logfp != sys.stderr:
+            self.logfp.close()
+        if line == "<stderr>":
+            self.logfp = self.session.logfp = sys.stderr
+        else:
+            try:
+                logfp = open(line, "a", 1)  # 1 => line buffered
+                self.logfp = self.session.logfp = logfp
+                print("Logfile set to", line)
+            except:
+                print("Could not open", line, "for logging.")
+
     def help_debug(self):
         self.say("""\
 function: set/change debugging level
