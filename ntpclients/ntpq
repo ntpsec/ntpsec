@@ -667,8 +667,6 @@ usage: hostnames [yes|no]
             except ValueError:
                 print("What?")
         self.session.debug = self.debug
-        if self.debug > 0:
-            self.session.logfp = open("ntpq.log", "a", 1)  # 1 => line buffered
         print("debug level is %d" % self.debug)
 
     def help_debug(self):
