@@ -443,7 +443,6 @@ interface_dump(const endpt *itf)
 	sockaddr_dump(&itf->mask);
 	printf("name = %s\n", itf->name);
 	printf("flags = 0x%08x\n", itf->flags);
-	printf("last_ttl = %d\n", itf->last_ttl);
 	printf("addr_refid = %08x\n", itf->addr_refid);
 	printf("received = %ld\n", itf->received);
 	printf("sent = %ld\n", itf->sent);
@@ -1298,7 +1297,6 @@ refresh_interface(
 		  * reset TTL indication so TTL is is set again
 		  * next time around
 		  */
-		interface->last_ttl = 0;
 		return (interface->fd != INVALID_SOCKET);
 	} else
 		return false;	/* invalid sockets are not refreshable */

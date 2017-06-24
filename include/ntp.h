@@ -141,7 +141,6 @@ typedef struct __endpt {
 	u_short		family;		/* AF_INET/AF_INET6 */
 	u_short		phase;		/* phase in update cycle */
 	uint32_t	flags;		/* interface flags */
-	int		last_ttl;	/* last TTL specified */
 	uint32_t	addr_refid;	/* IPv4 addr or IPv6 hash */
 	u_long		starttime;	/* current_time at creation */
 	volatile long	received;	/* number of incoming packets */

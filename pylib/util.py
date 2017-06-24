@@ -1030,14 +1030,13 @@ class ReslistSummary:
 class IfstatsSummary:
     "Reusable class for ifstats entry summary generation."
     header = """\
-    interface name                                     send
- #  address/broadcast     drop flag ttl received sent failed peers   uptime
+    interface name                                  send
+ #  address/broadcast     drop flag received sent failed peers   uptime
  """
     width = 74
     # Numbers are the fieldsize
     fields = {'name':  '%-24.24s',
               'flags': '%4x',
-              'tl':    '%3d',
               'rx':    '%6d',
               'tx':    '%6d',
               'txerr': '%6d',
@@ -1055,11 +1054,10 @@ class IfstatsSummary:
             formatted[name] = fmt
         try:
             enFlag = '.' if variables.get('en', False) else 'D'
-            s = ("%3u %-24.24s %c %4s %3s %6s %6s %6s %5s %8s\n    %s\n"
+            s = ("%3u %-24.24s %c %4s %6s %6s %6s %5s %8s\n    %s\n"
                  % (i, formatted['name'],
                     enFlag,
                     formatted['flags'],
-                    formatted['tl'],
                     formatted['rx'],
                     formatted['tx'],
                     formatted['txerr'],
