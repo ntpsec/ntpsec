@@ -1,0 +1,4 @@
+<servicedata>
+<service name="tar_scm">
+                <param name="url">https://gitlab.com/NTPsec/ntpsec.git</param>
+              <param name="changesrevision">7c0008c91645084fe46b246074bdf9506e7abafc</param></service></servicedata>

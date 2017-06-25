@@ -1,0 +1,15 @@
+<services>
+  <service mode="disabled" name="tar_scm">
+    <param name="url">https://gitlab.com/NTPsec/ntpsec.git</param>
+    <param name="scm">git</param>
+    <param name="changesgenerate">enable</param>
+    <param name="filename">ntpsec</param>
+    <param name="package-meta">yes</param>
+    <param name="versionformat">0.9.7+git%cd.%h</param>
+  </service>
+  <service mode="disabled" name="recompress">
+    <param name="file">*.tar</param>
+    <param name="compression">xz</param>
+  </service>
+  <service mode="disabled" name="set_version"/>
+</services>
