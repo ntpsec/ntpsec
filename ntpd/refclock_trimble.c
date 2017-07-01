@@ -624,7 +624,7 @@ TSIP_decode (
 #ifdef DEBUG
 				printf("TSIP_decode: UTC Offset Unknown\n");
 #endif
-				break;
+				return 0;
 			}
 
 			secs = getdbl((uint8_t *) &mb(3));
@@ -823,7 +823,7 @@ TSIP_decode (
 #ifdef DEBUG
 				printf("TSIP_decode: UTC Offset Unknown\n");
 #endif
-				break;
+				return 0;
 			}
 
 
