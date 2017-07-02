@@ -105,6 +105,8 @@
 #define PACKET_41A      0x41    /* GPS time */
 #define PACKET_46       0x46    /* Receiver Health */
 
+/* parse consts */
+#define RMAX 172 /* TSIP packet 0x58 can be 172 bytes */
 #define DLE 0x10
 #define ETX 0x03
 
@@ -152,7 +154,7 @@ struct trimble_unit {
 	char		leap_status;	/* leap second flag */
 	char		rpt_status;	/* TSIP Parser State */
 	size_t 		rpt_cnt;	/* TSIP packet length so far */
-	char 		rpt_buf[BMAX]; 	/* packet assembly buffer */
+	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
 	unsigned int	week;		/* GPS week number */
 	unsigned int	TOW;		/* GPS time of week */
@@ -1130,14 +1132,14 @@ praecis_parse (
 	}
 }
 
+/*
+ * trimble_io - create TSIP packets from serial data stream
+ */
 static void
 trimble_io (
 	struct recvbuf *rbufp
 	)
 {
-	/*
-	 * Initialize pointers and read the timecode and timestamp.
-	 */
 	struct trimble_unit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
@@ -1159,10 +1161,7 @@ trimble_io (
 	d = c + rbufp->recv_length;
 		
 	while (c != d) {
-
-		/* Build time packet */
 		switch (up->rpt_status) {
-
 		    case TSIP_PARSED_DLE_1:
 			switch (*c)
 			{
@@ -1176,6 +1175,9 @@ trimble_io (
 				up->rpt_status = TSIP_PARSED_DATA;
 				/* save packet ID */
 				up->rpt_buf[0] = *c;
+				/* stamp it */
+				if (pp->sloppyclockflag & CLK_FLAG2) 
+					get_systime(&pp->lastrec);
 				break;
 			}
 			break;
@@ -1190,13 +1192,11 @@ trimble_io (
 		    case TSIP_PARSED_DLE_2:
 			if (*c == DLE) {
 				up->rpt_status = TSIP_PARSED_DATA;
-				/* prevent overrun - should never happen */
-				if (up->rpt_cnt < BMAX - 2)
-					mb(up->rpt_cnt++) = *c;
-			}
-			else if (*c == ETX) 
+				mb(up->rpt_cnt++) = *c;
+			} else if (*c == ETX) {
 				up->rpt_status = TSIP_PARSED_FULL;
-			else 	{
+				trimble_receive(peer);
+			} else {
 				/* error: start new report packet */
 				up->rpt_status = TSIP_PARSED_DLE_1;
 				up->rpt_buf[0] = *c;
@@ -1206,30 +1206,20 @@ trimble_io (
 		    case TSIP_PARSED_FULL:
 		    case TSIP_PARSED_EMPTY:
 		    default:
-			if ( *c != DLE)
-				up->rpt_status = TSIP_PARSED_EMPTY;
-			else 
+			up->rpt_cnt = 0;
+			if (*c == DLE)
 				up->rpt_status = TSIP_PARSED_DLE_1;
+			else
+				up->rpt_status = TSIP_PARSED_EMPTY;
 			break;
 		}
-		
 		c++;
-
-		if (up->rpt_status == TSIP_PARSED_DLE_1) {
-			up->rpt_cnt = 0;
-			if (pp->sloppyclockflag & CLK_FLAG2) 
-				/* stamp it */
-				get_systime(&pp->lastrec);
+		if (up->rpt_cnt > RMAX - 2) {/* additional byte for ID */
+			up->rpt_status = TSIP_PARSED_EMPTY;
+			DPRINT(1, ("trimble_io: unit %d: oversize serial message (%luB) 0x%02x discarded",
+			        up->unit, (u_long)up->rpt_cnt,
+				(uint8_t)up->rpt_buf[0]));
 		}
-		else if (up->rpt_status == TSIP_PARSED_EMPTY)
-			up->rpt_cnt = 0;
-
-		else if (up->rpt_cnt > sizeof(up->rpt_buf)) 
-			up->rpt_status =TSIP_PARSED_EMPTY;
-
-		if (up->rpt_status == TSIP_PARSED_FULL) 
-			trimble_receive(peer);
-
 	} /* while chars in buffer */
 }
 
