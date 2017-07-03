@@ -109,6 +109,9 @@
 #define RMAX 172 /* TSIP packet 0x58 can be 172 bytes */
 #define DLE 0x10
 #define ETX 0x03
+#define MSG_TSIP 0
+#define MSG_PRAECIS 1
+#define SPSTAT_LEN 34 /* length of reply from Praecis SPSTAT message */
 
 /* parse states */
 #define TSIP_PARSED_EMPTY       0	
@@ -116,6 +119,7 @@
 #define TSIP_PARSED_DLE_1       2
 #define TSIP_PARSED_DATA        3
 #define TSIP_PARSED_DLE_2       4
+#define TSIP_PARSED_ASCII       5
 
 /* 
  * Leap-Insert and Leap-Delete are encoded as follows:
@@ -169,7 +173,7 @@ struct trimble_unit {
 
 static	bool	trimble_start		(int, struct peer *);
 static	void	trimble_shutdown	(int, struct peer *);
-static	void	trimble_receive	(struct peer *);
+static	void	trimble_receive	(struct peer *, int);
 static	void	trimble_poll		(int, struct peer *);
 static	void 	trimble_io		(struct recvbuf *);
 int 		trimble_configure	(int, struct peer *);
@@ -219,9 +223,6 @@ struct refclock refclock_trimble = {
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
 /* #define CLK_ACUTIMEB 4	* Trimble Actutime Gold Port B UNUSED */
-
-static bool praecis_msg;
-static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
 
 /* These routines are for sending packets to the Thunderbolt receiver
  * They are taken from Markus Prosch
@@ -999,7 +1000,8 @@ TSIP_decode (
 
 static void
 trimble_receive (
-	struct peer * peer
+	struct peer * peer,
+	int type
 	)
 {
 	struct trimble_unit *up;
@@ -1011,7 +1013,17 @@ trimble_receive (
 	pp = peer->procptr;
 	up = pp->unitptr;
 		
-	if (! TSIP_decode(peer)) return;
+	if (MSG_TSIP == type) {
+		if (!TSIP_decode(peer))
+			return;
+	} else {
+		if (SPSTAT_LEN == up->rpt_cnt &&
+		    up->rpt_buf[up->rpt_cnt - 1] == '\r') {
+			up->rpt_buf[up->rpt_cnt - 1] = '\0';
+			record_clock_stats(peer, up->rpt_buf);
+		}
+		return;
+	}
 	
 	if (up->polled <= 0) 
 		return;   /* no poll pending, already received or timeout */
@@ -1094,46 +1106,15 @@ trimble_poll (
 	if(up->type == CLK_PRAECIS) {
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
 			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",unit);
-		else {
-			praecis_msg = true;
-			return;
-		}
 	}
 
 	if (HW_poll(pp) < 0) 
 		refclock_report(peer, CEVNT_FAULT); 
 }
 
-static void
-praecis_parse (
-	struct recvbuf *rbufp,
-	struct peer *peer
-	)
-{
-	static char buf[100];
-	static size_t p = 0;
-	struct refclockproc *pp;
-
-	pp = peer->procptr;
-
-	memcpy(buf+p,rbufp->recv_space.X_recv_buffer, rbufp->recv_length);
-	p += rbufp->recv_length;
-
-	if(buf[p-2] == '\r' && buf[p-1] == '\n') {
-		buf[p-2] = '\0';
-		record_clock_stats(peer, buf);
-
-		p = 0;
-		praecis_msg = false;
-
-		if (HW_poll(pp) < 0)
-			refclock_report(peer, CEVNT_FAULT);
-
-	}
-}
 
 /*
- * trimble_io - create TSIP packets from serial data stream
+ * trimble_io - create TSIP packets or ASCII strings from serial data stream
  */
 static void
 trimble_io (
@@ -1149,13 +1130,6 @@ trimble_io (
 	peer = rbufp->recv_peer;
 	pp = peer->procptr;
 	up = pp->unitptr;
-
-	if(up->type == CLK_PRAECIS) {
-		if(praecis_msg) {
-			praecis_parse(rbufp,peer);
-			return;
-		}
-	}
 
 	c = (char *) &rbufp->recv_space;
 	d = c + rbufp->recv_length;
@@ -1195,7 +1169,7 @@ trimble_io (
 				mb(up->rpt_cnt++) = *c;
 			} else if (*c == ETX) {
 				up->rpt_status = TSIP_PARSED_FULL;
-				trimble_receive(peer);
+				trimble_receive(peer, MSG_TSIP);
 			} else {
 				/* error: start new report packet */
 				up->rpt_status = TSIP_PARSED_DLE_1;
@@ -1203,14 +1177,27 @@ trimble_io (
 			}
 			break;
 
+		    case TSIP_PARSED_ASCII:
+			mb(up->rpt_cnt++) = *c;
+			if (*c == '\n') {
+				up->rpt_status = TSIP_PARSED_FULL;
+				trimble_receive(peer, MSG_PRAECIS);
+			}
+			break;
+
 		    case TSIP_PARSED_FULL:
 		    case TSIP_PARSED_EMPTY:
 		    default:
 			up->rpt_cnt = 0;
-			if (*c == DLE)
+			if (*c == DLE) {
 				up->rpt_status = TSIP_PARSED_DLE_1;
-			else
-				up->rpt_status = TSIP_PARSED_EMPTY;
+			} else if (up->type == CLK_PRAECIS && NULL != strchr("6L789ADTP", *c)) {
+				/* Praecis command reply */
+				up->rpt_buf[0] = *c;
+				up->rpt_status = TSIP_PARSED_ASCII;
+			} else {
+ 				up->rpt_status = TSIP_PARSED_EMPTY;
+			}
 			break;
 		}
 		c++;
