@@ -160,6 +160,7 @@ struct trimble_unit {
 	size_t 		rpt_cnt;	/* TSIP packet length so far */
 	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
+	l_fp		p_recv_time;	/* timestamp of last received packet */
 	unsigned int	week;		/* GPS week number */
 	unsigned int	TOW;		/* GPS time of week */
 	int		UTC_offset;	/* GPS-UTC offset */
@@ -665,6 +666,9 @@ TSIP_decode (
 				return 0;
 			}
 
+			if (pp->sloppyclockflag & CLK_FLAG2)
+				pp->lastrec = up->p_recv_time;
+
 			return 2;
 			break;
 
@@ -739,6 +743,10 @@ TSIP_decode (
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 			up->UTC_offset = 0; /* don't re-use offset */
+
+			if (pp->sloppyclockflag & CLK_FLAG2)
+				pp->lastrec = up->p_recv_time;
+
 			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
 				   up->unit, (unsigned int)(mb(0) & 0xff), event,
 				   up->date.hour, up->date.minute, up->date.second, pp->nsec,
@@ -870,6 +878,9 @@ TSIP_decode (
 			up->week = (uint32_t)getint((uint8_t *) &mb(5));
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
+
+			pp->lastrec = up->p_recv_time;
+
 			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d TOW: %u  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
 				   up->unit, (unsigned int)(mb(0) & 0xff), event, up->TOW, up->week, 
 				   up->date.hour, up->date.minute, up->date.second,
@@ -1149,9 +1160,8 @@ trimble_io (
 				up->rpt_status = TSIP_PARSED_DATA;
 				/* save packet ID */
 				up->rpt_buf[0] = *c;
-				/* stamp it */
-				if (pp->sloppyclockflag & CLK_FLAG2) 
-					get_systime(&pp->lastrec);
+				/* save packet receive time */
+				up->p_recv_time = rbufp->recv_time;
 				break;
 			}
 			break;
