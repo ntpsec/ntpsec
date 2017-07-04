@@ -1,0 +1,671 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, division
+
+import sys
+import os
+import getopt
+import time
+import socket
+import select
+import subprocess
+
+try:
+    import ntp.util
+    import ntp.agentx
+    ax = ntp.agentx
+except ImportError as e:
+    sys.stderr.write(
+        "ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
+
+
+logfile = "ntpsnmpd.log"
+logfp = sys.stderr
+nofork = True  # don't daemonize while still under construction
+debug = 0
+timeout = 5  # default timeout, what shuold this be?
+
+ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
+
+
+class DataSource:  # This may be broken up in future to be less NTP-specific
+    def __init__(self):
+        # This is defined as a dict tree because simpler, and avoids
+        # certain edge cases
+        # OIDs are relative from ntp root
+        # ntpEntNotifications
+        self.oidTree = {0: (None,
+                            # ntpEntNotifModeChange
+                            {1: (None, None),
+                             # ntpEntNotifStratumChange
+                             2: (None, None),
+                             # ntpEntNotifSyspeerChange
+                             3: (None, None),
+                             # ntpEntNotifAddAssociation
+                             4: (None, None),
+                             # ntpEntNotifRemoveAsociation
+                             5: (None, None),
+                             # ntpEntNotifConfigChanged
+                             6: (None, None),
+                             # ntpEntNotifLeapSecondAnnounced
+                             7: (None, None),
+                             # ntpEntNotifHeartbeat
+                             8: (None, None)}),
+                        # ntpSnmpMIBObjects
+                        1: (None,
+                            # ntpEntInfo
+                            {1: (None,
+                                 # ntpNetSoftwareName utf8str
+                                 {1: ((lambda oid:
+                                       self.cb_systemInfo(oid, "name")),
+                                      None),
+                                  # ntpEntSoftwareVersion utf8str
+                                  2: ((lambda oid:
+                                       self.cb_systemInfo(oid, "version")),
+                                      None),
+                                  # ntpEntSoftwareVendor utf8str
+                                  3: ((lambda oid:
+                                       self.cb_systemInfo(oid, "vendor")),
+                                      None),
+                                  # ntpEntSystemType utf8str
+                                  4: ((lambda oid:
+                                       self.cb_systemInfo(oid, "system")),
+                                      None),
+                                  # ntpEntTimeResolution uint32
+                                  5: (self.cb_timeResolution, None),
+                                  # ntpEntTimePrecision int32
+                                  6: (self.cb_timePrecision, None),
+                                  # ntpEntTimeDistance DisplayString
+                                  7: (self.cb_timeDistance, None)}),
+                             # ntpEntStatus
+                             2: (None,
+                                 # ntpEntStatusCurrentMode INTEGER {...}
+                                 {1: (self.cb_statusCurrentMode, None),
+                                  # ntpEntStatusStratum NtpStratum
+                                  2: (self.cb_statusStratum, None),
+                                  # ntpEntStatusActiveRefSourceId
+                                  #  uint32 (0..99999)
+                                  3: (self.cb_statusActiveRefSourceID, None),
+                                  # ntpEntStatusActiveRefSourceName utf8str
+                                  4: (self.cb_statusActiveRefSourceName, None),
+                                  # ntpEntStatusActiveOffset DisplayString
+                                  5: (self.cb_statusActiveOffset, None),
+                                  # ntpEntStatusNumberOfRefSources
+                                  #  unit32 (0..99)
+                                  6: (self.cb_statusNumRefSources, None),
+                                  # ntpEntStatusDispersion DisplayString
+                                  7: (self.cb_statusDispersion, None),
+                                  # ntpEntStatusEntityUptime TimeTicks
+                                  8: (self.cb_statusEntityUptime, None),
+                                  # ntpEntStatusDateTime NtpDateTime
+                                  9: (self.cb_statusDateTime, None),
+                                  # ntpEntStatusLeapSecond NtpDateTime
+                                  10: (self.cb_statusLeapSecond, None),
+                                  # ntpEntStatusLeapSecondDirection
+                                  #  int32 (-1..1)
+                                  11: (self.cb_statusLeapSecDirection, None),
+                                  # ntpEntStatusInPkts Counter32
+                                  12: (self.cb_statusInPkts, None),
+                                  # ntpEntStatusOutPkts Counter32
+                                  13: (self.cb_statusOutPkts, None),
+                                  # ntpEntStatusBadVersion Counter32
+                                  14: (self.cb_statusBadVersion, None),
+                                  # ntpEntStatusProtocolError Counter32
+                                  15: (self.cb_statusProtocolError, None),
+                                  # ntpEntStatusNotifications Counter32
+                                  16: (self.cb_statusNotifications, None),
+                                  # ntpEntStatPktModeTable
+                                  #  SEQUENCE of NtpEntStatPktModeEntry
+                                  17: (None,
+                                       # ntpEntStatPktModeEntry SEQUENCE {...}
+                                       {1: (None,
+                                            # ntpEntStatPktMode INTEGER {...}
+                                            {1: (None, None),
+                                             # ntpEntStatPktSent Counter32
+                                             2: (None, None),
+                                             # ntpEntStatPktRecived Counter32
+                                             3: (None, None)})})}),
+                             # ntpAssociation
+                             3: (None,
+                                 # ntpAssociationTable
+                                 #  SEQUENCE of NtpAssociationEntry
+                                 {1: (None,
+                                      # ntpAssociationEntry SEQUENCE {...}
+                                      {1: (None,
+                                           # ntpAssocId uint32 (1..99999)
+                                           {1: (self.cb_assocID, None),
+                                            # ntpAssocName utf8str
+                                            2: (self.cb_assocName, None),
+                                            # ntpAssocRefId DisplayString
+                                            3: (self.cb_assocRefID, None),
+                                            # ntpAssocAddressType
+                                            #  InetAddressType
+                                            4: (self.cb_assocAddrType, None),
+                                            # ntpAssocAddress
+                                            #  InetAddress SIZE (4|8|16|20)
+                                            5: (self.cb_assocAddr, None),
+                                            # ntpAssocOffset DisplayString
+                                            6: (self.cb_assocOffset, None),
+                                            # ntpAssocStratum NtpStratum
+                                            7: (self.cb_assocStratum, None),
+                                            # ntpAssocStatusJitter DisplayString
+                                            8: (self.cb_assocStatusJitter,
+                                                None),
+                                            # ntpAssocStatusDelay DisplayString
+                                            9: (self.cb_assocStatusDelay, None),
+                                            # ntpAssocStatusDispersion
+                                            #  DisplayString
+                                            10: (self.cb_assocStatusDisp,
+                                                 None)})}),
+                                  # ntpAssociationStatisticsTable
+                                  #  SEQUENCE of ntpAssociationStatisticsEntry
+                                  2: (None,
+                                      # ntpAssociationStatisticsEntry
+                                      #  SEQUENCE {...}
+                                      {1: (None,
+                                           # ntpAssocStatInPkts Counter32
+                                           {1: (self.cb_assocStatInPkts, None),
+                                            # ntpAssocStatOutPkts Counter32
+                                            2: (self.cb_assocStatOutPkts,
+                                                None),
+                                            # ntpAssocStatProtocolError
+                                            #  Counter32
+                                            3: (self.cb_assocStatProtoErr,
+                                                None)})})}),
+                             # ntpEntControl
+                             4: (None,
+                                 # ntpEntHeartbeatInterval unit32
+                                 {1: (self.cb_entHeartbeatInterval, None),
+                                  # ntpEntNotifBits BITS {...}
+                                  2: (self.cb_entNotifBits, None)}),
+                             # ntpEntNotifObjects
+                             5: (None,
+                                 # ntpEntNotifMessage utf8str
+                                 {1: (self.cb_entNotifMessage, None)})}),
+                        # ntpEntConformance
+                        2: (None,
+                            # ntpEntCompliances
+                            {1: (None,
+                                 # ntpEntNTPCompliance
+                                 {1: (None, None),
+                                  # ntpEntSNTPCompliance
+                                  2: (None, None)}),
+                             # ntpEntGroups
+                             2: (None,
+                                 # ntpEntObjectsGroup1 OBJECTS {...}
+                                 {1: (None, None),
+                                  # ntpEntObjectsGroup2 OBJECTS {...}
+                                  2: (None, None),
+                                  # ntpEntNotifGroup NOTIFICATIONS {...}
+                                  3: (None, None)})})}
+        self.oidList = ntp.agentx.mibTree2List(self.oidTree, ntpRootOID)
+
+    def getOID(self, oid, acceptNext=False):
+        "Get the requested OID, or the next lexographical OID"
+        for node in self.oidList:
+            if node[0] is None:
+                continue  # skip over not yet implemented OIDs
+            if (node[1] == oid):
+                return node  # (callback, oid)
+            elif (node[1] > oid) and (acceptNext is True):
+                return node
+        # Nothing in the list
+        return (None, None)
+
+    def getNextOID(self, oid):
+        for pos in range(len(self.oidList)):
+            callback, current = self.oidList[pos]
+            if callback is None:
+                continue  # skip over not yet implemented OIDs
+            if current <= oid:
+                continue
+            else:
+                return self.oidList[pos]
+        # Nothing after the supplied oid
+        return (None, None)
+
+    def getOIDsInRange(self, oidrange, firstOnly=False):
+        oids = []
+        for node in self.oidList:
+            if node[0] is None:  # No callback
+                continue  # skip over not yet implemented OIDs
+            elif node[1] > oidrange.start:  # Past the start, in the body
+                if (oidrange.end is not None) and (node[1] >= oidrange.end):
+                    break  # Past the end of a bounded range
+                else:
+                    oids.append(node)  # Found a match
+            elif (node[1].subids == oidrange.start.subids) and \
+                 (oidrange.start.include is True):
+                oids.append(node)  # Inclusive search and a match at the start
+            else:
+                pass
+            if (firstOnly is True) and (len(oids) > 0):
+                break
+        return oids
+
+    # Data retrevial callbacks start here
+    # comment divider lines represent not yet implemented callbacks
+
+    #########################
+
+    def cb_systemInfo(self, oid, category):
+        if category == "name":  # The product name of the running NTP version
+            data = "NTPsec"
+        elif category == "version":  # version string
+            data = ntp.util.stdversion()
+        elif category == "vendor":  # vendor/author name
+            data = "Internet Civil Engineering Institute"
+        elif category == "system":  # system / hardware info
+            proc = subprocess.Popen(["uname","-srm"], stdout=subprocess.PIPE)
+            data = proc.communicate()[0]
+        vb = ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
+        return vb
+
+    def cb_timeResolution(self, oid):  # DUMMY
+        # Uinteger32
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 42)
+
+    def cb_timePrecision(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_INTEGER, oid, 23)
+
+    def cb_timeDistance(self, oid):  # DUMMY
+        # Displaystring
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "foo")
+
+    #############################
+
+    def cb_statusCurrentMode(self, oid):  # DUMMY
+        # Range of integers
+        return ax.Varbind(ax.VALUE_INTEGER, oid, 15)
+
+    def cb_statusStratum(self, oid):  # DUMMY
+        # NTPstratum
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 16)
+
+    def cb_statusActiveRefSourceID(self, oid):  # DUMMY
+        # range of uint32
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 1024)
+
+    def cb_statusActiveRefSourceName(self, oid):  # DUMMY
+        # utf8
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "bar")
+
+    def cb_statusActiveOffset(self, oid):  # DUMMY
+        # DisplayString
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "baz")
+
+    def cb_statusNumRefSources(self, oid):  # DUMMY
+        # range of uint32
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 50)
+
+    def cb_statusDispersion(self, oid):  # DUMMY
+        # DisplayString
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "quux")
+
+    def cb_statusEntityUptime(self, oid):  # DUMMY
+        # TimeTicks
+        return ax.Varbind(ax.VALUE_TIME_TICKS, oid, 8)
+
+    def cb_statusDateTime(self, oid):  # DUMMY
+        # NtpDateTime
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "fred")
+
+    def cb_statusLeapSecond(self, oid):  # DUMMY
+        # NtpDateTime
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "blah")
+
+    def cb_statusLeapSecDirection(self, oid):  # DUMMY
+        # range of int32
+        return ax.Varbind(ax.VALUE_INTEGER, oid, -1)
+
+    def cb_statusInPkts(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 100)
+
+    def cb_statusOutPkts(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 200)
+
+    def cb_statusBadVersion(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 300)
+
+    def cb_statusProtocolError(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 400)
+
+    def cb_statusNotifications(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 500)
+
+    ##############################
+
+    def cb_assocID(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 1)
+
+    def cb_assocName(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "It")
+
+    def cb_assocRefID(self, oid):  # DUMMY
+        # DisplayString
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "says;")
+
+    def cb_assocAddrType(self, oid):  # DUMMY
+        # InetAddressType (range of ints)
+        return ax.Varbind(ax.VALUE_INTEGER, oid, 3)
+
+    def cb_assocAddr(self, oid):  # DUMMY
+        # InetAddress
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "\x01\x02\x03\x04")
+
+    def cb_assocOffset(self, oid):  # DUMMY
+        # DisplayString
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "Would")
+
+    def cb_assocStratum(self, oid):  # DUMMY
+        # NTPStratum
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 12)
+
+    def cb_assocStatusJitter(self, oid):  # DUMMY
+        # DisplayString
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "You")
+
+    def cb_assocStatusDelay(self, oid):  # DUMMY
+        # DisplayString
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "Kindly?")
+
+    def cb_assocStatusDisp(self, oid):  # DUMMY
+        # DisplayString
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "*thunk*")
+
+    def cb_assocStatInPkts(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 2)
+
+    def cb_assocStatOutPkts(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 4)
+
+    def cb_assocStatProtoErr(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 8)
+
+    #########################
+
+    def cb_entHeartbeatInterval(self, oid):  # DUMMY
+        # uint32
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 16)
+
+    def cb_entNotifBits(self, oid):  # DUMMY
+        # BITS
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "\x10\x20")
+
+    ##########################
+
+    def cb_entNotifMessage(self, oid):  # DUMMY
+        # utf8str
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "jabber")
+
+    #########################
+
+
+def dolog(text, level):
+    if debug >= level:
+        logfp.write(text)
+
+
+def connect():
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sock.connect("/var/agentx/master")
+    except socket.error as msg:
+        dolog(repr(msg) + "\n", 2)
+        sys.exit(1)
+    return sock
+
+
+class PacketControl:
+    def __init__(self, sock, dbase, spinGap=0.001, timeout=5):
+        # take a pre-made socket instead of making our own so that
+        # PacketControl doesn't have to know or care about implementation
+        self.socket = sock
+        self.spinGap = spinGap  # sleep() time on each loop
+        # indexed on: (session_id, transaction_id, packet_id)
+        # contains: (timeout, packet class)
+        self.packetLog = {}  # Sent packets kept until response is received
+        self.loopCallback = None  # called each loop in runforever mode
+        self.database = dbase  # class for handling data requests
+        self.recievedData = ""  # buffer for data from incomplete packets
+        self.recievedPackets = []  # use as FIFO
+        self.timeout = timeout  # default 5s, arbitrary
+        self.sessionID = None  # need this for all packets
+        # indexed on pdu code
+        self.pduHandlers = {ax.PDU_GET: self.handle_GetPDU,
+                            ax.PDU_GET_NEXT: self.handle_GetNextPDU,
+                            ax.PDU_GET_BULK: self.handle_GetBulkPDU}
+
+    def mainloop(self, runforever):
+        if runforever:
+            while True:
+                self._doloop()
+                if self.loopCallback is not None:
+                    self.loopCallback()
+                time.sleep(self.spinGap)
+        else:
+            self._doloop()
+
+    def _doloop(self):
+        # loop body split out to seperate the one-shot/run-forever switches
+        # from the actual logic
+        self.packetEater()
+        while len(self.recievedPackets) > 0:
+            packet = self.recievedPackets.pop(0)
+            ptype = packet.pduType
+            if ptype in self.pduHandlers:
+                self.pduHandlers[ptype](packet)
+            else:
+                dolog("dropping packet type %i, not implemented\n" % ptype, 1)
+
+    def initNewSession(self):
+        dolog("init new session...\n", 1)
+        # We already have a connection, need to open a session.
+        openpkt = ntp.agentx.OpenPDU(True, 23, 0, 0, self.timeout, (),
+                                     "NTPsec SNMP subagent")
+        self.sendPacket(openpkt, False)
+        dolog("Sent open packet\n", 1)
+        response = self.waitForResponse(openpkt, True)
+        self.sessionID = response.sessionID
+        # Register the tree, just random crap for testing right now
+        fooregister = ntp.agentx.RegisterPDU(True, self.sessionID, 1, 1,
+                                             self.timeout, 1, ntpRootOID)
+        self.sendPacket(fooregister, False)
+        dolog("Sent register\n", 1)
+        response = self.waitForResponse(fooregister, True)
+
+    def waitForResponse(self, opkt, ignoreSID=False):
+        while True:
+            self.packetEater()
+            while len(self.recievedPackets) > 0:
+                packet = self.recievedPackets.pop(0)
+                dolog("Waiting, got packet: " + repr(packet) + "\n\n", 3)
+                # This will drop anything that is not the response
+                #  but if this method is being called we don't care
+                if packet.__class__ != ntp.agentx.ResponsePDU:
+                    continue
+                haveit = (opkt.transactionID == packet.transactionID) and \
+                         (opkt.packetID == packet.packetID)
+                if ignoreSID is False:
+                    haveit = haveit and (opkt.sessionID == packet.sessionID)
+                if haveit is True:
+                    return packet
+            time.sleep(self.spinGap)
+
+    def packetEater(self):
+        self.pollSocket()
+        while True:
+            datalen = len(self.recievedData)
+            if datalen < 20:
+                return None  # We don't even have a packet header, bail
+            try:
+                pkt, extraData = ntp.agentx.decode_packet(self.recievedData)
+                self.recievedData = extraData
+                self.recievedPackets.append(pkt)
+                dolog("\npacketEater got a full packet: %s\n" % repr(pkt), 3)
+            except IndexError:
+                return None  # this happens if we don't have all of a packet
+
+    def sendPacket(self, packet, expectsReply):
+        encoded = packet.encode()
+        dolog("\nsending packet: %s\n%s \n" % (repr(packet), repr(encoded)), 4)
+        self.socket.sendall(encoded)
+        if expectsReply is True:
+            index = (packet.sessionID,
+                     packet.transactionID,
+                     packet.packetID)
+            self.packetLog[index] = packet
+
+    def pollSocket(self):
+        "Reads all currently available data from sock, non-blocking"
+        data = ""
+        while True:
+            tmp = select.select([self.socket], [], [], 0)[0]
+            if len(tmp) == 0:  # No socket, means no data available
+                break
+            tmp = tmp[0]
+            newdata = tmp.recv(4096)  # Arbitrary value
+            if len(newdata) > 0:
+                dolog("Received data: " + repr(newdata) + "\n", 4)
+                data += newdata
+            else:
+                break
+        self.recievedData += data
+
+    # Packet handlers start here
+
+    def handle_GetPDU(self, packet):
+        binds = []
+        for oidr in packet.oidranges:
+            target = oidr.start
+            callback, oid = self.database.getOID(target, False)
+            if (oid != target) or (callback is None):
+                binds.append(ax.Varbind(ax.VALUE_NO_SUCH_OBJECT, target))
+            else:
+                binds.append(callback(oid))
+            # There should also be a situation that leads to noSuchInstance
+            #  but I do not understand the requirements for that
+        # Need to implement genError
+        resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
+                              packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
+        self.sendPacket(resp, False)
+
+    def handle_GetNextPDU(self, packet):
+        binds = []
+        for oidr in packet.oidranges:
+            oids = self.database.getOIDsInRange(oidr, True)
+            if len(oids) == 0:  # Nothing found
+                binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
+            else:
+                callback, oid = oids[0]
+                binds.append(callback(oid))
+        # Need to implement genError
+        resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
+                              packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
+        self.sendPacket(resp, False)
+
+    def handle_GetBulkPDU(self, packet):
+        binds = []
+        nonreps = packet.oidranges[:packet.nonReps]
+        repeats = packet.oidranges[packet.nonReps:]
+        # Handle non-repeats
+        for oidr in nonreps:
+            oids = self.database.getOIDsInRange(oidr, True)
+            if len(oids) == 0:  # Nothing found
+                binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
+            else:
+                callback, oid = oids[0]
+                binds.append(callback(oid))
+            binds.append(varbind)
+        # Handle repeaters
+        for oidr in repeats:
+            oids = self.database.getOIDsInRange(oidr)
+            if len(oids) == 0:  # Nothing found
+                binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
+            else:
+                for callback, oid in oids[:packet.maxReps]:
+                    binds.append(callback(oid))
+        resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
+                              packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
+        self.sendPacket(resp, False)
+
+
+def mainloop():
+    dolog("initing loop\n", 1)
+    sock = connect()
+    dbase = DataSource()
+    control = PacketControl(sock, dbase)
+    control.initNewSession()
+    control.mainloop(True)
+
+
+def daemonize(runfunc):
+    pid = os.fork()
+    if pid < 0:
+        print("Forking error", pid)
+        sys.exit(pid)
+    elif pid > 0:  # We are the parent
+        print("Daemonization success, child pid:", pid)
+        sys.exit(0)
+
+    # We must be the child
+
+    os.umask(0)
+
+    global logfp
+    logfp = open(logfile, "a", 1)
+
+    sid = os.setsid()
+
+    # chdir should be here, change to what? root?
+
+    sys.stdin.close()
+    sys.stdout.close()
+    sys.stderr.close()
+
+    runfunc()
+
+
+usage = """
+USAGE: ntpsnmpd [-n]
+  Flg Arg Option-Name   Description
+   -n no  no-fork         Do not fork and daemonize.
+   -d no  debug-level     Increase output debug message level
+                                - may appear multiple times
+   -D Int set-debug-level Set the output debug message level
+                                - may appear multiple times
+   -V no  version         Output version information and exit
+"""
+
+
+if __name__ == "__main__":
+    try:
+        (options, arguments) = getopt.getopt(
+            sys.argv[1:],
+            "ndD:V",
+            ["no-fork", "debug-level", "set-debug-level", "version"])
+    except getopt.GetoptError as e:
+        sys.stderr.write("%s\n" % e)
+        sys.stderr.write(usage)
+        raise SystemExit(1)
+
+    for (switch, val) in options:
+        if switch in ("-n", "--no-fork"):
+            # currently non functional, as nofork is inited to True
+            nofork = True
+        elif switch in ("-d", "--debug-level"):
+            debug += 1
+        elif switch in ("-D", "--set-debug-level"):
+            errmsg = "Error: -D parameter '%s' not a number\n"
+            debug = ntp.util.safeargcast(val, int, errmsg, usage)
+        elif switch in ("-V", "--version"):
+            print("ntpsnmpd %s" % ntp.util.stdversion())
+            raise SystemExit(0)
+
+    if nofork is True:
+        mainloop()
+    else:
+        daemonize(mainloop)

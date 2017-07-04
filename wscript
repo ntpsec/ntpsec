@@ -1050,6 +1050,7 @@ python_scripts = [
     "ntpclients/ntpviz",
     "ntpclients/ntpwait",
     "ntpclients/ntplogtemp",
+    "ntpclients/ntpsnmpd",
 ]
 
 
