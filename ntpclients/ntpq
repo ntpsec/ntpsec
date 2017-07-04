@@ -1595,7 +1595,6 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
                                 - may appear multiple times
    -h no  help            Print a usage message.
    -p no  peers           Print a list of the peers
-                                - prohibits the option 'interactive'
    -n no  numeric         Numeric host addresses
    -k Str keyfile         Specify a keyfile. ntpq will look in this file
                           for the key specified with -a
