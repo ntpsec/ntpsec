@@ -161,6 +161,7 @@ struct trimble_unit {
 	size_t 		rpt_cnt;	/* TSIP packet length so far */
 	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
+	bool		use_event;	/* receiver has event input */
 	bool		parity_chk;	/* enable parity checking */
 	l_fp		p_recv_time;	/* timestamp of last received packet */
 	unsigned int	week;		/* GPS week number */
@@ -425,6 +426,7 @@ trimble_start (
 
 	up->type = CLK_TYPE(peer);
 	up->parity_chk = true;
+	up->use_event = true;
 	switch (up->type) {
 	    case CLK_TRIMBLE:
 		/* Normal mode, do nothing */
@@ -437,6 +439,7 @@ trimble_start (
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Thunderbolt mode enabled",
 			refclock_name(peer));
 		up->parity_chk = false;
+		up->use_event = false;
 		break;
 	    case CLK_ACUTIME:
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Acutime Gold mode enabled",
@@ -555,9 +558,6 @@ TSIP_decode (
 	)
 {
 	int st;
-	long   secint;
-	double secs;
-	double secfrac;
 	unsigned short event = 0;
 
 	struct trimble_unit *up;
@@ -596,7 +596,7 @@ TSIP_decode (
 		 * Superpackets
 		 */
 		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
-		if (!((pp->sloppyclockflag & CLK_FLAG2) || event)) 
+		if (!event) 
 			/* Ignore Packet */
 			return 0;	   
 	
@@ -630,53 +630,7 @@ TSIP_decode (
 				printf(" : Tracking %d\n", ts); 
 			}
 #endif
-
-			if (up->UTC_offset == 0) { /* Check UTC offset */ 
-#ifdef DEBUG
-				printf("TSIP_decode: UTC Offset Unknown\n");
-#endif
-				return 0;
-			}
-
-			secs = getdbl((uint8_t *) &mb(3));
-			secint = (long) secs;
-			secfrac = secs - secint; /* 0.0 <= secfrac < 1.0 */
-
-			pp->nsec = (long) (secfrac * NS_PER_S);
-
-			secint %= SECSPERDAY;    /* Only care about today */
-			up->date.hour = (int)(secint / SECSPERHR);
-			secint %= SECSPERHR;
-			up->date.minute = (int)(secint / 60);
-			secint %= 60;
-			up->date.second = secint % 60;
-			up->date.monthday = (uint8_t)mb(11);
-			up->date.month = (uint8_t)mb(12);
-			up->date.year = (uint16_t)getint((uint8_t *) &mb(13));
-			up->date.yearday = 0;
-			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
-			gpsweekadj(&up->week, up->build_week);
-			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
-#ifdef DEBUG
-			if (debug > 1) /* SPECIAL DEBUG */
-				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02d\n",
-				       up->unit, (unsigned int)(mb(0) & 0xff), event,
-				       up->date.hour, up->date.minute, up->date.second, pp->nsec,
-				       up->date.month, up->date.monthday, up->date.year, up->UTC_offset);
-#endif
-			/* Only use this packet when no
-			 * 8F-AD's are being received
-			 */
-
-			if (up->leap_status) {
-				up->leap_status = 0;
-				return 0;
-			}
-
-			if (pp->sloppyclockflag & CLK_FLAG2)
-				pp->lastrec = up->p_recv_time;
-
-			return 2;
+			return 0;
 			break;
 
 		    case PACKET_NTP:
@@ -750,9 +704,6 @@ TSIP_decode (
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 			up->UTC_offset = 0; /* don't re-use offset */
-
-			if (pp->sloppyclockflag & CLK_FLAG2)
-				pp->lastrec = up->p_recv_time;
 
 			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
 				   up->unit, (unsigned int)(mb(0) & 0xff), event,
@@ -1115,10 +1066,9 @@ trimble_poll (
 	up->polled = 2; /* synchronous packet + 1 event */
 
 	DPRINT(1, ("trimble_poll: unit %d: polling %s\n", unit,
-		   (pp->sloppyclockflag & CLK_FLAG2) ? 
-		   "synchronous packet" : "event"));
+	           up->use_event ? "event" : "synchronous packet"));
 
-	if (pp->sloppyclockflag & CLK_FLAG2) 
+	if (!up->use_event)
 		return;  /* using synchronous packet input */
 
 	if(up->type == CLK_PRAECIS) {
