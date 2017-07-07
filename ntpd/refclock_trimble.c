@@ -120,6 +120,7 @@
 #define TSIP_PARSED_DATA        3
 #define TSIP_PARSED_DLE_2       4
 #define TSIP_PARSED_ASCII       5
+#define TSIP_PARSED_PARITY      6
 
 /* 
  * Leap-Insert and Leap-Delete are encoded as follows:
@@ -160,6 +161,7 @@ struct trimble_unit {
 	size_t 		rpt_cnt;	/* TSIP packet length so far */
 	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
+	bool		parity_chk;	/* enable parity checking */
 	l_fp		p_recv_time;	/* timestamp of last received packet */
 	unsigned int	week;		/* GPS week number */
 	unsigned int	TOW;		/* GPS time of week */
@@ -416,15 +418,13 @@ trimble_start (
 		return false;
 	}
 
-	tio.c_cflag |= (PARENB|PARODD);
-	tio.c_iflag &= (unsigned)~ICRNL;
-
 	/*
 	 * Allocate and initialize unit structure
 	 */
 	up = emalloc_zero(sizeof(*up));
 
 	up->type = CLK_TYPE(peer);
+	up->parity_chk = true;
 	switch (up->type) {
 	    case CLK_TRIMBLE:
 		/* Normal mode, do nothing */
@@ -436,7 +436,7 @@ trimble_start (
 	    case CLK_THUNDERBOLT:
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Thunderbolt mode enabled",
 			refclock_name(peer));
-		tio.c_cflag = (CS8|CLOCAL|CREAD);
+		up->parity_chk = false;
 		break;
 	    case CLK_ACUTIME:
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Acutime Gold mode enabled",
@@ -446,6 +446,13 @@ trimble_start (
 	        msyslog(LOG_NOTICE, "REFCLOCK: %s mode unknown",
 			refclock_name(peer));
 		break;
+	}
+	tio.c_cflag = (CS8|CLOCAL|CREAD);
+	tio.c_iflag &= (unsigned)~ICRNL;
+	if (up->parity_chk) {
+		tio.c_cflag |= (PARENB|PARODD);
+		tio.c_iflag &= (unsigned)~IGNPAR;
+		tio.c_iflag |= (INPCK|PARMRK);
 	}
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
 	    msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr(fd, &tio): %m",
@@ -1169,8 +1176,21 @@ trimble_io (
 		    case TSIP_PARSED_DATA:
 			if (*c == DLE)
 				up->rpt_status = TSIP_PARSED_DLE_2;
+			else if (up->parity_chk && *c == '\377')
+				up->rpt_status = TSIP_PARSED_PARITY;
 			else 
 				mb(up->rpt_cnt++) = *c;
+			break;
+
+		    case TSIP_PARSED_PARITY:
+			if (*c == '\377') {
+				up->rpt_status = TSIP_PARSED_DATA;
+				mb(up->rpt_cnt++) = *c;
+			} else {
+				msyslog(LOG_ERR, "Trimble(%d): detected serial parity error or receive buffer overflow",
+					up->unit);
+				up->rpt_status = TSIP_PARSED_EMPTY;
+			}
 			break;
 
 		    case TSIP_PARSED_DLE_2:
@@ -1188,10 +1208,14 @@ trimble_io (
 			break;
 
 		    case TSIP_PARSED_ASCII:
-			mb(up->rpt_cnt++) = *c;
 			if (*c == '\n') {
+				mb(up->rpt_cnt++) = *c;
 				up->rpt_status = TSIP_PARSED_FULL;
 				trimble_receive(peer, MSG_PRAECIS);
+			} else if (up->parity_chk && *c == '\377') {
+				up->rpt_status = TSIP_PARSED_PARITY;
+			} else {
+				mb(up->rpt_cnt++) = *c;
 			}
 			break;
 
