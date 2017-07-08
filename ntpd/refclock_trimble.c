@@ -126,9 +126,6 @@
  * Leap-Insert and Leap-Delete are encoded as follows:
  * 	TRIMBLE_UTC_TIME set   and TRIMBLE_LEAP_PENDING set: INSERT leap
  */
-
-/* #define TRIMBLE_LEAP_INPROGRESS 0x08 * This is the leap flag	UNUSED */
-/* #define TRIMBLE_LEAP_WARNING    0x04 * GPS Leap Warning (ICD-200) UNUSED */
 #define TRIMBLE_LEAP_PENDING    0x02 /* Leap Pending (24 hours)		*/
 #define TRIMBLE_UTC_TIME        0x01 /* UTC time available				*/
 
@@ -186,15 +183,11 @@ long		HW_poll			(struct refclockproc *);
 static	double	getdbl 			(uint8_t *);
 static	short	getint 			(uint8_t *);
 static	int32_t	getlong			(uint8_t *);
-#ifdef __UNUSED__
-static  void	sendcmd			(struct packettx *buffer, int c);
-#endif
 static  void	sendsupercmd		(struct packettx *buffer, int c1, int c2);
 static  void	sendbyte		(struct packettx *buffer, int b);
 static  void	sendint			(struct packettx *buffer, int a);
 static  int	sendetx			(struct packettx *buffer, int fd);
 static  void	init_thunderbolt	(int fd);
-static  void	init_acutime		(int fd);
 
 #ifdef DEBUG
 const char * Tracking_Status[15][15] = { 
@@ -226,27 +219,6 @@ struct refclock refclock_trimble = {
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
-/* #define CLK_ACUTIMEB 4	* Trimble Actutime Gold Port B UNUSED */
-
-/* These routines are for sending packets to the Thunderbolt receiver
- * They are taken from Markus Prosch
- */
-
-#ifdef __UNUSED__
-/*
- * sendcmd - Build data packet for sending
- */
-static void 
-sendcmd (
-	struct packettx *buffer,
-	int c
-	)
-{
-	*buffer->data = DLE;
-	*(buffer->data + 1) = (unsigned char)c;
-	buffer->size = 2;
-}
-#endif	/* __UNUSED_ */
 
 /*
  * sendsupercmd - Build super data packet for sending
@@ -335,31 +307,6 @@ init_thunderbolt (
 	sendsupercmd (&tx, 0x8E, 0xA5);
 	sendint      (&tx, 0x5);
 	sendetx      (&tx, fd);
-
-	free(tx.data);
-}
-
-/*
- * init_acutime - Prepares Acutime Receiver to be used with NTP
- */
-static void
-init_acutime (
-	int fd
-	)
-{
-	/* Disable all outputs, Enable Event-Polling on PortA so
-	   we can ask for time packets */
-	struct packettx tx;
-
-	tx.size = 0;
-	tx.data = (uint8_t *) malloc(100);
-
-	sendsupercmd(&tx, 0x8E, 0xA5);
-	sendbyte(&tx, 0x02);
-	sendbyte(&tx, 0x00);
-	sendbyte(&tx, 0x00);
-	sendbyte(&tx, 0x00);
-	sendetx(&tx, fd);
 
 	free(tx.data);
 }
@@ -519,8 +466,6 @@ trimble_start (
 
 	if (up->type == CLK_THUNDERBOLT)
 		init_thunderbolt(fd);
-	if (up->type == CLK_ACUTIME)
-		init_acutime(fd);
 
 	return true;
 }
@@ -847,67 +792,14 @@ TSIP_decode (
 			break;
 
 		    default:
-			/* Ignore Packet */
+			DPRINT(3, ("TSIP_decode: unit %d: unhandled superpacket 0x%02X-0x%02X len %d\n",
+			       up->unit, (u_int)(up->rpt_buf[0] & 0xff),
+			       (u_int)(mb(0) & 0xff), (int)up->rpt_cnt));
 			return 0;
 		} /* switch */
 	} /* if 8F packets */
-
-	else if (up->rpt_buf[0] == (uint8_t)0x42) {
-		printf("0x42\n");
-		return 0;
-	}
-	else if (up->rpt_buf[0] == (uint8_t)0x43) {
-		printf("0x43\n");
-		return 0;
-	}
-	else if ((up->rpt_buf[0] == PACKET_41) & (up->type == CLK_THUNDERBOLT)){
-		printf("Undocumented 0x41 packet on Thunderbolt\n");
-		return 0;
-	}
-	else if ((up->rpt_buf[0] == PACKET_41A) & (up->type == CLK_ACUTIME)) {
-#ifdef DEBUG
-		printf("GPS TOW: %ld\n", (long)getlong((uint8_t *) &mb(0)));
-		printf("GPS WN: %d\n", getint((uint8_t *) &mb(4)));
-		printf("GPS UTC-GPS Offser: %ld\n", (long)getlong((uint8_t *) &mb(6)));
-#endif
-		return 0;
-	}
-
-	/* Health Status for Acutime Receiver */
-	else if ((up->rpt_buf[0] == PACKET_46) & (up->type == CLK_ACUTIME)) {
-#ifdef DEBUG
-		if (debug > 1) /* SPECIAL DEBUG */
-		/* Status Codes */
-			switch (mb(0)) {
-			    case 0x00:
-				printf ("Doing Position Fixes\n");
-				break;
-			    case 0x01:
-				printf ("Do no have GPS time yet\n");
-				break;
-			    case 0x03:
-				printf ("PDOP is too high\n");
-				break;
-			    case 0x08:
-				printf ("No usable satellites\n");
-				break;
-			    case 0x09:
-				printf ("Only 1 usable satellite\n");
-				break;
-			    case 0x0A:
-				printf ("Only 2 usable satellites\n");
-				break;
-			    case 0x0B:
-				printf ("Only 3 usable satellites\n");
-				break;
-			    case 0x0C:
-				printf("The Chosen satellite is unusable\n");
-				break;
-			    default:
-				printf("(Status code is invalid)\n");
-			}
-#endif
-		/* Error Codes */
+	else if (up->rpt_buf[0] == PACKET_46) {
+		/* Health Status Error Codes */
 		if (mb(1) != 0)	{
 			
 			refclock_report(peer, CEVNT_BADTIME);
@@ -926,33 +818,14 @@ TSIP_decode (
 					printf ("Excessive reference frequency error, refer to packet 0x2D and packet 0x4D documentation for further information\n");
 			}
 #endif
-		
-		return 0;
 		}
+		return 0;
+	} else {
+		DPRINT(3, ("TSIP_decode: unit %d: unhandled packet 0x%02X len %d\n",
+		       up->unit, (u_int)(up->rpt_buf[0] & 0xff),
+		       (int)up->rpt_cnt));
+		return 0;
 	}
-	else if (up->rpt_buf[0] == 0x54)
-		return 0;
-
-	else if (up->rpt_buf[0] == PACKET_6D) {
-#ifdef DEBUG
-		int sats;
-
-		if ((mb(0) & 0x01) && (mb(0) & 0x02))
-			printf("2d Fix Dimension\n");
-		if (mb(0) & 0x04)
-			printf("3d Fix Dimension\n");
-
-		if (mb(0) & 0x08)
-			printf("Fix Mode is MANUAL\n");
-		else
-			printf("Fix Mode is AUTO\n");
-	
-		sats = mb(0) & 0xF0;
-		sats = sats >> 4;
-		printf("Tracking %d Satellites\n", sats);
-#endif
-		return 0;
-	} /* else if not super packet */
 	refclock_report(peer, CEVNT_BADREPLY);
 	up->polled = -1;
 #ifdef DEBUG
