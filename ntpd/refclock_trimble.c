@@ -82,29 +82,6 @@
 #endif
 #define	SPEED232	B9600		  	/* uart speed (9600 baud) */
 
-/*
- * TSIP Report Definitions
- */
-#define LENCODE_8F0B	74	/* Length of TSIP 8F-0B Packet & header */
-#define LENCODE_NTP     22	/* Length of Trimble NTP Packet */
-
-#define LENCODE_8FAC    68      /* Length of Thunderbolt 8F-AC Position Packet*/
-#define LENCODE_8FAB    17      /* Length of Thunderbolt Primary Timing Packet*/
-
-/* Allowed Sub-Packet ID's */
-#define PACKET_8F0B	0x0B
-#define PACKET_NTP	0xAD
-
-/* Thunderbolt Packets */
-#define PACKET_8FAC     0xAC	/* Supplementary Thunderbolt Time Packet */
-#define PACKET_8FAB     0xAB	/* Primary Thunderbolt Time Packet */
-#define PACKET_6D	0x6D	/* Supplementary Thunderbolt Tracking Stats */
-#define PACKET_41	0x41	/* Thunderbolt I don't know what this packet is, it's not documented on my manual*/
-
-/* Acutime Packets */
-#define PACKET_41A      0x41    /* GPS time */
-#define PACKET_46       0x46    /* Receiver Health */
-
 /* parse consts */
 #define RMAX 172 /* TSIP packet 0x58 can be 172 bytes */
 #define DLE 0x10
@@ -160,6 +137,7 @@ struct trimble_unit {
 	int		type;		/* Clock mode type */
 	bool		use_event;	/* receiver has event input */
 	bool		parity_chk;	/* enable parity checking */
+	bool		port_b_pkt;	/* saw a 'Port B' packet since startup */
 	l_fp		p_recv_time;	/* timestamp of last received packet */
 	unsigned int	week;		/* GPS week number */
 	unsigned int	TOW;		/* GPS time of week */
@@ -189,15 +167,24 @@ static  void	sendint			(struct packettx *buffer, int a);
 static  int	sendetx			(struct packettx *buffer, int fd);
 static  void	init_thunderbolt	(int fd);
 
-#ifdef DEBUG
-const char * Tracking_Status[15][15] = { 
-	{ "Doing Fixes\0" }, { "Good 1SV\0" }, { "Approx. 1SV\0" },
-	{"Need Time\0" }, { "Need INIT\0" }, { "PDOP too High\0" },
-	{ "Bad 1SV\0" }, { "0SV Usable\0" }, { "1SV Usable\0" },
-	{ "2SV Usable\0" }, { "3SV Usable\0" }, { "No Integrity\0" },
-	{ "Diff Corr\0" }, { "Overdet Clock\0" }, { "Invalid\0" } };
-#endif
+#define PAL_TSTATS 14
+static const char tracking_status[PAL_TSTATS+1][16] = { 
+	"Doing Fixes", "Good 1SV", "Approx. 1SV", "Need Time", "Need INIT",
+	"PDOP too High", "Bad 1SV", "0SV Usable", "1SV Usable", "2SV Usable",
+	"3SV Usable", "No Integrity", "Diff Corr", "Overdet Clock", "Invalid"};
+static const bool tracking_status_usable[PAL_TSTATS+1] = {
+	true, true, false, false, false,
+	false, false, false, false, false,
+	false, false, false, true, false};
 
+#define TB_DECOD_STATS 16 /* convert TB decoding status to tracking_status */
+static const unsigned int tb_decod_conv[TB_DECOD_STATS+1] = {
+	0, 3, 14, 5, 14, 14, 14, 14, 7, 8, 9, 10, 6, 14, 14, 14, 11};
+	
+#define TB_DISC_MODES 7
+static const char tb_disc_mode[TB_DISC_MODES+1][16] = {
+	"normal", "power-up", "auto holdover", "manual holdover",
+	"recovery", "unknown", "disabled", "invalid"};
 /*
  * Transfer vector
  */
@@ -215,7 +202,7 @@ struct refclock refclock_trimble = {
 #define CLK_TYPE(x) ((int)(((x)->cfg.ttl) & 0x7F))
 
 /* Supported clock types */
-#define CLK_TRIMBLE	0	/* Trimble Palisade */
+#define CLK_PALISADE	0	/* Trimble Palisade */
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
@@ -333,6 +320,7 @@ trimble_start (
 	/*
 	 * Open serial port. 
 	 */
+<<<<<<< HEAD
 	if ( !peer->cfg.path ) {
 	    /* build a path */
 	    rcode = snprintf(device, sizeof(device), DEVICE, unit);
@@ -359,9 +347,7 @@ trimble_start (
 		msyslog(LOG_ERR, 
 			"REFCLOCK: %s tcgetattr(fd, &tio): %m",
 			refclock_name(peer));
-#ifdef DEBUG
-		printf("%s tcgetattr(fd, &tio)\n", refclock_name(peer));
-#endif
+		DPRINT(1, ("%s tcgetattr(fd, &tio)\n", refclock_name(peer));
 		close(fd);
 		return false;
 	}
@@ -375,8 +361,8 @@ trimble_start (
 	up->parity_chk = true;
 	up->use_event = true;
 	switch (up->type) {
-	    case CLK_TRIMBLE:
-		/* Normal mode, do nothing */
+	    case CLK_PALISADE:
+		msyslog(LOG_NOTICE, "Trimble(%d) Palisade mode enabled", unit);
 		break;
 	    case CLK_PRAECIS:
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Praecis mode enabled",
@@ -396,6 +382,9 @@ trimble_start (
 	        msyslog(LOG_NOTICE, "REFCLOCK: %s mode unknown",
 			refclock_name(peer));
 		break;
+		close(fd);
+		free(up);
+		return false;
 	}
 	tio.c_cflag = (CS8|CLOCAL|CREAD);
 	tio.c_iflag &= (unsigned)~ICRNL;
@@ -421,9 +410,8 @@ trimble_start (
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-#ifdef DEBUG
-		printf("%s io_addclock\n", refclock_name(peer));
-#endif
+		msyslog(LOG_ERR, "%s io_addclock failed", refclock_name(peer));
+		DPRINT(1, ("%s io_addclock failed\n", refclock_name(peer)));
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
@@ -504,57 +492,35 @@ TSIP_decode (
 {
 	int st;
 	unsigned short event = 0;
+	unsigned char id, ds, dm, tf;
 
 	struct trimble_unit *up;
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
 	up = pp->unitptr;
-
-	/*
-	 * Check the time packet, decode its contents. 
-	 * If the timecode has invalid length or is not in
-	 * proper format, declare bad format and exit.
-	 */
-
-	if ((up->type != CLK_THUNDERBOLT) & (up->type != CLK_ACUTIME)){
-		if ((up->rpt_buf[0] == (char) 0x41) ||
-		    (up->rpt_buf[0] == (char) 0x46) ||
-		    (up->rpt_buf[0] == (char) 0x54) ||
-		    (up->rpt_buf[0] == (char) 0x4B) ||
-		    (up->rpt_buf[0] == (char) 0x6D)) {
-
-			/* standard time packet - GPS time and GPS week number */
-#ifdef DEBUG
-			printf("Trimble Port B packets detected. Connect to Port A\n");
-#endif
-
-			return 0;
-		}
-	}
-
-	/*
-	 * We cast both to uint8_t to as 0x8f uses the sign bit on a char
-	 */
-	if ((uint8_t) up->rpt_buf[0] == (uint8_t) 0x8f) {
-		/* 
-		 * Superpackets
-		 */
+	id = (unsigned char)up->rpt_buf[0];
+	
+	if (id == 0x8f) {
+		/* Superpackets */
 		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
-		if (!event) 
-			/* Ignore Packet */
+		if ((up->type != CLK_THUNDERBOLT) && !event)
+			/* ignore auto-report */
 			return 0;	   
 	
 		switch (mb(0) & 0xff) {
-
-		    case PACKET_8F0B: 
-			if (up->rpt_cnt != LENCODE_8F0B)  /* check length */
-				break;
-
+		    case 0x0B:
+			/* comprehensive time packet (dual-port devices) */
+			if (up->rpt_cnt != 74) {
+				DPRINT(1, ("TSIP_decode: unit %d: 8f-0b packet length is not 74 (%d)\n",
+				       up->unit, (int)up->rpt_cnt));
+				refclock_report(peer, CEVNT_BADREPLY);
+				return 0;
+			}
 			up->UTC_offset = getint((uint8_t *) &mb(16));
+
 			if (up->polled <= 0)
 				return 0;
-		
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
 				int ts;
@@ -575,15 +541,16 @@ TSIP_decode (
 				printf(" : Tracking %d\n", ts); 
 			}
 #endif
-			return 0;
 			break;
 
-		    case PACKET_NTP:
-			/* Trimble-NTP Packet */
-
-			if (up->rpt_cnt != LENCODE_NTP) /* check length */
-				break;
-	
+		    case 0xAD:
+			/* primary UTC time packet (dual-port devices) */
+			if (up->rpt_cnt != 22) {
+				DPRINT(1, ("TSIP_decode: unit %d: 8f-ad packet length is not 22 (%d)\n",
+				       up->unit, (int)up->rpt_cnt));
+				refclock_report(peer, CEVNT_BADREPLY);
+				return 0;
+			}
 			up->leap_status = mb(19);
 
 			if (up->polled  <= 0) 
@@ -593,25 +560,20 @@ TSIP_decode (
 			if (up->type == CLK_PRAECIS) {
 				up->UTC_offset = 0;
 			} else if (up->UTC_offset == 0) {
-#ifdef DEBUG
-				printf("TSIP_decode 8f-ad: need UTC offset from 8f-0b\n");
-#endif
+				DPRINT(1, ("TSIP_decode: unit %d: 8f-ad: need UTC offset from 8f-0b\n",
+				        up->unit));
 				return 0;
 			}
 
 			/* Check Tracking Status */
 			st = mb(18);
-			if (st < 0 || st > 14)
-				st = 14;
-			if ((st >= 2 && st <= 7) || st == 11 || st == 12) {
-#ifdef DEBUG
-				printf("TSIP_decode: Not Tracking Sats : %s\n",
-				       *Tracking_Status[st]);
-#endif
-				refclock_report(peer, CEVNT_BADTIME);
+			if (st < 0 || st > PAL_TSTATS)
+				st = PAL_TSTATS; /* invalid */
+			if (!tracking_status_usable[st]) {
+				DPRINT(1, ("TSIP_decode: unit %d: unusable tracking status: %s\n",
+				       up->unit, tracking_status[st]));
 				up->polled = -1;
 				return 0;
-				break;
 			}
 
 			if ( (up->leap_status & TRIMBLE_LEAP_PENDING) &&
@@ -629,11 +591,8 @@ TSIP_decode (
 				 * Receiver may have been reset, and lost
 				 * its UTC almanac data */
 				pp->leap = LEAP_NOTINSYNC;
-#ifdef DEBUG
-				printf("TSIP_decode: UTC Almanac unavailable: %d\n",
-				       mb(19));	
-#endif
-				refclock_report(peer, CEVNT_BADTIME);
+				DPRINT(1, ("TSIP_decode: unit %d: UTC Almanac unavailable: %d\n",
+				       up->unit, mb(19)));
 				up->polled = -1;
 				return 0;
 			}
@@ -650,20 +609,25 @@ TSIP_decode (
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 			up->UTC_offset = 0; /* don't re-use offset */
 
-			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
-				   up->unit, (unsigned int)(mb(0) & 0xff), event,
-				   up->date.hour, up->date.minute, up->date.second, pp->nsec,
-				   up->date.month, up->date.monthday, up->date.year,
-				   (unsigned int)mb(19), *Tracking_Status[st]));
+			DPRINT(2, ("TSIP_decode: unit %d: 8f-ad #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC 0x%02x\n    tracking status: %s\n",
+			       up->unit, event, up->date.hour, up->date.minute,
+			       up->date.second, pp->nsec, up->date.month,
+			       up->date.monthday, up->date.year,
+			       (unsigned int)mb(19), tracking_status[st]));
 			return 1;
 			break;
 
-		    case PACKET_8FAC:   
+		    case 0xAC:
+			/* supplemental timing packet (single-port devices) */
 			if (up->polled <= 0)
 				return 0; 
 
-			if (up->rpt_cnt != LENCODE_8FAC)/* check length */
-				break;
+			if (up->rpt_cnt != 68) {
+				DPRINT(1, ("TSIP_decode: unit %d: 8f-ac packet length is not 68 (%d)\n",
+				       up->unit, (int)up->rpt_cnt));
+				refclock_report(peer, CEVNT_BADREPLY);
+				return 0;
+			}
 
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
@@ -671,10 +635,8 @@ TSIP_decode (
 				lat = getdbl((uint8_t *) &mb(36)) * R2D;
 				lon = getdbl((uint8_t *) &mb(44)) * R2D;
 				alt = getdbl((uint8_t *) &mb(52));
-
 				printf("TSIP_decode: unit %d: Latitude: %03.4f Longitude: %03.4f Alt: %05.2f m\n",
 				       up->unit, lat,lon,alt);
-				printf("TSIP_decode: unit %d\n", up->unit);
 			}
 #endif
 			if ( (getint((uint8_t *) &mb(10)) & 0x80) &&
@@ -684,155 +646,103 @@ TSIP_decode (
 			else 
 				pp->leap = LEAP_NOWARNING;
 
-#ifdef DEBUG
-			if (debug > 1) /* SPECIAL DEBUG */
-				printf("TSIP_decode: unit %d: 0x%02x leap %d\n",
-				       up->unit, (unsigned int)(mb(0) & 0xff), pp->leap);
-			if (debug > 1) { /* SPECIAL DEBUG */
-				printf("Receiver MODE: 0x%02X\n", (uint8_t)mb(1));
-				if (mb(1) == 0x00)
-					printf("                AUTOMATIC\n");
-				if (mb(1) == 0x01)
-					printf("                SINGLE SATELLITE\n");   
-				if (mb(1) == 0x03)
-					printf("                HORIZONTAL(2D)\n");
-				if (mb(1) == 0x04)
-					printf("                FULL POSITION(3D)\n");
-				if (mb(1) == 0x05)
-					printf("                DGPR REFERENCE\n");
-				if (mb(1) == 0x06)
-					printf("                CLOCK HOLD(2D)\n");
-				if (mb(1) == 0x07)
-					printf("                OVERDETERMINED CLOCK\n");
+			ds = (unsigned char)mb(12);
+			if (ds > TB_DECOD_STATS)
+				ds = TB_DECOD_STATS;
+			dm = (unsigned char)mb(2);
+			if (dm > TB_DISC_MODES)
+				dm = TB_DISC_MODES;
+			DPRINT(2, ("TSIP_decode: unit %d: leap=%d  decod.stat=%s  disc.act=%s\n",
+			       up->unit, pp->leap,
+			       tracking_status[tb_decod_conv[ds]],
+			       tb_disc_mode[dm]));
 
-				printf("\n** Disciplining MODE 0x%02X:\n", (uint8_t)mb(2));
-				if (mb(2) == 0x00)
-					printf("                NORMAL\n");
-				if (mb(2) == 0x01)
-					printf("                POWER-UP\n");
-				if (mb(2) == 0x02)
-					printf("                AUTO HOLDOVER\n");
-				if (mb(2) == 0x03)
-					printf("                MANUAL HOLDOVER\n");
-				if (mb(2) == 0x04)
-					printf("                RECOVERY\n");
-				if (mb(2) == 0x06)
-					printf("                DISCIPLINING DISABLED\n");
-			}
-#endif   
-			return 0;
 			break;
 
-		    case PACKET_8FAB:
-			/* Thunderbolt Primary Timing Packet */
-
-			if (up->rpt_cnt != LENCODE_8FAB) /* check length */
-				break;
+		    case 0xAB:
+			/* primary timing packet (single-port devices) */
+			if (up->rpt_cnt != 17) {
+				DPRINT(1, ("TSIP_decode: unit %d: 8f-ab packet length is not 17 (%d)\n",
+				       up->unit, (int)up->rpt_cnt));
+				refclock_report(peer, CEVNT_BADREPLY);
+				return 0;
+			}
 
 			if (up->polled  <= 0)
 				return 0;
 
-			up->UTC_offset = getint((uint8_t *) &mb(7));
-			if (up->UTC_offset == 0){ /* Check UTC Offset */
+			tf = (unsigned char)mb(9);
 #ifdef DEBUG
-				printf("TSIP_decode: UTC Offset Unknown\n");
+			if (debug > 1) { /* SPECIAL DEBUG */
+				printf("TSIP_decode: unit %d: timing flags:0x%02X=\n",
+				       up->unit, tf);
+				if (tf & 0x08) {
+					printf("    timecode aligned to GPS(UTC not avail.), PPS aligned to GPS(UTC not avail.)\n");
+				} else {
+					if (tf & 0x01)
+						printf("    timecode aligned to UTC, ");
+					else
+						printf("    timecode aligned to GPS(misconfigured), ");
+					if (tf & 0x02)
+						printf("PPS aligned to UTC\n");
+					else
+						printf("PPS aligned to GPS(misconfigured)\n");
+				}
+				if (tf & 0x04)
+					printf("    time is NOT set, ");
+				else
+					printf("    time is set, ");
+				if (tf & 0x08)
+					printf("UTC is NOT available, ");
+				else
+					printf("UTC is available, ");
+				if (tf & 0x10)
+					printf("test-mode timesource(misconfigured)\n");
+				else
+					printf("satellite timesource\n");
+			}
 #endif
+			up->UTC_offset = getint((uint8_t *) &mb(7));
+			if (tf & 0x04 || tf & 0x08 || up->UTC_offset == 0) {
+				DPRINT(1, ("TSIP_decode: unit %d: time not set or UTC offset unavailable\n",
+					up->unit));
 				return 0;
 			}
-
-
-			if ((mb(9) & 0x1d) == 0x0) {
-				/* if we know the GPS time and the UTC offset,
-				   we expect UTC timing information !!! */
-
+			/*
+			 * configuration is sent only at ntpd startup. if unit
+			 * loses power it will revert to the factory default
+			 * time alignment (GPS)
+			 */
+			if (!(tf & 0x01) || !(tf & 0x02) || (tf & 0x10)) {
+				DPRINT(1, ("TSIP_decode: unit %d: 8f-ab flags: not UTC time: unit is misconfigured (0x%02X)\n",
+				       up->unit, tf));
 				pp->leap = LEAP_NOTINSYNC;
 				refclock_report(peer, CEVNT_BADTIME);
 				up->polled = -1;
 				return 0;
 			}
-
-			pp->nsec = 0;
-#ifdef DEBUG		
-			printf("\nTiming Flags are:\n");
-			printf("Timing flag value is: 0x%X\n", (unsigned int)mb(9));
-			if ((mb(9) & 0x01) != 0)
-				printf ("	Getting UTC time\n");
-			else
-				printf ("	Getting GPS time\n");
-			if ((mb(9) & 0x02) != 0)
-				printf ("	PPS is from UTC\n");
-			else
-				printf ("	PPS is from GPS\n");
-			if ((mb(9) & 0x04) != 0)
-				printf ("	Time is not Set\n");
-			else
-				printf ("	Time is Set\n");
-			if ((mb(9) & 0x08) != 0)
-				printf("	I don't have UTC info\n");
-			else
-				printf ("	I have UTC info\n");
-			if ((mb(9) & 0x10) != 0)
-				printf ("	Time is from USER\n\n");
-			else
-				printf ("	Time is from GPS\n\n");	
-#endif		
-
 			up->TOW = (uint32_t)getlong((uint8_t *) &mb(1));
 			up->week = (uint32_t)getint((uint8_t *) &mb(5));
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 
 			pp->lastrec = up->p_recv_time;
+			pp->nsec = 0;
 
-			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d TOW: %u  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
-				   up->unit, (unsigned int)(mb(0) & 0xff), event, up->TOW, up->week, 
-				   up->date.hour, up->date.minute, up->date.second,
-				   up->date.month, up->date.monthday, up->date.year));
+			DPRINT(2, ("TSIP_decode: unit %d: 8f-ab TOW: %u week: %u adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
+			       up->unit, up->TOW, up->week,
+			       up->date.hour, up->date.minute, up->date.second,
+			       up->date.month, up->date.monthday, up->date.year));
 			return 1;
 			break;
 
 		    default:
-			DPRINT(3, ("TSIP_decode: unit %d: unhandled superpacket 0x%02X-0x%02X len %d\n",
-			       up->unit, (u_int)(up->rpt_buf[0] & 0xff),
-			       (u_int)(mb(0) & 0xff), (int)up->rpt_cnt));
-			return 0;
+			break;
 		} /* switch */
-	} /* if 8F packets */
-	else if (up->rpt_buf[0] == PACKET_46) {
-		/* Health Status Error Codes */
-		if (mb(1) != 0)	{
-			
-			refclock_report(peer, CEVNT_BADTIME);
-			up->polled = -1;
-#ifdef DEBUG
-			if (debug > 1) { /* SPECIAL DEBUG */
-				if (mb(1) & 0x01)
-					printf ("Signal Processor Error, reset unit.\n");
-				if (mb(1) & 0x02)
-					printf ("Alignment error, channel or chip 1, reset unit.\n");
-				if (mb(1) & 0x03)
-					printf ("Alignment error, channel or chip 2, reset unit.\n");
-				if (mb(1) & 0x04)
-					printf ("Antenna feed line fault (open or short)\n");
-				if (mb(1) & 0x05)
-					printf ("Excessive reference frequency error, refer to packet 0x2D and packet 0x4D documentation for further information\n");
-			}
-#endif
-		}
-		return 0;
-	} else {
-		DPRINT(3, ("TSIP_decode: unit %d: unhandled packet 0x%02X len %d\n",
-		       up->unit, (u_int)(up->rpt_buf[0] & 0xff),
-		       (int)up->rpt_cnt));
-		return 0;
+	} else if (((up->type == CLK_PALISADE) || (up->type == CLK_ACUTIME)) &&
+	   ((id == 0x41) || (id == 0x54))) {
+		up->port_b_pkt = true; /* Acutime Gold sends on Ports A & B */
 	}
-	refclock_report(peer, CEVNT_BADREPLY);
-	up->polled = -1;
-#ifdef DEBUG
-	printf("TSIP_decode: unit %d: bad packet %02x-%02x event %d len %d\n", 
-	       up->unit, (unsigned int)(up->rpt_buf[0] & 0xff), (unsigned int)(mb(0) & 0xff),
-	       event, (int)up->rpt_cnt);
-#endif
 	return 0;
 }
 
@@ -895,18 +805,15 @@ trimble_receive (
 
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
-
-#ifdef DEBUG
-		printf("trimble_receive: unit %d: refclock_process failed!\n",
-		       up->unit);
-#endif
+		DPRINT(1, ("trimble_receive: unit %d: refclock_process failed!\n",
+		       up->unit));
 		return;
 	}
 
 	record_clock_stats(peer, pp->a_lastcode); 
 
 	DPRINT(1, ("trimble_receive: unit %d: %s\n",
-		   up->unit, prettydate(pp->lastrec)));
+	       up->unit, prettydate(pp->lastrec)));
 	if (pp->hour == 0 && up->week > up->build_week + 1000)
 		msyslog(LOG_WARNING, "REFCLOCK: Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
 		        up->unit, up->week, up->build_week);
@@ -933,8 +840,13 @@ trimble_poll (
 	up = pp->unitptr;
 
 	pp->polls++;
-	if (up->polled > 0) /* last reply never arrived or error */ 
+	if (up->polled > 0) { /* last reply never arrived or error */ 
 		refclock_report(peer, CEVNT_TIMEOUT);
+		if (up->port_b_pkt)
+			DPRINT(1, ("trimble_poll: unit %d: Port B packets found but no Port A packets found.\n    Connect to Port A.\n",
+			       up->unit));
+	}
+	up->port_b_pkt = false;
 
 	up->polled = 2; /* synchronous packet + 1 event */
 
@@ -1061,7 +973,7 @@ trimble_io (
 		if (up->rpt_cnt > RMAX - 2) {/* additional byte for ID */
 			up->rpt_status = TSIP_PARSED_EMPTY;
 			DPRINT(1, ("trimble_io: unit %d: oversize serial message (%luB) 0x%02x discarded",
-			        up->unit, (u_long)up->rpt_cnt,
+			        up->unit, (unsigned long)up->rpt_cnt,
 				(uint8_t)up->rpt_buf[0]));
 		}
 	} /* while chars in buffer */
@@ -1086,8 +998,7 @@ HW_poll (
 
 	/* read the current status, so we put things back right */
 	if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
-		DPRINT(1, ("Trimble HW_poll: unit %d: GET %m\n",
-			   up->unit));
+		DPRINT(1, ("Trimble HW_poll: unit %d: GET %m\n", up->unit));
 		msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd,GET): %m", 
 			up->unit);
 		return -1;
