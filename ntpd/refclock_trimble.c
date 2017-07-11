@@ -99,13 +99,6 @@
 #define TSIP_PARSED_ASCII       5
 #define TSIP_PARSED_PARITY      6
 
-/* 
- * Leap-Insert and Leap-Delete are encoded as follows:
- * 	TRIMBLE_UTC_TIME set   and TRIMBLE_LEAP_PENDING set: INSERT leap
- */
-#define TRIMBLE_LEAP_PENDING    0x02 /* Leap Pending (24 hours)		*/
-#define TRIMBLE_UTC_TIME        0x01 /* UTC time available				*/
-
 #define mb(_X_) (up->rpt_buf[(_X_ + 1)]) /* shortcut for buffer access	*/
 
 /* Conversion Definitions */
@@ -129,8 +122,9 @@ struct packettx
  */
 struct trimble_unit {
 	short		unit;		/* NTP refclock unit number */
-	int 		polled;		/* flag to detect noreplies */
-	char		leap_status;	/* leap second flag */
+	bool 		got_time;	/* time is valid for this poll */
+	unsigned char	UTC_flags;	/* UTC & leap second flag */
+	unsigned char	trk_status;	/* reported tracking status */
 	char		rpt_status;	/* TSIP Parser State */
 	size_t 		rpt_cnt;	/* TSIP packet length so far */
 	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
@@ -156,7 +150,7 @@ static	void	trimble_receive	(struct peer *, int);
 static	void	trimble_poll		(int, struct peer *);
 static	void 	trimble_io		(struct recvbuf *);
 int 		trimble_configure	(int, struct peer *);
-int 		TSIP_decode		(struct peer *);
+static bool	TSIP_decode		(struct peer *);
 long		HW_poll			(struct refclockproc *);
 static	double	getdbl 			(uint8_t *);
 static	short	getint 			(uint8_t *);
@@ -185,6 +179,7 @@ static const unsigned int tb_decod_conv[TB_DECOD_STATS+1] = {
 static const char tb_disc_mode[TB_DISC_MODES+1][16] = {
 	"normal", "power-up", "auto holdover", "manual holdover",
 	"recovery", "unknown", "disabled", "invalid"};
+
 /*
  * Transfer vector
  */
@@ -206,6 +201,10 @@ struct refclock refclock_trimble = {
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
+
+/* packet 8f-ad UTC flags */
+#define UTC_AVAILABLE	0x01
+#define LEAP_SCHEDULED	0x10
 
 /*
  * sendsupercmd - Build super data packet for sending
@@ -431,7 +430,6 @@ trimble_start (
 	peer->cfg.maxpoll = TRMB_MAXPOLL;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	
-	up->leap_status = 0;
 	up->unit = (short) unit;
 	up->rpt_status = TSIP_PARSED_EMPTY;
 	up->rpt_cnt = 0;
@@ -485,14 +483,15 @@ trimble_shutdown (
 /* 
  * TSIP_decode - decode the TSIP data packets 
  */
-int
+static bool
 TSIP_decode (
 	struct peer *peer
 	)
 {
-	int st;
-	unsigned short event = 0;
-	unsigned char id, ds, dm, tf;
+	unsigned char id, decod_stat, disc_mode, timing_flags;
+	long secint;
+	double secs, secfrac;
+	unsigned short event, m_alarms;
 
 	struct trimble_unit *up;
 	struct refclockproc *pp;
@@ -506,24 +505,23 @@ TSIP_decode (
 		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
 		if ((up->type != CLK_THUNDERBOLT) && !event)
 			/* ignore auto-report */
-			return 0;	   
+			return false;
 	
 		switch (mb(0) & 0xff) {
 		    case 0x0B:
-			/* comprehensive time packet (dual-port devices) */
+			/*
+			 * comprehensive time packet: sent after 8f-ad from
+			 * Palisade and Acutime
+			 */
 			if (up->rpt_cnt != 74) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-0b packet length is not 74 (%d)\n",
 				       up->unit, (int)up->rpt_cnt));
 				refclock_report(peer, CEVNT_BADREPLY);
-				return 0;
+				return false;
 			}
-			up->UTC_offset = getint((uint8_t *) &mb(16));
-
-			if (up->polled <= 0)
-				return 0;
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
-				int ts;
+				int st, ts;
 				double lat, lon, alt;
 				lat = getdbl((uint8_t *) &mb(42)) * R2D;
 				lon = getdbl((uint8_t *) &mb(50)) * R2D;
@@ -541,60 +539,93 @@ TSIP_decode (
 				printf(" : Tracking %d\n", ts); 
 			}
 #endif
+			if (!tracking_status_usable[up->trk_status]) {
+				DPRINT(1, ("TSIP_decode: unit %d: unusable tracking status: %s\n",
+				       up->unit,
+				       tracking_status[up->trk_status]));
+				return false;
+			}
+			up->UTC_offset = getint((uint8_t *) &mb(16));
+			if (!(up->UTC_flags & UTC_AVAILABLE) ||
+			    (up->UTC_offset == 0)) {
+				pp->leap = LEAP_NOTINSYNC;
+				DPRINT(1, ("TSIP_decode: unit %d: UTC data not available\n",
+				       up->unit));
+				return false;
+			}
+
+			secs = getdbl((uint8_t *) &mb(3));
+			secint = (long) secs;
+			secfrac = secs - secint; /* 0.0 <= secfrac < 1.0 */
+
+			pp->nsec = (long) (secfrac * NS_PER_S);
+
+			secint %= SECSPERDAY;    /* Only care about today */
+			up->date.hour = (int)(secint / SECSPERHR);
+			secint %= SECSPERHR;
+			up->date.minute = (int)(secint / 60);
+			secint %= 60;
+			up->date.second = secint % 60;
+			up->date.monthday = (uint8_t)mb(11);
+			up->date.month = (uint8_t)mb(12);
+			up->date.year = (uint16_t)getint((uint8_t *) &mb(13));
+			up->date.yearday = 0;
+			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
+			gpsweekadj(&up->week, up->build_week);
+			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
+
+			if ((up->UTC_flags & LEAP_SCHEDULED) &&
+			    /* Avoid early announce: https://bugs.ntp.org/2773 */
+			    (6 == up->date.month || 12 == up->date.month))
+				pp->leap = LEAP_ADDSECOND;
+			else
+				pp->leap = LEAP_NOWARNING;
+
+			DPRINT(2, ("TSIP_decode: unit %d: 8f-0b #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %d\n    tracking status: %s\n",
+			       up->unit, event, up->date.hour, up->date.minute,
+			       up->date.second, pp->nsec, up->date.month,
+			       up->date.monthday, up->date.year,
+			       up->UTC_offset, tracking_status[up->trk_status]));
+
+			/* don't reuse UTC flags or tracking status */
+			up->UTC_flags = 0;
+			up->trk_status = PAL_TSTATS;
+			return true;
 			break;
 
 		    case 0xAD:
-			/* primary UTC time packet (dual-port devices) */
+			/*
+			 * primary UTC time packet: first packet sent after PPS
+			 * from Palisade, Acutime, and Praecis
+			 */
 			if (up->rpt_cnt != 22) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ad packet length is not 22 (%d)\n",
 				       up->unit, (int)up->rpt_cnt));
 				refclock_report(peer, CEVNT_BADREPLY);
-				return 0;
-			}
-			up->leap_status = mb(19);
-
-			if (up->polled  <= 0) 
-				return 0;
-				
-			/* Praecis reports only 8f-ad with UTC offset applied */
-			if (up->type == CLK_PRAECIS) {
-				up->UTC_offset = 0;
-			} else if (up->UTC_offset == 0) {
-				DPRINT(1, ("TSIP_decode: unit %d: 8f-ad: need UTC offset from 8f-0b\n",
-				        up->unit));
-				return 0;
+				return false;
 			}
 
-			/* Check Tracking Status */
-			st = mb(18);
-			if (st < 0 || st > PAL_TSTATS)
-				st = PAL_TSTATS; /* invalid */
-			if (!tracking_status_usable[st]) {
+			/* flags checked in 8f-0b for Palisade and Acutime */
+			up->trk_status = (unsigned char)mb(18);
+			if (up->trk_status > PAL_TSTATS)
+				up->trk_status = PAL_TSTATS;
+			up->UTC_flags = (unsigned char)mb(19);
+
+			/* get timecode from 8f-0b except with Praecis */
+			if (up->type != CLK_PRAECIS)
+				return false;
+
+			if (!tracking_status_usable[up->trk_status]) {
 				DPRINT(1, ("TSIP_decode: unit %d: unusable tracking status: %s\n",
-				       up->unit, tracking_status[st]));
-				up->polled = -1;
-				return 0;
+				       up->unit,
+				       tracking_status[up->trk_status]));
+				return false;
 			}
-
-			if ( (up->leap_status & TRIMBLE_LEAP_PENDING) &&
-			/* Avoid early announce: https://bugs.ntp.org/2773 */
-				(6 == up->date.month || 12 == up->date.month) ) {
-				if (up->leap_status & TRIMBLE_UTC_TIME)  
-					pp->leap = LEAP_ADDSECOND;
-				else
-					pp->leap = LEAP_DELSECOND;
-			}
-			else if (up->leap_status)
-				pp->leap = LEAP_NOWARNING;
-		
-			else {  /* UTC flag is not set:
-				 * Receiver may have been reset, and lost
-				 * its UTC almanac data */
+			if (!(up->UTC_flags & UTC_AVAILABLE)) {
 				pp->leap = LEAP_NOTINSYNC;
-				DPRINT(1, ("TSIP_decode: unit %d: UTC Almanac unavailable: %d\n",
-				       up->unit, mb(19)));
-				up->polled = -1;
-				return 0;
+				DPRINT(1, ("TSIP_decode: unit %d: UTC data not available\n",
+				       up->unit));
+				return false;
 			}
 
 			pp->nsec = (long) (getdbl((uint8_t *) &mb(3)) * NS_PER_S);
@@ -604,29 +635,35 @@ TSIP_decode (
 			up->date.second = (uint8_t)mb(13);
 			up->date.month = (uint8_t)mb(15);
 			up->date.monthday = (uint8_t)mb(14);
-			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
+			caltogps(&up->date, 0, &up->week, &up->TOW);
 			gpsweekadj(&up->week, up->build_week);
-			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
-			up->UTC_offset = 0; /* don't re-use offset */
+			gpstocal(up->week, up->TOW, 0, &up->date);
+
+			if ((up->UTC_flags & LEAP_SCHEDULED) &&
+			    /* Avoid early announce: https://bugs.ntp.org/2773 */
+			    (6 == up->date.month || 12 == up->date.month))
+				pp->leap = LEAP_ADDSECOND;
+			else
+				pp->leap = LEAP_NOWARNING;
 
 			DPRINT(2, ("TSIP_decode: unit %d: 8f-ad #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC 0x%02x\n    tracking status: %s\n",
 			       up->unit, event, up->date.hour, up->date.minute,
 			       up->date.second, pp->nsec, up->date.month,
 			       up->date.monthday, up->date.year,
-			       (unsigned int)mb(19), tracking_status[st]));
-			return 1;
+			       up->UTC_flags, tracking_status[up->trk_status]));
+			return true;
 			break;
 
 		    case 0xAC:
-			/* supplemental timing packet (single-port devices) */
-			if (up->polled <= 0)
-				return 0; 
-
+			/*
+			 * supplemental timing packet: sent after 8f-ab from
+			 * Thunderbolt
+			 */
 			if (up->rpt_cnt != 68) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ac packet length is not 68 (%d)\n",
 				       up->unit, (int)up->rpt_cnt));
 				refclock_report(peer, CEVNT_BADREPLY);
-				return 0;
+				return false;
 			}
 
 #ifdef DEBUG
@@ -639,28 +676,42 @@ TSIP_decode (
 				       up->unit, lat,lon,alt);
 			}
 #endif
-			if ( (getint((uint8_t *) &mb(10)) & 0x80) &&
+			decod_stat = (unsigned char)mb(12);
+			if (decod_stat > TB_DECOD_STATS)
+				decod_stat = TB_DECOD_STATS;
+			disc_mode = (unsigned char)mb(2);
+			if (disc_mode > TB_DISC_MODES)
+				disc_mode = TB_DISC_MODES;
+			DPRINT(2, ("TSIP_decode: unit %d: leap=%d  decod.stat=%s  disc.act=%s\n",
+			       up->unit, pp->leap,
+			       tracking_status[tb_decod_conv[decod_stat]],
+			       tb_disc_mode[disc_mode]));
+
+			if (up->UTC_flags != UTC_AVAILABLE)
+				return false;
+
+			gpsweekadj(&up->week, up->build_week);
+			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
+			m_alarms = (unsigned short)getint((uint8_t *) &mb(10));
+			if ((m_alarms & 0x80) &&
 			/* Avoid early announce: https://bugs.ntp.org/2773 */
 			    (6 == up->date.month || 12 == up->date.month) )
 				pp->leap = LEAP_ADDSECOND;  /* we ASSUME addsecond */
 			else 
 				pp->leap = LEAP_NOWARNING;
 
-			ds = (unsigned char)mb(12);
-			if (ds > TB_DECOD_STATS)
-				ds = TB_DECOD_STATS;
-			dm = (unsigned char)mb(2);
-			if (dm > TB_DISC_MODES)
-				dm = TB_DISC_MODES;
-			DPRINT(2, ("TSIP_decode: unit %d: leap=%d  decod.stat=%s  disc.act=%s\n",
-			       up->unit, pp->leap,
-			       tracking_status[tb_decod_conv[ds]],
-			       tb_disc_mode[dm]));
-
+			DPRINT(2, ("TSIP_decode: unit %d: 8f-ac TOW: %u week: %u adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
+			       up->unit, up->TOW, up->week,
+			       up->date.hour, up->date.minute, up->date.second,
+			       up->date.month, up->date.monthday, up->date.year));
+			return true;
 			break;
 
 		    case 0xAB:
-			/* primary timing packet (single-port devices) */
+			/*
+			 * primary timing packet: first packet sent after PPS
+			 * from Thunderbolt
+			 */
 			if (up->rpt_cnt != 17) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ab packet length is not 17 (%d)\n",
 				       up->unit, (int)up->rpt_cnt));
@@ -668,72 +719,65 @@ TSIP_decode (
 				return 0;
 			}
 
-			if (up->polled  <= 0)
-				return 0;
-
-			tf = (unsigned char)mb(9);
+			timing_flags = (unsigned char)mb(9);
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
 				printf("TSIP_decode: unit %d: timing flags:0x%02X=\n",
-				       up->unit, tf);
-				if (tf & 0x08) {
+				       up->unit, timing_flags);
+				if (timing_flags & 0x08) {
 					printf("    timecode aligned to GPS(UTC not avail.), PPS aligned to GPS(UTC not avail.)\n");
 				} else {
-					if (tf & 0x01)
+					if (timing_flags & 0x01)
 						printf("    timecode aligned to UTC, ");
 					else
 						printf("    timecode aligned to GPS(misconfigured), ");
-					if (tf & 0x02)
+					if (timing_flags & 0x02)
 						printf("PPS aligned to UTC\n");
 					else
 						printf("PPS aligned to GPS(misconfigured)\n");
 				}
-				if (tf & 0x04)
+				if (timing_flags & 0x04)
 					printf("    time is NOT set, ");
 				else
 					printf("    time is set, ");
-				if (tf & 0x08)
+				if (timing_flags & 0x08)
 					printf("UTC is NOT available, ");
 				else
 					printf("UTC is available, ");
-				if (tf & 0x10)
+				if (timing_flags & 0x10)
 					printf("test-mode timesource(misconfigured)\n");
 				else
 					printf("satellite timesource\n");
 			}
 #endif
+			up->UTC_flags = 0;
 			up->UTC_offset = getint((uint8_t *) &mb(7));
-			if (tf & 0x04 || tf & 0x08 || up->UTC_offset == 0) {
+			if (timing_flags & 0x04 || timing_flags & 0x08 ||
+			    up->UTC_offset == 0) {
 				DPRINT(1, ("TSIP_decode: unit %d: time not set or UTC offset unavailable\n",
 					up->unit));
-				return 0;
+				return false;
 			}
 			/*
 			 * configuration is sent only at ntpd startup. if unit
 			 * loses power it will revert to the factory default
 			 * time alignment (GPS)
 			 */
-			if (!(tf & 0x01) || !(tf & 0x02) || (tf & 0x10)) {
+			if (!(timing_flags & 0x01) || !(timing_flags & 0x02) ||
+			    (timing_flags & 0x10)) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ab flags: not UTC time: unit is misconfigured (0x%02X)\n",
-				       up->unit, tf));
+				       up->unit, timing_flags));
 				pp->leap = LEAP_NOTINSYNC;
 				refclock_report(peer, CEVNT_BADTIME);
-				up->polled = -1;
-				return 0;
+				return false;
 			}
 			up->TOW = (uint32_t)getlong((uint8_t *) &mb(1));
 			up->week = (uint32_t)getint((uint8_t *) &mb(5));
-			gpsweekadj(&up->week, up->build_week);
-			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 
 			pp->lastrec = up->p_recv_time;
 			pp->nsec = 0;
-
-			DPRINT(2, ("TSIP_decode: unit %d: 8f-ab TOW: %u week: %u adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
-			       up->unit, up->TOW, up->week,
-			       up->date.hour, up->date.minute, up->date.second,
-			       up->date.month, up->date.monthday, up->date.year));
-			return 1;
+			up->UTC_flags = UTC_AVAILABLE; /* flag for 8f-ac */
+			return false;
 			break;
 
 		    default:
@@ -743,7 +787,7 @@ TSIP_decode (
 	   ((id == 0x41) || (id == 0x54))) {
 		up->port_b_pkt = true; /* Acutime Gold sends on Ports A & B */
 	}
-	return 0;
+	return false;
 }
 
 /*
@@ -764,8 +808,14 @@ trimble_receive (
 	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-		
+
+	/* startup may have caused a spurious edge, so wait for first HW_poll() */
+	if (up->use_event && pp->polls <= 1)
+		return;
+
 	if (MSG_TSIP == type) {
+		if (up->got_time) 
+			return;   /* no poll pending */
 		if (!TSIP_decode(peer))
 			return;
 	} else {
@@ -777,10 +827,7 @@ trimble_receive (
 		return;
 	}
 	
-	if (up->polled <= 0) 
-		return;   /* no poll pending, already received or timeout */
-
-	up->polled = 0;  /* Poll reply received */
+	up->got_time = true;
 	pp->lencode = 0; /* clear time code */
 	
 	pp->day = up->date.yearday;
@@ -840,15 +887,15 @@ trimble_poll (
 	up = pp->unitptr;
 
 	pp->polls++;
-	if (up->polled > 0) { /* last reply never arrived or error */ 
+	if (pp->polls > 2 && !up->got_time) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		if (up->port_b_pkt)
 			DPRINT(1, ("trimble_poll: unit %d: Port B packets found but no Port A packets found.\n    Connect to Port A.\n",
 			       up->unit));
 	}
+	up->got_time = false;
 	up->port_b_pkt = false;
 
-	up->polled = 2; /* synchronous packet + 1 event */
 
 	DPRINT(1, ("trimble_poll: unit %d: polling %s\n", unit,
 	           up->use_event ? "event" : "synchronous packet"));
