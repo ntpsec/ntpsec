@@ -179,6 +179,9 @@ static const unsigned int tb_decod_conv[TB_DECOD_STATS+1] = {
 static const char tb_disc_mode[TB_DISC_MODES+1][16] = {
 	"normal", "power-up", "auto holdover", "manual holdover",
 	"recovery", "unknown", "disabled", "invalid"};
+static const bool tb_disc_mode_usable[TB_DISC_MODES+1] = {
+	true, false, true, true,
+	true, false, false, false};
 
 /*
  * Transfer vector
@@ -687,12 +690,26 @@ TSIP_decode (
 			       tracking_status[tb_decod_conv[decod_stat]],
 			       tb_disc_mode[disc_mode]));
 
+			m_alarms = (unsigned short)getint((uint8_t *) &mb(10));
+			if (m_alarms & 0x200) {
+				DPRINT(1, ("TSIP_decode: unit %d: 'position questionable' flag is set,\n    you must update the unit's stored position.\n",
+				       up->unit));
+				return false;
+			}
+			/* check if disciplining is ok before checking GPS */
+			if (!tb_disc_mode_usable[disc_mode] &&
+			    !tracking_status_usable[tb_decod_conv[decod_stat]])
+			{
+				DPRINT(1, ("TSIP_decode: unit %d: not in holdover (disc.act=%s) and decod.stat of '%s' is unusable\n",
+				       up->unit, tb_disc_mode[disc_mode],
+				       tracking_status[tb_decod_conv[decod_stat]]));
+				return false;
+			}
 			if (up->UTC_flags != UTC_AVAILABLE)
 				return false;
 
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
-			m_alarms = (unsigned short)getint((uint8_t *) &mb(10));
 			if ((m_alarms & 0x80) &&
 			/* Avoid early announce: https://bugs.ntp.org/2773 */
 			    (6 == up->date.month || 12 == up->date.month) )
