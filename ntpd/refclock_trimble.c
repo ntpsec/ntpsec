@@ -149,9 +149,8 @@ static	void	trimble_shutdown	(int, struct peer *);
 static	void	trimble_receive	(struct peer *, int);
 static	void	trimble_poll		(int, struct peer *);
 static	void 	trimble_io		(struct recvbuf *);
-int 		trimble_configure	(int, struct peer *);
-static bool	TSIP_decode		(struct peer *);
-long		HW_poll			(struct refclockproc *);
+static	bool	TSIP_decode		(struct peer *);
+static	bool	HW_poll			(struct refclockproc *);
 static	double	getdbl 			(uint8_t *);
 static	short	getint 			(uint8_t *);
 static	int32_t	getlong			(uint8_t *);
@@ -925,7 +924,7 @@ trimble_poll (
 			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",unit);
 	}
 
-	if (HW_poll(pp) < 0) 
+	if (HW_poll(pp))
 		refclock_report(peer, CEVNT_FAULT); 
 }
 
@@ -1045,12 +1044,9 @@ trimble_io (
 
 
 /*
- * Trigger the Trimble's event input, which is driven off the RTS
- *
- * Take a system time stamp to match the GPS time stamp.
- *
+ * Trigger the event input
  */
-long
+static bool
 HW_poll (
 	struct refclockproc * pp 	/* pointer to unit structure */
 	)
@@ -1060,42 +1056,38 @@ HW_poll (
 
 	up = pp->unitptr;
 
-	/* read the current status, so we put things back right */
-	if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
-		DPRINT(1, ("Trimble HW_poll: unit %d: GET %m\n", up->unit));
-		msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd,GET): %m", 
-			up->unit);
-		return -1;
-	}
-  
-	x |= TIOCM_RTS;        /* turn on RTS  */
-
 	/* Edge trigger */
-	if (up->type == CLK_ACUTIME)
+	if (pp->sloppyclockflag & CLK_FLAG3) {
 		IGNORE(write (pp->io.fd, "", 1));
-		
-	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
-		DPRINT(1, ("Trimble HW_poll: unit %d: SET \n", up->unit));
-		msyslog(LOG_ERR,
-			"REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
-			up->unit);
-		return -1;
+	} else {
+		/* read the current status, so we put things back right */
+		if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
+			DPRINT(1, ("Trimble HW_poll: unit %d: GET %m\n", up->unit));
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
+				up->unit);
+			return true;
+		}
+		x |= TIOCM_RTS;        /* turn on RTS  */
+		if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
+			DPRINT(1, ("Trimble HW_poll: unit %d: SET %m\n", up->unit));
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m",
+			        up->unit);
+			return true;
+		}
 	}
-
-	x &= ~TIOCM_RTS;        /* turn off RTS  */
-	
-	/* poll timestamp */
+	/* get timestamp after triggering since RAND_bytes in get_systime is slow */
 	get_systime(&pp->lastrec);
 
-	if (ioctl(pp->io.fd, TIOCMSET, &x) == -1) {
-		DPRINT(1, ("Trimble HW_poll: unit %d: UNSET \n", up->unit));
-		msyslog(LOG_ERR,
-			"RECLOCK: Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m", 
-			up->unit);
-		return -1;
+	if (!(pp->sloppyclockflag & CLK_FLAG3)) {
+		x &= ~TIOCM_RTS;        /* turn off RTS  */
+		if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
+			DPRINT(1, ("Trimble HW_poll: unit %d: UNSET %m\n", up->unit));
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m",
+			        up->unit);
+			return true;
+		}
 	}
-
-	return 0;
+	return false;
 }
 
 /*

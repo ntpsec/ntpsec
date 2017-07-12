@@ -216,7 +216,9 @@ link:#refid[+refid string+]::
   Not used by this driver.
 
 +flag3 {0 | 1}+::
-  Not used by this driver.
+  Specifies the method used for trigger the receiver's hardware event input.
+  The default of 0 uses the serial port's RTS line. Set to 1 to use the serial
+  port's TXD line instead of RTS. Value is ignored when using a Thunderbolt.
 
 +flag4 {0 | 1}+::
   Not used by this driver.
@@ -225,8 +227,8 @@ link:#refid[+refid string+]::
    The mode parameter to the server command specifies the specific hardware
    this driver is for. The default is 0 for a normal Trimble Palisade. The
    other options are *1* for an *Endrun Praecis* in Trimble emulation mode,
-   *2* for the *Trimble Thunderbolt* GPS Disciplined Clock Receiver,
-   *3* for the Trimble Acutime Gold, and *4* for the Acutime Gold port B.
+   *2* for the *Trimble Thunderbolt* GPS Disciplined Clock Receiver, and
+   *3* for the Trimble Acutime Gold.
 
 +mode+ 'number'::
    Synonym for subtype, retained for backward compatibility.
