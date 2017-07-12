@@ -275,7 +275,6 @@ getgroup:
 
         signal_no_reset1(SIGSYS, catchTrap);
 
-
 	if (NULL == ctx) {
 		msyslog(LOG_ERR, "sandbox: seccomp_init() failed: %m");
 		exit (1);
@@ -305,6 +304,9 @@ int scmp_sc[] = {
 #ifdef __NR_getrlimit
 	SCMP_SYS(getrlimit),	/* sysconf */
 	SCMP_SYS(setrlimit),
+#endif
+#ifdef __NR_prlimit64
+	SCMP_SYS(prlimit64),	/* 64 bit Fedora 26 with early_droproot*/
 #endif
 	SCMP_SYS(getrusage),
 	SCMP_SYS(getsockname),
