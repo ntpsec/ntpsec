@@ -131,7 +131,8 @@ struct trimble_unit {
 	int		type;		/* Clock mode type */
 	bool		use_event;	/* receiver has event input */
 	bool		parity_chk;	/* enable parity checking */
-	bool		port_b_pkt;	/* saw a 'Port B' packet since startup */
+	bool		port_b_pkt;	/* saw a 'Port B' packet this poll */
+	unsigned char	last_id;	/* most recently rcvd packet this poll */
 	l_fp		p_recv_time;	/* timestamp of last received packet */
 	unsigned int	week;		/* GPS week number */
 	unsigned int	TOW;		/* GPS time of week */
@@ -501,14 +502,15 @@ TSIP_decode (
 	pp = peer->procptr;
 	up = pp->unitptr;
 	id = (unsigned char)up->rpt_buf[0];
-	
+	up->last_id = id;
+
 	if (id == 0x8f) {
 		/* Superpackets */
 		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
 		if ((up->type != CLK_THUNDERBOLT) && !event)
 			/* ignore auto-report */
 			return false;
-	
+
 		switch (mb(0) & 0xff) {
 		    case 0x0B:
 			/*
@@ -905,13 +907,16 @@ trimble_poll (
 	pp->polls++;
 	if (pp->polls > 2 && !up->got_time) {
 		refclock_report(peer, CEVNT_TIMEOUT);
-		if (up->port_b_pkt)
+		if (!up->last_id)
+			DPRINT(1, ("trimble_poll: unit %d: no packets found\n",
+			       up->unit));
+		else if (up->port_b_pkt)
 			DPRINT(1, ("trimble_poll: unit %d: Port B packets found but no Port A packets found.\n    Connect to Port A.\n",
 			       up->unit));
 	}
 	up->got_time = false;
 	up->port_b_pkt = false;
-
+	up->last_id = 0;
 
 	DPRINT(1, ("trimble_poll: unit %d: polling %s\n", unit,
 	           up->use_event ? "event" : "synchronous packet"));
