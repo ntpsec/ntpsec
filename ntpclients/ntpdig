@@ -325,6 +325,8 @@ if __name__ == '__main__':
                 elif switch in ("-p", "--samples"):
                     errmsg = "Error: -p parameter '%s' not a number\n"
                     samples = ntp.util.safeargcast(val, int, errmsg, usage)
+                    if samples < 1:  # If <1 it won't run at all
+                        samples = 1
                 elif switch in ('-r', "--replay"):
                     replay = val
                 elif switch in ("-S", "--step"):
@@ -379,24 +381,23 @@ if __name__ == '__main__':
             returned = [packet]
         else:
             returned = []
-            for server in concurrent_hosts:
-                try:
-                    returned += queryhost(server=server, concurrent=True,
-                                          timeout=timeout)
-                except ntp.packet.SyncException as e:
-                    log(str(e))
-                    continue
-                if len(returned) >= samples:
-                    break
-            for server in arguments:
-                try:
-                    returned += queryhost(server=server,
-                                          concurrent=False, timeout=timeout)
-                except ntp.packet.SyncException as e:
-                    log(str(e))
-                    continue
-                if len(returned) >= samples:
-                    break
+            for s in range(samples):
+                for server in concurrent_hosts:
+                    try:
+                        returned += queryhost(server=server,
+                                              concurrent=True,
+                                              timeout=timeout)
+                    except ntp.packet.SyncException as e:
+                        log(str(e))
+                        continue
+                for server in arguments:
+                    try:
+                        returned += queryhost(server=server,
+                                              concurrent=False,
+                                              timeout=timeout)
+                    except ntp.packet.SyncException as e:
+                        log(str(e))
+                        continue
             returned = clock_select(returned)
 
         if returned:
