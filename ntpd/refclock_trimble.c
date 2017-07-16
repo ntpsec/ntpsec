@@ -322,7 +322,6 @@ trimble_start (
 	/*
 	 * Open serial port. 
 	 */
-<<<<<<< HEAD
 	if ( !peer->cfg.path ) {
 	    /* build a path */
 	    rcode = snprintf(device, sizeof(device), DEVICE, unit);
@@ -346,10 +345,8 @@ trimble_start (
 			  refclock_name(peer), peer->cfg.path));
 
 	if (tcgetattr(fd, &tio) < 0) {
-		msyslog(LOG_ERR, 
-			"REFCLOCK: %s tcgetattr(fd, &tio): %m",
-			refclock_name(peer));
-		DPRINT(1, ("%s tcgetattr(fd, &tio)\n", refclock_name(peer));
+		msyslog(LOG_ERR, "REFCLOCK: %s tcgetattr failed: %m",
+		        refclock_name(peer));
 		close(fd);
 		return false;
 	}
@@ -396,16 +393,12 @@ trimble_start (
 		tio.c_iflag |= (INPCK|PARMRK);
 	}
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
-	    msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr(fd, &tio): %m",
-		refclock_name(peer));
-#ifdef DEBUG
-		printf("%s tcsetattr(fd, &tio)\n",refclock_name(peer));
-#endif
+		msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr failed: %m",
+		        refclock_name(peer));
 		close(fd);
 		free(up);
 		return false;
 	}
-
 	pp = peer->procptr;
 	pp->io.clock_recv = trimble_io;
 	pp->io.srcclock = peer;
@@ -413,7 +406,6 @@ trimble_start (
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 		msyslog(LOG_ERR, "%s io_addclock failed", refclock_name(peer));
-		DPRINT(1, ("%s io_addclock failed\n", refclock_name(peer)));
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
@@ -1067,14 +1059,12 @@ HW_poll (
 	} else {
 		/* read the current status, so we put things back right */
 		if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
-			DPRINT(1, ("Trimble HW_poll: unit %d: GET %m\n", up->unit));
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
-				up->unit);
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd,GET): %m",
+			        up->unit);
 			return true;
 		}
 		x |= TIOCM_RTS;        /* turn on RTS  */
 		if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
-			DPRINT(1, ("Trimble HW_poll: unit %d: SET %m\n", up->unit));
 			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m",
 			        up->unit);
 			return true;
@@ -1086,7 +1076,6 @@ HW_poll (
 	if (!(pp->sloppyclockflag & CLK_FLAG3)) {
 		x &= ~TIOCM_RTS;        /* turn off RTS  */
 		if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
-			DPRINT(1, ("Trimble HW_poll: unit %d: UNSET %m\n", up->unit));
 			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m",
 			        up->unit);
 			return true;
