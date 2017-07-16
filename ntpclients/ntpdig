@@ -239,7 +239,8 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -c yes concurrent      Hosts to be queried concurrently
    -d no  debug           Increase debug verbosity
    -D yes set-debug-level Set debug verbosity
-   -g yes gap             Set gap between requests
+   -g yes gap             Set gap between requests in seconds
+                                 - decimal values are valid
    -j no  json            Use JSON output format
    -l Str logfile         Log to specified logfile
                                  - prohibits the option 'syslog'
@@ -284,7 +285,7 @@ if __name__ == '__main__':
         authkey = None
         concurrent_hosts = []
         debug = 0
-        gap = 50
+        gap = .05
         json = False
         keyfile = None
         steplimit = 0       # Default is intentionally zero
@@ -309,6 +310,9 @@ if __name__ == '__main__':
                 elif switch in ("-D", "--set-debug-level"):
                     errmsg = "Error: -D parameter '%s' not a number\n"
                     debug = ntp.util.safeargcast(val, int, errmsg, usage)
+                elif switch in ("-g", "--gap"):
+                    errmsg = "Error: -g parameter '%s' not a float\n"
+                    gap = ntp.util.safeargcast(val, float, errmsg, usage)
                 elif switch in ("-j", "--json"):
                     json = True
                 elif switch in ("-k", "--keyfile"):
@@ -368,8 +372,6 @@ if __name__ == '__main__':
         if not credentials and authkey and keyfile is None:
             sys.stderr.write("-a option requires -k.\n")
             raise SystemExit(1)
-
-        gap /= 1000     # Scale gap to milliseconds
 
         if not arguments:
             arguments = ["localhost"]
