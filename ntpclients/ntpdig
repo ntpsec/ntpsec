@@ -239,8 +239,7 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -c yes concurrent      Hosts to be queried concurrently
    -d no  debug           Increase debug verbosity
    -D yes set-debug-level Set debug verbosity
-   -g yes gap             Set gap between requests in seconds
-                                 - decimal values are valid
+   -g yes gap             Set gap between requests in miliseconds
    -j no  json            Use JSON output format
    -l Str logfile         Log to specified logfile
                                  - prohibits the option 'syslog'
@@ -311,8 +310,8 @@ if __name__ == '__main__':
                     errmsg = "Error: -D parameter '%s' not a number\n"
                     debug = ntp.util.safeargcast(val, int, errmsg, usage)
                 elif switch in ("-g", "--gap"):
-                    errmsg = "Error: -g parameter '%s' not a float\n"
-                    gap = ntp.util.safeargcast(val, float, errmsg, usage)
+                    errmsg = "Error: -g parameter '%s' not a number\n"
+                    gap = ntp.util.safeargcast(val, int, errmsg, usage)
                 elif switch in ("-j", "--json"):
                     json = True
                 elif switch in ("-k", "--keyfile"):
@@ -355,6 +354,8 @@ if __name__ == '__main__':
             sys.stderr.write("Invalid argument.\n")
             sys.stderr.write(usage)
             raise SystemExit(1)
+
+        gap /= 1000  # convert to milliseconds
 
         credentials = keyid = keytype = passwd = None
         try:
