@@ -57,7 +57,8 @@ def decode_openpdu(data, flags):
     timeout = struct.unpack("Bxxx", temp)[0]
     oid, data = decode_oid(data, flags)
     octets = decode_octetstr(data, flags)[0]
-    return (timeout, oid, octets)
+    result = {"timeout": timeout, "oid": oid, "description": octets}
+    return result
 
 
 def encode_closepdu(sID, tactID, pktID, reason):
@@ -70,7 +71,7 @@ def encode_closepdu(sID, tactID, pktID, reason):
 
 
 def decode_closepdu(data, flags):
-    reason = ord(data[0])  # Bxxx
+    reason = {"reason": ord(data[0])}  # Bxxx
     return reason
 
 
@@ -108,7 +109,9 @@ def decode_registerpdu_core(data, flags):
         upperBound = struct.unpack(endianToken + "I", temp)[0]
     else:
         upperBound = None
-    result = (oid, timeout, priority, context, rangeSubid, upperBound)
+    result = {"oid": oid, "timeout": timeout, "priority": priority,
+              "context": context, "range_subid": rangeSubid,
+              "upper_bound": upperBound}
     return result
 
 
@@ -131,7 +134,7 @@ decode_registerpdu = decode_registerpdu_core
 
 def decode_unregisterpdu(data, flags):
     result = decode_registerpdu_core(data, flags)
-    result = (result[0],) + result[2:]  # Remove the timeout
+    del result["timeout"]
     return result
 
 
@@ -150,7 +153,8 @@ def encode_getpdu_core(isnext, sID, tactID, pktID, oidranges, context=None):
 def decode_getpdu_core(data, flags):
     context, data = decode_context(data, flags)
     oidranges, data = decode_searchrange_list(data, flags)
-    return (context, oidranges)
+    result = {"context": context, "oidranges": oidranges}
+    return result
 
 
 def encode_getpdu(sID, tactID, pktID, oidranges, context=None):
@@ -180,7 +184,8 @@ def decode_getbulkpdu(data, flags):
     temp, data = slicedata(data, 4)
     nonReps, maxReps = struct.unpack(endianToken + "HH", temp)
     oidranges, data = decode_searchrange_list(data, flags)
-    result = (context, nonReps, maxReps, oidranges)
+    result = {"context": context, "non_reps": nonReps, "max_reps": maxReps,
+              "oidranges": oidranges}
     return result
 
 
@@ -195,7 +200,8 @@ def encode_testsetpdu(sID, tactID, pktID, varbinds, context=None):
 def decode_testsetpdu(data, flags):
     context, data = decode_context(data, flags)
     varbinds = decode_varbindlist(data, flags)
-    return context, varbinds
+    result = {"context": context, "varbinds": varbinds}
+    return result
 
 
 # CommitSet, UndoSet, and CleanupSet are bare headers. Don't need decoders
@@ -224,7 +230,7 @@ def encode_pingpdu(sID, tactID, pktID, context=None):
 
 def decode_pingpdu(data, flags):
     context, data = decode_context(data, flags)
-    return context
+    return {"context": context}
 
 
 def encode_notifypdu(sID, tactID, pktID, varbinds, context=None):
@@ -238,7 +244,8 @@ def encode_notifypdu(sID, tactID, pktID, varbinds, context=None):
 def decode_notifypdu(data, flags):
     context, data = decode_context(data, flags)
     varbinds = decode_varbindlist(data, flags)
-    return (context, varbinds)
+    result = {"context": context, "varbinds": varbinds}
+    return result
 
 
 def encode_indexallocpdu_core(isdealloc,
@@ -269,7 +276,8 @@ def encode_indexdeallocpdu(sID, tactID, pktID, newIndex, anyIndex,
 def decode_indexallocpdu(data, flags):
     context, data = decode_context(data, flags)
     varbinds = decode_varbindlist(data, flags)
-    return (context, varbinds)
+    result = {"context": context, "varbinds": varbinds}
+    return result
 
 
 decode_indexdeallocpdu = decode_indexallocpdu
@@ -288,9 +296,9 @@ def encode_addagentcapspdu(sID, tactID, pktID, oid, descr, context=None):
 def decode_addagentcapspdu(data, flags):
     context, data = decode_context(data, flags)
     oid, data = decode_oid(data, flags)
-    oid = oid[0]  # we don't need the include field here
     descr = decode_octetstr(data, flags)[0]
-    return (context, oid, descr)
+    result = {"context": context, "oid": oid, "description": descr}
+    return result
 
 
 def encode_rmagentcapspdu(sID, tactID, pktID, oid, context=None):
@@ -305,8 +313,8 @@ def encode_rmagentcapspdu(sID, tactID, pktID, oid, context=None):
 def decode_rmagentcapspdu(data, flags):
     context, data = decode_context(data, flags)
     oid, data = decode_oid(data, flags)
-    oid = oid[0]  # we don't need the include here
-    return (context, oid)
+    result = {"context": context, "oid": oid}
+    return result
 
 
 def encode_responsepdu(sID, tactID, pktID,
@@ -328,7 +336,9 @@ def decode_responsepdu(data, flags):
         varbinds = decode_varbindlist(data, flags)
     else:
         varbinds = None
-    return (sysUpTime, resError, resIndex, varbinds)
+    result = {"sys_uptime": sysUpTime, "res_err": resError,
+              "res_index": resIndex, "varbinds": varbinds}
+    return result
 
 
 # ========================================================================
@@ -380,7 +390,8 @@ def decode_oid(data, flags):
     endianToken = getendian(flags)
     formatString = endianToken + ("I" * n_subid)
     subids += struct.unpack(formatString, data)
-    return ((subids, include), rest)
+    result = {"subids": subids, "include": include}
+    return (result, rest)
 
 
 def encode_octetstr(octets):
@@ -428,12 +439,12 @@ def decode_varbind(data, flags):
     header, data = slicedata(data, 4)
     endianToken = getendian(flags)
     valType = struct.unpack(endianToken + "Hxx", header)[0]
-    (name, _), data = decode_oid(data, flags)
+    name, data = decode_oid(data, flags)
     if valType not in definedValueTypes.keys():
         raise ValueError("Value type %s not in defined types" % valType)
     handlers = definedValueTypes[valType]
     payload, data = handlers[1](data, flags)
-    result = (valType, name, payload)
+    result = {"type": valType, "name": name, "data": payload}
     return result, data
 
 
@@ -488,7 +499,8 @@ def encode_searchrange(startOID, endOID, inclusiveP):
 def decode_searchrange(data, flags):
     startOID, data = decode_oid(data, flags)
     endOID, data = decode_oid(data, flags)
-    return (startOID, endOID, data)
+    result = {"start": startOID, "end": endOID}
+    return result, data
 
 
 def encode_searchrange_list(oidranges):
@@ -507,7 +519,7 @@ def decode_searchrange_list(data, flags):
         if isnullOID(one):
             break
         two, data = decode_oid(data, flags)
-        oidranges.append((one[0], two[0], one[1]))  # oid, oid, inclusive
+        oidranges.append({"start": one, "end": two})  # oid, oid, inclusive
     return tuple(oidranges), data
 
 
@@ -524,7 +536,7 @@ def slicedata(data, slicepoint):
 
 
 def isnullOID(oid):
-    if (len(oid[0]) == 0) and (oid[1] is False):
+    if (len(oid["subids"]) == 0) and (oid["include"] is False):
         return True
     return False
 
@@ -541,7 +553,6 @@ def decode_varbindlist(data, flags):
         varbinds = []
         while len(data) > 0:
             vb, data = decode_varbind(data, flags)
-            vb = tuple(vb)
             varbinds.append(vb)
         varbinds = tuple(varbinds)
     else:
@@ -564,7 +575,7 @@ def encode_pduheader(pduType, instanceRegistration, newIndex,
     flags |= newIndex << 1
     flags |= anyIndex << 2
     flags |= nonDefaultContext << 3
-    flags |= True << 4  # network byte order, we always send big endian
+    flags |= True << 4  # byte order, we always send network / big endian
     data = struct.pack(">BBBxIIII", 1, pduType, flags,
                        sessionID,
                        transactionID,
@@ -590,7 +601,10 @@ def decode_pduheader(data):  # Endianess is controlled from the PDU header
     fmt = getendian(flagDict) + "IIII"
     linen, data = slicedata(data, 16)  # 4 x 4-byte variables
     sID, tactionID, pktID, dataLen = struct.unpack(fmt, linen)
-    return (version, pduType, flagDict, sID, tactionID, pktID, dataLen)
+    result = {"version": version, "type": pduType, "flags": flagDict,
+              "session_id": sID, "transaction_id": tactionID,
+              "packet_id": pktID, "length": dataLen}
+    return result
 
 
 def encode_context(context):
@@ -614,19 +628,19 @@ def decode_context(data, flags):
 def decode_packet(data):
     header, data = slicedata(data, 20)
     header = decode_pduheader(header)
-    version, pduType, flags, sID, tactID, pktID, dataLen = header
-    if version != 1:
-        raise ValueError("Unknown packet version", version)
-    if pduType not in definedPDUTypes.keys():
-        raise ValueError("PDU type %s not in defined types" % pduType)
-    headerData = (pduType, flags, sID, tactID, pktID)
-    decoder = definedPDUTypes[pduType]
+    if header["version"] != 1:
+        raise ValueError("Unknown packet version", header["version"])
+    pktType = header["type"]
+    if pktType not in definedPDUTypes.keys():
+        raise ValueError("PDU type %s not in defined types" % pktType)
+    decoder = definedPDUTypes[pktType]
     if decoder is None:
         parsedPkt = None
     else:
-        packetSlice, data = slicedata(data, dataLen)
-        parsedPkt = decoder(packetSlice, flags)
-    return headerData + (parsedPkt,)
+        packetSlice, data = slicedata(data, header["length"])
+        parsedPkt = decoder(packetSlice, header["flags"])
+    result = {"header": header, "body": parsedPkt}
+    return result, data
 
 
 # Value types
@@ -720,3 +734,8 @@ ERR_INCONSISTENT_VALUE = 12
 ERR_RESOURCE_UNAVAILABLE = 13
 ERR_NOT_WRITABLE = 17
 ERR_INCONSISTENT_NAME = 18
+definedErrors = (ERR_NOERROR, ERR_GENERR, ERR_NO_ACCESS, ERR_WRONG_TYPE,
+                 ERR_WRONG_LEN, ERR_WRONG_ENCODING, ERR_WRONG_VALUE,
+                 ERR_NO_CREATION, ERR_INCONSISTENT_VALUE,
+                 ERR_RESOURCE_UNAVAILABLE, ERR_NOT_WRITABLE,
+                 ERR_INCONSISTENT_NAME)
