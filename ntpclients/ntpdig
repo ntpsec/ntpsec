@@ -76,7 +76,6 @@ def read_append(s, packets, packet, sockaddr):
     pkt.hostname = server
     pkt.resolved = sockaddr[0]
     packets.append(pkt)
-    time.sleep(gap)  # This may be moved
     return packets
 
 
@@ -95,7 +94,13 @@ def queryhost(server, concurrent, timeout=5, port=123):
     request.transmit_timestamp = ntp.packet.SyncPacket.posix_to_ntp(
         time.time())
     packet = request.flatten()
+    needgap = (len(iptuples) > 1) and (gap > 0)
+    firstloop = True
     for (family, socktype, proto, canonname, sockaddr) in iptuples:
+        if needgap and not firstloop:
+            time.sleep(gap)
+        if firstloop:
+            firstloop = False
         if debug:
             log("querying %s (%s)" % (sockaddr[0], server))
         s = socket.socket(family, socktype)
@@ -385,7 +390,13 @@ if __name__ == '__main__':
             returned = [packet]
         else:
             returned = []
+            needgap = (samples > 1) and (gap > 0)
+            firstloop = True
             for s in range(samples):
+                if needgap and not firstloop:
+                    time.sleep(gap)
+                if firstloop is True:
+                    firstloop = False
                 for server in concurrent_hosts:
                     try:
                         returned += queryhost(server=server,
