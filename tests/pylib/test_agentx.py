@@ -1713,7 +1713,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x0D\xF0\xCE\xFA\x00\x00\x00\x00"),
                          {"version": 1,
                           "type": a.PDU_OPEN,
-                          "flags": {"instReg ": False,
+                          "flags": {"instReg": False,
                                     "newIndex": False,
                                     "anyIndex": False,
                                     "contextP": False,
@@ -2069,6 +2069,16 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "body": {"sys_uptime": 4, "res_err": 5,
                                     "res_index": 6, "varbinds": None}},
                           ""))
+        # Test insufficient data
+        try:
+            f("\x01\x11\x10\x00"
+              "\x00\x00\x00\x01\x00\x00\x00\x02"
+              "\x00\x00\x00\x03\x00\x00\x00\x10"
+              "\x03\x00\x00\x00\x00\x00\x00\x04")
+            fail = False
+        except IndexError:
+            fail = True
+        self.assertEqual(fail, True)
 
 
 if __name__ == "__main__":

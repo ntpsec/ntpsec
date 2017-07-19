@@ -626,8 +626,10 @@ def decode_context(data, flags):
 
 
 def decode_packet(data):
-    header, data = slicedata(data, 20)
+    header, newData = slicedata(data, 20)
     header = decode_pduheader(header)
+    if header["length"] > len(newData):
+        raise IndexError("Packet data too short")
     if header["version"] != 1:
         raise ValueError("Unknown packet version", header["version"])
     pktType = header["type"]
@@ -637,10 +639,10 @@ def decode_packet(data):
     if decoder is None:
         parsedPkt = None
     else:
-        packetSlice, data = slicedata(data, header["length"])
+        packetSlice, newData = slicedata(newData, header["length"])
         parsedPkt = decoder(packetSlice, header["flags"])
     result = {"header": header, "body": parsedPkt}
-    return result, data
+    return result, newData
 
 
 # Value types
