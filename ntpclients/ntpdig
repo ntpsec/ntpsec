@@ -57,6 +57,29 @@ except ImportError as e:
     sys.exit(1)
 
 
+def read_append(s, packets, packet, sockaddr):
+    d, a = s.recvfrom(1024)
+    if debug >= 2:
+        ntp.packet.dump_hex_printable(d)
+    if credentials:
+        if not ntp.packet.Authenticator.have_mac(d):
+            if debug:
+                log("no MAC on reply from %s" % packet.hostname)
+        if not credentials.verify_mac(d):
+            packet.trusted = False
+            log("MAC verification on reply from %s failed"
+                % sockaddr[0])
+        elif debug:
+            log("MAC verification on reply from %s succeeded"
+                % sockaddr[0])
+    pkt = ntp.packet.SyncPacket(d)
+    pkt.hostname = server
+    pkt.resolved = sockaddr[0]
+    packets.append(pkt)
+    time.sleep(gap)  # This may be moved
+    return packets
+
+
 def queryhost(server, concurrent, timeout=5, port=123):
     "Query IP addresses associated with a specified host."
     try:
@@ -94,41 +117,19 @@ def queryhost(server, concurrent, timeout=5, port=123):
         if debug >= 2:
             log("Sent to %s:" % (sockaddr[0],))
             ntp.packet.dump_hex_printable(packet)
-
-        def read_append(s, packets):
-            d, a = s.recvfrom(1024)
-            if debug >= 2:
-                ntp.packet.dump_hex_printable(d)
-            if credentials:
-                if not ntp.packet.Authenticator.have_mac(d):
-                    if debug:
-                        log("no MAC on reply from %s" % packet.hostname)
-                if not credentials.verify_mac(d):
-                    packet.trusted = False
-                    log("MAC verification on reply from %s failed"
-                        % sockaddr[0])
-                elif debug:
-                    log("MAC verification on reply from %s succeeded"
-                        % sockaddr[0])
-            pkt = ntp.packet.SyncPacket(d)
-            pkt.hostname = server
-            pkt.resolved = sockaddr[0]
-            packets.append(pkt)
-            time.sleep(gap)
         if concurrent:
             sockets.append(s)
         else:
             r, _, _ = select.select([s], [], [], timeout)
             if not r:
                 return []
-            read_append(s, packets)
-    if concurrent:
+            read_append(s, packets, packet, sockaddr)
         while sockets:
             r, _, _ = select.select(sockets, [], [], timeout)
             if not r:
                 return packets
             for s in sockets:
-                read_append(s, packets)
+                read_append(s, packets, packet, sockaddr)
                 sockets.remove(s)
     return packets
 
@@ -401,6 +402,7 @@ if __name__ == '__main__':
                     except ntp.packet.SyncException as e:
                         log(str(e))
                         continue
+
             returned = clock_select(returned)
 
         if returned:
