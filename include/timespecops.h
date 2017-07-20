@@ -65,7 +65,7 @@
 #define S_PER_NS 1.0e-9
 
 /* nano seconds per millisecond */
-#define NS_PER_MS 1000000;
+#define NS_PER_MS 1000000
 
 /* returns true if a time stored as a double is close to zero */
 #define D_ISZERO_NS(t) (fabs(t) < S_PER_NS/10.0)
