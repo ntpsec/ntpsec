@@ -512,11 +512,11 @@ def encode_searchrange_list(oidranges):
     return encoded
 
 
-def decode_searchrange_list(data, flags):
+def decode_searchrange_list(data, flags, expectNullTerm=False):
     oidranges = []
-    while True:
+    while len(data) > 0:
         one, data = decode_oid(data, flags)
-        if isnullOID(one):
+        if (expectNullTerm is True) and isnullOID(one):
             break
         two, data = decode_oid(data, flags)
         oidranges.append({"start": one, "end": two})  # oid, oid, inclusive
