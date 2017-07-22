@@ -141,18 +141,23 @@ def decode_unregisterpdu(data, flags):
 def encode_getpdu_core(isnext, sID, tactID, pktID, oidranges, context=None):
     if isnext is True:
         pkttype = PDU_GET_NEXT
+        nullTerm = False
     else:
         pkttype = PDU_GET
+        nullTerm = True
     contextP, payload = encode_context(context)
-    payload += encode_searchrange_list(oidranges)
+    payload += encode_searchrange_list(oidranges, nullTerm)
     header = encode_pduheader(pkttype, False, False, False, contextP,
                               sID, tactID, pktID, len(payload))
     return header + payload
 
 
-def decode_getpdu_core(data, flags):
+def decode_getpdu_core(isnext, data, flags):
     context, data = decode_context(data, flags)
-    oidranges, data = decode_searchrange_list(data, flags)
+    if isnext is True:
+        oidranges = decode_searchrange_list(data, flags)
+    else:
+        oidranges, data = decode_searchrange_list_nullterm(data, flags)
     result = {"context": context, "oidranges": oidranges}
     return result
 
@@ -165,7 +170,12 @@ def encode_getnextpdu(sID, tactID, pktID, oidranges, context=None):
     return encode_getpdu_core(True, sID, tactID, pktID, oidranges, context)
 
 
-decode_getpdu = decode_getnextpdu = decode_getpdu_core
+def decode_getpdu(data, flags):
+    return decode_getpdu_core(False, data, flags)
+
+
+def decode_getnextpdu(data, flags):
+    return decode_getpdu_core(True, data, flags)
 
 
 def encode_getbulkpdu(sID, tactID, pktID, nonReps, maxReps,
@@ -183,7 +193,7 @@ def decode_getbulkpdu(data, flags):
     context, data = decode_context(data, flags)
     temp, data = slicedata(data, 4)
     nonReps, maxReps = struct.unpack(endianToken + "HH", temp)
-    oidranges, data = decode_searchrange_list(data, flags)
+    oidranges = decode_searchrange_list(data, flags)
     result = {"context": context, "non_reps": nonReps, "max_reps": maxReps,
               "oidranges": oidranges}
     return result
@@ -503,23 +513,32 @@ def decode_searchrange(data, flags):
     return result, data
 
 
-def encode_searchrange_list(oidranges):
+def encode_searchrange_list(oidranges, nullTerminate=False):
     encoded = []
     for oran in oidranges:
         encoded.append(encode_searchrange(*oran))
-    encoded.append(encode_oid(tuple(), False))
+    if nullTerminate:
+        encoded.append(encode_oid(tuple(), False))
     encoded = "".join(encoded)
     return encoded
 
 
-def decode_searchrange_list(data, flags, expectNullTerm=False):
+def decode_searchrange_list(data, flags):  # Cannot handle extra data
+    oidranges = []
+    while len(data) > 0:
+        oids, data = decode_searchrange(data, flags)
+        oidranges.append(oids)
+    return tuple(oidranges)
+
+
+def decode_searchrange_list_nullterm(data, flags):
     oidranges = []
     while len(data) > 0:
         one, data = decode_oid(data, flags)
-        if (expectNullTerm is True) and isnullOID(one):
+        if isnullOID(one):
             break
         two, data = decode_oid(data, flags)
-        oidranges.append({"start": one, "end": two})  # oid, oid, inclusive
+        oidranges.append({"start": one, "end": two})
     return tuple(oidranges), data
 
 

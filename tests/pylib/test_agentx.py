@@ -416,22 +416,20 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(f(1, 2, 3, ()),
                          "\x01\x06\x10\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x00\x00\x00\x00")
+                         "\x00\x00\x00\x03\x00\x00\x00\x00")
         # Test basic
         self.assertEqual(f(1, 2, 3,
                            (((1, 2, 3), (1, 2, 5), False),
                             ((10, 20), (30, 40), True))),
                          "\x01\x06\x10\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x3C"
+                         "\x00\x00\x00\x03\x00\x00\x00\x38"
                          "\x03\x00\x00\x00\x00\x00\x00\x01"
                          "\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x03\x00\x00\x00\x00\x00\x00\x01"
                          "\x00\x00\x00\x02\x00\x00\x00\x05"
                          "\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
-                         "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28"
-                         "\x00\x00\x00\x00")
+                         "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28")
         # Test with context
         self.assertEqual(f(1, 2, 3,
                            (((1, 2, 3), (1, 2, 5), False),
@@ -439,21 +437,20 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            context="blah"),
                          "\x01\x06\x18\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x44"
+                         "\x00\x00\x00\x03\x00\x00\x00\x40"
                          "\x00\x00\x00\x04blah"
                          "\x03\x00\x00\x00\x00\x00\x00\x01"
                          "\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x03\x00\x00\x00\x00\x00\x00\x01"
                          "\x00\x00\x00\x02\x00\x00\x00\x05"
                          "\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
-                         "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28"
-                         "\x00\x00\x00\x00")
+                         "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28")
 
     def test_decode_getnextpdu(self):
         f = ntp.agentx.decode_getnextpdu
 
         # Test null
-        self.assertEqual(f("\x00\x00\x00\x00", standardFlags),
+        self.assertEqual(f("", standardFlags),
                          {"context": None,
                           "oidranges": ()})
         # Test basic
@@ -461,8 +458,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
             "\x03\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
             "\x03\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x05"
             "\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
-            "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28"
-            "\x00\x00\x00\x00", standardFlags),
+            "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28",
+            standardFlags),
                          {"context": None,
                           "oidranges": ({"start": {"subids": (1, 2, 3),
                                                    "include": False},
@@ -477,8 +474,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
             "\x03\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
             "\x03\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x05\x00\x00\x00"
             "\x02\x00\x01\x00\x0A\x00\x00\x00\x14\x00\x00\x00"
-            "\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00"
-            "\x00\x00\x00\x00", lilEndianFlags),
+            "\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00",
+            lilEndianFlags),
                          {"context": None,
                           "oidranges": ({"start": {"subids": (1, 2, 3),
                                                    "include": False},
@@ -495,8 +492,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x03\x00\x00\x00\x00\x00\x00\x01"
                            "\x00\x00\x00\x02\x00\x00\x00\x05"
                            "\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
-                           "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28"
-                           "\x00\x00\x00\x00", contextFlags),
+                           "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28",
+                           contextFlags),
                          {"context": "blah",
                           "oidranges": ({"start": {"subids": (1, 2, 3),
                                                    "include": False},
@@ -514,28 +511,28 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(f(1, 2, 3, 1, 5,
                            (((1, 2), (3, 4), False),
                             ((6, 7), (8, 9), True))),
-                         "\x01\x07\x10\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x38"
+                         "\x01\x07\x10\x00"
+                         "\x00\x00\x00\x01\x00\x00\x00\x02"
+                         "\x00\x00\x00\x03\x00\x00\x00\x34"
                          "\x00\x01\x00\x05"
                          "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                         "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"
-                         "\x00\x00\x00\x00")
+                         "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09")
         # Test with context
         self.assertEqual(f(1, 2, 3, 1, 5,
                            (((1, 2), (3, 4), False),
                             ((6, 7), (8, 9), True)),
                            context="blah"),
-                         "\x01\x07\x18\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x40"
+                         "\x01\x07\x18\x00"
+                         "\x00\x00\x00\x01\x00\x00\x00\x02"
+                         "\x00\x00\x00\x03\x00\x00\x00\x3C"
                          "\x00\x00\x00\x04blah"
                          "\x00\x01\x00\x05"
                          "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                         "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"
-                         "\x00\x00\x00\x00")
+                         "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09")
 
     def test_decode_getbulkpdu(self):
         f = ntp.agentx.decode_getbulkpdu
@@ -545,8 +542,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                            "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                            "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                           "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"
-                           "\x00\x00\x00\x00", standardFlags),
+                           "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09",
+                           standardFlags),
                          {"context": None, "non_reps": 1, "max_reps": 5,
                           "oidranges": ({"start": {"subids": (1, 2),
                                                    "include": False},
@@ -561,8 +558,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                            "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
                            "\x02\x00\x01\x00\x06\x00\x00\x00\x07\x00\x00\x00"
-                           "\x02\x00\x00\x00\x08\x00\x00\x00\x09\x00\x00\x00"
-                           "\x00\x00\x00\x00", lilEndianFlags),
+                           "\x02\x00\x00\x00\x08\x00\x00\x00\x09\x00\x00\x00",
+                           lilEndianFlags),
                          {"context": None, "non_reps": 1, "max_reps": 5,
                           "oidranges": ({"start": {"subids": (1, 2),
                                                    "include": False},
@@ -578,8 +575,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                            "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                            "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                           "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"
-                           "\x00\x00\x00\x00", contextFlags),
+                           "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09",
+                           contextFlags),
                          {"context": "blah", "non_reps": 1, "max_reps": 5,
                           "oidranges": ({"start": {"subids": (1, 2),
                                                    "include": False},
@@ -1432,6 +1429,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
+                         "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04")
+        # Test, null terminated
+        self.assertEqual(f((((1, 2), (1, 2), True),
+                            ((2, 3), (3, 4), False)), nullTerminate=True),
+                         "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x00\x00\x00\x00")
 
@@ -1442,12 +1446,36 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(f("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                            "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                            "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
+                           "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04",
+                           standardFlags),
+                         ({"start": {"subids": (1, 2), "include": True},
+                           "end": {"subids": (1, 2), "include": False}},
+                          {"start": {"subids": (2, 3), "include": False},
+                           "end": {"subids": (3, 4), "include": False}}))
+        # Test, little endian
+        self.assertEqual(f("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                           "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                           "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                           "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00",
+                           lilEndianFlags),
+                         ({"start": {"subids": (1, 2), "include": True},
+                           "end": {"subids": (1, 2), "include": False}},
+                          {"start": {"subids": (2, 3), "include": False},
+                           "end": {"subids": (3, 4), "include": False}}))
+
+    def test_decode_searchrange_list_nullterm(self):
+        f = ntp.agentx.decode_searchrange_list_nullterm
+
+        # Test
+        self.assertEqual(f("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                           "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                           "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                            "\x00\x00\x00\x00" + extraData, standardFlags),
                          (({"start": {"subids": (1, 2), "include": True},
-                            "end": {"subids": (1, 2), "include": False}},
-                           {"start": {"subids": (2, 3), "include": False},
-                            "end": {"subids": (3, 4), "include": False}}),
+                           "end": {"subids": (1, 2), "include": False}},
+                          {"start": {"subids": (2, 3), "include": False},
+                           "end": {"subids": (3, 4), "include": False}}),
                           extraData))
         # Test, little endian
         self.assertEqual(f("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
@@ -1456,9 +1484,9 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
                            "\x00\x00\x00\x00" + extraData, lilEndianFlags),
                          (({"start": {"subids": (1, 2), "include": True},
-                            "end": {"subids": (1, 2), "include": False}},
-                           {"start": {"subids": (2, 3), "include": False},
-                            "end": {"subids": (3, 4), "include": False}}),
+                           "end": {"subids": (1, 2), "include": False}},
+                          {"start": {"subids": (2, 3), "include": False},
+                           "end": {"subids": (3, 4), "include": False}}),
                           extraData))
 
     def test_encode_octetstr(self):
@@ -1778,6 +1806,24 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                             "include": False},
                                     "description": "foo"}},
                           ""))
+        # Test open, extraData
+        self.assertEqual(f("\x01\x01\x10\x00"
+                           "\x00\x00\x00\x0C\x00\x00\x00\x22"
+                           "\x00\x00\x00\x38\x00\x00\x00\x20"
+                           "\x4E\x00\x00\x00"
+                           "\x04\x00\x00\x00"
+                           "\x00\x00\x00\x01\x00\x00\x00\x02"
+                           "\x00\x00\x00\x03\x00\x00\x00\x04"
+                           "\x00\x00\x00\x03foo\x00" + extraData),
+                         ({"header": {"version": 1, "type": x.PDU_OPEN,
+                                      "flags": standardFlags, "session_id": 12,
+                                      "transaction_id": 34, "packet_id": 56,
+                                      "length": 32},
+                           "body": {"timeout": 78,
+                                    "oid": {"subids": (1, 2, 3, 4),
+                                            "include": False},
+                                    "description": "foo"}},
+                          extraData))
         # Test close
         self.assertEqual(f("\x01\x02\x10\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02"
@@ -1837,28 +1883,26 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test get next
         self.assertEqual(f("\x01\x06\x10\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x00\x00\x00\x00"),
+                           "\x00\x00\x00\x03\x00\x00\x00\x00"),
                          ({"header": {"version": 1, "type": x.PDU_GET_NEXT,
                                       "flags": standardFlags, "session_id": 1,
                                       "transaction_id": 2, "packet_id": 3,
-                                      "length": 4},
+                                      "length": 0},
                            "body": {"context": None, "oidranges": ()}},
                           ""))
         # Test get bulk
         self.assertEqual(f("\x01\x07\x10\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x38"
+                           "\x00\x00\x00\x03\x00\x00\x00\x34"
                            "\x00\x01\x00\x05"
                            "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                            "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                            "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                           "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"
-                           "\x00\x00\x00\x00"),
+                           "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"),
                          ({"header": {"version": 1, "type": x.PDU_GET_BULK,
                                       "flags": standardFlags, "session_id": 1,
                                       "transaction_id": 2, "packet_id": 3,
-                                      "length": 56},
+                                      "length": 52},
                            "body": {"context": None, "non_reps": 1,
                                     "max_reps": 5,
                                     "oidranges": ({"start": {"subids": (1, 2),
