@@ -50,6 +50,7 @@
 
 #include <termios.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -130,6 +131,7 @@ struct trimble_unit {
 	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
 	bool		use_event;	/* receiver has event input */
+	int		MCR;		/* modem control register value at startup */
 	bool		parity_chk;	/* enable parity checking */
 	bool		port_b_pkt;	/* saw a 'Port B' packet this poll */
 	unsigned char	last_id;	/* most recently rcvd packet this poll */
@@ -398,6 +400,33 @@ trimble_start (
 		close(fd);
 		free(up);
 		return false;
+	}
+	if (up->use_event) {
+		/*
+		 * The width of the RTS pulse must be either less than 5us or
+		 * greater than 600ms or the Acutime 2000 may try to switch its
+		 * port A baud rate because of "Auto-DGPS". The Praecis will
+		 * produce unstable timestamps (-7us instead of +-40ns offsets)
+		 * when pulse width is more than a few us and less than 100us.
+		 * Palisade minimum puse width is specified as 1us. To satisfy
+		 * these constraints the RTS pin is idled with a positive
+		 * voltage and pulsed negative.
+		 */
+		if (ioctl(fd, TIOCMGET, &up->MCR) < 0) {
+			msyslog(LOG_ERR, "Trimble(%d) TIOCMGET failed: %m",
+			        unit);
+			close(fd);
+			free(up);
+			return false;
+		}
+		up->MCR |= TIOCM_RTS;
+		if (ioctl(fd, TIOCMSET, &up->MCR) < 0) {
+			msyslog(LOG_ERR, "Trimble(%d) TIOCMSET failed: %m",
+			        unit);
+			close(fd);
+			free(up);
+			return false;
+		}
 	}
 	pp = peer->procptr;
 	pp->io.clock_recv = trimble_io;
@@ -1045,11 +1074,11 @@ trimble_io (
  */
 static bool
 HW_poll (
-	struct refclockproc * pp 	/* pointer to unit structure */
+	struct refclockproc * pp
 	)
 {	
-	int x;	/* state before & after RTS set */
 	struct trimble_unit *up;
+	static const struct timespec ts = {0, 13 * NS_PER_MS};
 
 	up = pp->unitptr;
 
@@ -1057,30 +1086,24 @@ HW_poll (
 	if (pp->sloppyclockflag & CLK_FLAG3) {
 		IGNORE(write (pp->io.fd, "", 1));
 	} else {
-		/* read the current status, so we put things back right */
-		if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd,GET): %m",
-			        up->unit);
-			return true;
-		}
-		x |= TIOCM_RTS;        /* turn on RTS  */
-		if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m",
-			        up->unit);
-			return true;
-		}
+		up->MCR &= ~TIOCM_RTS; /* set RTS low from high idle state */
+		IGNORE(ioctl(pp->io.fd, TIOCMSET, &up->MCR));
+
+		/*
+		 * The Acutime 2000 will occasionally transmit with parity
+		 * errors if the low state is held for less than 1ms, and the
+		 * Praecis will produce unstable timestamps if the low state is
+		 * held for less than 12ms.
+		 */
+		nanosleep(&ts, NULL);
+
+		up->MCR |= TIOCM_RTS;  /* make edge / restore idle */
+		IGNORE(ioctl(pp->io.fd, TIOCMSET, &up->MCR));
 	}
-	/* get timestamp after triggering since RAND_bytes in get_systime is slow */
+
+	/* get timestamp after triggering since RAND_bytes is slow */
 	get_systime(&pp->lastrec);
 
-	if (!(pp->sloppyclockflag & CLK_FLAG3)) {
-		x &= ~TIOCM_RTS;        /* turn off RTS  */
-		if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m",
-			        up->unit);
-			return true;
-		}
-	}
 	return false;
 }
 
