@@ -123,7 +123,9 @@ struct packettx
  */
 struct trimble_unit {
 	short		unit;		/* NTP refclock unit number */
-	bool 		got_time;	/* time is valid for this poll */
+	bool		got_pkt;	/* decoded a packet this poll */
+	bool		got_time;	/* got a time packet this poll */
+	bool 		time_ok;	/* time is valid for this poll */
 	unsigned char	UTC_flags;	/* UTC & leap second flag */
 	unsigned char	trk_status;	/* reported tracking status */
 	char		rpt_status;	/* TSIP Parser State */
@@ -133,8 +135,6 @@ struct trimble_unit {
 	bool		use_event;	/* receiver has event input */
 	int		MCR;		/* modem control register value at startup */
 	bool		parity_chk;	/* enable parity checking */
-	bool		port_b_pkt;	/* saw a 'Port B' packet this poll */
-	unsigned char	last_id;	/* most recently rcvd packet this poll */
 	l_fp		p_recv_time;	/* timestamp of last received packet */
 	unsigned int	week;		/* GPS week number */
 	unsigned int	TOW;		/* GPS time of week */
@@ -153,7 +153,7 @@ static	void	trimble_receive	(struct peer *, int);
 static	void	trimble_poll		(int, struct peer *);
 static	void 	trimble_io		(struct recvbuf *);
 static	bool	TSIP_decode		(struct peer *);
-static	bool	HW_poll			(struct refclockproc *);
+static	void	HW_poll			(struct refclockproc *);
 static	double	getdbl 			(uint8_t *);
 static	short	getint 			(uint8_t *);
 static	int32_t	getlong			(uint8_t *);
@@ -523,7 +523,6 @@ TSIP_decode (
 	pp = peer->procptr;
 	up = pp->unitptr;
 	id = (unsigned char)up->rpt_buf[0];
-	up->last_id = id;
 
 	if (id == 0x8f) {
 		/* Superpackets */
@@ -544,6 +543,7 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADREPLY);
 				return false;
 			}
+			up->got_time = true;
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
 				int st, ts;
@@ -690,7 +690,7 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADREPLY);
 				return false;
 			}
-
+			up->got_time = true;
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
 				double lat, lon, alt;
@@ -757,7 +757,6 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADREPLY);
 				return 0;
 			}
-
 			timing_flags = (unsigned char)mb(9);
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
@@ -822,9 +821,6 @@ TSIP_decode (
 		    default:
 			break;
 		} /* switch */
-	} else if (((up->type == CLK_PALISADE) || (up->type == CLK_ACUTIME)) &&
-	   ((id == 0x41) || (id == 0x54))) {
-		up->port_b_pkt = true; /* Acutime Gold sends on Ports A & B */
 	}
 	return false;
 }
@@ -852,8 +848,9 @@ trimble_receive (
 	if (up->use_event && pp->polls <= 1)
 		return;
 
+	up->got_pkt = true;
 	if (MSG_TSIP == type) {
-		if (up->got_time) 
+		if (up->time_ok) 
 			return;   /* no poll pending */
 		if (!TSIP_decode(peer))
 			return;
@@ -866,7 +863,7 @@ trimble_receive (
 		return;
 	}
 	
-	up->got_time = true;
+	up->time_ok = true;
 	pp->lencode = 0; /* clear time code */
 	
 	pp->day = up->date.yearday;
@@ -926,18 +923,20 @@ trimble_poll (
 	up = pp->unitptr;
 
 	pp->polls++;
-	if (pp->polls > 2 && !up->got_time) {
+
+	/* check status for the previous poll interval */
+	if (pp->polls > 2 && !up->time_ok) {
 		refclock_report(peer, CEVNT_TIMEOUT);
-		if (!up->last_id)
+		if (!up->got_pkt)
 			DPRINT(1, ("trimble_poll: unit %d: no packets found\n",
 			       up->unit));
-		else if (up->port_b_pkt)
-			DPRINT(1, ("trimble_poll: unit %d: Port B packets found but no Port A packets found.\n    Connect to Port A.\n",
+		else if (!up->got_time)
+			DPRINT(1, ("trimble_poll: unit %d: packet(s) found but none were usable.\nVerify unit isn't connected to Port B and flag3 is correct for Palisade/Acutime\n",
 			       up->unit));
 	}
+	up->time_ok = false;
 	up->got_time = false;
-	up->port_b_pkt = false;
-	up->last_id = 0;
+	up->got_pkt = false;
 
 	DPRINT(1, ("trimble_poll: unit %d: polling %s\n", unit,
 	           up->use_event ? "event" : "synchronous packet"));
@@ -950,8 +949,7 @@ trimble_poll (
 			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",unit);
 	}
 
-	if (HW_poll(pp))
-		refclock_report(peer, CEVNT_FAULT); 
+	HW_poll(pp);
 }
 
 
@@ -1072,7 +1070,7 @@ trimble_io (
 /*
  * Trigger the event input
  */
-static bool
+static void
 HW_poll (
 	struct refclockproc * pp
 	)
@@ -1103,8 +1101,6 @@ HW_poll (
 
 	/* get timestamp after triggering since RAND_bytes is slow */
 	get_systime(&pp->lastrec);
-
-	return false;
 }
 
 /*
