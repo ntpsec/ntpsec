@@ -361,19 +361,31 @@ trimble_start (
 	up->type = CLK_TYPE(peer);
 	up->parity_chk = true;
 	up->use_event = true;
+
+	pp = peer->procptr;
+	pp->disp = 1000 * S_PER_NS; /* extra ~500ns for serial port delay */
+
 	switch (up->type) {
 	    case CLK_PALISADE:
-		msyslog(LOG_NOTICE, "Trimble(%d) Palisade mode enabled", unit);
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Palisade mode enabled",
+		        refclock_name(peer));
 		break;
 	    case CLK_PRAECIS:
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Praecis mode enabled",
 			refclock_name(peer));
+		/* account for distance to tower */
+		pp->disp = .00002;
 		break;
 	    case CLK_THUNDERBOLT:
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Thunderbolt mode enabled",
 			refclock_name(peer));
 		up->parity_chk = false;
 		up->use_event = false;
+		/*
+		 * packet transmission delay varies from 9ms to 32ms depending
+		 * on the number of SVs the receiver is attempting to track
+		 */
+		pp->disp = .023;
 		break;
 	    case CLK_ACUTIME:
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Acutime Gold mode enabled",
@@ -428,7 +440,6 @@ trimble_start (
 			return false;
 		}
 	}
-	pp = peer->procptr;
 	pp->io.clock_recv = trimble_io;
 	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
