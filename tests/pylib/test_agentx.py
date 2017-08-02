@@ -145,6 +145,16 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(basicPkt_new.oid, {"subids": (1, 2, 3, 4),
                                             "include": False})
         self.assertEqual(basicPkt_new.description, "foo")
+        # Test packetVars
+        self.assertEqual(basicPkt_new.packetVars(),
+                         {"pduType": 1,
+                          "bigEndian": False,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "timeout": 4,
+                          "oid": {"subids": (1, 2, 3, 4), "include": False},
+                          "description": "foo"})
 
     def test_ClosePDU(self):
         dec = ntp.agentx.decode_ClosePDU
@@ -174,6 +184,14 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.transactionID, 2)
         self.assertEqual(pkt_new.packetID, 3)
         self.assertEqual(pkt_new.reason, x.RSN_OTHER)
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 2,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "reason": x.RSN_OTHER})
 
     def test_RegisterPDU(self):
         dec = ntp.agentx.decode_xRegisterPDU
@@ -254,6 +272,19 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(fancyPkt_new.rangeSubid, 5)
         self.assertEqual(fancyPkt_new.upperBound, 23)
         self.assertEqual(fancyPkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(basicPkt_new.packetVars(),
+                         {"pduType": 3,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "timeout": 4,
+                          "priority": 5,
+                          "subtree": {"subids": (1, 2, 3), "include": False},
+                          "rangeSubid": 0,
+                          "upperBound": None,
+                          "context": None})
 
     def test_UnregisterPDU(self):
         dec = ntp.agentx.decode_xRegisterPDU
@@ -265,7 +296,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(basicPkt.sessionID, 1)
         self.assertEqual(basicPkt.transactionID, 2)
         self.assertEqual(basicPkt.packetID, 3)
-        self.assertEqual(basicPkt.timeout, None)
         self.assertEqual(basicPkt.priority, 5)
         self.assertEqual(basicPkt.subtree, (1, 2, 3))
         self.assertEqual(basicPkt.rangeSubid, 0)
@@ -278,7 +308,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(fancyPkt.sessionID, 1)
         self.assertEqual(fancyPkt.transactionID, 2)
         self.assertEqual(fancyPkt.packetID, 3)
-        self.assertEqual(fancyPkt.timeout, None)
         self.assertEqual(fancyPkt.priority, 5)
         self.assertEqual(fancyPkt.subtree, (1, 2, 3))
         self.assertEqual(fancyPkt.rangeSubid, 5)
@@ -312,7 +341,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(basicPkt_new.sessionID, 1)
         self.assertEqual(basicPkt_new.transactionID, 2)
         self.assertEqual(basicPkt_new.packetID, 3)
-        self.assertEqual(basicPkt_new.timeout, None)
         self.assertEqual(basicPkt_new.priority, 5)
         self.assertEqual(basicPkt_new.subtree, {"subids": (1, 2, 3),
                                                 "include": False})
@@ -327,13 +355,24 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(fancyPkt_new.sessionID, 1)
         self.assertEqual(fancyPkt_new.transactionID, 2)
         self.assertEqual(fancyPkt_new.packetID, 3)
-        self.assertEqual(fancyPkt_new.timeout, None)
         self.assertEqual(fancyPkt_new.priority, 5)
         self.assertEqual(fancyPkt_new.subtree, {"subids": (1, 2, 3),
                                                 "include": False})
         self.assertEqual(fancyPkt_new.rangeSubid, 5)
         self.assertEqual(fancyPkt_new.upperBound, 23)
         self.assertEqual(fancyPkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(basicPkt_new.packetVars(),
+                         {"pduType": 4,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "priority": 5,
+                          "subtree": {"subids": (1, 2, 3), "include": False},
+                          "rangeSubid": 0,
+                          "upperBound": None,
+                          "context": None})
 
     def test_GetPDU(self):
         dec = ntp.agentx.decode_xGetPDU
@@ -404,6 +443,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           {"start": {"subids": (10, 20), "include": True},
                            "end": {"subids": (30, 40), "include": False}}))
         self.assertEqual(fullPkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(nullPkt_new.packetVars(),
+                         {"pduType": 5,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "oidranges": (),
+                          "context": None})
 
     def test_GetNextPDU(self):
         dec = ntp.agentx.decode_xGetPDU
@@ -472,6 +520,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           {"start": {"subids": (10, 20), "include": True},
                            "end": {"subids": (30, 40), "include": False}}))
         self.assertEqual(fullPkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(nullPkt_new.packetVars(),
+                         {"pduType": 6,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "oidranges": (),
+                          "context": None})
 
     def test_GetBulkPDU(self):
         dec = ntp.agentx.decode_GetBulkPDU
@@ -520,6 +577,24 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           {"start": {"subids": (6, 7), "include": True},
                            "end": {"subids": (8, 9), "include": False}}))
         self.assertEqual(pkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 7,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "nonReps": 1,
+                          "maxReps": 5,
+                          "oidranges": ({"start": {"subids": (1, 2),
+                                                   "include": False},
+                                         "end": {"subids": (3, 4),
+                                                 "include": False}},
+                                        {"start": {"subids": (6, 7),
+                                                   "include": True},
+                                         "end": {"subids": (8, 9),
+                                                 "include": False}}),
+                          "context": "blah"})
 
     def test_TestSetPDU(self):
         dec = ntp.agentx.decode_TestSetPDU
@@ -571,6 +646,23 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "name": {"subids": (1, 2, 4), "include": False},
                            "data": "blah"}))
         self.assertEqual(pkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 8,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "varbinds": ({"type": x.OID,
+                                        "name": {"subids": (1, 2, 3),
+                                                 "include": False},
+                                        "data": {"subids": (4, 5, 6),
+                                                 "include": False}},
+                                       {"type": x.OCTET_STR,
+                                        "name": {"subids": (1, 2, 4),
+                                                 "include": False},
+                                        "data": "blah"}),
+                         "context": "blah"})
 
     def test_CommitSetPDU(self):
         dec = ntp.agentx.decode_CommitSetPDU
@@ -596,6 +688,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.sessionID, 1)
         self.assertEqual(pkt_new.transactionID, 2)
         self.assertEqual(pkt_new.packetID, 3)
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 9,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3})
 
     def test_UndoSetPDU(self):
         dec = ntp.agentx.decode_UndoSetPDU
@@ -621,6 +720,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.sessionID, 1)
         self.assertEqual(pkt_new.transactionID, 2)
         self.assertEqual(pkt_new.packetID, 3)
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 10,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3})
 
     def test_CleanupSetPDU(self):
         dec = ntp.agentx.decode_CleanupSetPDU
@@ -646,6 +752,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.sessionID, 1)
         self.assertEqual(pkt_new.transactionID, 2)
         self.assertEqual(pkt_new.packetID, 3)
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 11,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3})
 
     def test_PingPDU(self):
         dec = ntp.agentx.decode_PingPDU
@@ -674,6 +787,14 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.transactionID, 2)
         self.assertEqual(pkt_new.packetID, 3)
         self.assertEqual(pkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 13,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "context": "blah"})
 
     def test_NotifyPDU(self):
         dec = ntp.agentx.decode_NotifyPDU
@@ -725,6 +846,23 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "name": {"subids": (1, 2, 4), "include": False},
                            "data": "blah"}))
         self.assertEqual(pkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 12,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "varbinds": ({"type": x.OID,
+                                        "name": {"subids": (1, 2, 3),
+                                                 "include": False},
+                                        "data": {"subids": (4, 5, 6),
+                                                 "include": False}},
+                                       {"type": x.OCTET_STR,
+                                        "name": {"subids": (1, 2, 4),
+                                                 "include": False},
+                                        "data": "blah"}),
+                          "context": "blah"})
 
     def test_IndexAllocPDU(self):
         dec = ntp.agentx.decode_xIndexAllocPDU
@@ -740,6 +878,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt.sessionID, 1)
         self.assertEqual(pkt.transactionID, 2)
         self.assertEqual(pkt.packetID, 3)
+        self.assertEqual(pkt.newIndex, True)
+        self.assertEqual(pkt.anyIndex, True)
         self.assertEqual(pkt.varbinds,
                          ((x.OID, (1, 2, 3), (4, 5, 6), False),
                           (x.OCTET_STR, (1, 2, 4), "blah")))
@@ -768,6 +908,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.sessionID, 1)
         self.assertEqual(pkt_new.transactionID, 2)
         self.assertEqual(pkt_new.packetID, 3)
+        self.assertEqual(pkt.newIndex, True)
+        self.assertEqual(pkt.anyIndex, True)
         self.assertEqual(pkt_new.varbinds,
                          ({"type": x.OID,
                            "name": {"subids": (1, 2, 3), "include": False},
@@ -776,6 +918,25 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "name": {"subids": (1, 2, 4), "include": False},
                            "data": "blah"}))
         self.assertEqual(pkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 14,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "newIndex": True,
+                          "anyIndex": True,
+                          "varbinds": ({"type": x.OID,
+                                        "name": {"subids": (1, 2, 3),
+                                                 "include": False},
+                                        "data": {"subids": (4, 5, 6),
+                                                 "include": False}},
+                                       {"type": x.OCTET_STR,
+                                        "name": {"subids": (1, 2, 4),
+                                                 "include": False},
+                                        "data": "blah"}),
+                          "context": "blah"})
 
     def test_IndexDeallocPDU(self):
         dec = ntp.agentx.decode_xIndexAllocPDU
@@ -791,6 +952,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt.sessionID, 1)
         self.assertEqual(pkt.transactionID, 2)
         self.assertEqual(pkt.packetID, 3)
+        self.assertEqual(pkt.newIndex, True)
+        self.assertEqual(pkt.anyIndex, True)
         self.assertEqual(pkt.varbinds,
                          ((x.OID, (1, 2, 3), (4, 5, 6), False),
                           (x.OCTET_STR, (1, 2, 4), "blah")))
@@ -819,6 +982,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.sessionID, 1)
         self.assertEqual(pkt_new.transactionID, 2)
         self.assertEqual(pkt_new.packetID, 3)
+        self.assertEqual(pkt.newIndex, True)
+        self.assertEqual(pkt.anyIndex, True)
         self.assertEqual(pkt_new.varbinds,
                          ({"type": x.OID,
                            "name": {"subids": (1, 2, 3), "include": False},
@@ -827,6 +992,25 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "name": {"subids": (1, 2, 4), "include": False},
                            "data": "blah"}))
         self.assertEqual(pkt_new.context, "blah")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 15,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "newIndex": True,
+                          "anyIndex": True,
+                          "varbinds": ({"type": x.OID,
+                                        "name": {"subids": (1, 2, 3),
+                                                 "include": False},
+                                        "data": {"subids": (4, 5, 6),
+                                                 "include": False}},
+                                       {"type": x.OCTET_STR,
+                                        "name": {"subids": (1, 2, 4),
+                                                 "include": False},
+                                        "data": "blah"}),
+                          "context": "blah"})
 
     def test_AddAgentCapsPDU(self):
         dec = ntp.agentx.decode_AddAgentCapsPDU
@@ -863,6 +1047,16 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                        "include": False})
         self.assertEqual(pkt_new.description, "blah")
         self.assertEqual(pkt_new.context, "bluh")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 16,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "oid": {"subids": (4, 5, 6), "include": False},
+                          "description": "blah",
+                          "context": "bluh"})
 
     def test_RMAgentCapsPDU(self):
         dec = ntp.agentx.decode_RMAgentCapsPDU
@@ -896,6 +1090,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.oid, {"subids": (4, 5, 6),
                                        "include": False})
         self.assertEqual(pkt_new.context, "bluh")
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 17,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "oid": {"subids": (4, 5, 6), "include": False},
+                          "context": "bluh"})
 
     def test_ResponsePDU(self):
         dec = ntp.agentx.decode_ResponsePDU
@@ -950,6 +1153,25 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           {"type": x.OCTET_STR,
                            "name": {"subids": (1, 2, 4), "include": False},
                            "data": "blah"}))
+        # Test packetVars
+        self.assertEqual(pkt_new.packetVars(),
+                         {"pduType": 18,
+                          "bigEndian": True,
+                          "sessionID": 1,
+                          "transactionID": 2,
+                          "packetID": 3,
+                          "sysUptime": 4,
+                          "resError": 5,
+                          "resIndex": 6,
+                          "varbinds": ({"type": x.OID,
+                                        "name": {"subids": (1, 2, 3),
+                                                 "include": False},
+                                        "data": {"subids": (4, 5, 6),
+                                                 "include": False}},
+                                       {"type": x.OCTET_STR,
+                                        "name": {"subids": (1, 2, 4),
+                                                 "include": False},
+                                        "data": "blah"})})
 
     #
     # Data type tests

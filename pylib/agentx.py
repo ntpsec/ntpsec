@@ -45,13 +45,40 @@ prefixCount = len(internetPrefix)
 
 
 class AgentXPDU:
-    def __init__(self, pduType, bigEndian, sID, tactID, pktID, context=None):
+    def __init__(self, pduType, bigEndian, sID, tactID, pktID,
+                 hascontext=False, context=None):
         self.pduType = pduType
         self.bigEndian = bigEndian
         self.sessionID = sID
         self.transactionID = tactID
         self.packetID = pktID
         self.context = context
+        self._hascontext = hascontext
+
+    def packetVars(self):
+        pktvars = {}
+        names = dir(self)
+        names.remove("context")
+        for vname in names:
+            if vname[0] == "_":  # ignores specials, and what we want ignored
+                continue
+            var = getattr(self, vname)
+            if callable(var):  # ignores methods
+                # *might* have to rethink this if contents get classified
+                continue
+            pktvars[vname] = var
+        if self._hascontext is True:
+            # context is always present, not always used
+            pktvars["context"] = self.context
+        return pktvars
+
+    def __repr__(self):
+        s = self.__name__ + "("
+        v = []
+        for var in self.printvars:
+            v.append(repr(var))
+        s += ", ".join(v) + ")"
+        return s
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -177,19 +204,20 @@ class RegisterPDU(AgentXPDU):
                  timeout, priority, subtree,
                  rangeSubid=0, upperBound=None, context=None):
         AgentXPDU.__init__(self, PDU_REGISTER,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.timeout = timeout
         self.priority = priority
         self.subtree = subtree
         self.rangeSubid = rangeSubid
         self.upperBound = upperBound
-        self.instReg = True  # so we don't have to write two encode()s
+        self._instReg = True  # so we don't have to write two encode()s
 
     def __eq__(self, other):
         if AgentXPDU.__eq__(self, other) is not True:
             return False
-        if self.timeout != other.timeout:
-            return False
+        if hasattr(self, "timeout"):
+            if self.timeout != other.timeout:
+                return False
         if self.priority != other.priority:
             return False
         if self.subtree != other.subtree:
@@ -214,7 +242,7 @@ class RegisterPDU(AgentXPDU):
             if self.upperBound is None:
                 raise ValueError("upperBound must be set if rangeSubid is set")
             payload += struct.pack(endianToken + "I", self.upperBound)
-        header = encode_pduheader(self.pduType, self.instReg, False, False,
+        header = encode_pduheader(self.pduType, self._instReg, False, False,
                                   contextP, self.bigEndian,
                                   self.sessionID, self.transactionID,
                                   self.packetID, len(payload))
@@ -222,14 +250,15 @@ class RegisterPDU(AgentXPDU):
         return packet
 
 
-class UnregisterPDU(RegisterPDU):  # These could inherit in either direction
+class UnregisterPDU(RegisterPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, priority, subtree,
                  rangeSubid=0, upperBound=None, context=None):
         RegisterPDU.__init__(self, bigEndian, sID, tactID, pktID,
                              None, priority, subtree,
                              rangeSubid, upperBound, context)
         self.pduType = PDU_UNREGISTER
-        self.instReg = False
+        del self.timeout  # Unregister doesn't have a timeout
+        self._instReg = False
 
 
 def decode_xGetPDU(data, header):
@@ -251,9 +280,9 @@ def decode_xGetPDU(data, header):
 class GetPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, oidranges, context=None):
         AgentXPDU.__init__(self, PDU_GET,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.oidranges = oidranges
-        self.nullTerm = True
+        self._nullTerm = True
 
     def __eq__(self, other):
         if AgentXPDU.__eq__(self, other) is not True:
@@ -265,7 +294,7 @@ class GetPDU(AgentXPDU):
     def encode(self):
         contextP, payload = encode_context(self.bigEndian, self.context)
         payload += encode_searchrange_list(self.bigEndian,
-                                           self.oidranges, self.nullTerm)
+                                           self.oidranges, self._nullTerm)
         header = encode_pduheader(self.pduType, False, False, False,
                                   contextP, self.bigEndian,
                                   self.sessionID, self.transactionID,
@@ -278,7 +307,7 @@ class GetNextPDU(GetPDU):
         GetPDU.__init__(self, bigEndian, sID, tactID, pktID,
                         oidranges, context)
         self.pduType = PDU_GET_NEXT
-        self.nullTerm = False
+        self._nullTerm = False
 
 
 def decode_GetBulkPDU(data, header):
@@ -298,7 +327,7 @@ class GetBulkPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID,
                  nonReps, maxReps, oidranges, context=None):
         AgentXPDU.__init__(self, PDU_GET_BULK,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.nonReps = nonReps
         self.maxReps = maxReps
         self.oidranges = oidranges
@@ -340,7 +369,7 @@ def decode_TestSetPDU(data, header):
 class TestSetPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, varbinds, context=None):
         AgentXPDU.__init__(self, PDU_TEST_SET,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.varbinds = varbinds
 
     def __eq__(self, other):
@@ -432,7 +461,7 @@ def decode_PingPDU(data, header):
 class PingPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, context=None):
         AgentXPDU.__init__(self, PDU_PING,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
 
     def encode(self):
         contextP, payload = encode_context(self.bigEndian, self.context)
@@ -456,7 +485,7 @@ def decode_NotifyPDU(data, header):
 class NotifyPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, varbinds, context=None):
         AgentXPDU.__init__(self, PDU_NOTIFY,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.varbinds = varbinds
 
     def __eq__(self, other):
@@ -493,7 +522,7 @@ class IndexAllocPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID,
                  newIndex, anyIndex, varbinds, context=None):
         AgentXPDU.__init__(self, PDU_INDEX_ALLOC,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.newIndex = newIndex
         self.anyIndex = anyIndex
         self.varbinds = varbinds
@@ -543,7 +572,7 @@ class AddAgentCapsPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID,
                  oid, description, context=None):
         AgentXPDU.__init__(self, PDU_ADD_AGENT_CAPS,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.oid = oid
         self.description = description
 
@@ -580,7 +609,7 @@ def decode_RMAgentCapsPDU(data, header):
 class RMAgentCapsPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, oid, context=None):
         AgentXPDU.__init__(self, PDU_RM_AGENT_CAPS,
-                           bigEndian, sID, tactID, pktID, context)
+                           bigEndian, sID, tactID, pktID, True, context)
         self.oid = oid
 
     def __eq__(self, other):
