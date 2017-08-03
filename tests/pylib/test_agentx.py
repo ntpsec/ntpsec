@@ -82,6 +82,28 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
     #
     # PDU tests
     #
+    def test_AgentXPDU(self):
+        
+        # Test basic, without context
+        test = ntp.agentx.AgentXPDU(0, True, 1, 2, 3, context=extraData)
+        self.assertEqual(repr(test),
+                         "AgentXPDU(bigEndian=True, packetID=3, "
+                         "pduType=0, sessionID=1, transactionID=2)")
+        # Test basic, with context
+        test = ntp.agentx.AgentXPDU(0, True, 1, 2, 3, hascontext=True)
+        self.assertEqual(repr(test),
+                         "AgentXPDU(bigEndian=True, context=None, packetID=3, "
+                         "pduType=0, sessionID=1, transactionID=2)")
+        # Test with added variables
+        test.foo = 42
+        test._wyk = extraData  # this should be ignored
+        test.context = "jabber jabber jabber"
+        self.assertEqual(repr(test),
+                         "AgentXPDU(bigEndian=True, "
+                         "context='jabber jabber jabber', "
+                         "foo=42, packetID=3, "
+                         "pduType=0, sessionID=1, transactionID=2)")
+
     def test_OpenPDU(self):
         dec = ntp.agentx.decode_OpenPDU
         cls = ntp.agentx.OpenPDU

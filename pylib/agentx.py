@@ -73,10 +73,14 @@ class AgentXPDU:
         return pktvars
 
     def __repr__(self):
-        s = self.__name__ + "("
+        s = self.__class__.__name__ + "("
         v = []
-        for var in self.printvars:
-            v.append(repr(var))
+        myvars = self.packetVars()
+        keys = myvars.keys()
+        keys.sort()  # they will always be in the same order: testable
+        for name in keys:
+            value = myvars[name]
+            v.append("%s=%s" % (name, repr(value)))
         s += ", ".join(v) + ")"
         return s
 
