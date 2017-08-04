@@ -2046,6 +2046,29 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
             fail = True
         self.assertEqual(fail, True)
 
+    def test_compareOID(self):
+        f = ntp.agentx.compareOID
+
+        # Test equal
+        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3, 4)), 0)
+
+        # Test equal length, one < two
+        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3, 5)), -1)
+        # Test equal length, one > two
+        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3, 0)), 1)
+        # Test one shorter, less than two, equal for length
+        self.assertEqual(f((1, 2, 3), (1, 2, 3, 4)), -1)
+        # Test one shorter, less than two
+        self.assertEqual(f((1, 2, 3), (1, 2, 4, 5)), -1)
+        # Test one shorter, greater than two
+        self.assertEqual(f((1, 2, 3), (1, 2, 2, 4)), 1)
+        # Test two shorter, less than one, equal for length
+        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3)), 1)
+        # Test two shorter, less than one
+        self.assertEqual(f((1, 2, 4, 5), (1, 2, 3)), 1)
+        # Test two shorter, greater than one
+        self.assertEqual(f((1, 2, 2, 4), (1, 2, 3)), -1)
+
 
 if __name__ == "__main__":
     unittest.main()
