@@ -583,9 +583,9 @@ def cook(variables, showunits=False):
             else:
                 item += "\t".join(value.split())
         elif name == "flash":
-            item += "%02x" % value
+            item += "%02x " % value
             if value == 0:
-                item += " ok"
+                item += "ok "
             else:
                 # flasher bits
                 tstflagnames = (
@@ -606,7 +606,7 @@ def cook(variables, showunits=False):
                 for (i, n) in enumerate(tstflagnames):
                     if (1 << i) & value:
                         item += tstflagnames[i] + " "
-                item = item[:-1]
+            item = item[:-1]
         elif name in MS_VARS:
             #  Note that this is *not* complete, there are definitely
             #   missing variables here.
