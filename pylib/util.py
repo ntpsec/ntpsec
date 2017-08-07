@@ -492,9 +492,9 @@ class PeerStatusWord:
         if statval & ntp.control.CTL_PST_BCAST:
             self.reach = "none"
             if statval & ntp.control.CTL_PST_AUTHENABLE:
-                    self.auth = "yes"
+                self.auth = "yes"
             else:
-                    self.auth = "none"
+                self.auth = "none"
         elif statval & ntp.control.CTL_PST_REACH:
             self.reach = "yes"
         else:
