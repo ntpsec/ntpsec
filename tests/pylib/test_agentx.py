@@ -1790,247 +1790,255 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
     #
     # Data type tests
     #
-    def test_encode_integer32(self):
-        f = ntp.agentx.encode_integer32
+    def test_integer32(self):
+        enc = ntp.agentx.encode_integer32
+        dec = ntp.agentx.decode_integer32
 
-        # Test
-        self.assertEqual(f(True, 42), "\x00\x00\x00\x2A")
-
-    def test_decode_integer32(self):
-        f = ntp.agentx.decode_integer32
-
-        # Test
-        self.assertEqual(f("\x00\x00\x00\x2A" + extraData, standardFlags),
+        # Encode
+        self.assertEqual(enc(True, 42), "\x00\x00\x00\x2A")
+        # Encode, little endian
+        self.assertEqual(enc(False, 42), "\x2A\x00\x00\x00")
+        # Decode
+        self.assertEqual(dec("\x00\x00\x00\x2A" + extraData, standardFlags),
                          (42, extraData))
-        # Test little endian
-        self.assertEqual(f("\x2A\x00\x00\x00" + extraData, lilEndianFlags),
-                         (42, extraData))
-
-    def test_encode_nullvalue(self):
-        f = ntp.agentx.encode_nullvalue
-
-        # Test
-        self.assertEqual(f(True), "")
-
-    def test_decode_nullvalue(self):
-        f = ntp.agentx.decode_nullvalue
-
-        # Test
-        self.assertEqual(f(extraData, standardFlags), (None, extraData))
-
-    def test_encode_integer64(self):
-        f = ntp.agentx.encode_integer64
-
-        # Test
-        self.assertEqual(f(True, 42), "\x00\x00\x00\x00\x00\x00\x00\x2A")
-
-    def test_decode_integer64(self):
-        f = ntp.agentx.decode_integer64
-
-        # Test
-        self.assertEqual(f("\x00\x00\x00\x00\x00\x00\x00\x2A" + extraData,
-                           standardFlags),
-                         (42, extraData))
-        # Test
-        self.assertEqual(f("\x2A\x00\x00\x00\x00\x00\x00\x00" + extraData,
-                           lilEndianFlags),
+        # Decode, little endian
+        self.assertEqual(dec("\x2A\x00\x00\x00" + extraData, lilEndianFlags),
                          (42, extraData))
 
-    def test_encode_ipaddr(self):
-        f = ntp.agentx.encode_ipaddr
+    def test_nullvalue(self):
+        enc = ntp.agentx.encode_nullvalue
+        dec = ntp.agentx.decode_nullvalue
 
-        # Test correct
-        self.assertEqual(f(True, (1, 2, 3, 4)),
+        # Encode
+        self.assertEqual(enc(True), "")
+        # Decode
+        self.assertEqual(dec(extraData, standardFlags), (None, extraData))
+
+    def test_integer64(self):
+        enc = ntp.agentx.encode_integer64
+        dec = ntp.agentx.decode_integer64
+
+        # Encode
+        self.assertEqual(enc(True, 42), "\x00\x00\x00\x00\x00\x00\x00\x2A")
+        # Encode, little endian
+        self.assertEqual(enc(False, 42), "\x2A\x00\x00\x00\x00\x00\x00\x00")
+        # Decode
+        self.assertEqual(dec("\x00\x00\x00\x00\x00\x00\x00\x2A" + extraData,
+                             standardFlags),
+                         (42, extraData))
+        # Decode, little endian
+        self.assertEqual(dec("\x2A\x00\x00\x00\x00\x00\x00\x00" + extraData,
+                             lilEndianFlags),
+                         (42, extraData))
+
+    def test_ipaddr(self):
+        enc = ntp.agentx.encode_ipaddr
+        dec = ntp.agentx.decode_ipaddr
+
+        # Encode correct
+        self.assertEqual(enc(True, (1, 2, 3, 4)),
                          "\x00\x00\x00\x04\x01\x02\x03\x04")
-        # Test incorrect
+        # Encode correct, little endian
+        self.assertEqual(enc(False, (1, 2, 3, 4)),
+                         "\x04\x00\x00\x00\x01\x02\x03\x04")
+        # Encode incorrect
         try:
-            f(True, (1, 2, 3, 4, 5))
+            enc(True, (1, 2, 3, 4, 5))
             errored = False
         except ValueError:
             errored = True
         self.assertEqual(errored, True)
-
-    def test_decode_ipaddr(self):
-        f = ntp.agentx.decode_ipaddr
-
-        # Test
-        self.assertEqual(f("\x00\x00\x00\x04\x01\x02\x03\x04" + extraData,
-                           standardFlags),
+        # Decode
+        self.assertEqual(dec("\x00\x00\x00\x04\x01\x02\x03\x04" + extraData,
+                             standardFlags),
                          ((1, 2, 3, 4), extraData))
-        # Test little endian
-        self.assertEqual(f("\x04\x00\x00\x00\x01\x02\x03\x04" + extraData,
-                           lilEndianFlags),
+        # Decode, little endian
+        self.assertEqual(dec("\x04\x00\x00\x00\x01\x02\x03\x04" + extraData,
+                             lilEndianFlags),
                          ((1, 2, 3, 4), extraData))
 
-    def test_encode_oid(self):
-        f = ntp.agentx.encode_oid
+    def test_oid(self):
+        enc = ntp.agentx.encode_oid
+        dec = ntp.agentx.decode_oid
 
-        # Test empty OID
-        self.assertEqual(f(True, (), False), "\x00\x00\x00\x00")
-        # Test basic OID
-        self.assertEqual(f(True, (1, 2, 3, 4, 5), False),
+        # Encode empty OID
+        self.assertEqual(enc(True, (), False), "\x00\x00\x00\x00")
+        # Encode basic OID
+        self.assertEqual(enc(True, (1, 2, 3, 4, 5), False),
                          "\x05\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x00\x00\x00\x05")
-        # Test basic OID, little endian
-        self.assertEqual(f(False, (1, 2, 3, 4, 5), False),
+        # Encode basic OID, little endian
+        self.assertEqual(enc(False, (1, 2, 3, 4, 5), False),
                          "\x05\x00\x00\x00"
                          "\x01\x00\x00\x00\x02\x00\x00\x00"
                          "\x03\x00\x00\x00\x04\x00\x00\x00"
                          "\x05\x00\x00\x00")
-        # Test prefixed OID
-        self.assertEqual(f(True, (1, 3, 6, 1, 23, 1, 2, 3), False),
+        # Encode prefixed OID
+        self.assertEqual(enc(True, (1, 3, 6, 1, 23, 1, 2, 3), False),
                          "\x03\x17\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03")
-        # Test include
-        self.assertEqual(f(True, (1, 2), True),
+        # Encode include
+        self.assertEqual(enc(True, (1, 2), True),
                          "\x02\x00\x01\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02")
-        # Test together
-        self.assertEqual(f(True, (1, 3, 6, 1, 1, 3, 4, 5, 6), True),
+        # Encode together
+        self.assertEqual(enc(True, (1, 3, 6, 1, 1, 3, 4, 5, 6), True),
                          "\x04\x01\x01\x00"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x00\x00\x00\x05\x00\x00\x00\x06")
 
-        # Test maximum size
-        self.assertEqual(f(True, maximumOIDsubs, False), maximumOIDstr)
-        # Test over maximum size
+        # Encode maximum size
+        self.assertEqual(enc(True, maximumOIDsubs, False), maximumOIDstr)
+        # Encode over maximum size
         try:
-            f(True, maximumOIDsubs + (42,), False)
+            enc(True, maximumOIDsubs + (42,), False)
             fail = False
         except ValueError:
             fail = True
         self.assertEqual(fail, True)
-
-    def test_decode_oid(self):
-        f = ntp.agentx.decode_oid
-
-        # Test empty OID, extra data
-        self.assertEqual(f("\x00\x00\x00\x00" + extraData, standardFlags),
+        # Decode empty OID, extra data
+        self.assertEqual(dec("\x00\x00\x00\x00" + extraData, standardFlags),
                          ({"subids": (), "include": False}, extraData))
-        # Test basic OID, extra data
-        self.assertEqual(f("\x05\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x04\x00\x00\x00\x05" + extraData,
-                           standardFlags),
+        # Decode basic OID, extra data
+        self.assertEqual(dec("\x05\x00\x00\x00\x00\x00\x00\x01"
+                             "\x00\x00\x00\x02\x00\x00\x00\x03"
+                             "\x00\x00\x00\x04\x00\x00\x00\x05" + extraData,
+                             standardFlags),
                          ({"subids": (1, 2, 3, 4, 5), "include": False},
                           extraData))
-        # Test basic OID, little endian
-        self.assertEqual(f("\x05\x00\x00\x00\x01\x00\x00\x00"
-                           "\x02\x00\x00\x00\x03\x00\x00\x00"
-                           "\x04\x00\x00\x00\x05\x00\x00\x00", lilEndianFlags),
+        # Decode basic OID, little endian
+        self.assertEqual(dec("\x05\x00\x00\x00\x01\x00\x00\x00"
+                             "\x02\x00\x00\x00\x03\x00\x00\x00"
+                             "\x04\x00\x00\x00\x05\x00\x00\x00",
+                             lilEndianFlags),
                          ({"subids": (1, 2, 3, 4, 5), "include": False},
-                          ""))
-        # Test prefixed OID
-        self.assertEqual(f("\x03\x17\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03", standardFlags),
+                         ""))
+        # Decode prefixed OID
+        self.assertEqual(dec("\x03\x17\x00\x00\x00\x00\x00\x01"
+                             "\x00\x00\x00\x02\x00\x00\x00\x03", standardFlags),
                          ({"subids": (1, 3, 6, 1, 23, 1, 2, 3),
                            "include": False},
                           ""))
-        # Test include
-        self.assertEqual(f("\x02\x00\x05\x00\x00\x00\x00\x01\x00\x00\x00\x02",
-                           standardFlags),
+        # Decode include
+        self.assertEqual(dec("\x02\x00\x05\x00\x00\x00\x00\x01\x00\x00\x00\x02",
+                             standardFlags),
                          ({"subids": (1, 2), "include": True}, ""))
-        # Test together
-        self.assertEqual(f("\x04\x01\x02\x00\x00\x00\x00\x03"
-                           "\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00\x06",
-                           standardFlags),
+        # Decode together
+        self.assertEqual(dec("\x04\x01\x02\x00\x00\x00\x00\x03"
+                             "\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00\x06",
+                             standardFlags),
                          ({"subids": (1, 3, 6, 1, 1, 3, 4, 5, 6),
                            "include": True},
                           ""))
-        # Test maximum size
-        self.assertEqual(f(maximumOIDstr, standardFlags),
+        # Decode maximum size
+        self.assertEqual(dec(maximumOIDstr, standardFlags),
                          ({"subids": maximumOIDsubs, "include": False}, ""))
-        # Test over maximum size
+        # Decode over maximum size
         # Need to replace the hardcoded n_subid=128 with 129
         fatOID = "\x81" + maximumOIDstr[1:] + "\xDE\xAD\xBE\xEF"
         try:
-            f(fatOID, standardFlags)
+            dec(fatOID, standardFlags)
             fail = False
         except ValueError:
             fail = True
         self.assertEqual(fail, True)
 
-    def test_encode_searchrange(self):
-        f = ntp.agentx.encode_searchrange
+    def test_searchrange(self):
+        enc = ntp.agentx.encode_searchrange
+        dec = ntp.agentx.decode_searchrange
 
-        # Test minimum size
-        self.assertEqual(f(True, (), (), False),
+        # Encode minimum size
+        self.assertEqual(enc(True, (), (), False),
                          "\x00\x00\x00\x00\x00\x00\x00\x00")
-        # Test inclusive
-        self.assertEqual(f(True, (1, 2, 3, 4), (5, 6, 7, 8), True),
+        # Encode inclusive
+        self.assertEqual(enc(True, (1, 2, 3, 4), (5, 6, 7, 8), True),
                          "\x04\x00\x01\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x04\x00\x00\x00"
                          "\x00\x00\x00\x05\x00\x00\x00\x06"
                          "\x00\x00\x00\x07\x00\x00\x00\x08")
-        # Test exclusive
-        self.assertEqual(f(True, (1, 2, 3, 4), (5, 6, 7, 8), False),
+        # Encode exclusive
+        self.assertEqual(enc(True, (1, 2, 3, 4), (5, 6, 7, 8), False),
                          "\x04\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x04\x00\x00\x00"
                          "\x00\x00\x00\x05\x00\x00\x00\x06"
                          "\x00\x00\x00\x07\x00\x00\x00\x08")
-
-    def test_decode_searchrange(self):
-        f = ntp.agentx.decode_searchrange
-
-        # Test minimum size, extra data
-        self.assertEqual(f("\x00\x00\x00\x00\x00\x00\x00\x00" + extraData,
-                           standardFlags),
+        # Encode exclusive, little endian
+        self.assertEqual(enc(False, (1, 2, 3, 4), (5, 6, 7, 8), False),
+                         "\x04\x00\x00\x00"
+                         "\x01\x00\x00\x00\x02\x00\x00\x00"
+                         "\x03\x00\x00\x00\x04\x00\x00\x00"
+                         "\x04\x00\x00\x00"
+                         "\x05\x00\x00\x00\x06\x00\x00\x00"
+                         "\x07\x00\x00\x00\x08\x00\x00\x00")
+        # Decode minimum size, extra data
+        self.assertEqual(dec("\x00\x00\x00\x00\x00\x00\x00\x00" + extraData,
+                             standardFlags),
                          ({"start": {"subids": (), "include": False},
                            "end": {"subids": (), "include": False}},
                           extraData))
-        # Test inclusive
-        self.assertEqual(f("\x04\x00\x01\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x04\x00\x00\x00"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"
-                           "\x00\x00\x00\x07\x00\x00\x00\x08", standardFlags),
+        # Decode inclusive
+        self.assertEqual(dec("\x04\x00\x01\x00"
+                             "\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x00\x00\x00\x03\x00\x00\x00\x04"
+                             "\x04\x00\x00\x00"
+                             "\x00\x00\x00\x05\x00\x00\x00\x06"
+                             "\x00\x00\x00\x07\x00\x00\x00\x08",
+                             standardFlags),
                          ({"start": {"subids": (1, 2, 3, 4), "include": True},
                            "end": {"subids": (5, 6, 7, 8), "include": False}},
                           ""))
-        # Test exclusive
-        self.assertEqual(f("\x04\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x04\x00\x00\x00"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"
-                           "\x00\x00\x00\x07\x00\x00\x00\x08", standardFlags),
+        # Decode exclusive
+        self.assertEqual(dec("\x04\x00\x00\x00"
+                             "\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x00\x00\x00\x03\x00\x00\x00\x04"
+                             "\x04\x00\x00\x00"
+                             "\x00\x00\x00\x05\x00\x00\x00\x06"
+                             "\x00\x00\x00\x07\x00\x00\x00\x08",
+                             standardFlags),
                          ({"start": {"subids": (1, 2, 3, 4), "include": False},
                            "end": {"subids": (5, 6, 7, 8), "include": False}},
                           ""))
-        # Test little endian
-        self.assertEqual(f("\x04\x00\x01\x00"
-                           "\x01\x00\x00\x00\x02\x00\x00\x00"
-                           "\x03\x00\x00\x00\x04\x00\x00\x00"
-                           "\x04\x00\x00\x00"
-                           "\x05\x00\x00\x00\x06\x00\x00\x00"
-                           "\x07\x00\x00\x00\x08\x00\x00\x00", lilEndianFlags),
+        # Decode little endian
+        self.assertEqual(dec("\x04\x00\x01\x00"
+                             "\x01\x00\x00\x00\x02\x00\x00\x00"
+                             "\x03\x00\x00\x00\x04\x00\x00\x00"
+                             "\x04\x00\x00\x00"
+                             "\x05\x00\x00\x00\x06\x00\x00\x00"
+                             "\x07\x00\x00\x00\x08\x00\x00\x00",
+                             lilEndianFlags),
                          ({"start": {"subids": (1, 2, 3, 4), "include": True},
                            "end": {"subids": (5, 6, 7, 8), "include": False}},
                           ""))
 
     def test_encode_searchrange_list(self):
-        f = ntp.agentx.encode_searchrange_list
+        enc = ntp.agentx.encode_searchrange_list
 
-        # Test
-        self.assertEqual(f(True, (((1, 2), (1, 2), True),
-                                  ((2, 3), (3, 4), False))),
+        # Encode
+        self.assertEqual(enc(True, (((1, 2), (1, 2), True),
+                                    ((2, 3), (3, 4), False))),
                          "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04")
+        # Encode, little endian
+        self.assertEqual(enc(False, (((1, 2), (1, 2), True),
+                                     ((2, 3), (3, 4), False))),
+                         "\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                         "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                         "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                         "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00")
         # Test, null terminated
-        self.assertEqual(f(True,
-                           (((1, 2), (1, 2), True),
-                            ((2, 3), (3, 4), False)),
-                           nullTerminate=True),
+        self.assertEqual(enc(True,
+                             (((1, 2), (1, 2), True),
+                              ((2, 3), (3, 4), False)),
+                             nullTerminate=True),
                          "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
@@ -2038,140 +2046,146 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          "\x00\x00\x00\x00")
 
     def test_decode_searchrange_list(self):
-        f = ntp.agentx.decode_searchrange_list
+        dec = ntp.agentx.decode_searchrange_list
 
-        # Test
-        self.assertEqual(f("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04",
-                           standardFlags),
+        # Decode
+        self.assertEqual(dec("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
+                             "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04",
+                             standardFlags),
                          ({"start": {"subids": (1, 2), "include": True},
                            "end": {"subids": (1, 2), "include": False}},
                           {"start": {"subids": (2, 3), "include": False},
                            "end": {"subids": (3, 4), "include": False}}))
         # Test, little endian
-        self.assertEqual(f("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                           "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                           "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
-                           "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00",
-                           lilEndianFlags),
+        self.assertEqual(dec("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                             "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                             "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                             "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00",
+                             lilEndianFlags),
                          ({"start": {"subids": (1, 2), "include": True},
                            "end": {"subids": (1, 2), "include": False}},
                           {"start": {"subids": (2, 3), "include": False},
                            "end": {"subids": (3, 4), "include": False}}))
-
+        
     def test_decode_searchrange_list_nullterm(self):
-        f = ntp.agentx.decode_searchrange_list_nullterm
+        dec = ntp.agentx.decode_searchrange_list_nullterm
 
-        # Test
-        self.assertEqual(f("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x00\x00\x00\x00" + extraData, standardFlags),
+        # Decode
+        self.assertEqual(dec("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
+                             "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
+                             "\x00\x00\x00\x00" + extraData, standardFlags),
                          (({"start": {"subids": (1, 2), "include": True},
-                           "end": {"subids": (1, 2), "include": False}},
-                          {"start": {"subids": (2, 3), "include": False},
-                           "end": {"subids": (3, 4), "include": False}}),
+                            "end": {"subids": (1, 2), "include": False}},
+                           {"start": {"subids": (2, 3), "include": False},
+                            "end": {"subids": (3, 4), "include": False}}),
                           extraData))
         # Test, little endian
-        self.assertEqual(f("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                           "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                           "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
-                           "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
-                           "\x00\x00\x00\x00" + extraData, lilEndianFlags),
+        self.assertEqual(dec("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                             "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                             "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                             "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
+                             "\x00\x00\x00\x00" + extraData, lilEndianFlags),
                          (({"start": {"subids": (1, 2), "include": True},
-                           "end": {"subids": (1, 2), "include": False}},
-                          {"start": {"subids": (2, 3), "include": False},
-                           "end": {"subids": (3, 4), "include": False}}),
+                            "end": {"subids": (1, 2), "include": False}},
+                           {"start": {"subids": (2, 3), "include": False},
+                            "end": {"subids": (3, 4), "include": False}}),
                           extraData))
 
     def test_encode_octetstr(self):
-        f = ntp.agentx.encode_octetstr
+        enc = ntp.agentx.encode_octetstr
+        dec = ntp.agentx.decode_octetstr
 
-        # Test empty
-        self.assertEqual(f(True, ()), "\x00\x00\x00\x00")
-        # Test word multiple
-        self.assertEqual(f(True, (1, 2, 3, 4)),
+        # Encode empty
+        self.assertEqual(enc(True, ()), "\x00\x00\x00\x00")
+        # Encode word multiple
+        self.assertEqual(enc(True, (1, 2, 3, 4)),
                          "\x00\x00\x00\x04\x01\x02\x03\x04")
-        # Test non word multiple
-        self.assertEqual(f(True, (1, 2, 3, 4, 5)),
+        # Encode non word multiple
+        self.assertEqual(enc(True, (1, 2, 3, 4, 5)),
                          "\x00\x00\x00\x05\x01\x02\x03\x04\x05\x00\x00\x00")
-        # Test string
-        self.assertEqual(f(True, "blah"), "\x00\x00\x00\x04blah")
-
-    def test_decode_octetstr(self):
-        f = ntp.agentx.decode_octetstr
-
-        # Test empty
-        self.assertEqual(f("\x00\x00\x00\x00", standardFlags), ("", ""))
-        # Test word multiple, extra data
-        self.assertEqual(f("\x00\x00\x00\x04blah" + extraData, standardFlags),
+        # Encode string
+        self.assertEqual(enc(True, "blah"), "\x00\x00\x00\x04blah")
+        # Encode string, little endian
+        self.assertEqual(enc(False, "blah"), "\x04\x00\x00\x00blah")
+        # Decode empty
+        self.assertEqual(dec("\x00\x00\x00\x00", standardFlags), ("", ""))
+        # Decode word multiple, extra data
+        self.assertEqual(dec("\x00\x00\x00\x04blah" + extraData, standardFlags),
                          ("blah", extraData))
-        # Test word multiple, little endian
-        self.assertEqual(f("\x04\x00\x00\x00blah", lilEndianFlags),
+        # Decode word multiple, little endian
+        self.assertEqual(dec("\x04\x00\x00\x00blah", lilEndianFlags),
                          ("blah", ""))
-        # Test non word multiple, extra data
-        self.assertEqual(f("\x00\x00\x00\x05"
-                           "blarg\x00\x00\x00" + extraData, standardFlags),
+        # Decode non word multiple, extra data
+        self.assertEqual(dec("\x00\x00\x00\x05"
+                             "blarg\x00\x00\x00" + extraData,
+                             standardFlags),
                          ("blarg", extraData))
 
     def test_encode_varbind(self):
-        f = ntp.agentx.encode_varbind
+        enc = ntp.agentx.encode_varbind
         a = ntp.agentx
 
         # Test payloadless types
-        self.assertEqual(f(True, a.NULL, (1, 2, 3)),
+        self.assertEqual(enc(True, a.NULL, (1, 2, 3)),
                          "\x00\x05\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
-        self.assertEqual(f(True, a.NO_SUCH_OBJECT, (1, 2, 3)),
+        self.assertEqual(enc(True, a.NO_SUCH_OBJECT, (1, 2, 3)),
                          "\x00\x80\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
-        self.assertEqual(f(True, a.NO_SUCH_INSTANCE, (1, 2, 3)),
+        self.assertEqual(enc(True, a.NO_SUCH_INSTANCE, (1, 2, 3)),
                          "\x00\x81\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
-        self.assertEqual(f(True, a.END_OF_MIB_VIEW, (1, 2, 3)),
+        self.assertEqual(enc(True, a.END_OF_MIB_VIEW, (1, 2, 3)),
                          "\x00\x82\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
         # Test octet based types
-        self.assertEqual(f(True, a.OCTET_STR, (1, 2, 3), (1, 2, 3, 4, 5)),
+        self.assertEqual(enc(True, a.OCTET_STR, (1, 2, 3), (1, 2, 3, 4, 5)),
                          "\x00\x04\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x05"
                          "\x01\x02\x03\x04\x05\x00\x00\x00")
-        self.assertEqual(f(True, a.IP_ADDR, (1, 2, 3), (16, 32, 48, 64)),
+        self.assertEqual(enc(True, a.IP_ADDR, (1, 2, 3), (16, 32, 48, 64)),
                          "\x00\x40\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x04\x10\x20\x30\x40")
         # Test integer32 types
-        self.assertEqual(f(True, a.INTEGER, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.INTEGER, (1, 2, 3), 42),
                          "\x00\x02\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
-        self.assertEqual(f(True, a.COUNTER32, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.COUNTER32, (1, 2, 3), 42),
                          "\x00\x41\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
-        self.assertEqual(f(True, a.GAUGE32, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.GAUGE32, (1, 2, 3), 42),
                          "\x00\x42\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
-        self.assertEqual(f(True, a.TIME_TICKS, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.TIME_TICKS, (1, 2, 3), 42),
                          "\x00\x43\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
         # Test integer64 type
-        self.assertEqual(f(True, a.COUNTER64, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.COUNTER64, (1, 2, 3), 42),
                          "\x00\x46\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x00\x00\x00\x00\x2A")
         # Test oid type
-        self.assertEqual(f(True, a.OID, (1, 2, 3), (16, 42, 256), False),
+        self.assertEqual(enc(True, a.OID, (1, 2, 3), (16, 42, 256), False),
                          "\x00\x06\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x03\x00\x00\x00\x00\x00\x00\x10"
                          "\x00\x00\x00\x2A\x00\x00\x01\x00")
+        # Test oid type, little endian
+        self.assertEqual(enc(False, a.OID, (1, 2, 3), (16, 42, 256), False),
+                         "\x06\x00\x00\x00\x03\x00\x00\x00"
+                         "\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                         "\x03\x00\x00\x00\x10\x00\x00\x00"
+                         "\x2A\x00\x00\x00\x00\x01\x00\x00")
 
     def test_decode_varbind(self):
         f = ntp.agentx.decode_varbind
