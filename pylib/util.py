@@ -147,7 +147,7 @@ def oomsbetweenunits(a, b):
     "Calculates how many orders of magnitude separate two units"
     group = getunitgroup(a)
     if b is None:  # asking for baseunit
-        return (group.index(a) * 3)
+        return group.index(a) * 3
     elif b in group:
         ia = group.index(a)
         ib = group.index(b)
@@ -490,11 +490,11 @@ class PeerStatusWord:
         else:
             self.conf = "no"
         if statval & ntp.control.CTL_PST_BCAST:
-                self.reach = "none"
-                if statval & ntp.control.CTL_PST_AUTHENABLE:
-                        self.auth = "yes"
-                else:
-                        self.auth = "none"
+            self.reach = "none"
+            if statval & ntp.control.CTL_PST_AUTHENABLE:
+                    self.auth = "yes"
+            else:
+                    self.auth = "none"
         elif statval & ntp.control.CTL_PST_REACH:
             self.reach = "yes"
         else:
@@ -886,8 +886,8 @@ class PeerSummary:
                 % (variables.get("stratum", 0)[0],
                    ptype,
                    PeerSummary.prettyinterval(
-                    now if last_sync is None
-                    else int(now - ntp.ntpc.lfptofloat(last_sync))),
+                       now if last_sync is None
+                       else int(now - ntp.ntpc.lfptofloat(last_sync))),
                    PeerSummary.prettyinterval(poll_sec), reach))
             if saw6:
                 if self.showunits:
