@@ -741,7 +741,7 @@ class PeerSummary:
         now = time.time()
 
         for item in variables.items():
-            if len(item) == 0:
+            if 2 != len(item):
                 continue
             (name, (value, rawvalue)) = item
             if name in ("srcadr", "peeradr"):
