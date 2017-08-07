@@ -72,6 +72,7 @@
 #define	REFID		"GPS\0"		/* reference ID */
 #define TRMB_MINPOLL    4		/* 16 seconds */
 #define TRMB_MAXPOLL	5		/* 32 seconds */
+#define MIN_SAMPLES	7		/* minimum number of samples in the median filter to allow a poll */
 
 /*
  * I/O Definitions
@@ -125,7 +126,7 @@ struct trimble_unit {
 	short		unit;		/* NTP refclock unit number */
 	bool		got_pkt;	/* decoded a packet this poll */
 	bool		got_time;	/* got a time packet this poll */
-	bool 		time_ok;	/* time is valid for this poll */
+	int		samples;	/* samples in filter this poll */
 	unsigned char	UTC_flags;	/* UTC & leap second flag */
 	unsigned char	trk_status;	/* reported tracking status */
 	char		rpt_status;	/* TSIP Parser State */
@@ -146,12 +147,12 @@ struct trimble_unit {
 /*
  * Function prototypes
  */
-
 static	bool	trimble_start		(int, struct peer *);
 static	void	trimble_shutdown	(int, struct peer *);
-static	void	trimble_receive	(struct peer *, int);
 static	void	trimble_poll		(int, struct peer *);
+static	void	trimble_timer		(int, struct peer *);
 static	void 	trimble_io		(struct recvbuf *);
+static	void	trimble_receive		(struct peer *, int);
 static	bool	TSIP_decode		(struct peer *);
 static	void	HW_poll			(struct refclockproc *);
 static	double	getdbl 			(uint8_t *);
@@ -195,7 +196,7 @@ struct refclock refclock_trimble = {
 	trimble_poll,		/* transmit poll message */
 	NULL,			/* control - not used  */
 	NULL,			/* initialize driver (not used) */
-	NULL			/* timer - not used */
+	trimble_timer		/* called at 1Hz by mainloop */
 };
 
 /* Extract the clock type from the mode setting */
@@ -855,14 +856,15 @@ trimble_receive (
 	pp = peer->procptr;
 	up = pp->unitptr;
 
-	/* startup may have caused a spurious edge, so wait for first HW_poll() */
-	if (up->use_event && pp->polls <= 1)
+	/*
+	 * Wait for fudge flags to initialize. Also, startup may have caused
+	 * a spurious edge, so wait for first HW_poll()
+	 */
+	if (pp->polls < 1)
 		return;
 
 	up->got_pkt = true;
 	if (MSG_TSIP == type) {
-		if (up->time_ok) 
-			return;   /* no poll pending */
 		if (!TSIP_decode(peer))
 			return;
 	} else {
@@ -873,47 +875,23 @@ trimble_receive (
 		}
 		return;
 	}
-	
-	up->time_ok = true;
-	pp->lencode = 0; /* clear time code */
-	
+
+	/* add sample to filter */
+	pp->lastref = pp->lastrec;
 	pp->day = up->date.yearday;
 	pp->hour = up->date.hour;
 	pp->minute = up->date.minute;
 	pp->second = up->date.second;
-	DPRINT(1, ("trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
+	DPRINT(2, ("trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
 		   up->unit, pp->year, pp->day, pp->hour, pp->minute, 
 		   pp->second, pp->nsec));
-
-	/*
-	 * Process the sample
-	 * Generate timecode: YYYY DoY HH:MM:SS.microsec 
-	 * report and process 
-	 */
-
-	snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
-		 "%4d %03d %02d:%02d:%02d.%09ld",
-		 pp->year, pp->day,
-		 pp->hour,pp->minute, pp->second, pp->nsec); 
-	pp->lencode = 24;
-
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
 		DPRINT(1, ("trimble_receive: unit %d: refclock_process failed!\n",
 		       up->unit));
 		return;
 	}
-
-	record_clock_stats(peer, pp->a_lastcode); 
-
-	DPRINT(1, ("trimble_receive: unit %d: %s\n",
-	       up->unit, prettydate(pp->lastrec)));
-	if (pp->hour == 0 && up->week > up->build_week + 1000)
-		msyslog(LOG_WARNING, "REFCLOCK: Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
-		        up->unit, up->week, up->build_week);
-
-	pp->lastref = pp->lastrec;
-	refclock_receive(peer);
+	up->samples++;
 }
 
 
@@ -929,38 +907,60 @@ trimble_poll (
 {
 	struct trimble_unit *up;
 	struct refclockproc *pp;
-	
+	int cl;
+	bool err;
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 
-	pp->polls++;
+	/* samples are not taken until second poll */
+	if (++pp->polls < 2)
+		return;
 
 	/* check status for the previous poll interval */
-	if (pp->polls > 2 && !up->time_ok) {
+	err = (up->samples < MIN_SAMPLES);
+	if (err) {
 		refclock_report(peer, CEVNT_TIMEOUT);
-		if (!up->got_pkt)
+		if (!up->got_pkt) {
 			DPRINT(1, ("trimble_poll: unit %d: no packets found\n",
 			       up->unit));
-		else if (!up->got_time)
+		} else if (!up->got_time) {
 			DPRINT(1, ("trimble_poll: unit %d: packet(s) found but none were usable.\nVerify unit isn't connected to Port B and flag3 is correct for Palisade/Acutime\n",
 			       up->unit));
+		} else {
+			DPRINT(1, ("trimble_poll: unit %d: not enough samples (%d, min %d), skipping poll\n",
+			       up->unit, up->samples, MIN_SAMPLES));
+			pp->codeproc = pp->coderecv; /* reset filter */
+		}
 	}
-	up->time_ok = false;
 	up->got_time = false;
 	up->got_pkt = false;
+	up->samples = 0;
+	if (err)
+		return;
 
-	DPRINT(1, ("trimble_poll: unit %d: polling %s\n", unit,
-	           up->use_event ? "event" : "synchronous packet"));
-
-	if (!up->use_event)
-		return;  /* using synchronous packet input */
-
+	/* ask Praecis for its signal status */
 	if(up->type == CLK_PRAECIS) {
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
 			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",unit);
 	}
 
-	HW_poll(pp);
+	/* record clockstats */
+	cl = snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
+		 "%4d %03d %02d:%02d:%02d.%09ld",
+		 pp->year, pp->day, pp->hour,pp->minute, pp->second, pp->nsec);
+	pp->lencode = (cl < (int)sizeof(pp->a_lastcode)) ? cl : 0;
+	record_clock_stats(peer, pp->a_lastcode); 
+
+	DPRINT(2, ("trimble_poll: unit %d: %s\n",
+	       up->unit, prettydate(pp->lastrec)));
+
+	if (pp->hour == 0 && up->week > up->build_week + 1000)
+		msyslog(LOG_WARNING, "Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
+		        up->unit, up->week, up->build_week);
+
+	/* process samples in filter */
+	refclock_receive(peer);
 }
 
 
@@ -984,7 +984,7 @@ trimble_io (
 
 	c = (char *) &rbufp->recv_space;
 	d = c + rbufp->recv_length;
-		
+
 	while (c != d) {
 		switch (up->rpt_status) {
 		    case TSIP_PARSED_DLE_1:
@@ -1075,6 +1075,28 @@ trimble_io (
 				(uint8_t)up->rpt_buf[0]));
 		}
 	} /* while chars in buffer */
+}
+
+
+/*
+ * trimble_timer - trigger an event at 1Hz
+ */
+static void
+trimble_timer(
+	int unit,
+	struct peer * peer
+	)
+{
+	struct trimble_unit *up;
+	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
+
+	pp = peer->procptr;
+	up = pp->unitptr;
+
+	if (up->use_event)
+		HW_poll(pp);
 }
 
 
