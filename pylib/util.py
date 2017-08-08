@@ -5,13 +5,13 @@
 from __future__ import print_function
 
 
-import socket
-import sys
-import time
+import collections
 import os
 import re
 import shutil
-import collections
+import socket
+import sys
+import time
 
 import ntp.ntpc
 import ntp.version
@@ -732,6 +732,7 @@ class PeerSummary:
 
     def summary(self, rstatus, variables, associd):
         "Peer status summary line."
+        estdisp = float('NaN')
         hmode = 0
         srchost = None
         srcport = 0
