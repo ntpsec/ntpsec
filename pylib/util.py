@@ -732,19 +732,34 @@ class PeerSummary:
 
     def summary(self, rstatus, variables, associd):
         "Peer status summary line."
+        clock_name = ''
+        dstadr_refid = ""
+        dstport = 0
         estdisp = float('NaN')
+        filtdelay = 0.0
+        filtdisp = 0.0
+        filtoffset = 0.0
+        flash = 0
+        have_jitter = False
+        headway = 0
         hmode = 0
+        hpoll = 0
+        keyid = 0
+        leap = 0
+        pmode = 0
+        ppoll = 0
+        precision = 0
+        ptype = '?'
+        reach = 0
+        rootdelay = 0.0
+        saw6 = False        # x.6 floats for delay and friends
+        srcadr = None
         srchost = None
         srcport = 0
-        srcadr = None
-        dstadr_refid = ""
-        ppoll = 0
-        hpoll = 0
-        reach = 0
-        ptype = '?'
-        saw6 = False        # x.6 floats for delay and friends
-        have_jitter = False
-        clock_name = ''
+        stratum = 0
+        ttl = 0
+        unreach = 0
+        xmt = 0
 
         now = time.time()
 
@@ -753,59 +768,102 @@ class PeerSummary:
                 # bad item
                 continue
             (name, (value, rawvalue)) = item
-            if name in ("srcadr", "peeradr"):
-                srcadr = value
-            elif name == "srchost":
-                srchost = value
+            if name == "delay":
+                estdelay = rawvalue if self.showunits else value
+                if len(rawvalue) > 6 and rawvalue[-7] == ".":
+                    saw6 = True
             elif name == "dstadr":
                 # The C code tried to get a fallback pytpe from this in case
                 # the hmode field was not included
                 if "local" in self.__header:
                     dstadr_refid = value
+            elif name == "dstport":
+                # FIXME, dstport never used.
+                dstport = value
+            elif name == "filtdelay":
+                # FIXME, filtdelay never used.
+                filtdelay = value
+            elif name == "filtdisp":
+                # FIXME, filtdisp never used.
+                filtdisp = value
+            elif name == "filtoffset":
+                # FIXME, filtoffset never used.
+                filtoffset = value
+            elif name == "flash":
+                # FIXME, flash never used.
+                flash = value
+            elif name == "headway":
+                # FIXME, headway never used.
+                headway = value
             elif name == "hmode":
                 hmode = value
+            elif name == "hpoll":
+                hpoll = value
+                if hpoll < 0:
+                    hpoll = ntp.magic.NTP_MINPOLL
+            elif name == "jitter":
+                if "jitter" in self.__header:
+                    estjitter = rawvalue if self.showunits else value
+                    have_jitter = True
+            elif name == "keyid":
+                # FIXME, keyid never used.
+                keyid = value
+            elif name == "leap":
+                # FIXME, leap never used.
+                leap = value
+            elif name == "offset":
+                estoffset = rawvalue if self.showunits else value
+            elif name == "pmode":
+                # FIXME, pmode never used.
+                pmode = value
+            elif name == "ppoll":
+                ppoll = value
+                if ppoll < 0:
+                    ppoll = ntp.magic.NTP_MINPOLL
+            elif name == "precision":
+                # FIXME, precision never used.
+                precision = value
+            elif name == "reach":
+                # Shipped as hex, displayed in octal
+                reach = value
             elif name == "refid":
                 # The C code for this looked crazily overelaborate.  Best
                 # guess is that it was designed to deal with formats that
                 # no longer occur in this field.
                 if "refid" in self.__header:
                     dstadr_refid = value
-            elif name == "hpoll":
-                hpoll = value
-                if hpoll < 0:
-                    hpoll = ntp.magic.NTP_MINPOLL
-            elif name == "ppoll":
-                ppoll = value
-                if ppoll < 0:
-                    ppoll = ntp.magic.NTP_MINPOLL
-            elif name == "reach":
-                # Shipped as hex, displayed in octal
-                reach = value
-            elif name == "delay":
-                estdelay = rawvalue if self.showunits else value
-                if len(rawvalue) > 6 and rawvalue[-7] == ".":
-                    saw6 = True
-            elif name == "offset":
-                estoffset = rawvalue if self.showunits else value
-            elif name == "jitter":
-                if "jitter" in self.__header:
-                    estjitter = rawvalue if self.showunits else value
-                    have_jitter = True
+            elif name == "rec":
+                rec = value     # l_fp timestamp
+            elif name == "reftime":
+                reftime = value   # l_fp timestamp
+            elif name == "rootdelay":
+                # FIXME, rootdelay never used.
+                rootdelay = value   # l_fp timestamp
             elif name == "rootdisp" or name == "dispersion":
                 estdisp = rawvalue if self.showunits else value
-            elif name == "rec":
-                # FIXME, rec never used.
-                rec = value     # l_fp timestamp
+            elif name in ("srcadr", "peeradr"):
+                srcadr = value
+            elif name == "srchost":
+                srchost = value
             elif name == "srcport" or name == "peerport":
                 # FIXME, srcport never used.
                 srcport = value
-            elif name == "reftime":
-                # FIXME, reftime never used.
-                reftime = value   # l_fp timestamp
+            elif name == "stratum":
+                # FIXME, stratum never used.
+                stratum = value
+            elif name == "ttl":
+                # FIXME, ttl never used.
+                ttl = value
+            elif name == "unreach":
+                # FIXME, unreach never used.
+                unreach = value
+            elif name == "xmt":
+                # FIXME, xmt never used.
+                xmt = value
             else:
-                # unkown name?
+                # unknown name?
                 # line = " name=%s " % (name)    # debug
-                # return line
+                # return line                    # debug
                 continue
         if hmode == ntp.magic.MODE_BCLIENTX:
             # broadcastclient or multicastclient
