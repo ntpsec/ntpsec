@@ -125,8 +125,13 @@ def peer_detail(variables, showunits=False):
         vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
         vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
         vcopy['filtdisp'] = vcopy['filtdisp'].replace(' ', '\t')
+    # annotate IPv6, to stand out from :port
+    if ':' in vcopy['srcadr']:
+        vcopy['srcadr'] = '[' + vcopy['srcadr'] + ']'
+    if ':' in vcopy['dstadr']:
+        vcopy['dstadr'] = '[' + vcopy['dstadr'] + ']'
     peerfmt = """\
-srcadr=%(srcadr)s, srcport=%(srcport)d, dstadr=%(dstadr)s, dstport=%(dstport)s
+dstadr=%(dstadr)s:%(dstport)s srcadr=%(srcadr)s:%(srcport)d
 leap=%(leap)s\treftime=%(reftime)s\trootdelay=%(rootdelay)s
 stratum=%(stratum)2d\trec=%(rec)s\trootdisp=%(rootdisp)s
 precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)s
