@@ -758,7 +758,7 @@ class PeerSummary:
         srcadr = None
         srchost = None
         srcport = 0
-        stratum = 0
+        stratum = 20
         ttl = 0
         unreach = 0
         xmt = 0
@@ -853,7 +853,6 @@ class PeerSummary:
                 # FIXME, srcport never used.
                 srcport = value
             elif name == "stratum":
-                # FIXME, stratum never used.
                 stratum = value
             elif name == "ttl":
                 # FIXME, ttl never used.
@@ -959,7 +958,7 @@ class PeerSummary:
         try:
             line += (
                 " %2ld %c %4.4s %4.4s  %3lo"
-                % (variables.get("stratum", 0)[0],
+                % (stratum,
                    ptype,
                    PeerSummary.prettyinterval(
                        now if last_sync is None
