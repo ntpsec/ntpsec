@@ -167,14 +167,14 @@ and so on is suppressed.
     server without a lot of clients.  If clients come and go, for
     example, laptops going between home and work, the default setup
     shows only the long term average.
-    . If the age of the oldest slot is less than +maxage+, the oldest
-    slot is recycled.
+    . If the age of the oldest slot is greater than +maxage+, the oldest
+    slot is recycled (default 3600 seconds).
     . If the freelist is not empty, a slot is allocated from the
     free list.
     . If the freelist is empty but not full (see maxmem), more memory
     is allocated (see incmem) and a new slot is used.
     . If the age of the oldest slot is more than +minage+, the oldest
-    slot is recycled.
+    slot is recycled (default 64 seconds).
     . Otherwise, no slot is available.
   +initalloc+ 'count';;         
   +initmem+ 'kilobytes';;
