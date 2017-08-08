@@ -463,7 +463,7 @@ TermSize = collections.namedtuple("TermSize", ["width", "height"])
 
 def termsize():
     "Return the current terminal size."
-    # Alternatives at http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
+    # Alternatives at http://stackoverflow.com/questions/566746
     # The way this is used makes it not a big deal if the default is wrong.
     size = (80, 24)
     if os.isatty(1):
