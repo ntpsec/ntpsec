@@ -390,6 +390,8 @@ def f8dot4(f):
     if str(float(f)).lower() == 'nan':
         # yes, this is a better test than math.isnan()
         # it also catches None, strings, etc.
+        if isinstance(s, basestring):
+              return "%8s" % f
         return "     nan"
 
     fmt = "%8d"          # xxxxxxxx
@@ -421,6 +423,8 @@ def f8dot3(f):
     if str(float(f)).lower() == 'nan':
         # yes, this is a better test than math.isnan()
         # it also catches None, strings, etc.
+        if isinstance(s, basestring):
+              return "%8s" % f
         return "     nan"
 
     fmt = "%8d" % f          # xxxxxxxx or -xxxxxxx
@@ -751,10 +755,10 @@ class PeerSummary:
         clock_name = ''
         dstadr_refid = ""
         dstport = 0
-        estdelay = ""
-        estdisp = float('NaN')
-        estjitter = ""
-        estoffset = ""
+        estdelay = '.'
+        estdisp = '.'
+        estjitter = '.'
+        estoffset = '.'
         filtdelay = 0.0
         filtdisp = 0.0
         filtoffset = 0.0
