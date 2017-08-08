@@ -56,7 +56,7 @@ def gen_md5(id, groupname):
 def fheader(file,       # file name id
             ulink,      # linkname
             owner       # owner name
-           ):
+            ):
     try:
         filename = "ntpkey_%s_%s.%u" % (file, owner, int(time.time()))
         orig_umask = os.umask(stat.S_IWGRP | stat.S_IRWXO)
