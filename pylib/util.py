@@ -683,8 +683,8 @@ class PeerSummary:
     @staticmethod
     def prettyinterval(diff):
         "Print an interval in natural time units."
-        if diff <= 0:
-            return "-"
+        if not isinstance(diff, (int, long)) or diff <= 0:
+            return '-'
         if diff <= 2048:
             return str(diff)
         diff = (diff + 29) / 60
