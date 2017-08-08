@@ -1010,11 +1010,12 @@ class PeerSummary:
 
 class MRUSummary:
     "Reusable class for MRU entry summary generation."
-    def __init__(self, showhostnames):
-        self.showhostnames = showhostnames      # If false, display numeric IPs
-        self.now = None
-        self.logfp = sys.stderr
+    def __init__(self, showhostnames, wideremote=False):
         self.debug = 0
+        self.logfp = sys.stderr
+        self.now = None
+        self.showhostnames = showhostnames      # If false, display numeric IPs
+        self.wideremote = wideremote
 
     header = " lstint avgint rstr r m v  count rport remote address"
 
@@ -1055,6 +1056,9 @@ class MRUSummary:
         try:
             if self.showhostnames:
                 dns = canonicalize_dns(dns)
+            if not self.wideremote:
+                # truncate for narrow display
+                dns = dns[:40]
             stats += " %4hx %c %d %d %6d %5s %s" % \
                      (entry.rs, rscode,
                       ntp.magic.PKT_MODE(entry.mv),

@@ -210,7 +210,8 @@ if __name__ == '__main__':
                                        showunits=showunits,
                                        termwidth=80,
                                        debug=0)
-    mru_report = ntp.util.MRUSummary(showhostnames)
+    mru_report = ntp.util.MRUSummary(showhostnames,
+                                     wideremote=wideremote)
     try:
         session = ntp.packet.ControlSession()
         session.openhost(arguments[0] if arguments else "localhost")

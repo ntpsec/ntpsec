@@ -1305,7 +1305,8 @@ usage: config_from_file <configuration filename>
         else:
             mruhook = None
         try:
-            formatter = ntp.util.MRUSummary(interpreter.showhostnames)
+            formatter = ntp.util.MRUSummary(interpreter.showhostnames,
+                                            wideremote=True)
             if self.directmode:
                 formatter.now = None
             self.formatter = formatter
