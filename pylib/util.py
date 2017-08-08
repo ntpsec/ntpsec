@@ -735,7 +735,10 @@ class PeerSummary:
         clock_name = ''
         dstadr_refid = ""
         dstport = 0
+        estdelay = ""
         estdisp = float('NaN')
+        estjitter = ""
+        estoffset = ""
         filtdelay = 0.0
         filtdisp = 0.0
         filtoffset = 0.0
@@ -745,6 +748,7 @@ class PeerSummary:
         hmode = 0
         hpoll = 0
         keyid = 0
+        last_sync = None
         leap = 0
         pmode = 0
         ppoll = 0
@@ -835,11 +839,11 @@ class PeerSummary:
                 if "refid" in self.__header:
                     dstadr_refid = value
             elif name == "rec":
-                if isinstance(value, tuple):
-                    rec = value[0]
+                rec = value         # l_fp timestamp
+                last_sync = int(now - ntp.ntpc.lfptofloat(rec))
             elif name == "reftime":
-                if isinstance(value, tuple):
-                    reftime = value[0]
+                reftime = value     # l_fp timestamp
+                last_sync = int(now - ntp.ntpc.lfptofloat(reftime))
             elif name == "rootdelay":
                 # FIXME, rootdelay never used.
                 rootdelay = value   # l_fp timestamp
@@ -951,51 +955,43 @@ class PeerSummary:
         else:
             line += (" " * (self.refidwidth - len(visible)))
         # The rest of the story
-        last_sync = rec or reftime
-        if isinstance(last_sync, tuple):
-            last_sync = last_sync[0]
+        if last_sync is None:
+            last_sync = now
         jd = estjitter if have_jitter else estdisp
-        try:
-            line += (
-                " %2ld %c %4.4s %4.4s  %3lo"
-                % (stratum,
-                   ptype,
-                   PeerSummary.prettyinterval(
-                       now if last_sync is None
-                       else int(now - ntp.ntpc.lfptofloat(last_sync))),
-                   PeerSummary.prettyinterval(poll_sec), reach))
-            if saw6:
-                if self.showunits:
-                    line += (
-                        " %s %s %s" %
-                        (unitify(estdelay, UNIT_MS),
-                         unitify(estoffset, UNIT_MS),
-                         unitify(jd, UNIT_MS)))
-                else:
-                    line += (
-                        " %s %s %s" %
-                        (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
+        line += (
+            " %2ld %c %4.4s %4.4s  %3lo"
+            % (stratum, ptype,
+               PeerSummary.prettyinterval(last_sync),
+               PeerSummary.prettyinterval(poll_sec), reach))
+        if saw6:
+            if self.showunits:
+                line += (
+                    " %s %s %s" %
+                    (unitify(estdelay, UNIT_MS),
+                     unitify(estoffset, UNIT_MS),
+                     unitify(jd, UNIT_MS)))
             else:
-                # old servers only have 3 digits of fraction
-                # don't print a fake 4th digit
-                if self.showunits:
-                    line += (
-                        " %s %s %s" %
-                        (unitify(estdelay, UNIT_MS),
-                         unitify(estoffset, UNIT_MS),
-                         unitify(jd, UNIT_MS)))
-                else:
-                    line += (
-                        " %s %s %s" %
-                        (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
-            line += "\n"
-            # for debugging both case
-            # if srcadr != None and srchost != None:
-            #   line += "srcadr: %s, srchost: %s\n" % (srcadr, srchost)
-            return line
-        except TypeError:
-            # This can happen when ntpd ships a corrupt varlist
-            return ''
+                line += (
+                    " %s %s %s" %
+                    (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
+        else:
+            # old servers only have 3 digits of fraction
+            # don't print a fake 4th digit
+            if self.showunits:
+                line += (
+                    " %s %s %s" %
+                    (unitify(estdelay, UNIT_MS),
+                     unitify(estoffset, UNIT_MS),
+                     unitify(jd, UNIT_MS)))
+            else:
+                line += (
+                    " %s %s %s" %
+                    (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
+        line += "\n"
+        # for debugging both case
+        # if srcadr != None and srchost != None:
+        #   line += "srcadr: %s, srchost: %s\n" % (srcadr, srchost)
+        return line
 
     def intervals(self):
         "Return and flush the list of actual poll intervals."
