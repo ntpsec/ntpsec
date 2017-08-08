@@ -749,7 +749,8 @@ class PeerSummary:
         now = time.time()
 
         for item in variables.items():
-            if 2 != len(item):
+            if 2 != len(item) or 2 != len(item[1]):
+                # bad item
                 continue
             (name, (value, rawvalue)) = item
             if name in ("srcadr", "peeradr"):
@@ -801,6 +802,11 @@ class PeerSummary:
             elif name == "reftime":
                 # FIXME, reftime never used.
                 reftime = value   # l_fp timestamp
+            else:
+                # unkown name?
+                # line = " name=%s " % (name)    # debug
+                # return line
+                continue
         if hmode == ntp.magic.MODE_BCLIENTX:
             # broadcastclient or multicastclient
             ptype = 'b'
