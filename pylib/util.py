@@ -751,6 +751,8 @@ class PeerSummary:
         precision = 0
         ptype = '?'
         reach = 0
+        rec = None
+        reftime = None
         rootdelay = 0.0
         saw6 = False        # x.6 floats for delay and friends
         srcadr = None
@@ -833,9 +835,11 @@ class PeerSummary:
                 if "refid" in self.__header:
                     dstadr_refid = value
             elif name == "rec":
-                rec = value     # l_fp timestamp
+                if isinstance(value, tuple):
+                    rec = value[0]
             elif name == "reftime":
-                reftime = value   # l_fp timestamp
+                if isinstance(value, tuple):
+                    reftime = value[0]
             elif name == "rootdelay":
                 # FIXME, rootdelay never used.
                 rootdelay = value   # l_fp timestamp
@@ -948,7 +952,7 @@ class PeerSummary:
         else:
             line += (" " * (self.refidwidth - len(visible)))
         # The rest of the story
-        last_sync = variables.get("rec") or variables.get("reftime")
+        last_sync = rec or reftime
         if isinstance(last_sync, tuple):
             last_sync = last_sync[0]
         jd = estjitter if have_jitter else estdisp
