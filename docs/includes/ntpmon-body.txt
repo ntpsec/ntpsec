@@ -49,6 +49,8 @@ a:: Change peer display to apeers mode, showing association IDs.
 
 d:: Toggle detail mode (some peer will be reverse-video highlighted when on).
 
+h:: Display help screen
+
 j:: Select next peer (in select mode); arrow down also works.
 
 k:: Select previous peer (in select mode); arrow up also works.
@@ -77,7 +79,7 @@ x:: Cleanly terminate the program.
 
 -:: Decrease debugging level.
 
-?:: List these commands.
+?:: Display help screen
 
 == Options ==
 
