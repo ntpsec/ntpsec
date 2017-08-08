@@ -33,11 +33,11 @@ OLD_CTL_PST_SEL_SYSPEER = 3
 
 
 # Units for formatting
-UNIT_NS = "ns"
-UNIT_US = u"µs"
-UNIT_MS = "ms"
-UNIT_S = "s"
-UNIT_KS = "ks"
+UNIT_NS = "ns"       # nano second
+UNIT_US = u"µs"      # micro second
+UNIT_MS = "ms"       # milli second
+UNIT_S = "s"         # second
+UNIT_KS = "ks"       # kilo seconds
 UNITS_SEC = (UNIT_NS, UNIT_US, UNIT_MS, UNIT_S, UNIT_KS)
 UNIT_PPT = u"‰"      # parts per thousand
 UNIT_PPB = "ppb"     # parts per billion
