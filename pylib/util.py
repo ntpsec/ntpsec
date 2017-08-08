@@ -378,26 +378,33 @@ def unitify(value, startingunit, baseunit=None, width=8):
 
 def f8dot4(f):
     "Scaled floating point formatting to fit in 8 characters"
+
+    if str(float(f)).lower() == 'nan':
+        # yes, this is a better test than math.isnan()
+        return "     nan"
+
+    fmt = "%8d"          # xxxxxxxx
     if f >= 0:
         if f < 1000.0:
-            return "%8.4f" % f    # xxx.xxxx  normal case
+            fmt = "%8.4f"    # xxx.xxxx  normal case
         elif f < 10000.0:
-            return "%8.3f" % f    # xxxx.xxx
+            fmt = "%8.3f"    # xxxx.xxx
         elif f < 100000.0:
-            return "%8.2f" % f    # xxxxx.xx
+            fmt = "%8.2f"    # xxxxx.xx
         elif f < 1000000.0:
-            return "%8.1f" % f    # xxxxxx.x
-        return "%8d" % f          # xxxxxxxx
+            fmt = "%8.1f"    # xxxxxx.x
+    else:
+        # f < 0
+        if f > -100.0:
+            fmt = "%8.4f"      # -xx.xxxx  normal case
+        elif f > -1000.0:
+            fmt = "%8.3f"      # -xxx.xxx
+        elif f > -10000.0:
+            fmt = "%8.2f"      # -xxxx.xx
+        elif f > -100000.0:
+            fmt = "%8.1f"      # -xxxxx.x
 
-    if f > -100.0:
-        return "%8.4f" % f      # -xx.xxxx  normal case
-    elif f > -1000.0:
-        return "%8.3f" % f      # -xxx.xxx
-    elif f > -10000.0:
-        return "%8.2f" % f      # -xxxx.xx
-    elif f > -100000.0:
-        return "%8.1f" % f      # -xxxxx.x
-    return "%8d" % f            # -xxxxxxx
+    return fmt % f
 
 
 def f8dot3(f):
