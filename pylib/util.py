@@ -387,11 +387,15 @@ def unitify(value, startingunit, baseunit=None, width=8):
 def f8dot4(f):
     "Scaled floating point formatting to fit in 8 characters"
 
+    if isinstance(f, basestring):
+        # a string? pass it on as a signal
+        return "%8s" % f
+    if not isinstance(f, (int, long, float)):
+        # huh?
+        return "       X"
     if str(float(f)).lower() == 'nan':
         # yes, this is a better test than math.isnan()
         # it also catches None, strings, etc.
-        if isinstance(s, basestring):
-              return "%8s" % f
         return "     nan"
 
     fmt = "%8d"          # xxxxxxxx
@@ -420,11 +424,15 @@ def f8dot4(f):
 
 def f8dot3(f):
     "Scaled floating point formatting to fit in 8 characters"
+    if isinstance(f, basestring):
+        # a string? pass it on as a signal
+        return "%8s" % f
+    if not isinstance(f, (int, long, float)):
+        # huh?
+        return "       X"
     if str(float(f)).lower() == 'nan':
         # yes, this is a better test than math.isnan()
         # it also catches None, strings, etc.
-        if isinstance(s, basestring):
-              return "%8s" % f
         return "     nan"
 
     fmt = "%8d" % f          # xxxxxxxx or -xxxxxxx
