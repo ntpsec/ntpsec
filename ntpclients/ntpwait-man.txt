@@ -10,10 +10,12 @@ include::../docs/includes/ntpwait-body.txt[]
 
 One of the following exit values will be returned:
 
-0 (EXIT_SUCCESS)::
+0::
   Successful program execution.
-1 (EXIT_FAILURE)::
+1::
   The operation failed or the command syntax was not valid.
+2::
+  Operation was interrupted by signal.
 
 // end
 
