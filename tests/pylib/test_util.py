@@ -7,6 +7,33 @@ import ntp.util
 
 class TestPylibUtilMethods(unittest.TestCase):
 
+    def test_dolog(self):
+        f = ntp.util.dolog
+
+        # We need a test jig
+        class LogTester:
+            def __init__(self):
+                self.written = None
+                self.flushed = False
+
+            def write(self, text):
+                if self.written is None:
+                    self.written = ""
+                self.written += text
+
+            def flush(self):
+                self.flushed = True
+        # Test with logging off (fd == None)
+        #   uh... if someone can think of a way to do that please tell me
+        # Test with logging on, below threshold
+        jig = LogTester()
+        f(jig, "blah", 0)
+        self.assertEqual((jig.written, jig.flushed), (None, False))
+        # Test with logging on, above threshold
+        jig.__init__()  # reset
+        f(jig, "blah", 0)
+        self.assertEqual((jig.written, jig.flushed), ("blah", True))
+
     def test_rfc3339(self):
         self.assertEqual(ntp.util.rfc3339(1480999786),
                          '2016-12-06T04:49:46Z')
