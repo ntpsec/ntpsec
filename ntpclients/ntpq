@@ -278,9 +278,9 @@ usage: help [ command ]
             "===========================================================\n")
         for (i, peer) in enumerate(self.peers):
             statval = ntp.control.CTL_PEER_STATVAL(peer.status)
-            if ((not showall
-                 and (statval & (ntp.control.CTL_PST_CONFIG
-                                 | ntp.control.CTL_PST_REACH)) == 0)):
+            if ((not showall and
+                 (statval & (ntp.control.CTL_PST_CONFIG |
+                             ntp.control.CTL_PST_REACH)) == 0)):
                 continue
             sw = ntp.util.PeerStatusWord(peer.status)
             display = "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" \
@@ -311,10 +311,10 @@ usage: help [ command ]
                 self.say("=" * (maxhostlen + 1))
             self.say(("=" * report.width()) + "\n")
             for peer in self.peers:
-                if ((not showall
-                   and not (ntp.control.CTL_PEER_STATVAL(peer.status)
-                            & (ntp.control.CTL_PST_CONFIG
-                               | ntp.control.CTL_PST_REACH)))):
+                if ((not showall and
+                     not (ntp.control.CTL_PEER_STATVAL(peer.status) &
+                          (ntp.control.CTL_PST_CONFIG |
+                           ntp.control.CTL_PST_REACH)))):
                     if self.debug:
                         self.warn("eliding [%d]\n" % peer.associd)
                     continue
@@ -372,8 +372,8 @@ usage: help [ command ]
             except:
                 self.warn("Invalid associd literal.\n")
                 return -1
-            if ((associd != 0
-                 and associd not in [peer.associd for peer in self.peers])):
+            if ((associd != 0 and
+                 associd not in [peer.associd for peer in self.peers])):
                 self.warn("Unknown associd.\n")
                 return -1
             else:
@@ -589,8 +589,8 @@ usage: delay [ msec ]
                 session.ai_family = socket.AF_INET6
                 tokens.pop(0)
             try:
-                if ((tokens
-                     and self.session.openhost(tokens[0], session.ai_family))):
+                if ((tokens and
+                     self.session.openhost(tokens[0], session.ai_family))):
                     print("current host set to %s" % self.session.hostname)
                 elif self.session.havehost():
                     print("current host remains %s" % self.session.hostname)
@@ -670,7 +670,8 @@ usage: hostnames [yes|no]
         print("debug level is %d" % self.debug)
 
     def do_logfile(self, line):
-        "view/change logfile. \"<stderr>\" will log to stderr instead of a file"
+        """view/change logfile. \"<stderr>\" will log to stderr
+           instead of a file"""
         if not line:
             print(repr(self.logfp.name))
             return
@@ -801,8 +802,8 @@ usage: authenticate [yes|no]
         else:
             try:
                 newversion = int(line)
-                if ((newversion >= ntp.magic.NTP_OLDVERSION
-                     and newversion <= ntp.magic.NTP_VERSION)):
+                if ((newversion >= ntp.magic.NTP_OLDVERSION and
+                     newversion <= ntp.magic.NTP_VERSION)):
                     self.pktversion = newversion
                 else:
                     print("versions %d to %d, please"
@@ -1701,10 +1702,10 @@ if __name__ == '__main__':
     if len(arguments) == 0:
         interpreter.chosts.append((DEFHOST, session.ai_family))
 
-    if ((len(interpreter.ccmds) == 0
-            and not interpreter.interactive
-            and os.isatty(0)
-            and os.isatty(1)
+    if ((len(interpreter.ccmds) == 0 and
+            not interpreter.interactive and
+            os.isatty(0) and
+            os.isatty(1)
          )):
         interpreter.interactive = True
 
