@@ -129,7 +129,8 @@ srcadr=%(srcadr)s, srcport=%(srcport)d, dstadr=%(dstadr)s, dstport=%(dstport)s
 leap=%(leap)s\treftime=%(reftime)s\trootdelay=%(rootdelay)s
 stratum=%(stratum)2d\trec=%(rec)s\trootdisp=%(rootdisp)s
 precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)s
-unreach=%(unreach)d, hmode=%(hmode)d, pmode=%(pmode)d, hpoll=%(hpoll)d, ppoll=%(ppoll)d, headway=%(headway)s, flash=%(flash)s, keyid=%(keyid)s
+unreach=%(unreach)d, hmode=%(hmode)d, pmode=%(pmode)d, hpoll=%(hpoll)d, \
+ppoll=%(ppoll)d, headway=%(headway)s, flash=%(flash)s, keyid=%(keyid)s
 filtdelay  = %(filtdelay)s
 filtoffset = %(filtoffset)s
 filtdisp   = %(filtdisp)s
@@ -243,11 +244,10 @@ if __name__ == '__main__':
                     try:
                         initphase = False
                         for (i, peer) in enumerate(peers):
-                            if (not showall
-                                and not (
-                                    ntp.control.CTL_PEER_STATVAL(peer.status)
-                                    & (ntp.control.CTL_PST_CONFIG |
-                                       ntp.control.CTL_PST_REACH))):
+                            if (not showall and not (
+                                    ntp.control.CTL_PEER_STATVAL(peer.status) &
+                                    (ntp.control.CTL_PST_CONFIG |
+                                     ntp.control.CTL_PST_REACH))):
                                 continue
                             try:
                                 variables = session.readvar(peer.associd,
