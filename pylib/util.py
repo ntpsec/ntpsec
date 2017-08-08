@@ -911,8 +911,8 @@ class PeerSummary:
         # slots setup via pool have only srcadr
         if srcadr is not None \
                 and srcadr != "0.0.0.0" \
-                              and srcadr[:7] != "127.127" \
-                                                and srcadr != "::":
+                and srcadr[:7] != "127.127" \
+                and srcadr != "::":
             if self.showhostnames:
                 try:
                     if self.debug:
