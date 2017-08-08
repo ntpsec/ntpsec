@@ -64,7 +64,8 @@ a build-time switch, not a run-time one).
 
 * Clock identifiers in log files are normally the driver shortname
   followed by the unit number in parentheses, rather than the magic IP
-  addresses formerly used.  Reverted in the --enable-classic-mode build.
+  addresses formerly used.  This change affects the peerstats, rawstats,
+  and clockstats files.  Reverted in the --enable-classic-mode build.
 
 * The -!m, -\>, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented

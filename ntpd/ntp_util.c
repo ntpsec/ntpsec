@@ -364,6 +364,17 @@ timespec_to_MJDtime(const struct timespec *ts)
 }
 
 
+static const char *
+peerlabel(const struct peer *peer)
+{
+#if defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)
+	if (peer->procptr != NULL)
+		return refclock_name(peer);
+	else
+#endif /* defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)*/
+		return socktoa(&peer->srcadr);
+}
+
 /*
  * record_peer_stats - write peer statistics to file
  *
@@ -394,21 +405,10 @@ record_peer_stats(
 		fprintf(peerstats.fp,
 		    "%s %s %x %.9f %.9f %.9f %.9f\n",
 		    timespec_to_MJDtime(&now),
-		    socktoa(&peer->srcadr), (u_int)status, peer->offset,
+		    peerlabel(peer), (u_int)status, peer->offset,
 		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
-}
-
-static const char *
-peerlabel(const struct peer *peer)
-{
-#if defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)
- 	if (peer->procptr != NULL)
-		return refclock_name(peer);
-	else
-#endif /* defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)*/
-		return socktoa(&peer->srcadr);
 }
 
 /*
@@ -509,18 +509,14 @@ mprintf_clock_stats(
  * file format
  * day (MJD)
  * time (s past midnight)
- * peer ip address
- * IP address old format) or drivername(unit) (new format)
+ * source IP address old format) or drivername(unit) (new format)
+ * destination peer address 
  * t1 t2 t3 t4 timestamps
+ * various other local statistics
  */
 void
 record_raw_stats(
-	sockaddr_u *srcadr,
-	sockaddr_u *dstadr,
-	l_fp	*t1,		/* originate timestamp */
-	l_fp	*t2,		/* receive timestamp */
-	l_fp	*t3,		/* transmit timestamp */
-	l_fp	*t4,		/* destination timestamp */
+	struct peer *peer,
 	int	leap,
 	int	version,
 	int	mode,
@@ -534,6 +530,11 @@ record_raw_stats(
 	)
 {
 	struct timespec	now;
+	const sockaddr_u *dstaddr = peer->dstadr ? &peer->dstadr->sin : NULL;
+	l_fp	t1 = peer->org;		/* originate timestamp */
+	l_fp	t2 = peer->rec;		/* receive timestamp */
+	l_fp	t3 = peer->xmt;		/* transmit timestamp */
+	l_fp	t4 = peer->dst;		/* destination timestamp */
 
 	if (!stats_control)
 		return;
@@ -543,9 +544,9 @@ record_raw_stats(
 	if (rawstats.fp != NULL) {
 		fprintf(rawstats.fp, "%s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %u\n",
 		    timespec_to_MJDtime(&now),
-		    socktoa(srcadr), dstadr ?  socktoa(dstadr) : "-",
-		    ulfptoa(*t1, 9), ulfptoa(*t2, 9),
-		    ulfptoa(*t3, 9), ulfptoa(*t4, 9),
+		    peerlabel(peer), dstaddr ?  socktoa(dstaddr) : "-",
+		    ulfptoa(t1, 9), ulfptoa(t2, 9),
+		    ulfptoa(t3, 9), ulfptoa(t4, 9),
 		    leap, version, mode, stratum, ppoll, precision,
 		    root_delay, root_dispersion, refid_str(refid, stratum),
 		    outcount);

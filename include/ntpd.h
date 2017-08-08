@@ -191,7 +191,11 @@ extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (struct peer *, const char *);
 extern	int	mprintf_clock_stats(struct peer *, const char *, ...)
 			NTP_PRINTF(2, 3);
-extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int ppoll, int precision, double root_delay, double root_dispersion, uint32_t refid, u_int outcount);
+extern	void	record_raw_stats (struct peer *,
+				  int leap, int version, int mode, int stratum,
+				  int ppoll, int precision, double root_delay,
+				  double root_dispersion, uint32_t refid,
+				  u_int outcount);
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 #ifdef ENABLE_DEBUG_TIMING
 extern	void	record_timing_stats (const char *);
