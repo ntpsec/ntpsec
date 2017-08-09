@@ -838,7 +838,7 @@ class ControlSession:
         except socket.gaierror as e:
             ntp.util.dolog(self.logfp,
                            "ntpq: numeric-mode lookup of %s failed, %s\n"
-                           % (hname, e.strerror), 3)
+                           % (hname, e.strerror), self.debug, 3)
         try:
             return hinted_lookup(port="ntp", hints=0)
         except socket.gaierror as e1:
@@ -879,7 +879,8 @@ class ControlSession:
         else:
             self.hostname = canonname or hname
             self.isnum = False
-        ntp.util.logfp(self.logfp, "Opening host %s\n" % self.hostname, 3)
+        ntp.util.dolog(self.logfp, "Opening host %s\n" % self.hostname,
+                       self.debug, 3)
         self.port = sockaddr[1]
         try:
             self.sock = socket.socket(family, socktype, protocol)
@@ -933,7 +934,7 @@ class ControlSession:
             xdata += b"\x00"
         ntp.util.dolog(self.logfp,
                        "Sending %d octets.  seq=%d\n"
-                       % (len(xdata), self.sequence), 3)
+                       % (len(xdata), self.sequence), self.debug, 3)
         try:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
@@ -1006,10 +1007,11 @@ class ControlSession:
         self.response = ''
         seenlastfrag = False
         bail = 0
-        warn = self.logfp.write  # Yes this is different from the other warn()
-        warndbg = (lambda t, l: ntp.util.dolog(self.logfp, t, l))
+        warn = self.logfp.write
+        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
+                                                  self.debug, th))
 
-        warn("Fragment collection begins\n", 1)
+        warndbg("Fragment collection begins\n", 1)
         # Loop until we have an error or a complete response.  Nearly all
         # code paths to loop again use continue.
         while True:
@@ -1336,7 +1338,8 @@ Receive a nonce that can be replayed - combats source address spoofing
         "Retrieve MRU list data"
         restarted_count = 0
         cap_frags = True
-        warn = (lambda t, l: ntp.util.dolog(self.logfp, t, l))
+        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
+                                                  self.debug, th))
         sorter = None
         frags = MAXFRAGS
         self.slots = 0
@@ -1428,13 +1431,13 @@ Receive a nonce that can be replayed - combats source address spoofing
                     elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
                         # None of the supplied prior entries match, so
                         # toss them from our list and try again.
-                        warn("no overlap between prior entries and "
-                             "server MRU list\n", 1)
+                        warndbg("no overlap between prior entries and "
+                                "server MRU list\n", 1)
                         restarted_count += 1
                         if restarted_count > 8:
                             raise ControlException(SERR_STALL)
-                        warn("--->   Restarting from the beginning, "
-                             "retry #%u\n" % restarted_count, 1)
+                        warndbg("--->   Restarting from the beginning, "
+                                "retry #%u\n" % restarted_count, 1)
                     elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
                         e.message = ("CERR_UNKNOWNVAR from ntpd but "
                                      "no priors given.")
@@ -1442,25 +1445,25 @@ Receive a nonce that can be replayed - combats source address spoofing
                     elif e.errorcode == ntp.control.CERR_BADVALUE:
                         if cap_frags:
                             cap_frags = False
-                            warn("Reverted to row limit from "
-                                 "fragments limit.\n", 1)
+                            warndbg("Reverted to row limit from "
+                                    "fragments limit.\n", 1)
                         else:
                             # ntpd has lower cap on row limit
                             self.ntpd_row_limit -= 1
                             limit = min(limit, self.ntpd_row_limit)
-                            warn("Row limit reduced to %d following "
-                                 "CERR_BADVALUE.\n" % limit, 1)
+                            warndbg("Row limit reduced to %d following "
+                                    "CERR_BADVALUE.\n" % limit, 1)
                     elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
                         # Reduce the number of rows/frags requested by
                         # half to recover from lost response fragments.
                         if cap_frags:
                             frags = max(2, frags / 2)
-                            warn("Frag limit reduced to %d following "
-                                 "incomplete response.\n" % frags, 1)
+                            warndbg("Frag limit reduced to %d following "
+                                    "incomplete response.\n" % frags, 1)
                         else:
                             limit = max(2, limit / 2)
-                            warn("Row limit reduced to %d following "
-                                 " incomplete response.\n" % limit, 1)
+                            warndbg("Row limit reduced to %d following "
+                                    " incomplete response.\n" % limit, 1)
                     elif e.errorcode:
                         raise e
 
@@ -1482,7 +1485,7 @@ Receive a nonce that can be replayed - combats source address spoofing
                 curidx = -1
                 mru = None
                 for (tag, val) in variables.items():
-                    warn("tag=%s, val=%s\n" % (tag, val), 4)
+                    warndbg("tag=%s, val=%s\n" % (tag, val), 4)
                     if tag == "nonce":
                         nonce = "%s=%s" % (tag, val)
                     elif tag == "last.older":
