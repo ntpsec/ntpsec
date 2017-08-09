@@ -320,7 +320,7 @@ if __name__ == '__main__':
                                     opcode=ntp.control.CTL_OP_READCLOCK,
                                     raw=True)
                                 strconvert = ntp.util.cook(clockvars,
-                                                           showunits)
+                                                           showunits, " ")
                                 stdscr.addstr(strconvert.encode('UTF-8'))
                             except ntp.packet.ControlException as e:
                                 pass

@@ -598,7 +598,7 @@ class PeerStatusWord:
                 % self.__dict__)
 
 
-def cook(variables, showunits=False):
+def cook(variables, showunits=False, sep=", "):
     "Cooked-mode variable display."
     width = ntp.util.termsize().width - 2
     text = ""
@@ -673,7 +673,9 @@ def cook(variables, showunits=False):
                 item += repr(value)
         else:
             item += repr(value)
-        item += ", "
+        # add field separator
+        item += sep
+        # add newline so we don not overflow screen
         lastcount = 0
         for c in text:
             if c == '\n':
