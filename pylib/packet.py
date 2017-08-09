@@ -842,8 +842,10 @@ class ControlSession:
         try:
             return hinted_lookup(port="ntp", hints=0)
         except socket.gaierror as e1:
-            self.logfp.write("ntpq: standard-mode lookup of %s failed, %s\n"
-                             % (hname, e1.strerror))
+            if self.logfp is not None:
+                self.logfp.write("ntpq: standard-mode lookup "
+                                 "of %s failed, %s\n"
+                                 % (hname, e1.strerror))
             # EAI_NODATA and AI_CANONNAME should both exist - they're in the
             # POSIX API.  If this code throws AttributeErrors there is
             # probably a very old and broken socket layer in your Python
@@ -859,11 +861,13 @@ class ControlSession:
                     try:
                         return hinted_lookup(port="ntp", hints=0)
                     except socket.gaierror as e2:
-                        self.logfp.write("ntpq: ndp lookup failed, %s\n"
-                                         % e2.strerror)
+                        if self.logfp is not None:
+                            self.logfp.write("ntpq: ndp lookup failed, %s\n"
+                                             % e2.strerror)
             except AttributeError:
-                self.logfp.write(
-                    "ntpq: API error, missing socket attributes\n")
+                if self.logfp is not None:
+                    self.logfp.write(
+                        "ntpq: API error, missing socket attributes\n")
         return None
 
     def openhost(self, hname, fam=socket.AF_UNSPEC):
@@ -939,16 +943,19 @@ class ControlSession:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
             # On failure, we don't know how much data was actually received
-            self.logfp.write("Write to %s failed\n" % self.hostname)
+            if self.logfp is not None:
+                self.logfp.write("Write to %s failed\n" % self.hostname)
             return -1
-        if self.debug >= 5:  # special, not replacing with dolog()
+        if (self.debug >= 5) and (self.logfp is not None):
+            # special, not replacing with dolog()
             self.logfp.write("Request packet:\n")
             dump_hex_printable(xdata, self.logfp)
         return 0
 
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
-        if self.debug:  # special, not replacing with dolog()
+        if (self.debug >= 1) and (self.logfp is not None):
+            # special, not replacing with dolog()
             if self.debug >= 3:
                 self.logfp.write("\n")   # extra space to help find clumps
             self.logfp.write("sendrequest: opcode=%d, associd=%d, qdata=%s\n"
@@ -956,8 +963,9 @@ class ControlSession:
 
         # Check to make sure the data will fit in one packet
         if len(qdata) > ntp.control.CTL_MAX_DATA_LEN:
-            self.logfp.write("***Internal error! Data too large (%d)\n" %
-                             len(qdata))
+            if self.logfp is not None:
+                self.logfp.write("***Internal error! Data too large (%d)\n" %
+                                 len(qdata))
             return -1
 
         # Assemble the packet
@@ -1046,7 +1054,8 @@ class ControlSession:
                     if timeo:
                         raise ControlException(SERR_TIMEOUT)
                 if timeo:
-                    if self.debug:  # special, not replacing with dolog()
+                    if (self.debug >= 1) and (self.logfp is not None):
+                        # special, not replacing with dolog()
                         self.logfp.write(
                             "ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):
@@ -1201,12 +1210,12 @@ class ControlSession:
                         dump_hex_printable(self.response, self.logfp)
                     elif self.debug >= 3:
                         # FIXME: Garbage when retrieving assoc list (binary)
-                        warn("Response packet:\n%s\n" % self.response)
+                        warn("Response packet:\n%s\n" % repr(self.response))
                     elif self.debug >= 2:
                         # FIXME: Garbage when retrieving assoc list (binary)
                         eol = self.response.find("\n")
                         firstline = self.response[:eol]
-                        warn("First line:\n%s\n" % firstline)
+                        warn("First line:\n%s\n" % repr(firstline))
                     return None
                 break
 
