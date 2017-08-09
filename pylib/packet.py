@@ -1338,14 +1338,21 @@ class ControlSession:
 
     def fetch_nonce(self):
         """
-Receive a nonce that can be replayed - combats source address spoofing
+Ask for, and get, a nonce that can be replayed.
+This combats source address spoofing
 """
-        self.doquery(opcode=ntp.control.CTL_OP_REQ_NONCE)
-        self.nonce_xmit = time.time()
-        if not self.response.startswith(polybytes("nonce=")):
-            print("## Nonce expected: %s" % self.response)
-            raise ControlException(SERR_BADNONCE)
-        return polystr(self.response.strip())
+        for i in range(3):
+            # retry 4 times
+            self.doquery(opcode=ntp.control.CTL_OP_REQ_NONCE)
+            self.nonce_xmit = time.time()
+            if self.response.startswith(polybytes("nonce=")):
+                return polystr(self.response.strip())
+            # maybe a delay between tries?
+
+        # uh, oh, no nonce seen
+        # this print probably never can be seen...
+        print("## Nonce expected: %s" % self.response)
+        raise ControlException(SERR_BADNONCE)
 
     def mrulist(self, variables=None, rawhook=None, direct=None):
         "Retrieve MRU list data"
