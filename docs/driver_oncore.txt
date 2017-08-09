@@ -8,6 +8,13 @@ Reference ID: GPS
 Serial Port: /dev/oncore.serial._u_; 9600bps 8N1.
 PPS Port: /dev/oncore.pps._u_
 
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete; the entire Oncore line has
+been end-of-lifed. The NTPsec maintainers plan to remove it in a
+future release.  If you have a requirement for it, please make this
+known to us.
+
 == Description ==
 
 This driver supports most models of the
@@ -15,14 +22,13 @@ https://web.archive.org/web/19990427102123/http://www.mot.com/AECS/PNSB/products
 (Basic, PVT6, VP, UT, UT+, GT, GT+, SL, M12, M12+T), as long as they
 support the _Motorola Binary Protocol_.
 
-The interesting versions of the Oncore are the VP, the UT+, the "Remote"
-which is a prepackaged UT+, and the M12 Timing. The VP is no longer
-available new, and the UT, GT, and SL are at end-of-life. The Motorola
-evaluation kit can be recommended. It interfaces to a PC straightaway,
-using the serial (DCD) or parallel port for PPS input and packs the
-receiver in a nice and sturdy box. Less expensive interface kits are
-available from http://www.tapr.org[TAPR].
- 
+The (formerly) interesting versions of the Oncore were the VP, the
+UT+, the "Remote" which is a prepackaged UT+, and the M12 Timing. The
+Motorola evaluation kit can be recommended. It interfaces to a PC
+straightaway, using the serial (DCD) or parallel port for PPS input
+and packs the receiver in a nice and sturdy box. Less expensive
+interface kits are available from http://www.tapr.org[TAPR].
+
 [width="100%",cols="<34%,<33%,<33%",align="center",frame="none",grid="none"]
 |==========================================================================
 |image:pic/oncore_utplusbig.gif[]|image:pic/oncore_evalbig.gif[]|image:pic/oncore_remoteant.jpg[gif]
@@ -118,11 +124,15 @@ the kernel PLL.
 
 === Performance ===
 
-Really good. With the VP/UT+, the generated PPS pulse is referenced to
-UTC(GPS) with better than 50 nsec (1 sigma) accuracy. The limiting
-factor will be the timebase of the computer and the precision with which
-you can timestamp the rising flank of the PPS signal. Using FreeBSD, a
-FPGA based Timecounter/PPS interface, and an ovenized quartz oscillator,
+Even the newest of these variants, the M12+T with firmware dated 9 Jun
+2004 now reports bad dates due to era rollover.
+
+Performance is really good, other than the rollover issue. With the
+VP/UT+, the generated PPS pulse is referenced to UTC(GPS) with better
+than 50 nsec (1 sigma) accuracy. The limiting factor will be the
+timebase of the computer and the precision with which you can
+timestamp the rising flank of the PPS signal. Using FreeBSD, a FPGA
+based Timecounter/PPS interface, and an ovenized quartz oscillator,
 that performance has been reproduced. For more details on this aspect:
 https://web.archive.org/web/19990221121441/http://phk.freebsd.dk/rover.html[Sub-Microsecond
 timekeeping under FreeBSD].
