@@ -122,9 +122,9 @@ def peer_detail(variables, showunits=False):
         vcopy['filtoffset'] = ntp.util.stringfiltcooker(vcopyraw['filtoffset'])
         vcopy['filtdisp'] = ntp.util.stringfiltcooker(vcopyraw['filtdisp'])
     else:
-        vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
-        vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
-        vcopy['filtdisp'] = vcopy['filtdisp'].replace(' ', '\t')
+        vcopy['filtdelay'] = ntp.util.stringfilt(vcopyraw['filtdelay'])
+        vcopy['filtoffset'] = ntp.util.stringfilt(vcopyraw['filtoffset'])
+        vcopy['filtdisp'] = ntp.util.stringfilt(vcopyraw['filtdisp'])
     # annotate IPv6, to stand out from :port
     if ':' in vcopy['srcadr']:
         vcopy['srcadr'] = '[' + vcopy['srcadr'] + ']'

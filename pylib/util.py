@@ -111,6 +111,17 @@ def portsplit(hostname):
     return (hostname, portsuffix)
 
 
+def stringfilt(data):
+    "pretty print string of space separated numbers"
+    parts = data.split()
+
+    cooked = []
+    for part in parts:
+        fitted = fitinfield(part, 7)
+        cooked.append(fitted)
+    rendered = " ".join(cooked)
+    return rendered
+
 def stringfiltcooker(data):
     "Cooks a filt* string of space separated numbers, expects milliseconds"
     parts = data.split()
