@@ -74,7 +74,7 @@ def statline(_peerlist, _mrulist, nyquist):
     # We don't use stdversion here because the presence of a date is confusing
     leader = sysvars['version'][0]
     if span.entries:
-        trailer = "Last update: %s (%s)" \
+        trailer = "Updated: %s (%s)" \
                   % (iso8601(span.entries[0].last),
                      ntp.util.PeerSummary.prettyinterval(nyquist))
     else:
