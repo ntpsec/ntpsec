@@ -836,9 +836,9 @@ class ControlSession:
         try:
             return hinted_lookup(port="ntp", hints=socket.AI_NUMERICHOST)
         except socket.gaierror as e:
-            if self.debug > 2:
-                self.logfp.write("ntpq: numeric-mode lookup of %s failed, %s\n"
-                                 % (hname, e.strerror))
+            ntp.util.dolog(self.logfp,
+                           "ntpq: numeric-mode lookup of %s failed, %s\n"
+                           % (hname, e.strerror), 3)
         try:
             return hinted_lookup(port="ntp", hints=0)
         except socket.gaierror as e1:
@@ -879,8 +879,7 @@ class ControlSession:
         else:
             self.hostname = canonname or hname
             self.isnum = False
-        if self.debug > 2:
-            self.logfp.write("Opening host %s\n" % self.hostname)
+        ntp.util.logfp(self.logfp, "Opening host %s\n" % self.hostname, 3)
         self.port = sockaddr[1]
         try:
             self.sock = socket.socket(family, socktype, protocol)
@@ -932,23 +931,23 @@ class ControlSession:
         "Send a packet to the host."
         while len(xdata) % 4:
             xdata += b"\x00"
-        if self.debug >= 3:
-                self.logfp.write("Sending %d octets.  seq=%d\n"
-                                 % (len(xdata), self.sequence))
+        ntp.util.dolog(self.logfp,
+                       "Sending %d octets.  seq=%d\n"
+                       % (len(xdata), self.sequence), 3)
         try:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
             # On failure, we don't know how much data was actually received
             self.logfp.write("Write to %s failed\n" % self.hostname)
             return -1
-        if self.debug >= 5:
+        if self.debug >= 5:  # special, not replacing with dolog()
             self.logfp.write("Request packet:\n")
             dump_hex_printable(xdata, self.logfp)
         return 0
 
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
-        if self.debug:
+        if self.debug:  # special, not replacing with dolog()
             if self.debug >= 3:
                 self.logfp.write("\n")   # extra space to help find clumps
             self.logfp.write("sendrequest: opcode=%d, associd=%d, qdata=%s\n"
@@ -1007,10 +1006,10 @@ class ControlSession:
         self.response = ''
         seenlastfrag = False
         bail = 0
-        warn = self.logfp.write
+        warn = self.logfp.write  # Yes this is different from the other warn()
+        warndbg = (lambda t, l: ntp.util.dolog(self.logfp, t, l))
 
-        if self.debug:
-            warn("Fragment collection begins\n")
+        warn("Fragment collection begins\n", 1)
         # Loop until we have an error or a complete response.  Nearly all
         # code paths to loop again use continue.
         while True:
@@ -1026,16 +1025,14 @@ class ControlSession:
             else:
                 tvo = self.secondary_timeout / 1000
 
-            if self.debug > 4:
-                warn("At %s, select with timeout %d begins\n"
-                     % (time.asctime(), tvo))
+            warndbg("At %s, select with timeout %d begins\n"
+                    % (time.asctime(), tvo), 5)
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error:
                 raise ControlException(SERR_SELECT)
-            if self.debug > 4:
-                warn("At %s, select with timeout %d ends\n"
-                     % (time.asctime(), tvo))
+            warndbg("At %s, select with timeout %d ends\n"
+                    % (time.asctime(), tvo), 5)
 
             if not rd:
                 # Timed out.  Return what we have
@@ -1043,7 +1040,7 @@ class ControlSession:
                     if timeo:
                         raise ControlException(SERR_TIMEOUT)
                 if timeo:
-                    if self.debug:
+                    if self.debug:  # special, not replacing with dolog()
                         self.logfp.write(
                             "ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):
@@ -1052,11 +1049,9 @@ class ControlSession:
                                          % ("not ", "")[seenlastfrag])
                 raise ControlException(SERR_INCOMPLETE)
 
-            if self.debug > 3:
-                warn("At %s, socket read begins\n" % time.asctime())
+            warndbg("At %s, socket read begins\n" % time.asctime(), 4)
             rawdata = polybytes(self.sock.recv(4096))
-            if self.debug >= 3:
-                warn("Received %d octets\n" % len(rawdata))
+            warndbg("Received %d octets\n" % len(rawdata), 3)
             rpkt = ControlPacket(self)
             try:
                 rpkt.analyze(rawdata)
@@ -1065,31 +1060,30 @@ class ControlSession:
 
             if ((rpkt.version() > ntp.magic.NTP_VERSION or
                     rpkt.version() < ntp.magic.NTP_OLDVERSION)):
-                if self.debug:
-                    warn("Fragment received with version %d\n"
-                         % rpkt.version())
+                warndbg("Fragment received with version %d\n"
+                        % rpkt.version(), 1)
                 continue
             if rpkt.mode() != ntp.magic.MODE_CONTROL:
-                if self.debug:
-                    warn("Fragment received with mode %d\n" % rpkt.mode())
+                warndbg("Fragment received with mode %d\n" % rpkt.mode(), 1)
                 continue
             if not rpkt.is_response():
-                if self.debug:
-                    warn("Received request, wanted response\n")
+                warndbg("Received request, wanted response\n", 1)
                 # continue
 
             # Check opcode and sequence number for a match.
             # Could be old data getting to us.
+            # =======
+            # These had the continues inside a if debug block. Probably
+            # shouldn't have been there, but if there is a problem move
+            # them back.
             if rpkt.sequence != self.sequence:
-                if self.debug:
-                    warn("Received sequence number %d, wanted %d\n" %
-                         (rpkt.sequence, self.sequence))
-                    continue
+                warndbg("Received sequence number %d, wanted %d\n" %
+                        (rpkt.sequence, self.sequence), 1)
+                continue
             if rpkt.opcode() != opcode:
-                if self.debug:
-                    warn("Received opcode %d, wanted %d\n" %
-                         (rpkt.opcode(), opcode))
-                    continue
+                warndbg("Received opcode %d, wanted %d\n" %
+                        (rpkt.opcode(), opcode), 1)
+                continue
 
             # Check the error code.  If non-zero, return it.
             if rpkt.is_error():
@@ -1167,11 +1161,10 @@ class ControlSession:
                      % (rpkt.count, rpkt.offset, not_earlier.offset))
                 continue
 
-            if self.debug > 2:
-                warn("Recording fragment %d, size = %d offset = %d, "
-                     " end = %d, more=%s\n"
-                     % (len(fragments)+1, rpkt.count,
-                        rpkt.offset, rpkt.end(), rpkt.more()))
+            warndbg("Recording fragment %d, size = %d offset = %d, "
+                    " end = %d, more=%s\n"
+                    % (len(fragments)+1, rpkt.count,
+                       rpkt.offset, rpkt.end(), rpkt.more()), 3)
 
             # Passed all tests, insert it into the frag list.
             fragments.append(rpkt)
@@ -1188,18 +1181,16 @@ class ControlSession:
             if seenlastfrag and fragments[0].offset == 0:
                 for f in range(1, len(fragments)):
                     if fragments[f-1].end() != fragments[f].offset:
-                        if self.debug:
-                            warn("Hole in fragment sequence, %d of %d\n"
-                                 % (f, len(fragments)))
+                        warndbg("Hole in fragment sequence, %d of %d\n"
+                                % (f, len(fragments)), 1)
                         break
                 else:
                     self.response = polybytes(
                         "".join([polystr(frag.data) for frag in fragments]))
-                    if self.debug:
-                        warn("Fragment collection ends. %d bytes "
-                             " in %d fragments\n"
-                             % (len(self.response), len(fragments)))
-                    if self.debug >= 5:
+                    warndbg("Fragment collection ends. %d bytes "
+                            " in %d fragments\n"
+                            % (len(self.response), len(fragments)), 1)
+                    if self.debug >= 5:  # special, not replacing with dolog()
                         warn("Response packet:\n")
                         dump_hex_printable(self.response, self.logfp)
                     elif self.debug >= 3:
@@ -1345,7 +1336,7 @@ Receive a nonce that can be replayed - combats source address spoofing
         "Retrieve MRU list data"
         restarted_count = 0
         cap_frags = True
-        warn = self.logfp.write
+        warn = (lambda t, l: ntp.util.dolog(self.logfp, t, l))
         sorter = None
         frags = MAXFRAGS
         self.slots = 0
@@ -1437,15 +1428,13 @@ Receive a nonce that can be replayed - combats source address spoofing
                     elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
                         # None of the supplied prior entries match, so
                         # toss them from our list and try again.
-                        if self.debug:
-                            warn("no overlap between prior entries and "
-                                 "server MRU list\n")
+                        warn("no overlap between prior entries and "
+                             "server MRU list\n", 1)
                         restarted_count += 1
                         if restarted_count > 8:
                             raise ControlException(SERR_STALL)
-                        if self.debug:
-                            warn("--->   Restarting from the beginning, "
-                                 "retry #%u\n" % restarted_count)
+                        warn("--->   Restarting from the beginning, "
+                             "retry #%u\n" % restarted_count, 1)
                     elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
                         e.message = ("CERR_UNKNOWNVAR from ntpd but "
                                      "no priors given.")
@@ -1453,29 +1442,25 @@ Receive a nonce that can be replayed - combats source address spoofing
                     elif e.errorcode == ntp.control.CERR_BADVALUE:
                         if cap_frags:
                             cap_frags = False
-                            if self.debug:
-                                warn("Reverted to row limit from "
-                                     "fragments limit.\n")
+                            warn("Reverted to row limit from "
+                                 "fragments limit.\n", 1)
                         else:
                             # ntpd has lower cap on row limit
                             self.ntpd_row_limit -= 1
                             limit = min(limit, self.ntpd_row_limit)
-                            if self.debug:
-                                warn("Row limit reduced to %d following "
-                                     "CERR_BADVALUE.\n" % limit)
+                            warn("Row limit reduced to %d following "
+                                 "CERR_BADVALUE.\n" % limit, 1)
                     elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
                         # Reduce the number of rows/frags requested by
                         # half to recover from lost response fragments.
                         if cap_frags:
                             frags = max(2, frags / 2)
-                            if self.debug:
-                                warn("Frag limit reduced to %d following "
-                                     "incomplete response.\n" % frags)
+                            warn("Frag limit reduced to %d following "
+                                 "incomplete response.\n" % frags, 1)
                         else:
                             limit = max(2, limit / 2)
-                            if self.debug:
-                                warn("Row limit reduced to %d following "
-                                     " incomplete response.\n" % limit)
+                            warn("Row limit reduced to %d following "
+                                 " incomplete response.\n" % limit, 1)
                     elif e.errorcode:
                         raise e
 
@@ -1497,8 +1482,7 @@ Receive a nonce that can be replayed - combats source address spoofing
                 curidx = -1
                 mru = None
                 for (tag, val) in variables.items():
-                    if self.debug >= 4:
-                        warn("tag=%s, val=%s\n" % (tag, val))
+                    warn("tag=%s, val=%s\n" % (tag, val), 4)
                     if tag == "nonce":
                         nonce = "%s=%s" % (tag, val)
                     elif tag == "last.older":
