@@ -106,8 +106,7 @@ Palisade NTP reference clock driver.
 == O/S Serial Port Configuration ==
 
 The driver attempts to open the device /dev/trimble__u__ where 'u' is
-the NTP refclock unit number as defined by the LSB of the refclock
-address.  Valid refclock unit numbers are 0 - 3.
+the NTP refclock unit number.  Valid refclock unit numbers are 0 - 3.
 
 The user is expected to provide a symbolic link to an available serial
 port device.  This is typically performed by a command such as:

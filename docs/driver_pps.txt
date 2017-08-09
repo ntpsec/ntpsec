@@ -125,7 +125,7 @@ synchronization without needing the Internet at all.
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock pps flag2 1	# Capture PPS on trailing edge
+refclock pps unit 0 flag2 1	# Capture PPS on trailing edge of pps0
 ----------------------------------------------------------------------------
 
 This driver does not need to be configured explicitly in order to be
