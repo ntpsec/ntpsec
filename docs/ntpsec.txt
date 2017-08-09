@@ -219,6 +219,9 @@ codebase has been outright removed, with less than 5% new code added.
   generic-driver refclocks.  If the software was compiled with the
   --enable-classic-mode switch, the foregoing is reversed.
 
+* The _restrict_ statement can now take an address range in CIDR
+  notation rather than as an address/mask pair.
+
 * The includefile directive now evaluates relative pathnames not with
   respect to the current working directory but with respect to the
   directory name of the last pushed file in the stack.  This means
