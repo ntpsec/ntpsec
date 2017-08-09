@@ -139,16 +139,17 @@ def peer_detail(variables, showunits=False):
 
     peerfmt = """\
 %(adr)s
-leap=%(leap)s\treftime=%(reftime)s\trootdelay=%(rootdelay)s
-stratum=%(stratum)2d\trec=%(rec)s\trootdisp=%(rootdisp)s
-precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)s
+reftime=%(reftime)s\tleap=%(leap)s\trootdelay=%(rootdelay)s
+    rec=%(rec)s\tstratum=%(stratum)2d\trootdisp=%(rootdisp)s
+    xmt=%(xmt)s\tprecision=%(precision)3d\tdispersion=%(dispersion)s
 unreach=%(unreach)d hmode=%(hmode)d pmode=%(pmode)d hpoll=%(hpoll)d \
 ppoll=%(ppoll)d headway=%(headway)s flash=%(flash)s keyid=%(keyid)s
 filtdelay  = %(filtdelay)s
 filtoffset = %(filtoffset)s
 filtdisp   = %(filtdisp)s
 """
-    return peerfmt % vcopy
+    str = peerfmt % vcopy
+    return str.expandtabs()
 
 
 class Fatal(Exception):
