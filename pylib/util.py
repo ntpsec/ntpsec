@@ -57,10 +57,10 @@ MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
 PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
 
 
-def dolog(logfp, text, level):
+def dolog(logfp, text, debug, threshold):
     if logfp is None:
         return  # can turn off logging by supplying a None file descriptior
-    if debug >= level:
+    if debug >= threshold:
         logfp.write(text)
         logfp.flush()  # we don't want to lose an important log to a crash
 

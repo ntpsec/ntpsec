@@ -27,11 +27,11 @@ class TestPylibUtilMethods(unittest.TestCase):
         #   uh... if someone can think of a way to do that please tell me
         # Test with logging on, below threshold
         jig = LogTester()
-        f(jig, "blah", 0)
+        f(jig, "blah", 0, 3)
         self.assertEqual((jig.written, jig.flushed), (None, False))
         # Test with logging on, above threshold
         jig.__init__()  # reset
-        f(jig, "blah", 0)
+        f(jig, "blah", 4, 3)
         self.assertEqual((jig.written, jig.flushed), ("blah", True))
 
     def test_rfc3339(self):
