@@ -79,7 +79,7 @@ def statline(_peerlist, _mrulist, nyquist):
                      ntp.util.PeerSummary.prettyinterval(nyquist))
     else:
         trailer = ""
-    spacer = (peer_report.termwidth - len(leader) - len(trailer)) * " "
+    spacer = ((peer_report.termwidth - 1) - len(leader) - len(trailer)) * " "
     return leader + spacer + trailer
 
 
