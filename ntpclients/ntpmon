@@ -367,7 +367,9 @@ if __name__ == '__main__':
                         showunits = not showunits
                         peer_report.showunits = showunits
                     elif key == 'w':
-                        peer_report.wideremote = not peer_report.wideremote
+                        wideremote = not wideremote
+                        peer_report.wideremote = wideremote
+                        mru_report.wideremote = wideremote
                     elif key == " ":
                         if peer_report.displaymode == 'peers':
                             peer_report.displaymode = 'apeers'
