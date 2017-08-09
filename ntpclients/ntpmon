@@ -183,14 +183,26 @@ class OutputContext:
         curses.endwin()
 
 usage = '''
-USAGE: ntpmon [-n] [-u] [-V] [host]
+USAGE: ntpmon [-nudV] [-l logfile] [-D lvl] [host]
+  Flg Arg Option-Name    Description
+   -n no  numeric         Numeric host addresses
+   -u no  units           Display time with units.
+   -d no  debug-level     Increase output debug message level
+                                - may appear multiple times
+   -D Int set-debug-level Set the output debug message level
+                                - may appear multiple times
+   -l Str logfile         Logs debug messages to the provided filename
+   -h no  help            Print a usage message.
+   -V opt version         Output version information and exit
 '''
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "Vnu",
-                                             ["version", "numeric", "units"])
+                                             "VhnudD:l:",
+                                             ["version", "numeric", "units",
+                                              "debug", "set-debug-level=",
+                                              "logfile=", "help"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -203,15 +215,33 @@ if __name__ == '__main__':
     showpeers = True
     showunits = False
     nyquist = 1
+    debug = 0
+    logfp = None
+    defaultlog = "ntpmon.log"
 
     for (switch, val) in options:
         if switch in ("-V", "--version"):
             print("ntpmon %s" % ntp.util.stdversion())
             raise SystemExit(0)
+        elif switch in ("-h", "--help"):
+            print(usage)
+            raise SystemExit(0)
         elif switch in ("-n", "--numeric"):
             showhostnames = False
         elif switch in ("-u", "--units"):
             showunits = True
+        elif switch in ("-d", "--debug"):
+            debug += 1
+        elif switch in ("-D", "--set-debug-level"):
+            errmsg = "Error: -D parameter '%s' not a number\n"
+            debug = ntp.util.safeargcast(val, int, errmsg, usage)
+        elif switch in ("-l", "--logfile"):
+            if logfp is not None:
+                logfp.close()
+            logfp = open(val, "a", 1)  # 1 => line buffered
+
+    if (logfp is None) and (debug > 0):
+        logfp = open(defaultlog, "a", 1)
 
     poll_interval = 1
     helpmode = selectmode = detailmode = False
@@ -222,11 +252,15 @@ if __name__ == '__main__':
                                        wideremote=wideremote,
                                        showunits=showunits,
                                        termwidth=80,
-                                       debug=0)
+                                       debug=debug,
+                                       logfp=logfp)
     mru_report = ntp.util.MRUSummary(showhostnames,
-                                     wideremote=wideremote)
+                                     wideremote=wideremote,
+                                     debug=debug, logfp=logfp)
     try:
         session = ntp.packet.ControlSession()
+        session.debug = debug
+        session.logfp = logfp
         session.openhost(arguments[0] if arguments else "localhost")
         sysvars = session.readvar(raw=True)
         with OutputContext() as ctx:
@@ -301,9 +335,9 @@ if __name__ == '__main__':
                         if not initphase:
                             nyquist = int(min(peer_report.intervals()) / 2)
                             nyquist = 1 if nyquist == 0 else nyquist
-                            if session.debug:
-                                session.logfp.write("nyquist is %d\n" %
-                                                    nyquist)
+                            ntp.util.dolog(logfp,
+                                           "nyquist is %d\n" % nyquist,
+                                           debug, 1)
                         # The status line
                         sl = statline(peer_report, mru_report, nyquist)
                         strconvert = unicode(sl + "\n")
@@ -393,17 +427,20 @@ if __name__ == '__main__':
                             selected += len(peers) - 1
                             selected %= len(peers)
                     elif key == '+':
-                        if session.debug == 0:
-                            session.logfp = open("ntpmon.log", "a", 1)
-                            peer_report.logfp = session.logfp
-                            mru_report.logfp = session.logfp
-                        session.debug += 1
-                        peer_report.debug = session.debug
-                        mru_report.debug = session.debug
+                        if logfp is None:
+                            logfp = open(defaultlog, "a", 1)
+                            session.logfp = logfp
+                            peer_report.logfp = logfp
+                            mru_report.logfp = logfp
+                        debug += 1
+                        session.debug = debug
+                        peer_report.debug = debug
+                        mru_report.debug = debug
                     elif key == '-':
-                        session.debug -= 1
-                        peer_report.debug = session.debug
-                        mru_report.debug = session.debug
+                        debug -= 1
+                        session.debug = debug
+                        peer_report.debug = debug
+                        mru_report.debug = debug
                     elif key in ['?', 'h']:
                         helpmode = True
                 except curses.error:

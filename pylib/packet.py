@@ -1007,7 +1007,11 @@ class ControlSession:
         self.response = ''
         seenlastfrag = False
         bail = 0
-        warn = self.logfp.write
+        # TODO: refactor to simplify while retaining semantic info
+        if self.logfp is not None:
+            warn = self.logfp.write
+        else:
+            warn = (lambda x: x)
         warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
                                                   self.debug, th))
 

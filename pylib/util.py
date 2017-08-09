@@ -1044,9 +1044,10 @@ class PeerSummary:
 
 class MRUSummary:
     "Reusable class for MRU entry summary generation."
-    def __init__(self, showhostnames, wideremote=False):
-        self.debug = 0
-        self.logfp = sys.stderr
+    def __init__(self, showhostnames, wideremote=False,
+                 debug=0, logfp=sys.stderr):
+        self.debug = debug
+        self.logfp = logfp
         self.now = None
         self.showhostnames = showhostnames      # If false, display numeric IPs
         self.wideremote = wideremote
