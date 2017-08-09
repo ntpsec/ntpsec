@@ -27,9 +27,9 @@ Any keystroke causes a poll and update. Keystroke commands:
 
 from __future__ import print_function, division
 
+import getopt
 import sys
 import time
-import getopt
 
 try:
     import ntp.packet
@@ -91,6 +91,7 @@ def peer_detail(variables, showunits=False):
     vcopy = {}
     vcopyraw = {}
     vcopy.update(variables)
+    width = ntp.util.termsize().width - 2
     # Need to separate the casted from the raw
     for key in vcopy.keys():
         vcopyraw[key] = vcopy[key][1]
@@ -130,8 +131,14 @@ def peer_detail(variables, showunits=False):
         vcopy['srcadr'] = '[' + vcopy['srcadr'] + ']'
     if ':' in vcopy['dstadr']:
         vcopy['dstadr'] = '[' + vcopy['dstadr'] + ']'
+    vcopy['adr'] = "dstadr=%(dstadr)s:%(dstport)s " \
+                   "srcadr=%(srcadr)s:%(srcport)d" % vcopy
+    if len(vcopy['adr']) > width:
+        # too long, break the line
+        vcopy['adr'] = vcopy['adr'].replace(" ", "\n")
+
     peerfmt = """\
-dstadr=%(dstadr)s:%(dstport)s srcadr=%(srcadr)s:%(srcport)d
+%(adr)s
 leap=%(leap)s\treftime=%(reftime)s\trootdelay=%(rootdelay)s
 stratum=%(stratum)2d\trec=%(rec)s\trootdisp=%(rootdisp)s
 precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)s
@@ -397,7 +404,7 @@ if __name__ == '__main__':
                         session.debug -= 1
                         peer_report.debug = session.debug
                         mru_report.debug = session.debug
-                    elif key in ['?','h']:
+                    elif key in ['?', 'h']:
                         helpmode = True
                 except curses.error:
                     pass

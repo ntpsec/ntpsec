@@ -122,6 +122,7 @@ def stringfilt(data):
     rendered = " ".join(cooked)
     return rendered
 
+
 def stringfiltcooker(data):
     "Cooks a filt* string of space separated numbers, expects milliseconds"
     parts = data.split()
@@ -463,7 +464,7 @@ def f8dot3(f):
         elif f > -100000.0:
             fmt = "%8.1f"    # -xxxxx.x
 
-    return fmt % f 
+    return fmt % f
 
 
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
