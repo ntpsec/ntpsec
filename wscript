@@ -993,8 +993,9 @@ def afterparty(ctx):
     # Also, they need to be able to see the Python extension
     # module built in libntp.
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
-        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc "
-                         "wafhelpers/__pycache__/*.pyc ntpd/version.h")
+        ctx.exec_command("rm -fr wafhelpers/*.pyc pylib/__pycache__/*.pyc "
+                         "wafhelpers/__pycache__/*.pyc ntpd/version.h "
+                         "ntpclients/ntp")
     for x in ("ntpclients",):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
@@ -1072,6 +1073,9 @@ def build(ctx):
     )
 
     ctx.add_post_fun(afterparty)
+    # Second clause in the following guard is an unfulfilled hope.
+    # waf distclean doesn't go through build(ctx), it has its own
+    # execution path that we apparently cannot set hooks in.
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
         afterparty(ctx)
 

@@ -7,12 +7,7 @@
 * Add .tar.xz tarball.
 
 * Fix ntpq retransmissions.
-  Too many cases don't work well enough.  (maybe inherited from ntp classic.)
-
-* Fix waf quirks:
-  waf build doesn't build everything
-    it takes a second pass (or check) to build pylib/control.pyc and friends.
-  waf should have an option to not build or run check
+  Too many cases don't work well enough (may be inherited from ntp classic).
 
 === Testing ===
 
