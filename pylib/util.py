@@ -1054,9 +1054,9 @@ class MRUSummary:
 
     header = " lstint avgint rstr r m v  count rport remote address"
 
-    width = 79
 
     def summary(self, entry):
+        width = ntp.util.termsize().width - 1
         last = ntp.ntpc.lfptofloat(entry.last)
         if self.now:
             lstint = int(self.now - last + 0.5)
