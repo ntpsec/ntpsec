@@ -120,18 +120,6 @@ On macOS you can use this command to turn off the Apple version of NTP:
 sudo launchctl unload /System/Library/LaunchDaemons/org.ntp.ntpd.plist
 ----
 
-Under Mac OS X 10.6.8 (Snow Leopard) and probably older versions, you
-may find that configuration fails with a message about -o being an
-unknown option.  This is due to a bad interaction with waf. To work
-around this, find your waflib/Tools/gcc.py under the waf temporary
-directory There will be a line that looks like this:
-
-------------------------------------------------------------------------
-v.CCLNK_TGT_F=['-o']
-------------------------------------------------------------------------
-
-Modify that to insert a space between -o and the trailing single quote.
-
 == Basic Installation ==
 
 These are generic Unix installation instructions.
