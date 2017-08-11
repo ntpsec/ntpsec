@@ -76,7 +76,9 @@ read interactive format commands from the standard input.
   Print a usage message summarizing options end exit.
 +-n+, +--numeric+::
   Output all host addresses in numeric format rather than
-  converting to the canonical host names.
+  converting to the canonical host names.  You may get hostnames
+  anyway for peers in initialization phase, before DNS has resolved
+  the peer name.
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
   their state. This is equivalent to the +peers+ interactive command.
