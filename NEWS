@@ -9,6 +9,12 @@ on user-visible changes.
 
 == Repository Head ==
 
+The code size has been further reduced, to 56KLOC.
+
+ntpmon now reports units on time figures.
+
+Builds are fully reproducible; see SOURCE_DATE_EPOCH and BUILD_EPOCH.
+
 AES-CMAC authentication hashes are supported.  All that is necessary is for
 hosts to share the same key of type CMAC in their respective key files.
 
