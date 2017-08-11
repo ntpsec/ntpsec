@@ -10,9 +10,8 @@
 # association maintained by soft links. Following is a list of file
 # types.
 #
-# ntpkey_MD5key_<hostname>.<filestamp>
-# MD5 (128-bit) keys used to compute message digests in symmetric
-# key cryptography
+# ntpkey_MD5key_<hostname>.<filestamp>: MD5 (128-bit) keys
+# ntpkey_CMACkey_<hostname>.<filestamp>: CMAC (128-bit) keys
 
 from __future__ import print_function
 
@@ -25,40 +24,40 @@ import getopt
 import stat
 
 #
-# Cryptodefines
+# Cryptodefines.
 #
-MD5KEYS = 10    # number of keys generated of each type
-MD5SIZE = 20    # maximum key size
+BASEKEYS = 10    # number of keys generated of each type
+BASESIZE = 20    # maximum key size for MD5 and CMAC
 
-
-def gen_md5(id, groupname):
+def gen_keys(id, groupname):
     "Generate semi-random MD5 and SHA1 keys compatible with NTPv3 and NTPv4."
-    with fheader("MD5key", id, groupname) as wp:
-        for i in range(1, MD5KEYS+1):
-            md5key = ""
-            for j in range(MD5SIZE):
+    upid = id.upper()
+    with fheader(upid + "key", id, groupname) as wp:
+        for i in range(1, BASEKEYS+1):
+            basekey = ""
+            for j in range(BASESIZE):
                 while True:
                     r = randomizer.randint(0x21, 0x7e)
                     if r != ord('#'):
                         break
-                md5key += chr(r)
-            wp.write("%2d MD5 %s  # MD5 key\n" % (i, md5key))
-        for i in range(1, MD5KEYS+1):
+                basekey += chr(r)
+            wp.write("%2d %s %s  # %s key\n" % (i, upid, basekey, upid))
+        for i in range(1, BASEKEYS+1):
             sha1key = ""
-            for j in range(MD5SIZE):
+            for j in range(BASESIZE):
                 sha1key += "%02x" % randomizer.randint(0x00, 0xff)
-            wp.write("%2d SHA1 %s  # SHA1 key\n" % (i + MD5KEYS, sha1key))
+            wp.write("%2d SHA1 %s  # SHA1 key\n" % (i + BASEKEYS, sha1key))
 
 
 #
 # Generate file header and link
 #
-def fheader(file,       # file name id
+def fheader(stem,       # Filename stem made from MAC type
             ulink,      # linkname
             owner       # owner name
             ):
     try:
-        filename = "ntpkey_%s_%s.%u" % (file, owner, int(time.time()))
+        filename = "ntpkey_%s_%s.%u" % (stem, owner, int(time.time()))
         orig_umask = os.umask(stat.S_IWGRP | stat.S_IRWXO)
         wp = open(filename, "w")
         os.umask(orig_umask)
@@ -78,23 +77,26 @@ def fheader(file,       # file name id
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "hM", ["help"])
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hMC", ["help", "md5key", "cmackey"])
     except getopt.GetoptError as e:
         print(e)
         raise SystemExit(1)
 
+    keytype = "md5"
     for (switch, val) in options:
-        if switch == '-M':
+        if switch in ('-M', '--md5key'):
             # dummy MD5 option for backwards compatibility
-            pass
+            keytype = "md5"
+        elif switch in ('-C', '--cmackey'):
+            keytype = "cmac"
         elif switch in ("-h", "--help"):
-            print("usage: ntpkeygen [-M]")
+            print("usage: ntpkeygen [-M] [-C]")
             raise SystemExit(0)
 
     # The seed is ignored by random.SystemRandom,
     # even though the docs do not say so.
     randomizer = random.SystemRandom()
-    gen_md5("md5", socket.gethostname())
+    gen_keys(keytype, socket.gethostname())
     raise SystemExit(0)
 
 # end
