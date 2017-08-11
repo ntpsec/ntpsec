@@ -9,6 +9,9 @@ on user-visible changes.
 
 == Repository Head ==
 
+AES-CMAC authentication hashes are supported.  All that is necessary is for
+hosts to share the same key of type CMAC in their respective key files.
+
 == 2017-03-21: 0.9.7 ==
 
 The code size has been further reduced, to 60KLOC.
