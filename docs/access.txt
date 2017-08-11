@@ -61,12 +61,22 @@ of campus. Let's assume (not true!) that subnet 128.4.1 homes critical
 services like class rosters and spread sheets. A suitable ACL might look
 like this:
 
-----------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 restrict default nopeer                 # deny new associations
 restrict 128.175.0.0 mask 255.255.0.0       # allow campus access
 restrict 128.4.1.0 mask 255.255.255.0 notrust # require authentication on subnet 1
 restrict time.nist.gov                      # allow access
-----------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+Note that by design the 'restrict' declaration can only add
+restrictions to an IP range that has already been the subject of a
+previous restriction, not remove them.
+
+If the behavior of multiple restricts with identical or overlapping
+ranges seems confusing, bear in mind that each restrict creates an
+internal table entry associated with its subject IP range, and the table
+entries are checked in sequence when the flags applying to a
+particular IP need to be computed.
 
 While this facility may be useful for keeping unwanted, broken or
 malicious clients from congesting innocent servers, it should not be
