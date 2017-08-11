@@ -20,7 +20,7 @@ http://www.catb.org/gpsd/[the _GPSD_ project page].
 *It is important to understand that this driver works best using a GPS
 device with PPS support.*
 
-The GPSD-NG protocol is text based, using JSON notation to transfer
+The GPSD protocol is text based, using JSON notation to transfer
 records in the form of JSON objects. The driver uses a TCP/IP connection to
 +localhost:gpsd+ to connect to the daemon and then requests the GPS
 device +/dev/gpsu+ to be watched. (Different clock units use different
@@ -73,7 +73,6 @@ devices that are hot-plugged. This would require to attach the PPS line
 discipline to the character special file, which is not possible when
 running with root privileges already dropped. This is not likely to
 change in the future.
-
 
 == The \'mode' word ==
 
@@ -220,8 +219,6 @@ since the last poll.
   _[Primary Unit]_ If set, write a clock stats line on every poll cycle.
 +mode+::
   Control IBT and strict operating modes.
-+mode+::
-  Synonym for subtype, retained for backward compatibility.
 +path+ 'filename'::
   Overrides the default device path.
 +ppspath+ 'filename'::
