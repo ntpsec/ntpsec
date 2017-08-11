@@ -214,8 +214,8 @@ if __name__ == "__main__":
         if verbose:
             sys.stdout.write("\bNo!\nntpd did not synchronize.\n")
         sys.exit(1)
-    except KeyboardInterrupt:
-        sys.stderr.write("Interrupted.\n")
+    except:
+        sys.stderr.write("Aborted - possible internal error.\n")
         sys.exit(2)
 
 # end
