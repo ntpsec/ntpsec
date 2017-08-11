@@ -136,86 +136,82 @@ if __name__ == "__main__":
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
         raise SystemExit(2)
-    try:
-        tries = 100
-        sleep = 6
-        verbose = 0
-        for (switch, val) in options:
-            if switch in ("-n", "--tries"):
-                errmsg = "Error: -n parameter '%s' not a number\n"
-                tries = ntp.util.safeargcast(val, int, errmsg, __doc__)
-            elif switch in ("-s", "--sleep"):
-                errmsg = "Error: -s parameter '%s' not a number\n"
-                sleep = ntp.util.safeargcast(val, int, errmsg, __doc__)
-            elif switch in ("-v", "--verbose"):
-                verbose += 1
-            elif switch in ("-h", "--help"):
-                sys.stdout.write(__doc__)
-                raise SystemExit(0)
+    tries = 100
+    sleep = 6
+    verbose = 0
+    for (switch, val) in options:
+        if switch in ("-n", "--tries"):
+            errmsg = "Error: -n parameter '%s' not a number\n"
+            tries = ntp.util.safeargcast(val, int, errmsg, __doc__)
+        elif switch in ("-s", "--sleep"):
+            errmsg = "Error: -s parameter '%s' not a number\n"
+            sleep = ntp.util.safeargcast(val, int, errmsg, __doc__)
+        elif switch in ("-v", "--verbose"):
+            verbose += 1
+        elif switch in ("-h", "--help"):
+            sys.stdout.write(__doc__)
+            raise SystemExit(0)
 
-        # Autoflush stdout
-        sys.stdout = Unbuffered(sys.stdout)
+    # Autoflush stdout
+    sys.stdout = Unbuffered(sys.stdout)
 
-        if verbose:
-            sys.stdout.write("Waiting for ntpd to synchronize...  ")
+    if verbose:
+        sys.stdout.write("Waiting for ntpd to synchronize...  ")
 
-        for i in range(1, tries):
-            session = ntp.packet.ControlSession()
-            # session.debug = 4
-            if not session.openhost("localhost"):
-                if verbose:
-                    sys.stdout.write("\bntpd is not running!\n")
-                continue
+    for i in range(1, tries):
+        session = ntp.packet.ControlSession()
+        # session.debug = 4
+        if not session.openhost("localhost"):
+            if verbose:
+                sys.stdout.write("\bntpd is not running!\n")
+            continue
 
-            msg = None
-            try:
-                msg = session.doquery(2)     # Request system variables
-            except ntp.packet.ControlException as e:
-                sys.stderr.write("localhost: timed out, nothing received\n")
-                sys.stderr.write(e.message)
-            except socket.error:
-                if verbose:
-                    sys.stdout.write("\b" + "*+:."[i % 4])
-                time.sleep(sleep)
-                continue
+        msg = None
+        try:
+            msg = session.doquery(2)     # Request system variables
+        except ntp.packet.ControlException as e:
+            sys.stderr.write("localhost: timed out, nothing received\n")
+            sys.stderr.write(e.message)
+        except socket.error:
+            if verbose:
+                sys.stdout.write("\b" + "*+:."[i % 4])
+            time.sleep(sleep)
+            continue
 
-            if verbose >= 2:
-                sys.stderr.write(repr(session.response) + "\n")
+        if verbose >= 2:
+            sys.stderr.write(repr(session.response) + "\n")
 
-            if msg and msg.startswith("***"):
-                if verbose:
-                    sys.stdout.write("\b" + msg + "\n")
-                sys.exit(1)
-
-            m = re.search(r"leap=([^,]*),", session.response)
-            if m:
-                leap = int(m.group(1))
-            else:
-                sys.stdout.write("\bLeap status not available\n")
-                sys.exit(1)
-
-            if leap == ntp.magic.LEAP_NOTINSYNC:
-                if verbose:
-                    sys.stdout.write("\b" + "*+:."[i % 4])
-                if i < tries:
-                    time.sleep(sleep)
-                continue
-
-            if leap in (ntp.magic.LEAP_NOWARNING, ntp.magic.LEAP_ADDSECOND,
-                        ntp.magic.LEAP_DELSECOND):
-                # We could check "sync" here to make sure we like the source...
-                if verbose:
-                    sys.stdout.write("\bOK!\n")
-                sys.exit(0)
-
-            sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)
+        if msg and msg.startswith("***"):
+            if verbose:
+                sys.stdout.write("\b" + msg + "\n")
             sys.exit(1)
 
-        if verbose:
-            sys.stdout.write("\bNo!\nntpd did not synchronize.\n")
+        m = re.search(r"leap=([^,]*),", session.response)
+        if m:
+            leap = int(m.group(1))
+        else:
+            sys.stdout.write("\bLeap status not available\n")
+            sys.exit(1)
+
+        if leap == ntp.magic.LEAP_NOTINSYNC:
+            if verbose:
+                sys.stdout.write("\b" + "*+:."[i % 4])
+            if i < tries:
+                time.sleep(sleep)
+            continue
+
+        if leap in (ntp.magic.LEAP_NOWARNING, ntp.magic.LEAP_ADDSECOND,
+                    ntp.magic.LEAP_DELSECOND):
+            # We could check "sync" here to make sure we like the source...
+            if verbose:
+                sys.stdout.write("\bOK!\n")
+            sys.exit(0)
+
+        sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)
         sys.exit(1)
-    except:
-        sys.stderr.write("Aborted - possible internal error.\n")
-        sys.exit(2)
+
+    if verbose:
+        sys.stdout.write("\bNo!\nntpd did not synchronize.\n")
+    sys.exit(1)
 
 # end
