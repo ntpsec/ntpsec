@@ -15,9 +15,12 @@ hyphen and the flag character.
 A spurious 'not running' message can result from queries being disabled.
 """
 # SPDX-License-Identifier: BSD-2-Clause
-from __future__ import print_function, division
 
+# Because we've actually seen this fail on a ^C during import of ntp.packet.
+import signal
 import sys
+signal.signal(signal.SIGINT, lambda signal, frame: sys.exit(0))
+
 import getopt
 import re
 import time
