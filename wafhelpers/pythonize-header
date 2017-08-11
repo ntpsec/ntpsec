@@ -27,6 +27,8 @@ patterns = (
 
 skipstarters = ("struct", "union", "typedef struct", "typedef union")
 
+skipender = re.compile("^}.*;")	# Has to allow a structure attribute
+
 skippers = (
     re.compile(r"^#include"),
     re.compile(r"^typedef.*;\s*$"),
@@ -65,7 +67,7 @@ def pythonize(rfp, wfp):
             if line.startswith(skipstart):
                 skipto = True
                 break
-        if line.startswith("};"):
+        if skipender.match(line):
             skipto = False
             continue
         # Hack remaining content
