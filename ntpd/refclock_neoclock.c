@@ -23,6 +23,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "timespecops.h"
+#include "ntp_calendar.h"	/* for SECSPERHR */
 
 #define NAME		"NEOCLOCK"
 #define DESCRIPTION	"NeoClock4X"

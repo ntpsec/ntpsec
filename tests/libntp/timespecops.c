@@ -3,6 +3,7 @@
 #include "ntp_types.h"
 #include "ntp_fp.h"
 #include "timespecops.h"
+#include "ntp_calendar.h"
 
 #include "unity.h"
 #include "unity_fixture.h"

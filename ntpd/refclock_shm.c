@@ -17,6 +17,7 @@
 #include "ntp_refclock.h"
 #undef fileno
 #include "timespecops.h"
+#include "ntp_calendar.h"	/* for SECSPERHR */
 #undef fileno
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
