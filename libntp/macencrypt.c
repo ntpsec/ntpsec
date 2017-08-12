@@ -76,7 +76,7 @@ mac_authencrypt(
 
 
 /*
- * mac_authdecrypt - verify message authenticator
+ * mac_authdecrypt - verify MD5 message authenticator
  *
  * Returns true if digest valid, false if invalid.
  */

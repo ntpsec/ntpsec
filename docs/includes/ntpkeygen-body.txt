@@ -5,7 +5,7 @@
 [[synop]]
 == Synopsis ==
 [verse]
-+ntpkeygen+ [+-M+] [+-C+]
++ntpkeygen+ [+-M+]
 
 [[descrip]]
 == Description ==
@@ -14,24 +14,20 @@ This program generates the keys used in NTP's symmetric key
 cryptography.
 
 The program produces a file containing ten pseudo-random printable
-ASCII strings suitable for the message digest algorithms (MD5 and
-AES-CMAC) included in the distribution.  It also produces an
-additional ten hex-encoded random bit strings suitable for the SHA-1
-and other message digest algorithms. The message digest keys file must
-be distributed and stored using secure means beyond the scope of NTP
-itself. Besides the keys used for ordinary NTP associations,
-additional keys can be defined as passwords for the
-link:ntpq.html[+ntpq+] utility program.
+ASCII strings suitable for the MD5 message digest algorithm included
+in the distribution.  It also produces an additional ten hex-encoded
+random bit strings suitable for the SHA-1 and other message digest
+algorithms. The message digest keys file must be distributed and
+stored using secure means beyond the scope of NTP itself. Besides
+the keys used for ordinary NTP associations, additional keys can be
+defined as passwords for the link:ntpq.html[+ntpq+] utility program.
 
 [[cmd]]
 == Command Line Options ==
 
 +-M+, +--md5key+::
   Dummy option for backward compatibility in old scripts.  This
-  program runs in -M mode by default.
-
-+-C+, +--cmackey+::
-  Generate AES-CMAC keys.
+  program always runs in -M mode.
 
 [[run]]
 == Running the program ==
@@ -119,7 +115,7 @@ format:
 |====================================================================
 |Field	| Meaning
 |keyno	| Positive integer in the range 1-65,535
-|type	| MD5, CMAC, or SHA-1: type of key
+|type	| MD5 or SHA-1 , type of key
 |key	| the actual key, printable ASCII
 |====================================================================
 
