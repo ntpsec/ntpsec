@@ -137,6 +137,9 @@ from _GPSD_ and needs the corresponding master unit to
 work^link:#fn1[1]^. [[fn1bl]]Use the 'noselect' keyword on the primary unit if
 you are not interested in its data.
 
+The way to use a secondary clock unit is to pair it with a primary in
+"tandem mode": see the configuration examples below.
+
 The secondary unit employs the usual precautions before feeding clock
 samples:
 
@@ -244,11 +247,13 @@ control loop. You do not want to use sloppy data for that.
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock gpsd mode 2
+# Conentional mode 2 on unit 0, IBD only, experimental automatic mode
 refclock gpsd mode 2 path /dev/tty.usbserial
-----------------------------------------------------------------------------
 
-This is configured for the experimental automatic mode.
+# Tandem mode, IBD and PPS from unit 0
+server gpsd unit 0 minpoll 4 maxpoll 4 time1 0.142
+server gpsd unit 128 minpoll 4 maxpoll 4 time1 0.001500
+----------------------------------------------------------------------------
 
 == Known bugs ==
 
