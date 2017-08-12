@@ -99,9 +99,13 @@ wget:
 
 === Apple ===
 
+Previous support for OS X 10.11 has been dropped due to multiple
+botches on Apple's part.  Your OS X needs to have POSIX compliant
+clock_gettime(2) and clock_settime(2) functions.
+
 The OS X build has been tested in this environment:
 
- OS X Version             : 10.11.x (El Capitan)
+ OS X Version             : 10.12
  Xcode Version            : 7.1
  Xcode Command Line Tools : 7.2-beta
 
