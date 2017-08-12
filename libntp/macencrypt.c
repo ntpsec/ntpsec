@@ -1,5 +1,5 @@
 /*
- *	digest support for NTP, MD5 and with OpenSSL more
+ *	digest support for NTP
  */
 #include "config.h"
 
@@ -76,7 +76,7 @@ mac_authencrypt(
 
 
 /*
- * mac_authdecrypt - verify MD5 message authenticator
+ * mac_authdecrypt - verify message authenticator
  *
  * Returns true if digest valid, false if invalid.
  */
