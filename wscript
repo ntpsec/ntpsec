@@ -231,9 +231,6 @@ def configure(ctx):
     ctx.end_msg(ctx.env.NTPSEC_VERSION_STRING)
 
     # We require some things that C99 doesn't enable, like pthreads.
-    # FIXME: In theory, -D_POSIX_C_SOURCE=199309L should be sufficient for us.
-    # Bare -std=c99 won't work because it doesn't expose siginfo_t.
-    #
     # These flags get propagated to both the host and main parts of the build.
     #
     #_POSIX_C_SOURCE
@@ -242,6 +239,17 @@ def configure(ctx):
     #      if >=199309L, add IEEE Std 1003.1b-1993;
     #      if >=199506L, add IEEE Std 1003.1c-1995;
     #      if >=200112L, all of IEEE 1003.1-2004
+    #      if >=200809L, all of IEEE 1003.1-2008
+    #
+    # FIXME: We'd like this to be -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=600
+    # rather than -D_GNU_SOURCE, but that runs into problems in two places:
+    # (1) The ISC net handling stuff, where struct in6_addr’ loses a member
+    # named s6_addr32 that the macros need, and (2) three BSD functions
+    # related to chroot jailing in the sandbox code.
+    #
+    # Note that _POSIX_C_SOURCE >= 199506L and _GNU_SOURCE both turn on
+    # _POSIX_PTHREAD_SEMANTICS and _REENTRANT
+    #
     ctx.env.CFLAGS = ["-std=c99", "-D_GNU_SOURCE"] + ctx.env.CFLAGS
 
     msg("--- Configuring main ---")
