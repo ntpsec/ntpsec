@@ -13,6 +13,11 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
+/* This is a glibc thing, not standardized */
+#ifndef NI_MAXSERV
+#define NI_MAXSERV 32
+#endif
+
 /*
  * decodenetnum		convert text IP address and port to sockaddr_u
  *

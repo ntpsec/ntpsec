@@ -2093,7 +2093,7 @@ ctl_putpeer(
 				   strlen(p->hostname));
 #ifdef REFCLOCK
 		if (p->procptr != NULL) {
-		    char buf1[NI_MAXHOST];
+		    char buf1[256];
 		    strlcpy(buf1, refclock_name(p), sizeof(buf1));
 		    ctl_putstr(peer_var[id].text, buf1, strlen(buf1));
 		}
