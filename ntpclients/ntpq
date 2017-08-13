@@ -1326,7 +1326,7 @@ usage: config_from_file <configuration filename>
                 try:
                     delta1 = time.time() - self.session.start
                     self.say(ntp.util.MRUSummary.header + "\n")
-                    self.say(("=" * ntp.util.MRUSummary.width) + "\n")
+                    self.say(("=" * len(ntp.util.MRUSummary.header)) + "\n")
                     # reversed puts most recent entries at the top if no sort=
                     # see sort comments in pylib/packet.py
                     formatter.now = span.now
