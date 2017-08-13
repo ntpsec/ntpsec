@@ -116,7 +116,9 @@ void ppscheck(const char *device)
 			err(1, "time_pps_fetch");
 		if (olda == pi.assert_sequence &&
 		    oldc == pi.clear_sequence) {
-			usleep(10000);
+			/* used to be usleep(10000) - 0.1 sec */
+			const struct timespec tenth = {0, 100000};
+			nanosleep(&tenth, NULL);
 			continue;
 		}
 
