@@ -19,7 +19,7 @@ A spurious 'not running' message can result from queries being disabled.
 # Because we've actually seen this fail on a ^C during import of ntp.packet.
 import signal
 import sys
-signal.signal(signal.SIGINT, lambda signal, frame: sys.exit(0))
+signal.signal(signal.SIGINT, lambda signal, frame: sys.exit(2))
 
 import getopt
 import re
