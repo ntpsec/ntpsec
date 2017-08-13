@@ -55,9 +55,9 @@ format_time_fraction(
 	)
 {
 	char *		cp;
-	u_int		prec_u;
+	unsigned int	prec_u;
 	u_time		secs_u;
-	u_int		u;
+	unsigned int	u;
 	long		fraclimit;
 	int		notneg;	/* flag for non-negative value	*/
 	ldiv_t		qr;
@@ -69,7 +69,7 @@ format_time_fraction(
 	
 	/* check if we need signed or unsigned mode */
 	notneg = (prec < 0);
-	prec_u = (u_int)abs(prec);
+	prec_u = (unsigned int)abs(prec);
 	/* fraclimit = (long)pow(10, prec_u); */
 	for (fraclimit = 10, u = 1; u < prec_u; u++) {
 		//INSIST(fraclimit < fraclimit * 10);

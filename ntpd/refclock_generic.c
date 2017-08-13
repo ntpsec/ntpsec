@@ -218,8 +218,8 @@ typedef struct bind
 
 struct errorregression
 {
-	u_long err_count;	/* number of repetitions per class */
-	u_long err_delay;	/* minimum delay between messages */
+	unsigned long err_count;	/* number of repetitions per class */
+	unsigned long err_delay;	/* minimum delay between messages */
 };
 
 static struct errorregression
@@ -286,10 +286,10 @@ err_tbl[] =
 
 struct errorinfo
 {
-	u_long err_started;	/* begin time (ntp) of error condition */
-	u_long err_last;	/* last time (ntp) error occurred */
-	u_long err_cnt;	/* number of error repetitions */
-	u_long err_suppressed;	/* number of suppressed messages */
+	unsigned long err_started;	/* begin time (ntp) of error condition */
+	unsigned long err_last;		/* last time (ntp) error occurred */
+	unsigned long err_cnt;		/* number of error repetitions */
+	unsigned long err_suppressed;	/* number of suppressed messages */
 	struct errorregression *err_stage; /* current error stage */
 };
 
@@ -323,16 +323,16 @@ struct parseunit
 	/*
 	 * clock state handling/reporting
 	 */
-	uint8_t	      flags;	        /* flags (leap_control) */
-	u_long	      lastchange;       /* time (ntp) when last state change accured */
-	u_long	      statetime[CEVNT_MAX+1]; /* accumulated time of clock states */
-	u_long        pollneeddata; 	/* current_time(!=0) for receive sample expected in PPS mode */
-	u_short	      lastformat;       /* last format used */
-	u_long        lastsync;		/* time (ntp) when clock was last seen fully synchronized */
-        u_long        maxunsync;        /* max time in seconds a receiver is trusted after losing synchronisation */
-        double        ppsphaseadjust;   /* phase adjustment of PPS time stamp */
-        u_long        lastmissed;       /* time (ntp) when poll didn't get data (powerup heuristic) */
-	u_long        ppsserial;        /* magic cookie for ppsclock serials (avoids stale ppsclock data) */
+	uint8_t	      	      flags;	        /* flags (leap_control) */
+	unsigned long	      lastchange;       /* time (ntp) when last state change accured */
+	unsigned long	      statetime[CEVNT_MAX+1]; /* accumulated time of clock states */
+	unsigned long         pollneeddata; 	/* current_time(!=0) for receive sample expected in PPS mode */
+	unsigned short	      lastformat;       /* last format used */
+	unsigned long         lastsync;		/* time (ntp) when clock was last seen fully synchronized */
+        unsigned long         maxunsync;        /* max time in seconds a receiver is trusted after losing synchronisation */
+        double		      ppsphaseadjust;   /* phase adjustment of PPS time stamp */
+        unsigned long         lastmissed;       /* time (ntp) when poll didn't get data (powerup heuristic) */
+	unsigned long         ppsserial;        /* magic cookie for ppsclock serials (avoids stale ppsclock data) */
 	int	      ppsfd;	        /* fd to ise for PPS io */
 #ifdef HAVE_PPSAPI
         int           hardppsstate;     /* current hard pps state */
@@ -343,7 +343,7 @@ struct parseunit
         unsigned long localstate;       /* private local state */
 	struct errorinfo errors[ERR_CNT];  /* error state table for suppressing excessive error messages */
 	struct ctl_var *kv;	        /* additional pseudo variables */
-	u_long        laststatistic;    /* time when staticstics where output */
+	unsigned long        laststatistic;    /* time when staticstics where output */
 };
 
 
@@ -358,9 +358,9 @@ static	bool	poll_init	(struct parseunit *);
 
 typedef struct poll_info
 {
-	u_long      rate;		/* poll rate - once every "rate" seconds - 0 off */
-	const char *string;		/* string to send for polling */
-	u_long      count;		/* number of characters in string */
+	unsigned long      rate;	/* poll once every "rate" seconds - 0 off */
+	const char 	   *string;	/* string to send for polling */
+	unsigned long      count;	/* number of characters in string */
 } poll_info_t;
 
 #define NO_CL_FLAGS	0
@@ -507,7 +507,7 @@ static poll_info_t gps16x_pollinfo = { GPS16X_POLLRATE, GPS16X_POLLCMD, GPS16X_C
  * When the WSDCF clock is operating optimally we want the primary clock
  * distance to come out at 300 ms.  Thus, peer.distance in the WSDCF peer
  * structure is set to 290 ms and we compute delays which are at least
- * 10 ms long.  The following are 290 ms and 10 ms expressed in u_fp format
+ * 10 ms long.  The following are 290 ms and 10 ms expressed in unsigned fp format
  */
 #define WS_POLLRATE	1	/* every second - watch interdependency with poll routine */
 #define WS_POLLCMD	"\163"
@@ -809,7 +809,7 @@ static poll_info_t sel240x_pollinfo = { SEL240X_POLLRATE,
 
 static struct parse_clockinfo
 {
-	u_long  cl_flags;		/* operation flags (PPS interpretation, trust handling) */
+	unsigned long  cl_flags;		/* operation flags (PPS interpretation, trust handling) */
   void  (*cl_poll)    (struct parseunit *);			/* active poll routine */
   bool  (*cl_init)    (struct parseunit *);			/* active poll init routine */
   void  (*cl_event)   (struct parseunit *, int);		/* special event handling (e.g. reset clock) */
@@ -824,14 +824,14 @@ static struct parse_clockinfo
 	const char *cl_description;	/* device description */
 	const char *cl_format;		/* fixed format */
 	uint8_t  cl_type;		/* clock type (ntp control) */
-	u_long  cl_maxunsync;		/* time to trust oscillator after losing synch */
-	u_long  cl_speed;		/* terminal input & output baudrate */
-	u_long  cl_cflag;             /* terminal control flags */
-	u_long  cl_iflag;             /* terminal input flags */
-	u_long  cl_oflag;             /* terminal output flags */
-	u_long  cl_lflag;             /* terminal local flags */
-	u_long  cl_samples;	      /* samples for median filter */
-	u_long  cl_keep;              /* samples for median filter to keep */
+	unsigned long  cl_maxunsync;	/* time to trust oscillator after losing synch */
+	unsigned long  cl_speed;	/* terminal input & output baudrate */
+	unsigned long  cl_cflag;        /* terminal control flags */
+	unsigned long  cl_iflag;        /* terminal input flags */
+	unsigned long  cl_oflag;        /* terminal output flags */
+	unsigned long  cl_lflag;        /* terminal local flags */
+	unsigned long  cl_samples;	/* samples for median filter */
+	unsigned long  cl_keep;         /* samples for median filter to keep */
 } parse_clockinfo[] =
 {
 	{				/* subtype 0 */
@@ -1467,9 +1467,9 @@ static int notice = 0;
 
 static void parse_event   (struct parseunit *, int);
 static void parse_process (struct parseunit *, parsetime_t *);
-static void clear_err     (struct parseunit *, u_long);
-static int  list_err      (struct parseunit *, u_long);
-static char * l_mktime    (u_long);
+static void clear_err     (struct parseunit *, unsigned long);
+static int  list_err      (struct parseunit *, unsigned long);
+static char * l_mktime    (unsigned long);
 
 /**===========================================================================
  ** implementation error message regression module
@@ -1477,7 +1477,7 @@ static char * l_mktime    (u_long);
 static void
 clear_err(
 	struct parseunit *parse,
-	u_long            lstate
+	unsigned long    lstate
 	)
 {
 	if (lstate == ERR_ALL)
@@ -1506,7 +1506,7 @@ clear_err(
 static int
 list_err(
 	struct parseunit *parse,
-	u_long            lstate
+	unsigned long     lstate
 	)
 {
 	int do_it;
@@ -1563,7 +1563,7 @@ mkreadable(
 	char  *buffer,
 	long  blen,
 	const char  *src,
-	u_long  srclen,
+	unsigned long  srclen,
 	int hex
 	)
 {
@@ -1635,7 +1635,7 @@ mkascii(
 	char  *buffer,
 	long  blen,
 	const char  *src,
-	u_long  srclen
+	unsigned long  srclen
 	)
 {
 	return mkreadable(buffer, blen, src, srclen, 0);
@@ -2017,14 +2017,14 @@ ap(char *buffer, size_t len, char *pos, const char *fmt, ...)
  */
 static char *
 parsestate(
-	u_long lstate,
+	unsigned long lstate,
 	char *buffer,
 	int size
 	)
 {
 	static struct bits
 	{
-		u_long      bit;
+		unsigned long      bit;
 		const char *name;
 	} flagstrings[] =
 	  {
@@ -2045,7 +2045,7 @@ parsestate(
 
 	static struct sbits
 	{
-		u_long      bit;
+		unsigned long      bit;
 		const char *name;
 	} sflagstrings[] =
 	  {
@@ -2108,14 +2108,14 @@ parsestate(
  */
 static char *
 parsestatus(
-	u_long lstate,
+	unsigned long lstate,
 	char *buffer,
 	int size
 	)
 {
 	static struct bits
 	{
-		u_long      bit;
+		unsigned long      bit;
 		const char *name;
 	} flagstrings[] =
 	  {
@@ -2155,13 +2155,13 @@ parsestatus(
  */
 static const char *
 clockstatus(
-	u_long lstate
+	unsigned long lstate
 	)
 {
 	static char buffer[20];
 	static struct status
 	{
-		u_long      value;
+		unsigned long      value;
 		const char *name;
 	} flagstrings[] =
 	  {
@@ -2177,7 +2177,7 @@ clockstatus(
 	int i;
 
 	i = 0;
-	while (flagstrings[i].value != (u_int)~0)
+	while (flagstrings[i].value != (unsigned int)~0)
 	{
 		if (flagstrings[i].value == lstate)
 		{
@@ -2197,10 +2197,10 @@ clockstatus(
  */
 static char *
 l_mktime(
-	u_long delta
+	unsigned long delta
 	)
 {
-	u_long tmp, m, s;
+	unsigned long tmp, m, s;
 	static char buffer[40];
 	char *t;
 
@@ -2247,12 +2247,12 @@ parse_statistics(
 
 			for (i = 0; i <= CEVNT_MAX; i++)
 			{
-				u_long s_time;
-				u_long percent, d = current_time - parse->generic->timestarted;
+				unsigned long s_time;
+				unsigned long percent, d = current_time - parse->generic->timestarted;
 
 				percent = s_time = PARSE_STATETIME(parse, i);
 
-				while (((u_long)(~0) / 10000) < percent)
+				while (((unsigned long)(~0) / 10000) < percent)
 				{
 					percent /= 10;
 					d       /= 10;
@@ -2495,14 +2495,14 @@ parse_start(
 	struct peer *peer
 	)
 {
-	u_int unit;
+	unsigned int unit;
 	int fd232;
 	struct termios tio;		/* NEEDED FOR A LONG TIME ! */
 	struct parseunit * parse;
 	char parsedev[sizeof(PARSEDEVICE)+20];
 	char parseppsdev[sizeof(PARSEPPSDEVICE)+20];
 	parsectl_t tmp_ctl;
-	u_int type;
+	unsigned int type;
 
 	UNUSED_ARG(sysunit);
 
@@ -2521,10 +2521,10 @@ parse_start(
 	peer->refclkunit = peer->refclkunit & 0x03;
 #endif /* ENABLE_CLASSIC_MODE */
 
-	type = (u_int)CLK_TYPE(peer);
+	type = (unsigned int)CLK_TYPE(peer);
 	unit = peer->refclkunit;
 
-	if ((type == (u_int)~0) || (parse_clockinfo[type].cl_description == (char *)0))
+	if ((type == (unsigned int)~0) || (parse_clockinfo[type].cl_description == (char *)0))
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%u: parse_start: "
                                  "unsupported clock type %d (max %d)",
@@ -2786,7 +2786,7 @@ parse_start(
 	}
 
 	strlcpy(tmp_ctl.parseformat.parse_buffer, parse->parse_type->cl_format, sizeof(tmp_ctl.parseformat.parse_buffer));
-	tmp_ctl.parseformat.parse_count = (u_short) strlen(tmp_ctl.parseformat.parse_buffer);
+	tmp_ctl.parseformat.parse_count = (unsigned short) strlen(tmp_ctl.parseformat.parse_buffer);
 
 	if (!PARSE_SETFMT(parse, &tmp_ctl))
 	{
@@ -2894,7 +2894,7 @@ parse_ctl(
 		  parse->generic->fudgetime2 = in->fudgetime2;
 		  if (parse->flags & PARSE_TRUSTTIME)
 		    {
-		      parse->maxunsync = (u_long)ABS(in->fudgetime2);
+		      parse->maxunsync = (unsigned long)ABS(in->fudgetime2);
 		      msyslog(LOG_INFO, "PARSE receiver #%d: new trust time %s",
 			      parse->peer->refclkunit,
 			      l_mktime(parse->maxunsync));
@@ -3013,7 +3013,7 @@ parse_control(
 	 */
 	if (out)
 	{
-		u_long sum = 0;
+		unsigned long sum = 0;
 		char *tt, *start;
 		int i;
 
@@ -3125,13 +3125,13 @@ parse_control(
 
 		for (i = 0; i <= CEVNT_MAX; i++)
 		{
-			u_long s_time;
-			u_long d = current_time - parse->generic->timestarted;
-			u_long percent;
+			unsigned long s_time;
+			unsigned long d = current_time - parse->generic->timestarted;
+			unsigned long percent;
 
 			percent = s_time = PARSE_STATETIME(parse, i);
 
-			while (((u_long)(~0) / 10000) < percent)
+			while (((unsigned long)(~0) / 10000) < percent)
 			{
 				percent /= 10;
 				d       /= 10;
@@ -3185,7 +3185,7 @@ parse_control(
 			}
 		}
 
-		out->lencode       = (u_short) strlen(outstatus);
+		out->lencode       = (unsigned short) strlen(outstatus);
 		out->p_lastcode    = outstatus;
 	}
 }
@@ -4491,11 +4491,11 @@ trimbletaip_event(
 
 typedef struct trimble
 {
-	u_long last_msg;	/* last message received */
-	u_long last_reset;	/* last time a reset was issued */
+	unsigned long last_msg;	/* last message received */
+	unsigned long last_reset;	/* last time a reset was issued */
 	uint8_t qtracking;	/* query tracking status */
-	u_long ctrack;		/* current tracking set */
-	u_long ltrack;		/* last tracking set */
+	unsigned long ctrack;		/* current tracking set */
+	unsigned long ltrack;		/* last tracking set */
 } trimble_t;
 
 union uval {
@@ -4560,7 +4560,7 @@ sendetx(
 		  char buffer[256];
 
 		  mkreadable(buffer, sizeof(buffer), (char *)buf->txt,
-                             (u_long)buf->idx, 1);
+                             (unsigned long)buf->idx, 1);
 		  printf("PARSE receiver #%d: transmitted message (%d bytes) >%s<\n",
 			 parse->peer->refclkunit,
 			 buf->idx, buffer);
@@ -4677,7 +4677,7 @@ trimble_check(
 
 	if (t && t->qtracking)
 	{
-		u_long oldsats = t->ltrack & ~t->ctrack;
+		unsigned long oldsats = t->ltrack & ~t->ctrack;
 
 		t->qtracking = 0;
 		t->ltrack = t->ctrack;
@@ -4731,7 +4731,7 @@ trimbletsip_init(
 {
 #if defined(VEOL) || defined(VEOL2)
 	struct termios tio;		/* NEEDED FOR A LONG TIME ! */
-	u_int type;
+	unsigned int type;
 	/*
 	 * allocate local data area
 	 */
@@ -4757,8 +4757,8 @@ trimbletsip_init(
 	}
 	else
 	{
-		type = (u_int)CLK_TYPE(parse->peer);
-		if ( (type != (u_int)~0) &&
+		type = (unsigned int)CLK_TYPE(parse->peer);
+		if ( (type != (unsigned int)~0) &&
                      (parse_clockinfo[type].cl_lflag & ICANON))
 		{
 #ifdef VEOL
@@ -4898,7 +4898,7 @@ trimbletsip_message(
 	}
 	else
 	{
-		u_short var_flag;
+		unsigned short var_flag;
 		trimble_t *tr = parse->localdata;
 		unsigned int cmd = buffer[1];
 		char pbuffer[200];
@@ -4934,7 +4934,7 @@ trimbletsip_message(
 			return;
 		}
 
-		var_flag = (u_short) s->varmode;
+		var_flag = (unsigned short) s->varmode;
 
 		switch(cmd)
 		{
@@ -5230,7 +5230,7 @@ trimbletsip_message(
 			if (getflt((unsigned char *)&mb(4)) < 0.0)
 			{
 				t = ap(pbuffer, sizeof(pbuffer), t, "<NO MEASUREMENTS>");
-				var_flag &= (u_short)(~DEF);
+				var_flag &= (unsigned short)(~DEF);
 			}
 			else
 			{
@@ -5243,7 +5243,7 @@ trimbletsip_message(
 					getflt((unsigned char *)&mb(16)) * RTOD);
 				if (mb(20))
 				{
-					var_flag &= (u_short)(~DEF);
+					var_flag &= (unsigned short)(~DEF);
 					t = ap(pbuffer, sizeof(pbuffer), t, ", OLD");
 				}
 				if (mb(22))
@@ -5538,7 +5538,7 @@ rawdcf_init_2(
  * RECON_4_0_98F
  *
  * Revision 4.34  1999/05/14 06:08:05  kardel
- * store current_time in a suitable container (u_long)
+ * store current_time in a suitable container (unsigned long)
  *
  * Revision 4.33  1999/05/13 21:48:38  kardel
  * double the no response timeout interval

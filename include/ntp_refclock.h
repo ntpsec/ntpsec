@@ -38,7 +38,7 @@
 struct refclockstat {
 	uint8_t	flags;		/* clock flags */
 	uint8_t	haveflags;	/* bit array of valid flags */
-	u_short	lencode;	/* length of last timecode */
+	unsigned short	lencode;	/* length of last timecode */
 	const char *p_lastcode;	/* last timecode received */
 	uint32_t	polls;		/* transmit polls */
 	uint32_t	noresponse;	/* no response to poll */
@@ -71,7 +71,7 @@ struct refclockio {
 	struct peer *srcclock;	/* refclock peer */
 	size_t	datalen;	/* length of data */
 	int	fd;		/* file descriptor */
-	u_long	recvcount;	/* count of receive completions */
+	unsigned long	recvcount;	/* count of receive completions */
 	bool	active;		/* true when in use */
 };
 
@@ -82,12 +82,12 @@ struct refclockio {
 #define	NCLKBUGTIMES	32
 
 struct refclockbug {
-	uint8_t	nvalues;	/* values following */
-	uint8_t	ntimes;		/* times following */
-	u_short	svalues;	/* values format sign array */
+	uint8_t		nvalues;	/* values following */
+	uint8_t		ntimes;		/* times following */
+	unsigned short	svalues;	/* values format sign array */
 	uint32_t	stimes;		/* times format sign array */
 	uint32_t	values[NCLKBUGVALUES]; /* real values */
-	l_fp	times[NCLKBUGTIMES]; /* real times */
+	l_fp		times[NCLKBUGTIMES]; /* real times */
 };
 
 /*
@@ -109,7 +109,7 @@ struct refclockproc {
 	uint8_t	lastevent;	/* last exception event */
 	const char *clockname;	/* clock name (tag for logging) */
 	const char *clockdesc;	/* clock description */
-	u_long	nextaction;	/* local activity timeout */
+	unsigned long	nextaction;	/* local activity timeout */
 	void	(*action)(struct peer *); /* timeout callback */
 
 	char	a_lastcode[BMAX]; /* last timecode received */
@@ -143,11 +143,11 @@ struct refclockproc {
 	/*
 	 * Status tallies
  	 */
-	u_long	timestarted;	/* time we started this */
-	u_long	polls;		/* polls sent */
-	u_long	noreply;	/* no replies to polls */
-	u_long	badformat;	/* bad format reply */
-	u_long	baddata;	/* bad data reply */
+	unsigned long	timestarted;	/* time we started this */
+	unsigned long	polls;		/* polls sent */
+	unsigned long	noreply;	/* no replies to polls */
+	unsigned long	badformat;	/* bad format reply */
+	unsigned long	baddata;	/* bad data reply */
 };
 
 /*
@@ -181,7 +181,7 @@ extern	void	init_refclock	(void);
 extern	void	refclock_control(sockaddr_u *,
 				 const struct refclockstat *,
 				 struct refclockstat *);
-extern	int	refclock_open	(char *, u_int, u_int);
+extern	int	refclock_open	(char *, unsigned int, unsigned int);
 extern	void	refclock_timer	(struct peer *);
 extern	void	refclock_transmit(struct peer *);
 extern 	bool	refclock_process(struct refclockproc *);

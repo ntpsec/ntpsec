@@ -40,7 +40,7 @@
 extern	const char	*getconfig	(const char *);
 extern	void	readconfig(const char *);
 extern	void	ctl_clr_stats	(void);
-extern	u_short ctlpeerstatus	(struct peer *);
+extern	unsigned short ctlpeerstatus	(struct peer *);
 extern	void	init_control	(void);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *, const char *);
@@ -53,8 +53,8 @@ extern	int	mprintf_event	(int, struct peer *, const char *, ...)
  * variable indices and text format.
  */
 struct ctl_var {
-	u_short code;
-	u_short flags;
+	unsigned short code;
+	unsigned short flags;
 	const char *text;
 };
 /*
@@ -70,10 +70,10 @@ struct ctl_var {
 #define	RO	(CAN_READ)
 #define	RW	(CAN_READ|CAN_WRITE)
 
-extern	char *	add_var (struct ctl_var **, u_long, u_short);
+extern	char *	add_var (struct ctl_var **, unsigned long, unsigned short);
 extern	void	free_varlist (struct ctl_var *);
-extern	void	set_var (struct ctl_var **, const char *, u_long, u_short);
-extern	void	set_sys_var (const char *, u_long, u_short);
+extern	void	set_var (struct ctl_var **, const char *, unsigned long, unsigned short);
+extern	void	set_sys_var (const char *, unsigned long, unsigned short);
 extern	const char *	get_ext_sys_var(const char *tag);
 
 /* ntp_io.c */
@@ -109,7 +109,7 @@ extern	void	adj_host_clock(void);
 extern	void	loop_config(int, double);
 extern	void	select_loop(int);
 extern	void	huffpuff(void);
-extern	u_int	sys_tai;
+extern	unsigned int	sys_tai;
 extern 	int	freq_cnt;
 
 /* ntp_monitor.c */
@@ -119,7 +119,7 @@ extern 	int	freq_cnt;
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
-extern	u_short	ntp_monitor	(struct recvbuf *, u_short);
+extern	unsigned short	ntp_monitor	(struct recvbuf *, unsigned short);
 extern	void	mon_clearinterface(endpt *interface);
 extern  int	mon_get_oldest_age(l_fp);
 
@@ -132,7 +132,7 @@ extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
-				 uint8_t, uint8_t, u_int, uint8_t, uint32_t,
+				 uint8_t, uint8_t, unsigned int, uint8_t, uint32_t,
 				 keyid_t, const bool);
 extern	void	peer_update_hash (struct peer *);
 extern	void	peer_all_reset	(void);
@@ -160,26 +160,26 @@ extern	void	poll_update	(struct peer *, uint8_t);
 extern	void	clock_filter	(struct peer *, double, double, double);
 extern	void	init_proto	(const bool);
 extern	void	set_sys_tick_precision(double);
-extern	void	proto_config	(int, u_long, double);
+extern	void	proto_config	(int, unsigned long, double);
 extern	void	proto_clr_stats (void);
 
 
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
-extern	u_short	restrictions	(sockaddr_u *);
+extern	unsigned short	restrictions	(sockaddr_u *);
 extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *,
-				 u_short, u_short, u_long);
-extern	void	restrict_source	(sockaddr_u *, bool, u_long);
+				 unsigned short, unsigned short, unsigned long);
+extern	void	restrict_source	(sockaddr_u *, bool, unsigned long);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);
 extern	void	reinit_timer	(void);
 extern	void	timer		(void);
 extern	void	timer_clr_stats (void);
-extern	void	timer_interfacetimeout (u_long);
+extern	void	timer_interfacetimeout (unsigned long);
 extern	volatile int interface_interval;
-extern	u_long	orphwait;		/* orphan wait time */
+extern	unsigned long	orphwait;		/* orphan wait time */
 
 /* ntp_util.c */
 extern	void	init_util	(void);
@@ -195,7 +195,7 @@ extern	void	record_raw_stats (struct peer *,
 				  int leap, int version, int mode, int stratum,
 				  int ppoll, int precision, double root_delay,
 				  double root_dispersion, uint32_t refid,
-				  u_int outcount);
+				  unsigned int outcount);
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 #ifdef ENABLE_DEBUG_TIMING
 extern	void	record_timing_stats (const char *);
@@ -233,19 +233,19 @@ extern	void	reset_auth_stats(void);
 /*
  * Other statistics of possible interest
  */
-extern u_long packets_dropped;	/* total number of packets dropped on reception */
-extern u_long	packets_ignored;	/* received on wild card interface */
-extern u_long	packets_received;	/* total number of packets received */
-extern u_long	packets_sent;		/* total number of packets sent */
-extern u_long	packets_notsent; 	/* total number of packets which couldn't be sent */
+extern unsigned long packets_dropped;	/* # packets dropped on reception */
+extern unsigned long packets_ignored;	/* received on wild card interface */
+extern unsigned long packets_received;	/* total number of packets received */
+extern unsigned long packets_sent;	/* total number of packets sent */
+extern unsigned long packets_notsent; 	/* total number of packets which couldn't be sent */
 
-extern volatile u_long handler_calls;	/* number of calls to interrupt handler */
-extern volatile u_long handler_pkts;	/* number of pkts received by handler */
-extern u_long	io_timereset;		/* time counters were reset */
+extern volatile unsigned long handler_calls;	/* number of calls to interrupt handler */
+extern volatile unsigned long handler_pkts;	/* number of pkts received by handler */
+extern unsigned long	io_timereset;		/* time counters were reset */
 
 /* ntp_io.c */
 extern bool	disable_dynamic_updates;
-extern u_int	sys_ifnum;		/* next .ifnum to assign */
+extern unsigned int	sys_ifnum;		/* next .ifnum to assign */
 extern endpt *	any_interface;		/* IPv4 wildcard */
 extern endpt *	any6_interface;		/* IPv6 wildcard */
 extern endpt *	loopback_interface;	/* IPv4 loopback for refclocks */
@@ -286,20 +286,20 @@ extern double	sys_jitter;		/* system jitter (s) */
 extern uint8_t	mon_hash_bits;		/* log2 size of hash table */
 extern mon_entry ** mon_hash;		/* MRU hash table */
 extern mon_entry mon_mru_list;		/* mru listhead */
-extern u_int	mon_enabled;		/* MON_OFF (0) or other MON_* */
-extern u_int	mru_entries;		/* mru list count */
-extern u_int	mru_peakentries;	/* highest mru_entries */
-extern u_int	mru_initalloc;		/* entries to preallocate */
-extern u_int	mru_incalloc;		/* allocation batch factor */
-extern u_int	mru_mindepth;		/* preempt above this */
+extern unsigned int	mon_enabled;		/* MON_OFF (0) or other MON_* */
+extern unsigned int	mru_entries;		/* mru list count */
+extern unsigned int	mru_peakentries;	/* highest mru_entries */
+extern unsigned int	mru_initalloc;		/* entries to preallocate */
+extern unsigned int	mru_incalloc;		/* allocation batch factor */
+extern unsigned int	mru_mindepth;		/* preempt above this */
 extern int	mru_maxage;		/* recycle if older than this */
 extern int	mru_minage;		/* recycle if older than this & full */
-extern u_int	mru_maxdepth; 		/* MRU size hard limit */
-extern u_long	mru_exists;		/* slot already exists */
-extern u_long	mru_new;		/* allocated new slot */
-extern u_long	mru_recycleold;		/* recycle: age > maxage */
-extern u_long	mru_recyclefull;	/* recycle: full and age > minage */
-extern u_long	mru_none;		/* couldn't allocate slot */
+extern unsigned int	mru_maxdepth; 		/* MRU size hard limit */
+extern unsigned long	mru_exists;		/* slot already exists */
+extern unsigned long	mru_new;		/* allocated new slot */
+extern unsigned long	mru_recycleold;		/* recycle: age > maxage */
+extern unsigned long	mru_recyclefull;	/* recycle: full and age > minage */
+extern unsigned long	mru_none;		/* couldn't allocate slot */
 extern int	mon_age;		/* preemption limit */
 
 /* ntp_peer.c */
@@ -334,18 +334,18 @@ extern int	sys_minsane;		/* minimum candidates */
 /*
  * Statistics counters
  */
-extern u_long	sys_stattime;		/* time since reset */
-extern u_long	sys_received;		/* packets received */
-extern u_long	sys_processed;		/* packets for this host */
-extern u_long	sys_restricted;	 	/* restricted packets */
-extern u_long	sys_newversion;		/* current version  */
-extern u_long	sys_oldversion;		/* old version */
-extern u_long	sys_badlength;		/* bad length or format */
-extern u_long	sys_badauth;		/* bad authentication */
-extern u_long	sys_declined;		/* declined */
-extern u_long	sys_limitrejected;	/* rate exceeded */
-extern u_long	sys_kodsent;		/* KoD sent */
-extern u_long	use_stattime;		/* time since reset */
+extern unsigned long	sys_stattime;		/* time since reset */
+extern unsigned long	sys_received;		/* packets received */
+extern unsigned long	sys_processed;		/* packets for this host */
+extern unsigned long	sys_restricted;	 	/* restricted packets */
+extern unsigned long	sys_newversion;		/* current version  */
+extern unsigned long	sys_oldversion;		/* old version */
+extern unsigned long	sys_badlength;		/* bad length or format */
+extern unsigned long	sys_badauth;		/* bad authentication */
+extern unsigned long	sys_declined;		/* declined */
+extern unsigned long	sys_limitrejected;	/* rate exceeded */
+extern unsigned long	sys_kodsent;		/* KoD sent */
+extern unsigned long	use_stattime;		/* time since reset */
 
 /* Signalling */
 extern volatile bool sawALRM;
@@ -368,14 +368,14 @@ extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 #endif
 
 /* ntp_timer.c */
-extern volatile u_long alarm_overflow;
-extern u_long	current_time;		/* seconds since startup */
-extern u_long	timer_timereset;
-extern u_long	timer_xmtcalls;
-extern bool	leap_sec_in_progress;
+extern volatile unsigned long alarm_overflow;
+extern unsigned long	current_time;		/* seconds since startup */
+extern unsigned long	timer_timereset;
+extern unsigned long	timer_xmtcalls;
+extern bool		leap_sec_in_progress;
 #ifdef ENABLE_LEAP_SMEAR
 extern struct leap_smear_info leap_smear;
-extern u_int	leap_smear_intv;
+extern unsigned int		leap_smear_intv;
 #endif
 
 /* ntp_util.c */

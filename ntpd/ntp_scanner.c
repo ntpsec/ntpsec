@@ -564,7 +564,7 @@ is_integer(
 {
 	int	i;
 	int	is_neg;
-	u_int	u_val;
+	unsigned int	u_val;
 	
 	i = 0;
 
@@ -593,7 +593,7 @@ is_integer(
 }
 
 
-/* U_int -- assumes is_integer() has returned false */
+/* unsigned int -- assumes is_integer() has returned false */
 static int
 is_u_int(
 	char *lexeme
@@ -628,8 +628,8 @@ is_double(
 	char *lexeme
 	)
 {
-	u_int num_digits = 0;  /* Number of digits read */
-	u_int i;
+	unsigned int num_digits = 0;  /* Number of digits read */
+	unsigned int i;
 
 	i = 0;
 
@@ -998,7 +998,7 @@ lex_too_long:
 	yytext[min(sizeof(yytext) - 1, 50)] = 0;
 	msyslog(LOG_ERR, 
 		"configuration item on line %d longer than limit of %lu, began with '%s'",
-		lex_stack->curpos.nline, (u_long)min(sizeof(yytext) - 1, 50),
+		lex_stack->curpos.nline, (unsigned long)min(sizeof(yytext) - 1, 50),
 		yytext);
 
 	/*

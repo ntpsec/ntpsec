@@ -52,18 +52,18 @@ uint8_t	mon_hash_bits;
  */
 mon_entry **	mon_hash;	/* MRU hash table */
 mon_entry	mon_mru_list;	/* mru listhead */
-u_int		mru_entries;	/* mru list count */
+unsigned int	mru_entries;	/* mru list count */
 
-/*
+/*1
  * List of free structures, and counters of in-use and total
  * structures. The free structures are linked with the hash_next field.
  */
 static  mon_entry *mon_free;		/* free list or null if none */
-static	u_int mru_alloc;		/* mru list + free list count */
-	u_int mru_peakentries;		/* highest mru_entries seen */
-	u_int mru_initalloc = INIT_MONLIST;/* entries to preallocate */
-	u_int mru_incalloc = INC_MONLIST;/* allocation batch factor */
-static	u_int mon_mem_increments;	/* times called malloc() */
+static	unsigned int mru_alloc;		/* mru list + free list count */
+	unsigned int mru_peakentries;		/* highest mru_entries seen */
+	unsigned int mru_initalloc = INIT_MONLIST;/* entries to preallocate */
+	unsigned int mru_incalloc = INC_MONLIST;/* allocation batch factor */
+static	unsigned int mon_mem_increments;	/* times called malloc() */
 
 /*
  * Parameters of the RES_LIMITED restriction option. We define headway
@@ -78,11 +78,11 @@ uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
-u_int	mon_enabled;		/* enable switch */
-u_int	mru_mindepth = 600;	/* preempt above this */
-int	mru_maxage = 3600;	/* recycle if older than this */
-int	mru_minage = 64;	/* recycle if full and older than this */
-u_int	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
+unsigned int	mon_enabled;		/* enable switch */
+unsigned int	mru_mindepth = 600;	/* preempt above this */
+int		mru_maxage = 3600;	/* recycle if older than this */
+int		mru_minage = 64;	/* recycle if full and older than this */
+unsigned int	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
 int	mon_age = 3000;		/* preemption limit */
 
 static	void		mon_getmoremem(void);
@@ -91,11 +91,11 @@ static	inline void	mon_free_entry(mon_entry *);
 static	inline void	mon_reclaim_entry(mon_entry *);
 
 /* MRU counters */
-u_long mru_exists = 0;		/* slot already exists */
-u_long mru_new = 0;		/* allocate a new slot (2 cases) */
-u_long mru_recycleold = 0;	/* recycle slot: age > mru_maxage */
-u_long mru_recyclefull = 0;	/* recycle slot: full and age > mru_minage */
-u_long mru_none = 0;		/* couldn't get one */
+unsigned long mru_exists = 0;		/* slot already exists */
+unsigned long mru_new = 0;		/* allocate a new slot (2 cases) */
+unsigned long mru_recycleold = 0;	/* recycle slot: age > mru_maxage */
+unsigned long mru_recyclefull = 0;	/* recycle slot: full and age > mru_minage */
+unsigned long mru_none = 0;		/* couldn't get one */
 
 
 /*
@@ -122,7 +122,7 @@ remove_from_hash(
 	mon_entry *mon
 	)
 {
-	u_int hash;
+	unsigned int hash;
 	mon_entry *punlinked;
 
 	mru_entries--;
@@ -172,7 +172,7 @@ static void
 mon_getmoremem(void)
 {
 	mon_entry *chunk;
-	u_int entries;
+	unsigned int entries;
 
 	entries = (0 == mon_mem_increments)
 		      ? mru_initalloc
@@ -200,12 +200,12 @@ mon_start(
 	)
 {
 	size_t octets;
-	u_int min_hash_slots;
+	unsigned int min_hash_slots;
 
 	if (MON_OFF == mode)		/* MON_OFF is 0 */
 		return;
 	if (mon_enabled) {
-		mon_enabled |= (u_int)mode;
+		mon_enabled |= (unsigned int)mode;
 		return;
 	}
 	if (0 == mon_mem_increments)
@@ -224,7 +224,7 @@ mon_start(
 	octets = sizeof(*mon_hash) * MON_HASH_SIZE;
 	mon_hash = erealloc_zero(mon_hash, octets, 0);
 
-	mon_enabled = (u_int)mode;
+	mon_enabled = (unsigned int)mode;
 }
 
 
@@ -240,10 +240,10 @@ mon_stop(
 
 	if (MON_OFF == mon_enabled)
 		return;
-	if ((mon_enabled & (u_int)mode) == 0 || mode == MON_OFF)
+	if ((mon_enabled & (unsigned int)mode) == 0 || mode == MON_OFF)
 		return;
 
-	mon_enabled &= (u_int)~mode;
+	mon_enabled &= (unsigned int)~mode;
 	if (mon_enabled != MON_OFF)
 		return;
 	
@@ -313,10 +313,10 @@ int mon_get_oldest_age(l_fp now)
  * or RES_KOD is lit for a particular address before ntp_monitor()'s
  * typical dousing.
  */
-u_short
+unsigned short
 ntp_monitor(
 	struct recvbuf *rbufp,
-	u_short	flags
+	unsigned short	flags
 	)
 {
 	l_fp		interval_fp;
@@ -324,8 +324,8 @@ ntp_monitor(
 	mon_entry *	mon;
 	mon_entry *	oldest;
 	int		oldest_age;
-	u_int		hash;
-	u_short		restrict_mask;
+	unsigned int	hash;
+	unsigned short	restrict_mask;
 	uint8_t		mode;
 	uint8_t		version;
 	int		interval;

@@ -230,18 +230,18 @@ typedef struct {
 	bool	ppsapi_gate;	/* system is on PPS */
 #endif /* HAVE_PPSAPI */
 	bool	gps_time;	/* use GPS time, not UTC */
-	u_short century_cache;	/* cached current century */
+	unsigned short century_cache;	/* cached current century */
 	l_fp	last_reftime;	/* last processed reference stamp */
 	short 	epoch_warp;	/* last epoch warp, for logging */
 	/* tally stats, reset each poll cycle */
 	struct
 	{
-		u_int total;
-		u_int accepted;
-		u_int rejected;   /* GPS said not enough signal */
-		u_int malformed;  /* Bad checksum, invalid date or time */
-		u_int filtered;   /* mode bits, not GPZDG, same second */
-		u_int pps_used;
+		unsigned int total;
+		unsigned int accepted;
+		unsigned int rejected;   /* GPS said not enough signal */
+		unsigned int malformed;  /* Bad checksum, invalid date or time */
+		unsigned int filtered;   /* mode bits, not GPZDG, same second */
+		unsigned int pps_used;
 	}	
 		tally;
 	/* per sentence checksum seen flag */
@@ -265,9 +265,9 @@ typedef struct {
  * leap seconds that are the difference between GPS and UTC time scale.
  */
 typedef struct {
-	uint32_t wt_time;	/* seconds since weekstart */
-	u_short wt_week;	/* week number */
-	short	wt_leap;	/* leap seconds */
+	uint32_t 	wt_time;	/* seconds since weekstart */
+	unsigned short	wt_week;	/* week number */
+	short		wt_leap;	/* leap seconds */
 } gps_weektm;
 
 /*
@@ -311,7 +311,7 @@ static bool	parse_weekdata	(gps_weektm *, nmea_data *,
 static bool	unfold_day	(struct calendar * jd, uint32_t rec_ui);
 static bool	unfold_century	(struct calendar * jd, uint32_t rec_ui);
 static bool	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
-				 u_short * ccentury);
+				 unsigned short * ccentury);
 static l_fp     eval_gps_time	(struct peer * peer, const struct calendar * gpst,
 				 const struct timespec * gpso, const l_fp * xrecv);
 
@@ -1179,7 +1179,7 @@ save_ltc(
 {
 	if (len >= sizeof(pp->a_lastcode))
 		len = sizeof(pp->a_lastcode) - 1;
-	pp->lencode = (u_short)len;
+	pp->lencode = (unsigned short)len;
 	memcpy(pp->a_lastcode, tc, len);
 	pp->a_lastcode[len] = '\0';
 }
@@ -1487,12 +1487,12 @@ parse_time(
 	};
 
 	int	rc;
-	u_int	h;
-	u_int	m;
-	u_int	s;
+	unsigned int	h;
+	unsigned int	m;
+	unsigned int	s;
 	int	p1;
 	int	p2;
-	u_long	f;
+	unsigned long	f;
 	char  * dp;
 
 	dp = field_parse(rd, idx);
@@ -1539,12 +1539,12 @@ parse_date(
 	enum date_fmt	  fmt
 	)
 {
-	int	rc;
-	u_int	y;
-	u_int	m;
-	u_int	d;
-	int	p;
-	char  * dp;
+	int		rc;
+	unsigned int	y;
+	unsigned int	m;
+	unsigned int	d;
+	int		p;
+	char  	      * dp;
 	
 	dp = field_parse(rd, idx);
 	switch (fmt) {
@@ -1582,7 +1582,7 @@ parse_date(
 	/* store results */
 	jd->monthday = (uint8_t)d;
 	jd->month    = (uint8_t)m;
-	jd->year     = (u_short)y;
+	jd->year     = (unsigned short)y;
 
 	return true;
 }
@@ -1605,7 +1605,7 @@ parse_weekdata(
 	int          leapidx
 	)
 {
-	u_long secs;
+	unsigned long secs;
 	int    fcnt;
 
 	/* parse fields and count success */
@@ -1696,7 +1696,7 @@ unfold_century(
 	baseyear = rec.year - 20;
 	if (baseyear < g_gpsMinYear)
 		baseyear = g_gpsMinYear;
-	jd->year = (u_short)ntpcal_periodic_extend(baseyear, jd->year,
+	jd->year = (unsigned short)ntpcal_periodic_extend(baseyear, jd->year,
 						   100);
 
 	return ((baseyear <= jd->year) && (baseyear + 100 > jd->year));
@@ -1731,13 +1731,13 @@ static bool
 gpsfix_century(
 	struct calendar  * jd,
 	const gps_weektm * wd,
-	u_short          * century
+	unsigned short   * century
 	) 
 {
 	int32_t	days;
 	int32_t	doff;
-	u_short week;
-	u_short year;
+	unsigned short week;
+	unsigned short year;
 	int     loop;
 
 	/* Get day offset. Assumes that the input time is in range and

@@ -274,9 +274,9 @@ setup_clear_table(void)
 /*
 std::string CalendarToString(const calendar &cal) {
 	std::ostringstream ss;
-	ss << cal.year << "-" << (u_int)cal.month << "-" << (u_int)cal.monthday
-	   << " (" << cal.yearday << ") " << (u_int)cal.hour << ":"
-	   << (u_int)cal.minute << ":" << (u_int)cal.second;
+	ss << cal.year << "-" << (unsigned int)cal.month << "-" << (unsigned int)cal.monthday
+	   << " (" << cal.yearday << ") " << (unsigned int)cal.hour << ":"
+	   << (unsigned int)cal.minute << ":" << (unsigned int)cal.second;
 	return ss.str();
 }
 bool IsEqual(const calendar &expected, const calendar &actual) {

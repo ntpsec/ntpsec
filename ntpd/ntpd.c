@@ -760,7 +760,7 @@ ntpdmain(
 	    case 't':
 		if (ntp_optarg != NULL)
 		{
-		    u_long tkey = (u_long)atol(ntp_optarg);
+		    unsigned long tkey = (unsigned long)atol(ntp_optarg);
 		    if (tkey == 0 || tkey > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
 				"command line trusted key %s is invalid",
@@ -787,7 +787,7 @@ ntpdmain(
 	    case 'Z':
 		if (ntp_optarg != NULL)
 			set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1,
-                                    (u_short) (RW | DEF));
+                                    (unsigned short) (RW | DEF));
                 break;
             default:
 		msyslog(LOG_ERR, "Unknown option: %c", (char)op);

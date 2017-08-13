@@ -22,7 +22,7 @@ TEST_TEAR_DOWN(calendar) {}
 static const char *DateToString(char *, const struct calendar *);
 
 static const char *DateToString(char *str, const struct calendar *cal) {
-	snprintf(str, 255, "%hu-%u-%u(%u)\n", cal->year, (u_int)cal->month, (u_int)cal->monthday, cal->yearday);
+	snprintf(str, 255, "%hu-%u-%u(%u)\n", cal->year, (unsigned int)cal->month, (unsigned int)cal->monthday, cal->yearday);
 	return str;
 }
 
@@ -48,7 +48,7 @@ static bool IsEqualDate(const struct calendar *expected,
 // ---------------------------------------------------------------------
 // test cases
 // ---------------------------------------------------------------------
-static const u_short real_month_table[2][13] = {
+static const unsigned short real_month_table[2][13] = {
 	/* -*- table for regular years -*- */
 	{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 },
 	/* -*- table for leap years -*- */
@@ -56,7 +56,7 @@ static const u_short real_month_table[2][13] = {
 };
 
 // days in month, with one month wrap-around at both ends
-static const u_short real_month_days[2][14] = {
+static const unsigned short real_month_days[2][14] = {
 	/* -*- table for regular years -*- */
 	{ 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31 },
 	/* -*- table for leap years -*- */
@@ -98,9 +98,9 @@ TEST(calendar, days_per_year) {
 #ifdef CLOCK_GENERIC
 TEST(calendar, parse_to_unixtime) {
         /* check is_leapyear() */
-        clocktime_t  ct;
-        time_t       result;
-        u_long       Flag;
+        clocktime_t  	ct;
+        time_t       	result;
+        unsigned long       Flag;
 
         ct.day = 1;
         ct.month = 1;

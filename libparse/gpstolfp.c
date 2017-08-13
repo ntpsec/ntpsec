@@ -36,8 +36,8 @@ gpstolfp(
 
 void
 gpsweekadj(
-	u_int * week,
-	u_int build_week
+	unsigned int * week,
+	unsigned int build_week
 	)
 {
 	/* adjust for rollover */
@@ -48,8 +48,8 @@ gpsweekadj(
 
 void
 gpstocal(
-	u_int week,
-	u_int TOW,
+	unsigned int week,
+	unsigned int TOW,
 	int UTC_offset,
 	struct calendar * out
 	)
@@ -68,8 +68,8 @@ void
 caltogps(
 	const struct calendar * in,
 	int UTC_offset,
-	u_int * week,
-	u_int * TOW
+	unsigned int * week,
+	unsigned int * TOW
 	)
 {
 	time64_t t;

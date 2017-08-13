@@ -486,8 +486,8 @@ jjy_start ( int unit, struct peer *peer )
 	}
 
 	/* Open the device */
-	fd = refclock_open ( sDeviceName, (u_int)up->linespeed,
-                            (u_int)up->linediscipline ) ;
+	fd = refclock_open ( sDeviceName, (unsigned int)up->linespeed,
+                            (unsigned int)up->linediscipline ) ;
 	if ( fd <= 0 ) {
 		free ( (void*) up ) ;
 		/* coverity[leaked_handle] */

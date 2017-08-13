@@ -59,8 +59,8 @@ write_all(int fd, const void *buf, size_t len)
 		int n = write(fd, buf, len);
 		if (n <= 0) return total;
 		buf = n + (const char *)buf;
-		len -= (u_int)n;
-		total += (u_int)n;
+		len -= (unsigned int)n;
+		total += (unsigned int)n;
 	}
 	return total;
 }
@@ -76,8 +76,8 @@ read_all(int fd, void *buf, size_t len)
 		int n = read(fd, buf, len);
 		if (n <= 0) return total;
 		buf = n + (char *)buf;
-		len -= (u_int)n;
-		total += (u_int)n;
+		len -= (unsigned int)n;
+		total += (unsigned int)n;
 	}
 	return total;
 }

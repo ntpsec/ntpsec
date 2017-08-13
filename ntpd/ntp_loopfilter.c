@@ -116,13 +116,13 @@ uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
  */
 #ifndef ENABLE_LOCKCLOCK
 static double clock_offset;	/* offset */
-static u_long clock_epoch;	/* last update */
+static unsigned long clock_epoch;	/* last update */
 #endif /* ENABLE_LOCKCLOCK */
 double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
-u_int	sys_tai;		/* TAI offset from UTC */
+unsigned int	sys_tai;		/* TAI offset from UTC */
 #if !defined(ENABLE_LOCKCLOCK) && defined(HAVE_KERNEL_PLL)
 static bool loop_started;	/* true after LOOP_DRIFTINIT */
 #endif /* !ENABLE_LOCKCLOCK && HAVE_KERNEL_PLL */
@@ -143,7 +143,7 @@ static struct timex ntv;	/* ntp_adjtime() parameters */
 static int	pll_status;	/* last kernel status bits */
 #ifndef ENABLE_LOCKCLOCK
 #if defined(STA_NANO) && defined(NTP_API) && NTP_API == 4
-static u_int loop_tai;		/* last TAI offset */
+static unsigned int loop_tai;		/* last TAI offset */
 #endif /* STA_NANO */
 #endif /* ENABLE_LOCKCLOCK */
 static	void	start_kern_loop(void);

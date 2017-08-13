@@ -71,7 +71,7 @@ bool	cal_enable;		/* enable refclock calibrate */
  */
 static int refclock_cmpl_fp (const void *, const void *);
 static int refclock_sample (struct refclockproc *);
-static bool refclock_setup (int, u_int, u_int);
+static bool refclock_setup (int, unsigned int, unsigned int);
 
 
 /*
@@ -685,9 +685,9 @@ indicate_refclock_packet(
  */
 int
 refclock_open(
-	char	*dev,		/* device name pointer */
-	u_int	speed,		/* serial port speed (code) */
-	u_int	lflags		/* line discipline flags */
+	char		*dev,		/* device name pointer */
+	unsigned int	speed,		/* serial port speed (code) */
+	unsigned int	lflags		/* line discipline flags */
 	)
 {
 	int	fd;
@@ -740,9 +740,9 @@ refclock_open(
  */
 static bool
 refclock_setup(
-	int	fd,		/* file descriptor */
-	u_int	speed,		/* serial port speed (code) */
-	u_int	lflags		/* line discipline flags */
+	int		fd,		/* file descriptor */
+	unsigned int	speed,		/* serial port speed (code) */
+	unsigned int	lflags		/* line discipline flags */
 	)
 {
 	int	i;
@@ -771,7 +771,7 @@ refclock_setup(
 	 * 8 bits and no parity; map CR to NL; ignore break.
 	 */
 	if (speed) {
-		u_int	ltemp = 0;
+		unsigned int	ltemp = 0;
 
 		ttyp->c_iflag = IGNBRK | IGNPAR | ICRNL;
 		ttyp->c_oflag = 0;
@@ -924,7 +924,7 @@ refclock_control(
 		out->currentstatus = pp->currentstatus;
 		out->clockname = pp->clockname;
 		out->clockdesc = pp->clockdesc;
-		out->lencode = (u_short)pp->lencode;
+		out->lencode = (unsigned short)pp->lencode;
 		out->p_lastcode = pp->a_lastcode;
 	}
 

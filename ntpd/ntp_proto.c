@@ -131,11 +131,11 @@ double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 static double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_maxdisp = MAXDISPERSE; /* maximum dispersion */
 double	sys_jitter;		/* system jitter */
-static u_long	sys_epoch;	/* last clock update time */
+static unsigned long	sys_epoch;	/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
 static int leap_vote_ins;	/* leap consensus for insert */
 static int leap_vote_del;	/* leap consensus for delete */
-static	u_long	leapsec;	/* seconds to next leap (proximity class) */
+static	unsigned long	leapsec;	/* seconds to next leap (proximity class) */
 static int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 static int sys_survivors;		/* truest of the truechimers */
@@ -154,18 +154,18 @@ static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 /*
  * Statistics counters - first the good, then the bad
  */
-u_long	sys_stattime;		/* elapsed time since reset */
-u_long	sys_received;		/* packets received */
-u_long	sys_processed;		/* packets for this host */
-u_long	sys_newversion;		/* current version */
-u_long	sys_oldversion;		/* old version */
-u_long	sys_restricted;		/* access denied */
-u_long	sys_badlength;		/* bad length or format */
-u_long	sys_badauth;		/* bad authentication */
-u_long	sys_declined;		/* declined */
-u_long	sys_limitrejected;	/* rate exceeded */
-u_long	sys_kodsent;		/* KoD sent */
-u_long	use_stattime;		/* elapsed time since reset */
+unsigned long	sys_stattime;		/* elapsed time since reset */
+unsigned long	sys_received;		/* packets received */
+unsigned long	sys_processed;		/* packets for this host */
+unsigned long	sys_newversion;		/* current version */
+unsigned long	sys_oldversion;		/* old version */
+unsigned long	sys_restricted;		/* access denied */
+unsigned long	sys_badlength;		/* bad length or format */
+unsigned long	sys_badauth;		/* bad authentication */
+unsigned long	sys_declined;		/* declined */
+unsigned long	sys_limitrejected;	/* rate exceeded */
+unsigned long	sys_kodsent;		/* KoD sent */
+unsigned long	use_stattime;		/* elapsed time since reset */
 
 double	measured_tick;		/* non-overridable sys_tick (s) */
 
@@ -182,7 +182,7 @@ static	double	root_distance	(struct peer *);
 
 
 void
-set_sys_leap(u_char new_sys_leap) {
+set_sys_leap(unsigned char new_sys_leap) {
 	sys_leap = new_sys_leap;
 	xmt_leap = sys_leap;
 
@@ -437,7 +437,7 @@ static bool
 i_require_authentication(
 	struct peer const* peer,
 	struct parsed_pkt const* pkt,
-	u_short restrict_mask
+	unsigned short restrict_mask
 	)
 {
         bool restrict_notrust = restrict_mask & RES_DONTTRUST;
@@ -474,7 +474,7 @@ static bool is_kod(
 
 static bool check_early_restrictions(
 	struct recvbuf const* rbufp,
-	u_short restrict_mask
+	unsigned short restrict_mask
 	)
 {
 	return (restrict_mask & RES_IGNORE) ||
@@ -490,7 +490,7 @@ static bool check_early_restrictions(
 static void
 handle_fastxmit(
 	struct recvbuf *rbufp,
-	u_short restrict_mask,
+	unsigned short restrict_mask,
 	struct parsed_pkt const* pkt,
 	struct peer *peer,
 	bool request_already_authenticated
@@ -537,7 +537,7 @@ handle_fastxmit(
 static void
 handle_procpkt(
 	struct recvbuf *rbufp,
-	u_short restrict_mask,
+	unsigned short restrict_mask,
 	struct parsed_pkt const* pkt,
 	struct peer *peer,
 	bool request_already_authenticated
@@ -714,7 +714,7 @@ handle_procpkt(
 static void
 handle_manycast(
 	struct recvbuf *rbufp,
-	u_short restrict_mask,
+	unsigned short restrict_mask,
 	struct parsed_pkt const* pkt,
 	struct peer *mpeer,
 	bool request_already_authenticated
@@ -755,7 +755,7 @@ receive(
 {
 	struct parsed_pkt *pkt = NULL;
 	struct peer *peer = NULL;
-	u_short restrict_mask;
+	unsigned short restrict_mask;
 	int match = AM_NOMATCH;
 	bool authenticated = false;
 
@@ -1214,7 +1214,7 @@ poll_update(
 	uint8_t	mpoll
 	)
 {
-	u_long	next, utemp;
+	unsigned long	next, utemp;
 	uint8_t	hpoll;
 
 	/*
@@ -1247,7 +1247,7 @@ poll_update(
 	 * slink away. If called from the poll process, delay 1 s for a
 	 * reference clock, otherwise 2 s.
 	 */
-	utemp = current_time + (u_long)max(peer->throttle - (NTP_SHIFT - 1) *
+	utemp = current_time + (unsigned long)max(peer->throttle - (NTP_SHIFT - 1) *
 	    (1 << peer->minpoll), ntp_minpkt);
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
@@ -1287,7 +1287,7 @@ poll_update(
 		else
 			peer->nextdate = utemp;
 		if (peer->throttle > (1 << peer->minpoll))
-			peer->nextdate += (u_long)ntp_minpkt;
+			peer->nextdate += (unsigned long)ntp_minpkt;
 	}
 	DPRINT(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
 		   current_time, socktoa(&peer->srcadr), peer->hpoll,
@@ -1359,7 +1359,7 @@ peer_clear(
 	     * association ID fits the bill.
 	     */
 	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
-	    peer->nextdate += (u_long)(pseudorandom % (1 << peer->minpoll));
+	    peer->nextdate += (unsigned long)(pseudorandom % (1 << peer->minpoll));
 	}
 	DPRINT(1, ("peer_clear: at %lu next %lu associd %d refid %s\n",
 		   current_time, peer->nextdate, peer->associd,
@@ -1422,7 +1422,7 @@ clock_filter(
 			peer->filter_disp[j] = sys_maxdisp;
 			dst[i] = sys_maxdisp;
 		} else if (peer->update - peer->filter_epoch[j] >
-		    (u_long)ULOGTOD(allan_xpt)) {
+		    (unsigned long)ULOGTOD(allan_xpt)) {
 			dst[i] = peer->filter_delay[j] +
 			    peer->filter_disp[j];
 		} else {
@@ -1580,9 +1580,9 @@ clock_select(void)
 	static struct endpoint *endpoint = NULL;
 	static int *indx = NULL;
 	static peer_select *peers = NULL;
-	static u_int endpoint_size = 0;
-	static u_int peers_size = 0;
-	static u_int indx_size = 0;
+	static unsigned int endpoint_size = 0;
+	static unsigned int peers_size = 0;
+	static unsigned int indx_size = 0;
 	size_t octets;
 
 	/*
@@ -2049,7 +2049,7 @@ clock_select(void)
 	if (typesystem == NULL) {
 		if (osys_peer != NULL) {
 			if (sys_orphwait > 0)
-			    orphwait = current_time + (u_long)sys_orphwait;
+			    orphwait = current_time + (unsigned long)sys_orphwait;
 			report_event(EVNT_NOPEER, NULL, NULL);
 		}
 		sys_peer = NULL;
@@ -2791,7 +2791,7 @@ init_proto(const bool verbose)
 	sys_survivors = 0;
 	sys_manycastserver = 0;
 	sys_stattime = current_time;
-	orphwait = current_time + (u_long)sys_orphwait;
+	orphwait = current_time + (unsigned long)sys_orphwait;
 	proto_clr_stats();
 	use_stattime = current_time;
 	hardpps_enable = false;
@@ -2805,7 +2805,7 @@ init_proto(const bool verbose)
 void
 proto_config(
 	int	item,
-	u_long	value,
+	unsigned long	value,
 	double	dvalue
 	)
 {
@@ -2897,9 +2897,9 @@ proto_config(
 		break;
 
 	case PROTO_ORPHWAIT:	/* orphan wait (orphwait) */
-		orphwait -= (u_long)sys_orphwait;
+		orphwait -= (unsigned long)sys_orphwait;
 		sys_orphwait = (int)dvalue;
-		orphwait += (u_long)sys_orphwait;
+		orphwait += (unsigned long)sys_orphwait;
 		break;
 
 	default:

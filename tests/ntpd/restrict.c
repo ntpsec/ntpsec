@@ -27,7 +27,7 @@ TEST_SETUP(hackrestrict) {
 	init_restrict();
 }
 
-u_long	current_time;	/* not used - restruct code needs it */
+unsigned long	current_time;	/* not used - restruct code needs it */
 
 TEST_TEAR_DOWN(hackrestrict) {
 	restrict_u *empty_restrict = malloc(sizeof(restrict_u));
@@ -83,7 +83,7 @@ TEST(hackrestrict, RestrictionsAreEmptyAfterInit) {
 TEST(hackrestrict, ReturnsCorrectDefaultRestrictions) {
 	sockaddr_u sockaddr = create_sockaddr_u(54321, "63.161.169.137");
 
-	u_short retval = restrictions(&sockaddr);
+	unsigned short retval = restrictions(&sockaddr);
 
 	TEST_ASSERT_EQUAL(0, retval);
 }
@@ -94,7 +94,7 @@ TEST(hackrestrict, HackingDefaultRestriction) {
 	*	We change the flag of the default restriction,
 	*	and check if restriction() returns that flag
 	*/
-	const u_short flags = 42;
+	const unsigned short flags = 42;
 
 	sockaddr_u resaddr = create_sockaddr_u(54321, "0.0.0.0");
 	sockaddr_u resmask = create_sockaddr_u(54321, "0.0.0.0");
@@ -121,7 +121,7 @@ TEST(hackrestrict, AddingNewRestriction) {
 	sockaddr_u resaddr = create_sockaddr_u(54321, "11.22.33.44");
 	sockaddr_u resmask = create_sockaddr_u(54321, "128.0.0.0");
 
-	const u_short flags = 42;
+	const unsigned short flags = 42;
 
 	hack_restrict(RESTRICT_FLAGS, &resaddr, &resmask, 0, flags, 0);
 

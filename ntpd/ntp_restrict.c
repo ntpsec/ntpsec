@@ -72,15 +72,15 @@ static int restrictcount;	/* count in the restrict lists */
 static restrict_u *resfree4;	/* available entries (free list) */
 static restrict_u *resfree6;
 
-static u_long res_calls;
-static u_long res_found;
-static u_long res_not_found;
+static unsigned long res_calls;
+static unsigned long res_found;
+static unsigned long res_not_found;
 
 /*
  * Count number of restriction entries referring to RES_LIMITED, to
  * control implicit activation/deactivation of the MRU monlist.
  */
-static	u_long res_limited_refcnt;
+static	unsigned long res_limited_refcnt;
 
 /*
  * Our default entries.
@@ -92,8 +92,8 @@ static	restrict_u	restrict_def6;
  * "restrict source ..." enabled knob and restriction bits.
  */
 static	bool		restrict_source_enabled = false;
-static	u_short		restrict_source_flags;
-static	u_short		restrict_source_mflags;
+static	unsigned short	restrict_source_flags;
+static	unsigned short	restrict_source_mflags;
 
 /*
  * private functions
@@ -103,9 +103,9 @@ static restrict_u *	alloc_res6(void);
 static void		free_res(restrict_u *, int);
 static void		inc_res_limited(void);
 static void		dec_res_limited(void);
-static restrict_u *	match_restrict4_addr(uint32_t, u_short);
+static restrict_u *	match_restrict4_addr(uint32_t, unsigned short);
 static restrict_u *	match_restrict6_addr(const struct in6_addr *,
-					     u_short);
+					     unsigned short);
 static restrict_u *	match_restrict_entry(const restrict_u *, int);
 static int		res_sorts_before4(restrict_u *, restrict_u *);
 static int		res_sorts_before6(restrict_u *, restrict_u *);
@@ -255,7 +255,7 @@ dec_res_limited(void)
 static restrict_u *
 match_restrict4_addr(
 	uint32_t	addr,
-	u_short	port
+	unsigned short	port
 	)
 {
 	const int	v6 = 0;
@@ -279,7 +279,7 @@ match_restrict4_addr(
 static restrict_u *
 match_restrict6_addr(
 	const struct in6_addr *	addr,
-	u_short			port
+	unsigned short		port
 	)
 {
 	const int	v6 = 1;
@@ -410,14 +410,14 @@ res_sorts_before6(
 /*
  * restrictions - return restrictions for this host
  */
-u_short
+unsigned short
 restrictions(
 	sockaddr_u *srcadr
 	)
 {
 	restrict_u *match;
 	struct in6_addr *pin6;
-	u_short flags;
+	unsigned short flags;
 
 	res_calls++;
 	flags = 0;
@@ -478,9 +478,9 @@ hack_restrict(
 	int		op,
 	sockaddr_u *	resaddr,
 	sockaddr_u *	resmask,
-	u_short		mflags,
-	u_short		flags,
-	u_long		expire
+	unsigned short	mflags,
+	unsigned short	flags,
+	unsigned long	expire
 	)
 {
 	int		v6;
@@ -613,7 +613,7 @@ void
 restrict_source(
 	sockaddr_u *	addr,
 	bool		farewell,	/* false to add, true to remove */
-	u_long		expire		/* 0 is infinite, valid until */
+	unsigned long	expire		/* 0 is infinite, valid until */
 	)
 {
 	sockaddr_u	onesmask;

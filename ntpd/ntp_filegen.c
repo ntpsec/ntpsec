@@ -99,7 +99,7 @@ filegen_open(
 	char *fullname;	/* name with any designation extension */
 	char *filename;	/* name without designation extension */
 	char *suffix;	/* where to print suffix extension */
-	u_int len, suflen;
+	unsigned int len, suflen;
 	FILE *fp;
 	struct tm tm;
 
@@ -207,7 +207,7 @@ filegen_open(
 		/*
 		 * try to resolve name collisions
 		 */
-		static u_long conflicts = 0;
+		static unsigned long conflicts = 0;
 
 #ifndef	S_ISREG
 #define	S_ISREG(mode)	(((mode) & S_IFREG) == S_IFREG)
@@ -379,8 +379,8 @@ filegen_config(
 	FILEGEN *	gen,
 	const char *	dir,
 	const char *	fname,
-	u_int		type,
-	u_int		flag
+	unsigned int	type,
+	unsigned int	flag
 	)
 {
 	bool file_existed;

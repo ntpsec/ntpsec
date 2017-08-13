@@ -156,13 +156,13 @@ TEST(clocktime, NoReasonableConversion) {
 TEST(clocktime, AlwaysInLimit) {
 	/* Timestamp is: 2010-01-02 11:00:00Z */
 	const uint32_t timestamp = 3471418800UL;
-	const u_short prime_incs[] = { 127, 151, 163, 179 };
-	int	cyc;
-	int	yday;
-	u_char	whichprime;
-	u_short	ydayinc;
-	int	hour;
-	int	minute;
+	const unsigned short prime_incs[] = { 127, 151, 163, 179 };
+	int		cyc;
+	int		yday;
+	unsigned char	whichprime;
+	unsigned short	ydayinc;
+	int		hour;
+	int		minute;
 	uint32_t	yearstart;
 	uint32_t	actual;
 	uint32_t	diff;

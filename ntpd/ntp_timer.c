@@ -41,28 +41,28 @@ volatile int interface_interval;     /* init_io() sets def. 300s */
 /*
  * The counters and timeouts
  */
-static  u_long interface_timer;	/* interface update timer */
-static	u_long adjust_timer;	/* second timer */
-static	u_long stats_timer;	/* stats timer */
-static	u_long leapf_timer;	/* Report leapfile problems once/day */
-static	u_long huffpuff_timer;	/* huff-n'-puff timer */
-u_long	leapsec;	        /* seconds to next leap (proximity class) */
-u_int	leap_smear_intv;	/* Duration of smear.  Enables smear mode. */
+static unsigned long interface_timer;	/* interface update timer */
+static unsigned long adjust_timer;	/* second timer */
+static unsigned long stats_timer;	/* stats timer */
+static unsigned long leapf_timer;	/* Report leapfile problems once/day */
+static unsigned long huffpuff_timer;	/* huff-n'-puff timer */
+unsigned long	leapsec;	        /* secs to next leap (proximity class) */
+unsigned int	leap_smear_intv;	/* Duration of smear.  Enables smear mode. */
 int	leapdif;		/* TAI difference step at next leap second*/
-u_long	orphwait; 		/* orphan wait time */
+unsigned long	orphwait; 	/* orphan wait time */
 
 /*
  * Statistics counter for the interested.
  */
-volatile u_long alarm_overflow;
+volatile unsigned long alarm_overflow;
 
-u_long current_time;		/* seconds since startup */
+unsigned long current_time;		/* seconds since startup */
 
 /*
  * Stats.  Time of last reset and number of calls to transmit().
  */
-u_long timer_timereset;
-u_long timer_xmtcalls;
+unsigned long timer_timereset;
+unsigned long timer_xmtcalls;
 
 static	void catchALRM (int);
 
@@ -332,7 +332,7 @@ if (debug >= 4 && msg != NULL)
 
 
 void
-timer_interfacetimeout(u_long timeout)
+timer_interfacetimeout(unsigned long timeout)
 {
 	interface_timer = timeout;
 }
@@ -482,10 +482,10 @@ check_leapsec(
 			report_event(EVNT_LEAP, NULL, NULL);
 			lsprox  = LSPROX_NOWARN;
 			leapsec = LSPROX_NOWARN;
-			sys_tai = (u_int)lsdata.tai_offs;
+			sys_tai = (unsigned int)lsdata.tai_offs;
 		} else {
 			lsprox  = lsdata.proximity;
-			sys_tai = (u_int)lsdata.tai_offs;
+			sys_tai = (unsigned int)lsdata.tai_offs;
 		}
 	}
 

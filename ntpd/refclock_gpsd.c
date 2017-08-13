@@ -298,20 +298,20 @@ struct gpsd_unit {
 	/* admin stuff for sockets and device selection */
 	int         fdt;	/* current connecting socket */
 	addrinfoT * addr;	/* next address to try */
-	u_int       tickover;	/* timeout countdown */
-	u_int       tickpres;	/* timeout preset */
+	unsigned int       tickover;	/* timeout countdown */
+	unsigned int       tickpres;	/* timeout preset */
 
 	/* tallies for the various events */
-	u_int       tc_recv;	/* received known records */
-	u_int       tc_breply;	/* bad replies / parsing errors */
-	u_int       tc_nosync;	/* TPV / sample cycles w/o fix */
-	u_int       tc_ibt_recv;/* received serial time info records */
-	u_int       tc_ibt_used;/* used        --^-- */
-	u_int       tc_pps_recv;/* received PPS timing info records */
-	u_int       tc_pps_used;/* used        --^-- */
+	unsigned int       tc_recv;	/* received known records */
+	unsigned int       tc_breply;	/* bad replies / parsing errors */
+	unsigned int       tc_nosync;	/* TPV / sample cycles w/o fix */
+	unsigned int       tc_ibt_recv;/* received serial time info records */
+	unsigned int       tc_ibt_used;/* used        --^-- */
+	unsigned int       tc_pps_recv;/* received PPS timing info records */
+	unsigned int       tc_pps_used;/* used        --^-- */
 
 	/* log bloat throttle */
-	u_int       logthrottle;/* seconds to next log slot */
+	unsigned int       logthrottle;/* seconds to next log slot */
 
 	/* The parse context for the current record */
 	json_ctx    json_parse;
@@ -2074,7 +2074,7 @@ save_ltc(
 	len = (tc) ? strlen(tc) : 0;
 	if (len >= sizeof(pp->a_lastcode))
 		len = sizeof(pp->a_lastcode) - 1;
-	pp->lencode = (u_short)len;
+	pp->lencode = (unsigned short)len;
 	memcpy(pp->a_lastcode, tc, len);
 	pp->a_lastcode[len] = '\0';
 }

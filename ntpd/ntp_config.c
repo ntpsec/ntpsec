@@ -458,8 +458,8 @@ create_attr_ival(
 
 attr_val *
 create_attr_uval(
-	int	attr,
-	u_int	value
+	int		attr,
+	unsigned int	value
 	)
 {
 	attr_val *my_val;
@@ -552,7 +552,7 @@ create_address_node(
 		    AF_INET6 == type || AF_UNSPEC == type);
 	my_node = emalloc_zero(sizeof(*my_node));
 	my_node->address = addr;
-	my_node->type = (u_short)type;
+	my_node->type = (unsigned short)type;
 
 	return my_node;
 }
@@ -817,7 +817,7 @@ create_unpeer_node(
 	)
 {
 	unpeer_node *	my_node;
-	u_int		u;
+	unsigned int	u;
 	char *		pch;
 
 	my_node = emalloc_zero(sizeof(*my_node));
@@ -1318,7 +1318,7 @@ config_monitor(
 		filegen_flag = filegen->flag;
 		filegen_flag |= FGEN_FLAG_ENABLED;
 		filegen_config(filegen, statsdir, filegen_string,
-			       filegen->type, (u_int)filegen_flag);
+			       filegen->type, (unsigned int)filegen_flag);
 	}
 
 	/* Configure the statistics with the options */
@@ -1421,7 +1421,7 @@ config_monitor(
 			}
 		}
 		filegen_config(filegen, statsdir, filegen_file,
-			       (u_int)filegen_type, (u_int)filegen_flag);
+			       (unsigned int)filegen_type, (unsigned int)filegen_flag);
 	}
 }
 
@@ -1457,8 +1457,8 @@ config_access(
 	struct addrinfo *	pai;
 	int			rc;
 	bool			restrict_default;
-	u_short			flags;
-	u_short			mflags;
+	unsigned short		flags;
+	unsigned short		mflags;
 	bool			range_err;
 	const char *		signd_warning =
 #ifdef ENABLE_MSSNTP
@@ -1723,7 +1723,7 @@ config_access(
                         /* will overwrite my_node->mask-> address with CIDR */
                         fix_node_cidr(my_node);
                         /* type is always zero, AF_INET */
-			AF(&addr) = (u_short)my_node->addr->type;
+			AF(&addr) = (unsigned short)my_node->addr->type;
 
 			if (getnetnum(my_node->addr->address,
 				      &addr) != 1) {
@@ -2123,23 +2123,23 @@ apply_enable_disable(
 			break;
 
 		case T_Calibrate:
-			proto_config(PROTO_CAL, (u_long)enable, 0.);
+			proto_config(PROTO_CAL, (unsigned long)enable, 0.);
 			break;
 
 		case T_Kernel:
-			proto_config(PROTO_KERNEL, (u_long)enable, 0.);
+			proto_config(PROTO_KERNEL, (unsigned long)enable, 0.);
 			break;
 
 		case T_Monitor:
-			proto_config(PROTO_MONITOR, (u_long)enable, 0.);
+			proto_config(PROTO_MONITOR, (unsigned long)enable, 0.);
 			break;
 
 		case T_Ntp:
-			proto_config(PROTO_NTP, (u_long)enable, 0.);
+			proto_config(PROTO_NTP, (unsigned long)enable, 0.);
 			break;
 
 		case T_Stats:
-			proto_config(PROTO_FILEGEN, (u_long)enable, 0.);
+			proto_config(PROTO_FILEGEN, (unsigned long)enable, 0.);
 			break;
 
 		}
@@ -2617,7 +2617,7 @@ peer_config(
 	if (mode_ntpdate)
 		ctl->flags |= FLAG_IBURST;
 	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
-		       ctl->minpoll, ctl->maxpoll, (u_int)ctl->flags,
+		       ctl->minpoll, ctl->maxpoll, (unsigned int)ctl->flags,
 		       cast_flags, ctl->ttl, ctl->peerkey, true);
 }
 
@@ -3532,8 +3532,8 @@ ntp_rlimit(
 			if (rl_value > rl.rlim_max) {
 				msyslog(LOG_WARNING,
 					"ntp_rlimit: using maximum allowed stack limit %lu instead of %lu.",
-					(u_long)rl.rlim_max,
-					(u_long)rl_value);
+					(unsigned long)rl.rlim_max,
+					(unsigned long)rl_value);
 				rl_value = rl.rlim_max;
 			}
 			rl.rlim_cur = rl_value;

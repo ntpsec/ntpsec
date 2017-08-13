@@ -103,12 +103,12 @@ doing the appropriate time stamping.
 ----------------------------------------------------------------------------------
 struct clockformat
 {
-  u_long (*input)();
+  unsigned long (*input)();
   /* input routine - your routine - cvt_<yourclock> */
-  u_long (*convert)();
+  unsigned long (*convert)();
   /* conversion routine - your routine - cvt_<yourclock> */
   /* routine for handling RS232 sync events (time stamps) - usually sync_simple */
-  u_long (*syncpps)();
+  unsigned long (*syncpps)();
   /* PPS input routine - usually pps_one */
   void           *data;
   /* local parameters - any parameters/data/configuration info your conversion
@@ -117,7 +117,7 @@ struct clockformat
   /* clock format name - Name of the time code */
   unsigned short  length;
   /* maximum length of data packet for your clock format */
-  u_long   flags;
+  unsigned long   flags;
  /* information for the parser what to look for */
 };
 ----------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ clocks for example)
 -------------------------------------------------------------------------------------
    struct clockinfo
      {
-      u_long  cl_flags;             /* operation flags (io modes) */
+      unsigned long  cl_flags;             /* operation flags (io modes) */
          PARSE_F_PPSPPS       use loopfilter PPS code
          PARSE_F_PPSONSECOND  PPS pulses are on second
          usually flags stay 0 as they are used only for special setups
@@ -165,12 +165,12 @@ clocks for example)
     u_fp    cl_rootdelay;         /* rootdelay */
          NTP rootdelay estimate (usually 0)
 
-         u_long  cl_basedelay;         /* current offset - unsigned l_fp
+         unsigned long  cl_basedelay;         /* current offset - unsigned l_fp
                                               fractional part (fraction) by
                                               which the RS232 time code is
                                               delayed from the actual time. */
 
-    u_long  cl_ppsdelay;          /* current PPS offset - unsigned l_fp fractional
+    unsigned long  cl_ppsdelay;          /* current PPS offset - unsigned l_fp fractional
          time (fraction) by which the PPS time stamp is delayed (usually 0)
    part */
 
@@ -184,22 +184,22 @@ clocks for example)
          If the data format cann not ne detected automatically this is the name
      as in clk_*.c clockformat.
 
-    u_char  cl_type;              /* clock type (ntp control) */
+    unsigned char  cl_type;              /* clock type (ntp control) */
          Type if clock as in clock status word (ntp control messages) - usually 0
 
-    u_long  cl_maxunsync;         /* time to trust oscillator after losing synch
+    unsigned long  cl_maxunsync;  /* time to trust oscillator after losing synch
   */
          seconds a clock can be trusted after losing synchronisation.
 
-    u_long  cl_speed;             /* terminal input & output baudrate */
-    u_long  cl_cflag;             /* terminal io flags */
-    u_long  cl_iflag;             /* terminal io flags */
-    u_long  cl_oflag;             /* terminal io flags */
-    u_long  cl_lflag;             /* terminal io flags */
+    unsigned long  cl_speed;    /* terminal input & output baudrate */
+    unsigned long  cl_cflag;    /* terminal io flags */
+    unsigned long  cl_iflag;    /* terminal io flags */
+    unsigned long  cl_oflag;    /* terminal io flags */
+    unsigned long  cl_lflag;    /* terminal io flags */
          termio*.h tty modes.
 
-    u_long  cl_samples;           /* samples for median filter */
-    u_long  cl_keep;              /* samples for median filter to keep */
+    unsigned long  cl_samples;  /* samples for median filter */
+    unsigned long  cl_keep;     /* samples for median filter to keep */
          median filter parameters - smoothing and rejection of bad samples
   } clockinfo[] = {
   ...,<other clocks>,...

@@ -154,11 +154,11 @@ struct trimble_unit {
 	size_t 		rpt_cnt;	/* TSIP packet length so far */
 	char 		rpt_buf[BMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
-	u_int		week;		/* GPS week number */
-	u_int		TOW;		/* GPS time of week */
+	unsigned int	week;		/* GPS week number */
+	unsigned int	TOW;		/* GPS time of week */
 	int		UTC_offset;	/* GPS-UTC offset */
 	struct calendar	date;		/* calendar to avoid leap early announce */
-	u_int		build_week;	/* GPS week number of ntpd build date */
+	unsigned int	build_week;	/* GPS week number of ntpd build date */
 };
 
 /*
@@ -636,7 +636,7 @@ TSIP_decode (
 #ifdef DEBUG
 			if (debug > 1) /* SPECIAL DEBUG */
 				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02d\n",
-				       up->unit, (u_int)(mb(0) & 0xff), event,
+				       up->unit, (unsigned int)(mb(0) & 0xff), event,
 				       up->date.hour, up->date.minute, up->date.second, pp->nsec,
 				       up->date.month, up->date.monthday, up->date.year, up->UTC_offset);
 #endif
@@ -724,10 +724,10 @@ TSIP_decode (
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 			up->UTC_offset = 0; /* don't re-use offset */
 			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
-				   up->unit, (u_int)(mb(0) & 0xff), event,
+				   up->unit, (unsigned int)(mb(0) & 0xff), event,
 				   up->date.hour, up->date.minute, up->date.second, pp->nsec,
 				   up->date.month, up->date.monthday, up->date.year,
-				   (u_int)mb(19), *Tracking_Status[st]));
+				   (unsigned int)mb(19), *Tracking_Status[st]));
 			return 1;
 			break;
 
@@ -760,7 +760,7 @@ TSIP_decode (
 #ifdef DEBUG
 			if (debug > 1) /* SPECIAL DEBUG */
 				printf("TSIP_decode: unit %d: 0x%02x leap %d\n",
-				       up->unit, (u_int)(mb(0) & 0xff), pp->leap);
+				       up->unit, (unsigned int)(mb(0) & 0xff), pp->leap);
 			if (debug > 1) { /* SPECIAL DEBUG */
 				printf("Receiver MODE: 0x%02X\n", (uint8_t)mb(1));
 				if (mb(1) == 0x00)
@@ -827,7 +827,7 @@ TSIP_decode (
 			pp->nsec = 0;
 #ifdef DEBUG		
 			printf("\nTiming Flags are:\n");
-			printf("Timing flag value is: 0x%X\n", (u_int)mb(9));
+			printf("Timing flag value is: 0x%X\n", (unsigned int)mb(9));
 			if ((mb(9) & 0x01) != 0)
 				printf ("	Getting UTC time\n");
 			else
@@ -855,7 +855,7 @@ TSIP_decode (
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
 			DPRINT(2, ("TSIP_decode: unit %d: %02X #%d TOW: %u  week: %u  adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
-				   up->unit, (u_int)(mb(0) & 0xff), event, up->TOW, up->week, 
+				   up->unit, (unsigned int)(mb(0) & 0xff), event, up->TOW, up->week, 
 				   up->date.hour, up->date.minute, up->date.second,
 				   up->date.month, up->date.monthday, up->date.year));
 			return 1;
@@ -972,7 +972,7 @@ TSIP_decode (
 	up->polled = -1;
 #ifdef DEBUG
 	printf("TSIP_decode: unit %d: bad packet %02x-%02x event %d len %d\n", 
-	       up->unit, (u_int)(up->rpt_buf[0] & 0xff), (u_int)(mb(0) & 0xff),
+	       up->unit, (unsigned int)(up->rpt_buf[0] & 0xff), (unsigned int)(mb(0) & 0xff),
 	       event, (int)up->rpt_cnt);
 #endif
 	return 0;
@@ -1318,7 +1318,7 @@ getint (
 	uint8_t *bp
 	)
 {
-	u_short us;
+	unsigned short us;
 
 	memcpy(&us, bp, sizeof(us));
 	return (short)ntohs(us);

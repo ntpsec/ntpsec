@@ -75,7 +75,7 @@ void ppscheck(const char *device)
 	pps_params_t pp;
 	pps_handle_t ph = 0;    /* 0 to prevent spurious uninialized warning */
 	int i, mode;
-	u_int olda = 0, oldc = 0;
+	unsigned int olda = 0, oldc = 0;
 	struct timespec to;
 
 	if (device == NULL)

@@ -23,10 +23,10 @@ numtoa(
 	netnum = ntohl(num);
 	LIB_GETBUF(buf);
 	snprintf(buf, LIB_BUFLENGTH, "%lu.%lu.%lu.%lu",
-		 ((u_long)netnum >> 24) & 0xff,
-		 ((u_long)netnum >> 16) & 0xff,
-		 ((u_long)netnum >> 8) & 0xff,
-		 (u_long)netnum & 0xff);
+		 ((unsigned long)netnum >> 24) & 0xff,
+		 ((unsigned long)netnum >> 16) & 0xff,
+		 ((unsigned long)netnum >> 8) & 0xff,
+		 (unsigned long)netnum & 0xff);
 	return buf;
 }
 

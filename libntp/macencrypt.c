@@ -51,7 +51,7 @@ mac_authencrypt(
 	)
 {
 	uint8_t	digest[EVP_MAX_MD_SIZE];
-	u_int	len;
+	unsigned int	len;
 	EVP_MD_CTX *ctx;
 
 	/*
@@ -67,7 +67,7 @@ mac_authencrypt(
 		return (0);
 	}
 	EVP_DigestUpdate(ctx, key, cache_secretsize);
-	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (u_int)length);
+	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
 	EVP_MD_CTX_destroy(ctx);
 	memmove((uint8_t *)pkt + length + 4, digest, len);
@@ -90,7 +90,7 @@ mac_authdecrypt(
 	)
 {
 	uint8_t	digest[EVP_MAX_MD_SIZE];
-	u_int	len;
+	unsigned int	len;
 	EVP_MD_CTX *ctx;
 
 	/*
@@ -106,10 +106,10 @@ mac_authdecrypt(
 		return false;
 	}
 	EVP_DigestUpdate(ctx, key, cache_secretsize);
-	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (u_int)length);
+	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
 	EVP_MD_CTX_destroy(ctx);
-	if ((u_int)size != len + 4) {
+	if ((unsigned int)size != len + 4) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: MAC length error");
 		return false;
@@ -127,9 +127,9 @@ uint32_t
 addr2refid(sockaddr_u *addr)
 {
 	uint8_t		digest[20];
-	uint32_t		addr_refid;
+	uint32_t	addr_refid;
 	EVP_MD_CTX	*ctx;
-	u_int		len;
+	unsigned int	len;
 
 	if (IS_IPV4(addr))
 		return (NSRCADR(addr));

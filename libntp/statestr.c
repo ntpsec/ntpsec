@@ -330,7 +330,7 @@ decode_bitflags(
 				      tab[b].string);
 			if (rc < 0)
 				goto toosmall;
-			pch += (u_int)rc;
+			pch += (unsigned int)rc;
 			if (pch >= lim)
 				goto toosmall;
 			sep = sep2;
@@ -370,7 +370,7 @@ peer_st_flags(
 
 const char *
 res_match_flags(
-	u_short mf
+	unsigned short mf
 	)
 {
 	return decode_bitflags(mf, " ", res_match_bits,
@@ -380,7 +380,7 @@ res_match_flags(
 
 const char *
 res_access_flags(
-	u_short af
+	unsigned short af
 	)
 {
 	return decode_bitflags(af, " ", res_access_bits,

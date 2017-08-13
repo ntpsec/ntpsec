@@ -36,7 +36,7 @@ typedef enum {
 
 
 extern int	qos;
-extern bool	is_ip_address(const char *, u_short, sockaddr_u *);
+extern bool	is_ip_address(const char *, unsigned short, sockaddr_u *);
 extern void	add_nic_rule(nic_rule_match match_type,
 			     const char *if_name, int prefixlen,
 			     nic_rule_action action);

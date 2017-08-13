@@ -75,7 +75,7 @@
 struct neoclock4x_unit {
   l_fp	laststamp;	/* last receive timestamp */
   short	unit;		/* NTP refclock unit number */
-  u_long polled;	/* flag to detect noreplies */
+  unsigned long polled;	/* flag to detect noreplies */
   char	leap_status;	/* leap second flag */
   bool	recvnow;
 
@@ -163,8 +163,8 @@ neoclock4x_start(int unit,
   termsettings.c_iflag = IGNBRK | IGNPAR | ICRNL;
   termsettings.c_oflag = 0;
   termsettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
-  (void)cfsetispeed(&termsettings, (u_int)B2400);
-  (void)cfsetospeed(&termsettings, (u_int)B2400);
+  (void)cfsetispeed(&termsettings, (unsigned int)B2400);
+  (void)cfsetospeed(&termsettings, (unsigned int)B2400);
 
   if(tcsetattr(fd, TCSANOW, &termsettings) < 0)
     {

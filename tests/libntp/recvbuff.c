@@ -23,7 +23,7 @@ TEST(recvbuff, Initialization) {
 }
 
 TEST(recvbuff, GetAndFree) {
-	u_long initial = free_recvbuffs();
+	unsigned long initial = free_recvbuffs();
 	recvbuf_t* buf = get_free_recv_buffer();
 
 	TEST_ASSERT_EQUAL(initial-1, free_recvbuffs());

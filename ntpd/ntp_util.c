@@ -351,13 +351,13 @@ static char *
 timespec_to_MJDtime(const struct timespec *ts)
 {
 	char *buf;
-	u_long	day, sec, msec;
+	unsigned long	day, sec, msec;
 
 	LIB_GETBUF(buf);
 
-	day = (u_long)ts->tv_sec / SECSPERDAY + MJD_1970;
-	sec = (u_long)ts->tv_sec % SECSPERDAY;
-	msec = (u_long)ts->tv_nsec / NS_PER_MS;  /* nano secs to milli sec */
+	day = (unsigned long)ts->tv_sec / SECSPERDAY + MJD_1970;
+	sec = (unsigned long)ts->tv_sec % SECSPERDAY;
+	msec = (unsigned long)ts->tv_nsec / NS_PER_MS;  /* nano secs to milli sec */
 	snprintf(buf, LIB_BUFLENGTH, "%lu %lu.%03lu", day, sec, msec);
 
 	return buf;
@@ -405,7 +405,7 @@ record_peer_stats(
 		fprintf(peerstats.fp,
 		    "%s %s %x %.9f %.9f %.9f %.9f\n",
 		    timespec_to_MJDtime(&now),
-		    peerlabel(peer), (u_int)status, peer->offset,
+		    peerlabel(peer), (unsigned int)status, peer->offset,
 		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
@@ -526,7 +526,7 @@ record_raw_stats(
 	double	root_delay,	/* seconds */
 	double	root_dispersion,/* seconds */
 	uint32_t	refid,
-	u_int	outcount
+	unsigned int	outcount
 	)
 {
 	struct timespec	now;
@@ -799,7 +799,7 @@ getauthkeys(
 void
 ntpd_time_stepped(void)
 {
-	u_int saved_mon_enabled;
+	unsigned int saved_mon_enabled;
 
 	/*
 	 * flush the monitor MRU list which contains l_fp timestamps

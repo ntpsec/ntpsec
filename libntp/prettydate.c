@@ -125,7 +125,7 @@ common_prettydate(
 
 	char	    *bp;
 	struct tm   *tm, tmbuf;
-	u_int	     msec;
+	unsigned int	     msec;
 	uint32_t	     ntps;
 	time64_t	     sec;
 
@@ -148,13 +148,13 @@ common_prettydate(
 		struct calendar jd;
 		ntpcal_time_to_date(&jd, sec);
 		snprintf(bp, LIB_BUFLENGTH, pfmt,
-			 (u_long)lfpuint(ts), (u_long)lfpfrac(ts),
+			 (unsigned long)lfpuint(ts), (unsigned long)lfpfrac(ts),
 			 jd.year, jd.month, jd.monthday,
 			 jd.hour, jd.minute, jd.second, msec);
 		strncat(bp, "Z",  LIB_BUFLENGTH);
 	} else {
 		snprintf(bp, LIB_BUFLENGTH, pfmt,
-			 (u_long)lfpuint(ts), (u_long)lfpfrac(ts),
+			 (unsigned long)lfpuint(ts), (unsigned long)lfpfrac(ts),
 			 1900 + tm->tm_year, tm->tm_mon+1, tm->tm_mday,
 			 tm->tm_hour, tm->tm_min, tm->tm_sec, msec);
 		if (!local)

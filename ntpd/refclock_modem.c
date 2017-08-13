@@ -507,7 +507,7 @@ modem_timeout(
 				return;
 			}
 			snprintf(pidbuf, sizeof(pidbuf), "%u\n",
-			    (u_int)getpid());
+			    (unsigned int)getpid());
 			if (write(fd, pidbuf, strlen(pidbuf)) < 0)
 				msyslog(LOG_ERR, "modem: write lock fails %m");
 			close(fd);
@@ -748,11 +748,11 @@ modem_timecode(
 	struct refclockproc *pp;
 	int	day;		/* day of the month */
 	int	month;		/* month of the year */
-	u_long	mjd;		/* Modified Julian Day */
+	unsigned long	mjd;	/* Modified Julian Day */
 	double	dut1;		/* DUT adjustment */
 
-	u_int	dst;		/* ACTS daylight/standard time */
-	u_int	leap;		/* ACTS leap indicator */
+	unsigned int	dst;		/* ACTS daylight/standard time */
+	unsigned int	leap;		/* ACTS leap indicator */
 	double	msADV;		/* ACTS transmit advance (ms) */
 	char	utc[10];	/* ACTS timescale */
 	char	flag;		/* ACTS on-time character (* or #) */

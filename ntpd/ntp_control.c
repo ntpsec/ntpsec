@@ -36,7 +36,7 @@
 struct ctl_proc {
 	short control_code;		/* defined request code */
 #define NO_REQUEST	(-1)
-	u_short flags;			/* flags word */
+	unsigned short flags;			/* flags word */
 	/* Only one flag.  Authentication required or not. */
 #define NOAUTH	0
 #define AUTH	1
@@ -49,7 +49,7 @@ struct ctl_proc {
  */
 static	void	ctl_error	(uint8_t);
 #ifdef REFCLOCK
-static	u_short ctlclkstatus	(struct refclockstat *);
+static	unsigned short ctlclkstatus	(struct refclockstat *);
 #endif
 static	void	ctl_flushpkt	(uint8_t);
 static	void	ctl_putdata	(const char *, unsigned int, bool);
@@ -59,8 +59,8 @@ static	void	ctl_putdblf	(const char *, int, int, double);
 #define	ctl_putdbl6(tag, d)	ctl_putdblf(tag, 1, 6, d)
 #define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, 0, -1, \
 					    FP_UNSCALE(sfp))
-static	void	ctl_putuint	(const char *, u_long);
-static	void	ctl_puthex	(const char *, u_long);
+static	void	ctl_putuint	(const char *, unsigned long);
+static	void	ctl_puthex	(const char *, unsigned long);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
 static	void	ctl_putadr	(const char *, uint32_t,
@@ -75,8 +75,8 @@ static	void	ctl_putclock	(int, struct refclockstat *, int);
 #endif	/* REFCLOCK */
 static	const struct ctl_var *ctl_getitem(const struct ctl_var *,
 					  char **);
-static	u_short ctlsysstatus	(void);
-static	u_short	count_var	(const struct ctl_var *);
+static	unsigned short ctlsysstatus	(void);
+static	unsigned short	count_var	(const struct ctl_var *);
 static	void	control_unspec	(struct recvbuf *, int);
 static	void	read_status	(struct recvbuf *, int);
 static	void	read_sysvars	(void);
@@ -91,12 +91,12 @@ static	void	send_mru_entry	(mon_entry *, int);
 static	void	send_random_tag_value(int);
 #endif /* USE_RANDOMIZE_RESPONSES */
 static	void	read_mru_list	(struct recvbuf *, int);
-static	void	send_ifstats_entry(endpt *, u_int);
+static	void	send_ifstats_entry(endpt *, unsigned int);
 static	void	read_ifstats	(struct recvbuf *);
 static	void	sockaddrs_from_restrict_u(sockaddr_u *,	sockaddr_u *,
 					  restrict_u *, int);
-static	void	send_restrict_entry(restrict_u *, int, u_int);
-static	void	send_restrict_list(restrict_u *, int, u_int *);
+static	void	send_restrict_entry(restrict_u *, int, unsigned int);
+static	void	send_restrict_list(restrict_u *, int, unsigned int *);
 static	void	read_addr_restrictions(struct recvbuf *);
 static	void	read_ordlist	(struct recvbuf *, int);
 static	uint32_t	derive_nonce	(sockaddr_u *, uint32_t, uint32_t);
@@ -603,7 +603,7 @@ keyid_t ctl_auth_keyid;
  *  * A hack.  To keep the authentication module clear of ntp-ism's, we
  *   * include a time reset variable for its stats here.
  *    */
-static u_long auth_timereset;
+static unsigned long auth_timereset;
 
 
 /*
@@ -616,21 +616,21 @@ static	uint8_t ctl_sys_num_events;
 /*
  * Statistic counters to keep track of requests and responses.
  */
-static u_long ctltimereset;	/* time stats reset */
-static u_long numctlreq;	/* number of requests we've received */
-static u_long numctlbadpkts;	/* number of bad control packets */
-static u_long numctlresponses;	/* number of resp packets sent with data */
-static u_long numctlfrags;	/* number of fragments sent */
-static u_long numctlerrors;	/* number of error responses sent */
-static u_long numctltooshort;	/* number of too short input packets */
-static u_long numctlinputresp;	/* number of responses on input */
-static u_long numctlinputfrag;	/* number of fragments on input */
-static u_long numctlinputerr;	/* number of input pkts with err bit set */
-static u_long numctlbadoffset;	/* number of input pkts with nonzero offset */
-static u_long numctlbadversion;	/* number of input pkts with unknown version */
-static u_long numctldatatooshort;    /* data too short for count */
-static u_long numctlbadop;	/* bad op code found in packet */
-static u_long numasyncmsgs;	/* number of async messages we've sent */
+static unsigned long ctltimereset;	/* time stats reset */
+static unsigned long numctlreq;		/* # of requests we've received */
+static unsigned long numctlbadpkts;	/* # of bad control packets */
+static unsigned long numctlresponses;	/* # of resp packets sent with data */
+static unsigned long numctlfrags;	/* # of fragments sent */
+static unsigned long numctlerrors;	/* # of error responses sent */
+static unsigned long numctltooshort;	/* # of too short input packets */
+static unsigned long numctlinputresp;	/* # of responses on input */
+static unsigned long numctlinputfrag;	/* # of fragments on input */
+static unsigned long numctlinputerr;	/* # of input pkts with err bit set */
+static unsigned long numctlbadoffset;	/* # of input pkts with nonzero offset */
+static unsigned long numctlbadversion;	/* # of input pkts with unknown version */
+static unsigned long numctldatatooshort;    /* data too short for count */
+static unsigned long numctlbadop;	/* bad op code found in packet */
+static unsigned long numasyncmsgs;	/* # of async messages we've sent */
 
 /*
  * Response packet used by these routines. Also some state information
@@ -643,7 +643,7 @@ static struct ntp_control rpkt;
 static uint8_t	res_version;
 static uint8_t	res_opcode;
 static associd_t res_associd;
-static u_short	res_frags;	/* datagrams in this response */
+static unsigned short	res_frags;	/* datagrams in this response */
 static int	res_offset;	/* offset of payload in response */
 static uint8_t * datapt;
 static int	datalinelen;
@@ -712,7 +712,7 @@ ctl_error(
 	 */
 	rpkt.r_m_e_op = (uint8_t)CTL_RESPONSE | CTL_ERROR |
 			(res_opcode & CTL_OP_MASK);
-	rpkt.status = htons((u_short)(errcode << 8) & 0xff00);
+	rpkt.status = htons((unsigned short)(errcode << 8) & 0xff00);
 	rpkt.count = 0;
 
 	/*
@@ -882,12 +882,12 @@ process_control(
 /*
  * ctlpeerstatus - return a status word for this peer
  */
-u_short
+unsigned short
 ctlpeerstatus(
 	register struct peer *p
 	)
 {
-	u_short status;
+	unsigned short status;
 
 	status = p->status;
 	if (FLAG_CONFIG & p->flags)
@@ -909,7 +909,7 @@ ctlpeerstatus(
  * ctlclkstatus - return a status word for this clock
  */
 #ifdef REFCLOCK
-static u_short
+static unsigned short
 ctlclkstatus(
 	struct refclockstat *pcs
 	)
@@ -922,7 +922,7 @@ ctlclkstatus(
 /*
  * ctlsysstatus - return the system status word
  */
-static u_short
+static unsigned short
 ctlsysstatus(void)
 {
 	register uint8_t this_clock;
@@ -989,8 +989,8 @@ ctl_flushpkt(
 	 */
 	rpkt.r_m_e_op = CTL_RESPONSE | more |
 			(res_opcode & CTL_OP_MASK);
-	rpkt.count = htons((u_short)dlen);
-	rpkt.offset = htons((u_short)res_offset);
+	rpkt.count = htons((unsigned short)dlen);
+	rpkt.offset = htons((unsigned short)res_offset);
 	if (res_authenticate) {
 		totlen = sendlen;
 		/*
@@ -1111,7 +1111,7 @@ ctl_putstr(
 	memcpy(buffer, tag, tl);
 	if (len > 0)
 	    snprintf(buffer + tl, sizeof(buffer) - tl, "=\"%s\"", data);
-	ctl_putdata(buffer, (u_int)strlen(buffer), false);
+	ctl_putdata(buffer, (unsigned int)strlen(buffer), false);
 }
 
 
@@ -1145,7 +1145,7 @@ ctl_putunqstr(
 		memcpy(cp, data, len);
 		cp += len;
 	}
-	ctl_putdata(buffer, (u_int)(cp - buffer), false);
+	ctl_putdata(buffer, (unsigned int)(cp - buffer), false);
 }
 
 
@@ -1183,7 +1183,7 @@ ctl_putdblf(
 static void
 ctl_putuint(
 	const char *tag,
-	u_long uval
+	unsigned long uval
 	)
 {
 	register char *cp;
@@ -1242,7 +1242,7 @@ ctl_puttime(
 static void
 ctl_puthex(
 	const char *tag,
-	u_long uval
+	unsigned long uval
 	)
 {
 	register char *cp;
@@ -1309,7 +1309,7 @@ ctl_putts(
 	*cp++ = '=';
 	INSIST((size_t)(cp - buffer) < sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%08x.%08x",
-		 (u_int)lfpuint(*ts), (u_int)lfpfrac(*ts));
+		 (unsigned int)lfpuint(*ts), (unsigned int)lfpfrac(*ts));
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
@@ -1382,7 +1382,7 @@ ctl_putrefid(
 			*optr = '.';
 	if (!(optr <= oplim))
 		optr = past_eq;
-	ctl_putdata(output, (u_int)(optr - output), false);
+	ctl_putdata(output, (unsigned int)(optr - output), false);
 }
 
 
@@ -1429,13 +1429,13 @@ ctl_putsys(
 {
 	l_fp tmp;
 	char str[256];
-	u_int u;
+	unsigned int u;
 	double kb;
 	double dtemp;
 	const char *ss;
 #ifdef HAVE_KERNEL_PLL
 	static struct timex ntx;
-	static u_long ntp_adjtime_time;
+	static unsigned long ntp_adjtime_time;
 
 	/*
 	 * CS_K_* variables depend on up-to-date output of ntp_adjtime()
@@ -1666,7 +1666,7 @@ ctl_putsys(
 
 	case CS_MRU_MEM:
 		kb = mru_entries * (sizeof(mon_entry) / 1024.);
-		u = (u_int)kb;
+		u = (unsigned int)kb;
 		if (kb - u >= 0.5)
 			u++;
 		ctl_putuint(sys_var[varid].text, u);
@@ -1694,7 +1694,7 @@ ctl_putsys(
 
 	case CS_MRU_MAXMEM:
 		kb = mru_maxdepth * (sizeof(mon_entry) / 1024.);
-		u = (u_int)kb;
+		u = (unsigned int)kb;
 		if (kb - u >= 0.5)
 			u++;
 		ctl_putuint(sys_var[varid].text, u);
@@ -1724,7 +1724,7 @@ ctl_putsys(
 		l_fp now;
 		get_systime(&now);
 		ctl_putuint(sys_var[varid].text,
-                            (u_long)mon_get_oldest_age(now));
+                            (unsigned long)mon_get_oldest_age(now));
 		break;
 		}
 
@@ -1787,7 +1787,7 @@ ctl_putsys(
 		break;
 
 	case CS_AUTHFREEK:
-		ctl_putuint(sys_var[varid].text, (u_long)authnumfreekeys);
+		ctl_putuint(sys_var[varid].text, (unsigned long)authnumfreekeys);
 		break;
 
 	case CS_AUTHKLOOKUPS:
@@ -2125,7 +2125,7 @@ ctl_putpeer(
 		break;
 
 	case CP_RATE:
-		ctl_putuint(peer_var[id].text, (u_long)p->throttle);
+		ctl_putuint(peer_var[id].text, (unsigned long)p->throttle);
 		break;
 
 	case CP_LEAP:
@@ -2196,7 +2196,7 @@ ctl_putpeer(
 		break;
 
 	case CP_FLASH:
-		ctl_puthex(peer_var[id].text, (u_long)p->flash);
+		ctl_puthex(peer_var[id].text, (unsigned long)p->flash);
 		break;
 
 	case CP_TTL:
@@ -2209,7 +2209,7 @@ ctl_putpeer(
 		break;
 
 	case CP_UNREACH:
-		ctl_putuint(peer_var[id].text, (u_long)p->unreach);
+		ctl_putuint(peer_var[id].text, (unsigned long)p->unreach);
 		break;
 
 	case CP_TIMER:
@@ -2290,7 +2290,7 @@ ctl_putpeer(
 		if (s + 2 < be) {
 			*s++ = '"';
 			*s = '\0';
-			ctl_putdata(buf, (u_int)(s - buf), false);
+			ctl_putdata(buf, (unsigned int)(s - buf), false);
 		}
 		break;
 
@@ -2510,7 +2510,7 @@ ctl_getitem(
 {
 	static const struct ctl_var eol = { 0, EOV, NULL };
 	static char buf[128];
-	static u_long quiet_until;
+	static unsigned long quiet_until;
 	const struct ctl_var *v;
 	const char *pch;
 	char *cp;
@@ -2637,7 +2637,7 @@ read_status(
 	const uint8_t *cp;
 	size_t n;
 	/* a_st holds association ID, status pairs alternating */
-	u_short a_st[CTL_MAX_DATA_LEN / sizeof(u_short)];
+	unsigned short a_st[CTL_MAX_DATA_LEN / sizeof(unsigned short)];
 
 	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
@@ -2739,7 +2739,7 @@ read_sysvars(void)
 {
 	const struct ctl_var *v;
 	struct ctl_var *kv;
-	u_int	n;
+	unsigned int	n;
 	bool	gotvar;
 	const uint8_t *cs;
 	char *	valuep;
@@ -3042,13 +3042,13 @@ static uint32_t derive_nonce(
 	)
 {
 	static uint32_t	salt[4];
-	static u_long	last_salt_update;
+	static unsigned long	last_salt_update;
 	union d_tag {
 		uint8_t	digest[EVP_MAX_MD_SIZE];
 		uint32_t extract;
 	}		d;
 	EVP_MD_CTX	*ctx;
-	u_int		len;
+	unsigned int	len;
 
 	while (!salt[0] || current_time - last_salt_update >= SECSPERHR) {
             salt[0] = (uint32_t)ntp_random();
@@ -3108,12 +3108,12 @@ static int validate_nonce(
 	struct recvbuf *	rbufp
 	)
 {
-	u_int	ts_i;
-	u_int	ts_f;
-	l_fp	ts;
-	l_fp	now_delta;
-	u_int	supposed;
-	u_int	derived;
+	unsigned int	ts_i;
+	unsigned int	ts_f;
+	l_fp		ts;
+	l_fp		now_delta;
+	unsigned int	supposed;
+	unsigned int	derived;
 
 	if (3 != sscanf(pnonce, "%08x%08x%08x", &ts_i, &ts_f, &supposed))
 		return false;
@@ -3157,7 +3157,7 @@ send_random_tag_value(
 	noise >>= 5;
 	buf[3] = '.';
 	snprintf(&buf[4], sizeof(buf) - 4, "%d", indx);
-	ctl_putuint(buf, (u_long)noise);
+	ctl_putuint(buf, (unsigned long)noise);
 }
 #endif /* USE_RANDOMIZE_RESPONSE */
 
@@ -3183,8 +3183,8 @@ send_mru_entry(
 	char	tag[32];
 	bool	sent[6]; /* 6 tag=value pairs */
 	uint32_t noise;
-	u_int	which = 0;
-	u_int	remaining;
+	unsigned int	which = 0;
+	unsigned int	remaining;
 	const char * pch;
 
 	remaining = COUNTOF(sent);
@@ -3374,18 +3374,19 @@ static void read_mru_list(
 	static const char	recent_text[] =		"recent";
 	static const char	resaxx_fmt[] =		"0x%hx";
 
-	u_int			limit;
-	u_short			frags;
-	u_short			resall;
-	u_short			resany;
+	unsigned int		limit;
+	unsigned short		frags;
+	unsigned short		resall;
+	unsigned short		resany;
 	int			mincount;
-	u_int			maxlstint;
-	sockaddr_u		laddr; u_int			recent;
+	unsigned int		maxlstint;
+	sockaddr_u		laddr;
+	unsigned int		recent;
 	endpt *                 lcladr;
-	u_int			count;
-	static u_int		countdown;
-	u_int			ui;
-	u_int			uf;
+	unsigned int		count;
+	static unsigned int	countdown;
+	unsigned int		ui;
+	unsigned int		uf;
 	l_fp			last[16];
 	sockaddr_u		addr[COUNTOF(last)];
 	char			buf[128];
@@ -3397,7 +3398,7 @@ static void read_mru_list(
 	int			nonce_valid;
 	size_t			i;
 	int			priors;
-	u_short			hash;
+	unsigned short		hash;
 	mon_entry *		mon;
 	mon_entry *		prior_mon;
 	l_fp			now;
@@ -3641,7 +3642,7 @@ static void read_mru_list(
 static void
 send_ifstats_entry(
 	endpt *	la,
-	u_int	ifnum
+	unsigned int	ifnum
 	)
 {
 	const char addr_fmtu[] =	"addr.%u";
@@ -3658,8 +3659,8 @@ send_ifstats_entry(
 	uint8_t	sent[IFSTATS_FIELDS]; /* 12 tag=value pairs */
 	int	noisebits;
 	uint32_t noise;
-	u_int	which = 0;
-	u_int	remaining;
+	unsigned int	which = 0;
+	unsigned int	remaining;
 	const char *pch;
 
 	remaining = COUNTOF(sent);
@@ -3709,7 +3710,7 @@ send_ifstats_entry(
 
 		case 4:
 			snprintf(tag, sizeof(tag), flags_fmt, ifnum);
-			ctl_puthex(tag, (u_int)la->flags);
+			ctl_puthex(tag, (unsigned int)la->flags);
 			break;
 
 		case 5:
@@ -3759,7 +3760,7 @@ read_ifstats(
 	struct recvbuf *	rbufp
 	)
 {
-	u_int	ifidx;
+	unsigned int	ifidx;
 	endpt *	la;
 
 	UNUSED_ARG(rbufp);
@@ -3818,7 +3819,7 @@ static void
 send_restrict_entry(
 	restrict_u *	pres,
 	int		ipv6,
-	u_int		idx
+	unsigned int		idx
 	)
 {
 	const char addr_fmtu[] =	"addr.%u";
@@ -3829,8 +3830,8 @@ send_restrict_entry(
 	uint8_t		sent[RESLIST_FIELDS]; /* 4 tag=value pairs */
 	int		noisebits;
 	uint32_t		noise;
-	u_int		which = 0;
-	u_int		remaining;
+	unsigned int		which = 0;
+	unsigned int		remaining;
 	sockaddr_u	addr;
 	sockaddr_u	mask;
 	const char *	pch;
@@ -3908,7 +3909,7 @@ static void
 send_restrict_list(
 	restrict_u *	pres,
 	int		ipv6,
-	u_int *		pidx
+	unsigned int *		pidx
 	)
 {
 	for ( ; pres != NULL; pres = pres->link) {
@@ -3926,7 +3927,7 @@ read_addr_restrictions(
 	struct recvbuf *	rbufp
 )
 {
-	u_int idx;
+	unsigned int idx;
 
 	UNUSED_ARG(rbufp);
 
@@ -3951,7 +3952,7 @@ read_ordlist(
 	const char addr_rst_s[] = "addr_restrictions";
 	const size_t a_r_chars = COUNTOF(addr_rst_s) - 1;
 	struct ntp_control *	cpkt;
-	u_short			qdata_octets;
+	unsigned short		qdata_octets;
 
 	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
@@ -4267,12 +4268,12 @@ ctl_clr_stats(void)
 	numasyncmsgs = 0;
 }
 
-static u_short
+static unsigned short
 count_var(
 	const struct ctl_var *k
 	)
 {
-	u_int c;
+	unsigned int c;
 
 	if (NULL == k)
 		return 0;
@@ -4282,18 +4283,18 @@ count_var(
 		c++;
 
 	ENSURE(c <= USHRT_MAX);
-	return (u_short)c;
+	return (unsigned short)c;
 }
 
 
 char *
 add_var(
 	struct ctl_var **kv,
-	u_long size,
-	u_short def
+	unsigned long size,
+	unsigned short def
 	)
 {
-	u_short		c;
+	unsigned short	c;
 	struct ctl_var *k;
 	char *		buf;
 
@@ -4316,8 +4317,8 @@ void
 set_var(
 	struct ctl_var **kv,
 	const char *data,
-	u_long size,
-	u_short def
+	unsigned long size,
+	unsigned short def
 	)
 {
 	struct ctl_var *k;
@@ -4363,8 +4364,8 @@ set_var(
 void
 set_sys_var(
 	const char *data,
-	u_long size,
-	u_short def
+	unsigned long size,
+	unsigned short def
 	)
 {
 	set_var(&ext_sys_var, data, size, def);

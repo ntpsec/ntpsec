@@ -272,15 +272,15 @@ struct instance {
 
 	int	Bj_day;
 
-	u_long	delay;		/* ns */
+	unsigned long	delay;		/* ns */
 	long	offset; 	/* ns */
 
 	uint8_t	*shmem;
 	char	*shmem_fname;
-	u_int	shmem_Cb;
-	u_int	shmem_Ba;
-	u_int	shmem_Ea;
-	u_int	shmem_Ha;
+	unsigned int	shmem_Cb;
+	unsigned int	shmem_Ba;
+	unsigned int	shmem_Ea;
+	unsigned int	shmem_Ha;
 	uint8_t	shmem_reset;
 	uint8_t	shmem_Posn;
 	uint8_t	shmem_bad_Ea;
@@ -294,8 +294,8 @@ struct instance {
 	uint8_t	posn_set;
 
 	enum oncore_model model;
-	u_int	version;
-	u_int	revision;
+	unsigned int	version;
+	unsigned int	revision;
 
 	uint8_t	chan;		/* 6 for PVT6 or BASIC, 8 for UT/VP, 12 for m12, 0 if unknown */
 	int8_t	traim;		/* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
@@ -318,7 +318,7 @@ struct instance {
 	struct	Bl Bl;		/* Satellite Broadcast Data Message */
 	uint8_t	printed;
 	uint8_t	polled;
-	u_long	ev_serial;
+	unsigned long	ev_serial;
 	unsigned	Rcvptr;
 	uint8_t	Rcvbuf[500];
 	uint8_t	BEHa[160];	/* Ba, Ea or Ha */
@@ -557,8 +557,8 @@ static uint8_t oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
  */
 
 	/* to buffer, int w, uint8_t *buf */
-#define w32_buf(buf,w)	{ u_int i_tmp;			   \
-			  i_tmp = (u_int)((w<0) ? (~(-w)+1) : (w)); \
+#define w32_buf(buf,w)	{ unsigned int i_tmp;			   \
+			  i_tmp = (unsigned int)((w<0) ? (~(-w)+1) : (w)); \
 			  (buf)[0] = (i_tmp >> 24) & 0xff; \
 			  (buf)[1] = (i_tmp >> 16) & 0xff; \
 			  (buf)[2] = (i_tmp >>	8) & 0xff; \
@@ -1062,7 +1062,7 @@ oncore_init_shmem(
 
 	oncore_log_f(instance, LOG_NOTICE,
 		     "SHMEM (size = %ld) is CONFIGURED and available as %s",
-		     (u_long) shmem_length, instance->shmem_fname);
+		     (unsigned long) shmem_length, instance->shmem_fname);
 }
 #endif /* ENABLE_ONCORE_SHMEM */
 
@@ -1581,7 +1581,7 @@ oncore_get_timestamp(
 	)
 {
 	int	Rsm;
-	u_long	j;
+	unsigned long	j;
 	l_fp ts, ts_tmp;
 	double dmy;
 	struct timespec *tsp = 0;
@@ -1649,9 +1649,9 @@ oncore_get_timestamp(
 
 #ifdef ONCORE_VERBOSE_GET_TIMESTAMP
 		if (debug > 2) { /* SPECIAL DEBUG */
-			u_long i;
+			unsigned long i;
 
-			i = (u_long) pps_i.assert_sequence;
+			i = (unsigned long) pps_i.assert_sequence;
 			oncore_log_f(instance, LOG_DEBUG,
 				     "serial/j (%lu, %lu) %ld.%09ld", i,
 				     j, (long)tsp->tv_sec,
@@ -1671,9 +1671,9 @@ oncore_get_timestamp(
 
 #if 0
 		if (debug > 2) { /* SPECIAL DEBUG */
-			u_long i;
+			unsigned long i;
 
-			i = (u_long) pps_i.clear_sequence;
+			i = (unsigned long) pps_i.clear_sequence;
 			oncore_log_f(instance, LOG_DEBUG,
 				     "serial/j (%lu, %lu) %ld.%09ld", i,
 				     j, (long)tsp->tv_sec,
@@ -2073,7 +2073,7 @@ oncore_msg_Az(
 
 	instance->saw_Az = 1;
 
-	instance->delay = (u_long)buf_w32(&buf[4]);
+	instance->delay = (unsigned long)buf_w32(&buf[4]);
 
 	oncore_log_f(instance, LOG_INFO, "Cable delay is set to %lu ns",
 		     instance->delay);
@@ -2915,8 +2915,8 @@ oncore_msg_Cj_id(
 
 	/* next, the Firmware Version and Revision numbers */
 
-	instance->version  = (u_int)atoi((char *) &instance->Cj[83]);
-	instance->revision = (u_int)atoi((char *) &instance->Cj[111]);
+	instance->version  = (unsigned int)atoi((char *) &instance->Cj[83]);
+	instance->revision = (unsigned int)atoi((char *) &instance->Cj[111]);
 
 	/* from model number decide which Oncore this is,
 		and then the number of channels */

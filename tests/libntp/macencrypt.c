@@ -19,7 +19,7 @@ TEST_TEAR_DOWN(macencrypt) {}
  */
 const int keytype = NID_md5;
 char key[] = "abcdefgh";
-const u_short keyLength = 8;
+const unsigned short keyLength = 8;
 const char *packet = "ijklmnopqrstuvwx";
 const int packetLength = 16;
 const int keyIdLength = 4;
@@ -34,10 +34,10 @@ TEST(macencrypt, Encrypt) {
 
 	cache_secretsize = keyLength;
 
-	int length = mac_authencrypt(keytype, (u_char*)key,
+	int length = mac_authencrypt(keytype, (unsigned char*)key,
                                      (uint32_t*)packetPtr, packetLength);
 
-	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (u_char*)key, (uint32_t*)packetPtr, packetLength, length));
+	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (unsigned char*)key, (uint32_t*)packetPtr, packetLength, length));
 
 	TEST_ASSERT_EQUAL(20, length);
 //XXX	TEST_ASSERT_TRUE(memcmp(expectedPacket, packetPtr, totalLength) == 0);  Does not pass
@@ -47,7 +47,7 @@ TEST(macencrypt, Encrypt) {
 TEST(macencrypt, DecryptValid) {
 	cache_secretsize = keyLength;
 
-	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (u_char*)key,
+	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (unsigned char*)key,
                          (uint32_t*)expectedPacket, packetLength, 20));
 }
 
@@ -56,7 +56,7 @@ TEST(macencrypt, DecryptInvalid) {
 
 	char invalidPacket[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
 
-	TEST_ASSERT_FALSE(mac_authdecrypt(keytype, (u_char*)key,
+	TEST_ASSERT_FALSE(mac_authdecrypt(keytype, (unsigned char*)key,
                           (uint32_t*)invalidPacket, packetLength, 20));
 }
 

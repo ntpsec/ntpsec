@@ -28,7 +28,7 @@ socktoa(
 	int		saved_errno;
 	char *		res;
 	char *		addr;
-	u_long		scope;
+	unsigned long	scope;
 
 	saved_errno = errno;
 	LIB_GETBUF(res);
@@ -95,12 +95,12 @@ sockporttoa(
 /*
  * sock_hash - hash a sockaddr_u structure
  */
-u_short
+unsigned short
 sock_hash(
 	const sockaddr_u *addr
 	)
 {
-	u_int hashVal;
+	unsigned int hashVal;
 	size_t len;
 	const uint8_t *pch;
 
@@ -133,8 +133,8 @@ sock_hash(
                 break;
 	}
 
-	for (u_int j = 0; j < len ; j++)
+	for (unsigned int j = 0; j < len ; j++)
 		hashVal = 37 * hashVal + pch[j];
 
-	return (u_short)(hashVal & USHRT_MAX);
+	return (unsigned short)(hashVal & USHRT_MAX);
 }

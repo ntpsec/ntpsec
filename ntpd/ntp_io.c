@@ -97,15 +97,15 @@ static nic_rule *nic_rule_list;
 /*
  * Other statistics of possible interest
  */
-u_long packets_dropped;		/* total # of packets dropped on reception */
-u_long packets_ignored;		/* packets received on wild card interface */
-u_long packets_received;	/* total # of packets received */
-u_long packets_sent;		/* total # of packets sent */
-u_long packets_notsent;		/* total # of packets which couldn't be sent */
+unsigned long packets_dropped;	/* total # of packets dropped on reception */
+unsigned long packets_ignored;	/* packets received on wild card interface */
+unsigned long packets_received;	/* total # of packets received */
+unsigned long packets_sent;	/* total # of packets sent */
+unsigned long packets_notsent;	/* total # of packets which couldn't be sent */
 
-volatile u_long handler_calls;	/* number of calls to interrupt handler */
-volatile u_long handler_pkts;	/* number of pkts received by handler */
-u_long io_timereset;		/* time counters were reset */
+volatile unsigned long handler_calls;	/* # of calls to interrupt handler */
+volatile unsigned long handler_pkts;	/* number of pkts received by handler */
+unsigned long io_timereset;		/* time counters were reset */
 
 /*
  * Interface stuff
@@ -114,7 +114,7 @@ endpt *	any_interface;		/* wildcard ipv4 interface */
 endpt *	any6_interface;		/* wildcard ipv6 interface */
 endpt *	loopback_interface;	/* loopback ipv4 interface */
 
-u_int sys_ifnum;			/* next .ifnum to assign */
+unsigned int sys_ifnum;			/* next .ifnum to assign */
 static int ninterfaces;			/* total # of interfaces */
 
 bool disable_dynamic_updates;	/* if true, scan interfaces once only */
@@ -156,13 +156,13 @@ static int maxactivefd;
 /*
  * bit alternating value to detect verified interfaces during an update cycle
  */
-static  u_short		sys_interphase = 0;
+static unsigned short		sys_interphase = 0;
 
 static void	add_interface(endpt *);
-static bool	update_interfaces(u_short, interface_receiver_t,
+static bool	update_interfaces(unsigned short, interface_receiver_t,
 				  void *);
 static void	remove_interface(endpt *);
-static endpt *	create_interface(u_short, endpt *);
+static endpt *	create_interface(unsigned short, endpt *);
 
 static bool	is_wildcard_addr	(const sockaddr_u *);
 
@@ -220,7 +220,7 @@ static void init_async_notifications (void);
 
 static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 				 int);
-static	int	create_sockets	(u_short);
+static	int	create_sockets	(unsigned short);
 static	void	set_reuseaddr	(int);
 static	bool	socket_broadcast_enable	 (endpt *, SOCKET, sockaddr_u *);
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
@@ -248,7 +248,7 @@ static endpt *	find_addr_in_list	(sockaddr_u *);
 static void	delete_interface_from_list(endpt *);
 static void	close_and_delete_fd_from_list(SOCKET);
 static void	add_addr_to_list	(sockaddr_u *, endpt *);
-static void	create_wildcards	(u_short);
+static void	create_wildcards	(unsigned short);
 static endpt *	findlocalinterface	(sockaddr_u *, int, int);
 static endpt *	findclosestinterface	(sockaddr_u *, int);
 static endpt *	findbcastinter		(sockaddr_u *);
@@ -258,7 +258,7 @@ static const char *	action_text	(nic_rule_action);
 #endif
 static nic_rule_action	interface_action(char *, sockaddr_u *, uint32_t);
 static void		convert_isc_if	(isc_interface_t *,
-					 endpt *, u_short);
+					 endpt *, unsigned short);
 static void		calc_addr_distance(sockaddr_u *,
 					   const sockaddr_u *,
 					   const sockaddr_u *);
@@ -661,7 +661,7 @@ addr_eqprefix(
 	netaddr_fromsockaddr(&isc_b, &isc_sa);
 
 	return netaddr_eqprefix(&isc_a, &isc_b,
-					 (u_int)prefixlen);
+					 (unsigned int)prefixlen);
 }
 
 
@@ -674,7 +674,7 @@ addr_eqprefix(
 bool
 is_ip_address(
 	const char *	host,
-	u_short		af,
+	unsigned short	af,
 	sockaddr_u *	addr
 	)
 {
@@ -876,7 +876,7 @@ log_listen_address(
 
 static void
 create_wildcards(
-	u_short	port
+	unsigned short	port
 	)
 {
 	bool			v4wild;
@@ -1202,7 +1202,7 @@ static void
 convert_isc_if(
 	isc_interface_t *isc_if,
 	endpt *itf,
-	u_short port
+	unsigned short port
 	)
 {
 	const uint8_t v6loop[16] = {0, 0, 0, 0, 0, 0, 0, 0,
@@ -1210,7 +1210,7 @@ convert_isc_if(
 
 	strlcpy(itf->name, isc_if->name, sizeof(itf->name));
 	itf->ifindex = isc_if->ifindex;
-	itf->family = (u_short)isc_if->af;
+	itf->family = (unsigned short)isc_if->af;
 	AF(&itf->sin) = (sa_family_t)itf->family;
 	AF(&itf->mask) = (sa_family_t)itf->family;
 	AF(&itf->bcast) = (sa_family_t)itf->family;
@@ -1350,7 +1350,7 @@ is_wildcard_addr(
  */
 static void
 set_wildcard_reuse(
-	u_short	family,
+	unsigned short	family,
 	int	on
 	)
 {
@@ -1472,7 +1472,7 @@ is_valid(
 
 static bool
 update_interfaces(
-	u_short			port,
+	unsigned short		port,
 	interface_receiver_t	receiver,
 	void *			data
 	)
@@ -1748,7 +1748,7 @@ update_interfaces(
  */
 static int
 create_sockets(
-	u_short port
+	unsigned short port
 	)
 {
 	maxactivefd = 0;
@@ -1777,7 +1777,7 @@ create_sockets(
  */
 static endpt *
 create_interface(
-	u_short			port,
+	unsigned short		port,
 	endpt *	protot
 	)
 {
@@ -2181,7 +2181,7 @@ sendpkt(
 	DPRINT(2, ("sendpkt(%d, dst=%s, src=%s, len=%d)\n",
 		   src->fd, socktoa(dest), socktoa(&src->sin), len));
 
-	cc = sendto(src->fd, pkt, (u_int)len, 0,
+	cc = sendto(src->fd, pkt, (unsigned int)len, 0,
 		    &dest->sa, SOCKLEN(dest));
 	if (cc == -1) {
 		src->notsent++;

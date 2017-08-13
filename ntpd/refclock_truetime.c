@@ -152,7 +152,7 @@ static	void	true_send	(struct peer *, const char *);
 static	void	true_doevent	(struct peer *, enum true_event);
 
 #ifdef ENABLE_PPS720
-static	u_long	true_sample720	(void);
+static	unsigned long	true_sample720	(void);
 #endif
 
 /*
@@ -312,14 +312,14 @@ true_receive(
 	register struct true_unit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
-	u_short new_station;
+	unsigned short new_station;
 	char synced;
 	int i;
 	int lat, lon, off;	/* GOES Satellite position */
 	/* These variables hold data until we decide to keep it */
 	char	rd_lastcode[BMAX];
 	l_fp	rd_tmp;
-	u_short	rd_lencode;
+	unsigned short	rd_lencode;
 
 	/*
 	 * Get the clock this applies to and pointers to the data.
@@ -331,7 +331,7 @@ true_receive(
 	/*
 	 * Read clock output.  Automatically handles CLKLDISC.
 	 */
-	rd_lencode = (u_short)refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
+	rd_lencode = (unsigned short)refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
 	rd_lastcode[rd_lencode] = '\0';
 
 	/*
@@ -868,7 +868,7 @@ true_poll(
 /*
  * true_sample720 - sample the PCL-720
  */
-static u_long
+static unsigned long
 true_sample720(void)
 {
 	unsigned long f;

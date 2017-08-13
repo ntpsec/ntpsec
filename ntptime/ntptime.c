@@ -85,7 +85,7 @@ int ntp_gettime(struct ntptimeval *ntv)
 /*
  * Function prototypes
  */
-const char *	snprintb	(size_t, char *, u_int, const char *);
+const char *	snprintb	(size_t, char *, unsigned int, const char *);
 const char *	timex_state	(int);
 
 #ifdef SIGSYS
@@ -331,10 +331,11 @@ main(
 		setlfpfrac(ts, lfpfrac(ts) + ts_roundbit);
 		setlfpfrac(ts, lfpfrac(ts) & ts_mask);
 		printf(json ? jfmt2 : ofmt2,  json ? rfc3339date(ts) : prettydate(ts), fdigits, (int)time_frac);
-		printf(json ? jfmt3 : ofmt3,  (u_long)ntv.maxerror, (u_long)ntv.esterror);
+		printf(json ? jfmt3 : ofmt3,  (unsigned long)ntv.maxerror, (unsigned long)ntv.esterror);
 		if (rawtime)
 			printf(json ? jfmt4 : ofmt4,
-			       (u_int)lfpuint(ts), (u_int)lfpfrac(ts),
+			       (unsigned int)lfpuint(ts),
+			       (unsigned int)lfpfrac(ts),
 			       (int)ntv.time.tv_sec, fdigits,
 			       (int)time_frac,
 
@@ -382,10 +383,10 @@ main(
 		ftemp = FP_UNSCALE(ntx.freq);
 		printf(json ? jfmt10 : ofmt10, ftemp, 1 << ntx.shift);
 		printf(json ? jfmt11 : ofmt11,
-		     (u_long)ntx.maxerror, (u_long)ntx.esterror);
+		     (unsigned long)ntx.maxerror, (unsigned long)ntx.esterror);
 		printf(json ? jfmt12 : ofmt12,
 		       snprintb(sizeof(binbuf), binbuf,
-			       (u_int)ntx.status, TIMEX_STA_BITS));
+			       (unsigned int)ntx.status, TIMEX_STA_BITS));
 		ftemp = FP_UNSCALE(ntx.tolerance);
 		/*
 		 * Before the introduction of ntp_adjtime_ns() the
@@ -396,7 +397,7 @@ main(
 		 */
 		gtemp = (double)ntx.precision;
 		printf(json ? jfmt13 : ofmt13,
-			(u_long)ntx.constant, gtemp, ftemp);
+			(unsigned long)ntx.constant, gtemp, ftemp);
 		if (ntx.shift != 0) {
 		  ftemp = FP_UNSCALE(ntx.ppsfreq);
 		  gtemp = FP_UNSCALE(ntx.stabil);
@@ -404,8 +405,8 @@ main(
 			printf(json ? jfmt14 : ofmt14,
 			    ftemp, gtemp, htemp);
 			printf(json ? jfmt15 : ofmt15,
-			    (u_long)ntx.calcnt, (u_long)ntx.jitcnt,
-			    (u_long)ntx.stbcnt, (u_long)ntx.errcnt);
+			    (unsigned long)ntx.calcnt, (unsigned long)ntx.jitcnt,
+			    (unsigned long)ntx.stbcnt, (unsigned long)ntx.errcnt);
 		}
 		if (json)
 		    /* hack to avoid trailing comma - not semabtically needed */ 
@@ -450,7 +451,7 @@ const char *
 snprintb(
 	size_t		buflen,
 	char *		buf,
-	u_int		v,
+	unsigned int	v,
 	const char *	bits
 	)
 {
@@ -472,7 +473,7 @@ snprintb(
 		*cp++ = '(';
 		any = false;
 		while ((i = *bits++) != 0) {
-			if (v & (u_int)(1 << (i - 1))) {
+			if (v & (unsigned int)(1 << (i - 1))) {
 				if (any) {
 					*cp++ = ',';
 					if (cp >= cplim)

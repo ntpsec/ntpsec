@@ -105,9 +105,9 @@
  * MX4200 unit control structure.
  */
 struct mx4200unit {
-	u_int  pollcnt;			/* poll message counter */
+	unsigned int  pollcnt;			/* poll message counter */
 	bool   polled;			/* Hand in a time sample? */
-	u_int  lastserial;		/* last pps serial number */
+	unsigned int  lastserial;		/* last pps serial number */
 	double avg_lat;			/* average latitude */
 	double avg_lon;			/* average longitude */
 	double avg_alt;			/* average height */
@@ -115,10 +115,10 @@ struct mx4200unit {
 	double N_fixes;			/* Number of position measurements */
 	int    last_leap;		/* leap second warning */
 	bool   moving;			/* mobile platform? */
-	u_long sloppyclockflag;		/* driver option flags */
+	unsigned long sloppyclockflag;	/* driver option flags */
 	bool   known;			/* position known yet? */
-	u_long clamp_time;		/* when to stop position averaging */
-	u_long log_time;		/* when to print receiver status */
+	unsigned long clamp_time;	/* when to stop position averaging */
+	unsigned long log_time;		/* when to print receiver status */
 	pps_handle_t	pps_h;
 	pps_params_t	pps_p;
 	pps_info_t	pps_i;
@@ -1475,7 +1475,7 @@ mx4200_pps(
 	struct peer *peer
 	)
 {
-	u_int temp_serial;
+	unsigned int temp_serial;
 	struct refclockproc *pp;
 	struct mx4200unit *up;
 

@@ -16,7 +16,7 @@
 /* Define a structure to hold a (keyword, token) pair */
 struct key_tok {
 	const char * key;	/* Keyword */
-	u_short	token;		/* Associated Token */
+	unsigned short	token;		/* Associated Token */
 	follby	followedby;	/* nonzero indicates the next token(s)
 				   forced to be string(s) */
 };
@@ -200,11 +200,11 @@ struct key_tok ntp_keywords[] = {
 };
 
 typedef struct big_scan_state_tag {
-	char	ch;		/* Character this state matches on */
-	char	followedby;	/* Forces next token(s) to T_String */
-	u_short	finishes_token;	/* nonzero ID if last keyword char */
-	u_short	match_next_s;	/* next state to check matching ch */
-	u_short	other_next_s;	/* next state to check if not ch */
+	char		ch;		/* Character this state matches on */
+	char		followedby;	/* Forces next token(s) to T_String */
+	unsigned short	finishes_token;	/* nonzero ID if last keyword char */
+	unsigned short	match_next_s;	/* next state to check matching ch */
+	unsigned short	other_next_s;	/* next state to check if not ch */
 } big_scan_state;
 
 /*
@@ -220,22 +220,24 @@ typedef struct big_scan_state_tag {
 
 const char *	current_keyword;/* for error reporting */
 static big_scan_state	sst[MAXSTATES];	/* scanner FSM state entries */
-static u_short		sst_highwater;	/* next entry index to consider */
+static unsigned short	sst_highwater;	/* next entry index to consider */
 char *		symb[1024];	/* map token ID to symbolic name */
 
 /* for libntp */
 const char *	progname = "keyword-gen";
 
-int		main			(int, char **);
-static void	generate_preamble	(void);
-static void	generate_fsm		(void);
-static void	generate_token_text	(void);
-static u_short	create_keyword_scanner	(void);
-static u_short	create_scan_states	(const char *, u_short, follby, u_short);
-static int	compare_key_tok_id	(const void *, const void *);
-static int	compare_key_tok_text	(const void *, const void *);
-static void	populate_symb		(char *);
-static const char * symbname		(u_short);
+int			main			(int, char **);
+static void		generate_preamble	(void);
+static void		generate_fsm		(void);
+static void		generate_token_text	(void);
+static unsigned short	create_keyword_scanner	(void);
+static unsigned short	create_scan_states	(const char *,
+						 unsigned short, follby,
+						 unsigned short);
+static int		compare_key_tok_id	(const void *, const void *);
+static int		compare_key_tok_text	(const void *, const void *);
+static void		populate_symb		(char *);
+static const char*	symbname		(unsigned short);
 
 
 int main(int argc, char **argv)
@@ -291,11 +293,11 @@ generate_fsm(void)
 	size_t prefix_len;
 	char *p;
 	char *r;
-	u_short initial_state;
-	u_short this_state;
-	u_short state;
-	u_short i;
-	u_short token;
+	unsigned short initial_state;
+	unsigned short this_state;
+	unsigned short state;
+	unsigned short i;
+	unsigned short token;
 
 	/* 
 	 * Sort ntp_keywords in alphabetical keyword order.  This is
@@ -451,18 +453,18 @@ generate_fsm(void)
  * recognizing the complete keyword, and any pre-existing state that exists
  * for some other keyword that has the same prefix as the current one.
  */
-static u_short
+static unsigned short
 create_scan_states(
 	const char * text,
-	u_short	token, 
+	unsigned short	token, 
 	follby	followedby,
-	u_short	prev_state
+	unsigned short	prev_state
 	)
 {
-	u_short my_state;
-	u_short return_state;
-	u_short prev_char_s;
-	u_short curr_char_s;
+	unsigned short my_state;
+	unsigned short return_state;
+	unsigned short prev_char_s;
+	unsigned short curr_char_s;
 
 	return_state = prev_state;
 	curr_char_s = prev_state;
@@ -520,10 +522,10 @@ create_scan_states(
 	 * If not, we need to continue scanning
 	 */
 	if ('\0' == text[1]) {
-		sst[my_state].finishes_token = (u_short)token;
+		sst[my_state].finishes_token = (unsigned short)token;
 		sst[my_state].followedby = (char)followedby;
 
-		if (sst[token].finishes_token != (u_short)token) {
+		if (sst[token].finishes_token != (unsigned short)token) {
 			fprintf(stderr,
 				"fatal, sst[%d] not reserved for %s.\n",
 				token, symbname(token));
@@ -558,11 +560,11 @@ create_scan_states(
  * creates a keywords scanner out of it.
  */
 
-static u_short
+static unsigned short
 create_keyword_scanner(void)
 {
-	u_short scanner;
-	u_short i;
+	unsigned short scanner;
+	unsigned short i;
 
 	sst_highwater = 1;	/* index 0 invalid, unused */
 	scanner = 0;
@@ -584,11 +586,11 @@ create_keyword_scanner(void)
 static void
 generate_token_text(void)
 {
-	u_short lowest_id;
-	u_short highest_id;
-	u_short id_count;
-	u_short id;
-	u_short i;
+	unsigned short lowest_id;
+	unsigned short highest_id;
+	unsigned short id_count;
+	unsigned short id;
+	unsigned short i;
 
 	/* sort ntp_keywords in token ID order */
 	qsort(ntp_keywords, COUNTOF(ntp_keywords),
@@ -695,7 +697,7 @@ populate_symb(
 
 static const char *
 symbname(
-	u_short token
+	unsigned short token
 	)
 {
 	static char buf[20];

@@ -99,17 +99,17 @@ static associd_t initial_association_ID; /* association ID */
 /*
  * Miscellaneous statistic counters which may be queried.
  */
-static u_long	peer_timereset;		/* time stat counters zeroed */
-static u_long	findpeer_calls;		/* calls to findpeer */
-static u_long	assocpeer_calls;	/* calls to findpeerbyassoc */
-static u_long	peer_allocations;	/* allocations from free list */
-static u_long	peer_demobilizations;	/* structs freed to free list */
-static int	total_peer_structs;	/* peer structs */
-int	peer_associations;		/* mobilized associations */
-static int	peer_preempt;		/* preemptable associations */
+static unsigned long	peer_timereset;		/* time stat counters zeroed */
+static unsigned long	findpeer_calls;		/* calls to findpeer */
+static unsigned long	assocpeer_calls;	/* calls to findpeerbyassoc */
+static unsigned long	peer_allocations;	/* allocations from free list */
+static unsigned long	peer_demobilizations;	/* structs freed to free list */
+static int		total_peer_structs;	/* peer structs */
+int			peer_associations;	/* mobilized associations */
+static int		peer_preempt;		/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
-static struct peer *	findexistingpeer_name(const char *, u_short,
+static struct peer *	findexistingpeer_name(const char *, unsigned short,
 					      struct peer *, int);
 static struct peer *	findexistingpeer_addr(sockaddr_u *,
 					      struct peer *, int);
@@ -174,7 +174,7 @@ getmorepeermem(void)
 static struct peer *
 findexistingpeer_name(
 	const char *	hostname,
-	u_short		hname_fam,
+	unsigned short	hname_fam,
 	struct peer *	start_peer,
 	int		mode
 	)
@@ -228,7 +228,7 @@ findexistingpeer_addr(
 	while (peer != NULL) {
 		DPRINT(3, ("%s %s %d %d 0x%x ", sockporttoa(addr),
 			   sockporttoa(&peer->srcadr), mode, peer->hmode,
-			   (u_int)peer->cast_flags));
+			   (unsigned int)peer->cast_flags));
 		if ((-1 == mode || peer->hmode == mode) &&
 		    ADDR_PORT_EQ(addr, &peer->srcadr)) {
 			DPRINT(3, ("found.\n"));
@@ -273,7 +273,7 @@ findpeer(
 {
 	struct peer *	p;
 	sockaddr_u *	srcadr;
-	u_int		hash;
+	unsigned int	hash;
 	struct pkt *	pkt;
 	l_fp		pkt_org;
 
@@ -329,7 +329,7 @@ findpeerbyassoc(
 	)
 {
 	struct peer *p;
-	u_int hash;
+	unsigned int hash;
 
 	assocpeer_calls++;
 	hash = assoc & NTP_HASH_MASK;
@@ -629,7 +629,7 @@ newpeer(
 	uint8_t		version,
 	uint8_t		minpoll,
 	uint8_t		maxpoll,
-	u_int		flags,
+	unsigned int	flags,
 	uint8_t		cast_flags,
 	uint32_t	ttl,
 	keyid_t		key,
@@ -637,7 +637,7 @@ newpeer(
 	)
 {
 	struct peer *	peer;
-	u_int		hash;
+	unsigned int		hash;
 
 	/*
 	 * First search from the beginning for an association with given
@@ -777,7 +777,7 @@ newpeer(
 
 void peer_update_hash (struct peer *peer)
 {
-	u_int	hash;
+	unsigned int	hash;
 
 	hash = NTP_HASH_ADDR(&peer->srcadr);
 	LINK_SLIST(peer_hash[hash], peer, adr_link);

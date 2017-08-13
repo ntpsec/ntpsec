@@ -9,20 +9,6 @@
 #include <stddef.h>
 #include <math.h>
 
-#if ( defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600)) \
-   || (__STDC_VERSION__ >= 199901L)
-/*
- * Supply GCCisms that stop being visible if we tell it we need the
- * prototype for strptime(3).  Note that this conditionalization is
- * not actually necessary with -std=gnu99; we're leaving it here as
- * documentation. Ideally all these nonstandard types should go away
- * to be replaced by POSIX typedefs.
- */
-typedef unsigned long	u_long;
-typedef unsigned short	u_short;
-typedef unsigned int	u_int;
-#endif
-
 #include "ntp_fp.h"
 #include "ntp_types.h"
 #include "ntp_lists.h"
@@ -138,18 +124,18 @@ typedef struct __endpt {
 	sockaddr_u	mask;		/* subnet mask */
 	sockaddr_u	bcast;		/* broadcast address */
 	char		name[32];	/* name of interface */
-	u_short		family;		/* AF_INET/AF_INET6 */
-	u_short		phase;		/* phase in update cycle */
+	unsigned short	family;		/* AF_INET/AF_INET6 */
+	unsigned short	phase;		/* phase in update cycle */
 	uint32_t	flags;		/* interface flags */
 	uint32_t	addr_refid;	/* IPv4 addr or IPv6 hash */
-	u_long		starttime;	/* current_time at creation */
+	unsigned long	starttime;	/* current_time at creation */
 	volatile long	received;	/* number of incoming packets */
 	long		sent;		/* number of outgoing packets */
 	long		notsent;	/* number of send failures */
-	u_int		ifindex;	/* for IPV6_MULTICAST_IF */
+	unsigned int	ifindex;	/* for IPV6_MULTICAST_IF */
 	bool	ignore_packets; /* listen-read-drop this? */
 	struct peer *	peers;		/* list of peers using endpt */
-	u_int		peercnt;	/* count of same */
+	unsigned int	peercnt;	/* count of same */
 } endpt;
 
 /*
@@ -229,7 +215,7 @@ struct peer {
 	uint8_t	hpoll;		/* local poll interval */
 	uint8_t	minpoll;	/* min poll interval */
 	uint8_t	maxpoll;	/* max poll interval */
-	u_int	flags;		/* association flags */
+	unsigned int	flags;	/* association flags */
 	uint8_t	cast_flags;	/* additional flags */
 	uint8_t	last_event;	/* last peer error code */
 	uint8_t	num_events;	/* number of error events */
@@ -274,14 +260,14 @@ struct peer {
 	uint8_t	new_status;	/* under-construction status */
 	uint8_t	reach;		/* reachability register */
 	int	flash;		/* protocol error test tally bits */
-	u_long	epoch;		/* reference epoch */
+	unsigned long	epoch;		/* reference epoch */
 	int	burst;		/* packets remaining in burst */
 	int	retry;		/* retry counter */
 	int	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
 	double	filter_disp[NTP_SHIFT]; /* dispersion shift register */
-	u_long	filter_epoch[NTP_SHIFT]; /* epoch shift register */
+	unsigned long	filter_epoch[NTP_SHIFT]; /* epoch shift register */
 	uint8_t	filter_order[NTP_SHIFT]; /* filter sort index */
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
@@ -307,29 +293,29 @@ struct peer {
 	/*
 	 * End of clear-to-zero area
 	 */
-	u_int   outcount;       /* packets sent without reply */
-	u_long	update;		/* receive epoch */
+	unsigned int   outcount;       /* packets sent without reply */
+	unsigned long	update;		/* receive epoch */
 #define end_clear_to_zero update
 	int	unreach;	/* watchdog counter */
 	int	throttle;	/* rate control */
-	u_long	outdate;	/* send time last packet */
-	u_long	nextdate;	/* send time next packet */
+	unsigned long	outdate;	/* send time last packet */
+	unsigned long	nextdate;	/* send time next packet */
 
 	/*
 	 * Statistic counters
 	 */
-	u_long	timereset;	/* time stat counters were reset */
-	u_long	timereceived;	/* last packet received time */
-	u_long	timereachable;	/* last reachable/unreachable time */
+	unsigned long	timereset;	/* time stat counters were reset */
+	unsigned long	timereceived;	/* last packet received time */
+	unsigned long	timereachable;	/* last reachable/unreachable time */
 
-	u_long	sent;		/* packets sent */
-	u_long	received;	/* packets received */
-	u_long	processed;	/* packets processed */
-	u_long	badauth;	/* bad authentication (BOGON5) */
-	u_long	bogusorg;	/* bogus origin (BOGON2, BOGON3) */
-	u_long	oldpkt;		/* old duplicate (BOGON1) */
-	u_long	seldisptoolarge; /* bad header (BOGON6, BOGON7) */
-	u_long	selbroken;	/* KoD received */
+	unsigned long	sent;		/* packets sent */
+	unsigned long	received;	/* packets received */
+	unsigned long	processed;	/* packets processed */
+	unsigned long	badauth;	/* bad authentication (BOGON5) */
+	unsigned long	bogusorg;	/* bogus origin (BOGON2, BOGON3) */
+	unsigned long	oldpkt;		/* old duplicate (BOGON1) */
+	unsigned long	seldisptoolarge; /* bad header (BOGON6, BOGON7) */
+	unsigned long	selbroken;	/* KoD received */
 };
 
 /* pythonize-header: stop ignoring */
@@ -380,7 +366,7 @@ struct peer {
 #define	STRATUM_UNSPEC	((uint8_t)16) /* unspecified */
 
 /*
- * Values for peer.flags (u_int)
+ * Values for peer.flags (unsigned int)
  */
 #define	FLAG_CONFIG	0x0001	/* association was configured */
 #define	FLAG_PREEMPT	0x0002	/* preemptable association */
@@ -619,7 +605,7 @@ struct mon_data {
 	l_fp		last;		/* last time seen */
 	int		leak;		/* leaky bucket accumulator */
 	int		count;		/* total packet count */
-	u_short		flags;		/* restrict flags */
+	unsigned short	flags;		/* restrict flags */
 	uint8_t		vn_mode;	/* packet mode & version */
 	uint8_t		cast_flags;	/* flags MDF_?CAST */
 	sockaddr_u	rmtadr;		/* address of remote host */
@@ -669,9 +655,9 @@ typedef struct restrict_u_tag	restrict_u;
 struct restrict_u_tag {
 	restrict_u *		link;	/* link to next entry */
 	uint32_t		count;	/* number of packets matched */
-	u_short			flags;	/* accesslist flags */
-	u_short			mflags;	/* match flags */
-	u_long			expire;	/* valid until time */
+	unsigned short		flags;	/* accesslist flags */
+	unsigned short		mflags;	/* match flags */
+	unsigned long		expire;	/* valid until time */
 	union {				/* variant starting here */
 		res_addr4 v4;
 		res_addr6 v6;

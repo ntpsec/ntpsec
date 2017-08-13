@@ -87,16 +87,16 @@ look like
 
 ----------------------------------------
         struct message {
-                u_int   length;
-                u_char  sequence;
-                u_char  message[length];
+                unsigned int   length;
+                unsigned char  sequence;
+                unsigned char  message[length];
         }
 ----------------------------------------
 
 if something like that were legal. That is, there are two bytes
 (caution, these may NOT be aligned with word boundaries, so the field
-needs to be treated as a pair of u_char), that contains the length of
-the next message. This is followed by a u_char sequence number, that is
+needs to be treated as a pair of unsigned char), that contains the length of
+the next message. This is followed by a unsigned char sequence number, that is
 incremented whenever a new message of this type is received. This is
 followed by \'length' characters of the actual message.
 
@@ -104,7 +104,7 @@ The next structure starts immediately following the last char of the
 previous message (no alignment). Thus, each structure starts a distance
 of \'length+3' from the previous structure.
 
-Following the last structure, is a u_int containing a zero length to
+Following the last structure, is an unsigned int containing a zero length to
 indicate the end of the data.
 
 The messages are recognized by reading the headers in the data itself,

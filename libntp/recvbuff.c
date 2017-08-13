@@ -12,11 +12,11 @@
 /*
  * Memory allocation.
  */
-static u_long full_recvbufs;	/* recvbufs on full_recv_fifo */
-static u_long free_recvbufs;	/* recvbufs on free_recv_list */
-static u_long total_recvbufs;	/* total recvbufs currently in use */
-static u_long lowater_adds;	/* number of times we have added memory */
-static u_long buffer_shortfall;	/* number of missed free receive buffers
+static unsigned long full_recvbufs;	/* recvbufs on full_recv_fifo */
+static unsigned long free_recvbufs;	/* recvbufs on free_recv_list */
+static unsigned long total_recvbufs;	/* total recvbufs currently in use */
+static unsigned long lowater_adds;	/* # of times we have added memory */
+static unsigned long buffer_shortfall;	/* # of missed free receive buffers
 					   between replenishments */
 
 static DECL_FIFO_ANCHOR(recvbuf_t) full_recv_fifo;
@@ -27,25 +27,25 @@ static void uninit_recvbuff(void);
 #endif
 
 
-u_long
+unsigned long
 free_recvbuffs (void)
 {
 	return free_recvbufs;
 }
 
-u_long
+unsigned long
 full_recvbuffs (void)
 {
 	return full_recvbufs;
 }
 
-u_long
+unsigned long
 total_recvbuffs (void)
 {
 	return total_recvbufs;
 }
 
-u_long
+unsigned long
 lowater_additions(void)
 {
 	return lowater_adds;
@@ -58,7 +58,7 @@ initialise_buffer(recvbuf_t *buff)
 }
 
 static void
-create_buffers(u_int nbufs)
+create_buffers(unsigned int nbufs)
 {
 	register recvbuf_t *bufp;
 	unsigned int i, abuf;
@@ -89,7 +89,7 @@ create_buffers(u_int nbufs)
 }
 
 void
-init_recvbuff(u_int nbufs)
+init_recvbuff(unsigned int nbufs)
 {
 
 	/*

@@ -47,7 +47,7 @@ struct attr_val_tag {
 	int		type;	/* T_String, T_Integer, ... */
 	union val {
 		int		i;
-		u_int		u;
+		unsigned int	u;
 		int_range	r;
 		double		d;
 		char *		s;
@@ -61,7 +61,7 @@ typedef struct address_node_tag address_node;
 struct address_node_tag {
 	address_node *	link;
 	char *		address;
-	u_short		type;	/* family, AF_UNSPEC (0), AF_INET[6] */
+	unsigned short	type;	/* family, AF_UNSPEC (0), AF_INET[6] */
 };
 
 typedef DECL_FIFO_ANCHOR(address_node) address_fifo;
@@ -261,7 +261,7 @@ address_node *create_address_node(char *addr, int type);
 void destroy_address_node(address_node *my_node);
 attr_val *create_attr_dval(int attr, double value);
 attr_val *create_attr_ival(int attr, int value);
-attr_val *create_attr_uval(int attr, u_int value);
+attr_val *create_attr_uval(int attr, unsigned int value);
 attr_val *create_attr_rangeval(int attr, int first, int last);
 attr_val *create_attr_sval(int attr, const char *s);
 filegen_node *create_filegen_node(int filegen_token,

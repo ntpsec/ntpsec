@@ -245,6 +245,6 @@ ntpcal_date_to_time(const struct calendar * /* jd */);
  * 2208988800.  This is larger than 32-bit INT_MAX, so unsigned
  * type is forced.
  */
-#define	JAN_1970 ((u_int)NTP_TO_UNIX_DAYS * (u_int)SECSPERDAY)
+#define	JAN_1970 ((unsigned int)NTP_TO_UNIX_DAYS * (unsigned int)SECSPERDAY)
 
 #endif
