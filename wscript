@@ -230,6 +230,20 @@ def configure(ctx):
     ctx.define("NTPSEC_VERSION_STRING", ctx.env.NTPSEC_VERSION_STRING)
     ctx.end_msg(ctx.env.NTPSEC_VERSION_STRING)
 
+    # We require some things that C99 doesn't enable, like pthreads.
+    # FIXME: In theory, -D_POSIX_C_SOURCE=199309L should be sufficient for us.
+    # Bare -std=c99 won't work because it doesn't expose siginfo_t.
+    #
+    # These flags get propagated to both the host and main parts of the build.
+    #
+    #_POSIX_C_SOURCE
+    #      If ==1, like _POSIX_SOURCE;
+    #      if >=2 add IEEE Std 1003.2;
+    #      if >=199309L, add IEEE Std 1003.1b-1993;
+    #      if >=199506L, add IEEE Std 1003.1c-1995;
+    #      if >=200112L, all of IEEE 1003.1-2004
+    ctx.env.CFLAGS = ["-std=c99", "-D_GNU_SOURCE"] + ctx.env.CFLAGS
+
     msg("--- Configuring main ---")
     ctx.setenv("main", ctx.env.derive())
 
@@ -303,7 +317,6 @@ def configure(ctx):
         ('f_stack_protector_all', '-fstack-protector-all'),
         ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
-        ('gnu99', '-std=gnu99'),
         # this quiets most of macOS warnings on -fpie
         ('unused', '-Qunused-arguments'),
         # ('w_cast_align', "-Wcast-align"), # fails on RasPi, needs fixing.
@@ -409,14 +422,6 @@ int main(int argc, char **argv) {
                   run_build_cls='oc')
 
     ctx.run_build_cls = old_run_build_cls
-
-    # We require some things that C99 doesn't enable, like pthreads.
-    # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
-    # it.
-    if ctx.env.HAS_gnu99:
-        ctx.env.CFLAGS = ["-std=gnu99"] + ctx.env.CFLAGS
-    else:
-        ctx.env.CFLAGS = ["-std=c99"] + ctx.env.CFLAGS
 
     if ctx.env.HAS_PIC:
         ctx.env.CFLAGS = ["-fPIC"] + ctx.env.CFLAGS

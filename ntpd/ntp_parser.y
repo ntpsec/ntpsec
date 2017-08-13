@@ -923,7 +923,7 @@ refclock_command
 #ifdef REFCLOCK
 			peer_node *my_node;
 			address_node *fakeaddr;
-			char addrbuf[NI_MAXHOST];
+			char addrbuf[1025];	/* NI_MAXHOSTS on Linux */
 			int dtype;
 
 			for (dtype = 1; dtype < (int)num_refclock_conf; dtype++)

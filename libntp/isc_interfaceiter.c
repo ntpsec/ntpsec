@@ -258,7 +258,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         if (!seenv6) {
                 iter->proc = fopen("/proc/net/if_inet6", "r");
                 if (iter->proc == NULL) {
-                        (void)strerror_r(errno, strbuf, sizeof(strbuf));
+			IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 /*                      isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
                                       ISC_LOGMODULE_SOCKET, ISC_LOG_WARNING,
                                       "failed to open /proc/net/if_inet6");
@@ -277,7 +277,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
                         break;
         }
         if (ret < 0) {
-                (void)strerror_r(errno, strbuf, sizeof(strbuf));
+		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
                 UNEXPECTED_ERROR("getting interface addresses: getifaddrs: %s",
                                  strbuf);
                 result = ISC_R_UNEXPECTED;

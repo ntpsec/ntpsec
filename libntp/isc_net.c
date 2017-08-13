@@ -14,6 +14,9 @@
 #include <sys/sysctl.h>
 #endif
 
+/* hack to ignore GCC Unused Result */
+#define IGNORE(r) do{if(r){}}while(0)
+
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
@@ -50,7 +53,7 @@ try_proto(int domain) {
 #endif
 			return (ISC_R_NOTFOUND);
 		default:
-			(void)strerror_r(errno, strbuf, sizeof(strbuf));
+			IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 			UNEXPECTED_ERROR("socket() failed: %s", strbuf);
 			return (ISC_R_UNEXPECTED);
 		}
@@ -153,7 +156,7 @@ initialize_ipv6only(void) {
 	/* check for TCP sockets */
 	s = socket(PF_INET6, SOCK_STREAM, 0);
 	if (s == -1) {
-		(void)strerror_r(errno, strbuf, sizeof(strbuf));
+		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR("socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
@@ -170,7 +173,7 @@ initialize_ipv6only(void) {
 	/* check for UDP sockets */
 	s = socket(PF_INET6, SOCK_DGRAM, 0);
 	if (s == -1) {
-		(void)strerror_r(errno, strbuf, sizeof(strbuf));
+	    IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR("socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
