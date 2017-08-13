@@ -455,7 +455,7 @@ nmea_start(
 	}
 
 	/* Allocate and initialize unit structure */
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = (void *)up;
 	pp->io.fd = -1;
 	pp->io.clock_recv = nmea_receive;
 	pp->io.srcclock = peer;
@@ -519,7 +519,7 @@ nmea_shutdown(
 #endif
 		free(up);
 	}
-	pp->unitptr = (caddr_t)NULL;
+	pp->unitptr = (void *)NULL;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	pp->io.fd = -1;

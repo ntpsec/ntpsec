@@ -198,7 +198,7 @@ neoclock4x_start(int unit,
 #if defined(TIOCMSET) && (defined(TIOCM_RTS) || defined(CIOCM_RTS))
   /* turn on RTS, and DTR for power supply */
   /* NeoClock4x is powered from serial line */
-  if(ioctl(fd, TIOCMGET, (caddr_t)&sl232) == -1)
+  if(ioctl(fd, TIOCMGET, (void *)&sl232) == -1)
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): can't query RTS/DTR state: %m", unit);
       (void) close(fd);
@@ -209,7 +209,7 @@ neoclock4x_start(int unit,
 #else
   sl232 = sl232 | CIOCM_DTR | CIOCM_RTS;	/* turn on RTS, and DTR for power supply */
 #endif
-  if(ioctl(fd, TIOCMSET, (caddr_t)&sl232) == -1)
+  if(ioctl(fd, TIOCMSET, (void *)&sl232) == -1)
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m", unit);
       (void) close(fd);
@@ -349,7 +349,7 @@ neoclock4x_shutdown(int unit,
 #if defined(TIOCMSET) && (defined(TIOCM_RTS) || defined(CIOCM_RTS))
                   /* turn on RTS, and DTR for power supply */
                   /* NeoClock4x is powered from serial line */
-                  if(ioctl(pp->io.fd, TIOCMGET, (caddr_t)&sl232) == -1)
+                  if(ioctl(pp->io.fd, TIOCMGET, (void *)&sl232) == -1)
                     {
                       msyslog(LOG_CRIT, "NeoClock4X(%d): can't query RTS/DTR state: %m",
                               unit);
@@ -361,7 +361,7 @@ neoclock4x_shutdown(int unit,
                   /* turn on RTS, and DTR for power supply */
                   sl232 &= ~(CIOCM_DTR | CIOCM_RTS);
 #endif
-                  if(ioctl(pp->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
+                  if(ioctl(pp->io.fd, TIOCMSET, (void *)&sl232) == -1)
                     {
                       msyslog(LOG_CRIT, "NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m",
                               unit);

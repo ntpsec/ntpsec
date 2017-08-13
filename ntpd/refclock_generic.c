@@ -1886,8 +1886,8 @@ local_input(
 			{	/* simulate receive */
 				buf = get_free_recv_buffer();
 				if (buf != NULL) {
-					memmove((caddr_t)buf->recv_buffer,
-						(caddr_t)&parse->parseio.parse_dtime,
+					memmove((void *)buf->recv_buffer,
+						(void *)&parse->parseio.parse_dtime,
 						sizeof(parsetime_t));
 					buf->recv_length  = sizeof(parsetime_t);
 					buf->recv_time    = rbufp->recv_time;
@@ -1904,8 +1904,8 @@ local_input(
 			}
 			else
 			{
-				memmove((caddr_t)rbufp->recv_buffer,
-					(caddr_t)&parse->parseio.parse_dtime,
+				memmove((void *)rbufp->recv_buffer,
+					(void *)&parse->parseio.parse_dtime,
 					sizeof(parsetime_t));
 				parse_iodone(&parse->parseio);
 				rbufp->recv_length = sizeof(parsetime_t);
@@ -1944,8 +1944,8 @@ local_receive(
 	}
 	clear_err(parse, ERR_BADIO);
 
-	memmove((caddr_t)&parsetime,
-		(caddr_t)rbufp->recv_buffer,
+	memmove((void *)&parsetime,
+		(void *)rbufp->recv_buffer,
 		sizeof(parsetime_t));
 
 	DPRINT(4, ("PARSE receiver #%d: status %06x, state %08x, time(fp) %lx.%08lx, stime(fp) %lx.%08lx, ptime(fp) %lx.%08lx\n",
@@ -2356,7 +2356,7 @@ parse_shutdown(
 			parse->peer->refclkunit, parse->parse_type->cl_description);
 
 	parse->peer = (struct peer *)0; /* unused now */
-	peer->procptr->unitptr = (caddr_t)0;
+	peer->procptr->unitptr = (void *)0;
 	free(parse);
 }
 
@@ -2552,7 +2552,7 @@ parse_start(
 	parse = emalloc_zero(sizeof(*parse));
 
 	parse->generic = peer->procptr;	 /* link up */
-	parse->generic->unitptr = (caddr_t)parse; /* link down */
+	parse->generic->unitptr = (void *)parse; /* link down */
 
 	/*
 	 * Set up the structures
@@ -5293,7 +5293,7 @@ rawdcf_init_1(
 	 */
 	int sl232;
 
-	if (ioctl(parse->generic->io.fd, TIOCMGET, (caddr_t)&sl232) == -1)
+	if (ioctl(parse->generic->io.fd, TIOCMGET, (void *)&sl232) == -1)
 	{
 		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_DTR): %m", parse->peer->refclkunit);
 		return 0;
@@ -5305,7 +5305,7 @@ rawdcf_init_1(
 	sl232 = (sl232 & ~CIOCM_RTS) | CIOCM_DTR;	/* turn on DTR, clear RTS for power supply */
 #endif
 
-	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
+	if (ioctl(parse->generic->io.fd, TIOCMSET, (void *)&sl232) == -1)
 	{
 		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: ioctl(fd, TIOCMSET, [C|T]IOCM_DTR): %m", parse->peer->refclkunit);
 	}
@@ -5340,7 +5340,7 @@ rawdcf_init_2(
 	 */
 	int sl232;
 
-	if (ioctl(parse->generic->io.fd, TIOCMGET, (caddr_t)&sl232) == -1)
+	if (ioctl(parse->generic->io.fd, TIOCMGET, (void *)&sl232) == -1)
 	{
 		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_RTS): %m", parse->peer->refclkunit);
 		return 0;
@@ -5352,7 +5352,7 @@ rawdcf_init_2(
 	sl232 = (sl232 & ~CIOCM_DTR) | CIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
 #endif
 
-	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
+	if (ioctl(parse->generic->io.fd, TIOCMSET, (void *)&sl232) == -1)
 	{
 		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: ioctl(fd, TIOCMSET, [C|T]IOCM_RTS): %m", parse->peer->refclkunit);
 	}
