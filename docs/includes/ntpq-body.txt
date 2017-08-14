@@ -560,6 +560,8 @@ It is possible for a "config unpeer" command to fail silently, yielding
 a driver type name or a hostname not present in the peer list. The
 error will however be reported in the system log.
 
+The config command cannot be used to change a server's default restrictions.
+
 include::mrufail.txt[]
 
 You may be able to retrieve partial data in very high-traffic
