@@ -472,8 +472,11 @@ canonicalization_cache = {}
 
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
+    TTL = 300
     if inhost in canonicalization_cache:
-        return canonicalization_cache[inhost]
+        (resname, restime) = canonicalization_cache[inhost]
+        if restime >= time.time() - TTL:
+            return resname
     # Catch garbaged hostnames in corrupted Mode 6 responses
     m = re.match("([:.[\]]|\w)*", inhost)
     if not m:
@@ -483,8 +486,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
         ai = socket.getaddrinfo(hostname, None, family, 0, 0,
                                 socket.AI_CANONNAME)
     except socket.gaierror as e:
-        print('getaddrinfo failed: %s' % e, file=sys.stderr)
-        raise SystemExit(1)
+        return "DNSFAIL:%s" % hostname 
     (family, socktype, proto, canonname, sockaddr) = ai[0]
     try:
         name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
@@ -494,7 +496,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
         # Fall back to the hostname.
         canonicalized = canonname or hostname
         result = canonicalized.lower() + portsuffix
-    canonicalization_cache[inhost] = result
+    canonicalization_cache[inhost] = (result, time.time())
     return result
 
 TermSize = collections.namedtuple("TermSize", ["width", "height"])
