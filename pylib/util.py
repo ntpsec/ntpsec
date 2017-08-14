@@ -470,7 +470,6 @@ def f8dot3(f):
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = {}
 
-
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
     if inhost in canonicalization_cache:
@@ -1087,10 +1086,24 @@ class MRUSummary:
             rscode = 'L'
         else:
             rscode = '.'
-        (dns, port) = portsplit(entry.addr)
+        (ip, port) = portsplit(entry.addr)
         try:
-            if self.showhostnames:
-                dns = canonicalize_dns(dns)
+            if not self.showhostnames:
+                dns = ip
+            else:
+                dns = canonicalize_dns(ip)
+                # Forward-confirm the returned DNS
+                confirmed = False
+                try:
+                    ai = socket.getaddrinfo(dns, None)
+                    for (family, socktype, proto, canonname, sockaddr) in ai:
+                        if sockaddr and sockaddr[0] == ip:
+                            confirmed = True
+                            break
+                except socket.gaierror as e:
+                    pass
+                if not confirmed:
+                    dns = "%s (%s)" % (ip, dns)
             if not self.wideremote:
                 # truncate for narrow display
                 dns = dns[:40]
@@ -1100,7 +1113,7 @@ class MRUSummary:
                       ntp.magic.PKT_VERSION(entry.mv),
                       entry.ct, port[1:], dns)
             return stats
-        except TypeError:
+        except ValueError:
             # This can happen when ntpd ships a corrupt varlist
             return ''
 
