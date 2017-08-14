@@ -475,16 +475,33 @@ def monoclock():
     except AttributeError:
         return time.time()
 
+
+class Cache:
+    "Simple time-based cache"
+
+    ttl = 300
+
+    def __init__(self):
+        self._cache = {}
+
+    def get(self, key):
+        if key in self._cache:
+            value, settime = self._cache[key]
+            if settime >= monoclock() - self.ttl:
+                return value
+
+    def set(self, key, value):
+        self._cache[key] = (value, monoclock())
+
+
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
-canonicalization_cache = {}
+canonicalization_cache = Cache()
 
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
-    TTL = 300
-    if inhost in canonicalization_cache:
-        (resname, restime) = canonicalization_cache[inhost]
-        if restime >= monoclock() - TTL:
-            return resname
+    resname = canonicalization_cache.get(inhost)
+    if resname is not None:
+        return resname
     # Catch garbaged hostnames in corrupted Mode 6 responses
     m = re.match("([:.[\]]|\w)*", inhost)
     if not m:
@@ -504,7 +521,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
         # Fall back to the hostname.
         canonicalized = canonname or hostname
         result = canonicalized.lower() + portsuffix
-    canonicalization_cache[inhost] = (result, monoclock())
+    canonicalization_cache.set(inhost, result)
     return result
 
 TermSize = collections.namedtuple("TermSize", ["width", "height"])
@@ -1051,6 +1068,9 @@ class PeerSummary:
         return res
 
 
+# Another hack to avoid repeatedly hammering on DNS when ntpmon runs.
+confirmation_cache = Cache()
+
 class MRUSummary:
     "Reusable class for MRU entry summary generation."
     def __init__(self, showhostnames, wideremote=False,
@@ -1102,15 +1122,19 @@ class MRUSummary:
             else:
                 dns = canonicalize_dns(ip)
                 # Forward-confirm the returned DNS
-                confirmed = False
-                try:
-                    ai = socket.getaddrinfo(dns, None)
-                    for (family, socktype, proto, canonname, sockaddr) in ai:
-                        if sockaddr and sockaddr[0] == ip:
-                            confirmed = True
-                            break
-                except socket.gaierror as e:
-                    pass
+                confirmed = confirmation_cache.get(dns)
+                if confirmed is None:
+                    confirmed = False
+                    try:
+                        ai = socket.getaddrinfo(dns, None)
+                        for (family, socktype, proto, canonname, sockaddr) in \
+                            ai:
+                            if sockaddr and sockaddr[0] == ip:
+                                confirmed = True
+                                break
+                    except socket.gaierror as e:
+                        pass
+                    confirmation_cache.set(dns, confirmed)
                 if not confirmed:
                     dns = "%s (%s)" % (ip, dns)
             if not self.wideremote:
