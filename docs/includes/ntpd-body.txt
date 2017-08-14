@@ -533,6 +533,10 @@ Configuration files are parsed according to the following rules:
   interpreted in ASCII sort order of their pathnames.  Files with
   other extensions or no extensions are ignored.
 
+Note: The second two rules are *unstable*; this feature should be
+considered experimental and subject to revision.  In a future release,
+once we've settled on the right design, this caveat will be removed.
+
 It is best practice to put refclock and clockstats declarations in a
 ".refclockd" file and all other declarations in an ".ntpd" file.  This
 anticipates a future direction of the architecture - it is intended
