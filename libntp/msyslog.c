@@ -10,11 +10,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "ntp.h"
 #include "ntp_debug.h"
 #include "ntp_syslog.h"
+
+/* Use XSI-compliant strerror_r(3), prototype in string.h.
+ * Don't try moving this further up, else hilarity will ensue...
+ */
+#undef _GNU_SOURCE
+#include <string.h>
 
 /* start out with syslog and stderr, otherwise startup errors lost */
 bool    syslogit = true;        /* log messages to syslog */
@@ -91,11 +96,7 @@ errno_to_str(
 	size_t	bufsiz
 	)
 {
-#ifdef _GNU_SOURCE
-	char	*rc;
-#else
 	int rc;
-#endif /* _GNU_SOURCE */
 
 	rc = strerror_r(err, buf, bufsiz);
 	if (rc)
