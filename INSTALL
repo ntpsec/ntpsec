@@ -97,36 +97,10 @@ Local copy of DocBook stylesheets:
 wget:
    Optional, used by ntpleapfetch
 
-=== Apple ===
-
-Previous support for OS X 10.11 has been dropped due to multiple
-botches on Apple's part.  Your OS X needs to have POSIX compliant
-clock_gettime(2) and clock_settime(2) functions.
-
-The OS X build has been tested in this environment:
-
- OS X Version             : 10.12
- Xcode Version            : 7.1
- Xcode Command Line Tools : 7.2-beta
-
-The macOS build has been tested in this environment:
-
- macOS Version            : 16.3.0
- Xcode Version            : 8.2.1
-
-All you will require is the Xcode command line tools with no additions.
-There is currently no support for using Xcode's builder. NTPsec's standard
-waf based build system is used.
-
-On macOS you can use this command to turn off the Apple version of NTP:
-
-----
-sudo launchctl unload /System/Library/LaunchDaemons/org.ntp.ntpd.plist
-----
-
 == Basic Installation ==
 
-These are generic Unix installation instructions.
+These are generic Unix installation instructions.  Some notes on
+specific platforms follow this section.
 
 Under Unix, the simplest way to compile this package is:
 
@@ -156,24 +130,45 @@ Under Unix, the simplest way to compile this package is:
      configure and compile the package for a different kind of
      computer), type `./waf distclean'.
 
+=== Apple ===
+
 Under OS X you can build NTPsec using Xcode command line tools with no
 additions. There is currently no support for using Xcode's builder.
 
-== Qualification testing ==
+Previous support for OS X 10.11 has been dropped due to multiple
+botches on Apple's part.  Your OS X needs to have POSIX compliant
+clock_gettime(2) and clock_settime(2) functions.
 
-Details on how to qualify NTPsec if you've never used it before
-are at devel/testing.txt.
+The OS X build has been tested in this environment:
+
+ OS X Version             : 10.12
+ Xcode Version            : 7.1
+ Xcode Command Line Tools : 7.2-beta
+
+The macOS build has been tested in this environment:
+
+ macOS Version            : 16.3.0
+ Xcode Version            : 8.2.1
+
+All you will require is the Xcode command line tools with no additions.
+There is currently no support for using Xcode's builder. NTPsec's standard
+waf based build system is used.
+
+On macOS you can use this command to turn off the Apple version of NTP:
+
+----
+sudo launchctl unload /System/Library/LaunchDaemons/org.ntp.ntpd.plist
+----
+
+=== Solaris ===
+
+When building the NTPsec suite using gcc under Solaris, you may see
+prototype-mismatch warnings involving adjtime(2).  These warnings are
+functionally harmless and can be ignored.  They reflect an unfortunate
+choice by Solaris not to const the function's first argument as do
+other implementations.
 
 == Build Bugs ==
-
-You may find that after a fresh clone and first ./waf build you get a
-Python import error when trying to run ntpq or other Python tools.
-If this happens, just do ./waf build again.  This is a known bug
-which will be fixed in a future release.
-
-waf has been observed to fail under Python 3.6.0 and might under other
-Python 3 version as well.  The problem has been filed as an upstream
-bug. The workaround is simple: Configure and build with python2.
 
 The configuration system occasionally acts up during builds on new
 platforms.  If you see the message "Compilation check failed but
@@ -200,6 +195,11 @@ to your new location.
 
 You should read the section "Path problems with the test tools" in
 devel/testing.txt before setting a non-default prefix.
+
+== Qualification testing ==
+
+Details on how to qualify NTPsec if you've never used it before
+are at devel/testing.txt.
 
 == Strict compatibility mode ==
 
