@@ -177,7 +177,7 @@ class Ntpq(cmd.Cmd):
         "Called on an input line when the command prefix is not recognized."
 
         if line.startswith(":config"):
-            line = line[1:]
+            line = "hot_" + line[1:]
         elif line.startswith("config-from-file"):
             line = line.replace("config-from-file ", "config_from_file")
 
@@ -1223,7 +1223,7 @@ function: obtain and print a list of all peers and clients showing
 usage: lopeers
 """)
 
-    def do_config(self, line):
+    def do_hot_config(self, line):
         "send a remote configuration command to ntpd"
         try:
             self.session.password()
