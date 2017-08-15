@@ -251,8 +251,6 @@ codebase has been outright removed, with less than 5% new code added.
   default device path, the default PPS device path (if any) and the
   serial baud rate.
 
-* ntpq's ":config" command can be invoked as "config" (without the colon).
-
 [[other]]
 == Other user-visible changes ==
 
