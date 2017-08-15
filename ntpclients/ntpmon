@@ -282,7 +282,7 @@ if __name__ == '__main__':
                             raise Fatal(e.message)
                         except IOError as e:
                             raise Fatal(e.strerror)
-                        strconvert = unicode(peer_report.header() + "\n")
+                        strconvert = peer_report.header() + "\n"
                         stdscr.addstr(strconvert.encode('UTF-8'),
                                       curses.A_BOLD)
                     else:

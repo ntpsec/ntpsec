@@ -399,7 +399,7 @@ def unitify(value, startingunit, baseunit=None, width=8):
 def f8dot4(f):
     "Scaled floating point formatting to fit in 8 characters"
 
-    if isinstance(f, string):
+    if isinstance(f, str):
         # a string? pass it on as a signal
         return "%8s" % f
     if not isinstance(f, (int, float)):
