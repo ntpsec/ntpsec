@@ -155,6 +155,7 @@ if __name__ == "__main__":
     # Autoflush stdout
     sys.stdout = Unbuffered(sys.stdout)
 
+    basetime = time.time()
     if verbose:
         sys.stdout.write("Waiting for ntpd to synchronize...  ")
 
@@ -204,7 +205,7 @@ if __name__ == "__main__":
                     ntp.magic.LEAP_DELSECOND):
             # We could check "sync" here to make sure we like the source...
             if verbose:
-                sys.stdout.write("\bOK!\n")
+                sys.stdout.write("\bOK! (%d seconds)\n" % (time.time() - basetime))
             sys.exit(0)
 
         sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)
