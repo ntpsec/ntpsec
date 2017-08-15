@@ -2846,12 +2846,6 @@ config_unpeers(
 
 		/* It's not a numeric IP address... */
 
-		/* Misguided attempt to unpeer by driver type name? */
-		if (strchr(name, '.') == NULL && strchr(name, ':') == NULL) {
-		    msyslog(LOG_ERR, "refclocks cannot be unpeered by type.");
-		    continue;
-		}
-
 		/* It's a hostname. */
 		p = findexistingpeer(NULL, name, NULL, -1);
 		if (p != NULL) {

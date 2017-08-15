@@ -253,7 +253,8 @@ findexistingpeer(
 	int		mode)
 {
 	if (hostname != NULL)
-		return findexistingpeer_name(hostname, AF(addr),
+		return findexistingpeer_name(hostname,
+					     (addr == NULL) ? AF_UNSPEC : AF(addr),
 					     start_peer, mode);
 	else
 		return findexistingpeer_addr(addr, start_peer, mode);
