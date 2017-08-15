@@ -84,8 +84,8 @@ typedef DECL_FIFO_ANCHOR(string_node) string_fifo;
 
 typedef struct restrict_node_tag restrict_node;
 struct restrict_node_tag {
-	int		mode;	/* restrict or unrestrict? */
 	restrict_node *	link;
+	int		mode;	/* restrict or unrestrict? */
 	address_node *	addr;
 	address_node *	mask;
 	int_fifo *	flags;
