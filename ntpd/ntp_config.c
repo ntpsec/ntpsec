@@ -863,6 +863,7 @@ create_filegen_node(
 
 restrict_node *
 create_restrict_node(
+	const int       mode,
 	address_node *	addr,
 	address_node *	mask,
 	int_fifo *	flags,
@@ -872,6 +873,7 @@ create_restrict_node(
 	restrict_node *my_node;
 
 	my_node = emalloc_zero(sizeof(*my_node));
+	my_node->mode = mode;
 	my_node->addr = addr;
 	my_node->mask = mask;
 	my_node->flags = flags;
@@ -1793,7 +1795,9 @@ config_access(
 		}
 
 		do {
-			hack_restrict(RESTRICT_FLAGS, &addr,
+			int op = (my_node->mode == T_Restrict)
+				? RESTRICT_FLAGS : RESTRICT_UNFLAG;
+			hack_restrict(op, &addr,
 				      &mask, mflags, flags, 0);
 			if (pai != NULL &&
 			    NULL != (pai = pai->ai_next)) {

@@ -84,6 +84,7 @@ typedef DECL_FIFO_ANCHOR(string_node) string_fifo;
 
 typedef struct restrict_node_tag restrict_node;
 struct restrict_node_tag {
+	int		mode;	/* restrict or unrestrict? */
 	restrict_node *	link;
 	address_node *	addr;
 	address_node *	mask;
@@ -267,7 +268,7 @@ attr_val *create_attr_sval(int attr, const char *s);
 filegen_node *create_filegen_node(int filegen_token,
 				  attr_val_fifo *options);
 string_node *create_string_node(char *str);
-restrict_node *create_restrict_node(address_node *addr,
+restrict_node *create_restrict_node(int mode, address_node *addr,
 				    address_node *mask,
 				    int_fifo *flags, int line_no);
 int_node *create_int_node(int val);

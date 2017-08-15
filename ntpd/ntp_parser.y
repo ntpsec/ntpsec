@@ -211,6 +211,7 @@
 %token	<Integer>	T_Unit
 %token	<Integer>	T_Unconfig
 %token	<Integer>	T_Unpeer
+%token	<Integer>	T_Unrestrict
 %token	<Integer>	T_Usestats
 %token	<Integer>	T_Version
 %token	<Integer>	T_WanderThreshold	/* Not a token */
@@ -292,6 +293,7 @@
 %type	<Attr_val_fifo>	tos_option_list
 %type	<Integer>	unpeer_keyword
 %type	<Set_var>	variable_assign
+%type	<Integer>	restrict_prefix
 
 %%
 
@@ -701,6 +703,11 @@ filegen_type
  * -----------------------
  */
 
+restrict_prefix
+	: T_Restrict
+	| T_Unrestrict
+	;
+
 access_control_command
 	:	T_Discard discard_option_list
 		{
@@ -710,35 +717,35 @@ access_control_command
 		{
 			CONCAT_G_FIFOS(cfgt.mru_opts, $2);
 		}
-	|	T_Restrict address ac_flag_list
+	|	restrict_prefix address ac_flag_list
 		{
 			restrict_node *rn;
 
-			rn = create_restrict_node($2, NULL, $3,
+			rn = create_restrict_node($1, $2, NULL, $3,
 						  lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
-	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
+	|	restrict_prefix ip_address T_Mask ip_address ac_flag_list
 		{
 			restrict_node *rn;
 
-			rn = create_restrict_node($2, $4, $5,
+			rn = create_restrict_node($1, $2, $4, $5,
 						  lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
-	|	T_Restrict T_Default ac_flag_list
+	|	restrict_prefix T_Default ac_flag_list
 		{
 			restrict_node *rn;
 
-			rn = create_restrict_node(NULL, NULL, $3,
+			rn = create_restrict_node($1, NULL, NULL, $3,
 						  lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
-	|	T_Restrict T_Ipv4_flag T_Default ac_flag_list
+	|	restrict_prefix T_Ipv4_flag T_Default ac_flag_list
 		{
 			restrict_node *rn;
 
-			rn = create_restrict_node(
+			rn = create_restrict_node($1,
 				create_address_node(
 					estrdup("0.0.0.0"), 
 					AF_INET),
@@ -749,11 +756,11 @@ access_control_command
 				lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
-	|	T_Restrict T_Ipv6_flag T_Default ac_flag_list
+	|	restrict_prefix T_Ipv6_flag T_Default ac_flag_list
 		{
 			restrict_node *rn;
 			
-			rn = create_restrict_node(
+			rn = create_restrict_node($1,
 				create_address_node(
 					estrdup("::"), 
 					AF_INET6),
@@ -764,13 +771,13 @@ access_control_command
 				lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
-	|	T_Restrict T_Source ac_flag_list
+	|	restrict_prefix T_Source ac_flag_list
 		{
 			restrict_node *	rn;
 
 			APPEND_G_FIFO($3, create_int_node($2));
 			rn = create_restrict_node(
-				NULL, NULL, $3, lex_current()->curpos.nline);
+				$1, NULL, NULL, $3, lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	;

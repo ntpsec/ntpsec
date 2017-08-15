@@ -222,6 +222,10 @@ codebase has been outright removed, with less than 5% new code added.
 * The _restrict_ statement can now take an address range in CIDR
   notation rather than as an address/mask pair.
 
+* You can now turn off restriction flags with an _unrestrict_
+  statement that takes arguments exactly like a _restrict_. This
+  is expected to be useful mainly with the "ntpq config" command.
+
 * The includefile directive now evaluates relative pathnames not with
   respect to the current working directory but with respect to the
   directory name of the last pushed file in the stack.  This means

@@ -13,6 +13,10 @@ The code size has been further reduced, to 56KLOC.
 
 ntpmon now reports units on time figures.
 
+You can now turn off restriction flags with an _unrestrict_ statement
+that takes arguments exactly like a _restrict_. This is expected to be
+useful mainly with the "ntpq config" command.
+
 Builds are fully reproducible; see SOURCE_DATE_EPOCH and BUILD_EPOCH.
 
 == 2017-03-21: 0.9.7 ==

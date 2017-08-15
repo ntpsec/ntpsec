@@ -108,4 +108,11 @@ though if it is otherwise unconfigured; no flags are associated with
 the default entry (i.e., everything besides your own NTP server is
 unrestricted).
 
+[[restrict]]
++unrestrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
+   Like a +restrict+ command, but turns off the specified flags
+   rather than turning them on (expected to be useful mainly with ntpq
+   config). Use only on an address/mask or CIDR-format address
+   mentioned in a previous +restrict+ statement.
+
 // end
