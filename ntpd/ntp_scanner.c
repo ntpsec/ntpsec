@@ -438,7 +438,7 @@ bool lex_push_file(
 				lex_push_file(subpath);
 			}
 			for (int i = 0; i < basecount; i++)
-				free(baselist[basecount]);
+				free(baselist[i]);
 			free(baselist);
 			return basecount > 0;
 		} else {
