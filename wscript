@@ -1000,11 +1000,16 @@ for command, func, descr in commands:
 
 def afterparty(ctx):
     # Make magic links to support in-tree testing.
+    #
     # The idea is that all directories where the Python tools
     # listed above live should have an 'ntp' symlink so they
     # can import compiled Python modules from the build directory.
     # Also, they need to be able to see the Python extension
     # module built in libntp.
+    #
+    # Note, this kluge falls apart under Python 3, because
+    # waf radically changes the shape of the build directory and
+    # the naming conventions for the product files.
     if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
         ctx.exec_command("rm -fr wafhelpers/*.pyc pylib/__pycache__/*.pyc "
                          "wafhelpers/__pycache__/*.pyc ntpd/version.h "
