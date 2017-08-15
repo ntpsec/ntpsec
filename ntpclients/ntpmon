@@ -269,7 +269,7 @@ if __name__ == '__main__':
                 stdscr.clear()
                 stdscr.addstr(0, 0, u"".encode('UTF-8'))
                 if helpmode:
-                    stdscr.addstr(unicode(__doc__).encode('UTF-8'))
+                    stdscr.addstr(__doc__.encode('UTF-8'))
                     tempStr = u"\nPress any key to resume monitoring"
                     stdscr.addstr(tempStr.encode('UTF-8'))
                     stdscr.refresh()
@@ -318,7 +318,7 @@ if __name__ == '__main__':
                             data = peer_report.summary(session.rstatus,
                                                        variables,
                                                        peer.associd)
-                            data = unicode(data).encode('UTF-8')
+                            data = data.encode('UTF-8')
                             stdscr.addstr(data, hilite)
                             if (('refid' in variables and
                                  'INIT' in variables['refid'])):
@@ -341,7 +341,7 @@ if __name__ == '__main__':
                                            debug, 1)
                         # The status line
                         sl = statline(peer_report, mru_report, nyquist)
-                        strconvert = unicode(sl + "\n")
+                        strconvert = sl + "\n"
                         stdscr.addstr(strconvert.encode('UTF-8'),
                                       curses.A_REVERSE | curses.A_DIM)
                         if detailmode:
@@ -368,11 +368,11 @@ if __name__ == '__main__':
                                 pass
                         elif span.entries:
                             strconvert = ntp.util.MRUSummary.header + "\n"
-                            stdscr.addstr(unicode(strconvert).encode('UTF-8'),
+                            stdscr.addstr(strconvert.encode('UTF-8'),
                                           curses.A_BOLD)
                             for entry in reversed(span.entries):
                                 strcon = mru_report.summary(entry) + "\n"
-                                stdscr.addstr(unicode(strcon).encode('UTF-8'))
+                                stdscr.addstr(strcon.encode('UTF-8'))
                     except curses.error:
                         # An addstr overran the screen, no worries
                         pass
