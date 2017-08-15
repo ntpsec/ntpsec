@@ -35,10 +35,11 @@ returns "the time is not yet stable".
   Be verbose.
 +
 By default, +ntpwait+ is silent. With this option, +ntpwait+ will
-provide status information.
+provide status information, including time to synchronization in seconds.
 
-== AUTHOR ==
+== BUGS ==
 
-Harlan Stenn.
+If you are running Python at a version older than 3.3, the report on time
+to synchronization may be thrown off by NTP clock stepping.
 
 //end 
