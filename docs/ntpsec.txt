@@ -90,8 +90,6 @@ a build-time switch, not a run-time one).
 * The ttl-hop option for broadcast mode has been removed from the
   configuration grammar.  It was never actually implemented.
 
-* ntpq's ":config" command is now "config".
-
 * ntpq no longer has the -i/--interactive option, as there was no
   situation in which it was meaningful.
 
@@ -252,6 +250,8 @@ codebase has been outright removed, with less than 5% new code added.
 * Most refclock drivers now support configuration options to override the
   default device path, the default PPS device path (if any) and the
   serial baud rate.
+
+* ntpq's ":config" command can be invoked as "config" (without the colon).
 
 [[other]]
 == Other user-visible changes ==
