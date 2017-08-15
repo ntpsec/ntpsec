@@ -128,6 +128,7 @@ class Unbuffered(object):
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
 
+
 def monoclock():
     "Try to get a monotonic clock value unaffected by NTP stepping."
     try:
@@ -195,7 +196,7 @@ if __name__ == "__main__":
                 sys.stdout.write("\b" + msg + "\n")
             sys.exit(1)
 
-        m = re.search(r"leap=([^,]*),", session.response)
+        m = re.search(r"leap=([^,]*),", repr(session.response))
         if m:
             leap = int(m.group(1))
         else:
@@ -213,7 +214,8 @@ if __name__ == "__main__":
                     ntp.magic.LEAP_DELSECOND):
             # We could check "sync" here to make sure we like the source...
             if verbose:
-                sys.stdout.write("\bOK! (%d seconds)\n" % (monoclock() - basetime))
+                sys.stdout.write("\bOK! (%.1f seconds)\n" %
+                                 (monoclock() - basetime))
             sys.exit(0)
 
         sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)
