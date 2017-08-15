@@ -402,7 +402,7 @@ def f8dot4(f):
     if isinstance(f, basestring):
         # a string? pass it on as a signal
         return "%8s" % f
-    if not isinstance(f, (int, long, float)):
+    if not isinstance(f, (int, float)):
         # huh?
         return "       X"
     if str(float(f)).lower() == 'nan':
@@ -439,7 +439,7 @@ def f8dot3(f):
     if isinstance(f, basestring):
         # a string? pass it on as a signal
         return "%8s" % f
-    if not isinstance(f, (int, long, float)):
+    if not isinstance(f, (int, float)):
         # huh?
         return "       X"
     if str(float(f)).lower() == 'nan':
@@ -726,7 +726,7 @@ class PeerSummary:
     @staticmethod
     def prettyinterval(diff):
         "Print an interval in natural time units."
-        if not isinstance(diff, (int, long)) or diff <= 0:
+        if not isinstance(diff, int) or diff <= 0:
             return '-'
         if diff <= 2048:
             return str(diff)
