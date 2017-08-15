@@ -351,7 +351,7 @@ if __name__ == '__main__':
                                 dtype = ntp.ntpc.TYPE_PEER
                             sw = ntp.ntpc.statustoa(dtype,
                                                     peers[selected].status)
-                            strconvert = u"assoc=%d: %s\n".encode('UTF-8')
+                            strconvert = "assoc=%d: %s\n"
                             stdscr.addstr(strconvert
                                           % (peers[selected].associd, sw))
                             strconvert = peer_detail(retained, showunits)
