@@ -267,7 +267,7 @@ getcode(
 		codetab++;
 	}
 
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 	snprintf(buf, LIB_BUFLENGTH, "%s_%d", codetab->string, code);
 
 	return buf;
@@ -286,7 +286,7 @@ getevents(
 	if (cnt == 0)
 		return "no events";
 
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 	snprintf(buf, LIB_BUFLENGTH, "%d event%s", cnt,
 		 (1 == cnt)
 		     ? ""
@@ -319,7 +319,7 @@ decode_bitflags(
 	int		saved_errno;	/* for use in DPRINT/TPRINT with %m */
 
 	saved_errno = errno;
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 	pch = buf;
 	lim = buf + LIB_BUFLENGTH;
 	sep = "";
@@ -412,7 +412,7 @@ statustoa(
 	char *	cc;
 	uint8_t	pst;
 
-	LIB_GETBUF(cb);
+	cb = lib_getbuf();
 
 	switch (type) {
 

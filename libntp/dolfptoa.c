@@ -32,7 +32,7 @@ dolfptoa(
 	/*
 	 * Get a string buffer before starting
 	 */
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 
 	/*
 	 * Zero the character buffer

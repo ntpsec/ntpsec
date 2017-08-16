@@ -143,7 +143,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		 */
 		char *upcased;
 		char *pch;
-		LIB_GETBUF(upcased);
+		upcased = lib_getbuf();
 		strlcpy(upcased, token, LIB_BUFLENGTH);
 		for (pch = upcased; '\0' != *pch; pch++)
 			*pch = (char)toupper((unsigned char)*pch);

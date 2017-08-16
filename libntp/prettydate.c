@@ -129,7 +129,7 @@ common_prettydate(
 	uint32_t	     ntps;
 	time64_t	     sec;
 
-	LIB_GETBUF(bp);
+	bp = lib_getbuf();
 
 	/* get & fix milliseconds */
 	ntps = lfpuint(ts);
@@ -200,7 +200,7 @@ char * rfc3339time(
 	char *		buf;
 	struct tm tm, *tm2;
 
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 	tm2 = gmtime_r(&posix_stamp, &tm);
 	if (tm2 == NULL || tm.tm_year > 9999)
 		snprintf(buf, LIB_BUFLENGTH, "rfc3339time: %ld: range error",

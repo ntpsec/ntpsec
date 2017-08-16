@@ -31,7 +31,7 @@ socktoa(
 	unsigned long	scope;
 
 	saved_errno = errno;
-	LIB_GETBUF(res);
+	res = lib_getbuf();
 
 	if (NULL == sock) {
 		strlcpy(res, "(null)", LIB_BUFLENGTH);
@@ -50,7 +50,7 @@ socktoa(
 			scope = SCOPE_VAR(sock);
 			if (0 != scope && !strchr(res, '%')) {
 				addr = res;
-				LIB_GETBUF(res);
+				res = lib_getbuf();
 				snprintf(res, LIB_BUFLENGTH, "%s%%%lu",
 					 addr, scope);
 				res[LIB_BUFLENGTH - 1] = '\0';
@@ -80,7 +80,7 @@ sockporttoa(
 
 	saved_errno = errno;
 	atext = socktoa(sock);
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 	snprintf(buf, LIB_BUFLENGTH,
 		 (IS_IPV6(sock))
 		     ? "[%s]:%hu"

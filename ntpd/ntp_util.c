@@ -353,7 +353,7 @@ timespec_to_MJDtime(const struct timespec *ts)
 	char *buf;
 	unsigned long	day, sec, msec;
 
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 
 	day = (unsigned long)ts->tv_sec / SECSPERDAY + MJD_1970;
 	sec = (unsigned long)ts->tv_sec % SECSPERDAY;

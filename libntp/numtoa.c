@@ -21,7 +21,7 @@ numtoa(
 	register char *buf;
 
 	netnum = ntohl(num);
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 	snprintf(buf, LIB_BUFLENGTH, "%lu.%lu.%lu.%lu",
 		 ((unsigned long)netnum >> 24) & 0xff,
 		 ((unsigned long)netnum >> 16) & 0xff,
@@ -44,7 +44,7 @@ refid_str(
 	if (stratum > 1)
 		return numtoa(refid);
 
-	LIB_GETBUF(text);
+	text = lib_getbuf();
 	text[0] = '.';
 	memcpy(&text[1], &refid, sizeof(refid));
 	text[1 + sizeof(refid)] = '\0';

@@ -29,7 +29,7 @@ fmt_blong(
     int i = cnt;
 
     val <<= 32 - cnt;
-    LIB_GETBUF(buf);
+    buf = lib_getbuf();
     s = buf;
 
     while (i--) {
@@ -54,7 +54,7 @@ fmt_flt(
 {
         char *buf;
 
-        LIB_GETBUF(buf);
+        buf = lib_getbuf();
         if ( 8 == length ) {
             snprintf(buf, LIB_BUFLENGTH, "%c %s %s %s", sign ? '-' : '+',
                      fmt_blong(ch, 11),
@@ -79,7 +79,7 @@ fmt_hex(
         char    hex[4];
         int     i;
 
-        LIB_GETBUF(buf);
+        buf = lib_getbuf();
         buf[0] = '\0';
         for (i = 0; i < length; i++) {
                 snprintf(hex, sizeof(hex), "%02x", bufp[i]);

@@ -130,7 +130,7 @@ refclock_name(
 {
 	char *buf;
 
-	LIB_GETBUF(buf);
+	buf = lib_getbuf();
 
 	snprintf(buf, LIB_BUFLENGTH, "%s(%d)",
 			 peer->procptr->clockname, peer->refclkunit);

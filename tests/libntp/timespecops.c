@@ -35,7 +35,7 @@ struct lfpfracdata {
 
 TEST_GROUP(timespecops);
 
-TEST_SETUP(timespecops) {init_lib();}
+TEST_SETUP(timespecops) {}
 
 TEST_TEAR_DOWN(timespecops) {}
 

@@ -24,7 +24,7 @@ humanlogtime(void)
 	if (!tm)
 		return "-- --- --:--:--";
 
-	LIB_GETBUF(bp);
+	bp = lib_getbuf();
 
 #ifdef ENABLE_CLASSIC_MODE
 	const char * const months[12] = {
@@ -62,7 +62,7 @@ humantime(
 	if (!tm)
 		return "--:--:--";
 
-	LIB_GETBUF(bp);
+	bp  = lib_getbuf();
 	
 	snprintf(bp, LIB_BUFLENGTH, "%02d:%02d:%02d",
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);

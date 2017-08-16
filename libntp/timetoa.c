@@ -64,7 +64,7 @@ format_time_fraction(
 
 	//REQUIRE(prec != 0);
 
-	LIB_GETBUF(cp);
+	cp = lib_getbuf();
 	secs_u = (u_time)secs;
 	
 	/* check if we need signed or unsigned mode */

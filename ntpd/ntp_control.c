@@ -3884,7 +3884,7 @@ send_restrict_entry(
 			if ('\0' == match_str[0]) {
 				pch = access_str;
 			} else {
-				LIB_GETBUF(buf);
+				buf = lib_getbuf();
 				snprintf(buf, LIB_BUFLENGTH, "%s %s",
 					 match_str, access_str);
 				pch = buf;

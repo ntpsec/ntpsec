@@ -30,7 +30,7 @@ convertRefIDToLFP(uint32_t r)
 
 TEST_GROUP(refidsmear);
 
-TEST_SETUP(refidsmear) {init_lib();}
+TEST_SETUP(refidsmear) {}
 
 TEST_TEAR_DOWN(refidsmear) {}
 

@@ -74,8 +74,6 @@ main (
 
 	progname = argv[0];
 
-	init_lib();
-
 	if (argc<=1) {
 	  usage:
 		printf ("usage: %s [uu:]{r[c][l]|w|snnn}\n",argv[0]);
