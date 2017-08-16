@@ -233,7 +233,7 @@ def configure(ctx):
     # We require some things that C99 doesn't enable, like pthreads.
     # These flags get propagated to both the host and main parts of the build.
     #
-    #_POSIX_C_SOURCE
+    # _POSIX_C_SOURCE
     #      If ==1, like _POSIX_SOURCE;
     #      if >=2 add IEEE Std 1003.2;
     #      if >=199309L, add IEEE Std 1003.1b-1993;

@@ -27,7 +27,7 @@ patterns = (
 
 skipstarters = ("struct", "union", "typedef struct", "typedef union")
 
-skipender = re.compile("^}.*;")	# Has to allow a structure attribute
+skipender = re.compile("^}.*;")	 # Has to allow a structure attribute
 
 skippers = (
     re.compile(r"^#include"),

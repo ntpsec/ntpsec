@@ -37,7 +37,7 @@ def build(ctx):
         "prettydate.c",
         "statestr.c",
         "systime.c",
-	"timespecops.c",
+        "timespecops.c",
         "timetoa.c",
     ]
 

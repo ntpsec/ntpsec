@@ -91,7 +91,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
     # PDU tests
     #
     def test_AgentXPDU(self):
-        
+
         # Test basic, without context
         test = ntp.agentx.AgentXPDU(0, True, 1, 2, 3, context=extraData)
         self.assertEqual(repr(test),
@@ -1848,7 +1848,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "end": {"subids": (1, 2), "include": False}},
                           {"start": {"subids": (2, 3), "include": False},
                            "end": {"subids": (3, 4), "include": False}}))
-        
+
     def test_decode_searchrange_list_nullterm(self):
         dec = ntp.agentx.decode_searchrange_list_nullterm
 

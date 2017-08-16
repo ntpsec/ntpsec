@@ -470,6 +470,7 @@ def f8dot3(f):
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = {}
 
+
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
     TTL = 300
@@ -486,7 +487,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
         ai = socket.getaddrinfo(hostname, None, family, 0, 0,
                                 socket.AI_CANONNAME)
     except socket.gaierror as e:
-        return "DNSFAIL:%s" % hostname 
+        return "DNSFAIL:%s" % hostname
     (family, socktype, proto, canonname, sockaddr) = ai[0]
     try:
         name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
@@ -1054,7 +1055,6 @@ class MRUSummary:
         self.wideremote = wideremote
 
     header = " lstint avgint rstr r m v  count rport remote address"
-
 
     def summary(self, entry):
         width = ntp.util.termsize().width - 1
