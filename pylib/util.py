@@ -677,7 +677,7 @@ def cook(variables, showunits=False, sep=", "):
             item += repr(value)
         # add field separator
         item += sep
-        # add newline so we don not overflow screen
+        # add newline so we don't overflow screen
         lastcount = 0
         for c in text:
             if c == '\n':
