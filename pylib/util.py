@@ -830,7 +830,7 @@ class PeerSummary:
                 if len(rawvalue) > 6 and rawvalue[-7] == ".":
                     saw6 = True
             elif name == "dstadr":
-                # The C code tried to get a fallback pytpe from this in case
+                # The C code tried to get a fallback ptype from this in case
                 # the hmode field was not included
                 if "local" in self.__header:
                     dstadr_refid = value
