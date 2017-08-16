@@ -27,6 +27,7 @@ import time
 import socket
 import ntp.magic
 import ntp.packet
+import ntp.util
 
 # General notes on Python 2/3 compatibility:
 #
@@ -129,14 +130,6 @@ class Unbuffered(object):
         return getattr(self.stream, attr)
 
 
-def monoclock():
-    "Try to get a monotonic clock value unaffected by NTP stepping."
-    try:
-        # Available in Python 3.3 and up.
-        return time.monotonic()
-    except AttributeError:
-        return time.time()
-
 if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:v", [
@@ -164,7 +157,7 @@ if __name__ == "__main__":
     # Autoflush stdout
     sys.stdout = Unbuffered(sys.stdout)
 
-    basetime = monoclock()
+    basetime = ntp.util.monoclock()
     if verbose:
         sys.stdout.write("Waiting for ntpd to synchronize...  ")
 
@@ -215,7 +208,7 @@ if __name__ == "__main__":
             # We could check "sync" here to make sure we like the source...
             if verbose:
                 sys.stdout.write("\bOK! (%.1f seconds)\n" %
-                                 (monoclock() - basetime))
+                                 (ntp.util.monoclock() - basetime))
             sys.exit(0)
 
         sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)

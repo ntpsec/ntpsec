@@ -467,16 +467,23 @@ def f8dot3(f):
     return fmt % f
 
 
+def monoclock():
+    "Try to get a monotonic clock value unaffected by NTP stepping."
+    try:
+        # Available in Python 3.3 and up.
+        return time.monotonic()
+    except AttributeError:
+        return time.time()
+
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = {}
-
 
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
     TTL = 300
     if inhost in canonicalization_cache:
         (resname, restime) = canonicalization_cache[inhost]
-        if restime >= time.time() - TTL:
+        if restime >= monoclock() - TTL:
             return resname
     # Catch garbaged hostnames in corrupted Mode 6 responses
     m = re.match("([:.[\]]|\w)*", inhost)
@@ -497,7 +504,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
         # Fall back to the hostname.
         canonicalized = canonname or hostname
         result = canonicalized.lower() + portsuffix
-    canonicalization_cache[inhost] = (result, time.time())
+    canonicalization_cache[inhost] = (result, monoclock())
     return result
 
 TermSize = collections.namedtuple("TermSize", ["width", "height"])
