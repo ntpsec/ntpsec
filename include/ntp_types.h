@@ -70,9 +70,9 @@ typedef uint32_t keyid_t;	/* cryptographic key ID */
  *
  * The C standard does not specify the precision of a double.  C99
  * Annex F makes IEEE754 compliance optional and very few C compilers
- * are fully IEEE754 compliant. C doubles may be may be 24 bits, 53
- * bits, or something else. Only rarely would a C double be able to
- * hold a 65 bit number without loss of precision.
+ * are fully IEEE754 compliant. C doubles may be 24 bits, 53 bits, or something
+ * else. Only rarely would a C double be able to hold a 65 bit number without
+ * loss of precision.
  *
  * This matters because initial steps may be large, such as when a host
  * has no valid RTC and thinks the current time is 1Jan70. Thus truncating
