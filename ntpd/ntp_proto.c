@@ -852,7 +852,8 @@ receive(
             case AM_NEWPASS:
 		handle_fastxmit(rbufp, restrict_mask, pkt, peer, authenticated);
 		sys_processed++;
-		peer->processed++;
+		if (peer != NULL)	/* possible during pool query */
+		    peer->processed++;
 		break;
 	    case AM_PROCPKT:
 		handle_procpkt(rbufp, restrict_mask, pkt, peer, authenticated);
