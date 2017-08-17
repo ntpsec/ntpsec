@@ -112,8 +112,8 @@ unrestricted).
 +unrestrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
    Like a +restrict+ command, but turns off the specified flags rather
    than turning them on (expected to be useful mainly with ntpq
-   config). An unrestricr with no flags specified removes any rule
-   with matching address mask.  Use only on an address/mask or
+   :config). An unrestrict with no flags specified removes any rule
+   with matching address and mask.  Use only on an address/mask or
    CIDR-format address mentioned in a previous +restrict+ statement.
 
 // end
