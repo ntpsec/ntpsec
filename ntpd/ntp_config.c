@@ -3401,8 +3401,9 @@ fix_node_cidr(
         /* conversion fail, leave silently */
         return;
     }
-    if ( 0 > cidr_len ) {
-        /* negative?  leave silently */
+    if ( 0 >= cidr_len ) {
+        /* negative or zero?  leave silently */
+	/* exiting on 0 avoids a bad shift warning from Coverity */
         return;
     }
     /* sadly, addr->type not previously set, look for colon */
