@@ -1795,8 +1795,16 @@ config_access(
 		}
 
 		do {
-			int op = (my_node->mode == T_Restrict)
-				? RESTRICT_FLAGS : RESTRICT_UNFLAG;
+			int op;
+			if (my_node->mode == T_Restrict)
+				op = RESTRICT_FLAGS;
+			else if (my_node->mode == T_Unrestrict
+					&& flags == 0 && mflags == 0)
+				op = RESTRICT_REMOVE;
+			else if (my_node->mode == T_Unrestrict)
+				op = RESTRICT_UNFLAG;
+			else
+				continue;	/* should never happen */
 			hack_restrict(op, &addr,
 				      &mask, mflags, flags, 0);
 			if (pai != NULL &&
