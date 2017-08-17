@@ -787,6 +787,7 @@ receive(
 
 	if(is_control_packet(rbufp)) {
 		process_control(rbufp, restrict_mask);
+		sys_processed++;
 		goto done;
 	}
 
@@ -850,12 +851,18 @@ receive(
 	    case AM_FXMIT:
             case AM_NEWPASS:
 		handle_fastxmit(rbufp, restrict_mask, pkt, peer, authenticated);
+		sys_processed++;
+		peer->processed++;
 		break;
 	    case AM_PROCPKT:
 		handle_procpkt(rbufp, restrict_mask, pkt, peer, authenticated);
+		sys_processed++;
+		peer->processed++;
 		break;
 	    case AM_MANYCAST:
 		handle_manycast(rbufp, restrict_mask, pkt, peer, authenticated);
+		sys_processed++;
+		peer->processed++;
 		break;
 	    default:
 		/* Everything else is for broadcast modes,
