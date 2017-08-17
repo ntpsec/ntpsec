@@ -46,7 +46,7 @@ def build(ctx):
 
     ctx(
         features='py',
-        source=ctx.path.ant_glob('*.py'),
+        source=ctx.path.ant_glob('*.py')+ctx.path.ant_glob('*.py[oc]'),
         install_from='.',
         install_path='${PYTHONDIR}/ntp'
     )
