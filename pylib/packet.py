@@ -878,7 +878,7 @@ class ControlSession:
         # C implementation didn't use multiple responses, so we don't either
         (family, socktype, protocol, canonname, sockaddr) = res[0]
         if canonname is None:
-            self.hostname = sockaddr.inet_ntop(sockaddr[0], family)
+            self.hostname = socket.inet_ntop(sockaddr[0], family)
             self.isnum = True
         else:
             self.hostname = canonname or hname
@@ -1088,7 +1088,7 @@ class ControlSession:
             # Check opcode and sequence number for a match.
             # Could be old data getting to us.
             # =======
-            # These had the continues inside a if debug block. Probably
+            # These had the continues inside an if debug block. Probably
             # shouldn't have been there, but if there is a problem move
             # them back.
             if rpkt.sequence != self.sequence:
@@ -1341,7 +1341,7 @@ class ControlSession:
 Ask for, and get, a nonce that can be replayed.
 This combats source address spoofing
 """
-        for i in range(3):
+        for i in range(4):
             # retry 4 times
             self.doquery(opcode=ntp.control.CTL_OP_REQ_NONCE)
             self.nonce_xmit = time.time()
@@ -1351,7 +1351,7 @@ This combats source address spoofing
 
         # uh, oh, no nonce seen
         # this print probably never can be seen...
-        print("## Nonce expected: %s" % self.response)
+        self.logfp.write("## Nonce expected: %s" % self.response)
         raise ControlException(SERR_BADNONCE)
 
     def mrulist(self, variables=None, rawhook=None, direct=None):
@@ -1529,6 +1529,7 @@ This combats source address spoofing
                             if idx != curidx:
                                 # This makes duplicates
                                 curidx = idx
+
                                 if mru:
                                     # Can't have partial slots on list
                                     # or printing crashes after ^C
