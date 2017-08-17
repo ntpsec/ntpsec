@@ -127,11 +127,19 @@ static PyObject *
 ntpc_step_systime(PyObject *self, PyObject *args)
 {
     double adjustment;
+    doubletime_t full_adjustment;
 
     UNUSED_ARG(self);
+    /*
+     * What we really want is for Python to parse a long double.
+     * As this is, it's a potential source of problems in the Python
+     * utilties if and when the time difference between the Unix epoch
+     * and now exceeds the range of a double.
+     */
     if (!PyArg_ParseTuple(args, "d", &adjustment))
 	return NULL;
-    return Py_BuildValue("d", step_systime(adjustment, ntp_set_tod));
+    full_adjustment = adjustment;
+    return Py_BuildValue("d", step_systime(full_adjustment, ntp_set_tod));
 }
 
 int32_t ntp_random(void)

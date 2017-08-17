@@ -65,8 +65,8 @@ double	sys_fuzz = 0;		/* min. time to read the clock (s) */
 bool	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
-static double	sys_residual = 0;	/* adjustment residue (s) */
-static long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
+static doubletime_t  sys_residual = 0;	/* adjustment residue (s) */
+static long          sys_fuzz_nsec = 0;	/* minimum time to read clock (ns) */
 
 /* perlinger@ntp.org: As 'get_systime()' does its own check for clock
  * backstepping, this could probably become a local variable in
@@ -236,7 +236,7 @@ adj_systime(
 	struct timeval adjtv;	/* new adjustment */
 	struct timeval oadjtv;	/* residual adjustment */
 	double	quant;		/* quantize to multiples of */
-	double	dtemp;
+	doubletime_t	dtemp;
 	long	ticks;
 	bool	isneg = false;
 
@@ -315,7 +315,7 @@ adj_systime(
 
 bool
 step_systime(
-	double step,
+	doubletime_t step,
 	int (*settime)(struct timespec *)
 	)
 {

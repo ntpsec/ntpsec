@@ -25,8 +25,8 @@
 #define NBUF	800002
 #define NSAMPLES 10
 
-static double sys_residual;
-static double average;
+static doubletime_t sys_residual;
+static doubletime_t average;
 
 /*
  * get_clocktime - return system time in NTP timestamp format.
@@ -36,7 +36,7 @@ get_clocktime(
 	l_fp *now		/* system time */
 	)
 {
-	double dtemp;
+	doubletime_t dtemp;
 
 	struct timespec ts;	/* seconds and nanoseconds */
 
@@ -107,7 +107,7 @@ void jitter(const iomode mode)
 	qsort(gtod, NBUF, sizeof(gtod[0]), doublecmp);
 	average = average / (NBUF - 2);
 	if (mode == json) {
-		fprintf(stdout, "{\"Average\":%13.9f,", average);
+		fprintf(stdout, "{\"Average\":%13.9Lf,", average);
 		fprintf(stdout, "\"First rank\":[");
 		for (i = 0; i < NSAMPLES; i++) {
 		    fprintf(stdout, "%13.9f", gtod[i]);
@@ -125,7 +125,7 @@ void jitter(const iomode mode)
 	}
 	else if (mode != raw)
 	{
-		fprintf(stdout, "Average %13.9f\n", average);
+		fprintf(stdout, "Average %13.9Lf\n", average);
 		fprintf(stdout, "First rank\n");
 		for (i = 0; i < NSAMPLES; i++)
 		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);

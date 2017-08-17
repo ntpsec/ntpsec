@@ -63,6 +63,27 @@ typedef uint32_t keyid_t;	/* cryptographic key ID */
 #define KEYID_T_MAX	(0xffffffff)
 
 /*
+ * Ordinary double has only 53 bits  of precision in IEEE754.  But l_fp
+ * needs 64 bits of precision, arguably 65 bits after 2026. Thus, to have
+ * a float type coextensive with it, we need one with at least 65 bits of
+ * precision.
+ *
+ * The C standard does not specify the precision of a double.  C99
+ * Annex F makes IEEE754 compliance optional and very few C compilers
+ * are fully IEEE754 compliant. C doubles may be may be 24 bits, 53
+ * bits, or something else. Only rarely would a C double be able to
+ * hold a 65 bit number without loss of precision.
+ *
+ * This matters because initial steps may be large, such as when a host
+ * has no valid RTC and thinks the current time is 1Jan70. Thus truncating
+ * an l_fp conversion to double after 2026 risks loss of precision.
+ *
+ * On the other hand, long double is usually at least 80 bits.
+ * See https://en.wikipedia.org/wiki/Long_double for discussion and caveats.
+ */
+typedef long double doubletime_t;
+
+/*
  * Cloning malloc()'s behavior of always returning pointers suitably
  * aligned for the strictest alignment requirement of any type is not
  * easy to do portably, as the maximum alignment required is not

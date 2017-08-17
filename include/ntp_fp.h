@@ -133,27 +133,23 @@ typedef struct {
  */
 #define FRAC		4294967296.0 		/* 2^32 as a double */
 
-#include <math.h>	/* ldexp() */
+#include <math.h>	/* ldexpl() */
 
-static inline l_fp dtolfp(double d)
-/* double to l_fp
+static inline l_fp dtolfp(doubletime_t d)
+/* long double to l_fp
  * assumes signed l_fp, i.e. a time offset
  * undefined return if d in NaN
  */
 {
-/* Please check issue 264 before changing this to use llround
- * https://gitlab.com/NTPsec/ntpsec/issues/264
- * llround is broken on NetBSD, 2017-May-05
- */
-	return (l_fp)(int64_t)(ldexp(d, 32));
+	return (l_fp)(int64_t)(ldexpl(d, 32));
 }
 
-static inline double lfptod(l_fp r)
-/* l_fp to double
+static inline doubletime_t lfptod(l_fp r)
+/* l_fp to long double
  * assumes signed l_fp, i.e. a time offset
  */
 {
-	return ldexp((double)((int64_t)r), -32);
+	return ldexpl((double)((int64_t)r), -32);
 }
 
 /*
@@ -171,7 +167,7 @@ extern	char *	rfc3339time     (time_t);
 
 extern	void	set_sys_fuzz	(double);
 extern	void	get_systime	(l_fp *);
-extern	bool	step_systime	(double, int (*settime)(struct timespec *));
+extern	bool	step_systime	(doubletime_t, int (*settime)(struct timespec *));
 extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct timeval *));
 
 #define	lfptoa(fpv, ndec)	mfptoa((fpv), (ndec))
