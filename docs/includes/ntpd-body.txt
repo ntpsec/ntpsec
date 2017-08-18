@@ -36,20 +36,21 @@ The +ntpd+ program normally operates continuously while adjusting the
 system time and frequency, but in some cases this might not be
 practical. With the +-q+ option +ntpd+ operates as in continuous mode,
 but exits just after setting the clock for the first time. Most
-applications will probably want to specify the +iburst+ option with the
-+server+ command. With this option a volley of messages is exchanged to
-groom the data and set the clock in about ten seconds. If nothing is
-heard after a few minutes, the daemon times out and exits without
-setting the clock.
+applications will probably want to specify the +iburst+ option with
+the +server+ command. With this option a volley of messages is
+exchanged to groom the data and set the clock in about ten
+seconds. With -q, if nothing is heard after a few minutes, the daemon
+times out and exits without setting the clock.
 
-If NetInfo support is built into +ntpd+, then +ntpd+ will attempt to
-read its configuration from the NetInfo if the default
-{ntpdconfman} file cannot be read and no file is specified by
-the +-c+ option.
+//If NetInfo support is built into +ntpd+, then +ntpd+ will attempt to
+//read its configuration from the NetInfo if the default
+//{ntpdconfman} file cannot be read and no file is specified by
+//the +-c+ option.
 
 Various internal +ntpd+ variables can be displayed and configuration
 options altered while the +ntpd+ is running using the
-{ntpqman} utility program.
+{ntpqman} utility program.  The state of ntpd can be continuously
+monitored using {ntpmonman}.
 
 When +ntpd+ starts it looks at the value of umask(2), and if
 zero +ntpd+ will set the umask(2) to 022.
