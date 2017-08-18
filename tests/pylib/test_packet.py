@@ -492,6 +492,132 @@ class TestControlSession(unittest.TestCase):
         finally:
             ntp.packet.select = select
 
+    def test___validate_packet(self):
+        logjig = FileJig()
+        # Init
+        cls = self.target()
+        cls.debug = 5
+        cls.logfp = logjig
+        # Test good packet, empty data
+        raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         True)
+        self.assertEqual(logjig.data, [])
+        # Test good packet, with data
+        logjig.data = []
+        raw = "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09" \
+              "foo=4223,\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        cls.sequence = 1
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 3),
+                         True)
+        self.assertEqual(logjig.data, [])
+        # Test bad packet, bad version
+        # Need to fix version logic 0x46 can be ver == 5, or 0
+        cls.sequence = 0
+        logjig.data = []
+        raw = "\x46\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         False)
+        self.assertEqual(logjig.data, ["Fragment received with version 0\n"])
+        # Test bad packet, bad mode
+        logjig.data = []
+        raw = "\x0D\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         False)
+        self.assertEqual(logjig.data, ["Fragment received with mode 5\n"])
+        # Test bad packet, bad response bit
+        logjig.data = []
+        raw = "\x0E\x01\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         False)
+        self.assertEqual(logjig.data, ["Received request, wanted response\n"])
+        # Test bad packet, bad sequence
+        logjig.data = []
+        raw = "\x0E\x81\x00\x01\x00\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         False)
+        self.assertEqual(logjig.data,
+                         ["Received sequence number 1, wanted 0\n"])
+        # Test bad packet, bad opcode
+        logjig.data = []
+        raw = "\x0E\x80\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         False)
+        self.assertEqual(logjig.data,
+                         ["Received opcode 0, wanted 1\n"])
+        # Test error packet
+        logjig.data = []
+        raw = "\x0E\xC1\x00\x00" + \
+              chr(ntp.control.CERR_BADVALUE) + \
+              "\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        try:
+            cls._ControlSession__validate_packet(pkt, raw, 1, 2)
+            self.assertEqual(False, True)  # it should have errored here
+        except ntp.packet.ControlException as e:
+            self.assertEqual(e.errorcode, ntp.control.CERR_BADVALUE)
+        self.assertEqual(logjig.data, [])
+        # Test error packet, with more bit
+        logjig.data = []
+        errcs = chr(ntp.control.CERR_BADVALUE)
+        raw = "\x0E\xE1\x00\x00" + errcs + "\x03\x00\x02\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        try:
+            cls._ControlSession__validate_packet(pkt, raw, 1, 2)
+            self.assertEqual(False, True)  # it should have errored here
+        except ntp.packet.ControlException as e:
+            self.assertEqual(e.errorcode, ntp.control.CERR_BADVALUE)
+        errstr = "Error " + str(ntp.control.CERR_BADVALUE) + \
+                 " received on non-final fragment\n"
+        self.assertEqual(logjig.data, [errstr])
+        # Test ok-ish packet, bad associd
+        logjig.data = []
+        raw = "\x0E\x81\x00\x00\x00\x03\x00\xFF\x00\x00\x00\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         True)
+        self.assertEqual(logjig.data,
+                         ["Association ID 255 doesn't match expected 2\n"])
+        # Test bad data padding
+        logjig.data = []
+        raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x01@"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
+                         False)
+        self.assertEqual(logjig.data,
+                         ["Response fragment not padded, size = 13\n"])
+        # Test too little data
+        logjig.data = []
+        raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x10foo\x00"
+        pkt = ntp.packet.ControlPacket(cls)
+        pkt.analyze(raw)
+        try:
+            cls._ControlSession__validate_packet(pkt, raw, 1, 2)
+            self.assertEqual(True, False)  # should have errored here
+        except ntp.packet.ControlException as e:
+            self.assertEqual(e.message, ntp.packet.SERR_INCOMPLETE)
+        self.assertEqual(logjig.data,
+                         ["Response fragment claims 16 octets payload, "
+                          "above 4 received\n"])
+
     def test_doquery(self):
         sends = []
         def sendrequest_jig(opcode, associd, qdata, auth):

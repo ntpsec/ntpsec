@@ -1073,69 +1073,10 @@ class ControlSession:
             except struct.error:
                 raise ControlException(SERR_UNSPEC)
 
-            if ((rpkt.version() > ntp.magic.NTP_VERSION or
-                    rpkt.version() < ntp.magic.NTP_OLDVERSION)):
-                warndbg("Fragment received with version %d\n"
-                        % rpkt.version(), 1)
+            # Validate that packet header is sane, and the correct type
+            valid = self.__validate_packet(rpkt, rawdata, opcode, associd)
+            if valid is False:
                 continue
-            if rpkt.mode() != ntp.magic.MODE_CONTROL:
-                warndbg("Fragment received with mode %d\n" % rpkt.mode(), 1)
-                continue
-            if not rpkt.is_response():
-                warndbg("Received request, wanted response\n", 1)
-                # continue
-
-            # Check opcode and sequence number for a match.
-            # Could be old data getting to us.
-            # =======
-            # These had the continues inside an if debug block. Probably
-            # shouldn't have been there, but if there is a problem move
-            # them back.
-            if rpkt.sequence != self.sequence:
-                warndbg("Received sequence number %d, wanted %d\n" %
-                        (rpkt.sequence, self.sequence), 1)
-                continue
-            if rpkt.opcode() != opcode:
-                warndbg("Received opcode %d, wanted %d\n" %
-                        (rpkt.opcode(), opcode), 1)
-                continue
-
-            # Check the error code.  If non-zero, return it.
-            if rpkt.is_error():
-                if rpkt.more():
-                    warn("Error %d received on non-final fragment\n"
-                         % rpkt.errcode())
-                self.keyid = self.passwd = None
-                raise ControlException(
-                    SERR_SERVER
-                    % ControlSession.server_errors[rpkt.errcode()],
-                    rpkt.errcode())
-
-            # Check the association ID to make sure it matches what we expect
-            if rpkt.associd != associd:
-                warn("Association ID %d doesn't match expected %d\n"
-                     % (rpkt.associd, associd))
-
-            # validate received payload size is padded to next 32-bit
-            # boundary and no smaller than claimed by rpkt.count
-            if len(rawdata) & 0x3:
-                warn("Response fragment not padded, size = %d\n"
-                     % len(rawdata))
-                continue
-
-            shouldbesize = (ControlPacket.HEADER_LEN + rpkt.count + 3) & ~3
-            if len(rawdata) < shouldbesize:
-                warn("Response fragment claims %u octets payload, "
-                     "above %d received\n"
-                     % (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
-                raise ControlException(SERR_INCOMPLETE)
-
-            if rpkt.count > (len(rawdata) - ControlPacket.HEADER_LEN):
-                    warn("Received count of %u octets, data in "
-                         " fragment is %ld\n"
-                         % (rpkt.count,
-                            len(rawdata) - ControlPacket.HEADER_LEN))
-                    continue
 
             # Someday, perhaps, check authentication here
 
@@ -1218,6 +1159,70 @@ class ControlSession:
                         warn("First line:\n%s\n" % repr(firstline))
                     return None
                 break
+
+    def __validate_packet(self, rpkt, rawdata, opcode, associd):
+        # TODO: refactor to simplify while retaining semantic info
+        if self.logfp is not None:
+            warn = self.logfp.write
+        else:
+            warn = (lambda x: x)
+        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
+                                                  self.debug, th))
+
+        if ((rpkt.version() > ntp.magic.NTP_VERSION or
+             rpkt.version() < ntp.magic.NTP_OLDVERSION)):
+            warndbg("Fragment received with version %d\n"
+                    % rpkt.version(), 1)
+            return False
+        if rpkt.mode() != ntp.magic.MODE_CONTROL:
+            warndbg("Fragment received with mode %d\n" % rpkt.mode(), 1)
+            return False
+        if not rpkt.is_response():
+            warndbg("Received request, wanted response\n", 1)
+            return False
+
+        # Check opcode and sequence number for a match.
+        # Could be old data getting to us.
+        if rpkt.sequence != self.sequence:
+            warndbg("Received sequence number %d, wanted %d\n" %
+                    (rpkt.sequence, self.sequence), 1)
+            return False
+        if rpkt.opcode() != opcode:
+            warndbg("Received opcode %d, wanted %d\n" %
+                    (rpkt.opcode(), opcode), 1)
+            return False
+
+        # Check the error code.  If non-zero, return it.
+        if rpkt.is_error():
+            if rpkt.more():
+                warn("Error %d received on non-final fragment\n"
+                     % rpkt.errcode())
+            self.keyid = self.passwd = None
+            raise ControlException(
+                SERR_SERVER
+                % ControlSession.server_errors[rpkt.errcode()],
+                rpkt.errcode())
+
+        # Check the association ID to make sure it matches what we expect
+        if rpkt.associd != associd:
+            warn("Association ID %d doesn't match expected %d\n"
+                 % (rpkt.associd, associd))
+
+        # validate received payload size is padded to next 32-bit
+        # boundary and no smaller than claimed by rpkt.count
+        if len(rawdata) & 0x3:
+            warn("Response fragment not padded, size = %d\n"
+                 % len(rawdata))
+            return False
+
+        shouldbesize = (ControlPacket.HEADER_LEN + rpkt.count + 3) & ~3
+        if len(rawdata) < shouldbesize:
+            warn("Response fragment claims %u octets payload, "
+                 "above %d received\n"
+                 % (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
+            raise ControlException(SERR_INCOMPLETE)
+
+        return True
 
     def doquery(self, opcode, associd=0, qdata="", auth=False):
         "send a request and save the response"
