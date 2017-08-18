@@ -28,9 +28,13 @@ include::includes/hand.txt[]
 
 This page describes the Mode 6 protocol used to get status information
 from a running ntpd and configure some of its behaviors on the fly.
-The protocol is normally used by the 'ntpq' program distributed with
-the suite. It is fully documented here so that other clients can be
-written.
+The protocol is normally used by the 'ntpq' and 'ntpmon' program
+distributed with the suite. It is fully documented here so that other
+clients can be written.
+
+(Note that the most efficient way to write a new client is to use
+the Python Mode 6 libraries included in the distribution. Both 'ntpq'
+and 'ntpmon' use these.)
 
 [[packet]]
 == Mode 6 packet structure ==
@@ -420,7 +424,8 @@ flags.#:: Space-separated list of flag names applying to the address.
 	  These flag names are the same as those used in the
 	  "restrict" directive of the configuration syntax.
 
-hits.#:: Packet count for the address
+hits.#:: The number of times this rule has been matched.  Not updated
+	 for default rules.
 
 mask.#:: Subnet mask qualifying the address to express a range.
 
