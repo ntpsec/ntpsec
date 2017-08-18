@@ -7,6 +7,7 @@ import unittest
 import ntp.packet
 import ntp.control
 import ntp.util
+import ntp.magic
 import socket
 import select
 import sys
@@ -19,7 +20,16 @@ class FileJig:
     def __init__(self):
         self.data = []
         self.flushed = False
-        self.readline_return = ""
+        self.readline_return = [""]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def __iter__(self):
+        return self.readline_return.__iter__()
 
     def write(self, data):
         self.data.append(data)
@@ -29,7 +39,9 @@ class FileJig:
         self.flushed = True
 
     def readline(self):
-        return self.readline_return
+        if len(self.readline_return) > 0:
+            return self.readline_return.pop(0)
+        return ""
 
 
 class SocketJig:
@@ -84,6 +96,20 @@ class ControlPacketJig:
 
     def flatten(self):
         return self.extension
+
+
+class HasherJig:
+    def __init__(self):
+        self.update_calls = []
+        self.digest_size = 0
+
+    def update(self, data):
+        self.update_calls.append(data)
+        if (data is not None) and (data != "None"):
+            self.digest_size += 1
+
+    def digest(self):
+        return "blah" * 4  # 16 byte hash
 
 
 class SocketModuleJig:
@@ -141,6 +167,18 @@ class GetpassModuleJig:
     def getpass(self, prompt, stream=None):
         self.getpass_calls.append((prompt, stream))
         return "xyzzy"
+
+
+class HashlibModuleJig:
+    def __init__(self):
+        self.new_calls = []
+        self.hashers_returned = []
+
+    def new(self, name):
+        self.new_calls.append(name)
+        h = HasherJig()
+        self.hashers_returned.append(h)
+        return h
 
 
 class SelectModuleJig:
@@ -378,7 +416,7 @@ class TestControlSession(unittest.TestCase):
             tempstdout = sys.stdout
             sys.stdout = iojig
             # Test, with nothing
-            iojig.readline_return = "1\n"
+            iojig.readline_return = ["1\n"] * 10
             cls.password()
             self.assertEqual(isinstance(cls.auth, AuthenticatorJig), True)
             self.assertEqual(cls.keyid, 1)
@@ -978,6 +1016,119 @@ class TestControlSession(unittest.TestCase):
         result = cls.ifstats()
         self.assertEqual(result, 23)
         self.assertEqual(ords, ["ifstats"])
+
+
+class TestAuthenticator(unittest.TestCase):
+    target = ntp.packet.Authenticator
+    open_calls = []
+    open_files = []
+    open_data = []
+
+    def openjig(self, filename):
+        self.open_calls.append(filename)
+        fd = FileJig()
+        fd.readline_return = self.open_data
+        self.open_files.append(fd)
+        return fd
+
+    def test___init__(self):
+        try:
+            ntp.packet.open = self.openjig
+            # Test without file
+            cls = self.target()
+            self.assertEqual(cls.passwords, {})
+            self.assertEqual(self.open_calls, [])
+            self.assertEqual(self.open_files, [])
+            # Test with file
+            self.open_data = ["# blah blah\n",
+                              "0 foo sw0rdf1sh\n",
+                              "\n",
+                              "1 bar password1 # blargh\n"]
+            cls = self.target("file")
+            self.assertEqual(cls.passwords, {0: ("foo", "sw0rdf1sh"),
+                                             1: ("bar", "password1")})
+            self.assertEqual(self.open_calls, ["file"])
+            self.assertEqual(len(self.open_files), 1)
+        finally:
+            ntp.packet.open = open
+            self.open_calls = []
+            self.open_files = []
+            self.open_data = []
+
+    def test___len__(self):
+        cls = self.target()
+        cls.passwords = {0: ("a", "z"),
+                         2: ("b", "y")}
+        self.assertEqual(cls.__len__(), 2)
+
+    def test___getitem__(self):
+        cls = self.target()
+        cls.passwords = {0: ("a", "z"),
+                         2: ("b", "y")}
+        self.assertEqual(cls[2], ("b", "y"))
+
+    def test_control(self):
+        cls = self.target()
+        cls.passwords = {0: ("a", "z"),
+                         2: ("b", "y")}
+        # Keyid in passwords
+        self.assertEqual(cls.control(0), (0, "a", "z"))
+        # Keyid not in passwords
+        self.assertEqual(cls.control(1), (1, None, None))
+        try:
+            # Read keyid from /etc/ntp.conf
+            ntp.packet.open = self.openjig
+            self.open_data = ["blah blah", "control 2"]
+            self.assertEqual(cls.control(), (2, "b", "y"))
+            # Fail to read keyid from /etc/ntp.conf
+            self.open_data = ["blah blah"]
+            try:
+                cls.control()
+                errored = False
+            except ValueError:
+                errored = True
+            self.assertEqual(errored, True)
+        finally:
+            ntp.packet.open = open
+
+    def test_compute_mac(self):
+        f = self.target.compute_mac
+        try:
+            temphash = ntp.packet.hashlib
+            fakehashlibmod = HashlibModuleJig()
+            ntp.packet.hashlib = fakehashlibmod
+            # Test no digest
+            self.assertEqual(f(None, None, None, None), None)
+            # Test with digest
+            self.assertEqual(f("foo", 0x42, "bar", "quux"),
+                             "\x00\x00\x00\x42blahblahblahblah")
+        finally:
+            ntp.packet.hashlib = temphash
+
+    def test_have_mac(self):
+        f = self.target.have_mac
+        # Test under limit
+        pkt = "@" * ntp.magic.LEN_PKT_NOMAC
+        self.assertEqual(f(pkt), False)
+        # Test over limit
+        pkt += "foo"
+        self.assertEqual(f(pkt), True)
+
+    def test_verify_mac(self):
+        cls = self.target()
+        cls.passwords[0x23] = ("a", "z")
+        good_pkt = "foobar\x00\x00\x00\x23blahblahblahblah"
+        bad_pkt = "foobar\xDE\xAD\xDE\xAFblahblahblah"
+        try:
+            temphash = ntp.packet.hashlib
+            fakehashlibmod = HashlibModuleJig()
+            ntp.packet.hashlib = fakehashlibmod
+            # Test good
+            self.assertEqual(cls.verify_mac(good_pkt), True)
+            # Test bad
+            self.assertEqual(cls.verify_mac(bad_pkt), False)
+        finally:
+            ntp.packet.hashlib = temphash
 
 
 if __name__ == "__main__":
