@@ -57,7 +57,7 @@ bool dns_probe(struct peer* pp)
 
 	if (NULL != active)
 		busy = ", busy";
-	msyslog(LOG_INFO, "dns_probe: %s, cast_flags:%x, flags:%x%s",
+	msyslog(LOG_INFO, "DNS: dns_probe: %s, cast_flags:%x, flags:%x%s",
 		pp->hostname, pp->cast_flags, pp->flags, busy);
         if (NULL != active)
 		return false;
@@ -70,7 +70,7 @@ bool dns_probe(struct peer* pp)
 	rc = pthread_create(&worker, &thr_attr, dns_lookup, pp);
         if (rc) {
 		errno = rc;
-		msyslog(LOG_ERR, "dns_probe: error from pthread_create: %s, %m", pp->hostname);
+		msyslog(LOG_ERR, "DNS: dns_probe: error from pthread_create: %s, %m", pp->hostname);
 		return true;  /* don't try again */
 	}
         pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
@@ -85,16 +85,16 @@ void dns_check(void)
 	struct addrinfo *ai;
 	DNS_Status status;
 
-	msyslog(LOG_INFO, "dns_check: processing %s, %x, %x",
+	msyslog(LOG_INFO, "DNS: dns_check: processing %s, %x, %x",
 		active->hostname, active->cast_flags, active->flags);
 
 	rc = pthread_join(worker, NULL);
 	if (0 != rc) {
-		msyslog(LOG_ERR, "dns_check: join failed %m");
+		msyslog(LOG_ERR, "DNS: dns_check: join failed %m");
 		return;  /* leaves active set */
 	}
 	if (0 != gai_rc) {
-		msyslog(LOG_INFO, "dns_check: DNS error: %d, %s",
+		msyslog(LOG_INFO, "DNS: dns_check: DNS error: %d, %s",
 			gai_rc, gai_strerror(gai_rc));
 		answer = NULL;
 	}
@@ -103,7 +103,7 @@ void dns_check(void)
 		sockaddr_u sockaddr;
 		memcpy(&sockaddr, ai->ai_addr, ai->ai_addrlen);
 		/* Both dns_take_pool and dns_take_server log something. */
-		// msyslog(LOG_INFO, "DNS Take %s=>%s",
+		// msyslog(LOG_INFO, "DNS: Take %s=>%s",
 		//		socktoa(ai->ai_addr), socktoa(&sockaddr));
 		if (active->cast_flags & MDF_POOL)
 			dns_take_pool(active, &sockaddr);

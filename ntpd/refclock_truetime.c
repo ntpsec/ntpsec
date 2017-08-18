@@ -435,7 +435,7 @@ true_receive(
 	    strncmp(pp->a_lastcode, " TRUETIME XL", 12) == 0) {
 		true_doevent(peer, e_F18);
 		NLOG(NLOG_CLOCKSTATUS) {
-			msyslog(LOG_INFO, "TM/TMD/XL: %s", pp->a_lastcode);
+			msyslog(LOG_INFO, "REFCLOCK: TM/TMD/XL: %s", pp->a_lastcode);
 		}
 		return;
 	}
@@ -451,7 +451,7 @@ true_receive(
 	    pp->a_lastcode[18] == '+') {
 		true_doevent(peer, e_Location);
 		NLOG(NLOG_CLOCKSTATUS) {
-			msyslog(LOG_INFO, "TCU-800: %s", pp->a_lastcode);
+			msyslog(LOG_INFO, "REFCLOCK: TCU-800: %s", pp->a_lastcode);
 		}
 		return;
 	}
@@ -609,7 +609,7 @@ true_doevent(
 	up = pp->unitptr;
 	if (event != e_TS) {
 		NLOG(NLOG_CLOCKSTATUS) {
-			msyslog(LOG_INFO, "TRUE: clock %s, state %s, event %s",
+			msyslog(LOG_INFO, "REFCLOCK: TRUETIME: clock %s, state %s, event %s",
 				typeStr(up->type),
 				stateStr(up->state),
 				eventStr(event));
@@ -672,7 +672,7 @@ true_doevent(
                             strncmp(pp->a_lastcode, " TRUETIME XL", 12) == 0) {
                                 true_doevent(peer, e_F18);
                                 NLOG(NLOG_CLOCKSTATUS) {
-                                    msyslog(LOG_INFO, "TM/TMD/XL: %s", 
+                                    msyslog(LOG_INFO, "REFCLOCK: TM/TMD/XL: %s", 
                                             pp->a_lastcode);
                                 }
                                 return;
@@ -766,7 +766,7 @@ true_doevent(
 				break;
 			default:
                                 msyslog(LOG_INFO, 
-                                        "TRUE: TM/TMD init fellthrough!");
+                                        "REFCLOCK: TRUETIME: TM/TMD init fellthrough!");
 			        break;
 			}
 			break;
@@ -783,7 +783,7 @@ true_doevent(
 				break;
 			default:
                                 msyslog(LOG_INFO, 
-                                        "TRUE: TCU init fellthrough!");
+                                        "REFCLOCK: TRUETIME: TCU init fellthrough!");
                                 break;
 			}
 			break;
@@ -797,7 +797,7 @@ true_doevent(
 		case s_Start:
 		case s_Auto:
 		case s_Max:
-			msyslog(LOG_INFO, "TRUE: state %s is unexpected!",
+			msyslog(LOG_INFO, "REFCLOCK: TRUETIME: state %s is unexpected!",
 				stateStr(up->state));
 		default:
 			/* huh? */
@@ -805,7 +805,7 @@ true_doevent(
 		}
 		break;
 	default:
-                msyslog(LOG_INFO, "TRUE: cannot identify refclock!");
+                msyslog(LOG_INFO, "REFCLOCK: TRUETIME: cannot identify refclock!");
 		abort();    
 		/* NOTREACHED */
 	}
@@ -819,7 +819,7 @@ true_doevent(
 		 * they represent hardware maximums.)
 		 */
 		NLOG(NLOG_CLOCKINFO) {
-			msyslog(LOG_NOTICE, "PCL-720 initialized");
+			msyslog(LOG_NOTICE, "REFCLOCK: PCL-720 initialized");
 		}
 		up->pcl720init++;
 	}
@@ -879,13 +879,13 @@ true_sample720(void)
 	 */
 	if (inb(pcl720_data_16_23(PCL720_IOB)) & 0x01) {
 		NLOG(NLOG_CLOCKINFO) {
-			msyslog(LOG_NOTICE, "PCL-720 out of synch");
+			msyslog(LOG_NOTICE, "REFCLOCK: PCL-720 out of synch");
 		}
 		return (0);
 	}
 	f = (65536 - pcl720_read(PCL720_IOB, PCL720_CTR));
 #ifdef DEBUG_PPS720
-	msyslog(LOG_DEBUG, "PCL-720: %luus", f);
+	msyslog(LOG_DEBUG, "REFCLOCK: PCL-720: %luus", f);
 #endif
 	return (f);
 }

@@ -4070,8 +4070,8 @@ oncore_log (
 	const char *msg
 	)
 {
-	msyslog(log_level, "ONCORE[%d]: %s", instance->unit, msg);
-	mprintf_clock_stats(instance->peer, "ONCORE[%d]: %s",
+	msyslog(log_level, "REFCLOCK: ONCORE[%d]: %s", instance->unit, msg);
+	mprintf_clock_stats(instance->peer, "REFCLOCK: ONCORE[%d]: %s",
 			    instance->unit, msg);
 }
 

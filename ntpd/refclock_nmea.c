@@ -567,7 +567,7 @@ nmea_control(
 					 PPSOPENMODE, S_IRUSR | S_IWUSR);
 		} else {
 			up->ppsapi_fd = -1;
-			msyslog(LOG_ERR, "%s PPS device name too long",
+			msyslog(LOG_ERR, "REFCLOCK: %s PPS device name too long",
 				refclock_name(peer));
 		}
 		if (-1 == up->ppsapi_fd)
@@ -580,7 +580,7 @@ nmea_control(
 				/* failed to configure, drop PPS unit */
 				time_pps_destroy(up->ppsctl.handle);
 				msyslog(LOG_WARNING,
-					"%s set PPSAPI params fails",
+					"RECOCK: %s set PPSAPI params fails",
 					refclock_name(peer));
 			}
 			/* note: the PPS I/O handle remains valid until
@@ -588,7 +588,7 @@ nmea_control(
 			 */
 		} else {
 			msyslog(LOG_WARNING,
-				"%s flag1 1 but PPSAPI fails",
+				"REFCLOCK: %s flag1 1 but PPSAPI fails",
 				refclock_name(peer));
 		}
 	}
@@ -1022,7 +1022,7 @@ nmea_receive(
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
-		msyslog(LOG_INFO, "%s using GPS time as if it were UTC",
+		msyslog(LOG_INFO, "REFCLOCK: %s using GPS time as if it were UTC",
 			refclock_name(peer));
 		up->gps_time = true;
 	}

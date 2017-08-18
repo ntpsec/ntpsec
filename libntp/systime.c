@@ -100,7 +100,7 @@ get_ostime(
 	rc = clock_gettime(CLOCK_REALTIME, tsp);
 	if (rc < 0) {
 #ifndef __COVERITY__
-		msyslog(LOG_ERR, "read system clock failed: %m (%d)",
+		msyslog(LOG_ERR, "TIME: read system clock failed: %m (%d)",
 			errno);
 #endif /* __COVERITY__ */
 		exit(1);
@@ -159,7 +159,7 @@ normalize_time(
 		ts_lam = sub_tspec(ts_min, ts);
 		if (ts_lam.tv_sec > 0 && !lamport_violated) {
 		    msyslog(LOG_ERR,
-			"get_systime Lamport advance exceeds one second (%.9f)",
+			"CLOCK: get_systime Lamport advance exceeds one second (%.9f)",
 			ts_lam.tv_sec + S_PER_NS * ts_lam.tv_nsec);
 		    exit(1);
 		}
@@ -187,19 +187,19 @@ normalize_time(
 	if (lfp_prev != 0 && !lamport_violated) {
 		if (!L_ISGTU(result, lfp_prev) &&
 		    sys_fuzz > 0.) {
-			msyslog(LOG_ERR, "ts_prev %s ts_min %s",
+			msyslog(LOG_ERR, "CLOCK: ts_prev %s ts_min %s",
 				tspectoa(ts_prev_log),
 				tspectoa(ts_min));
-			msyslog(LOG_ERR, "ts %s", tspectoa(ts));
-			msyslog(LOG_ERR, "sys_fuzz %ld nsec, prior fuzz %.9f",
+			msyslog(LOG_ERR, "CLOCK: ts %s", tspectoa(ts));
+			msyslog(LOG_ERR, "CLOCK: sys_fuzz %ld nsec, prior fuzz %.9f",
 				sys_fuzz_nsec, dfuzz_prev);
-			msyslog(LOG_ERR, "this fuzz %.9f",
+			msyslog(LOG_ERR, "CLOCK: this fuzz %.9f",
 				dfuzz);
 			lfpdelta = lfp_prev;
 			lfpdelta -= result;
 			ddelta = lfptod(lfpdelta);
 			msyslog(LOG_ERR,
-				"prev get_systime 0x%x.%08x is %.9f later than 0x%x.%08x",
+				"CLOCK: prev get_systime 0x%x.%08x is %.9f later than 0x%x.%08x",
 				lfpuint(lfp_prev), lfpfrac(lfp_prev),
 				ddelta, lfpuint(result), lfpfrac(result));
 		}
@@ -298,7 +298,7 @@ adj_systime(
 	}
 	if (adjtv.tv_sec != 0 || adjtv.tv_usec != 0) {
 		if (ladjtime(&adjtv, &oadjtv) < 0) {
-			msyslog(LOG_ERR, "adj_systime: %m");
+			msyslog(LOG_ERR, "CLOCK: adj_systime: %m");
 			return false;
 		}
 	}
@@ -348,7 +348,7 @@ step_systime(
 		pivot += ntpcal_date_to_time(&jd);
 	} else {
 		msyslog(LOG_ERR,
-			"step_systime: assume 1970-01-01 as build date");
+			"CLOCK: step_systime: assume 1970-01-01 as build date");
 	}
 #else
 	UNUSED_LOCAL(jd);
@@ -384,7 +384,7 @@ step_systime(
 
 	/* now set new system time */
 	if (settime(&timets) != 0) {
-		msyslog(LOG_ERR, "step_systime: %m");
+		msyslog(LOG_ERR, "CLOCK: step_systime: %m");
 		return false;
 	}
 

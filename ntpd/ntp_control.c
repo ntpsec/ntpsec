@@ -1444,7 +1444,7 @@ ctl_putsys(
 	    current_time != ntp_adjtime_time) {
 		ZERO(ntx);
 		if (ntp_adjtime(&ntx) < 0)
-			msyslog(LOG_ERR, "ntp_adjtime() for mode 6 query failed: %m");
+			msyslog(LOG_ERR, "MODE6: ntp_adjtime() for mode 6 query failed: %m");
 		else
 			ntp_adjtime_time = current_time;
 	}
@@ -2567,7 +2567,7 @@ ctl_getitem(
 								if (quiet_until <= current_time) {
 									quiet_until = current_time + 300;
 									msyslog(LOG_WARNING,
-"Possible 'ntpdx' exploit from %s#%u (possibly spoofed)", socktoa(rmt_addr), SRCPORT(rmt_addr));
+"MODE6: Possible 'ntpdx' exploit from %s#%u (possibly spoofed)", socktoa(rmt_addr), SRCPORT(rmt_addr));
 								}
 							return NULL;
 						}
@@ -2954,7 +2954,7 @@ static void configure(
 		ctl_flushpkt(0);
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
-				"runtime config from %s rejected due to nomodify restriction",
+				"MODE6: runtime config from %s rejected due to nomodify restriction",
 				socktoa(&rbufp->recv_srcadr));
 		sys_restricted++;
 		return;
@@ -2971,7 +2971,7 @@ static void configure(
 			    strlen(remote_config.err_msg), false);
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
-			"runtime config from %s rejected: request too long",
+			"MODE6: runtime config from %s rejected: request too long",
 			socktoa(&rbufp->recv_srcadr));
 		return;
 	}
@@ -2996,7 +2996,7 @@ static void configure(
 
 	DPRINT(1, ("Got Remote Configuration Command: %s\n",
 		   remote_config.buffer));
-	msyslog(LOG_NOTICE, "%s config: %s",
+	msyslog(LOG_NOTICE, "MODE6: %s config: %s",
 		socktoa(&rbufp->recv_srcadr),
 		remote_config.buffer);
 
@@ -3025,7 +3025,7 @@ static void configure(
 	DPRINT(1, ("Reply: %s\n", remote_config.err_msg));
 
 	if (remote_config.no_errors > 0)
-		msyslog(LOG_NOTICE, "%d error in %s config",
+		msyslog(LOG_NOTICE, "MODE6: %d error in %s config",
 			remote_config.no_errors,
 			socktoa(&rbufp->recv_srcadr));
 }
@@ -3407,7 +3407,7 @@ static void read_mru_list(
 		ctl_error(CERR_PERMISSION);
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
-				"mrulist from %s rejected due to nomrulist restriction",
+				"MODE6: mrulist from %s rejected due to nomrulist restriction",
 				socktoa(&rbufp->recv_srcadr));
 		sys_restricted++;
 		return;
@@ -4178,7 +4178,7 @@ report_event(
 			    " %s", str);
 		}
 		NLOG(NLOG_SYSEVENT)
-			msyslog(LOG_INFO, "%s", statstr);
+			msyslog(LOG_INFO, "MODE6: %s", statstr);
 	} else {
 
 		/*
@@ -4212,7 +4212,7 @@ report_event(
 			    " %s", str);
 		}
 		NLOG(NLOG_PEEREVENT)
-			msyslog(LOG_INFO, "%s", statstr);
+			msyslog(LOG_INFO, "MODE6: %s", statstr);
 	}
 	record_proto_stats(statstr);
 	DPRINT(1, ("event at %lu %s\n", current_time, statstr));

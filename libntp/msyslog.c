@@ -421,7 +421,7 @@ change_logfile(
 
 	/* leave a pointer in the old log */
 	if (leave_crumbs && (syslogit || log_fname != syslog_abs_fname))
-		msyslog(LOG_NOTICE, "switching logging to file %s",
+		msyslog(LOG_NOTICE, "LOG: switching logging to file %s",
 			abs_fname);
 
 	if (syslog_file != NULL &&
@@ -469,7 +469,7 @@ setup_logfile(
 {
 	if (NULL == syslog_fname && NULL != name) {
 		if (-1 == change_logfile(name, true))
-			msyslog(LOG_ERR, "Cannot open log file %s, %m",
+			msyslog(LOG_ERR, "LOG: Cannot open log file %s, %m",
 				name);
 		return ;
 	} 
@@ -477,7 +477,7 @@ setup_logfile(
 		return;
 
 	if (-1 == change_logfile(syslog_fname, false))
-		msyslog(LOG_ERR, "Cannot reopen log file %s, %m",
+		msyslog(LOG_ERR, "LOG: Cannot reopen log file %s, %m",
 			syslog_fname);
 }
 
@@ -499,7 +499,7 @@ reopen_logfile(void)
 
 	new_file = fopen(syslog_fname, "a");
 	if (NULL == new_file) {
-		msyslog(LOG_ERR, "reopen_logfile: couldn't open %s %m", 
+		msyslog(LOG_ERR, "LOG: reopen_logfile: couldn't open %s %m", 
                         syslog_fname);
 		return;
 	}
@@ -513,14 +513,14 @@ reopen_logfile(void)
 	 */
 	if (ftell(syslog_file) == ftell(new_file)) {
 		/* just for debugging */
-		msyslog(LOG_INFO, "reopen_logfile: same length, ignored");
+		msyslog(LOG_INFO, "LOG: reopen_logfile: same length, ignored");
 		fclose(new_file);
 		return;
 	}
 
-	msyslog(LOG_INFO, "reopen_logfile: closing old file");
+	msyslog(LOG_INFO, "LOG: reopen_logfile: closing old file");
 	fclose(syslog_file);
 	syslog_file = new_file;
-	msyslog(LOG_INFO, "reopen_logfile: using %s", syslog_fname);
+	msyslog(LOG_INFO, "LOG: reopen_logfile: using %s", syslog_fname);
 }
 

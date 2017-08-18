@@ -200,7 +200,7 @@ convert_rawdcf(
 
 	if (size < 57)
 	{
-		msyslog(LOG_ERR, "parse: convert_rawdcf: INCOMPLETE DATA - time code only has %d bits", size);
+		msyslog(LOG_ERR, "ERR: parse: convert_rawdcf: INCOMPLETE DATA - time code only has %d bits", size);
 		return CVT_FAIL|CVT_BADFMT;
 	}
 
@@ -211,7 +211,7 @@ convert_rawdcf(
 			/*
 			 * we only have two types of bytes (ones and zeros)
 			 */
-			msyslog(LOG_ERR, "parse: convert_rawdcf: BAD DATA - no conversion");
+			msyslog(LOG_ERR, "ERR: parse: convert_rawdcf: BAD DATA - no conversion");
 			return CVT_NONE;
 		}
 		if (*b) b++;
@@ -283,7 +283,7 @@ convert_rawdcf(
 		/*
 		 * bad format - not for us
 		 */
-	    msyslog(LOG_ERR, "parse: convert_rawdcf: parity check FAILED for \"%.*s\"", size, buffer);
+	    msyslog(LOG_ERR, "ERR: parse: convert_rawdcf: parity check FAILED for \"%.*s\"", size, buffer);
 		return CVT_FAIL|CVT_BADFMT;
 	}
 }

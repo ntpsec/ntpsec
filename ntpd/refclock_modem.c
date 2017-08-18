@@ -346,7 +346,7 @@ modem_receive(
 			if (*tptr == '*' || *tptr == '#') {
 				up->tstamp = pp->lastrec;
 				if (write(pp->io.fd, tptr, 1) < 0)
-					msyslog(LOG_ERR, "modem: write echo fails %m");
+					msyslog(LOG_ERR, "REFCLOCK: modem: write echo fails %m");
 			}
 		}
 	}
@@ -408,10 +408,10 @@ modem_message(
 		mprintf_event(PEVNT_CLOCK, peer, "DIAL #%d %s",
 			      up->retry, sys_phone[up->retry]);
 		if (ioctl(pp->io.fd, TIOCMBIS, &dtr) < 0)
-			msyslog(LOG_ERR, "modem: ioctl(TIOCMBIS) failed: %m");
+			msyslog(LOG_ERR, "REFCLOCK: modem: ioctl(TIOCMBIS) failed: %m");
 		if (write(pp->io.fd, sys_phone[up->retry],
 		    strlen(sys_phone[up->retry])) < 0)
-			msyslog(LOG_ERR, "modem: write DIAL fails %m");
+			msyslog(LOG_ERR, "REFCLOCK: modem: write DIAL fails %m");
 		IGNORE(write(pp->io.fd, "\r", 1));
 		up->retry++;
 		up->state = S_CONNECT;
@@ -509,7 +509,7 @@ modem_timeout(
 			snprintf(pidbuf, sizeof(pidbuf), "%u\n",
 			    (unsigned int)getpid());
 			if (write(fd, pidbuf, strlen(pidbuf)) < 0)
-				msyslog(LOG_ERR, "modem: write lock fails %m");
+				msyslog(LOG_ERR, "REFCLOCK: modem: write lock fails %m");
 			close(fd);
 		}
 
@@ -521,12 +521,12 @@ modem_timeout(
 				   peer->baud ? peer->baud : SPEED232,
 				   LDISC_ACTS | LDISC_RAW | LDISC_REMOTE);
 		if (fd < 0) {
-			msyslog(LOG_ERR, "modem: open fails %m");
+			msyslog(LOG_ERR, "REFCLOCK: modem: open fails %m");
 			return;
 		}
 		pp->io.fd = fd;
 		if (!io_addclock(&pp->io)) {
-			msyslog(LOG_ERR, "modem: addclock fails");
+			msyslog(LOG_ERR, "REFCLOCK: modem: addclock fails");
 			close(fd);
 			pp->io.fd = -1;
 			return;
@@ -540,7 +540,7 @@ modem_timeout(
 		 */
 		if (sys_phone[up->retry] == NULL) {
 			if (write(pp->io.fd, "T", 1) < 0)
-				msyslog(LOG_ERR, "modem: write T fails %m");
+				msyslog(LOG_ERR, "REFCLOCK: modem: write T fails %m");
 			up->state = S_MSG;
 			up->timer = TIMECODE;
 			return;
@@ -554,7 +554,7 @@ modem_timeout(
 			      modem_setup);
 		rc = write(pp->io.fd, modem_setup, strlen(modem_setup));
 		if (rc < 0)
-			msyslog(LOG_ERR, "modem: write SETUP fails %m");
+			msyslog(LOG_ERR, "REFCLOCK: modem: write SETUP fails %m");
 		IGNORE(write(pp->io.fd, "\r", 1));
 		up->state = S_SETUP;
 		up->timer = SETUP;
@@ -620,7 +620,7 @@ modem_close(
 		report_event(PEVNT_CLOCK, peer, "close");
 		dtr = TIOCM_DTR;
 		if (ioctl(pp->io.fd, TIOCMBIC, &dtr) < 0)
-			msyslog(LOG_ERR, "modem: ioctl(TIOCMBIC) failed: %m");
+			msyslog(LOG_ERR, "REFCLOCK: modem: ioctl(TIOCMBIC) failed: %m");
 		io_closeclock(&pp->io);
 		pp->io.fd = -1;
 	}

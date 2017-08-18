@@ -63,7 +63,7 @@ mac_authencrypt(
 	ctx = EVP_MD_CTX_create();
 	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
 		msyslog(LOG_ERR,
-		    "MAC encrypt: digest init failed");
+		    "MAC: encrypt: digest init failed");
 		return (0);
 	}
 	EVP_DigestUpdate(ctx, key, cache_secretsize);
@@ -102,7 +102,7 @@ mac_authdecrypt(
 	ctx = EVP_MD_CTX_create();
 	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
 		msyslog(LOG_ERR,
-		    "MAC decrypt: digest init failed");
+		    "MAC: decrypt: digest init failed");
 		return false;
 	}
 	EVP_DigestUpdate(ctx, key, cache_secretsize);
@@ -111,7 +111,7 @@ mac_authdecrypt(
 	EVP_MD_CTX_destroy(ctx);
 	if ((unsigned int)size != len + 4) {
 		msyslog(LOG_ERR,
-		    "MAC decrypt: MAC length error");
+		    "MAC: decrypt: MAC length error");
 		return false;
 	}
 	return ctmemeq(digest, (char *)pkt + length + 4, len);
@@ -142,7 +142,7 @@ addr2refid(sockaddr_u *addr)
 	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
 #endif
 	if (!EVP_DigestInit_ex(ctx, EVP_md5(), NULL)) {
-		msyslog(LOG_ERR, "MD5 init failed");
+		msyslog(LOG_ERR, "MAC: MD5 init failed");
 		exit(1);
 	}
 

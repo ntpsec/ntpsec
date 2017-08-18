@@ -886,7 +886,7 @@ yylex(void)
 			if (yylval.Integer == 0
 			    && ((errno == EINVAL) || (errno == ERANGE))) {
 				msyslog(LOG_ERR, 
-					"Integer cannot be represented: %s",
+					"CONFIG: Integer cannot be represented: %s",
 					yytext);
 				if (lex_from_file()) {
 					exit(1);
@@ -909,7 +909,7 @@ yylex(void)
 						   &yylval.U_int);
 			if (1 != converted) {
 				msyslog(LOG_ERR, 
-					"U_int cannot be represented: %s",
+					"CONFIG: U_int cannot be represented: %s",
 					yytext);
 				if (lex_from_file()) {
 					exit(1);
@@ -928,7 +928,7 @@ yylex(void)
 			if ( D_ISZERO_NS(yylval.Double) && errno == ERANGE) {
 			    /* FIXME, POSIX says atof() never returns errors */
 			    msyslog(LOG_ERR,
-				    "Double too large to represent: %s",
+				    "CONFIG: Double too large to represent: %s",
 				    yytext);
 			    exit(1);
 			} else {
@@ -997,7 +997,7 @@ normal_return:
 lex_too_long:
 	yytext[min(sizeof(yytext) - 1, 50)] = 0;
 	msyslog(LOG_ERR, 
-		"configuration item on line %d longer than limit of %lu, began with '%s'",
+		"CONFIG: configuration item on line %d longer than limit of %lu, began with '%s'",
 		lex_stack->curpos.nline, (unsigned long)min(sizeof(yytext) - 1, 50),
 		yytext);
 

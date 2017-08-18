@@ -133,7 +133,7 @@ zyfer_start(
 		/* coverity[leaked_handle] */
 		return false;
 
-	msyslog(LOG_NOTICE, "zyfer(%d) fd: %d", unit, fd);
+	msyslog(LOG_NOTICE, "REFCLOCK: zyfer(%d) fd: %d", unit, fd);
 
 	/*
 	 * Allocate and initialize unit structure

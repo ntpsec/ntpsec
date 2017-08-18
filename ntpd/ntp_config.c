@@ -644,13 +644,13 @@ create_peer_node(
 		case T_Minpoll:
 			if (option->value.i < NTP_MINPOLL ) {
 				msyslog(LOG_INFO,
-					"minpoll: provided value (%d) is too small [%d-%d])",
+					"CONFIG: minpoll: provided value (%d) is too small [%d-%d])",
 					option->value.i, NTP_MINPOLL,
 					NTP_MAXPOLL);
 				my_node->ctl.minpoll = NTP_MINPOLL;
 			} else if (option->value.i > NTP_MAXPOLL) {
 				msyslog(LOG_INFO,
-					"minpoll: provided value (%d) is too large [%d-%d])",
+					"CONFIG: minpoll: provided value (%d) is too large [%d-%d])",
 					option->value.i, NTP_MINPOLL,
 					NTP_MAXPOLL);
 				my_node->ctl.minpoll = NTP_MAXPOLL;
@@ -663,13 +663,13 @@ create_peer_node(
 		case T_Maxpoll:
 			if (option->value.i < NTP_MINPOLL ) {
 			    msyslog(LOG_INFO,
-				"maxpoll: value (%d) is too small [%d-%d])",
+				"CONFIG: maxpoll: value (%d) is too small [%d-%d])",
 				option->value.i, NTP_MINPOLL,
 				NTP_MAXPOLL);
 			    my_node->ctl.maxpoll = NTP_MINPOLL;
 			} else if ( option->value.i > NTP_MAXPOLL) {
 			    msyslog(LOG_INFO,
-				"maxpoll: value (%d) is too large [%d-%d])",
+				"CONFIG: maxpoll: value (%d) is too large [%d-%d])",
 				option->value.i, NTP_MINPOLL,
 				NTP_MAXPOLL);
 			    my_node->ctl.maxpoll = NTP_MAXPOLL;
@@ -681,7 +681,7 @@ create_peer_node(
 
 		case T_Ttl:
 			if (option->value.u >= MAX_TTL) {
-				msyslog(LOG_ERR, "ttl: invalid argument");
+				msyslog(LOG_ERR, "CONFIG: ttl: invalid argument");
 				errflag = true;
 			} else {
 				my_node->ctl.ttl = (uint8_t)option->value.u;
@@ -695,7 +695,7 @@ create_peer_node(
 
 		case T_Key:
 			if (option->value.u >= KEYID_T_MAX) {
-				msyslog(LOG_ERR, "key: invalid argument");
+				msyslog(LOG_ERR, "CONFIG: key: invalid argument");
 				errflag = true;
 			} else {
 				my_node->ctl.peerkey =
@@ -705,7 +705,7 @@ create_peer_node(
 
 		case T_Version:
 			if (option->value.u >= UCHAR_MAX) {
-				msyslog(LOG_ERR, "version: invalid argument");
+				msyslog(LOG_ERR, "CONFIG: version: invalid argument");
 				errflag = true;
 			} else {
 				my_node->ctl.version =
@@ -794,7 +794,7 @@ create_peer_node(
 
 		default:
 			msyslog(LOG_ERR,
-				"Unknown peer/server option token %s",
+				"CONFIG: Unknown peer/server option token %s",
 				token_name(option->attr));
 			errflag = true;
 		}
@@ -1161,7 +1161,7 @@ config_auth(
 				authtrust((keyid_t)first, true);
 			} else {
 				msyslog(LOG_NOTICE,
-					"Ignoring invalid trustedkey %d, min 1 max %d.",
+					"CONFIG: Ignoring invalid trustedkey %d, min 1 max %d.",
 					first, NTP_MAXKEY);
 			}
 		} else {
@@ -1170,7 +1170,7 @@ config_auth(
 			if (first > last || first < 1 ||
 			    last > NTP_MAXKEY) {
 				msyslog(LOG_NOTICE,
-					"Ignoring invalid trustedkey range %d ... %d, min 1 max %d.",
+					"CONFIG: Ignoring invalid trustedkey range %d ... %d, min 1 max %d.",
 					first, last, NTP_MAXKEY);
 			} else {
 				for (i = first; i <= last; i++) {
@@ -1214,7 +1214,7 @@ config_tos(
 		case T_Ceiling:
 			if (val > STRATUM_UNSPEC - 1) {
 				msyslog(LOG_WARNING,
-					"Using maximum tos ceiling %d, %g requested",
+					"CONFIG: Using maximum tos ceiling %d, %g requested",
 					STRATUM_UNSPEC - 1, val);
 				val = STRATUM_UNSPEC - 1;
 			}
@@ -1310,7 +1310,7 @@ config_monitor(
 		filegen = filegen_get(filegen_string);
 		if (NULL == filegen) {
 			msyslog(LOG_ERR,
-				"stats %s unrecognized",
+				"CONFIG: stats %s unrecognized",
 				filegen_string);
 			continue;
 		}
@@ -1330,7 +1330,7 @@ config_monitor(
 		filegen = filegen_get(filegen_string);
 		if (NULL == filegen) {
 			msyslog(LOG_ERR,
-				"filegen category '%s' unrecognized",
+				"CONFIG: filegen category '%s' unrecognized",
 				filegen_string);
 			continue;
 		}
@@ -1409,7 +1409,7 @@ config_monitor(
 
 				default:
 					msyslog(LOG_ERR,
-						"Unknown filegen flag token %d",
+						"CONFIG: Unknown filegen flag token %d",
 						my_opts->value.i);
 					exit(1);
 				}
@@ -1417,7 +1417,7 @@ config_monitor(
 
 			default:
 				msyslog(LOG_ERR,
-					"Unknown filegen option token %d",
+					"CONFIG: Unknown filegen option token %d",
 					my_opts->attr);
 				exit(1);
 			}
@@ -1539,13 +1539,13 @@ config_access(
 
 		default:
 			msyslog(LOG_ERR,
-				"Unknown mru option %s (%d)",
+				"CONFIG: Unknown mru option %s (%d)",
 				keyword(my_opt->attr), my_opt->attr);
 			exit(1);
 		}
 		if (range_err)
 			msyslog(LOG_ERR,
-				"mru %s %d out of range, ignored.",
+				"CONFIG: mru %s %d out of range, ignored.",
 				keyword(my_opt->attr), my_opt->value.i);
 	}
 
@@ -1561,7 +1561,7 @@ config_access(
 				ntp_minpoll = (uint8_t)my_opt->value.u;
 			else
 				msyslog(LOG_ERR,
-					"discard average %d out of range, ignored.",
+					"CONFIG: discard average %d out of range, ignored.",
 					my_opt->value.i);
 			break;
 
@@ -1575,7 +1575,7 @@ config_access(
 
 		default:
 			msyslog(LOG_ERR,
-				"Unknown discard option %s (%d)",
+				"CONFIG: Unknown discard option %s (%d)",
 				keyword(my_opt->attr), my_opt->attr);
 			exit(1);
 		}
@@ -1671,7 +1671,7 @@ config_access(
 		if ((RES_MSSNTP & flags) && !warned_signd) {
 			warned_signd = true;
 			fprintf(stderr, "%s\n", signd_warning);
-			msyslog(LOG_WARNING, "%s", signd_warning);
+			msyslog(LOG_WARNING, "CONFIG: %s", signd_warning);
 		}
 
 		/* It would be swell if we could identify the line number */
@@ -1684,7 +1684,7 @@ config_access(
 			const char *kod_warn = "KOD does nothing without LIMITED.";
 
 			fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
-			msyslog(LOG_WARNING, "restrict %s: %s", kod_where, kod_warn);
+			msyslog(LOG_WARNING, "CONFIG: restrict %s: %s", kod_where, kod_warn);
 		}
 
 		if (RES_NOTRAP & flags) {
@@ -1694,7 +1694,7 @@ config_access(
 					    ? "source"
 					    : "default";
 
-			msyslog(LOG_WARNING, "restrict %s: notrap keyword is ignored.", notrap_where);
+			msyslog(LOG_WARNING, "CONFIG: restrict %s: notrap keyword is ignored.", notrap_where);
 		}
 
 		ZERO_SOCK(&addr);
@@ -1751,7 +1751,7 @@ config_access(
 						 &ai_list);
 				if (rc) {
 					msyslog(LOG_ERR,
-						"restrict: ignoring line %d, address/host '%s' unusable.",
+						"CONFIG: restrict: ignoring line %d, address/host '%s' unusable.",
 						my_node->line_no,
 						my_node->addr->address);
 					continue;
@@ -1776,7 +1776,7 @@ config_access(
 				if (getnetnum(my_node->mask->address,
 					      &mask) != 1) {
 					msyslog(LOG_ERR,
-						"restrict: ignoring line %d, mask '%s' unusable.",
+						"CONFIG: restrict: ignoring line %d, mask '%s' unusable.",
 						my_node->line_no,
 						my_node->mask->address);
 					continue;
@@ -1869,7 +1869,7 @@ config_rlimit(
 				   "4k");
 #else
 			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "'rlimit stacksize' specified but is not available on this system.");
+			msyslog(LOG_WARNING, "CONFIG: 'rlimit stacksize' specified but is not available on this system.");
 #endif /* RLIMIT_STACK */
 			break;
 
@@ -1881,7 +1881,7 @@ config_rlimit(
 				  "");
 #else
 			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "'rlimit filenum' specified but is not available on this system.");
+			msyslog(LOG_WARNING, "CONFIG: 'rlimit filenum' specified but is not available on this system.");
 #endif /* RLIMIT_NOFILE */
 			break;
 
@@ -1991,7 +1991,7 @@ config_nic_rules(
 
 	if (curr_node != NULL && have_interface_option) {
 		msyslog(LOG_ERR,
-			"interface/nic rules are not allowed with --interface (-I) or --novirtualips (-L)%s",
+			"CONFIG: interface/nic rules are not allowed with --interface (-I) or --novirtualips (-L)%s",
 			(input_from_file) ? ", exiting" : "");
 		if (input_from_file)
 			exit(1);
@@ -2130,7 +2130,7 @@ apply_enable_disable(
 
 		default:
 			msyslog(LOG_ERR,
-				"can not apply enable/disable token %d, unknown",
+				"CONFIG: can not apply enable/disable token %d, unknown",
 				option);
 			break;
 
@@ -2235,7 +2235,7 @@ config_phone(
 			sys_phone[i] = NULL;
 		} else {
 			msyslog(LOG_INFO,
-				"phone: Number of phone entries exceeds %zu. Ignoring phone %s...",
+				"CONFIG: Number of phone entries exceeds %zu. Ignoring phone %s...",
 				(COUNTOF(sys_phone) - 1), sn->s);
 		}
 	}
@@ -2324,14 +2324,14 @@ config_fudge(
 		    != 1) {
 			err_flag = true;
 			msyslog(LOG_ERR,
-				"unrecognized fudge reference clock address %s, line ignored",
+				"CONFIG: unrecognized fudge reference clock address %s, line ignored",
 				socktoa(&addr_sock));
 		}
 
 		if (!ISREFCLOCKADR(&addr_sock)) {
 			err_flag = true;
 			msyslog(LOG_ERR,
-				"inappropriate address %s for the fudge command, line ignored",
+				"CONFIG: inappropriate address %s for the fudge command, line ignored",
 				socktoa(&addr_sock));
 		}
 
@@ -2398,7 +2398,7 @@ config_fudge(
 
 			default:
 				msyslog(LOG_ERR,
-					"Unexpected fudge flag %s (%d) for %s",
+					"CONFIG: Unexpected fudge flag %s (%d) for %s",
 					token_name(curr_opt->attr),
 					curr_opt->attr, socktoa(&addr_sock));
 				exit(curr_opt->attr ? curr_opt->attr : 1);
@@ -2410,7 +2410,7 @@ config_fudge(
 # else
 	curr_fudge = HEAD_PFIFO(ptree->fudge);
 	if (curr_fudge != NULL)
-		msyslog(LOG_ERR, "Fudge commands not supported: built without refclocks");
+		msyslog(LOG_ERR, "CONFIG: Fudge commands not supported: built without refclocks");
 # endif
 }
 
@@ -2440,7 +2440,7 @@ config_logfile(
 		case T_Logfile:
 			if (-1 == change_logfile(curr_var->value.s, true))
 				msyslog(LOG_ERR,
-					"Cannot open logfile %s: %m",
+					"CONFIG: Cannot open logfile %s: %m",
 					curr_var->value.s);
 			break;
 
@@ -2470,7 +2470,7 @@ config_vars(
 		case T_Driftfile:
 			if ('\0' == curr_var->value.s[0]) {
 				stats_drift_file = 0;
-				msyslog(LOG_INFO, "config: driftfile disabled");
+				msyslog(LOG_INFO, "CONFIG: driftfile disabled");
 			} else
 				stats_config(STATS_FREQ_FILE, curr_var->value.s);
 			break;
@@ -2492,10 +2492,10 @@ config_vars(
 #ifdef ENABLE_LEAP_SMEAR
 		case T_Leapsmearinterval:
 			if (curr_var->value.i < 0)
-				msyslog(LOG_ERR, "config: negative leap smear interval ignored: %i", curr_var->value.i);
+				msyslog(LOG_ERR, "CONFIG: negative leap smear interval ignored: %i", curr_var->value.i);
 				break;
 			leap_smear_intv = curr_var->value.u;
-			msyslog(LOG_INFO, "config: leap smear interval %u sec", leap_smear_intv);
+			msyslog(LOG_INFO, "CONFIG: leap smear interval %u sec", leap_smear_intv);
 			break;
 #endif
 
@@ -2509,7 +2509,7 @@ config_vars(
 
 		default:
 			msyslog(LOG_ERR,
-				"config_vars(): unexpected token %d",
+				"CONFIG: config_vars(): unexpected token %d",
 				curr_var->attr);
 		}
 	}
@@ -2536,7 +2536,7 @@ is_sane_resolved_address(
 {
 	if (!ISREFCLOCKADR(peeraddr) && ISBADADR(peeraddr)) {
 		msyslog(LOG_ERR,
-			"attempt to configure invalid address %s",
+			"CONFIG: attempt to configure invalid address %s",
 			socktoa(peeraddr));
 		return false;
 	}
@@ -2547,7 +2547,7 @@ is_sane_resolved_address(
 	if ((T_Server == hmode || T_Peer == hmode || T_Pool == hmode)
 	    && IS_MCAST(peeraddr)) {
 		msyslog(LOG_ERR,
-			"attempt to configure invalid address %s",
+			"CONFIG: attempt to configure invalid address %s",
 			socktoa(peeraddr));
 		return false;
 	}
@@ -2579,7 +2579,7 @@ peer_config(
 
 #ifndef ENABLE_DNS_LOOKUP
 	if (NULL != hostname) {
-		msyslog(LOG_ERR, "hostnames need DNS lookup: %s", hostname);
+		msyslog(LOG_ERR, "CONFIG: hostnames need DNS lookup: %s", hostname);
 		return NULL;
 	}
 #endif
@@ -2602,7 +2602,7 @@ peer_config(
 		break;
 
 	case T_Peer:
-		msyslog(LOG_ERR, "peer deprecated, treated as server: %s",
+		msyslog(LOG_ERR, "CONFIG: peer deprecated, treated as server: %s",
 			NULL != hostname? hostname : socktoa(srcadr) );
 		FALLTHRU
 	case T_Server:
@@ -2613,7 +2613,7 @@ peer_config(
 		break;
 
 	default:
-		msyslog(LOG_ERR, "peer_config, strange htype: %d", htype);
+		msyslog(LOG_ERR, "CONFIG: peer_config, strange htype: %d", htype);
 		cast_flags = MDF_UCAST;
 		hmode = MODE_CLIENT;
 	}
@@ -2718,7 +2718,7 @@ config_peers(
 		if ( NULL == peer )
 		{
 		    /* duplicate peer !?, ignore */
-		    msyslog(LOG_INFO, "configpeers: Ignoring duplicate '%s'",
+		    msyslog(LOG_INFO, "CONFIG: configpeers: Ignoring duplicate '%s'",
 			socktoa(&peeraddr));
 		    continue;
 		}
@@ -2759,7 +2759,7 @@ config_peers(
 			    unpeer(peer);
 #else /* REFCLOCK */
 		    msyslog(LOG_ERR,
-			 "ntpd was compiled without refclock support.");
+			 "INIT: ntpd was compiled without refclock support.");
 		    unpeer(peer);
 #endif /* REFCLOCK */
 		}
@@ -2819,7 +2819,7 @@ config_unpeers(
 		if (curr_unpeer->assocID) {
 			p = findpeerbyassoc(curr_unpeer->assocID);
 			if (p != NULL) {
-				msyslog(LOG_NOTICE, "unpeered %s",
+				msyslog(LOG_NOTICE, "CONFIG: unpeered %s",
 					socktoa(&p->srcadr));
 				peer_clear(p, "GONE", true);
 				unpeer(p);
@@ -2829,7 +2829,7 @@ config_unpeers(
 		}
 
 		if (curr_unpeer->addr == NULL) {
-			msyslog(LOG_ERR, "invalid address in unpeer command");
+			msyslog(LOG_ERR, "CONFIG: invalid address in unpeer command");
 			continue;
 		}
 
@@ -2843,7 +2843,7 @@ config_unpeers(
 				   socktoa(&peeraddr)));
 			p = findexistingpeer(&peeraddr, NULL, NULL, -1);
 			if (p != NULL) {
-				msyslog(LOG_NOTICE, "unpeered %s",
+				msyslog(LOG_NOTICE, "CONFIG: unpeered %s",
 					socktoa(&peeraddr));
 				peer_clear(p, "GONE", true);
 				unpeer(p);
@@ -2857,7 +2857,7 @@ config_unpeers(
 		/* It's a hostname. */
 		p = findexistingpeer(NULL, name, NULL, -1);
 		if (p != NULL) {
-			msyslog(LOG_NOTICE, "unpeered %s", name);
+			msyslog(LOG_NOTICE, "CONFIG: unpeered %s", name);
 			peer_clear(p, "GONE", true);
 			unpeer(p);
 		}
@@ -3044,7 +3044,7 @@ void readconfig(const char *config_file)
 		&& check_netinfo && !(config_netinfo = get_netinfo_config())
 #endif /* HAVE_NETINFO_NI_H */
 		) {
-		msyslog(LOG_INFO, "readconfig: Couldn't open <%s>: %m", config_file);
+		msyslog(LOG_INFO, "CONFIG: readconfig: Couldn't open <%s>: %m", config_file);
 		io_open_sockets();
 
 		return;
@@ -3184,7 +3184,7 @@ get_logmask(
 	if (mask)
 		return mask << offset;
 	else
-		msyslog(LOG_ERR, "logconfig: '%s' not recognized - ignored",
+		msyslog(LOG_ERR, "CONFIG: logconfig: '%s' not recognized - ignored",
 			str);
 
 	return 0;
@@ -3319,7 +3319,7 @@ gettokens_netinfo (
 		int quoted = 0;
 		char *tokens = val_list[val_index];
 
-		msyslog(LOG_INFO, "%s %s", keywords[prop_index].text, val_list[val_index]);
+		msyslog(LOG_INFO, "CONFIG: %s %s", keywords[prop_index].text, val_list[val_index]);
 
 		(const char*)tokenlist[0] = keywords[prop_index].text;
 		for (ntok = 1; ntok < MAXTOKENS; ntok++) {
@@ -3342,7 +3342,7 @@ gettokens_netinfo (
 		if (ntok == MAXTOKENS) {
 			/* HMS: chomp it to lose the EOL? */
 			msyslog(LOG_ERR,
-				"gettokens_netinfo: too many tokens.  Ignoring: %s",
+				"CONFIG: gettokens_netinfo: too many tokens.  Ignoring: %s",
 				tokens);
 		} else {
 			*ntokens = ntok + 1;
@@ -3520,7 +3520,7 @@ ntp_rlimit(
 			   (int)rl_value / rl_scale, rl_sstr));
 		rl.rlim_cur = rl.rlim_max = rl_value;
 		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
-			msyslog(LOG_ERR, "Cannot set RLIMIT_NOFILE: %m");
+			msyslog(LOG_ERR, "CONFIG: Cannot set RLIMIT_NOFILE: %m");
 		break;
 #endif /* RLIMIT_NOFILE */
 
@@ -3534,11 +3534,11 @@ ntp_rlimit(
 		DPRINT(2, ("ntp_rlimit: STACK: %d %s pages\n",
 			   (int)rl_value / rl_scale, rl_sstr));
 		if (-1 == getrlimit(RLIMIT_STACK, &rl)) {
-			msyslog(LOG_ERR, "getrlimit(RLIMIT_STACK) failed: %m");
+			msyslog(LOG_ERR, "CONFIG: getrlimit(RLIMIT_STACK) failed: %m");
 		} else {
 			if (rl_value > rl.rlim_max) {
 				msyslog(LOG_WARNING,
-					"ntp_rlimit: using maximum allowed stack limit %lu instead of %lu.",
+					"CONFIG: ntp_rlimit: using maximum allowed stack limit %lu instead of %lu.",
 					(unsigned long)rl.rlim_max,
 					(unsigned long)rl_value);
 				rl_value = rl.rlim_max;
@@ -3546,7 +3546,7 @@ ntp_rlimit(
 			rl.rlim_cur = rl_value;
 			if (-1 == setrlimit(RLIMIT_STACK, &rl)) {
 				msyslog(LOG_ERR,
-					"ntp_rlimit: Cannot set RLIMIT_STACK: %m");
+					"CONFIG: ntp_rlimit: Cannot set RLIMIT_STACK: %m");
 			}
 		}
 		break;

@@ -317,7 +317,7 @@ command_list
 			 */
 			struct FILE_INFO * ip_ctx = lex_current();
 			msyslog(LOG_ERR, 
-				"syntax error in %s line %d, column %d",
+				"CONFIG: syntax error in %s line %d, column %d",
 				ip_ctx->fname,
 				ip_ctx->errpos.nline,
 				ip_ctx->errpos.ncol);
@@ -515,7 +515,7 @@ authentication_command
 	|	T_Requestkey T_Integer
 			{
 			    msyslog(LOG_WARNING,
-				    "requestkey is a no-op because "
+				    "CONFIG: requestkey is a no-op because "
 				    "ntpdc has been removed.");
 			}
 	|	T_Trustedkey integer_list_range
@@ -936,7 +936,7 @@ refclock_command
 			for (dtype = 1; dtype < (int)num_refclock_conf; dtype++)
 			    if (refclock_conf[dtype]->basename != NULL && strcasecmp(refclock_conf[dtype]->basename, $2) == 0)
 				goto foundit;
-			 msyslog(LOG_ERR, "Unknown driver name %s", $2);
+			 msyslog(LOG_ERR, "CONFIG: Unknown driver name %s", $2);
 			 exit(1);
 		foundit:
 			snprintf(addrbuf, sizeof(addrbuf),
@@ -1138,13 +1138,13 @@ miscellaneous_command
 				break;
 			}
 			if (lex_level() > MAXINCLUDELEVEL) {
-				fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
-				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
+				fprintf(stderr, "getconfig(): Maximum include file level exceeded.\n");
+				msyslog(LOG_ERR, "CONFIG: Maximum include file level exceeded.");
 			} else {
 				const char * path = $2;
 				if (!lex_push_file(path)) {
-					fprintf(stderr, "getconfig: Couldn't open <%s>\n", path);
-					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", path);
+					fprintf(stderr, "getconfig(): Couldn't open <%s>\n", path);
+					msyslog(LOG_ERR, "CONFIG: Couldn't open <%s>", path);
 				}
 			}
 			YYFREE($2); /* avoid leak */
@@ -1407,7 +1407,7 @@ yyerror(
 	ip_ctx = lex_current();
 	ip_ctx->errpos = ip_ctx->tokpos;
 	
-	msyslog(LOG_ERR, "line %d column %d %s", 
+	msyslog(LOG_ERR, "CONFIG: line %d column %d %s", 
 		ip_ctx->errpos.nline, ip_ctx->errpos.ncol, msg);
 	if (!lex_from_file()) {
 		/* Save the error message in the correct buffer */

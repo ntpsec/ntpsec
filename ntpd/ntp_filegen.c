@@ -122,7 +122,7 @@ filegen_open(
 
 	default:
 		msyslog(LOG_ERR, 
-			"unsupported file generations type %d for "
+			"LOG: unsupported file generations type %d for "
 			"\"%s\" - reverting to FILEGEN_NONE",
 			gen->type, filename);
 		gen->type = FILEGEN_NONE;
@@ -193,7 +193,7 @@ filegen_open(
 	/* check possible truncation */
 	if ('\0' != fullname[len - 1]) {
 		fullname[len - 1] = '\0';
-		msyslog(LOG_ERR, "logfile name truncated: \"%s\"",
+		msyslog(LOG_ERR, "LOG: logfile name truncated: \"%s\"",
 			fullname);
 	}
 
@@ -228,7 +228,7 @@ filegen_open(
 
 					if (rename(filename, savename) != 0)
 						msyslog(LOG_ERR,
-							"couldn't save %s: %m",
+							"LOG: couldn't save %s: %m",
 							filename);
 					free(savename);
 				} else {
@@ -240,7 +240,7 @@ filegen_open(
 					/* coverity[toctou] */
 					if (unlink(filename) != 0)
 						msyslog(LOG_ERR, 
-							"couldn't unlink %s: %m",
+							"LOG: couldn't unlink %s: %m",
 							filename);
 				}
 			} else {
@@ -248,7 +248,7 @@ filegen_open(
 				 * Ehh? Not a regular file ?? strange !!!!
 				 */
 				msyslog(LOG_ERR, 
-					"expected regular file for %s "
+					"LOG: expected regular file for %s "
 					"(found mode 0%lo)",
 					filename,
 					(unsigned long)stats.st_mode);
@@ -259,7 +259,7 @@ filegen_open(
 			 * 'basename' not to exist
 			 */
 			if (ENOENT != errno)
-				msyslog(LOG_ERR, "stat(%s) failed: %m",
+				msyslog(LOG_ERR, "LOG: stat(%s) failed: %m",
 						 filename);
 		}
 	}
@@ -283,7 +283,7 @@ filegen_open(
 		 */
 
 		if (ENOENT != errno)
-			msyslog(LOG_ERR, "can't open %s: %m", fullname);
+			msyslog(LOG_ERR, "LOG: can't open %s: %m", fullname);
 	} else {
 		if (NULL != gen->fp) {
 			fclose(gen->fp);
@@ -305,7 +305,7 @@ filegen_open(
 			if (link(fullname, filename) != 0)
 				if (EEXIST != errno)
 					msyslog(LOG_ERR, 
-						"can't link(%s, %s): %m",
+						"LOG: can't link(%s, %s): %m",
 						fullname, filename);
 		}		/* flags & FGEN_FLAG_LINK */
 	}			/* else fp == NULL */

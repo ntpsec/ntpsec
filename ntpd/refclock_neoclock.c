@@ -154,7 +154,7 @@ neoclock4x_start(int unit,
 #if 1
   if(tcgetattr(fd, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
       (void) close(fd);
       return false;
     }
@@ -168,7 +168,7 @@ neoclock4x_start(int unit,
 
   if(tcsetattr(fd, TCSANOW, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
       (void) close(fd);
       return false;
     }
@@ -176,7 +176,7 @@ neoclock4x_start(int unit,
 #else
   if(tcgetattr(fd, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
       (void) close(fd);
       return false;
     }
@@ -189,7 +189,7 @@ neoclock4x_start(int unit,
 
   if(tcsetattr(fd, TCSANOW, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
       (void) close(fd);
       return false;
     }
@@ -200,7 +200,7 @@ neoclock4x_start(int unit,
   /* NeoClock4x is powered from serial line */
   if(ioctl(fd, TIOCMGET, (void *)&sl232) == -1)
     {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): can't query RTS/DTR state: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %m", unit);
       (void) close(fd);
       return false;
     }
@@ -211,12 +211,12 @@ neoclock4x_start(int unit,
 #endif
   if(ioctl(fd, TIOCMSET, (void *)&sl232) == -1)
     {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m", unit);
       (void) close(fd);
       return false;
     }
 #else
-  msyslog(LOG_EMERG, "NeoClock4X(%d): don't know how to set DTR/RTS to power NeoClock4X with this OS!",
+  msyslog(LOG_EMERG, "REFCLOCK: NeoClock4X(%d): don't know how to set DTR/RTS to power NeoClock4X with this OS!",
 	  unit);
   (void) close(fd);
   return false;
@@ -225,7 +225,7 @@ neoclock4x_start(int unit,
   up = (struct neoclock4x_unit *) emalloc(sizeof(struct neoclock4x_unit));
   if(!(up))
     {
-      msyslog(LOG_ERR, "NeoClock4X(%d): can't allocate memory for: %m",unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): can't allocate memory for: %m",unit);
       (void) close(fd);
       return false;
     }
@@ -280,7 +280,7 @@ neoclock4x_start(int unit,
 	  sizeof(up->firmware));
   up->firmwaretag = 'A';
 #else
-  msyslog(LOG_EMERG, "NeoClock4X(%d): unknown firmware defined at compile time for NeoClock4X",
+  msyslog(LOG_EMERG, "REFCLOCK: NeoClock4X(%d): unknown firmware defined at compile time for NeoClock4X",
 	  unit);
   (void) close(fd);
   pp->io.fd = -1;
@@ -292,7 +292,7 @@ neoclock4x_start(int unit,
   for(tries=0; tries < 5; tries++)
     {
       NLOG(NLOG_CLOCKINFO)
-	msyslog(LOG_INFO, "NeoClock4X(%d): checking NeoClock4X firmware version (%d/5)", unit, tries);
+	msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): checking NeoClock4X firmware version (%d/5)", unit, tries);
       /* wait 3 seconds for receiver to power up */
       sleep(3);
       if(neol_query_firmware(pp->io.fd, up->unit, up->firmware, sizeof(up->firmware)))
@@ -314,7 +314,7 @@ neoclock4x_start(int unit,
 
   if(!io_addclock(&pp->io))
     {
-      msyslog(LOG_ERR, "NeoClock4X(%d): error add peer to ntpd: %m", unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): error add peer to ntpd: %m", unit);
       (void) close(fd);
       pp->io.fd = -1;
       free(pp->unitptr);
@@ -323,7 +323,7 @@ neoclock4x_start(int unit,
     }
 
   NLOG(NLOG_CLOCKINFO)
-    msyslog(LOG_INFO, "NeoClock4X(%d): receiver setup successful done", unit);
+    msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): receiver setup successful done", unit);
 
   return true;
 }
@@ -351,7 +351,7 @@ neoclock4x_shutdown(int unit,
                   /* NeoClock4x is powered from serial line */
                   if(ioctl(pp->io.fd, TIOCMGET, (void *)&sl232) == -1)
                     {
-                      msyslog(LOG_CRIT, "NeoClock4X(%d): can't query RTS/DTR state: %m",
+                      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %m",
                               unit);
                     }
 #ifdef TIOCM_RTS
@@ -363,7 +363,7 @@ neoclock4x_shutdown(int unit,
 #endif
                   if(ioctl(pp->io.fd, TIOCMSET, (void *)&sl232) == -1)
                     {
-                      msyslog(LOG_CRIT, "NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m",
+                      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m",
                               unit);
                     }
 #endif
@@ -375,10 +375,10 @@ neoclock4x_shutdown(int unit,
         }
     }
 
-  msyslog(LOG_ERR, "NeoClock4X(%d): shutdown", unit);
+  msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): shutdown", unit);
 
   NLOG(NLOG_CLOCKINFO)
-    msyslog(LOG_INFO, "NeoClock4X(%d): receiver shutdown done", unit);
+    msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): receiver shutdown done", unit);
 }
 
 static void
@@ -413,7 +413,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   if(NEOCLOCK4X_TIMECODELEN != pp->lencode)
     {
       NLOG(NLOG_CLOCKEVENT)
-	msyslog(LOG_WARNING, "NeoClock4X(%d): received data has invalid length, expected %d bytes, received %d bytes: %s",
+	msyslog(LOG_WARNING, "REFCLOCK: NeoClock4X(%d): received data has invalid length, expected %d bytes, received %d bytes: %s",
 		up->unit, NEOCLOCK4X_TIMECODELEN, pp->lencode, pp->a_lastcode);
       refclock_report(peer, CEVNT_BADREPLY);
       return;
@@ -430,7 +430,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   if(recv_chksum != calc_chksum)
     {
       NLOG(NLOG_CLOCKEVENT)
-	msyslog(LOG_WARNING, "NeoClock4X(%d): received data has invalid chksum: %s",
+	msyslog(LOG_WARNING, "REFCLOCK: NeoClock4X(%d): received data has invalid chksum: %s",
 		up->unit, pp->a_lastcode);
       refclock_report(peer, CEVNT_BADREPLY);
       return;
@@ -446,7 +446,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
       if('I' != up->quarzstatus)
 	{
 	  NLOG(NLOG_CLOCKEVENT)
-	    msyslog(LOG_NOTICE, "NeoClock4X(%d): quartz clock is not initialized: %s",
+	    msyslog(LOG_NOTICE, "REFCLOCK: NeoClock4X(%d): quartz clock is not initialized: %s",
 		    up->unit, pp->a_lastcode);
 	  pp->leap = LEAP_NOTINSYNC;
 	  refclock_report(peer, CEVNT_BADDATE);
@@ -456,7 +456,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   if('I' != up->quarzstatus)
     {
       NLOG(NLOG_CLOCKEVENT)
-	msyslog(LOG_NOTICE, "NeoClock4X(%d): using uninitialized quartz clock for time synchronization: %s",
+	msyslog(LOG_NOTICE, "REFCLOCK: NeoClock4X(%d): using uninitialized quartz clock for time synchronization: %s",
 		up->unit, pp->a_lastcode);
     }
 
@@ -483,7 +483,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   /* this should only used when first install is done */
   if(pp->sloppyclockflag & CLK_FLAG4)
     {
-      msyslog(LOG_DEBUG, "NeoClock4X(%d): received data: %s",
+      msyslog(LOG_DEBUG, "REFCLOCK: NeoClock4X(%d): received data: %s",
 	      up->unit, pp->a_lastcode);
     }
 
@@ -519,7 +519,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
      (pp->year < 0) || (pp->year > 99)) {
     /* Data out of range. */
     NLOG(NLOG_CLOCKEVENT)
-      msyslog(LOG_WARNING, "NeoClock4X(%d): date/time out of range: %s",
+      msyslog(LOG_WARNING, "REFCLOCK: NeoClock4X(%d): date/time out of range: %s",
 	      up->unit, pp->a_lastcode);
     refclock_report(peer, CEVNT_BADDATE);
     return;
@@ -553,7 +553,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
 
   if(pp->sloppyclockflag & CLK_FLAG4)
     {
-      msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03ld",
+      msyslog(LOG_DEBUG, "REFCLOCK: NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03ld",
 	      up->unit,
 	      pp->year, month, day,
 	      pp->hour, pp->minute, pp->second,
@@ -572,7 +572,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   if(!refclock_process(pp))
     {
       NLOG(NLOG_CLOCKEVENT)
-	msyslog(LOG_WARNING, "NeoClock4X(%d): refclock_process failed!", up->unit);
+	msyslog(LOG_WARNING, "REFCLOCK: NeoClock4X(%d): refclock_process failed!", up->unit);
       refclock_report(peer, CEVNT_FAULT);
       return;
     }
@@ -611,21 +611,21 @@ neoclock4x_control(int unit,
 
   if(NULL == peer)
     {
-      msyslog(LOG_ERR, "NeoClock4X(%d): control: unit invalid/inactive", unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): control: unit invalid/inactive", unit);
       return;
     }
 
   pp = peer->procptr;
   if(NULL == pp)
     {
-      msyslog(LOG_ERR, "NeoClock4X(%d): control: unit invalid/inactive", unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): control: unit invalid/inactive", unit);
       return;
     }
 
   up = pp->unitptr;
   if(NULL == up)
     {
-      msyslog(LOG_ERR, "NeoClock4X(%d): control: unit invalid/inactive", unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): control: unit invalid/inactive", unit);
       return;
     }
 
@@ -636,7 +636,7 @@ neoclock4x_control(int unit,
 	{
 	  pp->fudgetime1 = in->fudgetime1;
 	  NLOG(NLOG_CLOCKINFO)
-	    msyslog(LOG_NOTICE, "NeoClock4X(%d): using fudgetime1 with %0.5fs from ntp.conf.",
+	    msyslog(LOG_NOTICE, "REFCLOCK: NeoClock4X(%d): using fudgetime1 with %0.5fs from ntp.conf.",
 		    unit, pp->fudgetime1);
 	}
 
@@ -644,12 +644,12 @@ neoclock4x_control(int unit,
       if(pp->sloppyclockflag & CLK_FLAG1)
 	{
 	  NLOG(NLOG_CLOCKINFO)
-	    msyslog(LOG_NOTICE, "NeoClock4X(%d): quartz clock is used to synchronize time if radio clock has no reception.", unit);
+	    msyslog(LOG_NOTICE, "REFCLOCK: NeoClock4X(%d): quartz clock is used to synchronize time if radio clock has no reception.", unit);
 	}
       else
 	{
 	  NLOG(NLOG_CLOCKINFO)
-	    msyslog(LOG_NOTICE, "NeoClock4X(%d): time is only adjusted with radio signal reception.", unit);
+	    msyslog(LOG_NOTICE, "REFCLOCK: NeoClock4X(%d): time is only adjusted with radio signal reception.", unit);
 	}
     }
 
@@ -874,13 +874,13 @@ neol_query_firmware(int fd,
 	{
 	  if(read_errors > 5)
 	    {
-	      msyslog(LOG_ERR, "NeoClock4X(%d): can't read firmware version (timeout)", unit);
+	      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): can't read firmware version (timeout)", unit);
 	      strlcpy(tmpbuf, "unknown due to timeout", sizeof(tmpbuf));
 	      break;
 	    }
           if(chars_read > 500)
             {
-	      msyslog(LOG_ERR, "NeoClock4X(%d): can't read firmware version (garbage)", unit);
+	      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): can't read firmware version (garbage)", unit);
 	      strlcpy(tmpbuf, "unknown due to garbage input", sizeof(tmpbuf));
 	      break;
             }
@@ -914,7 +914,7 @@ neol_query_firmware(int fd,
 	    }
 
 #if 0
-	  msyslog(LOG_NOTICE, "NeoClock4X(%d): firmware %c = %02Xh", unit, c, c);
+	  msyslog(LOG_NOTICE, "REFCLOCK: NeoClock4X(%d): firmware %c = %02Xh", unit, c, c);
 #endif
 
 	  if(0x0A == c || 0x0D == c)
@@ -951,7 +951,7 @@ neol_query_firmware(int fd,
     }
   else
     {
-      msyslog(LOG_ERR, "NeoClock4X(%d): can't query firmware version", unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): can't query firmware version", unit);
       strlcpy(tmpbuf, "unknown error", sizeof(tmpbuf));
     }
   if (strlcpy(firmware, tmpbuf, maxlen) >= maxlen)
@@ -960,11 +960,11 @@ neol_query_firmware(int fd,
   if(flag)
     {
       NLOG(NLOG_CLOCKINFO)
-	msyslog(LOG_INFO, "NeoClock4X(%d): firmware version: %s", unit, firmware);
+	msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): firmware version: %s", unit, firmware);
 
       if(strstr(firmware, "/R2"))
 	{
-	  msyslog(LOG_INFO, "NeoClock4X(%d): Your NeoClock4X uses the new R2 firmware release. Please note the changed LED behaviour.", unit);
+	  msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): Your NeoClock4X uses the new R2 firmware release. Please note the changed LED behaviour.", unit);
 	}
 
     }
@@ -992,7 +992,7 @@ neol_check_firmware(int unit,
 
   if('A' != *firmwaretag)
     {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): firmware version \"%c\" not supported with this driver version!", unit, *firmwaretag);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): firmware version \"%c\" not supported with this driver version!", unit, *firmwaretag);
       return false;
     }
 

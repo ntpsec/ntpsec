@@ -1028,10 +1028,10 @@ transmit(
 				peer_ntpdate--;
 				if (peer_ntpdate == 0) {
 					msyslog(LOG_NOTICE,
-					    "ntpd: no servers found");
+					    "SYNC: no servers found");
 					if (!termlogit)
 						printf(
-						    "ntpd: no servers found\n");
+						    "SYNC: no servers found\n");
 					exit(0);
 				}
 			}
@@ -1136,7 +1136,7 @@ clock_update(
 				pause();
 		}
 #endif /* HAVE_LIBSCF_H */
-		msyslog(LOG_ERR, "Panic: offset too big: %.3f", sys_offset);
+		msyslog(LOG_ERR, "CLOCK: Panic: offset too big: %.3f", sys_offset);
 		exit (1);
 		/* not reached */
 
@@ -2230,7 +2230,7 @@ peer_xmit(
 	}
 	sendlen += authlen;
 	if (sendlen > sizeof(xpkt)) {
-		msyslog(LOG_ERR, "proto: buffer overflow %zu", sendlen);
+		msyslog(LOG_ERR, "PROTO: buffer overflow %zu", sendlen);
 		exit(1);
 	}
 	peer->t21_bytes = (int)sendlen;
@@ -2424,11 +2424,11 @@ dns_take_server(
 	pp = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
 	if (NULL != pp) {
 		/* Already in use. */
-		msyslog(LOG_INFO, "Server skipping: %s", socktoa(rmtadr));
+		msyslog(LOG_INFO, "PROTO: Server skipping: %s", socktoa(rmtadr));
 		return;
 	}
 
-	msyslog(LOG_INFO, "Server taking: %s", socktoa(rmtadr));
+	msyslog(LOG_INFO, "PROTO: Server taking: %s", socktoa(rmtadr));
 	server->flags &= (unsigned)~FLAG_DNS;
 		
 	server->srcadr = *rmtadr;
@@ -2436,7 +2436,7 @@ dns_take_server(
 
 	restrict_mask = restrictions(&server->srcadr);
 	if (RES_FLAGS & restrict_mask) {
-		msyslog(LOG_INFO, "Server poking hole in restrictions for: %s",
+		msyslog(LOG_INFO, "PROTO: Server poking hole in restrictions for: %s",
 			socktoa(&server->srcadr));
 		restrict_source(&server->srcadr, false, 0);
 	}
@@ -2465,11 +2465,11 @@ dns_take_pool(
 	peer = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
 	if (NULL != peer) {
 		/* This address is already in use. */
-		msyslog(LOG_INFO, "Pool skipping: %s", socktoa(rmtadr));
+		msyslog(LOG_INFO, "PROTO: Pool skipping: %s", socktoa(rmtadr));
 		return;
 	}
 
-	msyslog(LOG_INFO, "Pool taking: %s", socktoa(rmtadr));
+	msyslog(LOG_INFO, "PROTO: Pool taking: %s", socktoa(rmtadr));
 
 	lcladr = findinterface(rmtadr);
 	peer = newpeer(rmtadr, NULL, lcladr,
@@ -2483,7 +2483,7 @@ dns_take_pool(
 	restrict_mask = restrictions(&peer->srcadr);
 	/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
 	if (RES_FLAGS & restrict_mask) {
-		msyslog(LOG_INFO, "Pool poking hole in restrictions for: %s",
+		msyslog(LOG_INFO, "PROTO: Pool poking hole in restrictions for: %s",
 				socktoa(&peer->srcadr));
 		restrict_source(&peer->srcadr, false,
 				current_time + POOL_SOLICIT_WINDOW + 1);
@@ -2533,7 +2533,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	if ((DNS_good == status) &&
 		(MDF_UCAST & peer->cast_flags) && !(FLAG_DNS & peer->flags))
 		hpoll = 0;  /* server: no more */
-	msyslog(LOG_INFO, "dns_take_status: %s=>%s, %d",
+	msyslog(LOG_INFO, "PROTO: dns_take_status: %s=>%s, %d",
 		peer->hostname, txt, hpoll);
 	if (0 == hpoll)
 		return; /* hpoll already in use by new server */
@@ -2670,10 +2670,10 @@ measure_precision(const bool verbose)
 	measured_tick = measure_tick_fuzz();
 	set_sys_tick_precision(measured_tick);
 	if (verbose) {
-		msyslog(LOG_INFO, "proto: precision = %.3f usec (%d)",
+		msyslog(LOG_INFO, "PROTO: precision = %.3f usec (%d)",
 			sys_tick * US_PER_S, sys_precision);
 		if (sys_fuzz < sys_tick) {
-			msyslog(LOG_NOTICE, "proto: fuzz beneath %.3f usec",
+			msyslog(LOG_NOTICE, "PROTO: fuzz beneath %.3f usec",
 				sys_fuzz * US_PER_S);
 		}
 	}
@@ -2723,7 +2723,7 @@ measure_tick_fuzz(void)
 		}
 	}
 	if (changes < MINCHANGES) {
-		msyslog(LOG_ERR, "Fatal error: precision could not be measured (MINSTEP too large?)");
+		msyslog(LOG_ERR, "PROTO: Fatal error: precision could not be measured (MINSTEP too large?)");
 		exit(1);
 	}
 
@@ -2746,18 +2746,18 @@ set_sys_tick_precision(
 
 	if (tick > 1.) {
 		msyslog(LOG_ERR,
-			"unsupported tick %.3f > 1s ignored", tick);
+			"PROTO: unsupported tick %.3f > 1s ignored", tick);
 		return;
 	}
 	if (tick < measured_tick) {
 		msyslog(LOG_ERR,
-			"proto: tick %.3f less than measured tick %.3f, ignored",
+			"PROTO: tick %.3f less than measured tick %.3f, ignored",
 			tick, measured_tick);
 		return;
 	} else if (tick > measured_tick) {
 		trunc_os_clock = true;
 		msyslog(LOG_NOTICE,
-			"proto: truncating system clock to multiples of %.9f",
+			"PROTO: truncating system clock to multiples of %.9f",
 			tick);
 	}
 	sys_tick = tick;
@@ -2845,7 +2845,7 @@ proto_config(
 			mon_stop(MON_ON);
 			if (mon_enabled)
 				msyslog(LOG_WARNING,
-					"restrict: 'monitor' cannot be disabled while 'limited' is enabled");
+					"CONFIG: 'monitor' cannot be disabled while 'limited' is enabled");
 		}
 		break;
 
@@ -2912,7 +2912,7 @@ proto_config(
 
 	default:
 		msyslog(LOG_NOTICE,
-		    "proto: unsupported option %d", item);
+		    "CONFIG: unsupported protocol option %d", item);
 	}
 }
 

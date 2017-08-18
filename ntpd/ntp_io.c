@@ -298,7 +298,7 @@ maintain_activefds(
 
 	if (fd < 0 || fd >= (int)FD_SETSIZE) {
 		msyslog(LOG_ERR,
-			"Too many sockets in use, FD_SETSIZE %d exceeded by fd %d",
+			"IO: Too many sockets in use, FD_SETSIZE %d exceeded by fd %d",
 			FD_SETSIZE, fd);
 		exit(1);
 	}
@@ -824,7 +824,7 @@ remove_interface(
 
 	if (ep->fd != INVALID_SOCKET) {
 		msyslog(LOG_INFO,
-			"Deleting interface #%u %s, %s#%d, interface stats: "
+			"IO: Deleting interface #%u %s, %s#%d, interface stats: "
                         "received=%ld, sent=%ld, dropped=%ld, "
                         "active_time=%lu secs",
 			ep->ifnum,
@@ -841,7 +841,7 @@ remove_interface(
 
 	if (ep->bfd != INVALID_SOCKET) {
 		msyslog(LOG_INFO,
-			"stop listening for broadcasts to %s "
+			"IO: stop listening for broadcasts to %s "
                         "on interface #%u %s",
 			socktoa(&ep->bcast), ep->ifnum, ep->name);
 		close_and_delete_fd_from_list(ep->bfd);
@@ -864,7 +864,7 @@ log_listen_address(
 	endpt *	ep
 	)
 {
-	msyslog(LOG_INFO, "%s on %u %s %s",
+	msyslog(LOG_INFO, "IO: %s on %u %s %s",
 			(ep->ignore_packets)
 			    ? "Listen and drop"
 			    : "Listen normally",
@@ -932,7 +932,7 @@ create_wildcards(
 			log_listen_address(wildif);
 		} else {
 			msyslog(LOG_ERR,
-				"unable to bind to wildcard address %s - another process may be running: %m; EXITING",
+				"IO: unable to bind to wildcard address %s - another process may be running: %m; EXITING",
 				socktoa(&wildif->sin));
 			exit(1);
 		}
@@ -975,7 +975,7 @@ create_wildcards(
 			log_listen_address(wildif);
 		} else {
 			msyslog(LOG_ERR,
-				"unable to bind to wildcard address %s - another process may be running: %m; EXITING",
+				"IO: unable to bind to wildcard address %s - another process may be running: %m; EXITING",
 				socktoa(&wildif->sin));
 			exit(1);
 		}
@@ -1324,7 +1324,7 @@ interface_update(
 		return;
 
 #ifdef DEBUG
-	msyslog(LOG_DEBUG, "new interface(s) found: waking up resolver");
+	msyslog(LOG_DEBUG, "IO: new interface(s) found: waking up resolver");
 #endif
 }
 
@@ -1365,7 +1365,7 @@ set_wildcard_reuse(
 		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
 			       (char *)&on, sizeof(on)))
 			msyslog(LOG_ERR,
-				"set_wildcard_reuse: setsockopt(SO_REUSEADDR, %s) failed: %m",
+				"IO: set_wildcard_reuse: setsockopt(SO_REUSEADDR, %s) failed: %m",
 				on ? "on" : "off");
 
 		DPRINT(4, ("set SO_REUSEADDR to %s on %s\n",
@@ -1642,7 +1642,7 @@ update_interfaces(
 				 * occurs.
 				 */
 				msyslog(LOG_ERR,
-					"WARNING: conflicting enable configuration for interfaces %s and %s for address %s - unsupported configuration - address DISABLED",
+					"CONFIG: WARNING: conflicting enable configuration for interfaces %s and %s for address %s - unsupported configuration - address DISABLED",
 					enumep.name, ep->name,
 					socktoa(&enumep.sin));
 
@@ -1682,7 +1682,7 @@ update_interfaces(
 					 " new - creation FAILED"));
 
 				msyslog(LOG_INFO,
-					"failed to init interface for address %s",
+					"IO: failed to init interface for address %s",
 					socktoa(&enumep.sin));
 				continue;
 			}
@@ -1799,12 +1799,12 @@ create_interface(
 
 	if ((INT_BROADCAST & iface->flags)
 	    && iface->bfd != INVALID_SOCKET)
-		msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
+		msyslog(LOG_INFO, "IO: Listening on broadcast address %s#%d",
 			socktoa((&iface->bcast)), port);
 
 	if (INVALID_SOCKET == iface->fd
 	    && INVALID_SOCKET == iface->bfd) {
-		msyslog(LOG_ERR, "unable to create socket on %s (%u) for %s#%d",
+		msyslog(LOG_ERR, "IO: unable to create socket on %s (%u) for %s#%d",
 			iface->name,
 			iface->ifnum,
 			socktoa((&iface->sin)),
@@ -1855,7 +1855,7 @@ set_excladdruse(
 		return;
 
 	msyslog(LOG_ERR,
-		"setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %m",
+		"IO: setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %m",
 		(int)fd);
 }
 #endif  /* SO_EXCLUSIVEADDRUSE */
@@ -1889,7 +1889,7 @@ set_reuseaddr(
 		if (ep->fd != INVALID_SOCKET) {
 			if (setsockopt(ep->fd, SOL_SOCKET, SO_REUSEADDR,
 				       (char *)&flag, sizeof(flag))) {
-				msyslog(LOG_ERR, "set_reuseaddr: setsockopt(%s, SO_REUSEADDR, %s) failed: %m",
+				msyslog(LOG_ERR, "IO: set_reuseaddr: setsockopt(%s, SO_REUSEADDR, %s) failed: %m",
 					socktoa(&ep->sin), flag ? "on" : "off");
 			}
 		}
@@ -1933,7 +1933,7 @@ socket_broadcast_enable(
 		if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST,
 			       (char *)&on, sizeof(on)))
 			msyslog(LOG_ERR,
-				"setsockopt(SO_BROADCAST) enable failure on address %s: %m",
+				"IO: setsockopt(SO_BROADCAST) enable failure on address %s: %m",
 				socktoa(baddr));
 		else
 			DPRINT(2, ("Broadcast enabled on socket %d for address %s\n",
@@ -1964,7 +1964,7 @@ socket_broadcast_disable(
 	if (IS_IPV4(baddr) && setsockopt(iface->fd, SOL_SOCKET,
 	    SO_BROADCAST, (char *)&off, sizeof(off)))
 		msyslog(LOG_ERR,
-			"setsockopt(SO_BROADCAST) disable failure on address %s: %m",
+			"IO: setsockopt(SO_BROADCAST) disable failure on address %s: %m",
 			socktoa(baddr));
 
 	iface->flags &= ~INT_BCASTXMIT;
@@ -2006,7 +2006,7 @@ open_socket(
 	if (INVALID_SOCKET == fd) {
 		errval = errno;
 		msyslog(LOG_ERR,
-			"socket(AF_INET%s, SOCK_DGRAM, 0) failed on address %s: %m",
+			"IO: socket(AF_INET%s, SOCK_DGRAM, 0) failed on address %s: %m",
 			IS_IPV6(addr) ? "6" : "", socktoa(addr));
 
 		if (errval == EPROTONOSUPPORT ||
@@ -2017,7 +2017,7 @@ open_socket(
 		errno = errval;
 #ifndef __COVERITY__
 		msyslog(LOG_ERR,
-			"unexpected socket() error %m code %d (not EPROTONOSUPPORT nor EAFNOSUPPORT nor EPFNOSUPPORT) - exiting",
+			"IO: unexpected socket() error %m code %d (not EPROTONOSUPPORT nor EAFNOSUPPORT nor EPFNOSUPPORT) - exiting",
 			errno);
 		exit(1);
 #endif /* __COVERITY__ */
@@ -2040,7 +2040,7 @@ open_socket(
 		       sizeof(on))) {
 
 		msyslog(LOG_ERR,
-			"setsockopt SO_REUSEADDR %s fails for address %s: %m",
+			"IO: setsockopt SO_REUSEADDR %s fails for address %s: %m",
 			(turn_off_reuse)
 			    ? "off"
 			    : "on",
@@ -2064,7 +2064,7 @@ open_socket(
 		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char*)&qos,
 			       sizeof(qos)))
 			msyslog(LOG_ERR,
-				"setsockopt IP_TOS (%02x) fails on "
+				"IO: setsockopt IP_TOS (%02x) fails on "
                                 "address %s: %m",
 				(unsigned)qos, socktoa(addr));
 		if (bcast)
@@ -2078,7 +2078,7 @@ open_socket(
 #ifdef IPV6_TCLASS
 		if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, (char*)&qos,
 			       sizeof(qos)))
-			msyslog(LOG_ERR, "setsockopt IPV6_TCLASS (%02x) "
+			msyslog(LOG_ERR, "IO: setsockopt IPV6_TCLASS (%02x) "
                                          "fails on address %s: %m",
 				         (unsigned)qos, socktoa(addr));
 #endif /* IPV6_TCLASS */
@@ -2086,7 +2086,7 @@ open_socket(
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
 		    (const void *)&on, sizeof(on)))
 			msyslog(LOG_ERR,
-				"setsockopt IPV6_V6ONLY on fails on address %s: %m",
+				"IO: setsockopt IPV6_V6ONLY on fails on address %s: %m",
 				socktoa(addr));
 	}
 
@@ -2120,7 +2120,7 @@ open_socket(
 #endif
 		    ) {
 			msyslog(LOG_ERR,
-				"bind(%d) AF_INET%s %s#%d flags 0x%x failed: %m",
+				"IO: bind(%d) AF_INET%s %s#%d flags 0x%x failed: %m",
 				fd, IS_IPV6(addr) ? "6" : "",
 				socktoa(addr), SRCPORT(addr),
 				interf->flags);
@@ -2340,7 +2340,7 @@ read_network_packet(
 		freerecvbuf(rb);
 		return (buflen);
 	} else if (buflen < 0) {
-		msyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
+		msyslog(LOG_ERR, "IO: recvfrom(%s) fd=%d: %m",
 			socktoa(&rb->recv_srcadr), fd);
 		DPRINT(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n",
 			   fd));
@@ -2435,11 +2435,11 @@ io_handler(void)
 
 		input_handler(&rdfdes, &ts);
 	} else if (nfound == -1 && errno != EINTR) {
-		msyslog(LOG_ERR, "select() error: %m");
+		msyslog(LOG_ERR, "IO: select() error: %m");
 	}
 #   ifdef DEBUG
 	else if (debug > 4) { /* SPECIAL DEBUG */
-		msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
+		msyslog(LOG_DEBUG, "IO: select(): nfound=%d, error: %m", nfound);
 	} else {
 		DPRINT(1, ("select() returned %d: %m\n", nfound));
 	}
@@ -2511,11 +2511,11 @@ input_handler(
 				saved_errno = errno;
 				clk = refclock_name(rp->srcclock);
 				errno = saved_errno;
-				msyslog(LOG_ERR, "%s read: %m", clk);
+				msyslog(LOG_ERR, "IO: %s read: %m", clk);
 				maintain_activefds(fd, true);
 			} else if (0 == buflen) {
 				clk = refclock_name(rp->srcclock);
-				msyslog(LOG_ERR, "%s read EOF", clk);
+				msyslog(LOG_ERR, "IO: %s read EOF", clk);
 				maintain_activefds(fd, true);
 			} else {
 				/* drain any remaining refclock input */
@@ -2576,7 +2576,7 @@ input_handler(
 	if (select_count == 0) { /* We really had nothing to do */
 #ifdef DEBUG
 		if (debug) /* SPECIAL DEBUG */
-			msyslog(LOG_DEBUG, "input_handler: select() returned 0");
+			msyslog(LOG_DEBUG, "IO: input_handler: select() returned 0");
 #endif /* DEBUG */
 		return;
 	}
@@ -2591,7 +2591,7 @@ input_handler(
 	collect_timing(NULL, "input handler", 1, ts_e);
 	if (debug > 3) /* SPECIAL DEBUG */
 		msyslog(LOG_DEBUG,
-			"input_handler: Processed a gob of fd's in %s msec",
+			"IO: input_handler: Processed a gob of fd's in %s msec",
 			lfptoms(ts_e, 6));
 #endif /* ENABLE_DEBUG_TIMING */
 	/* We're done... */
@@ -3136,7 +3136,7 @@ close_and_delete_fd_from_list(
 
 	default:
 		msyslog(LOG_ERR,
-			"internal error - illegal descriptor type %d - EXITING",
+			"IO: internal error - illegal descriptor type %d - EXITING",
 			(int)lsock->type);
 		exit(1);
 	}
@@ -3266,10 +3266,10 @@ process_routing_msgs(struct asyncio_reader *reader)
 	if (cnt < 0) {
 		if (errno == ENOBUFS) {
 			msyslog(LOG_ERR,
-				"routing socket reports: %m");
+				"IO: routing socket reports: %m");
 		} else {
 			msyslog(LOG_ERR,
-				"routing socket reports: %m - disabling");
+				"IO: routing socket reports: %m - disabling");
 			remove_asyncio_reader(reader);
 			delete_asyncio_reader(reader);
 		}
@@ -3292,7 +3292,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 		memcpy(&rtm, p, sizeof(rtm));
 		if (rtm.rtm_version != RTM_VERSION) {
 			msyslog(LOG_ERR,
-				"version mismatch (got %d - expected %d) on routing socket - disabling",
+				"IO: version mismatch (got %d - expected %d) on routing socket - disabling",
 				rtm.rtm_version, RTM_VERSION);
 
 			remove_asyncio_reader(reader);
@@ -3381,7 +3381,7 @@ init_async_notifications()
 #endif
 	if (fd < 0) {
 		msyslog(LOG_ERR,
-			"unable to open routing socket (%m) - using polled interface update");
+			"IO: unable to open routing socket (%m) - using polled interface update");
 		return;
 	}
 
@@ -3395,7 +3395,7 @@ init_async_notifications()
 		       | RTMGRP_IPV6_MROUTE;
 	if (bind(fd, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
 		msyslog(LOG_ERR,
-			"bind failed on routing socket (%m) - using polled interface update");
+			"IO: bind failed on routing socket (%m) - using polled interface update");
 		return;
 	}
 #endif
@@ -3408,7 +3408,7 @@ init_async_notifications()
 
 	add_asyncio_reader(reader, FD_TYPE_SOCKET);
 	msyslog(LOG_INFO,
-		"Listening on routing socket on fd #%d for interface updates",
+		"IO: Listening on routing socket on fd #%d for interface updates",
 		fd);
 }
 #else

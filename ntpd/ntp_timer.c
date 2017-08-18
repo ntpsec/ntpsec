@@ -97,7 +97,7 @@ set_timer_or_die(
 	rc = setitimer(ITIMER_REAL, &itimer, NULL);
 #endif
 	if (-1 == rc) {
-		msyslog(LOG_ERR, "interval timer %s failed, %m",
+		msyslog(LOG_ERR, "ERR:interval timer %s failed, %m",
 			setfunc);
 		exit(1);
 	}
@@ -157,7 +157,7 @@ init_timer(void)
 	 */
 #ifdef HAVE_TIMER_CREATE
 	if (TC_ERR == timer_create(CLOCK_REALTIME, NULL, &timer_id)) {
-		msyslog(LOG_ERR, "timer_create failed, %m");
+		msyslog(LOG_ERR, "ERR: timer_create failed, %m");
 		exit(1);
 	}
 #endif
@@ -434,7 +434,7 @@ check_leapsec(
 				       */
 				      leap_smear.in_progress = true;
 #if 0 && defined( DEBUG )
-				      msyslog(LOG_NOTICE, "*** leapsec_query: [%.0f:%.0f] (%li), now %u (%.0f), smear offset %.6f ms\n",
+				      msyslog(LOG_NOTICE, "CLOCK: *** leapsec_query: [%.0f:%.0f] (%li), now %u (%.0f), smear offset %.6f ms\n",
 					      leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
 					      now, leap_smear_time, leap_smear.doffset);
 #else
@@ -478,7 +478,7 @@ check_leapsec(
 				}
 			}
 			if (leapmsg)
-				msyslog(LOG_NOTICE, "%s", leapmsg);
+				msyslog(LOG_NOTICE, "CLOCK: %s", leapmsg);
 			report_event(EVNT_LEAP, NULL, NULL);
 			lsprox  = LSPROX_NOWARN;
 			leapsec = LSPROX_NOWARN;

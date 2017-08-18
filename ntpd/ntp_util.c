@@ -157,7 +157,7 @@ static void drift_write(char *driftfile, double drift)
 	strlcat(tempfile, "/driftXXXXXX", sizeof(tempfile));
 	/* coverity[secure_temp] Warning is bogus on POSIX-compliant systems */
 	if ((fd = mkstemp(tempfile)) < 0) {
-	    msyslog(LOG_ERR, "frequency file %s: %m", tempfile);
+	    msyslog(LOG_ERR, "LOG: frequency file %s: %m", tempfile);
 	    return;
 	}
 	snprintf(driftval, sizeof(driftval), "%.6f\n", drift);
@@ -166,7 +166,7 @@ static void drift_write(char *driftfile, double drift)
 	/* atomic */
 	if (rename(tempfile, driftfile))
 	    msyslog(LOG_WARNING,
-		    "Unable to rename temp drift file %s to %s, %m",
+		    "LOG: Unable to rename temp drift file %s to %s, %m",
 		    tempfile, driftfile);
 }
 void
@@ -207,7 +207,7 @@ static bool drift_read(const char *drift_file, double *drift)
 	}
 	if (fscanf(fp, "%lf", drift) != 1) {
 	    msyslog(LOG_ERR,
-		    "format error frequency file %s",
+		    "LOG: format error frequency file %s",
 		    drift_file);
 	    fclose(fp);
 	    return false;
@@ -263,7 +263,7 @@ stats_config(
 		/* - 1 since value may be missing the DIR_SEP. */
 		if (strlen(value) >= sizeof(statsdir) - 1) {
 			msyslog(LOG_ERR,
-			    "statsdir too long (>%d, sigh)",
+			    "LOG: statsdir too long (>%d, sigh)",
 			    (int)sizeof(statsdir) - 2);
 		} else {
 			bool add_dir_sep;
@@ -292,7 +292,7 @@ stats_config(
 	 */
 	case STATS_PID_FILE:
 		if ((fp = fopen(value, "w")) == NULL) {
-			msyslog(LOG_ERR, "pid file %s: %m",
+			msyslog(LOG_ERR, "LOG: pid file %s: %m",
 			    value);
 			break;
 		}
@@ -757,16 +757,16 @@ check_leap_expiration(
 	rc = leapsec_daystolive(systime);
 	if (rc == 0) {
 		msyslog(LOG_WARNING,
-			"%s ('%s'): will expire in less than one day",
+			"CLOCK: %s ('%s'): will expire in less than one day",
 			logPrefix, leapfile_name);
 	} else if (is_daily_check && rc < 28) {
 		if (rc < 0)
 			msyslog(LOG_ERR,
-				"%s ('%s'): expired less than %d day%s ago",
+				"CLOCK: %s ('%s'): expired less than %d day%s ago",
 				logPrefix, leapfile_name, -rc, (rc == -1 ? "" : "s"));
 		else
 			msyslog(LOG_WARNING,
-				"%s ('%s'): will expire in less than %d days",
+				"CLOCK: %s ('%s'): will expire in less than %d days",
 				logPrefix, leapfile_name, 1+rc);
 	}
 }

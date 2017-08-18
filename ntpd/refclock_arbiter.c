@@ -180,7 +180,7 @@ arb_start(
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
 	if (peer->ttl > 1) {
-		msyslog(LOG_NOTICE, "ARBITER: Invalid mode %u", peer->ttl);
+		msyslog(LOG_NOTICE, "REFCLOCK ARBITER: Invalid mode %u", peer->ttl);
 		close(fd);
 		pp->io.fd = -1;
 		free(up);

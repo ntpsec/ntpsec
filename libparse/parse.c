@@ -539,7 +539,7 @@ timepacket(
 
 	default:
 		/* shouldn't happen */
-		msyslog(LOG_WARNING, "parse: INTERNAL error: bad return code of convert routine \"%s\"", clockformats[format]->name);
+		msyslog(LOG_WARNING, "ERR: parse: INTERNAL error: bad return code of convert routine \"%s\"", clockformats[format]->name);
 		return CVT_FAIL|cvtrtc;
 	}
 

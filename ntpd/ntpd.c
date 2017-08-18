@@ -374,7 +374,7 @@ parse_cmdline_opts(
 					"command line interface update interval %ld must not be negative\n",
 					val);
 				msyslog(LOG_ERR,
-					"command line interface update interval %ld must not be negative",
+					"CONFIG: command line interface update interval %ld must not be negative",
 					val);
 				exit(0);
 			}
@@ -435,7 +435,7 @@ main(
 static void
 catch_danger(int signo)
 {
-	msyslog(LOG_INFO, "ntpd: setpgid(): %m");
+	msyslog(LOG_INFO, "ERR: setpgid(): %m");
 	/* Make the system believe we'll free something, but don't do it! */
 	return;
 }
@@ -449,7 +449,7 @@ set_process_priority(void)
 {
 # ifdef DEBUG
 	if (debug > 1) /* SPECIAL DEBUG */
-		msyslog(LOG_DEBUG, "set_process_priority: %s",
+		msyslog(LOG_DEBUG, "INIT: set_process_priority: %s",
 			((!need_priority)
 			 ? "Leave priority alone"
 			 : "Attempt to set priority"
@@ -472,13 +472,13 @@ set_process_priority(void)
 				sched.sched_priority = config_priority;
 		}
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
-			msyslog(LOG_ERR, "sched_setscheduler(): %m");
+			msyslog(LOG_ERR, "INIT: sched_setscheduler(): %m");
 		else
 			need_priority = false;
 	}
 #endif
 	if (need_priority)
-		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
+		msyslog(LOG_ERR, "INIT: set_process_priority: No way found to improve our priority");
 }
 
 const char *ntpd_version(void)
@@ -542,7 +542,7 @@ ntpdmain(
 		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
 
-		msyslog(LOG_NOTICE, "%s: Starting", ntpd_version());
+		msyslog(LOG_NOTICE, "INIT: %s: Starting", ntpd_version());
 
 		/* Note that every arg has an initial space character */
 		snprintf(cp, sizeof(buf), "Command line:");
@@ -553,14 +553,14 @@ ntpdmain(
 				" %s", saved_argv[i]);
 			cp += strlen(cp);
 		}
-		msyslog(LOG_INFO, "%s", buf);
+		msyslog(LOG_INFO, "INIT: %s", buf);
 	}
 
 	uid = getuid();
 	if (uid && !dumpopts) {
 		termlogit = true;
 		msyslog(LOG_ERR,
-			"must be run as root, not uid %ld", (long)uid);
+			"INIT: must be run as root, not uid %ld", (long)uid);
 		exit(1);
 	}
 
@@ -578,7 +578,7 @@ ntpdmain(
 		termlogit = true;
 		exit_code = (errno) ? errno : -1;
 		msyslog(LOG_ERR,
-			"Pipe creation failed for --wait-sync: %m");
+			"INIT: Pipe creation failed for --wait-sync: %m");
 		exit(exit_code);
 	    }
 	    waitsync_fd_to_close = pipe_fds[1];
@@ -595,7 +595,7 @@ ntpdmain(
 		rc = fork();
 		if (-1 == rc) {
 			exit_code = (errno) ? errno : -1;
-			msyslog(LOG_ERR, "fork: %m");
+			msyslog(LOG_ERR, "INIT: fork: %m");
 			exit(exit_code);
 		}
 		if (rc > 0) {	
@@ -626,7 +626,7 @@ ntpdmain(
 		setup_logfile(logfilename);
 
 		if (setsid() == (pid_t)-1)
-			msyslog(LOG_ERR, "setsid(): %m");
+			msyslog(LOG_ERR, "INIT: setsid(): %m");
 #  ifdef SIGDANGER
 		/* Don't get killed by low-on-memory signal. */
 		sa.sa_handler = catch_danger;
@@ -762,7 +762,7 @@ ntpdmain(
 		    unsigned long tkey = (unsigned long)atol(ntp_optarg);
 		    if (tkey == 0 || tkey > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
-				"command line trusted key %s is invalid",
+				"INIT: command line trusted key %s is invalid",
 				ntp_optarg);
 			exit(1);
 		    } else {
@@ -789,7 +789,7 @@ ntpdmain(
                                     (unsigned short) (RW | DEF));
                 break;
             default:
-		msyslog(LOG_ERR, "Unknown option: %c", (char)op);
+		msyslog(LOG_ERR, "INIT: Unknown option: %c", (char)op);
 		exit(1);
 	    }
 	}
@@ -805,13 +805,13 @@ ntpdmain(
 	    rlim.rlim_max = rlim.rlim_cur = RLIM_INFINITY;
 #ifdef RLIMIT_MEMLOCK
 	    if (setrlimit(RLIMIT_MEMLOCK, &rlim) < 0)
-		msyslog(LOG_WARNING, "setrlimit() failed: not locking into RAM");
+		msyslog(LOG_WARNING, "INIT: setrlimit() failed: not locking into RAM");
 	    else
 #endif
 	    if (mlockall(MCL_CURRENT|MCL_FUTURE) < 0)
-		msyslog(LOG_WARNING, "mlockall() failed: not locking into RAM");
+		msyslog(LOG_WARNING, "INIT: mlockall() failed: not locking into RAM");
 	    else
-		msyslog(LOG_INFO, "successfully locked into RAM");
+		msyslog(LOG_INFO, "INIT: successfully locked into RAM");
 	}
 
 #ifdef ENABLE_EARLY_DROPROOT
@@ -825,7 +825,7 @@ ntpdmain(
 		 * ports that allow binding to NTP_PORT with uid != 0
 		 */
 		disable_dynamic_updates = true;
-		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
+		msyslog(LOG_INFO, "INIT: running as non-root disables dynamic interface tracking");
 	}
 #endif
 
@@ -876,12 +876,12 @@ ntpdmain(
 		else if (opt_ipv6)
 			ipv4_works = false;
 	} else if (!ipv4_works && !ipv6_works) {
-		msyslog(LOG_ERR, "Neither IPv4 nor IPv6 networking detected, fatal.");
+		msyslog(LOG_ERR, "INIT: Neither IPv4 nor IPv6 networking detected, fatal.");
 		exit(1);
 	} else if (opt_ipv4 && !ipv4_works)
-		msyslog(LOG_WARNING, "-4/--ipv4 ignored, IPv4 networking not found.");
+		msyslog(LOG_WARNING, "INIT: -4/--ipv4 ignored, IPv4 networking not found.");
 	else if (opt_ipv6 && !ipv6_works)
-		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
+		msyslog(LOG_WARNING, "INIT: -6/--ipv6 ignored, IPv6 networking not found.");
 
 	/*
 	 * Get the configuration.
@@ -891,8 +891,8 @@ ntpdmain(
 	check_minsane();
 
         if ( 8 > sizeof(time_t) ) {
-	    msyslog(LOG_ERR, "This system has a 32-bit time_t.");
-	    msyslog(LOG_ERR, "This ntpd will fail on 2038-01-19T03:14:07Z.");
+	    msyslog(LOG_ERR, "INIT: This system has a 32-bit time_t.");
+	    msyslog(LOG_ERR, "INIT: This ntpd will fail on 2038-01-19T03:14:07Z.");
         }
 
 	loop_config(LOOP_DRIFTINIT, 0);
@@ -902,7 +902,7 @@ ntpdmain(
 	/* drop root privileges */
 	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0) && interface_interval) {
 		interface_interval = 0;
-		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
+		msyslog(LOG_INFO, "INIT: running as non-root disables dynamic interface tracking");
 	}
 #endif
 	
@@ -979,7 +979,7 @@ static void mainloop(void)
 # endif
 					(*rbuf->receiver)(rbuf);
 				} else {
-					msyslog(LOG_ERR, "fatal: receive buffer callback NULL");
+					msyslog(LOG_ERR, "ERR: fatal: receive buffer callback NULL");
 					abort();
 				}
 
@@ -1001,7 +1001,7 @@ static void mainloop(void)
 		 */
 		if (sawHUP) {
 			sawHUP = false;
-			msyslog(LOG_INFO, "Saw SIGHUP");
+			msyslog(LOG_INFO, "LOG: Saw SIGHUP");
 
 			reopen_logfile();
 
@@ -1019,16 +1019,16 @@ static void mainloop(void)
 # if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_leap != LEAP_NOTINSYNC) {
 			mdnsreg = current_time;
-			msyslog(LOG_INFO, "Attempting to register mDNS");
+			msyslog(LOG_INFO, "INIT: Attempting to register mDNS");
 			if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL,
 			    htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
 				if (!--mdnstries) {
-					msyslog(LOG_ERR, "Unable to register mDNS, giving up.");
+					msyslog(LOG_ERR, "INIT: Unable to register mDNS, giving up.");
 				} else {	
-					msyslog(LOG_INFO, "Unable to register mDNS, will try later.");
+					msyslog(LOG_INFO, "INIT: Unable to register mDNS, will try later.");
 				}
 			} else {
-				msyslog(LOG_INFO, "mDNS service registered.");
+				msyslog(LOG_INFO, "INIT: mDNS service registered.");
 				mdnsreg = false;
 			}
 		}
@@ -1051,7 +1051,7 @@ finish_safe(
 	sig_desc = strsignal(sig);
 	if (sig_desc == NULL)
 		sig_desc = "";
-	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
+	msyslog(LOG_NOTICE, "ERR: %s exiting on signal %d (%s)", progname,
 		sig, sig_desc);
 	/* See Bug 2513 and Bug 2522 re the unlink of PIDFILE */
 # if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
@@ -1131,7 +1131,7 @@ wait_child_sync_if(
 				continue;
 			exit_code = (errno) ? errno : -1;
 			msyslog(LOG_ERR,
-				"--wait-sync select failed: %m");
+				"ERR: --wait-sync select failed: %m");
 			return exit_code;
 		}
 		if (0 == rc) {
@@ -1192,9 +1192,9 @@ static void check_minsane()
     }
 
     if (servers >= 5)
-	msyslog(LOG_ERR, "Found %d servers, suggest minsane at least 3", servers);
+	msyslog(LOG_ERR, "SYNC: Found %d servers, suggest minsane at least 3", servers);
     else if (servers == 4)
-        msyslog(LOG_ERR, "Found 4 servers, suggest minsane of 2");
+        msyslog(LOG_ERR, "SYNC: Found 4 servers, suggest minsane of 2");
 
 }
 
@@ -1214,7 +1214,7 @@ moredebug(
 	if (debug < 255) /* SPECIAL DEBUG */
 	{
 		debug++;
-		msyslog(LOG_DEBUG, "debug raised to %d", debug);
+		msyslog(LOG_DEBUG, "LOG: debug raised to %d", debug);
 	}
 	errno = saved_errno;
 }
@@ -1234,7 +1234,7 @@ lessdebug(
 	if (debug > 0) /* SPECIAL DEBUG */
 	{
 		debug--;
-		msyslog(LOG_DEBUG, "debug lowered to %d", debug);
+		msyslog(LOG_DEBUG, "LOG: debug lowered to %d", debug);
 	}
 	errno = saved_errno;
 }
@@ -1252,7 +1252,7 @@ no_debug(
 {
 	int saved_errno = errno;
 
-	msyslog(LOG_DEBUG, "ntpd not compiled for debugging (signal %d)", sig);
+	msyslog(LOG_DEBUG, "LOG: ntpd not compiled for debugging (signal %d)", sig);
 	errno = saved_errno;
 }
 # endif	/* !DEBUG */
@@ -1298,7 +1298,7 @@ close_all_beyond(
 	 * calls)
 	 */
 	if (fcntl(keep_fd + 1, F_CLOSEM, 0) == -1)
-		msyslog(LOG_ERR, "F_CLOSEM(%d): %m", keep_fd + 1);
+		msyslog(LOG_ERR, "INIT: F_CLOSEM(%d): %m", keep_fd + 1);
 # else  /* !HAVE_CLOSEFROM && !F_CLOSEM follows */
 	int fd;
 	int max_fd;
@@ -1306,7 +1306,7 @@ close_all_beyond(
 	/* includes POSIX case */
 	max_fd = sysconf(_SC_OPEN_MAX);
 	if (10000 < max_fd)
-		msyslog(LOG_ERR, "close_all_beyond: closing %d files", max_fd);
+		msyslog(LOG_ERR, "INIT: close_all_beyond: closing %d files", max_fd);
 	for (fd = keep_fd + 1; fd < max_fd; fd++)
 		close(fd);
 # endif /* !HAVE_CLOSEFROM && !F_CLOSEM */

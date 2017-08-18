@@ -449,7 +449,7 @@ free_peer(
 			     struct peer);
 		if (NULL == unlinked) {
 			peer_hash_count[hash]++;
-			msyslog(LOG_ERR, "peer %s not in address table!",
+			msyslog(LOG_ERR, "ERR: peer %s not in address table!",
 				socktoa(&p->srcadr));
 		}
 	}
@@ -463,7 +463,7 @@ free_peer(
 	if (NULL == unlinked) {
 		assoc_hash_count[hash]++;
 		msyslog(LOG_ERR,
-			"peer %s not in association ID table!",
+			"ERR: peer %s not in association ID table!",
 			socktoa(&p->srcadr));
 	}
 
@@ -471,7 +471,7 @@ free_peer(
 	UNLINK_SLIST(unlinked, peer_list, p, p_link,
 		     struct peer);
 	if (NULL == unlinked)
-		msyslog(LOG_ERR, "%s not in peer list!",
+		msyslog(LOG_ERR, "ERR: %s not in peer list!",
 			socktoa(&p->srcadr));
 
 	if (p->hostname != NULL)
@@ -538,7 +538,7 @@ set_peerdstadr(
 		p->dstadr->peercnt--;
 		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,
 			     struct peer);
-		msyslog(LOG_INFO, "%s unlink local addr %s -> %s",
+		msyslog(LOG_INFO, "REFCLOCK: %s unlink local addr %s -> %s",
 			socktoa(&p->srcadr), latoa(p->dstadr),
 			latoa(dstadr));
 	}

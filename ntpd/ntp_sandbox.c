@@ -70,7 +70,7 @@ bool sandbox(const bool droproot,
 #if !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS) && !defined(HAVE_SYS_CLOCKCTL_H)
 	if (droproot) {
 		msyslog(LOG_ERR,
-			"root can't be dropped due to missing capabilities.");
+			"INIT: root can't be dropped due to missing capabilities.");
 		exit(-1);
 	}
 #endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)  && !defined(HAVE_SYS_CLOCKCTL_H) */
@@ -79,7 +79,7 @@ bool sandbox(const bool droproot,
 #  ifdef HAVE_LINUX_CAPABILITY
 		/* set flag: keep privileges across setuid() call. */
 		if (prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1) {
-			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
+			msyslog( LOG_ERR, "INIT: prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
 			exit(-1);
 		}
 #  elif defined(HAVE_SOLARIS_PRIVS)
@@ -87,7 +87,7 @@ bool sandbox(const bool droproot,
 #  else
 		/* we need a user to switch to */
 		if (user == NULL) {
-			msyslog(LOG_ERR, "Need user name to drop root privileges (see -u flag!)" );
+			msyslog(LOG_ERR, "INIT: Need user name to drop root privileges (see -u flag!)" );
 			exit(-1);
 		}
 #  endif	/* HAVE_LINUX_CAPABILITY || HAVE_SOLARIS_PRIVS */
@@ -104,7 +104,7 @@ bool sandbox(const bool droproot,
 					sw_gid = pw->pw_gid;
 				} else {
 					errno = 0;
-					msyslog(LOG_ERR, "Cannot find user ID %s", user);
+					msyslog(LOG_ERR, "INIT: Cannot find user ID %s", user);
 					exit (-1);
 				}
 
@@ -116,9 +116,9 @@ getuser:
 					sw_gid = pw->pw_gid;
 				} else {
 					if (errno)
-						msyslog(LOG_ERR, "getpwnam(%s) failed: %m", user);
+						msyslog(LOG_ERR, "INIT: getpwnam(%s) failed: %m", user);
 					else
-						msyslog(LOG_ERR, "Cannot find user `%s'", user);
+						msyslog(LOG_ERR, "INIT: Cannot find user `%s'", user);
 					exit (-1);
 				}
 			}
@@ -134,7 +134,7 @@ getgroup:
 					sw_gid = gr->gr_gid;
 				} else {
 					errno = 0;
-					msyslog(LOG_ERR, "Cannot find group `%s'", group);
+					msyslog(LOG_ERR, "INIT: Cannot find group `%s'", group);
 					exit (-1);
 				}
 			}
@@ -143,50 +143,50 @@ getgroup:
 		if (chrootdir ) {
 			/* make sure cwd is inside the jail: */
 			if (chdir(chrootdir)) {
-				msyslog(LOG_ERR, "Cannot chdir() to `%s': %m", chrootdir);
+				msyslog(LOG_ERR, "INIT: Cannot chdir() to `%s': %m", chrootdir);
 				exit (-1);
 			}
 			if (chroot(chrootdir)) {
-				msyslog(LOG_ERR, "Cannot chroot() to `%s': %m", chrootdir);
+				msyslog(LOG_ERR, "INIT: Cannot chroot() to `%s': %m", chrootdir);
 				exit (-1);
 			}
 			if (chdir("/")) {
-				msyslog(LOG_ERR, "Cannot chdir() to root after chroot(): %m");
+				msyslog(LOG_ERR, "INIT: Cannot chdir() to root after chroot(): %m");
 				exit (-1);
 			}
 		}
 #  ifdef HAVE_SOLARIS_PRIVS
 		if ((lowprivs = priv_str_to_set(LOWPRIVS, ",", NULL)) == NULL) {
-			msyslog(LOG_ERR, "priv_str_to_set() failed:%m");
+			msyslog(LOG_ERR, "INIT: priv_str_to_set() failed:%m");
 			exit(-1);
 		}
 		if ((highprivs = priv_allocset()) == NULL) {
-			msyslog(LOG_ERR, "priv_allocset() failed:%m");
+			msyslog(LOG_ERR, "INIT: priv_allocset() failed:%m");
 			exit(-1);
 		}
 		(void) getppriv(PRIV_PERMITTED, highprivs);
 		(void) priv_intersect(highprivs, lowprivs);
 		if (setppriv(PRIV_SET, PRIV_PERMITTED, lowprivs) == -1) {
-			msyslog(LOG_ERR, "setppriv() failed:%m");
+			msyslog(LOG_ERR, "INIT: setppriv() failed:%m");
 			exit(-1);
 		}
 #  endif /* HAVE_SOLARIS_PRIVS */
                 /* FIXME? Apple takes an int as 2nd argument */
 		if (user && initgroups(user, (gid_t)sw_gid)) {
-			msyslog(LOG_ERR, "Cannot initgroups() to user `%s': %m", user);
+			msyslog(LOG_ERR, "INIT: Cannot initgroups() to user `%s': %m", user);
 			exit (-1);
 		}
 		if (group && setgid(sw_gid)) {
-			msyslog(LOG_ERR, "Cannot setgid() to group `%s': %m", group);
+			msyslog(LOG_ERR, "INIT: Cannot setgid() to group `%s': %m", group);
 			exit (-1);
 		}
 		if (group && setegid(sw_gid)) {
-			msyslog(LOG_ERR, "Cannot setegid() to group `%s': %m", group);
+			msyslog(LOG_ERR, "INIT: Cannot setegid() to group `%s': %m", group);
 			exit (-1);
 		}
 		if (group) {
 			if (0 != setgroups(1, &sw_gid)) {
-				msyslog(LOG_ERR, "setgroups(1, %u) failed: %m",
+				msyslog(LOG_ERR, "INIT: setgroups(1, %u) failed: %m",
                                         sw_gid);
 				exit (-1);
 			}
@@ -194,16 +194,16 @@ getgroup:
 		else if (pw)
 			if (0 != initgroups(pw->pw_name, (gid_t)pw->pw_gid)) {
 				msyslog(LOG_ERR,
-                                        "initgroups(<%s>, %u) filed: %m",
+                                        "INIT: initgroups(<%s>, %u) filed: %m",
                                         pw->pw_name, pw->pw_gid);
 				exit (-1);
 			}
 		if (user && setuid(sw_uid)) {
-			msyslog(LOG_ERR, "Cannot setuid() to user `%s': %m", user);
+			msyslog(LOG_ERR, "INIT: Cannot setuid() to user `%s': %m", user);
 			exit (-1);
 		}
 		if (user && seteuid(sw_uid)) {
-			msyslog(LOG_ERR, "Cannot seteuid() to user `%s': %m", user);
+			msyslog(LOG_ERR, "INIT: Cannot seteuid() to user `%s': %m", user);
 			exit (-1);
 		}
 
@@ -235,13 +235,13 @@ getgroup:
 			caps = cap_from_text(captext);
 			if (!caps) {
 				msyslog(LOG_ERR,
-					"cap_from_text(%s) failed: %m",
+					"INIT: cap_from_text(%s) failed: %m",
 					captext);
 				exit(-1);
 			}
 			if (-1 == cap_set_proc(caps)) {
 				msyslog(LOG_ERR,
-					"cap_set_proc() failed to drop root privs: %m");
+					"INIT: cap_set_proc() failed to drop root privs: %m");
 				exit(-1);
 			}
 			cap_free(caps);
@@ -249,11 +249,11 @@ getgroup:
 #  endif	/* HAVE_LINUX_CAPABILITY */
 #  ifdef HAVE_SOLARIS_PRIVS
 		if (priv_delset(lowprivs, "proc_setid") == -1) {
-			msyslog(LOG_ERR, "priv_delset() failed:%m");
+			msyslog(LOG_ERR, "INIT: priv_delset() failed:%m");
 			exit(-1);
 		}
 		if (setppriv(PRIV_SET, PRIV_PERMITTED, lowprivs) == -1) {
-			msyslog(LOG_ERR, "setppriv() failed:%m");
+			msyslog(LOG_ERR, "INIT: setppriv() failed:%m");
 			exit(-1);
 		}
 		priv_freeset(lowprivs);
@@ -276,7 +276,7 @@ getgroup:
         signal_no_reset1(SIGSYS, catchTrap);
 
 	if (NULL == ctx) {
-		msyslog(LOG_ERR, "sandbox: seccomp_init() failed: %m");
+		msyslog(LOG_ERR, "INIT: sandbox: seccomp_init() failed: %m");
 		exit (1);
 		}
 
@@ -412,18 +412,18 @@ int scmp_sc[] = {
 			if (seccomp_rule_add(ctx,
 			    SCMP_ACT_ALLOW, scmp_sc[i], 0) < 0) {
 				msyslog(LOG_ERR,
-				    "sandbox: seccomp_rule_add() failed: %m");
+				    "INIT: sandbox: seccomp_rule_add() failed: %m");
 			    exit(1);
 			}
 		}
 	}
 
 	if (seccomp_load(ctx) < 0) {
-		msyslog(LOG_ERR, "sandbox: seccomp_load() failed: %m");
+		msyslog(LOG_ERR, "INIT: sandbox: seccomp_load() failed: %m");
 		exit(1);
 	}
 	else {
-		msyslog(LOG_NOTICE, "sandbox: seccomp enabled.");
+		msyslog(LOG_NOTICE, "INIT: sandbox: seccomp enabled.");
 	}
 #endif /* HAVE_SECCOMP_H */
 
@@ -464,9 +464,9 @@ static void catchTrap(int sig, siginfo_t *si, void *u)
 {
 	UNUSED_ARG(sig);	/* signal number */
 	UNUSED_ARG(u);	        /* unused ucontext_t */
-	msyslog(LOG_ERR, "ERROR: SIGSYS: got a trap.\n");
+	msyslog(LOG_ERR, "ERR: SIGSYS: got a trap.\n");
 	if ( si->si_syscall ) {
-	    msyslog(LOG_ERR, "ERROR: SIGSYS/seccomp bad syscall %d/%#x\n",
+	    msyslog(LOG_ERR, "ERR: SIGSYS/seccomp bad syscall %d/%#x\n",
 		    si->si_syscall, si->si_arch);
         }
 #ifndef BACKTRACE_DISABLED

@@ -51,25 +51,25 @@ enable_packetstamps(
 #if defined (SO_TIMESTAMPNS)
 	if (!once) {
 		once = true;
-		msyslog(LOG_INFO, "Using SO_TIMESTAMPNS");
+		msyslog(LOG_INFO, "INIT: Using SO_TIMESTAMPNS");
 	}
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
 			       (const void *)&on, sizeof(on)))
 		msyslog(LOG_DEBUG,
-			"setsockopt SO_TIMESTAMPNS on fails on address %s: %m",
+			"ERR: setsockopt SO_TIMESTAMPNS on fails on address %s: %m",
 				socktoa(addr));
 	else
-		DPRINT(4, ("setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
+		DPRINT(4, ("ERR: setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
 				    fd, socktoa(addr)));
 #elif defined(SO_TIMESTAMP)
 	if (!once) {
 		once = true;
-		msyslog(LOG_INFO, "Using SO_TIMESTAMP");
+		msyslog(LOG_INFO, "INIT: Using SO_TIMESTAMP");
 	}
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
 			       (const void*)&on, sizeof(on)))
 		msyslog(LOG_DEBUG,
-			"setsockopt SO_TIMESTAMP on fails on address %s: %m",
+			"ERR: setsockopt SO_TIMESTAMP on fails on address %s: %m",
 			socktoa(addr));
 	else
 		DPRINT(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
@@ -113,7 +113,7 @@ fetch_packetstamp(
 	if (NULL == cmsghdr) {
 		DPRINT(4, ("fetch_timestamp: can't find timestamp\n"));
 		msyslog(LOG_ERR,
-			"fetch_timestamp: no msghdrs, %s",
+			"ERR: fetch_timestamp: no msghdrs, %s",
 			socktoa(&rb->recv_srcadr));
 		exit(2);
 		/* return ts;	** Kludge to use time from select. */
@@ -129,7 +129,7 @@ fetch_packetstamp(
                         ("fetch_timestamp: strange control message 0x%x\n",
 			     (unsigned)cmsghdr->cmsg_type));
 		msyslog(LOG_ERR,
-			"fetch_timestamp: strange control message 0x%x",
+			"ERR: fetch_timestamp: strange control message 0x%x",
                              (unsigned)cmsghdr->cmsg_type);
 		exit(2);
 		/* Could loop and skip strange types. */

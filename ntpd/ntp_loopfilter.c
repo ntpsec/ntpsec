@@ -259,14 +259,14 @@ ntp_adjtime_error_handler(
 	    case -1:
 		switch (saved_errno) {
 		    case EFAULT:
-			msyslog(LOG_ERR, "%s: %s line %d: invalid "
+			msyslog(LOG_ERR, "CLOCK: %s: %s line %d: invalid "
                                          "struct timex pointer: 0x%lx",
 			    caller, file_name(), line,
 			    (long unsigned)((void *)ptimex)
 			);
 		    break;
 		    case EINVAL:
-			msyslog(LOG_ERR, "%s: %s line %d: invalid struct timex \"constant\" element value: %ld",
+			msyslog(LOG_ERR, "CLOCK: %s: %s line %d: invalid struct timex \"constant\" element value: %ld",
 			    caller, file_name(), line,
 			    (long)(ptimex->constant)
 			);
@@ -275,53 +275,55 @@ ntp_adjtime_error_handler(
 			if (tai_call) {
 			    errno = saved_errno;
 			    msyslog(LOG_ERR,
-				"%s: ntp_adjtime(TAI) failed: %m",
+				"CLOCK: %s: ntp_adjtime(TAI) failed: %m",
 				caller);
 			}
 			errno = saved_errno;
-			msyslog(LOG_ERR, "%s: %s line %d: ntp_adjtime: %m",
-			    caller, file_name(), line
+			msyslog(LOG_ERR,
+				"CLOCK: %s: %s line %d: ntp_adjtime: %m",
+				caller, file_name(), line
 			);
 		    break;
 		    default:
-			msyslog(LOG_NOTICE, "%s: %s line %d: unhandled errno value %d after failed ntp_adjtime call",
-			    caller, file_name(), line,
-			    saved_errno
+			msyslog(LOG_NOTICE,
+				"CLOCK: %s: %s line %d: unhandled errno value %d after failed ntp_adjtime call",
+				caller, file_name(), line,
+				saved_errno
 			);
 		    break;
 		}
 	    break;
 #ifdef TIME_OK
 	    case TIME_OK: /* 0: synchronized, no leap second warning */
-		/* msyslog(LOG_INFO, "kernel reports time is synchronized normally"); */
+		/* msyslog(LOG_INFO, "CLOCK: kernel reports time is synchronized normally"); */
 	    break;
 #else
 # warning TIME_OK is not defined
 #endif
 #ifdef TIME_INS
 	    case TIME_INS: /* 1: positive leap second warning */
-		msyslog(LOG_INFO, "kernel reports leap second insertion scheduled");
+		msyslog(LOG_INFO, "CLOCK: kernel reports leap second insertion scheduled");
 	    break;
 #else
 # warning TIME_INS is not defined
 #endif
 #ifdef TIME_DEL
 	    case TIME_DEL: /* 2: negative leap second warning */
-		msyslog(LOG_INFO, "kernel reports leap second deletion scheduled");
+		msyslog(LOG_INFO, "CLOCK: kernel reports leap second deletion scheduled");
 	    break;
 #else
 # warning TIME_DEL is not defined
 #endif
 #ifdef TIME_OOP
 	    case TIME_OOP: /* 3: leap second in progress */
-		msyslog(LOG_INFO, "kernel reports leap second in progress");
+		msyslog(LOG_INFO, "CLOCK: kernel reports leap second in progress");
 	    break;
 #else
 # warning TIME_OOP is not defined
 #endif
 #ifdef TIME_WAIT
 	    case TIME_WAIT: /* 4: leap second has occurred */
-		msyslog(LOG_INFO, "kernel reports leap second has occurred");
+		msyslog(LOG_INFO, "CLOCK: kernel reports leap second has occurred");
 	    break;
 #else
 # warning TIME_WAIT is not defined
@@ -421,16 +423,16 @@ or, from ntp_adjtime():
 		 * so an initial TIME_ERROR message is less confising,
 		 * or skipping the first message (ugh),
 		 * or ???
-		 * msyslog(LOG_INFO, "kernel reports time synchronization lost");
+		 * msyslog(LOG_INFO, "CLOCK: kernel reports time synchronization lost");
 		 */
-		msyslog(LOG_INFO, "kernel reports TIME_ERROR: %#x: %s",
+		msyslog(LOG_INFO, "CLOCK: kernel reports TIME_ERROR: %#x: %s",
 			(unsigned)ptimex->status, des);
 	    break;
 #else
 # warning TIME_ERROR is not defined
 #endif
 	    default:
-		msyslog(LOG_NOTICE, "%s: %s line %d: unhandled return value %d from ntp_adjtime() in %s at line %d",
+		msyslog(LOG_NOTICE, "CLOCK: %s: %s line %d: unhandled return value %d from ntp_adjtime() in %s at line %d",
 		    caller, file_name(), line,
 		    ret,
 		    __func__, __LINE__
@@ -521,12 +523,12 @@ local_clock(
 		if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
 		   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
 			step_systime(fp_offset, ntp_set_tod);
-			msyslog(LOG_NOTICE, "ntpd: time set %+.6f s",
+			msyslog(LOG_NOTICE, "CLOCK: time set %+.6f s",
 			    fp_offset);
 			printf("ntpd: time set %+.6fs\n", fp_offset);
 		} else {
 			adj_systime(fp_offset, adjtime);
-			msyslog(LOG_NOTICE, "ntpd: time slew %+.6f s",
+			msyslog(LOG_NOTICE, "CLOCK: time slew %+.6f s",
 			    fp_offset);
 			printf("ntpd: time slew %+.6fs\n", fp_offset);
 		}
@@ -582,7 +584,7 @@ local_clock(
 	   || force_step_once ) {
 		if (force_step_once) {
 			force_step_once = false;  /* we want this only once after startup */
-			msyslog(LOG_NOTICE, "Doing intital time step" );
+			msyslog(LOG_NOTICE, "CLOCK: Doing intital time step" );
 		}
 
 		switch (state) {
@@ -860,7 +862,7 @@ local_clock(
 	 */
 	if (fabs(clock_frequency) > NTP_MAXFREQ)
 		msyslog(LOG_NOTICE,
-		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
+		    "CLOCK: frequency error %.0f PPM exceeds tolerance %.0f PPM",
 		    clock_frequency * US_PER_S, NTP_MAXFREQ * US_PER_S);
 	dtemp = SQUARE(clock_frequency - drift_comp);
 	if (clock_frequency > NTP_MAXFREQ)
@@ -1118,7 +1120,7 @@ start_kern_loop(void)
 	newsigsys.sa_handler = pll_trap;
 	newsigsys.sa_flags = 0;
 	if (sigaction(SIGSYS, &newsigsys, &sigsys)) {
-		msyslog(LOG_ERR, "sigaction() trap SIGSYS: %m");
+		msyslog(LOG_ERR, "ERR: sigaction() trap SIGSYS: %m");
 		pll_control = false;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
@@ -1128,7 +1130,7 @@ start_kern_loop(void)
 		}
 		if (sigaction(SIGSYS, &sigsys, NULL)) {
 			msyslog(LOG_ERR,
-			    "sigaction() restore SIGSYS: %m");
+			    "ERR: sigaction() restore SIGSYS: %m");
 			pll_control = false;
 		}
 	}
@@ -1362,7 +1364,7 @@ loop_config(
 	case LOOP_LEAP:		/* not used, fall through */
 	default:
 		msyslog(LOG_NOTICE,
-		    "loop_config: unsupported option %d", item);
+		    "CONFIG: loop_config: unsupported option %d", item);
 	}
 }
 

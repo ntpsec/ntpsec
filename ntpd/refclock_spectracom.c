@@ -587,7 +587,7 @@ spectracom_control(
 		return;
 	}
 
-	msyslog(LOG_WARNING, "%s flag1 1 but PPSAPI fails",
+	msyslog(LOG_WARNING, "REFCLOCK %s flag1 1 but PPSAPI fails",
 		refclock_name(peer));
 }
 #endif	/* HAVE_PPSAPI */

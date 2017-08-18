@@ -394,7 +394,7 @@ trimble_start (
 
 	if (tcgetattr(fd, &tio) < 0) {
 		msyslog(LOG_ERR, 
-			"Trimble(%d) tcgetattr(fd, &tio): %m",unit);
+			"REFCLOCK: Trimble(%d) tcgetattr(fd, &tio): %m",unit);
 #ifdef DEBUG
 		printf("Trimble(%d) tcgetattr(fd, &tio)\n",unit);
 #endif
@@ -416,24 +416,24 @@ trimble_start (
 		/* Normal mode, do nothing */
 		break;
 	    case CLK_PRAECIS:
-		msyslog(LOG_NOTICE, "Trimble(%d) Praecis mode enabled"
+		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) Praecis mode enabled"
 			,unit);
 		break;
 	    case CLK_THUNDERBOLT:
-		msyslog(LOG_NOTICE, "Trimble(%d) Thunderbolt mode enabled"
+		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) Thunderbolt mode enabled"
 			,unit);
 		tio.c_cflag = (CS8|CLOCAL|CREAD);
 		break;
 	    case CLK_ACUTIME:
-		msyslog(LOG_NOTICE, "Trimble(%d) Acutime Gold mode enabled"
+		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) Acutime Gold mode enabled"
 			,unit);
 		break;
 	    default:
-		msyslog(LOG_NOTICE, "Trimble(%d) mode unknown",unit);
+		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) mode unknown",unit);
 		break;
 	}
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
-		msyslog(LOG_ERR, "Trimble(%d) tcsetattr(fd, &tio): %m",unit);
+		msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) tcsetattr(fd, &tio): %m",unit);
 #ifdef DEBUG
 		printf("Trimble(%d) tcsetattr(fd, &tio)\n",unit);
 #endif
@@ -482,7 +482,7 @@ trimble_start (
 		up->build_week = 0;
 	}
 	if (up->build_week < MIN_BUILD_GPSWEEK || up->build_week > MAX_BUILD_GPSWEEK) {
-		msyslog(LOG_ERR, "Trimble(%d) ntpcal_get_build_date() failed: %u",
+		msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) ntpcal_get_build_date() failed: %u",
 		        unit, up->build_week);
 		close(fd);
 		pp->io.fd = -1;
@@ -1039,7 +1039,7 @@ trimble_receive (
 	DPRINT(1, ("trimble_receive: unit %d: %s\n",
 		   up->unit, prettydate(pp->lastrec)));
 	if (pp->hour == 0 && up->week > up->build_week + 1000)
-		msyslog(LOG_WARNING, "Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
+		msyslog(LOG_WARNING, "REFCLOCK: Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
 		        up->unit, up->week, up->build_week);
 
 	pp->lastref = pp->lastrec;
@@ -1078,7 +1078,7 @@ trimble_poll (
 
 	if(up->type == CLK_PRAECIS) {
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
-			msyslog(LOG_ERR, "Trimble(%d) write: %m:",unit);
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",unit);
 		else {
 			praecis_msg = true;
 			return;
@@ -1241,7 +1241,7 @@ HW_poll (
 	if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
 		DPRINT(1, ("Trimble HW_poll: unit %d: GET %m\n",
 			   up->unit));
-		msyslog(LOG_ERR, "Trimble(%d) HW_poll: ioctl(fd,GET): %m", 
+		msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) HW_poll: ioctl(fd,GET): %m", 
 			up->unit);
 		return -1;
 	}
@@ -1255,7 +1255,7 @@ HW_poll (
 	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) {
 		DPRINT(1, ("Trimble HW_poll: unit %d: SET \n", up->unit));
 		msyslog(LOG_ERR,
-			"Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
+			"REFCLOCK: Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
 			up->unit);
 		return -1;
 	}
@@ -1268,7 +1268,7 @@ HW_poll (
 	if (ioctl(pp->io.fd, TIOCMSET, &x) == -1) {
 		DPRINT(1, ("Trimble HW_poll: unit %d: UNSET \n", up->unit));
 		msyslog(LOG_ERR,
-			"Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m", 
+			"RECLOCK: Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m", 
 			up->unit);
 		return -1;
 	}

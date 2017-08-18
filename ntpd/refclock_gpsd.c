@@ -444,18 +444,18 @@ gpsd_init_check(void)
 	/* spool out the resolver errors */
 	for (idx = 0; idx < s_svcidx; ++idx) {
 		msyslog(LOG_WARNING,
-			"GPSD_JSON: failed to resolve '%s:%s', rc=%d (%s)",
+			"REFCLOCK: GPSD_JSON: failed to resolve '%s:%s', rc=%d (%s)",
 			s_svctab[idx][0], s_svctab[idx][1],
 			s_svcerr[idx], gai_strerror(s_svcerr[idx]));
 	}
 
 	/* check if it was fatal, or if we can proceed */
 	if (s_gpsd_addr == NULL)
-		msyslog(LOG_ERR, "%s",
-			"GPSD_JSON: failed to get socket address, giving up.");
+		msyslog(LOG_ERR,
+			"REFCLOCK: GPSD_JSON: failed to get socket address, giving up.");
 	else if (idx != 0)
 		msyslog(LOG_WARNING,
-			"GPSD_JSON: using '%s:%s' instead of '%s:%s'",
+			"REFCLOCK: GPSD_JSON: using '%s:%s' instead of '%s:%s'",
 			s_svctab[idx][0], s_svctab[idx][1],
 			s_svctab[0][0], s_svctab[0][1]);
 
@@ -516,12 +516,12 @@ gpsd_start(
                 }
 		if (-1 == ret ) {
                         /* more likely out of RAM */
-			msyslog(LOG_ERR, "%s: clock device name too long",
+			msyslog(LOG_ERR, "REFCLOCK: %s: clock device name too long",
 				up->logname);
 			goto dev_fail;
 		}
 		if (-1 == stat(up->device, &sb) || !S_ISCHR(sb.st_mode)) {
-			msyslog(LOG_ERR, "%s: '%s' is not a character device",
+			msyslog(LOG_ERR, "REFCLOCK: %s: '%s' is not a character device",
 				up->logname, up->device);
 			goto dev_fail;
 		}
@@ -551,7 +551,7 @@ gpsd_start(
 
 	/* If the daemon name lookup failed, just give up now. */
 	if (NULL == up->addr) {
-		msyslog(LOG_ERR, "%s: no GPSD socket address, giving up",
+		msyslog(LOG_ERR, "REFCLOCK: %s: no GPSD socket address, giving up",
 			up->logname);
 		goto dev_fail;
 	}
@@ -1033,7 +1033,7 @@ eval_auto(
 		if ((PPS_MAXCOUNT == up->ppscount) && up->fl_rawibt) {
 			up->fl_rawibt = 0;
 			msyslog(LOG_INFO,
-				"%s: expect valid PPS from now",
+				"REFCLOCK: %s: expect valid PPS from now",
 				up->logname);
 		}
 	} else {
@@ -1041,7 +1041,7 @@ eval_auto(
 		if ((0 == up->ppscount) && !up->fl_rawibt) {
 			up->fl_rawibt = -1;
 			msyslog(LOG_WARNING,
-				"%s: use TPV alone from now",
+				"REFCLOCK: %s: use TPV alone from now",
 				up->logname);
 		}
 	}
@@ -1443,7 +1443,7 @@ process_version(
 	if (0 == errno) {
 		if ( ! up->fl_vers)
 			msyslog(LOG_INFO,
-				"%s: GPSD revision=%s release=%s protocol=%u.%u",
+				"REFCLOCK: %s: GPSD revision=%s release=%s protocol=%u.%u",
 				up->logname, revision, release,
 				pvhi, pvlo);
 		up->proto_version = PROTO_VERSION(pvhi, pvlo);
@@ -1451,7 +1451,7 @@ process_version(
 	} else {
 		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
-				"%s: could not evaluate version data",
+				"REFCLOCK: %s: could not evaluate version data",
 				up->logname);
 		return;
 	}
@@ -1492,7 +1492,7 @@ process_version(
 		 * resulting data timeout will take care of the
 		 * connection!
 		 */
-		msyslog(LOG_ERR, "%s: failed to write watch request (%m)",
+		msyslog(LOG_ERR, "REFCLOCK: %s: failed to write watch request (%m)",
 			up->logname);
 	}
 }
@@ -1797,7 +1797,7 @@ gpsd_stop_socket(
 	if (-1 != pp->io.fd) {
 		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
-				"%s: closing socket to GPSD, fd=%d",
+				"REFCLOCK: %s: closing socket to GPSD, fd=%d",
 				up->logname, pp->io.fd);
 		else
 			DPRINT(1, ("%s: closing socket to GPSD, fd=%d\n",
@@ -1837,7 +1837,7 @@ gpsd_init_socket(
 	if (-1 == up->fdt) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"%s: cannot create GPSD socket: %m",
+				"REFCLOCK: %s: cannot create GPSD socket: %m",
 				up->logname);
 		goto no_socket;
 	}
@@ -1850,7 +1850,7 @@ gpsd_init_socket(
 	if (-1 == rc) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"%s: cannot set GPSD socket to non-blocking: %m",
+				"RECLOCK: %s: cannot set GPSD socket to non-blocking: %m",
 				up->logname);
 		goto no_socket;
 	}
@@ -1866,7 +1866,7 @@ gpsd_init_socket(
 	if (-1 == rc) {
 		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
-				"%s: cannot disable TCP nagle: %m",
+				"REFCLOCK: %s: cannot disable TCP nagle: %m",
 				up->logname);
 	}
 
@@ -1883,7 +1883,7 @@ gpsd_init_socket(
 
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"%s: cannot connect GPSD socket: %m",
+				"REFCLOCK: %s: cannot connect GPSD socket: %m",
 				up->logname);
 		goto no_socket;
 	}
@@ -1901,7 +1901,7 @@ gpsd_init_socket(
 	if (0 == io_addclock(&pp->io)) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"%s: failed to register with I/O engine",
+				"REFCLOCK: %s: failed to register with I/O engine",
 				up->logname);
 		goto no_socket;
 	}
@@ -1964,7 +1964,7 @@ gpsd_test_socket(
 		errtxt = strerror(ec);
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"%s: async connect to GPSD failed,"
+				"REFCLOCK: %s: async connect to GPSD failed,"
 				" fd=%d, ec=%d(%s)",
 				up->logname, up->fdt, ec, errtxt);
 		else
@@ -1983,7 +1983,7 @@ gpsd_test_socket(
 	if (0 == io_addclock(&pp->io)) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"%s: failed to register with I/O engine",
+				"REFCLOCK: %s: failed to register with I/O engine",
 				up->logname);
 		goto no_socket;
 	}

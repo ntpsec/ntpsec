@@ -385,24 +385,24 @@ leapsec_load_stream(
 		switch (rcheck)
 		{
 		case LSVALID_GOODHASH:
-			msyslog(LOG_NOTICE, "%s ('%s'): good hash signature",
+			msyslog(LOG_NOTICE, "CLOCK: %s ('%s'): good hash signature",
 				logPrefix, fname);
 			break;
 			
 		case LSVALID_NOHASH:
-			msyslog(LOG_ERR, "%s ('%s'): no hash signature",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): no hash signature",
 				logPrefix, fname);
 			break;
 		case LSVALID_BADHASH:
-			msyslog(LOG_ERR, "%s ('%s'): signature mismatch",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): signature mismatch",
 				logPrefix, fname);
 			break;
 		case LSVALID_BADFORMAT:
-			msyslog(LOG_ERR, "%s ('%s'): malformed hash signature",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): malformed hash signature",
 				logPrefix, fname);
 			break;
 		default:
-			msyslog(LOG_ERR, "%s ('%s'): unknown error code %d",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): unknown error code %d",
 				logPrefix, fname, rcheck);
 			break;
 		}
@@ -414,15 +414,15 @@ leapsec_load_stream(
 	if (!leapsec_load(pt, (leapsec_reader)getc, ifp)) {
 		switch (errno) {
 		case EINVAL:
-			msyslog(LOG_ERR, "%s ('%s'): bad transition time",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): bad transition time",
 				logPrefix, fname);
 			break;
 		case ERANGE:
-			msyslog(LOG_ERR, "%s ('%s'): times not ascending",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): times not ascending",
 				logPrefix, fname);
 			break;
 		default:
-			msyslog(LOG_ERR, "%s ('%s'): parsing error",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): parsing error",
 				logPrefix, fname);
 			break;
 		}
@@ -430,12 +430,12 @@ leapsec_load_stream(
 	}
 
 	if (pt->head.size)
-		msyslog(LOG_NOTICE, "%s ('%s'): loaded, expire=%s last=%s ofs=%d",
+		msyslog(LOG_NOTICE, "CLOCK: %s ('%s'): loaded, expire=%s last=%s ofs=%d",
 			logPrefix, fname, rfc3339time(pt->head.expire),
 			rfc3339time(pt->info[0].ttime), pt->info[0].taiof);
 	else
 		msyslog(LOG_NOTICE,
-			"%s ('%s'): loaded, expire=%s ofs=%d (no entries after build date)",
+			"CLOCK: %s ('%s'): loaded, expire=%s ofs=%d (no entries after build date)",
 			logPrefix, fname, rfc3339time(pt->head.expire),
 			pt->head.base_tai);
 	
@@ -462,7 +462,7 @@ leapsec_load_file(
 	/* coverity[toctou] */
 	if (0 != stat(fname, &sb_new)) {
 		if (logall)
-			msyslog(LOG_ERR, "%s ('%s'): stat failed: %m",
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): stat failed: %m",
 				logPrefix, fname);
 		return false;
 	}
@@ -497,7 +497,7 @@ leapsec_load_file(
 	if ((fp = fopen(fname, "r")) == NULL) {
 		if (logall)
 			msyslog(LOG_ERR,
-				"%s ('%s'): open failed: %m",
+				"CLOCK: %s ('%s'): open failed: %m",
 				logPrefix, fname);
 		return false;
 	}

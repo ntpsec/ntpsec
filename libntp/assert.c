@@ -50,11 +50,11 @@ backtrace_log(void) {
 
 	nptrs = backtrace(buffer, BACKTRACE_MAXFRAME);
 	strings = backtrace_symbols(buffer, nptrs);
-	msyslog(LOG_ERR, "Stack trace:\n");
+	msyslog(LOG_ERR, "ERR: Stack trace:\n");
 	if (strings) {
 	   /* skip trace of this shim function */
 	   for (j = 1; j < nptrs; j++)
-	       msyslog(LOG_ERR, "  %s\n", strings[j]);
+	       msyslog(LOG_ERR, "ERR:  %s\n", strings[j]);
 
 	   free(strings);
 	}
@@ -96,10 +96,10 @@ backtrace_log(void) {
 	arg.count = 0;
 	_Unwind_Backtrace(btcallback, &arg);
 
-	msyslog(LOG_ERR, "Stack trace:\n");
+	msyslog(LOG_ERR, "ERR: Stack trace:\n");
 	/* skip trace of this shim function */
 	for (i = 1; i < arg.count; i++) {
-	    msyslog(LOG_ERR, "#%d %p in ??\n", i, buffer[i]);
+	    msyslog(LOG_ERR, "ERR: #%d %p in ??\n", i, buffer[i]);
 	}
 
 }
@@ -151,12 +151,12 @@ assertion_failed(
 
 	termlogit = true; /* insist log to terminal */
 
-	msyslog(LOG_ERR, "%s:%d: %s(%s) failed",
+	msyslog(LOG_ERR, "ERR: %s:%d: %s(%s) failed",
 		file, line, assertion_typetotext(type), cond);
 #ifndef BACKTRACE_DISABLED
         backtrace_log();
 #endif
-	msyslog(LOG_ERR, "exiting (due to assertion failure)");
+	msyslog(LOG_ERR, "ERR: exiting (due to assertion failure)");
 
 	abort();
 }

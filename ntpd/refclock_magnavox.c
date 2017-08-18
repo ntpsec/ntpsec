@@ -274,7 +274,7 @@ mx4200_config(
 	up->sloppyclockflag = pp->sloppyclockflag;
 	if (pp->sloppyclockflag & CLK_FLAG2) {
 		up->moving   = true;	/* Receiver on mobile platform */
-		msyslog(LOG_DEBUG, "mx4200_config: mobile platform");
+		msyslog(LOG_DEBUG, "REFCLOCK: mx4200_config: mobile platform");
 	} else {
 		up->moving   = false;	/* Static Installation */
 	}
@@ -293,18 +293,18 @@ mx4200_config(
 	if (time_pps_create(pp->io.fd, &up->pps_h) < 0) {
 		perror("time_pps_create");
 		msyslog(LOG_ERR,
-			"mx4200_config: time_pps_create failed: %m");
+			"REFCLOCK: mx4200_config: time_pps_create failed: %m");
 		return false;
 	}
 	if (time_pps_getcap(up->pps_h, &mode) < 0) {
 		msyslog(LOG_ERR,
-			"mx4200_config: time_pps_getcap failed: %m");
+			"REFCLOCK: mx4200_config: time_pps_getcap failed: %m");
 		return false;
 	}
 
 	if (time_pps_getparams(up->pps_h, &up->pps_p) < 0) {
 		msyslog(LOG_ERR,
-			"mx4200_config: time_pps_getparams failed: %m");
+			"REFCLOCK: mx4200_config: time_pps_getparams failed: %m");
 		return false;
 	}
 
@@ -318,7 +318,7 @@ mx4200_config(
 	if (time_pps_setparams(up->pps_h, &up->pps_p) < 0) {
 		perror("time_pps_setparams");
 		msyslog(LOG_ERR,
-			"mx4200_config: time_pps_setparams failed: %m");
+			"REFCLOCK: mx4200_config: time_pps_setparams failed: %m");
 		exit(1);
 	}
 
@@ -326,7 +326,7 @@ mx4200_config(
 			PPS_TSFMT_TSPEC) < 0) {
 		perror("time_pps_kcbind");
 		msyslog(LOG_ERR,
-			"mx4200_config: time_pps_kcbind failed: %m");
+			"REFCLOCK: mx4200_config: time_pps_kcbind failed: %m");
 		exit(1);
 	}
 
@@ -562,7 +562,7 @@ mx4200_ref(
 	    1);		/* Altitude Reference (0=WGS84 ellipsoid, 1=MSL geoid)*/
 
 	msyslog(LOG_DEBUG,
-	    "mx4200: reconfig to fixed location: %s %c, %s %c, %.2f m",
+	    "REFCLOCK: mx4200: reconfig to fixed location: %s %c, %s %c, %.2f m",
 		lats, nsc, lons, ewc, alt );
 
 }
@@ -986,7 +986,7 @@ mx4200_parse_t(
 	}
 	if ( second == 60 ) {
 		msyslog(LOG_DEBUG,
-		    "mx4200: leap second! %02d:%02d:%02d",
+		    "REFCLOCK: mx4200: leap second! %02d:%02d:%02d",
 		    hour, minute, second);
 	}
 
@@ -1060,7 +1060,7 @@ mx4200_parse_t(
 	 */
 	if (leapsec_warn != up->last_leap ) {
 		msyslog(LOG_DEBUG,
-		    "mx4200: leap second warning: %d to %d (%d)",
+		    "REFCLOCK: mx4200: leap second warning: %d to %d (%d)",
 		    up->last_leap, leapsec_warn, pp->leap);
 	}
 	up->last_leap = leapsec_warn;
@@ -1446,19 +1446,19 @@ mx4200_parse_s(
 
 		case PMVXG_D_STATUS:
 			msyslog(LOG_DEBUG,
-			  "mx4200: status: %s", pp->a_lastcode);
+			  "REFCLOCK: mx4200: status: %s", pp->a_lastcode);
 			break;
 		case PMVXG_D_MODEDATA:
 			msyslog(LOG_DEBUG,
-			  "mx4200: mode data: %s", pp->a_lastcode);
+			  "REFCLOCK: mx4200: mode data: %s", pp->a_lastcode);
 			break;
 		case PMVXG_D_SOFTCONF:
 			msyslog(LOG_DEBUG,
-			  "mx4200: firmware configuration: %s", pp->a_lastcode);
+			  "REFCLOCK: mx4200: firmware configuration: %s", pp->a_lastcode);
 			break;
 		case PMVXG_D_TRECOVUSEAGE:
 			msyslog(LOG_DEBUG,
-			  "mx4200: time recovery parms: %s", pp->a_lastcode);
+			  "REFCLOCK: mx4200: time recovery parms: %s", pp->a_lastcode);
 			break;
 		default:
 			return ("wrong rec-type");
@@ -1580,7 +1580,7 @@ mx4200_send(struct peer *peer, const char *fmt, ...)
 
 	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)
-	    msyslog(LOG_ERR, "mx4200_send: write: %s [%s]", buf, strerror(errno));
+	    msyslog(LOG_ERR, "TRFCLOCK: mx4200_send: write: %s [%s]", buf, strerror(errno));
 	mx4200_debug(peer, "mx4200_send: %d %s\n", m, buf);
 	va_end(ap);
 }

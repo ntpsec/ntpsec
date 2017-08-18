@@ -136,13 +136,13 @@ void
 freerecvbuf(recvbuf_t *rb)
 {
 	if (rb == NULL) {
-		msyslog(LOG_ERR, "freerecvbuff received NULL buffer");
+		msyslog(LOG_ERR, "ERR: freerecvbuff received NULL buffer");
 		return;
 	}
 
 	rb->used--;
 	if (rb->used != 0)
-		msyslog(LOG_ERR, "******** freerecvbuff non-zero usage: %d *******", rb->used);
+		msyslog(LOG_ERR, "ERR: ******** freerecvbuff non-zero usage: %d *******", rb->used);
 	LINK_SLIST(free_recv_list, rb, link);
 	free_recvbufs++;
 }
@@ -152,7 +152,7 @@ void
 add_full_recv_buffer(recvbuf_t *rb)
 {
 	if (rb == NULL) {
-		msyslog(LOG_ERR, "add_full_recv_buffer received NULL buffer");
+		msyslog(LOG_ERR, "ERR: add_full_recv_buffer received NULL buffer");
 		return;
 	}
 	LINK_FIFO(full_recv_fifo, rb, link);

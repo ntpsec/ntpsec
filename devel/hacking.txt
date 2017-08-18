@@ -533,6 +533,24 @@ Setting this option adds --rebase to all your pulls.  This may cause
 minor inconvenience when you have uncommitted local changes; you
 should be able to use "git stash" to get around that.
 
+== Logging tags ==
+
+To facilitate analysis of logs, log messages are tagged with an initial
+topic group token.  These are:
+
+DNS:: DNS Lookup
+MAC:: Message authentication hash computation
+AUTH:: Authorization-key handling
+ERR:: Low-level errors from resource-management libraries
+LOG:: Log switching and debug levels
+CLOCK:: Low-level clock manipulation and validation checks & leap-second code
+CONFIG:: Configuration parsing and interpretation
+INIT:: Daemon setup 
+SYNC:: Server synchronization
+PROTO:: Protocol machine actions
+REFCLOCK:: Reference clock and driver actions
+MODE6:: Processing of Mode 6 requests
+
 == Release Checklist ==
 
 This is the release checklist to be used by the project manager to cut

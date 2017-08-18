@@ -84,12 +84,12 @@ authreadkeys(
 	 */
 	fp = fopen(file, "r");
 	if (fp == NULL) {
-		msyslog(LOG_ERR, "authreadkeys: file %s: %m",
+		msyslog(LOG_ERR, "AUTH: authreadkeys: file %s: %m",
 		    file);
 		return false;
 	}
 	ssl_init();
-msyslog(LOG_ERR, "authreadkeys: reading %s", file);
+msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 
 	/*
 	 * Remove all existing keys
@@ -110,13 +110,13 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		keyno = (keyid_t)atoi(token);
 		if (keyno == 0) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: cannot change key %s", token);
+			    "AUTH: authreadkeys: cannot change key %s", token);
 			continue;
 		}
 
 		if (keyno > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: key %s > %d reserved",
+			    "AUTH: authreadkeys: key %s > %d reserved",
 			    token, NTP_MAXKEY);
 			continue;
 		}
@@ -127,7 +127,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		token = nexttok(&line);
 		if (token == NULL) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: no key type for key %u", keyno);
+			    "AUTH: authreadkeys: no key type for key %u", keyno);
 			continue;
 		}
 		/*
@@ -153,12 +153,12 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 			keytype = NID_md5;
 		if (keytype == 0) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: invalid type for key %u", keyno);
+			    "AUTH: authreadkeys: invalid type for key %u", keyno);
 			continue;
 		}
 		if (EVP_get_digestbynid(keytype) == NULL) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: no algorithm for key %u", keyno);
+			    "AUTH: authreadkeys: no algorithm for key %u", keyno);
 			continue;
 		}
 
@@ -171,7 +171,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		token = nexttok(&line);
 		if (token == NULL) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: no key for key %u", keyno);
+			    "AUTH: authreadkeys: no key for key %u", keyno);
 			continue;
 		}
 		len = strlen(token);
@@ -197,7 +197,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 			}
 			if (j < jlim) {
 			    msyslog(LOG_ERR,
-				"authreadkeys: invalid hex digit for key %u",
+				"AUTH: authreadkeys: invalid hex digit for key %u",
 				keyno);
 			    continue;
 			}
@@ -206,6 +206,6 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 		}
 	}
 	fclose(fp);
-msyslog(LOG_ERR, "authreadkeys: added %d keys", keys);
+	msyslog(LOG_ERR, "AUTH: authreadkeys: added %d keys", keys);
 	return true;
 }

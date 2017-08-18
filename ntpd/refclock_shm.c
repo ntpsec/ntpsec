@@ -135,12 +135,12 @@ getShmTime(
 	shmid=shmget(0x4e545030 + unit, sizeof (struct shmTime),
 		      IPC_CREAT | (forall ? 0666 : 0600));
 	if (shmid == -1) { /* error */
-		msyslog(LOG_ERR, "SHM shmget (unit %d): %m", unit);
+		msyslog(LOG_ERR, "REFCLOCK: SHM shmget (unit %d): %m", unit);
 		return NULL;
 	}
 	p = (struct shmTime *)shmat (shmid, 0, 0);
 	if (p == (struct shmTime *)-1) { /* error */
-		msyslog(LOG_ERR, "SHM shmat (unit %d): %m", unit);
+		msyslog(LOG_ERR, "REFCLOCK: SHM shmat (unit %d): %m", unit);
 		return NULL;
 	}
 

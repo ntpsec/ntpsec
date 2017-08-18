@@ -30,11 +30,11 @@ isc_error_unexpected(const char *file, int line, const char *format, ...) {
 
         va_start(args, format);
 
-        msyslog(LOG_ERR, "%s:%d: unexpected error:", file, line);
+        msyslog(LOG_ERR, "ERR: %s:%d: unexpected error:", file, line);
         vsnprintf(errbuf, sizeof(errbuf), format, args);
         msyslog(LOG_ERR, "%s", errbuf);
 
         if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
-                msyslog(LOG_ERR, "Too many errors.  Shutting up.");
+                msyslog(LOG_ERR, "ERR: Too many errors.  Shutting up.");
         va_end(args);
 }

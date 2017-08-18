@@ -44,11 +44,11 @@ ereallocz(
 	if (NULL == mem) {
 		termlogit = true;
 #ifndef EREALLOC_CALLSITE
-		msyslog(LOG_ERR, "fatal out of memory (%lu bytes)",
+		msyslog(LOG_ERR, "ERR: fatal out of memory (%lu bytes)",
 			(unsigned long)newsz);
 #else
 		msyslog(LOG_ERR,
-			"fatal out of memory %s line %d (%lu bytes)",
+			"ERR: fatal out of memory %s line %d (%lu bytes)",
 			file, line, (unsigned long)newsz);
 #endif
 		exit(1);
@@ -99,10 +99,10 @@ oreallocarray(
 	if ((nmemb >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
 	    nmemb > 0 && SIZE_MAX / nmemb < size) {
 #ifndef EREALLOC_CALLSITE
-		msyslog(LOG_ERR, "fatal allocation size overflow");
+		msyslog(LOG_ERR, "ERR: fatal allocation size overflow");
 #else
 		msyslog(LOG_ERR,
-			"fatal allocation size overflow %s line %d",
+			"ERR: fatal allocation size overflow %s line %d",
 			file, line);
 #endif
 		exit(1);

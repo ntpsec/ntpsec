@@ -479,7 +479,7 @@ jjy_start ( int unit, struct peer *peer )
 
 	if ( rc != 0 ) {
 		msyslog(LOG_ERR,
-                        "JJY receiver [ %s subtype %u ] : Initialize error",
+                        "REFCLOCK: JJY receiver [ %s subtype %u ] : Initialize error",
 			socktoa(&peer->srcadr), peer->ttl ) ;
 		free ( (void*) up ) ;
 		return false ;
@@ -2716,13 +2716,13 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	/* Check the telephone number */
 
 	if ( sys_phone[0] == NULL ) {
-		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf must be specified." ) ;
+		msyslog( LOG_ERR, "REFCLOCK: refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf must be specified." ) ;
 		up->bInitError = true ;
 		return true ;
 	}
 
 	if ( sys_phone[1] != NULL ) {
-		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be only one." ) ;
+		msyslog( LOG_ERR, "REFCLOCK: refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be only one." ) ;
 		up->bInitError = true ;
 		return true ;
 	}
@@ -2737,14 +2737,14 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 		} else if ( *(sys_phone[0]+i) == ',' ) {
 			iCommaCount ++ ;
 			if ( iCommaCount > 1 ) {
-				msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be zero or one comma." ) ;
+				msyslog( LOG_ERR, "REFCCLOCK: refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be zero or one comma." ) ;
 				up->bInitError = true ;
 				return true ;
 			}
 			iFirstThreeDigitsCount = 0 ;
 			iCommaPosition = (int)i ;
 		} else if ( *(sys_phone[0]+i) != '-' ) {
-			msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be a number or a hyphen." ) ;
+			msyslog( LOG_ERR, "REFCLOCK: refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be a number or a hyphen." ) ;
 			up->bInitError = true ;
 			return true ;
 		}
@@ -2753,7 +2753,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 
 	if ( iCommaCount == 1 ) {
 		if ( iCommaPosition != 1 || *sys_phone[0] != '0' ) {
-			msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : Getting an outside line should be '0,'." ) ;
+			msyslog( LOG_ERR, "REFCLOCK: refclock_jjy.c : jjy_start_telephone : Getting an outside line should be '0,'." ) ;
 			up->bInitError = true ;
 			return true ;
 		}
@@ -2761,7 +2761,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 
 	if ( iNumberOfDigitsOfPhoneNumber - iCommaPosition < 6 || 10 < iNumberOfDigitsOfPhoneNumber - iCommaPosition ) {
 		/* Too short or too long */
-		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone=%s : Number of digits should be 6 to 10.", sys_phone[0] ) ;
+		msyslog( LOG_ERR, "REFCLOCK: refclock_jjy.c : jjy_start_telephone : phone=%s : Number of digits should be 6 to 10.", sys_phone[0] ) ;
 		up->bInitError = true ;
 		return true ;
 	}
@@ -2774,7 +2774,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	  || strncmp( sFirstThreeDigits + iCommaPosition, "177", 3 ) == 0
 	  || ( sFirstThreeDigits[0] == '0' &&  sFirstThreeDigits[2] == '0' ) ) {
 		/* Not allowed because of emergency numbers or special service numbers */
-		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone=%s : First 2 or 3 digits are not allowed.", sys_phone[0] ) ;
+		msyslog(LOG_ERR, "REFCLOCK: refclock_jjy.c : jjy_start_telephone : phone=%s : First 2 or 3 digits are not allowed.", sys_phone[0] ) ;
 		up->bInitError = true ;
 		return true ;
 	}

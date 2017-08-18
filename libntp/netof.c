@@ -35,7 +35,7 @@ netof6(
 		zero_mem(&NSRCADR6(netaddr)[8], 8);
 #ifdef DEBUG
 	else {
-		msyslog(LOG_ERR, "Not IPv6, AF %d", AF(netaddr));
+		msyslog(LOG_ERR, "ERR: Not IPv6, AF %d", AF(netaddr));
 		exit(1);
 	}
 #endif

@@ -146,7 +146,7 @@ pps_start(
 			     O_RDWR, 0777);
 	if (up->fddev <= 0) {
 		msyslog(LOG_ERR,
-			"refclock_pps: %m");
+			"REFCLOCK: refclock_pps: %m");
 		return false;
 	}
 
