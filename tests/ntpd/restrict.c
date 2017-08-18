@@ -63,14 +63,14 @@ TEST(hackrestrict, RestrictionsAreEmptyAfterInit) {
 	memset(rl4, 0, sizeof(restrict_u));
 	memset(rl6, 0, sizeof(restrict_u));
 
-	TEST_ASSERT_EQUAL(rl4->count, restrictlist4->count);
+	TEST_ASSERT_EQUAL(rl4->hitcount, restrictlist4->hitcount);
 	TEST_ASSERT_EQUAL(rl4->flags, restrictlist4->flags);
 	TEST_ASSERT_EQUAL(rl4->mflags, restrictlist4->mflags);
 	TEST_ASSERT_EQUAL(rl4->expire, restrictlist4->expire);
 	TEST_ASSERT_EQUAL(rl4->u.v4.addr, restrictlist4->u.v4.addr);
 	TEST_ASSERT_EQUAL(rl4->u.v4.mask, restrictlist4->u.v4.mask);
 
-	TEST_ASSERT_EQUAL(rl6->count, restrictlist6->count);
+	TEST_ASSERT_EQUAL(rl6->hitcount, restrictlist6->hitcount);
 	TEST_ASSERT_EQUAL(rl6->flags, restrictlist6->flags);
 	TEST_ASSERT_EQUAL(rl6->mflags, restrictlist6->mflags);
 	TEST_ASSERT_EQUAL(rl6->expire, restrictlist6->expire);

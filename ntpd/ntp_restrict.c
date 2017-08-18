@@ -433,7 +433,7 @@ restrictions(
 
 		match = match_restrict4_addr(SRCADR(srcadr),
 					     SRCPORT(srcadr));
-		match->count++;
+		match->hitcount++;
 		/*
 		 * res_not_found counts only use of the final default
 		 * entry, not any "restrict default ntpport ...", which
@@ -459,7 +459,7 @@ restrictions(
 			return (int)RES_IGNORE;
 
 		match = match_restrict6_addr(pin6, SRCPORT(srcadr));
-		match->count++;
+		match->hitcount++;
 		if (&restrict_def6 == match)
 			res_not_found++;
 		else

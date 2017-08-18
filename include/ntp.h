@@ -654,7 +654,7 @@ typedef struct res_addr6_tag {
 typedef struct restrict_u_tag	restrict_u;
 struct restrict_u_tag {
 	restrict_u *		link;	/* link to next entry */
-	uint32_t		count;	/* number of packets matched */
+	uint32_t		hitcount;	/* number of packets matched */
 	unsigned short		flags;	/* accesslist flags */
 	unsigned short		mflags;	/* match flags */
 	unsigned long		expire;	/* valid until time */

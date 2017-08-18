@@ -3874,7 +3874,7 @@ send_restrict_entry(
 
 		case 2:
 			snprintf(tag, sizeof(tag), hits_fmt, idx);
-			ctl_putuint(tag, pres->count);
+			ctl_putuint(tag, pres->hitcount);
 			break;
 
 		case 3:
