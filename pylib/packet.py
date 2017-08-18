@@ -658,6 +658,7 @@ class Peer:
         return "<Peer: associd=%s status=%0x>" % (self.associd, self.status)
     __repr__ = __str__
 
+
 SERR_BADFMT = "***Server reports a bad format request packet\n"
 SERR_PERMISSION = "***Server disallowed request (authentication?)\n"
 SERR_BADOP = "***Server reports a bad opcode in request\n"

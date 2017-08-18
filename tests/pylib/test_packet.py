@@ -56,7 +56,6 @@ class SocketJig:
 
     def recv(self, bytecount):
         if len(self.return_data) > 0:
-            x = len(self.return_data)
             current = self.return_data.pop(0)
             if len(current) > bytecount:
                 ret = current[:bytecount]
@@ -70,6 +69,7 @@ class SocketJig:
 
 class ControlPacketJig:
     HEADER_LEN = ntp.packet.ControlPacket.HEADER_LEN
+
     def __init__(self, session, opcode, associd, data):
         self.session = session
         self.opcode = opcode
@@ -156,6 +156,7 @@ class SelectModuleJig:
 
 class AuthenticatorJig:
     compute_mac_calls = []
+
     def __init__(self):
         self.control_call_count = 0
         self.fail_getitem = False
@@ -179,6 +180,7 @@ class AuthenticatorJig:
 
 class TestControlSession(unittest.TestCase):
     target = ntp.packet.ControlSession
+
     def test___init__(self):
         # Test
         cls = self.target()
@@ -202,7 +204,6 @@ class TestControlSession(unittest.TestCase):
         self.assertEqual(cls.ntpd_row_limit, self.target.MRU_ROW_LIMIT)
         self.assertEqual(cls.logfp, sys.stdout)
         self.assertEqual(cls.nonce_xmit, 0)
-
 
     def test_close(self):
         # Init
@@ -272,8 +273,8 @@ class TestControlSession(unittest.TestCase):
                                socket.AI_NUMERICHOST),
                               ("blah.com", "ntp", cls.ai_family,
                                socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0),
-                             ("blah.com", "ntp", cls.ai_family,
-                              socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0)])
+                              ("blah.com", "ntp", cls.ai_family,
+                               socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0)])
         finally:
             ntp.packet.socket = socket
 
@@ -281,16 +282,17 @@ class TestControlSession(unittest.TestCase):
         lookups = []
         returnNothing = True
         noCanon = False
+
         def lookup_jig(hostname, family):
             lookups.append((hostname, family))
             if returnNothing is True:
                 return None
             elif noCanon is True:
                 return [("family", "socktype", "protocol", None,
-                         ("1.2.3.4", 80)),]
+                         ("1.2.3.4", 80)), ]
             else:
                 return [("family", "socktype", "protocol", "canon",
-                         ("1.2.3.4", 80)),]
+                         ("1.2.3.4", 80)), ]
         logjig = FileJig()
         try:
             fakesockmod = SocketModuleJig()
@@ -431,7 +433,7 @@ class TestControlSession(unittest.TestCase):
             cls.debug = 3
             # Test oversize data
             datalen = ntp.control.CTL_MAX_DATA_LEN + 1
-            data = "a" *  datalen
+            data = "a" * datalen
             result = cls.sendrequest(1, 2, data)
             self.assertEqual(result, -1)
             self.assertEqual(logjig.data,
@@ -620,10 +622,12 @@ class TestControlSession(unittest.TestCase):
 
     def test_doquery(self):
         sends = []
+
         def sendrequest_jig(opcode, associd, qdata, auth):
             sends.append((opcode, associd, qdata, auth))
         gets = []
         doerror = [False]
+
         def getresponse_jig(opcode, associd, retry):
             gets.append((opcode, associd, retry))
             if doerror[0]:
@@ -658,6 +662,7 @@ class TestControlSession(unittest.TestCase):
     def test_readstat(self):
         # Init
         queries = []
+
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
         cls = self.target()
@@ -683,7 +688,7 @@ class TestControlSession(unittest.TestCase):
         try:
             cls.readstat()
             errored = False
-        except ntp.packet.ControlException as e:
+        except ntp.packet.ControlException:
             errored = True
         self.assertEqual(errored, True)
 
@@ -755,6 +760,7 @@ class TestControlSession(unittest.TestCase):
 
     def test_readvar(self):
         queries = []
+
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
         # Init
@@ -783,6 +789,7 @@ class TestControlSession(unittest.TestCase):
 
     def test_config(self):
         queries = []
+
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
         # Init
@@ -804,6 +811,7 @@ class TestControlSession(unittest.TestCase):
 
     def test_fetch_nonce(self):
         queries = []
+
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
         # Init
@@ -834,18 +842,22 @@ class TestControlSession(unittest.TestCase):
                           (ntp.control.CTL_OP_REQ_NONCE, 0, "", False)])
 
     def test_mrulist(self):
+
         def setresponse(data):  # needed for doquery_jig
             cls.response = data
         nonce_fetch_count = [0]
+
         def fetch_nonce_jig():
             nonce_fetch_count[0] += 1
             return "nonce=foo"
         queries = []
         qrm = ["addr.1=1.2.3.4:23,last.1=40,first.1=23,ct.1=1,mv.1=2,rs.1=3",
                "addr.2=1.2.3.4:23,last.2=41,first.2=23,ct.2=1,mv.2=2,rs.2=3",
-               "addr.1=10.20.30.40:23,last.1=42,first.1=23,ct.1=1,mv.1=2,rs.1=3",
+               "addr.1=10.20.30.40:23,last.1=42,first.1=23,ct.1=1,"
+               "mv.1=2,rs.1=3",
                "now=0x00000000.00000000"]
         query_results = qrm[:]  # qrm == query results master
+
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
             if len(query_results) > 0:
@@ -865,8 +877,8 @@ class TestControlSession(unittest.TestCase):
                            "nonce=foo, frags=32, addr.0=1.2.3.4:23, last.0=40",
                            False),
                           (10, 0,
-                           "nonce=foo, frags=32, addr.0=1.2.3.4:23, last.0=41, "
-                           "addr.1=1.2.3.4:23, last.1=40", False),
+                           "nonce=foo, frags=32, addr.0=1.2.3.4:23, "
+                           "last.0=41, addr.1=1.2.3.4:23, last.1=40", False),
                           (10, 0,
                            "nonce=foo, frags=32, addr.0=10.20.30.40:23, "
                            "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
@@ -891,7 +903,7 @@ class TestControlSession(unittest.TestCase):
         nonce_fetch_count = [0]
         query_results = qrm[:]
         queries = []
-        result = cls.mrulist(variables={"sort":"addr", "frags":24})
+        result = cls.mrulist(variables={"sort": "addr", "frags": 24})
         self.assertEqual(nonce_fetch_count, [4])
         self.assertEqual(queries,
                          [(10, 0, "nonce=foo, frags=24", False),
@@ -899,8 +911,8 @@ class TestControlSession(unittest.TestCase):
                            "nonce=foo, frags=25, addr.0=1.2.3.4:23, last.0=40",
                            False),
                           (10, 0,
-                           "nonce=foo, frags=26, addr.0=1.2.3.4:23, last.0=41, "
-                           "addr.1=1.2.3.4:23, last.1=40", False),
+                           "nonce=foo, frags=26, addr.0=1.2.3.4:23, "
+                           "last.0=41, addr.1=1.2.3.4:23, last.1=40", False),
                           (10, 0,
                            "nonce=foo, frags=27, addr.0=10.20.30.40:23, "
                            "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
@@ -924,6 +936,7 @@ class TestControlSession(unittest.TestCase):
 
     def test___ordlist(self):
         queries = []
+
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
         # Init
@@ -940,6 +953,7 @@ class TestControlSession(unittest.TestCase):
 
     def test_reslist(self):
         ords = []
+
         def ordlist_jig(listtype):
             ords.append(listtype)
             return 23
@@ -953,6 +967,7 @@ class TestControlSession(unittest.TestCase):
 
     def test_ifstats(self):
         ords = []
+
         def ordlist_jig(listtype):
             ords.append(listtype)
             return 23
@@ -963,6 +978,7 @@ class TestControlSession(unittest.TestCase):
         result = cls.ifstats()
         self.assertEqual(result, 23)
         self.assertEqual(ords, ["ifstats"])
+
 
 if __name__ == "__main__":
     unittest.main()
