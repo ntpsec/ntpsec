@@ -224,6 +224,53 @@ class AuthenticatorJig:
                                                    keytype, passwd))
         return "mac"
 
+# ==========================================================
+#  Tests
+# =========================================================
+
+
+class TestPacket(unittest.TestCase):
+    target = ntp.packet.Packet
+
+    def test_VN_MODE(self):
+        f = self.target.VN_MODE
+        self.assertEqual(f(0, 0), 0x00)
+        self.assertEqual(f(0, 6), 0x06)
+        self.assertEqual(f(1, 6), 0x0E)
+        self.assertEqual(f(7, 6), 0x3E)
+        self.assertEqual(f(9, 6), 0x0E)  # overflow version
+        self.assertEqual(f(0, 9), 0x01)  # overflow mode
+
+    def test_PKT_LI_VM_MODE(self):
+        f = self.target.PKT_LI_VN_MODE
+        self.assertEqual(f(0, 0, 0), 0x00)
+        self.assertEqual(f(1, 4, 6), 0x66)
+        self.assertEqual(f(3, 4, 6), 0xE6)
+        self.assertEqual(f(5, 4, 6), 0x66)  # overflow leap
+
+    def test_Packet(self):
+        # Test __init__, basic
+        cls = self.target()
+        self.assertEqual(cls.session, None)
+        self.assertEqual(cls.li_vn_mode, 0xE3)
+        self.assertEqual(cls.extension, b'')
+        # Test __init__, custom
+        cls = self.target(2, 2, "foo")
+        self.assertEqual(cls.session, "foo")
+        self.assertEqual(cls.li_vn_mode, 0xD2)
+        # Test leap
+        self.assertEqual(cls.leap(), "unsync")
+        cls.li_vn_mode = self.target.PKT_LI_VN_MODE(0, 1, 1)
+        self.assertEqual(cls.leap(), "no-leap")
+        cls.li_vn_mode = self.target.PKT_LI_VN_MODE(1, 1, 1)
+        self.assertEqual(cls.leap(), "add-leap")
+        cls.li_vn_mode = self.target.PKT_LI_VN_MODE(2, 3, 4)
+        self.assertEqual(cls.leap(), "del-leap")
+        # Test version
+        self.assertEqual(cls.version(), 3)
+        # Test mode
+        self.assertEqual(cls.mode(), 4)
+
 
 class TestMisc(unittest.TestCase):
     def test_Peer(self):

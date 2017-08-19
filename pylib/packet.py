@@ -345,7 +345,8 @@ class Packet:
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
         # Subclasses have variable fields here
         self.extension = b''     # extension data
-        self.li_vn_mode = Packet.PKT_LI_VN_MODE(3, version, mode)
+        self.li_vn_mode = Packet.PKT_LI_VN_MODE(ntp.magic.LEAP_NOTINSYNC,
+                                                version, mode)
 
     # These decorators will allow us to assign the extension Python 3 strings
     @property
