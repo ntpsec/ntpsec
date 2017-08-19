@@ -2,7 +2,7 @@
 
 == Checklist for a quality 1.0 release ==
 
-* Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
+* Package metadata for Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
 * Add .tar.xz tarball.
 
