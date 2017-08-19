@@ -745,7 +745,7 @@ class MRUEntry:
             return b'\0'*16 + socket.inet_pton(socket.AF_INET, addr)
 
     def __repr__(self):
-        return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
+        return "<MRUEntry: " + repr(self.__dict__)[1:-1] + ">"
 
 
 class MRUList:

@@ -79,6 +79,15 @@ class SocketJig:
         return None
 
 
+class SessionJig:
+    def __init__(self):
+        self.readvars_calls = 0
+
+    def readvars(self):
+        self.readvars_calls += 1
+        return {"foo": 23, "bar": 42}
+
+
 class ControlPacketJig:
     HEADER_LEN = ntp.packet.ControlPacket.HEADER_LEN
 
@@ -214,6 +223,99 @@ class AuthenticatorJig:
         AuthenticatorJig.compute_mac_calls.append((flatpkt, keyid,
                                                    keytype, passwd))
         return "mac"
+
+
+class TestMisc(unittest.TestCase):
+    def test_Peer(self):
+        session = SessionJig()
+        # Test init
+        cls = ntp.packet.Peer(session, 2, 3)
+        self.assertEqual(cls.session, session)
+        self.assertEqual(cls.associd, 2)
+        self.assertEqual(cls.status, 3)
+        self.assertEqual(cls.variables, {})
+        # Test readvars
+        cls.readvars()
+        self.assertEqual(cls.variables, {"foo": 23, "bar": 42})
+        # Test __str__
+        self.assertEqual(str(cls), "<Peer: associd=2 status=3>")
+        # Test __repr__
+        self.assertEqual(repr(cls), "<Peer: associd=2 status=3>")
+
+    def test_dump_hex_printable(self):
+        f = ntp.packet.dump_hex_printable
+        fp = FileJig()
+        data = "\x00\x01\x02\x03\x04\x05\x06\x07" \
+               "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+        # Test a single line
+        f(data, fp)
+        total = "".join(fp.data)  # easier than 300 million seperate strings
+        fp.data = []
+        self.assertEqual(total,
+                         "00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f "
+                         "................\n")
+        # Test >1 lines, partial line
+        data += "Would you kindly test this?"
+        f(data, fp)
+        total = "".join(fp.data)
+        fp.data = []
+        self.assertEqual(total,
+                         "00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f "
+                         "................\n"
+                         "57 6f 75 6c 64 20 79 6f 75 20 6b 69 6e 64 6c 79 "
+                         "Would you kindly\n"
+                         "20 74 65 73 74 20 74 68 69 73 3f                "
+                         " test this?\n")
+
+    def test_MRUEntry(self):
+        # Test init
+        cls = ntp.packet.MRUEntry()
+        self.assertEqual(cls.addr, None)
+        self.assertEqual(cls.last, None)
+        self.assertEqual(cls.first, None)
+        self.assertEqual(cls.ct, 0)
+        self.assertEqual(cls.mv, None)
+        self.assertEqual(cls.rs, None)
+        # Test avgint
+        cls.last = "0x00000200.00000000"
+        cls.first = "0x00000100.00000000"
+        cls.ct = 4
+        self.assertEqual(cls.avgint(), 64)
+        # Test sortaddr, ipv6
+        cls.addr = "[11:22:33::44:55]:42"
+        self.assertEqual(cls.sortaddr(),
+                         "\x00\x11\x00\x22\x00\x33\x00\x00"
+                         "\x00\x00\x00\x00\x00\x44\x00\x55")
+        # Test sortaddr, ipv6, local
+        cls.addr = "[11:22:33::44:55%8]:42"
+        self.assertEqual(cls.sortaddr(),
+                         "\x00\x11\x00\x22\x00\x33\x00\x00"
+                         "\x00\x00\x00\x00\x00\x44\x00\x55")
+        # Test sortaddr, ipv4
+        cls.addr = "11.22.33.44:23"
+        self.assertEqual(cls.sortaddr(), (("\0" * 16) + "\x0b\x16\x21\x2c"))
+        # Test __repr__
+        self.assertEqual(cls.__repr__(),
+                         "<MRUEntry: "
+                         "'last': '0x00000200.00000000', "
+                         "'addr': '11.22.33.44:23', 'rs': None, 'mv': None, "
+                         "'first': '0x00000100.00000000', 'ct': 4>")
+
+    def test_MRUList(self):
+        # Test init
+        cls = ntp.packet.MRUList()
+        self.assertEqual(cls.entries, [])
+        self.assertEqual(cls.now, None)
+        # Test is_complete, no
+        self.assertEqual(cls.is_complete(), False)
+        # Test is_complete, yes
+        cls.now = "0x01234567.89ABCDEF"
+        self.assertEqual(cls.is_complete(), True)
+        # Test __repr__, simplified
+        cls.entries = [1, 2, 3, 4]
+        self.assertEqual(cls.__repr__(),
+                         "<MRUList: entries=[1, 2, 3, 4] "
+                         "now=0x01234567.89ABCDEF>")
 
 
 class TestControlSession(unittest.TestCase):
