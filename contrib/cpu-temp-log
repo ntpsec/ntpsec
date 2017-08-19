@@ -36,6 +36,7 @@ temperatures will be hardware specific.
 
 """
 
+from __future__ import print_function, division
 
 import sys
 import re

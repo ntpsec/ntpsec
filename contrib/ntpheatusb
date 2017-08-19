@@ -26,6 +26,8 @@
 #
 # More info on the blog post: https://blog.ntpsec.org/2017/03/21/More_Heat.html
 
+from __future__ import print_function, division
+
 import argparse
 import atexit
 import subprocess
@@ -92,7 +94,7 @@ Discrete PID control
         self.error = 0.0
 
     def __repr__(self):
-        return ("D_value=%s, I_value=%s" % (self.D_value, self.I_value))
+        return "D_value=%s, I_value=%s" % (self.D_value, self.I_value)
 
     def setPoint(self, set_point):
             """

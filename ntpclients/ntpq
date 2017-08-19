@@ -1021,7 +1021,7 @@ usage: writevar assocID name=value,[...]
         if not idrange:
             return
         for associd in idrange:
-            if (associd != idrange[0]):
+            if associd != idrange[0]:
                 self.say("\n")
             if not self.__dolist(self.uservars,
                                  associd, ntp.control.CTL_OP_READVAR,
@@ -1058,7 +1058,7 @@ usage: mrl assocIDlow assocIDhigh
             return
         varlist = line.split()[2:]
         for associd in idrange:
-            if (associd != idrange[0]):
+            if associd != idrange[0]:
                 self.say("\n")
             if not self.__dolist(varlist, associd,
                                  ntp.control.CTL_OP_READVAR,
