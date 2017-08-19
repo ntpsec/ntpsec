@@ -26,6 +26,8 @@
 #
 # More info on the blog post: https://blog.ntpsec.org/2017/03/21/More_Heat.html
 
+from __future__ import print_function, division
+
 import argparse
 import atexit
 import subprocess

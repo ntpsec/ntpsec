@@ -19,6 +19,8 @@ optional arguments:
 See the manual page for details.
 """
 
+from __future__ import print_function, division
+
 import argparse
 import glob
 import logging
