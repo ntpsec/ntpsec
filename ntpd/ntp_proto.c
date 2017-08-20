@@ -2406,7 +2406,7 @@ fast_xmit(
 
 
 /*
- * server_take_dns - process DNS query for server.
+ * dns_take_server - process DNS query for server.
  */
 void
 dns_take_server(
@@ -2446,11 +2446,13 @@ dns_take_server(
 	server->hpoll = server->minpoll;
 	server->nextdate = current_time;
 	peer_xmit(server);
+	if (server->flags & FLAG_IBURST)
+	  server->retry = NTP_RETRY;
 	poll_update(server, server->hpoll);
 }
 
 /*
- pool_take_dns - process DNS query for pool.
+ dns_take_pool - process DNS query for pool.
  */
 void
 dns_take_pool(
@@ -2478,6 +2480,8 @@ dns_take_pool(
 		FLAG_PREEMPT | (FLAG_IBURST & pool->flags),
 		MDF_UCAST | MDF_UCLNT, 0, 0, false);
 	peer_xmit(peer);
+	if (peer->flags & FLAG_IBURST)
+	  peer->retry = NTP_RETRY;
 	poll_update(peer, peer->hpoll);
 
 	restrict_mask = restrictions(&peer->srcadr);
