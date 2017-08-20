@@ -391,8 +391,8 @@ class SyncPacket(Packet):
         self.stratum = 0
         self.poll = 0
         self.precision = 0
-        self.rootdelay = 0
-        self.rootdispersion = 0
+        self.root_delay = 0
+        self.root_dispersion = 0
         self.refid = 0
         self.reference_timestamp = 0
         self.origin_timestamp = 0
@@ -507,10 +507,6 @@ class SyncPacket(Packet):
         "Adjustment implied by this packet - 'theta' in NTP-speak."
         return ((self.t2()-self.t1())+(self.t3()-self.t4()))/2
 
-    def leap(self):
-        return ("no-leap", "add-leap", "del-leap",
-                "unsync")[((self.li_vn_mode) >> 6) & 0x3]
-
     def flatten(self):
         "Flatten the packet into an octet sequence."
         body = struct.pack(SyncPacket.format,
@@ -518,8 +514,8 @@ class SyncPacket(Packet):
                            self.stratum,
                            self.poll,
                            self.precision,
-                           self.rootdelay,
-                           self.rootdispersion,
+                           self.root_delay,
+                           self.root_dispersion,
                            self.refid,
                            self.reference_timestamp,
                            self.origin_timestamp,
