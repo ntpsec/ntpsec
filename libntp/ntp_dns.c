@@ -160,6 +160,11 @@ static void* dns_lookup(void* arg)
 
 	kill(getpid(), SIGDNS);
 	pthread_exit(NULL);
+
+	/* Prevent compiler warning. 
+	 * More portable than an attribute or directive
+	 */  
+	return (void *)NULL;
 };
 
 
