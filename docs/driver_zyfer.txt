@@ -25,6 +25,9 @@ link:refclock.html[Reference Clock Drivers]
 
 == Driver Options ==
 
++unit+ 'number'::
+  The driver unit number, defaulting to 0. Used as a distinguishing
+  suffix in the driver device name. 
 +time1+ 'time'::
   Not used by this driver.
 +time2+ 'time'::

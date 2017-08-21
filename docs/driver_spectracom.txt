@@ -85,6 +85,9 @@ received.
 
 == Driver Options ==
 
++unit+ 'number'::
+  The driver unit number, defaulting to 0. Used as a distinguishing
+  suffix in the driver device name. 
 +time1+ 'time'::
   Specifies the PPS time offset calibration factor, in seconds and
   fraction, with default 0.0.

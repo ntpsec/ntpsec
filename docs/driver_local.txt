@@ -37,6 +37,8 @@ No +filegen clockstats+ monitor data are produced by this driver.
 
 == Driver Options ==
 
++unit+ 'number'::
+  Not used by this driver.
 +time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,
   with default 0.0.
