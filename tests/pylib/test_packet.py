@@ -611,6 +611,115 @@ class TestMisc(unittest.TestCase):
                          "now=0x01234567.89ABCDEF>")
 
 
+class TestControlPacket(unittest.TestCase):
+    target = ntp.packet.ControlPacket
+    session = ntp.packet.ControlSession
+
+    def test___init__(self):
+        ses = self.session()
+        cls = self.target(ses)
+        self.assertEqual(cls.r_e_m_op, 0)
+        self.assertEqual(cls.sequence, 1)
+        self.assertEqual(cls.status, 0)
+        self.assertEqual(cls.associd, 0)
+        self.assertEqual(cls.offset, 0)
+        self.assertEqual(cls.extension, "")
+        self.assertEqual(cls.count, 0)
+
+    def test_is_response(self):
+        cls = self.target(self.session())
+        # Test True
+        cls.r_e_m_op = 0x80
+        self.assertEqual(cls.is_response(), True)
+        # Test False
+        cls.r_e_m_op = 0x7F
+        self.assertEqual(cls.is_response(), False)
+
+    def test_is_error(self):
+        cls = self.target(self.session())
+        # Test True
+        cls.r_e_m_op = 0x40
+        self.assertEqual(cls.is_error(), True)
+        # Test False
+        cls.r_e_m_op = 0xBF
+        self.assertEqual(cls.is_error(), False)
+
+    def test_more(self):
+        cls = self.target(self.session())
+        # Test True
+        cls.r_e_m_op = 0x20
+        self.assertEqual(cls.more(), True)
+        # Test False
+        cls.r_e_m_op = 0xDF
+        self.assertEqual(cls.more(), False)
+
+    def test_opcode(self):
+        cls = self.target(self.session())
+        # Test normal
+        cls.r_e_m_op = 0x06
+        self.assertEqual(cls.opcode(), 6)
+        # Test maximum
+        cls.r_e_m_op = 0xFF
+        self.assertEqual(cls.opcode(), 31)
+        # Test maximum, no bits
+        cls.r_e_m_op = 0x1F
+        self.assertEqual(cls.opcode(), 31)
+
+    def test_errcode(self):
+        cls = self.target(self.session())
+        # Test none
+        cls.status = 0x00FF
+        self.assertEqual(cls.errcode(), 0)
+        # Test midling
+        cls.status = 0x11FF
+        self.assertEqual(cls.errcode(), 17)
+        # Test maximum
+        cls.status = 0xFF00
+        self.assertEqual(cls.errcode(), 255)
+
+    def test_end(self):
+        cls = self.target(self.session())
+        cls.count = 5
+        cls.offset = 10
+        self.assertEqual(cls.end(), 15)
+
+    def test_stats(self):
+        cls = self.target(self.session())
+        cls.count = 25
+        cls.offset = 10
+        self.assertEqual(cls.stats(), "   10    35\t 25 octets\n")
+
+    def test_analyze_flatten_send(self):
+        cls = self.target(self.session())
+        header = "\x8A\x3F\x00\x01\x00\x02\x00\x03\x00\x20\x00\x10"
+        payload = "\x00\x11\x22\x33\x44\x55\x66\x77" \
+                  "\x88\x99\xAA\xBB\xCC\xDD\xEE\xFF"
+        ext = "\x01\x02\x03\x04" \
+              "\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7" \
+              "\xF8\xF9\xFA\xFB\xFC\xFD\xFE\xFF"
+        totaldata = header + payload + ext
+        # Test analyze
+        result = cls.analyze(totaldata)
+        self.assertEqual(result, (1, 2, 3, 32))
+        self.assertEqual(cls.li_vn_mode, 0x8A)
+        self.assertEqual(cls.r_e_m_op, 0x3F)
+        self.assertEqual(cls.sequence, 1)
+        self.assertEqual(cls.status, 2)
+        self.assertEqual(cls.associd, 3)
+        self.assertEqual(cls.offset, 32)
+        self.assertEqual(cls.count, 16)
+        # Test flatten
+        self.assertEqual(cls.flatten(), header)
+        # Test send
+        send_data = []
+
+        def send_jig(pkt):
+            send_data.append(pkt)
+        cls.session.sendpkt = send_jig
+        cls.send()
+        self.assertEqual(send_data, [header])
+
+
 class TestControlSession(unittest.TestCase):
     target = ntp.packet.ControlSession
 

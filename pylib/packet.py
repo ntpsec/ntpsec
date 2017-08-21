@@ -606,8 +606,9 @@ class ControlPacket(Packet):
     def end(self):
         return self.count + self.offset
 
-    def stats(self, idx):
+    def stats(self, idx=None):
         "Return statistics on a fragment."
+        # idx is default None until I can confirm that it is useless
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
     def analyze(self, rawdata):
@@ -621,6 +622,8 @@ class ControlPacket(Packet):
          self.count) = struct.unpack(ControlPacket.format,
                                      rawdata[:ControlPacket.HEADER_LEN])
         self.data = rawdata[ControlPacket.HEADER_LEN:]
+        # TODO: This method does not handle .extension
+        #  fix this, use .data or .extension?
         return (self.sequence, self.status, self.associd, self.offset)
 
     def flatten(self):
