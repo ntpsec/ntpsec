@@ -253,7 +253,7 @@ ind assid status conf reach auth condition last_event cnt
   Display a list of link:#clock[clock variables] for those associations
   supporting a reference clock.
 
-+config [...]+::
++:config [...]+::
   Send the remainder of the command line, including whitespace, to the
   server as a run-time configuration command in the same format as the
   configuration file. This command is experimental until further notice
@@ -550,8 +550,6 @@ reference clock was a numeric driver type index. It has been replaced
 by 'name', a shortname for the driver type.
 
 The -O (--old-rv) option of legacy versions has been retired.
-
-The command ":config" is no longer accepted; use "config" instead.
 
 == Known Limitations ==
 
