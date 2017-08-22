@@ -1258,7 +1258,7 @@ usage: config <configuration command line>
         "configure ntpd using the configuration filename"
         try:
             with open(line) as rfp:
-                self.say(self.session.config(rfp.read()))
+                self.say("%s\n" % self.session.config(rfp.read()))
         except IOError:
             self.warn("Could not read %s\n" % line)
 
