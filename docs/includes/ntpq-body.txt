@@ -553,7 +553,7 @@ The -O (--old-rv) option of legacy versions has been retired.
 
 == Known Limitations ==
 
-It is possible for a "config unpeer" command to fail silently, yielding
+It is possible for a ":config unpeer" command to fail silently, yielding
 "Config Succeeded", if it is given a peer identifier that looks like
 a driver type name or a hostname not present in the peer list. The
 error will however be reported in the system log.
