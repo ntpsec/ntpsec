@@ -179,7 +179,7 @@ class Ntpq(cmd.Cmd):
         if line.startswith(":config"):
             line = "hot_" + line[1:]
         elif line.startswith("config-from-file"):
-            line = line.replace("config-from-file ", "config_from_file")
+            line = line.replace("config-from-file", "config_from_file")
 
         cmd, arg, line = self.parseline(line)
         try:
