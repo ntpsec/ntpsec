@@ -558,10 +558,6 @@ It is possible for a "config unpeer" command to fail silently, yielding
 a driver type name or a hostname not present in the peer list. The
 error will however be reported in the system log.
 
-Any error messages from failed ":config" and "config-from-file" will have
-slightly confusing prefixes. This is due to a limitation in the Python
-Cmd.Cmd library and cannot practically be fixed.
-
 The config command cannot be used to change a server's default restrictions.
 
 include::mrufail.txt[]

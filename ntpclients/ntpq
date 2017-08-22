@@ -169,6 +169,10 @@ class Ntpq(cmd.Cmd):
         self.ai_family = socket.AF_UNSPEC
         self.termwidth = ntp.util.termsize()[0]
 
+    def get_names(self):
+        # Overrides a method in Cmd
+        return [x.replace('hot_', ':').replace('config_from_file', 'config-from-file') for x in dir(self.__class__)]
+
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
         pass
@@ -1248,7 +1252,7 @@ usage: lopeers
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
 
-    def help_config(self):
+    def help_hot_config(self):
         self.say("""\
 function: send a remote configuration command to ntpd
 usage: config <configuration command line>
