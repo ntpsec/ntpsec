@@ -179,7 +179,7 @@ class Ntpq(cmd.Cmd):
         if line.startswith(":config"):
             line = "hot_" + line[1:]
         elif line.startswith("config-from-file"):
-            line = line.replace("config-from-file ", "config_from_file")
+            line = line.replace("config-from-file", "config_from_file")
 
         cmd, arg, line = self.parseline(line)
         try:
@@ -1258,7 +1258,7 @@ usage: config <configuration command line>
         "configure ntpd using the configuration filename"
         try:
             with open(line) as rfp:
-                self.say(self.session.config(rfp.read()))
+                self.say("%s\n" % self.session.config(rfp.read()))
         except IOError:
             self.warn("Could not read %s\n" % line)
 
