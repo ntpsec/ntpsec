@@ -1,0 +1,6 @@
+To create the RPM directory structure, run rpmdev-setuptree.  This creates all
+the required directories.  Place the ntpsec.spec file in the SPECS directory
+and download the current tarball file to the SOURCES directory.  You do not
+need to extract the files.  RPM does this automatically.  From the rpmbuild
+root directory, run "rpmbuild -ba SPECS/ntpsec.spec".  This will extract the
+code and attempt to run the waf configure, build, and install steps.
