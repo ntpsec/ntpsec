@@ -1277,38 +1277,36 @@ class ControlSession:
                 response += c
                 instring = not instring
             elif (instring is False) and (c == ","):
+                # Separator between key=value pairs, done with this pair
                 kvpairs.append(response.strip())
                 response = ""
             elif 0 < cord < 127:
+                # if it isn't a special case or garbage, add it
                 response += c
         if len(response) > 0:  # The last item won't be caught in the loop
             kvpairs.append(response.strip())
         items = []
-        #print("__parse_value", repr(self.response), repr(kvpairs))
         for pair in kvpairs:
-            #print("pair:", repr(pair))
             if "=" in pair:
                 key, value = ntp.util.slicedata(pair, pair.index("="))
                 value = value[1:]  # Remove '='
             else:
                 key, value = pair, ""
             key, value = key.strip(), value.strip()
-            #print("k, v:", repr(key), repr(value))
             # Start trying to cast to non-string types
+            # I don't like this block, look for a less ugly method
             try:
                 castedvalue = int(value, 0)
-                #print("casted to int")
             except ValueError:
                 try:
                     castedvalue = float(value)
                     if (key == "delay") and (raw is False):
+                        # Hack for non-raw-mode to get precision
                         items.append(("delay-s", value))
-                    #print("casted to float")
                 except ValueError:
                     if (value[0] == '"') and (value[-1] == '"'):
                         value = value[1:-1]
                         castedvalue = value  # for uniform tuples
-                        #print("stripped string quotes")
                     else:  # fell through everything else, still need casted
                         castedvalue = value
             if raw is True:
