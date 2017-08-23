@@ -427,7 +427,7 @@ class TestSyncPacket(unittest.TestCase):
     def test_ntp_to_posix(self):
         f = self.target.ntp_to_posix
         # Test the Timeless Void Before Existence
-        self.assertEqual(f(-1), -2208988800)  # NTP can't see the Timeless Void
+        self.assertEqual(f(-1), -2208988801)  # NTP can see the Timeless Void
         # Test beginning of NTP epoch
         self.assertEqual(f(0), -2208988800)
         # Test just before the Age of Unix
