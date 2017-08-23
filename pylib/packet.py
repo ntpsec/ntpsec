@@ -608,9 +608,8 @@ class ControlPacket(Packet):
     def end(self):
         return self.count + self.offset
 
-    def stats(self, idx=None):
+    def stats(self):
         "Return statistics on a fragment."
-        # idx is default None until I can confirm that it is useless
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
     def analyze(self, rawdata):
@@ -1062,7 +1061,7 @@ class ControlSession:
                         self.logfp.write(
                             "ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):
-                            self.logfp.write("%d: %s" % (i+1, frag.stats(i)))
+                            self.logfp.write("%d: %s" % (i+1, frag.stats()))
                         self.logfp.write("last fragment %sreceived\n"
                                          % ("not ", "")[seenlastfrag])
                 raise ControlException(SERR_INCOMPLETE)
