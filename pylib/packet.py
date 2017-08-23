@@ -686,27 +686,21 @@ SERR_NOTRUST = "***No trusted keys have been declared"
 
 def dump_hex_printable(xdata, outfp=sys.stdout):
     "Dump a packet in hex, in a familiar hex format"
-    llen = len(xdata)
-    i = 0
-    while llen > 0:
-        rowlen = min(16, llen)
-        restart = i
-        for idx in range(16):
-            if idx < llen:
-                outfp.write("%02x " % polyord(xdata[i]))
-                i += 1
-            else:
-                outfp.write("   ")
-        i = restart
-        for idx in range(rowlen):
-            # Do not use curses.isprint(), netbsd base doesn't install curses
-            if polyord(xdata[i]) >= 32 and polyord(xdata[i]) < 127:
-                outfp.write(polychr(xdata[i]))
-            else:
-                outfp.write('.')
-            i += 1
-        outfp.write("\n")
-        llen -= rowlen
+    rowsize = 16
+    while len(xdata) > 0:
+        # Slice one row off of our data
+        linedata, xdata = ntp.util.slicedata(xdata, rowsize)
+        # Output data in hex form
+        linelen = len(linedata)
+        line = "%02x " * linelen
+        linedata = [polyord(x) for x in linedata]  # Will need this later
+        line %= tuple(linedata)
+        if linelen < rowsize:  # Pad out the line to keep columns neat
+            line += "   " * (rowsize - linelen)
+        # Output printable data in string form
+        linedata = [chr(x) if (32 <= x < 127) else "." for x in linedata]
+        line += "".join(linedata) + "\n"
+        outfp.write(line)
 
 
 class MRUEntry:
