@@ -1265,58 +1265,56 @@ class ControlSession:
         # Strip out NULs and binary garbage from text;
         # ntpd seems prone to generate these, especially
         # in reslist responses.
+        # ==================
+        # TODO: remove raw switch, always return (key, value, castedvalue)
+        # ==================
+        kvpairs = []
         instring = False
         response = ""
         for c in self.response:
+            cord = polyord(c)
             if c == '"':
-                response = response + c
+                response += c
                 instring = not instring
-            elif instring and c == ',':
-                response = response + "\xae"
-            elif polyord(c) > 0 and polyord(c) < 127:
-                response = response + polychr(c)
-        response = response.rstrip()
+            elif (instring is False) and (c == ","):
+                kvpairs.append(response.strip())
+                response = ""
+            elif 0 < cord < 127:
+                response += c
+        if len(response) > 0:  # The last item won't be caught in the loop
+            kvpairs.append(response.strip())
         items = []
-        if response:
-            for pair in response.split(","):
+        #print("__parse_value", repr(self.response), repr(kvpairs))
+        for pair in kvpairs:
+            #print("pair:", repr(pair))
+            if "=" in pair:
+                key, value = ntp.util.slicedata(pair, pair.index("="))
+                value = value[1:]  # Remove '='
+            else:
+                key, value = pair, ""
+            key, value = key.strip(), value.strip()
+            #print("k, v:", repr(key), repr(value))
+            # Start trying to cast to non-string types
+            try:
+                castedvalue = int(value, 0)
+                #print("casted to int")
+            except ValueError:
                 try:
-                    pair = pair.strip().replace("\xae", ",")
-                    eq = pair.index("=")
-                    var = pair[:eq].strip()
-                    val = pair[eq+1:].strip()
-                    casted = False
-                    try:
-                        if raw is True:
-                            val = (int(val, 0), val)
-                        else:
-                            val = int(val, 0)
-                        casted = True
-                    except ValueError:
-                        try:
-                            if raw is True:
-                                valf = (float(val), val)
-                            else:
-                                valf = float(val)
-                            if (var == "delay") and (raw is False):
-                                # raw==false, if true str returned anyway
-                                # hack to pass string version
-                                # so printout can handle .3f vs .6f
-                                items.append(("delay-s", val))
-                            val = valf
-                            casted = True
-                        except ValueError:
-                            if val[0] == '"' and val[-1] == '"':
-                                val = val[1:-1]
-                                if raw is True:
-                                    val = (val, val)
-                                casted = True
-                    if (raw is True) and (casted is False):
-                        val = (val, val)
-                    items.append((var, val))
+                    castedvalue = float(value)
+                    if (key == "delay") and (raw is False):
+                        items.append(("delay-s", value))
+                    #print("casted to float")
                 except ValueError:
-                    # Yes, ntpd really does emit bare tags for empty
-                    # string-valued variables.
-                    items.append((pair, ""))
+                    if (value[0] == '"') and (value[-1] == '"'):
+                        value = value[1:-1]
+                        castedvalue = value  # for uniform tuples
+                        #print("stripped string quotes")
+                    else:  # fell through everything else, still need casted
+                        castedvalue = value
+            if raw is True:
+                items.append((key, (castedvalue, value)))
+            else:
+                items.append((key, castedvalue))
         return ntp.util.OrderedDict(items)
 
     def readvar(self, associd=0, varlist=None,
