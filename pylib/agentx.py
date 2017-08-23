@@ -5,6 +5,7 @@
 from __future__ import print_function
 
 import struct
+from ntp.util import slicedata
 
 internetPrefix = (1, 3, 6, 1)  # Used by the prefix option of OID headers
 prefixCount = len(internetPrefix)
@@ -920,10 +921,6 @@ def compareOID(one, two):
 
 def getendian(bigEndian):
     return ">" if bigEndian is True else "<"
-
-
-def slicedata(data, slicepoint):
-    return data[:slicepoint], data[slicepoint:]
 
 
 def isnullOID(oid):

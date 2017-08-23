@@ -96,6 +96,10 @@ def rfc3339(t):
     return rep
 
 
+def slicedata(data, slicepoint):
+    return data[:slicepoint], data[slicepoint:]
+
+
 def portsplit(hostname):
     portsuffix = ""
     if hostname.count(":") == 1:                # IPv4 with appended port
