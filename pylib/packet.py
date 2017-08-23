@@ -333,11 +333,11 @@ class Packet:
     # The following two methods are copied from macros in includes/control.h
     @staticmethod
     def VN_MODE(v, m):
-        return ((((v) & 7) << 3) | ((m) & 0x7))
+        return (((v & 7) << 3) | (m & 0x7))
 
     @staticmethod
     def PKT_LI_VN_MODE(l, v, m):
-        return ((((l) & 3) << 6) | Packet.VN_MODE((v), (m)))
+        return (((l & 3) << 6) | Packet.VN_MODE(v, m))
 
     def __init__(self, mode=ntp.magic.MODE_CLIENT,
                  version=ntp.magic.NTP_VERSION, session=None):
