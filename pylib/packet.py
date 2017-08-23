@@ -454,20 +454,20 @@ class SyncPacket(Packet):
     def ntp_to_posix(t):
         "Scale from NTP time to POSIX time"
         # Note: assumes we're in the same NTP era as the transmitter...
-        return (t * 2**-32) - SyncPacket.UNIX_EPOCH
+        return (t >> 32) - SyncPacket.UNIX_EPOCH
 
     @staticmethod
     def posix_to_ntp(t):
         "Scale from POSIX time to NTP time"
         # Note: assumes we're in the same NTP era as the transmitter...
-        return int((t + SyncPacket.UNIX_EPOCH) * 2**32)
+        return int((t + SyncPacket.UNIX_EPOCH) << 32)
 
     def posixize(self):
         "Rescale all timestamps to POSIX time."
         if not self.rescaled:
             self.rescaled = True
-            self.root_delay *= 2**-16
-            self.root_dispersion *= 2**-16
+            self.root_delay >>= 16
+            self.root_dispersion >>= 16
             self.reference_timestamp = SyncPacket.ntp_to_posix(
                 self.reference_timestamp)
             self.origin_timestamp = SyncPacket.ntp_to_posix(
