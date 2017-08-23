@@ -15,6 +15,7 @@ import getpass
 
 odict = ntp.util.OrderedDict
 
+ntpp = ntp.packet
 
 class FileJig:
     def __init__(self):
@@ -51,8 +52,12 @@ class SocketJig:
         self.closed = False
         self.connected = None
         self.fail_connect = False
+        self.fail_send = 0
 
     def sendall(self, data):
+        if self.fail_send > 0:
+            self.fail_send -= 1
+            raise socket.error()
         self.data.append(data)
 
     def close(self):
@@ -195,10 +200,21 @@ class SelectModuleJig:
 
     def __init__(self):
         self.select_calls = []
+        self.select_fail = 0
+        self.do_return = []
 
     def select(self, ins, outs, excepts, timeout=0):
         self.select_calls.append((ins, outs, excepts, timeout))
-        return (ins, [], [])
+        if self.select_fail > 0:
+            self.select_fail -= 1
+            raise select.error
+        if len(self.do_return) == 0:  # simplify code that doesn't need it
+            self.do_return.append(True)
+        doreturn = self.do_return.pop(0)
+        if doreturn is True:
+            return (ins, [], [])
+        else:
+            return ([], [], [])
 
 
 class AuthenticatorJig:
@@ -206,6 +222,7 @@ class AuthenticatorJig:
 
     def __init__(self):
         self.control_call_count = 0
+        self.control_fail = 0
         self.fail_getitem = False
         self.compute_mac_calls = []
 
@@ -216,6 +233,9 @@ class AuthenticatorJig:
 
     def control(self):
         self.control_call_count += 1
+        if self.control_fail > 0:
+            self.control_fail -= 1
+            raise ValueError
         return (23, "keytype", "miranda")
 
     @staticmethod
@@ -300,6 +320,27 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.rescaled, False)
 
     def test_analyze(self):
+        # Test data less than packet
+        data = "blah blah"
+        try:
+            cls = self.target(data)
+            errored = False
+        except ntp.packet.SyncException as e:
+            errored = e.message
+        self.assertEqual(errored, "impossible packet length")
+        # Test data not word aligned
+        data = "\x5C\x10\x01\xFF" \
+               "\x00\x00\x01\x01\x00\x00\x01\x02\x00\x00\x01\x03" \
+               "\x00\x01\x02\x03\x04\x05\x06\x07" \
+               "\x01\x01\x02\x03\x04\x05\x06\x07" \
+               "\x02\x01\x02\x03\x04\x05\x06\x07" \
+               "\x03\x01\x02\x03\x04\x05\x06\x07\x0B\xAD"
+        try:
+            cls = self.target(data)
+            errored = False
+        except ntp.packet.SyncException as e:
+            errored = e.message
+        self.assertEqual(errored, "impossible packet length")
         # Test without extension
         data = "\x5C\x10\x01\xFF" \
                "\x00\x00\x01\x01\x00\x00\x01\x02\x00\x00\x01\x03" \
@@ -449,6 +490,7 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.t4(), 4)
 
     def test_delta_epsilon_synchd_adjust(self):
+        # Combined because they share setup, and are short tests
         cls = self.target()
         cls.origin_timestamp = 1
         cls.receive_timestamp = 2
@@ -497,18 +539,39 @@ class TestSyncPacket(unittest.TestCase):
 
     def test_is_crypto_nak(self):
         cls = self.target()
+        # Test True
         cls.mac = "blah"
         self.assertEqual(cls.is_crypto_nak(), True)
+        # Test too low
+        cls.mac = "bla"
+        self.assertEqual(cls.is_crypto_nak(), False)
+        # Test too high
+        cls.mac = "blah!"
+        self.assertEqual(cls.is_crypto_nak(), False)
 
     def test_MD5(self):
         cls = self.target()
+        # Test True
         cls.mac = "blah" * 5  # 20 bytes
         self.assertEqual(cls.has_MD5(), True)
+        # Test too low
+        cls.mac = "bla" * 5  # 15 bytes
+        self.assertEqual(cls.has_MD5(), False)
+        # Test too high
+        cls.mac = "blah!" * 5  # 24 bytes
+        self.assertEqual(cls.has_MD5(), False)
 
     def test_SHA1(self):
         cls = self.target()
+        # Test True
         cls.mac = "blah" * 6  # 24 bytes
         self.assertEqual(cls.has_SHA1(), True)
+        # Test too low
+        cls.mac = "bla" * 6  # 18 bytes
+        self.assertEqual(cls.has_SHA1(), False)
+        # Test too high
+        cls.mac = "blah!" * 6  # 30 bytes
+        self.assertEqual(cls.has_SHA1(), False)
 
     def test___repr__(self):
         cls = self.target()
@@ -817,6 +880,26 @@ class TestControlSession(unittest.TestCase):
                                socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0),
                               ("blah.com", "ntp", cls.ai_family,
                                socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0)])
+            # Test all types failed
+            logjig.__init__()  # reset
+            fakesockmod.__init__()
+            fakesockmod.gai_error_count = 3
+            result = cls._ControlSession__lookuphost("blah.com", "family")
+            self.assertEqual(result, None)
+            self.assertEqual(logjig.data,
+                             ["ntpq: numeric-mode lookup of blah.com "
+                              "failed, None\n",
+                              "ntpq: standard-mode lookup of blah.com "
+                              "failed, None\n",
+                              "ntpq: ndp lookup failed, None\n"])
+            self.assertEqual(fakesockmod.gai_calls,
+                             [("blah.com", "ntp", cls.ai_family,
+                               socket.SOCK_DGRAM, socket.IPPROTO_UDP,
+                               socket.AI_NUMERICHOST),
+                              ("blah.com", "ntp", cls.ai_family,
+                               socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0),
+                              ("blah.com", "ntp", cls.ai_family,
+                               socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0)])
         finally:
             ntp.packet.socket = socket
 
@@ -919,13 +1002,24 @@ class TestControlSession(unittest.TestCase):
             sys.stdin = iojig
             tempstdout = sys.stdout
             sys.stdout = iojig
-            # Test, with nothing
+            # Test with nothing
             iojig.readline_return = ["1\n"] * 10
             cls.password()
             self.assertEqual(isinstance(cls.auth, AuthenticatorJig), True)
             self.assertEqual(cls.keyid, 1)
             self.assertEqual(cls.passwd, "pass")
-            # Test, with auth and localhost
+            # Test with auth and localhost, fail
+            cls.keyid = None
+            cls.passwd = None
+            cls.hostname = "localhost"
+            cls.auth.control_fail = 1
+            try:
+                cls.password()
+                errored = False
+            except ntp.packet.ControlException as e:
+                errored = e.message
+            self.assertEqual(errored, ntp.packet.SERR_NOTRUST)
+            # Test with auth and localhost
             cls.keyid = None
             cls.passwd = None
             cls.hostname = "localhost"
@@ -933,7 +1027,7 @@ class TestControlSession(unittest.TestCase):
             self.assertEqual(cls.keyid, 23)
             self.assertEqual(cls.keytype, "keytype")
             self.assertEqual(cls.passwd, "miranda")
-            # Test, with all but password
+            # Test with all but password
             cls.passwd = None
             cls.auth.fail_getitem = True
             cls.password()
@@ -958,10 +1052,15 @@ class TestControlSession(unittest.TestCase):
         # Test
         res = cls.sendpkt("blahfoo")
         self.assertEqual(res, 0)
-        self.assertEqual(len(logjig.data), 1)
-        self.assertEqual(logjig.data[0], "Sending 8 octets.  seq=0\n")
-        self.assertEqual(len(sockjig.data), 1)
-        self.assertEqual(sockjig.data[0], "blahfoo\x00")
+        self.assertEqual(logjig.data, ["Sending 8 octets.  seq=0\n"])
+        self.assertEqual(sockjig.data, ["blahfoo\x00"])
+        # Test error
+        logjig.__init__()
+        sockjig.fail_send = 1
+        res = cls.sendpkt("blah")
+        self.assertEqual(res, -1)
+        self.assertEqual(logjig.data, ["Sending 4 octets.  seq=0\n",
+                                       "Write to None failed\n"])
 
     def test_sendrequest(self):
         logjig = FileJig()
@@ -1033,6 +1132,64 @@ class TestControlSession(unittest.TestCase):
             cls.sequence = 1
             cls.getresponse(1, 3, True)
             self.assertEqual(cls.response, "foo=4223,blah=248,x=23,quux=1")
+            # Test MAXFRAGS bail
+            maxtemp = ntp.packet.MAXFRAGS
+            ntp.packet.MAXFRAGS = 1
+            sockjig.return_data = [
+                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
+                "foo=4223,\x00\x00\x00",
+                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "blah=248,x=23,\x00\x00",
+                "\x0E\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
+                "quux=1\x00\x00"]
+            cls.sequence = 1
+            try:
+                cls.getresponse(1, 3, True)
+                errored = False
+            except ntp.packet.ControlException as e:
+                errored = e.message
+            self.assertEqual(errored, ntp.packet.SERR_TOOMUCH)
+            ntp.packet.MAXFRAGS = maxtemp
+            # Test select fail
+            fakeselectmod.select_fail = 1
+            try:
+                cls.getresponse(1, 2, True)
+                errored = False
+            except ntp.packet.ControlException as e:
+                errored = e.message
+            self.assertEqual(errored, ntpp.SERR_SELECT)
+            # Test no data and timeout
+            fakeselectmod.do_return = [False]
+            try:
+                cls.getresponse(1, 2, True)
+                errored = False
+            except ntpp.ControlException as e:
+                errored = e.message
+            self.assertEqual(errored, ntpp.SERR_TIMEOUT)
+            # Test partial data and no timeout
+            sockjig.return_data = [
+                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
+                "foo=4223,\x00\x00\x00",
+                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "blah=248,x=23,\x00\x00",
+                "\x0E\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
+                "quux=1\x00\x00"]
+            fakeselectmod.do_return = [True, False]
+            try:
+                cls.getresponse(1, 2, False)
+                errored = False
+            except ntpp.ControlException as e:
+                errored = e.message
+            self.assertEqual(errored, ntpp.SERR_INCOMPLETE)
+            # Test header parse fail
+            sockjig.return_data = [
+                "\x0E\x81\x00\x00\x00\x03"]
+            try:
+                cls.getresponse(1, 2, True)
+                errored = False
+            except ntpp.ControlException as e:
+                errored = e.message
+            self.assertEqual(errored, ntpp.SERR_UNSPEC)
         finally:
             ntp.packet.select = select
 
@@ -1180,8 +1337,16 @@ class TestControlSession(unittest.TestCase):
         cls = self.target()
         cls.sendrequest = sendrequest_jig
         cls.getresponse = getresponse_jig
-        cls.sock = True  # to fool havehost()
+
+        # Test no socket
+        try:
+            cls.doquery(1, 2, "blah")
+            errored = False
+        except ntp.packet.ControlException as e:
+            errored = e.message
+        self.assertEqual(errored, ntp.packet.SERR_NOHOST)
         # Test no retry
+        cls.sock = True  # to fool havehost()
         result = cls.doquery(1, 2, "blah")
         self.assertEqual(result, "flax!")
         self.assertEqual(len(sends), 1)
@@ -1350,6 +1515,15 @@ class TestControlSession(unittest.TestCase):
         self.assertEqual(result, False)
         self.assertEqual(queries,
                          [(ntp.control.CTL_OP_CONFIGURE, 0, "Boo!", True)])
+        # Test no response
+        queries = []
+        cls.response = ""
+        try:
+            cls.config("blah")
+            errored = False
+        except ntp.packet.ControlException as e:
+            errored = e.message
+        self.assertEqual(errored, ntp.packet.SERR_PERMISSION)
 
     def test_fetch_nonce(self):
         queries = []
@@ -1399,9 +1573,15 @@ class TestControlSession(unittest.TestCase):
                "mv.1=2,rs.1=3",
                "now=0x00000000.00000000"]
         query_results = qrm[:]  # qrm == query results master
+        query_fail = [0]
+        query_fail_code = []
 
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
+            if query_fail[0] > 0:
+                query_fail[0] -= 1
+                code = query_fail_code.pop(0)
+                raise ntp.packet.ControlException("foo", errorcode=code)
             if len(query_results) > 0:
                 setresponse(query_results.pop(0))
         logjig = FileJig()
@@ -1475,6 +1655,170 @@ class TestControlSession(unittest.TestCase):
         self.assertEqual(mru.ct, 1)
         self.assertEqual(mru.mv, 2)
         self.assertEqual(mru.rs, 3)
+        # Test sorter error
+        nonce_fetch_count = [0]
+        try:
+            cls.mrulist(variables={"sort": "foo"})
+            errored = False
+        except ntp.packet.ControlException as e:
+            errored = e.message
+        self.assertEqual(errored, ntp.packet.SERR_BADSORT % "foo")
+        # Test varbind error
+        nonce_fetch_count = [0]
+        try:
+            cls.mrulist(variables={"foo": 1})
+            errored = False
+        except ntp.packet.ControlException as e:
+            errored = e.message
+        self.assertEqual(errored, ntp.packet.SERR_BADPARAM % "foo")
+        # Test add to request errors
+        # Test None error
+        nonce_fetch_count = [0]
+        queries = []
+        query_fail = [1]
+        query_fail_code = [None]
+        try:
+            cls.mrulist()
+            errored = False
+        except ntp.packet.ControlException as e:
+            errored = e.errorcode
+        self.assertEqual(errored, None)
+        # Test random error
+        nonce_fetch_count = [0]
+        queries = []
+        query_fail = [1]
+        query_fail_code = ["therdaglib"]
+        try:
+            cls.mrulist()
+            errored = False
+        except ntp.packet.ControlException as e:
+            errored = e.errorcode
+        self.assertEqual(errored, "therdaglib")
+        # Test unknown var error
+        nonce_fetch_count = [0]
+        query_results = qrm[:]
+        queries = []
+        query_fail = [1]
+        query_fail_code = [ntp.control.CERR_UNKNOWNVAR] * 2
+        cls.response = ""
+        result = cls.mrulist()
+        self.assertEqual(nonce_fetch_count, [5])
+        self.assertEqual(queries,
+                         [(10, 0, "nonce=foo, frags=32", False),
+                          (10, 0, "nonce=foo, frags=32", False),
+                          (10, 0,
+                           "nonce=foo, frags=32, addr.0=1.2.3.4:23, last.0=40",
+                           False),
+                          (10, 0,
+                           "nonce=foo, frags=32, addr.0=1.2.3.4:23, "
+                           "last.0=41, addr.1=1.2.3.4:23, last.1=40", False),
+                          (10, 0,
+                           "nonce=foo, frags=32, addr.0=10.20.30.40:23, "
+                           "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
+                           "addr.2=1.2.3.4:23, last.2=40", False)])
+        self.assertEqual(isinstance(result, ntp.packet.MRUList), True)
+        self.assertEqual(len(result.entries), 2)
+        # Test bad value error
+        nonce_fetch_count = [0]
+        query_results = qrm[:]
+        queries = []
+        query_fail = [2]
+        query_fail_code = [ntp.control.CERR_BADVALUE] * 2
+        cls.response = ""
+        logjig.data = []
+        cls.debug = 1
+        result = cls.mrulist()
+        self.assertEqual(nonce_fetch_count, [6])
+        self.assertEqual(queries,
+                         [(10, 0, "nonce=foo, frags=32", False),
+                          (10, 0, "nonce=foo, limit=96", False),
+                          (10, 0, "nonce=foo, limit=96", False),
+                          (10, 0,
+                           "nonce=foo, limit=96, addr.0=1.2.3.4:23, last.0=40",
+                           False),
+                          (10, 0,
+                           "nonce=foo, limit=96, addr.0=1.2.3.4:23, "
+                           "last.0=41, addr.1=1.2.3.4:23, last.1=40", False),
+                          (10, 0,
+                           "nonce=foo, limit=96, addr.0=10.20.30.40:23, "
+                           "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
+                           "addr.2=1.2.3.4:23, last.2=40", False)])
+        self.assertEqual(isinstance(result, ntp.packet.MRUList), True)
+        self.assertEqual(len(result.entries), 2)
+        self.assertEqual(logjig.data, ["Reverted to row limit from "
+                                       "fragments limit.\n",
+                                       "Row limit reduced to 96 following "
+                                       "CERR_BADVALUE.\n"])
+        # Test incomplete error
+        nonce_fetch_count = [0]
+        query_results = qrm[:]
+        queries = []
+        query_fail = [3]
+        query_fail_code = [ntp.packet.SERR_INCOMPLETE,
+                           ntp.control.CERR_BADVALUE,  # Trigger cap_frags
+                           ntp.packet.SERR_INCOMPLETE]
+        cls.response = ""
+        logjig.data = []
+        cls.debug = 1
+        result = cls.mrulist()
+        self.assertEqual(nonce_fetch_count, [7])
+        self.assertEqual(queries,
+                         [(10, 0, "nonce=foo, frags=32", False),
+                          (10, 0, "nonce=foo, frags=16", False),
+                          (10, 0, "nonce=foo, limit=96", False),
+                          (10, 0, "nonce=foo, limit=48", False),
+                          (10, 0,
+                           "nonce=foo, limit=49, addr.0=1.2.3.4:23, last.0=40",
+                           False),
+                          (10, 0,
+                           "nonce=foo, limit=51, addr.0=1.2.3.4:23, "
+                           "last.0=41, addr.1=1.2.3.4:23, last.1=40", False),
+                          (10, 0,
+                           "nonce=foo, limit=52, addr.0=10.20.30.40:23, "
+                           "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
+                           "addr.2=1.2.3.4:23, last.2=40", False)])
+        self.assertEqual(len(result.entries), 2)
+        self.assertEqual(logjig.data,
+                         ["Frag limit reduced to 16 following incomplete "
+                          "response.\n",
+                          "Reverted to row limit from fragments limit.\n",
+                          "Row limit reduced to 48 following  incomplete "
+                          "response.\n"])
+        # Test timeout error
+        nonce_fetch_count = [0]
+        query_results = qrm[:]
+        queries = []
+        query_fail = [3]
+        query_fail_code = [ntp.packet.SERR_TIMEOUT,
+                           ntp.control.CERR_BADVALUE,  # Trigger cap_frags
+                           ntp.packet.SERR_TIMEOUT]
+        cls.response = ""
+        logjig.data = []
+        cls.debug = 1
+        result = cls.mrulist()
+        self.assertEqual(nonce_fetch_count, [7])
+        self.assertEqual(queries,
+                         [(10, 0, "nonce=foo, frags=32", False),
+                          (10, 0, "nonce=foo, frags=16", False),
+                          (10, 0, "nonce=foo, limit=96", False),
+                          (10, 0, "nonce=foo, limit=48", False),
+                          (10, 0,
+                           "nonce=foo, limit=49, addr.0=1.2.3.4:23, last.0=40",
+                           False),
+                          (10, 0,
+                           "nonce=foo, limit=51, addr.0=1.2.3.4:23, "
+                           "last.0=41, addr.1=1.2.3.4:23, last.1=40", False),
+                          (10, 0,
+                           "nonce=foo, limit=52, addr.0=10.20.30.40:23, "
+                           "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
+                           "addr.2=1.2.3.4:23, last.2=40", False)])
+        self.assertEqual(len(result.entries), 2)
+        self.assertEqual(logjig.data,
+                         ["Frag limit reduced to 16 following incomplete "
+                          "response.\n",
+                          "Reverted to row limit from fragments limit.\n",
+                          "Row limit reduced to 48 following  incomplete "
+                          "response.\n"])
 
     def test___ordlist(self):
         queries = []

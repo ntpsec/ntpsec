@@ -1464,10 +1464,6 @@ This combats source address spoofing
                             raise ControlException(SERR_STALL)
                         warndbg("--->   Restarting from the beginning, "
                                 "retry #%u\n" % restarted_count, 1)
-                    elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
-                        e.message = ("CERR_UNKNOWNVAR from ntpd but "
-                                     "no priors given.")
-                        raise e
                     elif e.errorcode == ntp.control.CERR_BADVALUE:
                         if cap_frags:
                             cap_frags = False
