@@ -44,6 +44,16 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(ntp.util.rfc3339(1480999786.025),
                          '2016-12-06T04:49:46.03Z')
 
+    def test_slicedata(self):
+        f = ntp.util.slicedata
+
+        # Test normal
+        self.assertEqual(f("foobaz", 2), ("fo", "obaz"))
+        # Test overflow
+        self.assertEqual(f("foobaz", 8), ("foobaz", ""))
+        # Test underflow
+        self.assertEqual(f("foobaz", -2), ("foob", "az"))
+
     def test_portsplit(self):
         self.assertEqual(ntp.util.portsplit("host.invalid"),
                          ("host.invalid", ""))

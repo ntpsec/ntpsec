@@ -2084,12 +2084,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test little endian
         self.assertEqual(f(False), "<")
 
-    def test_slicedata(self):
-        f = ntp.agentx.slicedata
-
-        # Test
-        self.assertEqual(f("foobaz", 2), ("fo", "obaz"))
-
     def test_encode_pduheader(self):
         f = ntp.agentx.encode_pduheader
         a = ntp.agentx
