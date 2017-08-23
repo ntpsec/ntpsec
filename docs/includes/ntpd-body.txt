@@ -530,19 +530,13 @@ Configuration files are parsed according to the following rules:
   /etc will be specified by the directory name of the -c argument.
 
 . Each file beneath the configuration directory with either the
-  extension ".ntpd" or ".refclockd" is interpreted.  Files are
-  interpreted in ASCII sort order of their pathnames.  Files with
-  other extensions or no extensions are ignored.
+  extension ".ntpd" is interpreted.  Files are interpreted in ASCII
+  sort order of their pathnames.  Files with other extensions or no
+  extensions are ignored.
 
 Note: The second two rules are *unstable*; this feature should be
 considered experimental and subject to revision.  In a future release,
 once we've settled on the right design, this caveat will be removed.
-
-It is best practice to put refclock and clockstats declarations in a
-".refclockd" file and all other declarations in an ".ntpd" file.  This
-anticipates a future direction of the architecture - it is intended
-that someday the refclock handling will be broken out of the main
-daemon into a separate executable with its own configuration parser.
 
 [[signals]]
 == SIGNALS ==
