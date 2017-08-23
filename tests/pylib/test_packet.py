@@ -310,7 +310,6 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.origin_timestamp, 0)
         self.assertEqual(cls.receive_timestamp, 0)
         self.assertEqual(cls.transmit_timestamp, 0)
-        self.assertEqual(cls.data, ntpp.polybytes(""))
         self.assertEqual(cls.extension, '')
         self.assertEqual(cls.extfields, [])
         self.assertEqual(cls.mac, '')
@@ -363,11 +362,12 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.transmit_timestamp, 0x0301020304050607)
         self.assertEqual(cls.extfields, [])
         # Test with extension, Crypto-NAK
-        data += "\x00\x00\x00\x01\x00\x00\x00\x04blah" \
-                "\x00\x00\x00\x02\x00\x00\x00\x0Cjabberjabber" \
-                "\x00\x00\x00\x03\x00\x00\x00\x20" \
-                "In the end, our choices make us."
-        data2 = data + "\x11\x22\x33\x44"
+        ext = "\x00\x00\x00\x01\x00\x00\x00\x04blah" \
+              "\x00\x00\x00\x02\x00\x00\x00\x0Cjabberjabber" \
+              "\x00\x00\x00\x03\x00\x00\x00\x20" \
+              "In the end, our choices make us."
+        mac = "\x11\x22\x33\x44"
+        data2 = data + ext + mac
         cls = self.target(data2)
         self.assertEqual(cls.li_vn_mode, 0x5C)
         self.assertEqual(cls.stratum, 16)
@@ -383,9 +383,10 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.extfields,
                          [(1, "blah"), (2, "jabberjabber"),
                           (3, "In the end, our choices make us.")])
-        self.assertEqual(cls.mac, "\x11\x22\x33\x44")
+        self.assertEqual(cls.extension, ext + mac)
+        self.assertEqual(cls.mac, mac)
         # Test with extension, DES
-        data2 = data + "\x11\x22\x33\x44\x55\x66\x77\x88\x99\xAA\xBB\xCC"
+        data2 = data + ext + "\x11\x22\x33\x44\x55\x66\x77\x88\x99\xAA\xBB\xCC"
         try:
             cls = self.target(data2)
             errored = False
@@ -393,7 +394,7 @@ class TestSyncPacket(unittest.TestCase):
             errored = e.message
         self.assertEqual(errored, "Unsupported DES authentication")
         # Test with extension, runt 8
-        data2 = data + "\x11\x22\x33\x44\x55\x66\x77\x88"
+        data2 = data + ext + "\x11\x22\x33\x44\x55\x66\x77\x88"
         try:
             cls = self.target(data2)
             errored = False
@@ -401,7 +402,7 @@ class TestSyncPacket(unittest.TestCase):
             errored = e.message
         self.assertEqual(errored, "Packet is a runt")
         # Test with extension, runt 16
-        data2 = data + "\x00\x11\x22\x33\x44\x55\x66\x77" \
+        data2 = data + ext + "\x00\x11\x22\x33\x44\x55\x66\x77" \
                 "\x88\x99\xAA\xBB\xCC\xDD\xEE\xFF"
         try:
             cls = self.target(data2)
@@ -410,16 +411,18 @@ class TestSyncPacket(unittest.TestCase):
             errored = e.message
         self.assertEqual(errored, "Packet is a runt")
         # Test with extension, MD5 or SHA1, 20
-        ext = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09" \
+        mac = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09" \
               "\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13"
-        data2 = data + ext
+        data2 = data + ext + mac
         cls = self.target(data2)
-        self.assertEqual(cls.mac, ext)
+        self.assertEqual(cls.mac, mac)
+        self.assertEqual(cls.extension, ext + mac)
         # Test with extension, MD5 or SHA1, 24
-        ext += "\x14\x15\x16\x17"
-        data2 = data + ext
+        mac += "\x14\x15\x16\x17"
+        data2 = data + ext + mac
         cls = self.target(data2)
-        self.assertEqual(cls.mac, ext)
+        self.assertEqual(cls.mac, mac)
+        self.assertEqual(cls.extension, ext + mac)
 
     def test_ntp_to_posix(self):
         f = self.target.ntp_to_posix
@@ -519,9 +522,9 @@ class TestSyncPacket(unittest.TestCase):
               "\x00\x00\x00\x03\x00\x00\x00\x20" \
               "In the end, our choices make us." \
               "\x11\x22\x33\x44"
-        cls = self.target(data)
-        cls.extension = ext
-        self.assertEqual(cls.flatten(), data + ext)
+        pkt = data + ext
+        cls = self.target(pkt)
+        self.assertEqual(cls.flatten(), pkt)
 
     def test_refid_octets(self):
         cls = self.target()

@@ -398,7 +398,6 @@ class SyncPacket(Packet):
         self.origin_timestamp = 0
         self.receive_timestamp = 0
         self.transmit_timestamp = 0
-        self.data = polybytes(data)
         self.extension = ''
         self.extfields = []
         self.mac = ''
@@ -407,11 +406,12 @@ class SyncPacket(Packet):
         self.received = SyncPacket.posix_to_ntp(time.time())
         self.trusted = True
         self.rescaled = False
-        if self.data:
-            self.analyze()
+        if data:
+            self.analyze(polybytes(data))
 
-    def analyze(self):
-        if len(self.data) < SyncPacket.HEADER_LEN or (len(self.data) & 3) != 0:
+    def analyze(self, data):
+        datalen = len(data)
+        if datalen < SyncPacket.HEADER_LEN or (datalen & 3) != 0:
             raise SyncException("impossible packet length")
         (self.li_vn_mode,
          self.stratum,
@@ -424,8 +424,8 @@ class SyncPacket(Packet):
          self.origin_timestamp,
          self.receive_timestamp,
          self.transmit_timestamp) = struct.unpack(
-            SyncPacket.format, self.data[:SyncPacket.HEADER_LEN])
-        self.extension = self.data[SyncPacket.HEADER_LEN:]
+            SyncPacket.format, data[:SyncPacket.HEADER_LEN])
+        self.extension = data[SyncPacket.HEADER_LEN:]
         # Parse the extension field if present. We figure out whether
         # an extension field is present by measuring the MAC size. If
         # the number of 4-octet words following the packet header is
@@ -436,18 +436,19 @@ class SyncPacket(Packet):
         # or 4, the packet is a runt and discarded forthwith. If
         # greater than 6, an extension field is present, so we
         # subtract the length of the field and go around again.
-        while len(self.extension) > 24:
-            (ftype, flen) = struct.unpack("!II", self.extension[:8])
-            self.extfields.append((ftype, self.extension[8:8+flen]))
-            self.extension = self.extension[8+flen:]
-        if len(self.extension) == 4:    # Crypto-NAK
-            self.mac = self.extension
-        if len(self.extension) == 12:   # DES
+        payload = self.extension  # Keep extension intact for flatten()
+        while len(payload) > 24:
+            (ftype, flen) = struct.unpack("!II", payload[:8])
+            self.extfields.append((ftype, payload[8:8+flen]))
+            payload = payload[8+flen:]
+        if len(payload) == 4:    # Crypto-NAK
+            self.mac = payload
+        if len(payload) == 12:   # DES
             raise SyncException("Unsupported DES authentication")
-        elif len(self.extension) in (8, 16):
+        elif len(payload) in (8, 16):
             raise SyncException("Packet is a runt")
-        elif len(self.extension) in (20, 24):   # MD5 or SHA1
-            self.mac = self.extension
+        elif len(payload) in (20, 24):   # MD5 or SHA1
+            self.mac = payload
 
     @staticmethod
     def ntp_to_posix(t):
