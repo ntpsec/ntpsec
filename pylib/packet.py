@@ -622,9 +622,7 @@ class ControlPacket(Packet):
          self.offset,
          self.count) = struct.unpack(ControlPacket.format,
                                      rawdata[:ControlPacket.HEADER_LEN])
-        self.data = rawdata[ControlPacket.HEADER_LEN:]
-        # TODO: This method does not handle .extension
-        #  fix this, use .data or .extension?
+        self.extension = rawdata[ControlPacket.HEADER_LEN:]
         return (self.sequence, self.status, self.associd, self.offset)
 
     def flatten(self):
@@ -1083,7 +1081,7 @@ class ControlSession:
             # Someday, perhaps, check authentication here
 
             # Clip off the MAC, if any
-            rpkt.data = rpkt.data[:rpkt.count]
+            rpkt.extension = rpkt.extension[:rpkt.count]
 
             if rpkt.count == 0 and rpkt.more():
                 warn("Received count of 0 in non-final fragment\n")
@@ -1144,7 +1142,8 @@ class ControlSession:
                         break
                 else:
                     self.response = polybytes(
-                        "".join([polystr(frag.data) for frag in fragments]))
+                        "".join([polystr(frag.extension) \
+                                 for frag in fragments]))
                     warndbg("Fragment collection ends. %d bytes "
                             " in %d fragments\n"
                             % (len(self.response), len(fragments)), 1)

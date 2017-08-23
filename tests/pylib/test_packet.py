@@ -776,7 +776,7 @@ class TestControlPacket(unittest.TestCase):
         self.assertEqual(cls.offset, 32)
         self.assertEqual(cls.count, 16)
         # Test flatten
-        self.assertEqual(cls.flatten(), header)
+        self.assertEqual(cls.flatten(), totaldata)
         # Test send
         send_data = []
 
@@ -784,7 +784,7 @@ class TestControlPacket(unittest.TestCase):
             send_data.append(pkt)
         cls.session.sendpkt = send_jig
         cls.send()
-        self.assertEqual(send_data, [header])
+        self.assertEqual(send_data, [totaldata])
 
 
 class TestControlSession(unittest.TestCase):
