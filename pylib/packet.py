@@ -80,7 +80,7 @@ the client at which the reply was received.  This is not in the reply packet,
 it's the packet receipt time collected by the client.
 
 The 'Reference timestamp' is an unused historical relic.  It's supposed to be
-copied unchanged from upstream in the strutum hierarchy. Normal practice
+copied unchanged from upstream in the stratum hierarchy. Normal practice
 has been for Stratum 1 servers to fill it in with the raw timestamp from the
 most recent reference-clock.
 
@@ -120,7 +120,7 @@ If you look at the raw data, there are 3 unknowns:
    * transit time client to server
    * transit time server to client
    * clock offset
->but there are only two equations, so you can't solve it.
+but there are only two equations, so you can't solve it.
 
 NTP gets a 3rd equation by assuming the transit times are equal.  That lets
 it solve for the clock offset.

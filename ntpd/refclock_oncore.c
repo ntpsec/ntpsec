@@ -2605,7 +2605,7 @@ oncore_msg_Bl(
 
 /*
  * Reg only wants the following output for "deeper" driver debugging.
- * See Bug 2142 and Bug 1866
+ * See Classic Bugs 2142 and Bug 1866
  */
 #if 0
 	oncore_log_f(instance, LOG_DEBUG,
@@ -3373,7 +3373,7 @@ oncore_check_almanac(
 
 		bits3 = instance->BEHa[141];	/* UTC parameters */
 		if (!instance->count5_set && (bits3 & 0xC0)) {
-			instance->count5 = 4;	/* was 2 [Bug 1766] */
+			instance->count5 = 4;	/* was 2 [Classic Bug 1766] */
 			instance->count5_set = 1;
 		}
 #ifdef ONCORE_VERBOSE_CHECK_ALMANAC

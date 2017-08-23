@@ -602,7 +602,7 @@ refresh_all_peerinterfaces(void)
 	 * or if the one they have hasn't worked for a while.
 	 */
 	for (p = peer_list; p != NULL; p = p->p_link) {
-		if ((p->dstadr) && (p->reach & 0x3))	// Bug 2849 XOR 2043
+		if ((p->dstadr) && (p->reach & 0x3))	// Classic Bug 2849 XOR 2043
 			/* either of last 2 tries with this dstadr worked */
 			continue;
 		if (MDF_POOL & p->cast_flags)

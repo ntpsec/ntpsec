@@ -2358,7 +2358,7 @@ read_network_packet(
 	 */
 
 	/*
-	** Bug 2672: Some OSes (MacOSX and Linux) don't block spoofed ::1
+	** Classic Bug 2672: Some OSes (MacOSX, Linux) don't block spoofed ::1
 	*/
 
 	if (AF_INET6 == itf->family) {
@@ -2779,9 +2779,9 @@ findlocalinterface(
  *
  * Find the numerically closest local address to the one connect()
  * suggested.  This matches an address on the same subnet first, as
- * needed by Bug 1184, and provides a consistent choice if there are
- * multiple feasible local addresses, regardless of the order ntpd
- * enumerated them.
+ * needed by Classic Bug 1184, and provides a consistent choice if
+ * there are multiple feasible local addresses, regardless of the
+ * order ntpd enumerated them.
  */
 endpt *
 findclosestinterface(

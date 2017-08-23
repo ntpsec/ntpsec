@@ -1053,7 +1053,7 @@ finish_safe(
 		sig_desc = "";
 	msyslog(LOG_NOTICE, "ERR: %s exiting on signal %d (%s)", progname,
 		sig, sig_desc);
-	/* See Bug 2513 and Bug 2522 re the unlink of PIDFILE */
+	/* See Classic Bugs 2513 and Bug 2522 re the unlink of PIDFILE */
 # if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 	if (mdns != NULL)
 		DNSServiceRefDeallocate(mdns);

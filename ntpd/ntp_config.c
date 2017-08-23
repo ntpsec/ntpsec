@@ -35,14 +35,14 @@
 #include "ntp_dns.h"
 
 /*
- * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
- * so #include these later.
+ * [Classic Bug 467]: Some linux headers collide with CONFIG_PHONE and
+ * CONFIG_KEYS so #include these later.
  */
 #include "ntp_config.h"
 #include "ntp_scanner.h"
 #include "ntp_parser.tab.h"
 
-/* Hack to dance around bug in older Bison.  See Issue 287 */
+/* Hack to dance around bug in older Bison.  See Classic Issue 287 */
 /* Similar for yydebug below */
 #ifndef yyparse
   int yyparse (void);
@@ -90,9 +90,9 @@ char **	cmdline_servers;
 
 /*
  * FIXME: ugly globals, only created to avoid wiring in option-parsing cruft.
- * These are symptoms of deeper factoring issues; the things they're controlling,
- * deep down inside that configuration parsing, should not be happening where
- * they are.
+ * These are symptoms of deeper factoring issues; the things they're
+ * controlling, deep down inside that configuration parsing, should
+ * not be happening where they are.
  */
 bool have_interface_option;
 
