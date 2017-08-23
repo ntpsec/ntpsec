@@ -16,6 +16,7 @@ import getpass
 odict = ntp.util.OrderedDict
 
 ntpp = ntp.packet
+ctlerr = ntp.packet.ControlException
 
 class FileJig:
     def __init__(self):
@@ -94,7 +95,7 @@ class SessionJig:
 
 
 class ControlPacketJig:
-    HEADER_LEN = ntp.packet.ControlPacket.HEADER_LEN
+    HEADER_LEN = ntpp.ControlPacket.HEADER_LEN
 
     def __init__(self, session, opcode, associd, data):
         self.session = session
@@ -250,7 +251,7 @@ class AuthenticatorJig:
 
 
 class TestPacket(unittest.TestCase):
-    target = ntp.packet.Packet
+    target = ntpp.Packet
 
     def test_VN_MODE(self):
         f = self.target.VN_MODE
@@ -293,7 +294,7 @@ class TestPacket(unittest.TestCase):
 
 
 class TestSyncPacket(unittest.TestCase):
-    target = ntp.packet.SyncPacket
+    target = ntpp.SyncPacket
 
     def test___init__(self):
         # Test without data (that will be tested via analyze())
@@ -309,7 +310,7 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.origin_timestamp, 0)
         self.assertEqual(cls.receive_timestamp, 0)
         self.assertEqual(cls.transmit_timestamp, 0)
-        self.assertEqual(cls.data, ntp.packet.polybytes(""))
+        self.assertEqual(cls.data, ntpp.polybytes(""))
         self.assertEqual(cls.extension, '')
         self.assertEqual(cls.extfields, [])
         self.assertEqual(cls.mac, '')
@@ -325,7 +326,7 @@ class TestSyncPacket(unittest.TestCase):
         try:
             cls = self.target(data)
             errored = False
-        except ntp.packet.SyncException as e:
+        except ntpp.SyncException as e:
             errored = e.message
         self.assertEqual(errored, "impossible packet length")
         # Test data not word aligned
@@ -338,7 +339,7 @@ class TestSyncPacket(unittest.TestCase):
         try:
             cls = self.target(data)
             errored = False
-        except ntp.packet.SyncException as e:
+        except ntpp.SyncException as e:
             errored = e.message
         self.assertEqual(errored, "impossible packet length")
         # Test without extension
@@ -388,7 +389,7 @@ class TestSyncPacket(unittest.TestCase):
         try:
             cls = self.target(data2)
             errored = False
-        except ntp.packet.SyncException as e:
+        except ntpp.SyncException as e:
             errored = e.message
         self.assertEqual(errored, "Unsupported DES authentication")
         # Test with extension, runt 8
@@ -396,7 +397,7 @@ class TestSyncPacket(unittest.TestCase):
         try:
             cls = self.target(data2)
             errored = False
-        except ntp.packet.SyncException as e:
+        except ntpp.SyncException as e:
             errored = e.message
         self.assertEqual(errored, "Packet is a runt")
         # Test with extension, runt 16
@@ -405,7 +406,7 @@ class TestSyncPacket(unittest.TestCase):
         try:
             cls = self.target(data2)
             errored = False
-        except ntp.packet.SyncException as e:
+        except ntpp.SyncException as e:
             errored = e.message
         self.assertEqual(errored, "Packet is a runt")
         # Test with extension, MD5 or SHA1, 20
@@ -585,7 +586,7 @@ class TestMisc(unittest.TestCase):
     def test_Peer(self):
         session = SessionJig()
         # Test init
-        cls = ntp.packet.Peer(session, 2, 3)
+        cls = ntpp.Peer(session, 2, 3)
         self.assertEqual(cls.session, session)
         self.assertEqual(cls.associd, 2)
         self.assertEqual(cls.status, 3)
@@ -599,7 +600,7 @@ class TestMisc(unittest.TestCase):
         self.assertEqual(repr(cls), "<Peer: associd=2 status=3>")
 
     def test_dump_hex_printable(self):
-        f = ntp.packet.dump_hex_printable
+        f = ntpp.dump_hex_printable
         fp = FileJig()
         data = "\x00\x01\x02\x03\x04\x05\x06\x07" \
                "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
@@ -625,7 +626,7 @@ class TestMisc(unittest.TestCase):
 
     def test_MRUEntry(self):
         # Test init
-        cls = ntp.packet.MRUEntry()
+        cls = ntpp.MRUEntry()
         self.assertEqual(cls.addr, None)
         self.assertEqual(cls.last, None)
         self.assertEqual(cls.first, None)
@@ -659,7 +660,7 @@ class TestMisc(unittest.TestCase):
 
     def test_MRUList(self):
         # Test init
-        cls = ntp.packet.MRUList()
+        cls = ntpp.MRUList()
         self.assertEqual(cls.entries, [])
         self.assertEqual(cls.now, None)
         # Test is_complete, no
@@ -675,8 +676,8 @@ class TestMisc(unittest.TestCase):
 
 
 class TestControlPacket(unittest.TestCase):
-    target = ntp.packet.ControlPacket
-    session = ntp.packet.ControlSession
+    target = ntpp.ControlPacket
+    session = ntpp.ControlSession
 
     def test___init__(self):
         ses = self.session()
@@ -784,15 +785,15 @@ class TestControlPacket(unittest.TestCase):
 
 
 class TestControlSession(unittest.TestCase):
-    target = ntp.packet.ControlSession
+    target = ntpp.ControlSession
 
     def test___init__(self):
         # Test
         cls = self.target()
         self.assertEqual(cls.debug, 0)
         self.assertEqual(cls.ai_family, socket.AF_UNSPEC)
-        self.assertEqual(cls.primary_timeout, ntp.packet.DEFTIMEOUT)
-        self.assertEqual(cls.secondary_timeout, ntp.packet.DEFSTIMEOUT)
+        self.assertEqual(cls.primary_timeout, ntpp.DEFTIMEOUT)
+        self.assertEqual(cls.secondary_timeout, ntpp.DEFSTIMEOUT)
         self.assertEqual(cls.pktversion, ntp.magic.NTP_OLDVERSION + 1)
         self.assertEqual(cls.always_auth, False)
         self.assertEqual(cls.keytype, "MD5")
@@ -833,7 +834,7 @@ class TestControlSession(unittest.TestCase):
         logjig = FileJig()
         try:
             fakesockmod = SocketModuleJig()
-            ntp.packet.socket = fakesockmod
+            ntpp.socket = fakesockmod
             # Init
             cls = self.target()
             cls.debug = 3
@@ -901,7 +902,7 @@ class TestControlSession(unittest.TestCase):
                               ("blah.com", "ntp", cls.ai_family,
                                socket.SOCK_DGRAM, socket.IPPROTO_UDP, 0)])
         finally:
-            ntp.packet.socket = socket
+            ntpp.socket = socket
 
     def test_openhost(self):
         lookups = []
@@ -921,7 +922,7 @@ class TestControlSession(unittest.TestCase):
         logjig = FileJig()
         try:
             fakesockmod = SocketModuleJig()
-            ntp.packet.socket = fakesockmod
+            ntpp.socket = fakesockmod
             # Init
             cls = self.target()
             cls.debug = 3
@@ -971,7 +972,7 @@ class TestControlSession(unittest.TestCase):
             try:
                 result = cls.openhost("foo.org")
                 errored = False
-            except ntp.packet.ControlException as e:
+            except ctlerr as e:
                 errored = e
             self.assertEqual(errored.message,
                              "Error opening foo.org: error! [23]")
@@ -982,12 +983,12 @@ class TestControlSession(unittest.TestCase):
             try:
                 result = cls.openhost("foo.org")
                 errored = False
-            except ntp.packet.ControlException as e:
+            except ctlerr as e:
                 errored = e
             self.assertEqual(errored.message,
                              "Error connecting to foo.org: socket! [16]")
         finally:
-            ntp.packet.socket = socket
+            ntpp.socket = socket
 
     def test_password(self):
         iojig = FileJig()
@@ -995,9 +996,9 @@ class TestControlSession(unittest.TestCase):
         # Init
         cls = self.target()
         try:
-            tempauth = ntp.packet.Authenticator()
-            ntp.packet.Authenticator = AuthenticatorJig
-            ntp.packet.getpass = fakegetpmod
+            tempauth = ntpp.Authenticator()
+            ntpp.Authenticator = AuthenticatorJig
+            ntpp.getpass = fakegetpmod
             tempstdin = sys.stdin
             sys.stdin = iojig
             tempstdout = sys.stdout
@@ -1016,9 +1017,9 @@ class TestControlSession(unittest.TestCase):
             try:
                 cls.password()
                 errored = False
-            except ntp.packet.ControlException as e:
+            except ctlerr as e:
                 errored = e.message
-            self.assertEqual(errored, ntp.packet.SERR_NOTRUST)
+            self.assertEqual(errored, ntpp.SERR_NOTRUST)
             # Test with auth and localhost
             cls.keyid = None
             cls.passwd = None
@@ -1035,8 +1036,8 @@ class TestControlSession(unittest.TestCase):
                              [("keytype Password: ", None)])
             self.assertEqual(cls.passwd, "xyzzy")
         finally:
-            ntp.packet.Authenticator = tempauth
-            ntp.packet.getpass = getpass
+            ntpp.Authenticator = tempauth
+            ntpp.getpass = getpass
             sys.stdin = tempstdin
             sys.stdout = tempstdout
 
@@ -1065,10 +1066,10 @@ class TestControlSession(unittest.TestCase):
     def test_sendrequest(self):
         logjig = FileJig()
         try:
-            tempcpkt = ntp.packet.ControlPacket
-            ntp.packet.ControlPacket = ControlPacketJig
-            tempauth = ntp.packet.Authenticator
-            ntp.packet.Authenticator = AuthenticatorJig
+            tempcpkt = ntpp.ControlPacket
+            ntpp.ControlPacket = ControlPacketJig
+            tempauth = ntpp.Authenticator
+            ntpp.Authenticator = AuthenticatorJig
             cls = self.target()
             cls.logfp = logjig
             cls.debug = 3
@@ -1098,12 +1099,12 @@ class TestControlSession(unittest.TestCase):
             try:
                 cls.sendrequest(1, 2, "foo", True)
                 errored = False
-            except ntp.packet.ControlException:
+            except ctlerr:
                 errored = True
             self.assertEqual(errored, True)
         finally:
-            ntp.packet.ControlPacket = tempcpkt
-            ntp.packet.Authenticator = tempauth
+            ntpp.ControlPacket = tempcpkt
+            ntpp.Authenticator = tempauth
 
     def test_getresponse(self):
         logjig = FileJig()
@@ -1115,7 +1116,7 @@ class TestControlSession(unittest.TestCase):
         cls.logfp = logjig
         cls.sock = sockjig
         try:
-            ntp.packet.select = fakeselectmod
+            ntpp.select = fakeselectmod
             # Test empty
             sockjig.return_data = [
                 "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"]
@@ -1133,8 +1134,8 @@ class TestControlSession(unittest.TestCase):
             cls.getresponse(1, 3, True)
             self.assertEqual(cls.response, "foo=4223,blah=248,x=23,quux=1")
             # Test MAXFRAGS bail
-            maxtemp = ntp.packet.MAXFRAGS
-            ntp.packet.MAXFRAGS = 1
+            maxtemp = ntpp.MAXFRAGS
+            ntpp.MAXFRAGS = 1
             sockjig.return_data = [
                 "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
                 "foo=4223,\x00\x00\x00",
@@ -1146,16 +1147,16 @@ class TestControlSession(unittest.TestCase):
             try:
                 cls.getresponse(1, 3, True)
                 errored = False
-            except ntp.packet.ControlException as e:
+            except ctlerr as e:
                 errored = e.message
-            self.assertEqual(errored, ntp.packet.SERR_TOOMUCH)
-            ntp.packet.MAXFRAGS = maxtemp
+            self.assertEqual(errored, ntpp.SERR_TOOMUCH)
+            ntpp.MAXFRAGS = maxtemp
             # Test select fail
             fakeselectmod.select_fail = 1
             try:
                 cls.getresponse(1, 2, True)
                 errored = False
-            except ntp.packet.ControlException as e:
+            except ctlerr as e:
                 errored = e.message
             self.assertEqual(errored, ntpp.SERR_SELECT)
             # Test no data and timeout
@@ -1163,7 +1164,7 @@ class TestControlSession(unittest.TestCase):
             try:
                 cls.getresponse(1, 2, True)
                 errored = False
-            except ntpp.ControlException as e:
+            except ctlerr as e:
                 errored = e.message
             self.assertEqual(errored, ntpp.SERR_TIMEOUT)
             # Test partial data and no timeout
@@ -1178,7 +1179,7 @@ class TestControlSession(unittest.TestCase):
             try:
                 cls.getresponse(1, 2, False)
                 errored = False
-            except ntpp.ControlException as e:
+            except ctlerr as e:
                 errored = e.message
             self.assertEqual(errored, ntpp.SERR_INCOMPLETE)
             # Test header parse fail
@@ -1187,11 +1188,11 @@ class TestControlSession(unittest.TestCase):
             try:
                 cls.getresponse(1, 2, True)
                 errored = False
-            except ntpp.ControlException as e:
+            except ctlerr as e:
                 errored = e.message
             self.assertEqual(errored, ntpp.SERR_UNSPEC)
         finally:
-            ntp.packet.select = select
+            ntpp.select = select
 
     def test___validate_packet(self):
         logjig = FileJig()
@@ -1201,7 +1202,7 @@ class TestControlSession(unittest.TestCase):
         cls.logfp = logjig
         # Test good packet, empty data
         raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          True)
@@ -1210,7 +1211,7 @@ class TestControlSession(unittest.TestCase):
         logjig.data = []
         raw = "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09" \
               "foo=4223,\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         cls.sequence = 1
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 3),
@@ -1221,7 +1222,7 @@ class TestControlSession(unittest.TestCase):
         cls.sequence = 0
         logjig.data = []
         raw = "\x46\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          False)
@@ -1229,7 +1230,7 @@ class TestControlSession(unittest.TestCase):
         # Test bad packet, bad mode
         logjig.data = []
         raw = "\x0D\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          False)
@@ -1237,7 +1238,7 @@ class TestControlSession(unittest.TestCase):
         # Test bad packet, bad response bit
         logjig.data = []
         raw = "\x0E\x01\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          False)
@@ -1245,7 +1246,7 @@ class TestControlSession(unittest.TestCase):
         # Test bad packet, bad sequence
         logjig.data = []
         raw = "\x0E\x81\x00\x01\x00\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          False)
@@ -1254,7 +1255,7 @@ class TestControlSession(unittest.TestCase):
         # Test bad packet, bad opcode
         logjig.data = []
         raw = "\x0E\x80\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          False)
@@ -1265,24 +1266,24 @@ class TestControlSession(unittest.TestCase):
         raw = "\x0E\xC1\x00\x00" + \
               chr(ntp.control.CERR_BADVALUE) + \
               "\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         try:
             cls._ControlSession__validate_packet(pkt, raw, 1, 2)
             self.assertEqual(False, True)  # it should have errored here
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             self.assertEqual(e.errorcode, ntp.control.CERR_BADVALUE)
         self.assertEqual(logjig.data, [])
         # Test error packet, with more bit
         logjig.data = []
         errcs = chr(ntp.control.CERR_BADVALUE)
         raw = "\x0E\xE1\x00\x00" + errcs + "\x03\x00\x02\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         try:
             cls._ControlSession__validate_packet(pkt, raw, 1, 2)
             self.assertEqual(False, True)  # it should have errored here
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             self.assertEqual(e.errorcode, ntp.control.CERR_BADVALUE)
         errstr = "Error " + str(ntp.control.CERR_BADVALUE) + \
                  " received on non-final fragment\n"
@@ -1290,7 +1291,7 @@ class TestControlSession(unittest.TestCase):
         # Test ok-ish packet, bad associd
         logjig.data = []
         raw = "\x0E\x81\x00\x00\x00\x03\x00\xFF\x00\x00\x00\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          True)
@@ -1299,7 +1300,7 @@ class TestControlSession(unittest.TestCase):
         # Test bad data padding
         logjig.data = []
         raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x01@"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         self.assertEqual(cls._ControlSession__validate_packet(pkt, raw, 1, 2),
                          False)
@@ -1308,13 +1309,13 @@ class TestControlSession(unittest.TestCase):
         # Test too little data
         logjig.data = []
         raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x10foo\x00"
-        pkt = ntp.packet.ControlPacket(cls)
+        pkt = ntpp.ControlPacket(cls)
         pkt.analyze(raw)
         try:
             cls._ControlSession__validate_packet(pkt, raw, 1, 2)
             self.assertEqual(True, False)  # should have errored here
-        except ntp.packet.ControlException as e:
-            self.assertEqual(e.message, ntp.packet.SERR_INCOMPLETE)
+        except ctlerr as e:
+            self.assertEqual(e.message, ntpp.SERR_INCOMPLETE)
         self.assertEqual(logjig.data,
                          ["Response fragment claims 16 octets payload, "
                           "above 4 received\n"])
@@ -1331,7 +1332,7 @@ class TestControlSession(unittest.TestCase):
             gets.append((opcode, associd, retry))
             if doerror[0]:
                 doerror[0] = False
-                raise ntp.packet.ControlException(ntp.packet.SERR_TIMEOUT)
+                raise ctlerr(ntpp.SERR_TIMEOUT)
             return "flax!"
         # Init
         cls = self.target()
@@ -1342,9 +1343,9 @@ class TestControlSession(unittest.TestCase):
         try:
             cls.doquery(1, 2, "blah")
             errored = False
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             errored = e.message
-        self.assertEqual(errored, ntp.packet.SERR_NOHOST)
+        self.assertEqual(errored, ntpp.SERR_NOHOST)
         # Test no retry
         cls.sock = True  # to fool havehost()
         result = cls.doquery(1, 2, "blah")
@@ -1385,7 +1386,7 @@ class TestControlSession(unittest.TestCase):
         cls.response = "\xDE\xAD\xF0\x0D"
         idlist = cls.readstat()
         self.assertEqual(len(idlist), 1)
-        self.assertEqual(isinstance(idlist[0], ntp.packet.Peer), True)
+        self.assertEqual(isinstance(idlist[0], ntpp.Peer), True)
         self.assertEqual(idlist[0].associd, 0xDEAD)
         self.assertEqual(idlist[0].status, 0xF00D)
         self.assertEqual(queries, [(ntp.control.CTL_OP_READSTAT,
@@ -1395,7 +1396,7 @@ class TestControlSession(unittest.TestCase):
         try:
             cls.readstat()
             errored = False
-        except ntp.packet.ControlException:
+        except ctlerr:
             errored = True
         self.assertEqual(errored, True)
 
@@ -1521,9 +1522,9 @@ class TestControlSession(unittest.TestCase):
         try:
             cls.config("blah")
             errored = False
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             errored = e.message
-        self.assertEqual(errored, ntp.packet.SERR_PERMISSION)
+        self.assertEqual(errored, ntpp.SERR_PERMISSION)
 
     def test_fetch_nonce(self):
         queries = []
@@ -1547,7 +1548,7 @@ class TestControlSession(unittest.TestCase):
         try:
             result = cls.fetch_nonce()
             errored = False
-        except ntp.packet.ControlException:
+        except ctlerr:
             errored = True
         self.assertEqual(errored, True)
         self.assertEqual(filefp.data, ["## Nonce expected: blah blah"])
@@ -1581,7 +1582,7 @@ class TestControlSession(unittest.TestCase):
             if query_fail[0] > 0:
                 query_fail[0] -= 1
                 code = query_fail_code.pop(0)
-                raise ntp.packet.ControlException("foo", errorcode=code)
+                raise ctlerr("foo", errorcode=code)
             if len(query_results) > 0:
                 setresponse(query_results.pop(0))
         logjig = FileJig()
@@ -1605,7 +1606,7 @@ class TestControlSession(unittest.TestCase):
                            "nonce=foo, frags=32, addr.0=10.20.30.40:23, "
                            "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
                            "addr.2=1.2.3.4:23, last.2=40", False)])
-        self.assertEqual(isinstance(result, ntp.packet.MRUList), True)
+        self.assertEqual(isinstance(result, ntpp.MRUList), True)
         self.assertEqual(len(result.entries), 2)
         mru = result.entries[0]
         self.assertEqual(mru.addr, "1.2.3.4:23")
@@ -1639,7 +1640,7 @@ class TestControlSession(unittest.TestCase):
                            "nonce=foo, frags=27, addr.0=10.20.30.40:23, "
                            "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
                            "addr.2=1.2.3.4:23, last.2=40", False)])
-        self.assertEqual(isinstance(result, ntp.packet.MRUList), True)
+        self.assertEqual(isinstance(result, ntpp.MRUList), True)
         self.assertEqual(len(result.entries), 2)
         mru = result.entries[0]
         self.assertEqual(mru.addr, "10.20.30.40:23")
@@ -1660,17 +1661,17 @@ class TestControlSession(unittest.TestCase):
         try:
             cls.mrulist(variables={"sort": "foo"})
             errored = False
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             errored = e.message
-        self.assertEqual(errored, ntp.packet.SERR_BADSORT % "foo")
+        self.assertEqual(errored, ntpp.SERR_BADSORT % "foo")
         # Test varbind error
         nonce_fetch_count = [0]
         try:
             cls.mrulist(variables={"foo": 1})
             errored = False
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             errored = e.message
-        self.assertEqual(errored, ntp.packet.SERR_BADPARAM % "foo")
+        self.assertEqual(errored, ntpp.SERR_BADPARAM % "foo")
         # Test add to request errors
         # Test None error
         nonce_fetch_count = [0]
@@ -1680,7 +1681,7 @@ class TestControlSession(unittest.TestCase):
         try:
             cls.mrulist()
             errored = False
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             errored = e.errorcode
         self.assertEqual(errored, None)
         # Test random error
@@ -1691,7 +1692,7 @@ class TestControlSession(unittest.TestCase):
         try:
             cls.mrulist()
             errored = False
-        except ntp.packet.ControlException as e:
+        except ctlerr as e:
             errored = e.errorcode
         self.assertEqual(errored, "therdaglib")
         # Test unknown var error
@@ -1716,7 +1717,7 @@ class TestControlSession(unittest.TestCase):
                            "nonce=foo, frags=32, addr.0=10.20.30.40:23, "
                            "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
                            "addr.2=1.2.3.4:23, last.2=40", False)])
-        self.assertEqual(isinstance(result, ntp.packet.MRUList), True)
+        self.assertEqual(isinstance(result, ntpp.MRUList), True)
         self.assertEqual(len(result.entries), 2)
         # Test bad value error
         nonce_fetch_count = [0]
@@ -1743,7 +1744,7 @@ class TestControlSession(unittest.TestCase):
                            "nonce=foo, limit=96, addr.0=10.20.30.40:23, "
                            "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
                            "addr.2=1.2.3.4:23, last.2=40", False)])
-        self.assertEqual(isinstance(result, ntp.packet.MRUList), True)
+        self.assertEqual(isinstance(result, ntpp.MRUList), True)
         self.assertEqual(len(result.entries), 2)
         self.assertEqual(logjig.data, ["Reverted to row limit from "
                                        "fragments limit.\n",
@@ -1754,9 +1755,9 @@ class TestControlSession(unittest.TestCase):
         query_results = qrm[:]
         queries = []
         query_fail = [3]
-        query_fail_code = [ntp.packet.SERR_INCOMPLETE,
+        query_fail_code = [ntpp.SERR_INCOMPLETE,
                            ntp.control.CERR_BADVALUE,  # Trigger cap_frags
-                           ntp.packet.SERR_INCOMPLETE]
+                           ntpp.SERR_INCOMPLETE]
         cls.response = ""
         logjig.data = []
         cls.debug = 1
@@ -1789,9 +1790,9 @@ class TestControlSession(unittest.TestCase):
         query_results = qrm[:]
         queries = []
         query_fail = [3]
-        query_fail_code = [ntp.packet.SERR_TIMEOUT,
+        query_fail_code = [ntpp.SERR_TIMEOUT,
                            ntp.control.CERR_BADVALUE,  # Trigger cap_frags
-                           ntp.packet.SERR_TIMEOUT]
+                           ntpp.SERR_TIMEOUT]
         cls.response = ""
         logjig.data = []
         cls.debug = 1
@@ -1867,7 +1868,7 @@ class TestControlSession(unittest.TestCase):
 
 
 class TestAuthenticator(unittest.TestCase):
-    target = ntp.packet.Authenticator
+    target = ntpp.Authenticator
     open_calls = []
     open_files = []
     open_data = []
@@ -1881,7 +1882,7 @@ class TestAuthenticator(unittest.TestCase):
 
     def test___init__(self):
         try:
-            ntp.packet.open = self.openjig
+            ntpp.open = self.openjig
             # Test without file
             cls = self.target()
             self.assertEqual(cls.passwords, {})
@@ -1898,7 +1899,7 @@ class TestAuthenticator(unittest.TestCase):
             self.assertEqual(self.open_calls, ["file"])
             self.assertEqual(len(self.open_files), 1)
         finally:
-            ntp.packet.open = open
+            ntpp.open = open
             self.open_calls = []
             self.open_files = []
             self.open_data = []
@@ -1925,7 +1926,7 @@ class TestAuthenticator(unittest.TestCase):
         self.assertEqual(cls.control(1), (1, None, None))
         try:
             # Read keyid from /etc/ntp.conf
-            ntp.packet.open = self.openjig
+            ntpp.open = self.openjig
             self.open_data = ["blah blah", "control 2"]
             self.assertEqual(cls.control(), (2, "b", "y"))
             # Fail to read keyid from /etc/ntp.conf
@@ -1937,21 +1938,21 @@ class TestAuthenticator(unittest.TestCase):
                 errored = True
             self.assertEqual(errored, True)
         finally:
-            ntp.packet.open = open
+            ntpp.open = open
 
     def test_compute_mac(self):
         f = self.target.compute_mac
         try:
-            temphash = ntp.packet.hashlib
+            temphash = ntpp.hashlib
             fakehashlibmod = HashlibModuleJig()
-            ntp.packet.hashlib = fakehashlibmod
+            ntpp.hashlib = fakehashlibmod
             # Test no digest
             self.assertEqual(f(None, None, None, None), None)
             # Test with digest
             self.assertEqual(f("foo", 0x42, "bar", "quux"),
                              "\x00\x00\x00\x42blahblahblahblah")
         finally:
-            ntp.packet.hashlib = temphash
+            ntpp.hashlib = temphash
 
     def test_have_mac(self):
         f = self.target.have_mac
@@ -1968,15 +1969,15 @@ class TestAuthenticator(unittest.TestCase):
         good_pkt = "foobar\x00\x00\x00\x23blahblahblahblah"
         bad_pkt = "foobar\xDE\xAD\xDE\xAFblahblahblah"
         try:
-            temphash = ntp.packet.hashlib
+            temphash = ntpp.hashlib
             fakehashlibmod = HashlibModuleJig()
-            ntp.packet.hashlib = fakehashlibmod
+            ntpp.hashlib = fakehashlibmod
             # Test good
             self.assertEqual(cls.verify_mac(good_pkt), True)
             # Test bad
             self.assertEqual(cls.verify_mac(bad_pkt), False)
         finally:
-            ntp.packet.hashlib = temphash
+            ntpp.hashlib = temphash
 
 
 if __name__ == "__main__":
