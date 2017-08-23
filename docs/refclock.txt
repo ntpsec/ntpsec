@@ -106,11 +106,11 @@ link:extern.html[External Clock Discipline and the Local Clock Driver]
 page.
 
 Several drivers make use of the pulse-per-second (PPS) signal
-discipline, which is part of the generic driver interface, so require no
-specific configuration. For those drivers that do not use this
-interface, the link:driver_pps.html[PPS Clock Discipline] driver
-can be can provide this function. It normally works in conjunction with
-the reference clock that produces the timecode signal, but can work with
+discipline, which is part of the generic driver interface, so require
+no specific configuration. For those drivers that do not use this
+interface, the link:driver_pps.html[PPS Clock Discipline] driver can
+provide this function. It normally works in conjunction with the
+reference clock that produces the timecode signal, but can work with
 another driver or remote server. When PPS kernel features are present,
 the driver can redirect the PPS signal to the kernel.
 
@@ -150,13 +150,12 @@ aftermarket activity for more than ten years. Several others have been
 removed for relying on obsolete buses or hardware classes that no
 longer exist.
 
-For security reasons, we will no longer support any refclock that requires
-a closed-source driver to run.  This filtered out the
-Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver,
-the Hopf GPS/DCF77 6039 for PCI-Bus,
-and the Spectracom TSYNC PCI.  The Hopf 6021 driver has also been
-removed because it duplicates support for the 6021 in the generic
-parse driver.
+For security reasons, we will no longer support any refclock that
+requires a closed-source driver to run.  This filtered out the
+Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver, the Hopf
+GPS/DCF77 6039 for PCI-Bus, and the Spectracom TSYNC PCI.  The Hopf
+6021 driver has also been removed because it duplicates support for
+the 6021 in the generic parse driver.
 
 [options="header"]
 [cols="15%,5%,80%",options="header"]
