@@ -177,14 +177,15 @@ class Ntpq(cmd.Cmd):
         "Called when an empty line is entered in response to the prompt."
         pass
 
-    def default(self, line):
-        "Called on an input line when the command prefix is not recognized."
-
+    def precmd(self, line):
         if line.startswith(":config"):
             line = "hot_" + line[1:]
         elif line.startswith("config-from-file"):
             line = line.replace("config-from-file", "config_from_file")
+        return line
 
+    def default(self, line):
+        "Called on an input line when the command prefix is not recognized."
         cmd, arg, line = self.parseline(line)
         try:
             dotext = 'do_'+cmd
