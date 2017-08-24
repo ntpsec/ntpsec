@@ -1289,20 +1289,21 @@ class ControlSession:
             key, value = key.strip(), value.strip()
             # Start trying to cast to non-string types
             # I don't like this block, look for a less ugly method
-            try:
-                castedvalue = int(value, 0)
-            except ValueError:
+            if value:
                 try:
-                    castedvalue = float(value)
-                    if (key == "delay") and (raw is False):
-                        # Hack for non-raw-mode to get precision
-                        items.append(("delay-s", value))
+                    castedvalue = int(value, 0)
                 except ValueError:
-                    if (value[0] == '"') and (value[-1] == '"'):
-                        value = value[1:-1]
-                        castedvalue = value  # for uniform tuples
-                    else:  # fell through everything else, still need casted
-                        castedvalue = value
+                    try:
+                        castedvalue = float(value)
+                        if (key == "delay") and (raw is False):
+                            # Hack for non-raw-mode to get precision
+                            items.append(("delay-s", value))
+                    except ValueError:
+                        if (value[0] == '"') and (value[-1] == '"'):
+                            value = value[1:-1]
+                        castedvalue = value  # str / unknown, stillneed casted
+            else:  # no value
+                castedvalue = value
             if raw is True:
                 items.append((key, (castedvalue, value)))
             else:
