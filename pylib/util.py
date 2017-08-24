@@ -1116,7 +1116,7 @@ class MRUSummary:
             else:
                 dns = canonicalize_dns(ip)
                 # Forward-confirm the returned DNS
-                confirmed = confirmation_cache.get(dns)
+                confirmed = canonicalization_cache.get(dns)
                 if confirmed is None:
                     confirmed = False
                     try:
@@ -1128,7 +1128,7 @@ class MRUSummary:
                                 break
                     except socket.gaierror as e:
                         pass
-                    confirmation_cache.set(dns, confirmed)
+                    canonicalization_cache.set(dns, confirmed)
                 if not confirmed:
                     dns = "%s (%s)" % (ip, dns)
             if not self.wideremote:
