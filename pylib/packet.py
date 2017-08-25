@@ -912,7 +912,6 @@ class ControlSession:
                     raise ControlException(SERR_NOTRUST)
             try:
                 key_id = int(input("Keyid: "))
-                # FIXME: Magic number, yuck
                 if key_id == 0 or key_id > MAX_KEYID:
                     raise ControlException(SERR_BADKEY)
             except (SyntaxError, ValueError):
@@ -968,7 +967,7 @@ class ControlSession:
         pkt = ControlPacket(self, opcode, associd, qdata)
 
         self.sequence += 1
-        self.sequence %= 65536  # Has to fit in a struct H field
+        self.sequence %= 0x10000  # Has to fit in a struct H field
         pkt.sequence = self.sequence
 
         # If we have data, pad it out to a 32-bit boundary.
