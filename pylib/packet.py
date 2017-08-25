@@ -327,6 +327,8 @@ MAXFRAGS = 32
 DEFTIMEOUT = 5000
 DEFSTIMEOUT = 3000
 
+# The maximum keyid for authentication, keyid is a 16-bit field
+MAX_KEYID = 0xFFFF
 
 class Packet:
     "Encapsulate an NTP fragment"
@@ -911,7 +913,7 @@ class ControlSession:
             try:
                 key_id = int(input("Keyid: "))
                 # FIXME: Magic number, yuck
-                if key_id == 0 or key_id > 65535:
+                if key_id == 0 or key_id > MAX_KEYID:
                     raise ControlException(SERR_BADKEY)
             except (SyntaxError, ValueError):
                 raise ControlException(SERR_BADKEY)
