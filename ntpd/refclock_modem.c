@@ -89,7 +89,7 @@
  *
  * US Naval Observatory (USNO)
  *
- * Phone: (202) 762-1594 (Washington, DC); (719) 567-6742 (Boulder, CO)
+ * Phone: (202) 762-1594 (Washington, DC); (719) 567-6743 (Colorado Springs, CO)
  *
  * Data Format (two lines, repeating at one-second intervals)
  *

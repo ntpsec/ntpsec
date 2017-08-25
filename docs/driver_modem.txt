@@ -101,7 +101,7 @@ correction is valid.
 
 http://www.usno.navy.mil/USNO/time/telephone-time[US Naval Observatory (USNO)]
 
-Phone: (202) 762-1594 (Washington, DC); (719) 567-6742 (Colorado Springs, CO)
+Phone: (202) 762-1594 (Washington, DC); (719) 567-6743 (Colorado Springs, CO)
 
 http://tycho.usno.navy.mil/modem_time.html[Data Format] (two lines,
 repeating at one-second intervals)
