@@ -1259,9 +1259,6 @@ class ControlSession:
         # Strip out NULs and binary garbage from text;
         # ntpd seems prone to generate these, especially
         # in reslist responses.
-        # ==================
-        # TODO: remove raw switch, always return (key, value, castedvalue)
-        # ==================
         kvpairs = []
         instring = False
         response = ""
@@ -1277,7 +1274,7 @@ class ControlSession:
             elif 0 < cord < 127:
                 # if it isn't a special case or garbage, add it
                 response += c
-        if len(response) > 0:  # The last item won't be caught in the loop
+        if len(response) > 0:  # The last item won't be caught by the loop
             kvpairs.append(response.strip())
         items = []
         for pair in kvpairs:
@@ -1288,7 +1285,6 @@ class ControlSession:
                 key, value = pair, ""
             key, value = key.strip(), value.strip()
             # Start trying to cast to non-string types
-            # I don't like this block, look for a less ugly method
             if value:
                 try:
                     castedvalue = int(value, 0)
