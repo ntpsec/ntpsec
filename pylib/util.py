@@ -1203,17 +1203,22 @@ class IfstatsSummary:
 
     def summary(self, i, variables):
         formatted = {}
-        for name in self.fields.keys():
-            value = variables.get(name, "?")
-            if value == "?":
-                fmt = value
-            else:
-                fmt = self.fields[name] % value
-            formatted[name] = fmt
         try:
+            # Format the fields
+            for name in self.fields.keys():
+                value = variables.get(name, "?")
+                if value == "?":
+                    fmt = value
+                else:
+                    fmt = self.fields[name] % value
+                formatted[name] = fmt
             enFlag = '.' if variables.get('en', False) else 'D'
-            s = ("%3u %-24.24s %c %4s %6s %6s %6s %5s %8s\n    %s\n"
-                 % (i, formatted['name'],
+            address = variables.get("addr", "?")
+            bcast = variables.get("bcast")
+            # Assemble the fields into a line
+            s = ("%3u %s %s %s %s %s %s %s %s\n    %s\n"
+                 % (i,
+                    formatted['name'],
                     enFlag,
                     formatted['flags'],
                     formatted['rx'],
@@ -1221,9 +1226,9 @@ class IfstatsSummary:
                     formatted['txerr'],
                     formatted['pc'],
                     formatted['up'],
-                    variables.get('addr', '?')))
-            if variables.get("bcast"):
-                s += "    %s\n" % variables['bcast']
+                    address))
+            if bcast:
+                s += "    %s\n" % bcast
         except TypeError:
             # Can happen when ntpd ships a corrupted response
             return ''
