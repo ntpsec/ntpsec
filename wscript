@@ -241,11 +241,14 @@ def configure(ctx):
     #      if >=200112L, all of IEEE 1003.1-2004
     #      if >=200809L, all of IEEE 1003.1-2008
     #
-    # FIXME: We'd like this to be -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=600
-    # rather than -D_GNU_SOURCE, but that runs into problems in two places:
-    # (1) The ISC net handling stuff, where struct in6_addr loses a member
-    # named s6_addr32 that the macros need, and (2) three BSD functions
-    # related to chroot jailing in the sandbox code.
+    # FIXME: The code is not quite as standards-clean as this makes it look.
+    # More work needs to be done here.
+    #
+    # A shim, -D_DEFAULT_SOURCE, is required in a handful of
+    # files: (1) Near the ISC net handling stuff, where struct in6_addr
+    # otherwise loses a member named s6_addr32 that the macros need,
+    # and (2) three BSD functions related to chroot jailing in the
+    # sandbox code.
     #
     # Note that _POSIX_C_SOURCE >= 199506L and _GNU_SOURCE both turn on
     # _POSIX_PTHREAD_SEMANTICS and _REENTRANT
