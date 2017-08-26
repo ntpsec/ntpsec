@@ -243,14 +243,14 @@ def configure(ctx):
     #
     # FIXME: We'd like this to be -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=600
     # rather than -D_GNU_SOURCE, but that runs into problems in two places:
-    # (1) The ISC net handling stuff, where struct in6_addr’ loses a member
+    # (1) The ISC net handling stuff, where struct in6_addr loses a member
     # named s6_addr32 that the macros need, and (2) three BSD functions
     # related to chroot jailing in the sandbox code.
     #
     # Note that _POSIX_C_SOURCE >= 199506L and _GNU_SOURCE both turn on
     # _POSIX_PTHREAD_SEMANTICS and _REENTRANT
     #
-    ctx.env.CFLAGS = ["-std=c99", "-D_GNU_SOURCE"] + ctx.env.CFLAGS
+    ctx.env.CFLAGS = ["-std=c99", "-D_POSIX_C_SOURCE=200809L", "-D_XOPEN_SOURCE=600"] + ctx.env.CFLAGS
 
     msg("--- Configuring main ---")
     ctx.setenv("main", ctx.env.derive())
