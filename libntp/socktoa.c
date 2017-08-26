@@ -85,7 +85,7 @@ sockporttoa(
 		 (IS_IPV6(sock))
 		     ? "[%s]:%hu"
 		     : "%s:%hu",
-		 atext, SRCPORT(sock));
+		 atext, (unsigned short)SRCPORT(sock));
 	errno = saved_errno;
 
 	return buf;
