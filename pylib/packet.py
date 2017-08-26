@@ -184,6 +184,7 @@ A Mode 6 packet cannot have extension fields.
 from __future__ import print_function, division
 import getpass
 import hashlib
+import os
 import select
 import socket
 import string
@@ -911,7 +912,10 @@ class ControlSession:
                     # There are no trusted keys.  Barf.
                     raise ControlException(SERR_NOTRUST)
             try:
-                key_id = int(input("Keyid: "))
+                if os.isatty(0):
+                    key_id = int(input("Keyid: "))
+                else:
+                    key_id = 0
                 if key_id == 0 or key_id > MAX_KEYID:
                     raise ControlException(SERR_BADKEY)
             except (SyntaxError, ValueError):

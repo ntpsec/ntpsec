@@ -146,7 +146,7 @@ class Ntpq(cmd.Cmd):
     def __init__(self, session):
         cmd.Cmd.__init__(self)
         self.session = session
-        self.prompt = "ntpq> "
+        self.prompt = "ntpq> " if os.isatty(0) else ""
         self.interactive = False        # set to True when we should prompt
         # self.auth_keyid   = 0# Keyid used for authentication.
         # self.auth_keytype = "NID_md5"# MD5 (FIXME: string value is a dummy)
@@ -1731,7 +1731,8 @@ if __name__ == '__main__':
                     session.close()
         raise SystemExit(0)
     except KeyboardInterrupt:
-        interpreter.say("\n")
+        if os.isatty(0):
+            interpreter.say("\n")
     except ntp.packet.ControlException as e:
         interpreter.warn(e.message + "\n")
     except IOError:
