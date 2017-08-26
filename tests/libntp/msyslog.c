@@ -157,9 +157,11 @@ TEST(msyslog, msnprintfTruncate)
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
 # pragma GCC diagnostic ignored "-Wformat-contains-nul"
 #endif
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)
 #pragma GCC diagnostic ignored "-Wformat="
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
+#endif /* GCC */
 TEST(msyslog, msnprintfHangingPercent)
 {
 	char exp_buf[64];
