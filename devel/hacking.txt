@@ -61,6 +61,9 @@ You can view POSIX.1-2001, SUSv3, online for free here:
 
 POSIX threads *are* considered part of the standardized API and may be used.
 
+You *may* assume the clock_gettime(2) and clock_settime(2) calls, and
+the related getitimer(2)/setitimer(2), from POSIX-1.2008.
+
 Here are the non-standardized APIs that may be used:
 
 * Either ntp_adjtime() or the older BSD adjtime(2).
@@ -71,6 +74,10 @@ Here are the non-standardized APIs that may be used:
   system's active UDP interfaces. However, the local details should be
   hidden as an implementation of the isc_interfaceiter.c functions,
   not called directly from the rest of the code.
+
+* Local facilities for reading packet arrival timestamps out of the
+  UDP packet layer.  See ntpd/ntp_packetstamp.c for details - if you
+  add a local hack to do this, it needs to be sealed inside that module.
 
 === Banned functions ===
 
@@ -215,10 +222,14 @@ back-compatibility issues that trying to make them run is probably
 doomed.  The first 3.x version under which our Python has been
 extensively tested is 3.5.
 
-Please check your Python code with the Pyflakes.  If your code fails
+Please check your Python code with Pyflakes.  If your code fails
 a Pyflakes test, we probably will not merge it.
 
 https://pypi.python.org/pypi/pyflakes
+
+Note: In the future, the Python baseline may
+http://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[change
+t 2.7.2].
 
 == General notes ==
 
