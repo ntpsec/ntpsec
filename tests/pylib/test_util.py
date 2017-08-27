@@ -371,5 +371,38 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Test -xxx.xxx
         self.assertEqual(f(-123.456789), "-123.457")
 
+    def test_Cache(self):
+        c = ntp.util.Cache
+
+        monodata = []
+        def monoclock_jig():
+            return monodata.pop(0)
+
+        # Test init
+        cls = c()
+        self.assertEqual(cls._cache, {})
+        try:
+            monotemp = ntp.util.monoclock
+            ntp.util.monoclock = monoclock_jig
+            # Test set
+            monodata = [5, 10, 315, 20]
+            cls.set("foo", 42)
+            cls.set("bar", 23)
+            self.assertEqual(cls._cache, {"foo": (42, 5),
+                                          "bar": (23, 10)})
+            self.assertEqual(monodata, [315, 20])
+            # Test get, expired
+            result = cls.get("foo")
+            self.assertEqual(result, None)
+            self.assertEqual(monodata, [20])
+            self.assertEqual(cls._cache, {"bar": (23, 10)})
+            # Test get, valid
+            result = cls.get("bar")
+            self.assertEqual(result, 23)
+            self.assertEqual(monodata, [])
+            self.assertEqual(cls._cache, {"bar": (23, 10)})
+        finally:
+            ntp.util.monoclock = monotemp
+
 if __name__ == '__main__':
     unittest.main()

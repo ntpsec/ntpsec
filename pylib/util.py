@@ -489,6 +489,8 @@ class Cache:
             value, settime = self._cache[key]
             if settime >= monoclock() - self.ttl:
                 return value
+            else:  # key expired, delete it
+                del self._cache[key]
     def set(self, key, value):
         self._cache[key] = (value, monoclock())
 
