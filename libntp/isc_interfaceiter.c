@@ -7,11 +7,6 @@
 
 #include "config.h"
 
-/* FIXME: GCC/glibc dependency - s6_addr32 member of struct in6_addr. */
-#ifndef _DEFAULT_SOURCE
-# define _DEFAULT_SOURCE 1
-#endif
-
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_SOCKIO_H

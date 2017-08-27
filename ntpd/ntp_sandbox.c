@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-/* FIXME: For some BSD functions related to chroot jailing */
-#ifndef _DEFAULT_SOURCE
-# define _DEFAULT_SOURCE 1
-#endif
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>

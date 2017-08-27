@@ -4,10 +4,6 @@
 
 #include "config.h"
 
-#ifndef _DEFAULT_SOURCE
-# define _DEFAULT_SOURCE 1
-#endif
-
 #include <stdio.h>
 #include <sys/types.h>
 
