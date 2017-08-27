@@ -713,6 +713,7 @@ create_peer_node(
 			}
 			break;
 
+#ifdef REFCLOCK
 		case T_Path:
 			my_node->ctl.path = estrdup(option->value.s);
 			break;
@@ -721,7 +722,6 @@ create_peer_node(
 			my_node->ctl.ppspath = estrdup(option->value.s);
 			break;
 
-#ifdef REFCLOCK
 		case T_Baud:
 			my_node->ctl.baud = option->value.u;
 			break;
