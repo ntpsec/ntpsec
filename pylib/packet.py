@@ -446,7 +446,7 @@ class SyncPacket(Packet):
             payload = payload[8+flen:]
         if len(payload) == 4:    # Crypto-NAK
             self.mac = payload
-        if len(payload) == 12:   # DES
+        elif len(payload) == 12:   # DES
             raise SyncException("Unsupported DES authentication")
         elif len(payload) in (8, 16):
             raise SyncException("Packet is a runt")
