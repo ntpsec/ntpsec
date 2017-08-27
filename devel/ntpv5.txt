@@ -125,5 +125,41 @@ that PNG chunks have only two-byte lengths and always end with a CRC.
 This chunk system is deliberately more similar to RFC7822 extension
 blocks.
 
+== Daniel weighs in ==
+
+There aren't many deficiencies in NTPv4 which can't be fixed by adding
+extension fields. A change big enough to make a version bump
+worthwhile would incorporate at least most of the following:
+
+1. Drop everything other than client/server mode. Replace mode 6 with
+something that runs over HTTPS on the NTS-KE port.
+
+2. Let client and server packets be formatted differently. Achieve
+data minimization by just taking the unnecessary fields out of client
+packets altogether.
+
+3. Forbid use of the legacy MAC field, thus fixing the hairiness
+around extension parsing.
+
+4. Make NTS mandatory. In the NTPv5 packet format, the version, mode,
+NTS unique identifier, and (in client packets) NTS cookie come first
+in plaintext, then the whole rest of the packet is encrypted.
+
+5. Ditch the useless poll, stratum, refid, and reference timestamp
+fields. Given that all of the above are implemented, origin timestamp
+also becomes redundant (NTS takes the place of its anti-spoofing
+role).
+
+6. Represent timestamps as days, seconds, and fractions so that the
+time can be represented unambiguously during leap seconds. Make the
+day field 64 bits wide so that its range comfortable exceeds the
+lifespan of the solar system.
+
+7. Don't implement leap smearing in the wire protocol (servers should
+always report accurate, unsmeared time), but standardize a formula for
+translating NTP time into smeared UNIX time seen by other
+applications.
+
+
 // end
 
