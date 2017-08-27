@@ -720,6 +720,7 @@ handle_manycast(
 	bool request_already_authenticated
 	)
 {
+	struct peer_ctl mctl;
 	(void)request_already_authenticated;
 	(void)restrict_mask;
 
@@ -741,11 +742,15 @@ handle_manycast(
 		return;
 	}
 
+	memset(&mctl, '\0', sizeof(struct peer_ctl));
+	mctl.version = PKT_VERSION(pkt->li_vn_mode);
+	mctl.flags = FLAG_PREEMPT | (FLAG_IBURST & mpeer->flags);
+	mctl.minpoll = mpeer->minpoll;
+	mctl.maxpoll = mpeer->maxpoll;
+	mctl.ttl = 0;
+	mctl.peerkey = mpeer->keyid;
 	newpeer(&rbufp->recv_srcadr, NULL, rbufp->dstadr,
-		MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		mpeer->minpoll, mpeer->maxpoll,
-		FLAG_PREEMPT | (FLAG_IBURST & mpeer->flags),
-		MDF_UCAST | MDF_UCLNT, 0, mpeer->keyid, false);
+		MODE_CLIENT, &mctl, MDF_UCAST | MDF_UCLNT, false);
 }
 	
 void
@@ -2460,6 +2465,7 @@ dns_take_pool(
 	sockaddr_u *		rmtadr
 	)
 {
+	struct peer_ctl		pctl;
 	struct peer *		peer;
 	int			restrict_mask;
 	endpt *			lcladr;
@@ -2474,11 +2480,15 @@ dns_take_pool(
 	msyslog(LOG_INFO, "PROTO: Pool taking: %s", socktoa(rmtadr));
 
 	lcladr = findinterface(rmtadr);
+	memset(&pctl, '\0', sizeof(struct peer_ctl));
+	pctl.version = pool->version;
+	pctl.minpoll = pool->minpoll;
+	pctl.maxpoll = pool->maxpoll;
+	pctl.flags = FLAG_PREEMPT | (FLAG_IBURST & pool->flags);
+	pctl.ttl = 0;
+	pctl.peerkey = 0;
 	peer = newpeer(rmtadr, NULL, lcladr,
-		MODE_CLIENT, pool->version,
-		pool->minpoll, pool->maxpoll,
-		FLAG_PREEMPT | (FLAG_IBURST & pool->flags),
-		MDF_UCAST | MDF_UCLNT, 0, 0, false);
+		       MODE_CLIENT, &pctl, MDF_UCAST | MDF_UCLNT, false);
 	peer_xmit(peer);
 	if (peer->flags & FLAG_IBURST)
 	  peer->retry = NTP_RETRY;

@@ -131,9 +131,8 @@ extern	struct peer *findpeer	(struct recvbuf *, int, int *);
 extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
-				 endpt *, uint8_t, uint8_t,
-				 uint8_t, uint8_t, unsigned int, uint8_t, uint32_t,
-				 keyid_t, const bool);
+				 endpt *, uint8_t, struct peer_ctl *,
+				 uint8_t, const bool);
 extern	void	peer_update_hash (struct peer *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);

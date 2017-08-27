@@ -627,13 +627,8 @@ newpeer(
 	const char *	hostname,
 	endpt *		dstadr,
 	uint8_t		hmode,
-	uint8_t		version,
-	uint8_t		minpoll,
-	uint8_t		maxpoll,
-	unsigned int	flags,
+	struct peer_ctl *ctl,
 	uint8_t		cast_flags,
-	uint32_t	ttl,
-	keyid_t		key,
 	bool		initializing1
 	)
 {
@@ -690,7 +685,7 @@ newpeer(
 	UNLINK_HEAD_SLIST(peer, peer_free, p_link);
 	peer_free_count--;
 	peer_associations++;
-	if (FLAG_PREEMPT & flags)
+	if (FLAG_PREEMPT & ctl->flags)
 		peer_preempt++;
 
 	/*
@@ -704,22 +699,22 @@ newpeer(
 	if (hostname != NULL)
 		peer->hostname = estrdup(hostname);
 	peer->hmode = hmode;
-	peer->version = version;
-	peer->flags = flags;
+	peer->version = ctl->version;
+	peer->flags = ctl->flags;
 	peer->cast_flags = cast_flags;
 	set_peerdstadr(peer, 
 		       select_peerinterface(peer, srcadr, dstadr));
 
-        if (NTP_MAXPOLL_UNK == maxpoll)
+        if (NTP_MAXPOLL_UNK == ctl->maxpoll)
 	    /* not set yet, set to default */
-	    maxpoll = NTP_MAXDPOLL;
+	    ctl->maxpoll = NTP_MAXDPOLL;
 	/*
          * minpoll is clamped not greater than NTP_MAXPOLL
          * maxpoll is clamped not less than NTP_MINPOLL
          * minpoll is clamped not greater than maxpoll.
 	 */
-	peer->minpoll = min(minpoll, NTP_MAXPOLL);
-	peer->maxpoll = max(maxpoll, NTP_MINPOLL);
+	peer->minpoll = min(ctl->minpoll, NTP_MAXPOLL);
+	peer->maxpoll = max(ctl->maxpoll, NTP_MINPOLL);
 	if (peer->minpoll > peer->maxpoll)
 		peer->minpoll = peer->maxpoll;
 
@@ -737,8 +732,8 @@ newpeer(
 	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
 		enable_broadcast(peer->dstadr, srcadr);
 
-	peer->ttl = ttl;
-	peer->keyid = key;
+	peer->ttl = ctl->ttl;
+	peer->keyid = ctl->peerkey;
 	peer->precision = sys_precision;
 	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_POOL)
@@ -760,7 +755,7 @@ newpeer(
 	/*
 	 * Put the new peer in the hash tables.
 	 */
-	if ((MDF_UCAST & cast_flags) && !(FLAG_DNS & flags))
+	if ((MDF_UCAST & cast_flags) && !(FLAG_DNS & ctl->flags))
 		peer_update_hash(peer);
 	hash = peer->associd & NTP_HASH_MASK;
 	LINK_SLIST(assoc_hash[hash], peer, aid_link);

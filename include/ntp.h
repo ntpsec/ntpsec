@@ -155,6 +155,24 @@ typedef struct __endpt {
 #define INT_BCASTXMIT	0x400   /* socket setup to allow broadcasts */
 
 /*
+ * Read-only control knobs for a peer structure.
+ * Packaging these makes context copies a bit more succinct.
+ */
+struct peer_ctl {
+	uint8_t		version;
+	int		flags;
+	uint8_t		minpoll;
+	uint8_t		maxpoll;
+	uint32_t	ttl;
+	keyid_t		peerkey;
+#ifdef REFCLOCK
+	uint32_t	baud;
+	char		*path;
+	char		*ppspath;
+#endif /* REFCLOCK */
+};
+
+/*
  * Define flasher bits (tests 1 through 11 in packet procedure)
  * These reveal the state at the last grumble from the peer and are
  * most handy for diagnosing problems, even if not strictly a state
@@ -198,7 +216,7 @@ typedef struct __endpt {
  *
  * The ttl field is overloaded; it's used in the refclock case to pass
  * in a mode byte that may contain a baud rate or subtype. Splitting
- * this fields would complicate some call sequences that are already
+ * this field would complicate some call sequences that are already
  * unpleasantly intricate.
  */
 struct peer {

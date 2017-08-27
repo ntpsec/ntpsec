@@ -2628,9 +2628,8 @@ peer_config(
 	ctl->flags |= FLAG_CONFIG;
 	if (mode_ntpdate)
 		ctl->flags |= FLAG_IBURST;
-	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
-		       ctl->minpoll, ctl->maxpoll, (unsigned int)ctl->flags,
-		       cast_flags, ctl->ttl, ctl->peerkey, true);
+	return newpeer(srcadr, hostname, dstadr, hmode,
+		       ctl, cast_flags, true);
 }
 
 
