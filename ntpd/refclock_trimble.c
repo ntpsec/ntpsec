@@ -319,6 +319,7 @@ trimble_start (
 	struct termios tio;
 	struct calendar build_date;
         int rcode;
+	unsigned int cflag, iflag;
 
 	snprintf(device, sizeof(device), DEVICE, unit);
 
@@ -407,9 +408,13 @@ trimble_start (
 		tio.c_iflag &= (unsigned)~IGNPAR;
 		tio.c_iflag |= (INPCK|PARMRK);
 	}
-	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
-		msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr failed: %m",
-		        refclock_name(peer));
+	cflag = tio.c_cflag;
+	iflag = tio.c_iflag;
+	if (tcsetattr(fd, TCSANOW, &tio) == -1 || tcgetattr(fd, &tio) == -1 ||
+	    tio.c_cflag != cflag || tio.c_iflag != iflag) {
+		msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr failed: wanted cflag 0x%x got 0x%x, wanted iflag 0x%x got 0x%x, return: %m",
+		        refclock_name(peer), cflag, tio.c_cflag, iflag,
+		        tio.c_iflag);
 		close(fd);
 		free(up);
 		return false;
@@ -433,9 +438,10 @@ trimble_start (
 			return false;
 		}
 		up->MCR |= TIOCM_RTS;
-		if (ioctl(fd, TIOCMSET, &up->MCR) < 0) {
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) TIOCMSET failed: %m",
-			        unit);
+		if (ioctl(fd, TIOCMSET, &up->MCR) < 0 || 
+		    !(up->MCR & TIOCM_RTS)) {
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) TIOCMSET failed: MCR=0x%x, return=%m",
+			        unit, (unsigned int)up->MCR);
 			close(fd);
 			free(up);
 			return false;
