@@ -1169,8 +1169,8 @@ class ControlSession:
         warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
                                                   self.debug, th))
 
-        if ((rpkt.version() > ntp.magic.NTP_VERSION or
-             rpkt.version() < ntp.magic.NTP_OLDVERSION)):
+        if ((rpkt.version() > ntp.magic.NTP_VERSION) or
+            (rpkt.version() < ntp.magic.NTP_OLDVERSION)):
             warndbg("Fragment received with version %d\n"
                     % rpkt.version(), 1)
             return False
