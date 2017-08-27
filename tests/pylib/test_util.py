@@ -311,5 +311,65 @@ class TestPylibUtilMethods(unittest.TestCase):
         # PPM var
         self.assertEqual(f("1.234", "frequency"), "1.234ppm")
 
+    def test_f8dot4(self):
+        f = ntp.util.f8dot4
+
+        # Test signal
+        self.assertEqual(f("foo"), "     foo")
+        # Test bad type
+        self.assertEqual(f({"food": "problematic"}), "       X")
+        # Test not a number
+        self.assertEqual(f(float("nan")), "     nan")
+        # Test Positives
+        # Test xxxxxxxx
+        self.assertEqual(f(12345678.9), "12345678")
+        # Test xxxxxx.x
+        self.assertEqual(f(123456.789), "123456.8")
+        # Test xxxxx.xx
+        self.assertEqual(f(12345.6789), "12345.68")
+        # Test xxxx.xxx
+        self.assertEqual(f(1234.56789), "1234.568")
+        # Test xxx.xxxx
+        self.assertEqual(f(123.456789), "123.4568")
+        # Test Negatives
+        # Test -xxxxxxx
+        self.assertEqual(f(-1234567.89), "-1234567")
+        # Test -xxxxx.x
+        self.assertEqual(f(-12345.6789), "-12345.7")
+        # Test -xxxx.xx
+        self.assertEqual(f(-1234.56789), "-1234.57")
+        # Test -xxx.xxx
+        self.assertEqual(f(-123.456789), "-123.457")
+        # Test -xx.xxxx
+        self.assertEqual(f(-12.3456789), "-12.3457")
+
+    def test_f8dot3(self):
+        f = ntp.util.f8dot3
+
+        # Test signal
+        self.assertEqual(f("foo"), "     foo")
+        # Test bad type
+        self.assertEqual(f({"food": "problematic"}), "       X")
+        # Test not a number
+        self.assertEqual(f(float("nan")), "     nan")
+        # Test Positives
+        # Test xxxxxxxx
+        self.assertEqual(f(12345678.9), "12345678")
+        # Test xxxxxx.x
+        self.assertEqual(f(123456.789), "123456.8")
+        # Test xxxxx.xx
+        self.assertEqual(f(12345.6789), "12345.68")
+        # Test xxxx.xxx
+        self.assertEqual(f(1234.56789), "1234.568")
+        # Test Negatives
+        # Test -xxxxxxx
+        self.assertEqual(f(-1234567.89), "-1234567")
+        # Test -xxxxx.x
+        self.assertEqual(f(-12345.6789), "-12345.7")
+        # Test -xxxx.xx
+        self.assertEqual(f(-1234.56789), "-1234.57")
+        # Test -xxx.xxx
+        self.assertEqual(f(-123.456789), "-123.457")
+
 if __name__ == '__main__':
     unittest.main()

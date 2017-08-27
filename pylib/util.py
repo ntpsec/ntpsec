@@ -414,7 +414,7 @@ def f8dot4(f):
         # it also catches None, strings, etc.
         return "     nan"
 
-    fmt = "%8d"          # xxxxxxxx
+    fmt = "%8d"          # xxxxxxxx or -xxxxxxx
     if f >= 0:
         if f < 1000.0:
             fmt = "%8.4f"    # xxx.xxxx  normal case
@@ -451,7 +451,7 @@ def f8dot3(f):
         # it also catches None, strings, etc.
         return "     nan"
 
-    fmt = "%8d" % f          # xxxxxxxx or -xxxxxxx
+    fmt = "%8d"          # xxxxxxxx or -xxxxxxx
     if f >= 0:
         if f < 10000.0:
             fmt = "%8.3f"    # xxxx.xxx  normal case
