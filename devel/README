@@ -25,9 +25,6 @@ make-tarball::
 ntpv5.txt::
 	Design notes towards NTPv5.
 
-packaging.txt::
-	Guidance for binary package builders.
-
 pre-release.txt::
 	A collection of ideas about testing before a release.
 

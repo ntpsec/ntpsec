@@ -63,11 +63,12 @@ has a pivot date and resolves incoming timestamps to the era that
 minimizes distance between now and the timestamp.  This procedure
 is part of the core protocol specification.
 
-An instance's pivot time is constructed from BUILD_EPOCH defined at configure
-time in config.h.  If BUILD_EPOCH is set to a known time then the binaries are
-reproducible.  By default the BUILD_EPOCH is the time when the last './waf
-configure' was run.  You can override the BUILD_EPOCH with '-waf --build-epoch'
-or using the SOURCE_DATE_EPOCH environment variable.
+An instance's pivot time is constructed from BUILD_EPOCH defined at
+configure time in config.h.  If BUILD_EPOCH is set to a known time
+then the binaries are reproducible.  By default the BUILD_EPOCH is the
+time when the last './waf configure' was run.  You can override the
+BUILD_EPOCH with '-waf --build-epoch' or using the SOURCE_DATE_EPOCH
+environment variable.
 
 More information on reproduceable builds is at:
 https://reproducible-builds.org/[https://reproducible-builds.org/]

@@ -71,6 +71,8 @@ ntpfrob/::      The ntpfrob utility collects several small diagnostic
 ntptime/:: 	Directory containing a utility for reading and modifying
 		kernel parameters related to the local clock.
 
+packaging/::	Parts and guidance for distribution packagers.
+
 pylib/::	Installable Python helper classes for scripts.
 
 tests/::	Self-test code.
