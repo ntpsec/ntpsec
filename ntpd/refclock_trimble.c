@@ -426,7 +426,7 @@ trimble_start (
 		 * voltage and pulsed negative.
 		 */
 		if (ioctl(fd, TIOCMGET, &up->MCR) < 0) {
-			msyslog(LOG_ERR, "Trimble(%d) TIOCMGET failed: %m",
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) TIOCMGET failed: %m",
 			        unit);
 			close(fd);
 			free(up);
@@ -434,7 +434,7 @@ trimble_start (
 		}
 		up->MCR |= TIOCM_RTS;
 		if (ioctl(fd, TIOCMSET, &up->MCR) < 0) {
-			msyslog(LOG_ERR, "Trimble(%d) TIOCMSET failed: %m",
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) TIOCMSET failed: %m",
 			        unit);
 			close(fd);
 			free(up);
@@ -942,7 +942,8 @@ trimble_poll (
 	/* ask Praecis for its signal status */
 	if(up->type == CLK_PRAECIS) {
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",unit);
+			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",
+			        unit);
 	}
 
 	/* record clockstats */
@@ -956,7 +957,7 @@ trimble_poll (
 	       up->unit, prettydate(pp->lastrec)));
 
 	if (pp->hour == 0 && up->week > up->build_week + 1000)
-		msyslog(LOG_WARNING, "Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
+		msyslog(LOG_WARNING, "REFCLOCK: Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
 		        up->unit, up->week, up->build_week);
 
 	/* process samples in filter */
@@ -1020,7 +1021,7 @@ trimble_io (
 				up->rpt_status = TSIP_PARSED_DATA;
 				mb(up->rpt_cnt++) = *c;
 			} else {
-				msyslog(LOG_ERR, "Trimble(%d): detected serial parity error or receive buffer overflow",
+				msyslog(LOG_ERR, "REFCLOCK: Trimble(%d): detected serial parity error or receive buffer overflow",
 					up->unit);
 				up->rpt_status = TSIP_PARSED_EMPTY;
 			}
