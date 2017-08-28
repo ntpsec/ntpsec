@@ -97,10 +97,15 @@ class SocketModuleJig:
     AI_CANONNAME = socket.AI_CANONNAME
     EAI_NONAME = socket.EAI_NONAME
     EAI_NODATA = socket.EAI_NODATA
+    NI_NAMEREQD = socket.NI_NAMEREQD
 
     def __init__(self):
         self.gai_calls = []
         self.gai_error_count = 0
+        self.gai_returns = []
+        self.gni_calls = []
+        self.gni_error_count = 0
+        self.gni_returns = []
         self.socket_calls = []
         self.socket_fail = False
         self.socket_fail_connect = False
@@ -115,7 +120,16 @@ class SocketModuleJig:
             err = self.gaierror("blah")
             err.errno = socket.EAI_NONAME
             raise err
-        return 42
+        return self.gai_returns.pop(0)
+
+    def getnameinfo(self, addr, flags):
+        self.gni_calls.append((addr, flags))
+        if self.gni_error_count > 0:
+            self.gni_error_count -= 1
+            err = self.gaierror("blah")
+            err.errno = socket.EAI_NONAME
+            raise err
+        return self.gni_returns.pop(0)
 
     def socket(self, family, socktype, protocol):
         self.socket_calls.append((family, socktype, protocol))

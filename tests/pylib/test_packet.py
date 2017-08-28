@@ -675,6 +675,7 @@ class TestControlSession(unittest.TestCase):
             cls.debug = 3
             cls.logfp = logjig
             # Test first type
+            fakesockmod.gai_returns = [42]
             result = cls._ControlSession__lookuphost("blah.com", "family")
             self.assertEqual(result, 42)
             self.assertEqual(fakesockmod.gai_calls,
@@ -685,6 +686,7 @@ class TestControlSession(unittest.TestCase):
             # Test second type
             logjig.__init__()  # reset
             fakesockmod.__init__()
+            fakesockmod.gai_returns = [42]
             fakesockmod.gai_error_count = 1
             result = cls._ControlSession__lookuphost("blah.com", "family")
             self.assertEqual(result, 42)
@@ -700,6 +702,7 @@ class TestControlSession(unittest.TestCase):
             # Test third type
             logjig.__init__()  # reset
             fakesockmod.__init__()
+            fakesockmod.gai_returns = [42]
             fakesockmod.gai_error_count = 2
             result = cls._ControlSession__lookuphost("blah.com", "family")
             self.assertEqual(result, 42)
