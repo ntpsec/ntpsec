@@ -18,7 +18,7 @@ selects the clock type which determines how I/O is done, the tty
 parameters and the NTP parameters.
 
 refclock_parse operates on an abstract reference clock that delivers
-time stamps and statuses. Offsets and sychron- isation information is
+time stamps and statuses. Offsets and sychronization information is
 derived from this data and passed on to refclock_receive of ntpd which
 uses that data for syncronisation.
 

@@ -29,7 +29,8 @@
  * Parse        T:  :  :  :  :  :  :  rn
  *
  * T	Startcharacter "T" specifies start of the timestamp
- * YY	Year MM	Month 1-12
+ * YY	Year
+ * MM	Month 1-12
  * MD	Day of the month
  * WD	Day of week
  * HH	Hour
