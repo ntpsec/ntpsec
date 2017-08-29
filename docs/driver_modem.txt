@@ -11,6 +11,10 @@ Requires: a dial-out device.
 
 == Description ==
 
+Warning: the ACTS mode of this driver reports only two-digit years,
+and may thus be subject to both lingering Y2K effects and problems
+near future century rollovers.
+
 This driver supports the US (NIST and USNO) and European (PTB (Germany),
 NPL (UK), etc.) modem time services, as well as Spectracom GPS receivers
 connected via a modem. The driver periodically dials a number from a

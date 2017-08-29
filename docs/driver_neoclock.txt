@@ -11,6 +11,10 @@ image:pic/neoclock4x.gif[float="right",link="http://www.linum.com"]
 
 == Description ==
 
+Warning: the ACTS mode of this driver reports only two-digit years,
+and may thus be subject to both lingering Y2K effects and problems
+near future century rollovers.
+
 The refclock_neoclock4x driver supports the NeoClock4X receiver
 available from http://www.linum.com[Linum Software GmbH]. The receiver
 is available as a http://www.dcf77.de[DCF77] or TDF receiver. Both

@@ -15,6 +15,9 @@ been end-of-lifed. The NTPsec maintainers plan to remove it in a
 future release.  If you have a requirement for it, please make this
 known to us.
 
+This driver reports only two-digit years, and may thus be subject to
+both lingering Y2K effects and issues near future century rollovers.
+
 == Description ==
 
 This driver supports most models of the

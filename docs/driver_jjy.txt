@@ -9,6 +9,10 @@ Serial Port: +/dev/jjyu+; See corresponding receiver
 
 == Description ==
 
+Warning: some modes of this driver report only two-digit years, and
+may thus be subject to both lingering Y2K effects and problems near
+future century rollovers.
+
 This driver supports the following the JJY receivers and the GPS clock
 sold in Japan, and the time service through a telephone line.
 

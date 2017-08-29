@@ -9,6 +9,15 @@ Serial Port: +/dev/spectracom+'u'; 9600bps 8N1
 Features: Optional PPS signal processing, +tty_clk+
 Requires: Optional PPS signal processing requires the PPSAPI signal interface.
 
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The NTPsec maintainers plan
+to remove it in a future release.  If you have a requirement for it,
+please make this known to us.
+
+This driver reports only two-digit years, and may thus be subject to
+both lingering Y2K effects and issues near future century rollovers.
+
 == Description ==
 
 This driver supports the "Type 2" format emitted by Spectracom time

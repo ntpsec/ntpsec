@@ -162,21 +162,21 @@ the 6021 in the generic parse driver.
 |====================================================================
 | Name                                  | Flags | Driver
 |link:driver_local.html[local]          | - | Undisciplined Local Clock
-|link:driver_spectracom.html[spectracom]| - | Generic Spectracom Receivers
+|link:driver_spectracom.html[spectracom]| D | Generic Spectracom Receivers
 |link:driver_truetime.html[truetime]    | D | TrueTime GPS/GOES Receivers
 |link:driver_generic.html[generic]      | T | Generic Reference Driver (Parse)
 |link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
-|link:driver_arbiter.html[arbiter]      | - | Arbiter 1088A/B GPS Receiver
+|link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver
 |link:driver_modem.html[modem]          | - | NIST/USNO/PTB Modem Time Services
 |link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
 |link:driver_pps.html[pps]              | T | PPS Clock Discipline
 |link:driver_hpgps.html[hpgps]          | T | Hewlett Packard GPS Receivers
 |link:driver_shm.html[shm]              | T | Shared Memory Driver
-|link:driver_trimble.html[trimble]      | T | Trimble Palisade/Thunderbolt/Acutime GPSes
+|link:driver_trimble.html[trimble]      | D | Trimble Palisade/Thunderbolt/Acutime GPSes
 |link:driver_oncore.html[oncore]        | D | Motorola UT Oncore GPS
 |link:driver_jjy.html[jjy]              | T | JJY Receivers
 |link:driver_zyfer.html[zyfer]          | - | Zyfer GPStarplus Receiver
-|link:driver_neoclock.html[neoclock]    | - | NeoClock4X DCF77 / TDF Receiver
+|link:driver_neoclock.html[neoclock]    | D | NeoClock4X DCF77 / TDF Receiver
 |link:driver_gpsd.html[gpsd]            | T | GPSD client protocol
 |==========================================================================
 
