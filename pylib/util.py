@@ -554,13 +554,17 @@ def termsize():
 class PeerStatusWord:
     "A peer status word from readstats(), dissected for display"
     def __init__(self, status, pktversion=ntp.magic.NTP_VERSION):
+        # Event
         self.event = ntp.control.CTL_PEER_EVENT(status)
+        # Event count
         self.event_count = ntp.control.CTL_PEER_NEVNT(status)
         statval = ntp.control.CTL_PEER_STATVAL(status)
+        # Config
         if statval & ntp.control.CTL_PST_CONFIG:
             self.conf = "yes"
         else:
             self.conf = "no"
+        # Reach
         if statval & ntp.control.CTL_PST_BCAST:
             self.reach = "none"
             if statval & ntp.control.CTL_PST_AUTHENABLE:
@@ -571,12 +575,14 @@ class PeerStatusWord:
             self.reach = "yes"
         else:
             self.reach = "no"
+        # Auth
         if (statval & ntp.control.CTL_PST_AUTHENABLE) == 0:
             self.auth = "none"
         elif statval & ntp.control.CTL_PST_AUTHENTIC:
             self.auth = "ok "
         else:
             self.auth = "bad"
+        # Condition
         if pktversion > ntp.magic.NTP_OLDVERSION:
             seldict = {
                 ntp.control.CTL_PST_SEL_REJECT: "reject",
@@ -603,6 +609,7 @@ class PeerStatusWord:
                 self.condition = "sync_cand"
             elif (statval & 0x3) == OLD_CTL_PST_SEL_SYSPEER:
                 self.condition = "sys_peer"
+        # Last Event
         event_dict = {
             ntp.magic.PEVNT_MOBIL: "mobilize",
             ntp.magic.PEVNT_DEMOBIL: "demobilize",
