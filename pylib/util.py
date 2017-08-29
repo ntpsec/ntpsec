@@ -609,8 +609,8 @@ class PeerStatusWord:
         event_dict = {
             ntp.magic.PEVNT_MOBIL: "mobilize",
             ntp.magic.PEVNT_DEMOBIL: "demobilize",
-            ntp.magic.PEVNT_REACH: "reachable",
             ntp.magic.PEVNT_UNREACH: "unreachable",
+            ntp.magic.PEVNT_REACH: "reachable",
             ntp.magic.PEVNT_RESTART: "restart",
             ntp.magic.PEVNT_REPLY: "no_reply",
             ntp.magic.PEVNT_RATE: "rate_exceeded",
