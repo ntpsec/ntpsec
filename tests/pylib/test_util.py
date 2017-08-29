@@ -453,5 +453,9 @@ class TestPylibUtilMethods(unittest.TestCase):
             ntp.util.canonicalization_cache = cachetemp
             ntp.util.socket = sockettemp
 
+    def test_termsize(self):
+        f = ntp.util.termsize
+        # TODO: write this, it needs many jigs
+
 if __name__ == '__main__':
     unittest.main()
