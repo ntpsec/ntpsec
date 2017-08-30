@@ -54,7 +54,7 @@ MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
            "kprecis", "kppsjitter", "fuzz", "clk_wander_threshold", "tick",
            "in", "out", "bias", "delay", "jitter", "dispersion",
            "fudgetime1", "fudgetime2")
-PPM_VARS = ("frequency", "clk_wander", "clk_wander_threshold")
+PPM_VARS = ("frequency", "clk_wander")
 
 
 def dolog(logfp, text, debug, threshold):
