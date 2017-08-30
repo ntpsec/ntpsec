@@ -82,18 +82,23 @@ protocols). Unless the device ships a particular $GZDA sentence
 digits only.
 
 Dedicated non-GPS reference-clock hardware designed in the 20th
-century frequently also reports only two-digit year dates - for
+century frequently also report only two-digit year dates - for
 example, the Arbiter and Spectracom devices supported by this
 distribution.  This problem may persist in post-2000 devices that
 are designed for compatility to use the same reporting protocols,
 such as Spectracom's "Type 2".
 
-For any device with a two-digit year report, Y2K-like hilarity can
-ensue near any century boundary.  There is an internal workaround, in
-{ntpdman}, but prudent time admimistrators should be aware that such
-workarounds are defect attractors and monitor such hardware carefully,
-especially near century boundaries. Warnings have been attached to the
-documentation of NTP clock drivers that may have a vulnerability here.
+There is an internal workaround ti deal with two-digit dates in
+{ntpdman}, but it relies of the sytem clock being at least roughly
+correct - it won't work (for example) at boot time if the clock
+has been trashed or zeroed due to a failed battery backup, and
+you have no remote check peers yet.
+
+Warnings have been attached to the documentation of NTP clock drivers
+that may have a vulnerability here.  Notably, the NMEA and SHM drivers
+(probaly the two in most common use) do *not* have this problem; the
+NMEA driver uses a clever calendrical trick to deduce a 4-digit year
+that should work until 2399.
 
 === Unix time ===
 
