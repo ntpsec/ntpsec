@@ -409,7 +409,7 @@ refclock_process_f(
 	 * filesystem time for the years and does not use the years of
 	 * the timecode.
 	 */
-	if (!clocktime(pp->day, pp->hour, pp->minute, pp->second, GMT,
+	if (!clocktime(pp->year, pp->day, pp->hour, pp->minute, pp->second, GMT,
 		       lfpuint(pp->lastrec), &pp->yearstart, &sec))
 		return false;
 

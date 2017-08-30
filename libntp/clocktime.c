@@ -31,9 +31,13 @@ static int32_t   ntp_to_year(uint32_t);
 static uint32_t year_to_ntp(int32_t);
 
 /*
- * Take a time spec given as day-of-year, hour, minute and second as
+ * Take a time spec given as year, day-of-year, hour, minute and second as
  * well as a GMT offset in hours and convert it to a NTP time stamp in
- * '*ts_ui'. The value will be in the range (rec_ui-0.5yrs) to
+ * '*ts_ui'.  There are two cases: ether the year is > 99, in which
+ * case it is used, or it is < 99 in which case we ignore it and try
+ * to deduce a year,
+ *
+ * The value will be in the range (rec_ui-0.5yrs) to
  * (rec_ui+0.5yrs). A hint for the current start-of-year will be
  * read from '*yearstart'.
  *
@@ -49,13 +53,14 @@ static uint32_t year_to_ntp(int32_t);
  */
 int
 clocktime(
+	int	year	 ,	/* year */
 	int	yday	 ,	/* day-of-year */
 	int	hour	 ,	/* hour of day */
 	int	minute	 ,	/* minute of hour */
 	int	second	 ,	/* second of minute */
 	int	tzoff	 ,	/* hours west of GMT */
 	uint32_t rec_ui	 ,	/* pivot value */
-	uint32_t *yearstart,	/* cached start-of-year */
+	uint32_t *yearstart,	/* cached start-of-year, secs from NTP epoch */
 	uint32_t *ts_ui	 )	/* effective time stamp */
 {
 	uint32_t ystt[3];	/* year start */
@@ -72,6 +77,19 @@ clocktime(
 			     MINSPERHR * ((int32_t)hour + (int32_t)tzoff +
 					  HRSPERDAY * ((int32_t)yday - 1))));
 	/*
+	 * Year > 1970 - from a 4-digit year stamp, must be greater
+	 * than POSIX epoch. Means we're not dependent on the pivot
+	 * value (derived from the packet receipt timestamp, and thus
+	 * ultimately from the system clock) to be correct.  These
+	 * two lines thus make it possible to recover from a trashed
+	 * or zeroed system clock.
+	 */
+	if (year > 1970)
+	    *yearstart = year_to_ntp(year);
+
+        /*
+	 * Year was too small to make sense, probably from a 2-digit
+	 * year stamp.
 	 * Based on the cached year start, do a first attempt. Be
 	 * happy and return if this gets us better than NEARTIME to
 	 * the receive time stamp. Do this only if the cached year
