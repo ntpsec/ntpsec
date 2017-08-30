@@ -15,8 +15,10 @@ This refclock is deprecated and obsolete. The NTPsec maintainers plan
 to remove it in a future release.  If you have a requirement for it,
 please make this known to us.
 
-This driver reports only two-digit years, and may thus be subject to
-both lingering Y2K effects and issues near future century rollovers.
+This driver reports only two-digit years, and is thus reliant on the
+system clock to be near correct before samples will be processed
+properly. You will not be able to use it to run autonomously, nor will
+it reliably recover from a trashed or zeroed system clock.
 
 == Description ==
 

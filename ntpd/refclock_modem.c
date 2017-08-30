@@ -24,6 +24,10 @@
  * use as backup when neither a radio clock nor connectivity to Internet
  * time servers is available.
  *
+ * WARNING: The ACTS mode of this driver depends on the system clock
+ * for year disambiguation.  It will thus not be usable for recovery
+ * if the system clock is trashed.
+ *
  * This driver requires a modem with a Hayes-compatible command set
  * and control over the modem data terminal ready (DTR) control
  * line. The default modem setup string is hard-coded in the driver

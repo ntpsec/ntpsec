@@ -7,11 +7,15 @@ Name: jjy
 Reference ID: JJY
 Serial Port: +/dev/jjyu+; See corresponding receiver
 
-== Description ==
+== Warning ==
 
-Warning: some modes of this driver report only two-digit years, and
-may thus be subject to both lingering Y2K effects and problems near
-future century rollovers.
+Some modes of this driver report only two-digit years, and are thus
+reliant on the system clock to be near correct before samples will be
+processed properly. You will not be able to use them to run
+autonomously, nor will it reliably recover from a trashed or zeroed
+system clock.
+
+== Description ==
 
 This driver supports the following the JJY receivers and the GPS clock
 sold in Japan, and the time service through a telephone line.

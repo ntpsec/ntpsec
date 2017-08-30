@@ -15,6 +15,11 @@
  * code in the parse library could also be dropped.
  * Also see subtypes 3 and 4, for which no information in use since 1999 and
  * 2001 respectively can be found on the web.
+ *
+ * WARNING: Most modes of this driver depend on the system clock for
+ * year disambiguation.  They will thus not be usable for recovery if
+ * the system clock is trashed. The only exceptions are the Scheitzer 240x
+ * and the two Trimble devices.
  */
 
 #include "config.h"

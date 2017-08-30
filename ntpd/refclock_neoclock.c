@@ -29,6 +29,10 @@
 #define DESCRIPTION	"NeoClock4X"
 
 /*
+ * WARNING: This driver depends on the system clock for year
+ * disambiguation.  It will thus not be usable for recovery if the
+ * system clock is trashed.
+ *
  * If you want the driver for whatever reason to not use
  * the TX line to send anything to your NeoClock4X
  * device you must tell the NTP refclock driver which

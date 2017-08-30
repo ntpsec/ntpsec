@@ -41,6 +41,9 @@
  *	XL-DC:		(a 151-602-210, reported by the driver as a GPS/TM-TMD)
  *	GPS-800 TCU:	(an 805-957 with the RS232 Talker/Listener module)
  *
+ * WARNING: This driver depends on the system clock for year disambiguation.
+ * It will thus not be usable for recovery if the system clock is trashed.  
+ *
  * Most of this code is originally from refclock_wwvb.c (now 
  * refclock_spectracom.c) with thanks.
  * It has been so mangled that wwvb is not a recognizable ancestor.

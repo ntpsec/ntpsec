@@ -18,6 +18,9 @@
  * The claimed accuracy of this clock is 100 ns relative to the PPS
  * output when receiving four or more satellites.
  *
+ * WARNING: This driver depends on the system clock for year disambiguation.
+ * It will thus not be usable for recovery if the system clock is trashed.  
+ *
  * The receiver should be configured before starting the NTP daemon, in
  * order to establish reliable position and operating conditions. It
  * does not initiate surveying or hold mode. For use with NTP, the

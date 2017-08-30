@@ -12,6 +12,15 @@ Reference ID: DCF | DCFa | DCFp | GPS | MSF
 Serial Port: /dev/refclock-'u'; TTY mode according to clock type
 PPS device: /dev/refclockpps-'u'; alternate PPS device
 
+== Warning ==
+
+Most modes of this driver report only two-digit years, and are thus
+reliant on the system clock to be near correct before samples will be
+processed properly. You will not be able to use these modes to run
+autonomously, nor will they reliably recover from a trashed or zeroed
+system clock.  The only exceptions are the Schweitzer 240x and the
+Trimble TAIP/TSIP modes.
+
 == Description ==
 
 The generic driver supports many different clock

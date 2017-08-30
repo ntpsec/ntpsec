@@ -1,5 +1,9 @@
 /*
  * refclock_jjy - clock driver for JJY receivers
+ *
+ * WARNING: Some modes of this driver depend on the system clock for
+ * year disambiguation.  They will thus not be usable for recovery if
+ * the system clock is trashed.
  */
 
 /**********************************************************************/

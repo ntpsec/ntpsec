@@ -157,6 +157,13 @@ codebase has been outright removed, with less than 5% new code added.
   rather than microseconds; this might actually matter for GPSDOs
   and high-quality radio clocks.
 
+* For a driver that ships 4-digit year stamps (notably including the NMEA
+  driver) that data is no longer ignored in favor of deducing the year
+  from the system clock.  This means that (a) it is now possible for
+  ntpd using a local clock source to recover from a trashed or zeroed
+  system clock (e.g. at boot time on a system with missing or damaged
+  vattery back up) without requiring sync to a remote peer.
+
 [[clients]]
 == Client Tool Improvements ==
 
