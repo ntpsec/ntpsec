@@ -190,3 +190,34 @@ class SelectModuleJig:
             return (ins, [], [])
         else:
             return ([], [], [])
+
+
+class OSModuleJig:
+    def __init__(self):
+        self.isatty_calls = []
+        self.isatty_returns = []
+
+    def isatty(self, fd):
+        self.isatty_calls.append(fd)
+        return self.isatty_returns.pop(0)
+
+
+class FcntlModuleJig:
+    def __init__(self):
+        self.ioctl_calls = []
+        self.ioctl_returns = []
+
+    def ioctl(self, fd, op, arg=0, mutate_flag=False):
+        self.ioctl_calls.append((fd, op, arg, mutate_flag))
+        return self.ioctl_returns.pop(0)
+
+
+class ShutilModuleJig:
+    def __init__(self):
+        self.gts_calls = []
+        self.gts_returns = []
+
+    def get_terminal_size(self, default=(80, 24)):
+        self.gts_calls.append(default)
+        return self.gts_returns.pop(0)
+    

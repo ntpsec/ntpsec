@@ -3,6 +3,7 @@
 
 import unittest
 import ntp.util
+import shutil
 
 import jigs
 
@@ -455,7 +456,45 @@ class TestPylibUtilMethods(unittest.TestCase):
 
     def test_termsize(self):
         f = ntp.util.termsize
-        # TODO: write this, it needs many jigs
+
+        fakeosmod = jigs.OSModuleJig()
+        fakefcntlmod = jigs.FcntlModuleJig()
+        fakeshutilmod = jigs.ShutilModuleJig()
+        try:
+            ostemp = ntp.util.os
+            ntp.util.os = fakeosmod
+            # Test default
+            fakeosmod.isatty_returns = [False]
+            self.assertEqual(f(), (80, 24))
+            self.assertEqual(fakeosmod.isatty_calls, [1])
+            # termsize takes different code paths for different
+            # versions of Python
+            if "get_terminal_size" in dir(shutil):
+                # Python 3 version
+                try:
+                    shutiltemp = ntp.util.shutil
+                    ntp.util.shutil = fakeshutilmod
+                    fakeosmod.isatty_returns = [True]
+                    fakeshutilmod.gts_returns = [(42, 23)]
+                    self.assertEqual(f(), (42, 23))
+                finally:
+                    ntp.util.shutil = shutiltemp
+            else:
+                # Python 2.x version
+                try:
+                    fcntltemp = ntp.util.fcntl
+                    ntp.util.fcntl = fakefcntlmod
+                    fakeosmod.isatty_returns = [True]
+                    data = ["\x11\x11\x22\x22\x33\x33\x44\x44"]
+                    fakefcntlmod.ioctl_returns = data
+                    self.assertEqual(f(), (0x2222, 0x1111))
+                    self.assertEqual(fakefcntlmod.ioctl_calls,
+                                     [(2, ntp.util.termios.TIOCGWINSZ,
+                                       "\0\0\0\0\0\0\0\0", False)])
+                finally:
+                    ntp.util.fcntl = fcntltemp
+        finally:
+            ntp.util.os = ostemp
 
     def test_PeerStatusWord(self):
         c = ntp.util.PeerStatusWord

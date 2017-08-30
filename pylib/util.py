@@ -13,6 +13,15 @@ import socket
 import sys
 import time
 
+if "get_terminal_size" not in dir(shutil):
+    # used by termsize() on python 2.x systems
+    import fcntl
+    import termios
+    import struct
+    PY3 = False
+else:
+    PY3 = True
+
 import ntp.ntpc
 import ntp.version
 import ntp.magic
@@ -532,15 +541,12 @@ def termsize():
     # The way this is used makes it not a big deal if the default is wrong.
     size = (80, 24)
     if os.isatty(1):
-        try:
+        if PY3 is True:
             (w, h) = shutil.get_terminal_size((80, 24))
             size = (w, h)
-        except AttributeError:
+        else:
             try:
                 # OK, Python version < 3.3, cope
-                import fcntl
-                import termios
-                import struct
                 h, w, hp, wp = struct.unpack(
                     'HHHH',
                     fcntl.ioctl(2, termios.TIOCGWINSZ,
