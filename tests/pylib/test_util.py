@@ -4,6 +4,7 @@
 import unittest
 import ntp.util
 import shutil
+import sys
 
 import jigs
 
@@ -38,14 +39,19 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual((jig.written, jig.flushed), ("blah", True))
 
     def test_rfc3339(self):
-        self.assertEqual(ntp.util.rfc3339(1480999786),
+        f = ntp.util.rfc3339
+
+        self.assertEqual(f(1480999786),
                          '2016-12-06T04:49:46Z')
-        self.assertEqual(ntp.util.rfc3339(1480999786.5),
+        self.assertEqual(f(1480999786.5),
                          '2016-12-06T04:49:46.5Z')
         # RFC 3339, 2 digits of seconds.
         # we round, but the spec is silent on rounding
-        self.assertEqual(ntp.util.rfc3339(1480999786.025),
-                         '2016-12-06T04:49:46.03Z')
+        # Python 2 and 3 round differently
+        if sys.version_info[0] < 3:
+            self.assertEqual(f(1480999786.025), "2016-12-06T04:49:46.03Z")
+        else:
+            self.assertEqual(f(1480999786.025), "2016-12-06T04:49:46.025Z")
 
     def test_slicedata(self):
         f = ntp.util.slicedata
