@@ -822,8 +822,7 @@ class TestPylibUtilMethods(unittest.TestCase):
                          "      blah 42.23.1.2/16\n           qwerty\n")
         # Test with missing data
         data = {"addr": "42.23.1.2", "mask": "FF:FF:0:0"}
-        self.assertEqual(cls.summary(data),
-                         "           42.23.1.2/16\n           \n")
+        self.assertEqual(cls.summary(data), "")
 
     def test_IfstatsSummary(self):
         c = ntp.util.IfstatsSummary
