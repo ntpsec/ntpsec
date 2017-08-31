@@ -80,12 +80,19 @@ clocktime(
 	 * Year > 1970 - from a 4-digit year stamp, must be greater
 	 * than POSIX epoch. Means we're not dependent on the pivot
 	 * value (derived from the packet receipt timestamp, and thus
-	 * ultimately from the system clock) to be correct.  These
-	 * two lines thus make it possible to recover from a trashed
-	 * or zeroed system clock.
+	 * ultimately from the system clock) to be correct. CLOSETIME
+	 * clipping to the receive time will *not* be applied in this
+	 * case. These two lines thus make it possible to recover from
+	 * a trashed or zeroed system clock.
+	 *
+	 * Warning: the hack in the NMEA driver that rectifies 4-digit
+	 * yearts from 2-digit ones has an expiration date in 2399.
+	 * After that this code will go badly wrong.
 	 */
-	if (year > 1970)
+	if (year > 1970) {
 	    *yearstart = year_to_ntp(year);
+	    return  *yearstart + tmp;
+	}
 
         /*
 	 * Year was too small to make sense, probably from a 2-digit
