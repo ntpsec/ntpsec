@@ -2644,14 +2644,15 @@ config_peers(
     /* add servers named on the command line with iburst implied */
     for ( ; cmdline_server_count > 0;
 	cmdline_server_count--, cmdline_servers++) {
-	    struct peer_ctl client_ctl = {
-		.version = NTP_VERSION,
-		.minpoll = NTP_MINDPOLL,
-		.maxpoll = NTP_MAXPOLL_UNK,
-		.flags = FLAG_IBURST,
-		.ttl = 0,
-		.peerkey = 0,
-	    };
+	     struct peer_ctl client_ctl;
+	     /* so any new members we introduce will be zeroed */
+	     memset(&client_ctl, '\0', sizeof(struct peer_ctl));
+	     client_ctl.version = NTP_VERSION,
+	     client_ctl.minpoll = NTP_MINDPOLL,
+	     client_ctl.maxpoll = NTP_MAXPOLL_UNK,
+	     client_ctl.flags = FLAG_IBURST,
+	     client_ctl.ttl = 0,
+	     client_ctl.peerkey = 0,
 
 	    ZERO_SOCK(&peeraddr);
 	    /*
