@@ -3,6 +3,7 @@
 
 import unittest
 import ntp.util
+import ntp.packet
 import shutil
 import sys
 
@@ -722,6 +723,84 @@ class TestPylibUtilMethods(unittest.TestCase):
         # Test PPM_VARS, with units
         self.assertEqual(f(data, showunits=True),
                          "frequency=0ppm, clk_wander=1ppm\n")
+
+    def test_MRUSummary(self):
+        c = ntp.util.MRUSummary
+        e = ntp.packet.MRUEntry
+
+        fakesockmod = jigs.SocketModuleJig()
+        mycache = ntp.util.Cache()
+
+        cdns_jig_calls = []
+        cdns_jig_returns = []
+
+        def cdns_jig(ip):  # canonicalize_dns()
+            cdns_jig_calls.append(ip)
+            return cdns_jig_returns.pop(0)
+
+        # Test init
+        cls = c(False, debug=3)
+        self.assertEqual(cls.debug, 3)
+        self.assertEqual(cls.logfp, sys.stderr)
+        self.assertEqual(cls.now, None)
+        self.assertEqual(cls.showhostnames, False)
+        self.assertEqual(cls.wideremote, False)
+        try:
+            socktemp = ntp.util.socket
+            ntp.util.socket = fakesockmod
+            cachetemp = ntp.util.canonicalization_cache
+            ntp.util.canonicalization_cache = mycache
+            cdnstemp = ntp.util.canonicalize_dns
+            ntp.util.canonicalize_dns = cdns_jig
+            # Test summary, first options
+            ent = e()
+            ent.first = "0x00000000.00000000"
+            ent.last = "0xFFFFFFFF.FFFFFFFF"
+            ent.ct = 1
+            ent.rs = ntp.magic.RES_KOD
+            ent.addr = "1.2.3.4:42"
+            ent.mv = 0x17
+            fakesockmod.gai_returns = [("fam", "type", "proto",
+                                        "foo.bar.com", "1.2.3.4")]
+            self.assertEqual(cls.summary(ent),
+                             "64730 23296      0  400 K 7 2"
+                             "      1    42 1.2.3.4")
+            # Test summary, second options
+            mycache._cache = {}
+            cls.now = 0x00000000
+            cls.showhostnames = True
+            ent.first = "0x00000100.00000000"
+            ent.last = "0x00000200.00000000"
+            ent.ct = 65
+            ent.rs = ntp.magic.RES_LIMITED
+            fakesockmod.gai_returns = [[("fam", "type", "proto",
+                                         "foo.bar.com", ("1.2.3.4", 42))]]
+            cdns_jig_returns = ["foo.com"]
+            self.assertEqual(cls.summary(ent),
+                             "64730 23808   4.00   20 L 7 2     65"
+                             "    42 foo.com")
+            # Test summary, third options
+            mycache._cache = {}
+            ent.ct = 2
+            ent.rs = 0
+            fakesockmod.gai_error_count = 1
+            cdns_jig_returns = ["foobarbaz" * 5]  # 45 chars, will be cropped
+            self.assertEqual(cls.summary(ent),
+                             "64730 23808    256    0 . 7 2      2    42"
+                             " 1.2.3.4 (foobarbazfoobarbazfoobarbazfoob")
+            # Test summary, wide
+            mycache._cache = {}
+            cls.wideremote = True
+            fakesockmod.gai_error_count = 1
+            cdns_jig_returns = ["foobarbaz" * 5]  # 45 chars, will be cropped
+            self.assertEqual(cls.summary(ent),
+                             "64730 23808    256    0 . 7 2      2"
+                             "    42 1.2.3.4 "
+                             "(foobarbazfoobarbazfoobarbazfoobarbazfoobarbaz)")
+        finally:
+            ntp.util.socket = socktemp
+            ntp.util.canonicalization_cache = cachetemp
+            ntp.util.canonicalize_dns = cdnstemp
 
 if __name__ == '__main__':
     unittest.main()
