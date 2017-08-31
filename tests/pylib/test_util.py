@@ -802,5 +802,28 @@ class TestPylibUtilMethods(unittest.TestCase):
             ntp.util.canonicalization_cache = cachetemp
             ntp.util.canonicalize_dns = cdnstemp
 
+    def test_ReslistSummary(self):
+        c = ntp.util.ReslistSummary
+        m = ntp.util.ReslistSummary._ReslistSummary__getPrefix
+
+        # Test __getPrefix
+        #   Test empty
+        self.assertEqual(m(""), "/0")
+        #   Test base 16
+        self.assertEqual(m("FF:FF:F0:00"), "/20")
+        #   Test base 10
+        self.assertEqual(m("255.240.0.0"), "/12")
+        # Test summary
+        # Test with everything
+        cls = c()
+        data = {"hits": "blah", "addr": "42.23.1.2",
+                "mask": "FF:FF:0:0", "flags": "qwerty"}
+        self.assertEqual(cls.summary(data),
+                         "      blah 42.23.1.2/16\n           qwerty\n")
+        # Test with missing data
+        data = {"addr": "42.23.1.2", "mask": "FF:FF:0:0"}
+        self.assertEqual(cls.summary(data),
+                         "           42.23.1.2/16\n           \n")
+
 if __name__ == '__main__':
     unittest.main()
