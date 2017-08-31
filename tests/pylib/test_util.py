@@ -825,5 +825,28 @@ class TestPylibUtilMethods(unittest.TestCase):
         self.assertEqual(cls.summary(data),
                          "           42.23.1.2/16\n           \n")
 
+    def test_IfstatsSummary(self):
+        c = ntp.util.IfstatsSummary
+        od = ntp.util.OrderedDict
+
+        cls = c()
+        # Test with all variables available
+        data = od((("addr", "1.2.3.4"), ("bcast", "foo"),
+                   ("name", "Namus Maximus"), ("en", True), ("flags", 0xFACE),
+                   ("rx", 12), ("tx", 34), ("txerr", 56), ("pc", 78),
+                   ("up", 90)))
+        self.assertEqual(cls.summary(1, data),
+                         "  1 Namus Maximus            . face     12     34"
+                         "     56    78       90\n    1.2.3.4\n    foo\n")
+        # Test without bcast
+        data = od((("addr", "1.2.3.4"), ("name", "Namus Maximus"),
+                   ("en", True), ("flags", 0xFACE), ("rx", 12), ("tx", 34),
+                   ("txerr", 56), ("pc", 78), ("up", 90)))
+        self.assertEqual(cls.summary(1, data),
+                         "  1 Namus Maximus            . face     12     34"
+                         "     56    78       90\n    1.2.3.4\n")
+        # Test with missing data
+        self.assertEqual(cls.summary(1, od()), "")
+
 if __name__ == '__main__':
     unittest.main()
