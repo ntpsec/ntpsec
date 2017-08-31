@@ -165,7 +165,7 @@ shm_start(
 	pp->io.datalen = 0;
 	pp->io.fd = -1;
 
-	up->forall = (unit >= 2) && !(peer->ttl & SHM_MODE_PRIVATE);
+	up->forall = (unit >= 2) && !(peer->cfg.ttl & SHM_MODE_PRIVATE);
 
 	up->shm = getShmTime(unit, up->forall);
 

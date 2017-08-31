@@ -508,9 +508,9 @@ gpsd_start(
 		 * practicable, we will have to read the symlink, if
 		 * any, so we can get the true device file.)
 		 */
-                if ( peer->path ) {
+                if ( peer->cfg.path ) {
                     /* use the ntp.conf path name */
-		    ret = myasprintf(&up->device, "%s", peer->path);
+		    ret = myasprintf(&up->device, "%s", peer->cfg.path);
                 } else {
                     ret = myasprintf(&up->device, DEVICE, up->unit);
                 }
@@ -559,7 +559,7 @@ gpsd_start(
 	LOGIF(CLOCKINFO,
 	      (LOG_NOTICE, "%s: startup, device is '%s'",
 	       refclock_name(peer), up->device));
-	up->mode = MODE_OP_MODE(peer->ttl);
+	up->mode = MODE_OP_MODE(peer->cfg.ttl);
 	if (up->mode > MODE_OP_MAXVAL)
 		up->mode = 0;
 	if (unit >= 128)
@@ -740,7 +740,7 @@ poll_secondary(
 		refclock_receive(peer);
 	} else {
 		peer->precision = PPS_PRECISION;
-		peer->flags &= ~FLAG_PPS;
+		peer->cfg.flags &= ~FLAG_PPS;
 		refclock_report(peer, CEVNT_TIMEOUT);
 	}
 }
@@ -781,15 +781,15 @@ gpsd_control(
 	if (peer == up->pps_peer) {
 		up->pps_fudge2 = dtolfp(pp->fudgetime1);
 		if ( ! (pp->sloppyclockflag & CLK_FLAG1))
-			peer->flags &= ~FLAG_PPS;
+			peer->cfg.flags &= ~FLAG_PPS;
 	} else {
 		/* save preprocessed fudge times */
 		up->pps_fudge = dtolfp(pp->fudgetime1);
 		up->ibt_fudge = dtolfp(pp->fudgetime2);
 
-		if (MODE_OP_MODE((uint32_t)up->mode ^ peer->ttl)) {
+		if (MODE_OP_MODE((uint32_t)up->mode ^ peer->cfg.ttl)) {
 			leave_opmode(peer, up->mode);
-			up->mode = MODE_OP_MODE(peer->ttl);
+			up->mode = MODE_OP_MODE(peer->cfg.ttl);
 			enter_opmode(peer, up->mode);
 		}
 	}
@@ -865,7 +865,7 @@ timer_secondary(
 			refclock_report(peer, CEVNT_TIMEOUT);
 			pp->coderecv = pp->codeproc;
 		}
-		peer->flags &= ~FLAG_PPS;
+		peer->cfg.flags &= ~FLAG_PPS;
 	}
 }
 
@@ -985,7 +985,7 @@ eval_pps_secondary(
 		up->ppscount2 = min(PPS2_MAXCOUNT, (up->ppscount2 + 2));
 		if ((PPS2_MAXCOUNT == up->ppscount2) &&
 		    (pp->sloppyclockflag & CLK_FLAG1) )
-			peer->flags |= FLAG_PPS;
+			peer->cfg.flags |= FLAG_PPS;
 		/* mark time stamp as burned... */
 		up->fl_pps2 = 0;
 		++up->tc_pps_used;

@@ -381,7 +381,7 @@ score_all(
 	tamp = score(peer);
 	temp = 100;
 	for (speer = peer_list; speer != NULL; speer = speer->p_link)
-		if (speer->flags & FLAG_PREEMPT) {
+		if (speer->cfg.flags & FLAG_PREEMPT) {
 			x = score(speer);
 			if (x < temp)
 				temp = x;
@@ -441,7 +441,7 @@ free_peer(
 	int		hash;
 
 
-	if ((MDF_UCAST & p->cast_flags) && !(FLAG_DNS & p->flags)) {
+	if ((MDF_UCAST & p->cast_flags) && !(FLAG_DNS & p->cfg.flags)) {
 		hash = NTP_HASH_ADDR(&p->srcadr);
 		peer_hash_count[hash]--;
 
@@ -497,13 +497,13 @@ unpeer(
 	set_peerdstadr(peer, NULL);
 	peer_demobilizations++;
 	peer_associations--;
-	if (FLAG_PREEMPT & peer->flags)
+	if (FLAG_PREEMPT & peer->cfg.flags)
 		peer_preempt--;
 #ifdef REFCLOCK
 	/*
 	 * If this peer is actually a clock, shut it down first
 	 */
-	if (FLAG_REFCLOCK & peer->flags)
+	if (FLAG_REFCLOCK & peer->cfg.flags)
 		refclock_unpeer(peer);
 #endif
 
@@ -530,7 +530,7 @@ set_peerdstadr(
 	 * Don't accept updates to a separate multicast receive-only
 	 * endpt while a BCLNT peer is running its unicast protocol.
 	 */
-	if (dstadr != NULL && (FLAG_BC_VOL & p->flags) &&
+	if (dstadr != NULL && (FLAG_BC_VOL & p->cfg.flags) &&
 	    (INT_MCASTIF & dstadr->flags) && MODE_CLIENT == p->hmode) {
 		return;
 	}
@@ -565,8 +565,8 @@ peer_refresh_interface(
 		   "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
 		   p->dstadr == NULL ? "<null>" :
 		   socktoa(&p->dstadr->sin), socktoa(&p->srcadr), p->hmode,
-		   p->version, p->minpoll, p->maxpoll, p->flags, p->cast_flags,
-		   p->ttl, p->keyid));
+		   p->version, p->minpoll, p->maxpoll, p->cfg.flags, p->cast_flags,
+		   p->cfg.ttl, p->keyid));
 	if (niface != NULL) {
 		DPRINT(4, (
 			   "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
@@ -607,7 +607,7 @@ refresh_all_peerinterfaces(void)
 			continue;
 		if (MDF_POOL & p->cast_flags)
 			continue;	/* Pool slots don't get interfaces. */
-		if (FLAG_DNS & p->flags)
+		if (FLAG_DNS & p->cfg.flags)
 			continue;	/* Still doing DNS lookup. */
 		peer_refresh_interface(p);
 
@@ -699,8 +699,8 @@ newpeer(
 	if (hostname != NULL)
 		peer->hostname = estrdup(hostname);
 	peer->hmode = hmode;
-	peer->version = ctl->version;
-	peer->flags = ctl->flags;
+	peer->cfg.version = ctl->version;
+	peer->cfg.flags = ctl->flags;
 	peer->cast_flags = cast_flags;
 	set_peerdstadr(peer, 
 		       select_peerinterface(peer, srcadr, dstadr));
@@ -713,10 +713,10 @@ newpeer(
          * maxpoll is clamped not less than NTP_MINPOLL
          * minpoll is clamped not greater than maxpoll.
 	 */
-	peer->minpoll = min(ctl->minpoll, NTP_MAXPOLL);
-	peer->maxpoll = max(ctl->maxpoll, NTP_MINPOLL);
-	if (peer->minpoll > peer->maxpoll)
-		peer->minpoll = peer->maxpoll;
+	peer->cfg.minpoll = min(ctl->minpoll, NTP_MAXPOLL);
+	peer->cfg.maxpoll = max(ctl->maxpoll, NTP_MINPOLL);
+	if (peer->cfg.minpoll > peer->cfg.maxpoll)
+		peer->cfg.minpoll = peer->cfg.maxpoll;
 
 	if (peer->dstadr != NULL)
 		DPRINT(3, ("newpeer(%s): using fd %d and our addr %s\n",
@@ -732,10 +732,10 @@ newpeer(
 	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
 		enable_broadcast(peer->dstadr, srcadr);
 
-	peer->ttl = ctl->ttl;
-	peer->keyid = ctl->peerkey;
+	peer->cfg.ttl = ctl->ttl;
+	peer->cfg.peerkey = ctl->peerkey;
 	peer->precision = sys_precision;
-	peer->hpoll = peer->minpoll;
+	peer->hpoll = peer->cfg.minpoll;
 	if (cast_flags & MDF_POOL)
 		peer_clear(peer, "POOL", initializing1);
 	else if (cast_flags & MDF_BCAST)
@@ -766,8 +766,8 @@ newpeer(
 	mprintf_event(PEVNT_MOBIL, peer, "assoc %d", peer->associd);
 	DPRINT(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
 		   latoa(peer->dstadr), socktoa(&peer->srcadr), peer->hmode,
-		   peer->version, peer->minpoll, peer->maxpoll, peer->flags,
-		   peer->cast_flags, peer->ttl, peer->keyid));
+		   peer->cfg.version, peer->cfg.minpoll, peer->cfg.maxpoll, peer->cfg.flags,
+		   peer->cast_flags, peer->cfg.ttl, peer->cfg.peerkey));
 	return peer;
 }
 

@@ -417,7 +417,7 @@ jjy_start ( int unit, struct peer *peer )
 	char	sDeviceName [ sizeof(DEVICE) + 10 ], sLog [ MAX_LOGTEXT ] ;
 
         DPRINT(1, ("refclock_jjy.c: jjy_start: %s  mode=%u  dev=%s  unit=%d\n",
-			 socktoa(&peer->srcadr), peer->ttl, DEVICE, unit )) ;
+			 socktoa(&peer->srcadr), peer->cfg.ttl, DEVICE, unit )) ;
 
 	/* Allocate memory for the unit structure */
 	up = emalloc_zero( sizeof(*up) ) ;
@@ -440,13 +440,13 @@ jjy_start ( int unit, struct peer *peer )
 	snprintf( sDeviceName, sizeof(sDeviceName), DEVICE, unit ) ;
 
 	snprintf(sLog, sizeof(sLog), "subtype=%u dev=%s", 
-                 peer->ttl, sDeviceName ) ;
+                 peer->cfg.ttl, sDeviceName ) ;
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
 	/*
-	 * peer->ttl is a subtype number specified by "jjy subtype N" in the ntp.conf
+	 * peer->cfg.ttl is a subtype number specified by "jjy subtype N" in the ntp.conf
 	 */
-	switch ( peer->ttl ) {
+	switch ( peer->cfg.ttl ) {
 	case 0 :
 	case 1 :
 		rc = jjy_start_tristate_jjy01 ( unit, peer, up ) ;
@@ -470,12 +470,12 @@ jjy_start ( int unit, struct peer *peer )
 		rc = jjy_start_telephone ( unit, peer, up ) ;
 		break ;
 	default :
-		if ( 101 <= peer->ttl && peer->ttl <= 180 ) {
+		if ( 101 <= peer->cfg.ttl && peer->cfg.ttl <= 180 ) {
 			rc = jjy_start_telephone ( unit, peer, up ) ;
 		} else {
 		    msyslog (LOG_ERR, 
 			"JJY receiver [ %s subtype %u ] : Unsupported mode",
-			socktoa(&peer->srcadr), peer->ttl ) ;
+			socktoa(&peer->srcadr), peer->cfg.ttl ) ;
 		    free ( (void*) up ) ;
 		    return false ;
 		}
@@ -484,7 +484,7 @@ jjy_start ( int unit, struct peer *peer )
 	if ( rc != 0 ) {
 		msyslog(LOG_ERR,
                         "REFCLOCK: JJY receiver [ %s subtype %u ] : Initialize error",
-			socktoa(&peer->srcadr), peer->ttl ) ;
+			socktoa(&peer->srcadr), peer->cfg.ttl ) ;
 		free ( (void*) up ) ;
 		return false ;
 	}
@@ -521,7 +521,7 @@ jjy_start ( int unit, struct peer *peer )
 
 	peer->precision = PRECISION ;
 
-	snprintf( sLog, sizeof(sLog), "minpoll=%d maxpoll=%d", peer->minpoll, peer->maxpoll ) ;
+	snprintf( sLog, sizeof(sLog), "minpoll=%d maxpoll=%d", peer->cfg.minpoll, peer->cfg.maxpoll ) ;
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
 	return true;
@@ -550,7 +550,7 @@ jjy_shutdown ( int unit, struct peer *peer )
 	}
 
 	snprintf(sLog, sizeof(sLog), "JJY stopped. unit=%d subtype=%u",
-                 unit, peer->ttl);
+                 unit, peer->cfg.ttl);
 	record_clock_stats(peer, sLog ) ;
 
 }
@@ -2786,17 +2786,17 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	snprintf( sLog, sizeof(sLog), "phone=%s", sys_phone[0] ) ;
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
-	if ( peer->minpoll < 8 ) {
+	if ( peer->cfg.minpoll < 8 ) {
 		/* minpoll must be greater or equal to 8 ( 256 seconds = about 4 minutes ) */
-		int oldminpoll = peer->minpoll ;
-		peer->minpoll = 8 ;
-		if ( peer->ppoll < peer->minpoll ) {
-			peer->ppoll = peer->minpoll ;
+		int oldminpoll = peer->cfg.minpoll ;
+		peer->cfg.minpoll = 8 ;
+		if ( peer->ppoll < peer->cfg.minpoll ) {
+			peer->ppoll = peer->cfg.minpoll ;
 		}
-		if ( peer->maxpoll < peer->minpoll ) {
-			peer->maxpoll = peer->minpoll ;
+		if ( peer->cfg.maxpoll < peer->cfg.minpoll ) {
+			peer->cfg.maxpoll = peer->cfg.minpoll ;
 		}
-		snprintf( sLog, sizeof(sLog), "minpoll=%d -> %d", oldminpoll, peer->minpoll ) ;
+		snprintf( sLog, sizeof(sLog), "minpoll=%d -> %d", oldminpoll, peer->cfg.minpoll ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 	}
 
@@ -3117,7 +3117,7 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 
 	/* subtype 101 = 1%, subtype 150 = 50%, subtype 180 = 80% */
 
-	iPercent = (int)peer->ttl - 100 ;
+	iPercent = (int)peer->cfg.ttl - 100 ;
 
 	/* Average delay time in milli second */
 
@@ -3357,12 +3357,12 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 	  	return TELJJY_CHANGE_CLOCK_STATE ;
 	}
 
-	if ( up->iClockCommandSeq == 0 && peer->ttl == 100 ) {
+	if ( up->iClockCommandSeq == 0 && peer->cfg.ttl == 100 ) {
 		/* Skip loopback */
 
 		up->iClockCommandSeq = TELJJY_COMMAND_START_SKIP_LOOPBACK ;
 
-	} else if ( up->iClockCommandSeq == 0 && peer->ttl != 100 ) {
+	} else if ( up->iClockCommandSeq == 0 && peer->cfg.ttl != 100 ) {
 		/* Loopback start */
 
 		up->iLoopbackCount = 0 ;
@@ -3370,7 +3370,7 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 			up->bLoopbackTimeout[i] = false ;
 		}
 
-	} else if ( up->iClockCommandSeq > 0 && peer->ttl != 100
+	} else if ( up->iClockCommandSeq > 0 && peer->cfg.ttl != 100
 		 && teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK
 		 && up->iLoopbackCount < MAX_LOOPBACK ) {
 		/* Loopback character comes */
@@ -3531,7 +3531,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 #endif
 			bAdjustment = true ;
 
-			if ( peer->ttl == 100 ) {
+			if ( peer->cfg.ttl == 100 ) {
 				/* subtype=100 */
 				up->msecond = 0 ;
 			} else {
@@ -3551,7 +3551,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 				jjy_synctime( peer, pp, up ) ;
 
-				if ( peer->ttl != 100 ) {
+				if ( peer->cfg.ttl != 100 ) {
 					if ( bAdjustment ) {
 						snprintf( sLog, sizeof(sLog),
 							  JJY_CLOCKSTATS_MESSAGE_DELAY_ADJUST,

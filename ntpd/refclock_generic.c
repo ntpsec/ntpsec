@@ -1454,10 +1454,10 @@ static struct parse_clockinfo
 
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
-#define CLK_REALTYPE(x) ((int)(((x)->ttl) & 0x7F))
+#define CLK_REALTYPE(x) ((int)(((x)->cfg.ttl) & 0x7F))
 /* carefull, CLK_TYPE() in refclock_trimle.c is different */
 #define CLK_TYPE(x)	((CLK_REALTYPE(x) >= ncltypes) ? ~0 : CLK_REALTYPE(x))
-#define CLK_PPS(x)	(((x)->ttl) & 0x80)
+#define CLK_PPS(x)	(((x)->cfg.ttl) & 0x80)
 
 /*
  * Other constant stuff
@@ -2524,7 +2524,7 @@ parse_start(
 	}
 
 #ifdef ENABLE_CLASSIC_MODE
-	peer->ttl = (peer->refclkunit & ~0x80) >> 2;
+	peer->cfg.ttl = (peer->refclkunit & ~0x80) >> 2;
 	peer->refclkunit = peer->refclkunit & 0x03;
 #endif /* ENABLE_CLASSIC_MODE */
 
@@ -2545,7 +2545,7 @@ parse_start(
 	(void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
 	(void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
 
-	fd232 = open(peer->path ? peer->path : parsedev,
+	fd232 = open(peer->cfg.path ? peer->cfg.path : parsedev,
 			 O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 	if (fd232 == -1)
@@ -2949,7 +2949,7 @@ parse_poll(
 	parse->generic->polls++;
 
 	if (parse->pollneeddata &&
-	    ((int)(current_time - parse->pollneeddata) > (1<<(max(min(parse->peer->hpoll, parse->peer->ppoll), parse->peer->minpoll)))))
+	    ((int)(current_time - parse->pollneeddata) > (1<<(max(min(parse->peer->hpoll, parse->peer->ppoll), parse->peer->cfg.minpoll)))))
 	{
 		/*
 		 * start worrying when exceeding a poll interval
@@ -3685,13 +3685,13 @@ parse_process(
 		 */
 		if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
 			{
-				parse->peer->flags |= (FLAG_PPS | FLAG_TSTAMP_PPS);
+				parse->peer->cfg.flags |= (FLAG_PPS | FLAG_TSTAMP_PPS);
 				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
 			}
 #endif
 	} else {
 		parse_hardpps(parse, PARSE_HARDPPS_DISABLE);
-		parse->peer->flags &= ~(FLAG_PPS | FLAG_TSTAMP_PPS);
+		parse->peer->cfg.flags &= ~(FLAG_PPS | FLAG_TSTAMP_PPS);
 	}
 
 	/*

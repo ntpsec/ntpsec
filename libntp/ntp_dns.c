@@ -58,7 +58,7 @@ bool dns_probe(struct peer* pp)
 	if (NULL != active)
 		busy = ", busy";
 	msyslog(LOG_INFO, "DNS: dns_probe: %s, cast_flags:%x, flags:%x%s",
-		pp->hostname, pp->cast_flags, pp->flags, busy);
+		pp->hostname, pp->cast_flags, (unsigned int)pp->cfg.flags, busy);
         if (NULL != active)
 		return false;
 	active = pp;
@@ -86,7 +86,7 @@ void dns_check(void)
 	DNS_Status status;
 
 	msyslog(LOG_INFO, "DNS: dns_check: processing %s, %x, %x",
-		active->hostname, active->cast_flags, active->flags);
+		active->hostname, active->cast_flags, (unsigned int)active->cfg.flags);
 
 	rc = pthread_join(worker, NULL);
 	if (0 != rc) {

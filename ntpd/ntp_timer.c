@@ -192,7 +192,7 @@ timer(void)
 #ifdef REFCLOCK
 		for (p = peer_list; p != NULL; p = next_peer) {
 			next_peer = p->p_link;
-			if (FLAG_REFCLOCK & p->flags)
+			if (FLAG_REFCLOCK & p->cfg.flags)
 				refclock_timer(p);
 		}
 #endif /* REFCLOCK */
@@ -216,7 +216,7 @@ timer(void)
 			p->throttle--;
 		if (p->nextdate <= current_time) {
 #ifdef REFCLOCK
-			if (FLAG_REFCLOCK & p->flags)
+			if (FLAG_REFCLOCK & p->cfg.flags)
 				refclock_transmit(p);
 			else
 #endif	/* REFCLOCK */

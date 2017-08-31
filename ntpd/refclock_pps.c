@@ -142,7 +142,7 @@ pps_start(
 	 * not necessarily the port used for the associated radio.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	up->fddev = open(peer->ppspath ? peer->ppspath : device,
+	up->fddev = open(peer->cfg.ppspath ? peer->cfg.ppspath : device,
 			     O_RDWR, 0777);
 	if (up->fddev <= 0) {
 		msyslog(LOG_ERR,
@@ -213,7 +213,7 @@ pps_timer(
         }
         if (rc != PPS_OK) return;
 
-	peer->flags |= FLAG_PPS;
+	peer->cfg.flags |= FLAG_PPS;
 
 	/*
 	 * If flag4 is lit, record each second offset to clockstats.
@@ -261,7 +261,7 @@ pps_poll(
 	up->pcount = up->scount = up->kcount = up->rcount = 0;
 
 	if (pp->codeproc == pp->coderecv) {
-		peer->flags &= ~FLAG_PPS;
+		peer->cfg.flags &= ~FLAG_PPS;
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}

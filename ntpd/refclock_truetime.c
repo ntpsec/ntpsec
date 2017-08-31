@@ -233,8 +233,8 @@ true_start(
 	 * Open serial port
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	fd = refclock_open(peer->path ? peer->path : device,
-			   peer->baud ? peer->baud : SPEED232, LDISC_CLK);
+	fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
+			   peer->cfg.baud ? peer->cfg.baud : SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;

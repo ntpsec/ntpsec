@@ -521,8 +521,8 @@ modem_timeout(
 		 * Open the device in raw mode and link the I/O.
 		 */
 		snprintf(device, sizeof(device), DEVICE, up->unit);
-		fd = refclock_open(peer->path ? peer->path : device,
-				   peer->baud ? peer->baud : SPEED232,
+		fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
+				   peer->cfg.baud ? peer->cfg.baud : SPEED232,
 				   LDISC_ACTS | LDISC_RAW | LDISC_REMOTE);
 		if (fd < 0) {
 			msyslog(LOG_ERR, "REFCLOCK: modem: open fails %m");
@@ -666,7 +666,7 @@ modem_poll(
 	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-	switch (peer->ttl) {
+	switch (peer->cfg.ttl) {
 
 	/*
 	 * In manual mode the calling program is activated by the ntpq

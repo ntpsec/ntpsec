@@ -616,10 +616,10 @@ oncore_start(
 	instance->Ag = 0xff;		/* Satellite mask angle, unset by user */
 	instance->ant_state = ONCORE_ANTENNA_UNKNOWN;
 
-	peer->flags &= ~FLAG_PPS;	/* PPS not active yet */
+	peer->cfg.flags &= ~FLAG_PPS;	/* PPS not active yet */
 	peer->precision = -26;
-	peer->minpoll = 4;
-	peer->maxpoll = 4;
+	peer->cfg.minpoll = 4;
+	peer->cfg.maxpoll = 4;
 	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, "GPS\0", (size_t) 4);
@@ -1610,14 +1610,14 @@ oncore_get_timestamp(
 
 	if ((instance->site_survey != ONCORE_SS_DONE) || (instance->mode != MODE_0D)) {
 #endif
-		peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
 	/* Don't do anything without an almanac to define the GPS->UTC delta */
 
 	if (instance->rsm.bad_almanac) {
-		peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
@@ -1629,7 +1629,7 @@ oncore_get_timestamp(
 
 	if (instance->count5) {
 		instance->count5--;
-		peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
@@ -1640,7 +1640,7 @@ oncore_get_timestamp(
 	    &timeout) < 0) {
 		oncore_log_f(instance, LOG_ERR,
 			     "time_pps_fetch failed %m");
-		peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
@@ -1661,7 +1661,7 @@ oncore_get_timestamp(
 
 		if (pps_i.assert_sequence == j) {
 			oncore_log(instance, LOG_NOTICE, "ONCORE: oncore_get_timestamp, error serial pps");
-			peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+			peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 			return;
 		}
 
@@ -1683,7 +1683,7 @@ oncore_get_timestamp(
 
 		if (pps_i.clear_sequence == j) {
 			oncore_log(instance, LOG_ERR, "oncore_get_timestamp, error serial pps");
-			peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+			peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 			return;
 		}
 		instance->ev_serial = pps_i.clear_sequence;
@@ -1723,14 +1723,14 @@ oncore_get_timestamp(
 	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
 		oncore_log_f(instance, LOG_ERR,
 			     "time_pps_getcap failed: %m");
-		peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
 		oncore_log_f(instance, LOG_ERR,
 			     "time_pps_getparams failed: %m");
-		peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
@@ -1850,7 +1850,7 @@ oncore_get_timestamp(
 
 	if (!refclock_process(instance->pp)) {
 		refclock_report(instance->peer, CEVNT_BADTIME);
-		peer->flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
+		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
@@ -1863,7 +1863,7 @@ oncore_get_timestamp(
 		instance->pp->lastref = instance->pp->lastrec;
 		refclock_receive(instance->peer);
 	}
-	peer->flags |= FLAG_PPS;
+	peer->cfg.flags |= FLAG_PPS;
 }
 
 

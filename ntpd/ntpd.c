@@ -1181,7 +1181,7 @@ static void check_minsane()
     if (sys_minsane > 1) return;  /* already adjusted, assume reasonable */
 
     for (peer = peer_list; peer != NULL; peer = peer->p_link) {
-	if (peer->flags & FLAG_NOSELECT) continue;
+	if (peer->cfg.flags & FLAG_NOSELECT) continue;
 	servers++;
 	if (peer->cast_flags & MDF_POOL) {
 	    /* pool server */

@@ -441,7 +441,7 @@ i_require_authentication(
 	)
 {
         bool restrict_notrust = restrict_mask & RES_DONTTRUST;
-        bool peer_has_key = peer != NULL && peer->keyid != 0;
+        bool peer_has_key = peer != NULL && peer->cfg.peerkey != 0;
         bool wants_association =
             PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST ||
             (peer == NULL && PKT_MODE(pkt->li_vn_mode == MODE_ACTIVE));
@@ -593,9 +593,9 @@ handle_procpkt(
 		if(!memcmp(pkt->refid, "RATE", REFIDLEN)) {
 			peer->selbroken++;
 			report_event(PEVNT_RATE, peer, NULL);
-			if (peer->minpoll < 10) { peer->minpoll = 10; }
+			if (peer->cfg.minpoll < 10) { peer->cfg.minpoll = 10; }
 			peer->burst = peer->retry = 0;
-			peer->throttle = (NTP_SHIFT + 1) * (1 << peer->minpoll);
+			peer->throttle = (NTP_SHIFT + 1) * (1 << peer->cfg.minpoll);
 			poll_update(peer, 10);
 		}
 		return;
@@ -691,7 +691,7 @@ handle_procpkt(
 		peer->retry = 0;
 		if (peer->reach)
 			peer->burst = min(1 << (peer->hpoll -
-			    peer->minpoll), NTP_SHIFT) - 1;
+			    peer->cfg.minpoll), NTP_SHIFT) - 1;
 		else
 			peer->burst = NTP_IBURST - 1;
 		if (peer->burst > 0)
@@ -744,11 +744,11 @@ handle_manycast(
 
 	memset(&mctl, '\0', sizeof(struct peer_ctl));
 	mctl.version = PKT_VERSION(pkt->li_vn_mode);
-	mctl.flags = FLAG_PREEMPT | (FLAG_IBURST & mpeer->flags);
-	mctl.minpoll = mpeer->minpoll;
-	mctl.maxpoll = mpeer->maxpoll;
+	mctl.flags = FLAG_PREEMPT | (FLAG_IBURST & mpeer->cfg.flags);
+	mctl.minpoll = mpeer->cfg.minpoll;
+	mctl.maxpoll = mpeer->cfg.maxpoll;
 	mctl.ttl = 0;
-	mctl.peerkey = mpeer->keyid;
+	mctl.peerkey = mpeer->cfg.peerkey;
 	newpeer(&rbufp->recv_srcadr, NULL, rbufp->dstadr,
 		MODE_CLIENT, &mctl, MDF_UCAST | MDF_UCLNT, false);
 }
@@ -829,8 +829,8 @@ receive(
 			!pkt->keyid_present || is_crypto_nak(pkt) ||
 			/* If we require a specific key from this peer,
 			   check that it matches. */
-			(peer != NULL && peer->keyid != 0 &&
-			 peer->keyid != pkt->keyid) ||
+			(peer != NULL && peer->cfg.peerkey != 0 &&
+			 peer->cfg.peerkey != pkt->keyid) ||
 			/* Verify the MAC.
 			   TODO: rewrite authdecrypt() to give it a
 			   better name and a saner interface so we don't
@@ -936,7 +936,7 @@ transmit(
 	}
 
 	/* Does server need DNS lookup? */
-	if (peer->flags & FLAG_DNS) {
+	if (peer->cfg.flags & FLAG_DNS) {
 		peer->outdate = current_time;
 		dns_probe(peer);
 		/* FIXME-DNS - need proper backoff */
@@ -974,7 +974,7 @@ transmit(
 				peer_unfit(peer);
 				report_event(PEVNT_UNREACH, peer, NULL);
 			}
-			if ((peer->flags & FLAG_IBURST) &&
+			if ((peer->cfg.flags & FLAG_IBURST) &&
 			    peer->retry == 0)
 				peer->retry = NTP_RETRY;
 		} else {
@@ -987,9 +987,9 @@ transmit(
 			 * clock_select().
 			 */
 			hpoll = sys_poll;
-			if (!(peer->flags & FLAG_PREEMPT))
+			if (!(peer->cfg.flags & FLAG_PREEMPT))
 				peer->unreach = 0;
-			if ((peer->flags & FLAG_BURST) && peer->retry ==
+			if ((peer->cfg.flags & FLAG_BURST) && peer->retry ==
 			    0 && !peer_unfit(peer))
 				peer->retry = NTP_RETRY;
 		}
@@ -1005,13 +1005,13 @@ transmit(
 		if (peer->unreach >= NTP_UNREACH) {
 			hpoll++;
 			/* ephemeral: no FLAG_CONFIG nor FLAG_PREEMPT */
-			if (!(peer->flags & (FLAG_CONFIG | FLAG_PREEMPT))) {
+			if (!(peer->cfg.flags & (FLAG_CONFIG | FLAG_PREEMPT))) {
 				report_event(PEVNT_RESTART, peer, "timeout");
 				peer_clear(peer, "TIME", false);
 				unpeer(peer);
 				return;
 			}
-			if ((peer->flags & FLAG_PREEMPT) &&
+			if ((peer->cfg.flags & FLAG_PREEMPT) &&
 			    (peer_associations > sys_maxclock) &&
 			    score_all(peer)) {
 				report_event(PEVNT_RESTART, peer, "timeout");
@@ -1069,10 +1069,10 @@ clock_update(
 	 */
 	sys_peer = peer;
 	sys_epoch = peer->epoch;
-	if (sys_poll < peer->minpoll)
-		sys_poll = peer->minpoll;
-	if (sys_poll > peer->maxpoll)
-		sys_poll = peer->maxpoll;
+	if (sys_poll < peer->cfg.minpoll)
+		sys_poll = peer->cfg.minpoll;
+	if (sys_poll > peer->cfg.maxpoll)
+		sys_poll = peer->cfg.maxpoll;
 	poll_update(peer, sys_poll);
 	sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 	if (peer->stratum == STRATUM_REFCLOCK ||
@@ -1239,7 +1239,7 @@ poll_update(
 	 *
 	 * Clamp the poll interval between minpoll and maxpoll.
 	 */
-	hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
+	hpoll = max(min(peer->cfg.maxpoll, mpoll), peer->cfg.minpoll);
 
 	peer->hpoll = hpoll;
 
@@ -1261,12 +1261,12 @@ poll_update(
 	 * reference clock, otherwise 2 s.
 	 */
 	utemp = current_time + (unsigned long)max(peer->throttle - (NTP_SHIFT - 1) *
-	    (1 << peer->minpoll), ntp_minpkt);
+	    (1 << peer->cfg.minpoll), ntp_minpkt);
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
 			return;
 #ifdef REFCLOCK
-		else if (peer->flags & FLAG_REFCLOCK)
+		else if (peer->cfg.flags & FLAG_REFCLOCK)
 			peer->nextdate = current_time + RESP_DELAY;
 #endif /* REFCLOCK */
 		else
@@ -1282,13 +1282,13 @@ poll_update(
 	 */
 	} else {
 		if (peer->retry > 0)
-			hpoll = peer->minpoll;
+			hpoll = peer->cfg.minpoll;
 		else if (!(peer->reach))
 			hpoll = peer->hpoll;
 		else
 			hpoll = min(peer->ppoll, peer->hpoll);
 #ifdef REFCLOCK
-		if (peer->flags & FLAG_REFCLOCK)
+		if (peer->cfg.flags & FLAG_REFCLOCK)
 			next = 1U << hpoll;
 		else
 #endif /* REFCLOCK */
@@ -1299,7 +1299,7 @@ poll_update(
 			peer->nextdate = next;
 		else
 			peer->nextdate = utemp;
-		if (peer->throttle > (1 << peer->minpoll))
+		if (peer->throttle > (1 << peer->cfg.minpoll))
 			peer->nextdate += (unsigned long)ntp_minpkt;
 	}
 	DPRINT(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
@@ -1327,8 +1327,8 @@ peer_clear(
 	 * Clear all values, including the optional crypto values above.
 	 */
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO(peer));
-	peer->ppoll = peer->maxpoll;
-	peer->hpoll = peer->minpoll;
+	peer->ppoll = peer->cfg.maxpoll;
+	peer->hpoll = peer->cfg.minpoll;
 	peer->disp = sys_maxdisp;
 	peer->flash = peer_unfit(peer);
 	peer->jitter = LOGTOD(sys_precision);
@@ -1338,7 +1338,7 @@ peer_clear(
 		peer->filter_disp[u] = sys_maxdisp;
 	}
 #ifdef REFCLOCK
-	if (!(peer->flags & FLAG_REFCLOCK)) {
+	if (!(peer->cfg.flags & FLAG_REFCLOCK)) {
 #endif
 		peer->leap = LEAP_NOTINSYNC;
 		peer->stratum = STRATUM_UNSPEC;
@@ -1372,7 +1372,7 @@ peer_clear(
 	     * association ID fits the bill.
 	     */
 	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
-	    peer->nextdate += (unsigned long)(pseudorandom % (1 << peer->minpoll));
+	    peer->nextdate += (unsigned long)(pseudorandom % (1 << peer->cfg.minpoll));
 	}
 	DPRINT(1, ("peer_clear: at %lu next %lu associd %d refid %s\n",
 		   current_time, peer->nextdate, peer->associd,
@@ -1691,7 +1691,7 @@ clock_select(void)
 		 * This is an attempt to set up fallbacks in case falseticker
 		 * elimination leaves no survivors with better service quality.
 		 */
-		if (!(peer->flags & FLAG_PREFER)) {
+		if (!(peer->cfg.flags & FLAG_PREFER)) {
 		    if (peer->sstclktype == CTL_SST_TS_LOCAL) {
 			if (current_time > orphwait && typelocal == NULL)
 				typelocal = peer;
@@ -1828,7 +1828,7 @@ clock_select(void)
 		peer = peers[i].peer;
 		h = peers[i].synch;
 		if ((high <= low || peer->offset + h < low ||
-		    peer->offset - h > high) && !(peer->flags & FLAG_TRUE))
+		    peer->offset - h > high) && !(peer->cfg.flags & FLAG_TRUE))
 			continue;
 
 #ifdef REFCLOCK
@@ -1837,10 +1837,10 @@ clock_select(void)
 		 * algorithm. Use the first one found, but don't
 		 * include any of them in the cluster population.
 		 */
-		if (peer->flags & FLAG_PPS) {
+		if (peer->cfg.flags & FLAG_PPS) {
 			if (typepps == NULL)
 				typepps = peer;
-			if (!(peer->flags & FLAG_TSTAMP_PPS))
+			if (!(peer->cfg.flags & FLAG_TSTAMP_PPS))
 				continue;
 		}
 #endif /* REFCLOCK */
@@ -1915,7 +1915,7 @@ clock_select(void)
 			}
 		}
 		if (nlist <= max(1, sys_minclock) || g <= d ||
-		    ((FLAG_TRUE | FLAG_PREFER) & peers[k].peer->flags))
+		    ((FLAG_TRUE | FLAG_PREFER) & peers[k].peer->cfg.flags))
 			break;
 
 		DPRINT(3, ("select: drop %s seljit %.6f jit %.6f\n",
@@ -1961,18 +1961,18 @@ clock_select(void)
 		peer->new_status = CTL_PST_SEL_SYNCCAND;
 		sys_survivors++;
 		if (peer->leap == LEAP_ADDSECOND) {
-			if (peer->flags & FLAG_REFCLOCK)
+			if (peer->cfg.flags & FLAG_REFCLOCK)
 				leap_vote_ins = nlist;
 			else if (leap_vote_ins < nlist)
 				leap_vote_ins++;
 		}
 		if (peer->leap == LEAP_DELSECOND) {
-			if (peer->flags & FLAG_REFCLOCK)
+			if (peer->cfg.flags & FLAG_REFCLOCK)
 				leap_vote_del = nlist;
 			else if (leap_vote_del < nlist)
 				leap_vote_del++;
 		}
-		if (peer->flags & FLAG_PREFER)
+		if (peer->cfg.flags & FLAG_PREFER)
 			sys_prefer = peer;
 		speermet = peers[i].seljit * peers[i].synch +
 		    peer->stratum * sys_mindisp;
@@ -2175,7 +2175,7 @@ peer_xmit(
 	if (!peer->dstadr)	/* drop peers without interface */
 		return;
 
-	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
+	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->cfg.version,
 	    peer->hmode);
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
 	xpkt.ppoll = peer->hpoll;
@@ -2193,7 +2193,7 @@ peer_xmit(
 	 * packet is not authenticated.
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	if (peer->keyid == 0) {
+	if (peer->cfg.peerkey == 0) {
 		/*
 		 * Transmit a-priori timestamps.  This is paired with
 		 * a later call used to record transmission time.
@@ -2205,7 +2205,7 @@ peer_xmit(
 		sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
 		peer->sent++;
 		peer->outcount++;
-		peer->throttle += (1 << peer->minpoll) - 2;
+		peer->throttle += (1 << peer->cfg.minpoll) - 2;
 
 		DPRINT(1, ("transmit: at %lu %s->%s mode %d len %zu\n",
 			   current_time, peer->dstadr ?
@@ -2225,7 +2225,7 @@ peer_xmit(
 	get_systime(&xmt_tx);
 	peer->org = xmt_tx;
 	xpkt.xmt = htonl_fp(xmt_tx);
-	xkeyid = peer->keyid;
+	xkeyid = peer->cfg.peerkey;
 	authlen = (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, (int)sendlen);
 	if (authlen == 0) {
 		report_event(PEVNT_AUTH, peer, "no key");
@@ -2242,7 +2242,7 @@ peer_xmit(
 	sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
 	peer->sent++;
         peer->outcount++;
-	peer->throttle += (1 << peer->minpoll) - 2;
+	peer->throttle += (1 << peer->cfg.minpoll) - 2;
 	DPRINT(1, ("transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
 		   current_time, peer->dstadr ?
 		   socktoa(&peer->dstadr->sin) : "-",
@@ -2422,7 +2422,7 @@ dns_take_server(
 	int		restrict_mask;
 	struct peer *	pp;
 
-	if(!(server->flags & FLAG_DNS))
+	if(!(server->cfg.flags & FLAG_DNS))
 		/* Already got an address for this slot. */
 		return;
 
@@ -2434,7 +2434,7 @@ dns_take_server(
 	}
 
 	msyslog(LOG_INFO, "PROTO: Server taking: %s", socktoa(rmtadr));
-	server->flags &= (unsigned)~FLAG_DNS;
+	server->cfg.flags &= (unsigned)~FLAG_DNS;
 		
 	server->srcadr = *rmtadr;
 	peer_update_hash(server);
@@ -2448,10 +2448,10 @@ dns_take_server(
 
 	peer_refresh_interface(server);
 
-	server->hpoll = server->minpoll;
+	server->hpoll = server->cfg.minpoll;
 	server->nextdate = current_time;
 	peer_xmit(server);
-	if (server->flags & FLAG_IBURST)
+	if (server->cfg.flags & FLAG_IBURST)
 	  server->retry = NTP_RETRY;
 	poll_update(server, server->hpoll);
 }
@@ -2481,16 +2481,16 @@ dns_take_pool(
 
 	lcladr = findinterface(rmtadr);
 	memset(&pctl, '\0', sizeof(struct peer_ctl));
-	pctl.version = pool->version;
-	pctl.minpoll = pool->minpoll;
-	pctl.maxpoll = pool->maxpoll;
-	pctl.flags = FLAG_PREEMPT | (FLAG_IBURST & pool->flags);
+	pctl.version = pool->cfg.version;
+	pctl.minpoll = pool->cfg.minpoll;
+	pctl.maxpoll = pool->cfg.maxpoll;
+	pctl.flags = FLAG_PREEMPT | (FLAG_IBURST & pool->cfg.flags);
 	pctl.ttl = 0;
 	pctl.peerkey = 0;
 	peer = newpeer(rmtadr, NULL, lcladr,
 		       MODE_CLIENT, &pctl, MDF_UCAST | MDF_UCLNT, false);
 	peer_xmit(peer);
-	if (peer->flags & FLAG_IBURST)
+	if (peer->cfg.flags & FLAG_IBURST)
 	  peer->retry = NTP_RETRY;
 	poll_update(peer, peer->hpoll);
 
@@ -2522,7 +2522,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	switch (status) {
 		case DNS_good:
 			txt = "good";
-			if (FLAG_DNS & peer->flags)
+			if (FLAG_DNS & peer->cfg.flags)
 				/* server: got answer, but didn't like any */
 				/* (all) already in use ?? */
 				hpoll += 1;
@@ -2545,7 +2545,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	if (hpoll > 12)
 		hpoll = 12;  /* 4096, a bit over an hour */
 	if ((DNS_good == status) &&
-		(MDF_UCAST & peer->cast_flags) && !(FLAG_DNS & peer->flags))
+		(MDF_UCAST & peer->cast_flags) && !(FLAG_DNS & peer->cfg.flags))
 		hpoll = 0;  /* server: no more */
 	msyslog(LOG_INFO, "PROTO: dns_take_status: %s=>%s, %d",
 		peer->hostname, txt, hpoll);
@@ -2610,14 +2610,14 @@ peer_unfit(
 	 * distance is greater than or equal to the distance threshold
 	 * plus the increment due to one host poll interval.
 	 */
-	if (!(peer->flags & FLAG_REFCLOCK) && root_distance(peer) >=
+	if (!(peer->cfg.flags & FLAG_REFCLOCK) && root_distance(peer) >=
 	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
 		rval |= BOGON11;		/* distance exceeded */
 /* Startup bug, https://gitlab.com/NTPsec/ntpsec/issues/68
  *   introduced with ntp-dev-4.2.7p385
  * [2085] Fix root distance and root dispersion calculations.
  */
-	if (!(peer->flags & FLAG_REFCLOCK) && peer->disp >=
+	if (!(peer->cfg.flags & FLAG_REFCLOCK) && peer->disp >=
 	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
 		rval |= BOGON11;		/* Initialization */
 
@@ -2634,7 +2634,7 @@ peer_unfit(
 	 * An unreachable error occurs if the server is unreachable or
 	 * the noselect bit is set.
 	 */
-	if (!peer->reach || (peer->flags & FLAG_NOSELECT))
+	if (!peer->reach || (peer->cfg.flags & FLAG_NOSELECT))
 		rval |= BOGON13;		/* unreachable */
 
 	peer->flash &= ~PEER_BOGON_MASK;

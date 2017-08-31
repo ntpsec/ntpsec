@@ -209,7 +209,7 @@ struct refclock refclock_trimble = {
 };
 
 /* Extract the clock type from the mode setting */
-#define CLK_TYPE(x) ((int)(((x)->ttl) & 0x7F))
+#define CLK_TYPE(x) ((int)(((x)->cfg.ttl) & 0x7F))
 
 /* Supported clock types */
 #define CLK_TRIMBLE	0	/* Trimble Palisade */
@@ -378,8 +378,8 @@ trimble_start (
 	/*
 	 * Open serial port. 
 	 */
-	fd = refclock_open(peer->path ? peer->path : gpsdev,
-			   peer->baud ? peer->baud : SPEED232,
+	fd = refclock_open(peer->cfg.path ? peer->cfg.path : gpsdev,
+			   peer->cfg.baud ? peer->cfg.baud : SPEED232,
 			   LDISC_RAW);
 	if (fd <= 0) {
 #ifdef DEBUG
@@ -466,8 +466,8 @@ trimble_start (
 
 	peer->precision = PRECISION;
 	peer->sstclktype = CTL_SST_TS_UHF;
-	peer->minpoll = TRMB_MINPOLL;
-	peer->maxpoll = TRMB_MAXPOLL;
+	peer->cfg.minpoll = TRMB_MINPOLL;
+	peer->cfg.maxpoll = TRMB_MAXPOLL;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	
 	up->leap_status = 0;

@@ -195,10 +195,10 @@ refclock_newpeer(
 	 * Initialize structures
 	 */
 	peer->refclkunit = (uint8_t)unit;
-	peer->flags |= FLAG_REFCLOCK;
+	peer->cfg.flags |= FLAG_REFCLOCK;
 	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
-	peer->ppoll = peer->maxpoll;
+	peer->ppoll = peer->cfg.maxpoll;
 	pp->conf = refclock_conf[clktype];
 	pp->timestarted = current_time;
 	pp->io.fd = -1;
@@ -318,7 +318,7 @@ refclock_transmit(
 				peer->timereachable = current_time;
 			}
 		} else {
-			if (peer->flags & FLAG_BURST)
+			if (peer->cfg.flags & FLAG_BURST)
 				peer->burst = NSTAGE;
 		}
 	} else {

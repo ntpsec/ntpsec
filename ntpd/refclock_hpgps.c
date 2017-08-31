@@ -164,12 +164,12 @@ hpgps_start(
 	ldisc = LDISC_CLK;
 	speed = SPEED232;
 	/* subtype parameter to server config line shares ttl slot */
-	if (1 == peer->ttl) {
+	if (1 == peer->cfg.ttl) {
 		ldisc |= LDISC_7O1;
 		speed = SPEED232Z;
 	}
-	fd = refclock_open(peer->path ? peer->path : device,
-			   peer->baud ? peer->baud : speed, ldisc);
+	fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
+			   peer->cfg.baud ? peer->cfg.baud : speed, ldisc);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;

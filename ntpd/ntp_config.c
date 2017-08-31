@@ -2738,13 +2738,13 @@ config_peers(
 			    /* default maxpoll for
 			     * refclocks is minpoll
 			     */
-			    peer->maxpoll = peer->minpoll;
+			    peer->cfg.maxpoll = peer->cfg.minpoll;
 		    clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 		    unit = REFCLOCKUNIT(&peer->srcadr);
 
-		    peer->path = curr_peer->ctl.path;
-		    peer->ppspath = curr_peer->ctl.ppspath;
-		    peer->baud = curr_peer->ctl.baud;
+		    peer->cfg.path = curr_peer->ctl.path;
+		    peer->cfg.ppspath = curr_peer->ctl.ppspath;
+		    peer->cfg.baud = curr_peer->ctl.baud;
 		    if (refclock_newpeer(clktype,
 					  unit,
 					  peer))

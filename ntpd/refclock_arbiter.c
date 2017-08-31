@@ -97,8 +97,8 @@
 #define MAXSTA		40		/* max length of status string */
 #define MAXPOS		80		/* max length of position string */
 
-#define COMMAND_HALT_BCAST ( (peer->ttl % 2) ? "O0" : "B0" )
-#define COMMAND_START_BCAST ( (peer->ttl % 2) ? "O5" : "B5" )
+#define COMMAND_HALT_BCAST ( (peer->cfg.ttl % 2) ? "O0" : "B0" )
+#define COMMAND_START_BCAST ( (peer->cfg.ttl % 2) ? "O5" : "B5" )
 
 /*
  * ARB unit control structure
@@ -151,8 +151,8 @@ arb_start(
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	fd = refclock_open(peer->path ? peer->path : device,
-			   peer->baud ? peer->baud : SPEED232, LDISC_CLK);
+	fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
+			   peer->cfg.baud ? peer->cfg.baud : SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;
@@ -182,14 +182,14 @@ arb_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
-	if (peer->ttl > 1) {
-		msyslog(LOG_NOTICE, "REFCLOCK ARBITER: Invalid mode %u", peer->ttl);
+	if (peer->cfg.ttl > 1) {
+		msyslog(LOG_NOTICE, "REFCLOCK ARBITER: Invalid mode %u", peer->cfg.ttl);
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
 		return false;
 	}
-	DPRINT(1, ("arbiter: mode = %u.\n", peer->ttl));
+	DPRINT(1, ("arbiter: mode = %u.\n", peer->cfg.ttl));
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	return true;
 }

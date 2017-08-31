@@ -890,11 +890,11 @@ ctlpeerstatus(
 	unsigned short status;
 
 	status = p->status;
-	if (FLAG_CONFIG & p->flags)
+	if (FLAG_CONFIG & p->cfg.flags)
 		status |= CTL_PST_CONFIG;
-	if (p->keyid)
+	if (p->cfg.peerkey)
 		status |= CTL_PST_AUTHENABLE;
-	if (FLAG_AUTHENTIC & p->flags)
+	if (FLAG_AUTHENTIC & p->cfg.flags)
 		status |= CTL_PST_AUTHENTIC;
 	if (p->reach)
 		status |= CTL_PST_REACH;
@@ -2067,16 +2067,16 @@ ctl_putpeer(
 
 	case CP_CONFIG:
 		ctl_putuint(peer_var[id].text,
-			    !(FLAG_PREEMPT & p->flags));
+			    !(FLAG_PREEMPT & p->cfg.flags));
 		break;
 
 	case CP_AUTHENABLE:
-		ctl_putuint(peer_var[id].text, !(p->keyid));
+		ctl_putuint(peer_var[id].text, !(p->cfg.peerkey));
 		break;
 
 	case CP_AUTHENTIC:
 		ctl_putuint(peer_var[id].text,
-			    !!(FLAG_AUTHENTIC & p->flags));
+			    !!(FLAG_AUTHENTIC & p->cfg.flags));
 		break;
 
 	case CP_SRCADR:
@@ -2162,7 +2162,7 @@ ctl_putpeer(
 
 	case CP_REFID:
 #ifdef REFCLOCK
-		if (p->flags & FLAG_REFCLOCK) {
+		if (p->cfg.flags & FLAG_REFCLOCK) {
 			ctl_putrefid(peer_var[id].text, p->refid);
 			break;
 		}
@@ -2201,8 +2201,8 @@ ctl_putpeer(
 
 	case CP_TTL:
 #ifdef REFCLOCK
-		if (p->flags & FLAG_REFCLOCK) {
-			ctl_putuint(peer_var[id].text, p->ttl);
+		if (p->cfg.flags & FLAG_REFCLOCK) {
+			ctl_putuint(peer_var[id].text, p->cfg.ttl);
 			break;
 		}
 #endif
@@ -2234,10 +2234,10 @@ ctl_putpeer(
 		break;
 
 	case CP_KEYID:
-		if (p->keyid > NTP_MAXKEY)
-			ctl_puthex(peer_var[id].text, p->keyid);
+		if (p->cfg.peerkey > NTP_MAXKEY)
+			ctl_puthex(peer_var[id].text, p->cfg.peerkey);
 		else
-			ctl_putuint(peer_var[id].text, p->keyid);
+			ctl_putuint(peer_var[id].text, p->cfg.peerkey);
 		break;
 
 	case CP_FILTDELAY:
@@ -4042,16 +4042,16 @@ read_clockstatus(
 		 * is a clock use it, else search peer_list for one.
 		 */
 		if (sys_peer != NULL && (FLAG_REFCLOCK &
-		    sys_peer->flags))
+		    sys_peer->cfg.flags))
 			peer = sys_peer;
 		else
 			for (peer = peer_list;
 			     peer != NULL;
 			     peer = peer->p_link)
-				if (FLAG_REFCLOCK & peer->flags)
+				if (FLAG_REFCLOCK & peer->cfg.flags)
 					break;
 	}
-	if (NULL == peer || !(FLAG_REFCLOCK & peer->flags)) {
+	if (NULL == peer || !(FLAG_REFCLOCK & peer->cfg.flags)) {
 		ctl_error(CERR_BADASSOC);
 		return;
 	}

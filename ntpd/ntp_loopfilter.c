@@ -572,10 +572,10 @@ local_clock(
 	 * than 0.5 s or in ntpdate mode.
 	 */
 	osys_poll = sys_poll;
-	if (sys_poll < peer->minpoll)
-		sys_poll = peer->minpoll;
-	if (sys_poll > peer->maxpoll)
-		sys_poll = peer->maxpoll;
+	if (sys_poll < peer->cfg.minpoll)
+		sys_poll = peer->cfg.minpoll;
+	if (sys_poll > peer->cfg.maxpoll)
+		sys_poll = peer->cfg.maxpoll;
 	mu = current_time - clock_epoch;
 	clock_frequency = drift_comp;
 	rval = 1;
@@ -894,7 +894,7 @@ local_clock(
 		tc_counter += sys_poll;
 		if (tc_counter > CLOCK_LIMIT) {
 			tc_counter = CLOCK_LIMIT;
-			if (sys_poll < peer->maxpoll) {
+			if (sys_poll < peer->cfg.maxpoll) {
 				tc_counter = 0;
 				sys_poll++;
 			}
@@ -903,7 +903,7 @@ local_clock(
 		tc_counter -= sys_poll << 1;
 		if (tc_counter < -CLOCK_LIMIT) {
 			tc_counter = -CLOCK_LIMIT;
-			if (sys_poll > peer->minpoll) {
+			if (sys_poll > peer->cfg.minpoll) {
 				tc_counter = 0;
 				sys_poll--;
 			}

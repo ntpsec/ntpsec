@@ -224,29 +224,22 @@ struct peer {
 	struct peer *adr_link;	/* link pointer in address hash */
 	struct peer *aid_link;	/* link pointer in associd hash */
 	struct peer *ilink;	/* list of peers for interface */
+	struct peer_ctl cfg;	/* peer configuration block */
 	sockaddr_u srcadr;	/* address of remote host */
 	char *	hostname;	/* if non-NULL, remote name */
 	endpt *	dstadr;		/* local address */
 	associd_t associd;	/* association ID */
-	uint8_t	version;	/* version number */
 	uint8_t	hmode;		/* local association mode */
 	uint8_t	hpoll;		/* local poll interval */
-	uint8_t	minpoll;	/* min poll interval */
-	uint8_t	maxpoll;	/* max poll interval */
-	unsigned int	flags;	/* association flags */
 	uint8_t	cast_flags;	/* additional flags */
 	uint8_t	last_event;	/* last peer error code */
 	uint8_t	num_events;	/* number of error events */
-	uint32_t ttl;		/* time-to-live/refclock mode */
 
 	/*
 	 * Variables used by reference clock support
 	 */
 #ifdef REFCLOCK
 	struct refclockproc *procptr; /* refclock structure pointer */
-	char *  path;		/* override path if non-NULL */
-	char *  ppspath;	/* override PPS device path if non-NULL */
-	uint32_t baud;		/* baud rate to initialize driver with */
 	bool	is_pps_driver;	/* is this the PPS driver? */
 	uint8_t	refclkunit;	/* reference clock unit number */
 	uint8_t	sstclktype;	/* clock type for system status word */
@@ -265,10 +258,6 @@ struct peer {
 	uint32_t	refid;	/* remote reference ID */
 	l_fp	reftime;	/* update epoch */
 
-	/*
-	 * Variables used by authenticated client
-	 */
-	keyid_t keyid;		/* current key ID */
 #define clear_to_zero status
 
 	/*

@@ -176,8 +176,8 @@ spectracom_start(
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	fd = refclock_open(peer->path ? peer->path : device,
-			   peer->baud ? peer->baud : SPEED232,
+	fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
+			   peer->cfg.baud ? peer->cfg.baud : SPEED232,
 			   LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
@@ -426,7 +426,7 @@ spectracom_receive(
 	 */
 #ifdef HAVE_PPSAPI
 	up->tcount++;
-	if (peer->flags & FLAG_PPS)
+	if (peer->cfg.flags & FLAG_PPS)
 		return;
 
 #endif /* HAVE_PPSAPI */
@@ -477,7 +477,7 @@ spectracom_timer(
 	if (up->ppsapi_lit &&
 	    refclock_catcher(peer, &up->ppsctl, pp->sloppyclockflag) > 0) {
 		up->pcount++,
-		peer->flags |= FLAG_PPS;
+		peer->cfg.flags |= FLAG_PPS;
 		peer->precision = PPS_PRECISION;
 	}
 #endif /* HAVE_PPSAPI */
@@ -521,7 +521,7 @@ spectracom_poll(
 	 */
 #ifdef HAVE_PPSAPI
 	if (up->pcount == 0) {
-		peer->flags &= ~FLAG_PPS;
+		peer->cfg.flags &= ~FLAG_PPS;
 		peer->precision = PRECISION;
 	}
 	if (up->tcount == 0) {
@@ -571,7 +571,7 @@ spectracom_control(
 		up->ppsapi_tried = 0;
 		if (!up->ppsapi_lit)
 			return;
-		peer->flags &= ~FLAG_PPS;
+		peer->cfg.flags &= ~FLAG_PPS;
 		peer->precision = PRECISION;
 		time_pps_destroy(up->ppsctl.handle);
 		up->ppsctl.handle = 0;

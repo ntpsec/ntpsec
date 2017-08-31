@@ -146,8 +146,8 @@ neoclock4x_start(int unit,
   /* LDISC_STD, LDISC_RAW
    * Open serial port. Use CLK line discipline, if available.
    */
-  fd = refclock_open(peer->path ? peer->path : dev,
-		     peer->baud ? peer->baud : B2400,
+  fd = refclock_open(peer->cfg.path ? peer->cfg.path : dev,
+		     peer->cfg.baud ? peer->cfg.baud : B2400,
 		     LDISC_STD);
   if(fd <= 0)
     {

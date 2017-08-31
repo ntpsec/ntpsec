@@ -183,8 +183,8 @@ mx4200_start(
 	 * Open serial port
 	 */
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
-	fd = refclock_open(peer->path ? peer->path : gpsdev,
-			   peer->baud ? peer->baud : SPEED232,
+	fd = refclock_open(peer->cfg.path ? peer->cfg.path : gpsdev,
+			   peer->cfg.baud ? peer->cfg.baud : SPEED232,
 			   LDISC_PPS);
 	if (fd < 0)
 		return false;
