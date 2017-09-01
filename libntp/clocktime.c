@@ -91,7 +91,7 @@ clocktime(
 	 */
 	if (year > 1970) {
 	    *yearstart = year_to_ntp(year);
-	    return  *yearstart + tmp;
+	    return  (int32_t)*yearstart + tmp;
 	}
 
         /*

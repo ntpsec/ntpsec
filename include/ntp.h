@@ -160,7 +160,7 @@ typedef struct __endpt {
  */
 struct peer_ctl {
 	uint8_t		version;
-	int		flags;
+	unsigned int	flags;
 	uint8_t		minpoll;
 	uint8_t		maxpoll;
 	uint32_t	ttl;
@@ -375,19 +375,19 @@ struct peer {
 /*
  * Values for peer.flags (unsigned int)
  */
-#define	FLAG_CONFIG	0x0001	/* association was configured */
-#define	FLAG_PREEMPT	0x0002	/* preemptable association */
-#define	FLAG_AUTHENTIC	0x0004	/* last message was authentic */
-#define	FLAG_REFCLOCK	0x0008	/* this is actually a reference clock */
-#define	FLAG_BC_VOL	0x0010	/* broadcast client volleying */
-#define	FLAG_PREFER	0x0020	/* prefer peer */
-#define	FLAG_BURST	0x0040	/* burst mode */
-#define	FLAG_PPS	0x0080U	/* steered by PPS */
-#define	FLAG_IBURST	0x0100	/* initial burst mode */
-#define	FLAG_NOSELECT	0x0200	/* never select */
-#define	FLAG_TRUE	0x0400	/* force truechimer */
-#define	FLAG_DNS	0x0800	/* needs DNS lookup */
-#define FLAG_TSTAMP_PPS	0x4cd000	/* PPS source provides absolute timestamp */
+#define	FLAG_CONFIG	0x0001u	/* association was configured */
+#define	FLAG_PREEMPT	0x0002u	/* preemptable association */
+#define	FLAG_AUTHENTIC	0x0004u	/* last message was authentic */
+#define	FLAG_REFCLOCK	0x0008u	/* this is actually a reference clock */
+#define	FLAG_BC_VOL	0x0010u	/* broadcast client volleying */
+#define	FLAG_PREFER	0x0020u	/* prefer peer */
+#define	FLAG_BURST	0x0040u	/* burst mode */
+#define	FLAG_PPS	0x0080u	/* steered by PPS */
+#define	FLAG_IBURST	0x0100u	/* initial burst mode */
+#define	FLAG_NOSELECT	0x0200u	/* never select */
+#define	FLAG_TRUE	0x0400u	/* force truechimer */
+#define	FLAG_DNS	0x0800u	/* needs DNS lookup */
+#define FLAG_TSTAMP_PPS	0x4cd000u	/* PPS source provides absolute timestamp */
 
 
 /*

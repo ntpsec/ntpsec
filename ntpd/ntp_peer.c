@@ -565,8 +565,8 @@ peer_refresh_interface(
 		   "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
 		   p->dstadr == NULL ? "<null>" :
 		   socktoa(&p->dstadr->sin), socktoa(&p->srcadr), p->hmode,
-		   p->version, p->minpoll, p->maxpoll, p->cfg.flags, p->cast_flags,
-		   p->cfg.ttl, p->keyid));
+		   p->cfg.version, p->cfg.minpoll, p->cfg.maxpoll, p->cfg.flags, p->cast_flags,
+		   p->cfg.ttl, p->cfg.peerkey));
 	if (niface != NULL) {
 		DPRINT(4, (
 			   "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
