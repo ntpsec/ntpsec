@@ -699,22 +699,31 @@ newpeer(
 	if (hostname != NULL)
 		peer->hostname = estrdup(hostname);
 	peer->hmode = hmode;
+
+	/*
+	 * Copy in the peer configuration block.
+	 */
 	peer->cfg.version = ctl->version;
 	peer->cfg.flags = ctl->flags;
+	peer->cfg.minpoll = ctl->minpoll;
+	peer->cfg.maxpoll = ctl->maxpoll;
+	peer->cfg.ttl = ctl->ttl;
+	peer->cfg.peerkey = ctl->peerkey;
+
 	peer->cast_flags = cast_flags;
 	set_peerdstadr(peer, 
 		       select_peerinterface(peer, srcadr, dstadr));
 
-        if (NTP_MAXPOLL_UNK == ctl->maxpoll)
+        if (NTP_MAXPOLL_UNK == peer->cfg.maxpoll)
 	    /* not set yet, set to default */
-	    ctl->maxpoll = NTP_MAXDPOLL;
+	    peer->cfg.maxpoll = NTP_MAXDPOLL;
 	/*
          * minpoll is clamped not greater than NTP_MAXPOLL
          * maxpoll is clamped not less than NTP_MINPOLL
          * minpoll is clamped not greater than maxpoll.
 	 */
-	peer->cfg.minpoll = min(ctl->minpoll, NTP_MAXPOLL);
-	peer->cfg.maxpoll = max(ctl->maxpoll, NTP_MINPOLL);
+	peer->cfg.minpoll = min(peer->cfg.minpoll, NTP_MAXPOLL);
+	peer->cfg.maxpoll = max(peer->cfg.maxpoll, NTP_MINPOLL);
 	if (peer->cfg.minpoll > peer->cfg.maxpoll)
 		peer->cfg.minpoll = peer->cfg.maxpoll;
 
@@ -732,8 +741,6 @@ newpeer(
 	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
 		enable_broadcast(peer->dstadr, srcadr);
 
-	peer->cfg.ttl = ctl->ttl;
-	peer->cfg.peerkey = ctl->peerkey;
 	peer->precision = sys_precision;
 	peer->hpoll = peer->cfg.minpoll;
 	if (cast_flags & MDF_POOL)
