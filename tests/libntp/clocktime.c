@@ -56,6 +56,11 @@ TEST(clocktime, CurrentYearExplicit) {
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
 				   tzoff, timestamp, &yearstart, &actual));
+	/* If this assertion fails with "Expected 3486372600 was
+	 * 104913720" that's a 32-bit integer overflow and your compiler
+	 * is failing to cast to int properly inside clocktime. 
+	 * Observed on Mac OS X.
+	 */
 	TEST_ASSERT_EQUAL(expected, actual);
 	TEST_ASSERT_EQUAL(yearstart, 3471292800);
 }
