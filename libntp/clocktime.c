@@ -86,12 +86,13 @@ clocktime(
 	 * a trashed or zeroed system clock.
 	 *
 	 * Warning: the hack in the NMEA driver that rectifies 4-digit
-	 * yearts from 2-digit ones has an expiration date in 2399.
+	 * years from 2-digit ones has an expiration date in 2399.
 	 * After that this code will go badly wrong.
 	 */
 	if (year > 1970) {
 	    *yearstart = year_to_ntp(year);
-	    return  (int32_t)*yearstart + tmp;
+	    *ts_ui = (int32_t)*yearstart + tmp;
+	    return true;
 	}
 
         /*
