@@ -784,7 +784,7 @@ class PeerSummary:
     @staticmethod
     def is_clock(variables):
         "Does a set of variables look like it returned from a clock?"
-        return "srchost" in variables and '(' in variables["srchost"]
+        return "srchost" in variables and '(' in variables["srchost"][0]
 
     def header(self):
         "Column headers for peer display"

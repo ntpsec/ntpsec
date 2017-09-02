@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import unittest
 import ntp.util
 import ntp.packet
@@ -385,6 +387,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         c = ntp.util.Cache
 
         monodata = []
+
         def monoclock_jig():
             return monodata.pop(0)
 
@@ -440,7 +443,8 @@ class TestPylibUtilMethods(unittest.TestCase):
             fakesockmod.gni_error_count = 1
             fakesockmod.gni_returns = [("www.Hastur.madness", 42)]
             fakesockmod.gai_returns = [(("family", "socktype", "proto",
-                                         "san.Hastur.madness", "42.23.%$.(#"),)]
+                                         "san.Hastur.madness",
+                                         "42.23.%$.(#"),)]
             self.assertEqual(f("bar:42"), "san.hastur.madness:42")
             # Test nameinfo fail, no canonname
             fakesockmod.__init__()
@@ -596,6 +600,7 @@ class TestPylibUtilMethods(unittest.TestCase):
         od = ntp.util.OrderedDict
 
         termsize = (80, 24)
+
         def termsize_jig():
             return ntp.util.TermSize(*termsize)
 
@@ -846,6 +851,253 @@ class TestPylibUtilMethods(unittest.TestCase):
                          "     56    78       90\n    1.2.3.4\n")
         # Test with missing data
         self.assertEqual(cls.summary(1, od()), "")
+
+
+class TestPeerSummary(unittest.TestCase):
+    target = ntp.util.PeerSummary
+
+    def test___init__(self):
+        cls = self.target("peers", 4, True, False)
+        self.assertEqual(cls.displaymode, "peers")
+        self.assertEqual(cls.pktversion, 4)
+        self.assertEqual(cls.showhostnames, True)
+        self.assertEqual(cls.showunits, False)
+        self.assertEqual(cls.wideremote, False)
+        self.assertEqual(cls.debug, 0)
+        self.assertEqual(cls.logfp, sys.stderr)
+        self.assertEqual(cls.termwidth, None)
+        self.assertEqual(cls.horizontal_slack, 0)
+        self.assertEqual(cls.namewidth, 15)
+        self.assertEqual(cls.refidwidth, 15)
+        self.assertEqual(cls._PeerSummary__remote, "     remote    ")
+        self.assertEqual(cls._PeerSummary__common,
+                         "st t when poll reach   delay   offset   ")
+        self.assertEqual(cls._PeerSummary__header, None)
+        self.assertEqual(cls.polls, [])
+
+    def test_prettyinterval(self):
+        m = self.target.prettyinterval
+
+        # Test invalid
+        self.assertEqual(m("Failure"), "-")
+        # Test <=2048
+        self.assertEqual(m(2048), "2048")
+        # Test <=300
+        self.assertEqual(m(17971), "300m")
+        # Test <=96
+        self.assertEqual(m(343831), "96h")
+        # Test final
+        self.assertEqual(m(350000), "4d")
+
+    def test_high_truncate(self):
+        m = self.target.high_truncate
+
+        # Test fit
+        self.assertEqual(m("foo", 10), "foo")
+        # Test doesn't fit
+        self.assertEqual(m("lorem ipsum", 5), "-psum")
+
+    def test_is_clock(self):
+        m = self.target.is_clock
+
+        # Test True
+        data = {"srchost": "(would)"}
+        self.assertEqual(m(data), True)
+        # Test False, not a clock
+        data = {"srchost": "wouldn't"}
+        self.assertEqual(m(data), False)
+        # Test False, no host
+        data = {"blah": "definately wouldn't"}
+        self.assertEqual(m(data), False)
+
+    def test_header(self):
+        # Test peers
+        cls = self.target("peers", 4, True, False)
+        self.assertEqual(cls.header(),
+                         "     remote           refid      st t when "
+                         "poll reach   delay   offset   jitter")
+        # Test opeers
+        cls = self.target("opeers", 4, True, False)
+        self.assertEqual(cls.header(),
+                         "     remote           local      st t when "
+                         "poll reach   delay   offset     disp")
+        # Test apeers
+        cls = self.target("apeers", 4, True, False)
+        self.assertEqual(cls.header(),
+                         "     remote       refid   assid  st t when "
+                         "poll reach   delay   offset   jitter")
+
+    def test_width(self):
+        cls = self.target("peers", 4, True, False)
+        self.assertEqual(cls.width(), 79)
+        cls.horizontal_slack = 10
+        self.assertEqual(cls.width(), 89)
+
+    def test_summary(self):
+        cls = self.target("peers", 4, True, False)
+        cls.header()
+
+        cdns_jig_calls = []
+        cdns_jig_returns = []
+
+        def cdns_jig(ip):  # canonicalize_dns()
+            cdns_jig_calls.append(ip)
+            return cdns_jig_returns.pop(0)
+
+        data = ntp.util.OrderedDict((("delay", (1.234567, "1.234567")),
+                                     ("dstadr", ("1.2.3.4", "1.2.3.4")),
+                                     ("dstport", ("blah0", "blah0")),
+                                     ("filtdelay", ("blah1", "blah1")),
+                                     ("filtdisp", ("blah2", "blah2")),
+                                     ("filtoffset", ("blah3", "blah3")),
+                                     ("flash", ("blah4", "blah4")),
+                                     ("headway", ("blah5", "blah5")),
+                                     ("hmode", (6, "6")),
+                                     ("hpoll", (12, "12")),
+                                     ("jitter", (3.14159, "3.14159")),
+                                     ("keyid", ("blah6", "blah6")),
+                                     ("leap", ("blah7", "blah7")),
+                                     ("offset", (2.71828, "2.71828")),
+                                     ("pmode", ("blah8", "blah8")),
+                                     ("ppoll", (5, "5")),
+                                     ("precision", ("blah9", "blah9")),
+                                     ("reach", (500, "500")),
+                                     ("refid", ("FAIL", "FAIL")),
+                                     ("rec", ("0x00000000.00000000",
+                                              "0x00000000.00000000")),
+                                     ("reftime", ("0x10000000.00000000",
+                                                  "0x10000000.00000000")),
+                                     ("rootdelay", ("blah10", "blah10")),
+                                     ("rootdisp", (299792.458, "299792.458")),
+                                     ("srcadr", ("10.20.30.40",
+                                                 "10.20.30.40")),
+                                     ("srchost", ("15.25.35.45",
+                                                  "15.25.35.45")),
+                                     ("scrport", ("blah11", "blah11")),
+                                     ("stratum", (8, "8")),
+                                     ("ttl", ("blah12", "blah12")),
+                                     ("unreach", ("blah13", "blah13")),
+                                     ("xmt", ("blah14", "blah14")),
+                                     ("randomness!", ("foo!", "bar!"))))
+        faketimemod = jigs.TimeModuleJig()
+        try:
+            timetemp = ntp.util.time
+            ntp.util.time = faketimemod
+            cdnstemp = ntp.util.canonicalize_dns
+            ntp.util.canonicalize_dns = cdns_jig
+            # Test, no units, hmode=BCLIENTX, peers
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 b    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=BROADCAST, not multicast
+            data["hmode"] = (5, "5")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 B    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=BROADCAST, not multicast
+            data["srcadr"] = ("224.2.3.4", "224.2.3.4")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 M    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=CLIENT, local refclock
+            data["srcadr"] = ("10.20.30.40", "10.20.30.40")
+            data["hmode"] = (3, "3")
+            data["srchost"] = ("(blah)", "(blah)")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 l    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=CLIENT, pool
+            data["srchost"] = ("15.25.35.45", "15.25.35.45")
+            data["refid"] = ("POOL", "POOL")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .POOL.           8 p    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=CLIENT, manycast client
+            data["srcadr"] = ("224.2.3.4", "224.2.3.4")
+            data["refid"] = ("FAIL", "FAIL")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 a    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=CLIENT, unicast
+            data["srcadr"] = ("10.20.30.40", "10.20.30.40")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 u    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=ACTIVE
+            data["hmode"] = (1, "1")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 s    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, hmode=PASSIVE
+            data["hmode"] = (2, "2")
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 S    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, don't show hostnames
+            cls.showhostnames = False
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " 10.20.30.40     .FAIL.           8 S    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, name crop
+            cls.showhostnames = True
+            cdns_jig_returns = ["clock_canon_blah_jabber_quantum"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon_bla .FAIL.           8 S    -"
+                             "   32  764   1.2346   2.7183   3.1416\n")
+            # Test, no units, name crop
+            cls.wideremote = True
+            cdns_jig_returns = ["clock_canon_blah_jabber_quantum"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon_blah_jabber_quantum\n"
+                             "                 .FAIL.           8 S"
+                             "    -   32  764   1.2346   2.7183   3.1416\n")
+            # Test, with units
+            cls.showunits = True
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.           8 S    -"
+                             "   32  764 1.2346ms 2.7183ms 3.1416ms\n")
+            # Test, apeers
+            cls.showunits = True
+            cls.displaymode = "apeers"
+            cdns_jig_returns = ["clock_canon"]
+            faketimemod.time_returns = [0]
+            self.assertEqual(cls.summary(5, data, 12345),
+                             " clock_canon     .FAIL.   12345   8 S    -"
+                             "   32  764 1.2346ms 2.7183ms 3.1416ms\n")
+        finally:
+            ntp.util.time = timetemp
+            ntp.util.canonicalize_dns = cdnstemp
+
+    def test_intervals(self):
+        cls = self.target("peers", 4, True, False)
+        cls.polls = [1, 2, 3, 4, 5]
+        self.assertEqual(cls.intervals(), [1, 2, 3, 4, 5])
+        self.assertEqual(cls.polls, [])
+
 
 if __name__ == '__main__':
     unittest.main()

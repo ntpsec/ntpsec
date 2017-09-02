@@ -221,3 +221,11 @@ class ShutilModuleJig:
         self.gts_calls.append(default)
         return self.gts_returns.pop(0)
     
+class TimeModuleJig:
+    def __init__(self):
+        self.time_calls = 0
+        self.time_returns = []
+
+    def time(self):
+        self.time_calls += 1
+        return self.time_returns.pop(0)
