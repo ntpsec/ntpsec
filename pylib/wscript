@@ -5,7 +5,7 @@ def options(opt):
 def configure(conf):
     conf.load('python')
     conf.check_python_version((2, 6, 0))
-    conf.check_python_headers()
+    conf.check_python_headers(features='pyext')  # Extension-only, no embedded
 
 
 def build(ctx):
