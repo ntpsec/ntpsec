@@ -5,6 +5,7 @@ from __future__ import print_function, division
 
 import socket
 import select
+import os.path
 
 class FileJig:
     def __init__(self):
@@ -177,6 +178,8 @@ class SelectModuleJig:
         self.select_calls = []
         self.select_fail = 0
         self.do_return = []
+        self.fqdn_calls = []
+        self.fqdn_returns = []
 
     def select(self, ins, outs, excepts, timeout=0):
         self.select_calls.append((ins, outs, excepts, timeout))
@@ -191,11 +194,41 @@ class SelectModuleJig:
         else:
             return ([], [], [])
 
+    def getfqdn(self, name=""):
+        self.fqdn_calls.append(name)
+        return self.fqdn_returns.pop(0)
+
+
+class path_mod:
+    def __init__(self):
+        self.isdir_calls = []
+        self.isdir_returns = []
+        self.getmtime_calls = []
+        self.getmtime_returns = []
+        self.join_calls = []
+
+    def isdir(self, dirname):
+        self.isdir_calls.append(dirname)
+        return self.isdir_returns.pop(0)
+
+    def join(self, *args):
+        self.join_calls.append(args)
+        return os.path.join(*args)
+
+    def basename(self, pathname):
+        self.join_calls.append(pathname)
+        return os.path.basename(pathname)
+
+    def getmtime(self, filename):
+        self.getmtime_calls.append(filename)
+        return self.getmtime_returns.pop(0)
+
 
 class OSModuleJig:
     def __init__(self):
         self.isatty_calls = []
         self.isatty_returns = []
+        self.path = path_mod()  # Need os.path
 
     def isatty(self, fd):
         self.isatty_calls.append(fd)
@@ -229,3 +262,25 @@ class TimeModuleJig:
     def time(self):
         self.time_calls += 1
         return self.time_returns.pop(0)
+
+
+class GzipModuleJig:
+    def __init__(self):
+        self.open_calls = []
+        self.files_returned = []
+
+    def open(self, filename, filemode):
+        self.open_calls.append((filename, filemode))
+        fd = FileJig()
+        self.files_returned.append(fd)
+        return fd
+
+
+class GlobModuleJig:
+    def __init__(self):
+        self.glob_calls = []
+        self.glob_returns = []
+
+    def glob(self, pathname):
+        self.glob_calls.append(pathname)
+        return self.glob_returns.pop(0)

@@ -41,6 +41,39 @@ class TestPylibUtilMethods(unittest.TestCase):
         f(jig, "blah", 4, 3)
         self.assertEqual((jig.written, jig.flushed), ("blah", True))
 
+    def test_safeargcast(self):
+        f = ntp.util.safeargcast
+
+        errjig = jigs.FileJig()
+        try:
+            errtemp = sys.stderr
+            sys.stderr = errjig
+            # Test successful int
+            self.assertEqual(f("42", int, "blah %s", "\nDo the needful\n"), 42)
+            self.assertEqual(errjig.data, [])
+            # Test successful float
+            self.assertEqual(f("5.23", float, "blah %s", "\nDo the needful\n"),
+                             5.23)
+            self.assertEqual(errjig.data, [])
+            # Test failure
+            try:
+                f("23.5", int, "blah %s", "\nDo the needful\n")
+                errored = False
+            except SystemExit:
+                errored = True
+            self.assertEqual(errored, True)
+            self.assertEqual(errjig.data, ["blah 23.5", "\nDo the needful\n"])
+        finally:
+            sys.stderr = errtemp
+
+    def test_stdversion(self):
+        f = ntp.util.stdversion
+
+        ver = str(ntp.version.VERSION)
+        tick = str(ntp.version.VCS_TICK)
+        date = str(ntp.version.VCS_DATE)
+        self.assertEqual(f(), "ntpsec-" + ver + "+" + tick + " " + date)
+
     def test_rfc3339(self):
         f = ntp.util.rfc3339
 
