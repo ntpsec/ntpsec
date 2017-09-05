@@ -451,7 +451,7 @@ struct pkt {
 #define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* SHA */
 
 	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
-};
+} __attribute__ ((aligned));
 
 /* pythonize-header: stop ignoring */
 
