@@ -1013,12 +1013,12 @@ def afterparty(ctx):
     if ctx.cmd == 'clean':
         ctx.exec_command("rm -fr wafhelpers/*.pyc pylib/__pycache__/*.pyc "
                          "wafhelpers/__pycache__/*.pyc ntpd/version.h "
-                         "ntpclients/ntp")
-    for x in ("ntpclients",):
+                         "ntpclients/ntp tests/pylib/ntp")
+    for x in ("ntpclients", "tests/pylib"):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
         path_source = ctx.srcnode.make_node(x + "/ntp")
-        relpath = "../" + path_build.path_from(ctx.srcnode)
+        relpath = ("../" * (x.count("/")+1)) + path_build.path_from(ctx.srcnode)
         if ctx.cmd in ('install', 'build'):
             if ((not path_source.exists() or
                     os.readlink(path_source.abspath()) != relpath)):
