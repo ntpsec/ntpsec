@@ -224,10 +224,10 @@ free_res(
 	INSIST(unlinked == res);
 
 	if (v6) {
-		zero_mem(res, V6_SIZEOF_RESTRICT_U);
+		memset(res, '\0', V6_SIZEOF_RESTRICT_U);
 		plisthead = &resfree6;
 	} else {
-		zero_mem(res, V4_SIZEOF_RESTRICT_U);
+		memset(res, '\0', V4_SIZEOF_RESTRICT_U);
 		plisthead = &resfree4;
 	}
 	LINK_SLIST(*plisthead, res, link);

@@ -2319,7 +2319,7 @@ read_network_packet(
 
 	iovec.iov_base        = &rb->recv_space;
 	iovec.iov_len         = sizeof(rb->recv_space);
-	zero_mem(&msghdr, sizeof(msghdr));
+	memset(&msghdr, '\0', sizeof(msghdr));
 	msghdr.msg_name       = &rb->recv_srcadr;
 	msghdr.msg_namelen    = fromlen;
 	msghdr.msg_iov        = &iovec;

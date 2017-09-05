@@ -259,7 +259,7 @@ mon_stop(
 	/* empty the MRU list and hash table. */
 	mru_entries = 0;
 	INIT_DLIST(mon_mru_list, mru);
-	zero_mem(mon_hash, sizeof(*mon_hash) * MON_HASH_SIZE);
+	memset(mon_hash, '\0', sizeof(*mon_hash) * MON_HASH_SIZE);
 }
 
 

@@ -32,7 +32,7 @@ netof6(
 
 	if (IS_IPV6(netaddr))
 		/* assume the typical /64 subnet size */
-		zero_mem(&NSRCADR6(netaddr)[8], 8);
+		memset(&NSRCADR6(netaddr)[8], '\0', 8);
 #ifdef DEBUG
 	else {
 		msyslog(LOG_ERR, "ERR: Not IPv6, AF %d", AF(netaddr));

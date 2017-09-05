@@ -55,7 +55,7 @@ ereallocz(
 	}
 
 	if (zero_init && newsz > priorsz)
-		zero_mem(mem + priorsz, newsz - priorsz);
+		memset(mem + priorsz, '\0', newsz - priorsz);
 
 	return mem;
 }

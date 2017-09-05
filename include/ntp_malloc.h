@@ -39,8 +39,6 @@ void * alloca(size_t);
 
 #include <strings.h>
 
-#define zero_mem(p, s)		memset(p, 0, s)
-
-#define ZERO(var)		zero_mem(&(var), sizeof(var))
+#define ZERO(var)		memset(&(var), '\0', sizeof(var))
 
 #endif	/* GUARD_NTP_MALLOC_H */
