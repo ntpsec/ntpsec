@@ -426,7 +426,7 @@ int main(int argc, char **argv) {
                   define_name='HAS_' + name,
                   fragment=FRAGMENT,
                   mandatory=False,
-                  msg='Checking if C compiler supports ' + name,
+                  msg='Checking if C compiler supports ' + ccflag,
                   run_build_cls='oc')
 
     ctx.run_build_cls = old_run_build_cls
@@ -504,7 +504,7 @@ int main(int argc, char **argv) {
                   fragment=FRAGMENT,
                   ldflags=ldflag,
                   mandatory=False,
-                  msg='Checking if ld compiler supports ' + name,
+                  msg='Checking if linker supports ' + ldflag,
                   run_build_cls='oc')
         if ctx.env['HAS_' + name]:
             ctx.env.LDFLAGS += [ldflag]
