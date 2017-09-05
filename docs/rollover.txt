@@ -1,4 +1,4 @@
-= Rollover issues ib time sources =
+= Rollover issues in time sources =
 
 '''''
 
@@ -8,7 +8,7 @@
 * link:#terminology[Terminology]
 * link:#cycles[Major cycles of interest]
 * link:#gps_pivots[GPS pivot dates]
-* link:#mtp_pivots[NTP pivot dates]
+* link:#ntp_pivots[NTP pivot dates]
 
 [[intro]]
 == Introduction ==
@@ -206,7 +206,7 @@ The worst impact of careless, low-budget design when using a GPS as
 an NTP clock is not around either jitter or leap-second corrections,
 but rather the behavior near GPS and century rollovers.
 
-[gps_pivots]
+[[gps_pivots]]
 == GPS pivot dates and rollover compensation ==
 
 To yield a UTC date, the weeks+second information from the GPS satellites
@@ -255,7 +255,7 @@ need to be aware of the possibility that their device could roll over
 at any time (but especially near the zeo dats of a GPS era) and be
 ready to compensate by dropping in a device with a newer pivot date.
 
-[ntp_pivots]
+[[ntp_pivots]]
 == NTP pivot dates ==
 
 For purposes of this discussion, a 'resolved' timestamp is one that
