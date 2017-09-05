@@ -1010,7 +1010,7 @@ def afterparty(ctx):
     # Note, this kluge falls apart under Python 3, because
     # waf radically changes the shape of the build directory and
     # the naming conventions for the product files.
-    if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
+    if ctx.cmd == 'clean':
         ctx.exec_command("rm -fr wafhelpers/*.pyc pylib/__pycache__/*.pyc "
                          "wafhelpers/__pycache__/*.pyc ntpd/version.h "
                          "ntpclients/ntp")
@@ -1091,10 +1091,7 @@ def build(ctx):
     )
 
     ctx.add_post_fun(afterparty)
-    # Second clause in the following guard is an unfulfilled hope.
-    # waf distclean doesn't go through build(ctx), it has its own
-    # execution path that we apparently cannot set hooks in.
-    if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
+    if ctx.cmd == 'clean':
         afterparty(ctx)
 
     ctx.manpage(1, "ntpclients/ntploggps-man.txt")

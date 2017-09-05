@@ -105,8 +105,7 @@ link:bugs.html[NTP Bug Reporting Procedures] page.
 +./waf clean+::
   Cleans out object files, programs and temporary files.
 +./waf distclean+::
-  Does the work of +clean+, but cleans out all directories in
-  preparation for a new distribution release.
+  Removes the build directory.
 
 '''''
 
