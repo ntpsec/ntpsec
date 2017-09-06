@@ -405,9 +405,9 @@ refclock_process_f(
 	 * Compute the timecode timestamp from the days, hours, minutes,
 	 * seconds and milliseconds/microseconds of the timecode. Use
 	 * clocktime() for the aggregate seconds and the msec/usec for
-	 * the fraction, when present. Note that this code relies on the
-	 * filesystem time for the years and does not use the years of
-	 * the timecode.
+	 * the fraction, when present. Note that this code will fall back
+	 * to deducing the year from the receipt time of the sample if
+	 * it finds only a 2-digit year in the timecode.
 	 */
 	if (!clocktime(pp->year, pp->day, pp->hour, pp->minute, pp->second, GMT,
 		       lfpuint(pp->lastrec), &pp->yearstart, &sec))
