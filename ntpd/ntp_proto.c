@@ -862,9 +862,9 @@ receive(
 		break;
 	    case AM_PROCPKT:
 		handle_procpkt(rbufp, restrict_mask, pkt, peer, authenticated);
+		sys_processed++;
 		if (peer != NULL)	/* just to be on the safe side */
-		    sys_processed++;
-		peer->processed++;
+		    peer->processed++;
 		break;
 	    case AM_MANYCAST:
 		handle_manycast(rbufp, restrict_mask, pkt, peer, authenticated);
