@@ -345,6 +345,9 @@ int scmp_sc[] = {
 	SCMP_SYS(socketcall),	/* old kernels */
 	SCMP_SYS(stat),
 	SCMP_SYS(statfs64),	/* from getaddrinfo after lid open */
+#ifdef __NR_sys_openat
+	SCMP_SYS(sys_openat),	/* SUSE */
+#endif
 #ifdef __NR_time
 	SCMP_SYS(time),		/* not in ARM */
 #endif
