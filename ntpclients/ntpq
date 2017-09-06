@@ -1730,7 +1730,7 @@ if __name__ == '__main__':
                         interpreter.onecmd(command)
                     session.close()
         raise SystemExit(0)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         if os.isatty(0):
             interpreter.say("\n")
     except ntp.packet.ControlException as e:
