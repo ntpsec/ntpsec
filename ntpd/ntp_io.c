@@ -3283,6 +3283,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 	for (nh = (struct nlmsghdr *)buffer;
 	     /* Avoid a sign comparison warning on some Linux distributions */
 	     NLMSG_OK(nh, (unsigned) cnt);
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 	     nh = NLMSG_NEXT(nh, cnt)) {
 		msg_type = nh->nlmsg_type;
 #else
