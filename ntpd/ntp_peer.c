@@ -703,12 +703,7 @@ newpeer(
 	/*
 	 * Copy in the peer configuration block.
 	 */
-	peer->cfg.version = ctl->version;
-	peer->cfg.flags = ctl->flags;
-	peer->cfg.minpoll = ctl->minpoll;
-	peer->cfg.maxpoll = ctl->maxpoll;
-	peer->cfg.ttl = ctl->ttl;
-	peer->cfg.peerkey = ctl->peerkey;
+	memcpy(&peer->cfg, ctl, sizeof(peer->cfg));
 
 	peer->cast_flags = cast_flags;
 	set_peerdstadr(peer, 
