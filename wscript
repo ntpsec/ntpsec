@@ -382,7 +382,7 @@ def configure(ctx):
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
             # "-Waggregate-return",   # breaks ldiv(), ntpcal_daysplit(),  etc.
-            "-Wcast-align",           # fails on RasPi, needs fixing.
+            # "-Wcast-align",         # fails on RasPi, needs fixing.
             # "-Wbad-function-cast",  # ntpd casts long<->double a lot
             # "-Wformat-nonliteral",  # complains about a used feature
             "-Winline",               # some OS have inline issues.
