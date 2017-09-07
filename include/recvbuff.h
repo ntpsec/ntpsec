@@ -51,7 +51,7 @@ struct recvbuf {
 	union {
 		struct pkt	X_recv_pkt;
 		uint8_t		X_recv_buffer[RX_BUFF_SIZE];
-	} recv_space;
+	} recv_space __attribute__ ((aligned));
 #define	recv_pkt		recv_space.X_recv_pkt
 #define	recv_buffer		recv_space.X_recv_buffer
 	int used;		/* reference count */

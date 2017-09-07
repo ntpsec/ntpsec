@@ -91,6 +91,8 @@ clocktime(
 	 */
 	if (year > 1970) {
 	    *yearstart = year_to_ntp(year);
+	    /* adding a signed int to an unsigned seems to confuse gcc */
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 	    *ts_ui = *yearstart + tmp;
 	    return true;
 	}
