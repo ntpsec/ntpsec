@@ -327,7 +327,13 @@ def configure(ctx):
         ('PIE', '-pie -fPIE'),
         # this quiets most of macOS warnings on -fpie
         ('unused', '-Qunused-arguments'),
-        # ('w_cast_align', "-Wcast-align"), # fails on RasPi, needs fixing.
+        # This is a useless warning on any architecture with a barrel
+        # shifter, which includes Intel and ARM and basically
+        # everything nowadays. Even so, we'd enable it out of
+        # perfectionism, but the GCC directives that ought to be
+        # useful for forcing structure alignment in order to suppress
+        # it locally don't seem to be working quite right.
+        #('w_cast_align', "-Wcast-align"),
         ('w_cast_qual', "-Wcast-qual"),
         ('w_disabled_optimization', "-Wdisabled-optimization"),
         ('w_float_equal', "-Wfloat-equal"),
@@ -480,8 +486,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wimplicit-function-declaration'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_disabled_optimization:
         ctx.env.CFLAGS = ['-Wdisabled-optimization'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_cast_align:
-        ctx.env.CFLAGS = ['-Wcast-align'] + ctx.env.CFLAGS
+    #if ctx.env.HAS_w_cast_align:
+    #    ctx.env.CFLAGS = ['-Wcast-align'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_missing_declarations:
         ctx.env.CFLAGS = ['-Wmissing-declarations'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_cast_qual:
