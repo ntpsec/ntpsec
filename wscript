@@ -394,10 +394,11 @@ def configure(ctx):
         ] + ctx.env.CFLAGS
         cc_test_flags += [
             ('w_implicit_fallthru', "-Wimplicit-fallthrough=3"),
-            # fails on Solaris and OpenBSD 6
-            # complains about a Bison bug
-            ('w_sign_conversion', "-Wsign-conversion"),
-            # fails on clang, lot's of false positives and Unity complaints
+            # Fails on Solaris, OpenBSD 6, and RasPi
+            # Complains about a Bison bug
+            # Cannot be suppressed
+            # ('w_sign_conversion', "-Wsign-conversion"),
+            # fails on clang, lots of false positives and Unity complaints
             # ('w_suggest_attribute_const', "-Wsuggest-attribute=const"),
             # fails on clang, lot's of false positives and Unity complaints
             # ('w_suggest_attribute_pure', "-Wsuggest-attribute=pure"),
