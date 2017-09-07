@@ -497,8 +497,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wpacked'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_sign_conversion:
-        ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
+    #if ctx.env.HAS_w_sign_conversion:
+    #    ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
     if ctx.env.HAS_f_stack_protector_all:
         ctx.env.CFLAGS = ['-fstack-protector-all'] + ctx.env.CFLAGS
 
