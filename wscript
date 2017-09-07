@@ -525,11 +525,12 @@ int main(int argc, char **argv) {
         # used on macOS, FreeBSD,
         # FORTIFY needs LTO to work well
         if ctx.env.DEST_OS not in ["darwin", "freebsd"]:
-            # -flto breaks tests on macOS
-            ctx.env.CFLAGS = [
-                "-fsanitize=cfi",           # hardening
-                "-fsanitize=safe-stack",    # hardening
-                ] + ctx.env.CFLAGS
+            # -flto and friends breaks tests on macOS
+            #ctx.env.CFLAGS = [
+            #    "-flto"
+            #    "-fsanitize=cfi",           # hardening
+            #    "-fsanitize=safe-stack",    # hardening
+            #    ] + ctx.env.CFLAGS
             ctx.env.LDFLAGS += [
                 "-Wl,-z,relro",  # hardening, marks some section read only,
                 ]
