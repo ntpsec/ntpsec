@@ -14,10 +14,10 @@ include::includes/clockopt.txt[]
 
 '''''
 
-[[addrs]]
-== Reference Clock Addresses ==
+[[types]]
+== Reference Clock Types ==
 
-Unless noted otherwise, further information about these commands is on
+Unless noted otherwise, further information about these types is on
 the link:refclock.html[Reference Clock Support] page.
 
 [[options]]
