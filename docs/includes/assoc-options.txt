@@ -7,8 +7,11 @@
   Add the command argument, a floating-point value in seconds, to the
   time offset (&theta;) computed for this server.  May be useful if
   you are a client on a network connection such as an ADSL line where
-  there is a predictable asymmetry between upsteam and downstream
-  flight times.
+  there is a predictable asymmetry between upstream and downstream
+  flight times.  One way you night see this is if you use a fixed set
+  of others and one has a stable offset that is an outlier from the
+  others; in that case you might want to use +bias+ to compensate out
+  the offset.
 
 +burst+::
   when the server is reachable, send a burst of eight packets instead of
