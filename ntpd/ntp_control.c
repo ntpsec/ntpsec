@@ -2188,7 +2188,7 @@ ctl_putpeer(
 
 	case CP_BIAS:
 		if ( !D_ISZERO_NS(p->cfg.bias) )
-			ctl_putdbl(peer_var[id].text, p->cfg.bias * MS_PER_S);
+			ctl_putdbl(peer_var[id].text, p->cfg.bias);
 		break;
 
 	case CP_REACH:
