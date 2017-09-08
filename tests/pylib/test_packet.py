@@ -1241,7 +1241,7 @@ class TestControlSession(unittest.TestCase):
     def test___parse_varlist(self):
         # Init
         cls = self.target()
-        cls.response = 'srcadr=0.0.0.0, srcport=0, srchost="0.ubuntu.pool.ntp.org",\r\ndstadr=0.0.0.0, dstport=0, leap=3, stratum=16, precision=-22,\r\nrootdelay=0.000, rootdisp=0.000, refid=POOL,\r\nreftime=0x00000000.00000000, rec=0x00000000.00000000, reach=0x0,\r\nunreach=0, hmode=3, pmode=0, hpoll=6, ppoll=10, headway=0, flash=0x1600,\r\nkeyid=0, offset=0.000, delay=0.000, dispersion=16000.000, jitter=0.000,\r\nfiltdelay= 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00,\r\nfiltoffset= 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00,\r\nfiltdisp= 16000.00 16000.00 16000.00 16000.00 16000.00 16000.00 16000.00 16000.00\r\n'
+        cls.response = 'srcadr=0.0.0.0, srcport=0, srchost="0.ubuntu.pool.ntp.org",\r\ndstadr=0.0.0.0, dstport=0, leap=3, stratum=16, precision=-22,\r\nrootdelay=0.000, rootdisp=0.000, refid=POOL,\r\nreftime=0x00000000.00000000, rec=0x00000000.00000000, reach=0x0,\r\nunreach=0, hmode=3, pmode=0, hpoll=6, ppoll=10, headway=0, flash=0x1600,\r\nkeyid=0, offset=0.000, delay=0.000, dispersion=16000.000, jitter=0.000,\r\nfiltdelay= 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00,\r\nfiltoffset= 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00,\r\nfiltdisp= 16000.00 16000.00 16000.00 16000.00 16000.00 16000.00 16000.00 16000.00,\r\nnovalue, blankvalue=, quotedvalue="jabber"'
         # Test with basic packet
         self.assertEqual(cls._ControlSession__parse_varlist(),
                          odict((("srcadr", "0.0.0.0"), ("srcport", 0),
@@ -1264,7 +1264,9 @@ class TestControlSession(unittest.TestCase):
                                  "0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00"),
                                 ("filtdisp",
                                  "16000.00 16000.00 16000.00 16000.00 "
-                                 "16000.00 16000.00 16000.00 16000.00"))))
+                                 "16000.00 16000.00 16000.00 16000.00"),
+                                ("novalue", ""), ("blankvalue", ""),
+                                ("quotedvalue", "jabber"))))
         # Test with basic packet, raw mode
         self.assertEqual(cls._ControlSession__parse_varlist(raw=True),
                          odict((("srcadr", ("0.0.0.0", "0.0.0.0")),
@@ -1302,7 +1304,9 @@ class TestControlSession(unittest.TestCase):
                                  ("16000.00 16000.00 16000.00 16000.00 "
                                   "16000.00 16000.00 16000.00 16000.00",
                                   "16000.00 16000.00 16000.00 16000.00 "
-                                  "16000.00 16000.00 16000.00 16000.00")))))
+                                  "16000.00 16000.00 16000.00 16000.00")),
+                                ("novalue", ("", "")), ("blankvalue", ("", "")),
+                                ("quotedvalue", ("jabber", "jabber")))))
 
     def test_readvar(self):
         queries = []
