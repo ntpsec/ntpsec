@@ -604,130 +604,166 @@ class TestPylibUtilMethods(unittest.TestCase):
         def termsize_jig():
             return ntp.util.TermSize(*termsize)
 
-        # Test empty
-        self.assertEqual(f(od()), "\n")
-        # Test prettydates
-        data = od((("reftime", ("0x00000000.00000000", "0x00000000.00000000")),
-                   ("clock", ("0x10000000.00000000", "0x10000000.00000000")),
-                   ("org", ("0x20000000.00000000", "0x20000000.00000000")),
-                   ("rec", ("0x30000000.00000000", "0x30000000.00000000")),
-                   ("xmt", ("0x40000000.00000000", "0x40000000.00000000"))))
-        self.assertEqual(f(data),
-                         "reftime=00000000.00000000 2036-02-07T00:28:16.000,\n"
-                         "clock=10000000.00000000 2044-08-09T22:52:32.000,\n"
-                         "org=20000000.00000000 2053-02-10T19:16:48.000,\n"
-                         "rec=30000000.00000000 2061-08-14T17:41:04.000,\n"
-                         "xmt=40000000.00000000 2070-02-15T14:05:20.000\n")
-        # Test prettydates, with units
-        self.assertEqual(f(data, showunits=True),
-                         "reftime=00000000.00000000 2036-02-07T00:28:16.000,\n"
-                         "clock=10000000.00000000 2044-08-09T22:52:32.000,\n"
-                         "org=20000000.00000000 2053-02-10T19:16:48.000,\n"
-                         "rec=30000000.00000000 2061-08-14T17:41:04.000,\n"
-                         "xmt=40000000.00000000 2070-02-15T14:05:20.000\n")
-        # Test ex-obscure cooking
-        data = od((("srcadr", ("1.1.1.1", "1.1.1.1")),
-                   ("peeradr", ("2.2.2.2", "2.2.2.2")),
-                   ("dstadr", ("3.3.3.3", "3.3.3.3")),
-                   ("refid", ("blah", "blah"))))
-        self.assertEqual(f(data),
-                         "srcadr=1.1.1.1, peeradr=2.2.2.2, "
-                         "dstadr=3.3.3.3, refid=blah\n")
-        # Test ex-obscure cooking
-        self.assertEqual(f(data, showunits=True),
-                         "srcadr=1.1.1.1, peeradr=2.2.2.2, "
-                         "dstadr=3.3.3.3, refid=blah\n")
-        # Test leap
-        self.assertEqual(f(od((("leap", (0, "0")),)), showunits=True),
-                         "leap=00\n")
-        self.assertEqual(f(od((("leap", (1, "1")),)), showunits=True),
-                         "leap=01\n")
-        self.assertEqual(f(od((("leap", (2, "2")),)), showunits=True),
-                         "leap=10\n")
-        self.assertEqual(f(od((("leap", (3, "3")),)), showunits=True),
-                         "leap=11\n")
-        # Test leap
-        self.assertEqual(f(od((("leap", (0, "0")),))), "leap=00\n")
-        self.assertEqual(f(od((("leap", (1, "1")),))), "leap=01\n")
-        self.assertEqual(f(od((("leap", (2, "2")),))), "leap=10\n")
-        self.assertEqual(f(od((("leap", (3, "3")),))), "leap=11\n")
-        # Test leap, with units
-        self.assertEqual(f(od((("leap", (0, "0")),)), showunits=True),
-                         "leap=00\n")
-        self.assertEqual(f(od((("leap", (1, "1")),)), showunits=True),
-                         "leap=01\n")
-        self.assertEqual(f(od((("leap", (2, "2")),)), showunits=True),
-                         "leap=10\n")
-        self.assertEqual(f(od((("leap", (3, "3")),)), showunits=True),
-                         "leap=11\n")
-        # Test reach
-        self.assertEqual(f(od((("reach", (1, "1")),))), "reach=001\n")
-        # Test reach, with units
-        self.assertEqual(f(od((("reach", (1, "1")),)), showunits=True),
-                         "reach=001\n")
-        # Test specials
-        data = od((("filtdelay", ("1 2 3", "1 2 3")),
-                   ("filtoffset", ("2 3 4", "2 3 4")),
-                   ("filtdisp", ("3 4 5", "3 4 5")),
-                   ("filterror", ("4 5 6", "4 5 6"))))
-        self.assertEqual(f(data),
-                         " filtdelay =1\t2\t3, filtoffset =2\t3\t4,   "
-                         "filtdisp =3\t4\t5,  filterror =4\t5\t6\n")
-        # Test specials, with units
-        self.assertEqual(f(data, showunits=True),
-                         " filtdelay =      1       2       3 ms,\n"
-                         "filtoffset =      2       3       4 ms,\n"
-                         "  filtdisp =      3       4       5 ms,\n"
-                         " filterror =      4       5       6 ms\n")
-        # Test flash null
-        self.assertEqual(f(od((("flash", (0, "0")),))), "flash=00 ok\n")
-        # Test flash all bits
-        self.assertEqual(f(od((("flash", (65535, "65535")),))),
-                         "\nflash=ffff pkt_dup pkt_bogus pkt_unsync "
-                         "pkt_denied pkt_auth pkt_stratum pkt_header "
-                         "pkt_autokey pkt_crypto peer_stratum "
-                         "peer_dist peer_loop peer_unreach\n")
-        # Test MS_VARS
-        data = od((("rootdelay", (0, "0")), ("rootdisp", (1, "1")),
-                   ("offset", (2, "2")), ("sys_jitter", (3, "3")),
-                   ("clk_jitter", (4, "4")), ("leapsmearoffset", (5, "5")),
-                   ("authdelay", (6, "6")), ("koffset", (7, "7")),
-                   ("kmaxerr", (8, "8")), ("kesterr", (9, "9")),
-                   ("kprecis", (10, "10")), ("kppsjitter", (11, "11")),
-                   ("fuzz", (12, "12")), ("clk_wander_threshold", (13, "13")),
-                   ("tick", (14, "14")), ("in", (15, "15")),
-                   ("out", (16, "16")), ("bias", (17, "17")),
-                   ("delay", (18, "18")), ("jitter", (19, "19")),
-                   ("dispersion", (20, "20")), ("fudgetime1", (21, "21")),
-                   ("fudgetime2", (21, "21"))))
-        self.assertEqual(f(data), "rootdelay=0, rootdisp=1, offset=2, "
-                         "sys_jitter=3, clk_jitter=4,\nleapsmearoffset=5, "
-                         "authdelay=6, koffset=7, kmaxerr=8, kesterr=9, "
-                         "kprecis=10,\nkppsjitter=11, fuzz=12, "
-                         "clk_wander_threshold=13, tick=14, in=15, out=16,\n"
-                         "bias=17, delay=18, jitter=19, dispersion=20, "
-                         "fudgetime1=21, fudgetime2=21\n")
-        # Test MS_VARS, with units
-        self.assertEqual(f(data, showunits=True),
-                         "rootdelay=0ms, rootdisp=1ms, offset=2ms, "
-                         "sys_jitter=3ms, clk_jitter=4ms,\n"
-                         "leapsmearoffset=5ms, authdelay=6ms, koffset=7ms, "
-                         "kmaxerr=8ms, kesterr=9ms,\nkprecis=10ms, "
-                         "kppsjitter=11ms, fuzz=12ms, "
-                         "clk_wander_threshold=13ms,\ntick=14ms, in=15ms, "
-                         "out=16ms, bias=17ms, delay=18ms, jitter=19ms,\n"
-                         "dispersion=20ms, fudgetime1=21ms, fudgetime2=21ms\n")
-        # Test S_VARS
-        data = od((("tai", (0, "0")), ("poll", (1, "1"))))
-        self.assertEqual(f(data), "tai=0, poll=1\n")
-        # Test S_VARS, with units
-        self.assertEqual(f(data, showunits=True), "tai=0s, poll=1s\n")
-        # Test PPM_VARS
-        data = od((("frequency", (0, "0")), ("clk_wander", (1, "1"))))
-        self.assertEqual(f(data), "frequency=0, clk_wander=1\n")
-        # Test PPM_VARS, with units
-        self.assertEqual(f(data, showunits=True),
-                         "frequency=0ppm, clk_wander=1ppm\n")
+        try:
+            termtemp = ntp.util.termsize
+            ntp.util.termsize = termsize_jig
+            # Test empty
+            self.assertEqual(f(od()), "\n")
+            # Test prettydates
+            data = od((("reftime",
+                        ("0x00000000.00000000", "0x00000000.00000000")),
+                       ("clock",
+                        ("0x10000000.00000000", "0x10000000.00000000")),
+                       ("org",
+                        ("0x20000000.00000000", "0x20000000.00000000")),
+                       ("rec",
+                        ("0x30000000.00000000", "0x30000000.00000000")),
+                       ("xmt",
+                        ("0x40000000.00000000", "0x40000000.00000000"))))
+            self.assertEqual(f(data),
+                             "reftime=00000000.00000000 "
+                             "2036-02-07T00:28:16.000,\n"
+                             "clock=10000000.00000000 "
+                             "2044-08-09T22:52:32.000,\n"
+                             "org=20000000.00000000 "
+                             "2053-02-10T19:16:48.000,\n"
+                             "rec=30000000.00000000 "
+                             "2061-08-14T17:41:04.000,\n"
+                             "xmt=40000000.00000000 "
+                             "2070-02-15T14:05:20.000\n")
+            # Test prettydates, with units
+            self.assertEqual(f(data, showunits=True),
+                             "reftime=00000000.00000000 "
+                             "2036-02-07T00:28:16.000,\n"
+                             "clock=10000000.00000000 "
+                             "2044-08-09T22:52:32.000,\n"
+                             "org=20000000.00000000 "
+                             "2053-02-10T19:16:48.000,\n"
+                             "rec=30000000.00000000 "
+                             "2061-08-14T17:41:04.000,\n"
+                             "xmt=40000000.00000000 "
+                             "2070-02-15T14:05:20.000\n")
+            # Test wide terminal
+            termsize = (160, 24)
+            self.assertEqual(f(data),
+                             "reftime=00000000.00000000 "
+                             "2036-02-07T00:28:16.000, "
+                             "clock=10000000.00000000 "
+                             "2044-08-09T22:52:32.000, "
+                             "org=20000000.00000000 "
+                             "2053-02-10T19:16:48.000,\n"
+                             "rec=30000000.00000000 "
+                             "2061-08-14T17:41:04.000, "
+                             "xmt=40000000.00000000 "
+                             "2070-02-15T14:05:20.000\n")
+            termsize = (80, 24)
+            # Test ex-obscure cooking
+            data = od((("srcadr", ("1.1.1.1", "1.1.1.1")),
+                       ("peeradr", ("2.2.2.2", "2.2.2.2")),
+                       ("dstadr", ("3.3.3.3", "3.3.3.3")),
+                       ("refid", ("blah", "blah"))))
+            self.assertEqual(f(data),
+                             "srcadr=1.1.1.1, peeradr=2.2.2.2, "
+                             "dstadr=3.3.3.3, refid=blah\n")
+            # Test ex-obscure cooking
+            self.assertEqual(f(data, showunits=True),
+                             "srcadr=1.1.1.1, peeradr=2.2.2.2, "
+                             "dstadr=3.3.3.3, refid=blah\n")
+            # Test leap
+            self.assertEqual(f(od((("leap", (0, "0")),)), showunits=True),
+                             "leap=00\n")
+            self.assertEqual(f(od((("leap", (1, "1")),)), showunits=True),
+                             "leap=01\n")
+            self.assertEqual(f(od((("leap", (2, "2")),)), showunits=True),
+                             "leap=10\n")
+            self.assertEqual(f(od((("leap", (3, "3")),)), showunits=True),
+                             "leap=11\n")
+            # Test leap
+            self.assertEqual(f(od((("leap", (0, "0")),))), "leap=00\n")
+            self.assertEqual(f(od((("leap", (1, "1")),))), "leap=01\n")
+            self.assertEqual(f(od((("leap", (2, "2")),))), "leap=10\n")
+            self.assertEqual(f(od((("leap", (3, "3")),))), "leap=11\n")
+            # Test leap, with units
+            self.assertEqual(f(od((("leap", (0, "0")),)), showunits=True),
+                             "leap=00\n")
+            self.assertEqual(f(od((("leap", (1, "1")),)), showunits=True),
+                             "leap=01\n")
+            self.assertEqual(f(od((("leap", (2, "2")),)), showunits=True),
+                             "leap=10\n")
+            self.assertEqual(f(od((("leap", (3, "3")),)), showunits=True),
+                             "leap=11\n")
+            # Test reach
+            self.assertEqual(f(od((("reach", (1, "1")),))), "reach=001\n")
+            # Test reach, with units
+            self.assertEqual(f(od((("reach", (1, "1")),)), showunits=True),
+                             "reach=001\n")
+            # Test specials
+            data = od((("filtdelay", ("1 2 3", "1 2 3")),
+                       ("filtoffset", ("2 3 4", "2 3 4")),
+                       ("filtdisp", ("3 4 5", "3 4 5")),
+                       ("filterror", ("4 5 6", "4 5 6"))))
+            self.assertEqual(f(data),
+                             " filtdelay =1\t2\t3, filtoffset =2\t3\t4,   "
+                             "filtdisp =3\t4\t5,  filterror =4\t5\t6\n")
+            # Test specials, with units
+            self.assertEqual(f(data, showunits=True),
+                             " filtdelay =      1       2       3 ms,\n"
+                             "filtoffset =      2       3       4 ms,\n"
+                             "  filtdisp =      3       4       5 ms,\n"
+                             " filterror =      4       5       6 ms\n")
+            # Test flash null
+            self.assertEqual(f(od((("flash", (0, "0")),))), "flash=00 ok\n")
+            # Test flash all bits
+            self.assertEqual(f(od((("flash", (65535, "65535")),))),
+                             "\nflash=ffff pkt_dup pkt_bogus pkt_unsync "
+                             "pkt_denied pkt_auth pkt_stratum pkt_header "
+                             "pkt_autokey pkt_crypto peer_stratum "
+                             "peer_dist peer_loop peer_unreach\n")
+            # Test MS_VARS
+            data = od((("rootdelay", (0, "0")), ("rootdisp", (1, "1")),
+                       ("offset", (2, "2")), ("sys_jitter", (3, "3")),
+                       ("clk_jitter", (4, "4")), ("leapsmearoffset", (5, "5")),
+                       ("authdelay", (6, "6")), ("koffset", (7, "7")),
+                       ("kmaxerr", (8, "8")), ("kesterr", (9, "9")),
+                       ("kprecis", (10, "10")), ("kppsjitter", (11, "11")),
+                       ("fuzz", (12, "12")),
+                       ("clk_wander_threshold", (13, "13")),
+                       ("tick", (14, "14")), ("in", (15, "15")),
+                       ("out", (16, "16")), ("bias", (17, "17")),
+                       ("delay", (18, "18")), ("jitter", (19, "19")),
+                       ("dispersion", (20, "20")), ("fudgetime1", (21, "21")),
+                       ("fudgetime2", (21, "21"))))
+            self.assertEqual(f(data), "rootdelay=0, rootdisp=1, offset=2, "
+                             "sys_jitter=3, clk_jitter=4,\nleapsmearoffset=5, "
+                             "authdelay=6, koffset=7, kmaxerr=8, kesterr=9, "
+                             "kprecis=10,\nkppsjitter=11, fuzz=12, "
+                             "clk_wander_threshold=13, tick=14, in=15, "
+                             "out=16,\nbias=17, delay=18, jitter=19, "
+                             "dispersion=20, fudgetime1=21, fudgetime2=21\n")
+            # Test MS_VARS, with units
+            self.assertEqual(f(data, showunits=True),
+                             "rootdelay=0ms, rootdisp=1ms, offset=2ms, "
+                             "sys_jitter=3ms, clk_jitter=4ms,\n"
+                             "leapsmearoffset=5ms, authdelay=6ms, koffset=7ms, "
+                             "kmaxerr=8ms, kesterr=9ms,\nkprecis=10ms, "
+                             "kppsjitter=11ms, fuzz=12ms, "
+                             "clk_wander_threshold=13ms,\ntick=14ms, in=15ms, "
+                             "out=16ms, bias=17ms, delay=18ms, jitter=19ms,\n"
+                             "dispersion=20ms, fudgetime1=21ms, "
+                             "fudgetime2=21ms\n")
+            # Test S_VARS
+            data = od((("tai", (0, "0")), ("poll", (1, "1"))))
+            self.assertEqual(f(data), "tai=0, poll=1\n")
+            # Test S_VARS, with units
+            self.assertEqual(f(data, showunits=True), "tai=0s, poll=1s\n")
+            # Test PPM_VARS
+            data = od((("frequency", (0, "0")), ("clk_wander", (1, "1"))))
+            self.assertEqual(f(data), "frequency=0, clk_wander=1\n")
+            # Test PPM_VARS, with units
+            self.assertEqual(f(data, showunits=True),
+                             "frequency=0ppm, clk_wander=1ppm\n")
+        finally:
+            ntp.util.termsize = termtemp
 
     def test_MRUSummary(self):
         c = ntp.util.MRUSummary
