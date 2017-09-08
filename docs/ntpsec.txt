@@ -224,6 +224,11 @@ codebase has been outright removed, with less than 5% new code added.
   generic-driver refclocks.  If the software was compiled with the
   --enable-classic-mode switch, the foregoing is reversed.
 
+* In server entries, its now possible to specify a time offset to be
+  applied to incoming timestamps (analogues to the fudge on certain
+  refclocks). This may be useful for client systems communicating
+  over ADSL lines, which have large but relatively fixed asymmetic delays.
+
 * The _restrict_ statement can now take an address range in CIDR
   notation rather than as an address/mask pair.
 

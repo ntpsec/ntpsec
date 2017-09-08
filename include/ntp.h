@@ -165,6 +165,7 @@ struct peer_ctl {
 	uint8_t		maxpoll;
 	uint32_t	ttl;
 	keyid_t		peerkey;
+	double		bias;
 #ifdef REFCLOCK
 	uint32_t	baud;
 	char		*path;
@@ -284,7 +285,6 @@ struct peer {
 	double	delay;		/* peer roundtrip delay */
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
-	double	bias;		/* programmed offset bias */
 
 	/*
 	 * Variables used to correct for packet length and asymmetry.

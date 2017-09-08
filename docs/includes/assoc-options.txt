@@ -3,6 +3,13 @@
 // Note, some of these options are described with special refclock
 // semantics in includes/clock-options.txt.
 
++bias+::
+  Add the command argument, a floating-point value in seconds, to the
+  time offset (&theta;) computed for this server.  May be useful if
+  you are a client on a network connection such as an ADSL line where
+  there is a predictable asymmetry between upsteam and downstream
+  flight times.
+
 +burst+::
   when the server is reachable, send a burst of eight packets instead of
   the usual one. The packet spacing is normally 2 s; however, the

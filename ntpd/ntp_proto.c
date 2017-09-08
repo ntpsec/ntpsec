@@ -708,7 +708,7 @@ handle_procpkt(
 	peer->reach |= 1;
 
 	/* Hooray! Pass our new sample off to the clock filter. */
-	clock_filter(peer, theta + peer->bias, delta, epsilon);
+	clock_filter(peer, theta + peer->cfg.bias, delta, epsilon);
 }
 
 static void

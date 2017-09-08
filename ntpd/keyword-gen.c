@@ -24,6 +24,7 @@ struct key_tok {
 struct key_tok ntp_keywords[] = {
 { "...",		T_Ellipsis,		FOLLBY_TOKEN },
 { "allpeers",		T_Allpeers,		FOLLBY_TOKEN },
+{ "bias",		T_Bias,			FOLLBY_TOKEN },
 { "broadcast",		T_Broadcast,		FOLLBY_STRING },
 { "baud",		T_Baud,			FOLLBY_TOKEN },
 { "ctl",		T_Ctl,			FOLLBY_TOKEN },

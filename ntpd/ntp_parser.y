@@ -57,6 +57,7 @@
 %token	<Integer>	T_Auth
 %token	<Integer>	T_Average
 %token	<Integer>	T_Baud
+%token	<Integer>	T_Bias
 %token	<Integer>	T_Broadcast
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
@@ -459,7 +460,8 @@ option_string
 	;
 
 option_double_keyword
-	:	T_Time1
+	:	T_Bias
+	|	T_Time1
 	|	T_Time2
 	;
 
