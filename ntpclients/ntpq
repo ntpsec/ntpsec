@@ -1474,6 +1474,7 @@ usage: kerninfo
             ("ss_received", "packets received:     ", NTP_INT),
             ("ss_thisver", "current version:      ", NTP_INT),
             ("ss_oldver", "older version:        ", NTP_INT),
+            ("ss_numctlreq", "control requests:     ", NTP_INT),
             ("ss_badformat", "bad length or format: ", NTP_INT),
             ("ss_badauth", "authentication failed:", NTP_INT),
             ("ss_declined", "declined:             ", NTP_INT),

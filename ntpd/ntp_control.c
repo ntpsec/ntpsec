@@ -220,8 +220,9 @@ static const struct ctl_proc control_codes[] = {
 #define CS_MRU_OLDEST_AGE	95
 #define	CS_LEAPSMEARINTV	96
 #define	CS_LEAPSMEAROFFS	97
-#define	CS_TICK                 98U
-#define	CS_MAXCODE		CS_TICK
+#define	CS_TICK                 98
+#define	CS_NUMCTLREQ		99
+#define	CS_MAXCODE		CS_NUMCTLREQ
 
 /*
  * Peer variables we understand
@@ -400,7 +401,9 @@ static const struct ctl_var sys_var[] = {
 	{ CS_LEAPSMEARINTV,	RO, "leapsmearinterval" },    /* 96 */
 	{ CS_LEAPSMEAROFFS,	RO, "leapsmearoffset" },      /* 97 */
 	{ CS_TICK,		RO, "tick" },		/* 98 */
-	{ 0,                    EOV, "" }		/* 98 */
+	/* new in NTPsec */
+	{ CS_NUMCTLREQ,		RO, "ss_numctlreq" },	/* 99 */
+	{ 0,                    EOV, "" }		/* 99 */
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -2033,13 +2036,20 @@ ctl_putsys(
 		/* a.k.a. fuzz (s), output in ms */
 		ctl_putdbl6(sys_var[varid].text, sys_fuzz * MS_PER_S);
 		break;
+
 	case CS_WANDER_THRESH:
 		ctl_putdbl(sys_var[varid].text, wander_threshold * US_PER_S);
 		break;
+
 	case CS_TICK:
 		/* a.k.a. sys_tick (s), output in ms */
 		ctl_putdbl6(sys_var[varid].text, sys_tick * MS_PER_S);
 		break;
+
+	case CS_NUMCTLREQ:
+		ctl_putuint(sys_var[varid].text, numctlreq);
+		break;
+
         default:
                 /* huh? */
                 break;

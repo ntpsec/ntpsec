@@ -521,6 +521,8 @@ is built with OpenSSL support it is possible to use and generate
 The "recent" parameter of CTL_OP_READ_MRU is not supported in versions
 prior to NTPsec 0.9.6.
 
+Export of the count of control requests (ss_numctlreq) is new in NTPsec.
+
 '''''
 
 include::includes/footer.txt[]

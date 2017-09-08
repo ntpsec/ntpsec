@@ -549,6 +549,8 @@ In older versions, the 'type' variable associated with a
 reference clock was a numeric driver type index. It has been replaced
 by 'name', a shortname for the driver type.
 
+In older versions, no count of control packets was listed under sysstats.
+
 The -O (--old-rv) option of legacy versions has been retired.
 
 == Known Limitations ==
