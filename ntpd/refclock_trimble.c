@@ -884,6 +884,7 @@ trimble_receive (
 
 	/* add sample to filter */
 	pp->lastref = pp->lastrec;
+	pp->year = up->date.year;
 	pp->day = up->date.yearday;
 	pp->hour = up->date.hour;
 	pp->minute = up->date.minute;
