@@ -8,10 +8,10 @@ import select
 import os.path
 
 class FileJig:
-    def __init__(self):
+    def __init__(self, returns=[""]):
         self.data = []
         self.flushed = False
-        self.readline_return = [""]
+        self.readline_return = returns
 
     def __enter__(self):
         return self
@@ -33,6 +33,11 @@ class FileJig:
         if len(self.readline_return) > 0:
             return self.readline_return.pop(0)
         return ""
+
+    def readlines(self):
+        ret = self.readline_return
+        self.readline_return = []
+        return ret
 
 
 class SocketJig:
@@ -112,6 +117,8 @@ class SocketModuleJig:
         self.socket_fail_connect = False
         self.socketsReturned = []
         self.inet_ntop_calls = []
+        self.getfqdn_calls = []
+        self.getfqdn_returns = []
 
     def getaddrinfo(self, host, port, family=None, socktype=None,
                     proto=None, flags=None):
@@ -148,6 +155,10 @@ class SocketModuleJig:
     def inet_ntop(self, addr, family):
         self.inet_ntop_calls.append((addr, family))
         return "canon.com"
+
+    def getfqdn(self, name=""):
+        self.getfqdn_calls.append(name)
+        return self.getfqdn_returns.pop(0)
 
 
 class GetpassModuleJig:
@@ -271,9 +282,7 @@ class GzipModuleJig:
 
     def open(self, filename, filemode):
         self.open_calls.append((filename, filemode))
-        fd = FileJig()
-        self.files_returned.append(fd)
-        return fd
+        return self.files_returned.pop(0)
 
 
 class GlobModuleJig:
@@ -283,4 +292,5 @@ class GlobModuleJig:
 
     def glob(self, pathname):
         self.glob_calls.append(pathname)
-        return self.glob_returns.pop(0)
+        ret =  self.glob_returns.pop(0)
+        return ret
