@@ -58,6 +58,22 @@ class TestNTPStats(unittest.TestCase):
         # Test
         self.assertEqual(f("12345.6789 blah blah"), 12345.6789)
 
+    def test_percentiles(self):
+        f = self.target.percentiles
+
+        # Test empty
+        self.assertEqual(f([], []), {})
+        # Test 1 item, empty percentile
+        self.assertEqual(f([], [42]), {})
+        # Test 1 item, non-empty percentile
+        self.assertEqual(f([10, 90], [42]), {"p10": 42, "p90": 42})
+        # Test several items, empty percentile
+        self.assertEqual(f([], [1, 23, 42, 99]), {})
+        # Test several items, non-empty percentile
+        self.assertEqual(f([10, 25, 50, 90, 100], [1, 23, 42, 99]),
+                         {"p10": 1, "p25": 23, "p90": 99,
+                          "p50": 42, "p100": 99})
+
     def test___init__(self):
         open_calls = []
         open_returns = []
