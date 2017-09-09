@@ -161,7 +161,6 @@ extern	char *	mfptoms		(l_fp, short);
 
 extern	bool	hextolfp	(const char *, l_fp *);
 extern	char *	prettydate	(const l_fp);
-extern	char *	gmprettydate	(const l_fp);
 extern	char *	rfc3339date	(const l_fp);
 extern	char *	rfc3339time     (time_t);
 

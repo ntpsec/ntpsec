@@ -3056,7 +3056,7 @@ parse_control(
 		if (PARSE_PPS(parse->timedata.parse_state))
 		{
 			tt = add_var(&out->kv_list, 80, RO|DEF);
-			snprintf(tt, 80, "refclock_ppstime=\"%s\"", gmprettydate(parse->timedata.parse_ptime));
+			snprintf(tt, 80, "refclock_ppstime=\"%s\"", prettydate(parse->timedata.parse_ptime));
 		}
 
 		start = tt = add_var(&out->kv_list, 128, RO|DEF);
@@ -3069,7 +3069,7 @@ parse_control(
 		else
 		{
 			ap(start, 128, tt, "%s\"",
-			    gmprettydate(parse->timedata.parse_time));
+			    prettydate(parse->timedata.parse_time));
 		}
 
 		if (!PARSE_GETTIMECODE(parse, &tmpctl))

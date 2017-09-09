@@ -14,8 +14,6 @@
 # error sizeof(time_t) < 4 -- this will not work!
 #endif
 
-static char *common_prettydate(const l_fp, bool);
-
 /* Helper function to handle possible wraparound of the ntp epoch.
  *
  * Works by periodic extension of the ntp time stamp in the UN*X epoch.
@@ -52,7 +50,6 @@ static char *common_prettydate(const l_fp, bool);
 static struct tm *
 get_struct_tm(
 	const	time64_t *stamp,
-	int	local,
 	struct	tm *tmbuf)
 {
 	struct tm *tm;
@@ -91,8 +88,11 @@ get_struct_tm(
 	 * At least the MSDN says that the (Microsoft) Windoze
 	 * versions of 'gmtime_r()' and 'localtime_r()' will bark on time
 	 * stamps < 0.
+	 *
+	 * ESR, 2017: Using localtime(3) for logging at all is bogus -
+	 * in particular bad for reproducibility.
 	 */
-	while ((tm = (*(local ? localtime_r : gmtime_r))(&ts, tmbuf)) == NULL)
+	while ((tm = gmtime_r(&ts, tmbuf)) == NULL)
 		if (ts < 0) {
 			if (--folds < MINFOLD)
 				return NULL;
@@ -116,8 +116,7 @@ get_struct_tm(
 
 static char *
 common_prettydate(
-	const l_fp ts,
-	bool local
+	const l_fp ts
 	)
 {
 	static const char pfmt[] =
@@ -139,7 +138,7 @@ common_prettydate(
 		ntps++;
 	}
 	sec = ntpcal_ntp_to_time(ntps, NULL);
-	tm  = get_struct_tm(&sec, local, &tmbuf);
+	tm  = get_struct_tm(&sec, &tmbuf);
 	if (!tm) {
 		/*
 		 * get a replacement, but always in UTC, using
@@ -157,8 +156,7 @@ common_prettydate(
 			 (unsigned long)lfpuint(ts), (unsigned long)lfpfrac(ts),
 			 1900 + tm->tm_year, tm->tm_mon+1, tm->tm_mday,
 			 tm->tm_hour, tm->tm_min, tm->tm_sec, msec);
-		if (!local)
-			strncat(bp, "Z", LIB_BUFLENGTH);
+		strncat(bp, "Z", LIB_BUFLENGTH);
 	}
 	return bp;
 }
@@ -169,7 +167,7 @@ prettydate(
 	const l_fp ts
 	)
 {
-	return common_prettydate(ts, true);
+	return common_prettydate(ts);
 }
 
 
@@ -178,17 +176,9 @@ rfc3339date(
 	const l_fp ts
 	)
 {
-	return common_prettydate(ts, false) + 18; /* skip past hex time */
+	return common_prettydate(ts) + 18; /* skip past hex time */
 }
 
-
-char *
-gmprettydate(
-	const l_fp ts
-	)
-{
-	return common_prettydate(ts, false);
-}
 
 /*
  * rfc3339time - prettyprint time stamp - POSIX epoch

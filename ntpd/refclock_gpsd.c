@@ -1544,8 +1544,8 @@ process_tpv(
 			DPRINT(2, ("%s: process_tpv, stamp='%s',"
 				   " recvt='%s' mode=%d\n",
 				   up->logname,
-				   gmprettydate(up->ibt_stamp),
-				   gmprettydate(up->ibt_recvt),
+				   prettydate(up->ibt_stamp),
+				   prettydate(up->ibt_recvt),
 				   gps_mode));
 
 			/* have to use local receive time as substitute
@@ -1641,12 +1641,12 @@ process_pps(
 	setlfpfrac(up->pps_stamp, 0);
 
 	if (NULL != up->pps_peer)
-		save_ltc(up->pps_peer->procptr, gmprettydate(up->pps_stamp2));
+		save_ltc(up->pps_peer->procptr, prettydate(up->pps_stamp2));
 	DPRINT(2, ("%s: PPS record processed,"
 		   " stamp='%s', recvt='%s'\n",
 		   up->logname,
-		   gmprettydate(up->pps_stamp2),
-		   gmprettydate(up->pps_recvt2)));
+		   prettydate(up->pps_stamp2),
+		   prettydate(up->pps_recvt2)));
 	
 	up->fl_pps  = (0 != (pp->sloppyclockflag & CLK_FLAG2)) - 1;
 	up->fl_pps2 = -1;
@@ -1688,12 +1688,12 @@ process_toff(
 	up->ibt_local = *rtime;
 	up->fl_ibt    = -1;
 
-	save_ltc(pp, gmprettydate(up->ibt_stamp));
+	save_ltc(pp, prettydate(up->ibt_stamp));
 	DPRINT(2, ("%s: TOFF record processed,"
 		   " stamp='%s', recvt='%s'\n",
 		   up->logname,
-		   gmprettydate(up->ibt_stamp),
-		   gmprettydate(up->ibt_recvt)));
+		   prettydate(up->ibt_stamp),
+		   prettydate(up->ibt_recvt)));
 	return;
 
   fail:
