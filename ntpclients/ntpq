@@ -1686,7 +1686,8 @@ if __name__ == '__main__':
         try:
             credentials = ntp.packet.Authenticator(keyfile)
         except (OSError, IOError):
-            pass
+            sys.stderr.write("ntpq: %s nonexistent or unreadable\n" % keyfile)
+            raise SystemExit(1)
         if credentials:
             session.auth = credentials
     if keyid is not None:  # Have an -a
