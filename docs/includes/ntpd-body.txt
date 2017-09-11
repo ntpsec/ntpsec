@@ -529,10 +529,10 @@ Configuration files are parsed according to the following rules:
   this directory is /etc/ntp.d, but if the -c option is specified the
   /etc will be specified by the directory name of the -c argument.
 
-. Each file beneath the configuration directory with either the
-  extension ".ntpd" is interpreted.  Files are interpreted in ASCII
-  sort order of their pathnames.  Files with other extensions or no
-  extensions are ignored.
+. Each file beneath the configuration directory with the extension
+  ".ntpd" is interpreted.  Files are interpreted in ASCII sort order
+  of their pathnames.  Files with other extensions or no extensions
+  are ignored.
 
 Note: The second two rules are *unstable*; this feature should be
 considered experimental and subject to revision.  In a future release,
