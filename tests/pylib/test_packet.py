@@ -147,7 +147,7 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.mac, '')
         self.assertEqual(cls.hostname, None)
         self.assertEqual(cls.resolved, None)
-        # In theory should test cls.recieved here, but it is assigned to time()
+        # In theory should test cls.received here, but it is assigned to time()
         self.assertEqual(cls.trusted, True)
         self.assertEqual(cls.rescaled, False)
 
