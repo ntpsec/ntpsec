@@ -90,7 +90,7 @@ get_struct_tm(
 	 * stamps < 0.
 	 *
 	 * ESR, 2017: Using localtime(3) for logging at all is bogus -
-	 * in particular bad for reproducibility.
+	 * in particular, it is bad for reproducibility.
 	 */
 	while ((tm = gmtime_r(&ts, tmbuf)) == NULL)
 		if (ts < 0) {
