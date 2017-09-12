@@ -206,6 +206,10 @@ Nov 14 16:16:21 terrapin ntpd[1127]: Trimble(0) message
   with default 0.0. 'time1' should be set to about 20 milliseconds when using a
   Thunderbolt.
 
+[[t2]]+time2+ 'time'::
+  Specifies the holdover duration for Thunderbolt, in seconds, with 
+  default 0 (holdover disabled).
+
 +stratum+ 'number'::
   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
 
@@ -407,6 +411,10 @@ transmitted by GPS satellites. With good antenna placement, Almanac reception
 can be expected to take 13 minutes or more after receiver power-up. The driver
 will wait for the receiver to report that its UTC offset is valid before
 enabling time transfer. 
+
+Time transfer during holdover may be enabled by setting xref:t2[time2] to the 
+maximum allowable holdover duration in seconds.
+
 
 == Change Log ==
 Since version 2.45 (30/08/09)

@@ -182,9 +182,9 @@ static const unsigned int tb_decod_conv[TB_DECOD_STATS+1] = {
 static const char tb_disc_mode[TB_DISC_MODES+1][16] = {
 	"normal", "power-up", "auto holdover", "manual holdover",
 	"recovery", "unknown", "disabled", "invalid"};
-static const bool tb_disc_mode_usable[TB_DISC_MODES+1] = {
-	true, false, true, true,
-	true, false, false, false};
+static const bool tb_disc_in_holdover[TB_DISC_MODES+1] = {
+	false, false, true, true,
+	false, false, false, false};
 
 /*
  * Transfer vector
@@ -534,7 +534,8 @@ TSIP_decode (
 	long secint;
 	double secs, secfrac;
 	unsigned short event, m_alarms;
-
+	uint32_t holdover_t;
+	
 	struct trimble_unit *up;
 	struct refclockproc *pp;
 
@@ -725,7 +726,7 @@ TSIP_decode (
 			disc_mode = (unsigned char)mb(2);
 			if (disc_mode > TB_DISC_MODES)
 				disc_mode = TB_DISC_MODES;
-			DPRINT(2, ("TSIP_decode: unit %d: leap=%d  decod.stat=%s  disc.act=%s\n",
+			DPRINT(2, ("TSIP_decode: unit %d: leap=%d  decod.stat=%s  disc.mode=%s\n",
 			       up->unit, pp->leap,
 			       tracking_status[tb_decod_conv[decod_stat]],
 			       tb_disc_mode[disc_mode]));
@@ -736,15 +737,31 @@ TSIP_decode (
 				       up->unit));
 				return false;
 			}
-			/* check if disciplining is ok before checking GPS */
-			if (!tb_disc_mode_usable[disc_mode] &&
-			    !tracking_status_usable[tb_decod_conv[decod_stat]])
-			{
-				DPRINT(1, ("TSIP_decode: unit %d: not in holdover (disc.act=%s) and decod.stat of '%s' is unusable\n",
-				       up->unit, tb_disc_mode[disc_mode],
-				       tracking_status[tb_decod_conv[decod_stat]]));
-				return false;
+
+			holdover_t = (uint32_t)getlong((uint8_t *) &mb(4));
+			if (!tracking_status_usable[tb_decod_conv[decod_stat]])	{
+				if (pp->fudgetime2 < 0.5) {
+					/* holdover not enabled */
+					DPRINT(1, ("TSIP_decode: unit %d: decod.stat of '%s' is unusable\n",
+					       up->unit,
+					       tracking_status[tb_decod_conv[decod_stat]]));
+					return false;
+				}else if (tb_disc_in_holdover[disc_mode] &&
+				          holdover_t > pp->fudgetime2) {
+					DPRINT(1, ("TSIP_decode: unit %d: unit in holdover (disc.mode=%s) with decod.stat of '%s' but holdover time of %us exceeds time2(%.fs)\n",
+					       up->unit,
+					       tb_disc_mode[disc_mode],
+					       tracking_status[tb_decod_conv[decod_stat]],
+					       holdover_t, pp->fudgetime2));
+					return false;
+				} else if (!tb_disc_in_holdover[disc_mode]) {
+					DPRINT(1, ("TSIP_decode: unit %d: not in holdover (disc.mode=%s) and decod.stat of '%s' is unusable\n",
+					       up->unit, tb_disc_mode[disc_mode],
+					       tracking_status[tb_decod_conv[decod_stat]]));
+					return false;
+				}
 			}
+
 			if (up->UTC_flags != UTC_AVAILABLE)
 				return false;
 
