@@ -197,7 +197,7 @@ TEST(clocktime, AlwaysInLimit) {
 			ydayinc = prime_incs[whichprime];
 			for (hour = -204; hour < 204; hour += 2) {
 				for (minute = -60; minute < 60; minute++) {
-				    clocktime(0, yday, hour, minute, 30, 0,
+				    (void)clocktime(0, yday, hour, minute, 30, 0,
 						  timestamp, &yearstart, &actual);
 					diff = actual - timestamp;
 					if (diff >= 0x80000000UL) {
