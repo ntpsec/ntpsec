@@ -59,6 +59,53 @@ class NTPStats:
         "get Unix time from converted line."
         return float(line.split()[0])
 
+    @staticmethod
+    def percentiles(percents, values):
+        "Return given percentiles of a given row in a given set of entries."
+        "assuming values are already split and sorted"
+        ret = {}
+        length = len(values)
+        if 1 >= length:
+            # uh, oh...
+            if 1 == length:
+                # just one data value, set all to that one value
+                v = values[0]
+            else:
+                # no data, set all to zero
+                v = 0
+            for perc in percents:
+                ret["p" + str(perc)] = v
+        else:
+            for perc in percents:
+                if perc == 100:
+                    ret["p100"] = values[length - 1]
+                else:
+                    ret["p" + str(perc)] = values[int(length * (perc/100))]
+        return ret
+
+    @staticmethod
+    def ip_label(key):
+        "Produce appropriate label for an IP address."
+        # If it's a new-style NTPsep clock label, pass it through,
+        # Otherwise we expect it to be an IP address and the next guard fires
+        if key[0].isdigit():
+            # TO BE REMOVED SOMEDAY
+            # Clock address - only possible if we're looking at a logfile made
+            # by NTP Classic or an NTPsec version configured with
+            # --enable-classic-mode.  Nasty that we have to emit a numeric
+            # driver type here.
+            if key.startswith("127.127."):
+                (_, _, t, u) = key.split(".")
+                return "REFCLOCK(type=%s,unit=%s)" % (t, u)
+            # Ordinary IP address - replace with primary hostname.
+            # Punt if the lookup fails.
+            try:
+                (hostname, _, _) = socket.gethostbyaddr(key)
+                return hostname
+            except socket.herror:
+                pass
+        return key      # Someday, be smarter than this.
+
     def __init__(self, statsdir, sitename=None,
                  period=None, starttime=None, endtime=None):
         "Grab content of logfiles, sorted by timestamp."
@@ -104,6 +151,7 @@ class NTPStats:
                         lines += open(logpart, 'r').readlines()
             except IOError:
                 sys.stderr.write("ntpviz: WARNING: could not read %s\n"
+
                                  % logpart)
                 pass
 
@@ -137,29 +185,6 @@ class NTPStats:
             # cmp= or key=
             lines1.sort()
             setattr(self, stem, lines1)
-
-    def percentiles(self, percents, values):
-        "Return given percentiles of a given row in a given set of entries."
-        "assuming values are already split and sorted"
-        ret = {}
-        length = len(values)
-        if 1 >= length:
-            # uh, oh...
-            if 1 == length:
-                # just one data value, set all to that one value
-                v = values[0]
-            else:
-                # no data, set all to zero
-                v = 0
-            for perc in percents:
-                ret["p" + str(perc)] = v
-        else:
-            for perc in percents:
-                if perc == 100:
-                    ret["p100"] = values[length - 1]
-                else:
-                    ret["p" + str(perc)] = values[int(length * (perc/100))]
-        return ret
 
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
@@ -205,28 +230,6 @@ class NTPStats:
                 # ignore corrupted rows
                 pass
         return tempsmap
-
-    def ip_label(self, key):
-        "Produce appropriate label for an IP address."
-        # If it's a new-style NTPsep clock label, pass it through,
-        # Otherwise we expect it to be an IP address and the next guard fires
-        if key[0].isdigit():
-            # TO BE REMOVED SOMEDAY
-            # Clock address - only possible if we're looking at a logfile made
-            # by NTP Classic or an NTPsec version configured with
-            # --enable-classic-mode.  Nasty that we have to emit a numeric
-            # driver type here.
-            if key.startswith("127.127."):
-                (_, _, t, u) = key.split(".")
-                return "REFCLOCK(type=%s,unit=%s)" % (t, u)
-            # Ordinary IP address - replace with primary hostname.
-            # Punt if the lookup fails.
-            try:
-                (hostname, _, _) = socket.gethostbyaddr(key)
-                return hostname
-            except socket.herror:
-                pass
-        return key      # Someday, be smarter than this.
 
 
 def iso_to_posix(s):

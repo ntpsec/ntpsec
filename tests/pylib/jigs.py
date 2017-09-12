@@ -96,6 +96,7 @@ class HasherJig:
 class SocketModuleJig:
     error = socket.error
     gaierror = socket._socket.gaierror
+    herror = socket.herror
     SOCK_DGRAM = socket.SOCK_DGRAM
     IPPROTO_UDP = socket.IPPROTO_UDP
     AF_UNSPEC = socket.AF_UNSPEC
@@ -119,6 +120,8 @@ class SocketModuleJig:
         self.inet_ntop_calls = []
         self.getfqdn_calls = []
         self.getfqdn_returns = []
+        self.ghba_calls = []
+        self.ghba_returns = []
 
     def getaddrinfo(self, host, port, family=None, socktype=None,
                     proto=None, flags=None):
@@ -159,6 +162,13 @@ class SocketModuleJig:
     def getfqdn(self, name=""):
         self.getfqdn_calls.append(name)
         return self.getfqdn_returns.pop(0)
+
+    def gethostbyaddr(self, addr):
+        self.ghba_calls.append(addr)
+        ret = self.ghba_returns.pop(0)
+        if ret is None:
+            raise self.herror
+        return ret
 
 
 class GetpassModuleJig:
