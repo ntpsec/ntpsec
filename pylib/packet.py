@@ -331,6 +331,7 @@ DEFSTIMEOUT = 3000
 # The maximum keyid for authentication, keyid is a 16-bit field
 MAX_KEYID = 0xFFFF
 
+
 class Packet:
     "Encapsulate an NTP fragment"
     # The following two methods are copied from macros in includes/control.h
@@ -1140,9 +1141,8 @@ class ControlSession:
                                 % (f, len(fragments)), 1)
                         break
                 else:
-                    self.response = polybytes(
-                        "".join([polystr(frag.extension) \
-                                 for frag in fragments]))
+                    tempfraglist = [polystr(f.extension) for f in fragments]
+                    self.response = polybytes("".join(tempfraglist))
                     warndbg("Fragment collection ends. %d bytes "
                             " in %d fragments\n"
                             % (len(self.response), len(fragments)), 1)
