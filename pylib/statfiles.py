@@ -83,6 +83,29 @@ class NTPStats:
                     ret["p" + str(perc)] = values[int(length * (perc/100))]
         return ret
 
+    @staticmethod
+    def ip_label(key):
+        "Produce appropriate label for an IP address."
+        # If it's a new-style NTPsep clock label, pass it through,
+        # Otherwise we expect it to be an IP address and the next guard fires
+        if key[0].isdigit():
+            # TO BE REMOVED SOMEDAY
+            # Clock address - only possible if we're looking at a logfile made
+            # by NTP Classic or an NTPsec version configured with
+            # --enable-classic-mode.  Nasty that we have to emit a numeric
+            # driver type here.
+            if key.startswith("127.127."):
+                (_, _, t, u) = key.split(".")
+                return "REFCLOCK(type=%s,unit=%s)" % (t, u)
+            # Ordinary IP address - replace with primary hostname.
+            # Punt if the lookup fails.
+            try:
+                (hostname, _, _) = socket.gethostbyaddr(key)
+                return hostname
+            except socket.herror:
+                pass
+        return key      # Someday, be smarter than this.
+
     def __init__(self, statsdir, sitename=None,
                  period=None, starttime=None, endtime=None):
         "Grab content of logfiles, sorted by timestamp."
@@ -128,6 +151,7 @@ class NTPStats:
                         lines += open(logpart, 'r').readlines()
             except IOError:
                 sys.stderr.write("ntpviz: WARNING: could not read %s\n"
+
                                  % logpart)
                 pass
 
@@ -206,28 +230,6 @@ class NTPStats:
                 # ignore corrupted rows
                 pass
         return tempsmap
-
-    def ip_label(self, key):
-        "Produce appropriate label for an IP address."
-        # If it's a new-style NTPsep clock label, pass it through,
-        # Otherwise we expect it to be an IP address and the next guard fires
-        if key[0].isdigit():
-            # TO BE REMOVED SOMEDAY
-            # Clock address - only possible if we're looking at a logfile made
-            # by NTP Classic or an NTPsec version configured with
-            # --enable-classic-mode.  Nasty that we have to emit a numeric
-            # driver type here.
-            if key.startswith("127.127."):
-                (_, _, t, u) = key.split(".")
-                return "REFCLOCK(type=%s,unit=%s)" % (t, u)
-            # Ordinary IP address - replace with primary hostname.
-            # Punt if the lookup fails.
-            try:
-                (hostname, _, _) = socket.gethostbyaddr(key)
-                return hostname
-            except socket.herror:
-                pass
-        return key      # Someday, be smarter than this.
 
 
 def iso_to_posix(s):
