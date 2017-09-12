@@ -790,9 +790,9 @@ class TestPylibUtilMethods(unittest.TestCase):
             self.assertEqual(f(data, showunits=True),
                              "rootdelay=0ms, rootdisp=1ms, offset=2ms, "
                              "sys_jitter=3ms, clk_jitter=4ms,\n"
-                             "leapsmearoffset=5ms, authdelay=6ms, koffset=7ms, "
-                             "kmaxerr=8ms, kesterr=9ms,\nkprecis=10ms, "
-                             "kppsjitter=11ms, fuzz=12ms, "
+                             "leapsmearoffset=5ms, authdelay=6ms, "
+                             "koffset=7ms, kmaxerr=8ms, kesterr=9ms,\n"
+                             "kprecis=10ms, kppsjitter=11ms, fuzz=12ms, "
                              "clk_wander_threshold=13ms,\ntick=14ms, in=15ms, "
                              "out=16ms, bias=17ms, delay=18ms, jitter=19ms,\n"
                              "dispersion=20ms, fudgetime1=21ms, "

@@ -231,7 +231,7 @@ class TestNTPStats(unittest.TestCase):
             faketimemod.time_returns = [TDP * 2]
             fakesockmod.getfqdn_returns = ["jabber"]
             fakeosmod.path.isdir_returns = [True]
-            open_returns = [None]
+            self.open_returns = [None]
             fakeglobmod.glob_returns = [([]), ([]), ([]), ([]), ([]), ([])]
             fakeosmod.path.getmtime_returns = []
             cls = self.target("/foo/bar", "ntpstats", 100, 50, 150)
@@ -251,7 +251,7 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.socket = socktemp
             ntp.statfiles.os = ostemp
             ntp.statfiles.time = timetemp
-            ntp.statfiles.glob = fakeglobmod
+            ntp.statfiles.glob = globtemp
             ntp.statfiles.open = opentemp
             sys.stderr = errtemp
 
@@ -341,7 +341,7 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.socket = socktemp
             ntp.statfiles.os = ostemp
             ntp.statfiles.time = timetemp
-            ntp.statfiles.glob = fakeglobmod
+            ntp.statfiles.glob = globtemp
             ntp.statfiles.open = opentemp
             sys.stderr = errtemp
 
@@ -422,7 +422,7 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.socket = socktemp
             ntp.statfiles.os = ostemp
             ntp.statfiles.time = timetemp
-            ntp.statfiles.glob = fakeglobmod
+            ntp.statfiles.glob = globtemp
             ntp.statfiles.open = opentemp
             sys.stderr = errtemp
 
@@ -510,7 +510,7 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.socket = socktemp
             ntp.statfiles.os = ostemp
             ntp.statfiles.time = timetemp
-            ntp.statfiles.glob = fakeglobmod
+            ntp.statfiles.glob = globtemp
             ntp.statfiles.open = opentemp
             sys.stderr = errtemp
 

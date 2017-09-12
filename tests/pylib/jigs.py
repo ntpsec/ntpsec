@@ -7,6 +7,7 @@ import socket
 import select
 import os.path
 
+
 class FileJig:
     def __init__(self, returns=[""]):
         self.data = []
@@ -274,7 +275,8 @@ class ShutilModuleJig:
     def get_terminal_size(self, default=(80, 24)):
         self.gts_calls.append(default)
         return self.gts_returns.pop(0)
-    
+
+
 class TimeModuleJig:
     def __init__(self):
         self.time_calls = 0
@@ -302,5 +304,5 @@ class GlobModuleJig:
 
     def glob(self, pathname):
         self.glob_calls.append(pathname)
-        ret =  self.glob_returns.pop(0)
+        ret = self.glob_returns.pop(0)
         return ret

@@ -12,8 +12,7 @@ import socket
 import select
 import sys
 import getpass
-
-from jigs import *
+import jigs
 
 odict = ntp.util.OrderedDict
 
@@ -308,7 +307,7 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.rescaled, True)
         self.assertEqual(cls.root_delay, 2)
         self.assertEqual(cls.root_dispersion, 2)
-        self.assertEqual(cls.reference_timestamp, -2208988800 )
+        self.assertEqual(cls.reference_timestamp, -2208988800)
         self.assertEqual(cls.origin_timestamp, -2208988800)
         self.assertEqual(cls.receive_timestamp, -2208988800)
         self.assertEqual(cls.transmit_timestamp, -2208988800)
@@ -436,7 +435,7 @@ class TestMisc(unittest.TestCase):
 
     def test_dump_hex_printable(self):
         f = ntpp.dump_hex_printable
-        fp = FileJig()
+        fp = jigs.FileJig()
         data = "\x00\x01\x02\x03\x04\x05\x06\x07" \
                "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
         # Test a single line
@@ -648,7 +647,7 @@ class TestControlSession(unittest.TestCase):
 
     def test_close(self):
         # Init
-        sockjig = SocketJig()
+        sockjig = jigs.SocketJig()
         cls = self.target()
         cls.sock = sockjig
         # Test
@@ -666,9 +665,9 @@ class TestControlSession(unittest.TestCase):
         self.assertEqual(cls.havehost(), True)
 
     def test___lookuphost(self):
-        logjig = FileJig()
+        logjig = jigs.FileJig()
         try:
-            fakesockmod = SocketModuleJig()
+            fakesockmod = jigs.SocketModuleJig()
             ntpp.socket = fakesockmod
             # Init
             cls = self.target()
@@ -757,9 +756,9 @@ class TestControlSession(unittest.TestCase):
             else:
                 return [("family", "socktype", "protocol", "canon",
                          ("1.2.3.4", 80)), ]
-        logjig = FileJig()
+        logjig = jigs.FileJig()
         try:
-            fakesockmod = SocketModuleJig()
+            fakesockmod = jigs.SocketModuleJig()
             ntpp.socket = fakesockmod
             # Init
             cls = self.target()
@@ -829,12 +828,12 @@ class TestControlSession(unittest.TestCase):
             ntpp.socket = socket
 
     def test_password(self):
-        iojig = FileJig()
-        fakegetpmod = GetpassModuleJig()
+        iojig = jigs.FileJig()
+        fakegetpmod = jigs.GetpassModuleJig()
         # Init
         cls = self.target()
         try:
-            tempauth = ntpp.Authenticator()
+            tempauth = ntpp.Authenticator
             ntpp.Authenticator = AuthenticatorJig
             ntpp.getpass = fakegetpmod
             tempstdin = sys.stdin
@@ -880,8 +879,8 @@ class TestControlSession(unittest.TestCase):
             sys.stdout = tempstdout
 
     def test_sendpkt(self):
-        logjig = FileJig()
-        sockjig = SocketJig()
+        logjig = jigs.FileJig()
+        sockjig = jigs.SocketJig()
 
         # Init
         cls = self.target()
@@ -902,7 +901,7 @@ class TestControlSession(unittest.TestCase):
                                        "Write to None failed\n"])
 
     def test_sendrequest(self):
-        logjig = FileJig()
+        logjig = jigs.FileJig()
         try:
             tempcpkt = ntpp.ControlPacket
             ntpp.ControlPacket = ControlPacketJig
@@ -945,9 +944,9 @@ class TestControlSession(unittest.TestCase):
             ntpp.Authenticator = tempauth
 
     def test_getresponse(self):
-        logjig = FileJig()
-        sockjig = SocketJig()
-        fakeselectmod = SelectModuleJig()
+        logjig = jigs.FileJig()
+        sockjig = jigs.SocketJig()
+        fakeselectmod = jigs.SelectModuleJig()
         # Init
         cls = self.target()
         cls.debug = 3
@@ -1033,7 +1032,7 @@ class TestControlSession(unittest.TestCase):
             ntpp.select = select
 
     def test___validate_packet(self):
-        logjig = FileJig()
+        logjig = jigs.FileJig()
         # Init
         cls = self.target()
         cls.debug = 5
@@ -1305,7 +1304,8 @@ class TestControlSession(unittest.TestCase):
                                   "16000.00 16000.00 16000.00 16000.00",
                                   "16000.00 16000.00 16000.00 16000.00 "
                                   "16000.00 16000.00 16000.00 16000.00")),
-                                ("novalue", ("", "")), ("blankvalue", ("", "")),
+                                ("novalue", ("", "")),
+                                ("blankvalue", ("", "")),
                                 ("quotedvalue", ("jabber", "jabber")))))
 
     def test_readvar(self):
@@ -1374,7 +1374,7 @@ class TestControlSession(unittest.TestCase):
         def doquery_jig(opcode, associd=0, qdata="", auth=False):
             queries.append((opcode, associd, qdata, auth))
         # Init
-        filefp = FileJig()
+        filefp = jigs.FileJig()
         cls = self.target()
         cls.doquery = doquery_jig
         # Test success
@@ -1427,7 +1427,7 @@ class TestControlSession(unittest.TestCase):
                 raise ctlerr("foo", errorcode=code)
             if len(query_results) > 0:
                 setresponse(query_results.pop(0))
-        logjig = FileJig()
+        logjig = jigs.FileJig()
         # Init
         cls = self.target()
         cls.fetch_nonce = fetch_nonce_jig
@@ -1717,7 +1717,7 @@ class TestAuthenticator(unittest.TestCase):
 
     def openjig(self, filename):
         self.open_calls.append(filename)
-        fd = FileJig()
+        fd = jigs.FileJig()
         fd.readline_return = self.open_data
         self.open_files.append(fd)
         return fd
@@ -1786,7 +1786,7 @@ class TestAuthenticator(unittest.TestCase):
         f = self.target.compute_mac
         try:
             temphash = ntpp.hashlib
-            fakehashlibmod = HashlibModuleJig()
+            fakehashlibmod = jigs.HashlibModuleJig()
             ntpp.hashlib = fakehashlibmod
             # Test no digest
             self.assertEqual(f(None, None, None, None), None)
@@ -1812,7 +1812,7 @@ class TestAuthenticator(unittest.TestCase):
         bad_pkt = "foobar\xDE\xAD\xDE\xAFblahblahblah"
         try:
             temphash = ntpp.hashlib
-            fakehashlibmod = HashlibModuleJig()
+            fakehashlibmod = jigs.HashlibModuleJig()
             ntpp.hashlib = fakehashlibmod
             # Test good
             self.assertEqual(cls.verify_mac(good_pkt), True)
