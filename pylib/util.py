@@ -12,6 +12,11 @@ import shutil
 import socket
 import sys
 import time
+import ntp.ntpc
+import ntp.version
+import ntp.magic
+import ntp.control
+
 
 if "get_terminal_size" not in dir(shutil):
     # used by termsize() on python 2.x systems
@@ -22,10 +27,6 @@ if "get_terminal_size" not in dir(shutil):
 else:
     PY3 = True
 
-import ntp.ntpc
-import ntp.version
-import ntp.magic
-import ntp.control
 
 # Old CTL_PST defines for version 2.
 OLD_CTL_PST_CONFIG = 0x80
@@ -488,11 +489,14 @@ def monoclock():
     except AttributeError:
         return time.time()
 
+
 class Cache:
     "Simple time-based cache"
     ttl = 300
+
     def __init__(self):
         self._cache = {}
+
     def get(self, key):
         if key in self._cache:
             value, settime = self._cache[key]
@@ -500,11 +504,14 @@ class Cache:
                 return value
             else:  # key expired, delete it
                 del self._cache[key]
+
     def set(self, key, value):
         self._cache[key] = (value, monoclock())
 
+
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = Cache()
+
 
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
@@ -519,7 +526,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     try:
         ai = socket.getaddrinfo(hostname, None, family, 0, 0,
                                 socket.AI_CANONNAME)
-    except socket.gaierror as e:
+    except socket.gaierror:
         return "DNSFAIL:%s" % hostname
     (family, socktype, proto, canonname, sockaddr) = ai[0]
     try:
@@ -533,7 +540,9 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     canonicalization_cache.set(inhost, result)
     return result
 
+
 TermSize = collections.namedtuple("TermSize", ["width", "height"])
+
 
 def termsize():
     "Return the current terminal size."
@@ -1089,7 +1098,6 @@ class MRUSummary:
     header = " lstint avgint rstr r m v  count rport remote address"
 
     def summary(self, entry):
-        width = ntp.util.termsize().width - 1
         last = ntp.ntpc.lfptofloat(entry.last)
         if self.now:
             lstint = int(self.now - last + 0.5)
@@ -1132,12 +1140,11 @@ class MRUSummary:
                     confirmed = False
                     try:
                         ai = socket.getaddrinfo(dns, None)
-                        for (family, socktype, proto, canonname, sockaddr) in \
-                            ai:
+                        for (_, _, _, _, sockaddr) in ai:
                             if sockaddr and sockaddr[0] == ip:
                                 confirmed = True
                                 break
-                    except socket.gaierror as e:
+                    except socket.gaierror:
                         pass
                     canonicalization_cache.set(dns, confirmed)
                 if not confirmed:
@@ -1250,6 +1257,7 @@ class IfstatsSummary:
             if not c.isalnum() and c not in "/.:[] \%\n":
                 return ''
         return s
+
 
 try:
     from collections import OrderedDict
