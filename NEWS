@@ -11,13 +11,21 @@ on user-visible changes.
 
 The code size has been further reduced, to 56KLOC.
 
+The depenendency local refclocks returning 4-digit years on
+pre-synchronization to a network peer has been removed.  It is
+this possible to run in a fully-autonomous mode using multiple
+refclocks and no network peers. (Note however that this mode
+is not yet well tested and may not be stable.)
+
 ntpmon now reports units on time figures.
+
+ntpq now reports a count of Mode 6 messages received under sysstats.
 
 You can now turn off restriction flags with an _unrestrict_ statement
 that takes arguments exactly like a _restrict_, except that with no
 argument flags it removes any filter rule associated with the
 address/mask (as opposed to creating one with unrestricted
-access). This is expected to be useful mainly with the "ntpq config"
+access). This is expected to be useful mainly with the "ntpq :config"
 command.
 
 Builds are fully reproducible; see SOURCE_DATE_EPOCH and BUILD_EPOCH.
