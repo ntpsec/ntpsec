@@ -20,6 +20,7 @@
 #define CLOCK_MONOTONIC	1
 typedef int clockid_t;
 int clock_gettime(clockid_t clock_id, struct timespec *tp);
+int clock_settime(clockid_t clock_id, const struct timespec *tp);
 #endif
 
 int ntp_set_tod (struct timespec *tvs);
