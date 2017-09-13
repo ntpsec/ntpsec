@@ -54,6 +54,9 @@ PY_MAJOR_VERSION
 MOD_TIMETICK
 NTP_API
 
+# Deom the Linux PPS header
+PPS_API_VERS
+
 # OpenSSL
 OPENSSL_VERSION_NUMBER
 LIBRESSL_VERSION_NUMBER
@@ -65,6 +68,7 @@ ENABLE_DEBUG_TIMING
 ENABLE_LOCKCLOCK
 ENABLE_MDNS_REGISTRATION
 ENABLE_MSSNTP
+ENABLE_LEAP_TESTING
 HAVE_LINUX_CAPABILITY
 HAVE_SECCOMP_H
 HAVE_SOLARIS_PRIVS
@@ -92,6 +96,7 @@ DSTMINUTES
 TEST_LIBNTP
 TEST_NTPD
 TEST_NTPDIG
+TEST_LIBPARSE
 
 # Purely internal symbols
 CONFIG_H
@@ -168,6 +173,9 @@ sem_timedwait		# In worker-thread code
 short			# In ntpd/ntp_parser.tab.c
 size_t			# In ntpd/ntp_parser.tab.c
 timercmp		# Only used in include/parse.h
+isinf
+isnan
+yydebug
 _ALLOCA_H
 __UNUSED__
 _STRING_H		# In ntpd/ntp_parser.tab.c 
@@ -175,10 +183,19 @@ __BUILTIN_VA_ARG_INCR	# In ntpd/ntp_parser.tab.c
 __SIZE_TYPE__		# In ntpd/ntp_parser.tab.c 
 EREALLOC_.*
 INTPTR_MAX		# Unity
+__TMS470__		# Unity
 HAVE_STRUCT_TIMEX_MODES
 HAVE_STRUCT_TIMEX_TIME_TICK
 HAVE_STRUCT_NTPTIMEVAL_TAI
 HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
+
+# seccomp-related symbols that may not be available on all systems
+__NR_mmap
+__NR_openat
+__NR_prlimit64
+
+# Exposed by some versions of glibc
+NI_MAXSERV
 
 # Inaccessible port guards
 SYS_CYGWIN32
