@@ -54,7 +54,7 @@ PY_MAJOR_VERSION
 MOD_TIMETICK
 NTP_API
 
-# Deom the Linux PPS header
+# From the Linux PPS header
 PPS_API_VERS
 
 # OpenSSL
