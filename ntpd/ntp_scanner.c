@@ -50,7 +50,7 @@ static struct FILE_INFO * lex_stack = NULL;
  * --------------------
  */
 #define ENDSWITH(str, suff) (strcmp(str + strlen(str) - strlen(suff), suff)==0) 
-#define CONF_ENABLE(s)	ENDSWITH(s, ".ntpd")
+#define CONF_ENABLE(s)	ENDSWITH(s, ".conf")
 
 
 /* SCANNER GLOBAL VARIABLES 

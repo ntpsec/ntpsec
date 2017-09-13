@@ -247,7 +247,7 @@ codebase has been outright removed, with less than 5% new code added.
 
 * If there is an /etc/ntp.d directory, its subfiles are scanned for
   more configuration declarations. Only files with the extension
-  ".ntpd" are interpreted; others are ignored.  This feature is
+  ".conf" are interpreted; others are ignored.  This feature is
   intended to make assembling configuration easier for administration
   and package-configuration scripts.  See {ntpdman} for details.
 
