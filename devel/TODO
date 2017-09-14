@@ -36,6 +36,9 @@ of the current startup logic gets discussed.
 
 === Future plans ===
 
+* Test that the pool code properly replaces a server if it goes dark. (Not
+  clear how to arrange this.)
+
 * ntpd is remarkably bad at standalone Stratum 1 - requires multiple chimers
   (and multiple inbound NTP connections, and a hole in your firewall) even when
   it has a known-good local timesource like a GPS.  This should be fixed.

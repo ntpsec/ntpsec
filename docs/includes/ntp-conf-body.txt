@@ -24,6 +24,12 @@ lines. Arguments may be host names, host addresses written in numeric,
 dotted-quad form, integers, floating point numbers (when specifying
 times in seconds) and text strings.
 
+Configuration files may have inclusion lines.  The syntax is "include"
+foollowed by whitespace followed by a file or directory name.  The
+configuation is evaluated as though the text of the file - or all
+files of the directory with the extension ".ntpd" - were textually
+spliced in at the point of the include. Relative paths will work.
+
 The rest of this page describes the configuration and control options.
 The "Notes on Configuring NTP and Setting up an NTP Subnet" page
 (available as part of the HTML documentation provided under
