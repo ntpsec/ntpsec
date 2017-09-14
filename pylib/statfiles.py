@@ -134,57 +134,72 @@ class NTPStats:
                              % statsdir)
             raise SystemExit(1)
 
-        for stem in ("clockstats", "peerstats", "loopstats", "rawstats",
-                     "temps", "gpsd"):
-            lines = []
-            try:
-                pattern = os.path.join(statsdir, stem)
-                if stem != "temps" and stem != "gpsd":
-                    pattern += "."
-                for logpart in glob.glob(pattern + "*"):
-                    # skip files older than starttime
-                    if starttime > os.path.getmtime(logpart):
-                        continue
-                    if logpart.endswith("gz"):
-                        lines += gzip.open(logpart, 'rt').readlines()
-                    else:
-                        lines += open(logpart, 'r').readlines()
-            except IOError:
-                sys.stderr.write("ntpviz: WARNING: could not read %s\n"
+        self.clockstats = []
+        self.peerstats = []
+        self.loopstats = []
+        self.rawstats = []
+        self.temps = []
+        self.gpsd = []
 
-                                 % logpart)
-                pass
+        for stem in ("clockstats", "peerstats", "loopstats",
+                     "rawstats", "temps", "gpsd"):
+            lines = self.__load_stem(statsdir, stem)
+            processed = self.__process_stem(stem, lines)
+            setattr(self, stem, processed)
 
-            lines1 = []
-            if stem == "temps" or stem == "gpsd":
-                # temps and gpsd are already in UNIX time
-                for line in lines:
-                    split = line.split()
-                    if 3 > len(split):
-                        # skip short lines
-                        continue
+    def __load_stem(self, statsdir, stem):
+        lines = []
+        try:
+            pattern = os.path.join(statsdir, stem)
+            if stem != "temps" and stem != "gpsd":
+                pattern += "."
+            for logpart in glob.glob(pattern + "*"):
+                # skip files older than starttime
+                if self.starttime > os.path.getmtime(logpart):
+                    continue
+                if logpart.endswith("gz"):
+                    lines += gzip.open(logpart, 'rt').readlines()
+                else:
+                    lines += open(logpart, 'r').readlines()
+        except IOError:
+            sys.stderr.write("ntpviz: WARNING: could not read %s\n"
+                             % logpart)
+            pass
 
-                    try:
-                        t = float(split[0])
-                    except:
-                        # ignore comment lines, lines with no time
-                        continue
+        return lines
 
-                    if starttime <= t <= endtime:
-                        # prefix with int milli sec.
-                        split.insert(0, int(t * 1000))
-                        lines1.append(split)
-            else:
-                # Morph first fields into Unix time with fractional seconds
-                # ut into nice dictionary of dictionary rows
-                lines1 = NTPStats.unixize(lines, starttime, endtime)
+    def __process_stem(self, stem, lines):
+        lines1 = []
+        if stem == "temps" or stem == "gpsd":
+            # temps and gpsd are already in UNIX time
+            for line in lines:
+                split = line.split()
+                if 3 > len(split):
+                    # skip short lines
+                    continue
 
-            # Sort by datestamp
-            # by default, a tuple sort()s on the 1st item, which is a nice
-            # integer of milli seconds.  This is faster than using
-            # cmp= or key=
-            lines1.sort()
-            setattr(self, stem, lines1)
+                try:
+                    t = float(split[0])
+                except:
+                    # ignore comment lines, lines with no time
+                    continue
+
+                if self.starttime <= t <= self.endtime:
+                    # prefix with int milli sec.
+                    split.insert(0, int(t * 1000))
+                    lines1.append(split)
+        else:
+            # Morph first fields into Unix time with fractional seconds
+            # ut into nice dictionary of dictionary rows
+            lines1 = NTPStats.unixize(lines, self.starttime, self.endtime)
+            
+        # Sort by datestamp
+        # by default, a tuple sort()s on the 1st item, which is a nice
+        # integer of milli seconds.  This is faster than using
+        # cmp= or key=
+        lines1.sort()
+        return lines1
+
 
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
