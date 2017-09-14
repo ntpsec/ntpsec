@@ -590,7 +590,7 @@ nmea_control(
 				/* failed to configure, drop PPS unit */
 				time_pps_destroy(up->ppsctl.handle);
 				msyslog(LOG_WARNING,
-					"RECOCK: %s set PPSAPI params fails",
+					"REFCLOCK: %s set PPSAPI params fails",
 					refclock_name(peer));
 			}
 			/* note: the PPS I/O handle remains valid until
@@ -1032,7 +1032,8 @@ nmea_receive(
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
-		msyslog(LOG_INFO, "REFCLOCK: %s using GPS time as if it were UTC",
+		msyslog(LOG_INFO,
+                        "REFCLOCK: %s using GPS time as if it were UTC",
 			refclock_name(peer));
 		up->gps_time = true;
 	}
