@@ -1427,7 +1427,6 @@ usage: reslist
             ("sys_jitter", "system jitter:    ", NTP_FLOAT),
             ("clk_jitter", "clock jitter:     ", NTP_FLOAT),
             ("clk_wander", "clock wander:     ", NTP_FLOAT),
-            ("bcastdelay", "broadcast delay:  ", NTP_FLOAT),
             ("authdelay", "symm. auth. delay:", NTP_FLOAT),
         )
         self.collect_display(associd=0, variables=sysinfo, decodestatus=True)
