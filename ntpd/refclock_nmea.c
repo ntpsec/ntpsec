@@ -400,6 +400,7 @@ nmea_start(
 	uint32_t			rate;
 	unsigned int			baudrate;
 	const char *			baudtext;
+        int rcode;
 
 
 	/* Old style: get baudrate choice from mode byte bits 4/5/6 */
@@ -477,12 +478,17 @@ nmea_start(
 	peer->sstclktype = CTL_SST_TS_UHF;
 
 	/* Open serial port. Use CLK line discipline, if available. */
-	snprintf(device, sizeof(device), DEVICE, unit);
-	pp->io.fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
-				  baudrate,
-				  LDISC_CLK);
+        rcode = snprintf(device, sizeof(device), DEVICE, unit);
+        if ( 0 > rcode ) {
+            pp->io.fd = -1;
+        } else {
+            pp->io.fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
+                                      baudrate,
+                                      LDISC_CLK);
+        }
 	if (-1 == pp->io.fd)
 		return false;
+
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
 	      refclock_name(peer), device, baudtext));
 
@@ -559,16 +565,20 @@ nmea_control(
 
 	/* Light up the PPSAPI interface if not yet attempted. */
 	if ((CLK_FLAG1 & pp->sloppyclockflag) && !up->ppsapi_tried) {
+                int rcode;
+
 		up->ppsapi_tried = true;
-                /* FIXME: snprintf() can return negative on error */
-		devlen = (size_t)snprintf(device, sizeof(device), PPSDEV, unit);
-		if (devlen < sizeof(device)) {
-		    up->ppsapi_fd = open(peer->cfg.ppspath ? peer->cfg.ppspath : device,
-					 PPSOPENMODE, S_IRUSR | S_IWUSR);
+		rcode = snprintf(device, sizeof(device), PPSDEV, unit);
+		devlen = (size_t)rcode;
+		if ( 0 > rcode || (devlen >= sizeof(device))) {
+		    up->ppsapi_fd = -1;
+		    msyslog(LOG_ERR,
+			    "REFCLOCK: %s PPS device name too long or bad",
+			    refclock_name(peer));
 		} else {
-			up->ppsapi_fd = -1;
-			msyslog(LOG_ERR, "REFCLOCK: %s PPS device name too long",
-				refclock_name(peer));
+		    up->ppsapi_fd = open(peer->cfg.ppspath ? \
+                                         peer->cfg.ppspath : device,
+					 PPSOPENMODE, S_IRUSR | S_IWUSR);
 		}
 		if (-1 == up->ppsapi_fd)
 			up->ppsapi_fd = pp->io.fd;	
@@ -1226,9 +1236,10 @@ gps_send(
 		/* format into output buffer with overflow check */
 		len = snprintf(buf, sizeof(buf), "$%.*s*%02X\r\n",
 			       len, beg, dcs);
-		if ((size_t)len >= sizeof(buf)) {
-			DPRINT(1, ("%s gps_send: buffer overflow for command '%s'\n",
-				   refclock_name(peer), cmd));
+		if ( ( 0 > len) || ((size_t)len >= sizeof(buf))) {
+			DPRINT(1,
+                            ("%s gps_send: buffer overflow for command '%s'\n",
+			    refclock_name(peer), cmd));
 			return;	/* game over player 1 */
 		}
 		cmd = buf;
