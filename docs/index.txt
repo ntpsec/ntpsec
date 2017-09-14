@@ -63,12 +63,11 @@ link:ntpsec.html[this summary].
 [[platforms]]
 == Supported platforms ==
 
-NTPsec supports all operating systems conforming to POSIX.1-2001 and
-ISO/IEC 9899:1999 (aka C99).  The POSIX.1-2008 clock calls
-clock_gettime(2) and clock_settime(2) musy also be present.  Primary
-platforms include Linux and the *BSD family; any reasonably modern
-proprietary Unix will also serve.  The OS must have either a
-Linux-like adjtimex(2) call or a BSD-like ntp_adjtime(2) call.
+NTPsec supports all operating systems conforming to
+POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
+include Linux and the *BSD family; any reasonably modern proprietary
+Unix will also serve.  The OS must have either a Linux-like
+adjtimex(2) call or a BSD-like ntp_adjtime(2) call.
 
 Legacy Windows support has been removed from the NTPsec
 codebase. Future Windows support will be conditional on the quality
