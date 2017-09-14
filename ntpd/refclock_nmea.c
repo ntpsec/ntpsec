@@ -1136,6 +1136,15 @@ nmea_poll(
 	 * for now.
 	 */
 	if (!up->ppsapi_gate) {
+		if ( FLAG_PPS & peer->cfg.flags ) {
+                    /*
+                     * PPS just turned off, reset jitter to prevent
+                     * thinking the NMEA is PPS precise and thus
+                     * being wrongly seelcted when better time is
+                     * available elsewhere
+                     */
+                    peer->jitter = LOGTOD(PRECISION);
+                }
 		peer->cfg.flags &= ~FLAG_PPS;
 		peer->precision = PRECISION;
 	} else {
