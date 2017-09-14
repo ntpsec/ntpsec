@@ -440,7 +440,7 @@ class TestMisc(unittest.TestCase):
                "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
         # Test a single line
         f(data, fp)
-        total = "".join(fp.data)  # easier than 300 million seperate strings
+        total = "".join(fp.data)  # easier than 300 million separate strings
         fp.data = []
         self.assertEqual(total,
                          "00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f "

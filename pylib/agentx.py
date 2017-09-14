@@ -972,7 +972,7 @@ def encode_pduheader(pduType, instanceRegistration, newIndex,
     return data
 
 
-def decode_pduheader(data):  # Endianess is controlled from the PDU header
+def decode_pduheader(data):  # Endianness is controlled from the PDU header
     lineone, data = slicedata(data, 4)
     version, pduType, flags = struct.unpack(">BBBx", lineone)
     if pduType not in definedPDUTypes:

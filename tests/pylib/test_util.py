@@ -989,7 +989,7 @@ class TestPeerSummary(unittest.TestCase):
         data = {"srchost": "wouldn't"}
         self.assertEqual(m(data), False)
         # Test False, no host
-        data = {"blah": "definately wouldn't"}
+        data = {"blah": "definitely wouldn't"}
         self.assertEqual(m(data), False)
 
     def test_header(self):
