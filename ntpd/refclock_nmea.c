@@ -477,20 +477,24 @@ nmea_start(
 	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
 
-	/* Open serial port. Use CLK line discipline, if available. */
-        rcode = snprintf(device, sizeof(device), DEVICE, unit);
-        if ( 0 > rcode ) {
-            pp->io.fd = -1;
-        } else {
-            pp->io.fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
-                                      baudrate,
-                                      LDISC_CLK);
+	if ( !peer->cfg.path ) {
+            /* build a path */
+	    rcode = snprintf(device, sizeof(device), DEVICE, unit);
+	    if ( 0 <= rcode ) {
+		peer->cfg.path = estrdup( device );
+            } else {
+		pp->io.fd = -1;
+		return false;  /* huh? */
+            }
         }
-	if (-1 == pp->io.fd)
+	/* Open serial port. Use CLK line discipline, if available. */
+	pp->io.fd = refclock_open(device, baudrate, LDISC_CLK);
+
+	if (0 > pp->io.fd)
 		return false;
 
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
-	      refclock_name(peer), device, baudtext));
+	      refclock_name(peer), peer->cfg.path, baudtext));
 
 	/* succeed if this clock can be added */
 	return io_addclock(&pp->io) != 0;
