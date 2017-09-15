@@ -1175,6 +1175,8 @@ nmea_poll(
 	 */
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
+                /* reset the jitter, to avoid bad time on recovery */
+		peer->jitter = LOGTOD(PRECISION);
 	} else {
 		pp->polls++;
 		pp->lastref = pp->lastrec;
