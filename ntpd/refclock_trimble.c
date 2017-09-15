@@ -369,34 +369,44 @@ trimble_start (
 	struct trimble_unit *up;
 	struct refclockproc *pp;
 	int fd;
-	char gpsdev[20];
+	char device[20];
 	struct termios tio;
 	struct calendar build_date;
+        int rcode;
 
-	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 
 	/*
 	 * Open serial port. 
 	 */
-	fd = refclock_open(peer->cfg.path ? peer->cfg.path : gpsdev,
-			   peer->cfg.baud ? peer->cfg.baud : SPEED232,
-			   LDISC_RAW);
-	if (fd <= 0) {
-#ifdef DEBUG
-		printf("Trimble(%d) start: open %s failed\n", unit, gpsdev);
-#endif
+	if ( !peer->cfg.path ) {
+	    /* build a path */
+	    rcode = snprintf(device, sizeof(device), DEVICE, unit);
+	    if ( 0 > rcode ) {
+	        /* failed, set to NUL */
+	        device[0] = '\0';
+	    }
+	    peer->cfg.path = estrdup( device );
+        }
+	fd = refclock_open(peer->cfg.path,
+				  peer->cfg.baud ? peer->cfg.baud : SPEED232,
+				  LDISC_RAW);
+	if (0 > fd) {
+	        msyslog(LOG_ERR, "REFCLOCK: %s Trimble device open(%s) failed",
+			refclock_name(peer), peer->cfg.path);
 		/* coverity[leaked_handle] */
 		return false;
 	}
 
-	msyslog(LOG_NOTICE, "Trimble(%d) fd: %d dev: %s", unit, fd,
-		gpsdev);
+	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s open at %s",
+			  refclock_name(peer), peer->cfg.path));
 
 	if (tcgetattr(fd, &tio) < 0) {
 		msyslog(LOG_ERR, 
-			"REFCLOCK: Trimble(%d) tcgetattr(fd, &tio): %m",unit);
+			"REFCLOCK: %s tcgetattr(fd, &tio): %m",
+			refclock_name(peer));
 #ifdef DEBUG
-		printf("Trimble(%d) tcgetattr(fd, &tio)\n",unit);
+		printf("%s tcgetattr(fd, &tio)\n", refclock_name(peer));
 #endif
 		close(fd);
 		return false;
@@ -416,26 +426,28 @@ trimble_start (
 		/* Normal mode, do nothing */
 		break;
 	    case CLK_PRAECIS:
-		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) Praecis mode enabled"
-			,unit);
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Praecis mode enabled",
+			refclock_name(peer));
 		break;
 	    case CLK_THUNDERBOLT:
-		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) Thunderbolt mode enabled"
-			,unit);
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Thunderbolt mode enabled",
+			refclock_name(peer));
 		tio.c_cflag = (CS8|CLOCAL|CREAD);
 		break;
 	    case CLK_ACUTIME:
-		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) Acutime Gold mode enabled"
-			,unit);
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Acutime Gold mode enabled",
+			refclock_name(peer));
 		break;
 	    default:
-		msyslog(LOG_NOTICE, "REFCLOCK: Trimble(%d) mode unknown",unit);
+	        msyslog(LOG_NOTICE, "REFCLOCK: %s mode unknown",
+			refclock_name(peer));
 		break;
 	}
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
-		msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) tcsetattr(fd, &tio): %m",unit);
+	    msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr(fd, &tio): %m",
+		refclock_name(peer));
 #ifdef DEBUG
-		printf("Trimble(%d) tcsetattr(fd, &tio)\n",unit);
+		printf("%s tcsetattr(fd, &tio)\n",refclock_name(peer));
 #endif
 		close(fd);
 		free(up);
@@ -449,7 +461,7 @@ trimble_start (
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 #ifdef DEBUG
-		printf("Trimble(%d) io_addclock\n",unit);
+		printf("%s io_addclock\n", refclock_name(peer));
 #endif
 		close(fd);
 		pp->io.fd = -1;
@@ -482,8 +494,9 @@ trimble_start (
 		up->build_week = 0;
 	}
 	if (up->build_week < MIN_BUILD_GPSWEEK || up->build_week > MAX_BUILD_GPSWEEK) {
-		msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) ntpcal_get_build_date() failed: %u",
-		        unit, up->build_week);
+		msyslog(LOG_ERR,
+			"REFCLOCK: %s ntpcal_get_build_date() failed: %u",
+		        refclock_name(peer), up->build_week);
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
