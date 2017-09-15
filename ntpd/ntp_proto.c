@@ -2053,7 +2053,11 @@ clock_select(void)
 		sys_jitter = typesystem->jitter;
 		DPRINT(1, ("select: pps offset %.9f jitter %.9f\n",
 			   sys_offset, sys_jitter));
-	}
+	} else if ( typepps &&
+                    ( CTL_PST_SEL_PPS == typepps->new_status )) {
+                /* uh, oh, it WAS a valid PPS, but no longer */
+		typepps->status = CTL_PST_SEL_REJECT;
+        }
 #endif /* REFCLOCK */
 
 	/*
