@@ -480,17 +480,18 @@ nmea_start(
 	if ( !peer->cfg.path ) {
             /* build a path */
 	    rcode = snprintf(device, sizeof(device), DEVICE, unit);
-	    if ( 0 <= rcode ) {
-		peer->cfg.path = estrdup( device );
-            } else {
-		pp->io.fd = -1;
-		return false;  /* huh? */
-            }
+	    if ( 0 > rcode ) {
+		/* failed, set to NUL */
+		device[0] = '\0';
+	    }
+	    peer->cfg.path = estrdup( device );
         }
 	/* Open serial port. Use CLK line discipline, if available. */
-	pp->io.fd = refclock_open(device, baudrate, LDISC_CLK);
+	pp->io.fd = refclock_open(peer->cfg.path, baudrate, LDISC_CLK);
 
 	if (0 > pp->io.fd)
+		msyslog(LOG_ERR, "REFCLOCK: %s NMEA device open(%s) failed",
+		    refclock_name(peer), peer->cfg.path);
 		return false;
 
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
