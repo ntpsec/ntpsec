@@ -59,23 +59,23 @@
  * GPS sentences other than RMC (the default) may be enabled by setting
  * the relevant bits of 'mode' in the server configuration line
  * refclock u mode X
- * 
+ *
  * bit 0 - enables RMC (1)
  * bit 1 - enables GGA (2)
  * bit 2 - enables GLL (4)
  * bit 3 - enables ZDA (8) - Standard Time & Date
- * bit 3 - enables ZDG (8) - Accord GPS Clock's custom sentence with GPS time 
+ * bit 3 - enables ZDG (8) - Accord GPS Clock's custom sentence with GPS time
  *			     very close to standard ZDA
- * 
+ *
  * Multiple sentences may be selected except when ZDG/ZDA is selected.
  *
  * bit 4/5/6 - selects the baudrate for serial port :
- *		0 for 4800 (default) 
- *		1 for 9600 
- *		2 for 19200 
- *		3 for 38400 
- *		4 for 57600 
- *		5 for 115200 
+ *		0 for 4800 (default)
+ *		1 for 9600
+ *		2 for 19200
+ *		3 for 38400
+ *		4 for 57600
+ *		5 for 115200
  */
 #define NMEA_MESSAGE_MASK	0x0000FF0FU
 #define NMEA_BAUDRATE_MASK	0x00000070U
@@ -102,24 +102,24 @@
  * $GPRMC,232418.19,A,3513.8386,S,14900.7853,E,00.0,000.0,121199,12.,E*77
  *
  * Defining GPZDA to support Standard Time & Date
- * sentence. The sentence has the following format 
- *  
+ * sentence. The sentence has the following format
+ *
  *  $--ZDA,HHMMSS.SS,DD,MM,YYYY,TH,TM,*CS<CR><LF>
  *
- *  Apart from the familiar fields, 
+ *  Apart from the familiar fields,
  *  'TH'    Time zone Hours
  *  'TM'    Time zone Minutes
  *
- * Defining GPZDG to support Accord GPS Clock's custom NMEA 
- * sentence. The sentence has the following format 
- *  
+ * Defining GPZDG to support Accord GPS Clock's custom NMEA
+ * sentence. The sentence has the following format
+ *
  *  $GPZDG,HHMMSS.S,DD,MM,YYYY,AA.BB,V*CS<CR><LF>
  *
  *  It contains the GPS timestamp valid for next PPS pulse.
- *  Apart from the familiar fields, 
- *  'AA.BB' denotes the signal strength( should be < 05.00 ) 
- *  'V'	    denotes the GPS sync status : 
- *	   '0' indicates INVALID time, 
+ *  Apart from the familiar fields,
+ *  'AA.BB' denotes the signal strength( should be < 05.00 )
+ *  'V'	    denotes the GPS sync status :
+ *	   '0' indicates INVALID time,
  *	   '1' indicates accuracy of +/-20 ms
  *	   '2' indicates accuracy of +/-100 ns
  *
@@ -357,7 +357,7 @@ nmea_init(void)
 {
 	struct calendar date;
 
-	/* - calculate min. base value for GPS epoch & century unfolding 
+	/* - calculate min. base value for GPS epoch & century unfolding
 	 * This assumes that the build system was roughly in sync with
 	 * the world, and that really synchronising to a time before the
 	 * program was created would be unsafe or insane. If the build
@@ -504,7 +504,7 @@ nmea_start(
 /*
  * -------------------------------------------------------------------
  * nmea_shutdown - shut down a GPS clock
- * 
+ *
  * NOTE this routine is called after nmea_start() returns failure,
  * as well as during a normal shutdown due to ntpq :config unpeer.
  * -------------------------------------------------------------------
@@ -609,7 +609,7 @@ nmea_control(
 					refclock_name(peer));
 			}
 			/* note: the PPS I/O handle remains valid until
-			 * flag1 is cleared or the clock is shut down. 
+			 * flag1 is cleared or the clock is shut down.
 			 */
 		} else {
 			msyslog(LOG_WARNING,
@@ -659,7 +659,7 @@ nmea_timer(
 	)
 {
 #if NMEA_WRITE_SUPPORT
-    
+
 	struct refclockproc * const pp = peer->procptr;
 
 	UNUSED_ARG(unit);
@@ -839,7 +839,7 @@ nmea_receive(
 	sentence = 0;
 	rc_date = false;
 	rc_time = false;
-	/* 
+	/*
 	 * Read the timecode and timestamp, then initialise field
 	 * processing. The <CR><LF> at the NMEA line end is translated
 	 * to <LF><LF> by the terminal input routines on most systems,
@@ -868,7 +868,7 @@ nmea_receive(
 	}
 	up->tally.total++;
 
-	/* 
+	/*
 	 * --> below this point we have a valid NMEA sentence <--
 	 *
 	 * Check sentence name. Skip first 2 chars (talker ID) in most
@@ -887,7 +887,7 @@ nmea_receive(
 		sentence = NMEA_GPZDA;
 	else if (strncmp(cp + 2, "ZDG,", 4) == 0)
 		sentence = NMEA_GPZDG;
-	else if (strncmp(cp,   "PGRMF,", 6) == 0) 
+	else if (strncmp(cp,   "PGRMF,", 6) == 0)
 		sentence = NMEA_PGRMF;
 	else
 		return;	/* not something we know about */
@@ -907,7 +907,7 @@ nmea_receive(
 		return;
 	}
 
-	/* 
+	/*
 	 * make sure it came in clean
 	 *
 	 * Apparently, older NMEA specifications (which are expensive)
@@ -938,7 +938,7 @@ nmea_receive(
 	 * $GPZDG provides GPS time not UTC, and the two mix poorly.
 	 * Once have processed a $GPZDG, do not process any further UTC
 	 * sentences (all but $GPZDG currently).
-	 */ 
+	 */
 	if (up->gps_time && NMEA_GPZDG != sentence) {
 		up->tally.filtered++;
 		return;
@@ -1768,7 +1768,7 @@ gpsfix_century(
 	struct calendar  * jd,
 	const gps_weektm * wd,
 	unsigned short   * century
-	) 
+	)
 {
 	int32_t	days;
 	int32_t	doff;
