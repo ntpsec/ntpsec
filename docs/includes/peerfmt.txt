@@ -18,3 +18,17 @@ of the link:decode.html#peer[peer status word]
 |+offset+        |offset of server relative to this host
 |+jitter+        |jitter
 |=======================================================================
+
+The tally code is one of the following:
+[width="80%",cols="10%,90%"]
+|==================================================
+| Code| Description
+|     | discarded as not valid
+| +x+ | discarded by intersection algorithm
+| +.+ | discarded by table overflow (not used)
+| +-+ | discarded by the cluster algorithm
+| +++ | included by the combine algorithm
+| +#+ | backup (more than +tos maxclock+ sources)
+| +*+ | system peer
+| +o+ | PPS peer (when the prefer peer is valid)
+|==================================================
