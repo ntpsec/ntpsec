@@ -553,7 +553,6 @@ nmea_control(
 	nmea_unit	    * const up = (nmea_unit *)pp->unitptr;
 
 	char   device[32];
-	size_t devlen;
 	
 	UNUSED_ARG(in_st);
 	UNUSED_ARG(out_st);
@@ -569,23 +568,35 @@ nmea_control(
 
 	/* Light up the PPSAPI interface if not yet attempted. */
 	if ((CLK_FLAG1 & pp->sloppyclockflag) && !up->ppsapi_tried) {
-                int rcode;
 
 		up->ppsapi_tried = true;
-		rcode = snprintf(device, sizeof(device), PPSDEV, unit);
-		devlen = (size_t)rcode;
-		if ( 0 > rcode || (devlen >= sizeof(device))) {
-		    up->ppsapi_fd = -1;
-		    msyslog(LOG_ERR,
-			    "REFCLOCK: %s PPS device name too long or bad",
-			    refclock_name(peer));
-		} else {
-		    up->ppsapi_fd = open(peer->cfg.ppspath ? \
-                                         peer->cfg.ppspath : device,
-					 PPSOPENMODE, S_IRUSR | S_IWUSR);
+		if ( !peer->cfg.ppspath ) {
+		    int rcode;
+
+		    /* build a path */
+		    rcode = snprintf(device, sizeof(device), PPSDEV, unit);
+		    if ( 0 > rcode ) {
+                        /* failed, set to NUL */
+                        device[0] = '\0';
+		    }
+		    peer->cfg.ppspath = estrdup( device );
 		}
-		if (-1 == up->ppsapi_fd)
-			up->ppsapi_fd = pp->io.fd;	
+		if ( peer->cfg.ppspath ) {
+		    up->ppsapi_fd = open(peer->cfg.ppspath,
+					 PPSOPENMODE, S_IRUSR | S_IWUSR);
+		} else {
+		    up->ppsapi_fd = -1;
+		}
+		if ( 0 <= up->ppsapi_fd) {
+		    LOGIF(CLOCKINFO, (LOG_NOTICE, "%s PPS %s opened",
+			  refclock_name(peer), peer->cfg.ppspath));
+                } else {
+		    /* fall back to primary device */
+		    up->ppsapi_fd = pp->io.fd;
+		    msyslog(LOG_ERR,
+			"REFCLOCK: %s PPS device open(%s) failed",
+			refclock_name(peer), peer->cfg.ppspath);
+                }
 		if (refclock_ppsapi(up->ppsapi_fd, &up->ppsctl)) {
 			/* use the PPS API for our own purposes now. */
 			up->ppsapi_lit = refclock_params(
