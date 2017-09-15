@@ -489,10 +489,11 @@ nmea_start(
 	/* Open serial port. Use CLK line discipline, if available. */
 	pp->io.fd = refclock_open(peer->cfg.path, baudrate, LDISC_CLK);
 
-	if (0 > pp->io.fd)
+	if (0 > pp->io.fd) {
 		msyslog(LOG_ERR, "REFCLOCK: %s NMEA device open(%s) failed",
 		    refclock_name(peer), peer->cfg.path);
 		return false;
+        }
 
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
 	      refclock_name(peer), peer->cfg.path, baudtext));
