@@ -106,7 +106,7 @@ cvt_rcc8000(
 
 	if ( (RCCP >= '0' && RCCP <= '9') || (RCCP >= 'A' && RCCP <= 'F') )
 	{
-		register int flag;
+		int flag;
 
 		flag = (RCCP >= '0' && RCCP <= '9' ) ?  RCCP - '0' : RCCP - 'A' + 10;
 

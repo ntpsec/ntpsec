@@ -149,7 +149,7 @@ hpgps_start(
 	struct peer *peer
 	)
 {
-	register struct hpgpsunit *up;
+	struct hpgpsunit *up;
 	struct refclockproc *pp;
 	int fd;
 	unsigned int ldisc;
@@ -226,7 +226,7 @@ hpgps_shutdown(
 	struct peer *peer
 	)
 {
-	register struct hpgpsunit *up;
+	struct hpgpsunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -248,7 +248,7 @@ hpgps_receive(
 	struct recvbuf *rbufp
 	)
 {
-	register struct hpgpsunit *up;
+	struct hpgpsunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 	l_fp trtmp;
@@ -574,7 +574,7 @@ hpgps_poll(
 	struct peer *peer
 	)
 {
-	register struct hpgpsunit *up;
+	struct hpgpsunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);

@@ -887,7 +887,7 @@ process_control(
  */
 unsigned short
 ctlpeerstatus(
-	register struct peer *p
+	struct peer *p
 	)
 {
 	unsigned short status;
@@ -928,7 +928,7 @@ ctlclkstatus(
 static unsigned short
 ctlsysstatus(void)
 {
-	register uint8_t this_clock;
+	uint8_t this_clock;
 
 	this_clock = CTL_SST_TS_UNSPEC;
 #ifdef REFCLOCK
@@ -1189,8 +1189,8 @@ ctl_putuint(
 	unsigned long uval
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 
 	cp = buffer;
@@ -1214,8 +1214,8 @@ ctl_puttime(
 	time_t uval
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 	struct tm tmbuf, *tm = NULL;
 	time_t fstamp = uval;
@@ -1248,8 +1248,8 @@ ctl_puthex(
 	unsigned long uval
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 
 	cp = buffer;
@@ -1274,8 +1274,8 @@ ctl_putint(
 	long ival
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 
 	cp = buffer;
@@ -1300,8 +1300,8 @@ ctl_putts(
 	l_fp *ts
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 
 	cp = buffer;
@@ -1328,8 +1328,8 @@ ctl_putadr(
 	sockaddr_u *addr
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 
 	cp = buffer;
@@ -1399,8 +1399,8 @@ ctl_putarray(
 	int start
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 	int i;
 	cp = buffer;

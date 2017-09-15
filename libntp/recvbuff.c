@@ -60,7 +60,7 @@ initialise_buffer(recvbuf_t *buff)
 static void
 create_buffers(unsigned int nbufs)
 {
-	register recvbuf_t *bufp;
+	recvbuf_t *bufp;
 	unsigned int i, abuf;
 
 	abuf = nbufs + buffer_shortfall;

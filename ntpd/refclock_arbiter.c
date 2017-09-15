@@ -142,7 +142,7 @@ arb_start(
 	struct peer *peer
 	)
 {
-	register struct arbunit *up;
+	struct arbunit *up;
 	struct refclockproc *pp;
 	int fd;
 	char device[20];
@@ -204,7 +204,7 @@ arb_shutdown(
 	struct peer *peer
 	)
 {
-	register struct arbunit *up;
+	struct arbunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -226,7 +226,7 @@ arb_receive(
 	struct recvbuf *rbufp
 	)
 {
-	register struct arbunit *up;
+	struct arbunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 	l_fp trtmp;
@@ -428,7 +428,7 @@ arb_poll(
 	struct peer *peer
 	)
 {
-	register struct arbunit *up;
+	struct arbunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);

@@ -116,7 +116,7 @@ zyfer_start(
 	struct peer *peer
 	)
 {
-	register struct zyferunit *up;
+	struct zyferunit *up;
 	struct refclockproc *pp;
 	int fd;
 	char device[20];
@@ -176,7 +176,7 @@ zyfer_shutdown(
 	struct peer *peer
 	)
 {
-	register struct zyferunit *up;
+	struct zyferunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -198,7 +198,7 @@ zyfer_receive(
 	struct recvbuf *rbufp
 	)
 {
-	register struct zyferunit *up;
+	struct zyferunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 	int tmode;		/* Time mode */
@@ -304,7 +304,7 @@ zyfer_poll(
 	struct peer *peer
 	)
 {
-	register struct zyferunit *up;
+	struct zyferunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);

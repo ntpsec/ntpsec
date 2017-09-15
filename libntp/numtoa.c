@@ -17,8 +17,8 @@ numtoa(
 	uint32_t num
 	)
 {
-	register uint32_t netnum;
-	register char *buf;
+	uint32_t netnum;
+	char *buf;
 
 	netnum = ntohl(num);
 	buf = lib_getbuf();

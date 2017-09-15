@@ -2280,7 +2280,7 @@ read_network_packet(
 {
 	socklen_t fromlen;
 	ssize_t buflen;
-	register struct recvbuf *rb;
+	struct recvbuf *rb;
 	struct msghdr msghdr;
 	struct iovec iovec;
 	char control[100];   /* FIXME: Need space for time stamp plus overhead */

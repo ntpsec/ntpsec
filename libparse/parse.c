@@ -57,7 +57,7 @@ parse_timedout(
 /*ARGSUSED*/
 bool
 parse_ioinit(
-	register parse_t *parseio
+	parse_t *parseio
 	)
 {
 	parseprintf(DD_PARSE, ("parse_iostart\n"));
@@ -80,7 +80,7 @@ parse_ioinit(
 /*ARGSUSED*/
 void
 parse_ioend(
-	register parse_t *parseio
+	parse_t *parseio
 	)
 {
 	parseprintf(DD_PARSE, ("parse_ioend\n"));
@@ -168,12 +168,12 @@ parse_end(
 /*ARGSUSED*/
 int
 parse_ioread(
-	register parse_t *parseio,
-	register char ch,
-	register timestamp_t *tstamp
+	parse_t *parseio,
+	char ch,
+	timestamp_t *tstamp
 	)
 {
-	register unsigned int updated = CVT_NONE;
+	unsigned int updated = CVT_NONE;
 	/*
 	 * within STREAMS CSx (x < 8) chars still have the upper bits set
 	 * so we normalize the characters by masking unnecessary bits off.
@@ -262,7 +262,7 @@ parse_ioread(
 /*ARGSUSED*/
 void
 parse_iodone(
-	register parse_t *parseio
+	parse_t *parseio
 	)
 {
 	/*
@@ -280,8 +280,8 @@ parse_iodone(
 
 time_t
 parse_to_unixtime(
-	register clocktime_t   *clock_time,
-	register unsigned long *cvtrtc
+	clocktime_t   *clock_time,
+	unsigned long *cvtrtc
 	)
 {
 #define SETRTC(_X_)	{ if (cvtrtc) *cvtrtc = (_X_); }
@@ -289,7 +289,7 @@ parse_to_unixtime(
 	{
 		0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 	};
-	register int i;
+	int i;
 	time_t t;
 
 	if (clock_time->utctime)
@@ -441,8 +441,8 @@ Strok(
 
 unsigned long
 updatetimeinfo(
-	       register parse_t *parseio,
-	       register unsigned long   flags
+	       parse_t *parseio,
+	       unsigned long   flags
 	       )
 {
 		parseio->parse_lstate          = parseio->parse_dtime.parse_state | flags | PARSEB_TIMECODE;
@@ -464,9 +464,9 @@ updatetimeinfo(
 /*ARGSUSED*/
 static unsigned long
 pps_simple(
-	register parse_t *parseio,
-	register int status,
-	register timestamp_t *ptime
+	parse_t *parseio,
+	int status,
+	timestamp_t *ptime
 	)
 {
 	UNUSED_ARG(status);
@@ -484,9 +484,9 @@ pps_simple(
 /*ARGSUSED*/
 unsigned long
 pps_one(
-	register parse_t *parseio,
-	register int status,
-	register timestamp_t *ptime
+	parse_t *parseio,
+	int status,
+	timestamp_t *ptime
 	)
 {
 	if (status)
@@ -502,11 +502,11 @@ pps_one(
  */
 static unsigned long
 timepacket(
-	register parse_t *parseio
+	parse_t *parseio
 	)
 {
-	register unsigned short format;
-	register time_t t;
+	unsigned short format;
+	time_t t;
 	unsigned long cvtrtc;		/* current conversion result */
 	clocktime_t clock_time;
 
@@ -601,7 +601,7 @@ parse_setfmt(
 	{
 		if (dct->parseformat.parse_count)
 		{
-			register unsigned short i;
+			unsigned short i;
 
 			for (i = 0; i < nformats; i++)
 			{

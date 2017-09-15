@@ -173,7 +173,7 @@ mx4200_start(
 	struct peer *peer
 	)
 {
-	register struct mx4200unit *up;
+	struct mx4200unit *up;
 	struct refclockproc *pp;
 	int fd;
 	char gpsdev[20];
@@ -233,7 +233,7 @@ mx4200_shutdown(
 	struct peer *peer
 	)
 {
-	register struct mx4200unit *up;
+	struct mx4200unit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -257,7 +257,7 @@ mx4200_config(
 {
 	char tr_mode;
 	int add_mode;
-	register struct mx4200unit *up;
+	struct mx4200unit *up;
 	struct refclockproc *pp;
 	int mode;
 
@@ -455,7 +455,7 @@ mx4200_ref(
 	struct peer *peer
 	)
 {
-	register struct mx4200unit *up;
+	struct mx4200unit *up;
 	struct refclockproc *pp;
 	double minute, lat, lon, alt;
 	char lats[16], lons[16];
@@ -576,7 +576,7 @@ mx4200_poll(
 	struct peer *peer
 	)
 {
-	register struct mx4200unit *up;
+	struct mx4200unit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -639,7 +639,7 @@ mx4200_receive(
 	struct recvbuf *rbufp
 	)
 {
-	register struct mx4200unit *up;
+	struct mx4200unit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 	char *cp;
@@ -1092,11 +1092,11 @@ mx4200_parse_t(
  */
 static uint8_t
 mx4200_cksum(
-	register char *cp,
-	register int n
+	char *cp,
+	int n
 	)
 {
-	register uint8_t ck;
+	uint8_t ck;
 
 	for (ck = 0; n-- > 0; cp++)
 		ck ^= *cp;
@@ -1119,7 +1119,7 @@ mx4200_jday(
 	int day_of_month
 	)
 {
-	register int day, i;
+	int day, i;
 	bool leap_year;
 
 	/*
@@ -1562,7 +1562,7 @@ mx4200_send(struct peer *peer, const char *fmt, ...)
 {
 	struct refclockproc *pp;
 
-	register int n, m;
+	int n, m;
 	va_list ap;
 	char buf1[1024];
 	char buf[sizeof(buf1)  + 10];

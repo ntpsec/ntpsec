@@ -38,9 +38,9 @@ atolfp(
 	l_fp *lfp
 	)
 {
-	register const char *cp;
-	register unsigned long dec_i;
-	register unsigned long dec_f;
+	const char *cp;
+	unsigned long dec_i;
+	unsigned long dec_f;
 	char *ind;
 	int ndec;
 	bool isneg;
@@ -98,9 +98,9 @@ atolfp(
 	}
 
 	if (ndec > 0) {
-		register unsigned long tmp;
-		register unsigned long bit;
-		register unsigned long ten_fact;
+		unsigned long tmp;
+		unsigned long bit;
+		unsigned long ten_fact;
 
 		ten_fact = ten_to_the_n[ndec];
 
@@ -138,9 +138,9 @@ mstolfp(
 	l_fp *lfp
 	)
 {
-	register const char *cp;
-	register char *bp;
-	register const char *cpdec;
+	const char *cp;
+	char *bp;
+	const char *cpdec;
 	char buf[100];
 
 	/*
@@ -194,7 +194,7 @@ mstolfp(
 	 */
 	*bp++ = '.';
 	if ((cpdec - cp) < 3) {
-		register int i = 3 - (cpdec - cp);
+		int i = 3 - (cpdec - cp);
 
 		do {
 			*bp++ = '0';

@@ -585,7 +585,7 @@ oncore_start(
 	)
 {
 #define STRING_LEN	32
-	register struct instance *instance;
+	struct instance *instance;
 	struct refclockproc *pp;
 	int fd1, fd2;
 	char device1[STRING_LEN], device2[STRING_LEN];
@@ -768,7 +768,7 @@ oncore_shutdown(
 	struct peer *peer
 	)
 {
-	register struct instance *instance;
+	struct instance *instance;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);

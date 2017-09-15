@@ -24,7 +24,7 @@ nexttok(
 	char	**str
 	)
 {
-	register char *cp;
+	char *cp;
 	char *starttok;
 
 	cp = *str;

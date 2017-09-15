@@ -179,9 +179,9 @@ cvt_trimtsip(
 	     void          *local
 	     )
 {
-        register struct trimble *t = (struct trimble *)local; /* get local data space */
+        struct trimble *t = (struct trimble *)local; /* get local data space */
 #define mb(_X_) (buffer[2+(_X_)]) /* shortcut for buffer access */
-	register uint8_t cmd;
+	uint8_t cmd;
 
 	UNUSED_ARG(format);
 

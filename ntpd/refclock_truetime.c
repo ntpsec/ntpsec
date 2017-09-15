@@ -224,7 +224,7 @@ true_start(
 	struct peer *peer
 	)
 {
-	register struct true_unit *up;
+	struct true_unit *up;
 	struct refclockproc *pp;
 	char device[40];
 	int fd;
@@ -290,7 +290,7 @@ true_shutdown(
 	struct peer *peer
 	)
 {
-	register struct true_unit *up;
+	struct true_unit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -312,7 +312,7 @@ true_receive(
 	struct recvbuf *rbufp
 	)
 {
-	register struct true_unit *up;
+	struct true_unit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 	unsigned short new_station;

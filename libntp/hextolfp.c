@@ -15,10 +15,10 @@ hextolfp(
 	l_fp *lfp
 	)
 {
-	register const char *cp;
-	register const char *cpstart;
-	register unsigned long dec_i;
-	register unsigned long dec_f;
+	const char *cp;
+	const char *cpstart;
+	unsigned long dec_i;
+	unsigned long dec_f;
 	char *ind = NULL;
 	static const char *digits = "0123456789abcdefABCDEF";
 

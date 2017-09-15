@@ -167,7 +167,7 @@ spectracom_start(
 	struct peer *peer
 	)
 {
-	register struct spectracomunit *up;
+	struct spectracomunit *up;
 	struct refclockproc *pp;
 	int fd;
 	char device[20];
@@ -446,7 +446,7 @@ spectracom_timer(
 {
 	UNUSED_ARG(unit);
 
-	register struct spectracomunit *up;
+	struct spectracomunit *up;
 	struct refclockproc *pp;
 	char	pollchar;	/* character sent to clock */
 #ifdef DEBUG
@@ -493,7 +493,7 @@ spectracom_poll(
 	struct peer *peer
 	)
 {
-	register struct spectracomunit *up;
+	struct spectracomunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -555,7 +555,7 @@ spectracom_control(
 	struct peer *peer
 	)
 {
-	register struct spectracomunit *up;
+	struct spectracomunit *up;
 	struct refclockproc *pp;
 	
 	UNUSED_ARG(unit);
