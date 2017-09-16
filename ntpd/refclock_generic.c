@@ -2510,6 +2510,7 @@ parse_start(
 	char parseppsdev[sizeof(PARSEPPSDEVICE)+20];
 	parsectl_t tmp_ctl;
 	unsigned int type;
+	char *path, *ppspath;
 
 	UNUSED_ARG(sysunit);
 
@@ -2542,17 +2543,26 @@ parse_start(
 	/*
 	 * Unit okay, attempt to open the device.
 	 */
-	(void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
-	(void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
+	if (peer->cfg.path)
+	    path = peer->cfg.path;
+	else {
+	    (void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
+	    path = parsedev;
+	}
+	if (peer->cfg.ppspath)
+	    ppspath = peer->cfg.ppspath;
+	else { 
+	    (void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
+	    ppspath = parseppsdev;
+	}
 
-	fd232 = open(peer->cfg.path ? peer->cfg.path : parsedev,
-			 O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
+	fd232 = open(path, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 	if (fd232 == -1)
 	{
 		msyslog(LOG_ERR,
                         "REFCLOCK: PARSE receiver #%u: parse_start: open of %s failed: %m",
-                        unit, parsedev);
+                        unit, path);
 		return false;
 	}
 
@@ -2668,7 +2678,7 @@ parse_start(
 		 * if the PARSEPPSDEVICE can be opened that will be used
 		 * for PPS else PARSEDEVICE will be used
 		 */
-		parse->ppsfd = open(parseppsdev, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
+		parse->ppsfd = open(ppspath, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 		if (parse->ppsfd == -1)
 		{
