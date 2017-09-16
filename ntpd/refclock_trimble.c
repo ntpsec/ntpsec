@@ -315,18 +315,21 @@ trimble_start (
 	struct trimble_unit *up;
 	struct refclockproc *pp;
 	int fd;
-	char device[20];
 	struct termios tio;
 	struct calendar build_date;
-        int rcode;
 	unsigned int cflag, iflag;
 
-	snprintf(device, sizeof(device), DEVICE, unit);
+	pp = peer->procptr;
+	pp->clockname = NAME;
 
 	/*
 	 * Open serial port. 
 	 */
 	if ( !peer->cfg.path ) {
+	    int rcode;
+	    char device[20];
+	    snprintf(device, sizeof(device), DEVICE, unit);
+
 	    /* build a path */
 	    rcode = snprintf(device, sizeof(device), DEVICE, unit);
 	    if ( 0 > rcode ) {
@@ -363,8 +366,6 @@ trimble_start (
 	up->type = CLK_TYPE(peer);
 	up->parity_chk = true;
 	up->use_event = true;
-
-	pp = peer->procptr;
 	pp->disp = 1000 * S_PER_NS; /* extra ~500ns for serial port delay */
 
 	switch (up->type) {
@@ -463,7 +464,6 @@ trimble_start (
 	 * Initialize miscellaneous variables
 	 */
 	pp->unitptr = up;
-	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 
 	peer->precision = PRECISION;

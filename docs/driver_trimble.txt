@@ -108,7 +108,7 @@ refclock trimble unit 0 subtype 2 time1 0.020
     (-d -d -n). Note: debug level 1 may also be used; only errors will be
 	printed to stdout.
 9.  Check the ntpd xref:log[event log] or stdout for a line similar to 
-'Trimble(0) fd: 4 dev: /dev/trimble0' to verify that your serial port opened.
+'TRIMBLE(0) open at /dev/trimble0' to verify that your serial port opened.
 10.  The driver will print +TSIP_decode+ lines to stdout as it processes
     message packets from the receiver. Note: ntpd must be built with debugging
 	enabled to see +TSIP_decode+ +trimble_poll+ and +trimble_receive+ messages
