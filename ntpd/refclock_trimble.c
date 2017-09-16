@@ -431,8 +431,8 @@ trimble_start (
 		 * voltage and pulsed negative.
 		 */
 		if (ioctl(fd, TIOCMGET, &up->MCR) < 0) {
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) TIOCMGET failed: %m",
-			        unit);
+			msyslog(LOG_ERR, "REFCLOCK: %s TIOCMGET failed: %m",
+			        refclock_name(peer));
 			close(fd);
 			free(up);
 			return false;
@@ -440,8 +440,8 @@ trimble_start (
 		up->MCR |= TIOCM_RTS;
 		if (ioctl(fd, TIOCMSET, &up->MCR) < 0 || 
 		    !(up->MCR & TIOCM_RTS)) {
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) TIOCMSET failed: MCR=0x%x, return=%m",
-			        unit, (unsigned int)up->MCR);
+			msyslog(LOG_ERR, "REFCLOCK: %s TIOCMSET failed: MCR=0x%x, return=%m",
+			        refclock_name(peer), (unsigned int)up->MCR);
 			close(fd);
 			free(up);
 			return false;
@@ -934,6 +934,8 @@ trimble_poll (
 	int cl;
 	bool err;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 
@@ -966,8 +968,8 @@ trimble_poll (
 	/* ask Praecis for its signal status */
 	if(up->type == CLK_PRAECIS) {
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
-			msyslog(LOG_ERR, "REFCLOCK: Trimble(%d) write: %m:",
-			        unit);
+			msyslog(LOG_ERR, "REFCLOCK: %s write: %m:",
+			        refclock_name(peer));
 	}
 
 	/* record clockstats */
@@ -981,8 +983,8 @@ trimble_poll (
 	       up->unit, prettydate(pp->lastrec)));
 
 	if (pp->hour == 0 && up->week > up->build_week + 1000)
-		msyslog(LOG_WARNING, "REFCLOCK: Trimble(%d) current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
-		        up->unit, up->week, up->build_week);
+		msyslog(LOG_WARNING, "REFCLOCK: %s current GPS week number (%u) is more than 1000 weeks past ntpd's build date (%u), please update",
+		        refclock_name(peer), up->week, up->build_week);
 
 	/* process samples in filter */
 	refclock_receive(peer);
@@ -1045,8 +1047,8 @@ trimble_io (
 				up->rpt_status = TSIP_PARSED_DATA;
 				mb(up->rpt_cnt++) = *c;
 			} else {
-				msyslog(LOG_ERR, "REFCLOCK: Trimble(%d): detected serial parity error or receive buffer overflow",
-					up->unit);
+				msyslog(LOG_ERR, "REFCLOCK: %s: detected serial parity error or receive buffer overflow",
+					refclock_name(peer));
 				up->rpt_status = TSIP_PARSED_EMPTY;
 			}
 			break;
