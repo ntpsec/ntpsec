@@ -318,6 +318,7 @@ trimble_start (
 	struct termios tio;
 	struct calendar build_date;
 	unsigned int cflag, iflag;
+	char device[20], *path;
 
 	pp = peer->procptr;
 	pp->clockname = NAME;
@@ -325,9 +326,11 @@ trimble_start (
 	/*
 	 * Open serial port. 
 	 */
-	if ( !peer->cfg.path ) {
+	if (peer->cfg.path)
+	    path = peer->cfg.path;
+	else
+	{
 	    int rcode;
-	    char device[20];
 	    snprintf(device, sizeof(device), DEVICE, unit);
 
 	    /* build a path */
@@ -336,20 +339,20 @@ trimble_start (
 	        /* failed, set to NUL */
 	        device[0] = '\0';
 	    }
-	    peer->cfg.path = estrdup( device );
+	    path = device;
         }
-	fd = refclock_open(peer->cfg.path,
+	fd = refclock_open(path,
 				  peer->cfg.baud ? peer->cfg.baud : SPEED232,
 				  LDISC_RAW);
 	if (0 > fd) {
 	        msyslog(LOG_ERR, "REFCLOCK: %s Trimble device open(%s) failed",
-			refclock_name(peer), peer->cfg.path);
+			refclock_name(peer), path);
 		/* coverity[leaked_handle] */
 		return false;
 	}
 
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s open at %s",
-			  refclock_name(peer), peer->cfg.path));
+			  refclock_name(peer), path));
 
 	if (tcgetattr(fd, &tio) < 0) {
 		msyslog(LOG_ERR, "REFCLOCK: %s tcgetattr failed: %m",
