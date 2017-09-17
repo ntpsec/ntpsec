@@ -68,10 +68,11 @@
  *
  * Notes on the 468-DC receiver:
  *
+ * http://www.ebay.com/gds/468-DC-SATELLITE-CLOCK-/10000000006640775/g.html
+ * tells us that the GOES sats were shut down in 2005, so this mode is obsolete.
+ *
  * Send the clock a 'R' or 'C' and once per second a timestamp will
  * appear.  Send a 'P' to get the satellite position once.
- *
- * Notes on the 468-DC receiver:
  *
  * Since the old east/west satellite locations are only historical, you can't
  * set your clock propagation delay settings correctly and still use
