@@ -1,10 +1,14 @@
+from wafhelpers.fix_python_config import FixConfig
+
+
 def options(opt):
     opt.load('python')
 
 
 def configure(conf):
-    conf.load('python')
-    conf.check_python_version((2, 6, 0))
+    fixed = FixConfig(conf)
+    fixed.load('python')
+    fixed.check_python_version((2, 6, 0))
     conf.check_python_headers(features='pyext')  # Extension-only, no embedded
 
 

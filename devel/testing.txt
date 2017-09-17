@@ -28,18 +28,13 @@ doesn't point to pylib/ under your build directory, report
 this as a bug. If it is, but ./ntpq startup fails anyway, you may
 have a mis-configured Python and need to investigate that.
 
-Load paths are more likely to be an issue after rootspace
-installation.  On most systems, waf will by default install the Python
-library under /usr/local/lib/python${VERSION}/dist-packages (or
-possibly the peer directory site-packages) where ${VERSION} is what
-the command "python --version" gives back. This directory should be on
-your Python's sys.path, in which case all will proceed normally.
-
-If it's not, you will get the same ntpq failure to launch ./ntpq from
-anywhere *outside* the source tree.  You may be able to patch around
-this by setting the environment variable PYTHONPATH to include the
-rootspace directory where waf installed the library; use "waf -v
-install" to nail down this location.
+Load paths may be more likely to be an issue after rootspace installation.
+The script should install the Python library in the directory specified by
+Python itself, which is reported as PYTHONDIR near the end of the configure
+phase.  This directory should be on your Python's sys.path, in which case all
+will proceed normally.  If it's not, you will get the same ntpq failure to
+launch ./ntpq from anywhere *outside* the source tree.  If this is the case,
+report it as a bug.
 
 Be aware that if this sort of problem occurs in an NTPsec instance
 installed from a binary package, it is almost certainly not an NTPsec

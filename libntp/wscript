@@ -55,6 +55,10 @@ def build(ctx):
     )
 
     # Loadable Python extension
+    #
+    # In theory this should use PYTHONARCHDIR, but that doesn't work on
+    # CentOS (at least), for some as-yet-undetermined reason.  On most
+    # platforms, PYTHONARCHDIR == PYTHONDIR, anyway.
     ctx(
         features="c cshlib bld_include src_include pyext",
         install_path='${PYTHONDIR}/ntp',
