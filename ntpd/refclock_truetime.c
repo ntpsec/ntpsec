@@ -125,8 +125,8 @@ static const char *states[] = {"Base", "InqTM", "InqTCU", "InqGOES",
 			"Init", "F18", "F50", "Start", "Auto"};
 #define stateStr(x) (((int)x<(int)s_Max) ? states[(int)x] : "?")
 
-enum true_type	{t_unknown, t_goes, t_tm, t_tcu, t_omega, t_tl3, t_Max};
-static const char *types[] = {"unknown", "goes", "tm", "tcu", "omega", "tl3"};
+enum true_type	{t_unknown, t_goes, t_tm, t_tcu, t_tl3, t_Max};
+static const char *types[] = {"unknown", "goes", "tm", "tcu", "tl3"};
 #define typeStr(x) (((int)x<(int)t_Max) ? types[(int)x] : "?")
 
 /*
@@ -643,23 +643,6 @@ true_doevent(
 			break;
 		}
 		/* FALLTHROUGH */
-	case t_omega:
-		switch (event) {
-		case e_Init:
-			true_send(peer, "C");
-			up->state = s_Start;
-			break;
-		case e_TS:
-			if (up->state != s_Start && up->state != s_Auto) {
-				true_send(peer, "\03\r");
-				break;
-			}
-			up->state = s_Auto;
-			break;
-		default:
-			break;
-		}
-		break;
 	case t_tm:
 		switch (event) {
 		case e_Init:
