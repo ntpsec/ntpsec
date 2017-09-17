@@ -22,11 +22,11 @@ it reliably recover from a trashed or zeroed system clock.
 == Description ==
 
 This driver supports several models models of Kinemetrics/TrueTime
-timing receivers, including 468-DC MK III GOES Synchronized Clock,
-GPS- DC MK III and GPS/TM-TMD GPS Synchronized Clock, XL-DC (a
-151-602-210, reported by the driver as a GPS/TM-TMD), GPS-800 TCU (an
-805-957 with the RS232 Talker/Listener module), and very likely others
-in the same model families that use the same timecode formats.
+timing receivers, including GPS- DC MK III and GPS/TM-TMD GPS
+Synchronized Clock, XL-DC (a 151-602-210, reported by the driver as a
+GPS/TM-TMD), GPS-800 TCU (an 805-957 with the RS232 Talker/Listener
+module), and very likely others in the same model families that use
+the same timecode formats.
 
 Most of this code is originally from refclock_wwvb.c (now
 refclock_spectracom.c) with thanks. It has been so mangled that wwvb is
@@ -43,7 +43,6 @@ L - Line feed
 Quality codes indicate possible error of:
 
 --------------------------------------------------
-468-DC GOES Receiver
 GPS-TM/TMD Receiver
     ? +/- 500 milliseconds # +/- 50 milliseconds
     * +/- 5 milliseconds . +/- 1 millisecond
@@ -54,34 +53,6 @@ In general, an alarm condition is indicated by ? at A, which occurs during
 initial synchronization and when received signal is lost for an
 extended period; unlock condition is indicated by other than <SP>
 in the quality field.
-
-== Notes on the 468-DC receiver: ==
-
-Send the clock a +R+ or +C+ and once per second a timestamp will appear.
-Send a +R+ to get the satellite position once (GOES only).
-
-Since the old east/west satellite locations are only historical, you
-can't set your clock propagation delay settings correctly and still use
-automatic mode. The manual says to use a compromise when setting the
-switches. This results in significant errors. The solution; use fudges
-time1 and time2 to incorporate corrections. If your clock is set for 50
-and it should be 58 for using the west and 46 for using the east, use
-the options
-
-+time1 +0.008 time2 -0.004+
-
-This corrects the 4 milliseconds advance and 8 milliseconds retard
-needed. The software will ask the clock which satellite it sees.
-
-The PCL720 from PC Labs has an Intel 8253 look-alike, as well as a bunch
-of TTL input and output pins, all brought out to the back panel. If you
-wire a PPS signal (such as the TTL PPS coming out of a GOES or other
-Kinemetrics/Truetime clock) to the 8253's GATE0, and then also wire the
-8253's OUT0 to the PCL720's INPUT3.BIT0, then we can read CTR0 to get
-the number of microseconds since the last PPS upward edge, mediated by
-reading OUT0 to find out if the counter has wrapped around (this happens
-if more than 65535us (65ms) elapses between the PPS event and our being
-called.)
 
 == Notes on the TL-3 receiver: ==
 

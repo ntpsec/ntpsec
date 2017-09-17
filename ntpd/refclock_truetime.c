@@ -15,14 +15,15 @@
 
 /* This should be an atom clock but those are very hard to build.
  *
- * The PCL720 from P C Labs has an Intel 8253 lookalike, as well as a bunch
- * of TTL input and output pins, all brought out to the back panel.  If you
- * wire a PPS signal (such as the TTL PPS coming out of a GOES or other
- * Kinemetrics/Truetime clock) to the 8253's GATE0, and then also wire the
- * 8253's OUT0 to the PCL720's INPUT3.BIT0, then we can read CTR0 to get the
- * number of uSecs since the last PPS upward swing, mediated by reading OUT0
- * to find out if the counter has wrapped around (this happens if more than
- * 65535us (65ms) elapses between the PPS event and our being called.)
+ * The PCL720 from P C Labs has an Intel 8253 lookalike, as well as a
+ * bunch of TTL input and output pins, all brought out to the back
+ * panel.  If you wire a PPS signal (such as the TTL PPS coming out of
+ * a Kinemetrics/Truetime clock) to the 8253's GATE0, and then also
+ * wire the 8253's OUT0 to the PCL720's INPUT3.BIT0, then we can read
+ * CTR0 to get the number of uSecs since the last PPS upward swing,
+ * mediated by reading OUT0 to find out if the counter has wrapped
+ * around (this happens if more than 65535us (65ms) elapses between
+ * the PPS event and our being called.)
  */
 #ifdef ENABLE_PPS720
 # undef min	/* XXX */
@@ -36,7 +37,6 @@
 
 /*
  * Support for Kinemetrics Truetime Receivers
- *	GOES:           (468-DC, usable with GPS->GOES converting antenna)
  *	GPS/TM-TMD:	
  *	XL-DC:		(a 151-602-210, reported by the driver as a GPS/TM-TMD)
  *	GPS-800 TCU:	(an 805-957 with the RS232 Talker/Listener module)
@@ -55,7 +55,6 @@
  *	L - Line feed
  *
  * Quality codes indicate possible error of
- *   468-DC GOES Receiver:
  *   GPS-TM/TMD Receiver: (default quality codes for XL-DC)
  *       ?     +/- 1  milliseconds	#     +/- 100 microseconds
  *       *     +/- 10 microseconds	.     +/- 1   microsecond
@@ -66,27 +65,9 @@
  *
  * The carriage return start bit begins on 0 seconds and extends to 1 bit time.
  *
- * Notes on the 468-DC receiver:
- *
+ * This driver used to support the 468-DC receiver, but  
  * http://www.ebay.com/gds/468-DC-SATELLITE-CLOCK-/10000000006640775/g.html
- * tells us that the GOES sats were shut down in 2005, so this mode is obsolete.
- *
- * Send the clock a 'R' or 'C' and once per second a timestamp will
- * appear.  Send a 'P' to get the satellite position once.
- *
- * Since the old east/west satellite locations are only historical, you can't
- * set your clock propagation delay settings correctly and still use
- * automatic mode. The manual says to use a compromise when setting the
- * switches. This results in significant errors. The solution; use fudge
- * time1 and time2 to incorporate corrections. If your clock is set for
- * 50 and it should be 58 for using the west and 46 for using the east,
- * use the line
- *
- * refclock truetime time1 +0.008 time2 -0.004
- *
- * This corrects the 4 milliseconds advance and 8 milliseconds retard
- * needed. The software will ask the clock which satellite it sees.
- *
+ * tells us that the GOES sats were shut down in 2005.
  */
 
 
@@ -105,18 +86,12 @@
 #define	DESCRIPTION	"Kinemetrics/TrueTime Receiver"
 
 /*
- * Tags which station (satellite) we see
- */
-#define GOES_WEST	0	/* Default to WEST satellite and apply time1 */
-#define GOES_EAST	1	/* until you discover otherwise */
-
-/*
  * used by the state machine
  */
-enum true_event	{e_Init, e_Huh, e_F18, e_F50, e_F51, e_Satellite,
-		 e_Poll, e_Location, e_TS, e_Max};
-static const char *events[] = {"Init", "Huh", "F18", "F50", "F51", "Satellite",
-			"Poll", "Location", "TS"};
+enum true_event	{e_Init, e_Huh, e_F18, e_F50, e_F51,
+		 e_Location, e_TS, e_Max};
+static const char *events[] = {"Init", "Huh", "F18", "F50", "F51",
+			"Location", "TS"};
 #define eventStr(x) (((int)x<(int)e_Max) ? events[(int)x] : "?")
 
 enum true_state	{s_Base, s_InqTM, s_InqTCU, s_InqGOES,
@@ -125,8 +100,8 @@ static const char *states[] = {"Base", "InqTM", "InqTCU", "InqGOES",
 			"Init", "F18", "F50", "Start", "Auto"};
 #define stateStr(x) (((int)x<(int)s_Max) ? states[(int)x] : "?")
 
-enum true_type	{t_unknown, t_goes, t_tm, t_tcu, t_tl3, t_Max};
-static const char *types[] = {"unknown", "goes", "tm", "tcu", "tl3"};
+enum true_type	{t_unknown, t_tm, t_tcu, t_tl3, t_Max};
+static const char *types[] = {"unknown", "tm", "tcu", "tl3"};
 #define typeStr(x) (((int)x<(int)t_Max) ? types[(int)x] : "?")
 
 /*
@@ -316,10 +291,8 @@ true_receive(
 	struct true_unit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
-	unsigned short new_station;
 	char synced;
 	int i;
-	int lat, lon, off;	/* GOES Satellite position */
 	/* These variables hold data until we decide to keep it */
 	char	rd_lastcode[BMAX];
 	l_fp	rd_tmp;
@@ -366,49 +339,6 @@ true_receive(
 	if (pp->a_lastcode[0] == '?' ||
 	    strcmp(pp->a_lastcode, "ERROR 05 NO SUCH FUNCTION") == 0) {
 		true_doevent(peer, e_Huh);
-		return;
-	}
-
-	/*
-	 * Timecode: "nnnnn+nnn-nnn"
-	 * (from GOES clock when asked about satellite position)
-	 */
-	if ((pp->a_lastcode[5] == '+' || pp->a_lastcode[5] == '-') &&
-	    (pp->a_lastcode[9] == '+' || pp->a_lastcode[9] == '-') &&
-	    sscanf(pp->a_lastcode, "%5d%*c%3d%*c%3d", &lon, &lat, &off) == 3
-	    ) {
-		const char *label = "Botch!";
-
-		/*
-		 * This is less than perfect.  Call the (satellite)
-		 * either EAST or WEST and adjust slop accodingly
-		 * Perfectionists would recalculate the exact delay
-		 * and adjust accordingly...
-		 */
-		if (lon > 7000 && lon < 14000) {
-			if (lon < 10000) {
-				new_station = GOES_EAST;
-				label = "EAST";
-			} else {
-				new_station = GOES_WEST;
-				label = "WEST";
-			}
-				
-			if (new_station != up->station) {
-				double dtemp;
-
-				dtemp = pp->fudgetime1;
-				pp->fudgetime1 = pp->fudgetime2;
-				pp->fudgetime2 = dtemp;
-				up->station = new_station;
-			}
-		}
-		else {
-			/*refclock_report(peer, CEVNT_BADREPLY);*/
-			label = "UNKNOWN";
-		}
-		true_debug(peer, "GOES: station %s\n", label);
-		true_doevent(peer, e_Satellite);
 		return;
 	}
 
@@ -535,13 +465,6 @@ true_receive(
 		if (!up->polled)
 			return;
 
-                /* We only call doevent if additional things need be done
-                 * at poll interval.  Currently, its only for GOES.  We also
-                 * call it for clock unknown so that it gets logged.
-                 */
-                if (up->type == t_goes || up->type == t_unknown)
-                    true_doevent(peer, e_Poll);
-
 		if (!refclock_process(pp)) {
 			refclock_report(peer, CEVNT_BADTIME);
 			return;
@@ -622,27 +545,6 @@ true_doevent(
 	true_debug(peer, "clock %s, state %s, event %s\n",
 		   typeStr(up->type), stateStr(up->state), eventStr(event));
 	switch (up->type) {
-	case t_goes:
-		switch (event) {
-		case e_Init:	/* FALLTHROUGH */
-		case e_Satellite:
-			/*
-			 * Switch back to on-second time codes and return.
-			 */
-			true_send(peer, "C");
-			up->state = s_Start;
-			break;
-		case e_Poll:
-			/*
-			 * After each poll, check the station (satellite).
-			 */
-			true_send(peer, "P");
-			/* No state change needed. */
-			break;
-		default:
-			break;
-		}
-		/* FALLTHROUGH */
 	case t_tm:
 		switch (event) {
 		case e_Init:
@@ -717,8 +619,6 @@ true_doevent(
                 }
                 break;
 	case t_unknown:
-               if (event == e_Poll)
-                   break;
 		switch (up->state) {
 		case s_Base:
 			if (event != e_Init)
@@ -728,10 +628,6 @@ true_doevent(
 			break;
 		case s_InqGOES:
 			switch (event) {
-			case e_Satellite:
-				up->type = t_goes;
-				true_doevent(peer, e_Init);
-				break;
 			case e_Init:	/*FALLTHROUGH*/
 			case e_Huh:
                                 sleep(1);               /* wait for it */
