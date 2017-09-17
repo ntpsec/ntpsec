@@ -233,12 +233,6 @@ extern	struct refclock	refclock_local;
 #define	refclock_local	refclock_none
 #endif
 
-#if defined(CLOCK_MAGNAVOX) && defined(HAVE_PPSAPI)
-extern	struct refclock	refclock_magnavox;
-#else
-#define	refclock_magnavox	refclock_none
-#endif
-
 #ifdef CLOCK_MODEM
 extern	struct refclock	refclock_modem;
 #else

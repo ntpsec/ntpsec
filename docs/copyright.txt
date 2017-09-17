@@ -95,7 +95,7 @@ as authors of this work.
 * mailto:karl@owl.HQ.ileaf.com[Karl Berry <karl@owl.HQ.ileaf.com>]
   syslog to file option
 * mailto:Marc.Brett@westgeo.com[Marc Brett
-  <Marc.Brett@westgeo.com>] Magnavox GPS clock driver
+  <Marc.Brett@westgeo.com>] Magnavox GPS clock driver (removed in NTPsec)
 * mailto:Piete.Brooks@cl.cam.ac.uk[Piete Brooks
   <Piete.Brooks@cl.cam.ac.uk>] Trimble PARSE support
 * mailto:nelson@bolyard.me[Nelson B Bolyard <nelson@bolyard.me>]
@@ -118,7 +118,7 @@ as authors of this work.
 * mailto:neoclock4x@linum.com[Claas Hilbrecht
   <neoclock4x@linum.com>] NeoClock4X clock driver
 * mailto:glenn@herald.usask.ca[Glenn Hollinger
-  <glenn@herald.usask.ca>] GOES clock driver
+  <glenn@herald.usask.ca>] GOES clock driver (removed in NTPsec)
 * mailto:jbj@chatham.usdesign.com[Jeff Johnson
   <jbj@chatham.usdesign.com>] massive prototyping overhaul
 * mailto:Hans.Lambermont@nl.origin-it.com[Hans Lambermont

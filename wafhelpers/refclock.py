@@ -33,13 +33,6 @@ refclock_map = {
         "file":     "generic"
     },
 
-    "magnavox": {
-        "descr":    "Magnavox MX4200 and related GPS receivers",
-        "define":   "CLOCK_MAGNAVOX",
-        "require":  ["ppsapi"],
-        "file":     "magnavox"
-    },
-
     "arbiter": {
         "descr":    "Arbiter 1088A/B GPS Receiver",
         "define":   "CLOCK_ARBITER",

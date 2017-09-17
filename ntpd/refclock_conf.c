@@ -43,7 +43,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 6 was: REFCLK_IRIG_AUDIO */
 	&refclock_none,		/* 7 was: REFCLK_CHU_AUDIO */
 	&refclock_parse,	/* 8 REFCLK_GENERIC */
-	&refclock_magnavox,	/* 9 REFCLK_GPS_MX4200 */
+	&refclock_none,		/* 9 was: REFCLK_GPS_MX4200 */
 	&refclock_none,		/* 10 was: REFCLK_GPS_AS2201 */
 	&refclock_arbiter,	/* 11 REFCLK_GPS_ARBITER */
 	&refclock_none,		/* 12 was: REFCLK_IRIG_TPRO */

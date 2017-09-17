@@ -145,10 +145,10 @@ entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change at
 2012-10-29T15:00:00Z) has been dropped in order to reduce our
 maintenance load. So have some other drivers (notably the Austron
-2200A/2201A) after having been end-of-lifed with no sign of
-aftermarket activity for more than ten years. Several others have been
-removed for relying on obsolete buses or hardware classes that no
-longer exist.
+2200A/2201A and Magnavox MX4200) after having been end-of-lifed with
+no sign of aftermarket activity for more than ten years. Several
+others have been removed for relying on obsolete buses or hardware
+classes that no longer exist.
 
 For security reasons, we will no longer support any refclock that
 requires a closed-source driver to run.  This filtered out the
@@ -165,7 +165,6 @@ the 6021 in the generic parse driver.
 |link:driver_spectracom.html[spectracom]| D | Generic Spectracom Receivers
 |link:driver_truetime.html[truetime]    | D | TrueTime GPS/GOES Receivers
 |link:driver_generic.html[generic]      | T | Generic Reference Driver (Parse)
-|link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
 |link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver
 |link:driver_modem.html[modem]          | - | NIST/USNO/PTB Modem Time Services
 |link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
