@@ -930,6 +930,8 @@ int main(int argc, char **argv) {
                 yesno(ctx.env.ENABLE_DOC and not ctx.env.DISABLE_MANPAGE))
 
     ctx.recurse("pylib")
+    msg_setting("PYTHONDIR", ctx.env.PYTHONDIR)
+    msg_setting("PYTHONARCHDIR", ctx.env.PYTHONARCHDIR)
 
 
 class check(BuildContext):
