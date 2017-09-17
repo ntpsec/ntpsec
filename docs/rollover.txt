@@ -128,7 +128,7 @@ synchronized to the solar calendar.  With it, Unix time after
 Time) coincides with UTC.  Unix time before 1972 was an approximation
 of GMT (Greenwich Mean Time) without leap seconds.
 
-On POSIX-compliant Unix systems (which is now effecively all) Unix
+On POSIX-compliant Unix systems (which is now effectively all) Unix
 time can be retrieved with nanosecond precision; some older versions
 supported only millisecond precision.  The subseconds counter is not
 involved in any of the rollover or leap-second issues thith the
@@ -192,7 +192,7 @@ Raw GPS time is not leap-second corrected, but the satellite messages
 include a leap-second offset field in a special update approximately
 every 20 minutes.  If the receiver firmware is not carefully designed
 there will be a window between device boot time and the next
-leap-second update, and around leap-second correctipns, during which
+leap-second update, and around leap-second corrections, during which
 the reported second will be incorrect.
 
 The qualifications about careful design are important because GPS
@@ -213,10 +213,11 @@ To yield a UTC date, the weeks+second information from the GPS satellites
 has to be used as an offset to a base date.
 
 The most naive way to do this would to simply use the zero date of the
-current era (1024-week cycle) as the base.  Some very early GPS equipment
-seems to have worked this way, but it has the drawback that the device
-time-warps at the next GPS era rollover - which, if your device first ship
-is only a few years before that rollover, is a serious drawback.
+current GPS era (1024-week cycle) as the base.  Some very early GPS
+equipment seems to have worked this way, but it has the drawback that
+the device time-warps at the next GPS era rollover - which, if your
+device first ship is only a few years before that rollover, is a
+serious drawback.
 
 There is a relatively simple way to extend the useful life of a GPS
 used as a clock. That is to choose a pivot date in GPS weeks.  When
@@ -252,7 +253,7 @@ Finally, when you buy a GPS you do not know - and often will not be
 able to discover - how far in the past its hidden pivot date is.  This
 means that time service operators using a GPS as a local Stratum 0
 need to be aware of the possibility that their device could roll over
-at any time (but especially near the zeo dats of a GPS era) and be
+at any time (but especially near the zero dats of a GPS era) and be
 ready to compensate by dropping in a device with a newer pivot date.
 
 [[ntp_pivots]]

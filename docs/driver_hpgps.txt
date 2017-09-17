@@ -13,7 +13,7 @@ Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
 As of September 2017 we have reports that the internal clock on a
 Z3801A has been recently observed to roll over around to 1998 (see
 link:rollover.html[Rollover issues in time sources]). Users should
-audit for rollover before deplying any of these devices.
+audit for rollover before deploying any of these devices.
 
 == Description ==
 
