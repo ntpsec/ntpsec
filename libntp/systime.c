@@ -396,6 +396,8 @@ step_systime(
 
 	sys_residual = 0;
 	lamport_violated = (step < 0);
+	if (lamport_violated)
+	    msyslog(LOG_WARNING, "CLOCK: negative time step %Lf", step);
 	if (step_callback)
 		(*step_callback)();
 
