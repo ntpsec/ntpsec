@@ -1,40 +1,20 @@
 /*
- * refclock_trimble - clock driver for the Trimble Palisade
- * Thunderbolt, and Acutime Gold timing receivers
+ * refclock_trimble - clock driver for the Trimble Palisade, Thunderbolt,
+ * Acutime 2000, Acutime Gold and EndRun Technologies Praecis Ct/Cf/Ce/II
+ * timing receivers
  *
- * For detailed information on this program, please refer to the html 
- * refclock_trimble.html page accompanying the NTP distribution.
+ * For detailed information on this program, please refer to the
+ * driver_trimble.html document accompanying the NTPsec distribution.
  *
- * for questions / bugs / comments, contact:
- * sven_dietrich@trimble.com
- *
- * Sven-Thorsten Dietrich
- * 645 North Mary Avenue
- * Post Office Box 3642
- * Sunnyvale, CA 94088-3642
- *
- * Version 2.45; July 14, 1999
+ * Version 3.00; September 17, 2017
+ * refer to driver_trimble.html for change log
  *
  * This software was developed by the Software and Component Technologies
  * group of Trimble Navigation, Ltd.
- * *
- * 31/03/06: Added support for Thunderbolt GPS Disciplined Clock.
- *	     Contact: Fernando Pablo Hauscarriaga
- * 	     E-mail: fernandoph@iar.unlp.edu.ar
- * 	     Home page: www.iar.unlp.edu.ar/~fernandoph
- *		  Instituto Argentino de Radioastronomia
- *			    www.iar.unlp.edu.ar
- *
- * 14/01/07: Conditinal compilation for Thunderbolt support no longer needed
- *	     now we use mode 2 for decode thunderbolt packets.
- *	     Fernando P. Hauscarriaga
- *
- * 30/08/09: Added support for Trimble Acutime Gold Receiver.
- *	     Fernando P. Hauscarriaga (fernandoph@iar.unlp.edu.ar)
  *
  * Copyright (c) 1997, 1998, 1999, 2000  Trimble Navigation Ltd.
  * All rights reserved.
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright 2017 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-4-clause
  */
 
@@ -165,10 +145,12 @@ static  int	sendetx			(struct packettx *buffer, int fd);
 static  void	init_thunderbolt	(int fd);
 
 #define PAL_TSTATS 14
+#ifdef DEBUG
 static const char tracking_status[PAL_TSTATS+1][16] = { 
 	"Doing Fixes", "Good 1SV", "Approx. 1SV", "Need Time", "Need INIT",
 	"PDOP too High", "Bad 1SV", "0SV Usable", "1SV Usable", "2SV Usable",
 	"3SV Usable", "No Integrity", "Diff Corr", "Overdet Clock", "Invalid"};
+#endif
 static const bool tracking_status_usable[PAL_TSTATS+1] = {
 	true, true, false, false, false,
 	false, false, false, false, false,
@@ -179,9 +161,11 @@ static const unsigned int tb_decod_conv[TB_DECOD_STATS+1] = {
 	0, 3, 14, 5, 14, 14, 14, 14, 7, 8, 9, 10, 6, 14, 14, 14, 11};
 	
 #define TB_DISC_MODES 7
+#ifdef DEBUG
 static const char tb_disc_mode[TB_DISC_MODES+1][16] = {
 	"normal", "power-up", "auto holdover", "manual holdover",
 	"recovery", "unknown", "disabled", "invalid"};
+#endif
 static const bool tb_disc_in_holdover[TB_DISC_MODES+1] = {
 	false, false, true, true,
 	false, false, false, false};
@@ -323,9 +307,7 @@ trimble_start (
 	pp = peer->procptr;
 	pp->clockname = NAME;
 
-	/*
-	 * Open serial port. 
-	 */
+	/* Open serial port. */
 	if (peer->cfg.path)
 	    path = peer->cfg.path;
 	else
@@ -361,9 +343,7 @@ trimble_start (
 		return false;
 	}
 
-	/*
-	 * Allocate and initialize unit structure
-	 */
+	/* Allocate and initialize unit structure */
 	up = emalloc_zero(sizeof(*up));
 
 	up->type = CLK_TYPE(peer);
@@ -417,8 +397,8 @@ trimble_start (
 	if (tcsetattr(fd, TCSANOW, &tio) == -1 || tcgetattr(fd, &tio) == -1 ||
 	    tio.c_cflag != cflag || tio.c_iflag != iflag) {
 		msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr failed: wanted cflag 0x%x got 0x%x, wanted iflag 0x%x got 0x%x, return: %m",
-		        refclock_name(peer), cflag, tio.c_cflag, iflag,
-		        tio.c_iflag);
+		        refclock_name(peer), cflag, (unsigned int)tio.c_cflag,
+		        iflag, (unsigned int)tio.c_iflag);
 		close(fd);
 		free(up);
 		return false;
@@ -463,9 +443,7 @@ trimble_start (
 		return false;
 	}
 
-	/*
-	 * Initialize miscellaneous variables
-	 */
+	/* Initialize miscellaneous variables */
 	pp->unitptr = up;
 	pp->clockdesc = DESCRIPTION;
 
@@ -501,7 +479,6 @@ trimble_start (
 	return true;
 }
 
-
 /*
  * trimble_shutdown - shut down the clock
  */
@@ -523,7 +500,6 @@ trimble_shutdown (
 	if (NULL != up)
 		free(up);
 }
-
 
 /* 
  * TSIP_decode - decode the TSIP data packets 
@@ -866,7 +842,6 @@ TSIP_decode (
 /*
  * trimble__receive - receive data from the serial interface
  */
-
 static void
 trimble_receive (
 	struct peer * peer,
@@ -876,9 +851,7 @@ trimble_receive (
 	struct trimble_unit *up;
 	struct refclockproc *pp;
 
-	/*
-	 * Initialize pointers and read the timecode and timestamp.
-	 */
+	/* Initialize pointers and read the timecode and timestamp. */
 	pp = peer->procptr;
 	up = pp->unitptr;
 
@@ -921,10 +894,8 @@ trimble_receive (
 	up->samples++;
 }
 
-
 /*
  * trimble_poll - called by the transmit procedure
- *
  */
 static void
 trimble_poll (
@@ -992,7 +963,6 @@ trimble_poll (
 	/* process samples in filter */
 	refclock_receive(peer);
 }
-
 
 /*
  * trimble_io - create TSIP packets or ASCII strings from serial data stream
@@ -1100,13 +1070,12 @@ trimble_io (
 		c++;
 		if (up->rpt_cnt > RMAX - 2) {/* additional byte for ID */
 			up->rpt_status = TSIP_PARSED_EMPTY;
-			DPRINT(1, ("trimble_io: unit %d: oversize serial message (%luB) 0x%02x discarded",
+			DPRINT(1, ("trimble_io: unit %d: oversize serial message (%luB) 0x%02x discarded\n",
 			        up->unit, (unsigned long)up->rpt_cnt,
 				(uint8_t)up->rpt_buf[0]));
 		}
 	} /* while chars in buffer */
 }
-
 
 /*
  * trimble_timer - trigger an event at 1Hz
@@ -1129,9 +1098,8 @@ trimble_timer(
 		HW_poll(pp);
 }
 
-
 /*
- * Trigger the event input
+ * HW_poll - trigger the event input
  */
 static void
 HW_poll (
@@ -1167,7 +1135,7 @@ HW_poll (
 }
 
 /*
- * copy/swap a big-endian palisade double into a host double
+ * getdbl - copy/swap a big-endian palisade double into a host double
  */
 static double
 getdbl (
@@ -1201,7 +1169,7 @@ getdbl (
 }
 
 /*
- * copy/swap a big-endian palisade short into a host short
+ * getint - copy/swap a big-endian palisade short into a host short
  */
 static short
 getint (
@@ -1214,9 +1182,8 @@ getint (
 	return (short)ntohs(us);
 }
 
-
 /*
- * copy/swap a big-endian palisade 32-bit int into a host 32-bit int
+ * getlong -copy/swap a big-endian palisade 32-bit int into a host 32-bit int
  */
 static int32_t
 getlong(
