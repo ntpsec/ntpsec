@@ -2359,7 +2359,7 @@ parse_shutdown(
 	free_varlist(parse->kv);
 
 	NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-		msyslog(LOG_INFO, "REFCLOG: PARSE receiver #%d: reference clock \"%s\" removed",
+		msyslog(LOG_INFO, "REFCLOCK: PARSE receiver #%d: reference clock \"%s\" removed",
 			parse->peer->refclkunit, parse->parse_type->cl_description);
 
 	parse->peer = (struct peer *)0; /* unused now */
