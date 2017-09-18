@@ -560,10 +560,6 @@ int main(int argc, char **argv) {
         ctx.define("_POSIX_C_SOURCE", "200112L", quote=False)
         ctx.define("__EXTENSIONS__", "1", quote=False)
 
-    # XXX: needed for ntp_worker, for now
-    if ctx.env.DEST_OS == "openbsd":
-        ctx.define("PLATFORM_OPENBSD", "1", quote=False)
-
     structures = (
         ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
         ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
