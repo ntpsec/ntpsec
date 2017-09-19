@@ -1397,7 +1397,7 @@ clock_filter(
 	double	dst[NTP_SHIFT];		/* distance vector */
 	int	ord[NTP_SHIFT];		/* index vector */
 	int	i, j, k, m;
-	double	dtemp, etemp;
+	double	dtemp, etemp, jtemp;
 	char	tbuf[80];
 
 	/*
@@ -1489,14 +1489,14 @@ clock_filter(
 	 * to 1.0. The jitter is the RMS differences relative to the
 	 * lowest delay sample.
 	 */
-	peer->disp = peer->jitter = 0;
+	peer->disp = jtemp = 0;
 	k = ord[0];
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		j = ord[i];
 		peer->disp = NTP_FWEIGHT * (peer->disp +
 		    peer->filter_disp[j]);
 		if (i < m)
-			peer->jitter += DIFF(peer->filter_offset[j],
+			jtemp += DIFF(peer->filter_offset[j],
 			    peer->filter_offset[k]);
 	}
 
@@ -1513,6 +1513,7 @@ clock_filter(
 	etemp = fabs(peer->offset - peer->filter_offset[k]);
 	peer->offset = peer->filter_offset[k];
 	peer->delay = peer->filter_delay[k];
+	peer->jitter = jtemp;
 	if (m > 1)
 		peer->jitter /= m - 1;
 	peer->jitter = SQRT(peer->jitter);
