@@ -396,7 +396,7 @@ nmea_start(
 {
 	struct refclockproc * const	pp = peer->procptr;
 	nmea_unit * const		up = emalloc_zero(sizeof(*up));
-	char				device[20];
+	char				device[20], *path;
 	uint32_t			rate;
 	unsigned int			baudrate;
 	const char *			baudtext;
@@ -477,26 +477,29 @@ nmea_start(
 	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
 
-	if ( !peer->cfg.path ) {
-            /* build a path */
-	    rcode = snprintf(device, sizeof(device), DEVICE, unit);
-	    if ( 0 > rcode ) {
-		/* failed, set to NUL */
-		device[0] = '\0';
-	    }
-	    peer->cfg.path = estrdup( device );
+	if (peer->cfg.path)
+		path = peer->cfg.path;
+	else
+	{
+		/* build a path */
+		rcode = snprintf(device, sizeof(device), DEVICE, unit);
+		if ( 0 > rcode ) {
+		    /* failed, set to NUL */
+		    device[0] = '\0';
+		}
+		path = device;
         }
 	/* Open serial port. Use CLK line discipline, if available. */
-	pp->io.fd = refclock_open(peer->cfg.path, baudrate, LDISC_CLK);
+	pp->io.fd = refclock_open(path, baudrate, LDISC_CLK);
 
 	if (0 > pp->io.fd) {
 		msyslog(LOG_ERR, "REFCLOCK: %s NMEA device open(%s) failed",
-		    refclock_name(peer), peer->cfg.path);
+		    refclock_name(peer), path);
 		return false;
         }
 
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
-	      refclock_name(peer), peer->cfg.path, baudtext));
+			  refclock_name(peer), path, baudtext));
 
 	/* succeed if this clock can be added */
 	return io_addclock(&pp->io) != 0;
