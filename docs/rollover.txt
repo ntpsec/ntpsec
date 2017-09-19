@@ -228,7 +228,8 @@ This technique will postpones time-warping to a full 1024 weeks after
 the pivot date - which the vendor typically makes the release date
 of the device firmware.  But it won't do any better than that; without the
 ability to change the base date, the device will ship incorrect
-reports forever afterwards.
+reports forever afterwards.  A few refclocks, like the HP-GPS line,
+have that ability; most do not.
 
 This where careless, low-budget design begins to matter. GPS vendors
 do not document even the fact that they use base or pivot dates, let
@@ -255,6 +256,16 @@ means that time service operators using a GPS as a local Stratum 0
 need to be aware of the possibility that their device could roll over
 at any time (but especially near the zero dats of a GPS era) and be
 ready to compensate by dropping in a device with a newer pivot date.
+
+Actionable advice that follows from this: If you don't know the
+manufacturing date of a GPS-based device to within a couple of years,
+don't trust that it won't be rolled over and useless *the first time
+you start it*.  Shopping for cheap refclocks at surplus houses or
+on the Web is particularly hazardous this way.
+
+A fairly bulletproof mitigation strategy, if you are running
+autonomously, is to have multiple GPS clocks per server and replace
+each individual one at least once every nine years (half a GPS era).
 
 [[ntp_pivots]]
 == NTP pivot dates ==
