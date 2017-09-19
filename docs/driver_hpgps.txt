@@ -73,6 +73,13 @@ the right line parameters.
 The timekeeping portion of HP's business has been sold to
 http://www.symmetricom.com/[Symmetricom].
 
+== Rollover compensation ==
+
+Some devices in this product line have a front-panel display of
+date-time and controls to manipulate it.  On these, it is possible to
+re-set the device's hidden base date for your current era. Consult
+your documentation for details.
+
 == Driver Options ==
 
 +unit+ 'number'::
