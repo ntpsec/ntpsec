@@ -3,11 +3,12 @@
 This directory contains example run-time configuration files for the
 NTP daemon, and some example startup scripts for launching it.
 
-Under ntp-conf.d, The "use-" files are modular pieces of ntp.conf
+Under ntp.d, the "use-" files are modular pieces of ntp.conf
 files that you can string together in any order for effect.  The file
 titles are clues to what they're useful for.  Each has an explanatory
-header comment.  The file "example.conf" shows what a file made out of
-use snippets is like.
+header comment.  The file "default.conf" shows what a file made out of
+use snippets is like.  This directory can be copied to /etc to
+give a sane default configuration.
 
 The rc files are start/stop scripts for NTP under System-V-style
 init. They are intended as models for distribution packagers.
@@ -16,5 +17,5 @@ The ntpd.service file is intended for use with systemd. Note that
 it assumes the waf default installation location /usr/sbin for
 ntpd; you may need to modify this for some distrbutions.
 
-Additional information can be found in the ./docs directory of the
+Additional information can be found in the ./docs subdirectory of the
 base directory.
