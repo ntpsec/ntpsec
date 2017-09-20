@@ -12,7 +12,7 @@
 #
 # us.pool.ntp.org
 # 
-# you are not in the USA, then it will probably work to
+# If you are not in the USA, then it will probably work to
 # change the 'us' to your two letter country code.
 #
 # Major Internet-using countries with pools include:
@@ -22,7 +22,7 @@
 #
 # https://en.wikipedia.org/wiki/ISO_3166-1
 #
-# and then try pinging prepending it to ".pool.ntp.org" and pinging that.
+# and then try prepending it to ".pool.ntp.org" and pinging that.
 # hostname. If you get a response, you can use it.
 #
 pool pool.ntp.org iburst
