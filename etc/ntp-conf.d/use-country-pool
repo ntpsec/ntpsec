@@ -7,9 +7,12 @@
 # speeds up the time for ntpd to set the system time and start responding to
 # requests.
 #
-# Notice we use the 'us' country code servers, otherwise we might get
-# pool servers from opposite sides of the planet accuracy would likely
-# be poor.  If you are not in the USA, then it will probably work to
+# You can speed up initialization, and spread the load better, by
+# using a country-specific potion of the pool, e.g. something like
+#
+# us.pool.ntp.org
+# 
+# you are not in the USA, then it will probably work to
 # change the 'us' to your two letter country code.
 #
 # Major Internet-using countries with pools include:
@@ -22,14 +25,7 @@
 # and then try pinging prepending it to ".pool.ntp.org" and pinging that.
 # hostname. If you get a response, you can use it.
 #
-# Note: in theory we could use the "pool" keyword here. There is some
-# controversy over whether it is implemented correctly.  One known problem
-# (a bug in ntpd) is that it can't be used with restrict nopeer.
-#
-server 0.us.pool.ntp.org iburst
-server 1.us.pool.ntp.org iburst
-server 2.us.pool.ntp.org iburst
-server 3.us.pool.ntp.org iburst
+pool pool.ntp.org iburst
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
