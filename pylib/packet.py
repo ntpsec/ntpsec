@@ -978,6 +978,7 @@ class ControlSession:
         # If we have data, pad it out to a 32-bit boundary.
         # Do not include these in the payload count.
         if pkt.extension:
+            pkt.extension = polybytes(pkt.extension)
             while ((ControlPacket.HEADER_LEN + len(pkt.extension)) & 3):
                 pkt.extension += b"\x00"
 
@@ -1001,7 +1002,7 @@ class ControlSession:
         if mac is None:
             raise ControlException(SERR_NOKEY)
         else:
-            pkt.extension += mac
+            pkt.extension += polybytes(mac)
         return pkt.send()
 
     def getresponse(self, opcode, associd, timeo):
@@ -1332,7 +1333,7 @@ class ControlSession:
         elif b"\x00" in self.response:
             self.response = self.response[:self.response.index(b"\x00")]
         self.response = self.response.rstrip()
-        return self.response == "Config Succeeded"
+        return self.response == polybytes("Config Succeeded")
 
     def fetch_nonce(self):
         """
@@ -1349,7 +1350,11 @@ This combats source address spoofing
 
         # uh, oh, no nonce seen
         # this print probably never can be seen...
-        self.logfp.write("## Nonce expected: %s" % self.response)
+        if str is bytes:
+            resp = self.response
+        else:
+            resp = self.response.decode()
+        self.logfp.write("## Nonce expected: %s" % resp)
         raise ControlException(SERR_BADNONCE)
 
     def mrulist(self, variables=None, rawhook=None, direct=None):
@@ -1714,6 +1719,6 @@ class Authenticator:
         hasher = hashlib.new(keytype)
         hasher.update(passwd)
         hasher.update(payload)
-        return hasher.digest() == mac
+        return polybytes(hasher.digest()) == mac
 
 # end

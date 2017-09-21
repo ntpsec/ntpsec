@@ -8,6 +8,84 @@ import select
 import os.path
 
 
+master_encoding = 'latin-1'
+
+if str is bytes:  # Python 2
+    polystr = str
+    polybytes = bytes
+    polyord = ord
+    polychr = str
+    input = raw_input
+
+    def string_escape(s):
+        return s.decode('string_escape')
+
+    def make_wrapper(fp):
+        return fp
+
+else:  # Python 3
+    import io
+
+    def polystr(o):
+        "Polymorphic string factory function"
+        if isinstance(o, str):
+            return o
+        if not isinstance(o, bytes):
+            return str(o)
+        return str(o, encoding=master_encoding)
+
+    def polybytes(s):
+        "Polymorphic string encoding function"
+        if isinstance(s, bytes):
+            return s
+        if not isinstance(s, str):
+            return bytes(s)
+        return bytes(s, encoding=master_encoding)
+
+    def polyord(c):
+        "Polymorphic ord() function"
+        if isinstance(c, str):
+            return ord(c)
+        else:
+            return c
+
+    def polychr(c):
+        "Polymorphic chr() function"
+        if isinstance(c, int):
+            return chr(c)
+        else:
+            return c
+
+    def string_escape(s):
+        "Polymorphic string_escape/unicode_escape"
+        # This hack is necessary because Unicode strings in Python 3 don't
+        # have a decode method, so there's no simple way to ask it for the
+        # equivalent of decode('string_escape') in Python 2. This function
+        # assumes that it will be called with a Python 3 'str' instance
+        return s.encode(master_encoding).decode('unicode_escape')
+
+    def make_wrapper(fp):
+        "Wrapper factory function to enforce master encoding"
+        # This can be used to wrap normally binary streams for API
+        # compatibility with functions that need a text stream in
+        # Python 3; it ensures that the binary bytes are decoded using
+        # the master encoding we use to turn bytes to Unicode in
+        # polystr above
+        # newline="\n" ensures that Python 3 won't mangle line breaks
+        return io.TextIOWrapper(fp, encoding=master_encoding, newline="\n")
+
+    def make_std_wrapper(stream):
+        "Standard input/output wrapper factory function"
+        # This ensures that the encoding of standard output and standard
+        # error on Python 3 matches the master encoding we use to turn
+        # bytes to Unicode in polystr above
+        # line_buffering=True ensures that interactive
+        # command sessions work as expected
+        return io.TextIOWrapper(stream.buffer,
+                                encoding=master_encoding, newline="\n",
+                                line_buffering=True)
+
+
 class FileJig:
     def __init__(self, returns=[""]):
         self.data = []
@@ -87,11 +165,11 @@ class HasherJig:
 
     def update(self, data):
         self.update_calls.append(data)
-        if (data is not None) and (data != "None"):
+        if len(data) > 0:
             self.digest_size += 1
 
     def digest(self):
-        return "blah" * 4  # 16 byte hash
+        return polybytes("blah" * 4)  # 16 byte hash
 
 
 class SocketModuleJig:
