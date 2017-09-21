@@ -110,7 +110,7 @@ def decode_OpenPDU(data, header):
     flags = header["flags"]
     temp, data = slicedata(data, 4)
     timeout = struct.unpack("Bxxx", temp)[0]
-    oid, data = decode_oid(data, header)
+    oid, data = decode_OID(data, header)
     description = decode_octetstr(data, header)[0]
     result = OpenPDU(flags["bigEndian"], header["session_id"],
                      header["transaction_id"], header["packet_id"],
@@ -123,7 +123,7 @@ class OpenPDU(AgentXPDU):
                  timeout, oid, description):
         AgentXPDU.__init__(self, PDU_OPEN, bigEndian, sID, tactID, pktID)
         self.timeout = timeout
-        self.oid = oid
+        self.oid = classifyOID(oid)
         self.description = description
 
     def __eq__(self, other):
@@ -139,7 +139,7 @@ class OpenPDU(AgentXPDU):
 
     def encode(self):
         payload = struct.pack("Bxxx", self.timeout)
-        payload += encode_oid(self.bigEndian, self.oid, False)
+        payload += self.oid.encode(self.bigEndian)
         payload += encode_octetstr(self.bigEndian, self.description)
         header = encode_pduheader(self.pduType,
                                   False, False, False, False, self.bigEndian,
@@ -186,7 +186,7 @@ def decode_xRegisterPDU(data, header):
     context, data = decode_context(data, header)
     temp, data = slicedata(data, 4)
     timeout, priority, rangeSubid = struct.unpack(endianToken + "BBBx", temp)
-    oid, data = decode_oid(data, header)
+    oid, data = decode_OID(data, header)
     if rangeSubid != 0:
         temp, data = slicedata(data, 4)
         upperBound = struct.unpack(endianToken + "I", temp)[0]
@@ -212,7 +212,7 @@ class RegisterPDU(AgentXPDU):
                            bigEndian, sID, tactID, pktID, True, context)
         self.timeout = timeout
         self.priority = priority
-        self.subtree = subtree
+        self.subtree = classifyOID(subtree)
         self.rangeSubid = rangeSubid
         self.upperBound = upperBound
         self._instReg = True  # so we don't have to write two encode()s
@@ -242,7 +242,7 @@ class RegisterPDU(AgentXPDU):
         else:
             payload += struct.pack(endianToken + "xBBx",
                                    self.priority, self.rangeSubid)
-        payload += encode_oid(self.bigEndian, self.subtree, False)
+        payload += self.subtree.encode(self.bigEndian)
         if self.rangeSubid != 0:
             if self.upperBound is None:
                 raise ValueError("upperBound must be set if rangeSubid is set")
@@ -565,7 +565,7 @@ class IndexDeallocPDU(IndexAllocPDU):
 def decode_AddAgentCapsPDU(data, header):
     flags = header["flags"]
     context, data = decode_context(data, header)
-    oid, data = decode_oid(data, header)
+    oid, data = decode_OID(data, header)
     descr = decode_octetstr(data, header)[0]
     result = AddAgentCapsPDU(flags["bigEndian"], header["session_id"],
                              header["transaction_id"], header["packet_id"],
@@ -578,7 +578,7 @@ class AddAgentCapsPDU(AgentXPDU):
                  oid, description, context=None):
         AgentXPDU.__init__(self, PDU_ADD_AGENT_CAPS,
                            bigEndian, sID, tactID, pktID, True, context)
-        self.oid = oid
+        self.oid = classifyOID(oid)
         self.description = description
 
     def __eq__(self, other):
@@ -592,7 +592,7 @@ class AddAgentCapsPDU(AgentXPDU):
 
     def encode(self):
         contextP, payload = encode_context(self.bigEndian, self.context)
-        payload += encode_oid(self.bigEndian, self.oid, False)
+        payload += self.oid.encode(self.bigEndian)
         payload += encode_octetstr(self.bigEndian, self.description)
         header = encode_pduheader(self.pduType, False, False, False,
                                   contextP, self.bigEndian,
@@ -604,7 +604,7 @@ class AddAgentCapsPDU(AgentXPDU):
 def decode_RMAgentCapsPDU(data, header):
     flags = header["flags"]
     context, data = decode_context(data, header)
-    oid, data = decode_oid(data, header)
+    oid, data = decode_OID(data, header)
     result = RMAgentCapsPDU(flags["bigEndian"], header["session_id"],
                             header["transaction_id"], header["packet_id"],
                             oid, context)
@@ -615,7 +615,7 @@ class RMAgentCapsPDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, oid, context=None):
         AgentXPDU.__init__(self, PDU_RM_AGENT_CAPS,
                            bigEndian, sID, tactID, pktID, True, context)
-        self.oid = oid
+        self.oid = classifyOID(oid)
 
     def __eq__(self, other):
         if AgentXPDU.__eq__(self, other) is not True:
@@ -626,7 +626,7 @@ class RMAgentCapsPDU(AgentXPDU):
 
     def encode(self):
         contextP, payload = encode_context(self.bigEndian, self.context)
-        payload += encode_oid(self.bigEndian, self.oid, False)
+        payload += self.oid.encode(self.bigEndian)
         header = encode_pduheader(self.pduType, False, False, False,
                                   contextP, self.bigEndian,
                                   self.sessionID, self.transactionID,
@@ -694,29 +694,15 @@ class ResponsePDU(AgentXPDU):
 #
 # ========================================================================
 
-def encode_oid(bigEndian, subids, include):
-    subids = tuple(subids)
-    numsubs = len(subids)
-    if not (0 <= numsubs <= 128):  # Packet can have a maximum of 128 sections
-        raise ValueError("OID has too many subids")
-    if subids[:prefixCount] == internetPrefix:
-        if numsubs > prefixCount:
-            prefix = subids[prefixCount]  # the number after the prefix
-            subids = subids[prefixCount + 1:]  # +1 to strip prefix arg
-        else:  # Have a prefix, but nothing else. Leave as is
-            prefix = 0
-    else:
-        prefix = 0
-    n_subid = len(subids)
-    include = int(bool(include))  # force integer bool
-    endianToken = getendian(bigEndian)
-    body = struct.pack(endianToken + "BBBx", n_subid, prefix, include)
-    for subid in subids:
-        body += struct.pack(endianToken + "I", subid)
-    return body
+
+def classifyOID(oid):
+    "utility function to allow the user to send a bare tuple for some cases"
+    if isinstance(oid, OID):
+        return oid
+    return OID(oid, False)
 
 
-def decode_oid(data, header):
+def decode_OID(data, header):
     flags = header["flags"]
     # Need to split off the header to get the subid count
     header, data = slicedata(data, 4)
@@ -735,8 +721,60 @@ def decode_oid(data, header):
     endianToken = getendian(flags["bigEndian"])
     formatString = endianToken + ("I" * n_subid)
     subids += struct.unpack(formatString, data)
-    result = {"subids": subids, "include": include}
+    result = OID(subids, include)
     return (result, rest)
+
+
+class OID:
+    def __init__(self, subids, include=False):
+        self.subids = subids
+        self.include = include
+        self.sanity()
+
+    def __eq__(self, other):
+        if not (self.subids == other.subids):
+            return False
+        elif self.include != other.include:
+            return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __repr__(self):
+        return "OID(%s, %s)" % (repr(self.subids), repr(self.include))
+
+    def sanity(self):
+        if not isinstance(self.subids, (tuple, list)):
+            raise TypeError
+        if len(self.subids) > 128:
+            raise ValueError
+
+    def isNull(self):
+        if (len(self.subids) == 0) and (self.include is False):
+            return True
+        return False
+
+    def encode(self, bigEndian):
+        subids = self.subids[:]  # we may need to modify the copy
+        numsubs = len(subids)
+        if not (0 <= numsubs <= 128):  # OIDs can have a maximum of 128 subs
+            raise ValueError("OID has too many subids")
+        if subids[:prefixCount] == internetPrefix:
+            if numsubs > prefixCount:
+                prefix = subids[prefixCount]  # the number after the prefix
+                subids = subids[prefixCount + 1:]  # +1 to strip prefix arg
+            else:  # Have a prefix but nothing else, leave it as is.
+                prefix = 0
+        else:
+            prefix = 0
+        n_subid = len(subids)
+        include = int(bool(self.include))  # force integer bool
+        endianToken = getendian(bigEndian)
+        body = struct.pack(endianToken + "BBBx", n_subid, prefix, include)
+        for subid in subids:
+            body += struct.pack(endianToken + "I", subid)
+        return body
 
 
 def encode_octetstr(bigEndian, octets):
@@ -769,17 +807,22 @@ def decode_octetstr(data, header):
     return data[:numoctets], data[numoctets + pad:]
 
 
-def encode_varbind(bigEndian, valType, oid, *payload):
+def encode_varbind(bigEndian, valType, oid, payload=()):
     if valType not in definedValueTypes.keys():
         raise ValueError("Value type %s not in defined types" % valType)
     endianToken = getendian(bigEndian)
     header = struct.pack(endianToken + "Hxx", valType)
-    name = encode_oid(bigEndian, oid, False)
+    oid = classifyOID(oid)
+    name = oid.encode(bigEndian)
     handlers = definedValueTypes[valType]
     if handlers is None:
         data = header + name
     else:
-        data = header + name + handlers[0](bigEndian, *payload)
+        isClass, encoder, _ = handlers
+        if isClass:
+            data = header + name + payload.encode(bigEndian)
+        else:
+            data = header + name + handlers[1](bigEndian, *payload)
     return data
 
 
@@ -788,11 +831,11 @@ def decode_varbind(data, header):
     bindheader, data = slicedata(data, 4)
     endianToken = getendian(flags["bigEndian"])
     valType = struct.unpack(endianToken + "Hxx", bindheader)[0]
-    name, data = decode_oid(data, header)
+    name, data = decode_OID(data, header)
     if valType not in definedValueTypes.keys():
         raise ValueError("Value type %s not in defined types" % valType)
     handlers = definedValueTypes[valType]
-    payload, data = handlers[1](data, header)
+    payload, data = handlers[2](data, header)
     result = {"type": valType, "name": name, "data": payload}
     return result, data
 
@@ -843,15 +886,17 @@ def decode_ipaddr(data, header):
     return addr, data
 
 
-def encode_searchrange(bigEndian, startOID, endOID, inclusiveP):
-    startOIDstr = encode_oid(bigEndian, startOID, inclusiveP)
-    endOIDstr = encode_oid(bigEndian, endOID, False)
+def encode_searchrange(bigEndian, startOID, endOID):
+    if endOID.include is not False:
+        raise ValueError
+    startOIDstr = startOID.encode(bigEndian)
+    endOIDstr = endOID.encode(bigEndian)
     return startOIDstr + endOIDstr
 
 
 def decode_searchrange(data, header):
-    startOID, data = decode_oid(data, header)
-    endOID, data = decode_oid(data, header)
+    startOID, data = decode_OID(data, header)
+    endOID, data = decode_OID(data, header)
     result = {"start": startOID, "end": endOID}
     return result, data
 
@@ -861,7 +906,8 @@ def encode_searchrange_list(bigEndian, oidranges, nullTerminate=False):
     for oran in oidranges:
         encoded.append(encode_searchrange(bigEndian, *oran))
     if nullTerminate:
-        encoded.append(encode_oid(bigEndian, tuple(), False))
+        noid = OID(())
+        encoded.append(noid.encode(bigEndian))
     encoded = "".join(encoded)
     return encoded
 
@@ -877,10 +923,10 @@ def decode_searchrange_list(data, header):  # Cannot handle extra data
 def decode_searchrange_list_nullterm(data, header):
     oidranges = []
     while len(data) > 0:
-        one, data = decode_oid(data, header)
-        if isnullOID(one):
+        one, data = decode_OID(data, header)
+        if one.isNull():
             break
-        two, data = decode_oid(data, header)
+        two, data = decode_OID(data, header)
         oidranges.append({"start": one, "end": two})
     return tuple(oidranges), data
 
@@ -921,12 +967,6 @@ def compareOID(one, two):
 
 def getendian(bigEndian):
     return ">" if bigEndian is True else "<"
-
-
-def isnullOID(oid):
-    if (len(oid["subids"]) == 0) and (oid["include"] is False):
-        return True
-    return False
 
 
 def encode_varbindlist(bigEndian, varbinds):
@@ -1034,33 +1074,34 @@ def decode_packet(data):
 
 
 # Value types
-INTEGER = 2
-OCTET_STR = 4
-NULL = 5
-OID = 6
-IP_ADDR = 64
-COUNTER32 = 65
-GAUGE32 = 66
-TIME_TICKS = 67
-OPAQUE = 68
-COUNTER64 = 70
-NO_SUCH_OBJECT = 128
-NO_SUCH_INSTANCE = 129
-END_OF_MIB_VIEW = 130
+VALUE_INTEGER = 2
+VALUE_OCTET_STR = 4
+VALUE_NULL = 5
+VALUE_OID = 6
+VALUE_IP_ADDR = 64
+VALUE_COUNTER32 = 65
+VALUE_GAUGE32 = 66
+VALUE_TIME_TICKS = 67
+VALUE_OPAQUE = 68
+VALUE_COUNTER64 = 70
+VALUE_NO_SUCH_OBJECT = 128
+VALUE_NO_SUCH_INSTANCE = 129
+VALUE_END_OF_MIB_VIEW = 130
+# Sub-tuple format: (isClass?, encoder/class, decoder)
 definedValueTypes = {  # Used by the varbind functions
-    INTEGER: (encode_integer32, decode_integer32),
-    OCTET_STR: (encode_octetstr, decode_octetstr),
-    NULL: (encode_nullvalue, decode_nullvalue),
-    OID: (encode_oid, decode_oid),
-    IP_ADDR: (encode_ipaddr, decode_ipaddr),
-    COUNTER32: (encode_integer32, decode_integer32),
-    GAUGE32: (encode_integer32, decode_integer32),
-    TIME_TICKS: (encode_integer32, decode_integer32),
-    OPAQUE: (encode_octetstr, decode_octetstr),
-    COUNTER64: (encode_integer64, decode_integer64),
-    NO_SUCH_OBJECT: (encode_nullvalue, decode_nullvalue),
-    NO_SUCH_INSTANCE: (encode_nullvalue, decode_nullvalue),
-    END_OF_MIB_VIEW: (encode_nullvalue, decode_nullvalue)}
+    VALUE_INTEGER: (False, encode_integer32, decode_integer32),
+    VALUE_OCTET_STR: (False, encode_octetstr, decode_octetstr),
+    VALUE_NULL: (False, encode_nullvalue, decode_nullvalue),
+    VALUE_OID: (True, OID, decode_OID),
+    VALUE_IP_ADDR: (False, encode_ipaddr, decode_ipaddr),
+    VALUE_COUNTER32: (False, encode_integer32, decode_integer32),
+    VALUE_GAUGE32: (False, encode_integer32, decode_integer32),
+    VALUE_TIME_TICKS: (False, encode_integer32, decode_integer32),
+    VALUE_OPAQUE: (False, encode_octetstr, decode_octetstr),
+    VALUE_COUNTER64: (False, encode_integer64, decode_integer64),
+    VALUE_NO_SUCH_OBJECT: (False, encode_nullvalue, decode_nullvalue),
+    VALUE_NO_SUCH_INSTANCE: (False, encode_nullvalue, decode_nullvalue),
+    VALUE_END_OF_MIB_VIEW: (False, encode_nullvalue, decode_nullvalue)}
 
 # PDU types
 PDU_OPEN = 1

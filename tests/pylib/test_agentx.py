@@ -121,13 +121,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         nullPkt = cls(True, 1, 2, 3, 4, (), "")
         test_pducore(self, nullPkt, x.PDU_OPEN, True, 1, 2, 3)
         self.assertEqual(nullPkt.timeout, 4)
-        self.assertEqual(nullPkt.oid, ())
+        self.assertEqual(nullPkt.oid, x.OID((), False))
         self.assertEqual(nullPkt.description, "")
         # Test PDU init, basic packet
         basicPkt = cls(False, 1, 2, 3, 4, (1, 2, 3, 4), "foo")
         test_pducore(self, basicPkt, x.PDU_OPEN, False, 1, 2, 3)
         self.assertEqual(basicPkt.timeout, 4)
-        self.assertEqual(basicPkt.oid, (1, 2, 3, 4))
+        self.assertEqual(basicPkt.oid, x.OID((1, 2, 3, 4), False))
         self.assertEqual(basicPkt.description, "foo")
         # Test encoding, null packet
         nullPkt_str = nullPkt.encode()
@@ -153,7 +153,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         nullPkt_new = dec(body, header)
         test_pducore(self, nullPkt_new, x.PDU_OPEN, True, 1, 2, 3)
         self.assertEqual(nullPkt_new.timeout, 4)
-        self.assertEqual(nullPkt_new.oid, {"subids": (), "include": False})
+        self.assertEqual(nullPkt_new.oid, x.OID((), False))
         self.assertEqual(nullPkt_new.description, "")
         # Test decoding, basic packet
         header, body = slicedata(basicPkt_str, 20)
@@ -161,8 +161,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         basicPkt_new = dec(body, header)
         test_pducore(self, basicPkt_new, x.PDU_OPEN, False, 1, 2, 3)
         self.assertEqual(basicPkt_new.timeout, 4)
-        self.assertEqual(basicPkt_new.oid, {"subids": (1, 2, 3, 4),
-                                            "include": False})
+        self.assertEqual(basicPkt_new.oid, x.OID((1, 2, 3, 4), False))
         self.assertEqual(basicPkt_new.description, "foo")
         # Test packetVars
         self.assertEqual(basicPkt_new.packetVars(),
@@ -172,7 +171,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "transactionID": 2,
                           "packetID": 3,
                           "timeout": 4,
-                          "oid": {"subids": (1, 2, 3, 4), "include": False},
+                          "oid": x.OID((1, 2, 3, 4), False),
                           "description": "foo"})
 
     def test_ClosePDU(self):
@@ -233,7 +232,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         test_pducore(self, basicPkt, x.PDU_REGISTER, True, 1, 2, 3)
         self.assertEqual(basicPkt.timeout, 4)
         self.assertEqual(basicPkt.priority, 5)
-        self.assertEqual(basicPkt.subtree, (1, 2, 3))
+        self.assertEqual(basicPkt.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt.rangeSubid, 0)
         self.assertEqual(basicPkt.upperBound, None)
         self.assertEqual(basicPkt.context, None)
@@ -242,7 +241,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         test_pducore(self, basicPkt_LE, x.PDU_REGISTER, False, 1, 2, 3)
         self.assertEqual(basicPkt_LE.timeout, 4)
         self.assertEqual(basicPkt_LE.priority, 5)
-        self.assertEqual(basicPkt_LE.subtree, (1, 2, 3))
+        self.assertEqual(basicPkt_LE.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt_LE.rangeSubid, 0)
         self.assertEqual(basicPkt_LE.upperBound, None)
         self.assertEqual(basicPkt_LE.context, None)
@@ -252,7 +251,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         test_pducore(self, fancyPkt, x.PDU_REGISTER, True, 1, 2, 3)
         self.assertEqual(fancyPkt.timeout, 4)
         self.assertEqual(fancyPkt.priority, 5)
-        self.assertEqual(fancyPkt.subtree, (1, 2, 3))
+        self.assertEqual(fancyPkt.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(fancyPkt.rangeSubid, 5)
         self.assertEqual(fancyPkt.upperBound, 23)
         self.assertEqual(fancyPkt.context, "blah")
@@ -292,8 +291,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         test_pducore(self, basicPkt_new, x.PDU_REGISTER, True, 1, 2, 3)
         self.assertEqual(basicPkt_new.timeout, 4)
         self.assertEqual(basicPkt_new.priority, 5)
-        self.assertEqual(basicPkt_new.subtree, {"subids": (1, 2, 3),
-                                                "include": False})
+        self.assertEqual(basicPkt_new.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt_new.rangeSubid, 0)
         self.assertEqual(basicPkt_new.upperBound, None)
         self.assertEqual(basicPkt_new.context, None)
@@ -304,8 +302,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         test_pducore(self, basicPkt_LE_new, x.PDU_REGISTER, False, 1, 2, 3)
         self.assertEqual(basicPkt_LE_new.timeout, 4)
         self.assertEqual(basicPkt_LE_new.priority, 5)
-        self.assertEqual(basicPkt_LE_new.subtree, {"subids": (1, 2, 3),
-                                                   "include": False})
+        self.assertEqual(basicPkt_LE_new.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt_LE_new.rangeSubid, 0)
         self.assertEqual(basicPkt_LE_new.upperBound, None)
         self.assertEqual(basicPkt_LE_new.context, None)
@@ -316,8 +313,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         test_pducore(self, fancyPkt_new, x.PDU_REGISTER, True, 1, 2, 3)
         self.assertEqual(fancyPkt_new.timeout, 4)
         self.assertEqual(fancyPkt_new.priority, 5)
-        self.assertEqual(fancyPkt_new.subtree, {"subids": (1, 2, 3),
-                                                "include": False})
+        self.assertEqual(fancyPkt_new.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(fancyPkt_new.rangeSubid, 5)
         self.assertEqual(fancyPkt_new.upperBound, 23)
         self.assertEqual(fancyPkt_new.context, "blah")
@@ -330,7 +326,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "packetID": 3,
                           "timeout": 4,
                           "priority": 5,
-                          "subtree": {"subids": (1, 2, 3), "include": False},
+                          "subtree": x.OID((1, 2, 3), False),
                           "rangeSubid": 0,
                           "upperBound": None,
                           "context": None})
@@ -344,7 +340,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         basicPkt = cls(True, 1, 2, 3, 5, (1, 2, 3))
         test_pducore(self, basicPkt, x.PDU_UNREGISTER, True, 1, 2, 3)
         self.assertEqual(basicPkt.priority, 5)
-        self.assertEqual(basicPkt.subtree, (1, 2, 3))
+        self.assertEqual(basicPkt.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt.rangeSubid, 0)
         self.assertEqual(basicPkt.upperBound, None)
         self.assertEqual(basicPkt.context, None)
@@ -352,7 +348,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         basicPkt_LE = cls(False, 1, 2, 3, 5, (1, 2, 3))
         test_pducore(self, basicPkt_LE, x.PDU_UNREGISTER, False, 1, 2, 3)
         self.assertEqual(basicPkt_LE.priority, 5)
-        self.assertEqual(basicPkt_LE.subtree, (1, 2, 3))
+        self.assertEqual(basicPkt_LE.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt_LE.rangeSubid, 0)
         self.assertEqual(basicPkt_LE.upperBound, None)
         self.assertEqual(basicPkt_LE.context, None)
@@ -361,7 +357,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                        rangeSubid=5, upperBound=23, context="blah")
         test_pducore(self, fancyPkt, x.PDU_UNREGISTER, True, 1, 2, 3)
         self.assertEqual(fancyPkt.priority, 5)
-        self.assertEqual(fancyPkt.subtree, (1, 2, 3))
+        self.assertEqual(fancyPkt.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(fancyPkt.rangeSubid, 5)
         self.assertEqual(fancyPkt.upperBound, 23)
         self.assertEqual(fancyPkt.context, "blah")
@@ -400,8 +396,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         basicPkt_new = dec(body, header)
         test_pducore(self, basicPkt, x.PDU_UNREGISTER, True, 1, 2, 3)
         self.assertEqual(basicPkt_new.priority, 5)
-        self.assertEqual(basicPkt_new.subtree, {"subids": (1, 2, 3),
-                                                "include": False})
+        self.assertEqual(basicPkt_new.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt_new.rangeSubid, 0)
         self.assertEqual(basicPkt_new.upperBound, None)
         self.assertEqual(basicPkt_new.context, None)
@@ -411,8 +406,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         basicPkt_LE_new = dec(body, header)
         test_pducore(self, basicPkt_LE, x.PDU_UNREGISTER, False, 1, 2, 3)
         self.assertEqual(basicPkt_LE_new.priority, 5)
-        self.assertEqual(basicPkt_LE_new.subtree, {"subids": (1, 2, 3),
-                                                   "include": False})
+        self.assertEqual(basicPkt_LE_new.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(basicPkt_LE_new.rangeSubid, 0)
         self.assertEqual(basicPkt_LE_new.upperBound, None)
         self.assertEqual(basicPkt_LE_new.context, None)
@@ -422,8 +416,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         fancyPkt_new = dec(body, header)
         test_pducore(self, fancyPkt_new, x.PDU_UNREGISTER, True, 1, 2, 3)
         self.assertEqual(fancyPkt_new.priority, 5)
-        self.assertEqual(fancyPkt_new.subtree, {"subids": (1, 2, 3),
-                                                "include": False})
+        self.assertEqual(fancyPkt_new.subtree, x.OID((1, 2, 3), False))
         self.assertEqual(fancyPkt_new.rangeSubid, 5)
         self.assertEqual(fancyPkt_new.upperBound, 23)
         self.assertEqual(fancyPkt_new.context, "blah")
@@ -435,7 +428,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "transactionID": 2,
                           "packetID": 3,
                           "priority": 5,
-                          "subtree": {"subids": (1, 2, 3), "include": False},
+                          "subtree": x.OID((1, 2, 3), False),
                           "rangeSubid": 0,
                           "upperBound": None,
                           "context": None})
@@ -452,21 +445,23 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(nullPkt.context, None)
         # Test init, full packet
         fullPkt = cls(True, 1, 2, 3,
-                      (((1, 2, 3), (1, 2, 5), False),
-                       ((10, 20), (30, 40), True)),
+                      ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                       (x.OID((10, 20), True), x.OID((30, 40)))),
                       context="blah")
         test_pducore(self, fullPkt, x.PDU_GET, True, 1, 2, 3)
-        self.assertEqual(fullPkt.oidranges, (((1, 2, 3), (1, 2, 5), False),
-                                             ((10, 20), (30, 40), True)))
+        self.assertEqual(fullPkt.oidranges,
+                         ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                          (x.OID((10, 20), True), x.OID((30, 40)))))
         self.assertEqual(fullPkt.context, "blah")
         # Test init, full packet, little endian
         fullPkt_LE = cls(False, 1, 2, 3,
-                      (((1, 2, 3), (1, 2, 5), False),
-                       ((10, 20), (30, 40), True)),
+                      ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                       (x.OID((10, 20), True), x.OID((30, 40)))),
                       context="blah")
         test_pducore(self, fullPkt_LE, x.PDU_GET, False, 1, 2, 3)
-        self.assertEqual(fullPkt_LE.oidranges, (((1, 2, 3), (1, 2, 5), False),
-                                                ((10, 20), (30, 40), True)))
+        self.assertEqual(fullPkt_LE.oidranges,
+                         ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                          (x.OID((10, 20), True), x.OID((30, 40)))))
         self.assertEqual(fullPkt_LE.context, "blah")
         # Test encode, null packet
         nullPkt_str = nullPkt.encode()
@@ -516,10 +511,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         fullPkt_new = dec(body, header)
         test_pducore(self, fullPkt_new, x.PDU_GET, True, 1, 2, 3)
         self.assertEqual(fullPkt_new.oidranges,
-                         ({"start": {"subids": (1, 2, 3), "include": False},
-                           "end": {"subids": (1, 2, 5), "include": False}},
-                          {"start": {"subids": (10, 20), "include": True},
-                           "end": {"subids": (30, 40), "include": False}}))
+                         ({"start": x.OID((1, 2, 3), False),
+                           "end": x.OID((1, 2, 5), False)},
+                          {"start": x.OID((10, 20), True),
+                           "end": x.OID((30, 40), False)}))
         self.assertEqual(fullPkt_new.context, "blah")
         # Test decoding, full packet, little endian
         header, body = slicedata(fullPkt_LE_str, 20)
@@ -527,10 +522,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         fullPkt_LE_new = dec(body, header)
         test_pducore(self, fullPkt_LE_new, x.PDU_GET, False, 1, 2, 3)
         self.assertEqual(fullPkt_LE_new.oidranges,
-                         ({"start": {"subids": (1, 2, 3), "include": False},
-                           "end": {"subids": (1, 2, 5), "include": False}},
-                          {"start": {"subids": (10, 20), "include": True},
-                           "end": {"subids": (30, 40), "include": False}}))
+                         ({"start": x.OID((1, 2, 3), False),
+                           "end": x.OID((1, 2, 5), False)},
+                          {"start": x.OID((10, 20), True),
+                           "end": x.OID((30, 40), False)}))
         self.assertEqual(fullPkt_LE_new.context, "blah")
         # Test packetVars
         self.assertEqual(nullPkt_new.packetVars(),
@@ -554,21 +549,23 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(nullPkt.context, None)
         # Test init, full packet
         fullPkt = cls(True, 1, 2, 3,
-                      (((1, 2, 3), (1, 2, 5), False),
-                       ((10, 20), (30, 40), True)),
+                      ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                       (x.OID((10, 20), True), x.OID((30, 40)))),
                       context="blah")
         test_pducore(self, fullPkt, x.PDU_GET_NEXT, True, 1, 2, 3)
-        self.assertEqual(fullPkt.oidranges, (((1, 2, 3), (1, 2, 5), False),
-                                             ((10, 20), (30, 40), True)))
+        self.assertEqual(fullPkt.oidranges,
+                         ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                          (x.OID((10, 20), True), x.OID((30, 40)))))
         self.assertEqual(fullPkt.context, "blah")
         # Test init, full packet, little endian
         fullPkt_LE = cls(False, 1, 2, 3,
-                      (((1, 2, 3), (1, 2, 5), False),
-                       ((10, 20), (30, 40), True)),
-                      context="blah")
+                         ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                          (x.OID((10, 20), True), x.OID((30, 40)))),
+                         context="blah")
         test_pducore(self, fullPkt_LE, x.PDU_GET_NEXT, False, 1, 2, 3)
-        self.assertEqual(fullPkt_LE.oidranges, (((1, 2, 3), (1, 2, 5), False),
-                                                ((10, 20), (30, 40), True)))
+        self.assertEqual(fullPkt_LE.oidranges,
+                         ((x.OID((1, 2, 3), False), x.OID((1, 2, 5))),
+                          (x.OID((10, 20), True), x.OID((30, 40)))))
         self.assertEqual(fullPkt_LE.context, "blah")
         # Test encode, null packet
         nullPkt_str = nullPkt.encode()
@@ -615,10 +612,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         fullPkt_new = dec(body, header)
         test_pducore(self, fullPkt_new, x.PDU_GET_NEXT, True, 1, 2, 3)
         self.assertEqual(fullPkt_new.oidranges,
-                         ({"start": {"subids": (1, 2, 3), "include": False},
-                           "end": {"subids": (1, 2, 5), "include": False}},
-                          {"start": {"subids": (10, 20), "include": True},
-                           "end": {"subids": (30, 40), "include": False}}))
+                         ({"start": x.OID((1, 2, 3), False),
+                           "end": x.OID((1, 2, 5), False)},
+                          {"start": x.OID((10, 20), True),
+                           "end": x.OID((30, 40), False)}))
         self.assertEqual(fullPkt_new.context, "blah")
         # Test decoding, full packet, little endian
         header, body = slicedata(fullPkt_LE_str, 20)
@@ -626,10 +623,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         fullPkt_LE_new = dec(body, header)
         test_pducore(self, fullPkt_LE_new, x.PDU_GET_NEXT, False, 1, 2, 3)
         self.assertEqual(fullPkt_LE_new.oidranges,
-                         ({"start": {"subids": (1, 2, 3), "include": False},
-                           "end": {"subids": (1, 2, 5), "include": False}},
-                          {"start": {"subids": (10, 20), "include": True},
-                           "end": {"subids": (30, 40), "include": False}}))
+                         ({"start": x.OID((1, 2, 3), False),
+                           "end": x.OID((1, 2, 5), False)},
+                          {"start": x.OID((10, 20), True),
+                           "end": x.OID((30, 40), False)}))
         self.assertEqual(fullPkt_LE_new.context, "blah")
         # Test packetVars
         self.assertEqual(nullPkt_new.packetVars(),
@@ -648,27 +645,27 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Test init
         pkt = cls(True, 1, 2, 3, 1, 5,
-                  (((1, 2), (3, 4), False),
-                   ((6, 7), (8, 9), True)),
+                  ((x.OID((1, 2), False), x.OID((3, 4))),
+                   (x.OID((6, 7), True), x.OID((8, 9)))),
                   context="blah")
         test_pducore(self, pkt, x.PDU_GET_BULK, True, 1, 2, 3)
         self.assertEqual(pkt.nonReps, 1)
         self.assertEqual(pkt.maxReps, 5)
         self.assertEqual(pkt.oidranges,
-                         (((1, 2), (3, 4), False),
-                          ((6, 7), (8, 9), True)))
+                         ((x.OID((1, 2), False), x.OID((3, 4))),
+                          (x.OID((6, 7), True), x.OID((8, 9))))),
         self.assertEqual(pkt.context, "blah")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3, 1, 5,
-                  (((1, 2), (3, 4), False),
-                   ((6, 7), (8, 9), True)),
-                  context="blah")
+                     ((x.OID((1, 2), False), x.OID((3, 4))),
+                      (x.OID((6, 7), True), x.OID((8, 9)))),
+                     context="blah")
         test_pducore(self, pkt_LE, x.PDU_GET_BULK, False, 1, 2, 3)
         self.assertEqual(pkt_LE.nonReps, 1)
         self.assertEqual(pkt_LE.maxReps, 5)
         self.assertEqual(pkt_LE.oidranges,
-                         (((1, 2), (3, 4), False),
-                          ((6, 7), (8, 9), True)))
+                         ((x.OID((1, 2), False), x.OID((3, 4))),
+                          (x.OID((6, 7), True), x.OID((8, 9)))))
         self.assertEqual(pkt_LE.context, "blah")
         # Test encoding
         pkt_str = pkt.encode()
@@ -702,10 +699,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.nonReps, 1)
         self.assertEqual(pkt_new.maxReps, 5)
         self.assertEqual(pkt_new.oidranges,
-                         ({"start": {"subids": (1, 2), "include": False},
-                           "end": {"subids": (3, 4), "include": False}},
-                          {"start": {"subids": (6, 7), "include": True},
-                           "end": {"subids": (8, 9), "include": False}}))
+                         ({"start": x.OID((1, 2), False),
+                           "end": x.OID((3, 4), False)},
+                          {"start": x.OID((6, 7), True),
+                           "end": x.OID((8, 9), False)}))
         self.assertEqual(pkt_new.context, "blah")
         # Test decoding, little endian
         header, body = slicedata(pkt_LE_str, 20)
@@ -715,10 +712,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_LE_new.nonReps, 1)
         self.assertEqual(pkt_LE_new.maxReps, 5)
         self.assertEqual(pkt_LE_new.oidranges,
-                         ({"start": {"subids": (1, 2), "include": False},
-                           "end": {"subids": (3, 4), "include": False}},
-                          {"start": {"subids": (6, 7), "include": True},
-                           "end": {"subids": (8, 9), "include": False}}))
+                         ({"start": x.OID((1, 2), False),
+                           "end": x.OID((3, 4), False)},
+                          {"start": x.OID((6, 7), True),
+                           "end": x.OID((8, 9), False)}))
         self.assertEqual(pkt_LE_new.context, "blah")
         # Test packetVars
         self.assertEqual(pkt_new.packetVars(),
@@ -729,14 +726,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "packetID": 3,
                           "nonReps": 1,
                           "maxReps": 5,
-                          "oidranges": ({"start": {"subids": (1, 2),
-                                                   "include": False},
-                                         "end": {"subids": (3, 4),
-                                                 "include": False}},
-                                        {"start": {"subids": (6, 7),
-                                                   "include": True},
-                                         "end": {"subids": (8, 9),
-                                                 "include": False}}),
+                          "oidranges": ({"start": x.OID((1, 2), False),
+                                         "end": x.OID((3, 4), False)},
+                                        {"start": x.OID((6, 7), True),
+                                         "end": x.OID((8, 9), False)}),
                           "context": "blah"})
 
     def test_TestSetPDU(self):
@@ -746,23 +739,23 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Test init
         pkt = cls(True, 1, 2, 3,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt, x.PDU_TEST_SET, True, 1, 2, 3)
         self.assertEqual(pkt.varbinds,
-                         ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                          (x.OCTET_STR, (1, 2, 4), "blah")))
+                         ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt.context, "blah")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt_LE, x.PDU_TEST_SET, False, 1, 2, 3)
         self.assertEqual(pkt_LE.varbinds,
-                         ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                          (x.OCTET_STR, (1, 2, 4), "blah")))
+                         ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt_LE.context, "blah")
         # Test encoding
         pkt_str = pkt.encode()
@@ -802,11 +795,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         pkt_new = dec(body, header)
         test_pducore(self, pkt_new, x.PDU_TEST_SET, True, 1, 2, 3)
         self.assertEqual(pkt_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         self.assertEqual(pkt_new.context, "blah")
         # Test decoding, little endian
@@ -815,11 +808,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         pkt_LE_new = dec(body, header)
         test_pducore(self, pkt_LE_new, x.PDU_TEST_SET, False, 1, 2, 3)
         self.assertEqual(pkt_LE_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         self.assertEqual(pkt_LE_new.context, "blah")
         # Test packetVars
@@ -829,14 +822,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "sessionID": 1,
                           "transactionID": 2,
                           "packetID": 3,
-                          "varbinds": ({"type": x.OID,
-                                        "name": {"subids": (1, 2, 3),
-                                                 "include": False},
-                                        "data": {"subids": (4, 5, 6),
-                                                 "include": False}},
-                                       {"type": x.OCTET_STR,
-                                        "name": {"subids": (1, 2, 4),
-                                                 "include": False},
+                          "varbinds": ({"type": x.VALUE_OID,
+                                        "name": x.OID((1, 2, 3), False),
+                                        "data": x.OID((4, 5, 6), False)},
+                                       {"type": x.VALUE_OCTET_STR,
+                                        "name": x.OID((1, 2, 4), False),
                                         "data": "blah"}),
                          "context": "blah"})
 
@@ -1018,23 +1008,23 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Test init
         pkt = cls(True, 1, 2, 3,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt, x.PDU_NOTIFY, True, 1, 2, 3)
         self.assertEqual(pkt.varbinds,
-                         ((6, (1, 2, 3), (4, 5, 6), False),
-                          (4, (1, 2, 4), 'blah')))
+                         ((6, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (4, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt.context, "blah")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt_LE, x.PDU_NOTIFY, False, 1, 2, 3)
         self.assertEqual(pkt_LE.varbinds,
-                         ((6, (1, 2, 3), (4, 5, 6), False),
-                          (4, (1, 2, 4), 'blah')))
+                         ((6, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (4, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt_LE.context, "blah")
         # Test encode
         pkt_str = pkt.encode()
@@ -1074,11 +1064,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         pkt_new = dec(body, header)
         test_pducore(self, pkt_new, x.PDU_NOTIFY, True, 1, 2, 3)
         self.assertEqual(pkt_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         self.assertEqual(pkt_new.context, "blah")
         # Test decode, little endian
@@ -1087,11 +1077,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         pkt_LE_new = dec(body, header)
         test_pducore(self, pkt_LE_new, x.PDU_NOTIFY, False, 1, 2, 3)
         self.assertEqual(pkt_LE_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         self.assertEqual(pkt_LE_new.context, "blah")
         # Test packetVars
@@ -1101,16 +1091,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "sessionID": 1,
                           "transactionID": 2,
                           "packetID": 3,
-                          "varbinds": ({"type": x.OID,
-                                        "name": {"subids": (1, 2, 3),
-                                                 "include": False},
-                                        "data": {"subids": (4, 5, 6),
-                                                 "include": False}},
-                                       {"type": x.OCTET_STR,
-                                        "name": {"subids": (1, 2, 4),
-                                                 "include": False},
+                          "varbinds": ({"type": x.VALUE_OID,
+                                        "name": x.OID((1, 2, 3), False),
+                                        "data": x.OID((4, 5, 6), False)},
+                                       {"type": x.VALUE_OCTET_STR,
+                                        "name": x.OID((1, 2, 4), False),
                                         "data": "blah"}),
-                          "context": "blah"})
+                         "context": "blah"})
 
     def test_IndexAllocPDU(self):
         dec = ntp.agentx.decode_xIndexAllocPDU
@@ -1119,27 +1106,27 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Test init
         pkt = cls(True, 1, 2, 3, True, True,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt, x.PDU_INDEX_ALLOC, True, 1, 2, 3)
         self.assertEqual(pkt.newIndex, True)
         self.assertEqual(pkt.anyIndex, True)
         self.assertEqual(pkt.varbinds,
-                         ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                          (x.OCTET_STR, (1, 2, 4), "blah")))
+                         ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt.context, "blah")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3, True, True,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt_LE, x.PDU_INDEX_ALLOC, False, 1, 2, 3)
         self.assertEqual(pkt_LE.newIndex, True)
         self.assertEqual(pkt_LE.anyIndex, True)
         self.assertEqual(pkt_LE.varbinds,
-                         ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                          (x.OCTET_STR, (1, 2, 4), "blah")))
+                         ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt_LE.context, "blah")
         # Test encode
         pkt_str = pkt.encode()
@@ -1181,11 +1168,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.newIndex, True)
         self.assertEqual(pkt_new.anyIndex, True)
         self.assertEqual(pkt_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         # Test decode, little endian
         header, body = slicedata(pkt_LE_str, 20)
@@ -1195,11 +1182,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_LE_new.newIndex, True)
         self.assertEqual(pkt_LE_new.anyIndex, True)
         self.assertEqual(pkt_LE_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         self.assertEqual(pkt_LE_new.context, "blah")
         # Test packetVars
@@ -1211,14 +1198,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "packetID": 3,
                           "newIndex": True,
                           "anyIndex": True,
-                          "varbinds": ({"type": x.OID,
-                                        "name": {"subids": (1, 2, 3),
-                                                 "include": False},
-                                        "data": {"subids": (4, 5, 6),
-                                                 "include": False}},
-                                       {"type": x.OCTET_STR,
-                                        "name": {"subids": (1, 2, 4),
-                                                 "include": False},
+                          "varbinds": ({"type": x.VALUE_OID,
+                                        "name": x.OID((1, 2, 3), False),
+                                        "data": x.OID((4, 5, 6), False)},
+                                       {"type": x.VALUE_OCTET_STR,
+                                        "name": x.OID((1, 2, 4), False),
                                         "data": "blah"}),
                           "context": "blah"})
 
@@ -1229,27 +1213,27 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Test init
         pkt = cls(True, 1, 2, 3, True, True,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt, x.PDU_INDEX_DEALLOC, True, 1, 2, 3)
         self.assertEqual(pkt.newIndex, True)
         self.assertEqual(pkt.anyIndex, True)
         self.assertEqual(pkt.varbinds,
-                         ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                          (x.OCTET_STR, (1, 2, 4), "blah")))
+                         ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt.context, "blah")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3, True, True,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")),
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])),
                   context="blah")
         test_pducore(self, pkt_LE, x.PDU_INDEX_DEALLOC, False, 1, 2, 3)
         self.assertEqual(pkt_LE.newIndex, True)
         self.assertEqual(pkt_LE.anyIndex, True)
         self.assertEqual(pkt_LE.varbinds,
-                         ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                          (x.OCTET_STR, (1, 2, 4), "blah")))
+                         ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         self.assertEqual(pkt_LE.context, "blah")
         # Test encode
         pkt_str = pkt.encode()
@@ -1291,11 +1275,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.newIndex, True)
         self.assertEqual(pkt_new.anyIndex, True)
         self.assertEqual(pkt_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         self.assertEqual(pkt_new.context, "blah")
         # Test decode, little endian
@@ -1306,11 +1290,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_LE_new.newIndex, True)
         self.assertEqual(pkt_LE_new.anyIndex, True)
         self.assertEqual(pkt_LE_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         self.assertEqual(pkt_LE_new.context, "blah")
         # Test packetVars
@@ -1322,14 +1306,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "packetID": 3,
                           "newIndex": True,
                           "anyIndex": True,
-                          "varbinds": ({"type": x.OID,
-                                        "name": {"subids": (1, 2, 3),
-                                                 "include": False},
-                                        "data": {"subids": (4, 5, 6),
-                                                 "include": False}},
-                                       {"type": x.OCTET_STR,
-                                        "name": {"subids": (1, 2, 4),
-                                                 "include": False},
+                          "varbinds": ({"type": x.VALUE_OID,
+                                        "name": x.OID((1, 2, 3), False),
+                                        "data": x.OID((4, 5, 6), False)},
+                                       {"type": x.VALUE_OCTET_STR,
+                                        "name": x.OID((1, 2, 4), False),
                                         "data": "blah"}),
                           "context": "blah"})
 
@@ -1341,13 +1322,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test init
         pkt = cls(True, 1, 2, 3, (4, 5, 6), "blah", context="bluh")
         test_pducore(self, pkt, x.PDU_ADD_AGENT_CAPS, True, 1, 2, 3)
-        self.assertEqual(pkt.oid, (4, 5, 6))
+        self.assertEqual(pkt.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt.description, "blah")
         self.assertEqual(pkt.context, "bluh")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3, (4, 5, 6), "blah", context="bluh")
         test_pducore(self, pkt_LE, x.PDU_ADD_AGENT_CAPS, False, 1, 2, 3)
-        self.assertEqual(pkt_LE.oid, (4, 5, 6))
+        self.assertEqual(pkt_LE.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt_LE.description, "blah")
         self.assertEqual(pkt_LE.context, "bluh")
         # Test encode
@@ -1375,8 +1356,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         header = decode_pduheader(header)
         pkt_new = dec(body, header)
         test_pducore(self, pkt_new, x.PDU_ADD_AGENT_CAPS, True, 1, 2, 3)
-        self.assertEqual(pkt_new.oid, {"subids": (4, 5, 6),
-                                       "include": False})
+        self.assertEqual(pkt_new.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt_new.description, "blah")
         self.assertEqual(pkt_new.context, "bluh")
         # Test decode, little endian
@@ -1384,8 +1364,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         header = decode_pduheader(header)
         pkt_LE_new = dec(body, header)
         test_pducore(self, pkt_LE_new, x.PDU_ADD_AGENT_CAPS, False, 1, 2, 3)
-        self.assertEqual(pkt_LE_new.oid, {"subids": (4, 5, 6),
-                                          "include": False})
+        self.assertEqual(pkt_LE_new.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt_LE_new.description, "blah")
         self.assertEqual(pkt_LE_new.context, "bluh")
         # Test packetVars
@@ -1395,7 +1374,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "sessionID": 1,
                           "transactionID": 2,
                           "packetID": 3,
-                          "oid": {"subids": (4, 5, 6), "include": False},
+                          "oid": x.OID((4, 5, 6), False),
                           "description": "blah",
                           "context": "bluh"})
 
@@ -1407,12 +1386,12 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test init
         pkt = cls(True, 1, 2, 3, (4, 5, 6), context="bluh")
         test_pducore(self, pkt, x.PDU_RM_AGENT_CAPS, True, 1, 2, 3)
-        self.assertEqual(pkt.oid, (4, 5, 6))
+        self.assertEqual(pkt.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt.context, "bluh")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3, (4, 5, 6), context="bluh")
         test_pducore(self, pkt_LE, x.PDU_RM_AGENT_CAPS, False, 1, 2, 3)
-        self.assertEqual(pkt_LE.oid, (4, 5, 6))
+        self.assertEqual(pkt_LE.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt_LE.context, "bluh")
         # Test encode
         pkt_str = pkt.encode()
@@ -1437,16 +1416,14 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         header = decode_pduheader(header)
         pkt_new = dec(body, header)
         test_pducore(self, pkt_new, x.PDU_RM_AGENT_CAPS, True, 1, 2, 3)
-        self.assertEqual(pkt_new.oid, {"subids": (4, 5, 6),
-                                       "include": False})
+        self.assertEqual(pkt_new.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt_new.context, "bluh")
         # Test decode, little endian
         header, body = slicedata(pkt_LE_str, 20)
         header = decode_pduheader(header)
         pkt_LE_new = dec(body, header)
         test_pducore(self, pkt_LE_new, x.PDU_RM_AGENT_CAPS, False, 1, 2, 3)
-        self.assertEqual(pkt_LE_new.oid, {"subids": (4, 5, 6),
-                                          "include": False})
+        self.assertEqual(pkt_LE_new.oid, x.OID((4, 5, 6), False))
         self.assertEqual(pkt_LE_new.context, "bluh")
         # Test packetVars
         self.assertEqual(pkt_new.packetVars(),
@@ -1455,7 +1432,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "sessionID": 1,
                           "transactionID": 2,
                           "packetID": 3,
-                          "oid": {"subids": (4, 5, 6), "include": False},
+                          "oid": x.OID((4, 5, 6), False),
                           "context": "bluh"})
 
     def test_ResponsePDU(self):
@@ -1465,26 +1442,26 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Test init
         pkt = cls(True, 1, 2, 3, 4, 5, 6,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")))
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         test_pducore(self, pkt, x.PDU_RESPONSE, True, 1, 2, 3)
         self.assertEqual(pkt.sysUptime, 4)
         self.assertEqual(pkt.resError, 5)
         self.assertEqual(pkt.resIndex, 6)
         self.assertEqual(pkt.varbinds,
-                         ((6, (1, 2, 3), (4, 5, 6), False),
-                          (4, (1, 2, 4), 'blah')))
+                         ((6, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (4, (1, 2, 4), ["blah"])))
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3, 4, 5, 6,
-                  ((x.OID, (1, 2, 3), (4, 5, 6), False),
-                   (x.OCTET_STR, (1, 2, 4), "blah")))
+                  ((x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
+                   (x.VALUE_OCTET_STR, (1, 2, 4), ["blah"])))
         test_pducore(self, pkt_LE, x.PDU_RESPONSE, False, 1, 2, 3)
         self.assertEqual(pkt_LE.sysUptime, 4)
         self.assertEqual(pkt_LE.resError, 5)
         self.assertEqual(pkt_LE.resIndex, 6)
         self.assertEqual(pkt_LE.varbinds,
-                         ((6, (1, 2, 3), (4, 5, 6), False),
-                          (4, (1, 2, 4), 'blah')))
+                         ((6, (1, 2, 3), x.OID((4, 5, 6), False)),
+                          (4, (1, 2, 4), ["blah"])))
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
@@ -1526,11 +1503,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.resError, 5)
         self.assertEqual(pkt_new.resIndex, 6)
         self.assertEqual(pkt_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         # Test decode, little endian
         header, body = slicedata(pkt_LE_str, 20)
@@ -1541,11 +1518,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_LE_new.resError, 5)
         self.assertEqual(pkt_LE_new.resIndex, 6)
         self.assertEqual(pkt_LE_new.varbinds,
-                         ({"type": x.OID,
-                           "name": {"subids": (1, 2, 3), "include": False},
-                           "data": {"subids": (4, 5, 6), "include": False}},
-                          {"type": x.OCTET_STR,
-                           "name": {"subids": (1, 2, 4), "include": False},
+                         ({"type": x.VALUE_OID,
+                           "name": x.OID((1, 2, 3), False),
+                           "data": x.OID((4, 5, 6), False)},
+                          {"type": x.VALUE_OCTET_STR,
+                           "name": x.OID((1, 2, 4), False),
                            "data": "blah"}))
         # Test packetVars
         self.assertEqual(pkt_new.packetVars(),
@@ -1557,14 +1534,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "sysUptime": 4,
                           "resError": 5,
                           "resIndex": 6,
-                          "varbinds": ({"type": x.OID,
-                                        "name": {"subids": (1, 2, 3),
-                                                 "include": False},
-                                        "data": {"subids": (4, 5, 6),
-                                                 "include": False}},
-                                       {"type": x.OCTET_STR,
-                                        "name": {"subids": (1, 2, 4),
-                                                 "include": False},
+                          "varbinds": ({"type": x.VALUE_OID,
+                                        "name": x.OID((1, 2, 3), False),
+                                        "data": x.OID((4, 5, 6), False)},
+                                       {"type": x.VALUE_OCTET_STR,
+                                        "name": x.OID((1, 2, 4), False),
                                         "data": "blah"})})
 
     #
@@ -1637,104 +1611,127 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              lilEndianFlags),
                          ((1, 2, 3, 4), extraData))
 
-    def test_oid(self):
-        enc = ntp.agentx.encode_oid
-        dec = ntp.agentx.decode_oid
+    def test_OID(self):
+        target = ntp.agentx.OID
+        dec = ntp.agentx.decode_OID
 
         # Encode empty OID
-        self.assertEqual(enc(True, (), False), "\x00\x00\x00\x00")
+        cls = target((), False)
+        self.assertEqual(cls.encode(True), "\x00\x00\x00\x00")
         # Encode basic OID
-        self.assertEqual(enc(True, (1, 2, 3, 4, 5), False),
+        cls = target((1, 2, 3, 4, 5), False)
+        self.assertEqual(cls.encode(True),
                          "\x05\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x00\x00\x00\x05")
         # Encode basic OID, little endian
-        self.assertEqual(enc(False, (1, 2, 3, 4, 5), False),
+        self.assertEqual(cls.encode(False),
                          "\x05\x00\x00\x00"
                          "\x01\x00\x00\x00\x02\x00\x00\x00"
                          "\x03\x00\x00\x00\x04\x00\x00\x00"
                          "\x05\x00\x00\x00")
         # Encode prefixed OID
-        self.assertEqual(enc(True, (1, 3, 6, 1, 23, 1, 2, 3), False),
+        cls = target((1, 3, 6, 1, 23, 1, 2, 3), False)
+        self.assertEqual(cls.encode(True),
                          "\x03\x17\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03")
         # Encode include
-        self.assertEqual(enc(True, (1, 2), True),
+        cls = target((1, 2), True)
+        self.assertEqual(cls.encode(True),
                          "\x02\x00\x01\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02")
         # Encode together
-        self.assertEqual(enc(True, (1, 3, 6, 1, 1, 3, 4, 5, 6), True),
+        cls = target((1, 3, 6, 1, 1, 3, 4, 5, 6), True)
+        self.assertEqual(cls.encode(True),
                          "\x04\x01\x01\x00"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
                          "\x00\x00\x00\x05\x00\x00\x00\x06")
-
         # Encode maximum size
-        self.assertEqual(enc(True, maximumOIDsubs, False), maximumOIDstr)
+        cls = target(maximumOIDsubs, False)
+        self.assertEqual(cls.encode(True), maximumOIDstr)
         # Encode over maximum size
         try:
-            enc(True, maximumOIDsubs + (42,), False)
-            fail = False
+            cls = target(maximumOIDsubs + (42,), False)
+            cls.encode(True)
+            errored = False
         except ValueError:
-            fail = True
-        self.assertEqual(fail, True)
+            errored = True
+        self.assertEqual(errored, True)
+
         # Decode empty OID, extra data
-        self.assertEqual(dec("\x00\x00\x00\x00" + extraData, standardFlags),
-                         ({"subids": (), "include": False}, extraData))
+        cls, xtr = dec("\x00\x00\x00\x00" + extraData, standardFlags)
+        self.assertEqual(isinstance(cls, target), True)
+        self.assertEqual(cls.subids, ())
+        self.assertEqual(cls.include, False)
+        self.assertEqual(xtr, extraData)
         # Decode basic OID, extra data
-        self.assertEqual(dec("\x05\x00\x00\x00\x00\x00\x00\x01"
-                             "\x00\x00\x00\x02\x00\x00\x00\x03"
-                             "\x00\x00\x00\x04\x00\x00\x00\x05" + extraData,
-                             standardFlags),
-                         ({"subids": (1, 2, 3, 4, 5), "include": False},
-                          extraData))
+        cls, xtr = dec("\x05\x00\x00\x00\x00\x00\x00\x01"
+                       "\x00\x00\x00\x02\x00\x00\x00\x03"
+                       "\x00\x00\x00\x04\x00\x00\x00\x05" + extraData,
+                       standardFlags)
+        self.assertEqual(isinstance(cls, target), True)
+        self.assertEqual(cls.subids, (1, 2, 3, 4, 5))
+        self.assertEqual(cls.include, False)
+        self.assertEqual(xtr, extraData)
         # Decode basic OID, little endian
-        self.assertEqual(dec("\x05\x00\x00\x00\x01\x00\x00\x00"
-                             "\x02\x00\x00\x00\x03\x00\x00\x00"
-                             "\x04\x00\x00\x00\x05\x00\x00\x00",
-                             lilEndianFlags),
-                         ({"subids": (1, 2, 3, 4, 5), "include": False},
-                         ""))
+        cls, xtr = dec("\x05\x00\x00\x00\x01\x00\x00\x00"
+                       "\x02\x00\x00\x00\x03\x00\x00\x00"
+                       "\x04\x00\x00\x00\x05\x00\x00\x00",
+                       lilEndianFlags)
+        self.assertEqual(isinstance(cls, target), True)
+        self.assertEqual(cls.subids, (1, 2, 3, 4, 5))
+        self.assertEqual(cls.include, False)
+        self.assertEqual(xtr, "")
         # Decode prefixed OID
-        self.assertEqual(dec("\x03\x17\x00\x00\x00\x00\x00\x01"
-                             "\x00\x00\x00\x02\x00\x00\x00\x03", standardFlags),
-                         ({"subids": (1, 3, 6, 1, 23, 1, 2, 3),
-                           "include": False},
-                          ""))
+        cls, xtr = dec("\x03\x17\x00\x00\x00\x00\x00\x01"
+                       "\x00\x00\x00\x02\x00\x00\x00\x03", standardFlags)
+        self.assertEqual(isinstance(cls, target), True)
+        self.assertEqual(cls.subids, (1, 3, 6, 1, 23, 1, 2, 3))
+        self.assertEqual(cls.include, False)
+        self.assertEqual(xtr, "")
         # Decode include
-        self.assertEqual(dec("\x02\x00\x05\x00\x00\x00\x00\x01\x00\x00\x00\x02",
-                             standardFlags),
-                         ({"subids": (1, 2), "include": True}, ""))
+        cls, xtr = dec("\x02\x00\x05\x00\x00\x00\x00\x01\x00\x00\x00\x02",
+                       standardFlags)
+        self.assertEqual(isinstance(cls, target), True)
+        self.assertEqual(cls.subids, (1, 2))
+        self.assertEqual(cls.include, True)
+        self.assertEqual(xtr, "")
         # Decode together
-        self.assertEqual(dec("\x04\x01\x02\x00\x00\x00\x00\x03"
-                             "\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00\x06",
-                             standardFlags),
-                         ({"subids": (1, 3, 6, 1, 1, 3, 4, 5, 6),
-                           "include": True},
-                          ""))
+        cls, xtr = dec("\x04\x01\x02\x00\x00\x00\x00\x03"
+                       "\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00\x06",
+                       standardFlags)
+        self.assertEqual(isinstance(cls, target), True)
+        self.assertEqual(cls.subids, (1, 3, 6, 1, 1, 3, 4, 5, 6))
+        self.assertEqual(cls.include, True)
+        self.assertEqual(xtr, "")
         # Decode maximum size
-        self.assertEqual(dec(maximumOIDstr, standardFlags),
-                         ({"subids": maximumOIDsubs, "include": False}, ""))
+        cls, xtr = dec(maximumOIDstr, standardFlags)
+        self.assertEqual(isinstance(cls, target), True)
+        self.assertEqual(cls.subids, maximumOIDsubs)
+        self.assertEqual(cls.include, False)
+        self.assertEqual(xtr, "")
         # Decode over maximum size
         # Need to replace the hardcoded n_subid=128 with 129
         fatOID = "\x81" + maximumOIDstr[1:] + "\xDE\xAD\xBE\xEF"
         try:
-            dec(fatOID, standardFlags)
-            fail = False
+            cls, xtr = dec(fatOID, standardFlags)
+            errored = False
         except ValueError:
-            fail = True
-        self.assertEqual(fail, True)
+            errored = True
+        self.assertEqual(errored, True)
 
     def test_searchrange(self):
         enc = ntp.agentx.encode_searchrange
         dec = ntp.agentx.decode_searchrange
+        oid = ntp.agentx.OID
 
         # Encode minimum size
-        self.assertEqual(enc(True, (), (), False),
+        self.assertEqual(enc(True, oid(()), oid(())),
                          "\x00\x00\x00\x00\x00\x00\x00\x00")
         # Encode inclusive
-        self.assertEqual(enc(True, (1, 2, 3, 4), (5, 6, 7, 8), True),
+        self.assertEqual(enc(True, oid((1, 2, 3, 4), True), oid((5, 6, 7, 8))),
                          "\x04\x00\x01\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
@@ -1742,7 +1739,9 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          "\x00\x00\x00\x05\x00\x00\x00\x06"
                          "\x00\x00\x00\x07\x00\x00\x00\x08")
         # Encode exclusive
-        self.assertEqual(enc(True, (1, 2, 3, 4), (5, 6, 7, 8), False),
+        self.assertEqual(enc(True,
+                             oid((1, 2, 3, 4), False),
+                             oid((5, 6, 7, 8))),
                          "\x04\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x00\x00\x00\x03\x00\x00\x00\x04"
@@ -1750,7 +1749,9 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          "\x00\x00\x00\x05\x00\x00\x00\x06"
                          "\x00\x00\x00\x07\x00\x00\x00\x08")
         # Encode exclusive, little endian
-        self.assertEqual(enc(False, (1, 2, 3, 4), (5, 6, 7, 8), False),
+        self.assertEqual(enc(False,
+                             oid((1, 2, 3, 4), False),
+                             oid((5, 6, 7, 8))),
                          "\x04\x00\x00\x00"
                          "\x01\x00\x00\x00\x02\x00\x00\x00"
                          "\x03\x00\x00\x00\x04\x00\x00\x00"
@@ -1760,8 +1761,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Decode minimum size, extra data
         self.assertEqual(dec("\x00\x00\x00\x00\x00\x00\x00\x00" + extraData,
                              standardFlags),
-                         ({"start": {"subids": (), "include": False},
-                           "end": {"subids": (), "include": False}},
+                         ({"start": oid((), False),
+                           "end": oid((), False)},
                           extraData))
         # Decode inclusive
         self.assertEqual(dec("\x04\x00\x01\x00"
@@ -1771,8 +1772,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              "\x00\x00\x00\x05\x00\x00\x00\x06"
                              "\x00\x00\x00\x07\x00\x00\x00\x08",
                              standardFlags),
-                         ({"start": {"subids": (1, 2, 3, 4), "include": True},
-                           "end": {"subids": (5, 6, 7, 8), "include": False}},
+                         ({"start": oid((1, 2, 3, 4), True),
+                           "end": oid((5, 6, 7, 8), False)},
                           ""))
         # Decode exclusive
         self.assertEqual(dec("\x04\x00\x00\x00"
@@ -1782,8 +1783,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              "\x00\x00\x00\x05\x00\x00\x00\x06"
                              "\x00\x00\x00\x07\x00\x00\x00\x08",
                              standardFlags),
-                         ({"start": {"subids": (1, 2, 3, 4), "include": False},
-                           "end": {"subids": (5, 6, 7, 8), "include": False}},
+                         ({"start": oid((1, 2, 3, 4), False),
+                           "end": oid((5, 6, 7, 8), False)},
                           ""))
         # Decode little endian
         self.assertEqual(dec("\x04\x00\x01\x00"
@@ -1793,31 +1794,32 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              "\x05\x00\x00\x00\x06\x00\x00\x00"
                              "\x07\x00\x00\x00\x08\x00\x00\x00",
                              lilEndianFlags),
-                         ({"start": {"subids": (1, 2, 3, 4), "include": True},
-                           "end": {"subids": (5, 6, 7, 8), "include": False}},
+                         ({"start": oid((1, 2, 3, 4), True),
+                           "end": oid((5, 6, 7, 8), False)},
                           ""))
 
     def test_encode_searchrange_list(self):
         enc = ntp.agentx.encode_searchrange_list
+        oid = ntp.agentx.OID
 
         # Encode
-        self.assertEqual(enc(True, (((1, 2), (1, 2), True),
-                                    ((2, 3), (3, 4), False))),
+        self.assertEqual(enc(True, ((oid((1, 2), True), oid((1, 2))),
+                                    (oid((2, 3), False), oid((3, 4))))),
                          "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04")
         # Encode, little endian
-        self.assertEqual(enc(False, (((1, 2), (1, 2), True),
-                                     ((2, 3), (3, 4), False))),
+        self.assertEqual(enc(False, ((oid((1, 2), True), oid((1, 2))),
+                                     (oid((2, 3), False), oid((3, 4))))),
                          "\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                          "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                          "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
                          "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00")
         # Test, null terminated
         self.assertEqual(enc(True,
-                             (((1, 2), (1, 2), True),
-                              ((2, 3), (3, 4), False)),
+                             ((oid((1, 2), True), oid((1, 2))),
+                              (oid((2, 3), False), oid((3, 4)))),
                              nullTerminate=True),
                          "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
                          "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
@@ -1827,6 +1829,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
     def test_decode_searchrange_list(self):
         dec = ntp.agentx.decode_searchrange_list
+        oid = ntp.agentx.OID
 
         # Decode
         self.assertEqual(dec("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
@@ -1834,23 +1837,24 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
                              "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04",
                              standardFlags),
-                         ({"start": {"subids": (1, 2), "include": True},
-                           "end": {"subids": (1, 2), "include": False}},
-                          {"start": {"subids": (2, 3), "include": False},
-                           "end": {"subids": (3, 4), "include": False}}))
+                         ({"start": oid((1, 2), True),
+                           "end": oid((1, 2), False)},
+                          {"start": oid((2, 3), False),
+                           "end": oid((3, 4), False)}))
         # Test, little endian
         self.assertEqual(dec("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                              "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                              "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
                              "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00",
                              lilEndianFlags),
-                         ({"start": {"subids": (1, 2), "include": True},
-                           "end": {"subids": (1, 2), "include": False}},
-                          {"start": {"subids": (2, 3), "include": False},
-                           "end": {"subids": (3, 4), "include": False}}))
+                         ({"start": oid((1, 2), True),
+                           "end": oid((1, 2), False)},
+                          {"start": oid((2, 3), False),
+                           "end": oid((3, 4), False)}),)
 
     def test_decode_searchrange_list_nullterm(self):
         dec = ntp.agentx.decode_searchrange_list_nullterm
+        oid = ntp.agentx.OID
 
         # Decode
         self.assertEqual(dec("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
@@ -1858,10 +1862,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
                              "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
                              "\x00\x00\x00\x00" + extraData, standardFlags),
-                         (({"start": {"subids": (1, 2), "include": True},
-                            "end": {"subids": (1, 2), "include": False}},
-                           {"start": {"subids": (2, 3), "include": False},
-                            "end": {"subids": (3, 4), "include": False}}),
+                         (({"start": oid((1, 2), True),
+                            "end": oid((1, 2), False)},
+                           {"start": oid((2, 3), False),
+                            "end": oid((3, 4), False)}),
                           extraData))
         # Test, little endian
         self.assertEqual(dec("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
@@ -1869,10 +1873,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
                              "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
                              "\x00\x00\x00\x00" + extraData, lilEndianFlags),
-                         (({"start": {"subids": (1, 2), "include": True},
-                            "end": {"subids": (1, 2), "include": False}},
-                           {"start": {"subids": (2, 3), "include": False},
-                            "end": {"subids": (3, 4), "include": False}}),
+                         (({"start": oid((1, 2), True),
+                            "end": oid((1, 2), False)},
+                           {"start": oid((2, 3), False),
+                            "end": oid((3, 4), False)}),
                           extraData))
 
     def test_encode_octetstr(self):
@@ -1910,58 +1914,62 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         a = ntp.agentx
 
         # Test payloadless types
-        self.assertEqual(enc(True, a.NULL, (1, 2, 3)),
+        self.assertEqual(enc(True, a.VALUE_NULL, (1, 2, 3)),
                          "\x00\x05\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
-        self.assertEqual(enc(True, a.NO_SUCH_OBJECT, (1, 2, 3)),
+        self.assertEqual(enc(True, a.VALUE_NO_SUCH_OBJECT, (1, 2, 3)),
                          "\x00\x80\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
-        self.assertEqual(enc(True, a.NO_SUCH_INSTANCE, (1, 2, 3)),
+        self.assertEqual(enc(True, a.VALUE_NO_SUCH_INSTANCE, (1, 2, 3)),
                          "\x00\x81\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
-        self.assertEqual(enc(True, a.END_OF_MIB_VIEW, (1, 2, 3)),
+        self.assertEqual(enc(True, a.VALUE_END_OF_MIB_VIEW, (1, 2, 3)),
                          "\x00\x82\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
         # Test octet based types
-        self.assertEqual(enc(True, a.OCTET_STR, (1, 2, 3), (1, 2, 3, 4, 5)),
+        self.assertEqual(enc(True, a.VALUE_OCTET_STR, (1, 2, 3),
+                             [(1, 2, 3, 4, 5)]),
                          "\x00\x04\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x05"
                          "\x01\x02\x03\x04\x05\x00\x00\x00")
-        self.assertEqual(enc(True, a.IP_ADDR, (1, 2, 3), (16, 32, 48, 64)),
+        self.assertEqual(enc(True, a.VALUE_IP_ADDR, (1, 2, 3),
+                             [(16, 32, 48, 64)]),
                          "\x00\x40\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x04\x10\x20\x30\x40")
         # Test integer32 types
-        self.assertEqual(enc(True, a.INTEGER, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.VALUE_INTEGER, (1, 2, 3), [42]),
                          "\x00\x02\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
-        self.assertEqual(enc(True, a.COUNTER32, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.VALUE_COUNTER32, (1, 2, 3), [42]),
                          "\x00\x41\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
-        self.assertEqual(enc(True, a.GAUGE32, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.VALUE_GAUGE32, (1, 2, 3), [42]),
                          "\x00\x42\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
-        self.assertEqual(enc(True, a.TIME_TICKS, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.VALUE_TIME_TICKS, (1, 2, 3), [42]),
                          "\x00\x43\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x2A")
         # Test integer64 type
-        self.assertEqual(enc(True, a.COUNTER64, (1, 2, 3), 42),
+        self.assertEqual(enc(True, a.VALUE_COUNTER64, (1, 2, 3), [42]),
                          "\x00\x46\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x00\x00\x00\x00\x00\x00\x00\x2A")
         # Test oid type
-        self.assertEqual(enc(True, a.OID, (1, 2, 3), (16, 42, 256), False),
+        self.assertEqual(enc(True, a.VALUE_OID, (1, 2, 3),
+                             a.OID((16, 42, 256), False)),
                          "\x00\x06\x00\x00\x03\x00\x00\x00"
                          "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          "\x03\x00\x00\x00\x00\x00\x00\x10"
                          "\x00\x00\x00\x2A\x00\x00\x01\x00")
         # Test oid type, little endian
-        self.assertEqual(enc(False, a.OID, (1, 2, 3), (16, 42, 256), False),
+        self.assertEqual(enc(False, a.VALUE_OID, (1, 2, 3),
+                             a.OID((16, 42, 256), False)),
                          "\x06\x00\x00\x00\x03\x00\x00\x00"
                          "\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
                          "\x03\x00\x00\x00\x10\x00\x00\x00"
@@ -1975,29 +1983,29 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(f("\x00\x05\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
-                         ({"type": a.NULL,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_NULL,
+                           "name": a.OID((1, 2, 3), False),
                            "data": None},
                           ""))
         self.assertEqual(f("\x00\x80\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
-                         ({"type": a.NO_SUCH_OBJECT,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_NO_SUCH_OBJECT,
+                           "name": a.OID((1, 2, 3), False),
                            "data": None},
                           ""))
         self.assertEqual(f("\x00\x81\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
-                         ({"type": a.NO_SUCH_INSTANCE,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_NO_SUCH_INSTANCE,
+                           "name": a.OID((1, 2, 3), False),
                            "data": None},
                           ""))
         self.assertEqual(f("\x00\x82\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
-                         ({"type": a.END_OF_MIB_VIEW,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_END_OF_MIB_VIEW,
+                           "name": a.OID((1, 2, 3), False),
                            "data": None},
                           ""))
         # Test octet based types
@@ -2005,52 +2013,52 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x00\x00\x00\x0512345\x00\x00\x00",
                            standardFlags),
-                         ({"type": a.OCTET_STR,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_OCTET_STR,
+                           "name": a.OID((1, 2, 3), False),
                            "data": "12345"},
                           ""))
         self.assertEqual(f("\x00\x40\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x00\x00\x00\x04\x10\x20\x30\x40", standardFlags),
-                         ({"type": a.IP_ADDR,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_IP_ADDR,
+                           "name": a.OID((1, 2, 3), False),
                            "data": (16, 32, 48, 64)},
                           ""))
         # Test integer32 types
         self.assertEqual(f("\x00\x02\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x00\x00\x00\x2A", standardFlags),
-                         ({"type": a.INTEGER,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_INTEGER,
+                           "name": a.OID((1, 2, 3), False),
                            "data": 42},
                           ""))
         self.assertEqual(f("\x00\x41\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x00\x00\x00\x2A", standardFlags),
-                         ({"type": a.COUNTER32,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_COUNTER32,
+                           "name": a.OID((1, 2, 3), False),
                            "data": 42},
                           ""))
         self.assertEqual(f("\x00\x42\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x00\x00\x00\x2A", standardFlags),
-                         ({"type": a.GAUGE32,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_GAUGE32,
+                           "name": a.OID((1, 2, 3), False),
                            "data": 42},
                           ""))
         self.assertEqual(f("\x00\x43\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x00\x00\x00\x2A", standardFlags),
-                         ({"type": a.TIME_TICKS,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_TIME_TICKS,
+                           "name": a.OID((1, 2, 3), False),
                            "data": 42},
                           ""))
         # Test integer64 type
         self.assertEqual(f("\x00\x46\x00\x00\x03\x00\x00\x00"
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x00\x00\x00\x00\x00\x00\x00\x2A", standardFlags),
-                         ({"type": a.COUNTER64,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_COUNTER64,
+                           "name": a.OID((1, 2, 3), False),
                            "data": 42},
                           ""))
         # Test oid type
@@ -2058,18 +2066,16 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            "\x03\x00\x00\x00\x00\x00\x00\x10"
                            "\x00\x00\x00\x2A\x00\x00\x01\x00", standardFlags),
-                         ({"type": a.OID,
-                           "name": {"subids": (1, 2, 3),
-                                    "include": False},
-                           "data": {"subids": (16, 42, 256),
-                                    "include": False}},
+                         ({"type": a.VALUE_OID,
+                           "name": a.OID((1, 2, 3), False),
+                           "data": a.OID((16, 42, 256), False)},
                           ""))
         # Test integer32 with little endian
         self.assertEqual(f("\x43\x00\x00\x00\x03\x00\x00\x00"
                            "\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
                            "\x2A\x00\x00\x00", lilEndianFlags),
-                         ({"type": a.TIME_TICKS,
-                           "name": {"subids": (1, 2, 3), "include": False},
+                         ({"type": a.VALUE_TIME_TICKS,
+                           "name": a.OID((1, 2, 3), False),
                            "data": 42},
                           ""))
 
@@ -2185,8 +2191,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x03\x00\x00\x00\x04"
                            "\x00\x00\x00\x03foo\x00"),
                          (x.OpenPDU(True, 12, 34, 56, 78,
-                                    {"subids": (1, 2, 3, 4),
-                                     "include": False},
+                                    x.OID((1, 2, 3, 4), False),
                                     "foo"),
                           ""))
         # Test open, extraData
@@ -2199,8 +2204,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x03\x00\x00\x00\x04"
                            "\x00\x00\x00\x03foo\x00" + extraData),
                          (x.OpenPDU(True, 12, 34, 56, 78,
-                                    {"subids": (1, 2, 3, 4),
-                                     "include": False},
+                                    x.OID((1, 2, 3, 4), False),
                                     "foo"),
                           extraData))
         # Test close
@@ -2218,8 +2222,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x03\x00\x00\x00\x00\x00\x00\x01"
                            "\x00\x00\x00\x02\x00\x00\x00\x03"),
                          (x.RegisterPDU(True, 1, 2, 3, 4, 5,
-                                        {"subids": (1, 2, 3),
-                                         "include": False},
+                                        x.OID((1, 2, 3), False),
                                         0, None, None),
                           ""))
         # Test unregister
@@ -2230,8 +2233,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x03\x00\x00\x00\x00\x00\x00\x01"
                            "\x00\x00\x00\x02\x00\x00\x00\x03"),
                          (x.UnregisterPDU(True, 1, 2, 3, 5,
-                                          {"subids": (1, 2, 3),
-                                           "include": False},
+                                          x.OID((1, 2, 3), False),
                                           0, None, None),
                           ""))
         # Test get
@@ -2257,14 +2259,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
                            "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"),
                          (x.GetBulkPDU(True, 1, 2, 3, 1, 5,
-                                       ({"start": {"subids": (1, 2),
-                                                   "include": False},
-                                         "end": {"subids": (3, 4),
-                                                 "include": False}},
-                                        {"start": {"subids": (6, 7),
-                                                   "include": True},
-                                         "end": {"subids": (8, 9),
-                                                 "include": False}})),
+                                       ({"start": x.OID((1, 2), False),
+                                         "end": x.OID((3, 4), False)},
+                                        {"start": x.OID((6, 7), True),
+                                         "end": x.OID((8, 9), False)})),
                           ""))
         # Test test set
         self.assertEqual(f("\x01\x08\x10\x00"
@@ -2280,14 +2278,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x02\x00\x00\x00\x04"
                            "\x00\x00\x00\x04blah"),
                          (x.TestSetPDU(True, 1, 2, 3,
-                                       ({"type": x.OID,
-                                         "name": {"subids": (1, 2, 3),
-                                                  "include": False},
-                                         "data": {"subids": (4, 5, 6),
-                                                  "include": False}},
-                                        {"type": x.OCTET_STR,
-                                         "name": {"subids": (1, 2, 4),
-                                                  "include": False},
+                                       ({"type": x.VALUE_OID,
+                                         "name": x.OID((1, 2, 3), False),
+                                         "data": x.OID((4, 5, 6), False)},
+                                        {"type": x.VALUE_OCTET_STR,
+                                         "name": x.OID((1, 2, 4), False),
                                          "data": "blah"})),
                           ""))
         # Test commit set
@@ -2322,15 +2317,12 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x02\x00\x00\x00\x04"
                            "\x00\x00\x00\x04blah"),
                          (x.NotifyPDU(True, 1, 2, 3,
-                                      ({"type": x.OID,
-                                        "name": {"subids": (1, 2, 3),
-                                                 "include": False},
-                                        "data": {"subids": (4, 5, 6),
-                                                 "include": False}},
-                                       {"type": x.OCTET_STR,
-                                        "name": {"subids": (1, 2, 4),
-                                                 "include": False},
-                                        "data": "blah"})),
+                                       ({"type": x.VALUE_OID,
+                                         "name": x.OID((1, 2, 3), False),
+                                         "data": x.OID((4, 5, 6), False)},
+                                        {"type": x.VALUE_OCTET_STR,
+                                         "name": x.OID((1, 2, 4), False),
+                                         "data": "blah"})),
                           ""))
         # Test ping
         self.assertEqual(f("\x01\x0D\x10\x00"
@@ -2352,15 +2344,12 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x02\x00\x00\x00\x04"
                            "\x00\x00\x00\x04blah"),
                          (x.IndexAllocPDU(True, 1, 2, 3, True, True,
-                                          ({"type": x.OID,
-                                            "name": {"subids": (1, 2, 3),
-                                                     "include": False},
-                                            "data": {"subids": (4, 5, 6),
-                                                     "include": False}},
-                                           {"type": x.OCTET_STR,
-                                            "name": {"subids": (1, 2, 4),
-                                                     "include": False},
-                                            "data": "blah"})),
+                                       ({"type": x.VALUE_OID,
+                                         "name": x.OID((1, 2, 3), False),
+                                         "data": x.OID((4, 5, 6), False)},
+                                        {"type": x.VALUE_OCTET_STR,
+                                         "name": x.OID((1, 2, 4), False),
+                                         "data": "blah"})),
                           ""))
         # Test index dealloc
         self.assertEqual(f("\x01\x0F\x16\x00"
@@ -2376,15 +2365,12 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x02\x00\x00\x00\x04"
                            "\x00\x00\x00\x04blah"),
                          (x.IndexDeallocPDU(True, 1, 2, 3, True, True,
-                                            ({"type": x.OID,
-                                              "name": {"subids": (1, 2, 3),
-                                                       "include": False},
-                                              "data": {"subids": (4, 5, 6),
-                                                       "include": False}},
-                                             {"type": x.OCTET_STR,
-                                              "name": {"subids": (1, 2, 4),
-                                                       "include": False},
-                                              "data": "blah"})),
+                                       ({"type": x.VALUE_OID,
+                                         "name": x.OID((1, 2, 3), False),
+                                         "data": x.OID((4, 5, 6), False)},
+                                        {"type": x.VALUE_OCTET_STR,
+                                         "name": x.OID((1, 2, 4), False),
+                                         "data": "blah"})),
                           ""))
         # Test add agent caps
         self.assertEqual(f("\x01\x10\x10\x00"
@@ -2394,8 +2380,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x00\x00\x00\x05\x00\x00\x00\x06"
                            "\x00\x00\x00\x04blah"),
                          (x.AddAgentCapsPDU(True, 1, 2, 3,
-                                            {"subids": (4, 5, 6),
-                                             "include": False},
+                                            x.OID((4, 5, 6), False),
                                             "blah"),
                           ""))
         # Test rm agent caps
@@ -2405,8 +2390,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            "\x03\x00\x00\x00\x00\x00\x00\x04"
                            "\x00\x00\x00\x05\x00\x00\x00\x06"),
                          (x.RMAgentCapsPDU(True, 1, 2, 3,
-                                           {"subids": (4, 5, 6),
-                                            "include": False}),
+                                           x.OID((4, 5, 6), False)),
                           ""))
         # Test response
         self.assertEqual(f("\x01\x12\x10\x00"
