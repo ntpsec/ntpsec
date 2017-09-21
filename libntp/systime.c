@@ -390,14 +390,14 @@ step_systime(
 
 	/* <--- time-critical path ended with call to the settime hook <--- */
 
+	msyslog(LOG_WARNING, "CLOCK: time stepped by %Lf", step);
+
 	/* only used for utmp/wtmpx time-step recording */
 	tslast.tv_sec = timets.tv_sec;
 	tslast.tv_nsec = timets.tv_nsec;
 
 	sys_residual = 0;
 	lamport_violated = (step < 0);
-	if (lamport_violated)
-	    msyslog(LOG_WARNING, "CLOCK: negative time step %Lf", step);
 	if (step_callback)
 		(*step_callback)();
 
