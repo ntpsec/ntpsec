@@ -3036,51 +3036,56 @@ void readconfig(const char *config_file)
 {
 	char	line[256];
 	char	dirpath[PATH_MAX];
+	int	srccount;
 	/*
 	 * install a non default variable with this daemon version
 	 */
 	snprintf(line, sizeof(line), "daemon_version=\"%s\"", ntpd_version());
 	set_sys_var(line, strlen(line) + 1, RO);
 
-	init_syntax_tree(&cfgt);
-	if (
-		!lex_init_stack(config_file, "r")
-#ifdef HAVE_NETINFO_NI_H
-		/* If there is no config_file, try NetInfo. */
-		&& check_netinfo && !(config_netinfo = get_netinfo_config())
-#endif /* HAVE_NETINFO_NI_H */
-		) {
-		msyslog(LOG_INFO, "CONFIG: readconfig: Couldn't open <%s>: %m", config_file);
-		io_open_sockets();
-
-		return;
-	} else
-		cfgt.source.value.s = estrdup(config_file);
-
 	atexit(free_all_config_trees);
 
-	/*** BULK OF THE PARSER ***/
 #ifdef DEBUG
 #ifndef yydebug
-  /* See comment above for yyparse */
-  extern int yydebug;
+	/* See comment above for yyparse */
+	extern int yydebug;
 #endif
 	yydebug = !!(debug >= 5);
 #endif
 
+	init_syntax_tree(&cfgt);
+	srccount = 0;
+	
 	/* parse the plain config file if it exists */
-	yyparse();
-
+	if (lex_init_stack(config_file, "r")) {
+		msyslog(LOG_INFO, "CONFIG: readconfig: parsing file: %s", config_file);
+	 	yyparse();
+		++srccount;
+		//cfgt.source.value.s = estrdup(config_file);
+	}
+	
 	/* parse configs in parallel subdirectory if that exists */
 	reparent(dirpath, sizeof(dirpath), config_file, CONFIG_DIR);
-	if (is_directory(dirpath) && lex_push_file(dirpath))
+	if (is_directory(dirpath) && lex_push_file(dirpath)) {
+		msyslog(LOG_INFO, "CONFIG: readconfig: parsing directory: %s", config_file);
 	    yyparse();
+	    ++srccount;
+	}
 
+	if (srccount == 0) {
+#ifdef HAVE_NETINFO_NI_H
+		/* If there is no config_file, try NetInfo. */
+	    if (check_netinfo)
+		config_netinfo = get_netinfo_config();
+#endif /* HAVE_NETINFO_NI_H */
+	    io_open_sockets();
+	}
+	    
 	lex_drop_stack();
 
 	DPRINT(1, ("Finished Parsing!!\n"));
 
-	cfgt.source.attr = CONF_SOURCE_FILE;
+	//cfgt.source.attr = CONF_SOURCE_FILE;
 	cfgt.timestamp = time(NULL);
 
 	save_and_apply_config_tree(true);
