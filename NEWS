@@ -3,19 +3,24 @@
 For historic news from NTP Classic, see devel/HISTORIC-NEWS in the
 distribution.
 
+Not all news features are described here; see docs/ntpsec.txt in the
+distribution.
+
 Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
 == Repository Head ==
 
-The code size has been further reduced, to 56KLOC.
+The code size has been further reduced, to 55KLOC.
 
-The depenendency local refclocks returning 4-digit years on
+A bug inherited from Classic that could cause bad peer's jitter to be
+incorrectly zeroed, producing erratic or slow startup, has been fixed 
+
+The dependency of local refclocks returning 4-digit years on
 pre-synchronization to a network peer has been removed.  It is
 this possible to run in a fully-autonomous mode using multiple
-refclocks and no network peers. (Note however that this mode
-is not yet well tested and may not be stable.)
+refclocks and no network peers.
 
 ntpmon now reports units on time figures.
 

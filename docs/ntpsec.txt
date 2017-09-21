@@ -162,7 +162,12 @@ codebase has been outright removed, with less than 5% new code added.
   from the system clock.  This means that (a) it is now possible for
   ntpd using a local clock source to recover from a trashed or zeroed
   system clock (e.g. at boot time on a system with missing or damaged
-  vattery back up) without requiring sync to a remote peer.
+  battery back up) without requiring sync to a remote peer.
+
+* We've fixed bug inherited from Classic that could cause the jitter
+  of a bad peer to be incorrectly zeroed, possibly causing that peer
+  to be selected.  This probably accounts for some flakiness within
+  8 polling intervals of startup on older versions.
 
 [[clients]]
 == Client Tool Improvements ==
