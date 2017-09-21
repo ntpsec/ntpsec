@@ -64,6 +64,6 @@ def build(ctx):
         install_path='${PYTHONDIR}/ntp',
         includes=includes,
         source=["pymodule.c"] + libntp_source_sharable,
-        target="ntpc",
+        target="../pylib/ntpc",  # Put the output in the pylib directory
         use="M RT CRYPTO",
     )

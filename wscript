@@ -1007,24 +1007,21 @@ for command, func, descr in commands:
 def afterparty(ctx):
     # Make magic links to support in-tree testing.
     #
-    # The idea is that all directories where the Python tools
-    # listed above live should have an 'ntp' symlink so they
-    # can import compiled Python modules from the build directory.
-    # Also, they need to be able to see the Python extension
-    # module built in libntp.
+    # The idea is that all directories where the Python tools live should
+    # have an 'ntp' symlink so they can import Python modules from the pylib
+    # directory.
     #
-    # Note, this kluge falls apart under Python 3, because
-    # waf radically changes the shape of the build directory and
-    # the naming conventions for the product files.
+    # Note that this setup is applied to the build tree, not the
+    # source tree.  Only the build-tree copies of the programs are
+    # expected to work.
     if ctx.cmd == 'clean':
-        ctx.exec_command("rm -fr wafhelpers/*.pyc pylib/__pycache__/*.pyc "
-                         "wafhelpers/__pycache__/*.pyc ntpd/version.h "
-                         "ntpclients/ntp tests/pylib/ntp")
+        ctx.exec_command("rm -fr wafhelpers/*.pyc "
+                         "wafhelpers/__pycache__/*.pyc ntpd/version.h ")
     for x in ("ntpclients", "tests/pylib"):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
-        path_source = ctx.srcnode.make_node(x + "/ntp")
-        relpath = ("../" * (x.count("/")+1)) + path_build.path_from(ctx.srcnode)
+        path_source = ctx.bldnode.make_node(x + "/ntp")
+        relpath = ("../" * (x.count("/")+1)) + path_build.path_from(ctx.bldnode)
         if ctx.cmd in ('install', 'build'):
             if ((not path_source.exists() or
                     os.readlink(path_source.abspath()) != relpath)):
@@ -1033,14 +1030,7 @@ def afterparty(ctx):
                 except OSError:
                     pass
                 os.symlink(relpath, path_source.abspath())
-        elif ctx.cmd == 'clean':
-            if path_source.exists():
-                # print "removing", path_source.abspath()
-                os.remove(path_source.abspath())
-    bldnode = ctx.bldnode.abspath()
-    if ctx.cmd in ('install', 'build'):
-        os.system("cd %s/pylib; ln -sf ../libntp/ntpc.so ntpc.so "
-                  % (bldnode,))
+
 
 python_scripts = [
     "ntpclients/ntploggps",

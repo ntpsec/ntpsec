@@ -1,3 +1,4 @@
+from waflib import Utils  # pylint: disable=import-error
 from wafhelpers.fix_python_config import FixConfig
 
 
@@ -14,11 +15,21 @@ def configure(conf):
 
 def build(ctx):
     srcnode = ctx.srcnode.make_node('pylib')
-    # bldnode = ctx.bldnode.make_node('pylib')
-    target1 = ctx.srcnode.make_node('pylib/control.py')
-    target2 = ctx.srcnode.make_node('pylib/magic.py')
-    target3 = ctx.srcnode.make_node('pylib/version.py')
+    bldnode = ctx.bldnode.make_node('pylib')
+    target1 = bldnode.make_node('control.py')
+    target2 = bldnode.make_node('magic.py')
+    target3 = bldnode.make_node('version.py')
     target4 = ctx.srcnode.make_node('wafhelpers/.autorevision-cache')
+    sources = srcnode.ant_glob('*.py')
+    builds = [x.get_bld() for x in sources]
+
+    # Make sure Python sees .py as well as .pyc/.pyo
+    ctx(
+        features="subst",
+        source=sources,
+        target=builds,
+        chmod=Utils.O755,
+    )
 
     ctx(
         before=['pyc', 'pyo'],
@@ -40,7 +51,7 @@ def build(ctx):
         before=['pyc', 'pyo'],
         cwd=srcnode,
         rule='VCS_EXTRA=`cat ${SRC[0]}` ../wafhelpers/autorevision.sh '
-             '-o ${TGT[1].abspath()} -e VERSION -t python >${TGT[0].name}',
+             '-o ${TGT[1].abspath()} -e VERSION -t python >${TGT[0].abspath()}',
         source=["../VERSION", '../wafhelpers/autorevision.sh'],
         target=[target3, target4],
     )
@@ -50,7 +61,7 @@ def build(ctx):
 
     ctx(
         features='py',
-        source=ctx.path.ant_glob('*.py')+ctx.path.ant_glob('*.py[oc]'),
-        install_from='.',
+        source=builds+[target1, target2, target3],
+        install_from=bldnode,
         install_path='${PYTHONDIR}/ntp'
     )
