@@ -25,6 +25,9 @@
 # and then try prepending it to ".pool.ntp.org" and pinging that.
 # hostname. If you get a response, you can use it.
 #
+# Alternatively, if you are running Linux your distribution may have
+# a designated pool disparcher, e.g. ubuntu.pool.ntp.org
+#
 pool pool.ntp.org iburst
 
 # The following sets edit modes for GNU EMACS

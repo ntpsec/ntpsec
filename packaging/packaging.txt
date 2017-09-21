@@ -6,6 +6,14 @@ Some useful components for package bulding can be found in the etc/
 subdirectory, including init boot time scripts, systemd unit files,
 and boilerplate for default ntpd configuration.
 
+== ntp.conf installation =
+
+Installation from source (waf install) does not attempt to put an ntp.conf
+or ntp.d in place. Your installable package should do this.
+
+The reason this is so is that NTPsec does not yet have an authorized
+pool group of its own. This may change in the future.
+
 == Platforms without Python ==
 
 Many tools (actually, almost everything except the core daemon itself)
