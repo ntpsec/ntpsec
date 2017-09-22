@@ -741,6 +741,40 @@ class OID:
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __lt__(self, other):
+        return self.compareOID(other) == -1
+
+    def __gt__(self, other):
+        return self.compareOID(other) == 1
+
+    def compareOID(self, other):
+        if self.subids == other.subids:
+            return 0
+        lself = len(self.subids)
+        lother = len(other.subids)
+        if lself > lother:
+            x = other.subids
+            y = self.subids
+            lx = lother
+            flipped = True
+        else:
+            x = self.subids
+            y = other.subids
+            lx = lself
+            flipped = False
+        for i in range(lx):
+            if x[i] == y[i]:
+                continue
+            else:
+                c = cmp(x[i], y[i])
+                c = -c if flipped is True else c
+                return c
+        # Only reach this if shorter, and each index is equal
+        if flipped is True:
+            return 1
+        else:
+            return -1
+
     def __repr__(self):
         return "OID(%s, %s)" % (repr(self.subids), repr(self.include))
 
@@ -934,35 +968,6 @@ def decode_searchrange_list_nullterm(data, header):
 # =========================================
 # Utilities, glue, and misc
 # =========================================
-
-
-def compareOID(one, two):
-    if one == two:  # Behold! The magic of a high level language
-        return 0
-    lone = len(one)
-    ltwo = len(two)
-    if lone > ltwo:
-        x = two
-        y = one
-        lx = ltwo
-        flipped = True
-    else:
-        x = one
-        y = two
-        lx = lone
-        flipped = False
-    for i in range(lx):
-        if x[i] == y[i]:
-            continue
-        else:
-            c = cmp(x[i], y[i])
-            c = -c if flipped is True else c
-            return c
-    # Only reach this if shorter, and each index is equal
-    if flipped is True:
-        return 1
-    else:
-        return -1
 
 
 def getendian(bigEndian):

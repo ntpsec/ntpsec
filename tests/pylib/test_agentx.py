@@ -1721,6 +1721,40 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         except ValueError:
             errored = True
         self.assertEqual(errored, True)
+        # Test compareOID
+        # Test equal
+        a = target((1, 2, 3, 4))
+        b = target((1, 2, 3, 4))
+        self.assertEqual(a.compareOID(b), 0)
+
+        # Test equal length, one < two
+        b = target((1, 2, 3, 5))
+        self.assertEqual(a.compareOID(b), -1)
+        # Test equal length, one > two
+        b = target((1, 2, 3, 0))
+        self.assertEqual(a.compareOID(b), 1)
+        # Test one shorter, less than two, equal for length
+        a = target((1, 2, 3))
+        b = target((1, 2, 3, 4))
+        self.assertEqual(a.compareOID(b), -1)
+        # Test one shorter, less than two
+        b = target((1, 2, 4, 5))
+        self.assertEqual(a.compareOID(b), -1)
+        # Test one shorter, greater than two
+        b = target((1, 2, 2, 4))
+        self.assertEqual(a.compareOID(b), 1)
+        # Test two shorter, less than one, equal for length
+        a = target((1, 2, 3, 4))
+        b = target((1, 2, 3))
+        self.assertEqual(a.compareOID(b), 1)
+        # Test two shorter, less than one
+        a = target((1, 2, 4, 5))
+        self.assertEqual(a.compareOID(b), 1)
+        # Test two shorter, greater than one
+        a = target((1, 2, 2, 4))
+        b = target((1, 2, 3))
+        self.assertEqual(a.compareOID(b), -1)
+
 
     def test_searchrange(self):
         enc = ntp.agentx.encode_searchrange
@@ -2409,29 +2443,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         except IndexError:
             fail = True
         self.assertEqual(fail, True)
-
-    def test_compareOID(self):
-        f = ntp.agentx.compareOID
-
-        # Test equal
-        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3, 4)), 0)
-
-        # Test equal length, one < two
-        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3, 5)), -1)
-        # Test equal length, one > two
-        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3, 0)), 1)
-        # Test one shorter, less than two, equal for length
-        self.assertEqual(f((1, 2, 3), (1, 2, 3, 4)), -1)
-        # Test one shorter, less than two
-        self.assertEqual(f((1, 2, 3), (1, 2, 4, 5)), -1)
-        # Test one shorter, greater than two
-        self.assertEqual(f((1, 2, 3), (1, 2, 2, 4)), 1)
-        # Test two shorter, less than one, equal for length
-        self.assertEqual(f((1, 2, 3, 4), (1, 2, 3)), 1)
-        # Test two shorter, less than one
-        self.assertEqual(f((1, 2, 4, 5), (1, 2, 3)), 1)
-        # Test two shorter, greater than one
-        self.assertEqual(f((1, 2, 2, 4), (1, 2, 3)), -1)
 
 
 if __name__ == "__main__":
