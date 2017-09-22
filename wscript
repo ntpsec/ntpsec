@@ -17,6 +17,9 @@ from waflib.Errors import WafError
 from waflib.Logs import pprint
 from waflib.Tools import waf_unit_test
 
+# Avoid writing .pyc files in wafhelpers/
+sys.dont_write_bytecode = True
+
 from wafhelpers.options import options_cmd
 from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
@@ -1015,8 +1018,7 @@ def afterparty(ctx):
     # source tree.  Only the build-tree copies of the programs are
     # expected to work.
     if ctx.cmd == 'clean':
-        ctx.exec_command("rm -fr wafhelpers/*.pyc "
-                         "wafhelpers/__pycache__/*.pyc ntpd/version.h ")
+        ctx.exec_command("rm -f ntpd/version.h ")
     for x in ("ntpclients", "tests/pylib"):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
