@@ -1,6 +1,9 @@
 """Work around waf bugs related to Python config setup."""
 
+import os
+
 from waflib import Utils  # pylint: disable=import-error
+from waflib.Logs import pprint  # pylint: disable=import-error
 
 # NOTE:  Everything in this file relates to waf bugs.  It can go away once
 # the waf bugs are fixed.
@@ -22,6 +25,22 @@ from waflib import Utils  # pylint: disable=import-error
 # after the version check, using the captured original settings to determine
 # whether to override.
 
+# An additional function is temporarily needed to clean up any libraries
+# that had been installed to the incorrect PYTHONDIR by former
+# versions of the script.
+#
+# Although this code is a NOP when the old and new install locations are
+# identical, for maximum safety the extra deletions are done preinstall
+# and postuninstall.  This might matter if the old and new locations were
+# symlinked together (a possible workaround for the old bug).
+#
+# Merely removing the libraries doesn't remove the containing directory(s)
+# which may have been newly created by the old script.  Removing any such
+# directories is desirable, but doing so automatically would be too
+# dangerous.  The compromise is to issue a warning message when an empty
+# containing directory is left.  This is always done at the end, to avoid
+# burying the warning in the install messages.
+
 
 class FixConfig(object):
     """Methods and state for working around waf's python-config bugs."""
@@ -36,6 +55,8 @@ class FixConfig(object):
 
     def fix_python_libs(self):
         """Fix up library install paths."""
+        # Remember original setting for "compatibility cleanup".
+        self.conf.env.OLD_PYTHONDIR = self.conf.env.PYTHONDIR
         if Utils.is_win32:
             return  # No fixups supported on Windows
         if not ('PYTHONDIR' in self.opts or 'PYTHONDIR' in self.conf.environ):
@@ -59,3 +80,21 @@ class FixConfig(object):
         """Check version and fix up install paths."""
         self.conf.check_python_version(*args, **kwargs)
         self.fix_python_libs()
+
+    @staticmethod
+    def cleanup_python_libs(ctx, cmd='preinstall'):
+        """Remove any Python libs that were installed to the wrong location."""
+        if not ctx.env.PYTHONDIR:
+            return  # Here on pre-setup call
+        if ctx.env.PYTHONDIR == ctx.env.OLD_PYTHONDIR:
+            return  # Here when old bug had no effect
+        if not os.path.isdir(ctx.env.OLD_PYTHONDIR):
+            return  # Here when old dir doesn't exist or isn't a dir
+        if cmd in ('preinstall', 'uninstall'):
+            ctx.exec_command('rm -rf %s/ntp' % ctx.env.OLD_PYTHONDIR)
+        if cmd == 'preinstall':
+            return  # Skip message where it's not likely to be seen
+        # See if we may have left an inappropriate empty directory
+        if not os.listdir(ctx.env.OLD_PYTHONDIR):
+            pprint('YELLOW',
+                   'May need to manually remove %s' % ctx.env.OLD_PYTHONDIR)
