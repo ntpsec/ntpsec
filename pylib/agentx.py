@@ -920,25 +920,56 @@ def decode_ipaddr(data, header):
     return addr, data
 
 
-def encode_searchrange(bigEndian, startOID, endOID):
-    if endOID.include is not False:
-        raise ValueError
-    startOIDstr = startOID.encode(bigEndian)
-    endOIDstr = endOID.encode(bigEndian)
-    return startOIDstr + endOIDstr
-
-
-def decode_searchrange(data, header):
+def decode_SearchRange(data, header):
     startOID, data = decode_OID(data, header)
     endOID, data = decode_OID(data, header)
-    result = {"start": startOID, "end": endOID}
+    result = SearchRange(startOID, endOID)
     return result, data
 
 
-def encode_searchrange_list(bigEndian, oidranges, nullTerminate=False):
+class SearchRange:
+    def __init__(self, start, end, include=None):
+        self.start = classifyOID(start)
+        self.end = classifyOID(end)
+        self.end.include = False  # sanify
+        if include is not None:
+            # if the user does not provide include it defaults to whatever
+            # start is already set to
+            self.start.include = include
+        self.sanity()
+
+    def __eq__(self, other):
+        if self.start != other.start:
+            return False
+        if self.end != other.end:
+            return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __repr__(self):
+        r = "SearchRange("
+        r += repr(self.start) + ", "
+        r += repr(self.end) + ")"
+        return r
+
+    def sanity(self):
+        self.start.sanity()
+        self.end.sanity()
+        if self.end.include is True:
+            raise ValueError
+
+    def encode(self, bigEndian):
+        startOIDstr = self.start.encode(bigEndian)
+        endOIDstr = self.end.encode(bigEndian)
+        return startOIDstr + endOIDstr
+
+
+def encode_searchrange_list(bigEndian, searchranges, nullTerminate=False):
     encoded = []
-    for oran in oidranges:
-        encoded.append(encode_searchrange(bigEndian, *oran))
+    for sran in searchranges:
+        encoded.append(sran.encode(bigEndian))
     if nullTerminate:
         noid = OID(())
         encoded.append(noid.encode(bigEndian))
@@ -949,7 +980,7 @@ def encode_searchrange_list(bigEndian, oidranges, nullTerminate=False):
 def decode_searchrange_list(data, header):  # Cannot handle extra data
     oidranges = []
     while len(data) > 0:
-        oids, data = decode_searchrange(data, header)
+        oids, data = decode_SearchRange(data, header)
         oidranges.append(oids)
     return tuple(oidranges)
 
@@ -961,7 +992,7 @@ def decode_searchrange_list_nullterm(data, header):
         if one.isNull():
             break
         two, data = decode_OID(data, header)
-        oidranges.append({"start": one, "end": two})
+        oidranges.append(SearchRange(one, two))
     return tuple(oidranges), data
 
 
