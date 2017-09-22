@@ -24,6 +24,8 @@ from wafhelpers.options import options_cmd
 from wafhelpers.probes \
     import probe_header_with_prerequisites, probe_function_with_prerequisites
 from wafhelpers.test import test_write_log, test_print_log
+from wafhelpers.fix_python_config import FixConfig
+
 
 pprint.__doc__ = None
 
@@ -1019,6 +1021,9 @@ def afterparty(ctx):
     # expected to work.
     if ctx.cmd == 'clean':
         ctx.exec_command("rm -f ntpd/version.h ")
+    if ctx.cmd in ('uninstall', 'install'):
+        # Make sure libs are removed from the old location
+        FixConfig.cleanup_python_libs(ctx, ctx.cmd)
     for x in ("ntpclients", "tests/pylib"):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
@@ -1058,6 +1063,10 @@ def build(ctx):
         # .pyc and .pyo files) in a source directory, compilation to
         # the build directory never happens.  This is how we foil that.
         ctx.add_pre_fun(lambda ctx: ctx.exec_command("rm -f pylib/*.py[co]"))
+
+    if ctx.cmd == "install":
+        # Make sure libs are removed from the old location
+        ctx.add_pre_fun(FixConfig.cleanup_python_libs)
 
     if ctx.env.ENABLE_DOC_USER:
         if ctx.variant != "main":
