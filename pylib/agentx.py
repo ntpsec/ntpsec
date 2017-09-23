@@ -827,7 +827,6 @@ def encode_octetstr(bigEndian, octets):
         data = header + data + pad
     return data
 
-
 def decode_octetstr(data, header):
     flags = header["flags"]
     header, data = slicedata(data, 4)
@@ -840,27 +839,18 @@ def decode_octetstr(data, header):
         pad = 4 - pad
     return data[:numoctets], data[numoctets + pad:]
 
-
-def encode_varbind(bigEndian, valType, oid, payload=()):
-    if valType not in definedValueTypes.keys():
-        raise ValueError("Value type %s not in defined types" % valType)
-    endianToken = getendian(bigEndian)
-    header = struct.pack(endianToken + "Hxx", valType)
-    oid = classifyOID(oid)
-    name = oid.encode(bigEndian)
-    handlers = definedValueTypes[valType]
-    if handlers is None:
-        data = header + name
-    else:
-        isClass, encoder, _ = handlers
-        if isClass:
-            data = header + name + payload.encode(bigEndian)
-        else:
-            data = header + name + handlers[1](bigEndian, *payload)
-    return data
+def sanity_octetstr(data):
+    if isinstance(data, str):
+        return
+    if isinstance(data, (list, tuple)):
+        for c in data:
+            if not (0 <= c < 256):
+                raise ValueError
+        return
+    raise TypeError
 
 
-def decode_varbind(data, header):
+def decode_Varbind(data, header):
     flags = header["flags"]
     bindheader, data = slicedata(data, 4)
     endianToken = getendian(flags["bigEndian"])
@@ -870,8 +860,56 @@ def decode_varbind(data, header):
         raise ValueError("Value type %s not in defined types" % valType)
     handlers = definedValueTypes[valType]
     payload, data = handlers[2](data, header)
-    result = {"type": valType, "name": name, "data": payload}
+    result = Varbind(valType, name, payload)
     return result, data
+
+
+class Varbind:
+    def __init__(self, vtype, oid, payload=None):
+        self.valueType = vtype
+        self.oid = classifyOID(oid)
+        self.payload = payload  # payload=None exists for Null types
+        self.sanity()
+
+    def __eq__(self, other):
+        if self.valueType != other.valueType:
+            return False
+        if self.oid != other.oid:
+            return False
+        if self.payload != other.payload:
+            return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __repr__(self):
+        fmt = "Varbind(vtype=%s, oid=%s, payload=%s)"
+        r = fmt % (repr(self.valueType), repr(self.oid), repr(self.payload))
+        return r
+
+    def sanity(self):
+        self.oid.sanity()
+        vt = self.valueType
+        if vt not in definedValueTypes.keys():
+            raise ValueError("Value type %s not in defined types" % vt)
+        sanifyer, encoder, decoder = definedValueTypes[vt]
+        if sanifyer is None:  # it is a class
+            self.payload.sanity()
+        else:
+            sanifyer(self.payload)
+
+    def encode(self, bigEndian):
+        endianToken = getendian(bigEndian)
+        header = struct.pack(endianToken + "Hxx", self.valueType)
+        name = self.oid.encode(bigEndian)
+        handlers = definedValueTypes[self.valueType]
+        sanifyer, encoder, decoder = handlers
+        if sanifyer is None:  # Classes have the .sanity() method
+            data = header + name + self.payload.encode(bigEndian)
+        else:  # Non-classes have an associated sanity_<vartype>() function
+            data = header + name + encoder(bigEndian, self.payload)
+        return data
 
 
 def encode_integer32(bigEndian, num):
@@ -887,12 +925,20 @@ def decode_integer32(data, header):
     return (num, data)
 
 
-def encode_nullvalue(bigEndian):
+def sanity_integer32(data):
+    if data != (data & 0xFFFFFFFF):
+        raise ValueError
+
+
+def encode_nullvalue(bigEndian, data):
     return ""
 
 
 def decode_nullvalue(data, header):
     return (None, data)
+
+def sanity_nullvalue(data):
+    pass  # Seriously?
 
 
 def encode_integer64(bigEndian, num):
@@ -907,17 +953,23 @@ def decode_integer64(data, header):
     num = struct.unpack(endianToken + "Q", num)[0]
     return (num, data)
 
+def sanity_integer64(data):
+    if data != (data & 0xFFFFFFFFFFFFFFFF):
+        raise ValueError
+
 
 def encode_ipaddr(bigEndian, octets):
-    if len(octets) != 4:
-        raise ValueError("IP Address incorrect length")
+    sanity_ipaddr(octets)
     return encode_octetstr(bigEndian, octets)
-
 
 def decode_ipaddr(data, header):
     addr, data = decode_octetstr(data, header)
     addr = struct.unpack("BBBB", addr)
     return addr, data
+
+def sanity_ipaddr(data):
+    if len(data) not in (4, 16):
+        raise ValueError
 
 
 def decode_SearchRange(data, header):
@@ -1008,7 +1060,7 @@ def getendian(bigEndian):
 def encode_varbindlist(bigEndian, varbinds):
     payload = ""
     for varbind in varbinds:
-        payload += encode_varbind(bigEndian, *varbind)
+        payload += varbind.encode(bigEndian)
     return payload
 
 
@@ -1016,7 +1068,7 @@ def decode_varbindlist(data, header):
     if len(data) > 0:
         varbinds = []
         while len(data) > 0:
-            vb, data = decode_varbind(data, header)
+            vb, data = decode_Varbind(data, header)
             varbinds.append(vb)
         varbinds = tuple(varbinds)
     else:
@@ -1123,21 +1175,47 @@ VALUE_COUNTER64 = 70
 VALUE_NO_SUCH_OBJECT = 128
 VALUE_NO_SUCH_INSTANCE = 129
 VALUE_END_OF_MIB_VIEW = 130
-# Sub-tuple format: (isClass?, encoder/class, decoder)
+# Sub-tuple format: (sanityChecker, encoder/class, decoder)
+# if the sanityChecker is None it means the data type is held in
+# a class, which has it's own .sanity() method
 definedValueTypes = {  # Used by the varbind functions
-    VALUE_INTEGER: (False, encode_integer32, decode_integer32),
-    VALUE_OCTET_STR: (False, encode_octetstr, decode_octetstr),
-    VALUE_NULL: (False, encode_nullvalue, decode_nullvalue),
-    VALUE_OID: (True, OID, decode_OID),
-    VALUE_IP_ADDR: (False, encode_ipaddr, decode_ipaddr),
-    VALUE_COUNTER32: (False, encode_integer32, decode_integer32),
-    VALUE_GAUGE32: (False, encode_integer32, decode_integer32),
-    VALUE_TIME_TICKS: (False, encode_integer32, decode_integer32),
-    VALUE_OPAQUE: (False, encode_octetstr, decode_octetstr),
-    VALUE_COUNTER64: (False, encode_integer64, decode_integer64),
-    VALUE_NO_SUCH_OBJECT: (False, encode_nullvalue, decode_nullvalue),
-    VALUE_NO_SUCH_INSTANCE: (False, encode_nullvalue, decode_nullvalue),
-    VALUE_END_OF_MIB_VIEW: (False, encode_nullvalue, decode_nullvalue)}
+    VALUE_INTEGER: (sanity_integer32,
+                    encode_integer32,
+                    decode_integer32),
+    VALUE_OCTET_STR: (sanity_octetstr,
+                      encode_octetstr,
+                      decode_octetstr),
+    VALUE_NULL: (sanity_nullvalue,
+                 encode_nullvalue,
+                 decode_nullvalue),
+    VALUE_OID: (None, OID, decode_OID),
+    VALUE_IP_ADDR: (sanity_ipaddr,
+                    encode_ipaddr,
+                    decode_ipaddr),
+    VALUE_COUNTER32: (sanity_integer32,
+                      encode_integer32,
+                      decode_integer32),
+    VALUE_GAUGE32: (sanity_integer32,
+                    encode_integer32,
+                    decode_integer32),
+    VALUE_TIME_TICKS: (sanity_integer32,
+                       encode_integer32,
+                       decode_integer32),
+    VALUE_OPAQUE: (sanity_octetstr,
+                   encode_octetstr,
+                   decode_octetstr),
+    VALUE_COUNTER64: (sanity_integer64,
+                      encode_integer64,
+                      decode_integer64),
+    VALUE_NO_SUCH_OBJECT: (sanity_nullvalue,
+                           encode_nullvalue,
+                           decode_nullvalue),
+    VALUE_NO_SUCH_INSTANCE: (sanity_nullvalue,
+                             encode_nullvalue,
+                             decode_nullvalue),
+    VALUE_END_OF_MIB_VIEW: (sanity_nullvalue,
+                            encode_nullvalue,
+                            decode_nullvalue)}
 
 # PDU types
 PDU_OPEN = 1
