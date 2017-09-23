@@ -827,6 +827,7 @@ def encode_octetstr(bigEndian, octets):
         data = header + data + pad
     return data
 
+
 def decode_octetstr(data, header):
     flags = header["flags"]
     header, data = slicedata(data, 4)
@@ -838,6 +839,7 @@ def decode_octetstr(data, header):
     if pad > 0:  # Pad out the data to word boundary
         pad = 4 - pad
     return data[:numoctets], data[numoctets + pad:]
+
 
 def sanity_octetstr(data):
     if isinstance(data, str):
@@ -937,6 +939,7 @@ def encode_nullvalue(bigEndian, data):
 def decode_nullvalue(data, header):
     return (None, data)
 
+
 def sanity_nullvalue(data):
     pass  # Seriously?
 
@@ -953,6 +956,7 @@ def decode_integer64(data, header):
     num = struct.unpack(endianToken + "Q", num)[0]
     return (num, data)
 
+
 def sanity_integer64(data):
     if data != (data & 0xFFFFFFFFFFFFFFFF):
         raise ValueError
@@ -962,10 +966,12 @@ def encode_ipaddr(bigEndian, octets):
     sanity_ipaddr(octets)
     return encode_octetstr(bigEndian, octets)
 
+
 def decode_ipaddr(data, header):
     addr, data = decode_octetstr(data, header)
     addr = struct.unpack("BBBB", addr)
     return addr, data
+
 
 def sanity_ipaddr(data):
     if len(data) not in (4, 16):
@@ -1048,15 +1054,6 @@ def decode_searchrange_list_nullterm(data, header):
     return tuple(oidranges), data
 
 
-# =========================================
-# Utilities, glue, and misc
-# =========================================
-
-
-def getendian(bigEndian):
-    return ">" if bigEndian is True else "<"
-
-
 def encode_varbindlist(bigEndian, varbinds):
     payload = ""
     for varbind in varbinds:
@@ -1074,6 +1071,15 @@ def decode_varbindlist(data, header):
     else:
         varbinds = None
     return varbinds
+
+
+# =========================================
+# Utilities, glue, and misc
+# =========================================
+
+
+def getendian(bigEndian):
+    return ">" if bigEndian is True else "<"
 
 
 def encode_pduheader(pduType, instanceRegistration, newIndex,

@@ -660,7 +660,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_LE.maxReps, 5)
         self.assertEqual(pkt_LE.oidranges,
                          (srch((1, 2), (3, 4), False),
-                         srch((6, 7), (8, 9), True)))
+                          srch((6, 7), (8, 9), True)))
         self.assertEqual(pkt_LE.context, "blah")
         # Test encoding
         pkt_str = pkt.encode()
@@ -739,9 +739,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt.context, "blah")
         # Test init, little endian
         pkt_LE = cls(False, 1, 2, 3,
-                  (x.Varbind(x.VALUE_OID, (1, 2, 3), x.OID((4, 5, 6), False)),
-                   x.Varbind(x.VALUE_OCTET_STR, (1, 2, 4), "blah")),
-                  context="blah")
+                     (x.Varbind(x.VALUE_OID, (1, 2, 3),
+                                x.OID((4, 5, 6), False)),
+                      x.Varbind(x.VALUE_OCTET_STR, (1, 2, 4), "blah")),
+                     context="blah")
         test_pducore(self, pkt_LE, x.PDU_TEST_SET, False, 1, 2, 3)
         self.assertEqual(pkt_LE.varbinds,
                          (x.Varbind(x.VALUE_OID, (1, 2, 3),
@@ -1726,7 +1727,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         b = target((1, 2, 3))
         self.assertEqual(a.compareOID(b), -1)
 
-
     def test_searchrange(self):
         target = ntp.agentx.SearchRange
         dec = ntp.agentx.decode_SearchRange
@@ -1827,7 +1827,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04")
         # Encode, little endian
         self.assertEqual(enc(False, (srch((1, 2), (1, 2), True),
-                                    srch((2, 3), (3, 4)))),
+                                     srch((2, 3), (3, 4)))),
                          "\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                          "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                          "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
@@ -1847,18 +1847,26 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         srch = ntp.agentx.SearchRange
 
         # Decode
-        self.assertEqual(dec("\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
-                             "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04",
+        self.assertEqual(dec("\x02\x00\x01\x00"
+                             "\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x02\x00\x00\x00"
+                             "\x00\x00\x00\x01\x00\x00\x00\x02"
+                             "\x02\x00\x00\x00"
+                             "\x00\x00\x00\x02\x00\x00\x00\x03"
+                             "\x02\x00\x00\x00"
+                             "\x00\x00\x00\x03\x00\x00\x00\x04",
                              standardFlags),
                          (srch((1, 2), (1, 2), True),
                           srch((2, 3), (3, 4), False)))
         # Test, little endian
-        self.assertEqual(dec("\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
-                             "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00",
+        self.assertEqual(dec("\x02\x00\x01\x00"
+                             "\x01\x00\x00\x00\x02\x00\x00\x00"
+                             "\x02\x00\x00\x00"
+                             "\x01\x00\x00\x00\x02\x00\x00\x00"
+                             "\x02\x00\x00\x00"
+                             "\x02\x00\x00\x00\x03\x00\x00\x00"
+                             "\x02\x00\x00\x00"
+                             "\x03\x00\x00\x00\x04\x00\x00\x00",
                              lilEndianFlags),
                          (srch((1, 2), (1, 2), True),
                           srch((2, 3), (3, 4), False)))
@@ -1913,7 +1921,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Decode empty
         self.assertEqual(dec("\x00\x00\x00\x00", standardFlags), ("", ""))
         # Decode word multiple, extra data
-        self.assertEqual(dec("\x00\x00\x00\x04blah" + extraData, standardFlags),
+        self.assertEqual(dec("\x00\x00\x00\x04blah" + extraData,
+                             standardFlags),
                          ("blah", extraData))
         # Decode word multiple, little endian
         self.assertEqual(dec("\x04\x00\x00\x00blah", lilEndianFlags),
