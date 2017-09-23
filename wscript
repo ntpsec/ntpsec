@@ -1134,6 +1134,11 @@ def build(ctx):
         from waflib import Options
         Options.options.no_tests = True
 
+    if ctx.cmd == "build":
+        if "PYTHONPATH" in os.environ:
+            print("--- PYTHONPATH is set, "
+                  "this may mask or cause library-related problems ---")
+
 #
 # Boot script setup
 #
