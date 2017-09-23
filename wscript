@@ -1134,11 +1134,6 @@ def build(ctx):
         from waflib import Options
         Options.options.no_tests = True
 
-    if ctx.cmd == "build":
-        if "PYTHONPATH" not in os.environ:
-            print("--- PYTHONPATH is not set, "
-                  "loading the Python ntp library may be troublesome ---")
-
 #
 # Boot script setup
 #

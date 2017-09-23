@@ -1,9 +1,6 @@
 #!/bin/sh
 # Hack to measure startup timing
 
-# FIXME - needed on Fedora
-export PYTHONPATH=/usr/local/lib/python2.7/site-packages
-
 if test "$#" -ge 1
 then
   CONF=$1
