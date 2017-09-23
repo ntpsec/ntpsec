@@ -40,7 +40,7 @@ try:
     import ntp.magic
 except ImportError as e:
     sys.stderr.write(
-        "ntpmon: can't find Python NTP library -- check PYTHONPATH.\n")
+        "ntpmon: can't find Python NTP library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
@@ -49,7 +49,7 @@ try:
     import locale
 except ImportError as e:
     sys.stderr.write(
-        "ntpmon: can't find Python locale library -- check PYTHONPATH.\n")
+        "ntpmon: can't find Python locale library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
@@ -57,7 +57,7 @@ try:
     import curses
 except ImportError as e:
     sys.stderr.write(
-        "ntpmon: can't find Python curses library -- check PYTHONPATH.\n")
+        "ntpmon: can't find Python curses library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 

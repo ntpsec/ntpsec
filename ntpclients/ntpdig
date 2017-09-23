@@ -52,7 +52,7 @@ try:
     import ntp.magic
 except ImportError as e:
     sys.stderr.write(
-        "ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
+        "ntpdig: can't find Python NTP library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 

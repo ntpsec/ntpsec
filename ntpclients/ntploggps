@@ -31,8 +31,7 @@ try:
     import gps
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("ntploggps: can't find Python NTP modules "
-                     "-- check PYTHONPATH.\n")
+    sys.stderr.write("ntploggps: can't find Python NTP modules.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
