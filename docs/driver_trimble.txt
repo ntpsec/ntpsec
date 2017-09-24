@@ -417,7 +417,7 @@ maximum allowable holdover duration in seconds.
 
 
 == Change Log ==
-Since version 2.45 (30/08/09) +
+Since version 2.45 (2008-30-09) +
 3.00 +
 * add GPS week number rollover workaround +
 * remove support for using the Palisade, Acutime 2000, Acutime Gold and
@@ -429,7 +429,7 @@ Since version 2.45 (30/08/09) +
 * check serial parity for receivers that generate parity by default +
 
 == Authors ==
-mailto:trv-n@comcast.net[*Questions or Comments : ntpsec version 3.00+*]
+mailto:trv-n@comcast.net[*Questions or Comments : ntpsec, driver version 3.00+*]
 
 mailto:sven_dietrich@trimble.com[*Sven-Thorsten Dietrich*] +
   645 North Mary Avenue +
