@@ -28,10 +28,12 @@ import threading
 import time
 
 try:
+    package = 'GPSD'  # pylint: disable=invalid-name
     import gps
+    package = 'NTP'  # pylint: disable=invalid-name
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("ntploggps: can't find Python NTP modules.\n")
+    sys.stderr.write("ntploggps: can't find Python %s modules.\n" % package)
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
