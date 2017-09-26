@@ -1066,7 +1066,12 @@ class ControlSession:
                 raise ControlException(SERR_INCOMPLETE)
 
             warndbg("At %s, socket read begins\n" % time.asctime(), 4)
-            rawdata = polybytes(self.sock.recv(4096))
+            try:
+                rawdata = polybytes(self.sock.recv(4096))
+            except socket.error:
+                # usually, errno 111: connection refused
+                raise ControlException(SERR_UNSPEC)
+
             warndbg("Received %d octets\n" % len(rawdata), 3)
             rpkt = ControlPacket(self)
             try:
