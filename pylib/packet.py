@@ -1268,6 +1268,7 @@ class ControlSession:
         kvpairs = []
         instring = False
         response = ""
+        self.response = polystr(self.response)
         for c in self.response:
             cord = polyord(c)
             if c == '"':
