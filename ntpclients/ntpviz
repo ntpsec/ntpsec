@@ -1164,7 +1164,8 @@ plot \
             rnd1 = 9        # round to 1 ns boxes
             out['boxwidth'] = S_PER_NS
 
-        cnt = collections.Counter()
+        # Python 2.6  has no collections.Counter(), so fake it.
+        cnt = collections.defaultdict(int)
         for value in values:
             # put into buckets
             # for a +/- 50 microSec range that is 1,000 buckets to plot
