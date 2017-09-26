@@ -37,11 +37,11 @@ doit ()
     ./$DIR/main/ntpd/ntpd --version           | tee -a $DIR/test.log
     cd ntpclients
       echo -n "VERSION: "                     | tee -a ../$DIR/test.log
-      ./ntpq --version                        | tee -a ../$DIR/test.log
+      ./$DIR/main/ntpclients/ntpq --version   | tee -a ../$DIR/test.log
       echo -n "VERSION: "                     | tee -a ../$DIR/test.log
-      ./ntpdig --version                      | tee -a ../$DIR/test.log
+      ./$DIR/main/ntpclients/ntpdig --version | tee -a ../$DIR/test.log
       echo -n "VERSION: "                     | tee -a ../$DIR/test.log
-      ./ntpmon --version                      | tee -a ../$DIR/test.log
+      ./$DIR/main/ntpclients/ntpmon --version | tee -a ../$DIR/test.log
     cd ..
   fi
   echo
