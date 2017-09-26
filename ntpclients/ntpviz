@@ -105,6 +105,12 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
+# check Python version
+Python26 = False
+if ((3 > sys.version_info[0]) and (7 > sys.version_info[1])):
+    # running under Python version before 2.7
+    Python26 = True
+
 
 # overload ArgumentParser
 class MyArgumentParser(argparse.ArgumentParser):
@@ -292,11 +298,15 @@ class VizStats(ntp.statfiles.NTPStats):
             v *= self.multiplier
             self.percs[k] = round(v, 4)
             if 'ppm' == self.unit and 0.020 > abs(self.percs[k]):
-                self.percs_f[k] = format(v, ",.4f")
+                fmt = ".4f"
             else:
-                self.percs_f[k] = format(v, ",.3f")
+                fmt = ".3f"
+            if not Python26:
+                # Python 2.6 does not undertand the comma format option
+                fmt = "," + fmt
+            self.percs_f[k] = format(v, fmt)
 
-        # dan't scale skewness and kurtosis
+        # don't scale skewness and kurtosis
         self.percs["skew"] = sts.skewness
         self.percs["kurt"] = sts.kurtosis
         if '°C' == units:
