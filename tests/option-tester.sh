@@ -30,19 +30,17 @@ doit ()
   fi
   if [ "$WAF1" != 0 -o "$WAF2" != 0 -o "$WAF3" != 0 ] 
   then
-    echo                                      | tee -a $DIR/test.log
-    echo "Trouble with $DIR"                  | tee -a $DIR/test.log
+    echo                                          | tee -a $DIR/test.log
+    echo "Trouble with $DIR"                      | tee -a $DIR/test.log
   else
-    echo -n "VERSION: "                       | tee -a $DIR/test.log
-    ./$DIR/main/ntpd/ntpd --version           | tee -a $DIR/test.log
-    cd ntpclients
-      echo -n "VERSION: "                     | tee -a ../$DIR/test.log
-      ./$DIR/main/ntpclients/ntpq --version   | tee -a ../$DIR/test.log
-      echo -n "VERSION: "                     | tee -a ../$DIR/test.log
-      ./$DIR/main/ntpclients/ntpdig --version | tee -a ../$DIR/test.log
-      echo -n "VERSION: "                     | tee -a ../$DIR/test.log
-      ./$DIR/main/ntpclients/ntpmon --version | tee -a ../$DIR/test.log
-    cd ..
+    echo -n "VERSION: "                           | tee -a $DIR/test.log
+    ./$DIR/main/ntpd/ntpd --version          2>&1 | tee -a $DIR/test.log
+    echo -n "VERSION: "                           | tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntpq --version    2>&1 | tee -a $DIR/test.log
+    echo -n "VERSION: "                           | tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntpdig --version  2>&1 | tee -a $DIR/test.log
+    echo -n "VERSION: "                           | tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntpmon --version  2>&1 | tee -a $DIR/test.log
   fi
   echo
   echo
