@@ -65,7 +65,11 @@ S_PER_NS = 1.0e-9       # seconds per nanosecond
 S_PER_US = 1.0e-6       # seconds per microsecond
 
 # table to translate refclock names
-refclock_name = {'127.127.22.0': 'PPS(0)',
+refclock_name = {'127.127.20.0': 'NMEA(0)',
+                 '127.127.20.1': 'NMEA(1)',
+                 '127.127.20.2': 'NMEA(2)',
+                 '127.127.20.3': 'NMEA(3)',
+                 '127.127.22.0': 'PPS(0)',
                  '127.127.22.1': 'PPS(1)',
                  '127.127.22.2': 'PPS(2)',
                  '127.127.22.3': 'PPS(3)',
