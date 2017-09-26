@@ -1024,7 +1024,7 @@ def afterparty(ctx):
     if ctx.cmd in ('uninstall', 'install'):
         # Make sure libs are removed from the old location
         FixConfig.cleanup_python_libs(ctx, ctx.cmd)
-    for x in ("ntpclients", "tests/pylib"):
+    for x in ("tests/pylib",):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
         path_source = ctx.bldnode.make_node(x + "/ntp")
