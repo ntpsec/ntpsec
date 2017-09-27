@@ -28,7 +28,6 @@ def build(ctx):
         features="subst",
         source=sources,
         target=builds,
-        chmod=Utils.O755,
     )
 
     ctx(
