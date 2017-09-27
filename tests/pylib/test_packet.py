@@ -925,6 +925,7 @@ class TestControlSession(unittest.TestCase):
     def test_password(self):
         iojig = jigs.FileJig()
         fakegetpmod = jigs.GetpassModuleJig()
+        fakeosmod = jigs.OSModuleJig()
         # Init
         cls = self.target()
         try:
@@ -935,8 +936,11 @@ class TestControlSession(unittest.TestCase):
             sys.stdin = iojig
             tempstdout = sys.stdout
             sys.stdout = iojig
+            tempos = ntpp.os
+            ntpp.os = fakeosmod
             # Test with nothing
             iojig.readline_return = ["1\n"] * 10
+            fakeosmod.isatty_returns = [True] * 10
             cls.password()
             self.assertEqual(isinstance(cls.auth, AuthenticatorJig), True)
             self.assertEqual(cls.keyid, 1)
@@ -972,6 +976,7 @@ class TestControlSession(unittest.TestCase):
             ntpp.getpass = getpass
             sys.stdin = tempstdin
             sys.stdout = tempstdout
+            ntpp.os = tempos
 
     def test_sendpkt(self):
         logjig = jigs.FileJig()
