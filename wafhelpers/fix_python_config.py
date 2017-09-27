@@ -53,6 +53,10 @@ class FixConfig(object):
         """Capture values after option processing."""
         self.opts = self.conf.env.derive().detach()
 
+    def massage(self, path):
+        "Massage Python library path to get around upstream bug."
+        return path.replace('/usr', self.conf.env.PREFIX)
+
     def fix_python_libs(self):
         """Fix up library install paths."""
         # Remember original setting for "compatibility cleanup".
@@ -63,13 +67,13 @@ class FixConfig(object):
             (pydir,) = self.conf.get_python_variables(
                 ["get_python_lib(plat_specific=0)"]
                 )
-            self.conf.env.PYTHONDIR = pydir
+            self.conf.env.PYTHONDIR = self.massage(pydir)
         if not ('PYTHONARCHDIR' in self.opts
                 or 'PYTHONARCHDIR' in self.conf.environ):
             (pyarchdir,) = self.conf.get_python_variables(
                 ["get_python_lib(plat_specific=1)"]
                 )
-            self.conf.env.PYTHONARCHDIR = pyarchdir or pydir
+            self.conf.env.PYTHONARCHDIR = self.massage(pyarchdir or pydir)
 
     def load(self, *args, **kwargs):
         """Do the load and capture the options."""
