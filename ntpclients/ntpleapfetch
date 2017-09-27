@@ -371,11 +371,12 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
             if [ ! -f $LEAPFILE ]; then
 		log "notice" "$LEAPFILE was missing, creating new copy - check permissions"
                 touch $LEAPFILE
-		# Can't copy permissions from old file, copy from NTPCONF instead
+		# Can't copy permissions from old file,
+                # copy from NTPCONF instead
 		REFFILE="$NTPCONF"
             fi
-            chmod --reference $REFFILE $TMPFILE
-            chown --reference $REFFILE $TMPFILE
+            chmod --reference=$REFFILE $TMPFILE
+            chown --reference=$REFFILE $TMPFILE
 	    ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1
             if  [ $? == 0 ] ; then
                 chcon --reference $REFFILE $TMPFILE
