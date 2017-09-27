@@ -6,10 +6,10 @@ import ntp.agentx
 
 from ntp.agentx import slicedata, decode_pduheader
 
-extraData = "Would you kindly ignore this?"
+extraData = b"Would you kindly ignore this?"
 
 maximumOIDsubs = tuple(range(1, 129))
-maximumOIDstr = "\x80\x00\x00\x00\
+maximumOIDstr = b"""\x80\x00\x00\x00\
 \x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x04\
 \x00\x00\x00\x05\x00\x00\x00\x06\x00\x00\x00\x07\x00\x00\x00\x08\
 \x00\x00\x00\x09\x00\x00\x00\x0A\x00\x00\x00\x0B\x00\x00\x00\x0C\
@@ -49,7 +49,7 @@ maximumOIDstr = "\x80\x00\x00\x00\
 \x00\x00\x00\x75\x00\x00\x00\x76\x00\x00\x00\x77\x00\x00\x00\x78\
 \x00\x00\x00\x79\x00\x00\x00\x7A\x00\x00\x00\x7B\x00\x00\x00\x7C\
 \x00\x00\x00\x7D\x00\x00\x00\x7E\x00\x00\x00\x7F\x00\x00\x00\x80\
-"
+"""
 
 # The most commonly used flag setups, some tests use custom flags
 standardFlags = {"flags": {"instReg": False,
@@ -91,7 +91,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
     # PDU tests
     #
     def test_AgentXPDU(self):
-
+        # Test these so we don't need a bunch of redundant tests
         # Test basic, without context
         test = ntp.agentx.AgentXPDU(0, True, 1, 2, 3, context=extraData)
         self.assertEqual(repr(test),
@@ -132,21 +132,21 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encoding, null packet
         nullPkt_str = nullPkt.encode()
         self.assertEqual(nullPkt_str,
-                         "\x01\x01\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x0C"
-                         "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+                         b"\x01\x01\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x0C"
+                         b"\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
         # Test encoding, basic packet
         basicPkt_str = basicPkt.encode()
         self.assertEqual(basicPkt_str,
-                         "\x01\x01\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x20\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x03\x00\x00\x00foo\x00")
+                         b"\x01\x01\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x20\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x03\x00\x00\x00foo\x00")
         # Test decoding, null packet
         header, body = slicedata(nullPkt_str, 20)
         header = decode_pduheader(header)
@@ -190,17 +190,17 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encoding
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x02\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x01\x00\x00\x00")
+                         b"\x01\x02\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x01\x00\x00\x00")
         # Test encoding, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x02\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x01\x00\x00\x00")
+                         b"\x01\x02\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x01\x00\x00\x00")
         # Test decoding
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -258,32 +258,32 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode, basic packet
         basicPkt_str = basicPkt.encode()
         self.assertEqual(basicPkt_str,
-                         "\x01\x03\x11\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x14"
-                         "\x04\x05\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03")
+                         b"\x01\x03\x11\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x14"
+                         b"\x04\x05\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03")
         # Test encode, basic packet, little endian
         basicPkt_LE_str = basicPkt_LE.encode()
         self.assertEqual(basicPkt_LE_str,
-                         "\x01\x03\x01\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x14\x00\x00\x00"
-                         "\x04\x05\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00")
+                         b"\x01\x03\x01\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x14\x00\x00\x00"
+                         b"\x04\x05\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00")
         # Test encode, fancy packet
         fancyPkt_str = fancyPkt.encode()
         self.assertEqual(fancyPkt_str,
-                         "\x01\x03\x19\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x20"
-                         "\x00\x00\x00\x04blah"
-                         "\x04\x05\x05\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x17")
+                         b"\x01\x03\x19\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x20"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x04\x05\x05\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x17")
         # Test decoding, basic packet
         header, body = slicedata(basicPkt_str, 20)
         header = decode_pduheader(header)
@@ -364,32 +364,32 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode, basic packet
         basicPkt_str = basicPkt.encode()
         self.assertEqual(basicPkt_str,
-                         "\x01\x04\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x14"
-                         "\x00\x05\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03")
+                         b"\x01\x04\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x14"
+                         b"\x00\x05\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03")
         # Test encode, basic packet, little endian
         basicPkt_LE_str = basicPkt_LE.encode()
         self.assertEqual(basicPkt_LE_str,
-                         "\x01\x04\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x14\x00\x00\x00"
-                         "\x00\x05\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00")
+                         b"\x01\x04\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x14\x00\x00\x00"
+                         b"\x00\x05\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00")
         # Test encode, fancy packet
         fancyPkt_str = fancyPkt.encode()
         self.assertEqual(fancyPkt_str,
-                         "\x01\x04\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x20"
-                         "\x00\x00\x00\x04blah"
-                         "\x00\x05\x05\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x17")
+                         b"\x01\x04\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x20"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x00\x05\x05\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x17")
         # Test decoding, basic packet
         header, body = slicedata(basicPkt_str, 20)
         header = decode_pduheader(header)
@@ -467,38 +467,38 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode, null packet
         nullPkt_str = nullPkt.encode()
         self.assertEqual(nullPkt_str,
-                         "\x01\x05\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x00\x00\x00\x00")
+                         b"\x01\x05\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x00")
         # Test encode, full packet
         fullPkt_str = fullPkt.encode()
         self.assertEqual(fullPkt_str,
-                         "\x01\x05\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x44"
-                         "\x00\x00\x00\x04blah"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x05"
-                         "\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
-                         "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28"
-                         "\x00\x00\x00\x00")
+                         b"\x01\x05\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x44"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x05"
+                         b"\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28"
+                         b"\x00\x00\x00\x00")
         # Test encode, full packet, little endian
         fullPkt_LE_str = fullPkt_LE.encode()
         self.assertEqual(fullPkt_LE_str,
-                         "\x01\x05\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x44\x00\x00\x00"
-                         "\x04\x00\x00\x00blah"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x05\x00\x00\x00"
-                         "\x02\x00\x01\x00\x0A\x00\x00\x00\x14\x00\x00\x00"
-                         "\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00"
-                         "\x00\x00\x00\x00")
+                         b"\x01\x05\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x44\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x05\x00\x00\x00"
+                         b"\x02\x00\x01\x00\x0A\x00\x00\x00\x14\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00"
+                         b"\x00\x00\x00\x00")
         # Test decoding, null packet
         header, body = slicedata(nullPkt_str, 20)
         header = decode_pduheader(header)
@@ -568,35 +568,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode, null packet
         nullPkt_str = nullPkt.encode()
         self.assertEqual(nullPkt_str,
-                         "\x01\x06\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x00")
+                         b"\x01\x06\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x00")
         # Test encode, full packet
         fullPkt_str = fullPkt.encode()
         self.assertEqual(fullPkt_str,
-                         "\x01\x06\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x40"
-                         "\x00\x00\x00\x04blah"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x05"
-                         "\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
-                         "\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28")
+                         b"\x01\x06\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x40"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x05"
+                         b"\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28")
         # Test encode, full packet, little endian
         fullPkt_LE_str = fullPkt_LE.encode()
         self.assertEqual(fullPkt_LE_str,
-                         "\x01\x06\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x40\x00\x00\x00"
-                         "\x04\x00\x00\x00blah"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x05\x00\x00\x00"
-                         "\x02\x00\x01\x00\x0A\x00\x00\x00\x14\x00\x00\x00"
-                         "\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00")
+                         b"\x01\x06\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x40\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x05\x00\x00\x00"
+                         b"\x02\x00\x01\x00\x0A\x00\x00\x00\x14\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00")
         # Test decoding, null packet
         header, body = slicedata(nullPkt_str, 20)
         header = decode_pduheader(header)
@@ -665,27 +665,27 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encoding
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x07\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x3C"
-                         "\x00\x00\x00\x04blah"
-                         "\x00\x01\x00\x05"
-                         "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                         "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09")
+                         b"\x01\x07\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x3C"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x00\x01\x00\x05"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09")
         # Test encoding, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x07\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x3C\x00\x00\x00"
-                         "\x04\x00\x00\x00blah"
-                         "\x01\x00\x05\x00"
-                         "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x02\x00\x01\x00\x06\x00\x00\x00\x07\x00\x00\x00"
-                         "\x02\x00\x00\x00\x08\x00\x00\x00\x09\x00\x00\x00")
+                         b"\x01\x07\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x3C\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah"
+                         b"\x01\x00\x05\x00"
+                         b"\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x02\x00\x01\x00\x06\x00\x00\x00\x07\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x08\x00\x00\x00\x09\x00\x00\x00")
         # Test decoding
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -752,35 +752,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encoding
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x08\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x48"
-                         "\x00\x00\x00\x04blah"
-                         "\x00\x06\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x04\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x04"
-                         "\x00\x00\x00\x04blah")
+                         b"\x01\x08\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x48"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x00\x06\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x04\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x04blah")
         # Test encoding, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x08\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x48\x00\x00\x00"
-                         "\x04\x00\x00\x00blah"
-                         "\x06\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x04\x00\x00\x00"
-                         "\x04\x00\x00\x00blah")
+                         b"\x01\x08\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x48\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah"
+                         b"\x06\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah")
         # Test decoding
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -836,15 +836,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x09\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x00")
+                         b"\x01\x09\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x00")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x09\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x00")
+                         b"\x01\x09\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x00")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -877,15 +877,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x0A\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x00")
+                         b"\x01\x0A\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x00")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x0A\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x00")
+                         b"\x01\x0A\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x00")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -918,15 +918,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x0B\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x00")
+                         b"\x01\x0B\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x00")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x0B\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x00")
+                         b"\x01\x0B\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x00")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -961,17 +961,17 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x0D\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x08"
-                         "\x00\x00\x00\x04blah")
+                         b"\x01\x0D\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x08"
+                         b"\x00\x00\x00\x04blah")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x0D\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x08\x00\x00\x00"
-                         "\x04\x00\x00\x00blah")
+                         b"\x01\x0D\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x08\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -1024,35 +1024,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x0C\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x48"
-                         "\x00\x00\x00\x04blah"
-                         "\x00\x06\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x04\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x04"
-                         "\x00\x00\x00\x04blah")
+                         b"\x01\x0C\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x48"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x00\x06\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x04\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x04blah")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x0C\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x48\x00\x00\x00"
-                         "\x04\x00\x00\x00blah"
-                         "\x06\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x04\x00\x00\x00"
-                         "\x04\x00\x00\x00blah")
+                         b"\x01\x0C\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x48\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah"
+                         b"\x06\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -1121,35 +1121,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x0E\x1E\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x48"
-                         "\x00\x00\x00\x04blah"
-                         "\x00\x06\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x04\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x04"
-                         "\x00\x00\x00\x04blah")
+                         b"\x01\x0E\x1E\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x48"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x00\x06\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x04\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x04blah")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x0E\x0E\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x48\x00\x00\x00"
-                         "\x04\x00\x00\x00blah"
-                         "\x06\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x04\x00\x00\x00"
-                         "\x04\x00\x00\x00blah")
+                         b"\x01\x0E\x0E\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x48\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah"
+                         b"\x06\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -1223,35 +1223,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x0F\x1E\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x48"
-                         "\x00\x00\x00\x04blah"
-                         "\x00\x06\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x04\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x04"
-                         "\x00\x00\x00\x04blah")
+                         b"\x01\x0F\x1E\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x48"
+                         b"\x00\x00\x00\x04blah"
+                         b"\x00\x06\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x04\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x04blah")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x0F\x0E\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x48\x00\x00\x00"
-                         "\x04\x00\x00\x00blah"
-                         "\x06\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x04\x00\x00\x00"
-                         "\x04\x00\x00\x00blah")
+                         b"\x01\x0F\x0E\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x48\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah"
+                         b"\x06\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -1311,23 +1311,23 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x10\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x20"
-                         "\x00\x00\x00\x04bluh"
-                         "\x03\x00\x00\x00\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x00\x00\x04blah")
+                         b"\x01\x10\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x20"
+                         b"\x00\x00\x00\x04bluh"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x00\x00\x04blah")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x10\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x20\x00\x00\x00"
-                         "\x04\x00\x00\x00bluh"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00"
-                         "\x04\x00\x00\x00blah")
+                         b"\x01\x10\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x20\x00\x00\x00"
+                         b"\x04\x00\x00\x00bluh"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -1373,21 +1373,21 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x11\x18\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x18"
-                         "\x00\x00\x00\x04bluh"
-                         "\x03\x00\x00\x00\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06")
+                         b"\x01\x11\x18\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x18"
+                         b"\x00\x00\x00\x04bluh"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x11\x08\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x18\x00\x00\x00"
-                         "\x04\x00\x00\x00bluh"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00")
+                         b"\x01\x11\x08\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x18\x00\x00\x00"
+                         b"\x04\x00\x00\x00bluh"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -1445,35 +1445,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encode
         pkt_str = pkt.encode()
         self.assertEqual(pkt_str,
-                         "\x01\x12\x10\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x48"
-                         "\x00\x00\x00\x04\x00\x05\x00\x06"
-                         "\x00\x06\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x04\x00\x00"
-                         "\x03\x00\x00\x00\x00\x00\x00\x01"
-                         "\x00\x00\x00\x02\x00\x00\x00\x04"
-                         "\x00\x00\x00\x04blah")
+                         b"\x01\x12\x10\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x48"
+                         b"\x00\x00\x00\x04\x00\x05\x00\x06"
+                         b"\x00\x06\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x04\x00\x00"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                         b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x04blah")
         # Test encode, little endian
         pkt_LE_str = pkt_LE.encode()
         self.assertEqual(pkt_LE_str,
-                         "\x01\x12\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x48\x00\x00\x00"
-                         "\x04\x00\x00\x00\x05\x00\x06\x00"
-                         "\x06\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x03\x00\x00\x00\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00\x04\x00\x00\x00"
-                         "\x04\x00\x00\x00blah")
+                         b"\x01\x12\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x48\x00\x00\x00"
+                         b"\x04\x00\x00\x00\x05\x00\x06\x00"
+                         b"\x06\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x04\x00\x00\x00blah")
         # Test decode
         header, body = slicedata(pkt_str, 20)
         header = decode_pduheader(header)
@@ -1521,14 +1521,14 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         dec = ntp.agentx.decode_integer32
 
         # Encode
-        self.assertEqual(enc(True, 42), "\x00\x00\x00\x2A")
+        self.assertEqual(enc(True, 42), b"\x00\x00\x00\x2A")
         # Encode, little endian
-        self.assertEqual(enc(False, 42), "\x2A\x00\x00\x00")
+        self.assertEqual(enc(False, 42), b"\x2A\x00\x00\x00")
         # Decode
-        self.assertEqual(dec("\x00\x00\x00\x2A" + extraData, standardFlags),
+        self.assertEqual(dec(b"\x00\x00\x00\x2A" + extraData, standardFlags),
                          (42, extraData))
         # Decode, little endian
-        self.assertEqual(dec("\x2A\x00\x00\x00" + extraData, lilEndianFlags),
+        self.assertEqual(dec(b"\x2A\x00\x00\x00" + extraData, lilEndianFlags),
                          (42, extraData))
 
     def test_nullvalue(self):
@@ -1536,7 +1536,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         dec = ntp.agentx.decode_nullvalue
 
         # Encode
-        self.assertEqual(enc(True, "this is ignored"), "")
+        self.assertEqual(enc(True, "this is ignored"), b"")
         # Decode
         self.assertEqual(dec(extraData, standardFlags), (None, extraData))
 
@@ -1545,15 +1545,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         dec = ntp.agentx.decode_integer64
 
         # Encode
-        self.assertEqual(enc(True, 42), "\x00\x00\x00\x00\x00\x00\x00\x2A")
+        self.assertEqual(enc(True, 42), b"\x00\x00\x00\x00\x00\x00\x00\x2A")
         # Encode, little endian
-        self.assertEqual(enc(False, 42), "\x2A\x00\x00\x00\x00\x00\x00\x00")
+        self.assertEqual(enc(False, 42), b"\x2A\x00\x00\x00\x00\x00\x00\x00")
         # Decode
-        self.assertEqual(dec("\x00\x00\x00\x00\x00\x00\x00\x2A" + extraData,
+        self.assertEqual(dec(b"\x00\x00\x00\x00\x00\x00\x00\x2A" + extraData,
                              standardFlags),
                          (42, extraData))
         # Decode, little endian
-        self.assertEqual(dec("\x2A\x00\x00\x00\x00\x00\x00\x00" + extraData,
+        self.assertEqual(dec(b"\x2A\x00\x00\x00\x00\x00\x00\x00" + extraData,
                              lilEndianFlags),
                          (42, extraData))
 
@@ -1563,10 +1563,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Encode correct
         self.assertEqual(enc(True, (1, 2, 3, 4)),
-                         "\x00\x00\x00\x04\x01\x02\x03\x04")
+                         b"\x00\x00\x00\x04\x01\x02\x03\x04")
         # Encode correct, little endian
         self.assertEqual(enc(False, (1, 2, 3, 4)),
-                         "\x04\x00\x00\x00\x01\x02\x03\x04")
+                         b"\x04\x00\x00\x00\x01\x02\x03\x04")
         # Encode incorrect
         try:
             enc(True, (1, 2, 3, 4, 5))
@@ -1575,11 +1575,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
             errored = True
         self.assertEqual(errored, True)
         # Decode
-        self.assertEqual(dec("\x00\x00\x00\x04\x01\x02\x03\x04" + extraData,
+        self.assertEqual(dec(b"\x00\x00\x00\x04\x01\x02\x03\x04" + extraData,
                              standardFlags),
                          ((1, 2, 3, 4), extraData))
         # Decode, little endian
-        self.assertEqual(dec("\x04\x00\x00\x00\x01\x02\x03\x04" + extraData,
+        self.assertEqual(dec(b"\x04\x00\x00\x00\x01\x02\x03\x04" + extraData,
                              lilEndianFlags),
                          ((1, 2, 3, 4), extraData))
 
@@ -1589,37 +1589,37 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
 
         # Encode empty OID
         cls = target((), False)
-        self.assertEqual(cls.encode(True), "\x00\x00\x00\x00")
+        self.assertEqual(cls.encode(True), b"\x00\x00\x00\x00")
         # Encode basic OID
         cls = target((1, 2, 3, 4, 5), False)
         self.assertEqual(cls.encode(True),
-                         "\x05\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05")
+                         b"\x05\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05")
         # Encode basic OID, little endian
         self.assertEqual(cls.encode(False),
-                         "\x05\x00\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00")
+                         b"\x05\x00\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00")
         # Encode prefixed OID
         cls = target((1, 3, 6, 1, 23, 1, 2, 3), False)
         self.assertEqual(cls.encode(True),
-                         "\x03\x17\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03")
+                         b"\x03\x17\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03")
         # Encode include
         cls = target((1, 2), True)
         self.assertEqual(cls.encode(True),
-                         "\x02\x00\x01\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02")
+                         b"\x02\x00\x01\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02")
         # Encode together
         cls = target((1, 3, 6, 1, 1, 3, 4, 5, 6), True)
         self.assertEqual(cls.encode(True),
-                         "\x04\x01\x01\x00"
-                         "\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06")
+                         b"\x04\x01\x01\x00"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06")
         # Encode maximum size
         cls = target(maximumOIDsubs, False)
         self.assertEqual(cls.encode(True), maximumOIDstr)
@@ -1633,60 +1633,60 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(errored, True)
 
         # Decode empty OID, extra data
-        cls, xtr = dec("\x00\x00\x00\x00" + extraData, standardFlags)
+        cls, xtr = dec(b"\x00\x00\x00\x00" + extraData, standardFlags)
         self.assertEqual(isinstance(cls, target), True)
         self.assertEqual(cls.subids, ())
         self.assertEqual(cls.include, False)
         self.assertEqual(xtr, extraData)
         # Decode basic OID, extra data
-        cls, xtr = dec("\x05\x00\x00\x00\x00\x00\x00\x01"
-                       "\x00\x00\x00\x02\x00\x00\x00\x03"
-                       "\x00\x00\x00\x04\x00\x00\x00\x05" + extraData,
+        cls, xtr = dec(b"\x05\x00\x00\x00\x00\x00\x00\x01"
+                       b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                       b"\x00\x00\x00\x04\x00\x00\x00\x05" + extraData,
                        standardFlags)
         self.assertEqual(isinstance(cls, target), True)
         self.assertEqual(cls.subids, (1, 2, 3, 4, 5))
         self.assertEqual(cls.include, False)
         self.assertEqual(xtr, extraData)
         # Decode basic OID, little endian
-        cls, xtr = dec("\x05\x00\x00\x00\x01\x00\x00\x00"
-                       "\x02\x00\x00\x00\x03\x00\x00\x00"
-                       "\x04\x00\x00\x00\x05\x00\x00\x00",
+        cls, xtr = dec(b"\x05\x00\x00\x00\x01\x00\x00\x00"
+                       b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                       b"\x04\x00\x00\x00\x05\x00\x00\x00",
                        lilEndianFlags)
         self.assertEqual(isinstance(cls, target), True)
         self.assertEqual(cls.subids, (1, 2, 3, 4, 5))
         self.assertEqual(cls.include, False)
-        self.assertEqual(xtr, "")
+        self.assertEqual(xtr, b"")
         # Decode prefixed OID
-        cls, xtr = dec("\x03\x17\x00\x00\x00\x00\x00\x01"
-                       "\x00\x00\x00\x02\x00\x00\x00\x03", standardFlags)
+        cls, xtr = dec(b"\x03\x17\x00\x00\x00\x00\x00\x01"
+                       b"\x00\x00\x00\x02\x00\x00\x00\x03", standardFlags)
         self.assertEqual(isinstance(cls, target), True)
         self.assertEqual(cls.subids, (1, 3, 6, 1, 23, 1, 2, 3))
         self.assertEqual(cls.include, False)
-        self.assertEqual(xtr, "")
+        self.assertEqual(xtr, b"")
         # Decode include
-        cls, xtr = dec("\x02\x00\x05\x00\x00\x00\x00\x01\x00\x00\x00\x02",
+        cls, xtr = dec(b"\x02\x00\x05\x00\x00\x00\x00\x01\x00\x00\x00\x02",
                        standardFlags)
         self.assertEqual(isinstance(cls, target), True)
         self.assertEqual(cls.subids, (1, 2))
         self.assertEqual(cls.include, True)
-        self.assertEqual(xtr, "")
+        self.assertEqual(xtr, b"")
         # Decode together
-        cls, xtr = dec("\x04\x01\x02\x00\x00\x00\x00\x03"
-                       "\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00\x06",
+        cls, xtr = dec(b"\x04\x01\x02\x00\x00\x00\x00\x03"
+                       b"\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00\x06",
                        standardFlags)
         self.assertEqual(isinstance(cls, target), True)
         self.assertEqual(cls.subids, (1, 3, 6, 1, 1, 3, 4, 5, 6))
         self.assertEqual(cls.include, True)
-        self.assertEqual(xtr, "")
+        self.assertEqual(xtr, b"")
         # Decode maximum size
         cls, xtr = dec(maximumOIDstr, standardFlags)
         self.assertEqual(isinstance(cls, target), True)
         self.assertEqual(cls.subids, maximumOIDsubs)
         self.assertEqual(cls.include, False)
-        self.assertEqual(xtr, "")
+        self.assertEqual(xtr, b"")
         # Decode over maximum size
         # Need to replace the hardcoded n_subid=128 with 129
-        fatOID = "\x81" + maximumOIDstr[1:] + "\xDE\xAD\xBE\xEF"
+        fatOID = b"\x81" + maximumOIDstr[1:] + b"\xDE\xAD\xBE\xEF"
         try:
             cls, xtr = dec(fatOID, standardFlags)
             errored = False
@@ -1754,65 +1754,66 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test encoding
         # Encode minimum size
         cls = target((), (), False)
-        self.assertEqual(cls.encode(True), "\x00\x00\x00\x00\x00\x00\x00\x00")
+        self.assertEqual(cls.encode(True),
+                         b"\x00\x00\x00\x00\x00\x00\x00\x00")
         # Encode inclusive
         cls = target((1, 2, 3, 4), (5, 6, 7, 8), True)
         self.assertEqual(cls.encode(True),
-                         "\x04\x00\x01\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x04\x00\x00\x00"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x00\x00\x07\x00\x00\x00\x08")
+                         b"\x04\x00\x01\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x04\x00\x00\x00"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x00\x00\x07\x00\x00\x00\x08")
         # Encode exclusive
         cls = target((1, 2, 3, 4), (5, 6, 7, 8), False)
         self.assertEqual(cls.encode(True),
-                         "\x04\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x04\x00\x00\x00"
-                         "\x00\x00\x00\x05\x00\x00\x00\x06"
-                         "\x00\x00\x00\x07\x00\x00\x00\x08")
+                         b"\x04\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x04\x00\x00\x00"
+                         b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                         b"\x00\x00\x00\x07\x00\x00\x00\x08")
         # Encode exclusive, little endian
         self.assertEqual(cls.encode(False),
-                         "\x04\x00\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x04\x00\x00\x00"
-                         "\x05\x00\x00\x00\x06\x00\x00\x00"
-                         "\x07\x00\x00\x00\x08\x00\x00\x00")
+                         b"\x04\x00\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x04\x00\x00\x00"
+                         b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                         b"\x07\x00\x00\x00\x08\x00\x00\x00")
         # Test decode
         # Decode minimum size, extra data
-        self.assertEqual(dec("\x00\x00\x00\x00\x00\x00\x00\x00" + extraData,
+        self.assertEqual(dec(b"\x00\x00\x00\x00\x00\x00\x00\x00" + extraData,
                              standardFlags),
                          (target((), (), False), extraData))
         # Decode inclusive
-        self.assertEqual(dec("\x04\x00\x01\x00"
-                             "\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x00\x00\x00\x03\x00\x00\x00\x04"
-                             "\x04\x00\x00\x00"
-                             "\x00\x00\x00\x05\x00\x00\x00\x06"
-                             "\x00\x00\x00\x07\x00\x00\x00\x08",
+        self.assertEqual(dec(b"\x04\x00\x01\x00"
+                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                             b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                             b"\x04\x00\x00\x00"
+                             b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                             b"\x00\x00\x00\x07\x00\x00\x00\x08",
                              standardFlags),
-                         (target((1, 2, 3, 4), (5, 6, 7, 8), True), ""))
+                         (target((1, 2, 3, 4), (5, 6, 7, 8), True), b""))
         # Decode exclusive
-        self.assertEqual(dec("\x04\x00\x00\x00"
-                             "\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x00\x00\x00\x03\x00\x00\x00\x04"
-                             "\x04\x00\x00\x00"
-                             "\x00\x00\x00\x05\x00\x00\x00\x06"
-                             "\x00\x00\x00\x07\x00\x00\x00\x08",
+        self.assertEqual(dec(b"\x04\x00\x00\x00"
+                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                             b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                             b"\x04\x00\x00\x00"
+                             b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                             b"\x00\x00\x00\x07\x00\x00\x00\x08",
                              standardFlags),
-                         (target((1, 2, 3, 4), (5, 6, 7, 8), False), ""))
+                         (target((1, 2, 3, 4), (5, 6, 7, 8), False), b""))
         # Decode little endian
-        self.assertEqual(dec("\x04\x00\x01\x00"
-                             "\x01\x00\x00\x00\x02\x00\x00\x00"
-                             "\x03\x00\x00\x00\x04\x00\x00\x00"
-                             "\x04\x00\x00\x00"
-                             "\x05\x00\x00\x00\x06\x00\x00\x00"
-                             "\x07\x00\x00\x00\x08\x00\x00\x00",
+        self.assertEqual(dec(b"\x04\x00\x01\x00"
+                             b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                             b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                             b"\x04\x00\x00\x00"
+                             b"\x05\x00\x00\x00\x06\x00\x00\x00"
+                             b"\x07\x00\x00\x00\x08\x00\x00\x00",
                              lilEndianFlags),
-                         (target((1, 2, 3, 4), (5, 6, 7, 8), True), ""))
+                         (target((1, 2, 3, 4), (5, 6, 7, 8), True), b""))
 
     def test_encode_searchrange_list(self):
         enc = ntp.agentx.encode_searchrange_list
@@ -1821,52 +1822,52 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Encode
         self.assertEqual(enc(True, (srch((1, 2), (1, 2), True),
                                     srch((2, 3), (3, 4)))),
-                         "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04")
+                         b"\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04")
         # Encode, little endian
         self.assertEqual(enc(False, (srch((1, 2), (1, 2), True),
                                      srch((2, 3), (3, 4)))),
-                         "\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00")
+                         b"\x02\x00\x01\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00")
         # Test, null terminated
         self.assertEqual(enc(True, (srch((1, 2), (1, 2), True),
                                     srch((2, 3), (3, 4))),
                          nullTerminate=True),
-                         "\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x00\x00\x00\x00")
+                         b"\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x00")
 
     def test_decode_searchrange_list(self):
         dec = ntp.agentx.decode_searchrange_list
         srch = ntp.agentx.SearchRange
 
         # Decode
-        self.assertEqual(dec("\x02\x00\x01\x00"
-                             "\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x02\x00\x00\x00"
-                             "\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x02\x00\x00\x00"
-                             "\x00\x00\x00\x02\x00\x00\x00\x03"
-                             "\x02\x00\x00\x00"
-                             "\x00\x00\x00\x03\x00\x00\x00\x04",
+        self.assertEqual(dec(b"\x02\x00\x01\x00"
+                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                             b"\x02\x00\x00\x00"
+                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                             b"\x02\x00\x00\x00"
+                             b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                             b"\x02\x00\x00\x00"
+                             b"\x00\x00\x00\x03\x00\x00\x00\x04",
                              standardFlags),
                          (srch((1, 2), (1, 2), True),
                           srch((2, 3), (3, 4), False)))
         # Test, little endian
-        self.assertEqual(dec("\x02\x00\x01\x00"
-                             "\x01\x00\x00\x00\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00"
-                             "\x01\x00\x00\x00\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00\x03\x00\x00\x00"
-                             "\x02\x00\x00\x00"
-                             "\x03\x00\x00\x00\x04\x00\x00\x00",
+        self.assertEqual(dec(b"\x02\x00\x01\x00"
+                             b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                             b"\x02\x00\x00\x00"
+                             b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                             b"\x02\x00\x00\x00"
+                             b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                             b"\x02\x00\x00\x00"
+                             b"\x03\x00\x00\x00\x04\x00\x00\x00",
                              lilEndianFlags),
                          (srch((1, 2), (1, 2), True),
                           srch((2, 3), (3, 4), False)))
@@ -1876,28 +1877,28 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         srch = ntp.agentx.SearchRange
 
         # Decode
-        self.assertEqual(dec("\x02\x00\x01\x00"
-                             "\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x02\x00\x00\x00"
-                             "\x00\x00\x00\x01\x00\x00\x00\x02"
-                             "\x02\x00\x00\x00"
-                             "\x00\x00\x00\x02\x00\x00\x00\x03"
-                             "\x02\x00\x00\x00"
-                             "\x00\x00\x00\x03\x00\x00\x00\x04",
+        self.assertEqual(dec(b"\x02\x00\x01\x00"
+                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                             b"\x02\x00\x00\x00"
+                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                             b"\x02\x00\x00\x00"
+                             b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                             b"\x02\x00\x00\x00"
+                             b"\x00\x00\x00\x03\x00\x00\x00\x04",
                              standardFlags),
                          ((srch((1, 2), (1, 2), True),
                            srch((2, 3), (3, 4), False)),
-                          ""))
+                          b""))
         # Test, little endian
-        self.assertEqual(dec("\x02\x00\x01\x00"
-                             "\x01\x00\x00\x00\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00"
-                             "\x01\x00\x00\x00\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00"
-                             "\x02\x00\x00\x00\x03\x00\x00\x00"
-                             "\x02\x00\x00\x00"
-                             "\x03\x00\x00\x00\x04\x00\x00\x00"
-                             "\x00\x00\x00\x00" + extraData, lilEndianFlags),
+        self.assertEqual(dec(b"\x02\x00\x01\x00"
+                             b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                             b"\x02\x00\x00\x00"
+                             b"\x01\x00\x00\x00\x02\x00\x00\x00"
+                             b"\x02\x00\x00\x00"
+                             b"\x02\x00\x00\x00\x03\x00\x00\x00"
+                             b"\x02\x00\x00\x00"
+                             b"\x03\x00\x00\x00\x04\x00\x00\x00"
+                             b"\x00\x00\x00\x00" + extraData, lilEndianFlags),
                          ((srch((1, 2), (1, 2), True),
                            srch((2, 3), (3, 4), False)),
                           extraData))
@@ -1907,29 +1908,29 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         dec = ntp.agentx.decode_octetstr
 
         # Encode empty
-        self.assertEqual(enc(True, ()), "\x00\x00\x00\x00")
+        self.assertEqual(enc(True, ()), b"\x00\x00\x00\x00")
         # Encode word multiple
         self.assertEqual(enc(True, (1, 2, 3, 4)),
-                         "\x00\x00\x00\x04\x01\x02\x03\x04")
+                         b"\x00\x00\x00\x04\x01\x02\x03\x04")
         # Encode non word multiple
         self.assertEqual(enc(True, (1, 2, 3, 4, 5)),
-                         "\x00\x00\x00\x05\x01\x02\x03\x04\x05\x00\x00\x00")
+                         b"\x00\x00\x00\x05\x01\x02\x03\x04\x05\x00\x00\x00")
         # Encode string
-        self.assertEqual(enc(True, "blah"), "\x00\x00\x00\x04blah")
+        self.assertEqual(enc(True, "blah"), b"\x00\x00\x00\x04blah")
         # Encode string, little endian
-        self.assertEqual(enc(False, "blah"), "\x04\x00\x00\x00blah")
+        self.assertEqual(enc(False, "blah"), b"\x04\x00\x00\x00blah")
         # Decode empty
-        self.assertEqual(dec("\x00\x00\x00\x00", standardFlags), ("", ""))
+        self.assertEqual(dec(b"\x00\x00\x00\x00", standardFlags), ("", b""))
         # Decode word multiple, extra data
-        self.assertEqual(dec("\x00\x00\x00\x04blah" + extraData,
+        self.assertEqual(dec(b"\x00\x00\x00\x04blah" + extraData,
                              standardFlags),
                          ("blah", extraData))
         # Decode word multiple, little endian
-        self.assertEqual(dec("\x04\x00\x00\x00blah", lilEndianFlags),
-                         ("blah", ""))
+        self.assertEqual(dec(b"\x04\x00\x00\x00blah", lilEndianFlags),
+                         ("blah", b""))
         # Decode non word multiple, extra data
-        self.assertEqual(dec("\x00\x00\x00\x05"
-                             "blarg\x00\x00\x00" + extraData,
+        self.assertEqual(dec(b"\x00\x00\x00\x05"
+                             b"blarg\x00\x00\x00" + extraData,
                              standardFlags),
                          ("blarg", extraData))
 
@@ -1949,172 +1950,172 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test payloadless types
         cls = target(a.VALUE_NULL, (1, 2, 3))
         self.assertEqual(cls.encode(True),
-                         "\x00\x05\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
+                         b"\x00\x05\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
         cls = target(a.VALUE_NO_SUCH_OBJECT, (1, 2, 3))
         self.assertEqual(cls.encode(True),
-                         "\x00\x80\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
+                         b"\x00\x80\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
         cls = target(a.VALUE_NO_SUCH_INSTANCE, (1, 2, 3))
         self.assertEqual(cls.encode(True),
-                         "\x00\x81\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
+                         b"\x00\x81\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
         cls = target(a.VALUE_END_OF_MIB_VIEW, (1, 2, 3))
         self.assertEqual(cls.encode(True),
-                         "\x00\x82\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
+                         b"\x00\x82\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03")
         # Test octet based types
         cls = target(a.VALUE_OCTET_STR, (1, 2, 3), (1, 2, 3, 4, 5))
         self.assertEqual(cls.encode(True),
-                         "\x00\x04\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x05"
-                         "\x01\x02\x03\x04\x05\x00\x00\x00")
+                         b"\x00\x04\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x05"
+                         b"\x01\x02\x03\x04\x05\x00\x00\x00")
         cls = target(a.VALUE_IP_ADDR, (1, 2, 3), (16, 32, 48, 64))
         self.assertEqual(cls.encode(True),
-                         "\x00\x40\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x04\x10\x20\x30\x40")
+                         b"\x00\x40\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x04\x10\x20\x30\x40")
         # Test integer32 types
         cls = target(a.VALUE_INTEGER, (1, 2, 3), 42)
         self.assertEqual(cls.encode(True),
-                         "\x00\x02\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x2A")
+                         b"\x00\x02\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x2A")
         cls = target(a.VALUE_COUNTER32, (1, 2, 3), 42)
         self.assertEqual(cls.encode(True),
-                         "\x00\x41\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x2A")
+                         b"\x00\x41\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x2A")
         cls = target(a.VALUE_GAUGE32, (1, 2, 3), 42)
         self.assertEqual(cls.encode(True),
-                         "\x00\x42\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x2A")
+                         b"\x00\x42\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x2A")
         cls = target(a.VALUE_TIME_TICKS, (1, 2, 3), 42)
         self.assertEqual(cls.encode(True),
-                         "\x00\x43\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x2A")
+                         b"\x00\x43\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x2A")
         # Test integer64 type
         cls = target(a.VALUE_COUNTER64, (1, 2, 3), 42)
         self.assertEqual(cls.encode(True),
-                         "\x00\x46\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x00\x00\x00\x00\x00\x00\x00\x2A")
+                         b"\x00\x46\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x00\x00\x00\x00\x00\x00\x00\x2A")
         # Test oid type
         cls = target(a.VALUE_OID, (1, 2, 3), a.OID((16, 42, 256), False))
         self.assertEqual(cls.encode(True),
-                         "\x00\x06\x00\x00\x03\x00\x00\x00"
-                         "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         "\x03\x00\x00\x00\x00\x00\x00\x10"
-                         "\x00\x00\x00\x2A\x00\x00\x01\x00")
+                         b"\x00\x06\x00\x00\x03\x00\x00\x00"
+                         b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                         b"\x03\x00\x00\x00\x00\x00\x00\x10"
+                         b"\x00\x00\x00\x2A\x00\x00\x01\x00")
         # Test oid type, little endian
         cls = target(a.VALUE_OID, (1, 2, 3), a.OID((16, 42, 256), False))
         self.assertEqual(cls.encode(False),
-                         "\x06\x00\x00\x00\x03\x00\x00\x00"
-                         "\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
-                         "\x03\x00\x00\x00\x10\x00\x00\x00"
-                         "\x2A\x00\x00\x00\x00\x01\x00\x00")
+                         b"\x06\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x10\x00\x00\x00"
+                         b"\x2A\x00\x00\x00\x00\x01\x00\x00")
 
     def test_decode_varbind(self):
         f = ntp.agentx.decode_Varbind
         a = ntp.agentx
 
         # Test payloadless types
-        self.assertEqual(f("\x00\x05\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
+        self.assertEqual(f(b"\x00\x05\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
                          (a.Varbind(a.VALUE_NULL, a.OID((1, 2, 3), False)),
-                          ""))
-        self.assertEqual(f("\x00\x80\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
+                          b""))
+        self.assertEqual(f(b"\x00\x80\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
                          (a.Varbind(a.VALUE_NO_SUCH_OBJECT,
                                     a.OID((1, 2, 3), False)),
-                          ""))
-        self.assertEqual(f("\x00\x81\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
+                          b""))
+        self.assertEqual(f(b"\x00\x81\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
                          (a.Varbind(a.VALUE_NO_SUCH_INSTANCE,
                                     a.OID((1, 2, 3), False)),
-                          ""))
-        self.assertEqual(f("\x00\x82\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
+                          b""))
+        self.assertEqual(f(b"\x00\x82\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03",
                            standardFlags),
                          (a.Varbind(a.VALUE_END_OF_MIB_VIEW,
                                     a.OID((1, 2, 3), False)),
-                          ""))
+                          b""))
         # Test octet based types
-        self.assertEqual(f("\x00\x04\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x0512345\x00\x00\x00",
+        self.assertEqual(f(b"\x00\x04\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x00\x00\x00\x0512345\x00\x00\x00",
                            standardFlags),
                          (a.Varbind(a.VALUE_OCTET_STR,
                                     a.OID((1, 2, 3), False),
                                     "12345"),
-                          ""))
-        self.assertEqual(f("\x00\x40\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x04\x10\x20\x30\x40", standardFlags),
+                          b""))
+        self.assertEqual(f(b"\x00\x40\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x00\x00\x00\x04\x10\x20\x30\x40", standardFlags),
                          (a.Varbind(a.VALUE_IP_ADDR,
                                     a.OID((1, 2, 3), False),
                                     (16, 32, 48, 64)),
-                          ""))
+                          b""))
         # Test integer32 types
-        self.assertEqual(f("\x00\x02\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x2A", standardFlags),
+        self.assertEqual(f(b"\x00\x02\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x00\x00\x00\x2A", standardFlags),
                          (a.Varbind(a.VALUE_INTEGER,
                                     a.OID((1, 2, 3), False),
                                     42),
-                          ""))
-        self.assertEqual(f("\x00\x41\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x2A", standardFlags),
+                          b""))
+        self.assertEqual(f(b"\x00\x41\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x00\x00\x00\x2A", standardFlags),
                          (a.Varbind(a.VALUE_COUNTER32,
                                     a.OID((1, 2, 3), False),
                                     42),
-                          ""))
-        self.assertEqual(f("\x00\x42\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x2A", standardFlags),
+                          b""))
+        self.assertEqual(f(b"\x00\x42\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x00\x00\x00\x2A", standardFlags),
                          (a.Varbind(a.VALUE_GAUGE32,
                                     a.OID((1, 2, 3), False),
                                     42),
-                          ""))
-        self.assertEqual(f("\x00\x43\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x2A", standardFlags),
+                          b""))
+        self.assertEqual(f(b"\x00\x43\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x00\x00\x00\x2A", standardFlags),
                          (a.Varbind(a.VALUE_TIME_TICKS,
                                     a.OID((1, 2, 3), False),
                                     42),
-                          ""))
+                          b""))
         # Test integer64 type
-        self.assertEqual(f("\x00\x46\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x00\x00\x00\x00\x00\x00\x00\x2A", standardFlags),
+        self.assertEqual(f(b"\x00\x46\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x00\x00\x00\x00\x00\x00\x00\x2A", standardFlags),
                          (a.Varbind(a.VALUE_COUNTER64,
                                     a.OID((1, 2, 3), False),
                                     42),
-                          ""))
+                          b""))
         # Test oid type
-        self.assertEqual(f("\x00\x06\x00\x00\x03\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x03\x00\x00\x00\x00\x00\x00\x10"
-                           "\x00\x00\x00\x2A\x00\x00\x01\x00", standardFlags),
+        self.assertEqual(f(b"\x00\x06\x00\x00\x03\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x10"
+                           b"\x00\x00\x00\x2A\x00\x00\x01\x00", standardFlags),
                          (a.Varbind(a.VALUE_OID,
                                     a.OID((1, 2, 3), False),
                                     a.OID((16, 42, 256), False)),
-                          ""))
+                          b""))
         # Test integer32 with little endian
-        self.assertEqual(f("\x43\x00\x00\x00\x03\x00\x00\x00"
-                           "\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
-                           "\x2A\x00\x00\x00", lilEndianFlags),
+        self.assertEqual(f(b"\x43\x00\x00\x00\x03\x00\x00\x00"
+                           b"\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
+                           b"\x2A\x00\x00\x00", lilEndianFlags),
                          (a.Varbind(a.VALUE_TIME_TICKS,
                                     a.OID((1, 2, 3), False),
                                     42),
-                          ""))
+                          b""))
 
     #
     # Misc tests
@@ -2135,25 +2136,25 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(f(a.PDU_OPEN,
                            False, False, False, False, False,
                            0xDEADBEEF, 0xCAFEBABE, 0xFACEF00D, 0),
-                         "\x01\x01\x00\x00"
-                         "\xEF\xBE\xAD\xDE\xBE\xBA\xFE\xCA"
-                         "\x0D\xF0\xCE\xFA\x00\x00\x00\x00")
+                         b"\x01\x01\x00\x00"
+                         b"\xEF\xBE\xAD\xDE\xBE\xBA\xFE\xCA"
+                         b"\x0D\xF0\xCE\xFA\x00\x00\x00\x00")
         # Test flags
         self.assertEqual(f(a.PDU_OPEN,
                            True, True, True, True, True,
                            0xDEADBEEF, 0xCAFEBABE, 0xFACEF00D, 0),
-                         "\x01\x01\x1F\x00"
-                         "\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
-                         "\xFA\xCE\xF0\x0D\x00\x00\x00\x00")
+                         b"\x01\x01\x1F\x00"
+                         b"\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
+                         b"\xFA\xCE\xF0\x0D\x00\x00\x00\x00")
 
     def test_decode_pduheader(self):
         f = ntp.agentx.decode_pduheader
         a = ntp.agentx
 
         # Test "empty" header
-        self.assertEqual(f("\x01\x01\x10\x00"
-                           "\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
-                           "\xFA\xCE\xF0\x0D\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x01\x10\x00"
+                           b"\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
+                           b"\xFA\xCE\xF0\x0D\x00\x00\x00\x00"),
                          {"version": 1,
                           "type": a.PDU_OPEN,
                           "flags": {"instReg": False,
@@ -2166,9 +2167,9 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "packet_id": 0xFACEF00D,
                           "length": 0})
         # Test "empty" header, little endian
-        self.assertEqual(f("\x01\x01\x00\x00"
-                           "\xEF\xBE\xAD\xDE\xBE\xBA\xFE\xCA"
-                           "\x0D\xF0\xCE\xFA\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x01\x00\x00"
+                           b"\xEF\xBE\xAD\xDE\xBE\xBA\xFE\xCA"
+                           b"\x0D\xF0\xCE\xFA\x00\x00\x00\x00"),
                          {"version": 1,
                           "type": a.PDU_OPEN,
                           "flags": {"instReg": False,
@@ -2181,9 +2182,9 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "packet_id": 0xFACEF00D,
                           "length": 0})
         # Test "empty" header, extra data
-        self.assertEqual(f("\x01\x01\x10\x00"
-                           "\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
-                           "\xFA\xCE\xF0\x0D\x00\x00\x00\x00" + extraData),
+        self.assertEqual(f(b"\x01\x01\x10\x00"
+                           b"\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
+                           b"\xFA\xCE\xF0\x0D\x00\x00\x00\x00" + extraData),
                          {"version": 1,
                           "type": a.PDU_OPEN,
                           "flags": {"instReg": False,
@@ -2196,9 +2197,9 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "packet_id": 0xFACEF00D,
                           "length": 0})
         # Test flags
-        self.assertEqual(f("\x01\x01\x1F\x00"
-                           "\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
-                           "\xFA\xCE\xF0\x0D\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x01\x1F\x00"
+                           b"\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE"
+                           b"\xFA\xCE\xF0\x0D\x00\x00\x00\x00"),
                          {"version": 1,
                           "type": a.PDU_OPEN,
                           "flags": {"instReg": True,
@@ -2220,99 +2221,99 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.maxDiff = None
 
         # Test open
-        self.assertEqual(f("\x01\x01\x10\x00"
-                           "\x00\x00\x00\x0C\x00\x00\x00\x22"
-                           "\x00\x00\x00\x38\x00\x00\x00\x20"
-                           "\x4E\x00\x00\x00"
-                           "\x04\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x00\x00\x00\x03foo\x00"),
+        self.assertEqual(f(b"\x01\x01\x10\x00"
+                           b"\x00\x00\x00\x0C\x00\x00\x00\x22"
+                           b"\x00\x00\x00\x38\x00\x00\x00\x20"
+                           b"\x4E\x00\x00\x00"
+                           b"\x04\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x03foo\x00"),
                          (x.OpenPDU(True, 12, 34, 56, 78,
                                     x.OID((1, 2, 3, 4), False),
                                     "foo"),
-                          ""))
+                          b""))
         # Test open, extraData
-        self.assertEqual(f("\x01\x01\x10\x00"
-                           "\x00\x00\x00\x0C\x00\x00\x00\x22"
-                           "\x00\x00\x00\x38\x00\x00\x00\x20"
-                           "\x4E\x00\x00\x00"
-                           "\x04\x00\x00\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x00\x00\x00\x03foo\x00" + extraData),
+        self.assertEqual(f(b"\x01\x01\x10\x00"
+                           b"\x00\x00\x00\x0C\x00\x00\x00\x22"
+                           b"\x00\x00\x00\x38\x00\x00\x00\x20"
+                           b"\x4E\x00\x00\x00"
+                           b"\x04\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x03foo\x00" + extraData),
                          (x.OpenPDU(True, 12, 34, 56, 78,
                                     x.OID((1, 2, 3, 4), False),
                                     "foo"),
                           extraData))
         # Test close
-        self.assertEqual(f("\x01\x02\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x01\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x02\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                           b"\x01\x00\x00\x00"),
                          (x.ClosePDU(True, 1, 2, 3, x.RSN_OTHER),
-                          ""))
+                          b""))
         # Test register
-        self.assertEqual(f("\x01\x03\x11\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x14"
-                           "\x04\x05\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03"),
+        self.assertEqual(f(b"\x01\x03\x11\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x14"
+                           b"\x04\x05\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x03"),
                          (x.RegisterPDU(True, 1, 2, 3, 4, 5,
                                         x.OID((1, 2, 3), False),
                                         0, None, None),
-                          ""))
+                          b""))
         # Test unregister
-        self.assertEqual(f("\x01\x04\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x14"
-                           "\x00\x05\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03"),
+        self.assertEqual(f(b"\x01\x04\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x14"
+                           b"\x00\x05\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x03"),
                          (x.UnregisterPDU(True, 1, 2, 3, 5,
                                           x.OID((1, 2, 3), False),
                                           0, None, None),
-                          ""))
+                          b""))
         # Test get
-        self.assertEqual(f("\x01\x05\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x05\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x00"),
                          (x.GetPDU(True, 1, 2, 3, ()),
-                          ""))
+                          b""))
         # Test get next
-        self.assertEqual(f("\x01\x06\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x06\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (x.GetNextPDU(True, 1, 2, 3, ()),
-                          ""))
+                          b""))
         # Test get bulk
-        self.assertEqual(f("\x01\x07\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x34"
-                           "\x00\x01\x00\x05"
-                           "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
-                           "\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                           "\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"),
+        self.assertEqual(f(b"\x01\x07\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x34"
+                           b"\x00\x01\x00\x05"
+                           b"\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
+                           b"\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
+                           b"\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"),
                          (x.GetBulkPDU(True, 1, 2, 3, 1, 5,
                                        (srch((1, 2), (3, 4), False),
                                         srch((6, 7), (8, 9), True))),
-                          ""))
+                          b""))
         # Test test set
-        self.assertEqual(f("\x01\x08\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x40"
-                           "\x00\x06\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x03\x00\x00\x00\x00\x00\x00\x04"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"
-                           "\x00\x04\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x04"
-                           "\x00\x00\x00\x04blah"),
+        self.assertEqual(f(b"\x01\x08\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x40"
+                           b"\x00\x06\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                           b"\x00\x04\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x04blah"),
                          (x.TestSetPDU(True, 1, 2, 3,
                                        (x.Varbind(x.VALUE_OID,
                                                   x.OID((1, 2, 3), False),
@@ -2320,38 +2321,38 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                         x.Varbind(x.VALUE_OCTET_STR,
                                                   x.OID((1, 2, 4), False),
                                                   "blah"))),
-                          ""))
+                          b""))
         # Test commit set
-        self.assertEqual(f("\x01\x09\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x09\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (x.CommitSetPDU(True, 1, 2, 3),
-                          ""))
+                          b""))
         # Test undo set
-        self.assertEqual(f("\x01\x0A\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x0A\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (x.UndoSetPDU(True, 1, 2, 3),
-                          ""))
+                          b""))
         # Test cleanup set
-        self.assertEqual(f("\x01\x0B\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x0B\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (x.CleanupSetPDU(True, 1, 2, 3),
-                          ""))
+                          b""))
         # Test notify
-        self.assertEqual(f("\x01\x0C\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x40"
-                           "\x00\x06\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x03\x00\x00\x00\x00\x00\x00\x04"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"
-                           "\x00\x04\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x04"
-                           "\x00\x00\x00\x04blah"),
+        self.assertEqual(f(b"\x01\x0C\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x40"
+                           b"\x00\x06\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                           b"\x00\x04\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x04blah"),
                          (x.NotifyPDU(True, 1, 2, 3,
                                       (x.Varbind(x.VALUE_OID,
                                                  x.OID((1, 2, 3), False),
@@ -2359,26 +2360,26 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                        x.Varbind(x.VALUE_OCTET_STR,
                                                  x.OID((1, 2, 4), False),
                                                  "blah"))),
-                          ""))
+                          b""))
         # Test ping
-        self.assertEqual(f("\x01\x0D\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x00"),
+        self.assertEqual(f(b"\x01\x0D\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (x.PingPDU(True, 1, 2, 3),
-                          ""))
+                          b""))
         # Test index alloc
-        self.assertEqual(f("\x01\x0E\x16\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x40"
-                           "\x00\x06\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x03\x00\x00\x00\x00\x00\x00\x04"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"
-                           "\x00\x04\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x04"
-                           "\x00\x00\x00\x04blah"),
+        self.assertEqual(f(b"\x01\x0E\x16\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x40"
+                           b"\x00\x06\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                           b"\x00\x04\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x04blah"),
                          (x.IndexAllocPDU(True, 1, 2, 3, True, True,
                                           (x.Varbind(x.VALUE_OID,
                                                      x.OID((1, 2, 3), False),
@@ -2386,20 +2387,20 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                            x.Varbind(x.VALUE_OCTET_STR,
                                                      x.OID((1, 2, 4), False),
                                                      "blah"))),
-                          ""))
+                          b""))
         # Test index dealloc
-        self.assertEqual(f("\x01\x0F\x16\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x40"
-                           "\x00\x06\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x03"
-                           "\x03\x00\x00\x00\x00\x00\x00\x04"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"
-                           "\x00\x04\x00\x00"
-                           "\x03\x00\x00\x00\x00\x00\x00\x01"
-                           "\x00\x00\x00\x02\x00\x00\x00\x04"
-                           "\x00\x00\x00\x04blah"),
+        self.assertEqual(f(b"\x01\x0F\x16\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x40"
+                           b"\x00\x06\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x03"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                           b"\x00\x04\x00\x00"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x01"
+                           b"\x00\x00\x00\x02\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x04blah"),
                          (x.IndexDeallocPDU(True, 1, 2, 3, True, True,
                                             (x.Varbind(x.VALUE_OID,
                                                        x.OID((1, 2, 3),
@@ -2410,40 +2411,40 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                                        x.OID((1, 2, 4),
                                                              False),
                                                        "blah"))),
-                          ""))
+                          b""))
         # Test add agent caps
-        self.assertEqual(f("\x01\x10\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x18"
-                           "\x03\x00\x00\x00\x00\x00\x00\x04"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"
-                           "\x00\x00\x00\x04blah"),
+        self.assertEqual(f(b"\x01\x10\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x18"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x05\x00\x00\x00\x06"
+                           b"\x00\x00\x00\x04blah"),
                          (x.AddAgentCapsPDU(True, 1, 2, 3,
                                             x.OID((4, 5, 6), False),
                                             "blah"),
-                          ""))
+                          b""))
         # Test rm agent caps
-        self.assertEqual(f("\x01\x11\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x10"
-                           "\x03\x00\x00\x00\x00\x00\x00\x04"
-                           "\x00\x00\x00\x05\x00\x00\x00\x06"),
+        self.assertEqual(f(b"\x01\x11\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x10"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x04"
+                           b"\x00\x00\x00\x05\x00\x00\x00\x06"),
                          (x.RMAgentCapsPDU(True, 1, 2, 3,
                                            x.OID((4, 5, 6), False)),
-                          ""))
+                          b""))
         # Test response
-        self.assertEqual(f("\x01\x12\x10\x00"
-                           "\x00\x00\x00\x01\x00\x00\x00\x02"
-                           "\x00\x00\x00\x03\x00\x00\x00\x08"
-                           "\x00\x00\x00\x04\x00\x05\x00\x06"),
+        self.assertEqual(f(b"\x01\x12\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x08"
+                           b"\x00\x00\x00\x04\x00\x05\x00\x06"),
                          (x.ResponsePDU(True, 1, 2, 3, 4, 5, 6),
-                          ""))
+                          b""))
         # Test insufficient data
         try:
-            f("\x01\x11\x10\x00"
-              "\x00\x00\x00\x01\x00\x00\x00\x02"
-              "\x00\x00\x00\x03\x00\x00\x00\x10"
-              "\x03\x00\x00\x00\x00\x00\x00\x04")
+            f(b"\x01\x11\x10\x00"
+              b"\x00\x00\x00\x01\x00\x00\x00\x02"
+              b"\x00\x00\x00\x03\x00\x00\x00\x10"
+              b"\x03\x00\x00\x00\x00\x00\x00\x04")
             fail = False
         except IndexError:
             fail = True
