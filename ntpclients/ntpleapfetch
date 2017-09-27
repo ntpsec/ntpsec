@@ -336,7 +336,7 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
         if [ -n "$VERBOSE" ]; then
             log "info" "Attempting download from $LEAPSRC, try $TRY.."
         fi
-        if wget $PROTO $PREFER -o ${TMPFILE}.log $LEAPSRC -O $TMPFILE ; then
+        if wget -T 10 $PROTO $PREFER -o ${TMPFILE}.log $LEAPSRC -O $TMPFILE ; then
             log "info" "Download of $LEAPSRC succeeded"
             if [ -n "$VERBOSE" ]; then
                 cat ${TMPFILE}.log
