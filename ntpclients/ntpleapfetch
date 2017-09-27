@@ -11,7 +11,7 @@ VERSION="1.003"
 # leap-seconds file manager/updater
 
 # Depends on:
-#  wget sed, tr, shasum, logger
+#  wget sed, tr, shasum/sha1sum, logger
 
 # ########## Default configuration ##########
 #
@@ -44,7 +44,7 @@ LOGFAC=daemon
 
 PATHLIST="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:"
 
-REQUIREDCMDS=" wget logger tr sed shasum"
+REQUIREDCMDS=" wget logger tr sed"
 
 SELF="`basename $0`"
 
@@ -107,7 +107,7 @@ need not be run more frequently than about once every three weeks.
 
 For cron-friendly behavior, define CRONJOB=1 in the crontab.
 
-This script depends on:$REQUIREDCMDS
+This script depends on: sha1sum/shasum $REQUIREDCMDS
 
 Version $VERSION
 EOF
@@ -211,6 +211,16 @@ for P in $REQUIREDCMDS ; do
     exit 1
 done
 
+# find sha1sum or shasum
+if >/dev/null 2>&1 which "sha1sum" ; then
+    SHASUM="sha1sum"
+elif >/dev/null 2>&1 which "shasum" ; then
+    SHASUM="shasum"
+else
+    echo "FATAL: Can not find sha1sum or shasum command, please install"
+    exit 1
+fi
+
 # Handle logging
 
 if ! LOGGER="`2>/dev/null which logger`" ; then
@@ -266,10 +276,12 @@ function verifySHA1 {
     local DATA="`echo \"$RAW\" | sed -e'/^#h/d' -e's/^#[\$@]//g' | tr -d '[:space:]'`"
 
     # Compute the SHA1 hash of the data, removing the marker and filename
-    # Computed in binary mode, which shouldn't matter since whitespace has been removed
-    # shasum comes in several flavors; a portable one is available in Perl (with Digest::SHA)
+    # Computed in binary mode, which shouldn't matter since whitespace
+    # has been removed
+    # shasum/sha1sum comes in several flavors;
+    # a portable one is available in Perl (with Digest::SHA)
 
-    local DSHA1="`echo -n \"$DATA\" | shasum | sed -e's/[? *].*$//'`"
+    local DSHA1="`echo -n \"$DATA\" | $SHASUM | sed -e's/[? *].*$//'`"
 
     # Extract the file's hash. Restore any leading zeroes in hash segments.
 
