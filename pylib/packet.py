@@ -855,7 +855,11 @@ class ControlSession:
             except AttributeError:
                 pass
             try:
-                if e1.errno in (socket.EAI_NONAME, socket.EAI_NODATA):
+                if hasattr(socket, "EAI_NODATA"):
+                    errlist = (socket.EAI_NONAME, socket.EAI_NODATA)
+                else:
+                    errlist = (socket.EAI_NONAME,)
+                if e1.errno in errlist:
                     try:
                         return hinted_lookup(port="ntp", hints=0)
                     except socket.gaierror as e2:

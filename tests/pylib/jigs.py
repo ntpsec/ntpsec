@@ -182,7 +182,10 @@ class SocketModuleJig:
     AI_NUMERICHOST = socket.AI_NUMERICHOST
     AI_CANONNAME = socket.AI_CANONNAME
     EAI_NONAME = socket.EAI_NONAME
-    EAI_NODATA = socket.EAI_NODATA
+    if hasattr(socket, "EAI_NODATA"):
+        EAI_NODATA = socket.EAI_NODATA
+    else:  # FreeBSD is speschul
+        EAI_NODATA = None
     NI_NAMEREQD = socket.NI_NAMEREQD
 
     def __init__(self):
