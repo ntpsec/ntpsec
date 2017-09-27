@@ -324,7 +324,7 @@ fi
 # FIXME broken on MacOS/macports
 LEAPFILE="`sed $NTPCONF -e'/^ *leapfile  *.*$/!d' -e's/^ *leapfile  *//'`"
 if [ -z "$LEAPFILE" ]; then
-    log "error" "$NTPCONF does not specify a leapfile"
+    log "warning" "$NTPCONF does not specify a leapfile"
 fi
 
 # Allow placing the file someplace else - testing
