@@ -208,10 +208,7 @@ import ntp.util
 # - Use latin-1 encoding to transform binary data to/from Unicode when
 #   necessary for operations where Python 3 expects Unicode; the
 #   polystr and polybytes functions are used to do this so that
-#   when running on Python 2, the byte string data is used unchanged;
-#   also, the make_wrapper function constructs a text stream that can
-#   wrap a file opened in binary mode for cases where a file object
-#   that can be passed around from function to function is needed
+#   when running on Python 2, the byte string data is used unchanged.
 #
 # - Construct custom stdin, stdout, and stderr streams when running
 #   on Python 3 that force latin-1 encoding, and wrap them around the
@@ -276,16 +273,6 @@ else:  # Python 3
         # equivalent of decode('string_escape') in Python 2. This function
         # assumes that it will be called with a Python 3 'str' instance
         return s.encode(master_encoding).decode('unicode_escape')
-
-    def make_wrapper(fp):
-        "Wrapper factory function to enforce master encoding"
-        # This can be used to wrap normally binary streams for API
-        # compatibility with functions that need a text stream in
-        # Python 3; it ensures that the binary bytes are decoded using
-        # the master encoding we use to turn bytes to Unicode in
-        # polystr above
-        # newline="\n" ensures that Python 3 won't mangle line breaks
-        return io.TextIOWrapper(fp, encoding=master_encoding, newline="\n")
 
     def make_std_wrapper(stream):
         "Standard input/output wrapper factory function"

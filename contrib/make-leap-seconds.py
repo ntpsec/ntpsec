@@ -26,9 +26,6 @@ if str is bytes:  # Python 2
     def string_escape(s):
         return s.decode('string_escape')
 
-    def make_wrapper(fp):
-        return fp
-
 else:  # Python 3
     import io
 
@@ -55,16 +52,6 @@ else:  # Python 3
         # equivalent of decode('string_escape') in Python 2. This function
         # assumes that it will be called with a Python 3 'str' instance
         return s.encode(master_encoding).decode('unicode_escape')
-
-    def make_wrapper(fp):
-        "Wrapper factory function to enforce master encoding"
-        # This can be used to wrap normally binary streams for API
-        # compatibility with functions that need a text stream in
-        # Python 3; it ensures that the binary bytes are decoded using
-        # the master encoding we use to turn bytes to Unicode in
-        # polystr above
-        # newline="\n" ensures that Python 3 won't mangle line breaks
-        return io.TextIOWrapper(fp, encoding=master_encoding, newline="\n")
 
     def make_std_wrapper(stream):
         "Standard input/output wrapper factory function"
