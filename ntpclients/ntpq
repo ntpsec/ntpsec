@@ -111,8 +111,6 @@ else:  # Python 3
         forced_utf8 = True
         sys.stderr = make_std_wrapper(sys.stderr)
 
-print(sys.stdout.encoding)
-
 # NTP-specific parts resume here
 
 # Flags for forming descriptors.
