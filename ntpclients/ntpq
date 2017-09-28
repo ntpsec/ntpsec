@@ -21,7 +21,6 @@ import resource
 import socket
 import sys
 import time
-import codecs
 
 try:
     import ntp.control
@@ -62,6 +61,8 @@ version = ntp.util.stdversion()
 forced_utf8 = False
 
 if str is bytes:  # Python 2
+    import codecs
+
     polystr = unicode
     polybytes = bytes
 
