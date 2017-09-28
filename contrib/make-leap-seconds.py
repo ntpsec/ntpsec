@@ -17,55 +17,6 @@ import sha
 import sys
 import time
 
-master_encoding = 'latin-1'
-
-if str is bytes:  # Python 2
-    polystr = str
-    polybytes = bytes
-
-    def string_escape(s):
-        return s.decode('string_escape')
-
-else:  # Python 3
-    import io
-
-    def polystr(o):
-        "Polymorphic string factory function"
-        if isinstance(o, str):
-            return o
-        if not isinstance(o, bytes):
-            return str(o)
-        return str(o, encoding=master_encoding)
-
-    def polybytes(s):
-        "Polymorphic string encoding function"
-        if isinstance(s, bytes):
-            return s
-        if not isinstance(s, str):
-            return bytes(s)
-        return bytes(s, encoding=master_encoding)
-
-    def string_escape(s):
-        "Polymorphic string_escape/unicode_escape"
-        # This hack is necessary because Unicode strings in Python 3 don't
-        # have a decode method, so there's no simple way to ask it for the
-        # equivalent of decode('string_escape') in Python 2. This function
-        # assumes that it will be called with a Python 3 'str' instance
-        return s.encode(master_encoding).decode('unicode_escape')
-
-    def make_std_wrapper(stream):
-        "Standard input/output wrapper factory function"
-        # This ensures that the encoding of standard output and standard
-        # error on Python 3 matches the master encoding we use to turn
-        # bytes to Unicode in polystr above
-        # line_buffering=True ensures that interactive command sessions
-        # work as expected
-        return io.TextIOWrapper(stream.buffer, encoding=master_encoding,
-                                newline="\n", line_buffering=True)
-
-    sys.stdin = make_std_wrapper(sys.stdin)
-    sys.stdout = make_std_wrapper(sys.stdout)
-    sys.stderr = make_std_wrapper(sys.stderr)
 
 JAN_1970 = 2208988800   # convert Unix/POSIX epoch to NTP epoch
 epoch = datetime.datetime.utcfromtimestamp(0)
