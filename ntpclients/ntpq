@@ -105,8 +105,6 @@ else:  # Python 3
         return io.TextIOWrapper(stream.buffer, encoding=master_encoding,
                                 newline="\n", line_buffering=True)
 
-    if sys.stdin.encoding == "ascii":
-        sys.stdin = make_std_wrapper(sys.stdin)
     if sys.stdout.encoding == "ascii":
         sys.stdout = make_std_wrapper(sys.stdout)
     if sys.stderr.encoding == "ascii":
