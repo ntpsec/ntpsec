@@ -52,6 +52,15 @@ version = ntp.util.stdversion()
 #   also, the make_wrapper function constructs a text stream that can
 #   wrap a file opened in binary mode for cases where a file object
 #   that can be passed around from function to function is needed
+#
+# - Construct custom stdin, stdout, and stderr streams when running
+#   on Python 3 that force latin-1 encoding, and wrap them around the
+#   underlying binary buffers (in Python 2, the streams are binary
+#   and are used unchanged); this ensures that the same transformation
+#   is done on data from/to the standard streams, as is done on binary
+#   data from/to files and subprocesses; the make_std_wrapper function
+#   does this. This is only done if the stream encoding is ascii, which
+#   is true on Mac OS X.
 
 master_encoding = 'latin-1'
 
