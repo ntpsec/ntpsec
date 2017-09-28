@@ -41,25 +41,24 @@ version = ntp.util.stdversion()
 # This code uses the following strategy to allow it to run on both Python 2
 # and Python 3:
 #
-# - Use binary I/O to read/write data from/to files and subprocesses;
-#   where the exact bytes are important (such as in checking for
-#   modified files), use the binary data directly
-#
 # - Use latin-1 encoding to transform binary data to/from Unicode when
 #   necessary for operations where Python 3 expects Unicode; the
 #   polystr and polybytes functions are used to do this so that
 #   when running on Python 2, the byte string data is used unchanged.
 #
-# - Construct custom stdin, stdout, and stderr streams when running
-#   on Python 3 that force latin-1 encoding, and wrap them around the
+# - Construct custom stdout and stderr streams when running
+#   on Python 3 that force UTF-8 encoding, and wrap them around the
 #   underlying binary buffers (in Python 2, the streams are binary
 #   and are used unchanged); this ensures that the same transformation
 #   is done on data from/to the standard streams, as is done on binary
 #   data from/to files and subprocesses; the make_std_wrapper function
-#   does this. This is only done if the stream encoding is ascii, which
-#   is true on Mac OS X.
+#   does this.
+#
+# anyone that changes this needs to test with all combinations of
+# python2, python3, LC_ALL=ascii, LC_ALL=latin-1, LC_ALL=en_US.utf8, and
+# piping output to a file.  While looking at the UTF-8 in the output.
 
-master_encoding = 'latin-1'
+forced_utf8 = False
 
 if str is bytes:  # Python 2
     polystr = unicode
@@ -102,13 +101,17 @@ else:  # Python 3
         # bytes to Unicode in polystr above
         # line_buffering=True ensures that interactive command sessions
         # work as expected
-        return io.TextIOWrapper(stream.buffer, encoding=master_encoding,
+        return io.TextIOWrapper(stream.buffer, encoding="utf-8",
                                 newline="\n", line_buffering=True)
 
-    if sys.stdout.encoding == "ascii":
+    if "UTF-8" != sys.stdout.encoding:
+        forced_utf8 = True
         sys.stdout = make_std_wrapper(sys.stdout)
-    if sys.stderr.encoding == "ascii":
+    if "UTF-8" != sys.stderr.encoding:
+        forced_utf8 = True
         sys.stderr = make_std_wrapper(sys.stderr)
+
+print(sys.stdout.encoding)
 
 # NTP-specific parts resume here
 
@@ -1665,6 +1668,9 @@ if __name__ == '__main__':
             logfp = open(val, "a", 1)  # 1 => line buffered
 
     session.logfp = interpreter.logfp = logfp
+
+    if forced_utf8 and interpreter.debug:
+        interpreter.warn("\nforced UTF-8 output\n")
 
     if keyfile is not None:  # Have a -k, setup the auth
         credentials = None
