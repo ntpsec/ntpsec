@@ -184,7 +184,7 @@ class SocketModuleJig:
     EAI_NONAME = socket.EAI_NONAME
     if hasattr(socket, "EAI_NODATA"):
         EAI_NODATA = socket.EAI_NODATA
-    else:  # FreeBSD is speschul
+    else:  # FreeBSD does not have EAI_NODATA (removed from POSIX)
         EAI_NODATA = None
     NI_NAMEREQD = socket.NI_NAMEREQD
 
