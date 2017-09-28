@@ -158,15 +158,15 @@ def stringfiltcooker(data):
         if count > highestcount:
             mostcommon = key
             highestcount = count
-    mspos = UNITS_SEC.index(UNIT_MS)
-    newunit = UNITS_SEC[mostcommon + mspos]
+    newunit = UNITS_SEC[mostcommon + UNITS_SEC.index(UNIT_MS)]
     # Shift all values to the new unit
     cooked = []
     for part in parts:
         part = rescalestring(part, mostcommon)
         fitted = fitinfield(part, 7)
         cooked.append(fitted)
-    rendered = " ".join(cooked) + " " + newunit
+    rendered = " ".join(cooked) + " " + UNITS_SEC[mostcommon + \
+                                                  UNITS_SEC.index(UNIT_MS)]
     return rendered
 
 
