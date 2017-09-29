@@ -48,14 +48,29 @@ UNIT_US = u"µs"      # micro second
 UNIT_MS = "ms"       # milli second
 UNIT_S = "s"         # second
 UNIT_KS = "ks"       # kilo seconds
-UNITS_SEC = (UNIT_NS, UNIT_US, UNIT_MS, UNIT_S, UNIT_KS)
+UNITS_SEC = [UNIT_NS, UNIT_US, UNIT_MS, UNIT_S, UNIT_KS]
 UNIT_PPT = "ppt"     # parts per trillion
 UNIT_PPB = "ppb"     # parts per billion
 UNIT_PPM = "ppm"     # parts per million
 UNIT_PPK = u"‰"      # parts per thousand
-UNITS_PPX = (UNIT_PPT, UNIT_PPB, UNIT_PPM, UNIT_PPK)
+UNITS_PPX = [UNIT_PPT, UNIT_PPB, UNIT_PPM, UNIT_PPK]
 unitgroups = (UNITS_SEC, UNITS_PPX)
 
+
+def deunicode_units():
+    "Under certain conditions it is not possible to force unicode output, "
+    "this overwrites units that contain unicode with safe versions"
+    global UNIT_US
+    global UNIT_PPK
+    # Replacement units
+    new_us = "us"
+    new_ppk = "ppk"
+    # Replace units in unit group
+    UNITS_SEC[UNITS_SEC.index(UNIT_US)] = new_us
+    UNITS_PPX[UNITS_PPX.index(UNIT_PPK)] = new_ppk
+    # Replace the units themselves
+    UNIT_US = new_us
+    UNIT_PPK = new_ppk
 
 # Variables that have units
 S_VARS = ("tai", "poll")
