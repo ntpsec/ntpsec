@@ -170,8 +170,6 @@ class Fatal(Exception):
 class OutputContext:
     def __enter__(self):
         "Begin critical region."
-        print(sys.stdout.encoding)
-        print(repr(locale.getlocale()))
         locale.setlocale(locale.LC_ALL, 'C.UTF-8')
         global stdscr
         stdscr = curses.initscr()
