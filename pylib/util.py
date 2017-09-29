@@ -18,9 +18,6 @@ import ntp.magic
 import ntp.control
 
 
-print(sys.stdout.encoding)
-
-
 if "get_terminal_size" not in dir(shutil):
     # used by termsize() on python 2.x systems
     import fcntl
