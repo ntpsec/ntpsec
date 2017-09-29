@@ -45,6 +45,11 @@ except ImportError as e:
     sys.exit(1)
 
 
+# LANG=C or LANG=POSIX refuse unicode when combined with curses
+if "ANSI_X3.4-1968" == sys.stdout.encoding:
+    ntp.util.deunicode_units()
+
+
 try:
     import locale
 except ImportError as e:
