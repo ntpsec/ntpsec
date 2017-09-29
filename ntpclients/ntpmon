@@ -46,7 +46,7 @@ except ImportError as e:
 
 
 # LANG=C or LANG=POSIX refuse unicode when combined with curses
-if "ANSI_X3.4-1968" == sys.stdout.encoding:
+if "UTF-8" != sys.stdout.encoding:
     ntp.util.deunicode_units()
 
 
