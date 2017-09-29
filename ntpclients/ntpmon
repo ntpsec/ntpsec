@@ -44,10 +44,11 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
-
+disableunicode = False
 # LANG=C or LANG=POSIX refuse unicode when combined with curses
 if "UTF-8" != sys.stdout.encoding:
     ntp.util.deunicode_units()
+    disableunicode = True
 
 
 try:
@@ -170,7 +171,11 @@ class Fatal(Exception):
 class OutputContext:
     def __enter__(self):
         "Begin critical region."
-        locale.setlocale(locale.LC_ALL, 'C.UTF-8')
+        if (sys.version_info[0] < 3) and (disableunicode is False):
+            # This appears to only be needed under python 2, it is only
+            # activated when we already have UTF-8. Otherwise we drop
+            # down to non-unicode versions.
+            locale.setlocale(locale.LC_ALL, "")
         global stdscr
         stdscr = curses.initscr()
         try:
