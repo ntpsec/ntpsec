@@ -14,6 +14,23 @@ import jigs
 
 class TestPylibUtilMethods(unittest.TestCase):
 
+    def test_deunicode_units(self):
+        u = ntp.util
+
+        self.assertEqual(u.UNIT_US, u"µs")
+        self.assertEqual(u.UNIT_PPK, u"‰")
+        self.assertEqual(u.UNITS_SEC, ["ns",  u"µs", "ms", "s", "ks"])
+        self.assertEqual(u.UNITS_PPX, ["ppt", "ppb", "ppm", u"‰"])
+        u.deunicode_units()
+        self.assertEqual(u.UNIT_US, "us")
+        self.assertEqual(u.UNIT_PPK, "ppk")
+        self.assertEqual(u.UNITS_SEC, ["ns",  "us", "ms", "s", "ks"])
+        self.assertEqual(u.UNITS_PPX, ["ppt", "ppb", "ppm", "ppk"])
+        u.UNIT_US = u"µs"
+        u.UNIT_PPK = u"‰"
+        u.UNITS_SEC[1] = u.UNIT_US
+        u.UNITS_PPX[3] = u.UNIT_PPK
+
     def test_dolog(self):
         f = ntp.util.dolog
 
