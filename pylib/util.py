@@ -104,6 +104,7 @@ def safeargcast(arg, castfunc, errtext, usage):
 
 
 def stdversion():
+    "Returns the NTPsec version string in a standard format"
     return "ntpsec-%s+%s %s" % (ntp.version.VERSION,
                                 ntp.version.VCS_TICK,
                                 ntp.version.VCS_DATE)
@@ -122,6 +123,7 @@ def rfc3339(t):
 
 
 def slicedata(data, slicepoint):
+    "Breaks a sequence into two pieces at the slice point"
     return data[:slicepoint], data[slicepoint:]
 
 
@@ -141,11 +143,14 @@ def portsplit(hostname):
 
 
 def stringfilt(data):
-    "pretty print string of space separated numbers"
+    "Pretty print string of space separated numbers"
     parts = data.split()
 
     cooked = []
     for part in parts:
+        # These are expected to fit on a single 80-char line.
+        # Accounting for other factors this leaves each number with
+        # 7 chars + a space.
         fitted = fitinfield(part, 7)
         cooked.append(fitted)
     rendered = " ".join(cooked)
@@ -159,7 +164,9 @@ def stringfiltcooker(data):
     minscale = -100000  # Keep track of the maxdownscale for each value
     # Find out what the 'natural' unit of each value is
     for part in parts:
+        # Only care about OOMs, the real scaling happens later
         value, oom = scalestring(part)
+        # Track the highest maxdownscale so we do not invent precision
         ds = maxdownscale(part)
         minscale = max(ds, minscale)
         oomcount[oom] = oomcount.get(oom, 0) + 1
@@ -195,7 +202,7 @@ def getunitgroup(unit):
 def oomsbetweenunits(a, b):
     "Calculates how many orders of magnitude separate two units"
     group = getunitgroup(a)
-    if b is None:  # asking for baseunit
+    if b is None:  # Caller is asking for the distance from the base unit
         return group.index(a) * 3
     elif b in group:
         ia = group.index(a)
@@ -236,8 +243,10 @@ def maxdownscale(value):
     "Maximum units a value can be scaled down without inventing data"
     if "." in value:
         digitcount = len(value.split(".")[1])
+        # Return a negative so it can be fed directly to a scaling function
         return -(digitcount // 3)
     else:
+        # No decimals, the value is already at the maximum down-scale
         return 0
 
 
