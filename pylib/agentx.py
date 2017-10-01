@@ -1150,6 +1150,14 @@ def decode_varbindlist(data, header):
 # =========================================
 
 
+def makeflags(iR, nI, aI, cP, bE):
+    return {"instReg": iR,
+            "newIndex": nI,
+            "anyIndex": aI,
+            "contextP": cP,
+            "bigEndian": bE}
+
+
 def getendian(bigEndian):
     return ">" if bigEndian is True else "<"
 

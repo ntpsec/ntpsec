@@ -4,7 +4,7 @@
 import unittest
 import ntp.agentx
 
-from ntp.agentx import slicedata, decode_pduheader
+from ntp.agentx import slicedata, decode_pduheader, makeflags
 
 extraData = b"Would you kindly ignore this?"
 
@@ -52,30 +52,10 @@ maximumOIDstr = b"""\x80\x00\x00\x00\
 """
 
 # The most commonly used flag setups, some tests use custom flags
-standardFlags = {"flags": {"instReg": False,
-                           "newIndex": False,
-                           "anyIndex": False,
-                           "contextP": False,
-                           "bigEndian": True}}
-standardFlags_bare = standardFlags["flags"]
-lilEndianFlags = {"flags": {"instReg": False,
-                            "newIndex": False,
-                            "anyIndex": False,
-                            "contextP": False,
-                            "bigEndian": False}}
-contextFlags = {"flags": {"instReg": False,
-                          "newIndex": False,
-                          "anyIndex": False,
-                          "contextP": True,
-                          "bigEndian": True}}
-
-
-def makeFlags(iR, nI, aI, cP, bE):
-    return {"flags": {"instReg": iR,
-                      "newIndex": nI,
-                      "anyIndex": aI,
-                      "contextP": cP,
-                      "bigEndian": bE}}
+standardFlags_bare = makeflags(False, False, False, False, True)
+standardFlags = {"flags": standardFlags_bare}
+lilEndianFlags = {"flags": makeflags(False, False, False, False, False)}
+contextFlags = {"flags": makeflags(False, False, False, True, True)}
 
 
 def test_pducore(tester, pdu, pduType, endian, sID, tactID, pktID):
@@ -2120,6 +2100,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
     #
     # Misc tests
     #
+    def test_makeflags(self):
+        f = ntp.agentx.makeflags
+        self.assertEqual(f(True, False, True, False, True),
+                         {"instReg": True,
+                          "newIndex": False,
+                          "anyIndex":  True,
+                          "contextP": False,
+                          "bigEndian": True})
+
     def test_getendian(self):
         f = ntp.agentx.getendian
 
