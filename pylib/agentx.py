@@ -1192,12 +1192,9 @@ def decode_pduheader(data):  # Endianness is controlled from the PDU header
     if pduType not in definedPDUTypes:
         raise ValueError("PDU type %s not in defined types" % pduType)
     # Slice up the flags
-    flagDict = {}
-    flagDict["instReg"] = bool(flags & 0x1)
-    flagDict["newIndex"] = bool(flags & 0x2)
-    flagDict["anyIndex"] = bool(flags & 0x4)
-    flagDict["contextP"] = bool(flags & 0x8)
-    flagDict["bigEndian"] = bool(flags & 0x10)
+    flagDict = makeflags(bool(flags & 0x1), bool(flags & 0x2),
+                         bool(flags & 0x4), bool(flags & 0x8),
+                         bool(flags & 0x10))
     # Chop the remaining parts of the header from the rest of the datastream
     # then parse them
     fmt = getendian(flagDict["bigEndian"]) + "IIII"
