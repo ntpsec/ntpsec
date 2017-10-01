@@ -55,7 +55,13 @@ class FixConfig(object):
 
     def massage(self, path):
         "Massage Python library path to get around upstream bug."
-        return path.replace('/usr', self.conf.env.PREFIX)
+        # This will produce an FHS-compliant insrallation if the
+        # proper local path pre-exists.
+        localized = path.replace('/usr', self.conf.env.PREFIX)
+        if os.path.exists(localized):
+            return localized
+        else:
+            return path
 
     def fix_python_libs(self):
         """Fix up library install paths."""
