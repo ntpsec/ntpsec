@@ -1145,6 +1145,23 @@ def decode_varbindlist(data, header):
     return varbinds
 
 
+def encode_flagbyte(flags):
+    flagbyte = 0
+    flagbyte |= flags["instReg"]
+    flagbyte |= flags["newIndex"] << 1
+    flagbyte |= flags["anyIndex"] << 2
+    flagbyte |= flags["contextP"] << 3  # nonDefaultContext
+    flagbyte |= flags["bigEndian"] << 4
+    return flagbyte
+
+
+def decode_flagbyte(flags):
+    flagDict = makeflags(bool(flags & 0x1), bool(flags & 0x2),
+                         bool(flags & 0x4), bool(flags & 0x8),
+                         bool(flags & 0x10))
+    return flagDict
+
+
 # =========================================
 # Utilities, glue, and misc
 # =========================================
@@ -1172,12 +1189,9 @@ def encode_pduheader(pduType, instanceRegistration, newIndex,
     # payload_length
     if pduType not in definedPDUTypes:
         raise ValueError("PDU type %s not in defined types" % pduType)
-    flags = 0
-    flags |= instanceRegistration
-    flags |= newIndex << 1
-    flags |= anyIndex << 2
-    flags |= nonDefaultContext << 3
-    flags |= bigEndian << 4
+    flags = encode_flagbyte(makeflags(instanceRegistration, newIndex,
+                                      anyIndex, nonDefaultContext,
+                                      bigEndian))
     # Yes, this is a kluge, it is less problematic then the next best kluge
     endianToken = getendian(bigEndian)
     data = struct.pack(endianToken + "BBBxIIII", 1, pduType, flags,
@@ -1192,9 +1206,7 @@ def decode_pduheader(data):  # Endianness is controlled from the PDU header
     if pduType not in definedPDUTypes:
         raise ValueError("PDU type %s not in defined types" % pduType)
     # Slice up the flags
-    flagDict = makeflags(bool(flags & 0x1), bool(flags & 0x2),
-                         bool(flags & 0x4), bool(flags & 0x8),
-                         bool(flags & 0x10))
+    flagDict = decode_flagbyte(flags)
     # Chop the remaining parts of the header from the rest of the datastream
     # then parse them
     fmt = getendian(flagDict["bigEndian"]) + "IIII"

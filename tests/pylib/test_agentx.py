@@ -2097,6 +2097,16 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                     42),
                           b""))
 
+    def test_encode_flagbyte(self):
+        f = ntp.agentx.encode_flagbyte
+        self.assertEqual(f(makeflags(False, True, False, True, False)), 0x0A)
+        self.assertEqual(f(makeflags(True, False, True, False, True)), 0x15)
+
+    def test_decode_flagbyte(self):
+        f = ntp.agentx.decode_flagbyte
+        self.assertEqual(f(0x0A), makeflags(False, True, False, True, False))
+        self.assertEqual(f(0x15), makeflags(True, False, True, False, True))
+
     #
     # Misc tests
     #
