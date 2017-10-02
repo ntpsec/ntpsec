@@ -69,12 +69,12 @@ if str is bytes:  # Python 2
     def string_escape(s):
         return s.decode('string_escape')
 
-    if sys.stdout.encoding != "UTF-8":
-        forced_utf8 = True
-        sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-    if sys.stderr.encoding != "UTF-8":
-        forced_utf8 = True
-        sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
+    #if sys.stdout.encoding != "UTF-8":
+    #    forced_utf8 = True
+    sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
+    #if sys.stderr.encoding != "UTF-8":
+    #    forced_utf8 = True
+    sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
 
 else:  # Python 3
     import io
