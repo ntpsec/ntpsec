@@ -445,7 +445,7 @@ class SyncPacket(Packet):
     def ntp_to_posix(t):
         "Scale from NTP time to POSIX time"
         # Note: assumes we're in the same NTP era as the transmitter...
-        return (t >> 32) - SyncPacket.UNIX_EPOCH
+        return (t / (2**32)) - SyncPacket.UNIX_EPOCH
 
     @staticmethod
     def posix_to_ntp(t):

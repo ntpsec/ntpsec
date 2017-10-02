@@ -212,7 +212,7 @@ def report(packet, json):
     digits = min(6, -int(math.log10(2**packet.precision)))
 
     date = time.strftime("%Y-%m-%d", t)
-    tod = time.strftime("%T", t) + (".%*d" % (digits, ms))
+    tod = time.strftime("%T", t) + (".%-*d" % (digits, ms)).rstrip()
     sgn = ("%+d" % tmoffset)[0]
     tz = "%s%02d%02d" % (sgn, abs(tmoffset) // 60, tmoffset % 60)
 
