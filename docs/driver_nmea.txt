@@ -186,8 +186,8 @@ the total but otherwise ignored.
 
 http://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
 NMEA Refclocks] might give further useful hints for specific hardware
-devices that exhibit strange or curious behaviour. Not that it
-describes NTP Classic and the old refclock confihuration syntax, and
+devices that exhibit strange or curious behaviour. Note that it
+describes NTP Classic and the old refclock configuration syntax, and
 assumes the old default speed of 4800 baud.
 
 To make a specific setting, select the corresponding decimal values from
