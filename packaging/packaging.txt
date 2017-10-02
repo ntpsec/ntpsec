@@ -18,18 +18,20 @@ pool group of its own. This may change in the future.
 
 Thw function get_python_lib() in the Python distutils library is the
 only reliable way to know where in fact the ntp Python library can
-installed; Under Linux, it normally returns something under /usr/lib. 
+installed; under Linux, it normally returns something under /usr/lib.
+This corresponds to a system installation.
 
-Thus, if you install from the source distribution with prefix set to
-a value other than /usr - in particular, if it's the default value
-/usr/local - the ntp Python library may get dropped in /usr/lib
-anyway, violating the Linux File Hierarchy Standard.
+Thus, if you install from the source distribution with prefix set to a
+value other than /usr - in particular, if it's the default value
+/usr/local corresponding to a user installation - the ntp Python
+library may get dropped in /usr/lib anyway, violating the Linux File
+Hierarchy Standard.
 
 We say 'may' because if the Python library directory corresponding
 to the prefixed library path already exists it will be used.
 
 Your installable package should arrange library installation to comply
-with the FHS.  If you are using --prefix=/usr (or, more generally, rge
+with the FHS.  If you are using --prefix=/usr (or, more generally, the
 default sys.prefix) this should not require special action.
 
 == Platforms without Python ==

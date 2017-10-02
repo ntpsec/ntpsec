@@ -229,6 +229,12 @@ to your new location.
 You should read the section "Path problems with the test tools" in
 devel/testing.txt before setting a non-default prefix.
 
+There is a separate `--destdir' option that changes the root of the
+entire installation hierarchy, prepending all paths.  It defaults to `/'.
+You might, say, use --destdir=/tmp/ntp for a test install to see what
+the installation paths look like without running as root or touching
+system directories.
+
 == Qualification testing ==
 
 Details on how to qualify NTPsec if you've never used it before
