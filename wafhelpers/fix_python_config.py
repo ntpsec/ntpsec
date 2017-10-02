@@ -1,6 +1,6 @@
 """Work around waf bugs related to Python config setup."""
 
-import os
+import os, sys
 
 from waflib import Utils  # pylint: disable=import-error
 from waflib.Logs import pprint  # pylint: disable=import-error
@@ -55,10 +55,10 @@ class FixConfig(object):
 
     def massage(self, path):
         "Massage Python library path to get around upstream bug."
-        # This will produce an FHS-compliant insrallation if the
+        # This will produce an FHS-compliant installation if the
         # proper local path pre-exists.
-        localized = path.replace('/usr', self.conf.env.PREFIX)
-        if os.path.exists(localized):
+        localized = path.replace(sys.prefix, self.conf.env.PREFIX)
+        if os.path.exists(localized) and localized in sys.path:
             return localized
         else:
             return path

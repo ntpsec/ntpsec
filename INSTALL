@@ -186,11 +186,11 @@ Due to a limitation of the Python distutils library, if you install
 from the source distribution with prefix set to a value other than
 /usr (in particular, if it's the default value /usr/local), that
 prefix will be honored *only if the corresponding Python library
-directory already exists*. Otherwise the install will drop the ntp
-Python library in /usr/lib. This layout may violate the Linux File
-Hierarchy Standard.
+directory already exists*. Otherwise, under Linux, the install will
+drop the ntp Python library in /usr/lib. This layout may violate the
+Linux File Hierarchy Standard.
 
-You should have neither issue if you installl from an OS distribution's
+You should have neither issue if you install from an OS distribution's
 binary package.
 
 == Caveat for Crossbuilders ==
