@@ -473,6 +473,7 @@ ntp_monitor(
 	/*
 	 * Got one, initialize it
 	 */
+	REQUIRE(mon != NULL);
 	mru_entries++;
 	mru_peakentries = max(mru_peakentries, mru_entries);
 	mon->last = rbufp->recv_time;

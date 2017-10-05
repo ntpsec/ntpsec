@@ -275,6 +275,7 @@ parse_packet(
 	}
 
 	struct parsed_pkt *pkt = calloc(1, sizeof (struct parsed_pkt));
+	uint8_t const* bufptr = recv_buf + LEN_PKT_NOMAC;
 
 	if(pkt == NULL) { goto fail; }
 
@@ -298,8 +299,6 @@ parse_packet(
 	pkt->keyid_present = false;
 	pkt->keyid = 0;
 	pkt->mac_len = 0;
-
-	uint8_t const* bufptr = recv_buf + LEN_PKT_NOMAC;
 
 	if(PKT_VERSION(pkt->li_vn_mode) > 4) {
 		/* Unsupported version */

@@ -2332,9 +2332,9 @@ read_network_packet(
 	rb->recv_length = (size_t)buflen;
 
 	if (buflen == 0 || (buflen == -1 &&
-	    (EWOULDBLOCK == errno
+			    ((EWOULDBLOCK == errno)
 #ifdef EAGAIN
-	     || EAGAIN == errno
+			     || (EAGAIN == errno)
 #endif
 	     ))) {
 		freerecvbuf(rb);
