@@ -1,6 +1,6 @@
 """Work around waf bugs related to Python config setup."""
 
-import os, sys
+import ast, os, sys
 
 from waflib import Utils  # pylint: disable=import-error
 from waflib.Logs import pprint  # pylint: disable=import-error
@@ -9,13 +9,21 @@ from waflib.Logs import pprint  # pylint: disable=import-error
 # the waf bugs are fixed.
 
 # The waf code for setting up PYTHONDIR and PYTHONARCHDIR is broken, because
-# get_python_lib() only returns the proper library locations when the 'prefix'
-# argument is absent or None, but waf insists on feeding it the PREFIX value.
-# To make matters worse, the design of waf's ConfigSet object makes it
+# get_python_lib() only returns guaranteed usable library locations when the
+# 'prefix' argument is absent or None, but waf insists on feeding it the PREFIX
+# value.  To make matters worse, the design of waf's ConfigSet object makes it
 # impossible to get it to return a value of None for any item, so merely
 # temporarily patching PREFIX doesn't work.  Thus, the most straightforward
 # workaround is to duplicate the relevant code with the properly omitted
 # 'prefix'.
+#
+# The downside of the prefixless get_python_lib() is that the result may not
+# be FHS-compliant, and may result in conflicts when a base install includes
+# this code and another version is installed later.  There doesn't seem to be
+# a universal solution to this, but it tries to do the best it can by using
+# waf's original prefixed result when it appears in the target Python's
+# sys.path.  Unfortunately, it will only appear there if it already exists,
+# even though the install itself will create it if needed.
 #
 # In principle, there might be some value in allowing a prefix to be optionally
 # supplied (separately from PREFIX), but given that both values are already
@@ -53,33 +61,31 @@ class FixConfig(object):
         """Capture values after option processing."""
         self.opts = self.conf.env.derive().detach()
 
-    def massage(self, path):
-        "Massage Python library path to get around upstream bug."
-        # This will produce an FHS-compliant installation if the
-        # proper local path pre-exists.
-        localized = path.replace(sys.prefix, self.conf.env.PREFIX)
-        if os.path.exists(localized) and localized in sys.path:
-            return localized
-        else:
-            return path
-
     def fix_python_libs(self):
         """Fix up library install paths."""
         # Remember original setting for "compatibility cleanup".
         self.conf.env.OLD_PYTHONDIR = self.conf.env.PYTHONDIR
         if Utils.is_win32:
             return  # No fixups supported on Windows
-        if not ('PYTHONDIR' in self.opts or 'PYTHONDIR' in self.conf.environ):
+        # Note that get_python_variables() doesn't work for sys.path
+        path_str = self.conf.cmd_and_log(self.conf.env.PYTHON
+                                         + ['-c',
+                                            'import sys; print(sys.path)'],
+                                         env=dict(os.environ))
+        sys_path = ast.literal_eval(path_str)
+        if (not ('PYTHONDIR' in self.opts or 'PYTHONDIR' in self.conf.environ)
+            and self.conf.env.PYTHONDIR not in sys_path):
             (pydir,) = self.conf.get_python_variables(
                 ["get_python_lib(plat_specific=0)"]
                 )
-            self.conf.env.PYTHONDIR = self.massage(pydir)
-        if not ('PYTHONARCHDIR' in self.opts
-                or 'PYTHONARCHDIR' in self.conf.environ):
+            self.conf.env.PYTHONDIR = pydir
+        if (not ('PYTHONARCHDIR' in self.opts
+                 or 'PYTHONARCHDIR' in self.conf.environ)
+            and self.conf.env.PYTHONARCHDIR not in sys_path):
             (pyarchdir,) = self.conf.get_python_variables(
                 ["get_python_lib(plat_specific=1)"]
                 )
-            self.conf.env.PYTHONARCHDIR = self.massage(pyarchdir or pydir)
+            self.conf.env.PYTHONARCHDIR = pyarchdir or pydir
 
     def load(self, *args, **kwargs):
         """Do the load and capture the options."""
