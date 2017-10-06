@@ -323,17 +323,17 @@ class TestSyncPacket(unittest.TestCase):
     def test_ntp_to_posix(self):
         f = self.target.ntp_to_posix
         # Test the Timeless Void Before Existence
-        self.assertEqual(f(-1), -2208988801)  # NTP can see the Timeless Void
+        self.assertAlmostEqual(f(-1), -2208988800.0)
         # Test beginning of NTP epoch
-        self.assertEqual(f(0), -2208988800)
+        self.assertAlmostEqual(f(0), -2208988800.0)
         # Test just before the Age of Unix
-        self.assertEqual(f(2208988799 * 2**32), -1)
+        self.assertAlmostEqual(f(2208988799 * 2**32), -1.0)
         # Test the beginning of the Age of Unix
-        self.assertEqual(f(2208988800 * 2**32), 0)
+        self.assertAlmostEqual(f(2208988800 * 2**32), 0.0)
         # Test the End of Time
-        self.assertEqual(f(0xFFFFFFFF00000000), 2085978495)
+        self.assertAlmostEqual(f(0xFFFFFFFF00000000), 2085978495.0)
         # Test the Timeless Void Beyond Existence
-        self.assertEqual(f(0x10000000000000000), 2085978496)  # It doesn't clip
+        self.assertEqual(f(0x10000000000000000), 2085978496.0)  # Doesn't clip
 
     def test_posix_to_ntp(self):
         f = self.target.posix_to_ntp
@@ -372,11 +372,11 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.rescaled, True)
         self.assertEqual(cls.root_delay, 2)
         self.assertEqual(cls.root_dispersion, 2)
-        self.assertEqual(cls.reference_timestamp, -2208988800)
-        self.assertEqual(cls.origin_timestamp, -2208988800)
-        self.assertEqual(cls.receive_timestamp, -2208988800)
-        self.assertEqual(cls.transmit_timestamp, -2208988800)
-        self.assertEqual(cls.received, -2208988800)
+        self.assertAlmostEqual(cls.reference_timestamp, -2208988800.0)
+        self.assertAlmostEqual(cls.origin_timestamp, -2208988800.0)
+        self.assertAlmostEqual(cls.receive_timestamp, -2208988800.0)
+        self.assertAlmostEqual(cls.transmit_timestamp, -2208988800.0)
+        self.assertAlmostEqual(cls.received, -2208988800.0)
 
     def test_t1_4(self):
         cls = self.target()
