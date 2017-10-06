@@ -69,7 +69,8 @@ class TestPylibUtilMethods(unittest.TestCase):
             self.assertEqual(f("42", int, "blah %s", "\nDo the needful\n"), 42)
             self.assertEqual(errjig.data, [])
             # Test successful float
-            self.assertEqual(f("5.23", float, "blah %s", "\nDo the needful\n"),
+            self.assertAlmostEqual(f("5.23", float, "blah %s",
+                                     "\nDo the needful\n"),
                              5.23)
             self.assertEqual(errjig.data, [])
             # Test failure

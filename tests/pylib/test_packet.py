@@ -142,7 +142,7 @@ class AuthenticatorJig:
 
 # ==========================================================
 #  Tests
-# =========================================================
+# ==========================================================
 
 
 class TestPacket(unittest.TestCase):
@@ -320,6 +320,12 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.mac, polybytes(mac))
         self.assertEqual(cls.extension, polybytes(ext + mac))
 
+    # ====================================================================
+    # The tests refering to the Timeless Void are testing outside of NTP's
+    # representation range, they are left in on the off chance that they
+    # catch a bug in the future. If they become problematic they can be
+    # removed without loss.
+    # ====================================================================
     def test_ntp_to_posix(self):
         f = self.target.ntp_to_posix
         # Test the Timeless Void Before Existence
@@ -336,6 +342,9 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(f(0x10000000000000000), 2085978496.0)  # Doesn't clip
 
     def test_posix_to_ntp(self):
+        # This function may develop float precision issues, however it
+        # returns an integer so testing for that is complicated. For the
+        # moment the tests are being left as-is until such issues appear.
         f = self.target.posix_to_ntp
         # Test the Timeless Void Before Existence
         self.assertEqual(f(-2208988801), -0x100000000)  # It doesn't clip
@@ -400,11 +409,11 @@ class TestSyncPacket(unittest.TestCase):
         # Test delta
         self.assertEqual(cls.delta(), 2)
         # Test epsilon
-        self.assertEqual(cls.epsilon(), 16.000045)
+        self.assertAlmostEqual(cls.epsilon(), 16.000045)
         # Test synchd
-        self.assertEqual(cls.synchd(), 17.000045)
+        self.assertAlmostEqual(cls.synchd(), 17.000045)
         # Test adjust
-        self.assertEqual(cls.adjust(), 0)
+        self.assertAlmostEqual(cls.adjust(), 0.0)
 
     def test_flatten(self):
         data = "\x5C\x10\x01\xFF" \
