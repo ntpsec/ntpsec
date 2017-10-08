@@ -1034,6 +1034,8 @@ class TestPeerSummary(unittest.TestCase):
         self.assertEqual(cls.width(), 89)
 
     def test_summary(self):
+        print(ntp.ntpc.lfptofloat("0x00000000.00000000"))
+        print(ntp.ntpc.lfptofloat("0x10000000.00000000"))
         cls = self.target("peers", 4, True, False)
         cls.header()
 
