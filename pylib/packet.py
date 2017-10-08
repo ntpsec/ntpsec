@@ -542,7 +542,7 @@ class SyncPacket(Packet):
 
     def __repr__(self):
         "Represent a posixized sync packet in an eyeball-friendly format."
-        r = "<NTP:%s:%d:%d" % (self.leap(), self.version(), self.mode())
+        r = "<NTP:%s:%d:%d:" % (self.leap(), self.version(), self.mode())
         r += "%f:%f" % (self.root_delay, self.root_dispersion)
         rs = self.refid_as_string()
         if not all(c in string.printable for c in rs):

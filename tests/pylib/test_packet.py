@@ -484,10 +484,14 @@ class TestSyncPacket(unittest.TestCase):
 
     def test___repr__(self):
         cls = self.target()
+        cls.reference_timestamp = self.target.posix_to_ntp(0)
+        cls.origin_timestamp = self.target.posix_to_ntp(1)
+        cls.receive_timestamp = self.target.posix_to_ntp(2)
+        cls.transmit_timestamp = self.target.posix_to_ntp(3)
         self.assertEqual(cls.__repr__(),
-                         "<NTP:unsync:4:30.000000:0.000000:0.0.0.0:"
-                         "1900-01-01T00:00:00Z:1900-01-01T00:00:00Z:"
-                         "1900-01-01T00:00:00Z:1900-01-01T00:00:00Z>")
+                         "<NTP:unsync:4:3:0.000000:0.000000:0.0.0.0:"
+                         "1970-01-01T00:00:00Z:1970-01-01T00:00:01Z:"
+                         "1970-01-01T00:00:02Z:1970-01-01T00:00:03Z>")
 
 
 class TestMisc(unittest.TestCase):
