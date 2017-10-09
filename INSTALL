@@ -147,11 +147,8 @@ All you will require is the Xcode command line tools with no additions.
 There is currently no support for using Xcode's builder. NTPsec's standard
 waf based build system is used.
 
-On macOS you can use this command to turn off the Apple version of NTP:
-
-----
-sudo launchctl unload /System/Library/LaunchDaemons/org.ntp.ntpd.plist
-----
+To disable Apple's NTP, open the Date & Time Preferences and uncheck
+"Set date and time automatically".
 
 === Solaris ===
 
