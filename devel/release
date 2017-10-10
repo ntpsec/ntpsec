@@ -21,16 +21,15 @@ set -e	# Bail out if the tarball build fails
 V=`cat ../VERSION`
 UV=`cat ../VERSION | tr '.' '_'`
 
-# Tag the version
-$do git tag -u ${K} -m "version ${V}" NTPsec_${UV}
-
-# Commit those modifications to the repository.
-
+# Commit pending modifications to the repository.
 if [ -z $do ]; then
-    git commit -Ssecurity@ntpsec.org -s -m "version ${V}"
+    git commit -Ssecurity@ntpsec.org -a -s -m "version ${V}"
 else
-    echo git commit -Ssecurity@ntpsec.org -s -m \"version ${V}\"
+    echo git commit -Ssecurity@ntpsec.org -a -s -m \"version ${V}\"
 fi
+
+# Tag the new head version
+$do git tag -u ${K} -m "version ${V}" NTPsec_${UV}
 
 # Push the repository upstream.
 $do git push  
