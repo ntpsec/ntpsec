@@ -10,12 +10,16 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository Head ==
+== 2017-10-10: 1.0.0 ==
+
+This is the 1.0 release.
+It has been a long road, getting from there to here.
 
 The code size has been further reduced, to 55KLOC.
 
-A bug inherited from Classic that could cause bad peer's jitter to be
-incorrectly zeroed, producing erratic or slow startup, has been fixed 
+A bug inherited from Classic that could cause bad jitter from bad
+peers to be incorrectly zeroed, producing erratic or slow startup, has
+been fixed.
 
 The dependency of local refclocks returning 4-digit years on
 pre-synchronization to a network peer has been removed.  It is
