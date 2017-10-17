@@ -36,7 +36,6 @@ def build(ctx):
         "libntp/clocktime.c",
         "libntp/decodenetnum.c",
         "libntp/hextolfp.c",
-        "libntp/humandate.c",
         "libntp/lfpfunc.c",
         "libntp/lfptostr.c",
         "libntp/macencrypt.c",

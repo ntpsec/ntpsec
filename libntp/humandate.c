@@ -44,28 +44,3 @@ humanlogtime(void)
 
 	return bp;
 }
-
-
-/*
- * humantime() -- like humanlogtime() but without date, and with the
- *		  time to display given as an argument.
- */
-const char *
-humantime(
-	time_t cursec
-	)
-{
-	char *		bp;
-	struct tm	tmbuf, *tm;
-	
-	tm = localtime_r(&cursec, &tmbuf);
-	if (!tm)
-		return "--:--:--";
-
-	bp  = lib_getbuf();
-	
-	snprintf(bp, LIB_BUFLENGTH, "%02d:%02d:%02d",
-		 tm->tm_hour, tm->tm_min, tm->tm_sec);
-		
-	return bp;
-}

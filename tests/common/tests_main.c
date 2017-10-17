@@ -44,7 +44,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(clocktime);
 	RUN_TEST_GROUP(decodenetnum);
 	RUN_TEST_GROUP(hextolfp);
-	RUN_TEST_GROUP(humandate);
 	RUN_TEST_GROUP(lfpfunc);
 	RUN_TEST_GROUP(lfptostr);
 	RUN_TEST_GROUP(macencrypt);

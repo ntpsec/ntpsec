@@ -110,7 +110,6 @@ extern	char *	estrdup_impl(const char *, const char *, int);
 
 
 extern	const char *	humanlogtime	(void);
-extern	const char *	humantime	(time_t);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
 extern	const char * res_match_flags(unsigned short);
