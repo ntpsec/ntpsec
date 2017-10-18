@@ -1260,7 +1260,7 @@ def mibTree2List(mibtree, currentPath=()):
     if (mibtree is None) or (mibtree == {}):
         return ()  # Empty tree
     paths = []
-    branches = mibtree.keys()
+    branches = list(mibtree.keys())
     branches.sort()
     for branch in branches:
         paths.append(currentPath + (branch,))
