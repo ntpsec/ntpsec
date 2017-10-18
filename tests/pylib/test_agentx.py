@@ -2449,6 +2449,42 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
             fail = True
         self.assertEqual(fail, True)
 
+    def test_mibTree2List(self):
+        f = ntp.agentx.mibTree2List
+
+        # Test empty tree
+        self.assertEqual(f({}), ())
+        # Test flat tree
+        self.assertEqual(f({0: None, 1: None, 3: None, 4: None}),
+                         ((0,), (1,), (3,), (4,)))
+        # Test nested tree
+        self.assertEqual(f({0: None,
+                            2: {0: None, 1: None},
+                            3: {5: {0: None, 2: None}, 6: None},
+                            4: None}),
+                         ((0,),
+                          (2,), (2, 0), (2, 1),
+                          (3,), (3, 5), (3, 5, 0), (3, 5, 2), (3, 6),
+                          (4,)))
+
+    def test_mibList2Tree(self):
+        f = ntp.agentx.mibList2Tree
+
+        # Test empty tree
+        self.assertEqual(f(tuple()), {})
+        # Test flat tree
+        self.assertEqual(f(((0,), (1,), (3,), (4,))),
+                         {0: None, 1: None, 3: None, 4:None})
+        # Test nested tree
+        self.assertEqual(f(((0,),
+                            (2,), (2, 0), (2, 1),
+                            (3,), (3, 5), (3, 5, 0), (3, 5, 2), (3, 6),
+                            (4,))),
+                         {0: None,
+                          2: {0: None, 1: None},
+                          3: {5: {0: None, 2: None}, 6: None},
+                          4: None})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1255,6 +1255,37 @@ def decode_packet(data):
         parsedPkt = decoder(packetSlice, header)
     return parsedPkt, newData
 
+def mibTree2List(mibtree, currentPath=()):
+    "Takes a tree of nested dicts representing OIDs and flattens it to a list"
+    if (mibtree is None) or (mibtree == {}):
+        return ()  # Empty tree
+    paths = []
+    branches = mibtree.keys()
+    branches.sort()
+    for branch in branches:
+        paths.append(currentPath + (branch,))
+        branchPath = currentPath + (branch,)
+        paths += mibTree2List(mibtree[branch], branchPath)
+    return tuple(paths)
+
+def mibList2Tree(miblist):
+    "Takes a list of OIDs and inflates it into a tree"
+    tree = {}
+    for node in miblist:
+        branch = tree
+        nodePos = 0
+        nodeSize = len(node)
+        maxNode = nodeSize - 1
+        while nodePos < nodeSize:
+            subid = node[nodePos]
+            if subid not in branch:  # First time at this position
+                branch[subid] = None  # might be a leaf
+            elif branch[subid] is None:  # It isn't a leaf
+                branch[subid] = {}
+            branch = branch[subid]
+            nodePos += 1
+    return tree
+
 
 # Value types
 VALUE_INTEGER = 2
