@@ -30,7 +30,6 @@ def build(ctx):
         "clockwork.c",
         "emalloc.c",
         "hextolfp.c",
-        "humandate.c",
         "lib_strbuf.c",
         "msyslog.c",
         "ntp_calendar.c",
