@@ -465,7 +465,7 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.os = fakeosmod
             TDP = self.target.DefaultPeriod
             faketimemod.time_returns = [TDP * 2]
-            fakeosmod.path.isdir_returns = [True] 
+            fakeosmod.path.isdir_returns = [True]
             TestNTPStats.load_stem_returns = [[]] * 6
             TestNTPStats.process_stem_returns = [[]] * 6
             cls = self.target("/foo/bar")
@@ -516,7 +516,7 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.os = fakeosmod
             TDP = self.target.DefaultPeriod
             faketimemod.time_returns = [TDP * 2]
-            fakeosmod.path.isdir_returns = [True] 
+            fakeosmod.path.isdir_returns = [True]
             TestNTPStats.load_stem_returns = [[]] * 6
             TestNTPStats.process_stem_returns = [[]] * 6
             cls = self.target("/foo/bar")
@@ -569,7 +569,7 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.os = fakeosmod
             TDP = self.target.DefaultPeriod
             faketimemod.time_returns = [TDP * 2]
-            fakeosmod.path.isdir_returns = [True] 
+            fakeosmod.path.isdir_returns = [True]
             TestNTPStats.load_stem_returns = [[]] * 6
             TestNTPStats.process_stem_returns = [[]] * 6
             cls = self.target("/foo/bar")

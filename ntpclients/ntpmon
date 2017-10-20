@@ -315,7 +315,7 @@ if __name__ == '__main__':
                                 if e.errorcode == ntp.control.CERR_BADASSOC:
                                     # Probable race condition due to pool
                                     # dropping an associaton during refresh;
-                                    # ignore. (GitLab issue #374.) 
+                                    # ignore. (GitLab issue #374.)
                                     break
                                 raise Fatal(e.message + "\n")
                             except IOError as e:
