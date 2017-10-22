@@ -1263,15 +1263,20 @@ def mibTree2List(mibtree, currentPath=()):
     branches = list(mibtree.keys())
     branches.sort()
     for branch in branches:
-        paths.append(currentPath + (branch,))
+        paths.append(OID(currentPath + (branch,)))
         branchPath = currentPath + (branch,)
         paths += mibTree2List(mibtree[branch], branchPath)
     return tuple(paths)
 
-def mibList2Tree(miblist):
+def mibList2Tree(miblist, rootPath=()):
     "Takes a list of OIDs and inflates it into a tree"
     tree = {}
-    for node in miblist:
+    for oid in miblist:
+        node = oid.subids
+        rootlen = len(rootPath)
+        if node[:rootlen] != rootPath:  # OID is not decended from the root, bail
+            raise ValueError("Node %s does not have root %s" % (node, rootPath))
+        node = node[rootlen:]  # clip the root off for the tree
         branch = tree
         nodePos = 0
         nodeSize = len(node)
