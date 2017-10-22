@@ -2292,10 +2292,14 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
                            b"\x00\x00\x00\x03\x00\x00\x00\x34"
                            b"\x00\x01\x00\x05"
-                           b"\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                           b"\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
-                           b"\x02\x00\x01\x00\x00\x00\x00\x06\x00\x00\x00\x07"
-                           b"\x02\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x09"),
+                           b"\x02\x00\x00\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x02\x00\x00\x00"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x04"
+                           b"\x02\x00\x01\x00"
+                           b"\x00\x00\x00\x06\x00\x00\x00\x07"
+                           b"\x02\x00\x00\x00"
+                           b"\x00\x00\x00\x08\x00\x00\x00\x09"),
                          (x.GetBulkPDU(True, 1, 2, 3, 1, 5,
                                        (srch((1, 2), (3, 4), False),
                                         srch((6, 7), (8, 9), True))),
@@ -2483,11 +2487,11 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test flat tree
         self.assertEqual(f((x.OID((0,)), x.OID((1,)),
                             x.OID((3,)), x.OID((4,)))),
-                         {0: None, 1: None, 3: None, 4:None})
+                         {0: None, 1: None, 3: None, 4: None})
         # Test flat tree with root path
         self.assertEqual(f((x.OID((42, 23, 0)), x.OID((42, 23, 1)),
                             x.OID((42, 23, 3)), x.OID((42, 23, 4))), (42, 23)),
-                         {0: None, 1: None, 3: None, 4:None})
+                         {0: None, 1: None, 3: None, 4: None})
         # Test nested tree
         self.assertEqual(f((x.OID((0,)),
                             x.OID((2,)), x.OID((2, 0)), x.OID((2, 1)),

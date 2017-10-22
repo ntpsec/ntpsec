@@ -1255,6 +1255,7 @@ def decode_packet(data):
         parsedPkt = decoder(packetSlice, header)
     return parsedPkt, newData
 
+
 def mibTree2List(mibtree, currentPath=()):
     "Takes a tree of nested dicts representing OIDs and flattens it to a list"
     if (mibtree is None) or (mibtree == {}):
@@ -1268,19 +1269,20 @@ def mibTree2List(mibtree, currentPath=()):
         paths += mibTree2List(mibtree[branch], branchPath)
     return tuple(paths)
 
+
 def mibList2Tree(miblist, rootPath=()):
     "Takes a list of OIDs and inflates it into a tree"
     tree = {}
     for oid in miblist:
         node = oid.subids
         rootlen = len(rootPath)
-        if node[:rootlen] != rootPath:  # OID is not decended from the root, bail
-            raise ValueError("Node %s does not have root %s" % (node, rootPath))
+        if node[:rootlen] != rootPath:  # OID not decended from the root, bail
+            raise ValueError("Node %s does not have root %s" %
+                             (node, rootPath))
         node = node[rootlen:]  # clip the root off for the tree
         branch = tree
         nodePos = 0
         nodeSize = len(node)
-        maxNode = nodeSize - 1
         while nodePos < nodeSize:
             subid = node[nodePos]
             if subid not in branch:  # First time at this position
