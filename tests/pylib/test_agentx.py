@@ -2460,23 +2460,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test empty tree
         self.assertEqual(f({}), ())
         # Test flat tree
-        self.assertEqual(f({0: None, 1: None, 3: None, 4: None}),
-                         (x.OID((0,)), x.OID((1,)), x.OID((3,)), x.OID((4,))))
+        self.assertEqual(f({0: (None, None), 1: (None, None),
+                            3: (None, None), 4: (None, None)}),
+                         ((None, x.OID((0,))), (None, x.OID((1,))),
+                          (None, x.OID((3,))), (None, x.OID((4,)))))
         # Test flat tree with root path
-        self.assertEqual(f({0: None, 1: None, 3: None, 4: None}, (42, 23)),
-                         (x.OID((42, 23, 0)), x.OID((42, 23, 1)),
-                          x.OID((42, 23, 3)), x.OID((42, 23, 4))))
+        self.assertEqual(f({0: (None, None), 1: (None, None),
+                            3: (None, None), 4: (None, None)},
+                           (42, 23)),
+                         ((None, x.OID((42, 23, 0))),
+                          (None, x.OID((42, 23, 1))),
+                          (None, x.OID((42, 23, 3))),
+                          (None, x.OID((42, 23, 4)))))
         # Test nested tree
-        self.assertEqual(f({0: None,
-                            2: {0: None, 1: None},
-                            3: {5: {0: None, 2: None}, 6: None},
-                            4: None}),
-                         (x.OID((0,)),
-                          x.OID((2,)), x.OID((2, 0)), x.OID((2, 1)),
-                          x.OID((3,)),
-                          x.OID((3, 5)), x.OID((3, 5, 0)), x.OID((3, 5, 2)),
-                          x.OID((3, 6)),
-                          x.OID((4,))))
+        self.assertEqual(f({0: (None, None),
+                            2: (None,
+                                {0: (None, None), 1: (None, None)}),
+                            3: (None,
+                                {5: (None,
+                                     {0: (None, None), 2: (None, None)}),
+                                 6: (None, None)}),
+                            4: (None, None)}),
+                         ((None, x.OID((0,))),
+                          (None, x.OID((2,))),
+                          (None, x.OID((2, 0))), (None, x.OID((2, 1))),
+                          (None, x.OID((3,))),
+                          (None, x.OID((3, 5))),
+                          (None, x.OID((3, 5, 0))), (None, x.OID((3, 5, 2))),
+                          (None, x.OID((3, 6))),
+                          (None, x.OID((4,)))))
 
     def test_mibList2Tree(self):
         x = ntp.agentx
@@ -2485,24 +2497,35 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test empty tree
         self.assertEqual(f(tuple()), {})
         # Test flat tree
-        self.assertEqual(f((x.OID((0,)), x.OID((1,)),
-                            x.OID((3,)), x.OID((4,)))),
-                         {0: None, 1: None, 3: None, 4: None})
+        self.assertEqual(f(((None, x.OID((0,))), (None, x.OID((1,))),
+                            (None, x.OID((3,))), (None, x.OID((4,))))),
+                         {0: (None, None), 1: (None, None),
+                          3: (None, None), 4: (None, None)})
         # Test flat tree with root path
-        self.assertEqual(f((x.OID((42, 23, 0)), x.OID((42, 23, 1)),
-                            x.OID((42, 23, 3)), x.OID((42, 23, 4))), (42, 23)),
-                         {0: None, 1: None, 3: None, 4: None})
+        self.assertEqual(f(((None, x.OID((42, 23, 0))),
+                            (None, x.OID((42, 23, 1))),
+                            (None, x.OID((42, 23, 3))),
+                            (None, x.OID((42, 23, 4)))),
+                           (42, 23)),
+                         {0: (None, None), 1: (None, None),
+                          3: (None, None), 4: (None, None)})
         # Test nested tree
-        self.assertEqual(f((x.OID((0,)),
-                            x.OID((2,)), x.OID((2, 0)), x.OID((2, 1)),
-                            x.OID((3,)),
-                            x.OID((3, 5)), x.OID((3, 5, 0)), x.OID((3, 5, 2)),
-                            x.OID((3, 6)),
-                            x.OID((4,)))),
-                         {0: None,
-                          2: {0: None, 1: None},
-                          3: {5: {0: None, 2: None}, 6: None},
-                          4: None})
+        self.assertEqual(f(((None, x.OID((0,))),
+                            (None, x.OID((2,))),
+                            (None, x.OID((2, 0))), (None, x.OID((2, 1))),
+                            (None, x.OID((3,))),
+                            (None, x.OID((3, 5))),
+                            (None, x.OID((3, 5, 0))), (None, x.OID((3, 5, 2))),
+                            (None, x.OID((3, 6))),
+                            (None, x.OID((4,))))),
+                         {0: (None, None),
+                          2: (None,
+                              {0: (None, None), 1: (None, None)}),
+                          3: (None,
+                              {5: (None,
+                                   {0: (None, None), 2: (None, None)}),
+                               6: (None, None)}),
+                          4: (None, None)})
 
 
 if __name__ == "__main__":
