@@ -1708,19 +1708,19 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(a.compareOID(b), -1)
         # Test direct comparisons
         # Test ==
-        self.assertEqual(target((1, 2, 3)), target((1, 2, 3)))
+        self.assertEqual(target((1, 2, 3)) == target((1, 2, 3)), True)
         # Test !=
-        self.assertNotEqual(target((1, 2, 3)), target((1, 2)))
+        self.assertEqual(target((1, 2, 3)) != target((1, 2)), True)
         # Test <
-        self.assertLess(target((1, 2)), target((1, 2, 3)))
+        self.assertEqual(target((1, 2)) < target((1, 2, 3)), True)
         # Test >
-        self.assertGreater(target((1, 2, 3)), target((1, 2)))
+        self.assertEqual(target((1, 2, 3)) > target((1, 2)), True)
         # Test <=
-        self.assertLessEqual(target((1, 2)), target((1, 2, 3)))
-        self.assertLessEqual(target((1, 2, 3)), target((1, 2, 3)))
+        self.assertEqual(target((1, 2)) <= target((1, 2, 3)), True)
+        self.assertEqual(target((1, 2, 3)) <= target((1, 2, 3)), True)
         # Test >=
-        self.assertGreaterEqual(target((1, 2, 3)), target((1, 2)))
-        self.assertGreaterEqual(target((1, 2, 3)), target((1, 2, 3)))
+        self.assertEqual(target((1, 2, 3)) >= target((1, 2)), True)
+        self.assertEqual(target((1, 2, 3)) >= target((1, 2, 3)), True)
 
     def test_searchrange(self):
         target = ntp.agentx.SearchRange
