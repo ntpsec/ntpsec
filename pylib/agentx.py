@@ -814,8 +814,14 @@ class OID:
     def __lt__(self, other):
         return self.compareOID(other) == -1
 
+    def __le__(self, other):
+        return self.compareOID(other) in (-1, 0)
+
     def __gt__(self, other):
         return self.compareOID(other) == 1
+
+    def __ge__(self, other):
+        return self.compareOID(other) in (0, 1)
 
     def compareOID(self, other):
         if self.subids == other.subids:
