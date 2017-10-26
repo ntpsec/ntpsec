@@ -994,20 +994,33 @@ class Varbind:
 
 def encode_integer32(bigEndian, num):
     endianToken = getendian(bigEndian)
-    return struct.pack(endianToken + "I", num)
+    return struct.pack(endianToken + "i", num)
 
 
 def decode_integer32(data, header):
     flags = header["flags"]
     endianToken = getendian(flags["bigEndian"])
     num, data = slicedata(data, 4)
-    num = struct.unpack(endianToken + "I", num)[0]
+    num = struct.unpack(endianToken + "i", num)[0]
     return (num, data)
 
 
 def sanity_integer32(data):
     if type(data) is not int:
         raise TypeError
+
+
+def encode_unsigned32(bigEndian, num):
+    endianToken = getendian(bigEndian)
+    return struct.pack(endianToken + "I", num)
+
+
+def decode_unsigned32(data, header):
+    flags = header["flags"]
+    endianToken = getendian(flags["bigEndian"])
+    num, data = slicedata(data, 4)
+    num = struct.unpack(endianToken + "I", num)[0]
+    return (num, data)
 
 
 def sanity_unsigned32(data):
@@ -1338,14 +1351,14 @@ definedValueTypes = {  # Used by the varbind functions
                     encode_ipaddr,
                     decode_ipaddr),
     VALUE_COUNTER32: (sanity_unsigned32,
-                      encode_integer32,
-                      decode_integer32),
+                      encode_unsigned32,
+                      decode_unsigned32),
     VALUE_GAUGE32: (sanity_unsigned32,
-                    encode_integer32,
-                    decode_integer32),
+                    encode_unsigned32,
+                    decode_unsigned32),
     VALUE_TIME_TICKS: (sanity_unsigned32,
-                       encode_integer32,
-                       decode_integer32),
+                       encode_unsigned32,
+                       decode_unsigned32),
     VALUE_OPAQUE: (sanity_octetstr,
                    encode_octetstr,
                    decode_octetstr),

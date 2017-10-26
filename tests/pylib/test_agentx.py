@@ -1971,12 +1971,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          b"\x00\x40\x00\x00\x03\x00\x00\x00"
                          b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                          b"\x00\x00\x00\x04\x10\x20\x30\x40")
-        # Test integer32 types
-        cls = target(a.VALUE_INTEGER, (1, 2, 3), 42)
+        # Test integer32 type
+        cls = target(a.VALUE_INTEGER, (1, 2, 3), -42)
         self.assertEqual(cls.encode(True),
                          b"\x00\x02\x00\x00\x03\x00\x00\x00"
                          b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                         b"\x00\x00\x00\x2A")
+                         b"\xFF\xFF\xFF\xD6")
+        # Test unsigned32 types
         cls = target(a.VALUE_COUNTER32, (1, 2, 3), 42)
         self.assertEqual(cls.encode(True),
                          b"\x00\x41\x00\x00\x03\x00\x00\x00"
@@ -2057,13 +2058,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                     a.OID((1, 2, 3), False),
                                     (16, 32, 48, 64)),
                           b""))
-        # Test integer32 types
+        # Test integer32 type
         self.assertEqual(f(b"\x00\x02\x00\x00\x03\x00\x00\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
-                           b"\x00\x00\x00\x2A", standardFlags),
+                           b"\xFF\xFF\xFF\xD6", standardFlags),
                          (a.Varbind(a.VALUE_INTEGER,
                                     a.OID((1, 2, 3), False),
-                                    42),
+                                    -42),
                           b""))
         self.assertEqual(f(b"\x00\x41\x00\x00\x03\x00\x00\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
@@ -2072,6 +2073,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                     a.OID((1, 2, 3), False),
                                     42),
                           b""))
+        # Test unsigned32 types
         self.assertEqual(f(b"\x00\x42\x00\x00\x03\x00\x00\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03"
                            b"\x00\x00\x00\x2A", standardFlags),
