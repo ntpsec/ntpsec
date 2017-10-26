@@ -1006,6 +1006,11 @@ def decode_integer32(data, header):
 
 
 def sanity_integer32(data):
+    if type(data) is not int:
+        raise TypeError
+
+
+def sanity_unsigned32(data):
     if data != (data & 0xFFFFFFFF):
         raise ValueError
 
@@ -1332,13 +1337,13 @@ definedValueTypes = {  # Used by the varbind functions
     VALUE_IP_ADDR: (sanity_ipaddr,
                     encode_ipaddr,
                     decode_ipaddr),
-    VALUE_COUNTER32: (sanity_integer32,
+    VALUE_COUNTER32: (sanity_unsigned32,
                       encode_integer32,
                       decode_integer32),
-    VALUE_GAUGE32: (sanity_integer32,
+    VALUE_GAUGE32: (sanity_unsigned32,
                     encode_integer32,
                     decode_integer32),
-    VALUE_TIME_TICKS: (sanity_integer32,
+    VALUE_TIME_TICKS: (sanity_unsigned32,
                        encode_integer32,
                        decode_integer32),
     VALUE_OPAQUE: (sanity_octetstr,
