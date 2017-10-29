@@ -5,6 +5,8 @@
 |image:pic/bustardfly.gif[]|
 {millshome}pictures.html[from 'Pogo', Walt Kelly]
 
+|==============================
+
 == More Help ==
 
 include::includes/manual.txt[]
