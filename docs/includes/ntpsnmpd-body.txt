@@ -1,0 +1,34 @@
+// This is the body of the manual page for ntpsnmpd.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
+
+== Synopsis ==
+
++ntpsnmpd+ [+-ndDV+]
+
+== Description ==
+
++ntpsnmpd+ is an AgentX Simple Network Management Protocol sub-agent.
+
+== Options ==
+
+Command line options are described following. Specifying the command line
+options +-c+ or +-p+ will cause the specified query (queries) to be sent
+to the indicated host(s) immediately. Otherwise, +ntpq+ will attempt to
+read interactive format commands from the standard input.
+
++-n+, +--nofork+::
+  Do not fork
++-d+, +--debug+::
+  Increase debugging level by 1.
++-D+ num, +--set-debug-level+=num::
+  The debug level is set to the following integer argument.
++-V+, +--version+::
+  Print the version string and exit.
+
+== Known Limitations ==
+
+This is a prototype. Large parts of the AgentX standard are not yet
+implemented. Most of the returned values are dummy values.
+
+// end
