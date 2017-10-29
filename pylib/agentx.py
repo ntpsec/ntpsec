@@ -104,6 +104,9 @@ class ParseError(Exception):
         self.packetData = packetData
         self.remainingData = remainingData
 
+class ParseDataLengthError(ParseError): pass
+class ParseVersionError(ParseError): pass
+
 # ==========================================================================
 #
 # Packet encoders / decoders
