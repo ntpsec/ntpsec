@@ -2459,16 +2459,46 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            b"\x00\x00\x00\x04\x00\x05\x00\x06"),
                          (x.ResponsePDU(True, 1, 2, 3, 4, 5, 6),
                           b""))
-        # Test insufficient data
+        # Test errors
+        # Test insufficient data for header
+        try:
+            self.assertEqual(f(b""), None)
+            errored = False
+        except x.ParseError as e:
+            errored = e
+        self.assertEqual(errored.message, "Data too short for header")
+        # Test insufficient data for packet
         try:
             f(b"\x01\x11\x10\x00"
               b"\x00\x00\x00\x01\x00\x00\x00\x02"
               b"\x00\x00\x00\x03\x00\x00\x00\x10"
               b"\x03\x00\x00\x00\x00\x00\x00\x04")
-            fail = False
-        except IndexError:
-            fail = True
-        self.assertEqual(fail, True)
+            errored = False
+        except x.ParseError as e:
+            errored = e
+        self.assertEqual(errored.message, "Packet data too short")
+        # Test wrong version
+        try:
+            f(b"\x02\x11\x10\x00"
+              b"\x00\x00\x00\x00\x00\x00\x00\x00"
+              b"\x00\x00\x00\x00\x00\x00\x00\x08"
+              b"blahblahjabber")
+            errored = False
+        except x.ParseError as e:
+            errored = e
+        self.assertEqual(errored.message, "Unknown packet version 2")
+        self.assertEqual(errored.packetData, "blahblah")
+        self.assertEqual(errored.remainingData, "jabber")
+        # Test unrecognized packet type
+        try:
+            f(b"\x01\xFF\x10\x00"
+              b"\x00\x00\x00\x00\x00\x00\x00\x00"
+              b"\x00\x00\x00\x00\x00\x00\x00\x08"
+              b"blahblah")
+            errored = False
+        except x.ParseError as e:
+            errored = e
+        self.assertEqual(errored.message, "PDU type 255 not in defined types")
 
     def test_mibTree2List(self):
         x = ntp.agentx

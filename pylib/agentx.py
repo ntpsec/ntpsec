@@ -91,6 +91,18 @@ prefixCount = len(internetPrefix)
 #
 # ==========================================================================
 
+# ==========================================================================
+#
+# Error classes
+#
+# ==========================================================================
+
+class ParseError(Exception):
+    def __init__(self, message, packetData="", remainingData=""):
+        Exception.__init__(self)
+        self.message = message
+        self.packetData = packetData
+        self.remainingData = remainingData
 
 # ==========================================================================
 #
@@ -1227,8 +1239,6 @@ def encode_pduheader(pduType, instanceRegistration, newIndex,
 def decode_pduheader(data):  # Endianness is controlled from the PDU header
     lineone, data = slicedata(data, 4)
     version, pduType, flags = struct.unpack(">BBBx", polybytes(lineone))
-    if pduType not in definedPDUTypes:
-        raise ValueError("PDU type %s not in defined types" % pduType)
     # Slice up the flags
     flagDict = decode_flagbyte(flags)
     # Chop the remaining parts of the header from the rest of the datastream
@@ -1262,21 +1272,30 @@ def decode_context(data, header):
 
 
 def decode_packet(data):
+    if len(data) < 20:
+        raise ParseError("Data too short for header")
     header, newData = slicedata(data, 20)
     header = decode_pduheader(header)
     if header["length"] > len(newData):
-        raise IndexError("Packet data too short")
+        raise ParseError("Packet data too short")
+    packetSlice, newData = slicedata(newData, header["length"])
     if header["version"] != 1:
-        raise ValueError("Unknown packet version", header["version"])
+        err = ParseError("Unknown packet version %i" % header["version"])
+        err.packetData = packetSlice
+        err.remainingData = newData
+        raise err
     pktType = header["type"]
     if pktType not in definedPDUTypes.keys():
-        raise ValueError("PDU type %s not in defined types" % pktType)
+        raise ParseError("PDU type %s not in defined types" % pktType)
     decoder = definedPDUTypes[pktType]
-    if decoder is None:
-        parsedPkt = None
-    else:
-        packetSlice, newData = slicedata(newData, header["length"])
+    try:
         parsedPkt = decoder(packetSlice, header)
+    except Exception as e:
+        err = ParseError("Body parsing error")
+        err.originalError = e
+        err.packetData = packetSlice
+        err.remainingData = newData
+        raise err
     return parsedPkt, newData
 
 
