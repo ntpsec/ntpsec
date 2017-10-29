@@ -2487,8 +2487,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         except x.ParseError as e:
             errored = e
         self.assertEqual(errored.message, "Unknown packet version 2")
-        self.assertEqual(errored.packetData, "blahblah")
-        self.assertEqual(errored.remainingData, "jabber")
+        self.assertEqual(errored.packetData, b"blahblah")
+        self.assertEqual(errored.remainingData, b"jabber")
         # Test unrecognized packet type
         try:
             f(b"\x01\xFF\x10\x00"
