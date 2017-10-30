@@ -216,6 +216,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         return (None, None)
 
     def getNextOID(self, oid):
+        "Get the next lexographical OID"
         for pos in range(len(self.oidList)):
             callback, current = self.oidList[pos]
             if callback is None:
@@ -228,6 +229,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         return (None, None)
 
     def getOIDsInRange(self, oidrange, firstOnly=False):
+        "Get a list of every (optionally the first) OID in a range"
         oids = []
         for node in self.oidList:
             if node[0] is None:  # No callback
@@ -246,8 +248,10 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                 break
         return oids
 
+    # =============================================================
     # Data retrevial callbacks start here
     # comment divider lines represent not yet implemented callbacks
+    # =============================================================
 
     #########################
 
@@ -470,21 +474,20 @@ class PacketControl:
         dolog("Sent open packet\n", 1)
         response = self.waitForResponse(openpkt, True)
         self.sessionID = response.sessionID
-        # Register the tree, just random crap for testing right now
-        fooregister = ntp.agentx.RegisterPDU(True, self.sessionID, 1, 1,
-                                             self.timeout, 1, ntpRootOID)
-        self.sendPacket(fooregister, False)
-        dolog("Sent register\n", 1)
+        # Register the tree
+        register = ntp.agentx.RegisterPDU(True, self.sessionID, 1, 1,
+                                          self.timeout, 1, ntpRootOID)
+        self.sendPacket(register, False)
+        dolog("Sent registration\n", 1)
         response = self.waitForResponse(fooregister, True)
 
     def waitForResponse(self, opkt, ignoreSID=False):
+        "Wait for a response to a specific packet, dropping everything else"
         while True:
             self.packetEater()
             while len(self.recievedPackets) > 0:
                 packet = self.recievedPackets.pop(0)
                 dolog("Waiting, got packet: " + repr(packet) + "\n\n", 3)
-                # This will drop anything that is not the response
-                #  but if this method is being called we don't care
                 if packet.__class__ != ntp.agentx.ResponsePDU:
                     continue
                 haveit = (opkt.transactionID == packet.transactionID) and \
@@ -496,6 +499,7 @@ class PacketControl:
             time.sleep(self.spinGap)
 
     def packetEater(self):
+        "Slurps data from the input buffer and tries to parse packets from it"
         self.pollSocket()
         while True:
             datalen = len(self.recievedData)
@@ -511,7 +515,7 @@ class PacketControl:
             except (ax.ParseVersionError, ax.ParsePDUTypeError,
                     ax.ParseError) as e:
                 if e.header["type"] != ax.PDU_RESPONSE:
-                    # Response errors are silently dropped
+                    # Response errors are silently dropped, per RFC
                     # Everything else sends an error response
                     resp = ax.ResponsePDU(e.header["flags"]["bigEndian"],
                                           e.header["session_id"],
@@ -520,6 +524,8 @@ class PacketControl:
                                           0, ax.RSPERR_PARSE_ERROR, 0)
                     self.sendPacket(resp, False)
                 # *Hopefully* the packet length was correct.....
+                #  if not, all packets will be scrambled. Maybe dump the
+                #  whole buffer if too many failures in a row?
                 self.receivedData = e.remainingData
 
     def sendPacket(self, packet, expectsReply):
@@ -533,7 +539,7 @@ class PacketControl:
             self.packetLog[index] = packet
 
     def pollSocket(self):
-        "Reads all currently available data from sock, non-blocking"
+        "Reads all currently available data from the socket, non-blocking"
         data = ""
         while True:
             tmp = select.select([self.socket], [], [], 0)[0]
@@ -548,7 +554,9 @@ class PacketControl:
                 break
         self.recievedData += data
 
+    # ==========================
     # Packet handlers start here
+    # ==========================
 
     def handle_GetPDU(self, packet):
         binds = []
