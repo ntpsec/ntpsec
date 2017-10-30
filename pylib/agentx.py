@@ -1308,8 +1308,10 @@ def mibTree2List(mibtree, currentPath=()):
     branches = list(mibtree.keys())
     branches.sort()
     for branch in branches:
-        callback, tree = mibtree[branch]
-        paths.append((callback, OID(currentPath + (branch,))))
+        read_callback, write_callback, tree = mibtree[branch]
+        paths.append((read_callback,
+                      write_callback,
+                      OID(currentPath + (branch,))))
         branchPath = currentPath + (branch,)
         paths += mibTree2List(tree, branchPath)
     return tuple(paths)
@@ -1317,9 +1319,10 @@ def mibTree2List(mibtree, currentPath=()):
 
 def mibList2Tree(miblist, rootPath=()):
     "Takes a list of OIDs and inflates it into a tree"
+    # Tree node format: (read callback, write callback, sub-nodes)
     tree = {}
     for mibnode in miblist:
-        callback, oid = mibnode[0], mibnode[1].subids
+        read_clbk, write_clbk, oid = mibnode[0], mibnode[1], mibnode[2].subids
         rootlen = len(rootPath)
         if oid[:rootlen] != rootPath:  # OID not decended from the root, bail
             raise ValueError("Node %s does not have root %s" %
@@ -1331,10 +1334,10 @@ def mibList2Tree(miblist, rootPath=()):
         while oidPos < oidSize:
             subid = oid[oidPos]
             if subid not in branch:  # First time at this position
-                branch[subid] = (callback, None)  # might be a leaf
-            elif branch[subid][1] is None:  # It isn't a leaf
-                branch[subid] = (branch[subid][0], {})
-            branch = branch[subid][1]
+                branch[subid] = (read_clbk, write_clbk, None)  # might be a leaf
+            elif branch[subid][2] is None:  # It isn't a leaf
+                branch[subid] = (branch[subid][0], branch[subid][1], {})
+            branch = branch[subid][2]
             oidPos += 1
     return tree
 
