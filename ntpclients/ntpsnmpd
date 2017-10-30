@@ -212,17 +212,15 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                                   3: (None, None, None)})})}
         self.oidList = ntp.agentx.mibTree2List(self.oidTree, ntpRootOID)
 
-    def getOID(self, oid, acceptNext=False):
+    def getOID(self, oid):
         "Get the requested OID, or the next lexographical OID"
         for node in self.oidList:
             if node[0] is None:  # No read callback
                 continue  # skip over not yet implemented OIDs
             if (node[2] == oid):
-                return node  # (callback, oid)
-            elif (node[2] > oid) and (acceptNext is True):
-                return node
+                return node  # (read_callback, write_callback, oid)
         # Nothing in the list
-        return (None, None)
+        return (None, None, None)
 
     def getNextOID(self, oid):
         "Get the next lexographical OID"
@@ -579,7 +577,7 @@ class PacketControl:
         binds = []
         for oidr in packet.oidranges:
             target = oidr.start
-            r_clbk, w_clbk, oid = self.database.getOID(target, False)
+            r_clbk, w_clbk, oid = self.database.getOID(target)
             if (oid != target) or (r_clbk is None):
                 binds.append(ax.Varbind(ax.VALUE_NO_SUCH_OBJECT, target))
             else:
