@@ -12,6 +12,7 @@ import select
 import subprocess
 
 try:
+    import ntp.packet
     import ntp.util
     import ntp.agentx
     ax = ntp.agentx
@@ -29,6 +30,8 @@ debug = 0
 timeout = 5  # default timeout, what shuold this be?
 
 ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
+
+DEFHOST = "localhost"  # For now only know how to talk to the local ntp
 
 
 class DataSource:  # This may be broken up in future to be less NTP-specific
@@ -211,6 +214,8 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                                   # ntpEntNotifGroup NOTIFICATIONS {...}
                                   3: (None, None, None)})})}
         self.oidList = ntp.agentx.mibTree2List(self.oidTree, ntpRootOID)
+        self.session = ntp.packet.ControlSession()
+        self.session.openhost(DEFHOST)  # only local for now
 
     def getOID(self, oid):
         "Get the requested OID, or the next lexographical OID"
@@ -294,7 +299,8 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
 
     def cb_statusStratum(self, oid):  # DUMMY
         # NTPstratum
-        return ax.Varbind(ax.VALUE_GAUGE32, oid, 16)
+        data = self.session.readvar(0, ["stratum"])
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, data["stratum"])
 
     def cb_statusActiveRefSourceID(self, oid):  # DUMMY
         # range of uint32
