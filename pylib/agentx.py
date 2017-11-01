@@ -97,6 +97,7 @@ prefixCount = len(internetPrefix)
 #
 # ==========================================================================
 
+
 class ParseError(Exception):
     def __init__(self, message, header=None, packetData="", remainingData=""):
         Exception.__init__(self)
@@ -105,9 +106,11 @@ class ParseError(Exception):
         self.packetData = packetData
         self.remainingData = remainingData
 
+
 class ParseDataLengthError(ParseError): pass
 class ParseVersionError(ParseError): pass
 class ParsePDUTypeError(ParseError): pass
+
 
 # ==========================================================================
 #
@@ -1285,7 +1288,8 @@ def decode_packet(data):
         raise ParseDataLengthError("Packet data too short", header)
     packetSlice, newData = slicedata(newData, header["length"])
     if header["version"] != 1:
-        raise ParseVersionError("Unknown packet version %i" % header["version"],
+        raise ParseVersionError("Unknown packet version %i" %
+                                header["version"],
                                 header, packetSlice, newData)
     pktType = header["type"]
     if pktType not in definedPDUTypes.keys():
@@ -1294,7 +1298,7 @@ def decode_packet(data):
     decoder = definedPDUTypes[pktType]
     try:
         parsedPkt = decoder(packetSlice, header)
-    except Exception as e:
+    except Exception:
         err = ParseError("Body parsing error", header, packetSlice, newData)
         raise err
     return parsedPkt, newData
@@ -1308,10 +1312,8 @@ def mibTree2List(mibtree, currentPath=()):
     branches = list(mibtree.keys())
     branches.sort()
     for branch in branches:
-        read_callback, write_callback, tree = mibtree[branch]
-        paths.append((read_callback,
-                      write_callback,
-                      OID(currentPath + (branch,))))
+        callback, tree = mibtree[branch]
+        paths.append((callback, OID(currentPath + (branch,))))
         branchPath = currentPath + (branch,)
         paths += mibTree2List(tree, branchPath)
     return tuple(paths)
@@ -1322,7 +1324,7 @@ def mibList2Tree(miblist, rootPath=()):
     # Tree node format: (read callback, write callback, sub-nodes)
     tree = {}
     for mibnode in miblist:
-        read_clbk, write_clbk, oid = mibnode[0], mibnode[1], mibnode[2].subids
+        callback, oid = mibnode[0], mibnode[1].subids
         rootlen = len(rootPath)
         if oid[:rootlen] != rootPath:  # OID not decended from the root, bail
             raise ValueError("Node %s does not have root %s" %
@@ -1334,10 +1336,10 @@ def mibList2Tree(miblist, rootPath=()):
         while oidPos < oidSize:
             subid = oid[oidPos]
             if subid not in branch:  # First time at this position
-                branch[subid] = (read_clbk, write_clbk, None)  # might be a leaf
-            elif branch[subid][2] is None:  # It isn't a leaf
-                branch[subid] = (branch[subid][0], branch[subid][1], {})
-            branch = branch[subid][2]
+                branch[subid] = (callback, None)  # might be a leaf
+            elif branch[subid][1] is None:  # It isn't a leaf
+                branch[subid] = (branch[subid][0], {})
+            branch = branch[subid][1]
             oidPos += 1
     return tree
 
