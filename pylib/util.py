@@ -397,7 +397,7 @@ def unitrelativeto(unit, move):
     return None  # couldn't find anything
 
 
-def unitifyvar(value, varname, baseunit=None, width=8):
+def unitifyvar(value, varname, baseunit=None, width=8, unitSpace=False):
     "Call unitify() with the correct units for varname"
     if varname in S_VARS:
         start = UNIT_S
@@ -407,10 +407,10 @@ def unitifyvar(value, varname, baseunit=None, width=8):
         start = UNIT_PPM
     else:
         return value
-    return unitify(value, start, baseunit, width)
+    return unitify(value, start, baseunit, width, unitSpace)
 
 
-def unitify(value, startingunit, baseunit=None, width=8):
+def unitify(value, startingunit, baseunit=None, width=8, unitSpace=False):
     "Formats a numberstring with relevant units. Attemps to fit in width."
     if baseunit is None:
         baseunit = getunitgroup(startingunit)[0]
@@ -421,14 +421,20 @@ def unitify(value, startingunit, baseunit=None, width=8):
         newvalue = cropprecision(value, ooms)
         newvalue, unitsmoved = scalestring(newvalue)
     unitget = unitrelativeto(startingunit, unitsmoved)
+    if unitSpace is True:
+        spaceWidthAdjustment = 1
+        spacer = " "
+    else:
+        spaceWidthAdjustment = 0
+        spacer = ""
     if unitget is not None:  # We have a unit
         if width is None:
             realwidth = None
         else:
-            realwidth = width - len(unitget)
-        newvalue = fitinfield(newvalue, realwidth) + unitget
+            realwidth = width - (len(unitget) + spaceWidthAdjustment)
+        newvalue = fitinfield(newvalue, realwidth) + spacer + unitget
     else:  # don't have a replacement unit, use original
-        newvalue = value + startingunit
+        newvalue = value + spacer + startingunit
     if width is None:
         newvalue = newvalue.strip()
     return newvalue

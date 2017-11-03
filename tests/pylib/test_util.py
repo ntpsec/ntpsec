@@ -278,6 +278,8 @@ class TestPylibUtilMethods(unittest.TestCase):
 
         # Zero
         self.assertEqual(f("0.000", nu.UNIT_MS), u"     0µs")
+        # Zero, spaced
+        self.assertEqual(f("0.000", nu.UNIT_MS, unitSpace=True), u"    0 µs")
         # Standard, width=8
         self.assertEqual(f("1.234", nu.UNIT_MS), " 1.234ms")
         # ditto, negative
