@@ -294,9 +294,10 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         if write is None:
             return ax.Varbind(ax.VALUE_GAUGE32, oid, 42)
 
-    def cb_timePrecision(self, oid, write=None):  # DUMMY
+    def cb_timePrecision(self, oid, write=None):
         if write is None:
-            return ax.Varbind(ax.VALUE_INTEGER, oid, 23)
+            data = self.session.readvar(0, ["precision"])
+            return ax.Varbind(ax.VALUE_INTEGER, oid, data["precision"])
 
     def cb_timeDistance(self, oid, write=None):  # DUMMY
         # Displaystring
@@ -310,7 +311,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         if write is None:
             return ax.Varbind(ax.VALUE_INTEGER, oid, 15)
 
-    def cb_statusStratum(self, oid, write=None):  # DUMMY
+    def cb_statusStratum(self, oid, write=None):
         # NTPstratum
         if write is None:
             data = self.session.readvar(0, ["stratum"])
@@ -321,20 +322,25 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         if write is None:
             return ax.Varbind(ax.VALUE_GAUGE32, oid, 1024)
 
-    def cb_statusActiveRefSourceName(self, oid, write=None):  # DUMMY
+    def cb_statusActiveRefSourceName(self, oid, write=None):
         # utf8
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "bar")
+        if write is None:  # TODO: pretty sure this is right, just need DNS
+            data = self.session.readvar(0, ["peeradr"])
+            return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["peeradr"])
 
-    def cb_statusActiveOffset(self, oid, write=None):  # DUMMY
+    def cb_statusActiveOffset(self, oid, write=None):
         # DisplayString
         if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "baz")
+            data = self.session.readvar(0, ["koffset"], raw=True)
+            data = ntp.util.unitifyvar(data["koffset"][1], "koffset",
+                                       width=None, unitSpace=True)
+            return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
-    def cb_statusNumRefSources(self, oid, write=None):  # DUMMY
+    def cb_statusNumRefSources(self, oid, write=None):
         # range of uint32
         if write is None:
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, 50)
+            data = self.session.readstat()
+            return ax.Varbind(ax.VALUE_GAUGE32, oid, len(data))
 
     def cb_statusDispersion(self, oid, write=None):  # DUMMY
         # DisplayString
@@ -361,17 +367,20 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         if write is None:
             return ax.Varbind(ax.VALUE_INTEGER, oid, -1)
 
-    def cb_statusInPkts(self, oid, write=None):  # DUMMY
+    def cb_statusInPkts(self, oid, write=None):
         if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 100)
+            data = self.session.readvar(0, ["io_received"])
+            return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_received"])
 
-    def cb_statusOutPkts(self, oid, write=None):  # DUMMY
+    def cb_statusOutPkts(self, oid, write=None):
         if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 200)
+            data = self.session.readvar(0, ["io_sent"])
+            return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_sent"])
 
-    def cb_statusBadVersion(self, oid, write=None):  # DUMMY
+    def cb_statusBadVersion(self, oid, write=None):
         if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 300)
+            data = self.session.readvar(0, ["ss_oldver"])
+            return ax.Varbind(ax.VALUE_COUNTER32, oid, data["ss_oldver"])
 
     def cb_statusProtocolError(self, oid, write=None):  # DUMMY
         if write is None:
