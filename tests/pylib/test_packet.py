@@ -321,7 +321,7 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(cls.extension, polybytes(ext + mac))
 
     # ====================================================================
-    # The tests refering to the Timeless Void are testing outside of NTP's
+    # The tests referring to the Timeless Void are testing outside of NTP's
     # representation range, they are left in on the off chance that they
     # catch a bug in the future. If they become problematic they can be
     # removed without loss.

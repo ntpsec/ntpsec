@@ -224,7 +224,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         self.session.openhost(DEFHOST)  # only local for now
 
     def getOID(self, oid):
-        "Get the requested OID, or the next lexographical OID"
+        "Get the requested OID, or the next lexicographical OID"
         for node in self.oidList:
             if node[0] is None:  # No read callback
                 continue  # skip over not yet implemented OIDs
@@ -234,7 +234,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         return (None, None, None)
 
     def getNextOID(self, oid):
-        "Get the next lexographical OID"
+        "Get the next lexicographical OID"
         for pos in range(len(self.oidList)):
             callback, current = self.oidList[pos]
             if callback is None:
