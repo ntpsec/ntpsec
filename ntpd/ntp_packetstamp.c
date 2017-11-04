@@ -9,9 +9,6 @@
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SYS_SOCKIO_H	/* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
-# include <sys/sockio.h>
-#endif
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"

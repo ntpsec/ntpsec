@@ -102,14 +102,6 @@ Remove clock fuzzing:
   implement fine grained clocks.  We should review this area to verify
   that fuzzing is still useful.
 
-Cleanup use of HAVE_SYS_SOCKIO_H
-  ntpd/ntp_packetstamp.c has:
-#ifdef HAVE_SYS_SOCKIO_H        /* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
-# include <sys/sockio.h>
-#endif
-  They are not referenced in ntpd/ntp_packetstamp.c but are referenced
-  in ntpd/ntp_io.c and libntp/isc_interfaceiter.c
-
 SIGHUP should do more:
   reload keys file (easy, it already reloads the leap file)
   reload ntp.conf (hard, but needed to add new keys,
