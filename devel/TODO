@@ -1,14 +1,5 @@
 = TO DO =
 
-== Checklist for a quality 1.0 release ==
-
-* Package metadata for Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
-
-* Add .tar.xz tarball.
-
-* Fix ntpq retransmissions.
-  Too many cases don't work well enough (may be inherited from ntp classic).
-
 === Testing ===
 
 * We need to live-test various refclocks.  It would be nice
@@ -35,6 +26,13 @@ Also see https://gitlab.com/NTPsec/ntpsec/issues/68 where the dubiousness
 of the current startup logic gets discussed.
 
 === Future plans ===
+
+* Package metadata for Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
+
+* Add .tar.xz tarball.
+
+* Fix ntpq retransmissions.
+  Too many cases don't work well enough (may be inherited from ntp classic).
 
 * Test that the pool code properly replaces a server if it goes dark. (Not
   clear how to arrange this.)
