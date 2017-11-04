@@ -930,21 +930,8 @@ refclock_command
 	:	T_Refclock T_String optional_unit option_list
 		{
 #ifdef REFCLOCK
-			peer_node *my_node;
-			address_node *fakeaddr;
-			char addrbuf[1025];	/* NI_MAXHOSTS on Linux */
-			int dtype;
-
-			for (dtype = 1; dtype < (int)num_refclock_conf; dtype++)
-			    if (refclock_conf[dtype]->basename != NULL && strcasecmp(refclock_conf[dtype]->basename, $2) == 0)
-				goto foundit;
-			 msyslog(LOG_ERR, "CONFIG: Unknown driver name %s", $2);
-			 exit(1);
-		foundit:
-			snprintf(addrbuf, sizeof(addrbuf),
-				 "127.127.%d.%d", dtype, $3);
-			fakeaddr = create_address_node(estrdup(addrbuf),AF_INET);
-			my_node = create_peer_node(T_Server, fakeaddr, $4);
+			address_node *fakeaddr = addr_from_typeunit($2, $3);
+			peer_node *my_node = create_peer_node(T_Server, fakeaddr, $4);
 			APPEND_G_FIFO(cfgt.peers, my_node);
 #endif /* REFCLOCK */
 		}
@@ -1397,6 +1384,24 @@ number
 
 
 %%
+
+#ifdef REFCLOCK
+address_node *
+addr_from_typeunit(char *type, int unit)
+{
+	char addrbuf[1025];	/* NI_MAXHOSTS on Linux */
+	int dtype;
+
+	for (dtype = 1; dtype < (int)num_refclock_conf; dtype++)
+	    if (refclock_conf[dtype]->basename != NULL && strcasecmp(refclock_conf[dtype]->basename, type) == 0)
+		goto foundit;
+	 msyslog(LOG_ERR, "CONFIG: Unknown driver name %s", type);
+	 exit(1);
+foundit:
+	snprintf(addrbuf, sizeof(addrbuf), "127.127.%d.%d", dtype, unit);
+	return create_address_node(estrdup(addrbuf), AF_INET);
+}
+#endif /* REFCLOCK */
 
 void 
 yyerror(
