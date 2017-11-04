@@ -107,9 +107,6 @@ SIGHUP should do more:
   reload ntp.conf (hard, but needed to add new keys,
     we could kludge a partial reload to add/delete servers)
 
-Endian:
-  Investigate using endian.h rather than libntp/ntp_endian.c
-
 Waf detect need configure:
   There are problems with people forgetting to run configure or clean
   after a git pull.  (From email on 23 May 2017)
