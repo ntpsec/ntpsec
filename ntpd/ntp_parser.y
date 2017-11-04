@@ -62,6 +62,7 @@
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
 %token	<Integer>	T_Ceiling
+%token	<Integer>	T_Clock
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
 %token	<Integer>	T_ControlKey
@@ -481,8 +482,16 @@ unpeer_command
 	:	unpeer_keyword address
 		{
 			unpeer_node *my_node;
-			
+
 			my_node = create_unpeer_node($2);
+			if (my_node)
+				APPEND_G_FIFO(cfgt.unpeers, my_node);
+		}
+	|	unpeer_keyword T_Clock T_String optional_unit
+		{
+			unpeer_node *my_node;
+
+			my_node = create_unpeer_node(addr_from_typeunit($3, $4));
 			if (my_node)
 				APPEND_G_FIFO(cfgt.unpeers, my_node);
 		}

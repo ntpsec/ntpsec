@@ -27,6 +27,7 @@ struct key_tok ntp_keywords[] = {
 { "bias",		T_Bias,			FOLLBY_TOKEN },
 { "broadcast",		T_Broadcast,		FOLLBY_STRING },
 { "baud",		T_Baud,			FOLLBY_TOKEN },
+{ "clock",		T_Clock,		FOLLBY_STRING },
 { "ctl",		T_Ctl,			FOLLBY_TOKEN },
 { "disable",		T_Disable,		FOLLBY_TOKEN },
 { "driftfile",		T_Driftfile,		FOLLBY_STRING },

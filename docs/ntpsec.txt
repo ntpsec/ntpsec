@@ -222,6 +222,9 @@ codebase has been outright removed, with less than 5% new code added.
   each refclock page.  One major feature of the new syntax is that
   refclock drivers are referred to by names, not numbers.
 
+* The unpeer command now takes a type-unit specofication when
+  unpeering a clock.
+
 * For the generic (parse) driver only: Using the new refclock syntax,
   the maximum number of units that can be set up changes from 4
   (numbers 0-3) to unlimited.  However, the old magic-address syntax

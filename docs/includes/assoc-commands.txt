@@ -15,10 +15,13 @@ link-local IPV6 address with an interface specified in
 
 +broadcast+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+ttl+ _ttl_]
 
-+unpeer+ ['address' | 'associd']::
-  These six commands specify the time server name or address to be used
-  and the mode in which to operate. The _address_ can be either a DNS
-  name or an IP address in dotted-quad notation.
++unpeer+ ['address' | 'associd' | +clock+ 'clocktype' [ +unit+ 'unitnum']]::
+  These six commands specify the time server name or address to be
+  used and the mode in which to operate. The _address_ can be either a
+  DNS name or an IP address in dotted-quad notation.  If it is a
+  refclock, it can be +clock+ followed by a type-unit pair as in the
+  +refclock+ directive; a missing unit clause is interpreted as unit
+  0.
 
 [[pool]]
 +pool+::

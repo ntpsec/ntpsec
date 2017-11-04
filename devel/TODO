@@ -42,10 +42,6 @@ of the current startup logic gets discussed.
 
 * A clock driver or auxiliary daemon for PTP.
 
-* Invent a syntax for type/unit pairs: use it in the refclock and unpeer
-  directives. Presently it's only possible to unpeer using the deprecated
-  magic address of the driver.
-
 * Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
   -du' is the traditional approach."  Hal's straw man is a new program
   rather than trying to make ntpdig do this.  Eric's proposed answer:
