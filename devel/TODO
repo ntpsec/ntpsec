@@ -8,8 +8,6 @@
   on at least one platform and test the NMEA, PPS, and SHM drivers
   on most platforms.
 
-== After 1.0 release ==
-
 === Slow convergence ===
 
 [quote, Gary Miller]
@@ -154,11 +152,6 @@ know things well enough to be sure that this sort of logic won't pick one
 back up.
 __________
 
-
-== Potential device removals ==
-
-* Modes 9 and 10 in the parse driver support hardware that was discontinued
-  before 2003.
 
 == Old, sometime ancient stuff ==
 
