@@ -1348,46 +1348,6 @@ def mibnode(static, callback, subs):
     return {"static": static, "callback": callback, "subids": subs}
 
 
-def mibTree2List(mibtree, currentPath=()):
-    "Takes a tree of nested dicts representing OIDs and flattens it to a list"
-    if (mibtree is None) or (mibtree == {}):
-        return ()  # Empty tree
-    paths = []
-    branches = list(mibtree.keys())
-    branches.sort()
-    for branch in branches:
-        callback, tree = mibtree[branch]
-        paths.append((callback, OID(currentPath + (branch,))))
-        branchPath = currentPath + (branch,)
-        paths += mibTree2List(tree, branchPath)
-    return tuple(paths)
-
-
-def mibList2Tree(miblist, rootPath=()):
-    "Takes a list of OIDs and inflates it into a tree"
-    # Tree node format: (read callback, write callback, sub-nodes)
-    tree = {}
-    for mibnode in miblist:
-        callback, oid = mibnode[0], mibnode[1].subids
-        rootlen = len(rootPath)
-        if oid[:rootlen] != rootPath:  # OID not decended from the root, bail
-            raise ValueError("Node %s does not have root %s" %
-                             (oid, rootPath))
-        oid = oid[rootlen:]  # clip the root off for the tree
-        branch = tree
-        oidPos = 0
-        oidSize = len(oid)
-        while oidPos < oidSize:
-            subid = oid[oidPos]
-            if subid not in branch:  # First time at this position
-                branch[subid] = (callback, None)  # might be a leaf
-            elif branch[subid][1] is None:  # It isn't a leaf
-                branch[subid] = (branch[subid][0], {})
-            branch = branch[subid][1]
-            oidPos += 1
-    return tree
-
-
 # Value types
 VALUE_INTEGER = 2
 VALUE_OCTET_STR = 4
