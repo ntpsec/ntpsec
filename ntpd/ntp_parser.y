@@ -491,9 +491,13 @@ unpeer_command
 		{
 			unpeer_node *my_node;
 
+#ifdef REFCLOCK
 			my_node = create_unpeer_node(addr_from_typeunit($3, $4));
 			if (my_node)
 				APPEND_G_FIFO(cfgt.unpeers, my_node);
+#else
+			yyerror("no refclock support was compiled in.");
+#endif /* REFCLOCK */
 		}
 	;	
 unpeer_keyword	
