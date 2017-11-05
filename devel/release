@@ -42,6 +42,8 @@ gpg -u ${KEY} -a --output ${TAR}.sum.asc --clearsign ${TAR}.sum
 # Copy the release tarball, GPG detached signature of the release
 # tarball, and the signed sha256sum file to the ftp artifact server.
 scp ntpsec-${V}.tar* ${DST}
+
+echo "Don't forget to bump the minor version number!"
 EOF
 
 # end
