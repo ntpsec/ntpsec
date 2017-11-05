@@ -2500,6 +2500,123 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
             errored = e
         self.assertEqual(errored.message, "PDU type 255 not in defined types")
 
+    def test_walkMIBTree(self):
+        x = ntp.agentx
+        f = x.walkMIBTree
+
+        # Test empty tree
+        self.assertEqual(tuple(f({})), ())
+        # Test flat, fully static tree
+        self.assertEqual(tuple(f({0: {"static": True, "callback": None,
+                                      "subids": None},
+                                  1: {"static": True, "callback": None,
+                                      "subids": None},
+                                  2: {"static": True, "callback": None,
+                                      "subids": None},
+                                  5: {"static": True, "callback": None,
+                                      "subids": None}})),
+                         ((x.OID((0,)), None),
+                          (x.OID((1,)), None),
+                          (x.OID((2,)), None),
+                          (x.OID((5,)), None)))
+        # Test nested, fully static tree
+        self.assertEqual(tuple(f({0: {"static": True,
+                                      "callback": None,
+                                      "subids": None},
+                                  1: {"static": True,
+                                      "callback": None,
+                                      "subids":
+                                      {0: {"static": True,
+                                           "callback": None,
+                                           "subids": None},
+                                       1: {"static": True,
+                                           "callback": None,
+                                           "subids":
+                                           {42: {"static": True,
+                                                 "callback": None,
+                                                 "subids": None}}}}},
+                                  5: {"static": True,
+                                      "callback": None,
+                                      "subids": None}})),
+                         ((x.OID((0,)), None),
+                          (x.OID((1,)), None),
+                          (x.OID((1, 0)), None),
+                          (x.OID((1, 1)), None),
+                          (x.OID((1, 1, 42)), None),
+                          (x.OID((5,)), None)))
+        # Test nested, fully static tree, with rootpath
+        self.assertEqual(tuple(f({0: {"static": True,
+                                      "callback": None,
+                                      "subids": None},
+                                  1: {"static": True,
+                                      "callback": None,
+                                      "subids":
+                                      {0: {"static": True,
+                                           "callback": None,
+                                           "subids": None},
+                                       1: {"static": True,
+                                           "callback": None,
+                                           "subids":
+                                           {42: {"static": True,
+                                                 "callback": None,
+                                                 "subids": None}}}}},
+                                  5: {"static": True,
+                                      "callback": None,
+                                      "subids": None}}, (23,))),
+                         ((x.OID((23, 0)), None),
+                          (x.OID((23, 1)), None),
+                          (x.OID((23, 1, 0)), None),
+                          (x.OID((23, 1, 1)), None),
+                          (x.OID((23, 1, 1, 42)), None),
+                          (x.OID((23, 5)), None)))
+        # subid lambda for dynamic tree testing
+        submaker = (lambda : {0: {"static": True,
+                                  "callback": None,
+                                  "subids": None},
+                              1: {"static": True,
+                                      "callback": None,
+                                      "subids":
+                                      {0: {"static": True,
+                                           "callback": None,
+                                           "subids": None}}},
+                              2: {"static": True,
+                                  "callback": None,
+                                  "subids": None}})
+        # Test tree with dynamic nodes
+        self.assertEqual(tuple(f({0: {"static": True,
+                                      "callback": None,
+                                      "subids": None},
+                                  1: {"static": False,
+                                      "callback": None,
+                                      "subids": submaker},
+                                  2: {"static": True,
+                                      "callback": None,
+                                      "subids": None}})),
+                         ((x.OID((0,)), None),
+                          (x.OID((1,)), None),
+                          (x.OID((1, 0)), None),
+                          (x.OID((1, 1)), None),
+                          (x.OID((1, 1, 0)), None),
+                          (x.OID((1, 2)), None),
+                          (x.OID((2,)), None)))
+        # Test tree with dynamic nodes and root path
+        self.assertEqual(tuple(f({0: {"static": True,
+                                      "callback": None,
+                                      "subids": None},
+                                  1: {"static": False,
+                                      "callback": None,
+                                      "subids": submaker},
+                                  2: {"static": True,
+                                      "callback": None,
+                                      "subids": None}}, (23,))),
+                         ((x.OID((23, 0)), None),
+                          (x.OID((23, 1)), None),
+                          (x.OID((23, 1, 0)), None),
+                          (x.OID((23, 1, 1)), None),
+                          (x.OID((23, 1, 1, 0)), None),
+                          (x.OID((23, 1, 2)), None),
+                          (x.OID((23, 2)), None)))
+
     def test_mibTree2List(self):
         x = ntp.agentx
         f = x.mibTree2List

@@ -1304,6 +1304,46 @@ def decode_packet(data):
     return parsedPkt, newData
 
 
+def walkMIBTree(tree, rootpath=()):
+    # Tree node formats:
+    # {"static": True, "callback": <func>, "subids": {.blah.}}
+    # {"static": False, "callback": <func>, "subids": <func>}
+    # The "subids" function in dynamic nodes must return an MIB tree
+    nodeStack = []
+    oidStack = []
+    current = tree
+    currentKeys = list(current.keys())
+    currentKeys.sort()
+    keyID = 0
+    while True:
+        if keyID >= len(currentKeys):
+            if len(nodeStack) > 0:
+                # No more nodes this level, pop higher node
+                current, currentKeys, keyID, key = nodeStack.pop()
+                oidStack.pop()
+                keyID += 1
+                continue
+            else:  # Out of tree, we are done
+                return
+        key = currentKeys[keyID]
+        oid = OID(rootpath + tuple(oidStack) + (key,))
+        yield (oid, current[key]["callback"])
+        if current[key]["subids"] is not None:
+            # Push current node, move down a level
+            nodeStack.append((current, currentKeys, keyID, key))
+            oidStack.append(key)
+            if current[key]["static"] is True:
+                current = current[key]["subids"]
+            else:
+                current = current[key]["subids"]()  # Tree generator function
+            currentKeys = list(current.keys())
+            currentKeys.sort()
+            keyID = 0
+            key = currentKeys[keyID]
+            continue
+        keyID += 1
+
+
 def mibTree2List(mibtree, currentPath=()):
     "Takes a tree of nested dicts representing OIDs and flattens it to a list"
     if (mibtree is None) or (mibtree == {}):
