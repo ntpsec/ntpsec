@@ -489,9 +489,9 @@ unpeer_command
 		}
 	|	unpeer_keyword T_Clock T_String optional_unit
 		{
+#ifdef REFCLOCK
 			unpeer_node *my_node;
 
-#ifdef REFCLOCK
 			my_node = create_unpeer_node(addr_from_typeunit($3, $4));
 			if (my_node)
 				APPEND_G_FIFO(cfgt.unpeers, my_node);
