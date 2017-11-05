@@ -1344,6 +1344,10 @@ def walkMIBTree(tree, rootpath=()):
         keyID += 1
 
 
+def mibnode(static, callback, subs):
+    return {"static": static, "callback": callback, "subids": subs}
+
+
 def mibTree2List(mibtree, currentPath=()):
     "Takes a tree of nested dicts representing OIDs and flattens it to a list"
     if (mibtree is None) or (mibtree == {}):

@@ -23,6 +23,9 @@ except ImportError as e:
     sys.exit(1)
 
 
+# TODO This is either necessary, or a different workaround is.
+ntp.util.deunicode_units()
+
 logfile = "ntpsnmpd.log"
 logfp = sys.stderr
 nofork = True  # don't daemonize while still under construction
@@ -36,234 +39,276 @@ DEFHOST = "localhost"  # For now only know how to talk to the local ntp
 
 class DataSource:  # This may be broken up in future to be less NTP-specific
     def __init__(self):
+        node = ax.mibnode
         # This is defined as a dict tree because simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
         # ntpEntNotifications
-        self.oidTree = {0: (None,
-                            # ntpEntNotifModeChange
-                            {1: (None, None),
-                             # ntpEntNotifStratumChange
-                             2: (None, None),
-                             # ntpEntNotifSyspeerChange
-                             3: (None, None),
-                             # ntpEntNotifAddAssociation
-                             4: (None, None),
-                             # ntpEntNotifRemoveAsociation
-                             5: (None, None),
-                             # ntpEntNotifConfigChanged
-                             6: (None, None),
-                             # ntpEntNotifLeapSecondAnnounced
-                             7: (None, None),
-                             # ntpEntNotifHeartbeat
-                             8: (None, None)}),
-                        # ntpSnmpMIBObjects
-                        1: (None,
-                            # ntpEntInfo
-                            {1: (None,
-                                 # ntpNetSoftwareName utf8str
-                                 {1: ((lambda oid:
-                                       self.cb_systemInfo(oid, None,
-                                                          "name")),
-                                      None),
-                                  # ntpEntSoftwareVersion utf8str
-                                  2: ((lambda oid:
-                                       self.cb_systemInfo(oid, None,
-                                                          "version")),
-                                      None),
-                                  # ntpEntSoftwareVendor utf8str
-                                  3: ((lambda oid:
-                                       self.cb_systemInfo(oid, None,
-                                                          "vendor")),
-                                      None),
-                                  # ntpEntSystemType utf8str
-                                  4: ((lambda oid:
-                                       self.cb_systemInfo(oid, None,
-                                                          "system")),
-                                      None),
-                                  # ntpEntTimeResolution uint32
-                                  5: (self.cb_timeResolution, None),
-                                  # ntpEntTimePrecision int32
-                                  6: (self.cb_timePrecision, None),
-                                  # ntpEntTimeDistance DisplayString
-                                  7: (self.cb_timeDistance, None)}),
-                             # ntpEntStatus
-                             2: (None,
-                                 # ntpEntStatusCurrentMode INTEGER {...}
-                                 {1: (self.cb_statusCurrentMode, None),
-                                  # ntpEntStatusStratum NtpStratum
-                                  2: (self.cb_statusStratum, None),
-                                  # ntpEntStatusActiveRefSourceId
-                                  #  uint32 (0..99999)
-                                  3: (self.cb_statusActiveRefSourceID,
-                                      None),
-                                  # ntpEntStatusActiveRefSourceName utf8str
-                                  4: (self.cb_statusActiveRefSourceName,
-                                      None),
-                                  # ntpEntStatusActiveOffset DisplayString
-                                  5: (self.cb_statusActiveOffset, None),
-                                  # ntpEntStatusNumberOfRefSources
-                                  #  unit32 (0..99)
-                                  6: (self.cb_statusNumRefSources, None),
-                                  # ntpEntStatusDispersion DisplayString
-                                  7: (self.cb_statusDispersion, None),
-                                  # ntpEntStatusEntityUptime TimeTicks
-                                  8: (self.cb_statusEntityUptime, None),
-                                  # ntpEntStatusDateTime NtpDateTime
-                                  9: (self.cb_statusDateTime, None),
-                                  # ntpEntStatusLeapSecond NtpDateTime
-                                  10: (self.cb_statusLeapSecond, None),
-                                  # ntpEntStatusLeapSecondDirection
-                                  #  int32 (-1..1)
-                                  11: (self.cb_statusLeapSecDirection,
-                                       None),
-                                  # ntpEntStatusInPkts Counter32
-                                  12: (self.cb_statusInPkts, None),
-                                  # ntpEntStatusOutPkts Counter32
-                                  13: (self.cb_statusOutPkts, None),
-                                  # ntpEntStatusBadVersion Counter32
-                                  14: (self.cb_statusBadVersion, None),
-                                  # ntpEntStatusProtocolError Counter32
-                                  15: (self.cb_statusProtocolError, None),
-                                  # ntpEntStatusNotifications Counter32
-                                  16: (self.cb_statusNotifications, None),
-                                  # ntpEntStatPktModeTable
-                                  #  SEQUENCE of NtpEntStatPktModeEntry
-                                  17: (None,
-                                       # ntpEntStatPktModeEntry SEQUENCE {...}
-                                       {1: (None,
-                                            # ntpEntStatPktMode INTEGER {...}
-                                            {1: (None, None),
-                                             # ntpEntStatPktSent Counter32
-                                             2: (None, None),
-                                             # ntpEntStatPktRecived Counter32
-                                             3: (None, None)})})}),
-                             # ntpAssociation
-                             3: (None,
-                                 # ntpAssociationTable
-                                 #  SEQUENCE of NtpAssociationEntry
-                                 {1: (None,
-                                      # ntpAssociationEntry SEQUENCE {...}
-                                      {1: (None,
-                                           # ntpAssocId uint32 (1..99999)
-                                           {1: (self.cb_assocID, None),
-                                            # ntpAssocName utf8str
-                                            2: (self.cb_assocName, None),
-                                            # ntpAssocRefId DisplayString
-                                            3: (self.cb_assocRefID, None),
-                                            # ntpAssocAddressType
-                                            #  InetAddressType
-                                            4: (self.cb_assocAddrType,
-                                                None),
-                                            # ntpAssocAddress
-                                            #  InetAddress SIZE (4|8|16|20)
-                                            5: (self.cb_assocAddr, None),
-                                            # ntpAssocOffset DisplayString
-                                            6: (self.cb_assocOffset,
-                                                None),
-                                            # ntpAssocStratum NtpStratum
-                                            7: (self.cb_assocStratum,
-                                                None),
-                                            # ntpAssocStatusJitter
-                                            #  DisplayString
-                                            8: (self.cb_assocStatusJitter,
-                                                None),
-                                            # ntpAssocStatusDelay
-                                            #  DisplayString
-                                            9: (self.cb_assocStatusDelay,
-                                                None),
-                                            # ntpAssocStatusDispersion
-                                            #  DisplayString
-                                            10: (self.cb_assocStatusDisp,
-                                                 None)})}),
-                                  # ntpAssociationStatisticsTable
-                                  #  SEQUENCE of ntpAssociationStatisticsEntry
-                                  2: (None,
-                                      # ntpAssociationStatisticsEntry
-                                      #  SEQUENCE {...}
-                                      {1: (None,
-                                           # ntpAssocStatInPkts Counter32
-                                           {1: (self.cb_assocStatInPkts,
-                                                None),
-                                            # ntpAssocStatOutPkts Counter32
-                                            2: (self.cb_assocStatOutPkts,
-                                                None),
-                                            # ntpAssocStatProtocolError
-                                            #  Counter32
-                                            3: (self.cb_assocStatProtoErr,
-                                                None)})})}),
-                             # ntpEntControl
-                             4: (None,
-                                 # ntpEntHeartbeatInterval unit32
-                                 {1: (self.cb_entHeartbeatInterval,
-                                      None),
-                                  # ntpEntNotifBits BITS {...}
-                                  2: (self.cb_entNotifBits, None)}),
-                             # ntpEntNotifObjects
-                             5: (None,
-                                 # ntpEntNotifMessage utf8str
-                                 {1: (self.cb_entNotifMessage, None)})}),
-                        # ntpEntConformance
-                        2: (None,
-                            # ntpEntCompliances
-                            {1: (None,
-                                 # ntpEntNTPCompliance
-                                 {1: (None, None),
-                                  # ntpEntSNTPCompliance
-                                  2: (None, None)}),
-                             # ntpEntGroups
-                             2: (None,
-                                 # ntpEntObjectsGroup1 OBJECTS {...}
-                                 {1: (None, None),
-                                  # ntpEntObjectsGroup2 OBJECTS {...}
-                                  2: (None, None),
-                                  # ntpEntNotifGroup NOTIFICATIONS {...}
-                                  3: (None, None)})})}
-        self.oidList = ntp.agentx.mibTree2List(self.oidTree, ntpRootOID)
+        self.oidTree = {
+            0:
+            node(True, None,
+                 # ntpEntNotifModeChange
+                 {1: node(True, None, None),
+                  # ntpEntNotifStratumChange
+                  2: node(True, None, None),
+                  # ntpEntNotifSyspeerChange
+                  3: node(True, None, None),
+                  # ntpEntNotifAddAssociation
+                  4: node(True, None, None),
+                  # ntpEntNotifRemoveAsociation
+                  5: node(True, None, None),
+                  # ntpEntNotifConfigChanged
+                  6: node(True, None, None),
+                  # ntpEntNotifLeapSecondAnnounced
+                  7: node(True, None, None),
+                  # ntpEntNotifHeartbeat
+                  8: node(True, None, None)}),
+            # ntpSnmpMIBObjects
+            1:
+            node(True, None,
+                 # ntpEntInfo
+                 {1:
+                  node(True, None,
+                       # ntpNetSoftwareName utf8str
+                       {1: node(True,
+                                (lambda oid:
+                                 self.cb_systemInfo(oid, None, "name")),
+                                None),
+                        # ntpEntSoftwareVersion utf8str
+                        2: node(True,
+                                (lambda oid:
+                                 self.cb_systemInfo(oid, None, "version")),
+                                None),
+                        # ntpEntSoftwareVendor utf8str
+                        3: node(True,
+                                (lambda oid:
+                                 self.cb_systemInfo(oid, None, "vendor")),
+                                None),
+                        # ntpEntSystemType utf8str
+                        4: node(True,
+                                (lambda oid:
+                                 self.cb_systemInfo(oid, None, "system")),
+                                None),
+                        # ntpEntTimeResolution uint32
+                        5: node(True, self.cb_timeResolution, None),
+                        # ntpEntTimePrecision int32
+                        6: node(True, self.cb_timePrecision, None),
+                        # ntpEntTimeDistance DisplayString
+                        7: node(True, self.cb_timeDistance, None)}),
+                  # ntpEntStatus
+                  2:
+                  node(True, None,
+                       # ntpEntStatusCurrentMode INTEGER {...}
+                       {1: node(True, self.cb_statusCurrentMode, None),
+                        # ntpEntStatusStratum NtpStratum
+                        2: node(True, self.cb_statusStratum, None),
+                        # ntpEntStatusActiveRefSourceId
+                        #  uint32 (0..99999)
+                        3: node(True,self.cb_statusActiveRefSourceID,
+                                None),
+                        # ntpEntStatusActiveRefSourceName utf8str
+                        4: node(True, self.cb_statusActiveRefSourceName,
+                                None),
+                        # ntpEntStatusActiveOffset DisplayString
+                        5: node(True, self.cb_statusActiveOffset, None),
+                        # ntpEntStatusNumberOfRefSources
+                        #  unit32 (0..99)
+                        6: node(True, self.cb_statusNumRefSources, None),
+                        # ntpEntStatusDispersion DisplayString
+                        7: node(True, self.cb_statusDispersion, None),
+                        # ntpEntStatusEntityUptime TimeTicks
+                        8: node(True, self.cb_statusEntityUptime, None),
+                        # ntpEntStatusDateTime NtpDateTime
+                        9: node(True, self.cb_statusDateTime, None),
+                        # ntpEntStatusLeapSecond NtpDateTime
+                        10: node(True, self.cb_statusLeapSecond, None),
+                        # ntpEntStatusLeapSecondDirection
+                        #  int32 (-1..1)
+                        11: node(True, self.cb_statusLeapSecDirection, None),
+                        # ntpEntStatusInPkts Counter32
+                        12: node(True, self.cb_statusInPkts, None),
+                        # ntpEntStatusOutPkts Counter32
+                        13: node(True, self.cb_statusOutPkts, None),
+                        # ntpEntStatusBadVersion Counter32
+                        14: node(True, self.cb_statusBadVersion, None),
+                        # ntpEntStatusProtocolError Counter32
+                        15: node(True, self.cb_statusProtocolError, None),
+                        # ntpEntStatusNotifications Counter32
+                        16: node(True, self.cb_statusNotifications, None),
+                        # ntpEntStatPktModeTable
+                        #  SEQUENCE of NtpEntStatPktModeEntry
+                        17:
+                        node(True, None,
+                             # ntpEntStatPktModeEntry SEQUENCE {...}
+                             {1:
+                              node(True, None,
+                                   # ntpEntStatPktMode INTEGER {...}
+                                   {1: node(True, None, None),
+                                    # ntpEntStatPktSent Counter32
+                                    2: node(True, None, None),
+                                    # ntpEntStatPktRecived Counter32
+                                    3: node(True, None, None)})})}),
+                  # ntpAssociation
+                  3:
+                  node(True, None,
+                       # ntpAssociationTable
+                       #  SEQUENCE of NtpAssociationEntry
+                       {1:
+                        node(True, None,
+                             # ntpAssociationEntry SEQUENCE {...}
+                             {1:
+                              node(True, None,
+                                   # ntpAssocId uint32 (1..99999)
+                                   {1: node(True, self.cb_assocID, None),
+                                    # ntpAssocName utf8str
+                                    2: node(True, self.cb_assocName, None),
+                                    # ntpAssocRefId DisplayString
+                                    3: node(True, self.cb_assocRefID, None),
+                                    # ntpAssocAddressType
+                                    #  InetAddressType
+                                    4: node(True, self.cb_assocAddrType,
+                                            None),
+                                    # ntpAssocAddress
+                                    #  InetAddress SIZE (4|8|16|20)
+                                    5: node(True, self.cb_assocAddr, None),
+                                    # ntpAssocOffset DisplayString
+                                    6: node(True, self.cb_assocOffset,
+                                            None),
+                                    # ntpAssocStratum NtpStratum
+                                    7: node(True, self.cb_assocStratum,
+                                            None),
+                                    # ntpAssocStatusJitter
+                                    #  DisplayString
+                                    8: node(True, self.cb_assocStatusJitter,
+                                            None),
+                                    # ntpAssocStatusDelay
+                                    #  DisplayString
+                                    9: node(True, self.cb_assocStatusDelay,
+                                            None),
+                                    # ntpAssocStatusDispersion
+                                    #  DisplayString
+                                    10: node(True, self.cb_assocStatusDisp,
+                                             None)})}),
+                        # ntpAssociationStatisticsTable
+                        #  SEQUENCE of ntpAssociationStatisticsEntry
+                        2:
+                        node(True, None,
+                             # ntpAssociationStatisticsEntry
+                             #  SEQUENCE {...}
+                             {1:
+                              node(True, None,
+                                   # ntpAssocStatInPkts Counter32
+                                   {1: node(True, self.cb_assocStatInPkts,
+                                            None),
+                                    # ntpAssocStatOutPkts Counter32
+                                    2: node(True, self.cb_assocStatOutPkts,
+                                            None),
+                                    # ntpAssocStatProtocolError
+                                    #  Counter32
+                                    3: node(True, self.cb_assocStatProtoErr,
+                                            None)})})}),
+                  # ntpEntControl
+                  4:
+                  node(True, None,
+                       # ntpEntHeartbeatInterval unit32
+                       {1: node(True, self.cb_entHeartbeatInterval,
+                                None),
+                        # ntpEntNotifBits BITS {...}
+                        2: node(True, self.cb_entNotifBits, None)}),
+                  # ntpEntNotifObjects
+                  5:
+                  node(True, None,
+                       # ntpEntNotifMessage utf8str
+                       {1: node(True, self.cb_entNotifMessage, None)})}),
+            # ntpEntConformance
+            2:
+            node(True, None,
+                 # ntpEntCompliances
+                {1:
+                 node(True, None,
+                      # ntpEntNTPCompliance
+                      {1: node(True, None, None),
+                       # ntpEntSNTPCompliance
+                       2: node(True, None, None)}),
+                 # ntpEntGroups
+                 2:
+                 node(True, None,
+                      # ntpEntObjectsGroup1 OBJECTS {...}
+                      {1: node(True, None, None),
+                       # ntpEntObjectsGroup2 OBJECTS {...}
+                       2: node(True, None, None),
+                       # ntpEntNotifGroup NOTIFICATIONS {...}
+                       3: node(True, None, None)})})}
         self.session = ntp.packet.ControlSession()
         self.session.openhost(DEFHOST)  # only local for now
 
-    def getOID(self, oid):
-        "Get the requested OID, or the next lexicographical OID"
-        for node in self.oidList:
-            if node[0] is None:  # No read callback
-                continue  # skip over not yet implemented OIDs
-            if (node[1] == oid):
-                return node  # (read_callback, write_callback, oid)
-        # Nothing in the list
-        return (None, None, None)
+    def getOID_core(self, nextP, searchoid, returnGenerator=False):
+        gen = ax.walkMIBTree(self.oidTree, ntpRootOID)
+        while True:
+            try:
+                oid, callback = gen.next()
+                if nextP is True:
+                    oidhit = (oid > searchoid)
+                else:
+                    oidhit = (oid.subids == searchoid.subids)
+                if oidhit and (callback is not None):
+                    if returnGenerator is True:
+                        return oid, callback, gen
+                    else:
+                        return oid, callback
+            except StopIteration:
+                if returnGenerator is True:
+                    return None, None, None
+                else:
+                    return None, None
 
-    def getNextOID(self, oid):
+    # These exist instead of just getOID_core for clearer semantics
+    def getOID(self, searchoid, returnGenerator=False):
+        "Get the requested OID"
+        return self.getOID_core(False, searchoid, returnGenerator)
+
+    def getNextOID(self, searchoid, returnGenerator=False):
         "Get the next lexicographical OID"
-        for pos in range(len(self.oidList)):
-            callback, current = self.oidList[pos]
-            if callback is None:
-                continue  # skip over not yet implemented OIDs
-            if current <= oid:
-                continue
-            else:
-                return self.oidList[pos]
-        # Nothing after the supplied oid
-        return (None, None)
+        return self.getOID_core(True, searchoid, returnGenerator)
 
     def getOIDsInRange(self, oidrange, firstOnly=False):
         "Get a list of every (optionally the first) OID in a range"
         oids = []
-        for node in self.oidList:
-            if node[0] is None:  # No read callback
-                continue  # skip over not yet implemented OIDs
-            elif node[1] > oidrange.start:  # Past the start, in the body
-                if (oidrange.end is not None) and (node[1] >= oidrange.end):
-                    break  # Past the end of a bounded range
+        gen = ax.walkMIBTree(self.oidTree, ntpRootOID)
+        # Find the first OID
+        while True:
+            try:
+                oid, callback = gen.next()
+                if callback is None:
+                    continue  # skip unimplemented OIDs
+                elif oid.subids == oidrange.start.subids:
+                    # ok, found the start, do we need to skip it?
+                    if oidrange.start.include is True:
+                        oids.append((oid, callback))
+                        break
+                    else:
+                        continue
+                elif oid > oidrange.start:
+                    # If we are here it means we hit the start but skipped
+                    oids.append((oid, callback))
+                    break
+            except StopIteration:
+                # Couldn't find *anything*
+                return []
+        if firstOnly is True:
+            return oids
+        # Start filling in the rest of the range
+        while True:
+            try:
+                oid, callback = gen.next()
+                if callback is None:
+                    continue  # skip unimplemented OIDs
+                elif (oidrange.end is not None) and (oid >= oidrange.end):
+                    break  # past the end of a bounded range
                 else:
-                    oids.append(node)  # Found a match
-            elif (node[1].subids == oidrange.start.subids) and \
-                 (oidrange.start.include is True):
-                oids.append(node)  # Inclusive search and a match at the start
-            else:
-                pass
-            if (firstOnly is True) and (len(oids) > 0):
-                break
+                    oids.append((oid, callback))
+            except StopIteration:
+                break  # We have run off the end of the MIB
         return oids
 
     # =============================================================
@@ -334,6 +379,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             data = self.session.readvar(0, ["koffset"], raw=True)
             data = ntp.util.unitifyvar(data["koffset"][1], "koffset",
                                        width=None, unitSpace=True)
+            print("\n\n\nactive offset:", repr(data))
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
     def cb_statusNumRefSources(self, oid, write=None):
@@ -640,7 +686,7 @@ class PacketControl:
         binds = []
         for oidr in packet.oidranges:
             target = oidr.start
-            callback, oid = self.database.getOID(target)
+            oid, callback = self.database.getOID(target)
             if (oid != target) or (callback is None):
                 binds.append(ax.Varbind(ax.VALUE_NO_SUCH_OBJECT, target))
             else:
@@ -656,10 +702,14 @@ class PacketControl:
         binds = []
         for oidr in packet.oidranges:
             oids = self.database.getOIDsInRange(oidr, True)
+            print()
+            print("GetNext:", oidr)
+            print("result:", oids)
+            print()
             if len(oids) == 0:  # Nothing found
                 binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
             else:
-                callback, oid = oids[0]
+                oid, callback = oids[0]
                 binds.append(callback(oid))
         # Need to implement genError
         resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
@@ -676,7 +726,7 @@ class PacketControl:
             if len(oids) == 0:  # Nothing found
                 binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
             else:
-                callback, oid = oids[0]
+                oid, callback = oids[0]
                 binds.append(callback(oid))
         # Handle repeaters
         for oidr in repeats:
@@ -684,7 +734,7 @@ class PacketControl:
             if len(oids) == 0:  # Nothing found
                 binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
             else:
-                for callback, oid in oids[:packet.maxReps]:
+                for oid, callback in oids[:packet.maxReps]:
                     binds.append(callback(oid))
         resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
                               packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
