@@ -388,20 +388,25 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             data = self.session.readstat()
             return ax.Varbind(ax.VALUE_GAUGE32, oid, len(data))
 
-    def cb_statusDispersion(self, oid, write=None):  # DUMMY
+    def cb_statusDispersion(self, oid, write=None):
         # DisplayString
         if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "quux")
+            data = self.session.readvar(0, ["rootdisp"], raw=True)
+            return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["rootdisp"][1])
 
     def cb_statusEntityUptime(self, oid, write=None):  # DUMMY
         # TimeTicks
         if write is None:
             return ax.Varbind(ax.VALUE_TIME_TICKS, oid, 8)
 
-    def cb_statusDateTime(self, oid, write=None):  # DUMMY
+    def cb_statusDateTime(self, oid, write=None):
         # NtpDateTime
         if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "fred")
+            data = self.session.readvar(0, ["reftime"])
+            txt = data["reftime"]
+            txt = txt[2:]  # Strip '0x'
+            txt = "".join(txt.split("."))  # Strip '.'
+            return ax.Varbind(ax.VALUE_OCTET_STR, oid, txt)
 
     def cb_statusLeapSecond(self, oid, write=None):  # DUMMY
         # NtpDateTime
