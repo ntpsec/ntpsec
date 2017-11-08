@@ -142,17 +142,6 @@
 #ifdef HAVE_PPSAPI
 # define	PPSDEV		"/dev/gpspps%d"	/* PPSAPI device override */
 # define	PPS_PRECISION	(-20)		/* precision assumed (~ 1 us) */
-# ifndef O_NOCTTY
-#  define M_NOCTTY	0
-# else
-#  define M_NOCTTY	O_NOCTTY
-# endif
-# ifndef O_NONBLOCK
-#  define M_NONBLOCK	0
-# else
-#  define M_NONBLOCK	O_NONBLOCK
-# endif
-# define PPSOPENMODE	(O_RDWR | M_NOCTTY | M_NONBLOCK)
 #endif
 #ifdef ENABLE_CLASSIC_MODE
 #define	SPEED232	B4800		/* uart speed (4800 bps) */
@@ -588,7 +577,7 @@ nmea_control(
 		}
 		if ( peer->cfg.ppspath ) {
 		    up->ppsapi_fd = open(peer->cfg.ppspath,
-					 PPSOPENMODE, S_IRUSR | S_IWUSR);
+			O_RDWR | O_NOCTTY | O_NONBLOCK, S_IRUSR | S_IWUSR);
 		} else {
 		    up->ppsapi_fd = -1;
 		}

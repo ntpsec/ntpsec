@@ -691,23 +691,13 @@ refclock_open(
 	)
 {
 	int	fd;
-	int	omode;
-#ifdef O_NONBLOCK
 	char	trash[128];	/* litter bin for old input data */
-#endif
 
 	/*
 	 * Open serial port and set default options
 	 */
-	omode = O_RDWR;
-#ifdef O_NONBLOCK
-	omode |= O_NONBLOCK;
-#endif
-#ifdef O_NOCTTY
-	omode |= O_NOCTTY;
-#endif
 
-	fd = open(dev, omode, 0777);
+	fd = open(dev, O_RDWR | O_NONBLOCK | O_NOCTTY, 0777);
 	/* refclock_open() long returned 0 on failure, avoid it. */
 	if (0 == fd) {
 		fd = dup(0);
@@ -721,7 +711,6 @@ refclock_open(
 		close(fd);
 		return -1;
 	}
-#ifdef O_NONBLOCK
 	/*
 	 * We want to make sure there is no pending trash in the input
 	 * buffer. Since we have non-blocking IO available, this is a
@@ -730,7 +719,6 @@ refclock_open(
 	 */
 	while (read(fd, trash, sizeof(trash)) > 0 || errno == EINTR)
 		/*NOP*/;
-#endif
 	return fd;
 }
 
