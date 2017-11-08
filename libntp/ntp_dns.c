@@ -51,7 +51,6 @@ static void* dns_lookup(void* arg);
 bool dns_probe(struct peer* pp)
 {
 	int rc;
-        pthread_attr_t  thr_attr;
         sigset_t        block_mask, saved_sig_mask;
 	const char	* busy = "";
 
@@ -63,18 +62,15 @@ bool dns_probe(struct peer* pp)
 		return false;
 	active = pp;
 
-        pthread_attr_init(&thr_attr);
-	/* might want to set stack size */
         sigfillset(&block_mask);
         pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
-	rc = pthread_create(&worker, &thr_attr, dns_lookup, pp);
+	rc = pthread_create(&worker, NULL, dns_lookup, pp);
         if (rc) {
 		errno = rc;
 		msyslog(LOG_ERR, "DNS: dns_probe: error from pthread_create: %s, %m", pp->hostname);
 		return true;  /* don't try again */
 	}
         pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
-        pthread_attr_destroy(&thr_attr);
 
 	return true;
 };
