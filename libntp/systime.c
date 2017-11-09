@@ -187,10 +187,11 @@ normalize_time(
 	if (lfp_prev != 0 && !lamport_violated) {
 		if (!L_ISGTU(result, lfp_prev) &&
 		    sys_fuzz > 0.) {
-			msyslog(LOG_ERR, "CLOCK: ts_prev %s ts_min %s",
-				tspectoa(ts_prev_log),
-				tspectoa(ts_min));
-			msyslog(LOG_ERR, "CLOCK: ts %s", tspectoa(ts));
+			msyslog(LOG_ERR, "CLOCK: ts_prev %ld s + %ld ns, ts_min %ld s + %ld ns",
+				ts_prev_log.tv_sec, ts_prev.tv_nsec,
+				ts_min.tv_sec, ts_min.tv_nsec);
+			msyslog(LOG_ERR, "CLOCK: ts %ld s + %ld ns",
+				ts.tv_sec, ts.tv_nsec);
 			msyslog(LOG_ERR, "CLOCK: sys_fuzz %ld nsec, prior fuzz %.9f",
 				sys_fuzz_nsec, dfuzz_prev);
 			msyslog(LOG_ERR, "CLOCK: this fuzz %.9f",

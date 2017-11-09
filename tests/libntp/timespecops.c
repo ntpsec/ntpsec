@@ -634,33 +634,6 @@ TEST(timespecops, test_LFProundtrip) {
 // string formatting
 //----------------------------------------------------------------------
 
-TEST(timespecops, test_ToString) {
-	static const struct {
-		time_t		sec;
-		long		nsec;
-		const char *	repr;
-	} data [] = {
-		{ 0, 0,	 "0.000000000" },
-		{ 2, 0,	 "2.000000000" },
-		{-2, 0, "-2.000000000" },
-		{ 0, 1,	 "0.000000001" },
-		{ 0,-1,	"-0.000000001" },
-		{ 1,-1,	 "0.999999999" },
-		{-1, 1, "-0.999999999" },
-		{-1,-1, "-1.000000001" },
-	};
-	int i;
-
-	for (i = 0; i < (int)COUNTOF(data); ++i) {
-		struct timespec a = timespec_init(data[i].sec, data[i].nsec);
-		const char * E = data[i].repr;
-		const char * r = tspectoa(a);
-		TEST_ASSERT_EQUAL_STRING(E, r);
-	}
-
-	return;
-}
-
 TEST_GROUP_RUNNER(timespecops) {
 	RUN_TEST_CASE(timespecops, Helpers1);
 	RUN_TEST_CASE(timespecops, Normalise);
@@ -689,7 +662,6 @@ TEST_GROUP_RUNNER(timespecops) {
 	RUN_TEST_CASE(timespecops, test_FromLFPrelPos);
 	RUN_TEST_CASE(timespecops, test_FromLFPrelNeg);
 	RUN_TEST_CASE(timespecops, test_LFProundtrip);
-	RUN_TEST_CASE(timespecops, test_ToString);
 }
 
     

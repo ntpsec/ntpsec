@@ -37,7 +37,6 @@ def build(ctx):
         "statestr.c",
         "systime.c",
         "timespecops.c",
-        "timetoa.c",
     ]
 
     if not ctx.env.HAVE_STRLCAT or not ctx.env.HAVE_STRLCPY:

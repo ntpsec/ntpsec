@@ -263,15 +263,6 @@ test_tspec_denorm(
 	return test_tspec(normalize_tspec(a));
 }
 
-/* return LIB buffer ptr to string rep */
-const char *
-tspectoa(
-	struct timespec	x
-	)
-{
-	return format_time_fraction(x.tv_sec, x.tv_nsec, 9);
-}
-
 /*
  *  convert to l_fp type, relative and absolute
  */
