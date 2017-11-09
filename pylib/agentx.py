@@ -1306,8 +1306,8 @@ def decode_packet(data):
 
 def walkMIBTree(tree, rootpath=()):
     # Tree node formats:
-    # {"static": True, "callback": <func>, "subids": {.blah.}}
-    # {"static": False, "callback": <func>, "subids": <func>}
+    # {"reader": <func>, "writer": <func>, "static": True, "subids": {.blah.}}
+    # {"reader": <func>, "writer": <func>, "static": False, "subids": <func>}
     # The "subids" function in dynamic nodes must return an MIB tree
     nodeStack = []
     oidStack = []
@@ -1327,7 +1327,7 @@ def walkMIBTree(tree, rootpath=()):
                 return
         key = currentKeys[keyID]
         oid = OID(rootpath + tuple(oidStack) + (key,))
-        yield (oid, current[key]["callback"])
+        yield (oid, current[key]["reader"], current[key]["writer"])
         if current[key]["subids"] is not None:
             # Push current node, move down a level
             nodeStack.append((current, currentKeys, keyID, key))
@@ -1344,8 +1344,9 @@ def walkMIBTree(tree, rootpath=()):
         keyID += 1
 
 
-def mibnode(static, callback, subs):
-    return {"static": static, "callback": callback, "subids": subs}
+def mibnode(reader, writer, static, subs):
+    return {"writer": writer, "reader": reader,
+            "static": static, "subids": subs}
 
 
 # Value types
