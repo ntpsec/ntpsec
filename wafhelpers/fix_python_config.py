@@ -22,8 +22,9 @@ from waflib.Logs import pprint  # pylint: disable=import-error
 # this code and another version is installed later.  There doesn't seem to be
 # a universal solution to this, but it tries to do the best it can by using
 # waf's original prefixed result when it appears in the target Python's
-# sys.path.  Unfortunately, it will only appear there if it already exists,
-# even though the install itself will create it if needed.
+# sys.path (with any preexisting PYTHONPATH definition inhibited).
+# Unfortunately, it will only appear there if it already exists, even though
+# the install itself will create it if needed.
 #
 # In principle, there might be some value in allowing a prefix to be optionally
 # supplied (separately from PREFIX), but given that both values are already
@@ -68,10 +69,12 @@ class FixConfig(object):
         if Utils.is_win32:
             return  # No fixups supported on Windows
         # Note that get_python_variables() doesn't work for sys.path
+        path_env = dict(os.environ)
+        path_env.pop('PYTHONPATH', None)  # Ignore any current PYTHONPATH
         path_str = self.conf.cmd_and_log(self.conf.env.PYTHON
                                          + ['-c',
                                             'import sys; print(sys.path)'],
-                                         env=dict(os.environ))
+                                         env=path_env)
         sys_path = ast.literal_eval(path_str)
         if (not ('PYTHONDIR' in self.opts or 'PYTHONDIR' in self.conf.environ)
             and self.conf.env.PYTHONDIR not in sys_path):
