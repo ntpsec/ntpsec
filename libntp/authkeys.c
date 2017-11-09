@@ -311,7 +311,7 @@ freesymkey(
  * authhavekey - return true and cache the key, if zero or both known
  *		 and trusted.
  */
-int
+bool
 authhavekey(
 	keyid_t		id
 	)
@@ -420,7 +420,7 @@ authtrust(
 /*
  * authistrusted - determine whether a key is trusted
  */
-int
+bool
 authistrusted(
 	keyid_t		keyno
 	)
