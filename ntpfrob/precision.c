@@ -75,10 +75,10 @@ default_get_resolution(void)
 	long val;
 	int minsteps = MINLOOPS;	/* need at least this many steps */
 
-	clock_gettime(CLOCK_MONOTONIC, &tp);
+	clock_gettime(CLOCK_REALTIME, &tp);
 	last = tp.tv_nsec;
 	for (i = - --minsteps; i< MAXLOOPS; i++) {
-		clock_gettime(CLOCK_MONOTONIC, &tp);
+		clock_gettime(CLOCK_REALTIME, &tp);
 		diff = tp.tv_nsec - last;
 		if (diff < 0) diff += DNSECS;
 		if (diff > MINSTEP) if (minsteps-- <= 0) break;
@@ -111,7 +111,7 @@ default_get_resolution(void)
 
 /*
  * This routine calculates the differences between successive calls to
- * clock_gettime(MONOTONIC). If a difference is less than zero, the ns field
+ * clock_gettime(REALTIME). If a difference is less than zero, the ns field
  * has rolled over to the next second, so we add a second in ns. If
  * the difference is greater than zero and less than MINSTEP, the
  * clock has been advanced by a small amount to avoid standing still.
@@ -133,10 +133,10 @@ default_get_precision(void)
 
 	nsec = 0;
 	val = MAXSTEP;
-	clock_gettime(CLOCK_MONOTONIC, &tp);
+	clock_gettime(CLOCK_REALTIME, &tp);
 	last = tp.tv_nsec;
 	for (i = 0; i < MINLOOPS && nsec < HUSECS * 1024;) {
-	    clock_gettime(CLOCK_MONOTONIC, &tp);
+	    clock_gettime(CLOCK_REALTIME, &tp);
 		diff = tp.tv_nsec - last;
 		last = tp.tv_nsec;
 		if (diff < 0)
