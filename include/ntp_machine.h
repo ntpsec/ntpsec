@@ -13,14 +13,53 @@
 
 #ifndef CLOCK_REALTIME
 /*
- * Pacify platforms that don't have a real clock_gettime(2),
- * notably Mac OS X.
+ * Handle platforms that don't have a real clock_gettime(2),
+ * notably some versions of Mac OS X.
  */
+
+#include <errno.h>
+
 #define CLOCK_REALTIME	0
-#define CLOCK_MONOTONIC	1
 typedef int clockid_t;
-int clock_gettime(clockid_t clock_id, struct timespec *tp);
-#endif
+
+static inline int clock_gettime(clockid_t clk_id, struct timespec *tp)
+{
+    struct timeval tv;
+
+    switch (clk_id) {
+    case CLOCK_REALTIME:
+	/*
+	 * On OSX, it's tempting to use clock_get_time() for its apparent
+	 * nanosecond resolution, but it really only has microsecond
+	 * resolution, and is substantially slower than gettimeofday().
+	 */
+	if (gettimeofday(&tv, NULL))
+	    return -1;
+	tp->tv_sec = tv.tv_sec;
+	tp->tv_nsec = tv.tv_usec * 1000;
+	return 0;
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+}
+
+static inline int clock_settime(clockid_t clk_id, const struct timespec *tp)
+{
+    struct timeval tv;
+
+    switch (clk_id) {
+    case CLOCK_REALTIME:
+	tv.tv_sec = tp->tv_sec;
+	tv.tv_usec = (tp->tv_nsec + 500) / 1000;
+	return settimeofday(&tv, NULL);
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+}
+
+#endif /* !CLOCK_REALTIME */
 
 int ntp_set_tod (struct timespec *tvs);
 

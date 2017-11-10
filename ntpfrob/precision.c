@@ -10,6 +10,7 @@
 #include <stdbool.h>
 
 #include "ntpfrob.h"
+#include "ntp_machine.h"
 
 #define	DEFAULT_SYS_PRECISION	-99
 

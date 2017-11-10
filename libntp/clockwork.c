@@ -80,14 +80,10 @@ ntp_set_tod(
 	int		saved_errno;
 
 	TPRINT(1, ("In ntp_set_tod\n"));
-#ifdef HAVE_CLOCK_SETTIME
 	errno = 0;
 	rc = clock_settime(CLOCK_REALTIME, tvs);
 	saved_errno = errno;
 	TPRINT(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
-#else
-#error POSIX clock_settime(2) is required
-#endif /* HAVE_CLOCK_SETTIME */
 	errno = saved_errno;	/* for %m below */
 	TPRINT(1, ("ntp_set_tod: Final result: clock_settime: %d %m\n", rc));
 
