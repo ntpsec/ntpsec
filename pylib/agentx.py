@@ -1349,6 +1349,40 @@ def mibnode(reader, writer, static, subs):
             "static": static, "subids": subs}
 
 
+def bits2Bools(bitString, cropLength=None):
+    bits = []
+    for octet in bitString:
+        octet = ord(octet)
+        bits.append(bool(octet & 0x80))  # Yes, these are backwards, that is
+        bits.append(bool(octet & 0x40))  # how SNMP wants them. It does make
+        bits.append(bool(octet & 0x20))  # sense if you think about it as a
+        bits.append(bool(octet & 0x10))  # stream of bits instead of octets.
+        bits.append(bool(octet & 0x08))
+        bits.append(bool(octet & 0x04))  # If you don't like it go yell at
+        bits.append(bool(octet & 0x02))  # the SNMP designers.
+        bits.append(bool(octet & 0x01))
+    if cropLength is not None:  # used when a bitfield is not a multiple of 8
+        bits = bits[:cropLength]
+    return bits
+
+def bools2Bits(bits):
+    bitCounter = 0
+    octets = []
+    current = 0
+    for bit in bits:
+        current += (int(bit) << (7 - bitCounter))
+        bitCounter += 1
+        if bitCounter >= 8:  # end of byte
+            bitCounter = 0
+            octets.append(chr(current))
+            current = 0
+    else:
+        if bitCounter != 0:
+            octets.append(chr(current))
+    octets = "".join(octets)
+    return octets
+
+
 # Value types
 VALUE_INTEGER = 2
 VALUE_OCTET_STR = 4
@@ -1465,6 +1499,8 @@ ERR_WRONG_VALUE = 10
 ERR_NO_CREATION = 11
 ERR_INCONSISTENT_VALUE = 12
 ERR_RESOURCE_UNAVAILABLE = 13
+ERR_COMMIT_FAILED = 14
+ERR_UNDO_FAILED = 15
 ERR_NOT_WRITABLE = 17
 ERR_INCONSISTENT_NAME = 18
 definedErrors = (ERR_NOERROR, ERR_GENERR, ERR_NO_ACCESS, ERR_WRONG_TYPE,

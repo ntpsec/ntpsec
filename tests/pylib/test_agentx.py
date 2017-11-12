@@ -2601,6 +2601,40 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           (x.OID((23, 1, 2)), None, None),
                           (x.OID((23, 2)), None, None)))
 
+    def test_bits2Bools(self):
+        bits2bool = ntp.agentx.bits2Bools
+
+        # Test empty
+        self.assertEqual(bits2bool(""), [])
+        # Test round bytes
+        self.assertEqual(bits2bool("\xFA\xCE"),
+                         [True, True, True, True,
+                          True, False, True, False,
+                          True, True, False, False,
+                          True, True, True, False])
+        # Test partial bytes
+        self.assertEqual(bits2bool("\xFF\xE1", 12),  # The extra bit is to
+                         [True, True, True, True,  #   confirm crop
+                          True, True, True, True,
+                          True, True, True, False])
+
+    def test_bools2bits(self):
+        bool2bits = ntp.agentx.bools2Bits
+
+        # Test empty
+        self.assertEqual(bool2bits([]), "")
+        # Test round bytes
+        self.assertEqual(bool2bits([True, True, True, True,
+                                    True, False, True, False,
+                                    True, True, False, False,
+                                    True, True, True, False]),
+                         "\xFA\xCE")
+        # Test partial bytes
+        self.assertEqual(bool2bits([True, True, True, True,
+                                    True, True, True, True,
+                                    True, True, True, False]),
+                         "\xFF\xE0")
+
 
 if __name__ == "__main__":
     unittest.main()
