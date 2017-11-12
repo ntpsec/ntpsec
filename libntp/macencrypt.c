@@ -120,7 +120,8 @@ mac_authdecrypt(
 /*
  * Calculate the reference id from the address. If it is an IPv4
  * address, use it as is. If it is an IPv6 address, do a md5 on
- * it and use the bottom 4 bytes.
+ * it and use the top 4 bytes. (Note: NTP Classic claimed it used
+ * the *bottom* 4 bytes, but that didn't match the code or the test.)
  * The result is in network byte order.
  */
 uint32_t
