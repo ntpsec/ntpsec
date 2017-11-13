@@ -27,7 +27,8 @@ bool    syslogit = true;        /* log messages to syslog */
 bool    termlogit = true;       /* duplicate to stdout/err */
 bool	termlogit_pid = true;
 bool	msyslog_include_timestamp = true;
-FILE *	syslog_file;
+
+static FILE *	syslog_file;
 static char *	syslog_fname;
 static char *	syslog_abs_fname;
 

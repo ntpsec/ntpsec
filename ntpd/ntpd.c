@@ -612,11 +612,6 @@ ntpdmain(
 		 */
 		termlogit = false;    /* do not use stderr after fork */
 		closelog();
-		if (syslog_file != NULL) {
-			fclose(syslog_file);
-			syslog_file = NULL;
-			syslogit = true;
-		}
 		close_all_except(waitsync_fd_to_close);
 		INSIST(0 == open("/dev/null", 0) && 1 == dup2(0, 1) \
 			&& 2 == dup2(0, 2));

@@ -14,8 +14,6 @@ extern bool	syslogit;	/* log to syslogit */
 extern bool	termlogit;	/* duplicate to stdout/err */
 extern bool	termlogit_pid;
 extern bool	msyslog_include_timestamp;
-extern FILE *	syslog_file;	/* if syslogit is false, log to
-				   this file and not syslog */
 
 /*
  * syslog output control
