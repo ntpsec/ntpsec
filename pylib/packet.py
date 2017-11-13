@@ -656,6 +656,7 @@ SERR_BADASSOC = "***Association ID {0} unknown to server\n"
 SERR_UNKNOWNVAR = "***A request variable unknown to the server\n"
 SERR_BADVALUE = "***Server indicates a request variable was bad\n"
 SERR_UNSPEC = "***Server returned an unspecified error\n"
+SERR_SOCKET = "***Socket error; probably ntpd is not running\n"
 SERR_TIMEOUT = "***Request timed out\n"
 SERR_INCOMPLETE = "***Response from server was incomplete\n"
 SERR_TOOMUCH = "***Buffer size exceeded for returned data\n"
@@ -1061,7 +1062,7 @@ class ControlSession:
                 rawdata = polybytes(self.sock.recv(4096))
             except socket.error:
                 # usually, errno 111: connection refused
-                raise ControlException(SERR_UNSPEC)
+                raise ControlException(SERR_SOCKET)
 
             warndbg("Received %d octets\n" % len(rawdata), 3)
             rpkt = ControlPacket(self)
