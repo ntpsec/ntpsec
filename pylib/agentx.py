@@ -358,13 +358,12 @@ class UnregisterPDU(RegisterPDU):
 def decode_xGetPDU(data, header):
     flags = header["flags"]
     context, data = decode_context(data, header)
+    oidranges = decode_searchrange_list(data, header)
     if header["type"] == PDU_GET_NEXT:
-        oidranges = decode_searchrange_list(data, header)
         result = GetNextPDU(flags["bigEndian"], header["session_id"],
                             header["transaction_id"], header["packet_id"],
                             oidranges, context)
     else:
-        oidranges, data = decode_searchrange_list_nullterm(data, header)
         result = GetPDU(flags["bigEndian"], header["session_id"],
                         header["transaction_id"], header["packet_id"],
                         oidranges, context)
@@ -376,7 +375,6 @@ class GetPDU(AgentXPDU):
         AgentXPDU.__init__(self, PDU_GET,
                            bigEndian, sID, tactID, pktID, True, context)
         self.oidranges = oidranges
-        self._nullTerm = True
 
     def __eq__(self, other):
         if AgentXPDU.__eq__(self, other) is not True:
@@ -387,8 +385,7 @@ class GetPDU(AgentXPDU):
 
     def encode(self):
         contextP, payload = encode_context(self.bigEndian, self.context)
-        payload += encode_searchrange_list(self.bigEndian,
-                                           self.oidranges, self._nullTerm)
+        payload += encode_searchrange_list(self.bigEndian, self.oidranges)
         header = encode_pduheader(self.pduType, False, False, False,
                                   contextP, self.bigEndian,
                                   self.sessionID, self.transactionID,
@@ -401,7 +398,6 @@ class GetNextPDU(GetPDU):
         GetPDU.__init__(self, bigEndian, sID, tactID, pktID,
                         oidranges, context)
         self.pduType = PDU_GET_NEXT
-        self._nullTerm = False
 
 
 def decode_GetBulkPDU(data, header):
@@ -441,8 +437,7 @@ class GetBulkPDU(AgentXPDU):
         endianToken = getendian(self.bigEndian)
         contextP, payload = encode_context(self.bigEndian, self.context)
         payload += struct.pack(endianToken + "HH", self.nonReps, self.maxReps)
-        payload += encode_searchrange_list(self.bigEndian,
-                                           self.oidranges, False)
+        payload += encode_searchrange_list(self.bigEndian, self.oidranges)
         header = encode_pduheader(self.pduType, False, False, False,
                                   contextP, self.bigEndian,
                                   self.sessionID, self.transactionID,
@@ -1140,13 +1135,10 @@ class SearchRange:
         return startOIDstr + endOIDstr
 
 
-def encode_searchrange_list(bigEndian, searchranges, nullTerminate=False):
+def encode_searchrange_list(bigEndian, searchranges):
     encoded = []
     for sran in searchranges:
         encoded.append(sran.encode(bigEndian))
-    if nullTerminate:
-        noid = OID(())
-        encoded.append(noid.encode(bigEndian))
     encoded = b"".join(encoded)
     return encoded
 
@@ -1157,17 +1149,6 @@ def decode_searchrange_list(data, header):  # Cannot handle extra data
         oids, data = decode_SearchRange(data, header)
         oidranges.append(oids)
     return tuple(oidranges)
-
-
-def decode_searchrange_list_nullterm(data, header):
-    oidranges = []
-    while len(data) > 0:
-        one, data = decode_OID(data, header)
-        if one.isNull():
-            break
-        two, data = decode_OID(data, header)
-        oidranges.append(SearchRange(one, two))
-    return tuple(oidranges), data
 
 
 def encode_varbindlist(bigEndian, varbinds):

@@ -449,36 +449,33 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(nullPkt_str,
                          b"\x01\x05\x10\x00"
                          b"\x00\x00\x00\x01\x00\x00\x00\x02"
-                         b"\x00\x00\x00\x03\x00\x00\x00\x04"
-                         b"\x00\x00\x00\x00")
+                         b"\x00\x00\x00\x03\x00\x00\x00\x00")
         # Test encode, full packet
         fullPkt_str = fullPkt.encode()
         self.assertEqual(fullPkt_str,
                          b"\x01\x05\x18\x00"
                          b"\x00\x00\x00\x01\x00\x00\x00\x02"
-                         b"\x00\x00\x00\x03\x00\x00\x00\x44"
+                         b"\x00\x00\x00\x03\x00\x00\x00\x40"
                          b"\x00\x00\x00\x04blah"
                          b"\x03\x00\x00\x00\x00\x00\x00\x01"
                          b"\x00\x00\x00\x02\x00\x00\x00\x03"
                          b"\x03\x00\x00\x00\x00\x00\x00\x01"
                          b"\x00\x00\x00\x02\x00\x00\x00\x05"
                          b"\x02\x00\x01\x00\x00\x00\x00\x0A\x00\x00\x00\x14"
-                         b"\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28"
-                         b"\x00\x00\x00\x00")
+                         b"\x02\x00\x00\x00\x00\x00\x00\x1E\x00\x00\x00\x28")
         # Test encode, full packet, little endian
         fullPkt_LE_str = fullPkt_LE.encode()
         self.assertEqual(fullPkt_LE_str,
                          b"\x01\x05\x08\x00"
                          b"\x01\x00\x00\x00\x02\x00\x00\x00"
-                         b"\x03\x00\x00\x00\x44\x00\x00\x00"
+                         b"\x03\x00\x00\x00\x40\x00\x00\x00"
                          b"\x04\x00\x00\x00blah"
                          b"\x03\x00\x00\x00\x01\x00\x00\x00"
                          b"\x02\x00\x00\x00\x03\x00\x00\x00"
                          b"\x03\x00\x00\x00\x01\x00\x00\x00"
                          b"\x02\x00\x00\x00\x05\x00\x00\x00"
                          b"\x02\x00\x01\x00\x0A\x00\x00\x00\x14\x00\x00\x00"
-                         b"\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00"
-                         b"\x00\x00\x00\x00")
+                         b"\x02\x00\x00\x00\x1E\x00\x00\x00\x28\x00\x00\x00")
         # Test decoding, null packet
         header, body = slicedata(nullPkt_str, 20)
         header = decode_pduheader(header)
@@ -1828,15 +1825,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          b"\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
                          b"\x02\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
                          b"\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00")
-        # Test, null terminated
-        self.assertEqual(enc(True, (srch((1, 2), (1, 2), True),
-                                    srch((2, 3), (3, 4))),
-                         nullTerminate=True),
-                         b"\x02\x00\x01\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         b"\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         b"\x02\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x03"
-                         b"\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
-                         b"\x00\x00\x00\x00")
 
     def test_decode_searchrange_list(self):
         dec = ntp.agentx.decode_searchrange_list
@@ -1866,37 +1854,6 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              lilEndianFlags),
                          (srch((1, 2), (1, 2), True),
                           srch((2, 3), (3, 4), False)))
-
-    def test_decode_searchrange_list_nullterm(self):
-        dec = ntp.agentx.decode_searchrange_list_nullterm
-        srch = ntp.agentx.SearchRange
-
-        # Decode
-        self.assertEqual(dec(b"\x02\x00\x01\x00"
-                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
-                             b"\x02\x00\x00\x00"
-                             b"\x00\x00\x00\x01\x00\x00\x00\x02"
-                             b"\x02\x00\x00\x00"
-                             b"\x00\x00\x00\x02\x00\x00\x00\x03"
-                             b"\x02\x00\x00\x00"
-                             b"\x00\x00\x00\x03\x00\x00\x00\x04",
-                             standardFlags),
-                         ((srch((1, 2), (1, 2), True),
-                           srch((2, 3), (3, 4), False)),
-                          b""))
-        # Test, little endian
-        self.assertEqual(dec(b"\x02\x00\x01\x00"
-                             b"\x01\x00\x00\x00\x02\x00\x00\x00"
-                             b"\x02\x00\x00\x00"
-                             b"\x01\x00\x00\x00\x02\x00\x00\x00"
-                             b"\x02\x00\x00\x00"
-                             b"\x02\x00\x00\x00\x03\x00\x00\x00"
-                             b"\x02\x00\x00\x00"
-                             b"\x03\x00\x00\x00\x04\x00\x00\x00"
-                             b"\x00\x00\x00\x00" + extraData, lilEndianFlags),
-                         ((srch((1, 2), (1, 2), True),
-                           srch((2, 3), (3, 4), False)),
-                          extraData))
 
     def test_encode_octetstr(self):
         enc = ntp.agentx.encode_octetstr
@@ -2294,8 +2251,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test get
         self.assertEqual(f(b"\x01\x05\x10\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
-                           b"\x00\x00\x00\x03\x00\x00\x00\x04"
-                           b"\x00\x00\x00\x00"),
+                           b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (x.GetPDU(True, 1, 2, 3, ()),
                           b""))
         # Test get next
