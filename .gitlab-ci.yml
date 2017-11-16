@@ -150,22 +150,6 @@ centos-7-refclocks:
   tags:
     - centos-7
 
-fedora-24-basic:
-  <<: *job_definition
-  script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
-  tags:
-    - fedora-24
-
-fedora-24-refclocks:
-  <<: *job_definition
-  script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
-  tags:
-    - fedora-24
-
 fedora-25-basic:
   <<: *job_definition
   script:
@@ -181,6 +165,38 @@ fedora-25-refclocks:
     - python -m unittest discover -s build/main/tests/pylib
   tags:
     - fedora-25
+
+fedora-26-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-26
+
+fedora-26-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-26
+
+fedora-27-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-27
+
+fedora-27-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-27
 
 python3:
   <<: *job_definition
