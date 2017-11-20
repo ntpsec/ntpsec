@@ -161,8 +161,8 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                                    {1: node(None, None, False,
                                             self.sub_assocID),
                                     # ntpAssocName utf8str
-                                    2: node(self.cbr_assocName,
-                                            None, True, None),
+                                    2: node(None, None, False,
+                                            self.sub_assocName),
                                     # ntpAssocRefId DisplayString
                                     3: node(self.cbr_assocRefID,
                                             None, True, None),
@@ -245,8 +245,9 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                        3: node(None, None, True, None)})})}
         self.session = ntp.packet.ControlSession()
         self.session.openhost(DEFHOST)  # only local for now
-        # I am currently assuming that the undo system is only for the last
-        #  set operation.
+        # Cache so we don't hammer ntpd, default 1 second timeout (from a hat)
+        self.cache = ntp.util.Cache(1)
+        # The undo system is only for the last operation
         self.inSetP = False  # Are we currently in the set procedure?
         self.setVarbinds = []  # Varbind of the current set operation
         self.setHandlers = []  # Handlers for commit/undo/cleanup of set
@@ -444,9 +445,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
     ##############################
 
     # assocID: dynamic
-
-    def cbr_assocName(self, oid):  # DUMMY
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "It")
+    # assocName: dynamic
 
     def cbr_assocRefID(self, oid):  # DUMMY
         # DisplayString
@@ -554,12 +553,26 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
     # =====================================
 
     def sub_assocID(self):
+        def readCallback(oid):
+            index = oid.subids[-1]  # if called properly this works (Ha!)
+            associds = self.misc_getPeerIDs()
+            return ax.Varbind(ax.VALUE_GAUGE32, oid, associds[index])
+        subs = {}
+        associds = self.misc_getPeerIDs()  # need the peer count
+        for i in range(len(associds)):
+            subs[i] = ax.mibnode(readCallback, None, None, None)
+        return subs
+
+    def sub_assocName(self):
         def readCallback(oid):  # DUMMY
             index = oid.subids[-1]  # if called properly this works (Ha!)
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, index)
+            pdata = self.misc_getPeerData()
+            associd = self.misc_getPeerIDs()[index]
+            srcadr = pdata[associd]["srcadr"][1]
+            return ax.Varbind(ax.VALUE_OCTET_STR, oid, srcadr)
         subs = {}
-        peers = self.session.readstat()
-        for i in range(len(peers)):
+        associds = self.misc_getPeerIDs()  # need the peer count
+        for i in range(len(associds)):
             subs[i] = ax.mibnode(readCallback, None, None, None)
         return subs
 
@@ -567,16 +580,27 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
     # Misc data helpers (not part of the MIB proper)
     # =====================================
 
-    def getPeerData(self):  # TODO: cache!
+    def misc_getPeerIDs(self):
+        peerids = self.cache.get("peerids")
+        if peerids is None:
+            peerids = [x.associd for x in self.session.readstat()]
+            peerids.sort()
+            self.cache.set("peerids", peerids)
+        return peerids
+
+    def misc_getPeerData(self):
         # not fully implemented
-        peers = self.session.readstat()
-        peerdata = {}
-        for peer in peers:
-            try:
-                variables = self.session.readvar(peer.associd, raw=True)
-            except IOError as e:
-                continue
-            peerdata[peer.associd] = variables
+        peerdata = self.cache.get("peerdata")
+        if peerdata is None:
+            associds = self.misc_getPeerIDs()
+            peerdata = {}
+            for aid in associds:
+                try:
+                    pdata = self.session.readvar(aid, raw=True)
+                except IOError as e:
+                    continue
+                peerdata[aid] = pdata
+            self.cache.set("peerdata", peerdata)
         return peerdata
 
 
