@@ -71,19 +71,19 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                   node(None, None, True,
                        # ntpNetSoftwareName utf8str
                        {1: node((lambda oid:
-                                 self.cbr_systemInfo(oid, None, "name")),
+                                 self.cbr_systemInfo(oid, "name")),
                                 None, True, None),
                         # ntpEntSoftwareVersion utf8str
                         2: node((lambda oid:
-                                 self.cbr_systemInfo(oid, None, "version")),
+                                 self.cbr_systemInfo(oid, "version")),
                                 None, True, None),
                         # ntpEntSoftwareVendor utf8str
                         3: node((lambda oid:
-                                 self.cbr_systemInfo(oid, None, "vendor")),
+                                 self.cbr_systemInfo(oid, "vendor")),
                                 None, True, None),
                         # ntpEntSystemType utf8str
                         4: node((lambda oid:
-                                 self.cbr_systemInfo(oid, None, "system")),
+                                 self.cbr_systemInfo(oid, "system")),
                                 None, True, None),
                         # ntpEntTimeResolution uint32
                         5: node(self.cbr_timeResolution, None, True, None),
@@ -339,215 +339,179 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
 
     #########################
 
-    def cbr_systemInfo(self, oid, write=None, category=None):
-        if write is None:
-            if category == "name":  # The product name of the running NTP
-                data = "NTPsec"
-            elif category == "version":  # version string
-                data = ntp.util.stdversion()
-            elif category == "vendor":  # vendor/author name
-                data = "Internet Civil Engineering Institute"
-            elif category == "system":  # system / hardware info
-                proc = subprocess.Popen(["uname", "-srm"],
-                                        stdout=subprocess.PIPE)
-                data = proc.communicate()[0]
-            vb = ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
-            return vb
+    def cbr_systemInfo(self, oid, category=None):
+        if category == "name":  # The product name of the running NTP
+            data = "NTPsec"
+        elif category == "version":  # version string
+            data = ntp.util.stdversion()
+        elif category == "vendor":  # vendor/author name
+            data = "Internet Civil Engineering Institute"
+        elif category == "system":  # system / hardware info
+            proc = subprocess.Popen(["uname", "-srm"],
+                                    stdout=subprocess.PIPE)
+            data = proc.communicate()[0]
+        vb = ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
+        return vb
 
-    def cbr_timeResolution(self, oid, write=None):  # DUMMY
+    def cbr_timeResolution(self, oid):  # DUMMY
         # Uinteger32
-        if write is None:
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, 42)
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 42)
 
     def cbr_timePrecision(self, oid, write=None):
-        if write is None:
-            data = self.session.readvar(0, ["precision"])
-            return ax.Varbind(ax.VALUE_INTEGER, oid, data["precision"])
+        data = self.session.readvar(0, ["precision"])
+        return ax.Varbind(ax.VALUE_INTEGER, oid, data["precision"])
 
-    def cbr_timeDistance(self, oid, write=None):  # DUMMY
+    def cbr_timeDistance(self, oid):  # DUMMY
         # Displaystring
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "foo")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "foo")
 
     #############################
 
-    def cbr_statusCurrentMode(self, oid, write=None):  # DUMMY
+    def cbr_statusCurrentMode(self, oid):  # DUMMY
         # Range of integers
-        if write is None:
-            return ax.Varbind(ax.VALUE_INTEGER, oid, 15)
+        return ax.Varbind(ax.VALUE_INTEGER, oid, 15)
 
-    def cbr_statusStratum(self, oid, write=None):
+    def cbr_statusStratum(self, oid):
         # NTPstratum
-        if write is None:
-            data = self.session.readvar(0, ["stratum"])
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, data["stratum"])
+        data = self.session.readvar(0, ["stratum"])
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, data["stratum"])
 
-    def cbr_statusActiveRefSourceID(self, oid, write=None):  # DUMMY
+    def cbr_statusActiveRefSourceID(self, oid):  # DUMMY
         # range of uint32
-        if write is None:
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, 1024)
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 1024)
 
-    def cbr_statusActiveRefSourceName(self, oid, write=None):
+    def cbr_statusActiveRefSourceName(self, oid):
         # utf8
-        if write is None:  # TODO: pretty sure this is right, just need DNS
-            data = self.session.readvar(0, ["peeradr"])
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["peeradr"])
+        # TODO: pretty sure this is right, just need DNS
+        data = self.session.readvar(0, ["peeradr"])
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["peeradr"])
 
-    def cbr_statusActiveOffset(self, oid, write=None):
+    def cbr_statusActiveOffset(self, oid):
         # DisplayString
-        if write is None:
-            data = self.session.readvar(0, ["koffset"], raw=True)
-            data = ntp.util.unitifyvar(data["koffset"][1], "koffset",
-                                       width=None, unitSpace=True)
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
+        data = self.session.readvar(0, ["koffset"], raw=True)
+        data = ntp.util.unitifyvar(data["koffset"][1], "koffset",
+                                   width=None, unitSpace=True)
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
-    def cbr_statusNumRefSources(self, oid, write=None):
+    def cbr_statusNumRefSources(self, oid):
         # range of uint32
-        if write is None:
-            data = self.session.readstat()
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, len(data))
+        data = self.session.readstat()
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, len(data))
 
-    def cbr_statusDispersion(self, oid, write=None):
+    def cbr_statusDispersion(self, oid):
         # DisplayString
-        if write is None:
-            data = self.session.readvar(0, ["rootdisp"], raw=True)
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["rootdisp"][1])
+        data = self.session.readvar(0, ["rootdisp"], raw=True)
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["rootdisp"][1])
 
-    def cbr_statusEntityUptime(self, oid, write=None):  # DUMMY
+    def cbr_statusEntityUptime(self, oid):  # DUMMY
         # TimeTicks
-        if write is None:
-            return ax.Varbind(ax.VALUE_TIME_TICKS, oid, 8)
+        return ax.Varbind(ax.VALUE_TIME_TICKS, oid, 8)
 
-    def cbr_statusDateTime(self, oid, write=None):
+    def cbr_statusDateTime(self, oid):
         # NtpDateTime
-        if write is None:
-            data = self.session.readvar(0, ["reftime"])
-            txt = data["reftime"]
-            txt = txt[2:]  # Strip '0x'
-            txt = "".join(txt.split("."))  # Strip '.'
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, txt)
+        data = self.session.readvar(0, ["reftime"])
+        txt = data["reftime"]
+        txt = txt[2:]  # Strip '0x'
+        txt = "".join(txt.split("."))  # Strip '.'
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, txt)
 
-    def cbr_statusLeapSecond(self, oid, write=None):  # DUMMY
+    def cbr_statusLeapSecond(self, oid):  # DUMMY
         # NtpDateTime
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "blah")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "blah")
 
-    def cbr_statusLeapSecDirection(self, oid, write=None):  # DUMMY
+    def cbr_statusLeapSecDirection(self, oid):  # DUMMY
         # range of int32
-        if write is None:
-            return ax.Varbind(ax.VALUE_INTEGER, oid, -1)
+        return ax.Varbind(ax.VALUE_INTEGER, oid, -1)
 
-    def cbr_statusInPkts(self, oid, write=None):
-        if write is None:
-            data = self.session.readvar(0, ["io_received"])
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_received"])
+    def cbr_statusInPkts(self, oid):
+        data = self.session.readvar(0, ["io_received"])
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_received"])
 
-    def cbr_statusOutPkts(self, oid, write=None):
-        if write is None:
-            data = self.session.readvar(0, ["io_sent"])
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_sent"])
+    def cbr_statusOutPkts(self, oid):
+        data = self.session.readvar(0, ["io_sent"])
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_sent"])
 
-    def cbr_statusBadVersion(self, oid, write=None):
-        if write is None:
-            data = self.session.readvar(0, ["ss_oldver"])
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, data["ss_oldver"])
+    def cbr_statusBadVersion(self, oid):
+        data = self.session.readvar(0, ["ss_oldver"])
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, data["ss_oldver"])
 
-    def cbr_statusProtocolError(self, oid, write=None):  # DUMMY
-        if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 400)
+    def cbr_statusProtocolError(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 400)
 
-    def cbr_statusNotifications(self, oid, write=None):
-        if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, self.sentNotifications)
+    def cbr_statusNotifications(self, oid):
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, self.sentNotifications)
 
     ##############################
 
-    #def cbr_assocID(self, oid, write=None):  # DUMMY
-    #    if write is None:
-    #        return ax.Varbind(ax.VALUE_GAUGE32, oid, 1)
+    # assocID: dynamic
 
-    def cbr_assocName(self, oid, write=None):  # DUMMY
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "It")
+    def cbr_assocName(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "It")
 
-    def cbr_assocRefID(self, oid, write=None):  # DUMMY
+    def cbr_assocRefID(self, oid):  # DUMMY
         # DisplayString
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "says;")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "says;")
 
-    def cbr_assocAddrType(self, oid, write=None):  # DUMMY
+    def cbr_assocAddrType(self, oid):  # DUMMY
         # InetAddressType (range of ints)
-        if write is None:
-            return ax.Varbind(ax.VALUE_INTEGER, oid, 3)
+        return ax.Varbind(ax.VALUE_INTEGER, oid, 3)
 
-    def cbr_assocAddr(self, oid, write=None):  # DUMMY
+    def cbr_assocAddr(self, oid):  # DUMMY
         # InetAddress
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "\x01\x02\x03\x04")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "\x01\x02\x03\x04")
 
-    def cbr_assocOffset(self, oid, write=None):  # DUMMY
+    def cbr_assocOffset(self, oid):  # DUMMY
         # DisplayString
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "Would")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "Would")
 
-    def cbr_assocStratum(self, oid, write=None):  # DUMMY
+    def cbr_assocStratum(self, oid):  # DUMMY
         # NTPStratum
-        if write is None:
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, 12)
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 12)
 
-    def cbr_assocStatusJitter(self, oid, write=None):  # DUMMY
+    def cbr_assocStatusJitter(self, oid):  # DUMMY
         # DisplayString
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "You")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "You")
 
-    def cbr_assocStatusDelay(self, oid, write=None):  # DUMMY
+    def cbr_assocStatusDelay(self, oid):  # DUMMY
         # DisplayString
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "Kindly?")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "Kindly?")
 
-    def cbr_assocStatusDisp(self, oid, write=None):  # DUMMY
+    def cbr_assocStatusDisp(self, oid):  # DUMMY
         # DisplayString
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "*thunk*")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "*thunk*")
 
-    def cbr_assocStatInPkts(self, oid, write=None):  # DUMMY
-        if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 2)
+    def cbr_assocStatInPkts(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 2)
 
-    def cbr_assocStatOutPkts(self, oid, write=None):  # DUMMY
-        if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 4)
+    def cbr_assocStatOutPkts(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 4)
 
-    def cbr_assocStatProtoErr(self, oid, write=None):  # DUMMY
-        if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 8)
+    def cbr_assocStatProtoErr(self, oid):  # DUMMY
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, 8)
 
     #########################
 
-    def cbr_entHeartbeatInterval(self, oid, write=None):  # DUMMY
+    def cbr_entHeartbeatInterval(self, oid):  # DUMMY
         # uint32
-        if write is None:
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, 16)
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, 16)
 
-    def cbr_entNotifBits(self, oid, write=None):  # DUMMY
+    def cbr_entNotifBits(self, oid):  # DUMMY
         # BITS
-        if write is None:
-            data = ax.bools2Bits((self.notifyModeChange,
-                                  self.notifyStratumChange,
-                                  self.notifySyspeerChange,
-                                  self.notifyAddAssociation,
-                                  self.notifyRMAssociation,
-                                  self.notifyConfigChange,
-                                  self.notifyLeapSecondAnnounced,
-                                  self.notifyHeartbeat))
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
+        data = ax.bools2Bits((self.notifyModeChange,
+                              self.notifyStratumChange,
+                              self.notifySyspeerChange,
+                              self.notifyAddAssociation,
+                              self.notifyRMAssociation,
+                              self.notifyConfigChange,
+                              self.notifyLeapSecondAnnounced,
+                              self.notifyHeartbeat))
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
     ##########################
 
-    def cbr_entNotifMessage(self, oid, write=None):  # DUMMY
+    def cbr_entNotifMessage(self, oid):  # DUMMY
         # utf8str
-        if write is None:
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, "jabber")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "jabber")
 
     #########################
 
