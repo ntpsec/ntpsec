@@ -158,7 +158,8 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                              {1:
                               node(None, None, True,
                                    # ntpAssocId uint32 (1..99999)
-                                   {1: node(self.cbr_assocID, None, True, None),
+                                   {1: node(None, None, False,
+                                            self.sub_assocID),
                                     # ntpAssocName utf8str
                                     2: node(self.cbr_assocName,
                                             None, True, None),
@@ -250,6 +251,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         self.setVarbinds = []  # Varbind of the current set operation
         self.setHandlers = []  # Handlers for commit/undo/cleanup of set
         self.setUndoData = []  # Previous values for undoing
+        self.sentNotifications = 0
         # Notify bits, these should be saved to disk
         # Also they currently have no effect
         self.notifyModeChange = False  # 1
@@ -397,7 +399,6 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             data = self.session.readvar(0, ["koffset"], raw=True)
             data = ntp.util.unitifyvar(data["koffset"][1], "koffset",
                                        width=None, unitSpace=True)
-            print("\n\n\nactive offset:", repr(data))
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
     def cbr_statusNumRefSources(self, oid, write=None):
@@ -455,15 +456,15 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         if write is None:
             return ax.Varbind(ax.VALUE_COUNTER32, oid, 400)
 
-    def cbr_statusNotifications(self, oid, write=None):  # DUMMY
+    def cbr_statusNotifications(self, oid, write=None):
         if write is None:
-            return ax.Varbind(ax.VALUE_COUNTER32, oid, 500)
+            return ax.Varbind(ax.VALUE_COUNTER32, oid, self.sentNotifications)
 
     ##############################
 
-    def cbr_assocID(self, oid, write=None):  # DUMMY
-        if write is None:
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, 1)
+    #def cbr_assocID(self, oid, write=None):  # DUMMY
+    #    if write is None:
+    #        return ax.Varbind(ax.VALUE_GAUGE32, oid, 1)
 
     def cbr_assocName(self, oid, write=None):  # DUMMY
         if write is None:
@@ -532,13 +533,13 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         # BITS
         if write is None:
             data = ax.bools2Bits((self.notifyModeChange,
-                                 self.notifyStratumChange,
-                                 self.notifySyspeerChange,
-                                 self.notifyAddAssociation,
-                                 self.notifyRMAssociation,
-                                 self.notifyConfigChange,
-                                 self.notifyLeapSecondAnnounced,
-                                 self.notifyHeartbeat))
+                                  self.notifyStratumChange,
+                                  self.notifySyspeerChange,
+                                  self.notifyAddAssociation,
+                                  self.notifyRMAssociation,
+                                  self.notifyConfigChange,
+                                  self.notifyLeapSecondAnnounced,
+                                  self.notifyHeartbeat))
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
     ##########################
@@ -583,6 +584,36 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             return ax.ERR_NOERROR
         elif action == "cleanup":
             pass
+
+    # =====================================
+    # Dynamic tree generator callbacks
+    # =====================================
+
+    def sub_assocID(self):
+        def readCallback(oid):  # DUMMY
+            index = oid.subids[-1]  # if called properly this works (Ha!)
+            return ax.Varbind(ax.VALUE_GAUGE32, oid, index)
+        subs = {}
+        peers = self.session.readstat()
+        for i in range(len(peers)):
+            subs[i] = ax.mibnode(readCallback, None, None, None)
+        return subs
+
+    # =====================================
+    # Misc data helpers (not part of the MIB proper)
+    # =====================================
+
+    def getPeerData(self):  # TODO: cache!
+        # not fully implemented
+        peers = self.session.readstat()
+        peerdata = {}
+        for peer in peers:
+            try:
+                variables = self.session.readvar(peer.associd, raw=True)
+            except IOError as e:
+                continue
+            peerdata[peer.associd] = variables
+        return peerdata
 
 
 def dolog(text, level):
