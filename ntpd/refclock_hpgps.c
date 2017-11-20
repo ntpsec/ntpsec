@@ -122,7 +122,7 @@ struct hpgpsunit {
  * Function prototypes
  */
 static	bool	hpgps_start	(int, struct peer *);
-static	void	hpgps_shutdown	(int, struct peer *);
+static	void	hpgps_shutdown	(int, struct refclockproc *);
 static	void	hpgps_receive	(struct recvbuf *);
 static	void	hpgps_poll	(int, struct peer *);
 
@@ -223,15 +223,13 @@ hpgps_start(
 static void
 hpgps_shutdown(
 	int unit,
-	struct peer *peer
+	struct refclockproc *pp
 	)
 {
 	struct hpgpsunit *up;
-	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
 
-	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);

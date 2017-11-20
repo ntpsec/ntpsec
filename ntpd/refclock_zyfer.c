@@ -88,7 +88,7 @@ struct zyferunit {
  * Function prototypes
  */
 static	bool	zyfer_start	(int, struct peer *);
-static	void	zyfer_shutdown	(int, struct peer *);
+static	void	zyfer_shutdown	(int, struct refclockproc *);
 static	void	zyfer_receive	(struct recvbuf *);
 static	void	zyfer_poll	(int, struct peer *);
 
@@ -172,15 +172,13 @@ zyfer_start(
 static void
 zyfer_shutdown(
 	int unit,
-	struct peer *peer
+	struct refclockproc *pp
 	)
 {
 	struct zyferunit *up;
-	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
 
-	pp = peer->procptr;
 	up = pp->unitptr;
 	if (pp->io.fd != -1)
 		io_closeclock(&pp->io);

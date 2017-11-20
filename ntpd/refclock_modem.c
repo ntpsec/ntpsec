@@ -218,14 +218,14 @@ struct modemunit {
  * Function prototypes
  */
 static	bool	modem_start	(int, struct peer *);
-static	void	modem_shutdown	(int, struct peer *);
+static	void	modem_shutdown	(int, struct refclockproc *);
 static	void	modem_receive	(struct recvbuf *);
 static	void	modem_message	(struct peer *, const char *);
 static	void	modem_timecode	(struct peer *, const char *);
 static	void	modem_poll	(int, struct peer *);
 static	void	modem_timeout	(struct peer *, teModemState);
 static	void	modem_timer	(int, struct peer *);
-static	void	modem_close	(struct peer *);
+static	void	modem_close	(struct refclockproc *);
 
 /*
  * Transfer vector (conditional structure name)
@@ -290,21 +290,16 @@ modem_start(
 static void
 modem_shutdown(
 	int	unit,
-	struct peer *peer
+	struct refclockproc *pp
 	)
 {
-	struct modemunit *up;
-	struct refclockproc *pp;
-
 	UNUSED_ARG(unit);
 
 	/*
 	 * Warning: do this only when a call is not in progress.
 	 */
-	pp = peer->procptr;
-	up = pp->unitptr;
-	modem_close(peer);
-	free(up);
+	modem_close(pp);
+	free(pp->unitptr);
 }
 
 
@@ -460,7 +455,7 @@ modem_message(
 	 * Other response. Tell us about it.
 	 */
 	report_event(PEVNT_CLOCK, peer, msg);
-	modem_close(peer);
+	modem_close(peer->procptr);
 }
 
 
@@ -597,7 +592,7 @@ modem_timeout(
                 /* huh? */
                 break;
 	}
-	modem_close(peer);
+	modem_close(peer->procptr);
 }
 
 
@@ -610,18 +605,16 @@ modem_timeout(
  */
 void
 modem_close(
-	struct peer *peer
+	struct refclockproc *pp
 	)
 {
 	struct modemunit *up;
-	struct refclockproc *pp;
 	char	lockfile[128];
 	int	dtr;
 
-	pp = peer->procptr;
 	up = pp->unitptr;
 	if (pp->io.fd != -1) {
-		report_event(PEVNT_CLOCK, peer, "close");
+		//report_event(PEVNT_CLOCK, peer, "close");
 		dtr = TIOCM_DTR;
 		if (ioctl(pp->io.fd, TIOCMBIC, &dtr) < 0)
 			msyslog(LOG_ERR, "REFCLOCK: modem: ioctl(TIOCMBIC) failed: %m");

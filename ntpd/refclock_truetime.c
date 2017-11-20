@@ -124,7 +124,7 @@ struct true_unit {
  * Function prototypes
  */
 static	bool	true_start	(int, struct peer *);
-static	void	true_shutdown	(int, struct peer *);
+static	void	true_shutdown	(int, struct refclockproc *);
 static	void	true_receive	(struct recvbuf *);
 static	void	true_poll	(int, struct peer *);
 static	void	true_send	(struct peer *, const char *);
@@ -263,15 +263,13 @@ true_start(
 static void
 true_shutdown(
 	int unit,
-	struct peer *peer
+	struct refclockproc *pp
 	)
 {
 	struct true_unit *up;
-	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
 
-	pp = peer->procptr;
 	up = pp->unitptr;
 	if (pp->io.fd != -1)
 		io_closeclock(&pp->io);

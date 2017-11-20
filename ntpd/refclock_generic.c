@@ -133,7 +133,7 @@
  **/
 
 static	bool	parse_start	(int, struct peer *);
-static	void	parse_shutdown	(int, struct peer *);
+static	void	parse_shutdown	(int, struct refclockproc *);
 static	void	parse_poll	(int, struct peer *);
 static	void	parse_control	(int, const struct refclockstat *, struct refclockstat *, struct peer *);
 
@@ -2305,13 +2305,13 @@ cparse_statistics(
 static void
 parse_shutdown(
 	int unit,
-	struct peer *peer
+	struct refclockproc *pp
 	)
 {
 	struct parseunit *parse = NULL;
 
-	if (peer && peer->procptr)
-		parse = peer->procptr->unitptr;
+	if (pp)
+		parse = pp->unitptr;
 
 	if (!parse)
 	{
@@ -2363,7 +2363,7 @@ parse_shutdown(
 			parse->peer->refclkunit, parse->parse_type->cl_description);
 
 	parse->peer = (struct peer *)0; /* unused now */
-	peer->procptr->unitptr = (void *)0;
+	pp->unitptr = (void *)0;
 	free(parse);
 }
 
@@ -2627,7 +2627,7 @@ parse_start(
                     "REFCLOCK: PARSE receiver #%u: parse_start: tcgetattr(%d, &tio): %m",
                     unit, fd232);
 		/* let our cleaning staff do the work */
-		parse_shutdown(parse->peer->refclkunit, peer);
+		parse_shutdown(parse->peer->refclkunit, peer->procptr);
 		return false;
 	}
 	else
@@ -2669,7 +2669,7 @@ parse_start(
 			    " tcset{i,o}speed(&tio, speed): %m",
 			    unit);
 		    /* let our cleaning staff do the work */
-		    parse_shutdown(parse->peer->refclkunit, peer);
+		    parse_shutdown(parse->peer->refclkunit, peer->procptr);
 		    return false;
 		}
 
@@ -2740,7 +2740,7 @@ parse_start(
 		      "REFCLOCK: PARSE receiver #%u: parse_start: tcsetattr(%d, &tio): %m",
                       unit, fd232);
 		    /* let our cleaning staff do the work */
-		    parse_shutdown(parse->peer->refclkunit, peer); 
+		    parse_shutdown(parse->peer->refclkunit, peer->procptr);
 		    return false;
 		}
 	}
@@ -2756,7 +2756,7 @@ parse_start(
 	if (parse->binding == (bind_t *)0)
 		{
 			msyslog(LOG_ERR, "REFCLOCK: PARSE receiver #%d: parse_start: io sub system initialisation failed.", parse->peer->refclkunit);
-			parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
+			parse_shutdown(parse->peer->refclkunit, peer->procptr); /* let our cleaning staff do the work */
 			return false;			/* well, ok - special initialisation broke */
 		}
 
@@ -2799,7 +2799,7 @@ parse_start(
 		msyslog(LOG_ERR,
                     "REFCLOCK: PARSE receiver #%u: parse_start: parse_setcs() FAILED.",
                     unit);
-		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
+		parse_shutdown(parse->peer->refclkunit, peer->procptr); /* let our cleaning staff do the work */
 		return false;			/* well, ok - special initialisation broke */
 	}
 
@@ -2811,7 +2811,7 @@ parse_start(
 		msyslog(LOG_ERR,
                     "REFCLOCK: PARSE receiver #%u: parse_start: parse_setfmt() FAILED.",
                     unit);
-		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
+		parse_shutdown(parse->peer->refclkunit, peer->procptr); /* let our cleaning staff do the work */
 		return false;			/* well, ok - special initialisation broke */
 	}
 
@@ -2827,7 +2827,7 @@ parse_start(
 		{
 			if (parse->parse_type->cl_init(parse))
 				{
-					parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
+					parse_shutdown(parse->peer->refclkunit, peer->procptr); /* let our cleaning staff do the work */
 					return false;		/* well, ok - special initialisation broke */
 				}
 		}
@@ -2839,7 +2839,7 @@ parse_start(
         {
 		msyslog(LOG_ERR,
 			"REFCLOCK: PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", parse->peer->refclkunit, parsedev);
-		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
+		parse_shutdown(parse->peer->refclkunit, peer->procptr); /* let our cleaning staff do the work */
 		return false;
 	}
 

@@ -102,7 +102,7 @@ struct neoclock4x_unit {
 };
 
 static	bool	neoclock4x_start	(int, struct peer *);
-static	void	neoclock4x_shutdown	(int, struct peer *);
+static	void	neoclock4x_shutdown	(int, struct refclockproc *);
 static	void	neoclock4x_receive	(struct recvbuf *);
 static	void	neoclock4x_poll		(int, struct peer *);
 static	void	neoclock4x_control	(int, const struct refclockstat *, struct refclockstat *, struct peer *);
@@ -334,55 +334,50 @@ neoclock4x_start(int unit,
 
 static void
 neoclock4x_shutdown(int unit,
-		   struct peer *peer)
+		   struct refclockproc *pp)
 {
-  struct neoclock4x_unit *up;
-  struct refclockproc *pp;
-  int sl232;
+    struct neoclock4x_unit *up;
+    int sl232;
 
-  if(NULL != peer)
+    if (pp != NULL)
     {
-      pp = peer->procptr;
-      if(pp != NULL)
-        {
-          up = pp->unitptr;
-          if(up != NULL)
-            {
-              if(-1 !=  pp->io.fd)
-                {
+	up = pp->unitptr;
+	if(up != NULL)
+	{
+	    if(-1 !=  pp->io.fd)
+	    {
 #if defined(TIOCMSET) && (defined(TIOCM_RTS) || defined(CIOCM_RTS))
-                  /* turn on RTS, and DTR for power supply */
-                  /* NeoClock4x is powered from serial line */
-                  if(ioctl(pp->io.fd, TIOCMGET, (void *)&sl232) == -1)
-                    {
-                      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %m",
-                              unit);
-                    }
+		/* turn on RTS, and DTR for power supply */
+		/* NeoClock4x is powered from serial line */
+		if(ioctl(pp->io.fd, TIOCMGET, (void *)&sl232) == -1)
+		{
+		    msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %m",
+			    unit);
+		}
 #ifdef TIOCM_RTS
-                  /* turn on RTS, and DTR for power supply */
-                  sl232 &= ~(TIOCM_DTR | TIOCM_RTS);
+		/* turn on RTS, and DTR for power supply */
+		sl232 &= ~(TIOCM_DTR | TIOCM_RTS);
 #else
-                  /* turn on RTS, and DTR for power supply */
-                  sl232 &= ~(CIOCM_DTR | CIOCM_RTS);
+		/* turn on RTS, and DTR for power supply */
+		sl232 &= ~(CIOCM_DTR | CIOCM_RTS);
 #endif
-                  if(ioctl(pp->io.fd, TIOCMSET, (void *)&sl232) == -1)
-                    {
-                      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m",
-                              unit);
-                    }
+		if(ioctl(pp->io.fd, TIOCMSET, (void *)&sl232) == -1)
+		{
+		    msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m",
+			    unit);
+		}
 #endif
-                  io_closeclock(&pp->io);
-                }
-              free(up);
-              pp->unitptr = NULL;
-            }
-        }
+		io_closeclock(&pp->io);
+	    }
+	    free(up);
+	    pp->unitptr = NULL;
+	}
     }
 
-  msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): shutdown", unit);
+    msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): shutdown", unit);
 
-  NLOG(NLOG_CLOCKINFO)
-    msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): receiver shutdown done", unit);
+    NLOG(NLOG_CLOCKINFO)
+	msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): receiver shutdown done", unit);
 }
 
 static void

@@ -132,7 +132,7 @@ struct spectracomunit {
  * Function prototypes
  */
 static	bool	spectracom_start	(int, struct peer *);
-static	void	spectracom_shutdown	(int, struct peer *);
+static	void	spectracom_shutdown	(int, struct refclockproc *);
 static	void	spectracom_receive	(struct recvbuf *);
 static	void	spectracom_poll	(int, struct peer *);
 static	void	spectracom_timer	(int, struct peer *);
@@ -218,15 +218,13 @@ spectracom_start(
 static void
 spectracom_shutdown(
 	int unit,
-	struct peer *peer
+	struct refclockproc *	pp
 	)
 {
-	struct refclockproc *	pp;
 	struct spectracomunit *	up;
 
 	UNUSED_ARG(unit);
 
-	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
