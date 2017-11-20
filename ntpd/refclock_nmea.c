@@ -573,7 +573,7 @@ nmea_control(
 		}
 		if ( peer->cfg.ppspath ) {
 		    up->ppsapi_fd = open(peer->cfg.ppspath,
-			O_RDWR | O_NOCTTY | O_NONBLOCK, S_IRUSR | S_IWUSR);
+			O_RDWR | O_NOCTTY | O_NONBLOCK);
 		} else {
 		    up->ppsapi_fd = -1;
 		}

@@ -701,7 +701,7 @@ refclock_open(
 	 * Open serial port and set default options
 	 */
 
-	fd = open(dev, O_RDWR | O_NONBLOCK | O_NOCTTY, 0777);
+	fd = open(dev, O_RDWR | O_NONBLOCK | O_NOCTTY);
 	/* refclock_open() long returned 0 on failure, avoid it. */
 	if (0 == fd) {
 		fd = dup(0);

@@ -143,10 +143,9 @@ pps_start(
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
 	up->fddev = open(peer->cfg.ppspath ? peer->cfg.ppspath : device,
-			     O_RDWR, 0777);
+		O_RDWR);
 	if (up->fddev <= 0) {
-		msyslog(LOG_ERR,
-			"REFCLOCK: refclock_pps: %m");
+		msyslog(LOG_ERR, "REFCLOCK: refclock_pps: %m");
 		return false;
 	}
 
