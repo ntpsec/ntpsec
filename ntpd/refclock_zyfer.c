@@ -81,7 +81,6 @@ struct zyferunit {
 	uint8_t	Rcvbuf[LENZYFER + 1];
 	uint8_t	polled;		/* poll message flag */
 	int	pollcnt;
-	l_fp    tstamp;         /* timestamp of last poll */
 	int	Rcvptr;
 };
 
