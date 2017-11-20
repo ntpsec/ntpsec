@@ -640,6 +640,12 @@ class PacketControl:
         self.packetEater()
         while len(self.recievedPackets) > 0:
             packet = self.recievedPackets.pop(0)
+            if packet.sessionID != self.sessionID:
+                resp = ax.ResponsePDU(True, packet.sessionID,
+                                      packet.transactioID, packet.packetID,
+                                      0, ax.REPERR_NOT_OPEN, 0)
+                self.sendPacket(resp, False)
+                continue
             ptype = packet.pduType
             if ptype in self.pduHandlers:
                 self.pduHandlers[ptype](packet)
