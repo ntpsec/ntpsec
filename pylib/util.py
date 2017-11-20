@@ -533,6 +533,9 @@ class Cache:
                 return value
             else:  # key expired, delete it
                 del self._cache[key]
+                return None
+        else:
+            return None
 
     def set(self, key, value, customTTL=None):
         ttl = customTTL if customTTL is not None else self.defaultTimeout
