@@ -522,21 +522,21 @@ def monoclock():
 
 class Cache:
     "Simple time-based cache"
-    ttl = 300
-
-    def __init__(self):
+    def __init__(self, defaultTimeout=300):  # 5 min default TTL
+        self.defaultTimeout = defaultTimeout
         self._cache = {}
 
     def get(self, key):
         if key in self._cache:
-            value, settime = self._cache[key]
-            if settime >= monoclock() - self.ttl:
+            value, settime, ttl = self._cache[key]
+            if settime >= monoclock() - ttl:
                 return value
             else:  # key expired, delete it
                 del self._cache[key]
 
-    def set(self, key, value):
-        self._cache[key] = (value, monoclock())
+    def set(self, key, value, customTTL=None):
+        ttl = customTTL if customTTL is not None else self.defaultTimeout
+        self._cache[key] = (value, monoclock(), ttl)
 
 
 # A hack to avoid repeatedly hammering on DNS when ntpmon runs.

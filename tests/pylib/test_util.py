@@ -454,19 +454,36 @@ class TestPylibUtilMethods(unittest.TestCase):
             monodata = [5, 10, 315, 20]
             cls.set("foo", 42)
             cls.set("bar", 23)
-            self.assertEqual(cls._cache, {"foo": (42, 5),
-                                          "bar": (23, 10)})
+            self.assertEqual(cls._cache, {"foo": (42, 5, 300),
+                                          "bar": (23, 10, 300)})
             self.assertEqual(monodata, [315, 20])
             # Test get, expired
             result = cls.get("foo")
             self.assertEqual(result, None)
             self.assertEqual(monodata, [20])
-            self.assertEqual(cls._cache, {"bar": (23, 10)})
+            self.assertEqual(cls._cache, {"bar": (23, 10, 300)})
             # Test get, valid
             result = cls.get("bar")
             self.assertEqual(result, 23)
             self.assertEqual(monodata, [])
-            self.assertEqual(cls._cache, {"bar": (23, 10)})
+            self.assertEqual(cls._cache, {"bar": (23, 10, 300)})
+            # Test set, custom TTL
+            monodata = [0, 0, 11, 15]
+            cls.set("foo", 42, 10)
+            cls.set("bar", 23, 20)
+            self.assertEqual(cls._cache, {"foo": (42, 0, 10),
+                                          "bar": (23, 0, 20)})
+            self.assertEqual(monodata, [11, 15])
+            # Test get, expired, custom TTL
+            result = cls.get("foo")
+            self.assertEqual(result, None)
+            self.assertEqual(monodata, [15])
+            self.assertEqual(cls._cache, {"bar": (23, 0, 20)})
+            # Test get, valid, custom TTL
+            result = cls.get("bar")
+            self.assertEqual(result, 23)
+            self.assertEqual(monodata, [])
+            self.assertEqual(cls._cache, {"bar": (23, 0, 20)})
         finally:
             ntp.util.monoclock = monotemp
 
