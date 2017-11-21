@@ -395,7 +395,7 @@ init_logging(
 int
 change_logfile(
 	const char *	fname,
-	int		leave_crumbs
+	bool		leave_crumbs
 	)
 {
 	FILE *		new_file;
