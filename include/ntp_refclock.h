@@ -104,6 +104,7 @@ struct refclockproc {
 	void *	unitptr;	/* pointer to unit structure */
 	struct refclock * conf;	/* pointer to driver method table */
 	struct refclockio io;	/* I/O handler structure */
+	uint8_t	refclkunit;	/* reference clock unit number */
 	uint8_t	leap;		/* leap/synchronization code */
 	uint8_t	currentstatus;	/* clock status */
 	uint8_t	lastevent;	/* last exception event */

@@ -3149,7 +3149,7 @@ teljjy_idle_dialout ( struct peer *peer, struct refclockproc *pp, struct jjyunit
 
 	DEBUG_TELJJY_PRINTF( "teljjy_idle_dialout" ) ;
 
-	modem_connect ( peer->refclkunit, peer ) ;
+	modem_connect ( peer->procptr->refclkunit, peer ) ;
 
 	return TELJJY_CHANGE_CLOCK_STATE ;
 
@@ -3678,7 +3678,7 @@ teljjy_bye_modem ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	DEBUG_TELJJY_PRINTF( "teljjy_bye_modem" ) ;
 
-	modem_disconnect ( peer->refclkunit, peer ) ;
+	modem_disconnect ( peer->procptr->refclkunit, peer ) ;
 
 	return TELJJY_STAY_CLOCK_STATE ;
 

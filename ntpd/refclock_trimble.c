@@ -128,7 +128,7 @@ struct trimble_unit {
  * Function prototypes
  */
 static	bool	trimble_start		(int, struct peer *);
-static	void	trimble_shutdown	(int, struct peer *);
+static	void	trimble_shutdown	(int, struct refclockproc *);
 static	void	trimble_poll		(int, struct peer *);
 static	void	trimble_timer		(int, struct peer *);
 static	void 	trimble_io		(struct recvbuf *);
@@ -485,15 +485,13 @@ trimble_start (
 static void
 trimble_shutdown (
 	int unit,
-	struct peer *peer
+	struct refclockproc *pp
 	)
 {
 	struct trimble_unit *up;
-	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
 
-	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);

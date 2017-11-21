@@ -133,7 +133,7 @@ refclock_name(
 	buf = lib_getbuf();
 
 	snprintf(buf, LIB_BUFLENGTH, "%s(%d)",
-			 peer->procptr->clockname, peer->refclkunit);
+			 peer->procptr->clockname, peer->procptr->refclkunit);
 
 	return buf;
 }
@@ -194,11 +194,11 @@ refclock_newpeer(
 	/*
 	 * Initialize structures
 	 */
-	peer->refclkunit = (uint8_t)unit;
 	peer->cfg.flags |= FLAG_REFCLOCK;
 	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->cfg.maxpoll;
+	pp->refclkunit = (uint8_t)unit;
 	pp->conf = refclock_conf[clktype];
 	pp->timestarted = current_time;
 	pp->io.fd = -1;
@@ -246,7 +246,7 @@ refclock_unpeer(
 	if (NULL == peer->procptr)
 		return;
 
-	unit = peer->refclkunit;
+	unit = peer->procptr->refclkunit;
 	if (peer->procptr->conf->clock_shutdown)
 		(peer->procptr->conf->clock_shutdown)(unit, peer->procptr);
 	free(peer->procptr);
@@ -265,8 +265,8 @@ refclock_timer(
 	struct refclockproc *	pp;
 	int			unit;
 
-	unit = p->refclkunit;
 	pp = p->procptr;
+	unit = pp->refclkunit;
 	if (pp->conf->clock_timer)
 		(*pp->conf->clock_timer)(unit, p);
 	if (pp->action != NULL && pp->nextaction <= current_time)
@@ -289,7 +289,7 @@ refclock_transmit(
 {
 	int unit;
 
-	unit = peer->refclkunit;
+	unit = peer->procptr->refclkunit;
 	peer->sent++;
 	get_systime(&peer->xmt);
 
@@ -848,7 +848,7 @@ refclock_control(
 		return;
 
 	pp = peer->procptr;
-	unit = peer->refclkunit;
+	unit = peer->procptr->refclkunit;
 
 	/*
 	 * Initialize requested data
