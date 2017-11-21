@@ -272,7 +272,7 @@ typedef struct {
  */
 static	void	nmea_init	(void);
 static	bool	nmea_start	(int, struct peer *);
-static	void	nmea_shutdown	(int, struct refclockproc *);
+static	void	nmea_shutdown	(struct refclockproc *);
 static	void	nmea_receive	(struct recvbuf *);
 static	void	nmea_poll	(int, struct peer *);
 #ifdef HAVE_PPSAPI
@@ -505,13 +505,10 @@ nmea_start(
  */
 static void
 nmea_shutdown(
-	int           unit,
 	struct refclockproc * pp
 	)
 {
 	nmea_unit	    * const up = (nmea_unit *)pp->unitptr;
-
-	UNUSED_ARG(unit);
 
 	if (up != NULL) {
 #ifdef HAVE_PPSAPI

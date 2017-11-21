@@ -92,7 +92,7 @@ struct ppsunit {struct refclock_ppsctl ppsctl; /* PPS context structure pointer 
  * Function prototypes
  */
 static	bool	pps_start	(int, struct peer *);
-static	void	pps_shutdown	(int, struct refclockproc *);
+static	void	pps_shutdown	(struct refclockproc *);
 static	void	pps_poll	(int, struct peer *);
 static	void	pps_timer	(int, struct peer *);
 
@@ -162,18 +162,15 @@ pps_start(
  */
 static void
 pps_shutdown(
-	int unit,		/* unit number (not used) */
 	struct refclockproc *pp	/* refclock structure pointer */
 	)
 {
 	struct ppsunit *up;
 
-	UNUSED_ARG(unit);
-
 	up = pp->unitptr;
+	free(up);
 	if (up->fddev > 0)
 		close(up->fddev);
-	free(up);
 }
 
 /*

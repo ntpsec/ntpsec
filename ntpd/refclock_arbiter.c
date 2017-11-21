@@ -115,7 +115,7 @@ struct arbunit {
  * Function prototypes
  */
 static	bool	arb_start	(int, struct peer *);
-static	void	arb_shutdown	(int, struct refclockproc *);
+static	void	arb_shutdown	(struct refclockproc *);
 static	void	arb_receive	(struct recvbuf *);
 static	void	arb_poll	(int, struct peer *);
 
@@ -200,19 +200,13 @@ arb_start(
  */
 static void
 arb_shutdown(
-	int unit,
 	struct refclockproc *pp
 	)
 {
-	struct arbunit *up;
-
-	UNUSED_ARG(unit);
-
-	up = pp->unitptr;
+	if (NULL != pp->unitptr)
+		free(pp->unitptr);
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
-	if (NULL != up)
-		free(up);
 }
 
 

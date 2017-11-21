@@ -248,7 +248,7 @@ refclock_unpeer(
 
 	unit = peer->procptr->refclkunit;
 	if (peer->procptr->conf->clock_shutdown)
-		(peer->procptr->conf->clock_shutdown)(unit, peer->procptr);
+		(peer->procptr->conf->clock_shutdown)(peer->procptr);
 	free(peer->procptr);
 	peer->procptr = NULL;
 }

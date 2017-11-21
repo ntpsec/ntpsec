@@ -59,7 +59,7 @@
  * Function prototypes
  */
 static  bool    shm_start       (int unit, struct peer *peer);
-static  void    shm_shutdown    (int unit, struct refclockproc *peer);
+static  void    shm_shutdown    (struct refclockproc *peer);
 static  void    shm_poll        (int unit, struct peer *peer);
 static  void    shm_timer       (int unit, struct peer *peer);
 static	void	shm_clockstats  (int unit, struct peer *peer);
@@ -231,13 +231,11 @@ shm_control(
  */
 static void
 shm_shutdown(
-	int unit,
 	struct refclockproc * pp
 	)
 {
 	struct shmunit *      const up = pp->unitptr;
 
-	UNUSED_ARG(unit);
 	if (NULL == up)
 		return;
 

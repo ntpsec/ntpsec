@@ -214,7 +214,7 @@ typedef struct addrinfo     addrinfoT;
 
 static	void	gpsd_init	(void);
 static	bool	gpsd_start	(int, peerT *);
-static	void	gpsd_shutdown	(int, struct refclockproc *);
+static	void	gpsd_shutdown	(struct refclockproc *);
 static	void	gpsd_receive	(struct recvbuf *);
 static	void	gpsd_poll	(int, peerT *);
 static	void	gpsd_control	(int, const struct refclockstat *,
@@ -586,13 +586,10 @@ dev_fail:
 
 static void
 gpsd_shutdown(
-	int     unit,
 	struct refclockproc *pp)
 {
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 	gpsd_unitT ** uscan   = &s_clock_units;
-
-	UNUSED_ARG(unit);
 
 	/* The unit pointer might have been removed already. */
 	if (up == NULL)
@@ -623,7 +620,7 @@ gpsd_shutdown(
 	}
 	pp->unitptr = NULL;
 	LOGIF(CLOCKINFO,
-	      (LOG_NOTICE, "%s: shutdown: gpsd_json(%d)", unit));
+	      (LOG_NOTICE, "%s: shutdown: gpsd_json(%d)", pp->refclkunit));
 }
 
 /* ------------------------------------------------------------------ */

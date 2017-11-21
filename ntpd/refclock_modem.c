@@ -218,7 +218,7 @@ struct modemunit {
  * Function prototypes
  */
 static	bool	modem_start	(int, struct peer *);
-static	void	modem_shutdown	(int, struct refclockproc *);
+static	void	modem_shutdown	(struct refclockproc *);
 static	void	modem_receive	(struct recvbuf *);
 static	void	modem_message	(struct peer *, const char *);
 static	void	modem_timecode	(struct peer *, const char *);
@@ -289,12 +289,9 @@ modem_start(
  */
 static void
 modem_shutdown(
-	int	unit,
 	struct refclockproc *pp
 	)
 {
-	UNUSED_ARG(unit);
-
 	/*
 	 * Warning: do this only when a call is not in progress.
 	 */

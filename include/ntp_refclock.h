@@ -160,7 +160,7 @@ struct refclockproc {
 struct refclock {
 	const char *basename;
 	bool (*clock_start)	(int, struct peer *);
-	void (*clock_shutdown)	(int, struct refclockproc *);
+	void (*clock_shutdown)	(struct refclockproc *);
 	void (*clock_poll)	(int, struct peer *);
 	void (*clock_control)	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);

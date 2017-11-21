@@ -132,9 +132,9 @@ struct spectracomunit {
  * Function prototypes
  */
 static	bool	spectracom_start	(int, struct peer *);
-static	void	spectracom_shutdown	(int, struct refclockproc *);
+static	void	spectracom_shutdown	(struct refclockproc *);
 static	void	spectracom_receive	(struct recvbuf *);
-static	void	spectracom_poll	(int, struct peer *);
+static	void	spectracom_poll		(int, struct peer *);
 static	void	spectracom_timer	(int, struct peer *);
 #ifdef HAVE_PPSAPI
 static	void	spectracom_control	(int, const struct refclockstat *,
@@ -217,19 +217,14 @@ spectracom_start(
  */
 static void
 spectracom_shutdown(
-	int unit,
 	struct refclockproc *	pp
 	)
 {
-	struct spectracomunit *	up;
-
-	UNUSED_ARG(unit);
-
-	up = pp->unitptr;
-	if (-1 != pp->io.fd)
-		io_closeclock(&pp->io);
+	struct spectracomunit *	up= pp->unitptr;
 	if (NULL != up)
 		free(up);
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
 }
 
 
