@@ -132,7 +132,6 @@ struct spectracomunit {
  * Function prototypes
  */
 static	bool	spectracom_start	(int, struct peer *);
-static	void	spectracom_shutdown	(struct refclockproc *);
 static	void	spectracom_receive	(struct recvbuf *);
 static	void	spectracom_poll		(int, struct peer *);
 static	void	spectracom_timer	(int, struct peer *);
@@ -148,9 +147,9 @@ static	void	spectracom_control	(int, const struct refclockstat *,
  * Transfer vector
  */
 struct	refclock refclock_spectracom = {
-	NAME,			/* basename of driver */
+	NAME,				/* basename of driver */
 	spectracom_start,		/* start up driver */
-	spectracom_shutdown,		/* shut down driver */
+	NULL,				/* shut down driver in standard way */
 	spectracom_poll,		/* transmit poll message */
 	SPECTRACOM_CONTROL,		/* fudge set/change notification */
 	NULL,				/* initialize driver (not used) */
@@ -209,22 +208,6 @@ spectracom_start(
 	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_LF;
 	return true;
-}
-
-
-/*
- * spectracom_shutdown - shut down the clock
- */
-static void
-spectracom_shutdown(
-	struct refclockproc *	pp
-	)
-{
-	struct spectracomunit *	up= pp->unitptr;
-	if (NULL != up)
-		free(up);
-	if (-1 != pp->io.fd)
-		io_closeclock(&pp->io);
 }
 
 

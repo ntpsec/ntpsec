@@ -237,8 +237,6 @@ refclock_unpeer(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	int unit;
-
 	/*
 	 * Wiggle the driver to release its resources, then give back
 	 * the interface structure.
@@ -246,9 +244,15 @@ refclock_unpeer(
 	if (NULL == peer->procptr)
 		return;
 
-	unit = peer->procptr->refclkunit;
+	/* There's a standard sghutdown sequence if user didn't declare one */
 	if (peer->procptr->conf->clock_shutdown)
 		(peer->procptr->conf->clock_shutdown)(peer->procptr);
+	else {
+		if (NULL != peer->procptr->unitptr)
+			free(peer->procptr->unitptr);
+		if (-1 != peer->procptr->io.fd)
+			io_closeclock(&peer->procptr->io);
+	}
 	free(peer->procptr);
 	peer->procptr = NULL;
 }

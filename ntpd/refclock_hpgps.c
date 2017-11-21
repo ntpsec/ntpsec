@@ -122,7 +122,6 @@ struct hpgpsunit {
  * Function prototypes
  */
 static	bool	hpgps_start	(int, struct peer *);
-static	void	hpgps_shutdown	(struct refclockproc *);
 static	void	hpgps_receive	(struct recvbuf *);
 static	void	hpgps_poll	(int, struct peer *);
 
@@ -132,7 +131,7 @@ static	void	hpgps_poll	(int, struct peer *);
 struct	refclock refclock_hpgps = {
 	NAME,			/* basename of driver */
 	hpgps_start,		/* start up driver */
-	hpgps_shutdown,		/* shut down driver */
+	NULL,			/* shut down driver in the standard way */
 	hpgps_poll,		/* transmit poll message */
 	NULL,			/* not used (old hpgps_control) */
 	NULL,			/* initialize driver */
@@ -214,21 +213,6 @@ hpgps_start(
 	    refclock_report(peer, CEVNT_FAULT);
 
 	return true;
-}
-
-
-/*
- * hpgps_shutdown - shut down the clock
- */
-static void
-hpgps_shutdown(
-	struct refclockproc *pp
-	)
-{
-	if (NULL != pp->unitptr)
-		free(pp->unitptr);
-	if (-1 != pp->io.fd)
-		io_closeclock(&pp->io);
 }
 
 

@@ -115,7 +115,6 @@ struct arbunit {
  * Function prototypes
  */
 static	bool	arb_start	(int, struct peer *);
-static	void	arb_shutdown	(struct refclockproc *);
 static	void	arb_receive	(struct recvbuf *);
 static	void	arb_poll	(int, struct peer *);
 
@@ -125,7 +124,7 @@ static	void	arb_poll	(int, struct peer *);
 struct	refclock refclock_arbiter = {
 	NAME,			/* basename of driver */
 	arb_start,		/* start up driver */
-	arb_shutdown,		/* shut down driver */
+	NULL,			/* shut down driver in standard way */
 	arb_poll,		/* transmit poll message */
 	NULL,			/* not used (old arb_control) */
 	NULL,			/* initialize driver (not used) */
@@ -192,21 +191,6 @@ arb_start(
 	DPRINT(1, ("arbiter: mode = %u.\n", peer->cfg.ttl));
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	return true;
-}
-
-
-/*
- * arb_shutdown - shut down the clock
- */
-static void
-arb_shutdown(
-	struct refclockproc *pp
-	)
-{
-	if (NULL != pp->unitptr)
-		free(pp->unitptr);
-	if (-1 != pp->io.fd)
-		io_closeclock(&pp->io);
 }
 
 
