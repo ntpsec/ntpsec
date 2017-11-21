@@ -801,6 +801,8 @@ oncore_poll(
 {
 	struct instance *instance;
 
+	UNUSED_ARG(unit);
+
 	instance = peer->procptr->unitptr;
 	if (instance->timeout) {
 		instance->timeout--;

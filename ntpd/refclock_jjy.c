@@ -223,8 +223,6 @@ struct jjyunit {
  *   |--  jjy_start_seiko_tsys_tdc_300
  *   |--  jjy_start_telephone
  *
- *  jjy_shutdown
- *
  *  jjy_poll
  *   |--  jjy_poll_tristate_jjy01
  *   |--  jjy_poll_cdex_jst2000
@@ -287,8 +285,6 @@ static	int 	jjy_start_tristate_gpsclock01	(int, struct peer *, struct jjyunit *)
 static	int 	jjy_start_seiko_tsys_tdc_300	(int, struct peer *, struct jjyunit *);
 static	bool 	jjy_start_telephone		(int, struct peer *, struct jjyunit *);
 
-static	void	jjy_shutdown			(int, struct peer *);
-
 static	void	jjy_poll		    	(int, struct peer *);
 static	void	jjy_poll_tristate_jjy01	    	(int, struct peer *);
 static	void	jjy_poll_cdex_jst2000	    	(int, struct peer *);
@@ -332,7 +328,7 @@ static	void	printableString ( char*, int, const char*, int ) ;
 struct	refclock refclock_jjy = {
 	NAME,		/* basename of driver */
 	jjy_start,	/* start up driver */
-	jjy_shutdown,	/* shutdown driver */
+	NULL,		/* shutdown driver in standard way */
 	jjy_poll,	/* transmit poll message */
 	NULL,		/* control - not used */
 	NULL,		/* init - not used */
@@ -525,33 +521,6 @@ jjy_start ( int unit, struct peer *peer )
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
 	return true;
-
-}
-
-/**************************************************************************************************/
-/*  jjy_shutdown - shutdown the clock                                                             */
-/**************************************************************************************************/
-static void
-jjy_shutdown ( int unit, struct peer *peer )
-{
-
-	struct jjyunit	    *up;
-	struct refclockproc *pp;
-
-	char	sLog [ MAX_LOGTEXT ] ;
-
-	pp = peer->procptr ;
-	up = pp->unitptr ;
-	if ( -1 != pp->io.fd ) {
-		io_closeclock ( &pp->io ) ;
-	}
-	if ( NULL != up ) {
-		free ( up ) ;
-	}
-
-	snprintf(sLog, sizeof(sLog), "JJY stopped. unit=%d subtype=%u",
-                 unit, peer->cfg.ttl);
-	record_clock_stats(peer, sLog ) ;
 
 }
 
