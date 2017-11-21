@@ -620,7 +620,7 @@ gpsd_shutdown(
 	}
 	pp->unitptr = NULL;
 	LOGIF(CLOCKINFO,
-	      (LOG_NOTICE, "%s: shutdown: gpsd_json(%d)", (int)pp->refclkunit));
+	      (LOG_NOTICE, "shutdown: gpsd_json(%d)", (int)pp->refclkunit));
 }
 
 /* ------------------------------------------------------------------ */
