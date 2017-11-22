@@ -47,13 +47,14 @@ doit ()
 }
 
 doit default ""
-doit minimal "--disable-debug --disable-droproot --disable-dns-lookup --disable-kernel-pll --disable-mdns-registration"
-doit nodebug "--disable-debug --refclock=all"
-doit all     "--enable-debug --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp"
+doit minimal "--disable-droproot --disable-dns-lookup --disable-kernel-pll --disable-mdns-registration"
 
 if [ `uname -s` = Linux ]
 then
 doit linux   "--enable-classic-mode --enable-early-droproot --enable-seccomp"
+doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp --enable-classic-mode --enable-early-droproot --enable-seccomp"
+else
+doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp"
 fi
 
 if [ "`which asciidoc 2>/dev/null`" != "" -a \
