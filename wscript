@@ -708,7 +708,6 @@ int main(int argc, char **argv) {
         ("sys/sysctl.h", ["sys/types.h"]),
         ("timepps.h", ["inttypes.h"]),
         ("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
-        "utmpx.h",       # missing on RTEMS and OpenBSD
         ("sys/timex.h", ["sys/time.h"]),
     )
     for hdr in optional_headers:
