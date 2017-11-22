@@ -46,6 +46,7 @@ doit ()
   echo
 }
 
+doit default ""
 doit minimal "--disable-debug --disable-droproot --disable-dns-lookup --disable-kernel-pll --disable-mdns-registration"
 doit nodebug "--disable-debug --refclock=all"
 doit all     "--enable-debug --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp"
