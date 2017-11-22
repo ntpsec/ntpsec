@@ -26,7 +26,6 @@ def build(ctx):
         "common/tests_main.c",
         "common/caltime.c",
         "common/sockaddrtest.c",
-        "common/file_handling.c"
     ]
 
     # libntp/

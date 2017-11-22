@@ -10,8 +10,6 @@ def options_cmd(ctx, config):
     grp = ctx.add_option_group("NTP configure options")
     grp.add_option('--enable-debug', action='store_true',
                    default=False, help="Enable debugging code")
-    grp.add_option('--disable-debug', action='store_true',
-                   default=False, help="(ignored)")
     grp.add_option('--enable-debug-gdb', action='store_true',
                    default=False, help="Enable GDB debugging symbols")
     grp.add_option('--disable-droproot', action='store_true',
@@ -23,8 +21,6 @@ def options_cmd(ctx, config):
                    default=False, help="Enable seccomp (restricts syscalls).")
     grp.add_option('--disable-dns-lookup', action='store_true',
                    default=False, help="Disable DNS lookups.")
-    grp.add_option('--disable-dns-retry', action='store_true',
-                   default=False, help="Disable retrying DNS lookups.")
     grp.add_option('--disable-kernel-pll', action='store_true',
                    default=False, help="Disable kernel PLL.")
     grp.add_option('--disable-mdns-registration', action='store_true',
