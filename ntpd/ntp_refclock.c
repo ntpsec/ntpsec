@@ -244,7 +244,7 @@ refclock_unpeer(
 	if (NULL == peer->procptr)
 		return;
 
-	/* There's a standard sghutdown sequence if user didn't declare one */
+	/* There's a standard shutdown sequence if user didn't declare one */
 	if (peer->procptr->conf->clock_shutdown)
 		(peer->procptr->conf->clock_shutdown)(peer->procptr);
 	else {
