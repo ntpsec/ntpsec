@@ -168,10 +168,12 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                                             self.sub_assocRefID),
                                     # ntpAssocAddressType
                                     #  InetAddressType
-                                    4: node(None, None, False, None),
+                                    4: node(None, None, False,
+                                            self.sub_assocAddrType),
                                     # ntpAssocAddress
                                     #  InetAddress SIZE (4|8|16|20)
-                                    5: node(None, None, False, None),
+                                    5: node(None, None, False,
+                                            self.sub_assocAddr),
                                     # ntpAssocOffset DisplayString
                                     6: node(None, None, False,
                                             self.sub_assocOffset),
@@ -555,8 +557,9 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             index = oid.subids[-1]  # if called properly this works (Ha!)
             pdata = self.misc_getPeerData()
             associd = self.misc_getPeerIDs()[index]
-            srcadr = pdata[associd]["srcadr"][1]  # TODO: DNS
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, srcadr)
+            peername = pdata[associd]["srcadr"][1]  # TODO: DNS
+            peername = ntp.util.canonicalize_dns(peername)
+            return ax.Varbind(ax.VALUE_OCTET_STR, oid, peername)
         subs = {}
         associds = self.misc_getPeerIDs()  # need the peer count
         for i in range(len(associds)):
@@ -580,7 +583,60 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             subs[i] = ax.mibnode(readCallback, None, None, None)
         return subs
 
-    ########################
+    def sub_assocAddrType(self):
+        def readCallback(oid):
+            index = oid.subids[-1]  # if called properly this works (Ha!)
+            pdata = self.misc_getPeerData()
+            associd = self.misc_getPeerIDs()[index]
+            srcadr = pdata[associd]["srcadr"][1]
+            try:
+                socklen = len(socket.getaddrinfo(srcadr, None)[0][-1])
+            except socket.gaierror:
+                socklen = None
+            if socklen == 2:  # ipv4
+                addrtype = 1
+            elif socklen == 4:  # ipv6
+                addrtype = 2
+            else:
+                # there is also ipv4z and ipv6z..... don't know how to
+                # detect those yet. Or if I even need to.
+                addrtype = 0  # is this ok? or should it return a NULL?
+            return ax.Varbind(ax.VALUE_INTEGER, oid, addrtype)
+        subs = {}
+        associds = self.misc_getPeerIDs()  # need the peer count
+        for i in range(len(associds)):
+            subs[i] = ax.mibnode(readCallback, None, None, None)
+        return subs
+
+    def sub_assocAddr(self):
+        def readCallback(oid):
+            index = oid.subids[-1]  # if called properly this works (Ha!)
+            pdata = self.misc_getPeerData()
+            associd = self.misc_getPeerIDs()[index]
+            srcadr = pdata[associd]["srcadr"][1]
+            # WARNING: I am only guessing that this is correct
+            # Discover what type of address we have
+            try:
+                sockinfo = socket.getaddrinfo(srcadr, None)[0][-1]
+                addr = sockinfo[0]
+                ipv6 = True if len(sockinfo) == 4 else False
+            except socket.gaierror:
+                addr = None  # how to handle?
+                ipv6 = None
+            # Convert address string to octets
+            if ipv6 is False:
+                pieces = addr.split(".")
+            elif ipv6 is True:
+                pieces = addr.split(":")
+            else:
+                pieces = []
+            srcadr = [int(x) for x in pieces]
+            return ax.Varbind(ax.VALUE_OCTET_STR, oid, srcadr)
+        subs = {}
+        associds = self.misc_getPeerIDs()  # need the peer count
+        for i in range(len(associds)):
+            subs[i] = ax.mibnode(readCallback, None, None, None)
+        return subs
 
     def sub_assocOffset(self):
         def readCallback(oid):
