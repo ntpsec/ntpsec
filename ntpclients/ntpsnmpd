@@ -201,21 +201,22 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                              {1:
                               node(None, None, True,
                                    # ntpAssocStatInPkts Counter32
-                                   {1: node(self.cbr_assocStatInPkts,
-                                            None, True, None),
+                                   {1: node(None, None, False,
+                                            self.sub_assocStatInPkts),
                                     # ntpAssocStatOutPkts Counter32
-                                    2: node(self.cbr_assocStatOutPkts,
-                                            None, True, None),
+                                    2: node(None, None, False,
+                                            self.sub_assocStatOutPkts),
                                     # ntpAssocStatProtocolError
                                     #  Counter32
-                                    3: node(self.cbr_assocStatProtoErr,
-                                            None, True, None)})})}),
+                                    3: node(None, None, False,
+                                            self.sub_assocStatProtoErr)})})}),
                   # ntpEntControl
                   4:
                   node(None, None, True,
                        # ntpEntHeartbeatInterval unit32
                        {1: node(self.cbr_entHeartbeatInterval,
-                                None, True, None),
+                                self.cbw_entHeartbeatInterval,
+                                True, None),
                         # ntpEntNotifBits BITS {...}
                         2: node(self.cbr_entNotifBits, self.cbw_entNotifBits,
                                 True, None)}),
@@ -245,13 +246,15 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                        3: node(None, None, True, None)})})}
         self.session = ntp.packet.ControlSession()
         self.session.openhost(DEFHOST)  # only local for now
-        # Cache so we don't hammer ntpd, default 1 second timeout (from a hat)
+        # Cache so we don't hammer ntpd, default 1 second timeout
+        # timeout default pulled from a hat
         self.cache = ntp.util.Cache(1)
         # The undo system is only for the last operation
         self.inSetP = False  # Are we currently in the set procedure?
         self.setVarbinds = []  # Varbind of the current set operation
         self.setHandlers = []  # Handlers for commit/undo/cleanup of set
         self.setUndoData = []  # Previous values for undoing
+        self.heartbeatInterval = 0
         self.sentNotifications = 0
         # Notify bits, these should be saved to disk
         # Also they currently have no effect
@@ -284,7 +287,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                 else:
                     return None, None, None
 
-    # These exist instead of just getOID_core for clearer semantics
+    # These exist instead of just using getOID_core for clearer semantics
     def getOID(self, searchoid, returnGenerator=False):
         "Get the requested OID"
         return self.getOID_core(False, searchoid, returnGenerator)
@@ -358,34 +361,68 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         # Uinteger32
         return ax.Varbind(ax.VALUE_GAUGE32, oid, 42)
 
-    def cbr_timePrecision(self, oid, write=None):
-        data = self.session.readvar(0, ["precision"])
-        return ax.Varbind(ax.VALUE_INTEGER, oid, data["precision"])
+    def cbr_timePrecision(self, oid):
+        return self.readCallbackSkeletonSimple(oid, "precision",
+                                               ax.VALUE_INTEGER)
 
     def cbr_timeDistance(self, oid):  # DUMMY
         # Displaystring
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, "foo")
 
-    #############################
+    # Blank: ntpEntStatus
 
-    def cbr_statusCurrentMode(self, oid):  # DUMMY
+    def cbr_statusCurrentMode(self, oid):  # DUMMY, partially implemented
         # Range of integers
-        return ax.Varbind(ax.VALUE_INTEGER, oid, 15)
+        try:
+            # Don't care about the data, this is a ploy to the the rstatus
+            self.session.readvar(0, ["stratum"])
+        except ntp.packet.ControlException as e:
+            if e.message == ntp.packet.SERR_SOCKET:
+                # Can't connect, ntpd probably not running
+                return ax.Varbind(ax.VALUE_INTEGER, oid, 1)
+            else:
+                raise e
+        rstatus = self.session.rstatus  # a ploy to get the system status
+        source = ntp.control.CTL_SYS_SOURCE(rstatus)
+        if source == ntp.control.CTL_SST_TS_UNSPEC:
+            mode = 2  # Not yet synced
+        elif False:
+            mode = 3  # No reference configured
+        elif source == ntp.control.CTL_SST_TS_LOCAL:
+            mode = 4  # Distributing local clock (low accuracy)
+        elif source in (ntp.control.CTL_SST_TS_ATOM, ntp.control.CTL_SST_TS_LF,
+                        ntp.control.CTL_SST_TS_HF, ntp.control.CTL_SST_TS_UHF):
+            # I am not sure if I should be including the radios in this
+            mode = 5  # Synced to local refclock
+        elif source == ntp.control.CTL_SST_TS_NTP:
+            # Should this include "other"? That covers things like chrony...
+            mode = 6  # Sync to remote NTP
+        else:
+            mode = 99  # Unknown
+        return ax.Varbind(ax.VALUE_INTEGER, oid, mode)
 
     def cbr_statusStratum(self, oid):
         # NTPstratum
-        data = self.session.readvar(0, ["stratum"])
-        return ax.Varbind(ax.VALUE_GAUGE32, oid, data["stratum"])
+        return self.readCallbackSkeletonSimple(oid, "stratum",
+                                               ax.VALUE_GAUGE32)
 
-    def cbr_statusActiveRefSourceID(self, oid):  # DUMMY
+    def cbr_statusActiveRefSourceID(self, oid):
         # range of uint32
-        return ax.Varbind(ax.VALUE_GAUGE32, oid, 1024)
+        peers = self.misc_getPeerData()
+        syspeer = 0
+        for associd in peers.keys():
+            rstatus = peers[associd]["peerstatus"]
+            if (ntp.control.CTL_PEER_STATVAL(rstatus) & 0x7) == \
+               ntp.control.CTL_PST_SEL_SYSPEER:
+                syspeer = associd
+                break
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, syspeer)
 
     def cbr_statusActiveRefSourceName(self, oid):
         # utf8
-        # TODO: pretty sure this is right, just need DNS
         data = self.session.readvar(0, ["peeradr"])
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["peeradr"])
+        data = ntp.util.canonicalize_dns(data["peeradr"])
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
     def cbr_statusActiveOffset(self, oid):
         # DisplayString
@@ -404,9 +441,22 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         data = self.session.readvar(0, ["rootdisp"], raw=True)
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["rootdisp"][1])
 
-    def cbr_statusEntityUptime(self, oid):  # DUMMY
+    def cbr_statusEntityUptime(self, oid):
         # TimeTicks
-        return ax.Varbind(ax.VALUE_TIME_TICKS, oid, 8)
+        # What the spec claims:
+        #   The uptime of the NTP entity, (i.e., the time since ntpd was
+        #   (re-)initialized not sysUptime!).  The time is represented in
+        #   hundreds of seconds since Jan 1, 1970 (00:00:00.000) UTC.
+        #
+        # First problem: TimeTicks represents hundred*ths* of seconds, could
+        #  easily be a typo.
+        # Second problem: snmpwalk will happily give you a display of
+        #  how long a period of time a value is, such as uptime since start.
+        #  That is the opposite of what the spec claims.
+        #
+        # I am abandoning the spec, and going with what makes a lick of sense
+        uptime = self.session.readvar(0, ["ss_reset"])["ss_reset"] * 100
+        return ax.Varbind(ax.VALUE_TIME_TICKS, oid, uptime)
 
     def cbr_statusDateTime(self, oid):
         # NtpDateTime
@@ -420,24 +470,35 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         # NtpDateTime
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, "blah")
 
-    def cbr_statusLeapSecDirection(self, oid):  # DUMMY
+    def cbr_statusLeapSecDirection(self, oid):
         # range of int32
-        return ax.Varbind(ax.VALUE_INTEGER, oid, -1)
+        leap = self.session.readvar(0, ["leap"])["leap"]
+        if leap == 1:
+            pass  # leap 1 == forward
+        elif leap == 2:
+            leap = -1  # leap 2 == backward
+        else:
+            leap = 0  # leap 0 or 3 == no change
+        return ax.Varbind(ax.VALUE_INTEGER, oid, leap)
 
     def cbr_statusInPkts(self, oid):
-        data = self.session.readvar(0, ["io_received"])
-        return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_received"])
+        return self.readCallbackSkeletonSimple(oid, "io_received",
+                                               ax.VALUE_COUNTER32)
 
     def cbr_statusOutPkts(self, oid):
-        data = self.session.readvar(0, ["io_sent"])
-        return ax.Varbind(ax.VALUE_COUNTER32, oid, data["io_sent"])
+        return self.readCallbackSkeletonSimple(oid, "io_sent",
+                                               ax.VALUE_COUNTER32)
 
     def cbr_statusBadVersion(self, oid):
-        data = self.session.readvar(0, ["ss_oldver"])
-        return ax.Varbind(ax.VALUE_COUNTER32, oid, data["ss_oldver"])
+        return self.readCallbackSkeletonSimple(oid, "ss_oldver",
+                                               ax.VALUE_COUNTER32)
 
-    def cbr_statusProtocolError(self, oid):  # DUMMY
-        return ax.Varbind(ax.VALUE_COUNTER32, oid, 400)
+    def cbr_statusProtocolError(self, oid):
+        data = self.session.readvar(0, ["ss_badformat", "ss_badauth"])
+        protoerr = 0
+        for key in data.keys():
+            protoerr += data[key]
+        return ax.Varbind(ax.VALUE_COUNTER32, oid, protoerr)
 
     def cbr_statusNotifications(self, oid):
         return ax.Varbind(ax.VALUE_COUNTER32, oid, self.sentNotifications)
@@ -451,39 +512,21 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
     # assocAddrType
     # assocAddr
     # assocOffset
-
-    def cbr_assocStratum(self, oid):  # DUMMY
-        # NTPStratum
-        return ax.Varbind(ax.VALUE_GAUGE32, oid, 12)
-
-    def cbr_assocStatusJitter(self, oid):  # DUMMY
-        # DisplayString
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "You")
-
-    def cbr_assocStatusDelay(self, oid):  # DUMMY
-        # DisplayString
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "Kindly?")
-
-    def cbr_assocStatusDisp(self, oid):  # DUMMY
-        # DisplayString
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "*thunk*")
-
-    def cbr_assocStatInPkts(self, oid):  # DUMMY
-        return ax.Varbind(ax.VALUE_COUNTER32, oid, 2)
-
-    def cbr_assocStatOutPkts(self, oid):  # DUMMY
-        return ax.Varbind(ax.VALUE_COUNTER32, oid, 4)
-
-    def cbr_assocStatProtoErr(self, oid):  # DUMMY
-        return ax.Varbind(ax.VALUE_COUNTER32, oid, 8)
+    # assocStratum
+    # assocJitter
+    # assocDelay
+    # assocDispersion
+    # assocInPackets
+    # assocOutPackets
+    # assocProtocolErrors
 
     #########################
 
-    def cbr_entHeartbeatInterval(self, oid):  # DUMMY
+    def cbr_entHeartbeatInterval(self, oid):
         # uint32
-        return ax.Varbind(ax.VALUE_GAUGE32, oid, 16)
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, self.heartbeatInterval)
 
-    def cbr_entNotifBits(self, oid):  # DUMMY
+    def cbr_entNotifBits(self, oid):
         # BITS
         data = ax.bools2Bits((self.notifyModeChange,
                               self.notifyStratumChange,
@@ -511,7 +554,19 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
     # Actions: test, undo, commit, cleanup
     # =====================================
 
-    def cbw_entNotifBits(self, action, varbind, oldData=None):  # DUMMY
+    def cbw_entHeartbeatInterval(self, action, varbind, oldData=None):
+        if action == "test":
+            return ax.ERR_NOERROR
+        elif action == "commit":
+            self.heartbeatInterval = varbind.payload
+            return ax.ERR_NOERROR
+        elif action == "undo":
+            self.heartbeatInterval = oldData
+            return ax.ERR_NOERROR
+        elif action == "cleanup":
+            pass
+
+    def cbw_entNotifBits(self, action, varbind, oldData=None):
         if action == "test":
             return ax.ERR_NOERROR
         elif action == "commit":
@@ -542,52 +597,38 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
     # =====================================
 
     def sub_assocID(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
-            associds = self.misc_getPeerIDs()
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, associds[index])
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        def handler(oid, associd):
+            return ax.Varbind(ax.VALUE_GAUGE32, oid, associd)
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocName(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             peername = pdata[associd]["srcadr"][1]  # TODO: DNS
             peername = ntp.util.canonicalize_dns(peername)
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, peername)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocRefID(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             # elaborate code in util.py indicates this may not be stable
             try:
                 refid = pdata[associd]["refid"][1]
             except IndexError:
                 refid = ""
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, refid)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocAddrType(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             srcadr = pdata[associd]["srcadr"][1]
             try:
                 socklen = len(socket.getaddrinfo(srcadr, None)[0][-1])
@@ -602,17 +643,13 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                 # detect those yet. Or if I even need to.
                 addrtype = 0  # is this ok? or should it return a NULL?
             return ax.Varbind(ax.VALUE_INTEGER, oid, addrtype)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocAddr(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             srcadr = pdata[associd]["srcadr"][1]
             # WARNING: I am only guessing that this is correct
             # Discover what type of address we have
@@ -632,82 +669,116 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
                 pieces = []
             srcadr = [int(x) for x in pieces]
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, srcadr)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocOffset(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             offset = pdata[associd]["offset"][1]
             offset = ntp.util.unitifyvar(offset, "offset", width=None,
                                          unitSpace=True)
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, offset)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocStratum(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             stratum = pdata[associd]["stratum"][0]
             return ax.Varbind(ax.VALUE_GAUGE32, oid, stratum)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocJitter(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             jitter = pdata[associd]["jitter"][1]
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, jitter)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocDelay(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             delay = pdata[associd]["delay"][1]
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, delay)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocDispersion(self):
-        def readCallback(oid):
-            index = oid.subids[-1]  # if called properly this works (Ha!)
+        def handler(oid, associd):
             pdata = self.misc_getPeerData()
-            associd = self.misc_getPeerIDs()[index]
+            if pdata is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
             dispersion = pdata[associd]["rootdisp"][1]
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, dispersion)
-        subs = {}
-        associds = self.misc_getPeerIDs()  # need the peer count
-        for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
-        return subs
+        return self.dynamicCallbackSkeleton(handler)
+
+    def sub_assocStatInPkts(self):
+        def handler(oid, associd):
+            inpkts = self.safeReadvar(associd, ["received"])
+            if inpkts is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
+            inpkts = inpkts["received"]
+            return ax.Varbind(ax.VALUE_COUNTER32, oid, inpkts)
+        return self.dynamicCallbackSkeleton(handler)
+
+    def sub_assocStatOutPkts(self):
+        def handler(oid, associd):
+            outpkts = self.safeReadvar(associd, ["sent"])
+            if outpkts is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
+            outpkts = outpkts["sent"]
+            return ax.Varbind(ax.VALUE_COUNTER32, oid, outpkts)
+        return self.dynamicCallbackSkeleton(handler)
+
+    def sub_assocStatProtoErr(self):
+        def handler(oid, associd):
+            pvars = self.safeReadvar(associd, ["badauth", "bogusorg",
+                                               "seldisp", "selbroken"])
+            if pvars is None:
+                return ax.Varbind(ax.VALUE_NULL, oid)
+            protoerr = 0
+            for key in pvars.keys():
+                protoerr += pvars[key]
+            return ax.Varbind(ax.VALUE_COUNTER32, oid, protoerr)
+        return self.dynamicCallbackSkeleton(handler)
 
     # =====================================
     # Misc data helpers (not part of the MIB proper)
     # =====================================
+
+    def safeReadvar(self, associd, variables=None, raw=False):
+        # Use this when we want to catch packet errors, but don't care
+        # about what they are
+        try:
+            return self.session.readvar(associd, varlist=variables, raw=raw)
+        except ntp.packet.ControlException:
+            return None
+
+    def dynamicCallbackSkeleton(self, handler):
+        def readCallback(oid):
+            index = oid.subids[-1]  # if called properly this works (Ha!)
+            associd = self.misc_getPeerIDs()[index]
+            return handler(oid, associd)
+        subs = {}
+        associds = self.misc_getPeerIDs()  # need the peer count
+        for i in range(len(associds)):
+            subs[i] = ax.mibnode(readCallback, None, None, None)
+        return subs
+
+    def readCallbackSkeletonSimple(self, oid, varname, dataType):
+        # Used for entries that just need a simple variable retrevial
+        # but do not need any processing.
+        data = self.safeReadvar(0, [varname])[varname]
+        if data is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
+        else:
+            return ax.Varbind(dataType, oid, data)
 
     def misc_getPeerIDs(self):
         peerids = self.cache.get("peerids")
@@ -725,7 +796,8 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             peerdata = {}
             for aid in associds:
                 try:
-                    pdata = self.session.readvar(aid, raw=True)
+                    pdata = self.safeReadvar(aid, raw=True)
+                    pdata["peerstatus"] = self.session.rstatus
                 except IOError as e:
                     continue
                 peerdata[aid] = pdata
