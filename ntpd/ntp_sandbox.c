@@ -371,11 +371,7 @@ int scmp_sc[] = {
 	SCMP_SYS(uname),
 #endif
 
-#ifdef HAVE_UTMPX_H
-	/* for setutxent and friends in libntp/systime.c */
-        /* Writing time-changed msg to accounting file */
         SCMP_SYS(access),
-#endif
 
 #ifdef REFCLOCK
 	SCMP_SYS(nanosleep),
