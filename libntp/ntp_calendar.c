@@ -237,14 +237,14 @@ ntpcal_periodic_extend(
 	)
 {
 	uint32_t diff;
-	char	 cpl = 0; /* modulo complement flag */
-	char	 neg = 0; /* sign change flag	    */
+	bool	 cpl = false; /* modulo complement flag */
+	bool	 neg = false; /* sign change flag	    */
 
 	/* make the cycle positive and adjust the flags */
 	if (cycle < 0) {
 		cycle = - cycle;
-		neg ^= 1;
-		cpl ^= 1;
+		neg = !neg;
+		cpl = !cpl;
 	}
 	/* guard against div by zero or one */
 	if (cycle > 1) {
