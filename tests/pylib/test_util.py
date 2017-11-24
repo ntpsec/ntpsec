@@ -107,6 +107,14 @@ class TestPylibUtilMethods(unittest.TestCase):
         else:
             self.assertEqual(f(1480999786.025), "2016-12-06T04:49:46.025Z")
 
+    def test_hexstr2octets(self):
+        f = ntp.util.hexstr2octets
+
+        # Test
+        self.assertEqual(f("f00dface"), "\xF0\x0D\xFA\xCE")
+        # Test odd length
+        self.assertEqual(f("cafebabe1"), "\xCA\xFE\xBA\xBE")
+
     def test_slicedata(self):
         f = ntp.util.slicedata
 

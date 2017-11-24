@@ -122,6 +122,15 @@ def rfc3339(t):
     return rep
 
 
+def hexstr2octets(hexstr):
+    if (len(hexstr) % 2) != 0:
+        hexstr = hexstr[:-1]  # slice off the last char
+    values = []
+    for index in range(0, len(hexstr), 2):
+        values.append(chr(int(hexstr[index:index+2], 16)))
+    return "".join(values)
+
+
 def slicedata(data, slicepoint):
     "Breaks a sequence into two pieces at the slice point"
     return data[:slicepoint], data[slicepoint:]
