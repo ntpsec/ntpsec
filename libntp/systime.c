@@ -184,14 +184,13 @@ normalize_time(
 		if (!L_ISGTU(result, lfp_prev) &&
 		    sys_fuzz > 0.) {
 			msyslog(LOG_ERR, "CLOCK: ts_prev %ld s + %ld ns, ts_min %ld s + %ld ns",
-				ts_prev_log.tv_sec, ts_prev.tv_nsec,
-				ts_min.tv_sec, ts_min.tv_nsec);
+				(long)ts_prev_log.tv_sec, ts_prev.tv_nsec,
+				(long)ts_min.tv_sec, ts_min.tv_nsec);
 			msyslog(LOG_ERR, "CLOCK: ts %ld s + %ld ns",
-				ts.tv_sec, ts.tv_nsec);
+				(long)ts.tv_sec, ts.tv_nsec);
 			msyslog(LOG_ERR, "CLOCK: sys_fuzz %ld nsec, prior fuzz %.9f",
 				sys_fuzz_nsec, dfuzz_prev);
-			msyslog(LOG_ERR, "CLOCK: this fuzz %.9f",
-				dfuzz);
+			msyslog(LOG_ERR, "CLOCK: this fuzz %.9f", dfuzz);
 			lfpdelta = lfp_prev;
 			lfpdelta -= result;
 			ddelta = lfptod(lfpdelta);
