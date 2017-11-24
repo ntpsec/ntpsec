@@ -460,15 +460,34 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
 
     def cbr_statusDateTime(self, oid):
         # NtpDateTime
-        data = self.session.readvar(0, ["reftime"])
+        data = self.safeReadvar(0, ["reftime"])
+        if data is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
         txt = data["reftime"]
         txt = txt[2:]  # Strip '0x'
         txt = "".join(txt.split("."))  # Strip '.'
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, txt)
+        value = ntp.util.hexstr2octets(txt)
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, value)
 
-    def cbr_statusLeapSecond(self, oid):  # DUMMY
+    def cbr_statusLeapSecond(self, oid):  # I am not confident in this yet
         # NtpDateTime
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "blah")
+        DAY = 86400
+        fmt = "%.8x%.8x"
+        data = self.safeReadvar(0, ["reftime"])
+        hasleap = self.safeReadvar(0, ["leap"])
+        if (data is None) or (hasleap is None):
+            return ax.Varbind(ax.VALUE_NULL, oid)
+        data = data["reftime"]
+        hasleap = hasleap["leap"]
+        if hasleap in (1, 2):
+            seconds = int(data.split(".")[0], 0)
+            days = seconds // DAY
+            scheduled = (days * DAY) + (DAY - 1)  # 23:59:59 of $CURRENT_DAY
+            formatted = fmt % (scheduled, 0)
+        else:
+            formatted = fmt % (0, 0)
+        value = ntp.util.hexstr2octets(formatted)
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, value)
 
     def cbr_statusLeapSecDirection(self, oid):
         # range of int32
