@@ -577,14 +577,21 @@ TEST(leapsec, addDynamic) {
 	bool           rc;
 	int            idx;
 
+	/* Explicit (time_t) cast avoids warnings
+	 * 32 bit FreeBSD 11.1, Nov 2017
+	 * FreeBSD clang version 4.0.0
+../../tests/ntpd/leapsec.c:582:3: warning: implicit conversion from 'long long' to 'time_t' (aka 'int') changes value from 2982009600 to -1312957696 [-Wconstant-conversion]
+                2982009600,     //      29      # 1 Jul 1994
+                ^~~~~~~~~~
+*/
 	static const time_t insns[] = {
-		2982009600,	//	29	# 1 Jul 1994
-		3029443200,	//	30	# 1 Jan 1996
-		3076704000,	//	31	# 1 Jul 1997
-		3124137600,	//	32	# 1 Jan 1999
-		3345062400,	//	33	# 1 Jan 2006
-		3439756800,	//	34	# 1 Jan 2009
-		3550089600,	//	35	# 1 Jul 2012
+		(time_t)2982009600,	//	29	# 1 Jul 1994
+		(time_t)3029443200,	//	30	# 1 Jan 1996
+		(time_t)3076704000,	//	31	# 1 Jul 1997
+		(time_t)3124137600,	//	32	# 1 Jan 1999
+		(time_t)3345062400,	//	33	# 1 Jan 2006
+		(time_t)3439756800,	//	34	# 1 Jan 2009
+		(time_t)3550089600,	//	35	# 1 Jul 2012
 		0 // sentinel
 	};
 
