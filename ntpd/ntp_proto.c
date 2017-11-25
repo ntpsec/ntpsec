@@ -2416,6 +2416,7 @@ fast_xmit(
 }
 
 
+#ifdef ENABLE_DNS_LOOKUP
 /*
  * dns_take_server - process DNS query for server.
  */
@@ -2560,6 +2561,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	peer->hpoll = hpoll;
 	peer->nextdate = current_time + (1U << hpoll);
 }
+#endif /* ENABLE_DNS_LOOKUP */
 
 
 
