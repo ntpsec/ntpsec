@@ -3,16 +3,22 @@
 #   sh: ${PIPESTATUS[...}: Bad substitution
 
 # This is a hack to build with various configuration options.
-# The intent is to check cases that normal testing doesn't use.
+# The intent is to check building combinations that normal testing doesn't use.
 
 # Stuff goes into various test-* directories.
 # Running again starts by deleting everything in the directory.
 
+LINUX=""
+if [ `uname -s` = "Linux" -a -f /usr/include/seccomp.h ]
+then
+  # Not supported on CentOS 6
+  LINUX="--enable-seccomp"
+fi
 
 doit ()
 {
   DIR=test-$1
-  mkdir $DIR
+  [ ! -d $DIR ] && mkdir $DIR
   rm -rf $DIR/*
   ./waf configure --out=$DIR $2          2>&1 | tee    $DIR/test.log
   WAF1=${PIPESTATUS[0]}
@@ -54,13 +60,6 @@ doit minimal "--disable-droproot --disable-dns-lookup --disable-kernel-pll --dis
 # This also tests refclocks without DEBUG
 doit classic "--enable-classic-mode --refclock=all"
 
-if [ `uname -s` = "Linux" ]
-then
-  # Not supported on CentOS 6
-  LINUX="--enable-seccomp"
-else
-  LINUX=""
-fi
 doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp --enable-early-droproot $LINUX"
 
 if [ "`which asciidoc 2>/dev/null`" != "" -a \
@@ -72,6 +71,12 @@ fi
 # should try cross compile
 
 echo
+if [ `uname -s` = "Linux" -a ! -f /usr/include/seccomp.h ]
+then
+    echo
+    echo "### Warning: Missing seccomp.h (on a Linux system)"
+    echo
+fi
 echo "PYTHONPATH is" \"$PYTHONPATH\"
 grep VERSION: test*/test.log
 echo
