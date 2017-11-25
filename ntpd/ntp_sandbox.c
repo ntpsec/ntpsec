@@ -294,6 +294,12 @@ int scmp_sc[] = {
 	SCMP_SYS(fcntl),
 	SCMP_SYS(fstat),
 	SCMP_SYS(fsync),
+
+#ifndef ENABLE_DNS_LOOKUP
+	/* libcrypto uses pthread_once() */
+	SCMP_SYS(futex),	/* sem_xxx, used by threads */
+#endif
+
 #ifdef __NR_getrandom
 	SCMP_SYS(getrandom),	/* 3.17 kernel */
 #endif
