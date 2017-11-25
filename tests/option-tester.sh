@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# sh on NetBSD and FreeBSD says:
+#   sh: ${PIPESTATUS[...}: Bad substitution
 
 # This is a hack to build with various configuration options.
 # The intent is to check cases that normal testing doesn't use.
@@ -49,13 +51,17 @@ doit ()
 doit default ""
 doit minimal "--disable-droproot --disable-dns-lookup --disable-kernel-pll --disable-mdns-registration"
 
-if [ `uname -s` = Linux ]
+# This also tests refclocks without DEBUG
+doit classic "--enable-classic-mode --refclock=all"
+
+if [ `uname -s` = "Linux" ]
 then
-doit linux   "--enable-classic-mode --enable-early-droproot --enable-seccomp"
-doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp --enable-classic-mode --enable-early-droproot --enable-seccomp"
+  # Not supported on CentOS 6
+  LINUX="--enable-seccomp"
 else
-doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp"
+  LINUX=""
 fi
+doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp --enable-early-droproot $LINUX"
 
 if [ "`which asciidoc 2>/dev/null`" != "" -a \
      "`which xsltproc 2>/dev/null`" != "" ]
@@ -66,9 +72,11 @@ fi
 # should try cross compile
 
 echo
+echo "PYTHONPATH is" \"$PYTHONPATH\"
 grep VERSION: test*/test.log
 echo
-grep warning: test*/test.log
-grep error:   test*/test.log
-grep ^Trouble test*/test.log
+grep warning:                    test*/test.log
+grep error:                      test*/test.log
+grep "The configuration failed"  test*/test.log
+grep ^Trouble                    test*/test.log
 echo
