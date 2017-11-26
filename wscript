@@ -903,7 +903,7 @@ int main(int argc, char **argv) {
         ctx.define("BUILD_EPOCH", int(time.time()), comment="Using default")
 
     ctx.start_msg("Writing configuration header:")
-    ctx.write_config_header("config.h", remove=False)
+    ctx.write_config_header("config.h", remove=True)
     ctx.end_msg("config.h", "PINK")
 
     def yesno(x):
