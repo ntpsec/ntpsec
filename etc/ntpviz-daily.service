@@ -5,4 +5,5 @@ Requisite=ntpd.service
 
 [Service]
 Type=simple
+IOSchedulingClass=idle
 ExecStart=/usr/bin/ntpviz -w l -p 1 -o /var/www/localhost/htdocs/day
