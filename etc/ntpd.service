@@ -1,6 +1,6 @@
 [Unit]
 Description=Network Time Service
-Documentation=man:ntpd(1)
+Documentation=man:ntpd(8)
 Wants=network.target
 ConditionVirtualization=!container
 ConditionCapability=CAP_SYS_TIME
@@ -10,7 +10,7 @@ Conflicts=systemd-timesyncd.service
 [Service]
 Type=forking
 PrivateTmp=true
-ExecStart=/usr/bin/ntpd -g -u ntp:ntp
+ExecStart=/usr/sbin/ntpd -g -u ntp:ntp
 Restart=always
 RemainAfterExit=yes
 
