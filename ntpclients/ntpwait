@@ -93,15 +93,16 @@ if __name__ == "__main__":
             time.sleep(sleep)
             continue
 
+        response = repr(session.response)
         if verbose >= 2:
-            sys.stderr.write(repr(session.response) + "\n")
+            sys.stderr.write(response + "\n")
 
         if msg and msg.startswith("***"):
             if verbose:
                 sys.stdout.write("\b" + msg + "\n")
             sys.exit(1)
 
-        m = re.search(r"leap=([^,]*),", repr(session.response))
+        m = re.search(r"leap=([^,]*),", response)
         if m:
             leap = int(m.group(1))
         else:
