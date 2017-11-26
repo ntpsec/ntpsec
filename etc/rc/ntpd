@@ -13,7 +13,7 @@ NTPD=/usr/sbin/ntpd
 PIDFILE=/var/run/ntpd.pid
 USER=ntp
 GROUP=ntp
-NTPD_OPTS="-g -u $USER:$GROUP -p $PIDFILE"
+NTPD_OPTS="-g -N -u $USER:$GROUP -p $PIDFILE"
 
 ntpd_start() {
     if [ -r $PIDFILE ]; then
