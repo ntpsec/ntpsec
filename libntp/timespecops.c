@@ -37,6 +37,8 @@
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: NTP
  */
+#include "config.h"
+
 #include <stdio.h>
 #include <math.h>
 
