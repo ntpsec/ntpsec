@@ -38,7 +38,7 @@ buildprep does not attempt to install dependencies for optional
 components like ntpviz or building documentation unless asked. See
 buildprep --help for details on available options.  asciidoc has a
 huge tail of dependencies and you probably don't want it unless you're
-planning to modify the documentation.  psutils may require different
+planning to modify the documentation.  psutil may require different
 packages depending on whether your base Python version is 2 or 3.
 
 === Details ===
@@ -55,7 +55,7 @@ argparse::
    Required for ntpviz when using Python version 2.6
    Install with pip: pip install argparse
 
-psutils::
+psutil::
    Optional for ntpviz.  Allows running with ionice()
    Debian: python-psutil or python3-psutil
    Ubuntu: python-psutil or python3-psutil
