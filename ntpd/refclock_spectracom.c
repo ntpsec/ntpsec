@@ -262,10 +262,10 @@ spectracom_receive(
 	 */
 	if (temp == 0) {
 		if (up->prev_eol_cr) {
-			DPRINT(2, ("wwvb: <LF> @ %s\n", prettydate(trtmp)));
+			DPRINT(2, ("spectracom: <LF> @ %s\n", prettydate(trtmp)));
 		} else {
 			up->laststamp = trtmp;
-			DPRINT(2, ("wwvb: <CR> @ %s\n", prettydate(trtmp)));
+			DPRINT(2, ("spectracom: <CR> @ %s\n", prettydate(trtmp)));
 		}
 		up->prev_eol_cr = !up->prev_eol_cr;
 		return;
@@ -274,7 +274,7 @@ spectracom_receive(
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
 	up->prev_eol_cr = true;
-	DPRINT(2, ("wwvb: code @ %s\n"
+	DPRINT(2, ("spectracom: code @ %s\n"
 		   "       using %s minus one char\n",
 		   prettydate(trtmp), prettydate(pp->lastrec)));
 	if (pp->lastrec == 0)
@@ -514,7 +514,7 @@ spectracom_poll(
 #endif /* HAVE_PPSAPI */
 	refclock_receive(peer);
 	record_clock_stats(peer, pp->a_lastcode);
-	DPRINT(1, ("wwvb: timecode %d %s\n", pp->lencode,
+	DPRINT(1, ("spectracom: timecode %d %s\n", pp->lencode,
 		   pp->a_lastcode));
 }
 
