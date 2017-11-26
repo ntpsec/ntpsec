@@ -1,6 +1,6 @@
 [Unit]
 Description=Wait for ntpd to synchronize system clock
-Requires=ntpd.service
+Requisite=ntpd.service
 After=ntpd.service
 Conflicts=systemd-timesyncd.service
 Wants=time-sync.target

@@ -1,7 +1,7 @@
 [Unit]
 Documentation=man:ntpviz(1)
 Description=Graph daily information for NTP
-Requires=ntpd.service
+Requisite=ntpd.service
 
 [Service]
 Type=simple

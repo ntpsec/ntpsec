@@ -1,5 +1,6 @@
 [Unit]
 Description=Run ntploggps every five minutes
+Requisite=gpsd.service
 
 [Timer]
 OnBootSec=5min
@@ -7,4 +8,4 @@ OnUnitActiveSec=5min
 Persistent=true
 
 [Install]
-WantedBy=timers.target
+WantedBy=gpsd.service

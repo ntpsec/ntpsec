@@ -1,7 +1,8 @@
 [Unit]
 Documentation=man:ntploggps(1)
 Description=GPS information logger for ntpviz
-Requires=gpsd.service
+Requisite=gpsd.service
+After=gpsd.service
 
 [Service]
 Type=simple
