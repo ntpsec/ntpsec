@@ -23,6 +23,11 @@ yet produced a synchronized and stable system clock.
 The maximum number of times we will check _ntpd_ to see if it has been
 able to synchronize and stabilize the system clock.
 
++-q+, +--quick+::
+  By default, +ntpwait+ waits for a full synchronization. With this
+  option, +ntpwait+ only waits for the initial clock step to occur
+  (or, without "ntp -g", for slewing to begin).
+
 +-s+ _secs-between-tries_, +--sleep+=_secs-between-tries_::
   How long to sleep between tries. This option takes an integer number
   as its argument. The default _secs-between-tries_ for this option

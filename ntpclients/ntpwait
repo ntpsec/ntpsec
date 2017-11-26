@@ -44,19 +44,22 @@ class Unbuffered(object):
 
 if __name__ == "__main__":
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:v", [
-            "tries=", "sleep=", "verbose", "help"
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hn:qs:v", [
+            "tries=", "quick", "sleep=", "verbose", "help"
         ])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
         raise SystemExit(2)
     tries = 100
+    quick = False
     sleep = 6
     verbose = 0
     for (switch, val) in options:
         if switch in ("-n", "--tries"):
             errmsg = "Error: -n parameter '%s' not a number\n"
             tries = ntp.util.safeargcast(val, int, errmsg, __doc__)
+        elif switch in ("-q", "--quick"):
+            quick = True
         elif switch in ("-s", "--sleep"):
             errmsg = "Error: -s parameter '%s' not a number\n"
             sleep = ntp.util.safeargcast(val, int, errmsg, __doc__)
@@ -109,8 +112,15 @@ if __name__ == "__main__":
             sys.stdout.write("\bLeap status not available\n")
             sys.exit(1)
 
+        m = re.search(r"refid=([^,]*),", response)
+        if m:
+            refid = m.group(1)
+        else:
+            refid = "INIT"
+
         if leap in (ntp.magic.LEAP_NOWARNING, ntp.magic.LEAP_ADDSECOND,
-                    ntp.magic.LEAP_DELSECOND):
+                    ntp.magic.LEAP_DELSECOND) or \
+           (quick and refid != "INIT"):
             # We could check "sync" here to make sure we like the source...
             if verbose:
                 sys.stdout.write("\bOK! (%.1f seconds)\n" %
