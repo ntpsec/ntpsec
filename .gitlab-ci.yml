@@ -1,3 +1,19 @@
+pages:
+  stage: deploy
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison python-dev asciidoc
+    - python ./waf configure --enable-doc --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
+    - cp www/favicon.ico `pwd`/public
+    - cp docs/top.html.in `pwd`/public/index.html
+    - cp docs/top-asciidoc.css `pwd`/public/asciidoc.css
+  artifacts:
+    paths:
+      - public
+#  only:
+#    - master
+  tags:
+    - gitlab-org
+
 codequality:
   image: docker:latest
   variables:
@@ -9,3 +25,200 @@ codequality:
     - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f json > codeclimate.json
   artifacts:
     paths: [codeclimate.json]
+  tags:
+    - gitlab-org
+
+.job_template: &job_definition
+  stage: build
+  artifacts:
+    expire_in: 7d
+    paths:
+      - build/main/attic/sht
+      - build/main/ntpclients/ntpdig
+      - build/main/ntpclients/ntpkeygen
+      - build/main/ntpclients/ntpleapfetch
+      - build/main/ntpclients/ntploggps
+      - build/main/ntpclients/ntplogtemp
+      - build/main/ntpclients/ntpmon
+      - build/main/ntpclients/ntpq
+      - build/main/ntpclients/ntpsweep
+      - build/main/ntpclients/ntptrace
+      - build/main/ntpclients/ntpviz
+      - build/main/ntpclients/ntpwait
+      - build/main/ntpd/ntpd
+      - build/main/ntpfrob/ntpfrob
+
+gitlab-basic:
+  <<: *job_definition
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - gitlab-org
+
+gitlab-refclocks:
+  <<: *job_definition
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - gitlab-org
+
+debian-wheezy-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - debian-wheezy
+
+debian-wheezy-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - debian-wheezy
+
+debian-jessie-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - debian-jessie
+
+debian-jessie-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - debian-jessie
+
+gcc-7-basic:
+  <<: *job_definition
+  image: gcc:7
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - gitlab-org
+
+gcc-7-refclocks:
+  <<: *job_definition
+  image: gcc:7
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - gitlab-org
+
+freebsd-11-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - freebsd-11
+
+freebsd-11-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - freebsd-11
+
+centos-6-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - centos-6
+
+centos-6-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - centos-6
+
+centos-7-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - centos-7
+
+centos-7-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - centos-7
+
+fedora-25-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-25
+
+fedora-25-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-25
+
+fedora-26-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-26
+
+fedora-26-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-26
+
+fedora-27-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-27
+
+fedora-27-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - fedora-27
+
+python3:
+  <<: *job_definition
+  image: python:3
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - gitlab-org
+
