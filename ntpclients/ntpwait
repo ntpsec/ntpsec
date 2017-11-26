@@ -109,13 +109,6 @@ if __name__ == "__main__":
             sys.stdout.write("\bLeap status not available\n")
             sys.exit(1)
 
-        if leap == ntp.magic.LEAP_NOTINSYNC:
-            if verbose:
-                sys.stdout.write("\b" + "*+:."[i % 4])
-            if i < tries:
-                time.sleep(sleep)
-            continue
-
         if leap in (ntp.magic.LEAP_NOWARNING, ntp.magic.LEAP_ADDSECOND,
                     ntp.magic.LEAP_DELSECOND):
             # We could check "sync" here to make sure we like the source...
@@ -124,8 +117,14 @@ if __name__ == "__main__":
                                  (ntp.util.monoclock() - basetime))
             sys.exit(0)
 
-        sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)
-        sys.exit(1)
+        if leap != ntp.magic.LEAP_NOTINSYNC:
+            sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)
+            sys.exit(1)
+
+        if verbose:
+            sys.stdout.write("\b" + "*+:."[i % 4])
+        if i < tries:
+            time.sleep(sleep)
 
     if verbose:
         sys.stdout.write("\bNo!\nntpd did not synchronize.\n")
