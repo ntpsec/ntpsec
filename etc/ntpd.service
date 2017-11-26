@@ -12,7 +12,6 @@ Type=forking
 PrivateTmp=true
 ExecStart=/usr/bin/ntpd -g -u ntp:ntp
 Restart=always
-RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
