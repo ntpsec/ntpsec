@@ -2710,7 +2710,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 		} else if ( *(sys_phone[0]+i) == ',' ) {
 			iCommaCount ++ ;
 			if ( iCommaCount > 1 ) {
-				msyslog( LOG_ERR, "REFCCLOCK: refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be zero or one comma." ) ;
+				msyslog( LOG_ERR, "REFCLOCK: refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be zero or one comma." ) ;
 				up->bInitError = true ;
 				return true ;
 			}

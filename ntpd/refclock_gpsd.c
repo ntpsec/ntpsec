@@ -1846,7 +1846,7 @@ gpsd_init_socket(
 	if (-1 == rc) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"RECLOCK: %s: cannot set GPSD socket to non-blocking: %m",
+				"REFCLOCK: %s: cannot set GPSD socket to non-blocking: %m",
 				up->logname);
 		goto no_socket;
 	}

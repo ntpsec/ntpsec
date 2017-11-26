@@ -1546,7 +1546,7 @@ list_err(
 	if (do_it && err->err_suppressed)
 	{
 		msyslog(LOG_INFO, 
-                    "RECLOCK: PARSE receiver #%d: %lu message%s suppressed, error "
+                    "REFCLOCK: PARSE receiver #%d: %lu message%s suppressed, error "
                     "condition class persists for %s",
 		    parse->peer->procptr->refclkunit, err->err_suppressed,
                     (err->err_suppressed == 1) ? " was" : "s where",
@@ -2248,7 +2248,7 @@ parse_statistics(
 				l_mktime(current_time - parse->generic->timestarted));
 
 			msyslog(LOG_INFO,
-				"RFFCLOCK: PARSE receiver #%d: current status: %s",
+				"REFCLOCK: PARSE receiver #%d: current status: %s",
 				parse->peer->procptr->refclkunit,
 				clockstatus(parse->generic->currentstatus));
 
@@ -2968,7 +2968,7 @@ parse_poll(
 		parse_event(parse, CEVNT_TIMEOUT);
 
 		ERR(ERR_NODATA)
-			msyslog(LOG_WARNING, "RECLOCK: PARSE receiver #%d: no data from device within poll interval (check receiver / wiring)", parse->peer->procptr->refclkunit);
+			msyslog(LOG_WARNING, "REFCLOCK: PARSE receiver #%d: no data from device within poll interval (check receiver / wiring)", parse->peer->procptr->refclkunit);
 	}
 
 	/*
