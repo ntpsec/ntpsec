@@ -3,8 +3,6 @@ Description=Wait for ntpd to synchronize system clock
 Requisite=ntpd.service
 After=ntpd.service
 Conflicts=systemd-timesyncd.service
-Wants=time-sync.target
-Before=time-sync.target
 ConditionVirtualization=!container
 ConditionCapability=CAP_SYS_TIME
 
@@ -15,4 +13,4 @@ RemainAfterExit=yes
 StandardOutput=null
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=time-sync.target
