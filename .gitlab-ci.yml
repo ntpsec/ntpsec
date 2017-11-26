@@ -26,7 +26,7 @@ codequality:
   artifacts:
     paths: [codeclimate.json]
   tags:
-    - gitlab-org
+    - docker
 
 .job_template: &job_definition
   stage: build
