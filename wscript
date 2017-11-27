@@ -1039,17 +1039,17 @@ def afterparty(ctx):
 
 
 python_scripts = [
-    "ntpclients/ntploggps",
-    "ntpclients/ntpdig",
-    "ntpclients/ntpkeygen",
-    "ntpclients/ntpmon",
-    "ntpclients/ntpq",
-    "ntpclients/ntpsweep",
-    "ntpclients/ntptrace",
-    "ntpclients/ntpviz",
-    "ntpclients/ntpwait",
-    "ntpclients/ntplogtemp",
-    "ntpclients/ntpsnmpd",
+    "ntpclients/ntploggps.py",
+    "ntpclients/ntpdig.py",
+    "ntpclients/ntpkeygen.py",
+    "ntpclients/ntpmon.py",
+    "ntpclients/ntpq.py",
+    "ntpclients/ntpsweep.py",
+    "ntpclients/ntptrace.py",
+    "ntpclients/ntpviz.py",
+    "ntpclients/ntpwait.py",
+    "ntpclients/ntplogtemp.py",
+    "ntpclients/ntpsnmpd.py",
 ]
 
 
@@ -1087,12 +1087,18 @@ def build(ctx):
     ctx.recurse("attic")
     ctx.recurse("tests")
 
+    # Make sure the python scripts actually get compiled
+    ctx(
+        features="py",
+        source=python_scripts,
+    )
+
     scripts = ["ntpclients/ntpleapfetch"] + python_scripts
 
     ctx(
         features="subst",
         source=scripts,
-        target=scripts,
+        target=[x.rstrip(".py") for x in scripts],
         chmod=Utils.O755,
         install_path='${BINDIR}',
     )
