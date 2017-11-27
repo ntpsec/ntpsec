@@ -200,8 +200,8 @@ if __name__ == '__main__':
                    satellites_used is not None and \
                    tdop is not None:
                     if last_time != current_time:
-			s = '%i %s %f %d' % (current_time, device, tdop,
-					     satellites_used)
+                        s = '%i %s %f %d' % (current_time, device, tdop,
+                                             satellites_used)
                         Logger.info(s)
                         last_time = current_time
                     if args.once:
