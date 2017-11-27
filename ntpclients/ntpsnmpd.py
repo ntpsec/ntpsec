@@ -12,10 +12,10 @@ import select
 import subprocess
 
 try:
-    import ntp.agentx
-    ax = ntp.agentx
     import ntp.packet
     import ntp.util
+    import ntp.agentx
+    ax = ntp.agentx
 except ImportError as e:
     sys.stderr.write(
         "ntpsnmpd: can't find Python NTP library.\n")
@@ -37,7 +37,7 @@ ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
 DEFHOST = "localhost"  # For now only know how to talk to the local ntp
 
 
-class DataSource:  # This may be broken up in future to be less NTP-specific
+class DataSource:  # This will be broken up in future to be less NTP-specific
     def __init__(self):
         node = ax.mibnode
         # This is defined as a dict tree because simpler, and avoids
@@ -254,7 +254,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
         self.setVarbinds = []  # Varbind of the current set operation
         self.setHandlers = []  # Handlers for commit/undo/cleanup of set
         self.setUndoData = []  # Previous values for undoing
-        self.heartbeatInterval = 0
+        self.heartbeatInterval = 0  # should save to disk
         self.sentNotifications = 0
         # Notify bits, these should be saved to disk
         # Also they currently have no effect
@@ -390,8 +390,10 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             mode = 3  # No reference configured
         elif source == ntp.control.CTL_SST_TS_LOCAL:
             mode = 4  # Distributing local clock (low accuracy)
-        elif source in (ntp.control.CTL_SST_TS_ATOM, ntp.control.CTL_SST_TS_LF,
-                        ntp.control.CTL_SST_TS_HF, ntp.control.CTL_SST_TS_UHF):
+        elif source in (ntp.control.CTL_SST_TS_ATOM,
+                        ntp.control.CTL_SST_TS_LF,
+                        ntp.control.CTL_SST_TS_HF,
+                        ntp.control.CTL_SST_TS_UHF):
             # I am not sure if I should be including the radios in this
             mode = 5  # Synced to local refclock
         elif source == ntp.control.CTL_SST_TS_NTP:
@@ -420,7 +422,9 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
 
     def cbr_statusActiveRefSourceName(self, oid):
         # utf8
-        data = self.session.readvar(0, ["peeradr"])
+        data = self.safeReadvar(0, ["peeradr"])
+        if data is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
         data = ntp.util.canonicalize_dns(data["peeradr"])
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
@@ -625,7 +629,7 @@ class DataSource:  # This may be broken up in future to be less NTP-specific
             pdata = self.misc_getPeerData()
             if pdata is None:
                 return ax.Varbind(ax.VALUE_NULL, oid)
-            peername = pdata[associd]["srcadr"][1]  # TODO: DNS
+            peername = pdata[associd]["srcadr"][1]
             peername = ntp.util.canonicalize_dns(peername)
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, peername)
         return self.dynamicCallbackSkeleton(handler)
