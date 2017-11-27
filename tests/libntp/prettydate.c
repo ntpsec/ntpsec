@@ -1,12 +1,16 @@
 #include "config.h"
 #include "ntp_stdlib.h"
+#include "ntp_fp.h"
+#include "caltime.h"
 
 #include "unity.h"
 #include "unity_fixture.h"
 
 TEST_GROUP(prettydate);
 
-TEST_SETUP(prettydate) {}
+TEST_SETUP(prettydate) {
+    set_prettydate_pivot(settime(2000, 1, 1, 0, 0, 0));
+}
 
 TEST_TEAR_DOWN(prettydate) {}
 

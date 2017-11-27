@@ -29,14 +29,6 @@ typedef struct {
 typedef time_t (*systime_func_ptr)(time_t *);
 
 /*
- * set the function for getting the system time. This is mostly used for
- * unit testing to provide a fixed / shifted time stamp. Setting the
- * value to NULL restores the original function, that is, 'time()',
- * which is also the automatic default.
- */
-extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
-
-/*
  * We deal in a 4 year cycle starting at March 1, 1900.	 We assume
  * we will only want to deal with dates since then, and not to exceed
  * the rollover day in 2036.
@@ -67,7 +59,7 @@ ntpcal_get_build_date(struct calendar * /* jd */);
  * current system time.
  */
 extern time64_t
-ntpcal_ntp_to_time(uint32_t /* ntp */, const time_t * /* pivot */);
+ntpcal_ntp_to_time(uint32_t /* ntp */, time_t /* pivot */);
 
 /*
  * Convert a timestamp in NTP scale to a 64bit seconds value in the NTP
@@ -76,7 +68,7 @@ ntpcal_ntp_to_time(uint32_t /* ntp */, const time_t * /* pivot */);
  * Note: The pivot must be given in UN*X time scale!
  */
 extern time64_t
-ntpcal_ntp_to_ntp(uint32_t /* ntp */, const time_t * /* pivot */);
+ntpcal_ntp_to_ntp(uint32_t /* ntp */, time_t /* pivot */);
 
 /*
  * Split a time stamp in seconds into elapsed days and elapsed seconds
@@ -187,7 +179,7 @@ ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
 
 extern int
 ntpcal_ntp_to_date(struct calendar * /* jd */,	uint32_t /* ntp */,
-		   const time_t * /* pivot */);
+		   time_t /* pivot */);
 
 extern time_t
 ntpcal_date_to_time(const struct calendar * /* jd */);

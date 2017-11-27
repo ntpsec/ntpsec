@@ -1686,7 +1686,7 @@ unfold_day(
 	 * cannot assume we can do this; therefore this is done
 	 * in split representation.
 	 */
-	rec_qw = ntpcal_ntp_to_ntp(rec_ui - SECSPERDAY/2, NULL);
+	rec_qw = ntpcal_ntp_to_ntp(rec_ui - SECSPERDAY/2, time(NULL));
 	rec_ds = ntpcal_daysplit(rec_qw);
 	rec_ds.lo = ntpcal_periodic_extend(rec_ds.lo,
 					   ntpcal_date_to_daysec(jd),
@@ -1720,7 +1720,7 @@ unfold_century(
 	struct calendar rec;
 	int32_t		baseyear;
 
-	ntpcal_ntp_to_date(&rec, rec_ui, NULL);
+	ntpcal_ntp_to_date(&rec, rec_ui, time(NULL));
 	baseyear = rec.year - 20;
 	if (baseyear < g_gpsMinYear)
 		baseyear = g_gpsMinYear;
@@ -1870,7 +1870,7 @@ eval_gps_time(
 	}
 
 	/* - get unfold base: day of full recv time - 512 weeks */
-	vi64 = ntpcal_ntp_to_ntp(lfpuint(*xrecv), NULL);
+	vi64 = ntpcal_ntp_to_ntp(lfpuint(*xrecv), time(NULL));
 	rs64 = ntpcal_daysplit(vi64);
 	rcv_sec = rs64.lo;
 	rcv_day = rs64.hi - 512 * 7;

@@ -376,7 +376,7 @@ step_systime(
 	fp_sys += fp_ofs;
 
 	/* unfold the new system time */
-	timets = lfp_stamp_to_tspec(fp_sys, &pivot);
+	timets = lfp_stamp_to_tspec(fp_sys, pivot);
 
 	/* now set new system time */
 	if (settime(&timets) != 0) {

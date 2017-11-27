@@ -12,16 +12,15 @@
 
 TEST_GROUP(leapsec);
 
+static time_t fixedpivot;
+
 TEST_SETUP(leapsec) {
-	ntpcal_set_timefunc(timefunc);
-	settime(1970, 1, 1, 0, 0, 0);
+	fixedpivot = settime(1970, 1, 1, 0, 0, 0);
 	leapsec_ut_pristine();
 }
 
 TEST_TEAR_DOWN(leapsec) {
-	ntpcal_set_timefunc(NULL);
 }
-
 
 static const char leap1 [] =
     "#\n"

@@ -16,13 +16,13 @@ TEST_GROUP(clocktime);
 // function for getting the current system time, so the tests are not
 // dependent on the actual system time.
 
+static time_t fixedpivot;
+
 TEST_SETUP(clocktime) {
-	ntpcal_set_timefunc(timefunc);
-	settime(2000, 1, 1, 0, 0, 0);
+	fixedpivot = settime(2000, 1, 1, 0, 0, 0);
 }
 
 TEST_TEAR_DOWN(clocktime) {
-	ntpcal_set_timefunc(NULL);
 }
 
 // ---------------------------------------------------------------------
@@ -39,7 +39,7 @@ TEST(clocktime, CurrentYear) {
 	uint32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
-				   tzoff, timestamp, &yearstart, &actual));
+				   tzoff, fixedpivot, timestamp, &yearstart, &actual));
 	TEST_ASSERT_EQUAL(expected, actual);
 	TEST_ASSERT_EQUAL(yearstart, 3471292800);
 }
@@ -55,7 +55,7 @@ TEST(clocktime, CurrentYearExplicit) {
 	uint32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
-				   tzoff, timestamp, &yearstart, &actual));
+				   tzoff, fixedpivot, timestamp, &yearstart, &actual));
 	/* If this assertion fails with "Expected 3486372600 was
 	 * 104913720" that's a 32-bit integer overflow and your compiler
 	 * is failing to cast to int properly inside clocktime. 
@@ -83,7 +83,7 @@ TEST(clocktime, CurrentYearFuzz) {
 	uint32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
-				   tzoff, timestamp, &yearstart, &actual));
+				   tzoff, fixedpivot, timestamp, &yearstart, &actual));
 	TEST_ASSERT_EQUAL(expected, actual);
 }
 
@@ -103,7 +103,7 @@ TEST(clocktime, TimeZoneOffset) {
 	uint32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
-				   tzoff, timestamp, &yearstart, &actual));
+				   tzoff, fixedpivot, timestamp, &yearstart, &actual));
 	TEST_ASSERT_EQUAL(expected, actual);
 }
 
@@ -122,7 +122,7 @@ TEST(clocktime, WrongYearStart) {
 	uint32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
-				   tzoff, timestamp, &yearstart, &actual));
+				   tzoff, fixedpivot, timestamp, &yearstart, &actual));
 	TEST_ASSERT_EQUAL(expected, actual);
 }
 
@@ -141,7 +141,7 @@ TEST(clocktime, PreviousYear) {
 	uint32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
-				   tzoff, timestamp, &yearstart, &actual));
+				   tzoff, fixedpivot, timestamp, &yearstart, &actual));
 	TEST_ASSERT_EQUAL(expected, actual);
 }
 
@@ -159,7 +159,7 @@ TEST(clocktime, NextYear) {
 	uint32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(year, yday, hour, minute, second,
-				   tzoff, timestamp, &yearstart, &actual));
+				   tzoff, fixedpivot, timestamp, &yearstart, &actual));
 	TEST_ASSERT_EQUAL(expected, actual);
 }
 
@@ -172,7 +172,7 @@ TEST(clocktime, NoReasonableConversion) {
 	uint32_t actual;
 
 	TEST_ASSERT_FALSE(clocktime(year, yday, hour, minute, second,
-				    tzoff, timestamp, &yearstart, &actual));
+				    tzoff, fixedpivot, timestamp, &yearstart, &actual));
 }
 
 TEST(clocktime, AlwaysInLimit) {
@@ -198,7 +198,7 @@ TEST(clocktime, AlwaysInLimit) {
 			for (hour = -204; hour < 204; hour += 2) {
 				for (minute = -60; minute < 60; minute++) {
 				    (void)clocktime(0, yday, hour, minute, 30, 0,
-						  timestamp, &yearstart, &actual);
+						    fixedpivot, timestamp, &yearstart, &actual);
 					diff = actual - timestamp;
 					if (diff >= 0x80000000UL) {
 						diff = ~diff + 1;

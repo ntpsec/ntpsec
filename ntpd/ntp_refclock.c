@@ -414,7 +414,7 @@ refclock_process_f(
 	 * it finds only a 2-digit year in the timecode.
 	 */
 	if (!clocktime(pp->year, pp->day, pp->hour, pp->minute, pp->second, GMT,
-		       lfpuint(pp->lastrec), &pp->yearstart, &sec))
+		       time(NULL), lfpuint(pp->lastrec), &pp->yearstart, &sec))
 		return false;
 
 	setlfpuint(offset, sec);

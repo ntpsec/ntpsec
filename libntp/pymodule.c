@@ -97,7 +97,7 @@ ntpc_lfptofloat(PyObject *self, PyObject *args)
 	PyErr_SetString(PyExc_ValueError, "ill-formed hex date");
 	return NULL;
     }
-    tt = lfp_stamp_to_tspec(ts, NULL);
+    tt = lfp_stamp_to_tspec(ts, time(NULL));
     return Py_BuildValue("d", tt.tv_sec + tt.tv_nsec * S_PER_NS);
 }
 

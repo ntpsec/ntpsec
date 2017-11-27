@@ -335,12 +335,12 @@ lfp_uintv_to_tspec(
 /*
  * absolute (timestamp) conversion. Input is time in NTP epoch, output
  * is in UN*X epoch. The NTP time stamp will be expanded around the
- * pivot time *p or the current time, if p is NULL.
+ * pivot time p.
  */
 struct timespec
 lfp_stamp_to_tspec(
 	l_fp		x,
-	const time_t *	p
+	time_t	 	p
 	)
 {
 	struct timespec	out;

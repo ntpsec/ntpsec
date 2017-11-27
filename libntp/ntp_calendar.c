@@ -22,36 +22,11 @@
  * --------------------------------------------------------------------
  */
 
-static systime_func_ptr systime_func = &time;
-static inline time_t now(void);
-
 static ntpcal_split
 ntpcal_days_in_months(int32_t /* months */);
 
 static  int32_t
 ntpcal_edate_to_yeardays(int32_t, int32_t, int32_t);
-
-systime_func_ptr
-ntpcal_set_timefunc(
-	systime_func_ptr nfunc
-	)
-{
-	systime_func_ptr res;
-
-	res = systime_func;
-	if (NULL == nfunc)
-		nfunc = &time;
-	systime_func = nfunc;
-
-	return res;
-}
-
-
-static inline time_t
-now(void)
-{
-	return (*systime_func)(NULL);
-}
 
 /*
  *---------------------------------------------------------------------
@@ -73,10 +48,10 @@ ntpcal_get_build_date(
 
         epoch_tm = gmtime(&epoch);
         if ( NULL == epoch_tm ) {
-            /* bad POCH */
+            /* bad EPOCH */
 	    return false;
         }
-	/* good EOPCH */
+	/* good EPOCH */
 	jd->year     = epoch_tm->tm_year + 1900;
 	jd->yearday  = epoch_tm->tm_yday + 1;
 	jd->month    = epoch_tm->tm_mon + 1;
@@ -289,12 +264,12 @@ ntpcal_periodic_extend(
 time64_t
 ntpcal_ntp_to_time(
 	uint32_t	ntp,
-	const time_t *	pivot
+	time_t		pivot
 	)
 {
 	time64_t res;
 
-	settime64s(res, (pivot != NULL) ? *pivot : now());
+	settime64s(res, pivot);
 	settime64u(res, time64u(res)-0x80000000);	/* unshift of half range */
 	ntp	-= (uint32_t)JAN_1970;		/* warp into UN*X domain */
 	ntp	-= time64lo(res);		/* cycle difference	 */
@@ -319,12 +294,12 @@ ntpcal_ntp_to_time(
 time64_t
 ntpcal_ntp_to_ntp(
 	uint32_t      ntp,
-	const time_t *pivot
+	time_t	      pivot
 	)
 {
 	time64_t res;
 
-	settime64s(res, (pivot) ? *pivot : now());
+	settime64s(res, pivot);
 	settime64u(res, time64u(res) - 0x80000000);		/* unshift of half range */
 	settime64u(res, time64u(res) + (uint32_t)JAN_1970);	/* warp into NTP domain	 */
 
@@ -887,7 +862,7 @@ int
 ntpcal_ntp_to_date(
 	struct calendar *jd,
 	uint32_t	 ntp,
-	const time_t	*piv
+	const time_t	piv
 	)
 {
 	time64_t	ntp64;

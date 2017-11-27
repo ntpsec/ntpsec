@@ -564,6 +564,8 @@ ntpdmain(
 		exit(1);
 	}
 
+	set_prettydate_pivot(time(NULL));
+	
 # ifdef HAVE_WORKING_FORK
 	/* make sure the FDs are initialised */
 	pipe_fds[0] = -1;

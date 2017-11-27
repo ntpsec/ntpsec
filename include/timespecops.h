@@ -61,7 +61,7 @@ extern l_fp tspec_intv_to_lfp( struct timespec);
 extern l_fp tspec_stamp_to_lfp( struct timespec);
 extern struct timespec lfp_intv_to_tspec(l_fp);
 extern struct timespec lfp_uintv_to_tspec(l_fp);
-extern struct timespec lfp_stamp_to_tspec(l_fp, const time_t *);
+extern struct timespec lfp_stamp_to_tspec(l_fp, time_t);
 extern struct timespec tval_to_tspec(struct timeval);
 
 #endif	/* GUARD_TIMESPECOPS_H */

@@ -114,6 +114,13 @@ get_struct_tm(
 	return tm;
 }
 
+static time_t prettypivot;
+
+void
+set_prettydate_pivot(time_t pivot) {
+    prettypivot = pivot;
+}
+
 static char *
 common_prettydate(
 	const l_fp ts
@@ -137,7 +144,7 @@ common_prettydate(
 		msec -= 1000u;
 		ntps++;
 	}
-	sec = ntpcal_ntp_to_time(ntps, NULL);
+	sec = ntpcal_ntp_to_time(ntps, prettypivot);
 	tm  = get_struct_tm(&sec, &tmbuf);
 	if (!tm) {
 		/*

@@ -27,7 +27,7 @@
 /*
  * local calendar helpers
  */
-static int32_t   ntp_to_year(uint32_t);
+static int32_t  ntp_to_year(uint32_t, time_t);
 static uint32_t year_to_ntp(int32_t);
 
 /*
@@ -59,7 +59,8 @@ clocktime(
 	int	minute	 ,	/* minute of hour */
 	int	second	 ,	/* second of minute */
 	int	tzoff	 ,	/* hours west of GMT */
-	uint32_t rec_ui	 ,	/* pivot value */
+	time_t	pivot	 ,	/* pivot for time unfolding */
+	uint32_t rec_ui	 ,	/* recent timestamp to get year from */
 	uint32_t *yearstart,	/* cached start-of-year, secs from NTP epoch */
 	uint32_t *ts_ui	 )	/* effective time stamp */
 {
@@ -128,7 +129,7 @@ clocktime(
 	 * around the guess and select the entry with the minimum
 	 * absolute difference to the receive time stamp.
 	 */
-	y = ntp_to_year(rec_ui - (unsigned int)tmp);
+	y = ntp_to_year(rec_ui - (unsigned int)tmp, pivot);
 	for (idx = 0; idx < 3; idx++) {
 		/* -- get year start of potential solution */
 		ystt[idx] = year_to_ntp(y + idx - 1);
@@ -153,12 +154,13 @@ clocktime(
 
 static int32_t
 ntp_to_year(
-	uint32_t ntp)
+    uint32_t ntp,
+    time_t pivot)
 {
 	time64_t	     t;
 	ntpcal_split s;
 
-	t = ntpcal_ntp_to_ntp(ntp, NULL);
+	t = ntpcal_ntp_to_ntp(ntp, pivot);
 	s = ntpcal_daysplit(t);
 	s = ntpcal_split_eradays(s.hi + DAY_NTP_STARTS - 1, NULL);
 	return s.hi + 1;
