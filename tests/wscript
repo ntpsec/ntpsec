@@ -1,8 +1,10 @@
+import os
 from waflib import Utils  # pylint: disable=import-error
 
 def build(ctx):
     srcnode = ctx.srcnode.abspath()
     testsrc = ctx.srcnode.make_node('tests')
+    pylib = ctx.srcnode.make_node('pylib')
     testpylib = testsrc.make_node('pylib')
     testpysrc = testpylib.ant_glob('*.py')
 
@@ -114,12 +116,43 @@ def build(ctx):
 
     testpylib.get_bld().mkdir()
 
+    pypath = pylib.get_bld()
+    linkpath = ctx.bldnode.make_node("tests/pylib/ntp")
+    if (not linkpath.exists()) or os.readlink(linkpath.abspath()):
+        try:
+            os.remove(linkpath.abspath())
+        except OSError:
+            pass
+        os.symlink(pypath.abspath(), linkpath.abspath())
+
+    ctx(
+        features="pytest",
+        pytest_source="pylib/test_util.py",
+        pytest_paths=pypath,
+		ut_str="${PYTHON} ${SRC}"
+    )
+    ctx(
+        features="pytest",
+        pytest_source="pylib/test_agentx.py",
+        pytest_paths=pypath,
+		ut_str="${PYTHON} ${SRC}"
+    )
+    ctx(
+        features="pytest",
+        pytest_source="pylib/test_packet.py",
+        pytest_paths=pypath,
+		ut_str="${PYTHON} ${SRC}"
+    )
+    ctx(
+        features="pytest",
+        pytest_source="pylib/test_statfiles.py",
+        pytest_paths=pypath,
+		ut_str="${PYTHON} ${SRC}"
+    )
+
     ctx(
         features="subst",
         source=testpysrc,
         target=[x.get_bld() for x in testpysrc],
         chmod=Utils.O755,
     )
-
-    # ctx.exec_command("%s/tests/pylib/test_statfiles.py" % srcnode)
-    # ctx.exec_command("%s/tests/pylib/test_util.py" % srcnode)

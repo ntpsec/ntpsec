@@ -16,6 +16,7 @@ from waflib.Context import BOTH
 from waflib.Errors import WafError
 from waflib.Logs import pprint
 from waflib.Tools import waf_unit_test
+from waflib.extras import pytest
 
 # Avoid writing .pyc files in wafhelpers/
 sys.dont_write_bytecode = True
@@ -91,6 +92,7 @@ def configure(ctx):
     ctx.run_build_cls = 'check'
     ctx.load('waf', tooldir='wafhelpers/')
     ctx.load('waf_unit_test')
+    ctx.load('pytest')
     ctx.load('gnu_dirs')
 
     with open("VERSION", "r") as f:
