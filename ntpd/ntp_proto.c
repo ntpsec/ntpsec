@@ -246,10 +246,9 @@ free_packet(
 	struct parsed_pkt *pkt
 	)
 {
-	size_t i;
 	if(pkt == NULL) { return; };
 	if(pkt->extensions != NULL) {
-		for(i = 0; i < pkt->num_extensions; i++) {
+		for(size_t i = 0; i < pkt->num_extensions; i++) {
 			free(pkt->extensions[i].body);
 			pkt->extensions[i].body = NULL;
 		}
@@ -309,7 +308,6 @@ parse_packet(
 		/* Count and validate extensions */
 		size_t ext_count = 0;
 		size_t extlen = 0;
-		size_t i;
 		while(bufptr <= recv_buf + recv_length - 28) {
 			extlen = ntp_be16dec(bufptr + 2);
 			if(extlen % 4 != 0 || extlen < 16) {
@@ -331,7 +329,7 @@ parse_packet(
 
 		/* Copy extensions */
 		bufptr = recv_buf + LEN_PKT_NOMAC;
-		for(i = 0; i < ext_count; i++) {
+		for(size_t i = 0; i < ext_count; i++) {
 			pkt->extensions[i].type = ntp_be16dec(bufptr);
 			pkt->extensions[i].len = ntp_be16dec(bufptr + 2) - 4;
 			pkt->extensions[i].body =

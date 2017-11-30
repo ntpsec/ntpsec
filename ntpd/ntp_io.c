@@ -461,12 +461,11 @@ sockaddr_dump(const sockaddr_u *psau)
 	/* Limit the size of the sockaddr_in6 hex dump */
 	const int maxsize = min(32, sizeof(psau->sa6));
 	const uint8_t *	cp;
-	int		i;
 
 	/* XXX: Should we limit maxsize based on psau->saX.sin_family? */
 	cp = (const void *)&psau->sa6;
 
-	for(i = 0; i < maxsize; i++) {
+	for(int i = 0; i < maxsize; i++) {
 		printf("%02x", *cp++);
 		if (!((i + 1) % 4))
 			printf(" ");
