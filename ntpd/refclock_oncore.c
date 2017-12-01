@@ -1475,7 +1475,7 @@ oncore_consume(
 	struct instance *instance
 	)
 {
-	unsigned i, l;
+	unsigned i, m, l;
 
 	while (rcvptr >= 7) {
 		if (rcvbuf[0] != '@' || rcvbuf[1] != '@') {
@@ -1497,7 +1497,7 @@ oncore_consume(
 
 		/* Ok, we have a header now */
 		l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) -1;
-		for(unsigned m = 0; m < l; m++)
+		for(m = 0; m < l; m++)
 			if (!strncmp(oncore_messages[m].flag, (char *)(rcvbuf+2), (size_t) 2))
 				break;
 		if (m == l) {
