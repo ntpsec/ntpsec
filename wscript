@@ -1052,6 +1052,10 @@ python_scripts = [
     "ntpclients/ntpsnmpd.py",
 ]
 
+other_scripts = [
+    "ntpclients/ntpleapfetch",
+]
+
 
 def build(ctx):
     ctx.load('waf', tooldir='wafhelpers/')
@@ -1093,12 +1097,13 @@ def build(ctx):
         source=python_scripts,
     )
 
-    scripts = ["ntpclients/ntpleapfetch"] + python_scripts
+    script_sources = other_scripts + python_scripts
+    script_targets = other_scripts + [script[:-3] for script in python_scripts]
 
     ctx(
         features="subst",
-        source=scripts,
-        target=[x.rstrip(".py") for x in scripts],
+        source=script_sources,
+        target=script_targets,
         chmod=Utils.O755,
         install_path='${BINDIR}',
     )
