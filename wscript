@@ -16,7 +16,6 @@ from waflib.Context import BOTH
 from waflib.Errors import WafError
 from waflib.Logs import pprint
 from waflib.Tools import waf_unit_test
-from waflib.extras import pytest
 
 # Avoid writing .pyc files in wafhelpers/
 sys.dont_write_bytecode = True
