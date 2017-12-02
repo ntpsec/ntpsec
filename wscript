@@ -1088,10 +1088,11 @@ def build(ctx):
     ctx.recurse("attic")
     ctx.recurse("tests")
 
-    # Make sure the python scripts actually get compiled
+    # Make sure the python scripts compile, but don't install them
     ctx(
         features="py",
         source=python_scripts,
+        install_path=None,
     )
 
     scripts = ["ntpclients/ntpleapfetch"] + python_scripts
