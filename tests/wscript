@@ -125,30 +125,15 @@ def build(ctx):
             pass
         os.symlink(pypath.abspath(), linkpath.abspath())
 
-    ctx(
-        features="pytest",
-        pytest_source="pylib/test_util.py",
-        pytest_paths=pypath,
-		ut_str="${PYTHON} ${SRC}"
-    )
-    ctx(
-        features="pytest",
-        pytest_source="pylib/test_agentx.py",
-        pytest_paths=pypath,
-		ut_str="${PYTHON} ${SRC}"
-    )
-    ctx(
-        features="pytest",
-        pytest_source="pylib/test_packet.py",
-        pytest_paths=pypath,
-		ut_str="${PYTHON} ${SRC}"
-    )
-    ctx(
-        features="pytest",
-        pytest_source="pylib/test_statfiles.py",
-        pytest_paths=pypath,
-		ut_str="${PYTHON} ${SRC}"
-    )
+    for path in ["pylib/test_util.py",
+                 "pylib/test_agentx.py",
+                 "pylib/test_packet.py",
+                 "pylib/test_statfiles.py"]:
+        ctx(
+            features="pytest",
+            pytest_source="pylib/test_util.py",
+            ut_str="${PYTHON} ${SRC}"
+        )
 
     ctx(
         features="subst",
