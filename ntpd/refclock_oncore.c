@@ -1497,7 +1497,7 @@ oncore_consume(
 
 		/* Ok, we have a header now */
 		l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) -1;
-		for(m=0; m<l; m++)
+		for(m = 0; m < l; m++)
 			if (!strncmp(oncore_messages[m].flag, (char *)(rcvbuf+2), (size_t) 2))
 				break;
 		if (m == l) {
@@ -1883,7 +1883,6 @@ oncore_msg_any(
 	UNUSED_ARG(len);
 	UNUSED_ARG(idx);
 #else
-	int i;
 	const char *fmt = oncore_messages[idx].fmt;
 	const char *p;
 	char *q;
@@ -1899,7 +1898,7 @@ oncore_msg_any(
 		if (!*fmt) {
 			snprintf(Msg, sizeof(Msg), ">>@@%c%c ", buf[2],
 				 buf[3]);
-			for(i = 2; i < len && i < 2400 ; i++) {
+			for(int i = 2; i < len && i < 2400 ; i++) {
 				snprintf(Msg2, sizeof(Msg2), "%02x",
 					 buf[i]);
 				strlcat(Msg, Msg2, sizeof(Msg));

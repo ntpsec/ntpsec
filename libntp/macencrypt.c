@@ -28,9 +28,8 @@ static bool ctmemeq(const void *s1, const void *s2, size_t n) {
 	const uint8_t *a = s1;
 	const uint8_t *b = s2;
 	uint8_t accum = 0;
-        size_t i;
 
-	for(i=0; i<n; i++) {
+	for(size_t i = 0; i < n; i++) {
 		accum |= a[i] ^ b[i];
 	}
 

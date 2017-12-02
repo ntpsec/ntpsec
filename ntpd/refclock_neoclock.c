@@ -137,9 +137,6 @@ neoclock4x_start(int unit,
   char dev[20];
   int sl232;
   struct termios termsettings;
-#if !defined(NEOCLOCK4X_FIRMWARE)
-  int tries;
-#endif
 
   (void) snprintf(dev, sizeof(dev)-1, "/dev/neoclock4x-%d", unit);
 
@@ -293,7 +290,7 @@ neoclock4x_start(int unit,
   return false;
 #endif
 #else
-  for(tries=0; tries < 5; tries++)
+  for(int tries = 0; tries < 5; tries++)
     {
       NLOG(NLOG_CLOCKINFO)
 	msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): checking NeoClock4X firmware version (%d/5)", unit, tries);
@@ -389,7 +386,6 @@ neoclock4x_receive(struct recvbuf *rbufp)
   unsigned long calc_utc;
   int day;
   int month;	/* ddd conversion */
-  int c;
   int dsec;
   unsigned char calc_chksum;
   int recv_chksum;
@@ -422,7 +418,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
 
   /* calculate checksum */
   calc_chksum = 0;
-  for(c=0; c < NEOCLOCK4X_OFFSET_CRC; c++)
+  for(int c = 0; c < NEOCLOCK4X_OFFSET_CRC; c++)
     {
       calc_chksum += pp->a_lastcode[c];
     }
@@ -725,10 +721,9 @@ neol_hexatoi_len(const char str[],
 		 int maxlen)
 {
   int hexdigit;
-  int i;
   int n = 0;
 
-  for(i=0; isxdigit((unsigned char)str[i]) && i < maxlen; i++)
+  for(int i = 0; isxdigit((unsigned char)str[i]) && i < maxlen; i++)
     {
       hexdigit = isdigit((unsigned char)str[i]) ? toupper((unsigned char)str[i]) - '0' : toupper((unsigned char)str[i]) - 'A' + 10;
       n = 16 * n + hexdigit;
@@ -743,10 +738,9 @@ neol_atoi_len(const char str[],
 		  int maxlen)
 {
   int digit;
-  int i;
   int n = 0;
 
-  for(i=0; isdigit((unsigned char)str[i]) && i < maxlen; i++)
+  for(int i = 0; isdigit((unsigned char)str[i]) && i < maxlen; i++)
     {
       digit = str[i] - '0';
       n = 10 * n + digit;
