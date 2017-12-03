@@ -31,8 +31,8 @@ static int32_t  ntp_to_year(uint32_t, time_t);
 static uint32_t year_to_ntp(int32_t);
 
 /*
- * Take a time spec given as year, day-of-year, hour, minute and second as
- * well as a GMT offset in hours and convert it to a NTP time stamp in
+ * Take a time spec given as year, day-of-year, hour, minute and second
+ * (in GMT/UTC) and convert it to a NTP time stamp in
  * '*ts_ui'.  There are two cases: ether the year is > 99, in which
  * case it is used, or it is < 99 in which case we ignore it and try
  * to deduce a year,
@@ -58,7 +58,6 @@ clocktime(
 	int	hour	 ,	/* hour of day */
 	int	minute	 ,	/* minute of hour */
 	int	second	 ,	/* second of minute */
-	int	tzoff	 ,	/* hours west of GMT */
 	time_t	pivot	 ,	/* pivot for time unfolding */
 	uint32_t rec_ui	 ,	/* recent timestamp to get year from */
 	uint32_t *yearstart,	/* cached start-of-year, secs from NTP epoch */
@@ -67,16 +66,17 @@ clocktime(
 	uint32_t ystt[3];	/* year start */
 	uint32_t test[3];	/* result time stamp */
 	uint32_t diff[3];	/* abs difference to receive */
-	int32_t y, tmp, idx, min;
+	int32_t y, idx, min;
+	uint32_t tmp;
 	
 	/*
-	 * Compute the offset into the year in seconds.	 Note that
-	 * this could come out to be a negative number.
+	 * Compute the offset into the year in seconds.	 Can't
+	 * be negative as yday is 1-origin.
 	 */
-	tmp = ((int32_t)second +
-	       SECSPERMIN * ((int32_t)minute +
-			     MINSPERHR * ((int32_t)hour + (int32_t)tzoff +
-					  HRSPERDAY * ((int32_t)yday - 1))));
+	tmp = ((uint32_t)second +
+	       SECSPERMIN * ((uint32_t)minute +
+			     MINSPERHR * ((uint32_t)hour +
+					  HRSPERDAY * ((uint32_t)yday - 1))));
 	/*
 	 * Year > 1970 - from a 4-digit year stamp, must be greater
 	 * than POSIX epoch. Means we're not dependent on the pivot
@@ -129,12 +129,12 @@ clocktime(
 	 * around the guess and select the entry with the minimum
 	 * absolute difference to the receive time stamp.
 	 */
-	y = ntp_to_year(rec_ui - (unsigned int)tmp, pivot);
+	y = ntp_to_year(rec_ui - tmp, pivot);
 	for (idx = 0; idx < 3; idx++) {
 		/* -- get year start of potential solution */
 		ystt[idx] = year_to_ntp(y + idx - 1);
 		/* -- get time stamp of potential solution */
-		test[idx] = ystt[idx] + (unsigned int)tmp;
+		test[idx] = ystt[idx] + tmp;
 		/* -- calc absolute difference to receive time */
 		diff[idx] = test[idx] - rec_ui;
 		if (diff[idx] >= 0x80000000u)

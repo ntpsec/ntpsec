@@ -402,7 +402,7 @@ true_receive(
 			 * the count from the PCL720
 			 */
 			if (!clocktime(pp->year, pp->day, pp->hour, pp->minute,
-				       pp->second, GMT, lfpuint(pp->lastrec),
+				       pp->second, lfpuint(pp->lastrec),
 				       &pp->yearstart, &sec)) {
 				refclock_report(peer, CEVNT_BADTIME);
 				return;
