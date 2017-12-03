@@ -97,7 +97,6 @@ struct refclockbug {
 #define MAXSTAGE	60	/* max median filter stages  */
 #define NSTAGE		5	/* default median filter stages */
 #define BMAX		128	/* max timecode length */
-#define GMT		0	/* I hope nobody sees this */
 #define MAXDIAL		60	/* max length of modem dial strings */
 
 struct refclockproc {
