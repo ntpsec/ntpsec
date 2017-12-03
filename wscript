@@ -567,13 +567,13 @@ int main(int argc, char **argv) {
         ctx.define("__EXTENSIONS__", "1", quote=False)
 
     structures = (
-        ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
-        ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
-        ("struct timex", ["sys/time.h", "sys/timex.h"]),
-        ("struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
+        ("struct if_laddrconf", ["sys/types.h", "net/if6.h"], False),
+        ("struct if_laddrreq", ["sys/types.h", "net/if6.h"], False),
+        ("struct timex", ["sys/time.h", "sys/timex.h"], True),
+        ("struct ntptimeval", ["sys/time.h", "sys/timex.h"], False),
     )
-    for (s, h) in structures:
-        ctx.check_cc(type_name=s, header_name=h, mandatory=False)
+    for (s, h, r) in structures:
+        ctx.check_cc(type_name=s, header_name=h, mandatory=r)
 
     # waf's SNIP_FIELD should likely include this header itself
     # This is needed on some systems to get size_t for following checks
