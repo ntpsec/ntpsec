@@ -657,7 +657,7 @@ class PeerStatusWord:
                 else:
                     self.condition = ""
             elif (statval & 0x3) == OLD_CTL_PST_SEL_SELCAND:
-                    self.condition = "sel_cand"
+                self.condition = "sel_cand"
             elif (statval & 0x3) == OLD_CTL_PST_SEL_SYNCCAND:
                 self.condition = "sync_cand"
             elif (statval & 0x3) == OLD_CTL_PST_SEL_SYSPEER:

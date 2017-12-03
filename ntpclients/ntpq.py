@@ -1014,8 +1014,8 @@ usage: writevar assocID name=value,[...]
     def do_mreadlist(self, line):
         "read the peer variables in the variable list for multiple peers"
         if not line:
-                self.warn("usage: mreadlist assocIDlow assocIDhigh\n")
-                return
+            self.warn("usage: mreadlist assocIDlow assocIDhigh\n")
+            return
         idrange = self.__assoc_range_valid(line)
         if not idrange:
             return
@@ -1036,8 +1036,8 @@ usage: mreadlist assocIDlow assocIDhigh
     def do_mrl(self, line):
         "read the peer variables in the variable list for multiple peers"
         if not line:
-                self.warn("usage: mrl assocIDlow assocIDhigh\n")
-                return
+            self.warn("usage: mrl assocIDlow assocIDhigh\n")
+            return
         self.do_mreadlist(line)
 
     def help_mrl(self):
@@ -1049,9 +1049,9 @@ usage: mrl assocIDlow assocIDhigh
     def do_mreadvar(self, line):
         "read peer variables from multiple peers"
         if not line:
-                self.warn("usage: mreadvar assocIDlow assocIDhigh  "
-                          "[ name=value[,...] ]\n")
-                return
+            self.warn("usage: mreadvar assocIDlow assocIDhigh  "
+                      "[ name=value[,...] ]\n")
+            return
         idrange = self.__assoc_range_valid(line)
         if not idrange:
             return
@@ -1073,9 +1073,9 @@ usage: mreadvar assocIDlow assocIDhigh [name=value[,...]]
     def do_mrv(self, line):
         "read peer variables from multiple peers"
         if not line:
-                self.warn(
-                    "usage: mrv assocIDlow assocIDhigh [name=value[,...]]\n")
-                return
+            self.warn(
+                "usage: mrv assocIDlow assocIDhigh [name=value[,...]]\n")
+            return
         self.do_mreadvar(line)
 
     def help_mrv(self):
@@ -1151,8 +1151,8 @@ usage: cv [ assocID ] [ name=value[,...] ]
             ("candidate", "candidate order:     ", NTP_INT),
         )
         if not line:
-                self.warn("usage: pstats assocID\n")
-                return
+            self.warn("usage: pstats assocID\n")
+            return
         associd = self.__assoc_valid(line)
         if associd >= 0:
             self.collect_display(associd=associd,

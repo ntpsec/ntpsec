@@ -754,8 +754,8 @@ component of frequency drift.</p>
                 out['min_y'] = out['max_y'] * 0.8
                 out['max_y'] = out['max_y'] * 1.2
         elif 2 > out['min_y']:
-                # scale 0:max_x
-                out['min_y'] = 0
+            # scale 0:max_x
+            out['min_y'] = 0
 
         # recalc fmt
         out['fmt'] = gnuplot_fmt(out["min_y"], out["max_y"])
