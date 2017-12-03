@@ -531,6 +531,7 @@ def monoclock():
 
 class Cache:
     "Simple time-based cache"
+
     def __init__(self, defaultTimeout=300):  # 5 min default TTL
         self.defaultTimeout = defaultTimeout
         self._cache = {}
@@ -610,6 +611,7 @@ def termsize():
 
 class PeerStatusWord:
     "A peer status word from readstats(), dissected for display"
+
     def __init__(self, status, pktversion=ntp.magic.NTP_VERSION):
         # Event
         self.event = ntp.control.CTL_PEER_EVENT(status)
@@ -1129,6 +1131,7 @@ class PeerSummary:
 
 class MRUSummary:
     "Reusable class for MRU entry summary generation."
+
     def __init__(self, showhostnames, wideremote=False,
                  debug=0, logfp=sys.stderr):
         self.debug = debug

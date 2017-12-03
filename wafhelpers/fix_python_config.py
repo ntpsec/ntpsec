@@ -53,6 +53,7 @@ from waflib.Logs import pprint  # pylint: disable=import-error
 
 class FixConfig(object):
     """Methods and state for working around waf's python-config bugs."""
+
     def __init__(self, conf):
         """Initialize state from conf object."""
         self.conf = conf

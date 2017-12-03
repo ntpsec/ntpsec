@@ -108,7 +108,11 @@ class ParseError(Exception):
 
 
 class ParseDataLengthError(ParseError): pass
+
+
 class ParseVersionError(ParseError): pass
+
+
 class ParsePDUTypeError(ParseError): pass
 
 
@@ -1345,6 +1349,7 @@ def bits2Bools(bitString, cropLength=None):
     if cropLength is not None:  # used when a bitfield is not a multiple of 8
         bits = bits[:cropLength]
     return bits
+
 
 def bools2Bits(bits):
     bitCounter = 0

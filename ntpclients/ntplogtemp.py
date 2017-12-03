@@ -183,6 +183,7 @@ class Temper:
 
 class ZoneTemp:
     "Zone sensors"
+
     def __init__(self):
         base_dir = '/sys/class/thermal/thermal_zone?/'
         self.zones = []

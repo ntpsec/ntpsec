@@ -58,11 +58,12 @@ ntpviz: can't find the Python argparse module
 
 if sys.version_info[0] == 2:
     import codecs
-    import sys  
+    import sys
 
     # force UTF-8 strings, otherwise some systems crash on micro.
-    reload(sys)  
+    reload(sys)
     sys.setdefaultencoding('utf8')
+
     def open(file, mode='r', buffering=-1, encoding=None, errors=None):
         return codecs.open(filename=file, mode=mode, encoding=encoding,
             errors=errors, buffering=buffering)

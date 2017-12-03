@@ -2519,14 +2519,14 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           (x.OID((23, 1, 1, 42)), None, None),
                           (x.OID((23, 5)), None, None)))
         # subid lambda for dynamic tree testing
-        submaker = (lambda : {0: {"reader": None, "writer": None,
-                                  "static": True, "subids": None},
-                              1: {"reader": None, "writer": None,
-                                  "static": True, "subids":
-                                  {0: {"reader": None, "writer": None,
-                                       "static": True, "subids": None}}},
-                              2: {"reader": None, "writer": None,
-                                  "static": True, "subids": None}})
+        submaker = (lambda: {0: {"reader": None, "writer": None,
+                                 "static": True, "subids": None},
+                             1: {"reader": None, "writer": None,
+                                 "static": True, "subids":
+                                 {0: {"reader": None, "writer": None,
+                                      "static": True, "subids": None}}},
+                             2: {"reader": None, "writer": None,
+                                 "static": True, "subids": None}})
         # Test tree with dynamic nodes
         self.assertEqual(tuple(f({0: {"reader": None, "writer": None,
                                       "static": True, "subids": None},

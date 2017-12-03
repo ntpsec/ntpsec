@@ -137,6 +137,7 @@ NTP_FLOAT = 0xa   # Float value
 
 class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
+
     def __init__(self, session):
         cmd.Cmd.__init__(self)
         self.session = session

@@ -1,6 +1,7 @@
 import os
 from waflib import Utils  # pylint: disable=import-error
 
+
 def build(ctx):
     srcnode = ctx.srcnode.abspath()
     testsrc = ctx.srcnode.make_node('tests')

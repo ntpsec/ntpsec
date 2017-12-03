@@ -160,6 +160,7 @@ filtdisp   = %(filtdisp)s
 
 class Fatal(Exception):
     "Unrecoverable error."
+
     def __init__(self, msg):
         Exception.__init__(self)
         self.msg = msg

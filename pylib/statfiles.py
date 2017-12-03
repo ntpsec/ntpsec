@@ -192,14 +192,13 @@ class NTPStats:
             # Morph first fields into Unix time with fractional seconds
             # ut into nice dictionary of dictionary rows
             lines1 = NTPStats.unixize(lines, self.starttime, self.endtime)
-            
+
         # Sort by datestamp
         # by default, a tuple sort()s on the 1st item, which is a nice
         # integer of milli seconds.  This is faster than using
         # cmp= or key=
         lines1.sort()
         return lines1
-
 
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
