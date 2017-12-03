@@ -787,21 +787,6 @@ int main(int argc, char **argv) {
     ctx.define("HAVE_WORKING_FORK", 1,
                comment="Whether a working fork() exists")
 
-    # Does the kernel implement a phase-locked loop for timing?
-    # All modern Unixes (in particular Linux and *BSD) have this.
-    #
-    # The README for the (now deleted) kernel directory says this:
-    # "If the precision-time kernel (KERNEL_PLL define) is
-    # configured, the installation process requires the header
-    # file /usr/include/sys/timex.h for the particular
-    # architecture to be in place."
-    #
-    if ((ctx.get_define("HAVE_SYS_TIMEX_H") and
-            not ctx.options.disable_kernel_pll)):
-        ctx.define("HAVE_KERNEL_PLL", 1,
-                   comment="Whether phase-locked loop for timing "
-                   "exists and is enabled")
-
     # SO_REUSEADDR socket option is needed to open a socket on an
     # interface when the port number is already in use on another
     # interface. Linux needs this, NetBSD does not, status on

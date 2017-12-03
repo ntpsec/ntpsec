@@ -1436,7 +1436,6 @@ ctl_putsys(
 	double kb;
 	double dtemp;
 	const char *ss;
-#ifdef HAVE_KERNEL_PLL
 	static struct timex ntx;
 	static unsigned long ntp_adjtime_time;
 
@@ -1451,7 +1450,6 @@ ctl_putsys(
 		else
 			ntp_adjtime_time = current_time;
 	}
-#endif	/* HAVE_KERNEL_PLL */
 
 	switch (varid) {
 
@@ -1824,93 +1822,50 @@ ctl_putsys(
 		break;
 
 		/*
-		 * CTL_IF_KERNLOOP() puts a zero if the kernel loop is
-		 * unavailable, otherwise calls putfunc with args.
-		 */
-#ifndef HAVE_KERNEL_PLL
-# define	CTL_IF_KERNLOOP(putfunc, args)	\
-		ctl_putint(sys_var[varid].text, 0)
-#else
-# define	CTL_IF_KERNLOOP(putfunc, args)	\
-		putfunc args
-#endif
-
-		/*
-		 * CTL_IF_KERNPPS() puts a zero if either the kernel
-		 * loop is unavailable, or kernel hard PPS is not
+		 * CTL_IF_KERNPPS() puts a zero if kernel hard PPS is not
 		 * active, otherwise calls putfunc with args.
 		 */
-#ifndef HAVE_KERNEL_PLL
-# define	CTL_IF_KERNPPS(putfunc, args)	\
-		ctl_putint(sys_var[varid].text, 0)
-#else
 # define	CTL_IF_KERNPPS(putfunc, args)			\
 		if (0 == ntx.shift)				\
 			ctl_putint(sys_var[varid].text, 0);	\
 		else						\
 			putfunc args	/* no trailing ; */
-#endif
 
 	case CS_K_OFFSET:
-		CTL_IF_KERNLOOP(
-			ctl_putdblf,
-			(sys_var[varid].text, 0, -1,
-			 ntp_error_in_seconds(ntx.offset) * MS_PER_S)
-		);
+		ctl_putdblf(sys_var[varid].text, 0, -1,
+			ntp_error_in_seconds(ntx.offset) * MS_PER_S);
 		break;
 
 	case CS_K_FREQ:
-		CTL_IF_KERNLOOP(
-			ctl_putsfp,
-			(sys_var[varid].text, ntx.freq)
-		);
+		ctl_putsfp(sys_var[varid].text, ntx.freq);
 		break;
 
 	case CS_K_MAXERR:
-		CTL_IF_KERNLOOP(
-			ctl_putdblf,
-			(sys_var[varid].text, 0, 6,
-			 ntp_error_in_seconds(ntx.maxerror) * MS_PER_S)
-		);
+		ctl_putdblf(sys_var[varid].text, 0, 6,
+			    ntp_error_in_seconds(ntx.maxerror) * MS_PER_S);
 		break;
 
 	case CS_K_ESTERR:
-		CTL_IF_KERNLOOP(
-			ctl_putdblf,
-			(sys_var[varid].text, 0, 6,
-			 ntp_error_in_seconds(ntx.esterror) * MS_PER_S)
-		);
+		ctl_putdblf(sys_var[varid].text, 0, 6,
+			 ntp_error_in_seconds(ntx.esterror) * MS_PER_S);
 		break;
 
 	case CS_K_STFLAGS:
-#ifndef HAVE_KERNEL_PLL
-		ss = "";
-#else
 		ss = k_st_flags((uint32_t)ntx.status);
-#endif
 		ctl_putstr(sys_var[varid].text, ss, strlen(ss));
 		break;
 
 	case CS_K_TIMECONST:
-		CTL_IF_KERNLOOP(
-			ctl_putint,
-			(sys_var[varid].text, ntx.constant)
-		);
+		ctl_putint(sys_var[varid].text, ntx.constant);
 		break;
 
 	case CS_K_PRECISION:
-		CTL_IF_KERNLOOP(
-			ctl_putdblf,
-			(sys_var[varid].text, 0, 6,
-			 ntp_error_in_seconds(ntx.precision) * MS_PER_S)
-		);
+		ctl_putdblf(sys_var[varid].text, 0, 6,
+			    ntp_error_in_seconds(ntx.precision) * MS_PER_S);
 		break;
 
 	case CS_K_FREQTOL:
-		CTL_IF_KERNLOOP(
-			ctl_putsfp,
-			(sys_var[varid].text, ntx.tolerance)
-		);
+	    ctl_putsfp(sys_var[varid].text, ntx.tolerance);
 		break;
 
 	case CS_K_PPS_FREQ:

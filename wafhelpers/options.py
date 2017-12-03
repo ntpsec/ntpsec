@@ -21,8 +21,6 @@ def options_cmd(ctx, config):
                    default=False, help="Enable seccomp (restricts syscalls).")
     grp.add_option('--disable-dns-lookup', action='store_true',
                    default=False, help="Disable DNS lookups.")
-    grp.add_option('--disable-kernel-pll', action='store_true',
-                   default=False, help="Disable kernel PLL.")
     grp.add_option('--disable-mdns-registration', action='store_true',
                    default=False, help="Disable MDNS registration.")
     grp.add_option(

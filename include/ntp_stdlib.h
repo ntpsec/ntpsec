@@ -113,9 +113,7 @@ extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
 extern	const char * res_match_flags(unsigned short);
 extern	const char * res_access_flags(unsigned short);
-#ifdef HAVE_KERNEL_PLL
 extern	const char * k_st_flags	(uint32_t);
-#endif
 extern	char *	statustoa	(int, int);
 extern	sockaddr_u * netof6	(sockaddr_u *);
 extern	char *	numtoa		(uint32_t);

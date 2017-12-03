@@ -12,9 +12,7 @@
 #include "lib_strbuf.h"
 #include "ntp_refclock.h"
 #include "ntp_control.h"
-#ifdef HAVE_KERNEL_PLL
 # include "ntp_syscall.h"
-#endif
 
 
 /*
@@ -188,62 +186,28 @@ static const struct codestring res_access_bits[] = {
 	/* not used with getcode(), no terminating entry needed */
 };
 
-#ifdef HAVE_KERNEL_PLL
 /*
  * kernel discipline status bits
  */
 static const struct codestring k_st_bits[] = {
-# ifdef STA_PLL
 	{ STA_PLL,			"pll" },
-# endif
-# ifdef STA_PPSFREQ
 	{ STA_PPSFREQ,			"ppsfreq" },
-# endif
-# ifdef STA_PPSTIME
 	{ STA_PPSTIME,			"ppstime" },
-# endif
-# ifdef STA_FLL
 	{ STA_FLL,			"fll" },
-# endif
-# ifdef STA_INS
 	{ STA_INS,			"ins" },
-# endif
-# ifdef STA_DEL
 	{ STA_DEL,			"del" },
-# endif
-# ifdef STA_UNSYNC
 	{ STA_UNSYNC,			"unsync" },
-# endif
-# ifdef STA_FREQHOLD
 	{ STA_FREQHOLD,			"freqhold" },
-# endif
-# ifdef STA_PPSSIGNAL
 	{ STA_PPSSIGNAL,		"ppssignal" },
-# endif
-# ifdef STA_PPSJITTER
 	{ STA_PPSJITTER,		"ppsjitter" },
-# endif
-# ifdef STA_PPSWANDER
 	{ STA_PPSWANDER,		"ppswander" },
-# endif
-# ifdef STA_PPSERROR
 	{ STA_PPSERROR,			"ppserror" },
-# endif
-# ifdef STA_CLOCKERR
 	{ STA_CLOCKERR,			"clockerr" },
-# endif
-# ifdef STA_NANO
 	{ STA_NANO,			"nano" },
-# endif
-# ifdef STA_MODE
 	{ STA_MODE,			"mode=fll" },
-# endif
-# ifdef STA_CLK
 	{ STA_CLK,			"src=B" },
-# endif
 	/* not used with getcode(), no terminating entry needed */
 };
-#endif	/* HAVE_KERNEL_PLL */
 
 /* Forwards */
 static const char *	getcode(int, const struct codestring *);
@@ -345,11 +309,9 @@ decode_bitflags(
 		 (tab == peer_st_bits)
 		     ? "peer_st"
 		     : 
-#ifdef HAVE_KERNEL_PLL
 		       (tab == k_st_bits)
 			   ? "kern_st"
 			   :
-#endif
 			     "",
 		 (unsigned)bits, (int)LIB_BUFLENGTH);
 	errno = saved_errno;
@@ -388,7 +350,6 @@ res_access_flags(
 }
 
 
-#ifdef HAVE_KERNEL_PLL
 const char *
 k_st_flags(
 	uint32_t st
@@ -396,8 +357,6 @@ k_st_flags(
 {
 	return decode_bitflags((int)st, " ", k_st_bits, COUNTOF(k_st_bits));
 }
-#endif	/* HAVE_KERNEL_PLL */
-
 
 /*
  * statustoa - return a descriptive string for a peer status

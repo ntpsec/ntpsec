@@ -13,9 +13,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
-#endif /* HAVE_KERNEL_PLL */
 
 #ifdef HAVE_TIMER_CREATE
 /* TC_ERR represents the timer_create() error return value. */
@@ -377,11 +375,7 @@ check_leapsec(
 
 	leap_result_t lsdata;
 	uint32_t       lsprox;
-#ifdef HAVE_KERNEL_PLL
 	leapsec_electric((pll_control && kern_enable) ? electric_on : electric_off);
-#else
-	leapsec_electric(electric_off);
-#endif
 #ifdef ENABLE_LEAP_SMEAR
 	leap_smear.enabled = (leap_smear_intv != 0);
 #endif

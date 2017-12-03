@@ -22,10 +22,8 @@
 
 #define NTP_MAXFREQ	500e-6
 
-#ifdef HAVE_KERNEL_PLL
 # define FREQTOD(x)	((x) / 65536e6)            /* NTP to double */
 # define DTOFREQ(x)	((int32_t)((x) * 65536e6)) /* double to NTP */
-#endif
 
 /*
  * This is an implementation of the clock discipline algorithm described
@@ -123,16 +121,13 @@ double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
 unsigned int	sys_tai;		/* TAI offset from UTC */
-#if !defined(ENABLE_LOCKCLOCK) && defined(HAVE_KERNEL_PLL)
-static bool loop_started;	/* true after LOOP_DRIFTINIT */
-#endif /* !ENABLE_LOCKCLOCK && HAVE_KERNEL_PLL */
 #ifndef ENABLE_LOCKCLOCK
+static bool loop_started;	/* true after LOOP_DRIFTINIT */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
 #endif /* ENABLE_LOCKCLOCK */
 
-#ifdef HAVE_KERNEL_PLL
 #ifndef PATH_MAX
 # define PATH_MAX MAX_PATH
 #endif
@@ -148,7 +143,6 @@ static unsigned int loop_tai;		/* last TAI offset */
 #endif /* ENABLE_LOCKCLOCK */
 static	void	start_kern_loop(void);
 static	void	stop_kern_loop(void);
-#endif /* HAVE_KERNEL_PLL */
 
 /*
  * Clock state machine control flags
@@ -157,14 +151,13 @@ bool	ntp_enable = true;	/* clock discipline enabled */
 bool	pll_control = false;	/* kernel support available */
 bool	kern_enable = true;	/* kernel support enabled */
 bool	hardpps_enable;		/* kernel PPS discipline enabled */
-#ifdef HAVE_KERNEL_PLL
-static bool	ext_enable;	/* external clock enabled */
-#endif /* HAVE_KERNEL_PLL */
 bool	allow_panic = false;	/* allow panic correction (-g) */
 bool	force_step_once = false; /* always step time once at startup (-G) */
 bool	mode_ntpdate = false;	/* exit on first clock set (-q) */
 int	freq_cnt;		/* initial frequency clamp */
+
 static int freq_set;		/* initial set frequency switch */
+static bool	ext_enable;	/* external clock enabled */
 
 /*
  * Clock state machine variables
@@ -184,7 +177,6 @@ static int sys_hufflen;		/* huff-n'-puff filter stages */
 static int sys_huffptr;		/* huff-n'-puff filter pointer */
 static double sys_mindly;	/* huff-n'-puff filter min delay */
 
-#if defined(HAVE_KERNEL_PLL)
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
@@ -194,9 +186,7 @@ static struct sigaction sigsys;	/* current sigaction status */
 static struct sigaction newsigsys; /* new sigaction status */
 static sigjmp_buf env;		/* environment var. for pll_trap() */
 #endif /* SIGSYS */
-#endif /* HAVE_KERNEL_PLL */
 
-#ifdef HAVE_KERNEL_PLL
 #ifndef ENABLE_LOCKCLOCK
 static void
 sync_status(const char *what, int ostatus, int nstatus)
@@ -222,7 +212,6 @@ static char *file_name(void)
 	}
 	return this_file;
 }
-#endif /* HAVE_KERNEL_PLL */
 
 /*
  * init_loopfilter - initialize loop filter data
@@ -238,7 +227,6 @@ init_loopfilter(void)
 	freq_cnt = (int)clock_minstep;
 }
 
-#ifdef HAVE_KERNEL_PLL
 /*
  * ntp_adjtime_error_handler - process errors from ntp_adjtime
  */
@@ -441,7 +429,6 @@ or, from ntp_adjtime():
 	}
 	return;
 }
-#endif
 
 /*
  * local_clock - the NTP logical clock loop filter.
@@ -467,9 +454,7 @@ local_clock(
 #else
 	int	rval;		/* return code */
 	int	osys_poll;	/* old system poll */
-#ifdef HAVE_KERNEL_PLL
 	int	ntp_adj_ret;	/* returned by ntp_adjtime */
-#endif /* HAVE_KERNEL_PLL */
 	double	mu;		/* interval since last update */
 	double	clock_frequency; /* clock frequency */
 	double	dtemp, etemp;	/* double temps */
@@ -738,7 +723,6 @@ local_clock(
 		}
 	}
 
-#ifdef HAVE_KERNEL_PLL
 	/*
 	 * This code segment works when clock adjustments are made using
 	 * precision time kernel support and the ntp_adjtime() system
@@ -854,7 +838,6 @@ local_clock(
 		}
 #endif /* STA_NANO */
 	}
-#endif /* HAVE_KERNEL_PLL */
 
 	/*
 	 * Clamp the frequency within the tolerance range and calculate
@@ -968,10 +951,8 @@ adj_host_clock(
 	} else if (freq_cnt > 0) {
 		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(1));
 		freq_cnt--;
-#ifdef HAVE_KERNEL_PLL
 	} else if (pll_control && kern_enable) {
 		offset_adj = 0.;
-#endif /* HAVE_KERNEL_PLL */
 	} else {
 		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
 	}
@@ -982,11 +963,9 @@ adj_host_clock(
 	 * set_freq().  Otherwise it is a component of the adj_systime()
 	 * offset.
 	 */
-#ifdef HAVE_KERNEL_PLL
 	if (pll_control && kern_enable)
 		freq_adj = 0.;
 	else
-#endif /* HAVE_KERNEL_PLL */
 		freq_adj = drift_comp;
 
 	/* Bound absolute value of total adjustment to NTP_MAXFREQ. */
@@ -1078,7 +1057,6 @@ set_freq(
 
 	drift_comp = freq;
 	loop_desc = "ntpd";
-#ifdef HAVE_KERNEL_PLL
 	if (pll_control) {
 		int ntp_adj_ret;
 		ZERO(ntv);
@@ -1091,13 +1069,11 @@ set_freq(
 		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
-#endif /* HAVE_KERNEL_PLL */
 	mprintf_event(EVNT_FSET, NULL, "%s %.6f PPM", loop_desc,
 	    drift_comp * US_PER_S);
 }
 #endif /* HAVE_LOCKCLOCK */
 
-#ifdef HAVE_KERNEL_PLL
 static void
 start_kern_loop(void)
 {
@@ -1158,10 +1134,8 @@ start_kern_loop(void)
 	  	    "kernel time sync enabled");
 	}
 }
-#endif	/* HAVE_KERNEL_PLL */
 
 
-#ifdef HAVE_KERNEL_PLL
 static void
 stop_kern_loop(void)
 {
@@ -1169,7 +1143,6 @@ stop_kern_loop(void)
 		report_event(EVNT_KERN, NULL,
 		    "kernel time sync disabled");
 }
-#endif	/* HAVE_KERNEL_PLL */
 
 
 /*
@@ -1182,21 +1155,17 @@ select_loop(
 {
 	if (kern_enable == use_kern_loop)
 		return;
-#ifdef HAVE_KERNEL_PLL
 	if (pll_control && !use_kern_loop)
 		stop_kern_loop();
-#endif
 	kern_enable = use_kern_loop;
-#ifdef HAVE_KERNEL_PLL
 	if (pll_control && use_kern_loop)
 		start_kern_loop();
-#endif
 	/*
 	 * If this loop selection change occurs after initial startup,
 	 * call set_freq() to switch the frequency compensation to or
 	 * from the kernel loop.
 	 */
-#if defined(HAVE_KERNEL_PLL) && !defined(ENABLE_LOCKCLOCK)
+#if !defined(ENABLE_LOCKCLOCK)
 	if (pll_control && loop_started)
 		set_freq(drift_comp);
 #endif
@@ -1247,12 +1216,10 @@ loop_config(
 	 */
 	case LOOP_DRIFTINIT:
 #ifndef ENABLE_LOCKCLOCK
-#ifdef HAVE_KERNEL_PLL
 		if (mode_ntpdate)
 			break;
 
 		start_kern_loop();
-#endif /* HAVE_KERNEL_PLL */
 
 		/*
 		 * Initialize frequency if given; otherwise, begin frequency
@@ -1270,16 +1237,13 @@ loop_config(
 			rstclock(EVNT_FSET, 0);
 		else
 			rstclock(EVNT_NSET, 0);
-#ifdef HAVE_KERNEL_PLL
 		loop_started = true;
-#endif /* HAVE_KERNEL_PLL */
 #endif /* !ENABLE_LOCKCLOCK */
 		break;
 
 	case LOOP_KERN_CLEAR:
 #if 0		/* XXX: needs more review, and how can we get here? */
 #ifndef ENABLE_LOCKCLOCK
-# ifdef HAVE_KERNEL_PLL
 		if (pll_control && kern_enable) {
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
@@ -1289,7 +1253,6 @@ loop_config(
 				pll_status,
 				ntv.status);
 		   }
-# endif /* HAVE_KERNEL_PLL */
 #endif /* ENABLE_LOCKCLOCK */
 #endif
 		break;
@@ -1369,7 +1332,7 @@ loop_config(
 }
 
 
-#if defined(HAVE_KERNEL_PLL) && defined(SIGSYS)
+#if defined(SIGSYS)
 /*
  * _trap - trap processor for undefined syscalls
  *
@@ -1387,4 +1350,4 @@ pll_trap(
 	pll_control = false;
 	siglongjmp(env, 1);
 }
-#endif /* HAVE_KERNEL_PLL && SIGSYS */
+#endif /* SIGSYS */

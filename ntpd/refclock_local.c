@@ -131,9 +131,6 @@ local_poll(
 	struct peer *peer
 	)
 {
-#if defined(HAVE_KERNEL_PLL) && defined(ENABLE_LOCKCLOCK)
-	struct timex ntv;
-#endif /* HAVE_KERNEL_PLL ENABLE_LOCKCLOCK */
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -159,7 +156,8 @@ local_poll(
 	 * If another process is disciplining the system clock, we set
 	 * the leap bits and quality indicators from the kernel.
 	 */
-#if defined(HAVE_KERNEL_PLL) && defined(ENABLE_LOCKCLOCK)
+#if defined(ENABLE_LOCKCLOCK)
+	struct timex ntv;
 	memset(&ntv,  0, sizeof ntv);
 	switch (ntp_adjtime(&ntv)) {
 	case TIME_OK:
@@ -183,11 +181,11 @@ local_poll(
 	}
 	pp->disp = 0;
 	pp->jitter = 0;
-#else /* HAVE_KERNEL_PLL && ENABLE_LOCKCLOCK */
+#else /* ENABLE_LOCKCLOCK */
 	pp->leap = LEAP_NOWARNING;
 	pp->disp = DISPERSION;
 	pp->jitter = 0;
-#endif /* HAVE_KERNEL_PLL && ENABLE_LOCKCLOCK */
+#endif /* ENABLE_LOCKCLOCK */
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }
