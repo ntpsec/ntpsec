@@ -65,7 +65,7 @@ def build(ctx):
                   "%s/tests/ntpdig/" % srcnode,
                   "%s/tests/common/" % srcnode
                   ] + ctx.env.PLATFORM_INCLUDES,
-        use="unity ntp isc parse M PTHREAD CRYPTO RT SOCKET NSL",
+        use="unity ntp parse M PTHREAD CRYPTO RT SOCKET NSL",
         source=libntp_source,
     )
 
@@ -91,7 +91,7 @@ def build(ctx):
             libpath=["libparse"],
             source=libparse_source,
             target="test_libparse",
-            use="unity ntp isc parse M PTHREAD CRYPTO RT SOCKET NSL",
+            use="unity ntp parse M PTHREAD CRYPTO RT SOCKET NSL",
         )
 
     ntpd_source = [
@@ -111,7 +111,7 @@ def build(ctx):
         install_path=None,
         source=ntpd_source,
         target="test_ntpd",
-        use="ntpd_lib libntpd_obj unity ntp isc "
+        use="ntpd_lib libntpd_obj unity ntp "
             "M PTHREAD CRYPTO RT SOCKET NSL",
     )
 

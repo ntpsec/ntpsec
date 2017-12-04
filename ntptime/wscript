@@ -10,7 +10,7 @@ def build(ctx):
             includes=["%s/ntptime/" % bldnode,
                       "%s/ntptime/" % srcnode,
                       ],
-            use="ntp isc M RT",
+            use="ntp M RT",
             install_path='${BINDIR}',
         )
 

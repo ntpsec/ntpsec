@@ -9,6 +9,6 @@ def build(ctx):
             features="c cprogram bld_include src_include",
             source=[name + ".c"],
             includes=["%s/%s/" % (bldnode, name)],
-            use="ntp isc M SSL CRYPTO RT THR PTHREAD",
+            use="ntp M SSL CRYPTO RT THR PTHREAD",
             install_path=None,
         )
