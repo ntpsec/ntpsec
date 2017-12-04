@@ -11,6 +11,14 @@ def configure(conf):
     fixed.load('python')
     fixed.check_python_version((2, 6, 0))
     conf.check_python_headers(features='pyext')  # Extension-only, no embedded
+    # Library directory hack, dist-packages is what python reports.
+    # That is reserved by the FHS, we have to use site-packages for user
+    # installs. Distribution installs can use dist-packages.
+    if "/usr/local/" in conf.env.PYTHONDIR:
+        if "dist-packages" in conf.env.PYTHONDIR:
+            conf.env.PYTHONDIR = conf.env.PYTHONDIR.replace("dist", "site")
+        if "dist-packages" in conf.env.PYTHONARCHDIR:
+            conf.env.PYTHONARCHDIR = conf.env.PYTHONARCHDIR.replace("dist", "site")
 
 
 def build(ctx):
