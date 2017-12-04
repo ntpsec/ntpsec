@@ -2188,7 +2188,7 @@ peer_xmit(
 	xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
 	xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_rootdisp));
 	xpkt.reftime = htonl_fp(sys_reftime);
-	xpkt.org = htonl_fp(peer->rec);
+	xpkt.org = htonl_fp(peer->xmt);
 	xpkt.rec = htonl_fp(peer->dst);
 
 	/*
