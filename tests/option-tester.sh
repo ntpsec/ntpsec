@@ -55,7 +55,7 @@ doit ()
 }
 
 doit default ""
-doit minimal "--disable-droproot --disable-dns-lookup --disable-kernel-pll --disable-mdns-registration"
+doit minimal "--disable-droproot --disable-dns-lookup --disable-mdns-registration"
 
 # This also tests refclocks without DEBUG
 doit classic "--enable-classic-mode --refclock=all"
