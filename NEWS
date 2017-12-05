@@ -20,8 +20,8 @@ OpenBSD has been removed from the list of supported platforms for
 ntpd. It will be restored if and when its clock API supports drift
 adjustment via ntp_adjtime() or equivalent facility.
 
-MAc OS X support hsas been dropped pending the implementation of
-ntp_adjtime(2); this is supposed to be in Mac OS X 10.13.
+Mac OS X support has been dropped pending the implementation of
+ntp_adjtime(2).
 
 == 2017-10-10: 1.0.0 ==
 
