@@ -895,7 +895,7 @@ class TestPylibUtilMethods(unittest.TestCase):
             fakesockmod.gai_returns = [("fam", "type", "proto",
                                         "foo.bar.com", "1.2.3.4")]
             self.assertEqual(cls.summary(ent),
-                             "64730     0      0  400 K 7 2"
+                             "64730 23296      0  400 K 7 2"
                              "      1    42 1.2.3.4")
             # Test summary, second options
             mycache._cache = {}
@@ -909,7 +909,7 @@ class TestPylibUtilMethods(unittest.TestCase):
                                          "foo.bar.com", ("1.2.3.4", 42))]]
             cdns_jig_returns = ["foo.com"]
             self.assertEqual(cls.summary(ent),
-                             "64730     0   4.00   20 L 7 2     65"
+                             "64730 23808   4.00   20 L 7 2     65"
                              "    42 foo.com")
             # Test summary, third options
             mycache._cache = {}
@@ -918,7 +918,7 @@ class TestPylibUtilMethods(unittest.TestCase):
             fakesockmod.gai_error_count = 1
             cdns_jig_returns = ["foobarbaz" * 5]  # 45 chars, will be cropped
             self.assertEqual(cls.summary(ent),
-                             "64730     0    256    0 . 7 2      2    42"
+                             "64730 23808    256    0 . 7 2      2    42"
                              " 1.2.3.4 (foobarbazfoobarbazfoobarbazfoob")
             # Test summary, wide
             mycache._cache = {}
@@ -926,7 +926,7 @@ class TestPylibUtilMethods(unittest.TestCase):
             fakesockmod.gai_error_count = 1
             cdns_jig_returns = ["foobarbaz" * 5]  # 45 chars, will be cropped
             self.assertEqual(cls.summary(ent),
-                             "64730     0    256    0 . 7 2      2"
+                             "64730 23808    256    0 . 7 2      2"
                              "    42 1.2.3.4 "
                              "(foobarbazfoobarbazfoobarbazfoobarbazfoobarbaz)")
         finally:

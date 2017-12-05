@@ -1150,9 +1150,7 @@ class MRUSummary:
         else:
             # direct mode doesn't have a reference time
             MJD_1970 = 40587     # MJD for 1 Jan 1970, Unix epoch
-            days = int(last) / 86400
-            seconds = last - days*86400
-            lstint = int(seconds)
+            days, lstint = divmod(int(last), 86400)
             stats = "%5d %5d" % (days + MJD_1970, lstint)
         first = ntp.ntpc.lfptofloat(entry.first)
         active = float(last - first)
