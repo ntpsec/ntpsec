@@ -830,7 +830,9 @@ ntpdmain(
 	if (dumpopts) {
 	    if (explicit_config)
 		fprintf(stdout, "conffile \"%s\";\n", explicit_config);
+#ifdef DEBUG
 	    fprintf(stdout, "#debug = %d\n", debug);
+#endif /* DEBUG */
 	    if (driftfile)
 		fprintf(stdout, "driftfile \"%s\";\n", driftfile);
 	    fprintf(stdout, "#allow_panic = %s\n",
