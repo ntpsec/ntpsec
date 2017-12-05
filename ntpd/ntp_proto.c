@@ -849,6 +849,11 @@ receive(
 		}
 	}
 
+	if (peer != NULL) {
+	    	peer->received++;
+		peer->timereceived = current_time;
+	}
+
 	switch(match) {
 	    case AM_FXMIT:
             case AM_NEWPASS:
