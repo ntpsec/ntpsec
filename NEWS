@@ -23,6 +23,9 @@ adjustment via ntp_adjtime() or equivalent facility.
 Mac OS X support has been dropped pending the implementation of
 ntp_adjtime(2).
 
+A bug that caused the rejection of 33% of packets from Amazon time
+service has been fixed.
+
 == 2017-10-10: 1.0.0 ==
 
 This is the 1.0 release.
