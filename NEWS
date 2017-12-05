@@ -16,6 +16,13 @@ It is now possible to unpeer refclocks using a type/unit specification
 rather than a magic IP address.  This was the last obligatory use of
 magic IP addresses in the configuration grammar.
 
+OpenBSD has been removed from the list of supported platforms for
+ntpd. It will be restored if and when its clock API supports drift
+adjustment via ntp_adjtime() or equivalent facility.
+
+MAc OS X support hsas been dropped pending the implementation of
+ntp_adjtime(2); this is supposed to be in Mac OS X 10.13.
+
 == 2017-10-10: 1.0.0 ==
 
 This is the 1.0 release.

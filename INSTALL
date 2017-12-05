@@ -4,10 +4,10 @@
 
 This software should build on any operating system conformant to
 POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  In addition, the operating
-system must have an ntp_adjtime(2) call or the older BSD adjtime(2)
-call. Also, it must support the IPv6 API defined in RFC 2493 and
-RFC 2553. Finally, it must support iterating over active UDP interfaces
-via getifaddrs(3) or some equivalent facility.
+system must have an ntp_adjtime(2) call. Also, it must support the
+IPv6 API defined in RFC 2493 and RFC 2553. Finally, it must support
+iterating over active UDP interfaces via getifaddrs(3) or some
+equivalent facility.
 
 You can browse a summary of differences from legacy NTP here:
 
@@ -122,33 +122,6 @@ Under Unix, the simplest way to compile this package is:
   9. To also remove the files that `./waf configure' created (so you can
      configure and compile the package for a different kind of
      computer), type `./waf distclean'.
-
-=== Apple ===
-
-Under OS X you can build NTPsec using Xcode command line tools with no
-additions. There is currently no support for using Xcode's builder.
-
-Previous support for OS X 10.11 has been dropped due to multiple
-botches on Apple's part.  Your OS X needs to have POSIX compliant
-clock_gettime(2) and clock_settime(2) functions.
-
-The OS X build has been tested in this environment:
-
- OS X Version             : 10.12
- Xcode Version            : 7.1
- Xcode Command Line Tools : 7.2-beta
-
-The macOS build has been tested in this environment:
-
- macOS Version            : 16.3.0
- Xcode Version            : 8.2.1
-
-All you will require is the Xcode command line tools with no additions.
-There is currently no support for using Xcode's builder. NTPsec's standard
-waf based build system is used.
-
-To disable Apple's NTP, open the Date & Time Preferences and uncheck
-"Set date and time automatically".
 
 === Solaris ===
 

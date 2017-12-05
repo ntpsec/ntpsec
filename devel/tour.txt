@@ -196,11 +196,12 @@ quite a while before NTPsec removed it.
 == System call interface and the PLL ==
 
 All of ntpd's clock management is done through four system calls:
-clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or the
-older BSD adjtime(2) call.  For ntp_adjtime(), ntpd actually uses a
-thin wrapper that hides the difference between systems with
-nanosecond-precision and those with only microsecond precision;
-internally, ntpd does all its calculations with nanosecond precision.
+clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or (in
+exceptional cases) the older BSD adjtime(2) call.  For ntp_adjtime(),
+ntpd actually uses a thin wrapper that hides the difference between
+systems with nanosecond-precision and those with only microsecond
+precision; internally, ntpd does all its calculations with nanosecond
+precision.
 
 The clock_gettime(2) and clock_settime(2) calls are standardized in
 POSIX; ntp_adjtime(2) is not, exhibiting some variability in
@@ -261,10 +262,12 @@ do its work, using a control technique called a PLL/FLL (phase-locked
 loop/frequency-locked loop) to do it.
 
 The older BSD adjtime(2) can be used for slewing as well, but doesn't
-assume a kernel-level PLL is available.  Some platforms, like OpenBSD
-and Mac OS X, use only this call because they lack ntp_adjtime(2).
-Without the PLL calls, convergence to good time is observably a lot
-slower and tracking will accordingly be less reliable.
+assume a kernel-level PLL is available.  It is used only when
+ntp_adjtime() calls generate a SIGSYS because the system call has not
+been implemented.  Without the PLL calls, convergence to good time is
+observably a lot slower and tracking will accordingly be less
+reliable; support for systems that lack them (notably OpenBSD and
+older Mac OS X versions) has been dropped fom NTPsec.
 
 Deep-in-the weeds details about the kernel PLL from Hal Murray follow.
 If you can follow these you may be qualified to maintain this code...
