@@ -99,6 +99,70 @@ debian-jessie-refclocks:
   tags:
     - debian-jessie
 
+debian-stretch-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - debian-stretch
+
+debian-stretch-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - debian-stretch
+
+ubuntu-1404-lts-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - ubuntu-1404-lts
+
+ubuntu-1404-lts-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - ubuntu-1404-lts
+
+ubuntu-1604-lts-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - ubuntu-1604-lts
+
+ubuntu-1604-lts-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - ubuntu-1604-lts
+
+ubuntu-1710-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - ubuntu-1710
+
+ubuntu-1710-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - ubuntu-1710
+
 gcc-7-basic:
   <<: *job_definition
   image: gcc:7
