@@ -13,7 +13,17 @@
 # include <sys/timex.h>
 extern int ntp_adjtime_ns(struct timex *);
 
+/*
+ * The units of the maxerror and esterror fields vary by platform.  If
+ * STA_NANO is defined, they're in nanoseconds; otherwise in
+ * microseconds. Hide the difference by normalizing everything to
+ * float seconds.
+ */
+# ifdef STA_NANO
 #define ntp_error_in_seconds(n)	((n)/1.0e9)
+# else
+#define ntp_error_in_seconds(n)	((n)/1.0e6)
+# endif
 
 /* MUSL port shim */
 #if !defined(HAVE_NTP_ADJTIME) && defined(HAVE_ADJTIMEX)
