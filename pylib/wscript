@@ -11,14 +11,17 @@ def configure(conf):
     fixed.load('python')
     fixed.check_python_version((2, 6, 0))
     conf.check_python_headers(features='pyext')  # Extension-only, no embedded
-    # Library directory hack, dist-packages is what python reports.
-    # That is reserved by the FHS, we have to use site-packages for user
-    # installs. Distribution installs can use dist-packages.
-    if "/usr/local/" in conf.env.PYTHONDIR:
-        if "dist-packages" in conf.env.PYTHONDIR:
-            conf.env.PYTHONDIR = conf.env.PYTHONDIR.replace("dist", "site")
-        if "dist-packages" in conf.env.PYTHONARCHDIR:
-            conf.env.PYTHONARCHDIR = conf.env.PYTHONARCHDIR.replace("dist", "site")
+    # Library directory hack
+    # For unknown reasons python libs are getting shunted off where they
+    # should not be on gentoo. I DO NOT KNOW HOW BRITTLE THIS CODE IS.
+    if conf.env.PYTHONDIR.startswith(conf.env.PREFIX) is False:
+        splitPoint = conf.env.PYTHONDIR.find("/python")
+        tail = conf.env.PYTHONDIR[splitPoint:]
+        conf.env.PYTHONDIR = conf.env.PREFIX + "lib" + tail
+    if conf.env.PYTHONARCHDIR.startswith(conf.env.PREFIX) is False:
+        splitPoint = conf.env.PYTHONARCHDIR.find("/python")
+        tail = conf.env.PYTHONARCHDIR[splitPoint:]
+        conf.env.PYTHONARCHDIR = conf.env.PREFIX + "lib" + tail
 
 
 def build(ctx):
