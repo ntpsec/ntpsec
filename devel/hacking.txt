@@ -342,6 +342,14 @@ the historic copyright is no longer appropriate, but such decisions
 cannot be made casually. Discuss it with the project management
 before moving.
 
+=== Document what you do ===
+
+When you change anything user-visible, you are expected to update the
+relevant documentation *in the same commit*.  No exceptions.
+
+Otherwise we'd have to inflict long, tedious document reviews on
+everybody. Nobody wants that.
+
 === Documentation format and structure ===
 
 All our documentation is mastered in asciidoc.  That includes internal
