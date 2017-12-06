@@ -23,6 +23,12 @@ def build(ctx):
     sources = srcnode.ant_glob('*.py')
     builds = [x.get_bld() for x in sources]
 
+    # Remove generated files to ensure they are properly updated
+    ctx.exec_command("rm -f %s" % target1.abspath())
+    ctx.exec_command("rm -f %s" % target2.abspath())
+    ctx.exec_command("rm -f %s" % target3.abspath())
+    ctx.exec_command("rm -f %s" % target4.abspath())
+
     # Make sure Python sees .py as well as .pyc/.pyo
     ctx(
         features="subst",
