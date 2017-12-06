@@ -93,6 +93,9 @@ a build-time switch, not a run-time one).
 * ntpq no longer has the -i/--interactive option, as there was no
   situation in which it was meaningful.
 
+* Interleave mode has been removed.  It was buggy and the root cause
+  of at least two CVEs.
+
 [[security]]
 == Security Improvements ==
 
