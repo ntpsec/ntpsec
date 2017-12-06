@@ -190,45 +190,19 @@ static const struct codestring res_access_bits[] = {
  * kernel discipline status bits
  */
 static const struct codestring k_st_bits[] = {
-# ifdef STA_PLL
 	{ STA_PLL,			"pll" },
-# endif
-# ifdef STA_PPSFREQ
 	{ STA_PPSFREQ,			"ppsfreq" },
-# endif
-# ifdef STA_PPSTIME
 	{ STA_PPSTIME,			"ppstime" },
-# endif
-# ifdef STA_FLL
 	{ STA_FLL,			"fll" },
-# endif
-# ifdef STA_INS
 	{ STA_INS,			"ins" },
-# endif
-# ifdef STA_DEL
 	{ STA_DEL,			"del" },
-# endif
-# ifdef STA_UNSYNC
 	{ STA_UNSYNC,			"unsync" },
-# endif
-# ifdef STA_FREQHOLD
 	{ STA_FREQHOLD,			"freqhold" },
-# endif
-# ifdef STA_PPSSIGNAL
 	{ STA_PPSSIGNAL,		"ppssignal" },
-# endif
-# ifdef STA_PPSJITTER
 	{ STA_PPSJITTER,		"ppsjitter" },
-# endif
-# ifdef STA_PPSWANDER
 	{ STA_PPSWANDER,		"ppswander" },
-# endif
-# ifdef STA_PPSERROR
 	{ STA_PPSERROR,			"ppserror" },
-# endif
-# ifdef STA_CLOCKERR
 	{ STA_CLOCKERR,			"clockerr" },
-# endif
 # ifdef STA_NANO
 	{ STA_NANO,			"nano" },
 # endif
