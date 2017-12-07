@@ -11,17 +11,6 @@ def configure(conf):
     fixed.load('python')
     fixed.check_python_version((2, 6, 0))
     conf.check_python_headers(features='pyext')  # Extension-only, no embedded
-    # Library directory hack
-    # For unknown reasons python libs are getting shunted off where they
-    # should not be on gentoo. I DO NOT KNOW HOW BRITTLE THIS CODE IS.
-    if conf.env.PYTHONDIR.startswith(conf.env.PREFIX) is False:
-        splitPoint = conf.env.PYTHONDIR.find("/python")
-        tail = conf.env.PYTHONDIR[splitPoint:]
-        conf.env.PYTHONDIR = conf.env.PREFIX + "lib" + tail
-    if conf.env.PYTHONARCHDIR.startswith(conf.env.PREFIX) is False:
-        splitPoint = conf.env.PYTHONARCHDIR.find("/python")
-        tail = conf.env.PYTHONARCHDIR[splitPoint:]
-        conf.env.PYTHONARCHDIR = conf.env.PREFIX + "lib" + tail
 
 
 def build(ctx):
