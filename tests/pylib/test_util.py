@@ -512,33 +512,33 @@ class TestPylibUtilMethods(unittest.TestCase):
             # Test addrinfo fail
             fakesockmod.__init__()
             fakesockmod.gai_error_count = 1
-            self.assertEqual(f("none"), "DNSFAIL:none")
+            self.assertEqual(f("nothing"), "DNSFAIL:nothing")
             self.assertEqual(fakesockmod.gai_calls,
-                             [("none", None, 0, 0, 0, 2)])
+                             [("nothing", None, 0, 0, 0, 2)])
             self.assertEqual(fakesockmod.gni_calls, [])
             # Test nameinfo fail
             fakesockmod.__init__()
             fakesockmod.gni_error_count = 1
-            fakesockmod.gni_returns = [("www.Hastur.madness", 42)]
+            fakesockmod.gni_returns = [("www.Hastur.invalid", 42)]
             fakesockmod.gai_returns = [(("family", "socktype", "proto",
-                                         "san.Hastur.madness",
+                                         "san.Hastur.invalid",
                                          "42.23.%$.(#"),)]
-            self.assertEqual(f("bar:42"), "san.hastur.madness:42")
+            self.assertEqual(f("bar:42"), "san.hastur.invalid:42")
             # Test nameinfo fail, no canonname
             fakesockmod.__init__()
             mycache.__init__()
             fakesockmod.gni_error_count = 1
-            fakesockmod.gni_returns = [("www.Hastur.madness", 42)]
+            fakesockmod.gni_returns = [("www.Hastur.invalid", 42)]
             fakesockmod.gai_returns = [(("family", "socktype", "proto",
                                          None, "42.23.%$.(#"),)]
             self.assertEqual(f("bar:42"), "bar:42")
             # Test success
             fakesockmod.__init__()
             mycache.__init__()
-            fakesockmod.gni_returns = [("www.Hastur.madness", 42)]
+            fakesockmod.gni_returns = [("www.Hastur.invalid", 42)]
             fakesockmod.gai_returns = [(("family", "socktype", "proto",
                                          None, "42.23.%$.(#"),)]
-            self.assertEqual(f("bar:42"), "www.hastur.madness:42")
+            self.assertEqual(f("bar:42"), "www.hastur.invalid:42")
         finally:
             ntp.util.canonicalization_cache = cachetemp
             ntp.util.socket = sockettemp
