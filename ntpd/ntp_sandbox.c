@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -11,7 +13,6 @@
 #include <errno.h>
 #include <signal.h>
 
-#include "config.h"
 #include "ntp_assert.h"
 
 #ifdef ENABLE_DROPROOT
