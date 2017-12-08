@@ -8,6 +8,7 @@ import ntp.util
 import ntp.packet
 import shutil
 import sys
+import socket
 
 import jigs
 
@@ -514,7 +515,8 @@ class TestPylibUtilMethods(unittest.TestCase):
             fakesockmod.gai_error_count = 1
             self.assertEqual(f("nothing"), "DNSFAIL:nothing")
             self.assertEqual(fakesockmod.gai_calls,
-                             [("nothing", None, 0, 0, 0, 2)])
+                             [("nothing", None, 0, 0, 0,
+                               socket.AI_CANONNAME)])
             self.assertEqual(fakesockmod.gni_calls, [])
             # Test nameinfo fail
             fakesockmod.__init__()
