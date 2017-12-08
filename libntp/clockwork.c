@@ -24,7 +24,7 @@
  * absent, however, this way callers can tell what accuracy they're
  * actually getting.
  *
- * Some versions of ntp_adtime(2), notably the Linux one which is
+ * Some versions of ntp_adjtime(2), notably the Linux one which is
  * implemented in terms of a local, unstandardized adjtimex(2), have a
  * time member that can be used to retrieve and increment
  * (ADJ_SETOFFSET) system time.  If this were portable there would be
