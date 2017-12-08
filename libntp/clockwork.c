@@ -2,12 +2,11 @@
  * clockwork.c - the interface to the hardare clock
  */
 
-#include <unistd.h>
-
 #include "config.h"
 
-# include <sys/time.h>	/* prerequisite on NetBSD */
-# include <sys/timex.h>
+#include <unistd.h>
+#include <sys/time.h>	/* prerequisite on NetBSD */
+#include <sys/timex.h>
 
 #include "ntp.h"
 #include "ntp_machine.h"
