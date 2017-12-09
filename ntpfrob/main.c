@@ -2,12 +2,13 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <getopt.h>
 #include <stdbool.h>
 
-#include "config.h"
 #include "ntpfrob.h"
 
 static void usage(void);
