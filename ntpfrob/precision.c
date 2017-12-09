@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include "ntp_types.h"
-#include "ntp_calendar.h"
+#include "config.h"
 
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "ntp_types.h"
+#include "ntp_calendar.h"
 #include "ntpfrob.h"
 
 #define	DEFAULT_SYS_PRECISION	-99
