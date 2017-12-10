@@ -772,6 +772,13 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         return self.dynamicCallbackSkeleton(handler)
 
     # =====================================
+    # Notification handlers
+    # =====================================
+
+    def checkNotifications(self):
+        pass
+
+    # =====================================
     # Misc data helpers (not part of the MIB proper)
     # =====================================
 
@@ -826,21 +833,6 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                 peerdata[aid] = pdata
             self.cache.set("peerdata", peerdata)
         return peerdata
-
-
-def dolog(text, level):
-    if debug >= level:
-        logfp.write(text)
-
-
-def connect():
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    try:
-        sock.connect("/var/agentx/master")
-    except socket.error as msg:
-        dolog(repr(msg) + "\n", 2)
-        sys.exit(1)
-    return sock
 
 
 class PacketControl:
@@ -1144,11 +1136,27 @@ class PacketControl:
         self.database.inSetP = False
 
 
+def dolog(text, level):
+    if debug >= level:
+        logfp.write(text)
+
+
+def connect():
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sock.connect("/var/agentx/master")
+    except socket.error as msg:
+        dolog(repr(msg) + "\n", 2)
+        sys.exit(1)
+    return sock
+
+
 def mainloop():
     dolog("initing loop\n", 1)
     sock = connect()
     dbase = DataSource()
     control = PacketControl(sock, dbase)
+    control.loopCallback = dbase.checkNotifications
     control.initNewSession()
     control.mainloop(True)
 
