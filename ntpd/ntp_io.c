@@ -1924,7 +1924,6 @@ socket_broadcast_enable(
 	sockaddr_u *		baddr
 	)
 {
-#ifdef SO_BROADCAST
 	int on = 1;
 
 	if (IS_IPV4(baddr)) {
@@ -1940,9 +1939,6 @@ socket_broadcast_enable(
 	}
 	iface->flags |= INT_BCASTXMIT;
 	return true;
-#else
-	return false;
-#endif /* SO_BROADCAST */
 }
 
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
@@ -1957,7 +1953,6 @@ socket_broadcast_disable(
 	sockaddr_u *		baddr
 	)
 {
-#ifdef SO_BROADCAST
 	int off = 0;	/* This seems to be OK as an int */
 
 	if (IS_IPV4(baddr) && setsockopt(iface->fd, SOL_SOCKET,
@@ -1968,9 +1963,6 @@ socket_broadcast_disable(
 
 	iface->flags &= ~INT_BCASTXMIT;
 	return true;
-#else
-	return false;
-#endif /* SO_BROADCAST */
 }
 #endif /* OS_MISSES_SPECIFIC_ROUTE_UPDATES */
 
