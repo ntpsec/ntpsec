@@ -33,7 +33,8 @@ try:
     package = 'NTP'  # pylint: disable=invalid-name
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("ntploggps: can't find Python %s modules.\n" % package)
+    sys.stderr.write("ntploggps: can't find Python %s modules "
+                     "-- check PYTHONPATH.\n" % package)
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 

@@ -34,7 +34,8 @@ import time
 try:
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("ntplogtemp: can't find Python NTP modules.\n%s\n" % e)
+    sys.stderr.write("ntplogtemp: can't find Python NTP modules "
+                     "-- check PYTHONPATH.\n%s\n" % e)
     sys.exit(1)
 
 

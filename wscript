@@ -1120,9 +1120,9 @@ def build(ctx):
         Options.options.no_tests = True
 
     if ctx.cmd == "build":
-        if "PYTHONPATH" in os.environ:
-            print("--- PYTHONPATH is set, "
-                  "this may mask or cause library-related problems ---")
+        if "PYTHONPATH" not in os.environ:
+            print("--- PYTHONPATH is not set, "
+                  "loading the Python ntp library may be troublesome ---")
 
 #
 # Boot script setup
