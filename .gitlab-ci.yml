@@ -229,22 +229,6 @@ centos-7-refclocks:
   tags:
     - centos-7
 
-fedora-25-basic:
-  <<: *job_definition
-  script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
-  tags:
-    - fedora-25
-
-fedora-25-refclocks:
-  <<: *job_definition
-  script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
-  tags:
-    - fedora-25
-
 fedora-26-basic:
   <<: *job_definition
   script:
