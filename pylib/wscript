@@ -27,7 +27,6 @@ def build(ctx):
     ctx.exec_command("rm -f %s" % target1.abspath())
     ctx.exec_command("rm -f %s" % target2.abspath())
     ctx.exec_command("rm -f %s" % target3.abspath())
-    ctx.exec_command("rm -f %s" % target4.abspath())
 
     # Make sure Python sees .py as well as .pyc/.pyo
     ctx(
