@@ -59,8 +59,8 @@ static	void	ctl_putdblf	(const char *, int, int, double);
 #define	ctl_putdbl6(tag, d)	ctl_putdblf(tag, 1, 6, d)
 #define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, 0, -1, \
 					    FP_UNSCALE(sfp))
-static	void	ctl_putuint	(const char *, unsigned long);
-static	void	ctl_puthex	(const char *, unsigned long);
+static	void	ctl_putuint	(const char *, uint64_t);
+static	void	ctl_puthex	(const char *, uint64_t);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
 static	void	ctl_putadr	(const char *, uint32_t,
@@ -1186,7 +1186,7 @@ ctl_putdblf(
 static void
 ctl_putuint(
 	const char *tag,
-	unsigned long uval
+	uint64_t uval
 	)
 {
 	char *cp;
@@ -1200,7 +1200,11 @@ ctl_putuint(
 
 	*cp++ = '=';
 	INSIST((cp - buffer) < (int)sizeof(buffer));
+#if (NTP_SIZEOF_LONG == 8)
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%lu", uval);
+#else
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%llu", uval);
+#endif
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
@@ -1245,7 +1249,7 @@ ctl_puttime(
 static void
 ctl_puthex(
 	const char *tag,
-	unsigned long uval
+	uint64_t uval
 	)
 {
 	char *cp;
@@ -1259,7 +1263,11 @@ ctl_puthex(
 
 	*cp++ = '=';
 	INSIST((cp - buffer) < (int)sizeof(buffer));
+#if (NTP_SIZEOF_LONG == 8)
 	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%lx", uval);
+#else
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%llx", uval);
+#endif
 	cp += strlen(cp);
 	ctl_putdata(buffer,(unsigned)( cp - buffer ), false);
 }

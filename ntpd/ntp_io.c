@@ -97,14 +97,14 @@ static nic_rule *nic_rule_list;
 /*
  * Other statistics of possible interest
  */
-unsigned long packets_dropped;	/* total # of packets dropped on reception */
-unsigned long packets_ignored;	/* packets received on wild card interface */
-unsigned long packets_received;	/* total # of packets received */
-unsigned long packets_sent;	/* total # of packets sent */
-unsigned long packets_notsent;	/* total # of packets which couldn't be sent */
+uint64_t packets_dropped;	/* total # of packets dropped on reception */
+uint64_t packets_ignored;	/* packets received on wild card interface */
+uint64_t packets_received;	/* total # of packets received */
+uint64_t packets_sent;		/* total # of packets sent */
+uint64_t packets_notsent;	/* total # of packets which couldn't be sent */
 
-volatile unsigned long handler_calls;	/* # of calls to interrupt handler */
-volatile unsigned long handler_pkts;	/* number of pkts received by handler */
+volatile uint64_t handler_calls;	/* # of calls to interrupt handler */
+volatile uint64_t handler_pkts;		/* number of pkts received by handler */
 unsigned long io_timereset;		/* time counters were reset */
 
 /*

@@ -154,18 +154,18 @@ static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 /*
  * Statistics counters - first the good, then the bad
  */
-unsigned long	sys_stattime;		/* elapsed time since reset */
-unsigned long	sys_received;		/* packets received */
-unsigned long	sys_processed;		/* packets for this host */
-unsigned long	sys_newversion;		/* current version */
-unsigned long	sys_oldversion;		/* old version */
-unsigned long	sys_restricted;		/* access denied */
-unsigned long	sys_badlength;		/* bad length or format */
-unsigned long	sys_badauth;		/* bad authentication */
-unsigned long	sys_declined;		/* declined */
-unsigned long	sys_limitrejected;	/* rate exceeded */
-unsigned long	sys_kodsent;		/* KoD sent */
-unsigned long	use_stattime;		/* elapsed time since reset */
+unsigned long	sys_stattime;		/* elapsed time since sysstats reset */
+uint64_t	sys_received;		/* packets received */
+uint64_t	sys_processed;		/* packets for this host */
+uint64_t	sys_newversion;		/* current version */
+uint64_t	sys_oldversion;		/* old version */
+uint64_t	sys_restricted;		/* access denied */
+uint64_t	sys_badlength;		/* bad length or format */
+uint64_t	sys_badauth;		/* bad authentication */
+uint64_t	sys_declined;		/* declined */
+uint64_t	sys_limitrejected;	/* rate exceeded */
+uint64_t	sys_kodsent;		/* KoD sent */
+unsigned long	use_stattime;		/* elapsed time since usestats reset */
 
 double	measured_tick;		/* non-overridable sys_tick (s) */
 
