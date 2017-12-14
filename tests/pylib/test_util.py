@@ -560,7 +560,7 @@ class TestPylibUtilMethods(unittest.TestCase):
             self.assertEqual(fakeosmod.isatty_calls, [1])
             # termsize takes different code paths for different
             # versions of Python
-            if "get_terminal_size" in dir(shutil):
+            if str is not bytes:
                 # Python 3 version
                 try:
                     shutiltemp = ntp.util.shutil
@@ -573,7 +573,8 @@ class TestPylibUtilMethods(unittest.TestCase):
             else:
                 # Python 2.x version
                 try:
-                    fcntltemp = ntp.util.fcntl
+                    import fcntl
+                    fcntltemp = fcntl
                     ntp.util.fcntl = fakefcntlmod
                     fakeosmod.isatty_returns = [True]
                     data = ["\x11\x11\x22\x22\x33\x33\x44\x44"]

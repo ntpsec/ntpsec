@@ -18,16 +18,6 @@ import ntp.magic
 import ntp.control
 
 
-if "get_terminal_size" not in dir(shutil):
-    # used by termsize() on python 2.x systems
-    import fcntl
-    import termios
-    import struct
-    PY3 = False
-else:
-    PY3 = True
-
-
 # Old CTL_PST defines for version 2.
 OLD_CTL_PST_CONFIG = 0x80
 OLD_CTL_PST_AUTHENABLE = 0x40
@@ -587,13 +577,25 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
 TermSize = collections.namedtuple("TermSize", ["width", "height"])
 
 
+# Python 2.x does not have the shutil.get_terminal_size function.
+# This conditional import is only needed by termsize() and should be kept
+# near it. It is not inside the function because the unit tests need to be
+# able to splice in a jig.
+if str is bytes:  # We are on python 2.x
+    import fcntl
+    import termios
+    import struct
+
+
 def termsize():
     "Return the current terminal size."
     # Alternatives at http://stackoverflow.com/questions/566746
     # The way this is used makes it not a big deal if the default is wrong.
     size = (80, 24)
     if os.isatty(1):
-        if PY3 is True:
+        if str is not bytes:
+            # str is bytes means we are >py3.0, but this will still fail
+            # on versions <3.3. We do not support those anyway.
             (w, h) = shutil.get_terminal_size((80, 24))
             size = (w, h)
         else:
