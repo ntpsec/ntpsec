@@ -286,19 +286,19 @@ extern uint8_t	mon_hash_bits;		/* log2 size of hash table */
 extern mon_entry ** mon_hash;		/* MRU hash table */
 extern mon_entry mon_mru_list;		/* mru listhead */
 extern unsigned int	mon_enabled;		/* MON_OFF (0) or other MON_* */
-extern unsigned int	mru_entries;		/* mru list count */
-extern unsigned int	mru_peakentries;	/* highest mru_entries */
-extern unsigned int	mru_initalloc;		/* entries to preallocate */
-extern unsigned int	mru_incalloc;		/* allocation batch factor */
-extern unsigned int	mru_mindepth;		/* preempt above this */
+extern uint64_t	mru_entries;		/* mru list count */
+extern uint64_t	mru_peakentries;	/* highest mru_entries */
+extern uint64_t	mru_initalloc;		/* entries to preallocate */
+extern uint64_t	mru_incalloc;		/* allocation batch factor */
+extern uint64_t	mru_mindepth;		/* preempt above this */
 extern int	mru_maxage;		/* recycle if older than this */
 extern int	mru_minage;		/* recycle if older than this & full */
-extern unsigned int	mru_maxdepth; 		/* MRU size hard limit */
-extern unsigned long	mru_exists;		/* slot already exists */
-extern unsigned long	mru_new;		/* allocated new slot */
-extern unsigned long	mru_recycleold;		/* recycle: age > maxage */
-extern unsigned long	mru_recyclefull;	/* recycle: full and age > minage */
-extern unsigned long	mru_none;		/* couldn't allocate slot */
+extern uint64_t	mru_maxdepth; 		/* MRU size hard limit */
+extern uint64_t	mru_exists;		/* slot already exists */
+extern uint64_t	mru_new;		/* allocated new slot */
+extern uint64_t	mru_recycleold;		/* recycle: age > maxage */
+extern uint64_t	mru_recyclefull;	/* recycle: full and age > minage */
+extern uint64_t	mru_none;		/* couldn't allocate slot */
 extern int	mon_age;		/* preemption limit */
 
 /* ntp_peer.c */

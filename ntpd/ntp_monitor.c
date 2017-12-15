@@ -49,21 +49,24 @@ uint8_t	mon_hash_bits;
 /*
  * Pointers to the hash table and the MRU list.  Memory for the hash
  * table is allocated only if monitoring is enabled.
+ * Total size can easily exceed 32 bits (4 GB)
+ * Total count is unlikely to exceed 32 bits in 2017
+ *   but memories keep growing.
  */
 mon_entry **	mon_hash;	/* MRU hash table */
 mon_entry	mon_mru_list;	/* mru listhead */
-unsigned int	mru_entries;	/* mru list count */
+uint64_t	mru_entries;	/* mru list count */
 
-/*1
+/*
  * List of free structures, and counters of in-use and total
  * structures. The free structures are linked with the hash_next field.
  */
 static  mon_entry *mon_free;		/* free list or null if none */
-static	unsigned int mru_alloc;		/* mru list + free list count */
-	unsigned int mru_peakentries;		/* highest mru_entries seen */
-	unsigned int mru_initalloc = INIT_MONLIST;/* entries to preallocate */
-	unsigned int mru_incalloc = INC_MONLIST;/* allocation batch factor */
-static	unsigned int mon_mem_increments;	/* times called malloc() */
+static	uint64_t mru_alloc;		/* mru list + free list count */
+	uint64_t mru_peakentries;	/* highest mru_entries seen */
+	uint64_t mru_initalloc = INIT_MONLIST;/* entries to preallocate */
+	uint64_t mru_incalloc = INC_MONLIST;/* allocation batch factor */
+static	uint64_t mon_mem_increments;	/* times called malloc() */
 
 /*
  * Parameters of the RES_LIMITED restriction option. We define headway
@@ -79,10 +82,10 @@ uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
  * we aren't, we may not even have allocated any memory yet.
  */
 unsigned int	mon_enabled;		/* enable switch */
-unsigned int	mru_mindepth = 600;	/* preempt above this */
+uint64_t	mru_mindepth = 600;	/* preempt above this */
 int		mru_maxage = 3600;	/* recycle if older than this */
 int		mru_minage = 64;	/* recycle if full and older than this */
-unsigned int	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
+uint64_t	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
 int	mon_age = 3000;		/* preemption limit */
 
 static	void		mon_getmoremem(void);
@@ -91,11 +94,11 @@ static	inline void	mon_free_entry(mon_entry *);
 static	inline void	mon_reclaim_entry(mon_entry *);
 
 /* MRU counters */
-unsigned long mru_exists = 0;		/* slot already exists */
-unsigned long mru_new = 0;		/* allocate a new slot (2 cases) */
-unsigned long mru_recycleold = 0;	/* recycle slot: age > mru_maxage */
-unsigned long mru_recyclefull = 0;	/* recycle slot: full and age > mru_minage */
-unsigned long mru_none = 0;		/* couldn't get one */
+uint64_t mru_exists = 0;	/* slot already exists */
+uint64_t mru_new = 0;		/* allocate a new slot (2 cases) */
+uint64_t mru_recycleold = 0;	/* recycle slot: age > mru_maxage */
+uint64_t mru_recyclefull = 0;	/* recycle slot: full and age > mru_minage */
+uint64_t mru_none = 0;		/* couldn't get one */
 
 
 /*

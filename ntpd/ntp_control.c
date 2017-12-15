@@ -620,20 +620,20 @@ static	uint8_t ctl_sys_num_events;
  * Statistic counters to keep track of requests and responses.
  */
 static unsigned long ctltimereset;	/* time stats reset */
-static unsigned long numctlreq;		/* # of requests we've received */
-static unsigned long numctlbadpkts;	/* # of bad control packets */
-static unsigned long numctlresponses;	/* # of resp packets sent with data */
-static unsigned long numctlfrags;	/* # of fragments sent */
-static unsigned long numctlerrors;	/* # of error responses sent */
-static unsigned long numctltooshort;	/* # of too short input packets */
-static unsigned long numctlinputresp;	/* # of responses on input */
-static unsigned long numctlinputfrag;	/* # of fragments on input */
-static unsigned long numctlinputerr;	/* # of input pkts with err bit set */
-static unsigned long numctlbadoffset;	/* # of input pkts with nonzero offset */
-static unsigned long numctlbadversion;	/* # of input pkts with unknown version */
-static unsigned long numctldatatooshort;    /* data too short for count */
-static unsigned long numctlbadop;	/* bad op code found in packet */
-static unsigned long numasyncmsgs;	/* # of async messages we've sent */
+static uint64_t numctlreq;		/* # of requests we've received */
+static uint64_t numctlbadpkts;		/* # of bad control packets */
+static uint64_t numctlresponses;	/* # of resp packets sent with data */
+static uint64_t numctlfrags;		/* # of fragments sent */
+static uint64_t numctlerrors;		/* # of error responses sent */
+static uint64_t numctltooshort;		/* # of too short input packets */
+static uint64_t numctlinputresp;	/* # of responses on input */
+static uint64_t numctlinputfrag;	/* # of fragments on input */
+static uint64_t numctlinputerr;		/* # of input pkts with err bit set */
+static uint64_t numctlbadoffset;	/* # of input pkts with nonzero offset */
+static uint64_t numctlbadversion;	/* # of input pkts with unknown version */
+static uint64_t numctldatatooshort;	/* data too short for count */
+static uint64_t numctlbadop;		/* bad op code found in packet */
+static uint64_t numasyncmsgs;		/* # of async messages we've sent */
 
 /*
  * Response packet used by these routines. Also some state information
@@ -1440,8 +1440,6 @@ ctl_putsys(
 {
 	l_fp tmp;
 	char str[256];
-	unsigned int u;
-	double kb;
 	double dtemp;
 	const char *ss;
 	static struct timex ntx;
@@ -1513,12 +1511,14 @@ ctl_putsys(
 		ctl_putunqstr(sys_var[CS_PEERADR].text, ss, strlen(ss));
 		break;
 
-	case CS_PEERMODE:
+	case CS_PEERMODE: {
+		uint64_t u;
 		u = (sys_peer != NULL)
 			? sys_peer->hmode
 			: MODE_UNSPEC;
 		ctl_putuint(sys_var[CS_PEERMODE].text, u);
 		break;
+		}
 
 	case CS_OFFSET:
 		ctl_putdbl6(sys_var[CS_OFFSET].text, last_offset * MS_PER_S);
@@ -1673,13 +1673,13 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, mru_entries);
 		break;
 
-	case CS_MRU_MEM:
-		kb = mru_entries * (sizeof(mon_entry) / 1024.);
-		u = (unsigned int)kb;
-		if (kb - u >= 0.5)
-			u++;
+	case CS_MRU_MEM: {
+		uint64_t u;
+		u = mru_entries * sizeof(mon_entry);
+		u = (u+512)/1024;
 		ctl_putuint(sys_var[varid].text, u);
 		break;
+		}
 
 	case CS_MRU_DEEPEST:
 		ctl_putuint(sys_var[varid].text, mru_peakentries);
@@ -1701,13 +1701,13 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, mru_maxdepth);
 		break;
 
-	case CS_MRU_MAXMEM:
-		kb = mru_maxdepth * (sizeof(mon_entry) / 1024.);
-		u = (unsigned int)kb;
-		if (kb - u >= 0.5)
-			u++;
+	case CS_MRU_MAXMEM: {
+		uint64_t u;
+		u = mru_maxdepth * sizeof(mon_entry);
+		u = (u+512)/1024;
 		ctl_putuint(sys_var[varid].text, u);
 		break;
+		}
 
 	case CS_MRU_EXISTS:
 		ctl_putuint(sys_var[varid].text, mru_exists);
@@ -1732,8 +1732,7 @@ ctl_putsys(
 	case CS_MRU_OLDEST_AGE: {
 		l_fp now;
 		get_systime(&now);
-		ctl_putuint(sys_var[varid].text,
-                            (unsigned long)mon_get_oldest_age(now));
+		ctl_putuint(sys_var[varid].text, mon_get_oldest_age(now));
 		break;
 		}
 
@@ -1742,8 +1741,7 @@ ctl_putsys(
 		break;
 
 	case CS_SS_RESET:
-		ctl_putuint(sys_var[varid].text,
-			    current_time - sys_stattime);
+		ctl_putuint(sys_var[varid].text, current_time - sys_stattime);
 		break;
 
 	case CS_SS_RECEIVED:
@@ -2098,7 +2096,7 @@ ctl_putpeer(
 		break;
 
 	case CP_RATE:
-		ctl_putuint(peer_var[id].text, (unsigned long)p->throttle);
+		ctl_putuint(peer_var[id].text, p->throttle);
 		break;
 
 	case CP_LEAP:
@@ -2169,7 +2167,7 @@ ctl_putpeer(
 		break;
 
 	case CP_FLASH:
-		ctl_puthex(peer_var[id].text, (unsigned long)p->flash);
+		ctl_puthex(peer_var[id].text, p->flash);
 		break;
 
 	case CP_TTL:
@@ -3683,7 +3681,7 @@ send_ifstats_entry(
 
 		case 4:
 			snprintf(tag, sizeof(tag), flags_fmt, ifnum);
-			ctl_puthex(tag, (unsigned int)la->flags);
+			ctl_puthex(tag, la->flags);
 			break;
 
 		case 5:
