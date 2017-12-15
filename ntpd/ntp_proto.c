@@ -63,7 +63,7 @@ static inline l_fp_w htonl_fp(l_fp lfp) {
 #define	NTP_MAXCLOCK	10	/* max candidates */
 #define MINDISPERSE	.001	/* min distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
-#define	NTP_ORPHWAIT	300	/* orphan wair (s) */
+#define	NTP_ORPHWAIT	300	/* orphan wait (s) */
 
 /*
  * pool soliciting restriction duration (s)
@@ -153,8 +153,9 @@ static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 
 /*
  * Statistics counters - first the good, then the bad
+ * These get reset every hour if sysstats is enabled.
  */
-unsigned long	sys_stattime;		/* elapsed time since sysstats reset */
+uptime_t	sys_stattime;		/* elapsed time since sysstats reset */
 uint64_t	sys_received;		/* packets received */
 uint64_t	sys_processed;		/* packets for this host */
 uint64_t	sys_newversion;		/* current version */
@@ -165,7 +166,7 @@ uint64_t	sys_badauth;		/* bad authentication */
 uint64_t	sys_declined;		/* declined */
 uint64_t	sys_limitrejected;	/* rate exceeded */
 uint64_t	sys_kodsent;		/* KoD sent */
-unsigned long	use_stattime;		/* elapsed time since usestats reset */
+uptime_t	use_stattime;		/* elapsed time since usestats reset */
 
 double	measured_tick;		/* non-overridable sys_tick (s) */
 
@@ -1115,7 +1116,7 @@ clock_update(
 	sys_rootdelay = peer->delay + peer->rootdelay;
 	sys_reftime = peer->dst;
 
-	DPRINT(1, ("clock_update: at %lu sample %lu associd %d\n",
+	DPRINT(1, ("clock_update: at %u sample %u associd %d\n",
 		   current_time, peer->epoch, peer->associd));
 
 	/*
@@ -1231,7 +1232,7 @@ poll_update(
 	uint8_t	mpoll
 	)
 {
-	unsigned long	next, utemp;
+	uptime_t	next, utemp;
 	uint8_t	hpoll;
 
 	/*
@@ -1306,7 +1307,7 @@ poll_update(
 		if (peer->throttle > (1 << peer->cfg.minpoll))
 			peer->nextdate += (unsigned long)ntp_minpkt;
 	}
-	DPRINT(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
+	DPRINT(2, ("poll_update: at %u %s poll %d burst %d retry %d head %d early %u next %u\n",
 		   current_time, socktoa(&peer->srcadr), peer->hpoll,
 		   peer->burst, peer->retry, peer->throttle,
 		   utemp - current_time, peer->nextdate -
@@ -1378,7 +1379,7 @@ peer_clear(
 	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
 	    peer->nextdate += (unsigned long)(pseudorandom % (1 << peer->cfg.minpoll));
 	}
-	DPRINT(1, ("peer_clear: at %lu next %lu associd %d refid %s\n",
+	DPRINT(1, ("peer_clear: at %u next %u associd %d refid %s\n",
 		   current_time, peer->nextdate, peer->associd,
 		   ident));
 }
@@ -1544,7 +1545,7 @@ clock_filter(
 	 * packets.
 	 */
 	if (peer->filter_epoch[k] <= peer->epoch) {
-	  DPRINT(2, ("clock_filter: old sample %lu\n", current_time -
+	  DPRINT(2, ("clock_filter: old sample %u\n", current_time -
 		     peer->filter_epoch[k]));
 		return;
 	}
@@ -2216,7 +2217,7 @@ peer_xmit(
 		peer->outcount++;
 		peer->throttle += (1 << peer->cfg.minpoll) - 2;
 
-		DPRINT(1, ("transmit: at %lu %s->%s mode %d len %zu\n",
+		DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
 			   current_time, peer->dstadr ?
 			   socktoa(&peer->dstadr->sin) : "-",
 			   socktoa(&peer->srcadr), peer->hmode, sendlen));
@@ -2252,7 +2253,7 @@ peer_xmit(
 	peer->sent++;
         peer->outcount++;
 	peer->throttle += (1 << peer->cfg.minpoll) - 2;
-	DPRINT(1, ("transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
+	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %zu\n",
 		   current_time, peer->dstadr ?
 		   socktoa(&peer->dstadr->sin) : "-",
 		   socktoa(&peer->srcadr), peer->hmode, xkeyid, sendlen));
@@ -2395,7 +2396,7 @@ fast_xmit(
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
-		DPRINT(1, ("transmit: at %lu %s->%s mode %d len %zu\n",
+		DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
 			   current_time, socktoa(&rbufp->dstadr->sin),
 			   socktoa(&rbufp->recv_srcadr), xmode, sendlen));
 		return;
@@ -2413,7 +2414,7 @@ fast_xmit(
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
 	sys_authdelay = xmt_ty;
-	DPRINT(1, ("transmit: at %lu %s->%s mode %d keyid %08x len %zu\n",
+	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %zu\n",
 		   current_time, socktoa(&rbufp->dstadr->sin),
 		   socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen));
 }
@@ -2513,7 +2514,7 @@ dns_take_pool(
 				current_time + POOL_SOLICIT_WINDOW + 1);
 	}
 
-	DPRINT(1, ("transmit: at %lu %s->%s pool\n",
+	DPRINT(1, ("transmit: at %u %s->%s pool\n",
 		   current_time, latoa(lcladr), socktoa(rmtadr)));
 }
 

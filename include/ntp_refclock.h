@@ -143,7 +143,7 @@ struct refclockproc {
 	/*
 	 * Status tallies
  	 */
-	unsigned long	timestarted;	/* time we started this */
+	uptime_t		timestarted;	/* time we started this */
 	unsigned long	polls;		/* polls sent */
 	unsigned long	noreply;	/* no replies to polls */
 	unsigned long	badformat;	/* bad format reply */

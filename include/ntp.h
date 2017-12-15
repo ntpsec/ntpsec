@@ -267,14 +267,14 @@ struct peer {
 	uint8_t	new_status;	/* under-construction status */
 	uint8_t	reach;		/* reachability register */
 	int	flash;		/* protocol error test tally bits */
-	unsigned long	epoch;		/* reference epoch */
+	uptime_t	epoch;	/* reference epoch */
 	int	burst;		/* packets remaining in burst */
 	int	retry;		/* retry counter */
 	int	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
 	double	filter_disp[NTP_SHIFT]; /* dispersion shift register */
-	unsigned long	filter_epoch[NTP_SHIFT]; /* epoch shift register */
+	uptime_t	filter_epoch[NTP_SHIFT]; /* epoch shift register */
 	uint8_t	filter_order[NTP_SHIFT]; /* filter sort index */
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
@@ -304,8 +304,8 @@ struct peer {
 #define end_clear_to_zero update
 	int	unreach;	/* watchdog counter */
 	int	throttle;	/* rate control */
-	unsigned long	outdate;	/* send time last packet */
-	unsigned long	nextdate;	/* send time next packet */
+	uptime_t	outdate;	/* send time last packet */
+	uptime_t	nextdate;	/* send time next packet */
 
 	/*
 	 * Statistic counters

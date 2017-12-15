@@ -54,12 +54,12 @@ unsigned long	orphwait; 	/* orphan wait time */
  */
 volatile unsigned long alarm_overflow;
 
-unsigned long current_time;		/* seconds since startup */
+uptime_t current_time;		/* seconds since startup */
 
 /*
  * Stats.  Time of last reset and number of calls to transmit().
  */
-unsigned long timer_timereset;
+uptime_t timer_timereset;
 unsigned long timer_xmtcalls;
 
 static	void catchALRM (int);

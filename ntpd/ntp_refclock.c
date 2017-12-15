@@ -304,7 +304,7 @@ refclock_transmit(
 	 */
 	if (peer->burst == 0) {
 		uint8_t oreach;
-		DPRINT(1, ("refclock_transmit: at %lu %s\n",
+		DPRINT(1, ("refclock_transmit: at %u %s\n",
 			   current_time, socktoa(&(peer->srcadr))));
 
 		/*
@@ -518,7 +518,7 @@ refclock_receive(
 {
 	struct refclockproc *pp;
 
-	DPRINT(1, ("refclock_receive: at %lu %s\n",
+	DPRINT(1, ("refclock_receive: at %u %s\n",
 		   current_time, socktoa(&peer->srcadr)));
 
 	/*
@@ -1074,7 +1074,7 @@ refclock_catcher(
 	if (dtemp > .5)
 		dtemp -= 1.;
 	SAMPLE(-dtemp + pp->fudgetime1);
-	DPRINT(2, ("refclock_pps: %lu %f %f\n", current_time,
+	DPRINT(2, ("refclock_pps: %u %f %f\n", current_time,
 		   dtemp, pp->fudgetime1));
 	return PPS_OK;
 }

@@ -114,7 +114,7 @@ uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
  */
 #ifndef ENABLE_LOCKCLOCK
 static double clock_offset;	/* offset */
-static unsigned long clock_epoch;	/* last update */
+static uptime_t clock_epoch;	/* last update */
 #endif /* ENABLE_LOCKCLOCK */
 double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */

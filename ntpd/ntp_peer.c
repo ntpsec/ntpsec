@@ -357,7 +357,7 @@ clear_all(void)
 		if (!(MDF_TXONLY_MASK & p->cast_flags))
 		    peer_clear(p, "STEP", false);
 
-	DPRINT(1, ("clear_all: at %lu\n", current_time));
+	DPRINT(1, ("clear_all: at %u\n", current_time));
 }
 
 
@@ -386,7 +386,7 @@ score_all(
 			if (x < temp)
 				temp = x;
 		}
-	DPRINT(1, ("score_all: at %lu score %d min %d\n",
+	DPRINT(1, ("score_all: at %u score %d min %d\n",
 		   current_time, tamp, temp));
 
 	if (tamp != temp)

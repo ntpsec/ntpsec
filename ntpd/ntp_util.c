@@ -586,9 +586,9 @@ record_sys_stats(void)
 	if (sysstats.fp != NULL) {
 		fprintf(sysstats.fp,
 #if (NTP_SIZEOF_LONG == 8)
-		    "%s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    "%s %u %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 #else
-		    "%s %lu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu\n",
+		    "%s %u %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu\n",
 #endif
 		    timespec_to_MJDtime(&now), current_time - sys_stattime,
 		    sys_received, sys_processed, sys_newversion,
@@ -633,7 +633,7 @@ void record_use_stats(void)
 		stimex /= 1E6;
 		stimex += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
-		    "%s %lu %.3f %.3f %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
+		    "%s %u %.3f %.3f %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
 		    timespec_to_MJDtime(&now), current_time - use_stattime,
 		    utime, stimex,
 		    usage.ru_minflt -   oldusage.ru_minflt,

@@ -13,6 +13,8 @@
 #include <limits.h>
 #include "ntp_machine.h"
 
+typedef uint32_t uptime_t;	/* seconds since startup */
+
 
 /*
  * This is another naming conflict.

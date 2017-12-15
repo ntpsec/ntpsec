@@ -333,7 +333,7 @@ extern int	sys_minsane;		/* minimum candidates */
 /*
  * Statistics counters
  */
-extern unsigned long	sys_stattime;	/* time since systats reset */
+extern uptime_t	sys_stattime;		/* time since sysstats reset */
 extern uint64_t	sys_received;		/* packets received */
 extern uint64_t	sys_processed;		/* packets for this host */
 extern uint64_t	sys_restricted;	 	/* restricted packets */
@@ -344,7 +344,7 @@ extern uint64_t	sys_badauth;		/* bad authentication */
 extern uint64_t	sys_declined;		/* declined */
 extern uint64_t	sys_limitrejected;	/* rate exceeded */
 extern uint64_t	sys_kodsent;		/* KoD sent */
-extern unsigned long	use_stattime;	/* time since usestats reset */
+extern uptime_t	use_stattime;		/* time since usestats reset */
 
 /* Signalling */
 extern volatile bool sawALRM;
@@ -368,8 +368,8 @@ extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 
 /* ntp_timer.c */
 extern volatile unsigned long alarm_overflow;
-extern unsigned long	current_time;		/* seconds since startup */
-extern unsigned long	timer_timereset;
+extern uptime_t	current_time;		/* seconds since startup */
+extern uptime_t	timer_timereset;
 extern unsigned long	timer_xmtcalls;
 extern bool		leap_sec_in_progress;
 #ifdef ENABLE_LEAP_SMEAR

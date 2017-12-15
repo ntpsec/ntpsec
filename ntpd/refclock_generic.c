@@ -291,8 +291,8 @@ err_tbl[] =
 
 struct errorinfo
 {
-	unsigned long err_started;	/* begin time (ntp) of error condition */
-	unsigned long err_last;		/* last time (ntp) error occurred */
+	uptime_t	err_started;	/* begin time (ntp) of error condition */
+	uptime_t	err_last;	/* last time (ntp) error occurred */
 	unsigned long err_cnt;		/* number of error repetitions */
 	unsigned long err_suppressed;	/* number of suppressed messages */
 	struct errorregression *err_stage; /* current error stage */
@@ -329,7 +329,7 @@ struct parseunit
 	 * clock state handling/reporting
 	 */
 	uint8_t	      	      flags;	        /* flags (leap_control) */
-	unsigned long	      lastchange;       /* time (ntp) when last state change accured */
+	uptime_t	      lastchange;       /* time (ntp) when last state change accured */
 	unsigned long	      statetime[CEVNT_MAX+1]; /* accumulated time of clock states */
 	unsigned long         pollneeddata; 	/* current_time(!=0) for receive sample expected in PPS mode */
 	unsigned short	      lastformat;       /* last format used */
@@ -347,8 +347,8 @@ struct parseunit
 	void         *localdata;        /* optional local, receiver-specific data */
         unsigned long localstate;       /* private local state */
 	struct errorinfo errors[ERR_CNT];  /* error state table for suppressing excessive error messages */
-	struct ctl_var *kv;	        /* additional pseudo variables */
-	unsigned long        laststatistic;    /* time when staticstics where output */
+	struct ctl_var *kv;		/* additional pseudo variables */
+	uptime_t	laststatistic;	/* time when staticstics where output */
 };
 
 

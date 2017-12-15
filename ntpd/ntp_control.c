@@ -4186,7 +4186,7 @@ report_event(
 			msyslog(LOG_INFO, "MODE6: %s", statstr);
 	}
 	record_proto_stats(statstr);
-	DPRINT(1, ("event at %lu %s\n", current_time, statstr));
+	DPRINT(1, ("event at %u %s\n", current_time, statstr));
 
 }
 

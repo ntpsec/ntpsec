@@ -27,7 +27,7 @@ TEST_SETUP(hackrestrict) {
 	init_restrict();
 }
 
-unsigned long	current_time;	/* not used - restruct code needs it */
+uptime_t	current_time;	/* not used - restruct code needs it */
 
 TEST_TEAR_DOWN(hackrestrict) {
 	restrict_u *empty_restrict = malloc(sizeof(restrict_u));
