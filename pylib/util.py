@@ -913,7 +913,7 @@ class PeerSummary:
                 # The C code tried to get a fallback ptype from this in case
                 # the hmode field was not included
                 if "local" in self.__header:
-                    dstadr_refid = value
+                    dstadr_refid = rawvalue
             elif name == "dstport":
                 # FIXME, dstport never used.
                 dstport = value
