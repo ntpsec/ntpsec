@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <inttypes.h>
 
 #include <openssl/evp.h>	/* provides OpenSSL digest API */
 
@@ -1200,11 +1201,7 @@ ctl_putuint(
 
 	*cp++ = '=';
 	INSIST((cp - buffer) < (int)sizeof(buffer));
-#if (NTP_SIZEOF_LONG == 8)
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%lu", uval);
-#else
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%llu", uval);
-#endif
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%" PRIu64, uval);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
@@ -1263,11 +1260,7 @@ ctl_puthex(
 
 	*cp++ = '=';
 	INSIST((cp - buffer) < (int)sizeof(buffer));
-#if (NTP_SIZEOF_LONG == 8)
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%lx", uval);
-#else
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%llx", uval);
-#endif
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%" PRIx64, uval);
 	cp += strlen(cp);
 	ctl_putdata(buffer,(unsigned)( cp - buffer ), false);
 }

@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <inttypes.h>
 
 #ifdef HAVE_GETRUSAGE
 #include <sys/time.h>
@@ -585,11 +586,8 @@ record_sys_stats(void)
 	filegen_setup(&sysstats, now.tv_sec);
 	if (sysstats.fp != NULL) {
 		fprintf(sysstats.fp,
-#if (NTP_SIZEOF_LONG == 8)
-		    "%s %u %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-#else
-		    "%s %u %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu\n",
-#endif
+		    "%s %u %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64
+		    " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 "\n",
 		    timespec_to_MJDtime(&now), current_time - sys_stattime,
 		    sys_received, sys_processed, sys_newversion,
 		    sys_oldversion, sys_restricted, sys_badlength,
