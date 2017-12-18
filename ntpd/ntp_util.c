@@ -144,30 +144,39 @@ init_util(void)
 
 
 /*
- * hourly_stats - print some interesting stats
+ * drift_write - write drift to file, speeds up restart
+ * drift can be off significantly if the system has cooled off
+ *
+ * This used to use mkstemp, but that uses mode 600, user ntp
+ * apparmor keeps root from reading that during initialization
+ * See Issue #409
+ * We don't need a unique filename.  No other job is writing driftfile.
+ * There is no security problem with reading the drift file since
+ * you can get the data via ntp_adjtime(2) or ntptime(8).
  */
 static void drift_write(char *driftfile, double drift)
 {
-	int fd;
-	char tempfile[PATH_MAX], driftcopy[PATH_MAX];
-	char driftval[32];
-	strlcpy(driftcopy, driftfile, PATH_MAX);
-	strlcpy(tempfile, dirname(driftcopy), sizeof(tempfile));
-	strlcat(tempfile, "/driftXXXXXX", sizeof(tempfile));
-	/* coverity[secure_temp] Warning is bogus on POSIX-compliant systems */
-	if ((fd = mkstemp(tempfile)) < 0) {
+	FILE *new;
+	char tempfile[PATH_MAX];
+	strlcpy(tempfile, driftfile, sizeof(tempfile));
+	strlcat(tempfile, "-tmp", sizeof(tempfile));
+	if ((new = fopen(tempfile, "w")) == NULL) {
 	    msyslog(LOG_ERR, "LOG: frequency file %s: %m", tempfile);
 	    return;
 	}
-	snprintf(driftval, sizeof(driftval), "%.6f\n", drift);
-	IGNORE(write(fd, driftval, strlen(driftval)));
-	(void)close(fd);
+	fprintf(new, "%.6f\n", drift);
+	(void)fclose(new);
 	/* atomic */
 	if (rename(tempfile, driftfile))
 	    msyslog(LOG_WARNING,
 		    "LOG: Unable to rename temp drift file %s to %s, %m",
 		    tempfile, driftfile);
 }
+
+
+/* 
+ * write_stats - hourly: sysstats, usestats, and maybe drift
+ */
 void
 write_stats(void)
 {
