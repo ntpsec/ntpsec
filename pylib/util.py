@@ -968,7 +968,7 @@ class PeerSummary:
                 # guess is that it was designed to deal with formats that
                 # no longer occur in this field.
                 if "refid" in self.__header:
-                    dstadr_refid = value
+                    dstadr_refid = rawvalue
             elif name == "rec":
                 rec = value         # l_fp timestamp
                 last_sync = int(now - ntp.ntpc.lfptofloat(rec))
