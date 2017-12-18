@@ -22,10 +22,8 @@
 #include <sys/stat.h>
 #include <inttypes.h>
 
-#ifdef HAVE_GETRUSAGE
 #include <sys/time.h>
 #include <sys/resource.h>
-#endif
 
 /*
  * Defines used by file logging
@@ -609,7 +607,6 @@ record_sys_stats(void)
  */
 void record_use_stats(void)
 {
-#ifdef HAVE_GETRUSAGE
 	struct timespec	now;
 	struct rusage usage;
 	static struct rusage oldusage;
@@ -647,7 +644,6 @@ void record_use_stats(void)
 		oldusage = usage;
 		use_stattime = current_time;
 	}
-#endif /* HAVE_GETRUSAGE */
 }
 
 
