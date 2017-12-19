@@ -177,7 +177,7 @@ extern	void	reinit_timer	(void);
 extern	void	timer		(void);
 extern	void	timer_clr_stats (void);
 extern	void	timer_interfacetimeout (uptime_t);
-extern	volatile int interface_interval;
+extern	int	interface_interval;
 extern	uptime_t	orphwait;		/* orphan wait time */
 
 /* ntp_util.c */
@@ -238,9 +238,11 @@ extern uint64_t packets_received;	/* total number of packets received */
 extern uint64_t packets_sent;		/* total number of packets sent */
 extern uint64_t packets_notsent; 	/* total number of packets which couldn't be sent */
 
-extern volatile uint64_t handler_calls;	/* number of calls to interrupt handler */
-extern volatile uint64_t handler_pkts;	/* number of pkts received by handler */
-extern unsigned long io_timereset;	/* time counters were reset */
+/* There used to be a signal handler for received packets. */
+/* It's not needed now that the kernel time stamps packets. */
+extern uint64_t handler_calls;	/* number of calls to interrupt handler */
+extern uint64_t handler_pkts;	/* number of pkts received by handler */
+extern uptime_t io_timereset;	/* time counters were reset */
 
 /* ntp_io.c */
 extern bool	disable_dynamic_updates;
@@ -346,7 +348,7 @@ extern uint64_t	sys_limitrejected;	/* rate exceeded */
 extern uint64_t	sys_kodsent;		/* KoD sent */
 extern uptime_t	use_stattime;		/* time since usestats reset */
 
-/* Signalling */
+/* Signalling: Set by signal handlers */
 extern volatile bool sawALRM;
 extern volatile bool sawHUP;
 extern volatile bool sawDNS;
@@ -367,7 +369,7 @@ extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 #endif
 
 /* ntp_timer.c */
-extern volatile unsigned long alarm_overflow;
+extern unsigned long alarm_overflow;
 extern uptime_t	current_time;		/* seconds since startup */
 extern uptime_t	timer_timereset;
 extern unsigned long	timer_xmtcalls;

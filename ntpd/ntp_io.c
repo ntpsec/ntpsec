@@ -103,9 +103,9 @@ uint64_t packets_received;	/* total # of packets received */
 uint64_t packets_sent;		/* total # of packets sent */
 uint64_t packets_notsent;	/* total # of packets which couldn't be sent */
 
-volatile uint64_t handler_calls;	/* # of calls to interrupt handler */
-volatile uint64_t handler_pkts;		/* number of pkts received by handler */
-unsigned long io_timereset;		/* time counters were reset */
+uint64_t handler_calls;		/* # of calls to interrupt handler */
+uint64_t handler_pkts;		/* number of pkts received by handler */
+uptime_t io_timereset;		/* time counters were reset */
 
 /*
  * Interface stuff

@@ -34,7 +34,7 @@ static void check_leapsec(time_t, bool);
  * Finally, we call the hourly procedure to do cleanup and print a
  * message.
  */
-volatile int interface_interval;     /* init_io() sets def. 300s */
+int interface_interval;     /* init_io() sets def. 300s */
 
 /*
  * The counters and timeouts
@@ -52,7 +52,7 @@ uptime_t	orphwait; 	/* orphan wait time */
 /*
  * Statistics counter for the interested.
  */
-volatile unsigned long alarm_overflow;
+unsigned long alarm_overflow;
 
 uptime_t current_time;		/* seconds since startup */
 
