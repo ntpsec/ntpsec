@@ -39,15 +39,15 @@ volatile int interface_interval;     /* init_io() sets def. 300s */
 /*
  * The counters and timeouts
  */
-static unsigned long interface_timer;	/* interface update timer */
-static unsigned long adjust_timer;	/* second timer */
-static unsigned long stats_timer;	/* stats timer */
-static unsigned long leapf_timer;	/* Report leapfile problems once/day */
-static unsigned long huffpuff_timer;	/* huff-n'-puff timer */
-unsigned long	leapsec;	        /* secs to next leap (proximity class) */
+static uptime_t interface_timer;	/* interface update timer */
+static uptime_t adjust_timer;	/* second timer */
+static uptime_t stats_timer;	/* stats timer */
+static uptime_t leapf_timer;	/* Report leapfile problems once/day */
+static uptime_t huffpuff_timer;	/* huff-n'-puff timer */
+static unsigned long	leapsec; /* secs to next leap (proximity class) */
 unsigned int	leap_smear_intv;	/* Duration of smear.  Enables smear mode. */
 int	leapdif;		/* TAI difference step at next leap second*/
-unsigned long	orphwait; 	/* orphan wait time */
+uptime_t	orphwait; 	/* orphan wait time */
 
 /*
  * Statistics counter for the interested.
@@ -275,8 +275,7 @@ timer(void)
 	 * Interface update timer
 	 */
 	if (interface_interval && interface_timer <= current_time) {
-		timer_interfacetimeout(current_time +
-		    (unsigned long)interface_interval);
+		timer_interfacetimeout(current_time + interface_interval);
 		DPRINT(2, ("timer: interface update\n"));
 		interface_update(NULL, NULL);
 	}
@@ -330,7 +329,7 @@ if (debug >= 4 && msg != NULL)
 
 
 void
-timer_interfacetimeout(unsigned long timeout)
+timer_interfacetimeout(uptime_t timeout)
 {
 	interface_timer = timeout;
 }

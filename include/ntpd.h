@@ -176,9 +176,9 @@ extern	void	init_timer	(void);
 extern	void	reinit_timer	(void);
 extern	void	timer		(void);
 extern	void	timer_clr_stats (void);
-extern	void	timer_interfacetimeout (unsigned long);
+extern	void	timer_interfacetimeout (uptime_t);
 extern	volatile int interface_interval;
-extern	unsigned long	orphwait;		/* orphan wait time */
+extern	uptime_t	orphwait;		/* orphan wait time */
 
 /* ntp_util.c */
 extern	void	init_util	(void);
