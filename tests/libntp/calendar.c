@@ -17,7 +17,7 @@ TEST_TEAR_DOWN(calendar) {}
 
 #include "ntp_calendar.h"
 
-#define TEST_ASSERT_GREATER_THAN(a, b) TEST_ASSERT_TRUE(a > b)
+#define TEST_ASSERT_LESS_THAN(a, b) TEST_ASSERT_TRUE(b < a)
 
 static const char *DateToString(char *, const struct calendar *);
 
@@ -165,8 +165,8 @@ TEST(calendar, SplitYearDays1) {
 	for (eyd = -1; eyd <= 365; eyd++) {
 		ntpcal_split split = ntpcal_split_yeardays(eyd, 0);
 		if (split.lo >= 0 && split.hi >= 0) {
-			TEST_ASSERT_GREATER_THAN(12, split.hi);
-			TEST_ASSERT_GREATER_THAN(real_month_days[0][split.hi+1], split.lo);
+			TEST_ASSERT_LESS_THAN(12, split.hi);
+			TEST_ASSERT_LESS_THAN(real_month_days[0][split.hi+1], split.lo);
 			int32_t tyd = real_month_table[0][split.hi] + split.lo;
 			TEST_ASSERT_EQUAL(eyd, tyd);
 		} else
@@ -180,8 +180,8 @@ TEST(calendar, SplitYearDays2) {
 	for (eyd = -1; eyd <= 366; eyd++) {
 		ntpcal_split split = ntpcal_split_yeardays(eyd, 1);
 		if (split.lo >= 0 && split.hi >= 0) {
-			TEST_ASSERT_GREATER_THAN(12, split.hi);
-			TEST_ASSERT_GREATER_THAN(real_month_days[1][split.hi+1], split.lo);
+			TEST_ASSERT_LESS_THAN(12, split.hi);
+			TEST_ASSERT_LESS_THAN(real_month_days[1][split.hi+1], split.lo);
 			int32_t tyd = real_month_table[1][split.hi] + split.lo;
 			TEST_ASSERT_EQUAL(eyd, tyd);
 		} else
