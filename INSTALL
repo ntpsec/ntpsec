@@ -205,6 +205,9 @@ You might, say, use --destdir=/tmp/ntp for a test install to see what
 the installation paths look like without running as root or touching
 system directories.
 
+NB: --destdir works at install time, --prefix works at configure time.
+
+
 == Qualification testing ==
 
 Details on how to qualify NTPsec if you've never used it before
