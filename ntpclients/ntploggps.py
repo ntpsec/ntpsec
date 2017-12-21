@@ -28,16 +28,6 @@ import threading
 import time
 
 try:
-    package = 'GPSD'  # pylint: disable=invalid-name
-    import gps
-    package = 'NTP'  # pylint: disable=invalid-name
-    import ntp.util
-except ImportError as e:
-    sys.stderr.write("ntploggps: can't find Python %s modules.\n" % package)
-    sys.stderr.write("%s\n" % e)
-    sys.exit(1)
-
-try:
     import argparse
 except ImportError:
     sys.stderr.write("""
@@ -47,6 +37,20 @@ ntpologgps: can't find the Python argparse module
 """)
     sys.exit(1)
 
+try:
+    import gps
+except ImportError as e:
+    sys.stderr.write("ntploggps: can't find Python GPSD library.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
+
+try:
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write(
+        "ntploggps: can't find Python NTP library.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 
 def logging_setup():
     "Create logging object"

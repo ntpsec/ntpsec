@@ -34,9 +34,10 @@ import time
 try:
     import ntp.util
 except ImportError as e:
-    sys.stderr.write("ntplogtemp: can't find Python NTP modules.\n%s\n" % e)
+    sys.stderr.write(
+        "ntplogtemp: can't find Python NTP library.\n")
+    sys.stderr.write("%s\n" % e)
     sys.exit(1)
-
 
 def run_binary(cmd):
     """\
