@@ -542,6 +542,10 @@ int main(int argc, char **argv) {
                 ]
     # else:  # gcc, probably
 
+    # Exclude Unity's support for printing floating point numbers since it triggers warnings
+    # with -Wfloat-equal
+    ctx.env.CFLAGS = ['-DUNITY_EXCLUDE_FLOAT_PRINT'] + ctx.env.CFLAGS
+
     # XXX: hack
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
         ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
