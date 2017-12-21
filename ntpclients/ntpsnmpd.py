@@ -18,7 +18,7 @@ try:
     ax = ntp.agentx
 except ImportError as e:
     sys.stderr.write(
-        "ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
+        "ntpsnmpd: can't find Python NTP library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
