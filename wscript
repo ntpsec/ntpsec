@@ -931,6 +931,10 @@ int main(int argc, char **argv) {
                 yesno(ctx.env.ENABLE_DOC and not ctx.env.DISABLE_MANPAGE))
 
     ctx.recurse("pylib")
+    # Convert the Python directories to absolute paths.
+    # This makes them behave the same as PREFIX.
+    ctx.env.PYTHONDIR = os.path.abspath(ctx.env.PYTHONDIR)
+    ctx.env.PYTHONARCHDIR = os.path.abspath(ctx.env.PYTHONARCHDIR)
     msg_setting("PYTHONDIR", ctx.env.PYTHONDIR)
     msg_setting("PYTHONARCHDIR", ctx.env.PYTHONARCHDIR)
 
