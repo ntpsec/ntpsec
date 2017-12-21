@@ -205,7 +205,8 @@ You might, say, use --destdir=/tmp/ntp for a test install to see what
 the installation paths look like without running as root or touching
 system directories.
 
-NB: --destdir works at install time, --prefix works at configure time.
+NB: --destdir is specified at install time, --prefix is specified
+at configure time and saved until install time.
 
 
 == Qualification testing ==
