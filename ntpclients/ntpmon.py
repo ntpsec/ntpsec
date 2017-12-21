@@ -32,12 +32,12 @@ import sys
 import time
 
 try:
-    import ntp.packet
-    import ntp.util
-    import ntp.ntpc
-    import ntp.version
     import ntp.control
     import ntp.magic
+    import ntp.ntpc
+    import ntp.packet
+    import ntp.util
+    import ntp.version
 except ImportError as e:
     sys.stderr.write(
         "ntpmon: can't find Python NTP library.\n")

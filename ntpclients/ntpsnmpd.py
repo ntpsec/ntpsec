@@ -12,10 +12,10 @@ import select
 import subprocess
 
 try:
-    import ntp.packet
-    import ntp.util
     import ntp.agentx
     ax = ntp.agentx
+    import ntp.packet
+    import ntp.util
 except ImportError as e:
     sys.stderr.write(
         "ntpsnmpd: can't find Python NTP library.\n")

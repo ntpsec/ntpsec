@@ -47,9 +47,9 @@ import getopt
 import math
 
 try:
+    import ntp.magic
     import ntp.packet
     import ntp.util
-    import ntp.magic
 except ImportError as e:
     sys.stderr.write(
         "ntpdig: can't find Python NTP library.\n")
