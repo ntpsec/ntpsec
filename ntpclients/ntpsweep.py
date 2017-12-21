@@ -28,6 +28,14 @@ import os
 import sys
 import getopt
 
+# Import ntp.* as needed, from our configured PYTHONDIR.
+original_sys_path = list(sys.path)
+PYTHONDIR='@PYTHONDIR@'
+PYTHONARCHDIR='@PYTHONARCHDIR@'
+if PYTHONDIR[0] != '@':
+    sys.path.insert(1, PYTHONDIR)
+if PYTHONARCHDIR[0] != '@' and PYTHONARCHDIR != PYTHONDIR:
+    sys.path.insert(2, PYTHONARCHDIR)
 try:
     import ntp.packet
     import ntp.util
@@ -36,6 +44,7 @@ except ImportError as e:
         "ntpsweep: can't find Python NTP library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
+sys.path = original_sys_path
 
 def ntp_peers(host):
     """Return: a list of peer IP addrs for a specified host,

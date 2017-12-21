@@ -11,6 +11,14 @@ import socket
 import select
 import subprocess
 
+# Import ntp.* as needed, from our configured PYTHONDIR.
+original_sys_path = list(sys.path)
+PYTHONDIR='@PYTHONDIR@'
+PYTHONARCHDIR='@PYTHONARCHDIR@'
+if PYTHONDIR[0] != '@':
+    sys.path.insert(1, PYTHONDIR)
+if PYTHONARCHDIR[0] != '@' and PYTHONARCHDIR != PYTHONDIR:
+    sys.path.insert(2, PYTHONARCHDIR)
 try:
     import ntp.packet
     import ntp.util
@@ -21,6 +29,7 @@ except ImportError as e:
         "ntpsnmpd: can't find Python NTP library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
+sys.path = original_sys_path
 
 
 # TODO This is either necessary, or a different workaround is.

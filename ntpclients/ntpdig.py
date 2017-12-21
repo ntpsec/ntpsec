@@ -46,6 +46,14 @@ import time
 import getopt
 import math
 
+# Import ntp.* as needed, from our configured PYTHONDIR.
+original_sys_path = list(sys.path)
+PYTHONDIR='@PYTHONDIR@'
+PYTHONARCHDIR='@PYTHONARCHDIR@'
+if PYTHONDIR[0] != '@':
+    sys.path.insert(1, PYTHONDIR)
+if PYTHONARCHDIR[0] != '@' and PYTHONARCHDIR != PYTHONDIR:
+    sys.path.insert(2, PYTHONARCHDIR)
 try:
     import ntp.magic
     import ntp.packet
@@ -55,6 +63,7 @@ except ImportError as e:
         "ntpdig: can't find Python NTP library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
+sys.path = original_sys_path
 
 
 def read_append(s, packets, packet, sockaddr):
