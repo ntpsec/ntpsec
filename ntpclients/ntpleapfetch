@@ -16,7 +16,7 @@ VERSION="1.003"
 # ########## Default configuration ##########
 #
 # Where to get the file
-LEAPSRC="ftp://time.nist.gov/pub/leap-seconds.list"
+LEAPSRC="ftp://ftp.nist.gov/pub/time/leap-seconds.list"
 
 # How many times to try to download new file
 MAXTRIES=6
