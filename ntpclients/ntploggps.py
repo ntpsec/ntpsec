@@ -31,7 +31,7 @@ try:
     import argparse
 except ImportError:
     sys.stderr.write("""
-ntpologgps: can't find the Python argparse module
+ntploggps: can't find the Python argparse module
          If your Python version is < 2.7, then manual installation is needed:
          # pip install argparse
 """)
