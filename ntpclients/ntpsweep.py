@@ -27,9 +27,15 @@ from __future__ import print_function
 import os
 import sys
 import getopt
-import ntp.packet
-import ntp.util
 
+try:
+    import ntp.packet
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write(
+        "ntpsweep: can't find Python NTP library.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 
 def ntp_peers(host):
     """Return: a list of peer IP addrs for a specified host,

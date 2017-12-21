@@ -25,10 +25,16 @@ import getopt
 import re
 import time
 import socket
-import ntp.magic
-import ntp.packet
-import ntp.util
 
+try:
+    import ntp.magic
+    import ntp.packet
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write(
+        "ntpwait: can't find Python NTP library.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 
 class Unbuffered(object):
     def __init__(self, stream):

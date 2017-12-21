@@ -17,8 +17,14 @@ import getopt
 import re
 import subprocess
 import sys
-import ntp.util
 
+try:
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write(
+        "ntptrace: can't find Python NTP library.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 
 def get_info(host):
     info = ntp_read_vars(0, [], host)
