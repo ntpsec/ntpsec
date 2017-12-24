@@ -27,7 +27,7 @@ times in seconds) and text strings.
 Configuration files may have inclusion lines.  The syntax is +include+
 followed by whitespace followed by a file or directory name.  The
 configuration is evaluated as though the text of the file - or all
-files of the directory with the extension ".ntpd" - were textually
+files of the directory with the extension ".conf" - were textually
 spliced in at the point of the include. Relative paths will work, even
 when the -c option changes the config directory root.
 
