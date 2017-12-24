@@ -126,7 +126,7 @@ logconfig =syncstatus +sysevents
 +
 This would just list the synchronizations state of
 {ntpdman} and the major system events. For a simple reference
-server, the following minimum message configuration could be useful:_
+server, the following minimum message configuration could be useful:
 +
 ----------------------------
 logconfig =syncall +clockall
@@ -146,7 +146,7 @@ and so on is suppressed.
   Controls size limits of the monitoring facility Most Recently Used
   (MRU) list of client addresses, which is also
   used by the rate control facility.
-  +maxdepth+ 'count';;         
+  +maxdepth+ 'count';;
   +maxmem+ 'kilobytes';;
     Equivalent upper limits on the size of the MRU list, in terms of
     entries or kilobytes. The actual limit will be up to +incalloc+
@@ -176,12 +176,12 @@ and so on is suppressed.
     . If the age of the oldest slot is more than +minage+, the oldest
     slot is recycled (default 64 seconds).
     . Otherwise, no slot is available.
-  +initalloc+ 'count';;         
+  +initalloc+ 'count';;
   +initmem+ 'kilobytes';;
     Initial memory allocation at the time the monitoring facility is
     first enabled, in terms of entries or kilobytes. The default is 4
     kilobytes.
-  +incalloc+ 'count';;         
+  +incalloc+ 'count';;
   +incmem+ 'kilobytes';;
     Size of additional memory allocations when growing the MRU list, in
     entries or kilobytes. The default is 4 kilobytes.
@@ -290,7 +290,7 @@ The variables operate as follows:
     Ignored for backward compatibility.
   +stacksize+ _4kPages_;;
     Specifies the maximum size of the process stack on systems with the
-    mlockall()_function. Defaults to 50 4k pages.
+    +mlockall()+ function. Defaults to 50 4k pages.
   +filenum+ _filedescriptors_;;
     Specifies the maximum number of file descriptors ntpd may have open
     at once. Defaults to the system default.

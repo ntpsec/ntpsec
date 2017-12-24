@@ -336,10 +336,10 @@ Note that this command can be sent from the
         This number is taken to be the number of seconds the server is
         running at the start of the corresponding 24-hour period.
 
-   _link_ | _nolink_::
+   +link+ | +nolink+::
       It is convenient to be able to access the current element of a
       file generation set by a fixed name. This feature is enabled by
-      specifying _link_ and disabled using _nolink_. If link is
+      specifying +link+ and disabled using +nolink+. If link is
       specified, a hard link from the current file set element to a file
       without suffix is created. When there is already a file with this
       name and the number of links of this file is one, it is renamed

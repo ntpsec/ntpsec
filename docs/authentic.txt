@@ -178,7 +178,7 @@ various authentication schemes.
 By default, the client sends non-authenticated packets and the server
 responds with non-authenticated packets. If the client sends
 authenticated packets, the server responds with authenticated packets if
-correct, or a crypto-NAK packet if not. The +notrust +flag, described on the
+correct, or a crypto-NAK packet if not. The +notrust+ flag, described on the
 link:authopt.html[Access Control Options] page, can be used to disable
 access to all but correctly authenticated clients.
 

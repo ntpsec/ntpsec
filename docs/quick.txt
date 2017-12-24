@@ -75,7 +75,7 @@ driftfile /var/lib/ntp/ntp.drift
 
 This sets up a drift file, which is used to store a measurement of
 the drift frequency of your computer's clock crystal between runs
-of +ntpd. The drift is used to converge on correct time more quickly
+of +ntpd+. The drift is used to converge on correct time more quickly
 after startup.
 
 You might see something more like this:
@@ -129,7 +129,7 @@ server 3.ubuntu.pool.ntp.org
 
 Multiple declarations of individual pool servers are not the best you can
 do; they're a workaround for a historical bug in NTP Classic.  It's
-better to say 
+better to say
 
 ------------------------------------------------------------------
 pool ubuntu.pool.ntp.org
@@ -163,7 +163,7 @@ servers are located where packet-transit times to you are short and
 there is little random variation in them.  Because the NTP pool is
 worldwide, asking for a random assignment from it may give you a
 timeserver on the other side of the world.  Thus, the pool is divided
-into subsections.  To improve your service, pick a pool section near 
+into subsections.  To improve your service, pick a pool section near
 you on the network.
 
 Unfortunately, "near you on the network" is often difficult to map

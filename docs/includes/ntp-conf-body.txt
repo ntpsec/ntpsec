@@ -24,9 +24,9 @@ lines. Arguments may be host names, host addresses written in numeric,
 dotted-quad form, integers, floating point numbers (when specifying
 times in seconds) and text strings.
 
-Configuration files may have inclusion lines.  The syntax is "include"
+Configuration files may have inclusion lines.  The syntax is +include+
 followed by whitespace followed by a file or directory name.  The
-configuation is evaluated as though the text of the file - or all
+configuration is evaluated as though the text of the file - or all
 files of the directory with the extension ".ntpd" - were textually
 spliced in at the point of the include. Relative paths will work, even
 when the -c option changes the config directory root.
@@ -65,9 +65,9 @@ Only those options applicable to each command are listed below. Use of
 options not listed may not be caught as an error, but may result in
 some weird and even destructive behavior.
 
-In contexts where a host name is expected, a `-4`or `--ipv4`
+In contexts where a host name is expected, a `-4` or `--ipv4`
 qualifier preceding the host name forces DNS resolution to the IPv4
-namespace, while a `-6` or `--ipv6' qualifier forces DNS resolution to
+namespace, while a `-6` or `--ipv6` qualifier forces DNS resolution to
 the IPv6 namespace.
 
 include::../includes/assoc-commands.txt[]
@@ -223,7 +223,7 @@ include::../includes/misc-options.txt[]
 
 `/etc/ntp.conf`::
   the default name of the configuration file
-_ntp.keys_::
+`ntp.keys`::
   private MD5 keys
 
 One of the following exit values will be returned:
@@ -247,4 +247,3 @@ David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
 
 The syntax checking is not picky; some combinations of ridiculous and
 even hilarious options and modes may not be detected.
-

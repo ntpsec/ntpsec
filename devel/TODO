@@ -13,7 +13,7 @@
 [quote, Gary Miller]
 __________
 ntpd takes way, way, way longer to converge than chronyd.  Which is
-why on the fly reconfiguation in ntpd is SO important.  Last thing you
+why on the fly reconfiguration in ntpd is SO important.  Last thing you
 ever want to do is restart ntpd.
 
 Right now, after 10 mins, ntpd has 2,000 times the jitter as chronyd had
@@ -121,7 +121,7 @@ Pivot cleanup:
   of seconds in l_fp.  We can clean up a lot of code if l_fp is
   only used for offsets except when used in packets.  That requires
   pushing the pivot logic down close to the packet processing.
-  
+
   There may be interactions with ntpq.
 
 Recvbuff cleanup:
