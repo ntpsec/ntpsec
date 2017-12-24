@@ -184,6 +184,22 @@ gcc-7-refclocks:
   tags:
     - gitlab-org
 
+freebsd-10-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - freebsd-10
+
+freebsd-10-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+    - python -m unittest discover -s build/main/tests/pylib
+  tags:
+    - freebsd-10
+
 freebsd-11-basic:
   <<: *job_definition
   script:
