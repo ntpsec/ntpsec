@@ -12,11 +12,6 @@
 
 == Options ==
 
-Command line options are described following. Specifying the command line
-options +-c+ or +-p+ will cause the specified query (queries) to be sent
-to the indicated host(s) immediately. Otherwise, +ntpq+ will attempt to
-read interactive format commands from the standard input.
-
 +-n+, +--nofork+::
   Do not fork
 +-d+, +--debug+::
@@ -29,6 +24,6 @@ read interactive format commands from the standard input.
 == Known Limitations ==
 
 This is a prototype. Large parts of the AgentX standard are not yet
-implemented. Most of the returned values are dummy values.
+implemented.
 
 // end
