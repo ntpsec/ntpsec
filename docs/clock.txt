@@ -21,7 +21,7 @@ congestion. This page describes the design and operation of the state
 machine in detail.
 
 The state machine is activated upon receipt of an update by the clock
-discipline algorithm. its primary purpose is to determines whether the
+discipline algorithm. Its primary purpose is to determine whether the
 clock is slewed or stepped and how the initial time and frequency are
 determined using three thresholds: _panic_, _step_ and _stepout_, and
 one timer: _hold_.

@@ -218,7 +218,7 @@ The subtype 101 to 180 is specified, this driver issues the loopback
 command and measures the delay of the telephone line and the system
 processing through the Telephone JJY loopback circuit.
 +
-The round trip time through the Telphone JJY loopback circuit is
+The round trip time through the Telephone JJY loopback circuit is
 measured 5 times, and each delay time is greater than 700
 milliseconds, that delay time is ignored during average delay time
 calculation. Also, if the valid delay time ( <= 700 mS. ) is

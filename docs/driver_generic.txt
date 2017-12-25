@@ -30,7 +30,7 @@ routine into a generic drive framework.
 Note that some of these subtypes below are to support equipment that
 has not been commercially available for a long time, report only
 2-digit years (thus being subject to lingering Y2K problems and
-possible fture issues near century boundaries). and may be removed in
+possible future issues near century boundaries), and may be removed in
 a future release.  See
 https://www.ntpsec.org/removal-plan.html[Feature removals] for a
 discussion of this issue.

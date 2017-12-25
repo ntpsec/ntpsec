@@ -85,7 +85,7 @@ Dedicated non-GPS reference-clock hardware designed in the 20th
 century frequently also report only two-digit year dates - for
 example, the Arbiter and Spectracom devices supported by this
 distribution.  This problem may persist in post-2000 devices that
-are designed for compatility to use the same reporting protocols,
+are designed for compatibility to use the same reporting protocols,
 such as Spectracom's "Type 2".
 
 There is an internal workaround to deal with two-digit dates in
@@ -114,7 +114,7 @@ drops back a second so that the same counter value represents two
 distinct times.  If a leap second were to be deleted, the counter
 would skip that second.
 
-Thw possibility of stutter or skip also means that in order to compute
+The possibility of stutter or skip also means that in order to compute
 elapsed time in seconds between two Unix times, you need to know
 the leap-second offset at each time.  It is not guaranteed that
 these offsets are the same if the interval crosses midnight  at the

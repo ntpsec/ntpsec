@@ -5,7 +5,7 @@
 ["verse",subs="normal"]
 Name: modem
 Reference ID: NIST | USNO | PTB | GPS
-xSerial Port: /dev/modem__u__; 9600 8N1
+Serial Port: /dev/modem__u__; 9600 8N1
 Features: tty_clk
 Requires: a dial-out device.
 

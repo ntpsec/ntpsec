@@ -48,7 +48,7 @@ ephemeral, or preemptable, and removed when the association is
 demobilized.
 
 Some flags have the effect to deny service, some have the effect to
-enable service and some are conditioned by other flags. The flags. are
+enable service and some are conditioned by other flags. The flags are
 not orthogonal, in that more restrictive flags will often make less
 restrictive ones redundant. The flags that deny service are classed in
 two categories, those that restrict time service and those that restrict

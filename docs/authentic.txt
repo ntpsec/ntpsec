@@ -231,7 +231,7 @@ range 1-10, the key is interpreted as a printable ASCII string. For key
 IDs in the range 11-20, the key is a 40-character hex digit string. The
 key is truncated or zero-filled internally to either 128 or 160 bits,
 depending on the key type. The line can be edited later or new lines can
-be added to change any field. The key can be change to a password, such
+be added to change any field. The key can be changed to a password, such
 as +2late4Me+ for key ID 10. Note that two or more keys files can be
 combined in any order as long as the key IDs are distinct.
 

@@ -190,7 +190,7 @@
    http://www.ntp.org/ .  NTPsec forked from it on June 6th, 2015.
 
 [[nonce]] nonce::
-  An arbitrary number that may only be used once. a random or
+  An arbitrary number that may only be used once. A random or
   pseudo-random number issued in an authentication protocol (such as
   NTP's) to ensure that old communications cannot be reused in replay
   attacks.
@@ -246,7 +246,7 @@
   or <<time radio>> receivers, or even a master cesium clock.
 
 [[stratum]] stratum::
-  A "stratum" is a layer in the hierarchy of time servers.  a
+  A "stratum" is a layer in the hierarchy of time servers.  A
   <<refclock>> is considered stratum 0; a computer directly attached to
   a refclock is stratum 1; and a client served by a stratum N is
   stratum N+1. Often capitalized, especially when referring to all

@@ -216,7 +216,7 @@ down and 3 can outvote 2 falsetickers.  That may be appropriate if you
 need high reliability, say because you are serving hundreds of
 clients.
 
-One pool declaratin will normally get you four or more servers.
+One pool declaration will normally get you four or more servers.
 
 [[gps]]
 == Configuring A Local GPS ==
