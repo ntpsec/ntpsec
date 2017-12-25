@@ -54,8 +54,7 @@ gitlab-basic:
   <<: *job_definition
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - gitlab-org
 
@@ -63,104 +62,91 @@ gitlab-refclocks:
   <<: *job_definition
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
 
 debian-wheezy-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - debian-wheezy
 
 debian-wheezy-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - debian-wheezy
 
 debian-jessie-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - debian-jessie
 
 debian-jessie-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - debian-jessie
 
 debian-stretch-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - debian-stretch
 
 debian-stretch-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - debian-stretch
 
 ubuntu-1404-lts-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - ubuntu-1404-lts
 
 ubuntu-1404-lts-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - ubuntu-1404-lts
 
 ubuntu-1604-lts-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - ubuntu-1604-lts
 
 ubuntu-1604-lts-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - ubuntu-1604-lts
 
 ubuntu-1710-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - ubuntu-1710
 
 ubuntu-1710-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - ubuntu-1710
 
@@ -169,8 +155,7 @@ gcc-7-basic:
   image: gcc:7
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - gitlab-org
 
@@ -179,102 +164,91 @@ gcc-7-refclocks:
   image: gcc:7
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
 
 freebsd-10-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - freebsd-10
 
 freebsd-10-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - freebsd-10
 
 freebsd-11-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - freebsd-11
 
 freebsd-11-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - freebsd-11
 
 centos-6-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
+    - python ./waf configure build check
   tags:
     - centos-6
 
 centos-6-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --refclock=all build check
   tags:
     - centos-6
 
 centos-7-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - centos-7
 
 centos-7-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - centos-7
 
 fedora-26-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - fedora-26
 
 fedora-26-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - fedora-26
 
 fedora-27-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure build check
   tags:
     - fedora-27
 
 fedora-27-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - fedora-27
 
@@ -283,8 +257,7 @@ python3:
   image: python:3
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools
-    - python ./waf configure --refclock=all build
-    - python -m unittest discover -s build/main/tests/pylib
+    - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
 
