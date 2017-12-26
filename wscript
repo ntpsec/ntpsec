@@ -29,6 +29,8 @@ from wafhelpers.fix_python_config import FixConfig
 
 pprint.__doc__ = None
 
+APPNAME='ntpsec'
+
 out = "build"
 
 config = {
