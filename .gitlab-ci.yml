@@ -34,6 +34,7 @@ codequality:
 sast:
   image: registry.gitlab.com/gitlab-org/gl-sast:latest
   script:
+    - touch Pipfile
     - /app/bin/run .
   artifacts:
     paths: [gl-sast-report.json]
