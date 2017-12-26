@@ -16,7 +16,7 @@ pool group of its own. This may change in the future.
 
 == FHS noncompliance under Linux ==
 
-Thw function get_python_lib() in the Python distutils library is the
+The function get_python_lib() in the Python distutils library is the
 only reliable way to know where in fact the ntp Python library can
 installed; under Linux, it normally returns something under /usr/lib.
 This corresponds to a system installation.
@@ -42,7 +42,7 @@ improving maintainability and reducing attack surface.  However, we
 know that some platforms cannot support Python or choose not to
 include it in their core configuration.
 
-For these platorms, we recommend using cx_Freeze to render the NTPsec
+For these platforms, we recommend using cx_Freeze to render the NTPsec
 Python programs, and all their imported modules, into standalone files.
 These files can then be copied to a host that does not have Python
 installed and executed just as if Python was installed.
