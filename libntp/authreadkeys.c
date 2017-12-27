@@ -70,7 +70,6 @@ authreadkeys(
 {
 	FILE	*fp;
 	char	*line;
-	char	*token;
 	keyid_t	keyno;
 	int	keytype;
 	char	buf[512];		/* lots of room for line */
@@ -100,7 +99,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 	 * Now read lines from the file, looking for key entries
 	 */
 	while ((line = fgets(buf, sizeof buf, fp)) != NULL) {
-		token = nexttok(&line);
+		char *token = nexttok(&line);
 		if (token == NULL)
 			continue;
 		
@@ -180,16 +179,14 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 			keys++;
 		} else {
 			char	hex[] = "0123456789abcdef";
-			uint8_t	temp;
-			char	*ptr;
 			size_t	jlim;
 
 			jlim = min(len, 2 * sizeof(keystr));
 			for (j = 0; j < jlim; j++) {
-				ptr = strchr(hex, tolower((unsigned char)token[j]));
+				char *ptr = strchr(hex, tolower((unsigned char)token[j]));
 				if (ptr == NULL)
 					break;	/* abort decoding */
-				temp = (uint8_t)(ptr - hex);
+				uint8_t temp = (uint8_t)(ptr - hex);
 				if (j & 1)
 					keystr[j / 2] |= temp;
 				else

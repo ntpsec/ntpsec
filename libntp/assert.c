@@ -44,7 +44,7 @@
 
 void
 backtrace_log(void) {
-	int j, nptrs;
+	int nptrs;
 	void *buffer[BACKTRACE_MAXFRAME];
 	char **strings;
 
@@ -53,7 +53,7 @@ backtrace_log(void) {
 	msyslog(LOG_ERR, "ERR: Stack trace:\n");
 	if (strings) {
 	   /* skip trace of this shim function */
-	   for (j = 1; j < nptrs; j++)
+	   for (int j = 1; j < nptrs; j++)
 	       msyslog(LOG_ERR, "ERR:  %s\n", strings[j]);
 
 	   free(strings);
