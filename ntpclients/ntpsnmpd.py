@@ -1167,19 +1167,25 @@ def dolog(text, level):
         logfp.write(text)
 
 
-def connect():
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+def connect(address):
     try:
-        sock.connect("/var/agentx/master")
+        if type(address) is str:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.connect(address)
+        else:
+            host, port = address[0], address[1]
+            af, _, _, _, _ = socket.getaddrinfo(host, port)[0]
+            sock = socket.socket(af, socket.SOCK_STREAM)
+            sock.connect((host, port))
     except socket.error as msg:
         dolog(repr(msg) + "\n", 2)
         sys.exit(1)
     return sock
 
 
-def mainloop():
+def mainloop(masterAddress=None):
     dolog("initing loop\n", 1)
-    sock = connect()
+    sock = connect(masterAddress)
     dbase = DataSource()
     control = PacketControl(sock, dbase)
     control.loopCallback = dbase.checkNotifications
@@ -1187,7 +1193,7 @@ def mainloop():
     control.mainloop(True)
 
 
-def daemonize(runfunc):
+def daemonize(runfunc, *runArgs):
     pid = os.fork()
     if pid < 0:
         print("Forking error", pid)
@@ -1211,13 +1217,15 @@ def daemonize(runfunc):
     sys.stdout.close()
     sys.stderr.close()
 
-    runfunc()
+    runfunc(*runArgs)
 
 
 usage = """
 USAGE: ntpsnmpd [-n]
   Flg Arg Option-Name   Description
    -n no  no-fork         Do not fork and daemonize.
+   -x Adr master-addr     Specify address for connecting to the master agent
+                                - default /var/agentx/master
    -d no  debug-level     Increase output debug message level
                                 - may appear multiple times
    -D Int set-debug-level Set the output debug message level
@@ -1230,17 +1238,26 @@ if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:],
-            "ndD:V",
-            ["no-fork", "debug-level", "set-debug-level", "version"])
+            "nx:dD:V",
+            ["no-fork", "master-address", "debug-level", "set-debug-level",
+             "version"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
         raise SystemExit(1)
 
+    masterAddr = "/var/agentx/master"  # Default NET-SNMP configuration
     for (switch, val) in options:
         if switch in ("-n", "--no-fork"):
             # currently non functional, as nofork is inited to True
             nofork = True
+        elif switch in ("-x", "--master-addr"):
+            if ":" in val:
+                host, port = val.split(":")
+                port = int(port)
+                masterAddr = (host, port)
+            else:
+                masterAddr = val
         elif switch in ("-d", "--debug-level"):
             debug += 1
         elif switch in ("-D", "--set-debug-level"):
@@ -1250,7 +1267,8 @@ if __name__ == "__main__":
             print("ntpsnmpd %s" % ntp.util.stdversion())
             raise SystemExit(0)
 
+
     if nofork is True:
-        mainloop()
+        mainloop(masterAddr)
     else:
-        daemonize(mainloop)
+        daemonize(mainloop, masterAddr)

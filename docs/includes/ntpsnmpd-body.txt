@@ -14,6 +14,8 @@
 
 +-n+, +--nofork+::
   Do not fork
++-x+, +--master-addr+::
+  Specify address for connecting to the master agent
 +-d+, +--debug+::
   Increase debugging level by 1.
 +-D+ num, +--set-debug-level+=num::
