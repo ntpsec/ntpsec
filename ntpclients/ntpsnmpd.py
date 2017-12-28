@@ -34,7 +34,8 @@ timeout = 5  # default timeout, what shuold this be?
 
 ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
 
-snmpTrapOID = (1, 3, 6, 1, 6, 3, 1, 1, 4, 1)
+snmpTrapOID = (1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0)
+snmpSysUptime = (1, 3, 6, 1, 2, 1, 1, 3, 0)
 
 DEFHOST = "localhost"  # For now only know how to talk to the local ntp
 
@@ -257,18 +258,18 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.setVarbinds = []  # Varbind of the current set operation
         self.setHandlers = []  # Handlers for commit/undo/cleanup of set
         self.setUndoData = []  # Previous values for undoing
-        self.heartbeatInterval = 10  # should save to disk
+        self.heartbeatInterval = 0  # should save to disk
         self.sentNotifications = 0
         # Notify bits, these should be saved to disk
-        # Also they currently have no effect
-        self.notifyModeChange = False  # 1
-        self.notifyStratumChange = False  # 2
-        self.notifySyspeerChange = False  # 3
-        self.notifyAddAssociation = False  # 4
-        self.notifyRMAssociation = False  # 5
-        self.notifyConfigChange = False  # 6
-        self.notifyLeapSecondAnnounced = False  # 7
-        self.notifyHeartbeat = True  # 8
+        # Also most of them currently have no effect
+        self.notifyModeChange = False  # 1 DUMMY
+        self.notifyStratumChange = False  # 2 DUMMY
+        self.notifySyspeerChange = False  # 3 DUMMY
+        self.notifyAddAssociation = False  # 4 DUMMY
+        self.notifyRMAssociation = False  # 5 DUMMY
+        self.notifyConfigChange = False  # 6 DUMMY
+        self.notifyLeapSecondAnnounced = False  # 7 DUMMY
+        self.notifyHeartbeat = False  # 8
 
     def getOID_core(self, nextP, searchoid, returnGenerator=False):
         gen = ax.walkMIBTree(self.oidTree, ntpRootOID)
@@ -780,24 +781,27 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def checkNotifications(self, control):
         if self.notifyHeartbeat is True:
-            if self.heartbeatInterval == 0:  # interval == 0 means send once
-                self.notifyHeartbeat = False
+            self.notifyHeartbeat(control)
+
+    def notifyHeartbeat(self, control):
+        if self.heartbeatInterval == 0:  # interval == 0 means send once
+            self.notifyHeartbeat = False
+            vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                             ax.OID((1, 3, 6, 1, 2, 1, 197, 0, 8))),
+                  ax.Varbind(ax.VALUE_GAUGE32,
+                             (1, 2, 6, 1, 2, 1, 197, 0, 1, 4, 1),
+                             self.heartbeatInterval)]
+            control.sendNotify(vl)
+        else:
+            current = ntp.util.monoclock()
+            if (current - self.lastHeartbeat) > self.heartbeatInterval:
+                self.lastHeartbeat = current
                 vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
                                  ax.OID((1, 3, 6, 1, 2, 1, 197, 0, 8))),
                       ax.Varbind(ax.VALUE_GAUGE32,
                                  (1, 2, 6, 1, 2, 1, 197, 0, 1, 4, 1),
                                  self.heartbeatInterval)]
-                control.sendNotify(vl, "public")
-            else:
-                current = ntp.util.monoclock()
-                if (current - self.lastHeartbeat) > self.heartbeatInterval:
-                    self.lastHeartbeat = current
-                    vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
-                                     ax.OID((1, 3, 6, 1, 2, 1, 197, 0, 8))),
-                          ax.Varbind(ax.VALUE_GAUGE32,
-                                     (1, 2, 6, 1, 2, 1, 197, 0, 1, 4, 1),
-                                     self.heartbeatInterval)]
-                    control.sendNotify(vl, "public")
+                control.sendNotify(vl)
 
     # =====================================
     # Misc data helpers (not part of the MIB proper)
