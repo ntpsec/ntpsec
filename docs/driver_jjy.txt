@@ -299,7 +299,7 @@ Interface::
 RS-232C or USB, 2400 BPS, 8-bits, no parity, 1 stop bit;;
 Modem control commands:;;
 
-+ATE0Q0V1, ATMnLn, AT&K4, AT+MS=V22B, AT%C0, AT\Nn, ATH1, ATDWxnn...nn +++, ATH0+;;
++`ATE0Q0V1, ATMnLn, AT&K4, AT+MS=V22B, AT%C0, AT\Nn, ATH1, ATDWxnn...nn +++, ATH0`+;;
 
 Time code format::
 +
