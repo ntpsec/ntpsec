@@ -262,13 +262,13 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.sentNotifications = 0
         # Notify bits, these should be saved to disk
         # Also most of them currently have no effect
-        self.notifyModeChange = False  # 1 DUMMY
-        self.notifyStratumChange = False  # 2 DUMMY
-        self.notifySyspeerChange = False  # 3 DUMMY
-        self.notifyAddAssociation = False  # 4 DUMMY
-        self.notifyRMAssociation = False  # 5 DUMMY
-        self.notifyConfigChange = False  # 6 DUMMY
-        self.notifyLeapSecondAnnounced = False  # 7 DUMMY
+        self.notifyModeChange = False  # 1
+        self.notifyStratumChange = False  # 2
+        self.notifySyspeerChange = False  # 3
+        self.notifyAddAssociation = False  # 4
+        self.notifyRMAssociation = False  # 5
+        self.notifyConfigChange = False  # 6
+        self.notifyLeapSecondAnnounced = False  # 7
         self.notifyHeartbeat = False  # 8
 
     def getOID_core(self, nextP, searchoid, returnGenerator=False):
@@ -780,10 +780,52 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     # =====================================
 
     def checkNotifications(self, control):
-        if self.notifyHeartbeat is True:
-            self.notifyHeartbeat(control)
+        if self.notifyModeChange is True:
+            self.doNotifyModeChange(control)
 
-    def notifyHeartbeat(self, control):
+        if self.notifyStratumChange is True:
+            self.doNotifyStratumChange(control)
+
+        if self.notifySyspeerChange is True:
+            self.doNotifySyspeerChange(control)
+
+        if self.notifyAddAssociation is True:
+            self.doNotifyAddAssociation(control)
+
+        if self.notifyRMAssociation is True:
+            self.doNotifyRMAssociation(control)
+
+        if self.notifyConfigChange is True:
+            self.doNotifyConfigChange(control)
+
+        if self.notifyLeapSecondAnnounced is True:
+            self.doNotifyLeapSecondAnnounced(control)
+
+        if self.notifyHeartbeat is True:
+            self.doNotifyHeartbeat(control)
+
+    def doNotifyModeChange(self, control):
+        pass  # DUMMY
+
+    def doNotifyStratumChange(self, control):
+        pass  # DUMMY
+
+    def doNotifySyspeerChange(self, control):
+        pass  # DUMMY
+
+    def doNotifyAddAssociation(self, control):
+        pass  # DUMMY
+
+    def doNotifyRMAssociation(self, control):
+        pass  # DUMMY
+
+    def doNotifyConfigChange(self, control):
+        pass  # DUMMY
+
+    def doNotifyLeapSecondAnnounced(self, control):
+        pass  # DUMMY
+
+    def doNotifyHeartbeat(self, control):  # TODO: check if ntpd running?
         if self.heartbeatInterval == 0:  # interval == 0 means send once
             self.notifyHeartbeat = False
             vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
