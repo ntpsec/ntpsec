@@ -62,6 +62,7 @@ forced_utf8 = False
 
 if str is bytes:  # Python 2
     import codecs
+    import readline
 
     polystr = unicode
     polybytes = bytes
@@ -69,10 +70,12 @@ if str is bytes:  # Python 2
     def string_escape(s):
         return s.decode('string_escape')
 
-    # Originally these only triggered if sys.stdout.encoding != "UTF-8":
-    # Unfortunately sometimes sys.stdout.encoding lies
-    sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-    sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
+    if sys.stdout.encoding != "UTF-8":
+        forced_utf8 = True
+        sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
+    if sys.stderr.encoding != "UTF-8":
+        forced_utf8 = True
+        sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
 
 else:  # Python 3
     import io
