@@ -108,6 +108,16 @@ class TestPylibUtilMethods(unittest.TestCase):
         else:
             self.assertEqual(f(1480999786.025), "2016-12-06T04:49:46.025Z")
 
+    def test_deformatNTPTime(self):
+        f = ntp.util.deformatNTPTime
+
+        # Test standard
+        self.assertEqual(f("0x0001020304050607.08090A0B0C0D0E0F"),
+                         "\x00\x01\x02\x03\x04\x05\x06\x07"
+                         "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F")
+        # Test empty
+        self.assertEqual(f(""), "")
+
     def test_hexstr2octets(self):
         f = ntp.util.hexstr2octets
 

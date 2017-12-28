@@ -252,6 +252,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # Cache so we don't hammer ntpd, default 1 second timeout
         # timeout default pulled from a hat
         self.cache = ntp.util.Cache(1)
+        self.oldValues = {}  # Used by notifications to detect changes
         self.lastHeartbeat = 0
         # The undo system is only for the last operation
         self.inSetP = False  # Are we currently in the set procedure?
@@ -263,7 +264,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # Notify bits, these should be saved to disk
         # Also most of them currently have no effect
         self.notifyModeChange = False  # 1
-        self.notifyStratumChange = False  # 2
+        self.notifyStratumChange = True  # 2
         self.notifySyspeerChange = False  # 3
         self.notifyAddAssociation = False  # 4
         self.notifyRMAssociation = False  # 5
@@ -472,9 +473,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         if data is None:
             return ax.Varbind(ax.VALUE_NULL, oid)
         txt = data["reftime"]
-        txt = txt[2:]  # Strip '0x'
-        txt = "".join(txt.split("."))  # Strip '.'
-        value = ntp.util.hexstr2octets(txt)
+        value = ntp.util.deformatNTPTime(txt)
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, value)
 
     def cbr_statusLeapSecond(self, oid):  # I am not confident in this yet
@@ -808,7 +807,28 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         pass  # DUMMY
 
     def doNotifyStratumChange(self, control):
-        pass  # DUMMY
+        oldStratum = self.oldValues.get("stratum")
+        newStratum = self.safeReadvar(0, ["stratum"])["stratum"]
+        if newStratum is None:
+            return  # couldn't read
+        if oldStratum is None:
+            self.oldValues["stratum"] = newStratum
+            return
+        elif oldStratum != newStratum:
+            datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+            if datetime is None:
+                datetime = ""
+            else:
+                datetime = ntp.util.deformatNTPTime(datetime)
+            vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                             ax.OID(ntpRootOID + (0, 2))),
+                  ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 2, 9),
+                             datetime),
+                  ax.Varbind(ax.VALUE_GAUGE32, ntpRootOID + (1, 2, 2),
+                             newStratum),
+                  ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
+                             "Stratum changed")]  # Uh... what goes here?
+            control.sendNotify(vl)
 
     def doNotifySyspeerChange(self, control):
         pass  # DUMMY
@@ -826,24 +846,19 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         pass  # DUMMY
 
     def doNotifyHeartbeat(self, control):  # TODO: check if ntpd running?
+        vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                         ax.OID(ntpRootOID + (0, 8))),
+              ax.Varbind(ax.VALUE_GAUGE32, ntpRootOID + (0, 1, 4, 1),
+                         self.heartbeatInterval)]
         if self.heartbeatInterval == 0:  # interval == 0 means send once
             self.notifyHeartbeat = False
-            vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
-                             ax.OID((1, 3, 6, 1, 2, 1, 197, 0, 8))),
-                  ax.Varbind(ax.VALUE_GAUGE32,
-                             (1, 2, 6, 1, 2, 1, 197, 0, 1, 4, 1),
-                             self.heartbeatInterval)]
             control.sendNotify(vl)
         else:
             current = ntp.util.monoclock()
             if (current - self.lastHeartbeat) > self.heartbeatInterval:
                 self.lastHeartbeat = current
-                vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
-                                 ax.OID((1, 3, 6, 1, 2, 1, 197, 0, 8))),
-                      ax.Varbind(ax.VALUE_GAUGE32,
-                                 (1, 2, 6, 1, 2, 1, 197, 0, 1, 4, 1),
-                                 self.heartbeatInterval)]
                 control.sendNotify(vl)
+        self.sentNotifications += 1
 
     # =====================================
     # Misc data helpers (not part of the MIB proper)

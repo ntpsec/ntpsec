@@ -112,6 +112,13 @@ def rfc3339(t):
     return rep
 
 
+def deformatNTPTime(txt):
+    txt = txt[2:]  # Strip '0x'
+    txt = "".join(txt.split("."))  # Strip '.'
+    value = ntp.util.hexstr2octets(txt)
+    return value
+
+
 def hexstr2octets(hexstr):
     if (len(hexstr) % 2) != 0:
         hexstr = hexstr[:-1]  # slice off the last char
