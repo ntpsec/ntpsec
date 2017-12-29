@@ -72,6 +72,7 @@ def build(ctx):
         includes=ctx.env.PLATFORM_INCLUDES,
         source=libntpd_source,
         target="libntpd_obj",
+        use="CRYPTO",
     )
 
     ctx(

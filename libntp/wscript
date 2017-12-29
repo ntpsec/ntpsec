@@ -50,6 +50,7 @@ def build(ctx):
         includes=includes,
         source=libntp_source + libntp_source_sharable,
         target="ntp",
+        use="CRYPTO",
     )
 
     # Loadable Python extension

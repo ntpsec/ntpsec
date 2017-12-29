@@ -611,32 +611,39 @@ int main(int argc, char **argv) {
     ctx.define("OPEN_BCAST_SOCKET", 1,
                comment="Whether to open a broadcast socket")
 
-    # Find OpenSSL. Must happen before function checks
-    # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
-    SNIP_OPENSSL_VERSION_CHECK = """
-    #include <openssl/evp.h>
-    int main(void) {
-    #if OPENSSL_VERSION_NUMBER < 0x0090704fL
-    #error OpenSSL must be at least 0.9.7
-    #endif
-        return 0;
-    }
-    """
+    # Check via pkg-config first, then fall back to a direct search
+    if not ctx.check_cfg(
+        package='libcrypto', uselib_store='CRYPTO',
+        args=['libcrypto >= 0.9.7d', '--cflags', '--libs'],
+        msg="Checking for OpenSSL >= 0.9.7d (via pkg-config)",
+        define_name='', mandatory=False,
+    ):
+        # Find OpenSSL. Must happen before function checks
+        # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
+        SNIP_OPENSSL_VERSION_CHECK = """
+        #include <openssl/evp.h>
+        int main(void) {
+        #if OPENSSL_VERSION_NUMBER < 0x0090704fL
+        #error OpenSSL must be at least 0.9.7d
+        #endif
+            return 0;
+        }
+        """
 
-    openssl_headers = (
-        "openssl/evp.h",
-        "openssl/rand.h",
-        "openssl/objects.h",
-    )
-    for hdr in openssl_headers:
-        ctx.check_cc(header_name=hdr, includes=ctx.env.PLATFORM_INCLUDES)
-    # FIXME! Ignoring the result...
-    ctx.check_cc(lib="crypto")
-    ctx.check_cc(comment="OpenSSL support",
-                 fragment=SNIP_OPENSSL_VERSION_CHECK,
-                 includes=ctx.env.PLATFORM_INCLUDES,
-                 msg="Checking OpenSSL >= 0.9.7",
-                 )
+        openssl_headers = (
+            "openssl/evp.h",
+            "openssl/rand.h",
+            "openssl/objects.h",
+        )
+        for hdr in openssl_headers:
+            ctx.check_cc(header_name=hdr, includes=ctx.env.PLATFORM_INCLUDES)
+        # FIXME! Ignoring the result...
+        ctx.check_cc(lib="crypto")
+        ctx.check_cc(comment="OpenSSL support",
+                     fragment=SNIP_OPENSSL_VERSION_CHECK,
+                     includes=ctx.env.PLATFORM_INCLUDES,
+                     msg="Checking for OpenSSL >= 0.9.7d",
+                     )
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
