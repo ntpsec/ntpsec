@@ -2440,11 +2440,11 @@ dns_take_server(
 	pp = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
 	if (NULL != pp) {
 		/* Already in use. */
-		msyslog(LOG_INFO, "PROTO: Server skipping: %s", socktoa(rmtadr));
+		msyslog(LOG_INFO, "DNS: Server skipping: %s", socktoa(rmtadr));
 		return;
 	}
 
-	msyslog(LOG_INFO, "PROTO: Server taking: %s", socktoa(rmtadr));
+	msyslog(LOG_INFO, "DNS: Server taking: %s", socktoa(rmtadr));
 	server->cfg.flags &= (unsigned)~FLAG_DNS;
 		
 	server->srcadr = *rmtadr;
@@ -2452,7 +2452,7 @@ dns_take_server(
 
 	restrict_mask = restrictions(&server->srcadr);
 	if (RES_FLAGS & restrict_mask) {
-		msyslog(LOG_INFO, "PROTO: Server poking hole in restrictions for: %s",
+		msyslog(LOG_INFO, "DNS: Server poking hole in restrictions for: %s",
 			socktoa(&server->srcadr));
 		restrict_source(&server->srcadr, false, 0);
 	}
@@ -2484,11 +2484,11 @@ dns_take_pool(
 	peer = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
 	if (NULL != peer) {
 		/* This address is already in use. */
-		msyslog(LOG_INFO, "PROTO: Pool skipping: %s", socktoa(rmtadr));
+		msyslog(LOG_INFO, "DNS: Pool skipping: %s", socktoa(rmtadr));
 		return;
 	}
 
-	msyslog(LOG_INFO, "PROTO: Pool taking: %s", socktoa(rmtadr));
+	msyslog(LOG_INFO, "DNS: Pool taking: %s", socktoa(rmtadr));
 
 	lcladr = findinterface(rmtadr);
 	memset(&pctl, '\0', sizeof(struct peer_ctl));
@@ -2508,7 +2508,7 @@ dns_take_pool(
 	restrict_mask = restrictions(&peer->srcadr);
 	/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
 	if (RES_FLAGS & restrict_mask) {
-		msyslog(LOG_INFO, "PROTO: Pool poking hole in restrictions for: %s",
+		msyslog(LOG_INFO, "DNS: Pool poking hole in restrictions for: %s",
 				socktoa(&peer->srcadr));
 		restrict_source(&peer->srcadr, false,
 				current_time + POOL_SOLICIT_WINDOW + 1);
@@ -2558,7 +2558,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	if ((DNS_good == status) &&
 		(MDF_UCAST & peer->cast_flags) && !(FLAG_DNS & peer->cfg.flags))
 		hpoll = 0;  /* server: no more */
-	msyslog(LOG_INFO, "PROTO: dns_take_status: %s=>%s, %d",
+	msyslog(LOG_INFO, "DNS: dns_take_status: %s=>%s, %d",
 		peer->hostname, txt, hpoll);
 	if (0 == hpoll)
 		return; /* hpoll already in use by new server */
