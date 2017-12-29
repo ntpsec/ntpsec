@@ -4142,7 +4142,7 @@ report_event(
 			    " %s", str);
 		}
 		NLOG(NLOG_SYSEVENT)
-			msyslog(LOG_INFO, "MODE6: %s", statstr);
+			msyslog(LOG_INFO, "PROTO: %s", statstr);
 	} else {
 
 		/*
