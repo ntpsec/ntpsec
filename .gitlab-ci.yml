@@ -72,6 +72,8 @@ debian-wheezy-basic:
     - python ./waf configure build check
   tags:
     - debian-wheezy
+  only:
+    - branches@NTPsec/ntpsec
 
 debian-wheezy-refclocks:
   <<: *job_definition
@@ -79,6 +81,8 @@ debian-wheezy-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - debian-wheezy
+  only:
+    - branches@NTPsec/ntpsec
 
 debian-jessie-basic:
   <<: *job_definition
@@ -86,6 +90,8 @@ debian-jessie-basic:
     - python ./waf configure build check
   tags:
     - debian-jessie
+  only:
+    - branches@NTPsec/ntpsec
 
 debian-jessie-refclocks:
   <<: *job_definition
@@ -93,6 +99,8 @@ debian-jessie-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - debian-jessie
+  only:
+    - branches@NTPsec/ntpsec
 
 debian-stretch-basic:
   <<: *job_definition
@@ -100,6 +108,8 @@ debian-stretch-basic:
     - python ./waf configure build check
   tags:
     - debian-stretch
+  only:
+    - branches@NTPsec/ntpsec
 
 debian-stretch-refclocks:
   <<: *job_definition
@@ -107,6 +117,8 @@ debian-stretch-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - debian-stretch
+  only:
+    - branches@NTPsec/ntpsec
 
 ubuntu-1404-lts-basic:
   <<: *job_definition
@@ -114,6 +126,8 @@ ubuntu-1404-lts-basic:
     - python ./waf configure build check
   tags:
     - ubuntu-1404-lts
+  only:
+    - branches@NTPsec/ntpsec
 
 ubuntu-1404-lts-refclocks:
   <<: *job_definition
@@ -121,6 +135,8 @@ ubuntu-1404-lts-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - ubuntu-1404-lts
+  only:
+    - branches@NTPsec/ntpsec
 
 ubuntu-1604-lts-basic:
   <<: *job_definition
@@ -128,6 +144,8 @@ ubuntu-1604-lts-basic:
     - python ./waf configure build check
   tags:
     - ubuntu-1604-lts
+  only:
+    - branches@NTPsec/ntpsec
 
 ubuntu-1604-lts-refclocks:
   <<: *job_definition
@@ -135,6 +153,8 @@ ubuntu-1604-lts-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - ubuntu-1604-lts
+  only:
+    - branches@NTPsec/ntpsec
 
 ubuntu-1710-basic:
   <<: *job_definition
@@ -142,6 +162,8 @@ ubuntu-1710-basic:
     - python ./waf configure build check
   tags:
     - ubuntu-1710
+  only:
+    - branches@NTPsec/ntpsec
 
 ubuntu-1710-refclocks:
   <<: *job_definition
@@ -149,6 +171,8 @@ ubuntu-1710-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - ubuntu-1710
+  only:
+    - branches@NTPsec/ntpsec
 
 gcc-7-basic:
   <<: *job_definition
@@ -174,6 +198,8 @@ freebsd-10-basic:
     - python ./waf configure build check
   tags:
     - freebsd-10
+  only:
+    - branches@NTPsec/ntpsec
 
 freebsd-10-refclocks:
   <<: *job_definition
@@ -181,6 +207,8 @@ freebsd-10-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - freebsd-10
+  only:
+    - branches@NTPsec/ntpsec
 
 freebsd-11-basic:
   <<: *job_definition
@@ -188,6 +216,8 @@ freebsd-11-basic:
     - python ./waf configure build check
   tags:
     - freebsd-11
+  only:
+    - branches@NTPsec/ntpsec
 
 freebsd-11-refclocks:
   <<: *job_definition
@@ -195,6 +225,8 @@ freebsd-11-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - freebsd-11
+  only:
+    - branches@NTPsec/ntpsec
 
 centos-6-basic:
   <<: *job_definition
@@ -202,6 +234,8 @@ centos-6-basic:
     - python ./waf configure build check
   tags:
     - centos-6
+  only:
+    - branches@NTPsec/ntpsec
 
 centos-6-refclocks:
   <<: *job_definition
@@ -209,6 +243,8 @@ centos-6-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - centos-6
+  only:
+    - branches@NTPsec/ntpsec
 
 centos-7-basic:
   <<: *job_definition
@@ -216,6 +252,8 @@ centos-7-basic:
     - python ./waf configure build check
   tags:
     - centos-7
+  only:
+    - branches@NTPsec/ntpsec
 
 centos-7-refclocks:
   <<: *job_definition
@@ -223,6 +261,8 @@ centos-7-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - centos-7
+  only:
+    - branches@NTPsec/ntpsec
 
 fedora-26-basic:
   <<: *job_definition
@@ -230,6 +270,8 @@ fedora-26-basic:
     - python ./waf configure build check
   tags:
     - fedora-26
+  only:
+    - branches@NTPsec/ntpsec
 
 fedora-26-refclocks:
   <<: *job_definition
@@ -237,6 +279,8 @@ fedora-26-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - fedora-26
+  only:
+    - branches@NTPsec/ntpsec
 
 fedora-27-basic:
   <<: *job_definition
@@ -244,6 +288,8 @@ fedora-27-basic:
     - python ./waf configure build check
   tags:
     - fedora-27
+  only:
+    - branches@NTPsec/ntpsec
 
 fedora-27-refclocks:
   <<: *job_definition
@@ -251,6 +297,8 @@ fedora-27-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - fedora-27
+  only:
+    - branches@NTPsec/ntpsec
 
 python3:
   <<: *job_definition
