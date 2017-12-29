@@ -4176,7 +4176,7 @@ report_event(
 			    " %s", str);
 		}
 		NLOG(NLOG_PEEREVENT)
-			msyslog(LOG_INFO, "MODE6: %s", statstr);
+			msyslog(LOG_INFO, "PROTO: %s", statstr);
 	}
 	record_proto_stats(statstr);
 	DPRINT(1, ("event at %u %s\n", current_time, statstr));
