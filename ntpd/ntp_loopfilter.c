@@ -6,6 +6,7 @@
  */
 #include "config.h"
 
+#include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -1002,9 +1003,9 @@ rstclock(
 	double	offset		/* new offset */
 	)
 {
-        DPRINT(2, ("local_clock: mu %lu state %d poll %d count %d\n",
-		   current_time - clock_epoch, trans, sys_poll,
-		   tc_counter));
+        DPRINT(2, ("local_clock: mu %" PRIu32 " state %d poll %d count %d\n",
+                  current_time - clock_epoch, trans, sys_poll,
+                  tc_counter));
 	if (trans != state && trans != EVNT_FSET)
 		report_event(trans, NULL, NULL);
 	state = trans;
