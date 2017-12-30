@@ -2696,10 +2696,10 @@ measure_precision(const bool verbose)
 	measured_tick = measure_tick_fuzz();
 	set_sys_tick_precision(measured_tick);
 	if (verbose) {
-		msyslog(LOG_INFO, "PROTO: precision = %.3f usec (%d)",
+		msyslog(LOG_INFO, "INIT: precision = %.3f usec (%d)",
 			sys_tick * US_PER_S, sys_precision);
 		if (sys_fuzz < sys_tick) {
-			msyslog(LOG_NOTICE, "PROTO: fuzz beneath %.3f usec",
+			msyslog(LOG_NOTICE, "INIT: fuzz beneath %.3f usec",
 				sys_fuzz * US_PER_S);
 		}
 	}
@@ -2772,18 +2772,18 @@ set_sys_tick_precision(
 
 	if (tick > 1.) {
 		msyslog(LOG_ERR,
-			"PROTO: unsupported tick %.3f > 1s ignored", tick);
+			"INIT: unsupported tick %.3f > 1s ignored", tick);
 		return;
 	}
 	if (tick < measured_tick) {
 		msyslog(LOG_ERR,
-			"PROTO: tick %.3f less than measured tick %.3f, ignored",
+			"INIT: tick %.3f less than measured tick %.3f, ignored",
 			tick, measured_tick);
 		return;
 	} else if (tick > measured_tick) {
 		trunc_os_clock = true;
 		msyslog(LOG_NOTICE,
-			"PROTO: truncating system clock to multiples of %.9f",
+			"INIT: truncating system clock to multiples of %.9f",
 			tick);
 	}
 	sys_tick = tick;
