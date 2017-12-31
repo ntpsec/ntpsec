@@ -51,7 +51,7 @@ few will be user-visible.
 Normally NTPsec is a drop-in replacement for legacy versions. We have
 tried to hold incompatible changes to a minimum, but there are a
 few.  Some can be reverted by building the software in strict
-compatibility mode with --enable-classic-mode (note that this is
+compatibility mode with +--enable-classic-mode+ (note that this is
 a build-time switch, not a run-time one).
 
 * The +sntp+ program has been renamed +ntpdig+ in order to make
@@ -60,26 +60,26 @@ a build-time switch, not a run-time one).
   is ntpwait, and +update-leap+ is now +ntpleapfetch+.
 
 * Log timestamps look a little different; they are now in ISO 8601 format.
-  Reverted in the --enable-classic-mode build.
+  Reverted in the +--enable-classic-mode+ build.
 
 * Clock identifiers in log files are normally the driver shortname
   followed by the unit number in parentheses, rather than the magic IP
   addresses formerly used.  This change affects the peerstats, rawstats,
-  and clockstats files.  Reverted in the --enable-classic-mode build.
+  and clockstats files.  Reverted in the +--enable-classic-mode+ build.
 
 * The -!m, -\>, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
   them in Classic was overcomplicated and buggy and had to be removed.)
 
-* The shortname of --help options is now -h, not -?
+* The shortname of +--help+ options is now +-h+, not +-?+
 
 * If you had a refclock on a path of the form /dev/palisadeNNN, that
   link needs to change to /dev/trimbleNNN. Reverted in the
-  --enable-classic-mode build.
+  +--enable-classic-mode+ build.
 
 * If you had a refclock on a path of the form /dev/actsNNN, that
   link needs to change to /dev/modemNNN. Reverted in the
-  --enable-classic-mode build.
+  +--enable-classic-mode+ build.
 
 * An instance of +ntpq+ built from the NTPsec code
   querying a legacy NTP daemon will not automatically display
@@ -90,7 +90,7 @@ a build-time switch, not a run-time one).
 * The ttl-hop option for broadcast mode has been removed from the
   configuration grammar.  It was never actually implemented.
 
-* ntpq no longer has the -i/--interactive option, as there was no
+* ntpq no longer has the +-i+/+--interactive+ option, as there was no
   situation in which it was meaningful.
 
 * Interleave mode has been removed.  It was buggy and the root cause
@@ -131,8 +131,8 @@ codebase has been outright removed, with less than 5% new code added.
 
 * Various features related to runtime dumping of the configuration
   state have been removed for security reasons.  These include the
-  saveconfig command in ntpq, the --saveconfigquit option of ntpd, and
-  the implementation of related config declarations in ntp.conf.
+  +saveconfig+ command in +ntpq+, the +--saveconfigquit+ option of ntpd, and
+  the implementation of related config declarations in +ntp.conf+.
 
 * Likewise, the poorly-documented ntpdsim code has also been removed
   to gain a significant reduction in code complexity.
@@ -233,7 +233,7 @@ codebase has been outright removed, with less than 5% new code added.
   (numbers 0-3) to unlimited.  However, the old magic-address syntax
   will not work correctly - you _must_ use the new syntax to declare
   generic-driver refclocks.  If the software was compiled with the
-  --enable-classic-mode switch, the foregoing is reversed.
+  +--enable-classic-mode+ switch, the foregoing is reversed.
 
 * In server entries, its now possible to specify a time offset to be
   applied to incoming timestamps (analogues to the fudge on certain

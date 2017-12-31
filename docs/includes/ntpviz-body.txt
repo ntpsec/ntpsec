@@ -107,12 +107,12 @@ The following plots are available:
 
 --all-peer-jitters::
    Report all peer jitters.  This is a different option name from
-   --peer-jitters only because of a limitation in the Python
+   +--peer-jitters+ only because of a limitation in the Python
    standard library.
 
 --all-peer-offsets::
    Report all peer offsets.  This is a different option name from
-   --peer-offsets only because of a minor limitation in the Python
+   +--peer-offsets+ only because of a minor limitation in the Python
    standard library.
 
 --local-error::

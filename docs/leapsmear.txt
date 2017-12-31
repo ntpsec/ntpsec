@@ -184,8 +184,8 @@ configured on time servers providing dedicated clients with time, if all
 those clients can accept smeared time.
 
 * Leap Second Smearing is NOT configured by default.  The only way to get
-this behavior is to invoke the ./configure script from the NTP source code
-package with the --enable-leap-smear parameter before the executables are
+this behavior is to invoke the +./waf configure+ script from the NTP source code
+package with the +--enable-leap-smear+ parameter before the executables are
 built.
 
 * Even if ntpd has been compiled to enable leap smearing support, leap

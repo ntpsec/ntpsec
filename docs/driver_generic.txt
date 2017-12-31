@@ -90,7 +90,7 @@ and any number of these clocks may be operational at any one time.
 Note: Under NTPsec, you _must_ use the new configuration syntax
 (refclock generic subtype N) to declare generic clocks, rather than
 the old-style syntax with a magic address, unless the software has
-been built with the --enable-classic-mode option in which case *only*
+been built with the +--enable-classic-mode+ option in which case *only*
 the old-style syntax will work.
 
 A note on the implementations:
