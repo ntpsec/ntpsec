@@ -187,8 +187,8 @@ and so on is suppressed.
     entries or kilobytes. The default is 4 kilobytes.
 
 +nonvolatile+ 'threshold'::
-  Specify the _threshold_ in seconds to write the frequency file, with
-  default of 1e-7 (0.1 PPM). The frequency file is inspected each hour.
+  Specify the _threshold_ in seconds to write the frequency file, with 
+  a default of 1e-7 (0.1 PPM). The frequency file is inspected each hour.
   If the difference between the current frequency and the last value
   written exceeds the threshold, the file is written and the +threshold+
   becomes the new threshold value. If the threshold is not exceeded, it
@@ -257,7 +257,7 @@ The variables operate as follows:
     The argument becomes the new value for the experimental huff-n'-puff
     filter span, which determines the most recent interval the algorithm
     will search for a minimum delay. The lower limit is 900 s (15 m),
-    but a more reasonable value is 7200 (2 hours). There is no default,
+    but a more reasonable value is 7200 (2 hours). There is no default 
     since the filter is not enabled unless this command is given.
   +panic+ _panic_;;
     The argument is the panic threshold, normally 1000 s. If set to

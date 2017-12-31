@@ -21,7 +21,7 @@ can be assembled, with raw and pretty-printed output options being
 available. It can also obtain and print a list of peers in a
 common format by sending multiple queries to the server.
 
-If one or more request options is included on the command line when
+If one or more request options are included on the command line when
 +ntpq+ is executed, each of the requests will be sent to the NTP servers
 running on each of the hosts given as command line arguments, or on
 localhost by default. If no request options are given, +ntpq+ will
@@ -34,7 +34,7 @@ will prompt for commands if the standard input is a terminal device.
 hence can be used to query any compatible server on the network which
 permits it. Note that since NTP is a UDP protocol this communication
 will be somewhat unreliable, especially over large distances in terms of
-network topology. +ntpq+ makes one attempt to retransmit requests, and
+network topology. +ntpq+ makes one attempt to retransmit requests and
 will time requests out if the remote host is not heard from within a
 suitable timeout time.
 
@@ -77,7 +77,7 @@ read interactive format commands from the standard input.
 +-n+, +--numeric+::
   Output all host addresses in numeric format rather than
   converting to the canonical host names.  You may get hostnames
-  anyway for peers in initialization phase, before DNS has resolved
+  anyway for peers in the initialization phase before DNS has resolved
   the peer name.
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
@@ -150,7 +150,7 @@ following.
   Specify a time interval to be added to timestamps included in requests
   which require authentication. This is used to enable (unreliable)
   server reconfiguration over long delay network paths or between
-  machines whose clocks are unsynchronized. Actually the server does not
+  machines whose clocks are unsynchronized. Actually, the server does not
   now require timestamps in authenticated requests, so this command may
   be obsolete.
 
@@ -164,7 +164,7 @@ following.
 +hostnames [yes | no]+::
   If +yes+ is specified, host names are printed in information displays.
   If +no+ is specified, numeric addresses are printed instead. The
-  default is +yes+, unless modified using the command line +-n+ switch.
+  default is +yes+ unless modified using the command line +-n+ switch.
 
 +keyid+ 'keyid'::
   This command specifies the key number to be used to authenticate
@@ -192,7 +192,7 @@ following.
 +raw+::
   Display server messages as received and without reformatting.
   The only formatting/interpretation done on the data is
-  to transform nonascii data into a printable (but barely
+  to transform non-ASCII data into a printable (but barely
   understandable) form.
 
 +timeout+ 'milliseconds'::
@@ -259,7 +259,7 @@ ind assid status conf reach auth condition last_event cnt
   and clarification. Authentication is of course required.
 
 +config-from-file+ 'filename'::
-  Send the each line of _filename_ to the server as run-time
+  Send each line of _filename_ to the server as run-time
   configuration commands in the same format as the configuration file.
   This command is experimental until further notice and clarification.
   Authentication is required.
@@ -288,7 +288,7 @@ ind assid status conf reach auth condition last_event cnt
   Display monitor facility statistics.
 
 +direct+::
-  Normally, the mrulist command retrieves an entire MRUreport (possibly
+  Normally, the mrulist command retrieves an entire MRU report (possibly
   consisting of more than one MRU span), sorts it, and presents the
   result. But attempting to fetch an entire MRU report may fail on a
   server so loaded that none of its MRU entries age out before they
@@ -365,7 +365,7 @@ displayed.
   whitespace. Note that time values are represented in milliseconds and
   frequency values in parts-per-million (PPM). Some NTP timestamps are
   represented in the format YYYYMMDDTTTT, where YYYY is the year, MM the
-  month of year, DD the day of month and TTTT the time of day.
+  month of the year, DD the day of the month and TTTT the time of day.
 
 +reslist+::
   Show the access control (restrict) list for +ntpq+.
@@ -397,9 +397,9 @@ a control key declared in ntp.conf for these commands to work.
 
 If you are running as root or otherwise have read access to the
 authkey and ntp.conf file, ntpq will mine the required credentials
-for you. Otherwise you will be prompted to enter a key ID and password.
+for you. Otherwise, you will be prompted to enter a key ID and password.
 
-Credentials, once entered, are retained and used for the duration
+Credentials once entered, are retained and used for the duration
 of your ntpq session.
 
 [[status]]
@@ -408,7 +408,7 @@ of your ntpq session.
 The current state of the operating program is shown in a set of status
 words maintained by the system and each association separately. These
 words are displayed in the +rv+ and +as+ commands both in hexadecimal
-and decoded short tip strings. The codes, tips and short explanations
+and decoded short tip strings. The codes, tips, and short explanations
 are on the link:decode.html[Event Messages and Status Words] page. The
 page also includes a list of system and peer messages, the code for the
 latest of which is included in the status word.
@@ -530,7 +530,7 @@ know how to request this, this program will do a slightly wrong thing.
 
 In older versions, the 'type' variable associated with a
 reference clock was a numeric driver type index. It has been replaced
-by 'name', a shortname for the driver type.
+by 'name', a short name for the driver type.
 
 In older versions, no count of control packets was listed under sysstats.
 
@@ -541,7 +541,7 @@ The +-O+ (+--old-rv+) option of legacy versions has been retired.
 It is possible for a ":config unpeer" command to fail silently, yielding
 "Config Succeeded", if it is given a peer identifier that looks like
 a driver type name or a hostname not present in the peer list. The
-error will however be reported in the system log.
+error will, however, be reported in the system log.
 
 The config command cannot be used to change a server's default restrictions.
 

@@ -11,7 +11,7 @@
 
 The `ntp.conf` configuration file is read at initial startup by the
 {ntpdman} daemon in order to specify the synchronization
-sources, modes and other related information. Usually, it is installed
+sources, modes, and other related information. Usually, it is installed
 in the `/etc` directory, but could be installed elsewhere (see the
 daemon's `-c` command line option).
 
@@ -88,7 +88,7 @@ include::../includes/auth-commands.txt[]
 == Monitoring Support ==
 
 {ntpdman} includes a comprehensive monitoring facility suitable
-for continuous, long term recording of server and client timekeeping
+for continuous, long-term recording of server and client timekeeping
 performance. See the +statistics+ command below for a listing and example of
 each type of statistics currently supported. Statistic files are managed
 using file generation sets and scripts in the ./scripts directory of this
@@ -110,7 +110,7 @@ source address is equal to the bitwise AND of the mask and address in
 the list. The list is searched in order with the last match found
 defining the restriction flags associated with the entry. Additional
 information and examples can be found in the "Notes on Configuring NTP
-and Setting up a NTP Subnet" page (available as part of the HTML
+and Setting up an NTP Subnet" page (available as part of the HTML
 documentation).
 
 The restriction facility was implemented in conformance with the access

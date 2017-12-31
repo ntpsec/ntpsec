@@ -21,7 +21,7 @@ to a minimum.
 
 Time-critical code must be written in C. Use Python for any code that
 is not time-critical, as this reduces line count and complexity (thus,
-also, expected defect rates). If you need a NTP-specific C function
+also, expected defect rates). If you need an NTP-specific C function
 not available in Python, try to improve the libntpc extension
 in ../libntp/pymodule.c to expose it.
 
@@ -118,7 +118,7 @@ NTPsec's history we found a bug introduced by poor data management
 where these two time representations bumped into each other; we don't
 want that to happen again. Thus, if you must refer to struct timeval due to
 an external interface, move the data to/from a struct timespec as
-close to that callsite as possible.
+close to that call site as possible.
 
 === Coding style and indentation ==
 
@@ -128,7 +128,7 @@ likes. It's a bit archaic, but we've stuck with it to preserve
 continuity; you should, too.
 
 A discussion about using uncrustify to mass convert all the C sources
-to a more modern indentation and format style is ongoing.  As it will
+to a more modern indentation and format, style is ongoing.  As it will
 result in a coordinated flag day in ongoing development, it will be
 carefully announced in the mailto:devel@ntpsec.org mailing list before
 being merged and pushed.
@@ -153,7 +153,7 @@ HAVE_*_H::
 	Guard symbol derived by configuration logic from checking
 	for the presence of a system header.  For example, the symbol
 	HAVE_SYS_FOOBAR_H gets defined only if waf configure detects
-	the presence of a sys/foobar.h in the system include directory.
+	the presence of sys/foobar.h in the system include directory.
 
 HAVE_*::
 	Without an H suffix, a HAVE symbol is set on the availability
@@ -240,15 +240,15 @@ caused many problems. The waf script is embedded in the top level of
 the distribution; run "./waf --help" or consult INSTALL for basic
 instructions.
 
-Full waf documentation is at: https://waf.io/
+Full waf documentation is at https://waf.io/
 
 === Naming conventions ===
 
-Every binary and script we install has an "ntp" prefix on the name,
+Every binary and script we install has an "ntp" prefix on the name 
 because namespace pollution is rude.  If you write a new tool that you
 want us to install, follow this convention.
 
-Generally we favor "ntp" rather than "ntp-" for consistency and to
+Generally, we favor "ntp" rather than "ntp-" for consistency and to
 reduce the amount people have to type. Choose tastefully.
 
 === Well-tempered output ===
@@ -263,7 +263,7 @@ There is more than one way to arrange this.  If you can design a
 simple tabular output format, or something resembling an RFC 2822 header
 that's easy for both human eyes and programs to parse, do that.
 Besides being simple, formats like these are easily handled by either
-Python or shellscripts.
+Python or shell scripts.
 
 Such simplicity is often difficult or impractical for heterogeneous
 data that needs to be both grouped and labeled, so we have another
@@ -284,7 +284,7 @@ and no JSON option, it is quite likely to be rejected.
 Our preferred format for dates is RFC 3339 (a version of ISO 8601 for
 UTC with some options frozen; full year required, medial T required,
 explicit Zulu timezone). Local times should be expressed in ISO 8601,
-always with full 4-digit year.
+always with the full 4-digit year.
 
 === Copyrights and licenses ===
 
@@ -347,7 +347,7 @@ before moving.
 When you change anything user-visible, you are expected to update the
 relevant documentation *in the same commit*.  No exceptions.
 
-Otherwise we'd have to inflict long, tedious document reviews on
+Otherwise, we'd have to inflict long, tedious document reviews on
 everybody. Nobody wants that.
 
 === Documentation format and structure ===
@@ -379,14 +379,14 @@ that appears on a man page.
 
 === Version string ===
 
-We use a variant of three part Semantic Versioning, of the form X.Y.Z.
+We use a variant of three-part Semantic Versioning, of the form X.Y.Z.
 X, Y, and Z are non-negative decimal integers.
 
 X is the "major" version number.
 Y is the "minor" version number.
 Z is the "revision" number.
 
-Each release will result in an incremented version number, and the
+Each release will result in an incremented version number and the
 version number string will be tagged into the git repository.
 
 When the minor number is even, it refers to a "stable" release, and
@@ -399,7 +399,7 @@ of a new development release.  For example, the currently hypothetical
 future release of "1.14.0" will also cause the release of an identical
 "1.15.0".
 
-The first public release is version 0.9.0, and will drive to 1.0.0.
+The first public release is version 0.9.0 and will drive to 1.0.0.
 When 1.0.0 is released, that will also create an identical 1.1.0.
 
 We currently have no formal policies for the criteria for releases,
@@ -462,11 +462,11 @@ at least send context (-c) or unified (-u) diffs rather than the
 default ed (-e) style, which is very brittle.
 
 You can email your patch to mailto:devel@ntpsec.org if you are a member of
-that mailing list, or you can email your patch to
+that mailing list or you can email your patch to
 mailto:contact@ntpsec.org if you are not.
 
 Please make sure your "From:" header in the email is correct, as that
-is what will be used as attribution of the commit.
+is what will be used as the attribution of the commit.
 
 The person on the team that merges in your patch will use the git
 parameter ---author from the email From header and the git parameter
@@ -495,7 +495,7 @@ should consist of:
   git format-patch. Bulleted list items are also OK.
 
 * In some cases it may be appropriate to end your summary line with a comma
-  or ellipsis ("...") to indicate that it runs directly into a following
+  or ellipsis ("...") to indicate that it runs directly into the following
   paragraph. You should still try to make the summary self-contained when
   you do this.
 
@@ -516,7 +516,7 @@ That was then, this is now.
 The best (most human-friendly) way to reference a commit is by quoting its
 summary line.  If you need to disambiguate, give its date and author.
 
-The worst way is to quote its git hash, because humans are not good at
+The worst way is to quote its git hash because humans are not good at
 keeping random strings of hex digits in working memory.  Besides, hashes
 will break if the history is ever moved to another VCS or the repository
 has to be surgically altered.
@@ -549,7 +549,7 @@ local commits on the new tip.  You may find it helpful to set
 -------------------------------------------------------------
 
 Setting this option adds --rebase to all your pulls.  This may cause
-minor inconvenience when you have uncommitted local changes; you
+a minor inconvenience when you have uncommitted local changes; you
 should be able to use "git stash" to get around that.
 
 == Logging tags ==
