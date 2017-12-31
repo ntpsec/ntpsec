@@ -83,7 +83,7 @@ a build-time switch, not a run-time one).
 
 * An instance of +ntpq+ built from the NTPsec code
   querying a legacy NTP daemon will not automatically display
-  peers with 127.127.127.t.u addresses as refclocks; that assumption
+  peers with 127.127.t.u addresses as refclocks; that assumption
   has been removed from the NTPsec code as part of
   getting it fully IPv6-ready.
 
