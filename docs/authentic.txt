@@ -147,23 +147,15 @@ The NTP standards include symmetric (private-key) authentication using
 the RSA Message Digest 5 (MD5) algorithm, commonly called
 keyed-MD5. This algorithm computes a message digest or one-way hash
 which can be used to verify the client has the same message digest as
-the server. The MD5 message digest algorithm is included in the
-distribution, so without further cryptographic support, the
-distribution can be freely exported.
+the server.
 
-If the OpenSSL cryptographic library is installed prior to building the
-distribution, all message digest algorithms included in the library may
+All message digest algorithms included in the OpenSSL library may
 be used, including MD5 and SHA1. However, if conformance to FIPS 140-2
-is required, only a limited subset of these algorithms can be used. This
-library is available from http://www.openssl.org and can be installed
-using the procedures outlined in the link:build.html[Building and
-Installing the Distribution] page. Once installed, the configure and
-build process automatically detects the library and links the library
-routines required.
+is required, only a limited subset of these algorithms can be used.
 
 Note that according to US law, NTP binaries including OpenSSL library
 components, including the OpenSSL library itself, cannot be exported
-outside the US without license from the US Department of Commerce.
+outside the US without a license from the US Department of Commerce.
 (However, these restrictions have been considerably relaxed since 1996.)
 Builders outside the US are advised to obtain the OpenSSL library
 directly from OpenSSL, which is outside the US, and build outside the

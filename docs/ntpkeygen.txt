@@ -40,10 +40,8 @@ Figure 1 shows a typical symmetric keys file used by the reference
 implementation. Each line of the file contains three fields, first an
 integer between 1 and 65534, inclusive, representing the key identifier
 used in the `server` and `peer` configuration commands. Next is the key
-type for the message digest algorithm, which in the absence of the
-OpenSSL library must be `MD5` to designate the MD5 message digest
-algorithm. If the OpenSSL library is installed, the key type can be any
-message digest algorithm supported by that library. However, if
+type for the message digest algorithm, which can be any
+message digest algorithm supported by the OpenSSL library. However, if
 compatibility with FIPS 140-2 is required, the key type must be
 `SHA1`. The key type can be changed using an ASCII text editor.
 

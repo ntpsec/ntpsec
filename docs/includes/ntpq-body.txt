@@ -173,8 +173,8 @@ following.
 
 +keytype+::
   Specify the digest algorithm to use for authenticated requests, with
-  default +MD5+. If the OpenSSL library is installed, digest can be
-  any message digest algorithm supported by the library. The current
+  default +MD5+. The digest can be
+  any message digest algorithm supported by the OpenSSL library. The current
   selections are: +MD2+, +MD4+, +MD5+, +MDC2+, +RIPEMD160+ and +SHA1+.
 
 +ntpversion 1 | 2 | 3 | 4+::
