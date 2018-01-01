@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import socket
+import signal
 import sys
 import time
 import ntp.ntpc
@@ -553,6 +554,25 @@ class Cache:
 canonicalization_cache = Cache()
 
 
+import subprocess
+
+
+def timed_canonicalize_dns(inhost, family=socket.AF_UNSPEC, ttl=1.0):
+    cmd = "import ntp.util; print(ntp.util.canonicalize_dns('%s', %s))"
+    cmd = cmd % (str(inhost), str(family))
+    p = subprocess.Popen(["python", "-c", cmd],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         stdin=subprocess.PIPE)
+    starttime = time.time()
+    while p.poll() is None:  # subprocess not yet returned
+        timediff = time.time() - starttime
+        if timediff > ttl:  # timed out; bail
+            p.terminate()
+            return inhost
+        time.sleep(.01)  # don't waste cycles with spinning
+    return p.communicate()[0].strip("\n")
+
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
     resname = canonicalization_cache.get(inhost)
@@ -1058,7 +1078,7 @@ class PeerSummary:
                 try:
                     if self.debug:
                         self.logfp.write("DNS lookup begins...\n")
-                    clock_name = canonicalize_dns(srcadr)
+                    clock_name = timed_canonicalize_dns(srcadr)
                     if self.debug:
                         self.logfp.write("DNS lookup ends.\n")
                 except TypeError:

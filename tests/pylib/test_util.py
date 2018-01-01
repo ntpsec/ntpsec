@@ -518,6 +518,7 @@ class TestPylibUtilMethods(unittest.TestCase):
             sockettemp = ntp.util.socket
             ntp.util.socket = fakesockmod
             # Test cache hit
+            print("DNS:", f)
             self.assertEqual(f("foo"), "bar")
             self.assertEqual(fakesockmod.gai_calls, [])
             # Test addrinfo fail
@@ -1123,8 +1124,8 @@ class TestPeerSummary(unittest.TestCase):
         try:
             timetemp = ntp.util.time
             ntp.util.time = faketimemod
-            cdnstemp = ntp.util.canonicalize_dns
-            ntp.util.canonicalize_dns = cdns_jig
+            cdnstemp = ntp.util.timed_canonicalize_dns
+            ntp.util.timed_canonicalize_dns = cdns_jig
             # Test, no units, hmode=BCLIENTX, peers
             cdns_jig_returns = ["clock_canon"]
             faketimemod.time_returns = [0xA0000000]
@@ -1230,7 +1231,7 @@ class TestPeerSummary(unittest.TestCase):
                              "   32  764 1.2346ms 2.7183ms 3.1416ms\n")
         finally:
             ntp.util.time = timetemp
-            ntp.util.canonicalize_dns = cdnstemp
+            ntp.util.timed_canonicalize_dns = cdnstemp
 
     def test_intervals(self):
         cls = self.target("peers", 4, True, False)

@@ -423,7 +423,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         data = self.safeReadvar(0, ["peeradr"])
         if data is None:
             return ax.Varbind(ax.VALUE_NULL, oid)
-        data = ntp.util.canonicalize_dns(data["peeradr"])
+        data = ntp.util.timed_canonicalize_dns(data["peeradr"])
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
     def cbr_statusActiveOffset(self, oid):
@@ -626,7 +626,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             if pdata is None:
                 return ax.Varbind(ax.VALUE_NULL, oid)
             peername = pdata[associd]["srcadr"][1]
-            peername = ntp.util.canonicalize_dns(peername)
+            peername = ntp.util.timed_canonicalize_dns(peername)
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, peername)
         return self.dynamicCallbackSkeleton(handler)
 

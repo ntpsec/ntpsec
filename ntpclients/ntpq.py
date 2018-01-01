@@ -520,8 +520,9 @@ usage: timeout [ msec ]
                     if self.showhostnames:
                         if self.debug:
                             self.say("DNS lookup begins...")
-                        value = ntp.util.canonicalize_dns(
-                            value, family=self.ai_family)
+                            self.say(ntp.util.__file__)
+                        value = ntp.util.timed_canonicalize_dns(
+                            value, family=self.ai_family, log=self.say)
                         if self.debug:
                             self.say("DNS lookup complete.")
                     self.say("%s  %s\n" % (legend, value))
