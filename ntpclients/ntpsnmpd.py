@@ -264,7 +264,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # Notify bits, these should be saved to disk
         # Also most of them currently have no effect
         self.notifyModeChange = False  # 1
-        self.notifyStratumChange = True  # 2
+        self.notifyStratumChange = False  # 2
         self.notifySyspeerChange = False  # 3
         self.notifyAddAssociation = False  # 4
         self.notifyRMAssociation = False  # 5
@@ -415,14 +415,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_statusActiveRefSourceID(self, oid):
         # range of uint32
-        peers = self.misc_getPeerData()
-        syspeer = 0
-        for associd in peers.keys():
-            rstatus = peers[associd]["peerstatus"]
-            if (ntp.control.CTL_PEER_STATVAL(rstatus) & 0x7) == \
-               ntp.control.CTL_PST_SEL_SYSPEER:
-                syspeer = associd
-                break
+        syspeer = self.misc_getSyspeerID()
         return ax.Varbind(ax.VALUE_GAUGE32, oid, syspeer)
 
     def cbr_statusActiveRefSourceName(self, oid):
@@ -831,7 +824,29 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             control.sendNotify(vl)
 
     def doNotifySyspeerChange(self, control):
-        pass  # DUMMY
+        oldSyspeer = self.oldValues.get("syspeer")
+        newSyspeer = self.safeReadvar(0, ["peeradr"])["peeradr"]
+        if newSyspeer is None:
+            return  # couldn't read
+        if oldSyspeer is None:
+            self.oldValues["syspeer"] = newSyspeer
+            return
+        elif oldSyspeer != newSyspeer:
+            datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+            if datetime is None:
+                datetime = ""
+            else:
+                datetime = ntp.util.deformatNTPTime(datetime)
+            syspeer = self.misc_getSyspeerID()
+            vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                             ax.OID(ntpRootOID + (0, 3))),
+                  ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 2, 9),
+                             datetime),
+                  ax.Varbind(ax.VALUE_GAUGE32, ntpRootOID + (1, 2, 3),
+                             syspeer),
+                  ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
+                             "SysPeer changed")]  # Uh... what goes here?
+            control.sendNotify(vl)
 
     def doNotifyAddAssociation(self, control):
         pass  # DUMMY
@@ -863,6 +878,17 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     # =====================================
     # Misc data helpers (not part of the MIB proper)
     # =====================================
+
+    def misc_getSyspeerID(self):
+        peers = self.misc_getPeerData()
+        syspeer = 0
+        for associd in peers.keys():
+            rstatus = peers[associd]["peerstatus"]
+            if (ntp.control.CTL_PEER_STATVAL(rstatus) & 0x7) == \
+               ntp.control.CTL_PST_SEL_SYSPEER:
+                syspeer = associd
+                break
+        return syspeer
 
     def safeReadvar(self, associd, variables=None, raw=False):
         # Use this when we want to catch packet errors, but don't care
