@@ -510,17 +510,9 @@ class TestPylibUtilMethods(unittest.TestCase):
         f = ntp.util.canonicalize_dns
 
         fakesockmod = jigs.SocketModuleJig()
-        mycache = ntp.util.Cache()
-        mycache.set("foo", "bar")
         try:
-            cachetemp = ntp.util.canonicalization_cache
-            ntp.util.canonicalization_cache = mycache
             sockettemp = ntp.util.socket
             ntp.util.socket = fakesockmod
-            # Test cache hit
-            print("DNS:", f)
-            self.assertEqual(f("foo"), "bar")
-            self.assertEqual(fakesockmod.gai_calls, [])
             # Test addrinfo fail
             fakesockmod.__init__()
             fakesockmod.gai_error_count = 1
@@ -539,7 +531,6 @@ class TestPylibUtilMethods(unittest.TestCase):
             self.assertEqual(f("bar:42"), "san.hastur.invalid:42")
             # Test nameinfo fail, no canonname
             fakesockmod.__init__()
-            mycache.__init__()
             fakesockmod.gni_error_count = 1
             fakesockmod.gni_returns = [("www.Hastur.invalid", 42)]
             fakesockmod.gai_returns = [(("family", "socktype", "proto",
@@ -547,13 +538,11 @@ class TestPylibUtilMethods(unittest.TestCase):
             self.assertEqual(f("bar:42"), "bar:42")
             # Test success
             fakesockmod.__init__()
-            mycache.__init__()
             fakesockmod.gni_returns = [("www.Hastur.invalid", 42)]
             fakesockmod.gai_returns = [(("family", "socktype", "proto",
                                          None, "42.23.%$.(#"),)]
             self.assertEqual(f("bar:42"), "www.hastur.invalid:42")
         finally:
-            ntp.util.canonicalization_cache = cachetemp
             ntp.util.socket = sockettemp
 
     def test_termsize(self):
