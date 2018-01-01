@@ -556,11 +556,17 @@ canonicalization_cache = Cache()
 
 import subprocess
 
-
+# Hack to avoid occasional multi-second long delays when doing a DNS
+# lookup. Delays of that length will cause the SNMP master agent to drop
+# the connection. Uaccceptable.
+# Unfortunately there is no good way to timeout a function in Python, so
+# we are left with one of the ugly options that happened to work.
 def timed_canonicalize_dns(inhost, family=socket.AF_UNSPEC, ttl=1.0):
     resname = canonicalization_cache.get(inhost)
     if resname is not None:
         return resname
+    if "'" in inhost:  # Invalid IP address that will break the function.
+        return inhost  # Potentially hostile.
     cmd = "import ntp.util; print(ntp.util.canonicalize_dns('%s', %s))"
     cmd = cmd % (str(inhost), str(family))
     p = subprocess.Popen(["python", "-c", cmd],
