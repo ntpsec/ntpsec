@@ -10,7 +10,6 @@ import os
 import re
 import shutil
 import socket
-import signal
 import sys
 import time
 import ntp.ntpc
@@ -554,38 +553,11 @@ class Cache:
 canonicalization_cache = Cache()
 
 
-import subprocess
-
-# Hack to avoid occasional multi-second long delays when doing a DNS
-# lookup. Delays of that length will cause the SNMP master agent to drop
-# the connection. Uaccceptable.
-# Unfortunately there is no good way to timeout a function in Python, so
-# we are left with one of the ugly options that happened to work.
-def timed_canonicalize_dns(inhost, family=socket.AF_UNSPEC, ttl=1.0):
+def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
+    "Canonicalize a hostname or numeric IP address."
     resname = canonicalization_cache.get(inhost)
     if resname is not None:
         return resname
-    if "'" in inhost:  # Invalid IP address that will break the function.
-        return inhost  # Potentially hostile.
-    cmd = "import ntp.util; print(ntp.util.canonicalize_dns('%s', %s))"
-    cmd = cmd % (str(inhost), str(family))
-    p = subprocess.Popen(["python", "-c", cmd],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                         stdin=subprocess.PIPE)
-    starttime = time.time()
-    while p.poll() is None:  # subprocess not yet returned
-        timediff = time.time() - starttime
-        if timediff > ttl:  # timed out; bail
-            p.terminate()
-            return inhost
-        time.sleep(.01)  # don't waste cycles with spinning
-    result = p.communicate()[0].strip("\n")
-    canonicalization_cache.set(inhost, result)
-    return result
-
-def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
-    "Canonicalize a hostname or numeric IP address."
     # Catch garbaged hostnames in corrupted Mode 6 responses
     m = re.match("([:.[\]]|\w)*", inhost)
     if not m:
@@ -605,6 +577,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
         # Fall back to the hostname.
         canonicalized = canonname or hostname
         result = canonicalized.lower() + portsuffix
+    canonicalization_cache.set(inhost, result)
     return result
 
 
@@ -1085,7 +1058,7 @@ class PeerSummary:
                 try:
                     if self.debug:
                         self.logfp.write("DNS lookup begins...\n")
-                    clock_name = timed_canonicalize_dns(srcadr)
+                    clock_name = canonicalize_dns(srcadr)
                     if self.debug:
                         self.logfp.write("DNS lookup ends.\n")
                 except TypeError:
