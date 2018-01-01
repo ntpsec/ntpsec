@@ -242,7 +242,7 @@ If greater than zero alters +ntpd+'s behavior when forking to
 daemonize. Instead of exiting with status 0 immediately after the
 fork, the parent waits up to the specified number of seconds for the
 child to first synchronize the clock. The exit status is zero
-(success) if the clock was synchronized, otherwise, it is ETIMEDOUT.
+(success) if the clock was synchronized; otherwise, it is ETIMEDOUT.
 This provides the option for a script starting +ntpd+ to easily wait
 for the first set of the clock before proceeding.
 
@@ -300,12 +300,12 @@ When the machine is booted, the chip is used to initialize the operating
 system time. After the machine has synchronized to an NTP server, the
 operating system corrects the chip from time to time. In the default
 case, if +ntpd+ detects that the time on the host is more than 1000s
-from the server time, +ntpd+ assumes something must be terribly wrong
+from the server time, +ntpd+ assumes something must be terribly wrong,
 and the only reliable action is for the operator to intervene and set
-the clock by hand. (Reasons for this include there is no TOY chip or
+the clock by hand. (Reasons for this include there is no TOY chip, or
 its battery is dead, or that the TOY chip is just of poor quality.) This
 causes +ntpd+ to exit with a panic message to the system log. The +-g+
-option overrides this check and the clock will be set to the server time
+option overrides this check, and the clock will be set to the server time
 regardless of the chip time (up to 68 years in the past or future — this
 is a limitation of the NTPv4 protocol). However, and to protect against
 broken hardware, such as when the CMOS battery fails or the clock
@@ -318,7 +318,7 @@ discontinuities. Under conditions of extreme network congestion, the
 roundtrip delay jitter can exceed three seconds and the synchronization
 distance, which is equal to one-half the roundtrip delay plus error
 budget terms, can become very large. The +ntpd+ algorithms discard
-sample offsets exceeding 128 ms unless the interval during which no
+sample offsets exceeding 128 ms, unless the interval during which no
 sample offset is less than 128 ms exceeds 900s. The first sample after
 that, no matter what the offset, steps the clock to the indicated time.
 In practice, this reduces the false alarm rate where the clock is stepped

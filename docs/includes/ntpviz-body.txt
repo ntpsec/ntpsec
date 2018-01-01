@@ -48,8 +48,8 @@ subset of comparative plots for multiple directories.
     gnuplot programs.
 
 -o OUTDIR or --outdir OUTDIR::
-    Set the directory for all output to be OUTDIR.  If OUTDIR does
-    not exist it is created.  The default OUTDIR is 'ntpgraphs'.
+    Set the directory for all output to be OUTDIR, if OUTDIR does
+    not exist it gets created.  The default OUTDIR is 'ntpgraphs'.
     Warning: existing PNG files and index.html in the output directory
     will be clobbered.
 

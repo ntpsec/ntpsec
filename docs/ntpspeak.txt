@@ -40,7 +40,7 @@
 
 [[drift]] drift::
   In an NTP context, drift refers to the frequency offset of a clock crystal
-  in an NTP host that causes the system time to slowly drift.  It is
+  in an NTP host that causes the system time to drift slowly.  It is
   usually  expressed in a parts-per-million (PPM) offset from its
   nominal frequency. It changes, slowly, in response to environmental
   factors (mainly ambient temperature). ntpd measures drift by
@@ -50,12 +50,12 @@
   it doesn't have to go through the entire resampling and resynchronization
   process before providing reliable time.
 
-[[falseticker]] falseticker::
+[[false-ticker]] false-ticker::
   <<Mills-speak>> for a timeserver identified as not
   reliable by statistical filtering.  Usually this does not imply any
   problem with the timeserver itself but rather with highly variable
   and asymmetric network delays between server and client, but firmware
-  bugs in GPS receivers have produced falsetickers.
+  bugs in GPS receivers have produced false-tickers.
 
 [[epoch]] epoch::
   1. The zero date of an NTP era.  The "prime epoch" (of era 0) was
@@ -100,8 +100,8 @@
 
 [[GPSDO]] GPSDO::
    GPS Disciplined Oscillator. A good crystal is synchronized to
-   time from a GPS receiver.  The combination gets the short term
-   stability of the crystal and the long term stability of GPS.
+   time from a GPS receiver.  The combination gets the short-term
+   stability of the crystal and the long-term stability of GPS.
    With appropriate firmware, the crystal can be used when the
    GPS receiver is temporarily non-operational; see <<holdover>>.
    Most cell towers have GPSDOs. You can usually spot the conical
@@ -166,7 +166,7 @@
    wrote in a vivid and idiosyncratic style which is still preserved in
    much of NTP's documentation.  He coined many neologisms which
    connoisseurs refer to as "Mills-speak"; examples in this glossary
-   include <<falseticker>>, <<proventic>>, and <<truechimer>>.  The
+   include <<false-ticker>>, <<proventic>>, and <<true-chimer>>.  The
    close-to-definitive reference is
    https://lists.ntp.org/pipermail/questions/2007-December/016592.html[The
    NTP dictionary], though not all those terms are still in use.
@@ -212,7 +212,7 @@
 [[PPS]] PPS::
   (Also as "1PPS") Pulse Per Second. A top-of-second pulse emitted
   by time sources, typically a GPS receiver or atomic clocks.  It
-  is often connected to a RS-232 modem control signal pin.
+  is often connected to an RS-232 modem control signal pin.
   A PPS signal doesn't tell you which second a pulse corresponds to
   so it must be used with an ancillary signal, typically text over
   the same RS-232 connector (see <<in-band time>>).
@@ -268,10 +268,10 @@
   used to be important time sources, but (especially in the U.S.) have
   been largely obsolesced by <<GPS>> and <<GPSDO>>-based clocks.
 
-[[truechimer]] truechimer::
+[[true-chimer]] true-chimer::
   <<Mills-speak>> for a timeserver that provides time believed good,
   that is with low jitter with respect to UTC.  As with a
-  <<falseticker>>, this is usually less a property of
+  <<false-ticker>>, this is usually less a property of
   the server itself than it is of favorable network topology.
 
 [[USNO]] USNO::

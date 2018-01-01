@@ -48,13 +48,13 @@ information.
 Phase two selects the _candidates_ from among the sources by excluding
 those sources showing one or more of the errors summarized on the
 link:select.html[Clock Select Algorithm] page and to determine the
-_truechimers_ from among the candidates, leaving behind the
-_falsetickers_. A server or peer configured with the +true+ option is
+_true-chimers_ from among the candidates, leaving behind the
+_false-tickers_. A server or peer configured with the +true+ option is
 declared a truechimer independent of this algorithm.
 
 Phase three uses the algorithm described on the
 link:cluster.html[Clock Cluster Algorithm] page to prune the
-statistical outliers from the truechimers, leaving the _survivor list_
+statistical outliers from the true-chimers, leaving the _survivor list_
 as result.
 
 Phase four uses a set of algorithms and mitigation rules to combined the
@@ -166,17 +166,17 @@ designates one or more sources as preferred over all others. While the
 rules do not forbid it, it is usually not useful to designate more than
 one source as preferred; however, if more than one source is so
 designated, they are used in the order specified in the configuration
-file. If the first one becomes un selectable, the second one is
+file. If the first one becomes unselectable, the second one is
 considered and so forth. This order of priority is also applicable to
 multiple PPS drivers, multiple modem drivers and even multiple local
 drivers, although that would not normally be useful.
 
-The cluster algorithm works on the set of truechimers produced by the
-select algorithm. At each round the algorithm casts off the survivor
+The cluster algorithm works on the set of true-chimers produced by the
+select algorithm. At each round, the algorithm casts off the survivor
 least likely to influence the choice of system peer. If selectable, the
 prefer peer is never discarded; on the contrary, its potential removal
 becomes a termination condition. However, the prefer peer can still be
-discarded by the select algorithm as a falseticker; otherwise, the
+discarded by the select algorithm as a false-ticker; otherwise, the
 prefer peer becomes the system peer.
 
 Ordinarily, the combine algorithm computes a weighted average of the
@@ -187,7 +187,7 @@ as the final values. In the common case involving a radio clock and a
 flock of remote backup servers, and with the radio clock designated a
 prefer peer, the radio clock disciplines the system clock as long as
 the radio itself remains operational. However, if the radio fails or
-becomes a falseticker, the combined backup sources continue to
+becomes a false-ticker, the combined backup sources continue to
 discipline the system clock.
 
 [[miti]]
@@ -202,7 +202,7 @@ later; the others are discarded. For this purpose the metric is defined
 as the four-octet IPv4 address or the first four octets of the hashed
 IPv6 address. The resulting candidates, including any prefer peers
 found, are processed by the select algorithm to produce a possibly empty
-set of truechimers.
+set of true-chimers.
 
 As previously noted, the cluster algorithm casts out outliers, leaving
 the survivor list for later processing. The survivor list is then sorted

@@ -42,11 +42,11 @@ update _V~c~_.
 
 In PLL mode the frequency predictor is an integral of the offset over
 past updates, while the phase predictor is the offset amortized over
-time in order to avoid setting the clock backward. In FLL mode the phase
+time to avoid setting the clock backward. In FLL mode the phase
 predictor is not used, while the frequency predictor is similar to the
 NIST _lockclock_ algorithm. In this algorithm, the frequency predictor
 is computed as a fraction of the current offset divided by the time
-since the last update in order to minimize the offset at the next
+since the last update to minimize the offset at the next
 update.
 
 The discipline response in PLL mode is determined by the _time
@@ -54,8 +54,8 @@ constant_, which results in a "stiffness" depending on the jitter of the
 available sources and the wander of the system clock oscillator. The
 scaled time constant is also used as the poll interval described on the
 link:poll.html[Poll Program] page. However, in NTP symmetric mode, each
-peer manages its own poll interval and the two might not be the same. In
-such cases either peer uses the minimum of its own poll interval and
+peer manages its poll interval and the two might not be the same. In
+such cases, either peer uses the minimum of its poll interval and
 that of the other peer, which is included in the NTP packet header.
 
 [[loop]]
@@ -63,40 +63,40 @@ that of the other peer, which is included in the NTP packet header.
 
 It is necessary to verify that the clock discipline algorithm is stable
 and satisfies the Nyquist criterion, which requires that the sampling
-rate be at least twice the bandwidth. In this case the bandwidth can be
+rate be at least twice the bandwidth. In this case, the bandwidth can be
 approximated by the reciprocal of the time constant. In the NTP
 specification and reference implementation, time constants and poll
 intervals are expressed as exponents of 2. By construction, the time
 constant exponent is five times the poll interval exponent. Thus, the
 default poll exponent of 6 corresponds to a poll interval of 64 s and a
 time constant of 2048 s. A change in the poll interval changes the time
-constant by a corresponding amount.. The Nyquist criterion requires the
+constant by a corresponding amount. The Nyquist criterion requires the
 sample interval to be not more than half the time constant or 1024 s.
 The clock filter guarantees at least one sample in eight poll intervals,
-so the sample interval is not more than 512 s. This would be described
+so the sample interval is not more than 512 s; this would be described
 as oversampling by a factor of two. Finally, the PLL parameters have
 been chosen for a damping factor of 2, which results in a much faster
-risetime than with critical damping, but results in modest overshoot of
+rise time than with critical damping, but results in modest overshoot of
 6 percent.
 
 It is important to understand how the dynamics of the PLL are affected
 by the time constant and poll interval. At the default poll interval of
 64 s and a step offset change of 100 ms, the time response crosses zero
 in about 50 min and overshoots about 6 ms, as per design. Ordinarily, a
-step correction would causes a temporary frequency surge of about 5 PPM,
+step correction would cause a temporary frequency surge of about 5 PPM,
 which along with the overshoot slowly dissipates over a few hours.
 
 However, the clock state machine used with the discipline algorithm
 avoids this transient at startup. It does this using a previously saved
 frequency file, if present, or by measuring the oscillator frequency, if
 not. It then quickly amortizes the residual offset at startup without
-affecting the oscillator frequency. In this way the offset error is less
+affecting the oscillator frequency. In this way, the offset error is less
 than 0.5 ms within 5 min, if the file is present, and within 10 min if
 not. See the link:clock.html[Clock State Machine] page for further
 details.
 
 Since the PLL is linear, the response with different offset step
-amplitudes and poll intervals has the same characteristic shape, but
+amplitudes and poll intervals has the same characteristic shape but
 scaled differently in amplitude and time. The response scales exactly
 with step amplitude, so that the response to a 10-ms step has the same
 shape as at 64 s, but with amplitude compressed by one-tenth. The
@@ -162,16 +162,16 @@ a residual frequency error less than 1 PPM. The measurement interval can
 be changed using the +stepout+ option of the
 link:miscopt.html#tinker[+tinker+] command.
 
-In order to reduce the clock offset error at restart, the reference
+In order to reduce the clock offset error when restarting, the reference
 implementation next disables oscillator frequency discipline and enables
-clock offset discipline with a small time constant. This is designed to
+clock offset discipline with a small time constant; this is designed to
 quickly reduce the clock offset error without causing a frequency surge.
 This configuration is continued for an interval of five-min, after which
 the clock offset error is usually no more than a millisecond. The
 measurement interval can be changed using the +stepout+ option of the
 link:miscopt.html#tinker[+tinker+] command.
 
-Another concern at restart is the time necessary for the select and
+Another concern when restarting is the time necessary for the select and
 cluster algorithms to refine and validate the initial clock offset
 estimate. Normally, this takes several updates before setting the system
 clock. As the default minimum poll interval in most configurations is
@@ -179,8 +179,8 @@ about one minute, it can take several minutes before setting the system
 clock. The +iburst+ option of the link:assoc.html#burst[+server+]
 command changes the behavior at restart and is recommended for
 client/server configurations. When this option is enabled, the client
-sends a volley of six requests at intervals of two seconds. This usually
-insures a reliable estimate is available in about ten seconds before
+sends a volley of six requests at intervals of two seconds; this usually
+ensures a reliable estimate is available in about ten seconds before
 setting the clock. Once this initial volley is complete, the procedures
 described above are executed.
 
@@ -189,8 +189,8 @@ the local clock driver, ACTS modem driver or orphan mode is included in
 the system configuration, it may happen that one or more of them are
 selectable before one or more of the regular sources are selectable.
 When backup sources are included in the configuration, the reference
-implementation waits an interval of several minutes without regular
-sources before switching to backup sources. This is generally enough to
+implementation waits several minutes without regular
+sources before switching to backup sources; this is generally enough to
 avoid startup transients due to premature switching to backup sources.
 The interval can be changed using the +orphanwait+ option of the
 link:miscopt.html#tos[+tos+] command.

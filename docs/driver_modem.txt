@@ -30,9 +30,9 @@ can also be configured to operate full period.
 For best results the indicated time must be corrected for the modem and
 telephone circuit propagation delays, which can reach 200 ms or more.
 For the NIST service, corrections are determined automatically by
-measuring the roundtrip delay of echoed characters. With this service
-the absolute accuracy is typically a millisecond or two. Corrections for
-the other services must be determined by other means. With these
+measuring the roundtrip delay of echoed characters. With this service,
+the absolute accuracy is typically a millisecond or two. Determining corrections for
+the other services must be by other means. With these
 services variations from call to call and between messages during a call
 are typically a few milliseconds, occasionally higher.
 

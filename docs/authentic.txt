@@ -41,13 +41,12 @@ vulnerability analysis is in the white paper
 Authentication is configured separately for each association using the +key+
 subcommand on the +server+ configuration commands. The authentication
 options described below specify the locations of the key files and
-specify the locations of the key files, if other than the default, which
-operations, if other than the default.
+which symmetric keys are trusted.
 
 Authentication is always enabled, although ineffective if not configured
-as described below. If an NTP packet arrives including a message
+as described below. If a NTP packet arrives including a message
 authentication code (MAC), it is accepted only if it passes all
-cryptographic checks. The checks require correct key ID, key value, and
+cryptographic checks. The checks require correct key ID, key value and
 message digest. If the packet has been modified in any way
 by an intruder, it will fail one or more of these checks and be
 discarded.  Authentication doesn't prevent replays.
@@ -78,7 +77,6 @@ selects the key used as the password for the {ntpqman} utility.
 == Operation ==
 
 A server receiving an unauthenticated packet will respond with an
-where the clients, servers, and peers may not all support the same
 unauthenticated packet, while the same server receiving a packet of a
 cryptotype it supports will respond with packets of that cryptotype.
 
@@ -98,7 +96,7 @@ the same time, as long as he has compatible authentication and identity
 credentials. Now, Bob can act just like the girls in his own choice of
 servers; he can run multiple configured associations with multiple
 different servers (or the same server, although that might not be
-useful). But, a wise security policy might preclude some cryptotype
+useful). But, wise security policy might preclude some combinations;
 for instance, running authentication with one server
 and no authentication with another might not be wise.
 
@@ -138,7 +136,7 @@ access to all but correctly authenticated clients.
 The NTPv4 specification (RFC 5905) allows any one of possibly 65,534
 message digest keys (excluding zero), each distinguished by a 32-bit key
 ID, to authenticate an association. The servers and clients involved
-must agree on the key ID, key type, and key to authenticate NTP packets.
+must agree on the key ID, key type and key to authenticate NTP packets.
 
 The message digest is a cryptographic hash computed by an algorithm such
 as MD5 or SHA1. When authentication is specified, a message
@@ -146,14 +144,15 @@ authentication code (MAC) is appended to the NTP packet header. The MAC
 consists of a 32-bit key identifier (key ID) followed by a 128- or
 160-bit message digest. The algorithm computes the digest as the hash of
 the key concatenated with the NTP packet header fields and the key ID.
-On transmit, the message digest is computed and inserted in the MAC.
-digest is computed and inserted into the MAC. On receive, the message
-The packet is accepted only if the two MACs are identical. If a
-discrepancy is found by the client, the client ignores the packet, but
-client, the client ignores the packet but raises an alarm. If this
-special message called a _crypto-NAK_. Since the crypto-NAK is protected
-by the loopback test, an intruder cannot disrupt the protocol by sending
+On transmit, the message digest is computed and inserted into the MAC.
+On receive, the message digest is computed and compared with the MAC.
+The packet is only accepted if the two MACs are identical. If the client
+finds a discrepancy, then it ignores the packet but
+raises the alarm. If this happens at the server, the server returns a
+special message called a _crypto-NAK_. Since the loopback test protects
+the crypto-NAK, an intruder cannot disrupt the protocol by sending
 a bogus crypto-NAK.
+
 
 MD5 digests are 16 bytes.  SHA1 digests are 20 bytes.
 Longer digests don't work yet.  2018-Jan-07
@@ -170,7 +169,6 @@ image:pic/sx5.gif["Typical Symmetric Key File",align="center"]
 
 
 Figure 1 shows a typical keys file. In this figure, for key IDs in he
-when the OpenSSL library is installed. In this figure, for key IDs in the
 range 1-10, the key is interpreted as a printable ASCII string. For key
 IDs in the range 11-20, the key is a 40-character hex digit string.
 Any line can be edited to change any field or new lines can

@@ -9,6 +9,17 @@ A new broom sweeps clean.
 
 |==============================
 
+== Related Links ==
+
+include::includes/manual.txt[]
+
+== Table of Contents ==
+
+* link:#_table_of_contents[Table of Contents]
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#_options[Options]
+
 '''''
 
 include::includes/ntpsweep-body.txt[]

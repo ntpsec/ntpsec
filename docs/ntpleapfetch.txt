@@ -14,6 +14,13 @@ Occasionally, the leap-second needs an update.
 
 include::includes/manual.txt[]
 
+== Table of Contents ==
+
+* link:#_table_of_contents[Table of Contents]
+* link:#synop[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+
 '''''
 
 include::includes/ntpleapfetch-body.txt[]

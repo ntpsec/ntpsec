@@ -12,13 +12,21 @@ You need help from the monkeys.
 
 == Table of Contents ==
 
-* link:#synop[Synopsis]
-* link:#descr[Description]
-* link:#cmd[Command Line Options]
-* link:#usage[Usage]
-* link:#files[Files]
-* link:#signals[Signals]
-* link:#bugs[Bugs]
+* link:#_table_of_contents[Table of Contents]
+* link:#synop[SYNOPSIS]
+* link:#descr[DESCRIPTION]
+* link:#cmd[OPTIONS]
+* link:#usage[USAGE]
+** link:#_how_ntp_operates[How NTP Operates]
+** link:#starting[Starting NTP (Best Current Practice)]
+** link:#_frequency_discipline[Frequency Discipline]
+** link:#_operating_modes[Operating Modes]
+** link:#_poll_interval_control[Poll Interval Control]
+** link:#_the_huff_n_puff_filter[The huff-n'-puff Filter]
+* link:#files[FILES]
+* link:#signals[SIGNALS]
+* link:#bugs[BUGS]
+* link:#_standards[STANDARDS]
 
 '''''
 

@@ -11,11 +11,29 @@ Racoon is shooting configuration bugs.
 
 == Table of Contents ==
 
-* link:#synop[Synopsis]
-* link:#descr[Description]
+* link:#_table_of_contents[Table of Contents]
+* link:#synop[SYNOPSIS]
+* link:#descr[DESCRIPTION]
+* link:#_configuration_support[Configuration Support]
+** link:#_association_commands[Association Commands]
+** link:#unpeer[Association Options]
+** link:#_association_auxiliary_commands[Association Auxiliary Commands]
+* link:#_authentication_commands[Authentication Commands]
 * link:#monit[Monitoring Support]
-* link:#files[Files]
-* link:#bugs[Bugs]
+** link:#_monitoring_commands[Monitoring Commands]
+* link:#_access_control_support[Access Control Support]
+** link:#_the_kiss_of_death_packet[The Kiss-of-Death Packet]
+* link:#_access_control_commands[Access Control Commands]
+* link:#restrict[Automatic NTP Configuration Options]
+** link:#_manycasting[Manycasting]
+** link:#_manycast_options[Manycast Options]
+* link:#_reference_clock_support[Reference Clock Support]
+* link:#_reference_clock_commands[Reference Clock Commands]
+* link:#_miscellaneous_options[Miscellaneous Options]
+* link:#files[FILES]
+* link:#_see_also[SEE ALSO]
+* link:#bugs[BUGS]
+
 
 '''''
 

@@ -11,10 +11,16 @@ Assorted doohickeys for clock-frobbing are in the backpack.
 
 == Table of Contents ==
 
+* link:#_table_of_contents[Table of Contents]
 * link:#synop[Synopsis]
 * link:#descr[Description]
 * link:#cmd[Command Line Options]
 * link:#usage[Usage]
+** link:#_clock_tick_adjustment[Clock tick adjustment]
+** link:#_clock_bump[Clock bump]
+** link:#_clock_jitter_measurement[Clock jitter measurement]
+** link:#_pulse_per_second_check[Pulse-per-second check]
+** link:#_measure_clock_precision[Measure clock precision]
 
 include::includes/ntpfrob-body.txt[]
 

@@ -89,7 +89,7 @@ read interactive format commands from the standard input.
   Print the version string and exit.
 +-w+, +--wide+::
   Wide mode: if the host name or IP Address doesn't fit, write the
-  full name/address and indent the next line so columns line up.
+  full name/address and indent the next line, so columns line up.
   The default truncates the name or address.
 +-W+ num, +--width+=num::
   Force the terminal width.  Only relevant for composition of the

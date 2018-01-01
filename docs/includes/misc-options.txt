@@ -70,7 +70,7 @@ and that file system links, symbolic or otherwise, should be avoided.
 +interface+ [+listen+ | +ignore+ | +drop+] [+all+ | +ipv4+ | +ipv6+ | +wildcard+ | 'name' | 'address'[/'prefixlen']]::
   This command controls which network addresses +ntpd+ opens, and
   whether input is dropped without processing. The first parameter
-  determines the action for addresses which match the second parameter.
+  determines the action on addresses which match the second parameter.
   That parameter specifies a class of addresses, or a specific interface
   name, or an address. In the address case, _prefixlen_ determines how
   many bits must match for this rule to apply. +ignore+ prevents opening
@@ -163,10 +163,10 @@ and so on is suppressed.
     If an address is not in the list, there are several possible ways
     to find a slot for it.
     . If the list has fewer than +mindepth+ entries, a slot is
-    allocated from the free list.  This is the normal case for a
+    allocated from the free list, this is the normal case for a
     server without a lot of clients.  If clients come and go, for
     example, laptops going between home and work, the default setup
-    shows only the long term average.
+    shows only the long-term average.
     . If the age of the oldest slot is greater than +maxage+, the oldest
     slot is recycled (default 3600 seconds).
     . If the freelist is not empty, a slot is allocated from the

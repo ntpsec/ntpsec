@@ -15,6 +15,17 @@ include::includes/manual.txt[]
 
 '''''
 
+== Table of Contents ==
+
+* link:#_table_of_contents[Table of Contents]
+* link:#synop[Synpopsis]
+* link:#_description[DESCRIPTION]
+** link:#_basic_options[Basic Options]
+** link:#_individual_plots[Individual Plots]
+** link:#_argument_file[Argument File]
+* link:#_requirements[REQUIREMENTS]
+* link:#_authors[AUTHORS]
+
 include::includes/ntpviz-body.txt[]
 
 '''''
