@@ -30,7 +30,7 @@ logfile = "ntpsnmpd.log"
 logfp = sys.stderr
 nofork = True  # don't daemonize while still under construction
 debug = 0
-timeout = 5  # default timeout, what shuold this be?
+defaultTimeout = 30  # default timeout, what shuold this be?
 
 ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
 
@@ -944,7 +944,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
 
 class PacketControl:
-    def __init__(self, sock, dbase, spinGap=0.001, timeout=5):
+    def __init__(self, sock, dbase, spinGap=0.001, timeout=30):
         # take a pre-made socket instead of making our own so that
         # PacketControl doesn't have to know or care about implementation
         self.socket = sock
@@ -1274,7 +1274,7 @@ def mainloop(masterAddress=None):
     dolog("initing loop\n", 1)
     sock = connect(masterAddress)
     dbase = DataSource()
-    control = PacketControl(sock, dbase)
+    control = PacketControl(sock, dbase, timeout=defaultTimeout)
     control.loopCallback = dbase.checkNotifications
     control.initNewSession()
     control.mainloop(True)
