@@ -695,7 +695,7 @@ create_peer_node(
 			break;
 
 		case T_Key:
-			if (option->value.u >= KEYID_T_MAX) {
+			if (option->value.u >= NTP_MAXKEY) {
 				msyslog(LOG_ERR, "CONFIG: key: invalid argument");
 				errflag = true;
 			} else {

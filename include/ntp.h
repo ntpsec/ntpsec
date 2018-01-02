@@ -87,7 +87,6 @@ extern int32_t ntp_random (void);
 /*
  * Miscellaneous stuff
  */
-#define NTP_MAXKEY	65535	/* max authentication key number */
 /*
  * Limits of things
  */
