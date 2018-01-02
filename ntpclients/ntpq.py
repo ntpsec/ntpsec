@@ -61,18 +61,17 @@ version = ntp.util.stdversion()
 forced_utf8 = False
 
 if str is bytes:  # Python 2
-    import codecs
-
     polystr = unicode
     polybytes = bytes
 
     def string_escape(s):
         return s.decode('string_escape')
 
-    # Originally these only triggered if sys.stdout.encoding != "UTF-8":
-    # Unfortunately sometimes sys.stdout.encoding lies
-    sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-    sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
+    # This used to force UTF-8 encoding, but that breaks the readline system.
+    # Unfortunately sometimes sys.stdout.encoding lies about the encoding,
+    # so expect random false positives.
+    if sys.stdout.encoding != "UTF-8":
+        ntp.util.deunicode_units()
 
 else:  # Python 3
     import io
