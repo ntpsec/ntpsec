@@ -50,14 +50,6 @@ run this program on an active host with a lot of available entropy.
 [[access]]
 == Key file access and location ==
 
-The {ntpdman} configuration command _crypto_ _pw_ _password_
-specifies the read password for previously encrypted files. The daemon
-expires on the spot if the password is missing or incorrect. For
-convenience, if a file has been previously encrypted, the default read
-password is the name of the host running the program. If the previous
-write password is specified as the host name, these files can be read by
-that host with no explicit password.
-
 File names begin with the prefix _ntpkey_ and end with the postfix
 _hostname.filestamp_, where _hostname_ is the owner name, usually the
 string returned by the Unix gethostname() routine, and _filestamp_ is
@@ -115,7 +107,7 @@ format:
 |====================================================================
 |Field	| Meaning
 |keyno	| Positive integer in the range 1-65,535
-|type	| MD5 or SHA-1 , type of key
+|type	| MD5 or SHA-1, type of key
 |key	| the actual key, printable ASCII
 |====================================================================
 
