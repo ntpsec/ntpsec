@@ -67,7 +67,7 @@ The log file looks like:
   This the simplest use of this program. It can be used to check the
   temperature readings of Zones, CPU, and disk drives every minute.
 
-+ntplogtemp -l /var/log/ntpstats/temperature -w 60 &::
++ntplogtemp -l /var/log/ntpstats/temperature -w 60 &+::
   This will continuously log the temperature data in the background
   to the file /var/log/ntpstats/temperature.  Only log every 60 seconds.
 
@@ -83,6 +83,7 @@ One of the following exit values will be returned:
 == AUTHORS ==
 
 Gary E. Miller
+
 Keane S. Wolter
 
 // end

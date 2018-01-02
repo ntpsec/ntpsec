@@ -1,0 +1,75 @@
+== DESCRIPTION ==
+
+This document describes the format of an NTP symmetric key file. For a
+description of the use of this type of file, see the "Authentication
+Support" page of the Web documentation.
+
+{ntpdman} reads its keys from a file specified using the -k command line
+option or the 'keys' statement in the configuration file. While key
+number 0 is fixed by the NTP standard (as 56 zero bits) and may not be
+changed, one or more keys numbered between 1 and 65534 may be
+arbitrarily set in the keys file.
+
+The key file uses the same comment conventions as the configuration
+file. Key entries use a fixed format of the form
+
+--------------
+keyno type key
+--------------
+
+where `keyno` is a positive integer (between 1 and 65534),
+`type` is the message digest algorithm, and
+`key` is the key itself.
+
+The file does not need to be sorted by `keyno`.
+
+`type` can be any digest type supported by your OpenSSL package.
+You can probably get a list from `man 1 dgst` or `openssl help`.
+(As of Jan 2018, they lie.  Be sure to try it.  {ntpdman} will
+print an error on startup if a selected type isn't supported.)
+
+The following types are widely supported:
+-----
+  md5, sha1, ripemd160, sha224, sha256, sha384, sha512
+-----
+
+FIPS 140-2, FIPS 180-4, and/or FIPS 202 may restrict your choices.
+If it matters to you, check with your lawyer.  (Let us know if you
+find a good reference.)
+
+The `key` may be printable ASCII excluding "#" or hex encoded.
+Keys longer than 20 characters are assumed to be hex.  The max
+length of a (possibly de-hexified) key is 32 bytes.  If you
+want to use an ASCII key longer than 20 bytes, you must hexify it.
+
+Note that the keys used by the {ntpqman} programs are
+checked against passwords entered by hand, so it is generally
+appropriate to specify these keys in ASCII format.  Or you can
+cut-paste a hex string from your password manager.
+
+== USAGE ==
+
+In order to use symmetric keys, the client side configuration file needs:
+-----
+  keys <path-to-client-keys-file>
+  trustedkey <keyno>
+  server ... key <keyno>
+-----
+The server side needs:
+-----
+  keys <path-to-server-keys-file>
+  trustedkey <keyno>
+-----
+
+Note that the client and server key files must both contain identical
+copies of the line specified by keyno.
+
+
+== FILES ==
+
+`/etc/ntp.keys`::
+  is a common location for the keys file
+
+Reminder: You have to keep it secret.
+
+// end
