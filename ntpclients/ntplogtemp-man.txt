@@ -1,4 +1,4 @@
-= ntplogtemp-(1) =
+= ntplogtemp(1) =
 :doctype: manpage
 
 == NAME ==
