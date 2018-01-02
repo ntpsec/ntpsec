@@ -47,6 +47,12 @@ UNITS_PPX = [UNIT_PPT, UNIT_PPB, UNIT_PPM, UNIT_PPK]
 unitgroups = (UNITS_SEC, UNITS_PPX)
 
 
+def check_unicode():
+    if "UTF-8" != sys.stdout.encoding:
+        deunicode_units()
+        return True  # needed by ntpmon
+    return False
+
 def deunicode_units():
     "Under certain conditions it is not possible to force unicode output, "
     "this overwrites units that contain unicode with safe versions"

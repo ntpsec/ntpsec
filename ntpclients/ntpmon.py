@@ -44,11 +44,9 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
-disableunicode = False
+
 # LANG=C or LANG=POSIX refuse unicode when combined with curses
-if "UTF-8" != sys.stdout.encoding:
-    ntp.util.deunicode_units()
-    disableunicode = True
+disableunicode = ntp.util.check_unicode()
 
 
 try:

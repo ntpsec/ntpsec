@@ -70,8 +70,7 @@ if str is bytes:  # Python 2
     # This used to force UTF-8 encoding, but that breaks the readline system.
     # Unfortunately sometimes sys.stdout.encoding lies about the encoding,
     # so expect random false positives.
-    if sys.stdout.encoding != "UTF-8":
-        ntp.util.deunicode_units()
+    ntp.util.check_unicode()
 
 else:  # Python 3
     import io
@@ -110,6 +109,7 @@ else:  # Python 3
         return io.TextIOWrapper(stream.buffer, encoding="utf-8",
                                 newline="\n", line_buffering=True)
 
+    # This is the one situation where we *can* force unicode.
     if "UTF-8" != sys.stdout.encoding:
         forced_utf8 = True
         sys.stdout = make_std_wrapper(sys.stdout)
