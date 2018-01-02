@@ -94,7 +94,7 @@ x:: Cleanly terminate the program.
 When run in a terminal that does not allow UTF-8 ntpmon will downgrade
 its unit display to a non-unicode version. ntpmon has to interact with
 the curses and locale libraries, which prevents it from forcing the use
-of UTF-8 the way ntpq can.
+of UTF-8.
 
 When querying a version of ntpd older than NTPsec 0.9.6, +ntpmon+ will
 appear to hang when monitoring hosts with extremely long MRU lists -

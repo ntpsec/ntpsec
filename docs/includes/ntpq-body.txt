@@ -562,6 +562,12 @@ error will however be reported in the system log.
 
 The config command cannot be used to change a server's default restrictions.
 
+Under some circumstances python 2 cannot emit unicode. When true the display
+of units is downgraded to non-unicode alternatives. One place a user is
+likely to encounter this is when diverting output through a pipe. Attempts
+have been made to force the use of UTF-8, all of which break the command
+history feature.
+
 include::mrufail.txt[]
 
 You may be able to retrieve partial data in very high-traffic
