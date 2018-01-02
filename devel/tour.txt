@@ -136,7 +136,14 @@ control logic works with.
 The peer buffer holds the last 8 samples from the upstream source.
 The normal logic uses the one with the lowest round trip time.  That's
 a hack to minimize errors from queuing delays out on the big bad
-internet.  Refclock data always has a round trip time of 0.
+internet.  Refclock data always has a round trip time of 0 and the
+code that finds the lowest RTT picks the most recent slot when the
+RTTs are equal.
+
+== config file parser ==
+
+There is a minor quirk: numbers come in as integers, type T_Integer.
+There is no type T_Unsigned.  Range checking may not work right.
 
 == ntpd control flow ==
 
@@ -163,7 +170,8 @@ Input handling used to be a lot more complex.  Due to inability to get
 arrival timestamps from the host's UDP layer, the code used to do
 asynchronous I/O with packet I/O indicated by signal, with packets
 (and their arrival timestamps) being stashed in a ring of buffers that
-was consumed by the protocol main loop.
+was consumed by the protocol main loop.  Some of this code hasn't been
+cleaned up yet.
 
 This looked partly like a performance hack, but if so it was an
 ineffective one. Because there is necessarily a synchronous bottleneck
@@ -179,7 +187,7 @@ time.  This used to be significant relative to users' accuracy
 expectations for NTP, but scheduler timeslices have since decreased
 by orders of magnitude and squashed the issue. We know this from some
 tests setup having run for six months with packet-timestamp fetching
-accidentally disabled...)
+accidentally disabled...  But they weren't horribly busy systems.)
 
 The new organization stops pretending; it simply spins on a select
 across all interfaces.  If inbound traffic is more than the daemon can
@@ -344,49 +352,36 @@ injects that into the peer buffer for the refclock.
 
 == Asynchronous DNS lookup ==
 
-There are great many complications in the code that arise from wanting
-to avoid stalling the main loop while it waits for a DNS lookup to
-return. And DNS lookups can take a *long* time.  Hal Murray notes that
+The DNS code runs in a separate thread in order to avoid stalling
+the main loop while it waits for a DNS lookup to return. And DNS
+lookups can take a *long* time.  Hal Murray notes that
 he thinks he's seen 40 seconds on a failing case.
 
-One reason for the complications is that the async-DNS support seems
-somewhat overengineered.  Whoever built it was thinking in terms of a
-general async-worker facility and implemented things that this use
-of it probably doesn't need - notably an input-buffer pool.
-
-This code is a candidate to be replaced by an async-DNS library such
-as cAres. One attempt at this has been made, but abandoned because
-the async-worker interface to the rest of the code is pretty gnarly.
+The old async-DNS support seemed somewhat overengineered.  Whoever
+built it was thinking in terms of a general async-worker facility
+and implemented things that this use of it probably doesn't
+need - notably an input-buffer pool.  (It also had an obscure bug.)
 
 The DNS lookups during initialization - of hostnames specified on the
-command line of ntp.conf - could be done synchronously.  But there are
-two cases we know of where ntpd has to do a DNS lookup after its
-main loop gets started.
+command line or server lines in ntp.conf - could be done synchronously.
+
+But that would delay startup and there are two cases we know of where
+ntpd has to do a DNS lookup during normal operation.
 
 One is the try again when DNS for the normal server case doesn't work during
 initialization.  It will try again occasionally until it gets an answer.
 (which might be negative)
 
-The main one is the pool code trying for a new server.  There are
-several possible extensions in this area.  The main one would be to verify that
-a server you are using is still in the pool.  (There isn't a way to do
-that yet - the pool doesn't have any DNS support for that.)  The other
-would be to try replacing the poorest server rather than only
-replacing dead servers.
+The main one is the pool code trying for more servers.  There are two
+cases for that.  One is that the initial result didn't return as many
+addresses as desired.  The other is when pool servers die and need to
+be replaced with working ones.
 
-As long as we get packet receive timestamps from the OS, synchronous
-DNS delays probably won't introduce any lies on the normal path.  We
-could test that by putting a sleep in the main loop.  (There is a
-filter to reject packets that take too long, but Hal thinks that's
-time-in-flight and excludes time sitting on the server.)
-
-There are two known cases where a pause in ntpd would cause troubles.
-One is that it would mess up refclocks.  The other is that packets
-will get dropped if too many of them arrive during the stall.
-
-This probably means we could go synchronous-only and use the pool
-command on a system without refclocks.  That covers end nodes and
-maybe lightly loaded servers.
+There are several possible extensions in this area.  The main one would
+be to verify that a server you are using is still in the pool.  (There
+isn't a way to do that yet - the pool doesn't have any DNS support
+for it.)  The other would be to try replacing the poorest server
+rather than only replacing dead servers.
 
 == The build recipe ==
 
@@ -504,9 +499,15 @@ ASCIIizations of MRU records, oldest to newest.  The spans include
 sequence metadata intended to allow you to stitch them together on the
 fly in O(n) time.
 
-There is also a direct mode that makes the individual spans available
-as they come in.  This may be useful for getting partial data from
-very heavily-loaded servers.
+Note that the data for a slot will be returned more than once if a
+request arrives after the data was returned but before the collection
+has finished.
+
+The code collects all the data, maybe sorts it, then prints it out.
+
+There is also a direct mode that prints the individual slots
+as they come in.  This avoids needing lots of memory if you want
+to get the MRU data from a system that keeps lots of history.
 
 A further interesting complication is use of a nonce to foil DDoSes by
 source-address spoofing.  The mrulist() code begins by requesting a
