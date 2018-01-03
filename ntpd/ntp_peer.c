@@ -538,7 +538,7 @@ set_peerdstadr(
 		p->dstadr->peercnt--;
 		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,
 			     struct peer);
-		msyslog(LOG_INFO, "MODE6: %s unlink local addr %s -> %s",
+		msyslog(LOG_INFO, "PROTO: %s unlink local addr %s -> %s",
 			socktoa(&p->srcadr), latoa(p->dstadr),
 			latoa(dstadr));
 	}
