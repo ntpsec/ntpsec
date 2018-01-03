@@ -30,7 +30,7 @@ logfile = "ntpsnmpd.log"
 logfp = sys.stderr
 nofork = True  # don't daemonize while still under construction
 debug = 0
-defaultTimeout = 30  # default timeout, what shuold this be?
+defaultTimeout = 30  # default timeout, what should this be?
 
 ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
 
