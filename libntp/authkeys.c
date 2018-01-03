@@ -563,7 +563,7 @@ authencrypt(
  *
  * Returns true if authenticator valid, false if invalid or not found.
  */
-int
+bool
 authdecrypt(
 	keyid_t		keyno,
 	uint32_t *	pkt,

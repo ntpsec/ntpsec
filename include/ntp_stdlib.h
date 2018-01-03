@@ -40,7 +40,7 @@ extern	void	setup_logfile	(const char *);
 
 /* authkeys.c */
 extern	void	auth_delkeys	(void);
-extern	int	authdecrypt	(keyid_t, uint32_t *, int, int);
+extern	bool	authdecrypt	(keyid_t, uint32_t *, int, int);
 extern	int	authencrypt	(keyid_t, uint32_t *, int);
 extern	bool	authhavekey	(keyid_t);
 extern	bool	authistrusted	(keyid_t);
@@ -67,7 +67,7 @@ int ntp_getopt(int argc, char *const argv[], const char *optstring);
 int ntp_getopt_long(int argc, char* const argv[], const char *optstring,
 		    const struct option *longopts, int *longindex);
 
-/* a_md5encrypt.c */
+/* mac_md5encrypt.c */
 extern	bool	mac_authdecrypt	(int, uint8_t *, uint32_t *, int, int);
 extern	int	mac_authencrypt	(int, uint8_t *, uint32_t *, int);
 extern	void	mac_setkey	(keyid_t, int, const uint8_t *, size_t);
