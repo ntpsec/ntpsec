@@ -131,7 +131,7 @@ of GMT (Greenwich Mean Time) without leap seconds.
 On POSIX-compliant Unix systems (which is now effectively all) Unix
 time can be retrieved with nanosecond precision; some older versions
 supported only millisecond precision.  The subseconds counter is not
-involved in any of the rollover or leap-second issues thith the
+involved in any of the rollover or leap-second issues with the
 seconds counter.
 
 The Unix 32-bit rollover may fizzle the way Y2K did, and will if a
@@ -254,7 +254,7 @@ Finally, when you buy a GPS you do not know - and often will not be
 able to discover - how far in the past its hidden pivot date is.  This
 means that time service operators using a GPS as a local Stratum 0
 need to be aware of the possibility that their device could roll over
-at any time (but especially near the zero dats of a GPS era) and be
+at any time (but especially near the zero days of a GPS era) and be
 ready to compensate by dropping in a device with a newer pivot date.
 
 Actionable advice that follows from this: If you don't know the
