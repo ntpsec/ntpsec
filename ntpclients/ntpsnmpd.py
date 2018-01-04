@@ -30,7 +30,7 @@ logfile = "ntpsnmpd.log"
 logfp = sys.stderr
 nofork = True  # don't daemonize while still under construction
 debug = 0
-defaultTimeout = 30  # default timeout, what should this be?
+defaultTimeout = 30
 
 ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
 
@@ -956,7 +956,7 @@ class PacketControl:
         self.database = dbase  # class for handling data requests
         self.recievedData = ""  # buffer for data from incomplete packets
         self.recievedPackets = []  # use as FIFO
-        self.timeout = timeout  # default 5s, arbitrary
+        self.timeout = timeout
         self.sessionID = None  # need this for all packets
         # indexed on pdu code
         self.pduHandlers = {ax.PDU_GET: self.handle_GetPDU,
