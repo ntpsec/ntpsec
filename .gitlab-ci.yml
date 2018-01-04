@@ -309,3 +309,13 @@ python3:
   tags:
     - gitlab-org
 
+python-coverage:
+  <<: *job_definition
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison python-dev python-coverage
+    - python ./waf configure build check
+    - for i in build/main/tests/pylib/test_*; do python-coverage run -a --source build/main/pylib $i; done
+    - python-coverage report
+  tags:
+    - gitlab-org
+
