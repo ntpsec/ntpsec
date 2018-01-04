@@ -944,7 +944,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
 
 class PacketControl:
-    def __init__(self, sock, dbase, spinGap=0.001, timeout=30):
+    def __init__(self, sock, dbase, spinGap=0.001, timeout=defaultTimeout):
         # take a pre-made socket instead of making our own so that
         # PacketControl doesn't have to know or care about implementation
         self.socket = sock
@@ -1274,7 +1274,7 @@ def mainloop(masterAddress=None):
     dolog("initing loop\n", 1)
     sock = connect(masterAddress)
     dbase = DataSource()
-    control = PacketControl(sock, dbase, timeout=defaultTimeout)
+    control = PacketControl(sock, dbase)
     control.loopCallback = dbase.checkNotifications
     control.initNewSession()
     control.mainloop(True)
