@@ -66,6 +66,7 @@ else
 	if [ "$(id -u)" != 0 ]
 	then
 		echo "# ERROR: You must be running as root for your installer to do its thing."
+		echo "# ERROR: If you just wish to see what would be done, use the -n option."
 		exit 1
 	fi
 fi
