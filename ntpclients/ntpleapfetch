@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Copyright (C) 2014 Timothe Litt litt at acm dot org
+# Modified 20180105 Sanjeev Gupta ghane0@gmail.com
 #
 # SPDX-License-Identifier: BSD-2-clause
 #
@@ -286,7 +287,12 @@ function verifySHA1 {
     # Extract the file's hash. Restore any leading zeroes in hash segments.
 
     # The sed [] includes a tab (\t) and space; #h is followed by a tab and space
-    local FSHA1="`echo \"$RAW\" | sed -e'/^#h/!d' -e's/^#h//' -e's/[ 	] */ 0x/g'`"
+    # The file of 8-Jul-2016 uses \r\n as line delimiters.  This must
+    # be corrected on UNIX systems, else the extra \r is read from the
+    # last line.  I am not clear if this is an error in the NIST file,
+    # or intentional.  Nevertheless - Sanjeev Gupta 20180105
+    #
+    local FSHA1="`echo \"$RAW\" | sed -e's/\r//' | sed -e'/^#h/!d' -e's/^#h//' -e's/[ 	] */ 0x/g'`"
     FSHA1=`printf '%08x%08x%08x%08x%08x' $FSHA1`
 
     if [ -n "$FSHA1" -a \( "$FSHA1" = "$DSHA1" \) ]; then
