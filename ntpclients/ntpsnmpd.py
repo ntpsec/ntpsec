@@ -263,7 +263,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.sentNotifications = 0
         # Notify bits, these should be saved to disk
         # Also most of them currently have no effect
-        self.notifyModeChange = False  # 1
+        self.notifyModeChange = True  # 1
         self.notifyStratumChange = False  # 2
         self.notifySyspeerChange = False  # 3
         self.notifyAddAssociation = False  # 4
@@ -376,36 +376,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     # Blank: ntpEntStatus
 
-    def cbr_statusCurrentMode(self, oid):  # DUMMY, partially implemented
-        # Range of integers
-        try:
-            # Don't care about the data, this is a ploy to the the rstatus
-            self.session.readvar(0, ["stratum"])
-        except ntp.packet.ControlException as e:
-            if e.message == ntp.packet.SERR_SOCKET:
-                # Can't connect, ntpd probably not running
-                return ax.Varbind(ax.VALUE_INTEGER, oid, 1)
-            else:
-                raise e
-        rstatus = self.session.rstatus  # a ploy to get the system status
-        source = ntp.control.CTL_SYS_SOURCE(rstatus)
-        if source == ntp.control.CTL_SST_TS_UNSPEC:
-            mode = 2  # Not yet synced
-        elif False:
-            mode = 3  # No reference configured
-        elif source == ntp.control.CTL_SST_TS_LOCAL:
-            mode = 4  # Distributing local clock (low accuracy)
-        elif source in (ntp.control.CTL_SST_TS_ATOM,
-                        ntp.control.CTL_SST_TS_LF,
-                        ntp.control.CTL_SST_TS_HF,
-                        ntp.control.CTL_SST_TS_UHF):
-            # I am not sure if I should be including the radios in this
-            mode = 5  # Synced to local refclock
-        elif source == ntp.control.CTL_SST_TS_NTP:
-            # Should this include "other"? That covers things like chrony...
-            mode = 6  # Sync to remote NTP
-        else:
-            mode = 99  # Unknown
+    def cbr_statusCurrentMode(self, oid):
+        mode = self.misc_getMode()
         return ax.Varbind(ax.VALUE_INTEGER, oid, mode)
 
     def cbr_statusStratum(self, oid):
@@ -795,9 +767,21 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
         if self.notifyHeartbeat is True:
             self.doNotifyHeartbeat(control)
+        # Test code
 
-    def doNotifyModeChange(self, control):
-        pass  # DUMMY
+    def doNotifyModeChange(self, control): # WORKING
+        oldMode = self.oldValues.get("mode")
+        newMode = self.misc_getMode()  # connection failure handled by method
+        if oldMode is None:
+            self.oldValues["mode"] = newMode
+            return
+        elif oldMode != newMode:
+            self.oldValues["mode"] = newMode
+            vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                             ax.OID(ntpRootOID + (0, 1))),
+                  ax.Varbind(ax.VALUE_INTEGER, ntpRootOID + (1, 2, 1),
+                             newMode)]
+            control.sendNotify(vl)
 
     def doNotifyStratumChange(self, control):
         oldStratum = self.oldValues.get("stratum")
@@ -808,6 +792,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             self.oldValues["stratum"] = newStratum
             return
         elif oldStratum != newStratum:
+            self.oldValues["stratum"] = newStratum
             datetime = self.safeReadvar(0, ["reftime"])["reftime"]
             if datetime is None:
                 datetime = ""
@@ -832,6 +817,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             self.oldValues["syspeer"] = newSyspeer
             return
         elif oldSyspeer != newSyspeer:
+            self.oldValues["syspeer"] = newSyspeer
             datetime = self.safeReadvar(0, ["reftime"])["reftime"]
             if datetime is None:
                 datetime = ""
@@ -878,6 +864,38 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     # =====================================
     # Misc data helpers (not part of the MIB proper)
     # =====================================
+
+    def misc_getMode(self):
+        # DUMMY: not fully implemented
+        try:
+            # Don't care about the data, this is a ploy to the the rstatus
+            self.session.readvar(0, ["stratum"])
+        except ntp.packet.ControlException as e:
+            if e.message == ntp.packet.SERR_SOCKET:
+                # Can't connect, ntpd probably not running
+                return ax.Varbind(ax.VALUE_INTEGER, oid, 1)
+            else:
+                raise e
+        rstatus = self.session.rstatus  # a ploy to get the system status
+        source = ntp.control.CTL_SYS_SOURCE(rstatus)
+        if source == ntp.control.CTL_SST_TS_UNSPEC:
+            mode = 2  # Not yet synced
+        elif False:
+            mode = 3  # No reference configured
+        elif source == ntp.control.CTL_SST_TS_LOCAL:
+            mode = 4  # Distributing local clock (low accuracy)
+        elif source in (ntp.control.CTL_SST_TS_ATOM,
+                        ntp.control.CTL_SST_TS_LF,
+                        ntp.control.CTL_SST_TS_HF,
+                        ntp.control.CTL_SST_TS_UHF):
+            # I am not sure if I should be including the radios in this
+            mode = 5  # Synced to local refclock
+        elif source == ntp.control.CTL_SST_TS_NTP:
+            # Should this include "other"? That covers things like chrony...
+            mode = 6  # Sync to remote NTP
+        else:
+            mode = 99  # Unknown
+        return mode
 
     def misc_getSyspeerID(self):
         peers = self.misc_getPeerData()
