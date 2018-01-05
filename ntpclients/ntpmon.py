@@ -40,7 +40,7 @@ try:
     import ntp.version
 except ImportError as e:
     sys.stderr.write(
-        "ntpmon: can't find Python NTP library.\n")
+        "ntpmon: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 

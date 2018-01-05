@@ -13,7 +13,7 @@ directory to build/main/ntpclients/ and run ./ntpq there. If you get a message
 that says
 
 ---------------------------------------------------------------------
-ntpq: can't find Python NTP library.
+ntpq: can't find Python NTP library -- check PYTHONPATH.
 ---------------------------------------------------------------------
 
 you *may* have a problem.  A lot of what was C code in legacy versions

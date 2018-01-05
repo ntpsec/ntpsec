@@ -48,7 +48,7 @@ try:
     import ntp.util
 except ImportError as e:
     sys.stderr.write(
-        "ntploggps: can't find Python NTP library.\n")
+        "ntploggps: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
