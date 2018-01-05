@@ -58,7 +58,6 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
      export PYTHONPATH=/usr/local/lib/python2.6/site-packages
    (I put it in my .bashrc)
 
-
 argparse::
    Required for ntpviz when using Python version 2.6
    Install with pip: pip install argparse
