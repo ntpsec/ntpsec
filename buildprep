@@ -119,16 +119,19 @@ daemon () {
     # Prerequisites to build the daemon: bison, pps-tools, service libraries
     case $installer in
 	apt)
+	    $install build-essential			# Build environment
 	    $install bison libssl-dev			# build
 	    $install libcap-dev libseccomp-dev		# build
 	    $install libavahi-compat-libdnssd-dev	# optional build
 	    $install libssl1.0.0 libcap2 pps-tools
 	    ;;
 	emerge)
+						# Build environment included!
 	    $install sys-libs/libcap sys-libs/libseccomp
 	    $install sys-devel/bison net-misc/pps-tools
 	    ;;
 	yum|dnf)
+	    $do $installer groupinstall "Development Tools" 	# Build environment
 	    $install bison openssl-devel 		# build
 	    $install libcap-devel libseccomp-devel	# build
 	    $install pps-tools-devel			# build
@@ -137,13 +140,13 @@ daemon () {
 	    ;;
 	yast)
 	    echo "# SLES versions 12 and earlier do not have pps-tools"
-	    $install basis-devel 			# build
+	    $install basis-devel 			# Build environment
 	    $install libcap-devel libseccomp-devel 	# build
 	    $install openssl-devel			# build
 	    $install libcap2 openssl-libs
 	    ;;
 	zypper)
-	    $install gcc6 gcc6-info gcc6-locale	# build
+	    $install -t pattern devel_basis		# Build environment
 	    $install bison				# build
 	    $install libcap-devel libseccomp-devel	# build
 	    $install openssl-devel			# build
