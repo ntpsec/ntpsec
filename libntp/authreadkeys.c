@@ -148,9 +148,9 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 			*pch = (char)toupper((unsigned char)*pch);
 
 		keytype = OBJ_sn2nid(upcased);
-		if (!keytype && 'm' == tolower((unsigned char)token[0]))
+		if ((NID_undef == keytype) && ('M' == upcased[0]))
 			keytype = NID_md5;
-		if (keytype == 0) {
+		if (NID_undef == keytype) {
 			msyslog(LOG_ERR,
 			    "AUTH: authreadkeys: invalid type for key %u", keyno);
 			continue;
