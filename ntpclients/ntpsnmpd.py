@@ -263,7 +263,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.sentNotifications = 0
         # Notify bits, these should be saved to disk
         # Also most of them currently have no effect
-        self.notifyModeChange = True  # 1
+        self.notifyModeChange = False  # 1
         self.notifyStratumChange = False  # 2
         self.notifySyspeerChange = False  # 3
         self.notifyAddAssociation = False  # 4
@@ -753,11 +753,15 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         if self.notifySyspeerChange is True:
             self.doNotifySyspeerChange(control)
 
-        if self.notifyAddAssociation is True:
-            self.doNotifyAddAssociation(control)
-
-        if self.notifyRMAssociation is True:
-            self.doNotifyRMAssociation(control)
+        # Both and and remove have to look at the same data, don't want them
+        # stepping on each other. Therefore the functions are combined.
+        if (self.notifyAddAssociation is True) and \
+           (self.notifyRMAssociation is True):
+            self.doNotifyChangeAssociation(control, "both")
+        elif self.notifyAddAssociation is True:
+            self.doNotifyChangeAssociation(control, "add")
+        elif self.notifyRMAssociation is True:
+            self.doNotifyChangeAssociation(control, "rm")
 
         if self.notifyConfigChange is True:
             self.doNotifyConfigChange(control)
@@ -769,7 +773,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             self.doNotifyHeartbeat(control)
         # Test code
 
-    def doNotifyModeChange(self, control): # WORKING
+    def doNotifyModeChange(self, control):
         oldMode = self.oldValues.get("mode")
         newMode = self.misc_getMode()  # connection failure handled by method
         if oldMode is None:
@@ -834,11 +838,43 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                              "SysPeer changed")]  # Uh... what goes here?
             control.sendNotify(vl)
 
-    def doNotifyAddAssociation(self, control):
-        pass  # DUMMY
-
-    def doNotifyRMAssociation(self, control):
-        pass  # DUMMY
+    def doNotifyChangeAssociation(self, control, which):
+        changes = self.misc_getAssocListChanges()
+        if changes is None:
+            return
+        datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+        if datetime is None:
+            datetime = ""
+        else:
+            datetime = ntp.util.deformatNTPTime(datetime)
+        adds, rms = changes
+        print("Notify Change assoc:", changes)
+        if which in ("add", "both"):
+            print("adding", adds)
+            for name in adds:
+                vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                                 ax.OID(ntpRootOID + (0, 4))),  # Add
+                      ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 2, 9),
+                                 datetime),
+                      ax.Varbind(ax.VALUE_OCTET_STR,
+                                 ntpRootOID + (1, 3, 1, 1, 2),
+                                 name),
+                      ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
+                                 "Association added")]  # Uh... what goes here?
+                control.sendNotify(vl)
+        if which in ("rm", "both"):
+            print("removing", rms)
+            for name in rms:
+                vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                                 ax.OID(ntpRootOID + (0, 5))),  # Remove
+                      ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 2, 9),
+                                 datetime),
+                      ax.Varbind(ax.VALUE_OCTET_STR,
+                                 ntpRootOID + (1, 3, 1, 1, 2),
+                                 name),
+                      ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
+                                 "Association removed")]  # Uh... what goes here?
+                control.sendNotify(vl)
 
     def doNotifyConfigChange(self, control):
         pass  # DUMMY
@@ -864,6 +900,38 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     # =====================================
     # Misc data helpers (not part of the MIB proper)
     # =====================================
+
+    def misc_getAssocListChanges(self):
+        # We need to keep the names, because those won't be available
+        # after they have been removed.
+        oldAssoc = self.oldValues.get("assoc")
+        newAssoc = {}
+        # Yes, these are cached, for a very short time
+        pdata = self.misc_getPeerData()
+        if pdata is None:
+            return
+        ids = self.misc_getPeerIDs()
+        if ids is None:
+            return
+        for associd in ids:
+            addr = pdata[associd]["srcadr"][1]
+            name = ntp.util.canonicalize_dns(addr)
+            newAssoc[associd] = name
+        if oldAssoc is None:
+            self.oldValues["assoc"] = newAssoc
+            return
+        elif oldAssoc != newAssoc:
+            oldIDs = oldAssoc.keys()
+            newIDs = newAssoc.keys()
+            adds = []
+            rms = []
+            for associd in oldIDs + newIDs:
+                if associd not in newIDs:  # removed
+                    rms.append(oldAssoc[associd])
+                if associd not in oldIDs:  # added
+                    adds.append(newAssoc[associd])
+            return (adds, rms)
+        return
 
     def misc_getMode(self):
         # DUMMY: not fully implemented
