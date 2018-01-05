@@ -101,65 +101,6 @@ meaning should be clear from context.
 +kernel time sync status ?+::
   For information only. See the codes in the +timex.h+ file.
 
-== Cryptographic Module ==
-
-=== LOG_ERR ===
-
-+cert_parse ?+::
-+cert_sign ?+::
-+crypto_cert ?+::
-+crypto_encrypt ?+::
-+crypto_gq ?+::
-+crypto_iff ?+::
-+crypto_key ?+::
-+crypto_mv ?+::
-+crypto_setup ?+::
-+make_keys ?+::
-  Usually fatal errors. These messages display error codes returned from
-  the OpenSSL library. See the OpenSSL documentation for explanation.
-
-+crypto_setup: certificate ? is trusted, but not self signed.+::
-+crypto_setup: certificate ? not for this host+::
-+crypto_setup: certificate file ? not found or corrupt+::
-+crypto_setup: host key file ? not found or corrupt+::
-+crypto_setup: host key is not RSA key type+::
-+crypto_setup: random seed file ? not found+::
-+crypto_setup: random seed file not specified+::
-  Fatal errors. These messages show problems during the initialization
-  procedure.
-
-=== LOG_INFO ===
-
-+cert_parse: expired ?+::
-+cert_parse: invalid issuer ?+::
-+cert_parse: invalid signature ?+::
-+cert_parse: invalid subject ?+::
-  There is a problem with a certificate. Operation cannot proceed until
-  the problem is fixed. If the certificate is local, it can be
-  regenerated using the ntpkeygen program. If it is held somewhere
-  else, it must be fixed by the holder.
-
-+crypto_?: defective key+::
-+crypto_?: invalid filestamp+::
-+crypto_?: missing challenge+::
-+crypto_?: scheme unavailable+::
-  There is a problem with the identity scheme. Operation cannot proceed
-  until the problem is fixed. Usually errors are due to
-  misconfiguration or an orphan association. If the latter, +ntpd+ will
-  usually time out and recover by itself.
-+crypto_cert: wrong PEM type ?+::
-  The certificate does not have MIME type +CERTIFICATE+. You are
-  probably using the wrong type from OpenSSL or an external certificate
-  authority.
-+crypto_ident: no compatible identity scheme found+::
-  Configuration error. The server and client identity schemes are
-  incompatible.
-+crypto_tai: kernel TAI update failed+::
-  The kernel does not support this function. You may need a new kernel
-  or patch.
-+crypto_tai: leapseconds file ? error ?+::
-  The leapseconds file is corrupt. Obtain the latest file from
-  +time.nist.gov+.
 
 '''''
 
