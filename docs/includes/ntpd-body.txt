@@ -547,10 +547,10 @@ On most systems, you can send SIGHUP to +ntpd+ with
   # sigkill -HUP ntpd
 -----
 
-If built with debugging enabled (waf configured without +--disable-debug+)
+If built with debugging enabled (waf configured with +--enable-debug+)
 SIGUSR1 will increase the debug level by 1 and
 SIGUSR2 will decrease it by 1.  This may be helpful if you are
-running without +-n+, either just to see the logging on your screen
+running with +-n+, either just to see the logging on your screen
 or with gdb.
 
 [[bugs]]
