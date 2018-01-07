@@ -662,21 +662,22 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                 addr = None  # how to handle?
                 ipv6 = None
             # Convert address string to octets
+            srcadr = []
             if ipv6 is False:
                 pieces = addr.split(".")
+                for piece in pieces:
+                    try:
+                        srcadr.append(int(piece))  # feed it a list of ints
+                    except ValueError:
+                        # Have gotten piece == "" before. Skip over that.
+                        # Still try to return data because it is potential
+                        # debugging information.
+                        continue
             elif ipv6 is True:
                 pieces = addr.split(":")
-            else:
-                pieces = []
-            srcadr = []
-            for x in pieces:
-                try:
-                    srcadr.append(int(x))
-                except ValueError:
-                    # Have gotten x == "" before. Skip over.
-                    # Still try to return data because it is potential
-                    # debugging information.
-                    pass
+                for piece in pieces:
+                    srcadr.append(ntp.util.hexstr2octets(piece))
+                srcadr = "".join(srcadr)  # feed it an octet string
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, srcadr)
         return self.dynamicCallbackSkeleton(handler)
 
