@@ -899,6 +899,18 @@ int main(int argc, char **argv) {
     else:
         ctx.define("BUILD_EPOCH", int(time.time()), comment="Using default")
 
+    # before write_config()
+    droproot_type = ""
+    if ctx.is_defined("HAVE_LINUX_CAPABILITY"):
+        droproot_type = "Linux"
+    elif ctx.is_defined("HAVE_SOLARIS_PRIVS"):
+        droproot_type = "Solaris"
+    elif ctx.is_defined("HAVE_SYS_CLOCKCTL_H"):
+        droproot_type = "NetBSD"
+    else:
+        droproot_type = "None"
+
+    # write_config() removes symbols
     ctx.start_msg("Writing configuration header:")
     ctx.write_config_header("config.h")
     ctx.end_msg("config.h", "PINK")
@@ -915,15 +927,6 @@ int main(int argc, char **argv) {
     msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
     msg_setting("LINKFLAGS_NTPD", " ".join(ctx.env.LINKFLAGS_NTPD))
     msg_setting("PREFIX", ctx.env.PREFIX)
-    droproot_type = ""
-    if ctx.is_defined("HAVE_LINUX_CAPABILITY"):
-        droproot_type = "Linux"
-    elif ctx.is_defined("HAVE_SOLARIS_PRIVS"):
-        droproot_type = "Solaris"
-    elif ctx.is_defined("HAVE_SYS_CLOCKCTL_H"):
-        droproot_type = "NetBSD"
-    else:
-        droproot_type = "None"
     msg_setting("Droproot Support", droproot_type)
     msg_setting("Debug Support", yesno(ctx.options.enable_debug))
     msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
