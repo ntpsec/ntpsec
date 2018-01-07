@@ -857,6 +857,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             control.sendNotify(vl)
 
     def doNotifyChangeAssociation(self, control, which):
+        # Add and remove are combined because they use the same data source
+        # and it would be easy to have them stepping on each other.
         changes = self.misc_getAssocListChanges()
         if changes is None:
             return
