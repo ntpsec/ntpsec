@@ -202,10 +202,10 @@ usually less than a few milliseconds.
 Reliable source authentication requires the use of symmetric key
 link:authopt.html[Authentication Options] page. In symmetric key
 cryptography servers and clients share session keys contained in a
-secret key file In public key cryptography, which requires the OpenSSL
-software library, the server has a private key, never shared, and a
-public key with unrestricted distribution. The cryptographic media
-required are produced by the link:ntpkeygen.html[+ntpkeygen+] program.
+secret key file. In public key cryptography, the server has a
+private key, never shared, and a public key with unrestricted
+distribution. Symmetric kays can be produced by
+the link:ntpkeygen.html[+ntpkeygen+] program.
 
 Problems with symmetric key authentication are usually due to mismatched
 keys or improper use of the +trustedkey+ command. A simple way to check

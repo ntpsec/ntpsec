@@ -78,10 +78,11 @@
   +nopeer+;;
     Deny packets which would result in mobilizing a new association.
     This includes symmetric active packets when a
-    configured association does not exist. It also includes _pool_
-    associations, so if you want to use servers from a +pool+ directive
-    and also want to use +nopeer+ by default, you'll want a +restrict
-    source ...+ line as well that does 'not' include the +nopeer+ directive.
+    configured association does not exist.  That used to happen
+    when the remote client used the +peer+ command in its config file.
+    We don't support that mode.
+    It used to include _pool_ servers but they now poke a hole in any
+    restrictions.
   +noserve+;;
     Deny all packets except {ntpqman} and queries.
   +notrust+;;

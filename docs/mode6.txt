@@ -512,9 +512,8 @@ The contents of the MAC trailer consists of:
 First, the password entered to use the signing key, then the request
 header fields, then the payload.
 
-The cryptographic hash is normally 16 octets of MD5 hash, but if ntpd
-is built with OpenSSL support it is possible to use and generate
-20-octet-long SHA1 keys as well.
+The cryptographic hash is 16 octets for MD5, and 20 octets
+for all other digest types.
 
 == Compatibility Notes ==
 

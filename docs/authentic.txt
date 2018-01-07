@@ -23,7 +23,6 @@ include::includes/authopt.txt[]
 * link:#algorithms[Algorithms]
 * link:#formats[Data Formats]
 //* link:#windows[Microsoft Windows Authentication]
-* link:#pub[Public Key Cryptography]
 
 '''''
 
@@ -32,32 +31,25 @@ include::includes/authopt.txt[]
 Authentication support allows the NTP client to verify that the server
 is in fact known and trusted and not an intruder intending
 accidentally or on purpose to masquerade as that server.  NTP performs
-authentication via the RSA Message Digest 5 (MD5) algorithm using a
-private key, commonly called keyed-MD5. Either algorithm computes a
-message digest, or one-way hash, which can be used to verify the
-server has the correct private key and key identifier.
+authentication via message digests. It computes a one-way hash, which
+verifies that the server has the correct private key and key identifier.
 
 A detailed discussion of the NTP multi-layer security model and
 vulnerability analysis is in the white paper
 {millshome}security.html[NTP Security Analysis].
 
 Authentication is configured separately for each association using the +key+
-subcommand on the +peer+, +server+, and +broadcast+
-configuration commands. The authentication options described below
-specify the locations of the key files, if other than default, which
-symmetric keys are trusted and the interval between various
-operations, if other than default.
+subcommand on the +server+ configuration commands. The authentication
+options described below specify the locations of the key files and
+which symmetric keys are trusted.
 
 Authentication is always enabled, although ineffective if not configured
 as described below. If a NTP packet arrives including a message
 authentication code (MAC), it is accepted only if it passes all
 cryptographic checks. The checks require correct key ID, key value and
-message digest. If the packet has been modified in any way or replayed
+message digest. If the packet has been modified in any way
 by an intruder, it will fail one or more of these checks and be
-discarded.
-
-The security model and protocol schemes for symmetric key
-are summarized below.
+discarded.  Authentication doesn't prevent replays.
 
 [[symm]]
 === Symmetric-Key Cryptography ===
@@ -66,7 +58,7 @@ NTP allows any one of possibly 65,534 keys, each distinguished by a
 32-bit key identifier, to authenticate an association. The servers and
 clients involved must agree on the key and key identifier to
 authenticate NTP packets. Keys and related information are specified
-in a key file, usually called _ntp.keys_, which must be distributed
+in a key file. More info in {ntpkeysman}. It must be distributed
 and stored using secure means beyond the scope of the NTP protocol
 itself. Besides the keys used for ordinary NTP associations,
 additional keys can be used as passwords for the {ntpqman} utility
@@ -74,53 +66,28 @@ program.
 
 When {ntpdman} is first started, it reads the key file specified
 in the keys configuration command and installs the keys in the key cache.
-However, individual keys must be activated with the trusted command before
+However, individual keys must be activated with the +trustedkey+ command before
 use. This allows, for instance, the installation of possibly several
 batches of keys and then activating or deactivating each batch remotely
 using {ntpqman}. This also provides a revocation capability
-that can be used if a key becomes compromised. The controlkey command
+that can be used if a key becomes compromised. The +controlkey+ command
 selects the key used as the password for the {ntpqman} utility.
 
 [[operation]]
 == Operation ==
 
-A specific combination of authentication scheme (none, symmetric key)
-and identity scheme is called a cryptotype, although not all
-combinations are compatible. There may be management configurations
-where the clients, servers and peers may not all support the same
-cryptotypes. A secure NTP subnet can be configured in many ways while
-keeping in mind the principles explained above and in this
-section. Note however that some cryptotype combinations may
-successfully interoperate with each other, but may not represent good
-security practice.
-
-The cryptotype of an association is determined at the time of
-mobilization, either at configuration time or some time later when a
-message of appropriate cryptotype arrives. When mobilized by a +server+
-or +peer+ configuration command and no +key+ subcommands
-are present, the association is not authenticated; if the +key+
-subcommand is present, the association is authenticated using the
-symmetric key ID specified.
-
-Following the principle that time is a public value, a server responds
-to any client packet that matches its cryptotype capabilities. Thus, a
-server receiving an unauthenticated packet will respond with an
+A server receiving an unauthenticated packet will respond with an
 unauthenticated packet, while the same server receiving a packet of a
 cryptotype it supports will respond with packets of that cryptotype.
-However, unconfigured broadcast or manycast client associations or
-symmetric passive associations will not be mobilized unless the server
-supports a cryptotype compatible with the first packet received. By
-default, unauthenticated associations will not be mobilized unless
-overridden in a decidedly dangerous way.
 
-Some examples may help to reduce confusion. Client Alice has no specific
-cryptotype selected. Server Bob has a symmetric key file.
+Some examples may help to reduce confusion. Client Alice has no
+keys fuke. Server Bob has a symmetric key file.
 Alice's unauthenticated messages arrive at Bob,
 who replies with unauthenticated messages. Cathy has a copy of Bob's
 symmetric key file and has selected key ID 4 in messages to Bob. Bob
 verifies the message with his key ID 4. If it's the same key and the
 message is verified, Bob sends Cathy a reply authenticated with that
-key. If verification fails, Bob sends Cathy a thing called a crypto-NAK,
+key. If verification fails, Bob sends Cathy a crypto-NAK,
 which tells her something broke. She can see the evidence using the
 {ntpqman} program.
 
@@ -129,37 +96,26 @@ the same time, as long as he has compatible authentication and identity
 credentials. Now, Bob can act just like the girls in his own choice of
 servers; he can run multiple configured associations with multiple
 different servers (or the same server, although that might not be
-useful). But, wise security policy might preclude some cryptotype
-combinations; for instance, running an identity scheme with one server
+useful). But, wise security policy might preclude some combinations;
+for instance, running authentication with one server
 and no authentication with another might not be wise.
 
 [[keys]]
 == Key Management ==
 
-The cryptographic values used for authentication are incorporated
-as a set of files generated by the {ntpkeygenman} utility
-program, including symmetric key and leapseconds files.
+Shared keys used for authentication are incorporated
+keys files generated by the {ntpkeygenman} utility
+program.
 
 [[algorithms]]
 == Algorithms ==
 
 The NTP standards include symmetric (private-key) authentication using
-the RSA Message Digest 5 (MD5) algorithm, commonly called
-keyed-MD5. This algorithm computes a message digest or one-way hash
+any message digest algorithm supported by the OpenSSL package
+This algorithm computes a message digest or one-way hash
 which can be used to verify the client has the same message digest as
 the server.
 
-All message digest algorithms included in the OpenSSL library may
-be used, including MD5 and SHA1. However, if conformance to FIPS 140-2
-is required, only a limited subset of these algorithms can be used.
-
-Note that according to US law, NTP binaries including OpenSSL library
-components, including the OpenSSL library itself, cannot be exported
-outside the US without a license from the US Department of Commerce.
-(However, these restrictions have been considerably relaxed since 1996.)
-Builders outside the US are advised to obtain the OpenSSL library
-directly from OpenSSL, which is outside the US, and build outside the
-US.
 
 Authentication is configured separately for each association using the
 +key+ option of the +server+ configuration command, as
@@ -208,17 +164,14 @@ ordinary text editor.
 Each line of the keys file consists of three fields: a key ID in the
 range 1 to 65,534, inclusive, a key type, and a message digest key
 consisting of a printable ASCII string less than 40 characters, or a
-40-character hex digit string. If the OpenSSL library is installed, the
-key type can be any message digest algorithm supported by the library.
-If the OpenSSL library is not installed, the only permitted key type is
-MD5.
+40-character hex digit string. The key type can be any message digest
+algorithm supported by the OpenSSL library.
 
 .Figure 1. Typical Symmetric Key File
 image:pic/sx5.gif["Typical Symmetric Key File",align="center"]
 
 
-Figure 1 shows a typical keys file used by the reference implementation
-when the OpenSSL library is installed. In this figure, for key IDs in he
+Figure 1 shows a typical keys file. In this figure, for key IDs in he
 range 1-10, the key is interpreted as a printable ASCII string. For key
 IDs in the range 11-20, the key is a 40-character hex digit string. The
 key is truncated or zero-filled internally to either 128 or 160 bits,
@@ -240,13 +193,21 @@ for the +ntpq+ utility.
 
 In addition to the above means, +ntpd+ supports Microsoft Windows
 MS-SNTP authentication using Active Directory services. This support was
-contributed by the Samba Team and is still in development. It is enabled
+contributed by the Samba Team and is still in development. It requires the
++--enable-mssntp+ option to +waf configure+.  At run time, it is enabled
 using the +mssntp+ flag of the +restrict+ command described on the
-link:accopt.html#restrict[Access Control Options] page. [red]#Note: Potential
+link:accopt.html#restrict[Access Control Options] page. *Note: Potential
 users should be aware that these services involve a TCP connection to
 another process that could potentially block, denying services to other
 users. Therefore, this flag should be used only for a dedicated server
-with no clients other than MS-SNTP.
+with no clients other than MS-SNTP.*
+
+
+== History ==
+
+Old versions of NTP supported Autokey. It is described in RFC 5906.
+It used key ids greater than 64K.
+
 
 '''''
 
