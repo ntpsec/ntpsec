@@ -152,12 +152,14 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 			keytype = NID_md5;
 		if (NID_undef == keytype) {
 			msyslog(LOG_ERR,
-			    "AUTH: authreadkeys: invalid type for key %u", keyno);
+			    "AUTH: authreadkeys: invalid type for key %u, %s",
+				keyno, token);
 			continue;
 		}
 		if (EVP_get_digestbynid(keytype) == NULL) {
 			msyslog(LOG_ERR,
-			    "AUTH: authreadkeys: no algorithm for key %u", keyno);
+			    "AUTH: authreadkeys: no algorithm for key %u, %s",
+				keyno, token);
 			continue;
 		}
 
