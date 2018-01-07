@@ -400,7 +400,9 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_statusActiveOffset(self, oid):
         # DisplayString
-        data = self.session.readvar(0, ["koffset"], raw=True)
+        data = self.safeReadvar(0, ["koffset"], raw=True)
+        if data is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
         data = ntp.util.unitifyvar(data["koffset"][1], "koffset",
                                    width=None, unitSpace=True)
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
@@ -412,7 +414,9 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_statusDispersion(self, oid):
         # DisplayString
-        data = self.session.readvar(0, ["rootdisp"], raw=True)
+        data = self.safeReadvar(0, ["rootdisp"], raw=True)
+        if data is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["rootdisp"][1])
 
     def cbr_statusEntityUptime(self, oid):
@@ -429,7 +433,9 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         #  That is the opposite of what the spec claims.
         #
         # I am abandoning the spec, and going with what makes a lick of sense
-        uptime = self.session.readvar(0, ["ss_reset"])["ss_reset"] * 100
+        uptime = self.safeReadvar(0, ["ss_reset"])["ss_reset"] * 100
+        if uptime is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
         return ax.Varbind(ax.VALUE_TIME_TICKS, oid, uptime)
 
     def cbr_statusDateTime(self, oid):
@@ -463,7 +469,9 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_statusLeapSecDirection(self, oid):
         # range of int32
-        leap = self.session.readvar(0, ["leap"])["leap"]
+        leap = self.safeReadvar(0, ["leap"])["leap"]
+        if leap is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
         if leap == 1:
             pass  # leap 1 == forward
         elif leap == 2:
@@ -485,7 +493,9 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                                                ax.VALUE_COUNTER32)
 
     def cbr_statusProtocolError(self, oid):
-        data = self.session.readvar(0, ["ss_badformat", "ss_badauth"])
+        data = self.safeReadvar(0, ["ss_badformat", "ss_badauth"])
+        if data is None:
+            return ax.Varbind(ax.VALUE_NULL, oid)
         protoerr = 0
         for key in data.keys():
             protoerr += data[key]
