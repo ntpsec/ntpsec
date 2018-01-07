@@ -804,6 +804,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                   ax.Varbind(ax.VALUE_INTEGER, ntpRootOID + (1, 2, 1),
                              newMode)]
             control.sendNotify(vl)
+            self.sentNotifications += 1
 
     def doNotifyStratumChange(self, control):
         oldStratum = self.oldValues.get("stratum")
@@ -829,6 +830,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                   ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
                              "Stratum changed")]  # Uh... what goes here?
             control.sendNotify(vl)
+            self.sentNotifications += 1
 
     def doNotifySyspeerChange(self, control):
         oldSyspeer = self.oldValues.get("syspeer")
@@ -855,6 +857,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                   ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
                              "SysPeer changed")]  # Uh... what goes here?
             control.sendNotify(vl)
+            self.sentNotifications += 1
 
     def doNotifyChangeAssociation(self, control, which):
         # Add and remove are combined because they use the same data source
@@ -882,6 +885,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                       ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
                                  "Association added")]  # Uh... what goes here?
                 control.sendNotify(vl)
+                self.sentNotifications += 1
         if which in ("rm", "both"):
             print("removing", rms)
             for name in rms:
@@ -895,12 +899,36 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                       ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
                                  "Association removed")]  # Uh... what goes here?
                 control.sendNotify(vl)
+                self.sentNotifications += 1
 
     def doNotifyConfigChange(self, control):
         pass  # DUMMY
 
     def doNotifyLeapSecondAnnounced(self, control):
-        pass  # DUMMY
+        oldLeap = self.oldValues["leap"]
+        newLeap = self.safeReadvar(0, ["leap"])["leap"]
+        if newLeap is None:
+            return
+        if oldLeap is None:
+            self.oldValues["leap"] = newLeap
+            return
+        if oldLeap != newLeap:
+            self.oldValues["leap"] = newLeap
+            if (oldLeap in (0, 3)) and (newLeap in (1, 2)):
+                # changed noleap or unsync to a leap announcement
+                datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+                if datetime is None:
+                    datetime = ""
+                else:
+                    datetime = ntp.util.deformatNTPTime(datetime)
+                vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
+                                 ax.OID(ntpRootOID + (0, 7))),
+                      ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 2, 9),
+                                 datetime),
+                      ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
+                                 "Leap second announced")]
+                control.sendNotify(vl)
+                self.sentNotifications += 1
 
     def doNotifyHeartbeat(self, control):  # TODO: check if ntpd running?
         vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
@@ -910,12 +938,13 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         if self.heartbeatInterval == 0:  # interval == 0 means send once
             self.notifyHeartbeat = False
             control.sendNotify(vl)
+            self.sentNotifications += 1
         else:
             current = ntp.util.monoclock()
             if (current - self.lastHeartbeat) > self.heartbeatInterval:
                 self.lastHeartbeat = current
                 control.sendNotify(vl)
-        self.sentNotifications += 1
+                self.sentNotifications += 1
 
     # =====================================
     # Misc data helpers (not part of the MIB proper)
