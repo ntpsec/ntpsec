@@ -658,7 +658,15 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                 pieces = addr.split(":")
             else:
                 pieces = []
-            srcadr = [int(x) for x in pieces]
+            srcadr = []
+            for x in pieces:
+                try:
+                    srcadr.append(int(x))
+                except ValueError:
+                    # Have gotten x == "" before. Skip over.
+                    # Still try to return data because it is potential
+                    # debugging information.
+                    pass
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, srcadr)
         return self.dynamicCallbackSkeleton(handler)
 
