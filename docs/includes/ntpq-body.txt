@@ -168,14 +168,13 @@ following.
 
 +keyid+ 'keyid'::
   This command specifies the key number to be used to authenticate
-  configuration requests. This must correspond to a key ID configured in
-  +ntp.conf+ for this purpose.
+  configuration requests. This must correspond to a key ID configured
+  with the +controlkey+ command in the server's +ntp.conf+
 
 +keytype+::
   Specify the digest algorithm to use for authenticated requests, with
-  default +MD5+. The digest can be
-  any message digest algorithm supported by the OpenSSL library. The current
-  selections are: +MD2+, +MD4+, +MD5+, +MDC2+, +RIPEMD160+ and +SHA1+.
+  default +MD5+. The keytype must match what the server is expecting
+  for the the specified key ID.
 
 +ntpversion 1 | 2 | 3 | 4+::
   Sets the NTP version number which +ntpq+ claims in packets. Defaults
@@ -184,8 +183,9 @@ following.
 
 +passwd+::
   This command prompts for a password to authenticate requests. The
-  password must correspond to the key ID configured in +ntp.conf+ for
-  this purpose.
+  password must match what the server is expecting.  Passwords longer
+  than 20 bytes are assumed to be hex encoding.
+FIXME: Actually fix the code.
 
 +quit+::
   Exit +ntpq+.

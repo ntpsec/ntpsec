@@ -512,8 +512,9 @@ The contents of the MAC trailer consists of:
 First, the password entered to use the signing key, then the request
 header fields, then the payload.
 
-The cryptographic hash is 16 octets for MD5, and 20 octets
-for all other digest types.
+The cryptographic hash is 16 octets for MD5 and 20 octets for SHA1.
+Longer digests don't work yet.  2018-Jan-06
+FIXME:  long digests
 
 == Compatibility Notes ==
 

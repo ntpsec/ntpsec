@@ -224,7 +224,7 @@ include::../includes/misc-options.txt[]
 `/etc/ntp.conf`::
   the default name of the configuration file
 `ntp.keys`::
-  private MD5 keys
+  private keys
 
 One of the following exit values will be returned:
 
