@@ -42,12 +42,12 @@ def gen_md5(id, groupname):
                     if r != ord('#'):
                         break
                 md5key += chr(r)
-            wp.write("%2d MD5 %s  # MD5 key\n" % (i, md5key))
+            wp.write("%2d MD5 %s\n" % (i, md5key))
         for i in range(1, MD5KEYS+1):
             sha1key = ""
             for j in range(MD5SIZE):
                 sha1key += "%02x" % randomizer.randint(0x00, 0xff)
-            wp.write("%2d SHA1 %s  # SHA1 key\n" % (i + MD5KEYS, sha1key))
+            wp.write("%2d SHA1 %s\n" % (i + MD5KEYS, sha1key))
 
 
 #
