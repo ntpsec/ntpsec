@@ -593,9 +593,16 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         elif action == "cleanup":
             pass
 
-    # =====================================
+    # ========================================================================
     # Dynamic tree generator callbacks
-    # =====================================
+    #
+    # The structure of these callbacks is somewhat complicated because they
+    # share code that is potentially finicky.
+    #
+    # The dynamicCallbackSkeleton() method handles the construction of the
+    # MIB tree, and the placement of the handler() within it. It also provides
+    # some useful data to the handler() via the readCallback() layer.
+    # ========================================================================
 
     def sub_assocID(self):
         def handler(oid, associd):
@@ -678,6 +685,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                 for piece in pieces:
                     srcadr.append(ntp.util.hexstr2octets(piece))
                 srcadr = "".join(srcadr)  # feed it an octet string
+            # The octet string encoder can handle either chars or 0-255
+            # ints. We use both of those options.
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, srcadr)
         return self.dynamicCallbackSkeleton(handler)
 
@@ -1035,7 +1044,10 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             return None
 
     def dynamicCallbackSkeleton(self, handler):
+        # Build a dynamic MIB tree, installing the provided handler in it
         def readCallback(oid):
+            # This function assumes that it is a leaf node and that the
+            # last number in the OID is the index.
             index = oid.subids[-1]  # if called properly this works (Ha!)
             associd = self.misc_getPeerIDs()[index]
             return handler(oid, associd)
@@ -1125,6 +1137,7 @@ class PacketControl:
                                       0, ax.REPERR_NOT_OPEN, 0)
                 self.sendPacket(resp, False)
                 continue
+            # TODO: Need to check for expected responses
             ptype = packet.pduType
             if ptype in self.pduHandlers:
                 self.pduHandlers[ptype](packet)
@@ -1252,7 +1265,7 @@ class PacketControl:
                 binds.append(reader(oid))
             # There should also be a situation that leads to noSuchInstance
             #  but I do not understand the requirements for that
-        # Need to implement genError
+        # TODO: Need to implement genError
         resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
                               packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
         self.sendPacket(resp, False)
@@ -1266,7 +1279,7 @@ class PacketControl:
             else:
                 oid, reader, _ = oids[0]
                 binds.append(reader(oid))
-        # Need to implement genError
+        # TODO: Need to implement genError
         resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
                               packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
         self.sendPacket(resp, False)
@@ -1295,7 +1308,7 @@ class PacketControl:
                               packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
         self.sendPacket(resp, False)
 
-    def handle_TestSetPDU(self, packet):  # WIP
+    def handle_TestSetPDU(self, packet):  # WIP / TODO
         # Be advised: MOST OF THE VALIDATION IS DUMMY CODE OR DOESN'T EXIST
         # According to the RFC this is one of the most demanding parts and
         #  *has* to be gotten right
