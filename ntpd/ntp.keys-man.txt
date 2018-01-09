@@ -32,7 +32,7 @@ The file does not need to be sorted by `keyno`.
 `type` can be any digest type supported by your OpenSSL package.
 You can probably get a list from `man 1 dgst` or `openssl help`.
 (As of Jan 2018, they lie.  Be sure to try it.  {ntpdman} will
-print an error on startup if a slected type isn't supported.)
+print an error on startup if a selected type isn't supported.)
 
 The following types are widely supported:
 -----

@@ -1114,7 +1114,7 @@ class PacketControl:
             self._doloop()
 
     def _doloop(self):
-        # loop body split out to seperate the one-shot/run-forever switches
+        # loop body split out to separate the one-shot/run-forever switches
         # from the actual logic
         self.packetEater()
         while len(self.recievedPackets) > 0:
@@ -1333,7 +1333,7 @@ class PacketControl:
                                   packet.packetID, 0, error, bindIndex)
             self.sendPacket(resp, False)
             for i in range(bindIndex):
-                # Errored out, clear the sucessful ones
+                # Errored out, clear the successful ones
                 self.database.setHandlers[i]("clear",
                                              self.database.setVarbinds[i])
             self.database.inSetP = False
