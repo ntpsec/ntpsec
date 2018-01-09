@@ -543,6 +543,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_entNotifMessage(self, oid):  # DUMMY
         # utf8str
+        # Should probably either return null, or remove this handler.
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, "jabber")
 
     #########################
@@ -911,8 +912,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                 control.sendNotify(vl)
                 self.sentNotifications += 1
 
-    def doNotifyConfigChange(self, control):
-        pass  # DUMMY
+    def doNotifyConfigChange(self, control):  # DUMMY
+        pass
 
     def doNotifyLeapSecondAnnounced(self, control):
         oldLeap = self.oldValues["leap"]
@@ -992,8 +993,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             return (adds, rms)
         return
 
-    def misc_getMode(self):
-        # DUMMY: not fully implemented
+    def misc_getMode(self):  # DUMMY: not fully implemented
         try:
             # Don't care about the data, this is a ploy to the the rstatus
             self.session.readvar(0, ["stratum"])
