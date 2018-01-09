@@ -1,5 +1,8 @@
 = ntp.conf(5) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntp.conf - Network Time Protocol (NTP) daemon configuration file format

@@ -1,5 +1,8 @@
 = ntpleapfetch(8) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME == 
 ntpleapfetch - leap-seconds file manager/updater

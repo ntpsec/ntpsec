@@ -1,5 +1,8 @@
 = ntpwait(8) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntpwait - wait for ntpd to stabilize the system clock

@@ -1,5 +1,8 @@
 = ntpdig(1) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntpdig - standard Simple Network Time Protocol client program

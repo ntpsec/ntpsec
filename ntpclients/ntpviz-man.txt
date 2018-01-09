@@ -1,5 +1,8 @@
 = ntpviz(1) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntpviz - make visualizations of offset, jitter, etc. from stats file data

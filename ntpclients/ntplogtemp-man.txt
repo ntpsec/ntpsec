@@ -1,5 +1,8 @@
 = ntplogtemp(1) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntplogtemp - log temperature data

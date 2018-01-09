@@ -1,5 +1,8 @@
 = ntptrace(1) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntptrace - trace peers of an NTP server

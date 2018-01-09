@@ -1,5 +1,8 @@
 = ntpkeygen(8) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntpkeygen - create and manage NTP host keys

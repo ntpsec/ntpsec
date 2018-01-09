@@ -1,5 +1,8 @@
 = ntpd(8) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntpd - Network Time Protocol service daemon

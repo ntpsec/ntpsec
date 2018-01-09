@@ -1,5 +1,8 @@
 = ntpsweep(1) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntpsweep - print various information about given NTP servers

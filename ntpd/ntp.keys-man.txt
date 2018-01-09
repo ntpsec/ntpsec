@@ -1,5 +1,8 @@
 = ntp.keys(5) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntp.keys - NTP symmetric key file format

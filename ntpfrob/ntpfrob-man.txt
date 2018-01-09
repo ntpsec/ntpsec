@@ -1,5 +1,8 @@
 = ntpfrob(8) =
 :doctype: manpage
+:man source: NTPsec
+:man version: @NTPSEC_VERSION@
+:man manual: NTPsec
 
 == NAME ==
 ntpfrob - frob the clock hardware
