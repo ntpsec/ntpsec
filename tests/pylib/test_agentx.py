@@ -71,14 +71,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
     # PDU tests
     #
     def test_AgentXPDU(self):
+        cls = ntp.agentx.AgentXPDU
         # Test these so we don't need a bunch of redundant tests
         # Test basic, without context
-        test = ntp.agentx.AgentXPDU(0, True, 1, 2, 3, context=extraData)
+        test = cls(0, True, 1, 2, 3, context=extraData)
         self.assertEqual(repr(test),
                          "AgentXPDU(bigEndian=True, packetID=3, "
                          "pduType=0, sessionID=1, transactionID=2)")
         # Test basic, with context
-        test = ntp.agentx.AgentXPDU(0, True, 1, 2, 3, hascontext=True)
+        test = cls(0, True, 1, 2, 3, hascontext=True)
         self.assertEqual(repr(test),
                          "AgentXPDU(bigEndian=True, context=None, packetID=3, "
                          "pduType=0, sessionID=1, transactionID=2)")
@@ -91,6 +92,39 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          "context='jabber jabber jabber', "
                          "foo=42, packetID=3, "
                          "pduType=0, sessionID=1, transactionID=2)")
+        # Test __eq__
+        a = cls(0, True, 1, 2, 3)
+        b = cls(0, True, 1, 2, 3)
+        # Test all equal
+        self.assertEqual(a == b, True)
+        # Test same class, false
+        b = "blah blah"
+        self.assertEqual(a == b, False)
+        # Test different pdu
+        b = cls(1, True, 1, 2, 3)
+        self.assertEqual(a == b, False)
+        # Test different endianess
+        b = cls(0, False, 1, 2, 3)
+        self.assertEqual(a == b, False)
+        # Test different session ID
+        b = cls(0, True, 42, 2, 3)
+        self.assertEqual(a == b, False)
+        # Test different transaction ID
+        b = cls(0, True, 1, 23, 3)
+        self.assertEqual(a == b, False)
+        # Test different packet ID
+        b = cls(0, True, 1, 2, 13)
+        self.assertEqual(a == b, False)
+        # Test different _hascontext
+        b = cls(0, True, 1, 2, 3, hascontext=True)
+        self.assertEqual(a == b, False)
+        # Test with context, equal
+        a = cls(0, True, 1, 2, 3, True, "foo")
+        b = cls(0, True, 1, 2, 3, True, "foo")
+        self.assertEqual(a == b, True)
+        # Test with context, not equal
+        b = cls(0, True, 1, 2, 3, True, "bar")
+        self.assertEqual(a == b, False)
 
     def test_OpenPDU(self):
         dec = ntp.agentx.decode_OpenPDU
@@ -310,6 +344,13 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "rangeSubid": 0,
                           "upperBound": None,
                           "context": None})
+        # Test __eq__ gap, equal
+        a = cls(True, 1, 2, 3, 4, 5, ())
+        b = cls(True, 1, 2, 3, 4, 5, ())
+        self.assertEqual(a == b, True)
+        # Test __eq__ gap, unequal
+        b = cls(False, 1, 2, 3, 4, 5, ())
+        self.assertEqual(a == b, False)
 
     def test_UnregisterPDU(self):
         dec = ntp.agentx.decode_xRegisterPDU
@@ -1718,6 +1759,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test >=
         self.assertEqual(target((1, 2, 3)) >= target((1, 2)), True)
         self.assertEqual(target((1, 2, 3)) >= target((1, 2, 3)), True)
+        # Test insane subids type
+        try:
+            errored = target("foo")
+        except TypeError:
+            errored = True
+        self.assertEqual(errored, True)
+        # Test isNull
+        self.assertEqual(target((1, 2)).isNull(), False)
+        self.assertEqual(target(()).isNull(), True)
 
     def test_searchrange(self):
         target = ntp.agentx.SearchRange
@@ -1806,6 +1856,31 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              b"\x07\x00\x00\x00\x08\x00\x00\x00",
                              lilEndianFlags),
                          (target((1, 2, 3, 4), (5, 6, 7, 8), True), b""))
+        # Test __eq__
+        # Test equal
+        a = target((1, 2, 3), (1, 2, 3))
+        b = target((1, 2, 3), (1, 2, 3))
+        self.assertEqual(a == b, True)
+        # Test start unequal
+        b = target((1, 2, 3), (1, 2, 3), True)
+        self.assertEqual(a == b, False)
+        # Test end unequal
+        b = target((1, 2, 3), (1, 2, 3, 4))
+        self.assertEqual(a == b, False)
+        # Test __ne__
+        # Test equal
+        a = target((1, 2, 3), (1, 2, 3))
+        b = target((1, 2, 3), (1, 2, 3))
+        self.assertEqual(a != b, False)
+        # Test start unequal
+        b = target((1, 2, 3), (1, 2, 3), True)
+        self.assertEqual(a != b, True)
+        # Test end unequal
+        b = target((1, 2, 3), (1, 2, 3, 4))
+        self.assertEqual(a != b, True)
+        # Test __repr__
+        self.assertEqual(repr(target((1, 2), (1, 3))),
+                         "SearchRange(OID((1, 2), False), OID((1, 3), False))")
 
     def test_encode_searchrange_list(self):
         enc = ntp.agentx.encode_searchrange_list
@@ -1855,9 +1930,10 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          (srch((1, 2), (1, 2), True),
                           srch((2, 3), (3, 4), False)))
 
-    def test_encode_octetstr(self):
+    def test_xcode_octetstr(self):
         enc = ntp.agentx.encode_octetstr
         dec = ntp.agentx.decode_octetstr
+        san = ntp.agentx.sanity_octetstr
 
         # Encode empty
         self.assertEqual(enc(True, ()), b"\x00\x00\x00\x00")
@@ -1885,6 +1961,43 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                              b"blarg\x00\x00\x00" + extraData,
                              standardFlags),
                          ("blarg", extraData))
+        # Test sanity
+        # Test str
+        try:
+            errored = san("foo")  # str is always sane
+        except Exception as e:
+            errored = e
+        self.assertEqual(errored, None)
+        # Test sane list
+        try:
+            errored = san([1, 2, 3])
+        except Exception as e:
+            errored = e
+        self.assertEqual(errored, None)
+        # Test sane tuple
+        try:
+            errored = san((1, 2, 3))
+        except Exception as e:
+            errored = e
+        self.assertEqual(errored, None)
+        # Test insane list
+        try:
+            errored = san([23, 300, 42])
+        except ValueError:
+            errored = True
+        self.assertEqual(errored, True)
+        # Test insane tuple
+        try:
+            errored = san((23, 300, 42))
+        except ValueError:
+            errored = True
+        self.assertEqual(errored, True)
+        # Test insane type
+        try:
+            errored = san(42.23)
+        except TypeError:
+            errored = True
+        self.assertEqual(errored, True)
 
     def test_Varbind(self):
         target = ntp.agentx.Varbind

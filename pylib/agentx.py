@@ -188,8 +188,11 @@ class AgentXPDU:
             return False
         if self.packetID != other.packetID:
             return False
-        if self.context != other.context:
+        if self._hascontext != other._hascontext:
             return False
+        if self._hascontext is True:
+            if self.context != other.context:
+                return False
         return True
 
     def __ne__(self, other):
@@ -313,7 +316,7 @@ class RegisterPDU(AgentXPDU):
     def __eq__(self, other):
         if AgentXPDU.__eq__(self, other) is not True:
             return False
-        if hasattr(self, "timeout"):
+        if hasattr(self, "timeout"):  # Relevant to UnregisterPDU subclass
             if self.timeout != other.timeout:
                 return False
         if self.priority != other.priority:
@@ -1122,9 +1125,7 @@ class SearchRange:
         return not self.__eq__(other)
 
     def __repr__(self):
-        r = "SearchRange("
-        r += repr(self.start) + ", "
-        r += repr(self.end) + ")"
+        r = "SearchRange(%s, %s)" % (repr(self.start), repr(self.end))
         return r
 
     def sanity(self):
