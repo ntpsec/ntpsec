@@ -1187,15 +1187,6 @@ class PacketControl:
             try:
                 pkt, extraData = ntp.agentx.decode_packet(self.recievedData)
                 self.recievedData = extraData
-                if (self.sessionID is not None) and \
-                   (pkt.sessionID != self.sessionID):
-                    # sessionID does not match
-                    header = {"session_id": pkt.sessionID,
-                              "transaction_id": pkt.transactionID,
-                              "packet_id": pkt.packetID,
-                              "flags": {"bigEndian": pkt.bigEndian}}
-                    self.sendErrorResponse(header, ax.RSPERR_NOT_OPEN, 0)
-                    continue
                 self.recievedPackets.append(pkt)
                 dolog("\npacketEater got a full packet: %s\n" % repr(pkt), 3)
             except ax.ParseDataLengthError:
