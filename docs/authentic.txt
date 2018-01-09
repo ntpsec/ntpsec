@@ -81,7 +81,7 @@ unauthenticated packet, while the same server receiving a packet of a
 cryptotype it supports will respond with packets of that cryptotype.
 
 Some examples may help to reduce confusion. Client Alice has no
-keys fuke. Server Bob has a symmetric key file.
+keys file. Server Bob has a symmetric key file.
 Alice's unauthenticated messages arrive at Bob,
 who replies with unauthenticated messages. Cathy has a copy of Bob's
 symmetric key file and has selected key ID 4 in messages to Bob. Bob
