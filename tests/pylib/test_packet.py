@@ -488,11 +488,19 @@ class TestSyncPacket(unittest.TestCase):
         cls.origin_timestamp = self.target.posix_to_ntp(1)
         cls.receive_timestamp = self.target.posix_to_ntp(2)
         cls.transmit_timestamp = self.target.posix_to_ntp(3)
+        # Test without extensions
         self.assertEqual(cls.__repr__(),
                          "<NTP:unsync:4:3:0.000000:0.000000:0.0.0.0:"
                          "1970-01-01T00:00:00Z:1970-01-01T00:00:01Z:"
                          "1970-01-01T00:00:02Z:1970-01-01T00:00:03Z>")
-
+        # Test with extensions
+        cls.extfields = "foobar"
+        cls.mac = "machinations"
+        self.assertEqual(cls.__repr__(),
+                         "<NTP:unsync:4:3:0.000000:0.000000:0.0.0.0:"
+                         "1970-01-01T00:00:00Z:1970-01-01T00:00:01Z:"
+                         "1970-01-01T00:00:02Z:1970-01-01T00:00:03Z:"
+                         "'foobar':machinations>")
 
 class TestMisc(unittest.TestCase):
     def test_Peer(self):
@@ -770,7 +778,7 @@ class TestControlSession(unittest.TestCase):
             cls.logfp = logjig
             # Test first type
             fakesockmod.gai_returns = [42]
-            result = cls._ControlSession__lookuphost("blah.com", "family")
+            result = cls._ControlSession__lookuphost("[blah.com]", "family")
             self.assertEqual(result, 42)
             self.assertEqual(fakesockmod.gai_calls,
                              [("blah.com", "ntp", cls.ai_family,
@@ -1063,6 +1071,20 @@ class TestControlSession(unittest.TestCase):
             sockjig.return_data = [
                 "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
                 "foo=4223,\x00\x00\x00",
+                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "blah=248,x=23,\x00\x00",
+                "\x0E\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
+                "quux=1\x00\x00"]
+            cls.sequence = 1
+            cls.getresponse(1, 3, True)
+            self.assertEqual(cls.response,
+                             polybytes("foo=4223,blah=248,x=23,quux=1"))
+            # Test with data, duplicate packet
+            sockjig.return_data = [
+                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
+                "foo=4223,\x00\x00\x00",
+                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "blah=248,x=23,\x00\x00",
                 "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
                 "blah=248,x=23,\x00\x00",
                 "\x0E\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
@@ -1571,18 +1593,24 @@ class TestControlSession(unittest.TestCase):
         nonce_fetch_count = [0]
         query_results = qrm[:]
         queries = []
-        result = cls.mrulist(variables={"sort": "addr", "frags": 24})
+        result = cls.mrulist(variables={"sort": "addr",
+                                        "frags": 24,
+                                        "resall":5})
         self.assertEqual(nonce_fetch_count, [4])
+        print(repr(queries))
         self.assertEqual(queries,
-                         [(10, 0, "nonce=foo, frags=24", False),
+                         [(10, 0, "nonce=foo, frags=24, resall=0x5", False),
                           (10, 0,
-                           "nonce=foo, frags=25, addr.0=1.2.3.4:23, last.0=40",
+                           "nonce=foo, frags=25, resall=0x5, "
+                           "addr.0=1.2.3.4:23, last.0=40",
                            False),
                           (10, 0,
-                           "nonce=foo, frags=26, addr.0=1.2.3.4:23, "
-                           "last.0=41, addr.1=1.2.3.4:23, last.1=40", False),
+                           "nonce=foo, frags=26, resall=0x5, "
+                           "addr.0=1.2.3.4:23, last.0=41, addr.1=1.2.3.4:23, "
+                           "last.1=40", False),
                           (10, 0,
-                           "nonce=foo, frags=27, addr.0=10.20.30.40:23, "
+                           "nonce=foo, frags=27, resall=0x5, "
+                           "addr.0=10.20.30.40:23, "
                            "last.0=42, addr.1=1.2.3.4:23, last.1=41, "
                            "addr.2=1.2.3.4:23, last.2=40", False)])
         self.assertEqual(isinstance(result, ntpp.MRUList), True)

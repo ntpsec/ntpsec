@@ -220,7 +220,8 @@ import ntp.util
 
 master_encoding = 'latin-1'
 
-if str is bytes:  # Python 2
+if str is bytes:  # pragma: no cover
+    # Python 2
     polystr = str
     polybytes = bytes
     polyord = ord
@@ -233,7 +234,8 @@ if str is bytes:  # Python 2
     def make_wrapper(fp):
         return fp
 
-else:  # Python 3
+else:  # pragma: nocover
+    # Python 3
     import io
 
     def polystr(o):
@@ -359,8 +361,7 @@ class Packet:
         return self.li_vn_mode & 0x7
 
 
-class SyncException(BaseException):
-
+class SyncException(BaseException):  # pragma: no cover
     def __init__(self, message, errorcode=0):
         self.message = message
         self.errorcode = errorcode
@@ -854,7 +855,7 @@ class ControlSession:
                         if self.logfp is not None:
                             self.logfp.write("ntpq: ndp lookup failed, %s\n"
                                              % e2.strerror)
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 if self.logfp is not None:
                     self.logfp.write(
                         "ntpq: API error, missing socket attributes\n")
@@ -911,7 +912,7 @@ class ControlSession:
                     key_id = 0
                 if key_id == 0 or key_id > MAX_KEYID:
                     raise ControlException(SERR_BADKEY)
-            except (SyntaxError, ValueError):
+            except (SyntaxError, ValueError):  # pragma: no cover
                 raise ControlException(SERR_BADKEY)
             self.keyid = key_id
 
@@ -938,7 +939,7 @@ class ControlSession:
             if self.logfp is not None:
                 self.logfp.write("Write to %s failed\n" % self.hostname)
             return -1
-        if (self.debug >= 5) and (self.logfp is not None):
+        if (self.debug >= 5) and (self.logfp is not None):  # pragma: no cover
             # special, not replacing with dolog()
             self.logfp.write("Request packet:\n")
             dump_hex_printable(xdata, self.logfp)
@@ -1047,7 +1048,8 @@ class ControlSession:
                     if timeo:
                         raise ControlException(SERR_TIMEOUT)
                 if timeo:
-                    if (self.debug >= 1) and (self.logfp is not None):
+                    if (self.debug >= 1) and \
+                       (self.logfp is not None):  # pragma: no cover
                         # special, not replacing with dolog()
                         self.logfp.write(
                             "ERR_INCOMPLETE: Received fragments:\n")
@@ -1060,7 +1062,7 @@ class ControlSession:
             warndbg("At %s, socket read begins\n" % time.asctime(), 4)
             try:
                 rawdata = polybytes(self.sock.recv(4096))
-            except socket.error:
+            except socket.error:  # pragma: no cover
                 # usually, errno 111: connection refused
                 raise ControlException(SERR_SOCKET)
 
@@ -1073,7 +1075,7 @@ class ControlSession:
 
             # Validate that packet header is sane, and the correct type
             valid = self.__validate_packet(rpkt, rawdata, opcode, associd)
-            if valid is False:
+            if valid is False:  # pragma: no cover
                 continue
 
             # Someday, perhaps, check authentication here
@@ -1085,7 +1087,9 @@ class ControlSession:
                 warn("Received count of 0 in non-final fragment\n")
                 continue
 
-            if seenlastfrag and rpkt.more():
+            if seenlastfrag and rpkt.more():  # pragma: no cover
+                # I'n not sure this can be triggered without hitting another
+                # error first.
                 warn("Received second last fragment\n")
                 continue
 
@@ -1144,13 +1148,14 @@ class ControlSession:
                     warndbg("Fragment collection ends. %d bytes "
                             " in %d fragments\n"
                             % (len(self.response), len(fragments)), 1)
-                    if self.debug >= 5:  # special, not replacing with dolog()
+                    # special loggers, not replacing with dolog()
+                    if self.debug >= 5:  # pragma: no cover
                         warn("Response packet:\n")
                         dump_hex_printable(self.response, self.logfp)
-                    elif self.debug >= 3:
+                    elif self.debug >= 3:  # pragma: no cover
                         # FIXME: Garbage when retrieving assoc list (binary)
                         warn("Response packet:\n%s\n" % repr(self.response))
-                    elif self.debug >= 2:
+                    elif self.debug >= 2:  # pragma: no cover
                         # FIXME: Garbage when retrieving assoc list (binary)
                         eol = self.response.find("\n")
                         firstline = self.response[:eol]
@@ -1591,7 +1596,7 @@ This combats source address spoofing
                         req_buf += incr
                 if direct is not None:
                     span.entries = []
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # pragma: no cover
             pass        # We can test for interruption with is_complete()
 
         # C ntpq's code for stitching together spans was absurdly
