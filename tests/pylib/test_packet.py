@@ -1597,7 +1597,6 @@ class TestControlSession(unittest.TestCase):
                                         "frags": 24,
                                         "resall":5})
         self.assertEqual(nonce_fetch_count, [4])
-        print(repr(queries))
         self.assertEqual(queries,
                          [(10, 0, "nonce=foo, frags=24, resall=0x5", False),
                           (10, 0,
