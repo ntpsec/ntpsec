@@ -9,7 +9,8 @@ from ntp.util import slicedata
 
 master_encoding = 'latin-1'
 
-if str is bytes:  # Python 2
+if str is bytes:  # pragma: no cover
+    # Python 2
     polystr = str
     polybytes = bytes
     polyord = ord
@@ -19,7 +20,8 @@ if str is bytes:  # Python 2
     def string_escape(s):
         return s.decode('string_escape')
 
-else:  # Python 3
+else:  # pragma: no cover
+    # Python 3
     import io
 
     def polystr(o):
