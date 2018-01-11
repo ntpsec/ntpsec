@@ -131,10 +131,17 @@ class TestNTPStats(unittest.TestCase):
         faketimemod = jigs.TimeModuleJig()
         fakeosmod = jigs.OSModuleJig()
         fakeglobmod = jigs.GlobModuleJig()
+        load_args = []
+        load_returns = []
+        def loadjig(self, statsdir, stem):
+            load_args.append((statsdir, stem))
+            return load_returns.pop(0)
+        process_args = []
+        def processjig(self, stem, lines):
+            process_args.append((stem, lines))
+            return [stem + " " + line for line in lines]
         try:
             # Splice in jigs
-            gziptemp = ntp.statfiles.gzip
-            ntp.statfiles.gzip = fakegzipmod
             socktemp = ntp.statfiles.socket
             ntp.statfiles.socket = fakesockmod
             errtemp = sys.stderr
@@ -143,52 +150,17 @@ class TestNTPStats(unittest.TestCase):
             ntp.statfiles.time = faketimemod
             ostemp = ntp.statfiles.os
             ntp.statfiles.os = fakeosmod
-            globtemp = ntp.statfiles.glob
-            ntp.statfiles.glob = fakeglobmod
-            opentemp = open
-            ntp.statfiles.open = self.open_jig
+            stemtemp = self.target._NTPStats__load_stem
+            self.target._NTPStats__load_stem = loadjig
+            processtemp = self.target._NTPStats__process_stem
+            self.target._NTPStats__process_stem = processjig
             # Test simplest
             TDP = self.target.DefaultPeriod
             faketimemod.time_returns = [TDP * 2]
             fakeosmod.path.isdir_returns = [True]
-            fakeosmod.path.getmtime_returns = [TDP+1, TDP+2, TDP+3, TDP+4,
-                                               TDP+5, TDP+6, TDP+7, TDP+8,
-                                               TDP+9, TDP+10, TDP+11, TDP-1]
-            self.open_returns = [jigs.FileJig(["40594 10\n", "40594 11"]),
-                                 jigs.FileJig(["40594 31\n",
-                                               "50594 -12\n",
-                                               "40594 30\n"]),
-                                 jigs.FileJig(["40594 40\n", "40594 41"]),
-                                 jigs.FileJig(["40594 50\n", "40594 51"]),
-                                 jigs.FileJig(["40594 60\n", "40594 61"]),
-                                 jigs.FileJig(["40594 70\n", "40594 71"]),
-                                 jigs.FileJig(["40594 80\n", "40594 81"]),
-                                 jigs.FileJig(["604801.25 40594 90\n",
-                                               "#blah",
-                                               "604802.25 40594 91"]),
-                                 jigs.FileJig(["604803.25 40594 100\n",
-                                               "#blah",
-                                               "604804.25 40594 101"]),
-                                 jigs.FileJig(["604805.25 40594 110\n",
-                                               "#blah",
-                                               "604806.25 40594 111"]),
-                                 jigs.FileJig(["604807.25 40594 120\n",
-                                               "#blah",
-                                               "604808.25 40594 121"])]
-            fakegzipmod.files_returned = [jigs.FileJig(["40594 20\n",
-                                                        "40594 21"])]
-            fakeglobmod.glob_returns = [("/foo/bar/clockstats.0",
-                                         "/foo/bar/clockstats.1gz"),
-                                        ("/foo/bar/peerstats.0",
-                                         "/foo/bar/peerstats.1"),
-                                        ("/foo/bar/loopstats.0",
-                                         "/foo/bar/loopstats.1"),
-                                        ("/foo/bar/rawstats.0",
-                                         "/foo/bar/rawstats.1"),
-                                        ("/foo/bar/temps0",
-                                         "/foo/bar/temps1"),
-                                        ("/foo/bar/gpsd0",
-                                         "/foo/bar/gpsd1")]  # time kicked
+            load_returns = [["clock0", "clock1"], ["peer0", "peer1"],
+                            ["loop0", "loop1"], ["raw0", "raw1"],
+                            ["temp0", "temp1"], ["gpsd0", "gpsd1"]]
             cls = self.target("/foo/bar")
             self.assertEqual(cls.endtime, TDP * 2)
             self.assertEqual(cls.starttime, TDP)
@@ -196,49 +168,62 @@ class TestNTPStats(unittest.TestCase):
             self.assertEqual(cls.sitename, "bar")
             self.assertEqual(logjig.data, [])
             self.assertEqual(cls.clockstats,
-                             [[604810000, '604810.0'],
-                              [604811000, '604811.0'],
-                              [604820000, '604820.0'],
-                              [604821000, '604821.0']])
+                             ["clockstats clock0", "clockstats clock1"])
             self.assertEqual(cls.peerstats,
-                             [[604830000, '604830.0'],
-                              [604831000, '604831.0'],
-                              [604840000, '604840.0'],
-                              [604841000, '604841.0']])
+                             ["peerstats peer0", "peerstats peer1"])
             self.assertEqual(cls.loopstats,
-                             [[604850000, '604850.0'],
-                              [604851000, '604851.0'],
-                              [604860000, '604860.0'],
-                              [604861000, '604861.0']])
+                             ["loopstats loop0", "loopstats loop1"])
             self.assertEqual(cls.rawstats,
-                             [[604870000, '604870.0'],
-                              [604871000, '604871.0'],
-                              [604880000, '604880.0'],
-                              [604881000, '604881.0']])
+                             ["rawstats raw0", "rawstats raw1"])
             self.assertEqual(cls.temps,
-                             [[604801250, '604801.25', '40594', '90'],
-                              [604802250, '604802.25', '40594', '91'],
-                              [604803250, '604803.25', '40594', '100'],
-                              [604804250, '604804.25', '40594', '101']])
+                             ["temps temp0", "temps temp1"])
             self.assertEqual(cls.gpsd,
-                             [[604805250, '604805.25', '40594', '110'],
-                              [604806250, '604806.25', '40594', '111']])
+                             ["gpsd gpsd0", "gpsd gpsd1"])
             # Test all arguments
             faketimemod.time_returns = [TDP * 2]
             fakesockmod.fqdn_returns = ["jabber"]
             fakeosmod.path.isdir_returns = [True]
-            self.open_returns = [None]
-            fakeglobmod.glob_returns = [(["/foo/bar/clockstats.0"]),
-                                        ([]), ([]), ([]), ([]), ([])]
-            fakeosmod.path.getmtime_returns = [101, 102, 103, 104, 105, 106]
-            cls = self.target("/foo/bar", "Sitename", 100, 50, 150)
+            load_returns = [[], [], [], [], [], []]
+            cls = self.target("/foo/bar", "Sitename", 200, 50, 150)
+            self.assertEqual(cls.endtime, 150)
+            self.assertEqual(cls.starttime, 50)
+            self.assertEqual(cls.period, 200)
+            self.assertEqual(cls.sitename, "Sitename")
+            self.assertEqual(logjig.data, [])
+            self.assertEqual(cls.clockstats, [])
+            self.assertEqual(cls.peerstats, [])
+            self.assertEqual(cls.loopstats, [])
+            self.assertEqual(cls.rawstats, [])
+            self.assertEqual(cls.temps, [])
+            self.assertEqual(cls.gpsd, [])
+            # Test endtime, but no starttime
+            faketimemod.time_returns = [TDP * 2]
+            fakesockmod.fqdn_returns = ["jabber"]
+            fakeosmod.path.isdir_returns = [True]
+            load_returns = [[], [], [], [], [], []]
+            cls = self.target("/foo/bar", "Sitename", 100, endtime=150)
             self.assertEqual(cls.endtime, 150)
             self.assertEqual(cls.starttime, 50)
             self.assertEqual(cls.period, 100)
             self.assertEqual(cls.sitename, "Sitename")
-            self.assertEqual(logjig.data,
-                             ["ntpviz: WARNING: could not read "
-                              "/foo/bar/clockstats.0\n"])
+            self.assertEqual(logjig.data, [])
+            self.assertEqual(cls.clockstats, [])
+            self.assertEqual(cls.peerstats, [])
+            self.assertEqual(cls.loopstats, [])
+            self.assertEqual(cls.rawstats, [])
+            self.assertEqual(cls.temps, [])
+            self.assertEqual(cls.gpsd, [])
+            # Test endtime, but no starttime
+            faketimemod.time_returns = [TDP * 2]
+            fakesockmod.fqdn_returns = ["jabber"]
+            fakeosmod.path.isdir_returns = [True]
+            load_returns = [[], [], [], [], [], []]
+            cls = self.target("/foo/bar", "Sitename", 100, starttime=150)
+            self.assertEqual(cls.endtime, 250)
+            self.assertEqual(cls.starttime, 150)
+            self.assertEqual(cls.period, 100)
+            self.assertEqual(cls.sitename, "Sitename")
+            self.assertEqual(logjig.data, [])
             self.assertEqual(cls.clockstats, [])
             self.assertEqual(cls.peerstats, [])
             self.assertEqual(cls.loopstats, [])
@@ -250,9 +235,7 @@ class TestNTPStats(unittest.TestCase):
             faketimemod.time_returns = [TDP * 2]
             fakesockmod.getfqdn_returns = ["jabber"]
             fakeosmod.path.isdir_returns = [True]
-            self.open_returns = [None]
-            fakeglobmod.glob_returns = [([]), ([]), ([]), ([]), ([]), ([])]
-            fakeosmod.path.getmtime_returns = []
+            load_returns = [[], [], [], [], [], []]
             cls = self.target("/foo/bar", "ntpstats", 100, 50, 150)
             self.assertEqual(cls.endtime, 150)
             self.assertEqual(cls.starttime, 50)
@@ -268,6 +251,8 @@ class TestNTPStats(unittest.TestCase):
         finally:
             ntp.statfiles.os = ostemp
             ntp.statfiles.time = timetemp
+            self.target._NTPStats__load_stem = stemtemp
+            self.target._NTPStats__process_stem = processtemp
             sys.stderr = errtemp
 
     def test___load_statfiles(self):
@@ -407,8 +392,9 @@ class TestNTPStats(unittest.TestCase):
             self.target._NTPStats__load_stem = self.load_stem_jig
             dataOne = ["#clockstats0\n", "40587 5 foo\n", "40587 10 bar\n",
                        "40587 15 baz\n", "#clockstats1\n", "40587 20 quux"]
-            dataTwo = ["#gpsdstats0\n", "20.5 5 foo\n", "21.5 10 bar\n",
-                       "22.5 15 baz\n", "#gpsdstats1\n", "23.5 20 quux"]
+            dataTwo = ["#gpsdstats0 foo bar quux\n",
+                       "20.5 5 foo\n", "21.5 10 bar\n", "22.5 15 baz\n",
+                       "#gpsdstats1\n", "23.5 20 quux"]
             TestNTPStats.load_stem_returns = [[]] * 6
             fakeosmod.path.isdir_returns = [True] * 10
             cls = self.target("/foo/bar", "sitename", starttime=0,
