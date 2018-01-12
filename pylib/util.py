@@ -47,13 +47,16 @@ UNITS_PPX = [UNIT_PPT, UNIT_PPB, UNIT_PPM, UNIT_PPK]
 unitgroups = (UNITS_SEC, UNITS_PPX)
 
 
-def check_unicode():
+# These two functions are not tested because they will muck up the module
+# for everything else, and they are simple.
+
+def check_unicode():  # pragma: no cover
     if "UTF-8" != sys.stdout.encoding:
         deunicode_units()
         return True  # needed by ntpmon
     return False
 
-def deunicode_units():
+def deunicode_units():  # pragma: no cover
     "Under certain conditions it is not possible to force unicode output, "
     "this overwrites units that contain unicode with safe versions"
     global UNIT_US
@@ -61,7 +64,7 @@ def deunicode_units():
     # Replacement units
     new_us = "us"
     new_ppk = "ppk"
-    # Replace units in unit group
+    # Replace units in unit groups
     UNITS_SEC[UNITS_SEC.index(UNIT_US)] = new_us
     UNITS_PPX[UNITS_PPX.index(UNIT_PPK)] = new_ppk
     # Replace the units themselves
@@ -600,7 +603,7 @@ if str is bytes:  # We are on python 2.x
     import struct
 
 
-def termsize():
+def termsize():  # pragma: no cover
     "Return the current terminal size."
     # Alternatives at http://stackoverflow.com/questions/566746
     # The way this is used makes it not a big deal if the default is wrong.
@@ -1067,7 +1070,7 @@ class PeerSummary:
                     clock_name = canonicalize_dns(srcadr)
                     if self.debug:
                         self.logfp.write("DNS lookup ends.\n")
-                except TypeError:
+                except TypeError:  # pragma: no cover
                     return ''
             else:
                 clock_name = srcadr
@@ -1305,7 +1308,7 @@ class IfstatsSummary:
                     address))
             if bcast:
                 s += "    %s\n" % bcast
-        except TypeError:
+        except TypeError:  # pragma: no cover
             # Can happen when ntpd ships a corrupted response
             return ''
 
@@ -1319,7 +1322,7 @@ class IfstatsSummary:
 
 try:
     from collections import OrderedDict
-except ImportError:
+except ImportError:  # pragma: no cover
     class OrderedDict(dict):
         "A stupid simple implementation in order to be back-portable to 2.6"
 
