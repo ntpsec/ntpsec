@@ -257,7 +257,7 @@ def decode_ClosePDU(data, header):
 class ClosePDU(AgentXPDU):
     def __init__(self, bigEndian, sID, tactID, pktID, reason):
         AgentXPDU.__init__(self, PDU_CLOSE, bigEndian, sID, tactID, pktID)
-        if reason not in definedReasons:
+        if reason not in definedReasons:  # pragma: no cover
             raise ValueError("Close reason %s not in defined types" % reason)
         self.reason = reason
 
@@ -1047,7 +1047,7 @@ def decode_unsigned32(data, header):
     return (num, data)
 
 
-def sanity_unsigned32(data):
+def sanity_unsigned32(data):  # pragma: no cover
     if data != (data & 0xFFFFFFFF):
         raise ValueError
 
@@ -1286,7 +1286,7 @@ def decode_packet(data):
     decoder = definedPDUTypes[pktType]
     try:
         parsedPkt = decoder(packetSlice, header)
-    except Exception:
+    except Exception:  # pragma: no cover
         err = ParseError("Body parsing error", header, packetSlice, newData)
         raise err
     return parsedPkt, newData

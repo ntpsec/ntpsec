@@ -2083,6 +2083,20 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          b"\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
                          b"\x03\x00\x00\x00\x10\x00\x00\x00"
                          b"\x2A\x00\x00\x00\x00\x01\x00\x00")
+        # Test __eq__
+        one = target(a.VALUE_INTEGER, (1, 2, 3), 1)
+        two = target(a.VALUE_INTEGER, (1, 2, 3), 1)
+        # Test equal
+        self.assertEqual(one == two, True)
+        # Test different type
+        two = target(a.VALUE_GAUGE32, (1, 2, 3), 1)
+        self.assertEqual(one == two, False)
+        # Test different OID
+        two = target(a.VALUE_INTEGER, (1, 2, 3, 4), 1)
+        self.assertEqual(one == two, False)
+        # Test different payload
+        two = target(a.VALUE_INTEGER, (1, 2, 3), 2)
+        self.assertEqual(one == two, False)
 
     def test_decode_varbind(self):
         f = ntp.agentx.decode_Varbind
@@ -2183,6 +2197,45 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                     a.OID((1, 2, 3), False),
                                     42),
                           b""))
+
+    def test_xcode_varbindlist(self):
+        a = ntp.agentx
+        enc = a.encode_varbindlist
+        dec = a.decode_varbindlist
+        vb = a.Varbind
+
+        # Test encode empty
+        self.assertEqual(enc(True, []), b"")
+        # Test encode big endian
+        big = enc(True,
+                  [vb(a.VALUE_INTEGER, (1, 2), 1),
+                   vb(a.VALUE_INTEGER, (3, 4), 2)])
+        self.assertEqual(big, b"\x00\x02\x00\x00"
+                         "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         "\x00\x00\x00\x01"
+                         "\x00\x02\x00\x00"
+                         "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
+                         "\x00\x00\x00\x02")
+        # Test encode little endian
+        little = enc(False,
+                     [vb(a.VALUE_INTEGER, (1, 2), 1),
+                      vb(a.VALUE_INTEGER, (3, 4), 2)])
+        self.assertEqual(little, b"\x02\x00\x00\x00"
+                         "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                         "\x01\x00\x00\x00"
+                         "\x02\x00\x00\x00"
+                         "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
+                         "\x02\x00\x00\x00")
+        # Test decode empty
+        self.assertEqual(dec(b"", standardFlags), None)
+        # Test decode big endian
+        self.assertEqual(dec(big, standardFlags),
+                         (vb(a.VALUE_INTEGER, (1, 2), 1),
+                          vb(a.VALUE_INTEGER, (3, 4), 2)))
+        # Test decode little endian
+        self.assertEqual(dec(little, lilEndianFlags),
+                         (vb(a.VALUE_INTEGER, (1, 2), 1),
+                          vb(a.VALUE_INTEGER, (3, 4), 2)))
 
     def test_encode_flagbyte(self):
         f = ntp.agentx.encode_flagbyte
