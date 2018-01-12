@@ -2211,21 +2211,21 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                   [vb(a.VALUE_INTEGER, (1, 2), 1),
                    vb(a.VALUE_INTEGER, (3, 4), 2)])
         self.assertEqual(big, b"\x00\x02\x00\x00"
-                         "\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
-                         "\x00\x00\x00\x01"
-                         "\x00\x02\x00\x00"
-                         "\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
-                         "\x00\x00\x00\x02")
+                         b"\x02\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02"
+                         b"\x00\x00\x00\x01"
+                         b"\x00\x02\x00\x00"
+                         b"\x02\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x04"
+                         b"\x00\x00\x00\x02")
         # Test encode little endian
         little = enc(False,
                      [vb(a.VALUE_INTEGER, (1, 2), 1),
                       vb(a.VALUE_INTEGER, (3, 4), 2)])
         self.assertEqual(little, b"\x02\x00\x00\x00"
-                         "\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
-                         "\x01\x00\x00\x00"
-                         "\x02\x00\x00\x00"
-                         "\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
-                         "\x02\x00\x00\x00")
+                         b"\x02\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+                         b"\x01\x00\x00\x00"
+                         b"\x02\x00\x00\x00"
+                         b"\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"
+                         b"\x02\x00\x00\x00")
         # Test decode empty
         self.assertEqual(dec(b"", standardFlags), None)
         # Test decode big endian
