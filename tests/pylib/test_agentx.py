@@ -103,7 +103,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test different pdu
         b = cls(1, True, 1, 2, 3)
         self.assertEqual(a == b, False)
-        # Test different endianess
+        # Test different endianness
         b = cls(0, False, 1, 2, 3)
         self.assertEqual(a == b, False)
         # Test different session ID
