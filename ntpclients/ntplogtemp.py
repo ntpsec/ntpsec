@@ -90,13 +90,18 @@ class CpuTemp:
         # grab the needed output
         output = run_binary(["sensors", "-u"])
 
-        for record in output:
-            match = self._pattern.match(record)
-            if match and match.group(1):
-                _now = int(time.time())
-                _cpu_temprature = match.group(1)
-                _data.append('%d LM%s %s' % (_now, _index, _cpu_temprature))
-                _index += 1
+        if output is not None:
+            for record in output:
+                match = self._pattern.match(record)
+                if match and match.group(1):
+                    _now = int(time.time())
+                    _cpu_temprature = match.group(1)
+                    _data.append('%d LM%s %s' % (_now, _index, _cpu_temprature))
+                    _index += 1
+        else:
+            self.has_sensors = False
+            if args.verbose:
+                sys.stderr.write("No sensors returned temperatures. Have you run sensors-detect?")
 
         return _data
 
