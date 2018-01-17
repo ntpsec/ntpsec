@@ -918,11 +918,16 @@ class ControlSession:
 
         if self.passwd is None:
             try:
-                passwd = self.auth[self.keyid][1]
+                self.keytype, passwd = self.auth[self.keyid]
             except (IndexError, TypeError):
                 passwd = getpass.getpass("%s Password: " % self.keytype)
                 if passwd is None:
                     raise ControlException(SERR_INVPASS)
+                # If the password is longer then 20 chars we assume it is
+                # hex encoded binary string. This assumption exists across all
+                # of NTP.
+                if len(passwd) > 20:
+                    passwd = ntp.util.hexstr2octets(passwd)
             self.passwd = passwd
 
     def sendpkt(self, xdata):
@@ -1686,6 +1691,8 @@ class Authenticator:
                 (keytype, passwd) = self.passwords[keyid]
                 if passwd is None:
                     raise ValueError
+                if len(passwd) > 20:
+                    passwd = ntp.util.hexstr2octets(passwd)
                 return (keyid, keytype, passwd)
         else:
             raise ValueError

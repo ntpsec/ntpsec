@@ -243,10 +243,11 @@ class SocketModuleJig:
 class GetpassModuleJig:
     def __init__(self):
         self.getpass_calls = []
+        self.getpass_returns = []
 
     def getpass(self, prompt, stream=None):
         self.getpass_calls.append((prompt, stream))
-        return "xyzzy"
+        return self.getpass_returns.pop(0)
 
 
 class HashlibModuleJig:

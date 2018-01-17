@@ -185,7 +185,6 @@ following.
   This command prompts for a password to authenticate requests. The
   password must match what the server is expecting.  Passwords longer
   than 20 bytes are assumed to be hex encoding.
-FIXME: Actually fix the code.
 
 +quit+::
   Exit +ntpq+.

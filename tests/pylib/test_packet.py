@@ -972,13 +972,26 @@ class TestControlSession(unittest.TestCase):
             self.assertEqual(cls.keyid, 23)
             self.assertEqual(cls.keytype, "keytype")
             self.assertEqual(cls.passwd, "miranda")
-            # Test with all but password
+            # Test with all but password, normal password
             cls.passwd = None
             cls.auth.fail_getitem = True
+            fakegetpmod.getpass_returns = ["xyzzy"]
             cls.password()
             self.assertEqual(fakegetpmod.getpass_calls,
                              [("keytype Password: ", None)])
             self.assertEqual(cls.passwd, "xyzzy")
+            # Test with all but password, hex password
+            fakegetpmod.getpass_calls = []
+            cls.passwd = None
+            cls.auth.fail_getitem = True
+            fakegetpmod.getpass_returns = ["0102030405060708090A"
+                                          "0B0C0D0E0F1011121314"]  # 40 char
+            cls.password()
+            self.assertEqual(fakegetpmod.getpass_calls,
+                             [("keytype Password: ", None)])
+            self.assertEqual(cls.passwd,
+                             "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A"
+                             "\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14")
         finally:
             ntpp.Authenticator = tempauth
             ntpp.getpass = getpass
