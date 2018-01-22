@@ -112,7 +112,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                         5: node(self.cbr_statusActiveOffset, None, True, None),
                         # ntpEntStatusNumberOfRefSources
                         #  unit32 (0..99)
-                        6: node(self.cbr_statusNumRefSources, None, True, None),
+                        6: node(self.cbr_statusNumRefSources,
+                                None, True, None),
                         # ntpEntStatusDispersion DisplayString
                         7: node(self.cbr_statusDispersion, None, True, None),
                         # ntpEntStatusEntityUptime TimeTicks
@@ -227,26 +228,27 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                   5:
                   node(None, None, True,
                        # ntpEntNotifMessage utf8str
-                       {1: node(self.cbr_entNotifMessage, None, True, None)})}),
+                       {1: node(self.cbr_entNotifMessage,
+                                None, True, None)})}),
             # ntpEntConformance
             2:
             node(None, None, True,
                  # ntpEntCompliances
-                {1:
-                 node(None, None, True,
-                      # ntpEntNTPCompliance
-                      {1: node(None, None, True, None),
-                       # ntpEntSNTPCompliance
-                       2: node(None, None, True, None)}),
-                 # ntpEntGroups
-                 2:
-                 node(None, None, True,
-                      # ntpEntObjectsGroup1 OBJECTS {...}
-                      {1: node(None, None, True, None),
-                       # ntpEntObjectsGroup2 OBJECTS {...}
-                       2: node(None, None, True, None),
-                       # ntpEntNotifGroup NOTIFICATIONS {...}
-                       3: node(None, None, True, None)})})}
+                 {1:
+                  node(None, None, True,
+                       # ntpEntNTPCompliance
+                       {1: node(None, None, True, None),
+                        # ntpEntSNTPCompliance
+                        2: node(None, None, True, None)}),
+                  # ntpEntGroups
+                  2:
+                  node(None, None, True,
+                       # ntpEntObjectsGroup1 OBJECTS {...}
+                       {1: node(None, None, True, None),
+                        # ntpEntObjectsGroup2 OBJECTS {...}
+                        2: node(None, None, True, None),
+                        # ntpEntNotifGroup NOTIFICATIONS {...}
+                        3: node(None, None, True, None)})})}
         self.session = ntp.packet.ControlSession()
         self.session.openhost(DEFHOST)  # only local for now
         # Cache so we don't hammer ntpd, default 1 second timeout
@@ -894,7 +896,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                                  ntpRootOID + (1, 3, 1, 1, 2),
                                  name),
                       ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
-                                 "Association added")]  # Uh... what goes here?
+                                 "Association added")]
                 control.sendNotify(vl)
                 self.sentNotifications += 1
         if which in ("rm", "both"):
@@ -908,7 +910,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                                  ntpRootOID + (1, 3, 1, 1, 2),
                                  name),
                       ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 5, 1),
-                                 "Association removed")]  # Uh... what goes here?
+                                 "Association removed")]
                 control.sendNotify(vl)
                 self.sentNotifications += 1
 
@@ -1087,7 +1089,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                 try:
                     pdata = self.safeReadvar(aid, raw=True)
                     pdata["peerstatus"] = self.session.rstatus
-                except IOError as e:
+                except IOError:
                     continue
                 peerdata[aid] = pdata
             self.cache.set("peerdata", peerdata)
@@ -1322,7 +1324,6 @@ class PacketControl:
         self.database.setHandlers = []
         self.database.setUndoData = []
         error = None
-        clearables = []
         for bindIndex in range(len(packet.varbinds)):
             varbind = packet.varbinds[bindIndex]
             # Find an OID, then validate it
@@ -1385,7 +1386,7 @@ class PacketControl:
                 break
         if error != ax.ERR_NOERROR:
             resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
-                                  packet.packetID, o, error, i)
+                                  packet.packetID, 0, error, i)
         else:
             resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
                                   packet.packetID, 0, ax.ERR_NOERROR, 0)
@@ -1394,7 +1395,6 @@ class PacketControl:
     def handle_CleanupSetPDU(self, packet):
         varbinds = self.database.setVarbinds
         handlers = self.database.setHandlers
-        undoData = self.database.setUndoData
         for i in range(len(varbinds)):
             handlers[i]("clean", varbinds[i])
         self.database.inSetP = False
@@ -1504,7 +1504,6 @@ if __name__ == "__main__":
         elif switch in ("-V", "--version"):
             print("ntpsnmpd %s" % ntp.util.stdversion())
             raise SystemExit(0)
-
 
     if nofork is True:
         mainloop(masterAddr)

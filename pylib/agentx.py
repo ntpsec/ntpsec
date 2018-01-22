@@ -109,13 +109,16 @@ class ParseError(Exception):
         self.remainingData = remainingData
 
 
-class ParseDataLengthError(ParseError): pass
+class ParseDataLengthError(ParseError):
+    pass
 
 
-class ParseVersionError(ParseError): pass
+class ParseVersionError(ParseError):
+    pass
 
 
-class ParsePDUTypeError(ParseError): pass
+class ParsePDUTypeError(ParseError):
+    pass
 
 
 # ==========================================================================
