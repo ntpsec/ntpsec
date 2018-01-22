@@ -394,7 +394,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # utf8
         data = self.safeReadvar(0, ["peeradr"])
         if data is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         data = ntp.util.canonicalize_dns(data["peeradr"])
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
@@ -402,7 +402,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # DisplayString
         data = self.safeReadvar(0, ["koffset"], raw=True)
         if data is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         data = ntp.util.unitifyvar(data["koffset"][1], "koffset",
                                    width=None, unitSpace=True)
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
@@ -416,7 +416,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # DisplayString
         data = self.safeReadvar(0, ["rootdisp"], raw=True)
         if data is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, data["rootdisp"][1])
 
     def cbr_statusEntityUptime(self, oid):
@@ -435,14 +435,14 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # I am abandoning the spec, and going with what makes a lick of sense
         uptime = self.safeReadvar(0, ["ss_reset"])["ss_reset"] * 100
         if uptime is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         return ax.Varbind(ax.VALUE_TIME_TICKS, oid, uptime)
 
     def cbr_statusDateTime(self, oid):
         # NtpDateTime
         data = self.safeReadvar(0, ["reftime"])
         if data is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         txt = data["reftime"]
         value = ntp.util.deformatNTPTime(txt)
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, value)
@@ -454,7 +454,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         data = self.safeReadvar(0, ["reftime"])
         hasleap = self.safeReadvar(0, ["leap"])
         if (data is None) or (hasleap is None):
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         data = data["reftime"]
         hasleap = hasleap["leap"]
         if hasleap in (1, 2):
@@ -471,7 +471,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # range of int32
         leap = self.safeReadvar(0, ["leap"])["leap"]
         if leap is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         if leap == 1:
             pass  # leap 1 == forward
         elif leap == 2:
@@ -495,7 +495,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     def cbr_statusProtocolError(self, oid):
         data = self.safeReadvar(0, ["ss_badformat", "ss_badauth"])
         if data is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return None
         protoerr = 0
         for key in data.keys():
             protoerr += data[key]
@@ -614,7 +614,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             peername = pdata[associd]["srcadr"][1]
             peername = ntp.util.canonicalize_dns(peername)
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, peername)
@@ -624,7 +624,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             # elaborate code in util.py indicates this may not be stable
             try:
                 refid = pdata[associd]["refid"][1]
@@ -637,7 +637,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             srcadr = pdata[associd]["srcadr"][1]
             try:
                 socklen = len(socket.getaddrinfo(srcadr, None)[0][-1])
@@ -658,7 +658,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             srcadr = pdata[associd]["srcadr"][1]
             # WARNING: I am only guessing that this is correct
             # Discover what type of address we have
@@ -695,7 +695,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             offset = pdata[associd]["offset"][1]
             offset = ntp.util.unitifyvar(offset, "offset", width=None,
                                          unitSpace=True)
@@ -706,7 +706,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             stratum = pdata[associd]["stratum"][0]
             return ax.Varbind(ax.VALUE_GAUGE32, oid, stratum)
         return self.dynamicCallbackSkeleton(handler)
@@ -715,7 +715,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             jitter = pdata[associd]["jitter"][1]
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, jitter)
         return self.dynamicCallbackSkeleton(handler)
@@ -724,7 +724,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             delay = pdata[associd]["delay"][1]
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, delay)
         return self.dynamicCallbackSkeleton(handler)
@@ -733,7 +733,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             dispersion = pdata[associd]["rootdisp"][1]
             return ax.Varbind(ax.VALUE_OCTET_STR, oid, dispersion)
         return self.dynamicCallbackSkeleton(handler)
@@ -742,7 +742,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             inpkts = self.safeReadvar(associd, ["received"])
             if inpkts is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             inpkts = inpkts["received"]
             return ax.Varbind(ax.VALUE_COUNTER32, oid, inpkts)
         return self.dynamicCallbackSkeleton(handler)
@@ -751,7 +751,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         def handler(oid, associd):
             outpkts = self.safeReadvar(associd, ["sent"])
             if outpkts is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             outpkts = outpkts["sent"]
             return ax.Varbind(ax.VALUE_COUNTER32, oid, outpkts)
         return self.dynamicCallbackSkeleton(handler)
@@ -761,7 +761,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             pvars = self.safeReadvar(associd, ["badauth", "bogusorg",
                                                "seldisp", "selbroken"])
             if pvars is None:
-                return ax.Varbind(ax.VALUE_NULL, oid)
+                return None
             protoerr = 0
             for key in pvars.keys():
                 protoerr += pvars[key]
@@ -1062,7 +1062,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # but do not need any processing.
         data = self.safeReadvar(0, [varname])
         if data is None:
-            return ax.Varbind(ax.VALUE_INTEGER, oid, 42)
+            return None
         else:
             return ax.Varbind(dataType, oid, data[varname])
 
@@ -1253,10 +1253,14 @@ class PacketControl:
         for oidr in packet.oidranges:
             target = oidr.start
             oid, reader, _ = self.database.getOID(target)
-            if (oid != target) or (reader is None):
+            if (oid != target) or (reader is None):  # Not implemented
                 binds.append(ax.Varbind(ax.VALUE_NO_SUCH_OBJECT, target))
             else:
-                binds.append(reader(oid))
+                vbind = reader(oid)
+                if vbind is None:  # No data avaliable.
+                    binds.append(ax.Varbind(ax.VALUE_NULL, target))
+                else:
+                    binds.append(vbind)
             # There should also be a situation that leads to noSuchInstance
             #  but I do not understand the requirements for that
         # TODO: Need to implement genError
@@ -1272,7 +1276,11 @@ class PacketControl:
                 binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
             else:
                 oid, reader, _ = oids[0]
-                binds.append(reader(oid))
+                vbind = reader(oid)
+                if vbind is None:  # No data available
+                    binds.append(ax.Varbind(ax.VALUE_NULL, oid))
+                else:
+                    binds.append(vbind)
         # TODO: Need to implement genError
         resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
                               packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
