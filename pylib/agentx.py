@@ -1324,6 +1324,11 @@ def walkMIBTree(tree, rootpath=()):
                 current = current[key]["subids"]
             else:
                 current = current[key]["subids"]()  # Tree generator function
+                if current == {}:  # no dynamic subids, pop
+                    current, currentKeys, keyID, key = nodeStack.pop()
+                    oidStack.pop()
+                    keyID += 1
+                    continue
             currentKeys = list(current.keys())
             currentKeys.sort()
             keyID = 0

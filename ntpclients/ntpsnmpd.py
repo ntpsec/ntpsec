@@ -1000,7 +1000,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         except ntp.packet.ControlException as e:
             if e.message == ntp.packet.SERR_SOCKET:
                 # Can't connect, ntpd probably not running
-                return ax.Varbind(ax.VALUE_INTEGER, oid, 1)
+                return 1
             else:
                 raise e
         rstatus = self.session.rstatus  # a ploy to get the system status
@@ -1060,16 +1060,19 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     def readCallbackSkeletonSimple(self, oid, varname, dataType):
         # Used for entries that just need a simple variable retrevial
         # but do not need any processing.
-        data = self.safeReadvar(0, [varname])[varname]
+        data = self.safeReadvar(0, [varname])
         if data is None:
-            return ax.Varbind(ax.VALUE_NULL, oid)
+            return ax.Varbind(ax.VALUE_INTEGER, oid, 42)
         else:
-            return ax.Varbind(dataType, oid, data)
+            return ax.Varbind(dataType, oid, data[varname])
 
     def misc_getPeerIDs(self):
         peerids = self.cache.get("peerids")
         if peerids is None:
-            peerids = [x.associd for x in self.session.readstat()]
+            try:
+                peerids = [x.associd for x in self.session.readstat()]
+            except ntp.packet.ControlException:
+                peerids = []
             peerids.sort()
             self.cache.set("peerids", peerids)
         return peerids
