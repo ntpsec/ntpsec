@@ -43,11 +43,11 @@ DEFHOST = "localhost"  # For now only know how to talk to the local ntp
 class DataSource:  # This will be broken up in future to be less NTP-specific
     def __init__(self):
         node = ax.mibnode
-        # This is defined as a dict tree because simpler, and avoids
+        # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
-        # ntpEntNotifications
         self.oidTree = {
+            # ntpEntNotifications
             0:
             node(None, None, True,
                  # ntpEntNotifModeChange
@@ -252,10 +252,11 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.session = ntp.packet.ControlSession()
         self.session.openhost(DEFHOST)  # only local for now
         # Cache so we don't hammer ntpd, default 1 second timeout
-        # timeout default pulled from a hat
+        # Timeout default pulled from a hat: we don't want it to last for
+        # long, just not flood ntpd when we don't need to.
         self.cache = ntp.util.Cache(1)
         self.oldValues = {}  # Used by notifications to detect changes
-        self.lastHeartbeat = 0
+        self.lastHeartbeat = 0  # Timestamp used for heartbeat notifications
         # The undo system is only for the last operation
         self.inSetP = False  # Are we currently in the set procedure?
         self.setVarbinds = []  # Varbind of the current set operation
@@ -263,8 +264,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.setUndoData = []  # Previous values for undoing
         self.heartbeatInterval = 0  # should save to disk
         self.sentNotifications = 0
-        # Notify bits, these should be saved to disk
-        # Also most of them currently have no effect
+        # Notify bits, they control whether the daemon sends notifications.
+        # these should be saved to disk
         self.notifyModeChange = False  # 1
         self.notifyStratumChange = False  # 2
         self.notifySyspeerChange = False  # 3
@@ -279,22 +280,26 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         while True:
             try:
                 oid, reader, writer = gen.next()
-                if nextP is True:
+                if nextP is True:  # GetNext
+                    # For getnext any OID greater than the start qualifies
                     oidhit = (oid > searchoid)
-                else:
+                else:  # Get
+                    # For get we need a *specific* OID
                     oidhit = (oid.subids == searchoid.subids)
                 if oidhit and (reader is not None):
+                    # We only return OIDs that have a minimal implementation
+                    # walkMIBTree handles the generation of dynamic trees
                     if returnGenerator is True:
                         return oid, reader, writer, gen
                     else:
                         return oid, reader, writer
-            except StopIteration:
+            except StopIteration:  # Couldn't find anything in the tree
                 if returnGenerator is True:
                     return None, None, None, None
                 else:
                     return None, None, None
 
-    # These exist instead of just using getOID_core for clearer semantics
+    # These exist instead of just using getOID_core so semantics are clearer
     def getOID(self, searchoid, returnGenerator=False):
         "Get the requested OID"
         return self.getOID_core(False, searchoid, returnGenerator)
@@ -348,7 +353,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     # comment divider lines represent not yet implemented callbacks
     # =============================================================
 
-    #########################
+    # Blank: notification OIDs
 
     def cbr_systemInfo(self, oid, category=None):
         if category == "name":  # The product name of the running NTP
@@ -435,9 +440,10 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         #  That is the opposite of what the spec claims.
         #
         # I am abandoning the spec, and going with what makes a lick of sense
-        uptime = self.safeReadvar(0, ["ss_reset"])["ss_reset"] * 100
+        uptime = self.safeReadvar(0, ["ss_reset"])
         if uptime is None:
             return None
+        uptime = uptime["ss_reset"] * 100
         return ax.Varbind(ax.VALUE_TIME_TICKS, oid, uptime)
 
     def cbr_statusDateTime(self, oid):
@@ -471,9 +477,10 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_statusLeapSecDirection(self, oid):
         # range of int32
-        leap = self.safeReadvar(0, ["leap"])["leap"]
+        leap = self.safeReadvar(0, ["leap"])
         if leap is None:
             return None
+        leap = leap["leap"]
         if leap == 1:
             pass  # leap 1 == forward
         elif leap == 2:
@@ -784,7 +791,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         if self.notifySyspeerChange is True:
             self.doNotifySyspeerChange(control)
 
-        # Both and and remove have to look at the same data, don't want them
+        # Both add and remove have to look at the same data, don't want them
         # stepping on each other. Therefore the functions are combined.
         if (self.notifyAddAssociation is True) and \
            (self.notifyRMAssociation is True):
@@ -821,19 +828,20 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def doNotifyStratumChange(self, control):
         oldStratum = self.oldValues.get("stratum")
-        newStratum = self.safeReadvar(0, ["stratum"])["stratum"]
+        newStratum = self.safeReadvar(0, ["stratum"])
         if newStratum is None:
             return  # couldn't read
+        newStratum = newStratum["stratum"]
         if oldStratum is None:
             self.oldValues["stratum"] = newStratum
             return
         elif oldStratum != newStratum:
             self.oldValues["stratum"] = newStratum
-            datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+            datetime = self.safeReadvar(0, ["reftime"])
             if datetime is None:
                 datetime = ""
             else:
-                datetime = ntp.util.deformatNTPTime(datetime)
+                datetime = ntp.util.deformatNTPTime(datetime["reftime"])
             vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
                              ax.OID(ntpRootOID + (0, 2))),
                   ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 2, 9),
@@ -847,19 +855,20 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def doNotifySyspeerChange(self, control):
         oldSyspeer = self.oldValues.get("syspeer")
-        newSyspeer = self.safeReadvar(0, ["peeradr"])["peeradr"]
+        newSyspeer = self.safeReadvar(0, ["peeradr"])
         if newSyspeer is None:
             return  # couldn't read
+        newSyspeer = newSyspeer["peeradr"]
         if oldSyspeer is None:
             self.oldValues["syspeer"] = newSyspeer
             return
         elif oldSyspeer != newSyspeer:
             self.oldValues["syspeer"] = newSyspeer
-            datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+            datetime = self.safeReadvar(0, ["reftime"])
             if datetime is None:
                 datetime = ""
             else:
-                datetime = ntp.util.deformatNTPTime(datetime)
+                datetime = ntp.util.deformatNTPTime(datetime["reftime"])
             syspeer = self.misc_getSyspeerID()
             vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
                              ax.OID(ntpRootOID + (0, 3))),
@@ -878,11 +887,11 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         changes = self.misc_getAssocListChanges()
         if changes is None:
             return
-        datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+        datetime = self.safeReadvar(0, ["reftime"])
         if datetime is None:
             datetime = ""
         else:
-            datetime = ntp.util.deformatNTPTime(datetime)
+            datetime = ntp.util.deformatNTPTime(datetime["reftime"])
         adds, rms = changes
         print("Notify Change assoc:", changes)
         if which in ("add", "both"):
@@ -919,9 +928,10 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def doNotifyLeapSecondAnnounced(self, control):
         oldLeap = self.oldValues["leap"]
-        newLeap = self.safeReadvar(0, ["leap"])["leap"]
+        newLeap = self.safeReadvar(0, ["leap"])
         if newLeap is None:
             return
+        newLeap = newLeap["leap"]
         if oldLeap is None:
             self.oldValues["leap"] = newLeap
             return
@@ -929,11 +939,11 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             self.oldValues["leap"] = newLeap
             if (oldLeap in (0, 3)) and (newLeap in (1, 2)):
                 # changed noleap or unsync to a leap announcement
-                datetime = self.safeReadvar(0, ["reftime"])["reftime"]
+                datetime = self.safeReadvar(0, ["reftime"])
                 if datetime is None:
                     datetime = ""
                 else:
-                    datetime = ntp.util.deformatNTPTime(datetime)
+                    datetime = ntp.util.deformatNTPTime(datetime["reftime"])
                 vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
                                  ax.OID(ntpRootOID + (0, 7))),
                       ax.Varbind(ax.VALUE_OCTET_STR, ntpRootOID + (1, 2, 9),
@@ -1080,7 +1090,6 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         return peerids
 
     def misc_getPeerData(self):
-        # not fully implemented
         peerdata = self.cache.get("peerdata")
         if peerdata is None:
             associds = self.misc_getPeerIDs()
@@ -1111,6 +1120,7 @@ class PacketControl:
         self.recievedPackets = []  # use as FIFO
         self.timeout = timeout
         self.sessionID = None  # need this for all packets
+        self.highestTransactionID = 0  # used for exchanges we start
         # indexed on pdu code
         self.pduHandlers = {ax.PDU_GET: self.handle_GetPDU,
                             ax.PDU_GET_NEXT: self.handle_GetNextPDU,
@@ -1193,6 +1203,8 @@ class PacketControl:
                 pkt, extraData = ntp.agentx.decode_packet(self.recievedData)
                 self.recievedData = extraData
                 self.recievedPackets.append(pkt)
+                if pkt.transactionID > self.highestTransactionID:
+                    self.highestTransactionID = pkt.transactionID
                 dolog("\npacketEater got a full packet: %s\n" % repr(pkt), 3)
             except ax.ParseDataLengthError:
                 return None  # this happens if we don't have all of a packet
@@ -1218,8 +1230,10 @@ class PacketControl:
             self.packetLog[index] = packet
 
     def sendNotify(self, varbinds, context=None):
-        # DUMMY: transactionID, packetID
-        pkt = ax.NotifyPDU(True, self.sessionID, 300, 1, varbinds, context)
+        # DUMMY: packetID
+        tid = self.highestTransactionID + 5  # +5 to avoid collisions
+        self.highestTransactionID = tid
+        pkt = ax.NotifyPDU(True, self.sessionID, tid, 1, varbinds, context)
         self.sendPacket(pkt, True)
 
     def sendErrorResponse(self, errorHeader, errorType, errorIndex):
@@ -1255,11 +1269,15 @@ class PacketControl:
         for oidr in packet.oidranges:
             target = oidr.start
             oid, reader, _ = self.database.getOID(target)
-            if (oid != target) or (reader is None):  # Not implemented
+            if (oid != target) or (reader is None):
+                # This OID must not be implemented yet.
                 binds.append(ax.Varbind(ax.VALUE_NO_SUCH_OBJECT, target))
             else:
                 vbind = reader(oid)
                 if vbind is None:  # No data avaliable.
+                    # I am not certain that this is the correct response
+                    # when no data is available. snmpwalk appears to stop
+                    # calling a particular sub-agent when it gets to a NULL.
                     binds.append(ax.Varbind(ax.VALUE_NULL, target))
                 else:
                     binds.append(vbind)
@@ -1280,6 +1298,9 @@ class PacketControl:
                 oid, reader, _ = oids[0]
                 vbind = reader(oid)
                 if vbind is None:  # No data available
+                    # I am not certain that this is the correct response
+                    # when no data is available. snmpwalk appears to stop
+                    # calling a particular sub-agent when it gets to a NULL.
                     binds.append(ax.Varbind(ax.VALUE_NULL, oid))
                 else:
                     binds.append(vbind)
@@ -1329,7 +1350,7 @@ class PacketControl:
             # Find an OID, then validate it
             oid, reader, writer = self.database.getOID(varbind.oid)
             if oid is None:  # doesn't exist, can we create it?
-                # Dummy, assume we can't create anything
+                # DUMMY, assume we can't create anything
                 error = ax.ERR_NO_ACCESS
                 break
             elif writer is None:  # exists, writing not implemented

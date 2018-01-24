@@ -129,7 +129,7 @@ class ParsePDUTypeError(ParseError):
 #   packet, ready for transmission.
 #
 #   Decoders take just the body sliced away from everything else,
-#   and a dict containing the already pared information from the header.
+#   and a dict containing the already parsed information from the header.
 #   They return the relevant class instance for the packet in question,
 #   they do not return extra data as they are never supposed to receive it.
 #
