@@ -1416,6 +1416,7 @@ usage: reslist
             ("precision", "log2 precision:   ", NTP_INT),
             ("rootdelay", "root delay:       ", NTP_FLOAT),
             ("rootdisp", "root dispersion:  ", NTP_FLOAT),
+            ("rootdist", "root distance     ", NTP_FLOAT),
             ("refid", "reference ID:     ", NTP_STR),
             ("reftime", "reference time:   ", NTP_LFP),
             ("sys_jitter", "system jitter:    ", NTP_FLOAT),
