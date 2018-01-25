@@ -211,7 +211,11 @@ codebase has been outright removed, with less than 5% new code added.
   the clock tick rate, precision, and jitter. Part of it formerly
   traveled as +tickadj+.
 
-[[configuration]]
+* Mode 6 now fully supports RFC 5907: "Definitions of Managed Objects for
+  Network Time Protocol Version 4 (NTPv4)" by reporting a sys_rootdist
+  variable that is the root distance of the selected peer. This can
+  fill in the MIB's ntpEntTimeDistance entry.
+
 == Configuration Improvements ==
 
 * The notorious collision between pool and nopeer in older
