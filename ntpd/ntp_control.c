@@ -223,7 +223,8 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_LEAPSMEAROFFS	97
 #define	CS_TICK                 98
 #define	CS_NUMCTLREQ		99
-#define	CS_MAXCODE		CS_NUMCTLREQ
+#define CS_ROOTDISTANCE		100
+#define	CS_MAXCODE		CS_ROOTDISTANCE
 
 /*
  * Peer variables we understand
@@ -404,7 +405,8 @@ static const struct ctl_var sys_var[] = {
 	{ CS_TICK,		RO, "tick" },		/* 98 */
 	/* new in NTPsec */
 	{ CS_NUMCTLREQ,		RO, "ss_numctlreq" },	/* 99 */
-	{ 0,                    EOV, "" }		/* 99 */
+	{ CS_ROOTDISTANCE,	RO, "rootdist" },	/* 100 */
+	{ 0,                    EOV, "" }
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -2002,6 +2004,11 @@ ctl_putsys(
 
 	case CS_NUMCTLREQ:
 		ctl_putuint(sys_var[varid].text, numctlreq);
+		break;
+
+	case CS_ROOTDISTANCE:
+		ctl_putdbl(sys_var[CS_ROOTDISTANCE].text,
+			   sys_rootdist * MS_PER_S);
 		break;
 
         default:

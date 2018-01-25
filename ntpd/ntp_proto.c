@@ -103,6 +103,7 @@ uint8_t	sys_stratum;		/* system stratum */
 int8_t	sys_precision;		/* local clock precision (log2 s) */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
 double	sys_rootdisp;		/* dispersion to primary source */
+double	sys_rootdist;		/* only used fror Mode 6 export */
 uint32_t sys_refid;		/* reference id (network byte order) */
 l_fp	sys_reftime;		/* last update time */
 struct	peer *sys_peer;		/* current peer */
@@ -2022,7 +2023,7 @@ clock_select(void)
 	 * Mitigation rules of the game. We have the pick of the
 	 * litter in typesystem if any survivors are left. If
 	 * there is a prefer peer, use its offset and jitter.
-	 * Otherwise, use the combined offset and jitter of all kitters.
+	 * Otherwise, use the combined offset and jitter of all kittens.
 	 */
 	if (typesystem != NULL) {
 		if (sys_prefer == NULL) {
@@ -2034,6 +2035,7 @@ clock_select(void)
 			typesystem->new_status = CTL_PST_SEL_SYSPEER;
 			sys_offset = typesystem->offset;
 			sys_jitter = typesystem->jitter;
+			sys_rootdist = root_distance(typesystem);
 		}
 		DPRINT(1, ("select: combine offset %.9f jitter %.9f\n",
 			   sys_offset, sys_jitter));
@@ -2055,6 +2057,7 @@ clock_select(void)
 		typesystem->new_status = CTL_PST_SEL_PPS;
 		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
+		sys_rootdist = root_distance(typesystem);
 		DPRINT(1, ("select: pps offset %.9f jitter %.9f\n",
 			   sys_offset, sys_jitter));
 	} else if ( typepps &&
