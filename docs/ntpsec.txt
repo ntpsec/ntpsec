@@ -216,6 +216,9 @@ codebase has been outright removed, with less than 5% new code added.
   variable that is the root distance of the selected peer. This can
   fill in the MIB's ntpEntTimeDistance entry.
 
+* ntpq displays the root distance (aka. syncronization distance) in the
+  sysinfo command.
+
 == Configuration Improvements ==
 
 * The notorious collision between pool and nopeer in older
