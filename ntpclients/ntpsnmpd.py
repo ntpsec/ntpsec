@@ -369,9 +369,18 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         vb = ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
         return vb
 
-    def cbr_timeResolution(self, oid):  # DUMMY
+    def cbr_timeResolution(self, oid):
         # Uinteger32
-        return ax.Varbind(ax.VALUE_GAUGE32, oid, 42)
+        # Arrives in fractional milliseconds
+        fuzz = self.safeReadvar(0, ["fuzz"])
+        if fuzz is None:
+            return None
+        fuzz = fuzz["fuzz"]
+        # We want to emit fractions of seconds
+        # Yes we are flooring instead of rounding: don't want to emit a
+        # resolution value higher than ntpd actually produces.
+        fuzz = int(1 / fuzz)
+        return ax.Varbind(ax.VALUE_GAUGE32, oid, fuzz)
 
     def cbr_timePrecision(self, oid):
         return self.readCallbackSkeletonSimple(oid, "precision",
@@ -379,6 +388,10 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_timeDistance(self, oid):  # DUMMY
         # Displaystring
+        # From docs/select.txt:
+        # The selection metric, called the _root distance,_, is one-half the
+        # roundtrip root delay plus the root dispersion plus minor error
+        # contributions not considered here.
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, "foo")
 
     # Blank: ntpEntStatus
