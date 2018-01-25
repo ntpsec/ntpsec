@@ -388,11 +388,12 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_timeDistance(self, oid):  # DUMMY
         # Displaystring
-        # From docs/select.txt:
-        # The selection metric, called the _root distance,_, is one-half the
-        # roundtrip root delay plus the root dispersion plus minor error
-        # contributions not considered here.
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "foo")
+        data = self.safeReadvar(0, ["rootdist"], raw=True)
+        if data is None:
+            return None
+        data = ntp.util.unitifyvar(data["rootdist"][1], "rootdist",
+                                   width=None, unitSpace=True)
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
 
     # Blank: ntpEntStatus
 
@@ -429,8 +430,11 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     def cbr_statusNumRefSources(self, oid):
         # range of uint32
-        data = self.session.readstat()
-        return ax.Varbind(ax.VALUE_GAUGE32, oid, len(data))
+        try:
+            data = self.session.readstat()
+            return ax.Varbind(ax.VALUE_GAUGE32, oid, len(data))
+        except ntp.packet.ControlException:
+            return None
 
     def cbr_statusDispersion(self, oid):
         # DisplayString
@@ -1304,19 +1308,22 @@ class PacketControl:
     def handle_GetNextPDU(self, packet):
         binds = []
         for oidr in packet.oidranges:
-            oids = self.database.getOIDsInRange(oidr, True)
-            if len(oids) == 0:  # Nothing found
-                binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
-            else:
-                oid, reader, _ = oids[0]
-                vbind = reader(oid)
-                if vbind is None:  # No data available
-                    # I am not certain that this is the correct response
-                    # when no data is available. snmpwalk appears to stop
-                    # calling a particular sub-agent when it gets to a NULL.
-                    binds.append(ax.Varbind(ax.VALUE_NULL, oid))
+            while True:
+                oids = self.database.getOIDsInRange(oidr, True)
+                if len(oids) == 0:  # Nothing found
+                    binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW,
+                                            oidr.start))
+                    break
                 else:
-                    binds.append(vbind)
+                    oid, reader, _ = oids[0]
+                    vbind = reader(oid)
+                    if vbind is None:  # No data available
+                        # Start next search from the current location
+                        oidr = ax.SearchRange(oid, oidr.end, False)
+                        continue
+                    else:
+                        binds.append(vbind)
+                        break
         # TODO: Need to implement genError
         resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
                               packet.packetID, 0, ax.ERR_NOERROR, 0, binds)
