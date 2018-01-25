@@ -73,10 +73,10 @@ def deunicode_units():  # pragma: no cover
 
 # Variables that have units
 S_VARS = ("tai", "poll")
-MS_VARS = ("rootdelay", "rootdisp", "offset", "sys_jitter", "clk_jitter",
-           "leapsmearoffset", "authdelay", "koffset", "kmaxerr", "kesterr",
-           "kprecis", "kppsjitter", "fuzz", "clk_wander_threshold", "tick",
-           "in", "out", "bias", "delay", "jitter", "dispersion",
+MS_VARS = ("rootdelay", "rootdisp", "rootdist", "offset", "sys_jitter",
+           "clk_jitter", "leapsmearoffset", "authdelay", "koffset", "kmaxerr",
+           "kesterr", "kprecis", "kppsjitter", "fuzz", "clk_wander_threshold",
+           "tick", "in", "out", "bias", "delay", "jitter", "dispersion",
            "fudgetime1", "fudgetime2")
 PPM_VARS = ("frequency", "clk_wander")
 

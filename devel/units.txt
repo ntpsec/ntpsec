@@ -46,6 +46,7 @@ leap                  | seconds       | seconds
 precision             | log2(seconds) | log2(seconds)
 rootdelay             | seconds       | milliseconds
 rootdisp              | seconds       | milliseconds
+rootdist              | seconds       | milliseconds
 offset                | seconds       | milliseconds
 frequency (aka drift) | seconds/s     | microseconds/s (aka ppm)
 sys_jitter            | seconds       | milliseconds
