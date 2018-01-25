@@ -2122,6 +2122,7 @@ clock_combine(
 	}
 	sys_offset = z / y;
 	sys_jitter = SQRT(w / y + SQUARE(peers[syspeer].seljit));
+	sys_rootdist = peers[syspeer].synch;
 }
 
 
