@@ -1899,10 +1899,10 @@ clock_select(void)
 	 * peer, who of course have the immunity idol.
 	 */
 	while (1) {
-		d = 1e9;
-		e = -1e9;
-		g = 0;
-		k = 0;
+		d = 1e9; // Minimum peer jitter
+		e = -1e9; // Worst peer select jitter * synch
+		g = 0; // Worst peer select jitter
+		k = 0; // Index of the worst peer
 		for (i = 0; i < nlist; i++) {
 			if (peers[i].error < d)
 				d = peers[i].error;
