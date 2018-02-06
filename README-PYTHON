@@ -1,0 +1,51 @@
+If you are trying to debug something like:
+  ImportError: No module named ntp
+you have come to the right place.
+
+The default location where we install our python libraries is
+  /usr/local/lib/pythonX.Y/site-packages/
+where X and Y are the python version numbers.
+
+Unfortunately, that's not on the default search path of several
+OSes/distros, in paritcular Fedora and NetBSD.
+
+
+Python has a search path that is used to find library modules when
+you import them.  You can see your search path with:
+  python2 -c "import sys; print sys.path"
+or
+  python3 -c "import sys; print(sys.path)"
+
+Info on Python's search path:
+  https://docs.python.org/2/tutorial/modules.html
+or
+  https://docs.python.org/3/tutorial/modules.html
+
+
+
+There are several ways to make things work.
+
+1: You can modify the location where waf will install the libraries.
+For NetBSD, something like this should work:
+  ./waf configure \
+    --pythondir=/usr/pkg/lib/python2.7/site-packages \
+    --pythonarchdir=/usr/pkg/lib/python2.7/site-packages \
+    ...
+You need to specify it at configure time.  Install time is too late.
+
+
+2: You can setup your PYTHONPATH with something like this:
+  export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+For bash, you can add that line to your .bashrc or the system /etc/bashrc
+If you don't put it in the system file, all users will have to do this,
+including root if root uses any ntp scripts.
+
+
+3: You can add to the default search path by setting up a .pth file
+with something like this:
+  echo /usr/local/lib/python2.7/site-packages > \
+    /usr/pkg/lib/python2.7/site-packages/ntpsec.pth
+  echo /usr/local/lib64/python2.7/site-packages >> \
+    /usr/pkg/lib/python2.7/site-packages/ntpsec.pth
+This works for all users, including root.
+
