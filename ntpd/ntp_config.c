@@ -1147,6 +1147,8 @@ config_auth(
 			}
 		}
 	}
+	if (0 < count)
+		msyslog(LOG_INFO, "Found %d trusted keys.", count);
 	auth_prealloc_symkeys(count);
 
 	/* Keys Command */
@@ -3030,6 +3032,14 @@ getconfig(const char *explicit_config)
 }
 
 /*
+ * init_readconfig() - init for readconfig
+ */
+void init_readconfig(void)
+{
+	init_syntax_tree(&cfgt);
+}
+
+/*
  * readconfig() - process startup configuration file
  */
 void readconfig(const char *config_file)
@@ -3053,7 +3063,9 @@ void readconfig(const char *config_file)
 	yydebug = !!(debug >= 5);
 #endif
 
-	init_syntax_tree(&cfgt);
+	/* Moved to init_readconfig so command lines can contribute info
+	 * init_syntax_tree(&cfgt);
+	 */
 	srccount = 0;
 	
 	/* parse the plain config file if it exists */
@@ -3095,6 +3107,23 @@ void readconfig(const char *config_file)
 		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO_NI_H */
 }
+
+
+/* hooks for ntpd.c */
+
+void set_keys_file(char* keys)
+{
+	cfgt.auth.keys = estrdup(keys);
+};
+
+void set_trustedkey(keyid_t tkey)
+{
+	attr_val *val = create_attr_ival('i', tkey);
+	attr_val *val2 = NULL;
+	APPEND_G_FIFO(val2, val);
+	CONCAT_G_FIFOS(cfgt.auth.trusted_key_list, val2);
+};
+
 
 
 void

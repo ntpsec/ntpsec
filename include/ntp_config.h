@@ -211,6 +211,9 @@ struct config_tree_tag {
 	sim_fifo *	sim_details;
 	int		mdnstries;
 };
+extern void init_readconfig(void);
+extern void set_keys_file(char*);
+extern void set_trustedkey(keyid_t);
 extern int mdnstries;
 
 

@@ -678,6 +678,7 @@ ntpdmain(
 	init_proto(!dumpopts);		/* Call at high priority */
 	init_io();
 	init_loopfilter();
+	init_readconfig();	/* see readconfig() */
 	mon_start(MON_ON);	/* monitor on by default now	  */
 				/* turn off in config if unwanted */
 
@@ -725,7 +726,7 @@ ntpdmain(
 		break;
 	    case 'k':
 		if (ntp_optarg != NULL)
-			getauthkeys(ntp_optarg);
+			set_keys_file(ntp_optarg);
 		break;
             case 'l':
             case 'L':
@@ -763,7 +764,7 @@ ntpdmain(
 				ntp_optarg);
 			exit(1);
 		    } else {
-			authtrust((keyid_t)tkey, true);
+			set_trustedkey((keyid_t)tkey);
 		    }
 	        }
 		break;
