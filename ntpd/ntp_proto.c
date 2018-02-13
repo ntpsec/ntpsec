@@ -2518,7 +2518,7 @@ dns_take_pool(
 				current_time + POOL_SOLICIT_WINDOW + 1);
 	}
 
-	DPRINT(1, ("transmit: at %u %s->%s pool\n",
+	DPRINT(1, ("dns_take_pool: at %u %s->%s pool\n",
 		   current_time, latoa(lcladr), socktoa(rmtadr)));
 }
 
@@ -2569,6 +2569,22 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	peer->hpoll = hpoll;
 	peer->nextdate = current_time + (1U << hpoll);
 }
+
+/*
+ * dns_new_interface
+ *   A new interface is now active
+ *   retry danging DNS lookups
+ */
+void dns_new_interface(void) {
+    struct peer *p;
+    for (p = peer_list; p != NULL; p = p->p_link) {
+	if ((p->cfg.flags & FLAG_DNS) || (p->cast_flags & MDF_POOL)) {
+	    p->hpoll = p->cfg.minpoll;
+	    transmit(p);   /* does all the work */
+	}
+    }
+}
+
 #endif /* ENABLE_DNS_LOOKUP */
 
 

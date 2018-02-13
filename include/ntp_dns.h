@@ -19,4 +19,7 @@ extern void dns_take_server(struct peer*, sockaddr_u*);
 extern void dns_take_pool(struct peer*, sockaddr_u*);
 extern void dns_take_status(struct peer*, DNS_Status);
 
+/* New interface has appeared - try again */
+extern void dns_new_interface(void);
+
 #endif	/* GUARD_NTP_DNS_H */

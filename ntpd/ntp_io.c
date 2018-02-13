@@ -1322,8 +1322,11 @@ interface_update(
 	if (!new_interface_found)
 		return;
 
+#ifdef ENABLE_DNS_LOOKUP
 #ifdef DEBUG
 	msyslog(LOG_DEBUG, "IO: new interface(s) found: waking up resolver");
+#endif
+	dns_new_interface();
 #endif
 }
 
