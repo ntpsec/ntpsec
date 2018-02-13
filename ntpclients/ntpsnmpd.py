@@ -379,7 +379,10 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         # We want to emit fractions of seconds
         # Yes we are flooring instead of rounding: don't want to emit a
         # resolution value higher than ntpd actually produces.
-        fuzz = int(1 / fuzz)
+        if fuzz != 0:
+            fuzz = int(1 / fuzz)
+        else:
+            fuzz = 0
         return ax.Varbind(ax.VALUE_GAUGE32, oid, fuzz)
 
     def cbr_timePrecision(self, oid):
