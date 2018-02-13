@@ -956,7 +956,9 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                 control.sendNotify(vl)
                 self.sentNotifications += 1
 
-    def doNotifyConfigChange(self, control):  # DUMMY
+    def doNotifyConfigChange(self, control):
+        # This left unimplemented because the MIB wants something we can't
+        # and/or shouldn't provide
         pass
 
     def doNotifyLeapSecondAnnounced(self, control):
