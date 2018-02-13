@@ -271,7 +271,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.notifySyspeerChange = False  # 3
         self.notifyAddAssociation = False  # 4
         self.notifyRMAssociation = False  # 5
-        self.notifyConfigChange = False  # 6
+        self.notifyConfigChange = False  # 6 [This is not implemented]
         self.notifyLeapSecondAnnounced = False  # 7
         self.notifyHeartbeat = False  # 8
 
@@ -570,7 +570,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     def cbr_entNotifMessage(self, oid):  # DUMMY
         # utf8str
         # Should probably either return null, or remove this handler.
-        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "jabber")
+        return ax.Varbind(ax.VALUE_OCTET_STR, oid, "no event")
 
     #########################
 
@@ -630,6 +630,19 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     # MIB tree, and the placement of the handler() within it. It also provides
     # some useful data to the handler() via the readCallback() layer.
     # ========================================================================
+
+    # Packet Mode Table
+
+    def sub_statPktMode(self):
+        pass
+
+    def sub_statPktSent(self):
+        pass
+
+    def sub_statPktRecv(self):
+        pass
+
+    # Association Table
 
     def sub_assocID(self):
         def handler(oid, associd):
