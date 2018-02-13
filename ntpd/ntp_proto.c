@@ -935,8 +935,7 @@ transmit(
 		if ((peer_associations <= 2 * sys_maxclock) &&
 		    (peer_associations < sys_maxclock ||
 		     sys_survivors < sys_minclock))
-			dns_probe(peer);
-		/* FIXME-DNS - need proper backoff */
+			if (!dns_probe(peer)) return;
 		poll_update(peer, hpoll);
 		return;
 	}
@@ -944,8 +943,7 @@ transmit(
 	/* Does server need DNS lookup? */
 	if (peer->cfg.flags & FLAG_DNS) {
 		peer->outdate = current_time;
-		dns_probe(peer);
-		/* FIXME-DNS - need proper backoff */
+		if (!dns_probe(peer)) return;
 		poll_update(peer, hpoll);
 		return;
         }
