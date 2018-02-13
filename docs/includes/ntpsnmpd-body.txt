@@ -25,7 +25,20 @@
 
 == Known Limitations ==
 
-This is a prototype. Large parts of the AgentX standard are not yet
-implemented.
+This is a prototype. Parts of the AgentX standard are not yet implemented.
+
+== Known Deviations from the MIB ==
+
+The ntpEntStatusEntityUptime OID specifies a bizzare time formant. This
+does not match what the SNMP tools expect to see from a TimeTicks variable.
+Instead the daemon returns a normal TimeTicks value.
+
+The ntpEntNotifConfigChanged trap is left unimplemented. This is because
+there currently is no way to implement what it wants, and it demands alerts
+regarding changes that are not part of NTPs jurisdiction.
+
+The ntpEntTimeResolution OID currently uses data from the sys_fuzz variable
+as the base for it's calculations. It is by no means certain that this is
+the correct choice, and the returned data should be taken with scepticism.
 
 // end
