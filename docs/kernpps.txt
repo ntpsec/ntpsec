@@ -61,7 +61,7 @@ The PPSAPI interface provides the following functions:
   implementation.
 +time_pps_fetch+::
   Returns the current timestamps associated with a PPS interface
-  instance in either nanoseconds and nanoseconds (Unix +timespec+) or
+  instance in either seconds and nanoseconds (Unix +timespec+) or
   seconds and fraction (NTP) format.
 +time_pps_kcbind+::
   If kernel PPS processing is supported, this binds the support to the
