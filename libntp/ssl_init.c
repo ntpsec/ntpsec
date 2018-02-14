@@ -16,6 +16,7 @@ static void	atexit_ssl_cleanup(void);
 #endif
 
 static bool ssl_init_done;
+EVP_MD_CTX *digest_ctx;
 
 void
 ssl_init(void)
@@ -28,6 +29,7 @@ ssl_init(void)
 	atexit(&atexit_ssl_cleanup);
 #endif
 
+	digest_ctx = EVP_MD_CTX_new();
 	ssl_init_done = true;
 }
 

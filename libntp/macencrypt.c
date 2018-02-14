@@ -51,15 +51,14 @@ mac_authencrypt(
 {
 	uint8_t	digest[EVP_MAX_MD_SIZE];
 	unsigned int	len;
-	EVP_MD_CTX *ctx;
+	EVP_MD_CTX *ctx = digest_ctx;
 
 	/*
 	 * Compute digest of key concatenated with packet. Note: the
 	 * key type and digest type have been verified when the key
 	 * was created.
 	 */
-	ssl_init();
-	ctx = EVP_MD_CTX_create();
+	EVP_MD_CTX_reset(ctx);
 	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC: encrypt: digest init failed");
@@ -68,7 +67,6 @@ mac_authencrypt(
 	EVP_DigestUpdate(ctx, key, cache_secretsize);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
-	EVP_MD_CTX_destroy(ctx);
 	memmove((uint8_t *)pkt + length + 4, digest, len);
 	return (int)(len + 4);
 }
@@ -90,15 +88,14 @@ mac_authdecrypt(
 {
 	uint8_t	digest[EVP_MAX_MD_SIZE];
 	unsigned int	len;
-	EVP_MD_CTX *ctx;
+	EVP_MD_CTX *ctx = digest_ctx;
 
 	/*
 	 * Compute digest of key concatenated with packet. Note: the
 	 * key type and digest type have been verified when the key
 	 * was created.
 	 */
-	ssl_init();
-	ctx = EVP_MD_CTX_create();
+	EVP_MD_CTX_reset(ctx);
 	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC: decrypt: digest init failed");
@@ -107,7 +104,6 @@ mac_authdecrypt(
 	EVP_DigestUpdate(ctx, key, cache_secretsize);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
-	EVP_MD_CTX_destroy(ctx);
 	if ((unsigned int)size != len + 4) {
 		msyslog(LOG_ERR,
 		    "MAC: decrypt: MAC length error");
@@ -133,8 +129,6 @@ addr2refid(sockaddr_u *addr)
 
 	if (IS_IPV4(addr))
 		return (NSRCADR(addr));
-
-	ssl_init();
 
 	ctx = EVP_MD_CTX_create();
 #ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
