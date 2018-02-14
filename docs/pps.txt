@@ -2,8 +2,8 @@
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
-|image:pic/alice32.gif|
-[]{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+|image:pic/alice32.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
 
 Alice is trying to find the PPS signal connector.
 
