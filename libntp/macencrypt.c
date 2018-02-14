@@ -45,6 +45,7 @@ int
 mac_authencrypt(
 	int	type,		/* hash algorithm */
 	uint8_t	*key,		/* key pointer */
+	int	key_size,	/* key size */
 	uint32_t *pkt,		/* packet pointer */
 	int	length		/* packet length */
 	)
@@ -64,7 +65,7 @@ mac_authencrypt(
 		    "MAC: encrypt: digest init failed");
 		return (0);
 	}
-	EVP_DigestUpdate(ctx, key, cache_secretsize);
+	EVP_DigestUpdate(ctx, key, key_size);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
 	memmove((uint8_t *)pkt + length + 4, digest, len);
@@ -81,7 +82,8 @@ bool
 mac_authdecrypt(
 	int	type,		/* hash algorithm */
 	uint8_t	*key,		/* key pointer */
-	uint32_t	*pkt,		/* packet pointer */
+	int	key_size,	/* key size */
+	uint32_t	*pkt,	/* packet pointer */
 	int	length,	 	/* packet length */
 	int	size		/* MAC size */
 	)
@@ -101,7 +103,7 @@ mac_authdecrypt(
 		    "MAC: decrypt: digest init failed");
 		return false;
 	}
-	EVP_DigestUpdate(ctx, key, cache_secretsize);
+	EVP_DigestUpdate(ctx, key, key_size);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
 	if ((unsigned int)size != len + 4) {

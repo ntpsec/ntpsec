@@ -18,14 +18,6 @@ TEST_SETUP(authkeys) {
 	 */
 	authnumkeys = 0;
 
-	/*
-	 * Especially, empty the key cache!
-	 */
-	cache_keyid = 0;
-	cache_type = 0;
-	cache_flags = 0;
-	cache_secret = NULL;
-	cache_secretsize = 0;
 }
 
 TEST_TEAR_DOWN(authkeys) {}

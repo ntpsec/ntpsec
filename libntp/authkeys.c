@@ -85,11 +85,11 @@ int authnumfreekeys;
 /*
  * The key cache. We cache the last key we looked at here.
  */
-keyid_t	cache_keyid;			/* key identifier */
-uint8_t *cache_secret;			/* secret */
-unsigned short cache_secretsize;	/* secret length */
-int cache_type;				/* OpenSSL digest NID */
-unsigned short cache_flags;		/* flags that wave */
+static keyid_t	cache_keyid;		/* key identifier */
+static uint8_t *cache_secret;		/* secret */
+static unsigned short cache_secretsize;	/* secret length */
+static int cache_type;			/* OpenSSL digest NID */
+static unsigned short cache_flags;	/* flags that wave */
 
 
 /*
@@ -554,7 +554,9 @@ authencrypt(
 		return 0;
 	}
 
-	return mac_authencrypt(cache_type, cache_secret, pkt, length);
+	return mac_authencrypt(cache_type,
+		cache_secret, cache_secretsize,
+		pkt, length);
 }
 
 
@@ -581,5 +583,7 @@ authdecrypt(
 		return false;
 	}
 
-	return mac_authdecrypt(cache_type, cache_secret, pkt, length, size);
+	return mac_authdecrypt(cache_type,
+		cache_secret, cache_secretsize,
+		pkt, length, size);
 }

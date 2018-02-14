@@ -69,8 +69,8 @@ int ntp_getopt_long(int argc, char* const argv[], const char *optstring,
 		    const struct option *longopts, int *longindex);
 
 /* mac_md5encrypt.c */
-extern	bool	mac_authdecrypt	(int, uint8_t *, uint32_t *, int, int);
-extern	int	mac_authencrypt	(int, uint8_t *, uint32_t *, int);
+extern	bool	mac_authdecrypt	(int, uint8_t *, int, uint32_t *, int, int);
+extern	int	mac_authencrypt	(int, uint8_t *, int, uint32_t *, int);
 extern	void	mac_setkey	(keyid_t, int, const uint8_t *, size_t);
 extern	uint32_t	addr2refid	(sockaddr_u *);
 
@@ -143,15 +143,6 @@ extern unsigned int	authencryptions;	/* calls to encrypt */
 extern unsigned int	authdecryptions;	/* calls to decrypt */
 
 extern int	authnumfreekeys;
-
-/*
- * The key cache. We cache the last key we looked at here.
- */
-extern keyid_t		cache_keyid;		/* key identifier */
-extern int		cache_type;		/* key type */
-extern uint8_t *	cache_secret;		/* secret */
-extern unsigned short	cache_secretsize;	/* secret octets */
-extern unsigned short	cache_flags;		/* KEY_ bit flags */
 
 /* getopt.c */
 extern char *	ntp_optarg;		/* global argument pointer */

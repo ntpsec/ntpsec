@@ -32,12 +32,13 @@ TEST(macencrypt, Encrypt) {
 	memset(packetPtr+packetLength, 0, (size_t)keyIdLength);
 	memcpy(packetPtr, packet, (size_t)packetLength);
 
-	cache_secretsize = keyLength;
+	int length = mac_authencrypt(keytype,
+		(unsigned char*)key, keyLength,
+		(uint32_t*)packetPtr, packetLength);
 
-	int length = mac_authencrypt(keytype, (unsigned char*)key,
-                                     (uint32_t*)packetPtr, packetLength);
-
-	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (unsigned char*)key, (uint32_t*)packetPtr, packetLength, length));
+	TEST_ASSERT_TRUE(mac_authdecrypt(keytype,
+		(unsigned char*)key, keyLength,
+		(uint32_t*)packetPtr, packetLength, length));
 
 	TEST_ASSERT_EQUAL(20, length);
 //XXX	TEST_ASSERT_TRUE(memcmp(expectedPacket, packetPtr, totalLength) == 0);  Does not pass
@@ -45,19 +46,17 @@ TEST(macencrypt, Encrypt) {
 }
 
 TEST(macencrypt, DecryptValid) {
-	cache_secretsize = keyLength;
-
-	TEST_ASSERT_TRUE(mac_authdecrypt(keytype, (unsigned char*)key,
-                         (uint32_t*)expectedPacket, packetLength, 20));
+	TEST_ASSERT_TRUE(mac_authdecrypt(keytype,
+		(unsigned char*)key, keyLength,
+		(uint32_t*)expectedPacket, packetLength, 20));
 }
 
 TEST(macencrypt, DecryptInvalid) {
-	cache_secretsize = keyLength;
-
 	char invalidPacket[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
 
-	TEST_ASSERT_FALSE(mac_authdecrypt(keytype, (unsigned char*)key,
-                          (uint32_t*)invalidPacket, packetLength, 20));
+	TEST_ASSERT_FALSE(mac_authdecrypt(keytype,
+		(unsigned char*)key, keyLength,
+		(uint32_t*)invalidPacket, packetLength, 20));
 }
 
 TEST(macencrypt, IPv4AddressToRefId) {
