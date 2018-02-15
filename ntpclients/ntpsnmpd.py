@@ -635,6 +635,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
     # ========================================================================
 
     # Packet Mode Table
+    # These are left as stubs for now. Information is lacking on where the
+    # data should come from.
 
     def sub_statPktMode(self):
         pass

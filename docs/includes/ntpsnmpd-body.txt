@@ -41,4 +41,7 @@ The ntpEntTimeResolution OID currently uses data from the sys_fuzz variable
 as the base for it's calculations. It is by no means certain that this is
 the correct choice, and the returned data should be taken with scepticism.
 
+The ntpEntStatPktModeTable is unimplemented due to not currently having a
+data source.
+
 // end
