@@ -14,6 +14,12 @@
 #include "ntp_stdlib.h"
 #include "ntp.h"
 
+#ifndef EVP_MD_CTX_reset
+/* Slightly older version of OpenSSL */
+/* Similar hack in ssl_init.c */
+#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
+#endif
+
 /* ctmemeq - test two blocks memory for equality without leaking
  * timing information.
  *
