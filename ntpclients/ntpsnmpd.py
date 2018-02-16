@@ -41,7 +41,7 @@ DEFHOST = "localhost"  # For now only know how to talk to the local ntp
 
 
 class DataSource:  # This will be broken up in future to be less NTP-specific
-    def __init__(self):
+    def __init__(self, hostname=DEFHOST):
         node = ax.mibnode
         # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
@@ -250,7 +250,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                         # ntpEntNotifGroup NOTIFICATIONS {...}
                         3: node(None, None, True, None)})})}
         self.session = ntp.packet.ControlSession()
-        self.session.openhost(DEFHOST)  # only local for now
+        self.session.openhost(hostname)
         # Cache so we don't hammer ntpd, default 1 second timeout
         # Timeout default pulled from a hat: we don't want it to last for
         # long, just not flood ntpd when we don't need to.
