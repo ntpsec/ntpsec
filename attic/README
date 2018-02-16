@@ -7,6 +7,11 @@ documentation, alas.  Read the header comments.
 calc_tickadj::	Calculates "optimal" value for tick given ntp.drift file
 		Tested: 20160226
 
+digest-find.c::	Hack to see if various digests are supported by OpenSSL
+
+digest-timing.c:: Hack to measure execution times for various digests
+		and key lengths
+
 kern.c:: 	Header comment from deep in the mists of past time says:
 		"This program simulates a first-order, type-II
 		phase-lock loop using actual code segments from
