@@ -4,11 +4,15 @@
 
 == Synopsis ==
 
-+ntpsnmpd+ [+-ndDV+]
++ntpsnmpd+ [+-ndDV+] [ntp host]
 
 == Description ==
 
 +ntpsnmpd+ is an AgentX Simple Network Management Protocol sub-agent.
+
+It functions as a bridge between the Mode 6 protocol used for Network
+Time Protocol monitoring, and an SNMP master agent. The user must have
+running NTP and SNMP daemons for ntpsnmpd to work.
 
 == Options ==
 
