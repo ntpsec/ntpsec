@@ -1485,11 +1485,10 @@ def connect(address):
     return sock
 
 
-def mainloop(masterAddress=None, host=None):
+def mainloop(snmpSocket, host=None):
     dolog("initing loop\n", 1)
-    sock = connect(masterAddress)
     dbase = DataSource(host)
-    control = PacketControl(sock, dbase)
+    control = PacketControl(snmpSocket, dbase)
     control.loopCallback = dbase.checkNotifications
     control.initNewSession()
     control.mainloop(True)
@@ -1582,7 +1581,10 @@ if __name__ == "__main__":
 
     hostname = arguments[0] if arguments else DEFHOST
 
+    # Connect here so it can always report a connection error
+    sock = connect(masterAddr)
+
     if nofork is True:
-        mainloop(masterAddr, hostname)
+        mainloop(sock, hostname)
     else:
-        daemonize(mainloop, masterAddr, hostname)
+        daemonize(mainloop, sock, hostname)
