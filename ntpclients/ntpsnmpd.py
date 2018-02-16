@@ -250,7 +250,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                         # ntpEntNotifGroup NOTIFICATIONS {...}
                         3: node(None, None, True, None)})})}
         self.session = ntp.packet.ControlSession()
-        self.session.openhost(hostname)
+        self.hostname = hostname if hostname else DEFHOST
+        self.session.openhost(self.hostname)
         # Cache so we don't hammer ntpd, default 1 second timeout
         # Timeout default pulled from a hat: we don't want it to last for
         # long, just not flood ntpd when we don't need to.
@@ -1484,10 +1485,10 @@ def connect(address):
     return sock
 
 
-def mainloop(masterAddress=None):
+def mainloop(masterAddress=None, host=None):
     dolog("initing loop\n", 1)
     sock = connect(masterAddress)
-    dbase = DataSource()
+    dbase = DataSource(host)
     control = PacketControl(sock, dbase)
     control.loopCallback = dbase.checkNotifications
     control.initNewSession()
@@ -1519,7 +1520,7 @@ def daemonize(runfunc, *runArgs):
 
 
 usage = """
-USAGE: ntpsnmpd [-n]
+USAGE: ntpsnmpd [-n] [ntp host]
   Flg Arg Option-Name   Description
    -n no  no-fork         Do not fork and daemonize.
    -x Adr master-addr     Specify address for connecting to the master agent
@@ -1579,7 +1580,9 @@ if __name__ == "__main__":
                 logfp.close()
             logfp = open(val, "a", 1)  # 1 => line buffered
 
+    hostname = arguments[0] if arguments else DEFHOST
+
     if nofork is True:
-        mainloop(masterAddr)
+        mainloop(masterAddr, hostname)
     else:
-        daemonize(mainloop, masterAddr)
+        daemonize(mainloop, masterAddr, hostname)
