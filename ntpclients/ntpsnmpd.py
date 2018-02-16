@@ -1538,9 +1538,9 @@ if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:],
-            "nx:dD:Vhl",
-            ["no-fork", "master-address", "debug-level", "set-debug-level",
-             "version", "help", "logfile"])
+            "nx:dD:Vhl:",
+            ["no-fork", "master-address=", "debug-level", "set-debug-level=",
+             "version", "help", "logfile="])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
