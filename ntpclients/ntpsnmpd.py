@@ -1526,8 +1526,10 @@ USAGE: ntpsnmpd [-n]
                                 - default /var/agentx/master
    -d no  debug-level     Increase output debug message level
                                 - may appear multiple times
+   -l Str logfile         Logs debug messages to the provided filename
    -D Int set-debug-level Set the output debug message level
                                 - may appear multiple times
+   -h no  help            Print a usage message.
    -V no  version         Output version information and exit
 """
 
@@ -1536,9 +1538,9 @@ if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:],
-            "nx:dD:V",
+            "nx:dD:Vhl",
             ["no-fork", "master-address", "debug-level", "set-debug-level",
-             "version"])
+             "version", "help", "logfile"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1564,6 +1566,13 @@ if __name__ == "__main__":
         elif switch in ("-V", "--version"):
             print("ntpsnmpd %s" % ntp.util.stdversion())
             raise SystemExit(0)
+        elif switch in ("-h", "--help"):
+            print(usage)
+            raise SystemExit(0)
+        elif switch in ("-l", "--logfile"):
+            if logfp != sys.stderr:
+                logfp.close()
+            logfp = open(val, "a", 1)  # 1 => line buffered
 
     if nofork is True:
         mainloop(masterAddr)
