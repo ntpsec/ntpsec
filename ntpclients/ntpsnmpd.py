@@ -1462,7 +1462,10 @@ class PacketControl:
 
 def dolog(text, level):
     if debug >= level:
-        logfp.write(text)
+        try:
+            logfp.write(text)
+        except:
+            pass
 
 
 def connect(address):
@@ -1504,9 +1507,6 @@ def daemonize(runfunc, *runArgs):
 
     os.umask(0)
 
-    global logfp
-    logfp = open(logfile, "a", 1)
-
     sid = os.setsid()
 
     # chdir should be here, change to what? root?
@@ -1547,6 +1547,7 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     masterAddr = "/var/agentx/master"  # Default NET-SNMP configuration
+    fileLogging = False
     for (switch, val) in options:
         if switch in ("-n", "--no-fork"):
             # currently non functional, as nofork is inited to True
@@ -1570,6 +1571,10 @@ if __name__ == "__main__":
             print(usage)
             raise SystemExit(0)
         elif switch in ("-l", "--logfile"):
+            logfile = val
+            fileLogging = True
+
+        if fileLogging is True:
             if logfp != sys.stderr:
                 logfp.close()
             logfp = open(val, "a", 1)  # 1 => line buffered
