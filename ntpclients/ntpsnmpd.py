@@ -28,7 +28,7 @@ ntp.util.deunicode_units()
 
 logfile = "ntpsnmpd.log"
 logfp = sys.stderr
-nofork = True  # don't daemonize while still under construction
+nofork = False
 debug = 0
 defaultTimeout = 30
 
@@ -389,7 +389,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         return self.readCallbackSkeletonSimple(oid, "precision",
                                                ax.VALUE_INTEGER)
 
-    def cbr_timeDistance(self, oid):  # DUMMY
+    def cbr_timeDistance(self, oid):
         # Displaystring
         data = self.safeReadvar(0, ["rootdist"], raw=True)
         if data is None:
@@ -844,7 +844,6 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
         if self.notifyHeartbeat is True:
             self.doNotifyHeartbeat(control)
-        # Test code
 
     def doNotifyModeChange(self, control):
         oldMode = self.oldValues.get("mode")
@@ -1042,7 +1041,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             return (adds, rms)
         return
 
-    def misc_getMode(self):  # DUMMY: not fully implemented
+    def misc_getMode(self):  # FIXME: not fully implemented
         try:
             # Don't care about the data, this is a ploy to the the rstatus
             self.session.readvar(0, ["stratum"])
@@ -1098,12 +1097,13 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             # This function assumes that it is a leaf node and that the
             # last number in the OID is the index.
             index = oid.subids[-1]  # if called properly this works (Ha!)
+            index -= 1 # SNMP reserves index 0, effectively 1-based lists
             associd = self.misc_getPeerIDs()[index]
             return handler(oid, associd)
         subs = {}
         associds = self.misc_getPeerIDs()  # need the peer count
         for i in range(len(associds)):
-            subs[i] = ax.mibnode(readCallback, None, None, None)
+            subs[i+1] = ax.mibnode(readCallback, None, None, None)
         return subs
 
     def readCallbackSkeletonSimple(self, oid, varname, dataType):
@@ -1434,7 +1434,6 @@ class PacketControl:
         else:
             resp = ax.ResponsePDU(True, self.sessionID, packet.transactionID,
                                   packet.packetID, 0, ax.ERR_NOERROR, 0)
-        print("About to send:", resp)
         self.sendPacket(resp, False)
 
     def handle_UndoSetPDU(self, packet):
