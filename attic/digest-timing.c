@@ -21,6 +21,14 @@
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 
+#ifndef EVP_MD_CTX_reset
+/* Slightly older version of OpenSSL */
+/* Similar hack in ssl_init.c */
+#define EVP_MD_CTX_new() EVP_MD_CTX_create()
+#define EVP_MD_CTX_free(ctx) EVP_MD_CTX_destroy(ctx)
+#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
+#endif
+
 
 /* Get timing for old slower way too.  Pre Feb 2018 */
 #define DoSLOW 1
@@ -42,21 +50,10 @@ void ssl_init(void)
 {
   ERR_load_crypto_strings();
   OpenSSL_add_all_digests();
-#ifdef EVP_MD_CTX_new
   ctx = EVP_MD_CTX_new();
-#else
-  ctx = EVP_MD_CTX_create();
-#endif
 }
 
-unsigned int SSL_Digest(
-  const EVP_MD *digest,   /* hash algorithm */
-  uint8_t *key,           /* key pointer */
-  int     keylength,       /* key size */
-  uint8_t *pkt,           /* packet pointer */
-  int     pktlength       /* packet length */
-);
-unsigned int SSL_Digest(
+static unsigned int SSL_Digest(
   const EVP_MD *digest,   /* hash algorithm */
   uint8_t *key,           /* key pointer */
   int     keylength,       /* key size */
@@ -65,25 +62,15 @@ unsigned int SSL_Digest(
 ) {
   unsigned char answer[EVP_MAX_MD_SIZE];
   unsigned int len;
-#ifdef EVP_MD_CTX_reset
   EVP_MD_CTX_reset(ctx);
-#else
-  EVP_MD_CTX_init(ctx);
-#endif
   EVP_DigestInit(ctx, digest);
   EVP_DigestUpdate(ctx, key, keylength);
   EVP_DigestUpdate(ctx, pkt, pktlength);
   EVP_DigestFinal(ctx, answer, &len);
   return len;
 }
-unsigned int SSL_DigestSlow(
-  int type,               /* hash algorithm */
-  uint8_t *key,           /* key pointer */
-  int     keylength,       /* key size */
-  uint8_t *pkt,           /* packet pointer */
-  int     pktlength       /* packet length */
-);
-unsigned int SSL_DigestSlow(
+
+static unsigned int SSL_DigestSlow(
   int type,               /* hash algorithm */
   uint8_t *key,           /* key pointer */
   int     keylength,       /* key size */
@@ -93,31 +80,16 @@ unsigned int SSL_DigestSlow(
   EVP_MD_CTX *ctxx;
   unsigned char answer[EVP_MAX_MD_SIZE];
   unsigned int len;
-#ifdef EVP_MD_CTX_new
   ctxx = EVP_MD_CTX_new();
-#else
-  ctxx = EVP_MD_CTX_create();
-#endif
   EVP_DigestInit(ctxx, EVP_get_digestbynid(type));
   EVP_DigestUpdate(ctxx, key, keylength);
   EVP_DigestUpdate(ctxx, pkt, pktlength);
   EVP_DigestFinal(ctxx, answer, &len);
-#ifdef EVP_MD_CTX_free
   EVP_MD_CTX_free(ctxx);
-#else
-  EVP_MD_CTX_destroy(ctxx);
-#endif
   return len;
 }
 
-void DoOne(
-  const char *name,       /* type of digest */
-  uint8_t *key,           /* key pointer */
-  int     keylength,      /* key size */
-  uint8_t *pkt,           /* packet pointer */
-  int     pktlength       /* packet length */
-);
-void DoOne(
+static void DoOne(
   const char *name,       /* type of digest */
   uint8_t *key,           /* key pointer */
   int     keylength,      /* key size */

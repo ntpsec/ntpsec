@@ -13,7 +13,7 @@
 
 #ifndef EVP_MD_CTX_new
 /* Slightly older version of OpenSSL */
-/* Similar hack in macencrypt.c */
+/* Similar hack in macencrypt.c and attic/digest-timing.c */
 #define EVP_MD_CTX_new() EVP_MD_CTX_create()
 #endif
 

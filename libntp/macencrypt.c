@@ -16,7 +16,7 @@
 
 #ifndef EVP_MD_CTX_reset
 /* Slightly older version of OpenSSL */
-/* Similar hack in ssl_init.c */
+/* Similar hack in ssl_init.c and attic/digest-timing.c */
 #define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
 #endif
 
