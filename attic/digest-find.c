@@ -31,7 +31,7 @@ const char* digests[] = {
   "MDC2", "GOST", "DSS1",
   NULL };
 
-int pkt[10];
+unsigned char pkt[100];
 int
 main (
 	int argc,
@@ -51,7 +51,7 @@ main (
 
   printf("      name type length\n");
   for (int i = 0; NULL != digests[i]; i++) {
-    uint8_t digest[EVP_MAX_MD_SIZE];
+    unsigned char digest[EVP_MAX_MD_SIZE];
     unsigned int length = 0;
     EVP_MD_CTX *ctx;
     int keytype;
@@ -70,7 +70,7 @@ main (
     /* libntp/macencrypt.c has an ifdef for this */
     EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
     EVP_DigestInit_ex(ctx, md, NULL);
-    EVP_DigestUpdate(ctx, (uint8_t *)pkt, sizeof(pkt));
+    EVP_DigestUpdate(ctx, pkt, sizeof(pkt));
     EVP_DigestFinal_ex(ctx, digest, &length);
     EVP_MD_CTX_destroy(ctx);
     printf("%10s %4d %6u\n", digests[i], keytype, length);
