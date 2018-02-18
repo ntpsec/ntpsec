@@ -2630,32 +2630,31 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(tuple(f({})), ())
         # Test flat, fully static tree
         self.assertEqual(tuple(f({0: {"reader": None, "writer": None,
-                                      "static": True, "subids": None},
+                                      "subids": None},
                                   1: {"reader": None, "writer": None,
-                                      "static": True, "subids": None},
+                                      "subids": None},
                                   2: {"reader": None, "writer": None,
-                                      "static": True, "subids": None},
+                                      "subids": None},
                                   5: {"reader": None, "writer": None,
-                                      "static": True, "subids": None}})),
+                                      "subids": None}})),
                          ((x.OID((0,)), None, None),
                           (x.OID((1,)), None, None),
                           (x.OID((2,)), None, None),
                           (x.OID((5,)), None, None)))
         # Test nested, fully static tree
         self.assertEqual(tuple(f({0: {"reader": None, "writer": None,
-                                      "static": True, "subids": None},
+                                      "subids": None},
                                   1: {"reader": None, "writer": None,
-                                      "static": True, "subids":
+                                      "subids":
                                       {0: {"reader": None, "writer": None,
-                                           "static": True, "subids": None},
+                                           "subids": None},
                                        1: {"reader": None, "writer": None,
-                                           "static": True, "subids":
+                                           "subids":
                                            {42: {"reader": None,
                                                  "writer": None,
-                                                 "static": True,
                                                  "subids": None}}}}},
                                   5: {"reader": None, "writer": None,
-                                      "static": True, "subids": None}})),
+                                      "subids": None}})),
                          ((x.OID((0,)), None, None),
                           (x.OID((1,)), None, None),
                           (x.OID((1, 0)), None, None),
@@ -2664,19 +2663,18 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           (x.OID((5,)), None, None)))
         # Test nested, fully static tree, with rootpath
         self.assertEqual(tuple(f({0: {"reader": None, "writer": None,
-                                      "static": True, "subids": None},
+                                      "subids": None},
                                   1: {"reader": None, "writer": None,
-                                      "static": True, "subids":
+                                      "subids":
                                       {0: {"reader": None, "writer": None,
-                                           "static": True, "subids": None},
+                                           "subids": None},
                                        1: {"reader": None, "writer": None,
-                                           "static": True, "subids":
+                                           "subids":
                                            {42: {"reader": None,
                                                  "writer": None,
-                                                 "static": True,
                                                  "subids": None}}}}},
                                   5: {"reader": None, "writer": None,
-                                      "static": True, "subids": None}},
+                                      "subids": None}},
                                  (23,))),
                          ((x.OID((23, 0)), None, None),
                           (x.OID((23, 1)), None, None),
@@ -2686,20 +2684,20 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           (x.OID((23, 5)), None, None)))
         # subid lambda for dynamic tree testing
         submaker = (lambda: {0: {"reader": None, "writer": None,
-                                 "static": True, "subids": None},
+                                 "subids": None},
                              1: {"reader": None, "writer": None,
-                                 "static": True, "subids":
+                                 "subids":
                                  {0: {"reader": None, "writer": None,
-                                      "static": True, "subids": None}}},
+                                      "subids": None}}},
                              2: {"reader": None, "writer": None,
-                                 "static": True, "subids": None}})
+                                 "subids": None}})
         # Test tree with dynamic nodes
         self.assertEqual(tuple(f({0: {"reader": None, "writer": None,
-                                      "static": True, "subids": None},
+                                      "subids": None},
                                   1: {"reader": None, "writer": None,
-                                      "static": False, "subids": submaker},
+                                      "subids": submaker},
                                   2: {"reader": None, "writer": None,
-                                      "static": True, "subids": None}})),
+                                      "subids": None}})),
                          ((x.OID((0,)), None, None),
                           (x.OID((1,)), None, None),
                           (x.OID((1, 0)), None, None),

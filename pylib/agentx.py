@@ -1297,8 +1297,8 @@ def decode_packet(data):
 
 def walkMIBTree(tree, rootpath=()):
     # Tree node formats:
-    # {"reader": <func>, "writer": <func>, "static": True, "subids": {.blah.}}
-    # {"reader": <func>, "writer": <func>, "static": False, "subids": <func>}
+    # {"reader": <func>, "writer": <func>, "subids": {.blah.}}
+    # {"reader": <func>, "writer": <func>, "subids": <func>}
     # The "subids" function in dynamic nodes must return an MIB tree
     nodeStack = []
     oidStack = []
@@ -1323,7 +1323,7 @@ def walkMIBTree(tree, rootpath=()):
             # Push current node, move down a level
             nodeStack.append((current, currentKeys, keyID, key))
             oidStack.append(key)
-            if current[key]["static"] is True:
+            if isinstance(current[key]["subids"], dict) is True:
                 current = current[key]["subids"]
             else:
                 current = current[key]["subids"]()  # Tree generator function
@@ -1340,9 +1340,8 @@ def walkMIBTree(tree, rootpath=()):
         keyID += 1
 
 
-def mibnode(reader, writer, static, subs):
-    return {"writer": writer, "reader": reader,
-            "static": static, "subids": subs}
+def mibnode(reader, writer, subs):
+    return {"writer": writer, "reader": reader, "subids": subs}
 
 
 def bits2Bools(bitString, cropLength=None):
