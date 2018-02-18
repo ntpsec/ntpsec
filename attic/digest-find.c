@@ -42,8 +42,9 @@ main (
   UNUSED_ARG(argc);
   UNUSED_ARG(argv);
 
-  unsigned int version = OPENSSL_VERSION_NUMBER;
-  printf("OpenSSL Version is %x\n", version);
+  unsigned int versionNumber = OPENSSL_VERSION_NUMBER;
+  const char *versionText = OPENSSL_VERSION_TEXT;
+  printf("OpenSSL Version is %x, %s\n", versionNumber, versionText);
 
   /* needed if OPENSSL_VERSION_NUMBER < 0x10100000L */
   OpenSSL_add_all_digests();
