@@ -37,7 +37,7 @@ ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
 snmpTrapOID = (1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0)
 snmpSysUptime = (1, 3, 6, 1, 2, 1, 1, 3, 0)
 
-DEFHOST = "localhost"  # For now only know how to talk to the local ntp
+DEFHOST = "localhost"
 
 
 class DataSource:  # This will be broken up in future to be less NTP-specific
@@ -571,9 +571,8 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
 
     ##########################
 
-    def cbr_entNotifMessage(self, oid):  # DUMMY
+    def cbr_entNotifMessage(self, oid):
         # utf8str
-        # Should probably either return null, or remove this handler.
         return ax.Varbind(ax.VALUE_OCTET_STR, oid, "no event")
 
     #########################
@@ -1268,7 +1267,8 @@ class PacketControl:
             self.packetLog[index] = packet
 
     def sendNotify(self, varbinds, context=None):
-        # DUMMY: packetID
+        # DUMMY packetID, does this need to change? or does the pktID only
+        # count relative to a given transaction ID?
         tid = self.highestTransactionID + 5  # +5 to avoid collisions
         self.highestTransactionID = tid
         pkt = ax.NotifyPDU(True, self.sessionID, tid, 1, varbinds, context)
