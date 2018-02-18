@@ -20,8 +20,7 @@
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 
-#include "ntp_types.h"
-
+#define UNUSED_ARG(arg)         ((void)(arg))
 
 
 const char* digests[] = {
@@ -44,7 +43,7 @@ main (
 
   unsigned int versionNumber = OPENSSL_VERSION_NUMBER;
   const char *versionText = OPENSSL_VERSION_TEXT;
-  printf("OpenSSL Version is %x, %s\n", versionNumber, versionText);
+  printf("OpenSSL xVersion is %x, %s\n", versionNumber, versionText);
 
   /* needed if OPENSSL_VERSION_NUMBER < 0x10100000L */
   OpenSSL_add_all_digests();
