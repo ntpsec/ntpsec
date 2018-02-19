@@ -14,8 +14,8 @@ import subprocess
 try:
     import ntp.packet
     import ntp.util
-    import ntp.agentx
-    ax = ntp.agentx
+    import ntp.agentx_packet
+    ax = ntp.agentx_packet
 except ImportError as e:
     sys.stderr.write(
         "ntpsnmpd: can't find Python NTP library.\n")
@@ -1173,15 +1173,15 @@ class PacketControl:
     def initNewSession(self):
         dolog("init new session...\n", 1)
         # We already have a connection, need to open a session.
-        openpkt = ntp.agentx.OpenPDU(True, 23, 0, 0, self.timeout, (),
-                                     "NTPsec SNMP subagent")
+        openpkt = ax.OpenPDU(True, 23, 0, 0, self.timeout, (),
+                             "NTPsec SNMP subagent")
         self.sendPacket(openpkt, False)
         dolog("Sent open packet\n", 1)
         response = self.waitForResponse(openpkt, True)
         self.sessionID = response.sessionID
         # Register the tree
-        register = ntp.agentx.RegisterPDU(True, self.sessionID, 1, 1,
-                                          self.timeout, 1, ntpRootOID)
+        register = ax.RegisterPDU(True, self.sessionID, 1, 1,
+                                  self.timeout, 1, ntpRootOID)
         self.sendPacket(register, False)
         dolog("Sent registration\n", 1)
         response = self.waitForResponse(register, True)
@@ -1193,7 +1193,7 @@ class PacketControl:
             while len(self.recievedPackets) > 0:
                 packet = self.recievedPackets.pop(0)
                 dolog("Waiting, got packet: " + repr(packet) + "\n\n", 3)
-                if packet.__class__ != ntp.agentx.ResponsePDU:
+                if packet.__class__ != ax.ResponsePDU:
                     continue
                 haveit = (opkt.transactionID == packet.transactionID) and \
                          (opkt.packetID == packet.packetID)
@@ -1211,7 +1211,7 @@ class PacketControl:
             if datalen < 20:
                 return None  # We don't even have a packet header, bail
             try:
-                pkt, extraData = ntp.agentx.decode_packet(self.recievedData)
+                pkt, extraData = ax.decode_packet(self.recievedData)
                 self.recievedData = extraData
                 self.recievedPackets.append(pkt)
                 if pkt.transactionID > self.highestTransactionID:

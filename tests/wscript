@@ -127,7 +127,7 @@ def build(ctx):
         os.symlink(pypath.abspath(), linkpath.abspath())
 
     pytests = ["pylib/test_util.py",
-               "pylib/test_agentx.py",
+               "pylib/test_agentx_packet.py",
                "pylib/test_packet.py",
                "pylib/test_statfiles.py"]
 
