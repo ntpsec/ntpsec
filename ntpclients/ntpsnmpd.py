@@ -43,8 +43,9 @@ snmpSysUptime = (1, 3, 6, 1, 2, 1, 1, 3, 0)
 DEFHOST = "localhost"
 
 
-class DataSource:  # This will be broken up in future to be less NTP-specific
+class DataSource(ntp.agentx.MIBControl):
     def __init__(self, hostname=DEFHOST):
+        ntp.agentx.MIBControl.__init__(self)
         # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
@@ -226,6 +227,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                  }}
             }
         }
+        self.mibRoot = ntpRootOID
         self.session = ntp.packet.ControlSession()
         self.hostname = hostname if hostname else DEFHOST
         self.session.openhost(self.hostname)
@@ -235,11 +237,6 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.cache = ntp.util.Cache(1)
         self.oldValues = {}  # Used by notifications to detect changes
         self.lastHeartbeat = 0  # Timestamp used for heartbeat notifications
-        # The undo system is only for the last operation
-        self.inSetP = False  # Are we currently in the set procedure?
-        self.setVarbinds = []  # Varbind of the current set operation
-        self.setHandlers = []  # Handlers for commit/undo/cleanup of set
-        self.setUndoData = []  # Previous values for undoing
         self.heartbeatInterval = 0  # should save to disk
         self.sentNotifications = 0
         # Notify bits, they control whether the daemon sends notifications.
@@ -252,91 +249,6 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         self.notifyConfigChange = False  # 6 [This is not implemented]
         self.notifyLeapSecondAnnounced = False  # 7
         self.notifyHeartbeat = False  # 8
-
-    def rootOID(self):
-        return ntpRootOID
-
-    def rangeSubid(self):
-        return 0
-
-    def upperBound(self):
-        return None
-
-    def context(self):
-        return None
-
-    def getOID_core(self, nextP, searchoid, returnGenerator=False):
-        gen = ax.walkMIBTree(self.oidTree, ntpRootOID)
-        while True:
-            try:
-                oid, reader, writer = gen.next()
-                if nextP is True:  # GetNext
-                    # For getnext any OID greater than the start qualifies
-                    oidhit = (oid > searchoid)
-                else:  # Get
-                    # For get we need a *specific* OID
-                    oidhit = (oid.subids == searchoid.subids)
-                if oidhit and (reader is not None):
-                    # We only return OIDs that have a minimal implementation
-                    # walkMIBTree handles the generation of dynamic trees
-                    if returnGenerator is True:
-                        return oid, reader, writer, gen
-                    else:
-                        return oid, reader, writer
-            except StopIteration:  # Couldn't find anything in the tree
-                if returnGenerator is True:
-                    return None, None, None, None
-                else:
-                    return None, None, None
-
-    # These exist instead of just using getOID_core so semantics are clearer
-    def getOID(self, searchoid, returnGenerator=False):
-        "Get the requested OID"
-        return self.getOID_core(False, searchoid, returnGenerator)
-
-    def getNextOID(self, searchoid, returnGenerator=False):
-        "Get the next lexicographical OID"
-        return self.getOID_core(True, searchoid, returnGenerator)
-
-    def getOIDsInRange(self, oidrange, firstOnly=False):
-        "Get a list of every (optionally the first) OID in a range"
-        oids = []
-        gen = ax.walkMIBTree(self.oidTree, ntpRootOID)
-        # Find the first OID
-        while True:
-            try:
-                oid, reader, writer = gen.next()
-                if reader is None:
-                    continue  # skip unimplemented OIDs
-                elif oid.subids == oidrange.start.subids:
-                    # ok, found the start, do we need to skip it?
-                    if oidrange.start.include is True:
-                        oids.append((oid, reader, writer))
-                        break
-                    else:
-                        continue
-                elif oid > oidrange.start:
-                    # If we are here it means we hit the start but skipped
-                    oids.append((oid, reader, writer))
-                    break
-            except StopIteration:
-                # Couldn't find *anything*
-                return []
-        if firstOnly is True:
-            return oids
-        # Start filling in the rest of the range
-        while True:
-            try:
-                oid, reader = gen.next()
-                if reader is None:
-                    continue  # skip unimplemented OIDs
-                elif (oidrange.end is not None) and (oid >= oidrange.end):
-                    break  # past the end of a bounded range
-                else:
-                    oids.append((oid, reader, writer))
-            except StopIteration:
-                break  # We have run off the end of the MIB
-        return oids
 
     # =============================================================
     # Data read callbacks start here

@@ -20,6 +20,101 @@ except ImportError as e:
 defaultTimeout = 30
 
 
+class MIBControl:
+    def __init__(self):
+        # The undo system is only for the last operation
+        self.inSetP = False  # Are we currently in the set procedure?
+        self.setVarbinds = []  # Varbind of the current set operation
+        self.setHandlers = []  # Handlers for commit/undo/cleanup of set
+        self.setUndoData = []  # Previous values for undoing
+        self.mibRoot = ()
+
+    def rootOID(self):
+        return self.mibRoot
+
+    def rangeSubid(self):
+        return 0
+
+    def upperBound(self):
+        return None
+
+    def context(self):
+        return None
+
+    def getOID_core(self, nextP, searchoid, returnGenerator=False):
+        gen = ax.walkMIBTree(self.oidTree, self.mibRoot)
+        while True:
+            try:
+                oid, reader, writer = gen.next()
+                if nextP is True:  # GetNext
+                    # For getnext any OID greater than the start qualifies
+                    oidhit = (oid > searchoid)
+                else:  # Get
+                    # For get we need a *specific* OID
+                    oidhit = (oid.subids == searchoid.subids)
+                if oidhit and (reader is not None):
+                    # We only return OIDs that have a minimal implementation
+                    # walkMIBTree handles the generation of dynamic trees
+                    if returnGenerator is True:
+                        return oid, reader, writer, gen
+                    else:
+                        return oid, reader, writer
+            except StopIteration:  # Couldn't find anything in the tree
+                if returnGenerator is True:
+                    return None, None, None, None
+                else:
+                    return None, None, None
+
+    # These exist instead of just using getOID_core so semantics are clearer
+    def getOID(self, searchoid, returnGenerator=False):
+        "Get the requested OID"
+        return self.getOID_core(False, searchoid, returnGenerator)
+
+    def getNextOID(self, searchoid, returnGenerator=False):
+        "Get the next lexicographical OID"
+        return self.getOID_core(True, searchoid, returnGenerator)
+
+    def getOIDsInRange(self, oidrange, firstOnly=False):
+        "Get a list of every (optionally the first) OID in a range"
+        oids = []
+        gen = ax.walkMIBTree(self.oidTree, self.mibRoot)
+        # Find the first OID
+        while True:
+            try:
+                oid, reader, writer = gen.next()
+                if reader is None:
+                    continue  # skip unimplemented OIDs
+                elif oid.subids == oidrange.start.subids:
+                    # ok, found the start, do we need to skip it?
+                    if oidrange.start.include is True:
+                        oids.append((oid, reader, writer))
+                        break
+                    else:
+                        continue
+                elif oid > oidrange.start:
+                    # If we are here it means we hit the start but skipped
+                    oids.append((oid, reader, writer))
+                    break
+            except StopIteration:
+                # Couldn't find *anything*
+                return []
+        if firstOnly is True:
+            return oids
+        # Start filling in the rest of the range
+        while True:
+            try:
+                oid, reader = gen.next()
+                if reader is None:
+                    continue  # skip unimplemented OIDs
+                elif (oidrange.end is not None) and (oid >= oidrange.end):
+                    break  # past the end of a bounded range
+                else:
+                    oids.append((oid, reader, writer))
+            except StopIteration:
+                break  # We have run off the end of the MIB
+        return oids
+
+
 class PacketControl:
     def __init__(self, sock, dbase, spinGap=0.001, timeout=defaultTimeout,
                  logfp=None, debugThreshold=0):
