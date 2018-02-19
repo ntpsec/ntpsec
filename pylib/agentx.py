@@ -21,25 +21,29 @@ defaultTimeout = 30
 
 
 class MIBControl:
-    def __init__(self):
+    def __init__(self, mibRoot=(), rangeSubid=0, upperBound=None,
+                 mibContext=None):
         # The undo system is only for the last operation
         self.inSetP = False  # Are we currently in the set procedure?
         self.setVarbinds = []  # Varbind of the current set operation
         self.setHandlers = []  # Handlers for commit/undo/cleanup of set
         self.setUndoData = []  # Previous values for undoing
-        self.mibRoot = ()
+        self.mibRoot = mibRoot
+        self.rangeSubid = rangeSubid
+        self.upperBound = upperBound
+        self.context = mibContext
 
-    def rootOID(self):
+    def mib_rootOID(self):
         return self.mibRoot
 
-    def rangeSubid(self):
-        return 0
+    def mib_rangeSubid(self):
+        return self.rangeSubid
 
-    def upperBound(self):
-        return None
+    def mib_upperBound(self):
+        return self.upperBound
 
-    def context(self):
-        return None
+    def mib_context(self):
+        return self.context
 
     def getOID_core(self, nextP, searchoid, returnGenerator=False):
         gen = ax.walkMIBTree(self.oidTree, self.mibRoot)
@@ -184,10 +188,10 @@ class PacketControl:
         self.sessionID = response.sessionID
         # Register the tree
         register = ax.RegisterPDU(True, self.sessionID, 1, 1, self.timeout, 1,
-                                  self.database.rootOID(),
-                                  self.database.rangeSubid(),
-                                  self.database.upperBound(),
-                                  self.database.context())
+                                  self.database.mib_rootOID(),
+                                  self.database.mib_rangeSubid(),
+                                  self.database.mib_upperBound(),
+                                  self.database.mib_context())
         self.sendPacket(register, False)
         self.log("Sent registration\n", 1)
         response = self.waitForResponse(register, True)

@@ -45,7 +45,7 @@ DEFHOST = "localhost"
 
 class DataSource(ntp.agentx.MIBControl):
     def __init__(self, hostname=DEFHOST):
-        ntp.agentx.MIBControl.__init__(self)
+        ntp.agentx.MIBControl.__init__(self, mibRoot=ntpRootOID)
         # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
@@ -227,7 +227,6 @@ class DataSource(ntp.agentx.MIBControl):
                  }}
             }
         }
-        self.mibRoot = ntpRootOID
         self.session = ntp.packet.ControlSession()
         self.hostname = hostname if hostname else DEFHOST
         self.session.openhost(self.hostname)
