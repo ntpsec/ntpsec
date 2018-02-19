@@ -1318,15 +1318,16 @@ def walkMIBTree(tree, rootpath=()):
                 return
         key = currentKeys[keyID]
         oid = OID(rootpath + tuple(oidStack) + (key,))
-        yield (oid, current[key]["reader"], current[key]["writer"])
-        if current[key]["subids"] is not None:
+        yield (oid, current[key].get("reader"), current[key].get("writer"))
+        subs = current[key].get("subids")
+        if subs is not None:
             # Push current node, move down a level
             nodeStack.append((current, currentKeys, keyID, key))
             oidStack.append(key)
-            if isinstance(current[key]["subids"], dict) is True:
-                current = current[key]["subids"]
+            if isinstance(subs, dict) is True:
+                current = subs
             else:
-                current = current[key]["subids"]()  # Tree generator function
+                current = subs()  # Tree generator function
                 if current == {}:  # no dynamic subids, pop
                     current, currentKeys, keyID, key = nodeStack.pop()
                     oidStack.pop()

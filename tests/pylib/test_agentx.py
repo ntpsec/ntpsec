@@ -2631,8 +2631,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         # Test flat, fully static tree
         self.assertEqual(tuple(f({0: {"reader": None, "writer": None,
                                       "subids": None},
-                                  1: {"reader": None, "writer": None,
-                                      "subids": None},
+                                  1: {},
                                   2: {"reader": None, "writer": None,
                                       "subids": None},
                                   5: {"reader": None, "writer": None,
