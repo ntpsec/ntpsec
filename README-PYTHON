@@ -7,7 +7,7 @@ The default location where we install our python libraries is
 where X and Y are the python version numbers.
 
 Unfortunately, that's not on the default search path of several
-OSes/distros, in paritcular Fedora and NetBSD.
+OSes/distros, in particular Fedora and NetBSD.
 
 
 Python has a search path that is used to find library modules when
