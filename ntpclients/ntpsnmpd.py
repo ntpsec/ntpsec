@@ -103,8 +103,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                         2: node(self.cbr_statusStratum, None, None),
                         # ntpEntStatusActiveRefSourceId
                         #  uint32 (0..99999)
-                        3: node(self.cbr_statusActiveRefSourceID,
-                                None, None),
+                        3: node(self.cbr_statusActiveRefSourceID, None, None),
                         # ntpEntStatusActiveRefSourceName utf8str
                         4: node(self.cbr_statusActiveRefSourceName,
                                 None, None),
@@ -112,8 +111,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                         5: node(self.cbr_statusActiveOffset, None, None),
                         # ntpEntStatusNumberOfRefSources
                         #  unit32 (0..99)
-                        6: node(self.cbr_statusNumRefSources,
-                                None, None),
+                        6: node(self.cbr_statusNumRefSources, None, None),
                         # ntpEntStatusDispersion DisplayString
                         7: node(self.cbr_statusDispersion, None, None),
                         # ntpEntStatusEntityUptime TimeTicks
@@ -124,8 +122,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                         10: node(self.cbr_statusLeapSecond, None, None),
                         # ntpEntStatusLeapSecondDirection
                         #  int32 (-1..1)
-                        11: node(self.cbr_statusLeapSecDirection,
-                                 None, None),
+                        11: node(self.cbr_statusLeapSecDirection, None, None),
                         # ntpEntStatusInPkts Counter32
                         12: node(self.cbr_statusInPkts, None, None),
                         # ntpEntStatusOutPkts Counter32
@@ -133,11 +130,9 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                         # ntpEntStatusBadVersion Counter32
                         14: node(self.cbr_statusBadVersion, None, None),
                         # ntpEntStatusProtocolError Counter32
-                        15: node(self.cbr_statusProtocolError,
-                                 None, None),
+                        15: node(self.cbr_statusProtocolError, None, None),
                         # ntpEntStatusNotifications Counter32
-                        16: node(self.cbr_statusNotifications,
-                                 None, None),
+                        16: node(self.cbr_statusNotifications, None, None),
                         # ntpEntStatPktModeTable
                         #  SEQUENCE of NtpEntStatPktModeEntry
                         17:
@@ -162,36 +157,28 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                              {1:
                               node(None, None,
                                    # ntpAssocId uint32 (1..99999)
-                                   {1: node(None, None,
-                                            self.sub_assocID),
+                                   {1: node(None, None, self.sub_assocID),
                                     # ntpAssocName utf8str
-                                    2: node(None, None,
-                                            self.sub_assocName),
+                                    2: node(None, None, self.sub_assocName),
                                     # ntpAssocRefId DisplayString
-                                    3: node(None, None,
-                                            self.sub_assocRefID),
+                                    3: node(None, None, self.sub_assocRefID),
                                     # ntpAssocAddressType
                                     #  InetAddressType
                                     4: node(None, None,
                                             self.sub_assocAddrType),
                                     # ntpAssocAddress
                                     #  InetAddress SIZE (4|8|16|20)
-                                    5: node(None, None,
-                                            self.sub_assocAddr),
+                                    5: node(None, None, self.sub_assocAddr),
                                     # ntpAssocOffset DisplayString
-                                    6: node(None, None,
-                                            self.sub_assocOffset),
+                                    6: node(None, None, self.sub_assocOffset),
                                     # ntpAssocStratum NtpStratum
-                                    7: node(None, None,
-                                            self.sub_assocStratum),
+                                    7: node(None, None, self.sub_assocStratum),
                                     # ntpAssocStatusJitter
                                     #  DisplayString
-                                    8: node(None, None,
-                                            self.sub_assocJitter),
+                                    8: node(None, None, self.sub_assocJitter),
                                     # ntpAssocStatusDelay
                                     #  DisplayString
-                                    9: node(None, None,
-                                            self.sub_assocDelay),
+                                    9: node(None, None, self.sub_assocDelay),
                                     # ntpAssocStatusDispersion
                                     #  DisplayString
                                     10: node(None, None,
@@ -228,8 +215,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
                   5:
                   node(None, None,
                        # ntpEntNotifMessage utf8str
-                       {1: node(self.cbr_entNotifMessage,
-                                None, None)})}),
+                       {1: node(self.cbr_entNotifMessage, None, None)})}),
             # ntpEntConformance
             2:
             node(None, None,
@@ -1097,7 +1083,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
             # This function assumes that it is a leaf node and that the
             # last number in the OID is the index.
             index = oid.subids[-1]  # if called properly this works (Ha!)
-            index -= 1 # SNMP reserves index 0, effectively 1-based lists
+            index -= 1  # SNMP reserves index 0, effectively 1-based lists
             associd = self.misc_getPeerIDs()[index]
             return handler(oid, associd)
         subs = {}
@@ -1465,7 +1451,7 @@ def dolog(text, level):
     if debug >= level:
         try:
             logfp.write(text)
-        except:
+        except Exception:
             pass
 
 
