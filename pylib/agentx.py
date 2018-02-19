@@ -21,8 +21,9 @@ defaultTimeout = 30
 
 
 class MIBControl:
-    def __init__(self, mibRoot=(), rangeSubid=0, upperBound=None,
+    def __init__(self, oidTree, mibRoot=(), rangeSubid=0, upperBound=None,
                  mibContext=None):
+        self.oidTree = oidTree  # contains callbacks for the MIB
         # The undo system is only for the last operation
         self.inSetP = False  # Are we currently in the set procedure?
         self.setVarbinds = []  # Varbind of the current set operation
