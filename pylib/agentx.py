@@ -1341,10 +1341,6 @@ def walkMIBTree(tree, rootpath=()):
         keyID += 1
 
 
-def mibnode(reader, writer, subs):
-    return {"writer": writer, "reader": reader, "subids": subs}
-
-
 def bits2Bools(bitString, cropLength=None):
     bits = []
     for octet in bitString:

@@ -42,7 +42,6 @@ DEFHOST = "localhost"
 
 class DataSource:  # This will be broken up in future to be less NTP-specific
     def __init__(self, hostname=DEFHOST):
-        node = ax.mibnode
         # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
@@ -1078,7 +1077,7 @@ class DataSource:  # This will be broken up in future to be less NTP-specific
         subs = {}
         associds = self.misc_getPeerIDs()  # need the peer count
         for i in range(len(associds)):
-            subs[i+1] = ax.mibnode(readCallback, None, None)
+            subs[i+1] = {"reader": readCallback}
         return subs
 
     def readCallbackSkeletonSimple(self, oid, varname, dataType):
