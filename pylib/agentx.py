@@ -18,6 +18,7 @@ except ImportError as e:
 
 
 defaultTimeout = 30
+pingTime = 60
 
 
 class MIBControl:
@@ -139,6 +140,7 @@ class PacketControl:
         self.timeout = timeout
         self.sessionID = None  # need this for all packets
         self.highestTransactionID = 0  # used for exchanges we start
+        self.lastReception = None
         # indexed on pdu code
         self.pduHandlers = {ax.PDU_GET: self.handle_GetPDU,
                             ax.PDU_GET_NEXT: self.handle_GetNextPDU,
@@ -146,7 +148,8 @@ class PacketControl:
                             ax.PDU_TEST_SET: self.handle_TestSetPDU,
                             ax.PDU_COMMIT_SET: self.handle_CommitSetPDU,
                             ax.PDU_UNDO_SET: self.handle_UndoSetPDU,
-                            ax.PDU_CLEANUP_SET: self.handle_CleanupSetPDU}
+                            ax.PDU_CLEANUP_SET: self.handle_CleanupSetPDU,
+                            ax.PDU_RESPONSE: self.handle_ResponsePDU}
 
     def mainloop(self, runforever):
         if runforever:
@@ -177,8 +180,12 @@ class PacketControl:
             else:
                 self.log("dropping packet type %i, not implemented\n" % ptype,
                          1)
+        self.checkResponses()
+        currentTime = time.time()
+        if (currentTime - self.lastReception) > pingTime:
+            self.sendPing()
 
-    def initNewSession(self): # WORKING
+    def initNewSession(self):
         self.log("init new session...\n", 1)
         # We already have a connection, need to open a session.
         openpkt = ax.OpenPDU(True, 23, 0, 0, self.timeout, (),
@@ -214,6 +221,16 @@ class PacketControl:
                     return packet
             time.sleep(self.spinGap)
 
+    def checkResponses(self):
+        "Check for expected responses that have timed out"
+        currentTime = time.time()
+        for key in self.packetLog.keys():
+            timeout, originalPkt, callback = self.packetLog[key]
+            if currentTime > timeout:
+                if callback is not None:
+                    callback(None, originalPkt)
+                del self.packetLog[key]
+
     def packetEater(self):
         "Slurps data from the input buffer and tries to parse packets from it"
         self.pollSocket()
@@ -241,7 +258,8 @@ class PacketControl:
                 #  whole buffer if too many failures in a row?
                 self.receivedData = e.remainingData
 
-    def sendPacket(self, packet, expectsReply):
+    def sendPacket(self, packet, expectsReply, replyTimeout=defaultTimeout,
+                   callback=None):
         encoded = packet.encode()
         self.log("\nsending packet: %s\n%s \n" % (repr(packet), repr(encoded)),
                  4)
@@ -250,7 +268,16 @@ class PacketControl:
             index = (packet.sessionID,
                      packet.transactionID,
                      packet.packetID)
-            self.packetLog[index] = packet
+            self.packetLog[index] = (replyTimeout, packet, callback)
+
+    def sendPing(self):
+        # DUMMY transactionID, does this count for Pings?
+        # DUMMY packetID, does this need to change? or does the pktID only
+        # count relative to a given transaction ID?
+        tid = self.highestTransactionID + 5  # +5 to avoid collisions
+        self.highestTransactionID = tid
+        pkt = ax.PingPDU(True, self.sessionID, tid, 1)
+        self.sendPacket(pkt, True)
 
     def sendNotify(self, varbinds, context=None):
         # DUMMY packetID, does this need to change? or does the pktID only
@@ -258,7 +285,7 @@ class PacketControl:
         tid = self.highestTransactionID + 5  # +5 to avoid collisions
         self.highestTransactionID = tid
         pkt = ax.NotifyPDU(True, self.sessionID, tid, 1, varbinds, context)
-        self.sendPacket(pkt, True)
+        self.sendPacket(pkt, True)  # TODO: callback
 
     def sendErrorResponse(self, errorHeader, errorType, errorIndex):
         err = ax.ResponsePDU(errorHeader["flags"]["bigEndian"],
@@ -280,6 +307,7 @@ class PacketControl:
             if len(newdata) > 0:
                 self.log("Received data: " + repr(newdata) + "\n", 4)
                 data += newdata
+                self.lastReception = time.time()
             else:
                 break
         self.recievedData += data
@@ -445,3 +473,15 @@ class PacketControl:
         for i in range(len(varbinds)):
             handlers[i]("clean", varbinds[i])
         self.database.inSetP = False
+
+    def handle_ResponsePDU(self, packet):
+        index = (packet.sessionID, packet.transactionID, packet.packetID)
+        if index in self.packetLog:
+            timeout, originalPkt, callback = self.packetLog[index]
+            del self.packetLog[index]
+            if callback is not None:
+                callback(packet, originalPkt)
+        else:
+            # Ok, response with no associated packet.
+            # Probably something that timed out.
+            pass
