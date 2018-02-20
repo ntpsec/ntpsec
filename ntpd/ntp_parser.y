@@ -424,7 +424,7 @@ option_int
 				$$ = create_attr_ival($1, $2);
 			} else {
 				$$ = NULL;
-				yyerror("fudge factor: stratum value out of boands, ignored");
+				yyerror("fudge factor: stratum value out of bounds, ignored");
 			}
 		}
 	;
