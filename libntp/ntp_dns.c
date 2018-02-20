@@ -54,12 +54,19 @@ bool dns_probe(struct peer* pp)
         sigset_t        block_mask, saved_sig_mask;
 	const char	* busy = "";
 
+	/* Comment out the next two lines to get (much) more
+	 * printout when we are busy.
+	 */
+        if (NULL != active)
+		return false;
+
 	if (NULL != active)
 		busy = ", busy";
 	msyslog(LOG_INFO, "DNS: dns_probe: %s, cast_flags:%x, flags:%x%s",
-		pp->hostname, pp->cast_flags, (unsigned int)pp->cfg.flags, busy);
-        if (NULL != active)
+		pp->hostname, pp->cast_flags, pp->cfg.flags, busy);
+        if (NULL != active)	/* normally redundant */
 		return false;
+
 	active = pp;
 
         sigfillset(&block_mask);
