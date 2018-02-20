@@ -555,14 +555,8 @@ class DataSource(ntp.agentx.MIBControl):
         return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocName(self):
-        def handler(oid, associd):
-            pdata = self.misc_getPeerData()
-            if pdata is None:
-                return None
-            peername = pdata[associd]["srcadr"][1]
-            peername = ntp.util.canonicalize_dns(peername)
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, peername)
-        return self.dynamicCallbackSkeleton(handler)
+        return self.dynamicCallbackPeerdata("srcadr", True,
+                                            ax.VALUE_OCTET_STR)
 
     def sub_assocRefID(self):
         def handler(oid, associd):
@@ -647,40 +641,20 @@ class DataSource(ntp.agentx.MIBControl):
         return self.dynamicCallbackSkeleton(handler)
 
     def sub_assocStratum(self):
-        def handler(oid, associd):
-            pdata = self.misc_getPeerData()
-            if pdata is None:
-                return None
-            stratum = pdata[associd]["stratum"][0]
-            return ax.Varbind(ax.VALUE_GAUGE32, oid, stratum)
-        return self.dynamicCallbackSkeleton(handler)
+        return self.dynamicCallbackPeerdata("stratum", False,
+                                            ax.VALUE_GAUGE32)
 
     def sub_assocJitter(self):
-        def handler(oid, associd):
-            pdata = self.misc_getPeerData()
-            if pdata is None:
-                return None
-            jitter = pdata[associd]["jitter"][1]
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, jitter)
-        return self.dynamicCallbackSkeleton(handler)
+        return self.dynamicCallbackPeerdata("jitter", True,
+                                            ax.VALUE_OCTET_STR)
 
     def sub_assocDelay(self):
-        def handler(oid, associd):
-            pdata = self.misc_getPeerData()
-            if pdata is None:
-                return None
-            delay = pdata[associd]["delay"][1]
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, delay)
-        return self.dynamicCallbackSkeleton(handler)
+        return self.dynamicCallbackPeerdata("delay", True,
+                                            ax.VALUE_OCTET_STR)
 
     def sub_assocDispersion(self):
-        def handler(oid, associd):
-            pdata = self.misc_getPeerData()
-            if pdata is None:
-                return None
-            dispersion = pdata[associd]["rootdisp"][1]
-            return ax.Varbind(ax.VALUE_OCTET_STR, oid, dispersion)
-        return self.dynamicCallbackSkeleton(handler)
+        return self.dynamicCallbackPeerdata("rootdisp", True,
+                                            ax.VALUE_OCTET_STR)
 
     def sub_assocStatInPkts(self):
         def handler(oid, associd):
@@ -990,6 +964,16 @@ class DataSource(ntp.agentx.MIBControl):
             return self.session.readvar(associd, varlist=variables, raw=raw)
         except ntp.packet.ControlException:
             return None
+
+    def dynamicCallbackPeerdata(self, variable, raw, valueType):
+        rawindex = 1 if raw is True else 0
+        def handler(oid, associd):
+            pdata = self.misc_getPeerData()
+            if pdata is None:
+                return None
+            value = pdata[associd][variable][rawindex]
+            return ax.Varbind(valueType, oid, value)
+        return self.dynamicCallbackSkeleton(handler)
 
     def dynamicCallbackSkeleton(self, handler):
         # Build a dynamic MIB tree, installing the provided handler in it
