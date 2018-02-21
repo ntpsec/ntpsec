@@ -1454,10 +1454,10 @@ static struct parse_clockinfo
 
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
-#define CLK_REALTYPE(x) ((int)(((x)->cfg.ttl) & 0x7F))
+#define CLK_REALTYPE(x) ((int)(((x)->cfg.mode) & 0x7F))
 /* carefull, CLK_TYPE() in refclock_trimle.c is different */
 #define CLK_TYPE(x)	((CLK_REALTYPE(x) >= ncltypes) ? ~0 : CLK_REALTYPE(x))
-#define CLK_PPS(x)	(((x)->cfg.ttl) & 0x80)
+#define CLK_PPS(x)	(((x)->cfg.mode) & 0x80)
 
 /*
  * Other constant stuff
@@ -2524,7 +2524,7 @@ parse_start(
 	}
 
 #ifdef ENABLE_CLASSIC_MODE
-	peer->cfg.ttl = (peer->procptr->refclkunit & ~0x80) >> 2;
+	peer->cfg.mode = (peer->procptr->refclkunit & ~0x80) >> 2;
 	peer->procptr->refclkunit = peer->procptr->refclkunit & 0x03;
 #endif /* ENABLE_CLASSIC_MODE */
 

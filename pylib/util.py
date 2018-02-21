@@ -910,7 +910,7 @@ class PeerSummary:
         srchost = None
         srcport = 0
         stratum = 20
-        ttl = 0
+        mode = 0
         unreach = 0
         xmt = 0
 
@@ -1005,9 +1005,9 @@ class PeerSummary:
                 srcport = value
             elif name == "stratum":
                 stratum = value
-            elif name == "ttl":
-                # FIXME, ttl never used.
-                ttl = value
+            elif name == "mode":
+                # FIXME, mode never used.
+                mode = value
             elif name == "unreach":
                 # FIXME, unreach never used.
                 unreach = value

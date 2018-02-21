@@ -746,7 +746,7 @@ handle_manycast(
 	mctl.flags = FLAG_PREEMPT | (FLAG_IBURST & mpeer->cfg.flags);
 	mctl.minpoll = mpeer->cfg.minpoll;
 	mctl.maxpoll = mpeer->cfg.maxpoll;
-	mctl.ttl = 0;
+	mctl.mode = 0;
 	mctl.peerkey = mpeer->cfg.peerkey;
 	newpeer(&rbufp->recv_srcadr, NULL, rbufp->dstadr,
 		MODE_CLIENT, &mctl, MDF_UCAST | MDF_UCLNT, false);
@@ -2498,7 +2498,7 @@ dns_take_pool(
 	pctl.minpoll = pool->cfg.minpoll;
 	pctl.maxpoll = pool->cfg.maxpoll;
 	pctl.flags = FLAG_PREEMPT | (FLAG_IBURST & pool->cfg.flags);
-	pctl.ttl = 0;
+	pctl.mode = 0;
 	pctl.peerkey = 0;
 	peer = newpeer(rmtadr, NULL, lcladr,
 		       MODE_CLIENT, &pctl, MDF_UCAST | MDF_UCLNT, false);

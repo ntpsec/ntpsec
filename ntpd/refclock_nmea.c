@@ -393,7 +393,7 @@ nmea_start(
 
 
 	/* Old style: get baudrate choice from mode byte bits 4/5/6 */
-	rate = (peer->cfg.ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT;
+	rate = (peer->cfg.mode & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT;
 
 	/* New style: get baudrate from baud option */
 	if (peer->cfg.baud)
@@ -883,7 +883,7 @@ nmea_receive(
 		return;	/* not something we know about */
 
 	/* Eventually output delay measurement now. */
-	if (peer->cfg.ttl & NMEA_DELAYMEAS_MASK) {
+	if (peer->cfg.mode & NMEA_DELAYMEAS_MASK) {
 		mprintf_clock_stats(peer, "delay %0.6f %.*s",
 			 ldexp(lfpfrac(rd_timestamp), -32),
 			 (int)(strchr(rd_lastcode, ',') - rd_lastcode),
@@ -891,8 +891,8 @@ nmea_receive(
 	}
 	
 	/* See if I want to process this message type */
-	if ((peer->cfg.ttl & NMEA_MESSAGE_MASK) &&
-	    !(peer->cfg.ttl & sentence_mode[sentence])) {
+	if ((peer->cfg.mode & NMEA_MESSAGE_MASK) &&
+	    !(peer->cfg.mode & sentence_mode[sentence])) {
 		up->tally.filtered++;
 		return;
 	}
@@ -1176,7 +1176,7 @@ nmea_poll(
 	 * clockstats file; otherwise just do a normal clock stats
 	 * record. Clear the tally stats anyway.
 	*/
-	if (peer->cfg.ttl & NMEA_EXTLOG_MASK) {
+	if (peer->cfg.mode & NMEA_EXTLOG_MASK) {
 		/* Log & reset counters with extended logging */
 		const char *nmea = pp->a_lastcode;
 		if (*nmea == '\0') nmea = "(none)";
@@ -1841,7 +1841,7 @@ eval_gps_time(
 
 	/* If we fully trust the GPS receiver, just combine days and
 	 * seconds and be done. */
-	if (peer->cfg.ttl & NMEA_DATETRUST_MASK) {
+	if (peer->cfg.mode & NMEA_DATETRUST_MASK) {
 		setlfpuint(retv, time64lo(ntpcal_dayjoin(gps_day, gps_sec)));
 		return retv;
 	}

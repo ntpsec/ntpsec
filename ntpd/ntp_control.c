@@ -264,7 +264,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_SENT			33
 #define	CP_FILTERROR		34
 #define	CP_FLASH		35
-#define	CP_TTL			36
+#define	CP_MODE			36
 #define	CP_VARLIST		37
 #define	CP_IN			38
 #define	CP_OUT			39
@@ -484,7 +484,7 @@ static const struct ctl_var peer_var[] = {
 	{ CP_SENT,	RO, "sent" },		/* 33 */
 	{ CP_FILTERROR,	RO, "filtdisp" },	/* 34 */
 	{ CP_FLASH,	RO, "flash" },		/* 35 */
-	{ CP_TTL,	RO, "ttl" },		/* 36 */
+	{ CP_MODE,	RO, "mode" },		/* 36 */
 	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
 	{ CP_IN,	RO, "in" },		/* 38 */
 	{ CP_OUT,	RO, "out" },		/* 39 */
@@ -531,7 +531,7 @@ static const uint8_t def_peer_var[] = {
 	CP_RATE,
 	CP_FLASH,
 	CP_KEYID,
-	CP_TTL,
+	CP_MODE,
 	CP_OFFSET,
 	CP_DELAY,
 	CP_DISPERSION,
@@ -2170,10 +2170,10 @@ ctl_putpeer(
 		ctl_puthex(peer_var[id].text, p->flash);
 		break;
 
-	case CP_TTL:
+	case CP_MODE:
 #ifdef REFCLOCK
 		if (p->cfg.flags & FLAG_REFCLOCK) {
-			ctl_putuint(peer_var[id].text, p->cfg.ttl);
+			ctl_putuint(peer_var[id].text, p->cfg.mode);
 			break;
 		}
 #endif

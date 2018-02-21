@@ -159,12 +159,12 @@ typedef struct __endpt {
  */
 struct peer_ctl {
 	uint8_t		version;
-	unsigned int	flags;
 	uint8_t		minpoll;
 	uint8_t		maxpoll;
-	uint32_t	ttl;
+	uint32_t	flags;
 	keyid_t		peerkey;
 	double		bias;
+	uint32_t	mode;	/* only used by refclocks */
 #ifdef REFCLOCK
 	uint32_t	baud;
 	char		*path;
@@ -214,10 +214,11 @@ struct peer_ctl {
  * we are peering with. Most of this stuff is from section 3.2 of the
  * spec.
  *
- * The ttl field is overloaded; it's used in the refclock case to pass
- * in a mode byte that may contain a baud rate or subtype. Splitting
- * this field would complicate some call sequences that are already
- * unpleasantly intricate.
+ * The mode field is overloaded; it's used in the refclock case to pass
+ * in a mode word that may contain a baud rate or subtype as well as flags.
+ * Splitting this field would complicate some call sequences that are
+ * already unpleasantly intricate.
+ * It used to be called ttl which was used by multicast which we dropped.
  */
 struct peer {
 	struct peer *p_link;	/* link pointer in free & peer lists */

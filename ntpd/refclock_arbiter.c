@@ -97,8 +97,8 @@
 #define MAXSTA		40		/* max length of status string */
 #define MAXPOS		80		/* max length of position string */
 
-#define COMMAND_HALT_BCAST ( (peer->cfg.ttl % 2) ? "O0" : "B0" )
-#define COMMAND_START_BCAST ( (peer->cfg.ttl % 2) ? "O5" : "B5" )
+#define COMMAND_HALT_BCAST ( (peer->cfg.mode % 2) ? "O0" : "B0" )
+#define COMMAND_START_BCAST ( (peer->cfg.mode % 2) ? "O5" : "B5" )
 
 /*
  * ARB unit control structure
@@ -181,14 +181,14 @@ arb_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
-	if (peer->cfg.ttl > 1) {
-		msyslog(LOG_NOTICE, "REFCLOCK ARBITER: Invalid mode %u", peer->cfg.ttl);
+	if (peer->cfg.mode > 1) {
+		msyslog(LOG_NOTICE, "REFCLOCK ARBITER: Invalid mode %u", peer->cfg.mode);
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
 		return false;
 	}
-	DPRINT(1, ("arbiter: mode = %u.\n", peer->cfg.ttl));
+	DPRINT(1, ("arbiter: mode = %u.\n", peer->cfg.mode));
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	return true;
 }

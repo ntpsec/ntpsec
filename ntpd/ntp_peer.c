@@ -562,11 +562,11 @@ peer_refresh_interface(
 	niface = select_peerinterface(p, &p->srcadr, NULL);
 
 	DPRINT(4, (
-		   "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
+		   "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x mode %u key %08x: new interface: ",
 		   p->dstadr == NULL ? "<null>" :
 		   socktoa(&p->dstadr->sin), socktoa(&p->srcadr), p->hmode,
 		   p->cfg.version, p->cfg.minpoll, p->cfg.maxpoll, p->cfg.flags, p->cast_flags,
-		   p->cfg.ttl, p->cfg.peerkey));
+		   p->cfg.mode, p->cfg.peerkey));
 	if (niface != NULL) {
 		DPRINT(4, (
 			   "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
@@ -766,10 +766,10 @@ newpeer(
 
 	restrict_source(&peer->srcadr, false, 0);
 	mprintf_event(PEVNT_MOBIL, peer, "assoc %d", peer->associd);
-	DPRINT(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
+	DPRINT(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x mode %u key %08x\n",
 		   latoa(peer->dstadr), socktoa(&peer->srcadr), peer->hmode,
 		   peer->cfg.version, peer->cfg.minpoll, peer->cfg.maxpoll, peer->cfg.flags,
-		   peer->cast_flags, peer->cfg.ttl, peer->cfg.peerkey));
+		   peer->cast_flags, peer->cfg.mode, peer->cfg.peerkey));
 	return peer;
 }
 

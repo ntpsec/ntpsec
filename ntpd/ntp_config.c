@@ -56,7 +56,6 @@
 /*
  * Selection algorithm tuning parameters
  */
-#define MAX_TTL		8	/* max ttl mapping vector size */
 
 /*
  * In the past, we told reference clocks from network peers by giving
@@ -681,17 +680,12 @@ create_peer_node(
 			break;
 
 		case T_Ttl:
-			if (option->value.u >= MAX_TTL) {
-				msyslog(LOG_ERR, "CONFIG: ttl: invalid argument");
-				errflag = true;
-			} else {
-				my_node->ctl.ttl = (uint8_t)option->value.u;
-			}
+			msyslog(LOG_ERR, "CONFIG: ttl, argument ignored");
 			break;
 
 		case T_Subtype:
 		case T_Mode:
-			my_node->ctl.ttl = option->value.u;
+			my_node->ctl.mode = option->value.u;
 			break;
 
 		case T_Key:
@@ -2658,7 +2652,7 @@ config_peers(
 	     client_ctl.minpoll = NTP_MINDPOLL;
 	     client_ctl.maxpoll = NTP_MAXPOLL_UNK;
 	     client_ctl.flags = FLAG_IBURST;
-	     client_ctl.ttl = 0;
+	     client_ctl.mode = 0;
 	     client_ctl.peerkey = 0;
 	     client_ctl.bias = 0;
 

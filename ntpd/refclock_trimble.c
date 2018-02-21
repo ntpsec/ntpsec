@@ -183,7 +183,7 @@ struct refclock refclock_trimble = {
 };
 
 /* Extract the clock type from the mode setting */
-#define CLK_TYPE(x) ((int)(((x)->cfg.ttl) & 0x7F))
+#define CLK_TYPE(x) ((int)(((x)->cfg.mode) & 0x7F))
 
 /* Supported clock types */
 #define CLK_PALISADE	0	/* Trimble Palisade */

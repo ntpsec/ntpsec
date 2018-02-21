@@ -656,7 +656,7 @@ modem_poll(
 	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-	switch (peer->cfg.ttl) {
+	switch (peer->cfg.mode) {
 
 	/*
 	 * In manual mode the calling program is activated by the ntpq

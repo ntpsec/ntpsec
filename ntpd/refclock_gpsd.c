@@ -559,7 +559,7 @@ gpsd_start(
 	LOGIF(CLOCKINFO,
 	      (LOG_NOTICE, "%s: startup, device is '%s'",
 	       refclock_name(peer), up->device));
-	up->mode = MODE_OP_MODE(peer->cfg.ttl);
+	up->mode = MODE_OP_MODE(peer->cfg.mode);
 	if (up->mode > MODE_OP_MAXVAL)
 		up->mode = 0;
 	if (unit >= 128)
@@ -783,9 +783,9 @@ gpsd_control(
 		up->pps_fudge = dtolfp(pp->fudgetime1);
 		up->ibt_fudge = dtolfp(pp->fudgetime2);
 
-		if (MODE_OP_MODE((uint32_t)up->mode ^ peer->cfg.ttl)) {
+		if (MODE_OP_MODE((uint32_t)up->mode ^ peer->cfg.mode)) {
 			leave_opmode(peer, up->mode);
-			up->mode = MODE_OP_MODE(peer->cfg.ttl);
+			up->mode = MODE_OP_MODE(peer->cfg.mode);
 			enter_opmode(peer, up->mode);
 		}
 	}
