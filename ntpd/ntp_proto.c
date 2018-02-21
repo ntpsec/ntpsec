@@ -137,7 +137,6 @@ static	double sys_clockhop;	/* clockhop threshold */
 static int leap_vote_ins;	/* leap consensus for insert */
 static int leap_vote_del;	/* leap consensus for delete */
 static	unsigned long	leapsec;	/* seconds to next leap (proximity class) */
-static int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 static int sys_survivors;		/* truest of the truechimers */
 
@@ -501,17 +500,7 @@ handle_fastxmit(
 	(void)peer;
 
 	if (rbufp->dstadr->flags & INT_MCASTOPEN) {
-		if (!sys_manycastserver) {
 			sys_restricted++;
-			return;
-		}
-
-		/* Do not bother responding to manycast requests if we
-		 * are not synchronized. */
-		if (sys_leap == LEAP_NOTINSYNC) {
-			sys_declined++;
-			return;
-		}
 	}
 
 	/* To prevent exposing an authentication oracle, only MAC
@@ -2841,7 +2830,6 @@ init_proto(const bool verbose)
 	measure_precision(verbose);
 	get_systime(&dummy);
 	sys_survivors = 0;
-	sys_manycastserver = 0;
 	sys_stattime = current_time;
 	orphwait = current_time + (unsigned long)sys_orphwait;
 	proto_clr_stats();
