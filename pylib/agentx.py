@@ -141,6 +141,7 @@ class PacketControl:
         self.sessionID = None  # need this for all packets
         self.highestTransactionID = 0  # used for exchanges we start
         self.lastReception = None
+        self.stillConnected = False
         # indexed on pdu code
         self.pduHandlers = {ax.PDU_GET: self.handle_GetPDU,
                             ax.PDU_GET_NEXT: self.handle_GetNextPDU,
@@ -152,14 +153,17 @@ class PacketControl:
                             ax.PDU_RESPONSE: self.handle_ResponsePDU}
 
     def mainloop(self, runforever):
+        if self.stillConnected is not True:
+            return False
         if runforever:
-            while True:
+            while self.stillConnected is True:
                 self._doloop()
                 if self.loopCallback is not None:
                     self.loopCallback(self)
                 time.sleep(self.spinGap)
         else:
             self._doloop()
+        return self.stillConnected
 
     def _doloop(self):
         # loop body split out to separate the one-shot/run-forever switches
@@ -181,9 +185,10 @@ class PacketControl:
                 self.log("dropping packet type %i, not implemented\n" % ptype,
                          1)
         self.checkResponses()
-        currentTime = time.time()
-        if (currentTime - self.lastReception) > pingTime:
-            self.sendPing()
+        if self.lastReception is not None:
+            currentTime = time.time()
+            if (currentTime - self.lastReception) > pingTime:
+                self.sendPing()
 
     def initNewSession(self):
         self.log("init new session...\n", 1)
@@ -203,6 +208,7 @@ class PacketControl:
         self.sendPacket(register, False)
         self.log("Sent registration\n", 1)
         response = self.waitForResponse(register, True)
+        self.stillConnected = True
 
     def waitForResponse(self, opkt, ignoreSID=False):
         "Wait for a response to a specific packet, dropping everything else"
@@ -277,6 +283,10 @@ class PacketControl:
         tid = self.highestTransactionID + 5  # +5 to avoid collisions
         self.highestTransactionID = tid
         pkt = ax.PingPDU(True, self.sessionID, tid, 1)
+        def callback(resp, orig):
+            if resp is None:  # Timed out. Need to restart the session.
+                # Er, problem: Can't handle reconnect from inside PacketControl
+                self.stillConnected = False
         self.sendPacket(pkt, True)
 
     def sendNotify(self, varbinds, context=None):
