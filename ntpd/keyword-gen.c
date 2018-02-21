@@ -25,7 +25,6 @@ struct key_tok ntp_keywords[] = {
 { "...",		T_Ellipsis,		FOLLBY_TOKEN },
 { "allpeers",		T_Allpeers,		FOLLBY_TOKEN },
 { "bias",		T_Bias,			FOLLBY_TOKEN },
-{ "broadcast",		T_Broadcast,		FOLLBY_STRING },
 { "baud",		T_Baud,			FOLLBY_TOKEN },
 { "clock",		T_Clock,		FOLLBY_STRING },
 { "ctl",		T_Ctl,			FOLLBY_TOKEN },
@@ -86,11 +85,9 @@ struct key_tok ntp_keywords[] = {
 { "minpoll",		T_Minpoll,		FOLLBY_TOKEN },
 { "mode",		T_Mode,			FOLLBY_TOKEN },
 { "noselect",		T_Noselect,		FOLLBY_TOKEN },
-{ "preempt",		T_Preempt,		FOLLBY_TOKEN },
 { "true",		T_True,			FOLLBY_TOKEN },
 { "prefer",		T_Prefer,		FOLLBY_TOKEN },
 { "subtype",		T_Subtype,		FOLLBY_TOKEN },
-{ "ttl",		T_Ttl,			FOLLBY_TOKEN },
 { "version",		T_Version,		FOLLBY_TOKEN },
 /*** MONITORING COMMANDS ***/
 /* stat */

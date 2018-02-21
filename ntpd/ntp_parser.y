@@ -58,7 +58,6 @@
 %token	<Integer>	T_Average
 %token	<Integer>	T_Baud
 %token	<Integer>	T_Bias
-%token	<Integer>	T_Broadcast
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
 %token	<Integer>	T_Ceiling
@@ -170,7 +169,6 @@
 %token	<Integer>	T_Pool
 %token	<Integer>	T_Ppspath
 %token	<Integer>	T_Port
-%token	<Integer>	T_Preempt
 %token	<Integer>	T_Prefer
 %token	<Integer>	T_Protostats
 %token	<Integer>	T_Rawstats
@@ -207,7 +205,6 @@
 %token	<Integer>	T_Trap
 %token	<Integer>	T_True
 %token	<Integer>	T_Trustedkey
-%token	<Integer>	T_Ttl
 %token	<Integer>	T_Type
 %token	<Integer>	T_U_int			/* Not a token */
 %token	<Integer>	T_Unit
@@ -360,7 +357,6 @@ client_type
 	:	T_Server
 	|	T_Pool
 	|	T_Peer
-	|	T_Broadcast
 	;
 
 address
@@ -408,7 +404,6 @@ option_flag_keyword
 	:	T_Burst
 	|	T_Iburst
 	|	T_Noselect
-	|	T_Preempt
 	|	T_Prefer
 	|	T_True
 	;
@@ -433,7 +428,6 @@ option_int_keyword
 	:	T_Key
 	|	T_Minpoll
 	|	T_Maxpoll
-	|	T_Ttl
 	|	T_Mode
 	|	T_Subtype
 	|	T_Version

@@ -139,7 +139,7 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
 |3565350575.154505763|NTP s                             |destination timestamp
 |0                   |0: OK, 1: insert pending, 2: delete pending, 3: not synced  |leap warning indicator
 |4                   |4 was current in 2012             |NTP version
-|4                   |3: client, 4: server, 5: broadcast|mode
+|4                   |3: client, 4: server, 6: ntpq     |mode
 |1                   |1-15, 16: not synced              |stratum
 |8                   |log~2~ seconds                    |poll
 |-21                 |log~2~ seconds                    |precision

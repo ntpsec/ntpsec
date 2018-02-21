@@ -87,9 +87,6 @@ a build-time switch, not a run-time one).
   has been removed from the NTPsec code as part of
   getting it fully IPv6-ready.
 
-* The ttl-hop option for broadcast mode has been removed from the
-  configuration grammar.  It was never actually implemented.
-
 * ntpq no longer has the +-i+/+--interactive+ option, as there was no
   situation in which it was meaningful.
 
@@ -113,10 +110,8 @@ codebase has been outright removed, with less than 5% new code added.
 * peer mode has been removed.  The keyword peer in ntp.conf is now
   just an alias for keyword server.
 
-* Broadcast- and multicast client modes, which are impossible to
-  secure, have been removed. Broadcast (but not multicast) service can
-  still be enabled, though this is a deprecated and unsupported mode
-  of operation and may be entirely removed in a future release.
+* Broadcast- and multicast modes, which are impossible to
+  secure, have been removed.
 
 * The authentication requirement for remote configuration commands
   (e.g., via +ntpq+) can no longer be disabled.

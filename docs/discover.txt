@@ -16,8 +16,6 @@ include::includes/hand.txt[]
 == Table of Contents ==
 
 * link:#assoc[Association Management]
-* link:#bcst[Broadcast/Multicast Scheme]
-* link:#mcst[Manycast Scheme]
 * link:#pool[Server Pool Scheme]
 
 '''''
@@ -83,85 +81,6 @@ Following is a summary of each scheme. Note that reference to option
 applies to the commands described on the link:confopt.html[Configuration
 Options] page. See that page for applicability and defaults.
 
-[[bcst]]
-== Broadcast/Multicast Scheme ==
-
-The broadcast/multicast scheme is deprecated in NTPsec due to
-irreparable security flaws. Client-side support has been removed.
-Server-side support for broadcast only remains present but may be
-removed in a future version, and its use is strongly discouraged.
-
-A broadcast server generates messages continuously at intervals by
-default 64 s and time-to-live by default 127. These defaults can be
-overridden by the +minpoll+ and +ttl+ options, respectively. Not all
-kernels support the +ttl+ option. A broadcast client responds to the
-first message received by waiting a randomized interval to avoid
-implosion at the server. It then polls the server in client/server mode
-using the +iburst+ option in order to quickly authenticate the server,
-calibrate the propagation delay and set the client clock. This normally
-results in a volley of six client/server exchanges at 2-s intervals
-during which both the synchronization and cryptographic protocols run
-concurrently.
-
-If for some reason the broadcast server does not
-respond to these messages, the client will cease transmission and
-continue in listen-only mode with a default propagation delay. The
-volley can be avoided by using the +broadcastdelay+ command with nonzero
-argument.
-
-Following the volley, the server continues in listen-only mode and sends
-no further messages for this association.
-
-A server is configured in broadcast mode using the +broadcast+ command
-and specifying the broadcast address of a local interface. If two or
-more local interfaces are installed with different broadcast addresses,
-a +broadcast+ command is needed for each address. This provides a way to
-limit exposure in a firewall, for example.
-
-NTPsec permits the use of symmetric authentication with broadcast mode
-the same way as any other mode; however, it is not effective at
-providing security because the sessionless, one-way nature of the
-protocol makes detection of replayed or delayed packets
-impossible. Regardless of whether authentication is employed,
-broadcast mode must be used only on physically-secure networks where
-all systems on the subnet are fully trusted.
-
-[[mcst]]
-== Manycast Scheme ==
-
-Note: This mode of operation is deprecated, because manycast
-associations cannot be effectively secured.  Accordingly, manycast
-client support has been removed from NTPsec; manycast server mode is
-retained for backwards compatibility but may be removed in a future
-release.
-
-Manycast is an automatic server discovery and configuration paradigm.
-It is intended as a means for a client to troll the nearby network
-neighborhood (not necessarily on the same link, where broadcast
-would work), to find cooperating servers, validate them using
-cryptographic means and evaluate their time values with respect to
-other servers that might be lurking in the vicinity. It uses the
-grab-n'-drop paradigm with the additional feature that active means
-are used to grab additional servers should the number of associations
-fall below the +maxclock+ option of the +tos+ command. The intended
-result is that each manycast client mobilizes client associations with
-some number of the "best" of the nearby manycast servers, yet
-automatically reconfigures to sustain this number of servers should
-one or another fail.
-
-The manycast paradigm is not the anycast paradigm described in RFC 1546,
-which is designed to find a single server from a clique of servers
-providing the same service. The manycast paradigm is designed to find a
-plurality of redundant servers satisfying defined optimality criteria.
-
-Manycasting can be used with symmetric-key cryptography.
-
-A manycast server is configured using the +manycastserver+ command,
-which listens on the specified address for manycast client
-messages.  If a manycast server is in scope of the current TTL and is
-itself synchronized to a valid source and operating at a stratum level
-equal to or lower than the manycast client, it replies with an ordinary
-unicast server message.
 
 [[pool]]
 == Server Pool Scheme ==

@@ -627,10 +627,6 @@ create_peer_node(
 				my_node->ctl.flags |= FLAG_NOSELECT;
 				break;
 
-			case T_Preempt:
-				my_node->ctl.flags |= FLAG_PREEMPT;
-				break;
-
 			case T_Prefer:
 				my_node->ctl.flags |= FLAG_PREFER;
 				break;
@@ -677,10 +673,6 @@ create_peer_node(
 				my_node->ctl.maxpoll =
 					(uint8_t)option->value.u;
 			}
-			break;
-
-		case T_Ttl:
-			msyslog(LOG_ERR, "CONFIG: ttl, argument ignored");
 			break;
 
 		case T_Subtype:
@@ -2591,10 +2583,6 @@ peer_config(
 	 * configure code is rebuilt. Note only one flag can be set.
 	 */
 	switch (htype) {
-	case T_Broadcast:
-		cast_flags = MDF_BCAST;
-		hmode = MODE_BROADCAST;
-		break;
 
 	case T_Pool:
 		cast_flags = MDF_POOL;

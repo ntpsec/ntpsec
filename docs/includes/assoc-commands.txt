@@ -13,8 +13,6 @@ link-local IPV6 address with an interface specified in
 
 +peer+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_]
 
-+broadcast+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+ttl+ _ttl_]
-
 +unpeer+ ['address' | 'associd' | +clock+ 'clocktype' [ +unit+ 'unitnum']]::
   These six commands specify the time server name or address to be
   used and the mode in which to operate. The _address_ can be either a
@@ -42,19 +40,6 @@ link-local IPV6 address with an interface specified in
 +peer+::
   NTP peer mode has been removed for security reasons.  peer is now just
   an alias for the server keyword.  See above.
-
-[[broadcast]]
-+broadcast+::
-  Note: This mode of server operation is deprecated, as broadcast
-  associations cannot be secured.  Broadcast-client mode has been
-  completely removed.
-+
-For broadcast addresses (only), this command mobilizes a persistent
-broadcast mode association. Multiple commands can be used to specify
-multiple local broadcast interfaces (subnets) In broadcast mode the
-local server sends periodic broadcast messages to a client population
-at the _address_ specified, which is usually the broadcast address on
-(one of) the local network(s).
 
 [[unpeer]]
 +unpeer+::

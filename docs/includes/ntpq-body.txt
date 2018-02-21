@@ -491,24 +491,8 @@ association. Not all variables are displayed in some configurations.
 |+delay+         |filter delay
 |+dispersion+    |filter dispersion
 |+jitter+        |filter jitter
-|+bias+          |unicast/broadcast bias
+|+bias+          |fudge for asymmetric links/paths
 |=======================================================================
-
-The bias variable is calculated when the first broadcast packet is
-received after the calibration volley. It represents the offset of the
-broadcast subgraph relative to the unicast subgraph.
-
-When ntpd is compiled with the OpenSSL software library,
-additional peer variables are displayed, including the following:
-
-[width="100%",cols="<20%,<80%"]
-|=====================================
-|Variable      |Description
-|+flags+       |peer flags
-|+signature+   |OpenSSL digest/signature scheme
-|+initsequence+|initial key ID
-|+initkey+     |initial key index
-|=====================================
 
 [[clock]]
 == Clock Variables ==

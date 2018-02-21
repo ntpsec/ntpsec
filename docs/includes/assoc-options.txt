@@ -46,32 +46,18 @@
   limit of 0 (1 s).
 
 +mode+ 'option'::
-  Pass the +option+ to a reference clock driver, where +option+ is an
-  integer in the range from 0 to 255, inclusive. This option is valid
+  Pass the +option+ to a reference clock driver. This option is valid
   only with refclock addresses.
 
 +noselect+::
   Marks the server as unused, except for display purposes. The server is
   discarded by the selection algorithm.
 
-+preempt+::
-  Specifies the association as preemptable rather than the default
-  persistent. This option is ignored with the +broadcast+ command and is
-  most useful with the +pool+ command.
-
 +prefer+::
   Marks the server as preferred. All other things being equal, this host
   will be chosen for synchronization among a set of correctly operating
   hosts. See the "Mitigation Rules and the prefer Keyword" page
   for further information.
-
-+ttl+ _ttl_::
-  This option is used only with broadcast server mode. It specifies
-  the time-to-live _ttl_ to use on broadcast server
-  and the maximum _ttl_ for the expanding ring search with
-  manycast client packets. Selection of the proper value, which
-  defaults to 127, is something of a black art and should be
-  coordinated with the network administrator.
 
 +true+::
   Mark the association to assume truechimer status; that is, always
@@ -80,7 +66,7 @@
   with large jitter on the serial port and precision pulse-per-second
   (PPS) signals. Caution: this option defeats the algorithms designed to
   cast out falsetickers and can allow these sources to set the system
-  clock. This option is valid only with the +server+ and +peer+ commands.
+  clock. This option is valid only with the +server+ command.
 
 +version+ _version_::
   Specifies the version number to be used for outgoing NTP packets.
