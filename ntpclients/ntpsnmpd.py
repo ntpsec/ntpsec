@@ -1050,13 +1050,16 @@ def connect(address):
     return sock
 
 
-def mainloop(snmpSocket, host=None):
+def mainloop(snmpSocket, reconnectionAddr, host=None):
     dolog("initing loop\n", 1)
     dbase = DataSource(host)
-    control = PacketControl(snmpSocket, dbase, logfp=logfp)
-    control.loopCallback = dbase.checkNotifications
-    control.initNewSession()
-    control.mainloop(True)
+    while True:  # Loop reconnection attempts
+        control = PacketControl(snmpSocket, dbase, logfp=logfp)
+        control.loopCallback = dbase.checkNotifications
+        control.initNewSession()
+        if control.mainloop(True) is False:  # disconnected
+            snmpSocket.close()
+            snmpSocket = connect(reconnectionAddr)
 
 
 def daemonize(runfunc, *runArgs):
