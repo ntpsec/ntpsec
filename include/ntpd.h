@@ -321,7 +321,7 @@ extern uint8_t	sys_stratum;		/* system stratum */
 extern int8_t	sys_precision;		/* local clock precision */
 extern double	sys_rootdelay;		/* roundtrip delay to primary source */
 extern double	sys_rootdisp;		/* dispersion to primary source */
-extern double	sys_rootdist;		/* distance to primaet source */
+extern double	sys_rootdist;		/* distance to primary source */
 extern uint32_t	sys_refid;		/* reference id */
 extern l_fp	sys_reftime;		/* last update time */
 extern struct peer *sys_peer;		/* current peer */
