@@ -177,7 +177,6 @@ class PacketControl:
                                       0, ax.REPERR_NOT_OPEN, 0)
                 self.sendPacket(resp, False)
                 continue
-            # TODO: Need to check for expected responses
             ptype = packet.pduType
             if ptype in self.pduHandlers:
                 self.pduHandlers[ptype](packet)
@@ -295,7 +294,10 @@ class PacketControl:
         tid = self.highestTransactionID + 5  # +5 to avoid collisions
         self.highestTransactionID = tid
         pkt = ax.NotifyPDU(True, self.sessionID, tid, 1, varbinds, context)
-        self.sendPacket(pkt, True)  # TODO: callback
+        def resendNotify(pkt, orig):
+            if pkt is None:
+                self.sendPacket(orig, True, callback=resendNotify)
+        self.sendPacket(pkt, True, resendNotify)
 
     def sendErrorResponse(self, errorHeader, errorType, errorIndex):
         err = ax.ResponsePDU(errorHeader["flags"]["bigEndian"],
