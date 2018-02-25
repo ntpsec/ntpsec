@@ -1153,7 +1153,13 @@ if __name__ == "__main__":
     if conf is not None:
         for key in conf.keys():
             if key == "master-addr":  # Address of the SNMP master daemon
-                masterAddr = conf[key]
+                val = conf[key]
+                if ":" in val:
+                    host, port = val.split(":")
+                    port = int(port)
+                    masterAddr = (host, port)
+                else:
+                    masterAddr = val
             elif key == "logfile":
                 logfile = conf[key]
             elif key == "ntp-addr":  # Address of the NTP daemon
