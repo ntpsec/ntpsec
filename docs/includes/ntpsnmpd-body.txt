@@ -33,9 +33,10 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 
 == Known Limitations ==
 
-This is a prototype. Parts of the AgentX standard are not yet implemented.
+This is still a prototype. Parts of the AgentX standard are not yet fully
+implemented.
 
-== Known Deviations from the MIB ==
+== Known Deviations from RFC 5907 ==
 
 The ntpEntStatusEntityUptime OID specifies a bizzare time formant. This
 does not match what the SNMP tools expect to see from a TimeTicks variable.
@@ -43,7 +44,7 @@ Instead the daemon returns a normal TimeTicks value.
 
 The ntpEntNotifConfigChanged trap is left unimplemented. This is because
 there currently is no way to implement what it wants, and it demands alerts
-regarding changes that are not part of NTPs jurisdiction.
+regarding changes that are not part of NTP's jurisdiction.
 
 The ntpEntTimeResolution OID currently uses data from the sys_fuzz variable
 as the base for it's calculations. It is by no means certain that this is
