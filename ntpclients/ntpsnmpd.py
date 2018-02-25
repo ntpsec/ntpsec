@@ -10,6 +10,7 @@ import time
 import socket
 import select
 import subprocess
+import shlex
 
 try:
     import ntp.packet
@@ -29,7 +30,6 @@ print("PC:", PacketControl)
 # TODO This is either necessary, or a different workaround is.
 ntp.util.deunicode_units()
 
-logfile = "ntpsnmpd.log"
 logfp = sys.stderr
 nofork = False
 debug = 0
@@ -41,6 +41,7 @@ snmpTrapOID = (1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0)
 snmpSysUptime = (1, 3, 6, 1, 2, 1, 1, 3, 0)
 
 DEFHOST = "localhost"
+DEFLOG = "ntpsnmpd.log"
 
 
 class DataSource(ntp.agentx.MIBControl):
@@ -1086,6 +1087,35 @@ def daemonize(runfunc, *runArgs):
     runfunc(*runArgs)
 
 
+optionList = ["master-address", "logfile", "ntp-address"]
+
+def loadSettings(filename, optionList):
+    if os.path.isfile(filename) is False:
+        return None
+    options = {}
+    with open(filename) as f:
+        data = f.read()
+        parser = shlex.shlex(data)
+        data = [x for x in parser]
+        i = 0
+        dataLen = len(data)
+        while i < dataLen:
+            if data[i] in optionList:
+                options[data[i]] = data[i+1]
+                i += 1
+            i += 1
+    return options
+
+
+def storeSettings(filename, options):
+    data = []
+    for key in options.keys():
+        data.append("%s %s\n" % (key, options[key]))
+    data = "".join(data)
+    with open(filename, "w") as f:
+        f.write(data)
+
+
 usage = """
 USAGE: ntpsnmpd [-n] [ntp host]
   Flg Arg Option-Name   Description
@@ -1114,11 +1144,24 @@ if __name__ == "__main__":
         sys.stderr.write(usage)
         raise SystemExit(1)
 
-    masterAddr = "/var/agentx/master"  # Default NET-SNMP configuration
+    masterAddr = "/var/agentx/master"
+    logfile = DEFLOG
+    hostname = DEFHOST
+    # Load configuration file
+    conf = loadSettings("/etc/ntpsnmpd.conf",
+                        ("master-addr", "logfile", "ntp-addr"))
+    if conf is not None:
+        for key in conf.keys():
+            if key == "master-addr":
+                masterAddr = conf[key]
+            elif key == "logfile":
+                logfile = conf[key]
+            elif key == "ntp-addr":
+                hostname = conf[key]
+
     fileLogging = False
     for (switch, val) in options:
         if switch in ("-n", "--no-fork"):
-            # currently non functional, as nofork is inited to True
             nofork = True
         elif switch in ("-x", "--master-addr"):
             if ":" in val:
@@ -1142,10 +1185,10 @@ if __name__ == "__main__":
             logfile = val
             fileLogging = True
 
-        if fileLogging is True:
-            if logfp != sys.stderr:
-                logfp.close()
-            logfp = open(val, "a", 1)  # 1 => line buffered
+    if fileLogging is True:
+        if logfp != sys.stderr:
+            logfp.close()
+        logfp = open(logfile, "a", 1)  # 1 => line buffered
 
     hostname = arguments[0] if arguments else DEFHOST
 
