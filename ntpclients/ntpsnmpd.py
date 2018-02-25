@@ -24,8 +24,6 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
-print("PC:", PacketControl)
-
 
 # TODO This is either necessary, or a different workaround is.
 ntp.util.deunicode_units()
