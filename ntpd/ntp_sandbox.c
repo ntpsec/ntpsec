@@ -296,6 +296,10 @@ int scmp_sc[] = {
 	SCMP_SYS(fstat),
 	SCMP_SYS(fsync),
 
+#ifdef ENABLE_EARLY_DROPROOT
+	SCMP_SYS(getdents),
+#endif
+
 #ifndef ENABLE_DNS_LOOKUP
 	/* libcrypto uses pthread_once() */
 	SCMP_SYS(futex),	/* sem_xxx, used by threads */
