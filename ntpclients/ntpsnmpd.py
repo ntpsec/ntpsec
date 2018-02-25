@@ -1145,17 +1145,22 @@ if __name__ == "__main__":
     masterAddr = "/var/agentx/master"
     logfile = DEFLOG
     hostname = DEFHOST
+
+    # Check for non-default config file lovation
     # Load configuration file
     conf = loadSettings("/etc/ntpsnmpd.conf",
-                        ("master-addr", "logfile", "ntp-addr"))
+                        ("master-addr", "logfile", "loglevel", "ntp-addr"))
     if conf is not None:
         for key in conf.keys():
-            if key == "master-addr":
+            if key == "master-addr":  # Address of the SNMP master daemon
                 masterAddr = conf[key]
             elif key == "logfile":
                 logfile = conf[key]
-            elif key == "ntp-addr":
+            elif key == "ntp-addr":  # Address of the NTP daemon
                 hostname = conf[key]
+            elif key == "loglevel":
+                errmsg = "Error: loglevel parameter '%s' not a number\n"
+                debug = ntp.util.safeargcast(val, int, errmsg, usage)
 
     fileLogging = False
     for (switch, val) in options:

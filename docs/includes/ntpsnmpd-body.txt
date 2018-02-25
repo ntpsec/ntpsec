@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+ntpsnmpd+ [+-ndDV+] [ntp host]
++ntpsnmpd+ [+-nxdDlhV+] [ntp host]
 
 == Description ==
 
@@ -31,10 +31,14 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 +-V+, +--version+::
   Print the version string and exit.
 
+== Files ==
+
+/etc/ntpsnmpd.conf the default name of the configuration file
+
 == Known Limitations ==
 
 This is still a prototype. Parts of the AgentX standard are not yet fully
-implemented.
+implemented, logging not fleshed out yet, some options missing, etc.
 
 == Known Deviations from RFC 5907 ==
 
