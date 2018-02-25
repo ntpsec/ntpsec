@@ -1134,9 +1134,9 @@ if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:],
-            "nx:dD:Vhl:",
+            "nx:dD:Vhl:c:",
             ["no-fork", "master-address=", "debug-level", "set-debug-level=",
-             "version", "help", "logfile="])
+             "version", "help", "logfile=", "configfile="])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1146,9 +1146,15 @@ if __name__ == "__main__":
     logfile = DEFLOG
     hostname = DEFHOST
 
-    # Check for non-default config file lovation
+    # Check for non-default config-file
+    conffile = "/etc/ntpsnmpd.conf"
+    for (switch, val) in options:
+        if switch in ("-c", "--configfile"):
+            conffile = val
+            break
+
     # Load configuration file
-    conf = loadSettings("/etc/ntpsnmpd.conf",
+    conf = loadSettings(conffile,
                         ("master-addr", "logfile", "loglevel", "ntp-addr"))
     if conf is not None:
         for key in conf.keys():
@@ -1166,7 +1172,7 @@ if __name__ == "__main__":
                 hostname = conf[key]
             elif key == "loglevel":
                 errmsg = "Error: loglevel parameter '%s' not a number\n"
-                debug = ntp.util.safeargcast(val, int, errmsg, usage)
+                debug = ntp.util.safeargcast(conf[key], int, errmsg, usage)
 
     fileLogging = False
     for (switch, val) in options:

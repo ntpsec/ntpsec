@@ -16,6 +16,8 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 
 == Options ==
 
++-c+ filename, +--configfile+=filename::
+  The path of the configuration file, /etc/ntpsnmpd.conf by default
 +-n+, +--nofork+::
   Do not fork
 +-x+, +--master-addr+::
