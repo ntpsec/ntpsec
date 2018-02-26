@@ -882,6 +882,46 @@ class DataSource(ntp.agentx.MIBControl):
     # Misc data helpers (not part of the MIB proper)
     # =====================================
 
+    def misc_loadDynamicSettings(self):
+        if self.settingsFilename is None:
+            return
+        def booify(d, k):
+            return True if d[k] == "True" else False
+        settings = loadSettings(self.settingsFilename)
+        if settings is None:
+            return
+        for key in settings.keys():
+            if key == "notify-mode-change":
+                self.notifyModeChange = boolify(settings, key)
+            elif key == "notify-stratum-change":
+                self.notifyStratumChange = boolify(settings, key)
+            elif key == "notify-syspeer-change":
+                self.notifySyspeerChange = boolify(settings, key)
+            elif key == "notify-add-association":
+                self.notifyAddAssociation = boolify(settings, key)
+            elif key == "notify-rm-association":
+                self.notifyRMAssociation = boolify(settings, key)
+            elif key == "notify-leap-announced":
+                self.notifyLeapSecondAnnounced = boolify(settings, key)
+            elif key == "notify-heartbeat":
+                self.notifyHeartbeat = boolify(settings, key)
+            elif key == "heartbeat-interval":
+                self.heartbeatInterval = int(settings[key])
+
+    def misc_storeDynamicSettings(self):
+        if self.settingsFilename is None:
+            return
+        settings = {}
+        settings["notify-mode-change"] = str(self.notifyModeChange)
+        settings["notify-stratum-change"] = str(self.notifyStratumChange)
+        settings["notify-syspeer-change"] = str(self.notifySyspeerChange)
+        settings["notify-add-association"] = str(self.notifyAddAssociation)
+        settings["notify-rm-association"] = str(self.notifyRMAssociation)
+        settings["notify-leap-announced"] = str(self.notifyLeapSecondAnnounced)
+        settings["notify-heartbeat"] = str(self.notifyHeartbeat)
+        settings["heartbeat-interval"] = str(self.heartbeatInterval)
+        storeSettings(self.settingsFilename, settings)
+
     def misc_getAssocListChanges(self):
         # We need to keep the names, because those won't be available
         # after they have been removed.
