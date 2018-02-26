@@ -25,8 +25,6 @@ of the current startup logic gets discussed.
 
 === Future plans ===
 
-* Package metadata for Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
-
 * Add .tar.xz tarball.
 
 * Fix ntpq retransmissions.
