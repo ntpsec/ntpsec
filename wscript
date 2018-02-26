@@ -1116,6 +1116,7 @@ def build(ctx):
     ctx.manpage(8, "ntpclients/ntpkeygen-man.txt")
     ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
     ctx.manpage(8, "ntpclients/ntpwait-man.txt")
+    ctx.manpage(8, "ntpclients/ntpsnmpd-man.txt")
 
     # Skip running unit tests on a cross compile build
     if not ctx.env.ENABLE_CROSS:

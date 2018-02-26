@@ -1,4 +1,4 @@
-= ntpsnmpd(1) =
+= ntpsnmpd(8) =
 :doctype: manpage
 :man source: NTPsec
 :man version: @NTPSEC_VERSION@
@@ -11,11 +11,6 @@ include::../docs/includes/ntpsnmpd-body.txt[]
 
 == EXIT STATUS ==
 
-One of the following exit values will be returned:
-
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
+Always returns 0.
 
 // end
