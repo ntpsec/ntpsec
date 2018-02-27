@@ -123,9 +123,8 @@ class MIBControl:
 
 class PacketControl:
     def __init__(self, sock, dbase, spinGap=0.001, timeout=defaultTimeout,
-                 logfp=None, debugThreshold=0):
-        self.log = (lambda txt, dbg : ntp.util.dolog(logfp, txt, dbg,
-                                                     debugThreshold))
+                 logfp=None, debug=10000):
+        self.log = (lambda txt, dbg : ntp.util.dolog(logfp, txt, debug, dbg))
         # take a pre-made socket instead of making our own so that
         # PacketControl doesn't have to know or care about implementation
         self.socket = sock
