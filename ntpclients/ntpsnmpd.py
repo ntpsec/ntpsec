@@ -460,7 +460,8 @@ class DataSource(ntp.agentx.MIBControl):
 
     def cbr_entNotifBits(self, oid):
         # BITS
-        data = ax.bools2Bits((self.notifyModeChange,
+        data = ax.bools2Bits((False, # notUsed(0)
+                              self.notifyModeChange,
                               self.notifyStratumChange,
                               self.notifySyspeerChange,
                               self.notifyAddAssociation,
