@@ -40,7 +40,6 @@ static void catchTrap(int sig, siginfo_t *, void *);
 #endif
 
 #ifdef ENABLE_DROPROOT
-static bool root_dropped;
 static uid_t sw_uid;
 static gid_t sw_gid;
 static char *endp;
@@ -260,7 +259,6 @@ getgroup:
 		priv_freeset(lowprivs);
 		priv_freeset(highprivs);
 #  endif /* HAVE_SOLARIS_PRIVS */
-		root_dropped = true;
 	}	/* if (droproot) */
 # endif	/* ENABLE_DROPROOT */
 
@@ -282,6 +280,25 @@ getgroup:
 		}
 
 int scmp_sc[] = {
+
+#ifdef ENABLE_EARLY_DROPROOT
+/* Initialization uses a few syscalls that are not otherwise used.
+ * Collect them here.
+ * There are probably a few below that were added before we
+ * understood the need for this section.
+ * We could make a second pass after initialization to remove
+ * these from the list.
+ */
+
+#ifndef ENABLE_DNS_LOOKUP
+	/* libcrypto uses pthread_once() */
+	/* We could avoid this by calling ssl_init() first. */
+	SCMP_SYS(futex),	/* sem_xxx, used by threads */
+#endif
+
+	SCMP_SYS(getdents),	/* Scanning /etc/ntp.d/ */
+#endif
+
 	SCMP_SYS(adjtimex),
 	SCMP_SYS(bind),
 	SCMP_SYS(brk),
@@ -296,17 +313,9 @@ int scmp_sc[] = {
 	SCMP_SYS(fstat),
 	SCMP_SYS(fsync),
 
-#ifdef ENABLE_EARLY_DROPROOT
-	SCMP_SYS(getdents),
-#endif
-
-#ifndef ENABLE_DNS_LOOKUP
-	/* libcrypto uses pthread_once() */
-	SCMP_SYS(futex),	/* sem_xxx, used by threads */
-#endif
 
 #ifdef __NR_getrandom
-	SCMP_SYS(getrandom),	/* 3.17 kernel */
+	SCMP_SYS(getrandom),	/* Added in 3.17 kernel */
 #endif
 	SCMP_SYS(getitimer),
 #ifdef __NR_ugetrlimit
