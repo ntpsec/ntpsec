@@ -1110,6 +1110,8 @@ def mainloop(snmpSocket, reconnectionAddr, host=None):
         if control.mainloop(True) is False:  # disconnected
             snmpSocket.close()
             snmpSocket = connect(reconnectionAddr)
+        else:  # Something else happened
+            break
 
 
 def daemonize(runfunc, *runArgs):
