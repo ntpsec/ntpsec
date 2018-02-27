@@ -43,7 +43,7 @@ DEFLOG = "ntpsnmpd.log"
 
 
 class DataSource(ntp.agentx.MIBControl):
-    def __init__(self, hostname=DEFHOST):
+    def __init__(self, hostname=DEFHOST, settingsFile=None):
         # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
@@ -229,6 +229,7 @@ class DataSource(ntp.agentx.MIBControl):
         self.session = ntp.packet.ControlSession()
         self.hostname = hostname if hostname else DEFHOST
         self.session.openhost(self.hostname)
+        self.settingsFilename = settingsFile
         # Cache so we don't hammer ntpd, default 1 second timeout
         # Timeout default pulled from a hat: we don't want it to last for
         # long, just not flood ntpd when we don't need to.
@@ -238,7 +239,7 @@ class DataSource(ntp.agentx.MIBControl):
         self.heartbeatInterval = 0  # should save to disk
         self.sentNotifications = 0
         # Notify bits, they control whether the daemon sends notifications.
-        # these should be saved to disk
+        # these are saved to disk
         self.notifyModeChange = False  # 1
         self.notifyStratumChange = False  # 2
         self.notifySyspeerChange = False  # 3
@@ -247,6 +248,7 @@ class DataSource(ntp.agentx.MIBControl):
         self.notifyConfigChange = False  # 6 [This is not implemented]
         self.notifyLeapSecondAnnounced = False  # 7
         self.notifyHeartbeat = False  # 8
+        self.misc_loadDynamicSettings()
 
     # =============================================================
     # Data read callbacks start here
@@ -489,9 +491,11 @@ class DataSource(ntp.agentx.MIBControl):
             return ax.ERR_NOERROR
         elif action == "commit":
             self.heartbeatInterval = varbind.payload
+            self.misc_storeDynamicSettings()
             return ax.ERR_NOERROR
         elif action == "undo":
             self.heartbeatInterval = oldData
+            self.misc_storeDynamicSettings()
             return ax.ERR_NOERROR
         elif action == "cleanup":
             pass
@@ -508,6 +512,7 @@ class DataSource(ntp.agentx.MIBControl):
              self.notifyConfigChange,
              self.notifyLeapSecondAnnounced,
              self.notifyHeartbeat) = ax.bits2Bools(varbind.payload, 8)
+            self.misc_storeDynamicSettings()
             return ax.ERR_NOERROR
         elif action == "undo":
             (self.notifyModeChange,
@@ -518,6 +523,7 @@ class DataSource(ntp.agentx.MIBControl):
              self.notifyConfigChange,
              self.notifyLeapSecondAnnounced,
              self.notifyHeartbeat) = ax.bits2Bools(oldData, 8)
+            self.misc_storeDynamicSettings()
             return ax.ERR_NOERROR
         elif action == "cleanup":
             pass
@@ -836,7 +842,7 @@ class DataSource(ntp.agentx.MIBControl):
         pass
 
     def doNotifyLeapSecondAnnounced(self, control):
-        oldLeap = self.oldValues["leap"]
+        oldLeap = self.oldValues.get("leap")
         newLeap = self.safeReadvar(0, ["leap"])
         if newLeap is None:
             return
@@ -885,9 +891,13 @@ class DataSource(ntp.agentx.MIBControl):
     def misc_loadDynamicSettings(self):
         if self.settingsFilename is None:
             return
-        def booify(d, k):
+        def boolify(d, k):
             return True if d[k] == "True" else False
-        settings = loadSettings(self.settingsFilename)
+        optionList = ("notify-mode-change", "notify-stratum-change",
+                      "notify-syspeer-change", "notify-add-association",
+                      "notify-rm-association", "notify-leap-announced",
+                      "notify-heartbeat", "heartbeat-interval")
+        settings = loadSettings(self.settingsFilename, optionList)
         if settings is None:
             return
         for key in settings.keys():
@@ -1091,9 +1101,9 @@ def connect(address):
 
 def mainloop(snmpSocket, reconnectionAddr, host=None):
     dolog("initing loop\n", 1)
-    dbase = DataSource(host)
+    dbase = DataSource(host, "/var/ntpsntpd/notify.conf")
     while True:  # Loop reconnection attempts
-        control = PacketControl(snmpSocket, dbase, logfp=logfp)
+        control = PacketControl(snmpSocket, dbase, logfp=logfp, debug=debug)
         control.loopCallback = dbase.checkNotifications
         control.initNewSession()
         if control.mainloop(True) is False:  # disconnected
@@ -1125,8 +1135,6 @@ def daemonize(runfunc, *runArgs):
     runfunc(*runArgs)
 
 
-optionList = ["master-address", "logfile", "ntp-address"]
-
 def loadSettings(filename, optionList):
     if os.path.isfile(filename) is False:
         return None
@@ -1134,6 +1142,7 @@ def loadSettings(filename, optionList):
     with open(filename) as f:
         data = f.read()
         parser = shlex.shlex(data)
+        parser.wordchars += "-"
         data = [x for x in parser]
         i = 0
         dataLen = len(data)
@@ -1145,10 +1154,13 @@ def loadSettings(filename, optionList):
     return options
 
 
-def storeSettings(filename, options):
+def storeSettings(filename, settings):
+    dirname = os.path.dirname(filename)
+    if os.path.exists(dirname) is False:
+        os.makedirs(dirname)
     data = []
-    for key in options.keys():
-        data.append("%s %s\n" % (key, options[key]))
+    for key in settings.keys():
+        data.append("%s %s\n" % (key, settings[key]))
     data = "".join(data)
     with open(filename, "w") as f:
         f.write(data)
