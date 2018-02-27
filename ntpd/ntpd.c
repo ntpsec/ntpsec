@@ -896,7 +896,7 @@ ntpdmain(
         }
 
 	loop_config(LOOP_DRIFTINIT, 0);
-	/* report_event(EVNT_SYSRESTART, NULL, NULL); */
+	report_event(EVNT_SYSRESTART, NULL, NULL);
 
 #ifndef ENABLE_EARLY_DROPROOT
 	/* drop root privileges */
