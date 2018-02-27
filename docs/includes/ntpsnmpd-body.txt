@@ -37,6 +37,8 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 
 /etc/ntpsnmpd.conf the default name of the configuration file
 
+/var/ntpsnmpd/notify.conf the location of notification flags
+
 == Known Limitations ==
 
 This is still a prototype. Parts of the AgentX standard are not yet fully
