@@ -807,9 +807,7 @@ class DataSource(ntp.agentx.MIBControl):
         else:
             datetime = ntp.util.deformatNTPTime(datetime["reftime"])
         adds, rms = changes
-        print("Notify Change assoc:", changes)
         if which in ("add", "both"):
-            print("adding", adds)
             for name in adds:
                 vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
                                  ax.OID(ntpRootOID + (0, 4))),  # Add
@@ -823,7 +821,6 @@ class DataSource(ntp.agentx.MIBControl):
                 control.sendNotify(vl)
                 self.sentNotifications += 1
         if which in ("rm", "both"):
-            print("removing", rms)
             for name in rms:
                 vl = [ax.Varbind(ax.VALUE_OID, snmpTrapOID,
                                  ax.OID(ntpRootOID + (0, 5))),  # Remove
