@@ -82,6 +82,8 @@ PPM_VARS = ("frequency", "clk_wander")
 
 
 def dolog(logfp, text, debug, threshold):
+    # debug is the current debug value
+    # threshold is the trigger for the current log
     if logfp is None:
         return  # can turn off logging by supplying a None file descriptior
     if debug >= threshold:
