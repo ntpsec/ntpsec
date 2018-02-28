@@ -12,6 +12,8 @@ on user-visible changes.
 
 == Repository head ==
 
+We have merged Classic's fix for CVE-2018-7182.
+
 It is now possible to unpeer refclocks using a type/unit specification
 rather than a magic IP address.  This was the last obligatory use of
 magic IP addresses in the configuration grammar.
