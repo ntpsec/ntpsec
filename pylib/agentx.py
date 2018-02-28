@@ -181,7 +181,7 @@ class PacketControl:
                 self.pduHandlers[ptype](packet)
             else:
                 self.log("dropping packet type %i, not implemented\n" % ptype,
-                         1)
+                         2)
         self.checkResponses()
         if self.lastReception is not None:
             currentTime = time.time()
@@ -189,12 +189,12 @@ class PacketControl:
                 self.sendPing()
 
     def initNewSession(self):
-        self.log("init new session...\n", 1)
+        self.log("init new session...\n", 3)
         # We already have a connection, need to open a session.
         openpkt = ax.OpenPDU(True, 23, 0, 0, self.timeout, (),
                              "NTPsec SNMP subagent")
         self.sendPacket(openpkt, False)
-        self.log("Sent open packet\n", 1)
+        self.log("Sent open packet: %s\n" % repr(openpkt), 4)
         response = self.waitForResponse(openpkt, True)
         self.sessionID = response.sessionID
         # Register the tree
@@ -204,7 +204,7 @@ class PacketControl:
                                   self.database.mib_upperBound(),
                                   self.database.mib_context())
         self.sendPacket(register, False)
-        self.log("Sent registration\n", 1)
+        self.log("Sent registration packet: %s\n" % repr(register), 4)
         response = self.waitForResponse(register, True)
         self.stillConnected = True
 
@@ -214,7 +214,7 @@ class PacketControl:
             self.packetEater()
             while len(self.recievedPackets) > 0:
                 packet = self.recievedPackets.pop(0)
-                self.log("Waiting, got packet: " + repr(packet) + "\n\n", 3)
+                self.log("Waiting, got packet: %s\n" % repr(packet), 4)
                 if packet.__class__ != ax.ResponsePDU:
                     continue
                 haveit = (opkt.transactionID == packet.transactionID) and \
@@ -248,7 +248,7 @@ class PacketControl:
                 self.recievedPackets.append(pkt)
                 if pkt.transactionID > self.highestTransactionID:
                     self.highestTransactionID = pkt.transactionID
-                self.log("\npacketEater got a full packet: %s\n" % repr(pkt), 3)
+                self.log("got a full packet: %s\n" % repr(pkt), 4)
             except ax.ParseDataLengthError:
                 return None  # this happens if we don't have all of a packet
             except (ax.ParseVersionError, ax.ParsePDUTypeError,
@@ -265,8 +265,7 @@ class PacketControl:
     def sendPacket(self, packet, expectsReply, replyTimeout=defaultTimeout,
                    callback=None):
         encoded = packet.encode()
-        self.log("\nsending packet: %s\n%s \n" % (repr(packet), repr(encoded)),
-                 4)
+        self.log("sending packet: %s\n" % repr(packet), 4)
         self.socket.sendall(encoded)
         if expectsReply is True:
             index = (packet.sessionID,
@@ -316,7 +315,7 @@ class PacketControl:
             tmp = tmp[0]
             newdata = tmp.recv(4096)  # Arbitrary value
             if len(newdata) > 0:
-                self.log("Received data: " + repr(newdata) + "\n", 4)
+                self.log("Received data: %s\n" % repr(newdata), 5)
                 data += newdata
                 self.lastReception = time.time()
             else:

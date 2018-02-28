@@ -33,6 +33,8 @@ nofork = False
 debug = 0
 defaultTimeout = 30
 
+log = (lambda msg, msgdbg: ntp.util.dolog(logfp, msg, debug, msgdbg))
+
 ntpRootOID = (1, 3, 6, 1, 2, 1, 197)  # mib-2 . 197, aka: NTPv4-MIB
 
 snmpTrapOID = (1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0)
@@ -1073,14 +1075,6 @@ class DataSource(ntp.agentx.MIBControl):
         return peerdata
 
 
-def dolog(text, level):
-    if debug >= level:
-        try:
-            logfp.write(text)
-        except Exception:
-            pass
-
-
 def connect(address):
     try:
         if type(address) is str:
@@ -1092,13 +1086,14 @@ def connect(address):
             sock = socket.socket(af, socket.SOCK_STREAM)
             sock.connect((host, port))
     except socket.error as msg:
-        dolog(repr(msg) + "\n", 2)
+        log(repr(msg) + "\n", 1)
         sys.exit(1)
+    log("connected to master agent at " + address, 3)
     return sock
 
 
 def mainloop(snmpSocket, reconnectionAddr, host=None):
-    dolog("initing loop\n", 1)
+    log("initing loop\n", 3)
     dbase = DataSource(host, "/var/ntpsntpd/notify.conf")
     while True:  # Loop reconnection attempts
         control = PacketControl(snmpSocket, dbase, logfp=logfp, debug=debug)
@@ -1107,6 +1102,7 @@ def mainloop(snmpSocket, reconnectionAddr, host=None):
         if control.mainloop(True) is False:  # disconnected
             snmpSocket.close()
             snmpSocket = connect(reconnectionAddr)
+            log("disconnected from master, attempting reconnect\n", 2)
         else:  # Something else happened
             break
 
@@ -1114,10 +1110,10 @@ def mainloop(snmpSocket, reconnectionAddr, host=None):
 def daemonize(runfunc, *runArgs):
     pid = os.fork()
     if pid < 0:
-        print("Forking error", pid)
+        log("Forking error " + str(pid) + "\n", 1)
         sys.exit(pid)
     elif pid > 0:  # We are the parent
-        print("Daemonization success, child pid:", pid)
+        log("Daemonization success, child pid: " + str(pid) + "\n", 3)
         sys.exit(0)
 
     # We must be the child
