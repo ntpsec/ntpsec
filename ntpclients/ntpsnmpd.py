@@ -8,7 +8,6 @@ import os
 import getopt
 import time
 import socket
-import select
 import subprocess
 import shlex
 
@@ -138,10 +137,7 @@ class DataSource(ntp.agentx.MIBControl):
                                  # ntpEntStatPktSent Counter32
                                  2: {},
                                  # ntpEntStatPktRecived Counter32
-                                 3: {}}
-                           }}
-                      }}
-                 },
+                                 3: {}}}}}}},
                  # ntpAssociation
                  3: {"subids":
                      # ntpAssociationTable
@@ -173,9 +169,7 @@ class DataSource(ntp.agentx.MIBControl):
                                 9: {"subids": self.sub_assocDelay},
                                 # ntpAssocStatusDispersion
                                 #  DisplayString
-                                10: {"subids": self.sub_assocDispersion}}
-                          }}
-                     },
+                                10: {"subids": self.sub_assocDispersion}}}}},
                       # ntpAssociationStatisticsTable
                       #  SEQUENCE of ntpAssociationStatisticsEntry
                       2: {"subids":
@@ -188,10 +182,8 @@ class DataSource(ntp.agentx.MIBControl):
                                 2: {"subids": self.sub_assocStatOutPkts},
                                 # ntpAssocStatProtocolError
                                 #  Counter32
-                                3: {"subids": self.sub_assocStatProtoErr}}
-                          }}
-                      }}
-                 },
+                                3: {"subids":
+                                    self.sub_assocStatProtoErr}}}}}}},
                  # ntpEntControl
                  4: {"subids":
                      # ntpEntHeartbeatInterval unit32
@@ -199,14 +191,11 @@ class DataSource(ntp.agentx.MIBControl):
                           "writer": self.cbw_entHeartbeatInterval},
                       # ntpEntNotifBits BITS {...}
                       2: {"reader": self.cbr_entNotifBits,
-                          "writer": self.cbw_entNotifBits,}}
-                 },
+                          "writer": self.cbw_entNotifBits}}},
                  # ntpEntNotifObjects
                  5: {"subids":
                      # ntpEntNotifMessage utf8str
-                     {1: {"reader": self.cbr_entNotifMessage}}
-                 }}
-            },
+                     {1: {"reader": self.cbr_entNotifMessage}}}}},
             # ntpEntConformance
             2: {"subids":
                 # ntpEntCompliances
@@ -214,8 +203,7 @@ class DataSource(ntp.agentx.MIBControl):
                      # ntpEntNTPCompliance
                      {1: {},
                       # ntpEntSNTPCompliance
-                      2: {}}
-                },
+                      2: {}}},
                  # ntpEntGroups
                  2: {"subids":
                      # ntpEntObjectsGroup1 OBJECTS {...}
@@ -223,10 +211,7 @@ class DataSource(ntp.agentx.MIBControl):
                       # ntpEntObjectsGroup2 OBJECTS {...}
                       2: {},
                       # ntpEntNotifGroup NOTIFICATIONS {...}
-                      3: {}}
-                 }}
-            }
-        }
+                      3: {}}}}}}
         ntp.agentx.MIBControl.__init__(self, oidTree, mibRoot=ntpRootOID)
         self.session = ntp.packet.ControlSession()
         self.hostname = hostname if hostname else DEFHOST
@@ -465,7 +450,7 @@ class DataSource(ntp.agentx.MIBControl):
 
     def cbr_entNotifBits(self, oid):
         # BITS
-        data = ax.bools2Bits((False, # notUsed(0)
+        data = ax.bools2Bits((False,  # notUsed(0)
                               self.notifyModeChange,
                               self.notifyStratumChange,
                               self.notifySyspeerChange,
@@ -706,6 +691,7 @@ class DataSource(ntp.agentx.MIBControl):
         if (currentTime - self.lastNotifyCheck) < self.notifySpinTime:
             return
         self.lastNotifyCheck = currentTime
+
         if self.notifyModeChange is True:
             self.doNotifyModeChange(control)
 
@@ -898,6 +884,7 @@ class DataSource(ntp.agentx.MIBControl):
     def misc_loadDynamicSettings(self):
         if self.settingsFilename is None:
             return
+
         def boolify(d, k):
             return True if d[k] == "True" else False
         optionList = ("notify-mode-change", "notify-stratum-change",
@@ -1023,6 +1010,7 @@ class DataSource(ntp.agentx.MIBControl):
 
     def dynamicCallbackPeerdata(self, variable, raw, valueType):
         rawindex = 1 if raw is True else 0
+
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
             if pdata is None:

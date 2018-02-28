@@ -5,6 +5,7 @@ from __future__ import print_function, division
 
 import select
 import time
+import sys
 
 try:
     import ntp.util
@@ -124,7 +125,7 @@ class MIBControl:
 class PacketControl:
     def __init__(self, sock, dbase, spinGap=0.001, timeout=defaultTimeout,
                  logfp=None, debug=10000):
-        self.log = (lambda txt, dbg : ntp.util.dolog(logfp, txt, debug, dbg))
+        self.log = (lambda txt, dbg: ntp.util.dolog(logfp, txt, debug, dbg))
         # take a pre-made socket instead of making our own so that
         # PacketControl doesn't have to know or care about implementation
         self.socket = sock
@@ -277,6 +278,7 @@ class PacketControl:
         tid = self.highestTransactionID + 5  # +5 to avoid collisions
         self.highestTransactionID = tid
         pkt = ax.PingPDU(True, self.sessionID, tid, 1)
+
         def callback(resp, orig):
             if resp is None:  # Timed out. Need to restart the session.
                 # Er, problem: Can't handle reconnect from inside PacketControl
@@ -289,6 +291,7 @@ class PacketControl:
         tid = self.highestTransactionID + 5  # +5 to avoid collisions
         self.highestTransactionID = tid
         pkt = ax.NotifyPDU(True, self.sessionID, tid, 1, varbinds, context)
+
         def resendNotify(pkt, orig):
             if pkt is None:
                 self.sendPacket(orig, True, callback=resendNotify)
