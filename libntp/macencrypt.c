@@ -23,6 +23,9 @@ EVP_MD_CTX *digest_ctx;
 /* Similar hack in ssl_init.c and attic/digest-timing.c */
 #define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init((ctx))
 #endif
+#ifndef EVP_MD_CTX_new
+#define EVP_MD_CTX_new() EVP_MD_CTX_create()
+#endif
 
 /* ctmemeq - test two blocks memory for equality without leaking
  * timing information.
