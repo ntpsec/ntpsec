@@ -20,6 +20,9 @@
 #define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
 #endif
 
+/* Need one per thread. */
+extern EVP_MD_CTX *digest_ctx;
+
 /* ctmemeq - test two blocks memory for equality without leaking
  * timing information.
  *

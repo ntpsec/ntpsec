@@ -10,7 +10,6 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdarg.h>
-#include <openssl/evp.h>
 
 #include "declcond.h"	/* ntpd uses ntpd/declcond.h, others include/ */
 #include "ntp_net.h"
@@ -154,10 +153,6 @@ extern bool	ipv6_works;
 
 /* ssl_init.c */
 extern	void	ssl_init	(void);
-
-/* Avoid 2x create/destroy per packet.
- * need per thread if we start using threads. */
-EVP_MD_CTX *digest_ctx;
 
 /* strl-obsd.c */
 #ifndef HAVE_STRLCPY		/* + */
