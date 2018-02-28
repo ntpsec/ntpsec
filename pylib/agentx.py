@@ -194,7 +194,6 @@ class PacketControl:
         openpkt = ax.OpenPDU(True, 23, 0, 0, self.timeout, (),
                              "NTPsec SNMP subagent")
         self.sendPacket(openpkt, False)
-        self.log("Sent open packet: %s\n" % repr(openpkt), 4)
         response = self.waitForResponse(openpkt, True)
         self.sessionID = response.sessionID
         # Register the tree
@@ -204,7 +203,6 @@ class PacketControl:
                                   self.database.mib_upperBound(),
                                   self.database.mib_context())
         self.sendPacket(register, False)
-        self.log("Sent registration packet: %s\n" % repr(register), 4)
         response = self.waitForResponse(register, True)
         self.stillConnected = True
 
@@ -214,7 +212,6 @@ class PacketControl:
             self.packetEater()
             while len(self.recievedPackets) > 0:
                 packet = self.recievedPackets.pop(0)
-                self.log("Waiting, got packet: %s\n" % repr(packet), 4)
                 if packet.__class__ != ax.ResponsePDU:
                     continue
                 haveit = (opkt.transactionID == packet.transactionID) and \
@@ -222,6 +219,7 @@ class PacketControl:
                 if ignoreSID is False:
                     haveit = haveit and (opkt.sessionID == packet.sessionID)
                 if haveit is True:
+                    self.log("Recieved waited for response", 4)
                     return packet
             time.sleep(self.spinGap)
 
@@ -248,7 +246,7 @@ class PacketControl:
                 self.recievedPackets.append(pkt)
                 if pkt.transactionID > self.highestTransactionID:
                     self.highestTransactionID = pkt.transactionID
-                self.log("got a full packet: %s\n" % repr(pkt), 4)
+                self.log("Received a full packet: %s\n" % repr(pkt), 4)
             except ax.ParseDataLengthError:
                 return None  # this happens if we don't have all of a packet
             except (ax.ParseVersionError, ax.ParsePDUTypeError,
@@ -265,7 +263,7 @@ class PacketControl:
     def sendPacket(self, packet, expectsReply, replyTimeout=defaultTimeout,
                    callback=None):
         encoded = packet.encode()
-        self.log("sending packet: %s\n" % repr(packet), 4)
+        self.log("Sending packet: %s\n" % repr(packet), 4)
         self.socket.sendall(encoded)
         if expectsReply is True:
             index = (packet.sessionID,
@@ -274,7 +272,6 @@ class PacketControl:
             self.packetLog[index] = (replyTimeout, packet, callback)
 
     def sendPing(self):
-        # DUMMY transactionID, does this count for Pings?
         # DUMMY packetID, does this need to change? or does the pktID only
         # count relative to a given transaction ID?
         tid = self.highestTransactionID + 5  # +5 to avoid collisions
