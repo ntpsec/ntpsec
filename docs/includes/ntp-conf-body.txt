@@ -240,6 +240,7 @@ One of the following exit values will be returned:
 In addition to the manual pages provided, comprehensive documentation is
 available on the world wide web at {project-website}. A snapshot of
 this documentation is available in HTML format in `/usr/share/doc/ntp`.
+
 David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
 
 [[bugs]]
