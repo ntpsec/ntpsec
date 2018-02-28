@@ -22,7 +22,6 @@ def build(ctx):
         "refidsmear.c",
         "socket.c",
         "socktoa.c",
-        "ssl_init.c",
         "syssignal.c",
     ]
 
