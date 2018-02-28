@@ -6,6 +6,7 @@ pages:
     - cp www/favicon.ico `pwd`/public
     - cp docs/top.html.in `pwd`/public/index.html
     - cp docs/top-asciidoc.css `pwd`/public/asciidoc.css
+  allow_failure: true
   artifacts:
     paths:
       - public
