@@ -45,7 +45,7 @@ DEFLOG = "ntpsnmpd.log"
 
 
 class DataSource(ntp.agentx.MIBControl):
-    def __init__(self, hostname=DEFHOST, settingsFile=None):
+    def __init__(self, hostname=DEFHOST, settingsFile=None, notifySpin=0.1):
         # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
@@ -234,9 +234,12 @@ class DataSource(ntp.agentx.MIBControl):
         self.settingsFilename = settingsFile
         # Cache so we don't hammer ntpd, default 1 second timeout
         # Timeout default pulled from a hat: we don't want it to last for
-        # long, just not flood ntpd when we don't need to.
+        # long, just not flood ntpd with duplicatte requests during a walk.
         self.cache = ntp.util.Cache(1)
         self.oldValues = {}  # Used by notifications to detect changes
+        # spinGap so we don't spam ntpd with requests during notify checks
+        self.notifySpinTime = notifySpin
+        self.lastNotifyCheck = 0
         self.lastHeartbeat = 0  # Timestamp used for heartbeat notifications
         self.heartbeatInterval = 0  # should save to disk
         self.sentNotifications = 0
@@ -699,6 +702,10 @@ class DataSource(ntp.agentx.MIBControl):
     # =====================================
 
     def checkNotifications(self, control):
+        currentTime = time.time()
+        if (currentTime - self.lastNotifyCheck) < self.notifySpinTime:
+            return
+        self.lastNotifyCheck = currentTime
         if self.notifyModeChange is True:
             self.doNotifyModeChange(control)
 
