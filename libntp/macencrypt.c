@@ -14,14 +14,10 @@
 #include "ntp_stdlib.h"
 #include "ntp.h"
 
-static bool ssl_init_done;
-/* Need one per thread. */
-EVP_MD_CTX *digest_ctx;
-
 #ifndef EVP_MD_CTX_reset
 /* Slightly older version of OpenSSL */
 /* Similar hack in ssl_init.c and attic/digest-timing.c */
-#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init((ctx))
+#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
 #endif
 
 /* ctmemeq - test two blocks memory for equality without leaking
@@ -159,35 +155,3 @@ addr2refid(sockaddr_u *addr)
 	memcpy(&addr_refid, digest, sizeof(addr_refid));
 	return (addr_refid);
 }
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-static void     atexit_ssl_cleanup(void);
-#endif
-
-void
-ssl_init(void)
-{
-	if (ssl_init_done)
-		return;
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-	OpenSSL_add_all_digests();
-	atexit(&atexit_ssl_cleanup);
-#endif
-
-	digest_ctx = EVP_MD_CTX_new();
-	ssl_init_done = true;
-}
-
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-static void
-atexit_ssl_cleanup(void)
-{
-	if (!ssl_init_done)
-		return;
-
-	ssl_init_done = false;
-	EVP_cleanup();
-}
-#endif

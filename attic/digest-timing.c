@@ -23,10 +23,10 @@
 
 #ifndef EVP_MD_CTX_reset
 /* Slightly older version of OpenSSL */
-/* Similar hack in libntp/macencrypt.c */
+/* Similar hack in ssl_init.c */
 #define EVP_MD_CTX_new() EVP_MD_CTX_create()
-#define EVP_MD_CTX_free(ctx) EVP_MD_CTX_destroy((ctx))
-#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init((ctx))
+#define EVP_MD_CTX_free(ctx) EVP_MD_CTX_destroy(ctx)
+#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
 #endif
 
 
