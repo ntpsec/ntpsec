@@ -20,35 +20,43 @@ doit ()
   DIR=test-$1
   [ ! -d $DIR ] && mkdir $DIR
   rm -rf $DIR/*
-  ./waf configure --out=$DIR $2          2>&1 | tee    $DIR/test.log
+  ./waf configure --out=$DIR $2          |& tee    $DIR/test.log
   WAF1=${PIPESTATUS[0]}
   WAF2=0
   WAF3=0
   if [ "$WAF1" = 0 ]
   then
-  echo                                   2>&1 | tee -a $DIR/test.log
-  ./waf build                            2>&1 | tee -a $DIR/test.log
+  echo                                   |& tee -a $DIR/test.log
+  ./waf build                            |& tee -a $DIR/test.log
   WAF2=${PIPESTATUS[0]}
   if [ "$WAF2" = 0 ]
   then
-  echo                                   2>&1 | tee -a $DIR/test.log
-  ./waf check                            2>&1 | tee -a $DIR/test.log
+  echo                                   |& tee -a $DIR/test.log
+  ./waf check                            |& tee -a $DIR/test.log
   WAF3=${PIPESTATUS[0]}
   fi
   fi
   if [ "$WAF1" != 0 -o "$WAF2" != 0 -o "$WAF3" != 0 ] 
   then
-    echo                                          | tee -a $DIR/test.log
-    echo "Trouble with $DIR"                      | tee -a $DIR/test.log
+    echo                                         |& tee -a $DIR/test.log
+    echo "Trouble with $DIR"                     |& tee -a $DIR/test.log
   else
-    echo -n "VERSION: "                           | tee -a $DIR/test.log
-    ./$DIR/main/ntpd/ntpd --version          2>&1 | tee -a $DIR/test.log
-    echo -n "VERSION: "                           | tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntpq --version    2>&1 | tee -a $DIR/test.log
-    echo -n "VERSION: "                           | tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntpdig --version  2>&1 | tee -a $DIR/test.log
-    echo -n "VERSION: "                           | tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntpmon --version  2>&1 | tee -a $DIR/test.log
+    echo -n "VERSION: "                          |& tee -a $DIR/test.log
+    ./$DIR/main/ntpd/ntpd --version              |& tee -a $DIR/test.log
+    echo -n "VERSION: "                          |& tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntpq --version        |& tee -a $DIR/test.log
+    echo -n "VERSION: "                          |& tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntpdig --version      |& tee -a $DIR/test.log
+    echo -n "VERSION: "                          |& tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntpmon --version      |& tee -a $DIR/test.log
+if [ "`which gpsmon 2>/dev/null`" != "" ]
+then
+    # needs GPSD library
+    echo -n "VERSION: "                          |& tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntploggps --version   |& tee -a $DIR/test.log
+fi
+    echo -n "VERSION: "                          |& tee -a $DIR/test.log
+    ./$DIR/main/ntpclients/ntplogtemp --version  |& tee -a $DIR/test.log
   fi
   echo
   echo
