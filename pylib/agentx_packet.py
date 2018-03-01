@@ -829,6 +829,8 @@ class OID:
         self.sanity()
 
     def __eq__(self, other):
+        if isinstance(other, OID) is False:
+            return False
         if not (self.subids == other.subids):
             return False
         elif self.include != other.include:
