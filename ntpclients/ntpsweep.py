@@ -172,8 +172,12 @@ if __name__ == '__main__':
             print(__doc__, file=sys.stderr)
             raise SystemExit(0)
 
-    if arguments:
-        hostlist += [ln.strip() for ln in open(arguments[0]).readlines()]
+    try:
+        if arguments:
+            hostlist += [ln.strip() for ln in open(arguments[0]).readlines()]
+    except IOError:
+        sys.stderr.write("Host file not found.\n")
+        raise SystemExit(1)
 
     if not hostlist:
         hostlist = ["localhost"]
