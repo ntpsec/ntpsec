@@ -73,60 +73,106 @@ class DataSource(ntp.agentx.MIBControl):
                 {1:
                  {"subids":
                   # ntpNetSoftwareName utf8str
-                  {1: {"reader":
-                       (lambda oid: self.cbr_systemInfo(oid, "name"))},
+                  {1: {"subids":
+                       {0:
+                        {"reader":
+                         (lambda oid: self.cbr_systemInfo(oid, "name"))}}},
                    # ntpEntSoftwareVersion utf8str
-                   2: {"reader":
-                       (lambda oid: self.cbr_systemInfo(oid, "version"))},
+                   2: {"subids":
+                       {0:
+                        {"reader":
+                         (lambda oid: self.cbr_systemInfo(oid, "version"))}}},
                    # ntpEntSoftwareVendor utf8str
-                   3: {"reader":
-                       (lambda oid: self.cbr_systemInfo(oid, "vendor"))},
+                   3: {"subids":
+                       {0:
+                        {"reader":
+                         (lambda oid: self.cbr_systemInfo(oid, "vendor"))}}},
                    # ntpEntSystemType utf8str
-                   4: {"reader":
-                       (lambda oid: self.cbr_systemInfo(oid, "system"))},
+                   4: {"subids":
+                       {0:
+                        {"reader":
+                         (lambda oid: self.cbr_systemInfo(oid, "system"))}}},
                    # ntpEntTimeResolution uint32
-                   5: {"reader": self.cbr_timeResolution},
+                   5: {"subids":
+                       {0:
+                        {"reader": self.cbr_timeResolution}}},
                    # ntpEntTimePrecision int32
-                   6: {"reader": self.cbr_timePrecision},
+                   6: {"subids":
+                       {0:
+                        {"reader": self.cbr_timePrecision}}},
                    # ntpEntTimeDistance DisplayString
-                   7: {"reader": self.cbr_timeDistance}}},
+                   7: {"subids":
+                       {0:
+                        {"reader": self.cbr_timeDistance}}}}},
                  # ntpEntStatus
                  2: {"subids":
                      # ntpEntStatusCurrentMode INTEGER {...}
-                     {1: {"reader": self.cbr_statusCurrentMode},
+                     {1: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusCurrentMode}}},
                       # ntpEntStatusStratum NtpStratum
-                      2: {"reader": self.cbr_statusStratum},
+                      2: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusStratum}}},
                       # ntpEntStatusActiveRefSourceId
                       #  uint32 (0..99999)
-                      3: {"reader": self.cbr_statusActiveRefSourceID},
+                      3: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusActiveRefSourceID}}},
                       # ntpEntStatusActiveRefSourceName utf8str
-                      4: {"reader": self.cbr_statusActiveRefSourceName},
+                      4: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusActiveRefSourceName}}},
                       # ntpEntStatusActiveOffset DisplayString
-                      5: {"reader": self.cbr_statusActiveOffset},
+                      5: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusActiveOffset}}},
                       # ntpEntStatusNumberOfRefSources
                       #  unit32 (0..99)
-                      6: {"reader": self.cbr_statusNumRefSources},
+                      6: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusNumRefSources}}},
                       # ntpEntStatusDispersion DisplayString
-                      7: {"reader": self.cbr_statusDispersion},
+                      7: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusDispersion}}},
                       # ntpEntStatusEntityUptime TimeTicks
-                      8: {"reader": self.cbr_statusEntityUptime},
+                      8: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusEntityUptime}}},
                       # ntpEntStatusDateTime NtpDateTime
-                      9: {"reader": self.cbr_statusDateTime},
+                      9: {"subids":
+                          {0:
+                           {"reader": self.cbr_statusDateTime}}},
                       # ntpEntStatusLeapSecond NtpDateTime
-                      10: {"reader": self.cbr_statusLeapSecond},
+                      10: {"subids":
+                           {0:
+                            {"reader": self.cbr_statusLeapSecond}}},
                       # ntpEntStatusLeapSecondDirection
                       #  int32 (-1..1)
-                      11: {"reader": self.cbr_statusLeapSecDirection},
+                      11: {"subids":
+                           {0:
+                            {"reader": self.cbr_statusLeapSecDirection}}},
                       # ntpEntStatusInPkts Counter32
-                      12: {"reader": self.cbr_statusInPkts},
+                      12: {"subids":
+                           {0:
+                            {"reader": self.cbr_statusInPkts}}},
                       # ntpEntStatusOutPkts Counter32
-                      13: {"reader": self.cbr_statusOutPkts},
+                      13: {"subids":
+                           {0:
+                            {"reader": self.cbr_statusOutPkts}}},
                       # ntpEntStatusBadVersion Counter32
-                      14: {"reader": self.cbr_statusBadVersion},
+                      14: {"subids":
+                           {0:
+                            {"reader": self.cbr_statusBadVersion}}},
                       # ntpEntStatusProtocolError Counter32
-                      15: {"reader": self.cbr_statusProtocolError},
+                      15: {"subids":
+                           {0:
+                            {"reader": self.cbr_statusProtocolError}}},
                       # ntpEntStatusNotifications Counter32
-                      16: {"reader": self.cbr_statusNotifications},
+                      16: {"subids":
+                           {0:
+                            {"reader": self.cbr_statusNotifications}}},
                       # ntpEntStatPktModeTable
                       #  SEQUENCE of NtpEntStatPktModeEntry
                       17: {"subids":
@@ -187,15 +233,21 @@ class DataSource(ntp.agentx.MIBControl):
                  # ntpEntControl
                  4: {"subids":
                      # ntpEntHeartbeatInterval unit32
-                     {1: {"reader": self.cbr_entHeartbeatInterval,
-                          "writer": self.cbw_entHeartbeatInterval},
+                     {1: {"subids":
+                          {0:
+                           {"reader": self.cbr_entHeartbeatInterval,
+                            "writer": self.cbw_entHeartbeatInterval}}},
                       # ntpEntNotifBits BITS {...}
-                      2: {"reader": self.cbr_entNotifBits,
-                          "writer": self.cbw_entNotifBits}}},
+                      2: {"subids":
+                          {0:
+                           {"reader": self.cbr_entNotifBits,
+                            "writer": self.cbw_entNotifBits}}}}},
                  # ntpEntNotifObjects
                  5: {"subids":
                      # ntpEntNotifMessage utf8str
-                     {1: {"reader": self.cbr_entNotifMessage}}}}},
+                     {1: {"subids":
+                          {0:
+                           {"reader": self.cbr_entNotifMessage}}}}}}},
             # ntpEntConformance
             2: {"subids":
                 # ntpEntCompliances
