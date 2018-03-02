@@ -12,7 +12,11 @@ on user-visible changes.
 
 == Repository head ==
 
+Digests longer then 20 bytes will be truncated.
+
 We have merged Classic's fix for CVE-2018-7182.
+
+We have dropped support for Broadcast servers.
 
 It is now possible to unpeer refclocks using a type/unit specification
 rather than a magic IP address.  This was the last obligatory use of
