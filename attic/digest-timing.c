@@ -6,6 +6,10 @@
  * It doesn't include the copy or compare or finding the right key.
  *
  * Beware of overflows in the timing computations.
+ *
+ * Disable AES-NI (Intel hardware: NI == New Instruction) with:
+ *    OPENSSL_ia32cap="~0x200000200000000"
+ * Check /proc/cpuinfo flags for "aes" to see if you have it.
  */
 
 #include <stdint.h>
@@ -14,6 +18,7 @@
 #include <time.h>
 
 #include <openssl/err.h>
+#include <openssl/cmac.h>
 #include <openssl/evp.h>
 #include <openssl/md5.h>
 #include <openssl/rand.h>
@@ -39,18 +44,20 @@ int NUM = 1000000;
 /* Nothing magic about these key lengths.
  * ntpkeygen just happens to label things this way.
  */
+#define AES_KEY_LENGTH 16
 #define MD5_KEY_LENGTH 16
 #define SHA1_KEY_LENGTH 20
 #define MAX_KEY_LENGTH 64
 
 EVP_MD_CTX *ctx;
+CMAC_CTX *cmac;
 
-void ssl_init(void);
-void ssl_init(void)
+static void ssl_init(void)
 {
   ERR_load_crypto_strings();
   OpenSSL_add_all_digests();
   ctx = EVP_MD_CTX_new();
+  cmac = CMAC_CTX_new();
 }
 
 static unsigned int SSL_Digest(
@@ -89,7 +96,23 @@ static unsigned int SSL_DigestSlow(
   return len;
 }
 
-static void DoOne(
+static size_t SSL_CMAC(
+  const EVP_CIPHER *cipher, /* cipher algorithm */
+  uint8_t *key,             /* key pointer */
+  int     keylength,        /* key size */
+  uint8_t *pkt,             /* packet pointer */
+  int     pktlength         /* packet length */
+) {
+  unsigned char answer[EVP_MAX_MD_SIZE];
+  size_t len;
+  CMAC_resume(cmac);
+  CMAC_Init(cmac, key, keylength, cipher, NULL);
+  CMAC_Update(cmac, pkt, pktlength);
+  CMAC_Final(cmac, answer, &len);
+  return len;
+}
+
+static void DoDigest(
   const char *name,       /* type of digest */
   uint8_t *key,           /* key pointer */
   int     keylength,      /* key size */
@@ -128,6 +151,34 @@ static void DoOne(
   printf("\n");
 }
 
+static void DoCMAC(
+  const char *name,       /* name of cipher */
+  const EVP_CIPHER *cipher,
+  uint8_t *key,           /* key pointer */
+  int     keylength,      /* key length */
+  uint8_t *pkt,           /* packet pointer */
+  int     pktlength       /* packet length */
+)
+{
+  struct timespec start, stop;
+  int i;
+  double fast;
+  unsigned long digestlength = 0;
+
+  if (NULL == cipher) return;
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  for (i = 0; i < NUM; i++) {
+    digestlength = SSL_CMAC(cipher, key, keylength, pkt, pktlength);
+  }
+  clock_gettime(CLOCK_MONOTONIC, &stop);
+  fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
+  printf("%10s  %2d %2d %2lu %6.0f  %6.3f",
+    name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
+
+  printf("\n");
+}
+
 
 
 int main(int argc, char *argv[])
@@ -146,25 +197,37 @@ int main(int argc, char *argv[])
   printf("# KL=key length, PL=packet length, DL=digest length\n");
   printf("# Digest    KL PL DL  ns/op sec/run     slow   %% diff\n");
 
-  DoOne("MD5",    key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
-  DoOne("MD5",    key, MD5_KEY_LENGTH-1, packet, PACKET_LENGTH);
-  DoOne("MD5",    key, SHA1_KEY_LENGTH, packet, PACKET_LENGTH);
-  DoOne("SHA1",   key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
-  DoOne("SHA1",   key, SHA1_KEY_LENGTH, packet, PACKET_LENGTH);
-  DoOne("SHA1",   key, SHA1_KEY_LENGTH-1, packet, PACKET_LENGTH);
-  DoOne("SHA224", key, 16, packet, PACKET_LENGTH);
-  DoOne("SHA224", key, 20, packet, PACKET_LENGTH);
-  DoOne("SHA256", key, 16, packet, PACKET_LENGTH);
-  DoOne("SHA256", key, 20, packet, PACKET_LENGTH);
-  DoOne("SHA384", key, 16, packet, PACKET_LENGTH);
-  DoOne("SHA384", key, 20, packet, PACKET_LENGTH);
-  DoOne("SHA512", key, 16, packet, PACKET_LENGTH);
-  DoOne("SHA512", key, 20, packet, PACKET_LENGTH);
-  DoOne("SHA512", key, 24, packet, PACKET_LENGTH);
-  DoOne("SHA512", key, 32, packet, PACKET_LENGTH);
-  DoOne("RIPEMD160", key, 16, packet, PACKET_LENGTH);
-  DoOne("RIPEMD160", key, 20, packet, PACKET_LENGTH);
-  DoOne("RIPEMD160", key, 32, packet, PACKET_LENGTH);
+  DoDigest("MD5",    key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
+  DoDigest("MD5",    key, MD5_KEY_LENGTH-1, packet, PACKET_LENGTH);
+  DoDigest("MD5",    key, SHA1_KEY_LENGTH, packet, PACKET_LENGTH);
+  DoDigest("SHA1",   key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
+  DoDigest("SHA1",   key, SHA1_KEY_LENGTH, packet, PACKET_LENGTH);
+  DoDigest("SHA1",   key, SHA1_KEY_LENGTH-1, packet, PACKET_LENGTH);
+  DoDigest("SHA224", key, 16, packet, PACKET_LENGTH);
+  DoDigest("SHA224", key, 20, packet, PACKET_LENGTH);
+  DoDigest("SHA256", key, 16, packet, PACKET_LENGTH);
+  DoDigest("SHA256", key, 20, packet, PACKET_LENGTH);
+  DoDigest("SHA384", key, 16, packet, PACKET_LENGTH);
+  DoDigest("SHA384", key, 20, packet, PACKET_LENGTH);
+  DoDigest("SHA512", key, 16, packet, PACKET_LENGTH);
+  DoDigest("SHA512", key, 20, packet, PACKET_LENGTH);
+  DoDigest("SHA512", key, 24, packet, PACKET_LENGTH);
+  DoDigest("SHA512", key, 32, packet, PACKET_LENGTH);
+  DoDigest("RIPEMD160", key, 16, packet, PACKET_LENGTH);
+  DoDigest("RIPEMD160", key, 20, packet, PACKET_LENGTH);
+  DoDigest("RIPEMD160", key, 32, packet, PACKET_LENGTH);
+
+  printf("\n");
+  printf("# KL=key length, PL=packet length, CL=CMAC length\n");
+  printf("# CMAC      KL PL CL  ns/op sec/run\n");
+
+  DoCMAC("DES",     EVP_des_cbc(),          key,  8, packet, PACKET_LENGTH);
+  DoCMAC("AES-128", EVP_aes_128_cbc(),      key, 16, packet, PACKET_LENGTH);
+  DoCMAC("AES-192", EVP_aes_192_cbc(),      key, 24, packet, PACKET_LENGTH);
+  DoCMAC("AES-256", EVP_aes_256_cbc(),      key, 32, packet, PACKET_LENGTH);
+  DoCMAC("CAM-128", EVP_camellia_128_cbc(), key, 16, packet, PACKET_LENGTH);
+  DoCMAC("CAM-192", EVP_camellia_192_cbc(), key, 24, packet, PACKET_LENGTH);
+  DoCMAC("CAM-256", EVP_camellia_256_cbc(), key, 32, packet, PACKET_LENGTH);
 
   return 0;
   
