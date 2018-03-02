@@ -9,6 +9,17 @@ The turtle has been swimming in the kernel.
 
 |==============================
 
+== Related Links ==
+
+include::includes/manual.txt[]
+
+== Table of Contents ==
+
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#_options[Options]
+* link:#_bugs[Bugs]
+
 '''''
 
 include::includes/ntptime-body.txt[]

@@ -14,6 +14,21 @@ A typical NTP monitoring packet
 include::includes/manual.txt[]
 
 '''''
+== Table of Contents ==
+
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#_options[Options]
+* link:#_internal_commands[Internal Commands]
+* link:#_control_message_commands[Control Message Commands]
+* link:#auth[Authentication]
+* link:#status[Status Words and Kiss Codes]
+* link:#system[System Variables]
+* link:#peer[Peer Variables]
+* link:#clock[Clock Variables]
+* link:#_compatibility[Compatibility]
+* link:#_known_limitations[Known Limitations]
+* link:#_mode_6_protocol[Mode 6 Protocol]
 
 include::includes/ntpq-body.txt[]
 

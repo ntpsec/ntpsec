@@ -9,6 +9,20 @@ S is for snakeoil.
 
 |==============================
 
+== Related Links ==
+
+include::includes/manual.txt[]
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+* link:#_usage[USAGE]
+* link:#_compatibility[COMPATIBILITY]
+* link:#_exit_status[EXIT STATUS]
+* link:#_authors[AUTHORS]
+
 '''''
 
 include::includes/ntpdig-body.txt[]
