@@ -43,7 +43,7 @@ appear multiple times.
 +-h+ string, +--host+=_string_::
   Specify a single host.  Deprecated option for backwards compatibility.
 
-If hodtfiles are speciied, they are treated as lists of hostnames
+If hostfiles are specified, they are treated as lists of hostnames
 to be swept, one per line.
 
 // end
