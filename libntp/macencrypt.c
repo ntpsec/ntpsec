@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include <openssl/evp.h>	/* provides OpenSSL digest API */
+#include <openssl/md5.h>
 
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
@@ -77,6 +78,8 @@ mac_authencrypt(
 	EVP_DigestUpdate(ctx, key, key_size);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
+	if (MAX_BARE_DIGEST_LENGTH < len)
+		len = MAX_BARE_DIGEST_LENGTH;
 	memmove((uint8_t *)pkt + length + 4, digest, len);
 	return (int)(len + 4);
 }
@@ -115,6 +118,8 @@ mac_authdecrypt(
 	EVP_DigestUpdate(ctx, key, key_size);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
+	if (MAX_BARE_DIGEST_LENGTH < len)
+		len = MAX_BARE_DIGEST_LENGTH;
 	if ((unsigned int)size != len + 4) {
 		msyslog(LOG_ERR,
 		    "MAC: decrypt: MAC length error");
@@ -133,7 +138,7 @@ mac_authdecrypt(
 uint32_t
 addr2refid(sockaddr_u *addr)
 {
-	uint8_t		digest[20];
+	uint8_t		digest[MD5_DIGEST_LENGTH];
 	uint32_t	addr_refid;
 	EVP_MD_CTX	*ctx;
 	unsigned int	len;

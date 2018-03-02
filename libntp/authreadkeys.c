@@ -60,6 +60,28 @@ nexttok(
 }
 
 
+static void
+check_digest_length(
+	keyid_t keyno,
+	int keytype,
+	char *name) {
+    unsigned char digest[EVP_MAX_MD_SIZE];
+    unsigned int length = 0;
+    EVP_MD_CTX *ctx;
+    const EVP_MD *md;
+
+    md = EVP_get_digestbynid(keytype);
+    ctx = EVP_MD_CTX_create();
+    EVP_DigestInit_ex(ctx, md, NULL);
+    EVP_DigestFinal_ex(ctx, digest, &length);
+    EVP_MD_CTX_destroy(ctx);
+
+    if (MAX_BARE_DIGEST_LENGTH < length) {
+	msyslog(LOG_ERR, "AUTH: authreadkeys: digest for key %u, %s will be truncated.", keyno, name);
+    }
+}
+
+
 /*
  * authreadkeys - (re)read keys from a file.
  */
@@ -177,13 +199,21 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		}
 		len = strlen(token);
 		if (len <= 20) {	/* Bug 2537 */
+			check_digest_length(keyno, keytype, upcased);
 			mac_setkey(keyno, keytype, (uint8_t *)token, len);
 			keys++;
 		} else {
 			char	hex[] = "0123456789abcdef";
 			size_t	jlim;
 
-			jlim = min(len, 2 * sizeof(keystr));
+			jlim = len;
+			if ((2*sizeof(keystr)) < jlim) {
+			  jlim =  2 * sizeof(keystr);
+			  msyslog(LOG_ERR,
+			    "AUTH: authreadkeys: key %u trucated to %u bytes",
+			    keyno, (unsigned int)jlim);
+
+			}
 			for (j = 0; j < jlim; j++) {
 				char *ptr = strchr(hex, tolower((unsigned char)token[j]));
 				if (ptr == NULL)
@@ -200,6 +230,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 				keyno);
 			    continue;
 			}
+			check_digest_length(keyno, keytype, upcased);
 			mac_setkey(keyno, keytype, keystr, jlim / 2);
 			keys++;
 		}

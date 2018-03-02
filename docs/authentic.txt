@@ -111,7 +111,8 @@ program.
 == Algorithms ==
 
 The NTP standards include symmetric (private-key) authentication using
-any message digest algorithm supported by the OpenSSL package
+any message digest algorithm supported by the OpenSSL package.
+Digests longer than 20 bytes will be truncated.
 This algorithm computes a message digest or one-way hash
 which can be used to verify the client has the same message digest as
 the server.

@@ -68,6 +68,9 @@ typedef uint16_t	associd_t; /* association ID */
 typedef uint32_t keyid_t;	/* cryptographic key ID */
 #define NTP_MAXKEY 0xffff	/* max authentication key number */
 
+/* Max digest length in non-extension MACs, add 4 for keyID */
+#define MAX_BARE_DIGEST_LENGTH 20
+
 /*
  * Ordinary double has only 53 bits  of precision in IEEE754.  But l_fp
  * needs 64 bits of precision, arguably 65 bits after 2026. Thus, to have
