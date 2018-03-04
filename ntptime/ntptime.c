@@ -409,7 +409,7 @@ main(
 			    (unsigned long)ntx.stbcnt, (unsigned long)ntx.errcnt);
 		}
 		if (json)
-		    /* hack to avoid trailing comma - not semabtically needed */ 
+		    /* hack to avoid trailing comma - not semantically needed */
 		    fputs("\"version\":\""  NTPSEC_VERSION_STRING "\"}\n", stdout);
 		exit(EXIT_SUCCESS);
 	}
