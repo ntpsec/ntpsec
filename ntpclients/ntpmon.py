@@ -37,7 +37,6 @@ try:
     import ntp.ntpc
     import ntp.packet
     import ntp.util
-    import ntp.version
 except ImportError as e:
     sys.stderr.write(
         "ntpmon: can't find Python NTP library -- check PYTHONPATH.\n")

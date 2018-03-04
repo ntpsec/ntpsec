@@ -27,7 +27,6 @@ try:
     import ntp.ntpc
     import ntp.packet
     import ntp.util
-    import ntp.version
 except ImportError as e:
     sys.stderr.write(
         "ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
