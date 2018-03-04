@@ -3,7 +3,6 @@ Description=Wait for ntpd to synchronize system clock
 Requisite=ntpd.service
 After=ntpd.service
 Conflicts=systemd-timesyncd.service
-ConditionVirtualization=!container
 ConditionCapability=CAP_SYS_TIME
 
 [Service]
