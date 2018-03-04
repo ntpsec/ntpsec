@@ -27,6 +27,7 @@
 #include <openssl/err.h>
 #if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
 #include <openssl/cmac.h>
+#include <openssl/hmac.h>
 #endif
 #include <openssl/evp.h>
 #include <openssl/md5.h>
@@ -61,6 +62,7 @@ int NUM = 1000000;
 EVP_MD_CTX *ctx;
 #if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
 CMAC_CTX *cmac;
+HMAC_CTX *hmac;
 #endif
 
 static void ssl_init(void)
@@ -70,6 +72,7 @@ static void ssl_init(void)
   ctx = EVP_MD_CTX_new();
 #if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
   cmac = CMAC_CTX_new();
+  hmac = HMAC_CTX_new();
 #endif
 }
 
@@ -119,10 +122,24 @@ static size_t SSL_CMAC(
 ) {
   unsigned char answer[EVP_MAX_MD_SIZE];
   size_t len;
-  CMAC_resume(cmac);
   CMAC_Init(cmac, key, keylength, cipher, NULL);
   CMAC_Update(cmac, pkt, pktlength);
   CMAC_Final(cmac, answer, &len);
+  return len;
+}
+
+static size_t SSL_HMAC(
+  const EVP_MD *digest,     /* digest algorithm */
+  uint8_t *key,             /* key pointer */
+  int     keylength,        /* key size */
+  uint8_t *pkt,             /* packet pointer */
+  int     pktlength         /* packet length */
+) {
+  unsigned char answer[EVP_MAX_MD_SIZE];
+  unsigned int len;
+  HMAC_Init_ex(hmac, key, keylength, digest, NULL);
+  HMAC_Update(hmac, pkt, pktlength);
+  HMAC_Final(hmac, answer, &len);
   return len;
 }
 #endif
@@ -189,10 +206,35 @@ static void DoCMAC(
   }
   clock_gettime(CLOCK_MONOTONIC, &stop);
   fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
-  printf("%10s  %2d %2d %2lu %6.0f  %6.3f",
+  printf("%10s  %2d %2d %2lu %6.0f  %6.3f\n",
     name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
+}
 
-  printf("\n");
+static void DoHMAC(
+  const char *name,       /* name of cipher */
+  uint8_t *key,           /* key pointer */
+  int     keylength,      /* key length */
+  uint8_t *pkt,           /* packet pointer */
+  int     pktlength       /* packet length */
+)
+{
+  int type = OBJ_sn2nid(name);
+  const EVP_MD *digest = EVP_get_digestbynid(type);
+  struct timespec start, stop;
+  int i;
+  double fast;
+  unsigned long digestlength = 0;
+
+  if (NULL == digest) return;
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  for (i = 0; i < NUM; i++) {
+    digestlength = SSL_HMAC(digest, key, keylength, pkt, pktlength);
+  }
+  clock_gettime(CLOCK_MONOTONIC, &stop);
+  fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
+  printf("%10s  %2d %2d %2lu %6.0f  %6.3f\n",
+    name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
 }
 #endif
 
@@ -245,6 +287,17 @@ int main(int argc, char *argv[])
   DoCMAC("CAM-128", EVP_camellia_128_cbc(), key, 16, packet, PACKET_LENGTH);
   DoCMAC("CAM-192", EVP_camellia_192_cbc(), key, 24, packet, PACKET_LENGTH);
   DoCMAC("CAM-256", EVP_camellia_256_cbc(), key, 32, packet, PACKET_LENGTH);
+
+  printf("\n");
+  printf("# KL=key length, PL=packet length, CL=HMAC length\n");
+  printf("# HMAC      KL PL CL  ns/op sec/run\n");
+
+  DoHMAC("MD5",    key,  8, packet, PACKET_LENGTH);
+  DoHMAC("SHA1",   key, 16, packet, PACKET_LENGTH);
+  DoHMAC("SHA256", key, 16, packet, PACKET_LENGTH);
+  DoHMAC("SHA256", key, 20, packet, PACKET_LENGTH);
+  DoHMAC("SHA512", key, 16, packet, PACKET_LENGTH);
+  DoHMAC("SHA512", key, 32, packet, PACKET_LENGTH);
 #endif
 
   return 0;
