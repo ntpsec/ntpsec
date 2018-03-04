@@ -213,16 +213,11 @@ def configure(ctx):
     if ctx.options.disable_manpage:
         ctx.env.DISABLE_MANPAGE = True
 
-    from waflib.Utils import subprocess
     if ((os.path.exists(".git") and
             ctx.find_program("git", var="BIN_GIT", mandatory=False))):
         ctx.start_msg("DEVEL: Getting revision")
-        cmd = ["git", "log", "-1", "--format=%H"]
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, universal_newlines=True)
-        ctx.env.NTPSEC_REVISION, stderr = p.communicate()
-        ctx.env.NTPSEC_REVISION = ctx.env.NTPSEC_REVISION.replace("\n", "")
+        cmd = shlex.split("git log -1 --format=%H")
+        ctx.env.NTPSEC_REVISION = ctx.cmd_and_log(cmd).strip()
         ctx.end_msg(ctx.env.NTPSEC_REVISION)
 
     ctx.start_msg("Building version")
