@@ -4,7 +4,7 @@
 :man version: @NTPSEC_VERSION@
 :man manual: NTPsec
 
-== NAME == 
+== NAME ==
 ntpleapfetch - leap-seconds file manager/updater
 
 include::../docs/includes/ntpleapfetch-body.txt[]

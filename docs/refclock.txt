@@ -177,7 +177,7 @@ the 6021 in the generic parse driver.
 |link:driver_zyfer.html[zyfer]          | - | Zyfer GPStarplus Receiver
 |link:driver_neoclock.html[neoclock]    | D | NeoClock4X DCF77 / TDF Receiver
 |link:driver_gpsd.html[gpsd]            | T | GPSD client protocol
-|==========================================================================
+|====================================================================
 
 The name in the left column is the driver type to be used in the
 refclock declaration. Matching to these names is case-insensitive.

@@ -13,7 +13,7 @@ and project conventions.
 You may also find the articles at https://blog.ntpsec.org/
 interesting.
 
-== Choice of language ===
+== Choice of language ==
 
 In order to reduce the complexity of maintenance and testing
 due to multiple languages, we hold the set of allowed languages
@@ -120,7 +120,7 @@ want that to happen again. Thus, if you must refer to struct timeval due to
 an external interface, move the data to/from a struct timespec as
 close to that callsite as possible.
 
-=== Coding style and indentation ==
+=== Coding style and indentation ===
 
 Dr. Dave Mills liked this code indented formatted in a consistent way.
 The file "dot.emacs" has the emacs C-mode indentation style that Dave

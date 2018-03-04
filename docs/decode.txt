@@ -166,7 +166,7 @@ the following table gives the corresponding tally codes used in the
 | +5+ | +sel_backup+    | +#+ | backup (more than +tos maxclock+ sources)
 | +6+ | +sel_sys.peer+  | +*+ | system peer
 | +7+ | +sel_pps.peer+  | +o+ | PPS peer (when the prefer peer is valid)
-|=============================================================================
+|============================================================================
 
 The Count Field displays the number of events since the last time the
 code changed. Upon reaching 15, subsequent events with the same code are
