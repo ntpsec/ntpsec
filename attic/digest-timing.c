@@ -12,13 +12,22 @@
  * Check /proc/cpuinfo flags for "aes" to see if you have it.
  */
 
+/* This may not be high enough.
+ * 0x10000003  1.0.0b fails
+ * 0x1000105fL 1.0.1e works.
+ */
+#define CMAC_VERSION_CUTOFF 0x10000003
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 
+#include <openssl/opensslv.h>
 #include <openssl/err.h>
+#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
 #include <openssl/cmac.h>
+#endif
 #include <openssl/evp.h>
 #include <openssl/md5.h>
 #include <openssl/rand.h>
@@ -50,14 +59,18 @@ int NUM = 1000000;
 #define MAX_KEY_LENGTH 64
 
 EVP_MD_CTX *ctx;
+#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
 CMAC_CTX *cmac;
+#endif
 
 static void ssl_init(void)
 {
   ERR_load_crypto_strings();
   OpenSSL_add_all_digests();
   ctx = EVP_MD_CTX_new();
+#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
   cmac = CMAC_CTX_new();
+#endif
 }
 
 static unsigned int SSL_Digest(
@@ -96,6 +109,7 @@ static unsigned int SSL_DigestSlow(
   return len;
 }
 
+#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
 static size_t SSL_CMAC(
   const EVP_CIPHER *cipher, /* cipher algorithm */
   uint8_t *key,             /* key pointer */
@@ -111,6 +125,7 @@ static size_t SSL_CMAC(
   CMAC_Final(cmac, answer, &len);
   return len;
 }
+#endif
 
 static void DoDigest(
   const char *name,       /* type of digest */
@@ -151,6 +166,7 @@ static void DoDigest(
   printf("\n");
 }
 
+#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
 static void DoCMAC(
   const char *name,       /* name of cipher */
   const EVP_CIPHER *cipher,
@@ -178,7 +194,7 @@ static void DoCMAC(
 
   printf("\n");
 }
-
+#endif
 
 
 int main(int argc, char *argv[])
@@ -217,6 +233,7 @@ int main(int argc, char *argv[])
   DoDigest("RIPEMD160", key, 20, packet, PACKET_LENGTH);
   DoDigest("RIPEMD160", key, 32, packet, PACKET_LENGTH);
 
+#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
   printf("\n");
   printf("# KL=key length, PL=packet length, CL=CMAC length\n");
   printf("# CMAC      KL PL CL  ns/op sec/run\n");
@@ -228,6 +245,7 @@ int main(int argc, char *argv[])
   DoCMAC("CAM-128", EVP_camellia_128_cbc(), key, 16, packet, PACKET_LENGTH);
   DoCMAC("CAM-192", EVP_camellia_192_cbc(), key, 24, packet, PACKET_LENGTH);
   DoCMAC("CAM-256", EVP_camellia_256_cbc(), key, 32, packet, PACKET_LENGTH);
+#endif
 
   return 0;
   
