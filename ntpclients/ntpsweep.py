@@ -196,7 +196,7 @@ Host                             st offset(s) version     system       processor
             scan_host(host, 0)
         except ntp.packet.ControlException as e:
             sys.stderr.write(e.message + "\n")
-            sys.exit(1)
+            continue
     sys.exit(0)
 
 # end
