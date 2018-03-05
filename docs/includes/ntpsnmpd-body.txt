@@ -17,7 +17,7 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 == Options ==
 
 +-c+ filename, +--configfile+=filename::
-  The path of the configuration file, /etc/ntpsnmpd.conf by default
+  Alternate path for the configuration file, /etc/ntpsnmpd.conf by default
 +-n+, +--nofork+::
   Do not fork
 +-x+, +--master-addr+::
@@ -33,11 +33,63 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 +-V+, +--version+::
   Print the version string and exit.
 
-== Files ==
+== Configuration Files ==
 
-/etc/ntpsnmpd.conf the default name of the configuration file
+=== /etc/ntpsnmpd.conf ===
 
-/var/ntpsnmpd/notify.conf the location of notification flags
+[[master-addr]]
++master-addr+ _addr_::
+  The address of the SNMP master agent to connect to. Can be either a named
+  socket or an IP address / hostname and port number.
+
+[[ntp-addr]]
++ntp-addr+ _addr_::
+  The address of the NTP daemon to monitor.
+
+[[logfile]]
++logfile+ _filename_::
+  Log debugging output to the specified file.
+
+[[loglevel]]
++loglevel+ _level_::
+  Threshold for log messages. Equivilent to -D
+
+=== /var/ntpsnmpd/notify.conf ===
+  This file is used to store the state of options that can be set
+  by writing to certain OIDs. Any comments will be overwritten by
+  ntpsnmpd upon write.
+
+[[notify-mode-change]]
++notify-mode-change+ [ True | False ]::
+  Enable notifications on ntpd mode change.
+
+[[notify-stratum-change]]
++notify-stratum-change+ [ True | False ]::
+  Enable notifications on NTP stratum change.
+
+[[notify-syspeer-change]]
++notify-syspeer-change+ [ True | False ]::
+  Enable notifications when ntpd selects a new system peer.
+
+[[notify-add-association]]
++notify-add-association+ [ True | False ]::
+  Enable notifications when ntpd adds a new peer.
+
+[[notify-rm-association]]
++notify-rm-association+ [ True | False ]::
+  Enable notifications when ntpd removes a peer.
+
+[[notify-leap-announced]]
++notify-leap-announced+ [ True | False ]::
+  Enable notifications on leap second announcement.
+
+[[notify-heartbeat]]
++notify-heartbeat+ [ True | False ]::
+  Send heartbeat notification.
+
+[[heartbeat-interval]]
++heartbeat-interval+ _interval_::
+  Frequency of heartbeat notification in integer seconds.
 
 == Known Limitations ==
 
