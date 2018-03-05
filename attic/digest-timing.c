@@ -13,16 +13,10 @@
  */
 
 /* This may not be high enough.
- * 0x10000003  1.0.0b fails CMAC
- * 0x1000105fL 1.0.1e works for CMAC
- *
- * The HMAC test could be split out.
- * ??          ??     fails HMAC on Debian/Jessie
- * 0x1000115fL 1.0.1u fails HMAC on NetBSD 7.1
- * 0x100020bfL 1.0.2k fails HMAC on FreeBSD 11
- * An older version of HMAC doesn't have HMAC_CTX_new
+ * 0x10000003  1.0.0b fails
+ * 0x1000105fL 1.0.1e works.
  */
-#define CMAC_VERSION_CUTOFF 0x100020bfL
+#define CMAC_VERSION_CUTOFF 0x10000003
 
 #include <stdint.h>
 #include <stdlib.h>
