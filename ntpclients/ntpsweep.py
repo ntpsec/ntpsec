@@ -4,8 +4,9 @@
 ntpsweep - print various information about given NTP servers
 USAGE: ntpsweep [-<flag> [<val>] | --<name>[{=| }<val>]]... [hostfile]
 
-    -l, --host-list=str        Host to execute actions on
-                                   - may appear multiple times
+    -h, --host=str             Host to execute actions on
+    -l, --host-list=str        Comma-delimited list of Hosts to 
+                                   execute actions on
     -p, --peers                Recursively list all peers a host syncs to
     -m, --maxlevel=num         Traverse peers up to this level
                                    (4 is a reasonable number)
