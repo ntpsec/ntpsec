@@ -123,6 +123,8 @@ def configure(ctx):
     ctx.load('compiler_c')
     ctx.start_msg('Checking compiler version')
     ctx.end_msg("%s" % ".".join(ctx.env.CC_VERSION))
+    # Ensure m4 is present, or bison will fail with SIGPIPE
+    ctx.find_program('m4')
     ctx.load('bison')
 
     for opt in opt_map:
