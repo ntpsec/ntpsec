@@ -27,7 +27,8 @@ configured timeservers on a LAN.
   of times.
 +
 Use this option to specify the host on which this script operates. May
-appear multiple times.
+appear multiple times.  Multiple hosts may be specified, delimited
+by commas.
 
 +-p+, +--peers+::
   Recursively list all peers a host synchronizes to.
