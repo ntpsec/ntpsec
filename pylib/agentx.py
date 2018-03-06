@@ -135,8 +135,8 @@ class PacketControl:
         self.packetLog = {}  # Sent packets kept until response is received
         self.loopCallback = None  # called each loop in runforever mode
         self.database = dbase  # class for handling data requests
-        self.recievedData = ""  # buffer for data from incomplete packets
-        self.recievedPackets = []  # use as FIFO
+        self.receivedData = ""  # buffer for data from incomplete packets
+        self.receivedPackets = []  # use as FIFO
         self.timeout = timeout
         self.sessionID = None  # need this for all packets
         self.highestTransactionID = 0  # used for exchanges we start
@@ -169,11 +169,11 @@ class PacketControl:
         # loop body split out to separate the one-shot/run-forever switches
         # from the actual logic
         self.packetEater()
-        while len(self.recievedPackets) > 0:
-            packet = self.recievedPackets.pop(0)
+        while len(self.receivedPackets) > 0:
+            packet = self.receivedPackets.pop(0)
             if packet.sessionID != self.sessionID:
                 self.log(
-                    "Recieved packet with incorrect session ID: %s" % packet,
+                    "Received packet with incorrect session ID: %s" % packet,
                     3)
                 resp = ax.ResponsePDU(True, packet.sessionID,
                                       packet.transactioID, packet.packetID,
@@ -214,8 +214,8 @@ class PacketControl:
         "Wait for a response to a specific packet, dropping everything else"
         while True:
             self.packetEater()
-            while len(self.recievedPackets) > 0:
-                packet = self.recievedPackets.pop(0)
+            while len(self.receivedPackets) > 0:
+                packet = self.receivedPackets.pop(0)
                 if packet.__class__ != ax.ResponsePDU:
                     continue
                 haveit = (opkt.transactionID == packet.transactionID) and \
@@ -223,7 +223,7 @@ class PacketControl:
                 if ignoreSID is False:
                     haveit = haveit and (opkt.sessionID == packet.sessionID)
                 if haveit is True:
-                    self.log("Recieved waited for response", 4)
+                    self.log("Received waited for response", 4)
                     return packet
             time.sleep(self.spinGap)
 
@@ -241,13 +241,13 @@ class PacketControl:
         "Slurps data from the input buffer and tries to parse packets from it"
         self.pollSocket()
         while True:
-            datalen = len(self.recievedData)
+            datalen = len(self.receivedData)
             if datalen < 20:
                 return None  # We don't even have a packet header, bail
             try:
-                pkt, extraData = ax.decode_packet(self.recievedData)
-                self.recievedData = extraData
-                self.recievedPackets.append(pkt)
+                pkt, extraData = ax.decode_packet(self.receivedData)
+                self.receivedData = extraData
+                self.receivedPackets.append(pkt)
                 if pkt.transactionID > self.highestTransactionID:
                     self.highestTransactionID = pkt.transactionID
                 self.log("Received a full packet: %s\n" % repr(pkt), 4)
@@ -324,7 +324,7 @@ class PacketControl:
                 self.lastReception = time.time()
             else:
                 break
-        self.recievedData += data
+        self.receivedData += data
 
     # ==========================
     # Packet handlers start here
