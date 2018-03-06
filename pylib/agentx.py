@@ -172,6 +172,9 @@ class PacketControl:
         while len(self.recievedPackets) > 0:
             packet = self.recievedPackets.pop(0)
             if packet.sessionID != self.sessionID:
+                self.log(
+                    "Recieved packet with incorrect session ID: %s" % packet,
+                    3)
                 resp = ax.ResponsePDU(True, packet.sessionID,
                                       packet.transactioID, packet.packetID,
                                       0, ax.REPERR_NOT_OPEN, 0)
@@ -181,7 +184,7 @@ class PacketControl:
             if ptype in self.pduHandlers:
                 self.pduHandlers[ptype](packet)
             else:
-                self.log("dropping packet type %i, not implemented\n" % ptype,
+                self.log("Dropping packet type %i, not implemented\n" % ptype,
                          2)
         self.checkResponses()
         if self.lastReception is not None:
@@ -190,7 +193,7 @@ class PacketControl:
                 self.sendPing()
 
     def initNewSession(self):
-        self.log("init new session...\n", 3)
+        self.log("Initializing new session...\n", 3)
         # We already have a connection, need to open a session.
         openpkt = ax.OpenPDU(True, 23, 0, 0, self.timeout, (),
                              "NTPsec SNMP subagent")
@@ -228,8 +231,8 @@ class PacketControl:
         "Check for expected responses that have timed out"
         currentTime = time.time()
         for key in self.packetLog.keys():
-            timeout, originalPkt, callback = self.packetLog[key]
-            if currentTime > timeout:
+            expiration, originalPkt, callback = self.packetLog[key]
+            if currentTime > expiration:
                 if callback is not None:
                     callback(None, originalPkt)
                 del self.packetLog[key]
@@ -264,7 +267,8 @@ class PacketControl:
     def sendPacket(self, packet, expectsReply, replyTimeout=defaultTimeout,
                    callback=None):
         encoded = packet.encode()
-        self.log("Sending packet: %s\n" % repr(packet), 4)
+        self.log("Sending packet (with reply: %s): %s\n" % (expectsReply,
+                                                            repr(packet)), 4)
         self.socket.sendall(encoded)
         if expectsReply is True:
             index = (packet.sessionID,
@@ -363,7 +367,8 @@ class PacketControl:
                     oid, reader, _ = oids[0]
                     vbind = reader(oid)
                     if vbind is None:  # No data available
-                        # Start next search from the current location
+                        # Re-do search for this OID range, starting from just
+                        # after the current location
                         oidr = ax.SearchRange(oid, oidr.end, False)
                         continue
                     else:
