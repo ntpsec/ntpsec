@@ -6,6 +6,7 @@ from __future__ import print_function, division
 import socket
 import select
 import os.path
+import time
 
 
 master_encoding = 'latin-1'
@@ -354,6 +355,15 @@ class TimeModuleJig:
     def time(self):
         self.time_calls += 1
         return self.time_returns.pop(0)
+
+    def strftime(self, f, t=None):
+        if t is None:
+            return time.strftime(f)
+        else:
+            return time.strftime(f, t)
+
+    def gmtime(self, *args, **kwargs):
+        return time.gmtime(*args, **kwargs)
 
 
 class GzipModuleJig:

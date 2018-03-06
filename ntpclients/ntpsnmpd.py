@@ -1133,14 +1133,14 @@ def connect(address):
             sock = socket.socket(af, socket.SOCK_STREAM)
             sock.connect((host, port))
     except socket.error as msg:
-        log(repr(msg) + "\n", 1)
+        log(repr(msg), 1)
         sys.exit(1)
     log("connected to master agent at " + address, 3)
     return sock
 
 
 def mainloop(snmpSocket, reconnectionAddr, host=None):
-    log("initing loop\n", 3)
+    log("initing loop", 3)
     dbase = DataSource(host, "/var/ntpsntpd/notify.conf")
     while True:  # Loop reconnection attempts
         control = PacketControl(snmpSocket, dbase, logfp=logfp, debug=debug)
@@ -1149,7 +1149,7 @@ def mainloop(snmpSocket, reconnectionAddr, host=None):
         if control.mainloop(True) is False:  # disconnected
             snmpSocket.close()
             snmpSocket = connect(reconnectionAddr)
-            log("disconnected from master, attempting reconnect\n", 2)
+            log("disconnected from master, attempting reconnect", 2)
         else:  # Something else happened
             break
 
@@ -1157,10 +1157,10 @@ def mainloop(snmpSocket, reconnectionAddr, host=None):
 def daemonize(runfunc, *runArgs):
     pid = os.fork()
     if pid < 0:
-        log("Forking error " + str(pid) + "\n", 1)
+        log("Forking error " + str(pid), 1)
         sys.exit(pid)
     elif pid > 0:  # We are the parent
-        log("Daemonization success, child pid: " + str(pid) + "\n", 3)
+        log("Daemonization success, child pid: " + str(pid), 3)
         sys.exit(0)
 
     # We must be the child
@@ -1186,7 +1186,7 @@ def daemonize(runfunc, *runArgs):
 
 
 def loadSettings(filename, optionList):
-    log("Loading config file: %s\n" % filename, 3)
+    log("Loading config file: %s" % filename, 3)
     if os.path.isfile(filename) is False:
         return None
     options = {}

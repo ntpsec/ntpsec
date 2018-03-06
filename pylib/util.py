@@ -86,6 +86,7 @@ def dolog(logfp, text, debug, threshold):
     # threshold is the trigger for the current log
     if logfp is None:
         return  # can turn off logging by supplying a None file descriptior
+    text = rfc3339(time.time()) + " " + text + "\n"
     if debug >= threshold:
         logfp.write(text)
         logfp.flush()  # we don't want to lose an important log to a crash

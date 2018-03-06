@@ -824,7 +824,7 @@ class ControlSession:
             return hinted_lookup(port="ntp", hints=socket.AI_NUMERICHOST)
         except socket.gaierror as e:
             ntp.util.dolog(self.logfp,
-                           "ntpq: numeric-mode lookup of %s failed, %s\n"
+                           "ntpq: numeric-mode lookup of %s failed, %s"
                            % (hname, e.strerror), self.debug, 3)
         try:
             return hinted_lookup(port="ntp", hints=0)
@@ -874,7 +874,7 @@ class ControlSession:
         else:
             self.hostname = canonname or hname
             self.isnum = False
-        ntp.util.dolog(self.logfp, "Opening host %s\n" % self.hostname,
+        ntp.util.dolog(self.logfp, "Opening host %s" % self.hostname,
                        self.debug, 3)
         self.port = sockaddr[1]
         try:
@@ -935,7 +935,7 @@ class ControlSession:
         while len(xdata) % 4:
             xdata += b"\x00"
         ntp.util.dolog(self.logfp,
-                       "Sending %d octets.  seq=%d\n"
+                       "Sending %d octets.  seq=%d"
                        % (len(xdata), self.sequence), self.debug, 3)
         try:
             self.sock.sendall(polybytes(xdata))
@@ -1022,7 +1022,7 @@ class ControlSession:
         warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
                                                   self.debug, th))
 
-        warndbg("Fragment collection begins\n", 1)
+        warndbg("Fragment collection begins", 1)
         # Loop until we have an error or a complete response.  Nearly all
         # code paths to loop again use continue.
         while True:
@@ -1038,13 +1038,13 @@ class ControlSession:
             else:
                 tvo = self.secondary_timeout / 1000
 
-            warndbg("At %s, select with timeout %d begins\n"
+            warndbg("At %s, select with timeout %d begins"
                     % (time.asctime(), tvo), 5)
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error:
                 raise ControlException(SERR_SELECT)
-            warndbg("At %s, select with timeout %d ends\n"
+            warndbg("At %s, select with timeout %d ends"
                     % (time.asctime(), tvo), 5)
 
             if not rd:
@@ -1064,14 +1064,14 @@ class ControlSession:
                                          % ("not ", "")[seenlastfrag])
                 raise ControlException(SERR_INCOMPLETE)
 
-            warndbg("At %s, socket read begins\n" % time.asctime(), 4)
+            warndbg("At %s, socket read begins" % time.asctime(), 4)
             try:
                 rawdata = polybytes(self.sock.recv(4096))
             except socket.error:  # pragma: no cover
                 # usually, errno 111: connection refused
                 raise ControlException(SERR_SOCKET)
 
-            warndbg("Received %d octets\n" % len(rawdata), 3)
+            warndbg("Received %d octets" % len(rawdata), 3)
             rpkt = ControlPacket(self)
             try:
                 rpkt.analyze(rawdata)
@@ -1125,7 +1125,7 @@ class ControlSession:
                 continue
 
             warndbg("Recording fragment %d, size = %d offset = %d, "
-                    " end = %d, more=%s\n"
+                    " end = %d, more=%s"
                     % (len(fragments)+1, rpkt.count,
                        rpkt.offset, rpkt.end(), rpkt.more()), 3)
 
@@ -1144,14 +1144,14 @@ class ControlSession:
             if seenlastfrag and fragments[0].offset == 0:
                 for f in range(1, len(fragments)):
                     if fragments[f-1].end() != fragments[f].offset:
-                        warndbg("Hole in fragment sequence, %d of %d\n"
+                        warndbg("Hole in fragment sequence, %d of %d"
                                 % (f, len(fragments)), 1)
                         break
                 else:
                     tempfraglist = [polystr(f.extension) for f in fragments]
                     self.response = polybytes("".join(tempfraglist))
                     warndbg("Fragment collection ends. %d bytes "
-                            " in %d fragments\n"
+                            " in %d fragments"
                             % (len(self.response), len(fragments)), 1)
                     # special loggers, not replacing with dolog()
                     if self.debug >= 5:  # pragma: no cover
@@ -1179,24 +1179,24 @@ class ControlSession:
 
         if ((rpkt.version() > ntp.magic.NTP_VERSION) or
             (rpkt.version() < ntp.magic.NTP_OLDVERSION)):
-            warndbg("Fragment received with version %d\n"
+            warndbg("Fragment received with version %d"
                     % rpkt.version(), 1)
             return False
         if rpkt.mode() != ntp.magic.MODE_CONTROL:
-            warndbg("Fragment received with mode %d\n" % rpkt.mode(), 1)
+            warndbg("Fragment received with mode %d" % rpkt.mode(), 1)
             return False
         if not rpkt.is_response():
-            warndbg("Received request, wanted response\n", 1)
+            warndbg("Received request, wanted response", 1)
             return False
 
         # Check opcode and sequence number for a match.
         # Could be old data getting to us.
         if rpkt.sequence != self.sequence:
-            warndbg("Received sequence number %d, wanted %d\n" %
+            warndbg("Received sequence number %d, wanted %d" %
                     (rpkt.sequence, self.sequence), 1)
             return False
         if rpkt.opcode() != opcode:
-            warndbg("Received opcode %d, wanted %d\n" %
+            warndbg("Received opcode %d, wanted %d" %
                     (rpkt.opcode(), opcode), 1)
             return False
 
@@ -1463,34 +1463,34 @@ This combats source address spoofing
                         # None of the supplied prior entries match, so
                         # toss them from our list and try again.
                         warndbg("no overlap between prior entries and "
-                                "server MRU list\n", 1)
+                                "server MRU list", 1)
                         restarted_count += 1
                         if restarted_count > 8:
                             raise ControlException(SERR_STALL)
                         warndbg("--->   Restarting from the beginning, "
-                                "retry #%u\n" % restarted_count, 1)
+                                "retry #%u" % restarted_count, 1)
                     elif e.errorcode == ntp.control.CERR_BADVALUE:
                         if cap_frags:
                             cap_frags = False
                             warndbg("Reverted to row limit from "
-                                    "fragments limit.\n", 1)
+                                    "fragments limit.", 1)
                         else:
                             # ntpd has lower cap on row limit
                             self.ntpd_row_limit -= 1
                             limit = min(limit, self.ntpd_row_limit)
                             warndbg("Row limit reduced to %d following "
-                                    "CERR_BADVALUE.\n" % limit, 1)
+                                    "CERR_BADVALUE." % limit, 1)
                     elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
                         # Reduce the number of rows/frags requested by
                         # half to recover from lost response fragments.
                         if cap_frags:
                             frags = max(2, frags / 2)
                             warndbg("Frag limit reduced to %d following "
-                                    "incomplete response.\n" % frags, 1)
+                                    "incomplete response." % frags, 1)
                         else:
                             limit = max(2, limit / 2)
                             warndbg("Row limit reduced to %d following "
-                                    " incomplete response.\n" % limit, 1)
+                                    " incomplete response." % limit, 1)
                     elif e.errorcode:
                         raise e
 
@@ -1512,7 +1512,7 @@ This combats source address spoofing
                 curidx = -1
                 mru = None
                 for (tag, val) in variables.items():
-                    warndbg("tag=%s, val=%s\n" % (tag, val), 4)
+                    warndbg("tag=%s, val=%s" % (tag, val), 4)
                     if tag == "nonce":
                         nonce = "%s=%s" % (tag, val)
                     elif tag == "last.older":

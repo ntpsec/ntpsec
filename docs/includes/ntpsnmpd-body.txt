@@ -93,8 +93,9 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 
 == Known Limitations ==
 
-This is still a prototype. Parts of the AgentX standard are not yet fully
-implemented, logging not fleshed out yet, some options missing, etc.
+This program is still experimental in nature. Parts of the AgentX standard
+are not yet fully implemented, logging not fleshed out yet, some options
+missing, etc.
 
 == Known Deviations from RFC 5907 ==
 

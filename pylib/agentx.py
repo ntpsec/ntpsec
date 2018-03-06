@@ -184,7 +184,7 @@ class PacketControl:
             if ptype in self.pduHandlers:
                 self.pduHandlers[ptype](packet)
             else:
-                self.log("Dropping packet type %i, not implemented\n" % ptype,
+                self.log("Dropping packet type %i, not implemented" % ptype,
                          2)
         self.checkResponses()
         if self.lastReception is not None:
@@ -193,7 +193,7 @@ class PacketControl:
                 self.sendPing()
 
     def initNewSession(self):
-        self.log("Initializing new session...\n", 3)
+        self.log("Initializing new session...", 3)
         # We already have a connection, need to open a session.
         openpkt = ax.OpenPDU(True, 23, 0, 0, self.timeout, (),
                              "NTPsec SNMP subagent")
@@ -250,7 +250,7 @@ class PacketControl:
                 self.receivedPackets.append(pkt)
                 if pkt.transactionID > self.highestTransactionID:
                     self.highestTransactionID = pkt.transactionID
-                self.log("Received a full packet: %s\n" % repr(pkt), 4)
+                self.log("Received a full packet: %s" % repr(pkt), 4)
             except ax.ParseDataLengthError:
                 return None  # this happens if we don't have all of a packet
             except (ax.ParseVersionError, ax.ParsePDUTypeError,
@@ -267,7 +267,7 @@ class PacketControl:
     def sendPacket(self, packet, expectsReply, replyTimeout=defaultTimeout,
                    callback=None):
         encoded = packet.encode()
-        self.log("Sending packet (with reply: %s): %s\n" % (expectsReply,
+        self.log("Sending packet (with reply: %s): %s" % (expectsReply,
                                                             repr(packet)), 4)
         self.socket.sendall(encoded)
         if expectsReply is True:
@@ -319,7 +319,7 @@ class PacketControl:
             tmp = tmp[0]
             newdata = tmp.recv(4096)  # Arbitrary value
             if len(newdata) > 0:
-                self.log("Received data: %s\n" % repr(newdata), 5)
+                self.log("Received data: %s" % repr(newdata), 5)
                 data += newdata
                 self.lastReception = time.time()
             else:

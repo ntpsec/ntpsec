@@ -35,6 +35,7 @@ class TestPylibUtilMethods(unittest.TestCase):
     def test_dolog(self):
         f = ntp.util.dolog
 
+        faketimemod = jigs.TimeModuleJig()
         # We need a test jig
         class LogTester:
             def __init__(self):
@@ -48,16 +49,23 @@ class TestPylibUtilMethods(unittest.TestCase):
 
             def flush(self):
                 self.flushed = True
-        # Test with logging off (fd == None)
-        #   uh... if someone can think of a way to do that please tell me
-        # Test with logging on, below threshold
-        jig = LogTester()
-        f(jig, "blah", 0, 3)
-        self.assertEqual((jig.written, jig.flushed), (None, False))
-        # Test with logging on, above threshold
-        jig.__init__()  # reset
-        f(jig, "blah", 4, 3)
-        self.assertEqual((jig.written, jig.flushed), ("blah", True))
+        try:
+            timetemp = ntp.util.time
+            ntp.util.time = faketimemod
+            # Test with logging off (fd == None)
+            #   uh... if someone can think of a way to do that please tell me
+            # Test with logging on, below threshold
+            jig = LogTester()
+            faketimemod.time_returns = [0, 1]
+            f(jig, "blah", 0, 3)
+            self.assertEqual((jig.written, jig.flushed), (None, False))
+            # Test with logging on, above threshold
+            jig.__init__()  # reset
+            f(jig, "blah", 4, 3)
+            self.assertEqual((jig.written, jig.flushed),
+                             ("1970-01-01T00:00:01Z blah\n", True))
+        finally:
+            ntp.util.time = timetemp
 
     def test_safeargcast(self):
         f = ntp.util.safeargcast
