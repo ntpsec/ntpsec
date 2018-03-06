@@ -1171,14 +1171,22 @@ def daemonize(runfunc, *runArgs):
 
     # chdir should be here, change to what? root?
 
+    global logfp
+    if logfp == sys.stderr:
+        logfp = None
+
     sys.stdin.close()
+    sys.stdin = None
     sys.stdout.close()
+    sys.stdout = None
     sys.stderr.close()
+    sys.stderr = None
 
     runfunc(*runArgs)
 
 
 def loadSettings(filename, optionList):
+    log("Loading config file: %s\n" % filename, 3)
     if os.path.isfile(filename) is False:
         return None
     options = {}
@@ -1294,6 +1302,9 @@ if __name__ == "__main__":
         elif switch in ("-l", "--logfile"):
             logfile = val
             fileLogging = True
+
+    if nofork is False:
+        fileLogging = True
 
     if fileLogging is True:
         if logfp != sys.stderr:
