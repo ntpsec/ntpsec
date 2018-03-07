@@ -594,22 +594,10 @@ int main(int argc, char **argv) {
     # Check via pkg-config first, then fall back to a direct search
     if not ctx.check_cfg(
         package='libcrypto', uselib_store='CRYPTO',
-        args=['libcrypto >= 0.9.7d', '--cflags', '--libs'],
-        msg="Checking for OpenSSL >= 0.9.7d (via pkg-config)",
+        args=['libcrypto', '--cflags', '--libs'],
+        msg="Checking for OpenSSL (via pkg-config)",
         define_name='', mandatory=False,
     ):
-        # Find OpenSSL. Must happen before function checks
-        # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
-        SNIP_OPENSSL_VERSION_CHECK = """
-        #include <openssl/evp.h>
-        int main(void) {
-        #if OPENSSL_VERSION_NUMBER < 0x0090704fL
-        #error OpenSSL must be at least 0.9.7d
-        #endif
-            return 0;
-        }
-        """
-
         openssl_headers = (
             "openssl/evp.h",
             "openssl/rand.h",
@@ -618,12 +606,8 @@ int main(int argc, char **argv) {
         for hdr in openssl_headers:
             ctx.check_cc(header_name=hdr, includes=ctx.env.PLATFORM_INCLUDES)
         # FIXME! Ignoring the result...
-        ctx.check_cc(lib="crypto")
-        ctx.check_cc(comment="OpenSSL support",
-                     fragment=SNIP_OPENSSL_VERSION_CHECK,
-                     includes=ctx.env.PLATFORM_INCLUDES,
-                     msg="Checking for OpenSSL >= 0.9.7d",
-                     )
+        ctx.check_cc(msg="Checking for OpenSSL's crypto library",
+                     lib="crypto")
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
