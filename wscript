@@ -852,7 +852,7 @@ int main(int argc, char **argv) {
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
     source_date_epoch = os.getenv('SOURCE_DATE_EPOCH', None)
-    if ctx.options.build_epoch:
+    if ctx.options.build_epoch is not None:
         ctx.define("BUILD_EPOCH", ctx.options.build_epoch,
                    comment="Using --build-epoch")
     elif source_date_epoch:
