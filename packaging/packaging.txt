@@ -2,7 +2,7 @@
 
 == Package parts ==
 
-Some useful components for package bulding can be found in the etc/
+Some useful components for package building can be found in the etc/
 subdirectory, including init boot time scripts, systemd unit files,
 and boilerplate for default ntpd configuration.
 
