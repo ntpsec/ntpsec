@@ -45,7 +45,7 @@ been fixed.
 
 The dependency of local refclocks returning 4-digit years on
 pre-synchronization to a network peer has been removed.  It is
-this possible to run in a fully-autonomous mode using multiple
+thus possible to run in a fully-autonomous mode using multiple
 refclocks and no network peers.
 
 ntpmon now reports units on time figures.
