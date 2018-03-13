@@ -8,6 +8,8 @@
 
 == Description ==
 
++[experimental]+
+
 +ntpsnmpd+ is an AgentX Simple Network Management Protocol sub-agent.
 
 It functions as a bridge between the Mode 6 protocol used for Network
@@ -34,6 +36,9 @@ running NTP and SNMP daemons for ntpsnmpd to work.
   Print the version string and exit.
 
 == Configuration Files ==
+  Note that filenames in the options should be enclosed in quotes.
+  This is a temporary measure that will not be the case in future
+  versions.
 
 === /etc/ntpsnmpd.conf ===
 

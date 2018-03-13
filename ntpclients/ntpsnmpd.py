@@ -1199,7 +1199,10 @@ def loadSettings(filename, optionList):
         dataLen = len(data)
         while i < dataLen:
             if data[i] in optionList:
-                options[data[i]] = data[i+1]
+                arg = data[i+1]
+                if arg[0] in "\"'":
+                    arg = arg[1:-1]
+                options[data[i]] = arg
                 i += 1
             i += 1
     return options
