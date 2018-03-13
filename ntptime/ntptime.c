@@ -410,7 +410,7 @@ main(
 		}
 		if (json)
 		    /* hack to avoid trailing comma - not semantically needed */
-		    printf("\"version\":\"ntpsec-%s\"}\n", NTPSEC_VERSION);
+		    fputs("\"version\":\""  NTPSEC_VERSION_STRING "\"}\n", stdout);
 		exit(EXIT_SUCCESS);
 	}
 

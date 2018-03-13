@@ -28,6 +28,10 @@ in with derivationOptions; rec {
     distPhase = ''
       runHook preDist
 
+      if [ -n "''${versionSuffix}" ]; then
+        distFlags="--build-version-tag=$versionSuffix $distFlags"
+      fi
+
       echo "dist flags: $distFlags ''${distFlagsArray[@]}"
       python waf dist $distFlags "''${distFlagsArray[@]}"
       
@@ -54,6 +58,10 @@ in with derivationOptions; rec {
 
         if [ -z "$dontAddPrefix" ]; then
           configureFlags="''${prefixKey:---prefix=}$prefix $configureFlags"
+        fi
+
+        if [ -n "$versionSuffix" ]; then
+          configureFlags="--build-version-tag=$versionSuffix $configureFlags"
         fi
 
         echo "configure flags: $configureFlags ''${configureFlagsArray[@]}"

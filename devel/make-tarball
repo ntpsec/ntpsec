@@ -5,6 +5,9 @@
 # a file named ntpsec-$V.tar.gz.  The name of this tarball is echoed to
 # standard output as part of the success message.
 #
+# The tricky part is that it has to include the autorevision cache file,
+# which can't be checked into the repo or there'd be an infinite loop.
+#
 # Do not try running this outside of devel/
 #
 # *Do* configure and test-build before running it.
@@ -12,6 +15,12 @@
 if [ `basename $PWD` != devel ]
 then
     echo "You are doomed to fail."
+    exit 1
+fi
+
+if [ ! -r ../wafhelpers/.autorevision-cache ]
+then
+    echo "Autorevision cache file does not exist, waf build and try again"
     exit 1
 fi
 
@@ -26,7 +35,7 @@ fi
 
 # Build the tarball
 rm -fr .tmp
-(cd ..; git ls-files; find build -print | grep '\.[0-9]$') >MANIFEST
+(cd ..; git ls-files; find build -print | grep '\.[0-9]$'; echo "wafhelpers/.autorevision-cache") >MANIFEST
 (cd ..; tar --transform="s:^:ntpsec-${V}/:" -T devel/MANIFEST -czf ntpsec-${V}.tar.gz)
 rm MANIFEST
 mv ../ntpsec-${V}.tar.gz .

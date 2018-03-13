@@ -166,6 +166,28 @@ Linux File Hierarchy Standard.
 You should have neither issue if you install from an OS distribution's
 binary package.
 
+== Caveat for Crossbuilders ==
+
+If you see a build failure with the message "error: No repo or cache
+detected.", you have collided with an unusual feature of our build recipe.
+
+To generate the version.h file, the uses a script called
+'autorevision.sh' which needs one of two preconditions.  Either (1)
+you are building in a local repository clone, or (2) you are building
+from an unpacked release tarball containing a file
+wafhelpers/.autorevision-cache containing version information.
+
+The motivation for this behavior is to have a version string that
+makes sense on every build from either the repository or a release
+tarball.  It means, however, that if you try to build when waf can see
+neither of these things, you'll get the "No repo or cache detected"
+error.  This can happen when atrempting to use a remote buildroot for
+cross-compilation or other purposes
+
+There are a couple of possible workarounds.  One is to do your remote build
+from a release tarball.  Another is to do a ./waf configure and build in the
+source directory before attempting a buildroot build.
+
 == Installation Names ==
 
 By default, `waf install' will install the package's files in

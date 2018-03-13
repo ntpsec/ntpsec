@@ -1,4 +1,6 @@
+wafhelpers/.autorevision-cache
 .lock-waf*
 .waf*
 *.pyc
+ntpd/version.h
 build

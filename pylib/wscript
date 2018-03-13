@@ -16,21 +16,15 @@ def build(ctx):
     bldnode = ctx.bldnode.make_node('pylib')
     target1 = bldnode.make_node('control.py')
     target2 = bldnode.make_node('magic.py')
-
-    ctx(
-        features="subst",
-        source='util.py.in',
-        target='util.py'
-    )
-    # Force early creation of util.py
-    ctx.add_group()
-
+    target3 = bldnode.make_node('version.py')
+    target4 = ctx.srcnode.make_node('wafhelpers/.autorevision-cache')
     sources = srcnode.ant_glob('*.py')
     builds = [x.get_bld() for x in sources]
 
     # Remove generated files to ensure they are properly updated
     ctx.exec_command("rm -f %s" % target1.abspath())
     ctx.exec_command("rm -f %s" % target2.abspath())
+    ctx.exec_command("rm -f %s" % target3.abspath())
 
     # Make sure Python sees .py as well as .pyc/.pyo
     ctx(
@@ -55,12 +49,21 @@ def build(ctx):
         target=target2,
     )
 
+    ctx(
+        before=['pyc', 'pyo'],
+        cwd=srcnode,
+        rule='VCS_EXTRA=`cat ${SRC[0]}` ../wafhelpers/autorevision.sh '
+             '-o ${TGT[1].abspath()} -e VERSION -t python >${TGT[0].abspath()}',
+        source=["../VERSION", '../wafhelpers/autorevision.sh'],
+        target=[target3, target4],
+    )
+
     # Force early creation of generated files
     ctx.add_group()
 
     ctx(
         features='py',
-        source=builds+[target1, target2],
+        source=builds+[target1, target2, target3],
         install_from=bldnode,
         install_path='${PYTHONDIR}/ntp'
     )

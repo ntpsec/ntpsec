@@ -61,7 +61,7 @@ def options_cmd(ctx, config):
 
     grp = ctx.add_option_group("NTP developer configure options")
     grp.add_option('--build-version-tag', type='string',
-                   help="Append a tag to the version string (unused)")
+                   help="Append a tag to the version string.")
     grp.add_option('--cflags', type='string', action="callback",
                    callback=callback_flags,
                    help="Users should use CFLAGS in their environment.")

@@ -96,8 +96,10 @@ class TestPylibUtilMethods(unittest.TestCase):
     def test_stdversion(self):
         f = ntp.util.stdversion
 
-        ver = "@NTPSEC_VERSION@"
-        self.assertEqual(f(), "ntpsec-" + ver)
+        ver = str(ntp.version.VERSION)
+        tick = str(ntp.version.VCS_TICK)
+        date = str(ntp.version.VCS_DATE)
+        self.assertEqual(f(), "ntpsec-" + ver + "+" + tick + " " + date)
 
     def test_rfc3339(self):
         f = ntp.util.rfc3339

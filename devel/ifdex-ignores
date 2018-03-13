@@ -87,6 +87,7 @@ TEST_LIBPARSE
 
 # Purely internal symbols
 CONFIG_H
+AUTOREVISION_H
 BITSPERCHAR		# Only used in the Arcron refclock
 BACKTRACE_MAXFRAME	# Internal to the ISC backtrace code
 BACKTRACE_LIBC
