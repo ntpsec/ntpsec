@@ -52,11 +52,7 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
    distinction.
    
    Some OS distros won't find our installed python libraries.
-   Your shell may need something like this:
-     export PYTHONPATH=/usr/local/lib/python2.7/site-packages
-   CentOS 6 is using python 2.6
-     export PYTHONPATH=/usr/local/lib/python2.6/site-packages
-   (I put it in my .bashrc)
+   More info in README-PYTHON.
 
 argparse::
    Required for ntpviz when using Python version 2.6

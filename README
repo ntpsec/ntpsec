@@ -59,7 +59,7 @@ ntpclients/::   Directory containing sources for clients - utility programs
 		to query local and remote NTP installations for log status,
 		state variables, and other timekeeping information.  The term
 		"clients" is used quite loosely here; any tool that is not a
-		not a multi-file C program probably lives in this directory.
+		multi-file C program probably lives in this directory.
 
 ntpd/::		Sources for the main time-synchronization daemon.
 
