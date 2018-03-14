@@ -46,6 +46,6 @@ with something like this:
   echo /usr/local/lib/python2.7/site-packages > \
     /usr/lib/python2.7/site-packages/ntpsec.pth
 This works for all users, including root.
-Note that the pth file must be on the default search path.
+Note that the pth file must be on the default Python search path.
 
 
