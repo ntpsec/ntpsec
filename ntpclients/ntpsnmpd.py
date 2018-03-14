@@ -1135,7 +1135,7 @@ def connect(address):
     except socket.error as msg:
         log("Connection to %s failure: %s" % (repr(address), repr(msg)), 1)
         sys.exit(1)
-    log("connected to master agent at " + address, 3)
+    log("connected to master agent at " + repr(address), 3)
     return sock
 
 
@@ -1193,7 +1193,7 @@ def loadSettings(filename, optionList):
     with open(filename) as f:
         data = f.read()
         parser = shlex.shlex(data)
-        parser.wordchars += "-."
+        parser.wordchars += "-.:"
         data = [x for x in parser]
         i = 0
         dataLen = len(data)
