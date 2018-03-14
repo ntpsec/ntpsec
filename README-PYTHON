@@ -44,8 +44,8 @@ including root if root uses any ntp scripts.
 3: You can add to the default search path by setting up a .pth file
 with something like this:
   echo /usr/local/lib/python2.7/site-packages > \
-    /usr/pkg/lib/python2.7/site-packages/ntpsec.pth
-  echo /usr/local/lib64/python2.7/site-packages >> \
-    /usr/pkg/lib/python2.7/site-packages/ntpsec.pth
+    /usr/lib/python2.7/site-packages/ntpsec.pth
 This works for all users, including root.
+Note that the pth file must be on the default search path.
+
 
