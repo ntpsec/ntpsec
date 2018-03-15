@@ -389,23 +389,17 @@ Z is the "revision" number.
 Each release will result in an incremented version number, and the
 version number string will be tagged into the git repository.
 
-When the minor number is even, it refers to a "stable" release, and
-when the minor number is odd, it refers to a "development" release.
-New releases on "stable" are generally bugfixes that are backported
-from it's matching "development".
+We have dropped even/odd minor version number stable/development
+release semantics.  Development on NTPsec has been carefully
+incremental with a strong emphasis on stabilty and correctness, such
+that it turned out to be unneeded.
 
-When a new stable release happens, that also results in the creation
-of a new development release.  For example, the currently hypothetical
-future release of "1.14.0" will also cause the release of an identical
-"1.15.0".
-
-The first public release is version 0.9.0, and will drive to 1.0.0.
-When 1.0.0 is released, that will also create an identical 1.1.0.
+The first public release was version 0.9.0.
+The first production and distribution ready release was 1.0.0.
 
 We currently have no formal policies for the criteria for releases,
-for the schedule of releases, and no formal policies for how far back
-bugfixes will be backported into stable releases.  Feel free to
-discuss it with project management.
+for the schedule of releases, and no formal policies for backporting
+bugfixes.  Feel free to discuss it with project management.
 
 Note that this is a different numbering system from NTP Classic. In
 their A.B.C numbers, A was the protocol version, B was the major, and

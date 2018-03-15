@@ -10,11 +10,19 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository head ==
+== 2018-03-14: 1.1.0 ==
+
+RIP Stephen William Hawking, CH CBE FRS FRSA. 1942-01-08 - 2018-03-14
+You gave us a Brief History of Time.  We will just count it.
+
+Enough user visible changes have been made that this is the 1.1.0 release
+instead of a 1.0.1.
+
+The code size is now 55KLOC in C, 15KLOC in Python.
 
 Digests longer then 20 bytes will be truncated.
 
-We have merged Classic's fix for CVE-2018-7182.
+We have merged NTP Classic's fix for CVE-2018-7182.
 
 The following NTP Classic CVEs announced in February 2018 do not affect NTPsec:
 
@@ -24,7 +32,10 @@ The following NTP Classic CVEs announced in February 2018 do not affect NTPsec:
 * CVE-2018-7185: Unauthenticated packet can reset authenticated interleaved association
 * CVE-2018-7183: ntpq:decodearr() can write beyond its buffer limit
 
-We have dropped support for Broadcast servers.
+We have dropped support for Broadcast servers.  We had kept it for
+older desktop operating systems listening on the local network
+broadcast domain, a use case that is now no longer in use at sane
+enviroments, and no longer necessary for modern desktop OSs.
 
 It is now possible to unpeer refclocks using a type/unit specification
 rather than a magic IP address.  This was the last obligatory use of
