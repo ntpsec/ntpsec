@@ -1297,52 +1297,6 @@ def decode_packet(data):
     return parsedPkt, newData
 
 
-def walkMIBTree(tree, rootpath=()):
-    # Tree node formats:
-    # {"reader": <func>, "writer": <func>, "subids": {.blah.}}
-    # {"reader": <func>, "writer": <func>, "subids": <func>}
-    # The "subids" function in dynamic nodes must return an MIB tree
-    nodeStack = []
-    oidStack = []
-    current = tree
-    currentKeys = list(current.keys())
-    currentKeys.sort()
-    keyID = 0
-    while True:
-        if keyID >= len(currentKeys):
-            if len(nodeStack) > 0:
-                # No more nodes this level, pop higher node
-                current, currentKeys, keyID, key = nodeStack.pop()
-                oidStack.pop()
-                keyID += 1
-                continue
-            else:  # Out of tree, we are done
-                return
-        key = currentKeys[keyID]
-        oid = OID(rootpath + tuple(oidStack) + (key,))
-        yield (oid, current[key].get("reader"), current[key].get("writer"))
-        subs = current[key].get("subids")
-        if subs is not None:
-            # Push current node, move down a level
-            nodeStack.append((current, currentKeys, keyID, key))
-            oidStack.append(key)
-            if isinstance(subs, dict) is True:
-                current = subs
-            else:
-                current = subs()  # Tree generator function
-                if current == {}:  # no dynamic subids, pop
-                    current, currentKeys, keyID, key = nodeStack.pop()
-                    oidStack.pop()
-                    keyID += 1
-                    continue
-            currentKeys = list(current.keys())
-            currentKeys.sort()
-            keyID = 0
-            key = currentKeys[keyID]
-            continue
-        keyID += 1
-
-
 def bits2Bools(bitString, cropLength=None):
     bits = []
     for octet in bitString:

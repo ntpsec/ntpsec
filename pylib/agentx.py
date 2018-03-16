@@ -49,7 +49,7 @@ class MIBControl:
         return self.context
 
     def getOID_core(self, nextP, searchoid, returnGenerator=False):
-        gen = ax.walkMIBTree(self.oidTree, self.mibRoot)
+        gen = walkMIBTree(self.oidTree, self.mibRoot)
         while True:
             try:
                 oid, reader, writer = gen.next()
@@ -84,7 +84,7 @@ class MIBControl:
     def getOIDsInRange(self, oidrange, firstOnly=False):
         "Get a list of every (optionally the first) OID in a range"
         oids = []
-        gen = ax.walkMIBTree(self.oidTree, self.mibRoot)
+        gen = walkMIBTree(self.oidTree, self.mibRoot)
         # Find the first OID
         while True:
             try:
@@ -500,3 +500,49 @@ class PacketControl:
             # Ok, response with no associated packet.
             # Probably something that timed out.
             pass
+
+
+def walkMIBTree(tree, rootpath=()):
+    # Tree node formats:
+    # {"reader": <func>, "writer": <func>, "subids": {.blah.}}
+    # {"reader": <func>, "writer": <func>, "subids": <func>}
+    # The "subids" function in dynamic nodes must return an MIB tree
+    nodeStack = []
+    oidStack = []
+    current = tree
+    currentKeys = list(current.keys())
+    currentKeys.sort()
+    keyID = 0
+    while True:
+        if keyID >= len(currentKeys):
+            if len(nodeStack) > 0:
+                # No more nodes this level, pop higher node
+                current, currentKeys, keyID, key = nodeStack.pop()
+                oidStack.pop()
+                keyID += 1
+                continue
+            else:  # Out of tree, we are done
+                return
+        key = currentKeys[keyID]
+        oid = OID(rootpath + tuple(oidStack) + (key,))
+        yield (oid, current[key].get("reader"), current[key].get("writer"))
+        subs = current[key].get("subids")
+        if subs is not None:
+            # Push current node, move down a level
+            nodeStack.append((current, currentKeys, keyID, key))
+            oidStack.append(key)
+            if isinstance(subs, dict) is True:
+                current = subs
+            else:
+                current = subs()  # Tree generator function
+                if current == {}:  # no dynamic subids, pop
+                    current, currentKeys, keyID, key = nodeStack.pop()
+                    oidStack.pop()
+                    keyID += 1
+                    continue
+            currentKeys = list(current.keys())
+            currentKeys.sort()
+            keyID = 0
+            key = currentKeys[keyID]
+            continue
+        keyID += 1
