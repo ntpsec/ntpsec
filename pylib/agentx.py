@@ -23,7 +23,7 @@ pingTime = 60
 
 
 class MIBControl:
-    def __init__(self, oidTree, mibRoot=(), rangeSubid=0, upperBound=None,
+    def __init__(self, oidTree={}, mibRoot=(), rangeSubid=0, upperBound=None,
                  mibContext=None):
         self.oidTree = oidTree  # contains callbacks for the MIB
         # The undo system is only for the last operation
@@ -47,6 +47,34 @@ class MIBControl:
 
     def mib_context(self):
         return self.context
+
+    def addNode(self, oid, reader=None, writer=None, dynamic=None):
+        if isinstance(oid, ax.OID):  # get it in a mungable format
+            oid = tuple(oid.subids)
+        # dynamic is the generator for tables
+        currentLevel = self.oidTree
+        remainingOID = oid
+        while True:
+            print(remainingOID)
+            node, remainingOID = ntp.util.slicedata(remainingOID, 1)
+            node = node[0]
+            print("Nodes at this level:", currentLevel.keys())
+            if node not in currentLevel.keys():
+                print("Adding node:", node)
+                currentLevel[node] = {"reader":None, "writer":None,
+                                      "subids":None}
+            if len(remainingOID) == 0:  # We have reached the target node
+                print("Reached target, filling it")
+                currentLevel[node]["reader"] = reader
+                currentLevel[node]["writer"] = writer
+                if dynamic is not None:
+                    # can't be both dynamic and non-dynamic
+                    currentLevel[node]["subids"] = dynamic
+                return
+            else:
+                if currentLevel[node]["subids"] is None:
+                    currentLevel[node]["subids"] = {}
+                currentLevel = currentLevel[node]["subids"]
 
     def getOID_core(self, nextP, searchoid, returnGenerator=False):
         gen = walkMIBTree(self.oidTree, self.mibRoot)
@@ -524,7 +552,7 @@ def walkMIBTree(tree, rootpath=()):
             else:  # Out of tree, we are done
                 return
         key = currentKeys[keyID]
-        oid = OID(rootpath + tuple(oidStack) + (key,))
+        oid = ax.OID(rootpath + tuple(oidStack) + (key,))
         yield (oid, current[key].get("reader"), current[key].get("writer"))
         subs = current[key].get("subids")
         if subs is not None:

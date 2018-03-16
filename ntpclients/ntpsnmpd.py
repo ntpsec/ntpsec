@@ -48,223 +48,110 @@ class DataSource(ntp.agentx.MIBControl):
         # This is defined as a dict tree because it is simpler, and avoids
         # certain edge cases
         # OIDs are relative from ntp root
-        oidTree = {
-            # ntpEntNotifications
-            0: {"subids":
-                # ntpEntNotifModeChange
-                {1: {},
-                 # ntpEntNotifStratumChange
-                 2: {},
-                 # ntpEntNotifSyspeerChange
-                 3: {},
-                 # ntpEntNotifAddAssociation
-                 4: {},
-                 # ntpEntNotifRemoveAsociation
-                 5: {},
-                 # ntpEntNotifConfigChanged
-                 6: {},
-                 # ntpEntNotifLeapSecondAnnounced
-                 7: {},
-                 # ntpEntNotifHeartbeat
-                 8: {}}},
-            # ntpSnmpMIBObjects
-            1: {"subids":
-                # ntpEntInfo
-                {1:
-                 {"subids":
-                  # ntpNetSoftwareName utf8str
-                  {1: {"subids":
-                       {0:
-                        {"reader":
-                         (lambda oid: self.cbr_systemInfo(oid, "name"))}}},
-                   # ntpEntSoftwareVersion utf8str
-                   2: {"subids":
-                       {0:
-                        {"reader":
-                         (lambda oid: self.cbr_systemInfo(oid, "version"))}}},
-                   # ntpEntSoftwareVendor utf8str
-                   3: {"subids":
-                       {0:
-                        {"reader":
-                         (lambda oid: self.cbr_systemInfo(oid, "vendor"))}}},
-                   # ntpEntSystemType utf8str
-                   4: {"subids":
-                       {0:
-                        {"reader":
-                         (lambda oid: self.cbr_systemInfo(oid, "system"))}}},
-                   # ntpEntTimeResolution uint32
-                   5: {"subids":
-                       {0:
-                        {"reader": self.cbr_timeResolution}}},
-                   # ntpEntTimePrecision int32
-                   6: {"subids":
-                       {0:
-                        {"reader": self.cbr_timePrecision}}},
-                   # ntpEntTimeDistance DisplayString
-                   7: {"subids":
-                       {0:
-                        {"reader": self.cbr_timeDistance}}}}},
-                 # ntpEntStatus
-                 2: {"subids":
-                     # ntpEntStatusCurrentMode INTEGER {...}
-                     {1: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusCurrentMode}}},
-                      # ntpEntStatusStratum NtpStratum
-                      2: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusStratum}}},
-                      # ntpEntStatusActiveRefSourceId
-                      #  uint32 (0..99999)
-                      3: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusActiveRefSourceID}}},
-                      # ntpEntStatusActiveRefSourceName utf8str
-                      4: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusActiveRefSourceName}}},
-                      # ntpEntStatusActiveOffset DisplayString
-                      5: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusActiveOffset}}},
-                      # ntpEntStatusNumberOfRefSources
-                      #  unit32 (0..99)
-                      6: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusNumRefSources}}},
-                      # ntpEntStatusDispersion DisplayString
-                      7: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusDispersion}}},
-                      # ntpEntStatusEntityUptime TimeTicks
-                      8: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusEntityUptime}}},
-                      # ntpEntStatusDateTime NtpDateTime
-                      9: {"subids":
-                          {0:
-                           {"reader": self.cbr_statusDateTime}}},
-                      # ntpEntStatusLeapSecond NtpDateTime
-                      10: {"subids":
-                           {0:
-                            {"reader": self.cbr_statusLeapSecond}}},
-                      # ntpEntStatusLeapSecondDirection
-                      #  int32 (-1..1)
-                      11: {"subids":
-                           {0:
-                            {"reader": self.cbr_statusLeapSecDirection}}},
-                      # ntpEntStatusInPkts Counter32
-                      12: {"subids":
-                           {0:
-                            {"reader": self.cbr_statusInPkts}}},
-                      # ntpEntStatusOutPkts Counter32
-                      13: {"subids":
-                           {0:
-                            {"reader": self.cbr_statusOutPkts}}},
-                      # ntpEntStatusBadVersion Counter32
-                      14: {"subids":
-                           {0:
-                            {"reader": self.cbr_statusBadVersion}}},
-                      # ntpEntStatusProtocolError Counter32
-                      15: {"subids":
-                           {0:
-                            {"reader": self.cbr_statusProtocolError}}},
-                      # ntpEntStatusNotifications Counter32
-                      16: {"subids":
-                           {0:
-                            {"reader": self.cbr_statusNotifications}}},
-                      # ntpEntStatPktModeTable
-                      #  SEQUENCE of NtpEntStatPktModeEntry
-                      17: {"subids":
-                           # ntpEntStatPktModeEntry SEQUENCE {...}
-                           {1: {"subids":
-                                # ntpEntStatPktMode INTEGER {...}
-                                {1: {},
-                                 # ntpEntStatPktSent Counter32
-                                 2: {},
-                                 # ntpEntStatPktRecived Counter32
-                                 3: {}}}}}}},
-                 # ntpAssociation
-                 3: {"subids":
-                     # ntpAssociationTable
-                     #  SEQUENCE of NtpAssociationEntry
-                     {1: {"subids":
-                          # ntpAssociationEntry SEQUENCE {...}
-                          {1: {"subids":
-                               # ntpAssocId uint32 (1..99999)
-                               {1: {"subids": self.sub_assocID},
-                                # ntpAssocName utf8str
-                                2: {"subids": self.sub_assocName},
-                                # ntpAssocRefId DisplayString
-                                3: {"subids": self.sub_assocRefID},
-                                # ntpAssocAddressType
-                                #  InetAddressType
-                                4: {"subids": self.sub_assocAddrType},
-                                # ntpAssocAddress
-                                #  InetAddress SIZE (4|8|16|20)
-                                5: {"subids": self.sub_assocAddr},
-                                # ntpAssocOffset DisplayString
-                                6: {"subids": self.sub_assocOffset},
-                                # ntpAssocStratum NtpStratum
-                                7: {"subids": self.sub_assocStratum},
-                                # ntpAssocStatusJitter
-                                #  DisplayString
-                                8: {"subids": self.sub_assocJitter},
-                                # ntpAssocStatusDelay
-                                #  DisplayString
-                                9: {"subids": self.sub_assocDelay},
-                                # ntpAssocStatusDispersion
-                                #  DisplayString
-                                10: {"subids": self.sub_assocDispersion}}}}},
-                      # ntpAssociationStatisticsTable
-                      #  SEQUENCE of ntpAssociationStatisticsEntry
-                      2: {"subids":
-                          # ntpAssociationStatisticsEntry
-                          #  SEQUENCE {...}
-                          {1: {"subids":
-                               # ntpAssocStatInPkts Counter32
-                               {1: {"subids": self.sub_assocStatInPkts},
-                                # ntpAssocStatOutPkts Counter32
-                                2: {"subids": self.sub_assocStatOutPkts},
-                                # ntpAssocStatProtocolError
-                                #  Counter32
-                                3: {"subids":
-                                    self.sub_assocStatProtoErr}}}}}}},
-                 # ntpEntControl
-                 4: {"subids":
-                     # ntpEntHeartbeatInterval unit32
-                     {1: {"subids":
-                          {0:
-                           {"reader": self.cbr_entHeartbeatInterval,
-                            "writer": self.cbw_entHeartbeatInterval}}},
-                      # ntpEntNotifBits BITS {...}
-                      2: {"subids":
-                          {0:
-                           {"reader": self.cbr_entNotifBits,
-                            "writer": self.cbw_entNotifBits}}}}},
-                 # ntpEntNotifObjects
-                 5: {"subids":
-                     # ntpEntNotifMessage utf8str
-                     {1: {"subids":
-                          {0:
-                           {"reader": self.cbr_entNotifMessage}}}}}}},
-            # ntpEntConformance
-            2: {"subids":
-                # ntpEntCompliances
-                {1: {"subids":
-                     # ntpEntNTPCompliance
-                     {1: {},
-                      # ntpEntSNTPCompliance
-                      2: {}}},
-                 # ntpEntGroups
-                 2: {"subids":
-                     # ntpEntObjectsGroup1 OBJECTS {...}
-                     {1: {},
-                      # ntpEntObjectsGroup2 OBJECTS {...}
-                      2: {},
-                      # ntpEntNotifGroup NOTIFICATIONS {...}
-                      3: {}}}}}}
-        ntp.agentx.MIBControl.__init__(self, oidTree, mibRoot=ntpRootOID)
+        ntp.agentx.MIBControl.__init__(self, mibRoot=ntpRootOID)
+        # MIB node init
+        # block 0
+        self.addNode((0,))  # ntpEntNotifications
+        self.addNode((0, 1))  # ntpEntNotifModeChange
+        self.addNode((0, 2))  # ntpEntNotifStratumChange
+        self.addNode((0, 3))  # ntpEntNotifSyspeerChange
+        self.addNode((0, 4))  # ntpEntNotifAddAssociation
+        self.addNode((0, 5))  # ntpEntNotifRemoveAsociation
+        self.addNode((0, 6))  # ntpEntNotifConfigChanged
+        self.addNode((0, 7))  # ntpEntNotifLeapSecondAnnounced
+        self.addNode((0, 8))  # ntpEntNotifHeartbeat
+        # block 1
+        # block 1, 1
+        self.addNode((1, 1, 1, 0),  # ntpNetSoftwareName utf8str
+                     (lambda oid: self.cbr_systemInfo(oid, "name")))
+        self.addNode((1, 1, 2, 0),  # ntpEntSoftwareVersion utf8str
+                     (lambda oid: self.cbr_systemInfo(oid, "version")))
+        self.addNode((1, 1, 3, 0),  # ntpEntSoftwareVendor utf8str
+                     (lambda oid: self.cbr_systemInfo(oid, "vendor")))
+        self.addNode((1, 1, 4, 0),  # ntpEntSystemType utf8str
+                     (lambda oid: self.cbr_systemInfo(oid, "system")))
+        self.addNode((1, 1, 5, 0),  # ntpEntTimeResolution uint32
+                     self.cbr_timeResolution)
+        self.addNode((1, 1, 6, 0),  # ntpEntTimePrecision int32
+                     self.cbr_timePrecision)
+        self.addNode((1, 1, 7, 0),  # ntpEntTimeDistance DisplayString
+                     self.cbr_timeDistance)
+        # block 1, 2
+        self.addNode((1, 2, 1, 0),  # ntpEntStatusCurrentMode INTEGER {...}
+                     self.cbr_statusCurrentMode)
+        self.addNode((1, 2, 2, 0),  # ntpEntStatusStratum NtpStratum
+                     self.cbr_statusStratum)
+        self.addNode((1, 2, 3, 0),  # ntpEntStatusActiveRefSourceId uint32
+                     self.cbr_statusActiveRefSourceID)
+        self.addNode((1, 2, 4, 0),  # ntpEntStatusActiveRefSourceName utf8str
+                     self.cbr_statusActiveRefSourceName)
+        self.addNode((1, 2, 5, 0),  # ntpEntStatusActiveOffset DisplayString
+                     self.cbr_statusActiveOffset)
+        self.addNode((1, 2, 6, 0),  # ntpEntStatusNumberOfRefSources unit32
+                     self.cbr_statusNumRefSources)
+        self.addNode((1, 2, 7, 0),  # ntpEntStatusDispersion DisplayString
+                     self.cbr_statusDispersion)
+        self.addNode((1, 2, 8, 0),  # ntpEntStatusEntityUptime TimeTicks
+                     self.cbr_statusEntityUptime)
+        self.addNode((1, 2, 9, 0),  # ntpEntStatusDateTime NtpDateTime
+                     self.cbr_statusDateTime)
+        self.addNode((1, 2, 10, 0),  # ntpEntStatusLeapSecond NtpDateTime
+                     self.cbr_statusLeapSecond)
+        self.addNode((1, 2, 11, 0),  # ntpEntStatusLeapSecondDirection int32
+                     self.cbr_statusLeapSecDirection)
+        self.addNode((1, 2, 12, 0),  # ntpEntStatusInPkts Counter32
+                     self.cbr_statusInPkts)
+        self.addNode((1, 2, 13, 0),  # ntpEntStatusOutPkts Counter32
+                     self.cbr_statusOutPkts)
+        self.addNode((1, 2, 14, 0),  # ntpEntStatusBadVersion Counter32
+                     self.cbr_statusBadVersion)
+        self.addNode((1, 2, 15, 0),  # ntpEntStatusProtocolError Counter32
+                     self.cbr_statusProtocolError)
+        self.addNode((1, 2, 16, 0),  # ntpEntStatusNotifications Counter32
+                     self.cbr_statusNotifications)
+        self.addNode((1, 2, 17, 1, 1))  # ntpEntStatPktMode INTEGER {...}
+        self.addNode((1, 2, 17, 1, 2))  # ntpEntStatPktSent Counter32
+        self.addNode((1, 2, 17, 1, 3))  # ntpEntStatPktRecived Counter32
+        # block 1, 3
+        self.addNode((1, 3, 1, 1, 1),  # ntpAssocId uint32 (1..99999)
+                     dynamic=self.sub_assocID)
+        self.addNode((1, 3, 1, 1, 2),  # ntpAssocName utf8str
+                     dynamic=self.sub_assocName)
+        self.addNode((1, 3, 1, 1, 3),  # ntpAssocRefId DisplayString
+                     dynamic=self.sub_assocRefID)
+        self.addNode((1, 3, 1, 1, 4),  # ntpAssocAddressType InetAddressType
+                     dynamic=self.sub_assocAddrType)
+        self.addNode((1, 3, 1, 1, 5),  # ntpAssocAddress InetAddress SIZE
+                     dynamic=self.sub_assocAddr)
+        self.addNode((1, 3, 1, 1, 6),  # ntpAssocOffset DisplayString
+                     dynamic=self.sub_assocOffset)
+        self.addNode((1, 3, 1, 1, 7),  # ntpAssocStratum NtpStratum
+                     dynamic=self.sub_assocStratum)
+        self.addNode((1, 3, 1, 1, 8),  # ntpAssocStatusJitter DisplayString
+                     dynamic=self.sub_assocJitter)
+        self.addNode((1, 3, 1, 1, 9),  # ntpAssocStatusDelay DisplayString
+                     dynamic=self.sub_assocDelay)
+        self.addNode((1, 3, 1, 1, 10),  # ntpAssocStatusDispersion DisplayStr
+                     dynamic=self.sub_assocDispersion)
+        self.addNode((1, 3, 2, 1, 1),  # ntpAssocStatInPkts Counter32
+                     dynamic=self.sub_assocStatInPkts)
+        self.addNode((1, 3, 2, 1, 2),  # ntpAssocStatOutPkts Counter32
+                     dynamic=self.sub_assocStatOutPkts)
+        self.addNode((1, 3, 2, 1, 3),  # ntpAssocStatProtocolError Counter32
+                     dynamic=self.sub_assocStatProtoErr)
+        # block 1, 4
+        self.addNode((1, 4, 1, 0),  # ntpEntHeartbeatInterval unit32
+                     self.cbr_entHeartbeatInterval,
+                     self.cbw_entHeartbeatInterval)
+        self.addNode((1, 4, 2, 0),  # ntpEntNotifBits BITS {...}
+                     self.cbr_entNotifBits,
+                     self.cbw_entNotifBits)
+        # block 1, 5
+        self.addNode((1, 5, 1, 0),  # ntpEntNotifMessage utf8str
+                     self.cbr_entNotifMessage)
+        # block 2 # all compliance statements
+        #print(repr(self.oidTree))
+        #print(self.oidTree[1]["subids"][1][1][0])
         self.session = ntp.packet.ControlSession()
         self.hostname = hostname if hostname else DEFHOST
         self.session.openhost(self.hostname)
