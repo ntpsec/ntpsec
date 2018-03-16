@@ -807,9 +807,6 @@ receive(
 		goto done;
 	}
 	peer = findpeer(rbufp, PKT_MODE(pkt->li_vn_mode), &match);
-	if(peer == NULL && match == AM_MANYCAST) {
-		peer = findmanycastpeer(rbufp);
-	}
 
 	if(i_require_authentication(peer, pkt, restrict_mask)) {
 		if(

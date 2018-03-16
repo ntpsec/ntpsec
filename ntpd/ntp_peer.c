@@ -275,8 +275,6 @@ findpeer(
 	struct peer *	p;
 	sockaddr_u *	srcadr;
 	unsigned int	hash;
-	struct pkt *	pkt;
-	l_fp		pkt_org;
 
 	findpeer_calls++;
 	srcadr = &rbufp->recv_srcadr;
@@ -294,21 +292,7 @@ findpeer(
                  */
                 *action = MATCH_ASSOC(p->hmode, pkt_mode);
 
-                /* A response to our manycastclient solicitation might
-                 * be misassociated with an ephemeral peer already spun
-                 * for the server.  If the packet's org timestamp
-                 * doesn't match the peer's, check if it matches the
-                 * ACST prototype peer's.  If so it is a redundant
-                 * solicitation response, return AM_ERR to discard it.
-                 * [Classic Bug 1762]
-                 */
-                if (MODE_SERVER == pkt_mode && AM_PROCPKT == *action) {
-                        pkt = &rbufp->recv_pkt;
-                        pkt_org = ntohl_fp(pkt->org);
-                        if (p->org != pkt_org && findmanycastpeer(rbufp))
-                                *action = AM_ERR;
-                }
-
+                /* This might be leftover findmulticastpeer() */
                 /* If an error was returned, exit back right here. */
                 if (*action == AM_ERR) return NULL;
 
@@ -832,39 +816,6 @@ peer_all_reset(void)
 }
 
 
-/*
- * findmanycastpeer - find and return a manycastclient or pool
- *		      association matching a received response.
- */
-struct peer *
-findmanycastpeer(
-	struct recvbuf *rbufp	/* receive buffer pointer */
-	)
-{
-	struct peer *peer;
-	struct pkt *pkt;
-	l_fp p_org;
-
-	/*
-	 * This routine is called upon arrival of a server-mode response
-	 * to a manycastclient multicast solicitation, or to a pool
-	 * server unicast solicitation.  Search the peer list for a
-	 * manycastclient association where the last transmit timestamp
-	 * matches the response packet's originate timestamp.  There can
-	 * be multiple manycastclient associations, or multiple pool
-	 * solicitation assocations, so this assumes the transmit
-	 * timestamps are unique for such.
-	 */
-	pkt = &rbufp->recv_pkt;
-	for (peer = peer_list; peer != NULL; peer = peer->p_link)
-		if (MDF_SOLICIT_MASK & peer->cast_flags) {
-			p_org = ntohl_fp(pkt->org);
-			if (p_org == peer->org)
-				break;
-		}
-
-	return peer;
-}
 
 /* peer_cleanup - clean peer list prior to shutdown */
 void peer_cleanup(void)
