@@ -118,10 +118,6 @@ static void		getmorepeermem(void);
 static	void		peer_reset	(struct peer *);
 static int		score(struct peer *);
 
-static inline l_fp ntohl_fp(l_fp_w lfpw) {
-    return lfpinit_u(ntohl(lfpw.l_ui), ntohl(lfpw.l_uf));
-}
-
 
 /*
  * init_peer - initialize peer data structures and counters
