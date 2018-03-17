@@ -205,16 +205,9 @@ refclock_newpeer(
 
 	/*
 	 * Set peer.pmode based on the hmode. For appearances only.
+	 * Leftover from "peer" modes.
 	 */
-	switch (peer->hmode) {
-	case MODE_ACTIVE:
-		peer->pmode = MODE_PASSIVE;
-		break;
-
-	default:
-		peer->pmode = MODE_SERVER;
-		break;
-	}
+	peer->pmode = MODE_SERVER;
 
 	/*
 	 * Do driver dependent initialization. The above defaults
