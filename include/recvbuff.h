@@ -16,9 +16,8 @@
 /*
  * Format of a recvbuf.  Back when ntpd did true asynchronous
  * I/O, these were used by the asynchronous receive routine to store
- * incoming packets and related information. Now, with faster processors
- * and lower latency in the synchronous I/O loop, that complexity
- * has been dropped.
+ * incoming packets and related information. Now, with kernel
+ * time stamps on received packets, that complexity has been dropped.
  */
 
 /*
@@ -35,12 +34,7 @@ typedef struct recvbuf recvbuf_t;
 
 struct recvbuf {
 	recvbuf_t *	link;	/* next in list */
-	union {
-		sockaddr_u	X_recv_srcadr;
-		struct peer *	X_recv_peer;
-	} X_from_where;
-#define recv_srcadr		X_from_where.X_recv_srcadr
-#define recv_peer		X_from_where.X_recv_peer
+	sockaddr_u	recv_srcadr;
 	sockaddr_u	srcadr;		/* where packet came from */
 	endpt *		dstadr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
@@ -54,9 +48,14 @@ struct recvbuf {
 	} recv_space;
 #define	recv_pkt		recv_space.X_recv_pkt
 #define	recv_buffer		recv_space.X_recv_buffer
+	struct parsed_pkt pkt;  /* host-order copy of data from wire */
 	int used;		/* reference count */
+	bool keyid_present;
+	keyid_t keyid;
+	int mac_len;
 #ifdef REFCLOCK
 	bool network_packet;
+	struct peer *	recv_peer;
 #endif /* REFCLOCK */
 };
 

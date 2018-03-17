@@ -1900,7 +1900,7 @@ local_input(
 					buf->dstadr       = rbufp->dstadr;
 					buf->receiver     = rbufp->receiver;
 					buf->fd           = rbufp->fd;
-					buf->X_from_where = rbufp->X_from_where;
+					buf->recv_peer    = rbufp->recv_peer;
 					parse->generic->io.recvcount++;
 					packets_received++;
 					add_full_recv_buffer(buf);

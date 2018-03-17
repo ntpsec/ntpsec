@@ -235,33 +235,29 @@ is_control_packet(
 	    PKT_MODE(rbufp->recv_space.X_recv_buffer[0]) == MODE_CONTROL;
 }
 
-/* Free a parsed_pkt structure allocated by parsed_packet(). In the
-   event of a parse error, this function may be called from within
-   parse_packet() while the structure is only partially initialized, so
-   we must be careful not to dereference uninitialized pointers.  This
-   is achieved by making sure we use calloc() everywhere in
-   parse_packet(), and then comparing to NULL before dereferencing.
+/* There used to be a calloc/free for each received packet.
+   Now, the parse_pkt version lives in a recvbuf.
+   The alloc/free only happens for extensions and we don't support
+   any of them.
 */
 static void
-free_packet(
-	struct parsed_pkt *pkt
+free_extens(
+	struct recvbuf *rbufp
 	)
 {
-	if(pkt == NULL) { return; };
-	if(pkt->extensions != NULL) {
-		for(size_t i = 0; i < pkt->num_extensions; i++) {
-			free(pkt->extensions[i].body);
-			pkt->extensions[i].body = NULL;
+	if(rbufp->pkt.extensions != NULL) {
+		for(size_t i = 0; i < rbufp->pkt.num_extensions; i++) {
+			free(rbufp->pkt.extensions[i].body);
+			rbufp->pkt.extensions[i].body = NULL;
 		}
-		free(pkt->extensions);
-		pkt->extensions = NULL;
+		free(rbufp->pkt.extensions);
+		rbufp->pkt.extensions = NULL;
 	}
-	free(pkt);
 }
 
-static struct parsed_pkt*
+static bool
 parse_packet(
-	struct recvbuf const* rbufp
+	struct recvbuf * rbufp
 	)
 {
 	REQUIRE(rbufp != NULL);
@@ -271,13 +267,11 @@ parse_packet(
 
 	if(recv_length < LEN_PKT_NOMAC) {
 		/* Packet is too short to possibly be valid. */
-		return NULL;
+		return false;
 	}
 
-	struct parsed_pkt *pkt = calloc(1, sizeof (struct parsed_pkt));
+	struct parsed_pkt * pkt = &rbufp->pkt;
 	uint8_t const* bufptr = recv_buf + LEN_PKT_NOMAC;
-
-	if(pkt == NULL) { goto fail; }
 
 	/* Parse header fields */
 	pkt->li_vn_mode = recv_buf[0];
@@ -292,13 +286,13 @@ parse_packet(
 	pkt->rec = ntp_be64dec(recv_buf + 32);
 	pkt->xmt = ntp_be64dec(recv_buf + 40);
 
-	/* These initializations should have already been taken care of
-	   by calloc(), but let's be explicit. */
-	pkt->num_extensions = 0;
+	/* Make sure these are clean before we might bail. */
+        pkt->num_extensions = 0;
 	pkt->extensions = NULL;
-	pkt->keyid_present = false;
-	pkt->keyid = 0;
-	pkt->mac_len = 0;
+
+	rbufp->keyid_present = false;
+	rbufp->keyid = 0;
+	rbufp->mac_len = 0;
 
 	if(PKT_VERSION(pkt->li_vn_mode) > 4) {
 		/* Unsupported version */
@@ -346,9 +340,9 @@ parse_packet(
 	switch(recv_buf + recv_length - bufptr) {
 	    case 0:
 		/* No authenticator */
-		pkt->keyid_present = false;
-		pkt->keyid = 0;
-		pkt->mac_len = 0;
+		rbufp->keyid_present = false;
+		rbufp->keyid = 0;
+		rbufp->mac_len = 0;
 		break;
 	    case 4:
 		/* crypto-NAK */
@@ -356,17 +350,17 @@ parse_packet(
 			/* Only allowed as of NTPv3 */
 			goto fail;
 		}
-		pkt->keyid_present = true;
-		pkt->keyid = ntp_be32dec(bufptr);
-		pkt->mac_len = 0;
+		rbufp->keyid_present = true;
+		rbufp->keyid = ntp_be32dec(bufptr);
+		rbufp->mac_len = 0;
 		break;
 	    case 6:
 		/* NTPv2 authenticator, which we allow but strip because
 		   we don't support it any more */
 		if(PKT_VERSION(pkt->li_vn_mode) != 2) { goto fail; }
-		pkt->keyid_present = false;
-		pkt->keyid = 0;
-		pkt->mac_len = 0;
+		rbufp->keyid_present = false;
+		rbufp->keyid = 0;
+		rbufp->mac_len = 0;
 		break;
 	    case 20:
 		/* MD5 authenticator */
@@ -374,10 +368,9 @@ parse_packet(
 			/* Only allowed as of NTPv3 */
 			goto fail;
 		}
-		pkt->keyid_present = true;
-		pkt->keyid = ntp_be32dec(bufptr);
-		pkt->mac_len = 16;
-		memcpy(pkt->mac, bufptr + 4, 16);
+		rbufp->keyid_present = true;
+		rbufp->keyid = ntp_be32dec(bufptr);
+		rbufp->mac_len = 16;
 		break;
 	    case 24:
 		/* SHA-1 authenticator */
@@ -385,10 +378,9 @@ parse_packet(
 			/* Only allowed as of NTPv3 */
 			goto fail;
 		}
-		pkt->keyid_present = true;
-		pkt->keyid = ntp_be32dec(bufptr);
-		pkt->mac_len = 20;
-		memcpy(pkt->mac, bufptr + 4, 20);
+		rbufp->keyid_present = true;
+		rbufp->keyid = ntp_be32dec(bufptr);
+		rbufp->mac_len = 20;
 		break;
 	    case 72:
 		/* MS-SNTP */
@@ -400,9 +392,9 @@ parse_packet(
 		/* We don't deal with the MS-SNTP fields, so just strip
 		 * them.
 		 */
-		pkt->keyid_present = false;
-		pkt->keyid = 0;
-		pkt->mac_len = 0;
+		rbufp->keyid_present = false;
+		rbufp->keyid = 0;
+		rbufp->mac_len = 0;
 
 		break;
 	    default:
@@ -410,10 +402,10 @@ parse_packet(
 		goto fail;
 	}
 
-	return pkt;
+	return true;
   fail:
-	free_packet(pkt);
-	return NULL;
+	free_extens(rbufp);
+	return false;
 }
 
 /* Returns true if we should not accept any unauthenticated packets from
@@ -434,15 +426,15 @@ parse_packet(
 static bool
 i_require_authentication(
 	struct peer const* peer,
-	struct parsed_pkt const* pkt,
+	struct recvbuf const* rbufp,
 	unsigned short restrict_mask
 	)
 {
         bool restrict_notrust = restrict_mask & RES_DONTTRUST;
         bool peer_has_key = peer != NULL && peer->cfg.peerkey != 0;
         bool wants_association =
-            PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST ||
-            (peer == NULL && PKT_MODE(pkt->li_vn_mode == MODE_ACTIVE));
+            PKT_MODE(rbufp->pkt.li_vn_mode) == MODE_BROADCAST ||
+            (peer == NULL && PKT_MODE(rbufp->pkt.li_vn_mode == MODE_ACTIVE));
         bool restrict_nopeer =
             (restrict_mask & RES_NOPEER) &&
             wants_association;
@@ -452,18 +444,18 @@ i_require_authentication(
 
 static bool
 is_crypto_nak(
-	struct parsed_pkt const* pkt
+	struct recvbuf const* rbufp
 	)
 {
-	return pkt->keyid_present && pkt->keyid == 0 && pkt->mac_len == 0;
+	return rbufp->keyid_present && rbufp->keyid == 0 && rbufp->mac_len == 0;
 }
 
 static bool is_kod(
-	struct parsed_pkt const* pkt
+	struct recvbuf const* rbufp
 	)
 {
-	return PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC &&
-	    PKT_TO_STRATUM(pkt->stratum) == STRATUM_UNSPEC;
+	return PKT_LEAP(rbufp->pkt.li_vn_mode) == LEAP_NOTINSYNC &&
+	    PKT_TO_STRATUM(rbufp->pkt.stratum) == STRATUM_UNSPEC;
 }
 
 /* Check the restrictions which can be checked just based on the source
@@ -489,7 +481,6 @@ static void
 handle_fastxmit(
 	struct recvbuf *rbufp,
 	unsigned short restrict_mask,
-	struct parsed_pkt const* pkt,
 	struct peer *peer,
 	bool request_already_authenticated
 	)
@@ -507,18 +498,18 @@ handle_fastxmit(
 	   the response if the request passed authentication.
 	*/
 	if(request_already_authenticated ||
-	   (pkt->keyid_present &&
-	    authdecrypt(pkt->keyid,
+	   (rbufp->keyid_present &&
+	    authdecrypt(rbufp->keyid,
 			(uint32_t*)rbufp->recv_space.X_recv_buffer,
-			(int)(rbufp->recv_length - (pkt->mac_len + 4)),
-			(int)(pkt->mac_len + 4)))) {
-		xkeyid = pkt->keyid;
+			(int)(rbufp->recv_length - (rbufp->mac_len + 4)),
+			(int)(rbufp->mac_len + 4)))) {
+		xkeyid = rbufp->keyid;
 	} else {
 		xkeyid = 0;
 	}
 
         int xmode =
-            PKT_MODE(pkt->li_vn_mode) == MODE_ACTIVE ? MODE_PASSIVE : MODE_SERVER;
+            PKT_MODE(rbufp->pkt.li_vn_mode) == MODE_ACTIVE ? MODE_PASSIVE : MODE_SERVER;
 	fast_xmit(rbufp, xmode, xkeyid, restrict_mask);
 }
 
@@ -526,7 +517,6 @@ static void
 handle_procpkt(
 	struct recvbuf *rbufp,
 	unsigned short restrict_mask,
-	struct parsed_pkt const* pkt,
 	struct peer *peer,
 	bool request_already_authenticated
 	)
@@ -541,24 +531,24 @@ handle_procpkt(
 	peer->flash &= ~PKT_BOGON_MASK;
 
 	/* Duplicate detection */
-	if(pkt->xmt == peer->xmt) {
+	if(rbufp->pkt.xmt == peer->xmt) {
 		peer->flash |= BOGON1;
 		peer->oldpkt++;
 		return;
 	}
 
 	/* Origin timestamp validation */
-	if(PKT_MODE(pkt->li_vn_mode) == MODE_SERVER) {
+	if(PKT_MODE(rbufp->pkt.li_vn_mode) == MODE_SERVER) {
 		if(peer->outcount == 0) {
 			peer->flash |= BOGON1;
 			peer->oldpkt++;
 			return;
 		}
-		if(pkt->org == 0) {
+		if(rbufp->pkt.org == 0) {
 			peer->flash |= BOGON3;
 			peer->bogusorg++;
 			return;
-		} else if(pkt->org != peer->org) {
+		} else if(rbufp->pkt.org != peer->org) {
 			peer->flash |= BOGON2;
 			peer->bogusorg++;
 			return;
@@ -577,8 +567,8 @@ handle_procpkt(
 
 	peer->outcount = 0;
 
-	if(is_kod(pkt)) {
-		if(!memcmp(pkt->refid, "RATE", REFIDLEN)) {
+	if(is_kod(rbufp)) {
+		if(!memcmp(rbufp->pkt.refid, "RATE", REFIDLEN)) {
 			peer->selbroken++;
 			report_event(PEVNT_RATE, peer, NULL);
 			if (peer->cfg.minpoll < 10) { peer->cfg.minpoll = 10; }
@@ -589,14 +579,14 @@ handle_procpkt(
 		return;
 	}
 
-	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC ||
-	    PKT_TO_STRATUM(pkt->stratum) < sys_floor ||
-	    PKT_TO_STRATUM(pkt->stratum) >= sys_ceiling) {
+	if (PKT_LEAP(rbufp->pkt.li_vn_mode) == LEAP_NOTINSYNC ||
+	    PKT_TO_STRATUM(rbufp->pkt.stratum) < sys_floor ||
+	    PKT_TO_STRATUM(rbufp->pkt.stratum) >= sys_ceiling) {
 		peer->flash |= BOGON6;
 		return;
 	}
 
-	if(scalbn((double)pkt->rootdelay/2.0 + (double)pkt->rootdisp, -16) >=
+	if(scalbn((double)rbufp->pkt.rootdelay/2.0 + (double)rbufp->pkt.rootdisp, -16) >=
 	   sys_maxdisp) {
 		peer->flash |= BOGON7;
 		return;
@@ -610,13 +600,13 @@ handle_procpkt(
 	*/
 
 	const double t34 =
-	    (pkt->xmt >= rbufp->recv_time) ?
-	    scalbn((double)(pkt->xmt - rbufp->recv_time), -32) :
-	    -scalbn((double)(rbufp->recv_time - pkt->xmt), -32);
+	    (rbufp->pkt.xmt >= rbufp->recv_time) ?
+	    scalbn((double)(rbufp->pkt.xmt - rbufp->recv_time), -32) :
+	    -scalbn((double)(rbufp->recv_time - rbufp->pkt.xmt), -32);
 	const double t21 =
-	    (pkt->rec >= peer->org) ?
-	    scalbn((double)(pkt->rec - peer->org), -32) :
-	    -scalbn((double)(peer->org - pkt->rec), -32);
+	    (rbufp->pkt.rec >= peer->org) ?
+	    scalbn((double)(rbufp->pkt.rec - peer->org), -32) :
+	    -scalbn((double)(peer->org - rbufp->pkt.rec), -32);
 	const double theta = (t21 + t34) / 2.;
 	const double delta = fabs(t21 - t34);
 	const double epsilon = LOGTOD(sys_precision) +
@@ -641,16 +631,16 @@ handle_procpkt(
 	  return;
 	}
 
-	peer->leap = PKT_LEAP(pkt->li_vn_mode);
-	peer->stratum = min(PKT_TO_STRATUM(pkt->stratum), STRATUM_UNSPEC);
-	peer->pmode = PKT_MODE(pkt->li_vn_mode);
-	peer->precision = pkt->precision;
-	peer->rootdelay = scalbn((double)pkt->rootdelay, -16);
-	peer->rootdisp = scalbn((double)pkt->rootdisp, -16);
-	memcpy(&peer->refid, pkt->refid, REFIDLEN);
-	peer->reftime = pkt->reftime;
-	peer->rec = pkt->rec;
-	peer->xmt = pkt->xmt;
+	peer->leap = PKT_LEAP(rbufp->pkt.li_vn_mode);
+	peer->stratum = min(PKT_TO_STRATUM(rbufp->pkt.stratum), STRATUM_UNSPEC);
+	peer->pmode = PKT_MODE(rbufp->pkt.li_vn_mode);
+	peer->precision = rbufp->pkt.precision;
+	peer->rootdelay = scalbn((double)rbufp->pkt.rootdelay, -16);
+	peer->rootdisp = scalbn((double)rbufp->pkt.rootdisp, -16);
+	memcpy(&peer->refid, rbufp->pkt.refid, REFIDLEN);
+	peer->reftime = rbufp->pkt.reftime;
+	peer->rec = rbufp->pkt.rec;
+	peer->xmt = rbufp->pkt.xmt;
 	peer->dst = rbufp->recv_time;
 
 	record_raw_stats(peer,
@@ -661,15 +651,14 @@ handle_procpkt(
 			    peer structure is a convenience, because
 			    they're already in the l_fp format that
 			    record_raw_stats() expects. */
-			 PKT_LEAP(pkt->li_vn_mode),
-			 PKT_VERSION(pkt->li_vn_mode),
-			 PKT_MODE(pkt->li_vn_mode),
-			 PKT_TO_STRATUM(pkt->stratum),
-			 pkt->ppoll, pkt->precision,
-			 pkt->rootdelay, pkt->rootdisp,
+			 PKT_LEAP(rbufp->pkt.li_vn_mode),
+			 PKT_VERSION(rbufp->pkt.li_vn_mode),
+			 PKT_MODE(rbufp->pkt.li_vn_mode),
+			 PKT_TO_STRATUM(rbufp->pkt.stratum),
+			 rbufp->pkt.ppoll, rbufp->pkt.precision,
+			 rbufp->pkt.rootdelay, rbufp->pkt.rootdisp,
 			 /* FIXME: this cast is disgusting */
-			 *(const uint32_t*)pkt->refid,
-			 /* This will always be 0 by the time we get here */
+			 *(const uint32_t*)rbufp->pkt.refid,
 			 peer->outcount);
 
 	/* If either burst mode is armed, enable the burst.
@@ -703,7 +692,6 @@ static void
 handle_manycast(
 	struct recvbuf *rbufp,
 	unsigned short restrict_mask,
-	struct parsed_pkt const* pkt,
 	struct peer *mpeer,
 	bool request_already_authenticated
 	)
@@ -722,16 +710,16 @@ handle_manycast(
 	}
 
 	/* Don't bother associating with unsynchronized servers */
-	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC ||
-	    PKT_TO_STRATUM(pkt->stratum) < sys_floor ||
-	    PKT_TO_STRATUM(pkt->stratum) >= sys_ceiling ||
-	    scalbn((double)pkt->rootdelay/2.0 + (double)pkt->rootdisp, -16) >=
+	if (PKT_LEAP(rbufp->pkt.li_vn_mode) == LEAP_NOTINSYNC ||
+	    PKT_TO_STRATUM(rbufp->pkt.stratum) < sys_floor ||
+	    PKT_TO_STRATUM(rbufp->pkt.stratum) >= sys_ceiling ||
+	    scalbn((double)rbufp->pkt.rootdelay/2.0 + (double)rbufp->pkt.rootdisp, -16) >=
 	    sys_maxdisp) {
 		return;
 	}
 
 	memset(&mctl, '\0', sizeof(struct peer_ctl));
-	mctl.version = PKT_VERSION(pkt->li_vn_mode);
+	mctl.version = PKT_VERSION(rbufp->pkt.li_vn_mode);
 	mctl.flags = FLAG_PREEMPT | (FLAG_IBURST & mpeer->cfg.flags);
 	mctl.minpoll = mpeer->cfg.minpoll;
 	mctl.maxpoll = mpeer->cfg.maxpoll;
@@ -746,7 +734,6 @@ receive(
 	struct recvbuf *rbufp
 	)
 {
-	struct parsed_pkt *pkt = NULL;
 	struct peer *peer = NULL;
 	unsigned short restrict_mask;
 	int match = AM_NOMATCH;
@@ -801,30 +788,29 @@ receive(
 	}
 	}
 
-	pkt = parse_packet(rbufp);
-	if(pkt == NULL) {
+	if (!parse_packet(rbufp)) {
 		sys_badlength++;
 		goto done;
 	}
-	peer = findpeer(rbufp, PKT_MODE(pkt->li_vn_mode), &match);
+	peer = findpeer(rbufp, PKT_MODE(rbufp->pkt.li_vn_mode), &match);
 
-	if(i_require_authentication(peer, pkt, restrict_mask)) {
+	if(i_require_authentication(peer, rbufp, restrict_mask)) {
 		if(
 			/* Check whether an authenticator is even present. */
-			!pkt->keyid_present || is_crypto_nak(pkt) ||
+			!rbufp->keyid_present || is_crypto_nak(rbufp) ||
 			/* If we require a specific key from this peer,
 			   check that it matches. */
 			(peer != NULL && peer->cfg.peerkey != 0 &&
-			 peer->cfg.peerkey != pkt->keyid) ||
+			 peer->cfg.peerkey != rbufp->keyid) ||
 			/* Verify the MAC.
 			   TODO: rewrite authdecrypt() to give it a
 			   better name and a saner interface so we don't
 			   have to do this screwy buffer-length
 			   arithmetic in order to call it. */
-			!authdecrypt(pkt->keyid,
+			!authdecrypt(rbufp->keyid,
 				 (uint32_t*)rbufp->recv_space.X_recv_buffer,
-				 (int)(rbufp->recv_length - (pkt->mac_len + 4)),
-				 (int)(pkt->mac_len + 4))) {
+				 (int)(rbufp->recv_length - (rbufp->mac_len + 4)),
+				 (int)(rbufp->mac_len + 4))) {
 
 			sys_badauth++;
 			if(peer != NULL) {
@@ -845,19 +831,19 @@ receive(
 	switch(match) {
 	    case AM_FXMIT:
             case AM_NEWPASS:
-		handle_fastxmit(rbufp, restrict_mask, pkt, peer, authenticated);
+		handle_fastxmit(rbufp, restrict_mask, peer, authenticated);
 		sys_processed++;
 		if (peer != NULL)	/* possible during pool query */
 		    peer->processed++;
 		break;
 	    case AM_PROCPKT:
-		handle_procpkt(rbufp, restrict_mask, pkt, peer, authenticated);
+		handle_procpkt(rbufp, restrict_mask, peer, authenticated);
 		sys_processed++;
 		if (peer != NULL)	/* just to be on the safe side */
 		    peer->processed++;
 		break;
 	    case AM_MANYCAST:
-		handle_manycast(rbufp, restrict_mask, pkt, peer, authenticated);
+		handle_manycast(rbufp, restrict_mask, peer, authenticated);
 		sys_processed++;
 		if (peer != NULL)	/* possible during pool query */
 		    peer->processed++;
@@ -872,7 +858,7 @@ receive(
 	}
 
   done:
-	free_packet(pkt);
+	free_extens(rbufp);
 }
 
 /*

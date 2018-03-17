@@ -414,10 +414,6 @@ struct parsed_pkt {
         uint64_t xmt;
         unsigned num_extensions;
         struct exten *extensions;
-        bool keyid_present;
-        keyid_t keyid;
-        size_t mac_len;
-        char mac[20];
 };
 
 struct exten {
