@@ -688,47 +688,7 @@ handle_procpkt(
 	clock_filter(peer, theta + peer->cfg.bias, delta, epsilon);
 }
 
-static void
-handle_manycast(
-	struct recvbuf *rbufp,
-	unsigned short restrict_mask,
-	struct peer *mpeer,
-	bool request_already_authenticated
-	)
-{
-	struct peer_ctl mctl;
-	(void)request_already_authenticated;
-	(void)restrict_mask;
 
-	if(mpeer == NULL) {
-		sys_restricted++;
-		return;
-	};
-
-	if(mpeer->cast_flags & MDF_POOL) {
-		mpeer->nextdate = current_time + 1;
-	}
-
-	/* Don't bother associating with unsynchronized servers */
-	if (PKT_LEAP(rbufp->pkt.li_vn_mode) == LEAP_NOTINSYNC ||
-	    PKT_TO_STRATUM(rbufp->pkt.stratum) < sys_floor ||
-	    PKT_TO_STRATUM(rbufp->pkt.stratum) >= sys_ceiling ||
-	    scalbn((double)rbufp->pkt.rootdelay/2.0 + (double)rbufp->pkt.rootdisp, -16) >=
-	    sys_maxdisp) {
-		return;
-	}
-
-	memset(&mctl, '\0', sizeof(struct peer_ctl));
-	mctl.version = PKT_VERSION(rbufp->pkt.li_vn_mode);
-	mctl.flags = FLAG_PREEMPT | (FLAG_IBURST & mpeer->cfg.flags);
-	mctl.minpoll = mpeer->cfg.minpoll;
-	mctl.maxpoll = mpeer->cfg.maxpoll;
-	mctl.mode = 0;
-	mctl.peerkey = mpeer->cfg.peerkey;
-	newpeer(&rbufp->recv_srcadr, NULL, rbufp->dstadr,
-		MODE_CLIENT, &mctl, MDF_UCAST | MDF_UCLNT, false);
-}
-	
 void
 receive(
 	struct recvbuf *rbufp
@@ -840,12 +800,6 @@ receive(
 		handle_procpkt(rbufp, restrict_mask, peer, authenticated);
 		sys_processed++;
 		if (peer != NULL)	/* just to be on the safe side */
-		    peer->processed++;
-		break;
-	    case AM_MANYCAST:
-		handle_manycast(rbufp, restrict_mask, peer, authenticated);
-		sys_processed++;
-		if (peer != NULL)	/* possible during pool query */
 		    peer->processed++;
 		break;
 	    default:
