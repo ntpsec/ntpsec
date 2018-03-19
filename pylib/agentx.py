@@ -6,7 +6,6 @@ from __future__ import print_function, division
 import select
 import time
 import sys
-import six
 
 try:
     import ntp.util
@@ -21,6 +20,13 @@ except ImportError as e:
 
 defaultTimeout = 30
 pingTime = 60
+
+
+def gen_next(generator):
+    if str is bytes:  # Python 2
+        return generator.next()
+    else:  # Python 3
+        return next(generator)
 
 
 class MIBControl:
@@ -79,7 +85,7 @@ class MIBControl:
         gen = walkMIBTree(self.oidTree, self.mibRoot)
         while True:
             try:
-                oid, reader, writer = six.next(gen)
+                oid, reader, writer = gen_next(gen)
                 if nextP is True:  # GetNext
                     # For getnext any OID greater than the start qualifies
                     oidhit = (oid > searchoid)
@@ -115,7 +121,7 @@ class MIBControl:
         # Find the first OID
         while True:
             try:
-                oid, reader, writer = six.next(gen)
+                oid, reader, writer = gen_next(gen)
                 if reader is None:
                     continue  # skip unimplemented OIDs
                 elif oid.subids == oidrange.start.subids:
@@ -141,7 +147,7 @@ class MIBControl:
         # Start filling in the rest of the range
         while True:
             try:
-                oid, reader, writer = six.next(gen)
+                oid, reader, writer = gen_next(gen)
                 if reader is None:
                     continue  # skip unimplemented OIDs
                 elif (oidrange.end.isNull() is False) and \
