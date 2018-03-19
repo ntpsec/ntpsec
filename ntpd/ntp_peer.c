@@ -10,51 +10,6 @@
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
 
-/*
- *		    Table of valid association combinations
- *		    ---------------------------------------
- *
- *                             packet->mode
- * peer->mode      | UNSPEC  ACTIVE PASSIVE  CLIENT  SERVER  BCAST
- * ----------      | ---------------------------------------------
- * NO_PEER         |   e       1       0       1       1       1
- * ACTIVE          |   e       1       1       0       0       0
- * PASSIVE         |   e       1       e       0       0       0
- * CLIENT          |   e       0       0       0       1       0
- * SERVER          |   e       0       0       0       0       0
- * BCAST           |   e       0       0       0       0       0
- * BCLIENT         |   e       0       0       0       e       1
- *
- * One point to note here: a packet in BCAST mode can potentially match
- * a peer in CLIENT mode, but we that is a special case and we check for
- * that early in the decision process.  This avoids having to keep track
- * of what kind of associations are possible etc...  We actually
- * circumvent that problem by requiring that the first b(m)roadcast
- * received after the change back to BCLIENT mode sets the clock.
- */
-#define AM_MODES	7	/* number of rows and columns */
-#define NO_PEER		0	/* action when no peer is found */
-
-static int AM[AM_MODES][AM_MODES] = {
-/*			packet->mode					    */
-/* peer { UNSPEC,   ACTIVE,     PASSIVE,    CLIENT,     SERVER,     BCAST } */
-/* mode */
-/*NONE*/{ AM_ERR, AM_NEWPASS, AM_NOMATCH, AM_FXMIT,   AM_MANYCAST, AM_NEWBCL},
-
-/*A*/	{ AM_ERR, AM_PROCPKT, AM_PROCPKT, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
-
-/*P*/	{ AM_ERR, AM_PROCPKT, AM_ERR,     AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
-
-/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_NOMATCH},
-
-/*S*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
-
-/*BCST*/{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
-
-/*BCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_PROCPKT},
-};
-
-#define MATCH_ASSOC(x, y)	AM[(x)][(y)]
 
 /*
  * These routines manage the allocation of memory to peer structures
@@ -263,9 +218,7 @@ findexistingpeer(
  */
 struct peer *
 findpeer(
-	struct recvbuf *rbufp,
-	int		pkt_mode,
-	int *		action
+	struct recvbuf *rbufp
 	)
 {
 	struct peer *	p;
@@ -282,23 +235,10 @@ findpeer(
                 /* ensure peer source address matches */
                 if (!ADDR_PORT_EQ(srcadr, &p->srcadr)) continue;
 
-                /* If the association matching rules determine that this
-                 * is not a valid combination, then look for the next
-                 * valid peer association.
-                 */
-                *action = MATCH_ASSOC(p->hmode, pkt_mode);
-
-                /* This might be leftover findmulticastpeer() */
-                /* If an error was returned, exit back right here. */
-                if (*action == AM_ERR) return NULL;
-
-                /* If a match is found, we stop our search. */
-                if (*action != AM_NOMATCH) break;
+		return p;
         }
 
-	/* If no matching association is found */
-	if (NULL == p) *action = MATCH_ASSOC(NO_PEER, pkt_mode);
-	return p;
+	return NULL;
 }
 
 /*

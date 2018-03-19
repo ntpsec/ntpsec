@@ -127,7 +127,7 @@ extern  int	mon_get_oldest_age(l_fp);
 extern	void	init_peer	(void);
 extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
 				      struct peer *, int);
-extern	struct peer *findpeer	(struct recvbuf *, int, int *);
+extern	struct peer *findpeer	(struct recvbuf *);
 extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,

@@ -481,14 +481,10 @@ static void
 handle_fastxmit(
 	struct recvbuf *rbufp,
 	unsigned short restrict_mask,
-	struct peer *peer,
 	bool request_already_authenticated
 	)
 {
 	uint32_t xkeyid;
-
-	/* This argument is currently unused. */
-	(void)peer;
 
 	if (rbufp->dstadr->flags & INT_MCASTOPEN) {
 			sys_restricted++;
@@ -516,14 +512,9 @@ handle_fastxmit(
 static void
 handle_procpkt(
 	struct recvbuf *rbufp,
-	unsigned short restrict_mask,
-	struct peer *peer,
-	bool request_already_authenticated
+	struct peer *peer
 	)
 {
-	/* These arguments are currently unused. */
-	(void)restrict_mask;
-	(void)request_already_authenticated;
 
 	/* Shouldn't happen, but include this for safety. */
 	if(peer == NULL) { return; }
@@ -696,7 +687,6 @@ receive(
 {
 	struct peer *peer = NULL;
 	unsigned short restrict_mask;
-	int match = AM_NOMATCH;
 	bool authenticated = false;
 
 	sys_received++;
@@ -705,6 +695,8 @@ receive(
 		sys_badlength++;
 		goto done;
 	}
+
+/* FIXME: This is lots more cleanup to do in this area. */
 
 #ifdef REFCLOCK
 	restrict_mask = rbufp->network_packet ?
@@ -752,7 +744,7 @@ receive(
 		sys_badlength++;
 		goto done;
 	}
-	peer = findpeer(rbufp, PKT_MODE(rbufp->pkt.li_vn_mode), &match);
+	peer = findpeer(rbufp);
 
 	if(i_require_authentication(peer, rbufp, restrict_mask)) {
 		if(
@@ -788,16 +780,15 @@ receive(
 		peer->timereceived = current_time;
 	}
 
-	switch(match) {
-	    case AM_FXMIT:
-            case AM_NEWPASS:
-		handle_fastxmit(rbufp, restrict_mask, peer, authenticated);
+	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
+	    case MODE_CLIENT:
+		/* Request for us as a server. */
+		handle_fastxmit(rbufp, restrict_mask, authenticated);
 		sys_processed++;
-		if (peer != NULL)	/* possible during pool query */
-		    peer->processed++;
 		break;
-	    case AM_PROCPKT:
-		handle_procpkt(rbufp, restrict_mask, peer, authenticated);
+	    case MODE_SERVER:
+		/* Reply to our request. */
+		handle_procpkt(rbufp, peer);
 		sys_processed++;
 		if (peer != NULL)	/* just to be on the safe side */
 		    peer->processed++;
