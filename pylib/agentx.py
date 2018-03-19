@@ -23,9 +23,11 @@ pingTime = 60
 
 
 class MIBControl:
-    def __init__(self, oidTree={}, mibRoot=(), rangeSubid=0, upperBound=None,
+    def __init__(self, oidTree=None, mibRoot=(), rangeSubid=0, upperBound=None,
                  mibContext=None):
-        self.oidTree = oidTree  # contains callbacks for the MIB
+        self.oidTree = {}  # contains callbacks for the MIB
+        if oidTree is not None:
+            self.oidTree = oidTree
         # The undo system is only for the last operation
         self.inSetP = False  # Are we currently in the set procedure?
         self.setVarbinds = []  # Varbind of the current set operation
@@ -55,16 +57,12 @@ class MIBControl:
         currentLevel = self.oidTree
         remainingOID = oid
         while True:
-            print(remainingOID)
             node, remainingOID = ntp.util.slicedata(remainingOID, 1)
             node = node[0]
-            print("Nodes at this level:", currentLevel.keys())
             if node not in currentLevel.keys():
-                print("Adding node:", node)
                 currentLevel[node] = {"reader":None, "writer":None,
                                       "subids":None}
             if len(remainingOID) == 0:  # We have reached the target node
-                print("Reached target, filling it")
                 currentLevel[node]["reader"] = reader
                 currentLevel[node]["writer"] = writer
                 if dynamic is not None:
@@ -128,6 +126,10 @@ class MIBControl:
                         continue
                 elif oid > oidrange.start:
                     # If we are here it means we hit the start but skipped
+                    if (oidrange.end.isNull() is False) and \
+                       (oid >= oidrange.end):
+                        # We fell off the range
+                        return []
                     oids.append((oid, reader, writer))
                     break
             except StopIteration:
@@ -138,10 +140,11 @@ class MIBControl:
         # Start filling in the rest of the range
         while True:
             try:
-                oid, reader = gen.next()
+                oid, reader, writer = gen.next()
                 if reader is None:
                     continue  # skip unimplemented OIDs
-                elif (oidrange.end is not None) and (oid >= oidrange.end):
+                elif (oidrange.end.isNull() is False) and \
+                     (oid >= oidrange.end):
                     break  # past the end of a bounded range
                 else:
                     oids.append((oid, reader, writer))
