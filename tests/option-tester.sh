@@ -47,8 +47,12 @@ doit ()
     ./$DIR/main/ntpclients/ntpq --version        |& tee -a $DIR/test.log
     echo -n "VERSION: "                          |& tee -a $DIR/test.log
     ./$DIR/main/ntpclients/ntpdig --version      |& tee -a $DIR/test.log
-    echo -n "VERSION: "                          |& tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntpmon --version      |& tee -a $DIR/test.log
+    if [ `uname -s` != "NetBSD" ]
+    then
+      # no Python/curses on NetBSD
+      echo -n "VERSION: "                        |& tee -a $DIR/test.log
+      ./$DIR/main/ntpclients/ntpmon --version    |& tee -a $DIR/test.log
+    fi
 if [ "`which gpsmon 2>/dev/null`" != "" ]
 then
     # needs GPSD library
