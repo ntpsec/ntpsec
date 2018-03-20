@@ -56,6 +56,25 @@ not have Python installed and execute the programs there.
 There appears to be no speed advantage, or disadvantage, to running the
 binaries created by cx_freeze.
 
+== Hacking Python shebangs ==
+
+The shebang lines in our Python scripts point to "python".  Part of
+our standard tests check that you can change that to "python3" without
+breaking anything.
+
+We are aware that the Python 3 transition is well advanced.  We are
+also aware that PEP394 strongly urges all distributors to point
+'python' at Python 2.
+
+This leaves us with a choice to either (a) change the shebangs to
+python3 ourselves, causing breakage to users stuck with Python 2
+and installing from source, or (b) not change them, leaving it up
+to distro maintainers to hack them in whatever way is appropriate for
+their distro's Python policy.
+
+We think the choice that minimizes overall pain, and directs it to
+the party best able to cope, is clear.  We choose (b).
+
 == Cross-era interoperability in modular calendar arithmetic ==
 
 The protocol necessarily uses time/date stamps of finite length in
