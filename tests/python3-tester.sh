@@ -5,11 +5,10 @@
 # This is a clone of option-tester.sh
 # to build with python3 and do minimal (version) testing.
 
-LINUX=""
-if [ `uname -s` = "Linux" -a -f /usr/include/seccomp.h ]
+if [ "`which python3 2>/dev/null`" = "" ]
 then
-  # Not supported on CentOS 6
-  LINUX="--enable-seccomp"
+  echo "# Error: No python3 on this system."
+  exit 1
 fi
 
 doit ()
