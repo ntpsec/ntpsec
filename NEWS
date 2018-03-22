@@ -12,6 +12,9 @@ on user-visible changes.
 
 == Repository Head ==
 
+Log timestamps now include the year.  This is useful when investigating bugs
+involving time-setting and -g.
+
 == 2018-03-14: 1.1.0 ==
 
 RIP Stephen William Hawking, CH CBE FRS FRSA. 1942-01-08 - 2018-03-14
