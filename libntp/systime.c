@@ -317,6 +317,7 @@ step_systime(
 {
 	time_t pivot; /* for ntp era unfolding */
 	struct timespec timets;
+	struct timespec old, new;
 	struct calendar jd;
 	l_fp fp_ofs, fp_sys; /* offset and target system time in FP */
 
@@ -370,6 +371,7 @@ step_systime(
 
 	/* get the current time as l_fp (without fuzz) and as struct timespec */
 	get_ostime(&timets);
+	old = timets;
 	fp_sys = tspec_stamp_to_lfp(timets);
 
 	/* get the target time as l_fp */
@@ -377,6 +379,7 @@ step_systime(
 
 	/* unfold the new system time */
 	timets = lfp_stamp_to_tspec(fp_sys, pivot);
+	new = timets;
 
 	/* now set new system time */
 	if (settime(&timets) != 0) {
@@ -387,6 +390,28 @@ step_systime(
 	/* <--- time-critical path ended with call to the settime hook <--- */
 
 	msyslog(LOG_WARNING, "CLOCK: time stepped by %Lf", step);
+	if (abs(step) > 86400) {
+	    /* Get the full year (both old and new) into the log file.
+	     * Issue #474 */
+	    struct tm oldtm, newtm;
+	    char oldbuf[100], newbuf[100];
+	    if (!localtime_r(&old.tv_sec, &oldtm)) {
+		oldtm.tm_year = 9999-1900;
+		oldtm.tm_mon = 98;
+		oldtm.tm_mday = 99;
+	    }
+	    snprintf(oldbuf, sizeof(oldbuf), "%04d-%02d-%02d",
+		oldtm.tm_year+1900, oldtm.tm_mon+1, oldtm.tm_mday);
+	    if (!localtime_r(&new.tv_sec, &newtm)) {
+		newtm.tm_year = 9999-1900;
+		newtm.tm_mon = 98;
+		newtm.tm_mday = 99;
+	    }
+	    snprintf(newbuf, sizeof(newbuf), "%04d-%02d-%02d",
+		newtm.tm_year+1900, newtm.tm_mon+1, newtm.tm_mday);
+	    msyslog(LOG_WARNING, "CLOCK: time changed from %s to %s",
+		oldbuf, newbuf);
+	}
 
 	sys_residual = 0;
 	lamport_violated = (step < 0);
