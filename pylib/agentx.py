@@ -173,7 +173,7 @@ class PacketControl:
         self.packetLog = {}  # Sent packets kept until response is received
         self.loopCallback = None  # called each loop in runforever mode
         self.database = dbase  # class for handling data requests
-        self.receivedData = ""  # buffer for data from incomplete packets
+        self.receivedData = b""  # buffer for data from incomplete packets
         self.receivedPackets = []  # use as FIFO
         self.timeout = timeout
         self.sessionID = None  # need this for all packets
@@ -268,7 +268,7 @@ class PacketControl:
     def checkResponses(self):
         "Check for expected responses that have timed out"
         currentTime = time.time()
-        for key in self.packetLog.keys():
+        for key in list(self.packetLog.keys()):
             expiration, originalPkt, callback = self.packetLog[key]
             if currentTime > expiration:
                 if callback is not None:
@@ -349,7 +349,7 @@ class PacketControl:
 
     def pollSocket(self):
         "Reads all currently available data from the socket, non-blocking"
-        data = ""
+        data = b""
         while True:
             tmp = select.select([self.socket], [], [], 0)[0]
             if len(tmp) == 0:  # No socket, means no data available

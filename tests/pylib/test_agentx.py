@@ -150,7 +150,7 @@ class TestPacketControl(unittest.TestCase):
         self.assertEqual(p.packetLog, {})
         self.assertEqual(p.loopCallback, None)
         self.assertEqual(p.database, "base")
-        self.assertEqual(p.receivedData, "")
+        self.assertEqual(p.receivedData, b"")
         self.assertEqual(p.timeout, 30)
         self.assertEqual(p.sessionID, None)
         self.assertEqual(p.highestTransactionID, 0)
@@ -354,7 +354,7 @@ class TestPacketControl(unittest.TestCase):
         enc = pkt.encode()
         part1, rest = ntp.util.slicedata(enc, 15)
         part2, part3 = ntp.util.slicedata(rest, 6)
-        pollReturns = [part1, part2, part3 + "blah"]
+        pollReturns = [part1, part2, part3 + b"blah"]
 
         def pollSocket_jig(self):
             self.receivedData += pollReturns.pop(0)
@@ -372,7 +372,7 @@ class TestPacketControl(unittest.TestCase):
         # Test packet eaten
         p.packetEater()
         self.assertEqual(p.receivedPackets, [pkt])
-        self.assertEqual(p.receivedData, "blah")
+        self.assertEqual(p.receivedData, b"blah")
 
     def test_sendPacket(self):
         sock = jigs.SocketJig()
@@ -380,18 +380,18 @@ class TestPacketControl(unittest.TestCase):
         testpkt = AP.PingPDU(True, 0, 1, 2, "fake")
         # Test not expecting reply
         p.sendPacket(testpkt, False)
-        self.assertEqual(sock.data, ["\x01\r\x18\x00"
-                                     "\x00\x00\x00\x00\x00\x00\x00\x01"
-                                     "\x00\x00\x00\x02\x00\x00\x00\x08"
-                                     "\x00\x00\x00\x04fake"])
+        self.assertEqual(sock.data, [b"\x01\r\x18\x00"
+                                     b"\x00\x00\x00\x00\x00\x00\x00\x01"
+                                     b"\x00\x00\x00\x02\x00\x00\x00\x08"
+                                     b"\x00\x00\x00\x04fake"])
         self.assertEqual(p.packetLog, {})
         sock.data = []
         # Test expecting reply
         p.sendPacket(testpkt, True, callback="foo")
-        self.assertEqual(sock.data, ["\x01\r\x18\x00"
-                                     "\x00\x00\x00\x00\x00\x00\x00\x01"
-                                     "\x00\x00\x00\x02\x00\x00\x00\x08"
-                                     "\x00\x00\x00\x04fake"])
+        self.assertEqual(sock.data, [b"\x01\r\x18\x00"
+                                     b"\x00\x00\x00\x00\x00\x00\x00\x01"
+                                     b"\x00\x00\x00\x02\x00\x00\x00\x08"
+                                     b"\x00\x00\x00\x04fake"])
         self.assertEqual(p.packetLog, {(0, 1, 2):(30.0, testpkt, "foo")})
 
     def test_sendPing(self):
@@ -399,10 +399,10 @@ class TestPacketControl(unittest.TestCase):
         p = AX.PacketControl(sock, None)
         p.sessionID = 42
         p.sendPing()
-        self.assertEqual(sock.data, ["\x01\r\x10\x00"
-                                     "\x00\x00\x00*\x00\x00\x00\x05"
-                                     "\x00\x00\x00\x01\x00\x00\x00\x00"])
-        self.assertEqual(p.packetLog.keys(), [(42, 5, 1)])
+        self.assertEqual(sock.data, [b"\x01\r\x10\x00"
+                                     b"\x00\x00\x00*\x00\x00\x00\x05"
+                                     b"\x00\x00\x00\x01\x00\x00\x00\x00"])
+        self.assertEqual(list(p.packetLog.keys()), [(42, 5, 1)])
 
     def test_sendNotify(self):
         sock = jigs.SocketJig()
@@ -411,14 +411,14 @@ class TestPacketControl(unittest.TestCase):
         vb = AP.Varbind(AP.VALUE_INTEGER, (0, 1, 2), 23)
         p.sendNotify([vb])
         self.assertEqual(sock.data,
-                         ["\x01\x0c\x10\x00"
-                          "\x00\x00\x00*\x00\x00\x00\x05"
-                          "\x00\x00\x00\x01\x00\x00\x00\x18"
-                          "\x00\x02\x00\x00"
-                          "\x03\x00\x00\x00\x00\x00\x00\x00"
-                          "\x00\x00\x00\x01\x00\x00\x00\x02"
-                          "\x00\x00\x00\x17"])
-        self.assertEqual(p.packetLog.keys(), [(42, 5, 1)])
+                         [b"\x01\x0c\x10\x00"
+                          b"\x00\x00\x00*\x00\x00\x00\x05"
+                          b"\x00\x00\x00\x01\x00\x00\x00\x18"
+                          b"\x00\x02\x00\x00"
+                          b"\x03\x00\x00\x00\x00\x00\x00\x00"
+                          b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                          b"\x00\x00\x00\x17"])
+        self.assertEqual(list(p.packetLog.keys()), [(42, 5, 1)])
 
     def test_sendErrorResponse(self):
         sock = jigs.SocketJig()
@@ -428,10 +428,10 @@ class TestPacketControl(unittest.TestCase):
                   "transaction_id":32, "packet_id":100}
         p.sendErrorResponse(header, AP.ERR_GENERR, 12)
         self.assertEqual(sock.data,
-                         ["\x01\x12\x10\x00"
-                          "\x00\x00\x00*\x00\x00\x00 "
-                          "\x00\x00\x00d\x00\x00\x00\x08"
-                          "\x00\x00\x00\x00\x00\x05\x00\x0c"])
+                         [b"\x01\x12\x10\x00"
+                          b"\x00\x00\x00*\x00\x00\x00 "
+                          b"\x00\x00\x00d\x00\x00\x00\x08"
+                          b"\x00\x00\x00\x00\x00\x05\x00\x0c"])
         self.assertEqual(p.packetLog, {})
 
     def test_pollSocket(self):
@@ -443,13 +443,13 @@ class TestPacketControl(unittest.TestCase):
         pkt = AP.ResponsePDU(True, 42, 23, 100, 0, 0, 0)
         enc = pkt.encode()
         part1, part2 = ntp.util.slicedata(enc, 15)
-        sock.return_data = [part1, part2, "blah"]
+        sock.return_data = [part1, part2, b"blah"]
         fakeselectmod.do_return = [True, True, True, False]
         try:
             selecttemp = AX.select
             AX.select = fakeselectmod
             p.pollSocket()
-            self.assertEqual(p.receivedData, enc + "blah")
+            self.assertEqual(p.receivedData, enc + b"blah")
         finally:
             AX.select = selecttemp
 
