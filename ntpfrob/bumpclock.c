@@ -16,18 +16,27 @@
 
 #define NS_PER_S	1000000000
 
-void bumpclock(int bump)
+void bumpclock(int64_t bump)
 {
     struct timespec was, set, now;
     int rc1, rc2, rc3;
     int er1, er2, er3;
 
-    printf("Bumping clock by %d microseconds.\n", bump);
+#if NTP_SIZEOF_LONG > 4
+    printf("Bumping clock by %ld microseconds.\n", bump);
+#else
+    printf("Bumping clock by %lld microseconds.\n", bump);
+#endif
 
     rc1 = clock_gettime(CLOCK_REALTIME, &was);
     er1 = errno;
 
     set = was;
+    if (bump > 1000000 || bump < -1000000) {
+	int64_t sec = bump/1000000;
+	bump -= sec*1000000;
+	set.tv_sec += sec;
+    }
     bump *= 1000;
     /* coverity[tainted_data] */
     set.tv_nsec += bump;
@@ -47,7 +56,7 @@ void bumpclock(int bump)
 
     /* Defer printing so it doesn't distort timing. */
     if (rc1)
-	printf("Couldn't get time: %s\n", strerror(er1));
+	printf("Couldn't get old time: %s\n", strerror(er1));
     else
 	printf("Was: %ld.%09ld\n", (long)was.tv_sec, was.tv_nsec);
 
@@ -58,7 +67,7 @@ void bumpclock(int bump)
 	printf("Set: %ld.%09ld\n", (long)set.tv_sec, set.tv_nsec);
  
    if (rc3)
-	printf("Couldn't set time: %s\n", strerror(er3));
+	printf("Couldn't get new time: %s\n", strerror(er3));
     else
 	printf("Now: %ld.%09ld\n", (long)now.tv_sec, now.tv_nsec);
 }

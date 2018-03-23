@@ -56,7 +56,11 @@ main(int argc, char **argv)
 #endif /* HAVE_ADJTIMEX */
 		    break;
 		case 'b':
-		    bumpclock(atoi(optarg));
+#if NTP_SIZEOF_LONG > 4
+		    bumpclock(atol(optarg));
+#else
+		    bumpclock(atoll(optarg));
+#endif
 		    break;
 		case 'c':
 		    jitter(mode);
