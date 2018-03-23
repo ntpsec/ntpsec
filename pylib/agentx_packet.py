@@ -1036,7 +1036,7 @@ def decode_integer32(data, header):
 
 def sanity_integer32(data):
     if type(data) is not int:
-        raise TypeError
+        raise TypeError("%s is not integer" % repr(data))
 
 
 def encode_unsigned32(bigEndian, num):

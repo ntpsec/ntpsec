@@ -214,8 +214,8 @@ class PacketControl:
                     "Received packet with incorrect session ID: %s" % packet,
                     3)
                 resp = ax.ResponsePDU(True, packet.sessionID,
-                                      packet.transactioID, packet.packetID,
-                                      0, ax.REPERR_NOT_OPEN, 0)
+                                      packet.transactionID, packet.packetID,
+                                      0, ax.RSPERR_NOT_OPEN, 0)
                 self.sendPacket(resp, False)
                 continue
             ptype = packet.pduType
@@ -245,7 +245,7 @@ class PacketControl:
                                   self.database.mib_upperBound(),
                                   self.database.mib_context())
         self.sendPacket(register, False)
-        response = self.waitForResponse(register, True)
+        response = self.waitForResponse(register)
         self.stillConnected = True
 
     def waitForResponse(self, opkt, ignoreSID=False):
@@ -325,7 +325,7 @@ class PacketControl:
             if resp is None:  # Timed out. Need to restart the session.
                 # Er, problem: Can't handle reconnect from inside PacketControl
                 self.stillConnected = False
-        self.sendPacket(pkt, True)
+        self.sendPacket(pkt, True, callback=callback)
 
     def sendNotify(self, varbinds, context=None):
         # DUMMY packetID, does this need to change? or does the pktID only
