@@ -151,6 +151,17 @@ class TestPylibUtilMethods(unittest.TestCase):
             "[0000:1111:2222:3333:4444:5555:6666:7777]:123"),
             ("0000:1111:2222:3333:4444:5555:6666:7777", ":123"))
 
+    def test_parseConf(self):
+        data = """foo bar 42 #blah blah blah
+        "abcd"   poi? 3.14
+        "\\"\\n\\\\foo\\c" \\
+        poi! """
+        parsed = ntp.util.parseConf(data)
+        self.assertEqual(parsed,
+                         [[(False, "foo"), (False, "bar"), (False, 42)],
+                          [(True, "abcd"), (False, "poi?"), (False, 3.14)],
+                          [(True, "\"\n\\foo"), (False, "poi!")]])
+
     def test_stringfilt(self):
         f = ntp.util.stringfilt
 

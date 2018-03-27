@@ -825,7 +825,7 @@ class DataSource(ntp.agentx.MIBControl):
             return
 
         def boolify(d, k):
-            return True if d[k] == "True" else False
+            return True if d[k][0][1] == "True" else False
         optionList = ("notify-mode-change", "notify-stratum-change",
                       "notify-syspeer-change", "notify-add-association",
                       "notify-rm-association", "notify-leap-announced",
@@ -849,7 +849,7 @@ class DataSource(ntp.agentx.MIBControl):
             elif key == "notify-heartbeat":
                 self.notifyHeartbeat = boolify(settings, key)
             elif key == "heartbeat-interval":
-                self.heartbeatInterval = int(settings[key])
+                self.heartbeatInterval = settings[key][0][1]
 
     def misc_storeDynamicSettings(self):
         if self.settingsFilename is None:
@@ -1079,19 +1079,11 @@ def loadSettings(filename, optionList):
     options = {}
     with open(filename) as f:
         data = f.read()
-        parser = shlex.shlex(data)
-        parser.wordchars += "-.:"
-        data = [x for x in parser]
-        i = 0
-        dataLen = len(data)
-        while i < dataLen:
-            if data[i] in optionList:
-                arg = data[i+1]
-                if arg[0] in "\"'":
-                    arg = arg[1:-1]
-                options[data[i]] = arg
-                i += 1
-            i += 1
+        lines = ntp.util.parseConf(data)
+        for line in lines:
+            isQuote, token = line[0]
+            if token in optionList:
+                options[token] = line[1:]
     return options
 
 
@@ -1152,7 +1144,7 @@ if __name__ == "__main__":
     if conf is not None:
         for key in conf.keys():
             if key == "master-addr":  # Address of the SNMP master daemon
-                val = conf[key]
+                val = conf[key][0][1]
                 if ":" in val:
                     host, port = val.split(":")
                     port = int(port)
@@ -1160,12 +1152,12 @@ if __name__ == "__main__":
                 else:
                     masterAddr = val
             elif key == "logfile":
-                logfile = conf[key]
+                logfile = conf[key][0][1]
             elif key == "ntp-addr":  # Address of the NTP daemon
-                hostname = conf[key]
+                hostname = conf[key][0][1]
             elif key == "loglevel":
                 errmsg = "Error: loglevel parameter '%s' not a number\n"
-                debug = ntp.util.safeargcast(conf[key], int, errmsg, usage)
+                debug = conf[key][0][1]
 
     fileLogging = False
     for (switch, val) in options:

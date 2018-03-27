@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import socket
+import string
 import sys
 import time
 import ntp.ntpc
@@ -155,6 +156,75 @@ def portsplit(hostname):
             hostname = hostname[:portsep]
             hostname = hostname[1:-1]   # Strip brackets
     return (hostname, portsuffix)
+
+
+def parseConf(text):
+    inQuote = False
+    quoteStarter = ""
+    lines = []
+    tokens = []
+    current = []
+
+    def pushToken():
+        token = "".join(current)
+        if inQuote is False:  # Attempt type conversion
+            try:
+                token = int(token)
+            except ValueError:
+                try:
+                    token = float(token)
+                except ValueError:
+                    pass
+        wrapper = (inQuote, token)
+        tokens.append(wrapper)
+        current[:] = []
+
+    def pushLine():
+        if len(current) > 0:
+            pushToken()
+        if len(tokens) > 0:
+            lines.append(tokens[:])
+            tokens[:] = []
+
+    i = 0
+    tlen = len(text)
+    while i < tlen:
+        if inQuote is True:
+            if text[i] == quoteStarter:  # Ending a text string
+                pushToken()
+                quoteStarter = ""
+                inQuote = False
+            elif text[i] == "\\":  # Starting an escape sequence
+                i += 1
+                if text[i] in "'\"n\\":
+                    print(repr(text[i]))
+                    current.append(eval("\'\\" + text[i] + "\'"))
+            else:
+                current.append(text[i])
+        else:
+            if text[i] == "#":  # Comment
+                while (i < tlen) and (text[i] != "\n"):
+                    i += 1  # Advance to end of line...
+                i -= 1  # ...and back up so we don't skip the newline
+            elif text[i] in "'\"":  # Starting a text string
+                inQuote = True
+                quoteStarter = text[i]
+                if len(current) > 0:
+                    pushToken()
+            elif text[i] == "\\":  # Linebreak escape
+                i += 1
+                if text[i] != "\n":
+                    raise SyntaxError
+            elif text[i] == "\n":  # EOL: break the lines
+                pushLine()
+            elif text[i] in string.whitespace:
+                if len(current) > 0:
+                    pushToken()
+            else:
+                current.append(text[i])
+        i += 1
+    pushLine()
+    return lines
 
 
 def stringfilt(data):
