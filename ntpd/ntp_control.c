@@ -758,7 +758,7 @@ process_control(
 	numctlreq++;
 	rmt_addr = &rbufp->recv_srcadr;
 	lcl_inter = rbufp->dstadr;
-	pkt = (struct ntp_control *)&rbufp->recv_pkt;
+	pkt = (struct ntp_control *)&rbufp->recv_buffer;
 
 	/*
 	 * If the length is less than required for the header, or
@@ -3979,7 +3979,7 @@ read_ordlist(
 	 * which are access control lists.  Other request data return
 	 * CERR_UNKNOWNVAR.
 	 */
-	cpkt = (struct ntp_control *)&rbufp->recv_pkt;
+	cpkt = (struct ntp_control *)&rbufp->recv_buffer;
 	qdata_octets = ntohs(cpkt->count);
 	if (0 == qdata_octets || (ifstatint8_ts == qdata_octets &&
 	    !memcmp(ifstats_s, cpkt->data, ifstatint8_ts))) {
