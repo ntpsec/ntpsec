@@ -320,3 +320,19 @@ python-coverage:
   tags:
     - gitlab-org
 
+clang-basic:
+  <<: *job_definition
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev clang
+    - python ./waf configure --check-c-compiler=clang build check
+  tags:
+    - gitlab-org
+
+clang-refclocks:
+  <<: *job_definition
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev clang
+    - python ./waf configure --check-c-compiler=clang --refclock=all build check
+  tags:
+    - gitlab-org
+
