@@ -390,7 +390,7 @@ step_systime(
 	/* <--- time-critical path ended with call to the settime hook <--- */
 
 	msyslog(LOG_WARNING, "CLOCK: time stepped by %Lf", step);
-	if (abs(step) > 86400) {
+	if (fabsl(step) > 86400) {
 	    /* Get the full year (both old and new) into the log file.
 	     * Issue #474 */
 	    struct tm oldtm, newtm;
