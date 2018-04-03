@@ -10,9 +10,15 @@ Occasionally, the leap-second needs an update.
 
 |==============================
 
-== More Help ==
+== Manual Pages ==
 
 include::includes/manual.txt[]
+
+== Table of Contents ==
+
+* link:#synop[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
 
 '''''
 

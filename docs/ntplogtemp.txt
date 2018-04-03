@@ -10,7 +10,7 @@ P is for patching.
 
 |==============================
 
-== Related Links ==
+== Manual Pages ==
 
 include::includes/manual.txt[]
 

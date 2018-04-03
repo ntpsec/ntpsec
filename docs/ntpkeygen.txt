@@ -9,7 +9,7 @@ Alice holds the key.
 
 |==============================
 
-== Related Links ==
+== Manual Pages ==
 
 include::includes/manual.txt[]
 
@@ -17,14 +17,11 @@ include::includes/manual.txt[]
 
 * link:#synop[Synopsis]
 * link:#descrip[Description]
-* link:#conf[Initial configuration]
 * link:#cmd[Command Line Options]
 * link:#run[Running the program]
 * link:#access[Key file access and location]
-* link:#trust[Trusted Hosts and Groups]
-* link:#ident[Identity schemes]
-* link:#rand[Random Seed File]
-* link:#fmt[Cryptographic Data Files]
+* link:#random[Random Seed File]
+* link:#crypto[Cryptographic Data Files]
 
 '''''
 

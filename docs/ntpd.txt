@@ -9,16 +9,20 @@ You need help from the monkeys.
 
 |===============================
 
+== Manual Pages ==
+
+include::includes/manual.txt[]
 
 == Table of Contents ==
 
-* link:#synop[Synopsis]
-* link:#descr[Description]
-* link:#cmd[Command Line Options]
-* link:#usage[Usage]
-* link:#files[Files]
-* link:#signals[Signals]
-* link:#bugs[Bugs]
+* link:#synop[SYNOPSIS]
+* link:#descr[DESCRIPTION]
+* link:#cmd[OPTIONS]
+* link:#usage[USAGE]
+* link:#files[FILES]
+* link:#signals[SIGNALS]
+* link:#bugs[BUGS]
+* link:#_standards[STANDARDS]
 
 '''''
 

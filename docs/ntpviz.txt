@@ -9,11 +9,18 @@ You could have a butterfly on your head and not even know it.
 
 |==============================
 
-== More Help ==
+== Manual Pages ==
 
 include::includes/manual.txt[]
 
 '''''
+
+== Table of Contents ==
+
+* link:#synop[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_requirements[REQUIREMENTS]
+* link:#_authors[AUTHORS]
 
 include::includes/ntpviz-body.txt[]
 

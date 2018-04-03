@@ -7,7 +7,7 @@
 
 |==============================
 
-== More Help ==
+== Manual Pages ==
 
 include::includes/manual.txt[]
 

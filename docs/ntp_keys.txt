@@ -9,7 +9,7 @@ Three can keep a secret, if two are dead.
 
 |==============================
 
-== More Help ==
+== Manual Pages ==
 
 include::includes/manual.txt[]
 

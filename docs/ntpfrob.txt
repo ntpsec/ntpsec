@@ -9,6 +9,10 @@ Assorted doohickeys for clock-frobbing are in the backpack.
 
 |==============================
 
+== Manual Pages ==
+
+include::includes/manual.txt[]
+
 == Table of Contents ==
 
 * link:#synop[Synopsis]

@@ -9,11 +9,19 @@ Words of wisdom.
 
 |==============================
 
-== More Help ==
+== Manual Pages ==
 
 include::includes/manual.txt[]
 
 '''''
+== Table of Contents ==
+
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#_commands[Commands]
+* link:#_options[Options]
+* link:#_known_bugs[Known Bugs]
+* link:#_mode_6_protocol[Mode 6 Protocol]
 
 include::includes/ntpmon-body.txt[]
 
