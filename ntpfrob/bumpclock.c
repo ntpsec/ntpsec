@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include "ntpfrob.h"
 
@@ -22,11 +23,7 @@ void bumpclock(int64_t bump)
     int rc1, rc2, rc3;
     int er1, er2, er3;
 
-#if NTP_SIZEOF_LONG > 4
-    printf("Bumping clock by %ld microseconds.\n", bump);
-#else
-    printf("Bumping clock by %lld microseconds.\n", bump);
-#endif
+    printf("Bumping clock by %" PRId64 " microseconds.\n", bump);
 
     rc1 = clock_gettime(CLOCK_REALTIME, &was);
     er1 = errno;
