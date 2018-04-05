@@ -15,8 +15,8 @@ include::includes/manual.txt[]
 
 == Table of Contents ==
 
-* link:#synop[SYNOPSIS]
-* link:#descr[DESCRIPTION]
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
 * link:#_configuration_support[Configuration Support]
 * link:#_authentication_commands[Authentication Commands]
 * link:#monit[Monitoring Support]
@@ -26,9 +26,9 @@ include::includes/manual.txt[]
 * link:#_reference_clock_support[Reference Clock Support]
 * link:#_reference_clock_commands[Reference Clock Commands]
 * link:#_miscellaneous_options[Miscellaneous Options]
-* link:#files[FILES]
+* link:#_files[FILES]
 * link:#_see_also[SEE ALSO]
-* link:#bugs[BUGS]
+* link:#_bugs[BUGS]
 
 '''''
 

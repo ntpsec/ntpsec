@@ -15,13 +15,13 @@ include::includes/manual.txt[]
 
 == Table of Contents ==
 
-* link:#synop[SYNOPSIS]
-* link:#descr[DESCRIPTION]
-* link:#cmd[OPTIONS]
-* link:#usage[USAGE]
-* link:#files[FILES]
-* link:#signals[SIGNALS]
-* link:#bugs[BUGS]
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+* link:#_usage[USAGE]
+* link:#_files[FILES]
+* link:#_signals[SIGNALS]
+* link:#_bugs[BUGS]
 * link:#_standards[STANDARDS]
 
 '''''

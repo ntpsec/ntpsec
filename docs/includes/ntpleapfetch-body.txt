@@ -2,7 +2,6 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-[[synop]]
 == SYNOPSIS ==
 [verse]
 +ntpleapfetch+

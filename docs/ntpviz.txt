@@ -17,7 +17,7 @@ include::includes/manual.txt[]
 
 == Table of Contents ==
 
-* link:#synop[SYNOPSIS]
+* link:#_synopsis[SYNOPSIS]
 * link:#_description[DESCRIPTION]
 * link:#_requirements[REQUIREMENTS]
 * link:#_authors[AUTHORS]

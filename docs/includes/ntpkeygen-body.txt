@@ -2,12 +2,10 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-[[synop]]
 == Synopsis ==
 [verse]
 +ntpkeygen+ [+-M+]
 
-[[descrip]]
 == Description ==
 
 This program generates a file containing keys that can be used

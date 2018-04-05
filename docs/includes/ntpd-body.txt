@@ -2,7 +2,6 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-[[synop]]
 == SYNOPSIS ==
 [verse]
 ntpd
@@ -12,7 +11,6 @@ ntpd
     [-u 'user'[:'group']] [-U 'interface_update_interval']
     [-v 'variable'] [-V 'variable'] [server...]
 
-[[descr]]
 == DESCRIPTION ==
 
 The +ntpd+ utility is an operating system daemon which sets and
@@ -55,7 +53,6 @@ monitored using {ntpmonman}.
 When +ntpd+ starts it looks at the value of umask(2), and if
 zero +ntpd+ will set the umask(2) to 022.
 
-[[cmd]]
 == OPTIONS ==
 
 +-4+, +--ipv4+::
@@ -276,7 +273,6 @@ or hostnames, with the _iburst_ option implied. Associations with
 these are formed before any associations implied by the configuration
 file.
 
-[[usage]]
 == USAGE ==
 
 === How NTP Operates ===
@@ -503,7 +499,6 @@ sign of the offset.
 The filter is activated by the _tinker_ command and _huffpuff_ keyword,
 as described in {ntpdconfman}.
 
-[[files]]
 == FILES ==
 
 [options="header"]
@@ -534,7 +529,6 @@ Configuration files are parsed according to the following rules:
   of their pathnames.  Files with other extensions or no extensions
   are ignored.
 
-[[signals]]
 == SIGNALS ==
 
 SIGQUIT, SIGINT, and SIGTERM will cause ntpd to clean up and exit.
@@ -553,7 +547,6 @@ SIGUSR2 will decrease it by 1.  This may be helpful if you are
 running with +-n+, either just to see the logging on your screen
 or with gdb.
 
-[[bugs]]
 == BUGS ==
 
 The '-V' option is not backward-compatible with its use (as the

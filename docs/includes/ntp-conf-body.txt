@@ -2,11 +2,9 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-[[synop]]
 == SYNOPSIS ==
 /etc/ntp.conf
 
-[[descr]]
 == DESCRIPTION ==
 
 The `ntp.conf` configuration file is read at initial startup by the
@@ -218,7 +216,6 @@ include::../includes/clock-options.txt[]
 
 include::../includes/misc-options.txt[]
 
-[[files]]
 == FILES ==
 
 `/etc/ntp.conf`::
@@ -243,7 +240,6 @@ this documentation is available in HTML format in `/usr/share/doc/ntp`.
 
 David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
 
-[[bugs]]
 == BUGS ==
 
 The syntax checking is not picky; some combinations of ridiculous and
