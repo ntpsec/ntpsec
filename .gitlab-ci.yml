@@ -123,57 +123,63 @@ debian-stretch-refclocks:
 
 ubuntu-1404-lts-basic:
   <<: *job_definition
+  image: ubuntu:14.04
   script:
+    - apt-get update
+    - apt-get install -y bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure build check
   tags:
-    - ubuntu-1404-lts
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 ubuntu-1404-lts-refclocks:
   <<: *job_definition
+  image: ubuntu:14.04
   script:
+    - apt-get update
+    - apt-get install -y bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build check
   tags:
-    - ubuntu-1404-lts
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 ubuntu-1604-lts-basic:
   <<: *job_definition
+  image: ubuntu:16.04
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure build check
   tags:
-    - ubuntu-1604-lts
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 ubuntu-1604-lts-refclocks:
   <<: *job_definition
+  image: ubuntu:16.04
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build check
   tags:
-    - ubuntu-1604-lts
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 ubuntu-1710-basic:
   <<: *job_definition
+  image: ubuntu:17.10
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure build check
   tags:
-    - ubuntu-1710
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 ubuntu-1710-refclocks:
   <<: *job_definition
+  image: ubuntu:17.10
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build check
   tags:
-    - ubuntu-1710
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 gcc-7-basic:
   <<: *job_definition
