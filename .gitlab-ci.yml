@@ -267,21 +267,21 @@ centos-7-refclocks:
 
 fedora-26-basic:
   <<: *job_definition
+  image: fedora:26
   script:
+    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
     - python ./waf configure build check
   tags:
-    - fedora-26
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 fedora-26-refclocks:
   <<: *job_definition
+  image: fedora:26
   script:
+    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
     - python ./waf configure --refclock=all build check
   tags:
-    - fedora-26
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 fedora-27-basic:
   <<: *job_definition
