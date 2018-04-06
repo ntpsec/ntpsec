@@ -744,7 +744,18 @@ receive(
 		sys_badlength++;
 		goto done;
 	}
-	peer = findpeer(rbufp);
+
+	if (MODE_SERVER == PKT_MODE(rbufp->pkt.li_vn_mode)) {
+	    /* Reply to our request:
+	     * Auth check breaks if we findpeer for MODE_CLIENT and
+	     * a site we are using as a server uses us as a server
+	     * with a different key. */
+	    peer = findpeer(rbufp);
+	    if (NULL == peer) {
+		sys_declined++;
+		goto done;
+	    }
+	}
 
 	if(i_require_authentication(peer, rbufp, restrict_mask)) {
 		if(
@@ -790,8 +801,7 @@ receive(
 		/* Reply to our request. */
 		handle_procpkt(rbufp, peer);
 		sys_processed++;
-		if (peer != NULL)	/* just to be on the safe side */
-		    peer->processed++;
+		peer->processed++;
 		break;
 	    default:
 		/* Everything else is for broadcast modes,
