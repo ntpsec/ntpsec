@@ -78,57 +78,63 @@ gitlab-refclocks:
 
 debian-wheezy-basic:
   <<: *job_definition
+  image: debian:wheezy-slim
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure build check
   tags:
-    - debian-wheezy
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 debian-wheezy-refclocks:
   <<: *job_definition
+  image: debian:wheezy-slim
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build check
   tags:
-    - debian-wheezy
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 debian-jessie-basic:
   <<: *job_definition
+  image: debian:jessie-slim
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure build check
   tags:
-    - debian-jessie
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 debian-jessie-refclocks:
   <<: *job_definition
+  image: debian:jessie-slim
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build check
   tags:
-    - debian-jessie
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 debian-stretch-basic:
   <<: *job_definition
+  image: debian:stretch-slim
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure build check
   tags:
-    - debian-stretch
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 debian-stretch-refclocks:
   <<: *job_definition
+  image: debian:stretch-slim
   script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build check
   tags:
-    - debian-stretch
-  only:
-    - branches@NTPsec/ntpsec
+    - gitlab-org
 
 ubuntu-1404-lts-basic:
   <<: *job_definition
