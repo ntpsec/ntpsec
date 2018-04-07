@@ -47,7 +47,7 @@ struct ntptimeval
 
 /* MUSL port shim */
 #ifndef HAVE_NTP_GETTIME
-int ntp_gettime(struct ntptimeval *ntv)
+static int ntp_gettime(struct ntptimeval *ntv)
 {
 	struct timex tntx;
 	int result;
