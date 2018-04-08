@@ -50,7 +50,7 @@ done
 cat <<EOF
 # Preparing your system for ntpsec source build...
 # This script presently knows about:
-#   CentOS, Debian, Fedora, Gentoo, SLES and Ubuntu
+#   CentOS, Debian, Fedora, Gentoo, SLES, Ubuntu, and Alpine Linux
 # If you are running something else, such as macOS or Solaris, please
 # read the source for this buildprep script to get an idea of what packages
 # are required.
@@ -96,6 +96,11 @@ elif yast -h >/dev/null 2>&1
 then
     installer=yast
     install="$do $installer --install"
+elif  apk --version >/dev/null 2>&1
+then
+    # Alpine Linux, musl rather than libc
+    installer=apk
+    install="$do $installer add"
 else
     echo "# ERROR: Package manager unidentified - Unsupported operating system"
     exit 1
@@ -118,6 +123,13 @@ echo ""
 daemon () {
     # Prerequisites to build the daemon: bison, pps-tools, service libraries
     case $installer in
+	apk)
+	    $install build-base python                  # basic tools
+	    $install bison python-dev linux-headers
+	    $install openssl-dev libcap-dev libseccomp-dev
+	    # probably needs more, but this builds
+	    # can't find timepps.h: gpsd and chrony have their own ??
+	    ;;
 	apt)
 	    $install build-essential			# Build environment
 	    $install bison libssl-dev			# build
