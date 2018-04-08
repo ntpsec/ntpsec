@@ -242,9 +242,11 @@ int main(int argc, char *argv[])
   DoCMAC("AES-128", EVP_aes_128_cbc(),      key, 16, packet, PACKET_LENGTH);
   DoCMAC("AES-192", EVP_aes_192_cbc(),      key, 24, packet, PACKET_LENGTH);
   DoCMAC("AES-256", EVP_aes_256_cbc(),      key, 32, packet, PACKET_LENGTH);
+#ifndef OPENSSL_NO_CAMELLIA
   DoCMAC("CAM-128", EVP_camellia_128_cbc(), key, 16, packet, PACKET_LENGTH);
   DoCMAC("CAM-192", EVP_camellia_192_cbc(), key, 24, packet, PACKET_LENGTH);
   DoCMAC("CAM-256", EVP_camellia_256_cbc(), key, 32, packet, PACKET_LENGTH);
+#endif
 #endif
 
   return 0;
