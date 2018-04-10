@@ -56,10 +56,9 @@ static	void	ctl_flushpkt	(uint8_t);
 static	void	ctl_putdata	(const char *, unsigned int, bool);
 static	void	ctl_putstr	(const char *, const char *, size_t);
 static	void	ctl_putdblf	(const char *, int, int, double);
-#define	ctl_putdbl(tag, d)	ctl_putdblf(tag, 1, 3, d)
-#define	ctl_putdbl6(tag, d)	ctl_putdblf(tag, 1, 6, d)
-#define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, 0, -1, \
-					    FP_UNSCALE(sfp))
+#define	ctl_putdbl(tag, d)	ctl_putdblf(tag, true, 3, d)
+#define	ctl_putdbl6(tag, d)	ctl_putdblf(tag, true, 6, d)
+#define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, false, -1, FP_UNSCALE(sfp))
 static	void	ctl_putuint	(const char *, uint64_t);
 static	void	ctl_puthex	(const char *, uint64_t);
 static	void	ctl_putint	(const char *, long);
@@ -1161,7 +1160,7 @@ ctl_putunqstr(
 static void
 ctl_putdblf(
 	const char *	tag,
-	int		use_f,
+	bool		use_f,
 	int		precision,
 	double		d
 	)
@@ -1833,7 +1832,7 @@ ctl_putsys(
 			putfunc args	/* no trailing ; */
 
 	case CS_K_OFFSET:
-		ctl_putdblf(sys_var[varid].text, 0, -1,
+		ctl_putdblf(sys_var[varid].text, false, -1,
 			ntp_error_in_seconds(ntx.offset) * MS_PER_S);
 		break;
 
@@ -1842,12 +1841,12 @@ ctl_putsys(
 		break;
 
 	case CS_K_MAXERR:
-		ctl_putdblf(sys_var[varid].text, 0, 6,
+		ctl_putdblf(sys_var[varid].text, false, 6,
 			    ntp_error_in_seconds(ntx.maxerror) * MS_PER_S);
 		break;
 
 	case CS_K_ESTERR:
-		ctl_putdblf(sys_var[varid].text, 0, 6,
+		ctl_putdblf(sys_var[varid].text, false, 6,
 			 ntp_error_in_seconds(ntx.esterror) * MS_PER_S);
 		break;
 
@@ -1861,7 +1860,7 @@ ctl_putsys(
 		break;
 
 	case CS_K_PRECISION:
-		ctl_putdblf(sys_var[varid].text, 0, 6,
+		ctl_putdblf(sys_var[varid].text, false, 6,
 			    ntp_error_in_seconds(ntx.precision) * MS_PER_S);
 		break;
 
