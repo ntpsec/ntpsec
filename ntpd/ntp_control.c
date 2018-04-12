@@ -697,6 +697,31 @@ init_control(void)
 
 }
 
+/*
+ * unmarshall_ntp_control - unmarshall data stream into a ntp_sontrol struct
+ */
+void
+unmarshall_ntp_control(struct ntp_control *pkt, struct recvbuf *rbufp)
+{
+  pkt->li_vn_mode = (uint8_t)rbufp->recv_buffer[0];
+  pkt->r_m_e_op = (uint8_t)rbufp->recv_buffer[1];
+  pkt->sequence = (uint16_t)rbufp->recv_buffer[2] << 8;
+  pkt->sequence |= (uint16_t)rbufp->recv_buffer[3];
+  pkt->sequence = ntohs(pkt->sequence);
+  pkt->status = (uint16_t)rbufp->recv_buffer[4] << 8;
+  pkt->status |= (uint16_t)rbufp->recv_buffer[5];
+  pkt->status = ntohs(pkt->status);
+  pkt->associd = (uint16_t)rbufp->recv_buffer[6] << 8;
+  pkt->associd |= (uint16_t)rbufp->recv_buffer[7];
+  pkt->associd = ntohs(pkt->associd);
+  pkt->offset = (uint16_t)rbufp->recv_buffer[8] << 8;
+  pkt->offset |= (uint16_t)rbufp->recv_buffer[9];
+  pkt->offset = ntohs(pkt->offset);
+  pkt->count = (uint16_t)rbufp->recv_buffer[10] << 8;
+  pkt->count |= (uint16_t)rbufp->recv_buffer[11];
+  pkt->count = ntohs(pkt->count);
+  memcpy(&pkt->data, rbufp->recv_buffer + 12, 480 + MAX_MAC_LEN);
+}
 
 /*
  * ctl_error - send an error response for the current request
@@ -742,6 +767,7 @@ process_control(
 	)
 {
 	struct ntp_control *pkt;
+	struct ntp_control pkt_core;
 	int req_count;
 	int req_data;
 	const struct ctl_proc *cc;
@@ -757,7 +783,8 @@ process_control(
 	numctlreq++;
 	rmt_addr = &rbufp->recv_srcadr;
 	lcl_inter = rbufp->dstadr;
-	pkt = (struct ntp_control *)&rbufp->recv_buffer;
+	unmarshall_ntp_control(&pkt_core, rbufp);
+	pkt = &pkt_core;
 
 	/*
 	 * If the length is less than required for the header, or
@@ -3962,6 +3989,7 @@ read_ordlist(
 	const char addr_rst_s[] = "addr_restrictions";
 	const size_t a_r_chars = COUNTOF(addr_rst_s) - 1;
 	struct ntp_control *	cpkt;
+	struct ntp_control pkt_core;
 	unsigned short		qdata_octets;
 
 	UNUSED_ARG(rbufp);
@@ -3978,7 +4006,8 @@ read_ordlist(
 	 * which are access control lists.  Other request data return
 	 * CERR_UNKNOWNVAR.
 	 */
-	cpkt = (struct ntp_control *)&rbufp->recv_buffer;
+	unmarshall_ntp_control(&pkt_core, rbufp);
+	cpkt = &pkt_core;
 	qdata_octets = ntohs(cpkt->count);
 	if (0 == qdata_octets || (ifstatint8_ts == qdata_octets &&
 	    !memcmp(ifstats_s, cpkt->data, ifstatint8_ts))) {
