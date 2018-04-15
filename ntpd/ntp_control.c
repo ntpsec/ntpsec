@@ -703,24 +703,24 @@ init_control(void)
 void
 unmarshall_ntp_control(struct ntp_control *pkt, struct recvbuf *rbufp)
 {
-  pkt->li_vn_mode = (uint8_t)rbufp->recv_buffer[0];
-  pkt->r_m_e_op = (uint8_t)rbufp->recv_buffer[1];
-  pkt->sequence = (uint16_t)rbufp->recv_buffer[2] << 8;
-  pkt->sequence |= (uint16_t)rbufp->recv_buffer[3];
-  pkt->sequence = ntohs(pkt->sequence);
-  pkt->status = (uint16_t)rbufp->recv_buffer[4] << 8;
-  pkt->status |= (uint16_t)rbufp->recv_buffer[5];
-  pkt->status = ntohs(pkt->status);
-  pkt->associd = (uint16_t)rbufp->recv_buffer[6] << 8;
-  pkt->associd |= (uint16_t)rbufp->recv_buffer[7];
-  pkt->associd = ntohs(pkt->associd);
-  pkt->offset = (uint16_t)rbufp->recv_buffer[8] << 8;
-  pkt->offset |= (uint16_t)rbufp->recv_buffer[9];
-  pkt->offset = ntohs(pkt->offset);
-  pkt->count = (uint16_t)rbufp->recv_buffer[10] << 8;
-  pkt->count |= (uint16_t)rbufp->recv_buffer[11];
-  pkt->count = ntohs(pkt->count);
-  memcpy(&pkt->data, rbufp->recv_buffer + 12, 480 + MAX_MAC_LEN);
+    pkt->li_vn_mode = (uint8_t)rbufp->recv_buffer[0];
+    pkt->r_m_e_op = (uint8_t)rbufp->recv_buffer[1];
+    pkt->sequence = (uint16_t)rbufp->recv_buffer[2] << 8;
+    pkt->sequence |= (uint16_t)rbufp->recv_buffer[3];
+    pkt->sequence = ntohs(pkt->sequence);
+    pkt->status = (uint16_t)rbufp->recv_buffer[4] << 8;
+    pkt->status |= (uint16_t)rbufp->recv_buffer[5];
+    pkt->status = ntohs(pkt->status);
+    pkt->associd = (uint16_t)rbufp->recv_buffer[6] << 8;
+    pkt->associd |= (uint16_t)rbufp->recv_buffer[7];
+    pkt->associd = ntohs(pkt->associd);
+    pkt->offset = (uint16_t)rbufp->recv_buffer[8] << 8;
+    pkt->offset |= (uint16_t)rbufp->recv_buffer[9];
+    pkt->offset = ntohs(pkt->offset);
+    pkt->count = (uint16_t)rbufp->recv_buffer[10] << 8;
+    pkt->count |= (uint16_t)rbufp->recv_buffer[11];
+    pkt->count = ntohs(pkt->count);
+    memcpy(&pkt->data, rbufp->recv_buffer + 12, 480 + MAX_MAC_LEN);
 }
 
 /*

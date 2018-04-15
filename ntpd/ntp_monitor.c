@@ -324,6 +324,7 @@ ntp_monitor(
 {
 	l_fp		interval_fp;
 	struct pkt *	pkt;
+	struct pkt pkt_core;
 	mon_entry *	mon;
 	mon_entry *	oldest;
 	int		oldest_age;
@@ -339,12 +340,13 @@ ntp_monitor(
 	if (mon_enabled == MON_OFF)
 		return ~(RES_LIMITED | RES_KOD) & flags;
 
-	pkt = &rbufp->recv_pkt;
+	unmarshall_pkt(&pkt_core, rbufp);
+	pkt = &pkt_core;
+
 	hash = MON_HASH(&rbufp->recv_srcadr);
 	mode = PKT_MODE(pkt->li_vn_mode);
 	version = PKT_VERSION(pkt->li_vn_mode);
 	mon = mon_hash[hash];
-
 	/*
 	 * We keep track of all traffic for a given IP in one entry,
 	 * otherwise cron'ed ntpdate or similar evades RES_LIMITED.

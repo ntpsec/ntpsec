@@ -2213,6 +2213,7 @@ fast_xmit(
 {
 	struct pkt xpkt;	/* transmit packet structure */
 	struct pkt *rpkt;	/* receive packet structure */
+	struct pkt pkt_core; /* recieve packet copy target */
 	l_fp	xmt_tx, xmt_ty;
 	size_t	sendlen;
 
@@ -2224,7 +2225,8 @@ fast_xmit(
 	 * control and not strictly specification compliant, but doesn't
 	 * break anything.
 	 */
-	rpkt = &rbufp->recv_pkt;
+	unmarshall_pkt(&pkt_core, rbufp);
+	rpkt = &pkt_core;
 
 	/*
 	 * If this is a kiss-o'-death (KoD) packet, show leap
