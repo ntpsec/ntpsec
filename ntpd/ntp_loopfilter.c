@@ -362,44 +362,40 @@ or, from ntp_adjtime():
 	    case TIME_ERROR: /* 5: unsynchronized, or loss of synchronization */
 				/* error (see status word) */
 
+		des[0] = 0;
+		des[1] = 0;  /* we skip first ":".  */
+
 		if (ptimex->status & STA_UNSYNC)
-			snprintf(des, sizeof(des), "%s%sClock Unsynchronized",
-				des, (*des) ? "; " : "");
+			strlcat(des, ":Clock Unsynchronized", sizeof(des));
 
 		if (ptimex->status & STA_CLOCKERR)
-			snprintf(des, sizeof(des), "%s%sClock Error",
-				des, (*des) ? "; " : "");
+			strlcat(des, ":Clock Error", sizeof(des));
 
 		if (!(ptimex->status & STA_PPSSIGNAL)
 		    && ptimex->status & STA_PPSFREQ)
-			snprintf(des, sizeof(des), "%s%sPPS Frequency Sync wanted but no PPS",
-				des, (*des) ? "; " : "");
+			strlcat(des, ":PPS Frequency Sync wanted but no PPS", sizeof(des));
 
 		if (!(ptimex->status & STA_PPSSIGNAL)
 		    && ptimex->status & STA_PPSTIME)
-			snprintf(des, sizeof(des), "%s%sPPS Time Sync wanted but no PPS signal",
-				des, (*des) ? "; " : "");
+			strlcat(des, ":PPS Time Sync wanted but no PPS signal", sizeof(des));
 
 		if (   ptimex->status & STA_PPSTIME
 		    && ptimex->status & STA_PPSJITTER)
-			snprintf(des, sizeof(des), "%s%sPPS Time Sync wanted but PPS Jitter exceeded",
-				des, (*des) ? "; " : "");
+			strlcat(des, ":PPS Time Sync wanted but PPS Jitter exceeded", sizeof(des));
 
 		if (   ptimex->status & STA_PPSFREQ
 		    && ptimex->status & STA_PPSWANDER)
-			snprintf(des, sizeof(des), "%s%sPPS Frequency Sync wanted but PPS Wander exceeded",
-				des, (*des) ? "; " : "");
+			strlcat(des, ":PPS Frequency Sync wanted but PPS Wander exceeded", sizeof(des));
 
 		if (   ptimex->status & STA_PPSFREQ
 		    && ptimex->status & STA_PPSERROR)
-			snprintf(des, sizeof(des), "%s%sPPS Frequency Sync wanted but Calibration error detected",
-				des, (*des) ? "; " : "");
+			strlcat(des, ":PPS Frequency Sync wanted but Calibration error detected", sizeof(des));
 
 		if (pps_call && !(ptimex->status & STA_PPSSIGNAL))
 			report_event(EVNT_KERN, NULL,
 			    "no PPS signal");
 		DPRINT(1, ("kernel loop status %#x (%s)\n",
-			   (unsigned)ptimex->status, des));
+			   (unsigned)ptimex->status, des+1));
 		/*
 		 * This code may be returned when ntp_adjtime() has just
 		 * been called for the first time, quite a while after
@@ -415,7 +411,7 @@ or, from ntp_adjtime():
 		 * msyslog(LOG_INFO, "CLOCK: kernel reports time synchronization lost");
 		 */
 		msyslog(LOG_INFO, "CLOCK: kernel reports TIME_ERROR: %#x: %s",
-			(unsigned)ptimex->status, des);
+			(unsigned)ptimex->status, des+1);
 	    break;
 #else
 # warning TIME_ERROR is not defined
