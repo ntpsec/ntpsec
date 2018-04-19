@@ -55,7 +55,7 @@ static	unsigned short ctlclkstatus	(struct refclockstat *);
 static	void	ctl_flushpkt	(uint8_t);
 static	void	ctl_putdata	(const char *, unsigned int, bool);
 static	void	ctl_putstr	(const char *, const char *, size_t);
-static	void	ctl_putdblf	(const char *, int, int, double);
+static	void	ctl_putdblf	(const char *, bool, int, double);
 #define	ctl_putdbl(tag, d)	ctl_putdblf(tag, true, 3, d)
 #define	ctl_putdbl6(tag, d)	ctl_putdblf(tag, true, 6, d)
 #define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, false, -1, FP_UNSCALE(sfp))
