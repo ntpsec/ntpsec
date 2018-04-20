@@ -82,7 +82,7 @@ then
 elif dnf --version >/dev/null 2>&1
 then
     installer=dnf
-    install="$do $installer install"
+    install="$do $installer -y install"
 elif apt-get --version >/dev/null 2>&1
 then
     installer=apt
