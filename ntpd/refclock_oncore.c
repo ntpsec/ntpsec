@@ -1762,7 +1762,7 @@ oncore_get_timestamp(
 		Rsm = ((instance->BEHa[129]<<8) | instance->BEHa[130]);
 
 	if (instance->chan == 6 || instance->chan == 8) {
-		char	f1[5], f2[5], f3[5], f4[5];
+		char	f1[5], f2[5], f3[8], f4[5];
 		if (instance->traim) {
 			snprintf(f1, sizeof(f1), "%d",
 				 instance->BEHn[21]);
@@ -1800,7 +1800,7 @@ oncore_get_timestamp(
                     instance->BEHa[65], instance->BEHa[69]
 		    );		/* will be 0 for 6 chan */
 	} else if (instance->chan == 12) {
-		char	f1[5], f2[5], f3[5], f4[5];
+		char	f1[5], f2[5], f3[8], f4[5];
 		if (instance->traim) {
 			snprintf(f1, sizeof(f1), "%d",
 				 instance->BEHn[6]);
