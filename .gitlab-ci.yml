@@ -50,6 +50,7 @@
       - build/main/ntpclients/ntpwait
       - build/main/ntpd/ntpd
       - build/main/ntpfrob/ntpfrob
+  retry: 2
 
 gitlab-alpine-basic:
   <<: *job_definition
