@@ -4120,16 +4120,15 @@ gps16x_message(
 					char buffer[128];
 
 					get_mbg_ascii_msg(&bufp, &gps_ascii_msg);
-
+					strncpy(buffer, "gps_message=", sizeof(buffer));
 					if (gps_ascii_msg.valid)
 						{
 							char buffer1[128];
 							mkreadable(buffer1, sizeof(buffer1), gps_ascii_msg.s, strlen(gps_ascii_msg.s), (int)0);
-
-							snprintf(buffer, sizeof(buffer), "gps_message=\"%s\"", buffer1);
+							strlcat(buffer, buffer1, sizeof(buffer));
 						}
 					else
-						snprintf(buffer, sizeof(buffer), "gps_message=<NONE>");
+						strlcat(buffer, "<None>", sizeof(buffer));
 
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}

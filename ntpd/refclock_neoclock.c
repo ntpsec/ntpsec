@@ -660,8 +660,8 @@ neoclock4x_control(int unit,
 	       up->utc_year, up->utc_month, up->utc_day,
 	       up->utc_hour, up->utc_minute, up->utc_second,
 	       up->utc_msec);
-      tt = add_var(&out->kv_list, sizeof(tmpbuf)-1, RO|DEF);
-      snprintf(tt, sizeof(tmpbuf)-1, "calc_utc=\"%s\"", tmpbuf);
+      tt = add_var(&out->kv_list, sizeof(tmpbuf)+20, RO|DEF);
+      snprintf(tt, sizeof(tmpbuf)+20, "calc_utc=\"%s\"", tmpbuf);
 
 #define MAXINTSIZE	20	/* max % of decimal digits in integer */
 #define S_RADIOSIGNAL	sizeof(up->radiosignal) + 15
