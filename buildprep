@@ -98,7 +98,7 @@ then
     install="$do $installer --install"
 elif  apk --version >/dev/null 2>&1
 then
-    # Alpine Linux, musl rather than libc
+    # Alpine Linux, musl rather than glibc
     installer=apk
     install="$do $installer add"
 else
