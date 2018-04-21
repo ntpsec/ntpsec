@@ -378,3 +378,40 @@ clang-refclocks:
   tags:
     - gitlab-org
 
+openSUSE-latest-basic:
+  <<: *job_definition
+  image: opensuse:latest
+  script:
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+openSUSE-latest-refclocks:
+  <<: *job_definition
+  image: opensuse:latest
+  script:
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
+
+openSUSE-tumbleweed-basic:
+  <<: *job_definition
+  image: opensuse:tumbleweed
+  allow_failure: true
+  script:
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+openSUSE-tumbleweed-refclocks:
+  <<: *job_definition
+  image: opensuse:tumbleweed
+  allow_failure: true
+  script:
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
