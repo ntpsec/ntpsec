@@ -4120,7 +4120,7 @@ gps16x_message(
 					char buffer[128];
 
 					get_mbg_ascii_msg(&bufp, &gps_ascii_msg);
-					strncpy(buffer, "gps_message=", sizeof(buffer));
+					strlcpy(buffer, "gps_message=", sizeof(buffer));
 					if (gps_ascii_msg.valid)
 						{
 							char buffer1[128];
