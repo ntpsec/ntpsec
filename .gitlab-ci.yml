@@ -77,9 +77,9 @@ gitlab-refclocks:
   tags:
     - gitlab-org
 
-debian-wheezy-basic:
+debian-oldoldstable-basic:
   <<: *job_definition
-  image: debian:wheezy-slim
+  image: debian:oldoldstable-slim
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -87,9 +87,9 @@ debian-wheezy-basic:
   tags:
     - gitlab-org
 
-debian-wheezy-refclocks:
+debian-oldoldstable-refclocks:
   <<: *job_definition
-  image: debian:wheezy-slim
+  image: debian:oldoldstable-slim
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -97,9 +97,9 @@ debian-wheezy-refclocks:
   tags:
     - gitlab-org
 
-debian-jessie-basic:
+debian-oldstable-basic:
   <<: *job_definition
-  image: debian:jessie-slim
+  image: debian:oldstable-slim
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -107,9 +107,9 @@ debian-jessie-basic:
   tags:
     - gitlab-org
 
-debian-jessie-refclocks:
+debian-oldstable-refclocks:
   <<: *job_definition
-  image: debian:jessie-slim
+  image: debian:oldstable-slim
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -117,9 +117,9 @@ debian-jessie-refclocks:
   tags:
     - gitlab-org
 
-debian-stretch-basic:
+debian-stable-basic:
   <<: *job_definition
-  image: debian:stretch-slim
+  image: debian:stable-slim
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -127,9 +127,51 @@ debian-stretch-basic:
   tags:
     - gitlab-org
 
-debian-stretch-refclocks:
+debian-stable-refclocks:
   <<: *job_definition
-  image: debian:stretch-slim
+  image: debian:stable-slim
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
+
+debian-testing-basic:
+  <<: *job_definition
+  image: debian:testing-slim
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+debian-testing-refclocks:
+  <<: *job_definition
+  image: debian:testing-slim
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
+
+debian-unstable-basic:
+  <<: *job_definition
+  image: debian:unstable-slim
+  allow_failure: true
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+debian-unstable-refclocks:
+  <<: *job_definition
+  image: debian:unstable-slim
+  allow_failure: true
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
