@@ -43,11 +43,12 @@ struct ctl_proc {
 #define AUTH	1
 	void (*handler) (struct recvbuf *, int); /* handle request */
 };
-
+  
 
 /*
  * Request processing routines
  */
+static  void    unmarshall_ntp_control(struct ntp_control *, struct recvbuf *);
 static	void	ctl_error	(uint8_t);
 #ifdef REFCLOCK
 static	unsigned short ctlclkstatus	(struct refclockstat *);
