@@ -59,7 +59,7 @@ struct recvbuf {
 #endif /* REFCLOCK */
 };
 
-extern void unmarshall_pkt(struct pkt *rpkt, struct recvbuf *rbufp);
+extern void unmarshall_pkt(struct pkt *, struct recvbuf *);
 
 extern	void	init_recvbuff(unsigned int); /* not really pure */
 
