@@ -49,6 +49,7 @@ struct ctl_proc {
  * Request processing routines
  */
 static  void    unmarshall_ntp_control(struct ntp_control *, struct recvbuf *);
+static  uint16_t extract_16bits_from_stream(uint8_t *);
 static	void	ctl_error	(uint8_t);
 #ifdef REFCLOCK
 static	unsigned short ctlclkstatus	(struct refclockstat *);
@@ -706,22 +707,22 @@ unmarshall_ntp_control(struct ntp_control *pkt, struct recvbuf *rbufp)
 {
     pkt->li_vn_mode = (uint8_t)rbufp->recv_buffer[0];
     pkt->r_m_e_op = (uint8_t)rbufp->recv_buffer[1];
-    pkt->sequence = (uint16_t)rbufp->recv_buffer[2] << 8;
-    pkt->sequence |= (uint16_t)rbufp->recv_buffer[3];
-    pkt->sequence = ntohs(pkt->sequence);
-    pkt->status = (uint16_t)rbufp->recv_buffer[4] << 8;
-    pkt->status |= (uint16_t)rbufp->recv_buffer[5];
-    pkt->status = ntohs(pkt->status);
-    pkt->associd = (uint16_t)rbufp->recv_buffer[6] << 8;
-    pkt->associd |= (uint16_t)rbufp->recv_buffer[7];
-    pkt->associd = ntohs(pkt->associd);
-    pkt->offset = (uint16_t)rbufp->recv_buffer[8] << 8;
-    pkt->offset |= (uint16_t)rbufp->recv_buffer[9];
-    pkt->offset = ntohs(pkt->offset);
-    pkt->count = (uint16_t)rbufp->recv_buffer[10] << 8;
-    pkt->count |= (uint16_t)rbufp->recv_buffer[11];
-    pkt->count = ntohs(pkt->count);
+	pkt->sequence = extract_16bits_from_stream(&rbufp->recv_buffer[2]);
+	pkt->status = extract_16bits_from_stream(&rbufp->recv_buffer[4]);
+	pkt->associd = extract_16bits_from_stream(&rbufp->recv_buffer[6]);
+	pkt->offset = extract_16bits_from_stream(&rbufp->recv_buffer[8]);
+	pkt->count = extract_16bits_from_stream(&rbufp->recv_buffer[10]);
     memcpy(&pkt->data, rbufp->recv_buffer + 12, 480 + MAX_MAC_LEN);
+}
+
+uint16_t
+extract_16bits_from_stream(uint8_t *addr)
+{
+    uint16_t var = 0;
+    var = (uint16_t)*addr << 8;
+    var |= (uint16_t)*(addr + 1);
+    var = ntohs(var);
+	return var;
 }
 
 /*

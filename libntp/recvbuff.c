@@ -18,6 +18,10 @@ static unsigned long total_recvbufs;	/* total recvbufs currently in use */
 static unsigned long lowater_adds;	/* # of times we have added memory */
 static unsigned long buffer_shortfall;	/* # of missed free receive buffers
 					   between replenishments */
+/*
+ * Unmarshalling helper
+ */
+extern uint32_t extract_32bits_from_stream(uint8_t *);
 
 static DECL_FIFO_ANCHOR(recvbuf_t) full_recv_fifo;
 static recvbuf_t *		   free_recv_list;
@@ -265,65 +269,33 @@ unmarshall_pkt(struct pkt *rpkt, struct recvbuf *rbufp)
     rpkt->ppoll = (uint8_t)rbufp->recv_buffer[2];
     rpkt->precision = (int8_t)rbufp->recv_buffer[3];
 	// rootdelay
-    rpkt->rootdelay = (u_fp)rbufp->recv_buffer[4] << 24;
-    rpkt->rootdelay |= (u_fp)rbufp->recv_buffer[5] << 16;
-    rpkt->rootdelay |= (u_fp)rbufp->recv_buffer[6] << 8;
-    rpkt->rootdelay |= (u_fp)rbufp->recv_buffer[7];
-    rpkt->rootdelay = ntohl(rpkt->rootdelay);
+	rpkt->rootdelay = extract_32bits_from_stream(&rbufp->recv_buffer[4]);
 	// rootdisp
-    rpkt->rootdisp = (u_fp)rbufp->recv_buffer[8] << 24;
-    rpkt->rootdisp |= (u_fp)rbufp->recv_buffer[9] << 16;
-    rpkt->rootdisp |= (u_fp)rbufp->recv_buffer[10] << 8;
-    rpkt->rootdisp |= (u_fp)rbufp->recv_buffer[11];
-    rpkt->rootdisp = ntohl(rpkt->rootdisp);
+	rpkt->rootdisp = extract_32bits_from_stream(&rbufp->recv_buffer[8]);
 	// refid
-    rpkt->refid = (uint32_t)rbufp->recv_buffer[12] << 24;
-    rpkt->refid |= (uint32_t)rbufp->recv_buffer[13] << 16;
-    rpkt->refid |= (uint32_t)rbufp->recv_buffer[14] << 8;
-    rpkt->refid |= (uint32_t)rbufp->recv_buffer[15];
-    rpkt->refid = ntohl(rpkt->refid);
+	rpkt->refid = extract_32bits_from_stream(&rbufp->recv_buffer[12]);
 	// reftime
-	rpkt->reftime.l_ui = (uint32_t)rbufp->recv_buffer[16] << 24;
-	rpkt->reftime.l_ui |= (uint32_t)rbufp->recv_buffer[17] << 16;
-	rpkt->reftime.l_ui |= (uint32_t)rbufp->recv_buffer[18] << 8;
-	rpkt->reftime.l_ui |= (uint32_t)rbufp->recv_buffer[19];
-	rpkt->reftime.l_ui = ntohl(rpkt->reftime.l_ui);
-	rpkt->reftime.l_uf = (uint32_t)rbufp->recv_buffer[20] << 24;
-	rpkt->reftime.l_uf |= (uint32_t)rbufp->recv_buffer[21] << 16;
-	rpkt->reftime.l_uf |= (uint32_t)rbufp->recv_buffer[22] << 8;
-	rpkt->reftime.l_uf |= (uint32_t)rbufp->recv_buffer[23];
-	rpkt->reftime.l_uf = ntohl(rpkt->reftime.l_uf);
+	rpkt->reftime.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[16]);
+	rpkt->reftime.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[20]);
 	// org
-	rpkt->org.l_ui = (uint32_t)rbufp->recv_buffer[24] << 24;
-	rpkt->org.l_ui |= (uint32_t)rbufp->recv_buffer[25] << 16;
-	rpkt->org.l_ui |= (uint32_t)rbufp->recv_buffer[26] << 8;
-	rpkt->org.l_ui |= (uint32_t)rbufp->recv_buffer[27];
-	rpkt->org.l_ui = ntohl(rpkt->org.l_ui);
-	rpkt->org.l_uf = (uint32_t)rbufp->recv_buffer[28] << 24;
-	rpkt->org.l_uf |= (uint32_t)rbufp->recv_buffer[29] << 16;
-	rpkt->org.l_uf |= (uint32_t)rbufp->recv_buffer[30] << 8;
-	rpkt->org.l_uf |= (uint32_t)rbufp->recv_buffer[31];
-	rpkt->org.l_uf = ntohl(rpkt->org.l_uf);
+	rpkt->org.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[24]);
+	rpkt->org.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[28]);
 	// rec
-	rpkt->rec.l_ui = (uint32_t)rbufp->recv_buffer[32] << 24;
-	rpkt->rec.l_ui |= (uint32_t)rbufp->recv_buffer[33] << 16;
-	rpkt->rec.l_ui |= (uint32_t)rbufp->recv_buffer[34] << 8;
-	rpkt->rec.l_ui |= (uint32_t)rbufp->recv_buffer[35];
-	rpkt->rec.l_ui = ntohl(rpkt->rec.l_ui);
-	rpkt->rec.l_uf = (uint32_t)rbufp->recv_buffer[36] << 24;
-	rpkt->rec.l_uf |= (uint32_t)rbufp->recv_buffer[37] << 16;
-	rpkt->rec.l_uf |= (uint32_t)rbufp->recv_buffer[38] << 8;
-	rpkt->rec.l_uf |= (uint32_t)rbufp->recv_buffer[39];
-	rpkt->rec.l_uf = ntohl(rpkt->rec.l_uf);
+	rpkt->rec.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[32]);
+	rpkt->rec.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[36]);
 	// xmt
-	rpkt->xmt.l_ui = (uint32_t)rbufp->recv_buffer[40] << 24;
-	rpkt->xmt.l_ui |= (uint32_t)rbufp->recv_buffer[41] << 16;
-	rpkt->xmt.l_ui |= (uint32_t)rbufp->recv_buffer[42] << 8;
-	rpkt->xmt.l_ui |= (uint32_t)rbufp->recv_buffer[43];
-	rpkt->xmt.l_ui = ntohl(rpkt->xmt.l_ui);
-	rpkt->xmt.l_uf = (uint32_t)rbufp->recv_buffer[44] << 24;
-	rpkt->xmt.l_uf |= (uint32_t)rbufp->recv_buffer[45] << 16;
-	rpkt->xmt.l_uf |= (uint32_t)rbufp->recv_buffer[46] << 8;
-	rpkt->xmt.l_uf |= (uint32_t)rbufp->recv_buffer[47];
-	rpkt->xmt.l_uf = ntohl(rpkt->xmt.l_uf);
+	rpkt->xmt.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[40]);
+	rpkt->xmt.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[44]);
+}
+
+uint32_t
+extract_32bits_from_stream(uint8_t *addr)
+{
+    uint32_t var = 0;
+	var = (uint32_t)*addr << 24;
+	var |= (uint32_t)*(addr + 1) << 16;
+	var |= (uint32_t)*(addr + 2) << 8;
+	var |= (uint32_t)*(addr + 3);
+	var = ntohl(var);
+	return var;
 }
