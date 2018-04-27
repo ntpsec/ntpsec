@@ -728,7 +728,7 @@ receive(
 	 * intentionally use an early version.
 	 */
 	{
-	uint8_t hisversion = PKT_VERSION(rbufp->recv_pkt.li_vn_mode);
+	uint8_t hisversion = PKT_VERSION(rbufp->recv_buffer[0]);
 	if (hisversion == NTP_VERSION) {
 		sys_newversion++;		/* new version */
 	} else if (!(restrict_mask & RES_VERSION) && hisversion >=
