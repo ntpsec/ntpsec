@@ -2211,8 +2211,6 @@ fast_xmit(
 	)
 {
 	struct pkt xpkt;	/* transmit packet structure */
-	struct pkt *rpkt;	/* receive packet structure */
-	struct pkt pkt_core; /* recieve packet copy target */
 	l_fp	xmt_tx, xmt_ty;
 	size_t	sendlen;
 
@@ -2224,8 +2222,6 @@ fast_xmit(
 	 * control and not strictly specification compliant, but doesn't
 	 * break anything.
 	 */
-	unmarshall_pkt(&pkt_core, rbufp);
-	rpkt = &pkt_core;
 
 	/*
 	 * If this is a kiss-o'-death (KoD) packet, show leap
@@ -2237,17 +2233,21 @@ fast_xmit(
 	if (flags & RES_KOD) {
 		sys_kodsent++;
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
-		    PKT_VERSION(rpkt->li_vn_mode), xmode);
+		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
-		xpkt.ppoll = max(rpkt->ppoll, ntp_minpoll);
-		xpkt.precision = rpkt->precision;
+		xpkt.ppoll = max(rbufp->pkt.ppoll, ntp_minpoll);
+		xpkt.precision = rbufp->pkt.precision;
 		memcpy(&xpkt.refid, "RATE", REFIDLEN);
-		xpkt.rootdelay = rpkt->rootdelay;
-		xpkt.rootdisp = rpkt->rootdisp;
-		xpkt.reftime = rpkt->reftime;
-		xpkt.org = rpkt->xmt;
-		xpkt.rec = rpkt->xmt;
-		xpkt.xmt = rpkt->xmt;
+		xpkt.rootdelay = htonl(rbufp->pkt.rootdelay);
+		xpkt.rootdisp = htonl(rbufp->pkt.rootdisp);
+		xpkt.reftime.l_ui = htonl(rbufp->pkt.reftime >> 32);
+		xpkt.reftime.l_uf = htonl(rbufp->pkt.reftime & 0xFFFFFFFF);
+		xpkt.org.l_ui = htonl(rbufp->pkt.xmt >> 32);
+		xpkt.org.l_uf = htonl(rbufp->pkt.xmt & 0xFFFFFFFF);
+		xpkt.rec.l_ui = htonl(rbufp->pkt.xmt >> 32);
+		xpkt.rec.l_uf = htonl(rbufp->pkt.xmt & 0xFFFFFFFF);
+		xpkt.xmt.l_ui = htonl(rbufp->pkt.xmt >> 32);
+		xpkt.xmt.l_uf = htonl(rbufp->pkt.xmt & 0xFFFFFFFF);
 
 	/*
 	 * This is a normal packet. Use the system variables.
@@ -2269,9 +2269,9 @@ fast_xmit(
 		 * the transmit/receive times.
 		 */
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
-		    PKT_VERSION(rpkt->li_vn_mode), xmode);
+		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
-		xpkt.ppoll = max(rpkt->ppoll, ntp_minpoll);
+		xpkt.ppoll = max(rbufp->pkt.ppoll, ntp_minpoll);
 		xpkt.precision = sys_precision;
 		xpkt.refid = sys_refid;
 		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
@@ -2292,7 +2292,8 @@ fast_xmit(
 		xpkt.reftime = htonl_fp(sys_reftime);
 #endif
 
-		xpkt.org = rpkt->xmt;
+		xpkt.org.l_ui = htonl(rbufp->pkt.xmt >> 32);
+		xpkt.org.l_uf = htonl(rbufp->pkt.xmt & 0xFFFFFFFF);
 
 #ifdef ENABLE_LEAP_SMEAR
 		this_recv_time = rbufp->recv_time;
