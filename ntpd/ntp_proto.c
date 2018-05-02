@@ -792,13 +792,12 @@ receive(
 	}
 
 	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
-	    case MODE_CLIENT:
-		/* Request for us as a server. */
+	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
+	    case MODE_CLIENT:  /* Request for us as a server. */
 		handle_fastxmit(rbufp, restrict_mask, authenticated);
 		sys_processed++;
 		break;
-	    case MODE_SERVER:
-		/* Reply to our request. */
+	    case MODE_SERVER:  /* Reply to our request. */
 		handle_procpkt(rbufp, peer);
 		sys_processed++;
 		peer->processed++;
