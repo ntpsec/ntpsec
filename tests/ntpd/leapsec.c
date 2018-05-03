@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 #include "config.h"
 
 #include "unity.h"
@@ -424,6 +426,23 @@ TEST(leapsec, loadFileTTL) {
 	TEST_ASSERT_EQUAL(-1, rc);
 }
 
+
+// Hack to avoid compiler warnings from gcc 8.0
+// We should be able to cast fprintf, but that gets:
+// ../../tests/ntpd/leapsec.c: In function ‘TEST_leapsec_lsQueryPristineState_’:
+// ../../tests/ntpd/leapsec.c:434:19: warning: cast between incompatible function types from ‘int (*)(FILE * restrict,  const char * restrict,  ...)’ {aka ‘int (*)(struct _IO_FILE * restrict,  const char * restrict,  ...)’} to ‘void (*)(void *, const char *, ...)’ [-Wcast-function-type]
+//   leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
+static void
+my_fprintf(FILE *stream, const char *fmt, ...) {
+	va_list  ap;
+
+	va_start(ap, fmt);
+	vfprintf(stream, fmt, ap);
+	va_end(ap);
+
+};
+
+
 // ----------------------------------------------------------------------
 // test query in pristine state (bug#2745 misbehaviour)
 TEST(leapsec, lsQueryPristineState) {
@@ -431,7 +450,7 @@ TEST(leapsec, lsQueryPristineState) {
 	leap_result_t  qr;
 
 	leap_table_t * pt = leapsec_get_table(0);
-	leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
+	leapsec_dump(pt, (leapsec_dumper)my_fprintf, stdout);
 
 	rc = leapsec_query(&qr, lsec2012);
 	TEST_ASSERT_FALSE(rc);
@@ -551,7 +570,7 @@ TEST(leapsec, ls2009limdata) {
 
 	rc = setup_load_table(leap1);
 	pt = leapsec_get_table(0);
-	leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
+	leapsec_dump(pt, (leapsec_dumper)my_fprintf, stdout);
 
 	// FIXME
 	// This used to check against build date
@@ -607,9 +626,9 @@ TEST(leapsec, addDynamic) {
 	rc = leapsec_add_dyn(true, insns[0] - (time_t)JAN_1970 -
                              20*SECSPERDAY - 100);
 	TEST_ASSERT_FALSE(rc);
-	//leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
+	//leapsec_dump(pt, (leapsec_dumper)my_fprintf, stdout);
 	pt = leapsec_get_table(0);
-	leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
+	leapsec_dump(pt, (leapsec_dumper)my_fprintf, stdout);
 }
 
 // ----------------------------------------------------------------------
@@ -662,7 +681,7 @@ TEST(leapsec, addFixed) {
 	    insns[0].tt,
 	    insns[0].tt + SECSPERDAY);
 	TEST_ASSERT_FALSE(rc);
-	//leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
+	//leapsec_dump(pt, (leapsec_dumper)my_fprintf, stdout);
 }
 
 // =====================================================================
