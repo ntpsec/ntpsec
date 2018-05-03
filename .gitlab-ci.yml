@@ -64,7 +64,7 @@ gitlab-alpine-basic:
 gitlab-basic:
   <<: *job_definition
   script:
-    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev
     - python ./waf configure build check
   tags:
     - gitlab-org
@@ -72,7 +72,7 @@ gitlab-basic:
 gitlab-refclocks:
   <<: *job_definition
   script:
-    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
+    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev
     - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
@@ -397,7 +397,7 @@ python3:
 python-coverage:
   <<: *job_definition
   script:
-    - apt-get update -qq && apt-get install -y -qq bison python-dev python-coverage
+    - apt-get update -qq && apt-get install -y -qq netbase bison python-dev python-coverage
     - python ./waf configure build check
     - for i in build/main/tests/pylib/test_*; do python-coverage run -a --source build/main/pylib $i; done
     - python-coverage report
@@ -407,7 +407,7 @@ python-coverage:
 clang-basic:
   <<: *job_definition
   script:
-    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev clang
+    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev clang
     - python ./waf configure --check-c-compiler=clang build check
   tags:
     - gitlab-org
@@ -415,7 +415,7 @@ clang-basic:
 clang-refclocks:
   <<: *job_definition
   script:
-    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev clang
+    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev clang
     - python ./waf configure --check-c-compiler=clang --refclock=all build check
   tags:
     - gitlab-org
