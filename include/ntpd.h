@@ -349,10 +349,14 @@ extern uint64_t	sys_kodsent;		/* KoD sent */
 extern uptime_t	use_stattime;		/* time since usestats reset */
 
 /* Signalling: Set by signal handlers */
-extern volatile bool sawALRM;
-extern volatile bool sawHUP;
-extern volatile bool sawDNS;
-extern volatile bool sawQuit;		/* SIGQUIT, SIGINT, SIGTERM */
+struct signals_detected {
+    bool sawALRM;
+    bool sawHUP;
+    bool sawDNS;
+    bool sawQuit;                   /* SIGQUIT, SIGINT, SIGTERM */
+};
+extern volatile struct signals_detected sig_flags;
+
 
 /* ntp_restrict.c */
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */

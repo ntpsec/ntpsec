@@ -278,14 +278,12 @@ static int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 /*
  * Flags from signal handlers
  */
-volatile bool sawALRM = false;
-volatile bool sawHUP = false;
-#ifdef ENABLE_DNS_LOOKUP
-volatile bool sawDNS = false;
-#else
-# define sawDNS false
-#endif
-volatile bool sawQuit = false;  /* SIGQUIT, SIGINT, SIGTERM */
+volatile struct signals_detected sig_flags = {
+    .sawALRM = false,
+    .sawHUP = false,
+    .sawDNS = false,
+    .sawQuit = false  /* SIGQUIT, SIGINT, SIGTERM */
+};
 static sigset_t blockMask;
 
 void
@@ -2412,7 +2410,8 @@ io_handler(void)
 	 * reception of input.
 	 */
 	pthread_sigmask(SIG_BLOCK, &blockMask, &runMask);
-	flag = sawALRM || sawQuit || sawHUP || sawDNS;
+	flag = sig_flags.sawALRM || sig_flags.sawQuit || sig_flags.sawHUP || \
+	  sig_flags.sawDNS;
 	if (!flag) {
 	  rdfdes = activefds;
 	  nfound = pselect(maxactivefd+1, &rdfdes, NULL, NULL, NULL, &runMask);

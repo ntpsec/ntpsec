@@ -918,28 +918,28 @@ static void mainloop(void)
 	init_timer();
 
 	for (;;) {
-		if (sawQuit)
+		if (sig_flags.sawQuit)
 			finish_safe(signo);
 
-		if (!sawALRM && !has_full_recv_buffer()) {
+		if (!sig_flags.sawALRM && !has_full_recv_buffer()) {
 			/*
 			 * Nothing to do.  Wait for something.
 			 */
 			io_handler();
 		}
 
-		if (sawALRM) {
+		if (sig_flags.sawALRM) {
 			/*
 			 * Out here, signals are unblocked.  Call timer routine
 			 * to process expiry.
 			 */
-			sawALRM = false;
+		    sig_flags.sawALRM = false;
 			timer();
 		}
 
 #ifdef ENABLE_DNS_LOOKUP
-		if (sawDNS) {
-			sawDNS = false;
+		if (sig_flags.sawDNS) {
+			sig_flags.sawDNS = false;
 			dns_check();
 		}
 #endif
@@ -956,10 +956,10 @@ static void mainloop(void)
 			rbuf = get_full_recv_buffer();
 			while (rbuf != NULL) {
 
-				if (sawALRM) {
+				if (sig_flags.sawALRM) {
 					/* avoid timer starvation during lengthy I/O handling */
 					timer();
-					sawALRM = false;
+					sig_flags.sawALRM = false;
 				}
 
 				/*
@@ -997,8 +997,8 @@ static void mainloop(void)
 		/*
 		 * Check files
 		 */
-		if (sawHUP) {
-			sawHUP = false;
+		if (sig_flags.sawHUP) {
+			sig_flags.sawHUP = false;
 			msyslog(LOG_INFO, "LOG: Saw SIGHUP");
 
 			reopen_logfile();
@@ -1065,7 +1065,7 @@ catchQuit(
 	int	sig
 	)
 {
-	sawQuit = true;
+	sig_flags.sawQuit = true;
 	signo = sig;
 }
 
@@ -1075,7 +1075,7 @@ catchQuit(
 static void catchHUP(int sig)
 {
 	UNUSED_ARG(sig);
-	sawHUP = true;
+	sig_flags.sawHUP = true;
 }
 
 #ifdef ENABLE_DNS_LOOKUP
@@ -1085,7 +1085,7 @@ static void catchHUP(int sig)
 static void catchDNS(int sig)
 {
 	UNUSED_ARG(sig);
-	sawDNS = true;
+	sig_flags.sawDNS = true;
 }
 #endif
 

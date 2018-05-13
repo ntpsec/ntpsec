@@ -137,7 +137,7 @@ init_timer(void)
 	/*
 	 * Initialize...
 	 */
-	sawALRM = false;
+	sig_flags.sawALRM = false;
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	stats_timer = SECSPERHR;
@@ -309,13 +309,13 @@ catchALRM(
 # ifdef DEBUG
 	const char *msg = NULL;
 # endif
-	if (sawALRM) {
+	if (sig_flags.sawALRM) {
 		alarm_overflow++;
 # ifdef DEBUG
 		msg = "catchALRM: overflow\n";
 # endif
 	} else {
-		sawALRM = true;
+		sig_flags.sawALRM = true;
 # ifdef DEBUG
 		msg = "catchALRM: normal\n";
 # endif
