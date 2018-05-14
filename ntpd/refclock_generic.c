@@ -1902,7 +1902,7 @@ local_input(
 					buf->fd           = rbufp->fd;
 					buf->recv_peer    = rbufp->recv_peer;
 					parse->generic->io.recvcount++;
-					packets_received++;
+					pkt_count.packets_received++;
 					add_full_recv_buffer(buf);
 				}
 				parse_iodone(&parse->parseio);

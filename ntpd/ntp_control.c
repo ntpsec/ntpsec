@@ -1956,7 +1956,7 @@ ctl_putsys(
 
 	case CS_IOSTATS_RESET:
 		ctl_putuint(sys_var[varid].text,
-			    current_time - io_timereset);
+			    current_time - pkt_count.io_timereset);
 		break;
 
 	case CS_TOTAL_RBUF:
@@ -1976,31 +1976,31 @@ ctl_putsys(
 		break;
 
 	case CS_IO_DROPPED:
-		ctl_putuint(sys_var[varid].text, packets_dropped);
+		ctl_putuint(sys_var[varid].text, pkt_count.packets_dropped);
 		break;
 
 	case CS_IO_IGNORED:
-		ctl_putuint(sys_var[varid].text, packets_ignored);
+		ctl_putuint(sys_var[varid].text, pkt_count.packets_ignored);
 		break;
 
 	case CS_IO_RECEIVED:
-		ctl_putuint(sys_var[varid].text, packets_received);
+		ctl_putuint(sys_var[varid].text, pkt_count.packets_received);
 		break;
 
 	case CS_IO_SENT:
-		ctl_putuint(sys_var[varid].text, packets_sent);
+		ctl_putuint(sys_var[varid].text, pkt_count.packets_sent);
 		break;
 
 	case CS_IO_SENDFAILED:
-		ctl_putuint(sys_var[varid].text, packets_notsent);
+		ctl_putuint(sys_var[varid].text, pkt_count.packets_notsent);
 		break;
 
 	case CS_IO_WAKEUPS:
-		ctl_putuint(sys_var[varid].text, handler_calls);
+		ctl_putuint(sys_var[varid].text, pkt_count.handler_calls);
 		break;
 
 	case CS_IO_GOODWAKEUPS:
-		ctl_putuint(sys_var[varid].text, handler_pkts);
+		ctl_putuint(sys_var[varid].text, pkt_count.handler_pkts);
 		break;
 
 	case CS_TIMERSTATS_RESET:

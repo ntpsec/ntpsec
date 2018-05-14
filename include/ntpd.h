@@ -231,17 +231,19 @@ extern	void	reset_auth_stats(void);
 /*
  * Other statistics of possible interest
  */
-extern uint64_t packets_dropped;	/* # packets dropped on reception */
-extern uint64_t packets_ignored;	/* received on wild card interface */
-extern uint64_t packets_received;	/* total number of packets received */
-extern uint64_t packets_sent;		/* total number of packets sent */
-extern uint64_t packets_notsent; 	/* total number of packets which couldn't be sent */
-
-/* There used to be a signal handler for received packets. */
-/* It's not needed now that the kernel time stamps packets. */
-extern uint64_t handler_calls;	/* number of calls to interrupt handler */
-extern uint64_t handler_pkts;	/* number of pkts received by handler */
-extern uptime_t io_timereset;	/* time counters were reset */
+struct packet_counters {
+   uint64_t packets_dropped;	/* # packets dropped on reception */
+   uint64_t packets_ignored;	/* received on wild card interface */
+   uint64_t packets_received;	/* total number of packets received */
+   uint64_t packets_sent;		/* total number of packets sent */
+   uint64_t packets_notsent; 	/* total number of packets which couldn't be sent */
+  /* There used to be a signal handler for received packets. */
+  /* It's not needed now that the kernel time stamps packets. */
+  uint64_t handler_calls;	/* number of calls to interrupt handler */
+  uint64_t handler_pkts;	/* number of pkts received by handler */
+  uptime_t io_timereset;	/* time counters were reset */
+};
+extern volatile struct packet_counters pkt_count;
 
 /* ntp_io.c */
 extern bool	disable_dynamic_updates;

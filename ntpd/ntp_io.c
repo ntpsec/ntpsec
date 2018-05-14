@@ -97,15 +97,7 @@ static nic_rule *nic_rule_list;
 /*
  * Other statistics of possible interest
  */
-uint64_t packets_dropped;	/* total # of packets dropped on reception */
-uint64_t packets_ignored;	/* packets received on wild card interface */
-uint64_t packets_received;	/* total # of packets received */
-uint64_t packets_sent;		/* total # of packets sent */
-uint64_t packets_notsent;	/* total # of packets which couldn't be sent */
-
-uint64_t handler_calls;		/* # of calls to interrupt handler */
-uint64_t handler_pkts;		/* number of pkts received by handler */
-uptime_t io_timereset;		/* time counters were reset */
+volatile struct packet_counters pkt_count;
 
 /*
  * Interface stuff
@@ -2177,10 +2169,10 @@ sendpkt(
 		    &dest->sa, SOCKLEN(dest));
 	if (cc == -1) {
 		src->notsent++;
-		packets_notsent++;
+		pkt_count.packets_notsent++;
 	} else	{
 		src->sent++;
-		packets_sent++;
+		pkt_count.packets_sent++;
 	}
 }
 
@@ -2216,7 +2208,7 @@ read_refclock_packet(
 		char buf[RX_BUFF_SIZE];
 
 		buflen = read(fd, buf, sizeof buf);
-		packets_dropped++;
+		pkt_count.packets_dropped++;
 		return (buflen);
 	}
 
@@ -2251,7 +2243,7 @@ read_refclock_packet(
 	consumed = indicate_refclock_packet(rp, rb);
 	if (!consumed) {
 		rp->recvcount++;
-		packets_received++;
+		pkt_count.packets_received++;
 	}
 
 	return (int)buflen;
@@ -2301,9 +2293,9 @@ read_network_packet(
 			    : "drop",
 			free_recvbuffs(), fd, socktoa(&from)));
 		if (itf->ignore_packets)
-			packets_ignored++;
+			pkt_count.packets_ignored++;
 		else
-			packets_dropped++;
+			pkt_count.packets_dropped++;
 		return (buflen);
 	}
 
@@ -2364,7 +2356,7 @@ read_network_packet(
 		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr))
 		    && !IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 		   ) {
-			packets_dropped++;
+			pkt_count.packets_dropped++;
 			DPRINT(2, ("DROPPING that packet\n"));
 			freerecvbuf(rb);
 			return buflen;
@@ -2389,7 +2381,7 @@ read_network_packet(
 	add_full_recv_buffer(rb);
 
 	itf->received++;
-	packets_received++;
+	pkt_count.packets_received++;
 	return (buflen);
 }
 
@@ -2467,7 +2459,7 @@ input_handler(
 	struct asyncio_reader *	next_asyncio_reader;
 #endif
 
-	handler_calls++;
+	pkt_count.handler_calls++;
 	select_count = 0;
 
 	/*
@@ -2476,7 +2468,7 @@ input_handler(
 	 */
 	ts = *cts;
 
-	++handler_pkts;
+	++pkt_count.handler_pkts;
 
 #ifdef REFCLOCK
 	/*
@@ -3016,15 +3008,15 @@ findbcastinter(
 void
 io_clr_stats(void)
 {
-	packets_dropped = 0;
-	packets_ignored = 0;
-	packets_received = 0;
-	packets_sent = 0;
-	packets_notsent = 0;
+	pkt_count.packets_dropped = 0;
+	pkt_count.packets_ignored = 0;
+	pkt_count.packets_received = 0;
+	pkt_count.packets_sent = 0;
+	pkt_count.packets_notsent = 0;
 
-	handler_calls = 0;
-	handler_pkts = 0;
-	io_timereset = current_time;
+	pkt_count.handler_calls = 0;
+	pkt_count.handler_pkts = 0;
+	pkt_count.io_timereset = current_time;
 }
 
 
