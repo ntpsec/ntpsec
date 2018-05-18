@@ -337,18 +337,21 @@ extern int	sys_minsane;		/* minimum candidates */
 /*
  * Statistics counters
  */
-extern uptime_t	sys_stattime;		/* time since sysstats reset */
-extern uint64_t	sys_received;		/* packets received */
-extern uint64_t	sys_processed;		/* packets for this host */
-extern uint64_t	sys_restricted;	 	/* restricted packets */
-extern uint64_t	sys_newversion;		/* current version  */
-extern uint64_t	sys_oldversion;		/* old version */
-extern uint64_t	sys_badlength;		/* bad length or format */
-extern uint64_t	sys_badauth;		/* bad authentication */
-extern uint64_t	sys_declined;		/* declined */
-extern uint64_t	sys_limitrejected;	/* rate exceeded */
-extern uint64_t	sys_kodsent;		/* KoD sent */
-extern uptime_t	use_stattime;		/* time since usestats reset */
+struct statistics_counters {
+    uptime_t	sys_stattime;		/* time since sysstats reset */
+    uint64_t	sys_received;		/* packets received */
+    uint64_t	sys_processed;		/* packets for this host */
+    uint64_t	sys_restricted;	 	/* restricted packets */
+    uint64_t	sys_newversion;		/* current version  */
+    uint64_t	sys_oldversion;		/* old version */
+    uint64_t	sys_badlength;		/* bad length or format */
+    uint64_t	sys_badauth;		/* bad authentication */
+    uint64_t	sys_declined;		/* declined */
+    uint64_t	sys_limitrejected;	/* rate exceeded */
+    uint64_t	sys_kodsent;		/* KoD sent */
+    uptime_t	use_stattime;		/* time since usestats reset */
+};
+extern volatile struct statistics_counters stat_count;
 
 /* Signalling: Set by signal handlers */
 struct signals_detected {

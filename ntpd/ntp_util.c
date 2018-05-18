@@ -595,11 +595,12 @@ record_sys_stats(void)
 		fprintf(sysstats.fp,
 		    "%s %u %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64
 		    " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 "\n",
-		    timespec_to_MJDtime(&now), current_time - sys_stattime,
-		    sys_received, sys_processed, sys_newversion,
-		    sys_oldversion, sys_restricted, sys_badlength,
-		    sys_badauth, sys_declined, sys_limitrejected,
-		    sys_kodsent);
+		    timespec_to_MJDtime(&now), current_time - stat_count.sys_stattime,
+			stat_count.sys_received, stat_count.sys_processed,
+			stat_count.sys_newversion, stat_count.sys_oldversion,
+			stat_count.sys_restricted, stat_count.sys_badlength,
+		    stat_count.sys_badauth, stat_count.sys_declined,
+			stat_count.sys_limitrejected, stat_count.sys_kodsent);
 		fflush(sysstats.fp);
 		proto_clr_stats();
 	}
@@ -638,7 +639,7 @@ void record_use_stats(void)
 		stimex += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
 		    "%s %u %.3f %.3f %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
-		    timespec_to_MJDtime(&now), current_time - use_stattime,
+		    timespec_to_MJDtime(&now), current_time - stat_count.use_stattime,
 		    utime, stimex,
 		    usage.ru_minflt -   oldusage.ru_minflt,
 		    usage.ru_majflt -   oldusage.ru_majflt,
@@ -651,7 +652,7 @@ void record_use_stats(void)
 		    usage.ru_maxrss );
 		fflush(usestats.fp);
 		oldusage = usage;
-		use_stattime = current_time;
+		stat_count.use_stattime = current_time;
 	}
 }
 

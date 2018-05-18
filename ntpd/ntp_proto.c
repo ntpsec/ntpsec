@@ -155,18 +155,7 @@ static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
  * Statistics counters - first the good, then the bad
  * These get reset every hour if sysstats is enabled.
  */
-uptime_t	sys_stattime;		/* elapsed time since sysstats reset */
-uint64_t	sys_received;		/* packets received */
-uint64_t	sys_processed;		/* packets for this host */
-uint64_t	sys_newversion;		/* current version */
-uint64_t	sys_oldversion;		/* old version */
-uint64_t	sys_restricted;		/* access denied */
-uint64_t	sys_badlength;		/* bad length or format */
-uint64_t	sys_badauth;		/* bad authentication */
-uint64_t	sys_declined;		/* declined */
-uint64_t	sys_limitrejected;	/* rate exceeded */
-uint64_t	sys_kodsent;		/* KoD sent */
-uptime_t	use_stattime;		/* elapsed time since usestats reset */
+volatile struct statistics_counters stat_count;
 
 double	measured_tick;		/* non-overridable sys_tick (s) */
 
@@ -487,7 +476,7 @@ handle_fastxmit(
 	uint32_t xkeyid;
 
 	if (rbufp->dstadr->flags & INT_MCASTOPEN) {
-			sys_restricted++;
+			stat_count.sys_restricted++;
 	}
 
 	/* To prevent exposing an authentication oracle, only MAC
@@ -546,7 +535,7 @@ handle_procpkt(
 		}
 	} else {
 		/* This case should be unreachable. */
-		sys_declined++;
+		stat_count.sys_declined++;
 		return;
 	}
 
@@ -689,10 +678,10 @@ receive(
 	unsigned short restrict_mask;
 	bool authenticated = false;
 
-	sys_received++;
+	stat_count.sys_received++;
 
 	if(!is_vn_mode_acceptable(rbufp)) {
-		sys_badlength++;
+		stat_count.sys_badlength++;
 		goto done;
 	}
 
@@ -707,19 +696,19 @@ receive(
 #endif
 
 	if(check_early_restrictions(rbufp, restrict_mask)) {
-		sys_restricted++;
+		stat_count.sys_restricted++;
 		goto done;
 	}
 
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
-		sys_limitrejected++;
+		stat_count.sys_limitrejected++;
 		if(!(restrict_mask & RES_KOD)) { goto done; }
 	}
 
 	if(is_control_packet(rbufp)) {
 		process_control(rbufp, restrict_mask);
-		sys_processed++;
+		stat_count.sys_processed++;
 		goto done;
 	}
 
@@ -730,18 +719,18 @@ receive(
 	{
 	uint8_t hisversion = PKT_VERSION(rbufp->recv_buffer[0]);
 	if (hisversion == NTP_VERSION) {
-		sys_newversion++;		/* new version */
+		stat_count.sys_newversion++;		/* new version */
 	} else if (!(restrict_mask & RES_VERSION) && hisversion >=
 	    NTP_OLDVERSION) {
-		sys_oldversion++;		/* previous version */
+		stat_count.sys_oldversion++;		/* previous version */
 	} else {
-		sys_badlength++;
+		stat_count.sys_badlength++;
 		goto done;			/* old version */
 	}
 	}
 
 	if (!parse_packet(rbufp)) {
-		sys_badlength++;
+		stat_count.sys_badlength++;
 		goto done;
 	}
 
@@ -752,7 +741,7 @@ receive(
 	     * with a different key. */
 	    peer = findpeer(rbufp);
 	    if (NULL == peer) {
-		sys_declined++;
+		stat_count.sys_declined++;
 		goto done;
 	    }
 	}
@@ -775,7 +764,7 @@ receive(
 				 (int)(rbufp->recv_length - (rbufp->mac_len + 4)),
 				 (int)(rbufp->mac_len + 4))) {
 
-			sys_badauth++;
+			stat_count.sys_badauth++;
 			if(peer != NULL) {
 				peer->badauth++;
 				peer->flash |= BOGON5;
@@ -795,11 +784,11 @@ receive(
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
 		handle_fastxmit(rbufp, restrict_mask, authenticated);
-		sys_processed++;
+		stat_count.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request. */
 		handle_procpkt(rbufp, peer);
-		sys_processed++;
+		stat_count.sys_processed++;
 		peer->processed++;
 		break;
 	    default:
@@ -807,7 +796,7 @@ receive(
 		   which are a security nightmare.  So they go to the
 		   bit bucket until this improves.
 		*/
-		sys_declined++;
+		stat_count.sys_declined++;
 		break;
 	}
 
@@ -2231,7 +2220,7 @@ fast_xmit(
 	 * synchronization.
 	 */
 	if (flags & RES_KOD) {
-		sys_kodsent++;
+		stat_count.sys_kodsent++;
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
@@ -2770,10 +2759,10 @@ init_proto(const bool verbose)
 	measure_precision(verbose);
 	get_systime(&dummy);
 	sys_survivors = 0;
-	sys_stattime = current_time;
+	stat_count.sys_stattime = current_time;
 	orphwait = current_time + (unsigned long)sys_orphwait;
 	proto_clr_stats();
-	use_stattime = current_time;
+	stat_count.use_stattime = current_time;
 	hardpps_enable = false;
 	stats_control = true;
 }
@@ -2895,16 +2884,16 @@ proto_config(
 void
 proto_clr_stats(void)
 {
-	sys_stattime = current_time;
-	sys_received = 0;
-	sys_processed = 0;
-	sys_newversion = 0;
-	sys_oldversion = 0;
-	sys_declined = 0;
-	sys_restricted = 0;
-	sys_badlength = 0;
-	sys_badauth = 0;
-	sys_limitrejected = 0;
-	sys_kodsent = 0;
+	stat_count.sys_stattime = current_time;
+	stat_count.sys_received = 0;
+	stat_count.sys_processed = 0;
+	stat_count.sys_newversion = 0;
+	stat_count.sys_oldversion = 0;
+	stat_count.sys_declined = 0;
+	stat_count.sys_restricted = 0;
+	stat_count.sys_badlength = 0;
+	stat_count.sys_badauth = 0;
+	stat_count.sys_limitrejected = 0;
+	stat_count.sys_kodsent = 0;
 }
 
