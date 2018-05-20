@@ -97,16 +97,8 @@ typedef struct peer_select_tag {
  * System variables are declared here. Unless specified otherwise, all
  * times are in seconds.
  */
-uint8_t	sys_leap;		/* system leap indicator */
+struct system_variables sys_vars;
 static uint8_t	xmt_leap;		/* leap indicator sent in client requests */
-uint8_t	sys_stratum;		/* system stratum */
-int8_t	sys_precision;		/* local clock precision (log2 s) */
-double	sys_rootdelay;		/* roundtrip delay to primary source */
-double	sys_rootdisp;		/* dispersion to primary source */
-double	sys_rootdist;		/* only used fror Mode 6 export */
-uint32_t sys_refid;		/* reference id (network byte order) */
-l_fp	sys_reftime;		/* last update time */
-struct	peer *sys_peer;		/* current peer */
 
 #ifdef ENABLE_LEAP_SMEAR
 struct leap_smear_info leap_smear;
@@ -173,8 +165,8 @@ static	double	root_distance	(struct peer *);
 
 void
 set_sys_leap(unsigned char new_sys_leap) {
-	sys_leap = new_sys_leap;
-	xmt_leap = sys_leap;
+	sys_vars.sys_leap = new_sys_leap;
+	xmt_leap = sys_vars.sys_leap;
 
 	/*
 	 * Under certain conditions we send faked leap bits to clients, so
@@ -589,7 +581,7 @@ handle_procpkt(
 	    -scalbn((double)(peer->org - rbufp->pkt.rec), -32);
 	const double theta = (t21 + t34) / 2.;
 	const double delta = fabs(t21 - t34);
-	const double epsilon = LOGTOD(sys_precision) +
+	const double epsilon = LOGTOD(sys_vars.sys_precision) +
 	    LOGTOD(peer->precision) +
 	    clock_phi * delta;
 
@@ -828,7 +820,7 @@ transmit(
 	 */
 	if (peer->cast_flags & MDF_BCAST) {
 		peer->outdate = current_time;
-		if (sys_leap != LEAP_NOTINSYNC)
+		if (sys_vars.sys_leap != LEAP_NOTINSYNC)
 			peer_xmit(peer);
 		poll_update(peer, hpoll);
 		return;
@@ -986,19 +978,19 @@ clock_update(
 	 * Update the system state variables. We do this very carefully,
 	 * as the poll interval might need to be clamped differently.
 	 */
-	sys_peer = peer;
+	sys_vars.sys_peer = peer;
 	sys_epoch = peer->epoch;
 	if (sys_poll < peer->cfg.minpoll)
 		sys_poll = peer->cfg.minpoll;
 	if (sys_poll > peer->cfg.maxpoll)
 		sys_poll = peer->cfg.maxpoll;
 	poll_update(peer, sys_poll);
-	sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
+	sys_vars.sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 	if (peer->stratum == STRATUM_REFCLOCK ||
 	    peer->stratum == STRATUM_UNSPEC)
-		sys_refid = peer->refid;
+		sys_vars.sys_refid = peer->refid;
 	else
-		sys_refid = addr2refid(&peer->srcadr);
+		sys_vars.sys_refid = addr2refid(&peer->srcadr);
 	/*
 	 * Root Dispersion (E) is defined (in RFC 5905) as:
 	 *
@@ -1024,11 +1016,11 @@ clock_update(
 		+ fabs(sys_offset);
 
 	if (dtemp > sys_mindisp)
-		sys_rootdisp = dtemp;
+		sys_vars.sys_rootdisp = dtemp;
 	else
-		sys_rootdisp = sys_mindisp;
-	sys_rootdelay = peer->delay + peer->rootdelay;
-	sys_reftime = peer->dst;
+		sys_vars.sys_rootdisp = sys_mindisp;
+	sys_vars.sys_rootdelay = peer->delay + peer->rootdelay;
+	sys_vars.sys_reftime = peer->dst;
 
 	DPRINT(1, ("clock_update: at %u sample %u associd %d\n",
 		   current_time, peer->epoch, peer->associd));
@@ -1070,12 +1062,12 @@ clock_update(
 	case 2:
 		clear_all();
 		set_sys_leap(LEAP_NOTINSYNC);
-		sys_stratum = STRATUM_UNSPEC;
-		memcpy(&sys_refid, "STEP", REFIDLEN);
-		sys_rootdelay = 0;
-		sys_rootdisp = 0;
-		sys_reftime = 0;
-		sys_jitter = LOGTOD(sys_precision);
+		sys_vars.sys_stratum = STRATUM_UNSPEC;
+		memcpy(&sys_vars.sys_refid, "STEP", REFIDLEN);
+		sys_vars.sys_rootdelay = 0;
+		sys_vars.sys_rootdisp = 0;
+		sys_vars.sys_reftime = 0;
+		sys_jitter = LOGTOD(sys_vars.sys_precision);
 		leapsec_reset_frame();
 		break;
 
@@ -1089,7 +1081,7 @@ clock_update(
 		 * leap bits. If crypto, the timer will goose the setup
 		 * process.
 		 */
-		if (sys_leap == LEAP_NOTINSYNC) {
+		if (sys_vars.sys_leap == LEAP_NOTINSYNC) {
 			set_sys_leap(LEAP_NOWARNING);
 			/*
 			 * If our parent process is waiting for the
@@ -1250,7 +1242,7 @@ peer_clear(
 	peer->hpoll = peer->cfg.minpoll;
 	peer->disp = sys_maxdisp;
 	peer->flash = peer_unfit(peer);
-	peer->jitter = LOGTOD(sys_precision);
+	peer->jitter = LOGTOD(sys_vars.sys_precision);
 
 	for (u = 0; u < NTP_SHIFT; u++) {
 		peer->filter_order[u] = u;
@@ -1474,7 +1466,7 @@ clock_filter(
 	DPRINT(1, ("clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f\n",
 		   m, peer->offset, peer->delay, peer->disp,
 		   peer->jitter));
-	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
+	if (peer->burst == 0 || sys_vars.sys_leap == LEAP_NOTINSYNC)
 		clock_select();
 }
 
@@ -1522,12 +1514,12 @@ clock_select(void)
 	 * Initialize and create endpoint, index and peer lists big
 	 * enough to handle all associations.
 	 */
-	osys_peer = sys_peer;
+	osys_peer = sys_vars.sys_peer;
 	sys_survivors = 0;
 #ifdef ENABLE_LOCKCLOCK
 	set_sys_leap(LEAP_NOTINSYNC);
-	sys_stratum = STRATUM_UNSPEC;
-	memcpy(&sys_refid, "DOWN", REFIDLEN);
+	sys_vars.sys_stratum = STRATUM_UNSPEC;
+	memcpy(&sys_vars.sys_refid, "DOWN", REFIDLEN);
 #endif /* ENABLE_LOCKCLOCK */
 
 	/*
@@ -1948,7 +1940,7 @@ clock_select(void)
 			typesystem->new_status = CTL_PST_SEL_SYSPEER;
 			sys_offset = typesystem->offset;
 			sys_jitter = typesystem->jitter;
-			sys_rootdist = root_distance(typesystem);
+			sys_vars.sys_rootdist = root_distance(typesystem);
 		}
 		DPRINT(1, ("select: combine offset %.9f jitter %.9f\n",
 			   sys_offset, sys_jitter));
@@ -1970,7 +1962,7 @@ clock_select(void)
 		typesystem->new_status = CTL_PST_SEL_PPS;
 		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
-		sys_rootdist = root_distance(typesystem);
+		sys_vars.sys_rootdist = root_distance(typesystem);
 		DPRINT(1, ("select: pps offset %.9f jitter %.9f\n",
 			   sys_offset, sys_jitter));
 	} else if ( typepps &&
@@ -1991,7 +1983,7 @@ clock_select(void)
 			    orphwait = current_time + (unsigned long)sys_orphwait;
 			report_event(EVNT_NOPEER, NULL, NULL);
 		}
-		sys_peer = NULL;
+		sys_vars.sys_peer = NULL;
 		for (peer = peer_list; peer != NULL; peer = peer->p_link)
 			peer->status = peer->new_status;
 		return;
@@ -2035,7 +2027,7 @@ clock_combine(
 	}
 	sys_offset = z / y;
 	sys_jitter = SQRT(w / y + SQUARE(peers[syspeer].seljit));
-	sys_rootdist = peers[syspeer].synch;
+	sys_vars.sys_rootdist = peers[syspeer].synch;
 }
 
 
@@ -2069,7 +2061,7 @@ root_distance(
 	 */
 	dtemp = (peer->delay + peer->rootdelay) / 2
 		+ LOGTOD(peer->precision)
-		  + LOGTOD(sys_precision)
+		  + LOGTOD(sys_vars.sys_precision)
 		  + clock_phi * (current_time - peer->update)
 		+ peer->rootdisp
 		+ peer->jitter;
@@ -2102,15 +2094,15 @@ peer_xmit(
 	if (!peer->dstadr)	/* drop peers without interface */
 		return;
 
-	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->cfg.version,
+	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap, peer->cfg.version,
 	    peer->hmode);
-	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+	xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 	xpkt.ppoll = peer->hpoll;
-	xpkt.precision = sys_precision;
-	xpkt.refid = sys_refid;
-	xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
-	xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_rootdisp));
-	xpkt.reftime = htonl_fp(sys_reftime);
+	xpkt.precision = sys_vars.sys_precision;
+	xpkt.refid = sys_vars.sys_refid;
+	xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
+	xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
+	xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
 	xpkt.org = htonl_fp(peer->xmt);
 	xpkt.rec = htonl_fp(peer->dst);
 
@@ -2257,17 +2249,17 @@ fast_xmit(
 		 * reftime to make sure the reftime isn't later than
 		 * the transmit/receive times.
 		 */
-		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
-		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = max(rbufp->pkt.ppoll, ntp_minpoll);
-		xpkt.precision = sys_precision;
-		xpkt.refid = sys_refid;
-		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_rootdelay));
-		xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
+		xpkt.precision = sys_vars.sys_precision;
+		xpkt.refid = sys_vars.sys_refid;
+		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
+		xpkt.rootdisp = HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
 
 #ifdef ENABLE_LEAP_SMEAR
-		this_ref_time = sys_reftime;
+		this_ref_time = sys_vars.sys_reftime;
 		if (leap_smear.in_progress) {
 			leap_smear_add_offs(&this_ref_time, NULL);
 			xpkt.refid = convertLFPToRefID(leap_smear.offset);
@@ -2278,7 +2270,7 @@ fast_xmit(
 		}
 		xpkt.reftime = htonl_fp(this_ref_time);
 #else
-		xpkt.reftime = htonl_fp(sys_reftime);
+		xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
 #endif
 
 		xpkt.org.l_ui = htonl(rbufp->pkt.xmt >> 32);
@@ -2633,7 +2625,7 @@ measure_precision(const bool verbose)
 	set_sys_tick_precision(measured_tick);
 	if (verbose) {
 		msyslog(LOG_INFO, "INIT: precision = %.3f usec (%d)",
-			sys_tick * US_PER_S, sys_precision);
+			sys_tick * US_PER_S, sys_vars.sys_precision);
 		if (sys_fuzz < sys_tick) {
 			msyslog(LOG_NOTICE, "INIT: fuzz beneath %.3f usec",
 				sys_fuzz * US_PER_S);
@@ -2732,7 +2724,7 @@ set_sys_tick_precision(
 	if (tick - 1 > 1 - tick / 2)
 		i++;
 
-	sys_precision = (int8_t)i;
+	sys_vars.sys_precision = (int8_t)i;
 }
 
 
@@ -2748,13 +2740,13 @@ init_proto(const bool verbose)
 	 * Fill in the sys_* stuff.  Default is don't listen to
 	 * broadcasting, require authentication.
 	 */
-	sys_leap = LEAP_NOTINSYNC;
-	sys_stratum = STRATUM_UNSPEC;
-	memcpy(&sys_refid, "INIT", REFIDLEN);
-	sys_peer = NULL;
-	sys_rootdelay = 0;
-	sys_rootdisp = 0;
-	sys_reftime = 0;
+	sys_vars.sys_leap = LEAP_NOTINSYNC;
+	sys_vars.sys_stratum = STRATUM_UNSPEC;
+	memcpy(&sys_vars.sys_refid, "INIT", REFIDLEN);
+	sys_vars.sys_peer = NULL;
+	sys_vars.sys_rootdelay = 0;
+	sys_vars.sys_rootdisp = 0;
+	sys_vars.sys_reftime = 0;
 	sys_jitter = 0;
 	measure_precision(verbose);
 	get_systime(&dummy);

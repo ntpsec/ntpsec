@@ -761,7 +761,7 @@ refclock_ppsrelate(
 	*rd_fudge = pp_fudge;
 
 	/* if whole system out-of-sync, do not try to PLL */
-	if (sys_leap == LEAP_NOTINSYNC)
+	if (sys_vars.sys_leap == LEAP_NOTINSYNC)
 		return PPS_RELATE_EDGE; /* cannot PLL with pps code */
 
 	/* check against reftime if PPS PLL can be used */

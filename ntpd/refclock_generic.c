@@ -2604,7 +2604,7 @@ parse_start(
 
 	peer->rootdelay       = parse->parse_type->cl_rootdelay;
 	peer->sstclktype      = parse->parse_type->cl_type;
-	peer->precision       = sys_precision;
+	peer->precision       = sys_vars.sys_precision;
 
 	peer->stratum         = STRATUM_REFCLOCK;
 

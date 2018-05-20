@@ -656,7 +656,7 @@ newpeer(
 	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
 		enable_broadcast(peer->dstadr, srcadr);
 
-	peer->precision = sys_precision;
+	peer->precision = sys_vars.sys_precision;
 	peer->hpoll = peer->cfg.minpoll;
 	if (cast_flags & MDF_POOL)
 		peer_clear(peer, "POOL", initializing1);

@@ -539,9 +539,9 @@ refclock_receive(
 		return;
 
 	clock_filter(peer, pp->offset, 0., pp->jitter);
-	if (cal_enable && fabs(last_offset) < sys_mindisp && sys_peer !=
+	if (cal_enable && fabs(last_offset) < sys_mindisp && sys_vars.sys_peer !=
 	    NULL) {
-		if (sys_peer->is_pps_driver &&
+		if (sys_vars.sys_peer->is_pps_driver &&
 		    !peer->is_pps_driver)
 			pp->fudgetime1 -= pp->offset * FUDGEFAC;
 	}
@@ -1027,7 +1027,7 @@ refclock_catcher(
 	if (ap->handle == 0)
 		return PPS_SETUP;
 
-	if (ap->pps_params.mode == 0 && sys_leap != LEAP_NOTINSYNC) {
+	if (ap->pps_params.mode == 0 && sys_vars.sys_leap != LEAP_NOTINSYNC) {
 		if (refclock_params(pp->sloppyclockflag, ap) < 1)
 			return PPS_SETUP;
 	}

@@ -317,16 +317,19 @@ extern int	peer_associations;	/* mobilized associations */
  * System variables are declared here.	See Section 3.2 of the
  * specification.
  */
-extern uint8_t	sys_leap;		/* system leap indicator */
-extern uint8_t	sys_stratum;		/* system stratum */
-extern int8_t	sys_precision;		/* local clock precision */
-extern double	sys_rootdelay;		/* roundtrip delay to primary source */
-extern double	sys_rootdisp;		/* dispersion to primary source */
-extern double	sys_rootdist;		/* distance to primary source */
-extern uint32_t	sys_refid;		/* reference id */
-extern l_fp	sys_reftime;		/* last update time */
-extern struct peer *sys_peer;		/* current peer */
-extern int	sys_maxclock;		/* maximum candidates */
+int	sys_maxclock;		/* maximum candidates */
+struct system_variables {
+    uint8_t	sys_leap;		/* system leap indicator */
+    uint8_t	sys_stratum;		/* system stratum */
+    int8_t	sys_precision;		/* local clock precision */
+    double	sys_rootdelay;		/* roundtrip delay to primary source */
+    double	sys_rootdisp;		/* dispersion to primary source */
+    double	sys_rootdist;		/* distance to primary source */
+    uint32_t	sys_refid;		/* reference id */
+    l_fp	sys_reftime;		/* last update time */
+    struct peer *sys_peer;		/* current peer */
+};
+extern struct system_variables sys_vars;
 
 /*
  * Nonspecified system state variables.

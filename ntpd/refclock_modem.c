@@ -678,7 +678,7 @@ modem_poll(
 	 * as either no peers are available or this peer is selected.
 	 */
 	case MODE_BACKUP:
-		if (!(sys_peer == NULL || sys_peer == peer))
+		if (!(sys_vars.sys_peer == NULL || sys_vars.sys_peer == peer))
 			return;
 
 		break;

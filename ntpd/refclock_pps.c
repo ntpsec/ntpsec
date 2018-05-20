@@ -240,7 +240,7 @@ pps_poll(
 	 * Don't wiggle the clock until some other driver has numbered
 	 * the seconds.
 	 */
-	if (sys_leap == LEAP_NOTINSYNC) {
+	if (sys_vars.sys_leap == LEAP_NOTINSYNC) {
 		pp->codeproc = pp->coderecv;  // xxx ??
 		up->pcount = up->scount = up->kcount = up->rcount = 0;
 		return;

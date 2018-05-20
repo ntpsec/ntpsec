@@ -224,7 +224,7 @@ init_loopfilter(void)
 	 * Initialize state variables.
 	 */
 	sys_poll = ntp_minpoll;
-	clock_jitter = LOGTOD(sys_precision);
+	clock_jitter = LOGTOD(sys_vars.sys_precision);
 	freq_cnt = (int)clock_minstep;
 }
 
@@ -636,7 +636,7 @@ local_clock(
 			step_systime(fp_offset, ntp_set_tod);
 			reinit_timer();
 			tc_counter = 0;
-			clock_jitter = LOGTOD(sys_precision);
+			clock_jitter = LOGTOD(sys_vars.sys_precision);
 			rval = 2;
 			if (state == EVNT_NSET) {
 				rstclock(EVNT_FREQ, 0);
@@ -772,8 +772,8 @@ local_clock(
 				ntv.constant = 0;
 
 			ntv.esterror = (long)(clock_jitter * US_PER_S);
-			ntv.maxerror = (long)((sys_rootdelay / 2 +
-			    sys_rootdisp) * US_PER_S);
+			ntv.maxerror = (long)((sys_vars.sys_rootdelay / 2 +
+			    sys_vars.sys_rootdisp) * US_PER_S);
 			ntv.status = STA_PLL;
 
 			/*
@@ -792,9 +792,9 @@ local_clock(
 						pll_status,
 						ntv.status);
 			}
-			if (sys_leap == LEAP_ADDSECOND)
+			if (sys_vars.sys_leap == LEAP_ADDSECOND)
 				ntv.status |= STA_INS;
-			else if (sys_leap == LEAP_DELSECOND) ntv.status |= STA_DEL;
+			else if (sys_vars.sys_leap == LEAP_DELSECOND) ntv.status |= STA_DEL;
 		}
 
 		/*
@@ -933,7 +933,7 @@ adj_host_clock(
 	 * would be counterproductive. During the startup clamp period, the
 	 * time constant is clamped at 2.
 	 */
-	sys_rootdisp += clock_phi;
+	sys_vars.sys_rootdisp += clock_phi;
 #ifndef ENABLE_LOCKCLOCK
 	if (!ntp_enable || mode_ntpdate)
 		return;

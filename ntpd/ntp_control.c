@@ -820,7 +820,7 @@ process_control(
 	 * Pull enough data from the packet to make intelligent
 	 * responses
 	 */
-	rpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, res_version,
+	rpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap, res_version,
 					 MODE_CONTROL);
 	res_opcode = pkt->r_m_e_op;
 	rpkt.sequence = pkt->sequence;
@@ -963,15 +963,15 @@ ctlsysstatus(void)
 
 	this_clock = CTL_SST_TS_UNSPEC;
 #ifdef REFCLOCK
-	if (sys_peer != NULL) {
-		if (CTL_SST_TS_UNSPEC != sys_peer->sstclktype)
-			this_clock = sys_peer->sstclktype;
+	if (sys_vars.sys_peer != NULL) {
+		if (CTL_SST_TS_UNSPEC != sys_vars.sys_peer->sstclktype)
+			this_clock = sys_vars.sys_peer->sstclktype;
 	}
 #else /* REFCLOCK */
-	if (sys_peer != 0)
+	if (sys_vars.sys_peer != 0)
 		this_clock = CTL_SST_TS_NTP;
 #endif /* REFCLOCK */
-	return CTL_SYS_STATUS(sys_leap, this_clock, ctl_sys_num_events,
+	return CTL_SYS_STATUS(sys_vars.sys_leap, this_clock, ctl_sys_num_events,
 			      ctl_sys_last_event);
 }
 
@@ -1483,35 +1483,35 @@ ctl_putsys(
 	switch (varid) {
 
 	case CS_LEAP:
-		ctl_putuint(sys_var[CS_LEAP].text, sys_leap);
+		ctl_putuint(sys_var[CS_LEAP].text, sys_vars.sys_leap);
 		break;
 
 	case CS_STRATUM:
-		ctl_putuint(sys_var[CS_STRATUM].text, sys_stratum);
+		ctl_putuint(sys_var[CS_STRATUM].text, sys_vars.sys_stratum);
 		break;
 
 	case CS_PRECISION:
-		ctl_putint(sys_var[CS_PRECISION].text, sys_precision);
+		ctl_putint(sys_var[CS_PRECISION].text, sys_vars.sys_precision);
 		break;
 
 	case CS_ROOTDELAY:
-		ctl_putdbl(sys_var[CS_ROOTDELAY].text, sys_rootdelay * MS_PER_S);
+		ctl_putdbl(sys_var[CS_ROOTDELAY].text, sys_vars.sys_rootdelay * MS_PER_S);
 		break;
 
 	case CS_ROOTDISPERSION:
 		ctl_putdbl(sys_var[CS_ROOTDISPERSION].text,
-			   sys_rootdisp * MS_PER_S);
+			   sys_vars.sys_rootdisp * MS_PER_S);
 		break;
 
 	case CS_REFID:
-		if (sys_stratum > 1 && sys_stratum < STRATUM_UNSPEC)
-			ctl_putadr(sys_var[varid].text, sys_refid, NULL);
+		if (sys_vars.sys_stratum > 1 && sys_vars.sys_stratum < STRATUM_UNSPEC)
+			ctl_putadr(sys_var[varid].text, sys_vars.sys_refid, NULL);
 		else
-			ctl_putrefid(sys_var[varid].text, sys_refid);
+			ctl_putrefid(sys_var[varid].text, sys_vars.sys_refid);
 		break;
 
 	case CS_REFTIME:
-		ctl_putts(sys_var[CS_REFTIME].text, &sys_reftime);
+		ctl_putts(sys_var[CS_REFTIME].text, &sys_vars.sys_reftime);
 		break;
 
 	case CS_POLL:
@@ -1519,16 +1519,16 @@ ctl_putsys(
 		break;
 
 	case CS_PEERID:
-		if (sys_peer == NULL)
+		if (sys_vars.sys_peer == NULL)
 			ctl_putuint(sys_var[CS_PEERID].text, 0);
 		else
 			ctl_putuint(sys_var[CS_PEERID].text,
-				    sys_peer->associd);
+				    sys_vars.sys_peer->associd);
 		break;
 
 	case CS_PEERADR:
-		if (sys_peer != NULL && sys_peer->dstadr != NULL)
-			ss = sockporttoa(&sys_peer->srcadr);
+		if (sys_vars.sys_peer != NULL && sys_vars.sys_peer->dstadr != NULL)
+			ss = sockporttoa(&sys_vars.sys_peer->srcadr);
 		else
 			ss = "0.0.0.0:0";
 		ctl_putunqstr(sys_var[CS_PEERADR].text, ss, strlen(ss));
@@ -1536,8 +1536,8 @@ ctl_putsys(
 
 	case CS_PEERMODE: {
 		uint64_t u;
-		u = (sys_peer != NULL)
-			? sys_peer->hmode
+		u = (sys_vars.sys_peer != NULL)
+			? sys_vars.sys_peer->hmode
 			: MODE_UNSPEC;
 		ctl_putuint(sys_var[CS_PEERMODE].text, u);
 		break;
@@ -2037,7 +2037,7 @@ ctl_putsys(
 
 	case CS_ROOTDISTANCE:
 		ctl_putdbl(sys_var[CS_ROOTDISTANCE].text,
-			   sys_rootdist * MS_PER_S);
+			   sys_vars.sys_rootdist * MS_PER_S);
 		break;
 
         default:
@@ -4083,9 +4083,9 @@ read_clockstatus(
 		 * Find a clock for this jerk.	If the system peer
 		 * is a clock use it, else search peer_list for one.
 		 */
-		if (sys_peer != NULL && (FLAG_REFCLOCK &
-		    sys_peer->cfg.flags))
-			peer = sys_peer;
+		if (sys_vars.sys_peer != NULL && (FLAG_REFCLOCK &
+		    sys_vars.sys_peer->cfg.flags))
+			peer = sys_vars.sys_peer;
 		else
 			for (peer = peer_list;
 			     peer != NULL;

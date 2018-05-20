@@ -228,19 +228,19 @@ timer(void)
 	 * synchronization source is an orphan. It shows offset zero and
 	 * reference ID the loopback address.
 	 */
-	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL &&
+	if (sys_orphan < STRATUM_UNSPEC && sys_vars.sys_peer == NULL &&
 	    current_time > orphwait) {
-		if (sys_leap == LEAP_NOTINSYNC) {
-			sys_leap = LEAP_NOWARNING;
+		if (sys_vars.sys_leap == LEAP_NOTINSYNC) {
+			sys_vars.sys_leap = LEAP_NOWARNING;
 		}
-		sys_stratum = (uint8_t)sys_orphan;
-		if (sys_stratum > 1)
-			sys_refid = htonl(LOOPBACKADR);
+		sys_vars.sys_stratum = (uint8_t)sys_orphan;
+		if (sys_vars.sys_stratum > 1)
+			sys_vars.sys_refid = htonl(LOOPBACKADR);
 		else
-			memcpy(&sys_refid, "LOOP", REFIDLEN);
+			memcpy(&sys_vars.sys_refid, "LOOP", REFIDLEN);
 		sys_offset = 0;
-		sys_rootdelay = 0;
-		sys_rootdisp = 0;
+		sys_vars.sys_rootdelay = 0;
+		sys_vars.sys_rootdisp = 0;
 	}
 
 	time(&now);
@@ -250,15 +250,15 @@ timer(void)
 	 * is imminent or every 8th second.
 	 */
 	if (leapsec > LSPROX_NOWARN || 0 == (current_time & 7))
-		check_leapsec(now, (sys_leap == LEAP_NOTINSYNC));
-	if (sys_leap != LEAP_NOTINSYNC) {
+		check_leapsec(now, (sys_vars.sys_leap == LEAP_NOTINSYNC));
+	if (sys_vars.sys_leap != LEAP_NOTINSYNC) {
 		if (leapsec >= LSPROX_ANNOUNCE && leapdif) {
 			if (leapdif > 0)
-				sys_leap = LEAP_ADDSECOND;
+				sys_vars.sys_leap = LEAP_ADDSECOND;
 			else
-				sys_leap = LEAP_DELSECOND;
+				sys_vars.sys_leap = LEAP_DELSECOND;
 		} else {
-			sys_leap = LEAP_NOWARNING;
+			sys_vars.sys_leap = LEAP_NOWARNING;
 		}
 	}
 
@@ -351,7 +351,7 @@ check_leap_sec_in_progress( const leap_result_t *lsdata ) {
 
 	/* if changed we may have to update the leap status sent to clients */
 	if (leap_sec_in_progress != prv_leap_sec_in_progress)
-		set_sys_leap(sys_leap);
+		set_sys_leap(sys_vars.sys_leap);
 }
 
 static void
@@ -492,7 +492,7 @@ check_leapsec(
 		if (  leapsec < LSPROX_SCHEDULE
 		   && lsprox >= LSPROX_SCHEDULE) {
 			if (lsdata.dynamic)
-				report_event(PEVNT_ARMED, sys_peer, NULL);
+				report_event(PEVNT_ARMED, sys_vars.sys_peer, NULL);
 			else
 				report_event(EVNT_ARMED, NULL, NULL);
 		}
