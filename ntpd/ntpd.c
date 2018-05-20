@@ -1015,7 +1015,7 @@ static void mainloop(void)
 		 */
 
 # if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
-		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_leap != LEAP_NOTINSYNC) {
+		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_vars.sys_leap != LEAP_NOTINSYNC) {
 			mdnsreg = current_time;
 			msyslog(LOG_INFO, "INIT: Attempting to register mDNS");
 			if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL,
