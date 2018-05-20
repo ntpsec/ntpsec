@@ -2616,7 +2616,7 @@ peer_config(
 	 * are.
 	 */
 	ctl->flags |= FLAG_CONFIG;
-	if (mode_ntpdate)
+	if (clock_ctl.mode_ntpdate)
 		ctl->flags |= FLAG_IBURST;
 	return newpeer(srcadr, hostname, dstadr, hmode,
 		       ctl, cast_flags, true);

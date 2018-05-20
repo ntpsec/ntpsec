@@ -908,7 +908,7 @@ oncore_ppsapi(
 			return false;
 		}
 
-		hardpps_enable = true;
+		clock_ctl.hardpps_enable = true;
 	}
 	return true;
 }

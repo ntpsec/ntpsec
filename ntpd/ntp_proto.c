@@ -940,7 +940,7 @@ transmit(
 			 * set and all peers have completed the burst,
 			 * we declare a successful failure.
 			 */
-			if (mode_ntpdate) {
+			if (clock_ctl.mode_ntpdate) {
 				peer_ntpdate--;
 				if (peer_ntpdate == 0) {
 					msyslog(LOG_NOTICE,
@@ -2755,7 +2755,7 @@ init_proto(const bool verbose)
 	orphwait = current_time + (unsigned long)sys_orphwait;
 	proto_clr_stats();
 	stat_count.use_stattime = current_time;
-	hardpps_enable = false;
+	clock_ctl.hardpps_enable = false;
 	stats_control = true;
 }
 
@@ -2803,11 +2803,11 @@ proto_config(
 		break;
 
 	case PROTO_NTP:		/* NTP discipline (ntp) */
-		ntp_enable = (bool)value;
+		clock_ctl.ntp_enable = (bool)value;
 		break;
 
 	case PROTO_PPS:		/* PPS discipline (pps) */
-		hardpps_enable = (bool)value;
+		clock_ctl.hardpps_enable = (bool)value;
 		break;
 
 	case PROTO_FILEGEN:	/* statistics (stats) */

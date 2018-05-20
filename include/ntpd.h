@@ -263,14 +263,17 @@ extern double	clock_phi;		/* dispersion rate (s/s) */
 /*
  * Clock state machine control flags
  */
-extern bool	ntp_enable;		/* clock discipline enabled */
-extern bool	pll_control;		/* kernel support available */
-extern bool	kern_enable;		/* kernel support enabled */
-extern bool	hardpps_enable;		/* kernel PPS discipline enabled */
+struct clock_control_flags {
+    bool	ntp_enable;		/* clock discipline enabled */
+    bool	pll_control;		/* kernel support available */
+    bool	kern_enable;		/* kernel support enabled */
+    bool	hardpps_enable;		/* kernel PPS discipline enabled */
+    bool	allow_panic;		/* allow panic correction (-g) */
+    bool	force_step_once;	/* always step time once at startup (-G) */
+    bool	mode_ntpdate;		/* exit on first clock set (-q) */
+};
+extern struct clock_control_flags clock_ctl;
 extern bool	cal_enable;		/* refclock calibrate enable */
-extern bool	allow_panic;		/* allow panic correction (-g) */
-extern bool	force_step_once;	/* always step time once at startup (-G) */
-extern bool	mode_ntpdate;		/* exit on first clock set (-q) */
 extern int	peer_ntpdate;		/* count of ntpdate peers */
 
 /*

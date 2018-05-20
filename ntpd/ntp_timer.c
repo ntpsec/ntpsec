@@ -373,7 +373,7 @@ check_leapsec(
 
 	leap_result_t lsdata;
 	uint32_t       lsprox;
-	leapsec_electric((pll_control && kern_enable) ? electric_on : electric_off);
+	leapsec_electric((clock_ctl.pll_control && clock_ctl.kern_enable) ? electric_on : electric_off);
 #ifdef ENABLE_LEAP_SMEAR
 	leap_smear.enabled = (leap_smear_intv != 0);
 #endif

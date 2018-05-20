@@ -261,10 +261,10 @@ parse_cmdline_opts(
 			driftfile = ntp_optarg;
 		break;
 	    case 'g':
-		allow_panic = true;
+		clock_ctl.allow_panic = true;
 		break;
 	    case 'G':
-		force_step_once = true;
+		clock_ctl.force_step_once = true;
 		break;
 	    case 'h':
 		ntpd_usage();
@@ -316,7 +316,7 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'q':
-		mode_ntpdate = true;
+		clock_ctl.mode_ntpdate = true;
 		nofork = true;
 		break;
 	    case 'r':
@@ -835,9 +835,9 @@ ntpdmain(
 	    if (driftfile)
 		fprintf(stdout, "driftfile \"%s\";\n", driftfile);
 	    fprintf(stdout, "#allow_panic = %s\n",
-		    allow_panic ? "true" : "false");
+		    clock_ctl.allow_panic ? "true" : "false");
 	    fprintf(stdout, "#force_step_once = %s\n",
-		    force_step_once ? "true" : "false");
+		    clock_ctl.force_step_once ? "true" : "false");
 #ifdef ENABLE_DROPROOT
 	    if (chrootdir)
 		fprintf(stdout, "#chrootdir = \"%s\";\n", chrootdir);
@@ -860,7 +860,7 @@ ntpdmain(
 		fprintf(stdout, "pidfile \"%s\";\n", pidfile);
 	    /* FIXME: dump priority */
 	    fprintf(stdout, "#mode_ntpdate = %s\n",
-		    mode_ntpdate ? "true" : "false");
+		    clock_ctl.mode_ntpdate ? "true" : "false");
 	    if (statsdir[0])
 		fprintf(stdout, "statsdir \"%s\";\n", statsdir);
 	    fprintf(stdout, "#interface_interval = %d\n", interface_interval);

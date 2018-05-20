@@ -2402,7 +2402,7 @@ parse_hardpps(
 			 * tell the rest, that we have a kernel PPS source, iff we ever enable HARDPPS
 			 */
 			if (mode == PARSE_HARDPPS_ENABLE)
-			        hardpps_enable = true;
+			        clock_ctl.hardpps_enable = true;
 		}
 	}
 

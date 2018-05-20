@@ -664,7 +664,7 @@ newpeer(
 		peer_clear(peer, "BCST", initializing1);
 	else
 		peer_clear(peer, "INIT", initializing1);
-	if (mode_ntpdate)
+	if (clock_ctl.mode_ntpdate)
 		peer_ntpdate++;
 
 	/*

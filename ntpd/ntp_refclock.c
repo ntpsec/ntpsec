@@ -991,7 +991,7 @@ refclock_params(
 				"REFCLOCK: refclock_params: time_pps_kcbind: %m");
 			return false;
 		}
-		hardpps_enable = true;
+		clock_ctl.hardpps_enable = true;
 	}
 	return true;
 }
