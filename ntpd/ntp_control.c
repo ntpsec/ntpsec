@@ -1689,67 +1689,67 @@ ctl_putsys(
 		break;
 
 	case CS_MRU_ENABLED:
-		ctl_puthex(sys_var[varid].text, mon_enabled);
+		ctl_puthex(sys_var[varid].text, mon_data.mon_enabled);
 		break;
 
 	case CS_MRU_DEPTH:
-		ctl_putuint(sys_var[varid].text, mru_entries);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_entries);
 		break;
 
 	case CS_MRU_MEM: {
 		uint64_t u;
-		u = mru_entries * sizeof(mon_entry);
+		u = mon_data.mru_entries * sizeof(mon_entry);
 		u = (u+512)/1024;
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 		}
 
 	case CS_MRU_DEEPEST:
-		ctl_putuint(sys_var[varid].text, mru_peakentries);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_peakentries);
 		break;
 
 	case CS_MRU_MINDEPTH:
-		ctl_putuint(sys_var[varid].text, mru_mindepth);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_mindepth);
 		break;
 
 	case CS_MRU_MAXAGE:
-		ctl_putint(sys_var[varid].text, mru_maxage);
+		ctl_putint(sys_var[varid].text, mon_data.mru_maxage);
 		break;
 
 	case CS_MRU_MINAGE:
-		ctl_putint(sys_var[varid].text, mru_minage);
+		ctl_putint(sys_var[varid].text, mon_data.mru_minage);
 		break;
 
 	case CS_MRU_MAXDEPTH:
-		ctl_putuint(sys_var[varid].text, mru_maxdepth);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_maxdepth);
 		break;
 
 	case CS_MRU_MAXMEM: {
 		uint64_t u;
-		u = mru_maxdepth * sizeof(mon_entry);
+		u = mon_data.mru_maxdepth * sizeof(mon_entry);
 		u = (u+512)/1024;
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 		}
 
 	case CS_MRU_EXISTS:
-		ctl_putuint(sys_var[varid].text, mru_exists);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_exists);
 		break;
 
 	case CS_MRU_NEW:
-		ctl_putuint(sys_var[varid].text, mru_new);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_new);
 		break;
 
 	case CS_MRU_RECYCLEOLD:
-		ctl_putuint(sys_var[varid].text, mru_recycleold);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_recycleold);
 		break;
 
 	case CS_MRU_RECYCLEFULL:
-		ctl_putuint(sys_var[varid].text, mru_recyclefull);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_recyclefull);
 		break;
 
 	case CS_MRU_NONE:
-		ctl_putuint(sys_var[varid].text, mru_none);
+		ctl_putuint(sys_var[varid].text, mon_data.mru_none);
 		break;
 
 	case CS_MRU_OLDEST_AGE: {
@@ -3584,7 +3584,7 @@ static void read_mru_list(
 	mon = NULL;
 	for (i = 0; i < (size_t)priors; i++) {
 		hash = MON_HASH(&addr[i]);
-		for (mon = mon_hash[hash];
+		for (mon = mon_data.mon_hash[hash];
 		     mon != NULL;
 		     mon = mon->hash_next)
 			if (ADDR_PORT_EQ(&mon->rmtadr, &addr[i]))
@@ -3615,10 +3615,10 @@ static void read_mru_list(
 		 * that case return the starting point entry.
 		 */
 		if (limit > 1)
-			mon = PREV_DLIST(mon_mru_list, mon, mru);
+			mon = PREV_DLIST(mon_data.mon_mru_list, mon, mru);
 	} else {	/* start with the oldest */
-		mon = TAIL_DLIST(mon_mru_list, mru);
-		countdown = mru_entries;
+		mon = TAIL_DLIST(mon_data.mon_mru_list, mru);
+		countdown = mon_data.mru_entries;
 	}
 
 	/*
@@ -3630,7 +3630,7 @@ static void read_mru_list(
 	prior_mon = NULL;
 	for (count = 0;
 	     mon != NULL && res_frags < frags && count < limit;
-	     mon = PREV_DLIST(mon_mru_list, mon, mru)) {
+	     mon = PREV_DLIST(mon_data.mon_mru_list, mon, mru)) {
 
 		if (mon->count < mincount)
 			continue;

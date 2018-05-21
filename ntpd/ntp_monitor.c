@@ -41,21 +41,20 @@
 # define MRU_MAXDEPTH_DEF	(1024 * 1024 / sizeof(mon_entry))
 #endif
 
-/*
- * Hashing stuff
- */
-uint8_t	mon_hash_bits;
-
-/*
- * Pointers to the hash table and the MRU list.  Memory for the hash
- * table is allocated only if monitoring is enabled.
- * Total size can easily exceed 32 bits (4 GB)
- * Total count is unlikely to exceed 32 bits in 2017
- *   but memories keep growing.
- */
-mon_entry **	mon_hash;	/* MRU hash table */
-mon_entry	mon_mru_list;	/* mru listhead */
-uint64_t	mru_entries;	/* mru list count */
+struct monitor_data mon_data = {
+    .mru_mindepth = 600, /* preempt above this */
+	.mru_maxage = 3600,	/* recycle if older than this */
+	.mru_minage = 64,	/* recycle if full and older than this */
+	.mru_maxdepth = MRU_MAXDEPTH_DEF,	/* MRU count hard limit */
+	.mon_age = 3000,		/* preemption limit */
+	.mru_initalloc = INIT_MONLIST, /* entries to preallocate */
+	.mru_incalloc = INC_MONLIST, /* allocation batch factor */
+	.mru_exists = 0,	/* slot already exists */
+	.mru_new = 0,		/* allocate a new slot (2 cases) */
+	.mru_recycleold = 0,	/* recycle slot: age > mru_maxage */
+	.mru_recyclefull = 0,	/* recycle slot: full and age > mru_minage */
+	.mru_none = 0		/* couldn't get one */
+};
 
 /*
  * List of free structures, and counters of in-use and total
@@ -63,9 +62,6 @@ uint64_t	mru_entries;	/* mru list count */
  */
 static  mon_entry *mon_free;		/* free list or null if none */
 static	uint64_t mru_alloc;		/* mru list + free list count */
-	uint64_t mru_peakentries;	/* highest mru_entries seen */
-	uint64_t mru_initalloc = INIT_MONLIST;/* entries to preallocate */
-	uint64_t mru_incalloc = INC_MONLIST;/* allocation batch factor */
 static	uint64_t mon_mem_increments;	/* times called malloc() */
 
 /*
@@ -77,29 +73,10 @@ static	uint64_t mon_mem_increments;	/* times called malloc() */
 int	ntp_minpkt = NTP_MINPKT;	/* minimum (log 2 s) */
 uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
 
-/*
- * Initialization state.  We may be monitoring, we may not.  If
- * we aren't, we may not even have allocated any memory yet.
- */
-unsigned int	mon_enabled;		/* enable switch */
-uint64_t	mru_mindepth = 600;	/* preempt above this */
-int		mru_maxage = 3600;	/* recycle if older than this */
-int		mru_minage = 64;	/* recycle if full and older than this */
-uint64_t	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
-int	mon_age = 3000;		/* preemption limit */
-
 static	void		mon_getmoremem(void);
 static	void		remove_from_hash(mon_entry *);
 static	inline void	mon_free_entry(mon_entry *);
 static	inline void	mon_reclaim_entry(mon_entry *);
-
-/* MRU counters */
-uint64_t mru_exists = 0;	/* slot already exists */
-uint64_t mru_new = 0;		/* allocate a new slot (2 cases) */
-uint64_t mru_recycleold = 0;	/* recycle slot: age > mru_maxage */
-uint64_t mru_recyclefull = 0;	/* recycle slot: full and age > mru_minage */
-uint64_t mru_none = 0;		/* couldn't get one */
-
 
 /*
  * init_mon - initialize monitoring global data
@@ -111,8 +88,8 @@ init_mon(void)
 	 * Don't do much of anything here.  We don't allocate memory
 	 * until mon_start().
 	 */
-	mon_enabled = MON_OFF;
-	INIT_DLIST(mon_mru_list, mru);
+	mon_data.mon_enabled = MON_OFF;
+	INIT_DLIST(mon_data.mon_mru_list, mru);
 }
 
 
@@ -128,9 +105,9 @@ remove_from_hash(
 	unsigned int hash;
 	mon_entry *punlinked;
 
-	mru_entries--;
+	mon_data.mru_entries--;
 	hash = MON_HASH(&mon->rmtadr);
-	UNLINK_SLIST(punlinked, mon_hash[hash], mon, hash_next,
+	UNLINK_SLIST(punlinked, mon_data.mon_hash[hash], mon, hash_next,
 		     mon_entry);
 	ENSURE(punlinked == mon);
 }
@@ -178,8 +155,8 @@ mon_getmoremem(void)
 	unsigned int entries;
 
 	entries = (0 == mon_mem_increments)
-		      ? mru_initalloc
-		      : mru_incalloc;
+		      ? mon_data.mru_initalloc
+		      : mon_data.mru_incalloc;
 
 	if (entries) {
 		chunk = eallocarray(entries, sizeof(*chunk));
@@ -207,8 +184,8 @@ mon_start(
 
 	if (MON_OFF == mode)		/* MON_OFF is 0 */
 		return;
-	if (mon_enabled) {
-		mon_enabled |= (unsigned int)mode;
+	if (mon_data.mon_enabled) {
+		mon_data.mon_enabled |= (unsigned int)mode;
 		return;
 	}
 	if (0 == mon_mem_increments)
@@ -218,16 +195,16 @@ mon_start(
 	 * per bucket at capacity (mru_maxdepth) to 8, if possible
 	 * given our hash is limited to 16 bits.
 	 */
-	min_hash_slots = (mru_maxdepth / 8) + 1;
-	mon_hash_bits = 0;
+	min_hash_slots = (mon_data.mru_maxdepth / 8) + 1;
+	mon_data.mon_hash_bits = 0;
 	while (min_hash_slots >>= 1)
-		mon_hash_bits++;
-	mon_hash_bits = max(4, mon_hash_bits);
-	mon_hash_bits = min(16, mon_hash_bits);
-	octets = sizeof(*mon_hash) * MON_HASH_SIZE;
-	mon_hash = erealloc_zero(mon_hash, octets, 0);
+		mon_data.mon_hash_bits++;
+	mon_data.mon_hash_bits = max(4, mon_data.mon_hash_bits);
+	mon_data.mon_hash_bits = min(16, mon_data.mon_hash_bits);
+	octets = sizeof(*mon_data.mon_hash) * MON_HASH_SIZE;
+	mon_data.mon_hash = erealloc_zero(mon_data.mon_hash, octets, 0);
 
-	mon_enabled = (unsigned int)mode;
+	mon_data.mon_enabled = (unsigned int)mode;
 }
 
 
@@ -241,13 +218,13 @@ mon_stop(
 {
 	mon_entry *mon;
 
-	if (MON_OFF == mon_enabled)
+	if (MON_OFF == mon_data.mon_enabled)
 		return;
-	if ((mon_enabled & (unsigned int)mode) == 0 || mode == MON_OFF)
+	if ((mon_data.mon_enabled & (unsigned int)mode) == 0 || mode == MON_OFF)
 		return;
 
-	mon_enabled &= (unsigned int)~mode;
-	if (mon_enabled != MON_OFF)
+	mon_data.mon_enabled &= (unsigned int)~mode;
+	if (mon_data.mon_enabled != MON_OFF)
 		return;
 	
 	/*
@@ -255,14 +232,14 @@ mon_stop(
 	 * without bothering to remove each from either the MRU list or
 	 * the hash table.
 	 */
-	ITER_DLIST_BEGIN(mon_mru_list, mon, mru, mon_entry)
+	ITER_DLIST_BEGIN(mon_data.mon_mru_list, mon, mru, mon_entry)
 		mon_free_entry(mon);
 	ITER_DLIST_END()
 
 	/* empty the MRU list and hash table. */
-	mru_entries = 0;
-	INIT_DLIST(mon_mru_list, mru);
-	memset(mon_hash, '\0', sizeof(*mon_hash) * MON_HASH_SIZE);
+	mon_data.mru_entries = 0;
+	INIT_DLIST(mon_data.mon_mru_list, mru);
+	memset(mon_data.mon_hash, '\0', sizeof(*mon_data.mon_hash) * MON_HASH_SIZE);
 }
 
 
@@ -278,7 +255,7 @@ mon_clearinterface(
 	mon_entry *mon;
 
 	/* iterate mon over mon_mru_list */
-	ITER_DLIST_BEGIN(mon_mru_list, mon, mru, mon_entry)
+	ITER_DLIST_BEGIN(mon_data.mon_mru_list, mon, mru, mon_entry)
 		if (mon->lcladr == lcladr) {
 			/* remove from mru list */
 			UNLINK_DLIST(mon, mru);
@@ -293,9 +270,9 @@ mon_clearinterface(
 int mon_get_oldest_age(l_fp now)
 {
     mon_entry *	oldest;
-    if (mru_entries == 0)
+    if (mon_data.mru_entries == 0)
 	return 0;
-    oldest = TAIL_DLIST(mon_mru_list, mru);
+    oldest = TAIL_DLIST(mon_data.mon_mru_list, mru);
     now -= oldest->last;
     /* add one-half second to round up */
     now += 0x80000000;
@@ -336,14 +313,14 @@ ntp_monitor(
 	int		leak;		/* new headway */
 	int		limit;		/* average threshold */
 
-	if (mon_enabled == MON_OFF)
+	if (mon_data.mon_enabled == MON_OFF)
 		return ~(RES_LIMITED | RES_KOD) & flags;
 
 	hash = MON_HASH(&rbufp->recv_srcadr);
 	li_vn_mode = rbufp->recv_buffer[0];
 	mode = PKT_MODE(li_vn_mode);
 	version = PKT_VERSION(li_vn_mode);
-	mon = mon_hash[hash];
+	mon = mon_data.mon_hash[hash];
 	/*
 	 * We keep track of all traffic for a given IP in one entry,
 	 * otherwise cron'ed ntpdate or similar evades RES_LIMITED.
@@ -354,7 +331,7 @@ ntp_monitor(
 			break;
 
 	if (mon != NULL) {
-		mru_exists++;
+		mon_data.mru_exists++;
 		interval_fp = rbufp->recv_time;
 		interval_fp -= mon->last;
 		/* add one-half second to round up */
@@ -368,7 +345,7 @@ ntp_monitor(
 
 		/* Shuffle to the head of the MRU list. */
 		UNLINK_DLIST(mon, mru);
-		LINK_DLIST(mon_mru_list, mon, mru);
+		LINK_DLIST(mon_data.mon_mru_list, mon, mru);
 
 		/*
 		 * At this point the most recent arrival is first in the
@@ -444,28 +421,28 @@ ntp_monitor(
 	 * ntp.conf controls.  Similarly for "mru initalloc" and "mru
 	 * initmem", and for "mru incalloc" and "mru incmem".
 	 */
-	if (mru_entries < mru_mindepth) {
-		mru_new++;
+	if (mon_data.mru_entries < mon_data.mru_mindepth) {
+		mon_data.mru_new++;
 		if (NULL == mon_free)
 			mon_getmoremem();
 		UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 	} else {
-		oldest = TAIL_DLIST(mon_mru_list, mru);
+		oldest = TAIL_DLIST(mon_data.mon_mru_list, mru);
 		oldest_age = mon_get_oldest_age(rbufp->recv_time);
-		if (mru_maxage < oldest_age) {
-			mru_recycleold++;
+		if (mon_data.mru_maxage < oldest_age) {
+			mon_data.mru_recycleold++;
 			mon_reclaim_entry(oldest);
 			mon = oldest;
-		} else if (mon_free != NULL || mru_alloc < mru_maxdepth) {
-			mru_new++;
+		} else if (mon_free != NULL || mru_alloc < mon_data.mru_maxdepth) {
+			mon_data.mru_new++;
 			if (NULL == mon_free)
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
-		} else if (oldest_age < mru_minage) {
-			mru_none++;
+		} else if (oldest_age < mon_data.mru_minage) {
+			mon_data.mru_none++;
 			return ~(RES_LIMITED | RES_KOD) & flags;
 		} else {
-			mru_recyclefull++;
+			mon_data.mru_recyclefull++;
 			/* coverity[var_deref_model] */
 			mon_reclaim_entry(oldest);
 			mon = oldest;
@@ -476,8 +453,9 @@ ntp_monitor(
 	 * Got one, initialize it
 	 */
 	REQUIRE(mon != NULL);
-	mru_entries++;
-	mru_peakentries = max(mru_peakentries, mru_entries);
+	mon_data.mru_entries++;
+	mon_data.mru_peakentries = max(mon_data.mru_peakentries,
+								   mon_data.mru_entries);
 	mon->last = rbufp->recv_time;
 	mon->first = mon->last;
 	mon->count = 1;
@@ -492,8 +470,8 @@ ntp_monitor(
 	 * Drop him into front of the hash table. Also put him on top of
 	 * the MRU list.
 	 */
-	LINK_SLIST(mon_hash[hash], mon, hash_next);
-	LINK_DLIST(mon_mru_list, mon, mru);
+	LINK_SLIST(mon_data.mon_hash[hash], mon, hash_next);
+	LINK_DLIST(mon_data.mon_mru_list, mon, mru);
 
 	return mon->flags;
 }

@@ -1472,14 +1472,14 @@ config_access(
 
 		case T_Incalloc:
 			if (0 <= my_opt->value.i)
-				mru_incalloc = my_opt->value.u;
+				mon_data.mru_incalloc = my_opt->value.u;
 			else
 				range_err = true;
 			break;
 
 		case T_Incmem:
 			if (0 <= my_opt->value.i)
-				mru_incalloc = (my_opt->value.u * 1024U)
+				mon_data.mru_incalloc = (my_opt->value.u * 1024U)
 						/ sizeof(mon_entry);
 			else
 				range_err = true;
@@ -1487,14 +1487,14 @@ config_access(
 
 		case T_Initalloc:
 			if (0 <= my_opt->value.i)
-				mru_initalloc = my_opt->value.u;
+				mon_data.mru_initalloc = my_opt->value.u;
 			else
 				range_err = true;
 			break;
 
 		case T_Initmem:
 			if (0 <= my_opt->value.i)
-				mru_initalloc = (my_opt->value.u * 1024U)
+				mon_data.mru_initalloc = (my_opt->value.u * 1024U)
 						 / sizeof(mon_entry);
 			else
 				range_err = true;
@@ -1502,32 +1502,32 @@ config_access(
 
 		case T_Mindepth:
 			if (0 <= my_opt->value.i)
-				mru_mindepth = my_opt->value.u;
+				mon_data.mru_mindepth = my_opt->value.u;
 			else
 				range_err = true;
 			break;
 
 		case T_Maxage:
-			mru_maxage = my_opt->value.i;
+			mon_data.mru_maxage = my_opt->value.i;
 			break;
 
 		case T_Minage:
-			mru_minage = my_opt->value.i;
+			mon_data.mru_minage = my_opt->value.i;
 			break;
 
 		case T_Maxdepth:
 			if (0 <= my_opt->value.i)
-				mru_maxdepth = my_opt->value.u;
+				mon_data.mru_maxdepth = my_opt->value.u;
 			else
-				mru_maxdepth = UINT_MAX;
+				mon_data.mru_maxdepth = UINT_MAX;
 			break;
 
 		case T_Maxmem:
 			if (0 <= my_opt->value.i)
-				mru_maxdepth = (my_opt->value.u * 1024U) /
+				mon_data.mru_maxdepth = (my_opt->value.u * 1024U) /
 					       sizeof(mon_entry);
 			else
-				mru_maxdepth = UINT_MAX;
+				mon_data.mru_maxdepth = UINT_MAX;
 			break;
 
 		default:
@@ -1563,7 +1563,7 @@ config_access(
 			break;
 
 		case T_Monitor:
-			mon_age = my_opt->value.i;
+			mon_data.mon_age = my_opt->value.i;
 			break;
 
 		default:

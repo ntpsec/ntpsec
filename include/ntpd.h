@@ -113,7 +113,7 @@ extern	unsigned int	sys_tai;
 extern 	int	freq_cnt;
 
 /* ntp_monitor.c */
-#define MON_HASH_SIZE		(1U << mon_hash_bits)
+#define MON_HASH_SIZE		(1U << mon_data.mon_hash_bits)
 #define MON_HASH_MASK		(MON_HASH_SIZE - 1)
 #define	MON_HASH(addr)		(sock_hash(addr) & MON_HASH_MASK)
 extern	void	init_mon	(void);
@@ -288,24 +288,39 @@ extern double	sys_offset;		/* system offset (s) */
 extern double	sys_jitter;		/* system jitter (s) */
 
 /* ntp_monitor.c */
-extern uint8_t	mon_hash_bits;		/* log2 size of hash table */
-extern mon_entry ** mon_hash;		/* MRU hash table */
-extern mon_entry mon_mru_list;		/* mru listhead */
-extern unsigned int	mon_enabled;		/* MON_OFF (0) or other MON_* */
-extern uint64_t	mru_entries;		/* mru list count */
-extern uint64_t	mru_peakentries;	/* highest mru_entries */
-extern uint64_t	mru_initalloc;		/* entries to preallocate */
-extern uint64_t	mru_incalloc;		/* allocation batch factor */
-extern uint64_t	mru_mindepth;		/* preempt above this */
-extern int	mru_maxage;		/* recycle if older than this */
-extern int	mru_minage;		/* recycle if older than this & full */
-extern uint64_t	mru_maxdepth; 		/* MRU size hard limit */
-extern uint64_t	mru_exists;		/* slot already exists */
-extern uint64_t	mru_new;		/* allocated new slot */
-extern uint64_t	mru_recycleold;		/* recycle: age > maxage */
-extern uint64_t	mru_recyclefull;	/* recycle: full and age > minage */
-extern uint64_t	mru_none;		/* couldn't allocate slot */
-extern int	mon_age;		/* preemption limit */
+struct monitor_data {
+    uint8_t	mon_hash_bits;		/* log2 size of hash table */
+    /*
+	 * Pointers to the hash table and the MRU list.  Memory for the hash
+	 * table is allocated only if monitoring is enabled.
+	 * Total size can easily exceed 32 bits (4 GB)
+	 * Total count is unlikely to exceed 32 bits in 2017
+	 *   but memories keep growing.
+	 */
+    mon_entry ** mon_hash;		/* MRU hash table */
+    mon_entry mon_mru_list;		/* mru listhead */
+    uint64_t	mru_entries;		/* mru list count */
+    /*
+	 * Initialization state.  We may be monitoring, we may not.  If
+	 * we aren't, we may not even have allocated any memory yet.
+	 */
+    unsigned int	mon_enabled;		/* MON_OFF (0) or other MON_* */
+
+    uint64_t	mru_peakentries;	/* highest mru_entries */
+    uint64_t	mru_initalloc;		/* entries to preallocate */
+    uint64_t	mru_incalloc;		/* allocation batch factor */
+    uint64_t	mru_mindepth;		/* preempt above this */
+    int	mru_maxage;		/* recycle if older than this */
+    int	mru_minage;		/* recycle if older than this & full */
+    uint64_t	mru_maxdepth; 		/* MRU size hard limit */
+    uint64_t	mru_exists;		/* slot already exists */
+    uint64_t	mru_new;		/* allocated new slot */
+    uint64_t	mru_recycleold;		/* recycle: age > maxage */
+    uint64_t	mru_recyclefull;	/* recycle: full and age > minage */
+    uint64_t	mru_none;		/* couldn't allocate slot */
+    int	mon_age;		/* preemption limit */
+};
+extern struct monitor_data mon_data;
 
 /* ntp_peer.c */
 extern struct peer *peer_list;		/* peer structures list */

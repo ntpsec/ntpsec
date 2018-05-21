@@ -2796,7 +2796,7 @@ proto_config(
 			mon_start(MON_ON);
 		else {
 			mon_stop(MON_ON);
-			if (mon_enabled)
+			if (mon_data.mon_enabled)
 				msyslog(LOG_WARNING,
 					"CONFIG: 'monitor' cannot be disabled while 'limited' is enabled");
 		}
