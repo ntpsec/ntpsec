@@ -479,3 +479,12 @@ debian-stable-mDNS-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
+
+cross-build:
+  <<: *job_definition
+  script:
+    - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
+  tags:
+    - ubuntu-1604-lts
+  only:
+    - branches@NTPsec/ntpsec

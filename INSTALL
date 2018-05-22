@@ -251,11 +251,13 @@ operates.
 == Cross-compiling ==
 
 Set up a cross-compile environment for the target architecture.  At minimum
-it will need its own binaries for the OpenSSL library.
+it will need OpenSSL headers/libraries and Python headers/libraries.
 
 Configure NTPSec with:
 
-  waf configure --cross-compiler=/path/to/your/cross/cc
+  PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' \
+  ./waf configure --cross-compiler=/path/to/your/cross/cc \
+  --pythondir=/usr/local/lib/python2.7/dist-packages --pythonarchdir=/usr/local/lib/python2.7/dist-packages
 
 There are also --cross-cflags and --cross-ldflags to supply the cross compiler
 with appropriate values.
