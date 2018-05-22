@@ -293,36 +293,18 @@ freebsd-11-refclocks:
   only:
     - branches@NTPsec/ntpsec
 
-centos-6-basic:
+centos-latest-basic:
   <<: *job_definition
-  image: centos:6
+  image: centos:latest
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
     - python ./waf configure build check
   tags:
     - gitlab-org
 
-centos-6-refclocks:
+centos-latest-refclocks:
   <<: *job_definition
-  image: centos:6
-  script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure --refclock=all build check
-  tags:
-    - gitlab-org
-
-centos-7-basic:
-  <<: *job_definition
-  image: centos:7
-  script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure build check
-  tags:
-    - gitlab-org
-
-centos-7-refclocks:
-  <<: *job_definition
-  image: centos:7
+  image: centos:latest
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
     - python ./waf configure --refclock=all build check
