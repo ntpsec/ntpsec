@@ -477,3 +477,23 @@ debian-stable-refclocks-32bit:
     - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
+
+debian-stable-mDNS-basic:
+  <<: *job_definition
+  image: debian:stable-slim
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev libavahi-compat-libdnssd-dev
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+debian-stable-mDNS-refclocks:
+  <<: *job_definition
+  image: debian:stable-slim
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev libavahi-compat-libdnssd-dev
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
