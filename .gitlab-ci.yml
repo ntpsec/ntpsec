@@ -457,3 +457,23 @@ openSUSE-tumbleweed-refclocks:
     - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
+
+debian-stable-basic-32bit:
+  <<: *job_definition
+  image: i386/debian:stable-slim
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+debian-stable-refclocks-32bit:
+  <<: *job_definition
+  image: i386/debian:stable-slim
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
