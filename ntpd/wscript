@@ -121,7 +121,7 @@ def build(ctx):
         source=ntpd_source,
         target="ntpd",
         use="libntpd_obj ntp M parse RT CAP SECCOMP PTHREAD NTPD "
-            "CRYPTO DNS_SD DNS_SD_INCLUDES %s SOCKET NSL SCF" % use_refclock,
+            "CRYPTO DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
 
     ctx.manpage(8, "ntpd-man.txt")

@@ -42,7 +42,7 @@ static	void	finish_safe	(int)
 # include <ulimit.h>
 #endif /* SIGDANGER */
 
-#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+#if defined(HAVE_DNS_SD_H)
 # include <dns_sd.h>
 static DNSServiceRef mdns;
 #endif
@@ -64,7 +64,7 @@ static bool dumpopts;
 static long wait_sync = -1;
 static const char *driftfile, *pidfile;
 
-#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+#if defined(HAVE_DNS_SD_H)
 /*
  * mDNS registration flag. If set, we attempt to register with the
  * mDNS system, but only after we have synched the first time. If the
@@ -73,7 +73,7 @@ static const char *driftfile, *pidfile;
  */
 static bool mdnsreg = false;
 int mdnstries = 5;
-#endif  /* ENABLE_MDNS_REGISTRATION */
+#endif  /* HAVE_DNS_SD_H */
 
 static bool droproot = false;
 static char *user;		/* User to switch to */
@@ -291,9 +291,9 @@ parse_cmdline_opts(
 		listen_to_virtual_ips = false;
 		break;
 	    case 'm':
-#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+#if defined(HAVE_DNS_SD_H)
 		mdnsreg = true;
-#endif  /* ENABLE_MDNS_REGISTRATION */
+#endif  /* HAVE_DNS_SD_H */
 		break;
 	    case 'M':
 		/* defer */
@@ -852,10 +852,10 @@ ntpdmain(
 		fprintf(stdout, "logfile \"%s\";\n", logfilename);
 	    fprintf(stdout, "#listen_to_virtual_ips = %s\n",
 		    listen_to_virtual_ips ? "true" : "false");
-#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+#if defined(HAVE_DNS_SD_H)
 	    fprintf(stdout, "#mdnsreg = %s\n",
 		    mdnsreg ? "true" : "false");
-#endif  /* ENABLE_MDNS_REGISTRATION */
+#endif  /* HAVE_DNS_SD_H */
 	    if (pidfile)
 		fprintf(stdout, "pidfile \"%s\";\n", pidfile);
 	    /* FIXME: dump priority */
@@ -1014,7 +1014,7 @@ static void mainloop(void)
 		 * Go around again
 		 */
 
-# if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+# if defined(HAVE_DNS_SD_H)
 		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_vars.sys_leap != LEAP_NOTINSYNC) {
 			mdnsreg = current_time;
 			msyslog(LOG_INFO, "INIT: Attempting to register mDNS");
@@ -1030,7 +1030,7 @@ static void mainloop(void)
 				mdnsreg = false;
 			}
 		}
-# endif /* ENABLE_MDNS_REGISTRATION */
+# endif /* HAVE_DNS_SD_H */
 
 	}
 }
@@ -1052,7 +1052,7 @@ finish_safe(
 	msyslog(LOG_NOTICE, "ERR: %s exiting on signal %d (%s)", progname,
 		sig, sig_desc);
 	/* See Classic Bugs 2513 and Bug 2522 re the unlink of PIDFILE */
-# if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+# if defined(HAVE_DNS_SD_H)
 	if (mdns != NULL)
 		DNSServiceRefDeallocate(mdns);
 # endif

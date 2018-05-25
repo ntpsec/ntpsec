@@ -2239,11 +2239,11 @@ config_mdnstries(
 	config_tree *ptree
 	)
 {
-#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+#if defined(HAVE_DNS_SD_H)
 	mdnstries = ptree->mdnstries;
 #else
 	UNUSED_ARG(ptree);
-#endif  /* ENABLE_MDNS_REGISTRATION */
+#endif  /* HAVE_DNS_SD_H */
 }
 
 static void

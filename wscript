@@ -675,7 +675,6 @@ int main(int argc, char **argv) {
     optional_headers = (
         "alloca.h",
         ("arpa/nameser.h", ["sys/types.h"]),
-        "dns_sd.h",         # NetBSD, Apple, mDNS
         "bsd/string.h",     # bsd emulation
         ("ifaddrs.h", ["sys/types.h"]),
         ("linux/if_addr.h", ["sys/socket.h"]),
@@ -826,16 +825,12 @@ int main(int argc, char **argv) {
     check_pthread_header_lib(ctx)
 
     if not ctx.options.disable_mdns_registration:
-        from wafhelpers.check_mdns import check_mdns_header
-        check_mdns_header(ctx)
+        ctx.check_cc(header_name="dns_sd.h", lib="dns_sd", mandatory=False,
+                     uselib_store="DNS_SD")
 
     if not ctx.options.disable_dns_lookup:
         from wafhelpers.check_pthread import check_pthread_run
         check_pthread_run(ctx)
-
-    if not ctx.options.disable_mdns_registration:
-        from wafhelpers.check_mdns import check_mdns_run
-        check_mdns_run(ctx)
 
     # Solaris needs -lsocket and -lnsl for socket code
     if ctx.env.DEST_OS == "sunos":
