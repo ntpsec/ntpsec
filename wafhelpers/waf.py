@@ -1,5 +1,3 @@
-import re
-
 from waflib.Configure import conf
 from waflib.TaskGen import before_method, feature, re_m4
 

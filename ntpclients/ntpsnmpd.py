@@ -9,7 +9,6 @@ import getopt
 import time
 import socket
 import subprocess
-import shlex
 
 try:
     import ntp.packet

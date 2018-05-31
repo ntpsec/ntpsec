@@ -13,7 +13,6 @@ import select
 import sys
 import getpass
 import jigs
-import time
 
 odict = ntp.util.OrderedDict
 

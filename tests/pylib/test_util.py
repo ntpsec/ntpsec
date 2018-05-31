@@ -6,7 +6,6 @@ from __future__ import print_function
 import unittest
 import ntp.util
 import ntp.packet
-import shutil
 import sys
 import socket
 
