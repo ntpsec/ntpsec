@@ -439,6 +439,10 @@ static const uint8_t def_sys_var[] = {
 	CS_TAI,
 	CS_LEAPTAB,
 	CS_LEAPEND,
+#ifdef ENABLE_LEAP_SMEAR
+	CS_LEAPSMEARINTV,
+	CS_LEAPSMEAROFFS,
+#endif	/* ENABLE_LEAP_SMEAR */
 	0
 };
 
