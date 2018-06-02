@@ -488,3 +488,55 @@ cross-build:
     - ubuntu-1604-lts
   only:
     - branches@NTPsec/ntpsec
+
+gentoo-basic:
+  <<: *job_definition
+  image: gentoo/stage3-amd64
+  script:
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2.md5sum
+    - md5sum -c portage-latest.tar.bz2.md5sum
+    - tar -xjf portage-latest.tar.bz2 -C /usr
+    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+gentoo-refclocks:
+  <<: *job_definition
+  image: gentoo/stage3-amd64
+  script:
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2.md5sum
+    - md5sum -c portage-latest.tar.bz2.md5sum
+    - tar -xjf portage-latest.tar.bz2 -C /usr
+    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
+
+gentoo-hardened-basic:
+  <<: *job_definition
+  image: gentoo/stage3-amd64-hardened
+  script:
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2.md5sum
+    - md5sum -c portage-latest.tar.bz2.md5sum
+    - tar -xjf portage-latest.tar.bz2 -C /usr
+    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
+    - python ./waf configure build check
+  tags:
+    - gitlab-org
+
+gentoo-hardened-refclocks:
+  <<: *job_definition
+  image: gentoo/stage3-amd64-hardened
+  script:
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+    - wget -q http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2.md5sum
+    - md5sum -c portage-latest.tar.bz2.md5sum
+    - tar -xjf portage-latest.tar.bz2 -C /usr
+    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
+    - python ./waf configure --refclock=all build check
+  tags:
+    - gitlab-org
