@@ -885,7 +885,7 @@ int main(int argc, char **argv) {
     msg_setting("PREFIX", ctx.env.PREFIX)
     msg_setting("Droproot Support", droproot_type)
     msg_setting("Debug Support", yesno(ctx.options.enable_debug))
-    msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
+    msg_setting("Refclocks", ", ".join(sorted(ctx.env.REFCLOCK_LIST)))
     msg_setting("Build Manpages",
                 yesno(ctx.env.ENABLE_DOC and not ctx.env.DISABLE_MANPAGE))
 
