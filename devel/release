@@ -3,7 +3,7 @@
 #
 # VERSION must contain the correct release number.
 
-KEY=477C7528	# Release manager's GPG key ID
+KEY=161C3978	# Release manager's GPG key ID
 DST=markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
 
 # No user-serviceable parts below this line
