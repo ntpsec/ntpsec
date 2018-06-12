@@ -10,10 +10,14 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository Head ==
+== 2018-06-11: 1.1.1 ==
 
-Log timestamps now include the year.  This is useful when investigating bugs
-involving time-setting and -g.
+Log timestamps now include the year.  This is useful when
+investigating bugs involving time-setting and -g.
+
+Many internal cleanups to clear the way for upcoming major features.
+They should generally not be user visible.  Refer to the git-log if
+you are interested.
 
 == 2018-03-14: 1.1.0 ==
 

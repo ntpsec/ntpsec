@@ -581,7 +581,7 @@ MODE6:: Processing of Mode 6 requests
 == Release Checklist ==
 
 This is the release checklist to be used by the project manager to cut
-each 0.9.X release.
+each release.
 
 . Decide that it is time to cut a release.  This decision can be driven
   by landing a significant new feature, landing a critical fix, or just
@@ -599,7 +599,7 @@ each 0.9.X release.
   regressions on the supported platforms.
 
 . Modify the .../VERSION file with the new version number.
-  Version number strings look like "0.9.1"
+  Version number strings look like "1.1.1"
 
 . Modify the .../NEWS file, changing the "Repository head".
   to the current date and the version string.
