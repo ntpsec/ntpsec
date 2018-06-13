@@ -9,6 +9,7 @@
 #include "ntpd.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
+#include "ntp_auth.h"
 
 
 /*
@@ -553,7 +554,13 @@ newpeer(
 	)
 {
 	struct peer *	peer;
-	unsigned int		hash;
+	unsigned int	hash;
+	const char *	name;	/* for error messages */
+
+	if (NULL != hostname)
+		name = hostname;
+	else
+		name = socktoa(srcadr);
 
 	/*
 	 * First search from the beginning for an association with given
@@ -589,10 +596,7 @@ newpeer(
 	 * associations.
 	 */
 	if (peer != NULL) {
-		DPRINT(2, ("newpeer(%s) found existing association\n",
-			   (hostname)
-			   ? hostname
-			   : socktoa(srcadr)));
+		DPRINT(2, ("newpeer(%s) found existing association\n", name));
 		return NULL;
 	}
 
@@ -655,6 +659,16 @@ newpeer(
 	 */
 	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
 		enable_broadcast(peer->dstadr, srcadr);
+
+	/* if a key specified, verify that it will work */
+	if (0 != peer->cfg.peerkey) {
+		if (NULL == authlookup(peer->cfg.peerkey, false))
+			msyslog(LOG_ERR, "ERR: key %u not found for server %s",
+				peer->cfg.peerkey, name);
+		else if (NULL == authlookup(peer->cfg.peerkey, true))
+			msyslog(LOG_ERR, "ERR: key %u found but not trusted for server %s",
+				peer->cfg.peerkey, name); 
+		}
 
 	peer->precision = sys_vars.sys_precision;
 	peer->hpoll = peer->cfg.minpoll;
