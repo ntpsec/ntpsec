@@ -12,6 +12,7 @@
 #include "ntp_config.h"
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
+#include "ntp_auth.h"
 #ifdef ENABLE_DNS_LOOKUP
 #include "ntp_dns.h"
 #endif
@@ -663,7 +664,7 @@ ntpdmain(
 	 * Exactly what command-line options are we expecting here?
 	 */
 	ssl_init();
-	init_auth();
+	auth_init();
 	init_util();
 	init_restrict();
 	init_mon();

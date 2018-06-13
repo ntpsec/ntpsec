@@ -508,13 +508,18 @@ The contents of the MAC trailer consists of:
 
 1. The 32-bit identifier of the signing key in network byte order.
 
-2. A cryptographic hash of the following octet spans, in order.
-First, the password entered to use the signing key, then the request
-header fields, then the payload.
+2a. In digest mode, a cryptographic hash of the following octet spans,
+in order. First, the password entered to use the signing key, then the
+request header fields, then the payload.
 
-The cryptographic hash is 16 octets for MD5 and 20 octets for SHA1.
-Longer digests don't work yet.  2018-Jan-06
-FIXME:  long digests
+2b. In CMAC mode, a cryptographic hash of the packet header and
+payload with the crypto algorithim using the key.
+
+The cryptographic hash is 16 octets for MD5 and AES and 20 octets for SHA1.
+Longer digests are truncated.
+
+The key length for AES is 16 bytes.  Longer keys are truncated.  Shorter
+keys are padded with 0s.  MD5 and SHA1 can use any key length.
 
 == Compatibility Notes ==
 

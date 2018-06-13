@@ -33,6 +33,7 @@
 #include "lib_strbuf.h"
 #include "ntp_assert.h"
 #include "ntp_dns.h"
+#include "ntp_auth.h"
 
 /*
  * [Classic Bug 467]: Some linux headers collide with CONFIG_PHONE and
@@ -1135,7 +1136,7 @@ config_auth(
 	}
 	if (0 < count)
 		msyslog(LOG_INFO, "Found %d trusted keys.", count);
-	auth_prealloc_symkeys(count);
+	auth_prealloc(count);
 
 	/* Keys Command */
 	if (ptree->auth.keys)
@@ -2897,7 +2898,7 @@ config_reset_counters(
 			break;
 
 		case T_Auth:
-			reset_auth_stats();
+			auth_reset_stats(current_time);
 			break;
 
 		case T_Ctl:

@@ -38,20 +38,8 @@ extern	int	change_logfile	(const char *, bool);
 extern	void	reopen_logfile  (void);
 extern	void	setup_logfile	(const char *);
 
-/* authkeys.c */
-extern	void	auth_delkeys	(void);
-extern	bool	authdecrypt	(keyid_t, uint32_t *, int, int);
-extern	int	authencrypt	(keyid_t, uint32_t *, int);
-extern	bool	authhavekey	(keyid_t);
-extern	bool	authistrusted	(keyid_t);
-extern	bool	authreadkeys	(const char *);
-extern	void	authtrust	(keyid_t, bool);
-extern	bool	authusekey	(keyid_t, int, const uint8_t *);
-
 extern	int	clocktime	(int, int, int, int, int, time_t, uint32_t, uint32_t *, uint32_t *);
-extern	void	init_auth	(void);
 extern	void	init_network	(void);
-extern	void	auth_prealloc_symkeys(int);
 extern	int	ymd2yd		(int, int, int);
 
 /* getopt.c */
@@ -68,9 +56,6 @@ int ntp_getopt_long(int argc, char* const argv[], const char *optstring,
 		    const struct option *longopts, int *longindex);
 
 /* mac_md5encrypt.c */
-extern	bool	mac_authdecrypt	(int, uint8_t *, int, uint32_t *, int, int);
-extern	int	mac_authencrypt	(int, uint8_t *, int, uint32_t *, int);
-extern	void	mac_setkey	(keyid_t, int, const uint8_t *, size_t);
 extern	uint32_t	addr2refid	(sockaddr_u *);
 
 /* emalloc.c */
@@ -132,16 +117,6 @@ extern	void	getauthkeys 	(const char *);
 /*
  * Variable declarations for libntp.
  */
-
-/* authkeys.c */
-extern unsigned int	authkeynotfound;	/* keys not found */
-extern unsigned int	authkeylookups;		/* calls to lookup keys */
-extern unsigned int	authnumkeys;		/* number of active keys */
-extern unsigned int	authkeyuncached;	/* cache misses */
-extern unsigned int	authencryptions;	/* calls to encrypt */
-extern unsigned int	authdecryptions;	/* calls to decrypt */
-
-extern int	authnumfreekeys;
 
 /* getopt.c */
 extern char *	ntp_optarg;		/* global argument pointer */

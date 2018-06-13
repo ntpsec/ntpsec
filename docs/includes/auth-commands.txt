@@ -9,7 +9,7 @@
 
 [[keys]]
 +keys+ _keyfile_::
-  Specifies the complete path and location of the MD5/SHA1 key file
+  Specifies the complete path and location of the key file
   containing the keys and key identifiers used by {ntpdman},
   and {ntpqman} when operating with symmetric-key cryptography.
   This is the same operation as the +-k+ command line option.

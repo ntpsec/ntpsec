@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #include <openssl/opensslv.h>
@@ -67,6 +68,7 @@ static void ssl_init(void)
 {
   ERR_load_crypto_strings();
   OpenSSL_add_all_digests();
+  OpenSSL_add_all_ciphers();
   ctx = EVP_MD_CTX_new();
 #if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
   cmac = CMAC_CTX_new();
@@ -93,7 +95,7 @@ static unsigned int SSL_Digest(
 static unsigned int SSL_DigestSlow(
   int type,               /* hash algorithm */
   uint8_t *key,           /* key pointer */
-  int     keylength,       /* key size */
+  int     keylength,      /* key size */
   uint8_t *pkt,           /* packet pointer */
   int     pktlength       /* packet length */
 ) {

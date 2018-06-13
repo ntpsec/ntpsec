@@ -154,9 +154,16 @@ special message called a _crypto-NAK_. Since the crypto-NAK is protected
 by the loopback test, an intruder cannot disrupt the protocol by sending
 a bogus crypto-NAK.
 
-MD5 digests are 16 bytes.  SHA1 digests are 20 bytes.
-Longer digests don't work yet.  2018-Jan-07
-FIXME: long digests
++ntpd+'s digest mode can use any digest supported by libcrypto
+from the OpenSSL project.  MD5 digests are 16 bytes.  SHA1 digests are 20 bytes.
+Longer digests are truncated.
+
++ntpd+'s mode can use any cypher with a CBC mode that is supported by
+libcrypto from the OpenSSL project.  AES is short for AES-128.
+AES needs a 16 byte key.  Longer keys are truncated.  Shorter
+keys are padded with 0s.  AES MACs are 16 bytes long.  MACs longer
+than 20 bytes will be truncated.
+
 
 Keys and related information are specified in a keys file, which must be
 distributed and stored using secure means beyond the scope of the NTP

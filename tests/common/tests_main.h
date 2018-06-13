@@ -7,6 +7,7 @@
 #include "unity_fixture.h"
 
 #include "ntp_stdlib.h"
+#include "ntp_auth.h"
 
 const char* tests_main_args(int arg);
 

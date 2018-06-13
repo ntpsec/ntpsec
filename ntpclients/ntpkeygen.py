@@ -10,9 +10,12 @@
 # association maintained by soft links. Following is a list of file
 # types.
 #
-# ntpkey_MD5key_<hostname>.<filestamp>
-# MD5 (128-bit) keys used to compute message digests in symmetric
-# key cryptography
+# ntpkey_AES_<hostname>.<filestamp>
+# AES (128-bit) keys used to compute CMAC mode authentcation
+# using shared key cryptography
+
+# The file can be edited by hand to support MD5 and SHA1 for
+# old digest mode authentcation.
 
 from __future__ import print_function
 
@@ -27,27 +30,27 @@ import stat
 #
 # Cryptodefines
 #
-MD5KEYS = 10    # number of keys generated of each type
-MD5SIZE = 20    # maximum key size
+NUMKEYS = 10    # number of keys generated of each type
+KEYSIZE = 16    # maximum key size
 
 
-def gen_md5(id, groupname):
-    "Generate semi-random MD5 and SHA1 keys compatible with NTPv3 and NTPv4."
-    with fheader("MD5key", id, groupname) as wp:
-        for i in range(1, MD5KEYS+1):
-            md5key = ""
-            for j in range(MD5SIZE):
+def gen_keys(id, groupname):
+    "Generate semi-random AES keys for versions of ntpd with CMAC support."
+    with fheader("AES", id, groupname) as wp:
+        for i in range(1, NUMKEYS+1):
+            key = ""
+            for j in range(KEYSIZE):
                 while True:
                     r = randomizer.randint(0x21, 0x7e)
                     if r != ord('#'):
                         break
-                md5key += chr(r)
-            wp.write("%2d MD5 %s\n" % (i, md5key))
-        for i in range(1, MD5KEYS+1):
-            sha1key = ""
-            for j in range(MD5SIZE):
-                sha1key += "%02x" % randomizer.randint(0x00, 0xff)
-            wp.write("%2d SHA1 %s\n" % (i + MD5KEYS, sha1key))
+                key += chr(r)
+            wp.write("%2d AES %s\n" % (i, key))
+        for i in range(1, NUMKEYS+1):
+            key = ""
+            for j in range(KEYSIZE):
+                key += "%02x" % randomizer.randint(0x00, 0xff)
+            wp.write("%2d AES %s\n" % (i + NUMKEYS, key))
 
 
 #
@@ -85,16 +88,16 @@ if __name__ == '__main__':
 
     for (switch, val) in options:
         if switch == '-M':
-            # dummy MD5 option for backwards compatibility
+            # dummy MD5 option for backwards compatibility, ignored
             pass
         elif switch in ("-h", "--help"):
-            print("usage: ntpkeygen [-M]")
+            print("usage: ntpkeygen")
             raise SystemExit(0)
 
     # The seed is ignored by random.SystemRandom,
     # even though the docs do not say so.
     randomizer = random.SystemRandom()
-    gen_md5("md5", socket.gethostname())
+    gen_keys("AES", socket.gethostname())
     raise SystemExit(0)
 
 # end

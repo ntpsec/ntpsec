@@ -1405,6 +1405,8 @@ function: show ntpd access control list
 usage: reslist
 """)
 
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_sysinfo(self, _line):
         "display system summary"
         sysinfo = (
@@ -1431,6 +1433,8 @@ function: display system summary
 usage: sysinfo
 """)
 
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_kerninfo(self, _line):
         "display kernel loop and PPS statistics"
         kerninfo = (
@@ -1459,6 +1463,8 @@ function: display kernel loop and PPS statistics
 usage: kerninfo
 """)
 
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_sysstats(self, _line):
         "display system uptime and packet counts"
         sysstats = (
@@ -1484,6 +1490,8 @@ function: display system uptime and packet counts
 usage: sysstats
 """)
 
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_monstats(self, _line):
         "display monitor (mrulist) counters and limits"
         monstats = (
@@ -1511,18 +1519,28 @@ function: display monitor (mrulist) counters and limits
 usage: monstats
 """)
 
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_authinfo(self, _line):
         "display symmetric authentication counters"
         authinfo = (
-            ("authreset", "time since reset:", NTP_INT),
-            ("authkeys", "stored keys:     ", NTP_INT),
-            ("authfreek", "free keys:       ", NTP_INT),
-            ("authklookups", "key lookups:     ", NTP_INT),
-            ("authknotfound", "keys not found:  ", NTP_INT),
-            ("authkuncached", "uncached keys:   ", NTP_INT),
-            ("authkexpired", "expired keys:    ", NTP_INT),
-            ("authencrypts", "encryptions:     ", NTP_INT),
-            ("authdecrypts", "decryptions:     ", NTP_INT),
+            ("authreset",          "time since reset:    ", NTP_INT),
+            ("authkeys",           "stored keys:         ", NTP_INT),
+            ("authfreek",          "free keys:           ", NTP_INT),
+            ("authklookups",       "key lookups:         ", NTP_INT),
+            ("authknotfound",      "keys not found:      ", NTP_INT),
+            ("authencrypts",       "encryptions:         ", NTP_INT),
+            ("authdigestencrypts", "digest encryptions:  ", NTP_INT),
+            ("authcmacencrypts",   "CMAC encryptions:    ", NTP_INT),
+            ("authdecrypts",       "decryptions:         ", NTP_INT),
+            ("authdigestdecrypts", "digest decryptions:  ", NTP_INT),
+            ("authdigestfails",    "digest failures:     ", NTP_INT),
+            ("authcmacdecrypts",   "CMAC decryptions:    ", NTP_INT),
+            ("authcmacfails",      "CMAC failures:       ", NTP_INT),
+        # Old variables no longer supported.
+        # Interesting if looking at an old system.
+            ("authkuncached",      "uncached keys:       ", NTP_INT),
+            ("authkexpired",       "expired keys:        ", NTP_INT),
         )
         self.collect_display(associd=0, variables=authinfo, decodestatus=False)
 
@@ -1532,6 +1550,8 @@ function: display symmetric authentication counters
 usage: authinfo
 """)
 
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_iostats(self, _line):
         "display network input and output counters"
         iostats = (
@@ -1556,6 +1576,8 @@ function: display network input and output counters
 usage: iostats
 """)
 
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_timerstats(self, line):
         "display interval timer counters"
         timerstats = (

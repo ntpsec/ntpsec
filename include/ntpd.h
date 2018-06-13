@@ -226,7 +226,6 @@ extern char *ntp_signd_socket;
 
 /* ntp_control.c */
 extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
-extern	void	reset_auth_stats(void);
 
 /*
  * Other statistics of possible interest

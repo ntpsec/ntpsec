@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include <openssl/evp.h>
+#include <openssl/cmac.h>
 
 #ifndef EVP_MD_CTX_new
 /* Slightly older version of OpenSSL */
@@ -23,6 +24,7 @@ static void	atexit_ssl_cleanup(void);
 
 static bool ssl_init_done;
 EVP_MD_CTX *digest_ctx;
+CMAC_CTX *cmac_ctx;
 
 void
 ssl_init(void)
@@ -32,10 +34,12 @@ ssl_init(void)
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	OpenSSL_add_all_digests();
+	OpenSSL_add_all_ciphers();
 	atexit(&atexit_ssl_cleanup);
 #endif
 
 	digest_ctx = EVP_MD_CTX_new();
+	cmac_ctx = CMAC_CTX_new();
 	ssl_init_done = true;
 }
 

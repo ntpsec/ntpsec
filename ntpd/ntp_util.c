@@ -11,6 +11,7 @@
 #include "ntp_leapsec.h"
 #include "ntp_stdlib.h"
 #include "ntp_stdlib.h"
+#include "ntp_auth.h"
 #include "ntpd.h"
 #include "timespecops.h"
 

@@ -78,7 +78,7 @@ static void RunAllTests(void)
 int main(int argc, const char * argv[]) {
 
 	ssl_init();
-	init_auth();
+	auth_init();
 	init_network();
 
 	args_argc = argc;

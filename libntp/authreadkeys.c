@@ -9,9 +9,14 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 #include "lib_strbuf.h"
+#include "ntp_auth.h"
 
 #include <openssl/objects.h>
 #include <openssl/evp.h>
+
+#include <openssl/cmac.h>
+
+#define NAMEBUFSIZE 100
 
 /* Forwards */
 static char *nexttok (char **);
@@ -59,26 +64,153 @@ nexttok(
 	return starttok;
 }
 
+static char*
+try_cmac(const char *upcased, char* namebuf) {
+	strncpy(namebuf, upcased, NAMEBUFSIZE);
+	if ((strcmp(namebuf, "AES") == 0) || (strcmp(namebuf, "AES128CMAC") == 0))
+		strncpy(namebuf, "AES-128", NAMEBUFSIZE);
+	strlcat(namebuf, "-CBC", NAMEBUFSIZE);
+	namebuf[NAMEBUFSIZE-1] = '\0';
+	if (0) msyslog(LOG_INFO, "DEBUG try_cmac: %s=>%s", upcased, namebuf);
+	if (EVP_get_cipherbyname(namebuf) == NULL)
+		return NULL;
+	return namebuf;
+}
+
+static char*
+try_digest(char *upcased, char *namebuf) {
+	strncpy(namebuf, upcased, NAMEBUFSIZE);
+	if (EVP_get_digestbyname(namebuf) != NULL)
+	  return namebuf;
+	if ('M' == upcased[0]) {
+		/* hack for backward compatibility */
+		strncpy(namebuf, "MD5", NAMEBUFSIZE);
+		if (EVP_get_digestbyname(namebuf) != NULL)
+	 		return namebuf;
+	}
+	return NULL;
+}
 
 static void
-check_digest_length(
+check_digest_mac_length(
 	keyid_t keyno,
-	int keytype,
 	char *name) {
     unsigned char digest[EVP_MAX_MD_SIZE];
     unsigned int length = 0;
     EVP_MD_CTX *ctx;
     const EVP_MD *md;
 
-    md = EVP_get_digestbynid(keytype);
+    md = EVP_get_digestbyname(name);
     ctx = EVP_MD_CTX_create();
     EVP_DigestInit_ex(ctx, md, NULL);
     EVP_DigestFinal_ex(ctx, digest, &length);
     EVP_MD_CTX_destroy(ctx);
 
-    if (MAX_BARE_DIGEST_LENGTH < length) {
+    if (MAX_BARE_MAC_LENGTH < length) {
 	msyslog(LOG_ERR, "AUTH: authreadkeys: digest for key %u, %s will be truncated.", keyno, name);
     }
+}
+
+static void
+check_cmac_mac_length(
+	keyid_t keyno,
+	char *name) {
+    unsigned char mac[CMAC_MAX_MAC_LENGTH+1024];
+    size_t length = 0;
+    char key[EVP_MAX_KEY_LENGTH];  /* garbage is OK */
+    CMAC_CTX *ctx;
+    const EVP_CIPHER *cipher = EVP_get_cipherbyname(name);
+
+    ctx = CMAC_CTX_new();
+    CMAC_Init(ctx, key, EVP_CIPHER_key_length(cipher), cipher, NULL);
+    CMAC_Final(ctx, mac, &length);
+    CMAC_CTX_free(ctx);
+
+    /* CMAC_MAX_MAC_LENGTH isn't in API
+     * Check here to avoid buffer overrun in cmac_decrypt and cmac_encrypt
+     */
+    if (CMAC_MAX_MAC_LENGTH < length) {
+	msyslog(LOG_ERR,
+		"AUTH: authreadkeys: CMAC for key %u, %s is too big: %lu",
+		keyno, name, (long unsigned int)length);
+	exit(1);
+    }
+
+    if (MAX_BARE_MAC_LENGTH < length) {
+	msyslog(LOG_ERR, "AUTH: authreadkeys: CMAC for key %u, %s will be truncated.", keyno, name);
+    }
+}
+
+/* check_mac_length - Check for CMAC/digest too long.
+ * maybe should check for too short.
+ */
+static void
+check_mac_length(
+	keyid_t keyno,
+	AUTH_Type type,
+	char * name,
+	char *upcased) {
+    switch (type) {
+	case AUTH_CMAC:
+	    check_cmac_mac_length(keyno, name);
+	    break;
+    	case AUTH_DIGEST:
+	    check_digest_mac_length(keyno, name);
+	    break;
+    	case AUTH_NONE:
+	    msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u, %s", keyno, upcased);
+    }
+}
+
+/* check_cmac_key_length: check and fix CMAC key length
+ * Ciphers require a specific key length.
+ * Truncate or pad if necessary.
+ * This may modify the key string - assumes enough storage.
+ * AES-128 is 128 bits or 16 bytes.
+ */
+static int
+check_cmac_key_length(
+	keyid_t keyno,
+	char *name,
+	char *key,
+	int keylength) {
+    const EVP_CIPHER *cipher = EVP_get_cipherbyname(name);
+    int len = EVP_CIPHER_key_length(cipher);
+    int i;
+
+    if (len < keylength) {
+	    msyslog(LOG_ERR, "AUTH: CMAC key %u will be truncated %d=>%d",
+		keyno, keylength, len);
+    } else if ( len > keylength) {
+	    msyslog(LOG_ERR, "AUTH: CMAC key %u will be padded %d=>%d",
+		keyno, keylength, len);
+	    for (i=keylength; i<len; i++) key[i] = 0;
+    } else {
+	    if (0) msyslog(LOG_ERR, "AUTH: CMAC key %u is right size", keyno);
+    }
+
+    return len;
+}
+
+static int
+check_key_length(
+	keyid_t keyno,
+	AUTH_Type type,
+	char *name,
+	char *key,
+	int keylength) {
+    int length = keylength;
+    switch (type) {
+	case AUTH_CMAC:
+	    length = check_cmac_key_length(keyno, name, key, keylength);
+	    break;
+    	case AUTH_DIGEST:
+	    /* any length key works */
+	    break;
+    	case AUTH_NONE:
+	    msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u", keyno);
+    }
+    return length;
 }
 
 
@@ -93,9 +225,11 @@ authreadkeys(
 	FILE	*fp;
 	char	*line;
 	keyid_t	keyno;
-	int	keytype;
+	AUTH_Type type;
 	char	buf[512];		/* lots of room for line */
 	uint8_t	keystr[32];		/* Bug 2537 */
+	char *	name;
+	char	namebuf[NAMEBUFSIZE];
 	size_t	len;
 	size_t	j;
 	int	keys = 0;
@@ -120,7 +254,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 	/*
 	 * Now read lines from the file, looking for key entries
 	 */
-	while ((line = fgets(buf, sizeof buf, fp)) != NULL) {
+	while ((line = fgets(buf, sizeof(buf), fp)) != NULL) {
 		char *token = nexttok(&line);
 		if (token == NULL)
 			continue;
@@ -143,7 +277,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		}
 
 		/*
-		 * Next is keytype. See if that is all right.
+		 * Next is CMAC or Digest type. See if that is all right.
 		 */
 		token = nexttok(&line);
 		if (token == NULL) {
@@ -152,15 +286,24 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 			continue;
 		}
 		/*
-		 * The key type is the NID used by the message digest 
-		 * algorithm. There are a number of inconsistencies in
-		 * the OpenSSL database. We attempt to discover them
-		 * here and prevent use of inconsistent data later.
+		 * This area used to pass around nids.
+		 * There is a bug in older versions of libcrypt
+		 * where some nid routine doesn't work so AES
+		 * didn't work on old CentOS, NetBSD, or FreeBSD.
+		 * 2018-Jun-08
 		 *
-		 * OpenSSL digest short names are capitalized, so uppercase the
-		 * digest name before passing to OBJ_sn2nid().  If it is not
-		 * recognized but begins with 'M' use NID_md5 to be consistent
-		 * with past behavior.
+		 * OpenSSL names are capitalized.
+		 * So uppercase the name before passing to
+		 * EVP_get_digestbyname() or EVP_get_cipherbyname().
+		 *
+		 * AES is short for AES-128.
+		 * CMAC names get "-CBC" appended.
+		 * ntp classic uses AES128CMAC, so we support that too.
+		 *
+		 * If it is not recognized but begins with 'M' use
+		 * NID_md5 digest to be consistent with past behavior.
+		 * Try CMAC names first to dodge this hack in case future
+		 * cipher names begin with M.
 		 */
 		char *upcased;
 		char *pch;
@@ -169,27 +312,31 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		for (pch = upcased; '\0' != *pch; pch++)
 			*pch = (char)toupper((unsigned char)*pch);
 
-		keytype = OBJ_sn2nid(upcased);
-		if ((NID_undef == keytype) && ('M' == upcased[0]))
-			keytype = NID_md5;
-		if (NID_undef == keytype) {
-			msyslog(LOG_ERR,
-			    "AUTH: authreadkeys: invalid type for key %u, %s",
-				keyno, token);
-			continue;
+		name = NULL;
+		if (NULL == name) {
+			name = try_cmac(upcased, namebuf);
+			if (NULL != name)
+				type = AUTH_CMAC;
 		}
-		if (EVP_get_digestbynid(keytype) == NULL) {
-			msyslog(LOG_ERR,
-			    "AUTH: authreadkeys: no algorithm for key %u, %s",
-				keyno, token);
-			continue;
+		if (NULL == name) {
+			name = try_digest(upcased, namebuf);
+			if (NULL != name)
+				type = AUTH_DIGEST;
 		}
+                if (NULL == name) {
+			msyslog(LOG_ERR,
+			    "AUTH: authreadkeys: unknown auth type %u, %s",
+				keyno, token);
+                        continue;
+                }
+
+
 
 		/*
-		 * Finally, get key and insert it. If it is longer than 20
-		 * characters, it is a binary string encoded in hex;
-		 * otherwise, it is a text string of printable ASCII
-		 * characters.
+		 * Finally, get key and insert it.
+		 * If it is longer than 20 characters, it is a binary
+		 * string encoded in hex; otherwise, it is a text string
+		 * of printable ASCII characters.
 		 */
 		token = nexttok(&line);
 		if (token == NULL) {
@@ -199,8 +346,9 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		}
 		len = strlen(token);
 		if (len <= 20) {	/* Bug 2537 */
-			check_digest_length(keyno, keytype, upcased);
-			mac_setkey(keyno, keytype, (uint8_t *)token, len);
+			len = check_key_length(keyno, type, name, upcased, len);
+			check_mac_length(keyno, type, name, upcased);
+			auth_setkey(keyno, type, name, (uint8_t *)token, len);
 			keys++;
 		} else {
 			char	hex[] = "0123456789abcdef";
@@ -230,8 +378,10 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 				keyno);
 			    continue;
 			}
-			check_digest_length(keyno, keytype, upcased);
-			mac_setkey(keyno, keytype, keystr, jlim / 2);
+			len = jlim / 2;
+			len = check_key_length(keyno, type, name, upcased, len);
+			check_mac_length(keyno, type, name, upcased);
+			auth_setkey(keyno, type, name, keystr, len);
 			keys++;
 		}
 	}

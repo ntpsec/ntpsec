@@ -1,5 +1,6 @@
 #include "config.h"
 #include "ntp_stdlib.h"
+#include "ntp_auth.h"
 
 #include "unity.h"
 #include "unity_fixture.h"
@@ -26,19 +27,15 @@ TEST_TEAR_DOWN(authkeys) {}
 
 
 
-static const int KEYTYPE = NID_md5;
-
-
 static void AddTrustedKey(keyid_t);
 static void AddUntrustedKey(keyid_t);
 
 static void AddTrustedKey(keyid_t keyno) {
 	/*
-	 * We need to add a MD5-key in addition to setting the
-	 * trust, because authhavekey() requires type != 0.
+	 * We need to add a type and key in addition to setting the
+	 * trust, because authlookup() requires type != AUTH_NONE.
 	 */
-	mac_setkey(keyno, KEYTYPE, NULL, 0);
-
+	auth_setkey(keyno, AUTH_DIGEST, "MD5", NULL, 0);
 	authtrust(keyno, true);
 }
 
@@ -54,16 +51,24 @@ TEST(authkeys, AddTrustedKeys) {
 	AddTrustedKey(KEYNO1);
 	AddTrustedKey(KEYNO2);
 
-	TEST_ASSERT_TRUE(authistrusted(KEYNO1));
-	TEST_ASSERT_TRUE(authistrusted(KEYNO2));
+	TEST_ASSERT_NOT_NULL(authlookup(KEYNO1, true));
+	TEST_ASSERT_NOT_NULL(authlookup(KEYNO1, false));
+	TEST_ASSERT_NOT_NULL(authlookup(KEYNO2, true));
+	TEST_ASSERT_NOT_NULL(authlookup(KEYNO2, false));
 }
 
 TEST(authkeys, AddUntrustedKey) {
 	const keyid_t KEYNO = 3;
 
-	AddUntrustedKey(KEYNO);
+	AddUntrustedKey(KEYNO);  /* gets type of AUTH_NULL */
 
-	TEST_ASSERT_FALSE(authistrusted(KEYNO));
+	TEST_ASSERT_NULL(authlookup(KEYNO, true));
+	TEST_ASSERT_NULL(authlookup(KEYNO, false));
+
+	auth_setkey(KEYNO, AUTH_DIGEST, "MD5", NULL, 0);
+
+	TEST_ASSERT_NULL(authlookup(KEYNO, true));
+	TEST_ASSERT_NOT_NULL(authlookup(KEYNO, false));
 }
 
 TEST(authkeys, HaveKeyCorrect) {
@@ -71,13 +76,15 @@ TEST(authkeys, HaveKeyCorrect) {
 
 	AddTrustedKey(KEYNO);
 
-	TEST_ASSERT_TRUE(authhavekey(KEYNO));
+	TEST_ASSERT_NOT_NULL(authlookup(KEYNO, true));
+	TEST_ASSERT_NOT_NULL(authlookup(KEYNO, false));
 }
 
 TEST(authkeys, HaveKeyIncorrect) {
 	const keyid_t KEYNO = 2;
 
-	TEST_ASSERT_FALSE(authhavekey(KEYNO));
+	TEST_ASSERT_NULL(authlookup(KEYNO, true));
+	TEST_ASSERT_NULL(authlookup(KEYNO, false));
 }
 
 TEST_GROUP_RUNNER(authkeys) {

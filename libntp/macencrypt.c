@@ -1,5 +1,5 @@
 /*
- *	digest support for NTP
+ *	CMAC and digest support for NTP
  */
 #include "config.h"
 
@@ -13,6 +13,7 @@
 
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
+#include "ntp_auth.h"
 #include "ntp.h"
 
 #ifndef EVP_MD_CTX_reset
@@ -23,6 +24,7 @@
 
 /* Need one per thread. */
 extern EVP_MD_CTX *digest_ctx;
+extern CMAC_CTX *cmac_ctx;
 
 /* ctmemeq - test two blocks memory for equality without leaking
  * timing information.
@@ -47,15 +49,88 @@ static bool ctmemeq(const void *s1, const void *s2, size_t n) {
 }
 
 /*
- * mac_authencrypt - generate message digest
+ * cmac_encrypt - generate CMAC authenticator
  *
  * Returns length of MAC including key ID and digest.
  */
 int
-mac_authencrypt(
-	int	type,		/* hash algorithm */
-	uint8_t	*key,		/* key pointer */
-	int	key_size,	/* key size */
+cmac_encrypt(
+	auth_info* auth,
+	uint32_t *pkt,		/* packet pointer */
+	int	length		/* packet length */
+	)
+{
+	uint8_t	mac[CMAC_MAX_MAC_LENGTH];
+	size_t	len;
+	CMAC_CTX *ctx = cmac_ctx;
+
+	CMAC_resume(ctx);
+	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
+		/* Shouldn't happen.  Does if wrong key_size. */
+		msyslog(LOG_ERR,
+		    "CMAC: encrypt: CMAC init failed, %u, %u",
+			auth->keyid, auth->key_size);
+		return (0);
+	}
+	CMAC_Update(ctx, (uint8_t *)pkt, (unsigned int)length);
+	CMAC_Final(ctx, mac, &len);
+	if (MAX_BARE_MAC_LENGTH < len)
+		len = MAX_BARE_MAC_LENGTH;
+	memmove((uint8_t *)pkt + length + 4, mac, len);
+	return (int)(len + 4);
+}
+
+
+/*
+ * cmac_decrypt - verify CMAC authenticator
+ *
+ * Returns true if valid, false if invalid.
+ */
+bool
+cmac_decrypt(
+	auth_info*	auth,
+	uint32_t	*pkt,	/* packet pointer */
+	int	length,	 	/* packet length */
+	int	size		/* MAC size */
+	)
+{
+	uint8_t	mac[CMAC_MAX_MAC_LENGTH];
+	size_t	len;
+	CMAC_CTX *ctx = cmac_ctx;
+
+	CMAC_resume(ctx);
+	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
+		/* Shouldn't happen.  Does if wrong key_size. */
+		msyslog(LOG_ERR,
+		    "CMAC: decrypt: CMAC init failed, %u, %u",
+			auth->keyid, auth->key_size);
+		return false;
+	}
+	CMAC_Update(ctx, (uint8_t *)pkt, (unsigned int)length);
+	CMAC_Final(ctx, mac, &len);
+	if (MAX_BARE_MAC_LENGTH < len)
+		len = MAX_BARE_MAC_LENGTH;
+	if ((unsigned int)size != len + 4) {
+		/* Beware of DoS attack.
+		 * This indicates either the sender is broken
+		 * or some admin fatfingered things.
+		 * Similar code at digest_decrypt.
+		 */
+		if (0) msyslog(LOG_ERR,
+		    "CMAC: decrypt: MAC length error");
+		return false;
+	}
+	return ctmemeq(mac, (char *)pkt + length + 4, len);
+}
+
+/*
+ * digest_encrypt - generate message digest
+ *
+ * Returns length of MAC including key ID and digest.
+ */
+int
+digest_encrypt(
+	auth_info* auth,
 	uint32_t *pkt,		/* packet pointer */
 	int	length		/* packet length */
 	)
@@ -70,31 +145,29 @@ mac_authencrypt(
 	 * was created.
 	 */
 	EVP_MD_CTX_reset(ctx);
-	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
+	if (!EVP_DigestInit_ex(ctx, auth->digest, NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC: encrypt: digest init failed");
 		return (0);
 	}
-	EVP_DigestUpdate(ctx, key, key_size);
+	EVP_DigestUpdate(ctx, auth->key, auth->key_size);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
-	if (MAX_BARE_DIGEST_LENGTH < len)
-		len = MAX_BARE_DIGEST_LENGTH;
+	if (MAX_BARE_MAC_LENGTH < len)
+		len = MAX_BARE_MAC_LENGTH;
 	memmove((uint8_t *)pkt + length + 4, digest, len);
 	return (int)(len + 4);
 }
 
 
 /*
- * mac_authdecrypt - verify message authenticator
+ * digest_decrypt - verify message authenticator
  *
  * Returns true if digest valid, false if invalid.
  */
 bool
-mac_authdecrypt(
-	int	type,		/* hash algorithm */
-	uint8_t	*key,		/* key pointer */
-	int	key_size,	/* key size */
+digest_decrypt(
+	auth_info*	auth,
 	uint32_t	*pkt,	/* packet pointer */
 	int	length,	 	/* packet length */
 	int	size		/* MAC size */
@@ -110,19 +183,24 @@ mac_authdecrypt(
 	 * was created.
 	 */
 	EVP_MD_CTX_reset(ctx);
-	if (!EVP_DigestInit_ex(ctx, EVP_get_digestbynid(type), NULL)) {
+	if (!EVP_DigestInit_ex(ctx, auth->digest, NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC: decrypt: digest init failed");
 		return false;
 	}
-	EVP_DigestUpdate(ctx, key, key_size);
+	EVP_DigestUpdate(ctx, auth->key, auth->key_size);
 	EVP_DigestUpdate(ctx, (uint8_t *)pkt, (unsigned int)length);
 	EVP_DigestFinal_ex(ctx, digest, &len);
-	if (MAX_BARE_DIGEST_LENGTH < len)
-		len = MAX_BARE_DIGEST_LENGTH;
+	if (MAX_BARE_MAC_LENGTH < len)
+		len = MAX_BARE_MAC_LENGTH;
 	if ((unsigned int)size != len + 4) {
-		msyslog(LOG_ERR,
-		    "MAC: decrypt: MAC length error");
+		/* Beware of DoS attack.
+		 * This indicates either the sender is broken
+		 * or some admin fatfingered things.
+		 * Similar code at cmac_decrypt.
+		 */
+		if (0) msyslog(LOG_ERR,
+		    "ERR: decrypt: digest length error");
 		return false;
 	}
 	return ctmemeq(digest, (char *)pkt + length + 4, len);

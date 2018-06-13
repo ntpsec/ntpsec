@@ -9,6 +9,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_leapsec.h"
 #include "ntp_dns.h"
+#include "ntp_auth.h"
 #include "timespecops.h"
 
 #include <string.h>
@@ -154,7 +155,7 @@ double	measured_tick;		/* non-overridable sys_tick (s) */
 static	void	clock_combine	(peer_select *, int, int);
 static	void	clock_select	(void);
 static	void	clock_update	(struct peer *);
-static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
+static	void	fast_xmit	(struct recvbuf *, int, auth_info*, int);
 static	int	local_refid	(struct peer *);
 static	void	measure_precision(const bool);
 static	double	measure_tick_fuzz(void);
@@ -344,7 +345,7 @@ parse_packet(
 		rbufp->mac_len = 0;
 		break;
 	    case 20:
-		/* MD5 authenticator */
+		/* AES-128 CMAC, MD5 digest */
 		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
 			/* Only allowed as of NTPv3 */
 			goto fail;
@@ -354,7 +355,7 @@ parse_packet(
 		rbufp->mac_len = 16;
 		break;
 	    case 24:
-		/* SHA-1 authenticator */
+		/* SHA-1 digest */
 		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
 			/* Only allowed as of NTPv3 */
 			goto fail;
@@ -407,20 +408,13 @@ parse_packet(
 static bool
 i_require_authentication(
 	struct peer const* peer,
-	struct recvbuf const* rbufp,
 	unsigned short restrict_mask
 	)
 {
         bool restrict_notrust = restrict_mask & RES_DONTTRUST;
         bool peer_has_key = peer != NULL && peer->cfg.peerkey != 0;
-        bool wants_association =
-            PKT_MODE(rbufp->pkt.li_vn_mode) == MODE_BROADCAST ||
-            (peer == NULL && PKT_MODE(rbufp->pkt.li_vn_mode == MODE_ACTIVE));
-        bool restrict_nopeer =
-            (restrict_mask & RES_NOPEER) &&
-            wants_association;
 
-        return restrict_notrust || peer_has_key || restrict_nopeer;
+        return restrict_notrust || peer_has_key;
 }
 
 static bool
@@ -462,32 +456,12 @@ static void
 handle_fastxmit(
 	struct recvbuf *rbufp,
 	unsigned short restrict_mask,
-	bool request_already_authenticated
+	auth_info* auth
 	)
 {
-	uint32_t xkeyid;
-
-	if (rbufp->dstadr->flags & INT_MCASTOPEN) {
-			stat_count.sys_restricted++;
-	}
-
-	/* To prevent exposing an authentication oracle, only MAC
-	   the response if the request passed authentication.
-	*/
-	if(request_already_authenticated ||
-	   (rbufp->keyid_present &&
-	    authdecrypt(rbufp->keyid,
-			(uint32_t*)rbufp->recv_space.X_recv_buffer,
-			(int)(rbufp->recv_length - (rbufp->mac_len + 4)),
-			(int)(rbufp->mac_len + 4)))) {
-		xkeyid = rbufp->keyid;
-	} else {
-		xkeyid = 0;
-	}
-
         int xmode =
             PKT_MODE(rbufp->pkt.li_vn_mode) == MODE_ACTIVE ? MODE_PASSIVE : MODE_SERVER;
-	fast_xmit(rbufp, xmode, xkeyid, restrict_mask);
+	fast_xmit(rbufp, xmode, auth, restrict_mask);
 }
 
 static void
@@ -668,7 +642,7 @@ receive(
 {
 	struct peer *peer = NULL;
 	unsigned short restrict_mask;
-	bool authenticated = false;
+	auth_info* auth = NULL;  /* !NULL if authenticated */
 
 	stat_count.sys_received++;
 
@@ -738,7 +712,16 @@ receive(
 	    }
 	}
 
-	if(i_require_authentication(peer, rbufp, restrict_mask)) {
+	if(i_require_authentication(peer, restrict_mask) ||
+	    /* He wants authentication */
+	    rbufp->keyid_present) {
+		auth = authlookup(rbufp->keyid, true);
+		if (0) msyslog(LOG_INFO, "DEBUG: receive: key %u %s%s, length %d, %s",
+		    rbufp->keyid,
+		    (NULL == auth)? "N" : "A",
+		    (NULL == peer)? "N" : "P",
+		    rbufp->mac_len, socktoa(&rbufp->recv_srcadr) );
+		// FIXME: crypto-NAK?
 		if(
 			/* Check whether an authenticator is even present. */
 			!rbufp->keyid_present || is_crypto_nak(rbufp) ||
@@ -746,12 +729,13 @@ receive(
 			   check that it matches. */
 			(peer != NULL && peer->cfg.peerkey != 0 &&
 			 peer->cfg.peerkey != rbufp->keyid) ||
+			(auth == NULL) ||
 			/* Verify the MAC.
 			   TODO: rewrite authdecrypt() to give it a
 			   better name and a saner interface so we don't
 			   have to do this screwy buffer-length
 			   arithmetic in order to call it. */
-			!authdecrypt(rbufp->keyid,
+			!authdecrypt(auth,
 				 (uint32_t*)rbufp->recv_space.X_recv_buffer,
 				 (int)(rbufp->recv_length - (rbufp->mac_len + 4)),
 				 (int)(rbufp->mac_len + 4))) {
@@ -762,8 +746,6 @@ receive(
 				peer->flash |= BOGON5;
 			}
 			goto done;
-		} else {
-			authenticated = true;
 		}
 	}
 
@@ -775,7 +757,7 @@ receive(
 	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
-		handle_fastxmit(rbufp, restrict_mask, authenticated);
+		handle_fastxmit(rbufp, restrict_mask, auth);
 		stat_count.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request. */
@@ -2088,7 +2070,7 @@ peer_xmit(
 {
 	struct pkt xpkt;	/* transmit packet */
 	size_t	sendlen, authlen;
-	keyid_t	xkeyid = 0;	/* transmit key ID */
+	auth_info *auth;	/* !NULL for authentication */
 	l_fp	xmt_tx;
 
 	if (!peer->dstadr)	/* drop peers without interface */
@@ -2107,9 +2089,8 @@ peer_xmit(
 	xpkt.rec = htonl_fp(peer->dst);
 
 	/*
-	 * If the received packet contains a MAC, the transmitted packet
-	 * is authenticated and contains a MAC. If not, the transmitted
-	 * packet is not authenticated.
+	 * If the peer (aka server) was configured with a key authenticate
+	 * the packet.  Else, the packet is not authenticated.
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (peer->cfg.peerkey == 0) {
@@ -2144,14 +2125,14 @@ peer_xmit(
 	get_systime(&xmt_tx);
 	peer->org = xmt_tx;
 	xpkt.xmt = htonl_fp(xmt_tx);
-	xkeyid = peer->cfg.peerkey;
-	authlen = (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, (int)sendlen);
-	if (authlen == 0) {
+	auth = authlookup(peer->cfg.peerkey, true);
+	if (NULL == auth) {
 		report_event(PEVNT_AUTH, peer, "no key");
 		peer->flash |= BOGON5;		/* auth error */
 		peer->badauth++;
 		return;
 	}
+	authlen = (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
 	sendlen += authlen;
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "PROTO: buffer overflow %zu", sendlen);
@@ -2165,7 +2146,8 @@ peer_xmit(
 	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %zu\n",
 		   current_time, peer->dstadr ?
 		   socktoa(&peer->dstadr->sin) : "-",
-		   socktoa(&peer->srcadr), peer->hmode, xkeyid, sendlen));
+		   socktoa(&peer->srcadr), peer->hmode,
+		   peer->cfg.peerkey, sendlen));
 }
 
 
@@ -2187,7 +2169,7 @@ static void
 fast_xmit(
 	struct recvbuf *rbufp,	/* receive packet pointer */
 	int	xmode,		/* receive mode */
-	keyid_t	xkeyid,		/* transmit key ID */
+	auth_info *auth,	/* !NULL for authentication */
 	int	flags		/* restrict mask */
 	)
 {
@@ -2295,7 +2277,9 @@ fast_xmit(
 
 #ifdef ENABLE_MSSNTP
 	if (flags & RES_MSSNTP) {
-		send_via_ntp_signd(rbufp, xmode, xkeyid, flags, &xpkt);
+		keyid_t keyid = 0;
+		if (NULL != auth) keyid = auth->keyid;
+		send_via_ntp_signd(rbufp, xmode, keyid, flags, &xpkt);
 		return;
 	}
 #endif /* ENABLE_MSSNTP */
@@ -2306,7 +2290,7 @@ fast_xmit(
 	 * packet is not authenticated.
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	if (rbufp->recv_length == sendlen) {
+	if (NULL == auth) {
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 		DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
 			   current_time, socktoa(&rbufp->dstadr->sin),
@@ -2321,14 +2305,14 @@ fast_xmit(
 	 * cryptosum.
 	 */
 	get_systime(&xmt_tx);
-	sendlen += (size_t)authencrypt(xkeyid, (uint32_t *)&xpkt, (int)sendlen);
+	sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
 	sys_authdelay = xmt_ty;
 	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %zu\n",
 		   current_time, socktoa(&rbufp->dstadr->sin),
-		   socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen));
+		   socktoa(&rbufp->recv_srcadr), xmode, auth->keyid, sendlen));
 }
 
 
