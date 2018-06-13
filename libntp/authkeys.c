@@ -422,8 +422,7 @@ auth_setkey(
 	auth_info **	bucket;
 	uint8_t *	newkey;
 
-	// FIXME	
-	if (1) msyslog(LOG_INFO, "DEBUG: auth_setkey: key %u, %s, length %zu",
+	if (0) msyslog(LOG_INFO, "DEBUG: auth_setkey: key %u, %s, length %zu",
 	    keyno, name, key_size);
 
 	//ENSURE(??? <= USHRT_MAX);
