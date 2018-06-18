@@ -157,7 +157,7 @@ check_mac_length(
     	case AUTH_DIGEST:
 	    check_digest_mac_length(keyno, name);
 	    break;
-    	case AUTH_NONE:
+    	default:
 	    msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u, %s", keyno, upcased);
     }
 }
@@ -207,7 +207,7 @@ check_key_length(
     	case AUTH_DIGEST:
 	    /* any length key works */
 	    break;
-    	case AUTH_NONE:
+    	default:
 	    msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u", keyno);
     }
     return length;

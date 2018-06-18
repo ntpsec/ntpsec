@@ -300,6 +300,9 @@ alloc_auth_info(
 		auth->digest = NULL;
 		auth->cipher = EVP_get_cipherbyname(name);
 		break;
+	  default:
+		msyslog(LOG_ERR, "BUG: alloc_auth_info: bogus type %u", type);
+		exit(1);
 	}
 	LINK_SLIST(*bucket, auth, hlink);
 	LINK_TAIL_DLIST(key_listhead, auth, llink);
@@ -448,6 +451,9 @@ auth_setkey(
 				auth->digest = NULL;
 				auth->cipher = EVP_get_cipherbyname(name);
 				break;
+			  default:
+				msyslog(LOG_ERR, "BUG: auth_setkey: bogus type %u", type);
+				exit(1);
 			}
 			if (NULL != auth->key) {
 				memset(auth->key, '\0', auth->key_size);
@@ -536,8 +542,9 @@ authencrypt(
 	    case AUTH_CMAC:
 		authcmacencrypt++;
 		return cmac_encrypt(auth, pkt, length);
-	    case AUTH_NONE:
-		return 0;
+	    default:
+		msyslog(LOG_ERR, "BUG: authencrypt: bogus type %u", auth->type);
+		exit(1);
 	}
 	return 0;
 }
@@ -574,8 +581,9 @@ authdecrypt(
 		answer = cmac_decrypt(auth, pkt, length, size);
 		if (!answer) authcmacfail++;
 		return answer;
-	    case AUTH_NONE:
-		return false;
+	    default:
+		msyslog(LOG_ERR, "BUG: authdecrypt: bogus type %u", auth->type);
+		exit(1);
 	}
 	return false;
 }

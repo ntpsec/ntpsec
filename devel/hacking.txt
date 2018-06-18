@@ -569,6 +569,7 @@ DNS:: DNS Lookup
 MAC:: Message authentication hash computation
 AUTH:: Authorization-key handling
 ERR:: Low-level errors from resource-management libraries
+BUG:: Bugs in the code
 LOG:: Log switching and debug levels
 CLOCK:: Low-level clock manipulation and validation checks & leap-second code
 CONFIG:: Configuration parsing and interpretation
