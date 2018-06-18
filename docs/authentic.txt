@@ -158,7 +158,7 @@ a bogus crypto-NAK.
 from the OpenSSL project.  MD5 digests are 16 bytes.  SHA1 digests are 20 bytes.
 Longer digests are truncated.
 
-+ntpd+'s mode can use any cypher with a CBC mode that is supported by
++ntpd+'s CMAC mode can use any cipher with a CBC mode that is supported by
 libcrypto from the OpenSSL project.  AES is short for AES-128.
 AES needs a 16 byte key.  Longer keys are truncated.  Shorter
 keys are padded with 0s.  AES MACs are 16 bytes long.  MACs longer

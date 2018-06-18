@@ -2089,7 +2089,7 @@ peer_xmit(
 	xpkt.rec = htonl_fp(peer->dst);
 
 	/*
-	 * If the peer (aka server) was configured with a key authenticate
+	 * If the peer (aka server) was configured with a key, authenticate
 	 * the packet.  Else, the packet is not authenticated.
 	 */
 	sendlen = LEN_PKT_NOMAC;
