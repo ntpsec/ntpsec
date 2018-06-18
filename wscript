@@ -607,6 +607,10 @@ int main(int argc, char **argv) {
         msg="Checking for OpenSSL (via pkg-config)",
         define_name='', mandatory=False,
     ):
+    # Very old versions of OpenSSL don't have cmac support.
+    # This gives a sane(er) error message.
+    # It would be possible to make CMAC support optional by adding
+    # appropriate #ifdefs to the code.
         openssl_headers = (
             "openssl/evp.h",
             "openssl/cmac.h",
@@ -660,13 +664,6 @@ int main(int argc, char **argv) {
 
     # Nobody uses the symbol, but this seems like a good sanity check.
     ctx.check_cc(header_name="stdbool.h", mandatory=True,
-                 comment="Sanity check.")
-
-    # Very old versions of OpenSSL don't have cmac support.
-    # This gives a sane(er) error message.
-    # It would be possible to make CMAC support optional by adding
-    # appropriate #ifdefs to the code.
-    ctx.check_cc(header_name="openssl/cmac.h", mandatory=True,
                  comment="Sanity check.")
 
     # This is a list of every optional include header in the
