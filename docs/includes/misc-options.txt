@@ -141,6 +141,10 @@ and so on is suppressed.
   used instead of the default system _syslog(3)_ facility. This is the
   same operation as the -l command line option.
 
+If your ntpd runs for a long time, you probably want to use logrotate or
+newsyslog to switch to a new log file occasionally.  SIGHUP will reopen
+the log file.
+
 [[mru]]
 +mru+ [+maxdepth+ 'count' | +maxmem+ 'kilobytes' | +mindepth+ 'count' | +maxage+ 'seconds' | +minage+ 'seconds' | +initalloc+ 'count' | +initmem+ 'kilobytes' | +incalloc+ 'count' | +incmem+ 'kilobytes']::
   Controls size limits of the monitoring facility Most Recently Used

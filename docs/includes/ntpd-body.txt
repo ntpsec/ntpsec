@@ -150,7 +150,7 @@ configuration file directive.
 +
 Specify the name and path of the log file. The default is the system
 log file. This is the same operation as the _logfile_
-configuration file directive.
+configuration file directive.  See {ntpdconfman} for more info.
 
 +-L+, +--novirtualips+::
   Do not listen to virtual interfaces.
