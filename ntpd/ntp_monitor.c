@@ -73,10 +73,10 @@ static	uint64_t mon_mem_increments;	/* times called malloc() */
 int	ntp_minpkt = NTP_MINPKT;	/* minimum (log 2 s) */
 uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
 
-static	void		mon_getmoremem(void);
-static	void		remove_from_hash(mon_entry *);
-static	inline void	mon_free_entry(mon_entry *);
-static	inline void	mon_reclaim_entry(mon_entry *);
+static	void	mon_getmoremem(void);
+static	void	remove_from_hash(mon_entry *);
+static	void	mon_free_entry(mon_entry *);
+static	void	mon_reclaim_entry(mon_entry *);
 
 /*
  * init_mon - initialize monitoring global data
@@ -113,7 +113,7 @@ remove_from_hash(
 }
 
 
-static inline void
+static void
 mon_free_entry(
 	mon_entry *m
 	)
@@ -132,7 +132,7 @@ mon_free_entry(
  * remove_from_hash(), mru_entries is decremented.  It is the caller's
  * responsibility to increment it again.
  */
-static inline void
+static void
 mon_reclaim_entry(
 	mon_entry *m
 	)
