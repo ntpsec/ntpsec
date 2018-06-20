@@ -65,8 +65,8 @@ if sys.version_info[0] == 2:
     sys.setdefaultencoding('utf8')
 
     def open(file, mode='r', buffering=-1, encoding=None, errors=None):
-        return codecs.open(filename=file, mode=mode, encoding=encoding,
-            errors=errors, buffering=buffering)
+        return(codecs.open(filename=file, mode=mode, encoding=encoding,
+               errors=errors, buffering=buffering))
 
 # believe it or not, Python has no way to make a simple constant!
 MS_PER_S = 1e3          # milliseconds per second
@@ -1719,9 +1719,15 @@ dd {
         index_header += '<b>Start Time:</b> %s UTC<br>\n' \
                         '<b>End Time:</b> %s UTC<br>\n' \
             % (start_time, end_time)
-        index_header += '<b>Report Period:</b> %1.1f days <br>\n' \
-            % (float(stats.period) /
-                float(ntp.statfiles.NTPStats.SecondsInDay))
+        if (1 > stats.period):
+            # less than a day, report hours
+            index_header += ('<b>Report Period:</b> %1.1f hours <br>\n' %
+                             (float(stats.period) / (24 * 60)))
+        else:
+            # more than a day, report days
+            index_header += ('<b>Report Period:</b> %1.1f days <br>\n' %
+                             (float(stats.period) /
+                              ntp.statfiles.NTPStats.SecondsInDay))
 
     if args.clip:
         index_header += """\
