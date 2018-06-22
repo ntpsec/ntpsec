@@ -4,11 +4,11 @@
 
 == SYNOPSIS ==
 [verse]
-ntpviz [OPTIONS]  
+ntpviz [OPTIONS]
          [-c | --clip]
          [-D DLVL | --debug DLVL]
-         [-d LOGDIR] 
-         [-g] [-n name] 
+         [-d LOGDIR]
+         [-g] [-n name]
          [-N | --nice]
          [-o OUTDIR]
          [-p DAYS]
