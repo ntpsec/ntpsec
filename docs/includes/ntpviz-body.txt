@@ -4,10 +4,16 @@
 
 == SYNOPSIS ==
 [verse]
-ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
-         [-s starttime] [-e endtime]
-         [-o OUTDIR]
+ntpviz [OPTIONS]  
          [-c | --clip]
+         [-D DLVL | --debug DLVL]
+         [-d LOGDIR] 
+         [-g] [-n name] 
+         [-N | --nice]
+         [-o OUTDIR]
+         [-p DAYS]
+         [-s starttime] [-e endtime]
+         [-V | --version]
          [-w SIZE | --width SIZE]
          [--all-peer-jitters |
           --all-peer-offsets |
@@ -22,14 +28,12 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
           --local-temps |
           --peer-jitters=hosts |
           --peer-offsets=hosts]
-         [-D DLVL | --debug DLVL]
-         [-N | --nice]
-         [-V | --version]
          [@OPTIONFILE]
+
 
 == DESCRIPTION ==
 
-This utility analyzes files in an NTP log directory and generates
+ntpviz analyzes files in an NTP log directory and generates
 statistical plots from them.  It can output either PNG images or the
 gnuplot programs to generate them to standard output.  In its default
 mode it generates an HTML directory containing an index page and
@@ -38,28 +42,21 @@ subset of comparative plots for multiple directories.
 
 === Basic Options ===
 
+-c or --clip::
+    Normally all data are plotted.  This option limits the range of
+    the plots to the data between 1% and 99%.  This is useful for
+    ignoring a few spikes in the data.
+
 -d LOGDIR or --datadir LOGDIR::
     Specifies one or more logfile directories to examine; the default is
     the single directory /var/log/ntpstats.
 
--g or --generate::
-    Run plot through gnuplot to make png.  The default is to generate
-    gnuplot programs.
-
--o OUTDIR or --outdir OUTDIR::
-    Set the directory for all output to be OUTDIR.  If OUTDIR does
-    not exist it is created.  The default OUTDIR is 'ntpgraphs'.
-    Warning: existing PNG files and index.html in the output directory
-    will be clobbered.
-
--n STR or --name STR::
-    Set the sitename shown in the plot title, and is effective only for the
-    single-directory case. The default is the basename of the log directory.
-
--p DAYS or --period DAYS::
-    The default DAYS is for the period of 7 days.  DAYS can be a
-    floating point number, so "-p 0.5" plots 12 hours.  DAYS is ignored
-    if -s and -e are given.
+-D DLVL or --debug DLVL::
+    Set the debug level to DLVL.  Larger DLVL leads to more verbosity. +
+    0 is the default, quiet except for all ERRORs and some WARNINGs. +
+    1 shows some environment info and basic program progress. +
+    2 leaves the plot file in the system temp directory. +
+    9 is painfully verbose. 9 also includes profile data.
 
 -e TIME or --endtime TIME::
     With -s and -e you set the start and end times.  TIME is either numeric
@@ -70,31 +67,38 @@ subset of comparative plots for multiple directories.
     Alternatively you may specify either -s or -e (but not both) and use
     -p to set the plot period in days.
 
+-g or --generate::
+    Run plot through gnuplot to make png.  The default is to generate
+    gnuplot programs.
+
+-n STR or --name STR::
+    Set the sitename shown in the plot title, and is effective only for the
+    single-directory case. The default is the basename of the log directory.
+
+-N or --nice::
+    Run at the lowest possible priority.  Only available on UNIX.
+
+-o OUTDIR or --outdir OUTDIR::
+    Set the directory for all output to be OUTDIR.  If OUTDIR does
+    not exist it is created.  The default OUTDIR is 'ntpgraphs'.
+    Warning: existing PNG files and index.html in the output directory
+    will be clobbered.
+
+-p DAYS or --period DAYS::
+    The default DAYS is for the period of 7 days.  DAYS can be a
+    floating point number, so "-p 0.5" plots 12 hours.  DAYS is ignored
+    if -s and -e are given.
+
 -s TIME or --starttime TIME::
     See -e and -p.
 
--c or --clip::
-    Normally all the data is plotted.  This option limits the range of
-    the plots to the data between 1% and 99%.  This is useful for
-    ignoring a few spikes in the data.
+-V or --version:
+    Print program version and exit.
 
 -w SIZE or --width SIZE::
     Set the size of the output plots.  SIZE can be one of 's', 'm', or 'l'.
     's' is for browser on small screens (1024x768).  'm' for medium screens
     (1388x768).  'l' for large screens (1920x1080).  'm' is the default.
-
--D DLVL or --debug DLVL::
-    Set the debug level to DLVL.  Larger DLVL leads to more verbosity. +
-    0 is the default, quiet except for all ERRORs and some WARNINGs. +
-    1 shows some environment info and basic program progress. +
-    2 leaves the plot file in the system temp directory. +
-    9 is painfully verbose. 9 also includes profile data.
-
--N or --nice::
-    Run at the lowest possible priority.  Only available on UNIX.
-
--V or --version:
-    Print program version and exit.
 
 === Individual Plots ===
 
