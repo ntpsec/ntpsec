@@ -67,7 +67,7 @@ subset of comparative plots for multiple directories.
     timestamps (yyyy-mmm-ddThh:mm:ss). +
     The default end time is the last logfile entry timestamp.   +
     The default start time is computed as the end time minus DAYS. +
-    Alternatively you can specify either -s or -e (but not both) and use
+    Alternatively you may specify either -s or -e (but not both) and use
     -p to set the plot period in days.
 
 -s TIME or --starttime TIME::
@@ -126,9 +126,9 @@ The following plots are available:
    Clock time-jitter plot from the loop statistics (field 5).
 
 --local-gps::
-   Plot GPS Time Dilution of Precision (TDOP) and Number of Sats Used
-   (nSats).  This plot is only generated if there is a log file named
-   gpsd in the log file directory.
+   Plot GPS Time Dilution of Precision (TDOP) and number of satellites
+   used (nSats).  This plot is only generated if there is a log file
+   named gpsd in the log file directory.
 
 --local-offset::
    Clock time and clock frequency offsets from the loop statistics
@@ -162,34 +162,33 @@ The following plots are available:
 If no individual plot is specified, all plots and an index HTML page
 are generated into the output directory.
 
-When an index is generated, ntpviz will look for two files in the
-output directory.  Neither of these files need be present, and the
-'header' and 'footer' files may contain arbitrary HTML.
+When an index is generated, ntpviz will look for a 'header' and
+'footer' file in the output directory.  Neither of these files are
+required. The files may contain arbitrary HTML.
 
-The first file is named 'header'.  The contents of that file will be
-added almost at the top of the body on the generated index page.
+The 'header' file will be added almost at the top of the body of the
+generated index page, and the 'footer' file will be added almost at
+the bottom of the body of the generated index page.
 
-This is the place to put links to other web pages, or headline notes.
+The contents are at the discretion of the operator. One might put
+links to other related webpages, or notes on the server OS, software
+versions, hardware configuration, etc. into either of these files,
+as desired.
 
-The second file is named 'footer'.  The contents of that file will be
-added almost at the bottom of the body on the generated index.
-
-It is suggested that notes on the server be included in the footer
-file: OS, versions, CPU speed, etc.  You may also put links there.
-
-The code includes various sanity checks and will bail out with a message to
-standard error on, for example, missing logfile data required for a plot.
+The code includes various sanity checks and will bail out with a message
+to standard error on, for example, missing logfile data required for a
+plot.
 
 === Argument File ===
 
-Any command line options can also be placed into a command file.  The
+Any command line options may also be placed into a command file.  The
 command file name (OPTIONFILE) is prefixed on the command line with an
 atsign (@).
 
 Each line in the command file should contain just one option.  Multiple
 options per line are allowed, but discouraged.  Blank lines are allowed.
 
-Comments can be added, and start with an octothorpe (#).  Comments may
+Comments may be added, prepended with an octothorpe (#).  Comments may
 appear on a new line, or trailing, after the # .
 
 When an option takes a parameter, the option and parameter must be
