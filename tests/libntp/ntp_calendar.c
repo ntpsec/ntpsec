@@ -128,6 +128,11 @@ TEST(calendar, parse_to_unixtime) {
 }
 #endif
 
+// test the NTP to Unix time conversion
+TEST(calendar, NtpToTime1) {
+  TEST_ASSERT_EQUAL(1, ntpcal_ntp_to_time(2208988801, 2147483648));
+}
+
 // test the day/sec join & split ops, making sure that 32bit
 // intermediate results would definitely overflow and the hi DWORD of
 // the 'time64_t' is definitely needed.
@@ -266,6 +271,7 @@ TEST_GROUP_RUNNER(calendar) {
 #ifdef CLOCK_GENERIC
 	RUN_TEST_CASE(calendar, parse_to_unixtime);
 #endif
+	RUN_TEST_CASE(calendar, NtpToTime1);
 	RUN_TEST_CASE(calendar, DaySplitMerge);
 	RUN_TEST_CASE(calendar, SplitYearDays1);
 	RUN_TEST_CASE(calendar, SplitYearDays2);
