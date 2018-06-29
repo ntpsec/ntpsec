@@ -130,7 +130,7 @@ TEST(calendar, parse_to_unixtime) {
 
 // test the NTP to Unix time conversion
 TEST(calendar, NtpToTime1) {
-  TEST_ASSERT_EQUAL(1, ntpcal_ntp_to_time(2208988801, 2147483648));
+  TEST_ASSERT_EQUAL(2085978538, ntpcal_ntp_to_time(42, 23));
 }
 
 // test the day/sec join & split ops, making sure that 32bit
