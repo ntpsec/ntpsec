@@ -71,7 +71,7 @@
 %token	<Integer>	T_Disable
 %token	<Integer>	T_Discard
 %token	<Integer>	T_Dispersion
-%token	<Double>	T_Double		/* not a token */
+%token	<Double>	T_Double		/* Not a token */
 %token	<Integer>	T_Driftfile
 %token	<Integer>	T_Drop
 %token	<Integer>	T_Dscp
@@ -99,9 +99,9 @@
 %token	<Integer>	T_Initalloc
 %token	<Integer>	T_Initmem
 %token	<Integer>	T_Includefile
-%token	<Integer>	T_Integer		/* not a token */
+%token	<Integer>	T_Integer		/* Not a token, used as tag */
 %token	<Integer>	T_Interface
-%token	<Integer>	T_Intrange		/* not a token */
+%token	<Integer>	T_Intrange		/* Not a token, used as tag */
 %token	<Integer>	T_Io
 %token	<Integer>	T_Ipv4
 %token	<Integer>	T_Ipv4_flag
@@ -168,7 +168,6 @@
 %token	<Integer>	T_Pidfile
 %token	<Integer>	T_Pool
 %token	<Integer>	T_Ppspath
-%token	<Integer>	T_Port
 %token	<Integer>	T_Prefer
 %token	<Integer>	T_Protostats
 %token	<Integer>	T_Rawstats
@@ -192,7 +191,7 @@
 %token	<Integer>	T_Stepout
 %token	<Integer>	T_Stratum
 %token	<Integer>	T_Subtype
-%token	<String>	T_String		/* not a token */
+%token	<String>	T_String		/* Not a token */
 %token	<Integer>	T_Sys
 %token	<Integer>	T_Sysstats
 %token	<Integer>	T_Tick
@@ -202,7 +201,6 @@
 %token	<Integer>	T_Timingstats
 %token	<Integer>	T_Tinker
 %token	<Integer>	T_Tos
-%token	<Integer>	T_Trap
 %token	<Integer>	T_True
 %token	<Integer>	T_Trustedkey
 %token	<Integer>	T_Type
@@ -213,11 +211,11 @@
 %token	<Integer>	T_Unrestrict
 %token	<Integer>	T_Usestats
 %token	<Integer>	T_Version
-%token	<Integer>	T_WanderThreshold	/* Not a token */
+%token	<Integer>	T_WanderThreshold	/* Not a token, used as tag */
 %token	<Integer>	T_Week
 %token	<Integer>	T_Wildcard
 %token	<Integer>	T_Year
-%token	<Integer>	T_Flag			/* Not a token */
+%token	<Integer>	T_Flag			/* Not a token, used as tag */
 %token	<Integer>	T_EOC
 
 /*** NON-TERMINALS ***/
@@ -501,7 +499,6 @@ unpeer_keyword
 	
 	
 /* Other Modes
- * (manycastserver)
  * ------------------------------------------------
  */
 

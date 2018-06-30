@@ -187,7 +187,6 @@ struct key_tok ntp_keywords[] = {
 { "huffpuff",		T_Huffpuff,		FOLLBY_TOKEN },
 { "freq",		T_Freq,			FOLLBY_TOKEN },
 /* miscellaneous_command */
-{ "port",		T_Port,			FOLLBY_TOKEN },
 { "interface",		T_Interface,		FOLLBY_TOKEN },
 /* interface_command (ignore and interface already defined) */
 { "nic",		T_Nic,			FOLLBY_TOKEN },
