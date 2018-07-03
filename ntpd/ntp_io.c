@@ -424,7 +424,6 @@ interface_dump(const endpt *itf)
 {
 	printf("Dumping interface: %p\n", itf);
 	printf("fd = %d\n", itf->fd);
-	printf("bfd = %d\n", itf->bfd);
 	printf("sin = %s,\n", socktoa(&itf->sin));
 	sockaddr_dump(&itf->sin);
 	printf("bcast = %s,\n", socktoa(&itf->bcast));
@@ -469,12 +468,11 @@ sockaddr_dump(const sockaddr_u *psau)
 static void
 print_interface(const endpt *iface, const char *pfx, const char *sfx)
 {
-	printf("%sinterface #%u: fd=%d, bfd=%d, name=%s, "
+	printf("%sinterface #%u: fd=%d, name=%s, "
                "flags=0x%x, ifindex=%u, sin=%s",
 	       pfx,
 	       iface->ifnum,
 	       iface->fd,
-	       iface->bfd,
 	       iface->name,
 	       iface->flags,
 	       iface->ifindex,
@@ -736,7 +734,6 @@ init_interface(
 {
 	ZERO(*ep);
 	ep->fd = INVALID_SOCKET;
-	ep->bfd = INVALID_SOCKET;
 	ep->phase = sys_interphase;
 }
 
@@ -826,16 +823,6 @@ remove_interface(
 			current_time - ep->starttime);
 		close_and_delete_fd_from_list(ep->fd);
 		ep->fd = INVALID_SOCKET;
-	}
-
-	if (ep->bfd != INVALID_SOCKET) {
-		msyslog(LOG_INFO,
-			"IO: stop listening for broadcasts to %s "
-                        "on interface #%u %s",
-			socktoa(&ep->bcast), ep->ifnum, ep->name);
-		close_and_delete_fd_from_list(ep->bfd);
-		ep->bfd = INVALID_SOCKET;
-		ep->flags &= ~INT_BCASTOPEN;
 	}
 
 	ninterfaces--;
@@ -1789,13 +1776,7 @@ create_interface(
 	if (iface->fd != INVALID_SOCKET)
 		log_listen_address(iface);
 
-	if ((INT_BROADCAST & iface->flags)
-	    && iface->bfd != INVALID_SOCKET)
-		msyslog(LOG_INFO, "IO: Listening on broadcast address %s#%d",
-			socktoa((&iface->bcast)), port);
-
-	if (INVALID_SOCKET == iface->fd
-	    && INVALID_SOCKET == iface->bfd) {
+	if (INVALID_SOCKET == iface->fd) {
 		msyslog(LOG_ERR, "IO: unable to create socket on %s (%u) for %s#%d",
 			iface->name,
 			iface->ifnum,
@@ -2439,7 +2420,6 @@ input_handler(
 	)
 {
 	int		buflen;
-	int		doing;
 	SOCKET		fd;
 	l_fp		ts;	/* Timestamp at BOselect() gob */
 #ifdef ENABLE_DEBUG_TIMING
@@ -2514,24 +2494,12 @@ input_handler(
 	 * Loop through the interfaces looking for data to read.
 	 */
 	for (ep = ep_list; ep != NULL; ep = ep->elink) {
-		for (doing = 0; doing < 2; doing++) {
-			if (!doing) {
-				fd = ep->fd;
-			} else {
-				if (!(ep->flags & INT_BCASTOPEN))
-					break;
-				fd = ep->bfd;
-			}
-			if (fd < 0)
-				continue;
-			if (FD_ISSET(fd, fds))
-				do {
-					++select_count;
-					buflen = read_network_packet(
-							fd, ep, ts);
-				} while (buflen > 0);
-			/* Check more interfaces */
-		}
+		fd = ep->fd;
+		if (FD_ISSET(fd, fds))
+			do {
+				++select_count;
+				buflen = read_network_packet(fd, ep, ts);
+			} while (buflen > 0);
 	}
 
 #ifdef USE_ROUTING_SOCKET

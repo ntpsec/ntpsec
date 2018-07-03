@@ -490,8 +490,8 @@ peer_refresh_interface(
 		   p->cfg.mode, p->cfg.peerkey));
 	if (niface != NULL) {
 		DPRINT(4, (
-			   "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
-			   niface->fd,  niface->bfd, niface->name,
+			   "fd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
+			   niface->fd, niface->name,
 			   niface->flags, niface->ifindex,
 			   socktoa(&niface->sin)));
 		if (niface->flags & INT_BROADCAST)

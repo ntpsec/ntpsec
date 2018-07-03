@@ -117,7 +117,6 @@ extern int32_t ntp_random (void);
 typedef struct __endpt {
 	struct __endpt *elink;		/* endpt list link */
 	SOCKET		fd;		/* socket descriptor */
-	SOCKET		bfd;		/* for receiving broadcasts */
 	uint32_t	ifnum;		/* endpt instance count */
 	sockaddr_u	sin;		/* unicast address */
 	sockaddr_u	mask;		/* subnet mask */
