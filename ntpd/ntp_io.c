@@ -243,7 +243,6 @@ static void	add_addr_to_list	(sockaddr_u *, endpt *);
 static void	create_wildcards	(unsigned short);
 static endpt *	findlocalinterface	(sockaddr_u *, int, int);
 static endpt *	findclosestinterface	(sockaddr_u *, int);
-static endpt *	findbcastinter		(sockaddr_u *);
 
 #ifdef DEBUG
 static const char *	action_text	(nic_rule_action);
@@ -2575,14 +2574,6 @@ select_peerinterface(
 	 */
 	if (IS_PEER_REFCLOCK(peer)) {
 		ep = loopback_interface;
-	} else if (peer->cast_flags & MDF_BCAST) {
-		ep = findbcastinter(srcadr);
-		if (ep != NULL)
-			DPRINT(4, ("Found *-cast interface %s for address %s\n",
-				   socktoa(&ep->sin), socktoa(srcadr)));
-		else
-			DPRINT(4, ("No *-cast local address found for address %s\n",
-				   socktoa(srcadr)));
 	} else {
 		ep = dstadr;
 		if (NULL == ep)
@@ -2885,88 +2876,6 @@ getinterface(
 
 	return iface;
 }
-
-
-/*
- * findbcastinter - find broadcast interface corresponding to address
- */
-static endpt *
-findbcastinter(
-	sockaddr_u *addr
-	)
-{
-	endpt *	iface;
-
-	iface = NULL;
-#if defined(SIOCGIFCONF)
-	DPRINT(4, ("Finding broadcast interface for addr %s in list of addresses\n",
-		   socktoa(addr)));
-
-	iface = findlocalinterface(addr, INT_LOOPBACK | INT_WILDCARD,
-				   1);
-	if (iface != NULL) {
-		DPRINT(4, ("Easily found bcast-/mcast- interface index #%d %s\n",
-			   iface->ifnum, iface->name));
-		return iface;
-	}
-
-	/*
-	 * plan B - try to find something reasonable in our lists in
-	 * case kernel lookup doesn't help
-	 */
-	for (iface = ep_list; iface != NULL; iface = iface->elink) {
-		if (iface->flags & INT_WILDCARD)
-			continue;
-
-		/* Don't bother with ignored interfaces */
-		if (iface->ignore_packets)
-			continue;
-
-		/*
-		 * First look if this is the correct family
-		 */
-		if(AF(&iface->sin) != AF(addr))
-			continue;
-
-		/* Skip the loopback addresses */
-		if (iface->flags & INT_LOOPBACK)
-			continue;
-
-		/*
-		 * We match only those interfaces marked as
-		 * broadcastable and either the explicit broadcast
-		 * address or the network portion of the IP address.
-		 * Sloppy.
-		 */
-		if (IS_IPV4(addr)) {
-			if (SOCK_EQ(&iface->bcast, addr))
-				break;
-
-			if ((NSRCADR(&iface->sin) & NSRCADR(&iface->mask))
-			    == (NSRCADR(addr)	  & NSRCADR(&iface->mask)))
-				break;
-		}
-		else if (IS_IPV6(addr)) {
-			if (SOCK_EQ(&iface->bcast, addr))
-				break;
-
-			if (SOCK_EQ(netof6(&iface->sin), netof6(addr)))
-				break;
-		}
-	}
-#endif /* SIOCGIFCONF */
-	if (NULL == iface) {
-		DPRINT(4, ("No bcast interface found for %s\n",
-			   socktoa(addr)));
-		iface = ANY_INTERFACE_CHOOSE(addr);
-	} else {
-		DPRINT(4, ("Found bcast-/mcast- interface index #%u %s\n",
-			   iface->ifnum, iface->name));
-	}
-
-	return iface;
-}
-
 
 /*
  * io_clr_stats - clear I/O module statistics

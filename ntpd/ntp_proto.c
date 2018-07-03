@@ -797,18 +797,6 @@ transmit(
 	hpoll = peer->hpoll;
 
 	/*
-	 * In broadcast mode the poll interval is never changed from
-	 * minpoll.
-	 */
-	if (peer->cast_flags & MDF_BCAST) {
-		peer->outdate = current_time;
-		if (sys_vars.sys_leap != LEAP_NOTINSYNC)
-			peer_xmit(peer);
-		poll_update(peer, hpoll);
-		return;
-	}
-
-	/*
 	 * Pool associations transmit unicast solicitations when there
 	 * are less than a hard limit of 2 * sys_maxclock associations,
 	 * and either less than sys_minclock survivors or less than

@@ -612,7 +612,7 @@ struct mon_data {
  */
 #define	MDF_UCAST	0x01	/* unicast client */
 /* #define MDF_MCAST	0x02	** multicast server (not used) */
-#define	MDF_BCAST	0x04	/* broadcast server */
+/* #define MDF_BCAST	0x04	** broadcast server (not used) */
 #define	MDF_POOL	0x08	/* pool client solicitor */
 /* #define MDF_ACAST	0x10	** manycast client solicitor (not used) */
 #define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client */
@@ -620,9 +620,9 @@ struct mon_data {
 /*
  * In the context of struct peer in ntpd, one cast_flags bit
  * represent configured associations which never receive packets, and
- * whose reach is always 0: MDF_BCAST
+ * whose reach is always 0: MDF_BCAST  (Historical)
  */
-#define MDF_TXONLY_MASK	(MDF_BCAST | MDF_POOL)
+#define MDF_TXONLY_MASK	(MDF_POOL)
 /*
  * manycastclient-like solicitor association cast_flags bits
  */

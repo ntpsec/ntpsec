@@ -654,12 +654,6 @@ newpeer(
 		DPRINT(3, ("newpeer(%s): local interface currently not bound\n",
 			   socktoa(srcadr)));
 
-	/*
-	 * Broadcast needs the socket enabled for broadcast
-	 */
-	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
-		enable_broadcast(peer->dstadr, srcadr);
-
 	/* if a key specified, verify that it will work */
 	if (0 != peer->cfg.peerkey) {
 		if (NULL == authlookup(peer->cfg.peerkey, false))
@@ -674,8 +668,6 @@ newpeer(
 	peer->hpoll = peer->cfg.minpoll;
 	if (cast_flags & MDF_POOL)
 		peer_clear(peer, "POOL", initializing1);
-	else if (cast_flags & MDF_BCAST)
-		peer_clear(peer, "BCST", initializing1);
 	else
 		peer_clear(peer, "INIT", initializing1);
 	if (clock_ctl.mode_ntpdate)
