@@ -38,7 +38,6 @@ struct recvbuf {
 	sockaddr_u	srcadr;		/* where packet came from */
 	endpt *		dstadr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
-	int		cast_flags;	/* unicast/broadcast/manycast mode */
 	l_fp		recv_time;	/* time of arrival */
 	void		(*receiver)(struct recvbuf *); /* callback */
 	size_t		recv_length;	/* number of octets received */
