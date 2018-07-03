@@ -110,6 +110,7 @@ unsigned int sys_ifnum;			/* next .ifnum to assign */
 static int ninterfaces;			/* total # of interfaces */
 
 bool disable_dynamic_updates;	/* if true, scan interfaces once only */
+extern  SOCKET  open_socket     (sockaddr_u *, bool, endpt *);
 
 static bool
 netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
@@ -214,10 +215,6 @@ static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 				 int);
 static	int	create_sockets	(unsigned short);
 static	void	set_reuseaddr	(int);
-static	bool	socket_broadcast_enable	 (endpt *, SOCKET, sockaddr_u *);
-#ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
-static	bool	socket_broadcast_disable (endpt *, sockaddr_u *);
-#endif
 
 typedef struct remaddr remaddr_t;
 
@@ -897,7 +894,7 @@ create_wildcards(
 		wildif->flags = INT_UP | INT_WILDCARD;
 		wildif->ignore_packets = (ACTION_DROP == action);
 
-		wildif->fd = open_socket(&wildif->sin, 0, 1, wildif);
+		wildif->fd = open_socket(&wildif->sin, true, wildif);
 
 		if (wildif->fd != INVALID_SOCKET) {
 			wildipv6 = wildif;
@@ -939,7 +936,7 @@ create_wildcards(
 
 		wildif->flags = INT_BROADCAST | INT_UP | INT_WILDCARD;
 		wildif->ignore_packets = (ACTION_DROP == action);
-		wildif->fd = open_socket(&wildif->sin, 0, 1, wildif);
+		wildif->fd = open_socket(&wildif->sin, true, wildif);
 
 		if (wildif->fd != INVALID_SOCKET) {
 			wildipv4 = wildif;
@@ -1256,18 +1253,11 @@ refresh_interface(
 {
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
 	if (interface->fd != INVALID_SOCKET) {
-		int bcast = (interface->flags & INT_BCASTXMIT) != 0;
-		/* as we forcibly close() the socket remove the
-		   broadcast permission indication */
-		if (bcast)
-			socket_broadcast_disable(interface, &interface->sin);
-
 		close_and_delete_fd_from_list(interface->fd);
 
 		/* create new socket picking up a new first hop binding
 		   at connect() time */
-		interface->fd = open_socket(&interface->sin,
-					    bcast, 0, interface);
+		interface->fd = open_socket(&interface->sin, false, interface);
 		 /*
 		  * reset TTL indication so TTL is is set again
 		  * next time around
@@ -1770,7 +1760,7 @@ create_interface(
 	/*
 	 * create socket
 	 */
-	iface->fd = open_socket(&iface->sin, 0, 0, iface);
+	iface->fd = open_socket(&iface->sin, false, iface);
 
 	if (iface->fd != INVALID_SOCKET)
 		log_listen_address(iface);
@@ -1869,64 +1859,6 @@ set_reuseaddr(
 #endif /* ! SO_EXCLUSIVEADDRUSE */
 }
 
-
-#ifdef OPEN_BCAST_SOCKET
-/*
- * Enable a broadcast address to a given socket
- * The socket is in the ep_list all we need to do is enable
- * broadcasting. It is not this function's job to select the socket
- */
-static bool
-socket_broadcast_enable(
-	endpt *	iface,
-	SOCKET			fd,
-	sockaddr_u *		baddr
-	)
-{
-	int on = 1;
-
-	if (IS_IPV4(baddr)) {
-		/* if this interface can support broadcast, set SO_BROADCAST */
-		if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST,
-			       (char *)&on, sizeof(on)))
-			msyslog(LOG_ERR,
-				"IO: setsockopt(SO_BROADCAST) enable failure on address %s: %m",
-				socktoa(baddr));
-		else
-			DPRINT(2, ("Broadcast enabled on socket %d for address %s\n",
-				   fd, socktoa(baddr)));
-	}
-	iface->flags |= INT_BCASTXMIT;
-	return true;
-}
-
-#ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
-/*
- * Remove a broadcast address from a given socket
- * The socket is in the ep_list all we need to do is disable
- * broadcasting. It is not this function's job to select the socket
- */
-static bool
-socket_broadcast_disable(
-	endpt *	iface,
-	sockaddr_u *		baddr
-	)
-{
-	int off = 0;	/* This seems to be OK as an int */
-
-	if (IS_IPV4(baddr) && setsockopt(iface->fd, SOL_SOCKET,
-	    SO_BROADCAST, (char *)&off, sizeof(off)))
-		msyslog(LOG_ERR,
-			"IO: setsockopt(SO_BROADCAST) disable failure on address %s: %m",
-			socktoa(baddr));
-
-	iface->flags &= ~INT_BCASTXMIT;
-	return true;
-}
-#endif /* OS_MISSES_SPECIFIC_ROUTE_UPDATES */
-
-#endif /* OPEN_BCAST_SOCKET */
-
 /*
  * open_socket - open a socket, returning the file descriptor
  */
@@ -1934,7 +1866,6 @@ socket_broadcast_disable(
 SOCKET
 open_socket(
 	sockaddr_u *	addr,
-	bool		bcast,
 	bool		turn_off_reuse,
 	endpt *		interf
 	)
@@ -2017,8 +1948,6 @@ open_socket(
 				"IO: setsockopt IP_TOS (%02x) fails on "
                                 "address %s: %m",
 				(unsigned)qos, socktoa(addr));
-		if (bcast)
-			socket_broadcast_enable(interf, fd, addr);
 	}
 
 	/*
@@ -2547,6 +2476,11 @@ select_peerinterface(
 {
 	endpt *ep;
 	endpt *wild;
+
+#ifndef REFCLOCK
+	UNUSED_ARG(peer);
+#endif
+
 
 	wild = ANY_INTERFACE_CHOOSE(srcadr);
 

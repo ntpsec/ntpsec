@@ -596,10 +596,6 @@ int main(int argc, char **argv) {
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
 
-    # These are helpful and don't break Linux or *BSD
-    ctx.define("OPEN_BCAST_SOCKET", 1,
-               comment="Whether to open a broadcast socket")
-
     # Check via pkg-config first, then fall back to a direct search
     if not ctx.check_cfg(
         package='libcrypto', uselib_store='CRYPTO',

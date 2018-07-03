@@ -92,7 +92,6 @@ extern	endpt *	findinterface		(sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
 extern  void    io_handler              (void);
 extern	void	init_io 	(void);
-extern  SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
 extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, int);
