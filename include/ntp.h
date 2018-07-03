@@ -604,7 +604,6 @@ struct mon_data {
 	int		count;		/* total packet count */
 	unsigned short	flags;		/* restrict flags */
 	uint8_t		vn_mode;	/* packet mode & version */
-	uint8_t		cast_flags;	/* flags MDF_?CAST */
 	sockaddr_u	rmtadr;		/* address of remote host */
 };
 
