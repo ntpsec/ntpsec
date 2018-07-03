@@ -1869,20 +1869,6 @@ set_reuseaddr(
 #endif /* ! SO_EXCLUSIVEADDRUSE */
 }
 
-/*
- * This is just a wrapper around an internal function so we can
- * make other changes as necessary later on
- */
-void
-enable_broadcast(
-	endpt *	iface,
-	sockaddr_u *		baddr
-	)
-{
-#ifdef OPEN_BCAST_SOCKET
-	socket_broadcast_enable(iface, iface->fd, baddr);
-#endif
-}
 
 #ifdef OPEN_BCAST_SOCKET
 /*
