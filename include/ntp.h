@@ -285,17 +285,6 @@ struct peer {
 	double	disp;		/* peer dispersion */
 
 	/*
-	 * Variables used to correct for packet length and asymmetry.
-	 */
-	double	t21;		/* outbound packet delay */
-	int	t21_bytes;	/* outbound packet length */
-	int	t21_last;	/* last outbound packet length */
-	double	r21;		/* outbound data rate */
-	double	t34;		/* inbound packet delay */
-	int	t34_bytes;	/* inbound packet length */
-	double	r34;		/* inbound data rate */
-
-	/*
 	 * End of clear-to-zero area
 	 */
 	unsigned int   outcount;       /* packets sent without reply */

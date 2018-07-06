@@ -272,19 +272,17 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_FLASH		35
 #define	CP_MODE			36
 #define	CP_VARLIST		37
-#define	CP_IN			38
-#define	CP_OUT			39
-#define	CP_RATE			40
-#define	CP_BIAS			41
-#define	CP_SRCHOST		42
-#define	CP_TIMEREC		43
-#define	CP_TIMEREACH		44
-#define	CP_BADAUTH		45
-#define	CP_BOGUSORG		46
-#define	CP_OLDPKT		47
-#define	CP_SELDISP		48
-#define	CP_SELBROKEN		49
-#define	CP_CANDIDATE		50
+#define	CP_RATE			38
+#define	CP_BIAS			39
+#define	CP_SRCHOST		40
+#define	CP_TIMEREC		41
+#define	CP_TIMEREACH		42
+#define	CP_BADAUTH		43
+#define	CP_BOGUSORG		44
+#define	CP_OLDPKT		45
+#define	CP_SELDISP		46
+#define	CP_SELBROKEN		47
+#define	CP_CANDIDATE		48
 #define	CP_MAXCODE		CP_CANDIDATE
 
 /*
@@ -500,20 +498,18 @@ static const struct ctl_var peer_var[] = {
 	{ CP_FLASH,	RO, "flash" },		/* 35 */
 	{ CP_MODE,	RO, "mode" },		/* 36 */
 	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
-	{ CP_IN,	RO, "in" },		/* 38 */
-	{ CP_OUT,	RO, "out" },		/* 39 */
-	{ CP_RATE,	RO, "headway" },	/* 40 */
-	{ CP_BIAS,	RO, "bias" },		/* 41 */
-	{ CP_SRCHOST,	RO, "srchost" },	/* 42 */
-	{ CP_TIMEREC,	RO, "timerec" },	/* 43 */
-	{ CP_TIMEREACH,	RO, "timereach" },	/* 44 */
-	{ CP_BADAUTH,	RO, "badauth" },	/* 45 */
-	{ CP_BOGUSORG,	RO, "bogusorg" },	/* 46 */
-	{ CP_OLDPKT,	RO, "oldpkt" },		/* 47 */
-	{ CP_SELDISP,	RO, "seldisp" },	/* 48 */
-	{ CP_SELBROKEN,	RO, "selbroken" },	/* 49 */
-	{ CP_CANDIDATE, RO, "candidate" },	/* 50 */
-	{ 0,		EOV, "" }		/* 50/58 */
+	{ CP_RATE,	RO, "headway" },	/* 38 */
+	{ CP_BIAS,	RO, "bias" },		/* 39 */
+	{ CP_SRCHOST,	RO, "srchost" },	/* 40 */
+	{ CP_TIMEREC,	RO, "timerec" },	/* 41 */
+	{ CP_TIMEREACH,	RO, "timereach" },	/* 42 */
+	{ CP_BADAUTH,	RO, "badauth" },	/* 43 */
+	{ CP_BOGUSORG,	RO, "bogusorg" },	/* 44 */
+	{ CP_OLDPKT,	RO, "oldpkt" },		/* 45 */
+	{ CP_SELDISP,	RO, "seldisp" },	/* 46 */
+	{ CP_SELBROKEN,	RO, "selbroken" },	/* 47 */
+	{ CP_CANDIDATE, RO, "candidate" },	/* 48 */
+	{ 0,		EOV, "" }
 };
 
 
@@ -526,8 +522,6 @@ static const uint8_t def_peer_var[] = {
 	CP_SRCHOST,
 	CP_DSTADR,
 	CP_DSTPORT,
-	CP_OUT,
-	CP_IN,
 	CP_LEAP,
 	CP_STRATUM,
 	CP_PRECISION,
@@ -2129,16 +2123,6 @@ ctl_putpeer(
 			    (p->dstadr != NULL)
 				? SRCPORT(&p->dstadr->sin)
 				: 0);
-		break;
-
-	case CP_IN:
-		if (p->r21 > 0.)
-			ctl_putdbl(peer_var[id].text, p->r21 / MS_PER_S);
-		break;
-
-	case CP_OUT:
-		if (p->r34 > 0.)
-			ctl_putdbl(peer_var[id].text, p->r34 / MS_PER_S);
 		break;
 
 	case CP_RATE:

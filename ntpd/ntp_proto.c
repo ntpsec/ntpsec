@@ -2089,7 +2089,6 @@ peer_xmit(
 		get_systime(&xmt_tx);
 		peer->org = xmt_tx;
 		xpkt.xmt = htonl_fp(xmt_tx);
-		peer->t21_bytes = (int)sendlen;
 		sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
 		peer->sent++;
 		peer->outcount++;
@@ -2126,7 +2125,6 @@ peer_xmit(
 		msyslog(LOG_ERR, "PROTO: buffer overflow %zu", sendlen);
 		exit(1);
 	}
-	peer->t21_bytes = (int)sendlen;
 	sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
 	peer->sent++;
         peer->outcount++;
