@@ -424,9 +424,13 @@ struct pkt {
 	l_fp_w	rec;		/* receive time stamp */
 	l_fp_w	xmt;		/* transmit time stamp */
 
+/* Old style authentication was just appended
+ * without the type/length of an extension header. */
+/* Length includes 1 word of keyID */
+/* MD5 length is 16 bytes => 4+1 */
+/* SHA length is 20 bytes => 5+1 */
 #define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
-#define MAX_MD5_LEN	(5 * sizeof(uint32_t))	/* MD5 */
-#define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* SHA */
+#define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* MAX of old style */
 
 	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
 } __attribute__ ((aligned));
@@ -677,11 +681,6 @@ struct restrict_u_tag {
 #define	RES_MSSNTP		0x0800	/* enable MS-SNTP authentication */
 #define	RES_FLAKE		0x1000	/* flakeway - drop 10% */
 #define	RES_NOMRULIST		0x2000	/* mode 6 mrulist denied */
-
-#define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |	\
-				 RES_NOMODIFY | RES_KOD |	\
-				 RES_MSSNTP | RES_FLAKE |	\
-				 RES_NOMRULIST)
 
 /* pythonize-header: start ignoring */
 
