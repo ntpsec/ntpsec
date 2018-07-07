@@ -11,12 +11,21 @@
 
 #include "config.h"
 #include "ntp.h"
-#include "ntp_endian.h"
+
+/* NB: RAND_bytes comes from OpenSSL
+ * Starting in version 1.1.1, it reseeds itself occasionally.
+ * That needs access to /dev/urandom which may be blocked by chroot jails.
+ */
 
 int32_t
 ntp_random(void)
 {
-	unsigned char rnd[sizeof(uint32_t)];
-	RAND_bytes(rnd, sizeof(rnd));
-	return (int32_t)ntp_be32dec(rnd);
+	int err;
+	uint32_t rnd;
+	err = RAND_bytes((unsigned char *)&rnd, sizeof(rnd));
+	if (1 != err) {
+		msyslog(LOG_ERR, "ERR: ntp_random - RAND_bytes failed");
+	  exit(1);
+	}
+	return rnd;
 }
