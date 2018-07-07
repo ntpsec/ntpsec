@@ -142,12 +142,6 @@ ntpc_step_systime(PyObject *self, PyObject *args)
     return Py_BuildValue("d", step_systime(full_adjustment, ntp_set_tod));
 }
 
-int32_t ntp_random(void)
-/* stub random function for get_systime() */
-{
-    return 0;
-}
-
 /* List of functions defined in the module */
 
 static PyMethodDef ntpc_methods[] = {
