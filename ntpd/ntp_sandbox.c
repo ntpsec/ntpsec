@@ -411,6 +411,9 @@ int scmp_sc[] = {
 	SCMP_SYS(geteuid),
 	SCMP_SYS(ppoll),
 	SCMP_SYS(sendmsg),
+#ifdef __NR_geteuid32
+	SCMP_SYS(geteuid32),
+#endif
 
 #ifdef __NR_mmap
 	/* gentoo 64-bit and 32-bit, Intel and Arm use mmap */
