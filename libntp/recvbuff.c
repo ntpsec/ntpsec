@@ -18,11 +18,6 @@ static unsigned long total_recvbufs;	/* total recvbufs currently in use */
 static unsigned long lowater_adds;	/* # of times we have added memory */
 static unsigned long buffer_shortfall;	/* # of missed free receive buffers
 					   between replenishments */
-/*
- * Unmarshalling helper
- */
-extern uint32_t extract_32bits_from_stream(uint8_t *);
-
 static DECL_FIFO_ANCHOR(recvbuf_t) full_recv_fifo;
 static recvbuf_t *		   free_recv_list;
 	
@@ -261,41 +256,3 @@ check_gen_fifo_consistency(void *fifo)
 }
 #endif	/* NTP_DEBUG_LISTS */
 
-void
-unmarshall_pkt(struct pkt *rpkt, struct recvbuf *rbufp)
-{
-    rpkt->li_vn_mode = (uint8_t)rbufp->recv_buffer[0];
-    rpkt->stratum = (uint8_t)rbufp->recv_buffer[1];
-    rpkt->ppoll = (uint8_t)rbufp->recv_buffer[2];
-    rpkt->precision = (int8_t)rbufp->recv_buffer[3];
-	// rootdelay
-	rpkt->rootdelay = extract_32bits_from_stream(&rbufp->recv_buffer[4]);
-	// rootdisp
-	rpkt->rootdisp = extract_32bits_from_stream(&rbufp->recv_buffer[8]);
-	// refid
-	rpkt->refid = extract_32bits_from_stream(&rbufp->recv_buffer[12]);
-	// reftime
-	rpkt->reftime.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[16]);
-	rpkt->reftime.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[20]);
-	// org
-	rpkt->org.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[24]);
-	rpkt->org.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[28]);
-	// rec
-	rpkt->rec.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[32]);
-	rpkt->rec.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[36]);
-	// xmt
-	rpkt->xmt.l_ui = extract_32bits_from_stream(&rbufp->recv_buffer[40]);
-	rpkt->xmt.l_uf = extract_32bits_from_stream(&rbufp->recv_buffer[44]);
-}
-
-uint32_t
-extract_32bits_from_stream(uint8_t *addr)
-{
-    uint32_t var = 0;
-	var = (uint32_t)*addr << 24;
-	var |= (uint32_t)*(addr + 1) << 16;
-	var |= (uint32_t)*(addr + 2) << 8;
-	var |= (uint32_t)*(addr + 3);
-	var = ntohl(var);
-	return var;
-}
