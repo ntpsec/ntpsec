@@ -2056,12 +2056,10 @@ peer_xmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	struct pkt xpkt;	/* transmit packet */
-	size_t	sendlen, authlen;
-	auth_info *auth;	/* !NULL for authentication */
-	l_fp	xmt_tx;
+	struct		pkt xpkt;	/* transmit packet */
+	unsigned int	sendlen;
 
-	if (!peer->dstadr)	/* drop peers without interface */
+	if (!peer->dstadr)		/* drop peers without interface */
 		return;
 
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap, peer->cfg.version,
@@ -2075,61 +2073,35 @@ peer_xmit(
 	xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
 	xpkt.org = htonl_fp(peer->xmt);
 	xpkt.rec = htonl_fp(peer->dst);
+	sendlen = LEN_PKT_NOMAC;
+
+	get_systime(&peer->org);	/* out in xmt, back in org */
+	xpkt.xmt = htonl_fp(peer->org);
 
 	/*
 	 * If the peer (aka server) was configured with a key, authenticate
 	 * the packet.  Else, the packet is not authenticated.
 	 */
-	sendlen = LEN_PKT_NOMAC;
-	if (peer->cfg.peerkey == 0) {
-		/*
-		 * Transmit a-priori timestamps.  This is paired with
-		 * a later call used to record transmission time.
-		 */
-		get_systime(&xmt_tx);
-		peer->org = xmt_tx;
-		xpkt.xmt = htonl_fp(xmt_tx);
-		sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
-		peer->sent++;
-		peer->outcount++;
-		peer->throttle += (1 << peer->cfg.minpoll) - 2;
-
-		DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
-			   current_time, peer->dstadr ?
-			   socktoa(&peer->dstadr->sin) : "-",
-			   socktoa(&peer->srcadr), peer->hmode, sendlen));
-		return;
+	if (0 != peer->cfg.peerkey) {
+		auth_info *auth = authlookup(peer->cfg.peerkey, true);
+		if (NULL == auth) {
+			report_event(PEVNT_AUTH, peer, "no key");
+			peer->flash |= BOGON5;		/* auth error */
+			peer->badauth++;
+			return;
+		}
+		sendlen += authencrypt(auth, (uint32_t *)&xpkt, sendlen);
+		if (sendlen > sizeof(xpkt)) {
+			msyslog(LOG_ERR, "PROTO: buffer overflow %u", sendlen);
+			exit(1);
+		}
 	}
 
-	/*
-	 * Authentication is enabled, so the transmitted packet must be
-	 * authenticated.
-`	 */
-
-	/*
-	 * Transmit a-priori timestamps
-	 */
-	get_systime(&xmt_tx);
-	peer->org = xmt_tx;
-	xpkt.xmt = htonl_fp(xmt_tx);
-	auth = authlookup(peer->cfg.peerkey, true);
-	if (NULL == auth) {
-		report_event(PEVNT_AUTH, peer, "no key");
-		peer->flash |= BOGON5;		/* auth error */
-		peer->badauth++;
-		return;
-	}
-	authlen = (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
-	sendlen += authlen;
-	if (sendlen > sizeof(xpkt)) {
-		msyslog(LOG_ERR, "PROTO: buffer overflow %zu", sendlen);
-		exit(1);
-	}
-	sendpkt(&peer->srcadr, peer->dstadr, &xpkt, (int)sendlen);
+	sendpkt(&peer->srcadr, peer->dstadr, &xpkt, sendlen);
 	peer->sent++;
         peer->outcount++;
 	peer->throttle += (1 << peer->cfg.minpoll) - 2;
-	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %zu\n",
+	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %u\n",
 		   current_time, peer->dstadr ?
 		   socktoa(&peer->dstadr->sin) : "-",
 		   socktoa(&peer->srcadr), peer->hmode,
