@@ -29,3 +29,17 @@ ntp_random(void)
 	}
 	return rnd;
 }
+
+uint64_t
+ntp_random64(void)
+{
+        int err;
+        uint64_t rnd;
+        err = RAND_bytes((unsigned char *)&rnd, sizeof(rnd));
+        if (1 != err) {
+                msyslog(LOG_ERR, "ERR: ntp_random - RAND_bytes failed");
+          exit(1);
+        }
+        return rnd;
+}
+

@@ -16,6 +16,7 @@
 #include "ntp_net.h"
 
 extern int32_t ntp_random (void);
+extern uint64_t ntp_random64 (void);
 
 /*
  * Calendar arithmetic - contributed by G. Healton
