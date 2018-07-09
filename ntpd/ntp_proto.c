@@ -2049,7 +2049,7 @@ root_distance(
 
 
 /*
- * peer_xmit - send packet for persistent association.
+ * peer_xmit - send client-mode packet for persistent association.
  */
 static void
 peer_xmit(
@@ -2062,17 +2062,34 @@ peer_xmit(
 	if (!peer->dstadr)		/* drop peers without interface */
 		return;
 
-	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap, peer->cfg.version,
-	    peer->hmode);
-	xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
-	xpkt.ppoll = peer->hpoll;
-	xpkt.precision = sys_vars.sys_precision;
-	xpkt.refid = sys_vars.sys_refid;
-	xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
-	xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
-	xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
-	xpkt.org = htonl_fp(peer->xmt);
-	xpkt.rec = htonl_fp(peer->dst);
+	if (NTP_VERSION == peer->cfg.version) {
+		/* Hide most of info for privacy
+		 * RFC in progress - draft-ietf-ntp-data-minimization, 2018-Jul-07
+		 */
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(
+			LEAP_NOWARNING, peer->cfg.version, MODE_CLIENT);
+		xpkt.stratum = 0;
+		xpkt.ppoll = 0;
+		xpkt.precision = 0x20;
+		xpkt.refid = 0;
+		xpkt.rootdelay = 0;
+		xpkt.rootdisp =	0;
+		xpkt.reftime = htonl_fp(0);
+		xpkt.org = htonl_fp(0);
+		xpkt.rec = htonl_fp(0);
+	} else {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(
+			sys_vars.sys_leap, peer->cfg.version, peer->hmode);
+		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
+		xpkt.ppoll = peer->hpoll;
+		xpkt.precision = sys_vars.sys_precision;
+		xpkt.refid = sys_vars.sys_refid;
+		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
+		xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
+		xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
+		xpkt.org = htonl_fp(peer->xmt);
+		xpkt.rec = htonl_fp(peer->dst);
+	}
 	sendlen = LEN_PKT_NOMAC;
 
 	get_systime(&peer->org);	/* out in xmt, back in org */
@@ -2098,6 +2115,7 @@ peer_xmit(
 	}
 
 	sendpkt(&peer->srcadr, peer->dstadr, &xpkt, sendlen);
+
 	peer->sent++;
         peer->outcount++;
 	peer->throttle += (1 << peer->cfg.minpoll) - 2;
