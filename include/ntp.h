@@ -279,7 +279,8 @@ struct peer {
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
 	l_fp	dst;		/* destination timestamp */
-	l_fp	org;		/* origin timestamp */
+	l_fp	org_ts;		/* origin real-timestamp */
+	l_fp	org_rand;	/* origin pseudo-timestamp */
 	double	offset;		/* peer clock offset */
 	double	delay;		/* peer roundtrip delay */
 	double	jitter;		/* peer jitter (squares) */

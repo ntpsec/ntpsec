@@ -540,7 +540,7 @@ record_raw_stats(
 {
 	struct timespec	now;
 	const sockaddr_u *dstaddr = peer->dstadr ? &peer->dstadr->sin : NULL;
-	l_fp	t1 = peer->org;		/* originate timestamp */
+	l_fp	t1 = peer->org_ts;	/* originate timestamp */
 	l_fp	t2 = peer->rec;		/* receive timestamp */
 	l_fp	t3 = peer->xmt;		/* transmit timestamp */
 	l_fp	t4 = peer->dst;		/* destination timestamp */

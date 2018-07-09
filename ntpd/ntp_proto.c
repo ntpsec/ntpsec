@@ -494,7 +494,7 @@ handle_procpkt(
 			peer->flash |= BOGON3;
 			peer->bogusorg++;
 			return;
-		} else if(rbufp->pkt.org != peer->org) {
+		} else if(rbufp->pkt.org != peer->org_rand) {
 			peer->flash |= BOGON2;
 			peer->bogusorg++;
 			return;
@@ -550,9 +550,9 @@ handle_procpkt(
 	    scalbn((double)(rbufp->pkt.xmt - rbufp->recv_time), -32) :
 	    -scalbn((double)(rbufp->recv_time - rbufp->pkt.xmt), -32);
 	const double t21 =
-	    (rbufp->pkt.rec >= peer->org) ?
-	    scalbn((double)(rbufp->pkt.rec - peer->org), -32) :
-	    -scalbn((double)(peer->org - rbufp->pkt.rec), -32);
+	    (rbufp->pkt.rec >= peer->org_ts) ?
+	    scalbn((double)(rbufp->pkt.rec - peer->org_ts), -32) :
+	    -scalbn((double)(peer->org_ts - rbufp->pkt.rec), -32);
 	const double theta = (t21 + t34) / 2.;
 	const double delta = fabs(t21 - t34);
 	const double epsilon = LOGTOD(sys_vars.sys_precision) +
@@ -2062,6 +2062,7 @@ peer_xmit(
 	if (!peer->dstadr)		/* drop peers without interface */
 		return;
 
+	sendlen = LEN_PKT_NOMAC;
 	if (NTP_VERSION == peer->cfg.version) {
 		/* Hide most of info for privacy
 		 * RFC in progress - draft-ietf-ntp-data-minimization, 2018-Jul-07
@@ -2077,6 +2078,8 @@ peer_xmit(
 		xpkt.reftime = htonl_fp(0);
 		xpkt.org = htonl_fp(0);
 		xpkt.rec = htonl_fp(0);
+		peer->org_rand = ntp_random64();
+		get_systime(&peer->org_ts);	/* as late as possible */
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(
 			sys_vars.sys_leap, peer->cfg.version, peer->hmode);
@@ -2089,11 +2092,12 @@ peer_xmit(
 		xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
 		xpkt.org = htonl_fp(peer->xmt);
 		xpkt.rec = htonl_fp(peer->dst);
+		get_systime(&peer->org_ts);	/* as late as possible */
+		peer->org_rand = peer->org_ts;
 	}
-	sendlen = LEN_PKT_NOMAC;
 
-	get_systime(&peer->org);	/* out in xmt, back in org */
-	xpkt.xmt = htonl_fp(peer->org);
+	xpkt.xmt = htonl_fp(peer->org_rand);	/* out in xmt, back in org */
+
 
 	/*
 	 * If the peer (aka server) was configured with a key, authenticate
@@ -2107,6 +2111,7 @@ peer_xmit(
 			peer->badauth++;
 			return;
 		}
+		/* Maybe bump peer->org_ts to account for crypto time */
 		sendlen += authencrypt(auth, (uint32_t *)&xpkt, sendlen);
 		if (sendlen > sizeof(xpkt)) {
 			msyslog(LOG_ERR, "PROTO: buffer overflow %u", sendlen);
