@@ -12,6 +12,12 @@ on user-visible changes.
 
 == Repository Head ==
 
+Use data minimization on client requests
+  https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/
+
+Support AES-128-CMAC for authentication
+  https://datatracker.ietf.org/doc/draft-ietf-ntp-mac/
+
 == 2018-06-11: 1.1.1 ==
 
 Log timestamps now include the year.  This is useful when
