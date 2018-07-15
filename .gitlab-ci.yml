@@ -21,6 +21,7 @@ pages:
 
 include:
   - template: Code-Quality.gitlab-ci.yml
+  - template: SAST.gitlab-ci.yml
 
 .job_template: &job_definition
   stage: build
