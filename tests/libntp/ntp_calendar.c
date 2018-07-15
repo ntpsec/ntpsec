@@ -128,9 +128,25 @@ TEST(calendar, parse_to_unixtime) {
 }
 #endif
 
-// test the NTP to Unix time conversion
+TEST(calendar, PeriodicExtend1) {
+    // Test positive cycle, pivot > value
+    TEST_ASSERT_EQUAL(1001, ntpcal_periodic_extend(1000, 5, 2));
+    // Test positive cycle, pivot < value
+    TEST_ASSERT_EQUAL(6, ntpcal_periodic_extend(5, 1000, 2));
+    // Test negative cycle, pivot > value
+    TEST_ASSERT_EQUAL(999, ntpcal_periodic_extend(1000, 5, -2));
+    // Test negative cycle, pivot < value
+    TEST_ASSERT_EQUAL(4, ntpcal_periodic_extend(5, 1000, -2));
+}
+
+// test the NTP to 64-bit Unix scale time conversion
 TEST(calendar, NtpToTime1) {
-  TEST_ASSERT_EQUAL(2085978538, ntpcal_ntp_to_time(42, 23));
+    TEST_ASSERT_EQUAL(2085978538, ntpcal_ntp_to_time(42, 23));
+}
+
+// test the NTP to 64-bit NTP scale time conversion
+TEST(calendar, NtpToNtp1) {
+    TEST_ASSERT_EQUAL(4294967338, ntpcal_ntp_to_ntp(42, 23));
 }
 
 // test the day/sec join & split ops, making sure that 32bit
@@ -160,6 +176,37 @@ TEST(calendar, DaySplitMerge) {
 			TEST_ASSERT_EQUAL(esec, split.lo);
 		}
 	}
+}
+
+TEST(calendar, SplitEraDays1) {
+    ntpcal_split res;
+    int32_t isleapyear = 42;
+
+    // Test no flag, no-leap, positive
+    res = ntpcal_split_eradays(4, NULL);
+    TEST_ASSERT_EQUAL(0, res.hi);
+    TEST_ASSERT_EQUAL(4, res.lo);
+    TEST_ASSERT_EQUAL(42, isleapyear);
+
+    // Test flag, no-leap, positive
+    res = ntpcal_split_eradays(4, &isleapyear);
+    TEST_ASSERT_EQUAL(0, res.hi);
+    TEST_ASSERT_EQUAL(4, res.lo);
+    TEST_ASSERT_EQUAL(0, isleapyear);
+
+    // Test flag, leap, positive
+    res = ntpcal_split_eradays(1400, &isleapyear);
+    TEST_ASSERT_EQUAL(3, res.hi);
+    TEST_ASSERT_EQUAL(305, res.lo);
+    TEST_ASSERT_EQUAL(1, isleapyear);
+
+    isleapyear = 0;
+
+    // Test flag, leap, negative
+    res = ntpcal_split_eradays(-100, &isleapyear);
+    TEST_ASSERT_EQUAL(-1, res.hi);
+    TEST_ASSERT_EQUAL(266, res.lo);
+    TEST_ASSERT_EQUAL(1, isleapyear);
 }
 
 TEST(calendar, SplitYearDays1) {
@@ -199,6 +246,84 @@ TEST(calendar, RataDie1) {
 
 	ntpcal_rd_to_date(&actual, testDate);
 	TEST_ASSERT_TRUE(IsEqualDate(&expected, &actual));
+}
+
+TEST(calendar, DaysecToDate1) {
+    struct calendar cal;
+    int32_t days;
+
+    // Test normal date
+    days = ntpcal_daysec_to_date(&cal, 100000);
+    TEST_ASSERT_EQUAL(days, 1);
+    TEST_ASSERT_EQUAL(cal.hour, 3);
+    TEST_ASSERT_EQUAL(cal.minute, 46);
+    TEST_ASSERT_EQUAL(cal.second, 40);
+
+    // Test negative date
+    days = ntpcal_daysec_to_date(&cal, -100000);
+    TEST_ASSERT_EQUAL(-2, days);
+    TEST_ASSERT_EQUAL(20, cal.hour);
+    TEST_ASSERT_EQUAL(13, cal.minute);
+    TEST_ASSERT_EQUAL(20, cal.second);
+}
+
+TEST(calendar, TimeToDate1) {
+    struct calendar jd = {0, 0, 0, 0, 0, 0, 0, 0};
+    int res;
+
+    res = ntpcal_time_to_date(&jd, 1000000);
+    TEST_ASSERT_EQUAL(0, res);
+    TEST_ASSERT_EQUAL(1970, jd.year);
+    TEST_ASSERT_EQUAL(12, jd.yearday);
+    TEST_ASSERT_EQUAL(1, jd.month);
+    TEST_ASSERT_EQUAL(12, jd.monthday);
+    TEST_ASSERT_EQUAL(13, jd.hour);
+    TEST_ASSERT_EQUAL(46, jd.minute);
+    TEST_ASSERT_EQUAL(40, jd.second);
+    TEST_ASSERT_EQUAL(1, jd.weekday);
+}
+
+TEST(calendar, DayJoin1) {
+    TEST_ASSERT_EQUAL(4323600, ntpcal_dayjoin(50, 3600));
+}
+
+TEST(calendar, DaysInYears1) {
+    // Test positive less than one gregorian cycle of years
+    TEST_ASSERT_EQUAL(109572, ntpcal_days_in_years(300));
+    // Test positive one gregorian cycle of years
+    TEST_ASSERT_EQUAL(146097, ntpcal_days_in_years(400));
+    // Test positive greater than one gregorian cycle of years
+    TEST_ASSERT_EQUAL(182621, ntpcal_days_in_years(500));
+    // Test negative less than one gregorian cycle of years
+    TEST_ASSERT_EQUAL(-109573, ntpcal_days_in_years(-300));
+    // Test negative one gregorian cycle of years
+    TEST_ASSERT_EQUAL(-146097, ntpcal_days_in_years(-400));
+    // Test negative greater than one gregorian cycle of years
+    TEST_ASSERT_EQUAL(-182622, ntpcal_days_in_years(-500));
+}
+
+TEST(calendar, EdateToEradays1) {
+    // Test positive, no months
+    TEST_ASSERT_EQUAL(1827, ntpcal_edate_to_eradays(5, 0, 1));
+    // Test positive, with months
+    TEST_ASSERT_EQUAL(1917, ntpcal_edate_to_eradays(5, 3, 1));
+    // Test negative, no months
+    TEST_ASSERT_EQUAL(-1828, ntpcal_edate_to_eradays(-5, 0, -1));
+    // Test negative, with months
+    TEST_ASSERT_EQUAL(-1920, ntpcal_edate_to_eradays(-5, -3, -1));
+}
+
+TEST(calendar, EtimeToSeconds1) {
+    TEST_ASSERT_EQUAL(18181, ntpcal_etime_to_seconds(5, 3, 1));
+}
+
+TEST(calendar, TmToRd1) {
+    struct tm utm;
+
+    utm.tm_year = 10;
+    utm.tm_mon = 5;
+    utm.tm_mday = 1;
+    TEST_ASSERT_EQUAL(697399, ntpcal_tm_to_rd(&utm));
 }
 
 // check last day of february for first 10000 years
@@ -263,6 +388,60 @@ TEST(calendar, RoundTripDate) {
 	}
 }
 
+TEST(calendar, DateToDaysec1) {
+    struct calendar jd;
+
+    jd.hour = 18;
+    jd.minute = 45;
+    jd.second = 15;
+    TEST_ASSERT_EQUAL(67515, ntpcal_date_to_daysec(&jd));
+}
+
+TEST(calendar, TmToDaysec1) {
+    struct tm utm;
+
+    utm.tm_hour = 18;
+    utm.tm_min = 45;
+    utm.tm_sec = 15;
+    TEST_ASSERT_EQUAL(67515, ntpcal_tm_to_daysec(&utm));
+}
+
+TEST(calendar, DateToTime1) {
+    struct calendar jd;
+
+    jd.year = 2000;
+    jd.month = 2;
+    jd.monthday = 4;
+    jd.hour = 8;
+    jd.minute = 16;
+    jd.second = 32;
+    TEST_ASSERT_EQUAL(949652192, ntpcal_date_to_time(&jd));
+}
+
+TEST(calendar, Ntp64ToDate1) {
+    struct calendar jd;
+
+    TEST_ASSERT_EQUAL(0, ntpcal_ntp64_to_date(&jd, 10000000));
+    TEST_ASSERT_EQUAL(1900, jd.year);
+    TEST_ASSERT_EQUAL(4, jd.month);
+    TEST_ASSERT_EQUAL(26, jd.monthday);
+    TEST_ASSERT_EQUAL(17, jd.hour);
+    TEST_ASSERT_EQUAL(46, jd.minute);
+    TEST_ASSERT_EQUAL(40, jd.second);
+}
+
+TEST(calendar, NtpToDate1) {
+    struct calendar jd;
+
+    TEST_ASSERT_EQUAL(1, ntpcal_ntp_to_date(&jd, 86400, 1000000));
+    TEST_ASSERT_EQUAL(2036, jd.year);
+    TEST_ASSERT_EQUAL(2, jd.month);
+    TEST_ASSERT_EQUAL(8, jd.monthday);
+    TEST_ASSERT_EQUAL(6, jd.hour);
+    TEST_ASSERT_EQUAL(28, jd.minute);
+    TEST_ASSERT_EQUAL(16, jd.second);
+}
+
 
 TEST_GROUP_RUNNER(calendar) {
 	RUN_TEST_CASE(calendar, is_leapyear);
@@ -271,12 +450,27 @@ TEST_GROUP_RUNNER(calendar) {
 #ifdef CLOCK_GENERIC
 	RUN_TEST_CASE(calendar, parse_to_unixtime);
 #endif
+	RUN_TEST_CASE(calendar, PeriodicExtend1);
 	RUN_TEST_CASE(calendar, NtpToTime1);
+	RUN_TEST_CASE(calendar, NtpToNtp1);
 	RUN_TEST_CASE(calendar, DaySplitMerge);
+	RUN_TEST_CASE(calendar, DaysecToDate1);
+	RUN_TEST_CASE(calendar, SplitEraDays1);
 	RUN_TEST_CASE(calendar, SplitYearDays1);
 	RUN_TEST_CASE(calendar, SplitYearDays2);
 	RUN_TEST_CASE(calendar, RataDie1);
+	RUN_TEST_CASE(calendar, TimeToDate1);
+	RUN_TEST_CASE(calendar, DayJoin1);
+	RUN_TEST_CASE(calendar, DaysInYears1);
+	RUN_TEST_CASE(calendar, EdateToEradays1);
+	RUN_TEST_CASE(calendar, EtimeToSeconds1);
+	RUN_TEST_CASE(calendar, TmToRd1);
 	RUN_TEST_CASE(calendar, LeapYears1);
 	RUN_TEST_CASE(calendar, LeapYears2);
 	RUN_TEST_CASE(calendar, RoundTripDate);
+	RUN_TEST_CASE(calendar, DateToDaysec1);
+	RUN_TEST_CASE(calendar, TmToDaysec1);
+	RUN_TEST_CASE(calendar, DateToTime1);
+	RUN_TEST_CASE(calendar, Ntp64ToDate1);
+	RUN_TEST_CASE(calendar, NtpToDate1);
 }
