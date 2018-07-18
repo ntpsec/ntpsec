@@ -4,9 +4,10 @@ pages:
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoc
     - python ./waf configure --enable-doc --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
-    - cp www/favicon.ico `pwd`/public
-    - cp docs/top.html.in `pwd`/public/index.html
-    - cp docs/top-asciidoc.css `pwd`/public/asciidoc.css
+    - cp www/favicon.ico public
+    - cp docs/top.html.in public/index.html
+    - cp docs/top-asciidoc.css public/asciidoc.css
+    - find public -type f -iregex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -execdir gzip -f --keep {} \;
   allow_failure: true
   artifacts:
     paths:
