@@ -3,11 +3,11 @@
 # That will rotate ntpd.log monthly and then
 # kick ntpd to switch to the new log file.
 
-/var/log/ntp/ntpd.log {
+/var/log/ntpd.log {
     monthly
     postrotate
       /usr/bin/killall -HUP ntpd
     endscript
-    rotate 9999
+    rotate 6
 }
 
