@@ -100,28 +100,26 @@ void jitter(const iomode mode)
 
 	if (mode == raw)
 	    exit(0);
-	
+
 	/*
 	 * Sort the gtod array and display deciles
 	 */
 	qsort(gtod, NBUF, sizeof(gtod[0]), doublecmp);
 	average = average / (NBUF - 2);
 	if (mode == json) {
-		fprintf(stdout, "{\"Average\":%13.9Lf,", average);
-		fprintf(stdout, "\"First rank\":[");
+		fprintf(stdout, "{\"Average\": %.9Lf, \"First rank\": [", average);
 		for (i = 0; i < NSAMPLES; i++) {
-		    fprintf(stdout, "%13.9f", gtod[i]);
+		    fprintf(stdout, "%.9f", gtod[i]);
 		    if (i < NSAMPLES - 1)
-			fputc(',', stdout);
-		    fputs("],", stdout);
+			fputs(", ", stdout);
 		}
-		fprintf(stdout, "\"Last rank\":");
+		fputs("], \"Last rank\": [", stdout);
 		for (i = NBUF - 12; i < NBUF - 2; i++) {
-		    fprintf(stdout, "%13.9f\n", gtod[i]);
-		    if (i < NSAMPLES - 1)
-			fputc(',', stdout);
-		    fputs("]}\n", stdout);
+		    fprintf(stdout, "%.9f", gtod[i]);
+		    if (i < NBUF - 3)
+			fputs(", ", stdout);
 		}
+		fputs("]}\n", stdout);
 	}
 	else if (mode != raw)
 	{
