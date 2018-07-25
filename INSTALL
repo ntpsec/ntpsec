@@ -50,7 +50,7 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
    Python 3.  Note that you will need both the ordinary Python
    installation and Python dev tools, if your OS makes such a
    distinction.
-   
+
    Some OS distros won't find our installed python libraries.
    More info in README-PYTHON.
 

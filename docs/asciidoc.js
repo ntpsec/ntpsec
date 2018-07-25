@@ -76,7 +76,7 @@ toc: function (toclevels) {
   for (i = 0; i < tocEntriesToRemove.length; i++) {
     toc.removeChild(tocEntriesToRemove[i]);
   }
-  
+
   // Rebuild TOC entries.
   var entries = tocEntries(document.getElementById("content"), toclevels);
   for (var i = 0; i < entries.length; ++i) {

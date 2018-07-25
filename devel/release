@@ -38,7 +38,7 @@ shasum -a 256 -p ${TAR} >${TAR}.sum
 
 # GPG sign that sha256sum file.
 gpg -u ${KEY} -a --output ${TAR}.sum.asc --clearsign ${TAR}.sum
-  
+
 # Copy the release tarball, GPG detached signature of the release
 # tarball, and the signed sha256sum file to the ftp artifact server.
 scp ntpsec-${V}.tar* ${DST}

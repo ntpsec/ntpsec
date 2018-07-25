@@ -40,7 +40,7 @@ comments in the version-control system.
 	compatibility real-time library does strange things with threads
 	as other processes and we're getting lots of complaints about it.
 	Reported by: Juha Sarlin <juha@c3l.com>
-	
+
 2001-06-30  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/driver35.htm: Update email address.
@@ -473,7 +473,7 @@ comments in the version-control system.
 
 	* configure.in (RSASRCS): rsaref2 needs digit.h (I thought I fixed
 	this already).
-	
+
 	* configure.in (CFLAGS): Disable -Wconversion, enable
 	-Wmissing-prototypes, and allow for -Werror.
 	From: Simon Burge <simonb@wasabisystems.com>
@@ -578,7 +578,7 @@ comments in the version-control system.
 	* ntpd/refclock_shm.c (shm_start): Always use strerror. 
 	* libntp/msyslog.c (msyslog): Use strerror if present. 
 	From: Rainer Orth  <ro@TechFak.Uni-Bielefeld.
-	
+
 	* ntpd/ntp_config.c (getconfig): Read stratum fudge value into 
 	long variable.
 	From: Rainer Orth <ro@TechFak.Uni-Bielefeld.DE> 

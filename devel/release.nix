@@ -30,12 +30,12 @@ in with derivationOptions; rec {
 
       echo "dist flags: $distFlags ''${distFlagsArray[@]}"
       python waf dist $distFlags "''${distFlagsArray[@]}"
-      
+
       if [ "$dontCopyDist" != 1 ]; then       
         mkdir -p "$out/tarballs"
         cp -pvd ''${tarballs:-*.tar.gz} $out/tarballs
       fi
-      
+
       runHook postDist
     '';
   });

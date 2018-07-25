@@ -57,7 +57,7 @@ NTP 4.2.8p2 (Harlan Stenn <stenn@ntp.org>, 2015/04/07)
 Focus: Security and Bug fixes, enhancements.
 
 Severity: MEDIUM
- 
+
 In addition to bug fixes and enhancements, this release fixes the
 following medium-severity vulnerabilities involving private key
 authentication:
@@ -198,7 +198,7 @@ NTP 4.2.8p1 (Harlan Stenn <stenn@ntp.org>, 2015/02/04)
 Focus: Security and Bug fixes, enhancements.
 
 Severity: HIGH
- 
+
 In addition to bug fixes and enhancements, this release fixes the
 following high-severity vulnerabilities:
 
@@ -254,11 +254,11 @@ See the ChangeLog for more information.
 
 ---
 NTP 4.2.8 (Harlan Stenn <stenn@ntp.org>, 2014/12/18) 
- 
+
 Focus: Security and Bug fixes, enhancements.
- 
+
 Severity: HIGH
- 
+
 In addition to bug fixes and enhancements, this release fixes the
 following high-severity vulnerabilities:
 
@@ -465,11 +465,11 @@ lists these.
 
 --- 
 NTP 4.2.6p5 (Harlan Stenn <stenn@ntp.org>, 2011/12/24) 
- 
+
 Focus: Bug fixes
- 
+
 Severity: Medium 
- 
+
 This is a recommended upgrade. 
 
 This release updates sys_rootdisp and sys_jitter calculations to match the
@@ -505,30 +505,30 @@ ntpq
 
 --- 
 NTP 4.2.6p4 (Harlan Stenn <stenn@ntp.org>, 2011/09/22) 
- 
+
 Focus: Bug fixes and portability improvements 
- 
+
 Severity: Medium 
- 
+
 This is a recommended upgrade. 
- 
+
 This release includes build infrastructure updates, code 
 clean-ups, minor bug fixes, fixes for a number of minor 
 ref-clock issues, and documentation revisions. 
- 
+
 Portability improvements affect AIX, HP-UX, Linux, OS X and 64-bit time_t. 
- 
+
 New features / changes in this release: 
- 
+
 Build system 
- 
+
 * Fix checking for struct rtattr 
 * Update config.guess and config.sub for AIX 
 * Upgrade required version of autogen and libopts for building 
   from our source code repository 
- 
+
 ntpd 
- 
+
 * Back-ported several fixes for Coverity warnings from ntp-dev 
 * Fix a rare boundary condition in UNLINK_EXPR_SLIST() 
 * Allow "logconfig =allall" configuration directive 
@@ -546,23 +546,23 @@ ntpd
 * Added the NTPD_TICKADJ_PPM environment variable for specifying baseline 
   clock slew on Microsoft Windows 
 * Code cleanup in libntpq 
- 
+
 ntpdc 
- 
+
 * Fix timerstats reporting 
- 
+
 ntpdate 
- 
+
 * Reduce time required to set clock 
 * Allow a timeout greater than 2 seconds 
- 
+
 sntp 
- 
+
 * Backward incompatible command-line option change: 
   -l/--filelog changed -l/--logfile (to be consistent with ntpd) 
- 
+
 Documentation 
- 
+
 * Update html2man. Fix some tags in the .html files 
 * Distribute ntp-wait.html 
 
@@ -761,7 +761,7 @@ This release fixes the following low-severity vulnerabilities:
 
 * [Sec 1144] limited (two byte) buffer overflow in ntpq.  CVE-2009-0159
   Credit for finding this vulnerability goes to Geoff Keating of Apple.
-  
+
 * [Sec 1149] use SO_EXCLUSIVEADDRUSE on Windows
   Credit for finding this issue goes to Dave Hart.
 

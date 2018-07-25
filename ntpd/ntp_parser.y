@@ -496,8 +496,8 @@ unpeer_keyword
 	:	T_Unconfig
 	|	T_Unpeer
 	;
-	
-	
+
+
 /* Other Modes
  * ------------------------------------------------
  */
@@ -598,7 +598,7 @@ monitoring_command
 	|	T_Filegen stat filegen_option_list
 		{
 			filegen_node *fgn;
-			
+
 			fgn = create_filegen_node($2, $3);
 			APPEND_G_FIFO(cfgt.filegen_opts, fgn);
 		}
@@ -661,7 +661,7 @@ filegen_option
 	|	link_nolink
 		{
 			const char *err;
-			
+
 			if (lex_from_file()) {
 				$$ = create_attr_ival(T_Flag, $1);
 			} else {
@@ -758,7 +758,7 @@ access_control_command
 	|	restrict_prefix T_Ipv6_flag T_Default ac_flag_list
 		{
 			restrict_node *rn;
-			
+
 			rn = create_restrict_node($1,
 				create_address_node(
 					estrdup("::"), 
@@ -870,7 +870,7 @@ fudge_command
 	:	T_Fudge address fudge_factor_list
 		{
 			addr_opts_node *aon;
-			
+
 			aon = create_addr_opts_node($2, $3);
 			APPEND_G_FIFO(cfgt.fudge, aon);
 		}
@@ -888,7 +888,7 @@ fudge_factor_list
 			APPEND_G_FIFO($$, $1);
 		}
 	;
-	
+
 fudge_factor
 	:	fudge_factor_dbl_keyword number
 			{ $$ = create_attr_dval($1, $2); }
@@ -1010,7 +1010,7 @@ system_option
 				$$ = create_attr_ival(T_Flag, $1);
 			} else {
 				char err_str[128];
-				
+
 				$$ = NULL;
 				snprintf(err_str, sizeof(err_str),
 					 "enable/disable %s remote configuration ignored",
@@ -1082,14 +1082,14 @@ miscellaneous_command
 	|	misc_cmd_dbl_keyword number
 		{
 			attr_val *av;
-			
+
 			av = create_attr_dval($1, $2);
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
 	|	misc_cmd_int_keyword T_Integer
 		{
 			attr_val *av;
-			
+
 			av = create_attr_ival($1, $2);
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
@@ -1190,7 +1190,7 @@ drift_parm
 	|	T_String T_Double
 		{
 			attr_val *av;
-			
+
 			av = create_attr_sval(T_Driftfile, $1);
 			APPEND_G_FIFO(cfgt.vars, av);
 			av = create_attr_dval(T_WanderThreshold, $2);
@@ -1199,7 +1199,7 @@ drift_parm
 	|	/* Null driftfile,  indicated by empty string "" */
 		{
 			attr_val *av;
-			
+
 			av = create_attr_sval(T_Driftfile, estrdup(""));
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
@@ -1234,21 +1234,21 @@ log_config_command
 		{
 			char	prefix;
 			char *	type;
-			
+
 			switch ($1[0]) {
-			
+
 			case '+':
 			case '-':
 			case '=':
 				prefix = $1[0];
 				type = $1 + 1;
 				break;
-				
+
 			default:
 				prefix = '=';
 				type = $1;
 			}	
-			
+
 			$$ = create_attr_sval(prefix, estrdup(type));
 			YYFREE($1);
 		}
@@ -1258,14 +1258,14 @@ interface_command
 	:	interface_nic nic_rule_action nic_rule_class
 		{
 			nic_rule_node *nrn;
-			
+
 			nrn = create_nic_rule_node($3, NULL, $2);
 			APPEND_G_FIFO(cfgt.nic_rules, nrn);
 		}
 	|	interface_nic nic_rule_action T_String
 		{
 			nic_rule_node *nrn;
-			
+
 			nrn = create_nic_rule_node(0, $3, $2);
 			APPEND_G_FIFO(cfgt.nic_rules, nrn);
 		}
@@ -1410,7 +1410,7 @@ yyerror(
 
 	ip_ctx = lex_current();
 	ip_ctx->errpos = ip_ctx->tokpos;
-	
+
 	msyslog(LOG_ERR, "CONFIG: line %d column %d %s", 
 		ip_ctx->errpos.nline, ip_ctx->errpos.ncol, msg);
 	if (!lex_from_file()) {
