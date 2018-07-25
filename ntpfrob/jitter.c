@@ -114,7 +114,7 @@ void jitter(const iomode mode)
 			fputs(", ", stdout);
 		}
 		fputs("], \"Last rank\": [", stdout);
-		for (i = NBUF - 12; i < NBUF - 2; i++) {
+		for (i = NBUF - NSAMPLES - 2; i < NBUF - 2; i++) {
 		    fprintf(stdout, "%.9f", gtod[i]);
 		    if (i < NBUF - 3)
 			fputs(", ", stdout);
@@ -128,7 +128,7 @@ void jitter(const iomode mode)
 		for (i = 0; i < NSAMPLES; i++)
 		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
 		fprintf(stdout, "Last rank\n");
-		for (i = NBUF - 12; i < NBUF - 2; i++)
+		for (i = NBUF - NSAMPLES - 2; i < NBUF - 2; i++)
 		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
 	}
 
