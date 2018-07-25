@@ -349,7 +349,7 @@ fedora-branched-refclocks:
 
 fedora-rawhide-basic:
   <<: *job_definition
-  image: fedora:rawhide
+  image: registry.fedoraproject.org/fedora:rawhide
   allow_failure: true
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
@@ -359,7 +359,7 @@ fedora-rawhide-basic:
 
 fedora-rawhide-refclocks:
   <<: *job_definition
-  image: fedora:rawhide
+  image: registry.fedoraproject.org/fedora:rawhide
   allow_failure: true
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
