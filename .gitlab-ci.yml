@@ -52,28 +52,12 @@ pages:
       - build/main/ntpfrob/ntpfrob
   retry: 2
 
-gitlab-alpine-basic:
+alpine-basic:
   <<: *job_definition
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
     - python ./waf configure build check
-  tags:
-    - gitlab-org
-
-gitlab-basic:
-  <<: *job_definition
-  script:
-    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev
-    - python ./waf configure build check
-  tags:
-    - gitlab-org
-
-gitlab-refclocks:
-  <<: *job_definition
-  script:
-    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build check
   tags:
     - gitlab-org
 
