@@ -7,6 +7,8 @@ pages:
     - cp www/favicon.ico public
     - cp docs/top.html.in public/index.html
     - cp docs/top-asciidoc.css public/asciidoc.css
+    - mv public/latest/404.html public/404.html
+    - sed -i -E -e 's!\./(asciidoc\.(js|css))!\./latest/\1!g' public/404.html
     - find public -type f -iregex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -execdir gzip -f --keep {} \;
   allow_failure: true
   artifacts:
