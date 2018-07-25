@@ -99,7 +99,7 @@ struct FILE_INFO {
 	FILE *		   fpi;		/* File Descriptor */
 	bool               force_eof;	/* locked or not */
 	int                backch;	/* ungetch buffer */
-	
+
 	struct LCPOS       curpos;	/* current scan position */
 	struct LCPOS       bakpos;	/* last line end for ungetc */
 	struct LCPOS       tokpos;	/* current token position */

@@ -735,7 +735,7 @@ check_leap_file(
 	/* just do nothing if there is no leap file */
 	if ( ! (leapfile_name && *leapfile_name))
 		return;
-	
+
 	/* try to load leapfile, force it if no leapfile loaded yet */
 	if (leapsec_load_file(
 		    leapfile_name, &leapfile_stat,
@@ -794,7 +794,7 @@ getauthkeys(
 	len = strlen(keyfile);
 	if (!len)
 		return;
-	
+
 	key_file_name = erealloc(key_file_name, len + 1);
 	memcpy(key_file_name, keyfile, len + 1);
 

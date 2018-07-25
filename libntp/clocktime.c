@@ -68,7 +68,7 @@ clocktime(
 	uint32_t diff[3];	/* abs difference to receive */
 	int32_t y, idx, min;
 	uint32_t tmp;
-	
+
 	/*
 	 * Compute the offset into the year in seconds.	 Can't
 	 * be negative as yday is 1-origin.

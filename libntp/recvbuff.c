@@ -20,7 +20,7 @@ static unsigned long buffer_shortfall;	/* # of missed free receive buffers
 					   between replenishments */
 static DECL_FIFO_ANCHOR(recvbuf_t) full_recv_fifo;
 static recvbuf_t *		   free_recv_list;
-	
+
 #ifdef DEBUG
 static void uninit_recvbuff(void);
 #endif
@@ -146,7 +146,7 @@ freerecvbuf(recvbuf_t *rb)
 	free_recvbufs++;
 }
 
-	
+
 void
 add_full_recv_buffer(recvbuf_t *rb)
 {

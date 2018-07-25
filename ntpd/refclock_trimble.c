@@ -158,7 +158,7 @@ static const bool tracking_status_usable[PAL_TSTATS+1] = {
 #define TB_DECOD_STATS 16 /* convert TB decoding status to tracking_status */
 static const unsigned int tb_decod_conv[TB_DECOD_STATS+1] = {
 	0, 3, 14, 5, 14, 14, 14, 14, 7, 8, 9, 10, 6, 14, 14, 14, 11};
-	
+
 #define TB_DISC_MODES 7
 #ifdef DEBUG
 static const char tb_disc_mode[TB_DISC_MODES+1][16] = {
@@ -248,11 +248,11 @@ sendetx (
 	)
 {
 	ssize_t result;
-	
+
 	*(buffer->data+buffer->size++) = DLE;
 	*(buffer->data+buffer->size++) = ETX;
 	result = write(fd, buffer->data, (size_t)buffer->size);
-	
+
 	if (result != -1)
 		return (result);
 	else
@@ -269,7 +269,7 @@ init_thunderbolt (
 	)
 {
 	struct packettx tx;
-	
+
 	tx.size = 0;
 	tx.data = (uint8_t *) malloc(100);
 
@@ -277,7 +277,7 @@ init_thunderbolt (
 	sendsupercmd (&tx, 0x8E, 0xA2);
 	sendbyte     (&tx, 0x3);
 	sendetx      (&tx, fd);
-	
+
 	/* activate packets 0x8F-AB and 0x8F-AC */
 	sendsupercmd (&tx, 0x8E, 0xA5);
 	sendint      (&tx, 0x5);
@@ -451,7 +451,7 @@ trimble_start (
 	peer->cfg.minpoll = TRMB_MINPOLL;
 	peer->cfg.maxpoll = TRMB_MAXPOLL;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
-	
+
 	up->unit = (short) unit;
 	up->rpt_status = TSIP_PARSED_EMPTY;
 	up->rpt_cnt = 0;
@@ -491,7 +491,7 @@ TSIP_decode (
 	double secs, secfrac;
 	unsigned short event, m_alarms;
 	uint32_t holdover_t;
-	
+
 	struct trimble_unit *up;
 	struct refclockproc *pp;
 
@@ -1129,7 +1129,7 @@ getdbl (
 		uint8_t ch[8];
 		uint32_t u32[2];
 	} ui;
-		
+
 	union {
 		double out;
 		uint32_t u32[2];

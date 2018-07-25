@@ -55,7 +55,7 @@ gpstocal(
 	)
 {
 	time64_t t;
-	
+
 	t = (time64_t)((int64_t)GPSORIGIN - UTC_offset);
 	t += (time64_t)week * SECSPERWEEK;
 	t += TOW;

@@ -529,7 +529,7 @@ gpsd_start(
 		/* All set up, just increment use count. */
 		++up->refcount;
 	}
-	
+
 	/* setup refclock processing */
 	pp->unitptr       = (void *)up;
 	pp->io.fd         = -1;
@@ -1146,7 +1146,7 @@ json_token_skip(
 			for (++tid; len; --len)
 				tid = json_token_skip(ctx, tid);
 			break;
-			
+
                 case JSMN_PRIMITIVE:
                 case JSMN_STRING:
 		default:
@@ -1173,7 +1173,7 @@ json_object_lookup(
 	if (tid < 0 || tid >= ctx->ntok ||
 	    ctx->tok[tid].type != JSMN_OBJECT)
 		return INVALID_TOKEN;
-	
+
 	len = ctx->tok[tid].size;
 	for (++tid; len && tid+1 < ctx->ntok; --len) {
 		if (ctx->tok[tid].type != JSMN_STRING) { /* Blooper! */
@@ -1622,7 +1622,7 @@ process_pps(
 	xlog2 = (int)json_object_lookup_int_default(
 			jctx, 0, "precision", up->ibt_prec);
 	up->pps_prec = clamped_precision(xlog2);
-	
+
 	/* Get fudged receive times for primary & secondary unit */
 	up->pps_recvt = up->pps_recvt2;
 	up->pps_recvt -= up->pps_fudge;
@@ -1643,7 +1643,7 @@ process_pps(
 		   up->logname,
 		   prettydate(up->pps_stamp2),
 		   prettydate(up->pps_recvt2)));
-	
+
 	up->fl_pps  = (0 != (pp->sloppyclockflag & CLK_FLAG2)) - 1;
 	up->fl_pps2 = -1;
 	return;
@@ -1722,7 +1722,7 @@ gpsd_parse(
 		++up->tc_breply;
 		return;
 	}
-	
+
 	/* Now dispatch over the objects we know */
 	clsid = json_object_lookup_string(&up->json_parse, 0, "class");
 	if (NULL == clsid) {

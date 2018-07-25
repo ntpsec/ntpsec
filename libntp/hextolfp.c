@@ -32,7 +32,7 @@ hextolfp(
 	 */
 	while (isspace((unsigned char)*cp))
 	    cp++;
-	
+
 	cpstart = cp;
 	while (*cp != '\0' && (cp - cpstart) < 8 &&
 	       (ind = strchr(digits, *cp)) != NULL) {
@@ -58,7 +58,7 @@ hextolfp(
 
 	if ((cp - cpstart) < 8 || ind == NULL)
 	    return false;
-	
+
 	if (*cp != '\0' && !isspace((unsigned char)*cp))
 	    return false;
 

@@ -623,7 +623,7 @@ generate_token_text(void)
 	printf("\n};\n\n");
 }
 
-	
+
 static int
 compare_key_tok_id(
 	const void *a1,

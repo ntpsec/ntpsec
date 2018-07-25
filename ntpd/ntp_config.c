@@ -3051,7 +3051,7 @@ void readconfig(const char *config_file)
 	 * init_syntax_tree(&cfgt);
 	 */
 	srccount = 0;
-	
+
 	/* parse the plain config file if it exists */
 	if (lex_init_stack(config_file, "r")) {
 		msyslog(LOG_INFO, "CONFIG: readconfig: parsing file: %s", config_file);
@@ -3059,7 +3059,7 @@ void readconfig(const char *config_file)
 		++srccount;
 		//cfgt.source.value.s = estrdup(config_file);
 	}
-	
+
 	/* parse configs in parallel subdirectory if that exists */
 	reparent(dirpath, sizeof(dirpath), config_file, CONFIG_DIR);
 	if (is_directory(dirpath) && lex_push_file(dirpath)) {
@@ -3076,7 +3076,7 @@ void readconfig(const char *config_file)
 #endif /* HAVE_NETINFO_NI_H */
 	    io_open_sockets();
 	}
-	    
+
 	lex_drop_stack();
 
 	DPRINT(1, ("Finished Parsing!!\n"));

@@ -218,7 +218,7 @@ cmp_tspec(
 	if (0 == r)
 		r = (a.tv_nsec > b.tv_nsec) -
 		    (a.tv_nsec < b.tv_nsec);
-	
+
 	return r;
 }
 
@@ -249,7 +249,7 @@ test_tspec(
 	r = (a.tv_sec > 0) - (a.tv_sec < 0);
 	if (r == 0)
 		r = (a.tv_nsec > 0);
-	
+
 	return r;
 }
 
@@ -302,7 +302,7 @@ lfp_intv_to_tspec(
 	struct timespec out;
 	l_fp		absx;
 	int		neg;
-	
+
 	neg = L_ISNEG(x);
 	absx = x;
 	if (neg) {
@@ -325,7 +325,7 @@ lfp_uintv_to_tspec(
 	)
 {
 	struct timespec	out;
-	
+
 	out.tv_nsec = FTOTVN(lfpfrac(x));
 	out.tv_sec  = lfpsint(x);
 

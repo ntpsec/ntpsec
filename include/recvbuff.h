@@ -83,7 +83,7 @@ extern unsigned long free_recvbuffs(void);    /* not really pure */
 extern unsigned long full_recvbuffs(void);    /* not really pure */
 extern unsigned long total_recvbuffs(void);   /* not really pure */
 extern unsigned long lowater_additions(void); /* not really pure */
-		
+
 /*  Returns the next buffer in the full list.
  *
  */

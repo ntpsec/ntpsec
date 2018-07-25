@@ -533,7 +533,7 @@ spectracom_control(
 {
 	struct spectracomunit *up;
 	struct refclockproc *pp;
-	
+
 	UNUSED_ARG(unit);
 	UNUSED_ARG(in_st);
 	UNUSED_ARG(out_st);

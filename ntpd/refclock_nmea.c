@@ -543,7 +543,7 @@ nmea_control(
 	nmea_unit	    * const up = (nmea_unit *)pp->unitptr;
 
 	char   device[32];
-	
+
 	UNUSED_ARG(in_st);
 	UNUSED_ARG(out_st);
 
@@ -657,10 +657,10 @@ nmea_timer(
 	if (-1 != pp->io.fd) /* any mode bits to evaluate here? */
 		gps_send(pp->io.fd, "$PMOTG,RMC,0000*1D\r\n", peer);
 #else
-	
+
 	UNUSED_ARG(unit);
 	UNUSED_ARG(peer);
-	
+
 #endif /* NMEA_WRITE_SUPPORT */
 }
 
@@ -748,7 +748,7 @@ refclock_ppsrelate(
 	delta += pp_fudge - *rd_fudge;
 	if (fabs(delta) > 1.5)
 		return PPS_RELATE_NONE; /* PPS timeout control */
-	
+
 	/* eventually warp edges, check phase */
 	idelta	  = floor(delta + 0.5);
 	pp_fudge -= idelta;
@@ -889,7 +889,7 @@ nmea_receive(
 			 (int)(strchr(rd_lastcode, ',') - rd_lastcode),
 			 rd_lastcode);
 	}
-	
+
 	/* See if I want to process this message type */
 	if ((peer->cfg.mode & NMEA_MESSAGE_MASK) &&
 	    !(peer->cfg.mode & sentence_mode[sentence])) {
@@ -970,7 +970,7 @@ nmea_receive(
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 1, 3, -1);
 		break;
-	
+
 	case NMEA_GPZDA:
 		/* No quality.	Assume best, fetch time & full date */
 		pp->leap = LEAP_NOWARNING;
@@ -1000,7 +1000,7 @@ nmea_receive(
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 6, 8, -1);
 		break;
-		
+
 	default:
 		INVARIANT(0);	/* Coverity 97123 */
 		return;
@@ -1042,7 +1042,7 @@ nmea_receive(
 			refclock_name(peer));
 		up->gps_time = true;
 	}
-	
+
 	/*
 	 * Get the reference time stamp from the calendar buffer.
 	 * Process the new sample in the median filter and determine the
@@ -1084,14 +1084,14 @@ nmea_receive(
 				   refclock_name(peer)));
 			up->tally.pps_used++;
 			break;
-			
+
 		case PPS_RELATE_EDGE:
 			up->ppsapi_gate = true;
 			peer->precision = PPS_PRECISION;
 			DPRINT(2, ("%s PPS_RELATE_EDGE\n",
 				   refclock_name(peer)));
 			break;
-			
+
 		case PPS_RELATE_NONE:
 		default:
 			/*
@@ -1128,7 +1128,7 @@ nmea_poll(
 {
 	struct refclockproc * const pp = peer->procptr;
 	nmea_unit	    * const up = (nmea_unit *)pp->unitptr;
-	
+
 	UNUSED_ARG(unit);
 
 	/*
@@ -1170,7 +1170,7 @@ nmea_poll(
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
 	}
-	
+
 	/*
 	 * If extended logging is required, write the tally stats to the
 	 * clockstats file; otherwise just do a normal clock stats
@@ -1317,7 +1317,7 @@ field_init(
 	uint8_t cs_r;	/* checksum remote given	*/
 	char * eptr;	/* buffer end end pointer	*/
 	char   tmp;	/* char buffer 			*/
-	
+
 	cs_l = 0;
 	cs_r = 0;
 	/* some basic input constraints */
@@ -1325,7 +1325,7 @@ field_init(
 		dlen = 0;
 	eptr = cptr + dlen;
 	*eptr = '\0';
-	
+
 	/* load data context */	
 	data->base = cptr;
 	data->cptr = cptr;
@@ -1348,7 +1348,7 @@ field_init(
 	data->base++;
 	data->cptr++;
 	data->blen--;
-	
+
 	/* -*- field name: '[A-Z][A-Z0-9]{4,},' */
 	if (*cptr < 'A' || *cptr > 'Z')
 		return CHECK_INVALID;
@@ -1363,7 +1363,7 @@ field_init(
 	/* -*- data: '[^*]*' */
 	while (*cptr && *cptr != '*')
 		cs_l ^= *cptr++;
-	
+
 	/* -*- checksum field: (\*[0-9A-F]{2})?$ */
 	if (*cptr == '\0')
 		return CHECK_VALID;
@@ -1445,7 +1445,7 @@ field_wipe(
 	int	fcnt;		/* safeguard against runaway arglist */
 	int	fidx;		/* field to nuke, or -1 for checksum */
 	char  * cp;		/* overwrite destination */
-	
+
 	fcnt = 8;
 	cp = NULL;
 	va_start(va, data);
@@ -1491,7 +1491,7 @@ parse_qual(
 	char * dp;
 
 	dp = field_parse(rd, idx);
-	
+
 	return table[ *dp && ((*dp == tag) == !inv) ];
 }
 
@@ -1529,7 +1529,7 @@ parse_time(
 		DPRINT(1, ("nmea: invalid time code: '%.6s'\n", dp));
 		return false;
 	}
-	
+
 	/* value sanity check */
 	if (h > 23 || m > 59 || s > 60) {
 		DPRINT(1, ("nmea: invalid time spec %02u:%02u:%02u\n",
@@ -1573,7 +1573,7 @@ parse_date(
 	unsigned int	d;
 	int		p;
 	char  	      * dp;
-	
+
 	dp = field_parse(rd, idx);
 	switch (fmt) {
 
@@ -1606,7 +1606,7 @@ parse_date(
 			   y, m, d));
 		return false;
 	}
-	
+
 	/* store results */
 	jd->monthday = (uint8_t)d;
 	jd->month    = (uint8_t)m;

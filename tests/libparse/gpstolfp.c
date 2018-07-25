@@ -30,7 +30,7 @@ TEST(gpstolfp, check) {
 		caltogps(&in, 0, &week, &TOW);
 		TEST_ASSERT_TRUE(week == bw[i] && TOW == 0);
 	}
-	
+
 	for (uint32_t b = MIN_BUILD_GPSWEEK; b <= MAX_BUILD_GPSWEEK; b++) {
 		build_week = b;
 		week = b;

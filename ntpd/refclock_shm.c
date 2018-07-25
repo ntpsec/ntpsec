@@ -406,7 +406,7 @@ static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat
 	shm_stat->tvt.tv_sec	= shmcopy.clockTimeStampSec;
 	shm_stat->tvt.tv_nsec	= shmcopy.clockTimeStampUSec * 1000;
 	cns_new		= shmcopy.clockTimeStampNSec;
-		
+
 	/* See the case above for an explanation of the
 	** following test.
 	*/

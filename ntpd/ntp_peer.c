@@ -176,7 +176,7 @@ findexistingpeer_addr(
 		peer = peer_hash[NTP_HASH_ADDR(addr)];
 	else
 		peer = start_peer->adr_link;
-	
+
 	while (peer != NULL) {
 		DPRINT(3, ("%s %s %d %d 0x%x ", sockporttoa(addr),
 			   sockporttoa(&peer->srcadr), mode, peer->hmode,

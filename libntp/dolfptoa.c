@@ -49,7 +49,7 @@ dolfptoa(
 	for (dec = cp - cbuf; dec > 0 && fpi != 0; dec--) {
 		/* can add another digit */
 		uint32_t digit;
-		
+
 		digit  = fpi;
 		fpi   /= 10U;
 		digit -= (fpi << 3) + (fpi << 1); /* i*10 */
@@ -69,7 +69,7 @@ dolfptoa(
 	}
 	if (dec > (long)sizeof(cbuf) - (cpend - cbuf))
 		dec = (long)sizeof(cbuf) - (cpend - cbuf);
-	
+
 	/*
 	 * If there's a fraction to deal with, do so.
 	 */

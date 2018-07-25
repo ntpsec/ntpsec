@@ -779,7 +779,7 @@ modem_timecode(
 			break;
 
 		return;
-	
+
 	/*
 	 * ACTS format A: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa
 	 * UTC(NIST) *".

@@ -62,7 +62,7 @@ void bumpclock(int64_t bump)
 	printf("Try: %ld.%09ld\n", (long)set.tv_sec, set.tv_nsec);
     } else
 	printf("Set: %ld.%09ld\n", (long)set.tv_sec, set.tv_nsec);
- 
+
    if (rc3)
 	printf("Couldn't get new time: %s\n", strerror(er3));
     else

@@ -282,13 +282,13 @@ hpgps_receive(
 		}
 		if (up->linecnt == 0) 
 		    record_clock_stats(peer, up->statscrn);
-               
+
 		return;
 	}
 
 	record_clock_stats(peer, pp->a_lastcode);
 	pp->lastrec = trtmp;
-            
+
 	up->lastptr = up->statscrn;
 	*up->lastptr = '\0';
 	up->pollcnt = 2;
@@ -394,7 +394,7 @@ hpgps_receive(
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	} /* end of tcodechar2 format switch */
-           
+
 	/* 
 	 * Compute and verify the checksum.
 	 * Characters are summed starting at tcodechar1, ending at just
@@ -491,7 +491,7 @@ hpgps_receive(
 
 		    case '0':
 			break;
-                     
+
 		    /* See http://bugs.ntp.org/1090
 		     * Ignore leap announcements unless June or December.
 		     * Better would be to use :GPSTime? to find the month,
@@ -501,12 +501,12 @@ hpgps_receive(
 			if ((month==6) || (month==12))
 			    pp->leap = LEAP_ADDSECOND;
 			break;
-                     
+
 		    case '-':
 			if ((month==6) || (month==12))
 			    pp->leap = LEAP_DELSECOND;
 			break;
-                     
+
 		    default:
 			DPRINT(1, ("hpgps: unrecognized leap indicator: %c\n",
 				   leapchar));

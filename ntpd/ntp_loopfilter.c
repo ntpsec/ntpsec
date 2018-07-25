@@ -926,7 +926,7 @@ adj_host_clock(
 	double	offset_adj;
 	double	freq_adj;
 #endif /* ENABLE_LOCKCLOCK */
-	
+
 	/*
 	 * Update the dispersion since the last update. In contrast to
 	 * NTPv3, NTPv4 does not declare unsynchronized after one day,

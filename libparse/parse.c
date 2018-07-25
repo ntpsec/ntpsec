@@ -553,7 +553,7 @@ timepacket(
 	 */
 	struct timespec ts = {t, clock_time.usecond * 1000};
 	parseio->parse_dtime.parse_time = tspec_stamp_to_lfp(ts);
-	
+
 	parseio->parse_dtime.parse_format       = format;
 
 	return updatetimeinfo(parseio, clock_time.flags);

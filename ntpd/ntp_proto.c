@@ -397,7 +397,7 @@ parse_packet(
    2. We've configured the peer with a 'key' option,
    3. The packet wants to create a new associations, and a 'restrict
       nopeer' command applies to the peer's IP.
-      
+
    The 'peer' argument may be NULL to indicate that we have no current
    association.
 
@@ -2323,7 +2323,7 @@ dns_take_server(
 
 	msyslog(LOG_INFO, "DNS: Server taking: %s", socktoa(rmtadr));
 	server->cfg.flags &= (unsigned)~FLAG_DNS;
-		
+
 	server->srcadr = *rmtadr;
 	peer_update_hash(server);
 

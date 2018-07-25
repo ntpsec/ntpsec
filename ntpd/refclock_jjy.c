@@ -860,7 +860,7 @@ jjy_poll ( int unit, struct peer *peer )
 	up->iRawBufLen = 0 ;
 
 	switch ( up->unittype ) {
-	
+
 	case UNITTYPE_TRISTATE_JJY01 :
 		jjy_poll_tristate_jjy01  ( unit, peer ) ;
 		break ;
@@ -917,7 +917,7 @@ jjy_timer ( int unit, struct peer *peer )
 	}
 
 	switch ( up->unittype ) {
-	
+
 	case UNITTYPE_TELEPHONE :
 		jjy_timer_telephone ( unit, peer ) ;
 		break ;
@@ -3356,7 +3356,7 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	pCmd = teljjy_command_sequence[up->iClockCommandSeq].command ;
 	iLen = teljjy_command_sequence[up->iClockCommandSeq].commandLength ;
-	
+
 	if ( pCmd != NULL ) {
 
 		if ( write( pp->io.fd, pCmd, (size_t)iLen ) != iLen ) {

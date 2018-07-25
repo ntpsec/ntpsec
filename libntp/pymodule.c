@@ -89,7 +89,7 @@ ntpc_lfptofloat(PyObject *self, PyObject *args)
     char *s;
     l_fp ts;
     struct timespec tt;
- 
+
     UNUSED_ARG(self);
     if (!PyArg_ParseTuple(args, "s", &s))
 	return NULL;

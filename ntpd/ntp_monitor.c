@@ -226,7 +226,7 @@ mon_stop(
 	mon_data.mon_enabled &= (unsigned int)~mode;
 	if (mon_data.mon_enabled != MON_OFF)
 		return;
-	
+
 	/*
 	 * Move everything on the MRU list to the free list quickly,
 	 * without bothering to remove each from either the MRU list or

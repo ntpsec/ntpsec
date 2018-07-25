@@ -44,7 +44,7 @@ struct ctl_proc {
 #define AUTH	1
 	void (*handler) (struct recvbuf *, int); /* handle request */
 };
-  
+
 
 /*
  * Request processing routines
@@ -1005,7 +1005,7 @@ ctl_flushpkt(
 	 * garbage.
 	 */
 	memset(rpkt.data + sendlen, '\0', sizeof(rpkt.data) - (size_t)sendlen);
-	
+
 	/*
 	 * Pad to a multiple of 32 bits
 	 */
@@ -2554,7 +2554,7 @@ ctl_getitem(
 			++plhead;
 		while (plhead != pltail && isspace((u_char)pltail[-1]))
 			--pltail;
-		
+
 		/* check payload size, terminate packet on overflow */
 		plsize = (size_t)(pltail - plhead);
 		if (plsize >= sizeof(buf))
@@ -2579,7 +2579,7 @@ ctl_getitem(
 	 * variable lists after an EoV was returned.  (Such a behavior
 	 * actually caused Bug 3008.)
 	 */
-	
+
 	if (NULL == var_list)
 		return &eol;
 

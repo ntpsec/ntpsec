@@ -38,7 +38,7 @@ ux_socket_connect(const char *name)
 	if (fd == -1) {
 		return -1;
 	}
-	
+
 	if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
 		close(fd);
 		return -1;
@@ -123,7 +123,7 @@ send_via_ntp_signd(
 #ifndef DEBUG
 	UNUSED_ARG(xmode);
 #endif
-	
+
 	/* We are here because it was detected that the client
 	 * sent an all-zero signature, and we therefore know
 	 * it's windows trying to talk to an AD server
@@ -137,7 +137,7 @@ send_via_ntp_signd(
 	 * Microsoft in MS-SNTP, found here:
 	 * http://msdn.microsoft.com/en-us/library/cc212930.aspx
 	 */
-	
+
 	int fd, sendlen;
 	struct samba_key_in {
 		uint32_t version;
@@ -146,19 +146,19 @@ send_via_ntp_signd(
 		uint32_t key_id_le;
 		struct pkt pkt;
 	} samba_pkt;
-	
+
 	struct samba_key_out {
 		uint32_t version;
 		uint32_t op;
 		uint32_t packet_id;
 		struct pkt pkt;
 	} samba_reply;
-	
+
 	char full_socket[256];
 
 	char *reply = NULL;
 	uint32_t reply_len;
-	
+
 	ZERO(samba_pkt);
 	samba_pkt.op = 0; /* Sign message */
 	/* This will be echoed into the reply - a different
@@ -188,13 +188,13 @@ send_via_ntp_signd(
 		   [key id] - LITTLE endian (as on wire) - 4 bytes
 		   [message to sign] - as marshalled, without signature
 		*/
-			
+
 		if (send_packet(fd, (char *)&samba_pkt, offsetof(struct samba_key_in, pkt) + LEN_PKT_NOMAC) != 0) {
 			/* Huh?  could not talk to Samba... */
 			close(fd);
 			return;
 		}
-			
+
 		if (recv_packet(fd, &reply, &reply_len) != 0) {
 			close(fd);
 			return;
@@ -205,7 +205,7 @@ send_via_ntp_signd(
 		   [operation (signed success=3, failure=4)] network byte order - - 4 byte
 		   (optional) [signed message] - as provided before, with signature appended
 		*/
-			
+
 		if (reply_len <= sizeof(samba_reply)) {
 			memcpy(&samba_reply, reply, reply_len);
 			if (ntohl(samba_reply.op) == 3 && reply_len >  offsetof(struct samba_key_out, pkt)) {
@@ -217,12 +217,12 @@ send_via_ntp_signd(
 					   socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen));
 			}
 		}
-		
+
 		if (reply) {
 			free(reply);
 		}
 		close(fd);
-		
+
 	}
 }
 #endif

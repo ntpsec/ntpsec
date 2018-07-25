@@ -175,7 +175,7 @@ again:
 			clk_frc -= 1000000000;
 			clk_sec += 1;
 		}
-		
+
 		/* Most 'real' time sources would create a clock
 		 * (reference) time stamp where the fraction is zero,
 		 * but that's not an actual requirement. So we show how

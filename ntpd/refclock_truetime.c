@@ -249,7 +249,7 @@ true_start(
 	 * sending timecodes
 	 */
 	true_send(peer, "\03\r");
-	
+
 	true_doevent(peer, e_Init);
 
 	return true;

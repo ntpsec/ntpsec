@@ -81,7 +81,7 @@ present and to default leapfile) /etc/{ntpconf}
 
 +-P+ 'logfacility'::
   Specify the syslog facility for logging.
-  
+
 +-q+::
   Only report errors to stdout.
 

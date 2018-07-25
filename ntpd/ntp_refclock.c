@@ -269,7 +269,7 @@ refclock_timer(
 	if (pp->action != NULL && pp->nextaction <= current_time)
 		(*pp->action)(p);
 }
-	
+
 
 /*
  * refclock_transmit - simulate the transmit procedure
@@ -579,7 +579,7 @@ refclock_gtlin(
 
 	while (sp != spend && dp != dpend) {
 		char c;
-		
+
 		c = *sp++ & 0x7f;
 		if (c >= 0x20 && c < 0x7f)
 			*dp++ = c;

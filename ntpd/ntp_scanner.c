@@ -464,7 +464,7 @@ lex_pop_file(void)
 {
 	struct FILE_INFO * head = lex_stack;
 	struct FILE_INFO * tail = NULL; 
-	
+
 	if (NULL != head) {
 		tail = head->st_next;
 		if (NULL != tail) {
@@ -565,7 +565,7 @@ is_integer(
 	int	i;
 	int	is_neg;
 	unsigned int	u_val;
-	
+
 	i = 0;
 
 	/* Allow a leading minus sign */
@@ -601,7 +601,7 @@ is_u_int(
 {
 	int	i;
 	int	is_hex;
-	
+
 	i = 0;
 	if ('0' == lexeme[i] && 'x' == tolower((uint8_t)lexeme[i + 1])) {
 		i += 2;
@@ -869,12 +869,12 @@ yylex(void)
 	} while (i == 0);
 
 	/* Now return the desired token */
-	
+
 	/* First make sure that the parser is *not* expecting a string
 	 * as the next token (based on the previous token that was
 	 * returned) and that we haven't read a string.
 	 */
-	
+
 	if (followedby == FOLLBY_TOKEN && !instring) {
 		token = is_keyword(yytext, &followedby);
 		if (token) {

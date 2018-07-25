@@ -84,7 +84,7 @@ A few operation modes can be selected with the mode word.
 |Bits     |Value |Description
 .4+<.>|0..1  |  0   |IBT only operation. This mode is affected by the timing
 stability of whatever protocol is used between the GPS  and GPSD
-	
+
 Running on IBT only is not recommended in general. Possible use cases include:
 
 * The receiver does not provide a PPS signal.

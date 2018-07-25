@@ -2011,7 +2011,7 @@ open_socket(
 	}
 
 	enable_packetstamps(fd, addr);
-	
+
 	DPRINT(4, ("bind(%d) AF_INET%s, addr %s%%%u#%d, flags 0x%x\n",
 		   fd, IS_IPV6(addr) ? "6" : "", socktoa(addr),
 		   SCOPE(addr), SRCPORT(addr), interf->flags));

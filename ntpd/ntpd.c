@@ -564,7 +564,7 @@ ntpdmain(
 	}
 
 	set_prettydate_pivot(time(NULL));
-	
+
 # ifdef HAVE_WORKING_FORK
 	/* make sure the FDs are initialised */
 	pipe_fds[0] = -1;
@@ -605,7 +605,7 @@ ntpdmain(
 						       wait_sync);
 			exit(exit_code);
 		}
-		
+
 		/*
 		 * child/daemon
 		 * close all open files excepting waitsync_fd_to_close.
@@ -868,7 +868,7 @@ ntpdmain(
 	    /* FIXME: dump variable settings */
 	    exit(0);
 	}
-			
+
 	if (ipv4_works && ipv6_works) {
 		if (opt_ipv4)
 			ipv6_works = false;
@@ -904,7 +904,7 @@ ntpdmain(
 		msyslog(LOG_INFO, "INIT: running as non-root disables dynamic interface tracking");
 	}
 #endif
-	
+
 	mainloop();
         /* unreachable, mainloop() never returns */
 }

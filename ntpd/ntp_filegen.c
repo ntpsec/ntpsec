@@ -189,7 +189,7 @@ filegen_open(
 	    snprintf(suffix, suflen, "%ca%08lld",
 		     SUFFIX_SEP, (long long)gen->id_lo);
 	}
-  
+
 	/* check possible truncation */
 	if ('\0' != fullname[len - 1]) {
 		fullname[len - 1] = '\0';
@@ -271,7 +271,7 @@ filegen_open(
 		   gen->type, (long long)stamp, fullname));
 
 	fp = fopen(fullname, "a");
-  
+
 	if (NULL == fp)	{
 		/* open failed -- keep previous state
 		 *
@@ -309,7 +309,7 @@ filegen_open(
 						fullname, filename);
 		}		/* flags & FGEN_FLAG_LINK */
 	}			/* else fp == NULL */
-	
+
 	free(filename);
 	free(fullname);
 	return;
@@ -398,7 +398,7 @@ filegen_config(
 	 */
 	if (!valid_fileref(dir, fname))
 		return;
-  
+
 	if (NULL != gen->fp) {
 		fclose(gen->fp);
 		gen->fp = NULL;
@@ -550,7 +550,7 @@ filegen_register(
 	(*ppfe)->filegen = filegen;
 
 	DPRINT(6, ("adding new filegen\n"));
-	
+
 	return;
 }
 
@@ -582,7 +582,7 @@ filegen_unregister(
 	struct filegen_entry **	ppfe;
 	struct filegen_entry *	pfe;
 	FILEGEN *		fg;
-			
+
 	DPRINT(4, ("filegen_unregister(%s)\n", name));
 
 	ppfe = &filegen_registry;

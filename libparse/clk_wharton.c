@@ -121,20 +121,20 @@ inp_wharton_400a(
 	      )
 {
 	unsigned int rtc;
-	
+
 	parseprintf(DD_PARSE, ("inp_wharton_400a(0x%lx, 0x%x, ...)\n",
                     (unsigned long)parseio, (unsigned)ch));
-	
+
 	switch (ch)
 	{
 	case STX:
 		parseprintf(DD_PARSE, ("inp_wharton_400a: STX seen\n"));
-		
+
 		parseio->parse_index = 1;
 		parseio->parse_data[0] = ch;
 		parseio->parse_dtime.parse_stime = *tstamp; /* collect timestamp */
 		return PARSE_INP_SKIP;
-	  
+
 	case ETX:
 		parseprintf(DD_PARSE, ("inp_wharton_400a: ETX seen\n"));
 		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP)

@@ -39,7 +39,7 @@ nexttok(
 	 */
 	while (*cp == ' ' || *cp == '\t')
 		cp++;
-	
+
 	/*
 	 * Save this and space to end of token
 	 */
@@ -47,19 +47,19 @@ nexttok(
 	while (*cp != '\0' && *cp != '\n' && *cp != ' '
 	       && *cp != '\t' && *cp != '#')
 		cp++;
-	
+
 	/*
 	 * If token length is zero return an error, else set end of
 	 * token to zero and return start.
 	 */
 	if (starttok == cp)
 		return NULL;
-	
+
 	if (*cp == ' ' || *cp == '\t')
 		*cp++ = '\0';
 	else
 		*cp = '\0';
-	
+
 	*str = cp;
 	return starttok;
 }
@@ -258,7 +258,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		char *token = nexttok(&line);
 		if (token == NULL)
 			continue;
-		
+
 		/*
 		 * First is key number.  See if it is okay.
 		 */

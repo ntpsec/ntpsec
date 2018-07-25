@@ -314,7 +314,7 @@ class TestPacketControl(unittest.TestCase):
 
         def packetEater_jig(self):
             self.receivedPackets.append(pkts.pop(0))
-        
+
         p = AX.PacketControl(None, None)
         p.packetEater = (lambda : packetEater_jig(p))
         p.spinGap = 0

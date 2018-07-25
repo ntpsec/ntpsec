@@ -664,5 +664,5 @@ TEST_GROUP_RUNNER(timespecops) {
 	RUN_TEST_CASE(timespecops, test_LFProundtrip);
 }
 
-    
+
 // -*- EOF -*-

@@ -20,7 +20,7 @@ static int ntp_opterr;
 /* Implemented based on [1] and [2] for optional arguments.
    ntp_optopt is handled FreeBSD-style, per [3].
    Other GNU and FreeBSD extensions are purely accidental.
-  
+
 [1] http://pubs.opengroup.org/onlinepubs/000095399/functions/getopt.html
 [2] http://www.kernel.org/doc/man-pages/online/pages/man3/getopt.3.html
 [3] http://www.freebsd.org/cgi/man.cgi?query=getopt&sektion=3&manpath=FreeBSD+9.0-RELEASE
