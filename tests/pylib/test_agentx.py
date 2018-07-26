@@ -254,7 +254,7 @@ class TestPacketControl(unittest.TestCase):
             p._doloop()
             self.assertEqual(sock.data, [])
             self.assertEqual(handler_calls, [0])
-            # Test sucessful
+            # Test successful
             faketimemod.time_returns = [55]
             sock.data = []
             pkts = [AP.PingPDU(True, 42, 0, 0)]
@@ -463,7 +463,7 @@ class TestPacketControl(unittest.TestCase):
         sock = jigs.SocketJig()
         p = AX.PacketControl(sock, mjig)
         p.sessionID = 42
-        # Test sucessful
+        # Test successful
         pkt = AP.GetPDU(True, 42, 23, 100, [AP.SearchRange((0, 0), ())])
         p.handle_GetPDU(pkt)
         self.assertEqual(len(sock.data), 1)
