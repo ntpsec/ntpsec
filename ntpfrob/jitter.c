@@ -91,7 +91,7 @@ void jitter(const iomode mode)
 	 * Write out gtod array for later processing with Matlab
 	 */
 	average = 0;
-	for (i = 0; i < NBUF - 2; i++) {
+	for (i = 0; i < (NBUF - 1); i++) {
 		gtod[i] = gtod[i + 1] - gtod[i];
 		if (mode == raw)
 			printf("%13.9f\n", gtod[i]);
@@ -104,7 +104,7 @@ void jitter(const iomode mode)
 	/*
 	 * Sort the gtod array and display deciles
 	 */
-	qsort(gtod, NBUF, sizeof(gtod[0]), doublecmp);
+	qsort(gtod, (NBUF - 1), sizeof(gtod[0]), doublecmp);
 	average = average / (NBUF - 2);
 	if (mode == json) {
 		fprintf(stdout, "{\"Average\": %.9Lf, \"First rank\": [", average);
