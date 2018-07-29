@@ -558,16 +558,18 @@ class TestMisc(unittest.TestCase):
         cls.first = "0x00000100.00000000"
         cls.ct = 4
         self.assertEqual(cls.avgint(), 64)
-        # Test sortaddr, ipv6
-        cls.addr = "[11:22:33::44:55]:42"
-        self.assertEqual(cls.sortaddr(),
-                         polybytes("\x00\x11\x00\x22\x00\x33\x00\x00"
-                                   "\x00\x00\x00\x00\x00\x44\x00\x55"))
-        # Test sortaddr, ipv6, local
-        cls.addr = "[11:22:33::44:55%8]:42"
-        self.assertEqual(cls.sortaddr(),
-                         polybytes("\x00\x11\x00\x22\x00\x33\x00\x00"
-                                   "\x00\x00\x00\x00\x00\x44\x00\x55"))
+        if socket.has_ipv6:
+            # Test sortaddr, ipv6
+            cls.addr = "[11:22:33::44:55]:42"
+            self.assertEqual(cls.sortaddr(),
+                             polybytes("\x00\x11\x00\x22\x00\x33\x00\x00"
+                                       "\x00\x00\x00\x00\x00\x44\x00\x55"))
+            # Test sortaddr, ipv6, local
+            cls.addr = "[11:22:33::44:55%8]:42"
+            self.assertEqual(cls.sortaddr(),
+                             polybytes("\x00\x11\x00\x22\x00\x33\x00\x00"
+                                       "\x00\x00\x00\x00\x00\x44\x00\x55"))
+
         # Test sortaddr, ipv4
         cls.addr = "11.22.33.44:23"
         self.assertEqual(cls.sortaddr(),
