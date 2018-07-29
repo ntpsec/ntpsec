@@ -179,29 +179,9 @@ debian-unstable-refclocks:
   tags:
     - gitlab-org
 
-ubuntu-1404-lts-basic:
+ubuntu-latest-basic:
   <<: *job_definition
-  image: ubuntu:14.04
-  script:
-    - apt-get update
-    - apt-get install -y bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
-  tags:
-    - gitlab-org
-
-ubuntu-1404-lts-refclocks:
-  <<: *job_definition
-  image: ubuntu:14.04
-  script:
-    - apt-get update
-    - apt-get install -y bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
-  tags:
-    - gitlab-org
-
-ubuntu-1604-lts-basic:
-  <<: *job_definition
-  image: ubuntu:16.04
+  image: ubuntu:latest
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -209,9 +189,9 @@ ubuntu-1604-lts-basic:
   tags:
     - gitlab-org
 
-ubuntu-1604-lts-refclocks:
+ubuntu-latest-refclocks:
   <<: *job_definition
-  image: ubuntu:16.04
+  image: ubuntu:latest
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -219,9 +199,9 @@ ubuntu-1604-lts-refclocks:
   tags:
     - gitlab-org
 
-ubuntu-1710-basic:
+ubuntu-rolling-basic:
   <<: *job_definition
-  image: ubuntu:17.10
+  image: ubuntu:rolling
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
@@ -229,9 +209,31 @@ ubuntu-1710-basic:
   tags:
     - gitlab-org
 
-ubuntu-1710-refclocks:
+ubuntu-rolling-refclocks:
   <<: *job_definition
-  image: ubuntu:17.10
+  image: ubuntu:rolling
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure --refclock=all build
+  tags:
+    - gitlab-org
+
+ubuntu-devel-basic:
+  <<: *job_definition
+  image: ubuntu:devel
+  allow_failure: true
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
+    - python ./waf configure build
+  tags:
+    - gitlab-org
+
+ubuntu-devel-refclocks:
+  <<: *job_definition
+  image: ubuntu:devel
+  allow_failure: true
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
