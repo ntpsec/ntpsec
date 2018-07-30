@@ -518,7 +518,7 @@ mprintf_clock_stats(
  * file format
  * day (MJD)
  * time (s past midnight)
- * source IP address old format) or drivername(unit) (new format)
+ * source IP address (old format) or drivername(unit) (new format)
  * destination peer address 
  * t1 t2 t3 t4 timestamps
  * various other local statistics

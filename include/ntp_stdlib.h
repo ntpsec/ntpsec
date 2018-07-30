@@ -101,7 +101,6 @@ extern	const char * res_access_flags(unsigned short);
 extern	const char * k_st_flags	(uint32_t);
 extern	char *	statustoa	(int, int);
 extern	sockaddr_u * netof6	(sockaddr_u *);
-extern	char *	numtoa		(uint32_t);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	unsigned short	sock_hash(const sockaddr_u *) __attribute__((pure));

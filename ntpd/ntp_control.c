@@ -1365,8 +1365,11 @@ ctl_putadr(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	if (NULL == addr)
-		cq = numtoa(addr32);
+	if (NULL == addr) {
+		struct in_addr in4;
+		in4.s_addr = addr32;
+		cq = inet_ntoa(in4);
+	}
 	else
 		cq = socktoa(addr);
 	INSIST((cp - buffer) < (int)sizeof(buffer));

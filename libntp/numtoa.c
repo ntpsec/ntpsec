@@ -12,25 +12,6 @@
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
 
-char *
-numtoa(
-	uint32_t num
-	)
-{
-	uint32_t netnum;
-	char *buf;
-
-	netnum = ntohl(num);
-	buf = lib_getbuf();
-	snprintf(buf, LIB_BUFLENGTH, "%lu.%lu.%lu.%lu",
-		 ((unsigned long)netnum >> 24) & 0xff,
-		 ((unsigned long)netnum >> 16) & 0xff,
-		 ((unsigned long)netnum >> 8) & 0xff,
-		 (unsigned long)netnum & 0xff);
-	return buf;
-}
-
-
 /* Convert a refid & stratum to a string */
 const char *
 refid_str(
@@ -41,8 +22,11 @@ refid_str(
 	char *	text;
 	size_t	tlen;
 
-	if (stratum > 1)
-		return numtoa(refid);
+	if (stratum > 1) {
+		struct in_addr in4;
+		in4.s_addr = refid;
+		return inet_ntoa(in4);
+	}
 
 	text = lib_getbuf();
 	text[0] = '.';
