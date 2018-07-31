@@ -104,7 +104,7 @@ dolfptoa(
 		M_LSHIFT(digit, fpv);
 		M_ADD(digit, fpv, tmph, tmpl);
 #undef M_ADD
-#undef M_SHIFT
+#undef M_LSHIFT
 		*cpend++ = (uint8_t)digit;
 	}
 
