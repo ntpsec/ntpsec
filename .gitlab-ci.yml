@@ -1,6 +1,8 @@
 pages:
   stage: build
   image: alpine
+  except:
+    - schedules
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoc findutils gzip
     - python ./waf configure --enable-doc --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
@@ -35,6 +37,8 @@ pages:
 
 .job_template: &job_definition
   stage: build
+  except:
+    - schedules
   artifacts:
     expire_in: 7d
     paths:
@@ -536,3 +540,19 @@ gentoo-hardened-refclocks:
     - python ./waf configure --refclock=all build
   tags:
     - gitlab-org
+
+coverity-scan:
+  script:
+    - ./waf configure
+    - /opt/cov-analysis/bin/cov-build --dir cov-int ./waf build
+    - tar czf ntpsec_coverity.tgz cov-int
+    - curl --form token=${COVERITY_TOKEN} \
+           --form email=security@ntpsec.org \
+           --form file=@ntpsec_coverity.tgz \
+           --form version="$(git rev-parse --short HEAD)" \
+           --form description="Automatic submission by gitlab-ci" \
+      https://scan.coverity.com/builds?project=ntpsec
+  tags:
+    - ubuntu-1604-lts
+  only:
+    - schedules
