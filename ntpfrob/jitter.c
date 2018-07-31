@@ -75,6 +75,7 @@ void jitter(const iomode mode)
 	l_fp tr;
 	int i;
 	double gtod[NBUF];
+	doubletime_t jitter;
 
 	/*
 	 * Force pages into memory
@@ -104,33 +105,45 @@ void jitter(const iomode mode)
 	if (mode == raw)
 	    exit(0);
 
+	average = average / (NBUF - 1);
+
+	// calculate 'variance' and call it jitter
+	// and scale everything up a million time for clarity
+	jitter = 0;
+	for (i = 0; i < (NBUF - 1); i ++) {
+		gtod[i] = (gtod[i] - average) * 1000000;
+		jitter += gtod[i] * gtod[i];
+	}
+	jitter = jitter / (NBUF - 1);
+
 	/*
 	 * Sort the gtod array and display deciles
 	 */
 	qsort(gtod, (NBUF - 1), sizeof(gtod[0]), doublecmp);
-	average = average / (NBUF - 2);
+
 	if (mode == json) {
-		fprintf(stdout, "{\"Average\": %.9Lf, \"First rank\": [", average);
+		fprintf(stdout, "{\"Mean\": %.9Lf, \"High\": [", average);
 		for (i = 0; i < NSAMPLES; i++) {
 		    fprintf(stdout, "%.9f", gtod[i]);
 		    if (i < NSAMPLES - 1)
 			fputs(", ", stdout);
 		}
-		fputs("], \"Last rank\": [", stdout);
+		fputs("], \"Low\": [", stdout);
 		for (i = NBUF - NSAMPLES - 2; i < NBUF - 2; i++) {
 		    fprintf(stdout, "%.9f", gtod[i]);
 		    if (i < NBUF - 3)
 			fputs(", ", stdout);
 		}
-		fputs("]}\n", stdout);
+		fprintf(stdout, "], \"Jitter\": %.9Lf}\n", jitter);
 	}
 	else if (mode != raw)
 	{
-		fprintf(stdout, "Average %13.9Lf\n", average);
-		fprintf(stdout, "First rank\n");
+		fprintf(stdout, "Mean %13.9Lf\n", average);
+		fprintf(stdout, "Jitter %13.9Lf\n", jitter);
+		fprintf(stdout, "High\n");
 		for (i = 0; i < NSAMPLES; i++)
 		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
-		fprintf(stdout, "Last rank\n");
+		fprintf(stdout, "Low\n");
 		for (i = NBUF - NSAMPLES - 2; i < NBUF - 2; i++)
 		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
 	}
