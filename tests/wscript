@@ -35,6 +35,7 @@ def build(ctx):
     libntp_source = [
         "libntp/authkeys.c",
         "libntp/ntp_calendar.c",
+		"libntp/ntp_endian.c",
         "libntp/ntp_random.c",
         "libntp/clocktime.c",
         "libntp/decodenetnum.c",

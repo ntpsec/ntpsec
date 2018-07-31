@@ -180,7 +180,7 @@ TEST(timespecops, SignNoFrac) {
 	for (i = -4; i <= 4; ++i) {
 		struct timespec a = timespec_init(i, 0);
 		int E = (i > 0) - (i < 0);
-		int r = test_tspec(a);
+		int r = test_tspec_denorm(a);
 
 		TEST_ASSERT_EQUAL(E, r);
 	}
@@ -196,7 +196,7 @@ TEST(timespecops, SignWithFrac) {
 	for (i = -4; i <= 4; ++i) {
 		struct timespec a = timespec_init(i, 10);
 		int E = (i >= 0) - (i < 0);
-		int r = test_tspec(a);
+		int r = test_tspec_denorm(a);
 
 		TEST_ASSERT_EQUAL(E, r);
 	}
@@ -631,6 +631,124 @@ TEST(timespecops, test_LFProundtrip) {
 }
 
 //----------------------------------------------------------------------
+// conversion from l_fp, unsigned
+//----------------------------------------------------------------------
+
+TEST(timespecops, test_FromLFPuBittest) {
+	struct timespec limit = timespec_init(0, 2);
+
+	// Not *exactly* a bittest, because 2**32 tests would take a
+	// really long time even on very fast machines! So we do test
+	// every 1000 fractional units.
+	uint32_t tsf;
+	for (tsf = 0; tsf < ~((uint32_t)(1000)); tsf += 1000) {
+		struct timespec E = timespec_init(1, (long)my_tsf_to_tick(tsf));
+		l_fp a = lfpinit(1, tsf);
+		struct timespec r;
+
+		r = lfp_uintv_to_tspec(a);
+		// The conversion might be off by one nanosecond when
+		// comparing to calculated value.
+		TEST_ASSERT_TRUE(AssertTimespecClose(E, r, limit));
+	}
+
+	return;
+}
+
+
+TEST(timespecops, test_FromLFPuRelPos) {
+	struct timespec limit = timespec_init(0, 2);
+	int i;
+
+	for (i = 0; i < (int)COUNTOF(fdata); ++i) {
+		l_fp a = lfpinit(1, fdata[i].frac);
+		struct timespec E = timespec_init(1, fdata[i].nsec);
+		struct timespec r;
+
+		r = lfp_uintv_to_tspec(a);
+		TEST_ASSERT_TRUE(AssertTimespecClose(E, r, limit));
+	}
+
+	return;
+}
+
+
+TEST(timespecops, test_FromLFPuRelNeg) {
+	struct timespec limit = timespec_init(0, 2);
+	int i;
+
+	for (i = 0; i < (int)COUNTOF(fdata); ++i) {
+		l_fp a = lfpinit(~0, fdata[i].frac);
+		struct timespec E = timespec_init(-1, fdata[i].nsec);
+		struct timespec r;
+
+		r = lfp_uintv_to_tspec(a);
+		TEST_ASSERT_TRUE(AssertTimespecClose(E, r, limit));
+	}
+
+	return;
+}
+
+
+// nsec -> frac -> nsec roundtrip, using a prime start and increment
+TEST(timespecops, test_LFPuRoundtrip) {
+	int32_t t;
+	uint32_t i;
+
+	for (t = -1; t < 2; ++t)
+		for (i = 4999; i < 1000000000; i += 10007) {
+			struct timespec E = timespec_init(t, (long)i);
+			l_fp a;
+			struct timespec r;
+
+			a = tspec_intv_to_lfp(E);
+			r = lfp_uintv_to_tspec(a);
+			TEST_ASSERT_EQUAL_timespec(E, r);
+		}
+
+	return;
+}
+
+//----------------------------------------------------------------------
+// conversion from double
+//----------------------------------------------------------------------
+
+TEST(timespecops, DToTspec) {
+	struct timespec res;
+
+	res = d_to_tspec(42.25);
+	TEST_ASSERT_EQUAL(42, res.tv_sec);
+	TEST_ASSERT_EQUAL(250000000, res.tv_nsec);
+}
+
+//----------------------------------------------------------------------
+// conversion from lfp stamp
+//----------------------------------------------------------------------
+
+TEST(timespecops, LfpStampToTspec) {
+	struct timespec res;
+
+	res = lfp_stamp_to_tspec(86400, 100000);
+	TEST_ASSERT_EQUAL(2085978496, res.tv_sec);
+	TEST_ASSERT_EQUAL(20117, res.tv_nsec);
+}
+
+//----------------------------------------------------------------------
+// conversion from tval
+//----------------------------------------------------------------------
+
+TEST(timespecops, TvalToTspec) {
+	struct timespec res;
+	struct timeval in;
+
+	in.tv_sec = 42;
+	in.tv_usec = 23;
+	res = tval_to_tspec(in);
+	TEST_ASSERT_EQUAL(42, res.tv_sec);
+	TEST_ASSERT_EQUAL(23000, res.tv_nsec);
+}
+
+//----------------------------------------------------------------------
 // string formatting
 //----------------------------------------------------------------------
 
@@ -662,6 +780,13 @@ TEST_GROUP_RUNNER(timespecops) {
 	RUN_TEST_CASE(timespecops, test_FromLFPrelPos);
 	RUN_TEST_CASE(timespecops, test_FromLFPrelNeg);
 	RUN_TEST_CASE(timespecops, test_LFProundtrip);
+	RUN_TEST_CASE(timespecops, test_FromLFPuBittest);
+	RUN_TEST_CASE(timespecops, test_FromLFPuRelPos);
+	RUN_TEST_CASE(timespecops, test_FromLFPuRelNeg);
+	RUN_TEST_CASE(timespecops, test_LFPuRoundtrip);
+	RUN_TEST_CASE(timespecops, DToTspec);
+	RUN_TEST_CASE(timespecops, LfpStampToTspec);
+	RUN_TEST_CASE(timespecops, TvalToTspec);
 }
 
 
