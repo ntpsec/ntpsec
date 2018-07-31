@@ -62,9 +62,12 @@ get_clocktime(
 	setlfpfrac(*now, (uint32_t)dtemp);
 }
 
-static int doublecmp(const void *a, const void *b)
+// modified from https://stackoverflow.com/questions/11931547/qsort-does-not-work-for-double-array
+static int doublecmp(const void * a, const void * b)
 {
-    return (int)(*((const double *)a) - *((const double *)b));
+  if (*(const double*)a > *(const double*)b) return -1;
+  else if (*(const double*)a < *(const double*)b) return 1;
+  else return 0;
 }
 
 void jitter(const iomode mode)
