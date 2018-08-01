@@ -2211,9 +2211,7 @@ read_network_packet(
 
 	if (buflen == 0 || (buflen == -1 &&
 			    ((EWOULDBLOCK == errno)
-#ifdef EAGAIN
 			     || (EAGAIN == errno)
-#endif
 	     ))) {
 		freerecvbuf(rb);
 		return (buflen);
