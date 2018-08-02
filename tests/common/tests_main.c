@@ -52,7 +52,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(numtoa);
 	RUN_TEST_GROUP(prettydate);
 	RUN_TEST_GROUP(random);
-	RUN_TEST_GROUP(recvbuff);
 	RUN_TEST_GROUP(refidsmear);
 	RUN_TEST_GROUP(socktoa);
 	RUN_TEST_GROUP(statestr);
@@ -71,6 +70,7 @@ static void RunAllTests(void)
 #ifdef TEST_NTPD
 	RUN_TEST_GROUP(leapsec);
 	RUN_TEST_GROUP(hackrestrict);
+	RUN_TEST_GROUP(recvbuff);
 #endif
 
 }

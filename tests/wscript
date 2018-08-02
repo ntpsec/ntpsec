@@ -47,7 +47,6 @@ def build(ctx):
         "libntp/netof.c",
         "libntp/numtoa.c",
         "libntp/prettydate.c",
-        "libntp/recvbuff.c",
         "libntp/refidsmear.c",
         "libntp/socktoa.c",
         "libntp/statestr.c",
@@ -100,6 +99,7 @@ def build(ctx):
         # "ntpd/filegen.c",
         "ntpd/leapsec.c",
         "ntpd/restrict.c",
+        "ntpd/recvbuff.c",
     ] + common_source
 
     ctx.ntp_test(

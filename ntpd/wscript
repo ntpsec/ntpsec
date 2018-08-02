@@ -53,6 +53,7 @@ def build(ctx):
         "ntp_filegen.c",
         "ntp_leapsec.c",
         "ntp_monitor.c",    # Needed by the restrict code
+        "ntp_recvbuff.c",
         "ntp_restrict.c",
         "ntp_util.c",
     ]

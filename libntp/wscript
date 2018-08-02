@@ -17,7 +17,6 @@ def build(ctx):
         "ntp_endian.c",
         "ntp_dns.c",
         "numtoa.c",
-        "recvbuff.c",
         "refidsmear.c",
         "socket.c",
         "socktoa.c",
