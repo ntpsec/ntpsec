@@ -111,12 +111,12 @@ extern uint64_t ntp_random64 (void);
 
 
 /*
- * The endpt structure is used to hold the addresses and socket
+ * The netendpt structure is used to hold the addresses and socket
  * numbers of each of the local network addresses we are using.
  * endpt is unrelated to the select algorithm's struct endpoint.
  */
-typedef struct __endpt {
-	struct __endpt *elink;		/* endpt list link */
+typedef struct netendpt {
+	struct netendpt *elink;		/* endpt list link */
 	SOCKET		fd;		/* socket descriptor */
 	uint32_t	ifnum;		/* endpt instance count */
 	sockaddr_u	sin;		/* unicast address */

@@ -36,7 +36,7 @@ struct recvbuf {
 	recvbuf_t *	link;	/* next in list */
 	sockaddr_u	recv_srcadr;
 	sockaddr_u	srcadr;		/* where packet came from */
-	endpt *		dstadr;		/* address pkt arrived on */
+	struct netendpt *	dstadr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
 	l_fp		recv_time;	/* time of arrival */
 	void		(*receiver)(struct recvbuf *); /* callback */
