@@ -52,6 +52,10 @@ dolfptoa(
 
 		digit  = fpi;
 		fpi   /= 10U;
+		/*
+		 * This should be able to be replaced by [digit -= fpi * 10].
+		 * It is being left as is at the moment for subtle bug avoidance.
+		 */
 		digit -= (fpi << 3) + (fpi << 1); /* i*10 */
 		*--cp  = (uint8_t)digit;
 	}

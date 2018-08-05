@@ -42,7 +42,9 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(authkeys);
 	RUN_TEST_GROUP(calendar);
 	RUN_TEST_GROUP(clocktime);
+	RUN_TEST_GROUP(endian);
 	RUN_TEST_GROUP(decodenetnum);
+	RUN_TEST_GROUP(dolfptoa);
 	RUN_TEST_GROUP(hextolfp);
 	RUN_TEST_GROUP(lfpfunc);
 	RUN_TEST_GROUP(lfptostr);

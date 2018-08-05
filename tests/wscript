@@ -39,6 +39,7 @@ def build(ctx):
         "libntp/ntp_random.c",
         "libntp/clocktime.c",
         "libntp/decodenetnum.c",
+        "libntp/dolfptoa.c",
         "libntp/hextolfp.c",
         "libntp/lfpfunc.c",
         "libntp/lfptostr.c",
