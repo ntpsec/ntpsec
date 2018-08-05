@@ -225,7 +225,7 @@ class VizStats(ntp.statfiles.NTPStats):
     <td style="text-align:left;">Name</td>
     <td>Min</td><td>1%</td><td>5%</td><td>50%</td><td>95%</td>
     <td>99%</td><td>Max</td> <td style="width:10px;">&nbsp;</td>
-    <td>90%</td><td>95%</td><td>StdDev</td>
+    <td>90%</td><td>98%</td><td>StdDev</td>
     <td style="width:10px;">&nbsp;</td><td>Mean</td><td>Units</td>
     <td>ness</td><td>osis</td>
   </tr>
