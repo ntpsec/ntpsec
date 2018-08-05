@@ -705,8 +705,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_new.nonReps, 1)
         self.assertEqual(pkt_new.maxReps, 5)
         self.assertEqual(pkt_new.oidranges,
-                         ((srch((1, 2), (3, 4), False),
-                           srch((6, 7), (8, 9), True))))
+                         (srch((1, 2), (3, 4), False),
+                          srch((6, 7), (8, 9), True)))
         self.assertEqual(pkt_new.context, "blah")
         # Test decoding, little endian
         header, body = slicedata(pkt_LE_str, 20)
@@ -716,8 +716,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
         self.assertEqual(pkt_LE_new.nonReps, 1)
         self.assertEqual(pkt_LE_new.maxReps, 5)
         self.assertEqual(pkt_LE_new.oidranges,
-                         ((srch((1, 2), (3, 4), False),
-                           srch((6, 7), (8, 9), True))))
+                         (srch((1, 2), (3, 4), False),
+                          srch((6, 7), (8, 9), True)))
         self.assertEqual(pkt_LE_new.context, "blah")
         # Test packetVars
         self.assertEqual(pkt_new.packetVars(),

@@ -1594,8 +1594,8 @@ This combats source address spoofing
                 for i in range(len(span.entries)):
                     e = span.entries[len(span.entries) - i - 1]
                     incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
-                    if ((len(req_buf) + len(incr) >=
-                            ntp.control.CTL_MAX_DATA_LEN)):
+                    if (len(req_buf) + len(incr) >=
+                            ntp.control.CTL_MAX_DATA_LEN):
                         break
                     else:
                         req_buf += incr
