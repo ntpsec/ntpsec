@@ -34,6 +34,7 @@ except ImportError as e:
     sys.exit(1)
 
 version = ntp.util.stdversion()
+master_encoding = 'latin-1'
 
 # General notes on Python 2/3 compatibility:
 #
