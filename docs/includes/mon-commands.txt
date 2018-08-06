@@ -4,7 +4,7 @@
 +statistics+ _name..._::
   Enables writing of statistics records. Currently, eight kinds of
   _name_ statistics are supported.
-
++
   +clockstats+;;
     Enables recording of clock driver statistics information. Each
     update received from a clock driver appends a line of the following
@@ -22,7 +22,7 @@
 |SPECTRACOM(1)       |          |receiver identifier (Spectracom unit 1)
 |93 226 00:08:29.606 |          |timecode (format varies by refclock)
 |====================================================================
-
++
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next
 normally shows clock type and unit (but if you are running in strict
@@ -31,7 +31,7 @@ dotted-quad notation). The final field last timecode received from the
 clock in decoded ASCII format, where meaningful. In some clock drivers
 a good deal of additional information can be gathered and displayed as
 well. See information specific to each clock for further details.
-
++
   +loopstats+;;
     Enables recording of loop filter statistics information. Each update
     of the local clock outputs a line of the following form to the file
@@ -58,7 +58,7 @@ The first two fields show the date (Modified Julian Day) and time
 time offset (seconds), frequency offset (parts per million - PPM),
 RMS jitter (seconds), Allan deviation (PPM) and clock discipline
 time constant.
-
++
   +protostats+;;
     Record significant peer and system events. Each significant
     event appends one line to the +protostats+ file set:
@@ -78,7 +78,7 @@ time constant.
 +
 The event message code and _message_ field are described on the
 "Event Messages and Status Words" page.
-
++
   +peerstats+;;
     Enables recording of peer statistics information. This includes
     statistics records of all peers of a NTP server and of special
@@ -111,7 +111,7 @@ the peer address in dotted-quad notation instead) The fourth field
 is a status word, encoded in hex in the format described in
 Appendix A of the NTP specification RFC 1305. The final four fields
 show the offset, delay, dispersion and RMS jitter, all in seconds.
-
++
   +rawstats+;;
     Enables recording of raw-timestamp statistics information. This
     includes statistics records of all peers of a NTP server and of
@@ -156,7 +156,7 @@ dotted-quad notation. The final four fields show the originate,
 receive, transmit and final NTP timestamps in order. The timestamp
 values are as received and before processing by the various data
 smoothing and mitigation algorithms.
-
++
   +sysstats+;;
     Enables recording of ntpd statistics counters on a periodic basis.
     Each hour a line of the following form is appended to the file
@@ -188,7 +188,7 @@ The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The remaining ten fields
 show the statistics counter values accumulated since the last
 generated line.
-
++
   +usestats+;;
     Enables recording of ntpd resource usage statistics.
     Each hour a line of the following form is appended to the file
@@ -223,7 +223,7 @@ names from the rusage struct.  See +man getrusage+ for details.
 (The NetBSD and FreeBSD man pages have more details.)
 The maxrss column is the high water mark since the process was started.
 The remaining fields show the values used since the last report.
-
++
   +timingstats+;;
    (Only available when the daemon is compiled with process time
    debugging support (+--enable-debug-timing+ - costs performance). Record
@@ -242,15 +242,17 @@ The remaining fields show the values used since the last report.
 |_message_    |text     |code path description (see source)
 |====================================
 
+// End of super-long series of statistics directives
+
 [[statsdir]]
-  +statsdir+ _directory_path_;;
++statsdir+ _directory_path_::
     Indicates the full path of a directory where statistics files should
     be created (see below). This keyword allows the (otherwise constant)
     _filegen_ filename prefix to be modified for file generation sets,
     which is useful for handling statistics logs.
 
 [[filegen]]
-  +filegen+ _name_ [+file+ _filename_] [+type+ _typename_] [+link+ | +nolink+] [+enable+ | +disable+];;
++filegen+ _name_ [+file+ _filename_] [+type+ _typename_] [+link+ | +nolink+] [+enable+ | +disable+]::
     Configures setting of generation file set name. Generation file sets
     provide a means for handling files that are continuously growing
     during the lifetime of a server. Server statistics are a typical
@@ -266,39 +268,44 @@ The remaining fields show the values used since the last report.
 Note that this command can be sent from the
 {ntpqman} program running at a remote location.
 +
-    +name+::
+    +name+;;
       This is the type of the statistics records, as shown in the
       _statistics_ command.
-    +file+ _filename_::
+    +file+ _filename_;;
       This is the file name for the statistics records. Filenames of set
       members are built from three concatenated elements _prefix_,
       _filename_ and _suffix_:
-
-      _prefix_;;
-        This is a constant filename path. It is not subject to
++
+[width="100%"]
+|====================================
+|Attribute         |Description
+|__prefix__        |This is a constant filename path. It is not subject to
         modifications via the _filegen_ option. It is defined by the
         server, usually specified as a compile-time constant. It may,
         however, be configurable for individual file generation sets via
         other commands. For example, the prefix used with _loopstats_
         and _peerstats_ generation can be configured using the
         _statsdir_ option explained above.
-      _filename_;;
-        This string is directly concatenated to the prefix mentioned
+|__filename__      |This string is directly concatenated to the prefix mentioned
         above (no intervening ‘/’). This can be modified using the file
         argument to the _filegen_ statement. No +..+ elements are
         allowed in this component to prevent filenames referring to
         parts outside the filesystem hierarchy denoted by _prefix_.
-      _suffix_;;
-        This part is reflects individual elements of a file set. It is
-        generated according to the type of a file set.
-    +type+ _typename_::
+|__suffix__        |This part is reflects individual elements of a
+	file set. It is generated according to the type of a file set. 
+|====================================
++
+    +type+ _typename_;;
       A file generation set is characterized by its type. The following
       types are supported:
-
-      +none+;;
-        The file set is actually a single plain file.
-      +pid+;;
-        One element of file set is used per incarnation of a ntpd
+      // The following are tables only because indent lists cannot be
+      // nested more than 2 deep.
++
+[width="100%"]
+|====================================
+|Attribute         |Description
+|+none+            |The file set is actually a single plain file.
+|+pid+             |One element of file set is used per incarnation of a ntpd
         server. This type does not perform any changes to file set
         members during runtime, however it provides an easy way of
         separating files belonging to different {ntpdman} server
@@ -306,37 +313,33 @@ Note that this command can be sent from the
         ‘.’ to concatenated prefix and filename strings, and appending the
         decimal representation of the process ID of the
         {ntpdman} server process.
-      +day+;;
-        One file generation set element is created per day. A day is
+|+day+             |One file generation set element is created per day. A day is
         defined as the period between 00:00 and 24:00 UTC. The file set
         member suffix consists of a ‘.’ and a day specification in the
         form _YYYYMMdd_. _YYYY_ is a 4-digit year number (e.g., 1992).
         _MM_ is a two digit month number. _dd_ is a two digit day
         number. Thus, all information written at 10 December 1992 would
         end up in a file named _prefix_ _filename_.19921210.
-      +week+;;
-        Any file set member contains data related to a certain week of a
-        year. The term week is defined by computing day-of-year modulo 7.
-        Elements of such a file generation set are distinguished by
-        appending the following suffix to the file set filename base: A
-        dot, a 4-digit year number, the letter _W_, and a 2-digit week
-        number. For example, information from January, 10th 1992 would
-        end up in a file with suffix _1992W1_.
-      +month+;;
-        One generation file set element is generated per month. The file
-        name suffix consists of a dot, a 4-digit year number, and a
-        2-digit month.
-      +year+;;
-        One generation file element is generated per year. The filename
-        suffix consists of a dot and a 4 digit year number.
-      +age+;;
-        This type of file generation sets changes to a new element of
+|+week+            |Any file set member contains data related to a certain
+	week of a year. The term week is defined by computing
+	day-of-year modulo 7. Elements of such a file generation set
+	are distinguished by appending the following suffix to the
+	file set filename base: A dot, a 4-digit year number, the
+	letter _W_, and a 2-digit week number. For example,
+	information from January, 10th 1992 would end up in a file
+	with suffix _1992W1_.
+|+month+           |One generation file set element is generated per
+	month. The file name suffix consists of a dot, a 4-digit year
+	number, and a 2-digit month.
+|+year+            |One generation file element is generated per year.
+	The filename  suffix consists of a dot and a 4 digit year number.
+|+age+$$           |This type of file generation sets changes to a new element of
         the file set every 24 hours of server operation. The filename
         suffix consists of a dot, the letter _a_, and an 8-digit number.
         This number is taken to be the number of seconds the server is
         running at the start of the corresponding 24-hour period.
-
-   +link+ | +nolink+::
+|====================================
+   +link+ | +nolink+;;
       It is convenient to be able to access the current element of a
       file generation set by a fixed name. This feature is enabled by
       specifying +link+ and disabled using +nolink+. If link is
@@ -347,8 +350,7 @@ Note that this command can be sent from the
       process. When the number of links is greater than one, the file is
       unlinked. This allows the current file to be accessed by a
       constant name.
-
-  +enable+ | +disable+::
+  +enable+ | +disable+;;
       Enables or disables the recording function.
       Information is only written to a file generation by specifying
       +enable+; output is prevented by specifying +disable+.
