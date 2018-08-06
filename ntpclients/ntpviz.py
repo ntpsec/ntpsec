@@ -1552,7 +1552,6 @@ Python by ESR, concept and gnuplot code by Dan Drown.
         except ImportError:
             if 0 < args.debug_level:
                 sys.stderr.write("ntpviz: INFO: psutil not found\n")
-            pass
 
         # set nice()
         nice = os.nice(nice)

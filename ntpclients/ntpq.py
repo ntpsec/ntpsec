@@ -1375,7 +1375,6 @@ usage: mrulist [tag=value] [tag=value] [tag=value] [tag=value]
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
-        pass
 
     def help_ifstats(self):
         self.say("""\

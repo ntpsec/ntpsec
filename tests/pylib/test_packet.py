@@ -591,7 +591,6 @@ class TestMisc(unittest.TestCase):
                              "'last': '0x00000200.00000000', "
                              "'first': '0x00000100.00000000', 'ct': 4, "
                              "'mv': None, 'rs': None>")
-            pass
         else:
             # Python 3.x < 3.6, dicts enumerate randomly
             # I can not test randomness of this type

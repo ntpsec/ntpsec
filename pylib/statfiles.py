@@ -164,7 +164,6 @@ class NTPStats:
         except IOError:  # pragma: no cover
             sys.stderr.write("ntpviz: WARNING: could not read %s\n"
                              % logpart)
-            pass
 
         return lines
 
