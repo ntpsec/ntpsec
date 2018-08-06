@@ -1,7 +1,7 @@
 = Preliminary design notes for the NTPv5 protocol =
 
 NTPv4 is showing its age.  There are functional capabilities that
-would be very useful if they could be standardized, but
+would be very useful if they could be standardized but
 currently are not.
 
 This document will first list these missing bits, then discuss
@@ -14,8 +14,8 @@ ways to incorporate them.
 Reference IDs are used by Stratum 1 sources to identify clocks and
 clock types, and by hosts at higher strata to perform loop detection.
 
-The REFID field is 4 octets long, sufficient to hold an IPv4 address
-for loop detection. This is inadequate for IPv6, so the reference ID of
+The REFID field is four octets long, sufficient to hold an IPv4 address
+for loop detection; this is inadequate for IPv6, so the reference ID of
 an IPv6 host is a 4-octet hash of its actual address. Hash collisions
 have been observed in the wild, possibly resulting in false-positive
 loop detection.
@@ -29,7 +29,7 @@ Most servers ship UTC.  Some ship TAI. Some perform leap-second
 smearing, some do not.
 
 The new protocol should enable a server to advertise its timescale,
-including, if applicable in its timescale, its current leapsecond offset.
+including, if applicable in its timescale, its current leap second offset.
 
 === Era ===
 
@@ -61,12 +61,12 @@ not incremented; "v5" becomes a set of required extension blocks.
 
 A difficulty with this approach is that some firewalls and routers are
 known to silently discard RFC7822 extension blocks as a way of
-preventing DoS attacks.  This would create propagation issues
+preventing DoS attacks; this would create propagation issues
 difficult to diagnose.
 
 === NTPNG ===
 
-In this approach, a new port number is allocated. The protocol is
+In this approach, a new port number is allocated. The protocol
 design is unconstrained except that it must carry the semantic
 content of the v4 header minus the unused Reference Timestamp
 field.
@@ -81,7 +81,7 @@ the first byte of the v4 packet header structure, so that the version
 number and packet mode are at the same offset as in v4. The version
 field *is* incremented to 5.
 
-The following payload is design is unconstrained except that it must
+The following payload design is unconstrained except that it must
 carry the semantic content of the v4 header minus the unused Reference
 Timestamp field.
 
@@ -117,7 +117,7 @@ A chunk system appropriate for NTP can be summarized as follows:
 * If the first character is not uppercase, the chunk is non-critical
   and may be skipped.
 
-* Chunk content is not constrained and is interpreted based in the
+* Chunk content is not constrained and is interpreted based on the
   chunk type.
 
 Note that this is not identical to PNG chunk layout; one difference is
@@ -135,10 +135,10 @@ worthwhile would incorporate at least most of the following:
 something that runs over HTTPS on the NTS-KE port.
 
 2. Let client and server packets be formatted differently. Achieve
-data minimization by just taking the unnecessary fields out of client
+data minimization by just taking unnecessary fields out of client 
 packets altogether.
 
-3. Forbid use of the legacy MAC field, thus fixing the hairiness
+3. Forbid the use of the legacy MAC field, thus fixing the hairiness
 around extension parsing.
 
 4. Make NTS mandatory. In the NTPv5 packet format, the version, mode,

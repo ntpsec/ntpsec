@@ -17,9 +17,9 @@ a higher-level view than individual comments.
 
 === l_fp, s_fp, u_fp ===
 
-C doesn't have any native fixed-point types, only float types.  In
-order to do certain time calculations without loss of precision, NTP
-home-brews three fixed-point types of its own.  Of these l_fp is the
+C doesn't have any native fixed-point types, only float types. 
+To do certain time calculations without loss of precision, NTP
+home-brews three fixed-point types of its own.  Of these, l_fp is the
 most common, with 32 bits of precision in both integer and fractional
 parts. Gory details are in include/ntp_fp.h.
 
@@ -32,24 +32,24 @@ become an l_fp.  For most calculations with l_fp it's easier to
 envision it as a 64bit integer that represents time with a unit of
 2^-32s, slightly short of 233 ps.
 
-When used to represent dates internally an l_fp must be interpreted in
-relation to the NTP era (the left 32 bits of the integer part of the
+When used to represent dates internally an l_fp must be interpreted 
+relative to the NTP era (the left 32 bits of the integer part of the
 NTP date that got cut off).  The NTP prime epoch (or epoch 0) is then
 an *unsigned* number of seconds since 1900-01-01T00:00:00Z and
-unsigned decimal fractional seconds.  Just to complicate matters,
-however, some uses of l_fp are time offsets with a signed seconds
+unsigned decimal fractional seconds, just to complicate matters.
+However, some uses of l_fp are time offsets with a signed seconds
 part.  Under the assumption that only adjacent epochs get compared,
 the offset calculations work correctly without taking the era number
 into account.
 
-Most time offsets are much smaller than the NTP epoch, so a 32 bit
-representation is used for these.  Actually, there were two of these:
-s_fp for signed offsets and u_fp for strictly non-negative ones.  The
-signed version has already been removed in NTPsec.
+Most time offsets are much smaller than the NTP epoch, so a 32-bit
+representation is used for these. There were two of these:
+s_fp for signed offsets and u_fp for strictly non-negative ones.
+NTPsec has already removed the singed version
 
 The comments in libntp/ntp_calendar.c are pretty illuminating about
 calendar representations.  A high-level point they don't make is
-that ignoring time cycles in l_fp is exactly how NTP gets around the
+that ignoring time cycles in l_fp is how NTP gets around the
 Y2K38 problem. As long as the average clock skew between machines
 is much less than the length of a calendar cycle (which it generally
 will be, by a factor of at least five million) we can map all incoming
@@ -62,10 +62,10 @@ NTP was written well before the 64-bit word size became common. While
 compilers on 32-bit machines sometimes have had "long long" as an
 integral 64-bit type, this was not guaranteed before C99.
 
-Thus in order to do calendar arithmetic, NTP used to carry a "vint64"
+Thus to do calendar arithmetic, NTP used to carry a "vint64"
 (variant 64-bit int) type that was actually a union with several
-different interpretations. This has been replaced with a scalar
-time64_t which is used the same way but implemented as a uint64_t.
+different interpretations; the scalar time64_t which is used the same 
+way but implemented as a uint64_t has already replaced this.
 
 This still has some utility because NTP still runs on 32-bit machines
 with a 32-bit time_t.
@@ -80,7 +80,7 @@ In a clock sample (a time-sync packet with stratum number 1), the
 refid is interpreted as 4 ASCII characters of clock identification.
 In a time-synchronization packet with stratum 2 or higher the refid
 identifies the originating time server; it may be an IPv4 or a hash of
-an IPv6 address.  (If and when the protocol is fully redesigned for
+an IPv6 address.  (If and when the protocol is redesigned for
 IPv6 the field length will go to 128 bits and it will become a full
 IPv6 address.)
 
@@ -96,7 +96,7 @@ types ship the refid "GPS". It is possible to fudge this ID to
 something more informative in the ntpd configuration command
 for the driver.
 
-The conflation of ID-for-humans with loop-detection cookie is not quite
+The conflation of ID-for-humans with the loop-detection cookie is not quite
 the design error it looks like, as refclocks aren't implicated in
 loop detection.
 
@@ -115,7 +115,7 @@ the millennium.  The struct timespec is newer and associated with
 ANSI/POSIX standardization.
 
 The NTP code was written well before calls like clock_gettime(2) that
-use it were standardized, but as part of of its general cleanup NTPsec
+use it were standardized, but as part of its general cleanup NTPsec
 has been updated to do all its internal computations at nanosecond
 precision or better.  
 
@@ -123,7 +123,7 @@ Thus, when you see a struct timeval in the NTPsec code, it's due to
 a precision limit imposed by an external interface.  One such is in
 the code for using the old BSD adjtime(2) call; another is in getting
 packet timestamps from the IP layer.  Our practice is to convert from
-or to nanosecond precision as close to these callsites as possible;
+or to nanosecond precision as close to these call sites as possible;
 this doesn't pull additional accuracy out of thin air, but it does 
 avoid loss-of-precision bugs due to mixing these structures.
 
@@ -133,10 +133,10 @@ In ntpd, there are peer control blocks - one per upstream synchronization
 source - that have an IP address in them.  That's what the main
 control logic works with.
 
-The peer buffer holds the last 8 samples from the upstream source.
-The normal logic uses the one with the lowest round trip time.  That's
+The peer buffer holds the last eight samples from the upstream source.
+The normal logic uses the one with the lowest round-trip time.  That's
 a hack to minimize errors from queuing delays out on the big bad
-internet.  Refclock data always has a round trip time of 0 and the
+internet.  Refclock data always has a round trip time of zero, and the
 code that finds the lowest RTT picks the most recent slot when the
 RTTs are equal.
 
@@ -147,7 +147,7 @@ There is no type T_Unsigned.  Range checking may not work right.
 
 == ntpd control flow ==
 
-In normal operation, after initialization, ntpd simply loops forever
+In normal operation, after initialization, ntpd loops forever
 waiting for a UDP packet to arrive on some set of open interfaces, or
 a clock sample to arrive from a locally-attached reference clock.
 Incoming packets and clock samples are fed to a protocol state
@@ -157,20 +157,20 @@ captured by a function in ntpd/ntpd.c tellingly named 'mainloop()'.
 This main loop is interrupted once per second by a timer tick that
 sets an alarm flag visible to the mainloop() logic.  When execution
 gets back around to where that flag is checked, a timer() function may
-fire.  This is used to adjust the system clock in time and frequency,
+fire; this is used to adjust the system clock in time and frequency,
 implement the kiss-o'-death function and the association polling
 function.
 
 There may be one asynchronous thread.  It does DNS lookups of server
-and pool hostnames.  This is intended to avoid adding startup delay
+and pool hostnames; this is intended to avoid adding startup delay
 and jitter to the time synchronization logic due to address lookups
 of unpredictable length.
 
 Input handling used to be a lot more complex.  Due to inability to get
 arrival timestamps from the host's UDP layer, the code used to do
-asynchronous I/O with packet I/O indicated by signal, with packets
+asynchronous I/O with packet I/O indicated by a signal, with packets
 (and their arrival timestamps) being stashed in a ring of buffers that
-was consumed by the protocol main loop.  Some of this code hasn't been
+was consumed by the main protocol loop.  Some of this code hasn't been
 cleaned up yet.
 
 This looked partly like a performance hack, but if so it was an
@@ -183,30 +183,30 @@ dropped.
 get those arrival timestamps from the UDP layer ASAP, rather than
 looking at packet read time in userspace. The cost of the latter,
 naive approach is additional jitter dominated by process-scheduling
-time.  This used to be significant relative to users' accuracy
+time; this used to be significant relative to users' accuracy
 expectations for NTP, but scheduler timeslices have since decreased
 by orders of magnitude and squashed the issue. We know this from some
 tests setup having run for six months with packet-timestamp fetching
-accidentally disabled...  But they weren't horribly busy systems.)
+accidentally disabled...  But they weren't busy systems.)
 
 The new organization stops pretending; it simply spins on a select
 across all interfaces.  If inbound traffic is more than the daemon can
 handle, packets will pile up in the UDP layer and be dropped at that
 level. The main difference is that dropped packets are less likely to
-be visible in the statistics the server can gather. (In order to show,
+be visible in the statistics the server can gather. (To show,
 they'd have to make it out of the system IP layer to userland at a
 higher rate than ntpd can process; this is very unlikely.)
 
 There was internal evidence in the NTP Classic build machinery that
-asynchronous I/O on Unix machines probably hadn't actually worked for
+asynchronous I/O on Unix machines probably hadn't worked for
 quite a while before NTPsec removed it.
 
 == System call interface and the PLL ==
 
-All of ntpd's clock management is done through four system calls:
+All of ntpds clock management is done through four system calls:
 clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or (in
 exceptional cases) the older BSD adjtime(2) call.  For ntp_adjtime(),
-ntpd actually uses a thin wrapper that hides the difference between
+ntpd uses a thin wrapper that hides the difference between
 systems with nanosecond-precision and those with only microsecond
 precision; internally, ntpd does all its calculations with nanosecond
 precision.
@@ -269,21 +269,21 @@ ntp_adjtime(2). ntp_adjtime(2)/adjtimex(2) uses a kernel interface to
 do its work, using a control technique called a PLL/FLL (phase-locked
 loop/frequency-locked loop) to do it.
 
-The older BSD adjtime(2) can be used for slewing as well, but doesn't
-assume a kernel-level PLL is available.  It is used only when
+The older BSD adjtime(2) can be used for slewing as well but doesn't
+assume a kernel-level PLL is available.  It is used when
 ntp_adjtime() calls generate a SIGSYS because the system call has not
-been implemented.  Without the PLL calls, convergence to good time is
-observably a lot slower and tracking will accordingly be less
+been implemented.  Without the PLL calls, convergence to a good time is
+observably a lot slower, and tracking will accordingly be less
 reliable; support for systems that lack them (notably OpenBSD and
-older Mac OS X versions) has been dropped fom NTPsec.
+older Mac OS X versions) has been dropped from NTPsec.
 
 Deep-in-the weeds details about the kernel PLL from Hal Murray follow.
-If you can follow these you may be qualified to maintain this code...
+If you can follow these, you may be qualified to maintain this code.
 
 Deep inside the kernel, there is code that updates the time by reading the
 cycle counter, subtracting off the previous cycle count and multiplying by
 the time/cycle.  The actual implementation is complicated mostly to maintain
-accuracy.  You need ballpark of 9 digits of accuracy on the time/cycle and
+accuracy.  You need ballpark of 9 digits of accuracy on the time/cycle, and
 that has to get carried through the calculations.
 
 On PCs, Linux measures the time/cycle at boot time by comparing with another
@@ -301,13 +301,13 @@ You can grep for "MHz" to find these.
 the clock fuzzing to smear the EMI over a broader band to comply with
 FCC rules.  It rounds down to make sure the CPU isn't overclocked.)
 
-There is an API call to adjust the time/cycle.  That adjustment is ntpd's
+There is an API call to adjust the time/cycle.  That adjustment is ntpds
 drift.  That covers manufacturing errors and temperature changes and such.
 The manufacturing error part is typically under 50 PPM.  I have a few systems
 off by over 100.  The temperature part varies by ballpark of 1 PPM / C.
 
-There is another error source which is errors in the calibration code and/or
-time keeping code.  If your timekeeping code rounds down occasionally, you
+There is another error source which is errors in the calibration code and
+timekeeping code.  If your timekeeping code rounds down occasionally, you
 can correct for that by tweaking the time/cycle.
 
 There is another API that says "slew the clock by X seconds".  That is
@@ -320,7 +320,7 @@ implemented in user code with reduced accuracy.
 
 There is a PLL kernel option to track a PPS.  It's not compiled into most
 Linux kernels.  (It doesn't work with tickless.)  There is an API to turn it
-on.  Then ntpd basically sits off to the side and watches.
+on.  Then ntpd sits off to the side and watches.
 
 RFC 1589 covers the above timekeeping and slewing and kernel PLL.
 
@@ -335,10 +335,10 @@ that the clock is actually a peer."  The code mostly hides the
 difference between clock samples and sync updates from peers.
 
 Internally, each refclock has a FIFO holding the last ~64 samples.  For
-things like NMEA, each time the driver gets a valid sample it adds it to the
+things like NMEA, each time the driver, gets a valid sample it adds it to the
 FIFO.  For the Atom/PPS driver there is a hook that gets called/polled each
 second.  If it finds good data, it adds a sample to the FIFO.  The FIFO is
-actually a ring buffer.  On overflow, old samples are dropped.
+a ring buffer.  On overflow, old samples are dropped.
 
 At the polling interval, the driver is "polled".  (Note the possible
 confusion on "poll".)  That is parallel with sending a packet to the
@@ -352,7 +352,7 @@ injects that into the peer buffer for the refclock.
 
 == Asynchronous DNS lookup ==
 
-The DNS code runs in a separate thread in order to avoid stalling
+The DNS code runs in a separate thread to avoid stalling
 the main loop while it waits for a DNS lookup to return. And DNS
 lookups can take a *long* time.  Hal Murray notes that
 he thinks he's seen 40 seconds on a failing case.
@@ -365,7 +365,7 @@ need - notably an input-buffer pool.  (It also had an obscure bug.)
 The DNS lookups during initialization - of hostnames specified on the
 command line or server lines in ntp.conf - could be done synchronously.
 
-But that would delay startup and there are two cases we know of where
+But that would delay startup, and there are two cases we know of where
 ntpd has to do a DNS lookup during normal operation.
 
 One is the try again when DNS for the normal server case doesn't work during
@@ -386,23 +386,23 @@ rather than only replacing dead servers.
 == The build recipe ==
 
 The build recipe is, essentially, a big Python program using a set of
-specialized procedures caled 'waf'.  To learn about waf itself see
+specialized procedures called 'waf'.  To learn about waf itself see
 the https://waf.io/book/[Waf Book]; this section is about the
 organization and particular quirks of NTPsec's build.
 
 If you are used to autoconf, you will find the waf recipe
 odd at first.  We replaced autoconf because with waf the
-build recipe is literally orders of magnitude less complex,
+build recipe is orders of magnitude less complex,
 faster, and more maintainable.
 
-The top level wscript calls wscript files in various subdirectories
+The top-level wscript calls wscript files in various subdirectories
 using the ctx.recurse() function. These subfiles are all relatively
 simple, consisting mainly of calls to the waf function ctx().  Each
 such call declares a build target to be composed (often using the
 compiler) from various prerequisites.
 
 The top-level wscript does not itself declare a lot of targets (the
-exceptions are a handful of installable shellscripts and man pages).
+exceptions are a handful of installable shell scripts and man pages).
 It is mainly concerned with setting up various assumptions for the
 configure and build phases.
 
@@ -410,7 +410,7 @@ If you are used to working with Makefiles, you may find the absence
 of object files and binaries from the source directory after a build
 surprising.  Look under the build/ directory.
 
-Most of the complexity in this build is in the configure phase, when
+Most of the complexity in this build is in the configure phase when
 the build engine is probing the environment.  The product of this
 phase is the file build/config.h, which the C programs include to
 get symbols that describe the environment's capabilities and
@@ -421,7 +421,7 @@ in the wafhelpers/ directory. The entire collection is structured as
 a loadable Python module.  Here are a few useful generalizations:
 
 * The main sequence of the configuration logic, and most of the simpler
-  checks, lives in configure.py.
+  checks live in configure.py.
 
 * Some generic but bulky helper functions live in probes.py.
 
@@ -476,7 +476,7 @@ re-used.
 
 === ntpdig ===
 
-ntpdig also uses the pylib library, but doesn't speak Mode 6.
+ntpdig also uses the pylib library but doesn't speak Mode 6.
 Instead, it builds and interprets time-synchronization packets 
 using some of the same machinery.
 
@@ -492,7 +492,7 @@ layers of segment reassembly.  The lower layer is the vanilla UDP
 fragment reassembly encapsulated in do_query() and shared with the
 other request types.
 
-In order to avoid blocking for long periods of time, and in order to
+To avoid blocking for long periods of time, and to
 be cleanly interruptible by control-C, the upper layer does a sequence
 of requests for MRU spans, which are multi-frag sequences of
 ASCIIizations of MRU records, oldest to newest.  The spans include
@@ -506,12 +506,12 @@ has finished.
 The code collects all the data, maybe sorts it, then prints it out.
 
 There is also a direct mode that prints the individual slots
-as they come in.  This avoids needing lots of memory if you want
+as they come in; this avoids needing lots of memory if you want
 to get the MRU data from a system that keeps lots of history.
 
-A further interesting complication is use of a nonce to foil DDoSes by
+A further interesting complication is the use of a nonce to foil DDoSes by
 source-address spoofing.  The mrulist() code begins by requesting a
-nonce from ntpd, which it then replays between span requets to
+nonce from ntpd, which it then replays between span requests to
 convince ntpd that the address it's firehosing all that MRU data at is
 the same one that asked for the nonce. To foil replay attacks, the
 nonce is timed out; you have to re-request another every 16 seconds

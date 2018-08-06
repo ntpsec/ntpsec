@@ -20,7 +20,7 @@ ifdex-ignores::
 	Lists and explains a large number of internal configuration symbols.	
 
 make-tarball::
-	Script for building a release tarball.
+	The script for building a release tarball.
 
 ntpv5.txt::
 	Design notes towards NTPv5.
@@ -29,7 +29,7 @@ pre-release.txt::
 	A collection of ideas about testing before a release.
 
 release::
-	Script for shipping a release.
+	The script for shipping a release.
 
 TODO::
 	List of items the NTPsec developers are working on.

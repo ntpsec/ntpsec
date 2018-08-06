@@ -16,14 +16,14 @@ that says
 ntpq: can't find Python NTP library -- check PYTHONPATH.
 ---------------------------------------------------------------------
 
-you *may* have a problem.  A lot of what was C code in legacy versions
+You *may* have a problem.  A lot of what was C code in legacy versions
 (pretty much everything except ntpd itself, in fact) has been moved to
-Python in order to improve maintainability and decrease attack
+Python to improve maintainability and decrease attack
 surface.  Most of these tools share a Python library of critical
 functions.  If you can't load that library, you can't test effectively.
 
 The waf build is supposed to create a symbolic link from
-build/main/ntpclients/ntp to pylib in the build directory. This should enable
+build/main/ntpclients/ntp to pylib in the build directory; this should enable
 ntpq to "import ntp" before you install to rootspace. If that link is not
 created or doesn't point to pylib/ under your build directory, report
 this as a bug. If it is, but ./ntpq startup fails anyway, you may
@@ -40,7 +40,7 @@ report it as a bug.
 Be aware that if this sort of problem occurs in an NTPsec instance
 installed from a binary package, it is almost certainly not an NTPsec
 bug but a packaging error that the NTPsec maintainers themselves can't
-fix. In that case you need to report it to your distribution
+fix. In that case, you need to report it to your distribution
 maintainers.
 
 == Preliminary one-off test ==
@@ -64,7 +64,7 @@ Run "ntpq -p" to see if things look normal.
 
 == Full qualification test ==
 
-For a longer test, including over reboots...
+For a longer test, including over reboots.
 
 Install your new code using "./waf install" (as root).
 That will install your new ntpd into /usr/local/sbin/ntpd
@@ -87,7 +87,7 @@ Note that under Fedora and CentOS, "dnf update" may undo that edit
 and revert to running the system version.
 
 Older versions used /etc/rc.d/init.d/ntpd. The file /etc/sysconfig/ntpd
-gets sourced into the init script so you can put real code in there
+gets sourced into the init script so you can put the real code in there
 (systemd doesn't do that)  You can insert this:
 
 --------------------------------------------------
