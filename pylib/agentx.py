@@ -67,8 +67,8 @@ class MIBControl:
             node, remainingOID = ntp.util.slicedata(remainingOID, 1)
             node = node[0]
             if node not in currentLevel.keys():
-                currentLevel[node] = {"reader":None, "writer":None,
-                                      "subids":None}
+                currentLevel[node] = {"reader": None, "writer": None,
+                                      "subids": None}
             if len(remainingOID) == 0:  # We have reached the target node
                 currentLevel[node]["reader"] = reader
                 currentLevel[node]["writer"] = writer

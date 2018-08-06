@@ -1663,7 +1663,7 @@ class TestControlSession(unittest.TestCase):
             queries = []
             result = cls.mrulist(variables={"sort": "addr",
                                             "frags": 24,
-                                            "resall":5})
+                                            "resall": 5})
             self.assertEqual(nonce_fetch_count, [4])
             self.assertEqual(queries,
                              [(10, 0, "nonce=foo, frags=24, resall=0x5", False),
