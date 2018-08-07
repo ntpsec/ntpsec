@@ -1,8 +1,8 @@
 def build(ctx):
     bldnode = ctx.bldnode.abspath()
 
-    frob_sources = ['main.c', 'bumpclock.c', 'jitter.c', 'precision.c',
-                    'pps-api.c', 'tickadj.c']
+    frob_sources = ['main.c', 'bumpclock.c', 'dump.c', 'jitter.c',
+                    'precision.c', 'pps-api.c', 'tickadj.c']
 
     ctx(
         features="c cprogram bld_include src_include",

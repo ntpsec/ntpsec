@@ -22,6 +22,7 @@ static void usage(void)
 "        -A         Display kernel tick\n"
 "        -b bump    Bump clock by specified microseconds.\n"
 "        -c         Compute and display clock jitter.\n"
+"        -d         Dump attributes from adjtimex.\n"
 "        -e         Measure clock precision.\n"
 "        -j         Report in self-describing JSON.\n"
 "        -p ppsdev  Look for PPS pulses on a specified device\n"
@@ -38,7 +39,7 @@ main(int argc, char **argv)
 	int ch;
         bool got_one = false;
 	iomode mode = plain_text;
-	while ((ch = getopt(argc, argv, "a:Ab:cejp:rh?")) != EOF) {
+	while ((ch = getopt(argc, argv, "a:Ab:cdejp:rh?")) != EOF) {
                 got_one = true;
 		switch (ch) {
 		case 'A':
@@ -65,6 +66,13 @@ main(int argc, char **argv)
 		case 'c':
 		    jitter(mode);
                     /* never returns */
+		    break;
+		case 'd':
+#ifdef HAVE_ADJTIMEX
+		    do_dump(mode);
+#else
+		    fputs("ntpfrob: no adjtimex(2)\n", stderr);
+#endif /* HAVE_ADJTIMEX */
 		    break;
 		case 'e':
 		    precision(mode);
