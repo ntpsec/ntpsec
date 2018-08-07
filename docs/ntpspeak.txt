@@ -10,7 +10,7 @@
 [[ACTS]] ACTS::
   https://www.nist.gov/pml/time-and-frequency-division/services/automated-computer-time-service-acts[NIST
   Automated Computer Time Service]. NIST provides a civil time reference for
-  computers equipped with analog modems that can dial to its phone
+  computers equipped with analog modems that can dial in to its phone
   lines.  Due to variability of delays in the analog phone network
   accuracy is not very good, around 4 milliseconds compared to
   around a microsecond for <<PPS>>. But the service is still
@@ -45,14 +45,14 @@
   nominal frequency. It changes, slowly, in response to environmental
   factors (mainly ambient temperature). ntpd measures drift by
   sampling the clock and performing clock recovery against a
-  phase-locked loop.  The drift measurement is occasionally stored
+  phase-locked loop.  The drift measurement can be stored and updated
   locally to a drift file so that when ntpd is stopped and restarted
   it doesn't have to go through the entire resampling and resynchronization
   process before providing reliable time.
 
 [[falseticker]] falseticker::
   <<Mills-speak>> for a timeserver identified as not
-  reliable by statistical filtering.  Usually this does not imply any
+  reliable by statistical filtering.  Usually this does not imply a
   problem with the timeserver itself but rather with highly variable
   and asymmetric network delays between server and client, but firmware
   bugs in GPS receivers have produced falsetickers.
@@ -64,7 +64,7 @@
   definitions; notably, the Unix epoch is 1970-00-00T00:00:00.
 
 [[era]] era::
-  One complete revolution of a 64-bit NTP 64-bit timestamp; approximately
+  One complete revolution of an NTP 64-bit timestamp; approximately
   136 years. Eras are numbered from 0, but this era number is not
   represented internally in NTP code because modular-arithmetic
   trickery is used to deduce the nearest time that could fit a given
@@ -87,13 +87,13 @@
    now long gone, but have left a few traces in the NTP codebase.
 
 [[GPS]] GPS::
-   Global Positioning System; also, "a GPS" is a radio receiver
+   Global Positioning System; in common parlance "a GPS" is a radio receiver
    designed to get position and time fixes from the system. GPS fixes
    are derived from spherical trigonometry using the precisely known
    positions of satellites in a geocentric coordinate system. GPS
    also provides time service; those that emit <<PPS>> are suitable
    as clock sources for Stratum 1 timeservers.  In timekeeping, the
-   term is used to refer not only to the US original GPS system,
+   term is used to refer not only to the original U.S. GPS system,
    but newer constellations that work on the same principles, such
    as ГЛОНАСС (the Russian GLONASS), 北斗 (the Chinese BeiDou-2),
    and the EU's Galileo.
@@ -140,12 +140,12 @@
    serial link is called "in-band time" to contrast it with the
    out-of-band <<PPS>> signal.  Abbreviated IBT. Seldom useful
    by itself as it tends to have a large random wander from top
-   of second.  It is however, useful as a count of seconds.
+   of second. However, it is useful as a count of seconds.
 
 [[leap second]] leap second::
    Because the earth's rotation varies in irregular ways (gradually
-   slowing due to tidal drag) and the second is now defined in
-   absolute terms rather than as a fraction of day length, keeping
+   slowing due to tidal drag among other forces) and the second is now defined
+   in absolute terms rather than as a fraction of day length, keeping
    time of day synchronized with mean solar time requires occasional,
    unpredictable insertions of a standard second in the calendar. Leap
    second notifications are issued as Bulletin C by the
@@ -169,17 +169,17 @@
    include <<falseticker>>, <<proventic>>, and <<truechimer>>.  The
    close-to-definitive reference is
    https://lists.ntp.org/pipermail/questions/2007-December/016592.html[The
-   NTP dictionary], though not all those terms are still in use.
+   NTP dictionary], though not all of those terms are still in use.
 
 [[mode 6]] mode 6::
    Mode 6 is a control protocol used to get various kinds of
    status information from a running ntpd and configure it on
-   the fly.  So called from the value 6 (0110) in the packet mode
+   the fly.  So-called from the value 6 (0110) in the packet mode
    field.  It is described in detail mode6.html[here].
 
 [[NIST]] NIST::
-   http://www.nist.gov/[National Institute of Standards and
-   Technology].  The civilian national time authority of the USA;
+   http://www.nist.gov[National Institute of Standards and
+   Technology].  The civilian national time authority of the U.S.;
    runs <<WWVB>>.  Responsible for keeping U.S. civil time
    coordinated with UTC.  Civil <<NIST>> and military <<USNO>>
    time agree to within nanoseconds.
@@ -187,7 +187,7 @@
 [[NTP-classic]] NTP Classic::
    The original reference implementation of NTP by Dave Mills, later
    maintained by the Network Time Foundation.  It is available at
-   http://www.ntp.org/ .  NTPsec forked from it on June 6th, 2015.
+   http://www.ntp.org .  NTPsec forked from it on June 6th, 2015.
 
 [[nonce]] nonce::
   An arbitrary number that may only be used once. A random or
@@ -229,9 +229,9 @@
 
 [[pool]] pool::
    In an NTP context, "the pool" is usually the
-   http://www.pool.ntp.org/en/[NTP Pool Project], a collection of
-   thousands of NTP servers accessible through DNS servers that hand
-   out "nearby" server addresses from the pool.  These servers are
+   https://www.pool.ntp.org/en/[NTP Pool Project], a collection of
+   thousands of NTP servers accessible via GeoDNS servers that hand
+   out "nearby" timeserver addresses from the pool.  These timeservers are
    usually run by volunteers, and available via well-known DNS names.
 
 [[proventic]] proventic:: <<Mills-speak>> for "the transitive
@@ -251,8 +251,8 @@
   a refclock is stratum 1; and a client served by a stratum N is
   stratum N+1. Often capitalized, especially when referring to all
   members of a stratum. While strata up to 15 are defined, it is
-  unusual to see a public timeserver with stratum greater than 3,
-  and thus almost all NTP clients are at Stratum 4 or lower.
+  unusual to see a public timeserver with stratum higher than 3,
+  and thus almost all NTP clients are at Stratum 4 or higher.
   Notice that a 'lower' stratum is closer to the reference clock than
   a 'higher'.
 
@@ -275,7 +275,7 @@
   the server itself than it is of favorable network topology.
 
 [[USNO]] USNO::
-  http://www.usno.navy.mil/USNO[The United States Naval Observatory],
+  https://www.usno.navy.mil/USNO[The United States Naval Observatory],
   one of the two U.S. national time authorities and the source of the
   U.S. military time reference, now delivered primarily by GPS
   signals. U.S. civil <<NIST>> and military <<USNO>> time agree to
