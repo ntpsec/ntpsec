@@ -114,9 +114,9 @@
    interface.
 
 [[GPS pivot date]] GPS pivot date::
-   The GPS pivot date is specific fixed arbitrary time.  It is stored in
+   The GPS pivot date is a specific fixed arbitrary time.  It is stored in
    the firmware of a GPS receiver, and is probably the date that firmware
-   was released.  For reasons, a GPS receiver will start reporting
+   was released.  For this reason, a GPS receiver will start reporting
    incorrect time 512 weeks (9.8 years) or 1024 weeks (19.6 years) after
    it's pivot date.  There is generally no way to determine what a given
    GPS receiver's pivot date is, or to determine that it has failed in
