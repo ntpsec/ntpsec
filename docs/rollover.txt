@@ -231,10 +231,10 @@ ability to change the base date, the device will ship incorrect
 reports forever afterwards.  A few refclocks, like the HP-GPS line,
 have that ability; most do not.
 
-This where careless, low-budget design begins to matter. GPS vendors
+This is where careless, low-budget design begins to matter. GPS vendors
 do not document even the fact that they use base or pivot dates, let
 alone what the base and pivot dates for their devices are. As of 2017,
-NTP's developers no not know of any devices for which you can even
+NTP's developers do not know of any devices for which you can even
 query these parameters, let alone set them.  The best you can generally
 do (and on only some devices) is get the firmware release date; from this,
 you can assume that you will get non-timewarped reports for 1024 weeks
