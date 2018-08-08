@@ -149,7 +149,7 @@
    time of day synchronized with mean solar time requires occasional,
    unpredictable insertions of a standard second in the calendar. Leap
    second notifications are issued as Bulletin C by the
-   http://www.iers.org/IERS/EN/Home/home_node.html[International
+   https://www.iers.org/IERS/EN/Home/home_node.html[International
    Earth Rotation Service] when required, and obeyed by national time
    authorities.  The current leap-second offset is automatically
    propagated through the <<GPS>> system.
@@ -178,7 +178,7 @@
    field.  It is described in detail mode6.html[here].
 
 [[NIST]] NIST::
-   http://www.nist.gov[National Institute of Standards and
+   https://www.nist.gov[National Institute of Standards and
    Technology].  The civilian national time authority of the U.S.;
    runs <<WWVB>>.  Responsible for keeping U.S. civil time
    coordinated with UTC.  Civil <<NIST>> and military <<USNO>>
