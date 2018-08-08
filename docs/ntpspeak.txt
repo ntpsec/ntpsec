@@ -108,7 +108,7 @@
    GPS antenna.
 
 [[GPSD]] GPSD::
-   The http://www.catb.org/gpsd/[GPS Daemon], an open-source device
+   The http://www.catb.org/gpsd[GPS Daemon], an open-source device
    manager for GPSes and other geodetic sensors. Frequently used as
    a clock source by Stratum 1 sites via the link:driver_shm.html[SHM]
    interface.
@@ -229,7 +229,7 @@
 
 [[pool]] pool::
    In an NTP context, "the pool" is usually the
-   https://www.pool.ntp.org/en/[NTP Pool Project], a collection of
+   https://www.ntppool.org/en[NTP Pool Project], a collection of
    thousands of NTP servers around the world that you can use to keep
    time. The DNS names are designed to keep the timeservers you select
    relatively "close" to you on the internet, with varying degrees of
