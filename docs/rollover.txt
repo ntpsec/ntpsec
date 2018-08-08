@@ -22,26 +22,26 @@ lifetime of the universe (or whatever portion of it concerns you).
 On real-world hardware you will seldom be that lucky.
 
 This page discusses calendar cycles related to NTP, the ways they
-interact, the consequences of rollover, and common workarounds for
+interact, the consequences of rollover and common workarounds for
 rollover problems.
 
 [[terminology]]
 == Terminology ==
 
 Every calendar cycle has at least three basic properties: a start date
-(usually referred to a solar astronomical date in the Gregorian
-calendar), a unit (such as seconds), and a rollover time or cycle
+(usually referenced to a solar astronomical date in the Gregorian
+calendar), a unit (such as seconds) and a rollover time or cycle
 length in that unit.  It also matters what the calendar does about
 leap seconds.
 
 As an important example, the basic time representation used on
 computers running Unix has a start date of 1970-01-01T00:00:00
-(midnight of Janary 1st 1970), a unit of seconds, and a rollover time
+(midnight of January 1st 1970), a unit of seconds and a rollover time
 of either 2^31^ seconds or 2^63^ seconds, depending on the word size
 of the hardware. Negative times represent seconds before the start
 date.
 
-The start date is often called the "epoch", and a rollover period may
+The start date is often called the "epoch" and a rollover period may
 be called an "era". Beware that eras are often numbered zero-origin;
 it is likely that Unix software will refer to dates immediately before
 the 2038 rollover as "era 0", not "era 1".
@@ -91,7 +91,7 @@ such as Spectracom's "Type 2".
 There is an internal workaround to deal with two-digit dates in
 {ntpdman}, but it relies on the system clock being at least roughly
 correct - it won't work (for example) at boot time if the clock
-has been trashed or zeroed due to a failed backup battery, and
+has been trashed or zeroed due to a failed battery backup and
 you have no remote check peers yet.
 
 Warnings have been attached to the documentation of NTP clock drivers
@@ -183,7 +183,7 @@ to compose this with message data to report time at subsecond
 precision.  Many, however, do not, and those that do are often
 inaccurate; consumer-grade hardware often has jitter of over a tenth
 of a second (100ms). On the other hand, carefully designed GPSes
-easily deliver 1ms accuracy, and some do 20 times better than that. For
+easily deliver 1ms accuracy, and some do 1000 times better than that. For
 a more detailed discussion of accuracy budgets see the
 http://www.catb.org/gpsd/time-service-intro.html[Introduction to Time
 Service].
@@ -276,7 +276,7 @@ has been mapped from a 32-bit seconds offset in some era to a full
 
 When {ntpdman} receives an unresolved timestamp from an upstream server,
 that timestamp could be based in any era prior to the current
-wall-clock date - but by definition, we may not know the wall-clock
+wall-clock date - but by definition we may not know the wall-clock
 date with confidence yet (not having achieved sync).
 
 To resolve this ambiguity, NTP also uses an internal pivot date.  It
