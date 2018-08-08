@@ -33,7 +33,7 @@
 +key+ _key_::
   All packets sent to and received from the server or peer are to
   include authentication fields encrypted using the specified _key_
-  identifier with values from 1 to 65534, inclusive. The default is to
+  identifier with values from 1 to 65535, inclusive. The default is to
   include no encryption field.
 
 +minpoll+ _minpoll_::

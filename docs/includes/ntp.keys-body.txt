@@ -7,7 +7,7 @@ Support" page of the Web documentation.
 {ntpdman} reads its keys from a file specified using the -k command line
 option or the 'keys' statement in the configuration file. While key
 number 0 is fixed by the NTP standard (as 56 zero bits) and may not be
-changed, one or more keys numbered between 1 and 65534 may be
+changed, one or more keys numbered between 1 and 65535 may be
 arbitrarily set in the keys file.
 
 The key file uses the same comment conventions as the configuration
@@ -17,7 +17,7 @@ file. Key entries use a fixed format of the form
 keyno type key
 --------------
 
-where `keyno` is a positive integer (between 1 and 65534),
+where `keyno` is a positive integer (between 1 and 65535),
 `type` is the message digest algorithm, and
 `key` is the key itself.
 

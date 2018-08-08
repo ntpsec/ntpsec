@@ -54,7 +54,7 @@ discarded.  Authentication doesn't prevent replays.
 [[symm]]
 === Symmetric-Key Cryptography ===
 
-NTP allows any one of possibly 65,534 keys, each distinguished by a
+NTP allows any one of possibly 65,535 keys, each distinguished by a
 32-bit key identifier, to authenticate an association. The servers and
 clients involved must agree on the key and key identifier to
 authenticate NTP packets. Keys and related information are specified
@@ -134,7 +134,7 @@ access to all but correctly authenticated clients.
 [[formats]]
 == Data Formats ==
 
-The NTPv4 specification (RFC 5905) allows any one of possibly 65,534
+The NTPv4 specification (RFC 5905) allows any one of possibly 65,535
 message digest keys (excluding zero), each distinguished by a 32-bit key
 ID, to authenticate an association. The servers and clients involved
 must agree on the key ID, key type and key to authenticate NTP packets.

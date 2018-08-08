@@ -35,7 +35,7 @@ Figure 1. Typical Symmetric Key File
 
 Figure 1 shows a typical symmetric keys file used by the reference
 implementation. Each line of the file contains three fields, first
-keyno an integer between 1 and 65534, inclusive, representing the
+keyno an integer between 1 and 65535, inclusive, representing the
 key identifier used in the `server` configuration commands. Next
 is the key type for the message digest algorithm, which can be any
 message digest algorithm supported by the OpenSSL library.
