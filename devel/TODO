@@ -25,6 +25,9 @@ of the current startup logic gets discussed.
 
 === Future plans ===
 
+* Implement Google's proposed standard smear?
+  See https://developers.google.com/time/smear
+
 * Add .tar.xz tarball.
 
 * Fix ntpq retransmissions.
