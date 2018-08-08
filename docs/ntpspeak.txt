@@ -230,13 +230,13 @@
 [[pool]] pool::
    In an NTP context, "the pool" is usually the
    https://www.pool.ntp.org/en/[NTP Pool Project], a collection of
-   thousands of NTP servers accessible via DNS names that distribute
-   timeserver IP addresses from a pool of addresses that are topologically
-   "near" you on the internet - e.g. 0.north-america.pool.ntp.org will connect
-   you to timeservers that are generally located in North America, while
-   0.us.pool.ntp.org will connect you to timeservers that are more likely
-   to be located in the United States, rather than Canada or Mexico. These
-   pool timeservers are usually run by volunteers.
+   thousands of NTP servers around the world that you can use to keep
+   time. The DNS names are designed to keep the timeservers you select
+   relatively "close" to you on the internet, with varying degrees of
+   specificity, e.g. using north-america.pool.ntp.org may connect you
+   to timeservers from Canada to Panama, while us.pool.ntp.org is more
+   likely to connect you to timeservers within the continental U.S..
+   These pool timeservers are usually run by volunteers.
 
 [[proventic]] proventic:: <<Mills-speak>> for "the transitive
   completion of the authentication relationship", defined in RFC 5906.
