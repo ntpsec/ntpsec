@@ -26,7 +26,9 @@ utilities.
 +-c+::
   Compute and display clock jitter.
 +-d+::
-  display 19 values extracted via adjtimex.
+  display values extracted via adjtimex(2).
++-D+::
+  display values extracted via adjtimex(2) forcibly including PPS.
 +-e+::
   Measure clock precision.
 +-j+::
