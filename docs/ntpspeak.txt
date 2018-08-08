@@ -247,14 +247,13 @@
 
 [[stratum]] stratum::
   A "stratum" is a layer in the hierarchy of time servers.  A
-  <<refclock>> is considered stratum 0; a computer directly attached to
+  <<refclock>> is stratum 0; a computer directly attached to
   a refclock is stratum 1; and a client served by a stratum N is
   stratum N+1. Often capitalized, especially when referring to all
-  members of a stratum. While strata up to 15 are defined, it is
-  unusual to see a public timeserver with stratum higher than 3,
-  and thus almost all NTP clients are at Stratum 4 or higher.
-  Notice that a 'lower' stratum is closer to the reference clock than
-  a 'higher'.
+  members of a stratum. The larger the number, the further away from
+  the source clock, thus the less accurate. Stratum 16 is the maximum, and
+  indicates a device that is unreachable and unsynchronized. The majority
+  of public timeservers are Stratum 1 and Stratum 2. 
 
 [[time-radio]] time radio::
   A radio receiver specialized for picking up accurate time reference
