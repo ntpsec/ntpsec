@@ -888,7 +888,6 @@ ntpdmain(
 	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
 	readconfig(getconfig(explicit_config));
 	check_minsane();
-
         if ( 8 > sizeof(time_t) ) {
 	    msyslog(LOG_ERR, "INIT: This system has a 32-bit time_t.");
 	    msyslog(LOG_ERR, "INIT: This ntpd will fail on 2038-01-19T03:14:07Z.");
@@ -904,6 +903,10 @@ ntpdmain(
 		msyslog(LOG_INFO, "INIT: running as non-root disables dynamic interface tracking");
 	}
 #endif
+
+	if (access(statsdir, W_OK) != 0) {
+	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno)); 
+	}
 
 	mainloop();
         /* unreachable, mainloop() never returns */
