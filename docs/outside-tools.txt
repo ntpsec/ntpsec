@@ -17,6 +17,7 @@ include::includes/hand.txt[]
 * link:#introduction[Introduction]
 * link:#wireshark[Wireshark]
 * link:#nagios[Nagios]
+* link:#netdata[Netdata]
 
 '''''
 
@@ -41,6 +42,13 @@ and interpreted.
 The https://www.nagios.org/[Nagios] monitoring suite has native
 support for querying NTP servers.  The 'check_ntp_peer' and
 'check_ntp_time' programs may be of particular interest.
+
+[[netdata]]
+== Netdata ==
+
+The https://github.com/firehol/netdata/wiki[Netdata] monitoring
+solution has native support for realtime monitoring of ntpd,
+among a vast number of other system metrics. 
 
 '''''
 
