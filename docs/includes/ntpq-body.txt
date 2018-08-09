@@ -386,7 +386,10 @@ displayed.
   Display operational summary.
 
 +sysstats+::
-  Print statistics counters maintained in the protocol module.
+  Print statistics counters maintained in the protocol module.  Note
+  that the relationships among these counters can look unlikely because
+  packets can get flagged for inclusion in exception statistics in more
+  than one way, for example by having both a bad length and an old version.
 
 [[auth]]
 == Authentication ==
