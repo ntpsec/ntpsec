@@ -51,7 +51,7 @@ address-allocation time to use the NTP servers provided by DHCP.
 
 NTPsec, unlike legacy versions, can also be configured using an
 Apache-style directory /etc/ntp.d of configuration-file segments.
-This is intended to make like easier for software configurators, which
+This is intended to make life easier for software configurators, which
 can write independent segments rather than having to do the kind of
 edit-in-place on a flat ntp.conf that comes naturally to a human.
 
@@ -127,8 +127,8 @@ server 2.ubuntu.pool.ntp.org
 server 3.ubuntu.pool.ntp.org
 ------------------------------------------------------------------
 
-Multiple declarations of individual pool servers are not the best you can
-do; they're a workaround for a historical bug in NTP Classic.  It's
+Multiple declarations of individual pool servers is not the best
+method; they're a workaround for a historical bug in NTP Classic.  It's
 better to say
 
 ------------------------------------------------------------------
@@ -227,7 +227,7 @@ accurate time, provided it has link:ntpspeak.html[PPS] capability.
 want check servers from the pool.)
 
 The easiest way to arrange this is by installing
-http://catb.org/gpsd/[GPSD] to watch the GPS, and configuring your
+http://catb.org/gpsd[GPSD] to watch the GPS, and configuring your
 +ntpd+ to accept time from it.  It is also possible to do this with
 native +ntpd+ drivers (nmea, trimble, oncore), though these are less
 flexible and a bit more difficult to configure.
