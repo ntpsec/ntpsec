@@ -18,8 +18,8 @@ parameter, hybrid phase/frequency-lock feedback loop. It is an
 intricately crafted algorithm that automatically adapts for optimum
 performance while minimizing network overhead. Operation is in two
 modes, phase-lock loop (PLL), which is used at poll intervals below the
-Allan intercept, by default 2048 s, and frequency-lock loop (FLL), which
-is used above that.
+Allan intercept - by default 2048 s - and frequency-lock loop (FLL),
+which is used above that.
 
 image::pic/discipline.gif[align="center"]
 
@@ -70,7 +70,7 @@ intervals are expressed as exponents of 2. By construction, the time
 constant exponent is five times the poll interval exponent. Thus, the
 default poll exponent of 6 corresponds to a poll interval of 64 s and a
 time constant of 2048 s. A change in the poll interval changes the time
-constant by a corresponding amount.. The Nyquist criterion requires the
+constant by a corresponding amount. The Nyquist criterion requires the
 sample interval to be not more than half the time constant or 1024 s.
 The clock filter guarantees at least one sample in eight poll intervals,
 so the sample interval is not more than 512 s. This would be described
@@ -133,8 +133,9 @@ If left running continuously, an NTP client on a fast LAN in a home or
 office environment can maintain synchronization nominally within one
 millisecond. When the ambient temperature variations are less than a
 degree Celsius, the clock oscillator frequency is disciplined to within
-one part per million (PPM), even when the clock oscillator native
-frequency offset is 100 PPM or more.
+one part per million (PPM), even when the clock oscillator native frequency
+offset is 100 PPM or more. A temperature-compensated crystal oscillator,
+if available, will be even less affected by thermal influences.
 
 For laptops and portable devices when the power is turned off, the
 battery backup clock offset error can increase as much as one second per
@@ -143,7 +144,7 @@ offset and oscillator frequency errors must be resolved by the clock
 discipline algorithm, but this can take several hours without specific
 provisions.
 
-The provisions described in this section insure that, in all but
+The provisions described in this section ensure that, in all but
 pathological situations, the startup transient is suppressed to within
 nominal levels in no more than five minutes after a warm start or ten
 minutes after a cold start. Following is a summary of these provisions.
@@ -180,7 +181,7 @@ clock. The +iburst+ option of the link:assoc.html#burst[+server+]
 command changes the behavior at restart and is recommended for
 client/server configurations. When this option is enabled, the client
 sends a volley of six requests at intervals of two seconds. This usually
-insures a reliable estimate is available in about ten seconds before
+ensures a reliable estimate is available in about ten seconds before
 setting the clock. Once this initial volley is complete, the procedures
 described above are executed.
 
