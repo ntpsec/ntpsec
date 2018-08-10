@@ -713,6 +713,7 @@ oncore_start(
 	oncore_read_config(instance);
 
 	if (!oncore_ppsapi(instance)) {
+		close(fd1);
 		free(instance);
 		return false;
 	}
