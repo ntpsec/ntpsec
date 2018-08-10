@@ -77,14 +77,14 @@ configuration command has been obsoleted by this driver.
 [[use]]
 == Using the Pulse-per-Second (PPS) Signal ==
 
-The PPS signal can be used in either of two ways: using the NTP
+The PPS signal can be used in three ways: using the NTP
 grooming and mitigation algorithms, or using the kernel PPS
 signal support described in the link:kern.html[Kernel Model for
-Precision Timekeeping] page. The presence of  kernel support is
-automatically detected during the NTP build process and supporting code
-automatically compiled. In either case, the PPS signal must be present
-and within nominal jitter and wander tolerances. Additionally, the prefer
-peer must be a truechimer; that is, survive the sanity checks and
+Precision Timekeeping] page, or via the shared-memory interface. The presence
+of  kernel support is automatically detected during the NTP build process and
+supporting code automatically compiled. Regardles of mechanism, the PPS signal
+must be present and within nominal jitter and wander tolerances. Additionally,
+the prefer peer must be a truechimer; that is, survive the sanity checks and
 intersection algorithm. Finally, the offset of the system clock relative
 to the prefer peer must be within ±0.5 s. The kernel maintains a
 watchdog timer for the PPS signal; if the signal has not been heard or
@@ -92,11 +92,12 @@ is out of tolerance for more than some interval, currently two minutes,
 the kernel discipline is disabled and operation continues as if it were
 not present.
 
-An option flag in the driver determines whether the NTP algorithms or
-kernel support is enabled (if available). For historical reasons, the
-NTP algorithms are selected by default, since performance is
-generally better using older, slower systems. However, performance is
-generally better with kernel support using newer, faster systems.
+An option flag in the driver determines whether the NTP algorithms, the
+kernel support, or the shared-memory interface is enabled (depending upon
+availability). For historical reasons, the NTP algorithms are selected by
+default, since performance is generally better when using older, slower
+systems. However, performance is generally better with kernel support or
+shared-memory support when using newer, faster systems.
 
 '''''
 
