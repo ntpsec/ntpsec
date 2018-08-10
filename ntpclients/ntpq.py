@@ -1537,8 +1537,8 @@ usage: monstats
             ("authdigestfails",    "digest failures:     ", NTP_INT),
             ("authcmacdecrypts",   "CMAC decryptions:    ", NTP_INT),
             ("authcmacfails",      "CMAC failures:       ", NTP_INT),
-        # Old variables no longer supported.
-        # Interesting if looking at an old system.
+            # Old variables no longer supported.
+            # Interesting if looking at an old system.
             ("authkuncached",      "uncached keys:       ", NTP_INT),
             ("authkexpired",       "expired keys:        ", NTP_INT),
         )
@@ -1593,6 +1593,7 @@ usage: iostats
 function: display interval timer counters
 usage: timerstats
 """)
+
 
 # Default values we use.
 DEFHOST = "localhost"    # default host name
