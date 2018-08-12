@@ -1028,7 +1028,7 @@ refclock_catcher(
 		return PPS_SETUP;
 
 	if (ap->pps_params.mode == 0 && sys_vars.sys_leap != LEAP_NOTINSYNC) {
-		if (refclock_params(pp->sloppyclockflag, ap) < 1)
+		if (!refclock_params(pp->sloppyclockflag, ap))
 			return PPS_SETUP;
 	}
 	timeout.tv_sec = 0;

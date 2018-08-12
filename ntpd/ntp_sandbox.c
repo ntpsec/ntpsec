@@ -213,7 +213,7 @@ getgroup:
 		 * is associated with running with uid 0 - should be refined on
 		 * ports that allow binding to NTP_PORT with uid != 0
 		 */
-		nonroot |= (sw_uid != 0);  /* also notifies routing message listener */
+		nonroot = nonroot || (sw_uid != 0);  /* also notifies routing message listener */
 #  endif /* !HAVE_LINUX_CAPABILITY && !HAVE_SOLARIS_PRIVS */
 
 #  ifdef HAVE_LINUX_CAPABILITY

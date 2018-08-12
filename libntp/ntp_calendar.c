@@ -234,7 +234,7 @@ ntpcal_periodic_extend(
 			diff = (uint32_t)value - (uint32_t)pivot;
 		} else {
 			diff = (uint32_t)pivot - (uint32_t)value;
-			cpl ^= 1;
+			cpl = !cpl;
 		}
 		diff %= (uint32_t)cycle;
 		if (diff) {
