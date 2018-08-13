@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Common utility functions
+"Common utility functions"
 # SPDX-License-Identifier: BSD-2-clause
 
 from __future__ import print_function, division
@@ -51,15 +51,15 @@ unitgroups = (UNITS_SEC, UNITS_PPX)
 # for everything else, and they are simple.
 
 def check_unicode():  # pragma: no cover
-    if "UTF-8" != sys.stdout.encoding:
+    if sys.stdout.encoding != "UTf-8":
         deunicode_units()
         return True  # needed by ntpmon
     return False
 
 
 def deunicode_units():  # pragma: no cover
-    "Under certain conditions it is not possible to force unicode output, "
-    "this overwrites units that contain unicode with safe versions"
+    """Under certain conditions it is not possible to force unicode output,
+    this overwrites units that contain unicode with safe versions"""
     global UNIT_US
     global UNIT_PPK
     # Replacement units
@@ -84,8 +84,8 @@ PPM_VARS = ("frequency", "clk_wander")
 
 
 def dolog(logfp, text, debug, threshold):
-    # debug is the current debug value
-    # threshold is the trigger for the current log
+    """debug is the current debug value
+    threshold is the trigger for the current log"""
     if logfp is None:
         return  # can turn off logging by supplying a None file descriptior
     text = rfc3339(time.time()) + " " + text + "\n"

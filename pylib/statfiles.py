@@ -30,9 +30,9 @@ class NTPStats:
 
     @staticmethod
     def unixize(lines, starttime, endtime):
-        "Extract first two fields, MJD and seconds past midnight."
-        "convert timestamp (MJD & seconds past midnight) to Unix time"
-        "Replace MJD+second with Unix time."
+        """Extract first two fields, MJD and seconds past midnight.
+        convert timestamp (MJD & seconds past midnight) to Unix time
+        Replace MJD+second with Unix time."""
         # HOT LOOP!  Do not change w/o profiling before and after
         lines1 = []
         for line in lines:
@@ -61,20 +61,20 @@ class NTPStats:
 
     @staticmethod
     def percentiles(percents, values):
-        "Return given percentiles of a given row in a given set of entries."
-        "assuming values are already split and sorted"
+        """Return given percentiles of a given row in a given set of entries.
+        assuming values are already split and sorted"""
         ret = {}
         length = len(values)
-        if 1 >= length:
+        if length <= 1:
             # uh, oh...
-            if 1 == length:
+            if length == 1:
                 # just one data value, set all to that one value
-                v = values[0]
+                value = values[0]
             else:
                 # no data, set all to zero
-                v = 0
+                value = 0
             for perc in percents:
-                ret["p" + str(perc)] = v
+                ret["p" + str(perc)] = value
         else:
             for perc in percents:
                 if perc == 100:
@@ -95,8 +95,8 @@ class NTPStats:
             # --enable-classic-mode.  Nasty that we have to emit a numeric
             # driver type here.
             if key.startswith("127.127."):
-                (_, _, t, u) = key.split(".")
-                return "REFCLOCK(type=%s,unit=%s)" % (t, u)
+                (_, _, clock_type, unit) = key.split(".")
+                return "REFCLOCK(type=%s,unit=%s)" % (clock_type, unit)
             # Ordinary IP address - replace with primary hostname.
             # Punt if the lookup fails.
             try:
@@ -125,7 +125,7 @@ class NTPStats:
         self.endtime = endtime
 
         self.sitename = sitename or os.path.basename(statsdir)
-        if 'ntpstats' == self.sitename:
+        if self.sitename == 'ntpstats':
             # boring, use hostname
             self.sitename = socket.getfqdn()
 
@@ -173,19 +173,19 @@ class NTPStats:
             # temps and gpsd are already in UNIX time
             for line in lines:
                 split = line.split()
-                if 3 > len(split):
+                if len(split) < 3:
                     # skip short lines
                     continue
 
                 try:
-                    t = float(split[0])
+                    time_float = float(split[0])
                 except:
                     # ignore comment lines, lines with no time
                     continue
 
-                if self.starttime <= t <= self.endtime:
+                if self.starttime <= time_float <= self.endtime:
                     # prefix with int milli sec.
-                    split.insert(0, int(t * 1000))
+                    split.insert(0, int(time_float * 1000))
                     lines1.append(split)
         else:
             # Morph first fields into Unix time with fractional seconds
@@ -200,17 +200,17 @@ class NTPStats:
         return lines1
 
     def peersplit(self):
-        "Return a dictionary mapping peerstats IPs to entry subsets."
-        "This is very expensive, so cache the result"
+        """Return a dictionary mapping peerstats IPs to entry subsets.
+        This is very expensive, so cache the result"""
         if len(self.peermap):
             return self.peermap
 
         for row in self.peerstats:
             try:
-                ip = row[2]     # peerstats field 2, refclock id
-                if ip not in self.peermap:
-                    self.peermap[ip] = []
-                self.peermap[ip].append(row)
+                ip_address = row[2]     # peerstats field 2, refclock id
+                if ip_address not in self.peermap:
+                    self.peermap[ip_address] = []
+                self.peermap[ip_address].append(row)
             except IndexError:  # pragma: no cover
                 # ignore corrupted rows
                 pass
@@ -245,18 +245,17 @@ class NTPStats:
         return tempsmap
 
 
-def iso_to_posix(s):
+def iso_to_posix(time_string):
     "Accept timestamps in ISO 8661 format or numeric POSIX time. UTC only."
-    if str(s).isdigit():
-        return int(s)
-    else:
-        t = time.strptime(s, "%Y-%m-%dT%H:%M:%S")
-        # don't use time.mktime() as that is local tz
-        return calendar.timegm(t)
+    if str(time_string).isdigit():
+        return int(time_string)
+    time_struct = time.strptime(time_string, "%Y-%m-%dT%H:%M:%S")
+    # don't use time.mktime() as that is local tz
+    return calendar.timegm(time_struct)
 
 
-def posix_to_iso(t):
+def posix_to_iso(utc_time):
     "ISO 8601 string in UTC from Unix time."
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t))
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(utc_time))
 
 # end
