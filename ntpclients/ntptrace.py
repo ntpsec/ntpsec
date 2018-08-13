@@ -26,6 +26,7 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
+
 def get_info(host):
     info = ntp_read_vars(0, [], host)
     if info is None or 'stratum' not in info:

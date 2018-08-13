@@ -299,7 +299,7 @@ class TestSyncPacket(unittest.TestCase):
         self.assertEqual(errored, "Packet is a runt")
         # Test with extension, runt 16
         data2 = data + ext + "\x00\x11\x22\x33\x44\x55\x66\x77" \
-                "\x88\x99\xAA\xBB\xCC\xDD\xEE\xFF"
+                             "\x88\x99\xAA\xBB\xCC\xDD\xEE\xFF"
         try:
             cls = self.target(data2)
             errored = False
@@ -501,6 +501,7 @@ class TestSyncPacket(unittest.TestCase):
                          "1970-01-01T00:00:00Z:1970-01-01T00:00:01Z:"
                          "1970-01-01T00:00:02Z:1970-01-01T00:00:03Z:"
                          "'foobar':machinations>")
+
 
 class TestMisc(unittest.TestCase):
     def test_Peer(self):
@@ -998,7 +999,7 @@ class TestControlSession(unittest.TestCase):
             cls.passwd = None
             cls.auth.fail_getitem = True
             fakegetpmod.getpass_returns = ["0102030405060708090A"
-                                          "0B0C0D0E0F1011121314"]  # 40 char
+                                           "0B0C0D0E0F1011121314"]  # 40 char
             cls.password()
             self.assertEqual(fakegetpmod.getpass_calls,
                              [("keytype Password: ", None)])

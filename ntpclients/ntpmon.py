@@ -191,6 +191,7 @@ class OutputContext:
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()
 
+
 usage = '''
 USAGE: ntpmon [-nudV] [-l logfile] [-D lvl] [host]
   Flg Arg Option-Name    Description

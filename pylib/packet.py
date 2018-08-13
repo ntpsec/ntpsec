@@ -1178,7 +1178,7 @@ class ControlSession:
                                                   self.debug, th))
 
         if ((rpkt.version() > ntp.magic.NTP_VERSION) or
-            (rpkt.version() < ntp.magic.NTP_OLDVERSION)):
+           (rpkt.version() < ntp.magic.NTP_OLDVERSION)):
             warndbg("Fragment received with version %d"
                     % rpkt.version(), 1)
             return False

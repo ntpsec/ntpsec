@@ -79,6 +79,7 @@ def fheader(file,       # file name id
         sys.stderr.write("Key file creation or link failed.\n")
         raise SystemExit(1)
 
+
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "hM", ["help"])

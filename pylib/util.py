@@ -56,6 +56,7 @@ def check_unicode():  # pragma: no cover
         return True  # needed by ntpmon
     return False
 
+
 def deunicode_units():  # pragma: no cover
     "Under certain conditions it is not possible to force unicode output, "
     "this overwrites units that contain unicode with safe versions"
@@ -70,6 +71,7 @@ def deunicode_units():  # pragma: no cover
     # Replace the units themselves
     UNIT_US = new_us
     UNIT_PPK = new_ppk
+
 
 # Variables that have units
 S_VARS = ("tai", "poll")
@@ -272,7 +274,7 @@ def stringfiltcooker(data):
         part = rescalestring(part, mostcommon)
         fitted = fitinfield(part, 7)
         cooked.append(fitted)
-    rendered = " ".join(cooked) + " " + UNITS_SEC[mostcommon + \
+    rendered = " ".join(cooked) + " " + UNITS_SEC[mostcommon +
                                                   UNITS_SEC.index(UNIT_MS)]
     return rendered
 

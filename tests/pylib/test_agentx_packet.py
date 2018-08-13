@@ -1088,7 +1088,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "varbinds": (AX.Varbind(AX.VALUE_OID, (1, 2, 3),
                                                   AX.OID((4, 5, 6), False)),
                                        AX.Varbind(AX.VALUE_OCTET_STR, (1, 2, 4),
-                                                 "blah")),
+                                                  "blah")),
                           "context": "blah"})
 
     def test_IndexAllocPDU(self):
@@ -1189,7 +1189,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "varbinds": (AX.Varbind(AX.VALUE_OID, (1, 2, 3),
                                                   AX.OID((4, 5, 6), False)),
                                        AX.Varbind(AX.VALUE_OCTET_STR, (1, 2, 4),
-                                                 "blah")),
+                                                  "blah")),
                           "context": "blah"})
 
     def test_IndexDeallocPDU(self):
@@ -1291,7 +1291,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           "varbinds": (AX.Varbind(AX.VALUE_OID, (1, 2, 3),
                                                   AX.OID((4, 5, 6), False)),
                                        AX.Varbind(AX.VALUE_OCTET_STR, (1, 2, 4),
-                                                 "blah")),
+                                                  "blah")),
                           "context": "blah"})
 
     def test_AddAgentCapsPDU(self):
@@ -2416,8 +2416,8 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            b"\x02\x00\x00\x00"
                            b"\x00\x00\x00\x08\x00\x00\x00\x09"),
                          (AX.GetBulkPDU(True, 1, 2, 3, 1, 5,
-                                       (srch((1, 2), (3, 4), False),
-                                        srch((6, 7), (8, 9), True))),
+                                        (srch((1, 2), (3, 4), False),
+                                         srch((6, 7), (8, 9), True))),
                           b""))
         # Test test set
         self.assertEqual(f(b"\x01\x08\x10\x00"
@@ -2611,7 +2611,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                           True, True, True, False])
         # Test partial bytes
         self.assertEqual(bits2bool("\xFF\xE1", 12),  # The extra bit is to
-                         [True, True, True, True,  #   confirm crop
+                         [True, True, True, True,    # confirm crop
                           True, True, True, True,
                           True, True, True, False])
 

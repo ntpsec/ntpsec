@@ -109,6 +109,7 @@ class UTC(datetime.tzinfo):
     def dst(self, dt):
         return datetime.timedelta(0)
 
+
 try:
     import ntp.statfiles
     import ntp.util
@@ -1258,6 +1259,7 @@ plot \
                'title': "Local Clock Time Offset Histogram"}
         return ret
 
+
 # Multiplotting can't live inside NTPViz because it consumes a list
 # of such objects, not a single one.
 
@@ -1293,6 +1295,7 @@ plot \\
     ret['title'] = "Multiplot"
     ret['plot'] = plot + plot_data
     return ret
+
 
 # here is how to create the base64 from an image file:
 # with open("path/to/file.png", "rb") as f:

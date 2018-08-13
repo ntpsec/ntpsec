@@ -133,10 +133,12 @@ class TestNTPStats(unittest.TestCase):
         fakeglobmod = jigs.GlobModuleJig()
         load_args = []
         load_returns = []
+
         def loadjig(self, statsdir, stem):
             load_args.append((statsdir, stem))
             return load_returns.pop(0)
         process_args = []
+
         def processjig(self, stem, lines):
             process_args.append((stem, lines))
             return [stem + " " + line for line in lines]

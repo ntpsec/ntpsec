@@ -39,6 +39,7 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
+
 def run_binary(cmd):
     """\
 Run a binary
@@ -96,12 +97,14 @@ class CpuTemp:
                 if match and match.group(1):
                     _now = int(time.time())
                     _cpu_temprature = match.group(1)
-                    _data.append('%d LM%s %s' % (_now, _index, _cpu_temprature))
+                    _data.append('%d LM%s %s' % (_now, _index,
+                                                 _cpu_temprature))
                     _index += 1
         else:
             self.has_sensors = False
             if args.verbose:
-                sys.stderr.write("No sensors returned temperatures. Have you run sensors-detect?")
+                sys.stderr.write("No sensors returned temperatures. ",
+                                 "Have you run sensors-detect?")
 
         return _data
 

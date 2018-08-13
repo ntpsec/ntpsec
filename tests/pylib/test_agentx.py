@@ -61,8 +61,8 @@ class TestMIBControl(unittest.TestCase):
         self.assertEqual(c.oidTree,
                          {0: {"reader": 1, "writer": 2, "subids": None},
                           1: {"reader": 1, "writer": 2, "subids":
-                             {2: {"reader": None, "writer": None, "subids": {
-                                 3: {"reader": 1, "writer": 2, "subids": None}}}}},
+                              {2: {"reader": None, "writer": None, "subids": {
+                                   3: {"reader": 1, "writer": 2, "subids": None}}}}},
                           2: {"reader": None, "writer": None, "subids": 3}})
 
     def test_getOID_andNext(self):
@@ -212,7 +212,7 @@ class TestPacketControl(unittest.TestCase):
         # need jigs for
         # time
         pkts = []
-        recpTimes = []
+        # recpTimes = []
         handler_calls = [0]
 
         def packetEater_jig(self):
@@ -633,7 +633,7 @@ class TestPacketControl(unittest.TestCase):
         handlerCalls = []
         handlerReturns = [AP.ERR_NOERROR, AP.ERR_NOERROR]
         handler = (lambda a, vb: (handlerCalls.append((a, vb)),
-                                      handlerReturns.pop(0))[1])
+                   handlerReturns.pop(0))[1])
         mjig = AX.MIBControl()
         mjig.setVarbinds = ["foo", "bar"]
         mjig.setHandlers = [handler, handler]
@@ -709,6 +709,7 @@ class TestPacketControl(unittest.TestCase):
 
     def test_handle_ResponsePDU(self):
         cbreturn = []
+
         def callback(pkt, origpkt):
             cbreturn.append((pkt, origpkt))
         opkt = AP.PingPDU(True, 42, 4, 50)

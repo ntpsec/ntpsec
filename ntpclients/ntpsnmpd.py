@@ -149,8 +149,8 @@ class DataSource(ntp.agentx.MIBControl):
         self.addNode((1, 5, 1, 0),  # ntpEntNotifMessage utf8str
                      self.cbr_entNotifMessage)
         # block 2 # all compliance statements
-        #print(repr(self.oidTree))
-        #print(self.oidTree[1]["subids"][1][1][0])
+        # print(repr(self.oidTree))
+        # print(self.oidTree[1]["subids"][1][1][0])
         self.session = ntp.packet.ControlSession()
         self.hostname = hostname if hostname else DEFHOST
         self.session.openhost(self.hostname)

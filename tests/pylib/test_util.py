@@ -36,6 +36,7 @@ class TestPylibUtilMethods(unittest.TestCase):
 
         faketimemod = jigs.TimeModuleJig()
         # We need a test jig
+
         class LogTester:
             def __init__(self):
                 self.written = None
@@ -79,7 +80,7 @@ class TestPylibUtilMethods(unittest.TestCase):
             # Test successful float
             self.assertAlmostEqual(f("5.23", float, "blah %s",
                                      "\nDo the needful\n"),
-                             5.23)
+                                   5.23)
             self.assertEqual(errjig.data, [])
             # Test failure
             try:

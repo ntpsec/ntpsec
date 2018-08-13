@@ -306,7 +306,7 @@ class PacketControl:
                    callback=None):
         encoded = packet.encode()
         self.log("Sending packet (with reply: %s): %s" % (expectsReply,
-                                                            repr(packet)), 4)
+                                                          repr(packet)), 4)
         self.socket.sendall(encoded)
         if expectsReply is True:
             index = (packet.sessionID,

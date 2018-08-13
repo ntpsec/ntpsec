@@ -7,7 +7,22 @@ ntpdig - simple SNTP client
 # SPDX-License-Identifier: BSD-2-clause
 # This code runs identically under Python 2 and Python 3. Keep it that way!
 from __future__ import print_function, division
+import getopt
+import math
+import select
+import socket
+import sys
+import time
 
+try:
+    import ntp.magic
+    import ntp.packet
+    import ntp.util
+except ImportError as e:
+    sys.stderr.write(
+        "ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 # This code is somewhat stripped down from the legacy C version.  It
 # does however have one additional major feature; it can filter
 # out falsetickers from multiple samples, like the ntpdate of old,
@@ -38,23 +53,6 @@ from __future__ import print_function, division
 # running in a script, redirect standard error to logger(1).
 #
 # The one new option in this version is -p, borrowed from ntpdate.
-
-import sys
-import socket
-import select
-import time
-import getopt
-import math
-
-try:
-    import ntp.magic
-    import ntp.packet
-    import ntp.util
-except ImportError as e:
-    sys.stderr.write(
-        "ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
-    sys.stderr.write("%s\n" % e)
-    sys.exit(1)
 
 
 def read_append(s, packets, packet, sockaddr):
@@ -233,6 +231,7 @@ def report(packet, json):
             say(" " + packet.resolved)
         say(" s%d %s\n" % (packet.stratum, packet.leap()))
 
+
 usage = """
 USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
                 [ hostname-or-IP ...]
@@ -260,6 +259,7 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -V no version          Output version information and exit
    -h no  help            Display extended usage information and exit
 """
+
 
 if __name__ == '__main__':
     try:
@@ -367,7 +367,8 @@ if __name__ == '__main__':
         try:
             credentials = ntp.packet.Authenticator(keyfile)
         except (OSError, IOError):
-            sys.stderr.write("ntpdig: %s nonexistent or unreadable\n" % keyfile)
+            sys.stderr.write("ntpdig: %s nonexistent or unreadable\n" %
+                             keyfile)
             raise SystemExit(1)
         if credentials:
             try:

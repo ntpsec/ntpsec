@@ -52,6 +52,7 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
+
 def logging_setup():
     "Create logging object"
     logFormat = logging.Formatter('%(message)s')
@@ -174,6 +175,7 @@ class GpsPoller(threading.Thread):
                 return None
             return t
         return gps.isotime(t)
+
 
 if __name__ == '__main__':
     # this is the main thread

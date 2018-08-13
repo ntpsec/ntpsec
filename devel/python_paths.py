@@ -101,10 +101,11 @@ def main(argv=None):  # pylint: disable=too-many-locals
         this_file.close()
         result = PythonCommands(['ssh', '-T', argv[1], 'python'], this_script)
         if result and result[-1]:
-            result += ['']  #  Add trailing EOL if needed
+            result += ['']  # Add trailing EOL if needed
         sys.stdout.write('\n'.join(result))
         return 0
-    python_list = ExeFilter(FileList(MakePatterns(GetPaths(), PYTHON_PATTERNS)))
+    python_list = ExeFilter(FileList(MakePatterns(GetPaths(),
+                            PYTHON_PATTERNS)))
     done = set()
     unique = total = 0
     for python in python_list:
@@ -141,7 +142,8 @@ def main(argv=None):  # pylint: disable=too-many-locals
             _print(' Prefix(sys): %s' % valdict['sys-prefix'])
             _print(' Prefix(std): %s' % valdict['std-prefix'])
             _print(' Prefix(exec): %s' % valdict['exec-prefix'])
-    plural = unique != 1 and 's' or ''  # pylint: disable=consider-using-ternary
+    plural = unique != 1 and 's' or ''
+    # pylint: disable=consider-using-ternary
     print('Found %d unique Python installation%s out of %d total'
           % (unique, plural, total))
     return 0

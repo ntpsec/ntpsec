@@ -1730,10 +1730,9 @@ if __name__ == '__main__':
         interpreter.chosts.append((DEFHOST, session.ai_family))
 
     if (len(interpreter.ccmds) == 0 and
-                not interpreter.interactive and
-                os.isatty(0) and
-                os.isatty(1)
-            ):
+            not interpreter.interactive and
+            os.isatty(0) and
+            os.isatty(1)):
         interpreter.interactive = True
 
     try:

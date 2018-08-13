@@ -5,7 +5,7 @@ ntpsweep - print various information about given NTP servers
 USAGE: ntpsweep [-<flag> [<val>] | --<name>[{=| }<val>]]... [hostfile]
 
     -h, --host=str             Host to execute actions on
-    -l, --host-list=str        Comma-delimited list of Hosts to 
+    -l, --host-list=str        Comma-delimited list of Hosts to
                                    execute actions on
     -p, --peers                Recursively list all peers a host syncs to
     -m, --maxlevel=num         Traverse peers up to this level
@@ -37,6 +37,7 @@ except ImportError as e:
         "ntpsweep: can't find Python NTP library.\n")
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
+
 
 def ntp_peers(host):
     """Return: a list of peer IP addrs for a specified host,
@@ -144,6 +145,7 @@ def scan_host(host, level):
         if strip:
             printhost = printhost.replace(strip, "")
         print("%-32s  ?" % printhost[:32])
+
 
 if __name__ == '__main__':
     try:
