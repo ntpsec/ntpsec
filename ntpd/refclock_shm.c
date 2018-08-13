@@ -354,9 +354,9 @@ static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat
     shm->valid = 0;
     memory_barrier();
 
-    /* 
+    /*
      * Clash detection in case neither (a) nor (b) was true.
-     * Not supported in mode 0, and word access to the count field 
+     * Not supported in mode 0, and word access to the count field
      * must be atomic for this to work.
      */
     if (shmcopy.mode > 0 && cnt != shm->count) {

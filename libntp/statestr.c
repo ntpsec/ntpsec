@@ -314,7 +314,7 @@ decode_bitflags(
 		 "decode_bitflags(%s) can't decode 0x%x in %d bytes",
 		 (tab == peer_st_bits)
 		     ? "peer_st"
-		     : 
+		     :
 		       (tab == k_st_bits)
 			   ? "kern_st"
 			   :

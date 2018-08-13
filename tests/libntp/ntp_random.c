@@ -25,7 +25,7 @@ TEST(random, random32) {
 	for (i=0; i<99; i++) {
 		uint32_t sample = ntp_random();
 		ones |= sample;
-		zeros &= sample; 
+		zeros &= sample;
 	}
 
 	TEST_ASSERT_EQUAL_INT32(~0, ones);
@@ -46,7 +46,7 @@ TEST(random, random64) {
 	for (i=0; i<99; i++) {
 		uint64_t sample = ntp_random64();
 		ones |= sample;
-		zeros &= sample; 
+		zeros &= sample;
 	}
 
 	TEST_ASSERT_EQUAL_INT64(~0, ones);

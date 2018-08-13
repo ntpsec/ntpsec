@@ -26,7 +26,7 @@
 #include "ntp_calendar.h"
 #include "ntp_leapsec.h"
 #include "ntp.h"
-#include "ntpd.h"	/* for rfc3339time() only */ 
+#include "ntpd.h"	/* for rfc3339time() only */
 #include "lib_strbuf.h"
 
 #include <openssl/evp.h>
@@ -619,7 +619,7 @@ add_range(
 	}
 
 	/* make room in lower end and insert item */
-	memmove(pt->info+1, pt->info, pt->head.size*sizeof(*pt->info)); 
+	memmove(pt->info+1, pt->info, pt->head.size*sizeof(*pt->info));
 	pt->info[0] = *pi;
 	pt->head.size++;
 

@@ -22,11 +22,11 @@
 
 /*
  *  the maximum length NTP packet contains the NTP header, one Autokey
- *  request, one Autokey response and the MAC (Autokey has been removed 
- *  from NTPsec, but we need to deal with the largest packets from legacy 
+ *  request, one Autokey response and the MAC (Autokey has been removed
+ *  from NTPsec, but we need to deal with the largest packets from legacy
  *  versions). Assuming certificates don't get too big, the maximum packet
  *  length is set arbitrarily at 1000.
- */   
+ */
 #define	RX_BUFF_SIZE	1000		/* hail Mary */
 
 
@@ -68,7 +68,7 @@ extern	void	freerecvbuf(struct recvbuf *);
  *  read can directly place data into the buffer
  *
  *  The buffer is removed from the free list. Make sure
- *  you put it back with freerecvbuf() or 
+ *  you put it back with freerecvbuf() or
  */
 
 /* signal safe - no malloc */

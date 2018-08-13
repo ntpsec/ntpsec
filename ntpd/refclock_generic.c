@@ -1545,7 +1545,7 @@ list_err(
 
 	if (do_it && err->err_suppressed)
 	{
-		msyslog(LOG_INFO, 
+		msyslog(LOG_INFO,
                     "REFCLOCK: PARSE receiver #%d: %lu message%s suppressed, error "
                     "condition class persists for %s",
 		    parse->peer->procptr->refclkunit, err->err_suppressed,
@@ -2458,7 +2458,7 @@ parse_ppsapi(
 		parse->peer->procptr->refclkunit, cp);
 
 	if (!(mode_ppsoffset & cap)) {
-	  msyslog(LOG_WARNING, 
+	  msyslog(LOG_WARNING,
 		  "REFCLOCK: PARSE receiver #%u: Cannot set PPS_%sCLEAR, "
 		  " this will increase jitter (PPS API capabilities=0x%x)",
 		  parse->peer->procptr->refclkunit, cp, (unsigned)cap);
@@ -2550,7 +2550,7 @@ parse_start(
 	}
 	if (peer->cfg.ppspath)
 	    ppspath = peer->cfg.ppspath;
-	else { 
+	else {
 	    (void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
 	    ppspath = parseppsdev;
 	}

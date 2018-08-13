@@ -20,7 +20,7 @@
  * This driver furnishes an interface for pulse-per-second (PPS) signals
  * produced by a cesium clock, timing receiver or related equipment. It
  * can be used to remove accumulated jitter over a congested link and
- * retime a server before redistributing the time to clients. It can 
+ * retime a server before redistributing the time to clients. It can
  * also be used as a holdover should all other synchronization sources
  * become unreachable.
  *

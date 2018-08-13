@@ -135,7 +135,7 @@ typedef union {
 		SET_ONESMASK(psau);				\
 	} while (0)
 
-/* 
+/*
  * compare two in6_addr returning negative, 0, or positive.
  * ADDR6_CMP is negative if *pin6A is lower than *pin6B, zero if they
  * are equal, positive if *pin6A is higher than *pin6B.  IN6ADDR_ANY

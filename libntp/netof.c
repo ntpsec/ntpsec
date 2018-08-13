@@ -1,4 +1,4 @@
-/* 
+/*
  * netof6 - return the net address part of an IPv6 address
  *  in a sockaddr_storage structure (zero out host part)
  *

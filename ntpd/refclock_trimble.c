@@ -73,7 +73,7 @@
 #define SPSTAT_LEN 34 /* length of reply from Praecis SPSTAT message */
 
 /* parse states */
-#define TSIP_PARSED_EMPTY       0	
+#define TSIP_PARSED_EMPTY       0
 #define TSIP_PARSED_FULL        1
 #define TSIP_PARSED_DLE_1       2
 #define TSIP_PARSED_DATA        3
@@ -145,7 +145,7 @@ static  void	init_thunderbolt	(int fd);
 
 #define PAL_TSTATS 14
 #ifdef DEBUG
-static const char tracking_status[PAL_TSTATS+1][16] = { 
+static const char tracking_status[PAL_TSTATS+1][16] = {
 	"Doing Fixes", "Good 1SV", "Approx. 1SV", "Need Time", "Need INIT",
 	"PDOP too High", "Bad 1SV", "0SV Usable", "1SV Usable", "2SV Usable",
 	"3SV Usable", "No Integrity", "Diff Corr", "Overdet Clock", "Invalid"};
@@ -198,7 +198,7 @@ struct refclock refclock_trimble = {
 /*
  * sendsupercmd - Build super data packet for sending
  */
-static void 
+static void
 sendsupercmd (
 	struct packettx *buffer,
 	int c1,
@@ -214,7 +214,7 @@ sendsupercmd (
 /*
  * sendbyte -
  */
-static void 
+static void
 sendbyte (
 	struct packettx *buffer,
 	int b
@@ -228,7 +228,7 @@ sendbyte (
 /*
  * sendint -
  */
-static void 
+static void
 sendint (
 	struct packettx *buffer,
 	int a
@@ -241,7 +241,7 @@ sendint (
 /*
  * sendetx - Send packet or super packet to the device
  */
-static int 
+static int
 sendetx (
 	struct packettx *buffer,
 	int fd
@@ -421,7 +421,7 @@ trimble_start (
 			return false;
 		}
 		up->MCR |= TIOCM_RTS;
-		if (ioctl(fd, TIOCMSET, &up->MCR) < 0 || 
+		if (ioctl(fd, TIOCMSET, &up->MCR) < 0 ||
 		    !(up->MCR & TIOCM_RTS)) {
 			msyslog(LOG_ERR, "REFCLOCK: %s TIOCMSET failed: MCR=0x%x, return=%m",
 			        refclock_name(peer), (unsigned int)up->MCR);
@@ -478,8 +478,8 @@ trimble_start (
 	return true;
 }
 
-/* 
- * TSIP_decode - decode the TSIP data packets 
+/*
+ * TSIP_decode - decode the TSIP data packets
  */
 static bool
 TSIP_decode (
@@ -536,7 +536,7 @@ TSIP_decode (
 						if (mb(st) > 0) ts++;
 						printf(" %02d", mb(st));
 					}
-				printf(" : Tracking %d\n", ts); 
+				printf(" : Tracking %d\n", ts);
 			}
 #endif
 			if (!tracking_status_usable[up->trk_status]) {
@@ -629,7 +629,7 @@ TSIP_decode (
 			}
 
 			pp->nsec = (long) (getdbl((uint8_t *) &mb(3)) * NS_PER_S);
-			up->date.year = (uint16_t)getint((uint8_t *) &mb(16)); 
+			up->date.year = (uint16_t)getint((uint8_t *) &mb(16));
 			up->date.hour = (uint8_t)mb(11);
 			up->date.minute = (uint8_t)mb(12);
 			up->date.second = (uint8_t)mb(13);
@@ -727,7 +727,7 @@ TSIP_decode (
 			/* Avoid early announce: https://bugs.ntp.org/2773 */
 			    (6 == up->date.month || 12 == up->date.month) )
 				pp->leap = LEAP_ADDSECOND;  /* we ASSUME addsecond */
-			else 
+			else
 				pp->leap = LEAP_NOWARNING;
 
 			DPRINT(2, ("TSIP_decode: unit %d: 8f-ac TOW: %u week: %u adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
@@ -860,7 +860,7 @@ trimble_receive (
 	pp->minute = up->date.minute;
 	pp->second = up->date.second;
 	DPRINT(2, ("trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
-		   up->unit, pp->year, pp->day, pp->hour, pp->minute, 
+		   up->unit, pp->year, pp->day, pp->hour, pp->minute,
 		   pp->second, pp->nsec));
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
@@ -928,7 +928,7 @@ trimble_poll (
 		 "%4d %03d %02d:%02d:%02d.%09ld",
 		 pp->year, pp->day, pp->hour,pp->minute, pp->second, pp->nsec);
 	pp->lencode = (cl < (int)sizeof(pp->a_lastcode)) ? cl : 0;
-	record_clock_stats(peer, pp->a_lastcode); 
+	record_clock_stats(peer, pp->a_lastcode);
 
 	DPRINT(2, ("trimble_poll: unit %d: %s\n",
 	       up->unit, prettydate(pp->lastrec)));
@@ -988,7 +988,7 @@ trimble_io (
 				up->rpt_status = TSIP_PARSED_DLE_2;
 			else if (up->parity_chk && *c == '\377')
 				up->rpt_status = TSIP_PARSED_PARITY;
-			else 
+			else
 				mb(up->rpt_cnt++) = *c;
 			break;
 
@@ -1082,7 +1082,7 @@ static void
 HW_poll (
 	struct refclockproc * pp
 	)
-{	
+{
 	struct trimble_unit *up;
 	static const struct timespec ts = {0, 13 * NS_PER_MS};
 

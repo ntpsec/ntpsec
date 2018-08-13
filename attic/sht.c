@@ -1,4 +1,4 @@
-/* 
+/*
  * sht.c - Testprogram for shared memory refclock
  * read/write shared memory segment; see usage
  */
@@ -20,11 +20,11 @@ char	*progname;
 
 struct shmTime {
 	int    mode; /* 0 - if valid set
-		      *       use values, 
+		      *       use values,
 		      *       clear valid
-		      * 1 - if valid set 
+		      * 1 - if valid set
 		      *       if count before and after read of values is equal,
-		      *         use values 
+		      *         use values
 		      *       clear valid
 		      */
 	volatile int	count;
@@ -113,7 +113,7 @@ main (
 	case 'r': {
 		int clear=0;
 		int loop=0;
-		printf ("reader\n");		
+		printf ("reader\n");
 		while (*++argp) {
 			switch (*argp) {
 			case 'l': loop=1; break;
@@ -182,7 +182,7 @@ again:
 		 * to deal with the time stamps in general; changing the
 		 * behaviour for cases where the fraction of the
 		 * clock time is zero should be trivial.
-		 */ 
+		 */
 		printf ("writer\n");
 		p->mode=0;
 		if (!p->valid) {

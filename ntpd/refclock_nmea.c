@@ -231,7 +231,7 @@ typedef struct {
 		unsigned int malformed;  /* Bad checksum, invalid date or time */
 		unsigned int filtered;   /* mode bits, not GPZDG, same second */
 		unsigned int pps_used;
-	}	
+	}
 		tally;
 	/* per sentence checksum seen flag */
 	uint8_t	cksum_type[NMEA_ARRAY_SIZE];
@@ -994,7 +994,7 @@ nmea_receive(
 		rc_date  = parse_weekdata(&gpsw, &rdata, 1, 2, 5)
 		        && parse_date(&date, &rdata, 3, DATE_1_DDMMYY);
 		rc_time  = parse_time(&date, &tofs.tv_nsec, &rdata, 4);
-		pp->leap = parse_qual(&rdata, 11, '0', 1);		
+		pp->leap = parse_qual(&rdata, 11, '0', 1);
 		rc_date  = rc_date
 		        && gpsfix_century(&date, &gpsw, &up->century_cache);
 		if (CLK_FLAG4 & pp->sloppyclockflag)
@@ -1326,7 +1326,7 @@ field_init(
 	eptr = cptr + dlen;
 	*eptr = '\0';
 
-	/* load data context */	
+	/* load data context */
 	data->base = cptr;
 	data->cptr = cptr;
 	data->cidx = 0;
@@ -1462,7 +1462,7 @@ field_wipe(
 			if ('.' != *cp)
 				*cp = '_';
 	} while (fcnt-- && fidx >= 0);
-	va_end(va);	
+	va_end(va);
 }
 
 /*

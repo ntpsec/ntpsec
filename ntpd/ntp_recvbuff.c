@@ -50,7 +50,7 @@ lowater_additions(void)
 	return lowater_adds;
 }
 
-static inline void 
+static inline void
 initialise_buffer(recvbuf_t *buff)
 {
 	ZERO(*buff);

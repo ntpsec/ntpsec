@@ -667,7 +667,7 @@ neoclock4x_control(int unit,
 #define S_RADIOSIGNAL	sizeof(up->radiosignal) + 15
       tt = add_var(&out->kv_list, S_RADIOSIGNAL+1, RO|DEF);
       snprintf(tt, S_RADIOSIGNAL, "radiosignal=\"%s\"", up->radiosignal);
-#undef S_RADIOSIGNAL 
+#undef S_RADIOSIGNAL
 #define S_ANTENNA1	MAXINTSIZE + 12
       tt = add_var(&out->kv_list, S_ANTENNA1+1, RO|DEF);
       snprintf(tt, S_ANTENNA1, "antenna1=\"%d\"", up->antenna1);
@@ -697,11 +697,11 @@ neoclock4x_control(int unit,
         snprintf(tt, 39, "dststatus=\"winter\"");
       else
         snprintf(tt, 39, "dststatus=\"unknown\"");
-#define S_FIRMWARE	sizeof(up->firmware) + 13 
+#define S_FIRMWARE	sizeof(up->firmware) + 13
       tt = add_var(&out->kv_list, S_FIRMWARE+1, RO|DEF);
       snprintf(tt, S_FIRMWARE, "firmware=\"%s\"", up->firmware);
 #undef S_FIRMWARE
-#define S_FIRMWARETAG	sizeof(up->firmware) + 15 
+#define S_FIRMWARETAG	sizeof(up->firmware) + 15
       tt = add_var(&out->kv_list, S_FIRMWARETAG+1, RO|DEF);
       snprintf(tt, S_FIRMWARETAG, "firmwaretag=\"%c\"", up->firmwaretag);
 #undef S_FIRMWARETAG

@@ -19,7 +19,7 @@
  * output when receiving four or more satellites.
  *
  * WARNING: This driver depends on the system clock for year disambiguation.
- * It will thus not be usable for recovery if the system clock is trashed.  
+ * It will thus not be usable for recovery if the system clock is trashed.
  *
  * The receiver should be configured before starting the NTP daemon, in
  * order to establish reliable position and operating conditions. It
@@ -33,7 +33,7 @@
  *
  * Format B5 (24 ASCII printing characters):
  *
- * <cr><lf>i yy ddd hh:mm:ss.000bbb  
+ * <cr><lf>i yy ddd hh:mm:ss.000bbb
  *
  *	on-time = <cr>
  *	i = synchronization flag (' ' = locked, '?' = unlocked)
@@ -298,7 +298,7 @@ arb_receive(
 	 * timecode has invalid length, which sometimes occurs when the
 	 * B0 amputates the broadcast, we just quietly steal away. Note
 	 * that the time quality character and receiver status string is
-	 * tacked on the end for clockstats display. 
+	 * tacked on the end for clockstats display.
 	 */
 	up->tcswitch++;
 	if (up->tcswitch <= 1 || temp < LENARB)

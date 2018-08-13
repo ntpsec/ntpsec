@@ -370,7 +370,7 @@ init_logging(
 #  ifndef LOG_NTP
 #	define	LOG_NTP LOG_DAEMON
 #  endif
-	openlog(progname, LOG_PID | LOG_NDELAY, (was_daemon) 
+	openlog(progname, LOG_PID | LOG_NDELAY, (was_daemon)
 						    ? LOG_NTP
 						    : 0);
 #  ifdef DEBUG
@@ -511,7 +511,7 @@ setup_logfile(
 			msyslog(LOG_ERR, "LOG: Cannot open log file %s, %m",
 				name);
 		return ;
-	} 
+	}
 	if (NULL == syslog_fname)
 		return;
 
@@ -538,7 +538,7 @@ reopen_logfile(void)
 
 	new_file = fopen(syslog_fname, "a");
 	if (NULL == new_file) {
-		msyslog(LOG_ERR, "LOG: reopen_logfile: couldn't open %s %m", 
+		msyslog(LOG_ERR, "LOG: reopen_logfile: couldn't open %s %m",
                         syslog_fname);
 		return;
 	}

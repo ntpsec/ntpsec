@@ -28,10 +28,10 @@
  * bits 31 and 32. This is why there are macros to extract the low and
  * high halves.
  *
- * Internally, this type is sometimes used for time offsets.  In that 
+ * Internally, this type is sometimes used for time offsets.  In that
  * context it is interpreted as signed and can only express offsets
  * up to a half cycle. Offsets are normally much, much smaller than that;
- * for an offset to have a value even as large as 1 second would be 
+ * for an offset to have a value even as large as 1 second would be
  * highly unusual after ntpd initialization.
  *
  * Anyway, an l_fp looks like:

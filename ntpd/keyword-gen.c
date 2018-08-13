@@ -298,7 +298,7 @@ generate_fsm(void)
 	unsigned short i;
 	unsigned short token;
 
-	/* 
+	/*
 	 * Sort ntp_keywords in alphabetical keyword order.  This is
 	 * not necessary, but minimizes nonfunctional changes in the
 	 * generated finite state machine when keywords are modified.
@@ -307,7 +307,7 @@ generate_fsm(void)
 	      sizeof(ntp_keywords[0]), compare_key_tok_text);
 
 	/*
-	 * To save space, reserve the state array entry matching each 
+	 * To save space, reserve the state array entry matching each
 	 * token number for its terminal state, so the token identifier
 	 * does not need to be stored in each state, but can be
 	 * recovered trivially.  To mark the entry reserved,
@@ -374,7 +374,7 @@ generate_fsm(void)
 		}
 
 		if (sst[i].finishes_token) {
-			snprintf(token_id_comment, 
+			snprintf(token_id_comment,
 				 sizeof(token_id_comment), "%5d %-17s",
 				 i, symbname(sst[i].finishes_token));
 			if (i != sst[i].finishes_token) {
@@ -425,8 +425,8 @@ generate_fsm(void)
 
 			snprintf(token_id_comment,
 				 sizeof(token_id_comment), "%5d %-17s",
-				 i, (initial_state == i) 
-					? "[initial state]" 
+				 i, (initial_state == i)
+					? "[initial state]"
 					: prefix);
 		}
 
@@ -455,7 +455,7 @@ generate_fsm(void)
 static unsigned short
 create_scan_states(
 	const char * text,
-	unsigned short	token, 
+	unsigned short	token,
 	follby	followedby,
 	unsigned short	prev_state
 	)
@@ -469,7 +469,7 @@ create_scan_states(
 	curr_char_s = prev_state;
 	prev_char_s = 0;
 
-	/* Find the correct position to insert the state. 
+	/* Find the correct position to insert the state.
 	 * All states should be in alphabetical order
 	 */
 	while (curr_char_s && (text[0] < sst[curr_char_s].ch)) {
@@ -477,7 +477,7 @@ create_scan_states(
 		curr_char_s = sst[curr_char_s].other_next_s;
 	}
 
-	/* 
+	/*
 	 * Check if a previously seen keyword has the same prefix as
 	 * the current keyword.  If so, simply use the state for that
 	 * keyword as my_state, otherwise, allocate a new state.
@@ -505,7 +505,7 @@ create_scan_states(
 			exit(3);
 		}
 		/* Store the next character of the keyword */
-		sst[my_state].ch = text[0]; 
+		sst[my_state].ch = text[0];
 		sst[my_state].other_next_s = curr_char_s;
 		sst[my_state].followedby = FOLLBY_NON_ACCEPTING;
 
@@ -544,7 +544,7 @@ create_scan_states(
 				return_state = my_state;
 		}
 	} else
-		sst[my_state].match_next_s = 
+		sst[my_state].match_next_s =
 		    create_scan_states(
 			&text[1],
 			token,
@@ -572,8 +572,8 @@ create_keyword_scanner(void)
 		current_keyword = ntp_keywords[i].key;
 		scanner =
 		    create_scan_states(
-			ntp_keywords[i].key, 
-			ntp_keywords[i].token, 
+			ntp_keywords[i].key,
+			ntp_keywords[i].token,
 			ntp_keywords[i].followedby,
 			scanner);
 	}
@@ -614,7 +614,7 @@ generate_token_text(void)
 		if (i > 0)
 			printf(",");
 		printf("\n\t/* %-5d %5d %20s */\t\"%s\"",
-		       id - lowest_id, id, symbname(id), 
+		       id - lowest_id, id, symbname(id),
 		       ntp_keywords[i].key);
 		i++;
 		id++;
@@ -707,7 +707,7 @@ symbname(
 	} else {
 		snprintf(buf, sizeof(buf), "%d", token);
 		name = buf;
-	}	
+	}
 
 	return name;
 }

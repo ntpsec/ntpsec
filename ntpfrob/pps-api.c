@@ -82,7 +82,7 @@ void ppscheck(const char *device)
 		device = "/dev/cuaa1";
 	setbuf(stdout, 0);
 	fd = open(device, O_RDONLY);
-	if (fd < 0) 
+	if (fd < 0)
 		err(1, device);
 	i = time_pps_create(fd, &ph);
 	if (i < 0)

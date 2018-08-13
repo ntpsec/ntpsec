@@ -15,7 +15,7 @@
  *
  * fmt is the location of the format string parameter.
  * args is the location of the first argument (or 0 for no argument checking).
- * 
+ *
  * Note:
  * The first parameter is 1, not 0.
  */

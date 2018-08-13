@@ -58,8 +58,8 @@ socktoa(
 			break;
 
 		default:
-			snprintf(res, LIB_BUFLENGTH, 
-				 "(socktoa unknown family %d)", 
+			snprintf(res, LIB_BUFLENGTH,
+				 "(socktoa unknown family %d)",
 				 AF(sock));
 		}
 	}

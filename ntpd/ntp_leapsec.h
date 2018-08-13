@@ -82,7 +82,7 @@ extern bool leapsec_electric(electric_mode el);
  * 'proximity' is a proximity warning. See definitions below. This is
  *	more useful than an absolute difference to the leap second.
  * 'dynamic' != 0 if entry was requested by clock/peer
- */ 
+ */
 struct leap_result {
 	time_t   ttime;
 	uint32_t ddist;

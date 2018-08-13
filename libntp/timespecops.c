@@ -141,7 +141,7 @@ sub_tspec(
 	struct timespec	a,
 	struct timespec	b
 	)
-{	
+{
 	struct timespec x;
 
 	x = a;
@@ -171,7 +171,7 @@ struct timespec
 neg_tspec(
 	struct timespec	a
 	)
-{	
+{
 	struct timespec	x;
 
 	x.tv_sec = -a.tv_sec;

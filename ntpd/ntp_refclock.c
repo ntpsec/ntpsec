@@ -51,15 +51,15 @@
  * structure, which contains for most drivers the decimal equivalants
  * of the year, day, month, hour, second and millisecond/microsecond
  * decoded from the ASCII timecode.  Additional information includes
- * the receive timestamp, exception report, statistics tallies, etc. 
+ * the receive timestamp, exception report, statistics tallies, etc.
  * In addition, there may be a driver-specific unit structure used for
  * local control of the device.
  *
  * The support routines are passed a pointer to the peer structure,
  * which is used for all peer-specific processing and contains a
  * pointer to the refclockproc structure, which in turn contains a
- * pointer to the unit structure, if used.  The peer structure is 
- * identified as a refclock by having a non-NULL procptr member. 
+ * pointer to the unit structure, if used.  The peer structure is
+ * identified as a refclock by having a non-NULL procptr member.
  */
 #define FUDGEFAC	.1	/* fudge correction factor */
 /* #define LF		0x0a	* ASCII LF UNUSED */
@@ -1008,7 +1008,7 @@ pps_status
 refclock_catcher(
 	struct peer *peer,		/* peer structure pointer */
 	struct refclock_ppsctl *ap,	/* PPS context structure pointer */
-	int	mode			/* mode bits */	
+	int	mode			/* mode bits */
 	)
 {
 	struct refclockproc *pp;
@@ -1022,7 +1022,7 @@ refclock_catcher(
 	 * We require the clock to be synchronized before setting the
 	 * parameters. When the parameters have been set, fetch the
 	 * most recent PPS timestamp.
-	 */ 
+	 */
 	pp = peer->procptr;
 	if (ap->handle == 0)
 		return PPS_SETUP;

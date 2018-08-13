@@ -37,14 +37,14 @@
 
 /*
  * Support for Kinemetrics Truetime Receivers
- *	GPS/TM-TMD:	
+ *	GPS/TM-TMD:
  *	XL-DC:		(a 151-602-210, reported by the driver as a GPS/TM-TMD)
  *	GPS-800 TCU:	(an 805-957 with the RS232 Talker/Listener module)
  *
  * WARNING: This driver depends on the system clock for year disambiguation.
- * It will thus not be usable for recovery if the system clock is trashed.  
+ * It will thus not be usable for recovery if the system clock is trashed.
  *
- * Most of this code is originally from refclock_wwvb.c (now 
+ * Most of this code is originally from refclock_wwvb.c (now
  * refclock_spectracom.c) with thanks.
  * It has been so mangled that wwvb is not a recognizable ancestor.
  *
@@ -65,7 +65,7 @@
  *
  * The carriage return start bit begins on 0 seconds and extends to 1 bit time.
  *
- * This driver used to support the 468-DC receiver, but  
+ * This driver used to support the 468-DC receiver, but
  * http://www.ebay.com/gds/468-DC-SATELLITE-CLOCK-/10000000006640775/g.html
  * tells us that the GOES sats were shut down in 2005.
  */
@@ -537,7 +537,7 @@ true_doevent(
                             strncmp(pp->a_lastcode, " TRUETIME XL", 12) == 0) {
                                 true_doevent(peer, e_F18);
                                 NLOG(NLOG_CLOCKSTATUS) {
-                                    msyslog(LOG_INFO, "REFCLOCK: TM/TMD/XL: %s", 
+                                    msyslog(LOG_INFO, "REFCLOCK: TM/TMD/XL: %s",
                                             pp->a_lastcode);
                                 }
                                 return;
@@ -624,7 +624,7 @@ true_doevent(
 				up->state = s_InqTCU;
 				break;
 			default:
-                                msyslog(LOG_INFO, 
+                                msyslog(LOG_INFO,
                                         "REFCLOCK: TRUETIME: TM/TMD init fellthrough!");
 			        break;
 			}
@@ -641,7 +641,7 @@ true_doevent(
 				sleep(1);	/* XXX */
 				break;
 			default:
-                                msyslog(LOG_INFO, 
+                                msyslog(LOG_INFO,
                                         "REFCLOCK: TRUETIME: TCU init fellthrough!");
                                 break;
 			}
@@ -665,7 +665,7 @@ true_doevent(
 		break;
 	default:
                 msyslog(LOG_INFO, "REFCLOCK: TRUETIME: cannot identify refclock!");
-		abort();    
+		abort();
 		/* NOTREACHED */
 	}
 

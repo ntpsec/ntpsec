@@ -41,7 +41,7 @@ typedef struct isc_netaddr {
 		struct in6_addr in6;
 	} type;
 	uint32_t zone;
-} isc_netaddr_t;	      
+} isc_netaddr_t;
 
 
 /*!

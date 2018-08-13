@@ -417,7 +417,7 @@ int scmp_sc[] = {
 
 #ifdef __NR_mmap
 	/* gentoo 64-bit and 32-bit, Intel and Arm use mmap */
-	SCMP_SYS(mmap),           
+	SCMP_SYS(mmap),
 #endif
 #if defined(__i386__) || defined(__arm__)
 	SCMP_SYS(_newselect),

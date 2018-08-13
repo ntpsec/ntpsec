@@ -11,7 +11,7 @@ TEST_SETUP(lfptostr) {}
 
 TEST_TEAR_DOWN(lfptostr) {}
 
-/* 
+/*
  * This file contains test for both mfptoa and mfptoms (which uses dolfptoa),
  * since all these functions are very similar. It also tests ulfptoa, which is
  * a macro.

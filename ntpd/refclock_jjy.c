@@ -435,7 +435,7 @@ jjy_start ( int unit, struct peer *peer )
 	/* Set up the device name */
 	snprintf( sDeviceName, sizeof(sDeviceName), DEVICE, unit ) ;
 
-	snprintf(sLog, sizeof(sLog), "subtype=%u dev=%s", 
+	snprintf(sLog, sizeof(sLog), "subtype=%u dev=%s",
                  peer->cfg.mode, sDeviceName ) ;
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
@@ -469,7 +469,7 @@ jjy_start ( int unit, struct peer *peer )
 		if ( 101 <= peer->cfg.mode && peer->cfg.mode <= 180 ) {
 			rc = jjy_start_telephone ( unit, peer, up ) ;
 		} else {
-		    msyslog (LOG_ERR, 
+		    msyslog (LOG_ERR,
 			"JJY receiver [ %s subtype %u ] : Unsupported mode",
 			socktoa(&peer->srcadr), peer->cfg.mode ) ;
 		    free ( (void*) up ) ;
@@ -946,8 +946,8 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 	pp->second = up->second ;
 	pp->nsec   = up->msecond * 1000000 ;
 
-	/* 
-	 * JST to UTC 
+	/*
+	 * JST to UTC
 	 */
 	pp->hour -= 9 ;
 	if ( pp->hour < 0 ) {
@@ -996,7 +996,7 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 	case 5 : cStatus = '#' ; pStatus = "Selected"  ; break ;
 	case 6 : cStatus = '*' ; pStatus = "Sys.Peer"  ; break ;
 	case 7 : cStatus = 'o' ; pStatus = "PPS.Peer"  ; break ;
-	default : break ; 
+	default : break ;
 	}
 
 	snprintf ( sLog, sizeof(sLog),
@@ -1325,7 +1325,7 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 
 	DPRINT(1, ("%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X "
 		   "up->iLineCount=%d\n",
-		   sFunctionName, pp->sloppyclockflag, 
+		   sFunctionName, pp->sloppyclockflag,
 		   (unsigned)CLK_FLAG1,
 		   up->iLineCount )) ;
 
@@ -4491,7 +4491,7 @@ printableString ( char *sOutput, int iOutputLen, const char *sInput, int iInputL
 			if ( j + 1 >= OutputLen )
 				break ;
 			sOutput[j] = sInput[i] ;
-		} else if ( ( sInput[i] & 0xFF ) < 
+		} else if ( ( sInput[i] & 0xFF ) <
 			    COUNTOF(printableControlChar) ) {
 			n = strlen( printableControlChar[sInput[i] & 0xFF] ) ;
 			if ( j + n + 1 >= OutputLen )

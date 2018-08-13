@@ -97,7 +97,7 @@ typedef long double doubletime_t;
  * aligned for the strictest alignment requirement of any type is not
  * easy to do portably, as the maximum alignment required is not
  * exposed.  Use the size of a struct of the types known to represent the
- * strictest alignment on some platform. This will force the struct to 
+ * strictest alignment on some platform. This will force the struct to
  * have the strictest possible alignment.
  */
 typedef struct max_alignment_tag {

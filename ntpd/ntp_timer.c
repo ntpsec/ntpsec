@@ -105,7 +105,7 @@ set_timer_or_die(
 /*
  * reinit_timer - reinitialize interval timer after a clock step.
  */
-void 
+void
 reinit_timer(void)
 {
 	ZERO(itimer);
@@ -160,7 +160,7 @@ init_timer(void)
 	}
 #endif
 	signal_no_reset(SIGALRM, catchALRM);
-	itimer.it_interval.tv_sec = 
+	itimer.it_interval.tv_sec =
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = itimer.it_value.itv_frac = 0;
 	set_timer_or_die(&itimer);

@@ -122,7 +122,7 @@ fetch_packetstamp(
 #else
 # error "Can't get packet timestamp"
 #endif
-		DPRINT(4,	
+		DPRINT(4,
                         ("fetch_timestamp: strange control message 0x%x\n",
 			     (unsigned)cmsghdr->cmsg_type));
 		msyslog(LOG_ERR,

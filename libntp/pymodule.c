@@ -178,7 +178,7 @@ NTPSEC_PY_MODULE_INIT(ntpc)
     /* Create the module and add the functions */
     NTPSEC_PY_MODULE_DEF(m, "ntpc", module_doc, ntpc_methods)
 
-    /* for statustoa() */ 
+    /* for statustoa() */
     PyModule_AddIntConstant(m, "TYPE_SYS", TYPE_SYS);
     PyModule_AddIntConstant(m, "TYPE_PEER", TYPE_PEER);
     PyModule_AddIntConstant(m, "TYPE_CLOCK", TYPE_CLOCK);

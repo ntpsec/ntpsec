@@ -1,4 +1,4 @@
-/* 
+/*
  * digest.c - Hack to test various digest types.
  *
  * Fedora mentions blake2b and friends.  They are in the man page

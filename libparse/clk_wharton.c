@@ -2,9 +2,9 @@
  * Support for WHARTON 400A Series clock + 404.2 serial interface.
  *
  * Copyright (C) 1999, 2000 by Philippe De Muyter <phdm@macqel.be>
- * 
+ *
  * SPDX-License-Identifier: BSD-2-clause
- * 
+ *
  */
 
 #include "config.h"
@@ -35,7 +35,7 @@
  *	Parity even			12		E
  *
  * WHARTON 400A Series output format 1 is as follows :
- * 
+ *
  * Timestamp	STXssmmhhDDMMYYSETX
  * Pos		0  12345678901234
  *		0  00000000011111
@@ -53,7 +53,7 @@
  *			bit 1	0 = Winter time		1 = Summer time
  *			bit 2	0 = not synchronised	1 = synchronised
  *			bit 3	0 = no early warning	1 = early warning
- * 
+ *
  */
 
 static parse_cvt_fnc_t cvt_wharton_400a;
@@ -61,7 +61,7 @@ static parse_inp_fnc_t inp_wharton_400a;
 
 /*
  * parse_cvt_fnc_t cvt_wharton_400a
- * 
+ *
  * convert simple type format
  */
 static          unsigned long

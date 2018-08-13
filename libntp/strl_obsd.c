@@ -1,4 +1,4 @@
-/* 
+/*
  * Why use strlcpy()/strlcat() instead of standard strncpy()/strncat()?
  * To reduce likelihood of bugs and avoid wasteful zero fills.  See:
  * http://www.gratisoft.us/todd/papers/strlcpy.html

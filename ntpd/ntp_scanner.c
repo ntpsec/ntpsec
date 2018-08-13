@@ -1,7 +1,7 @@
 
 /* ntp_scanner.c
  *
- * The source code for a simple lexical analyzer. 
+ * The source code for a simple lexical analyzer.
  *
  * Written By:	Sachin Kamboj
  *		University of Delaware
@@ -36,7 +36,7 @@
 
 
 
-/* SCANNER GLOBAL VARIABLES 
+/* SCANNER GLOBAL VARIABLES
  * ------------------------
  */
 
@@ -49,11 +49,11 @@ static struct FILE_INFO * lex_stack = NULL;
 /* CONSTANTS AND MACROS
  * --------------------
  */
-#define ENDSWITH(str, suff) (strcmp(str + strlen(str) - strlen(suff), suff)==0) 
+#define ENDSWITH(str, suff) (strcmp(str + strlen(str) - strlen(suff), suff)==0)
 #define CONF_ENABLE(s)	ENDSWITH(s, ".conf")
 
 
-/* SCANNER GLOBAL VARIABLES 
+/* SCANNER GLOBAL VARIABLES
  * ------------------------
  */
 static const char special_chars[] = "{}(),;|=";
@@ -255,7 +255,7 @@ lex_close(
 {
 	if (NULL != stream) {
 		if (NULL != stream->fpi)
-			fclose(stream->fpi);		
+			fclose(stream->fpi);
 		free(stream);
 	}
 }
@@ -345,7 +345,7 @@ lex_flush_stack()
 }
 
 /* Reversed string comparison - we want to LIFO directory subfiles so they
- * actually get evaluated in sort order. 
+ * actually get evaluated in sort order.
  */
 static int rcmpstring(const void *p1, const void *p2)
 {
@@ -434,7 +434,7 @@ bool lex_push_file(
 				strlcat(subpath, baselist[i], PATH_MAX);
 				/* This should barf safely if the complete
 				 * filename was too long to fit in the buffer.
-				 */ 
+				 */
 				lex_push_file(subpath);
 			}
 			for (int i = 0; i < basecount; i++)
@@ -463,7 +463,7 @@ bool
 lex_pop_file(void)
 {
 	struct FILE_INFO * head = lex_stack;
-	struct FILE_INFO * tail = NULL; 
+	struct FILE_INFO * tail = NULL;
 
 	if (NULL != head) {
 		tail = head->st_next;
@@ -483,7 +483,7 @@ lex_pop_file(void)
  * Returns the nesting level of includes, that is, the current depth of
  * the lexer input stack.
  *
- * Note: 
+ * Note:
  */
 size_t
 lex_level(void)
@@ -498,7 +498,7 @@ lex_level(void)
 	return cnt;
 }
 
-/* check if the current input is from a file */	
+/* check if the current input is from a file */
 bool
 lex_from_file(void)
 {
@@ -515,7 +515,7 @@ lex_current()
 }
 
 
-/* STATE MACHINES 
+/* STATE MACHINES
  * --------------
  */
 
@@ -540,7 +540,7 @@ is_keyword(
 
 		if (curr_s && (lexeme[i] == SS_CH(sst[curr_s]))) {
 			if ('\0' == lexeme[i + 1]
-			    && FOLLBY_NON_ACCEPTING 
+			    && FOLLBY_NON_ACCEPTING
 			       != SS_FB(sst[curr_s])) {
 				fb = SS_FB(sst[curr_s]);
 				*pfollowedby = fb;
@@ -651,7 +651,7 @@ is_double(
 
 	/*
 	 * The number of digits in both the decimal part and the
-	 * fraction part must not be zero at this point 
+	 * fraction part must not be zero at this point
 	 */
 	if (!num_digits)
 		return false;
@@ -713,8 +713,8 @@ quote_if_needed(char *str)
 	len = strlen(str);
 	octets = len + 2 + 1;
 	ret = emalloc(octets);
-	if ('"' != str[0] 
-	    && (strcspn(str, special_chars) < len 
+	if ('"' != str[0]
+	    && (strcspn(str, special_chars) < len
 		|| strchr(str, ' ') != NULL)) {
 		snprintf(ret, octets, "\"%s\"", str);
 	} else
@@ -817,7 +817,7 @@ yylex(void)
 			yytext[i] = (char)ch;
 
 			/* Break on whitespace or a special character */
-			if (isspace(ch) || is_EOC(ch) 
+			if (isspace(ch) || is_EOC(ch)
 			    || '"' == ch
 			    || (FOLLBY_TOKEN == followedby
 				&& is_special(ch)))
@@ -885,7 +885,7 @@ yylex(void)
 			yylval.Integer = (int)strtol(yytext, NULL, 10);
 			if (yylval.Integer == 0
 			    && ((errno == EINVAL) || (errno == ERANGE))) {
-				msyslog(LOG_ERR, 
+				msyslog(LOG_ERR,
 					"CONFIG: Integer cannot be represented: %s",
 					yytext);
 				if (lex_from_file()) {
@@ -908,7 +908,7 @@ yylex(void)
 				converted = sscanf(yytext, "%u",
 						   &yylval.U_int);
 			if (1 != converted) {
-				msyslog(LOG_ERR, 
+				msyslog(LOG_ERR,
 					"CONFIG: U_int cannot be represented: %s",
 					yytext);
 				if (lex_from_file()) {
@@ -946,7 +946,7 @@ yylex(void)
 	/*
 	 * Either followedby is not FOLLBY_TOKEN or this lexeme is part
 	 * of a string.  Hence, we need to return T_String.
-	 * 
+	 *
 	 * _Except_ we might have a -4 or -6 flag on a an association
 	 * configuration line (server, peer, pool, etc.).
 	 *
@@ -996,7 +996,7 @@ normal_return:
 
 lex_too_long:
 	yytext[min(sizeof(yytext) - 1, 50)] = 0;
-	msyslog(LOG_ERR, 
+	msyslog(LOG_ERR,
 		"CONFIG: configuration item on line %d longer than limit of %lu, began with '%s'",
 		lex_stack->curpos.nline, (unsigned long)min(sizeof(yytext) - 1, 50),
 		yytext);

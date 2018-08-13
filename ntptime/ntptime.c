@@ -348,7 +348,7 @@ main(
 	}
 	status = ntp_adjtime_ns(&ntx);
 	if (status < 0) {
-		perror((errno == EPERM) ? 
+		perror((errno == EPERM) ?
 		   "Must be root to set kernel values\nntp_adjtime() call fails" :
 		   "ntp_adjtime() call fails");
 	} else {

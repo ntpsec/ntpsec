@@ -150,7 +150,7 @@ findexistingpeer_name(
 
 
 static
-struct peer *		
+struct peer *
 findexistingpeer_addr(
 	sockaddr_u *	addr,
 	struct peer *	start_peer,
@@ -170,7 +170,7 @@ findexistingpeer_addr(
 	 * start_peer is included so we can locate instances of the
 	 * same peer through different interfaces in the hash table.
 	 * A match requires the same mode and remote
-	 * address. 
+	 * address.
 	 */
 	if (NULL == start_peer)
 		peer = peer_hash[NTP_HASH_ADDR(addr)];
@@ -630,7 +630,7 @@ newpeer(
 	memcpy(&peer->cfg, ctl, sizeof(peer->cfg));
 
 	peer->cast_flags = cast_flags;
-	set_peerdstadr(peer, 
+	set_peerdstadr(peer,
 		       select_peerinterface(peer, srcadr, dstadr));
 
         if (NTP_MAXPOLL_UNK == peer->cfg.maxpoll)
@@ -661,7 +661,7 @@ newpeer(
 				peer->cfg.peerkey, name);
 		else if (NULL == authlookup(peer->cfg.peerkey, true))
 			msyslog(LOG_ERR, "ERR: key %u found but not trusted for server %s",
-				peer->cfg.peerkey, name); 
+				peer->cfg.peerkey, name);
 		}
 
 	peer->precision = sys_vars.sys_precision;

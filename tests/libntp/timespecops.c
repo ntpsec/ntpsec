@@ -457,7 +457,7 @@ TEST(timespecops, test_AbsWithFrac) {
 // test support stuff -- part 2
 // ---------------------------------------------------------------------
 
-/* FIXME: temporarily disabled - spews cryptic messages into test log */ 
+/* FIXME: temporarily disabled - spews cryptic messages into test log */
 TEST(timespecops, test_Helpers2) {
 	struct timespec limit = timespec_init(0, 2);
 	struct timespec x, y;

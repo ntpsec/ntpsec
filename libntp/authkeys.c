@@ -151,7 +151,7 @@ free_auth_mem(void)
 	key_hash = NULL;
 	for (alloc = auth_allocs; NULL != alloc; alloc = next_alloc) {
 		next_alloc = alloc->link;
-		free(alloc->mem);	
+		free(alloc->mem);
 	}
 	authfreekeys = NULL;
 	authnumfreekeys = 0;
@@ -367,7 +367,7 @@ authtrust(
 	 * There are two conditions remaining. Either it does not
 	 * exist and is to be trusted or it does exist and is or is
 	 * not to be trusted.
-	 */	
+	 */
 	if (NULL != auth) {
 		/* Key exists. Leave it around so we can trust it again. */
 		if (trust) {
@@ -480,7 +480,7 @@ auth_setkey(
 		for (size_t j = 0; j < key_size; j++)
 			printf("%02x", key[j]);
 		printf("\n");
-	}	
+	}
 #endif
 }
 

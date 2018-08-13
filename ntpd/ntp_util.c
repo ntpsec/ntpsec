@@ -67,7 +67,7 @@ static FILEGEN usestats;
 
 /*
  * This controls whether stats are written to the fileset. Provided
- * so that ntpq can turn off stats when the file system fills up. 
+ * so that ntpq can turn off stats when the file system fills up.
  */
 bool stats_control;
 
@@ -84,7 +84,7 @@ static	void	record_use_stats(void);
 	void	ntpd_time_stepped(void);
 static  void	check_leap_expiration(bool, time_t);
 
-/* 
+/*
  * Prototypes
  */
 #ifdef DEBUG
@@ -175,7 +175,7 @@ static void drift_write(char *driftfile, double drift)
 }
 
 
-/* 
+/*
  * write_stats - hourly: sysstats, usestats, and maybe drift
  */
 void
@@ -519,7 +519,7 @@ mprintf_clock_stats(
  * day (MJD)
  * time (s past midnight)
  * source IP address (old format) or drivername(unit) (new format)
- * destination peer address 
+ * destination peer address
  * t1 t2 t3 t4 timestamps
  * various other local statistics
  */

@@ -28,7 +28,7 @@
   void yyerror(const char *msg);
 %}
 
-/* 
+/*
  * Enable generation of token names array even without YYDEBUG.
  * We access via token_name() defined below.
  */
@@ -313,7 +313,7 @@ command_list
 			 * the time being.
 			 */
 			struct FILE_INFO * ip_ctx = lex_current();
-			msyslog(LOG_ERR, 
+			msyslog(LOG_ERR,
 				"CONFIG: syntax error in %s line %d, column %d",
 				ip_ctx->fname,
 				ip_ctx->errpos.nline,
@@ -364,7 +364,7 @@ address
 	;
 
 ip_address
-	:	T_String 
+	:	T_String
 			{ $$ = create_address_node($1, AF_UNSPEC); }
 	;
 
@@ -378,7 +378,7 @@ address_fam
 option_list
 	:	/* empty list */
 			{ $$ = NULL; }
-	|	option_list option 
+	|	option_list option
 		{
 			$$ = $1;
 			APPEND_G_FIFO($$, $2);
@@ -491,8 +491,8 @@ unpeer_command
 			yyerror("no refclock support was compiled in.");
 #endif /* REFCLOCK */
 		}
-	;	
-unpeer_keyword	
+	;
+unpeer_keyword
 	:	T_Unconfig
 	|	T_Unpeer
 	;
@@ -547,7 +547,7 @@ tos_option_list
 			APPEND_G_FIFO($$, $2);
 		}
 	|	tos_option
-		{	
+		{
 			$$ = NULL;
 			APPEND_G_FIFO($$, $1);
 		}
@@ -605,7 +605,7 @@ monitoring_command
 	;
 
 stats_list
-	:	stats_list stat 
+	:	stats_list stat
 		{
 			$$ = $1;
 			APPEND_G_FIFO($$, create_int_node($2));
@@ -746,12 +746,12 @@ access_control_command
 
 			rn = create_restrict_node($1,
 				create_address_node(
-					estrdup("0.0.0.0"), 
+					estrdup("0.0.0.0"),
 					AF_INET),
 				create_address_node(
-					estrdup("0.0.0.0"), 
+					estrdup("0.0.0.0"),
 					AF_INET),
-				$4, 
+				$4,
 				lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
@@ -761,12 +761,12 @@ access_control_command
 
 			rn = create_restrict_node($1,
 				create_address_node(
-					estrdup("::"), 
+					estrdup("::"),
 					AF_INET6),
 				create_address_node(
-					estrdup("::"), 
+					estrdup("::"),
 					AF_INET6),
-				$4, 
+				$4,
 				lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
@@ -814,7 +814,7 @@ discard_option_list
 			$$ = $1;
 			APPEND_G_FIFO($$, $2);
 		}
-	|	discard_option 
+	|	discard_option
 		{
 			$$ = NULL;
 			APPEND_G_FIFO($$, $1);
@@ -838,7 +838,7 @@ mru_option_list
 			$$ = $1;
 			APPEND_G_FIFO($$, $2);
 		}
-	|	mru_option 
+	|	mru_option
 		{
 			$$ = NULL;
 			APPEND_G_FIFO($$, $1);
@@ -1005,7 +1005,7 @@ system_option
 	:	system_option_flag_keyword
 			{ $$ = create_attr_ival(T_Flag, $1); }
 	|	system_option_local_flag_keyword
-		{ 
+		{
 			if (lex_from_file()) {
 				$$ = create_attr_ival(T_Flag, $1);
 			} else {
@@ -1247,7 +1247,7 @@ log_config_command
 			default:
 				prefix = '=';
 				type = $1;
-			}	
+			}
 
 			$$ = create_attr_sval(prefix, estrdup(type));
 			YYFREE($1);
@@ -1400,7 +1400,7 @@ foundit:
 }
 #endif /* REFCLOCK */
 
-void 
+void
 yyerror(
 	const char *msg
 	)
@@ -1411,7 +1411,7 @@ yyerror(
 	ip_ctx = lex_current();
 	ip_ctx->errpos = ip_ctx->tokpos;
 
-	msyslog(LOG_ERR, "CONFIG: line %d column %d %s", 
+	msyslog(LOG_ERR, "CONFIG: line %d column %d %s",
 		ip_ctx->errpos.nline, ip_ctx->errpos.ncol, msg);
 	if (!lex_from_file()) {
 		/* Save the error message in the correct buffer */

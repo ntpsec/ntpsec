@@ -143,7 +143,7 @@ init_restrict(void)
 	 * RESM_NTPONLY are sorted earlier so they take precedence over
 	 * any otherwise similar entry without.  Again, this is the same
 	 * behavior as but reversed implementation compared to the docs.
-	 * 
+	 *
 	 */
 	LINK_SLIST(restrictlist4, &restrict_def4, link);
 	LINK_SLIST(restrictlist6, &restrict_def6, link);
@@ -661,6 +661,6 @@ restrict_source(
 	hack_restrict(RESTRICT_FLAGS, addr, &onesmask,
 		      restrict_source_mflags, restrict_source_flags,
 		      expire);
-	DPRINT(1, ("restrict_source: %s host restriction added\n", 
+	DPRINT(1, ("restrict_source: %s host restriction added\n",
 		   socktoa(addr)));
 }

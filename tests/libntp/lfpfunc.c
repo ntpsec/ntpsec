@@ -56,7 +56,7 @@ static int l_fp_scmp(const l_fp first, const l_fp second)
 static int l_fp_ucmp(const l_fp first, l_fp second)
 {
 	uint32_t a[3], b[3];
-	const l_fp op1 = first; 
+	const l_fp op1 = first;
 	const l_fp op2 = second;
 
 	a[0] = lfpfrac(op1); a[1] = lfpuint(op1); a[2] = 0;

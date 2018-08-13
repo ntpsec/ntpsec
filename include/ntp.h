@@ -139,7 +139,7 @@ typedef struct netendpt {
 
 /*
  * Flags for interfaces. Do not change these casually as they will be visible
- * in Mode 6 ifstats reports. 
+ * in Mode 6 ifstats reports.
  */
 #define INT_UP		0x001	/* Interface is up */
 #define	INT_PPP		0x002	/* Point-to-point interface */

@@ -2,7 +2,7 @@
  * dolfptoa - do the grunge work of converting an l_fp number to decimal
  *
  * Warning: this conversion is lossy in the low-order bits of the fractional
- * part.  It's good enough for statistics and logging, but do not expect 
+ * part.  It's good enough for statistics and logging, but do not expect
  * it to round-trip through atolfp(). 1444359386.1798776096, for example, may
  * dump as ...095 or ...097.
  */
@@ -115,7 +115,7 @@ dolfptoa(
 	/* decide whether to round or simply extend by zeros */
 	if (dec > 0) {
 		/* only '0' digits left -- just reposition end */
-		cpend += dec; 
+		cpend += dec;
 	} else {
 		/* some bits remain in 'fpv'; do round */
 		uint8_t *tp    = cpend;
@@ -125,7 +125,7 @@ dolfptoa(
 			*--tp += 1;
 			if (*tp == 10)
 				*tp = 0;
-			else 
+			else
 				carry = false;
 		}
 

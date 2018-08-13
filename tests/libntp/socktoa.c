@@ -30,7 +30,7 @@ TEST(socktoa, IPv6AddressWithPort) {
 
 	const char* expected =
 		"2001:db8:85a3:8d3:1319:8a2e:370:7334";
-	const char* expected_port = 
+	const char* expected_port =
 		"[2001:db8:85a3:8d3:1319:8a2e:370:7334]:123";
 
 	sockaddr_u input;

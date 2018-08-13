@@ -2,7 +2,7 @@
  *
  * Copyright 2016 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-clause
- * 
+ *
  * These are portable reimplementations of what BSD provides
  * in <sys/endian.h>.
  */

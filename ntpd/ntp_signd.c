@@ -21,7 +21,7 @@
 /*
   connect to a unix domain socket
 */
-static int 
+static int
 ux_socket_connect(const char *name)
 {
 	int fd;
@@ -51,7 +51,7 @@ ux_socket_connect(const char *name)
 /*
   keep writing until its all sent
 */
-static int 
+static int
 write_all(int fd, const void *buf, size_t len)
 {
 	size_t total = 0;
@@ -68,7 +68,7 @@ write_all(int fd, const void *buf, size_t len)
 /*
   keep reading until its all read
 */
-static int 
+static int
 read_all(int fd, void *buf, size_t len)
 {
 	size_t total = 0;
@@ -85,7 +85,7 @@ read_all(int fd, void *buf, size_t len)
 /*
   send a packet in length prefix format
 */
-static int 
+static int
 send_packet(int fd, const char *buf, uint32_t len)
 {
 	uint32_t net_len = htonl(len);
@@ -97,7 +97,7 @@ send_packet(int fd, const char *buf, uint32_t len)
 /*
   receive a packet in length prefix format
 */
-static int 
+static int
 recv_packet(int fd, char **buf, uint32_t *len)
 {
 	if (read_all(fd, len, sizeof(*len)) != sizeof(*len)) return -1;
@@ -110,11 +110,11 @@ recv_packet(int fd, char **buf, uint32_t *len)
 	return 0;
 }
 
-void 
+void
 send_via_ntp_signd(
 	struct recvbuf *rbufp,	/* receive packet pointer */
 	int	xmode,
-	keyid_t	xkeyid, 
+	keyid_t	xkeyid,
 	int flags,
 	struct pkt  *xpkt
 	)
@@ -179,7 +179,7 @@ send_via_ntp_signd(
 	/* Only continue with this if we can talk to Samba */
 	if (fd != -1) {
 		/* Send old packet to Samba, expect response */
-		/* Packet to Samba is quite simple: 
+		/* Packet to Samba is quite simple:
 		   All values BIG endian except key ID as noted
 		   [packet size as BE] - 4 bytes
 		   [protocol version (0)] - 4 bytes
@@ -199,7 +199,7 @@ send_via_ntp_signd(
 			close(fd);
 			return;
 		}
-		/* Return packet is also simple: 
+		/* Return packet is also simple:
 		   [packet size] - network byte order - 4 bytes
 		   [protocol version (0)] network byte order - - 4 bytes
 		   [operation (signed success=3, failure=4)] network byte order - - 4 byte

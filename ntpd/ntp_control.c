@@ -1000,7 +1000,7 @@ ctl_flushpkt(
 	/*
 	 * Zero-fill the unused part of the packet.  This wasn't needed
 	 * when the clients were all in C, for which the first NUL is
-	 * a string terminator.  But Python allows NULs in strings, 
+	 * a string terminator.  But Python allows NULs in strings,
 	 * which means Python mode 6 clients might actually see the trailing
 	 * garbage.
 	 */
@@ -1123,8 +1123,8 @@ ctl_putdata(
  *		The write will be truncated if data contains  a NUL,
  *		so don't do that.
  *
- * ESR, 2016: Whoever wrote this should be *hurt*.  If the string value is 
- * empty, no "=" and no value literal is written, just the bare tag.  
+ * ESR, 2016: Whoever wrote this should be *hurt*.  If the string value is
+ * empty, no "=" and no value literal is written, just the bare tag.
  */
 static void
 ctl_putstr(
@@ -2517,7 +2517,7 @@ ctl_getitem(
 	 * packet; If it's EOV, it will never be NULL again until the
 	 * variable is found and processed in a given 'var_list'. (That
 	 * is, a result is returned that is neither NULL nor EOV).
-	 */ 
+	 */
 	static const struct ctl_var eol = { 0, EOV, NULL };
 	static char buf[128];
 	static u_long quiet_until;
@@ -4246,7 +4246,7 @@ report_event(
 		if (IS_PEER_REFCLOCK(peer))
 			src = refclock_name(peer);
 		else
-#endif /* REFCLOCK */ 
+#endif /* REFCLOCK */
 		    src = socktoa(&peer->srcadr);
 
 		snprintf(statstr, sizeof(statstr),

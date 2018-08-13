@@ -599,7 +599,7 @@ ntpdmain(
 			msyslog(LOG_ERR, "INIT: fork: %m");
 			exit(exit_code);
 		}
-		if (rc > 0) {	
+		if (rc > 0) {
 			/* parent */
 			exit_code = wait_child_sync_if(pipe_fds[0],
 						       wait_sync);
@@ -905,7 +905,7 @@ ntpdmain(
 #endif
 
 	if (access(statsdir, W_OK) != 0) {
-	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno)); 
+	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
 	}
 
 	mainloop();
@@ -1026,7 +1026,7 @@ static void mainloop(void)
 			    htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
 				if (!--mdnstries) {
 					msyslog(LOG_ERR, "INIT: Unable to register mDNS, giving up.");
-				} else {	
+				} else {
 					msyslog(LOG_INFO, "INIT: Unable to register mDNS, will try later.");
 				}
 			} else {

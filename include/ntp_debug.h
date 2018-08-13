@@ -17,7 +17,7 @@
  * The calling convention is not attractive:
  *     DPRINT(debuglevel, (fmt, ...));
  *     DPRINT(2, ("this will appear on stdout if debug >= %d\n", 2));
- * 
+ *
  * TPRINT is used where the logger needs to remain even when DEBUG is off.
  */
 #ifdef DEBUG

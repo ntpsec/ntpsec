@@ -58,7 +58,7 @@ TEST(clocktime, CurrentYearExplicit) {
 				   fixedpivot, timestamp, &yearstart, &actual));
 	/* If this assertion fails with "Expected 3486372600 was
 	 * 104913720" that's a 32-bit integer overflow and your compiler
-	 * is failing to cast to int properly inside clocktime. 
+	 * is failing to cast to int properly inside clocktime.
 	 * Observed on Mac OS X.
 	 */
 	TEST_ASSERT_EQUAL(expected, actual);
@@ -88,7 +88,7 @@ TEST(clocktime, CurrentYearFuzz) {
 }
 
 TEST(clocktime, WrongYearStart) {
-	/* 
+	/*
 	 * Timestamp (rec_ui) is: 2010-01-02 11:00:00Z
 	 * Time sent into function is 11:00:00.
 	 * Yearstart sent into function is the yearstart of 2009!
