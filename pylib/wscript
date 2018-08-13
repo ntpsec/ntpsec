@@ -52,5 +52,5 @@ def build(ctx):
         features='py',
         source=builds+[target1, target2],
         install_from=bldnode,
-        install_path='${PYTHONDIR}/ntp'
+        install_path='${PYTHONARCHDIR}/ntp'
     )

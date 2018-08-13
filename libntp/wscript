@@ -59,7 +59,7 @@ def build(ctx):
     # platforms, PYTHONARCHDIR == PYTHONDIR, anyway.
     ctx(
         features="c cshlib bld_include src_include pyext",
-        install_path='${PYTHONDIR}/ntp',
+        install_path='${PYTHONARCHDIR}/ntp',
         includes=includes,
         source=["pymodule.c"] + libntp_source_sharable,
         target="../pylib/ntpc",  # Put the output in the pylib directory

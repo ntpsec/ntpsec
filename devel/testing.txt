@@ -31,7 +31,8 @@ have a mis-configured Python and need to investigate that.
 
 Load paths may be more likely to be an issue after rootspace installation.
 The script should install the Python library in the directory specified by
-Python itself, which is reported as PYTHONDIR near the end of the configure
+Python itself (unless overridden by command line options or environment
+variables), which is reported as PYTHONARCHDIR near the end of the configure
 phase.  This directory should be on your Python's sys.path, in which case all
 will proceed normally.  If it's not, you will get the same ntpq failure to
 launch ./ntpq from anywhere *outside* the source tree.  If this is the case,
