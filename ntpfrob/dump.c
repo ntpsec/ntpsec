@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef HAVE_ADJTIMEX
 #include <sys/timex.h>
 
 const char * verbose[] =
@@ -114,3 +115,4 @@ do_dump(const iomode mode, const int force)
     }
     exit(0);
 } /* do_dump */
+#endif /* HAVE_ADJTIMEX */
