@@ -254,8 +254,8 @@ def iso_to_posix(time_string):
     return calendar.timegm(time_struct)
 
 
-def posix_to_iso(utc_time):
+def posix_to_iso(unix_time):
     "ISO 8601 string in UTC from Unix time."
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(utc_time))
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(unix_time))
 
 # end
