@@ -284,16 +284,16 @@ struct gpsd_unit {
 	l_fp ibt_fudge;		/* TPV/TOFF serial data fudge */
 
 	/* Flags to indicate available data */
-	int fl_nosync: 1;	/* GPSD signals bad quality */
-	int fl_ibt   : 1;	/* valid TPV/TOFF seen (have time) */
-	int fl_pps   : 1;	/* valid pulse seen */
-	int fl_pps2  : 1;	/* valid pulse seen for PPS channel */
-	int fl_rawibt: 1;	/* permit raw TPV/TOFF time stamps */
-	int fl_vers  : 1;	/* have protocol version */
-	int fl_watch : 1;	/* watch reply seen */
+	bool fl_nosync: true;	/* GPSD signals bad quality */
+	bool fl_ibt   : true;	/* valid TPV/TOFF seen (have time) */
+	bool fl_pps   : true;	/* valid pulse seen */
+	bool fl_pps2  : true;	/* valid pulse seen for PPS channel */
+	bool fl_rawibt: true;	/* permit raw TPV/TOFF time stamps */
+	bool fl_vers  : true;	/* have protocol version */
+	bool fl_watch : true;	/* watch reply seen */
 	/* protocol flags */
-	int pf_nsec  : 1;	/* have nanosec PPS info */
-	int pf_toff  : 1;	/* have TOFF record for timing */
+	bool pf_nsec  : true;	/* have nanosec PPS info */
+	bool pf_toff  : true;	/* have TOFF record for timing */
 
 	/* admin stuff for sockets and device selection */
 	int         fdt;	/* current connecting socket */
@@ -897,11 +897,11 @@ enter_opmode(
 		   up->logname, MODE_OP_MODE(mode)));
 
 	if (MODE_OP_MODE(mode) == MODE_OP_AUTO) {
-		up->fl_rawibt = 0;
+		up->fl_rawibt = false;
 		up->ppscount  = PPS_MAXCOUNT / 2;
 	}
-	up->fl_pps = 0;
-	up->fl_ibt = 0;
+	up->fl_pps = false;
+	up->fl_ibt = false;
 }
 
 /* ------------------------------------------------------------------ */
@@ -918,11 +918,11 @@ leave_opmode(
 		   up->logname, MODE_OP_MODE(mode)));
 
 	if (MODE_OP_MODE(mode) == MODE_OP_AUTO) {
-		up->fl_rawibt = 0;
+		up->fl_rawibt = false;
 		up->ppscount  = 0;
 	}
-	up->fl_pps = 0;
-	up->fl_ibt = 0;
+	up->fl_pps = false;
+	up->fl_ibt = false;
 }
 
 /* =====================================================================
@@ -955,8 +955,8 @@ eval_strict(
 		add_clock_sample(peer, pp, up->ibt_stamp, up->pps_recvt);
 		peer->precision = (int8_t)up->pps_prec;
 		/* both packets consumed now... */
-		up->fl_pps = 0;
-		up->fl_ibt = 0;
+		up->fl_pps = false;
+		up->fl_ibt = false;
 		++up->tc_ibt_used;
 	}
 }
@@ -983,7 +983,7 @@ eval_pps_secondary(
 		    (pp->sloppyclockflag & CLK_FLAG1) )
 			peer->cfg.flags |= FLAG_PPS;
 		/* mark time stamp as burned... */
-		up->fl_pps2 = 0;
+		up->fl_pps2 = false;
 		++up->tc_pps_used;
 	}
 }
@@ -1000,7 +1000,7 @@ eval_serial(
 		add_clock_sample(peer, pp, up->ibt_stamp, up->ibt_recvt);
 		peer->precision = (int8_t)up->ibt_prec;
 		/* mark time stamp as burned... */
-		up->fl_ibt = 0;
+		up->fl_ibt = false;
 		++up->tc_ibt_used;
 	}
 }
@@ -1027,7 +1027,7 @@ eval_auto(
 		up->ppscount = min(PPS_MAXCOUNT,
 				   (up->ppscount + PPS_INCCOUNT));
 		if ((PPS_MAXCOUNT == up->ppscount) && up->fl_rawibt) {
-			up->fl_rawibt = 0;
+			up->fl_rawibt = false;
 			msyslog(LOG_INFO,
 				"REFCLOCK: %s: expect valid PPS from now",
 				up->logname);
@@ -1035,7 +1035,7 @@ eval_auto(
 	} else {
 		up->ppscount = max(0, (up->ppscount - PPS_DECCOUNT));
 		if ((0 == up->ppscount) && !up->fl_rawibt) {
-			up->fl_rawibt = -1;
+			up->fl_rawibt = true;
 			msyslog(LOG_WARNING,
 				"REFCLOCK: %s: use TPV alone from now",
 				up->logname);
@@ -1400,11 +1400,11 @@ process_watch(
 
 	if (json_object_lookup_bool(jctx, 0, "enable") > 0 &&
 	    json_object_lookup_bool(jctx, 0, "json"  ) > 0  )
-		up->fl_watch = -1;
+		up->fl_watch = true;
 	else
-		up->fl_watch = 0;
+		up->fl_watch = false;
 	DPRINT(2, ("%s: process_watch, enabled=%d\n",
-		   up->logname, (up->fl_watch & 1)));
+		   up->logname, up->fl_watch));
 }
 
 /* ------------------------------------------------------------------ */
@@ -1443,7 +1443,7 @@ process_version(
 				up->logname, revision, release,
 				pvhi, pvlo);
 		up->proto_version = PROTO_VERSION(pvhi, pvlo);
-		up->fl_vers = -1;
+		up->fl_vers = true;
 	} else {
 		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
@@ -1454,12 +1454,12 @@ process_version(
 	/* With the 3.9 GPSD protocol, '*_musec' vanished from the PPS
 	 * record and was replace by '*_nsec'.
 	 */
-	up->pf_nsec = -(up->proto_version >= PROTO_VERSION(3,9));
+	up->pf_nsec = up->proto_version >= PROTO_VERSION(3,9);
 
 	/* With the 3.10 protocol we can get TOFF records for better
 	 * timing information.
 	 */
-	up->pf_toff = -(up->proto_version >= PROTO_VERSION(3,10));
+	up->pf_toff = up->proto_version >= PROTO_VERSION(3,10);
 
 	/* request watch for our GPS device if not yet watched.
 	 *
@@ -1478,7 +1478,7 @@ process_version(
 		return;
 
 	snprintf(up->buffer, sizeof(up->buffer),
-		 s_req_watch[up->pf_toff != 0], up->device);
+		 s_req_watch[up->pf_toff], up->device);
 	buf = up->buffer;
 	len = strlen(buf);
 	log_data(peer, "send", buf, len);
@@ -1521,12 +1521,12 @@ process_tpv(
 		if ( ! up->pf_toff)
 			++up->tc_ibt_recv;
 		++up->tc_nosync;
-		up->fl_ibt    = 0;
-		up->fl_pps    = 0;
-		up->fl_nosync = -1;
+		up->fl_ibt    = false;
+		up->fl_pps    = false;
+		up->fl_nosync = true;
 		return;
 	}
-	up->fl_nosync = 0;
+	up->fl_nosync = false;
 
 	/* convert clock and set resulting ref time, but only if the
 	 * TOFF sentence is *not* available
@@ -1551,10 +1551,10 @@ process_tpv(
 			up->ibt_local = *rtime;
 			up->ibt_recvt = *rtime;
 			up->ibt_recvt -= up->ibt_fudge;
-			up->fl_ibt = -1;
+			up->fl_ibt = true;
 		} else {
 			++up->tc_breply;
-			up->fl_ibt = 0;
+			up->fl_ibt = false;
 		}
 	}
 
@@ -1644,8 +1644,8 @@ process_pps(
 		   prettydate(up->pps_stamp2),
 		   prettydate(up->pps_recvt2)));
 
-	up->fl_pps  = (0 != (pp->sloppyclockflag & CLK_FLAG2)) - 1;
-	up->fl_pps2 = -1;
+	up->fl_pps  = !(pp->sloppyclockflag & CLK_FLAG2);
+	up->fl_pps2 = true;
 	return;
 
   fail:
@@ -1668,7 +1668,7 @@ process_toff(
 	++up->tc_ibt_recv;
 
 	/* remember this! */
-	up->pf_toff = -1;
+	up->pf_toff = true;
 
 	/* bail out if there's indication that time sync is bad */
 	if (up->fl_nosync)
@@ -1682,7 +1682,7 @@ process_toff(
 			goto fail;
 	up->ibt_recvt -= up->ibt_fudge;
 	up->ibt_local = *rtime;
-	up->fl_ibt    = -1;
+	up->fl_ibt    = true;
 
 	save_ltc(pp, prettydate(up->ibt_stamp));
 	DPRINT(2, ("%s: TOFF record processed,"
@@ -1759,9 +1759,9 @@ gpsd_parse(
 		diff = up->ibt_local;
 		diff -= up->pps_local;
 		if (lfpsint(diff) > 0)
-			up->fl_pps = 0; /* pps too old */
+			up->fl_pps = false; /* pps too old */
 		else if (lfpsint(diff) < 0)
-			up->fl_ibt = 0; /* serial data too old */
+			up->fl_ibt = false; /* serial data too old */
 	}
 
 	/* dispatch to the mode-dependent processing functions */
@@ -1803,10 +1803,10 @@ gpsd_stop_socket(
 	}
 	up->tickover = up->tickpres;
 	up->tickpres = min(up->tickpres + 5, TICKOVER_HIGH);
-	up->fl_vers  = 0;
-	up->fl_ibt   = 0;
-	up->fl_pps   = 0;
-	up->fl_watch = 0;
+	up->fl_vers  = false;
+	up->fl_ibt   = false;
+	up->fl_pps   = false;
+	up->fl_watch = false;
 }
 
 /* ------------------------------------------------------------------ */
