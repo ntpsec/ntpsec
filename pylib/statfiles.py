@@ -65,9 +65,9 @@ class NTPStats:
         assuming values are already split and sorted"""
         ret = {}
         length = len(values)
-        if length <= 1:
+        if 1 >= length:
             # uh, oh...
-            if length == 1:
+            if 1 == length:
                 # just one data value, set all to that one value
                 value = values[0]
             else:
@@ -125,7 +125,7 @@ class NTPStats:
         self.endtime = endtime
 
         self.sitename = sitename or os.path.basename(statsdir)
-        if self.sitename == 'ntpstats':
+        if 'ntpstats' == self.sitename:
             # boring, use hostname
             self.sitename = socket.getfqdn()
 
@@ -173,7 +173,7 @@ class NTPStats:
             # temps and gpsd are already in UNIX time
             for line in lines:
                 split = line.split()
-                if len(split) < 3:
+                if 3 > len(split):
                     # skip short lines
                     continue
 

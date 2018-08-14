@@ -51,7 +51,7 @@ unitgroups = (UNITS_SEC, UNITS_PPX)
 # for everything else, and they are simple.
 
 def check_unicode():  # pragma: no cover
-    if sys.stdout.encoding != "UTf-8":
+    if "UTF-8" != sys.stdout.encoding:
         deunicode_units()
         return True  # needed by ntpmon
     return False
