@@ -52,7 +52,7 @@ The following NTP Classic CVEs announced in February 2018 do not affect NTPsec:
 We have dropped support for Broadcast servers.  We had kept it for
 older desktop operating systems listening on the local network
 broadcast domain, a use case that is now no longer in use at sane
-enviroments, and no longer necessary for modern desktop OSs.
+environments, and no longer necessary for modern desktop OSs.
 
 It is now possible to unpeer refclocks using a type/unit specification
 rather than a magic IP address.  This was the last obligatory use of
