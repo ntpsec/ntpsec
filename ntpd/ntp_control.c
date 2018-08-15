@@ -2625,7 +2625,7 @@ ctl_getitem(
 	    if (quiet_until <= current_time) {
 		    quiet_until = current_time + 300;
 		    msyslog(LOG_WARNING,
-			    "Possible 'ntpdx' exploit from %s#%u (possibly spoofed)",
+			    "Possible 'ntpdx' exploit from %s#%" PRIu16 " (possibly spoofed)",
 			    socktoa(rmt_addr), SRCPORT(rmt_addr));
 	    }
 	reqpt = reqend; /* never again for this packet! */
