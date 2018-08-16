@@ -7,15 +7,15 @@ from waflib.Logs import pprint
 cmd_map = {
     ("main/ntpd/ntpd", "-invalid"): br'.*must be run as root, not uid.*',
     ("main/ntpclients/ntpdig", "time.apple.com"): br'.*time.apple.com.*',
-    ("main/ntpfrob/ntpfrob", "-h"): br'.*illegal option.*',
+    ("main/ntpfrob/ntpfrob", "-h"): br'usage:',
     ("main/ntpfrob/ntpfrob", "-b 100000"):
-        br".*Bumping clock by 100000 microseconds.*",
-    ("main/ntpclients/ntpkeygen", "-M"):
-        br'.*Generating new md5 file and link.*',
+        br"Bumping clock by 100000 microseconds",
+    ("main/ntpclients/ntpkeygen", None):
+        br'Generating new ',
     ("main/ntpclients/ntpq", "-p"): br'.*remote.*jitter.*',
     ("main/ntptime/ntptime", None):
-        br'.*ntp_gettime\(\) returns code 0 \(OK\).*',
-    ("main/attic/sht", "2:r"): br'.*reader.*',
+        br'ntp_gettime\(\) returns code 0 \(OK\)',
+    ("main/attic/sht", "2:r"): br'reader',
 
     # Perl library
     #       ("main/ntpclients/ntptrace", ""): br'',
