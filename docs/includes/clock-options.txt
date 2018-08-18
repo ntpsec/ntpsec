@@ -5,7 +5,7 @@
   This command is used to configure reference clocks.
   The required _drivername_ argument is the shortname of a driver type
   (e.g. +shm+, +nmea+, +generic+;
-  see the link:refclock.html [Reference Clock Drivers]
+  see the link:refclock.html[Reference Clock Drivers]
   page for a full list. The options are interpreted as follows:
 
   +unit+;;
