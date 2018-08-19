@@ -220,7 +220,7 @@ try:
                 # make sure it is a temperature
                 temp = float(output[0])
                 break
-            except:
+            except ValueError:
                 # bad data, try aagin
                 fail = True
                 if args.verbose:

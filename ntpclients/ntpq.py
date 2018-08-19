@@ -354,7 +354,7 @@ usage: help [ command ]
         if line.startswith("&"):
             try:
                 idx = int(line[1:].split()[0])
-            except:
+            except ValueError:
                 self.warn("Invalid index literal.\n")
                 return -1
             if idx < 0 or idx >= 2**16-1:
@@ -368,7 +368,7 @@ usage: help [ command ]
         else:
             try:
                 associd = int(line.split()[0])
-            except:
+            except ValueError:
                 self.warn("Invalid associd literal.\n")
                 return -1
             if (associd != 0 and

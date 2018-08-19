@@ -39,7 +39,7 @@ zone = 0
 while True:
     try:
         f = open('/sys/class/thermal/thermal_zone{0}/temp'.format(zone), 'r')
-    except:
+    except IOError:
         break
     for line in f:
         temp = float(line) / 1000
