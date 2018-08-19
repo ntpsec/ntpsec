@@ -909,6 +909,7 @@ def bin_test(ctx):
     from wafhelpers.bin_test import cmd_bin_test
     cmd_bin_test(ctx, config)
 
+
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
     ("build", BuildContext),
@@ -945,6 +946,7 @@ def init_handler(ctx):
         obj.variant = v
         pprint("YELLOW", "--- %sing %s ---" % (cmd, v))
         obj.execute()
+
 
 commands = (
     ("install", "init_handler", None),

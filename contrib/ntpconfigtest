@@ -14,8 +14,8 @@ try:
     with gzip.open(config_file_name, 'rb') as f:
         file_content = f.read()
 except:
-        print("ERROR: can not read your %s" % (config_file_name))
-        sys.exit(1)
+    print("ERROR: can not read your %s" % (config_file_name))
+    sys.exit(1)
 
 tests = (
     ('CONFIG_CPU_FREQ_GOV_PERFORMANCE', 'For best performance'),

@@ -26,6 +26,7 @@ def manpage_subst_fun(self, code):
 
     # extract the vars foo into lst and replace @foo@ by %(foo)s
     lst = []
+
     def repl(match):
         g = match.group
         if g(1):

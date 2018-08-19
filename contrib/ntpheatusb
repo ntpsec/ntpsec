@@ -97,10 +97,10 @@ Discrete PID control
         return "D_value=%s, I_value=%s" % (self.D_value, self.I_value)
 
     def setPoint(self, set_point):
-            """
-            Initialize the setpoint of PID
-            """
-            self.set_point = set_point
+        """
+        Initialize the setpoint of PID
+        """
+        self.set_point = set_point
 
     def update(self, current_value):
         """
@@ -116,15 +116,16 @@ Discrete PID control
         self.Integrator = self.Integrator + self.error
 
         if self.Integrator > self.Integrator_max:
-                self.Integrator = self.Integrator_max
+            self.Integrator = self.Integrator_max
         elif self.Integrator < self.Integrator_min:
-                self.Integrator = self.Integrator_min
+            self.Integrator = self.Integrator_min
 
         self.I_value = self.Integrator * self.Ki
 
         PID = self.P_value + self.I_value + self.D_value
 
         return PID
+
 
 # Work with argvars
 parser = argparse.ArgumentParser(description="make heat with USB relay")

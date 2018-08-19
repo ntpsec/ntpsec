@@ -81,6 +81,7 @@ def pythonize(rfp, wfp):
         if not skipto:
             wfp.write(line)
 
+
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         pythonize(sys.stdin, sys.stdout)
