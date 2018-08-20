@@ -1,4 +1,5 @@
 = Trimble Palisade/Thunderbolt/Acutime & Praecis Receivers =
+include::html.include[]
 
 [width="100%",cols="<50%,<50%",frame="none",grid="none"]
 |==============================================================

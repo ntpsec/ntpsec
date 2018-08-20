@@ -1,4 +1,5 @@
 = ntpwait - wait until ntpd is in synchronized state =
+include::html.include[]
 
 == Manual Pages ==
 

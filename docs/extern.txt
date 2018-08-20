@@ -1,4 +1,5 @@
 = External Clock Discipline and the Local Clock Driver =
+include::html.include[]
 
 The NTPv4 implementation includes provisions for an external clock,
 where the system clock is implemented by some external hardware device.

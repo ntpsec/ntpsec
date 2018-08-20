@@ -1,4 +1,5 @@
 = Arbiter 1088A/B GPS Receiver =
+include::html.include[]
 
 == Synopsis ==
 

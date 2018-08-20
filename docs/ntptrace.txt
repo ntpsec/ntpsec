@@ -1,4 +1,5 @@
 = ntptrace - trace a chain of NTP servers back to the primary source =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

@@ -1,4 +1,5 @@
 = How to build new GENERIC clocks =
+include::html.include[]
 
 Here is an attempt to sketch out what you need to do in order to add
 another clock to the generic driver: Currently the implementation is being

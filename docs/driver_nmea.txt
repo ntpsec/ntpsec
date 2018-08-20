@@ -1,4 +1,5 @@
 = Generic NMEA GPS Receiver =
+include::html.include[]
 
 == Synopsis ==
 

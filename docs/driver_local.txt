@@ -1,4 +1,5 @@
 = Undisciplined Local Clock =
+include::html.include[]
 
 == Synopsis ==
 

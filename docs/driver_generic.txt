@@ -1,4 +1,5 @@
 = Generic Reference Driver =
+include::html.include[]
 
 == Name ==
 

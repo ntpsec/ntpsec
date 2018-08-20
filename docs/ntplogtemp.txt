@@ -1,4 +1,5 @@
 = ntplogtemp - log system temperature data for use by ntpviz =
+include::html.include[]
 //FIXME: Image duplicates the one used for panda.txt
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]

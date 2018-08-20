@@ -1,4 +1,5 @@
 = Performance Metrics =
+include::html.include[]
 
 == Related Links ==
 

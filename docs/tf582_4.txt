@@ -1,4 +1,5 @@
 = European Automated Computer Time Services =
+include::html.include[]
 
 The National Laboratories of many European countries provide
 time information in a standardised format, an ITU-R

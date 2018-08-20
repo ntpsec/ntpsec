@@ -1,4 +1,5 @@
 = ntpfrob - frob the local clock hardware =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

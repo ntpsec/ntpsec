@@ -1,4 +1,5 @@
 = Clock Filter Algorithm =
+include::html.include[]
 
 The clock filter algorithm processes the offset and delay samples
 produced by the on-wire protocol for each peer process separately. It

@@ -1,4 +1,5 @@
 = Reference Clock Support =
+include::html.include[]
 
 image:pic/stack1a.jpg[gif]Master Time Facility at the
 {millshome}lab.html[UDel Internet Research

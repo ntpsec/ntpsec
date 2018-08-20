@@ -1,4 +1,5 @@
 = Mitigation Rules and the prefer Keyword =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

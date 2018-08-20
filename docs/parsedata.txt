@@ -1,4 +1,5 @@
 = NTP PARSE clock data formats =
+include::html.include[]
 
 The parse driver currently supports several clocks with different query
 mechanisms. In order for you to find a sample that might be similar to a

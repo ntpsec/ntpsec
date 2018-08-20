@@ -1,4 +1,5 @@
 = ntpleapfetch - fetch and manage local leap file =
+include::html.include[]
 
 //FIXME: Image duplicates the one used for ntpfrob
 [cols="10%,90%",frame="none",grid="none",style="verse"]

@@ -1,4 +1,5 @@
 = JJY Receivers =
+include::html.include[]
 
 == Synopsis ==
 

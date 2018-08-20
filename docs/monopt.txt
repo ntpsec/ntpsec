@@ -1,4 +1,5 @@
 = Monitoring Commands and Options =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

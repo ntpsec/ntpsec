@@ -1,4 +1,5 @@
 = NIST/USNO/PTB Modem Time Services =
+include::html.include[]
 
 == Synopsis ==
 

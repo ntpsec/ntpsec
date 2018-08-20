@@ -1,4 +1,5 @@
 = Clock State Machine =
+include::html.include[]
 
 == Table of Contents ==
 

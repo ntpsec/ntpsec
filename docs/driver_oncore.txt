@@ -1,4 +1,5 @@
 = Motorola Oncore GPS receiver =
+include::html.include[]
 
 == Synopsis ==
 

@@ -1,4 +1,5 @@
 = Pulse-Per-Second (PPS) Signal Interfacing =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

@@ -1,4 +1,5 @@
 = Motorola ONCORE - The Shared Memory Interface =
+include::html.include[]
 
 == Introduction ==
 

@@ -1,4 +1,5 @@
 = ntpkeygen - generate public and private keys =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

@@ -1,4 +1,5 @@
 = Leap Second Smearing with NTP =
+include::html.include[]
 
 By Martin Burnicki
 with some edits by Harlan Stenn

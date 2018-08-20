@@ -1,4 +1,5 @@
 = Rate Management and the Kiss-o'-Death Packet =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

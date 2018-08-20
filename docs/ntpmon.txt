@@ -1,4 +1,5 @@
 = ntpmon - real-time NTP status monitor =
+include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

@@ -1,4 +1,5 @@
 = Clock Select Algorithm =
+include::html.include[]
 
 The clock select algorithm determines from a set of sources, which are
 correct (_truechimers_) and which are not (_falsetickers_) according to

@@ -1,4 +1,5 @@
 = Clock Cluster Algorithm =
+include::html.include[]
 
 The clock cluster algorithm processes the truechimers produced by the
 clock select algorithm to produce a list of _survivors_. These survivors
