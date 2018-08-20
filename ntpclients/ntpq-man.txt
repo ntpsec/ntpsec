@@ -1,10 +1,7 @@
 = ntpq(1) =
-:doctype: manpage
-:man source: NTPsec
 :man version: @NTPSEC_VERSION@
-:man manual: NTPsec
+include::../docs/manual.include[]
 
-== NAME ==
 ntpq - standard NTP query program
 
 include::../docs/includes/ntpq-body.txt[]

@@ -1,10 +1,7 @@
 = ntpwait(8) =
-:doctype: manpage
-:man source: NTPsec
 :man version: @NTPSEC_VERSION@
-:man manual: NTPsec
+include::../docs/manual.include[]
 
-== NAME ==
 ntpwait - wait for ntpd to stabilize the system clock
 
 include::../docs/includes/ntpwait-body.txt[]

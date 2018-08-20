@@ -1,10 +1,7 @@
 = ntpdig(1) =
-:doctype: manpage
-:man source: NTPsec
 :man version: @NTPSEC_VERSION@
-:man manual: NTPsec
+include::../docs/manual.include[]
 
-== NAME ==
 ntpdig - standard Simple Network Time Protocol client program
 
 include::../docs/includes/ntpdig-body.txt[]

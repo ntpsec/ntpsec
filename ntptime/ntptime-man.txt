@@ -1,10 +1,7 @@
 = ntptime(8) =
-:doctype: manpage
-:man source: NTPsec
 :man version: @NTPSEC_VERSION@
-:man manual: NTPsec
+include::../docs/manual.include[]
 
-== NAME ==
 ntptime - read and set kernel time variables
 
 include::../docs/includes/ntptime-body.txt[]
