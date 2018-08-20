@@ -1009,6 +1009,7 @@ python_scripts = [
 
 
 def build(ctx):
+    from waflib.Logs import verbose
     ctx.load('waf', tooldir='wafhelpers/')
     ctx.load('asciidoc', tooldir='wafhelpers/')
     ctx.load('rtems_trace', tooldir='wafhelpers/')
@@ -1018,6 +1019,10 @@ def build(ctx):
         # .pyc and .pyo files) in a source directory, compilation to
         # the build directory never happens.  This is how we foil that.
         ctx.add_pre_fun(lambda ctx: ctx.exec_command("rm -f pylib/*.py[co]"))
+
+    if verbose > 0:  # Pass Verbosity to asciidoc and a2x
+        ctx.env.A2X_FLAGS += ["-v"]
+        ctx.env.ASCIIDOC_FLAGS += ["-v"]
 
     if ctx.env.ENABLE_DOC_USER:
         if ctx.variant != "main":
@@ -1079,7 +1084,7 @@ def build(ctx):
             ctx.options.all_tests = True
 
             # Print log if -v is supplied
-            if ctx.options.verbose:
+            if verbose > 0:
                 ctx.add_post_fun(test_print_log)
 
         # Write test log to a file
