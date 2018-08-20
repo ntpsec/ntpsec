@@ -1,0 +1,27 @@
+// All names and websites particular to the project's name, hosting location,
+// and public communications channels indirect through here.
+:project-domain: ntpsec.org
+:project-website: https://www.ntpsec.org
+:project-weblink: https://www.ntpsec.org[www.ntpsec.org]
+:project-issuetracker: https://gitlab.com/NTPsec/ntpsec/issues
+:project-contact: https://www.ntpsec.org/channels.html
+:project-security-list: security@ntpsec.org
+:project-bug-list: bugs@ntpsec.org
+:millshome: http://www.eecis.udel.edu/~mills/
+:GPSD: http://www.catb.org/gpsd/
+:ntpconf: ntp.conf
+// Annoyingly, these have to be *manually* synchronized with the headers
+// on their manual pages - asciidoc doesn't expand attributes in header lines.
+:ntpdconfman: ntp.conf(5)
+:ntpfrobman: ntpfrob(8)
+:ntpkeygenman: ntpkeygen(8)
+:ntpkeysman: ntp.keys(5)
+:ntpdman: ntpd(8)
+:ntpmonman: ntpmon(1)
+:ntpleapfetch: ntpleapfetch(8)
+:ntpqman: ntpq(1)
+:ntptimeman: ntptime(8)
+:ntpwaitman: ntpwait(8)
+:ntpdigman: ntpdig(1)
+:ntpvizman: ntpviz(1)
+
