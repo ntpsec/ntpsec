@@ -50,20 +50,22 @@ def run(cmd, reg):
 
     if check:
         pprint("GREEN", "  OK")
-        return False
+        return True
     else:
         pprint("RED", "  FAILED")
-        return True
+        return False
 
 
 def cmd_bin_test(ctx, config):
-    fail = True
+    fails = 0
 
     for cmd in sorted(cmd_map):
-        fail = run(cmd, cmd_map[cmd])
+        if not run(cmd, cmd_map[cmd]):
+            fails += 1
 
-    if fail:
-        pprint("RED", "Tests failed!")
-        # ctx.fatal("Failed")
+    if 1 == fails:
+        ctx.fatal("1 binary test failed!")
+    elif 1 < fails:
+        ctx.fatal("%d binary tests failed!" % fails)
 
 # cmd_bin_test(None, None)
