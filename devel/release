@@ -21,7 +21,7 @@ set -x		# Echo commands
 TAR=ntpsec-${V}.tar.gz
 
 # Commit pending modifications to the repository.
-git commit -Ssecurity@ntpsec.org -a -s -m 'version ${V}
+git commit -Ssecurity@ntpsec.org -a -s -m 'version ${V}'
 
 # Tag the new head version
 git tag -u ${K} -m 'version ${V}' NTPsec_${UV}

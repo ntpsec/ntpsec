@@ -10,7 +10,9 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== 2018-08-28 1.1.2 ==
+== Reposatory Head ==
+
+== 2018-08-28: 1.1.2 ==
 
 Use data minimization on client requests
   https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/

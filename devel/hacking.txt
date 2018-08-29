@@ -605,6 +605,14 @@ each release.
 . Modify the .../NEWS file, changing the "Repository head"
   to the current date and the version string.
 
+. Run ./waf configure
+
+. Run ./waf build
+
+. cd ./devel
+
 . Run the "release" script in this (devel) directory.
+
+. Post release announcement
 
 //end
