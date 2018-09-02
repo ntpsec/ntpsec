@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+ntpmon+ [hostname]
++ntpmon+ [-dhnuV] [-D lvl] [-l logfile] [host]
 
 == Description ==
 
@@ -82,6 +82,16 @@ x:: Cleanly terminate the program.
 ?:: Display help screen
 
 == Options ==
+
+-d:: Increase output debug message level
+- may appear multiple times
+
+-D:: Set the output debug message level
+- may appear multiple times
+
+-h:: Print a usage message.
+
+-l:: Logs debug messages to the provided filename
 
 -n:: Show IP addresses (vs. hostnames)
 

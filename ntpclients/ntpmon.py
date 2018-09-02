@@ -193,26 +193,26 @@ class OutputContext:
 
 
 usage = '''
-USAGE: ntpmon [-nudV] [-l logfile] [-D lvl] [host]
+USAGE: ntpmon [-dhnuV] [-D lvl] [-l logfile] [host]
   Flg Arg Option-Name    Description
-   -n no  numeric         Numeric host addresses
-   -u no  units           Display time with units.
    -d no  debug-level     Increase output debug message level
                                 - may appear multiple times
    -D Int set-debug-level Set the output debug message level
                                 - may appear multiple times
-   -l Str logfile         Logs debug messages to the provided filename
    -h no  help            Print a usage message.
+   -l Str logfile         Logs debug messages to the provided filename
+   -n no  numeric         Numeric host addresses
+   -u no  units           Display time with units.
    -V opt version         Output version information and exit
 '''
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "VhnudD:l:",
-                                             ["version", "numeric", "units",
-                                              "debug", "set-debug-level=",
-                                              "logfile=", "help"])
+                                             "dD:hl:nuV",
+                                             ["debug", "help", "logfile=",
+                                              "numeric", "units",
+                                              "set-debug-level=", "version"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -230,25 +230,25 @@ if __name__ == '__main__':
     defaultlog = "ntpmon.log"
 
     for (switch, val) in options:
-        if switch in ("-V", "--version"):
-            print("ntpmon %s" % ntp.util.stdversion())
-            raise SystemExit(0)
-        elif switch in ("-h", "--help"):
-            print(usage)
-            raise SystemExit(0)
-        elif switch in ("-n", "--numeric"):
-            showhostnames = False
-        elif switch in ("-u", "--units"):
-            showunits = True
-        elif switch in ("-d", "--debug"):
+        if switch in ("-d", "--debug"):
             debug += 1
         elif switch in ("-D", "--set-debug-level"):
             errmsg = "Error: -D parameter '%s' not a number\n"
             debug = ntp.util.safeargcast(val, int, errmsg, usage)
+        elif switch in ("-h", "--help"):
+            print(usage)
+            raise SystemExit(0)
         elif switch in ("-l", "--logfile"):
             if logfp is not None:
                 logfp.close()
             logfp = open(val, "a", 1)  # 1 => line buffered
+        elif switch in ("-n", "--numeric"):
+            showhostnames = False
+        elif switch in ("-u", "--units"):
+            showunits = True
+        elif switch in ("-V", "--version"):
+            print("ntpmon %s" % ntp.util.stdversion())
+            raise SystemExit(0)
 
     if (logfp is None) and (debug > 0):
         logfp = open(defaultlog, "a", 1)
