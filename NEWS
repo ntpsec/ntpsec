@@ -53,7 +53,7 @@ The following NTP Classic CVEs announced in February 2018 do not affect NTPsec:
 
 We have dropped support for Broadcast servers.  We had kept it for
 older desktop operating systems listening on the local network
-broadcast domain, a use case that is now no longer in use at sane
+broadcast domain, a use case that is no longer employed in sane
 environments, and no longer necessary for modern desktop OSs.
 
 It is now possible to unpeer refclocks using a type/unit specification
@@ -108,8 +108,8 @@ It prepares your system for an NTPsec source build by installing all required
 dependencies on the build host.
 
 Extra digits of precision are now output in numerous places.  The
-driftfile now output 6 digits past the decimal point instead of 3.  The
-stats files now output 9 digits past the decimal point instead of 6 for
+driftfile now stores 6 digits past the decimal point instead of 3.  The
+stats files now stores 9 digits past the decimal point instead of 6 for
 some fields. ntpq and ntpmon also report extra digits of precision in
 multiple places.  These changes may break simple parsing scripts.
 
@@ -153,7 +153,7 @@ functional changes.  Obsolete options have been dropped, logging is
 done a bit differently, and the synchronization-distance computation has
 been brought up to date with ntpd's. Also, this version can be told to
 collect multiple samples and use whichever has the lowest combination
-of stratum and synch distance.
+of stratum and synchronization distance.
 
 A new tool for time-service operators, ntpmon, supports real-time
 monitoring of your NTP installation's status.
@@ -293,9 +293,12 @@ forward-ported from Classic:
 [Bug 2965] Local clock didn't work since 4.2.8p4.
 [Bug 2969] Segfault from ntpq/mrulist when looking at server with lots of clients
 
-We regard NTP Classic's [Bug 3012] (CVE-2016-1549) Sybil
-vulnerability: ephemeral association attack (Credit: Matthew van Gundy
-of Cisco ASIG) as a duplicate of CVE-2015-7974 (see 0.9.1 release
+We regard the following NTP Classic bug -
+
+[Bug 3012] (CVE-2016-1549) Sybil vulnerability: ephemeral association attack
+(Credit: Matthew van Gundy of Cisco ASIG)
+
+as a duplicate of CVE-2015-7974 (see 0.9.1 release
 notes) and it is WONTFIX for the time being: it is
 correct-but-unfortunate behavior consequent to confusing and
 inflexible semantics of ntp.conf's access control language, and we
