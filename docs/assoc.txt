@@ -36,7 +36,7 @@ _preemptable_ and _ephemeral_. Persistent associations are mobilized by
 a configuration command and never demobilized. Preemptable associations
 are mobilized by a configuration command which
 includes the +preempt+ option or upon arrival of an automatic server
-discovery packet. They are are demobilized by timeout or when preempted
+discovery packet. They are demobilized by timeout or when preempted
 by a "better" server, as described on the link:discover.html[Automatic
 Server Discovery Schemes] page.
 
@@ -83,7 +83,7 @@ options should not be used with reference clock drivers.
 Symmetric active/passive mode is intended for configurations where a
 clique of low-stratum peers operate as mutual backups for each other.
 Each peer operates with one or more primary reference sources, such as a
-reference clock, or a set of secondary (stratum, 2) servers known to be
+reference clock, or a set of secondary (stratum 2) servers known to be
 reliable and authentic. Should one of the peers lose all reference
 sources or simply cease operation, the other peers will automatically
 reconfigure so that time and related values can flow from the surviving
@@ -95,7 +95,7 @@ configuration.
 A symmetric active peer sends a symmetric active (mode 1) message to a
 designated peer. If a matching configured symmetric active association
 is found, the designated peer returns a symmetric active message. If no
-matching association is found, the designated peer mobilizes a ephemeral
+matching association is found, the designated peer mobilizes an ephemeral
 symmetric passive association and returns a symmetric passive (mode 2)
 message. Since an intruder can impersonate a symmetric active peer and
 cause a spurious symmetric passive association to be mobilized,
@@ -107,7 +107,7 @@ which formerly set up a symmetric active association is now a synonym
 for +server+. Servers which receive symmetric active messages will
 immediately reply with symmetric passive responses without setting up
 any new association; essentially they treat such messages exactly
-like client-mode messages aside from putting a different mode number
+like client-mode messages, aside from putting a different mode number
 into the response.
 
 [[broad]]
@@ -200,7 +200,7 @@ hr), respectively.
 Occasionally it is necessary to send packets temporarily at intervals
 less than the poll interval. For instance, with the +burst+ and +iburst+
 options of the link:confopt.html[+server+] command, the poll program
-sends a burst of several packets at 2-sec intervals. In either case the
+sends a burst of several packets at 2 second intervals. In either case the
 poll program avoids sending needless packets if the server is not
 responding. The client begins a burst with a single packet. When the
 first packet is received from the server, the client continues with the
