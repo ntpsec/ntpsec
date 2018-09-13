@@ -5,7 +5,7 @@ several different but compatible licenses.  Each will generally be
 found near a year or years of copyright declaration.
 
 Much of the existing and historical code is licensed under the "NTP
-License".  Additionally, small portions of the code is licensed under
+License".  Additionally, small portions of the code are licensed under
 the BSD 3-clause and MIT licenses.
 
 Our preferred license for new code contributions is BSD 2-clause.
@@ -18,10 +18,10 @@ licensing, and contributor credits.
 A great deal of effort has been spent researching old file archives
 and old source control data sets and then integrating and correcting
 it all into the git history of this repository.  As near as we can
-currently tell, this git repo contains all of the currently surviving
+tell, this git repo contains all of the currently surviving
 history of the NTP reference implementation.  If you know of or
-possess tarballs or source trees of the project not contained in this
-git repo, please let us know, so we can add them.
+possess tarballs or source trees of the project that are not contained
+in this git repo, please let us know, so that we can add them.
 
 
 == Creative Commons Attribution 4.0 International license ==
