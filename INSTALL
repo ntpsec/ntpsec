@@ -100,7 +100,7 @@ specific platforms follow this section.
 
 Under Unix, the simplest way to compile this package is:
 
-  1. `cd' to the directory containing the package's source code and
+  1. `cd' to the directory containing the package's source code.
 
   2. Run `./buildprep' as root to get your prerequisites installed.
 
@@ -108,23 +108,23 @@ Under Unix, the simplest way to compile this package is:
   You may want to add configuration options after the verb 'configure';
   see below.
 
-  4. Invoke `./waf build' to compile the package.
+  4. Run `./waf build' to compile the package.
 
-  5. Invoke `./waf install' to install the programs and any data files and
+  5. Run `./waf install' to install the programs and any data files and
      documentation.
 
-  6. You can uninstall cleanly by invoking `./waf uninstall' as root.
+  6. You can uninstall cleanly by running `./waf uninstall' as root.
 
   7. Look under "Boot script setup" in wscript for how to set up
      boot time startup of ntpd; this will vary according to your
      init system.
 
   8. You can remove the program binaries and object files from the
-     source code directory by typing `./waf clean'.
+     source code directory by running `./waf clean'.
 
   9. To also remove the files that `./waf configure' created (so you can
      configure and compile the package for a different kind of
-     computer), type `./waf distclean'.
+     computer), run `./waf distclean'.
 
 === Solaris ===
 
@@ -198,7 +198,7 @@ These are unlikely to affect normal operation.  However, there is a configure
 operation, --enable-classic-mode, that restores certain legacy behaviors. This
 is not recommended, as it makes the code a little bulkier and slower.
 
-Here's what it presently does:
+Here's what it currently does:
 
 * Reverts logging to the old format that designates clocks with magic
   addresses rather than the driver shortname and unit number.
