@@ -41,7 +41,7 @@ include::html.include[]
 
 [[drift]] drift::
   In an NTP context, drift refers to the frequency offset of a clock crystal
-  in an NTP host that causes the system time to slowly drift.  It is
+  in an NTP host that causes the system time to drift slowly.  It is
   usually  expressed in a parts-per-million (PPM) offset from its
   nominal frequency. It changes, slowly, in response to environmental
   factors (mainly ambient temperature). ntpd measures drift by

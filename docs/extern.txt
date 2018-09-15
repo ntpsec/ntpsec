@@ -20,7 +20,7 @@ necessary to provide backup, for instance, if the external clock
 or protocol were to fail, and synchronization service fall back to other
 means, such as a local reference clock or another NTP server. In
 addition, when the external clock and driver are in control, some means
-needs to be provided for the clock driver to pass on status information
+needs to be provided for the clock driver to pass on the status information
 and error statistics to the NTP daemon.
 
 Control and monitoring functions for the external clock and driver are
@@ -36,7 +36,7 @@ applications to determine the operating parameters of the discipline.
 
 When the external clock is enabled, +ntpd+ does not discipline the
 system clock, nor does it maintain the error statistics. In this case,
-the external clock and driver do this using mechanisms unknown to
+the external clock and driver do that using mechanisms unknown to
 +ntpd+; however, in this case the kernel state variables are retrieved
 at 64-s intervals by the Local Clock driver and used by the clock
 selection and mitigation algorithms to determine the system variables

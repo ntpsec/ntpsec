@@ -99,7 +99,7 @@ refclock trimble unit 0 subtype 2 time1 0.020
     will blink if using an interface module; this indicates that the receiver
 	has entered a state that is usable by the driver.
 ..  If the PPS is not produced after a few hours: The antenna placement may be
-    too poor, signal level mask values are too high, or PPS was disabled in the
+    suboptimal, the signal level mask values are too high, or PPS was disabled in the
     receiver. Relocate to a better position, or reset the receiver's
 	configuration to factory defaults.
 5.  Connect the host to 'Port A'.

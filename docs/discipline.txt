@@ -43,11 +43,11 @@ update _V~c~_.
 
 In PLL mode the frequency predictor is an integral of the offset over
 past updates, while the phase predictor is the offset amortized over
-time in order to avoid setting the clock backward. In FLL mode the phase
+time to avoid setting the clock backward. In FLL mode the phase
 predictor is not used, while the frequency predictor is similar to the
 NIST _lockclock_ algorithm. In this algorithm, the frequency predictor
 is computed as a fraction of the current offset divided by the time
-since the last update in order to minimize the offset at the next
+since the last update to minimize the offset at the next
 update.
 
 The discipline response in PLL mode is determined by the _time
@@ -55,8 +55,8 @@ constant_, which results in a "stiffness" depending on the jitter of the
 available sources and the wander of the system clock oscillator. The
 scaled time constant is also used as the poll interval described on the
 link:poll.html[Poll Program] page. However, in NTP symmetric mode, each
-peer manages its own poll interval and the two might not be the same. In
-such cases either peer uses the minimum of its own poll interval and
+peer manages its poll interval and the two might not be the same. In
+such cases, either peer uses the minimum of its poll interval and
 that of the other peer, which is included in the NTP packet header.
 
 [[loop]]
@@ -164,7 +164,7 @@ a residual frequency error less than 1 PPM. The measurement interval can
 be changed using the +stepout+ option of the
 link:miscopt.html#tinker[+tinker+] command.
 
-In order to reduce the clock offset error at restart, the reference
+In order to reduce the clock offset error when restarting, the reference
 implementation next disables oscillator frequency discipline and enables
 clock offset discipline with a small time constant; this is designed to
 quickly reduce the clock offset error without causing a frequency surge.
@@ -173,7 +173,7 @@ the clock offset error is usually no more than a millisecond. The
 measurement interval can be changed using the +stepout+ option of the
 link:miscopt.html#tinker[+tinker+] command.
 
-Another concern at restart is the time necessary for the select and
+Another concern when restarting is the time necessary for the select and
 cluster algorithms to refine and validate the initial clock offset
 estimate. Normally, this takes several updates before setting the system
 clock. As the default minimum poll interval in most configurations is
@@ -191,7 +191,7 @@ the local clock driver, ACTS modem driver or orphan mode is included in
 the system configuration, it may happen that one or more of them are
 selectable before one or more of the regular sources are selectable.
 When backup sources are included in the configuration, the reference
-implementation waits an interval of several minutes without regular
+implementation waits several minutes without regular
 sources before switching to backup sources; this is generally enough to
 avoid startup transients due to premature switching to backup sources.
 The interval can be changed using the +orphanwait+ option of the
