@@ -8,7 +8,7 @@
 [[driftfile]]
 +driftfile+ _driftfile_::
   This command specifies the complete path and name of the file used to
-  record the frequency of the local clock oscillator. This is the same
+  record the frequency of the local clock oscillator; this is the same
   operation as the +-f+ command line option. If the file exists, it is
   read at startup in order to set the initial frequency and then updated
   once per hour with the current frequency computed by the daemon. If
@@ -21,7 +21,7 @@ The file format consists of a single line containing a single floating
 point number, which records the frequency offset measured in
 parts-per-million (PPM). The file is updated by first writing the
 current drift value into a temporary file and then renaming this file
-to replace the old version. This implies that {ntpdman} must
+to replace the old version; this implies that {ntpdman} must
 have write permission for the directory the drift file is located in,
 and that file system links, symbolic or otherwise, should be avoided.
 
@@ -137,7 +137,7 @@ and so on is suppressed.
 
 +logfile+ _logfile_::
   This command specifies the location of an alternate log file to be
-  used instead of the default system _syslog(3)_ facility. This is the
+  used instead of the default system _syslog(3)_ facility; this is the
   same operation as the -l command line option.
 
 If your ntpd runs for a long time, you probably want to use logrotate or
@@ -166,7 +166,7 @@ the log file.
     If an address is not in the list, there are several possible ways
     to find a slot for it.
     . If the list has fewer than +mindepth+ entries, a slot is
-    allocated from the free list.  This is the normal case for a
+    allocated from the free list; this is the normal case for a
     server without a lot of clients.  If clients come and go, for
     example, laptops going between home and work, the default setup
     shows only the long term average.
@@ -195,7 +195,7 @@ the log file.
   If the difference between the current frequency and the last value
   written exceeds the threshold, the file is written and the +threshold+
   becomes the new threshold value. If the threshold is not exceeded, it
-  is reduced by half. This is intended to reduce the frequency of
+  is reduced by half; this is intended to reduce the frequency of
   unnecessary file writes for embedded systems with nonvolatile memory.
 
 [[phone]]
@@ -254,7 +254,7 @@ The variables operate as follows:
     normally .000015 s/s.
   +freq+ _freq_;;
     The argument becomes the initial value of the frequency offset in
-    parts-per-million. This overrides the value in the frequency file,
+    parts-per-million; this overrides the value in the frequency file,
     if present, and avoids the initial training state if it is not.
   +huffpuff+ _huffpuff_;;
     The argument becomes the new value for the experimental huff-n'-puff

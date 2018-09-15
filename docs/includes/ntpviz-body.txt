@@ -44,7 +44,7 @@ subset of comparative plots for multiple directories.
 
 -c or --clip::
     Normally all data are plotted.  This option limits the range of
-    the plots to the data between 1% and 99%.  This is useful for
+    the plots to the data between 1% and 99%; this is useful for
     ignoring a few spikes in the data.
 
 -d LOGDIR or --datadir LOGDIR::
@@ -109,12 +109,12 @@ rendered PNG.
 The following plots are available:
 
 --all-peer-jitters::
-   Report all peer jitters.  This is a different option name from
+   Report all peer jitters; this is a different option name from
    +--peer-jitters+ only because of a limitation in the Python
    standard library.
 
 --all-peer-offsets::
-   Report all peer offsets.  This is a different option name from
+   Report all peer offsets; this is a different option name from
    +--peer-offsets+ only because of a minor limitation in the Python
    standard library.
 
@@ -149,8 +149,8 @@ The following plots are available:
    there is a log file named temps in the log file directory.
 
 --local-stability::
-   RMS frequency-jitter plot from the loop statistics (field 6).
-   This is deviation from a root-mean-square extrapolation of the
+   RMS frequency-jitter plot from the loop statistics (field 6);
+   this is deviation from a root-mean-square extrapolation of the
    moving average of past frequency readings.
 
 --peer-jitters=host1[,host2...]::

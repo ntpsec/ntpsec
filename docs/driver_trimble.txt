@@ -96,7 +96,7 @@ refclock trimble unit 0 subtype 2 time1 0.020
 3.  Power up and allow the receiver to obtain UTC offset data. This can take
     13 to 30 minutes with outdoor placement, or up to a few hours indoors.
 4.  Optionally wait for the receiver to pulse its PPS output. The 'PPS' LED
-    will blink if using an interface module. This indicates that the receiver
+    will blink if using an interface module; this indicates that the receiver
 	has entered a state that is usable by the driver.
 ..  If the PPS is not produced after a few hours: The antenna placement may be
     too poor, signal level mask values are too high, or PPS was disabled in the

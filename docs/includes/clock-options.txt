@@ -9,7 +9,7 @@
   page for a full list. The options are interpreted as follows:
 
   +unit+;;
-    The 0-origin unit number of the device. Modifies the devicename.
+    The 0-origin unit number of the device; this modifies the devicename.
     If not specified, defaults to zero.
   +prefer+;;
     Marks the reference clock as preferred. All other things being

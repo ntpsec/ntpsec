@@ -46,7 +46,7 @@ when more than one server is available.
 
 In order to implement a reliable mitigation between ordinary NTP sources
 and the external clock source, a protocol is necessary between the local
-clock driver and the external clock driver. This is implemented using
+clock driver and the external clock driver; this is implemented using
 Boolean variables and certain bits in the kernel clock status word. The
 Boolean variables include the following:
 

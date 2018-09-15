@@ -81,7 +81,7 @@ read interactive format commands from the standard input.
   the peer name.
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
-  their state. This is equivalent to the +peers+ interactive command.
+  their state; this is equivalent to the +peers+ interactive command.
 +-k+ filename, +--keyfile+=filename::
   Specify a keyfile. ntpq will look in this file for the key specified
   with -a.
@@ -148,7 +148,7 @@ following.
 
 +delay+ 'milliseconds'::
   Specify a time interval to be added to timestamps included in requests
-  which require authentication. This is used to enable (unreliable)
+  which require authentication; this is used to enable (unreliable)
   server reconfiguration over long delay network paths or between
   machines whose clocks are unsynchronized. Actually the server does not
   now require timestamps in authenticated requests, so this command may

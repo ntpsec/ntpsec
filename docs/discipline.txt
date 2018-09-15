@@ -74,7 +74,7 @@ time constant of 2048 s. A change in the poll interval changes the time
 constant by a corresponding amount. The Nyquist criterion requires the
 sample interval to be not more than half the time constant or 1024 s.
 The clock filter guarantees at least one sample in eight poll intervals,
-so the sample interval is not more than 512 s. This would be described
+so the sample interval is not more than 512 s; this would be described
 as oversampling by a factor of two. Finally, the PLL parameters have
 been chosen for a damping factor of 2, which results in a much faster
 risetime than with critical damping, but results in modest overshoot of
@@ -166,7 +166,7 @@ link:miscopt.html#tinker[+tinker+] command.
 
 In order to reduce the clock offset error at restart, the reference
 implementation next disables oscillator frequency discipline and enables
-clock offset discipline with a small time constant. This is designed to
+clock offset discipline with a small time constant; this is designed to
 quickly reduce the clock offset error without causing a frequency surge.
 This configuration is continued for an interval of five-min, after which
 the clock offset error is usually no more than a millisecond. The
@@ -181,7 +181,7 @@ about one minute, it can take several minutes before setting the system
 clock. The +iburst+ option of the link:assoc.html#burst[+server+]
 command changes the behavior at restart and is recommended for
 client/server configurations. When this option is enabled, the client
-sends a volley of six requests at intervals of two seconds. This usually
+sends a volley of six requests at intervals of two seconds; this usually
 ensures a reliable estimate is available in about ten seconds before
 setting the clock. Once this initial volley is complete, the procedures
 described above are executed.
@@ -192,7 +192,7 @@ the system configuration, it may happen that one or more of them are
 selectable before one or more of the regular sources are selectable.
 When backup sources are included in the configuration, the reference
 implementation waits an interval of several minutes without regular
-sources before switching to backup sources. This is generally enough to
+sources before switching to backup sources; this is generally enough to
 avoid startup transients due to premature switching to backup sources.
 The interval can be changed using the +orphanwait+ option of the
 link:miscopt.html#tos[+tos+] command.

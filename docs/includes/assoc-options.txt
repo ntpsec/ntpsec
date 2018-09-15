@@ -5,7 +5,7 @@
 
 +bias+::
   Add the command argument, a floating-point value in seconds, to the
-  time offset (&theta;) computed for this server.  May be useful if
+  time offset (&theta;) computed for this server; this may be useful if
   you are a client on a network connection such as an ADSL line where
   there is a predictable asymmetry between upstream and downstream
   flight times.  One way you might see this is if you use a fixed set
@@ -18,7 +18,7 @@
   the usual one. The packet spacing is normally 2 s; however, the
   spacing between the first and second packets can be changed with the
   calldelay command to allow additional time for a modem or ISDN call to
-  complete. This is designed to improve timekeeping quality with the
+  complete; this is designed to improve timekeeping quality with the
   +server+ command.
 
 +iburst+::
@@ -26,7 +26,7 @@
   of the usual one. The packet spacing is normally 2 s; however, the
   spacing between the first and second packets can be changed with the
   calldelay command to allow additional time for a modem or ISDN call to
-  complete. This is designed to speed the initial synchronization
+  complete; this is designed to speed the initial synchronization
   acquisition with the +server+ command, and when
   {ntpdman} is started with the +-q+ option.
 
