@@ -175,7 +175,7 @@ generated index page, and the 'footer' file will be added almost at
 the bottom of the body of the generated index page.
 
 The contents are at the discretion of the operator. One might put
-links to other related webpages, or notes on the server OS, software
+links to other related web pages, or notes on the server OS, software
 versions, hardware configuration, etc. into either of these files,
 as desired.
 

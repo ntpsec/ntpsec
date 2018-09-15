@@ -1,4 +1,4 @@
-= ntpleapfetch - fetch and manage local leap file =
+= ntpleapfetch - fetch and manage local leapfile =
 include::html.include[]
 
 //FIXME: Image duplicates the one used for ntpfrob
@@ -7,7 +7,7 @@ include::html.include[]
 |image:pic/pogo3a.gif[]|
 {millshome}pictures.html[from 'Pogo', Walt Kelly]
 
-Occasionally, the leap-second needs an update.
+Occasionally, the leap second needs an update.
 
 |==============================
 

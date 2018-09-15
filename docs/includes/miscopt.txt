@@ -4,7 +4,7 @@
 * link:miscopt.html#enable[disable - disable options]
 * link:miscopt.html#includefile[includefile - specify include file]
 * link:miscopt.html#interface[interface - specify which local network addresses to use]
-* link:miscopt.html#leapfile[leapfile - specify leapseconds file]
+* link:miscopt.html#leapfile[leapfile - specify leap seconds file]
 * link:miscopt.html#logconfig[logconfig - configure log file]
 * link:miscopt.html#mru[mru - control monitor MRU list limits]
 * link:miscopt.html#phone[phone - specify modem phone numbers]

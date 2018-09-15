@@ -85,8 +85,8 @@ and that file system links, symbolic or otherwise, should be avoided.
 
 [[leapfile]]
 +leapfile+ 'leapfile'::
-  This command loads the NIST leapseconds file and initializes the
-  leapsecond values for the next leapsecond time, expiration time and
+  This command loads the NIST leap seconds file and initializes the
+  leapsecond values for the next leap second time, expiration time and
   TAI offset. The file can be obtained using +ntpleapfetch+.
 +
 The _leapfile_ is scanned when +ntpd+ processes the +leapfile+

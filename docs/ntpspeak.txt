@@ -152,7 +152,7 @@ include::html.include[]
    second notifications are issued as Bulletin C by the
    https://www.iers.org/IERS/EN/Home/home_node.html[International
    Earth Rotation Service] when required, and obeyed by national time
-   authorities.  The current leap-second offset is automatically
+   authorities.  The current leap second offset is automatically
    propagated through the <<GPS>> system.
 
 [[leapfile]] leapfile::

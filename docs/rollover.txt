@@ -109,7 +109,7 @@ The basics of Unix time have already been described.
 second era.  It will not roll over to zero but rather to the minimum
 *negative* Unix time, which will report as 1901-12-13T20:45:52.
 
-Unix time is leap-second-corrected. When a leap second is inserted,
+Unix time is leap second-corrected. When a leap second is inserted,
 the Unix counter stutters - increases during the leap second, then
 drops back a second so that the same counter value represents two
 distinct times.  If a leap second were to be deleted, the counter
@@ -117,13 +117,13 @@ would skip that second.
 
 The possibility of stutter or skip also means that in order to compute
 elapsed time in seconds between two Unix times, you need to know
-the leap-second offset at each time.  It is not guaranteed that
+the leap second offset at each time.  It is not guaranteed that
 these offsets are the same if the interval crosses midnight  at the
 end of any calendar month. To date in 2018,  IERS (the International
 Earth Rotation service) has performed all corrections just after
 midnight of June 31 and December 31 respectively.
 
-The purpose of leap-second correction is to keep Unix time
+The purpose of leap second correction is to keep Unix time
 synchronized to the solar calendar.  With it, Unix time after
 1972-01-01T00:00:00 (the start date of UTC, Universal Coordinated
 Time) coincides with UTC.  Unix time before 1972 was an approximation
@@ -132,7 +132,7 @@ of GMT (Greenwich Mean Time) without leap seconds.
 On POSIX-compliant Unix systems (which is now effectively all) Unix
 time can be retrieved with nanosecond precision; some older versions
 supported only millisecond precision.  The subseconds counter is not
-involved in any of the rollover or leap-second issues with the
+involved in any of the rollover or leap second issues with the
 seconds counter.
 
 The Unix 32-bit rollover may fizzle the way Y2K did, and will if a
@@ -156,7 +156,7 @@ Numbering]. NTP time has a subsecond part in units of 2^-32^
 seconds, which does not participate in the seconds counter's rollover
 problems.
 
-NTP time is leap-second corrected, and the reference implementation
+NTP time is leap second corrected, and the reference implementation
 may exhibit stutter or skip.  There is a controversial technique
 called https://developers.google.com/time/smear["leap smearing"] used
 by some servers that avoids these by changing the length of the issued
@@ -189,11 +189,11 @@ a more detailed discussion of accuracy budgets see the
 http://www.catb.org/gpsd/time-service-intro.html[Introduction to Time
 Service].
 
-Raw GPS time is not leap-second corrected, but the satellite messages
-include a leap-second offset field in a special update approximately
+Raw GPS time is not leap second corrected, but the satellite messages
+include a leap second offset field in a special update approximately
 every 20 minutes.  If the receiver firmware is not carefully designed
 there will be a window between device boot time and the next
-leap-second update, and around leap-second corrections, during which
+leap second update, and around leap second corrections, during which
 the reported second will be incorrect.
 
 The qualifications about careful design are important because GPS
@@ -204,7 +204,7 @@ SiRF have a history of embarrassing firmware glitches, and the
 semi-anonymous outfits in Shenzhen and on Taiwan are worse.
 
 The worst impact of careless, low-budget design when using a GPS as
-an NTP clock is not around either jitter or leap-second corrections,
+an NTP clock is not around either jitter or leap second corrections,
 but rather the behavior near GPS and century rollovers.
 
 [[gps_pivots]]
