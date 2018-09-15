@@ -116,7 +116,7 @@ program.
 
 The NTP standards include symmetric (private-key) authentication using
 any message digest algorithm supported by the OpenSSL package.
-Digests longer than 20 bytes will be truncated.
+NTPsec will truncate digests longer than 20 bytes.
 This algorithm computes a message digest or one-way hash
 which can be used to verify that the client has the same message digest as
 the server.
@@ -148,14 +148,15 @@ authentication code (MAC) is appended to the NTP packet header. The MAC
 consists of a 32-bit key identifier (key ID) followed by a 128- or
 160-bit message digest. The algorithm computes the digest as the hash of
 the key concatenated with the NTP packet header fields and the key ID.
-On transmit, the message digest is computed and inserted in the MAC.
+On transmit, the message digest is computed and inserted into the MAC.
 On receive, the message digest is computed and compared with the MAC.
-The packet is accepted only if the two MACs are identical. If a
-discrepancy is found by the client, the client ignores the packet, but
-raises an alarm. If this happens at the server, the server returns a
-special message called a _crypto-NAK_. Since the crypto-NAK is protected
-by the loopback test, an intruder cannot disrupt the protocol by sending
+The packet is only accepted if the two MACs are identical. If the client
+finds a discrepancy, then it ignores the packet but
+raises the alarm. If this happens at the server, the server returns a
+special message called a crypto-NAK. Since the loopback test protects
+the crypto-NAK, an intruder cannot disrupt the protocol by sending
 a bogus crypto-NAK.
+
 
 +ntpd+'s digest mode can use any digest supported by libcrypto
 from the OpenSSL project.  MD5 digests are 16 bytes.  SHA1 digests are 20 bytes.

@@ -125,8 +125,8 @@ refclock trimble unit 0 subtype 2 time1 0.020
     time is successfully transferred.
 ..  If TSIP_decode lines are seen but trimble_receive never appears: 
 ... TSIP_decode lines with 'Sats: {list of numbers} : Tracking' display the
-    number of usable satellites after 'Tracking'. At least 4 must be tracking
-    if the receiver does not have a valid stored position, but only 1 is needed
+    number of usable satellites after 'Tracking'. At least four must be tracking
+    if the receiver does not have a valid stored position, but only one is needed
 	if it does.
 ... TSIP_decode lines with 'unusable tracking status' will appear if there are
     insufficient usable satellites.

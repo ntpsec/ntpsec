@@ -9,7 +9,7 @@
 == Description ==
 
 The +ntpq+ utility program is used to monitor NTP daemon +ntpd+
-operations and determine performance. It uses the standard NTP mode 6
+operations and determine performance. It uses the standard NTP mode six
 control message formats defined in Appendix B of the NTPv3 specification
 RFC 1305. The same formats are used in NTPv4, although some of the
 variable names have changed, and new ones added. The description on this
@@ -106,8 +106,8 @@ sent to the standard output, but optionally the output of individual
 commands may be sent to a file by appending a +>+, followed by a file
 name, to the command line. A number of interactive format commands are
 executed entirely within the +ntpq+ program itself and do not result in
-NTP mode-6 requests being sent to a server. These are described
 following.
+NTP mode 6 requests being sent to a server. These are described
 
  +?+ ['command_keyword']::
  +help+ ['command_keyword']::
@@ -178,7 +178,7 @@ following.
 
 +ntpversion 1 | 2 | 3 | 4+::
   Sets the NTP version number which +ntpq+ claims in packets. Defaults
-  to 2, Note that mode-6 control messages (and modes, for that matter)
+  to 2, Note that mode 6 control messages (and modes, for that matter)
   didn't exist in NTP version 1.
 
 +passwd+::
@@ -212,7 +212,7 @@ following.
 Association IDs are used to identify system, peer and clock variables.
 System variables are assigned an association ID of zero and system name
 space, while each association is assigned a nonzero association ID and
-peer namespace. Most control commands send a single mode-6 message to
+peer namespace. Most control commands send a single mode 6 message to
 the server and expect a single response message. The exceptions are the
 +peers+ command, which sends a series of messages, and the +mreadlist+
 and +mreadvar+ commands, which iterate over a range of associations.

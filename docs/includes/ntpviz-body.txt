@@ -85,7 +85,7 @@ subset of comparative plots for multiple directories.
     will be clobbered.
 
 -p DAYS or --period DAYS::
-    The default DAYS is for the period of 7 days.  DAYS can be a
+    The default DAYS is for 7 days.  DAYS can be a
     floating point number, so "-p 0.5" plots 12 hours.  DAYS is ignored
     if -s and -e are given.
 
