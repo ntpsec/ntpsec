@@ -14,7 +14,7 @@
   the offset.
 
 +burst+::
-  when the server is reachable, send a burst of eight packets instead of
+  When the server is reachable, send a burst of eight packets instead of
   the usual one. The packet spacing is normally 2 s; however, the
   spacing between the first and second packets can be changed with the
   calldelay command to allow additional time for a modem or ISDN call to

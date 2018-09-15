@@ -108,7 +108,7 @@ within 0.5 ms in less than 300 s.
 The state machine operates in one of four nonoverlapping intervals.
 
 Training interval::
-  This interval is used at startup when the frequency file is nor
+  This interval is used at startup when the frequency file is not
   present at startup. It begins when the first update is received by the
   discipline algorithm and ends when an update is received following the
   stepout threshold. The clock phase is steered to the offset presented

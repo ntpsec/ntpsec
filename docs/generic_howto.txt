@@ -188,7 +188,7 @@ struct clockinfo {
          Name of this device.
 
         char   *cl_format;            /* fixed format */
-         If the data format cann not ne detected automatically this is the name
+         If the data format can not be detected automatically this is the name
          as in clk_*.c clockformat.
 
         unsigned char  cl_type;       /* clock type (ntp control) */

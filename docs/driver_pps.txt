@@ -72,7 +72,7 @@ This driver is enabled only under one of two conditions (a) a prefer
 peer other than this driver is among the survivors of the mitigation
 algorithms or (b) there are no survivors and the +minsane+ option of the
 +tos+ command is 0. The prefer peer designates another source that can
-reliably number the seconds when available . However, if no sources are
+reliably number the seconds when available. However, if no sources are
 available, the system clock continues to be disciplined by the PPS
 driver on an indefinite basis.
 

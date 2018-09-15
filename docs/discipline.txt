@@ -84,7 +84,7 @@ It is important to understand how the dynamics of the PLL are affected
 by the time constant and poll interval. At the default poll interval of
 64 s and a step offset change of 100 ms, the time response crosses zero
 in about 50 min and overshoots about 6 ms, as per design. Ordinarily, a
-step correction would causes a temporary frequency surge of about 5 PPM,
+step correction would cause a temporary frequency surge of about 5 PPM,
 which along with the overshoot slowly dissipates over a few hours.
 
 However, the clock state machine used with the discipline algorithm
