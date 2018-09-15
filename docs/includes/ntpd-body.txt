@@ -348,11 +348,10 @@ such a correction the frequency error is so large that the first sample
 is outside the acceptable range, +ntpd+ enters the same state as when
 the _ntp.drift_ file is not present. The intent of this behavior is to
 quickly correct the frequency and restore operation to the normal
-tracking mode. In the most extreme cases (the host _time.ien.it_ comes
-to mind), there may be occasional step/slew corrections and subsequent
-frequency corrections. It helps in these cases to use the _burst_
-keyword when configuring the server, but ONLY when you have permission
-to do so from the owner of the target host.
+tracking mode. In the most extreme cases, there may be occasional
+step/slew corrections and subsequent frequency corrections. It helps in
+these cases to use the _burst_ keyword when configuring the server, but
+ONLY when you have permission to do so from the owner of the target host.
 
 Finally, in the past many startup scripts would run
 a separate utility to get the system clock close to correct before
