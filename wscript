@@ -184,8 +184,7 @@ def configure(ctx):
         ctx.fatal("asciidoc and xsltproc are required in order "
                   "to build documentation")
     elif ctx.options.enable_doc:
-        ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf"
-                                  % ctx.srcnode.abspath()]
+        ctx.env.ASCIIDOC_FLAGS = []
         ctx.env.ENABLE_DOC_USER = ctx.options.enable_doc
 
     # XXX: conditionally build this with --disable-man?
