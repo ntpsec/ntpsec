@@ -18,7 +18,7 @@
     default 2.
   +monitor+;;
     Specify the probability of being recorded for packets that overflow
-    the MRU list size limit set by +mru maxmem+ or +mru maxdepth+. This
+    the MRU list size limit set by +mru maxmem+ or +mru maxdepth+; this
     is a performance optimization for servers with aggregate arrivals of
     1000 packets per second or more.
 
@@ -76,8 +76,8 @@
   +noquery+;;
     Deny {ntpqman} queries. Time service is not affected.
   +nopeer+;;
-    Deny packets which would result in mobilizing a new association.
-    This includes symmetric active packets when a
+    Deny packets which would result in mobilizing a new association;
+    this includes symmetric active packets when a
     configured association does not exist.  That used to happen
     when the remote client used the +peer+ command in its config file.
     We don't support that mode.

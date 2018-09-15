@@ -15,9 +15,9 @@ Computer Time Service (ACTS) modem synchronized time.
 
 When external clocks are used in conjunction with NTP service, some way
 needs to be provided for the external clock driver and NTP daemon +ntpd+
-to communicate and determine which discipline is in control. This is
 necessary in order to provide backup, for instance if the external clock
 or protocol were to fail and synchronization service fall back to other
+to communicate and determine which discipline is in control; this is
 means, such as a local reference clock or another NTP server. In
 addition, when the external clock and driver are in control, some means
 needs to be provided for the clock driver to pass on status information

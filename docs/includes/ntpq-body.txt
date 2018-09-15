@@ -168,7 +168,7 @@ NTP mode 6 requests being sent to a server. These are described
 
 +keyid+ 'keyid'::
   This command specifies the key number to be used to authenticate
-  configuration requests. This must correspond to a key ID configured
+  configuration requests; this must correspond to a key ID configured
   with the +controlkey+ command in the server's +ntp.conf+
 
 +keytype+::
