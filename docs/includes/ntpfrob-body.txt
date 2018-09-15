@@ -83,14 +83,14 @@ option does that.
 === Clock jitter measurement ===
 
 The -c option can be used to determine the timing jitter due to the
-operating system in a gettimeofday() call.  For most systems the
+operating system in a gettimeofday() call.  For most systems, the
 dominant contribution to the jitter budget is the period of the
 hardware interrupt, usually in the range between 10 us and 1 ms. For
-those systems with microsecond counters the jitter is dominated
+those systems with microsecond counters, the jitter is dominated
 only by the operating system.
 
 The -j option is applicable to this mode.  With the -r option, write
-the raw unsorted clock samples to standard output for post-analysis.
+the raw, unsorted clock samples to standard output for post-analysis.
 All but the last -j or -r option before the -c mode flag is ignored.
 
 === Pulse-per-second check ===

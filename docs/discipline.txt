@@ -64,7 +64,7 @@ that of the other peer, which is included in the NTP packet header.
 
 It is necessary to verify that the clock discipline algorithm is stable
 and satisfies the Nyquist criterion, which requires that the sampling
-rate be at least twice the bandwidth. In this case the bandwidth can be
+rate be at least twice the bandwidth. In this case, the bandwidth can be
 approximated by the reciprocal of the time constant. In the NTP
 specification and reference implementation, time constants and poll
 intervals are expressed as exponents of 2. By construction, the time
@@ -91,13 +91,13 @@ However, the clock state machine used with the discipline algorithm
 avoids this transient at startup. It does this using a previously saved
 frequency file, if present, or by measuring the oscillator frequency, if
 not. It then quickly amortizes the residual offset at startup without
-affecting the oscillator frequency. In this way the offset error is less
+affecting the oscillator frequency. In this way, the offset error is less
 than 0.5 ms within 5 min, if the file is present, and within 10 min if
 not. See the link:clock.html[Clock State Machine] page for further
 details.
 
 Since the PLL is linear, the response with different offset step
-amplitudes and poll intervals has the same characteristic shape, but
+amplitudes and poll intervals has the same characteristic shape but
 scaled differently in amplitude and time. The response scales exactly
 with step amplitude, so that the response to a 10-ms step has the same
 shape as at 64 s, but with amplitude compressed by one-tenth. The

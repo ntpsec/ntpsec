@@ -64,7 +64,7 @@ subset of comparative plots for multiple directories.
     timestamps (yyyy-mmm-ddThh:mm:ss). +
     The default end time is the last logfile entry timestamp.   +
     The default start time is computed as the end time minus DAYS. +
-    Alternatively you may specify either -s or -e (but not both) and use
+    Alternatively, you may specify either -s or -e (but not both) and use
     -p to set the plot period in days.
 
 -g or --generate::
@@ -79,8 +79,8 @@ subset of comparative plots for multiple directories.
     Run at the lowest possible priority.  Only available on UNIX.
 
 -o OUTDIR or --outdir OUTDIR::
-    Set the directory for all output to be OUTDIR.  If OUTDIR does
     not exist it is created.  The default OUTDIR is 'ntpgraphs'.
+    Set the directory for all output to be OUTDIR, if OUTDIR does
     Warning: existing PNG files and index.html in the output directory
     will be clobbered.
 
@@ -190,9 +190,9 @@ command file name (OPTIONFILE) is prefixed on the command line with an
 atsign (@).
 
 Each line in the command file should contain just one option.  Multiple
-options per line are allowed, but discouraged.  Blank lines are allowed.
+options per line are allowed but discouraged.  Blank lines are allowed.
 
-Comments may be added, prepended with an octothorpe (#).  Comments may
+Comments may be added prepended with an octothorpe (#).  Comments may
 appear on a new line, or trailing, after the # .
 
 When an option takes a parameter, the option and parameter must be

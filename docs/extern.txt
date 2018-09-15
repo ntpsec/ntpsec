@@ -27,7 +27,7 @@ Control and monitoring functions for the external clock and driver are
 implemented using the link:driver_local.html[Local Clockdriver]
 and the +ntp_adjtime()+ system call. This system call is
 implemented by special kernel provisions included in the kernel of
-several operating systems, including Solaris, Tru64, FreeBSD and Linux,
+several operating systems, including Solaris, Tru64, FreeBSD, Linux,
 and possibly others. When the external clock is disabled or not
 implemented, the system call is used to pass time and frequency
 information, as well as error statistics, to the kernel. Besides

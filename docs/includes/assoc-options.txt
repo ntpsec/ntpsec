@@ -10,7 +10,7 @@
   there is a predictable asymmetry between upstream and downstream
   flight times.  One way you might see this is if you use a fixed set
   of others and one has a stable offset that is an outlier from the
-  others; in that case you might want to use +bias+ to compensate out
+  others; in that case, you might want to use +bias+ to compensate out
   the offset.
 
 +burst+::
@@ -62,7 +62,7 @@
 +true+::
   Mark the association to assume truechimer status; that is, always
   survive the selection and clustering algorithms. This option can be
-  used with any association, but is most useful for reference clocks
+  used with any association but is most useful for reference clocks
   with large jitter on the serial port and precision pulse-per-second
   (PPS) signals. Caution: this option defeats the algorithms designed to
   cast out falsetickers and can allow these sources to set the system

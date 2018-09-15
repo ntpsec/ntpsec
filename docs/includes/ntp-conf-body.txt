@@ -9,7 +9,7 @@
 
 The `ntp.conf` configuration file is read at initial startup by the
 {ntpdman} daemon in order to specify the synchronization
-sources, modes and other related information. Usually, it is installed
+sources, modes, and other related information. Usually, it is installed
 in the `/etc` directory, but could be installed elsewhere (see the
 daemon's `-c` command line option).
 

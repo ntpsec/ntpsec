@@ -173,7 +173,7 @@ multiple PPS drivers, multiple modem drivers and even multiple local
 drivers, although that would not normally be useful.
 
 The cluster algorithm works on the set of truechimers produced by the
-select algorithm. At each round the algorithm casts off the survivor
+select algorithm. At each round, the algorithm casts off the survivor
 least likely to influence the choice of system peer. If selectable, the
 prefer peer is never discarded; on the contrary, its potential removal
 becomes a termination condition. However, the prefer peer can still be

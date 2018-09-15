@@ -30,7 +30,7 @@
   host DNS name. The _mask_ argument expressed in IPv4 or IPv6 numeric
   address form defaults to all mask bits on, meaning that the _address_ is
   treated as the address of an individual host.  Instead of an explicit
-  _mask_ the _address/cidr_ may be specified in CIDR notation.  A
+  _mask_, the _address/cidr_ may be specified in CIDR notation.  A
   default entry (address +0.0.0.0+, mask +0.0.0.0+) is always included
   and is always the first entry in the list. Note that text string
   _default_, with no mask option, may be used to indicate the default
@@ -81,7 +81,7 @@
     configured association does not exist.  That used to happen
     when the remote client used the +peer+ command in its config file.
     We don't support that mode.
-    It used to include _pool_ servers but they now poke a hole in any
+    It used to include _pool_ servers, but they now poke a hole in any
     restrictions.
   +noserve+;;
     Deny all packets except {ntpqman} and queries.
@@ -96,7 +96,7 @@
     list.
   +nomrulist+;;
     Do not accept MRU-list requests.  These can be expensive to
-    service, and may generate a high volume of response traffic.
+    service and may generate a high volume of response traffic.
   +version+;;
     Deny packets that do not match the current NTP version.
 --

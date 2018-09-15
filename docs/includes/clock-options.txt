@@ -4,7 +4,7 @@
 +refclock+ _drivername_ [+unit+ _u_] [+prefer+] [+subtype+ _int_] [+mode+ _int_] [+minpoll+ _int_] [+maxpoll+ _int_] [+time1+ _sec_] [+time2+ _sec_] [+stratum+ _int_] [+refid+ _string_] [+path+ 'filename'] [+ppspath+ 'filename'] [+baud+ 'number'] [+flag1+ {+0+ | +1+}] [+flag2+ {+0+ | +1+}] [+flag3+ {+0+ | +1+}] [+flag4+ {+0+ | +1+}]::
   This command is used to configure reference clocks.
   The required _drivername_ argument is the shortname of a driver type
-  (e.g. +shm+, +nmea+, +generic+;
+  (e.g., +shm+, +nmea+, +generic+;
   see the link:refclock.html[Reference Clock Drivers]
   page for a full list. The options are interpreted as follows:
 

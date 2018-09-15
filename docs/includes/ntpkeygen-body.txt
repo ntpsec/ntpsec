@@ -38,7 +38,7 @@ usually +/etc/ntp/+, then run the program.  Then chown the output
 file to ntp:ntp.  It should be mode 400.
 
 WARNING: +ntpkeygen+ uses the system randomness source.  On a POSIX
-system this is usually /dev/urandom.  Immediately after a reboot, on any
+system, this is usually /dev/urandom.  Immediately after a reboot, on any
 OS, there may not be sufficient entropy available for this program to
 perform well.  Do not run this program from any startup scripts.  Only
 run this program on an active host with a lot of available entropy.
@@ -64,7 +64,7 @@ number generator used by the library routines.
 It is important to understand that entropy must be evolved for each
 generation, for otherwise the random number sequence would be
 predictable. Various means dependent on external events, such as
-keystroke intervals, can be used to do this and some systems have
+keystroke intervals can be used to do this and some systems have
 built-in entropy sources.
 
 This implementation uses Python's random.SystemRandom class, which relies on
@@ -83,7 +83,7 @@ on the target server.
 This file is also used to authenticate remote configuration
 commands used by the {ntpqman} utility.
 
-Comments may appear in the file, and are preceded with the +#+
+Comments may appear in the file and are preceded with the +#+
 character.  
 
 Following any headers the keys are entered one per line in the

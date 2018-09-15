@@ -110,8 +110,8 @@ The NTPv4 specification requires that bursts contain no more than eight
 packets. Starting from an output counter value of zero, the maximum
 counter value, called the ceiling, can be no more than eight times the
 MAH. However, if the burst starts with a counter value other than zero,
-protocol restarts. In these cases the
 there is a potential to exceed the ceiling; this can result from
+protocol restarts. In these cases, the
 poll algorithm throttles the output rate by computing an additional
 headway time so that the next packet sent will not exceed the ceiling.
 Designs such as this are often called leaky buckets.

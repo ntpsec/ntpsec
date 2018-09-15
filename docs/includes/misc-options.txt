@@ -79,7 +79,7 @@ and that file system links, symbolic or otherwise, should be avoided.
   commands can be used. The last rule which matches a particular address
   determines the action for it. +interface+ commands are disabled if any
   of the +-I+, +--interface+,+-L+, or +--novirtualips+ command-line options
-  are used. If none of those options are used and no +interface+ actions
+  are used. If none of those options are used, and no +interface+ actions
   are specified in the configuration file, all available network
   addresses are opened. The +nic+ command is an alias for +interface+.
 
@@ -175,7 +175,7 @@ the log file.
     . If the freelist is not empty, a slot is allocated from the
     free list.
     . If the freelist is empty but not full (see maxmem), more memory
-    is allocated (see incmem) and a new slot is used.
+    is allocated (see incmem) and, a new slot is used.
     . If the age of the oldest slot is more than +minage+, the oldest
     slot is recycled (default 64 seconds).
     . Otherwise, no slot is available.
@@ -193,7 +193,7 @@ the log file.
   Specify the _threshold_ in seconds to write the frequency file, with
   default of 1e-7 (0.1 PPM). The frequency file is inspected each hour.
   If the difference between the current frequency and the last value
-  written exceeds the threshold, the file is written and the +threshold+
+  written exceeds the threshold, the file is written, and the +threshold+
   becomes the new threshold value. If the threshold is not exceeded, it
   is reduced by half; this is intended to reduce the frequency of
   unnecessary file writes for embedded systems with nonvolatile memory.
@@ -236,10 +236,10 @@ the log file.
   before any other configuration options. The default values of these
   variables have been carefully optimized for a wide range of network
   speeds and reliability expectations. In general, they interact in
-  intricate ways that are hard to predict and some combinations can
+  intricate ways that are hard to predict, and some combinations can
   result in some very nasty behavior. Very rarely is it necessary to
   change the default values; but, some folks cannot resist twisting the
-  knobs anyway and this command is for them. Emphasis added: twisters
+  knobs anyway, and this command is for them. Emphasis added: twisters
   are on their own and can expect no help from the support group.
 +
 The variables operate as follows:
@@ -260,11 +260,11 @@ The variables operate as follows:
     The argument becomes the new value for the experimental huff-n'-puff
     filter span, which determines the most recent interval the algorithm
     will search for a minimum delay. The lower limit is 900 s (15 m),
-    but a more reasonable value is 7200 (2 hours). There is no default,
+    but a more reasonable value is 7200 (2 hours). There is no default 
     since the filter is not enabled unless this command is given.
   +panic+ _panic_;;
     The argument is the panic threshold, normally 1000 s. If set to
-    zero, the panic sanity check is disabled and a clock offset of any
+    zero, the panic sanity check is disabled, and a clock offset of any
     value will be accepted.
   +step+ _step_;;
     The argument is the step threshold, which by default is 0.128 sec. It

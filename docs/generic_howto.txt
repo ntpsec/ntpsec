@@ -154,12 +154,12 @@ struct clockinfo {
 
         void  (*cl_poll)();       /* active poll routine */
          The routine to call when the clock needs data sent to it in order to
-         get a time code from the clock (e.g. Trimble clock)
+         get a time code from the clock (e.g., Trimble clock)
 
         int   (*cl_init)();      /* active poll init routine */
          The routine to call for very special initializations.
 
-        void  (*cl_event)();     /* special event handling (e.g. reset clock) */
+        void  (*cl_event)();     /* special event handling (e.g., reset clock) */
          What to do, when an event happens - used to re-initialize clocks on timeout.
 
         void  (*cl_end)();       /* active poll end routine */

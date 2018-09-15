@@ -28,7 +28,7 @@ to a few microseconds.
 
 While this driver can discipline the time and frequency relative to the
 PPS source, it cannot number the seconds. For this purpose an auxiliary
-source is required, ordinarily a radio clock operated as a primary
+source is required; ordinarily a radio clock operated as a primary
 reference (stratum 1) source; however, another NTP time server can be
 used as well. For this purpose, the auxiliary source should be specified
 as the prefer peer, as described in the link:prefer.html[Mitigation
