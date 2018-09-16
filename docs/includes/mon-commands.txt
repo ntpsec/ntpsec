@@ -27,8 +27,8 @@ The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next
 normally shows clock type and unit (but if you are running in strict
 Classic compatibility mode it will show the magic clock address in
-dotted-quad notation). The final field last timecode received from the
-clock in decoded ASCII format, where meaningful. In some clock drivers
+dotted-quad notation). The final field is the last timecode received from the
+clock in decoded ASCII format, where meaningful. For some clock drivers, 
 a good deal of additional information can be gathered and displayed as
 well. See information specific to each clock for further details.
 +
@@ -235,7 +235,7 @@ The remaining fields show the values used since the last report.
 
 [[filegen]]
 +filegen+ _name_ [+file+ _filename_] [+type+ _typename_] [+link+ | +nolink+] [+enable+ | +disable+]::
-    Configures setting of generation file set name. Generation file sets
+    Configures setting of the generation file set name. Generation file sets
     provide a means for handling files that are continuously growing
     during the lifetime of a server. Server statistics are a typical
     example for such files. Generation file sets provide access to a set

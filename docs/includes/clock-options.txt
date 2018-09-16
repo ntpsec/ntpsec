@@ -44,7 +44,7 @@
     offset is in addition to the propagation delay provided by other
     means, such as internal DIP switches. Where a calibration for an
     individual system and driver is available, an approximate correction
-    is noted in the driver documentation pages. Note: in order to
+    is noted in the driver documentation pages. Note: To
     facilitate calibration when more than one radio clock or PPS signal
     is supported, a special calibration feature is available. It takes
     the form of an argument to the +enable+ command described in

@@ -10,7 +10,7 @@
   This command specifies the complete path and name of the file used to
   record the frequency of the local clock oscillator; this is the same
   operation as the +-f+ command line option. If the file exists, it is
-  read at startup in order to set the initial frequency and then updated
+  read at startup to set the initial frequency and then updated
   once per hour with the current frequency computed by the daemon. If
   the file name is specified, but the file itself does not exist, +ntpd+
   starts with an initial frequency of zero and creates the file when
@@ -69,8 +69,8 @@ and that file system links, symbolic or otherwise, should be avoided.
 [[interface]]
 +interface+ [+listen+ | +ignore+ | +drop+] [+all+ | +ipv4+ | +ipv6+ | +wildcard+ | 'name' | 'address'[/'prefixlen']]::
   This command controls which network addresses +ntpd+ opens, and
-  whether input is dropped without processing. The first parameter
-  determines the action for addresses which match the second parameter.
+  whether the input is dropped without processing. The first parameter
+  determines the action on addresses which match the second parameter.
   That parameter specifies a class of addresses, or a specific interface
   name, or an address. In the address case, _prefixlen_ determines how
   many bits must match for this rule to apply. +ignore+ prevents opening
@@ -158,7 +158,7 @@ the log file.
     and +maxmem+ are used, the last one used controls. The default is
     1024 kilobytes.
   +mindepth+ 'count';;
-    Lower limit on the MRU list size. When the MRU list has fewer than
+    The lower limit on the MRU list size. When the MRU list has fewer than
     +mindepth+ entries, existing entries are never removed to make room
     for newer ones, regardless of their age. The default is 600 entries.
   +maxage+ 'seconds';;

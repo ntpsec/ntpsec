@@ -46,7 +46,7 @@
 --
   +flake+;;
     Discard received NTP packets with probability 0.1; that is, on
-    average drop one packet in ten. This is for testing and amusement.
+    average drop one packet in ten. This flag is for testing and amusement.
     The name comes from Bob Braden's _flakeway_, which once did a
     similar thing for early Internet testing.
   +ignore+;;
@@ -90,7 +90,7 @@
   +ntpport+;;
     This is a match algorithm modifier, rather than a
     restriction flag. Its presence causes the restriction entry to be
-    matched only if the source port in the packet is the standard NTP
+    matched if the source port in the packet is the standard NTP
     UDP port (123). Both +ntpport+ and +non-ntpport+ may be specified.
     The +ntpport+ is considered more specific and is sorted later in the
     list.
