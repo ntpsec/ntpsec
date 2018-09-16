@@ -130,7 +130,7 @@ The following plots are available:
    Clock time-jitter plot from the loop statistics (field 5).
 
 --local-gps::
-   Plot GPS Time Dilution of Precision (TDOP) and number of satellites
+   Plot GPS Time Dilution of Precision (TDOP) and the number of satellites
    used (nSats).  This plot is only generated if there is a log file
    named gpsd in the log file directory.
 
@@ -168,7 +168,7 @@ are generated into the output directory.
 
 When an index is generated, ntpviz will look for a 'header' and
 'footer' file in the output directory.  Neither of these files are
-required. The files may contain arbitrary HTML.
+required. These files may contain arbitrary HTML.
 
 The 'header' file will be added almost at the top of the body of the
 generated index page, and the 'footer' file will be added almost at

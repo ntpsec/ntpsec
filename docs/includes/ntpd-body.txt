@@ -139,14 +139,14 @@ localhost. This option is deprecated. Please consider using the
 configuration file _interface_ command, which is more versatile.
 
 +-k+ _string_, +--keyfile+=_string_::
-  path to symmetric keys.
+  the path to symmetric keys.
 +
 Specify the name and path of the symmetric key file. +/etc/ntp.keys+
 is a common location. This is the same operation as the _keys_
 configuration file directive.
 
 +-l+ _string_, +--logfile+=_string_::
-  path to the log file.
+  the path to the log file.
 +
 Specify the name and path of the log file. The default is the system
 log file. This is the same operation as the _logfile_
@@ -176,7 +176,7 @@ To the extent permitted by the operating system, run +ntpd+ at the
 highest priority.
 
 +-p+ _string_, +--pidfile+=_string_::
-  path to the PID file.
+  the path to the PID file.
 +
 Specify the name and path of the file used to record +ntpd+'s process
 ID. This is the same operation as the _pidfile_
@@ -296,7 +296,7 @@ When the machine is booted, the chip is used to initialize the operating
 system time. After the machine has synchronized to an NTP server, the
 operating system corrects the chip from time to time. In the default
 case, if +ntpd+ detects that the time on the host is more than 1000s
-from the server time, +ntpd+ assumes something must be terribly wrong
+from the server time, +ntpd+ assumes something must be terribly wrong,
 and the only reliable action is for the operator to intervene and set
 the clock by hand. (Reasons for this include there is no TOY chip, or
 its battery is dead, or that the TOY chip is just of poor quality.) This
@@ -383,7 +383,7 @@ Finally, if you have processes like _dovecot_ or database servers that
 require monotonically-increasing time, run {ntpwaitman} as
 late as possible in the boot sequence (perhaps with the +-v+ flag) and
 after {ntpwaitman} exits successfully it is as safe as it
-will ever be to start any process that require stable time.
+will ever be to start any processes that require stable time.
 
 === Frequency Discipline ===
 
@@ -466,7 +466,7 @@ clock discipline loop has stabilized the interval will be increased in
 steps from the minimum to the maximum. However, this assumes the
 intrinsic clock frequency error is small enough for the discipline loop
 correct it. The capture range of the loop is 500 PPM at an interval of
-64s decreasing by a factor of two for each doubling of interval. At a
+64s decreasing by a factor of two for each doubling of the interval. At a
 minimum of 1,024 s, for example, the capture range is only 31 PPM. If
 the intrinsic error is greater than this, the drift file _ntp.drift_
 will have to be specially tailored to reduce the residual error below

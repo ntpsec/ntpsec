@@ -146,7 +146,7 @@ means all adjustments will be stepped. This is a feature, as different
 situations demand different values.
 
 +-p+, +--samples+::
-  Number of samples to take (default 1). The best one (chosen by,
+  The number of samples to take (default 1). The best one (chosen by,
   among other criteria, sync distance) is selected for display or use.
 
 +-S+, +--step+::

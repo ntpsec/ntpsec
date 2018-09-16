@@ -9,7 +9,7 @@
 == Description ==
 
 The +ntpq+ utility program is used to monitor NTP daemon +ntpd+
-operations and determine performance. It uses the standard NTP mode six
+operations and determine performance. It uses the standard NTP mode 6
 control message formats defined in Appendix B of the NTPv3 specification
 RFC 1305. The same formats are used in NTPv4, although some of the
 variable names have changed, and new ones added. The description on this
@@ -21,7 +21,7 @@ can be assembled, with raw and pretty-printed output options being
 available. It can also obtain and print a list of peers in a
 common format by sending multiple queries to the server.
 
-If one or more request options is included on the command line when
+If one or more request options are included on the command line when
 +ntpq+ is executed, each of the requests will be sent to the NTP servers
 running on each of the hosts given as command line arguments, or on
 localhost by default. If no request options are given, +ntpq+ will
@@ -107,6 +107,7 @@ commands may be sent to a file by appending a +>+, followed by a file
 name, to the command line. Some interactive format commands are
 executed entirely within the +ntpq+ program itself and do not result in
 NTP mode 6 requests being sent to a server. These are described
+as following.
 
  +?+ ['command_keyword']::
  +help+ ['command_keyword']::
@@ -149,7 +150,7 @@ NTP mode 6 requests being sent to a server. These are described
   Specify a time interval to be added to timestamps included in requests
   which require authentication; this is used to enable (unreliable)
   server reconfiguration over long delay network paths or between
-  machines whose clocks are unsynchronized. Actually the server does not
+  machines whose clocks are unsynchronized. The server does not
   now require timestamps in authenticated requests so that this command may
   be obsolete.
 
@@ -173,7 +174,7 @@ NTP mode 6 requests being sent to a server. These are described
 +keytype+::
   Specify the digest algorithm to use for authenticated requests, with
   default +MD5+. The keytype must match what the server is expecting
-  for the the specified key ID.
+  for the specified key ID.
 
 +ntpversion 1 | 2 | 3 | 4+::
   Sets the NTP version number which +ntpq+ claims in packets. Defaults
@@ -191,7 +192,7 @@ NTP mode 6 requests being sent to a server. These are described
 +raw+::
   Display server messages as received and without reformatting.
   The only formatting/interpretation done on the data is
-  to transform nonascii data into a printable (but barely
+  to transform non-ASCII data into a printable (but barely
   understandable) form.
 
 +timeout+ 'milliseconds'::
@@ -258,7 +259,7 @@ ind assid status conf reach auth condition last_event cnt
   and clarification. Authentication is of course required.
 
 +config-from-file+ 'filename'::
-  Send the each line of _filename_ to the server as run-time
+  Send each line of _filename_ to the server as run-time
   configuration commands in the same format as the configuration file.
   This command is experimental until further notice and clarification.
   Authentication is required.
@@ -287,7 +288,7 @@ ind assid status conf reach auth condition last_event cnt
   Display monitor facility statistics.
 
 +direct+::
-  Normally, the mrulist command retrieves an entire MRUreport (possibly
+  Normally, the mrulist command retrieves an entire MRU report (possibly
   consisting of more than one MRU span), sorts it, and presents the
   result. But attempting to fetch an entire MRU report may fail on a
   server so loaded that none of its MRU entries age out before they
@@ -364,7 +365,7 @@ displayed.
   whitespace. Note that time values are represented in milliseconds and
   frequency values in parts-per-million (PPM). Some NTP timestamps are
   represented in the format YYYYMMDDTTTT, where YYYY is the year, MM the
-  month of year, DD the day of month and TTTT the time of day.
+  month of the year, DD the day of the month and TTTT the time of day.
 
 +reslist+::
   Show the access control (restrict) list for +ntpq+.
