@@ -24,34 +24,32 @@ include::includes/hand.adoc[]
 [[modes]]
 == Introduction ==
 
-This page describes the automatic server discovery schemes provided in
-NTPv4. There are three automatic server discovery schemes: broadcast,
-manycast, and server pool; which are described on this page. The
-broadcast scheme utilizes the ubiquitous broadcast or one-to-many
-paradigm native to IPv4 and IPv6.  The manycast scheme is similar
-to specifying to broadcast, but the servers listen on a specific
-address known to the client.  The server pool scheme uses DNS to resolve
-addresses of multiple volunteer servers scattered throughout the world.
+The NTPv4 *reference specification* supports three Automatic server discovery
+schemes: broadcast, manycast, and server pool. However, NTPsec only supports
+the 'Server pool' mechanism. For details on the reference specification,
+please see https://tools.ietf.org/html/rfc5905[rfc 5905]
 
-All three schemes work in much the same way and might be described as
-_grab-n'-prune._ Through one means or another they grab a number of
-associations either directly or indirectly from the configuration file,
-order them from best to worst according to the NTP mitigation
-algorithms, and prune the surplus associations.
+’Server pool’ uses DNS to resolve addresses of multiple volunteer servers
+scattered throughout the world.
+
+The mechanism might be described as _grab-n'-prune._ Through one means or
+another, a number of associations are "grabbed" either directly or indirectly
+from the configuration file, and they are ordered from best to worst according
+to the NTP mitigation algorithms, and surplus associations are pruned.
 
 [[assoc]]
 == Association Management ==
 
-All schemes use an iterated process to discover new preemptable client
+Server pool use an iterated process to discover new preemptable client
 associations as long as the total number of client associations is less
 than the +maxclock+ option of the +tos+ command. The +maxclock+ default
 is 10, but it should be changed in typical configuration to some lower
 number, usually two greater than the +minclock+ option of the same
 command.
 
-All schemes use a stratum filter to select just those servers with
+Server pool uses a stratum filter to select just those servers with
 stratum considered useful. This can avoid large numbers of clients
-ganging up on a small number of low-stratum servers and avoid servers
+ganging up on a small number of low-stratum servers and avoids servers
 below or above specified stratum levels. By default, servers of all
 strata are acceptable; however, the +tos+ command can be used to
 restrict the acceptable range from the +floor+ option, inclusive, to the
@@ -65,7 +63,7 @@ association created by the configuration or discovery processes. At each
 poll interval, the counter is increased by one. If an acceptable packet
 arrives for a persistent (configured) or ephemeral (broadcast)
 association, the counter is set to zero. If an acceptable packet arrives
-for a preemptable (manycast, pool) association and survives the
+for a preemptable association and survives the
 selection and clustering algorithms, the counter is set to zero. If the
 the counter reaches an arbitrary threshold of 10, the association
 becomes a candidate for pruning.
@@ -78,17 +76,17 @@ maximum. The pruning algorithm design avoids needless discovery/prune
 cycles for associations that wander in and out of the survivor list, but
 otherwise have similar characteristics.
 
-Following is a summary of each scheme. Note that reference to option
-applies to the commands described on the link:confopt.html[Configuration
-Options] page. See that page for applicability and defaults.
-
+Following is a description of the server pool scheme. Note that
+reference to options applies to the commands described on the
+link:confopt.html[Configuration Options] page. See that page
+for applicability and defaults.
 
 [[pool]]
 == Server Pool Scheme ==
 
 The idea of targeting servers on a random basis to distribute and
 balance the load is not a new one; however, the
-http://www.pool.ntp.org/en/use.html[NTP Pool Project] puts
+https://www.pool.ntp.org/en/use.html[NTP Pool Project] puts
 this on steroids. At present, several thousand operators around the
 globe have volunteered their servers for public access. In general,
 NTP is a lightweight service and servers used for other purposes don't
