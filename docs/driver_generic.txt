@@ -26,7 +26,7 @@ Trimble TAIP/TSIP modes.
 
 The generic driver supports many different clock
 types/configurations by plugging type-specific packet-parsing
-routine into a generic drive framework.
+routines into a generic driver framework.
 
 Note that some of these subtypes below are to support equipment that
 has not been commercially available for a long time, report only
@@ -85,7 +85,7 @@ refclock_ppstime::
 
 == Supported Devices ==
 
-Currently, twenty-five clock types are supported by the GENERIC driver
+Twenty-five clock types are supported by the GENERIC driver
 and any number of these clocks may be operational at any one time.
 
 Note: Under NTPsec, you _must_ use the new configuration syntax
@@ -330,8 +330,8 @@ Raw DCF77 pulses can be fed via a level converter to the RXD pin of an
 RS-232 serial port (pin 3 of a 25-pin connector or pin 2 of a 9-pin
 connector). The telegrams are decoded and used for synchronization.
 DCF77 AM receivers can be bought for as little as $25. The accuracy is
-dependent on the receiver and is somewhere between 2ms (expensive) and
-10ms (cheap). Synchronization ceases when reception of the DCF77 signal
+dependent on the receiver and is somewhere between 2 ms (expensive) and
+10 ms (cheap). Synchronization ceases when reception of the DCF77 signal
 deteriorates, since no backup oscillator is available as usually found
 in other reference clock receivers. So it is important to have a good
 place for the DCF77 antenna. During transmitter shutdowns you are out of
@@ -341,10 +341,12 @@ available.
 In addition to the PPS loopfilter control, a true PPS hardware signal
 can be utilized via the PPSAPI interface. PPS pulses are usually fed via
 a level converter to the DCD pin of an RS-232 serial port (pin 8 of a
-25-pin connector or pin 1 of a 9-pin connector). To select PPS support,
-the subtype parameter is the subtype value as above plus 128. If 128 is not
-added to the subtype value, PPS will be detected to be available but will
-not be used.
+25-pin connector or pin 1 of a 9-pin connector), where one edge of the pulse
+-- often the leading edge, but in many cases not -- provides the reference.
+NTPsec uses the edge of the pulse specified by the driver for the particular
+hardware used. To select PPS support, the subtype parameter is the subtype
+value as above plus 128. If 128 is not added to the subtype value, PPS will
+be detected to be available but will not be used.
 
 == Hardware PPS support ==
 
@@ -375,9 +377,9 @@ First let ntpq display the table of associations:
   ntpq> as
   ind assID status  conf reach auth  condition last_event cnt
   ===========================================================
-  1   19556  9154   yes   yes  none  falsetick reachable   5
-  2   19557  9435   yes   yes  none  candidat  clock expt  3
-  3   19558  9714   yes   yes  none  pps.peer  reachable   1
+  1   19556  9154   yes   yes  none  falsetick  reachable  5
+  2   19557  9435   yes   yes  none  candidate clock expt  3
+  3   19558  9714   yes   yes  none   pps.peer  reachable  1
 -------------------------------------------------------------
 
 
@@ -459,7 +461,7 @@ screen width and looks similar to:
 +stratum+ _stratum_ ::
   The stratum for this reference clock.
 +refid+ _refid_ ::
-  The refid for this reference clock.
+  The reference id for this reference clock.
 
 +flag1 {0 | 1}+::
   If 0, the fudge factor time2 refers to the PPS offset. +
