@@ -177,7 +177,7 @@ decidedly beyond the scope of this page.
 == Interface Routine Overview ==
 
 +refclock_newpeer+ - initialize and start a reference clock.::
-  This routine allocates and initializes the interface structure which
+  Allocates and initializes the interface structure which
   supports a reference clock in the form of an ordinary NTP peer. A
   driver-specific support routine completes the initialization, if used.
   Default peer variables which identify the clock and establish its
@@ -185,22 +185,21 @@ decidedly beyond the scope of this page.
   zero if the clock address is invalid or already running, insufficient
   resources are available or the driver declares a bum rap.
 +refclock_unpeer+ - shut down a clock::
-  This routine is used to shut down a clock and return its resources to
-  the system.
+  Shuts down a clock and returns its resources to the system.
 +refclock_transmit+ - simulate the transmit procedure::
-  This routine implements the NTP transmit procedure for a reference
+  Implements the NTP transmit procedure for a reference
   clock. This provides a mechanism to call the driver at the NTP poll
   interval, as well as provides a reachability mechanism to detect a
   broken radio or other madness.
 +refclock_process+ - insert a sample in the circular buffer::
-  This routine saves the offset computed from the on-time timestamp and
+  Saves the offset computed from the on-time timestamp and
   the days, hours, minutes, seconds and nanoseconds in the circular
   buffer. Note that no provision is included for the year, as provided
   by some (but not all) radio clocks. Ordinarily, the year is implicit
   in the Unix file system and hardware/software clock support, so this
   is ordinarily not a problem.
 +refclock_receive+ - simulate the receive and packet procedures::
-  This routine simulates the NTP receive and packet procedures for a
+  Simulates the NTP receive and packet procedures for a
   reference clock. This provides a mechanism in which the ordinary NTP
   filter, selection and combining algorithms can be used to suppress
   misbehaving radios and to mitigate between them when more than one is
@@ -213,17 +212,17 @@ decidedly beyond the scope of this page.
   and returns all the characters up to and including the line
   terminator. Either routine returns the number of characters delivered.
 +refclock_open+ - open a serial port for reference clock::
-  This routine opens a serial port for I/O and sets default options. It
+  Opens a serial port for I/O and sets default options. It
   returns the file descriptor if success and zero if failure.
 +refclock_ioctl+ - set serial port control functions::
-  This routine attempts to hide the internal, system-specific details of
+  Attempts to hide the internal, system-specific details of
   serial ports. It can handle POSIX (+termios+), SYSV (+termio+) and BSD
   (+sgtty+) interfaces with varying degrees of success. The routine
   returns one if success and zero if failure.
 +refclock_ppsapi+::
-  This routine initializes the Pulse-per-Second interface (see below).
+  Initializes the Pulse-per-Second interface (see below).
 +refclock_pps+::
-  This routine is called once per second to read the latest PPS offset
+  Called once per second to read the latest PPS offset
   and save it in the circular buffer (see below).
 
 [[pps]]
