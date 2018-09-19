@@ -37,7 +37,7 @@ the other services must be by other means. With these
 services variations from call to call and between messages during a call
 are typically a few milliseconds, occasionally higher.
 
-This driver requires a 9600-bps modem with a Hayes-compatible command
+This driver requires a 9600 bps modem with a Hayes-compatible command
 set and control over the modem data terminal ready (DTR) control line.
 The actual line speed ranges from 1200 bps with USNO to 14,400 bps
 with NIST. The modem setup string is hard-coded in the driver and may
@@ -46,11 +46,11 @@ can be overridden by setting the extended system variable
 "modem_setup" via ntpq.
 
 There are three modes of operation selected by the +mode+ keyword in the
-+server+ configuration command. In manual mode (2) the calling program
-is initiated by setting the +flag1+ option. This can be done manually using
-+ntpq+, or by a cron job. In auto mode (0) +flag1+ is set at each poll
++server+ configuration command. In auto mode (0) +flag1+ is set at each poll
 event. In backup mode (1) +flag1+ is set at each poll event, but only if
-no other synchronization sources are available.
+no other synchronization sources are available. In manual mode (2) the
+calling program is initiated by setting the +flag1+ option. This can be done
+manually using +ntpq+, or by a cron job.
 
 When +flag1+ is set, the calling program dials the first number in the
 list specified by the +phone+ command. If the call fails for any reason,
@@ -71,9 +71,9 @@ Once the service is known, the reference identifier for the driver is
 set to NIST, USNO, PTB or GPS as appropriate.
 
 The Spectracom receiver can be connected via a modem if the radio is
-configured to send time codes continuously at 1-s intervals. In
+configured to send time codes continuously at 1 s intervals. In
 principle, the +flag2+ option enables port locking, allowing the modem
-to be shared when not in use by this driver. At least on Solaris with
+to be shared when not in use by this driver. On Solaris with
 the current NTP I/O routines, this results in lots of ugly error
 messages.
 
