@@ -30,9 +30,9 @@ clock instance.)
 
 This driver does not expect _GPSD_ to be running or the clock device to
 be present _a priori_; it will try to re-establish a lost or hitherto
-unsuccessful connection and will wait for device to come up in _GPSD._
+unsuccessful connection and will wait for the device to come up in _GPSD._
 There is an initial 10 seconds delay between a connection loss or failed
-attempt and the next reconnect attempt; this makes sure that there is no
+attempt and the next reconnect attempt; this ensures that there is no
 thrashing on the network layer. If the connection fails again, an
 exponential back off is used with an upper limit of approximately 10
 minutes.
@@ -58,9 +58,9 @@ were used to obtain it.
 The _GPSD_ driver uses the same device name as the NMEA driver, namely
 +/dev/gpsu+. There is a simple reason for that: While the NMEA driver
 and the _GPSD_ driver can be active at the same time *for different
-devices*, they cannot access the same device at a time. Having the same
-name helps on that. It also eases migration from using NMEA directly to
-using _GPSD_, as no new links etc need to be created.
+devices*, they cannot access the same device at the same time. Having the same
+name helps prevent that collision. It also eases migration from using NMEA
+directly to using _GPSD_, as no new links etc. need to be created.
 
 _GPSD_ is normally started with the device name to access; it can also
 be instructed by hot-plug scripts to add or remove devices from its
@@ -77,7 +77,7 @@ change in the future.
 
 == The \'mode' word ==
 
-A few operation modes can be selected with the mode word.
+A few operational modes can be selected with the mode word.
 
 [cols="10%d,10%,80%a",options="header"]
 |===========================================================================
@@ -103,9 +103,9 @@ PPS drops out. This mode is a possible choice for receivers that provide
 a PPS signal most of the time but have an unstable serial timing that
 cannot be fudge-compensated.
 
-        | 2       |Automatic mode. Tries to operate in strict mode unless it fails to process valid samples for some time, currently 120s. Then
+        | 2       |Automatic mode. Tries to operate in strict mode unless it fails to process valid samples for some time, currently 120 s. Then
 it reverts to IBT-only operation until the PPS is stable again for
-40s, when strict mode is engaged again.
+40 s, when strict mode is engaged again.
 
 *Important Notice: This is an experimental feature!*
 
@@ -145,8 +145,8 @@ The secondary unit employs the usual precautions before feeding clock
 samples:
 
 * The system must be already in a synchronised state.
-* The system offset must be less than 400ms absolute.
-* The phase adjustment from the PPS signal must also be less than 400ms
+* The system offset must be less than 400 ms absolute.
+* The phase adjustment from the PPS signal must also be less than 400 ms
 absolute.
 
 If option +flag1+ is set for the secondary unit, the unit asserts
@@ -239,8 +239,8 @@ clock units. This avoids double transmission over two sockets and
 decoding the same data twice, but the primary unit is always needed as a
 downside of this approach.
 
-[[fn2]]link:#fn2bl[^2^)]The clock driver suppresses the processing PPS records
-when the TPV/TIME data indicates the receiver has no fix. It can also
+[[fn2]]link:#fn2bl[^2^)]The clock driver suppresses the processing of PPS
+records when the TPV/TIME data indicates the receiver has no fix. It can also
 deal with situations where the PPS signal is not delivered to _GPSD_.
 But once it is available, it is also processed and used to create
 samples. If a receiver cannot be trusted for the precision of its PPS
