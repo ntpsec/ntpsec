@@ -213,7 +213,7 @@ class VizStats(ntp.statfiles.NTPStats):
 
     table_head = """\
 <br>
-<table style="text-align:right;width:1300px;">
+<table>
 <thead>
   <tr style="font-weight:bold;text-align:left;">
     <td style="width:300px;"></td>
@@ -357,10 +357,10 @@ class VizStats(ntp.statfiles.NTPStats):
         # csv is raw, html table is autoranged
         self.csv = [x % self.percs for x in s]
         self.table = [x % self.percs_f for x in s]
-        self.table = "</td><td>".join(self.table)
+        self.table = "</td>\n <td>".join(self.table)
 
         self.table = '''\
-<tr style="vertical-align:top;">
+<tr>
  <td style="text-align:left;">%s</td>
 </tr>
 ''' % self.table
@@ -943,7 +943,7 @@ plot \
         if not peerlist:
             peerlist = list(peerdict.keys())
             if not peerlist:
-                sys.stderr.write("ntpviz: WARNING: no peer data to graph\n")
+                sys.stderr.write("ntpviz: WARNING: no server data to graph\n")
                 return ''
         peerlist.sort()  # For stability of output
         namelist = []    # peer names
@@ -967,7 +967,7 @@ plot \
                 ip_todo.append(ip)
             else:
                 # can this ever happen?
-                sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
+                sys.stderr.write("ntpviz: ERROR: No such server as %s" % key)
                 raise SystemExit(1)
 
         rtt = 0
@@ -993,20 +993,20 @@ at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local PPS
 <p>Clock Offset is field 5 in the peerstats log file.</p>
 """
                 else:
-                    title = "Peer Offset " + str(peerlist[0])
+                    title = "Server Offset " + str(peerlist[0])
                     exp = """\
-<p>The offset of a peer or server in seconds.  This is
+<p>The offset of a server in seconds.  This is
 useful to see how the measured offset is behaving.</p>
 
 <p>The chart also plots offset±rtt,  where rtt is the round trip time
-to the remote.  NTP can not really know the offset of a remote chimer,
+to the server.  NTP can not really know the offset of a remote chimer,
 NTP computes it by subtracting rtt/2 from the offset.  Plotting the
 offset±rtt reverses this calculation to more easily see the effects of
 rtt changes.</p>
 
 <p>Closer to 0s is better.  An ideal system would be a horizontal line
-at 0s. Typical 90% ranges may be: local LAN peer 80µs; 90% ranges for
-WAN servers may be 4ms and much larger. </p>
+at 0s. Typical 90% ranges may be: local LAN server 80µs; 90% ranges for
+WAN server may be 4ms and much larger. </p>
 
 <p>Clock Offset is field 5 in the peerstats log file.  The Round Trip
 Time (rtt) is field 6 in the peerstats log file.</p>
@@ -1027,9 +1027,9 @@ line at 0s.</p>
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
                 else:
-                    title = "Peer Jitter " + str(peerlist[0])
+                    title = "Server Jitter " + str(peerlist[0])
                     exp = """\
-<p>The RMS Jitter of a remote peer or server.  Jitter is the
+<p>The RMS Jitter of a server.  Jitter is the
 current estimated dispersion, in other words the variation in offset
 between samples.</p>
 
@@ -1049,18 +1049,18 @@ at 0s.</p>
             title += "s"
 
             if "offset" == ptype:
-                title = "Peer Offsets"
+                title = "Server Offsets"
                 exp = """\
-<p>The offset of all refclocks, peers and servers.
+<p>The offset of all refclocks and servers.
 This can be useful to see if offset changes are happening in
 a single clock or all clocks together.</p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
 """
             else:
-                title = "Peer Jitters"
+                title = "Server Jitters"
                 exp = """\
-<p>The RMS Jitter of all refclocks, peers and servers. Jitter is the
+<p>The RMS Jitter of all refclocks and servers. Jitter is the
 current estimated dispersion, in other words the variation in offset
 between samples.</p>
 
@@ -1152,12 +1152,12 @@ plot \
 
     def peer_offsets_gnuplot(self, peerlist=None):
         "gnuplot Peer Offsets"
-        return self.peerstats_gnuplot(peerlist, 4, "Peer Clock Offset",
+        return self.peerstats_gnuplot(peerlist, 4, "Server Offset",
                                       "offset")
 
     def peer_jitters_gnuplot(self, peerlist=None):
         "gnuplot Peer Jitters"
-        return self.peerstats_gnuplot(peerlist, 7, "Peer Clock Jitter",
+        return self.peerstats_gnuplot(peerlist, 7, "Server Jitter",
                                       "jitter")
 
     def local_offset_histogram_gnuplot(self):
@@ -1697,6 +1697,17 @@ dd {
     margin-top: 4px;
     margin-bottom: 10px;
 }
+table {
+    text-align: right;
+    width: 1300px;
+    border-collapse: collapse;
+}
+thead {
+    font-weight: bold;
+}
+tbody tr {
+    vertical-align: top;
+}
 .section {
     color: #000000;
     text-decoration: none;
@@ -1753,7 +1764,7 @@ system clock frequency (usually in parts per million, ppm)</dd>
 
 <dt>jitter, dispersion:</dt>
 <dd>The short term change in a value.  NTP measures Local Time Jitter,
-Refclock Jitter, and Peer Jitter in seconds.  Local Frequency Jitter is
+Refclock Jitter, and Server Jitter in seconds.  Local Frequency Jitter is
 in ppm or ppb.
 </dd>
 
@@ -1822,7 +1833,7 @@ interpretation of the skew is complicated and unintuitive."<br> A normal
 distribution has a skewness of zero. </dd>
 
 <dt>upstream clock:</dt>
-<dd>Any remote clock or reference clock used as a source of time.</dd>
+<dd>Any server or reference clock used as a source of time.</dd>
 
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
