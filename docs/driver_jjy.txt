@@ -53,7 +53,7 @@ refclock jjy unit X subtype 1 time1 0.NNN flag1 {0|1};;
 --
 +
 Interface::
-RS-232C, 9600 BPS, 8-bits, no parity, 1 stop bit;;
+RS-232C, 9600 bps, 8-bits, no parity, 1 stop bit;;
 
 Time code format::
 +
@@ -77,7 +77,7 @@ refclock jjy unit X subtype 2 time1 0.NNN;;
 --
 +
 Interface::
-RS-232C, 9600 BPS, 8-bits, no parity, 1 stop bit;;
+RS-232C, 9600 bps, 8-bits, no parity, 1 stop bit;;
 
 Time code format::
 +
@@ -93,7 +93,7 @@ refclock jjy unit X subtype 3 time1 0.NNN;;
 --
 +
 Interface::
-RS-232C, 9800 BPS, 8-bits, no parity, 1 stop bit;;
+RS-232C, 9600 bps, 8-bits, no parity, 1 stop bit;;
 
 Time code format::
 +
@@ -116,7 +116,7 @@ refclock jjy unit X subtype 4 time1 0.NNN;;
 --
 +
 Interface::
-RS-232C, 4800 BPS, 8-bits, no parity, 1 stop bit;;
+RS-232C, 4800 bps, 8-bits, no parity, 1 stop bit;;
 
 Time code format::
 +
@@ -183,7 +183,7 @@ refclock jjy unit X subtype 6 time1 0.NNN;;
 --
 +
 Interface::
-RS-232C, 2400 BPS, 8-bits, no parity, 1 stop bit;;
+RS-232C, 2400 bps, 8-bits, no parity, 1 stop bit;;
 
 Time code format::
 +
@@ -282,7 +282,7 @@ flag1 {0|1} flag2 {0|1} flag3 {0|1} flag4 {0|1};;
 |=======================================
 
 phone 042NNNNNNN;;
-   The phone number is available at http://jjy.nict.go.jp/ +
+   The phone number is available at http://jjy.nict.go.jp/time/teljjy (Japanese and English) +
    The number of digits of the phone number is checked. If the
    international access number and the country number are added in
    order to call from outside of Japan, the number of digits is over
@@ -297,7 +297,7 @@ other outside access number is allowed.
 --
 +
 Interface::
-RS-232C or USB, 2400 BPS, 8-bits, no parity, 1 stop bit;;
+RS-232C or USB, 2400 bps, 8-bits, no parity, 1 stop bit;;
 Modem control commands:;;
 
 +ATE0Q0V1, ATMnLn, AT&K4, AT+MS=V22B, AT%C0, AT\Nn, ATH1, ATDWxnn...nn `+++`, ATH0+;;
@@ -322,26 +322,25 @@ before and after the date request to check uncertainty of the date
 whether it's before or after midnight.
 +
 The leap second is not handled, and only written in the clockstats
-file as an information.
+file as information.
 
 
-The JJY is the radio station which transmits the JST (Japan Standard
-Time) in long wave radio. The station JJY is operated by the National
+JJY is the radio station that transmits JST (Japan Standard
+Time) in long wave radio. The JJY station is operated by the National
 Institute of Information and Communications Technology. An operating
 announcement and some information are available from
-http://www.nict.go.jp/ (English and Japanese) and http://jjy.nict.go.jp/
-(English and Japanese)
+http://jjy.nict.go.jp/ (Japanese and English).
 
 The user is expected to provide a symbolic link to an available serial
-port device. This is typically performed by a command such as;
+port device:
 
 ----------------------------------------------------------------
 ln -s /dev/ttyS0 /dev/jjy0
 ----------------------------------------------------------------
 
 Using an RS-232C to USB converter cable, the clock or a modem can be
-connected to a USB port instead of a serial port. In this case, the
-typical symbolic link command is as follows;
+connected to a USB port instead of a serial port with this symbolic
+link:
 
 ----------------------------------------------------------------
 ln -s /dev/ttyUSB0 /dev/jjy0
