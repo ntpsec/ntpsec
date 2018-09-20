@@ -2238,7 +2238,7 @@ read_network_packet(
 	 */
 	rb->dstadr = itf;
 	rb->fd = fd;
-	ts = fetch_packetstamp(rb, &msghdr, ts);
+	ts = fetch_packetstamp(&msghdr, ts);
 	rb->recv_time = ts;
 	rb->receiver = receive;
 #ifdef REFCLOCK

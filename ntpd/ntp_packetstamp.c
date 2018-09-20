@@ -82,7 +82,6 @@ enable_packetstamps(
  */
 l_fp
 fetch_packetstamp(
-	struct recvbuf *	rb,
 	struct msghdr *		msghdr,
 	l_fp			ts
 	)
@@ -98,15 +97,11 @@ fetch_packetstamp(
 	l_fp			lfpfuzz;
 	l_fp			nts = 0;  /* network time stamp */
 
-	UNUSED_ARG(rb);
-
 /* There should be only one cmsg. */
 	cmsghdr = CMSG_FIRSTHDR(msghdr);
 	if (NULL == cmsghdr) {
 		DPRINT(4, ("fetch_timestamp: can't find timestamp\n"));
-		msyslog(LOG_ERR,
-			"ERR: fetch_timestamp: no msghdrs, %s",
-			socktoa(&rb->recv_srcadr));
+		msyslog(LOG_ERR, "ERR: fetch_timestamp: no msghdrs");
 		exit(2);
 		/* return ts;	** Kludge to use time from select. */
 	}

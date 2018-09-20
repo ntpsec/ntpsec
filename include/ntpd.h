@@ -193,7 +193,7 @@ extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 
 /* packetstamp.c */
 extern void	enable_packetstamps(int, sockaddr_u *);
-extern l_fp	fetch_packetstamp(struct recvbuf *, struct msghdr *, l_fp);
+extern l_fp	fetch_packetstamp(struct msghdr *, l_fp);
 
 /*
  * Signals we catch for debugging.
