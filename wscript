@@ -840,11 +840,6 @@ int main(int argc, char **argv) {
     else:
         ctx.undefine("ENABLE_CLASSIC_MODE")
 
-    if ctx.options.enable_debug_timing:
-        ctx.define("ENABLE_DEBUG_TIMING", 1)
-    else:
-        ctx.undefine("ENABLE_DEBUG_TIMING")
-
     # Ugly hack to examine config symbols
     for sym in ctx.env.DEFINES:
         if sym.startswith("NTP_SIZEOF_TIME_T="):

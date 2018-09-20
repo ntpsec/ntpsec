@@ -97,13 +97,8 @@ fetch_packetstamp(
 	double			fuzz;
 	l_fp			lfpfuzz;
 	l_fp			nts = 0;  /* network time stamp */
-#ifdef ENABLE_DEBUG_TIMING
-	l_fp			dts;
-#endif
 
-#ifndef ENABLE_DEBUG_TIMING
 	UNUSED_ARG(rb);
-#endif
 
 /* There should be only one cmsg. */
 	cmsghdr = CMSG_FIRSTHDR(msghdr);
@@ -159,13 +154,6 @@ fetch_packetstamp(
 	fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 	lfpfuzz = dtolfp(fuzz);
 	nts += lfpfuzz;
-#ifdef ENABLE_DEBUG_TIMING
-	dts = ts;
-	dts -= nts;
-	collect_timing(rb, "input processing delay", 1, dts);
-	DPRINT(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",
-		lfptoa(dts, 9)));
-#endif	/* ENABLE_DEBUG_TIMING */
 	ts = nts;
 
 	return ts;

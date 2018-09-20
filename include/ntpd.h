@@ -95,9 +95,6 @@ extern	void	init_io 	(void);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
 extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, int);
-#ifdef ENABLE_DEBUG_TIMING
-extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp);
-#endif
 extern const char * latoa(endpt *);
 
 /* ntp_loopfilter.c */
@@ -193,9 +190,6 @@ extern	void	record_raw_stats (struct peer *,
 				  double root_dispersion, uint32_t refid,
 				  unsigned int outcount);
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
-#ifdef ENABLE_DEBUG_TIMING
-extern	void	record_timing_stats (const char *);
-#endif
 
 /* packetstamp.c */
 extern void	enable_packetstamps(int, sockaddr_u *);

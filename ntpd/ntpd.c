@@ -948,15 +948,6 @@ static void mainloop(void)
 		}
 #endif
 
-# ifdef ENABLE_DEBUG_TIMING
-		{
-			l_fp pts;
-			l_fp tsa, tsb;
-			int bufcount = 0;
-
-			get_systime(&pts);
-			tsa = pts;
-# endif
 			rbuf = get_full_recv_buffer();
 			while (rbuf != NULL) {
 
@@ -971,14 +962,6 @@ static void mainloop(void)
 				 * packet.
 				 */
 				if (rbuf->receiver != NULL) {
-# ifdef ENABLE_DEBUG_TIMING
-					l_fp dts = pts;
-
-					dts -= rbuf->recv_time;
-					DPRINT(2, ("processing timestamp delta %s (with prec. fuzz)\n", lfptoa(dts, 9)));
-					collect_timing(rbuf, "buffer processing delay", 1, dts);
-					bufcount++;
-# endif
 					(*rbuf->receiver)(rbuf);
 				} else {
 					msyslog(LOG_ERR, "ERR: fatal: receive buffer callback NULL");
@@ -988,15 +971,6 @@ static void mainloop(void)
 				freerecvbuf(rbuf);
 				rbuf = get_full_recv_buffer();
 			}
-# ifdef ENABLE_DEBUG_TIMING
-			get_systime(&tsb);
-			tsb -= tsa;
-			if (bufcount) {
-				collect_timing(NULL, "processing", bufcount, tsb);
-				DPRINT(2, ("processing time for %d buffers %s\n", bufcount, lfptoa(tsb, 9)));
-			}
-		}
-# endif
 
 		/*
 		 * Check files

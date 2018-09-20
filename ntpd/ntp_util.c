@@ -62,7 +62,6 @@ static FILEGEN peerstats;
 static FILEGEN protostats;
 static FILEGEN rawstats;
 static FILEGEN sysstats;
-static FILEGEN timingstats;
 static FILEGEN usestats;
 
 /*
@@ -112,7 +111,6 @@ uninit_util(void)
 	filegen_unregister("sysstats");
 	filegen_unregister("peerstats");
 	filegen_unregister("protostats");
-	filegen_unregister("timingstats");
 	filegen_unregister("usestats");
 }
 #endif /* DEBUG */
@@ -130,7 +128,6 @@ init_util(void)
 	filegen_register(statsdir, "sysstats",	  &sysstats);
 	filegen_register(statsdir, "peerstats",	  &peerstats);
 	filegen_register(statsdir, "protostats",  &protostats);
-	filegen_register(statsdir, "timingstats", &timingstats);
 	filegen_register(statsdir, "usestats",	  &usestats);
 
 	/*
@@ -685,36 +682,6 @@ record_proto_stats(
 	}
 }
 
-#ifdef ENABLE_DEBUG_TIMING
-/*
- * record_timing_stats - write timing statistics to file
- *
- * file format:
- * day (mjd)
- * time (s past midnight)
- * text message
- */
-void
-record_timing_stats(
-	const char *text	/* text message */
-	)
-{
-	static unsigned int flshcnt;
-	struct timespec	now;
-
-	if (!stats_control)
-		return;
-
-	clock_gettime(CLOCK_REALTIME, &now);
-	filegen_setup(&timingstats, now.tv_sec);
-	if (timingstats.fp != NULL) {
-		fprintf(timingstats.fp, "%s %s\n",
-		    timespec_to_MJDtime(&now), text);
-		if (++flshcnt % 100 == 0)
-			fflush(timingstats.fp);
-	}
-}
-#endif
 
 
 /*

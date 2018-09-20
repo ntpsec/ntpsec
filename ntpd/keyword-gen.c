@@ -97,7 +97,6 @@ struct key_tok ntp_keywords[] = {
 { "protostats",		T_Protostats,		FOLLBY_TOKEN },
 { "rawstats",		T_Rawstats,		FOLLBY_TOKEN },
 { "sysstats", 		T_Sysstats,		FOLLBY_TOKEN },
-{ "timingstats",	T_Timingstats,		FOLLBY_TOKEN },
 { "usestats",		T_Usestats,		FOLLBY_TOKEN },
 /* filegen_option */
 { "file",		T_File,			FOLLBY_STRING },

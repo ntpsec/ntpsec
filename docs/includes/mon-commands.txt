@@ -223,24 +223,6 @@ names from the rusage struct.  See +man getrusage+ for details.
 (The NetBSD and FreeBSD man pages have more details.)
 The maxrss column is the high water mark since the process was started.
 The remaining fields show the values used since the last report.
-+
-  +timingstats+;;
-   (Only available when the daemon is compiled with process time
-   debugging support (+--enable-debug-timing+ - costs performance). Record
-   processing time statistics for various selected code paths.
-+
-+53876 36.920 10.0.3.5 1 0.000014592 input processing delay+
-+
-[width="100%",cols="<34%,<33%,<33%",]
-|====================================
-|Item         |Units    |Description
-|+53876+      |MJD      |date
-|+36.920+     |s        |time past midnight
-|+10.0.3.5+   |IP       |server address
-|+1+          |#        |event count
-|+0.000014592+|s        |total time
-|_message_    |text     |code path description (see source)
-|====================================
 
 // End of super-long series of statistics directives
 

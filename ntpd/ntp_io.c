@@ -306,30 +306,6 @@ maintain_activefds(
 }
 
 
-#ifdef ENABLE_DEBUG_TIMING
-/*
- * collect timing information for various processing
- * paths. currently we only pass them on to the file
- * for later processing. this could also do histogram
- * based analysis in order to reduce the load (and skew)
- * due to the file output
- */
-void
-collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp dts)
-{
-	char buf[256];
-
-	snprintf(buf, sizeof(buf), "%s %d %s %s",
-		 (rb != NULL)
-		     ? ((rb->dstadr != NULL)
-			    ? socktoa(&rb->recv_srcadr)
-			    : "-REFCLOCK-")
-		     : "-",
-		 count, lfptoa(dts, 9), tag);
-	record_timing_stats(buf);
-}
-#endif
-
 /*
  * About dynamic interfaces, sockets, reception and more...
  *
@@ -2334,9 +2310,6 @@ input_handler(
 	int		buflen;
 	SOCKET		fd;
 	l_fp		ts;	/* Timestamp at BOselect() gob */
-#ifdef ENABLE_DEBUG_TIMING
-	l_fp		ts_e;	/* Timestamp at EOselect() gob */
-#endif
 	size_t		select_count;
 	endpt *		ep;
 #ifdef REFCLOCK
@@ -2444,19 +2417,6 @@ input_handler(
 		return;
 	}
 	/* We've done our work */
-#ifdef ENABLE_DEBUG_TIMING
-	get_systime(&ts_e);
-	/*
-	 * (ts_e - ts) is the amount of time we spent processing this
-	 * gob of file descriptors.  Log it.
-	 */
-	ts_e -= ts;
-	collect_timing(NULL, "input handler", 1, ts_e);
-	if (debug > 3) /* SPECIAL DEBUG */
-		msyslog(LOG_DEBUG,
-			"IO: input_handler: Processed a gob of fd's in %s msec",
-			lfptoms(ts_e, 6));
-#endif /* ENABLE_DEBUG_TIMING */
 	/* We're done... */
 	return;
 }
