@@ -28,6 +28,7 @@ Any keystroke causes a poll and update. Keystroke commands:
 from __future__ import print_function, division
 
 import getopt
+import re
 import sys
 import time
 
@@ -76,9 +77,10 @@ def statline(_peerlist, _mrulist, nyquist):
     "Generate a status line"
     # We don't use stdversion here because the presence of a date is confusing
     leader = sysvars['version'][0]
+    leader = re.sub(r" \([^\)]*\)" , "", leader)
     if span.entries:
         trailer = "Updated: %s (%s)" \
-                  % (iso8601(span.entries[0].last),
+                  % (iso8601(span.entries[0].last).split("T")[1],
                      ntp.util.PeerSummary.prettyinterval(nyquist))
     else:
         trailer = ""
