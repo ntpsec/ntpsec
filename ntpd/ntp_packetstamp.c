@@ -82,8 +82,7 @@ enable_packetstamps(
  */
 l_fp
 fetch_packetstamp(
-	struct msghdr *		msghdr,
-	l_fp			ts
+	struct msghdr *		msghdr
 	)
 {
 	struct cmsghdr *	cmsghdr;
@@ -149,9 +148,8 @@ fetch_packetstamp(
 	fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 	lfpfuzz = dtolfp(fuzz);
 	nts += lfpfuzz;
-	ts = nts;
 
-	return ts;
+	return nts;
 }
 
 // end
