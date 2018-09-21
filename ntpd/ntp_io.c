@@ -257,10 +257,10 @@ static void		maintain_activefds(int fd, bool closing);
 /*
  * Routines to read the ntp packets
  */
-static int	read_network_packet	(SOCKET, endpt *, l_fp);
-static void input_handler (fd_set *, l_fp *);
+static int	read_network_packet	(SOCKET, endpt *);
+static void input_handler (fd_set *);
 #ifdef REFCLOCK
-static int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
+static int	read_refclock_packet	(SOCKET, struct refclockio *);
 #endif
 
 /*
@@ -2060,8 +2060,7 @@ sendpkt(
 static int
 read_refclock_packet(
 	SOCKET			fd,
-	struct refclockio *	rp,
-	l_fp			ts
+	struct refclockio *	rp
 	)
 {
 	size_t			i;
@@ -2069,6 +2068,13 @@ read_refclock_packet(
 	int			saved_errno;
 	int			consumed;
 	struct recvbuf *	rb;
+	l_fp			ts;
+
+	/* Could read earlier in normal case,
+	 * but too early gets wrong time if data arrives
+	 * while we are busy processing other packets.
+	 */
+	get_systime(&ts);
 
 	rb = get_free_recv_buffer();
 
@@ -2128,8 +2134,7 @@ read_refclock_packet(
 static int
 read_network_packet(
 	SOCKET			fd,
-	endpt *	itf,
-	l_fp			ts
+	endpt *	itf
 	)
 {
 	socklen_t fromlen;
@@ -2238,8 +2243,7 @@ read_network_packet(
 	 */
 	rb->dstadr = itf;
 	rb->fd = fd;
-	ts = fetch_packetstamp(&msghdr);
-	rb->recv_time = ts;
+	rb->recv_time = fetch_packetstamp(&msghdr);
 #ifdef REFCLOCK
 	rb->network_packet = true;
 #endif /* REFCLOCK */
@@ -2281,11 +2285,7 @@ io_handler(void)
 	pthread_sigmask(SIG_SETMASK, &runMask, NULL);
 
 	if (nfound > 0) {
-		l_fp ts;
-
-		get_systime(&ts);
-
-		input_handler(&rdfdes, &ts);
+		input_handler(&rdfdes);
 	} else if (nfound == -1 && errno != EINTR) {
 		msyslog(LOG_ERR, "IO: select() error: %m");
 	}
@@ -2303,13 +2303,11 @@ io_handler(void)
  */
 static void
 input_handler(
-	fd_set *	fds,
-	l_fp *	cts
+	fd_set *	fds
 	)
 {
 	int		buflen;
 	SOCKET		fd;
-	l_fp		ts;	/* Timestamp at BOselect() gob */
 	size_t		select_count;
 	endpt *		ep;
 #ifdef REFCLOCK
@@ -2329,7 +2327,6 @@ input_handler(
 	 * If we have something to do, freeze a timestamp.
 	 * See below for the other cases (nothing left to do or error)
 	 */
-	ts = *cts;
 
 	++pkt_count.handler_pkts;
 
@@ -2345,7 +2342,7 @@ input_handler(
 			if (!FD_ISSET(fd, fds))
 				continue;
 			++select_count;
-			buflen = read_refclock_packet(fd, rp, ts);
+			buflen = read_refclock_packet(fd, rp);
 			/*
 			 * The first read must succeed after select()
 			 * indicates readability, or we've reached
@@ -2368,7 +2365,7 @@ input_handler(
 			} else {
 				/* drain any remaining refclock input */
 				do {
-					buflen = read_refclock_packet(fd, rp, ts);
+					buflen = read_refclock_packet(fd, rp);
 				} while (buflen > 0);
 			}
 		}
@@ -2383,7 +2380,7 @@ input_handler(
 		if (FD_ISSET(fd, fds))
 			do {
 				++select_count;
-				buflen = read_network_packet(fd, ep, ts);
+				buflen = read_network_packet(fd, ep);
 			} while (buflen > 0);
 	}
 
