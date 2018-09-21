@@ -12,13 +12,11 @@
 /*
  * Memory allocation.
  */
-static unsigned long full_recvbufs;	/* recvbufs on full_recv_fifo */
 static unsigned long free_recvbufs;	/* recvbufs on free_recv_list */
 static unsigned long total_recvbufs;	/* total recvbufs currently in use */
 static unsigned long lowater_adds;	/* # of times we have added memory */
 static unsigned long buffer_shortfall;	/* # of missed free receive buffers
 					   between replenishments */
-static DECL_FIFO_ANCHOR(recvbuf_t) full_recv_fifo;
 static recvbuf_t *		   free_recv_list;
 
 #ifdef DEBUG
@@ -30,12 +28,6 @@ unsigned long
 free_recvbuffs (void)
 {
 	return free_recvbufs;
-}
-
-unsigned long
-full_recvbuffs (void)
-{
-	return full_recvbufs;
 }
 
 unsigned long
@@ -94,8 +86,7 @@ init_recvbuff(unsigned int nbufs)
 	/*
 	 * Init buffer free list and stat counters
 	 */
-	free_recvbufs = total_recvbufs = 0;
-	full_recvbufs = lowater_adds = 0;
+	free_recvbufs = total_recvbufs = lowater_adds = 0;
 
 	create_buffers(nbufs);
 
@@ -112,13 +103,6 @@ uninit_recvbuff(void)
 	recvbuf_t *rbunlinked;
 
 	for (;;) {
-		UNLINK_FIFO(rbunlinked, full_recv_fifo, link);
-		if (rbunlinked == NULL)
-			break;
-		free(rbunlinked);
-	}
-
-	for (;;) {
 		UNLINK_HEAD_SLIST(rbunlinked, free_recv_list, link);
 		if (rbunlinked == NULL)
 			break;
@@ -127,6 +111,23 @@ uninit_recvbuff(void)
 }
 #endif	/* DEBUG */
 
+
+recvbuf_t *
+get_free_recv_buffer(void)
+{
+        recvbuf_t *buffer;
+
+        UNLINK_HEAD_SLIST(buffer, free_recv_list, link);
+        if (buffer != NULL) {
+                free_recvbufs--;
+                initialise_buffer(buffer);
+                buffer->used++;
+        } else {
+                buffer_shortfall++;
+        }
+
+        return buffer;
+}
 
 /*
  * freerecvbuf - make a single recvbuf available for reuse
@@ -146,91 +147,6 @@ freerecvbuf(recvbuf_t *rb)
 	free_recvbufs++;
 }
 
-
-void
-add_full_recv_buffer(recvbuf_t *rb)
-{
-	if (rb == NULL) {
-		msyslog(LOG_ERR, "ERR: add_full_recv_buffer received NULL buffer");
-		return;
-	}
-	LINK_FIFO(full_recv_fifo, rb, link);
-	full_recvbufs++;
-}
-
-
-recvbuf_t *
-get_free_recv_buffer(void)
-{
-	recvbuf_t *buffer;
-
-	UNLINK_HEAD_SLIST(buffer, free_recv_list, link);
-	if (buffer != NULL) {
-		free_recvbufs--;
-		initialise_buffer(buffer);
-		buffer->used++;
-	} else {
-		buffer_shortfall++;
-	}
-
-	return buffer;
-}
-
-
-recvbuf_t *
-get_full_recv_buffer(void)
-{
-	recvbuf_t *	rbuf;
-
-	/*
-	 * try to grab a full buffer
-	 */
-	UNLINK_FIFO(rbuf, full_recv_fifo, link);
-	if (rbuf != NULL)
-		full_recvbufs--;
-
-	return rbuf;
-}
-
-
-/*
- * purge_recv_buffers_for_fd() - purges any previously-received input
- *				 from a given file descriptor.
- */
-void
-purge_recv_buffers_for_fd(
-	SOCKET	fd
-	)
-{
-	recvbuf_t *rbufp;
-	recvbuf_t *next;
-	recvbuf_t *punlinked;
-
-	for (rbufp = HEAD_FIFO(full_recv_fifo);
-	     rbufp != NULL;
-	     rbufp = next) {
-		next = rbufp->link;
-		if (rbufp->fd == fd) {
-			UNLINK_MID_FIFO(punlinked, full_recv_fifo,
-					rbufp, link, recvbuf_t);
-			INSIST(punlinked == rbufp);
-			full_recvbufs--;
-			freerecvbuf(rbufp);
-		}
-	}
-}
-
-
-/*
- * Checks to see if there are buffers to process
- */
-bool has_full_recv_buffer(void)
-{
-	if (HEAD_FIFO(full_recv_fifo) != NULL)
-		return (true);
-	else
-		return (false);
-}
 
 
 #ifdef NTP_DEBUG_LISTS

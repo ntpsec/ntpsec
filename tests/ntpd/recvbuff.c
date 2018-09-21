@@ -17,9 +17,6 @@ TEST_TEAR_DOWN(recvbuff) {}
 
 TEST(recvbuff, Initialization) {
 	TEST_ASSERT_EQUAL(RECV_INIT, free_recvbuffs());
-	TEST_ASSERT_EQUAL(0, full_recvbuffs());
-	TEST_ASSERT_FALSE(has_full_recv_buffer());
-	TEST_ASSERT_NULL(get_full_recv_buffer());
 }
 
 TEST(recvbuff, GetAndFree) {
@@ -31,19 +28,7 @@ TEST(recvbuff, GetAndFree) {
 	TEST_ASSERT_EQUAL(initial, free_recvbuffs());
 }
 
-TEST(recvbuff, GetAndFill) {
-	recvbuf_t* buf = get_free_recv_buffer();
-	recvbuf_t* buf1;
-
-	add_full_recv_buffer(buf);
-	TEST_ASSERT_EQUAL(1, full_recvbuffs());
-	TEST_ASSERT_TRUE(has_full_recv_buffer());
-	buf1 = get_full_recv_buffer();
-	TEST_ASSERT_POINTERS_EQUAL(buf, buf1);
-}
-
 TEST_GROUP_RUNNER(recvbuff) {
 	RUN_TEST_CASE(recvbuff, Initialization);
 	RUN_TEST_CASE(recvbuff, GetAndFree);
-	RUN_TEST_CASE(recvbuff, GetAndFill);
 }

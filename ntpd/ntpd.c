@@ -917,15 +917,14 @@ ntpdmain(
  */
 static void mainloop(void)
 {
-	struct recvbuf *rbuf;
-
 	init_timer();
 
 	for (;;) {
 		if (sig_flags.sawQuit)
 			finish_safe(signo);
 
-		if (!sig_flags.sawALRM && !has_full_recv_buffer()) {
+		if (!sig_flags.sawALRM) {
+			// FIXME: Check other flags
 			/*
 			 * Nothing to do.  Wait for something.
 			 */
@@ -947,30 +946,6 @@ static void mainloop(void)
 			dns_check();
 		}
 #endif
-
-			rbuf = get_full_recv_buffer();
-			while (rbuf != NULL) {
-
-				if (sig_flags.sawALRM) {
-					/* avoid timer starvation during lengthy I/O handling */
-					timer();
-					sig_flags.sawALRM = false;
-				}
-
-				/*
-				 * Call the data procedure to handle each received
-				 * packet.
-				 */
-				if (rbuf->receiver != NULL) {
-					(*rbuf->receiver)(rbuf);
-				} else {
-					msyslog(LOG_ERR, "ERR: fatal: receive buffer callback NULL");
-					abort();
-				}
-
-				freerecvbuf(rbuf);
-				rbuf = get_full_recv_buffer();
-			}
 
 		/*
 		 * Check files

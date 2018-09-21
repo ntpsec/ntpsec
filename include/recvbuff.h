@@ -39,7 +39,6 @@ struct recvbuf {
 	struct netendpt *	dstadr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
 	l_fp		recv_time;	/* time of arrival */
-	void		(*receiver)(struct recvbuf *); /* callback */
 	size_t		recv_length;	/* number of octets received */
 	union {
 		struct pkt	X_recv_pkt;
@@ -74,30 +73,10 @@ extern	void	freerecvbuf(struct recvbuf *);
 /* signal safe - no malloc */
 extern	struct recvbuf *get_free_recv_buffer(void);
 
-/*   Add a buffer to the full list
- */
-extern	void	add_full_recv_buffer(struct recvbuf *);
 
 /* number of recvbufs on freelist */
 extern unsigned long free_recvbuffs(void);    /* not really pure */
-extern unsigned long full_recvbuffs(void);    /* not really pure */
 extern unsigned long total_recvbuffs(void);   /* not really pure */
 extern unsigned long lowater_additions(void); /* not really pure */
-
-/*  Returns the next buffer in the full list.
- *
- */
-extern	struct recvbuf *get_full_recv_buffer(void);
-
-/*
- * purge_recv_buffers_for_fd() - purges any previously-received input
- *				 from a given file descriptor.
- */
-extern	void purge_recv_buffers_for_fd(SOCKET);
-
-/*
- * Checks to see if there are buffers to process
- */
-extern bool has_full_recv_buffer(void); /* not really pure */
 
 #endif	/* GUARD_RECVBUFF_H */

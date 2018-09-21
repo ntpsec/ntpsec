@@ -1983,7 +1983,8 @@ ctl_putsys(
 		break;
 
 	case CS_USED_RBUF:
-		ctl_putuint(sys_var[varid].text, full_recvbuffs());
+		// FIXME: nuke this slot
+		ctl_putuint(sys_var[varid].text, 0);
 		break;
 
 	case CS_RBUF_LOWATER:

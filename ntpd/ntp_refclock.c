@@ -667,7 +667,8 @@ indicate_refclock_packet(
 
 		return true;
 	}
-	add_full_recv_buffer(rb);
+	(rio->clock_recv)(rb);
+	freerecvbuf(rb);
 
 	return false;
 }
