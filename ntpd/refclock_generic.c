@@ -1889,6 +1889,11 @@ local_input(
 			}
 			if (count)
 			{	/* simulate receive */
+// FIXME - this copy is no longer needed
+// This code is the result of a simple fix for SINGLEBUFFER
+// The copy used to go to add_full_recv_buffer, but that's not needed any more
+// I'm not sure the local_receive below is correct
+// Hal, 2018-Sep-21
 				buf = get_free_recv_buffer();
 				if (buf != NULL) {
 					memmove((void *)buf->recv_buffer,
@@ -1898,12 +1903,12 @@ local_input(
 					buf->recv_time    = rbufp->recv_time;
 					buf->srcadr       = rbufp->srcadr;
 					buf->dstadr       = rbufp->dstadr;
-					buf->receiver     = rbufp->receiver;
 					buf->fd           = rbufp->fd;
 					buf->recv_peer    = rbufp->recv_peer;
 					parse->generic->io.recvcount++;
 					pkt_count.packets_received++;
-					add_full_recv_buffer(buf);
+					local_receive(buf);
+					freerecvbuf(buf);
 				}
 				parse_iodone(&parse->parseio);
 			}
