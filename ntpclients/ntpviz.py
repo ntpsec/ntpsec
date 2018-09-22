@@ -956,7 +956,7 @@ plot \
             try:
                 ip = socket.gethostbyname(key)
                 namelist.append(key)
-            except:
+            except socket.error:
                 # ignore it
                 ip = key
                 # socket.getfqdn() is also flakey...
@@ -1480,7 +1480,7 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                             action="store_true",
                             dest='nice',
                             help="Run as lowest priority")
-    except:
+    except OSError:
         pass
 
     parser.add_argument('-V', '--version',
@@ -1980,7 +1980,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     try:
         os.remove(csv_filename)
         os.remove(index_filename)
-    except:
+    except OSError:
         pass
 
     os.rename(csv_filename + ".tmp", csv_filename)
