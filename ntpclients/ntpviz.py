@@ -387,6 +387,7 @@ def gnuplot_fmt(min, max):
 
 def gnuplot(template, outfile=None):
     "Run a specified gnuplot program."
+
     if not len(template):
         # silently ignore empty plots
         return ''
@@ -1867,7 +1868,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     if len(statlist) > 1:
         index_buffer += local_offset_multiplot(statlist)
     else:
-        # imagepairs in the order of the heml entries
+        # imagepairs in the order of the html entries
         imagepairs = [
             ("local-offset", stats.local_offset_gnuplot()),
             # skipa next one, redundant to one above
@@ -1902,15 +1903,17 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 sys.stderr.write("ntpviz: plotting %s\n" % image['title'])
             stats.append(image['stats'])
             # give each H2 an unique ID.
-            id = image['title'].lower()
-            id = id.replace(' ', '_').replace(':', '_')
+            id = image['title'].lower().replace(' ', '_').replace(':', '_')
+
             index_buffer += """\
 <div id="%s">\n<h2><a class="section" href="#%s">%s</a></h2>
 """ % (id, id, image['title'])
 
             div_name = imagename.replace('-', ' ')
-            index_buffer += imagewrapper % \
-                (imagename.replace(':', '%3A'), div_name)
+            # Windows hates colons in filename
+            imagename = imagename.replace(':', '-')
+            index_buffer += imagewrapper % (imagename, div_name)
+
             if image['html']:
                 index_buffer += "<div>\n%s</div>\n" % image['html']
             index_buffer += "<br><br>\n"
