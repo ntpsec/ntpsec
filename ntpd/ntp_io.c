@@ -2335,39 +2335,37 @@ input_handler(
 	 * Check out the reference clocks first, if any
 	 */
 
-	if (refio != NULL) {
-		for (rp = refio; rp != NULL; rp = rp->next) {
-			fd = rp->fd;
+	for (rp = refio; rp != NULL; rp = rp->next) {
+		fd = rp->fd;
 
-			if (!FD_ISSET(fd, fds))
-				continue;
-			++select_count;
-			buflen = read_refclock_packet(fd, rp);
-			/*
-			 * The first read must succeed after select()
-			 * indicates readability, or we've reached
-			 * a permanent EOF.  http://bugs.ntp.org/1732
-			 * reported ntpd munching CPU after a USB GPS
-			 * was unplugged because select was indicating
-			 * EOF but ntpd didn't remove the descriptor
-			 * from the activefds set.
-			 */
-			if (buflen < 0 && EAGAIN != errno) {
-				saved_errno = errno;
-				clk = refclock_name(rp->srcclock);
-				errno = saved_errno;
-				msyslog(LOG_ERR, "IO: %s read: %m", clk);
-				maintain_activefds(fd, true);
-			} else if (0 == buflen) {
-				clk = refclock_name(rp->srcclock);
-				msyslog(LOG_ERR, "IO: %s read EOF", clk);
-				maintain_activefds(fd, true);
-			} else {
-				/* drain any remaining refclock input */
-				do {
-					buflen = read_refclock_packet(fd, rp);
-				} while (buflen > 0);
-			}
+		if (!FD_ISSET(fd, fds))
+			continue;
+		++select_count;
+		buflen = read_refclock_packet(fd, rp);
+		/*
+		 * The first read must succeed after select()
+		 * indicates readability, or we've reached
+		 * a permanent EOF.  http://bugs.ntp.org/1732
+		 * reported ntpd munching CPU after a USB GPS
+		 * was unplugged because select was indicating
+		 * EOF but ntpd didn't remove the descriptor
+		 * from the activefds set.
+		 */
+		if (buflen < 0 && EAGAIN != errno) {
+			saved_errno = errno;
+			clk = refclock_name(rp->srcclock);
+			errno = saved_errno;
+			msyslog(LOG_ERR, "IO: %s read: %m", clk);
+			maintain_activefds(fd, true);
+		} else if (0 == buflen) {
+			clk = refclock_name(rp->srcclock);
+			msyslog(LOG_ERR, "IO: %s read EOF", clk);
+			maintain_activefds(fd, true);
+		} else {
+			/* drain any remaining refclock input */
+			do {
+				buflen = read_refclock_packet(fd, rp);
+			} while (buflen > 0);
 		}
 	}
 #endif /* REFCLOCK */
