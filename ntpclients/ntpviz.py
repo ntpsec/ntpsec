@@ -64,6 +64,7 @@ if sys.version_info[0] == 2:
     sys.setdefaultencoding('utf8')
 
     def open(file, mode='r', buffering=-1, encoding=None, errors=None):
+        "Redefine open()"
         return(codecs.open(filename=file, mode=mode, encoding=encoding,
                errors=errors, buffering=buffering))
 
@@ -113,20 +114,20 @@ try:
     import ntp.statfiles
     import ntp.util
 except ImportError as e:
-    sys.stderr.write(
-        "ntpviz: can't find Python NTP library.\n")
-    sys.stderr.write("%s\n" % e)
+    sys.stderr.write("ntpviz: ERROR: can't find Python NTP library.\n%s\n"
+                     "Check your PYTHONPATH\n" % e)
     sys.exit(1)
 
 # check Python version
 Python26 = False
-if ((3 > sys.version_info[0]) and (7 > sys.version_info[1])):
+if (3 > sys.version_info[0]) and (7 > sys.version_info[1]):
     # running under Python version before 2.7
     Python26 = True
 
 
 # overload ArgumentParser
 class MyArgumentParser(argparse.ArgumentParser):
+    "class to parse arguments"
 
     def convert_arg_line_to_args(self, arg_line):
         '''Make options file more tolerant'''
@@ -157,7 +158,7 @@ def print_profile():
 # class to calc:
 #   Mean, Variance, Standard Deviation, Skewness and Kurtosis
 
-class RunningStats:
+class RunningStats(object):
     "Calculate mean, variance, sigma, skewness and kurtosis"
 
     def __init__(self, values):
@@ -196,6 +197,8 @@ class RunningStats:
 
 # class for calced values
 class VizStats(ntp.statfiles.NTPStats):
+    "Class for calculated values"
+
     percs = {}          # dictionary of percentages
     title = ''          # title
     unit = 's'          # display units: s, ppm, etc.
@@ -365,9 +368,9 @@ class VizStats(ntp.statfiles.NTPStats):
         return
 
 
-def gnuplot_fmt(min, max):
+def gnuplot_fmt(min_val, max_val):
     "return optimal gnuplot format"
-    span = max - min
+    span = max_val - min_val
     if 6 <= span:
         fmt = '%.0f'
     elif 0.6 <= span:
@@ -732,7 +735,6 @@ component of frequency drift.</p>
 
         # build the output dictionary, because Python can not format
         # complex objects.
-        gps_data = ()
         values_nsat = []
         values_tdop = []
         plot_data = ""
@@ -1078,14 +1080,14 @@ at 0s.</p>
             # actually use
             if rtt:
                 # fields: time, fld, and rtt
-                p = self.plot_slice(peerdict[ip], fld, 5)
-                plot_data += p[0]
+                pt = self.plot_slice(peerdict[ip], fld, 5)
+                plot_data += pt[0]
             else:
                 # fields: time, fld
-                p = self.plot_slice(peerdict[ip], fld)
-                plot_data += p[0]
+                pt = self.plot_slice(peerdict[ip], fld)
+                plot_data += pt[0]
 
-        stats = VizStats(p[1], title)
+        stats = VizStats(pt[1], title)
         if len(peerlist) == 1:
             percentages = " %(p50)s title '50th percentile', " % stats.percs
         else:
@@ -1905,11 +1907,11 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 sys.stderr.write("ntpviz: plotting %s\n" % image['title'])
             stats.append(image['stats'])
             # give each H2 an unique ID.
-            id = image['title'].lower().replace(' ', '_').replace(':', '_')
+            div_id = image['title'].lower().replace(' ', '_').replace(':', '_')
 
             index_buffer += """\
 <div id="%s">\n<h2><a class="section" href="#%s">%s</a></h2>
-""" % (id, id, image['title'])
+""" % (div_id, div_id, image['title'])
 
             div_name = imagename.replace('-', ' ')
             # Windows hates colons in filename
