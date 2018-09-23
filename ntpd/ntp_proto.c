@@ -653,13 +653,7 @@ receive(
 
 /* FIXME: This is lots more cleanup to do in this area. */
 
-#ifdef REFCLOCK
-	restrict_mask = rbufp->network_packet ?
-	    restrictions(&rbufp->recv_srcadr) :
-	    0;
-#else
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
-#endif
 
 	if(check_early_restrictions(rbufp, restrict_mask)) {
 		stat_count.sys_restricted++;

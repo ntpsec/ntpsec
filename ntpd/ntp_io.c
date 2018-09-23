@@ -2102,7 +2102,6 @@ read_refclock_packet(
 	rb->dstadr = 0;
 	rb->fd = fd;
 	rb->recv_time = ts;
-	rb->network_packet = false;
 
 	consumed = indicate_refclock_packet(rp, rb);
 	if (!consumed) {
@@ -2233,9 +2232,6 @@ read_network_packet(
 	rb->dstadr = itf;
 	rb->fd = fd;
 	rb->recv_time = fetch_packetstamp(&msghdr);
-#ifdef REFCLOCK
-	rb->network_packet = true;
-#endif /* REFCLOCK */
 
 	receive(rb);
 	freerecvbuf(rb);

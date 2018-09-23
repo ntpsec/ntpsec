@@ -52,7 +52,6 @@ struct recvbuf {
 	keyid_t keyid;
 	int mac_len;
 #ifdef REFCLOCK
-	bool network_packet;
 	struct peer *	recv_peer;
 #endif /* REFCLOCK */
 };
