@@ -122,7 +122,6 @@ NOTUSED
 ONCORE_VERBOSE_.*	# Debugging symbols internal to the OnCore refclock
 PI			# Math constant used by the sim code
 RUN_TEST		# Internal to Unity
-SETSOCKOPT_ARG_CAST	# Can probably go away when the Windows port is cleaned up.
 THREAD_MINSTACKSIZE
 UINTPTR_MAX		# Unity
 UINTPTR_MAX0		# Unity

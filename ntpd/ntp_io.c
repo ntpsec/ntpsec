@@ -38,17 +38,6 @@
 #define IFS_CREATED     2       /* was just created */
 #define IFS_DELETED     3       /* was just delete */
 
-/*
- * setsockopt does not always have the same arg declaration
- * across all platforms. If it's not defined we make it empty
- * UNUSED
- *
- * #ifndef SETSOCKOPT_ARG_CAST
- * #define SETSOCKOPT_ARG_CAST
- * #endif
- */
-
-
 #ifndef IPTOS_DSCP_EF
 #define IPTOS_DSCP_EF 0xb8
 #endif
