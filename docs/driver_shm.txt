@@ -49,9 +49,9 @@ checked:
 
 If set, the values in the record (clockTimeStampSec, clockTimeStampUSec,
 receiveTimeStampSec, receiveTimeStampUSec, leap, precision) are passed
-to +ntpd+, and +valid+ is cleared and +count+ is bumped.
+to +ntpd+, and +valid+ is cleared and +count+ is incremented.
 
-If not set, +count+ is bumped.
+If not set, +count+ is incremented.
 
 == Operation mode=1 ==
 
@@ -64,20 +64,20 @@ receiveTimeStampUSec, leap, precision) are read. Then, the remembered
 both are equal, the values read from the record are passed to _ntpd_. If
 they differ, another process has modified the record while it was read
 out (was not able to produce this case), and failure is reported to
-_ntpd_. The +valid+ flag is cleared and +count+ is bumped.
+_ntpd_. The +valid+ flag is cleared and +count+ is incremented.
 
-If not set, +count+ is bumped
+If not set, +count+ is incremented.
 
 == Mode-independent post-processing ==
 
 After the time stamps have been successfully plucked from the SHM
 segment, some sanity checks take place:
 
-* The receive time stamp of the SHM data must be in the last 5 seconds
+* The receive time stamp of the SHM data must be within the last 5 seconds
 before the time the data is processed. This helps in weeding out stale
 data.
 * If the absolute difference between remote and local clock exceeds the
-limit (either _time2_ or the default of 4hrs), then the sample is
+limit (either _time2_ or the default of 4 h), then the sample is
 discarded. This check is disabled when _flag1_ is set to 1.
 
 == GPSD ==
@@ -110,8 +110,8 @@ The 4th field is the number of second ticks since the last poll. The 5th
 field is the number of good data samples found. The last 64 will be used
 by _ntpd_. The 6th field is the number of sample that didn't have valid
 data ready. The 7th field is the number of bad samples. The 8th field is
-the number of times the mode 1 info was update while _ntpd_ was
-trying to grab a sample.
+the number of times the mode 1 info was updated while _ntpd_ was
+trying to acquire a sample.
 
 Here is a sample showing the GPS reception fading out:
 
@@ -163,8 +163,8 @@ for the specific unit.
   with default 0.0.
 +time2+ 'time'::
    Maximum allowed difference between remote and local clock, in seconds.
-   Values <1.0 or >86400.0 are ignored, and the default value of 4hrs
-   (14400s) is used instead. See also flag 1.
+   Values <1.0 or >86400.0 are ignored, and the default value of 4 h
+   (14400 s) is used instead. See also flag 1.
 +stratum+ 'number'::
    Specifies the driver stratum, in decimal from 0 to 15, with default 0.
 +refid+ 'string'::
@@ -218,7 +218,7 @@ the setuid/setgid system API to run under reduced rights once the
 initial setup of the process is done. One consequence out of this is
 that the allocation of SHM segments must be done early during the clock
 setup. The actual polling of the clock is done as the run-time user;
-deferring the creation of the SHM segment to this point will create a
+deferring the creation of the SHM segment to this point will create an
 SHM segment owned by the runtime-user account. The internal structure of
 ntpd does not permit the use of a refclock option if this is to be avoided;
 this is the reason why a mode bit is used for the configuration of a
