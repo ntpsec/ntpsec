@@ -12,11 +12,11 @@ image::pic/flt5.gif["Wedge Scattergram",align="center"]
 Figure 1. Wedge Scattergram
 
 Figure 1 shows a typical _wedge scattergram_ plotting sample points of
-offset versus delay collected over a 24-hr period. As the delay
+offset versus delay collected over a 24 h period. As the delay
 increases, the offset variation increases, so the best samples are those
 at the lowest delay. There are two limb lines at slope ±0.5,
 representing the limits of sample variation. However, it is apparent
-that, if a way could be found to find the sample of lowest delay, it
+that, if a way could be found to determine the sample of lowest delay, it
 would have the least offset variation and would be the best candidate to
 synchronize the system clock.
 
@@ -78,7 +78,7 @@ image:pic/flt1.gif["Raw",align="left"] image:pic/flt2.gif["Filtered",align="righ
 Figure 2. Raw (left) and Filtered (right) Offsets
 
 Figure 2 shows the performance of the algorithm for a typical Internet
-path over a 24-hr period. The graph on the left shows the raw offsets
+path over a 24 h period. The graph on the left shows the raw offsets
 produced by the on-wired protocol, while the figure on the right shows
 the filtered offsets produced by the clock filter algorithm. If we
 consider the series formed as the absolute value of the offset samples,
@@ -93,7 +93,7 @@ sample with lower delay is available. This commonly occurs when an older
 selected sample is discarded from the shift register. The reason for
 this is to preserve causality; that is, time always moves forward, never
 backward. The result can be the loss of up to seven samples in the shift
-register, or more to the point, the output sample rate can never be less
+register, or -- more to the point -- the output sample rate can never be less
 than one in eight input samples. The clock discipline algorithm is
 specifically designed to operate at this rate.
 
