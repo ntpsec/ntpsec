@@ -6,7 +6,7 @@ include::html.include[]
 ["verse",subs="normal"]
 Name: spectracom
 Reference ID: +GPS+
-Serial Port: +/dev/spectracom+'u'; 9600bps 8N1
+Serial Port: +/dev/spectracom+'u'; 9600 bps 8N1
 Features: Optional PPS signal processing, +tty_clk+
 Requires: Optional PPS signal processing requires the PPSAPI signal interface.
 
@@ -79,9 +79,9 @@ itself, which is a known problem with the older radios.
 
 == PPS Signal Processing ==
 
-When PPS signal processing is enabled, and when the system clock has
-been set by this or another driver and the PPS signal offset is within
-0.4 s of the system clock offset, the PPS signal replaces the timecode
+When PPS signal processing is enabled; and when the system clock has
+been set by this or another driver; and the PPS signal offset is within
+0.4 s of the system clock offset; then the  PPS signal replaces the timecode
 for as long as the PPS signal is active. If for some reason the PPS
 signal fails for one or more poll intervals, the driver reverts to the
 timecode. If the timecode fails for one or more poll intervals, the PPS
