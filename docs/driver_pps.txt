@@ -64,7 +64,7 @@ clock discipline can be used instead. The default behavior is not to
 use the kernel PPS clock discipline, even if present. This driver
 incorporates a good deal of signal processing to reduce jitter using
 the median filter algorithm in the driver. As the result, performance
-with +minpoll+ configured at 4 (16s) is generally better than the
+with +minpoll+ configured at 4 (16 s) is generally better than the
 kernel PPS discipline. However, the +flag 3+ option can be used to
 enable the kernel PPS discipline if necessary.
 
@@ -78,9 +78,9 @@ driver on an indefinite basis.
 
 A scenario where the latter behavior can be most useful is a planetary
 orbiter fleet, for instance in the vicinity of Mars, where contact
-between orbiters and Earth only one or two times per Sol (Mars day).
+between orbiters and Earth occurs only one or two times per Sol (Mars day).
 These orbiters have a precise timing reference based on an Ultra Stable
-Oscillator (USO) with accuracy in the order of a Cesium oscillator. A
+Oscillator (USO) with accuracy on the order of a Cesium oscillator. A
 PPS signal is derived from the USO and can be disciplined from Earth on
 rare occasion or from another orbiter via NTP. In the above scenario the
 PPS signal disciplines the spacecraft clock between NTP updates.
@@ -134,8 +134,8 @@ refclock pps unit 0 flag2 1	# Capture PPS on trailing edge of pps0
 
 This driver does not need to be configured explicitly in order to be
 active; thus no "refclock pps" is required unless you need to set a
-driver option, . It is initialized by whatever other driver is using
-it. That will be one of the following: generic, nmea, or spectracom.
+driver option. It is initialized by whatever other driver is using
+it, which will be one of generic, nmea, or spectracom.
 
 == Clockstats  ==
 
