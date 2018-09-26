@@ -15,7 +15,7 @@ include::includes/misc.txt[]
 The technical report [2], which is a revision and update of an earlier
 report [3], describes an engineering model for a precision clock
 discipline function for a generic operating system. The model is the
-same hybrid phase/frequecy-lock feedback loop used by +ntpd+, but
+same hybrid phase/frequency-lock feedback loop used by +ntpd+, but
 implemented in the kernel. The code described in [2] is included in
 Solaris and Digital/Compaq/HP Tru64. It provides two system calls
 +ntp_gettime()+ and +ntp_adjtime()+ and can discipline the system clock
@@ -26,7 +26,7 @@ Tru64. The software and documentation, including a simulator used to
 verify correct behavior, but not involving licensed code, is available
 in the
 https://www.eecis.udel.edu/~ntp/ntp_spool/software/nanokernel.tar.gz[nanokernel.tar.gz]
-distribution
+distribution.
 
 Ordinarily, the kernel clock discipline function is used with the NTP
 daemon, but could be used for other purposes. The
