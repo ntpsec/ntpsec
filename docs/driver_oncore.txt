@@ -6,7 +6,7 @@ include::html.include[]
 ["verse",subs="normal"]
 Name: oncore
 Reference ID: GPS
-Serial Port: /dev/oncore.serial._u_; 9600bps 8N1.
+Serial Port: /dev/oncore.serial._u_; 9600 bps 8N1.
 PPS Port: /dev/oncore.pps._u_
 
 == Deprecation warning ==
@@ -43,19 +43,19 @@ interface kits are available from http://www.tapr.org[TAPR].
 
 The driver requires a standard +PPS+ interface for the pulse-per-second
 output from the receiver. The serial data stream alone does not provide
-precision time stamps (0-50msec variance, according to the manual),
-whereas the PPS output is precise down to 50 nsec (1 sigma) for the
-VP/UT models and 25 nsec for the M12 Timing. If you do not have the PPS
+precision time stamps (0-50 ms variance, according to the manual),
+whereas the PPS output is precise down to 50 ns (1 sigma) for the
+VP/UT models and 25 ns for the M12 Timing. If you do not have the PPS
 signal available, then you should probably be using the NMEA driver
 rather than the Oncore driver. Most of these are available on-line
 
 The driver will use the "position hold" mode with user provided
-coordinates, the receivers built-in site-survey, or a similar algorithm
+coordinates, the receiver's built-in site-survey, or a similar algorithm
 implemented in this driver to determine the antenna position.
 
 == Monitor Data ==
 
-The driver always puts a lot of useful information on the clockstats
+The driver always puts a lot of useful information in the clockstats
 file, and when run with debugging can be quite chatty on stdout. When
 first starting to use the driver you should definitely review the
 information written to the clockstats file to verify that the driver is
@@ -138,7 +138,7 @@ Even the newest of these variants, the M12+T with firmware dated 9 Jun
 
 Performance is really good, other than the rollover issue. With the
 VP/UT+, the generated PPS pulse is referenced to UTC(GPS) with better
-than 50 nsec (1 sigma) accuracy. The limiting factor will be the
+than 50 ns (1 sigma) accuracy. The limiting factor will be the
 timebase of the computer and the precision with which you can
 timestamp the rising flank of the PPS signal. Using FreeBSD, a FPGA
 based Timecounter/PPS interface, and an ovenized quartz oscillator,
