@@ -10,7 +10,7 @@ possible.
 
 Unfortunately, leap seconds are scheduled to be inserted into or deleted
 from the UTC time scale in irregular intervals to keep the UTC time scale
-synchronized with the Earth rotation.  Deletions haven't happened, yet, but
+synchronized with the Earth's rotation.  Deletions haven't happened, yet, but
 insertions have happened over 30 times.
 
 The problem is that POSIX requires 86400 seconds in a day, and there is no
@@ -30,30 +30,30 @@ approaching leap second, and can handle the leap second appropriately.
 
 == The Problem on Unix-like Systems ==
 
-If a leap second is to be inserted then in most Unix-like systems the OS
+If a leap second is to be inserted, then in most Unix-like systems the OS
 kernel just steps the time back by 1 second at the beginning of the leap
 second, so the last second of the UTC day is repeated and thus duplicate
 timestamps can occur.
 
-Unfortunately there are lots of applications which get confused it the
+Unfortunately there are lots of applications which get confused if the
 system time is stepped back, e.g. due to a leap second insertion.  Thus,
-many users have been looking for ways to avoid this, and tried to introduce
-workarounds which may work properly, or not.
+many users have been looking for ways to avoid this, and have tried to introduce
+workarounds which may or may not work properly.
 
 So even though these Unix kernels normally can handle leap seconds, the way
-they do this is not optimal for applications.
+they do this is not always optimal for applications.
 
 One good way to handle the leap second is to use ntp_gettime() instead of
 the usual calls, because ntp_gettime() includes a "clock state" variable
 that will actually tell you if the time you are receiving is OK or not, and
 if it is OK, if the current second is an in-progress leap second.  But even
-though this mechanism has been available for about 20 years' time, almost
+though this mechanism has been available for decades, almost
 nobody uses it.
 
 
 == The Leap Smear Approach ==
 
-Due to the reasons mentioned above some support for leap smearing has
+Due to the reasons mentioned above, some support for leap smearing has
 recently been implemented in ntpd.  This means that to insert a leap second
 an NTP server adds a certain increasing "smear" offset to the real UTC time
 sent to its clients, so that after some predefined interval the leap second
@@ -73,9 +73,9 @@ finished, at the end of the smear interval.  By examining the first byte of
 the refid, one can also determine if the server is offering smeared time or
 not.
 
-Of course, clients which receive the "smeared" time from an NTP server don't
-have to (and even must not) care about the leap second anymore.  Smearing is
-just transparent to the clients, and the clients don't even notice there's a
+Of course, clients that receive the "smeared" time from an NTP server don't
+have to (and must not) care about the leap second anymore.  Smearing is
+transparent to the clients, and the clients don't even notice there's a
 leap second.
 
 
@@ -95,7 +95,7 @@ time.  Make sure you check to see if this requirement affects you.
 However, for applications where it's only important that all computers have
 the same time and a temporary offset of up to 1 s to UTC is acceptable, a
 better approach may be to slew the time in a well defined way, over a
-certain interval, which is what we call smearing the leap second.
+certain interval, thus "smearing" the leap second.
 
 
 == The Motivation to Implement Leap Smearing ==
@@ -114,7 +114,7 @@ accidental behavior.
 
 However, as we learned in the discussion in http://bugs.ntp.org/2745, this
 behavior was very much appreciated since indeed the time was never stepped
-back, and even though the start of the slewing was somewhat undefined and
+back, even though the start of the slewing was not strictly defined and
 depended on the poll interval.  The system time was off by 1 second for
 several minutes before slewing even started.
 
@@ -132,7 +132,7 @@ i.e. ntpd with -x would still step the time.  This has only recently been
 fixed in the current ntpd stable code, but this fix is only available with a
 certain patch level of ntpd 4.2.8.
 
-So a possible solution for users who were looking for a way to come over the
+So a possible solution for users who were looking for a way to bridge the
 leap second without the time being stepped could have been to check the
 version of ntpd installed on each of their systems.  If it's still 4.2.4 be
 sure to start the client ntpd with -x.  If it's 4.2.6 or 4.2.8 it won't work
@@ -193,8 +193,8 @@ built.
 smearing is only done if explicitly configured.
 
 * The leap smear interval should be at least several hours' long, and up to
-1 day (86400s).  If the interval is too short then the applied smear offset
-is applied too quickly for clients to follow.  86400s (1 day) is a good
+1 day (86400 s).  If the interval is too short then the applied smear offset
+is applied too quickly for clients to follow.  86400 s (1 day) is a good
 choice.
 
 * If several NTP servers are set up for leap smearing then the *same* smear
@@ -202,12 +202,12 @@ interval should be configured on each server.
 
 * Smearing NTP servers DO NOT send a leap second warning flag to client time
 requests.  Since the leap second is applied gradually the clients don't even
-notice there's a leap second being inserted, and thus there will be no log
-message or similar related to the leap second be visible on the clients.
+notice that there's a leap second being inserted, and thus there will be no log
+messages or similar related to the leap second visible on the clients.
 
 * Since clients don't (and must not) become aware of the leap second at all,
 clients getting the time from a smearing NTP server MUST NOT be configured
-to use a leap second file.  If they had a leap second file they would apply
+to use a leap second file.  If they have a leap second file they will apply
 the leap second twice: the smeared one from the server, plus another one
 inserted by themselves due to the leap second file.  As a result, the
 additional correction would soon be detected and corrected/adjusted.
@@ -216,7 +216,6 @@ additional correction would soon be detected and corrected/adjusted.
 servers at the same time.  During the smear interval they would get
 different times from different servers and wouldn't know which server(s) to
 accept.
-
 
 == Setting Up A Smearing NTP Server ==
 
