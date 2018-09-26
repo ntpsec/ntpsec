@@ -6,7 +6,7 @@ include::html.include[]
 ["verse",subs="normal"]
 Name: zyfer
 Reference ID: GPS
-Serial Port: /dev/zyfer__u__; 9600bps 8N1
+Serial Port: /dev/zyfer__u__; 9600 bps 8N1
 
 == Description ==
 
