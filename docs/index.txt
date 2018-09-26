@@ -47,7 +47,7 @@ For background on the problems NTP solves, see
 http://www.catb.org/gpsd/time-service-intro.html[Introduction to
 Time Service].  This white paper discusses time source types, relative
 accuracy, relative cost, and how those figures of merit have changed
-in recent decades
+in recent decades.
 
 The link:ntpspeak.html[Glossary of NTP-speak] might also be a helpful
 guide for the perplexed.
@@ -66,7 +66,7 @@ link:ntpsec.html[this summary].
 
 NTPsec supports all operating systems conforming to POSIX.1-2001 and
 ISO/IEC 9899:1999 (aka C99).  The POSIX.1-2008 clock calls
-clock_gettime(2) and clock_settime(2) musy also be present.  Primary
+clock_gettime(2) and clock_settime(2) must also be present.  Primary
 platforms include Linux and the *BSD family; any reasonably modern
 proprietary Unix will also serve.  The OS must have either a
 Linux-like adjtimex(2) call or a BSD-like ntp_adjtime(2) call.
@@ -87,7 +87,7 @@ redistributable as open source.
 [[hand]]
 == The Handbook ==
 
-A good deal of tutorial and directive information is available on the
+A good deal of tutorial and directive information is available in the
 handbook pages. These should be read in conjunction with the command and
 option information available on the pages listed on the
 link:sitemap.html[Site Map] page.
@@ -115,15 +115,15 @@ link:refclock.html[Reference Clock Support]::
 link:warp.html[How NTP Works]::
   Gives an overview of the NTP daemon architecture and how it works.
 link:outside-tools.html[Outside Tools]::
-  A variety of tools not directly maintained along with NTP can be
-  useful for administering and monitoring it. This page collects some
-  references and links.
+  A variety of tools not directly maintained by the NTPsec project
+  that can be useful for administering and monitoring NTP. This page
+  collects some references and links.
 
 [[build]]
 == Building and Installing NTP ==
 
 The link:build.html[Building and Installing the Distribution] page
-gives and overview of the procedures for building and installing
+gives an overview of the procedures for building and installing NTPsec
 on a typical system.  For more details, see the INSTALL file in the
 distribution root.
 
@@ -135,7 +135,7 @@ include::includes/manual.txt[]
 
 Like other things in modern Internet life, NTP problems can be
 devilishly intricate. This distribution includes a number of utilities
-designed to identify and repair problems using an integrated management
+designed to identify and resolve problems using an integrated management
 protocol supported by the link:ntpq.html[+ntpq+] utility program.
 
 The link:debug.html[NTP Debugging Techniques] page contains useful
