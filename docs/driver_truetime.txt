@@ -6,7 +6,7 @@ include::html.include[]
 ["verse",subs="normal"]
 Name: truetime
 Reference ID: TRUE
-Serial Port: +/dev/true+'u'; 9600bps 8N1
+Serial Port: +/dev/true+'u'; 9600 bps 8N1
 Features: +tty_clk+
 
 == Deprecation warning ==
@@ -22,7 +22,7 @@ it reliably recover from a trashed or zeroed system clock.
 
 == Description ==
 
-This driver supports several models models of Kinemetrics/TrueTime
+This driver supports several models of Kinemetrics/TrueTime
 timing receivers, including GPS- DC MK III and GPS/TM-TMD GPS
 Synchronized Clock, XL-DC (a 151-602-210, reported by the driver as a
 GPS/TM-TMD), GPS-800 TCU (an 805-957 with the RS232 Talker/Listener
@@ -59,14 +59,14 @@ in the quality field.
 
 The mini-DIN RS-232 port uses the Apple pinout.
 
-Send the clock ST1 to turn on continuous (1/sec) timecodes. You can
+Send the clock ST1 to turn on continuous (1/s) timecodes. You can
 also enable "mode C" via the front panel. ST0 turns off this mode.
 
 QV will return the firmware revision (and is useful in identifying
 this clock.)
 
 QW will return its weekly signal log, useful if you're testing
-antennas. You may wish to turn the loss interval down from 4h (04) to 1h
+antennas. You may wish to turn the loss interval down from 4 h (04) to 1 h
 (01), so the receiver declares itself unlocked sooner. When in holdover,
 drift can be on the order of 10 ms/hr since there is no high quality
 reference oscillator.
