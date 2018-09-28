@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# ntpkeygen - generate cryptographic keys for NTP clients and servers
-#
-# All file names are like "ntpkey_<type>_<hostname>.<filestamp>", where
-# <type> is the file type, <hostname> the generating host name and
-# <filestamp> the generation time in NTP seconds. The NTP programs
-# expect generic names such as "ntpkey_<type>_whimsy.udel.edu" with the
-# association maintained by soft links. Following is a list of file
-# types.
-#
-# ntpkey_AES_<hostname>.<filestamp>
-# AES (128-bit) keys used to compute CMAC mode authentcation
-# using shared key cryptography
+'''
+ntpkeygen - generate cryptographic keys for NTP clients and servers
 
-# The file can be edited by hand to support MD5 and SHA1 for
-# old digest mode authentcation.
+All file names are like "ntpkey_<type>_<hostname>.<filestamp>", where
+<type> is the file type, <hostname> the generating host name and
+<filestamp> the generation time in NTP seconds. The NTP programs
+expect generic names such as "ntpkey_<type>_whimsy.udel.edu" with the
+association maintained by soft links. Following is a list of file
+types.
+
+ntpkey_AES_<hostname>.<filestamp>
+AES (128-bit) keys used to compute CMAC mode authentcation
+using shared key cryptography
+
+The file can be edited by hand to support MD5 and SHA1 for
+old digest mode authentcation.
+'''
 
 from __future__ import print_function
 
@@ -34,9 +35,9 @@ NUMKEYS = 10    # number of keys generated of each type
 KEYSIZE = 16    # maximum key size
 
 
-def gen_keys(id, groupname):
+def gen_keys(ident, groupname):
     "Generate semi-random AES keys for versions of ntpd with CMAC support."
-    with fheader("AES", id, groupname) as wp:
+    with fheader("AES", ident, groupname) as wp:
         for i in range(1, NUMKEYS+1):
             key = ""
             for j in range(KEYSIZE):
@@ -56,12 +57,13 @@ def gen_keys(id, groupname):
 #
 # Generate file header and link
 #
-def fheader(file,       # file name id
+def fheader(fileid,     # file name id
             ulink,      # linkname
             owner       # owner name
             ):
+    "Generate file header and link"
     try:
-        filename = "ntpkey_%s_%s.%u" % (file, owner, int(time.time()))
+        filename = "ntpkey_%s_%s.%u" % (fileid, owner, int(time.time()))
         orig_umask = os.umask(stat.S_IWGRP | stat.S_IRWXO)
         wp = open(filename, "w")
         os.umask(orig_umask)
