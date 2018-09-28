@@ -222,7 +222,6 @@ class VizStats(ntp.statfiles.NTPStats):
     <td colspan=3></td>
     <td style="text-align:right;">Skew-</td>
     <td style="text-align:right;">Kurt-</td>
-    <td ></td>
   </tr>
   <tr style="font-weight:bold;text-align:right;">
     <td style="text-align:left;">Name</td>
@@ -1711,9 +1710,9 @@ tbody tr {
 .section {
     color: #000000;
     text-decoration: none;
-    .site-title:visited {
-        color: #000000; }
-        text-decoration: none;
+}
+.section .site-title:visited {
+    color: #000000;
 }
 </style>
 </head>
