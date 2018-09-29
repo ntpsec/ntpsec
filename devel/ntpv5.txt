@@ -135,7 +135,7 @@ worthwhile would incorporate at least most of the following:
 something that runs over HTTPS on the NTS-KE port.
 
 2. Let client and server packets be formatted differently. Achieve
-data minimization by just taking unnecessary fields out of client 
+data minimization by just taking unnecessary fields out of client
 packets altogether.
 
 3. Forbid the use of the legacy MAC field, thus fixing the hairiness

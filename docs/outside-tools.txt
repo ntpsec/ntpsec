@@ -49,7 +49,7 @@ support for querying NTP servers.  The 'check_ntp_peer' and
 
 The https://github.com/firehol/netdata/wiki[Netdata] monitoring
 solution has native support for realtime monitoring of ntpd,
-among a vast number of other system metrics. 
+among a vast number of other system metrics.
 
 '''''
 

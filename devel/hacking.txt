@@ -244,7 +244,7 @@ Full waf documentation is at https://waf.io/
 
 === Naming conventions ===
 
-Every binary and script we install has an "ntp" prefix on the name 
+Every binary and script we install has an "ntp" prefix on the name
 because namespace pollution is rude.  If you write a new tool that you
 want us to install, follow this convention.
 
@@ -256,7 +256,7 @@ reduce the amount people have to type. Choose tastefully.
 We are devotees of the Unix rule that programs should play nicely
 with other programs.  We like output formats that are simple,
 regular, and machine-parseable without ambiguity. The practical
-goal to aim at, given our choice of scripting languages, 
+goal to aim at, given our choice of scripting languages,
 is to make writing script wrappers in Python easy.
 
 There is more than one way to arrange this.  If you can design a
@@ -573,7 +573,7 @@ BUG:: Bugs in the code
 LOG:: Log switching and debug levels
 CLOCK:: Low-level clock manipulation and validation checks & leap-second code
 CONFIG:: Configuration parsing and interpretation
-INIT:: Daemon setup 
+INIT:: Daemon setup
 SYNC:: Server synchronization
 PROTO:: Protocol machine actions
 REFCLOCK:: Reference clock and driver actions

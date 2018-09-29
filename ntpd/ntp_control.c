@@ -2627,7 +2627,7 @@ ctl_getitem(
 		    quiet_until = current_time + 300;
 	/* The cast on SRCPORT is required to supress a warning on NetBSD 8.0
 	 * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53618
-	 */ 
+	 */
 		    msyslog(LOG_WARNING,
 			    "Possible 'ntpdx' exploit from %s#%" PRIu16 " (possibly spoofed)",
 			    socktoa(rmt_addr), (unsigned)SRCPORT(rmt_addr));

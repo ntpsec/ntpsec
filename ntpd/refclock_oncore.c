@@ -1825,7 +1825,7 @@ oncore_get_timestamp(
 		    instance->pp->hour, instance->pp->minute,
                     instance->pp->second,
 		    (long) tsp->tv_sec % 60,
-		    (unsigned)Rsm, 
+		    (unsigned)Rsm,
                     0.1*(256*instance->BEHa[53]+instance->BEHa[54]),
 		    /*rsat	dop */
 		    instance->BEHa[55], instance->BEHa[56],
@@ -2716,11 +2716,11 @@ oncore_msg_CaFaIa(
 		if (buf[2] == 'I') i = i || buf[6];
 		if (i) {
 			if (buf[2] == 'I')
-				oncore_log_f(instance, LOG_ERR, 
+				oncore_log_f(instance, LOG_ERR,
 					     "self test failed: result %02x %02x %02x",
 					     buf[4], buf[5], buf[6]);
 			else
-				oncore_log_f(instance, LOG_ERR, 
+				oncore_log_f(instance, LOG_ERR,
 					     "self test failed: result %02x %02x",
 					     buf[4], buf[5]);
 
@@ -3372,7 +3372,7 @@ oncore_check_almanac(
 			instance->count5_set = 1;
 		}
 #ifdef ONCORE_VERBOSE_CHECK_ALMANAC
-		oncore_log_f(instance, LOG_DEBUG, 
+		oncore_log_f(instance, LOG_DEBUG,
 			     "DEBUG BITS: (%x %x), (%x %x %x),  %x %x %x %x %x",
 			     instance->BEHa[129], instance->BEHa[130],
 			     bits1, bits2, bits3,

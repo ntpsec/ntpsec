@@ -80,7 +80,7 @@ written as-is to the +clockstats+ file.
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
-  suffix in the driver device name. 
+  suffix in the driver device name.
 +time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,
    to be used for the West satellite, with default 0.0.

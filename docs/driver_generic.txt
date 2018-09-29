@@ -447,7 +447,7 @@ screen width and looks similar to:
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
-  suffix in the driver device name. 
+  suffix in the driver device name.
 +time1+ _time_ ::
   Specifies the time offset calibration factor, in seconds and fraction.
   The default value depends on the clock type.

@@ -28,7 +28,7 @@ The first two fields show the date (Modified Julian Day) and time
 normally shows clock type and unit (but if you are running in strict
 Classic compatibility mode it will show the magic clock address in
 dotted-quad notation). The final field is the last timecode received from the
-clock in decoded ASCII format, where meaningful. For some clock drivers, 
+clock in decoded ASCII format, where meaningful. For some clock drivers,
 a good deal of additional information can be gathered and displayed as
 well. See information specific to each clock for further details.
 +
@@ -274,7 +274,7 @@ Note that this command can be sent from the
         allowed in this component to prevent filenames referring to
         parts outside the filesystem hierarchy denoted by _prefix_.
 |__suffix__        |This part is reflects individual elements of a
-	file set. It is generated according to the type of a file set. 
+	file set. It is generated according to the type of a file set.
 |====================================
 +
     +type+ _typename_;;

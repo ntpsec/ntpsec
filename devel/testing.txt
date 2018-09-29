@@ -54,7 +54,7 @@ For a one-off test:
  is likely to be either something resembling "/etc/init.d/ntp stop" or
  "systemctl stop timeservice".
 
-3. Run ./build/ntpd/ntpd plus the command line parameters from above. 
+3. Run ./build/ntpd/ntpd plus the command line parameters from above.
 
 4. It will daemonize itself and give you back your terminal prompt.
 

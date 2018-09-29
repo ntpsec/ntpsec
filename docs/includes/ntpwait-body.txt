@@ -45,4 +45,4 @@ provide status information, including time to synchronization in seconds.
 If you are running Python at a version older than 3.3, the report on time
 to synchronization may be thrown off by NTP clock stepping.
 
-//end 
+//end

@@ -103,7 +103,7 @@ that should work until 2399.
 
 === Unix time ===
 
-The basics of Unix time have already been described. 
+The basics of Unix time have already been described.
 
 32-bit Unix time will roll over at 2038-01-19T03:14:08, beginning its
 second era.  It will not roll over to zero but rather to the minimum

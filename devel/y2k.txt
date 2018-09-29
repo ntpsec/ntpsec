@@ -58,7 +58,7 @@ Comments:
 
 1)	Errors were found in improper use of tm_year within struct tm,
 	calculations that did not support year 2000 as a leap year
-	(it truly is, despite any unchanged comments remaining in 
+	(it truly is, despite any unchanged comments remaining in
 	the NTP source), and some incorrect date calculations, while
 	not traditional Y2K errors, would break in the year 2000.
 
@@ -89,7 +89,7 @@ Non-Y2K Problems Observed:
 
 2)	libntp/caltontp.c:
         Has logic I believe will fail starting in year 2100 or so.
-        Left unchanged/untested as it works well beyond basic NTP 2036 
+        Left unchanged/untested as it works well beyond basic NTP 2036
 	limit checked by check_y2k.c.
         If NTP is implemented on 64-bit machines, this should be fixed
 
@@ -98,7 +98,7 @@ Non-Y2K Problems Observed:
 	In particular the '*' '#' character switch no longer occurs...
 	only '*' is typed.
 
-      NOTE: Author (falsely) stated Y2K is NOT a leap year when it 
+      NOTE: Author (falsely) stated Y2K is NOT a leap year when it
       really is.
 
       TRUTH: ACTS will go beyond Y2K: it uses FourDigitYear % 100 values
@@ -111,8 +111,8 @@ Non-Y2K Problems Observed:
        Multiply by 256????
 
     Response from PHK:
-       The entire protocol is binary, the year is a 16 bit quantity 
-       which according to the manual can have the range 1998-2018. 
+       The entire protocol is binary, the year is a 16 bit quantity
+       which according to the manual can have the range 1998-2018.
 ............................................................................
 
 The "Non-Y2K Problems Observed" have been fixed.
@@ -154,7 +154,7 @@ Wed Jul 14 13:57:43 EST 1999
 timelord.att.com: stratum 2, offset -0.000094, synch distance 0.06522
 timemaster.att.com: stratum 1, offset -0.010803, synch distance 0.03078, refid 'GPS'
 [root@timetest ntptrace]# cd -
-[root@timetest ntpdate]# date 
+[root@timetest ntpdate]# date
 Wed Mar  1 01:00:03 EST 2000
 [root@timetest ntpdate]# ./ntpdate -b timelord.att.com
 14 Jul 13:58:10 ntpdate[12525]: step time server 135.16.xxxx.xxxx offset -19911719.766061 sec
@@ -168,7 +168,7 @@ timemaster.att.com: stratum 1, offset -0.013598, synch distance 0.03116, refid '
 Script done on Wed Jul 14 13:58:28 1999
 
 RESULTS OK.
---------------------END OF TEST1-------------------- 
+--------------------END OF TEST1--------------------
 
 
 ### freeware test configuration
@@ -201,8 +201,8 @@ Some now-irrelevant material has been removed.
 
 AT&T Freeware Year 2000 Certification
 
-This is the "readme" file for the freeware application which has 
-been certified by AT&T Labs as part of the "Freeware Y2K 
+This is the "readme" file for the freeware application which has
+been certified by AT&T Labs as part of the "Freeware Y2K
 Certification Project".
 
 DISCLAIMER
@@ -228,9 +228,9 @@ DISCLAIMER
     LICENSE TO USE
     AT&T's intent is to ensure these Y2K patches are freely
     available to the public but will not maintain a public web site
-    for their distribution. Any copyright claims only only apply to 
-    the specific changes made by Y2K to the code. Any original 
-    copyright holders retain rights to unchanged code. Wherever 
+    for their distribution. Any copyright claims only only apply to
+    the specific changes made by Y2K to the code. Any original
+    copyright holders retain rights to unchanged code. Wherever
     possible patches will be returned to the current owner(s) of the code.
 
     Owners and publishers are free to incorporate appropriate patches,
@@ -267,8 +267,8 @@ DISCLAIMER
 
 SUPPORT
 
-See http://y2k.labs.att.com/freeware.  There will be no ongoing 
-support for the project. But if you have some very important issue, 
+See http://y2k.labs.att.com/freeware.  There will be no ongoing
+support for the project. But if you have some very important issue,
 you may email us at: y2k@y2k.labs.att.com
 ............................................................................
 

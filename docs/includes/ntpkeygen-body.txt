@@ -57,8 +57,8 @@ file.  +ntp.keys+ is the normal file used in +ntp.conf+.
 [[random]]
 == Random Seed File ==
 
-All key generation schemes must have means to randomize the 
-entropy seed used to initialize the internal pseudo-random 
+All key generation schemes must have means to randomize the
+entropy seed used to initialize the internal pseudo-random
 number generator used by the library routines.
 
 It is important to understand that entropy must be evolved for each
@@ -84,7 +84,7 @@ This file is also used to authenticate remote configuration
 commands used by the {ntpqman} utility.
 
 Comments may appear in the file and are preceded with the +#+
-character.  
+character.
 
 Following any headers the keys are entered one per line in the
 format:

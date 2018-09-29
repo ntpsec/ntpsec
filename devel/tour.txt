@@ -17,7 +17,7 @@ a higher-level view than individual comments.
 
 === l_fp, s_fp, u_fp ===
 
-C doesn't have any native fixed-point types, only float types. 
+C doesn't have any native fixed-point types, only float types.
 To do certain time calculations without loss of precision, NTP
 home-brews three fixed-point types of its own.  Of these, l_fp is the
 most common, with 32 bits of precision in both integer and fractional
@@ -32,7 +32,7 @@ become an l_fp.  For most calculations with l_fp it's easier to
 envision it as a 64bit integer that represents time with a unit of
 2^-32s, slightly short of 233 ps.
 
-When used to represent dates internally an l_fp must be interpreted 
+When used to represent dates internally an l_fp must be interpreted
 relative to the NTP era (the left 32 bits of the integer part of the
 NTP date that got cut off).  The NTP prime epoch (or epoch 0) is then
 an *unsigned* number of seconds since 1900-01-01T00:00:00Z and
@@ -64,7 +64,7 @@ integral 64-bit type, this was not guaranteed before C99.
 
 Thus to do calendar arithmetic, NTP used to carry a "vint64"
 (variant 64-bit int) type that was actually a union with several
-different interpretations; the scalar time64_t which is used the same 
+different interpretations; the scalar time64_t which is used the same
 way but implemented as a uint64_t has already replaced this.
 
 This still has some utility because NTP still runs on 32-bit machines
@@ -117,14 +117,14 @@ ANSI/POSIX standardization.
 The NTP code was written well before calls like clock_gettime(2) that
 use it were standardized, but as part of its general cleanup NTPsec
 has been updated to do all its internal computations at nanosecond
-precision or better.  
+precision or better.
 
 Thus, when you see a struct timeval in the NTPsec code, it's due to
 a precision limit imposed by an external interface.  One such is in
 the code for using the old BSD adjtime(2) call; another is in getting
 packet timestamps from the IP layer.  Our practice is to convert from
 or to nanosecond precision as close to these call sites as possible;
-this doesn't pull additional accuracy out of thin air, but it does 
+this doesn't pull additional accuracy out of thin air, but it does
 avoid loss-of-precision bugs due to mixing these structures.
 
 === struct peer ===
@@ -224,7 +224,7 @@ has a (non-portable) 'time' member;
 There is some confusion abroad about this interface because it has
 left a trail of abandoned experiments behind it.
 
-Older BSD systems read the clock using gettimeofday(2) 
+Older BSD systems read the clock using gettimeofday(2)
 (in POSIX but deprecated) and set it using settimeofday(2),
 which was never standardized. Neither of these calls are still
 used in NTPsec, though the equally ancient BSD adjtime(2) call
@@ -240,7 +240,7 @@ have not achieved wide use in applications.
 
 Both ntp_gettime(3) and ntp_gettimex(3) can be implemented as wrappers
 around ntp_adjtime(2)/adjtimex(2).  Thus, on a Linux system, the
-library ntp_gettime(3) call could conceivably go through two levels 
+library ntp_gettime(3) call could conceivably go through two levels
 of indirection, being implemented in terms of ntp_adjtime(2) which
 is in turn implemented by adjtimex(2).
 
@@ -442,9 +442,9 @@ describes how they fit together.
 == The pylib/ntp library
 
 The most important structural thing about the python tools is the
-layering of the three most important ones - ntpq, ntpdig, and ntpmon. 
+layering of the three most important ones - ntpq, ntpdig, and ntpmon.
 These are front ends to a back-end library of Python service routines that
-installs as 'ntp' and lives in the source tree at pylib/. 
+installs as 'ntp' and lives in the source tree at pylib/.
 
 === ntpq and ntpmon ===
 
@@ -477,7 +477,7 @@ re-used.
 === ntpdig ===
 
 ntpdig also uses the pylib library but doesn't speak Mode 6.
-Instead, it builds and interprets time-synchronization packets 
+Instead, it builds and interprets time-synchronization packets
 using some of the same machinery.
 
 === MRU reporting ===

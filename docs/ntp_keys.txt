@@ -29,10 +29,10 @@ include::includes/ntp.keys-body.txt[]
 
 == SEE ALSO ==
 
-link:ntp_conf.html[{ntpdconfman}], 
-link:ntpd.html[{ntpdman}], 
-link:ntpq.html[{ntpqman}], 
-link:ntpkeygen.html[{ntpkeygenman}], 
+link:ntp_conf.html[{ntpdconfman}],
+link:ntpd.html[{ntpdman}],
+link:ntpq.html[{ntpqman}],
+link:ntpkeygen.html[{ntpkeygenman}],
 link:ntpdig.html[{ntpdigman}].
 
 include::includes/footer.txt[]
