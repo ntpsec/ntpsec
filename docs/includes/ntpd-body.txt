@@ -160,7 +160,7 @@ containing a colon. This option is deprecated. Please consider using
 the configuration file +interface+ command, which is more versatile.
 
 +-m+, +--mdns+::
-  Register with mDNS as a NTP server.
+  Register with mDNS as an NTP server.
 +
 Registers as an NTP server with the local mDNS server which allows the
 server to be discovered via mDNS client lookup.
@@ -293,7 +293,7 @@ keyword with the _server_ configuration command, as described in
 Most operating systems and hardware of today incorporate a time-of-year
 (TOY) chip to maintain the time during periods when the power is off.
 When the machine is booted, the chip is used to initialize the operating
-system time. After the machine has synchronized to a NTP server, the
+system time. After the machine has synchronized to an NTP server, the
 operating system corrects the chip from time to time. In the default
 case, if +ntpd+ detects that the time on the host is more than 1000s
 from the server time, +ntpd+ assumes something must be terribly wrong
@@ -329,7 +329,7 @@ to be set backwards if the local clock time is more than 128 ms in the
 future relative to the server. In some applications, this behavior may
 be unacceptable. There are several solutions, however. If the +-x+
 option is included on the command line, the clock will never be stepped
-and only slew corrections will be used. But this choice comes with a
+and only slew corrections will be used. But this choice comes at a
 cost that should be carefully explored before deciding to use the +-x+
 option. The maximum slew rate possible is limited to 500
 parts-per-million (PPM) as a consequence of the correctness principles

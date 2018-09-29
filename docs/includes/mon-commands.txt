@@ -81,7 +81,7 @@ The event message code and _message_ field are described on the
 +
   +peerstats+;;
     Enables recording of peer statistics information. This includes
-    statistics records of all peers of a NTP server and of special
+    statistics records of all peers of an NTP server and of special
     signals, where present and configured. Each valid update appends a
     line of the following form to the current element of a file
     generation set named _peerstats_:
@@ -114,7 +114,7 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
 +
   +rawstats+;;
     Enables recording of raw-timestamp statistics information. This
-    includes statistics records of all peers of a NTP server and of
+    includes statistics records of all peers of an NTP server and of
     special signals, where present and configured. Each NTP message
     received from a peer or clock driver appends a line of the following
     form to the file generation set named _rawstats_:

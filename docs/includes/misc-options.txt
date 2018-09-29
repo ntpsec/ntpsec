@@ -190,8 +190,8 @@ the log file.
     entries or kilobytes. The default is 4 kilobytes.
 
 +nonvolatile+ 'threshold'::
-  Specify the _threshold_ in seconds to write the frequency file, with
-  default of 1e-7 (0.1 PPM). The frequency file is inspected each hour.
+  Specify the _threshold_ in seconds to write the frequency file, with 
+  a default of 1e-7 (0.1 PPM). The frequency file is inspected each hour.
   If the difference between the current frequency and the last value
   written exceeds the threshold, the file is written, and the +threshold+
   becomes the new threshold value. If the threshold is not exceeded, it
@@ -215,7 +215,7 @@ the log file.
 
 [[setvar]]
 +setvar+ _variable_ [_default_]::
-  This command adds an additional system variable. These variables can
+  This command adds a system variable. These variables can
   be used to distribute additional information such as the access
   policy. If the variable of the form _name=value_ is followed by the
   +default+ keyword, the variable will be listed as part of the default

@@ -213,7 +213,7 @@ include::html.include[]
 [[PPS]] PPS::
   (Also as "1PPS") Pulse Per Second. A top-of-second pulse emitted
   by time sources, typically a GPS receiver or atomic clocks.  It
-  is often connected to a RS-232 modem control signal pin.
+  is often connected to an RS-232 modem control signal pin.
   A PPS signal doesn't tell you which second a pulse corresponds to
   so it must be used with an ancillary signal, typically text over
   the same RS-232 connector (see <<in-band time>>).

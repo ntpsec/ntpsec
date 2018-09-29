@@ -196,7 +196,7 @@ Comments may be added prepended with an octothorpe (#).  Comments may
 appear on a new line, or trailing, after the # .
 
 When an option takes a parameter, the option and parameter must be
-separated by an equal sign (=) or a space.
+separated by an equal sign (=) or spaces.
 
 These two ways to invoke ntpviz are equivalent:
 

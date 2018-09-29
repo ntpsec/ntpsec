@@ -104,9 +104,8 @@ four arguments. Only enough characters of the full keyword to uniquely
 identify the command need be typed. The output of a command is normally
 sent to the standard output, but optionally the output of individual
 commands may be sent to a file by appending a +>+, followed by a file
-name, to the command line. A number of interactive format commands are
+name, to the command line. Some interactive format commands are
 executed entirely within the +ntpq+ program itself and do not result in
-following.
 NTP mode 6 requests being sent to a server. These are described
 
  +?+ ['command_keyword']::

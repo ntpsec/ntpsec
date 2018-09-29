@@ -12,7 +12,7 @@ ntpdig
 
 == DESCRIPTION ==
 
-ntpdig can be used as an SNTP client to query a NTP or SNTP server and
+ntpdig can be used as an SNTP client to query an NTP or SNTP server and
 either display the time or set the local system's time (given suitable
 privilege). It can be run as an interactive command or from a _cron_
 job. NTP (the Network Time Protocol) and SNTP (the Simple Network Time
