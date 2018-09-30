@@ -1707,6 +1707,11 @@ thead {
 tbody tr {
     vertical-align: top;
 }
+tbody tr:nth-child(6n+4),
+tbody tr:nth-child(6n+5),
+tbody tr:nth-child(6n+6) {
+    background-color: rgba(0,255,0,0.2);
+}
 .section {
     color: #000000;
     text-decoration: none;
