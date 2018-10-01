@@ -45,6 +45,8 @@ Kernel Model for Precision Timekeeping] page,
   Specify clock status. Better know what you are doing.
 +-t+ 'time_constant'::
   Specify time constant, an integer in the range 0-10.
++-V+::
+  Print the version string and exit.
 
 == Bugs ==
 

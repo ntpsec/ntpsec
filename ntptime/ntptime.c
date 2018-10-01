@@ -100,7 +100,7 @@ static volatile int pll_control; /* (0) daemon, (1) kernel loop */
 static volatile int status;	/* most recent status bits */
 static volatile int flash;	/* most recent ntp_adjtime() bits */
 char* progname;
-static char optargs[] = "MNT:cde:f:hjm:o:rs:t:";
+static char optargs[] = "MNT:cde:f:hjm:o:rs:t:V";
 
 int
 main(
@@ -190,6 +190,10 @@ main(
 			ntx.constant = atoi(ntp_optarg);
 			break;
 
+	    case 'V':
+		    printf("ntptime ntpsec-%s\n", NTPSEC_VERSION_EXTENDED);
+			exit(0);
+
 		default:
 			errflg++;
 		}
@@ -207,7 +211,8 @@ main(
 -o offset	current offset (ms)\n\
 -r		print the unix and NTP time raw\n\
 -s status	Set the status bits\n\
--t timeconstant	log2 of PLL time constant (0 .. %d)\n",
+-t timeconstant	log2 of PLL time constant (0 .. %d)\n\
+-V      Output version information and exit\n",
 			progname, optargs,
 #ifdef MOD_MICRO
 "-M		switch to microsecond mode\n",

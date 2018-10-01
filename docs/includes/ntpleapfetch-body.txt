@@ -8,7 +8,7 @@
     [+-46+] [+-c+ 'command'] [+-e+ 'expiry'] [+-f+ 'config'] [+-F+] [+-h+]
 	[+-i+ 'interval'] [+-l+] [+L+] [+-p+ {4|6}] [+-P+ 'logfacility'] [+-q+]
 	[+-r+ 'retries'] [+-s+ 'source-url'] [+-t+ 'path'] [+-v+] [+-z+ 'path']
-	[+-Z+] ['leapfile']
+	[+-Z+] ['leapfile'] [+-V+ | +--version+]
 
 == DESCRIPTION ==
 
@@ -102,5 +102,8 @@ present and to default leapfile) /etc/{ntpconf}
 
 +-Z+::
   Use system path only.
+
++-V+, +--version+::
+  Print the version string and exit.
 
 // end

@@ -87,6 +87,7 @@ All arguments are optional:  Default (or current value) shown:
     -z    Specify path for utilities
           $PATHLIST
     -Z    Only use system path
+    -V    Output version information and exit
 
 $SELF will validate the file currently on the local system
 
@@ -115,6 +116,13 @@ EOF
    return 0
 }
 
+function displayVersion {
+            cat <<EOF
+ntpleapfetch ntpsec-@NTPSEC_VERSION_EXTENDED@
+EOF
+   return 0
+}
+
 # Default: Use syslog for logging if running under cron
 
 SYSLOG="$CRONJOB"
@@ -124,9 +132,14 @@ if [ "$1" = "--help" ]; then
     exit 0
 fi
 
+if [ "$1" = "--version" ]; then
+    displayVersion
+    exit 0
+fi
+
 # Parse options
 
-while getopts 46p:P:s:e:f:Fc:r:i:lLt:hqvz:Z opt; do
+while getopts 46p:P:s:e:f:Fc:r:i:lLt:hqvz:ZV opt; do
     case $opt in
         4)
             PROTO="-4"
@@ -179,6 +192,10 @@ while getopts 46p:P:s:e:f:Fc:r:i:lLt:hqvz:Z opt; do
             displayHelp
             exit 0
             ;;
+		V)
+			displayVersion
+			exit 0
+			;;
 	q)
 	    QUIET="Y"
 	    ;;

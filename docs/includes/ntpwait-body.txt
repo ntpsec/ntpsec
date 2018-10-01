@@ -1,6 +1,6 @@
 == SYNOPSIS ==
 
-+ntpwait+ [+-v+] [+-n+ 'number'] [+-s+ 'secs']
++ntpwait+ [+-vV+] [+-n+ 'number'] [+-s+ 'secs']
 
 == DESCRIPTION ==
 
@@ -36,6 +36,9 @@ returns "the time is not yet stable".
 +
 By default, +ntpwait+ is silent. With this option, +ntpwait+ will
 provide status information, including time to synchronization in seconds.
+
++-V+, +--version+::
+  Print the version string and exit.
 
 == BUGS ==
 

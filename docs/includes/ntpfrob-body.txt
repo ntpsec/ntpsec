@@ -42,6 +42,8 @@ utilities.
   Print usage and exit.
 +-h+::
   Print usage and exit.
++-V+::
+  Print the version string and exit.
 
 [[usage]]
 == Usage ==

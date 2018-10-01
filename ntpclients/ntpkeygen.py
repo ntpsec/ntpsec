@@ -27,6 +27,7 @@ import random
 import time
 import getopt
 import stat
+import ntp.util
 
 #
 # Cryptodefines
@@ -84,7 +85,8 @@ def fheader(fileid,     # file name id
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "hM", ["help"])
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hMV",
+                                             ["help", "version"])
     except getopt.GetoptError as e:
         print(e)
         raise SystemExit(1)
@@ -95,6 +97,9 @@ if __name__ == '__main__':
             pass
         elif switch in ("-h", "--help"):
             print("usage: ntpkeygen")
+            raise SystemExit(0)
+        elif switch in ("-V", "--version"):
+            print("ntpkeygen %s" % ntp.util.stdversion())
             raise SystemExit(0)
 
     # The seed is ignored by random.SystemRandom,

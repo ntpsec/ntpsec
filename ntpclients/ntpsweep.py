@@ -11,6 +11,7 @@ USAGE: ntpsweep [-<flag> [<val>] | --<name>[{=| }<val>]]... [hostfile]
     -m, --maxlevel=num         Traverse peers up to this level
                                    (4 is a reasonable number)
     -s, --strip=str            Strip this string from hostnames
+    -V, --version              Output version information and exit
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
@@ -150,8 +151,8 @@ def scan_host(host, level):
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(
-            sys.argv[1:], "h:l:m:ps:?",
-            ["host=", "host-list=", "maxlevel=", "peers", "strip="])
+            sys.argv[1:], "h:l:m:ps:?V",
+            ["host=", "host-list=", "maxlevel=", "peers", "strip=", "version"])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
         raise SystemExit(1)
@@ -173,6 +174,9 @@ if __name__ == '__main__':
             strip = val
         elif switch == "-?" or switch == "--help":
             print(__doc__, file=sys.stderr)
+            raise SystemExit(0)
+        elif switch == "-V" or switch == "--version":
+            print("ntpsweep %s" % ntp.util.stdversion())
             raise SystemExit(0)
 
     try:

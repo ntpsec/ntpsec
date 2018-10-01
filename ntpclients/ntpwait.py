@@ -8,6 +8,7 @@ USAGE: ntpwait [-n tries] [-s sleeptime] [-v] [-h]
     -s, --sleep=num              How long to sleep between tries
     -v, --verbose                Be verbose
     -h, --help                   Issue help
+    -V, --version                Output version information and exit
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
@@ -51,8 +52,8 @@ class Unbuffered(object):
 
 if __name__ == "__main__":
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:v", [
-            "tries=", "sleep=", "verbose", "help"
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:vV", [
+            "tries=", "sleep=", "verbose", "help", "version"
         ])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
@@ -71,6 +72,9 @@ if __name__ == "__main__":
             verbose += 1
         elif switch in ("-h", "--help"):
             sys.stdout.write(__doc__)
+            raise SystemExit(0)
+        elif switch in ("-V", "--version"):
+            print("ntpwait %s" % ntp.util.stdversion())
             raise SystemExit(0)
 
     # Autoflush stdout

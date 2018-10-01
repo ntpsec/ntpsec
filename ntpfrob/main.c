@@ -30,6 +30,7 @@ static void usage(void)
 "        -r         Raw mode. Only applies to the jitter mode.\n"
 "        -?         Print usage\n"
 "        -h         Print usage\n"
+"        -V         Output version information and exit\n"
     , stderr);
 
 }
@@ -40,7 +41,7 @@ main(int argc, char **argv)
 	int ch;
         bool got_one = false;
 	iomode mode = plain_text;
-	while ((ch = getopt(argc, argv, "a:Ab:cdDejp:rh?")) != EOF) {
+	while ((ch = getopt(argc, argv, "a:Ab:cdDejp:rh?V")) != EOF) {
                 got_one = true;
 		switch (ch) {
 		case 'A':
@@ -101,6 +102,9 @@ main(int argc, char **argv)
 		case 'r':
 		    mode = raw;
 		    break;
+	    case 'V':
+		    printf("ntpfrob ntpsec-%s\n", NTPSEC_VERSION_EXTENDED);
+			exit(0);
 		default:
 		    fputs("ntpfrob: no mode option specified.\n", stderr);
                     /* fall through */

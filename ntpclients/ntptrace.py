@@ -5,6 +5,7 @@ ntptrace - trace peers of an NTP server
 
 Usage: ntptrace [-n | --numeric] [-m number | --max-hosts=number]
                 [-r hostname | --host=hostname] [--help | --more-help]
+                [-V | --version]
                 hostname
 
 See the manual page for details.
@@ -110,14 +111,15 @@ USAGE: ntptrace [-<flag> [<val>] | --<name>[{=| }<val>]]... [host]
     -r, --host=str               Single remote host
     -?, --help                   Display usage information and exit
         --more-help              Pass the extended usage text through a pager
+    -V, --version                Output version information and exit
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.""" + "\n"
 
 try:
     (options, arguments) = getopt.getopt(
-        sys.argv[1:], "m:nr:?",
-        ["help", "host=", "max-hosts=", "more-help", "numeric"])
+        sys.argv[1:], "m:nr:?V",
+        ["help", "host=", "max-hosts=", "more-help", "numeric", "version"])
 except getopt.GetoptError as err:
     sys.stderr.write(str(err) + "\n")
     raise SystemExit(1)
@@ -136,6 +138,9 @@ for (switch, val) in options:
         host = val
     elif switch == "-?" or switch == "--help" or switch == "--more-help":
         print(usage, file=sys.stderr)
+        raise SystemExit(0)
+    elif switch == "-V" or switch == "--version":
+        print("ntptrace %s" % ntp.util.stdversion())
         raise SystemExit(0)
 
 if len(arguments):

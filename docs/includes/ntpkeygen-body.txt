@@ -4,7 +4,7 @@
 
 == Synopsis ==
 [verse]
-+ntpkeygen+ [+-M+]
++ntpkeygen+ [+-MV+]
 
 == Description ==
 
@@ -26,6 +26,8 @@ passwords for the link:ntpq.html[+ntpq+] utility program.
 +-M+, +--md5key+::
   Dummy option for backward compatibility in old scripts.  This
   program always runs in -M mode.
++-V+, +--version+::
+  Print the version string and exit.
 
 [[run]]
 == Running the program ==

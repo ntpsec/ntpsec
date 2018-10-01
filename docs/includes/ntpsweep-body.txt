@@ -3,7 +3,7 @@
 // tree, and once to make an individual man page.
 
 == Synopsis ==
-+ntpsweep+ [+-l+ 'host']... [-p] [+-m+ 'number'] [+-s+ 'prefix'] [+-h+ 'string'] [hostfile...]
++ntpsweep+ [+-V+ | +--version+] [+-l+ 'host']... [-p] [+-m+ 'number'] [+-s+ 'prefix'] [+-h+ 'string'] [hostfile...]
 
 
 == Description ==
@@ -42,6 +42,9 @@ by commas.
 
 +-h+ string, +--host+=_string_::
   Specify a single host.  Deprecated option for backwards compatibility.
+
++-V+, +--version+::
+  Print the version string and exit.
 
 If hostfiles are specified, they are treated as lists of hostnames
 to be swept, one per line.
