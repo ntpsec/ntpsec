@@ -78,3 +78,13 @@ def build(ctx):
         install_from=bldnode,
         install_path='${PYTHONARCHDIR}/ntp'
     )
+
+    # pep241  lay an egg
+    egg = ['ntp-%s.info' % ctx.env.NTPSEC_VERSION]
+    ctx(
+        features="subst",
+        is_copy=True,
+        source=['ntp-in.info'],
+        target=egg
+    )
+    ctx.install_files(ctx.env.PYTHONARCHDIR, egg)

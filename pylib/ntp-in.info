@@ -1,0 +1,22 @@
+Metadata-Version: 1.0
+Name: ntpsec
+Version: @NTPSEC_VERSION_EXTENDED@
+Platform: POSIX
+Summary: The NTP reference implementation, refactored
+Home-page: https://ntpsec.org/
+License: HPND MIT BSD-2 BSD CC-BY-SA-4.0
+Description: 
+         NTPsec, as its name implies, is a more secure Network Time Protocol
+         suite. Which synchronizes your computers clock with sources on the
+         Internet, your intranet or any reference clocks you might have. Our
+         goal is to deliver code that can be used with confidence in 
+         deployments with the most stringent security, availability, and
+         assurance requirements. Towards that end we apply best practices and
+         state-of-the art technology in code auditing, verification, and
+         testing. We begin with the most important best practice: true open-
+         source code review. The NTPsec code is available in a public git 
+         repository. One of our goals is to support broader community
+         participation.
+Author: the NTPsec project
+Author-email: devel@ntpsec.org
+Keywords: 
