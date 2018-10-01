@@ -1082,6 +1082,9 @@ def build(ctx):
             if verbose > 0:
                 ctx.add_post_fun(test_print_log)
 
+            # Test binaries
+            ctx.add_post_fun(bin_test)
+
         # Write test log to a file
         ctx.add_post_fun(test_write_log)
 
