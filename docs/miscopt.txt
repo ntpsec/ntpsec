@@ -54,7 +54,7 @@ include::includes/misc-options.txt[]
     increased to synchronize clocks on the Moon or planets.
   +maxdisp+ 'maxdispersion';;
     Specify the maximum dispersion used by the clock synchronization
-    algorithm. The default is 16s.  This is also the dispersion
+    algorithm. The default is 16 s.  This is also the dispersion
     assigned to missing data. See RFC 5905 for discussion.
   +minclock+ 'minclock';;
     Specify the number of servers used by the clustering algorithm as
