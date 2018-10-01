@@ -12,7 +12,7 @@ Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
 == Warning ==
 
 As of September 2017 we have reports that the internal clock on a
-Z3801A has been recently observed to roll over around to 1998 (see
+Z3801A was observed to roll over to 1998 (see
 link:rollover.html[Rollover issues in time sources]). Users should
 audit for rollover before deploying any of these devices.
 
@@ -21,7 +21,7 @@ audit for rollover before deploying any of these devices.
 This driver supports the HP 58503A Time and Frequency Reference Receiver
 and HP Z3801A GPS Receiver. It will probably work with other Z38xx models.
 Two-unit pairs of these are sometimes known as a KS-24361. All of
-these product are well past end of life.
+these product are well past end-of-life.
 
 These receivers are very old designs, dating from around 1990, so
 their GPS receiver stages are not very sensitive by modern
@@ -31,8 +31,8 @@ off in the thousands.
 
 They use HP SmartClock (TM) to implement an Enhanced GPS receiver. The
 receiver accuracy when locked to GPS in normal operation is better
-than 1 usec. The accuracy when operating in holdover is typically
-better than 10 us per day. The receiver should be operated with
+than 1 µs. The accuracy when operating in holdover is typically
+better than 10 µs per day. The receiver should be operated with
 factory default settings. Initial driver operation: expects the
 receiver to be already locked to GPS, configured and able to output
 timecode format 2 messages.
@@ -56,13 +56,13 @@ this:
 scpi >T#yyyymmddhhmmssMFLRVcc<cr><lf>
 -------------------------------------
 
-The T is the on-time character, at 980 msec. before the next 1PPS edge.
+The T is the on-time character, at 980 ms before the next 1PPS edge.
 The # is the timecode format type. We look for format 2. Without any of
 the CLK or PPS stuff, then, the receiver buffer timestamp at the <cr> is
-24 characters later, which is about 25 msec. at 9600 bps, so the first
-approximation for the +time1+ option is nominally -0.955 seconds. This number
-probably needs adjusting for each machine / OS type, so far: -0.955000
-on an HP 9000 Model 712/80 HP-UX 9.05 -0.953175 on an HP 9000 Model 370
+24 characters later, which is about 25 ms. at 9600 bps, so the first
+approximation for the +time1+ option is nominally -0.955 s. This number
+probably needs adjusting for each machine / OS type, so far: -0.955000 s
+on an HP 9000 Model 712/80 HP-UX 9.05 -0.953175 s on an HP 9000 Model 370
 HP-UX 9.10
 
 This driver will probably work with the 58503B and 59551A if they are
@@ -71,14 +71,14 @@ set up appropriately.
 To use an HP Z3801A, specify +subtype 1+ on the server config line to setup
 the right line parameters.
 
-The timekeeping portion of HP's business has been sold to
-http://www.symmetricom.com/[Symmetricom].
+The timekeeping portion of HP's business was sold to Symmetricom; Symmetricom
+was later acquired by https://www.microsemi.com/[Microsemi].
 
 == Rollover compensation ==
 
 Some devices in this product line have a front-panel display of
 date-time and controls to manipulate it.  On these, it is possible to
-re-set the device's hidden base date for your current era. Consult
+reset the device's hidden base date for your current era. Consult
 your documentation for details.
 
 == Driver Options ==
