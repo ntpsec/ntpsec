@@ -94,7 +94,7 @@ they may arrive out of order, and the client is responsible for
 reassembling the payloads.
 
 All multibyte numeric fields are interpreted as big-endian
-2s-complement integers.
+2's-complement integers.
 
 The maximum length of the Mode 6 payload is constrained by the
 minimum-maximum UDP payload size of 576. As of late 2018 there is no
@@ -107,11 +107,11 @@ response size in the actual protocol.
 
 Several requests and responses (in fact, all but one) use a common
 textual payload format consisting of a comma-separated list of items.
-An item may be textual (ASCII) variable name, or a textual variable
+An item may be a textual (ASCII) variable name, or a textual variable
 name followed by an equals sign followed by a textual value. Following
 any comma the format may insert a newline; these are not significant
 to the meaning of the payload, but are placed so that if the payload
-is dumped to an 80-character terminal window the lines will be folded
+is dumped to an 80 character terminal window the lines will be folded
 in a way convenient for visibility.
 
 Values may be decimal numeric literals, decimal float literals, hex
