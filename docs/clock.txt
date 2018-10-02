@@ -30,10 +30,11 @@ one timer: _hold_.
 [[panic]]
 == Panic Threshold ==
 
-Most computers today incorporate a time-of-year (TOY) chip to maintain
+Most computers today incorporate a real-time-clock (RTC) chip (sometimes
+referred to as a "time-of-year" (TOY) chip in the past) to maintain
 the time when the power is off. When the computer is restarted, the chip
-is used to initialize the operating system time. In case there is no TOY
-chip or the TOY time is different from NTP time by more than the panic
+is used to initialize the operating system time. In case there is no RTC
+chip or the RTC time is different from NTP time by more than the panic
 threshold, the daemon assumes something must be terribly wrong, so
 exits with a message to the system operator to set the time manually.
 With the +-g+ option on the command line, the daemon sets the clock to
@@ -71,10 +72,10 @@ leap second, but the radio itself did not respond until it
 resynchronized some minutes later. Further details are on the
 link:leap.html[Leap Second Processing] page.
 
-In some applications the clock can never be set backward, even it
+In some applications the clock can never be set backward, even if it is
 accidentally set forward a week by some evil means. The issues should be
 carefully considered before using these options. The slew rate is fixed
-at 500 parts-per-million (PPM) by the Unix kernel. As a result, the
+at 500 parts-per-million (ppm) by the Unix kernel. As a result, the
 clock can take 33 minutes to amortize each second the clock is outside
 the acceptable range. During this interval the clock will not be
 consistent with any other network clock and the system cannot be used
@@ -85,7 +86,7 @@ time.
 == Hold Timer ==
 
 When the daemon is started after a considerable downtime, it could be
-the TOY chip clock has drifted significantly from NTP time. This can
+that the RTC chip clock has drifted significantly from NTP time. This can
 cause a transient at system startup. In the past, this has produced a
 phase transient and resulted in a frequency surge that could take some
 time, even hours, to subside. When the highest accuracy is required,
@@ -98,7 +99,7 @@ second intervals until reaching zero. However, the hold timer is forced
 to zero if the residual clock offset is less than 0.5 ms. When nonzero,
 the discipline algorithm uses a small time constant (equivalent to a
 poll exponent of 2), but does not adjust the frequency. Assuming that
-the frequency has been set to within 1 PPM, either from the frequency
+the frequency has been set to within 1 ppm, either from the frequency
 file or by the training interval described later, the clock is set to
 within 0.5 ms in less than 300 s.
 
@@ -109,14 +110,14 @@ The state machine operates in one of four nonoverlapping intervals.
 
 Training interval::
   This interval is used at startup when the frequency file is not
-  present at startup. It begins when the first update is received by the
+  present. It begins when the first update is received by the
   discipline algorithm and ends when an update is received following the
   stepout threshold. The clock phase is steered to the offset presented
   at the beginning of the interval, but without affecting the frequency.
-  During the interval further updates are ignored. At the end of the
+  During this interval further updates are ignored. At the end of the
   interval the frequency is calculated as the phase change during the
   interval divided by the length of the interval. This generally results
-  in a frequency error less than 0.5 PPM. Note that, if the intrinsic
+  in a frequency error of less than 0.5 ppm. Note that if the intrinsic
   oscillator frequency error is large, the offset will in general have
   significant error. This is corrected during the subsequent startup
   interval.
