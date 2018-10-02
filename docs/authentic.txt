@@ -30,8 +30,8 @@ include::includes/authopt.txt[]
 == Introduction ==
 
 Authentication support allows the NTP client to verify that the server
-is in fact known and trusted and not an intruder intending
-accidentally or purposely to masquerade as that server.  NTP performs
+is in fact known and trusted and not an intruder accidentally
+or intentionally masquerading as that server.  NTP performs
 authentication via message digests. It computes a one-way hash, which
 verifies that the server has the correct private key and key identifier.
 
@@ -55,9 +55,9 @@ discarded.  Authentication doesn't prevent replays.
 [[symm]]
 === Symmetric-Key Cryptography ===
 
-NTP allows any one of possibly 65,535 keys, each distinguished by a
-32-bit key identifier, to authenticate an association. The servers and
-clients involved must agree on the key and key identifier to
+NTP allows use of any one of possibly 65,535 keys, each distinguished by a
+32-bit key identifier, to authenticate an association. Both server and
+client must agree on the key and key identifier in order to
 authenticate NTP packets. Keys and related information are specified
 in a key file. More info in {ntpkeysman}. It must be distributed
 and stored using secure means beyond the scope of the NTP protocol
@@ -81,25 +81,28 @@ A server receiving an unauthenticated packet will respond with an
 unauthenticated packet, while the same server receiving a packet of a
 cryptotype it supports will respond with packets of that cryptotype.
 
-Some examples may help to reduce confusion. Client Alice has no
-keys file. Server Bob has a symmetric key file.
-Alice's unauthenticated messages arrive at Bob,
-who replies with unauthenticated messages. Cathy has a copy of Bob's
-symmetric key file and has selected key ID 4 in messages to Bob. Bob
-verifies the message with his key ID 4. If it's the same key and the
-message is verified, Bob sends Cathy a reply authenticated with that
-key. If verification fails, Bob sends Cathy a crypto-NAK,
-which tells her something is broken. She can see the evidence using the
-{ntpqman} program.
+Some examples may help to reduce confusion.
 
-It should be clear from the above that Bob can support both Alice and Cathy
-at the same time, as long as he has compatible authentication and identity
-credentials. Bob can act just like Alice and Cathy in his own choice of
-servers; he can run multiple configured associations with multiple
-different servers (or the same server, although that might not be
-useful). But, wise security policy might preclude some combinations;
-for instance, running authentication with one server
-and no authentication with another might be unwise.
+Client Alice has no key file. Server Bob has a symmetric key file.
+Alice sends an unauthenticated message to Bob. Bob therefore replies
+also with an unauthenticated message.
+
+Client Carol does have a copy of Bob's symmetric key file. Carol selects
+key ID 4, and sends a message to Bob. Bob verifies the message with his
+key ID 4. If the key matches and the message verifies, Bob replies to
+Carol with a message authenticated with his key ID 4. If verification fails,
+Bob sends Carol a crypto-NAK, which tells her that something is broken.
+She can see the evidence using the {ntpqman} program.
+
+It should be clear from the above that Bob can support both unauthenticated
+Alice and authenticated Carol alike. Unauthenticated messages will 
+receive unauthenticated replies. Authenticated messages will receive
+authenticated replies, assuming the authentication method and credentials
+are valid and compatible.
+
+Bob also can act just like Alice and Carol in his own choice of connections
+to other servers; he can run multiple configured associations with multiple
+different servers (or the same server, although that might not be useful).
 
 [[keys]]
 == Key Management ==
