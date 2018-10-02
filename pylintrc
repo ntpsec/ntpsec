@@ -1,0 +1,25 @@
+# NTPsec configuration for pylintrc
+
+# NTPsec does not try to conform to pylint, but pylint can be useful
+# to find things like unused variables, missing docstrings, undefined
+# variables, unused imports, etc.
+# 
+# The whitespace checker in pylint conflicts with that in pycodestyle.
+# pycodestyle replaces pep8 for checking PEP8 conformity.
+# 
+# Use pylint as an advisory tool, not as a blunt instrument.
+
+[MESSAGES CONTROL]
+
+# Disable warnings that are silly
+disable=bad-continuation,
+        invalid-name,
+        misplaced-comparison-constant,
+        no-self-use,
+        too-many-branches,
+        too-many-lines,
+        too-many-locals,
+        too-many-nested-blocks,
+        too-many-public-methods,
+        too-many-statements
+
