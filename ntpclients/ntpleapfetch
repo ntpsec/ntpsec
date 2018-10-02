@@ -358,6 +358,10 @@ if [ -n "$1" ]; then
     fi
     LEAPFILE="$1"
 fi
+if [ -z "$LEAPFILE" ]; then
+    log "error" "No leapfile in ntp.conf or on the command line."
+    exit 1
+fi
 
 # Verify the current file
 # If it is missing, doesn't validate or expired
