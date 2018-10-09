@@ -106,7 +106,9 @@ Under Unix, the simplest way to compile this package is:
 
   3. Run `./waf configure' to configure the package for your system.
   You may want to add configuration options after the verb 'configure';
-  see below.
+  see below. NOTE: if you will be using any local reference clocks (GPS,
+  PTP, SHM, etc.) then you need to configure for them by running the
+  command: `./waf configure --refclock=all`.
 
   4. Run `./waf build' to compile the package.
 
