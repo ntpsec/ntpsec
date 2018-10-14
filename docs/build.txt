@@ -71,7 +71,7 @@ the executables by default in +/usr/local/bin+.
 [[conf]]
 == Configuration ==
 
-You are now ready to configure the daemon. You will need to create a NTP
+You are now ready to configure the daemon. You will need to create an NTP
 configuration file by default in +/etc/{ntpconf}+. Newbies should see the
 link:quick.html[Quick Start] page for orientation. Seasoned veterans can
 start with the link:ntpd.html[+ntpd+ - Network Time Protocol (NTP)
