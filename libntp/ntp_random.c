@@ -21,7 +21,7 @@ int32_t
 ntp_random(void)
 {
 	int err;
-	uint32_t rnd;
+	uint32_t rnd = 0;
 	err = RAND_bytes((unsigned char *)&rnd, sizeof(rnd));
 	if (1 != err) {
 		msyslog(LOG_ERR, "ERR: ntp_random - RAND_bytes failed");
@@ -34,7 +34,7 @@ uint64_t
 ntp_random64(void)
 {
         int err;
-        uint64_t rnd;
+        uint64_t rnd = 0;
         err = RAND_bytes((unsigned char *)&rnd, sizeof(rnd));
         if (1 != err) {
                 msyslog(LOG_ERR, "ERR: ntp_random - RAND_bytes failed");
