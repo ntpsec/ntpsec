@@ -9,7 +9,7 @@
 /* The attribute after this structure is a gcc/clang extension that forces
  * the beginning of a structure instance to be 32-bit aligned.  Without this
  * attempting to compile on a 32-bit host may throw warnings or errors when
- * a pointer to this tructure is passed to authdecrypt/authencrypt, both of
+ * a pointer to this structure is passed to authdecrypt/authencrypt, both of
  * which expect to be able to treat the structure as an array of uint32_t
  * elements.  Ideally, we'd get rid of that nasty type punning. */
 struct ntp_control {
