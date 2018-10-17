@@ -49,7 +49,7 @@ are sent to the optional +protostats+ monitor file, as described on the
 link:decode.html[Event Messages and Status Words] page. These and other
 error messages are sent to the system log, as described on the
 link:msyslog.html[+ntpd+ System Log Messages] page. In real emergencies
-the daemon will sent a terminal error message to the system log and then
+the daemon will send a terminal error message to the system log and then
 cease operation.
 
 The next most common problem is incorrect DNS names. Check that each DNS
@@ -63,17 +63,17 @@ problems with the network or firewall configuration.
 
 Unless using the +iburst+ option, the client normally takes a few
 minutes to synchronize to a server. If the client time at startup
-happens to be more than 1000 sec distant from NTP time, the daemon exits
+happens to be more than 1000 s distant from NTP time, the daemon exits
 with a message to the system log directing the operator to manually set
-the time within 1000 sec and restart. If the time is less than 1000 sec but
-more than 128 sec distant, a step correction occurs and the daemon
+the time within 1000 s and restart. If the time is less than 1000 s but
+more than 128 s distant, a step correction occurs and the daemon
 restarts automatically.
 
-When started for the first time and a frequency file is not present, the
-daemon enters a special mode in order to calibrate the frequency. This
-takes 900 sec during which the time is not disciplined. When calibration
-is complete, the daemon creates the frequency file and enters normal
-mode to amortize whatever residual offset remains.
+When started for the first time and a frequency file - usually ntp.drift -
+is not present, the daemon enters a special mode in order to calibrate the
+frequency. This takes 900 s during which the time is not disciplined. When
+calibration is complete, the daemon creates the frequency file and enters
+normal mode to amortize whatever residual offset remains.
 
 The +ntpq+ commands +pe+, +as+ and +rv+ are normally sufficient to
 verify correct operation and assess nominal performance. The
@@ -93,7 +93,7 @@ link:ntpq.html#rv[+rv assocID+] command, where +assocID+ is the
 association ID, displays the link:ntpq.html#peer[peer variables]
 billboard, including the link:decode.html#peer[peer status word]. Note
 that, except for explicit calendar dates, times are in milliseconds and
-frequencies are in parts-per-million (PPM).
+frequencies are in parts-per-million (ppm).
 
 A detailed explanation of the system, peer and clock variables in the
 billboards is beyond the scope of this page; however, a comprehensive
@@ -139,8 +139,8 @@ link:ntpviz.html[ntpviz].
 == Large Frequency Errors ==
 
 The frequency tolerance of computer clock oscillators varies widely,
-sometimes above 500 PPM. While the daemon can handle frequency errors up
-to 500 PPM, or 43 seconds per day, values much above 100 PPM reduce the
+sometimes above 500 ppm. While the daemon can handle frequency errors up
+to 500 ppm, or 43 seconds per day, values much above 100 ppm reduce the
 headroom, especially at the lowest poll intervals. To determine the
 particular oscillator frequency, start +ntpd+ using the +noselect+
 option with the +server+ configuration command.
@@ -148,7 +148,7 @@ option with the +server+ configuration command.
 Record the time of day and offset displayed by the +ntpq+
 link:ntpq.html#peer[+peer+] command. Wait for an hour or so and record the
 time of day and offset. Calculate the frequency as the offset difference
-divided by the time difference. If the frequency is much above 100 PPM,
+divided by the time difference. If the frequency offset is much above 100 ppm,
 the link:ntpfrob.html[{ntpfrob}] program might be useful to adjust the
 kernel clock frequency below that value. For systems that do not support
 this program, this might be one using a command in the system startup
@@ -235,7 +235,10 @@ running.
 3.  Verify using +ping+ or other utility that packets actually do make
 the round trip between the client and server. Verify using +dig+,
 +nslookup+ or other utility that the DNS server names do exist and
-resolve to valid Internet addresses.
+resolve to valid Internet addresses. Be aware that ICMP (ping) packets
+may be firewalled or filtered anywhere in the path. Ping failure does not
+explicitly mean that the client and server cannot exchange NTP's
+UDP traffic.
 
 4.  Check that the remote NTP server is up and running. The usual
 evidence that it is not is a +Connection refused+ message.
@@ -244,7 +247,7 @@ evidence that it is not is a +Connection refused+ message.
 packets sent counters are incrementing. If the sent counter does not
 increment and the configuration file includes configured servers,
 something may be wrong in the host network or interface configuration.
-If this counter does increment, but the received counter does not
+If the sent counter does increment, but the received counter does not
 increment, something may be wrong in the network or the server NTP
 daemon may not be running or the server itself may be down or not
 responding.
@@ -255,8 +258,9 @@ received packets are probably being discarded for some reason. If this
 is the case, the cause should be evident from the +flash+ variable as
 discussed above and on the +ntpq+ page. It could be that the server has
 disabled access for the client address, in which case the +refid+ field
-in the +ntpq+ peers billboard will show a kiss code. See earlier on this
-page for a list of kiss codes and their meaning.
+in the +ntpq+ peers billboard will show a kiss code. See
+link:decode.html#kiss[Kiss Codes] for a full list of the codes and their
+meanings.
 
 7.  If the +reach+ values in the peers billboard show the servers are
 alive and responding, note the tattletale symbols at the left margin,
