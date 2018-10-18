@@ -849,6 +849,13 @@ process_control(
 		return;
 	}
 
+	if (CTL_MAX_DATA_LEN < req_count) {
+                /* count to big */
+		ctl_error(CERR_BADFMT);
+		numctlbadpkts++;
+		return;
+	}
+
 	properlen = req_count + (int)CTL_HEADER_LEN;
 	/* round up proper len to a 8 octet boundary */
 
@@ -2539,7 +2546,7 @@ ctl_getitem(
 
 	/* Scan the string in the packet until we hit comma or
 	 * EoB. Register position of first '=' on the fly. */
-	for (tp = NULL, cp = reqpt; cp != reqend; ++cp) {
+	for (tp = NULL, cp = reqpt; cp < reqend; ++cp) {
 		if (*cp == '=' && tp == NULL)
 			tp = cp;
 		if (*cp == ',')
