@@ -2922,8 +2922,7 @@ write_variables(
 	while (NULL != (v = ctl_getitem(sys_var, &valuep))) {
 		ext_var = 0;
 		if (v->flags & EOV) {
-			if ((v = ctl_getitem(ext_sys_var, &valuep)) !=
-			    0) {
+			if (NULL != (v = ctl_getitem(ext_sys_var, &valuep))) {
 				if (v->flags & EOV) {
 					ctl_error(CERR_UNKNOWNVAR);
 					return;
