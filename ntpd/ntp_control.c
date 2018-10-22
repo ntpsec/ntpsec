@@ -850,7 +850,7 @@ process_control(
 	}
 
 	if (CTL_MAX_DATA_LEN < req_count) {
-                /* count to big */
+                /* count too big */
 		ctl_error(CERR_BADFMT);
 		numctlbadpkts++;
 		return;

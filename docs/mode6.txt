@@ -97,7 +97,7 @@ All multibyte numeric fields are interpreted as big-endian
 2s-complement integers.
 
 The maximum length of the Mode 6 payload is constrained by the
-minimum-maximum USP payload size of 576. As of late 2018 there is no
+minimum-maximum UDP payload size of 576. As of late 2018 there is no
 language in the NTP RFCs pinning it down. A draft RFC on Mode 6 says
 it's 500 octets, which is far in excess of any plausible request or
 response size in the actual protocol.
