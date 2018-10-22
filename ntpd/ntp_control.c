@@ -2919,7 +2919,7 @@ write_variables(
 	 * Look through the variables. Dump out at the first sign of
 	 * trouble.
 	 */
-	while ((v = ctl_getitem(sys_var, &valuep)) != 0) {
+	while (NULL != (v = ctl_getitem(sys_var, &valuep))) {
 		ext_var = 0;
 		if (v->flags & EOV) {
 			if ((v = ctl_getitem(ext_sys_var, &valuep)) !=
