@@ -2938,8 +2938,9 @@ write_variables(
 			return;
 		}
 		errno = 0;
-		if (!ext_var && (*valuep == '\0'
-				 || (val = strtol(valuep, NULL, 10), errno != 0))) {
+		if (!ext_var &&
+                    (*valuep == '\0' ||
+                     (val = strtol(valuep, NULL, 10), errno != 0))) {
 			ctl_error(CERR_BADFMT);
 			return;
 		}
