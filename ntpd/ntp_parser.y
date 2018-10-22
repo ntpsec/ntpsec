@@ -1413,19 +1413,34 @@ yyerror(
 
 	msyslog(LOG_ERR, "CONFIG: line %d column %d %s",
 		ip_ctx->errpos.nline, ip_ctx->errpos.ncol, msg);
-	if (!lex_from_file()) {
-		/* Save the error message in the correct buffer */
-		retval = snprintf(remote_config.err_msg + remote_config.err_pos,
-				  (size_t)(MAXLINE - remote_config.err_pos),
-				  "column %d %s",
-				  ip_ctx->errpos.ncol, msg);
+	if (lex_from_file()) {
+                /* all is good, so far */
+                return;
+        }
+        /* Uh, oh, got an error */
 
-		/* Increment the value of err_pos */
-		if (retval > 0)
-			remote_config.err_pos += retval;
+	/* Increment the number of errors */
+	++remote_config.no_errors;
 
-		/* Increment the number of errors */
-		++remote_config.no_errors;
+	/* Save the error message in the correct buffer */
+	if ((MAXLINE - 10) < remote_config.err_pos) {
+		/* err_msg already full, ignore this */
+		return;
+	}
+	retval = snprintf(remote_config.err_msg + remote_config.err_pos,
+			  (size_t)(MAXLINE - remote_config.err_pos),
+			  "column %d %s", ip_ctx->errpos.ncol, msg);
+
+	/* Increment the value of err_pos */
+	if (retval > 0) {
+		/* careful, retval is not bytes written, it is
+		 * bytes that would have been written if space had
+                 * been available */
+		remote_config.err_pos += retval;
+		if (MAXLINE < remote_config.err_pos) {
+			/* err_msg overflowed! */
+			remote_config.err_pos = MAXLINE;
+		}
 	}
 }
 
