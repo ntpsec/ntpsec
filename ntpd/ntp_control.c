@@ -2892,6 +2892,7 @@ write_variables(
 	const struct ctl_var *v;
 	int ext_var;
 	char *valuep;
+	char nulltxt[1] = { '\0' };
 	long val;
 	size_t octets;
 	char *vareqv;
@@ -2936,6 +2937,9 @@ write_variables(
 			ctl_error(CERR_PERMISSION);
 			return;
 		}
+		if (NULL == valuep)
+			valuep = nulltxt;
+
 		errno = 0;
 		if (!ext_var &&
                     (*valuep == '\0' ||
