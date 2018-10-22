@@ -887,6 +887,12 @@ process_control(
 	 * Set up translate pointers
 	 */
 	reqpt = (char *)pkt->data;
+	if (CTL_MAX_DATA_LEN < req_count) {
+                /* count too big */
+		ctl_error(CERR_BADFMT);
+		numctlbadpkts++;
+		return;
+	}
 	reqend = reqpt + req_count;
 
 	/*
