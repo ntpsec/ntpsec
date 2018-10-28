@@ -1,73 +1,86 @@
+"""Run a suite of tests on the listed binaries."""
 from __future__ import print_function
+import os
+import os.path
 import sys
-from os.path import exists
-from waflib.Utils import subprocess
-from waflib.Logs import pprint
+import waflib.Context
+import waflib.Logs
+import waflib.Utils
+sys.path.insert(0, "%s/main/tests/pylib" % waflib.Context.out_dir)
+import ntp.poly
+import ntp.util
 
-# Need the build form of util.py to get the version string
-sys.path.insert(0, "build/main/pylib/")
-import util
-
-verStr = util.stdversion()
+verStr = ntp.util.stdversion()
 
 cmd_map = {
+    ("main/ntpclients/ntpleapfetch", "--version"): "ntpleapfetch %s\n"
+                                                   % verStr,
     ("main/ntpd/ntpd", "--version"): "ntpd %s\n" % verStr,
+    ("main/ntpfrob/ntpfrob", "-V"): "ntpfrob %s\n" % verStr,
+    ("main/ntptime/ntptime", "-V"): "ntptime %s\n" % verStr
+}
+cmd_map2 = {
     ("main/ntpclients/ntpdig", "--version"): "ntpdig %s\n" % verStr,
     ("main/ntpclients/ntpkeygen", "--version"): "ntpkeygen %s\n" % verStr,
     ("main/ntpclients/ntpq", "--version"): "ntpq %s\n" % verStr,
     ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n" % verStr,
-    ("main/ntpclients/ntpleapfetch", "--version"): "ntpleapfetch %s\n" % verStr,
     ("main/ntpclients/ntplogtemp", "--version"): "ntplogtemp %s\n" % verStr,
     ("main/ntpclients/ntpsnmpd", "--version"): "ntpsnmpd %s\n" % verStr,
     ("main/ntpclients/ntpsweep", "--version"): "ntpsweep %s\n" % verStr,
     ("main/ntpclients/ntptrace", "--version"): "ntptrace %s\n" % verStr,
     ("main/ntpclients/ntpviz", "--version"): "ntpviz %s\n" % verStr,
-    ("main/ntpclients/ntpwait", "--version"): "ntpwait %s\n" % verStr,
-    ("main/ntpfrob/ntpfrob", "-V"): "ntpfrob %s\n" % verStr,
-    ("main/ntptime/ntptime", "-V"): "ntptime %s\n" % verStr,
+    ("main/ntpclients/ntpwait", "--version"): "ntpwait %s\n" % verStr
 }
 
 
-# XXX: Needs to run in a thread with a timeout.
-def run(cmd, reg):
+def run(cmd, reg, pythonic):
+    """Run an individual non-python test."""
     check = False
 
-    if cmd[1] is None:
-        cmd = [cmd[0]]
+    breg = ntp.poly.polybytes(reg)
 
     print("running: ", " ".join(cmd), end="")
 
-    if not exists("build/%s" % cmd[0]):
-        pprint("YELLOW", " SKIPPING (does not exist)")
+    if not os.path.exists("%s/%s" % (waflib.Context.out_dir, cmd[0])):
+        waflib.Logs.pprint("YELLOW", " SKIPPING (does not exist)")
         return False
 
-    p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, env=None, cwd="build")
+    if pythonic:
+        cmd = [sys.executable] + list(cmd)
+    p = waflib.Utils.subprocess.Popen(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
+                                                 waflib.Context.out_dir},
+                         stdin=waflib.Utils.subprocess.PIPE,
+                         stdout=waflib.Utils.subprocess.PIPE,
+                         stderr=waflib.Utils.subprocess.PIPE, cwd=waflib.Context.out_dir)
 
     stdout, stderr = p.communicate()
 
-    if (stdout == reg) or (stderr == reg):
+    if (stdout == breg) or (stderr == breg):
         check = True
 
     if check:
-        pprint("GREEN", "  OK")
+        waflib.Logs.pprint("GREEN", "  OK")
         return True
-    else:
-        pprint("RED", "  FAILED")
-        return False
+    waflib.Logs.pprint("RED", "  FAILED")
+    waflib.Logs.pprint("PINK", ntp.poly.polystr(stderr))
+    return False
 
 
 def cmd_bin_test(ctx, config):
+    """Run a suite of binary tests."""
     fails = 0
 
     for cmd in sorted(cmd_map):
-        if not run(cmd, cmd_map[cmd]):
+        if not run(cmd, cmd_map[cmd], False):
             fails += 1
 
+    for cmd in sorted(cmd_map2):
+        if not run(cmd, cmd_map2[cmd], True):
+            fails += 1
+
+    if 0 < fails:
+        waflib.Logs.pprint("GREY", "Expected:\t%s" % (verStr))
     if 1 == fails:
         ctx.fatal("1 binary test failed!")
     elif 1 < fails:
         ctx.fatal("%d binary tests failed!" % fails)
-
-# cmd_bin_test(None, None)
