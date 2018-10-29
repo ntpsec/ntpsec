@@ -47,11 +47,6 @@ if str is bytes:  # Python 2
         """String_escape/unicode_escape."""
         return s.decode('string_escape')
 
-    # This used to force UTF-8 encoding, but that breaks the readline system.
-    # Unfortunately sometimes sys.stdout.encoding lies about the encoding,
-    # so expect random false positives.
-    ntp.util.check_unicode()
-
 else:  # Python 3
     import io
 
