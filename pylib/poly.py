@@ -37,7 +37,7 @@ master_encoding = 'latin-1'
 forced_utf8 = False
 
 if str is bytes:  # Python 2
-    polystr = unicode
+    polystr = str
     polybytes = bytes
     polyord = ord
     polychr = str
