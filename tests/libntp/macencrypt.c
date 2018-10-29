@@ -24,7 +24,10 @@ const char *packet = "ijklmnopqrstuvwx";
 const int packetLength = 16;
 const int keyIdLength = 4;
 const int digestLength = 16;
-const int totalLength = 36; //error: initializer element is not constant packetLength + keyIdLength + digestLength;
+
+/* Need #define to avoie VLA (variable length array) */
+#define totalLength 36
+
 char expectedMD5Packet[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
 char expectedCMACPacket[] = "ijklmnopqrstuvwx\0\0\0\0\xb0\xa1\xcf\xd2\x7f\x69\x0c\x43\xa7\x5d\x6c\x55\x91\x4b\x15\x14";
 
