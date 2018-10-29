@@ -887,6 +887,7 @@ process_control(
 	 * Set up translate pointers
 	 */
 	reqpt = (char *)pkt->data;
+        /* coverity[deadcode] backstop to prevent stack overflow */
 	if (CTL_MAX_DATA_LEN < req_count) {
                 /* count too big */
 		ctl_error(CERR_BADFMT);
