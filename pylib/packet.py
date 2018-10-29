@@ -195,97 +195,8 @@ import ntp.control
 import ntp.magic
 import ntp.ntpc
 import ntp.util
+import ntp.poly
 
-# General notes on Python 2/3 compatibility:
-#
-# This code uses the following strategy to allow it to run on both Python 2
-# and Python 3:
-#
-# - Use binary I/O to read/write data from/to files and subprocesses;
-#   where the exact bytes are important (such as in checking for
-#   modified files), use the binary data directly
-#
-# - Use latin-1 encoding to transform binary data to/from Unicode when
-#   necessary for operations where Python 3 expects Unicode; the
-#   polystr and polybytes functions are used to do this so that
-#   when running on Python 2, the byte string data is used unchanged.
-#
-# - Construct custom stdin, stdout, and stderr streams when running
-#   on Python 3 that force latin-1 encoding, and wrap them around the
-#   underlying binary buffers (in Python 2, the streams are binary
-#   and are used unchanged); this ensures that the same transformation
-#   is done on data from/to the standard streams, as is done on binary
-#   data from/to files and subprocesses; the make_std_wrapper function
-#   does this
-
-master_encoding = 'latin-1'
-
-if str is bytes:  # pragma: no cover
-    # Python 2
-    polystr = str
-    polybytes = bytes
-    polyord = ord
-    polychr = str
-    input = raw_input
-
-    def string_escape(s):
-        return s.decode('string_escape')
-
-    def make_wrapper(fp):
-        return fp
-
-else:  # pragma: nocover
-    # Python 3
-    import io
-
-    def polystr(o):
-        "Polymorphic string factory function"
-        if isinstance(o, str):
-            return o
-        if not isinstance(o, bytes):
-            return str(o)
-        return str(o, encoding=master_encoding)
-
-    def polybytes(s):
-        "Polymorphic string encoding function"
-        if isinstance(s, bytes):
-            return s
-        if not isinstance(s, str):
-            return bytes(s)
-        return bytes(s, encoding=master_encoding)
-
-    def polyord(c):
-        "Polymorphic ord() function"
-        if isinstance(c, str):
-            return ord(c)
-        else:
-            return c
-
-    def polychr(c):
-        "Polymorphic chr() function"
-        if isinstance(c, int):
-            return chr(c)
-        else:
-            return c
-
-    def string_escape(s):
-        "Polymorphic string_escape/unicode_escape"
-        # This hack is necessary because Unicode strings in Python 3 don't
-        # have a decode method, so there's no simple way to ask it for the
-        # equivalent of decode('string_escape') in Python 2. This function
-        # assumes that it will be called with a Python 3 'str' instance
-        return s.encode(master_encoding).decode('unicode_escape')
-
-    def make_std_wrapper(stream):
-        "Standard input/output wrapper factory function"
-        # This ensures that the encoding of standard output and standard
-        # error on Python 3 matches the master encoding we use to turn
-        # bytes to Unicode in polystr above
-        # line_buffering=True ensures that interactive
-        # command sessions work as expected
-        return io.TextIOWrapper(stream.buffer,
-                                encoding=master_encoding, newline="\n",
-                                line_buffering=True)
 
 # Limit on packets in a single Mode 6 response.  Increasing this value to
 # 96 will marginally speed "mrulist" operation on lossless networks
@@ -348,7 +259,7 @@ class Packet:
 
     @extension.setter
     def extension(self, x):
-        self.__extension = polybytes(x)
+        self.__extension = ntp.poly.polybytes(x)
 
     def leap(self):
         return ("no-leap", "add-leap", "del-leap",
@@ -399,7 +310,7 @@ class SyncPacket(Packet):
         self.trusted = True
         self.rescaled = False
         if data:
-            self.analyze(polybytes(data))
+            self.analyze(ntp.poly.polybytes(data))
 
     def analyze(self, data):
         datalen = len(data)
@@ -526,11 +437,11 @@ class SyncPacket(Packet):
 
     def refid_as_string(self):
         "Sometimes it's a clock name or KOD type"
-        return polystr(struct.pack(*(("BBBB",) + self.refid_octets())))
+        return ntp.poly.polystr(struct.pack(*(("BBBB",) + self.refid_octets())))
 
     def refid_as_address(self):
         "Sometimes it's an IPV4 address."
-        return polystr("%d.%d.%d.%d" % self.refid_octets())
+        return ntp.poly.polystr("%d.%d.%d.%d" % self.refid_octets())
 
     def is_crypto_nak(self):
         return len(self.mac) == 4
@@ -605,7 +516,7 @@ class ControlPacket(Packet):
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
     def analyze(self, rawdata):
-        rawdata = polybytes(rawdata)
+        rawdata = ntp.poly.polybytes(rawdata)
         (self.li_vn_mode,
          self.r_e_m_op,
          self.sequence,
@@ -686,7 +597,8 @@ def dump_hex_printable(xdata, outfp=sys.stdout):
         # Output data in hex form
         linelen = len(linedata)
         line = "%02x " * linelen
-        linedata = [polyord(x) for x in linedata]  # Will need this later
+        # Will need linedata later
+        linedata = [ntp.poly.polyord(x) for x in linedata]
         line %= tuple(linedata)
         if linelen < rowsize:  # Pad out the line to keep columns neat
             line += "   " * (rowsize - linelen)
@@ -907,7 +819,7 @@ class ControlSession:
                     raise ControlException(SERR_NOTRUST)
             try:
                 if os.isatty(0):
-                    key_id = int(input("Keyid: "))
+                    key_id = int(ntp.poly.polyinput("Keyid: "))
                 else:
                     key_id = 0
                 if key_id == 0 or key_id > MAX_KEYID:
@@ -938,7 +850,7 @@ class ControlSession:
                        "Sending %d octets.  seq=%d"
                        % (len(xdata), self.sequence), self.debug, 3)
         try:
-            self.sock.sendall(polybytes(xdata))
+            self.sock.sendall(ntp.poly.polybytes(xdata))
         except socket.error:
             # On failure, we don't know how much data was actually received
             if self.logfp is not None:
@@ -976,7 +888,7 @@ class ControlSession:
         # If we have data, pad it out to a 32-bit boundary.
         # Do not include these in the payload count.
         if pkt.extension:
-            pkt.extension = polybytes(pkt.extension)
+            pkt.extension = ntp.poly.polybytes(pkt.extension)
             while ((ControlPacket.HEADER_LEN + len(pkt.extension)) & 3):
                 pkt.extension += b"\x00"
 
@@ -1000,7 +912,7 @@ class ControlSession:
         if mac is None:
             raise ControlException(SERR_NOKEY)
         else:
-            pkt.extension += polybytes(mac)
+            pkt.extension += ntp.poly.polybytes(mac)
         return pkt.send()
 
     def getresponse(self, opcode, associd, timeo):
@@ -1066,7 +978,7 @@ class ControlSession:
 
             warndbg("At %s, socket read begins" % time.asctime(), 4)
             try:
-                rawdata = polybytes(self.sock.recv(4096))
+                rawdata = ntp.poly.polybytes(self.sock.recv(4096))
             except socket.error:  # pragma: no cover
                 # usually, errno 111: connection refused
                 raise ControlException(SERR_SOCKET)
@@ -1148,8 +1060,9 @@ class ControlSession:
                                 % (f, len(fragments)), 1)
                         break
                 else:
-                    tempfraglist = [polystr(f.extension) for f in fragments]
-                    self.response = polybytes("".join(tempfraglist))
+                    tempfraglist = [ntp.poly.polystr(f.extension) \
+                                    for f in fragments]
+                    self.response = ntp.poly.polybytes("".join(tempfraglist))
                     warndbg("Fragment collection ends. %d bytes "
                             " in %d fragments"
                             % (len(self.response), len(fragments)), 1)
@@ -1275,9 +1188,9 @@ class ControlSession:
         kvpairs = []
         instring = False
         response = ""
-        self.response = polystr(self.response)
+        self.response = ntp.poly.polystr(self.response)
         for c in self.response:
-            cord = polyord(c)
+            cord = ntp.poly.polyord(c)
             if c == '"':
                 response += c
                 instring = not instring
@@ -1341,7 +1254,7 @@ class ControlSession:
         elif b"\x00" in self.response:
             self.response = self.response[:self.response.index(b"\x00")]
         self.response = self.response.rstrip()
-        return self.response == polybytes("Config Succeeded")
+        return self.response == ntp.poly.polybytes("Config Succeeded")
 
     def fetch_nonce(self):
         """
@@ -1352,8 +1265,8 @@ This combats source address spoofing
             # retry 4 times
             self.doquery(opcode=ntp.control.CTL_OP_REQ_NONCE)
             self.nonce_xmit = time.time()
-            if self.response.startswith(polybytes("nonce=")):
-                return polystr(self.response.strip())
+            if self.response.startswith(ntp.poly.polybytes("nonce=")):
+                return ntp.poly.polystr(self.response.strip())
             # maybe a delay between tries?
 
         # uh, oh, no nonce seen
@@ -1700,7 +1613,7 @@ class Authenticator:
     @staticmethod
     def compute_mac(payload, keyid, keytype, passwd):
         hasher = hashlib.new(keytype)
-        hasher.update(polybytes(passwd))
+        hasher.update(ntp.poly.polybytes(passwd))
         hasher.update(payload)
         if hasher.digest_size == 0:
             return None
@@ -1729,6 +1642,6 @@ class Authenticator:
         hasher = hashlib.new(keytype)
         hasher.update(passwd)
         hasher.update(payload)
-        return polybytes(hasher.digest()) == mac
+        return ntp.poly.polybytes(hasher.digest()) == mac
 
 # end
