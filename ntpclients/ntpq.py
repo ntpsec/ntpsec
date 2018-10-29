@@ -33,6 +33,11 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
+# This used to force UTF-8 encoding, but that breaks the readline system.
+# Unfortunately sometimes sys.stdout.encoding lies about the encoding,
+# so expect random false positives.
+ntp.util.check_unicode()
+
 version = ntp.util.stdversion()
 master_encoding = 'latin-1'
 

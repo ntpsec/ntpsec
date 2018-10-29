@@ -44,7 +44,9 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
-
+# This used to force UTF-8 encoding, but that breaks the readline system.
+# Unfortunately sometimes sys.stdout.encoding lies about the encoding,
+# so expect random false positives.
 # LANG=C or LANG=POSIX refuse unicode when combined with curses
 disableunicode = ntp.util.check_unicode()
 
