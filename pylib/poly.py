@@ -41,7 +41,7 @@ if str is bytes:  # Python 2
     polybytes = bytes
     polyord = ord
     polychr = str
-    input = raw_input
+    polyinput = raw_input
 
     def string_escape(s):
         """String_escape/unicode_escape."""
@@ -54,6 +54,8 @@ if str is bytes:  # Python 2
 
 else:  # Python 3
     import io
+
+    polyinput = input
 
     def polystr(o):
         """Polymorphic string factory function."""
