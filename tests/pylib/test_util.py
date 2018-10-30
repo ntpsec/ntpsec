@@ -914,7 +914,7 @@ class TestPylibUtilMethods(unittest.TestCase):
             return cdns_jig_returns.pop(0)
 
         # Test init
-        cls = c(False, debug=3)
+        cls = c(False, debug=3, logfp=sys.stderr)
         self.assertEqual(cls.debug, 3)
         self.assertEqual(cls.logfp, sys.stderr)
         self.assertEqual(cls.now, None)
@@ -1027,7 +1027,7 @@ class TestPeerSummary(unittest.TestCase):
     target = ntp.util.PeerSummary
 
     def test___init__(self):
-        cls = self.target("peers", 4, True, False)
+        cls = self.target("peers", 4, True, False, logfp=sys.stderr)
         self.assertEqual(cls.displaymode, "peers")
         self.assertEqual(cls.pktversion, 4)
         self.assertEqual(cls.showhostnames, True)
