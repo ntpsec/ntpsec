@@ -38,6 +38,7 @@ forced_utf8 = False
 
 if str is bytes:  # Python 2
     polystr = str
+    polyunicode = unicode
     polybytes = bytes
     polyord = ord
     polychr = str
@@ -59,6 +60,8 @@ else:  # Python 3
         if not isinstance(o, bytes):
             return str(o)
         return str(o, encoding=master_encoding)
+
+    polyunicode = polystr
 
     def polybytes(s):
         """Polymorphic string encoding function."""
