@@ -199,7 +199,6 @@ def parseConf(text):
             elif text[i] == "\\":  # Starting an escape sequence
                 i += 1
                 if text[i] in "'\"n\\":
-                    print(repr(text[i]))
                     current.append(eval("\'\\" + text[i] + "\'"))
             else:
                 current.append(text[i])

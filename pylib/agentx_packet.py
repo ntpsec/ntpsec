@@ -886,7 +886,6 @@ def decode_octetstr(data, header):
 
 
 def sanity_octetstr(data):
-    print("sanity_octetstr:", type(data), data)
     if isinstance(data, str):
         return
     if isinstance(data, (list, tuple)):
