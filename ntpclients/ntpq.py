@@ -27,6 +27,7 @@ try:
     import ntp.ntpc
     import ntp.packet
     import ntp.util
+    import ntp.poly
 except ImportError as e:
     sys.stderr.write(
         "ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
@@ -39,90 +40,6 @@ except ImportError as e:
 ntp.util.check_unicode()
 
 version = ntp.util.stdversion()
-master_encoding = 'latin-1'
-
-# General notes on Python 2/3 compatibility:
-#
-# This code uses the following strategy to allow it to run on both Python 2
-# and Python 3:
-#
-# - Use latin-1 encoding to transform binary data to/from Unicode when
-#   necessary for operations where Python 3 expects Unicode; the
-#   polystr and polybytes functions are used to do this so that
-#   when running on Python 2, the byte string data is used unchanged.
-#
-# - Construct custom stdout and stderr streams when running
-#   on Python 3 that force UTF-8 encoding, and wrap them around the
-#   underlying binary buffers (in Python 2, the streams are binary
-#   and are used unchanged); this ensures that the same transformation
-#   is done on data from/to the standard streams, as is done on binary
-#   data from/to files and subprocesses; the make_std_wrapper function
-#   does this.
-#
-# anyone that changes this needs to test with all combinations of
-# python2, python3, LC_ALL=ascii, LC_ALL=latin-1, LC_ALL=en_US.utf8, and
-# piping output to a file.  While looking at the UTF-8 in the output.
-
-forced_utf8 = False
-
-if str is bytes:  # Python 2
-    polystr = unicode
-    polybytes = bytes
-
-    def string_escape(s):
-        return s.decode('string_escape')
-
-    # This used to force UTF-8 encoding, but that breaks the readline system.
-    # Unfortunately sometimes sys.stdout.encoding lies about the encoding,
-    # so expect random false positives.
-    ntp.util.check_unicode()
-
-else:  # Python 3
-    import io
-
-    def polystr(o):
-        "Polymorphic string factory function"
-        if isinstance(o, str):
-            return o
-        if not isinstance(o, bytes):
-            return str(o)
-        return str(o, encoding=master_encoding)
-
-    def polybytes(s):
-        "Polymorphic string encoding function"
-        if isinstance(s, bytes):
-            return s
-        if not isinstance(s, str):
-            return bytes(s)
-        return bytes(s, encoding=master_encoding)
-
-    def string_escape(s):
-        "Polymorphic string_escape/unicode_escape"
-        # This hack is necessary because Unicode strings in Python 3 don't
-        # have a decode method, so there's no simple way to ask it for the
-        # equivalent of decode('string_escape') in Python 2. This function
-        # assumes that it will be called with a Python 3 'str' instance
-        return s.encode(master_encoding).decode('unicode_escape')
-
-    def make_std_wrapper(stream):
-        "Standard input/output wrapper factory function"
-        # This ensures that the encoding of standard output and standard
-        # error on Python 3 matches the master encoding we use to turn
-        # bytes to Unicode in polystr above
-        # line_buffering=True ensures that interactive command sessions
-        # work as expected
-        return io.TextIOWrapper(stream.buffer, encoding="utf-8",
-                                newline="\n", line_buffering=True)
-
-    # This is the one situation where we *can* force unicode.
-    if "UTF-8" != sys.stdout.encoding:
-        forced_utf8 = True
-        sys.stdout = make_std_wrapper(sys.stdout)
-    if "UTF-8" != sys.stderr.encoding:
-        forced_utf8 = True
-        sys.stderr = make_std_wrapper(sys.stderr)
-
-# NTP-specific parts resume here
 
 # Flags for forming descriptors.
 OPT = 0x80        # this argument is optional, or'd with type */
@@ -233,7 +150,7 @@ class Ntpq(cmd.Cmd):
 
     def say(self, msg):
         try:
-            sys.stdout.write(polystr(msg))
+            sys.stdout.write(ntp.poly.polyunicode(msg))
         except UnicodeEncodeError as e:
             print("Unicode failure:", e)
             print("msg:\n", repr(msg))
@@ -241,7 +158,7 @@ class Ntpq(cmd.Cmd):
         sys.stdout.flush()    # In case we're piping the output
 
     def warn(self, msg):
-        sys.stderr.write(polystr(msg))
+        sys.stderr.write(ntp.poly.polystr(msg))
 
     def help_help(self):
         self.say("""\
@@ -405,8 +322,9 @@ usage: help [ command ]
             # high-half characters.  We won't do that unless somebody
             # files a bug, Mode 6 never seems to generate those in
             # variable fetches.
-            text = polystr(session.response.replace(polybytes(",\r\n"),
-                           polybytes(",\n")))
+            text = ntp.poly.polystr(session.response.replace(
+                ntp.poly.polybytes(",\r\n"),
+                ntp.poly.polybytes(",\n")))
         else:
             if not quiet:
                 self.say("status=%04x %s,\n"
@@ -1702,7 +1620,7 @@ if __name__ == '__main__':
 
     session.logfp = interpreter.logfp = logfp
 
-    if forced_utf8 and interpreter.debug:
+    if ntp.poly.forced_utf8 and interpreter.debug:
         interpreter.warn("\nforced UTF-8 output\n")
 
     if keyfile is not None:  # Have a -k, setup the auth
