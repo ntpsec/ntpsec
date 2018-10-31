@@ -2347,6 +2347,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          (AX.OpenPDU(True, 12, 34, 56, 78,
                                      AX.OID((1, 2, 3, 4), False),
                                      "foo"),
+                          True,
                           b""))
         # Test open, extraData
         self.assertEqual(f(b"\x01\x01\x10\x00"
@@ -2360,6 +2361,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          (AX.OpenPDU(True, 12, 34, 56, 78,
                                      AX.OID((1, 2, 3, 4), False),
                                      "foo"),
+                          True,
                           extraData))
         # Test close
         self.assertEqual(f(b"\x01\x02\x10\x00"
@@ -2367,6 +2369,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            b"\x00\x00\x00\x03\x00\x00\x00\x04"
                            b"\x01\x00\x00\x00"),
                          (AX.ClosePDU(True, 1, 2, 3, AX.RSN_OTHER),
+                          True,
                           b""))
         # Test register
         self.assertEqual(f(b"\x01\x03\x11\x00"
@@ -2378,6 +2381,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          (AX.RegisterPDU(True, 1, 2, 3, 4, 5,
                                          AX.OID((1, 2, 3), False),
                                          0, None, None),
+                          True,
                           b""))
         # Test unregister
         self.assertEqual(f(b"\x01\x04\x10\x00"
@@ -2389,18 +2393,21 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          (AX.UnregisterPDU(True, 1, 2, 3, 5,
                                            AX.OID((1, 2, 3), False),
                                            0, None, None),
+                          True,
                           b""))
         # Test get
         self.assertEqual(f(b"\x01\x05\x10\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
                            b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (AX.GetPDU(True, 1, 2, 3, ()),
+                          True,
                           b""))
         # Test get next
         self.assertEqual(f(b"\x01\x06\x10\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
                            b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (AX.GetNextPDU(True, 1, 2, 3, ()),
+                          True,
                           b""))
         # Test get bulk
         self.assertEqual(f(b"\x01\x07\x10\x00"
@@ -2418,6 +2425,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          (AX.GetBulkPDU(True, 1, 2, 3, 1, 5,
                                         (srch((1, 2), (3, 4), False),
                                          srch((6, 7), (8, 9), True))),
+                          True,
                           b""))
         # Test test set
         self.assertEqual(f(b"\x01\x08\x10\x00"
@@ -2439,24 +2447,28 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                          AX.Varbind(AX.VALUE_OCTET_STR,
                                                     AX.OID((1, 2, 4), False),
                                                     "blah"))),
+                          True,
                           b""))
         # Test commit set
         self.assertEqual(f(b"\x01\x09\x10\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
                            b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (AX.CommitSetPDU(True, 1, 2, 3),
+                          True,
                           b""))
         # Test undo set
         self.assertEqual(f(b"\x01\x0A\x10\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
                            b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (AX.UndoSetPDU(True, 1, 2, 3),
+                          True,
                           b""))
         # Test cleanup set
         self.assertEqual(f(b"\x01\x0B\x10\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
                            b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (AX.CleanupSetPDU(True, 1, 2, 3),
+                          True,
                           b""))
         # Test notify
         self.assertEqual(f(b"\x01\x0C\x10\x00"
@@ -2478,12 +2490,14 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                         AX.Varbind(AX.VALUE_OCTET_STR,
                                                    AX.OID((1, 2, 4), False),
                                                    "blah"))),
+                          True,
                           b""))
         # Test ping
         self.assertEqual(f(b"\x01\x0D\x10\x00"
                            b"\x00\x00\x00\x01\x00\x00\x00\x02"
                            b"\x00\x00\x00\x03\x00\x00\x00\x00"),
                          (AX.PingPDU(True, 1, 2, 3),
+                          True,
                           b""))
         # Test index alloc
         self.assertEqual(f(b"\x01\x0E\x16\x00"
@@ -2505,6 +2519,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                             AX.Varbind(AX.VALUE_OCTET_STR,
                                                        AX.OID((1, 2, 4), False),
                                                        "blah"))),
+                          True,
                           b""))
         # Test index dealloc
         self.assertEqual(f(b"\x01\x0F\x16\x00"
@@ -2529,6 +2544,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                                                          AX.OID((1, 2, 4),
                                                                 False),
                                                          "blah"))),
+                          True,
                           b""))
         # Test add agent caps
         self.assertEqual(f(b"\x01\x10\x10\x00"
@@ -2540,6 +2556,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                          (AX.AddAgentCapsPDU(True, 1, 2, 3,
                                              AX.OID((4, 5, 6), False),
                                              "blah"),
+                          True,
                           b""))
         # Test rm agent caps
         self.assertEqual(f(b"\x01\x11\x10\x00"
@@ -2549,6 +2566,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            b"\x00\x00\x00\x05\x00\x00\x00\x06"),
                          (AX.RMAgentCapsPDU(True, 1, 2, 3,
                                             AX.OID((4, 5, 6), False)),
+                          True,
                           b""))
         # Test response
         self.assertEqual(f(b"\x01\x12\x10\x00"
@@ -2556,6 +2574,7 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
                            b"\x00\x00\x00\x03\x00\x00\x00\x08"
                            b"\x00\x00\x00\x04\x00\x05\x00\x06"),
                          (AX.ResponsePDU(True, 1, 2, 3, 4, 5, 6),
+                          True,
                           b""))
         # Test errors
         # Test insufficient data for header
@@ -2566,15 +2585,15 @@ class TestNtpclientsNtpsnmpd(unittest.TestCase):
             errored = e
         self.assertEqual(errored.message, "Data too short for header")
         # Test insufficient data for packet
-        try:
-            f(b"\x01\x11\x10\x00"
-              b"\x00\x00\x00\x01\x00\x00\x00\x02"
-              b"\x00\x00\x00\x03\x00\x00\x00\x10"
-              b"\x03\x00\x00\x00\x00\x00\x00\x04")
-            errored = False
-        except AX.ParseError as e:
-            errored = e
-        self.assertEqual(errored.message, "Packet data too short")
+        self.assertEqual(f(b"\x01\x11\x10\x00"
+                           b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                           b"\x00\x00\x00\x03\x00\x00\x00\x10"
+                           b"\x03\x00\x00\x00\x00\x00\x00\x04"),
+                         (None, False,
+                          b"\x01\x11\x10\x00"
+                          b"\x00\x00\x00\x01\x00\x00\x00\x02"
+                          b"\x00\x00\x00\x03\x00\x00\x00\x10"
+                          b"\x03\x00\x00\x00\x00\x00\x00\x04"))
         # Test wrong version
         try:
             f(b"\x02\x11\x10\x00"

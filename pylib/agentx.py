@@ -283,14 +283,14 @@ class PacketControl:
             if datalen < 20:
                 return None  # We don't even have a packet header, bail
             try:
-                pkt, extraData = ax.decode_packet(self.receivedData)
+                pkt, fullPkt, extraData = ax.decode_packet(self.receivedData)
+                if fullPkt is False:
+                    return None
                 self.receivedData = extraData
                 self.receivedPackets.append(pkt)
                 if pkt.transactionID > self.highestTransactionID:
                     self.highestTransactionID = pkt.transactionID
                 self.log("Received a full packet: %s" % repr(pkt), 4)
-            except ax.ParseDataLengthError:
-                return None  # this happens if we don't have all of a packet
             except (ax.ParseVersionError, ax.ParsePDUTypeError,
                     ax.ParseError) as e:
                 if e.header["type"] != ax.PDU_RESPONSE:

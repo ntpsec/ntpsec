@@ -1218,7 +1218,7 @@ def decode_packet(data):
     header, newData = slicedata(data, 20)
     header = decode_pduheader(header)
     if header["length"] > len(newData):
-        raise ParseDataLengthError("Packet data too short", header)
+        return None, False, data  # pkt, isFull?, buffer
     packetSlice, newData = slicedata(newData, header["length"])
     if header["version"] != 1:
         raise ParseVersionError("Unknown packet version %i" %
@@ -1234,7 +1234,7 @@ def decode_packet(data):
     except Exception:  # pragma: no cover
         err = ParseError("Body parsing error", header, packetSlice, newData)
         raise err
-    return parsedPkt, newData
+    return parsedPkt, True, newData  # pkt, isFull?, buffer
 
 
 def bits2Bools(bitString, cropLength=None):
