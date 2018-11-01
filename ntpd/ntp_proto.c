@@ -737,6 +737,7 @@ receive(
 			stat_count.sys_badauth++;
 			if(peer != NULL) {
 				peer->badauth++;
+				peer->cfg.flags &= ~FLAG_AUTHENTIC;
 				peer->flash |= BOGON5;
 			}
 			goto done;
@@ -745,6 +746,7 @@ receive(
 
 	if (peer != NULL) {
 	    	peer->received++;
+		peer->cfg.flags |= FLAG_AUTHENTIC;
 		peer->timereceived = current_time;
 	}
 
