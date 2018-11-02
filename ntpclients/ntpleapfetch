@@ -49,7 +49,7 @@ REQUIREDCMDS=" wget logger tr sed"
 
 SELF="`basename $0`"
 
-function displayHelp {
+displayHelp() {
             cat <<EOF
 Usage: $SELF [options] [leapfile]
 
@@ -116,7 +116,7 @@ EOF
    return 0
 }
 
-function displayVersion {
+displayVersion() {
             cat <<EOF
 ntpleapfetch ntpsec-@NTPSEC_VERSION_EXTENDED@
 EOF
@@ -245,7 +245,7 @@ if ! LOGGER="`2>/dev/null which logger`" ; then
     LOGGER=
 fi
 
-function log {
+log() {
     # "priority" "message"
     #
     # Stdout unless syslog specified or logger isn't available
@@ -279,7 +279,7 @@ INTERVAL=$(( $INTERVAL *1 ))
 # Date lines have comments.
 # #h hex hex hex hex hex is the SHA1 checksum of the data & dates, excluding whitespace w/o leading zeroes
 
-function verifySHA1 {
+verifySHA1() {
 
     if [ ! -f "$1" ]; then
         return 1
@@ -405,7 +405,7 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
             chmod --reference=$REFFILE $TMPFILE
             chown --reference=$REFFILE $TMPFILE
 	    ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1
-            if  [ $? == 0 ] ; then
+            if  [ $? -eq 0 ] ; then
                 chcon --reference $REFFILE $TMPFILE
             fi
 
