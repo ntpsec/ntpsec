@@ -106,4 +106,6 @@ present and to default leapfile) /etc/{ntpconf}
 +-V+, +--version+::
   Print the version string and exit.
 
+'leapfile'::
+  An alternate location to download the leapseconds file to.
 // end

@@ -60,7 +60,6 @@ All arguments are optional:  Default (or current value) shown:
     -6    Use only IPv6
     -p 4|6
           Prefer IPv4 or IPv6 (as specified) addresses, but use either
-    -d    Specify the filename on the local system
     -e    Specify how long before expiration the file is to be refreshed
           Units are required, e.g. "-e 60 days"  Note that larger values
           imply more frequent refreshes.
