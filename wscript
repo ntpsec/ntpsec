@@ -1101,7 +1101,7 @@ def build(ctx):
             print("--- PYTHONPATH is not set, "
                   "loading the Python ntp library may be troublesome ---")
         elif ctx.env.PYTHONARCHDIR not in os.environ["PYTHONPATH"]:
-            print("--- PYTHONDARCHIR not in PYTHONPATH"
+            print("--- PYTHONARCHDIR not in PYTHONPATH"
                   "loading the Python ntp library may be troublesome ---")
 
 #
