@@ -135,7 +135,7 @@ daemon () {
 	    $install bison libssl-dev			# build
 	    $install libcap-dev libseccomp-dev		# build
 	    $install libavahi-compat-libdnssd-dev	# optional build
-	    $install libssl1.0.0 libcap2 pps-tools
+	    $install pps-tools
 	    ;;
 	emerge)
 						# Build environment included!
