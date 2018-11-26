@@ -297,7 +297,11 @@ int scmp_sc[] = {
 #endif
 
 	SCMP_SYS(getdents),	/* Scanning /etc/ntp.d/ */
+	SCMP_SYS(getdents64),
+#ifdef __NR_prlimit64
+	SCMP_SYS(prlimit64),	/* 64 bit Fedora 26 with early_droproot*/
 #endif
+#endif  /* ENABLE_EARLY_DROPROOT */
 
 	SCMP_SYS(adjtimex),
 	SCMP_SYS(bind),
@@ -324,9 +328,6 @@ int scmp_sc[] = {
 #ifdef __NR_getrlimit
 	SCMP_SYS(getrlimit),	/* sysconf */
 	SCMP_SYS(setrlimit),
-#endif
-#ifdef __NR_prlimit64
-	SCMP_SYS(prlimit64),	/* 64 bit Fedora 26 with early_droproot*/
 #endif
 	SCMP_SYS(getrusage),
 	SCMP_SYS(getsockname),
