@@ -75,7 +75,7 @@ void jitter(const iomode mode)
 	l_fp tr;
 	int i;
 	double gtod[NBUF];
-	doubletime_t jitter;
+	doubletime_t jitterx;	/* shadow warning on some old systems */
 
 	/*
 	 * Force pages into memory
@@ -109,12 +109,12 @@ void jitter(const iomode mode)
 
 	// calculate 'variance' and call it jitter
 	// and scale everything up a million time for clarity
-	jitter = 0;
+	jitterx = 0;
 	for (i = 0; i < (NBUF - 1); i ++) {
 		gtod[i] = (gtod[i] - average) * 1000000;
-		jitter += gtod[i] * gtod[i];
+		jitterx += gtod[i] * gtod[i];
 	}
-	jitter = jitter / (NBUF - 1);
+	jitterx = jitterx / (NBUF - 1);
 
 	/*
 	 * Sort the gtod array and display deciles
@@ -134,12 +134,12 @@ void jitter(const iomode mode)
 		    if (i < NBUF - 3)
 			fputs(", ", stdout);
 		}
-		fprintf(stdout, "], \"Jitter\": %.9Lf}\n", jitter);
+		fprintf(stdout, "], \"Jitter\": %.9Lf}\n", jitterx);
 	}
 	else if (mode != raw)
 	{
 		fprintf(stdout, "Mean %13.9Lf\n", average);
-		fprintf(stdout, "Jitter %13.9Lf\n", jitter);
+		fprintf(stdout, "Jitter %13.9Lf\n", jitterx);
 		fprintf(stdout, "High\n");
 		for (i = 0; i < NSAMPLES; i++)
 		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
