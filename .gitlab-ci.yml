@@ -408,7 +408,7 @@ openSUSE-leap-basic:
   <<: *job_definition
   image: opensuse/leap
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
     - python ./waf configure build
   tags:
     - gitlab-org
@@ -417,7 +417,7 @@ openSUSE-leap-refclocks:
   <<: *job_definition
   image: opensuse/leap
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
     - python ./waf configure --refclock=all build
   tags:
     - gitlab-org
@@ -427,7 +427,7 @@ openSUSE-tumbleweed-basic:
   image: opensuse/tumbleweed
   allow_failure: true
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
     - python ./waf configure build
   tags:
     - gitlab-org
@@ -437,7 +437,7 @@ openSUSE-tumbleweed-refclocks:
   image: opensuse/tumbleweed
   allow_failure: true
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
     - python ./waf configure --refclock=all build
   tags:
     - gitlab-org

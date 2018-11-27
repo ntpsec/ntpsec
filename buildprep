@@ -156,6 +156,7 @@ daemon () {
 	    $install libcap-devel libseccomp-devel 	# build
 	    $install openssl-devel			# build
 	    $install libcap2 openssl-libs
+	    $install python-curses
 	    ;;
 	zypper)
 	    $install -t pattern devel_basis		# Build environment
@@ -166,6 +167,7 @@ daemon () {
 	    $install pps-tools-devel			# build
 	    $install pps-tools
 	    $install libcap2 openssl-libs
+	    $install python-curses
 	    ;;
     esac
 }
