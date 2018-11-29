@@ -992,7 +992,6 @@ python_scripts = [
     "ntpclients/ntploggps.py",
     "ntpclients/ntpdig.py",
     "ntpclients/ntpkeygen.py",
-    "ntpclients/ntpmon.py",
     "ntpclients/ntpq.py",
     "ntpclients/ntpsweep.py",
     "ntpclients/ntptrace.py",
@@ -1038,6 +1037,9 @@ def build(ctx):
     ctx.recurse("attic")
     ctx.recurse("tests")
 
+    if ctx.env['PYTHON_CURSES']:
+        python_scripts.append("ntpclients/ntpmon.py")
+
     # Make sure the python scripts compile, but don't install them
     ctx(
         features="py",
@@ -1061,7 +1063,8 @@ def build(ctx):
 
     ctx.manpage(1, "ntpclients/ntploggps-man.txt")
     ctx.manpage(1, "ntpclients/ntpdig-man.txt")
-    ctx.manpage(1, "ntpclients/ntpmon-man.txt")
+    if ctx.env['PYTHON_CURSES']:
+        ctx.manpage(1, "ntpclients/ntpmon-man.txt")
     ctx.manpage(1, "ntpclients/ntpq-man.txt")
     ctx.manpage(1, "ntpclients/ntpsweep-man.txt")
     ctx.manpage(1, "ntpclients/ntptrace-man.txt")
