@@ -600,10 +600,10 @@ int main(int argc, char **argv) {
         msg="Checking for OpenSSL (via pkg-config)",
         define_name='', mandatory=False,
     ):
-    # Very old versions of OpenSSL don't have cmac support.
-    # This gives a sane(er) error message.
-    # It would be possible to make CMAC support optional by adding
-    # appropriate #ifdefs to the code.
+        # Very old versions of OpenSSL don't have cmac support.
+        # This gives a sane(er) error message.
+        # It would be possible to make CMAC support optional by adding
+        # appropriate #ifdefs to the code.
         openssl_headers = (
             "openssl/evp.h",
             "openssl/cmac.h",
