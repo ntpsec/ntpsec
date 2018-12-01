@@ -23,13 +23,15 @@ cmd_map2 = {
     ("main/ntpclients/ntpdig", "--version"): "ntpdig %s\n" % verStr,
     ("main/ntpclients/ntpkeygen", "--version"): "ntpkeygen %s\n" % verStr,
     ("main/ntpclients/ntpq", "--version"): "ntpq %s\n" % verStr,
-    ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n" % verStr,
     ("main/ntpclients/ntplogtemp", "--version"): "ntplogtemp %s\n" % verStr,
     ("main/ntpclients/ntpsnmpd", "--version"): "ntpsnmpd %s\n" % verStr,
     ("main/ntpclients/ntpsweep", "--version"): "ntpsweep %s\n" % verStr,
     ("main/ntpclients/ntptrace", "--version"): "ntptrace %s\n" % verStr,
     ("main/ntpclients/ntpviz", "--version"): "ntpviz %s\n" % verStr,
     ("main/ntpclients/ntpwait", "--version"): "ntpwait %s\n" % verStr
+}
+cmd_map3 = {    # Need curses
+    ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n" % verStr,
 }
 
 
@@ -69,6 +71,10 @@ def run(cmd, reg, pythonic):
 def cmd_bin_test(ctx, config):
     """Run a suite of binary tests."""
     fails = 0
+
+    if ctx.env['PYTHON_CURSES']:
+      for cmd in cmd_map3:
+        cmd_map2[cmd] = cmd_map3[cmd]
 
     for cmd in sorted(cmd_map):
         if not run(cmd, cmd_map[cmd], False):
