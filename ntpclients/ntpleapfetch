@@ -7,8 +7,6 @@
 #
 # Bugfixes and improvements would be appreciated by the author.
 
-VERSION="1.003"
-
 # leap-seconds file manager/updater
 
 # Depends on:
@@ -111,7 +109,7 @@ For cron-friendly behavior, define CRONJOB=1 in the crontab.
 
 This script depends on: sha1sum/shasum $REQUIREDCMDS
 
-Version $VERSION
+Version @NTPSEC_VERSION_EXTENDED@
 EOF
    return 0
 }
