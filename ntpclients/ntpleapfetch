@@ -153,18 +153,18 @@ while getopts 46p:P:s:e:f:Fc:r:i:lLt:hqvz:ZV opt; do
                 exit 1;
             fi
             ;;
-	P)
-	    LOGFAC="$OPTARG"
-	    ;;
+        P)
+            LOGFAC="$OPTARG"
+            ;;
         s)
             LEAPSRC="$OPTARG"
             ;;
         e)
             PREFETCH="$OPTARG"
             ;;
-	f)
-	    NTPCONF="$OPTARG"
-	    ;;
+        f)
+            NTPCONF="$OPTARG"
+            ;;
         F)
             FORCE="Y"
             ;;
@@ -180,32 +180,32 @@ while getopts 46p:P:s:e:f:Fc:r:i:lLt:hqvz:ZV opt; do
         t)
             TMPFILE="$OPTARG"
             ;;
-	l)
-	    SYSLOG="y"
-	    ;;
-	L)
-	    SYSLOG=
-	    ;;
+        l)
+            SYSLOG="y"
+            ;;
+        L)
+            SYSLOG=
+            ;;
         h)
             displayHelp
             exit 0
             ;;
-		V)
-			displayVersion
-			exit 0
-			;;
-	q)
-	    QUIET="Y"
-	    ;;
+        V)
+            displayVersion
+            exit 0
+            ;;
+        q)
+            QUIET="Y"
+            ;;
         v)
             VERBOSE="Y"
             ;;
-	z)
-	    PATHLIST="$OPTARG:"
-	    ;;
-	Z)
-	    PATHLIST=
-	    ;;
+        z)
+            PATHLIST="$OPTARG:"
+            ;;
+        Z)
+            PATHLIST=
+            ;;
         *)
             echo "$SELF -h for usage" >&2
             exit 1
@@ -220,7 +220,7 @@ export PATH="$PATHLIST$PATH"
 #
 for P in $REQUIREDCMDS ; do
     if >/dev/null 2>&1 which "$P" ; then
-	continue
+        continue
     fi
     [ "$P" = "logger" ] && continue
     echo "FATAL: missing $P command, please install"
@@ -249,17 +249,17 @@ log() {
     # Stdout unless syslog specified or logger isn't available
     #
     if [ -z "$SYSLOG" -o -z "$LOGGER" ]; then
-	if [ -n "$QUIET" -a \( "$1" = "info" -o "$1" = "notice" -o "$1" = "debug" \) ]; then
-	    return 0
-	fi
-	echo "`echo \"$1\" | tr a-z A-Z`: $2"
-	return 0
+        if [ -n "$QUIET" -a \( "$1" = "info" -o "$1" = "notice" -o "$1" = "debug" \) ]; then
+            return 0
+        fi
+        echo "`echo \"$1\" | tr a-z A-Z`: $2"
+        return 0
     fi
 
     # Also log to stdout if cron job && notice or higher
     local S
     if [ -n "$CRONJOB" -a \( "$1" != "info" \) -a \( "$1" != "debug" \) ] || [ -n "$VERBOSE" ]; then
-	S="-s"
+        S="-s"
     fi
     $LOGGER $S -t "$SELF[$$]" -p "$LOGFAC.$1" "$2"
 }
@@ -316,7 +316,7 @@ verifySHA1() {
         fi
     else
         log "error" "Checksum of $1 is invalid:"
-	[ -z "$FSHA1" ] && FSHA1="(no checksum record found in file)"
+        [ -z "$FSHA1" ] && FSHA1="(no checksum record found in file)"
         log "error" "EXPECTED: $FSHA1"
         log "error" "COMPUTED: $DSHA1"
         return 1
@@ -380,8 +380,8 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
             fi
 
             if ! verifySHA1 $TMPFILE "$VERBOSE" ; then
-		# There is no point in retrying, as the file on the server is almost
-		# certainly corrupt.
+                # There is no point in retrying, as the file on the server is almost
+                # certainly corrupt.
 
                 log "warning" "Downloaded file $TMPFILE rejected -- saved for diagnosis"
                 cat ${TMPFILE}.log
@@ -390,24 +390,24 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
             fi
             rm -f ${TMPFILE}.log
 
-	    # Set correct permissions on temporary file
+            # Set correct permissions on temporary file
 
-	    REFFILE="$LEAPFILE"
+            REFFILE="$LEAPFILE"
             if [ ! -f $LEAPFILE ]; then
-		log "notice" "$LEAPFILE was missing, creating new copy - check permissions"
+                log "notice" "$LEAPFILE was missing, creating new copy - check permissions"
                 touch $LEAPFILE
-		# Can't copy permissions from old file,
+                # Can't copy permissions from old file,
                 # copy from NTPCONF instead
-		REFFILE="$NTPCONF"
+                REFFILE="$NTPCONF"
             fi
             chmod --reference=$REFFILE $TMPFILE
             chown --reference=$REFFILE $TMPFILE
-	    ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1
+            ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1
             if  [ $? -eq 0 ] ; then
                 chcon --reference $REFFILE $TMPFILE
             fi
 
-	    # Replace current file with validated new one
+            # Replace current file with validated new one
 
             if mv -f $TMPFILE $LEAPFILE ; then
                 log "notice" "Installed new $LEAPFILE from $LEAPSRC"
@@ -416,30 +416,30 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
                 exit 1
             fi
 
-	    # Restart NTP (or whatever else is specified)
+            # Restart NTP (or whatever else is specified)
 
-	    if [ -n "$RESTART" ]; then
-		if [ -n "$VERBOSE" ]; then
-		    log "info" "Attempting restart action: $RESTART"
-		fi
-		R="$( 2>&1 $RESTART )"
-		if [ $? -eq 0 ]; then
-		    log "notice" "Restart action succeeded"
-		    if [ -n "$VERBOSE" -a -n "$R" ]; then
-			log "info" "$R"
-		    fi
-		else
-		    log "error" "Restart action failed"
-		    if [ -n "$R" ]; then
-			log "error" "$R"
-		    fi
-		    exit 2
-		fi
-	    fi
+            if [ -n "$RESTART" ]; then
+                if [ -n "$VERBOSE" ]; then
+                    log "info" "Attempting restart action: $RESTART"
+                fi
+                R="$( 2>&1 $RESTART )"
+                if [ $? -eq 0 ]; then
+                    log "notice" "Restart action succeeded"
+                    if [ -n "$VERBOSE" -a -n "$R" ]; then
+                        log "info" "$R"
+                    fi
+                else
+                    log "error" "Restart action failed"
+                    if [ -n "$R" ]; then
+                        log "error" "$R"
+                    fi
+                    exit 2
+                fi
+            fi
             exit 0
-	fi
+        fi
 
-	# Failed to download.  See about trying again
+        # Failed to download.  See about trying again
 
         rm -f $TMPFILE
         if [ $TRY -ge $MAXTRIES ]; then
