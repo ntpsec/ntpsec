@@ -259,24 +259,6 @@ gcc-latest-refclocks:
   tags:
     - gitlab-org
 
-freebsd-10-basic:
-  <<: *job_definition
-  script:
-    - python ./waf configure build
-  tags:
-    - freebsd-10
-  only:
-    - branches@NTPsec/ntpsec
-
-freebsd-10-refclocks:
-  <<: *job_definition
-  script:
-    - python ./waf configure --refclock=all build
-  tags:
-    - freebsd-10
-  only:
-    - branches@NTPsec/ntpsec
-
 freebsd-11-basic:
   <<: *job_definition
   script:
