@@ -11,6 +11,12 @@
 
 # Depends on:
 #  wget sed, tr, shasum/sha1sum, logger
+#
+# This file needs to remain free of bash-isms.  Make sure it
+# runs on plain POSIX shell.
+
+# GNU sed has many extentions not on osX and FreeBSD.  If
+# you change near sed, test on FreeBSD.
 
 # ########## Default configuration ##########
 #
@@ -284,7 +290,7 @@ verifySHA1() {
 
     # Remove comments, except those that are markers for last update, expires and hash
 
-    local RAW="`sed $1 -e'/^\\([0-9]\\|#[\$@h]\)/!d' -e'/^#[\$@h]/!s/#.*\$//g'`"
+    local RAW="`sed -e'/^\\([0-9]\\|#[\$@h]\)/!d' -e'/^#[\$@h]/!s/#.*\$//g' $1`"
 
     # Extract just the data, removing all whitespace
 
