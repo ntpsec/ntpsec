@@ -9,9 +9,11 @@
 # Running again starts by deleting everything in the directory.
 
 # set pipefail to catch pipeline failures
-set -o pipefail
-# crash on unset shell variables
-set -u
+# Unfortunately, it doesn't work on some older sh-es
+if /bin/sh -c "set -o pipefail"
+then
+  set -o pipefail
+fi
 
 LINUX=""
 if [ `uname -s` = "Linux" -a -f /usr/include/seccomp.h ]
@@ -95,6 +97,14 @@ then
     echo "### Warning: Missing seccomp.h (on a Linux system)"
     echo
 fi
+
+if ! /bin/sh -c "set -o pipefail"
+then
+  echo "### old sh - no pipefail"
+  echo "We can't test for errors"
+  echo "###          You will have to scan the log files."
+fi
+
 echo "PYTHONPATH is" \"$PYTHONPATH\"
 grep VERSION: test*/test.log
 echo
