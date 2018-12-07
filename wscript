@@ -49,6 +49,7 @@ Usage: waf <command>
     dist        Create a release
     install     Install the project
     loccount    Show SLOC count of the source tree
+    uninstall   Uninstall the project
 
 ''')
 
