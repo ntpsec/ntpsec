@@ -301,12 +301,10 @@ verifySHA1() {
     # Extract the file's hash. Restore any leading zeroes in hash segments.
 
     # The sed [] includes a tab (\t) and space; #h is followed by a tab and space
-    # The file of 8-Jul-2016 uses \r\n as line delimiters.  This must
-    # be corrected on UNIX systems, else the extra \r is read from the
-    # last line.  I am not clear if this is an error in the NIST file,
-    # or intentional.  Nevertheless - Sanjeev Gupta 20180105
+    # or maybe a space and a tab.  remove the tab, whereever it may be.  Add some 0x
+    # so it can be run throught printf to restore missing leading zeros.
     #
-    local FSHA1="`echo \"$RAW\" | sed -e's/\r//' | sed -e'/^#h/!d' -e's/^#h//' -e's/[ 	] */ 0x/g'`"
+    local FSHA1="`grep '^#h' $1 | tr -d '[:cntrl:]' | sed -e's/^#h//' -e's/ / 0x/g'`"
     FSHA1=`printf '%08x%08x%08x%08x%08x' $FSHA1`
 
     if [ -n "$FSHA1" -a \( "$FSHA1" = "$DSHA1" \) ]; then
