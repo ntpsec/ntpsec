@@ -341,8 +341,7 @@ if ! [ -f "$NTPCONF" ]; then
 fi
 
 # Parse ntp.conf for leapfile directive
-# FIXME broken on MacOS/macports
-LEAPFILE="`sed $NTPCONF -e'/^ *leapfile  *.*$/!d' -e's/^ *leapfile  *//'`"
+LEAPFILE="`grep -x 'leapfile *.*' $NTPCONF | grep -o ' [^ ]*.*'`"
 if [ -z "$LEAPFILE" ]; then
     log "warning" "$NTPCONF does not specify a leapfile"
 fi
