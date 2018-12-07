@@ -34,6 +34,14 @@ cmd_map3 = {    # Need curses
     ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n" % verStr,
 }
 
+test_logs = []
+
+def addLog(color, text):
+    test_logs.append((color, text))
+
+def bin_test_summary(ctx):
+    for i in test_logs:
+        waflib.Logs.pprint(i[0], i[1])
 
 def run(cmd, reg, pythonic):
     """Run an individual non-python test."""
@@ -41,10 +49,10 @@ def run(cmd, reg, pythonic):
 
     breg = ntp.poly.polybytes(reg)
 
-    print("running: ", " ".join(cmd), end="")
+    prefix = "running: " + " ".join(cmd)
 
     if not os.path.exists("%s/%s" % (waflib.Context.out_dir, cmd[0])):
-        waflib.Logs.pprint("YELLOW", " SKIPPING (does not exist)")
+        addLog("YELLOW", prefix + " SKIPPING (does not exist)")
         return False
 
     if pythonic:
@@ -61,10 +69,10 @@ def run(cmd, reg, pythonic):
         check = True
 
     if check:
-        waflib.Logs.pprint("GREEN", "  OK")
+        addLog("GREEN", prefix + "  OK")
         return True
-    waflib.Logs.pprint("RED", "  FAILED")
-    waflib.Logs.pprint("PINK", ntp.poly.polystr(stderr))
+    addLog("RED", prefix + "  FAILED")
+    addLog("PINK", prefix + " " + ntp.poly.polystr(stderr))
     return False
 
 
@@ -85,8 +93,10 @@ def cmd_bin_test(ctx, config):
             fails += 1
 
     if 0 < fails:
-        waflib.Logs.pprint("GREY", "Expected:\t%s" % (verStr))
+        addLog("GREY", "Expected:\t%s" % (verStr))
     if 1 == fails:
+        bin_test_summary(ctx)
         ctx.fatal("1 binary test failed!")
     elif 1 < fails:
+        bin_test_summary(ctx)
         ctx.fatal("%d binary tests failed!" % fails)

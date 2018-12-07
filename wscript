@@ -897,6 +897,10 @@ def bin_test(ctx):
     from wafhelpers.bin_test import cmd_bin_test
     cmd_bin_test(ctx, config)
 
+def bin_test_summary(ctx):
+    """Display results of binary check, use after tests."""
+    from wafhelpers.bin_test import bin_test_summary
+    bin_test_summary(ctx)
 
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
@@ -1083,8 +1087,8 @@ def build(ctx):
             if verbose > 0:
                 ctx.add_post_fun(test_print_log)
 
-            # Test binaries
-            ctx.add_post_fun(bin_test)
+        # Test binaries
+        ctx.add_post_fun(bin_test)
 
         # Write test log to a file
         ctx.add_post_fun(test_write_log)
@@ -1092,6 +1096,7 @@ def build(ctx):
         # Print a summary at the end
         ctx.add_post_fun(waf_unit_test.summary)
         ctx.add_post_fun(waf_unit_test.set_exit_code)
+        ctx.add_post_fun(bin_test_summary)
     else:
         pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
         from waflib import Options
