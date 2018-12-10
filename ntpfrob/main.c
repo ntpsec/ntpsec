@@ -102,7 +102,7 @@ main(int argc, char **argv)
 		case 'r':
 		    mode = raw;
 		    break;
-	    case 'V':
+		case 'V':
 		    printf("ntpfrob ntpsec-%s\n", NTPSEC_VERSION_EXTENDED);
 			exit(0);
 		default:
