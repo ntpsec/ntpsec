@@ -82,7 +82,8 @@ default_get_resolution(void)
 		clock_gettime(CLOCK_REALTIME, &tp);
 		diff = tp.tv_nsec - last;
 		if (diff < 0) diff += DNSECS;
-		if (diff > MINSTEP) if (minsteps-- <= 0) break;
+		if (diff > MINSTEP && minsteps-- <= 0)
+			break;
 		last = tp.tv_nsec;
 	}
 	diff /= 1000;	/* step down to milliseconds */
