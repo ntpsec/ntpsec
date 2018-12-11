@@ -13,7 +13,7 @@ Defaults are start of tomorrow (UTC), and 28 days after the leap.
 from __future__ import print_function, division
 
 import datetime
-import sha
+import hashlib
 import sys
 import time
 
@@ -64,7 +64,7 @@ tai = "40"          # hardwired
 #
 #  All dates use NTP epoch of 1900-01-01
 
-sha1 = sha.new()
+sha1 = hashlib.sha1()
 print("%s %s  # %s" % (leap, tai, leap_txt))
 sha1.update(leap)
 sha1.update(tai)
