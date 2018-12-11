@@ -39,27 +39,26 @@ ntpcal_get_build_date(
 	)
 {
         time_t epoch = (time_t)BUILD_EPOCH;
-        struct tm *epoch_tm;
+        struct tm epoch_tm;
 
 	ZERO(*jd);
 	jd->year     = 1970;
 	jd->month    = 1;
 	jd->monthday = 1;
 
-        epoch_tm = gmtime(&epoch);
-        if ( NULL == epoch_tm ) {
+        if (NULL == gmtime_r(&epoch, &epoch_tm)) {
             /* bad EPOCH */
 	    return false;
         }
 	/* good EPOCH */
-	jd->year     = epoch_tm->tm_year + 1900;
-	jd->yearday  = epoch_tm->tm_yday + 1;
-	jd->month    = epoch_tm->tm_mon + 1;
-	jd->monthday = epoch_tm->tm_mday;
-	jd->hour     = epoch_tm->tm_hour;
-	jd->minute   = epoch_tm->tm_min;
-	jd->second   = epoch_tm->tm_sec;
-	jd->weekday  = epoch_tm->tm_wday;
+	jd->year     = epoch_tm.tm_year + 1900;
+	jd->yearday  = epoch_tm.tm_yday + 1;
+	jd->month    = epoch_tm.tm_mon + 1;
+	jd->monthday = epoch_tm.tm_mday;
+	jd->hour     = epoch_tm.tm_hour;
+	jd->minute   = epoch_tm.tm_min;
+	jd->second   = epoch_tm.tm_sec;
+	jd->weekday  = epoch_tm.tm_wday;
 
 #if 0
         fprintf(stderr, "Build: %d %d %d %d %d %d %d %d\n",
