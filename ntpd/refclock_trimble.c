@@ -20,10 +20,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif /* not HAVE_SYS_IOCTL_H */
-
 #if defined HAVE_SYS_MODEM_H
 #include <sys/modem.h>
 #endif
