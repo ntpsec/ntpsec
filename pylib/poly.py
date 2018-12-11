@@ -8,7 +8,6 @@ https://gitlab.com/esr/practical-python-porting/blob/master/polystr-inclusion.py
 see http://www.catb.org/esr/faqs/practical-python-porting/ for more information.
 """
 import sys
-import ntp.util
 
 master_encoding = 'latin-1'
 
