@@ -294,7 +294,7 @@ verifySHA1() {
 
     # Extract just the data, removing all whitespace
 
-    local DSHA1="`printf \"$DATA\" | $SHASUM | sed -e's/[? *].*$//'`"
+    local DATA="`echo \"$RAW\" | sed -e'/^#h/d' -e's/^#[\$@]//g' | tr -d '[:space:]'`"
 
     # Compute the SHA1 hash of the data, removing the marker and filename
     # Computed in binary mode, which shouldn't matter since whitespace
@@ -302,7 +302,7 @@ verifySHA1() {
     # shasum/sha1sum comes in several flavors;
     # a portable one is available in Perl (with Digest::SHA)
 
-    local DSHA1="`echo -n \"$DATA\" | $SHASUM | sed -e's/[? *].*$//'`"
+    local DSHA1="`printf \"$DATA\" | $SHASUM | sed -e's/[? *].*$//'`"
 
     # Extract the file's hash. Restore any leading zeroes in hash segments.
 
@@ -402,8 +402,16 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
                 # copy from NTPCONF instead
                 REFFILE="$NTPCONF"
             fi
-            chmod --reference=$REFFILE $TMPFILE
-            chown --reference=$REFFILE $TMPFILE
+            chmod --reference=$REFFILE $TMPFILE > /dev/null 2>&1
+            if  [ $? -ne 0 ] ; then
+                # the above chmod fails on osX and BSD, just force it
+                chmod 644 $TMPFILE
+            fi
+            chown --reference=$REFFILE $TMPFILE > /dev/null 2>&1
+            if  [ $? -ne 0 ] ; then
+                # the above chown fails on osX and BSD, just force it
+                chown root:wheel $TMPFILE
+            fi
             ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1
             if  [ $? -eq 0 ] ; then
                 chcon --reference $REFFILE $TMPFILE
