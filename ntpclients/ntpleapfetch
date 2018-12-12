@@ -290,11 +290,11 @@ verifySHA1() {
 
     # Remove comments, except those that are markers for last update, expires and hash
 
-    local RAW="`sed -e'/^\\([0-9]\\|#[\$@h]\)/!d' -e'/^#[\$@h]/!s/#.*\$//g' $1`"
+    local RAW="`sed -ne'/^#[\$@h]/p;/^[^#]/s/.#.*$//p' $1 `"
 
     # Extract just the data, removing all whitespace
 
-    local DATA="`echo \"$RAW\" | sed -e'/^#h/d' -e's/^#[\$@]//g' | tr -d '[:space:]'`"
+    local DSHA1="`printf \"$DATA\" | $SHASUM | sed -e's/[? *].*$//'`"
 
     # Compute the SHA1 hash of the data, removing the marker and filename
     # Computed in binary mode, which shouldn't matter since whitespace
