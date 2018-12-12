@@ -448,6 +448,8 @@ int scmp_sc[] = {
 	else {
 		msyslog(LOG_NOTICE, "INIT: sandbox: seccomp enabled.");
 	}
+        seccomp_release(ctx);
+
 #endif /* HAVE_SECCOMP_H */
 
 	return nonroot;
