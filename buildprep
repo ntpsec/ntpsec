@@ -50,7 +50,7 @@ done
 cat <<EOF
 # Preparing your system for ntpsec source build...
 # This script presently knows about:
-#   CentOS, Debian, Fedora, Gentoo, SLES, Ubuntu, and Alpine Linux
+#   CentOS, Debian, Fedora, Gentoo, NetBSD, SLES, Ubuntu, and Alpine Linux
 # If you are running something else, such as macOS or Solaris, please
 # read the source for this buildprep script to get an idea of what packages
 # are required.
@@ -101,6 +101,21 @@ then
     # Alpine Linux, musl rather than glibc
     installer=apk
     install="$do $installer add"
+elif pkgin -v
+then
+    # NetBSD binary package installer
+    installer=pkgin
+    install="$do $installer install"
+elif pkg_add -V
+then
+    echo "## Looks like a NetBSD system"
+    echo "## You need to setup pkgin"
+    echo "## The last page of install disk has a check-box to do it"
+    echo "## But you don't get that option on a Raspberry Pi."
+    echo "## For the Pi, do something like:"
+    echo "## pkg_add ftp://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/earmv7hf/8.0/All/pkgin-0.9.4nb8.tgz"
+    echo "## Adjust the version an arch to match your setup."
+    exit 1
 else
     echo "# ERROR: Package manager unidentified - Unsupported operating system"
     exit 1
@@ -141,6 +156,24 @@ daemon () {
 						# Build environment included!
 	    $install sys-libs/libcap sys-libs/libseccomp
 	    $install sys-devel/bison net-misc/pps-tools
+	    ;;
+	pkgin)
+	    # NetBSD
+	    #  There is nothing magic about 3.7.
+	    #  In Dec 2018, 3.6 and 2.7 are also good candidates.
+	    $install bison python37 py37-curses-3.7
+	    # setup "python" from command line
+	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
+	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
+	    # Add to Python search path
+	    if [ "$DRYRUN" = "yes" ]
+            then
+		echo echo /usr/local/lib/python3.7/site-packages \> \\
+		echo "  " /usr/pkg/lib/python3.7/site-packages/ntpsec.pth
+	    else
+		echo /usr/local/lib/python3.7/site-packages > \
+			/usr/pkg/lib/python3.7/site-packages/ntpsec.pth
+	    fi
 	    ;;
 	yum|dnf)
 	    $do $installer groupinstall "Development Tools" 	# Build environment
@@ -229,6 +262,9 @@ doc () {
 	 yum|dnf)
 		echo "# Please check that your asciidoc is at least 8.6.0"
 		echo "# You may need to enable EPEL repositories"
+		$install asciidoc
+		;;
+	 pkgin)
 		$install asciidoc
 		;;
 	 yast|zypper)
