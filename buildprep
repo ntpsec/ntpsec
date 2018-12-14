@@ -10,6 +10,8 @@ DRYRUN="no"
 NTPVIZ="no"
 DOC="no"
 
+OS=`uname -s`
+
 # Loop through option flags
 for optflag in "$@"
 do
@@ -50,7 +52,8 @@ done
 cat <<EOF
 # Preparing your system for ntpsec source build...
 # This script presently knows about:
-#   CentOS, Debian, Fedora, Gentoo, NetBSD, SLES, Ubuntu, and Alpine Linux
+#   CentOS, Debian, Fedora, Gentoo, NetBSD, FreeBSD,
+$   SLES, Ubuntu, and Alpine Linux
 # If you are running something else, such as macOS or Solaris, please
 # read the source for this buildprep script to get an idea of what packages
 # are required.
@@ -60,7 +63,8 @@ EOF
 if [ "$DRYRUN" = "yes" ]
 then
 	do=echo
-	echo "# Run this without -n|--dry-run, as root, for actual installation.\n#"
+	echo "# Run this without -n|--dry-run, as root, for actual installation."
+	echo "#"
 else
 	do=""
 	if [ "$(id -u)" != 0 ]
@@ -101,13 +105,14 @@ then
     # Alpine Linux, musl rather than glibc
     installer=apk
     install="$do $installer add"
-elif pkgin -v
+elif test "$OS" = "NetBSD"
 then
+  if pkgin -v
+  then
     # NetBSD binary package installer
     installer=pkgin
     install="$do $installer install"
-elif pkg_add -V
-then
+  else
     echo "## Looks like a NetBSD system"
     echo "## You need to setup pkgin"
     echo "## The last page of install disk has a check-box to do it"
@@ -116,6 +121,15 @@ then
     echo "## pkg_add ftp://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/earmv7hf/8.0/All/pkgin-0.9.4nb8.tgz"
     echo "## Adjust the version an arch to match your setup."
     exit 1
+  fi
+elif test "$OS" = "FreeBSD"
+then
+  if pkg -v
+  then
+    # FreeBSD binary package installer
+    installer=pkg
+    install="$do $installer install"
+  fi
 else
     echo "# ERROR: Package manager unidentified - Unsupported operating system"
     exit 1
@@ -174,6 +188,11 @@ daemon () {
 		echo /usr/local/lib/python3.7/site-packages > \
 			/usr/pkg/lib/python3.7/site-packages/ntpsec.pth
 	    fi
+	    ;;
+	pkg)
+	    # FreeBSD
+	    $install bison python3
+	    $do ln -s /usr/local/bin/python3 /usr/local/bin/python
 	    ;;
 	yum|dnf)
 	    $do $installer groupinstall "Development Tools" 	# Build environment
@@ -265,6 +284,9 @@ doc () {
 		$install asciidoc
 		;;
 	 pkgin)
+		$install asciidoc
+		;;
+	 pkg)
 		$install asciidoc
 		;;
 	 yast|zypper)
