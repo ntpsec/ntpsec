@@ -277,6 +277,24 @@ freebsd-11-refclocks:
   only:
     - branches@NTPsec/ntpsec
 
+freebsd-12-basic:
+  <<: *job_definition
+  script:
+    - python ./waf configure build
+  tags:
+    - freebsd-12
+  only:
+    - branches@NTPsec/ntpsec
+
+freebsd-12-refclocks:
+  <<: *job_definition
+  script:
+    - python ./waf configure --refclock=all build
+  tags:
+    - freebsd-12
+  only:
+    - branches@NTPsec/ntpsec
+
 centos-latest-basic:
   <<: *job_definition
   image: centos:latest
