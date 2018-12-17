@@ -171,7 +171,7 @@ class GpsPoller(threading.Thread):
         if isinstance(t, int):
             return t
         if isinstance(t, float):
-            if gps.isnan(t):
+            if not gps.isfinite(t):
                 return None
             return t
         return gps.isotime(t)
