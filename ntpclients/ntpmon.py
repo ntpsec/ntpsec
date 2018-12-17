@@ -71,8 +71,8 @@ stdscr = None
 
 
 def iso8601(t):
-    "ISO8601 string from Unix time, including fractional second."
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time.time()))
+    "ISO8601 string from Unix time."
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t))
 
 
 def statline(_peerlist, _mrulist, nyquist):
@@ -82,7 +82,7 @@ def statline(_peerlist, _mrulist, nyquist):
     leader = re.sub(r" \([^\)]*\)", "", leader)
     if span.entries:
         trailer = "Updated: %s (%s)" \
-                  % (iso8601(span.entries[0].last).split("T")[1],
+                  % (iso8601(int(ntp.ntpc.lfptofloat(span.entries[0].last))),
                      ntp.util.PeerSummary.prettyinterval(nyquist))
     else:
         trailer = ""
