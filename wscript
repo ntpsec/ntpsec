@@ -601,21 +601,22 @@ int main(int argc, char **argv) {
         msg="Checking for OpenSSL (via pkg-config)",
         define_name='', mandatory=False,
     ):
-        # Very old versions of OpenSSL don't have cmac support.
-        # This gives a sane(er) error message.
-        # It would be possible to make CMAC support optional by adding
-        # appropriate #ifdefs to the code.
-        openssl_headers = (
-            "openssl/evp.h",
-            "openssl/cmac.h",
-            "openssl/objects.h",
-            "openssl/rand.h",
-        )
-        for hdr in openssl_headers:
-            ctx.check_cc(header_name=hdr, includes=ctx.env.PLATFORM_INCLUDES)
-        # FIXME! Ignoring the result...
         ctx.check_cc(msg="Checking for OpenSSL's crypto library",
-                     lib="crypto")
+                     lib="crypto", mandatory=True)
+    # Very old versions of OpenSSL don't have cmac support.
+    # This gives a sane(er) error message.
+    # It would be possible to make CMAC support optional by adding
+    # appropriate #ifdefs to the code.
+    openssl_headers = (
+        "openssl/evp.h",
+        "openssl/cmac.h",
+        "openssl/objects.h",
+        "openssl/md5.h",
+        "openssl/rand.h",
+    )
+    for hdr in openssl_headers:
+        ctx.check_cc(header_name=hdr, mandatory=True,
+            includes=ctx.env.PLATFORM_INCLUDES)
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
