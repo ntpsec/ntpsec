@@ -369,6 +369,16 @@ fedora-rawhide-refclocks:
   tags:
     - gitlab-org
 
+fedora-rawhide-refclocks-gpsd:
+  <<: *job_definition
+  image: registry.fedoraproject.org/fedora:rawhide
+  allow_failure: true
+  script:
+    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python3-gpsd
+    - python3 ./waf configure --refclock=all build
+  tags:
+    - gitlab-org
+
 python3:
   <<: *job_definition
   image: python:3

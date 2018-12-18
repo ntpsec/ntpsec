@@ -990,7 +990,6 @@ def afterparty(ctx):
 
 
 python_scripts = [
-    "ntpclients/ntploggps.py",
     "ntpclients/ntpdig.py",
     "ntpclients/ntpkeygen.py",
     "ntpclients/ntpq.py",
@@ -1040,6 +1039,8 @@ def build(ctx):
 
     if ctx.env['PYTHON_CURSES']:
         python_scripts.append("ntpclients/ntpmon.py")
+    if ctx.env['PYTHON_GPS']:
+        python_scripts.append("ntpclients/ntploggps.py")
 
     # Make sure the python scripts compile, but don't install them
     ctx(
@@ -1062,7 +1063,8 @@ def build(ctx):
     if ctx.cmd == 'clean':
         afterparty(ctx)
 
-    ctx.manpage(1, "ntpclients/ntploggps-man.txt")
+    if ctx.env['PYTHON_GPS']:
+        ctx.manpage(1, "ntpclients/ntploggps-man.txt")
     ctx.manpage(1, "ntpclients/ntpdig-man.txt")
     if ctx.env['PYTHON_CURSES']:
         ctx.manpage(1, "ntpclients/ntpmon-man.txt")

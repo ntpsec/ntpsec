@@ -16,6 +16,12 @@ def configure(conf):
     except conf.errors.ConfigurationError:
         pprint("YELLOW", "WARNING: ntpmon will not be built/installed since "
                "python curses module was not found")
+    try:
+        conf.check_python_module('gps', condition="ver >= num(3, 18)")
+        conf.env['PYTHON_GPS'] = True
+    except conf.errors.ConfigurationError:
+        pprint("YELLOW", "WARNING: ntploggps will not be built/installed since "
+               "python gps module >= 3.18 was not found")
 
 
 def build(ctx):
