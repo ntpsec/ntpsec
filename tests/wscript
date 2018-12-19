@@ -121,13 +121,15 @@ def build(ctx):
     testpylib.get_bld().mkdir()
 
     pypath = pylib.get_bld()
-    linkpath = ctx.bldnode.make_node("tests/pylib/ntp")
-    if (not linkpath.exists()) or os.readlink(linkpath.abspath()):
+    targdir = "tests/pylib"
+    linkpath = ctx.bldnode.make_node(targdir + "/ntp").abspath()
+    relpath = ("../" * (targdir.count("/")+1)) + pypath.path_from(ctx.bldnode)
+    if (not os.path.exists(linkpath)) or os.readlink(linkpath) != relpath:
         try:
-            os.remove(linkpath.abspath())
+            os.remove(linkpath)
         except OSError:
             pass
-        os.symlink(pypath.abspath(), linkpath.abspath())
+        os.symlink(relpath, linkpath)
 
     pytests = ["pylib/test_util.py",
                "pylib/test_agentx.py",
