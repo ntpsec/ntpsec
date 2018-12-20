@@ -633,7 +633,7 @@ int main(int argc, char **argv) {
         ('sched_setscheduler', ["sched.h"]),
         ('strlcpy', ["string.h"]),
         ('strlcat', ["string.h"]),
-        ('timer_create', ["time.h"])
+        ('timer_create', ["signal.h", "time.h"])
     )
     for ft in functions:
         if len(ft) == 2:
