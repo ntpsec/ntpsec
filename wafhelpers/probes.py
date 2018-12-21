@@ -4,7 +4,7 @@ up the logic in the main configure.py.
 """
 
 
-def probe_header_with_prerequisites(ctx, header, prerequisites, use=None):
+def probe_header(ctx, header, prerequisites, mandatory=False, use=None):
     "Check that a header (with its prerequisites) compiles."
     src = ""
     for hdr in prerequisites + [header]:
@@ -17,14 +17,14 @@ def probe_header_with_prerequisites(ctx, header, prerequisites, use=None):
         define_name=have_name,
         fragment=src,
         includes=ctx.env.PLATFORM_INCLUDES,
-        mandatory=False,
+        mandatory=mandatory,
         msg="Checking for header %s" % header,
         use=use or [],
     )
     return ctx.get_define(have_name)
 
 
-def probe_function_with_prerequisites(ctx, function, prerequisites, use=None):
+def probe_function(ctx, function, prerequisites, mandatory=False, use=None):
     "Check that a function (with its prerequisites) compiles."
     src = ""
     for hdr in prerequisites:
@@ -40,7 +40,7 @@ def probe_function_with_prerequisites(ctx, function, prerequisites, use=None):
         define_name=have_name,
         fragment=src,
         includes=ctx.env.PLATFORM_INCLUDES,
-        mandatory=False,
+        mandatory=mandatory,
         msg="Checking for function %s" % function,
         use=use or [],
     )

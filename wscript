@@ -22,8 +22,7 @@ from waflib.Tools import waf_unit_test
 sys.dont_write_bytecode = True
 
 from wafhelpers.options import options_cmd
-from wafhelpers.probes \
-    import probe_header_with_prerequisites, probe_function_with_prerequisites
+from wafhelpers.probes import probe_header, probe_function
 from wafhelpers.test import test_write_log, test_print_log
 
 
@@ -603,57 +602,49 @@ int main(int argc, char **argv) {
     ):
         ctx.check_cc(msg="Checking for OpenSSL's crypto library",
                      lib="crypto", mandatory=True)
-    # Very old versions of OpenSSL don't have cmac support.
-    # This gives a sane(er) error message.
-    # It would be possible to make CMAC support optional by adding
-    # appropriate #ifdefs to the code.
-    openssl_headers = (
-        "openssl/evp.h",
-        "openssl/cmac.h",
-        "openssl/objects.h",
-        "openssl/md5.h",
-        "openssl/rand.h",
-    )
-    for hdr in openssl_headers:
-        ctx.check_cc(header_name=hdr, mandatory=True,
-            includes=ctx.env.PLATFORM_INCLUDES)
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
-    functions = (
+    optional_functions = (
         ('_Unwind_Backtrace', ["unwind.h"]),
         ('adjtimex', ["sys/time.h", "sys/timex.h"]),
         ('backtrace_symbols_fd', ["execinfo.h"]),
         ('closefrom', ["stdlib.h"]),
-        ('clock_gettime', ["time.h"], "RT"),
-        ('clock_settime', ["time.h"], "RT"),
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),
         ('sched_setscheduler', ["sched.h"]),
         ('strlcpy', ["string.h"]),
-        ('strlcat', ["string.h"]),
-        ('timer_create', ["signal.h", "time.h"])
+        ('strlcat', ["string.h"]) 
     )
-    for ft in functions:
-        if len(ft) == 2:
-            probe_function_with_prerequisites(ctx, function=ft[0],
-                                              prerequisites=ft[1])
-        else:
-            probe_function_with_prerequisites(ctx, function=ft[0],
-                                              prerequisites=ft[1],
-                                              use=ft[2])
+    for ft in optional_functions:
+            probe_function(ctx, function=ft[0], prerequisites=ft[1])
+
+    # This area is still work in progress
+    # Need to disable making symbols
+    #   but not until killing off HAVE_TIMER_CREATE
+
+    # Sanity checks to give a sensible error message
+    required_functions = (
+        ('timer_create', ["signal.h", "time.h"], "RT"),
+        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO") )
+    for ft in required_functions:
+            probe_function(ctx, function=ft[0],
+                prerequisites=ft[1], use=ft[2],
+                mandatory=True)
+
+
 
     # check for BSD versions outside of libc
     if not ctx.get_define("HAVE_STRLCAT"):
-        ret = probe_function_with_prerequisites(ctx, function='strlcat',
-                                                prerequisites=['bsd/string.h'])
+        ret = probe_function(ctx, function='strlcat',
+                    prerequisites=['bsd/string.h'])
         if ret:
             ctx.define("HAVE_STRLCAT", 1, comment="Using bsd/strlcat")
 
     if not ctx.get_define("HAVE_STRLCPY"):
-        ret = probe_function_with_prerequisites(ctx, function='strlcpy',
-                                                prerequisites=['bsd/string.h'])
+        ret = probe_function(ctx, function='strlcpy',
+                    prerequisites=['bsd/string.h'])
         if ret:
             ctx.define("HAVE_STRLCPY", 1, comment="Using bsd/strlcpy")
 
@@ -684,7 +675,6 @@ int main(int argc, char **argv) {
         ("net/route.h", ["sys/types.h", "sys/socket.h", "net/if.h"]),
         "netinfo/ni.h",     # Apple
         "priv.h",           # Solaris
-        "semaphore.h",
         "stdatomic.h",
         "sys/clockctl.h",   # NetBSD
         "sys/ioctl.h",
@@ -702,7 +692,7 @@ int main(int argc, char **argv) {
                 continue
         else:
             (hdr, prereqs) = hdr
-            if probe_header_with_prerequisites(ctx, hdr, prereqs):
+            if probe_header(ctx, hdr, prereqs):
                 continue
         if os.path.exists("/usr/include/" + hdr):
             # Sanity check...
