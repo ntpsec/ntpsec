@@ -2257,7 +2257,11 @@ io_handler(void)
 	 * time.  select() will terminate on SIGALARM or on the
 	 * reception of input.
 	 */
+#ifdef ENABLE_DNS_LOOKUP
 	pthread_sigmask(SIG_BLOCK, &blockMask, &runMask);
+#else
+	sigprocmask(SIG_BLOCK, &blockMask, &runMask);
+#endif
 	flag = sig_flags.sawALRM || sig_flags.sawQuit || sig_flags.sawHUP || \
 	  sig_flags.sawDNS;
 	if (!flag) {
@@ -2267,7 +2271,11 @@ io_handler(void)
 	  nfound = -1;
 	  errno = EINTR;
 	}
+#ifdef ENABLE_DNS_LOOKUP
 	pthread_sigmask(SIG_SETMASK, &runMask, NULL);
+#else
+	sigprocmask(SIG_SETMASK, &runMask, NULL);
+#endif  
 
 	if (nfound > 0) {
 		input_handler(&rdfdes);
