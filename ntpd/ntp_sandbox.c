@@ -321,7 +321,6 @@ int scmp_sc[] = {
 #ifdef __NR_getrandom
 	SCMP_SYS(getrandom),	/* Added in 3.17 kernel */
 #endif
-	SCMP_SYS(getitimer),
 #ifdef __NR_ugetrlimit
 	SCMP_SYS(ugetrlimit),	/* sysconf */
 #endif
@@ -360,7 +359,6 @@ int scmp_sc[] = {
 	SCMP_SYS(select),	/* not in ARM */
 #endif
 	SCMP_SYS(sendto),
-	SCMP_SYS(setitimer),
 	SCMP_SYS(setsid),
 #ifdef __NR_setsockopt
 	SCMP_SYS(setsockopt),	/* not in old kernels */
@@ -371,6 +369,14 @@ int scmp_sc[] = {
 	SCMP_SYS(statfs64),	/* from getaddrinfo after lid open */
 #ifdef __NR_time
 	SCMP_SYS(time),		/* not in ARM */
+#endif
+#ifdef HAVE_TIMER_CREATE
+	SCMP_SYS(timer_create),
+	SCMP_SYS(timer_gettime),
+	SCMP_SYS(timer_settime),
+#else
+	SCMP_SYS(getitimer),
+	SCMP_SYS(setitimer),
 #endif
 	SCMP_SYS(write),
         SCMP_SYS(unlink),
