@@ -1046,6 +1046,8 @@ oncore_init_shmem(
 	instance->shmem = (uint8_t *) mmap(0, shmem_length,
 		PROT_READ | PROT_WRITE,
 #ifdef MAP_HASSEMAPHORE
+		/* In API and man pages for FreeBSD and NetBSD
+		   But unused in kernel.  HGM, 2018-Dec.  */
 		MAP_HASSEMAPHORE |
 #endif
 		MAP_SHARED, instance->shmemfd, (off_t)0);
