@@ -239,6 +239,10 @@ tools () {
 ntpviz () {
     # Prerequisites to use ntpviz: gnuplot and liberation fonts
     case $installer in
+	apk)
+	    $install gnuplot || echo "# You need to enable the community repository"
+	    $install ttf-liberation
+	    ;;
 	apt)
 	    distro=`lsb_release -i -s`
 	    if [ "$distro" = "Ubuntu" ]
@@ -272,6 +276,9 @@ ntpviz () {
 doc () {
 	# prerequisites to build documentation
 	case $installer in
+	 apk)
+		$install asciidoc
+		;;
 	 apt)
 		$install asciidoc
 		;;
