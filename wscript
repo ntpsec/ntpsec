@@ -626,12 +626,16 @@ int main(int argc, char **argv) {
 
     # Sanity checks to give a sensible error message
     required_functions = (
-        ('timer_create', ["signal.h", "time.h"], "RT"),
-        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO") )
+        # MacOS doesn't have timer_create ??
+        ('timer_create', ["signal.h", "time.h"], "RT", False),
+        # Very old versions of OpenSSL don't have cmac.h
+        #  We could add ifdefs, but old crypto is deprecated in favor of CMAC
+        #  and so far, all the systems that we want to support are new enough.
+        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True) )
     for ft in required_functions:
             probe_function(ctx, function=ft[0],
                 prerequisites=ft[1], use=ft[2],
-                mandatory=True)
+                mandatory=ft[3])
 
 
 
