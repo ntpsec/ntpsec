@@ -1,6 +1,9 @@
 /*
  * Our methods, one per linked module
  */
+#ifndef GUARD_NTPFROB_H
+#define GUARD_NTPFROB_H
+
 #include <stdbool.h>      /* for bool */
 #include <stdint.h>       /* for int64_t */
 #include "ntp_fp.h"       /* for l_fp */
@@ -17,3 +20,4 @@ extern void stepback(void);
 extern void tickadj(const bool mode, const int tick);
 
 /*end */
+#endif	/* GUARD_NTPFROB_H */

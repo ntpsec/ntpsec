@@ -7,6 +7,8 @@
  *
  * Each half is further divided into sections for each source file.
  */
+#ifndef GUARD_NTPD_H
+#define GUARD_NTPD_H
 
 #include "ntp.h"
 #include "ntp_stdlib.h"
@@ -417,3 +419,4 @@ extern struct refclock * const refclock_conf[];
 extern const uint8_t	num_refclock_conf;
 #endif
 
+#endif	/* GUARD_NTPD_H */

@@ -6,6 +6,8 @@
  *
  * SPDX-License-Identifier: BSD-2-clause
  */
+#ifndef GUARD_NTP_FILEGEN_H
+#define GUARD_NTP_FILEGEN_H
 
 #include "ntp_types.h"
 
@@ -50,3 +52,5 @@ extern	void	filegen_register (const char *, const char *, FILEGEN *);
 #ifdef DEBUG
 extern	void	filegen_unregister(const char *);
 #endif
+
+#endif	/* GUARD_NTP_FILEGEN_H */
