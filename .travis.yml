@@ -1,0 +1,17 @@
+os:
+  - osx
+
+addons:
+  homebrew:
+    packages:
+      - openssl
+
+matrix:
+  include:
+    - name: "macOS without refclocks"
+      env: REFCLOCK=""
+    - name: "macOS with refclocks"
+      env: REFCLOCK="--refclock=all"
+
+script:
+  - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig ./waf configure $REFCLOCK build check
