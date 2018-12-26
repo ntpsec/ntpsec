@@ -303,6 +303,7 @@ int scmp_sc[] = {
 #endif
 #endif  /* ENABLE_EARLY_DROPROOT */
 
+        SCMP_SYS(access),
 	SCMP_SYS(adjtimex),
 	SCMP_SYS(bind),
 	SCMP_SYS(brk),
@@ -387,7 +388,6 @@ int scmp_sc[] = {
  * rather than generate a trap.
  */
 	SCMP_SYS(clone),	/* threads */
-	SCMP_SYS(futex),	/* sem_xxx, used by threads */
 	SCMP_SYS(kill),		/* generate signal */
 	SCMP_SYS(madvise),
 	SCMP_SYS(mprotect),
@@ -397,8 +397,11 @@ int scmp_sc[] = {
 	SCMP_SYS(statfs),
 	SCMP_SYS(uname),
 #endif
+/* This shouldn't be needed if we don't use DNS, but
+ * several libraries call pthread_once, just in case.
+ */
+	SCMP_SYS(futex),	/* sem_xxx, used by threads */
 
-        SCMP_SYS(access),
 
 #ifdef REFCLOCK
 	SCMP_SYS(nanosleep),
