@@ -56,10 +56,12 @@ Chew(struct timespec *tsa, struct timespec *tsc, unsigned sa, unsigned sc)
 	fflush(stdout);
 }
 
-static int err(int out, const char *legend)
+void err(const char *legend)
 {
-    fprintf(stderr, "ntpfrob: %s\n", legend);
-    exit(out);
+    fflush(stdout);
+    fprintf(stderr, "ntpfrob: %s: %s\n", legend, strerror(errno));
+    fflush(stderr);
+    exit(1);
 }
 #endif /* HAVE_SYS_TIMEPPS_H */
 
@@ -83,14 +85,14 @@ void ppscheck(const char *device)
 	setbuf(stdout, 0);
 	fd = open(device, O_RDONLY);
 	if (fd < 0)
-		err(1, device);
+		err("Trying to open() PPS device");
 	i = time_pps_create(fd, &ph);
 	if (i < 0)
-		err(1, "time_pps_create");
+		err("return handle to time_pps_create() device");
 
 	i = time_pps_getcap(ph, &mode);
 	if (i < 0)
-		err(1, "time_pps_getcap");
+		err("return time_pps_getcap() implementation capabilities");
 
         memset(&pp, 0, sizeof(pp));
 	/* pp.mode = PPS_CAPTUREASSERT | PPS_ECHOASSERT; */
@@ -106,14 +108,14 @@ void ppscheck(const char *device)
 
 	i = time_pps_setparams(ph, &pp);
 	if (i < 0)
-		err(1, "time_pps_setparams");
+		err("return time_pps_setparams() parameters to interface");
 
 	while (1) {
 		to.tv_nsec = 0;
 		to.tv_sec = 0;
 		i = time_pps_fetch(ph, PPS_TSFMT_TSPEC, &pi, &to);
 		if (i < 0)
-			err(1, "time_pps_fetch");
+			err("return timestamp associated with time_pps_fetch() instance");
 		if (olda == pi.assert_sequence &&
 		    oldc == pi.clear_sequence) {
 			/* used to be usleep(10000) - 0.1 sec */

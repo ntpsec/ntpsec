@@ -18,6 +18,7 @@ extern void ppscheck(const char *device) __attribute__((noreturn));
 extern void precision(const iomode mode);
 extern void stepback(void);
 extern void tickadj(const bool mode, const int tick);
+extern void err(const char *legend) __attribute__((noreturn));
 
 /*end */
 #endif	/* GUARD_NTPFROB_H */
