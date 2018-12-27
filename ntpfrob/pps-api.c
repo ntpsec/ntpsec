@@ -76,7 +76,7 @@ void ppscheck(const char *device)
 	pps_info_t pi;
 	pps_params_t pp;
 	pps_handle_t ph = 0;    /* 0 to prevent spurious uninialized warning */
-	int i, mode;
+	int mode;
 	unsigned int olda = 0, oldc = 0;
 	struct timespec to;
 
@@ -86,12 +86,10 @@ void ppscheck(const char *device)
 	fd = open(device, O_RDONLY);
 	if (fd < 0)
 		err("Trying to open() PPS device");
-	i = time_pps_create(fd, &ph);
-	if (i < 0)
+	if (time_pps_create(fd, &ph) < 0)
 		err("return handle to time_pps_create() device");
 
-	i = time_pps_getcap(ph, &mode);
-	if (i < 0)
+	if (time_pps_getcap(ph, &mode) < 0)
 		err("return time_pps_getcap() implementation capabilities");
 
         memset(&pp, 0, sizeof(pp));
@@ -106,15 +104,13 @@ void ppscheck(const char *device)
         pp.api_version = 1;
 #endif
 
-	i = time_pps_setparams(ph, &pp);
-	if (i < 0)
+	if (time_pps_setparams(ph, &pp) < 0)
 		err("return time_pps_setparams() parameters to interface");
 
 	while (1) {
 		to.tv_nsec = 0;
 		to.tv_sec = 0;
-		i = time_pps_fetch(ph, PPS_TSFMT_TSPEC, &pi, &to);
-		if (i < 0)
+		if (time_pps_fetch(ph, PPS_TSFMT_TSPEC, &pi, &to) < 0)
 			err("return timestamp associated with time_pps_fetch() instance");
 		if (olda == pi.assert_sequence &&
 		    oldc == pi.clear_sequence) {
