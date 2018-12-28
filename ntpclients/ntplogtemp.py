@@ -180,7 +180,7 @@ class Temper:
                 now = int(time.time())
                 data.append('%d %s %s' % (now, _device, temp))
                 break
-            except:
+            except ValueError:
                 # bad data, ignore it, for a bit
                 if args.verbose:
                     sys.stderr.write("TEMPer-poll failed\n")

@@ -606,7 +606,7 @@ usage: hostnames [yes|no]
                 logfp = open(line, "a", 1)  # 1 => line buffered
                 self.logfp = self.session.logfp = logfp
                 print("Logfile set to", line)
-            except:
+            except IOError:
                 print("Could not open", line, "for logging.")
 
     def help_debug(self):

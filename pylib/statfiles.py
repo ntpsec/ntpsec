@@ -40,7 +40,7 @@ class NTPStats:
                 split = line.split()
                 mjd = int(split[0])
                 second = float(split[1])
-            except:
+            except ValueError:
                 # unparseable, skip this line
                 continue
 
@@ -179,7 +179,7 @@ class NTPStats:
 
                 try:
                     time_float = float(split[0])
-                except:
+                except ValueError:
                     # ignore comment lines, lines with no time
                     continue
 
