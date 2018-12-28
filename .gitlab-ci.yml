@@ -400,16 +400,20 @@ python-coverage:
 
 clang-basic:
   <<: *job_definition
+  image: debian:testing-slim
   script:
-    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev clang
+    - apt-get update
+    - apt-get install -y netbase bison libssl-dev libcap-dev pps-tools python-dev clang
     - python ./waf configure --check-c-compiler=clang build
   tags:
     - gitlab-org
 
 clang-refclocks:
   <<: *job_definition
+  image: debian:testing-slim
   script:
-    - apt-get update -qq && apt-get install -y -qq netbase bison libcap-dev pps-tools python-dev clang
+    - apt-get update
+    - apt-get install -y netbase bison libssl-dev libcap-dev pps-tools python-dev clang
     - python ./waf configure --check-c-compiler=clang --refclock=all build
   tags:
     - gitlab-org
