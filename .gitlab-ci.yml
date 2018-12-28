@@ -567,3 +567,21 @@ coverity-scan:
     - ubuntu-1604-lts
   only:
     - schedules
+
+macos-basic:
+  <<: *job_definition
+  script:
+    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure build
+  tags:
+    - macos
+  only:
+    - branches@NTPsec/ntpsec
+
+macos-refclocks:
+  <<: *job_definition
+  script:
+    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --refclock=all build
+  tags:
+    - macos
+  only:
+    - branches@NTPsec/ntpsec
