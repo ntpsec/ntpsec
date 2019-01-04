@@ -898,7 +898,7 @@ class DataSource(ntp.agentx.MIBControl):
 
     def misc_getMode(self):  # FIXME: not fully implemented
         try:
-            # Don't care about the data, this is a ploy to the the rstatus
+            # Don't care about the data, this is a ploy to get the rstatus
             self.session.readvar(0, ["stratum"])
         except ntp.packet.ControlException as e:
             if e.message == ntp.packet.SERR_SOCKET:
