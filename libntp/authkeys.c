@@ -262,7 +262,7 @@ auth_resize_hashtable(void)
 /*
  * alloc_auth_info - allocate and link in an auth_info slot.
  * secret must be allocated with a free-compatible allocator.
- * It is owned by the the new auth_info and will be free()d by
+ * It is owned by the new auth_info and will be free()d by
  * free_auth_info().
  */
 static void
