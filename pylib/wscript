@@ -33,9 +33,18 @@ def build(ctx):
     sources = srcnode.ant_glob('*.py')
     builds = [x.get_bld() for x in sources]
 
-    # Remove generated files to ensure they are properly updated
-    ctx.exec_command("rm -f %s" % target1.abspath())
-    ctx.exec_command("rm -f %s" % target2.abspath())
+    # The rm's here were added to fix a reported (but underdocumented) problem
+    # where the results of pythonize-header were not updated when needed,
+    # though there is as yet no explanation for why this had occurred, and the
+    # alleged failure only occurred when changing the code between 'configure'
+    # and 'build', which is not a legal action, anyway.
+    # These rm's were causing unnecessary reruns of pythonize-header,
+    # including during 'install'. They are now disabled but retained as a
+    # comment.
+
+    ## Remove generated files to ensure they are properly updated
+    #ctx.exec_command("rm -f %s" % target1.abspath())
+    #ctx.exec_command("rm -f %s" % target2.abspath())
 
     # Make sure Python sees .py as well as .pyc/.pyo
     ctx(
