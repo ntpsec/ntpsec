@@ -80,6 +80,6 @@ def check_sizeof_cross(ctx, header, sizeof, mandatory=True):
 @conf
 def check_sizeof(*kwargs):
     if kwargs[0].env.ENABLE_CROSS:
-        return check_sizeof_cross(*kwargs)
+        check_sizeof_cross(*kwargs)
     else:
-        return check_sizeof_host(*kwargs)
+        check_sizeof_host(*kwargs)
