@@ -29,17 +29,21 @@ Hal wrote:
 
 4 boxes.  My ASCII art is weak.  C for client, S for server.
 
-   NTS-C----NTS-S
-      |                  |
-   NTP-C----NTP-S
+   Bravo                       Delta
+   NTS client ---------------- NTS server
+      |                         |
+   Alpha                       Charlie
+   NTP client ---------------- NTP server
 
-NTS-C-NTS-S is our stuff in TLS over TCP.  Everything we need to know is in
-the draft.  It's pretty simple.
+NTS-C-NTS-S (Bravo to Delta and back) is our stuff in TLS over TCP.
+Everything we need to know is in the draft.  It's pretty simple.
 
-NTP-C to NTS-C is pretty simple.  NTP sends host name, or something like that.
- It gets back an IP Address (maybe more than 1) and a bunch of cookies.
+NTP-C to NTS-C (Bravo to Alpha) is pretty simple.  NTP sends host
+name, or something like that.  It gets back an IP Address (maybe more
+than 1) and a bunch of cookies.
 
-NTP-S to NTS-S Is only an occasional ?????.  I don't have the right word
-handy.  It's whatever is needed to verify the cookie from the NTP-C.
+NTP-S to NTS-S (Charlie to Delta) Is only an occasional ?????.  I
+don't have the right word handy.  It's whatever is needed to verify
+the cookie from Alpha.
 
-NTP-C to NTP-S is in the draft.
+NTP-C to NTP-S (Alpha to Charlie) is in the draft.
