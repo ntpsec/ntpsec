@@ -1,9 +1,22 @@
 = NTS support specification =
 
-The relevant RFC draft is
+== Cisco's Statement of Work requirements ==
 
-https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp
+The NTS implementation shall:
 
+* Use OpenSSL 1.1.1 for its crypto functions.
+
+* Address RFC5705 Keying Material Exporting and AES_SIV (RFC5297) code
+  support which may not be natively supported in OpenSSL.
+
+* Comply with the standardized specification of NTS
+  https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp
+
+* Be interoperable with the other reference implementations in IETF hackathons.
+
+== System Partitioning ==
+
+Hal wrote:
 > My understanding is that there are to be four agents: the client ntpd, a NTS
 > symbiont communicating locally with the client ntpd, the server ntpd, and a
 > symbiont communicating locally with the server ntpd.
