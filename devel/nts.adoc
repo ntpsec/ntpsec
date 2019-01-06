@@ -1,0 +1,32 @@
+= NTS support specification =
+
+The relevant RFC draft is
+
+https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp
+
+> My understanding is that there are to be four agents: the client ntpd, a NTS
+> symbiont communicating locally with the client ntpd, the server ntpd, and a
+> symbiont communicating locally with the server ntpd.
+
+> When a client wants to establish a secure link with a server, what are the
+> first (say) three transactions among these agents?  Expand from there. I'll
+> know that I understand enough to write code when I start correctly
+> anticipating steps before you have described them.  This is unlikely to take
+> long.
+
+4 boxes.  My ASCII art is weak.  C for client, S for server.
+
+   NTS-C----NTS-S
+      |                  |
+   NTP-C----NTP-S
+
+NTS-C-NTS-S is our stuff in TLS over TCP.  Everything we need to know is in
+the draft.  It's pretty simple.
+
+NTP-C to NTS-C is pretty simple.  NTP sends host name, or something like that.
+ It gets back an IP Address (maybe more than 1) and a bunch of cookies.
+
+NTP-S to NTS-S Is only an occasional ?????.  I don't have the right word
+handy.  It's whatever is needed to verify the cookie from the NTP-C.
+
+NTP-C to NTP-S is in the draft.
