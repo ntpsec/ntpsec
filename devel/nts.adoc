@@ -43,7 +43,7 @@ name, or something like that.  It gets back an IP Address (maybe more
 than 1) and a bunch of cookies.
 
 NTP-S to NTS-S (Charlie to Delta) Is only an occasional ?????.  I
-don't have the right word handy.  It's whatever is needed to verify
-the cookie from Alpha.
+don't have the right word handy.  It's whatever key transfer or status
+messages are required.
 
 NTP-C to NTP-S (Alpha to Charlie) is in the draft.
