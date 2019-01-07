@@ -63,12 +63,6 @@ extern	unsigned long authcmacfail;	/* fails from cmac_decrypt*/
 extern	uptime_t auth_timereset;	/* current_time when stats reset */
 
 
-/* EVP_get_cipherbyname() is broken on
- * old CentOS, NetBSD, FreeBSD, and maybe others.
- */
-extern const EVP_CIPHER * MY_get_cipherbyname(const char * name);
-
-
 /* Not in CMAC API */
 #define CMAC_MAX_MAC_LENGTH 64
 
