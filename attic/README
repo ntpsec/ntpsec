@@ -1,7 +1,8 @@
 = README file for directory attic/ =
 
 This is a dusty attic containing code we have not quite decided to
-discard.  Programs in it are not installed by default. Not much
+discard and chunks of code that may be useful is exploring performance
+or corner cases.  Programs in it are not installed by default. Not much
 documentation, alas.  Read the header comments.
 
 calc_tickadj::	Calculates "optimal" value for tick given ntp.drift file
@@ -10,6 +11,10 @@ calc_tickadj::	Calculates "optimal" value for tick given ntp.drift file
 digest-find.c::	Hack to see if various digests are supported by OpenSSL
 
 digest-timing.c:: Hack to measure execution times for various digests
+		and key lengths
+
+clocks::	Hack to measure properties of system clocks.
+
 		and key lengths
 
 kern.c:: 	Header comment from deep in the mists of past time says:
