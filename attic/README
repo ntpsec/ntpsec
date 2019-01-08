@@ -15,8 +15,6 @@ digest-timing.c:: Hack to measure execution times for various digests
 
 clocks::	Hack to measure properties of system clocks.
 
-		and key lengths
-
 kern.c:: 	Header comment from deep in the mists of past time says:
 		"This program simulates a first-order, type-II
 		phase-lock loop using actual code segments from
