@@ -10,7 +10,7 @@
 
 # set pipefail to catch pipeline failures
 # Unfortunately, it doesn't work on some older sh-es
-if /bin/sh -c "set -o pipefail"
+if /bin/sh -c "set -o pipefail" 2> /dev/null
 then
   set -o pipefail
 fi
@@ -47,27 +47,6 @@ doit ()
   then
     echo                                  2>&1   | tee -a $DIR/test.log
     echo "Trouble with $DIR"              2>&1   | tee -a $DIR/test.log
-  else
-    echo -n "VERSION: "                   2>&1   | tee -a $DIR/test.log
-    ./$DIR/main/ntpd/ntpd --version       2>&1   | tee -a $DIR/test.log
-    echo -n "VERSION: "                   2>&1   | tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntpq --version 2>&1   | tee -a $DIR/test.log
-    echo -n "VERSION: "                   2>&1   | tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntpdig --version 2>&1 | tee -a $DIR/test.log
-    if [ `uname -s` != "NetBSD" ]
-    then
-      # no Python/curses on NetBSD
-      echo -n "VERSION: "                 2>&1   | tee -a $DIR/test.log
-      ./$DIR/main/ntpclients/ntpmon --version 2>&1 | tee -a $DIR/test.log
-    fi
-if [ "`which gpsmon 2>/dev/null`" != "" ]
-then
-    # needs GPSD library
-    echo -n "VERSION: "                         2>&1 | tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntploggps --version  2>&1 | tee -a $DIR/test.log
-fi
-    echo -n "VERSION: "                         2>&1 | tee -a $DIR/test.log
-    ./$DIR/main/ntpclients/ntplogtemp --version 2>&1 | tee -a $DIR/test.log
   fi
   echo
   echo
@@ -91,6 +70,26 @@ fi
 # should try cross compile
 
 echo
+
+grep warning:                    test*/test.log
+grep error:                      test*/test.log
+grep "The configuration failed"  test*/test.log
+grep ^Trouble                    test*/test.log
+echo
+
+echo -n "## ";  python --version
+if test -n "$PYTHONPATH"
+then
+  echo "## PYTHONPATH is" \"$PYTHONPATH\"
+fi
+
+if ! /bin/sh -c "set -o pipefail" 2> /dev/null
+then
+  echo "### Old sh - no pipefail"
+  echo "### We can't test for errors during build"
+  echo "### You will have to scan the log files."
+fi
+
 if [ `uname -s` = "Linux" -a ! -f /usr/include/seccomp.h ]
 then
     echo
@@ -98,18 +97,4 @@ then
     echo
 fi
 
-if ! /bin/sh -c "set -o pipefail"
-then
-  echo "### old sh - no pipefail"
-  echo "We can't test for errors"
-  echo "###          You will have to scan the log files."
-fi
 
-echo "PYTHONPATH is" \"$PYTHONPATH\"
-grep VERSION: test*/test.log
-echo
-grep warning:                    test*/test.log
-grep error:                      test*/test.log
-grep "The configuration failed"  test*/test.log
-grep ^Trouble                    test*/test.log
-echo
