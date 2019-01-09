@@ -72,7 +72,11 @@ def run(cmd, reg, pythonic):
         addLog("GREEN", prefix + "  OK")
         return True
     addLog("RED", prefix + "  FAILED")
-    addLog("PINK", prefix + " " + ntp.poly.polystr(stderr))
+    addLog("PINK", "Expected: " + breg)
+    if stdout:
+        addLog("PINK", "Got (stdout): " + ntp.poly.polystr(stdout))
+    if stderr:
+        addLog("PINK", "Got (stderr): " + ntp.poly.polystr(stderr))
     return False
 
 
@@ -92,8 +96,6 @@ def cmd_bin_test(ctx, config):
         if not run(cmd, cmd_map2[cmd], True):
             fails += 1
 
-    if 0 < fails:
-        addLog("GREY", "Expected:\t%s" % (verStr))
     if 1 == fails:
         bin_test_summary(ctx)
         ctx.fatal("1 binary test failed!")
