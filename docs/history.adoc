@@ -1,6 +1,6 @@
 == History of NTP ==
 
-// Esarly history was found at https://www.galsys.co.uk/about-NTP.html
+// Early history was found at https://www.galsys.co.uk/about-NTP.html
 
 The first NTP implementation started around 1980 with an accuracy of
 only several hundred milliseconds. That very first implementation was

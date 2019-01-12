@@ -167,6 +167,8 @@ bibliography and briefing slides suitable for presentations are on the
 Synchronization Research Project] page. Additional information is at
 the NTPsec web site {project-weblink}.
 
+You can also read a brief link:history.html[history of NTP].
+
 '''''
 
 image::pic/pogo1a.gif[align="center"]
