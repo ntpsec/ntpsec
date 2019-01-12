@@ -268,7 +268,7 @@ Whether or not the GPS driver disables the PPS signal when the timecode
 becomes unreliable is at the discretion of the driver. Ordinarily, the
 PPS signal is disabled in this case; however, when the GPS receiver has
 a precision holdover oscillator, the driver may elect to continue PPS
-discipline . In this case, +minsane+ can be set to zero so the PPS
+discipline. In this case, +minsane+ can be set to zero so the PPS
 signal continues to discipline the system clock.
 
 '''''
