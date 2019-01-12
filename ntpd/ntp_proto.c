@@ -1924,8 +1924,8 @@ clock_select(void)
 	 */
 	if (typepps != NULL && fabs(sys_offset) < 0.4 &&
 	    (!typepps->is_pps_driver ||
-	    (typepps->is_pps_driver && (sys_prefer !=
-	    NULL || (typesystem == NULL && sys_minsane == 0))))) {
+	     sys_prefer != NULL ||
+	     (typesystem == NULL && sys_minsane == 0))) {
 		typesystem = typepps;
 		sys_clockhop = 0;
 		typesystem->new_status = CTL_PST_SEL_PPS;
