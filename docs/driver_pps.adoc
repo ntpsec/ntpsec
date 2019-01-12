@@ -30,7 +30,7 @@ While this driver can discipline the time and frequency relative to the
 PPS source, it cannot number the seconds. For this purpose an auxiliary
 source is required; ordinarily a radio clock operated as a primary
 reference (stratum 1) source; however, another NTP time server can be
-used as well. For this purpose, the auxiliary source should be specified
+used as well. For this purpose, the auxiliary source must be specified
 as the prefer peer, as described in the link:prefer.html[Mitigation
 Rules and the +prefer+ Keyword] page.
 
@@ -71,10 +71,8 @@ enable the kernel PPS discipline if necessary.
 This driver is enabled only under one of two conditions (a) a prefer
 peer other than this driver is among the survivors of the mitigation
 algorithms or (b) there are no survivors and the +minsane+ option of the
-+tos+ command is 0. The prefer peer designates another source that can
-reliably number the seconds when available. However, if no sources are
-available, the system clock continues to be disciplined by the PPS
-driver on an indefinite basis.
++tos+ command is 0. In typical usage, the prefer peer designates another
+source that can reliably number the seconds when available.
 
 A scenario where the latter behavior can be most useful is a planetary
 orbiter fleet, for instance in the vicinity of Mars, where contact

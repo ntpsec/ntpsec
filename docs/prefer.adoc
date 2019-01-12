@@ -137,12 +137,14 @@ orphan parents as if synchronized to a server at the orphan stratum.
 Note that, as described on the link:orphan.html[Orphan Mode] page, all
 orphan children will select the same orphan parent for synchronization.
 3.  When a device driver has been configured for pulse-per-second (PPS)
-signals and PPS signals are being received, it is designated the _PPS
-driver._ Note that the Pulse-per-Second driver is often used
-as a PPS driver, but any driver can be configure as a PPS driver if the
-hardware facilities are available. The PPS driver provides precision
-clock discipline only within ±0.4 s, so it is always associated with
-another source or sources that provide the seconds numbering function.
+signals and PPS signals are being received, it is designated _a_ PPS
+driver. Note that _the_ link:driver_pps.html[driver named "pps"] is
+often used as a PPS driver, but any driver can be configured as a PPS
+driver if the hardware facilities are available and the driver supports
+PPS functionality. PPS provides precision clock discipline only within
+±0.4 s, so it is always associated with another source or sources (in
+the same driver or a separate driver) that provide the seconds numbering
+function.
 4.  When the Undisciplined Local Clock driver is configured, it
 is designated the _local driver_. It can be used either as a backup
 source (stratum greater than zero) should all sources fail, or as the
@@ -233,12 +235,13 @@ peer and its offset and jitter are inherited by the corresponding system
 variables. Otherwise, the combine algorithm computes these variables
 from the survivor population.
 3.  If there is a PPS driver and the system clock offset at this point
-is less than 0.4 s, and if there is a prefer peer among the survivors or
-if the PPS peer is designated as a prefer peer, the PPS driver becomes
-the system peer and its offset and jitter are inherited by the system
-variables, thus overriding any variables already computed. Note that a
-PPS driver is present only if PPS signals are actually being received
-and enabled by the associated driver.
+is less than 0.4 s, that PPS driver becomes the system peer and its
+offset and jitter are inherited by the system variables, thus overriding
+any values already computed. However, if the PPS driver is specifically
+the link:driver_pps.html[driver named "pps"], which must be used with
+another driver, then there must be a prefer peer among the survivors, as
+the +prefer+ keyword is used to identify the source associated with the
+PPS input. For an exception, see the +minsane+ option below.
 
 If none of the above is the case, the data are disregarded and the
 system variables remain as they are.
@@ -268,8 +271,11 @@ Whether or not the GPS driver disables the PPS signal when the timecode
 becomes unreliable is at the discretion of the driver. Ordinarily, the
 PPS signal is disabled in this case; however, when the GPS receiver has
 a precision holdover oscillator, the driver may elect to continue PPS
-discipline. In this case, +minsane+ can be set to zero so the PPS
-signal continues to discipline the system clock.
+discipline.
+
+To achieve the same result when using the link:driver_pps.html[separate
+"pps" driver], +minsane+ can be set to zero so the PPS signal disciplines
+the system clock in the absense of other sources.
 
 '''''
 
