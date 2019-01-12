@@ -47,3 +47,31 @@ don't have the right word handy.  It's whatever key transfer or status
 messages are required.
 
 NTP-C to NTP-S (Alpha to Charlie) is in the draft.
+
+== Key Generation and Usage ==
+
+NTS makes use of three keys:
+
+* Client to Server (c2s)
+
+* Server to Client (s2c)
+
+* NTS Master Key
+
+Because one of the goals of NTS is to not require any per-client state in
+the servers, the server (both NTPD and NTS-KE) does not posess either of the
+c2s/s2c pair. The servers do posess the NTS Master Key, which is expected to
+be updated somewhat regularly.
+
+The c2s/s2c pair is created during the TLS handshake between client and NTS-KE.
+As part of this NTS-KE will create a variable number of cookies (should be 8).
+These cookies are encrypted with the NTS master key, and are opaque to the
+client. The cookies contain the c2s/s2c pair in a form that NTPD will
+understand, and is how NTPD is able to en/decrypt data without needing to
+store per-client keys.
+
+When sending an NTS packet the client attaches a cookie-blob in cleartext,
+then encrypts the rest of the data using the c2s key. When the NTPD server
+recieves the packet it decrypts the cookie-blob using its Master Key, and
+extracts the c2s/s2c pair so it can decrypt the rest. The response packet
+is encrypted using the s2c key extracted from the cookie.
