@@ -1,0 +1,19 @@
+= ntpwait - wait until ntpd is in synchronized state =
+include::html.include[]
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+* link:#_bugs[BUGS]
+
+include::includes/ntpwait-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

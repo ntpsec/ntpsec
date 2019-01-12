@@ -1,0 +1,24 @@
+= ntpleapfetch(8) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntpleapfetch - leap-seconds file manager/updater
+
+include::../docs/includes/ntpleapfetch-body.adoc[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+2::
+  Internal error - restart command failed.
+
+== AUTHORS ==
+
+Timothe Litt
+
+// end

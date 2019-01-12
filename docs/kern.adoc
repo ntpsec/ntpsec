@@ -1,0 +1,73 @@
+= Kernel Model for Precision Timekeeping =
+include::html.include[]
+
+image:pic/alice61.gif[]
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+Alice finds the kernel a house of cards.
+
+== Related Links ==
+
+include::includes/misc.adoc[]
+
+'''''
+
+The technical report [2], which is a revision and update of an earlier
+report [3], describes an engineering model for a precision clock
+discipline function for a generic operating system. The model is the
+same hybrid phase/frequency-lock feedback loop used by +ntpd+, but
+implemented in the kernel. The code described in [2] is included in
+Solaris and Digital/Compaq/HP Tru64. It provides two system calls
++ntp_gettime()+ and +ntp_adjtime()+ and can discipline the system clock
+with microsecond resolution. However, newer hardware and kernels with
+the same system calls can discipline the clock with nanosecond
+resolution. The new code described in [1] is in FreeBSD, Linux and
+Tru64. The software and documentation, including a simulator used to
+verify correct behavior, but not involving licensed code, is available
+in the
+https://www.eecis.udel.edu/~ntp/ntp_spool/software/nanokernel.tar.gz[nanokernel.tar.gz]
+distribution.
+
+Ordinarily, the kernel clock discipline function is used with the NTP
+daemon, but could be used for other purposes. The
+link:ntptime.html[ntptime] utility program can be used to control it
+manually.
+
+The kernel model also provides support for an external precision timing
+source, such as described in the link:pps.html[Pulse-per-second (PPS)
+Signal Interfacing] page. The new system calls are used by the
+link:kernpps.html[PPSAPI interface] and in turn by the
+link:driver_pps.html[PPS Clock Discipline] driver to
+provide synchronization limited in principle only by the accuracy and
+stability of the external timing source. Typical results with the PPS
+signal from a GPS receiver and a modern computer are in the 3 μs range.
+
+== References ==
+
+1.  Mills, D.L., and P.-H. Kamp. The nanokernel. _Proc. Precision Time
+and Time Interval (PTTI) Applications and Planning Meeting_ (Reston VA,
+November 2000). Paper:
+{millshome}database/papers/nano/nano2.ps[PostScript]
+|
+{millshome}database/papers/nano/nano2.pdf[PDF],
+Slides:
+{millshome}database/brief/nano/nano.ps[PostScript]
+| {millshome}database/brief/nano/nano.pdf[PDF] |
+{millshome}database/brief/nano/nano.ppt[PowerPoint]
+2.  Mills, D.L. Unix kernel modifications for precision time
+synchronization. Electrical Engineering Department Report 94-10-1,
+University of Delaware, October 1994, 24 pp. Abstract:
+{millshome}database/reports/kern/kerna.ps[PostScript]
+|
+{millshome}database/reports/kern/kerna.pdf[PDF],
+Body:
+{millshome}database/reports/kern/kernb.ps[PostScript]
+|
+{millshome}database/reports/kern/kernb.pdf[PDF]
+3.  Mills, D.L. A kernel model for precision timekeeping. Network
+Working Group Report RFC 1589, University of Delaware, March 1994. 31
+pp. {millshome}database/rfc/rfc1589.txt[ASCII]
+
+'''''
+
+include::includes/footer.adoc[]

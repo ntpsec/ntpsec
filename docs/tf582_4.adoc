@@ -1,0 +1,48 @@
+= European Automated Computer Time Services =
+include::html.include[]
+
+The National Laboratories of many European countries provide
+time information in a standardised format, an ITU-R
+Recommendation (ITU-R TF583.4).  Information is provided
+over a dial-up modem, with one 78-char segment every second.
+A description of the time code is available at
+https://www.ptb.de/cms/en/ptb/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dissemination-of-time-via-the-public-telephone-network/the-european-telephone-time-code.html
+
+The following countries have traditionally provided this service:
+Austria, Belgium, Germany, Italy, The Netherlands, Poland, Portugal,
+Romania, Spain, Sweden, Switzerland, Turkey and United Kingdom.
+
+Note that the service is usually available from outside the country
+as well, as long as you are willing to make a long-distance phone
+call.
+
+Some examples are:
+
+* In Germany, Physikalisch-Technische Bundesanstalt (PTB)'s timecode
+service. Phone number: +49 5 31 51 20 38.
++
+For more detail, see
+https://www.ptb.de/cms/index.php?id=1786&L=1
+
+* In the UK, National Physical Laboratory (NPL)'s Telephone Time Service.
+Phone number: 020 8943 6333
++
+For more detail, see https://www.npl.co.uk/science-technology/time-frequency/products-and-services/time/time-synchronisation-of-computers-to-utc(npl)
+
+* In Italy, L'Istituto Nazionale di Ricerca Metrologica
+(INRIM)'s CTD service. Phone numbers: 011 39 19 263 and 011 39 19 264
++
+For more detail, see https://www.inrim.it/res/tf/ctd_i.shtml
+
+* In Sweden, SP Swedish National Testing and Research Institute's
+timecode service. Phone number: +46 33 415783.
++
+For more detail, see https://www.sp.se/en/index/services/time_sync/modem_time/Sidor/default.aspx
+
+== Additional Information ==
+
+link:refclock.html[Reference Clock Drivers]
+
+'''''
+
+include::includes/footer.adoc[]

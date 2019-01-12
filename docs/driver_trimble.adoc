@@ -1,0 +1,445 @@
+= Trimble Palisade/Thunderbolt/Acutime & Praecis Receivers =
+include::html.include[]
+
+[width="100%",cols="<50%,<50%",frame="none",grid="none"]
+|==============================================================
+| image:pic/driver_palisade.gif[] | image:pic/thunderbolt.jpg[]
+|==============================================================
+
+== Synopsis ==
+["verse",subs="normal"]
+Name: trimble
+Reference ID: GPS
+Serial Port: /dev/trimble__u__; 9600 bps 8N1/8O1
+
+== Description ==
+
+The *refclock trimble* driver version 3.00 supports
+ftp://ftp.trimble.com/pub/sct/embedded/bin/Manuals/Old%20Manuals/PALISADE.PDF[Trimble
+Navigation's Palisade Smart Antenna GPS receiver], Thunderbolt, Acutime 2000
+and Acutime Gold. The EndRun Technologies Praecis Cf, Ct, Ce, and II modules
+(in Palisade emulation mode) are also supported.
+
+== Tested Receivers ==
+The driver has been tested with the following receivers :
+
+[width="60%",cols="<50%,<50%",options="header"]
+|============================================
+| Model                    | Firmware Version
+| Palisade 26664-00        | 7.12
+| Praecis Cf 3001-0000-000 | 2.21
+| Thunderbolt  48051-61    | 3.00
+| Acutime 2000 39091-00    | 2.02
+| Acutime Gold 55238-00    | 1.12
+|============================================
+
+The driver has been tested with the receivers listed above on the
+following host computers:
+
+[width="50%",cols="<40%,<40%,<20%",options="header"]
+|===========================================
+| Processor        | Operating System | Note
+| i686 (PC)        | FreeBSD 11.1     | 1
+| amd64 (PC)       | Linux, Gentoo    | 2
+| powerpc64 (Apple)| Linux, Gentoo    | 3
+| sparc64 (Oracle) | Solaris 11.3     | 4
+|===========================================
+1. HP Pavilion a000, Athlon 64, SIIG CyberPro v5
+2. Supermicro X9SCL, E3-1220, onboard serial ports, kernel 4.12.11
+3. Power Mac G5(7,2), DP 1.8GHz, StarTech PCI1S550, kernel 4.9.34
+4. Sun SPARC Enterprise T5220, onboard serial port, gcc 4.8.2
+
+
+[[sym]]
+== Operating System Serial Port Configuration ==
+
+The driver attempts to open the device /dev/trimble__u__ where 'u' is
+the NTP refclock xref:un[unit number], or the LSB of the refclock
+address when using the legacy syntax.
+
+The user must provide a symbolic link to an available serial port device. This
+is typically performed by a command such as:
+
+[width="50%",cols="<20%,<80%",options="header"]
+|=========================================
+|OS      | Command
+|FreeBSD | ln -s /dev/ttyu0 /dev/trimble0
+|Linux   | ln -s /dev/ttyS0 /dev/trimble0
+|Solaris | ln -s /dev/term/a /dev/trimble0
+|=========================================
+
+All receivers except the Thunderbolt have a factory default serial port
+configuration of 8O1 (odd parity). The Thunderbolt defaults to 8N1 (no parity).
+The driver automatically sets the baud rate and parity of the host to
+match the receiver's factory default values.
+
+[[cfg]]
+== NTP Configuration Examples ==
+
+NTP configuration file "{ntpconf}"
+
+Acutime 2000 or Acutime Gold:
+---------------------------------
+refclock trimble unit 0 subtype 3
+---------------------------------
+
+Thunderbolt:
+---------------------------------------------
+refclock trimble unit 0 subtype 2 time1 0.020
+---------------------------------------------
+
+
+== Initial Setup and Testing for Palisade / Acutime Receivers ==
+1.  Read the xref:Pal[Palisade / Acutime] notes.
+2.  Place the GPS receiver outdoors, with a clear view of the sky for best
+    results -- these receivers do not work well indoors.
+3.  Power up and allow the receiver to obtain UTC offset data. This can take
+    13 to 30 minutes with outdoor placement, or up to a few hours indoors.
+4.  Optionally wait for the receiver to pulse its PPS output. The 'PPS' LED
+    will blink if using an interface module; this indicates that the receiver
+	has entered a state that is usable by the driver.
+..  If the PPS is not produced after a few hours: The antenna placement may be
+    suboptimal, the signal level mask values are too high, or PPS was disabled in the
+    receiver. Relocate to a better position, or reset the receiver's
+	configuration to factory defaults.
+5.  Connect the host to 'Port A'.
+6.  Configure the serial I/O port and its xref:sym[symbolic link] on the host.
+7.  Add the refclock to your +ntpd+ xref:cfg[configuration file].
+8.  Run +ntpd+ with debug level 2 without detaching from the terminal
+    (-d -d -n). Note: debug level 1 may also be used; only errors will be
+	printed to stdout.
+9.  Check the ntpd xref:log[event log] or stdout for a line similar to
+'TRIMBLE(0) open at /dev/trimble0' to verify that your serial port opened.
+10.  The driver will print +TSIP_decode+ lines to stdout as it processes
+    message packets from the receiver. Note: ntpd must be built with debugging
+	enabled to see +TSIP_decode+ +trimble_poll+ and +trimble_receive+ messages
+..  Check your serial connection if 'trimble_poll: unit __u__: no packets found'
+    appears.
+..  If no +TSIP_decode+ lines are seen within 60s the event triggering method
+    may be incorrect, check your xref:f3[+flag3+] setting. It's also possible
+    that the receiver is misconfigured: try resetting it to factory defaults.
+... The driver will print the message
+    'trimble_poll: unit __u__: packets found but none were usable' to stdout if
+    xref:f3[+flag3+] is incorrect, and also if the host is connected to Port B.
+11. The driver will print a +trimble_poll+ line with a timecode to stdout when
+    time is successfully transferred.
+..  If TSIP_decode lines are seen but trimble_receive never appears:
+... TSIP_decode lines with 'Sats: {list of numbers} : Tracking' display the
+    number of usable satellites after 'Tracking'. At least four must be tracking
+    if the receiver does not have a valid stored position, but only one is needed
+	if it does.
+... TSIP_decode lines with 'unusable tracking status' will appear if there are
+    insufficient usable satellites.
+
+
+== Initial Setup and Testing for Thunderbolt Receivers ==
+1.  Read the xref:TB[Thunderbolt] notes.
+2.  Place the GPS antenna outdoors, with a clear view of the sky for best
+    results -- Thunderbolt is not very good at tracking weak signals.
+3.  Power up and allow the receiver to obtain UTC offset data. This can take
+    13 to 30 minutes with outdoor placement, or up to a few hours indoors.
+4.  Configure the serial I/O port and its xref:sym[symbolic link] on the host.
+5.  Add the refclock to your +ntpd+ xref:cfg[configuration file].
+6.  Run +ntpd+ with debug level 2 without detaching from the terminal
+    (-d -d -n). Note: debug level 1 may also be used; only errors will be
+	printed to stdout.
+7.  Check the ntpd xref:log[event log] or stdout for a line similar to
+'TRIMBLE(0) open at /dev/trimble0' to verify that your serial port opened.
+8.  The driver will print +TSIP_decode+ lines to stdout as it processes
+    message packets from the receiver. Note: ntpd must be built with debugging
+	enabled to see +TSIP_decode+ +trimble_poll+ and +trimble_receive+ messages
+..  Check your serial connection if 'trimble_poll: unit __u__: no packets found'
+    appears.
+... The driver may print the message
+    'trimble_poll: unit __u__: packets found but none were usable' to stdout if
+    it failed to reconfigure the receiver to transmit auto-report superpackets.
+9. The driver will print a +trimble_poll+ line with a timecode to stdout when
+    time is successfully transferred.
+..  If TSIP_decode lines are seen but trimble_receive never appears:
+... TSIP_decode lines with 'not in holdover...unusable' will appear if there
+    are insufficient usable satellites and the receiver is not in holdover.
+... TSIP_decode lines with 'misconfigured' will appear if the driver failed
+    to reconfigure the receiver at startup.
+
+
+== Initial Setup and Testing for Praecis Receivers ==
+1.  Read the xref:Pra[Praecis] notes.
+2.  Power up and allow the receiver to lock with a cell tower. This can take
+    a few minutes if the unit has been powered on recently and has good
+	reception, but may take much longer with poor reception or if the unit has
+	been powered off for many months.
+3.  Configure the serial I/O port and its xref:sym[symbolic link] on the host.
+4.  Add the refclock to your +ntpd+ xref:cfg[configuration file].
+5.  Run +ntpd+ with debug level 2 without detaching from the terminal
+    (-d -d -n). Note: debug level 1 may also be used; only errors will be
+	printed to stdout.
+6.  Check the ntpd xref:log[event log] or stdout for a line similar to
+'TRIMBLE(0) open at /dev/trimble0' to verify that your serial port opened.
+7.  The driver will print +TSIP_decode+ lines to stdout as it processes
+    message packets from the receiver. Note: ntpd must be built with debugging
+	enabled to see +TSIP_decode+ +trimble_poll+ and +trimble_receive+ messages
+..  Check your serial connection if 'trimble_poll: unit __u__: no packets found'
+    appears, and ensure that xref:f3[+flag3+] is not set.
+8. The driver will print a +trimble_poll+ line with a timecode to stdout when
+   time is successfully transferred.
+..  If the time data has random large offsets the receiver's CTIME is probably
+    set ON. See the Praecis manual for the command to change this setting.
+
+
+[[log]]
+== Event Logging ==
+
+System and Event log entries are generated by NTP to report significant
+system events. Administrators should monitor the system log to observe
+NTP error messages. Log entries generated by the driver will be of the form:
+
+-------------------------------------------------------
+09-17T01:36:56 ntpd[1127]: REFCLOCK: TRIMBLE(0) message
+-------------------------------------------------------
+
+== Driver Options ==
+[[un]]+unit+ 'number'::
+  Specifies the receiver number, with default 0. Used as an identifier so that
+  the driver can control multiple receivers.
+
+[[t1]]+time1+ 'time'::
+  Specifies the time offset calibration factor, in seconds and fraction,
+  with default 0.0. 'time1' should be set to about 20 ms when using a
+  Thunderbolt.
+
+[[t2]]+time2+ 'time'::
+  Specifies the holdover duration for Thunderbolt, in seconds, with
+  default 0 (holdover disabled).
+
++stratum+ 'number'::
+  Specifies the driver stratum, in decimal from 0 to 15, with default 0.
+
++refid+ 'string'::
+  Specifies the driver reference identifier, an ASCII string from one to
+  four characters, with default +GPS+. When using a Praecis this should be
+  set to +CDMA+.
+
++flag1 {0 | 1}+::
+  Not used by this driver.
+
++flag2 {0 | 1}+::
+  Not used by this driver. NOTE: Versions of the driver before 3.00 used flag2
+  to disable hardware event capture. Event capture is now required for all
+  receivers except the Thunderbolt.
+
+[[f3]]+flag3 {0 | 1}+::
+  Specifies the method used for triggering the receiver's hardware event input.
+  The default of 0 uses the serial port RTS line. Set to 1 to use the serial
+  port's TXD line instead of RTS. Value is ignored when using a Thunderbolt.
+
++flag4 {0 | 1}+::
+  Not used by this driver.
+
+[[st]]+subtype+ 'number'::
+  Specifies the receiver model, default is 0:
+[width="60%",cols="^20%,<80%",options="header"]
+|================================
+| # | Model
+| 0 | Palisade
+| 1 | Praecis
+| 2 | Thunderbolt
+| 3 | Acutime 2000 & Acutime Gold
+|================================
+note: There is currently no difference between subtype 0 and subtype 3 other
+than the driver startup message.
+
++mode+ 'number'::
+  Synonym for subtype, retained for backward compatibility.
+
++path+ 'filename'::
+  Overrides the default device path.
+
++ppspath+ 'filename'::
+  Not used by this driver.
+
++baud+ 'number'::
+  Overrides the default baud rate.
+
+
+[[Pal]]
+== Palisade / Acutime Notes ==
+
+The driver uses the receiver's 'external event' input and 'Port A' TSIP output
+packets for time transfer, so use the 'Port A' RS232 connector. Operation with
+'Port B' is not supported. The event input must be attached to the host serial
+port's RTS or TXD lines -- set xref:f3[+flag3+] accordingly. The host will
+pulse the event input which will cause the receiver to emit a timestamp packet.
+Jitter of less than 400 ns has been observed with a Palisade on a machine with
+'-24 precision' using a 16550-compatible serial port and RTS for event
+triggering.
+
+The Palisade, Acutime 2000 and Acutime Gold are typically used with a
+'Synchronization Interface Module' which converts the receiver's RS422 I/O
+lines to RS232. Generic RS422 to RS232 adapters will also work. Current part
+numbers for the 12-pin antenna connector: DEUTSCH IMC26-2212X body,
+6862-201-22278 pins, and IMC2AD backshell. See the receiver manual for pinouts.
+If you opt to build your own interface with RTS triggering, ensure that
+positive voltage on the RS232 RTS line produces positive voltage on the Port A
+Receive+ line.
+
+The module supplied by Trimble for the Palisade and Acutime 2000, and the
+TrimTim modules available from http://www.navox.pl[Navimor Oxer] have two RS232
+ports which allow a host to communicate with the receiver's 'Port A' and
+'Port B'. With these modules the PPS is not connected to either RS232 port,
+but is made available on a BNC connector. The RS232 connector routed to 'Port A'
+connects the host's RTS line to the receiver's 'external event' input, so the
+host's TXD line is not connected. Since data can't be transmitted from the host
+to the receiver because of the unconnected TXD line, the driver expects the
+receiver to be set to its factory default configuration.
+
+If resetting the receiver to defaults is not desired, verify that 'time base'
+is set to UTC in 8e-4a. For the Palisade, verify that 8e-0b is 2 or 3 and
+8e-ad is 2 or 3. For the Acutimes, verify that the 8e-a5 packet mask has at
+least 'Event 8f-0b on Port A' and 'Event 8f-ad on Port A' enabled.
+
+If it is not possible to use the external event input with your interface and
+you have an Acutime Gold or Acutime 2000, try using the
+link:driver_gpsd.html[+gpsd+] driver instead.
+
+The supported receivers will have 'GPS Week Number Rollover' problems after the
+following dates:
+[width="50%",cols="<50%,<50%",options="header"]
+|=============================
+| Model        | Rollover Date
+| Palisade     | 17-Nov-2018
+| Acutime 2000 | 5-Aug-2018
+| Acutime Gold | 1-Sep-2029
+|=============================
+
+A workaround for this has been implemented in the driver which relies on the
+ntpd program build date. Ensure that the build date reported during ntpd
+startup is less than 19 years from the current date.
+
+Palisade firmware versions previous to 7.12 are untested.
+The Palisade 26664-00 with pre-7.12 firmware must be upgraded to 7.12 because
+pre-7.12 firmware versions disable the receiver's external event input.
+Firmware version 7.12 for all Palisade receivers is available at:
+ftp://ftp.trimble.com/pub/sct/timing/
+
+The Acutime Gold Starter Kit contains a USB interface module. This driver has
+been tested using an RS232 interface module so the performance of the USB
+version is unknown. Navimor Oxer recommends that the USB port on their IF2
+module not be used for precision timing. This is likely also true for the
+Trimble interface. xref:f3[+Flag3+] may need to be set when using a USB
+interface.
+
+Refer to the manuals for hardware setup instructions, cable pinouts and packet
+formats. The manuals are available at:
+ftp://ftp.trimble.com/pub/sct/embedded/bin/Manuals/
+
+The Palisade can't automatically save its self-survey position. It must
+perform a self-survey every time power is lost unless its
+'accurate initial position' is manually set. Once set, the receiver will power
+up with this position and skip its self-survey. The driver does not wait for
+the self-survey to complete before allowing time transfer.
+
+Acutime 2000 transmits incorrect position data in its event-trigger response,
+so the TSIP_decode Latitude / Longitude / Altitude debugging message will not
+display correctly.
+
+The receiver must know the current UTC offset from GPS time to be usable with
+ntpd. The receiver automatically decodes the UTC offset data from the +Almanac+
+transmitted by GPS satellites. With good antenna placement, Almanac
+reception can be expected to take 13 minutes or more after receiver power-up.
+The driver will wait for the receiver to report that its UTC offset is valid
+before enabling time transfer. The receiver stores the UTC offset in NVRAM so
+it will become usable before the Almanac is available, but if it was powered
+off during a leap second change the stored offset may be incorrect until the
+current Almanac is obtained.
+
+
+[[Pra]]
+== EndRun Technologies Praecis Notes ==
+
+The driver has been tested with a Praecis Cf. The Ct, Ce, and Praecis II
+should also work. The receiver must be set to use Trimble emulation mode.
+To configure the receiver, see:
+https://net.its.hawaii.edu/network-performance/using-praecis/
+NTP setup instructions are also in the receiver manuals, which can be found at:
+https://www.endruntechnologies.com/documentation.htm
+
+Check the receiver's LEAP setting. Incorrect values will cause a time offset.
+See the note for this command in the receiver manual.
+
+Jitter of less than 100 ns has been observed with a Praecis Cf on a machine with
+'-24 precision' using a 16550-compatible serial port and RTS for event
+triggering, but the offset relative to a Palisade on the same machine may vary
+in steps by several microseconds, likely due to the receiver switching between
+cell towers.
+
+IMPORTANT: Turn off the receiver's auto-report feature (CTIME=OFF) because the
+driver can't distinguish auto-reports from event capture responses. This is
+mentioned in the receiver manual.
+
+
+[[TB]]
+== Thunderbolt Notes ==
+
+The driver will attempt to set the time report packet and PPS output alignment
+to UTC time since the Thunderbolt defaults to GPS alignment. Time transfer will
+not be allowed unless the receiver reports that it is aligned to UTC time.
+
+The Thunderbolt does not have an event input. Initially it was thought that
+the firmware could be upgraded to enable event input so that it would operate
+with this driver in a way similar to a Palisade or Acutime, but no upgrade was
+ever released. The Thunderbolt's serial port CTS line is not connected with the
+standard board configuration, and there is no mention of event capability in
+any documentation. Newer receivers in the Thunderbolt line also do not have
+event inputs. Here is a link explaining the firmware situation:
+https://lists.ntp.org/pipermail/hackers/2006-April/002216.html
+
+Due to the lack of an event input the driver uses the timecode packet
+transmitted by the Thunderbolt shortly after the beginning of each second, but
+this packet is not very well aligned: delay varies from 7 ms to 32 ms depending
+on the number of satellites the receiver is attempting to track, and the delay
+is not included in the timecode. For this reason the xref:t1[+time1+] should be
+set to about 20 ms. The link:driver_pps.html[+pps+] driver should be used along
+with this driver for best results, but a hardware modification is required to
+route the receiver's 1PPS output to the serial port DCD line for serial PPS.
+
+The Thunderbolt will have a "GPS Week Number Rollover" problem after
+30-Jul-2017. The same workaround mentioned in the
+xref:Pal[Palisade / Acutime Notes] section is implemented for the Thunderbolt.
+
+The receiver must know the current UTC offset from GPS time to be usable with
+ntpd. The receiver automatically decodes the UTC offset data from the +Almanac+
+transmitted by GPS satellites. With good antenna placement, Almanac reception
+can be expected to take 13 minutes or more after receiver power-up. The driver
+will wait for the receiver to report that its UTC offset is valid before
+enabling time transfer.
+
+Time transfer during holdover may be enabled by setting xref:t2[time2] to the
+maximum allowable holdover duration in seconds.
+
+
+== Change Log ==
+Since version 2.45 (2008-30-09) +
+3.00 +
+* add GPS week number rollover workaround +
+* remove support for using the Palisade, Acutime 2000, Acutime Gold and
+* Praecis without event triggering (due to the GPS week number rollover
+  workaround) +
+* add flag3 to select event triggering method +
+* simplify debugging messages +
+* allow for time transfer during Thunderbolt holdover +
+* check serial parity for receivers that generate parity by default +
+
+== Authors ==
+mailto:trv-n@comcast.net[*Questions or Comments : ntpsec, driver version 3.00+*]
+
+mailto:sven_dietrich@trimble.com[*Sven-Thorsten Dietrich*] +
+  645 North Mary Avenue +
+  Post Office Box 3642 +
+  Sunnyvale, CA 94088-3642 +
+
+mailto:fernandoph@iar.unlp.edu.ar[*Fernando P. Hauscarriaga*] +
+  http://www.iar.unlp.edu.ar/~fernandoph +
+  Instituto Argentino de Radioastronomia +
+  http://www.iar.unlp.edu.ar +
+
+include::includes/footer.adoc[]

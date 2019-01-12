@@ -1,0 +1,19 @@
+= ntpdig(1) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntpdig - standard Simple Network Time Protocol client program
+
+include::../docs/includes/ntpdig-body.adoc[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+// end
+

@@ -1,0 +1,412 @@
+= JJY Receivers =
+include::html.include[]
+
+== Synopsis ==
+
+["verse",subs="normal"]
+Name: jjy
+Reference ID: JJY
+Serial Port: +/dev/jjyu+; See corresponding receiver
+
+== Warning ==
+
+Some modes of this driver report only two-digit years, and are thus
+reliant on the system clock to be near correct before samples will be
+processed properly. You will not be able to use them to run
+autonomously, nor will it reliably recover from a trashed or zeroed
+system clock.
+
+== Description ==
+
+This driver supports the following the JJY receivers and the GPS clock
+sold in Japan, and the time service through a telephone line.
+
+[width="100%",cols="<50%,<50%",]
+|=================================================
+|link:#subtype-1[Tristate Ltd.   TS-JJY01, TS-JJY02] |link:#subtype-6[SEIKO TIME SYSTEMS INC.   TDC-300]
+|link:#subtype-2[C-DEX Co.,Ltd.   JST2000]           |link:#subtype-100[Telephone JJY]
+|link:#subtype-3[Echo Keisokuki Co.,Ltd.   LT-2000]  |
+|link:#subtype-4[CITIZEN T.I.C. CO.,LTD.   JJY-200]  |
+|link:#subtype-5[Tristate Ltd.   TS-GPSclock-01]     |
+|=================================================
+
+* [[subtype-1]]Tristate Ltd.   TS-JJY01, TS-JJY02 http://www.tristate.ne.jp/ (Japanese only)
++
+NTP configuration ( {ntpconf} )::
++
+--
+refclock jjy unit X subtype 1 time1 0.NNN flag1 {0|1};;
+  Time1 may specify a constant to be added to the time offset for the
+  time from the receiver, a fixed-point decimal number in seconds. You
+  may specify the time offset from several tens of milliseconds (
+  0.0NN seconds ) to a hundred and several tens of milliseconds (
+  0.1NN seconds ) for this clock. +
+  Flag1 has no effect for time synchronization. When flag1 is set to
+  1, status commands are issued before DATE and STIM commands, and
+  write a response text into the clockstats file.
++
+[width="100%",cols="<50%,<50%",]
+|====================================
+|0 (Default) | DCST and STUS commands are not issued
+|1           | DCST and STUS commands are issued
+|====================================
+--
++
+Interface::
+RS-232C, 9600 bps, 8-bits, no parity, 1 stop bit;;
+
+Time code format::
++
+Command        -\-> Reply
++dcst{CR}{LF}+ -\-> +valid{CR}{LF} | invalid{CR}{LF}+
++stus{CR}{LF}+ -\-> +adjusted{CR}{LF} | unadjusted{CR}{LF}+
++time{CR}{LF}+ -\-> +HH:MM:SS{CR}{LF}+
++date{CR}{LF}+ -\-> +YYYY/MM/DD WWW{CR}{LF}+
++stim{CR}{LF}+ -\-> +HH:MM:SS{CR}{LF}+
++
+The date and time are requested separately. The time is requested
+before and after the date request to check uncertainty of the date
+whether it's before or after midnight.
+
+* [[subtype-2]]C-DEX Co.,Ltd. JST2000 http://www.c-dex.co.jp/ (Japanese only)
++
+NTP configuration ( {ntpconf} )::
++
+--
+refclock jjy unit X subtype 2 time1 0.NNN;;
+--
++
+Interface::
+RS-232C, 9600 bps, 8-bits, no parity, 1 stop bit;;
+
+Time code format::
++
+Command        -\-> Reply +
++{ENQ}1J{ETX}+ -\-> +{STX}JYYMMDDWHHMMSSS{ETX}+
+
+* [[subtype-3]]Echo Keisokuki Co.,Ltd. LT-2000
++
+NTP configuration ( {ntpconf} )::
++
+--
+refclock jjy unit X subtype 3 time1 0.NNN;;
+--
++
+Interface::
+RS-232C, 9600 bps, 8-bits, no parity, 1 stop bit;;
+
+Time code format::
++
+[width="100%",cols="<45%,<10%,<45%",grid="none",frame="none"]
+|===================================================================
+|Command                           | -\-> | Reply
+|C                                 | -\-> | ( Subtype 2 : Continuous )
+|( Every second before 0.5 second )|      | +YYMMDDWHHMMSS{ST1}{ST2}{ST3}{ST4}{CR}+
+|#                                 | -\-> | ( Subtype 1 : Request&Send )
+|===================================================================
++
+Note: Echo Keisokuki has been dissolved. Some business of the company was taken over by FreqTime Co., Ltd. in July, 2015.
+
+* [[subtype-4]]CITIZEN T.I.C. CO.,LTD. JJY-200 http://www.tic-citizen.co.jp/ (Japanese only)
++
+NTP configuration ( {ntpconf} )::
++
+--
+refclock jjy unit X subtype 4 time1 0.NNN;;
+--
++
+Interface::
+RS-232C, 4800 bps, 8-bits, no parity, 1 stop bit;;
+
+Time code format::
++
+[width="100%",cols="<45%,<10%,<45%",frame="none",grid="none"]
+|======================================
+|Command       | -\-> |Reply
+|(Every second)| -\-> |+'XX YY/MM/DD W HH:MM:SS{CR}+
+|======================================
+
+* [[subtype-5]]Tristate Ltd. TS-GPSclock-01 http://www.tristate.ne.jp/ (Japanese only)
++
+This driver supports the Tristate TS-GPSclock-01 in command/response
+subtype, though it is a GPS clock, not JJY radio clock. Using the
+menus and the onboard switches, the TS-GPSclock-01 should be set to
+command/response mode and JUST time zone.
++
+Besides this driver, link:driver_nmea.html[the generic NMEA
+GPS driver] supports the TS-GPSclock-01 in NMEA mode.
++
+NTP configuration ( {ntpconf} )::
++
+--
+refclock jjy unit X subtype 5 time1 0.NNN flag1 {0|1};;
+  Time1 may specify a constant to be added to the time offset for the
+  time from the receiver, a fixed-point decimal number in seconds. +
+  Flag1 has no effect for time synchronization. When a flag1 is set to
+  1, status command is issued before DATE and TIME commands, and write
+  a response text into a clockstats file.
++
+[width="100%",cols="<50%,<50%",]
+|=========================
+|0 (Default)|STUS command is not issued
+|1          |STUS command is issued
+|=========================
+--
++
+Interface::
+USB ( /dev/ttyACM_0_ );;
+
+Time code format::
++
+[width="100%",cols="<25%,<10%,<65%",]
+|==================================================
+|Command       | -\-> |Reply
+|+stus{CR}{LF}+| -\-> |+*R{CR}{LF} \| *G{CR}{LF} \| *U{CR}{LF} \| +U{CR}{LF}+
+|+time{CR}{LF}+| -\-> |+HH:MM:SS{CR}{LF}+
+|+date{CR}{LF}+| -\-> |+YYYY/MM/DD{CR}{LF}+
+|+time{CR}{LF}+| -\-> |+HH:MM:SS{CR}{LF}+
+|==================================================
++
+The date and time are requested separately. The time is requested
+before and after the date request to check uncertainty of the date
+whether it's before or after midnight.
+
+* [[subtype-6]]SEIKO TIME SYSTEMS INC. TDC-300 http://www.seiko-sts.co.jp/ (English and Japanese)
++
+The TDC-300 must be set to the type 3 data format using the front panel
+menu display and the switches.
++
+NTP configuration ( {ntpconf} )::
++
+--
+refclock jjy unit X subtype 6 time1 0.NNN;;
+--
++
+Interface::
+RS-232C, 2400 bps, 8-bits, no parity, 1 stop bit;;
+
+Time code format::
++
+[width="100%",cols="<45%,<10%,<45%",frame="none",grid="none"]
+|============================================================================
+|Command                        | -\-> |Reply
+|                               |      |+{STX}YYMMDDWHHMMSS{ETX}+
+|( 5 to 10 mSec. before second )|      |+{STX}{xE5}{ETX}+
+|============================================================================
+
+* [[subtype-100]]Telephone JJY http://jjy.nict.go.jp/ (English and Japanese)
++
+The telephone JJY is the time service through a public telephone line. +
+The service is provided by the National Institute of Information and
+Communications Technology in Japan.
++
+ATTENTION; This subtype, the telephone JJY, can not be used with the
+refclock_modem driver at the same time. Because the "phone"
+statement in the configuration file is not involved with the
+"server" statement, so the both the refclock_modem and this
+refclock_jjy ( subtype 100 to 180 ) can not recognize the
+appropriate "phone" statement among the "phone" statements.
++
+NTP configuration ( {ntpconf} )::
++
+--
+refclock jjy unit X subtype (100, 101 to 180) minpoll N (N >= 8);;
+    The subtype 100 is specified, this driver does not issue the loopback
+    command in order to measure the delay, and the delay of the
+    telephone line and the system processing is not  adjusted.
++
+The subtype 101 to 180 is specified, this driver issues the loopback
+command and measures the delay of the telephone line and the system
+processing through the Telephone JJY loopback circuit.
++
+The round trip time through the Telephone JJY loopback circuit is
+measured 5 times, and each delay time is greater than 700
+milliseconds, that delay time is ignored during average delay time
+calculation. Also, if the valid delay time ( <= 700 mS. ) is
+measured more than 3 times, the maximum delay time among the valid
+delay times is ignored, and if the valid delay time is measured more
+than 4 times, the minimum delay time among them is ignored, like
+marking/grading sports judgment.
++
+The adjustment time is calculated by the formula, multiply ( the
+measured round trip time ) by ( ( the subtype number ) - 100 ) %,
+and the adjustment delay time is added to the synchronizing time.
++
+If you choose the automatic delay adjustment, in other words, the subtype
+101 to 180 is specified, the recommended subtype number is 145 to 165.
++
+The default polling interval 6 ( 64 seconds ) is too short for this
+subtype. The "minpoll" should be set to greater than or equal to 8 ( 256
+seconds, about 4 minutes ).
++
+The interval time is given the value in second power of 2. The
+minpoll value 12 is 4096 seconds interval ( about 1 hour ), 14 is
+16384 seconds interval ( about 4.5 hours ), 16 is 65536 seconds (
+about 18 hours ), respectively.
+
+flag1 {0|1} flag2 {0|1} flag3 {0|1} flag4 {0|1};;
+    Time1 may specify a constant to be added to the time offset for
+    the time from the receiver, a fixed-point decimal number in
+    seconds.  When the subtype 100 is specified, the time1 may be
+    specified in order to adjust the time offset.  When the subtype 101
+    to 180 is specified, the time1 should not be specified because
+    this driver adds some percentage of the measured loopback delay,
+    depending on the value of the subtype number.
++
+.Flag1 is the modem dialing type
+[width="100%",cols="<34%,<33%,<33%",]
+|=================================
+|0 (Default)|Tone |ATDWTnn...nn
+|1          |Pulse|ATDWPnn...nn
+|=================================
++
+.Flag2 is the modem error correction type.
+[width="100%",cols="<34%,<33%,<33%",]
+|=======================================
+|0 (Default)|Normal               |AT\N0
+|1          |Auto V42, MNP, Normal|AT\N3
+|=======================================
++
+.Flag3 is the modem speaker switch.
+[width="100%",cols="<34%,<33%,<33%",]
+|=======================================
+|0 (Default)|Off         |ATM0Ln
+|1          |On          |ATM2Ln
+|=======================================
++
+.Flag4 is the modem speaker volume.
+[width="100%",cols="<34%,<33%,<33%",]
+|=======================================
+|0 (Default) |Low    |ATMnL1
+|1           |Middle |ATMnL2
+|=======================================
+
+phone 042NNNNNNN;;
+   The phone number is available at http://jjy.nict.go.jp/time/teljjy (Japanese and English) +
+   The number of digits of the phone number is checked. If the
+   international access number and the country number are added in
+   order to call from outside of Japan, the number of digits is over
+   the limit.
++
+The first 2 or 3 digits are checked. The emergency service number
+and the special service number in Japan are not allowed.
++
+Calling from extension line, the number for an outside line should
+be prefix "0," ( Zero, Comma ). The prefix is also checked, and no
+other outside access number is allowed.
+--
++
+Interface::
+RS-232C or USB, 2400 bps, 8-bits, no parity, 1 stop bit;;
+Modem control commands:;;
+
++ATE0Q0V1, ATMnLn, AT&K4, AT+MS=V22B, AT%C0, AT\Nn, ATH1, ATDWxnn...nn `+++`, ATH0+;;
+
+Time code format::
++
+----------------------------------------------------------------
+Prompt 	 -->  	Command 	 -->  	Reply
+Name{SP}?{SP} 	 -->  	TJJY{CR} 	 -->  	Welcome messages
+> 	 -->  	LOOP{CR} 	 -->  	( Switch to the loopback circuit )
+  	   	( One char. ) 	 -->  	( One char. )
+  	   	COM{CR} 	 -->  	( Exit from the loopback circuit )
+> 	 -->  	TIME{CR} 	 -->  	HHMMSS{CR}HHMMSS{CR}HHMMSS{CR} 3 times on second
+> 	 -->  	4DATE{CR} 	 -->  	YYYYMMDD{CR}
+> 	 -->  	LEAPSEC{CR} 	 -->  	{SP}0{CR} | +1{CR} | -1{CR}
+> 	 -->  	TIME{CR} 	 -->  	HHMMSS{CR}HHMMSS{CR}HHMMSS{CR} 3 times on second
+> 	 -->  	BYE{CR} 	 -->  	Sayounara messages
+----------------------------------------------------------------
++
+The date and time are requested separately. The time is requested
+before and after the date request to check uncertainty of the date
+whether it's before or after midnight.
++
+The leap second is not handled, and only written in the clockstats
+file as information.
+
+
+JJY is the radio station that transmits JST (Japan Standard
+Time) in long wave radio. The JJY station is operated by the National
+Institute of Information and Communications Technology. An operating
+announcement and some information are available from
+http://jjy.nict.go.jp/ (Japanese and English).
+
+The user is expected to provide a symbolic link to an available serial
+port device:
+
+----------------------------------------------------------------
+ln -s /dev/ttyS0 /dev/jjy0
+----------------------------------------------------------------
+
+Using an RS-232C to USB converter cable, the clock or a modem can be
+connected to a USB port instead of a serial port with this symbolic
+link:
+
+----------------------------------------------------------------
+ln -s /dev/ttyUSB0 /dev/jjy0
+----------------------------------------------------------------
+
+== Monitor Data ==
+
+The driver writes sent and received data to/from the JJY receivers, GPS
+clock, and the modem into the +clockstats+ file.
+
+[subs="normal"]
+----------------------------------------------------------------
+statsdir /var/log/ntpd/
+filegen clockstats file clockstats type day enable
+----------------------------------------------------------------
+
+.Mark of the clockstats record
+[width="100%",cols="<50%,<50%",]
+|============================================================
+|+JJY+ | Information message ( This refclock starts or stops. )
+|+-->+ | Sent data
+|+<--+ | Received data
+|+---+ | Information message
+|+===+ | Information message ( Start of each polling, and sync. time. )
+|+-W-+ | Warning message
+|+-X-+ | Error message
+|============================================================
+
+== Driver Options ==
+
++unit+ 'number'::
+  The driver unit number, defaulting to 0. Used as a distinguishing
+  suffix in the driver device name.
++time1+ 'time'::
+  Specifies the time offset calibration factor, in seconds and fraction,
+  with default 0.0.
++time2+ 'time'::
+  Not used by this driver.
++stratum+ 'number'::
+  Specifies the driver stratum, in decimal from 0 to 15, with default 0.
++refid+ 'string'::
+  Specifies the driver reference identifier, an ASCII string from one to
+  four characters, with default +JJY+.
++flag1 {0 | 1}+::
+  See corresponding receiver.
++flag2 {0 | 1}+::
+  See corresponding receiver.
++flag3 {0 | 1}+::
+  See corresponding receiver.
++flag4 {0 | 1}+::
+  See corresponding receiver.
++subtype+::
+   Used to select a device type and serial parameters.
++mode+::
+  Synonym for subtype, retained for backward compatibility.
++path+ 'filename'::
+  Not used by this driver.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
+  Not used by this driver. The subtype implies the baud rate.
+
+== Configuration Examples ==
+
+See the examples in the Description section.
+
+'''''
+
+include::includes/footer.adoc[]

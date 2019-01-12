@@ -1,0 +1,19 @@
+= ntpfrob(8) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntpfrob - frob the clock hardware
+
+include::../docs/includes/ntpfrob-body.adoc[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command invocation was not valid.
+
+
+// end

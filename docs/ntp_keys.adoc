@@ -1,0 +1,38 @@
+= ntp.keys - NTP symmetric key file format =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice35.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Three can keep a secret, if two are dead.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_description[DESCRIPTION]
+* link:#_usage[USAGE]
+* link:#_files[FILES]
+* link:#_see_also[SEE ALSO]
+
+'''''
+
+include::includes/ntp.keys-body.adoc[]
+
+'''''
+
+== SEE ALSO ==
+
+link:ntp_conf.html[{ntpdconfman}],
+link:ntpd.html[{ntpdman}],
+link:ntpq.html[{ntpqman}],
+link:ntpkeygen.html[{ntpkeygenman}],
+link:ntpdig.html[{ntpdigman}].
+
+include::includes/footer.adoc[]

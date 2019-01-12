@@ -1,0 +1,21 @@
+= ntpviz(1) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntpviz - make visualizations of offset, jitter, etc. from stats file data
+
+include::../docs/includes/ntpviz-body.adoc[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0::
+  Successful program execution.
+1::
+  The operation failed, usually due to a missing logfile required for
+  a plot.
+2::
+  Illegal command-line option.
+
+// end

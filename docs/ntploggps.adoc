@@ -1,0 +1,31 @@
+= ntploggps - log gpsd data for use by ntpviz =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/dogsnake.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+S is for snakeoil.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+'''''
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+* link:#_usage[USAGE]
+* link:#_exit_status[EXIT STATUS]
+* link:#_authors[AUTHORS]
+
+include::includes/ntploggps-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

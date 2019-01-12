@@ -1,0 +1,13 @@
+= ntp.keys(5) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntp.keys - NTP symmetric key file format
+
+include::../docs/includes/ntp.keys-body.adoc[]
+
+== SEE ALSO ==
+
+{ntpdconfman}, {ntpdman}, {ntpqman}, {ntpkeygenman}, {ntpdigman}.
+
+// end

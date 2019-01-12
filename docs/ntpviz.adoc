@@ -1,0 +1,30 @@
+= ntpviz - make data visualizations from statistics files =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogocell.gif[]|
+{millshome}pictures.html[from the 1969 Pogo Birthday Special]
+
+You could have a butterfly on your head and not even know it.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+'''''
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_requirements[REQUIREMENTS]
+* link:#_authors[AUTHORS]
+
+include::includes/ntpviz-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

@@ -2,7 +2,7 @@ from waflib.Configure import conf
 from waflib.Logs import pprint
 
 # Note: When you change this list. also check the following files:
-# doc/refclock.txt
+# doc/refclock.adoc
 # include/ntp_refclock.h
 # ntpd/refclock_conf.c
 

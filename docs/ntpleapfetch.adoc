@@ -1,0 +1,30 @@
+= ntpleapfetch - fetch and manage local leapfile =
+include::html.include[]
+
+//FIXME: Image duplicates the one used for ntpfrob
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogo3a.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+Occasionally, the leap second needs an update.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+
+'''''
+
+include::includes/ntpleapfetch-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

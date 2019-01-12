@@ -1,0 +1,24 @@
+= Command Index =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice38.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carrol]
+
+The Mad Hatter says "Bring it on".
+
+|==============================
+
+== Related Links ==
+
+include::includes/accopt.adoc[]
+include::includes/authopt.adoc[]
+include::includes/confopt.adoc[]
+include::includes/monopt.adoc[]
+include::includes/clockopt.adoc[]
+include::includes/miscopt.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

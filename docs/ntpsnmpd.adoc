@@ -1,0 +1,26 @@
+= ntpsnmpd - NTP SNMP AgentX daemon =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/bustardfly.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+'''''
+
+include::includes/ntpsnmpd-body.adoc[]
+
+== Mode 6 Protocol ==
+
+The Mode 6 protocol used by ntpsnmpd to communicate with ntpd
+is described link:mode6.html[here].
+
+'''''
+
+include::includes/footer.adoc[]

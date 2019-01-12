@@ -1,0 +1,40 @@
+= ntpd Configuration File
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogo7.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+Racoon is shooting configuration bugs.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_configuration_support[Configuration Support]
+* link:#_authentication_commands[Authentication Commands]
+* link:#monit[Monitoring Support]
+* link:#_access_control_support[Access Control Support]
+* link:#_access_control_commands[Access Control Commands]
+* link:#restrict[Automatic NTP Configuration Options]
+* link:#_reference_clock_support[Reference Clock Support]
+* link:#_reference_clock_commands[Reference Clock Commands]
+* link:#_miscellaneous_options[Miscellaneous Options]
+* link:#_files[FILES]
+* link:#_see_also[SEE ALSO]
+* link:#_bugs[BUGS]
+
+'''''
+
+include::includes/ntp-conf-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

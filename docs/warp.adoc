@@ -1,0 +1,190 @@
+= How NTP Works =
+include::html.include[]
+
+== Related Links ==
+
+include::includes/special.adoc[]
+include::includes/external.adoc[]
+
+== Table of Contents ==
+
+* link:#intro[Introduction and Overview]
+* link:#scale[NTP Timescale and Data Formats]
+* link:#arch[Architecture and Algorithms]
+
+'''''
+
+== Abstract ==
+
+[abstract]
+This page and its dependencies contain a technical description of the
+Network Time Protocol (NTP) architecture and operation. It is intended
+for administrators, operators and monitoring personnel. Additional
+information for nontechnical readers can be found in the white paper
+{millshome}exec.html[Executive Summary: Computer
+Network Time Synchronization]. While this page and its dependencies are
+primarily concerned with NTP, additional information on related
+protocols can be found in the white papers
+{millshome}ptp.html[IEEE 1588 Precision Time
+Protocol (PTP)] and {millshome}proximity.html[Time
+Synchronization for Space Data Links]. Note that reference to a page in
+this document collection is to a page in the collection, while reference
+to a _white paper_ is to a document at the
+{millshome}ntp.html[Network Time Synchronization
+Research Project] web site.
+
+
+[[intro]]
+== Introduction and Overview ==
+
+NTP time synchronization services are widely available in the public
+Internet. The public NTP subnet currently includes several thousand
+servers in most countries and on every continent of the globe, including
+Antarctica, and sometimes in space and on the sea floor.
+
+The NTP subnet operates with a hierarchy of levels, where each level is
+assigned a number called the stratum. Stratum 1 (primary) servers at the
+lowest level are directly synchronized to national time services via
+satellite, radio or telephone modem. Stratum 2 (secondary) servers at
+the next higher level are synchronized to stratum 1 servers and so on.
+Normally, NTP clients and servers with a relatively small number of
+clients do not synchronize to public primary servers. There are several
+hundred public secondary servers operating at higher strata and are the
+preferred choice.
+
+This page presents an overview of the NTP implementation included in
+this software distribution. We refer to this implementation as the
+_reference implementation_ only because it was used to test and validate
+the NTPv4 specification RFC 5905. It is best read in conjunction with
+the briefings and white papers on the
+{millshome}ntp.html[Network Time Synchronization
+Research Project] page. An executive summary suitable for management and
+planning purposes is in the white paper
+{millshome}exec.html[Executive Summary: Computer
+Network Time Synchronization].
+
+[[scale]]
+== NTP Timescale and Data Formats ==
+
+NTP clients and servers synchronize to the Coordinated Universal Time
+(UTC) timescale used by national laboratories and disseminated by radio,
+satellite and telephone modem. This is a global timescale independent of
+geographic position. There are no provisions to correct for local time
+zone or daylight savings time; however, these functions can be performed
+by the operating system on a per-user basis.
+
+The UT1 timescale, upon which UTC is based, is determined by the
+rotation of the Earth about its axis. The Earth rotation is gradually
+slowing down relative to International Atomic Time (TAI). In order to
+rationalize UTC with respect to TAI, a leap second is inserted at
+intervals, historically averaging about 18 months, as determined by the
+https://www.iers.org/IERS/EN/Home/home_node.html [International Earth
+Rotation Service (IERS)]. Reckoning with leap seconds in the NTP
+timescale is described in the white paper
+{millshome}leap.html[The NTP Timescale and Leap Seconds].
+
+The historic insertions are documented in the +leap-seconds.list+ file,
+which can be downloaded from the NIST FTP servers. This file is updated
+at intervals not exceeding six months. Leap second warnings are
+disseminated by the national laboratories in the broadcast timecode
+format. These warnings are propagated from the NTP primary servers via
+other server to the clients by the NTP on-wire protocol. The leap second
+is implemented by the operating system kernel, as described in the white
+paper {millshome}leap.html[The NTP Timescale and
+Leap Seconds]. Implementation details are described on the
+link:leap.html[Leap Second Processing] page.
+
+image:pic/time1.gif[]
+
+Figure 1. NTP Timestamp format
+
+Figure 1 shows the timestamp format used in packet headers exchanged
+between clients and servers.  Ordinarily, this timestamp format is not
+seen by application programs, which converts it to native formats such
+as ISO 8601 or RFC 822-style Gregorian-calendar dates.
+
+The timestamp format spans 136 years, called an _era_. Conceptually,
+it is helpful to think of an absolute dates as being a tuple of one of
+these timestamps and an era number. The current era, era 0, began on 1
+January 1900, while the next one begins in 2036.
+
+Details on converting between era-timestamp pairs and timestamps are
+in the white paper {millshome}y2k.html[The NTP Era and Era
+Numbering]. The NTP protocol will synchronize correctly, regardless of
+era, as long as the system clock is set initially within 68 years (a
+half-era) of the correct time. Further discussion on this issue is in
+the white paper {millshome}time.html[NTP Timestamp Calculations].
+
+[[arch]]
+== Architecture and Algorithms ==
+
+image:pic/fig_3_1.gif[]
+
+Figure 2. NTP Daemon Processes and Algorithms
+
+The overall organization of the NTP architecture is shown in Figure 2.
+It is useful in this context to consider the implementation as both a
+client of upstream (lower stratum) servers and as a server for
+downstream (higher stratum) clients. It includes a pair of peer/poll
+processes for each reference clock or remote server used as a
+synchronization source. Packets are exchanged between the client and
+server using the _on-wire protocol_ described in the white paper
+{millshome}onwire.html[Analysis and Simulation of
+the NTP On-Wire Protocols]. The protocol is resistant to lost, replayed
+or spoofed packets.
+
+The poll process sends NTP packets at intervals ranging from 1 s to
+2^17 s (36.4 hr). The intervals are managed as described on the
+link:poll.html[Poll Process] page to maximize accuracy while
+minimizing network load. The peer process receives NTP packets and
+performs the packet sanity tests described on the
+link:decode.html[Event Messages and Status Words] page
+and link:decode.html#flash[flash status word]. The flash status word
+reports in addition the results of various access control and security
+checks described in the white paper
+{millshome}security.html[NTP Security Analysis]. A
+sophisticated traffic monitoring facility described on the
+link:rate.html[Rate Management and the Kiss-o'-Death Packet] page
+protects against denial-of-service (DoS) attacks.
+
+Packets that fail one or more of these tests are summarily discarded.
+Otherwise, the peer process runs the on-wire protocol that uses four raw
+timestamps: the _origin timestamp_ _T_~1~ upon departure of the client
+request, the _receive timestamp_ _T_~2~ upon arrival at the server, the
+_transmit timestamp_ _T_~3~ upon departure of the server reply, and the
+_destination timestamp_ _T_~4~ upon arrival at the client. These
+timestamps, which are recorded by the +rawstats+ option of the
+link:monopt.html#filegen[+filegen+] command, are used to calculate the
+clock offset and roundtrip delay samples:
+
+[verse]
+delay = (_T_~4~ - _T_~1~) - (_T_~3~ - _T_~2~).
+
+The offset and delay statistics for one or more peer processes are
+processed by a suite of mitigation algorithms. The algorithm described
+on the link:filter.html[Clock Filter Algorithm] page selects the offset
+and delay samples most likely to produce accurate results. Those servers
+that have passed the sanity tests are declared _selectable_. From the
+selectable population the statistics are used by the algorithm described
+on the link:select.html[Clock Select Algorithm] page to determine a
+number of _truechimers_ according to Byzantine agreement and correctness
+principles. From the truechimer population the algorithm described on
+the link:cluster.html[Clock Cluster Algorithm] page determines a number
+of _survivors_ on the basis of statistical clustering principles.
+
+The algorithms described on the link:prefer.html[Mitigation Rules and
+the +prefer+ Keyword] page combine the survivor offsets, designate one
+of them as the _system peer_ and produces the final offset used by the
+algorithm described on the link:discipline.html[Clock Discipline
+Algorithm] page to adjust the system clock time and frequency. The clock
+offset and frequency, are recorded by the +loopstats+ option of the
+link:monopt.html#filegen[+filegen+] command. For additional details
+about these algorithms, see the Architecture Briefing on the
+{millshome}ntp.html[Network Time Synchronization
+Research Project] page. For additional information on statistical
+principles and performance metrics, see the link:stats.html[Performance
+Metrics] page.
+
+'''''
+
+include::includes/footer.adoc[]

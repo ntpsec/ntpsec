@@ -1,0 +1,91 @@
+= Debugging Reference Clock Drivers =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/oz2.gif[]|
+{millshome}pictures.html[from 'The Wizard of Oz', L. Frank Baum]
+
+Call the girls and they'll sweep your bugs.
+
+|==============================
+
+== Related Links ==
+
+include::includes/refclock.adoc[]
+include::includes/install.adoc[]
+
+'''''
+
+The link:ntpq.html[+ntpq+] utility program
+can be used to debug reference clocks, either on the server itself or
+from another machine elsewhere in the network. The server is compiled,
+installed and started using the configuration file described in the
+link:ntpd.html[+ntpd+] page and its dependencies. If the clock appears
+in the +ntpq+ utility and +pe+ command, no errors have occurred and the
+daemon has started, opened the devices specified and waiting for peers
+and radios to come up. If not, the first thing to look for are error
+messages on the system log. These are usually due to improper
+configuration, missing links or multiple instances of the daemon.
+
+It normally takes a minute or so for evidence to appear that the clock
+is running and the driver is operating correctly. The first indication
+is a nonzero value in the +reach+ column in the +pe+ billboard. If
+nothing appears after a few minutes, the next step is to be sure the
+RS232 messages, if used, are getting to and from the clock. The most
+reliable way to do this is with an RS232 tester and to look for data
+flashes as the driver polls the clock and/or as data arrive from the
+clock. Our experience is that the overwhelming fraction of problems
+occurring during installation are due to problems such as miswired
+connectors or improperly configured device links at this stage.
+
+If RS232 messages are getting to and from the clock, the variables of
+interest can be inspected using the +ntpq+ program and various commands
+described on the documentation page. First, use the +pe+ and +as+
+commands to display billboards showing the peer configuration and
+association IDs for all peers, including the radio clock. The assigned
+clock address should appear in the +pe+ billboard and the association ID
+for it at the same relative line position in the +as+ billboard.
+
+Additional information is available with the +rv+ and +clockvar+
+commands, which take as argument the association ID shown in the +as+
+billboard. The +rv+ command with no argument shows the system variables,
+while the +rv+ command with association ID argument shows the peer
+variables for the clock, as well as other peers of interest. The
++clockvar+ command with argument shows the peer variables specific to
+reference clock peers, including the clock status, device name, last
+received timecode (if relevant), and various event counters. In
+addition, a subset of the driver options is included. The poll and
+error counters in the +clockvar+ billboard are useful debugging aids.
+The +poll+ counts the poll messages sent to the clock, while the
++noreply+, +badformat+ and +baddate+ count various errors. Check the
+timecode to be sure it matches what the driver expects. This may require
+consulting the clock hardware reference manual, which is probably pretty
+dusty at this stage.
+
+The +ntpq+ utility program can be used for detailed inspection of the
+clock driver status. The most useful are the +clockstat+ and +clkbug+
+commands described in the document page. While these commands permit
+getting quite personal with the particular driver involved, their use is
+seldom necessary, unless an implementation bug shows up. If all else
+fails, turn on the debugging trace using two +-d+ flags in the +ntpd+
+startup command line. Most drivers will dump status at every received
+message in this case. While the displayed trace can be intimidating,
+this provides the most detailed and revealing indicator of how the
+driver and clock are performing and where bugs might lurk.
+
+Most drivers write a message to the +clockstats+ file as each timecode
+or surrogate is received from the radio clock. By convention, this is
+the last ASCII timecode (or ASCII gloss of a binary-coded one) received
+from the radio clock. This file is managed by the +filegen+ facility
+described in the +ntpd+ page and requires specific commands in the
+configuration file. This forms a highly useful record to discover
+anomalies during regular operation of the clock. The scripts included in
+the +./scripts/stats+ directory can be run from a +cron+ job to collect
+and summarize these data on a daily or weekly basis. The summary files
+have proven inspirational to detect infrequent misbehavior due to clock
+implementation bugs in some radios.
+
+'''''
+
+include::includes/footer.adoc[]

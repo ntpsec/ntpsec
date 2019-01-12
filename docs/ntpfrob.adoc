@@ -1,0 +1,28 @@
+= ntpfrob - frob the local clock hardware =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogo3a.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+Assorted doohickeys for clock-frobbing are in the backpack.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#cmd[Command Line Options]
+* link:#usage[Usage]
+
+include::includes/ntpfrob-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

@@ -1,0 +1,19 @@
+= ntplogtemp(1) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntplogtemp - log temperature data
+
+include::../docs/includes/ntplogtemp-body.adoc[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+// end
+

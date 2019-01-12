@@ -1,0 +1,119 @@
+// This is the body of the manual page for ntmon.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
+
+== Synopsis ==
+
++ntpmon+ [-dhnuV] [-D lvl] [-l logfile] [host]
+
+== Description ==
+
+This program is a real-time status monitor for NTP.  It presents the
+same information as the 'peers', 'mrulist', 'rv', and 'cv' commands of
+{ntpqman}, but using a split-window display that also includes a
+status summary bar, and updates at intervals guaranteed to show status
+changes almost as soon as they occur.
+
+(Specifically, the display begins updating once per second and
+adjusts itself to poll at twice the frequency of the shortest
+polling interval reported in the last peers response.)
+
+The status bar includes the version string of the server being
+watched, the (local) time at which it was last updated, and the
+current query interval.
+
+There is a detail-display mode that dumps full information about a
+single selected peer in a tabular format that makes it relatively easy
+to see changing values. However, note that a default-sized terminal
+emulator window (usually 25 lines) doesn't have enough room for the
+clock variables portion. The only fix for this is to resize your
+terminal.
+
+^C cleanly terminates the program. Any keystroke will trigger a poll
+and update. A few single-keystroke commands are also interpreted as
+commands.
+
+If no hostname is specified on the command line, localhost is monitored.
+
+Here's a breakdown of the peers display in the top window:
+
+include::peerfmt.adoc[]
+
+And the MRU list in the bottom window:
+
+include::mrufmt.adoc[]
+
+== Commands ==
+
+a:: Change peer display to apeers mode, showing association IDs.
+
+d:: Toggle detail mode (some peer will be reverse-video highlighted when on).
+
+h:: Display help screen
+
+j:: Select next peer (in select mode); arrow down also works.
+
+k:: Select previous peer (in select mode); arrow up also works.
+
+m:: Toggle MRUlist-only mode; suppresses peer display when on.
+
+n:: Toggle display of hostnames vs. IP addresses (default is hostnames).
+
+o:: Change peer display to opeers mode, showing destination address.
+
+p:: Change peer display to default mode, showing refid.
+
+q:: Cleanly terminate the program.
+
+s:: Toggle display of only reachable hosts (default is all hosts).
+
+u:: Toggle display of units for time values. (default is off)
+
+w:: Toggle wide mode.
+
+x:: Cleanly terminate the program.
+
+<space>:: Rotate through a/n/o/p display modes.
+
++:: Increase debugging level.  Output goes to ntpmon.log
+
+-:: Decrease debugging level.
+
+?:: Display help screen
+
+== Options ==
+
+-d:: Increase output debug message level
+- may appear multiple times
+
+-D:: Set the output debug message level
+- may appear multiple times
+
+-h:: Print a usage message.
+
+-l:: Logs debug messages to the provided filename
+
+-n:: Show IP addresses (vs. hostnames)
+
+-u:: Show units
+
+-V:: Display version and exit.
+
+== Known Bugs ==
+
+When run in a terminal that does not allow UTF-8 ntpmon will downgrade
+its unit display to a non-unicode version. ntpmon has to interact with
+the curses and locale libraries, which prevents it from forcing the use
+of UTF-8.
+
+When querying a version of ntpd older than NTPsec 0.9.6, +ntpmon+ will
+appear to hang when monitoring hosts with extremely long MRU lists -
+in particular, public pool hosts. Correct behavior requires a Mode 6
+protocol extension not yet present in those versions.
+
+Even with this extension, monitoring a sufficiently high-traffic
+server sometimes fails.
+
+include::mrufail.adoc[]
+
+// end

@@ -57,7 +57,7 @@ def tabulate(path):
         # generated HTML, the file part of a stored anchor name needs to be
         # the original path from the top of the include stack, not
         # whatever inclusion we might be walking through now.
-        html = path[len(prefix):].replace(".txt", ".html")
+        html = path[len(prefix):].replace(".adoc", ".html")
         m = boxanchor_re.search(line)
         if m:
             anchor = "link:" + html + "#" + m.group(1)
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     for dirpath, dnames, fnames in os.walk(prefix):
         for f in fnames:
             fullpath = os.path.join(dirpath, f)
-            if fullpath.endswith(".txt") and "includes" not in fullpath:
+            if fullpath.endswith(".adoc") and "includes" not in fullpath:
                 tabulate(fullpath)
     # print("References: %s" % references)
     # print("Anchors: %s" % anchors)

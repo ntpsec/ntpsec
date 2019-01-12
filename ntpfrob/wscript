@@ -13,4 +13,4 @@ def build(ctx):
         use="M RT",
     )
 
-    ctx.manpage(8, "ntpfrob-man.txt")
+    ctx.manpage(8, "ntpfrob-man.adoc")

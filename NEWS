@@ -3,7 +3,7 @@
 For historic news from NTP Classic, see devel/HISTORIC-NEWS in the
 distribution.
 
-Not all news features are described here; see docs/ntpsec.txt in the
+Not all news features are described here; see docs/ntpsec.adoc in the
 distribution.
 
 Much of the traditional function of a news file is now better addressed

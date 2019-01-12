@@ -1,0 +1,31 @@
+= Reference Clock Commands and Options =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/stack1a.jpg[]|
+Master Time Facility at the {millshome}lab.html[UDel Internet Research Laboratory]
+
+|==============================
+
+== Related Links ==
+
+include::includes/refclock.adoc[]
+include::includes/clockopt.adoc[]
+
+'''''
+
+[[types]]
+== Reference Clock Types ==
+
+Unless noted otherwise, further information about these types is on
+the link:refclock.html[Reference Clock Support] page.
+
+[[options]]
+== Commands and Options ==
+
+include::includes/clock-options.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

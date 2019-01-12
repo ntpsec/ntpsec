@@ -13,7 +13,7 @@ ChangeLog::
 dot.emacs::
 	C-mode indentation rules for code "Just the way Dave likes it".
 
-hacking.txt::
+hacking.adoc::
 	Notes to folks who want to hack on the code.
 
 ifdex-ignores::
@@ -22,10 +22,10 @@ ifdex-ignores::
 make-tarball::
 	The script for building a release tarball.
 
-ntpv5.txt::
+ntpv5.adoc::
 	Design notes towards NTPv5.
 
-pre-release.txt::
+pre-release.adoc::
 	A collection of ideas about testing before a release.
 
 release::
@@ -34,16 +34,16 @@ release::
 TODO::
 	List of items the NTPsec developers are working on.
 
-testing.txt::
+testing.adoc::
 	How to qualify NTPsec for production use.
 
-tour.txt:
+tour.adoc:
 	A tour of the NTP internals.
 
 HISTORIC-NEWS::
 	NTP Classic news file up to 4.2.8p3 (May 2015).
 
-y2k.txt::
+y2k.adoc::
 	Notes on Y2K conformance.
 
 release.nix::

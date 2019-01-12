@@ -125,6 +125,6 @@ def build(ctx):
             "CRYPTO DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
 
-    ctx.manpage(8, "ntpd-man.txt")
-    ctx.manpage(5, "ntp.conf-man.txt")
-    ctx.manpage(5, "ntp.keys-man.txt")
+    ctx.manpage(8, "ntpd-man.adoc")
+    ctx.manpage(5, "ntp.conf-man.adoc")
+    ctx.manpage(5, "ntp.keys-man.adoc")

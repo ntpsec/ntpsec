@@ -1,0 +1,78 @@
+= Server Commands and Options =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/boom3a.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+The chicken is getting configuration advice.
+
+|==============================
+
+== Related Links ==
+
+include::includes/confopt.adoc[]
+
+== Table of Contents ==
+
+* link:#address[Server and Peer Addresses]
+* link:#association[Association Commands]
+* link:#option[Server Command Options]
+
+'''''
+
+[[address]]
+== Server and Peer Addresses ==
+
+Following is a description of the server configuration commands in
+NTPv4. There are two classes of commands, configuration commands that
+configure an association with a remote server, peer or reference clock,
+and auxiliary commands that specify environment variables that control
+various related operations.
+
+The various modes described on the link:assoc.html[Association
+Management] page are determined by the command keyword and the DNS
+name or IP address. Addresses are classed by type as (s) a remote
+server or peer (IPv4 class A, B and C or IPv6), or (b) the IPv4 broadcast
+address of a local interface.
+
+If the Basic Socket Interface Extensions for IPv6 (RFC 2553) is
+detected, support for the IPv6 address family is generated in addition
+to the default IPv4 address family. IPv6 addresses can be identified by
+the presence of colons ":" in the address field. IPv6 addresses can be
+used almost everywhere where IPv4 addresses can be used, with the
+exception of reference clock addresses, which are always IPv4. Note that
+in contexts where a host name is expected, a +-4+ qualifier preceding
+the host name forces DNS resolution to the IPv4 namespace, while a
++-6+ qualifier forces DNS resolution to the IPv6 namespace.
+
+[[association]]
+== Association Commands ==
+
+Unless noted otherwise, further information about these commands is at
+link:discover.html#pool[Automatic Server Discovery].
+
+The http://www.pool.ntp.org/[www.pool.ntp.org] page describes a
+compatible pool of public NTP servers, which are probably what you
+want to define associations with unless you specifically know
+otherwise.
+
+include::includes/assoc-commands.adoc[]
+
+[[option]]
+== Server Command Options ==
+
+include::includes/assoc-options.adoc[]
+
+[[aux]]
+== Auxiliary Commands ==
+
+Information on authentication for broadcast options can be found at
+link:authopt.html[Authentication Options].
+
+include::includes/assoc-auxcommands.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

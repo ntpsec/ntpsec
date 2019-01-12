@@ -1,0 +1,60 @@
+= Monitoring Commands and Options =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogo8.gif[]|
+from 'Pogo', Walt Kelly
+
+Pig was hired to watch the logs.
+
+|==============================
+
+== Related Links ==
+
+include::includes/monopt.adoc[]
+
+== Table of Contents ==
+
+* link:#intro[Naming Conventions]
+* link:#cmd[Monitoring Commands and Options]
+* link:#types[File Set Types]
+
+'''''
+
+[[intro]]
+== Naming Conventions ==
+
+The +ntpd+ daemon includes a comprehensive monitoring facility which
+collects statistical data of various types and writes the data to
+files associated with each type at defined events or intervals. The
+files associated with a particular type are collectively called the
+generation file set for that type. The files in the file set are the
+members of that set.
+
+File sets have names specific to the type and generation epoch. The
+names are constructed from three concatenated elements _prefix_,
+_filename_ and _suffix_:
+
+_prefix_::
+  The directory path specified in the +statsdir+ command.
+_name_::
+  The name specified by the +file+ option of the +filegen+ command.
+_suffix_::
+  A string of elements beginning with . (dot) followed by a number of
+  elements depending on the file set type.
+
+There is a visualization tool, link:ntpviz.html[ntpviz], which assists
+in making sense of statistics files.
+
+[[cmd]]
+== Monitoring Commands and Options ==
+
+Unless noted otherwise, further information about these commands is on
+the link:decode.html[Event Messages and Status Codes] page.
+
+include::includes/mon-commands.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

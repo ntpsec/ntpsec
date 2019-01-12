@@ -1,0 +1,304 @@
+= Rollover issues in time sources =
+include::html.include[]
+
+'''''
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#terminology[Terminology]
+* link:#cycles[Major cycles of interest]
+* link:#gps_pivots[GPS pivot dates]
+* link:#ntp_pivots[NTP pivot dates]
+
+[[intro]]
+== Introduction ==
+
+All time-handling software and hardware suffers from a fundamental
+problem: finite-sized data representations for times means that,
+sooner or later, your time counter is going to roll over to zero. If
+you are lucky, the space you have to represent time is large enough
+that you can expect not to observe a rollover during the expected
+lifetime of the universe (or whatever portion of it concerns you).
+On real-world hardware you will seldom be that lucky.
+
+This page discusses calendar cycles related to NTP, the ways they
+interact, the consequences of rollover and common workarounds for
+rollover problems.
+
+[[terminology]]
+== Terminology ==
+
+Every calendar cycle has at least three basic properties: a start date
+(usually referenced to a solar astronomical date in the Gregorian
+calendar), a unit (such as seconds) and a rollover time or cycle
+length in that unit.  It also matters what the calendar does about
+leap seconds.
+
+As an important example, the basic time representation used on
+computers running Unix has a start date of 1970-01-01T00:00:00
+(midnight of January 1st 1970), a unit of seconds and a rollover time
+of either 2^31^ seconds or 2^63^ seconds, depending on the word size
+of the hardware. Negative times represent seconds before the start
+date.
+
+The start date is often called the "epoch" and a rollover period may
+be called an "era". Beware that eras are often numbered zero-origin;
+it is likely that Unix software will refer to dates immediately before
+the 2038 rollover as "era 0", not "era 1".
+
+Rollover problems arise when a counter wraps to zero, so that a system
+behaves or reports as though time has warped into the far past. The
+consequences can range from trivial to catastrophic; time-dependent
+software enters previously unexplored regions of its behavior space
+and may crash or deliver nonsensical results.  Because these edge
+cases are difficult to test, they are defect attractors even when
+system designers have been careful and conscientious.
+
+[[cycles]]
+== Major cycles of interest ==
+
+For purposes related to NTP there are four major cyclic calendars of
+interest: two-digit years, Unix time, NTP time, GPS time (because GPSes
+are so often used as primary time sources).
+
+=== Two-digit year reports ===
+
+A well-known historical rollover problem was "Y2K", which derived from
+the use of two-digit decimal year counters in mainframe software
+(written when storage was so limited that longer counters would have
+been dramatically more expensive). Expensive preparation and
+mitigation work prevented any major disasters in the year 2000, but
+this was in part because there were many fewer vulnerable systems than
+there later became.
+
+Alas, Y2K-like problems are not dead.  Some will persist as long
+as bad old time-source hardware that only reports two-digit years
+is in service.
+
+Many GPSes have this problem due to NMEA0183's inadequacies as a
+reporting format (and analogous problems in various proprietary GPS
+protocols). Unless the device ships a particular $GZDA sentence
+(which many do not) the year parts of time stamps are the low two
+digits only.
+
+Dedicated non-GPS reference-clock hardware designed in the 20th
+century frequently also report only two-digit year dates - for
+example, the Arbiter and Spectracom devices supported by this
+distribution.  This problem may persist in post-2000 devices that
+are designed for compatibility to use the same reporting protocols,
+such as Spectracom's "Type 2".
+
+There is an internal workaround to deal with two-digit dates in
+{ntpdman}, but it relies on the system clock being at least roughly
+correct - it won't work (for example) at boot time if the clock
+has been trashed or zeroed due to a failed battery backup and
+you have no remote check peers yet.
+
+Warnings have been attached to the documentation of NTP clock drivers
+that may have a vulnerability here.  Notably, the NMEA and SHM drivers
+(probably the two in most common use) do *not* have this problem; the
+NMEA driver uses a clever calendrical trick to deduce a 4-digit year
+that should work until 2399.
+
+=== Unix time ===
+
+The basics of Unix time have already been described.
+
+32-bit Unix time will roll over at 2038-01-19T03:14:08, beginning its
+second era.  It will not roll over to zero but rather to the minimum
+*negative* Unix time, which will report as 1901-12-13T20:45:52.
+
+Unix time is leap second-corrected. When a leap second is inserted,
+the Unix counter stutters - increases during the leap second, then
+drops back a second so that the same counter value represents two
+distinct times.  If a leap second were to be deleted, the counter
+would skip that second.
+
+The possibility of stutter or skip also means that in order to compute
+elapsed time in seconds between two Unix times, you need to know
+the leap second offset at each time.  It is not guaranteed that
+these offsets are the same if the interval crosses midnight  at the
+end of any calendar month. To date in 2018,  IERS (the International
+Earth Rotation service) has performed all corrections just after
+midnight of June 31 and December 31 respectively.
+
+The purpose of leap second correction is to keep Unix time
+synchronized to the solar calendar.  With it, Unix time after
+1972-01-01T00:00:00 (the start date of UTC, Universal Coordinated
+Time) coincides with UTC.  Unix time before 1972 was an approximation
+of GMT (Greenwich Mean Time) without leap seconds.
+
+On POSIX-compliant Unix systems (which is now effectively all) Unix
+time can be retrieved with nanosecond precision; some older versions
+supported only millisecond precision.  The subseconds counter is not
+involved in any of the rollover or leap second issues with the
+seconds counter.
+
+The Unix 32-bit rollover may fizzle the way Y2K did, and will if a
+large enough percentage of 32-bit computers are replaced with 64-bit
+systems (the time counters on those won't roll over for approximately
+292 billion years, which is twenty times the lifetime of the universe
+so far).  There is, however, reason for worry; various Unix
+filesystems, binary file formats, and databases even on 64-bit systems
+use 32-bit fields.  A more serious worry is embedded 32-bit hardware
+quietly ticking away in life-critical systems everywhere from medical
+devices to avionics.
+
+=== NTP time ===
+
+NTP time has a 32-bit cycle with an epoch of 1900-01-01T00:00:00.  NTP
+time is unsigned; the cycle is thus twice that from a signed 32-bit
+counter and the era 1 rollover will be on 2036-01-08.  A detailed
+discussion can be found at
+https://www.eecis.udel.edu/~mills/y2k.html[The NTP Era and Era
+Numbering]. NTP time has a subsecond part in units of 2^-32^
+seconds, which does not participate in the seconds counter's rollover
+problems.
+
+NTP time is leap second corrected, and the reference implementation
+may exhibit stutter or skip.  There is a controversial technique
+called https://developers.google.com/time/smear["leap smearing"] used
+by some servers that avoids these by changing the length of the issued
+second slightly near scheduled corrections.
+
+=== GPS time ===
+
+Raw GPS time is expressed as weeks since the GPS epoch
+1980-01-06T00:00:00, and seconds within the week.  Due to cost
+constraints at the time the system was designed, the week counters are
+only 10 bits long; thus, GPS time has a period of 1024 weeks (a bit
+over 19 years) footnote:[It is planned that future GPS satellites will
+increase the week counter length to 13 bits, for a period of 8192
+weeks or more than 157 years].  At time of writing, one GPS rollover
+has occurred at 1999-08-22T00:00:00 and the next will occur on
+2019-05-06.
+
+(GPS was originally designed for military geolocation, not time
+service. It does not seem to have occurred to the originators that
+long-service GPS clocks would ever be built.)
+
+Raw GPS time does not include subseconds, but does ship a
+top-of-second notification accurate to 50ns.  Receivers are expected
+to compose this with message data to report time at subsecond
+precision.  Many, however, do not, and those that do are often
+inaccurate; consumer-grade hardware often has jitter of over a tenth
+of a second (100ms). On the other hand, carefully designed GPSes
+easily deliver 1ms accuracy, and some do 1000 times better than that. For
+a more detailed discussion of accuracy budgets see the
+http://www.catb.org/gpsd/time-service-intro.html[Introduction to Time
+Service].
+
+Raw GPS time is not leap second corrected, but the satellite messages
+include a leap second offset field in a special update approximately
+every 20 minutes.  If the receiver firmware is not carefully designed
+there will be a window between device boot time and the next
+leap second update, and around leap second corrections, during which
+the reported second will be incorrect.
+
+The qualifications about careful design are important because GPS
+firmware - especially in inexpensive consumer-grade devices - is
+often low-quality and poorly tested due to vendors trying to squeeze
+every possible dime out of their costs.  Even major vendors like
+SiRF have a history of embarrassing firmware glitches, and the
+semi-anonymous outfits in Shenzhen and on Taiwan are worse.
+
+The worst impact of careless, low-budget design when using a GPS as
+an NTP clock is not around either jitter or leap second corrections,
+but rather the behavior near GPS and century rollovers.
+
+[[gps_pivots]]
+== GPS pivot dates and rollover compensation ==
+
+To yield a UTC date, the weeks+second information from the GPS satellites
+has to be used as an offset to a base date.
+
+The most naive way to do this would be to simply use the zero date of the
+current GPS era (1024-week cycle) as the base.  Some very early GPS
+equipment seems to have worked this way, but it has the drawback that
+the device time-warps at the next GPS era rollover - which, if your
+device first shipped only a few years before that rollover - is a
+serious drawback.
+
+There is a relatively simple way to extend the useful life of a GPS
+used as a clock. That is to choose a pivot date in GPS weeks.  When
+your device reports a week number *before* the pivot, you assume that
+a GPS rollover has occurred and add 1024 weeks to the base date.
+
+This technique will postpone time-warping to a full 1024 weeks after
+the pivot date - which the vendor typically makes the release date
+of the device firmware.  But it won't do any better than that; without the
+ability to change the base date, the device will ship incorrect
+reports forever afterwards.  A few refclocks, like the HP-GPS line,
+have that ability; most do not.
+
+This is where careless, low-budget design begins to matter. GPS vendors
+do not document even the fact that they use base or pivot dates, let
+alone what the base and pivot dates for their devices are. As of 2018,
+NTP's developers do not know of any devices for which you can even
+query these parameters, let alone set them.  The best you can generally
+do (and on only some devices) is get the firmware release date; from this,
+you can assume that you will get non-timewarped reports for 1024 weeks
+after that and probably be right.
+
+This is not entirely the GPS vendors' fault.  The truth is, GPS
+reporting protocols are an awful mess.  The closest thing to a
+standard is NMEA0183, originally designed for a different purpose; it
+is poorly specified and has no standard device-control functions at
+all, let alone any for querying base and pivot dates.
+http://www.catb.org/gpsd/[GPSD], the ubiquitous open-source GPS
+manager daemon that shares some developers with NTPsec, works around a
+lot of the general messiness, but can't solve this problem
+because the device capabilities to address it are simply absent.
+
+Finally, when you buy a GPS device, you do not know - and often will not be
+able to discover - how far in the past its hidden pivot date is.  This
+means that time service operators using a GPS as a local Stratum 0
+need to be aware of the possibility that their device could roll over
+at any time (but especially near the zero days of a GPS era) and be
+ready to compensate by dropping in a device with a newer pivot date.
+
+Actionable advice that follows from this: If you don't know the
+manufacturing date of a GPS-based device to within a couple of years,
+don't trust that it won't be rolled over and useless *the first time
+you start it*.  Shopping for cheap refclocks at surplus houses or
+on the Web is particularly hazardous this way.
+
+A fairly bulletproof mitigation strategy, if you are running
+autonomously, is to have multiple GPS clocks per server and replace
+each individual one at least once every nine years (half a GPS era).
+
+[[ntp_pivots]]
+== NTP pivot dates ==
+
+For purposes of this discussion, a 'resolved' timestamp is one that
+has been mapped from a 32-bit seconds offset in some era to a full
+64-bit timestamp implicitly based in some known era.
+
+When {ntpdman} receives an unresolved timestamp from an upstream server,
+that timestamp could be based in any era prior to the current
+wall-clock date - but by definition we may not know the wall-clock
+date with confidence yet (not having achieved sync).
+
+To resolve this ambiguity, NTP also uses an internal pivot date.  It
+chooses the era that would minimize the absolute value of the time
+difference between the resolved timestamp and its internal pivot date.
+
+This resolution technique is part of the NTP specification. It will
+normally resolve to the current era, but may in cases where the pivot
+is within a half-cycle of a rollover time resolve to either the
+previous or the next era.
+
+An {ntpdman} instance's pivot date will be the date it was compiled
+and built.
+
+It is fairly easy to see that this guarantees correct resolution if the
+pivot dates of the communicating ntpds are within a half-cycle
+(88 years) of each other, even if there is a rollover between the pivot
+dates.
+
+'''''
+
+image::pic/pogo1a.gif[align="center"]
+
+include::includes/footer.adoc[]

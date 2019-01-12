@@ -1,0 +1,96 @@
+= Miscellaneous Commands and Options =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/boom3.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+We have three, now looking for more.
+
+|==============================
+
+== Related Links ==
+
+include::includes/miscopt.adoc[]
+
+'''''
+
+== Commands and Options ==
+
+include::includes/misc-options.adoc[]
+
+// A subset of the tos options is described on the ntp.conf manual page.
+// If you change this, be very sure to keep that synchronized.
+
+[[tos]]
++tos+ [+ceiling+ 'ceiling' | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
+  This command alters certain system variables used by the clock
+  selection and clustering algorithms. The default values of these
+  variables have been carefully optimized for a wide range of network
+  speeds and reliability expectations. Very rarely is it necessary to
+  change the default values; but, some folks can't resist twisting the
+  knobs. It can be used to select the quality and quantity of peers used
+  to synchronize the system clock and is most useful in dynamic server
+  discovery schemes. The options are as follows:
+  +ceiling+ 'ceiling';;
+    Specify the maximum stratum (exclusive) for acceptable server
+    packets. The default is 16. See the link:discover.html[Automatic
+    Server Discovery] page for further details.
+  +floor+ 'floor';;
+    Specify the minimum stratum (inclusive) for acceptable server
+    packets. The default is 1. See the link:discover.html[Automatic
+    Server Discovery] page for further details.
+  +maxclock+ 'maxclock';;
+    Specify the maximum number of servers retained by the server
+    discovery schemes. The default is 10. See the
+    link:discover.html[Automatic Server Discovery] page for further
+    details.
+  +maxdist+ 'maxdistance';;
+    Specify the synchronization distance threshold used by the clock
+    selection algorithm. The default is 1.5 s. This determines both the
+    minimum number of packets to set the system clock and the maximum
+    roundtrip delay. It can be decreased to improve reliability or
+    increased to synchronize clocks on the Moon or planets.
+  +maxdisp+ 'maxdispersion';;
+    Specify the maximum dispersion used by the clock synchronization
+    algorithm. The default is 16 s.  This is also the dispersion
+    assigned to missing data. See RFC 5905 for discussion.
+  +minclock+ 'minclock';;
+    Specify the number of servers used by the clustering algorithm as
+    the minimum to include on the candidate list. The default is 3. This
+    is also the number of servers to be averaged by the combining
+    algorithm.
+  +mindist+ 'mindistance';;
+    Specify the minimum distance used by the selection and anticlockhop
+    algorithm. Larger values increase the tolerance for outliers;
+    smaller values increase the selectivity. The default is .001 s. In
+    some cases, such as reference clocks with high jitter and a PPS
+    signal, it is useful to increase the value to insure the
+    intersection interval is always nonempty.
+  +minsane+ 'minsane';;
+    Specify the number of servers used by the selection algorithm as the
+    minimum to set the system clock. The default is 1 for legacy
+    purposes; however, for critical applications the value should be
+    somewhat higher but less than +minclock+.
+  +orphan+ 'stratum';;
+    Specify the orphan stratum with default 16. If less than 16 this is
+    the stratum assumed by the root servers. See the
+    link:orphan.html[Orphan Mode] page for further details.
+  +orphanwait+ 'delay';;
+    Specify the delay in seconds from the time all sources are lost
+    until orphan parent mode is enabled with default 300 s (five
+    minutes). During this period, the local clock driver and the modem
+    driver are not selectable, unless marked with the +prefer+ keyword.
+    This allows time for one or more primary sources to become reachable
+    and selectable before using backup sources, and avoids transient use
+    of the backup sources at startup.
+
++dscp+ 'dscp'::
+  This command specifies the Differentiated Services Code Point (DSCP)
+  value that is used in sent NTP packets. The default value is 46 for
+  Expedited Forwarding (EF).
+
+'''''
+
+include::includes/footer.adoc[]

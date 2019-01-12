@@ -45,7 +45,7 @@ packages depending on whether your base Python version is 2 or 3.
 
 Python 2.x, x >= 6, or Python 3.x, x >= 3::
    Required to build, and for various scripts such as ntpviz (but see
-   the guidance for packagers in devel/packaging.txt).  Our Python code
+   the guidance for packagers in devel/packaging.adoc).  Our Python code
    has been written polyglot to also run with production versions of
    Python 3.  Note that you will need both the ordinary Python
    installation and Python dev tools, if your OS makes such a
@@ -176,7 +176,7 @@ installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
 
 You should read the section "Path problems with the test tools" in
-devel/testing.txt before setting a non-default prefix.
+devel/testing.adoc before setting a non-default prefix.
 
 There is a separate `--destdir' option that changes the root of the
 entire installation hierarchy, prepending all paths.  It defaults to `/'.
@@ -191,7 +191,7 @@ at configure time and saved until install time.
 == Qualification testing ==
 
 Details on how to qualify NTPsec if you've never used it before
-are at devel/testing.txt.
+are at devel/testing.adoc.
 
 == Strict compatibility mode ==
 

@@ -1,0 +1,23 @@
+= ntpd(8) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntpd - Network Time Protocol service daemon
+
+include::../docs/includes/ntpd-body.adoc[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+
+1 (EXIT_FAILURE)::
+  Execution failed - examine system logfiles.
+
+== SEE ALSO ==
+
+{ntpdconfman}, {ntpqman}, {ntpdigman}.
+
+// end

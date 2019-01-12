@@ -1,0 +1,562 @@
+// This is the body of the manual page for ntpq.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
+
+== Synopsis ==
+
++ntpq+ [+-46adhinpkwWu+] [+-c+ 'command'] ['host'] [...]
+
+== Description ==
+
+The +ntpq+ utility program is used to monitor NTP daemon +ntpd+
+operations and determine performance. It uses the standard NTP mode 6
+control message formats defined in Appendix B of the NTPv3 specification
+RFC 1305. The same formats are used in NTPv4, although some of the
+variable names have changed, and new ones added. The description on this
+page is for the NTPv4 variables.
+
+The program can be run either in interactive mode or controlled using
+command line arguments. Requests to read and write arbitrary variables
+can be assembled, with raw and pretty-printed output options being
+available. It can also obtain and print a list of peers in a
+common format by sending multiple queries to the server.
+
+If one or more request options are included on the command line when
++ntpq+ is executed, each of the requests will be sent to the NTP servers
+running on each of the hosts given as command line arguments, or on
+localhost by default. If no request options are given, +ntpq+ will
+attempt to read commands from the standard input and execute these on
+the NTP server running on the first host given on the command line,
+again defaulting to localhost when no other host is specified. +ntpq+
+will prompt for commands if the standard input is a terminal device.
+
++ntpq+ uses NTP mode 6 packets to communicate with the NTP server, and
+hence can be used to query any compatible server on the network which
+permits it. Note that since NTP is a UDP protocol this communication
+will be somewhat unreliable, especially over large distances in terms of
+network topology. +ntpq+ makes one attempt to retransmit requests and
+will time requests out if the remote host is not heard from within a
+suitable timeout time.
+
+Note that in contexts where a host name is expected, a +-4+ qualifier
+preceding the host name forces DNS resolution to the IPv4 namespace,
+while a +-6+ qualifier forces DNS resolution to the IPv6 namespace.
+
+For examples and usage, see the link:debug.html[NTP Debugging
+Techniques] page.
+
+For a simpler near-real-time monitor, see {ntpmonman}.
+
+== Options ==
+
+Command line options are described following. Specifying the command line
+options +-c+ or +-p+ will cause the specified query (queries) to be sent
+to the indicated host(s) immediately. Otherwise, +ntpq+ will attempt to
+read interactive format commands from the standard input.
+
++-4+, +--ipv4+::
+  Force DNS resolution of following host names on the command line to
+  the IPv4 namespace.
++-6+, +--ipv6+::
+  Force DNS resolution of following host names on the command line to
+  the IPv6 namespace.
++-a+ num, +--authentication+=num::
+  Enable authentication with the numbered key.
++-c+ cmd, +--command+=cmd::
+  The following argument is interpreted as an interactive format command
+  and is added to the list of commands to be executed on the specified
+  host(s). Multiple +-c+ options may be given.
++-d+, +--debug+::
+  Increase debugging level by 1.
++-D+ num, +--set-debug-level+=num::
+  The debug level is set to the following integer argument.
++-l+ filename, +--logfile+=filename::
+  Log debugging output to the specified file.
++-h+, +--help+::
+  Print a usage message summarizing options end exit.
++-n+, +--numeric+::
+  Output all host addresses in numeric format rather than
+  converting to the canonical host names.  You may get hostnames
+  anyway for peers in the initialization phase before DNS has resolved
+  the peer name.
++-p+, +--peers+::
+  Print a list of the peers known to the server as well as a summary of
+  their state; this is equivalent to the +peers+ interactive command.
++-k+ filename, +--keyfile+=filename::
+  Specify a keyfile. ntpq will look in this file for the key specified
+  with -a.
++-V+, +--version+::
+  Print the version string and exit.
++-w+, +--wide+::
+  Wide mode: if the host name or IP Address doesn't fit, write the
+  full name/address and indent the next line, so columns line up.
+  The default truncates the name or address.
++-W+ num, +--width+=num::
+  Force the terminal width.  Only relevant for composition of the
+  peers display.
++-u+, +--units+::
+  Display timing information with units.
+
+== Internal Commands ==
+
+Interactive format commands consist of a keyword followed by zero to
+four arguments. Only enough characters of the full keyword to uniquely
+identify the command need be typed. The output of a command is normally
+sent to the standard output, but optionally the output of individual
+commands may be sent to a file by appending a +>+, followed by a file
+name, to the command line. Some interactive format commands are
+executed entirely within the +ntpq+ program itself and do not result in
+NTP mode 6 requests being sent to a server. These are described
+as following.
+
+ +?+ ['command_keyword']::
+ +help+ ['command_keyword']::
+  A +?+ by itself will print a list of all the command keywords known to
+  +ntpq+. A +?+ followed by a command keyword will print function and
+  usage information about the command.
+
++addvars+ _name_ [ = value] [...]; +rmvars+ _name_ [...]; +clearvars+::
+  The arguments to this command consist of a list of items of the form
+  +name = value+, where the += value+ is ignored and can be omitted in
+  read requests. +ntpq+ maintains an internal list in which data to be
+  included in control messages can be assembled and sent using the
+  +readlist+ and +writelist+ commands described below. The +addvars+
+  command allows variables and optional values to be added to the list.
+  If more than one variable is to be added, the list should be
+  comma-separated and not contain white space. The +rmvars+ command can
+  be used to remove individual variables from the list, while the
+  +clearlist+ command removes all variables from the list.
+
++authenticate+ [yes | no]::
+  Normally +ntpq+ does not authenticate requests unless they are
+  write requests. The command +authenticate yes+ causes +ntpq+ to
+  send authentication with all requests it makes. Authenticated
+  requests causes some servers to handle requests slightly
+  differently. The command +authenticate+ without arguments causes
+  +ntpq+ to display whether or not +ntpq+ is currently
+  authenticating requests.
+
++cooked+::
+  Display server messages in prettyprint format.
+
++debug more | less | off+::
+  Turns internal query program debugging on and off.
+
++logfile <stderr> | filename+::
+  Displays or sets the file for debug logging. <stderr> will send logs
+  to standard error.
+
++delay+ 'milliseconds'::
+  Specify a time interval to be added to timestamps included in requests
+  which require authentication; this is used to enable (unreliable)
+  server reconfiguration over long delay network paths or between
+  machines whose clocks are unsynchronized. The server does not
+  now require timestamps in authenticated requests so that this command may
+  be obsolete.
+
++exit+::
+  Exit +ntpq+.
+
++host+ 'name'::
+  Set the host to which future queries will be sent. The name may be
+  either a DNS name or a numeric address.
+
++hostnames [yes | no]+::
+  If +yes+ is specified, host names are printed in information displays.
+  If +no+ is specified, numeric addresses are printed instead. The
+  default is +yes+ unless modified using the command line +-n+ switch.
+
++keyid+ 'keyid'::
+  This command specifies the key number to be used to authenticate
+  configuration requests; this must correspond to a key ID configured
+  with the +controlkey+ command in the server's +ntp.conf+
+
++keytype+::
+  Specify the digest algorithm to use for authenticated requests, with
+  default +MD5+. The keytype must match what the server is expecting
+  for the specified key ID.
+
++ntpversion 1 | 2 | 3 | 4+::
+  Sets the NTP version number which +ntpq+ claims in packets. Defaults
+  to 2, Note that mode 6 control messages (and modes, for that matter)
+  didn't exist in NTP version 1.
+
++passwd+::
+  This command prompts for a password to authenticate requests. The
+  password must match what the server is expecting.  Passwords longer
+  than 20 bytes are assumed to be hex encoding.
+
++quit+::
+  Exit +ntpq+.
+
++raw+::
+  Display server messages as received and without reformatting.
+  The only formatting/interpretation done on the data is
+  to transform non-ASCII data into a printable (but barely
+  understandable) form.
+
++timeout+ 'milliseconds'::
+  Specify a timeout period for responses to server queries. The default
+  is about 5000 milliseconds. Note that since +ntpq+ retries each query
+  once after a timeout, the total waiting time for a timeout will be
+  twice the timeout value set.
+
++units+::
+  Toggle whether times in the peers display are shown with units.
+
++version+::
+  Print the version of the +ntpq+ program.
+
+== Control Message Commands ==
+
+Association IDs are used to identify system, peer and clock variables.
+System variables are assigned an association ID of zero and system name
+space, while each association is assigned a nonzero association ID and
+peer namespace. Most control commands send a single mode 6 message to
+the server and expect a single response message. The exceptions are the
++peers+ command, which sends a series of messages, and the +mreadlist+
+and +mreadvar+ commands, which iterate over a range of associations.
+
+[[as]]
++associations+::
+  Display a list of mobilized associations in the form
++
+---------------------------------------------------------
+ind assid status conf reach auth condition last_event cnt
+---------------------------------------------------------
++
+[width="100%",cols="<20%,<80%"]
+|=======================================================================
+|Variable    |Description
+|+ind+       |index on this list
+|+assid+     |association ID
+|+status+    |link:decode.html#peer[peer status word]
+|+conf+      |+yes+: persistent, +no+: ephemeral
+|+reach+     |+yes+: reachable, +no+: unreachable
+|+auth+      |+ok+, +yes+, +bad+ and +none+
+|+condition+ |selection status (see the +select+ field of the
+             link:decode.html#peer[peer status word])
+|+last_event+|
+  event report (see the +event+ field of the link:decode.html#peer[peer
+  status word])
+|+cnt+       |
+  event count (see the +count+ field of the link:decode.html#peer[peer
+  status word])
+|=======================================================================
+
++authinfo+::
+  Display the authentication statistics.
+
++clockvar+ 'assocID' ['name' [ = 'value' [...] ][...]::
++cv+ 'assocID' ['name' [ = 'value' [...] ][...]::
+  Display a list of link:#clock[clock variables] for those associations
+  supporting a reference clock.
+
++:config [...]+::
+  Send the remainder of the command line, including whitespace, to the
+  server as a run-time configuration command in the same format as the
+  configuration file. This command is experimental until further notice
+  and clarification. Authentication is of course required.
+
++config-from-file+ 'filename'::
+  Send each line of _filename_ to the server as run-time
+  configuration commands in the same format as the configuration file.
+  This command is experimental until further notice and clarification.
+  Authentication is required.
+
++ifstats+::
+  Display statistics for each local network address. Authentication is
+  required.
+
++iostats+::
+  Display network and reference clock I/O statistics.
+
++kerninfo+::
+  Display kernel loop and PPS statistics. As with other ntpq output,
+  times are in milliseconds. The precision value displayed is in
+  milliseconds as well, unlike the precision system variable.
+
++lassociations+::
+  Perform the same function as the associations command, except display
+  mobilized and unmobilized associations.
+
++lpeers+ [+-4+ | +-6+]::
+  Print a peer spreadsheet for the appropriate IP version(s). _dstadr_
+  (associated with any given IP version).
+
++monstats+::
+  Display monitor facility statistics.
+
++direct+::
+  Normally, the mrulist command retrieves an entire MRU report (possibly
+  consisting of more than one MRU span), sorts it, and presents the
+  result. But attempting to fetch an entire MRU report may fail on a
+  server so loaded that none of its MRU entries age out before they
+  are shipped. With this option, each segment is reported as it arrives.
+
++mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
+  Obtain and print traffic counts collected and maintained by the
+  monitor facility. This is useful for tracking who _uses_ or
+  _abuses_ your server.
++
+With the exception of +sort=+'sortorder', the options
+filter the list returned by +ntpd+. The +limited+ and +kod+ options
+return only entries representing client addresses from which the last
+packet received triggered either discarding or a KoD response. The
++mincount=+'count' option filters entries representing less than 'count'
+packets. The +laddr=+'localaddr' option filters entries for packets
+received on any local address other than 'localaddr'. +resany=+'hexmask'
+and +resall=+'hexmask' filter entries containing none or less than all,
+respectively, of the bits in 'hexmask', which must begin with +0x+.
++
+The _sortorder_ defaults to +lstint+ and may be any of +addr+,
++count+, +avgint+, +lstint+, or any of those preceded by a minus sign
+(hyphen) to reverse the sort order. The output columns are:
++
+include::mrufmt.adoc[]
+
++mreadvar+ 'assocID' 'assocID' [ 'variable_name' [ = 'value'[ ... ]::
++mrv+ 'assocID' 'assocID' [ 'variable_name' [ = 'value'[ ... ]::
+  Perform the same function as the +readvar+ command, except for a range
+  of association IDs. This range is determined from the association list
+  cached by the most recent +associations+ command.
+
++opeers+::
+  Obtain and print the old-style list of all peers and clients showing
+  _dstadr_ (associated with any given IP version), rather than the
+  _refid_.
+
++passociations+::
+  Perform the same function as the +associations command+, except that
+  it uses previously stored data rather than making a new query.
+
+[[pe]]
++peers+::
+  Display a list of peers in the form
++
++tally remote refid st t when pool reach delay offset jitter+
++
+include::peerfmt.adoc[]
+
++apeers+::
+  Display a list of peers in the form:
++
+-------------------------------------------------------------------
+[tally]remote refid assid st t when pool reach delay offset jitter
+-------------------------------------------------------------------
++
+where the output is just like the +peers+ command except that the
++refid+ is displayed in hex format and the association number is also
+displayed.
+
++pstats+ _assocID_::
+  Show the statistics for the peer with the given _assocID_.
+
+[[rv]]
++readvar+ 'assocID' [ 'name' ] [,...]::
++rv+ 'assocID' [ 'name' ] [,...]::
+  Display the specified variables. If +assocID+ is zero, the variables
+  are from the link:#system[system variables] name space, otherwise they
+  are from the link:#peer[peer variables] name space. The +assocID+ is
+  required, as the same name can occur in both spaces. If no +name+ is
+  included, all operative variables in the name space are displayed. In
+  this case only, if the +assocID+ is omitted, it is assumed zero.
+  Multiple names are specified with comma separators and without
+  whitespace. Note that time values are represented in milliseconds and
+  frequency values in parts-per-million (PPM). Some NTP timestamps are
+  represented in the format YYYYMMDDTTTT, where YYYY is the year, MM the
+  month of the year, DD the day of the month and TTTT the time of day.
+
++reslist+::
+  Show the access control (restrict) list for +ntpq+.
+
++timerstats+::
+  Display interval timer counters.
+
++writelist+ _assocID_::
+  Write the system or peer variables included in the variable list.
+
++writevar+ 'assocID' 'name' = 'value' [,...]::
+  Write the specified variables. If the +assocID+ is zero, the variables
+  are from the link:#system[system variables] name space, otherwise they
+  are from the link:#peer[peer variables] name space. The +assocID+ is
+  required, as the same name can occur in both spaces.
+
++sysinfo+::
+  Display operational summary.
+
++sysstats+::
+  Print statistics counters maintained in the protocol module.  Note
+  that the relationships among these counters can look unlikely because
+  packets can get flagged for inclusion in exception statistics in more
+  than one way, for example by having both a bad length and an old version.
+
+[[auth]]
+== Authentication ==
+
+Four commands require authentication to the server: config-from-file,
+config, ifstats, and reslist.  An authkey file must be in place and
+a control key declared in ntp.conf for these commands to work.
+
+If you are running as root or otherwise have read access to the
+authkey and ntp.conf file, ntpq will mine the required credentials
+for you. Otherwise, you will be prompted to enter a key ID and password.
+
+Credentials once entered, are retained and used for the duration
+of your ntpq session.
+
+[[status]]
+== Status Words and Kiss Codes ==
+
+The current state of the operating program is shown in a set of status
+words maintained by the system and each association separately. These
+words are displayed in the +rv+ and +as+ commands both in hexadecimal
+and decoded short tip strings. The codes, tips, and short explanations
+are on the link:decode.html[Event Messages and Status Words] page. The
+page also includes a list of system and peer messages, the code for the
+latest of which is included in the status word.
+
+Information resulting from protocol machine state transitions is
+displayed using an informal set of ASCII strings called
+link:decode.html#kiss[kiss codes]. The original purpose was for
+kiss-o'-death (KoD) packets sent by the server to advise the client of
+an unusual condition. They are now displayed, when appropriate, in the
+reference identifier field in various billboards.
+
+[[system]]
+== System Variables ==
+
+The following system variables appear in the +rv+ billboard. Not all
+variables are displayed in some configurations.
+
+[cols="<20%,<80%"]
+|====================================================
+|Variable    |Description
+|+status+    |link:decode.html#sys[system status word]
+|+version+   |NTP software version and build time
+|+processor+ |hardware platform and version
+|+system+    |operating system and version
+|+leap+      |leap warning indicator (0-3)
+|+stratum+   |stratum (1-15)
+|+precision+ |precision (log~2~ s)
+|+rootdelay+ |total roundtrip delay to the primary reference clock
+|+rootdisp+  |total dispersion to the primary reference clock
+|+peer+      |system peer association ID
+|+tc+        |time constant and poll exponent (log~2~ s) (3-17)
+|+mintc+     |minimum time constant (log~2~ s) (3-10)
+|+clock+     |date and time of day
+|+refid+     |reference ID or link:decode.html#kiss[kiss code]
+|+reftime+   |reference time
+|+offset+    |combined offset of server relative to this host
+|+sys_jitter+|combined system jitter
+|+frequency+ |frequency offset (PPM) relative to hardware clock
+|+clk_wander+|clock frequency wander (PPM)
+|+clk_jitter+|clock jitter
+|+tai+       |TAI-UTC offset (s)
+|+leapsec+   |NTP seconds when the next leap second is/was inserted
+|+expire+    |NTP seconds when the NIST leapseconds file expires
+|====================================================
+
+The jitter and wander statistics are exponentially-weighted RMS
+averages. The system jitter is defined in the NTPv4 specification; the
+clock jitter statistic is computed by the clock discipline module.
+
+[[peer]]
+== Peer Variables ==
+
+The following peer variables appear in the +rv+ billboard for each
+association. Not all variables are displayed in some configurations.
+
+[width="100%",cols="<20%,<80%"]
+|=======================================================================
+|Variable        |Description
+|+associd+       |association ID
+|+status+        |link:decode.html#peer[peer status word]
+|+srcadr srcport+|source (remote) IP address and port
+|+dstadr dstport+|destination (local) IP address and port
+|+leap+          |leap indicator (0-3)
+|+stratum+       |stratum (0-15)
+|+precision+     |precision (log~2~ s)
+|+rootdelay+     |total roundtrip delay to the primary reference clock
+|+rootdisp+      |total root dispersion to the primary reference clock
+|+refid+         |reference ID or link:decode.html#kiss[kiss code]
+|+reftime+       |reference time
+|+reach+         |reach register (octal)
+|+unreach+       |unreach counter
+|+hmode+         |host mode (1-6)
+|+pmode+         |peer mode (1-5)
+|+hpoll+         |host poll exponent (log~2~ s) (3-17)
+|+ppoll+         |peer poll exponent (log~2~ s) (3-17)
+|+headway+       |headway (see link:rate.html[Rate Management and
+		  the Kiss-o'-Death Packet)]
+|+flash+         |link:decode.html#flash[flash status word]
+|+offset+        |filter offset
+|+delay+         |filter delay
+|+dispersion+    |filter dispersion
+|+jitter+        |filter jitter
+|+bias+          |fudge for asymmetric links/paths
+|=======================================================================
+
+[[clock]]
+== Clock Variables ==
+
+The following clock variables appear in the +cv+ billboard for each
+association with a reference clock. Not all variables are displayed in
+some configurations.
+
+[width="100%",cols="<20%,<80%"]
+|==========================================
+|Variable      |Description
+|+associd+     |association ID
+|+status+      |link:decode.html#clock[clock status word]
+|+device+      |device description
+|+timecode+    |ASCII time code string (specific to device)
+|+poll+        |poll messages sent
+|+noreply+     |no reply
+|+badformat+   |bad format
+|+baddata+     |bad date or time
+|+fudgetime1+  |fudge time 1
+|+fudgetime2+  |fudge time 2
+|+stratum+     |driver stratum
+|+refid+       |driver reference ID
+|+flags+       |driver flags
+|==========================================
+
+== Compatibility ==
+
+When listing refids, addresses of the form 127.127.x.x are no longer
+automatically interpreted as local refclocks as in older versions of
++ntpq+. Instead, a clock-format display is requested by the NTPsec
+daemon when appropriate (by setting the srcaddr peer variable). This
+means that when used to query legacy versions of ntpd, which do not
+know how to request this, this program will do a slightly wrong thing.
+
+In older versions, the 'type' variable associated with a
+reference clock was a numeric driver type index. It has been replaced
+by 'name', a shortname for the driver type.
+
+In older versions, no count of control packets was listed under sysstats.
+
+The +-O+ (+--old-rv+) option of legacy versions has been retired.
+
+== Known Limitations ==
+
+It is possible for a ":config unpeer" command to fail silently, yielding
+"Config Succeeded", if it is given a peer identifier that looks like
+a driver type name or a hostname not present in the peer list. The
+error will, however, be reported in the system log.
+
+The config command cannot be used to change a server's default restrictions.
+
+Under some circumstances python 2 cannot emit unicode. When true, the display
+of units is downgraded to non-unicode alternatives. One place a user is
+likely to encounter this is when diverting output through a pipe. Attempts
+have been made to force the use of UTF-8, all of which break the command
+history feature.
+
+include::mrufail.adoc[]
+
+You may be able to retrieve partial data in very high-traffic
+conditions by using the 'direct' option.
+
+// end

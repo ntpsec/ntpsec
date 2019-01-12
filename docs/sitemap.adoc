@@ -1,0 +1,33 @@
+= Site Map =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice15.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Welcome to the tea party.
+|==============================
+
+
+== Links ==
+
+include::includes/install.adoc[]
+include::includes/manual.adoc[]
+xref:_links[Back to Top]
+
+include::includes/hand.adoc[]
+include::includes/refclock.adoc[]
+xref:_links[Back to Top]
+
+include::includes/misc.adoc[]
+include::includes/special.adoc[]
+xref:_links[Back to Top]
+
+include::includes/external.adoc[]
+
+'''''
+
+image::pic/tribeb.gif[align="center"]
+
+include::includes/footer.adoc[]

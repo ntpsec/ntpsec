@@ -1,0 +1,34 @@
+= ntpd - Network Time Protocol (NTP) Daemon =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|===============================
+|image:pic/wingdorothy.gif[]|
+{millshome}pictures.html[from 'The Wizard of Oz', L. Frank Baum]
+
+You need help from the monkeys.
+
+|===============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+* link:#_usage[USAGE]
+* link:#_files[FILES]
+* link:#_signals[SIGNALS]
+* link:#_bugs[BUGS]
+* link:#_standards[STANDARDS]
+
+'''''
+
+include::includes/ntpd-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

@@ -1,0 +1,30 @@
+= ntptime - read and set kernel time variables =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogo5.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+The turtle has been swimming in the kernel.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#_options[Options]
+* link:#_bugs[Bugs]
+
+'''''
+
+include::includes/ntptime-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

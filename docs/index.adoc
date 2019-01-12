@@ -1,0 +1,174 @@
+= The Secure Network Time Protocol (NTPsec) Distribution =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/barnstable.gif[]|
+{millshome}pictures.html['P.T. Bridgeport Bear'; from 'Pogo', Walt Kelly]
+
+Pleased to meet you.
+
+|==============================
+
+== Related Links ==
+
+* A list of all links is on the link:sitemap.html[Site Map] page.
+
+'''''
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#platforms[Supported Platforms]
+* link:#build[Building and Installing NTP]
+* link:#man[Manual Pages]
+* link:#hand[The Handbook]
+* link:#prob[Resolving Problems]
+* link:#info[Further Information]
+
+[[intro]]
+== Introduction ==
+
+The Network Time Protocol software contained in this
+distribution is available without charge under the conditions set
+forth in the link:copyright.html[Copyright Notice].
+
+This distribution is an implementation of RFC 5905 "Network Time
+Protocol Version 4: Protocol and Algorithms Specification".  NTP is
+widely used to synchronize a computer to Internet time servers or
+other sources, such as a radio or satellite receiver or telephone
+modem service. It can also be used as a server for dependent
+clients. It provides accuracies typically less than a millisecond on
+LANs and up to a few tens of milliseconds on WANs. Typical NTP
+configurations utilize multiple redundant servers and diverse network
+paths in order to achieve high accuracy and reliability.
+
+For background on the problems NTP solves, see
+http://www.catb.org/gpsd/time-service-intro.html[Introduction to
+Time Service].  This white paper discusses time source types, relative
+accuracy, relative cost, and how those figures of merit have changed
+in recent decades.
+
+The link:ntpspeak.html[Glossary of NTP-speak] might also be a helpful
+guide for the perplexed.
+
+Use caution when employing search engines to dig up NTP material.
+There are many, many copies of the NTP documentation out there, often
+referring to very old versions and carrying stale information. It's
+best to use only the HTML and manpages that come with your
+distribution.
+
+For differences between NTPsec and legacy versions, see
+link:ntpsec.html[this summary].
+
+[[platforms]]
+== Supported platforms ==
+
+NTPsec supports all operating systems conforming to POSIX.1-2001 and
+ISO/IEC 9899:1999 (aka C99).  The POSIX.1-2008 clock calls
+clock_gettime(2) and clock_settime(2) must also be present.  Primary
+platforms include Linux and the *BSD family; any reasonably modern
+proprietary Unix will also serve.  The OS must have either a
+Linux-like adjtimex(2) call or a BSD-like ntp_adjtime(2) call.
+
+Legacy Windows support has been removed from the NTPsec
+codebase. Future Windows support will be conditional on the quality
+of POSIX/C99 emulation environments such as Cygwin and/or the support
+for Linux binary execution in Windows 10 and later.
+
+If you have a requirement for time service on an OS we don't support,
+and its API is reasonably close to our POSIX/C99 conformance baseline,
+we'll try to meet you halfway. We're open to development partnerships
+with individuals and organizations who have special needs and can
+contribute either engineering time or money to meet our costs of
+development; our only hard condition is that all joint results must be
+redistributable as open source.
+
+[[hand]]
+== The Handbook ==
+
+A good deal of tutorial and directive information is available in the
+handbook pages. These should be read in conjunction with the command and
+option information available on the pages listed on the
+link:sitemap.html[Site Map] page.
+
+link:quick.html[Quick start for client configurations]::
+  Basic configuration for 99% of client installations.  Introduces
+  concepts used later in the Handbook.
+link:assoc.html[Association Management]::
+  Describes how to configure servers and peers and manage the various
+  options. Includes automatic server discovery schemes.
+link:discover.html[Automatic Server Discovery Schemes]::
+  Describes automatic server discovery using broadcast
+  and server pool schemes.
+link:access.html[Access Control Support]::
+  Describes the access control mechanisms that can be used to limit
+  client access to various time and management functions.
+link:authentic.html[Authentication Support]::
+  Describes the cryptographic authentication mechanisms.
+link:rate.html[Rate Management]::
+  Describes the principles of rate management to minimize network load
+  and defend against DoS attacks.
+link:refclock.html[Reference Clock Support]::
+  Describes the collection of clocks and devices used to synchronize primary
+  servers.
+link:warp.html[How NTP Works]::
+  Gives an overview of the NTP daemon architecture and how it works.
+link:outside-tools.html[Outside Tools]::
+  A variety of tools not directly maintained by the NTPsec project
+  that can be useful for administering and monitoring NTP. This page
+  collects some references and links.
+
+[[build]]
+== Building and Installing NTP ==
+
+The link:build.html[Building and Installing the Distribution] page
+gives an overview of the procedures for building and installing NTPsec
+on a typical system.  For more details, see the INSTALL file in the
+distribution root.
+
+[[man]]
+include::includes/manual.adoc[]
+
+[[prob]]
+== Resolving Problems ==
+
+Like other things in modern Internet life, NTP problems can be
+devilishly intricate. This distribution includes a number of utilities
+designed to identify and resolve problems using an integrated management
+protocol supported by the link:ntpq.html[+ntpq+] utility program.
+
+The link:debug.html[NTP Debugging Techniques] page contains useful
+information for identifying problems and devising solutions. Additional
+information on reference clock driver construction and debugging is
+in the link:rdebug.html[Debugging Hints for Reference Clock Drivers] page.
+
+Users are invited to report bugs and offer suggestions via the
+link:bugs.html[NTP Bug Reporting Procedures] page.
+
+[[info]]
+== Further Information ==
+
+The link:sitemap.html[Site Map] page contains a list of document
+collections arranged by topic. The Program Manual Pages collection may
+be the best place to start. The link:comdex.html[Command Index]
+collection contains a list of all configuration file commands together
+with a short function description. There is a
+link:ntpspeak.html[glossary of NTP-speak]. A great wealth of
+additional information is available via the External Links collection,
+including a book and numerous background papers and briefing
+presentations.
+
+Background information on computer network time synchronization is on
+the {millshome}exec.html[Executive Summary -
+Computer Network Time Synchronization] page. Background information,
+bibliography and briefing slides suitable for presentations are on the
+{millshome}ntp.html[Network Time
+Synchronization Research Project] page. Additional information is at
+the NTPsec web site {project-weblink}.
+
+'''''
+
+image::pic/pogo1a.gif[align="center"]
+
+include::includes/footer.adoc[]

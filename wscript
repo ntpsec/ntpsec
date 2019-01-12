@@ -1063,19 +1063,19 @@ def build(ctx):
         afterparty(ctx)
 
     if ctx.env['PYTHON_GPS']:
-        ctx.manpage(1, "ntpclients/ntploggps-man.txt")
-    ctx.manpage(1, "ntpclients/ntpdig-man.txt")
+        ctx.manpage(1, "ntpclients/ntploggps-man.adoc")
+    ctx.manpage(1, "ntpclients/ntpdig-man.adoc")
     if ctx.env['PYTHON_CURSES']:
-        ctx.manpage(1, "ntpclients/ntpmon-man.txt")
-    ctx.manpage(1, "ntpclients/ntpq-man.txt")
-    ctx.manpage(1, "ntpclients/ntpsweep-man.txt")
-    ctx.manpage(1, "ntpclients/ntptrace-man.txt")
-    ctx.manpage(1, "ntpclients/ntpviz-man.txt")
-    ctx.manpage(1, "ntpclients/ntplogtemp-man.txt")
-    ctx.manpage(8, "ntpclients/ntpkeygen-man.txt")
-    ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
-    ctx.manpage(8, "ntpclients/ntpwait-man.txt")
-    ctx.manpage(8, "ntpclients/ntpsnmpd-man.txt")
+        ctx.manpage(1, "ntpclients/ntpmon-man.adoc")
+    ctx.manpage(1, "ntpclients/ntpq-man.adoc")
+    ctx.manpage(1, "ntpclients/ntpsweep-man.adoc")
+    ctx.manpage(1, "ntpclients/ntptrace-man.adoc")
+    ctx.manpage(1, "ntpclients/ntpviz-man.adoc")
+    ctx.manpage(1, "ntpclients/ntplogtemp-man.adoc")
+    ctx.manpage(8, "ntpclients/ntpkeygen-man.adoc")
+    ctx.manpage(8, "ntpclients/ntpleapfetch-man.adoc")
+    ctx.manpage(8, "ntpclients/ntpwait-man.adoc")
+    ctx.manpage(8, "ntpclients/ntpsnmpd-man.adoc")
 
     # Skip running unit tests on a cross compile build
     if not ctx.env.ENABLE_CROSS:

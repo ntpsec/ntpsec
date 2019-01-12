@@ -4,10 +4,10 @@ from waflib import Task
 from waflib.TaskGen import extension
 
 # asciidoc -b html5 -a linkcss -a stylesdir=/mnt/devel/ntp/commit/docs \
-#   -o asd driver32.txt
+#   -o asd driver32.adoc
 
 # Borrowed from waf/docs/book/wscript in the Waf Project.
-re_xi = re.compile('''^(include|image)::(.*?.(txt|\\{PIC\\}))\[''', re.M)
+re_xi = re.compile('''^(include|image)::(.*?.(adoc|\\{PIC\\}))\[''', re.M)
 
 
 def ascii_doc_scan(self):
@@ -50,7 +50,7 @@ class asciidoc(Task.Task):
     ext_out = ".html"
 
 
-@extension('.txt')
+@extension('.adoc')
 def run_asciidoc(self, node):
     out = node.change_ext(".html")
     tsk = self.create_task("asciidoc", node, [out])
@@ -67,7 +67,7 @@ class a2x(Task.Task):
 @extension('.man-tmp')
 def run_a2x(self, node):
     n_file = node.path_from(self.bld.bldnode)
-    out = "%s.%s" % (n_file.replace("-man.txt.man-tmp", ""), self.section)
+    out = "%s.%s" % (n_file.replace("-man.adoc.man-tmp", ""), self.section)
     out_n = self.bld.path.find_or_declare(out)
     self.create_task('a2x', node, out_n)
     self.bld.install_files("${MANDIR}/man%s/" % self.section, out_n)

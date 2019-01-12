@@ -1,0 +1,28 @@
+= Access Control Commands and Options =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogo6.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+The skunk watches for intruders and sprays.
+
+|==============================
+
+== Related Links ==
+
+include::includes/accopt.adoc[]
+
+'''''
+
+== Commands and Options ==
+
+Unless noted otherwise, further information about these commands is on
+the link:access.html[Access Control Support] page.
+
+include::includes/access-commands.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

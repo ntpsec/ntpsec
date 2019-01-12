@@ -1,0 +1,274 @@
+= Event Messages and Status Words =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice47.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Caterpillar knows all the error codes, which is more than most of us do.
+
+|==============================
+
+
+
+== Related Links ==
+
+include::includes/install.adoc[]
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#sys[System Status Word]
+* link:#peer[Peer Status Word]
+* link:#clock[Clock Status Word]
+* link:#flash[Flash Status Word]
+* link:#kiss[Kiss Codes]
+// The crypto link goes nowhere.  TODO: locate this info and add here
+// -- Sanjeev 20161129
+// * link:#crypto[Crypto Messages]
+
+'''''
+
+[[intro]]
+== Introduction ==
+
+This page lists the status words, event messages and error codes used
+for +ntpd+ reporting and monitoring. Status words are used to display
+the current status of the running program. There is one system status
+word and a peer status word for each association. There is a clock
+status word for each association that supports a reference clock. There
+is a flash code for each association which shows errors found in the
+last packet received (pkt) and during protocol processing (peer). These
+are commonly viewed using the +ntpq+ program.
+
+Significant changes in program state are reported as events. There is
+one set of system events and a set of peer events for each association.
+In addition, there is a set of clock events for each association that
+supports a reference clock. Events are normally reported to the
++protostats+ monitoring file and optionally to the system log.
+//The now-removed trap feature was mentioned here - we're marking
+//this spot in case something like it is reintroduced.
+
+In the following tables the Event Field is the status or event code
+assigned and the Message Field a short string used for display and event
+reporting. The Description field contains a longer explanation of the
+status or event. Some messages include additional information useful for
+error diagnosis and performance assessment.
+
+[[sys]]
+== System Status Word ==
+
+The system status word consists of four fields LI (0-1), Source (2-7),
+Count (8-11) and Event (12-15). It is reported in the first line of the
++rv+ display produced by the +ntpq+ program.
+
+[width="50%"]
+|=======================
+|Leap|Source|Count|Event
+|=======================
+
+The Leap Field displays the system leap indicator bits coded as follows:
+
+[width="70%",cols=">10%,<30%,<60%",]
+|========================================================================
+|Code  | Message        | Description
+| +0+  | +leap_none+    | normal synchronized state
+| +1+  | +leap_add_sec+ | insert second after 23:59:59 of the current day
+| +2+  | +leap_del_sec+ | delete second 23:59:59 of the current day
+| +3+  | +leap_alarm+   | never synchronized
+|========================================================================
+
+The Source Field displays the current synchronization source coded as
+follows:
+
+[width="70%",cols=">10%,<30%,<60%",]
+|=============================================================================
+| Code  | Message          | Description
+| +0+   | +sync_unspec+    | not yet synchronized
+| +1+   | +sync_pps+       | pulse-per-second signal (Cs, Ru, GPS, etc.)
+| +2+   | +sync_lf_radio+  | VLF/LF radio (WWVB, DCF77, etc.)
+| +3+   | +sync_hf_radio+  | MF/HF radio (WWV, etc.)
+| +4+   | +sync_uhf_radio+ | VHF/UHF radio/satellite (GPS, Galileo, etc.)
+| +5+   | +sync_local+     | local timecode (IRIG, LOCAL driver, etc.)
+| +6+   | +sync_ntp+       | NTP
+| +7+   | +sync_other+     | other (IEEE 1588, openntp, crony, etc.)
+| +8+   | +sync_wristwatch+| eyeball and wristwatch
+| +9+   | +sync_telephone+ | telephone modem (ACTS, PTB, etc.)
+|=============================================================================
+
+The Count Field displays the number of events since the last time the
+code changed. Upon reaching 15, subsequent events with the same code are
+ignored.
+
+The Event Field displays the most recent event message coded as follows:
+
+[width="70%",cols=">10%,<30%,<60%",]
+|============================================================================
+| Code  | Message                   | Description
+| +00+  | +unspecified+             | unspecified
+| +01+  | +freq_not_set+            | frequency file not available
+| +02+  | +freq_set+                | frequency set from frequency file
+| +03+  | +spike_detect+            | spike detected
+| +04+  | +freq_mode+               | initial frequency training mode
+| +05+  | +clock_sync+              | clock synchronized
+| +06+  | +restart+                 | program restart
+| +07+  | +panic_stop+              | clock error more than 600 s
+| +08+  | +no_system_peer+          | no system peer
+| +09+  | +leap_armed+              | leap second armed
+| +0a+  | +leap_disarmed+           | leap second disarmed
+| +0b+  | +leap_event+              | leap event
+| +0c+  | +clock_step+              | clock stepped
+| +0d+  | +kern+                    | kernel information message
+| +0e+  | +TAI...+                  | leapsecond values update from file
+| +0f+  | +stale leapsecond values+ | new NIST leapseconds file needed
+|============================================================================
+
+[[peer]]
+== Peer Status Word ==
+
+The peer status word consists of four fields: Status (0-4), Select
+(5-7), Count (8-11) and Code (12-15). It is reported in the first line
+of the +rv associd+ display produced by the +ntpq+ program.
+
+[width="50%"]
+|===============================
+| Status | Select | Count | Code
+|===============================
+
+The Status Field displays the peer status code bits in hexadecimal; each
+bit is an independent flag. (Note this field is 5 bits wide, and
+combines with the 3-bit-wide Select Field to create the first full
+byte of the peer status word.) The meaning of each bit in the Status
+Field is listed in the following table:
+
+[width="70%",cols=">10%,<30%,<60%",]
+|==============================================================
+| Code | Message   | Description
+| +08+ | +bcst+    | broadcast association
+| +10+ | +reach+   | host reachable
+| +20+ | +auth+    | authentication ok
+| +40+ | +authenb+ | authentication enabled
+| +80+ | +config+  | persistent association
+|==============================================================
+
+The Select Field displays the current selection status. (The T Field in
+the following table gives the corresponding tally codes used in the
++ntpq peers+ display.) The values are coded as follows:
+
+[width="70%",cols=">10%,<25%,^10%,<55%",]
+|============================================================================
+| Code| Message         | T   | Description
+| +0+ | +sel_reject+    |     | discarded as not valid (TEST10-TEST13)
+| +1+ | +sel_falsetick+ | +x+ | discarded by intersection algorithm
+| +2+ | +sel_excess+    | +.+ | discarded by table overflow (not used)
+| +3+ | +sel_outlier+   | +-+ | discarded by the cluster algorithm
+| +4+ | +sel_candidate+ | +++ | included by the combine algorithm
+| +5+ | +sel_backup+    | +#+ | backup (more than +tos maxclock+ sources)
+| +6+ | +sel_sys.peer+  | +*+ | system peer
+| +7+ | +sel_pps.peer+  | +o+ | PPS peer (when the prefer peer is valid)
+|============================================================================
+
+The Count Field displays the number of events since the last time the
+code changed. Upon reaching 15, subsequent events with the same code are
+ignored.
+
+The Event Field displays the most recent event message coded as follows:
+
+[width="70%",cols=">10%,<30%,<60%",]
+|============================================================================
+| Code | Message            | Description
+| +01+ | +mobilize+         | association mobilized
+| +02+ | +demobilize+       | association demobilized
+| +03+ | +unreachable+      | server unreachable
+| +04+ | +reachable+        | server reachable
+| +05+ | +restart+          | association restart
+| +06+ | +no_reply+         | no server found
+| +07+ | +rate_exceeded+    | rate exceeded (kiss code +RATE+)
+| +08+ | +access_denied+    | access denied (kiss code +DENY+)
+| +09+ | +leap_armed+       | leap armed from server LI code
+| +0a+ | +sys_peer+         | become system peer
+| +0b+ | +clock_event+      | see clock status word
+| +0c+ | +bad_auth+         | authentication failure
+| +0d+ | +popcorn+          | popcorn spike suppressor
+|============================================================================
+
+[[clock]]
+== Clock Status Word ==
+
+The clock status word consists of four fields: Unused (0-7), Count
+(8-11) and Code (12-15). It is reported in the first line of the
++clockvar associd+ display produced by the +ntpq+ program.
+
+[width="50%"]
+|=========================
+| Unused | Count | Code
+|=========================
+
+The Count Field displays the number of events since the last +clockvar+
+command, while the Event Field displays the most recent event message
+coded as follows:
+
+[width="70%",cols=">10%,<30%,<60%",]
+|===========================================================================
+| Code | Message            | Description
+| +00+ | +clk_unspec+        | nominal
+| +01+ | +clk_noreply+      | no reply to poll
+| +02+ | +clk_badformat+    | bad timecode format
+| +03+ | +clk_fault+        | hardware or software fault
+| +04+ | +clk_bad_signal+   | signal loss
+| +05+ | +clk_bad_date+     | bad date format
+| +06+ | +clk_bad_time+     | bad time format
+|===========================================================================
+
+When the clock driver sets the code to a new value, a +clock_alarm+ (11)
+peer event is reported.
+
+[[flash]]
+== Flash Status Word ==
+
+The flash status word is displayed by the +ntpq+ program +rv+ command.
+It consists of a number of bits coded in hexadecimal as follows:
+
+[width="70%",cols=">10%,<15%,<25%,<50%",]
+|==============================================================================
+| Code   | Tag     | Message        | Description
+| +0001+ | BOGON1  | +pkt_dup+      | duplicate packet
+| +0002+ | BOGON2  | +pkt_bogus+    | bogus packet
+| +0004+ | BOGON3  | +pkt_unsync+   | server not synchronized
+| +0008+ | BOGON4  | +pkt_denied+   | access denied
+| +0010+ | BOGON5  | +pkt_auth+     | authentication failure
+| +0020+ | BOGON6  | +pkt_stratum+  | invalid leap or stratum
+| +0040+ | BOGON7  | +pkt_header+   | header distance exceeded
+| +0200+ | BOGON10 | +peer_stratum+ | invalid header or stratum
+| +0400+ | BOGON11 | +peer_dist+    | distance threshold exceeded
+| +0800+ | BOGON12 | +peer_loop+    | synchronization loop
+| +1000+ | BOGON13 | +peer_unreach+ | unreachable or nonselect
+|==============================================================================
+
+The "Tag" field is the name the source code uses for the status bit.
+Not all bits are in use, but have been kept for backwards compatibility.
+
+[[kiss]]
+== Kiss Codes ==
+
+Kiss codes are used in kiss-o'-death (KoD) packets, billboard displays
+and log messages. They consist of a string of four zero-padded ASCII
+characters. In practice they are informal and tend to change with time
+and implementation. Some of these codes can appear in the reference
+identifier field in +ntpq+ billboards. Following is the current list:
+
+[width="50%",cols=">20%,<80%"]
+|==================================================================
+| Code   | Description
+| +ACST+ | manycast server
+| +AUTH+ | authentication error
+| +BCST+ | broadcast server
+| +DENY+ | access denied by server
+| +INIT+ | association initialized
+| +RATE+ | rate exceeded
+| +TIME+ | association timeout
+| +STEP+ | step time change
+|==================================================================
+
+include::includes/footer.adoc[]

@@ -1,0 +1,28 @@
+= Authentication Commands and Options =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|===============================
+|image:pic/alice44.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Our resident cryptographer; now you see him, now you don't.
+
+|===============================
+
+== Related Links ==
+
+include::includes/authopt.adoc[]
+
+'''''
+
+== Commands and Options ==
+
+Unless noted otherwise, further information about these commands is on
+the link:authentic.html[Authentication Support] page.
+
+include::includes/auth-commands.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]

@@ -1,0 +1,108 @@
+= ntpd System Log Messages =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/flatheads.gif[]|
+{millshome}pictures.html[from
+'Alice's Adventures in Wonderland', Lewis Carroll]
+
+The log can be shrill at times.
+
+|==============================
+
+== Related Links ==
+
+include::includes/install.adoc[]
+
+'''''
+
+You have come here because you found a cryptic message in the system
+log. This page by no means lists all messages that might be found, since
+new ones come and old ones go. Generally, however, the most common ones
+will be found here. They are listed by program module and log severity
+code in bold: *+LOG_ERR+*, *+LOG_NOTICE+* and *+LOG_INFO+*.
+
+Most of the time *+LOG_ERR+* messages are fatal, but often +ntpd+ limps
+onward in the hopes of discovering more errors. The *+LOG_NOTICE+*
+messages usually mean the time has changed or some other condition that
+probably should be noticed. The *+LOG_INFO+* messages usually say
+something about the system operations, but do not affect the time.
+
+In the following a \'?' character stands for text in the message. The
+meaning should be clear from context.
+
+== Protocol Module ==
+
+=== LOG_ERR ===
+
++buffer overflow ?+::
+  Fatal error. An input packet is too long for processing.
+
+=== LOG_NOTICE ===
+
++no reply; clock not set+::
+  No servers have been found. The server(s) and/or
+  network may be down. Standard debugging procedures apply.
+
+=== LOG_INFO ===
+
++proto_config: illegal item ?, value ?+::
+  Program error. Bugs can be reported link:bugs.html[here].
++receive: server server maximum rate exceeded+::
+  A kiss-o'death packet has been received. The transmit rate is
+  automatically reduced.
++pps sync enabled+::
+  The PPS signal has been detected and enabled.
++transmit: encryption key ? not found+::
+  The encryption key is not defined or not trusted.
++precision = ? usec+::
+  This reports the precision measured for this machine.
++using 10ms tick adjustments+::
+  Gotcha for some machines with dirty rotten clock hardware.
++no servers reachable+::
+  The system clock is running on internal batteries. The server(s)
+  and/or network may be down.
+
+== Clock Discipline Module ==
+
+=== LOG_ERR ===
+--
++time correction of ? seconds exceeds sanity limit (?); set clock manually to the correct UTC time+. ::
+   Fatal error. Better do what it says, then restart the daemon. Be advised
+   NTP and Unix know nothing about local time zones. The clock must be set
+   to Coordinated Universal Time (UTC). Believe it; by international
+   agreement abbreviations are in French and descriptions are in English.
+
++sigaction() fails to save SIGSYS trap: ?+::
++sigaction() fails to restore SIGSYS trap: ?+::
+    Program error. Bugs can be reported link:bugs.html[here].::
+--
+
+=== LOG_NOTICE ===
+
++frequency error ? exceeds tolerance 500 PPM+::
+  The hardware clock frequency error exceeds the rate the kernel can
+  correct. This could be a hardware or a kernel problem.
++time slew ? s+::
+  The time error exceeds the step threshold and is being slewed to the
+  correct time. You may have to wait a very long time.
++time reset ? s+::
+  The time error exceeds the step threshold and has been reset to the
+  correct time. Computer scientists don't like this, but they can set
+  the +ntpd -x+ option and wait forever.
++kernel time sync disabled ?+::
+  The kernel reports an error. See the codes in the +timex.h+ file.
++pps sync disabled+::
+  The PPS signal has died, probably due to a dead radio, broken wire or
+  loose connector.
+
+=== LOG_INFO ===
+
++kernel time sync status ?+::
+  For information only. See the codes in the +timex.h+ file.
+
+
+'''''
+
+include::includes/footer.adoc[]

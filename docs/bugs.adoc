@@ -1,0 +1,40 @@
+= NTP Bug Reporting Procedures =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/hornraba.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+The rabbit toots to make sure you read this.
+
+|==============================
+
+'''''
+
+== Security Bug Reporting Procedures ==
+
+If you find or suspect a security related program bug in this
+distribution, please send a report to {project-security-list}. Please do not
+contact developers directly.
+
+== Non-Security Bug Reporting Procedures ==
+
+If you find or suspect a non-security related program or documentation
+bug in this distribution, please enter a report on the project's
+{project-issuetracker}[issue tracker]. Bugs reported this way are
+immediately forwarded to the developers. Please do not contact the
+developers directly.
+
+If you wish to send a report via electronic mail, please remember that
+your report will be held until one of our volunteers enters it in
+the project's issue tracker. The email address for these reports is
+{project-bug-list}. You will need to join the bugs list to
+participate directly in any e-mail discussion regarding your
+report. If you don't register and we have questions for you we won't
+be able to make progress on fixing your problem. Please directly
+register on and use our bugtracker instance to report issues.
+
+'''''
+
+include::includes/footer.adoc[]

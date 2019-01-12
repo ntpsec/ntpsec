@@ -1,0 +1,240 @@
+= Association Management =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice51.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Make sure who your friends are.
+
+|==============================
+
+
+== Related Links ==
+
+include::includes/hand.adoc[]
+
+== Table of Contents ==
+
+* link:#modes[Association Modes]
+* link:#client[Client/Server Mode]
+* link:#symact[Symmetric Active/Passive Mode]
+* link:#broad[Broadcast/Multicast Modes]
+* link:#many[Manycast Mode]
+* link:#poll[Poll Interval Management]
+* link:#burst[Burst Options]
+
+'''''
+
+[[modes]]
+== Association Modes ==
+
+This page describes the various modes of operation provided in NTPv4.
+There are three types of associations in NTP: _persistent_,
+_preemptable_ and _ephemeral_. Persistent associations are mobilized by
+a configuration command and never demobilized. Preemptable associations
+are mobilized by a configuration command which
+includes the +preempt+ option or upon arrival of an automatic server
+discovery packet. They are demobilized by timeout or when preempted
+by a "better" server, as described on the link:discover.html[Automatic
+Server Discovery Schemes] page.
+
+There are two principal modes of operation in NTP: client/server and
+broadcast. There are three automatic server discovery schemes in NTP:
+broadcast and pool described on the link:discover.html[Automatic
+Server Discovery Schemes] page. In addition, the link:#burst[burst
+options] and link:orphan.html[orphan mode] can be used in appropriate
+cases.
+
+Following is a summary of the operations in each mode. Note that
+reference to option applies to the commands described on the
+link:confopt.html[Server Commands and Options] page. See that page for
+applicability and defaults.
+
+[[client]]
+== Client/Server Mode ==
+
+Client/server mode is the most common configuration in the Internet
+today. It operates in the classic remote-procedure-call (RPC) paradigm
+with stateless servers and stateful clients. In this mode a host sends a
+client (mode 3) request to the specified server and expects a server
+(mode 4) reply at some future time. In some contexts this would be
+described as a "pull" operation, in that the host pulls the time and
+related values from the server.
+
+A host is configured in client mode using the +server+ (sic)
+or +pool+ command and specifying the server DNS name or IPv4 or
+IPv6 address; the server requires no prior configuration (but
+see link:access.html[Access Control]). The +iburst+ option described
+later on this page is recommended for clients, as this speeds up initial
+synchronization from several minutes to several seconds. The +burst+
+option described later on this page can be useful to reduce jitter on
+very noisy dial-up or ISDN network links.
+
+Ordinarily, the program automatically manages the poll interval between
+the default minimum and maximum values. The +minpoll+ and +maxpoll+
+options can be used to bracket the range. Unless noted otherwise, these
+options should not be used with reference clock drivers.
+
+[[symact]]
+== Symmetric Active/Passive Mode ==
+
+Symmetric active/passive mode is intended for configurations where a
+clique of low-stratum peers operate as mutual backups for each other.
+Each peer operates with one or more primary reference sources, such as a
+reference clock, or a set of secondary (stratum 2) servers known to be
+reliable and authentic. Should one of the peers lose all reference
+sources or simply cease operation, the other peers will automatically
+reconfigure so that time and related values can flow from the surviving
+peers to all hosts in the subnet. In some contexts this would be
+described as a "push-pull" operation, in that the peer either pulls or
+pushes the time and related values depending on the particular
+configuration.
+
+A symmetric active peer sends a symmetric active (mode 1) message to a
+designated peer. If a matching configured symmetric active association
+is found, the designated peer returns a symmetric active message. If no
+matching association is found, the designated peer mobilizes an ephemeral
+symmetric passive association and returns a symmetric passive (mode 2)
+message. Since an intruder can impersonate a symmetric active peer and
+cause a spurious symmetric passive association to be mobilized,
+symmetric passive mode should always be cryptographically validated.
+
+Due to unresolvable security issues with symmetric mode, NTPsec
+includes only partial support for it. The deprecated +peer+ directive
+which formerly set up a symmetric active association is now a synonym
+for +server+. Servers which receive symmetric active messages will
+immediately reply with symmetric passive responses without setting up
+any new association; essentially they treat such messages exactly
+like client-mode messages, aside from putting a different mode number
+into the response.
+
+[[broad]]
+== Broadcast/Multicast Modes ==
+
+These modes cannot be effectively secured and are deprecated in
+NTPsec.  Client-mode support has been removed; server-side support
+is retained for backward compatibility but may be removed in a
+future release.
+
+NTP broadcast modes are intended for configurations
+involving one or a few servers and a possibly very large client
+population. Broadcast mode can be used with Ethernet, FDDI and WiFi
+spans interconnected by hubs or switches. Ordinarily, broadcast packets
+do not extend beyond a level-3 router.
+
+A server is configured to send broadcast messages using the
++broadcast+ command and specifying the subnet address for broadcast.
+
+[[many]]
+== Manycast and Pool Modes ==
+
+Manycast and pool modes are automatic discovery and configuration
+paradigms. They are intended as a means for a client to troll the
+nearby network neighborhood to find cooperating willing servers,
+validate them using cryptographic means and evaluate their time values
+with respect to other servers that might be lurking in the
+vicinity. The intended result is that each client mobilizes ephemeral
+client associations with some number of the "best" of the nearby
+servers, yet automatically reconfigures to sustain this number of
+servers should one or another fail. Additional information is on the
+link:discover.html[Automatic Server Discovery Schemes] page.
+
+[[poll]]
+== Poll Interval Management ==
+
+NTP uses an intricate heuristic algorithm to automatically control the
+poll interval for maximum accuracy consistent with minimum network
+overhead. The algorithm measures the incidental offset and jitter to
+determine the best poll interval. When +ntpd+ starts, the interval is
+the default minimum 64 sec. Under normal conditions when the clock
+discipline has stabilized, the interval increases in steps to the
+default maximum 1024 sec. In addition, should a server become unreachable
+after some time, the interval increases in steps to the maximum in order
+to reduce network overhead. Additional information about the algorithm
+is on the link:poll.html[Poll Program] page.
+
+The default poll interval range is suitable for most conditions, but can
+be changed using options on the link:confopt.html[Server Commands and
+Options] and link:miscopt.html[Miscellaneous Options] pages. However,
+when using maximum intervals much larger than the default, the residual
+clock frequency error must be small enough for the discipline loop to
+capture and correct. The capture range is 500 PPM with a 64-sec interval
+decreasing by a factor of two for each interval doubling. At a 36-hr
+interval, for example, the capture range is only 0.24 PPM.
+
+In the NTPv4 specification and reference implementation, the poll
+interval is expressed in log~2~ units, properly called the _poll
+exponent._ It is constrained by the lower limit +minpoll+ and upper
+limit +maxpoll+ options of the link:confopt.html[+server+] command. The
+limits default to 6 (64 sec) and 10 (1024 sec), respectively, which are
+appropriate for the vast majority of cases.
+
+As a rule of thumb, the expected errors increase by a factor of two as
+the poll interval increases by a factor of four. The poll interval
+algorithm slowly increases the poll interval when jitter dominates the
+error budget, but quickly reduces the interval when wander dominates it.
+More information about this algorithm is on the link:warp.html[How NTP
+Works] page.
+
+There is normally no need to change the poll limits, as the poll
+interval is managed automatically as a function of prevailing jitter and
+wander. The most common exceptions are the following.
+
+* With fast, lightly loaded LANs and modern processors, the nominal
+Allan intercept is about 500 sec. In these cases the expected errors can
+be further reduced using a poll exponent of 4 (16 sec). In the case of the
+pulse-per-second (PPS) driver, this is the recommended value.
+* With symmetric modes the most stable behavior results when both peers
+are configured in symmetric active mode with matching poll intervals of
+6 (64 sec).
+* The poll interval should not be modified for reference clocks, with
+the single exception the ACTS telephone modem driver. In this case the
+recommended minimum and maximum intervals are 12 (1.1 hr) and 17 (36
+hr), respectively.
+
+[[burst]]
+== Burst Options ==
+
+Occasionally it is necessary to send packets temporarily at intervals
+less than the poll interval. For instance, with the +burst+ and +iburst+
+options of the link:confopt.html[+server+] command, the poll program
+sends a burst of several packets at 2 second intervals. In either case the
+poll program avoids sending needless packets if the server is not
+responding. The client begins a burst with a single packet. When the
+first packet is received from the server, the client continues with the
+remaining packets in the burst. If the first packet is not received
+within 64 s, it will be sent again for two additional retries before
+beginning backoff. The result is to minimize network load if the server
+is not responding. Additional details are on the link:poll.html[Poll
+Program] page.
+
+There are two burst options where a single poll event triggers a burst.
+They should be used only with the +server+ and +pool+ commands, but not
+with reference clock drivers nor symmetric mode peers. In both modes,
+received server packets update the clock filter, which selects the best
+(most accurate) time values. When the last packet in the burst is sent,
+the next received packet updates the system variables and adjusts the
+system clock as if only a single packet exchange had occurred.
+
+The +iburst+ option is useful where the system clock must be set quickly
+or when the network attachment requires an initial calling or training
+sequence, as in PPP or ISDN services. In general, this option is
+recommended for +server+ and +pool+ commands. A burst is sent only when
+the server is unreachable; in particular, when first starting up.
+Ordinarily, the clock is set within a few seconds after the first
+received packet. See the link:clock.html[Clock State Machine] page for
+further details about the startup behavior.
+
+The +burst+ option is useful in cases of severe network jitter or when
+the network attachment requires an initial calling or training sequence.
+This option is recommended when the minimum poll exponent is larger than
+10 (1024 sec). A burst is sent only when the server is reachable. The
+number of packets in the burst is determined by the poll interval so
+that the average interval between packets (headway) is no less than the
+minimum poll interval for the association.
+
+'''''
+
+include::includes/footer.adoc[]

@@ -1,0 +1,618 @@
+= How-to for NTPsec hackers =
+
+Annoying but necessary legalese:
+
+    By submitting patches to this project, you agree to allow them to be
+    redistributed under the project's license according to the normal
+    forms and usages of the open-source community.
+
+If you want to learn more about the code internals, consult the
+../devel/tour.adoc file.  This document is about development practices
+and project conventions.
+
+You may also find the articles at https://blog.ntpsec.org/
+interesting.
+
+== Choice of language ==
+
+In order to reduce the complexity of maintenance and testing
+due to multiple languages, we hold the set of allowed languages
+to a minimum.
+
+Time-critical code must be written in C. Use Python for any code that
+is not time-critical, as this reduces line count and complexity (thus,
+also, expected defect rates). If you need an NTP-specific C function
+not available in Python, try to improve the libntpc extension
+in ../libntp/pymodule.c to expose it.
+
+The only scripting language allowed and supported other than Python is
+POSIX sh (this is more restricted than bash!).  Python is preferred, as
+it's easier to verify portability in Python than it is in sh.
+
+Please read our C and Python guidelines carefully; they're not just
+about style, they're serious measures to reduce defect rates.
+
+== C Guidelines ==
+
+=== C API standards ===
+
+The baseline C standard to write to is ISO/IEC 9899:1999, also known
+as C99 (but see the following section on banned functions).  Note that
+C99 is a coding standard, not an ABI standard, so it can happily
+coexist with distributions that use C89 conventions.
+
+You can download the C99 standard for free from here:
+    https://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
+
+You *may* use C11-style anonymous unions.
+
+Only POSIX-1.2001/SUSv3 library functions should be used (a few
+specific exceptions are noted below).  If a library
+function not in that standard is required, then a wrapper function for backward
+compatibility must be provided.  One notable case is clock_gettime()
+which is used, when available, for increased accuracy, and has a
+fallback implementation using native time calls.
+
+You can read POSIX-1.2001, with 2004 Corrigendum, online for free here:
+    http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
+
+You can see POSIX.1-2001, SUSv3, online for free here:
+    http://www.unix-systems.org/version3/
+
+POSIX threads *are* considered part of the standardized API and may be used.
+
+You *may* assume the clock_gettime(2) and clock_settime(2) calls, and
+the related getitimer(2)/setitimer(2), from POSIX-1.2008.
+
+Here are the non-standardized APIs that may be used:
+
+* Either ntp_adjtime() or the older BSD adjtime(2).
+
+* Berkeley sockets and the IPv6 API defined in RFC 2493 and RFC 2553.
+
+* getifaddrs(3) or an equivalent local API for iterating over the
+  system's active UDP interfaces. However, the local details should be
+  hidden as an implementation of the isc_interfaceiter.c functions,
+  not called directly from the rest of the code.
+
+* Local facilities for reading packet arrival timestamps out of the
+  UDP packet layer.  See ntpd/ntp_packetstamp.c for details - if you
+  add a local hack to do this, it needs to be sealed inside that module.
+
+=== Banned functions ===
+
+The following C99/POSIX functions are BANNED.  They are unsafe, tending to
+cause buffer overruns and (all too often) exploitable security holes:
+
+* strcpy, strncpy, strcat:  Use strlcpy and strlcat instead.
+* sprintf, vsprintf: use snprintf and vsnprintf instead.
+* In scanf and friends, the %s format without length limit is banned.
+* strtok: use strtok_r() or unroll this into the obvious loop.
+* gets: Use fgets instead.
+* gmtime(), localtime(), asctime(), ctime(): use the reentrant *_r variants.
+* tmpnam(): use mkstemp() or tmpfile() instead.
+
+Do not rely on dirname() being reentrant, and assume it will modify
+(truncate) its argument. The Linux version is re-entrant, but this
+property is not portable.
+
+In general, avoid functions that are non-reentrant.  When in doubt, see
+http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
+
+=== Banned features ===
+
+All C files should be in plain US-ASCII encoding; do not use trigraphs.
+
+=== Other interfaces to be avoided ===
+
+Don't use gettimeofday(2).  While this is nominally POSIX, it is
+deprecated and may be removed in the future.  Use clock_gettime(2)
+instead.
+
+Use pselect(2) rather than select(2), to avoid introducing struct
+timeval.
+
+In general, avoid introducing the type struct timeval into the code,
+in favor of the higher-resolution struct timespec. Early on in
+NTPsec's history, we found a bug introduced by poor data management
+where these two time representations bumped into each other; we don't
+want that to happen again. Thus, if you must refer to struct timeval due to
+an external interface, move the data to/from a struct timespec as
+close to that call site as possible.
+
+=== Coding style and indentation ===
+
+Dr. Dave Mills liked this code indented formatted in a consistent way.
+The file "dot.emacs" has the emacs C-mode indentation style that Dave
+likes. It's a bit archaic, but we've stuck with it to preserve
+continuity; you should, too.
+
+A discussion about using uncrustify to mass convert all the C sources
+to a more current indentation and format style is ongoing.  As it will
+result in a coordinated flag day in ongoing development, it will be
+carefully announced in the mailto:devel@ntpsec.org mailing list before
+being merged and pushed.
+
+=== Conventions for #ifdef guard names ===
+
+Parts of this code are a thicket of C preprocessor conditionals.
+In an attempt to make these halfway comprehensible, we use the
+following conventions to distinguish classes of macro names:
+
+ENABLE_*::
+	Gates the code for an optional feature.  Set by a switch on
+	the "waf configure" invocation.
+
+GUARD_*::
+	Symbols with the GUARD_ prefix are idempotency guards - that is,
+	they're used to nullify inclusions of a header file
+	after the first. They don't interact with the build system's
+	configuration logic in any way at all.
+
+HAVE_*_H::
+	Guard symbol derived by configuration logic from checking
+	for the presence of a system header.  For example, the symbol
+	HAVE_SYS_FOOBAR_H gets defined only if waf configure detects
+	the presence of sys/foobar.h in the system include directory.
+
+HAVE_*::
+	Without an H suffix, a HAVE symbol is set on the availability
+	of a specified function in the system libraries.
+
+NEED_*::
+	Need symbols conditionalize porting hacks the need for which
+	cannot be detected by checking for a system header or
+	function, but instead have to be probed for by some ad-hoc
+	test in waf configure.
+
+OVERRIDE_*::
+	Override a default for debugging purposes. These are values
+	(buffer lengths and the like) which waf is not expected to
+	override normally but which might need to be forced.
+
+USE_*::
+	Use symbols are set internally within other conditionals to
+	gate use of sections of code that must be conditionally
+	compiled depending on *combinations* of HAVE and NEED symbols.
+
+=== Cross-platform portability ===
+
+Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
+to assume the code will never run on a 16-bit machine.  When in doubt,
+and whenever possible, use the fixed-width integral types from
+<stdint.h>.
+
+You *may* assume that the compiler supports POSIX 64-bit integral types
+(int64_t, uint64_t and friends) even if the target hardware is 32-bit.
+
+Do not assume any particular endianness. When in doubt, use
+htons()/htonl()/ntohs()/ntohl() and do your bit-bashing in network
+(big-endian) byte order.
+
+Do not assume anything about sign-bit interpretation in chars.  Target
+machines may have either signed or unsigned characters.
+
+Do not rely on assumptions about how structure or unions are padded.
+Historically, the NTP code assumed self-alignment.  We're trying
+to eliminate that assumption, but the work isn't finished.
+
+Do not assume you can cast pointers to ints, or vice-versa.  While this
+is true on effectively all modern hardware, the code runs on some
+sufficiently old iron that this is not necessarily the case even if
+the compiler and toolchain have been modernized.
+
+== Python guidelines ==
+
+You may assume Python 2 at 2.6 or later, or Python 3 at 3.3 or later.
+
+Please read https://www.python.org/dev/peps/pep-0008/[PEP 8] and use
+that style.  The only PEP 8 style rule we relax is that you may
+specify multiple module names in an import rather than going strictly
+with one per line.  The point is to encourage you to group your import
+declarations in informative ways.
+
+You *must* write Python code to be 'polyglot', that can run
+unaltered under 2 or 3.  Practices for doing so are documented in
+detail at
+
+http://www.catb.org/esr/faqs/practical-python-porting/
+
+Note that Python 3.x versions before 3.3 had sufficiently serious
+backward-compatibility issues that trying to make them run is probably
+doomed.  The first 3.x version under which our Python has been
+extensively tested is 3.5.
+
+Please check your Python code with Pyflakes.  If your code fails
+a Pyflakes test, we probably will not merge it.
+
+https://pypi.python.org/pypi/pyflakes
+
+Note: In the future, the Python baseline may
+http://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[change
+t 2.7.2].
+
+== General notes ==
+
+=== Build system ===
+
+The build uses waf, replacing a huge ancient autoconf hairball that
+caused many problems. The waf script is embedded in the top level of
+the distribution; run "./waf --help" or consult INSTALL for basic
+instructions.
+
+Full waf documentation is at https://waf.io/
+
+=== Naming conventions ===
+
+Every binary and script we install has an "ntp" prefix on the name
+because namespace pollution is rude.  If you write a new tool that you
+want us to install, follow this convention.
+
+Generally, we favor "ntp" rather than "ntp-" for consistency and to
+reduce the amount people have to type. Choose tastefully.
+
+=== Well-tempered output ===
+
+We are devotees of the Unix rule that programs should play nicely
+with other programs.  We like output formats that are simple,
+regular, and machine-parseable without ambiguity. The practical
+goal to aim at, given our choice of scripting languages,
+is to make writing script wrappers in Python easy.
+
+There is more than one way to arrange this.  If you can design a
+simple tabular output format, or something resembling an RFC 2822 header
+that's easy for both human eyes and programs to parse, do that.
+Besides being simple, formats like these are easily handled by either
+Python or shell scripts.
+
+Such simplicity is often difficult or impractical for heterogeneous
+data that needs to be both grouped and labeled, so we have another
+convention for those cases. Here it is:
+
+[quote]
+Wherever it is reasonable, tools that generate complex reports to
+standard output should be able to emit two formats. The default can be
+[a] relatively unstructured multiline text for human eyeballs. There
+should also be a -j/--json option that emits a self-describing JSON
+object.
+
+You can read about JSON at http://www.json.org/
+
+Be aware that if you present a tool design with a messy output format
+and no JSON option, it is quite likely to be rejected.
+
+Our preferred format for dates is RFC 3339 (a version of ISO 8601 for
+UTC with some options frozen; full year required, medial T required,
+explicit Zulu timezone). Local times should be expressed in ISO 8601,
+always with the full 4-digit year.
+
+=== Copyrights and licenses ===
+
+Much of the historic code in this distribution is under the "NTP
+License" resembling BSD-2-clause.  Our favored licenses are
+BSD-2-clause for code and Creative Commons Attribution 4.0 License
+for documentation.
+
+Please do *not* submit code under GPL or other licenses which place
+conditions on derived works; we cannot accept such code.
+
+It is your responsibility to make sure you have the necessary rights
+to contribute a patch to the project.
+
+We use the SPDX convention for inclusion by reference.  You can read
+about this at
+
+      https://spdx.org/licenses
+
+When you create a new file, mark it as follows (updating the year)
+as required:
+
+------------------------------------------------
+/* Copyright 2018 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+------------------------------------------------
+
+For documentation:
+
+------------------------------------------------
+// Copyright 2018 by the NTPsec project contributors
+// SPDX-License-Identifier: CC-BY-4.0
+------------------------------------------------
+
+Modify as needed for whatever comment syntax the language or markup uses.
+Good places for these markings are at the end of an extended
+header comment, or at the very top of the file.
+
+When you modify a file, leave existing copyright markings in place -
+especially all references to Dr. Dave Mills, to Mr. Harlan Stenn, and
+to the Network Time Foundation.
+
+You *may* add project copyright and replace the inline license
+with an SPDX tag. For example:
+
+------------------------------------------------
+/* Copyright 2018 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
+ */
+------------------------------------------------
+
+We recognize that occasionally a file may have changed so much that
+the historic copyright is no longer appropriate, but such decisions
+cannot be made casually. Discuss it with the project management
+before moving.
+
+=== Document what you do ===
+
+When you change anything user-visible, you are expected to update the
+relevant documentation *in the same commit*.  No exceptions.
+
+Otherwise, we'd have to inflict long, tedious document reviews on
+everybody. Nobody wants that.
+
+=== Documentation format and structure ===
+
+All our documentation is mastered in asciidoc.  That includes internal
+documentation like this file. We do this because asciidoc is easy to
+edit and gives us good options for rendering to multiple formats,
+including both HTML and Unix manual pages
+
+If you're going to write in anything else you need to have a good
+reason, and the bar for "good" will be set high.  "I like Markdown",
+in particular, does not qualify - Markdown doesn't have good enough table
+support for our needs.  ReST does, but the hassle costs of supporting
+two different master markups are too high.
+
+If you must use non-ASCII characters, use UTF-8 and not Latin-1 or
+any other encoding.  Best practice is to use XML character entities.
+
+The NTP Classic documentation had a terrible problem with duplicative
+documentation gradually diverging as the duplicates mutated and
+bitrotted. Therefore one of our house rules is to have a *single point
+of truth* for everything.
+
+Accordingly, the way we handle pairs of manual and Web pages that
+need to have the same content is to have both be thin wrappers around
+a large common include file. These includes live in docs/includes
+and are probably what you need to edit if you're updating anything
+that appears on a man page.
+
+=== Version number ===
+
+We use a variant of three-part Semantic Versioning, of the form X.Y.Z.
+X, Y, and Z are non-negative decimal integers.
+
+X is the "major" version number.
+Y is the "minor" version number.
+Z is the "revision" number.
+
+Each release will result in an incremented version number and the
+version number string will be tagged into the git repository.
+
+We have dropped even/odd minor version number stable/development
+release semantics.  Development on NTPsec has been carefully
+incremental with a strong emphasis on stabilty and correctness, such
+that it turned out to be unneeded.
+
+The first public release was version 0.9.0.
+The first production and distribution ready release was 1.0.0.
+
+We currently have no formal policies for the criteria for releases,
+for the schedule of releases, and no formal policies for backporting
+bugfixes.  Feel free to discuss it with project management.
+
+Note that this is a different numbering system from NTP Classic. In
+their A.B.C numbers, A was the protocol version, B was the major, and
+C was the minor.  They also use release-candidate suffixes.
+
+== Version string ==
+
+We use the BUILD_EPOCH as described in packaging/packaging.adoc for
+the timestamp (converted to RFC 3339 format) part of the version
+string reported in ntpd and other binaries.
+
+Release builds have version strings of the form:
+
+<base version number> <BUILD_EPOCH in RFC 3339 format>
+
+Development builds have version strings of the form:
+
+<base version number>+ <BUILD_EPOCH in RFC 3339 format> (git rev <git shorthash>)
+
+== Contribution workflow and conventions ==
+
+Please work on one piece of conceptual work at a time.
+
+Please make sure your code builds and passes the test suite before you
+commit it, and especially before you push it.
+
+Before starting significant work, propose it first in the
+mailto:devel@ntpsec.org mailing list.  Other people may have
+suggestions, will want to collaborate, and will wish to review your
+code.
+
+=== Git ===
+
+We use Git as our distributed version control system.
+
+If you ever get stuck or confused while using Git, please consult
+http://ohshitgit.com/
+
+=== GitLab.com ===
+
+We use GitLab.com as our forge.
+
+Our GitLab group is at https://gitlab.com/groups/NTPsec
+
+Please use the issue tracker and the pull request process at GitLab.com.
+
+If you wish, you can request to join the GitLab project team at
+https://gitlab.com/groups/NTPsec/group_members, and we will add you to the
+team with Guest access; this will cause GitLab to send issue tracker
+updates and pipeline updates to your email address.  You do not have
+to formally be a member of the GitLab team to participate, contribute,
+or send issues, patches, or pull requests.
+
+Granting other levels of GitLab project team access is at the discretion
+of the Project Manager, after consulting with the existing core team.
+Generally, other levels of access will not be granted, as they are not
+necessary to be a welcome and effective contributor.
+
+=== Optional: Send patches by email ===
+
+If you do not want to use GitLab pull requests, we welcome simple fix
+and "drive-by" patches submitted by email.
+
+Please create the patch with git format-patch.
+
+If for some reason it is impossible for you to use git format-patch,
+at least send context (-c) or unified (-u) diffs rather than the
+default ed (-e) style, which is very brittle.
+
+You can email your patch to mailto:devel@ntpsec.org if you are a member of
+that mailing list or you can email your patch to
+mailto:contact@ntpsec.org if you are not.
+
+Please make sure your "From:" header in the email is correct, as that
+is what will be used as the attribution of the commit.
+
+The team member who merges your patch will use the git
+parameter ---author from the email From header and the git parameter
+--date from the email Date header.
+
+For complex patches and contribution narratives, please use GitLab.
+
+== Commit comments ==
+
+And please follow git conventions for change comments. That means your comment
+should consist of:
+
+* A summary line, never more than 69 characters long and ideally no more than
+  50 characters long.  These numbers are set by the window sizes of various
+  common web views of git repositories.
+
+* Your summary line should be terse and imperative.  "Fix bug #666" "Add DWIM
+  feature" and "Typo repair" are good summary lines.
+
+* If your comment is longer than the summary line, separate it from
+  the summary with a blank line.
+
+* The remainder of your comment should be one or more paragraphs line-wrapped at
+  72 characters - please do *not* enter entire paragraphs as single lines, it
+  makes life more difficult for browsing tools and people viewing the output of
+  git format-patch. Bulleted list items are also OK.
+
+* In some cases it may be appropriate to end your summary line with a comma
+  or ellipsis ("...") to indicate that it runs directly into the following
+  paragraph. You should still try to make the summary self-contained when
+  you do this.
+
+Finally, it is not necessary (and is in fact bad style) to list all
+the files a multi-file commit touches in the comment for it.  The
+--name-status, --name-only, and --stat options of git log will report
+this information to users who want it.  It is still appropriate
+to list a file path if you have something specific to say about that
+individual file, or if it's the only one touched in a single-file
+change and you can easily fit it in the summary line along with your
+summary.
+
+Yes, we know the pre-git portions of the history violate some of these.
+That was then; this is now.
+
+=== How to refer to previous commits ===
+
+The best (most human-friendly) way to reference a commit is by quoting its
+summary line; if you need to disambiguate, give its date and author.
+
+The worst way is to quote its git hash because humans are not good at
+keeping random strings of hex digits in working memory.  Besides, hashes
+will break if the history is ever moved to another VCS or the repository
+has to be surgically altered.
+
+=== Avoid unnecessary merge bubbles ===
+
+There are two kinds of merge bubbles in git commit graphs. The
+necessary kind happens because branches have genuinely diverged enough
+that a merge by hand is required - common files have been touched in
+incompatible ways. In the unnecessary kind, the patches on either side
+of the bubble commute cleanly, but the developer on one side or the other
+forgot to rebase so his commit would be a fast-forward.
+
+We strongly dislike unnecessary merge bubbles.  They make the
+repository history hard to read, and can make bisection tests
+trickier. We prefer the code to have a simple, close-to-linear
+history even if that means older commits are sometimes fast-forwarded
+from new ones because a long-lived branch was rebased.
+
+To avoid merge bubbles, git pull --rebase before pushing.  This will
+pull all pending commits from the repo, then attempt to rebase your
+local commits on the new tip.  You may find it helpful to set
+"rebase = true" in your .git/config, so it looks like this:
+
+-------------------------------------------------------------
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+	rebase = true
+-------------------------------------------------------------
+
+Setting this option adds --rebase to all your pulls; this may cause
+a minor inconvenience when you have uncommitted local changes; you
+should be able to use "git stash" to get around that.
+
+== Logging tags ==
+
+To facilitate analysis of logs, log messages are tagged with an initial
+topic group token.  These are:
+
+DNS:: DNS Lookup
+MAC:: Message authentication hash computation
+AUTH:: Authorization-key handling
+ERR:: Low-level errors from resource-management libraries
+BUG:: Bugs in the code
+LOG:: Log switching and debug levels
+CLOCK:: Low-level clock manipulation and validation checks & leap-second code
+CONFIG:: Configuration parsing and interpretation
+INIT:: Daemon setup
+SYNC:: Server synchronization
+PROTO:: Protocol machine actions
+REFCLOCK:: Reference clock and driver actions
+MODE6:: Processing of Mode 6 requests
+
+== Release Checklist ==
+
+This is the release checklist to be used by the project manager to cut
+each release.
+
+. Decide that it is time to cut a release.  This decision can be driven
+  by landing a significant new feature, landing a critical fix, or just
+  that enough time has passed with ongoing improvements and fixes.
+
+. Email a warning message to the mailto:devel@ntpsec.org list,
+  and ask the major contributors to chime in, and to each assure
+  that the .../NEWS file and the .../devel/TODO file is up to date.
+
+. Wait for the contributors to answer and for the discussion
+  to settle down.  If the discussion suggests that now is not a good
+  time to cut a release, wait until the raised issues are resolved.
+
+. Check with the buildbot reports, assure that there are no unplanned
+  regressions on the supported platforms.
+
+. Modify the .../VERSION file with the new version number.
+  Version number strings look like "1.1.1"
+
+. Modify the .../NEWS file, changing the "Repository head"
+  to the current date and the version string.
+
+. Run ./waf configure
+
+. Run ./waf build
+
+. cd ./devel
+
+. Run the "release" script in this (devel) directory.
+
+. Post release announcement
+
+//end

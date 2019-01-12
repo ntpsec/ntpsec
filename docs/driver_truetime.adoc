@@ -1,0 +1,127 @@
+= TrueTime GPS/GOES Receivers =
+include::html.include[]
+
+== Synopsis ==
+
+["verse",subs="normal"]
+Name: truetime
+Reference ID: TRUE
+Serial Port: +/dev/true+'u'; 9600 bps 8N1
+Features: +tty_clk+
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The NTPsec maintainers plan
+to remove it in a future release.  If you have a requirement for it,
+please make this known to us.
+
+This driver reports only two-digit years, and is thus reliant on the
+system clock to be near correct before samples will be processed
+properly. You will not be able to use it to run autonomously, nor will
+it reliably recover from a trashed or zeroed system clock.
+
+== Description ==
+
+This driver supports several models of Kinemetrics/TrueTime
+timing receivers, including GPS- DC MK III and GPS/TM-TMD GPS
+Synchronized Clock, XL-DC (a 151-602-210, reported by the driver as a
+GPS/TM-TMD), GPS-800 TCU (an 805-957 with the RS232 Talker/Listener
+module), and very likely others in the same model families that use
+the same timecode formats.
+
+Most of this code is originally from refclock_wwvb.c (now
+refclock_spectracom.c) with thanks. It has been so mangled that wwvb is
+not a recognizable ancestor.
+
+[literal]
+Timecode format: ADDD:HH:MM:SSQCL
+A - control A (this is stripped before we see it)
+Q - Quality indication (see below)
+C - Carriage return
+L - Line feed
+
+
+Quality codes indicate possible error of:
+
+--------------------------------------------------
+GPS-TM/TMD Receiver
+    ? +/- 500 milliseconds # +/- 50 milliseconds
+    * +/- 5 milliseconds . +/- 1 millisecond
+    space less than 1 millisecond
+--------------------------------------------------
+
+In general, an alarm condition is indicated by ? at A, which occurs during
+initial synchronization and when received signal is lost for an
+extended period; unlock condition is indicated by other than <SP>
+in the quality field.
+
+== Notes on the TL-3 receiver: ==
+
+The mini-DIN RS-232 port uses the Apple pinout.
+
+Send the clock ST1 to turn on continuous (1/s) timecodes. You can
+also enable "mode C" via the front panel. ST0 turns off this mode.
+
+QV will return the firmware revision (and is useful in identifying
+this clock.)
+
+QW will return its weekly signal log, useful if you're testing
+antennas. You may wish to turn the loss interval down from 4 h (04) to 1 h
+(01), so the receiver declares itself unlocked sooner. When in holdover,
+drift can be on the order of 10 ms/hr since there is no high quality
+reference oscillator.
+
+== Monitor Data ==
+
+When enabled by the +flag4+ option, every received timecode is
+written as-is to the +clockstats+ file.
+
+== Driver Options ==
+
++unit+ 'number'::
+  The driver unit number, defaulting to 0. Used as a distinguishing
+  suffix in the driver device name.
++time1+ 'time'::
+   Specifies the time offset calibration factor, in seconds and fraction,
+   to be used for the West satellite, with default 0.0.
++time2 time+::
+   Specifies the time offset calibration factor, in seconds and fraction,
+   to be used for the East satellite, with default 0.0.
++stratum+ 'number'::
+   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
++refid+ 'string'::
+   Specifies the driver reference identifier, an ASCII string from one to
+   four characters, with default +TRUE+.
++flag1 {0 | 1}+::
+   Silence the clock side of ntpd, just reading the clock without trying to
+   write to it.
++flag2 {0 | 1}+::
+   Generate a debug file /tmp/true%d.
++flag3 {0 | 1}+::
+   Not used by this driver.
++flag4 {0 | 1}+::
+   Enable verbose +clockstats+ recording if set.
++subtype+::
+   Not used by this driver.
++mode+::
+   Not used by this driver.
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
+  Overrides the default baud rate.
+
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock truetime
+----------------------------------------------------------------------------
+
+== Additional Information ==
+
+link:refclock.html[Reference Clock Drivers]
+
+'''''
+
+include::includes/footer.adoc[]

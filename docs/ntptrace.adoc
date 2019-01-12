@@ -1,0 +1,35 @@
+= ntptrace - trace a chain of NTP servers back to the primary source =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice13.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+The rabbit knows the way back.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+* link:#_options[OPTIONS]
+* link:#_bugs[Bugs]
+
+'''''
+
+include::includes/ntptrace-body.adoc[]
+
+== Bugs ==
+
+This program makes no attempt to improve accuracy by doing multiple
+samples.
+
+'''''
+
+include::includes/footer.adoc[]

@@ -1,0 +1,43 @@
+= ntpq - standard NTP query program =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/bustardfly.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+A typical NTP monitoring packet
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+'''''
+== Table of Contents ==
+
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#_options[Options]
+* link:#_internal_commands[Internal Commands]
+* link:#_control_message_commands[Control Message Commands]
+* link:#auth[Authentication]
+* link:#status[Status Words and Kiss Codes]
+* link:#system[System Variables]
+* link:#peer[Peer Variables]
+* link:#clock[Clock Variables]
+* link:#_compatibility[Compatibility]
+* link:#_known_limitations[Known Limitations]
+* link:#_mode_6_protocol[Mode 6 Protocol]
+
+include::includes/ntpq-body.adoc[]
+
+== Mode 6 Protocol ==
+
+The Mode 6 protocol used by ntpq to communicate with ntpd
+is described link:mode6.html[here].
+
+'''''
+
+include::includes/footer.adoc[]

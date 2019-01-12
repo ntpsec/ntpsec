@@ -1,0 +1,238 @@
+= Copyright Notice =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/sheepb.jpg[]|
+"Clone me," says Dolly sheepishly.
+
+|==============================
+
+'''''
+
+The following copyright notice applies to all files collectively called
+the Network Time Protocol Version 4 Distribution. Unless specifically
+declared otherwise in an individual file, this entire notice applies as
+if the text was explicitly included in the file.
+
+-----------------------------------------------------------------------
+***********************************************************************
+*                                                                     *
+* Copyright (c) University of Delaware 1992-2015                      *
+*                                                                     *
+* Permission to use, copy, modify, and distribute this software and   *
+* its documentation for any purpose with or without fee is hereby     *
+* granted, provided that the above copyright notice appears in all    *
+* copies and that both the copyright notice and this permission       *
+* notice appear in supporting documentation, and that the name        *
+* University of Delaware not be used in advertising or publicity      *
+* pertaining to distribution of the software without specific,        *
+* written prior permission. The University of Delaware makes no       *
+* representations about the suitability this software for any         *
+* purpose. It is provided "as is" without express or implied          *
+* warranty.                                                           *
+*                                                                     *
+***********************************************************************
+-----------------------------------------------------------------------
+
+Content starting in 2011 from Harlan Stenn, Danny Mayer, and Martin
+Burnicki is:
+
+-----------------------------------------------------------------------
+***********************************************************************
+*                                                                     *
+* Copyright (c) Network Time Foundation 2011-2015                     *
+*                                                                     *
+* All Rights Reserved                                                 *
+*                                                                     *
+* Redistribution and use in source and binary forms, with or without  *
+* modification, are permitted provided that the following conditions  *
+* are met:                                                            *
+* 1. Redistributions of source code must retain the above copyright   *
+*    notice, this list of conditions and the following disclaimer.    *
+* 2. Redistributions in binary form must reproduce the above          *
+*    copyright notice, this list of conditions and the following      *
+*    disclaimer in the documentation and/or other materials provided  *
+*    with the distribution.                                           *
+*                                                                     *
+* THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS  *
+* OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  *
+* ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE    *
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR *
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT   *
+* OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR  *
+* BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF          *
+* LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT           *
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE   *
+* USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH    *
+* DAMAGE.                                                             *
+***********************************************************************
+-----------------------------------------------------------------------
+
+The following individuals have contributed significantly to
+NTPsec:
+
+* mailto:esr@thyrsus.com[Eric S. Raymond <esr@thyrsus.com>] Massive
+  code reduction/refactoring/hardening, documentation cleanup and update,
+  new refclock configuration syntax.
+* mailto:gem@rellim.com[Gary E. Miller <gem@rellim.com>] Code
+  ANSIfication, testing, ntpviz
+* mailto:dfranke@dfranke.us[Daniel Fox Franke <dfranke@dfranke.us>]
+  CVE fixes, protocol machine refactoring.
+* mailto:hmurray@megapathdsl.net[Hal Murray <hmurray@megapathdsl.net>]
+  Code cleanups, bug hunting, sage advice.
+* mailto:verm@darkbeer.org[Amar Takhar <verm@darkbeer.org>] waf build recipe.
+* mailto:matthew.selsky@twosigma.com[Matt Selsky
+  <matthew.selsky@twosigma.com>] Documentation corrections,
+  compiler warning and port cleanup.
+
+The following individuals contributed in part to the Network Time
+Protocol Distribution Version 4 ("NTP Classic") and are acknowledged
+as authors of this work.
+
+* mailto:takao_abe@xurb.jp[Takao Abe <takao_abe@xurb.jp>] Clock
+  driver for JJY receivers
+* mailto:karl@owl.HQ.ileaf.com[Karl Berry <karl@owl.HQ.ileaf.com>]
+  syslog to file option
+* mailto:Marc.Brett@westgeo.com[Marc Brett
+  <Marc.Brett@westgeo.com>] Magnavox GPS clock driver (removed in NTPsec)
+* mailto:Piete.Brooks@cl.cam.ac.uk[Piete Brooks
+  <Piete.Brooks@cl.cam.ac.uk>] Trimble PARSE support
+* mailto:nelson@bolyard.me[Nelson B Bolyard <nelson@bolyard.me>]
+  update and complete broadcast and crypto features in sntp
+* mailto:Jean-Francois.Boudreault@viagenie.qc.ca[Jean-Francois
+  Boudreault <Jean-Francois.Boudreault@viagenie.qc.ca>] IPv6 support
+* mailto:reg@dwf.com[Reg Clemens <reg@dwf.com>] Oncore driver
+  (Current maintainer)
+* mailto:Sven_Dietrich@trimble.COM[Sven Dietrich
+  <sven_dietrich@trimble.com>] Palisade reference clock driver
+* mailto:duwe@immd4.informatik.uni-erlangen.de[Torsten Duwe
+  <duwe@immd4.informatik.uni-erlangen.de>] Linux port
+* mailto:dennis@mrbill.canet.ca[Dennis Ferguson
+  <dennis@mrbill.canet.ca>] foundation code for NTP Version 2 as specified
+  in RFC 1119
+* mailto:jhay@icomtek.csir.co.za[John Hay
+  <jhay@icomtek.csir.co.za>] IPv6 support and testing
+* mailto:davehart@davehart.com[Dave Hart <davehart@davehart.com>]
+  General maintenance
+* mailto:neoclock4x@linum.com[Claas Hilbrecht
+  <neoclock4x@linum.com>] NeoClock4X clock driver
+* mailto:glenn@herald.usask.ca[Glenn Hollinger
+  <glenn@herald.usask.ca>] GOES clock driver (removed in NTPsec)
+* mailto:jbj@chatham.usdesign.com[Jeff Johnson
+  <jbj@chatham.usdesign.com>] massive prototyping overhaul
+* mailto:Hans.Lambermont@nl.origin-it.com[Hans Lambermont
+  <Hans.Lambermont@nl.origin-it.com>] or
+  mailto:H.Lambermont@chello.nl[<H.Lambermont@chello.nl>] ntpsweep
+* mailto:phk@FreeBSD.ORG[Poul-Henning Kamp <phk@FreeBSD.ORG>]
+  Oncore driver (Original author)
+* http://www4.informatik.uni-erlangen.de/%7ekardel[Frank Kardel]
+  mailto:kardel@ntp.org[<kardel (at) ntp
+  (dot) org>] PARSE <GENERIC> (driver 14 reference clocks), STREAMS
+  modules for PARSE, support scripts, syslog cleanup, dynamic interface
+  handling
+* mailto:kuehn@ntp.org[Johannes Maximilian Kuehn <kuehn@ntp.org>]
+  Rewrote +sntp+ to comply with NTPv4 specification
+* mailto:leres@ee.lbl.gov[Craig Leres <leres@ee.lbl.gov>] 4.4BSD
+  port, ppsclock, Magnavox GPS clock driver
+* mailto:louie@ni.umd.edu[Louis A. Mamakos <louie@ni.umd.edu>]
+  MD5-based authentication
+* mailto:thorinn@diku.dk[Lars H. Mathiesen <thorinn@diku.dk>]
+  adaptation of foundation code for Version 3 as specified in RFC 1305
+* mailto:mayer@ntp.org[Danny Mayer <mayer@ntp.org>]Network I/O,
+  Windows Port, Code Maintenance
+* mailto:mills@udel.edu[David L. Mills <mills@udel.edu>] Version 4
+  foundation, precision kernel; clock drivers: 1, 3, 4, 6, 7, 11, 13, 18,
+  19, 22, 36
+* mailto:mogul@pa.dec.com[Jeffrey Mogul <mogul@pa.dec.com>] ntptrace utility
+* mailto:neal@ntp.org[Rob Neal <neal@ntp.org>] config/parse code maintenance
+* mailto:jack@innovativeinternet.com[Jack Sasportas
+  <jack@innovativeinternet.com>] Saved a Lot of space on the stuff in the
+  html/pic/ subdirectory
+* mailto:shields@tembel.org[Michael Shields <shields@tembel.org>]
+  USNO clock driver
+* mailto:harlan@pfcs.com[Harlan Stenn <harlan@pfcs.com>]
+  General maintenance (see the ChangeLog)
+* mailto:ajit@ee.udel.edu[Ajit Thyagarajan <ajit@ee.udel.edu>]IP
+  multicast/anycast support
+* mailto:brian.utterback@oracle.com[Brian Utterback
+  <brian.utterback@oracle.com>] General codebase
+* mailto:loganaden@gmail.com[Loganaden Velvindron
+  <loganaden@gmail.com>] Sandboxing (libseccomp) support
+* mailto:vixie@vix.com[Paul A Vixie <vixie@vix.com>] TrueTime GPS
+  driver, generic TrueTime clock driver
+
+The following people contributed code to NTP Classic which has since
+been removed:
+
+* mailto:mark_andrews@isc.org[Mark Andrews <mark_andrews@isc.org>]
+  Leitch atomic clock controller
+* mailto:altmeier@atlsoft.de[Bernd Altmeier <altmeier@atlsoft.de>]
+  hopf Elektronik serial line and PCI-bus devices
+* mailto:vbais@mailman1.intel.com[Viraj Bais <vbais@mailman1.intel.com>] and
+  mailto:kirkwood@striderfm.intel.com[Clayton Kirkwood
+  <kirkwood@striderfm.intel.com>] port to WindowsNT 3.5
+* mailto:michael.barone@lmco.com[Michael Barone
+  <michael,barone@lmco.com>] GPSVME fixes
+* mailto:greg.brackley@bigfoot.com[Greg Brackley
+  <greg.brackley@bigfoot.com>] Major rework of WINNT port. Clean up
+  recvbuf and iosignal code into separate modules.
+* mailto:Piete.Brooks@cl.cam.ac.uk[Piete Brooks
+  <Piete.Brooks@cl.cam.ac.uk>] MSF clock driver
+* mailto:clift@ml.csiro.au[Steve Clift <clift@ml.csiro.au>] OMEGA clock driver
+* mailto:casey@csc.co.za[Casey Crellin <casey@csc.co.za>] vxWorks
+  (Tornado) port and help with target configuration
+* mailto:Sven_Dietrich@trimble.COM[Sven Dietrich
+  <sven_dietrich@trimble.com>] NT adj. residuals, integrated Greg's Winnt port.
+* mailto:dundas@salt.jpl.nasa.gov[John A. Dundas III
+  <dundas@salt.jpl.nasa.gov>] Apple A/UX port
+* mailto:davehart@davehart.com[Dave Hart <davehart@davehart.com>]
+  Windows port interpolation rewrite
+* mailto:iglesias@uci.edu[Mike Iglesias <iglesias@uci.edu>] DEC Alpha port
+* mailto:jim@jagubox.gsfc.nasa.gov[Jim Jagielski
+  <jim@jagubox.gsfc.nasa.gov>] A/UX port
+* mailto:kuehn@ntp.org[Johannes Maximilian Kuehn <kuehn@ntp.org>]
+  +ntpq saveconfig+
+* mailto:jones@hermes.chpc.utexas.edu[William L. Jones
+  <jones@hermes.chpc.utexas.edu>] RS/6000 AIX modifications, HPUX
+  modifications
+* mailto:dkatz@cisco.com[Dave Katz <dkatz@cisco.com>] RS/6000 AIX port
+* mailto:lindholm@ucs.ubc.ca[George Lindholm <lindholm@ucs.ubc.ca>]
+  SunOS 5.1 port
+* mailto:moeller@gwdgv1.dnet.gwdg.de[Wolfgang Moeller
+  <moeller@gwdgv1.dnet.gwdg.de>] VMS port
+* mailto:tmoore@fievel.daytonoh.ncr.com[Tom Moore
+  <tmoore@fievel.daytonoh.ncr.com>] i386 svr4 port
+* mailto:kamal@whence.com[Kamal A Mostafa <kamal@whence.com>] SCO OpenServer port
+* mailto:derek@toybox.demon.co.uk[Derek Mulcahy
+  <derek@toybox.demon.co.uk>] and mailto:d@hd.org[Damon Hart-Davis
+  <d@hd.org>] ARCRON MSF clock driver
+* mailto:neal@ntp.org[Rob Neal <neal@ntp.org>] Bancomm refclock
+* mailto:Rainer.Pruy@informatik.uni-erlangen.de[Rainer Pruy
+  <Rainer.Pruy@informatik.uni-erlangen.de>] monitoring/trap scripts,
+  statistics file handling
+* mailto:dirce@zk3.dec.com[Dirce Richards <dirce@zk3.dec.com>]
+  Digital UNIX V4.0 port
+* mailto:wsanchez@apple.com[Wilfredo Sánchez <wsanchez@apple.com>]
+  added support for NetInfo
+* mailto:mrapple@quack.kfu.com[Nick Sayer <mrapple@quack.kfu.com>]
+  SunOS streams modules
+* mailto:schnitz@unipress.com[Ray Schnitzler <schnitz@unipress.com>]
+  Unixware1 port
+* mailto:jss@pebbles.jpl.nasa.gov[Jeff Steinman
+  <jss@pebbles.jpl.nasa.gov>] Datum PTS clock driver
+* mailto:harlan@pfcs.com[Harlan Stenn <harlan@pfcs.com>] GNU
+  automake/autoconfigure makeover
+* mailto:ken@sdd.hp.com[Kenneth Stone <ken@sdd.hp.com>] HP-UX port
+* mailto:tsuruoka@nc.fukuoka-u.ac.jp[Tomoaki TSURUOKA
+  <tsuruoka@nc.fukuoka-u.ac.jp>]TRAK clock driver
+* mailto:brian.utterback@oracle.com[Brian Utterback
+  <brian.utterback@oracle.com>] Solaris issues
+* mailto:Ulrich.Windl@rz.uni-regensburg.de[Ulrich Windl
+  <Ulrich.Windl@rz.uni-regensburg.de>] corrected and validated HTML
+  documents according to the HTML DTD
+
+'''''
+
+include::includes/footer.adoc[]

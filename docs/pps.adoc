@@ -1,0 +1,105 @@
+= Pulse-Per-Second (PPS) Signal Interfacing =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice32.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Alice is trying to find the PPS signal connector.
+
+|==============================
+
+== Related Links ==
+
+include::includes/misc.adoc[]
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#opsys[Operating System Support]
+* link:#use[Using the Pulse-per-Second (PPS) Signal]
+
+'''''
+
+[[intro]]
+== Introduction ==
+
+Most conventional time sources (radio clocks and GPSes) are connected
+using a serial or USB port operating at speeds of 9600 bps. The
+accuracy using typical clock-radio timecode formats, where the on-time
+epoch is indicated by a designated ASCII character such as
+carriage-return +<cr>+, is normally limited to 100 &mu;s; NMEA streams
+from GPSes have a similar limit.  Some are worse; the SiRF line of
+consumer-grade GPSes, for example, has a long-period wander of over
+100 ms.
+
+Using carefully crafted averaging techniques, the NTP algorithms can
+whittle this down to a few tens of microseconds. However, some time
+sources produce a pulse-per-second (PPS) signal which can be used to
+improve the accuracy to a few microseconds. This page describes the
+hardware and software necessary for ntpd to use the PPS signal.
+
+The simplest way to collect a PPS signal is from a GPS over a serial
+handshake pin, typically DCD; Linux supports this.  On FreeBSD systems
+(with the PPS_SYNC and pps kernel options) it can be connected
+directly to the ACK pin of a parallel port. Clock radios are more
+complicated; their PPS signal levels are usually incompatible with
+serial port interface signals.  Note that NTPsec no
+longer supports connection via the RD pin of a serial port.
+
+[[opsys]]
+== Operating System Support ==
+
+Both the serial and parallel port connection require operating system
+support, which is available in a few operating systems, including
+FreeBSD, Linux, and Solaris.  The kernel interface described on the
+link:kernpps.html[PPSAPI Interface for Precision Time Signals] page is
+the only interface currently supported. Older PPS interfaces based on
+the +ppsclock+ and +tty_clk+ streams modules are no longer supported.
+The interface consists of the +timepps.h+ header file, which should be
+in the /usr/include/ or /usr/include/sys directory of your file
+system.
+
+== PPS Driver ==
+
+PPS support is built into some drivers, in particular the NMEA
+driver, and may be added to other drivers in future.  Alternatively,
+the PPS driver described on the link:driver_pps.html[PPS Clock
+Discipline] page can be used. It operates in conjunction with another
+source that provides seconds numbering. The selected source is
+designated as a 'prefer peer' using the +prefer+ option, as described on
+the link:prefer.html[Mitigation Rules and the +prefer+ Keyword]
+page. The prefer peer is ordinarily the radio clock that provides the
+PPS signal, but in principle another radio clock or even a remote
+Internet server could be designated preferred. Note that the +pps+
+configuration command has been obsoleted by this driver.
+
+[[use]]
+== Using the Pulse-per-Second (PPS) Signal ==
+
+The PPS signal can be used in three ways: using the NTP
+grooming and mitigation algorithms, or using the kernel PPS
+signal support described in the link:kern.html[Kernel Model for
+Precision Timekeeping] page, or via the shared-memory interface. The presence
+of  kernel support is automatically detected during the NTP build process and
+supporting code automatically compiled. Regardles of mechanism, the PPS signal
+must be present and within nominal jitter and wander tolerances. Additionally,
+the prefer peer must be a truechimer; that is, survive the sanity checks and
+intersection algorithm. Finally, the offset of the system clock relative
+to the prefer peer must be within ±0.5 s. The kernel maintains a
+watchdog timer for the PPS signal; if the signal has not been heard or
+is out of tolerance for more than some interval, currently two minutes,
+the kernel discipline is disabled and operation continues as if it were
+not present.
+
+An option flag in the driver determines whether the NTP algorithms, the
+kernel support, or the shared-memory interface is enabled (depending upon
+availability). For historical reasons, the NTP algorithms are selected by
+default, since performance is generally better when using older, slower
+systems. However, performance is generally better with kernel support or
+shared-memory support when using newer, faster systems.
+
+'''''
+
+include::includes/footer.adoc[]

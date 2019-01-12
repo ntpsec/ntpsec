@@ -1,0 +1,126 @@
+= Hewlett Packard GPS Receivers -  HP 58503A and HP Z3801A =
+include::html.include[]
+
+== Synopsis ==
+
+["verse",subs="normal"]
+Name: hpgps
+Reference ID: GPS
+Driver ID: GPS_HP
+Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
+
+== Warning ==
+
+As of September 2017 we have reports that the internal clock on a
+Z3801A was observed to roll over to 1998 (see
+link:rollover.html[Rollover issues in time sources]). Users should
+audit for rollover before deploying any of these devices.
+
+== Description ==
+
+This driver supports the HP 58503A Time and Frequency Reference Receiver
+and HP Z3801A GPS Receiver. It will probably work with other Z38xx models.
+Two-unit pairs of these are sometimes known as a KS-24361. All of
+these product are well past end-of-life.
+
+These receivers are very old designs, dating from around 1990, so
+their GPS receiver stages are not very sensitive by modern
+standards. On the other hand, lots of them are available cheap,
+because they used to be standard kit on cell towers and were surplussed
+off in the thousands.
+
+They use HP SmartClock (TM) to implement an Enhanced GPS receiver. The
+receiver accuracy when locked to GPS in normal operation is better
+than 1 µs. The accuracy when operating in holdover is typically
+better than 10 µs per day. The receiver should be operated with
+factory default settings. Initial driver operation: expects the
+receiver to be already locked to GPS, configured and able to output
+timecode format 2 messages.
+
+The driver uses the poll sequence +:PTIME:TCODE?+ to get a response from
+the receiver. The receiver responds with a timecode string of ASCII
+printing characters, followed by a <cr><lf>, followed by a prompt string
+issued by the receiver, in the following format:
+
+-------------------------------------
+T#yyyymmddhhmmssMFLRVcc<cr><lf>scpi >
+-------------------------------------
+
+The driver processes the response at the <cr> and <lf>, so what the
+driver sees is the prompt from the previous poll, followed by this
+timecode. The prompt from the current poll is (usually) left unread
+until the next poll. So (except on the very first poll) the driver sees
+this:
+
+-------------------------------------
+scpi >T#yyyymmddhhmmssMFLRVcc<cr><lf>
+-------------------------------------
+
+The T is the on-time character, at 980 ms before the next 1PPS edge.
+The # is the timecode format type. We look for format 2. Without any of
+the CLK or PPS stuff, then, the receiver buffer timestamp at the <cr> is
+24 characters later, which is about 25 ms. at 9600 bps, so the first
+approximation for the +time1+ option is nominally -0.955 s. This number
+probably needs adjusting for each machine / OS type, so far: -0.955000 s
+on an HP 9000 Model 712/80 HP-UX 9.05 -0.953175 s on an HP 9000 Model 370
+HP-UX 9.10
+
+This driver will probably work with the 58503B and 59551A if they are
+set up appropriately.
+
+To use an HP Z3801A, specify +subtype 1+ on the server config line to setup
+the right line parameters.
+
+The timekeeping portion of HP's business was sold to Symmetricom; Symmetricom
+was later acquired by https://www.microsemi.com/[Microsemi].
+
+== Rollover compensation ==
+
+Some devices in this product line have a front-panel display of
+date-time and controls to manipulate it.  On these, it is possible to
+reset the device's hidden base date for your current era. Consult
+your documentation for details.
+
+== Driver Options ==
+
++unit+ 'number'::
+  The driver unit number, defaulting to 0. Used as a distinguishing
+  suffix in the driver device name.
++time1+ 'time'::
+   Specifies the time offset calibration factor, in seconds and fraction,
+   with default 0.0.
++time2+ 'time'::
+   Not used by this driver.
++stratum+ 'number'::
+   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
++refid+ 'string'::
+   Specifies the driver reference identifier, an ASCII string from one to
+   four characters, with default +GPS+.
++flag1 {0 | 1}+::
+   Not used by this driver.
++flag2 {0 | 1}+::
+   Not used by this driver.
++flag3 {0 | 1}+::
+   Not used by this driver.
++flag4 {0 | 1}+::
+   Not used by this driver.
++subtype+::
+   Setting mode 1 configures for the HP Z3801A.
++mode+::
+  Synonym for subtype, retained for backward compatibility.
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
+  Overrides the default baud rate.
+
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock hpgps
+----------------------------------------------------------------------------
+
+'''''
+
+include::includes/footer.adoc[]

@@ -1,0 +1,52 @@
+= ntpkeygen - generate public and private keys =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice23.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Alice holds the key.
+
+|==============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[Synopsis]
+* link:#_description[Description]
+* link:#cmd[Command Line Options]
+* link:#run[Running the program]
+* link:#access[Key file access and location]
+* link:#random[Random Seed File]
+* link:#crypto[Cryptographic Data Files]
+
+'''''
+
+include::includes/ntpkeygen-body.adoc[]
+
+// The end of "Cryptographic Data Files" runs into this following text.
+
+image:pic/sx5.gif[]
+
+Figure 1. Typical Symmetric Key File
+
+Figure 1 shows a typical symmetric keys file used by the reference
+implementation. Each line of the file contains three fields, first
+keyno an integer between 1 and 65535, inclusive, representing the
+key identifier used in the `server` configuration commands. Next
+is the key type for the message digest algorithm, which can be any
+message digest algorithm supported by the OpenSSL library.
+
+For details, see {ntpkeysman}.
+
++ntpkeygen+ just makes a sample file with good random keys.  You can
+edit it by hand to change the keyno or keytype and/or copy lines to
+other key files.
+
+'''''
+
+include::includes/footer.adoc[]

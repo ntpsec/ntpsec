@@ -1,0 +1,284 @@
+= Generic NMEA GPS Receiver =
+include::html.include[]
+
+== Synopsis ==
+
+["verse",subs="normal"]
+Name: nmea
+Reference ID: GPS
+Serial Port: /dev/gps__u__; 4800-115200bps, 8N1
+Serial Port: /dev/gpspps__u__; for PPS
+Features: +tty_clk+
+
+== Description ==
+
+This driver supports GPS receivers with the +$GPRMC+, +$GPGLL+,
++$GPGGA+, +$GPZDA+ and +$GPZDG+ NMEA sentences by default.  Note that
+Accord's custom NMEA sentence +$GPZDG+ reports using the GPS timescale,
+while the rest of the sentences report UTC.  The difference between the
+two is a whole number of seconds which increases with each leap second
+insertion in UTC.  To avoid problems mixing UTC and GPS timescales, the
+driver disables processing of UTC sentences once +$GPZDG+ is received.
+
+The driver expects the receiver to be set up to transmit at least one
+supported sentence every second.
+
+The accuracy depends on the receiver used. Inexpensive GPS models are
+available with a claimed PPS signal accuracy of 1 µs or better relative
+to the broadcast signal. However, in most cases the actual accuracy is
+limited by the precision of the timecode and the latencies of the serial
+interface and operating system.
+
+If the operating system supports PPSAPI
+(http://www.ietf.org/rfc/rfc2783.txt[RFC 2783]), the +flag1 1+ option
+enables its use.
+
+If there is a /dev/gpspps__u__ it is tried first for PPS, before /dev/gps__u__.
+
+The various GPS sentences that this driver recognises look like this
+(others are quietly ignored):
+
+.Accepted NMEA sentences
+[options="header"]
+|=============================================================================
+|Sentence                                                             |Vendor
+|$GPRMC,UTC,POS_STAT,LAT,LAT_REF,LON,LON_REF,SPD,HDG,DATE,MAG_VAR,MAG_REF*CS<cr><lf>|
+|$GPGLL,LAT,LAT_REF,LON,LON_REF,UTC,POS_STAT*CS<cr><lf>|
+|$GPGGA,UTC,LAT,LAT_REF,LON,LON_REF,FIX_MODE,SAT_USED,HDOP,ALT,ALT_UNIT,GEO,G_UNIT,D_AGE,D_REF*CS<cr><lf>|
+|$GPZDA,UTC,DD,MM,YYYY,TH,TM,*CS<cr><lf>|
+|$GPZDG,GPSTIME,DD,MM,YYYY,AA.BB,V*CS<cr><lf>|Accord
+|=============================================================================
+
+.NMEA data items
+[cols="15%,85%",options="header"]
+[options="header"]
+|=============================================================================
+|Symbol  | Meaning and Format
+|UTC     |Time of day on UTC timescale. Hours, minutes and seconds [fraction
+(opt.)]. (hhmmss[.fff])
+|POS_STAT|Position status. (A = Data valid, V = Data invalid)
+|LAT     |Latitude (llll.ll)
+|LAT_REF |Latitude direction. (N = North, S = South)
+|LON     |Longitude (yyyyy.yy)
+|LON_REF |Longitude direction (E = East, W = West)
+|SPD     |Speed over ground. (knots) (x.x)
+|HDG     |Heading/track made good (degrees True) (x.x)
+|DATE    |Date (ddmmyy)
+|MAG_VAR |Magnetic variation (degrees) (x.x)
+|MAG_REF |Magnetic variation (E = East, W = West)
+|FIX_MODE|Position Fix Mode (0 = Invalid, >0 = Valid)
+|SAT_USED|Number of Satellites used in solution
+|HDOP    |Horizontal Dilution of Precision
+|ALT     |Antenna Altitude
+|ALT_UNIT|Altitude Units (Metres/Feet)
+|GEO     |Geoid/Elipsoid separation
+|G_UNIT  |Geoid units (M/F)
+|D_AGE   |Age of last DGPS Fix
+|D_REF   |Reference ID of DGPS station
+|GPSTIME |Time of day on GPS timescale. Hours, minutes and seconds [fraction
+(opt.)]. (hhmmss[.f])
+|DD      |Day of the month (1-31)
+|MM      |Month of the year (1-12)
+|YYYY    |Year
+|AA.BB   |Denotes the signal strength (should be < 05.00)
+|V       |GPS sync status
+ '0' => INVALID time,
+ '1' => accuracy of +/- 20ms,
+ '2' => accuracy of +/- 100ns
+|CS      |Checksum
+|<cr><lf>|Sentence terminator.
+|=============================================================================
+
+== The \'mode' byte ==
+
+Specific GPS sentences and bitrates may be selected by setting bits of the \'mode' in the refclock configuration line:
+
+.mode byte bits and bit groups
+[cols="10%,10%,10%,70%",options="header"]
+|=============================================================================
+|Bit    | Decimal | Hex | Meaning
+|0      |1        |1    |process +$GPRMC+
+|1      |2        |2    |process +$GPGGA+
+|2      |4        |4    |process +$GPGLL+
+|3      |8        |8    |process +$GPZDA+ or +$GPZDG+
+|7      |128      |0x80 |
+Write the sub-second fraction of the receive time stamp to the clockstat
+file for all recognized NMEA sentences. This can provide a useful
+value for fudge time2
+*Caveat:* This will fill your clockstat file rather fast. Use it only
+temporarily to get the numbers for the NMEA sentence of your choice.
+|8      |256      |0x100|process +$PGRMF+
+|9-15   |         |0xFE00   |reserved - leave 0
+|16     |65536    |0x10000 | Append extra statistics to the clockstats line. Details below.
+|=============================================================================
+
+
+The default (mode 0) is to process all supported sentences at a
+linespeed of 9600 bps, which results in the first one received and
+recognized in each cycle being used.  If only specific sentences should
+be recognized, then the mode byte must be chosen to enable only the
+selected ones.  Multiple sentences may be selected by adding their mode
+bit values, but of those enabled, only the first received sentence
+in a cycle will be used.  Using more than one sentence per cycle is
+impossible, because
+
+* there is only the link:#fudgetime2[time2] option available to compensate
+  for transmission delays but every sentence would need a different one
+
+and
+
+* using more than one sentence per cycle overstuffs the internal data
+  filters.
+
+The driver uses 9600 bps by default, unless
+NTPsec was built in Classic strict-compatibility mode, in which
+case the old default of 4800 bps is used. Faster bitrates can be
+selected using the +baud+ option.
+
+*Caveat:* Using higher line speeds does not necessarily increase the
+precision of the timing device.  9600 bps is useful to accommodate an
+amount of data that does not fit into a 1-second cycle at 4800 bps;
+some GPSes (especially when emitting skyview sentences) emit more than
+this.  Any device that is exclusively used for time synchronisation
+purposes should be configured to transmit the relevant data only,
+e.g. one +$GPRMC+ or +$GPZDA+ per second; this will slightly reduce
+jitter by reducing variation in transmission times.
+
+== Monitor Data ==
+
+The last GPS sentence that is accepted or rejected is written to the
+clockstats file and available with +ntpq -c clockvar+. (Logging the
+rejected sentences lets you see/debug why they were rejected.) Filtered
+sentences are not logged.
+
+If the 0x10000 mode bit is on and clockstats is enabled, several extra
+counters will be appended to the NMEA sentence that gets logged. For
+example:
+
+----------------------------------------------------------------------------
+56299 76876.691 nmea(0) $GPGGA,212116.000,3726.0785,N,12212.2605,W,1,05,2.0,17.0,M,-25.7,M,,0000*5C  228 64 0 0 64 0
+----------------------------------------------------------------------------
+
+.Clockstats
+[cols="10%,20%,70%",options="header"]
+|=============================================================================
+|Column|Sample          |Meaning
+|1     |56299           |MJD
+|2     |76876.691       |Time of day in seconds
+|3     |NMEA(0)         |Driver type and unit.
+|4     |$GPGGA,...0*5C  |NMEA Sentence
+|5     |228             |Number of sentences received
+|6     |64              |Number of sentences accepted and used for timekeeping
+|7     |0               |Number of sentences rejected
+                         because they were marked invalid (poor signal)
+|8     |0               |Number of sentences rejected because of bad
+                         checksum or invalid date/time
+|9     |64              |Number of sentences filtered by mode bits or same second
+|10    |0               |Number of PPS pulses used, overrides NMEA sentences
+|=============================================================================
+
+The clock identification in field 3 is normally the driver type and
+unit, but if your ntpd was built in strict Classic compatibility
+mode it will be a magic clock address expressing the same information
+in a more opaque way.
+
+Sentences like $GPGSV that don't contain the time will get counted in
+the total but otherwise ignored.
+
+http://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
+NMEA Refclocks] might give further useful hints for specific hardware
+devices that exhibit strange or curious behaviour. Note that it
+describes NTP Classic and the old refclock configuration syntax, and
+assumes the old default speed of 4800 bps.
+
+To make a specific setting, select the corresponding decimal values from
+the mode byte table, add them all together and enter the resulting
+decimal value into the clock configuration line.
+
+== Setting up the Garmin GPS-25XL ==
+
+Switch off all output by sending it the following string.
+
+-------------------
+"$PGRMO,,2<cr><lf>"
+-------------------
+
+Now switch only $GPRMC on by sending it the following string.
+
+------------------------
+"$PGRMO,GPRMC,1<cr><lf>"
+------------------------
+
+On some systems the PPS signal isn't switched on by default. It can be
+switched on by sending the following string.
+
+-----------------------------
+"$PGRMC,,,,,,,,,,,,2<cr><lf>"
+-----------------------------
+
+== Driver Options ==
+
++unit+ 'number'::
+  The driver unit number, defaulting to 0. Used as a distinguishing
+  suffix in the driver device name.
++time1+ 'time'::
+  Specifies the PPS time offset calibration factor, in seconds and
+  fraction, with default 0.0.
++time2+ 'time'::
+  Specifies the serial end of line time offset calibration factor, in
+  seconds and fraction, with default 0.0.
++stratum+ 'number'::
+  Specifies the driver stratum, in decimal from 0 to 15, with default 0.
++refid+ 'string'::
+  Specifies the driver reference identifier, an ASCII string from one to
+  four characters, with default +GPS+.
++flag1 {0 | 1}+::
+  Disable PPS signal processing if 0 (default); enable PPS signal
+  processing if 1.
++flag2 {0 | 1}+::
+  If PPS signal processing is enabled, capture the pulse on the rising
+  edge if 0 (default); capture on the falling edge if 1.
++flag3 {0 | 1}+::
+  If PPS signal processing is enabled, use the +ntpd+ clock discipline
+  if 0 (default); use the kernel discipline if 1.
++flag4 {0 | 1}+::
+  Obscures location in timecode: 0 for disable (default), 1 for enable.
++subtype+::
+   Not used by this driver.
++mode+::
+   Used to control GPS sentence selection and logging.
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
+  Overrides the default PPS-device path.
++baud+ 'number'::
+  Overrides the default baud/bps rate.
+
+== Configuration Example ==
+
+------------------------------------------------------------------------------
+refclock nmea baud 19200	# All sentences from /dev/gps0 at 19200 bps
+refclock nmea path /dev/ttyUSB0	# All sentences from /dev/ttyUSB0 at 9600 bps
+------------------------------------------------------------------------------
+
+link:refclock.html[Reference Clock Drivers]
+
+'''''
+
+== Known bugs ==
+
+If your GPS has firmware made more than 1024 weeks (19 years and 36
+weeks) in the past, its internal date counter will almost certainly
+wrap around and generate spurious timestamps.  Beginning in January
+2018, newer GPSes may have a longer wraparound (8192 weeks, or 157
+years and 28 weeks) but it is not safe to bet that any given receiver
+will have firmware updated to take advantage of this.
+
+This problem is fundamental and cannot be compensated for in code
+without relying on the accuracy of the local system clock, which
+is exactly what an NTP implementation may not do without risking
+perverse failure modes (especially at startup time). The only
+remedy is not to use ancient GPS hardware.
+
+'''''
+include::includes/footer.adoc[]

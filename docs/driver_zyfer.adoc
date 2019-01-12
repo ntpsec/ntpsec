@@ -1,0 +1,68 @@
+= Zyfer GPStarplus Receiver =
+include::html.include[]
+
+== Synopsis ==
+
+["verse",subs="normal"]
+Name: zyfer
+Reference ID: GPS
+Serial Port: /dev/zyfer__u__; 9600 bps 8N1
+
+== Description ==
+
+This driver supports the http://www.zyfer.com/[Zyfer GPStarplus]
+receiver.
+
+The receiver has a DB15 port on the back which has input TxD and RxD
+lines for configuration and control, and a separate TxD line for the
+once-per-second timestamp.
+
+Additionally, there are BNC connectors on the back for things like PPS
+and IRIG output.
+
+== Additional Information ==
+
+link:refclock.html[Reference Clock Drivers]
+
+== Driver Options ==
+
++unit+ 'number'::
+  The driver unit number, defaulting to 0. Used as a distinguishing
+  suffix in the driver device name.
++time1+ 'time'::
+  Not used by this driver.
++time2+ 'time'::
+  Not used by this driver.
++stratum+ 'number'::
+  Specifies the driver stratum, in decimal from 0 to 15, with default 0.
++refid+ 'string'::
+  Specifies the driver reference identifier, an ASCII string from one to
+  four characters, with default +GPS+.
++flag1 {0 | 1}+::
+  Not used by this driver.
++flag2 {0 | 1}+::
+  Not used by this driver.
++flag3 {0 | 1}+::
+  Not used by this driver.
++flag4 {0 | 1}+::
+  Not used by this driver.
++subtype+::
+  Not used by this driver.
++mode+::
+  Not used by this driver.
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
+  Overrides the default baud rate.
+
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock zyfer
+----------------------------------------------------------------------------
+
+'''''
+
+include::includes/footer.adoc[]

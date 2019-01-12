@@ -155,13 +155,13 @@ __________
 
 * A conformant SNMP subagent in Python - see RFC 5907.
 
-* In the docs subdirectory, include/command.txt is an HTML passthrough
+* In the docs subdirectory, include/command.adoc is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
   Mills HTML documentation this directory was made from. It should be
   cleaned up or replaced.  Requires HTML and CSS skills; intern must
   be willing to learn asciidoc.
 
-* Similarly, includes/footer.txt is a tabular hack made to resemble
+* Similarly, includes/footer.adoc is a tabular hack made to resemble
   the old HTML and should be cleaned up.  Requires HTML and CSS
   skills; intern must be willing to learn asciidoc
 

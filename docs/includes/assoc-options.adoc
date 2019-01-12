@@ -1,0 +1,75 @@
+// Association options - included twice.
+//
+// Note, some of these options are described with special refclock
+// semantics in includes/clock-options.adoc.
+
++bias+::
+  Add the command argument, a floating-point value in seconds, to the
+  time offset (&theta;) computed for this server; this may be useful if
+  you are a client on a network connection such as an ADSL line where
+  there is a predictable asymmetry between upstream and downstream
+  flight times.  One way you might see this is if you use a fixed set
+  of others and one has a stable offset that is an outlier from the
+  others; in that case, you might want to use +bias+ to compensate out
+  the offset.
+
++burst+::
+  When the server is reachable, send a burst of eight packets instead of
+  the usual one. The packet spacing is normally 2 s; however, the
+  spacing between the first and second packets can be changed with the
+  calldelay command to allow additional time for a modem or ISDN call to
+  complete; this is designed to improve timekeeping quality with the
+  +server+ command.
+
++iburst+::
+  When the server is unreachable, send a burst of six packets instead
+  of the usual one. The packet spacing is normally 2 s; however, the
+  spacing between the first and second packets can be changed with the
+  calldelay command to allow additional time for a modem or ISDN call to
+  complete; this is designed to speed the initial synchronization
+  acquisition with the +server+ command, and when
+  {ntpdman} is started with the +-q+ option.
+
++key+ _key_::
+  All packets sent to and received from the server or peer are to
+  include authentication fields encrypted using the specified _key_
+  identifier with values from 1 to 65535, inclusive. The default is to
+  include no encryption field.
+
++minpoll+ _minpoll_::
++maxpoll+ _maxpoll_::
+  These options specify the minimum and maximum poll intervals for NTP
+  messages, as a power of 2 in seconds. The maximum poll interval
+  defaults to 10 (1,024 s), but can be increased by the _maxpoll_ option
+  to an upper limit of 17 (36.4 h). The minimum poll interval defaults
+  to 6 (64 s), but can be decreased by the _minpoll_ option to a lower
+  limit of 0 (1 s).
+
++mode+ 'option'::
+  Pass the +option+ to a reference clock driver. This option is valid
+  only with refclock addresses.
+
++noselect+::
+  Marks the server as unused, except for display purposes. The server is
+  discarded by the selection algorithm.
+
++prefer+::
+  Marks the server as preferred. All other things being equal, this host
+  will be chosen for synchronization among a set of correctly operating
+  hosts. See the "Mitigation Rules and the prefer Keyword" page
+  for further information.
+
++true+::
+  Mark the association to assume truechimer status; that is, always
+  survive the selection and clustering algorithms. This option can be
+  used with any association but is most useful for reference clocks
+  with large jitter on the serial port and precision pulse-per-second
+  (PPS) signals. Caution: this option defeats the algorithms designed to
+  cast out falsetickers and can allow these sources to set the system
+  clock. This option is valid only with the +server+ command.
+
++version+ _version_::
+  Specifies the version number to be used for outgoing NTP packets.
+  Versions 1-4 are the choices, with version 4 the default.
+
+// end

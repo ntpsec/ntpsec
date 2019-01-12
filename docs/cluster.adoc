@@ -1,0 +1,74 @@
+= Clock Cluster Algorithm =
+include::html.include[]
+
+The clock cluster algorithm processes the truechimers produced by the
+clock select algorithm to produce a list of _survivors_. These survivors
+are used by the mitigation algorithms to discipline the system clock.
+The cluster algorithm operates in a series of rounds, where at each
+round the truechimer furthest from the offset centroid is pruned from
+the population. The rounds are continued until a specified termination
+condition is met. This page discusses the algorithm in detail.
+
+First, the truechimer associations are saved on an unordered list with
+each candidate entry identified with index __i__ (__i__ = 1, ..., __n)__,
+where __n__ is the number of candidates. Let θ(__i__), be the offset and
+λ(__i__) be the root distance of the __i__th entry. Recall that the root
+distance is equal to the root dispersion plus half the root delay. For
+the __i__th candidate on the list, a statistic called the _select jitter_
+relative to the __i__th candidate is calculated as follows. Let
+
+__d~i~__(__j__) = |θ(__j__) − θ(__i__)| λ(__i__),
+
+where θ(__i)__ is the peer offset of the __i__th entry and θ(__j__) is the
+peer offset of the __j__th entry, both produced by the clock filter
+algorithm. The metric used by the cluster algorithm is the select jitter
+φ~S~(__i__) computed as the root mean square (RMS) of the __d~i~__(__j__) as
+__j__ ranges from 1 to __n__. For the purpose of notation in the example
+to follow, let φ~R~(__i__) be the peer jitter computed by the clock filter
+algorithm for the __i__th candidate.
+
+The object at each round is to prune the entry with the largest metric
+until the termination condition is met. Note that the select jitter must
+be recomputed at each round, but the peer jitter does not change. At
+each round the remaining entries on the list represent the survivors of
+that round. If the candidate to be pruned is preemptable and the number
+of candidates is greater than the _maxclock_ _threshold_, the association
+is demobilized. This is useful in the schemes described on the
+link:discover.html[Automatic Server Discovery Schemes] page. The
+maxclock threshold default is 10, but it can be changed using the
++maxclock+ option of the link:miscopt.html#tos[+tos+] command. Further
+pruning is subject to the following termination conditions, but no
+associations will be automatically demobilized.
+
+The termination condition has two parts. First, if the number of
+survivors is not greater than the _minclock_ _threshold_ set by the
++minclock+ option of the link:miscopt.html#tos[+tos+] command, the
+pruning process terminates. The _minclock_ default is 3, but can be
+changed to fit special conditions, as described on the
+link:prefer.html[Mitigation Rules and the prefer Keyword] page.
+
+image:pic/flt7.gif[]
+
+Figure 1. Cluster Algorithm
+
+The second termination condition is more intricate. Figure 1 shows a
+round where a candidate of (a) is pruned to yield the candidates of (b).
+Let φ~max~ be the maximum select jitter and φ~min~ be the minimum
+peer jitter over all candidates on the list. In (a), candidate 1 has the
+highest select jitter, so φ~_max_~ = φ~S~(1). Candidate 4 has the lowest
+peer jitter, so φ~min~ = φ~R~(4). Since φ~max~ > φ~min~, select
+jitter dominates peer jitter, the algorithm prunes candidate 1. In (b),
+φ~max~ = φ~S~(3) and φ~min~ =φ~R~(4). Since φ~max~ < φ~min~,
+pruning additional candidates does not reduce select jitter, the
+algorithm terminates with candidates 2, 3 and 4 as survivors.
+
+The survivor list is passed on to the mitigation algorithms, which
+combine the survivors, select a system peer, and compute the system
+statistics passed on to dependent clients. Note the use of root distance
+λ as a weight factor at each round in the clock cluster algorithm. This
+is to favor the survivors with the lowest root distance and thus the
+smallest maximum error.
+
+'''''
+
+include::includes/footer.adoc[]

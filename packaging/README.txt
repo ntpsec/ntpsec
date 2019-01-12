@@ -1,5 +1,0 @@
-== Packaging ==
-
-Packaging scripts go in this directory.
-
-Some general guidance for packagers can be found in packaging.txt

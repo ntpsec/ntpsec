@@ -1,0 +1,120 @@
+= Automatic Server Discovery Schemes =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/alice51.gif[]|
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+
+Make sure who your friends are.
+
+|==============================
+
+== Related Links ==
+
+include::includes/hand.adoc[]
+
+== Table of Contents ==
+
+* link:#assoc[Association Management]
+* link:#pool[Server Pool Scheme]
+
+'''''
+
+[[modes]]
+== Introduction ==
+
+This page describes the automatic server discovery schemes provided in
+NTPv4. There are three automatic server discovery schemes: broadcast,
+manycast, and server pool; which are described on this page. The
+broadcast scheme utilizes the ubiquitous broadcast or one-to-many
+paradigm native to IPv4 and IPv6.  The manycast scheme is similar
+to specifying to broadcast, but the servers listen on a specific
+address known to the client.  The server pool scheme uses DNS to resolve
+addresses of multiple volunteer servers scattered throughout the world.
+
+All three schemes work in much the same way and might be described as
+_grab-n'-prune._ Through one means or another they grab a number of
+associations either directly or indirectly from the configuration file,
+order them from best to worst according to the NTP mitigation
+algorithms, and prune the surplus associations.
+
+[[assoc]]
+== Association Management ==
+
+All schemes use an iterated process to discover new preemptable client
+associations as long as the total number of client associations is less
+than the +maxclock+ option of the +tos+ command. The +maxclock+ default
+is 10, but it should be changed in typical configuration to some lower
+number, usually two greater than the +minclock+ option of the same
+command.
+
+All schemes use a stratum filter to select just those servers with
+stratum considered useful. This can avoid large numbers of clients
+ganging up on a small number of low-stratum servers and avoid servers
+below or above specified stratum levels. By default, servers of all
+strata are acceptable; however, the +tos+ command can be used to
+restrict the acceptable range from the +floor+ option, inclusive, to the
++ceiling+ option, exclusive. Potential servers operating at the same
+stratum as the client will be avoided.  Additional filters can be
+supplied using the methods described on the
+link:authentic.html[Authentication Support] page.
+
+The pruning process uses a set of unreach counters, one for each
+association created by the configuration or discovery processes. At each
+poll interval, the counter is increased by one. If an acceptable packet
+arrives for a persistent (configured) or ephemeral (broadcast)
+association, the counter is set to zero. If an acceptable packet arrives
+for a preemptable (manycast, pool) association and survives the
+selection and clustering algorithms, the counter is set to zero. If the
+the counter reaches an arbitrary threshold of 10, the association
+becomes a candidate for pruning.
+
+The pruning algorithm is very simple. If an ephemeral or preemptable
+association becomes a candidate for pruning, it is immediately
+demobilized. If a persistent association becomes a candidate for
+pruning, it is not demobilized, but its poll interval is set at the
+maximum. The pruning algorithm design avoids needless discovery/prune
+cycles for associations that wander in and out of the survivor list, but
+otherwise have similar characteristics.
+
+Following is a summary of each scheme. Note that reference to option
+applies to the commands described on the link:confopt.html[Configuration
+Options] page. See that page for applicability and defaults.
+
+
+[[pool]]
+== Server Pool Scheme ==
+
+The idea of targeting servers on a random basis to distribute and
+balance the load is not a new one; however, the
+http://www.pool.ntp.org/en/use.html[NTP Pool Project] puts
+this on steroids. At present, several thousand operators around the
+globe have volunteered their servers for public access. In general,
+NTP is a lightweight service and servers used for other purposes don't
+mind an additional small load. The trick is to randomize over the
+population and minimize the load on any one server while retaining the
+advantages of multiple servers using the NTP mitigation algorithms.
+
+To support this service, custom DNS software is used by pool.ntp.org
+and its subdomains to discover a random selection of participating
+(in-country) servers in response to a DNS query. The client receiving
+this list mobilizes some or all of them, similar to the manycast
+discovery scheme, and prunes the excess. Cryptographic authentication
+is not required.
+
+The pool scheme is configured using one or more +pool+ commands with DNS
+names indicating the pool from which to draw. The +pool+ command can be
+used more than once; duplicate servers are detected and discarded. In
+principle, it is possible to use a configuration file containing a
+single line +pool   pool.ntp.org+. The NTP Pool Project offers
+instructions on using the pool with the +server+ command, which is
+suboptimal but works with older versions of +ntpd+ predating the +pool+
+command.  Use of the +server+ command does a one-time DNS lookup, and
+uses the IP address returned thereafter.  If the server becomes unavailable,
+the DNS will not be re-resolved.  The +pool+ command will
+use multiple servers that the DNS resolves to, refreshing as required.
+
+'''''
+
+include::includes/footer.adoc[]

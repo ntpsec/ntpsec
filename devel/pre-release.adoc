@@ -1,0 +1,69 @@
+This is a collection of ideas about how/what to test when
+we are preparing for a release.  Most of them require
+manual action.
+
+It assumes we have a release candidate tarball and git tag.
+
+
+We should probably make a web page so we can collect check-boxes
+when we get reports that something works and graphs of typical
+operations so we have a reference for the next release.
+
+
+The first step is to make sure it builds cleanly on as many
+OSes/distros as we can.
+
+The second step is to make sure it runs.  Unfortunately, "it"
+gets complicated due to the collection of features and options
+and the possible interactions.
+
+In this context, we should treat different versions of
+an OS/distro as separate items.
+
+Similarly, we should have separate slots within an OS/distro
+for different hardware platforms.  The obvious platforms are
+Intel-64, Intel-32, ARM-32.  ARM-64 would be nice but I don't
+know if that is ready yet. (Jan 2017)
+
+We really need to test on an other-endian platform.
+NetBSD runs Big Endian on some ARM systems.
+  https://wiki.netbsd.org/ports/evbarm/allwinner/
+Debian runs Big Endian on MIBSbe (tested May 2017).
+
+We should try as many refclocks as we can on as many
+OS/distros as we can.  This is testing the OS kernel
+as well as ntpd.  If possible, we should at least test
+the NMEA driver with the PPS driver and via SHM.
+
+Note that there are two levels of PPS to test.  The first
+is just being able to get the data.  The second is to see
+if the in-kernel PLL as activated by flag3 on the PPS driver
+works.  On Linux, that needs building a custom kernel with
+CONFIG_NO_HZ turned off and CONFIG_NTP_PPS on.
+
+
+We should review any documentation for best-practices and verify
+that any sample code and build recipies work as expected.  In
+particular, we should make sure the pool option works and that
+the Raspberry Pi Stratum 1 server HOWTO works.
+(There are two sample ntp.conf files in contrib/ .
+Both use the pool.  Jan 2017)
+
+
+We should bump the clock (ntpfrob -b) and watch how it recovers.
+We should probably do this on every OS.
+There should be 4 cases.  For small excursions,
+less than 128 ms, the clock should be adjusted.  For most OSes,
+it will slew.  For larger excursions, the clock will be stepped.
+If the clock is way off (over 600 seconds), ntpd should panic
+and exit, expecting a human to fix it.  The -g command line switch
+will override that panic and allow one big step.
+
+We should verify that the cx_Freeze recipe for converting
+our Python based utilities to non-Python works.
+Details are in devel/packaging.adoc
+
+We should test cold-start with no drift file.
+
+xx
+  All the options in ntp.conf, debug, crypto

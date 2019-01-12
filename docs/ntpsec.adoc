@@ -1,0 +1,291 @@
+= Differences from NTP Classic =
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/clocktower128.png[alt="The NTPsec logo"]|
+
+Accept no imitations.
+|==============================
+
+== Related Links ==
+
+* A list of all links is on the link:sitemap.html[Site Map] page.
+
+'''''
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#incompatible[Incompatible Changes]
+* link:#security[Security Improvements]
+* link:#timesync[Time Synchronization Improvements]
+* link:#configuration[Configuration Improvements]
+* link:#other[Other user-visible changes]
+
+[[intro]]
+== Introduction ==
+
+The design objectives of this distribution, NTPsec, are in
+many ways a break with NTP's past.  We have deliberately jettisoned
+support for ancient legacy hardware and operating systems in order to
+ship code that is security-hardened, simpler, drastically less bulky,
+easier to understand, and easier to maintain.
+
+We retain, however, almost full compatibility and interoperation with
+NTP Classic.  The qualification "almost" is required mainly because we
+do not support the Autokey (RFC 5906) public-key encryption scheme. It
+had interoperability and exploitable vulnerability issues too severe
+to be patched.  We are participating in an IETF effort to develop
+better security features.
+
+This project began as an effort to address serious security issues
+with NTP Classic, and we intend to keep a particularly strong focus on
+code security and code verifiability.
+
+Most of the changes are under the hood, internal to the codebase.  A
+few will be user-visible.
+
+[[incompatible]]
+== Incompatible Changes ==
+
+Normally NTPsec is a drop-in replacement for legacy versions. We have
+tried to hold incompatible changes to a minimum, but there are a
+few.  Some can be reverted by building the software in strict
+compatibility mode with +--enable-classic-mode+ (note that this is
+a build-time switch, not a run-time one).
+
+* The +sntp+ program has been renamed +ntpdig+ in order to make
+  NTP installables have a uniform name prefix and take up less
+  namespace. Also, +ntp-keygen+ is now +ntpkeygen+, +ntp-wait+
+  is ntpwait, and +update-leap+ is now +ntpleapfetch+.
+
+* Log timestamps look a little different; they are now in ISO 8601 format.
+  Reverted in the +--enable-classic-mode+ build.
+
+* Clock identifiers in log files are normally the driver shortname
+  followed by the unit number in parentheses, rather than the magic IP
+  addresses formerly used.  This change affects the peerstats, rawstats,
+  and clockstats files.  Reverted in the +--enable-classic-mode+ build.
+
+* The -!m, -\>, and -< options of some Classic commands are not
+  supported.  (The argument-parsing framework code that implemented
+  them in Classic was overcomplicated and buggy and had to be removed.)
+
+* The shortname of +--help+ options is now +-h+, not +-?+
+
+* If you had a refclock on a path of the form /dev/palisadeNNN, that
+  link needs to change to /dev/trimbleNNN. Reverted in the
+  +--enable-classic-mode+ build.
+
+* If you had a refclock on a path of the form /dev/actsNNN, that
+  link needs to change to /dev/modemNNN. Reverted in the
+  +--enable-classic-mode+ build.
+
+* An instance of +ntpq+ built from the NTPsec code
+  querying a legacy NTP daemon will not automatically display
+  peers with 127.127.t.u addresses as refclocks; that assumption
+  has been removed from the NTPsec code as part of
+  getting it fully IPv6-ready.
+
+* ntpq no longer has the +-i+/+--interactive+ option, as there was no
+  situation in which it was meaningful.
+
+* Interleave mode has been removed.  It was buggy and the root cause
+  of at least two CVEs.
+
+[[security]]
+== Security Improvements ==
+
+We have spent more effort than anything else on reducing attack
+surface and hardening code.  In toto, more than 70% of the NTP Classic
+codebase has been outright removed, with less than 5% new code added.
+
+* The deprecated ntpdc utility, long a chronic locus of security
+  vulnerabilities, has been removed.  Its function has been merged
+  into +ntpq+.
+
+* Autokey is not supported; that code has been
+  removed, as it was chronically prone to security vulnerabilities.
+
+* peer mode has been removed.  The keyword peer in ntp.conf is now
+  just an alias for keyword server.
+
+* Broadcast- and multicast modes, which are impossible to
+  secure, have been removed.
+
+* The authentication requirement for remote configuration commands
+  (e.g., via +ntpq+) can no longer be disabled.
+
+* The deprecated and vulnerability-prone ntpdate program has been
+  replaced with a shell wrapper around ntpdig.  Its -e and -p
+  options are not implemented. It is no longer documented, but can be
+  found in the attic/ directory of the source distribution.
+
+* A large number of obsolete refclocks have been removed in order to
+  reduce attack surface, code bulk, and documentation complexity.
+
+* Various features related to runtime dumping of the configuration
+  state have been removed for security reasons.  These include the
+  +saveconfig+ command in +ntpq+, the +--saveconfigquit+ option of ntpd, and
+  the implementation of related config declarations in +ntp.conf+.
+
+* Likewise, the poorly-documented ntpdsim code has also been removed
+  to gain a significant reduction in code complexity.
+
+* The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
+  has been removed.
+
+* The 'trap' feature has been removed.  It was broken by bit-rot in
+  recent versions of NTP Classic, and if not broken would have been at
+  high risk for bugs that would enable DoS vulnerabilities.
+
+* Interleave mode has been removed.  It didn't work correctly (there
+  was an implementation error in the timestamp handling), so no point
+  in allowing it to increase attack surface.
+
+* The code has been systematically hardened, with unsafe string
+  copy and formatting functions replaced by safe (bounded) ones.
+
+[[timesync]]
+== Time-synchronization improvements ==
+
+* Internally, there is more consistent use of nanosecond precision.
+  A visible effect of this is that time stepping with sufficiently
+  high-precision time sources could be accurate down to nanoseconds
+  rather than microseconds; this might actually matter for GPSDOs
+  and high-quality radio clocks.
+
+* For a driver that ships 4-digit year stamps (notably including the NMEA
+  driver) that data is no longer ignored in favor of deducing the year
+  from the system clock.  This means that (a) it is now possible for
+  ntpd using a local clock source to recover from a trashed or zeroed
+  system clock (e.g. at boot time on a system with missing or damaged
+  battery back up) without requiring sync to a remote peer.
+
+* We've fixed bug inherited from Classic that could cause the jitter
+  of a bad peer to be incorrectly zeroed, possibly causing that peer
+  to be selected.  This probably accounts for some flakiness within
+  8 polling intervals of startup on older versions.
+
+[[clients]]
+== Client Tool Improvements ==
+
+* A new tool, +ntpmon+, performs real-time monitoring of your
+  peer and MRU status with efficient (least-cost) querying.
+
+* Both +ntpq+ and +ntpmon+ can now optionally do display with time
+  units shown and scaled, in the manner of "chrony sources".
+
+* There is a new data-visualization tool,
+  link:ntpviz.html[+ntpviz+], which can produce various useful and
+  interesting plots from the NTP statistics logs.  These should assist in
+  monitoring a time-server's performance, fixing configuration
+  problems, and identifying noise sources in network weather and
+  elsewhere.
+
+* Because +ntpviz+ exists, a number of ancient and poorly-documented
+  scripts in awk, Perl, and S, formerly used for making statistical
+  summaries, have been removed from the distribution in order to
+  reduce overall maintenance burden and complexity. If you miss any
+  of this cruft, the project team will (a) be quite surprised, and (b)
+  work with you on better analytics using ntpviz and modern tools.
+
+* The ntpq utility resizes its display to take advantage of wide
+  terminal windows, allowing more space for long peer addresses.
+
+* When running as root, the ntpq utility looks in /etc/ntp.conf and
+  /usr/local/etc/ntp.keys to find credentials for control requests
+  that require authentication. Thus it will often not be necessary to enter
+  them by hand. Note that your installation's locations for config and
+  key files may differ from these; in that case this convenience
+  feature will fail, as we have elected not to chase it down a
+  complexity rathole.
+
+* A new utility, +ntpfrob+, collects several small diagnostic functions
+  for reading and tweaking the local clock hardware, including reading
+  the clock tick rate, precision, and jitter. Part of it formerly
+  traveled as +tickadj+.
+
+* Mode 6 now fully supports RFC 5907: "Definitions of Managed Objects for
+  Network Time Protocol Version 4 (NTPv4)" by reporting a sys_rootdist
+  variable that is the root distance of the selected peer. This can
+  fill in the MIB's ntpEntTimeDistance entry.
+
+* ntpq displays the root distance (aka. syncronization distance) in the
+  sysinfo command.
+
+== Configuration Improvements ==
+
+* The notorious collision between pool and nopeer in older
+  implementations has been fixed; the pool keyword is now fully
+  usable.
+
+* There is a new, simpler syntax for declaring refclocks.  The old
+  syntax with the magic 127.127.t.u addresses and fudge command is
+  still supported, but no longer documented.  It may be removed in a
+  future release.  Relevant examples of the new syntax are included on
+  each refclock page.  One major feature of the new syntax is that
+  refclock drivers are referred to by names, not numbers.
+
+* The unpeer command now takes a type-unit specification when
+  unpeering a clock.
+
+* For the generic (parse) driver only: Using the new refclock syntax,
+  the maximum number of units that can be set up changes from 4
+  (numbers 0-3) to unlimited.  However, the old magic-address syntax
+  will not work correctly - you _must_ use the new syntax to declare
+  generic-driver refclocks.  If the software was compiled with the
+  +--enable-classic-mode+ switch, the foregoing is reversed.
+
+* In server entries, its now possible to specify a time offset to be
+  applied to incoming timestamps (analogues to the fudge on certain
+  refclocks). This may be useful for client systems communicating
+  over ADSL lines, which have large but relatively fixed asymmetric delays.
+
+* The _restrict_ statement can now take an address range in CIDR
+  notation rather than as an address/mask pair.
+
+* You can now turn off restriction flags with an _unrestrict_
+  statement that takes arguments exactly like a _restrict_. With
+  no aruments it removes any rule matching the address mask
+  entirely.  This is expected to be useful mainly with the "ntpq
+  :config" command.
+
+* The includefile directive now evaluates relative pathnames not with
+  respect to the current working directory but with respect to the
+  directory name of the last pushed file in the stack.  This means
+  that you can run ntpd from any directory with "includefile foo"
+  in /etc/ntp.conf finding /etc/foo rather than looking for foo in
+  your current directory.
+
+* If there is an /etc/ntp.d directory, its subfiles are scanned for
+  more configuration declarations. Only files with the extension
+  ".conf" are interpreted; others are ignored.  This feature is
+  intended to make assembling configuration easier for administration
+  and package-configuration scripts.  See {ntpdman} for details.
+
+* It is now possible to set the peer maximum dispersion with "tos
+  maxdisp". See RFC 5905 for discussion of this synchronization
+  parameter.
+
+* The default baudrate of the NMEA driver has been changed to 9600 to
+  match the default speed of almost all modern GPSes.  The code can be
+  built in a strict NTP Classic compatibility mode that restores the
+  old 4800bps default.
+
+* Most refclock drivers now support configuration options to override the
+  default device path, the default PPS device path (if any) and the
+  serial baud rate.
+
+[[other]]
+== Other user-visible changes ==
+
+* The documentation has been extensively updated and revised.  One
+  important change is that manual pages are now generated from the
+  same masters as this web documentation, so the two will no longer
+  drift out of synchronization.
+
+'''''
+
+include::includes/footer.adoc[]
