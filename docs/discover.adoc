@@ -24,13 +24,15 @@ include::includes/hand.adoc[]
 [[modes]]
 == Introduction ==
 
-The NTPv4 *reference specification* supports three Automatic server discovery
+The NTPv4 *reference specification* supports three automatic server discovery
 schemes: broadcast, manycast, and server pool. However, NTPsec only supports
-the 'Server pool' mechanism. For details on the reference specification,
-please see https://tools.ietf.org/html/rfc5905[rfc 5905]
+the Server Pool mechanism. For details on the reference specification,
+please see https://tools.ietf.org/html/rfc5905[RFC 5905].
 
-’Server pool’ uses DNS to resolve addresses of multiple volunteer servers
-scattered throughout the world.
+The Server Pool scheme expands a single DNS name into multiple peer entries.
+This is intended for, but not limited to, the
+https://www.ntppool.org[NTP Pool Project], a worldwide set of servers
+volunteered for public use.
 
 The mechanism might be described as _grab-n'-prune._ Through one means or
 another, a number of associations are "grabbed" either directly or indirectly
@@ -40,14 +42,14 @@ to the NTP mitigation algorithms, and surplus associations are pruned.
 [[assoc]]
 == Association Management ==
 
-Server pool use an iterated process to discover new preemptable client
+Server Pool discovery uses an iterated process to discover new preemptable client
 associations as long as the total number of client associations is less
 than the +maxclock+ option of the +tos+ command. The +maxclock+ default
 is 10, but it should be changed in typical configuration to some lower
 number, usually two greater than the +minclock+ option of the same
 command.
 
-Server pool uses a stratum filter to select just those servers with
+Server Pool uses a stratum filter to select just those servers with
 stratum considered useful. This can avoid large numbers of clients
 ganging up on a small number of low-stratum servers and avoids servers
 below or above specified stratum levels. By default, servers of all
@@ -59,12 +61,9 @@ supplied using the methods described on the
 link:authentic.html[Authentication Support] page.
 
 The pruning process uses a set of unreach counters, one for each
-association created by the configuration or discovery processes. At each
+association created by the configuration or discovery process. At each
 poll interval, the counter is increased by one. If an acceptable packet
-arrives for a persistent (configured) or ephemeral (broadcast)
-association, the counter is set to zero. If an acceptable packet arrives
-for a preemptable association and survives the
-selection and clustering algorithms, the counter is set to zero. If the
+arrives for an association, the counter is set to zero. If the
 the counter reaches an arbitrary threshold of 10, the association
 becomes a candidate for pruning.
 
@@ -76,7 +75,7 @@ maximum. The pruning algorithm design avoids needless discovery/prune
 cycles for associations that wander in and out of the survivor list, but
 otherwise have similar characteristics.
 
-Following is a description of the server pool scheme. Note that
+Following is a description of the Server Pool scheme. Note that
 reference to options applies to the commands described on the
 link:confopt.html[Configuration Options] page. See that page
 for applicability and defaults.
@@ -101,7 +100,7 @@ this list mobilizes some or all of them, similar to the manycast
 discovery scheme, and prunes the excess. Cryptographic authentication
 is not required.
 
-The pool scheme is configured using one or more +pool+ commands with DNS
+The Server Pool scheme is configured using one or more +pool+ commands with DNS
 names indicating the pool from which to draw. The +pool+ command can be
 used more than once; duplicate servers are detected and discarded. In
 principle, it is possible to use a configuration file containing a
