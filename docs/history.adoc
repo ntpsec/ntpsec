@@ -48,7 +48,7 @@ specification was https://tools.ietf.org/rfc/rfc2030.txt[RFC 2030],
 Simple Network Time Protocol (SNTP) version 4 for IPv4, IPv6 and OSI.
 This issued in 1996.
 
-An operating system interface for accrate 1-per-second pulses pulses
+An operating system interface for accurate 1-per-second pulses pulses
 for calibrating and stabilizing the system clock was designed and
 documented in https://tools.ietf.org/rfc/rfc2783.txt[RFC 2783]
 (Pulse-per-second API for Unix-like operating systems, version 1),
