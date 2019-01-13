@@ -87,7 +87,7 @@ supporting code automatically compiled. Regardles of mechanism, the PPS signal
 must be present and within nominal jitter and wander tolerances. Additionally,
 the prefer peer must be a truechimer; that is, survive the sanity checks and
 intersection algorithm. Finally, the offset of the system clock relative
-to the prefer peer must be within ±0.5 s. The kernel maintains a
+to the prefer peer must be within ±0.4 s. The kernel maintains a
 watchdog timer for the PPS signal; if the signal has not been heard or
 is out of tolerance for more than some interval, currently two minutes,
 the kernel discipline is disabled and operation continues as if it were
