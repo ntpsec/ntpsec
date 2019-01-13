@@ -43,20 +43,21 @@ model for precision timekeeping) described a new implementation and
 interface in 1994. That implementation could keep time with a
 precision of up to one microsecond.
 
-While version 3 was still the latest specification available, both,
-the specification and the implementation has been continuously
-improved (this is what xntp3-5 actually implements). Since about 1994
-work for a new version of NTP is in progress. The first new
+Work for a Version 4 of NTP bagain around 1994. The first new
 specification was https://tools.ietf.org/rfc/rfc2030.txt[RFC 2030],
 Simple Network Time Protocol (SNTP) version 4 for IPv4, IPv6 and OSI.
 This issued in 1996.
 
-External pulses can be used to calibrate and stabilize the operating
-system's clock. Therefore an operating system interface (API) has been
-designed and documented in https://tools.ietf.org/rfc/rfc2783.txt[RFC
-2783] (Pulse-per-second API for Unix-like operating systems, version
-1), finally published in 1999.  This is now implemented in all
-modern Unixes.
+An operating system interface for accrate 1-per-second pulses pulses
+for calibrating and stabilizing the system clock was designed and
+documented in https://tools.ietf.org/rfc/rfc2783.txt[RFC 2783]
+(Pulse-per-second API for Unix-like operating systems, version 1),
+finally published in 1999.  This is now implemented in all modern
+Unixes.
 
-
+A proposed specification for NTPv4 issued in 2010 as
+https://tools.ietf.org/rfc/rfc5905.txt[RFC 5905].  Despite some
+underspecification and technical difficulties (especially near
+Autokey, its attempt at public-key encryption for authentication) 
+NTPv4 implementations were in general use by 2014.
 
