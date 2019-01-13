@@ -8,7 +8,7 @@ Name: pps
 Reference ID: PPS
 Driver ID: PPS
 Serial or Parallel Port: /dev/pps__u__
-Requires: PPSAPI signal interface for PPS signal processing.
+Requires: link:kernpps.html[PPSAPI Interface for Precision Time Signals]
 
 == Description ==
 
@@ -34,12 +34,12 @@ used as well. For this purpose, the auxiliary source must be specified
 as the prefer peer, as described in the link:prefer.html[Mitigation
 Rules and the +prefer+ Keyword] page.
 
-The driver requires the PPSAPI interface^1^, which is a proposed IETF
-standard. The interface consists of the +timepps.h+ header file and
-associated kernel support. Support for this interface is included in
-current versions of Solaris, FreeBSD and Linux and proprietary versions
-of Tru64 (Alpha) and SunOS. See the link:pps.html[Pulse-per-second
-(PPS) Signal Interfacing] page for further information.
+The driver requires the link:kernpps.html[PPSAPI interface], which is
+documented in RFC 2783.  The interface consists of the +timepps.h+
+header file and associated kernel support. Support for this interface is
+included in current versions of Solaris, FreeBSD, and Linux. See the
+link:pps.html[Pulse-Per-second (PPS) Signal Interfacing] page for
+further information.
 
 The PPS source can be connected via a serial or parallel port, depending
 on the hardware and operating system. A serial port can be dedicated to
@@ -173,10 +173,9 @@ link:refclock.html[Reference Clock Drivers]
 
 == Reference ==
 
-1.  Mogul, J., D. Mills, J. Brittenson, J. Stone and U. Windl.
-Pulse-per-second API for Unix-like operating systems, version 1. Request
-for Comments RFC 2783, Internet Engineering Task Force, March 2000, 31
-pp.
+RFC 2783::
+  Mogul, J., D. Mills, J. Brittenson, J. Stone and U. Windl, _Pulse-Per-Second
+  API for Unix-like Operating Systems, Version 1.0_, RFC 2783
 
 == Author ==
 
