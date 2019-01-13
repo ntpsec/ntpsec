@@ -26,10 +26,10 @@ include::includes/hand.adoc[]
 
 The NTPv4 *reference specification* supports three automatic server discovery
 schemes: broadcast, manycast, and server pool. However, NTPsec only supports
-the Server Pool mechanism. For details on the reference specification,
+the pool mechanism. For details on the reference specification,
 please see https://tools.ietf.org/html/rfc5905[RFC 5905].
 
-The Server Pool scheme expands a single DNS name into multiple peer entries.
+The pool scheme expands a single DNS name into multiple peer entries.
 This is intended for, but not limited to, the
 https://www.ntppool.org[NTP Pool Project], a worldwide set of servers
 volunteered for public use.
@@ -42,15 +42,15 @@ to the NTP mitigation algorithms, and surplus associations are pruned.
 [[assoc]]
 == Association Management ==
 
-Server Pool discovery uses an iterated process to discover new preemptable client
+Pool discovery uses an iterated process to discover new preemptable client
 associations as long as the total number of client associations is less
 than the +maxclock+ option of the +tos+ command. The +maxclock+ default
 is 10, but it should be changed in typical configuration to some lower
 number, usually two greater than the +minclock+ option of the same
 command.
 
-Server Pool uses a stratum filter to select just those servers with
-stratum considered useful. This can avoid large numbers of clients
+Pool discovery uses a stratum filter to select just those servers with 
+strata considered useful. This can avoid large numbers of clients
 ganging up on a small number of low-stratum servers and avoids servers
 below or above specified stratum levels. By default, servers of all
 strata are acceptable; however, the +tos+ command can be used to
@@ -75,13 +75,13 @@ maximum. The pruning algorithm design avoids needless discovery/prune
 cycles for associations that wander in and out of the survivor list, but
 otherwise have similar characteristics.
 
-Following is a description of the Server Pool scheme. Note that
+Following is a description of the lool scheme. Note that
 reference to options applies to the commands described on the
 link:confopt.html[Configuration Options] page. See that page
 for applicability and defaults.
 
 [[pool]]
-== Server Pool Scheme ==
+== Pool Scheme ==
 
 The idea of targeting servers on a random basis to distribute and
 balance the load is not a new one; however, the
@@ -100,7 +100,7 @@ this list mobilizes some or all of them, similar to the manycast
 discovery scheme, and prunes the excess. Cryptographic authentication
 is not required.
 
-The Server Pool scheme is configured using one or more +pool+ commands with DNS
+The pool scheme is configured using one or more +pool+ commands with DNS
 names indicating the pool from which to draw. The +pool+ command can be
 used more than once; duplicate servers are detected and discarded. In
 principle, it is possible to use a configuration file containing a
