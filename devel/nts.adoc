@@ -27,7 +27,9 @@ Thus cookies are only used once.  Each NTP response returns
 a new encrypted cookie.
 
 NTS should not assist DDoS amplification.  All NTP responses
-are the same length as the request.
+are the same length as the request.  This means that some
+fields are padded to match the length of the response that
+will replace them.
 
 == System Partitioning ==
 
@@ -76,12 +78,13 @@ If all goes well (no lost packets) the client sends:
   Authentication using C2S 5.6
 It gets back the same, with the cookie replaced with a new cookie
 and S2C used for authentication.
+New cookies are encrypted with S2C.  Pg 20
 
 All the extra data is in real NTP extensions.  (No more of
-the magic length kludgery for the curret shared key authentication.)
+the magic length kludgery for the current shared key authentication.)
 
 If packets (and hence cookies) are lost, the client will include
-a cookie-placeholder for each cookie it wants.  5.5
+a cookie-placeholder for each extra cookie it wants.  5.5
 Those slots will be returned with new cookies.
 
 The AEAD algorithm is setup to encrypt some data as well as authenticate.
