@@ -10,7 +10,11 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository Head ==
+== 2019-01-13: 1.1.3 ==
+
+Lots of typo fixes, documentation cleanups, test targets.
+
+In memory of Arland D. Williams Jr.
 
 == 2018-08-28: 1.1.2 ==
 
