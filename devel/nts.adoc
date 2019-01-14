@@ -14,20 +14,27 @@ The NTS implementation shall:
 
 * Be interoperable with the other reference implementations in IETF hackathons.
 
+== General Ideas ==
+
+The NTP server maintains no per-client state.  The NTP client
+stores the state in a cookie which is sent with each request.
+The cookie is provided by the server.  The server will decrypt
+it to revover the session keys.
+
+NTS should not assist tracking of the client.  (Consider
+a laptop that moves from home to work to a coffee shop.)
+Thus cookies are only used once.  Each NTP response returns
+a new encrypted cookie.
+
+NTS should not assist DDoS amplification.  All NTP responses
+are the same length as the request.
+
 == System Partitioning ==
 
-Hal wrote:
-> My understanding is that there are to be four agents: the client ntpd, a NTS
-> symbiont communicating locally with the client ntpd, the server ntpd, and a
-> symbiont communicating locally with the server ntpd.
-
-> When a client wants to establish a secure link with a server, what are the
-> first (say) three transactions among these agents?  Expand from there. I'll
-> know that I understand enough to write code when I start correctly
-> anticipating steps before you have described them.  This is unlikely to take
-> long.
-
-4 boxes.  My ASCII art is weak.  C for client, S for server.
+This picture is for discussion.  The actual packaging may have
+both clients and both servers in one binary to simplify
+administration.  It may be convenient to have them as
+separate programs for debugging.
 
    Bravo                       Delta
    NTS client ---------------- NTS server
@@ -35,18 +42,51 @@ Hal wrote:
    Alpha                       Charlie
    NTP client ---------------- NTP server
 
-NTS-C-NTS-S (Bravo to Delta and back) is our stuff in TLS over TCP.
-Everything we need to know is in the draft.  It's pretty simple.
+NTP-C to NTS-C (Alpha to Bravo) is pretty simple.
+  NTP-C sends:
+    Host name of NTS-KE server
+    Optional preferred IP Address 4.1.7
+    A sorted list of AEAD algorithms 4.1.5
+  It gets back:
+    IP Address 4.1.7
+    1 to 8 cookies  4.1.6
+    C2S and S2C encryption keys  4.2, 5.1
+    The selected AEAD algorithm 4.1.5
 
-NTP-C to NTS-C (Bravo to Alpha) is pretty simple.  NTP sends host
-name, or something like that.  It gets back an IP Address (maybe more
-than 1) and a bunch of cookies.
+For AEAD, we need libaes_siv.so, RFC 5297
+It's available, but not in OpenSSL yet
 
-NTP-S to NTS-S (Charlie to Delta) Is only an occasional ?????.  I
-don't have the right word handy.  It's whatever key transfer or status
-messages are required.
+NTS-C-NTS-S (Bravo to Delta) is mostly the above in TLS over TCP.
+NTS-C has to make the C2S and S2C keys.  They are tangled up
+with TLS.
 
-NTP-C to NTP-S (Alpha to Charlie) is in the draft.
+NTP-S to NTS-S (Charlie to Delta) Is very low bandwidth.
+It's just the master key which is updated daily.
+NB: That channel has to be encrypted/protected.
+
+We could also send the initial cookies over that channel
+so that only NTP-S knows the cookie format.
+
+NTP-C to NTP-S (Alpha to Charlie)
+
+If all goes well (no lost packets) the client sends:
+  The normal 48 byte NTP packet
+  A 32 byte unique ID 5.3
+  A cookie 5.4
+  Authentication using C2S 5.6
+It gets back the same, with the cookie replaced with a new cookie
+and S2C used for authentication.
+
+All the extra data is in real NTP extensions.  (No more of
+the magic length kludgery for the curret shared key authentication.)
+
+If packets (and hence cookies) are lost, the client will include
+a cookie-placeholder for each cookie it wants.  5.5
+Those slots will be returned with new cookies.
+
+The AEAD algorithm is setup to encrypt some data as well as authenticate.
+I don't know of any reason to use that.  (Hal, Jan 14)
+I think we need a nonce in there.
 
 == Key Generation and Usage ==
 
@@ -75,3 +115,14 @@ then encrypts the rest of the data using the c2s key. When the NTPD server
 recieves the packet it decrypts the cookie-blob using its Master Key, and
 extracts the c2s/s2c pair so it can decrypt the rest. The response packet
 is encrypted using the s2c key extracted from the cookie.
+
+== Odds and ends ==
+
+How many cookies should the NTP client try to hold?  8
+
+There is no hard reason, but it is what the server SHOULD return.  4.1.6
+It also matches the number of samples that ntpd remembers (the reach bit
+mask in ntpq/peers) and running out of responses is a good time to do
+special things like get a new pool server or get new cookies by running
+NTS-KE again.
+
