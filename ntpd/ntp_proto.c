@@ -519,10 +519,11 @@ handle_procpkt(
 		if(!memcmp(rbufp->pkt.refid, "RATE", REFIDLEN)) {
 			peer->selbroken++;
 			report_event(PEVNT_RATE, peer, NULL);
-			if (peer->cfg.minpoll < 10) { peer->cfg.minpoll = 10; }
 			peer->burst = peer->retry = 0;
 			peer->throttle = (NTP_SHIFT + 1) * (1 << peer->cfg.minpoll);
-			poll_update(peer, 10);
+			if (rbufp->pkt.ppoll > peer->cfg.minpoll)
+			    peer->cfg.minpoll = min(peer->ppoll, 10);
+			poll_update(peer, min(rbufp->pkt.ppoll, 10));
 		}
 		return;
 	}
