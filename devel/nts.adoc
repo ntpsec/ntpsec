@@ -19,7 +19,7 @@ The NTS implementation shall:
 The NTP server maintains no per-client state.  The NTP client
 stores the state in a cookie which is sent with each request.
 The cookie is provided by the server.  The server will decrypt
-it to revolver the session keys.
+it to resolve the session keys.
 
 NTS should not assist tracking of the client.  (Consider
 a laptop that moves from home to work to a coffee shop.)
@@ -33,16 +33,20 @@ will replace them.
 
 == System Partitioning ==
 
-This picture is for discussion.  The actual packaging may have
-both clients and both servers in one binary to simplify
-administration.  It may be convenient to have them as
-separate programs for debugging.
+This picture is for discussion.  In actual packaging Alpha and Bravo
+will both be inside ntpd. Charlie and Delta, on the other hand, need
+to be separate because Delta will have its own public port serving
+requests from Bravo.
 
-   Bravo                       Delta
-   NTS client ---------------- NTS server
-      |                         |
-   Alpha                       Charlie
-   NTP client ---------------- NTP server
+    Bravo                       Delta
+    NTS client ---------------> NTS server
+       ^                         ^
+       |                         |
+    Alpha                       Charlie
+    NTP client <--------------> NTP server
+
+In this diagram, an arrow means "initiates requests to". 
+Responses may flow in the other direction.
 
 NTP-client to NTS-client (Alpha to Bravo) is pretty simple.
   NTP-client sends:
