@@ -18,12 +18,12 @@ The NTS implementation shall:
 
 The NTP server maintains no per-client state.  The NTP client
 stores the state in a cookie which is sent with each request.
-The cookie is provided by the server.  The server will decrypt
-it to resolve the session keys.
+The cookie is provided by the KE server.  The NTP server will
+decrypt it to recover the session keys.
 
 NTS should not assist tracking of the client.  (Consider
 a laptop that moves from home to work to a coffee shop.)
-Thus cookies are only used once.  Each NTP response returns
+Thus cookies should only used once.  Each NTP response returns
 a new encrypted cookie.
 
 NTS should not assist DDoS amplification.  All NTP responses
@@ -38,18 +38,32 @@ will both be inside ntpd. Charlie and Delta, on the other hand, need
 to be separate because Delta will have its own public port serving
 requests from Bravo.
 
-    Bravo                       Delta
-    NTS client ---------------> NTS server
-       ^                         ^
-       |                         |
-    Alpha                       Charlie
-    NTP client <--------------> NTP server
+[ditaa, "NTS-flow", "svg"]
+----
+  + - - - - - - - - +
+  ;     Client      ;
+  ; +-------------+ ;           +-------------+
+  ; |Bravo        | ;           |Delta        |
+  ; |NTS-KE client|-^---------->|NTS-KE server|
+  ; +-------------+ ;           +-------------+
+  ;     ^           ;                |
+  ;     |           ;              .----.
+  ;     |           ;              |Echo|
+  ;     |           ;              .----.
+  ;     |           ;                |
+  ; +-----------+   ;           +-----------+
+  ; |Alpha      |   ;           |Charlie    |
+  ; |NTP client |---^---------->|NTP server |
+  ; +-----------+   ;           +-----------+
+  + - - - - - - - - +
+----
 
 In this diagram, an arrow means "initiates requests to". 
 Responses may flow in the other direction.
 
-NTP-client to NTS-client (Alpha to Bravo) is pretty simple.
-  NTP-client sends:
+=== Alpha -> Bravo ===
+NTP-client to NTS-KE-client (Alpha to Bravo) is pretty simple.
+  NTP-KE-client sends:
     Host name of NTS-KE server
     Optional preferred IP Address 4.1.7
     A sorted list of AEAD algorithms 4.1.5
@@ -62,17 +76,17 @@ NTP-client to NTS-client (Alpha to Bravo) is pretty simple.
 For AEAD, we need libaes_siv.so, RFC 5297
 It's available, but not in OpenSSL yet
 
+=== Bravo -> Delta ===
 NTS-client-NTS-server (Bravo to Delta) is mostly the above in TLS over TCP.
 NTS-client has to make the C2S and S2C keys.  They are tangled up
 with TLS.
 
-NTP-server to NTS-server (Charlie to Delta) Is very low bandwidth.
-It's just the master key which is updated daily.
-NB: That channel has to be encrypted/protected.
+=== Echo -> Charlie & Delta ===
+Echo to the servers Charlie and Delta is a one shot.
+Echo sends a seed/ratchet mechanism number pair to both servers.
+optionally a rotation time and cookie format number could be sent. 
 
-We could also send the initial cookies over that channel
-so that only NTP-server knows the cookie format.
-
+=== Alpha -> Charlie ===
 NTP-client to NTP-server (Alpha to Charlie)
 
 If all goes well (no lost packets) the client sends:
@@ -107,7 +121,7 @@ NTS makes use of three keys:
 
 Because one of the goals of NTS is to not require any per-client state in
 the servers, the server (both NTPD and NTS-KE) does not possess either of the
-c2s/s2c pair. The servers do possess the NTS Master Key, which is expected to
+c2s/s2c pair. Both servers possess the NTS Master Key, which is expected to
 be updated somewhat regularly.
 
 The c2s/s2c pair is created during the TLS handshake between client and NTS-KE.
@@ -119,7 +133,7 @@ store per-client keys.
 
 When sending an NTS packet the client attaches a cookie-blob in cleartext,
 then encrypts the rest of the data using the c2s key. When the NTPD server
-recieves the packet it decrypts the cookie-blob using its Master Key, and
+receives the packet it decrypts the cookie-blob using its Master Key, and
 extracts the c2s/s2c pair so it can decrypt the rest. The response packet
 is encrypted using the s2c key extracted from the cookie.
 
