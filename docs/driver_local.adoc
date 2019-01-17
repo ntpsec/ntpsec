@@ -53,7 +53,7 @@ No +filegen clockstats+ monitor data are produced by this driver.
   four characters, with default +LOCL+.
 +flag1 {0 | 1}+::
   If flag1 is 1, set NIST lockclock mode.  In this mode, ntpd assumes
-  the system clock is externally disctplined and disables frequency adjustment.
+  the system clock is externally disciplined and disables frequency adjustment.
 +flag2 {0 | 1}+::
   Not used by this driver.
 +flag3 {0 | 1}+::
