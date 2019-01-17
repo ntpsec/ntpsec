@@ -110,7 +110,7 @@ local_start(
 	peer->sstclktype = CTL_SST_TS_LOCAL;
 	poll_time = current_time;
 	if (pp->sloppyclockflag & CLK_FLAG1)
-	    lockclock = true
+	    lockclock = true;
 	return true;
 }
 
