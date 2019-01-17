@@ -19,7 +19,7 @@ The NTS implementation shall:
 The NTP server maintains no per-client state.  The NTP client
 stores the state in a cookie which is sent with each request.
 The cookie is provided by the server.  The server will decrypt
-it to revover the session keys.
+it to revolver the session keys.
 
 NTS should not assist tracking of the client.  (Consider
 a laptop that moves from home to work to a coffee shop.)
@@ -44,8 +44,8 @@ separate programs for debugging.
    Alpha                       Charlie
    NTP client ---------------- NTP server
 
-NTP-C to NTS-C (Alpha to Bravo) is pretty simple.
-  NTP-C sends:
+NTP-client to NTS-client (Alpha to Bravo) is pretty simple.
+  NTP-client sends:
     Host name of NTS-KE server
     Optional preferred IP Address 4.1.7
     A sorted list of AEAD algorithms 4.1.5
@@ -58,18 +58,18 @@ NTP-C to NTS-C (Alpha to Bravo) is pretty simple.
 For AEAD, we need libaes_siv.so, RFC 5297
 It's available, but not in OpenSSL yet
 
-NTS-C-NTS-S (Bravo to Delta) is mostly the above in TLS over TCP.
-NTS-C has to make the C2S and S2C keys.  They are tangled up
+NTS-client-NTS-server (Bravo to Delta) is mostly the above in TLS over TCP.
+NTS-client has to make the C2S and S2C keys.  They are tangled up
 with TLS.
 
-NTP-S to NTS-S (Charlie to Delta) Is very low bandwidth.
+NTP-server to NTS-server (Charlie to Delta) Is very low bandwidth.
 It's just the master key which is updated daily.
 NB: That channel has to be encrypted/protected.
 
 We could also send the initial cookies over that channel
-so that only NTP-S knows the cookie format.
+so that only NTP-server knows the cookie format.
 
-NTP-C to NTP-S (Alpha to Charlie)
+NTP-client to NTP-server (Alpha to Charlie)
 
 If all goes well (no lost packets) the client sends:
   The normal 48 byte NTP packet
@@ -102,8 +102,8 @@ NTS makes use of three keys:
 * NTS Master Key
 
 Because one of the goals of NTS is to not require any per-client state in
-the servers, the server (both NTPD and NTS-KE) does not posess either of the
-c2s/s2c pair. The servers do posess the NTS Master Key, which is expected to
+the servers, the server (both NTPD and NTS-KE) does not possess either of the
+c2s/s2c pair. The servers do possess the NTS Master Key, which is expected to
 be updated somewhat regularly.
 
 The c2s/s2c pair is created during the TLS handshake between client and NTS-KE.
