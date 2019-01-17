@@ -109,25 +109,23 @@ static double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
 static double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
 uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
+bool lockclock;		/* hardware clock is externally disciplined? */
 
 /*
  * Program variables
  */
-#ifndef ENABLE_LOCKCLOCK
-static double clock_offset;	/* offset */
-static uptime_t clock_epoch;	/* last update */
-#endif /* ENABLE_LOCKCLOCK */
+static double clock_offset;	/* offset (lockclock case only) */
+static uptime_t clock_epoch;	/* last update (lockclock case only) */
 double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
 unsigned int	sys_tai;		/* TAI offset from UTC */
-#ifndef ENABLE_LOCKCLOCK
+/* following variables are non-lockclock case only */
 static bool loop_started;	/* true after LOOP_DRIFTINIT */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
-#endif /* ENABLE_LOCKCLOCK */
 
 #ifndef PATH_MAX
 # define PATH_MAX MAX_PATH
@@ -137,11 +135,9 @@ static char *this_file = NULL;
 
 static struct timex ntv;	/* ntp_adjtime() parameters */
 static int	pll_status;	/* last kernel status bits */
-#ifndef ENABLE_LOCKCLOCK
 #if defined(STA_NANO) && defined(NTP_API) && NTP_API == 4
-static unsigned int loop_tai;		/* last TAI offset */
+static unsigned int loop_tai;	/* last TAI offset (non-lockclock case only) */
 #endif /* STA_NANO */
-#endif /* ENABLE_LOCKCLOCK */
 static	void	start_kern_loop(void);
 static	void	stop_kern_loop(void);
 
@@ -165,9 +161,7 @@ static bool	ext_enable;	/* external clock enabled */
 /*
  * Clock state machine variables
  */
-#ifndef ENABLE_LOCKCLOCK
-static int	state = 0;	/* clock discipline state */
-#endif /* ENABLE_LOCKCLOCK */
+static int	state = 0;	/* clock discipline state (non-lockclock only) */
 uint8_t	sys_poll;		/* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
@@ -190,17 +184,16 @@ static struct sigaction newsigsys; /* new sigaction status */
 static sigjmp_buf env;		/* environment var. for pll_trap() */
 #endif /* SIGSYS */
 
-#ifndef ENABLE_LOCKCLOCK
 static void
 sync_status(const char *what, int ostatus, int nstatus)
 {
+	/* only used in non-lockclock case */
 	char obuf[256], nbuf[256], tbuf[1024];
 	snprintf(obuf, sizeof(obuf), "%04x", (unsigned)ostatus);
 	snprintf(nbuf, sizeof(nbuf), "%04x", (unsigned)nstatus);
 	snprintf(tbuf, sizeof(tbuf), "%s status: %s -> %s", what, obuf, nbuf);
 	report_event(EVNT_KERN, NULL, tbuf);
 }
-#endif /* ENABLE_LOCKCLOCK */
 
 /*
  * file_name - return pointer to non-relative portion of this C file pathname
@@ -438,7 +431,7 @@ or, from ntp_adjtime():
  * 1	clock was slewed
  * 2	clock was stepped
  *
- * ENABLE_LOCKCLOCK: The only thing this routine does is set the
+ * If lockclock is on, the only thing this routine does is set the
  * sys_rootdisp variable equal to the peer dispersion.
  */
 int
@@ -447,10 +440,17 @@ local_clock(
 	double	fp_offset	/* clock offset (s) */
 	)
 {
-#ifdef ENABLE_LOCKCLOCK
-	UNUSED_ARG(peer);
-	UNUSED_ARG(fp_offset);
-#else
+	/*
+	 * If the loop is opened or the NIST lockclock scheme is in use,
+	 * monitor and record the offsets anyway in order to determine
+	 * the open-loop response and then go home.
+	 */
+	if (lockclock || !clock_ctl.ntp_enable) {
+		record_loop_stats(fp_offset, drift_comp, clock_jitter,
+		    clock_stability, sys_poll);
+		return (0);
+	}
+
 	int	rval;		/* return code */
 	int	osys_poll;	/* old system poll */
 	int	ntp_adj_ret;	/* returned by ntp_adjtime */
@@ -458,24 +458,7 @@ local_clock(
 	double	clock_frequency; /* clock frequency */
 	double	dtemp, etemp;	/* double temps */
 	char	tbuf[80];	/* report buffer */
-#endif /* ENABLE_LOCKCLOCK */
 
-	/*
-	 * If the loop is opened or the NIST lockclock scheme is in use,
-	 * monitor and record the offsets anyway in order to determine
-	 * the open-loop response and then go home.
-	 */
-#ifdef ENABLE_LOCKCLOCK
-	{
-#else
-	if (!clock_ctl.ntp_enable) {
-#endif /* ENABLE_LOCKCLOCK */
-		record_loop_stats(fp_offset, drift_comp, clock_jitter,
-		    clock_stability, sys_poll);
-		return (0);
-	}
-
-#ifndef ENABLE_LOCKCLOCK
 	/*
 	 * If the clock is way off, panic is declared. The clock_panic
 	 * defaults to 1000 s; if set to zero, the panic will never
@@ -907,14 +890,13 @@ local_clock(
 		   clock_offset, clock_jitter, drift_comp * US_PER_S,
 		   clock_stability * US_PER_S, sys_poll));
 	return (rval);
-#endif /* ENABLE_LOCKCLOCK */
 }
 
 
 /*
  * adj_host_clock - Called once every second to update the local clock.
  *
- * ENABLE_LOCKCLOCK: The only thing this routine does is increment the
+ * If lockclock is on the only thing this routine does is increment the
  * sys_rootdisp variable.
  */
 void
@@ -922,10 +904,8 @@ adj_host_clock(
 	void
 	)
 {
-#ifndef ENABLE_LOCKCLOCK
 	double	offset_adj;
 	double	freq_adj;
-#endif /* ENABLE_LOCKCLOCK */
 
 	/*
 	 * Update the dispersion since the last update. In contrast to
@@ -936,8 +916,7 @@ adj_host_clock(
 	 * time constant is clamped at 2.
 	 */
 	sys_vars.sys_rootdisp += clock_phi;
-#ifndef ENABLE_LOCKCLOCK
-	if (!clock_ctl.ntp_enable || clock_ctl.mode_ntpdate)
+	if (lockclock || !clock_ctl.ntp_enable || clock_ctl.mode_ntpdate)
 		return;
 	/*
 	 * Determine the phase adjustment. The gain factor (denominator)
@@ -987,11 +966,9 @@ adj_host_clock(
 	 * has decayed to zero.
 	 */
 	adj_systime(offset_adj + freq_adj, adjtime);
-#endif /* ENABLE_LOCKCLOCK */
 }
 
 
-#ifndef ENABLE_LOCKCLOCK
 /*
  * Clock state machine. Enter new state and set state variables.
  */
@@ -1032,9 +1009,7 @@ direct_freq(
 
 	return drift_comp;
 }
-#endif /* ENABLE_LOCKCLOCK */
 
-#ifndef ENABLE_LOCKCLOCK
 /*
  * set_freq - set clock frequency correction
  *
@@ -1071,7 +1046,6 @@ set_freq(
 	mprintf_event(EVNT_FSET, NULL, "%s %.6f PPM", loop_desc,
 	    drift_comp * US_PER_S);
 }
-#endif /* HAVE_LOCKCLOCK */
 
 static void
 start_kern_loop(void)
@@ -1164,10 +1138,8 @@ select_loop(
 	 * call set_freq() to switch the frequency compensation to or
 	 * from the kernel loop.
 	 */
-#if !defined(ENABLE_LOCKCLOCK)
-	if (clock_ctl.pll_control && loop_started)
+	if (!lockclock && clock_ctl.pll_control && loop_started)
 		set_freq(drift_comp);
-#endif
 }
 
 
@@ -1195,7 +1167,7 @@ huffpuff(void)
 /*
  * loop_config - configure the loop filter
  *
- * ENABLE_LOCKCLOCK: The LOOP_DRIFTINIT and LOOP_DRIFTCOMP cases are no-ops.
+ * If lockclock is on, the LOOP_DRIFTINIT and LOOP_DRIFTCOMP cases are no-ops.
  */
 void
 loop_config(
@@ -1214,8 +1186,7 @@ loop_config(
 	 * variables. Otherwise, continue leaving no harm behind.
 	 */
 	case LOOP_DRIFTINIT:
-#ifndef ENABLE_LOCKCLOCK
-		if (clock_ctl.mode_ntpdate)
+		if (!lockclock || clock_ctl.mode_ntpdate)
 			break;
 
 		start_kern_loop();
@@ -1237,13 +1208,11 @@ loop_config(
 		else
 			rstclock(EVNT_NSET, 0);
 		loop_started = true;
-#endif /* !ENABLE_LOCKCLOCK */
 		break;
 
 	case LOOP_KERN_CLEAR:
 #if 0		/* XXX: needs more review, and how can we get here? */
-#ifndef ENABLE_LOCKCLOCK
-		if (clock_ctl.pll_control && clock_ctl.kern_enable) {
+		if (!lockclock && (clock_ctl.pll_control && clock_ctl.kern_enable)) {
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
 			ntv.status = STA_UNSYNC;
@@ -1252,7 +1221,6 @@ loop_config(
 				pll_status,
 				ntv.status);
 		   }
-#endif /* ENABLE_LOCKCLOCK */
 #endif
 		break;
 

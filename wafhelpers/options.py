@@ -48,8 +48,6 @@ def options_cmd(ctx, config):
                    help="Enable leaps on other than 1st of month.")
     grp.add_option('--enable-mssntp', action='store_true',
                    default=False, help="Enable Samba MS SNTP support.")
-    grp.add_option('--enable-lockclock', action='store_true',
-                   default=False, help="Enable NIST lockclock scheme.")
 
     grp = ctx.add_option_group("Refclock configure options")
     grp.add_option(

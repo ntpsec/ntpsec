@@ -247,6 +247,7 @@ extern endpt *	loopback_interface;	/* IPv4 loopback for refclocks */
 extern endpt *	ep_list;		/* linked list */
 
 /* ntp_loopfilter.c */
+extern bool	lockclock;		/* lock to the system clock? */
 extern double	drift_comp;		/* clock frequency (s/s) */
 extern double	clock_stability;	/* clock stability (s/s) */
 extern double	clock_max_back;		/* max backward offset before step (s) */

@@ -109,6 +109,8 @@ local_start(
 	memcpy(&pp->refid, "LOCL", REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_LOCAL;
 	poll_time = current_time;
+	if (pp->sloppyclockflag & CLK_FLAG1)
+	    lockclock = true
 	return true;
 }
 
@@ -116,7 +118,7 @@ local_start(
 /*
  * local_poll - called by the transmit procedure
  *
- * ENABLE_LOCKCLOCK: If the kernel supports the nanokernel or microkernel
+ * If lockclock is on: If the kernel supports the nanokernel or microkernel
  * system calls, the leap bits are extracted from the kernel. If there
  * is a kernel error or the kernel leap bits are set to 11, the NTP leap
  * bits are set to 11 and the stratum is set to infinity. Otherwise, the
@@ -156,36 +158,36 @@ local_poll(
 	 * If another process is disciplining the system clock, we set
 	 * the leap bits and quality indicators from the kernel.
 	 */
-#if defined(ENABLE_LOCKCLOCK)
-	struct timex ntv;
-	memset(&ntv,  0, sizeof ntv);
-	switch (ntp_adjtime(&ntv)) {
-	case TIME_OK:
+	if (lockclock) {
+		struct timex ntv;
+		memset(&ntv,  0, sizeof ntv);
+		switch (ntp_adjtime(&ntv)) {
+		case TIME_OK:
+		    pp->leap = LEAP_NOWARNING;
+		    peer->stratum = pp->stratum;
+		    break;
+
+		case TIME_INS:
+		    pp->leap = LEAP_ADDSECOND;
+		    peer->stratum = pp->stratum;
+		    break;
+
+		case TIME_DEL:
+		    pp->leap = LEAP_DELSECOND;
+		    peer->stratum = pp->stratum;
+		    break;
+
+		default:
+		    pp->leap = LEAP_NOTINSYNC;
+		    peer->stratum = STRATUM_UNSPEC;
+		}
+		pp->disp = 0;
+		pp->jitter = 0;
+	} else {
 		pp->leap = LEAP_NOWARNING;
-		peer->stratum = pp->stratum;
-		break;
-
-	case TIME_INS:
-		pp->leap = LEAP_ADDSECOND;
-		peer->stratum = pp->stratum;
-		break;
-
-	case TIME_DEL:
-		pp->leap = LEAP_DELSECOND;
-		peer->stratum = pp->stratum;
-		break;
-
-	default:
-		pp->leap = LEAP_NOTINSYNC;
-		peer->stratum = STRATUM_UNSPEC;
+		pp->disp = DISPERSION;
+		pp->jitter = 0;
 	}
-	pp->disp = 0;
-	pp->jitter = 0;
-#else /* ENABLE_LOCKCLOCK */
-	pp->leap = LEAP_NOWARNING;
-	pp->disp = DISPERSION;
-	pp->jitter = 0;
-#endif /* ENABLE_LOCKCLOCK */
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }

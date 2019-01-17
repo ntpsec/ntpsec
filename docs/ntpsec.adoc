@@ -278,6 +278,10 @@ codebase has been outright removed, with less than 5% new code added.
   default device path, the default PPS device path (if any) and the
   serial baud rate.
 
+* NIST lockclock mode is now a runtime option set by the (previously unused)
+  flag1 mode bit of the local-clock driver, rather than a compile-time
+  option.
+
 [[other]]
 == Other user-visible changes ==
 
