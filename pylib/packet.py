@@ -1603,11 +1603,13 @@ class Authenticator:
                 keyid = int(line.split()[1])
                 (keytype, passwd) = self.passwords[keyid]
                 if passwd is None:
+                    # Invalid key ID
                     raise ValueError
                 if len(passwd) > 20:
                     passwd = ntp.util.hexstr2octets(passwd)
                 return (keyid, keytype, passwd)
         else:
+            # No control lines found
             raise ValueError
 
     @staticmethod

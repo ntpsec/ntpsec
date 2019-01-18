@@ -544,6 +544,8 @@ usage: poll [n] [verbose]
             self.session.password()
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
+        except IOError:
+            print("***Can't read control key from /etc/ntp.conf")
 
     def help_passwd(self):
         self.say("""\
@@ -1152,6 +1154,9 @@ usage: lopeers
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
+        except IOError:
+            print("***Can't read control key from /etc/ntp.conf")
+            return
         if self.debug > 2:
             self.warn("In Config\nKeyword = :config\nCommand = %s\n" % line)
         try:
@@ -1298,6 +1303,8 @@ usage: mrulist [tag=value] [tag=value] [tag=value] [tag=value]
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
+        except IOError:
+            print("***Can't read control key from /etc/ntp.conf")
 
     def help_ifstats(self):
         self.say("""\
@@ -1321,6 +1328,8 @@ usage: ifstats
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
+        except IOError:
+            print("***Can't read control key from /etc/ntp.conf")
 
     def help_reslist(self):
         self.say("""\

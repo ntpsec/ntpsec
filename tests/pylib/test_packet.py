@@ -1919,6 +1919,22 @@ class TestAuthenticator(unittest.TestCase):
             except ValueError:
                 errored = True
             self.assertEqual(errored, True)
+            # Malformed control line
+            self.open_data = ["control foo"]
+            try:
+                cls.control()
+                errored = False
+            except ValueError:
+                errored = True
+            self.assertEqual(errored, True)
+            # Non-existent key
+            self.open_data = ["control 42"]
+            try:
+                cls.control()
+                errored = False
+            except KeyError:
+                errored = True
+            self.assertEqual(errored, True)
         finally:
             ntpp.open = open
 
