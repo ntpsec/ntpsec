@@ -63,6 +63,7 @@ Responses may flow in the other direction.
 
 === Alpha -> Bravo ===
 NTP-client to NTS-KE-client (Alpha to Bravo) is pretty simple.
+
   NTP-KE-client sends:
     Host name of NTS-KE server
     Optional preferred IP Address 4.1.7
@@ -90,10 +91,12 @@ optionally a rotation time and cookie format number could be sent.
 NTP-client to NTP-server (Alpha to Charlie)
 
 If all goes well (no lost packets) the client sends:
+
   The normal 48 byte NTP packet
   A 32 byte unique ID 5.3
   A cookie 5.4
   Authentication using C2S 5.6
+  
 It gets back the same, with the cookie replaced with a new cookie
 and S2C used for authentication.
 New cookies are encrypted with S2C.  Pg 20
