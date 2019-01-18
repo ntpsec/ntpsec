@@ -59,7 +59,7 @@ doit minimal "--disable-droproot --disable-dns-lookup --disable-mdns-registratio
 # This also tests refclocks without DEBUG
 doit classic "--enable-classic-mode --refclock=all --disable-manpage"
 
-doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-lockclock --enable-leap-smear --enable-mssntp --enable-early-droproot $LINUX"
+doit all     "--enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot $LINUX"
 
 if [ "`which asciidoc 2>/dev/null`" != "" -a \
      "`which xsltproc 2>/dev/null`" != "" ]
