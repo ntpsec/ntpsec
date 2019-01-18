@@ -57,6 +57,13 @@ NTP_API
 # From the Linux PPS header
 PPS_API_VERS
 
+# Linux symbols related to time.  CLOCK_MONOTONIC is POSIX.
+# Only used in the attic
+CLOCK_BOOTTIME
+CLOCK_MONOTONIC
+CLOCK_MONOTONIC_RAW
+CLOCK_REALTIME_COARSE
+
 # OpenSSL
 OPENSSL_VERSION_NUMBER
 LIBRESSL_VERSION_NUMBER
@@ -121,6 +128,7 @@ NOTUSED
 ONCORE_VERBOSE_.*	# Debugging symbols internal to the OnCore refclock
 PI			# Math constant used by the sim code
 RUN_TEST		# Internal to Unity
+__ghs__			# Unity
 THREAD_MINSTACKSIZE
 UINTPTR_MAX		# Unity
 UINTPTR_MAX0		# Unity
@@ -170,6 +178,8 @@ HAVE_STRUCT_TIMEX_MODES
 HAVE_STRUCT_TIMEX_TIME_TICK
 HAVE_STRUCT_NTPTIMEVAL_TAI
 HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
+CMAC_VERSION_CUTOFF	# Cruft from the attic
+DoSLOW			# Cruft from the attic
 
 # seccomp-related symbols that may not be available on all systems
 __NR_mmap
