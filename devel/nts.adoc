@@ -36,7 +36,9 @@ will replace them.
 This picture is for discussion.  In actual packaging Alpha and Bravo
 will both be inside ntpd. Charlie and Delta, on the other hand, need
 to be separate because Delta will have its own public port serving
-requests from Bravo.
+requests from Bravo.Also, potentially, one Delta (or Delta/Echo
+combination) could serve multiple Charlies, e.g. in a data-center
+deployment.
 
 [ditaa, "NTS-flow", "svg"]
 ----
