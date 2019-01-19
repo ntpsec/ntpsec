@@ -114,6 +114,18 @@ associations.
 The NTS-KE client SHOULD provide a configuration parameter to
 configure the root CAs used to validate TLS certificates.
 
+The NTS-KE client SHOULD have a configuration parameter to specify
+which TLS protocols are permissible.  Regardless of what is
+configured, because the NTS specification relies on RFC 5705, and
+also because it explicitly says so, TLS 1.3 is the minimum TLS
+version allowed.
+
+The NTS-KE client SHOULD provide a configuration paramter to
+configure an OpenSSL cipher string for the TLS connection.
+
+The NTS-KE client SHOULD provide a configuration paramter to
+configure an OpenSSL cipher string for the AEAD algorithms.
+
 The NTP client SHOULD provide a mechanism for the administrator to
 see whether NTS is currently in use on a given server association.
 
@@ -140,9 +152,11 @@ configured, because the NTS specification relies on RFC 5705, and
 also because it explicitly says so, TLS 1.3 is the minimum TLS
 version allowed.
 
-OpenSSL supports multiple AEAD algorithms.  The NTS-KE server SHOULD
-have a configuration parameter which takes an OpenSSL cipher string
-to define the allowed algorithms and their order.
+The NTS-KE server SHOULD provide a configuration paramter to
+configure an OpenSSL cipher string for the TLS connection.
+
+The NTS-KE server SHOULD provide a configuration paramter to
+configure an OpenSSL cipher string for the AEAD algorithms.
 
 By default, the NTS-KE server SHOULD honor the client's AEAD
 algorithm ordering; that is, the NTS-KE server SHALL by default
