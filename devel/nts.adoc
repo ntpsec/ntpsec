@@ -16,15 +16,24 @@ The NTS implementation shall:
 
 == General Ideas ==
 
-The NTP server maintains no per-client state.  The NTP client
-stores the state in a cookie which is sent with each request.
-The cookie is provided by the NTS-KE server.  The NTP server will
-decrypt it to recover the session keys.
+The NTP server maintains no per-client state.  The NTS-KE server
+initially generates the state and wraps it into an
+implementation-defined cookie.  Multiple copies of this plaintext
+cookie are encrypted with nonces and provided to the client by the
+NTS-KE server.  The client treats the cookies as opaque data and
+echos them back to the NTP server with each request.  The NTP
+server decrypts the cookie to retrieve the state, which includes
+the encryption parameters (AEAD algorithm and keys).  To issue a
+new cookie, the NTP server encrypts (to itself) the same plaintext
+cookie with a new nonce.
 
 NTS should avoid exposing information that would be useful in
 tracking the client.  (Consider a laptop that moves from home
 to work to a coffee shop.)  Thus cookies should only used once.
-To implement that, each NTP response includes a new encrypted cookie.
+To implement that, each NTP response includes a new cookie, which is
+encrypted when sent to the client.  (Otherwise, the cookie could be
+observed in transit, which would allow for tracking the client when
+it later echos the cookie back to the server.)
 
 NTS should not assist DDoS amplification.  All NTP responses
 are the same length as the request.  This means that some
@@ -36,7 +45,7 @@ will replace them.
 This picture is for discussion.  In actual packaging Alpha and Bravo
 will both be inside ntpd. Charlie and Delta, on the other hand, need
 to be separate because Delta will have its own public port serving
-requests from Bravo.Also, potentially, one Delta (or Delta/Echo
+requests from Bravo. Also, potentially, one Delta (or Delta/Echo
 combination) could serve multiple Charlies, e.g. in a data-center
 deployment.
 
@@ -49,9 +58,9 @@ deployment.
   ; |NTS-KE client|-^---------->|NTS-KE server|
   ; +-------------+ ;           +-------------+
   ;     ^           ;                |
-  ;     |           ;              .----.
-  ;     |           ;              |Echo|
-  ;     |           ;              .----.
+  ;     |           ;                |
+  ;     |           ;                |
+  ;     |           ;                |
   ;     |           ;                |
   ; +-----------+   ;           +-----------+
   ; |Alpha      |   ;           |Charlie    |
@@ -66,9 +75,11 @@ is used for one request/response transaction.
 
 
 === Alpha -> Bravo ===
-NTP-client to NTS-KE-client (Alpha to Bravo) is pretty simple.
+NTP client to NTS-KE client (Alpha to Bravo) is pretty simple.
+As these will both be inside ntpd, this will be function calling,
+not a network connection.
 
-  NTS-KE-client sends:
+  NTS-KE client sends:
     Host name of NTS-KE server
     Optional preferred IP Address 4.1.7
     A sorted list of AEAD algorithms 4.1.5
@@ -79,35 +90,75 @@ NTP-client to NTS-KE-client (Alpha to Bravo) is pretty simple.
     The selected AEAD algorithm 4.1.5
 
 For AEAD, we need libaes_siv.so, RFC 5297
-It's available, but not in OpenSSL yet
+It's available, but not in OpenSSL yet.
+
+TODO: Is the NTP client going to initiate NTS for servers by default?
+If so, it SHOULD (MUST?) provide a configuration parameter to disable
+NTS for a given server.
+
+While it is technically permitted (see RFC5280, page 35) to put an
+IP address in a subjectAltName in a certificate, this is essentially
+never done in practice, and certainly not with public CAs.
+Accordingly, the NTP client SHOULD NOT initiate NTS for servers
+specified by IP address (whether IPv4 or IPv6).
+
+Additionally, the NTP client SHOULD NOT initiate NTS for pool
+associations by default.  The most common pool is the public pool at
+pool.ntp.org.  The volunteer NTP servers will never be able to pass a
+certificate check for <anything>.pool.ntp.org, so NTS-KE will always
+fail, and represents useless load on the public pool servers.  As the
+pool statement can be used in other configurations that could work
+with NTS-KE, the NTP client SHOULD allow NTS to be enabled on pool
+associations.
+
+The NTS-KE client SHOULD provide a configuration parameter to
+configure the root CAs used to validate TLS certificates.
+
+The NTP client SHOULD provide a mechanism for the administrator to
+see whether NTS is currently in use on a given server association.
 
 === Bravo -> Delta ===
-NTS-client-NTS-server (Bravo to Delta) is mostly the above in TLS over TCP.
-NTS-client has to make the C2S and S2C keys.  They are tangled up
-with TLS.
+The NTS-KE client to NTS-KE server (Bravo to Delta) communication is
+mostly the above in TLS 1.3 (or later) over TCP in the format
+specified in the NTS draft.
 
-=== Echo -> Charlie & Delta ===
-In this mode, the NTS server generates the cookies, and thus
-must know the master key and the cookie generation recipe.
+The NTS-KE client (Bravo) and NTS-KE server (Delta) independently
+derive the C2S and S2C keys.  For OpenSSL, this is implemented by
+making two calls to SSL_export_keying_material(), which implements
+RFC5705.  The label and context inputs are provided in 5.1.  This
+process is deterministic, so both ends generate the same C2S and S2C.
 
-Echo to the servers Charlie and Delta is a one shot.
-Echo sends a seed/ratchet mechanism number pair to both servers.
-optionally a rotation time and cookie format number could be sent.
+The NTS-KE server SHOULD have a configuration parameter to specify
+the TLS key, certificate, and intermediate certificate bundles.
 
-=== Or... dump the Echo box
-In this mode, the NTS-server doesn't know the master key
-or the cookie format.
+The NTS-KE server MAY have a method to reload the key, certificate,
+and intermediate certificate bundles without a full daemon restart.
 
-NTS-server to NTP-server
-  NTS-Server sends:
-    C2S and S2C encryption keys  4.2, 5.1
-    A sorted list of AEAD algorithms  4.1.5
-  It gets back:
-    The selected AEAD algorithm 4.1.5
-    1 to 8 cookies  4.1.6
+The NTS-KE server SHOULD have a configuration parameter to specify
+which TLS protocols are permissible.  Regardless of what is
+configured, because the NTS specification relies on RFC 5705, and
+also because it explicitly says so, TLS 1.3 is the minimum TLS
+version allowed.
+
+OpenSSL supports multiple AEAD algorithms.  The NTS-KE server SHOULD
+have a configuration parameter which takes an OpenSSL cipher string
+to define the allowed algorithms and their order.
+
+By default, the NTS-KE server SHOULD honor the client's AEAD
+algorithm ordering; that is, the NTS-KE server SHALL by default
+choose the first of the client's AEAD algorithms that the server
+also supports (after limiting by the server's configured cipher
+string). However, the server SHOULD have a configuration parameter to
+honor its cipher order which reverses this behavior, choosing the
+first from the server's sorted list of algorithms that is also
+supported by the client.
+
+The NTS-KE server then generates and returns 8 cookies using, for
+example, the suggested format in section 6 of the NTS draft.  To do
+so, the NTS-KE server needs a master key, called "K" in the draft.
 
 === Alpha -> Charlie ===
-NTP-client to NTP-server (Alpha to Charlie)
+NTP client to NTP server (Alpha to Charlie)
 
 If all goes well (no lost packets) the client sends:
 
@@ -118,9 +169,8 @@ If all goes well (no lost packets) the client sends:
   
 It gets back the same, with the cookie replaced with a new cookie
 and S2C used for authentication.
-New cookies are encrypted with S2C.  Pg 20
-The response is the same lengh.  The cookie is moved from
-unencrypted to encrypted.
+
+The response is the same lengh.
 
 All the extra data is in real NTP extensions.  (No more of
 the magic length kludgery for the current shared key authentication.)
@@ -138,35 +188,43 @@ I think we need a nonce in there.
 
 NTS makes use of three keys:
 
-* Client to Server (c2s)
+* Client to Server key (C2S)
 
-* Server to Client (s2c)
+* Server to Client key (S2C)
 
-* NTS Master Key
+* NTS Master Key (called K in the NTS draft)
 
-Because one of the goals of NTS is to not require any per-client state in
-the servers, the server (both NTPD and NTS-KE) does not possess either of the
-c2s/s2c pair. Both servers possess the NTS Master Key, which is expected to
-be updated somewhat regularly.
+Because one of the goals of NTS is to not require any per-client
+state in the servers, the servers (both NTP and NTS-KE) do not
+store either of C2S/S2C.  Both servers possess the NTS Master Key,
+which is expected to be updated somewhat regularly, with old versions
+being kept for some time (SHOULD be two rotation cycles) to allow for
+old cookies to be decrypted.
 
-The c2s/s2c pair is created during the TLS handshake between client and NTS-KE.
-As part of this NTS-KE will create a variable number of cookies (should be 8).
-These cookies are encrypted with the NTS master key, and are opaque to the
-client. The cookies contain the c2s/s2c pair in a form that NTPD will
-understand, and is how NTPD is able to en/decrypt data without needing to
-store per-client keys.
+The C2S and S2C keys are derived from the TLS session data between
+the NTS-KE client and the NTS-KE server using the RFC5705 algorithm.
+These are not the same as the keys used by TLS to protect the data
+flowing over the TLS connection itself.
 
-When sending an NTS packet the client attaches a cookie-blob in cleartext,
-then encrypts the rest of the data using the c2s key. When the NTPD server
-receives the packet it decrypts the cookie-blob using its Master Key, and
-extracts the c2s/s2c pair so it can decrypt the rest. The response packet
-is encrypted using the s2c key extracted from the cookie.
+As part of the setup, NTS-KE will create a variable number of cookies
+(which SHOULD be 8).  These cookies are encrypted with the NTS Master
+Key, and are opaque to the client. The cookies contain C2S and S2C in
+a form that the NTP server will understand, and this is how the NTP
+server is able to en/decrypt data without needing to store per-client
+keys.
+
+When sending an NTP packet, the client attaches a cookie blob in
+cleartext, then encrypts the rest of the data using the C2S key. When
+the NTP server receives the packet, it decrypts the cookie using its
+NTS Master Key, and extracts C2S and S2C.  It uses C2S to decrypt the
+rest. The response packet is encrypted using the S2C extracted from the
+cookie.
 
 == Odds and ends ==
 
 How many cookies should the NTP client try to hold?  8
 
-There is no hard reason, but it is what the server SHOULD return.  4.1.6
+There is no hard reason, but it is what the NTS-KE server SHOULD return.  4.1.6
 It also matches the number of samples that ntpd remembers (the reach bit
 mask in ntpq/peers) and running out of responses is a good time to do
 special things like get a new pool server or get new cookies by running
