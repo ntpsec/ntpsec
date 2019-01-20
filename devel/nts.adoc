@@ -16,16 +16,19 @@ The NTS implementation shall:
 
 == General Ideas ==
 
-The NTP server maintains no per-client state.  The NTS-KE server
-initially generates the state and wraps it into an
-implementation-defined cookie.  Multiple copies of this plaintext
-cookie are encrypted with nonces and provided to the client by the
-NTS-KE server.  The client treats the cookies as opaque data and
-echos them back to the NTP server with each request.  The NTP
-server decrypts the cookie to retrieve the state, which includes
-the encryption parameters (AEAD algorithm and keys).  To issue a
-new cookie, the NTP server encrypts (to itself) the same plaintext
-cookie with a new nonce.
+The NTP server maintains no per-client state.  The necessary state
+is provided by a cookie that is included with each NTP request.  An
+initial batch of cookies is provided by the NTS-KE server.  The
+NTP client treats the cookies as opaque data and sends one to the
+NTP server with each request.
+
+A cookie contains the AEAD algorithm and keys necessary to
+authenticate a request.  They are encrypted with the NTP servers
+key.  The NTP server decrypts the cookie to retrieve the
+the encryption parameters (AEAD algorithm and keys) and then uses
+then to authenticate the packet.  To issue a new cookie, the NTP
+server makes a new nonce and uses the AEAD algorithm and keys
+from the old cookie.
 
 NTS should avoid exposing information that would be useful in
 tracking the client.  (Consider a laptop that moves from home
@@ -33,7 +36,7 @@ to work to a coffee shop.)  Thus cookies should only used once.
 To implement that, each NTP response includes a new cookie, which is
 encrypted when sent to the client.  (Otherwise, the cookie could be
 observed in transit, which would allow for tracking the client when
-it later echos the cookie back to the server.)
+it later echos that cookie back to the server.)
 
 NTS should not assist DDoS amplification.  All NTP responses
 are the same length as the request.  This means that some
@@ -43,11 +46,9 @@ will replace them.
 == System Partitioning ==
 
 This picture is for discussion.  In actual packaging Alpha and Bravo
-will both be inside ntpd. Charlie and Delta, on the other hand, need
-to be separate because Delta will have its own public port serving
-requests from Bravo. Also, potentially, one Delta (or Delta/Echo
-combination) could serve multiple Charlies, e.g. in a data-center
-deployment.
+will both be inside ntpd. In the simple case, Charlie and Delta can
+also be packaged together.  In complicated cases, Delta could serve multiple
+Charlies, e.g. in a data-center deployment or for load sharing.
 
 [ditaa, "NTS-flow", "svg"]
 ----
@@ -55,15 +56,15 @@ deployment.
   ;     Client      ;
   ; +-------------+ ;           +-------------+
   ; |Bravo        | ;           |Delta        |
-  ; |NTS-KE client|-^---------->|NTS-KE server|
-  ; +-------------+ ;           +-------------+
-  ;     ^           ;                |
-  ;     |           ;                |
-  ;     |           ;                |
-  ;     |           ;                |
-  ;     |           ;                |
-  ; +-----------+   ;           +-----------+
-  ; |Alpha      |   ;           |Charlie    |
+  ; |NTS-KE client|-^---------->|NTS-KE server|<-+
+  ; +-------------+ ;           +-------------+  |
+  ;     ^           ;                |           |
+  ;     |           ;                |      +------------+
+  ;     |           ;                |      | Admin: Key |
+  ;     |           ;                |      +------------+
+  ;     |           ;                v           |
+  ; +-----------+   ;           +-----------+    |
+  ; |Alpha      |   ;           |Charlie    |<---+
   ; |NTP client |---^---------->|NTP server |
   ; +-----------+   ;           +-----------+
   + - - - - - - - - +
@@ -72,6 +73,16 @@ deployment.
 In this diagram, an arrow means "initiates requests to". 
 Responses flow in the other direction.  Each connection
 is used for one request/response transaction.
+
+
+The NTS-KE server has to make cookies that the NTP server
+will process.  There are 2 ways to do that.  First, they can share
+the same key, new-cookie recipe, and new-key recipe.  If they are
+in separate systems, the admin must setup the initial key and keep
+the keys in sync if either system gets trashed.  The second way is
+for the NTS-KE server to ask the NTP server for new cookies.  If it
+does that, it doesn't need to know the key or anything about the
+contents of a cookie.
 
 
 === Alpha -> Bravo ===
@@ -90,7 +101,8 @@ not a network connection.
     The selected AEAD algorithm 4.1.5
 
 For AEAD, we need libaes_siv.so, RFC 5297
-It's available, but not in OpenSSL yet.
+It's not in OpenSSL yet.
+  https://github.com/dfoxfranke/libaes_siv
 
 TODO: Is the NTP client going to initiate NTS for servers by default?
 If so, it SHOULD (MUST?) provide a configuration parameter to disable
@@ -182,7 +194,7 @@ If all goes well (no lost packets) the client sends:
   Authentication using C2S 5.6
   
 It gets back the same, with the cookie replaced with a new cookie
-and S2C used for authentication.
+and S2C used for authentication and to encrypt the new cookie.
 
 The response is the same lengh.
 
@@ -193,10 +205,10 @@ If packets (and hence cookies) are lost, the client will include
 a cookie-placeholder for each extra cookie it wants.  5.5
 Those slots will be returned with new cookies.
 
-The AEAD algorithm is setup to encrypt some data as well as authenticate.
-For the request, that's empty.  For the response, it contains a new
-cookie.  (Or cookies.)
-I think we need a nonce in there.
+The AEAD algorithm used for authentication is setup to encrypt some
+data as well.  For the request, the encrypted data is empty.  For the
+response, it contains a new cookie (or cookies). AEAD also needs a nonce.
+
 
 == Key Generation and Usage ==
 
@@ -228,11 +240,11 @@ server is able to en/decrypt data without needing to store per-client
 keys.
 
 When sending an NTP packet, the client attaches a cookie blob in
-cleartext, then encrypts the rest of the data using the C2S key. When
+cleartext, then authenticates the packet using the C2S key. When
 the NTP server receives the packet, it decrypts the cookie using its
-NTS Master Key, and extracts C2S and S2C.  It uses C2S to decrypt the
-rest. The response packet is encrypted using the S2C extracted from the
-cookie.
+NTS Master Key to revover C2S and S2C.  It uses C2S to authenticate the
+packet. For the response, S2C is used to encrypt the new cookies and
+authenticate the return packet.
 
 == Odds and ends ==
 
