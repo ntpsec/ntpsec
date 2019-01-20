@@ -9,8 +9,8 @@ The NTS implementation shall:
 * Address RFC5705 Keying Material Exporting and AES_SIV (RFC5297) code
   support which may not be natively supported in OpenSSL.
 
-* Comply with the standardized specification of NTS
-  https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp
+* Comply with the standardized specification of 
+  link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp[NTS]
 
 * Be interoperable with the other reference implementations in IETF hackathons.
 
@@ -92,14 +92,21 @@ not a network connection.
 
 ====  NTS-KE client sends:
 -    Host name of NTS-KE server
--    Optional preferred IP Address 4.1.7
--    A sorted list of AEAD algorithms 4.1.5
+-    Optional preferred IP Address
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
+-    A sorted list of AEAD algorithms
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
 
 ====  It gets back:
--    IP Address 4.1.7
--    1 to 8 cookies  4.1.6
--    C2S and S2C encryption keys  4.2, 5.1
--    The selected AEAD algorithm 4.1.5
+-    IP Address
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
+-    1 to 8 cookies  
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.6[4.1.6]
+-    C2S and S2C encryption keys  
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.2[4.2],
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]
+-    The selected AEAD algorithm 
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
 
 For AEAD, we need libaes_siv.so, RFC 5297
 It's not in OpenSSL yet.
@@ -150,8 +157,9 @@ specified in the NTS draft.
 The NTS-KE client (Bravo) and NTS-KE server (Delta) independently
 derive the C2S and S2C keys.  For OpenSSL, this is implemented by
 making two calls to SSL_export_keying_material(), which implements
-RFC5705.  The label and context inputs are provided in 5.1.  This
-process is deterministic, so both ends generate the same C2S and S2C.
+RFC5705.  The label and context inputs are provided in 
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]. 
+This process is deterministic, so both ends generate the same C2S and S2C.
 
 The NTS-KE client passes C2S and S2C to the NTP client.  The NTS-KE
 server uses them to make the initial cookies.
@@ -166,9 +174,12 @@ NTP client to NTP server (Alpha to Charlie)
 If all goes well (no lost packets) the client sends:
 
 -  The normal 48 byte NTP packet
--  A 32+ byte unique ID 5.3
--  A cookie 5.4
--  Authentication using C2S 5.6
+-  A 32+ byte unique ID
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.3[5.3]
+-  A cookie
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.4[5.4]
+-  Authentication using C2S
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.6[5.6]
   
 It gets back the same, with the cookie replaced with a new cookie
 and S2C used for authentication and to encrypt the new cookie.
@@ -179,7 +190,8 @@ All the extra data is in real NTP extensions.  (No more of
 the magic length kludgery for the current shared key authentication.)
 
 If packets (and hence cookies) are lost, the client will include
-a cookie-placeholder for each extra cookie it wants.  5.5
+a cookie-placeholder for each extra cookie it wants. 
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.5[5.5] 
 Those slots will be returned with new cookies.
 
 The AEAD algorithm used for authentication is setup to encrypt some
@@ -256,7 +268,8 @@ authenticate the return packet.
 
 How many cookies should the NTP client try to hold?  8
 
-There is no hard reason, but it is what the NTS-KE server SHOULD return.  4.1.6
+There is no hard reason, but it is what the NTS-KE server SHOULD return. 
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.6[4.1.6]
 It also matches the number of samples that ntpd remembers (the reach bit
 mask in ntpq/peers) and running out of responses is a good time to do
 special things like get a new pool server or get new cookies by running
