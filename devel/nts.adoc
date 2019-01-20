@@ -286,3 +286,11 @@ needs to be kept private.  (aka encrypted if it goes over the net)
 Same for NTS-KE server and NTP server.
 Both connections contain C2S and S2C keys.
 
+== Potential cookie recipe(s)
+
+. Form a plaintext according to cookie variation
+.. the AEAD algorthm number, and c2s/s2c keys.
+.. a countdown word, the AEAD algorthm number, and c2s/s2c keys.
+.. a countdown word, client IPv6 address, the AEAD algorthm number, and c2s/s2c keys.
+. encrypt it with the master key (which has nothing to do w/ TLS)
+. form the cookie w/ cookie recipe number, master key number, a nonce and the ciphertext.
