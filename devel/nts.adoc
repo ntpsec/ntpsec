@@ -294,3 +294,18 @@ Both connections contain C2S and S2C keys.
 .. a countdown word, client IPv6 address, the AEAD algorthm number, and c2s/s2c keys.
 . encrypt it with the master key (which has nothing to do w/ TLS)
 . form the cookie w/ cookie recipe number, master key number, a nonce and the ciphertext.
+
+== Ridiculous questions
+
+=== link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.3[4.1.3], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.4[4.1.4]
+Is the response in case of abuse 'continue abuse, just wait a minute'?
+
+=== link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.4[5.4], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.5[5.5]
+When sending a cookie placeholder, are multiple cookie extensions sent?
+
+=== link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.7[5.7] ===
+Does the unique identifier extension need to be omniversally unique?
+
+Why are The timestamps, unique identifier extension etc. seemingly not tamper resisted?
+
+Can NTSN and other KODs get signed?
