@@ -152,32 +152,8 @@ making two calls to SSL_export_keying_material(), which implements
 RFC5705.  The label and context inputs are provided in 5.1.  This
 process is deterministic, so both ends generate the same C2S and S2C.
 
-The NTS-KE server SHOULD have a configuration parameter to specify
-the TLS key, certificate, and intermediate certificate bundles.
-
-The NTS-KE server MAY have a method to reload the key, certificate,
-and intermediate certificate bundles without a full daemon restart.
-
-The NTS-KE server SHOULD have a configuration parameter to specify
-which TLS protocols are permissible.  Regardless of what is
-configured, because the NTS specification relies on RFC 5705, and
-also because it explicitly says so, TLS 1.3 is the minimum TLS
-version allowed.
-
-The NTS-KE server SHOULD provide a configuration paramter to
-configure an OpenSSL cipher string for the TLS connection.
-
-The NTS-KE server SHOULD provide a configuration paramter to
-configure an OpenSSL cipher string for the AEAD algorithms.
-
-By default, the NTS-KE server SHOULD honor the client's AEAD
-algorithm ordering; that is, the NTS-KE server SHALL by default
-choose the first of the client's AEAD algorithms that the server
-also supports (after limiting by the server's configured cipher
-string). However, the server SHOULD have a configuration parameter to
-honor its cipher order which reverses this behavior, choosing the
-first from the server's sorted list of algorithms that is also
-supported by the client.
+The NTS-KE client passes C2S and S2C to the NTP client.  The NTS-KE
+server uses them to make the initial cookies.
 
 The NTS-KE server then generates and returns 8 cookies using, for
 example, the suggested format in section 6 of the NTS draft.  To do
@@ -209,6 +185,35 @@ The AEAD algorithm used for authentication is setup to encrypt some
 data as well.  For the request, the encrypted data is empty.  For the
 response, it contains a new cookie (or cookies). AEAD also needs a nonce.
 
+
+== Configuration ==
+
+By default, the NTS-KE server SHOULD honor the client's AEAD
+algorithm ordering; that is, the NTS-KE server SHALL by default
+choose the first of the client's AEAD algorithms that the server
+also supports (after limiting by the server's configured cipher
+string). However, the server SHOULD have a configuration parameter to
+honor its cipher order which reverses this behavior, choosing the
+first from the server's sorted list of algorithms that is also
+supported by the client.
+
+The NTS-KE server SHOULD have a configuration parameter to specify
+the TLS key, certificate, and intermediate certificate bundles.
+
+The NTS-KE server MAY have a method to reload the key, certificate,
+and intermediate certificate bundles without a full daemon restart.
+
+The NTS-KE server SHOULD have a configuration parameter to specify
+which TLS protocols are permissible.  Regardless of what is
+configured, because the NTS specification relies on RFC 5705, and
+also because it explicitly says so, TLS 1.3 is the minimum TLS
+version allowed.
+
+The NTS-KE server SHOULD provide a configuration paramter to
+configure an OpenSSL cipher string for the TLS connection.
+
+The NTS-KE server SHOULD provide a configuration paramter to
+configure an OpenSSL cipher string for the AEAD algorithms.
 
 == Key Generation and Usage ==
 
