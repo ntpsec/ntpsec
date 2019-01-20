@@ -90,15 +90,16 @@ NTP client to NTS-KE client (Alpha to Bravo) is pretty simple.
 As these will both be inside ntpd, this will be function calling,
 not a network connection.
 
-  NTS-KE client sends:
-    Host name of NTS-KE server
-    Optional preferred IP Address 4.1.7
-    A sorted list of AEAD algorithms 4.1.5
-  It gets back:
-    IP Address 4.1.7
-    1 to 8 cookies  4.1.6
-    C2S and S2C encryption keys  4.2, 5.1
-    The selected AEAD algorithm 4.1.5
+====  NTS-KE client sends:
+-    Host name of NTS-KE server
+-    Optional preferred IP Address 4.1.7
+-    A sorted list of AEAD algorithms 4.1.5
+
+====  It gets back:
+-    IP Address 4.1.7
+-    1 to 8 cookies  4.1.6
+-    C2S and S2C encryption keys  4.2, 5.1
+-    The selected AEAD algorithm 4.1.5
 
 For AEAD, we need libaes_siv.so, RFC 5297
 It's not in OpenSSL yet.
@@ -164,10 +165,10 @@ NTP client to NTP server (Alpha to Charlie)
 
 If all goes well (no lost packets) the client sends:
 
-  The normal 48 byte NTP packet
-  A 32 byte unique ID 5.3
-  A cookie 5.4
-  Authentication using C2S 5.6
+-  The normal 48 byte NTP packet
+-  A 32+ byte unique ID 5.3
+-  A cookie 5.4
+-  Authentication using C2S 5.6
   
 It gets back the same, with the cookie replaced with a new cookie
 and S2C used for authentication and to encrypt the new cookie.
