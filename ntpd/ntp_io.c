@@ -301,7 +301,7 @@ maintain_activefds(
  * the code solves following tasks:
  *
  *   - keep a current list of active interfaces in order
- *     to bind to to the interface address on NTP_PORT so that
+ *     to bind to the interface address on NTP_PORT so that
  *     all wild and specific bindings for NTP_PORT are taken by ntpd
  *     to avoid other daemons messing with the time or sockets.
  *   - all interfaces keep a list of peers that are referencing

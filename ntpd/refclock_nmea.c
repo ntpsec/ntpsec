@@ -1746,7 +1746,7 @@ unfold_century(
  * centuries. (I *think* that will not happen for 400*1024 years, but I
  * have no valid proof. -*-perlinger@ntp.org-*-)
  *
- * This function is bound to to work between years 1980 and 2399
+ * This function is bound to work between years 1980 and 2399
  * (inclusive), which should suffice for now ;-)
  *
  * Note: This function needs a full date&time spec on input due to the
