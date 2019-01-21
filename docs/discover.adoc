@@ -75,7 +75,7 @@ maximum. The pruning algorithm design avoids needless discovery/prune
 cycles for associations that wander in and out of the survivor list, but
 otherwise have similar characteristics.
 
-Following is a description of the lool scheme. Note that
+Following is a description of the pool scheme. Note that
 reference to options applies to the commands described on the
 link:confopt.html[Configuration Options] page. See that page
 for applicability and defaults.
