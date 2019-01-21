@@ -20,7 +20,7 @@ polling interval reported in the last peers response.)
 
 The status bar includes the version string of the server being
 watched, the (local) time at which it was last updated, and the
-current query interval.
+current query interval in parens following the date.
 
 There is a detail-display mode that dumps full information about a
 single selected peer in a tabular format that makes it relatively easy
