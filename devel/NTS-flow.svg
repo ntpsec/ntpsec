@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="650" height="280" version="1.0" shape-rendering="geometricPrecision">
+<defs>
+<style type="text/css">
+@font-face{font-family:sans-serif;
+}
+text{font-family:sans-serif;
+font-size:15px;
+stroke:none;
+fill:black;
+}
+.a,.b{stroke-linecap:round;
+stroke-linejoin:round;
+}
+.a{stroke:black;
+stroke-width:1;
+fill:none;
+}
+.b{stroke:none;
+stroke-width:1;
+fill:black;
+}
+.c{stroke:black;
+stroke-width:1;
+stroke-miterlimit:0;
+stroke-linecap:butt;
+stroke-linejoin:round;
+fill:white;
+}
+.d{stroke:rgb(150,150,150);
+fill:rgb(150,150,150);
+filter:url(#shadowBlur);
+}
+</style>
+<filter id="shadowBlur" x="0" y="0" width="200%" height="200%">
+<feOffset in="SourceGraphic" dx="3.0003002" dy="3.0003002" result="offOut"/>
+<feGaussianBlur in="offOut" stdDeviation="3"/>
+</filter>
+</defs>
+<g stroke-width="1" stroke-linecap="square" stroke-linejoin="round">
+<rect x="0" y="0" width="650" height="280" style="fill:white"/>
+<g class="d">
+<path d="M370 105Q365 105 365 98L365 70Q365 63 370 63L520 63L520 63Q525 63 525 70L525 98L525 98Q525 105 520 105L370 105z"/>
+<path d="M65 98Q65 105 70 105L220 105Q225 105 225 98L225 70L225 70Q225 63 220 63L70 63L70 63Q65 63 65 70L65 98z"/>
+<path d="M370 189Q365 189 365 196L365 224Q365 231 370 231L500 231L500 231Q505 231 505 224L505 196L505 196Q505 189 500 189L370 189z"/>
+<path d="M70 231Q65 231 65 224L65 196Q65 189 70 189L190 189L190 189Q195 189 195 196L195 224L195 224Q195 231 190 231L70 231z"/>
+<path d="M620 133Q625 133 625 140L625 154Q625 161 620 161L510 161L510 161Q505 161 505 154L505 140L505 140Q505 133 510 133L620 133z"/>
+</g>
+<path stroke="black" stroke-width="1" stroke-dasharray="5,5" stroke-miterlimit="0" stroke-linecap="butt" stroke-linejoin="round" fill="white" d="M245 77L245 42Q245 35 240 35L50 35L50 35Q45 35 45 42L45 238L45 238Q45 245 50 245L240 245L240 245Q245 245 245 238L245 231L245 231z"/>
+<g class="c">
+<path d="M370 105Q365 105 365 98L365 70Q365 63 370 63L520 63L520 63Q525 63 525 70L525 98L525 98Q525 105 520 105L370 105z"/>
+<path d="M65 98Q65 105 70 105L220 105Q225 105 225 98L225 70L225 70Q225 63 220 63L70 63L70 63Q65 63 65 70L65 98z"/>
+<path d="M370 189Q365 189 365 196L365 224Q365 231 370 231L500 231L500 231Q505 231 505 224L505 196L505 196Q505 189 500 189L370 189z"/>
+<path d="M70 231Q65 231 65 224L65 196Q65 189 70 189L190 189L190 189Q195 189 195 196L195 224L195 224Q195 231 190 231L70 231z"/>
+<path d="M620 133Q625 133 625 140L625 154Q625 161 620 161L510 161L510 161Q505 161 505 154L505 140L505 140Q505 133 510 133L620 133z"/>
+</g>
+<g class="b">
+<path d="M355 84L365 91L355 98z"/>
+<path d="M535 84L525 91L535 98z"/>
+<path d="M105 105L100 119L110 119z"/>
+<path d="M420 175L425 189L430 175z"/>
+<path d="M515 196L505 203L515 210z"/>
+<path d="M355 210L365 217L355 224z"/>
+</g>
+<g class="a">
+<path d="M555 161L555 196Q555 203 550 203L515 203L515 203"/>
+<path d="M535 91L550 91Q555 91 555 98L555 133L555 133"/>
+<path d="M425 175L425 105"/>
+<path d="M355 91L225 91"/>
+<path d="M355 217L195 217"/>
+<path d="M105 189L105 119"/>
+</g>
+<text x="80" y="208">Alpha</text>
+<text x="80" y="222">NTP client</text>
+<text x="380" y="208">Charlie</text>
+<text x="380" y="222">NTP server</text>
+<text x="528" y="152">Admin: Key</text>
+<text x="380" y="82">Delta</text>
+<text x="380" y="96">NTS-KE server</text>
+<text x="80" y="82">Bravo</text>
+<text x="80" y="96">NTS-KE client</text>
+<text x="109" y="54">Client</text>
+</g>
+</svg>

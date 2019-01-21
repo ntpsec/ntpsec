@@ -50,24 +50,25 @@ will both be inside ntpd. In the simple case, Charlie and Delta can
 also be packaged together.  In complicated cases, Delta could serve multiple
 Charlies, e.g. in a data-center deployment or for load sharing.
 
-[ditaa, "NTS-flow", "svg"]
+image:NTS-flow.svg[]
+
 ----
-  /-------------------\
-  |     Client        |
-  | /---------------\ |           /---------------\
-  | | Bravo         | |           | Delta         |
-  | | NTS KE client +------------>| NTS KE server |<-\
-  | \---------------/ |           \-----+---------/  |
-  |     ^             |                 |            |
-  |     |             |                 |       /----+------\
-  :     |             :                 |       | Admin Key |
-  |     |             |                 |       \----+------/
-  |     |             |                 v            |
-  | /---+--------\    |           /-------------\    |
-  | | Alpha      |    |           | Charlie     |<---/
-  | | NTP client +--------------->| NTP server  |
-  | \------------/    |           \-------------/
-  \-------------------/
+  ╔═══════════════════╗
+  ║     Client        ║
+  ║ ┌───────────────┐ ║           ┌───────────────┐
+  ║ │ Bravo         │ ║           │ Delta         │
+  ║ │ NTS-KE client ├─╫──────────►│ NTS-KE server │◄─┐
+  ║ └───────────────┘ ║           └─────┬─────────┘  │
+  ║     ▲             ║                 │            │
+  ║     │             ║                 │       ┌────┴───────┐
+  ║     │             ║                 │       │ Admin: Key │
+  ║     │             ║                 │       └────┬───────┘
+  ║     │             ║                 ▼            │
+  ║ ┌───┴────────┐    ║           ┌─────────────┐    │
+  ║ │ Alpha      │    ║           │ Charlie     │◄───┘
+  ║ │ NTP client ├────╫──────────►│ NTP server  │
+  ║ └────────────┘    ║           └─────────────┘
+  ╚═══════════════════╝
 ----
 
 In this diagram, an arrow means "initiates requests to".
