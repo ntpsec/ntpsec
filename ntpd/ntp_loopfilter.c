@@ -114,8 +114,8 @@ bool lockclock;		/* hardware clock is externally disciplined? */
 /*
  * Program variables
  */
-static double clock_offset;	/* offset (lockclock case only) */
-static uptime_t clock_epoch;	/* last update (lockclock case only) */
+static double clock_offset;	/* offset (non-lockclock case only) */
+static uptime_t clock_epoch;	/* last update (non-lockclock case only) */
 double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
@@ -1167,7 +1167,7 @@ huffpuff(void)
 /*
  * loop_config - configure the loop filter
  *
- * If lockclock is on, the LOOP_DRIFTINIT and LOOP_DRIFTCOMP cases are no-ops.
+ * If lockclock is on, the LOOP_DRIFTINIT case is a no-op.
  */
 void
 loop_config(
@@ -1186,7 +1186,7 @@ loop_config(
 	 * variables. Otherwise, continue leaving no harm behind.
 	 */
 	case LOOP_DRIFTINIT:
-		if (!lockclock || clock_ctl.mode_ntpdate)
+		if (lockclock || clock_ctl.mode_ntpdate)
 			break;
 
 		start_kern_loop();
