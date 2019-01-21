@@ -17,12 +17,12 @@ flag1 mode bit of the local-clock driver.
 
 == 2019-01-13: 1.1.3 ==
 
-Security fixes:
+Security fixes for bugs inherited from NTP Classic:
 
-* Out of bounds read in ctl_getitem() in ntp_control.c (GitLab #507, CVE-2019-6443)
-* Out of bounds read in process_control() in ntp_control.c (GitLab #508, CVE-2019-6444)
-* Authenticated remotely triggerable NULL pointer dereference in ntp_control.c (GitLab #509, CVE-2019-6445)
-* Authenticated out-of-bounds write in ntp_parser.y (GitLab #510, CVE-2019-6442)
+* CVE-2019-6443: OOB read in ctl_getitem() in ntp_control.c (GitLab #507)
+* CVE-2019-6444: OOB read in process_control() in ntp_control.c (GitLab #508)
+* CVE-2019-6445: Remotely triggerable crash in ntp_control.c (GitLab #509)
+* CVE-2019-6442: Authenticated OOB write in ntp_parser.y (GitLab #510)
 
 Lots of typo fixes, documentation cleanups, test targets.
 
