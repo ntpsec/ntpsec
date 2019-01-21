@@ -1925,6 +1925,7 @@ clock_select(void)
 	if (typepps != NULL && fabs(sys_offset) < 0.4 &&
 	    (!typepps->is_pps_driver ||
 	     sys_prefer != NULL ||
+	     (typesystem != NULL && typepps->cfg.flags & FLAG_PREFER) ||
 	     (typesystem == NULL && sys_minsane == 0))) {
 		typesystem = typepps;
 		sys_clockhop = 0;

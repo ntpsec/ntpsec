@@ -239,9 +239,12 @@ is less than 0.4 s, that PPS driver becomes the system peer and its
 offset and jitter are inherited by the system variables, thus overriding
 any values already computed. However, if the PPS driver is specifically
 the link:driver_pps.html[driver named "pps"], which must be used with
-another driver, then there must be a prefer peer among the survivors, as
-the +prefer+ keyword is used to identify the source associated with the
-PPS input. For an exception, see the +minsane+ option below.
+another driver, additional rules apply. In one mode of operation, there
+must be a prefer peer among the survivors, as the +prefer+ keyword is
+used to identify the source associated with the PPS input. To indicate
+that the PPS input should be used with any source(s), the pps peer
+itself must be marked with the +prefer+ keyword. For an exception, see
+the +minsane+ option below.
 
 If none of the above is the case, the data are disregarded and the
 system variables remain as they are.
