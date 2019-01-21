@@ -369,12 +369,12 @@ neoclock4x_shutdown(
 	    free(up);
 	    pp->unitptr = NULL;
 	}
+
+	msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): shutdown", pp->refclkunit);
+
+	NLOG(NLOG_CLOCKINFO)
+	    msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): receiver shutdown done", pp->refclkunit);
     }
-
-    msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): shutdown", pp->refclkunit);
-
-    NLOG(NLOG_CLOCKINFO)
-	msyslog(LOG_INFO, "REFCLOCK: NeoClock4X(%d): receiver shutdown done", pp->refclkunit);
 }
 
 static void
