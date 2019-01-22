@@ -149,6 +149,12 @@ def scan_host(host, level):
 
 
 if __name__ == '__main__':
+    bin_ver = "ntpsec-@NTPSEC_VERSION_EXTENDED@"
+    if ntp.util.stdversion() != bin_ver:
+        sys.stderr.write("Library/Binary version mismatch\n")
+        sys.stderr.write("Binary: %s\n" % bin_ver)
+        sys.stderr.write("Library: %s\n" % ntp.util.stdversion())
+        raise SystemExit(1)
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:], "h:l:m:ps:?V",

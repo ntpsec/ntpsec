@@ -262,6 +262,12 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
 
 
 if __name__ == '__main__':
+    bin_ver = "ntpsec-@NTPSEC_VERSION_EXTENDED@"
+    if ntp.util.stdversion() != bin_ver:
+        sys.stderr.write("Library/Binary version mismatch\n")
+        sys.stderr.write("Binary: %s\n" % bin_ver)
+        sys.stderr.write("Library: %s\n" % ntp.util.stdversion())
+        raise SystemExit(1)
     try:
         try:
             (options, arguments) = getopt.getopt(
@@ -349,7 +355,7 @@ if __name__ == '__main__':
                     print(usage)
                     raise SystemExit(0)
                 elif switch in ("-V", "--version"):
-                    print("ntpdig %s" % ntp.util.stdversion())
+                    print("ntpdig %s" % bin_ver)
                     raise SystemExit(0)
                 else:
                     sys.stderr.write(

@@ -116,6 +116,13 @@ USAGE: ntptrace [-<flag> [<val>] | --<name>[{=| }<val>]]... [host]
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.""" + "\n"
 
+bin_ver = "ntpsec-@NTPSEC_VERSION_EXTENDED@"
+if ntp.util.stdversion() != bin_ver:
+    sys.stderr.write("Library/Binary version mismatch\n")
+    sys.stderr.write("Binary: %s\n" % bin_ver)
+    sys.stderr.write("Library: %s\n" % ntp.util.stdversion())
+    raise SystemExit(1)
+
 try:
     (options, arguments) = getopt.getopt(
         sys.argv[1:], "m:nr:?V",
