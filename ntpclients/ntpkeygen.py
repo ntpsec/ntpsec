@@ -27,7 +27,6 @@ import random
 import time
 import getopt
 import stat
-import ntp.util
 
 #
 # Cryptodefines
@@ -99,7 +98,7 @@ if __name__ == '__main__':
             print("usage: ntpkeygen")
             raise SystemExit(0)
         elif switch in ("-V", "--version"):
-            print("ntpkeygen %s" % ntp.util.stdversion())
+            print("ntpkeygen ntpsec-@NTPSEC_VERSION_EXTENDED@")
             raise SystemExit(0)
 
     # The seed is ignored by random.SystemRandom,

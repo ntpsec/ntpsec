@@ -31,14 +31,6 @@ import subprocess
 import sys
 import time
 
-try:
-    import ntp.util
-except ImportError as e:
-    sys.stderr.write(
-        "ntplogtemp: can't find Python NTP library -- check PYTHONPATH.\n")
-    sys.stderr.write("%s\n" % e)
-    sys.exit(1)
-
 
 def run_binary(cmd):
     """\
@@ -241,7 +233,7 @@ parser.add_argument('-w', '--wait',
                     type=int)
 parser.add_argument('-V', '--version',
                     action="version",
-                    version="ntplogtemp %s" % ntp.util.stdversion())
+                    version="ntplogtemp ntpsec-@NTPSEC_VERSION_EXTENDED@")
 args = parser.parse_args()
 
 

@@ -44,14 +44,6 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
-try:
-    import ntp.util
-except ImportError as e:
-    sys.stderr.write(
-        "ntploggps: can't find Python NTP library -- check PYTHONPATH.\n")
-    sys.stderr.write("%s\n" % e)
-    sys.exit(1)
-
 
 def logging_setup():
     "Create logging object"
@@ -107,7 +99,7 @@ parser.add_argument('-v', '--verbose',
 
 parser.add_argument('-V', '--version',
                     action="version",
-                    version="ntploggps %s" % ntp.util.stdversion())
+                    version="ntploggps ntpsec-@NTPSEC_VERSION_EXTENDED@")
 
 args = parser.parse_args()
 
