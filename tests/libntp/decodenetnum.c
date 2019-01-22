@@ -1,7 +1,5 @@
-#include <unistd.h>          /* for close() */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
 #include "config.h"
 #include "ntp_stdlib.h"
@@ -19,15 +17,14 @@ TEST_TEAR_DOWN(decodenetnum) {}
 
 
 TEST(decodenetnum, Services) {
-	const char *str = "/etc/services";
-        int ret;
+	struct addrinfo *res;
+	int ret;
 
-        /* try to open /etc/services for read */
-        ret = open(str, O_RDONLY);
-	TEST_ASSERT_NOT_EQUAL(-1, ret);
-        if ( -1 != ret) {
-		close(ret);
-        }
+	ret = getaddrinfo(NULL, "ntp", NULL, &res);
+	TEST_ASSERT_EQUAL_MESSAGE(0, ret, gai_strerror(ret));
+	if (0 == ret) {
+		freeaddrinfo(res);
+	}
 }
 
 TEST(decodenetnum, IPv4AddressOnly) {
