@@ -230,7 +230,9 @@ static const struct ctl_proc control_codes[] = {
 #define CS_AUTHDIGESTFAIL	102
 #define CS_AUTHCMACDECRYPT	103
 #define CS_AUTHCMACFAIL		104
-#define	CS_MAXCODE		CS_AUTHCMACFAIL
+/* Should be above with other CS_K_xxx, but that requires big renumbering */
+#define CS_K_LOCKCLOCK		105
+#define	CS_MAXCODE		CS_K_LOCKCLOCK
 
 /*
  * Peer variables we understand
@@ -414,6 +416,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_AUTHDIGESTFAIL,	RO, "authdigestfails" },	/* 102 */
 	{ CS_AUTHCMACDECRYPT,	RO, "authcmacdecrypts" },	/* 103 */
 	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },		/* 104 */
+	{ CS_K_LOCKCLOCK,	RO, "lockclock" },		/* 105 */
 	{ 0,                    EOV, "" }
 };
 
@@ -1981,6 +1984,10 @@ ctl_putsys(
 			ctl_putint,
 			(sys_var[varid].text, ntx.stbcnt)
 		);
+		break;
+
+	case CS_K_LOCKCLOCK:
+		ctl_putuint(sys_var[varid].text, lockclock);
 		break;
 
 	case CS_IOSTATS_RESET:
