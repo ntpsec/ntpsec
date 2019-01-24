@@ -16,6 +16,11 @@ https://docs.ntpsec.org/latest/ntpsec.html
 There are some prerequisites.  Libraries need the binary installed
 to run and in addition, the development headers installed to build.
 
+We need pthreads (It's optional in POSIX)
+We need OpenSSL >= 1.1.1 ???
+We need libaes_siv - it's not in OpenSSL yet
+  https://github.com/dfoxfranke/libaes_siv
+
 === The short version ===
 
 If you are on a Debian or Ubuntu distribution that uses apt-get, or on
