@@ -5066,7 +5066,7 @@ trimbletsip_message(
 		case CMD_RMESSAGE:
 			mkreadable(t, (int)BUFFER_SIZE(pbuffer, t),
                                    (char *)&mb(0),
-                                   (unsigned)(size - 2u -
+                                   (unsigned)(size - 2U -
                                               (unsigned)(&mb(0) - buffer)),
                                    0);
 			break;

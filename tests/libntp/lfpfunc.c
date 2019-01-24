@@ -88,7 +88,7 @@ static l_fp l_fp_abs(const l_fp first)
 
 static int l_fp_signum(const l_fp first)
 {
-	if (lfpuint(first) & 0x80000000u)
+	if (lfpuint(first) & 0x80000000U)
 		return -1;
 	return (lfpuint(first) || lfpfrac(first));
 }

@@ -161,7 +161,7 @@ again:
 		else
 		{
 			time(&rcv_sec);
-			rcv_frc = (unsigned int)ntp_random() % 1000000000u;
+			rcv_frc = (unsigned int)ntp_random() % 1000000000U;
 		}
 		/* add a wobble of ~3.5msec to the clock time */
 		clk_sec = rcv_sec;

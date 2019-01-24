@@ -3251,7 +3251,7 @@ oncore_msg_Gj(
 		oncore_log_f(instance, LOG_NOTICE,
 			     "Leap second %s (%d) before %04u-%02u-%02u/%02u:%02u:%02u",
 			     insrem[(dt > 0)], dt,
-			     256u * buf[6] + buf[7], buf[8], buf[9],
+			     256U * buf[6] + buf[7], buf[8], buf[9],
 			     buf[15], buf[16], buf[17]);
 
 	/* Only raise warning within a month of the leap second */

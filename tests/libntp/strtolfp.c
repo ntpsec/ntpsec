@@ -121,7 +121,7 @@ atolfp(
 
 	if (isneg)
 	{
-		(dec_f) = ~(dec_f) + 1u;
+		(dec_f) = ~(dec_f) + 1U;
 		(dec_i) = ~(dec_i) + ((dec_f) == 0);
 	}
 

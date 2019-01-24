@@ -140,8 +140,8 @@ common_prettydate(
 	/* get & fix milliseconds */
 	ntps = lfpuint(ts);
 	msec = lfpfrac(ts) / 4294967;	/* fract / (2 ** 32 / 1000) */
-	if (msec >= 1000u) {
-		msec -= 1000u;
+	if (msec >= 1000U) {
+		msec -= 1000U;
 		ntps++;
 	}
 	sec = ntpcal_ntp_to_time(ntps, prettypivot);

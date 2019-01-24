@@ -110,7 +110,7 @@ clocktime(
 		test[0] = (uint32_t)(*yearstart) + (unsigned int)tmp;
 		/* -- calc absolute difference to receive time */
 		diff[0] = test[0] - rec_ui;
-		if (diff[0] >= 0x80000000u)
+		if (diff[0] >= 0x80000000U)
 			diff[0] = ~diff[0] + 1;
 		/* -- can't get closer if diff < NEARTIME */
 		if (diff[0] < NEARTIME) {
@@ -137,7 +137,7 @@ clocktime(
 		test[idx] = ystt[idx] + tmp;
 		/* -- calc absolute difference to receive time */
 		diff[idx] = test[idx] - rec_ui;
-		if (diff[idx] >= 0x80000000u)
+		if (diff[idx] >= 0x80000000U)
 			diff[idx] = ~diff[idx] + 1;
 	}
 	/* -*- assume current year fits best, then search best fit */
