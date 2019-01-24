@@ -805,7 +805,6 @@ transmit(
 	 * This was observed testing with pool, where sys_maxclock == 12
 	 * resulted in 60 associations without the hard limit.
 	 */
-#ifdef ENABLE_DNS_LOOKUP
 	if (peer->cast_flags & MDF_POOL) {
 		peer->outdate = current_time;
 		if ((peer_associations <= 2 * sys_maxclock) &&
@@ -823,7 +822,6 @@ transmit(
 		poll_update(peer, hpoll);
 		return;
         }
-#endif
 
 	/*
 	 * In unicast modes the dance is much more intricate. It is
@@ -2297,7 +2295,6 @@ fast_xmit(
 }
 
 
-#ifdef ENABLE_DNS_LOOKUP
 /*
  * dns_take_server - process DNS query for server.
  */
@@ -2457,8 +2454,6 @@ void dns_new_interface(void) {
 	}
     }
 }
-
-#endif /* ENABLE_DNS_LOOKUP */
 
 
 

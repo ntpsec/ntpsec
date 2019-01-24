@@ -748,10 +748,6 @@ int main(int argc, char **argv) {
         ctx.define("ENABLE_EARLY_DROPROOT", 1,
                    comment="Enable early drop root")
 
-    if not ctx.options.disable_dns_lookup:
-        ctx.define("ENABLE_DNS_LOOKUP", 1,
-                   comment="Enable DNS lookup of hostnames")
-
     # This is true under every Unix-like OS.
     ctx.define("HAVE_WORKING_FORK", 1,
                comment="Whether a working fork() exists")
@@ -813,9 +809,8 @@ int main(int argc, char **argv) {
         ctx.check_cc(header_name="dns_sd.h", lib="dns_sd", mandatory=False,
                      uselib_store="DNS_SD")
 
-    if not ctx.options.disable_dns_lookup:
-        from wafhelpers.check_pthread import check_pthread_run
-        check_pthread_run(ctx)
+    from wafhelpers.check_pthread import check_pthread_run
+    check_pthread_run(ctx)
 
     # Solaris needs -lsocket and -lnsl for socket code
     if ctx.env.DEST_OS == "sunos":

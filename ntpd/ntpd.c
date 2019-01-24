@@ -13,9 +13,7 @@
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
 #include "ntp_auth.h"
-#ifdef ENABLE_DNS_LOOKUP
 #include "ntp_dns.h"
-#endif
 #include "isc_error.h"
 
 #include <unistd.h>
@@ -92,9 +90,7 @@ static int	wait_child_sync_if	(int, long);
 #endif
 
 static	void	catchHUP	(int);
-#ifdef ENABLE_DNS_LOOKUP
 static	void	catchDNS	(int);
-#endif
 
 # ifdef	DEBUG
 static	void	moredebug	(int);
@@ -641,9 +637,7 @@ ntpdmain(
 	signal_no_reset(SIGTERM, catchQuit);
 	signal_no_reset(SIGHUP, catchHUP);
 	signal_no_reset(SIGBUS, catchQuit);  /* FIXME: It's broken, can't continue. */
-#ifdef ENABLE_DNS_LOOKUP
 	signal_no_reset(SIGDNS, catchDNS);
-#endif
 
 # ifdef DEBUG
 	signal_no_reset(MOREDEBUGSIG, moredebug);
@@ -940,12 +934,10 @@ static void mainloop(void)
 			timer();
 		}
 
-#ifdef ENABLE_DNS_LOOKUP
 		if (sig_flags.sawDNS) {
 			sig_flags.sawDNS = false;
 			dns_check();
 		}
-#endif
 
 		/*
 		 * Check files
@@ -1031,16 +1023,14 @@ static void catchHUP(int sig)
 	sig_flags.sawHUP = true;
 }
 
-#ifdef ENABLE_DNS_LOOKUP
 /*
- * catchDNS - set flag to process answer DNS lookup
+ * catchDNS - set flag to process answer from DNS lookup
  */
 static void catchDNS(int sig)
 {
 	UNUSED_ARG(sig);
 	sig_flags.sawDNS = true;
 }
-#endif
 
 /*
  * wait_child_sync_if - implements parent side of -w/--wait-sync

@@ -290,12 +290,6 @@ int scmp_sc[] = {
  * these from the list.
  */
 
-#ifndef ENABLE_DNS_LOOKUP
-	/* libcrypto uses pthread_once() */
-	/* We could avoid this by calling ssl_init() first. */
-	SCMP_SYS(futex),	/* sem_xxx, used by threads */
-#endif
-
 	SCMP_SYS(getdents),	/* Scanning /etc/ntp.d/ */
 	SCMP_SYS(getdents64),
 #ifdef __NR_prlimit64
@@ -317,6 +311,7 @@ int scmp_sc[] = {
 	SCMP_SYS(fcntl),
 	SCMP_SYS(fstat),
 	SCMP_SYS(fsync),
+	SCMP_SYS(futex),	/* sem_xxx, used by threads */
 
 
 #ifdef __NR_getrandom
@@ -382,7 +377,6 @@ int scmp_sc[] = {
 	SCMP_SYS(write),
         SCMP_SYS(unlink),
 
-#ifdef ENABLE_DNS_LOOKUP
 /* Don't comment out this block for testing.
  * pthread_create blocks signals so it will crash
  * rather than generate a trap.
@@ -396,11 +390,6 @@ int scmp_sc[] = {
 	SCMP_SYS(socketpair),
 	SCMP_SYS(statfs),
 	SCMP_SYS(uname),
-#endif
-/* This shouldn't be needed if we don't use DNS, but
- * several libraries call pthread_once, just in case.
- */
-	SCMP_SYS(futex),	/* sem_xxx, used by threads */
 
 
 #ifdef REFCLOCK

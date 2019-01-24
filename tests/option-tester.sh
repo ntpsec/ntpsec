@@ -54,7 +54,7 @@ doit ()
 
 # no --disable-manpage on default and all
 doit default ""
-doit minimal "--disable-droproot --disable-dns-lookup --disable-mdns-registration --disable-manpage"
+doit minimal "--disable-droproot --disable-mdns-registration --disable-manpage"
 
 # This also tests refclocks without DEBUG
 doit classic "--enable-classic-mode --refclock=all --disable-manpage"

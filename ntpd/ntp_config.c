@@ -2572,13 +2572,6 @@ peer_config(
 	uint8_t cast_flags;
 	uint8_t hmode;
 
-#ifndef ENABLE_DNS_LOOKUP
-	if (NULL != hostname) {
-		msyslog(LOG_ERR, "CONFIG: hostnames need DNS lookup: %s", hostname);
-		return NULL;
-	}
-#endif
-
 	/*
 	 * We do a dirty little jig to figure the cast flags. This is
 	 * probably not the best place to do this, at least until the

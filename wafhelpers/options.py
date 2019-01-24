@@ -19,8 +19,6 @@ def options_cmd(ctx, config):
                    help="Droproot earlier (breaks SHM and NetBSD).")
     grp.add_option('--enable-seccomp', action='store_true',
                    default=False, help="Enable seccomp (restricts syscalls).")
-    grp.add_option('--disable-dns-lookup', action='store_true',
-                   default=False, help="Disable DNS lookups.")
     grp.add_option('--disable-mdns-registration', action='store_true',
                    default=False, help="Disable MDNS registration.")
     grp.add_option(

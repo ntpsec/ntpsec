@@ -13,15 +13,13 @@ int main(void) {
 
 
 def check_pthread_header_lib(ctx):
-    if ctx.options.disable_dns_lookup:
-      # threads only used by DNS lookup
-      # libcrypto uses pthread_once, but that's not our problem
-      return
     ctx.check(header_name="pthread.h", includes=ctx.env.PLATFORM_INCLUDES,
               mandatory=False, comment="pthread header")
     ctx.check(feature="c cshlib", lib="pthread",
               libpath=ctx.env.PLATFORM_LIBPATH, mandatory=False,
               comment="pthread library")
+    # FreeBSD uses libthr rather than libpthread
+    # There may be some magic to translate
     ctx.check_cc(lib="thr", mandatory=False,
                  comment="thr library, required by some operating systems.")
 

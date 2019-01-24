@@ -51,7 +51,7 @@ doit ()
 # Build with only one set of options.  The options don't change
 # the Python side of things.
 
-doit python3 "--disable-droproot --disable-dns-lookup --disable-mdns-registration --disable-manpage"
+doit python3 "--disable-droproot --disable-mdns-registration --disable-manpage"
 
 
 grep warning:                    test*/test.log

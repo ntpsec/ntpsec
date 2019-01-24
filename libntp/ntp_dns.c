@@ -7,8 +7,6 @@
 
 #include "config.h"
 
-#ifdef ENABLE_DNS_LOOKUP
-
 #include <signal.h>
 #include <pthread.h>
 #include <sys/types.h>
@@ -169,8 +167,4 @@ static void* dns_lookup(void* arg)
 	 */
 	return (void *)NULL;
 };
-
-
-
-#endif /* ENABLE_DNS_LOOKUP */
 
