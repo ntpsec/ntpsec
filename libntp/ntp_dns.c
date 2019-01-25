@@ -71,9 +71,9 @@ bool dns_probe(struct peer* pp)
         pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
 	rc = pthread_create(&worker, NULL, dns_lookup, pp);
         if (rc) {
-		errno = rc;
-		msyslog(LOG_ERR, "DNS: dns_probe: error from pthread_create: %s, %m", pp->hostname);
-		return true;  /* don't try again */
+	  msyslog(LOG_ERR, "DNS: dns_probe: error from pthread_create: %s, %s",
+	      pp->hostname, strerror(rc));
+	  return true;  /* don't try again */
 	}
         pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 
@@ -91,7 +91,7 @@ void dns_check(void)
 
 	rc = pthread_join(worker, NULL);
 	if (0 != rc) {
-		msyslog(LOG_ERR, "DNS: dns_check: join failed %m");
+		msyslog(LOG_ERR, "DNS: dns_check: join failed %s", strerror(rc));
 		return;  /* leaves active set */
 	}
 	if (0 != gai_rc) {
