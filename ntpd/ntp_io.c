@@ -2266,7 +2266,6 @@ io_handler(void)
 	  errno = EINTR;
 	}
 	pthread_sigmask(SIG_SETMASK, &runMask, NULL);
-	sigprocmask(SIG_SETMASK, &runMask, NULL);
 
 	if (nfound > 0) {
 		input_handler(&rdfdes);
