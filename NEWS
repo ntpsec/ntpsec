@@ -12,6 +12,8 @@ on user-visible changes.
 
 == Repository head ==
 
+Pthread support is now required.  --disable-dns-lookup is gone.
+
 NIST lockclock mode is now a runtime option set by the (previously unused)
 flag1 mode bit of the local-clock driver.
 
