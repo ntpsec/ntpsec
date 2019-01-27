@@ -92,7 +92,7 @@ int nts_validate(struct parsed_pkt *pkt, struct ntspeer_t *ntspeer)
 
 /*
  * Decorate an outgoing client request or server response with packet
- * extension fields carrying NTS information.  For a server reponse,
+ * extension fields carrying NTS information.  For a server response,
  * the ntspeer pointer is expected to be NULL as there is no
  * per-client server state.  Return the count of words appended.
  */
