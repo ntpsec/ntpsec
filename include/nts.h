@@ -1,8 +1,8 @@
 /*
  * nts.h - NTS (Network Time Security) declarations 
  */
-#ifndef NTS_H
-#define NTS_H
+#ifndef GUARD_NTS_H
+#define GUARD_NTS_H
 
 #define NTS_MAX_COOKIES	8	/* RFC 4.1.6 */
 #define NTS_COOKIELEN	128	/* placeholder - see RFC 6 */
@@ -14,4 +14,4 @@ struct ntspeer_t {
     int current_cookie;
 };
 
-#endif	/* NTS_H */
+#endif /* GUARD_NTS_H */
