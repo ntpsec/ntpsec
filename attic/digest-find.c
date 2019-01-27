@@ -29,6 +29,7 @@ const char* digests[] = {
   "RMD160", "RIPEMD160",
   "SHA224", "SHA256", "SHA384", "SHA512",
   "MDC2", "GOST", "DSS1",
+  "ChaCha20", "Poly1305",
   NULL };
 
 unsigned char pkt[100];
