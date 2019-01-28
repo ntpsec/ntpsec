@@ -248,7 +248,13 @@ parse_packet(
 	uint8_t const* recv_buf = rbufp->recv_space.X_recv_buffer;
 
 	if(recv_length < LEN_PKT_NOMAC) {
-		/* Packet is too short to possibly be valid. */
+		/* Data is too short to possibly be a valid packet. */
+		return false;
+	}
+
+	if(recv_length > sizeof(struct pkt)) {
+		/* Data is too long to be punned into the wire-packet struct. */
+		/* If this happens it will be due to too much extension data. */
 		return false;
 	}
 

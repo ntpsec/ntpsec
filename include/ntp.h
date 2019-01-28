@@ -345,7 +345,10 @@ struct peer {
 /* #define	MODE_BCLIENT	6	** broadcast client mode */
 #define	MODE_BCLIENTX	6	/* for pylib/util.py */
 
-#define	LEN_PKT_NOMAC	48 /* min header length */
+#define	LEN_PKT_NOMAC	48	/* min header length */
+
+/* The RFCs carefully avoid specifying this. */
+#define MAX_EXT_LEN	4096	/* maximum length of extension-field data */
 
 /* pythonize-header: start ignoring */
 
@@ -373,6 +376,13 @@ struct peer {
 #define	FLAG_TRUE	0x0400u	/* force truechimer */
 #define	FLAG_DNS	0x0800u	/* needs DNS lookup */
 #define FLAG_TSTAMP_PPS	0x4cd000u	/* PPS source provides absolute timestamp */
+
+/* The MAC follows any extension fields. */
+/* Its length includes 1 word of keyID. */
+/* MD5 length is 16 bytes => 4+1 */
+/* SHA length is 20 bytes => 5+1 */
+#define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
+#define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* maximum MAC length */
 
 /* This is the new, sane way of representing packets. All fields are
    in host byte order, and the fixed-point time fields are just integers,
@@ -418,16 +428,7 @@ struct pkt {
 	l_fp_w	org;		/* originate time stamp */
 	l_fp_w	rec;		/* receive time stamp */
 	l_fp_w	xmt;		/* transmit time stamp */
-
-/* Old style authentication was just appended
- * without the type/length of an extension header. */
-/* Length includes 1 word of keyID */
-/* MD5 length is 16 bytes => 4+1 */
-/* SHA length is 20 bytes => 5+1 */
-#define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
-#define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* MAX of old style */
-
-	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
+	uint32_t	exten[(MAX_MAC_LEN + MAX_EXT_LEN) / sizeof(uint32_t)];
 } __attribute__ ((aligned));
 
 /* pythonize-header: stop ignoring */
