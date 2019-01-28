@@ -954,10 +954,10 @@ clock_update(
 	poll_update(peer, sys_poll);
 	sys_vars.sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 	if (peer->stratum == STRATUM_REFCLOCK ||
-	    peer->stratum == STRATUM_UNSPEC)
-		sys_vars.sys_refid = peer->refid;
+		peer->stratum == STRATUM_UNSPEC)
+		memcpy(&sys_vars.sys_refid, &peer->refid, REFIDLEN);
 	else
-		sys_vars.sys_refid = addr2refid(&peer->srcadr);
+	    ntp_be32enc(sys_vars.sys_refid, addr2refid(&peer->srcadr));
 	/*
 	 * Root Dispersion (E) is defined (in RFC 5905) as:
 	 *
@@ -1537,14 +1537,16 @@ clock_select(void)
 		 * orphan mode in timer().
 		 */
 		if (peer->stratum == sys_orphan) {
+			char addrhash[REFIDLEN];
 			uint32_t	localmet;
 			uint32_t peermet;
 
 			if (peer->dstadr != NULL)
-				localmet = ntohl(peer->dstadr->addr_refid);
+				localmet = ntp_be32dec(peer->dstadr->addr_refid);
 			else
 				localmet = UINT32_MAX;
-			peermet = ntohl(addr2refid(&peer->srcadr));
+			ntp_be32enc(addrhash, addr2refid(&peer->srcadr));
+			peermet = ntp_be32dec(addrhash);
 			if (peermet < localmet && peermet < orphmet) {
 				typeorphan = peer;
 				orphmet = peermet;
@@ -2070,7 +2072,7 @@ peer_xmit(
 		xpkt.stratum = 0;
 		xpkt.ppoll = 0;
 		xpkt.precision = 0x20;
-		xpkt.refid = 0;
+		memset(&xpkt.refid, '\0', REFIDLEN);
 		xpkt.rootdelay = 0;
 		xpkt.rootdisp =	0;
 		xpkt.reftime = htonl_fp(0);
@@ -2084,7 +2086,7 @@ peer_xmit(
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = peer->hpoll;
 		xpkt.precision = sys_vars.sys_precision;
-		xpkt.refid = sys_vars.sys_refid;
+		memcpy(&xpkt.refid, &sys_vars.sys_refid, REFIDLEN);
 		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
 		xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
 		xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
@@ -2215,7 +2217,7 @@ fast_xmit(
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = max(rbufp->pkt.ppoll, ntp_minpoll);
 		xpkt.precision = sys_vars.sys_precision;
-		xpkt.refid = sys_vars.sys_refid;
+		memcpy(&xpkt.refid, &sys_vars.sys_refid, REFIDLEN);
 		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
 		xpkt.rootdisp = HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
 

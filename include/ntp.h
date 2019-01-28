@@ -109,6 +109,7 @@ extern uint64_t ntp_random64 (void);
 #define LOGTOD(a)	ldexp(1., (int)(a)) /* log2 to double */
 #define ULOGTOD(a)	ldexp(1., (int)(a)) /* ulog2 to double */
 
+#define REFIDLEN	sizeof(uint32_t)	/* size of IPv4 network addr */
 
 /*
  * The netendpt structure is used to hold the addresses and socket
@@ -126,7 +127,7 @@ typedef struct netendpt {
 	unsigned short	family;		/* AF_INET/AF_INET6 */
 	unsigned short	phase;		/* phase in update cycle */
 	uint32_t	flags;		/* interface flags */
-	uint32_t	addr_refid;	/* IPv4 addr or IPv6 hash */
+	char		addr_refid[REFIDLEN];	/* IPv4 addr or IPv6 hash */
 	unsigned long	starttime;	/* current_time at creation */
 	volatile long	received;	/* number of incoming packets */
 	long		sent;		/* number of outgoing packets */
@@ -255,7 +256,7 @@ struct peer {
 	int8_t	precision;	/* remote clock precision */
 	double	rootdelay;	/* roundtrip delay to primary source */
 	double	rootdisp;	/* dispersion to primary source */
-	uint32_t	refid;	/* remote reference ID */
+	char	refid[REFIDLEN];/* remote reference ID */
 	l_fp	reftime;	/* update epoch */
 
 #define clear_to_zero status
@@ -373,14 +374,6 @@ struct peer {
 #define	FLAG_DNS	0x0800u	/* needs DNS lookup */
 #define FLAG_TSTAMP_PPS	0x4cd000u	/* PPS source provides absolute timestamp */
 
-
-/*
- * It's ugly that refid is sometimes treated as a  uint32_t and sometimes
- * as a string; that should be fixed. Using this in memcpy() at least
- * contains the problem.
- */
-#define REFIDLEN	sizeof(uint32_t)
-
 /* This is the new, sane way of representing packets. All fields are
    in host byte order, and the fixed-point time fields are just integers,
    with uints of 2^-16 or 2^-32 seconds as appropriate. */
@@ -420,7 +413,7 @@ struct pkt {
 	int8_t	precision;	/* peer clock precision */
 	u_fp	rootdelay;	/* roundtrip delay to primary source */
 	u_fp	rootdisp;	/* dispersion to primary source*/
-	uint32_t	refid;		/* reference id */
+	char	refid[REFIDLEN];	/* reference id */
 	l_fp_w	reftime;	/* last update time */
 	l_fp_w	org;		/* originate time stamp */
 	l_fp_w	rec;		/* receive time stamp */

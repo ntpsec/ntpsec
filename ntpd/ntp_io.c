@@ -19,6 +19,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
+#include "ntp_endian.h"
 #include "ntp_dns.h"
 #include "timespecops.h"
 
@@ -393,7 +394,9 @@ interface_dump(const endpt *itf)
 	sockaddr_dump(&itf->mask);
 	printf("name = %s\n", itf->name);
 	printf("flags = 0x%08x\n", itf->flags);
-	printf("addr_refid = %08x\n", itf->addr_refid);
+	printf("addr_refid = %02x%02x%02x%02x\n",
+	       itf->addr_refid[0], itf->addr_refid[1],
+	       itf->addr_refid[2], itf->addr_refid[3]);
 	printf("received = %ld\n", itf->received);
 	printf("sent = %ld\n", itf->sent);
 	printf("notsent = %ld\n", itf->notsent);
@@ -747,7 +750,7 @@ add_interface(
 	)
 {
 	/* Calculate the refid */
-	ep->addr_refid = addr2refid(&ep->sin);
+	ntp_be32enc(ep->addr_refid, addr2refid(&ep->sin));
 	/* link at tail so ntpq -c ifstats index increases each row */
 	LINK_TAIL_SLIST(ep_list, ep, elink, endpt);
 	ninterfaces++;

@@ -137,7 +137,7 @@ struct refclockproc {
 	double	fudgetime1;	/* fudge time1 */
 	double	fudgetime2;	/* fudge time2 */
 	uint8_t	stratum;	/* server stratum */
-	uint32_t	refid;		/* reference identifier */
+	char	refid[REFIDLEN]; /* reference identifier */
 	uint8_t	sloppyclockflag; /* driver options */
 
 	/*

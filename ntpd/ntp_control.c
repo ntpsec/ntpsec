@@ -66,9 +66,9 @@ static	void	ctl_putuint	(const char *, uint64_t);
 static	void	ctl_puthex	(const char *, uint64_t);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
-static	void	ctl_putadr	(const char *, uint32_t,
+static	void	ctl_putadr	(const char *, char[REFIDLEN],
 				 sockaddr_u *);
-static	void	ctl_putrefid	(const char *, uint32_t);
+static	void	ctl_putrefid	(const char *, char *);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
@@ -701,7 +701,7 @@ init_control(void)
 }
 
 /*
- * unmarshall_ntp_control - unmarshall data stream into a ntp_sontrol struct
+ * unmarshall_ntp_control - unmarshall data stream into a ntp_control struct
  */
 void
 unmarshall_ntp_control(struct ntp_control *pkt, struct recvbuf *rbufp)
@@ -1368,7 +1368,7 @@ ctl_putts(
 static void
 ctl_putadr(
 	const char *tag,
-	uint32_t addr32,
+	char refid[REFIDLEN],
 	sockaddr_u *addr
 	)
 {
@@ -1383,9 +1383,8 @@ ctl_putadr(
 
 	*cp++ = '=';
 	if (NULL == addr) {
-		struct in_addr in4;
-		in4.s_addr = addr32;
-		cq = inet_ntoa(in4);
+		/* refid is an IPv4 address in binary format, just copy it */
+		cq = refid;
 	}
 	else
 		cq = socktoa(addr);
@@ -1397,12 +1396,12 @@ ctl_putadr(
 
 
 /*
- * ctl_putrefid - send a uint32_t refid as printable text
+ * ctl_putrefid - send a refid as printable text
  */
 static void
 ctl_putrefid(
 	const char *	tag,
-	uint32_t		refid
+	char		refid[REFIDLEN]
 	)
 {
 	char	output[16];
@@ -1422,8 +1421,8 @@ ctl_putrefid(
 	}
 	if (!(optr < oplim))
 		return;
-	iptr = (char *)&refid;
-	iplim = iptr + sizeof(refid);
+	iptr = refid;
+	iplim = iptr + REFIDLEN;
 	for ( ; optr < oplim && iptr < iplim && '\0' != *iptr;
 	     iptr++, optr++)
 		if (isprint((int)*iptr))
@@ -2435,13 +2434,15 @@ ctl_putclock(
 		break;
 
 	case CC_FUDGEVAL2:
+		/*
+	         * ESR: NTP Classic sometimes shipped this as a refid string,
+		 * which seems wrong. If you need to look at that code,
+		 * any version of NTP Classic or NTPsec before January
+		 * 2019 has it that way.
+	         */
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL2)) {
-			if (pcs->fudgeval1 > 1)
-				ctl_putadr(clock_var[id].text,
-					   pcs->fudgeval2, NULL);
-			else
-				ctl_putrefid(clock_var[id].text,
-					     pcs->fudgeval2);
+			ctl_putint(clock_var[id].text,
+				   pcs->fudgeval2);
 		}
 		break;
 

@@ -24,6 +24,14 @@ uint32_t ntp_be32dec(const void *buf) {
 	    (uint32_t)(b[3]);
 }
 
+void ntp_be32enc(void *buf, uint32_t x) {
+	uint8_t *b = (uint8_t*)buf;
+	b[0] = (x >> 24) & 0xff;
+	b[1] = (x >> 16) & 0xff;
+	b[2] = (x >> 8) & 0xff;
+	b[3] = x & 0xff;
+}
+
 uint64_t ntp_be64dec(const void *buf) {
 	const uint8_t *b = (const uint8_t*)buf;
 	return ((uint64_t)(b[0]) << 56) +
