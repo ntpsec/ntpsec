@@ -201,10 +201,10 @@ is_vn_mode_acceptable(
 	)
 {
 	return rbufp->recv_length >= 1 &&
-	    PKT_VERSION(rbufp->recv_space.X_recv_buffer[0]) >= 1 &&
-	    PKT_VERSION(rbufp->recv_space.X_recv_buffer[0]) <= 4 &&
-	    PKT_MODE(rbufp->recv_space.X_recv_buffer[0]) != MODE_PRIVATE &&
-	    PKT_MODE(rbufp->recv_space.X_recv_buffer[0]) != MODE_UNSPEC;
+	    PKT_VERSION(rbufp->recv_buffer[0]) >= 1 &&
+	    PKT_VERSION(rbufp->recv_buffer[0]) <= 4 &&
+	    PKT_MODE(rbufp->recv_buffer[0]) != MODE_PRIVATE &&
+	    PKT_MODE(rbufp->recv_buffer[0]) != MODE_UNSPEC;
 }
 
 static bool
@@ -213,8 +213,8 @@ is_control_packet(
 	)
 {
 	return rbufp->recv_length >= 1 &&
-	    PKT_VERSION(rbufp->recv_space.X_recv_buffer[0]) <= 4 &&
-	    PKT_MODE(rbufp->recv_space.X_recv_buffer[0]) == MODE_CONTROL;
+	    PKT_VERSION(rbufp->recv_buffer[0]) <= 4 &&
+	    PKT_MODE(rbufp->recv_buffer[0]) == MODE_CONTROL;
 }
 
 /* There used to be a calloc/free for each received packet.
@@ -224,16 +224,16 @@ is_control_packet(
 */
 static void
 free_extens(
-	struct recvbuf *rbufp
+	struct parsed_pkt *pkt
 	)
 {
-	if(rbufp->pkt.extensions != NULL) {
-		for(size_t i = 0; i < rbufp->pkt.num_extensions; i++) {
-			free(rbufp->pkt.extensions[i].body);
-			rbufp->pkt.extensions[i].body = NULL;
+	if(pkt->extensions != NULL) {
+		for(size_t i = 0; i < pkt->num_extensions; i++) {
+			free(pkt->extensions[i].body);
+			pkt->extensions[i].body = NULL;
 		}
-		free(rbufp->pkt.extensions);
-		rbufp->pkt.extensions = NULL;
+		free(pkt->extensions);
+		pkt->extensions = NULL;
 	}
 }
 
@@ -245,7 +245,7 @@ parse_packet(
 	REQUIRE(rbufp != NULL);
 
 	size_t recv_length = rbufp->recv_length;
-	uint8_t const* recv_buf = rbufp->recv_space.X_recv_buffer;
+	uint8_t const* recv_buf = rbufp->recv_buffer;
 
 	if(recv_length < LEN_PKT_NOMAC) {
 		/* Data is too short to possibly be a valid packet. */
@@ -392,7 +392,7 @@ parse_packet(
 
 	return true;
   fail:
-	free_extens(rbufp);
+	free_extens(&rbufp->pkt);
 	return false;
 }
 
@@ -432,11 +432,11 @@ is_crypto_nak(
 }
 
 static bool is_kod(
-	struct recvbuf const* rbufp
+	struct parsed_pkt *pkt
 	)
 {
-	return PKT_LEAP(rbufp->pkt.li_vn_mode) == LEAP_NOTINSYNC &&
-	    PKT_TO_STRATUM(rbufp->pkt.stratum) == STRATUM_UNSPEC;
+	return PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC &&
+	    PKT_TO_STRATUM(pkt->stratum) == STRATUM_UNSPEC;
 }
 
 /* Check the restrictions which can be checked just based on the source
@@ -455,7 +455,7 @@ static bool check_early_restrictions(
 	    rbufp->recv_length < 1 ||
 	    ((restrict_mask & RES_VERSION) &&
 	     (rbufp->recv_length < 1 ||
-	      PKT_VERSION(rbufp->recv_space.X_recv_buffer[0]) != NTP_VERSION));
+	      PKT_VERSION(rbufp->recv_buffer[0]) != NTP_VERSION));
 }
 
 static void
@@ -521,7 +521,7 @@ handle_procpkt(
 	peer->outcount = 0;
 	outcount--;
 
-	if(is_kod(rbufp)) {
+	if(is_kod(&rbufp->pkt)) {
 		if(!memcmp(rbufp->pkt.refid, "RATE", REFIDLEN)) {
 			peer->selbroken++;
 			report_event(PEVNT_RATE, peer, NULL);
@@ -739,7 +739,7 @@ receive(
 			   have to do this screwy buffer-length
 			   arithmetic in order to call it. */
 			!authdecrypt(auth,
-				 (uint32_t*)rbufp->recv_space.X_recv_buffer,
+				 (uint32_t*)rbufp->recv_buffer,
 				 (int)(rbufp->recv_length - (rbufp->mac_len + 4)),
 				 (int)(rbufp->mac_len + 4))) {
 
@@ -780,7 +780,7 @@ receive(
 	}
 
   done:
-	free_extens(rbufp);
+	free_extens(&rbufp->pkt);
 }
 
 /*
