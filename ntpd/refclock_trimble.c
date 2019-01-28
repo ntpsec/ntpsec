@@ -955,7 +955,7 @@ trimble_io (
 	pp = peer->procptr;
 	up = pp->unitptr;
 
-	c = (char *) &rbufp->recv_space;
+	c = (char *) &rbufp->recv_buffer;
 	d = c + rbufp->recv_length;
 
 	while (c != d) {

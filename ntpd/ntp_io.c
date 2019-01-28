@@ -2080,11 +2080,11 @@ read_refclock_packet(
 	}
 
 	i = (rp->datalen == 0
-	     || rp->datalen > sizeof(rb->recv_space))
-	        ? sizeof(rb->recv_space)
+	     || rp->datalen > sizeof(rb->recv_buffer))
+	        ? sizeof(rb->recv_buffer)
 		: rp->datalen;
 	do {
-		buflen = read(fd, (char *)&rb->recv_space, i);
+		buflen = read(fd, (char *)&rb->recv_buffer, i);
 	} while (buflen < 0 && EINTR == errno);
 
 	if (buflen <= 0) {

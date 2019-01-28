@@ -1433,7 +1433,7 @@ oncore_receive(
 
 	peer = rbufp->recv_peer;
 	instance = peer->procptr->unitptr;
-	p = (uint8_t *) &rbufp->recv_space;
+	p = (uint8_t *) &rbufp->recv_buffer;
 
 #ifdef ONCORE_VERBOSE_RECEIVE
 	if (debug > 4) { /* SPECIAL DEBUG */
