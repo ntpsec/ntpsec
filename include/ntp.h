@@ -410,27 +410,6 @@ struct exten {
         uint8_t *body;
 };
 
-/* This is the old, insane way of representing packets. It'll gradually
-   be phased out and removed. Packets are simply pulled off the wire and
-   then type-punned into this structure, so all fields are in network
-   byte order. Note that there is no pack pragma. The only reason this
-   ever worked at all is that all the fields are self-aligned, so no ABI
-   has been evil enough to insert padding between fields. */
-struct pkt {
-	uint8_t	li_vn_mode;	/* peer leap indicator */
-	uint8_t	stratum;	/* peer stratum */
-	uint8_t	ppoll;		/* peer poll interval */
-	int8_t	precision;	/* peer clock precision */
-	u_fp	rootdelay;	/* roundtrip delay to primary source */
-	u_fp	rootdisp;	/* dispersion to primary source*/
-	char	refid[REFIDLEN];	/* reference id */
-	l_fp_w	reftime;	/* last update time */
-	l_fp_w	org;		/* originate time stamp */
-	l_fp_w	rec;		/* receive time stamp */
-	l_fp_w	xmt;		/* transmit time stamp */
-	uint32_t	exten[(MAX_MAC_LEN + MAX_EXT_LEN) / sizeof(uint32_t)];
-} __attribute__ ((aligned));
-
 /* pythonize-header: stop ignoring */
 
 /*

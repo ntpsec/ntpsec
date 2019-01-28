@@ -93,7 +93,7 @@ int nts_daily(void)
  * side, the nts_client pointer is expected to be NULL as there is no
  * per-client server state.
  */
-int nts_validate(struct pkt *pkt, struct nts_client_t *nts_client)
+int nts_validate(struct parsed_pkt *pkt, struct nts_client_t *nts_client)
 {
 	UNUSED_ARG(pkt);
 	UNUSED_ARG(nts_client);
@@ -106,7 +106,7 @@ int nts_validate(struct pkt *pkt, struct nts_client_t *nts_client)
  * the nts_client pointer is expected to be NULL as there is no
  * per-client server state.
  */
-int nts_decorate(struct pkt *pkt, struct nts_client_t *nts_client)
+int nts_decorate(struct parsed_pkt *pkt, struct nts_client_t *nts_client)
 {
 	UNUSED_ARG(pkt);
 	UNUSED_ARG(nts_client);

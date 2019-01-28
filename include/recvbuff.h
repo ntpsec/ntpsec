@@ -40,12 +40,7 @@ struct recvbuf {
 	SOCKET		fd;		/* fd on which it was received */
 	l_fp		recv_time;	/* time of arrival */
 	size_t		recv_length;	/* number of octets received */
-	union {
-		struct pkt	X_recv_pkt;
-		uint8_t		X_recv_buffer[RX_BUFF_SIZE];
-	} recv_space;
-#define	recv_pkt		recv_space.X_recv_pkt
-#define	recv_buffer		recv_space.X_recv_buffer
+	uint8_t		recv_buffer[RX_BUFF_SIZE];
 	struct parsed_pkt pkt;  /* host-order copy of data from wire */
 	int used;		/* reference count */
 	bool keyid_present;

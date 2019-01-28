@@ -2165,8 +2165,8 @@ read_network_packet(
 
 	fromlen = sizeof(rb->recv_srcadr);
 
-	iovec.iov_base        = &rb->recv_space;
-	iovec.iov_len         = sizeof(rb->recv_space);
+	iovec.iov_base        = &rb->recv_buffer;
+	iovec.iov_len         = sizeof(rb->recv_buffer);
 	memset(&msghdr, '\0', sizeof(msghdr));
 	msghdr.msg_name       = &rb->recv_srcadr;
 	msghdr.msg_namelen    = fromlen;
