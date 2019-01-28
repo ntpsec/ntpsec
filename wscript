@@ -296,6 +296,7 @@ def configure(ctx):
     # may depend on some libs, like -lssp
     ctx.check_cc(lib="m", comment="Math library")
     ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
+    ctx.check_cc(lib="pthread", mandatory=False, comment="threads library")
     ctx.check_cc(lib="execinfo", mandatory=False,
                  comment="BSD backtrace library")
     ret = ctx.check_cc(lib="bsd", mandatory=False,
@@ -802,15 +803,9 @@ int main(int argc, char **argv) {
             ctx.check_cc(header_name="seccomp.h")
             ctx.check_cc(lib="seccomp")
 
-    from wafhelpers.check_pthread import check_pthread_header_lib
-    check_pthread_header_lib(ctx)
-
     if not ctx.options.disable_mdns_registration:
         ctx.check_cc(header_name="dns_sd.h", lib="dns_sd", mandatory=False,
                      uselib_store="DNS_SD")
-
-    from wafhelpers.check_pthread import check_pthread_run
-    check_pthread_run(ctx)
 
     # Solaris needs -lsocket and -lnsl for socket code
     if ctx.env.DEST_OS == "sunos":
