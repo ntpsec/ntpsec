@@ -17,6 +17,13 @@
 #include <sys/un.h>
 
 /* socket routines by tridge - from junkcode.samba.org */
+/*
+ * Dependency on NTP packet structure removed by ESR.
+ * This code now only knows about the length of an NTP packet header,
+ * not its content. Note that the signing technique never handled anything
+ * but unextended and MACless packet headers, so it can't be used with NTS. 
+ */
+
 
 /*
   connect to a unix domain socket
@@ -116,7 +123,7 @@ send_via_ntp_signd(
 	int	xmode,
 	keyid_t	xkeyid,
 	int flags,
-	struct pkt  *xpkt
+	void *xpkt
 	)
 {
 	UNUSED_ARG(flags);
@@ -144,14 +151,14 @@ send_via_ntp_signd(
 		uint32_t op;
 		uint32_t packet_id;
 		uint32_t key_id_le;
-		struct pkt pkt;
+		char pkt[LEN_PKT_NOMAC];
 	} samba_pkt;
 
 	struct samba_key_out {
 		uint32_t version;
 		uint32_t op;
 		uint32_t packet_id;
-		struct pkt pkt;
+		char pkt[LEN_PKT_NOMAC];
 	} samba_reply;
 
 	char full_socket[256];
@@ -171,7 +178,7 @@ send_via_ntp_signd(
 	 * endian on the wire, but it was read above as
 	 * network byte order */
 	samba_pkt.key_id_le = htonl(xkeyid);
-	samba_pkt.pkt = *xpkt;
+	memcpy(&samba_pkt.pkt, xpkt, sizeof(samba_pkt.pkt));
 
 	snprintf(full_socket, sizeof(full_socket), "%s/socket", ntp_signd_socket);
 

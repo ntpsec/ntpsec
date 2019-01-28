@@ -389,7 +389,7 @@ extern uint8_t		ntp_minpoll;
 #ifdef ENABLE_MSSNTP
 /* ntp_signd.c */
 extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
-			       struct pkt *);
+			       void *);
 #endif
 
 /* ntp_timer.c */
