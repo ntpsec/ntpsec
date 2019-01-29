@@ -394,7 +394,7 @@ interface_dump(const endpt *itf)
 	sockaddr_dump(&itf->mask);
 	printf("name = %s\n", itf->name);
 	printf("flags = 0x%08x\n", itf->flags);
-	printf("addr_refid = %s\n", refid_dump(itf->addr_refid));
+	printf("addr_refid = %s\n", refid_dump(itf->addr_refid, 2));
 	printf("received = %ld\n", itf->received);
 	printf("sent = %ld\n", itf->sent);
 	printf("notsent = %ld\n", itf->notsent);
