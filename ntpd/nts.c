@@ -58,7 +58,7 @@ int nts_server_ke_verify(void)
 /*
  * RFC section 4:
  * - Verify server response message
- * - Extract cookie(s). 
+ * - Extract cookie(s).
  */
 int nts_client_ke_verify(struct ntspeer_t *ntspeer)
 {
@@ -69,7 +69,7 @@ int nts_client_ke_verify(struct ntspeer_t *ntspeer)
 /*
  * Daily rotation of server-side master keys.
  */
-int nts_daily(void) 
+int nts_daily(void)
 {
 	return 0;
 }

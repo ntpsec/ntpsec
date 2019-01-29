@@ -1,5 +1,5 @@
 /*
- * nts.h - NTS (Network Time Security) declarations 
+ * nts.h - NTS (Network Time Security) declarations
  */
 #ifndef GUARD_NTS_H
 #define GUARD_NTS_H
