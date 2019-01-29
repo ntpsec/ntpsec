@@ -68,7 +68,6 @@ static inline l_fp_w htonl_fp(l_fp lfp) {
 #define	CLEAR_TO_ZERO(p)	((char *)&((p)->clear_to_zero))
 #define	END_CLEAR_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
 #define	LEN_CLEAR_TO_ZERO(p)	(END_CLEAR_TO_ZERO(p) - CLEAR_TO_ZERO(p))
-
 /*
  * traffic shaping parameters
  */
@@ -684,7 +683,7 @@ receive(
 		goto done;
 	}
 
-/* FIXME: This is lots more cleanup to do in this area. */
+	/* FIXME: This is lots more cleanup to do in this area. */
 
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 
@@ -786,10 +785,18 @@ receive(
 	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
+		if (nts_validate(&rbufp->pkt, NULL) != 0) {
+			stat_count.sys_declined++;
+			break;
+		}
 		handle_fastxmit(rbufp, restrict_mask, auth);
 		stat_count.sys_processed++;
 		break;
-	    case MODE_SERVER:  /* Reply to our request. */
+	    case MODE_SERVER:  /* Reply to our request to a server. */
+		if (peer == NULL || nts_validate(&rbufp->pkt, &peer->nts) != 0) {
+		    stat_count.sys_declined++;
+		    break;
+		}	
 		handle_procpkt(rbufp, peer);
 		stat_count.sys_processed++;
 		peer->processed++;
@@ -2129,6 +2136,8 @@ peer_xmit(
 	xpkt.xmt = htonl_fp(peer->org_rand);	/* out in xmt, back in org */
 
 
+	sendlen += nts_decorate(xpkt.exten, sizeof(xpkt.exten), &peer->nts);
+
 	/*
 	 * If the peer (aka server) was configured with a key, authenticate
 	 * the packet.  Else, the packet is not authenticated.
@@ -2286,6 +2295,7 @@ fast_xmit(
 		xpkt.xmt = htonl_fp(xmt_tx);
 	}
 
+
 #ifdef ENABLE_MSSNTP
 	if (flags & RES_MSSNTP) {
 		keyid_t keyid = 0;
@@ -2295,6 +2305,7 @@ fast_xmit(
 	}
 #endif /* ENABLE_MSSNTP */
 
+
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
 	 * is authenticated and contains a MAC. If not, the transmitted
@@ -2302,6 +2313,7 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (NULL == auth) {
+		sendlen += nts_decorate(xpkt.exten, sizeof(xpkt.exten), NULL);
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 		DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
 			   current_time, socktoa(&rbufp->dstadr->sin),
@@ -2316,6 +2328,7 @@ fast_xmit(
 	 * cryptosum.
 	 */
 	get_systime(&xmt_tx);
+	sendlen += nts_decorate(xpkt.exten, sizeof(xpkt.exten), NULL);
 	sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 	get_systime(&xmt_ty);

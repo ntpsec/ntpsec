@@ -4,13 +4,14 @@
 #ifndef NTS_H
 #define NTS_H
 
-struct nts_client_t;
+#define NTS_MAX_COOKIES	8	/* RFC 4.1.6 */
+#define NTS_COOKIELEN	128	/* placeholder - see RFC 6 */
 
-int nts_client_ke_request(void);
-int nts_server_ke_verify(void);
-int nts_client_ke_verify(struct nts_client_t *);
-int nts_daily(void);
-int nts_validate(struct parsed_pkt *, struct nts_client_t *);
-int nts_decorate(struct parsed_pkt *, struct nts_client_t *);
+/* Client-side state per connection to server */
+struct ntspeer_t {
+    /* we treat an empty cookie string as a sentinel */
+    char cookies[NTS_MAX_COOKIES][NTS_COOKIELEN];
+    int current_cookie;
+};
 
 #endif	/* NTS_H */

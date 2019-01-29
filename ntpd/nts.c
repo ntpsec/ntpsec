@@ -5,7 +5,7 @@
  * https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp-15
  *
  * This module exposes mostly functions and structure pointers (not
- * structures) so that the NTS implementation can be sealed off deom
+ * structures) so that the NTS implementation can be sealed off from
  * the rest of the code. It supports both the client and server sides.
  *
  * The exception is client configuration, for which various bits have
@@ -13,18 +13,7 @@
  */
 #include "config.h"
 #include "ntp_types.h"
-#include "ntp.h"
-#include "nts.h"
-
-#define NTS_COOKIES	8	/* RFC 4.1.6 */
-#define NTS_COOKIELEN	128	/* placeholder - see RFC 6 */
-
-/* Client-side state per connection to server */
-struct nts_client_t {
-    /* we treat an empty cookie string as a sentinel */
-    char cookies[NTS_COOKIES][NTS_COOKIELEN];
-    int current_cookie;
-};
+#include "ntpd.h"
 
 /* By design, there is no per-client-side state on the server */
 
@@ -71,9 +60,9 @@ int nts_server_ke_verify(void)
  * - Verify server response message
  * - Extract cookie(s). 
  */
-int nts_client_ke_verify(struct nts_client_t *nts_client)
+int nts_client_ke_verify(struct ntspeer_t *ntspeer)
 {
-	UNUSED_ARG(nts_client);
+	UNUSED_ARG(ntspeer);
 	return 0;
 }
 
@@ -90,27 +79,28 @@ int nts_daily(void)
 /*
  * Extract and validate NTS validation information from packet
  * extension fields in an incoming request or response.  On the server
- * side, the nts_client pointer is expected to be NULL as there is no
- * per-client server state.
+ * side, the ntspeer pointer is expected to be NULL as there is no
+ * per-client server state.  A nonzero return causes the packet to be
+ * discarded.
  */
-int nts_validate(struct parsed_pkt *pkt, struct nts_client_t *nts_client)
+int nts_validate(struct parsed_pkt *pkt, struct ntspeer_t *ntspeer)
 {
 	UNUSED_ARG(pkt);
-	UNUSED_ARG(nts_client);
+	UNUSED_ARG(ntspeer);
 	return 0;
 }
 
 /*
  * Decorate an outgoing client request or server response with packet
  * extension fields carrying NTS information.  For a server reponse,
- * the nts_client pointer is expected to be NULL as there is no
- * per-client server state.
+ * the ntspeer pointer is expected to be NULL as there is no
+ * per-client server state.  Return the count of words appended.
  */
-int nts_decorate(struct parsed_pkt *pkt, struct nts_client_t *nts_client)
+int nts_decorate(uint32_t *extdata, size_t extlen, struct ntspeer_t *ntspeer)
 {
-	UNUSED_ARG(pkt);
-	UNUSED_ARG(nts_client);
-	return 0;
+	UNUSED_ARG(extdata);
+	UNUSED_ARG(extlen);
+	UNUSED_ARG(ntspeer);
 }
 
 /* end */

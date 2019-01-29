@@ -14,6 +14,7 @@
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
 #include "ntp_net.h"
+#include "nts.h"
 
 extern int32_t ntp_random (void);
 extern uint64_t ntp_random64 (void);
@@ -253,6 +254,7 @@ struct peer {
 	uint8_t	cast_flags;	/* additional flags */
 	uint8_t	last_event;	/* last peer error code */
 	uint8_t	num_events;	/* number of error events */
+	struct ntspeer_t nts;	/* per-peer Network Time Security state */
 
 	/*
 	 * Variables used by reference clock support

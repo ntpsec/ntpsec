@@ -420,6 +420,14 @@ extern struct refclock * const refclock_conf[];
 extern const uint8_t	num_refclock_conf;
 #endif
 
+/* nts.c */
+int nts_client_ke_request(void);
+int nts_server_ke_verify(void);
+int nts_client_ke_verify(struct ntspeer_t *);
+int nts_daily(void);
+int nts_validate(struct parsed_pkt *, struct ntspeer_t *);
+int nts_decorate(uint32_t *, size_t, struct ntspeer_t *);
+
 /* ntp_util.c */
 extern char * refid_dump(refid_t, int);
 
