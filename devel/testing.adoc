@@ -8,15 +8,18 @@ directory.
 
 == Path problems with the test tools ==
 
-The very first thing to do, even before you start up ntpd, is to change
-directory to build/main/ntpclients/ and run ./ntpq there. If you get a message
-that says
+The build tree has been set up so that if you first waf builid then cd to
+build/main/ntpclients/ and run (say) ntpq, you should be able to test
+new bersions of the Python code without installing to rootspace.
+
+The very first thing to do, even before you start up ntpd, is to try that.
+If you get a message that says
 
 ---------------------------------------------------------------------
 ntpq: can't find Python NTP library -- check PYTHONPATH.
 ---------------------------------------------------------------------
 
-You *may* have a problem.  A lot of what was C code in legacy versions
+you *may* have a problem.  A lot of what was C code in legacy versions
 (pretty much everything except ntpd itself, in fact) has been moved to
 Python to improve maintainability and decrease attack
 surface.  Most of these tools share a Python library of critical
