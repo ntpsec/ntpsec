@@ -337,7 +337,7 @@ struct system_variables {
     double	sys_rootdelay;		/* roundtrip delay to primary source */
     double	sys_rootdisp;		/* dispersion to primary source */
     double	sys_rootdist;		/* distance to primary source */
-    char	sys_refid[REFIDLEN];	/* reference id */
+    refid_t	sys_refid;		/* reference id */
     l_fp	sys_reftime;		/* last update time */
     struct peer *sys_peer;		/* current peer */
 };

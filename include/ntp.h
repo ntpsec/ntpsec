@@ -109,7 +109,24 @@ extern uint64_t ntp_random64 (void);
 #define LOGTOD(a)	ldexp(1., (int)(a)) /* log2 to double */
 #define ULOGTOD(a)	ldexp(1., (int)(a)) /* ulog2 to double */
 
+/*
+ * A refid is a "reference ID", intended as a uniqueness cookie for
+ * network hosts, used to prevent loops in the flow graph of
+ * client/server relationships.  Unfortunately, the length was frozen
+ * into the NTP packet format before IPv6; in that case the value is a
+ * hash of the IPv6 address and collisions *have* been observed in the
+ * wild
+ *
+ * Just to contemplate things further, the refid for a local clock source 
+ * (which doesn't have an IP address) is interpreted as a 4-digit string that
+ * identifies the clock device class.
+ *
+ * In ntpq, the refid field in displays is overloaded yet again.  It can have
+ * the value "POOL" or "INIT" describing a connection status for a host that
+ * is not yet supplying time.
+ */
 #define REFIDLEN	sizeof(uint32_t)	/* size of IPv4 network addr */
+typedef unsigned char refid_t[REFIDLEN];
 
 /*
  * The netendpt structure is used to hold the addresses and socket
@@ -127,7 +144,7 @@ typedef struct netendpt {
 	unsigned short	family;		/* AF_INET/AF_INET6 */
 	unsigned short	phase;		/* phase in update cycle */
 	uint32_t	flags;		/* interface flags */
-	char		addr_refid[REFIDLEN];	/* IPv4 addr or IPv6 hash */
+	refid_t		addr_refid;	/* IPv4 addr or IPv6 hash */
 	unsigned long	starttime;	/* current_time at creation */
 	volatile long	received;	/* number of incoming packets */
 	long		sent;		/* number of outgoing packets */
@@ -256,7 +273,7 @@ struct peer {
 	int8_t	precision;	/* remote clock precision */
 	double	rootdelay;	/* roundtrip delay to primary source */
 	double	rootdisp;	/* dispersion to primary source */
-	char	refid[REFIDLEN];/* remote reference ID */
+	refid_t	refid;		/* remote reference ID */
 	l_fp	reftime;	/* update epoch */
 
 #define clear_to_zero status
@@ -395,7 +412,7 @@ struct parsed_pkt {
         int8_t precision;
         uint32_t rootdelay;
         uint32_t rootdisp;
-        char refid[REFIDLEN];
+        refid_t refid;
         uint64_t reftime;
         uint64_t org;
         uint64_t rec;

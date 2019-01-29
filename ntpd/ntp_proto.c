@@ -35,7 +35,7 @@ struct pkt {
 	int8_t	precision;	/* peer clock precision */
 	u_fp	rootdelay;	/* roundtrip delay to primary source */
 	u_fp	rootdisp;	/* dispersion to primary source*/
-	char	refid[REFIDLEN];	/* reference id */
+	refid_t	refid;		/* reference id */
 	l_fp_w	reftime;	/* last update time */
 	l_fp_w	org;		/* originate time stamp */
 	l_fp_w	rec;		/* receive time stamp */

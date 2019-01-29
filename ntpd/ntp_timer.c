@@ -235,11 +235,11 @@ timer(void)
 		}
 		sys_vars.sys_stratum = (uint8_t)sys_orphan;
 		if (sys_vars.sys_stratum > 1) {
-		    /* set LOOPBACKADR */
-		    sys_vars.sys_refid[0] = 127;
-		    sys_vars.sys_refid[1] = 0;
-		    sys_vars.sys_refid[2] = 0;
-		    sys_vars.sys_refid[3] = 1;
+			/* set LOOPBACKADR */
+			sys_vars.sys_refid[0] = 127;
+			sys_vars.sys_refid[1] = 0;
+			sys_vars.sys_refid[2] = 0;
+			sys_vars.sys_refid[3] = 1;
 		} else
 			memcpy(&sys_vars.sys_refid, "LOOP", REFIDLEN);
 		sys_offset = 0;

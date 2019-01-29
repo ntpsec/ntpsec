@@ -66,9 +66,8 @@ static	void	ctl_putuint	(const char *, uint64_t);
 static	void	ctl_puthex	(const char *, uint64_t);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
-static	void	ctl_putadr	(const char *, char[REFIDLEN],
-				 sockaddr_u *);
-static	void	ctl_putrefid	(const char *, char *);
+static	void	ctl_putadr	(const char *, refid_t, sockaddr_u *);
+static	void	ctl_putrefid	(const char *, refid_t);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
@@ -1368,7 +1367,7 @@ ctl_putts(
 static void
 ctl_putadr(
 	const char *tag,
-	char refid[REFIDLEN],
+	refid_t refid,
 	sockaddr_u *addr
 	)
 {
@@ -1401,7 +1400,7 @@ ctl_putadr(
 static void
 ctl_putrefid(
 	const char *	tag,
-	char		refid[REFIDLEN]
+	refid_t		refid
 	)
 {
 	char	output[16];
