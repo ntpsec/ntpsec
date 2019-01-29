@@ -66,7 +66,7 @@ static	void	ctl_putuint	(const char *, uint64_t);
 static	void	ctl_puthex	(const char *, uint64_t);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
-static	void	ctl_putadr	(const char *, refid_t, sockaddr_u *);
+static	void	ctl_putadr	(const char *, refid_t *, sockaddr_u *);
 static	void	ctl_putrefid	(const char *, refid_t);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
@@ -1367,7 +1367,7 @@ ctl_putts(
 static void
 ctl_putadr(
 	const char *tag,
-	refid_t refid,
+	refid_t *refid,
 	sockaddr_u *addr
 	)
 {
@@ -1385,7 +1385,7 @@ ctl_putadr(
 		if (NULL == refid)
 			cq = "";
 		else
-			cq = refid_dump(refid, 1);
+			cq = refid_dump(*refid, 1);
 	}
 	else
 		cq = socktoa(addr);
@@ -1521,7 +1521,7 @@ ctl_putsys(
 
 	case CS_REFID:
 		if (sys_vars.sys_stratum > 1 && sys_vars.sys_stratum < STRATUM_UNSPEC)
-			ctl_putadr(sys_var[varid].text, sys_vars.sys_refid, NULL);
+			ctl_putadr(sys_var[varid].text, &sys_vars.sys_refid, NULL);
 		else
 			ctl_putrefid(sys_var[varid].text, sys_vars.sys_refid);
 		break;
@@ -2116,7 +2116,7 @@ ctl_putpeer(
 		break;
 
 	case CP_SRCADR:
-		ctl_putadr(peer_var[id].text, 0, &p->srcadr);
+		ctl_putadr(peer_var[id].text, NULL, &p->srcadr);
 		break;
 
 	case CP_SRCPORT:
@@ -2194,7 +2194,7 @@ ctl_putpeer(
 		}
 #endif
 		if (p->stratum > 1 && p->stratum < STRATUM_UNSPEC)
-			ctl_putadr(peer_var[id].text, p->refid,
+			ctl_putadr(peer_var[id].text, &p->refid,
 				   NULL);
 		else
 			ctl_putrefid(peer_var[id].text, p->refid);
