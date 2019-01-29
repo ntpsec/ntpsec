@@ -101,6 +101,7 @@ int nts_decorate(uint32_t *extdata, size_t extlen, struct ntspeer_t *ntspeer)
 	UNUSED_ARG(extdata);
 	UNUSED_ARG(extlen);
 	UNUSED_ARG(ntspeer);
+	return 0;
 }
 
 /* end */

@@ -789,7 +789,7 @@ ntpd_time_stepped(void)
 }
 
 char *
-refid_dump(refid_t refid, int mode)
+refid_dump(const refid_t refid, int mode)
 {
     static char outbuf[16];
     char const *fmt;

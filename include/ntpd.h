@@ -429,6 +429,6 @@ int nts_validate(struct parsed_pkt *, struct ntspeer_t *);
 int nts_decorate(uint32_t *, size_t, struct ntspeer_t *);
 
 /* ntp_util.c */
-extern char * refid_dump(refid_t, int);
+extern char * refid_dump(const refid_t, int);
 
 #endif	/* GUARD_NTPD_H */
