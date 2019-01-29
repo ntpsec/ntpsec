@@ -1382,8 +1382,10 @@ ctl_putadr(
 
 	*cp++ = '=';
 	if (NULL == addr) {
-		/* refid is an IPv4 address in binary format, just copy it */
-		cq = refid;
+		if (NULL == refid)
+			cq = "";
+		else
+			cq = refid_dump(refid, 1);
 	}
 	else
 		cq = socktoa(addr);
@@ -1406,8 +1408,8 @@ ctl_putrefid(
 	char	output[16];
 	char *	optr;
 	char *	oplim;
-	char *	iptr;
-	char *	iplim;
+	unsigned char *	iptr;
+	unsigned char *	iplim;
 	char *	past_eq = NULL;
 
 	optr = output;
@@ -2135,7 +2137,7 @@ ctl_putpeer(
 		break;
 
 	case CP_DSTADR:
-		ctl_putadr(peer_var[id].text, 0,
+		ctl_putadr(peer_var[id].text, NULL,
 			   (p->dstadr != NULL)
 				? &p->dstadr->sin
 				: NULL);

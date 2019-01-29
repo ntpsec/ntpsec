@@ -420,4 +420,7 @@ extern struct refclock * const refclock_conf[];
 extern const uint8_t	num_refclock_conf;
 #endif
 
+/* ntp_util.c */
+extern char * refid_dump(refid_t, int);
+
 #endif	/* GUARD_NTPD_H */
