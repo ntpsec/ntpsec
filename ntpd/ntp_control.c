@@ -26,6 +26,7 @@
 #include "lib_strbuf.h"
 #include "ntp_syscall.h"
 #include "ntp_auth.h"
+#include "ntp_endian.h"
 #include "timespecops.h"
 
 /* undefine to suppress random tags and get fixed emission order */
@@ -2435,15 +2436,16 @@ ctl_putclock(
 		break;
 
 	case CC_FUDGEVAL2:
-		/*
-	         * ESR: NTP Classic sometimes shipped this as a refid string,
-		 * which seems wrong. If you need to look at that code,
-		 * any version of NTP Classic or NTPsec before January
-		 * 2019 has it that way.
-	         */
+		/* Yes, the clocl refid is passed as a 32 bit in fudgeval2 */
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL2)) {
-			ctl_putint(clock_var[id].text,
-				   pcs->fudgeval2);
+			refid_t stringized;
+			ntp_be32enc(stringized, pcs->fudgeval2);
+			if (pcs->fudgeval1 > 1)
+				ctl_putadr(clock_var[id].text,
+					   &stringized, NULL);
+			else
+				ctl_putrefid(clock_var[id].text,
+					     stringized);
 		}
 		break;
 
