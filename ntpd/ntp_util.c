@@ -531,7 +531,7 @@ record_raw_stats(
 	int	precision,
 	double	root_delay,	/* seconds */
 	double	root_dispersion,/* seconds */
-	uint32_t	refid,
+	refid_t	refid,
 	unsigned int	outcount
 	)
 {
