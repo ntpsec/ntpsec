@@ -1401,13 +1401,13 @@ ctl_putrefid(
 {
         char    output[16];
         char    buf[REFIDLEN + 1];
-        int i;
+        unsigned int i;
 
         strlcpy(output, tag, sizeof(output));
         strlcat(output, "=", sizeof(output));
 
         /* grab the refid */
-        strlcpy(buf, refid, sizeof(buf));
+        strlcpy(buf, (const char*)refid, sizeof(buf));
 
         /* be sure it is printable, how can it not be? */
         for (i = 0; i < REFIDLEN; i++) {
@@ -2423,7 +2423,7 @@ ctl_putclock(
 		break;
 
 	case CC_FUDGEVAL2:
-		/* Yes, the clocl refid is passed as a 32 bit in fudgeval2 */
+		/* Yes, the clock refid is passed as a 32 bit in fudgeval2 */
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL2)) {
 			refid_t stringized;
 			ntp_be32enc(stringized, pcs->fudgeval2);
