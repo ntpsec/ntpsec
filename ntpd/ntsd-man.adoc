@@ -1,0 +1,23 @@
+= ntsd(8) =
+:man version: @NTPSEC_VERSION@
+include::../docs/manual.include[]
+
+ntsd - Network Time Security service daemon
+
+include::../docs/includes/ntps-body.adoc[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+
+1 (EXIT_FAILURE)::
+  Execution failed - examine system logfiles.
+
+== SEE ALSO ==
+
+{ntpdman}.
+
+// end

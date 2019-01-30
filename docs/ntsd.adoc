@@ -1,0 +1,29 @@
+= ntsd - Network Time Protocol (NTP) Daemon =
+include::html.include[]
+
+//FIXME: Needs its own cartoon
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|===============================
+|image:pic/wingdorothy.gif[]|
+{millshome}pictures.html[from 'The Wizard of Oz', L. Frank Baum]
+
+You need help from the monkeys.
+
+|===============================
+
+== Manual Pages ==
+
+include::includes/manual.adoc[]
+
+== Table of Contents ==
+
+* link:#_synopsis[SYNOPSIS]
+* link:#_description[DESCRIPTION]
+
+'''''
+
+include::includes/ntsd-body.adoc[]
+
+'''''
+
+include::includes/footer.adoc[]
