@@ -2,3 +2,4 @@
 .waf*
 *.pyc
 build
+attic/clock
