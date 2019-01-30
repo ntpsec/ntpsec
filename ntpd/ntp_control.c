@@ -1395,38 +1395,32 @@ ctl_putadr(
  */
 static void
 ctl_putrefid(
-	const char *	tag,
-	refid_t		refid
-	)
+        const char *    tag,
+        refid_t         refid
+)
 {
-	char	output[16];
-	char *	optr;
-	char *	oplim;
-	unsigned char *	iptr;
-	unsigned char *	iplim;
-	char *	past_eq = NULL;
+        char    output[16];
+        char    buf[REFIDLEN + 1];
+        int i;
 
-	optr = output;
-	oplim = output + sizeof(output);
-	while (optr < oplim && '\0' != *tag)
-		*optr++ = *tag++;
-	if (optr < oplim) {
-		*optr++ = '=';
-		past_eq = optr;
-	}
-	if (!(optr < oplim))
-		return;
-	iptr = refid;
-	iplim = iptr + REFIDLEN;
-	for ( ; optr < oplim && iptr < iplim && '\0' != *iptr;
-	     iptr++, optr++)
-		if (isprint((int)*iptr))
-			*optr = *iptr;
-		else
-			*optr = '.';
-	if (!(optr <= oplim))
-		optr = past_eq;
-	ctl_putdata(output, (unsigned int)(optr - output), false);
+        strlcpy(output, tag, sizeof(output));
+        strlcat(output, "=", sizeof(output));
+
+        /* grab the refid */
+        strlcpy(buf, refid, sizeof(buf));
+
+        /* be sure it is printable, how can it not be? */
+        for (i = 0; i < REFIDLEN; i++) {
+            if ('\0' == buf[i]) {
+                break;
+            }
+            if (!isprint(buf[i])) {
+                buf[i] = '.';
+            }
+        }
+
+        strlcat(output, buf, sizeof(output));
+        ctl_putdata(output, strlen(output), false);
 }
 
 
