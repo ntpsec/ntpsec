@@ -1400,32 +1400,38 @@ ctl_putadr(
  */
 static void
 ctl_putrefid(
-        const char *    tag,
-        refid_t         refid
-)
+	const char *	tag,
+	refid_t		refid
+	)
 {
-        char    output[16];
-        char    buf[REFIDLEN + 1];
-        unsigned int i;
+	char	output[16];
+	char *	optr;
+	char *	oplim;
+	char *	iptr;
+	char *	iplim;
+	char *	past_eq = NULL;
 
-        strlcpy(output, tag, sizeof(output));
-        strlcat(output, "=", sizeof(output));
-
-        /* grab the refid */
-        strlcpy(buf, (const char*)refid, sizeof(buf));
-
-        /* be sure it is printable, how can it not be? */
-        for (i = 0; i < REFIDLEN; i++) {
-            if ('\0' == buf[i]) {
-                break;
-            }
-            if (!isprint(buf[i])) {
-                buf[i] = '.';
-            }
-        }
-
-        strlcat(output, buf, sizeof(output));
-        ctl_putdata(output, strlen(output), false);
+	optr = output;
+	oplim = output + sizeof(output);
+	while (optr < oplim && '\0' != *tag)
+		*optr++ = *tag++;
+	if (optr < oplim) {
+		*optr++ = '=';
+		past_eq = optr;
+	}
+	if (!(optr < oplim))
+		return;
+	iptr = (char *)&refid;
+	iplim = iptr + sizeof(refid);
+	for ( ; optr < oplim && iptr < iplim && '\0' != *iptr;
+	     iptr++, optr++)
+		if (isprint((int)*iptr))
+			*optr = *iptr;
+		else
+			*optr = '.';
+	if (!(optr <= oplim))
+		optr = past_eq;
+	ctl_putdata(output, (unsigned int)(optr - output), false);
 }
 
 
@@ -2428,16 +2434,13 @@ ctl_putclock(
 		break;
 
 	case CC_FUDGEVAL2:
-		/* Yes, the clock refid is passed as a 32 bit in fudgeval2 */
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL2)) {
-			refid_t stringized;
-			ntp_be32enc(stringized, pcs->fudgeval2);
 			if (pcs->fudgeval1 > 1)
 				ctl_putadr(clock_var[id].text,
-					   &stringized, NULL);
+					   pcs->fudgeval2, NULL);
 			else
 				ctl_putrefid(clock_var[id].text,
-					     stringized);
+					     pcs->fudgeval2);
 		}
 		break;
 
