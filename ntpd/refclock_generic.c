@@ -24,7 +24,6 @@
 
 #include "config.h"
 #include "ntp_types.h"
-#include "ntp_endian.h"
 #include "timespecops.h"
 
 /*
@@ -2617,7 +2616,7 @@ parse_start(
 	if (peer->stratum <= 1)
 	    memmove((char *)&parse->generic->refid, parse->parse_type->cl_id, REFIDLEN);
 	else
-	    ntp_be32enc(parse->generic->refid, PARSEHSREFID);
+	    parse->generic->refid = htonl(PARSEHSREFID);
 
 	parse->generic->io.fd = fd232;
 

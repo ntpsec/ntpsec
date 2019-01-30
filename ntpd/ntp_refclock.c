@@ -12,7 +12,6 @@
 #include "lib_strbuf.h"
 #include "ntp_calendar.h"
 #include "timespecops.h"
-#include "ntp_endian.h"
 
 #include <stdio.h>
 
@@ -218,7 +217,7 @@ refclock_newpeer(
 		refclock_unpeer(peer);
 		return false;
 	}
-	memcpy(&peer->refid, &pp->refid, REFIDLEN);
+	peer->refid = pp->refid;
 	return true;
 }
 
@@ -859,10 +858,8 @@ refclock_control(
 			pp->fudgetime2 = in->fudgetime2;
 		if (in->haveflags & CLK_HAVEVAL1)
 			peer->stratum = pp->stratum = (uint8_t)in->fudgeval1;
-		if (in->haveflags & CLK_HAVEVAL2) {
-			ntp_be32enc(peer->refid,in->fudgeval2);
-			ntp_be32enc(pp->refid,in->fudgeval2);
-		}
+		if (in->haveflags & CLK_HAVEVAL2)
+			peer->refid = pp->refid = in->fudgeval2;
 		if (in->haveflags & CLK_HAVEFLAG1) {
 			pp->sloppyclockflag &= ~CLK_FLAG1;
 			pp->sloppyclockflag |= in->flags & CLK_FLAG1;
@@ -886,7 +883,7 @@ refclock_control(
 	 */
 	if (out != NULL) {
 		out->fudgeval1 = pp->stratum;
-		out->fudgeval2 = ntp_be16dec(pp->refid);
+		out->fudgeval2 = pp->refid;
 		out->haveflags = CLK_HAVEVAL1 | CLK_HAVEVAL2;
 		out->fudgetime1 = pp->fudgetime1;
 		if (!D_ISZERO_NS(out->fudgetime1))

@@ -19,30 +19,6 @@
 #endif
 #include <unistd.h>
 
-/* This is the old, insane way of representing packets,noqw only used here fot
-   parsing data off the wire. It'll gradually be phased out and removed. The 
-   publuc view of packets is struct parsed_pkt.
-
-   Packets are simply pulled off the wire and
-   then type-punned into this structure, so all fields are in network
-   byte order. Note that there is no pack pragma. The only reason this
-   ever worked at all is that all the fields are self-aligned, so no ABI
-   has been evil enough to insert padding between fields. */
-struct pkt {
-	uint8_t	li_vn_mode;	/* peer leap indicator */
-	uint8_t	stratum;	/* peer stratum */
-	uint8_t	ppoll;		/* peer poll interval */
-	int8_t	precision;	/* peer clock precision */
-	u_fp	rootdelay;	/* roundtrip delay to primary source */
-	u_fp	rootdisp;	/* dispersion to primary source*/
-	refid_t	refid;		/* reference id */
-	l_fp_w	reftime;	/* last update time */
-	l_fp_w	org;		/* originate time stamp */
-	l_fp_w	rec;		/* receive time stamp */
-	l_fp_w	xmt;		/* transmit time stamp */
-	uint32_t	exten[(MAX_MAC_LEN + MAX_EXT_LEN) / sizeof(uint32_t)];
-} __attribute__ ((aligned));
-
 /*
  * Byte order conversion
  */
@@ -991,10 +967,10 @@ clock_update(
 	poll_update(peer, sys_poll);
 	sys_vars.sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 	if (peer->stratum == STRATUM_REFCLOCK ||
-		peer->stratum == STRATUM_UNSPEC)
-		memcpy(&sys_vars.sys_refid, &peer->refid, REFIDLEN);
+	    peer->stratum == STRATUM_UNSPEC)
+		sys_vars.sys_refid = peer->refid;
 	else
-	    ntp_be32enc(sys_vars.sys_refid, addr2refid(&peer->srcadr));
+		sys_vars.sys_refid = addr2refid(&peer->srcadr);
 	/*
 	 * Root Dispersion (E) is defined (in RFC 5905) as:
 	 *
@@ -1574,16 +1550,14 @@ clock_select(void)
 		 * orphan mode in timer().
 		 */
 		if (peer->stratum == sys_orphan) {
-			char addrhash[REFIDLEN];
 			uint32_t	localmet;
 			uint32_t peermet;
 
 			if (peer->dstadr != NULL)
-				localmet = ntp_be32dec(peer->dstadr->addr_refid);
+				localmet = ntohl(peer->dstadr->addr_refid);
 			else
 				localmet = UINT32_MAX;
-			ntp_be32enc(addrhash, addr2refid(&peer->srcadr));
-			peermet = ntp_be32dec(addrhash);
+			peermet = ntohl(addr2refid(&peer->srcadr));
 			if (peermet < localmet && peermet < orphmet) {
 				typeorphan = peer;
 				orphmet = peermet;
@@ -2109,7 +2083,7 @@ peer_xmit(
 		xpkt.stratum = 0;
 		xpkt.ppoll = 0;
 		xpkt.precision = 0x20;
-		memset(&xpkt.refid, '\0', REFIDLEN);
+		xpkt.refid = 0;
 		xpkt.rootdelay = 0;
 		xpkt.rootdisp =	0;
 		xpkt.reftime = htonl_fp(0);
@@ -2123,7 +2097,7 @@ peer_xmit(
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = peer->hpoll;
 		xpkt.precision = sys_vars.sys_precision;
-		memcpy(&xpkt.refid, &sys_vars.sys_refid, REFIDLEN);
+		xpkt.refid = sys_vars.sys_refid;
 		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
 		xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
 		xpkt.reftime = htonl_fp(sys_vars.sys_reftime);
@@ -2256,7 +2230,7 @@ fast_xmit(
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = max(rbufp->pkt.ppoll, ntp_minpoll);
 		xpkt.precision = sys_vars.sys_precision;
-		memcpy(&xpkt.refid, &sys_vars.sys_refid, REFIDLEN);
+		xpkt.refid = sys_vars.sys_refid;
 		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));
 		xpkt.rootdisp = HTONS_FP(DTOUFP(sys_vars.sys_rootdisp));
 

@@ -787,17 +787,3 @@ ntpd_time_stepped(void)
 		mon_start((int)saved_mon_enabled);
 	}
 }
-
-char *
-refid_dump(const refid_t refid, int mode)
-{
-    static char outbuf[16];
-    char const *fmt;
-    switch (mode) {
-    case 0: fmt = "%s";	break;
-    case 1: fmt = "%u.%u.%u.%u"; break;
-    default: fmt = "%02x%02x%02x%02x"; break;
-    }
-    snprintf(outbuf, sizeof(outbuf), fmt, refid[0],refid[1],refid[2],refid[3]);
-    return outbuf;
-}

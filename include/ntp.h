@@ -127,7 +127,7 @@ extern uint64_t ntp_random64 (void);
  * is not yet supplying time.
  */
 #define REFIDLEN	sizeof(uint32_t)	/* size of IPv4 network addr */
-typedef unsigned char refid_t[REFIDLEN];
+typedef uint32_t	refid_t;
 
 /*
  * The netendpt structure is used to hold the addresses and socket
@@ -396,13 +396,6 @@ struct peer {
 #define	FLAG_DNS	0x0800u	/* needs DNS lookup */
 #define FLAG_TSTAMP_PPS	0x4cd000u	/* PPS source provides absolute timestamp */
 
-/* The MAC follows any extension fields. */
-/* Its length includes 1 word of keyID. */
-/* MD5 length is 16 bytes => 4+1 */
-/* SHA length is 20 bytes => 5+1 */
-#define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
-#define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* maximum MAC length */
-
 /* This is the new, sane way of representing packets. All fields are
    in host byte order, and the fixed-point time fields are just integers,
    with uints of 2^-16 or 2^-32 seconds as appropriate. */
@@ -414,7 +407,7 @@ struct parsed_pkt {
         int8_t precision;
         uint32_t rootdelay;
         uint32_t rootdisp;
-        refid_t refid;
+        char refid[REFIDLEN];
         uint64_t reftime;
         uint64_t org;
         uint64_t rec;
@@ -428,6 +421,36 @@ struct exten {
         uint16_t len;
         uint8_t *body;
 };
+
+/* This is the old, insane way of representing packets. It'll gradually
+   be phased out and removed. Packets are simply pulled off the wire and
+   then type-punned into this structure, so all fields are in network
+   byte order. Note that there is no pack pragma. The only reason this
+   ever worked at all is that all the fields are self-aligned, so no ABI
+   has been evil enough to insert padding between fields. */
+struct pkt {
+	uint8_t	li_vn_mode;	/* peer leap indicator */
+	uint8_t	stratum;	/* peer stratum */
+	uint8_t	ppoll;		/* peer poll interval */
+	int8_t	precision;	/* peer clock precision */
+	u_fp	rootdelay;	/* roundtrip delay to primary source */
+	u_fp	rootdisp;	/* dispersion to primary source*/
+	refid_t	refid;		/* reference id */
+	l_fp_w	reftime;	/* last update time */
+	l_fp_w	org;		/* originate time stamp */
+	l_fp_w	rec;		/* receive time stamp */
+	l_fp_w	xmt;		/* transmit time stamp */
+
+/* Old style authentication was just appended
+ * without the type/length of an extension header. */
+/* Length includes 1 word of keyID */
+/* MD5 length is 16 bytes => 4+1 */
+/* SHA length is 20 bytes => 5+1 */
+#define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
+#define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* MAX of old style */
+
+	uint32_t	exten[(MAX_MAC_LEN + MAX_EXT_LEN) / sizeof(uint32_t)];
+} __attribute__ ((aligned));
 
 /* pythonize-header: stop ignoring */
 

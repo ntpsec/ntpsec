@@ -189,7 +189,7 @@ extern	int	mprintf_clock_stats(struct peer *, const char *, ...)
 extern	void	record_raw_stats (struct peer *,
 				  int leap, int version, int mode, int stratum,
 				  int ppoll, int precision, double root_delay,
-				  double root_dispersion, uint32_t refid,
+				  double root_dispersion, refid_t refid,
 				  unsigned int outcount);
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 
@@ -427,8 +427,5 @@ int nts_client_ke_verify(struct ntspeer_t *);
 int nts_daily(void);
 int nts_validate(struct parsed_pkt *, struct ntspeer_t *);
 int nts_decorate(uint32_t *, size_t, struct ntspeer_t *);
-
-/* ntp_util.c */
-extern char * refid_dump(const refid_t, int);
 
 #endif	/* GUARD_NTPD_H */

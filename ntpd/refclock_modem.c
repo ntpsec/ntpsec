@@ -909,7 +909,7 @@ modem_timecode(
 	 * telephone networks the propatation time can be different for
 	 * each call and can reach 200 ms for some calls.
 	 */
-	memcpy(&peer->refid, &pp->refid, REFIDLEN);
+	peer->refid = pp->refid;
 	pp->lastrec = up->tstamp;
 	if (up->msgcnt == 0)
 		return;

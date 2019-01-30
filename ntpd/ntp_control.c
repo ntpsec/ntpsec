@@ -26,7 +26,6 @@
 #include "lib_strbuf.h"
 #include "ntp_syscall.h"
 #include "ntp_auth.h"
-#include "ntp_endian.h"
 #include "timespecops.h"
 
 /* undefine to suppress random tags and get fixed emission order */
@@ -67,7 +66,7 @@ static	void	ctl_putuint	(const char *, uint64_t);
 static	void	ctl_puthex	(const char *, uint64_t);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
-static	void	ctl_putadr	(const char *, refid_t *, sockaddr_u *);
+static	void	ctl_putadr	(const char *, refid_t, sockaddr_u *);
 static	void	ctl_putrefid	(const char *, refid_t);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
@@ -701,7 +700,7 @@ init_control(void)
 }
 
 /*
- * unmarshall_ntp_control - unmarshall data stream into a ntp_control struct
+ * unmarshall_ntp_control - unmarshall data stream into a ntp_sontrol struct
  */
 void
 unmarshall_ntp_control(struct ntp_control *pkt, struct recvbuf *rbufp)
@@ -1368,25 +1367,31 @@ ctl_putts(
 static void
 ctl_putadr(
 	const char *tag,
-	refid_t *refid,
+	refid_t addr32,
 	sockaddr_u *addr
 	)
 {
+	char *cp;
 	const char *cq;
 	char buffer[200];
 
-	strlcpy(buffer, tag, sizeof(buffer));
-	strlcat(buffer, "=", sizeof(buffer));
-	if (NULL != addr) {
-		cq = socktoa(addr);
-        } else if (NULL != refid) {
-		cq = refid_dump(*refid, 1);
-	} else {
-		cq = "0.0.0.0";
-        }
+	cp = buffer;
+	cq = tag;
+	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
+		*cp++ = *cq++;
 
-	strlcat(buffer, cq, sizeof(buffer));
-	ctl_putdata(buffer, strlen(buffer), false);
+	*cp++ = '=';
+	if (NULL == addr) {
+		struct in_addr in4;
+		in4.s_addr = addr32;
+		cq = inet_ntoa(in4);
+	}
+	else
+		cq = socktoa(addr);
+	INSIST((cp - buffer) < (int)sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%s", cq);
+	cp += strlen(cp);
+	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
 }
 
 
@@ -1509,7 +1514,7 @@ ctl_putsys(
 
 	case CS_REFID:
 		if (sys_vars.sys_stratum > 1 && sys_vars.sys_stratum < STRATUM_UNSPEC)
-			ctl_putadr(sys_var[varid].text, &sys_vars.sys_refid, NULL);
+			ctl_putadr(sys_var[varid].text, sys_vars.sys_refid, NULL);
 		else
 			ctl_putrefid(sys_var[varid].text, sys_vars.sys_refid);
 		break;
@@ -2104,7 +2109,7 @@ ctl_putpeer(
 		break;
 
 	case CP_SRCADR:
-		ctl_putadr(peer_var[id].text, NULL, &p->srcadr);
+		ctl_putadr(peer_var[id].text, 0, &p->srcadr);
 		break;
 
 	case CP_SRCPORT:
@@ -2125,7 +2130,7 @@ ctl_putpeer(
 		break;
 
 	case CP_DSTADR:
-		ctl_putadr(peer_var[id].text, NULL,
+		ctl_putadr(peer_var[id].text, 0,
 			   (p->dstadr != NULL)
 				? &p->dstadr->sin
 				: NULL);
@@ -2182,7 +2187,7 @@ ctl_putpeer(
 		}
 #endif
 		if (p->stratum > 1 && p->stratum < STRATUM_UNSPEC)
-			ctl_putadr(peer_var[id].text, &p->refid,
+			ctl_putadr(peer_var[id].text, p->refid,
 				   NULL);
 		else
 			ctl_putrefid(peer_var[id].text, p->refid);
