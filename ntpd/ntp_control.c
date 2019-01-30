@@ -1372,28 +1372,21 @@ ctl_putadr(
 	sockaddr_u *addr
 	)
 {
-	char *cp;
 	const char *cq;
 	char buffer[200];
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
-
-	*cp++ = '=';
-	if (NULL == addr) {
-		if (NULL == refid)
-			cq = "";
-		else
-			cq = refid_dump(*refid, 1);
-	}
-	else
+	strlcpy(buffer, tag, sizeof(buffer));
+	strlcat(buffer, "=", sizeof(buffer));
+	if (NULL != addr) {
 		cq = socktoa(addr);
-	INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%s", cq);
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
+        } else if (NULL != refid) {
+		cq = refid_dump(*refid, 1);
+	} else {
+		cq = "0.0.0.0";
+        }
+
+	strlcat(buffer, cq, sizeof(buffer));
+	ctl_putdata(buffer, strlen(buffer), false);
 }
 
 
