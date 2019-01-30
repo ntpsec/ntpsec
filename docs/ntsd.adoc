@@ -1,13 +1,12 @@
-= ntsd - Network Time Protocol (NTP) Daemon =
+= ntsd - Network Time Security (NTS) Daemon =
 include::html.include[]
 
-//FIXME: Needs its own cartoon
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |===============================
-|image:pic/wingdorothy.gif[]|
-{millshome}pictures.html[from 'The Wizard of Oz', L. Frank Baum]
+|image:pic/pogo-enemy2.png[]|
+{millshome}pictures.html[from 'Pogo', by Walt Kelly]
 
-You need help from the monkeys.
+Security is hard.
 
 |===============================
 

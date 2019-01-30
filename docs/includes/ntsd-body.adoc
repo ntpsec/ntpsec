@@ -8,7 +8,7 @@ ntsd
 
 == DESCRIPTION ==
 
-This is a placeholder for a manual pafe fully describing the
+This is a placeholder for a manual page fully describing the
 Network Time Security daemon, which is a work in progress.
 
 //end
