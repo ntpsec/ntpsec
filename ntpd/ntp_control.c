@@ -4376,11 +4376,12 @@ set_var(
 					t++;
 				}
 				if (*s == *t && ((*t == '=') || !*t)) {
-					td = erealloc((void *)(intptr_t)k->text, size);
-					memcpy(td, data, size);
-					k->text = td;
-					k->flags = def;
-					return;
+                                    td = erealloc((void *)(intptr_t)k->text,
+                                                  size);
+                                    memcpy(td, data, size);
+                                    k->text = td;
+                                    k->flags = def;
+                                    return;
 				}
 			}
 			k++;
