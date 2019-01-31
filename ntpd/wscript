@@ -127,7 +127,7 @@ def build(ctx):
     )
 
     ntsd_source = [
-	"nts.c",
+        "nts.c",
         "ntsd.c",
     ]
 

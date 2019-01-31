@@ -616,7 +616,7 @@ int main(int argc, char **argv) {
         ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),
         ('sched_setscheduler', ["sched.h"]),
         ('strlcpy', ["string.h"]),
-        ('strlcat', ["string.h"]) 
+        ('strlcat', ["string.h"])
     )
     for ft in optional_functions:
             probe_function(ctx, function=ft[0], prerequisites=ft[1])
@@ -632,24 +632,22 @@ int main(int argc, char **argv) {
         # Very old versions of OpenSSL don't have cmac.h
         #  We could add ifdefs, but old crypto is deprecated in favor of CMAC
         #  and so far, all the systems that we want to support are new enough.
-        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True) )
+        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True))
     for ft in required_functions:
-            probe_function(ctx, function=ft[0],
-                prerequisites=ft[1], use=ft[2],
-                mandatory=ft[3])
-
-
+        probe_function(ctx, function=ft[0],
+                       prerequisites=ft[1], use=ft[2],
+                       mandatory=ft[3])
 
     # check for BSD versions outside of libc
     if not ctx.get_define("HAVE_STRLCAT"):
         ret = probe_function(ctx, function='strlcat',
-                    prerequisites=['bsd/string.h'])
+                             prerequisites=['bsd/string.h'])
         if ret:
             ctx.define("HAVE_STRLCAT", 1, comment="Using bsd/strlcat")
 
     if not ctx.get_define("HAVE_STRLCPY"):
         ret = probe_function(ctx, function='strlcpy',
-                    prerequisites=['bsd/string.h'])
+                             prerequisites=['bsd/string.h'])
         if ret:
             ctx.define("HAVE_STRLCPY", 1, comment="Using bsd/strlcpy")
 
@@ -878,10 +876,12 @@ def bin_test(ctx):
     from wafhelpers.bin_test import cmd_bin_test
     cmd_bin_test(ctx, config)
 
+
 def bin_test_summary(ctx):
     """Display results of binary check, use after tests."""
     from wafhelpers.bin_test import bin_test_summary
     bin_test_summary(ctx)
+
 
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
