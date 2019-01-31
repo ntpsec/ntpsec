@@ -1343,21 +1343,16 @@ ctl_putts(
 	l_fp *ts
 	)
 {
-	char *cp;
-	const char *cq;
 	char buffer[200];
+	char buf[50];
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
+        strlcpy(buffer, tag, sizeof(buffer));
+        strlcat(buffer, "=", sizeof(buffer));
 
-	*cp++ = '=';
-	INSIST((size_t)(cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "0x%08x.%08x",
+	snprintf(buf, sizeof(buf), "0x%08x.%08x",
 		 (unsigned int)lfpuint(*ts), (unsigned int)lfpfrac(*ts));
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
+        strlcat(buffer, buf, sizeof(buffer));
+	ctl_putdata(buffer, strlen(buffer), false);
 }
 
 
