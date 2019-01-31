@@ -2970,13 +2970,15 @@ static void configure(
 	if (RES_NOMODIFY & restrict_mask) {
 		snprintf(remote_config.err_msg,
 			 sizeof(remote_config.err_msg),
-			 "runtime configuration prohibited by restrict ... nomodify");
+			 "runtime configuration prohibited by restrict ..."
+                         " nomodify");
 		ctl_putdata(remote_config.err_msg,
 			    strlen(remote_config.err_msg), false);
 		ctl_flushpkt(0);
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
-				"MODE6: runtime config from %s rejected due to nomodify restriction",
+				"MODE6: runtime config from %s rejected due"
+                                " to nomodify restriction",
 				socktoa(&rbufp->recv_srcadr));
 		stat_count.sys_restricted++;
 		return;
@@ -2993,7 +2995,8 @@ static void configure(
 			    strlen(remote_config.err_msg), false);
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
-			"MODE6: runtime config from %s rejected: request too long",
+			"MODE6: runtime config from %s rejected: request"
+                        " too long",
 			socktoa(&rbufp->recv_srcadr));
 		return;
 	}
