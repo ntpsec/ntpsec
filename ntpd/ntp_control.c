@@ -1389,26 +1389,23 @@ ctl_putarray(
 	int start
 	)
 {
-	char *cp;
-	const char *cq;
 	char buffer[200];
+	char buf[50];
 	int i;
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
-	*cp++ = '=';
+
+        strlcpy(buffer, tag, sizeof(buffer));
+        strlcat(buffer, "=", sizeof(buffer));
+
 	i = start;
 	do {
 		if (i == 0)
 			i = NTP_SHIFT;
 		i--;
-		INSIST((cp - buffer) < (int)sizeof(buffer));
-		snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
-			 " %.2f", arr[i] * MS_PER_S);
-		cp += strlen(cp);
+		snprintf(buf, sizeof(buf), " %.2f", arr[i] * MS_PER_S);
+                strlcat(buffer, buf, sizeof(buffer));
 	} while (i != start);
-	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
+
+	ctl_putdata(buffer, strlen(buffer), false);
 }
 
 
