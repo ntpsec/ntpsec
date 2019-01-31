@@ -84,7 +84,7 @@ Here are the non-standardized APIs that may be used:
 The following C99/POSIX functions are BANNED.  They are unsafe, tending to
 cause buffer overruns and (all too often) exploitable security holes:
 
-* strcpy, strncpy, strcat:  Use strlcpy and strlcat instead.
+* strcpy, strncpy, strcat, strncat:  Use strlcpy and strlcat instead.
 * sprintf, vsprintf: use snprintf and vsnprintf instead.
 * In scanf and friends, the %s format without length limit is banned.
 * strtok: use strtok_r() or unroll this into the obvious loop.
