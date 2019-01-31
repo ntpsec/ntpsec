@@ -1175,20 +1175,15 @@ ctl_putunqstr(
 	)
 {
 	char buffer[512];
-	char *cp;
-	size_t tl;
 
-	tl = strlen(tag);
-	if (tl + 1 + len >= sizeof(buffer))
+	if ((strlen(tag) + 2 + len) >= sizeof(buffer))
 	    return;
-	memcpy(buffer, tag, tl);
-	cp = buffer + tl;
-	if (len > 0) {
-		*cp++ = '=';
-		memcpy(cp, data, len);
-		cp += len;
-	}
-	ctl_putdata(buffer, (unsigned int)(cp - buffer), false);
+
+        strlcpy(buffer, tag, sizeof(buffer));
+        strlcat(buffer, "=", sizeof(buffer));
+	if (len > 0)
+            strlcat(buffer, data, sizeof(buffer));
+	ctl_putdata(buffer, strlen(buffer), false);
 }
 
 
