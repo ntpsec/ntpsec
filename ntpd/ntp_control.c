@@ -1286,20 +1286,15 @@ ctl_putint(
 	long ival
 	)
 {
-	char *cp;
-	const char *cq;
 	char buffer[200];
+        char buf[50];
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
+        strlcpy(buffer, tag, sizeof(buffer));
 
-	*cp++ = '=';
-	INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%ld", ival);
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
+	snprintf(buf, sizeof(buf), "=%ld", ival);
+        strlcat(buffer, buf, sizeof(buffer));
+
+	ctl_putdata(buffer, strlen(buffer), false);
 }
 
 
