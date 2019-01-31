@@ -1138,9 +1138,6 @@ ctl_putdata(
  *		as in ctl_putstr("var", "value", strlen("value"));
  *		The write will be truncated if data contains  a NUL,
  *		so don't do that.
- *
- * ESR, 2016: Whoever wrote this should be *hurt*.  If the string value is
- * empty, no "=" and no value literal is written, just the bare tag.
  */
 static void
 ctl_putstr(
@@ -1150,14 +1147,14 @@ ctl_putstr(
 	)
 {
 	char buffer[512];
-	size_t tl = strlen(tag);
 
-	if (tl >= sizeof(buffer))
-	    return;
-	memcpy(buffer, tag, tl);
-	if (len > 0)
-	    snprintf(buffer + tl, sizeof(buffer) - tl, "=\"%s\"", data);
-	ctl_putdata(buffer, (unsigned int)strlen(buffer), false);
+        strlcpy(buffer, tag, sizeof(buffer));
+        strlcat(buffer, "=\"", sizeof(buffer));
+        if (0 < len)
+            strlcat(buffer, data, sizeof(buffer));
+        strlcat(buffer, "\"", sizeof(buffer));
+
+	ctl_putdata(buffer, strlen(buffer), false);
 }
 
 
