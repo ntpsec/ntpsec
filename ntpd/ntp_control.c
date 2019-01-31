@@ -1407,7 +1407,7 @@ ctl_putrefid(
         char	output[16];
         char    buf[sizeof(refid) + 1];
         char *  cp;
-        int i;
+        unsigned int i;
 
         strlcpy(output, tag, sizeof(output));
         strlcat(output, "=", sizeof(output));
