@@ -1311,9 +1311,8 @@ ctl_putts(
 	char buf[50];
 
         strlcpy(buffer, tag, sizeof(buffer));
-        strlcat(buffer, "=", sizeof(buffer));
 
-	snprintf(buf, sizeof(buf), "0x%08x.%08x",
+	snprintf(buf, sizeof(buf), "=0x%08x.%08x",
 		 (unsigned int)lfpuint(*ts), (unsigned int)lfpfrac(*ts));
         strlcat(buffer, buf, sizeof(buffer));
 	ctl_putdata(buffer, strlen(buffer), false);
