@@ -1217,20 +1217,15 @@ ctl_putuint(
 	uint64_t uval
 	)
 {
-	char *cp;
-	const char *cq;
-	char buffer[200];
+        char buffer[200];
+        char buf[50];
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
+        strlcpy(buffer, tag, sizeof(buffer));
 
-	*cp++ = '=';
-	INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%" PRIu64, uval);
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
+        snprintf(buf, sizeof(buf), "=%" PRIu64, uval);
+        strlcat(buffer, buf, sizeof(buffer));
+
+        ctl_putdata(buffer, strlen(buffer), false);
 }
 
 /*
