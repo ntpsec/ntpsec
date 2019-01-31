@@ -114,15 +114,17 @@ For AEAD, we need libaes_siv.so, RFC 5297
 It's not in OpenSSL yet.
   https://github.com/dfoxfranke/libaes_siv
 
-TODO: Is the NTP client going to initiate NTS for servers by default?
-If so, it SHOULD (MUST?) provide a configuration parameter to disable
-NTS for a given server.
+An NTP client SHOULD NOT initiate NTS-KE by default.  Configuration
+parameters from the NTPD config file will tell the NTPD client when and
+how to initiate NTS-KE.
 
-While it is technically permitted (see RFC5280, page 35) to put an
-IP address in a subjectAltName in a certificate, this is essentially
-never done in practice, and certainly not with public CAs.
-Accordingly, the NTP client SHOULD NOT initiate NTS for servers
-specified by IP address (whether IPv4 or IPv6).
+While it is technically permitted (see RFC5280, page 35) to put an IP
+address in a subjectAltName in a certificate, this is essentially never
+done in practice, and rarely with public CAs.  Accordingly, the NTS-KE
+client SHOULD NOT generally initiate NTS for servers specified by IP
+address (whether IPv4 or IPv6).  The NTS-KE client MAY initiate NTS
+for servers specified by IP address (whether IPv4 or IPv6) for testing
+purposes.
 
 Additionally, the NTP client SHOULD NOT initiate NTS for pool
 associations by default.  The most common pool is the public pool at
@@ -229,6 +231,30 @@ configure an OpenSSL cipher string for the TLS connection.
 
 The NTS-KE server SHOULD provide a configuration paramter to
 configure an OpenSSL cipher string for the AEAD algorithms.
+
+== Configuration parameters ==
+
+To specify that an NTPD client should initiate a connection to
+a remote NTS-KE (nts-ke.example.com), and accept the provided
+NTPD server hostname or IP:
+
+....
+nts nts-ke.example.com
+....
+
+Use the optional keyword `ask` to ask for, but not require, a cookie and
+association to a given server (ntpd.example.com).
+
+....
+nts nts-ke.example.com ask ntpd.example.com
+....
+
+Use the optional keyword `require` to require a cookie and association
+to a given server (ntpd.example.com). server (ntpd.example.com).
+
+....
+nts nts-ke.example.com require ntpd.example.com
+....
 
 == Key Generation and Usage ==
 
