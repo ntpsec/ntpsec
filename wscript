@@ -1116,9 +1116,13 @@ def ifdex(ctx):
     "Get a report on configuration symbols not accounted for."
     ctx.exec_command("ifdex -X build/config.h -X devel/ifdex-ignores .")
 
+# Pull in inclusions required for the build.
+# You probably want to do a commit after this.
+def pullincludes(ctx):
+    ctx.exec_command("cd libntp; wget https://raw.githubusercontent.com/dfoxfranke/libaes_siv/master/aes_siv.c")
+    ctx.exec_command("cd libntp; wget https://raw.githubusercontent.com/dfoxfranke/libaes_siv/master/aes_siv.h")
+
 # See https://gitlab.com/esr/loccount
-
-
 def loccount(ctx):
     "Report the SLOC count of the source tree."
     ctx.exec_command("loccount -x=build .")

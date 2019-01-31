@@ -32,6 +32,20 @@ it's easier to verify portability in Python than it is in sh.
 Please read our C and Python guidelines carefully; they're not just
 about style, they're serious measures to reduce defect rates.
 
+== Inclusions from other projects ==
+
+Git subtrees and submodules are clever but full of traps. Discussion
+here:
+
+https://medium.com/@porteneuve/mastering-git-submodules-34c65e940407
+https://medium.com/@porteneuve/mastering-git-subtrees-943d29a798ec
+
+These don't even touch the biggest issue, which is stable reproducible
+builds.  For this reason, we use naive textual inclusion.
+
+So far this has only been an issue with libaes_siv. If you notice
+there's an inclusion not listed here, file an issue.
+
 == C Guidelines ==
 
 === C API standards ===
@@ -182,6 +196,10 @@ to assume the code will never run on a 16-bit machine.  When in doubt,
 and whenever possible, use the fixed-width integral types from
 <stdint.h>.
 
+You *may* assume twos-complement arithmetic.  The C Standards
+committee has accepted a proposal to mandate twos complement in the
+next revision beyond ISO/IEC 9899:2018.  Some of our code requires it.
+
 You *may* assume that the compiler supports POSIX 64-bit integral types
 (int64_t, uint64_t and friends) even if the target hardware is 32-bit.
 
@@ -244,8 +262,9 @@ Full waf documentation is at https://waf.io/
 
 === Naming conventions ===
 
-Every binary and script we install has an "ntp" prefix on the name
-because namespace pollution is rude.  If you write a new tool that you
+Almost every binary and script we install has an "ntp" prefix on the name
+because namespace pollution is rude. (The only exception is "ntsd", the
+network time security key-exchange daemon.) If you write a new tool that you
 want us to install, follow this convention.
 
 Generally, we favor "ntp" rather than "ntp-" for consistency and to
@@ -587,6 +606,10 @@ each release.
 . Decide that it is time to cut a release.  This decision can be driven
   by landing a significant new feature, landing a critical fix, or just
   that enough time has passed with ongoing improvements and fixes.
+
+. Make sure inclusions (currently only libaes_siv) are updated, and
+  run the build as a sanity check.  There's a 'pullincludes' target
+  in waf that refreshes the includes. Commit that change.
 
 . Email a warning message to the mailto:devel@ntpsec.org list,
   and ask the major contributors to chime in, and to each assure
