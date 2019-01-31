@@ -1237,27 +1237,21 @@ ctl_puttime(
 	time_t uval
 	)
 {
-	char *cp;
-	const char *cq;
 	char buffer[200];
 	struct tm tmbuf, *tm = NULL;
-	time_t fstamp = uval;
+        char buf[50];
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
+        strlcpy(buffer, tag, sizeof(buffer));
 
-	*cp++ = '=';
-	tm = gmtime_r(&fstamp, &tmbuf);
+	tm = gmtime_r(&uval, &tmbuf);
 	if (NULL == tm)
 		return;
-	INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
-		 "%04d-%02d-%02dT%02d:%02dZ", tm->tm_year + 1900,
+	snprintf(buf, sizeof(buf), "=%04d-%02d-%02dT%02d:%02dZ",
+                 tm->tm_year + 1900,
 		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
+        strlcat(buffer, buf, sizeof(buffer));
+
+	ctl_putdata(buffer, strlen(buf), false);
 }
 
 
