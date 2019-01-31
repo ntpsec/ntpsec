@@ -1431,9 +1431,10 @@ ctl_putsys(
 	    current_time != ntp_adjtime_time) {
 		ZERO(ntx);
 		if (ntp_adjtime(&ntx) < 0)
-			msyslog(LOG_ERR, "MODE6: ntp_adjtime() for mode 6 query failed: %m");
+                    msyslog(LOG_ERR,
+                            "MODE6: ntp_adjtime() for mode 6 query failed: %m");
 		else
-			ntp_adjtime_time = current_time;
+                    ntp_adjtime_time = current_time;
 	}
 
 	switch (varid) {
@@ -1451,7 +1452,8 @@ ctl_putsys(
 		break;
 
 	case CS_ROOTDELAY:
-		ctl_putdbl(sys_var[CS_ROOTDELAY].text, sys_vars.sys_rootdelay * MS_PER_S);
+		ctl_putdbl(sys_var[CS_ROOTDELAY].text,
+                           sys_vars.sys_rootdelay * MS_PER_S);
 		break;
 
 	case CS_ROOTDISPERSION:
@@ -1460,8 +1462,10 @@ ctl_putsys(
 		break;
 
 	case CS_REFID:
-		if (sys_vars.sys_stratum > 1 && sys_vars.sys_stratum < STRATUM_UNSPEC)
-			ctl_putadr(sys_var[varid].text, sys_vars.sys_refid, NULL);
+		if (sys_vars.sys_stratum > 1 &&
+                    sys_vars.sys_stratum < STRATUM_UNSPEC)
+			ctl_putadr(sys_var[varid].text, sys_vars.sys_refid,
+                                   NULL);
 		else
 			ctl_putrefid(sys_var[varid].text, sys_vars.sys_refid);
 		break;
@@ -1483,7 +1487,8 @@ ctl_putsys(
 		break;
 
 	case CS_PEERADR:
-		if (sys_vars.sys_peer != NULL && sys_vars.sys_peer->dstadr != NULL)
+		if (sys_vars.sys_peer != NULL &&
+                    sys_vars.sys_peer->dstadr != NULL)
 			ss = sockporttoa(&sys_vars.sys_peer->srcadr);
 		else
 			ss = "0.0.0.0:0";
@@ -1540,7 +1545,8 @@ ctl_putsys(
 
 	case CS_STABIL:
 		/* a.k.a clk_wander (s/s), output as us/s */
-		ctl_putdbl6(sys_var[CS_STABIL].text, clock_stability * US_PER_S);
+		ctl_putdbl6(sys_var[CS_STABIL].text,
+                            clock_stability * US_PER_S);
 		break;
 
 	case CS_VARLIST:
@@ -1630,7 +1636,8 @@ ctl_putsys(
 #ifdef ENABLE_LEAP_SMEAR
 	case CS_LEAPSMEARINTV:
 		if (leap_smear_intv > 0)
-			ctl_putuint(sys_var[CS_LEAPSMEARINTV].text, leap_smear_intv);
+			ctl_putuint(sys_var[CS_LEAPSMEARINTV].text,
+                                    leap_smear_intv);
 		break;
 
 	case CS_LEAPSMEAROFFS:
@@ -1655,7 +1662,7 @@ ctl_putsys(
 	case CS_MRU_MEM: {
 		uint64_t u;
 		u = mon_data.mru_entries * sizeof(mon_entry);
-		u = (u+512)/1024;
+		u = (u + 512) / 1024;
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 		}
@@ -1683,7 +1690,7 @@ ctl_putsys(
 	case CS_MRU_MAXMEM: {
 		uint64_t u;
 		u = mon_data.mru_maxdepth * sizeof(mon_entry);
-		u = (u+512)/1024;
+		u = (u + 512) / 1024;
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 		}
@@ -1721,7 +1728,7 @@ ctl_putsys(
 
 	case CS_SS_RESET:
 		ctl_putuint(sys_var[varid].text,
-					current_time - stat_count.sys_stattime);
+			    current_time - stat_count.sys_stattime);
 		break;
 
 	case CS_SS_RECEIVED:
@@ -1774,7 +1781,8 @@ ctl_putsys(
 		break;
 
 	case CS_AUTHFREEK:
-		ctl_putuint(sys_var[varid].text, (unsigned long)authnumfreekeys);
+		ctl_putuint(sys_var[varid].text,
+                            (unsigned long)authnumfreekeys);
 		break;
 
 	case CS_AUTHKLOOKUPS:
@@ -1866,7 +1874,7 @@ ctl_putsys(
 		break;
 
 	case CS_K_FREQTOL:
-	    ctl_putsfp(sys_var[varid].text, ntx.tolerance);
+	        ctl_putsfp(sys_var[varid].text, ntx.tolerance);
 		break;
 
 	case CS_K_PPS_FREQ:
