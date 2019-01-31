@@ -205,14 +205,23 @@ response, it contains a new cookie (or cookies). AEAD also needs a nonce.
 
 == Configuration ==
 
-By default, the NTS-KE server SHOULD honor the client's AEAD
-algorithm ordering; that is, the NTS-KE server SHALL by default
-choose the first of the client's AEAD algorithms that the server
-also supports (after limiting by the server's configured cipher
-string). However, the server SHOULD have a configuration parameter to
-honor its cipher order which reverses this behavior, choosing the
-first from the server's sorted list of algorithms that is also
-supported by the client.
+The NTS-KE server SHOULD have a configuration parameter to specify
+which TLS protocols are permissible.  Regardless of what is
+configured, because the NTS specification relies on RFC 5705, and
+also because it explicitly says so, TLS 1.3 is the minimum TLS
+version allowed.
+
+The NTS-KE server SHOULD have a configuration parameter to specify its
+preferred AEAD algorithms for the TLS connection in preference order.
+This SHOULD be provided as an OpenSSL cipher string.
+
+The NTS-KE server SHOULD have a configuration parameter to specify its
+preferred AEAD algorithms for the NTPD connection in preference order.
+This SHOULD be provided as an OpenSSL cipher string.
+
+Honoring the NTS-KE client's AEAD preference order for the NTPD
+connection is OPTIONAL[4.1.5].  How we reconcile the NTS-KE client
+and NTS-KE server preference order is TBD.
 
 The NTS-KE server SHOULD have a configuration parameter to specify
 the TLS key, certificate, and intermediate certificate bundles.
@@ -220,23 +229,14 @@ the TLS key, certificate, and intermediate certificate bundles.
 The NTS-KE server MAY have a method to reload the key, certificate,
 and intermediate certificate bundles without a full daemon restart.
 
-The NTS-KE server SHOULD have a configuration parameter to specify
-which TLS protocols are permissible.  Regardless of what is
-configured, because the NTS specification relies on RFC 5705, and
-also because it explicitly says so, TLS 1.3 is the minimum TLS
-version allowed.
-
-The NTS-KE server SHOULD provide a configuration paramter to
-configure an OpenSSL cipher string for the TLS connection.
-
-The NTS-KE server SHOULD provide a configuration paramter to
-configure an OpenSSL cipher string for the AEAD algorithms.
-
 == Configuration parameters ==
 
+=== nts ===
+
 To specify that an NTPD client should initiate a connection to
-a remote NTS-KE (nts-ke.example.com), and accept the provided
-NTPD server hostname or IP:
+a remote NTS-KE (nts-ke.example.com), accept the provided
+NTPD server hostname (ntd.example.com) or IP, and then make a
+secure NTPD connection to that server:
 
 ....
 nts nts-ke.example.com
