@@ -2300,9 +2300,11 @@ fast_xmit(
 	 * must be authenticated. For symmetric key cryptography, use
 	 * the predefined and trusted symmetric keys to generate the
 	 * cryptosum.
+	 *
+	 * No nts_decorate() call before the sendpkt() because we don't expect
+	 * to ever combine old-style auth with NTS.
 	 */
 	get_systime(&xmt_tx);
-	sendlen += nts_decorate(xpkt.exten, sizeof(xpkt.exten), NULL);
 	sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 	get_systime(&xmt_ty);
