@@ -295,6 +295,12 @@ Both connections contain C2S and S2C keys.
 . encrypt it with the master key (which has nothing to do w/ TLS)
 . form the cookie w/ cookie recipe number, master key number, a nonce and the ciphertext.
 
+== Unresolved issues for the next RFC revision
+
+The binary KE request-response format is unfortunate for all the usual
+reasons (endianness issues etc). At the expected transaction volume,
+the encode/decode overhead shouldn't be an issue.
+
 == Ridiculous questions
 
 === link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.3[4.1.3], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.4[4.1.4]
