@@ -97,6 +97,11 @@ not a network connection.
 -    A sorted list of AEAD algorithms
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
 
+====  NTS-KE server and NTS-KE client compute from the TLS connection:
+-    C2S and S2C encryption keys
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.2[4.2],
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]
+
 ====  NTS-KE client gets back:
 -    NTPD server hostname or IP Address
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
@@ -104,11 +109,6 @@ not a network connection.
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.6[4.1.6]
 -    The selected AEAD algorithm
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
-
-====  NTS-KE server and NTS-KE client compute from the TLS connection:
--    C2S and S2C encryption keys
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.2[4.2],
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]
 
 For AEAD, we need libaes_siv.so, RFC 5297
 It's not in OpenSSL yet.
