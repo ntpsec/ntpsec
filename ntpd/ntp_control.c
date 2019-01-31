@@ -2598,7 +2598,8 @@ ctl_getitem(
 	 * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53618
 	 */
 		    msyslog(LOG_WARNING,
-			    "Possible 'ntpdx' exploit from %s#%" PRIu16 " (possibly spoofed)",
+			    "Possible 'ntpdx' exploit from %s#%" PRIu16
+                            " (possibly spoofed)",
 			    socktoa(rmt_addr), (unsigned)SRCPORT(rmt_addr));
 	    }
 	reqpt = reqend; /* never again for this packet! */
