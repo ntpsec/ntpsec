@@ -118,9 +118,9 @@ hyphen and the flag character.""" + "\n"
 
 bin_ver = "ntpsec-@NTPSEC_VERSION_EXTENDED@"
 if ntp.util.stdversion() != bin_ver:
-    sys.stderr.write("Library/Binary version mismatch\n")
+    sys.stderr.write("Module/Binary version mismatch\n")
     sys.stderr.write("Binary: %s\n" % bin_ver)
-    sys.stderr.write("Library: %s\n" % ntp.util.stdversion())
+    sys.stderr.write("Module: %s\n" % ntp.util.stdversion())
     raise SystemExit(1)
 
 try:
