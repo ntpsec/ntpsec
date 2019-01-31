@@ -1367,7 +1367,6 @@ if __name__ == '__main__':
         sys.stderr.write("Module/Binary version mismatch\n")
         sys.stderr.write("Binary: %s\n" % bin_ver)
         sys.stderr.write("Module: %s\n" % ntp.util.stdversion())
-        raise SystemExit(1)
 
     parser = MyArgumentParser(description="ntpd stats visualizer",
                               fromfile_prefix_chars='@',

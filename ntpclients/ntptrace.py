@@ -121,7 +121,6 @@ if ntp.util.stdversion() != bin_ver:
     sys.stderr.write("Module/Binary version mismatch\n")
     sys.stderr.write("Binary: %s\n" % bin_ver)
     sys.stderr.write("Module: %s\n" % ntp.util.stdversion())
-    raise SystemExit(1)
 
 try:
     (options, arguments) = getopt.getopt(
