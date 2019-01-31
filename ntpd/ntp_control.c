@@ -1198,21 +1198,14 @@ ctl_putdblf(
 	double		d
 	)
 {
-	char *cp;
-	const char *cq;
-	char buffer[200];
+        char buffer[200];
+        char buf[50];
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
-	*cp++ = '=';
-	INSIST((size_t)(cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer),
-                 use_f ? "%.*f" : "%.*g",
-	    precision, d);
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
+        strlcpy(buffer, tag, sizeof(buffer));
+        snprintf(buf, sizeof(buf), use_f ? "=%.*f" : "%.*g", precision, d);
+        strlcat(buffer, buf, sizeof(buffer));
+
+        ctl_putdata(buffer, strlen(buffer), false);
 }
 
 /*
