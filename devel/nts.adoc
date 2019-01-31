@@ -92,21 +92,23 @@ not a network connection.
 
 ====  NTS-KE client sends:
 -    Host name of NTS-KE server
--    Optional preferred IP Address
+-    Optional preferred NTPD server hostname or IP Address
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
 -    A sorted list of AEAD algorithms
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
 
-====  It gets back:
--    IP Address
+====  NTS-KE client gets back:
+-    NTPD server hostname or IP Address
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
--    1 to 8 cookies  
+-    1 to 8 cookies
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.6[4.1.6]
--    C2S and S2C encryption keys  
+-    The selected AEAD algorithm
+     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
+
+====  NTS-KE server and NTS-KE client compute from the TLS connection:
+-    C2S and S2C encryption keys
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.2[4.2],
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]
--    The selected AEAD algorithm 
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
 
 For AEAD, we need libaes_siv.so, RFC 5297
 It's not in OpenSSL yet.
