@@ -1371,27 +1371,21 @@ ctl_putadr(
 	sockaddr_u *addr
 	)
 {
-	char *cp;
-	const char *cq;
+        const char *cq;
 	char buffer[200];
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0' && cp < buffer + sizeof(buffer) - 1)
-		*cp++ = *cq++;
+        strlcpy(buffer, tag, sizeof(buffer));
+        strlcat(buffer, "=", sizeof(buffer));
 
-	*cp++ = '=';
 	if (NULL == addr) {
 		struct in_addr in4;
 		in4.s_addr = addr32;
 		cq = inet_ntoa(in4);
-	}
-	else
+	} else
 		cq = socktoa(addr);
-	INSIST((cp - buffer) < (int)sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (size_t)(cp - buffer), "%s", cq);
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
+
+        strlcat(buffer, cq, sizeof(buffer));
+	ctl_putdata(buffer, strlen(buffer), false);
 }
 
 
