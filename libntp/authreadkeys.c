@@ -66,9 +66,9 @@ nexttok(
 
 static char*
 try_cmac(const char *upcased, char* namebuf) {
-	strncpy(namebuf, upcased, NAMEBUFSIZE);
+	strlcpy(namebuf, upcased, NAMEBUFSIZE);
 	if ((strcmp(namebuf, "AES") == 0) || (strcmp(namebuf, "AES128CMAC") == 0))
-		strncpy(namebuf, "AES-128", NAMEBUFSIZE);
+		strlcpy(namebuf, "AES-128", NAMEBUFSIZE);
 	strlcat(namebuf, "-CBC", NAMEBUFSIZE);
 	namebuf[NAMEBUFSIZE-1] = '\0';
 	if (0) msyslog(LOG_INFO, "DEBUG try_cmac: %s=>%s", upcased, namebuf);
@@ -79,12 +79,12 @@ try_cmac(const char *upcased, char* namebuf) {
 
 static char*
 try_digest(char *upcased, char *namebuf) {
-	strncpy(namebuf, upcased, NAMEBUFSIZE);
+	strlcpy(namebuf, upcased, NAMEBUFSIZE);
 	if (EVP_get_digestbyname(namebuf) != NULL)
 	  return namebuf;
 	if ('M' == upcased[0]) {
 		/* hack for backward compatibility */
-		strncpy(namebuf, "MD5", NAMEBUFSIZE);
+		strlcpy(namebuf, "MD5", NAMEBUFSIZE);
 		if (EVP_get_digestbyname(namebuf) != NULL)
 	 		return namebuf;
 	}
