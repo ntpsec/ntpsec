@@ -3432,7 +3432,8 @@ static void read_mru_list(
 		ctl_error(CERR_PERMISSION);
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
-				"MODE6: mrulist from %s rejected due to nomrulist restriction",
+				"MODE6: mrulist from %s rejected due to"
+                                " nomrulist restriction",
 				socktoa(&rbufp->recv_srcadr));
 		stat_count.sys_restricted++;
 		return;
@@ -3525,12 +3526,14 @@ static void read_mru_list(
 			if (lfpuint(last[si]) && lfpfrac(last[si]) && si == priors)
 				priors++;
 		} else {
-			DPRINT(1, ("read_mru_list: invalid key item: '%s' (ignored)\n",
+			DPRINT(1, ("read_mru_list: invalid key item: '%s'"
+                                   " (ignored)\n",
 				   v->text));
 			continue;
 
 		blooper:
-			DPRINT(1, ("read_mru_list: invalid param for '%s': '%s' (bailing)\n",
+			DPRINT(1, ("read_mru_list: invalid param for '%s'"
+                                   ": '%s' (bailing)\n",
 				   v->text, val));
 			free(pnonce);
 			pnonce = NULL;
