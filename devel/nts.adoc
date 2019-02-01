@@ -144,10 +144,10 @@ configured, because the NTS specification relies on RFC 5705, and
 also because it explicitly says so, TLS 1.3 is the minimum TLS
 version allowed.
 
-The NTS-KE client SHOULD provide a configuration paramter to
+The NTS-KE client SHOULD provide a configuration parameter to
 configure an OpenSSL cipher string for the TLS connection.
 
-The NTS-KE client SHOULD provide a configuration paramter to
+The NTS-KE client SHOULD provide a configuration parameter to
 configure an OpenSSL cipher string for the AEAD algorithms.
 
 The NTP client SHOULD provide a mechanism for the administrator to
@@ -264,8 +264,8 @@ order.
 order.  TLS 1.2 and 1.3 ciphers are different and must be specified
 separately as OpenSSL needs them separately.
 
-*ntpciphers [list]*  List of ciphers to negotiate, in prefered
-order for the NTPD connection.
+*ntpciphers [list]* List of ciphers to negotiate, in prefered order for
+the NTPD connection.  The server must support AEAD_AES_SIV_CMAC_256.
 
 *expire [seconds]*  How long to use an NTPD association before rekeying
 with the NTS-KE server.
