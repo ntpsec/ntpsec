@@ -183,6 +183,7 @@ struct peer_ctl {
 	uint32_t	flags;
 	keyid_t		peerkey;
 	double		bias;
+	struct ntscfg_t nts_cfg;
 	uint32_t	mode;	/* only used by refclocks */
 #ifdef REFCLOCK
 	uint32_t	baud;
@@ -254,7 +255,7 @@ struct peer {
 	uint8_t	cast_flags;	/* additional flags */
 	uint8_t	last_event;	/* last peer error code */
 	uint8_t	num_events;	/* number of error events */
-	struct ntspeer_t nts;	/* per-peer Network Time Security state */
+	struct ntsstate_t nts_state;	/* per-peer Network Time Security state */
 
 	/*
 	 * Variables used by reference clock support

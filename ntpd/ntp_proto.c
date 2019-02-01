@@ -761,7 +761,7 @@ receive(
 	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
-		if (nts_validate(&rbufp->pkt, NULL) != 0) {
+		if (nts_validate(NULL, NULL, &rbufp->pkt) != 0) {
 			stat_count.sys_declined++;
 			break;
 		}
@@ -769,7 +769,8 @@ receive(
 		stat_count.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
-		if (peer == NULL || nts_validate(&rbufp->pkt, &peer->nts) != 0) {
+		if (peer == NULL || nts_validate(&peer->cfg.nts_cfg, &peer->nts_state,
+						 &rbufp->pkt) != 0) {
 		    stat_count.sys_declined++;
 		    break;
 		}	
@@ -2110,7 +2111,8 @@ peer_xmit(
 	xpkt.xmt = htonl_fp(peer->org_rand);	/* out in xmt, back in org */
 
 
-	sendlen += nts_decorate(xpkt.exten, sizeof(xpkt.exten), &peer->nts);
+	sendlen += nts_decorate(&peer->cfg.nts_cfg, &peer->nts_state,
+				xpkt.exten, sizeof(xpkt.exten));
 
 	/*
 	 * If the peer (aka server) was configured with a key, authenticate
@@ -2287,7 +2289,8 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (NULL == auth) {
-		sendlen += nts_decorate(xpkt.exten, sizeof(xpkt.exten), NULL);
+		sendlen += nts_decorate(NULL, NULL,
+					xpkt.exten, sizeof(xpkt.exten));
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 		DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
 			   current_time, socktoa(&rbufp->dstadr->sin),

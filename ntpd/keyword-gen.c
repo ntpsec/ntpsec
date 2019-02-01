@@ -195,6 +195,10 @@ struct key_tok ntp_keywords[] = {
 { "wildcard",		T_Wildcard,		FOLLBY_TOKEN },
 { "listen",		T_Listen,		FOLLBY_TOKEN },
 { "drop",		T_Drop,			FOLLBY_TOKEN },
+/* NTS */
+{ "nts",		T_Nts,			FOLLBY_TOKEN },
+{ "ask",		T_Ask,			FOLLBY_STRING },
+{ "require",		T_Require,		FOLLBY_STRING },
 };
 
 typedef struct big_scan_state_tag {

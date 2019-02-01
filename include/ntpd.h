@@ -421,11 +421,11 @@ extern const uint8_t	num_refclock_conf;
 #endif
 
 /* nts.c */
-int nts_client_ke_request(void);
-int nts_server_ke_verify(void);
-int nts_client_ke_verify(struct ntspeer_t *);
-int nts_daily(void);
-int nts_validate(struct parsed_pkt *, struct ntspeer_t *);
-int nts_decorate(uint32_t *, size_t, struct ntspeer_t *);
+int nts_client_ke_request(struct ntscfg_t *);
+int nts_server_ke_verify(struct ntscfg_t *);
+int nts_client_ke_verify(struct ntscfg_t *, struct ntsstate_t *);
+int nts_daily(struct ntscfg_t *);
+int nts_validate(struct ntscfg_t *, struct ntsstate_t *, struct parsed_pkt *);
+int nts_decorate(struct ntscfg_t *, struct ntsstate_t *, uint32_t *, size_t);
 
 #endif	/* GUARD_NTPD_H */

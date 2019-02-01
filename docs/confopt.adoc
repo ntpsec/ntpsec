@@ -18,7 +18,7 @@ include::includes/confopt.adoc[]
 
 * link:#address[Server and Peer Addresses]
 * link:#association[Association Commands]
-* link:#option[Server Command Options]
+* link:#options[Server Command Options]
 
 '''''
 
@@ -60,7 +60,7 @@ otherwise.
 
 include::includes/assoc-commands.adoc[]
 
-[[option]]
+[[options]]
 == Server Command Options ==
 
 include::includes/assoc-options.adoc[]

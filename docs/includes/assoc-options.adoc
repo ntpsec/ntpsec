@@ -72,4 +72,16 @@
   Specifies the version number to be used for outgoing NTP packets.
   Versions 1-4 are the choices, with version 4 the default.
 
++nts+::
+  Use Network Time Security for authentication and encryption.
+  Request key exchange from the NTP server.
+
++nts ask+ 'servername'::
+  Use Network Time Security for authentication and encryption.
+  Ask for a specific NTS server, which may differ from the NTP server.
+
++nts require+ 'servername'::
+  Use Network Time Security for authentication and encryption.
+  Require a specific NTS server, which may differ from the NTP server.
+
 // end

@@ -19,8 +19,6 @@
 
 /*
  * Key exchange support.
- *
- * These function headers will probably need to change
  */
 
 /*
@@ -32,9 +30,10 @@
  *  o <NTP Server Negotiation>
  *  o End of Message
  */
-int nts_client_ke_request(void)
+int nts_client_ke_request(struct ntscfg_t *cfg)
 {
-    return 0;
+	UNUSED_ARG(cfg);
+	return 0;
 }
 
 /*
@@ -50,8 +49,9 @@ int nts_client_ke_request(void)
  *       o <New Cookie for NTPv4>
  *       o End of Message
  */
-int nts_server_ke_verify(void)
+int nts_server_ke_verify(struct ntscfg_t *cfg)
 {
+	UNUSED_ARG(cfg);
 	return 0;
 }
 
@@ -60,17 +60,19 @@ int nts_server_ke_verify(void)
  * - Verify server response message
  * - Extract cookie(s).
  */
-int nts_client_ke_verify(struct ntspeer_t *ntspeer)
+int nts_client_ke_verify(struct ntscfg_t *cfg, struct ntsstate_t *state)
 {
-	UNUSED_ARG(ntspeer);
+	UNUSED_ARG(cfg);
+	UNUSED_ARG(state);
 	return 0;
 }
 
 /*
  * Daily rotation of server-side master keys.
  */
-int nts_daily(void)
+int nts_daily(struct ntscfg_t *cfg)
 {
+	UNUSED_ARG(cfg);
 	return 0;
 }
 
@@ -79,28 +81,32 @@ int nts_daily(void)
 /*
  * Extract and validate NTS validation information from packet
  * extension fields in an incoming request or response.  On the server
- * side, the ntspeer pointer is expected to be NULL as there is no
- * per-client server state.  A nonzero return causes the packet to be
- * discarded.
+ * side, the ntscfg and state pointers are expected to be NULL as
+ * there is no per-client server state.  A nonzero return causes the
+ * packet to be discarded.
  */
-int nts_validate(struct parsed_pkt *pkt, struct ntspeer_t *ntspeer)
+int nts_validate(struct ntscfg_t *cfg, struct ntsstate_t *state,
+		 struct parsed_pkt *pkt)
 {
+	UNUSED_ARG(cfg);
 	UNUSED_ARG(pkt);
-	UNUSED_ARG(ntspeer);
+	UNUSED_ARG(state);
 	return 0;
 }
 
 /*
  * Decorate an outgoing client request or server response with packet
  * extension fields carrying NTS information.  For a server response,
- * the ntspeer pointer is expected to be NULL as there is no
- * per-client server state.  Return the count of words appended.
+ * the ntscfg and state pointers are expected to be NULL as there
+ * is no per-client server state.  Return the count of words appended.
  */
-int nts_decorate(uint32_t *extdata, size_t extlen, struct ntspeer_t *ntspeer)
+int nts_decorate(struct ntscfg_t *cfg, struct ntsstate_t *state,
+		 uint32_t *extdata, size_t extlen)
 {
+	UNUSED_ARG(cfg);
 	UNUSED_ARG(extdata);
 	UNUSED_ARG(extlen);
-	UNUSED_ARG(ntspeer);
+	UNUSED_ARG(state);
 	return 0;
 }
 

@@ -628,6 +628,10 @@ create_peer_node(
 				my_node->ctl.flags |= FLAG_NOSELECT;
 				break;
 
+			case T_Nts:
+				my_node->ctl.nts_cfg.flags |= FLAG_NTS;
+				break;
+
 			case T_Prefer:
 				my_node->ctl.flags |= FLAG_PREFER;
 				break;
@@ -703,6 +707,16 @@ create_peer_node(
 
 		case T_Bias:
 			my_node->ctl.bias = option->value.d;
+			break;
+
+		case T_Ask:
+			my_node->ctl.nts_cfg.flags |= FLAG_NTS_ASK;
+			my_node->ctl.nts_cfg.server = estrdup(option->value.s);
+			break;
+
+		case T_Require:
+			my_node->ctl.nts_cfg.flags |= FLAG_NTS_REQ;
+			my_node->ctl.nts_cfg.server = estrdup(option->value.s);
 			break;
 
 #ifdef REFCLOCK

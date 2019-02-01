@@ -54,6 +54,7 @@
 %token	<Integer>	T_All
 %token	<Integer>	T_Allan
 %token	<Integer>	T_Allpeers
+%token	<Integer>	T_Ask
 %token	<Integer>	T_Auth
 %token	<Integer>	T_Average
 %token	<Integer>	T_Baud
@@ -157,6 +158,7 @@
 %token	<Integer>	T_Ntp
 %token	<Integer>	T_Ntpport
 %token	<Integer>	T_NtpSignDsocket
+%token	<Integer>	T_Nts
 %token	<Integer>	T_Orphan
 %token	<Integer>	T_Orphanwait
 %token	<Integer>	T_Panic
@@ -174,6 +176,7 @@
 %token	<Integer>	T_Refclock
 %token	<Integer>	T_Refid
 %token	<Integer>	T_Requestkey
+%token	<Integer>	T_Require
 %token	<Integer>	T_Reset
 %token	<Integer>	T_Restrict
 %token	<Integer>	T_Rlimit
@@ -402,6 +405,7 @@ option_flag_keyword
 	:	T_Burst
 	|	T_Iburst
 	|	T_Noselect
+	|	T_Nts
 	|	T_Prefer
 	|	T_True
 	;
@@ -449,6 +453,10 @@ option_string
 	|	T_Path T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Ppspath T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Ask T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Require T_String
 			{ $$ = create_attr_sval($1, $2); }
 	;
 

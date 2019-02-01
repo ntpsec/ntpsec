@@ -232,30 +232,7 @@ and intermediate certificate bundles without a full daemon restart.
 
 == NTP Configuration parameters ==
 
-=== nts ===
-
-To specify that an NTPD client should initiate a connection to
-a remote NTS-KE (nts-ke.example.com), accept the provided
-NTPD server hostname (ntd.example.com) or IP, and then make a
-secure NTPD connection to that server:
-
-....
-nts nts-ke.example.com
-....
-
-Use the optional keyword `ask` to ask for, but not require, a cookie and
-association to a given server (ntpd.example.com).
-
-....
-nts nts-ke.example.com ask ntpd.example.com
-....
-
-Use the optional keyword `require` to require a cookie and association
-to a given server (ntpd.example.com). server (ntpd.example.com).
-
-....
-nts nts-ke.example.com require ntpd.example.com
-....
+This is now part of the NTP documentation.
 
 == NTS-KE Server Configuration parameters ==
 
