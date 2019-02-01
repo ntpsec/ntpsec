@@ -23,7 +23,7 @@ is set to 0 and the poll exponent decreased by 1. In effect, the
 algorithm has a relatively slow reaction to good news, but a relatively
 fast reaction to bad news.
 
-As an option of the link:confopt.html#option[+server+] command, instead
+As an option of the link:confopt.html#options[+server+] command, instead
 of a single packet, the poll process can send a burst of several packets
 at 2-s intervals. This is designed to reduce the time to synchronize the
 clock at initial startup (+iburst+) and/or to reduce the phase noise at
