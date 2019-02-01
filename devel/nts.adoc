@@ -234,6 +234,37 @@ and intermediate certificate bundles without a full daemon restart.
 
 This is now part of the NTP documentation.
 
+New options for an NTS client:
+
+*ask [address]* Request a particular NTPD server, but do not require it.
+*address* may be a hostname, a FQDN, an IPv4 numeric address, an IPv6
+numeric addresa (in square brackets).  Address may have the suffix
+*:port* to specify a UDP port.
+
+*require [address]* Require a particular NTPD server, fail if it is not
+the NTPD sevver address returned.  Otherwise same as *ask*.
+
+*noval* do not validate the server certificate
+
+*cert [file]*  Present the certificate in *file* as our cclient certificate
+
+*tls1.2* Allow TLS1.2 connection.
+
+*tls1.3* Allow TLS1.3 connection.
+
+*tls1.2ciphers [list]*  List of TLS 1.2 ciphers to negotiate, in prefered
+order.
+
+*tls1.3ciphers [list]*  List of TLS 1.3 ciphers to negotiate, in prefered
+order.  TLS 1.2 and 1.3 ciphers are different and must be specified
+separately as OpenSSL needs them separately.
+
+*ntpciphers [list]*  List of ciphers to negotiate, in prefered
+order for the NTPD connection.
+
+*expire [seconds]*  How long to use an NTPD association before rekeying
+with the NTS-KE server.
+
 == NTS-KE Server Configuration parameters ==
 
 == TLS Options ==
