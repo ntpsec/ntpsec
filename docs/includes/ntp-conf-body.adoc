@@ -54,7 +54,7 @@ commands.
 Following is a description of the configuration commands in
 NTPv4. There are two classes of commands, association commands that
 configure a persistent association with a remote server or peer or
-reference clock, and auxiliary commands that specify environmental
+reference clock, and auxiliary commands that specify environment
 variables that control various related operations.
 
 === Association Commands ===
@@ -123,7 +123,7 @@ cracker.
 Clients can be denied service because they are explicitly included in
 the restrict list created by the restrict command or implicitly as the
 result of cryptographic or rate limit violations. Cryptographic
-violations include certificate or identity verification failure; rate
+violations include certificate or identity verification failures; rate
 limit violations generally result from defective NTP implementations
 that send packets at abusive rates. Some violations cause denied service
 only for the offending packet, others cause denied service for a timed

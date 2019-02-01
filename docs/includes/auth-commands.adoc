@@ -69,10 +69,10 @@ The following options of the +server+ command configure NTS.
 +ask+ _address_::
   Use Network Time Security for authentication and encryption.  Ask
   for a specific NTS server, which may differ from the NTP server.
-  Conforms to RFC3896 section 3.2.2 prescription for the Host part of
-  a URI: that is, the +address_ may be a hostname, a FQDN, an IPv4
-  numeric address, an IPv6 numeric address (in square brackets).
-  Address may have the suffix +:port+ to specify a UDP port.
+  Conforms to RFC 3896 section 3.2.2 prescription for the Host part of
+  a URI: that is, the _address_ may be a hostname, an FQDN, an IPv4
+  numeric address, or an IPv6 numeric address (in square brackets).
+  The address may have the suffix +:port+ to specify a UDP port.
 
 +require+ _address_::
   Use Network Time Security for authentication and encryption.
