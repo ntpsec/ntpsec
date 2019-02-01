@@ -53,8 +53,8 @@ digests. It computes a one-way hash, which verifies that the server
 has the correct private key and key identifier.
 
 Beware: both commonly supported message digest formats, MD5 and SHA-1,
-have been either entirely or partly cracked and should not ne
-consideredc strong security.
+have been either entirely or partly cracked, and should not be
+considered strong security.
 
 MAC authentication is is configured using the +key+ subcommand on the
 +server+ configuration commands. The authentication options described
@@ -157,30 +157,23 @@ ID, to authenticate an association. The servers and clients involved
 must agree on the key ID, key type and key to authenticate NTP packets.
 
 The message digest is a cryptographic hash computed by an algorithm such
-as MD5 or SHA1. When authentication is specified, a message
-authentication code (MAC) is appended to the NTP packet header. The MAC
-consists of a 32-bit key identifier (key ID) followed by a 128- or
-160-bit message digest. The algorithm computes the digest as the hash of
-the key concatenated with the NTP packet header fields and the key ID.
-On transmit, the message digest is computed and inserted into the MAC.
-On receive, the message digest is computed and compared with the MAC.
-The packet is only accepted if the two MACs are identical. If the client
-finds a discrepancy, then it ignores the packet but
-raises the alarm. If this happens at the server, the server returns a
-special message called a crypto-NAK. Since the loopback test protects
-the crypto-NAK, an intruder cannot disrupt the protocol by sending
-a bogus crypto-NAK.
+as MD5 or SHA-1. While, +ntpd+'s digest mode could use any digest
+supported by libcrypto from the OpenSSL project, in practice MD5 and
+SHA-1 are the only supported types. This is very unlikely to change
+before MAC authentication is obsolesced by NTS.
 
-
-+ntpd+'s digest mode can use any digest supported by libcrypto
-from the OpenSSL project.  MD5 digests are 16 bytes.  SHA1 digests are 20 bytes.
-Longer digests are truncated.
-
-+ntpd+'s CMAC mode can use any cipher with a CBC mode that is supported by
-libcrypto from the OpenSSL project.  AES is short for AES-128.
-AES needs a 16 byte key.  Longer keys are truncated.  Shorter
-keys are padded with 0s.  AES MACs are 16 bytes long.  MACs longer
-than 20 bytes will be truncated.
+When authentication is specified, a message authentication code (MAC)
+is appended to the NTP packet header. The MAC consists of a 32-bit key
+identifier (key ID) followed by a 128- or 160-bit message digest. The
+algorithm computes the digest as the hash of the key concatenated with
+the NTP packet header fields and the key ID.  On transmit, the message
+digest is computed and inserted into the MAC.  On receive, the message
+digest is computed and compared with the MAC.  The packet is only
+accepted if the two MACs are identical. If the client finds a
+discrepancy, then it ignores the packet but raises the alarm. If this
+happens at the server, the server returns a special message called a
+crypto-NAK. Since the loopback test protects the crypto-NAK, an
+intruder cannot disrupt the protocol by sending a bogus crypto-NAK.
 
 Keys and related information are specified in a keys file, which must be
 distributed and stored using secure means beyond the scope of the NTP
@@ -190,7 +183,6 @@ utility program.  See {ntpkeysman} for details.
 
 .Figure 1. Typical Symmetric Key File
 image:pic/sx5.gif["Typical Symmetric Key File",align="center"]
-
 
 Figure 1 shows a typical keys file. In this figure, for key IDs in he
 range 1-10, the key is interpreted as a printable ASCII string. For key
@@ -210,10 +202,15 @@ for the +ntpq+ utility.
 [[nts]]
 == Network Time Security ==
 
+NTS (Network Time security) uses the TLS public-key encryption
+infrastructure to secure and authenticate associations.
+
 This section is a placeholder for complete documentation on NTS. The
 NTS implementation is work in progress conforming to a draft RFC not
-yet accepted. NTPsec's future direction is to fully support NTS
-and remove older, insecure authentication methods.
+yet accepted.
+
+NTPsec's future direction is to fully support NTS and eventually
+remove older, insecure authentication methods.
 
 There is some documentation of client-side configuration on the
 link:confopt.html#options[Server Commands and Options] page.

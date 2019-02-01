@@ -36,8 +36,8 @@ We retain, however, almost full compatibility and interoperation with
 NTP Classic.  The qualification "almost" is required mainly because we
 do not support the Autokey (RFC 5906) public-key encryption scheme. It
 had interoperability and exploitable vulnerability issues too severe
-to be patched.  We are participating in an IETF effort to develop
-better security features.
+to be patched.  We are participating in an IETF's Network Time
+Security effort to develop better security features.
 
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
@@ -289,6 +289,14 @@ codebase has been outright removed, with less than 5% new code added.
   important change is that manual pages are now generated from the
   same masters as this web documentation, so the two will no longer
   drift out of synchronization.
+
+[[future]]
+== Future directions ==
+
+* We intend to fully support Network Time Security and to be first or
+  second interop on that standard once it is finalized.  At that
+  point, older insecure authentication methods (MAC and MS-SNTP) may
+  be removed.
 
 '''''
 
