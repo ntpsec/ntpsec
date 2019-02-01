@@ -232,7 +232,7 @@ and intermediate certificate bundles without a full daemon restart.
 
 == NTP Configuration parameters ==
 
-This is now part of the NTP documentation.
+See also the NTP documentation.
 
 New options for an NTS client:
 
@@ -248,7 +248,10 @@ the NTPD sevver address returned.  Otherwise same as *ask*.
 
 *noval* do not validate the server certificate
 
-*cert [file]*  Present the certificate in *file* as our cclient certificate
+*cert [file]*  Present the certificate in *file* as our client certificate
+
+*ca [location]*  Use the file, or directory, specified by *location* to
+validate the NTS-KE server certificate.  Do not use any other CA.
 
 *tls1.2* Allow TLS1.2 connection.
 
