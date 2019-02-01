@@ -163,7 +163,7 @@ codebase has been outright removed, with less than 5% new code added.
   system clock (e.g. at boot time on a system with missing or damaged
   battery back up) without requiring sync to a remote peer.
 
-* We've fixed bug inherited from Classic that could cause the jitter
+* We've fixed a bug inherited from Classic that could cause the jitter
   of a bad peer to be incorrectly zeroed, possibly causing that peer
   to be selected.  This probably accounts for some flakiness within
   8 polling intervals of startup on older versions.
@@ -212,7 +212,7 @@ codebase has been outright removed, with less than 5% new code added.
   variable that is the root distance of the selected peer. This can
   fill in the MIB's ntpEntTimeDistance entry.
 
-* ntpq displays the root distance (aka. syncronization distance) in the
+* ntpq displays the root distance (aka. synchronization distance) in the
   sysinfo command.
 
 == Configuration Improvements ==
