@@ -5,7 +5,7 @@ include::html.include[]
 
 ["verse",subs="normal"]
 Name: spectracom
-Reference ID: +GPS+
+Reference ID: GPS
 Serial Port: +/dev/spectracom+'u'; 9600 bps 8N1
 Features: Optional PPS signal processing, +tty_clk+
 Requires: Optional PPS signal processing requires the PPSAPI signal interface.

@@ -98,8 +98,14 @@ a build-time switch, not a run-time one).
 == Security Improvements ==
 
 We have spent more effort than anything else on reducing attack
-surface and hardening code.  In toto, more than 70% of the NTP Classic
-codebase has been outright removed, with less than 5% new code added.
+surface and hardening code.  In toto, more than 74% of the NTP Classic
+codebase has been outright removed, with less than 5% new code added
+to the security-critical core.
+
+* NTPsec conforms to the
+  https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/[NTP
+  Client Data Minimization] draft RFC, which changes the client-side
+  generation of some packet headers to prevent client fingerprinting.
 
 * The deprecated ntpdc utility, long a chronic locus of security
   vulnerabilities, has been removed.  Its function has been merged
@@ -167,6 +173,11 @@ codebase has been outright removed, with less than 5% new code added.
   of a bad peer to be incorrectly zeroed, possibly causing that peer
   to be selected.  This probably accounts for some flakiness within
   8 polling intervals of startup on older versions.
+
+* Flagging a PPS peer with "prefer" allows its pulse-per-second input
+  to be used with any source. This capability had been claimed in the NTP
+  Classic documentation but if it was ever actually implemented that
+  code was lost without trace by the time NTPsec forked.
 
 [[clients]]
 == Client Tool Improvements ==

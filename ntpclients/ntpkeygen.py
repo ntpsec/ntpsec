@@ -15,7 +15,7 @@ AES (128-bit) keys used to compute CMAC mode authentcation
 using shared key cryptography
 
 The file can be edited by hand to support MD5 and SHA1 for
-old digest mode authentcation.
+old digest mode authentication.
 '''
 
 from __future__ import print_function
