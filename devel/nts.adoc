@@ -230,7 +230,7 @@ the TLS key, certificate, and intermediate certificate bundles.
 The NTS-KE server MAY have a method to reload the key, certificate,
 and intermediate certificate bundles without a full daemon restart.
 
-== Configuration parameters ==
+== NTP Configuration parameters ==
 
 === nts ===
 
@@ -256,6 +256,89 @@ to a given server (ntpd.example.com). server (ntpd.example.com).
 ....
 nts nts-ke.example.com require ntpd.example.com
 ....
+
+== NTS-KE Server Configuration parameters ==
+
+== TLS Options ==
+
+The directory with the Certificates of Certification Authorities (CAs).
+
+....
+TLSCACertificatePath directory-path
+....
+
+A file with this NTS-KE servers certificate data in PEM format.  May
+include chain certificates.
+
+....
+TLSCertificateFile file-path
+....
+
+The PEM-encoded private key file for the server.
+
+....
+TLSCertificateKeyFile file-path
+....
+
+A colon-separated cipher-spec string consisting of OpenSSL cipher
+specifications to configure the Cipher Suite the client is permitted
+to negotiate in the TLS handshake phase.  TLS1.2 and TLS1.3 must be
+specified separately.
+
+....
+TLSCipherSuite TLS1.2 cipher-spec
+TLSCipherSuite TLS1.3 cipher-spec
+....
+
+A colon-separated cipher-spec string consisting of OpenSSL AEAD cipher
+specifications to configure the Cipher Suite for the NTS cookie.  TLS1.2
+and TLS1.3 must be specified separately. AEAD_AES_SIV_CMAC_256 is
+mandatory, and need not be specified.
+
+....
+NTPCipherSuite TLS1.2 cipher-spec
+NTPCipherSuite TLS1.3 cipher-spec
+....
+
+Option to prefer the server's cipher preference order for the TLS connection.
+Default on.
+
+....
+TLSHonorCipherOrder on|off
+....
+
+Option to prefer the server's cipher preference order for the cookie.
+Default on.
+
+....
+NTPHonorCipherOrder on|off
+....
+
+Which versions of the TLS protocol will be accepted in new TLS connections.
+
+....
+TLSProtocol [+TLS1.2] [+TLS1.3]
+....
+
+Configures one or more sources for seeding the Pseudo Random Number
+Generator (PRNG) in OpenSSL at startup time.  One source per directive.
+Multiple directives may be used.  Souce may be: builtin, "file:/dev/random",
+"file:/dev/urandom", etc.
+
+....
+TLSRandomSeed source [bytes]
+....
+
+Sets the Certificate verification level for the Client Authentication.
+Level may be: none: no client Certificate is required at all, optional:
+the client may present a valid Certificate, require: the client has to
+present a valid Certificate, optional_no_ca: the client may present a
+valid Certificate but it need not to be verifiable.
+
+....
+TLSVerifyClient level
+....
+
 
 == Key Generation and Usage ==
 
