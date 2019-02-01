@@ -384,7 +384,9 @@ Both connections contain C2S and S2C keys.
 . encrypt it with the master key (which has nothing to do w/ TLS)
 . form the cookie w/ cookie recipe number, master key number, a nonce and the ciphertext.
 
-== Unresolved issues for the next RFC revision
+== Unresolved issues for the next RFC WG
+
+How to make NTS-KE work, securely, with pooled servers?
 
 The binary KE request-response format is unfortunate for all the usual
 reasons (endianness issues etc). At the expected transaction volume,
