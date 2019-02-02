@@ -1455,7 +1455,7 @@ static struct parse_clockinfo
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
 #define CLK_REALTYPE(x) ((int)(((x)->cfg.mode) & 0x7F))
-/* carefull, CLK_TYPE() in refclock_trimle.c is different */
+/* careful, CLK_TYPE() in refclock_trimble.c is different */
 #define CLK_TYPE(x)	((CLK_REALTYPE(x) >= ncltypes) ? ~0 : CLK_REALTYPE(x))
 #define CLK_PPS(x)	(((x)->cfg.mode) & 0x80)
 

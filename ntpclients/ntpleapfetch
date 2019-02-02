@@ -15,7 +15,7 @@
 # This file needs to remain free of bash-isms.  Make sure it
 # runs on plain POSIX shell.
 
-# GNU sed has many extentions not on osX and FreeBSD.  If
+# GNU sed has many extensions not on macOS and FreeBSD.  If
 # you change near sed, test on FreeBSD.
 
 # ########## Default configuration ##########
@@ -307,8 +307,8 @@ verifySHA1() {
     # Extract the file's hash. Restore any leading zeroes in hash segments.
 
     # The sed [] includes a tab (\t) and space; #h is followed by a tab and space
-    # or maybe a space and a tab.  remove the tab, whereever it may be.  Add some 0x
-    # so it can be run throught printf to restore missing leading zeros.
+    # or maybe a space and a tab.  remove the tab, wherever it may be.  Add some 0x
+    # so it can be run through printf to restore missing leading zeros.
     #
     local FSHA1="`grep '^#h' $1 | tr -d '[:cntrl:]' | sed -e's/^#h//' -e's/ / 0x/g'`"
     FSHA1=`printf '%08x%08x%08x%08x%08x' $FSHA1`
@@ -404,12 +404,12 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
             fi
             chmod --reference=$REFFILE $TMPFILE > /dev/null 2>&1
             if  [ $? -ne 0 ] ; then
-                # the above chmod fails on osX and BSD, just force it
+                # the above chmod fails on macOS and BSD, just force it
                 chmod 644 $TMPFILE
             fi
             chown --reference=$REFFILE $TMPFILE > /dev/null 2>&1
             if  [ $? -ne 0 ] ; then
-                # the above chown fails on osX and BSD, just force it
+                # the above chown fails on macOS and BSD, just force it
                 chown root:wheel $TMPFILE
             fi
             ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1

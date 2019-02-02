@@ -43,7 +43,7 @@ model for precision timekeeping) described a new implementation and
 interface in 1994. That implementation could keep time with a
 precision of up to one microsecond.
 
-Work for a Version 4 of NTP begain around 1994. The first new
+Work for a Version 4 of NTP began around 1994. The first new
 specification was https://tools.ietf.org/rfc/rfc2030.txt[RFC 2030],
 Simple Network Time Protocol (SNTP) version 4 for IPv4, IPv6 and OSI.
 This issued in 1996.

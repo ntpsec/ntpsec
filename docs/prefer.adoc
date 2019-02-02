@@ -278,7 +278,7 @@ discipline.
 
 To achieve the same result when using the link:driver_pps.html[separate
 "pps" driver], +minsane+ can be set to zero so the PPS signal disciplines
-the system clock in the absense of other sources.
+the system clock in the absence of other sources.
 
 '''''
 

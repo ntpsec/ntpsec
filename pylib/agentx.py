@@ -378,7 +378,7 @@ class PacketControl:
                 binds.append(ax.Varbind(ax.VALUE_NO_SUCH_OBJECT, target))
             else:
                 vbind = reader(oid)
-                if vbind is None:  # No data avaliable.
+                if vbind is None:  # No data available.
                     # I am not certain that this is the correct response
                     # when no data is available. snmpwalk appears to stop
                     # calling a particular sub-agent when it gets to a NULL.

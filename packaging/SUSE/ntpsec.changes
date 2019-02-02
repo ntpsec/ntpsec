@@ -371,7 +371,7 @@ Sat Apr 22 16:39:04 UTC 2017 - mpluskal@suse.com
 - Update to version 0.9.7+git20170422.4162ff742:
   * Typo
   * Fix typo in etc/ntplogtemp.service
-  * waf: define EPOCH=[build-date], for reproducable builds.
+  * waf: define EPOCH=[build-date], for reproducible builds.
   * EPOCH: remove REPRO_DATE and NTPD_IGNORE_BUILD_DATE.
   * ntpcal_get_build_date: now uses EPOCH.
   * ntp_calendar: add missing return.

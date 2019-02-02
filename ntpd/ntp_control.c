@@ -2594,7 +2594,7 @@ ctl_getitem(
 	NLOG(NLOG_SYSEVENT)
 	    if (quiet_until <= current_time) {
 		    quiet_until = current_time + 300;
-	/* The cast on SRCPORT is required to supress a warning on NetBSD 8.0
+	/* The cast on SRCPORT is required to suppress a warning on NetBSD 8.0
 	 * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53618
 	 */
 		    msyslog(LOG_WARNING,

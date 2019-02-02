@@ -19,7 +19,7 @@ TEST(random, random32) {
 	/* This is just a crude sanity check.
 	 * It could fail when working correctly,
 	 * but the chances are pretty small.
-	 * It won't be reproducable.  ;)
+	 * It won't be reproducible.  ;)
 	 * You can test this code by making the loop count smaller.
 	 */
 	for (i=0; i<99; i++) {
@@ -40,7 +40,7 @@ TEST(random, random64) {
 	/* This is just a crude sanity check.
 	 * It could fail when working correctly,
 	 * but the chances are pretty small.
-	 * It won't be reproducable.  ;)
+	 * It won't be reproducible.  ;)
 	 * You can test this code by making the loop count smaller.
 	 */
 	for (i=0; i<99; i++) {

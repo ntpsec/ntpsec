@@ -57,7 +57,7 @@ running NTP and SNMP daemons for ntpsnmpd to work.
 
 [[loglevel]]
 +loglevel+ _level_::
-  Threshold for log messages. Equivilent to -D
+  Threshold for log messages. Equivalent to -D
 
 === /var/ntpsnmpd/notify.conf ===
   This file is used to store the state of options that can be set
@@ -104,7 +104,7 @@ missing, etc.
 
 == Known Deviations from RFC 5907 ==
 
-The ntpEntStatusEntityUptime OID specifies a bizzare time formant. This
+The ntpEntStatusEntityUptime OID specifies a bizarre time format. This
 does not match what the SNMP tools expect to see from a TimeTicks variable.
 Instead the daemon returns a normal TimeTicks value.
 
