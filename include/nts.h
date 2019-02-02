@@ -10,6 +10,7 @@
 #define FLAG_NTS	0x01u	/* use NTS (network time security) */
 #define FLAG_NTS_ASK	0x02u	/* NTS, ask for specified server */
 #define FLAG_NTS_REQ	0x04u	/* NTS, ask for specified server */
+#define FLAG_NTS_NOVAL	0x08u	/* do not validate the server certificate */
 
 /* Configuration data for an NTS association */
 struct ntscfg_t {

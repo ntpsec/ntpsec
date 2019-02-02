@@ -74,14 +74,23 @@
 
 +nts+::
   Use Network Time Security for authentication and encryption.
-  Request key exchange from the NTP server.
+  Request key exchange from the NTP server.  Following options
+  are revelevant only for nts peers, and are thus tagged with 'nts'.
+  that can be omitted when the option is given.
 
-+nts ask+ 'servername'::
++nts ask+ 'address'::
   Use Network Time Security for authentication and encryption.
   Ask for a specific NTS server, which may differ from the NTP server.
+  The +address_ may be a hostname, a FQDN, an IPv4 numeric address, an
+  IPv6 numeric addresa (in square brackets).  Address may have the suffix
+  +:port+ to specify a UDP port.
 
-+nts require+ 'servername'::
++nts require+ 'address'::
   Use Network Time Security for authentication and encryption.
   Require a specific NTS server, which may differ from the NTP server.
+  Address syntax is as for +ask+.
+
++nts noval::
+  Do not validate the server certificate.
 
 // end

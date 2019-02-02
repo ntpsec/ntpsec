@@ -628,6 +628,10 @@ create_peer_node(
 				my_node->ctl.flags |= FLAG_NOSELECT;
 				break;
 
+			case T_Noval:
+				my_node->ctl.nts_cfg.flags |= FLAG_NTS_NOVAL;
+				break;
+
 			case T_Nts:
 				my_node->ctl.nts_cfg.flags |= FLAG_NTS;
 				break;

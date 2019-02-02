@@ -155,6 +155,7 @@
 %token	<Integer>	T_Noserve
 %token	<Integer>	T_Notrap
 %token	<Integer>	T_Notrust
+%token	<Integer>	T_Noval
 %token	<Integer>	T_Ntp
 %token	<Integer>	T_Ntpport
 %token	<Integer>	T_NtpSignDsocket
@@ -405,6 +406,7 @@ option_flag_keyword
 	:	T_Burst
 	|	T_Iburst
 	|	T_Noselect
+	|	T_Noval
 	|	T_Nts
 	|	T_Prefer
 	|	T_True
