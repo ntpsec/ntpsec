@@ -197,7 +197,7 @@ are no longer relevant.
 
 Note that NTPsec has entirely dropped conformance with
 https://tools.ietf.org/html/rfc5905[RFC 5906].  Autokey never quite
-worked, and the design was unstable enough that if there was ever
+qworked, and the design was unstable enough that if there was ever
 actually a time when it fully conformed to its RFC that span must have
 been pretty short.
 
@@ -224,6 +224,10 @@ NTPsec conforms to the
 https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/[NTP
 Client Data Minimization] draft RFC, which changes the client-side
 generation of some packet headers.
+
+NTPsec also conforms to the
+https://datatracker.ietf.org/doc/draft-ietf-ntp-mac/[MAC for NTP]
+draft RFC, inolementing AES-CMAC (128 bits).
 
 The table of reference identifiers in Figure 12 is largely obsolete
 and somewhat incomplete relative to the code.
