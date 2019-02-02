@@ -230,23 +230,10 @@ the TLS key, certificate, and intermediate certificate bundles.
 The NTS-KE server MAY have a method to reload the key, certificate,
 and intermediate certificate bundles without a full daemon restart.
 
-== NTP Configuration parameters ==
+== NTS Configuration parameters (client side) ==
 
-See also the NTP documentation.
-
-New options for an NTS client:
-
-*ask [address]* (IMPLEMENTED) Request a particular NTPD server, but do
-not require it. [address] is an ASCII-encoded [ANSI.X3-4.1986] string
-conforming to the syntax of the Host subcomponent of a URI (Section
-3.2.2 of RFC3986).  *address* may be a hostname, a FQDN, an IPv4
-numeric address, an IPv6 numeric address (in square brackets).
-
-*require [address]* (IMPLEMENTED) Require a particular NTPD server,
-fail if it is not the NTPD sevver address returned.  Otherwise same as
-*ask*.
-
-*noval* (IMPLEMENTED) Do not validate the server certificate
+Options now implemented in the config parser are now described in
+docs/includes/assoc-options.txt
 
 *cert [file]*  Present the certificate in *file* as our client certificate
 
@@ -266,9 +253,6 @@ separately as OpenSSL needs them separately.
 
 *ntpciphers [list]* List of ciphers to negotiate, in prefered order for
 the NTPD connection.  The server must support AEAD_AES_SIV_CMAC_256.
-
-*expire [seconds]* (IMPLEMENTED) How long to use an NTPD association
-before rekeying with the NTS-KE server.
 
 == NTS-KE Server Configuration parameters ==
 
