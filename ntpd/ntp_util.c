@@ -309,7 +309,7 @@ stats_config(
 	/*
 	 * Read leapseconds file.
 	 *
-	 * Note: Currently a leap file without SHA1 signature is
+	 * Note: Currently a leap file without SHA-1 signature is
 	 * accepted, but if there is a signature line, the signature
 	 * must be valid or the file is rejected.
 	 */
@@ -690,7 +690,7 @@ record_proto_stats(
  * Returns: n/a
  *
  * Note: This loads a new leapfile on the fly. Currently a leap file
- * without SHA1 signature is accepted, but if there is a signature line,
+ * without SHA-1 signature is accepted, but if there is a signature line,
  * the signature must be valid or the file is rejected.
  */
 void

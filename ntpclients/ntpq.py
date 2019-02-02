@@ -746,7 +746,10 @@ usage: ntpversion [version number]
         "set key type to use for authenticated requests"
         if not line:
             self.say("Keytype: %s\n" % self.session.keytype)
-        elif line not in "DSA, MD4, MD5, MDC2, RIPEMD160, SHA1":
+        elif line not in "DSA, MD4, MD5, MDC2, RIPEMD160, SHA-1, AES-CMAC":
+            # Above list is somewhat bogus. All but oldest versions of NTPsec
+            # will cheerfully use any 16- or 20-bit MAC supported by libcrypto;
+            # NTP Classic will probably barf on AES-CMAC.
             self.warn("Keytype %s is not supported by ntpd.\n" % line)
         elif line not in hashlib.algorithms_available:
             self.warn("Keytype %s is not supported by ntpq.\n" % line)
@@ -756,7 +759,7 @@ usage: ntpversion [version number]
     def help_keytype(self):
         self.say("""\
 function: set key type to use for authenticated requests, one of:
-    DSA, MD4, MD5, MDC2, RIPEMD160, SHA1
+    DSA, MD4, MD5, MDC2, RIPEMD160, SHA-1, AES-CMAC
 usage: keytype [digest-name]
 """)
 

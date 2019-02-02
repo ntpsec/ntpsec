@@ -28,7 +28,7 @@ typedef struct leap_table leap_table_t;
 
 /* Validate a stream containing a leap second file in the NIST / NTPD
  * format that can also be loaded via 'leapsec_load()'. This uses
- * the SHA1 hash and preprocessing as described in the NIST leapsecond
+ * the SHA-1 hash and preprocessing as described in the NIST leapsecond
  * file.
  */
 #define LSVALID_GOODHASH	1	/* valid signature         */

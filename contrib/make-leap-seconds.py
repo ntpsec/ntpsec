@@ -55,7 +55,7 @@ tai = "40"          # hardwired
 #  # is comment
 #  #$ xxx  Update Date
 #  #@ xxx  Expiration Date
-#  #h SHA1 hash of payload
+#  #h SHA-1 hash of payload
 #
 #  #$       3676924800
 #  #@       3707596800

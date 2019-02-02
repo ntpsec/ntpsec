@@ -522,11 +522,11 @@ request header fields, then the payload.
 2b. In CMAC mode, a cryptographic hash of the packet header and
 payload with the crypto algorithim using the key.
 
-The cryptographic hash is 16 octets for MD5 and AES and 20 octets for SHA1.
-Longer digests are truncated.
+The cryptographic hash is 16 octets for MD5 ir AES-CMAC and AES and 20
+octets for SHA-1.  Longer digests are truncated.
 
 The key length for AES is 16 bytes.  Longer keys are truncated.  Shorter
-keys are padded with 0s.  MD5 and SHA1 can use any key length.
+keys are padded with 0s.  MD5 and SHA-1 can use any key length.
 
 == Compatibility Notes ==
 

@@ -131,7 +131,8 @@ direction.
 
 The RFC 5905 diagram is slightly out of date in that the digest header assumes
 a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
-160-bit (20-octet) SHA1 hash.
+128-bit AES_CMAC hash or 160-bit (20-octet) SHA-1 hash.  NTPsec will
+support any 128- or 160-bit MAC type in lincrypto.
 
 An extension field consists of a 16-bit network-order type field
 length, followed by a 16-bit network-order payload length in octets,

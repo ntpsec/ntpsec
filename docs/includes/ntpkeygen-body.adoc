@@ -14,7 +14,7 @@ in NTP's symmetric key cryptography.
 The program produces a file containing ten pseudo-random printable
 ASCII strings suitable for the MD5 message digest algorithm.
 It also produces an additional ten hex-encoded random bit strings
-suitable for the SHA1 and other message digest algorithms.
+suitable for the SHA-1 and other message digest algorithms.
 
 The keys file must be distributed and stored using secure means
 beyond the scope of NTP itself. The keys can also be used as
@@ -93,7 +93,7 @@ format:
 |====================================================================
 |Field	| Meaning
 |keyno	| Positive integer in the range 1-65,535
-|type	| MD5 or SHA1, type of key
+|type	| Type of key (MD5, SHA-1, AES-CMAC etc.)
 |key	| the actual key, printable ASCII or hex
 |====================================================================
 

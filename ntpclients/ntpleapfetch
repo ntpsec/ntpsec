@@ -280,7 +280,7 @@ INTERVAL=$(( $INTERVAL *1 ))
 # #@ number : the NTP date that the file expires
 # Date (seconds since 1900) leaps : leaps is the # of seconds to add for times >= Date
 # Date lines have comments.
-# #h hex hex hex hex hex is the SHA1 checksum of the data & dates, excluding whitespace w/o leading zeroes
+# #h hex hex hex hex hex is the SHA-1 checksum of the data & dates, excluding whitespace w/o leading zeroes
 
 verifySHA1() {
 
@@ -296,7 +296,7 @@ verifySHA1() {
 
     local DATA="`echo \"$RAW\" | sed -e'/^#h/d' -e's/^#[\$@]//g' | tr -d '[:space:]'`"
 
-    # Compute the SHA1 hash of the data, removing the marker and filename
+    # Compute the SHA-1 hash of the data, removing the marker and filename
     # Computed in binary mode, which shouldn't matter since whitespace
     # has been removed
     # shasum/sha1sum comes in several flavors;

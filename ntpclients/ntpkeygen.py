@@ -14,7 +14,7 @@ ntpkey_AES_<hostname>.<filestamp>
 AES (128-bit) keys used to compute CMAC mode authentcation
 using shared key cryptography
 
-The file can be edited by hand to support MD5 and SHA1 for
+The file can be edited by hand to support MD5 and SHA-1 for
 old digest mode authentication.
 '''
 

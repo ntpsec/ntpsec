@@ -197,7 +197,7 @@ are no longer relevant.
 
 Note that NTPsec has entirely dropped conformance with
 https://tools.ietf.org/html/rfc5905[RFC 5906].  Autokey never quite
-qworked, and the design was unstable enough that if there was ever
+worked, and the design was unstable enough that if there was ever
 actually a time when it fully conformed to its RFC that span must have
 been pretty short.
 
@@ -217,7 +217,7 @@ client (mode 3) packets. Mode 2 (Symmetric Passive) is still distinct
 from mode 3 but its only effect is on initial poll interval.
 
 In figure 8 of section 7.3, 128 bits (16 octets, corresponding to an
-MD5 digest) is not the only possible length for the MAC. This was
+MD5 or AES-CMAC digest) is not the only possible length for the MAC. This was
 a pre-NTPsec change present in NTP Classic versions after 2010.
 
 NTPsec conforms to the

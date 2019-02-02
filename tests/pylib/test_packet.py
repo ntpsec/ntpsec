@@ -243,14 +243,14 @@ class TestSyncPacket(unittest.TestCase):
         except ntpp.SyncException as e:
             errored = e.message
         self.assertEqual(errored, "Packet is a runt")
-        # Test with extension, MD5 or SHA1, 20
+        # Test with extension, MD5 or SHA-1, 20
         mac = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09" \
               "\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13"
         data2 = data + ext + mac
         cls = self.target(data2)
         self.assertEqual(cls.mac, ntp.poly.polybytes(mac))
         self.assertEqual(cls.extension, ntp.poly.polybytes(ext + mac))
-        # Test with extension, MD5 or SHA1, 24
+        # Test with extension, MD5 or SHA-1, 24
         mac += "\x14\x15\x16\x17"
         data2 = data + ext + mac
         cls = self.target(ntp.poly.polybytes(data2))
