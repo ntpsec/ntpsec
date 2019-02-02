@@ -201,6 +201,8 @@ struct key_tok ntp_keywords[] = {
 { "require",		T_Require,		FOLLBY_STRING },
 { "noval",		T_Noval,		FOLLBY_TOKEN },
 { "expire",		T_Expire,		FOLLBY_TOKEN },
+{ "cert",		T_Cert,			FOLLBY_TOKEN },
+{ "ca",			T_Ca,			FOLLBY_TOKEN },
 };
 
 typedef struct big_scan_state_tag {

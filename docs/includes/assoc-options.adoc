@@ -98,4 +98,12 @@
   How long to use a secured NTP association before rekeying with the
   NTS-KE server.
 
++nts cert +file+::
+  Present the certificate in +file+ as our client certificate
+
++nts ca+ +location+::
+  Use the file, or directory, specified by +location+ to
+  validate the NTS-KE server certificate.  Do not use any other CA.
+
+
 // end

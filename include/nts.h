@@ -15,6 +15,8 @@
 /* Configuration data for an NTS association */
 struct ntscfg_t {
     char *server;	/* if NUL, use the peer itself (normal case) */
+    char *ca;		/* if NUL, use the system default (normal case) */
+    char *cert;		/* if NUL, use the system default (normal case) */
     uint32_t flags;
     uint32_t expire;
 };

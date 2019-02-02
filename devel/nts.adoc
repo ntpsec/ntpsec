@@ -248,11 +248,6 @@ Eventually, look into how openssl-ciphers does this and autoconfigure.
 Per-server options now implemented in the config parser are now
 described in docs/includes/assoc-options.txt
 
-*cert [file]*  Present the certificate in *file* as our client certificate
-
-*ca [location]*  Use the file, or directory, specified by *location* to
-validate the NTS-KE server certificate.  Do not use any other CA.
-
 == NTS-KE Server Configuration parameters ==
 
 == TLS Options ==

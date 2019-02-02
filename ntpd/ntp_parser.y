@@ -61,7 +61,9 @@
 %token	<Integer>	T_Bias
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
+%token	<Integer>	T_Ca
 %token	<Integer>	T_Ceiling
+%token	<Integer>	T_Cert
 %token	<Integer>	T_Clock
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
@@ -461,6 +463,10 @@ option_string
 	|	T_Ask T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Require T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Ca T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Cert T_String
 			{ $$ = create_attr_sval($1, $2); }
 	;
 
