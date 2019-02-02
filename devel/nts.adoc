@@ -240,16 +240,17 @@ New options for an NTS client:
 
 *ntpport YYY* Request an NTPD server on UDP port YYY.
 
-*ask [address]* Request a particular NTPD server, but do not require
-it. [address] is an ASCII-encoded [ANSI.X3-4.1986] string conforming to
-the syntax of the Host subcomponent of a URI (Section 3.2.2 of RFC3986).
-*address* may be a hostname, a FQDN, an IPv4 numeric address, an IPv6
-numeric address (in square brackets).
+*ask [address]* (IMPLEMENTED) Request a particular NTPD server, but do
+not require it. [address] is an ASCII-encoded [ANSI.X3-4.1986] string
+conforming to the syntax of the Host subcomponent of a URI (Section
+3.2.2 of RFC3986).  *address* may be a hostname, a FQDN, an IPv4
+numeric address, an IPv6 numeric address (in square brackets).
 
-*require [address]* Require a particular NTPD server, fail if it is not
-the NTPD sevver address returned.  Otherwise same as *ask*.
+*require [address]* (IMPLEMENTED) Require a particular NTPD server,
+fail if it is not the NTPD sevver address returned.  Otherwise same as
+*ask*.
 
-*noval* do not validate the server certificate
+*noval* (IMPLEMENTED) Do not validate the server certificate
 
 *cert [file]*  Present the certificate in *file* as our client certificate
 
@@ -270,8 +271,8 @@ separately as OpenSSL needs them separately.
 *ntpciphers [list]* List of ciphers to negotiate, in prefered order for
 the NTPD connection.  The server must support AEAD_AES_SIV_CMAC_256.
 
-*expire [seconds]*  How long to use an NTPD association before rekeying
-with the NTS-KE server.
+*expire [seconds]* (IMPLEMENTED) How long to use an NTPD association
+before rekeying with the NTS-KE server.
 
 == NTS-KE Server Configuration parameters ==
 

@@ -93,4 +93,7 @@
 +nts noval::
   Do not validate the server certificate.
 
++nts expire::
+  Do not validate the server certificate.
+
 // end

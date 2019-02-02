@@ -16,6 +16,7 @@
 struct ntscfg_t {
     char *server;
     uint32_t flags;
+    uint32_t expire;
 };
 
 /* Client-side state per connection to server */

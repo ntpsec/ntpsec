@@ -76,6 +76,7 @@
 %token	<Integer>	T_Driftfile
 %token	<Integer>	T_Drop
 %token	<Integer>	T_Dscp
+%token	<Integer>	T_Expire
 %token	<Integer>	T_Ellipsis	/* "..." not "ellipsis" */
 %token	<Integer>	T_Enable
 %token	<Integer>	T_End
@@ -429,7 +430,8 @@ option_int
 	;
 
 option_int_keyword
-	:	T_Key
+	:	T_Expire
+	|	T_Key
 	|	T_Minpoll
 	|	T_Maxpoll
 	|	T_Mode

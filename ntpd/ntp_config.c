@@ -646,6 +646,10 @@ create_peer_node(
 			}
 			break;
 
+		case T_Expire:
+		    my_node->ctl.nts_cfg.expire = option->value.u;
+		    break;
+
 		case T_Minpoll:
 			if (option->value.i < NTP_MINPOLL ) {
 				msyslog(LOG_INFO,
