@@ -241,6 +241,10 @@ option, then just use the most recent version at or above it your TLS
 library and the remote both support. If the remote can't cope, you
 abort.
 
+To avoid having to hand-configure ciphers offered to the remote, we
+can initially have a list of common known-good ones wired in.
+Eventually, look into how openssl-ciphers does this and autoconfigure.
+
 Per-server options now implemented in the config parser are now
 described in docs/includes/assoc-options.txt
 
@@ -248,16 +252,6 @@ described in docs/includes/assoc-options.txt
 
 *ca [location]*  Use the file, or directory, specified by *location* to
 validate the NTS-KE server certificate.  Do not use any other CA.
-
-*tls1.2ciphers [list]*  List of TLS 1.2 ciphers to negotiate, in prefered
-order.  The list is one or more cipher names, separated by colons.
-
-*tls1.3ciphers [list]*  List of TLS 1.3 ciphers to negotiate, in prefered
-order.  TLS 1.2 and 1.3 ciphers are different and must be specified
-separately as OpenSSL needs them separately.
-
-*ntpciphers [list]* List of ciphers to negotiate, in prefered order for
-the NTPD connection.  The server must support AEAD_AES_SIV_CMAC_256.
 
 == NTS-KE Server Configuration parameters ==
 
