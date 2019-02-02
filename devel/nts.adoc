@@ -236,12 +236,15 @@ See also the NTP documentation.
 
 New options for an NTS client:
 
-*ask [address]* Request a particular NTPD server, but do not require it.
-[address] is an ASCII-encoded [ANSI.X3-4.1986] string conforming to the
-syntax of the Host subcomponent of a URI ([RFC3986]). *address* may be a
-hostname, a FQDN, an IPv4 numeric address, an IPv6 numeric addresa (in
-square brackets).  Address may have the suffix *:port* to specify a UDP
-port.
+*tlsport XXX* Contact the NTS-KE server on TCP port XXX.
+
+*ntpport YYY* Request an NTPD server on UDP port YYY.
+
+*ask [address]* Request a particular NTPD server, but do not require
+it. [address] is an ASCII-encoded [ANSI.X3-4.1986] string conforming to
+the syntax of the Host subcomponent of a URI (ection 3.2.2 of RFC3986).
+*address* may be a hostname, a FQDN, an IPv4 numeric address, an IPv6
+numeric addresa (in square brackets).
 
 *require [address]* Require a particular NTPD server, fail if it is not
 the NTPD sevver address returned.  Otherwise same as *ask*.
