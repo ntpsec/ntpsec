@@ -232,17 +232,22 @@ and intermediate certificate bundles without a full daemon restart.
 
 == NTS Configuration parameters (client side) ==
 
-Options now implemented in the config parser are now described in
-docs/includes/assoc-options.txt
+*min-tls*:: This is not per-server but for all client sessions.  Must
+be at least 1.2. Bumped at crypto emergencies.
+
+To avoid having to configure TLS versions you accept beyond this, he
+right (and conformant) thing is to do is honor a global min-tls
+option, then just use the most recent version at or above it your TLS 
+library and the remote both support. If the remote can't cope, you
+abort.
+
+Per-server options now implemented in the config parser are now
+described in docs/includes/assoc-options.txt
 
 *cert [file]*  Present the certificate in *file* as our client certificate
 
 *ca [location]*  Use the file, or directory, specified by *location* to
 validate the NTS-KE server certificate.  Do not use any other CA.
-
-*tls1.2* Allow TLS1.2 connection.
-
-*tls1.3* Allow TLS1.3 connection.
 
 *tls1.2ciphers [list]*  List of TLS 1.2 ciphers to negotiate, in prefered
 order.  The list is one or more cipher names, separated by colons.
