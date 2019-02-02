@@ -261,7 +261,7 @@ validate the NTS-KE server certificate.  Do not use any other CA.
 *tls1.3* Allow TLS1.3 connection.
 
 *tls1.2ciphers [list]*  List of TLS 1.2 ciphers to negotiate, in prefered
-order.
+order.  The list is one or more cipher names, separated by colons.
 
 *tls1.3ciphers [list]*  List of TLS 1.3 ciphers to negotiate, in prefered
 order.  TLS 1.2 and 1.3 ciphers are different and must be specified
