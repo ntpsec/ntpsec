@@ -427,9 +427,7 @@ int scmp_sc[] = {
 #endif
 };
 	{
-		unsigned int i;
-
-		for (i = 0; i < COUNTOF(scmp_sc); i++) {
+		for (unsigned int i = 0; i < COUNTOF(scmp_sc); i++) {
 			if (seccomp_rule_add(ctx,
 			    SCMP_ACT_ALLOW, scmp_sc[i], 0) < 0) {
 				msyslog(LOG_ERR,

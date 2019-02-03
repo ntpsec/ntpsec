@@ -140,14 +140,13 @@ static void DoDigest(
   int type = OBJ_sn2nid(name);
   const EVP_MD *digest = EVP_get_digestbynid(type);
   struct timespec start, stop;
-  int i;
   double fast, slow;
   unsigned int digestlength = 0;
 
   if (NULL == digest) return;
 
   clock_gettime(CLOCK_MONOTONIC, &start);
-  for (i = 0; i < NUM; i++) {
+  for (int i = 0; i < NUM; i++) {
     digestlength = SSL_Digest(digest, key, keylength, pkt, pktlength);
   }
   clock_gettime(CLOCK_MONOTONIC, &stop);
@@ -157,7 +156,7 @@ static void DoDigest(
 
 #ifdef DoSLOW
   clock_gettime(CLOCK_MONOTONIC, &start);
-  for (i = 0; i < NUM; i++) {
+  for (int i = 0; i < NUM; i++) {
     digestlength = SSL_DigestSlow(type, key, keylength, pkt, pktlength);
   }
   clock_gettime(CLOCK_MONOTONIC, &stop);
@@ -179,14 +178,13 @@ static void DoCMAC(
 )
 {
   struct timespec start, stop;
-  int i;
   double fast;
   unsigned long digestlength = 0;
 
   if (NULL == cipher) return;
 
   clock_gettime(CLOCK_MONOTONIC, &start);
-  for (i = 0; i < NUM; i++) {
+  for (int i = 0; i < NUM; i++) {
     digestlength = SSL_CMAC(cipher, key, keylength, pkt, pktlength);
   }
   clock_gettime(CLOCK_MONOTONIC, &stop);

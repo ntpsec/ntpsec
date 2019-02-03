@@ -57,12 +57,11 @@ TEST(macencrypt, Encrypt) {
 		(uint32_t*)packetPtr, packetLength, length));
 
 if (0) {
-	int i;
         printf("\n");
-	for (i = 0; i< totalLength; i++)
+	for (int i = 0; i< totalLength; i++)
 	  printf("%02x ", (unsigned int)expectedMD5Packet[i] & 0xff);
         printf("\n");
-	for (i = 0; i< totalLength; i++)
+	for (int i = 0; i< totalLength; i++)
 	  printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
         printf("\n");
 }
@@ -93,12 +92,11 @@ TEST(macencrypt, CMAC_Encrypt) {
 		(uint32_t*)packetPtr, packetLength, length));
 
 if (0) {
-	int i;
         printf("\n");
-	for (i = 0; i< totalLength; i++)
+	for (int i = 0; i< totalLength; i++)
 	  printf("%02x ", (unsigned int)expectedCMACPacket[i] & 0xff);
         printf("\n");
-	for (i = 0; i< totalLength; i++)
+	for (int i = 0; i< totalLength; i++)
 	  printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
         printf("\n");
 }

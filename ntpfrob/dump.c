@@ -44,7 +44,7 @@ do_dump(const iomode mode, const int force)
 {
     struct timex txc;
     long adjval[18];
-    int out, i, v, end = 10;
+    int out, v, end = 10;
 
     txc.modes = 0;
     out       = adjtimex(&txc);
@@ -102,14 +102,14 @@ do_dump(const iomode mode, const int force)
     if (mode == json) {
         printf("{\"time\":%ld.%09ld, \"verbose\": \"%s\"", txc.time.tv_sec,
           txc.time.tv_usec, verbose[v]);
-        for (i = 0; i < end; i++) {
+        for (int i = 0; i < end; i++) {
             printf(", \"%s\": %ld", adjkey[i], adjval[i]);
         }
         puts("}\n");
     } else {
         printf("time = %ld.%09ld\n", txc.time.tv_sec, txc.time.tv_usec);
         printf("verbose = \"%s\"\n", verbose[v]);
-        for (i = 0; i < end; i++) {
+        for (int i = 0; i < end; i++) {
             printf("%s = %ld\n", adjkey[i], adjval[i]);
         }
     }

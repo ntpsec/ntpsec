@@ -12,7 +12,6 @@ TEST_TEAR_DOWN(random) {}
 
 
 TEST(random, random32) {
-	int i;
 	uint32_t ones = 0;
 	uint32_t zeros = ~0;
 
@@ -22,7 +21,7 @@ TEST(random, random32) {
 	 * It won't be reproducible.  ;)
 	 * You can test this code by making the loop count smaller.
 	 */
-	for (i=0; i<99; i++) {
+	for (int i=0; i<99; i++) {
 		uint32_t sample = ntp_random();
 		ones |= sample;
 		zeros &= sample;
@@ -33,7 +32,6 @@ TEST(random, random32) {
 }
 
 TEST(random, random64) {
-	int i;
 	uint64_t ones = 0;
 	uint64_t zeros = ~0;
 
@@ -43,7 +41,7 @@ TEST(random, random64) {
 	 * It won't be reproducible.  ;)
 	 * You can test this code by making the loop count smaller.
 	 */
-	for (i=0; i<99; i++) {
+	for (int i=0; i<99; i++) {
 		uint64_t sample = ntp_random64();
 		ones |= sample;
 		zeros &= sample;

@@ -88,7 +88,6 @@ void
 backtrace_log(void) {
 	trace_arg_t arg;
 	void *buffer[BACKTRACE_MAXFRAME];
-	int i;
 
 	arg.skip_count = 1;
 	arg.result = buffer;
@@ -98,7 +97,7 @@ backtrace_log(void) {
 
 	msyslog(LOG_ERR, "ERR: Stack trace:\n");
 	/* skip trace of this shim function */
-	for (i = 1; i < arg.count; i++) {
+	for (int i = 1; i < arg.count; i++) {
 	    msyslog(LOG_ERR, "ERR: #%d %p in ??\n", i, buffer[i]);
 	}
 

@@ -158,7 +158,6 @@ alloc_res4(void)
 	const size_t	count = INC_RESLIST4;
 	restrict_u *	rl;
 	restrict_u *	res;
-	int		i;
 
 	UNLINK_HEAD_SLIST(res, resfree4, link);
 	if (res != NULL)
@@ -167,7 +166,7 @@ alloc_res4(void)
 	rl = emalloc_zero(count * cb);
 	/* link all but the first onto free list */
 	res = (void *)((char *)rl + (count - 1) * cb);
-	for (i = count - 1; i > 0; i--) {
+	for (int i = count - 1; i > 0; i--) {
 		LINK_SLIST(resfree4, res, link);
 		res = (void *)((char *)res - cb);
 	}
@@ -184,7 +183,6 @@ alloc_res6(void)
 	const size_t	count = INC_RESLIST6;
 	restrict_u *	rl;
 	restrict_u *	res;
-	int		i;
 
 	UNLINK_HEAD_SLIST(res, resfree6, link);
 	if (res != NULL)
@@ -193,7 +191,7 @@ alloc_res6(void)
 	rl = emalloc_zero(count * cb);
 	/* link all but the first onto free list */
 	res = (void *)((char *)rl + (count - 1) * cb);
-	for (i = count - 1; i > 0; i--) {
+	for (int i = count - 1; i > 0; i--) {
 		LINK_SLIST(resfree6, res, link);
 		res = (void *)((char *)res - cb);
 	}

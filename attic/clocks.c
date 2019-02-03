@@ -53,7 +53,7 @@ int do_res(int type, const char* name) {
 }
 
 int do_average(int type, const char* name) {
-  int err, i;
+  int err;
   struct timespec start, stop;
   uint64_t sec, nanos;
 
@@ -64,7 +64,7 @@ int do_average(int type, const char* name) {
   }
 
   clock_gettime(CLOCK_REALTIME, &start);
-  for (i = 0; i < BATCHSIZE; i++) {
+  for (int i = 0; i < BATCHSIZE; i++) {
     clock_gettime(type, &stop);
   }
   clock_gettime(CLOCK_REALTIME, &stop);
@@ -77,7 +77,6 @@ int do_average(int type, const char* name) {
 }
 
 int do_fastest(int type, const char* name) {
-  int i;
   struct timespec start, stop;
   uint64_t sec, nanos, fastest;
 
@@ -85,7 +84,7 @@ int do_fastest(int type, const char* name) {
 
   dups = 0;
   fastest = 999999999;
-  for (i = 0; i < BATCHSIZE; i++) {
+  for (int i = 0; i < BATCHSIZE; i++) {
     clock_gettime(type, &start);  /* warm up caches */
     clock_gettime(type, &start);
     clock_gettime(type, &stop);
@@ -162,14 +161,13 @@ void do_hist(int type, int fastest) {
 
 int main(int argc, char *argv[])
 {
-  int i;
   int res, average, fastest;
 
   (void)argc;  /* Squash unused warnings */
   (void)argv;
 
 printf("      res   avg     min  dups  CLOCK\n");
-for (i=0; (NULL != clocks[i].name); i++) {
+for (int i=0; (NULL != clocks[i].name); i++) {
   res = do_res(clocks[i].type, clocks[i].name);
   average = do_average(clocks[i].type, clocks[i].name);
   fastest = do_fastest(clocks[i].type, clocks[i].name);

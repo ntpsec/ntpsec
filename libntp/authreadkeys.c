@@ -176,7 +176,6 @@ check_cmac_key_length(
 	int keylength) {
     const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
     int len = EVP_CIPHER_key_length(cmac_cipher);
-    int i;
 
     if (len < keylength) {
 	    msyslog(LOG_ERR, "AUTH: CMAC key %u will be truncated %d=>%d",
@@ -184,7 +183,7 @@ check_cmac_key_length(
     } else if ( len > keylength) {
 	    msyslog(LOG_ERR, "AUTH: CMAC key %u will be padded %d=>%d",
 		keyno, keylength, len);
-	    for (i=keylength; i<len; i++) key[i] = 0;
+	    for (int i=keylength; i<len; i++) key[i] = 0;
     } else {
 	    if (0) msyslog(LOG_ERR, "AUTH: CMAC key %u is right size", keyno);
     }
@@ -231,7 +230,6 @@ authreadkeys(
 	char *	name;
 	char	namebuf[NAMEBUFSIZE];
 	size_t	len;
-	size_t	j;
 	int	keys = 0;
 
 	/*
@@ -362,6 +360,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 			    keyno, (unsigned int)jlim);
 
 			}
+			size_t j;
 			for (j = 0; j < jlim; j++) {
 				char *ptr = strchr(hex, tolower((unsigned char)token[j]));
 				if (ptr == NULL)

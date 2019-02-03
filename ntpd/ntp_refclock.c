@@ -149,9 +149,7 @@ refclock_name(
 void
 init_refclock(void)
 {
-	int i;
-
-	for (i = 0; i < (int)num_refclock_conf; i++)
+	for (int i = 0; i < (int)num_refclock_conf; i++)
 		if (refclock_conf[i]->clock_init)
 			(refclock_conf[i]->clock_init)();
 }
@@ -731,7 +729,6 @@ refclock_setup(
 	unsigned int	lflags		/* line discipline flags */
 	)
 {
-	int	i;
 	TTY	ttyb, *ttyp;
 
 	/*
@@ -769,7 +766,7 @@ refclock_setup(
 		}
 		cfsetispeed(&ttyb, speed);
 		cfsetospeed(&ttyb, speed);
-		for (i = 0; i < NCCS; ++i)
+		for (int i = 0; i < NCCS; ++i)
 			ttyp->c_cc[i] = '\0';
 
 #ifdef TIOCMGET

@@ -3690,15 +3690,15 @@ oncore_print_array(
 	int	n
 	)
 {
-	int	jj, i, j, nn;
+	int	jj, nn;
 
 	nn = 0;
 	printf("\nTOP\n");
 	jj = n/16;
-	for (j=0; j<jj; j++) {
+	for (int j=0; j<jj; j++) {
 		printf("%4d: ", nn);
 		nn += 16;
-		for (i=0; i<16; i++)
+		for (int i=0; i<16; i++)
 			printf(" %o", *cp++);
 		printf("\n");
 	}

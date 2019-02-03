@@ -269,8 +269,6 @@ maintain_activefds(
 	bool closing
 	)
 {
-	int i;
-
 	if (fd < 0 || fd >= (int)FD_SETSIZE) {
 		msyslog(LOG_ERR,
 			"IO: Too many sockets in use, FD_SETSIZE %d exceeded by fd %d",
@@ -284,7 +282,7 @@ maintain_activefds(
 	} else {
 		FD_CLR(fd, &activefds);
 		if (maxactivefd && fd == maxactivefd) {
-			for (i = maxactivefd - 1; i >= 0; i--)
+			for (int i = maxactivefd - 1; i >= 0; i--)
 				if (FD_ISSET(i, &activefds)) {
 					maxactivefd = i;
 					break;
@@ -2636,7 +2634,6 @@ calc_addr_distance(
 	uint32_t	v4dist;
 	bool	found_greater;
 	bool	a1_greater;
-	int	i;
 
 	REQUIRE(AF(a1) == AF(a2));
 
@@ -2657,7 +2654,7 @@ calc_addr_distance(
 
 	found_greater = false;
 	a1_greater = false;	/* suppress pot. uninit. warning */
-	for (i = 0; i < (int)sizeof(NSRCADR6(a1)); i++) {
+	for (int i = 0; i < (int)sizeof(NSRCADR6(a1)); i++) {
 		if (!found_greater &&
 		    NSRCADR6(a1)[i] != NSRCADR6(a2)[i]) {
 			found_greater = true;
@@ -2687,8 +2684,6 @@ cmp_addr_distance(
 	const sockaddr_u *	d2
 	)
 {
-	int	i;
-
 	REQUIRE(AF(d1) == AF(d2));
 
 	if (IS_IPV4(d1)) {
@@ -2700,7 +2695,7 @@ cmp_addr_distance(
 			return COMPARE_GREATERTHAN;
 	}
 
-	for (i = 0; i < (int)sizeof(NSRCADR6(d1)); i++) {
+	for (int i = 0; i < (int)sizeof(NSRCADR6(d1)); i++) {
 		if (NSRCADR6(d1)[i] < NSRCADR6(d2)[i])
 			return COMPARE_LESSTHAN;
 		else if (NSRCADR6(d1)[i] > NSRCADR6(d2)[i])

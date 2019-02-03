@@ -529,12 +529,11 @@ is_keyword(
 	follby fb;
 	int curr_s;		/* current state index */
 	int token;
-	int i;
 
 	curr_s = SCANNER_INIT_S;
 	token = 0;
 
-	for (i = 0; lexeme[i]; i++) {
+	for (int i = 0; lexeme[i]; i++) {
 		while (curr_s && (lexeme[i] != SS_CH(sst[curr_s])))
 			curr_s = (int)SS_OTHER_N(sst[curr_s]);
 
