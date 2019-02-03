@@ -604,3 +604,84 @@ macos-refclocks:
     - macos
   only:
     - branches@NTPsec/ntpsec
+
+feature-classic-mode:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --enable-classic-mode build
+  tags:
+    - gitlab-org
+
+feature-seccomp:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev libseccomp-dev
+    - python ./waf configure --refclock=all --enable-seccomp build
+  tags:
+    - gitlab-org
+
+feature-debug:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --enable-debug build
+  tags:
+    - gitlab-org
+
+feature-debug-gdb:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --enable-debug-gdb build
+  tags:
+    - gitlab-org
+
+feature-debug-timing:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --enable-debug-timing build
+  tags:
+    - gitlab-org
+
+feature-disable-droproot:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --disable-droproot build
+  tags:
+    - gitlab-org
+
+feature-early-droproot:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --enable-early-droproot build
+  tags:
+    - gitlab-org
+
+feature-leap-smear:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --enable-leap-smear build
+  tags:
+    - gitlab-org
+
+feature-mssntp:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --refclock=all --enable-mssntp build
+  tags:
+    - gitlab-org
