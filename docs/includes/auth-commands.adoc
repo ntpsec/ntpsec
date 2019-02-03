@@ -56,7 +56,7 @@ The options are as follows:
 +tlsciphersuites+ _string_::
    An OpenSSL ciphersuite list to configure the allowed ciphersuites for
    TLS 1.3. An empty string disables encryption.
-   
+
 The following options of the +server+ command configure NTS.
 
 +nts+::
