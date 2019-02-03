@@ -232,21 +232,18 @@ and intermediate certificate bundles without a full daemon restart.
 
 == NTS Configuration parameters (client side) ==
 
-*min-tls*:: This is not per-server but for all client sessions.  Must
-be at least 1.2. Bumped at crypto emergencies.
+Options now implemented in the config parser are now described in
+docs/includes/auth-commands.txt
 
-To avoid having to configure TLS versions you accept beyond this, he
-right (and conformant) thing is to do is honor a global min-tls
-option, then just use the most recent version at or above it your TLS 
+To avoid having to hand-configure TLS versions, the right (and
+conformant) thing is to do is honor the global mintls and maxtls
+options, then just use the most recent version at or above it your TLS
 library and the remote both support. If the remote can't cope, you
 abort.
 
 To avoid having to hand-configure ciphers offered to the remote, we
 can initially have a list of common known-good ones wired in.
 Eventually, look into how openssl-ciphers does this and autoconfigure.
-
-Per-server options now implemented in the config parser are now
-described in docs/includes/assoc-options.txt
 
 == NTS-KE Server Configuration parameters ==
 

@@ -36,7 +36,7 @@ The following command controls NTS authentication. It overrides
 normal TLS protocol negotiation, which is not usually necessary.
 
 [[crypto]]
-+crypto+ [+mintls+ _version_] [+maxtls+ _version_] [+enclair+]
++crypto+ [+mintls+ _version_] [+maxtls+ _version_] [+enclair+] [+cipher+ _name_]
 
 The options are as follows:
 
@@ -53,6 +53,10 @@ The options are as follows:
   certificates is bypassed.  Useful for testing if you have a
   cooperating implementation on the other end that can also
   disable crypto. {ntsdman} will do this.
+
++cipher+ _name_::
+  Disable normal cipher negotiation, forcing one by name. Intended
+  for testing.
 
 The following options of the +server+ command configure NTS.
 

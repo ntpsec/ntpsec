@@ -2004,6 +2004,10 @@ config_crypto(
 		case T_Enclair:
 			enclair = (bool)crypto->value.i;
 			break;
+
+		case T_Cipher:
+			cipher = estrdup(crypto->value.s);
+			break;
 		}
 	}
 }

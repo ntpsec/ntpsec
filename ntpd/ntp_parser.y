@@ -69,6 +69,7 @@
 %token	<Integer>	T_Cohort
 %token	<Integer>	T_ControlKey
 %token	<Integer>	T_Crypto
+%token	<Integer>	T_Cipher
 %token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
@@ -1125,6 +1126,8 @@ crypto_option
 			{ $$ = create_attr_dval($1, $2); }
 	|	T_Enclair boolean
 			{ $$ = create_attr_ival($1, 1); }
+	|	T_Cipher T_String
+			{ $$ = create_attr_sval($1, $2); }
 	;
 
 crypto_option_keyword
