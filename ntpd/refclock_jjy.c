@@ -10,7 +10,7 @@
 /*								      */
 /*  Copyright (C) 2001-2015, Takao Abe.  All rights reserved.	      */
 /*								      */
-/* SPDX-License-Identifier: BSD-3-clause				*/
+/* SPDX-License-Identifier: BSD-3-Clause				*/
 /*								      */
 /*  This driver is developed in my private time, and is opened as     */
 /*  voluntary contributions for the NTP.			      */

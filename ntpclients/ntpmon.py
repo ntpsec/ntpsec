@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 '''\
 Any keystroke causes a poll and update. Keystroke commands:
 

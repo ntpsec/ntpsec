@@ -181,7 +181,7 @@ M = More bit.
 A Mode 6 packet cannot have extension fields.
 
 """
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 import getpass
 import hashlib

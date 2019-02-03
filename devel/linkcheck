@@ -9,7 +9,7 @@
 # Optional argument is the root directory of the tree, otherwise it
 # is run from the corrent directory.
 #
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
 import os

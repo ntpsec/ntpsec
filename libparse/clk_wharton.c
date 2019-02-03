@@ -3,7 +3,7 @@
  *
  * Copyright (C) 1999, 2000 by Philippe De Muyter <phdm@macqel.be>
  *
- * SPDX-License-Identifier: BSD-2-clause
+ * SPDX-License-Identifier: BSD-2-Clause
  *
  */
 

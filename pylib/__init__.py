@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!

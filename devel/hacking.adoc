@@ -308,8 +308,8 @@ always with the full 4-digit year.
 === Copyrights and licenses
 
 Much of the historic code in this distribution is under the "NTP
-License" resembling BSD-2-clause.  Our favored licenses are
-BSD-2-clause for code and Creative Commons Attribution 4.0 License
+License" resembling BSD-2-Clause.  Our favored licenses are
+BSD-2-Clause for code and Creative Commons Attribution 4.0 License
 for documentation.
 
 Please do *not* submit code under GPL or other licenses which place

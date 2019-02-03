@@ -16,7 +16,7 @@ USAGE: ntpsweep [-<flag> [<val>] | --<name>[{=| }<val>]]... [hostfile]
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
 """
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 #
 # Python translation by ESR of a Perl script written long ago by
 # Hans Lambermont <ntpsweep@lambermont.dyndns.org>

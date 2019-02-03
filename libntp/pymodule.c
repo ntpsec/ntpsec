@@ -1,6 +1,6 @@
 /*
  * This file is Copyright (c) 2016 by the NTPsec project
- * SPDX-License-Identifier: BSD-2-clause
+ * SPDX-License-Identifier: BSD-2-Clause
  *
  * Python binding for selected libntp library functions
  */

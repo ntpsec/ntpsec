@@ -4,7 +4,7 @@
 ntpdig - simple SNTP client
 
 """
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 # This code runs identically under Python 2 and Python 3. Keep it that way!
 from __future__ import print_function, division
 import getopt

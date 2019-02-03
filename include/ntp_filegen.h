@@ -4,7 +4,7 @@
  * Copyright (C) 1992, 1996 by Rainer Pruy
  * Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
- * SPDX-License-Identifier: BSD-2-clause
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 #ifndef GUARD_NTP_FILEGEN_H
 #define GUARD_NTP_FILEGEN_H

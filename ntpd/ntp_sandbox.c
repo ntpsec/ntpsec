@@ -1,7 +1,7 @@
 /*
  * ntp_sandbox.c - privilege containment for the NTP daemon
  *
- * SPDX-License-Identifier: BSD-2-clause
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include "config.h"

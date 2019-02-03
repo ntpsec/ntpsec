@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright 2015 by the NTPsec project contributors
- * SPDX-License-Identifier: BSD-3-clause
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef GUARD_ASCII_H
 #define GUARD_ASCII_H

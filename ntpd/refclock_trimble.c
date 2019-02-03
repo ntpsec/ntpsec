@@ -15,7 +15,7 @@
  * Copyright (c) 1997, 1998, 1999, 2000  Trimble Navigation Ltd.
  * All rights reserved.
  * Copyright 2017 by the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-clause
+ * SPDX-License-Identifier: BSD-4-Clause
  */
 
 #include "config.h"

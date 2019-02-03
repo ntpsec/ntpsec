@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 "Common utility functions"
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 from __future__ import print_function, division
 

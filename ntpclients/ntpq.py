@@ -9,7 +9,7 @@
 # from ntpd as objects that can be re-used by other front
 # ends. Reusable pieces live in pylib.
 #
-# SPDX-License-Identifier: BSD-2-clause
+# SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
 import cmd
