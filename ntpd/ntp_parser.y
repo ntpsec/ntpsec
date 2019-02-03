@@ -69,7 +69,6 @@
 %token	<Integer>	T_Cohort
 %token	<Integer>	T_ControlKey
 %token	<Integer>	T_Crypto
-%token	<Integer>	T_Cipher
 %token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
@@ -80,7 +79,6 @@
 %token	<Integer>	T_Driftfile
 %token	<Integer>	T_Drop
 %token	<Integer>	T_Dscp
-%token	<Integer>	T_Enclair
 %token	<Integer>	T_Expire
 %token	<Integer>	T_Ellipsis	/* "..." not "ellipsis" */
 %token	<Integer>	T_Enable
@@ -212,6 +210,8 @@
 %token	<Integer>	T_Timer
 %token	<Integer>	T_Timingstats
 %token	<Integer>	T_Tinker
+%token	<Integer>	T_Tlsciphers
+%token	<Integer>	T_Tlsciphersuites
 %token	<Integer>	T_Tos
 %token	<Integer>	T_True
 %token	<Integer>	T_Trustedkey
@@ -1124,9 +1124,9 @@ crypto_option_list
 crypto_option
 	:	crypto_option_keyword number
 			{ $$ = create_attr_dval($1, $2); }
-	|	T_Enclair boolean
-			{ $$ = create_attr_ival($1, 1); }
-	|	T_Cipher T_String
+	|	T_Tlsciphers T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Tlsciphersuites T_String
 			{ $$ = create_attr_sval($1, $2); }
 	;
 

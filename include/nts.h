@@ -14,8 +14,8 @@
 
 extern float mintls;		/* minimum TLS version allowed */
 extern float maxtls;		/* maximum TLS version allowed */
-extern bool enclair;		/* if on, disable TLS and talk en clair */
-extern char *cipher;		/* force cipher; NULL for negotiation */
+extern char *tlsciphers;	/* allowed TLS 1.2 ciphers */
+extern char *tlsciphersuites;	/* allowed TLS 1.3 ciphersuites */
 
 /* Configuration data for an NTS association */
 struct ntscfg_t {

@@ -17,8 +17,8 @@
 
 float mintls = 1.2;		/* minimum TLS version allowed */
 float maxtls;			/* maximum TLS version allowed */
-bool enclair;			/* if on, disable TLS and talk en clair */
-char *cipher;			/* force cipher; NULL for negotiation */
+char *tlsciphers;		/* allowed TLS 1.2 ciphers */
+char *tlsciphersuites;		/* allowed TLS 1.3 ciphersuites */
 
 /* By design, there is no per-client-side state on the server */
 

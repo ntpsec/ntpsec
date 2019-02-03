@@ -36,7 +36,7 @@ The following command controls NTS authentication. It overrides
 normal TLS protocol negotiation, which is not usually necessary.
 
 [[crypto]]
-+crypto+ [+mintls+ _version_] [+maxtls+ _version_] [+enclair+] [+cipher+ _name_]
++crypto+ [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphers+ _name_] [+tlsciphersuites+ _name_]
 
 The options are as follows:
 
@@ -48,16 +48,15 @@ The options are as follows:
   Set the highest allowable TLS version to negotiate. By setting
   mintls and maxtls equal you can force the TLS version for testing.
 
-+enclair+ _bool_::
-  Turning this on disables crypto. Code requiring installed
-  certificates is bypassed.  Useful for testing if you have a
-  cooperating implementation on the other end that can also
-  disable crypto. {ntsdman} will do this.
+// https://crypto.stackexchange.com/questions/8964/sending-tls-messages-with-out-encryption-using-openssl-code
++tlsciphers+ _string_::
+   An OpenSSL cipher list to configure the allowed ciphers for TLS
+   versions up to and including TLS 1.2. An empty string disables encryption.
 
-+cipher+ _name_::
-  Disable normal cipher negotiation, forcing one by name. Intended
-  for testing.
-
++tlsciphersuites+ _string_::
+   An OpenSSL ciphersuite list to configure the allowed ciphersuites for
+   TLS 1.3. An empty string disables encryption.
+   
 The following options of the +server+ command configure NTS.
 
 +nts+::
@@ -71,7 +70,7 @@ The following options of the +server+ command configure NTS.
   for a specific NTS server, which may differ from the NTP server.
   Conforms to RFC3896 section 3.2.2 prescription for the Host part of
   a URI: that is, the +address_ may be a hostname, a FQDN, an IPv4
-  numeric address, an IPv6 numeric addresa (in square brackets).
+  numeric address, an IPv6 numeric address (in square brackets).
   Address may have the suffix +:port+ to specify a UDP port.
 
 +require+ 'address'::

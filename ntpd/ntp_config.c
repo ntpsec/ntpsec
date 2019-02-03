@@ -2001,12 +2001,12 @@ config_crypto(
 		    	mintls = crypto->value.d;
 			break;
 
-		case T_Enclair:
-			enclair = (bool)crypto->value.i;
+		case T_Tlsciphers:
+			tlsciphers = estrdup(crypto->value.s);
 			break;
 
-		case T_Cipher:
-			cipher = estrdup(crypto->value.s);
+		case T_Tlsciphersuites:
+			tlsciphersuites = estrdup(crypto->value.s);
 			break;
 		}
 	}

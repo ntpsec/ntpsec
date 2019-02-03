@@ -119,10 +119,10 @@ check_cmac_mac_length(
     size_t length = 0;
     char key[EVP_MAX_KEY_LENGTH];  /* garbage is OK */
     CMAC_CTX *ctx;
-    const EVP_CIPHER *cipher = EVP_get_cipherbyname(name);
+    const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
 
     ctx = CMAC_CTX_new();
-    CMAC_Init(ctx, key, EVP_CIPHER_key_length(cipher), cipher, NULL);
+    CMAC_Init(ctx, key, EVP_CIPHER_key_length(cmac_cipher), cmac_cipher, NULL);
     CMAC_Final(ctx, mac, &length);
     CMAC_CTX_free(ctx);
 
@@ -174,8 +174,8 @@ check_cmac_key_length(
 	char *name,
 	char *key,
 	int keylength) {
-    const EVP_CIPHER *cipher = EVP_get_cipherbyname(name);
-    int len = EVP_CIPHER_key_length(cipher);
+    const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
+    int len = EVP_CIPHER_key_length(cmac_cipher);
     int i;
 
     if (len < keylength) {
