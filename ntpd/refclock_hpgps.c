@@ -160,7 +160,7 @@ hpgps_start(
 	 * Default is HP 58503A, mode arg selects HP Z3801A
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	ldisc = LDISC_CLK;
+	ldisc = LDISC_STD;
 	speed = SPEED232;
 	/* subtype parameter to server config line shares mode slot */
 	if (1 == peer->cfg.mode) {

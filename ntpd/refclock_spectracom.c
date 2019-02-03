@@ -177,7 +177,7 @@ spectracom_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
 			   peer->cfg.baud ? peer->cfg.baud : SPEED232,
-			   LDISC_CLK);
+			   LDISC_STD);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;

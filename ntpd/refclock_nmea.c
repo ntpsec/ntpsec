@@ -478,8 +478,8 @@ nmea_start(
 		}
 		path = device;
         }
-	/* Open serial port. Use CLK line discipline, if available. */
-	pp->io.fd = refclock_open(path, baudrate, LDISC_CLK);
+	/* Open serial port. */
+	pp->io.fd = refclock_open(path, baudrate, LDISC_STD);
 
 	if (0 > pp->io.fd) {
 		msyslog(LOG_ERR, "REFCLOCK: %s NMEA device open(%s) failed",

@@ -149,7 +149,7 @@ struct jjyunit {
 	char	unittype ;	    /* UNITTYPE_XXXXXXXXXX */
 	short   operationmode ;	    /* Echo Keisokuki LT-2000 */
 	int 	linespeed ;         /* SPEED232_XXXXXXXXXX */
-	short	linediscipline ;    /* LDISC_CLK or LDISC_RAW */
+	short	linediscipline ;    /* LDISC_STD or LDISC_RAW */
 /* Receiving data */
 	bool	bInitError ;        /* Set by jjy_start if any error during initialization */
 	short	iProcessState ;     /* JJY_PROCESS_STATE_XXXXXX */
@@ -747,7 +747,7 @@ jjy_receive ( struct recvbuf *rbufp )
 			}
 		}
 
-		if ( up->linediscipline == LDISC_CLK ) {
+		if ( up->linediscipline == LDISC_STD ) {
 			break ;
 		}
 
@@ -1076,7 +1076,7 @@ jjy_start_tristate_jjy01 ( int unit, struct peer *peer, struct jjyunit *up )
 
 	up->unittype  = UNITTYPE_TRISTATE_JJY01 ;
 	up->linespeed = SPEED232_TRISTATE_JJY01 ;
-	up->linediscipline = LDISC_CLK ;
+	up->linediscipline = LDISC_STD ;
 
 	return 0 ;
 
@@ -1550,7 +1550,7 @@ jjy_start_echokeisokuki_lt2000 ( int unit, struct peer *peer, struct jjyunit *up
 
 	up->unittype  = UNITTYPE_ECHOKEISOKUKI_LT2000 ;
 	up->linespeed = SPEED232_ECHOKEISOKUKI_LT2000 ;
-	up->linediscipline = LDISC_CLK ;
+	up->linediscipline = LDISC_STD ;
 
 	up->operationmode = ECHOKEISOKUKI_LT2000_MODE_SWITCHING_CONTINUOUS ;
 
@@ -1778,7 +1778,7 @@ jjy_start_citizentic_jjy200 ( int unit, struct peer *peer, struct jjyunit *up )
 
 	up->unittype  = UNITTYPE_CITIZENTIC_JJY200 ;
 	up->linespeed = SPEED232_CITIZENTIC_JJY200 ;
-	up->linediscipline = LDISC_CLK ;
+	up->linediscipline = LDISC_STD ;
 
 	return 0 ;
 
@@ -1964,7 +1964,7 @@ jjy_start_tristate_gpsclock01 ( int unit, struct peer *peer, struct jjyunit *up 
 
 	up->unittype  = UNITTYPE_TRISTATE_GPSCLOCK01 ;
 	up->linespeed = SPEED232_TRISTATE_GPSCLOCK01 ;
-	up->linediscipline = LDISC_CLK ;
+	up->linediscipline = LDISC_STD ;
 
 	return 0 ;
 

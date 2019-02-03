@@ -17,20 +17,11 @@
 #endif
 
 /*
- * Line discipline flags.  The deprecated ones required line discipline
- * or streams modules to be installed/loaded in the kernel and are now
- * ignored.  Leave the LDISC_CLK and other deprecated symbols defined
- * until 2013 or 2014 to avoid complicating the use of newer drivers on
- * older ntpd, which is often as easy as dropping in the refclock *.c.
+ * Line discipline flags.
  */
 #define LDISC_STD	0x000	/* standard */
-#define LDISC_CLK	0x001	/* deprecated tty_clk \n */
-#define LDISC_CLKPPS	0x002	/* deprecated tty_clk \377 */
-#define LDISC_MODEM	0x004	/* deprecated tty_clk #* */
-#define LDISC_CHU	0x008	/* deprecated */
-#define LDISC_PPS	0x010	/* deprecated */
 #define LDISC_RAW	0x020	/* raw binary */
-#define	LDISC_REMOTE	0x080	/* remote mode */
 #define	LDISC_7O1	0x100	/* 7-bit, odd parity for Z3801A */
+#define	LDISC_REMOTE	0x080	/* remote mode */
 
 #endif /* GUARD_NTP_TTY_H */
