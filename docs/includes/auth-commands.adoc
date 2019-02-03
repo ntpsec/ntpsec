@@ -1,5 +1,7 @@
 // Authentication commands - included twice
 
+The following declarations control MAC authentication:
+
 [[controlkey]]
 +controlkey+ _key_::
   Specifies the key identifier to use with the
@@ -24,10 +26,60 @@
   the ... are necessary.  Multiple +trustedkey+ lines are supported
   and trusted keys can also be specified on the command line.
 
-The authentication procedures require that both the local and remote
+The MAC authentication procedures require that both the local and remote
 servers share the same key and key identifier for this purpose,
 although different keys can be used with different servers.
 The _key_ arguments are 32-bit unsigned integers with values from 1 to
 65,535.
 
+The following command controls NTS authentication. It overrides
+normal TLS protocol negotiation, which is not usually necessary.
+
+[[crypto]]
++crypto+ [+mintls+ _version_] [+maxtls+ _version_]
+
+The options are as follows:
+
++mintls+ _number_::
+  Set the lowest allowable TLS version to negotiate. Will be useful in
+  the wake of a TLS compromise.
+
++maxtls+ _number_::
+  Set the highest allowable TLS version to negotiate. By setting
+  mintls and maxtls equal you can force the TLS version for testing.
+
+The following options of the +server+ command configure NTS.
+
++nts+::
+  Use Network Time Security for authentication and encryption.
+  Request key exchange from the NTP server.  if there is an NTS
+  key service running in the same host as the NTP server adding this
+  option is normally all you need to do.
+
++ask+ 'address'::
+  Use Network Time Security for authentication and encryption.  Ask
+  for a specific NTS server, which may differ from the NTP server.
+  Conforms to RFC3896 section 3.2.2 prescription for the Host part of
+  a URI: that is, the +address_ may be a hostname, a FQDN, an IPv4
+  numeric address, an IPv6 numeric addresa (in square brackets).
+  Address may have the suffix +:port+ to specify a UDP port.
+
++require+ 'address'::
+  Use Network Time Security for authentication and encryption.
+  Require a specific NTS server, which may differ from the NTP server.
+  Address syntax is as for +ask+.
+
++noval::
+  Do not validate the server certificate.
+
++expire::
+  How long to use a secured NTP association before rekeying with the
+  NTS-KE server.
+
++cert +file+::
+  Present the certificate in +file+ as our client certificate
+
++ca+ +location+::
+  Use the file, or directory, specified by +location+ to
+  validate the NTS-KE server certificate.  Do not use any other CA.
 // end

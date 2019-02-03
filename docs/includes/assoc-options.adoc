@@ -72,38 +72,4 @@
   Specifies the version number to be used for outgoing NTP packets.
   Versions 1-4 are the choices, with version 4 the default.
 
-+nts+::
-  Use Network Time Security for authentication and encryption.
-  Request key exchange from the NTP server.  Following options
-  are revelevant only for nts peers, and are thus tagged with 'nts'.
-  that can be omitted when the option is given.
-
-+nts ask+ 'address'::
-  Use Network Time Security for authentication and encryption.  Ask
-  for a specific NTS server, which may differ from the NTP server.
-  Conforms to RFC3896 section 3.2.2 prescription for the Host part of
-  a URI: that is, the +address_ may be a hostname, a FQDN, an IPv4
-  numeric address, an IPv6 numeric addresa (in square brackets).
-  Address may have the suffix +:port+ to specify a UDP port.
-
-+nts require+ 'address'::
-  Use Network Time Security for authentication and encryption.
-  Require a specific NTS server, which may differ from the NTP server.
-  Address syntax is as for +ask+.
-
-+nts noval::
-  Do not validate the server certificate.
-
-+nts expire::
-  How long to use a secured NTP association before rekeying with the
-  NTS-KE server.
-
-+nts cert +file+::
-  Present the certificate in +file+ as our client certificate
-
-+nts ca+ +location+::
-  Use the file, or directory, specified by +location+ to
-  validate the NTS-KE server certificate.  Do not use any other CA.
-
-
 // end
