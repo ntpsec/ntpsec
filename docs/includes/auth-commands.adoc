@@ -51,11 +51,12 @@ The options are as follows:
 // https://crypto.stackexchange.com/questions/8964/sending-tls-messages-with-out-encryption-using-openssl-code
 +tlsciphers+ _string_::
    An OpenSSL cipher list to configure the allowed ciphers for TLS
-   versions up to and including TLS 1.2. An empty string disables encryption.
+   versions up to and including TLS 1.2. A single NULL cipher disables
+   encryption and use of certificates.
 
 +tlsciphersuites+ _string_::
    An OpenSSL ciphersuite list to configure the allowed ciphersuites for
-   TLS 1.3. An empty string disables encryption.
+   TLS 1.3.  A single NULL cipher disables encryption and use of certificates.
 
 The following options of the +server+ command configure NTS.
 
