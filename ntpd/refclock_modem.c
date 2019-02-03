@@ -515,7 +515,7 @@ modem_timeout(
 		snprintf(device, sizeof(device), DEVICE, up->unit);
 		fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
 				   peer->cfg.baud ? peer->cfg.baud : SPEED232,
-				   LDISC_ACTS | LDISC_RAW | LDISC_REMOTE);
+				   LDISC_MODEM | LDISC_RAW | LDISC_REMOTE);
 		if (fd < 0) {
 			msyslog(LOG_ERR, "REFCLOCK: modem: open fails %m");
 			return;
