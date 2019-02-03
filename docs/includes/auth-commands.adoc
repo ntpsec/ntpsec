@@ -46,7 +46,7 @@ The options are as follows:
 
 +maxtls+ _number_::
   Set the highest allowable TLS version to negotiate. By setting
-  mintls and maxtls equal you can force the TLS version for testing.
+  +mintls+ and +maxtls+ equal, you can force the TLS version for testing.
 
 // https://crypto.stackexchange.com/questions/8964/sending-tls-messages-with-out-encryption-using-openssl-code
 +tlsciphers+ _string_::
@@ -61,11 +61,11 @@ The following options of the +server+ command configure NTS.
 
 +nts+::
   Use Network Time Security for authentication and encryption.
-  Request key exchange from the NTP server.  if there is an NTS
+  Request key exchange from the NTP server.  If there is an NTS
   key service running in the same host as the NTP server adding this
   option is normally all you need to do.
 
-+ask+ 'address'::
++ask+ _address_::
   Use Network Time Security for authentication and encryption.  Ask
   for a specific NTS server, which may differ from the NTP server.
   Conforms to RFC3896 section 3.2.2 prescription for the Host part of
@@ -73,22 +73,22 @@ The following options of the +server+ command configure NTS.
   numeric address, an IPv6 numeric address (in square brackets).
   Address may have the suffix +:port+ to specify a UDP port.
 
-+require+ 'address'::
++require+ _address_::
   Use Network Time Security for authentication and encryption.
   Require a specific NTS server, which may differ from the NTP server.
   Address syntax is as for +ask+.
 
-+noval::
++noval+::
   Do not validate the server certificate.
 
-+expire::
++expire+::
   How long to use a secured NTP association before rekeying with the
   NTS-KE server.
 
-+cert +file+::
-  Present the certificate in +file+ as our client certificate
++cert+ _file_::
+  Present the certificate in _file_ as our client certificate
 
-+ca+ +location+::
-  Use the file, or directory, specified by +location+ to
++ca+ _location_::
+  Use the file, or directory, specified by _location_ to
   validate the NTS-KE server certificate.  Do not use any other CA.
 // end
