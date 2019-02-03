@@ -2,7 +2,7 @@
  * Copyright (c) 1983, 1993
  *	The Regents of the University of California.  All rights reserved.
  * Copyright 2015 by the NTPsec project contributors
- * SPDX-License-Identifier: BSD-2-clause
+ * SPDX-License-Identifier: BSD-4-Clause-UC
  */
 
 #include "config.h"
