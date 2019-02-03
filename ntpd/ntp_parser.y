@@ -68,6 +68,7 @@
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
 %token	<Integer>	T_ControlKey
+%token	<Integer>	T_Crypto
 %token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
@@ -132,6 +133,7 @@
 %token	<Integer>	T_Maxdist
 %token	<Integer>	T_Maxmem
 %token	<Integer>	T_Maxpoll
+%token	<Integer>	T_Maxtls
 %token	<Integer>	T_Mdnstries
 %token	<Integer>	T_Mem
 %token	<Integer>	T_Memlock
@@ -142,6 +144,7 @@
 %token	<Integer>	T_Minimum
 %token	<Integer>	T_Minpoll
 %token	<Integer>	T_Minsane
+%token	<Integer>	T_Mintls
 %token	<Integer>	T_Mode
 %token	<Integer>	T_Monitor
 %token	<Integer>	T_Month
@@ -291,6 +294,9 @@
 %type	<Integer>	tinker_option_keyword
 %type	<Attr_val>	tinker_option
 %type	<Attr_val_fifo>	tinker_option_list
+%type	<Integer>	crypto_option_keyword
+%type	<Attr_val>	crypto_option
+%type	<Attr_val_fifo>	crypto_option_list
 %type	<Attr_val>	tos_option
 %type	<Integer>	tos_option_dbl_keyword
 %type	<Integer>	tos_option_int_keyword
@@ -341,6 +347,7 @@ command :	/* NULL STATEMENT */
 	|	rlimit_command
 	|	system_option_command
 	|	tinker_command
+	|	crypto_command
 	|	miscellaneous_command
 	;
 
@@ -1087,6 +1094,39 @@ tinker_option_keyword
 	|	T_Stepfwd
 	|	T_Stepout
 	|	T_Tick
+	;
+
+
+/* Crypto Commands
+ * ---------------
+ */
+
+crypto_command
+	:	T_Crypto crypto_option_list
+			{ CONCAT_G_FIFOS(cfgt.crypto, $2); }
+	;
+
+crypto_option_list
+	:	crypto_option_list crypto_option
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	crypto_option
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
+	;
+
+crypto_option
+	:	crypto_option_keyword number
+			{ $$ = create_attr_dval($1, $2); }
+	;
+
+crypto_option_keyword
+	:	T_Maxtls
+	|	T_Mintls
 	;
 
 

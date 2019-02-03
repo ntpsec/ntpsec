@@ -12,6 +12,9 @@
 #define FLAG_NTS_REQ	0x04u	/* NTS, ask for specified server */
 #define FLAG_NTS_NOVAL	0x08u	/* do not validate the server certificate */
 
+extern float mintls;		/* minimum TLS version allowed */
+extern float maxtls;		/* force this version for testing */
+
 /* Configuration data for an NTS association */
 struct ntscfg_t {
     char *server;	/* if NULL, use the peer itself (normal case) */

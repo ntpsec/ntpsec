@@ -15,6 +15,9 @@
 #include "ntp_types.h"
 #include "ntpd.h"
 
+float mintls = 1.2;		/* minimum TLS version allowed */
+float maxtls;			/* force this version for testing */
+
 /* By design, there is no per-client-side state on the server */
 
 /*

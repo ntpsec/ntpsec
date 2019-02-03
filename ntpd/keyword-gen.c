@@ -203,6 +203,9 @@ struct key_tok ntp_keywords[] = {
 { "expire",		T_Expire,		FOLLBY_TOKEN },
 { "cert",		T_Cert,			FOLLBY_TOKEN },
 { "ca",			T_Ca,			FOLLBY_TOKEN },
+{ "crypto",		T_Crypto,		FOLLBY_TOKEN },
+{ "mintls",		T_Mintls,		FOLLBY_TOKEN },
+{ "maxtls",		T_Maxtls,		FOLLBY_TOKEN },
 };
 
 typedef struct big_scan_state_tag {
