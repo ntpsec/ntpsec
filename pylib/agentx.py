@@ -69,7 +69,7 @@ class MIBControl:
             if node not in currentLevel.keys():
                 currentLevel[node] = {"reader": None, "writer": None,
                                       "subids": None}
-            if len(remainingOID) == 0:  # We have reached the target node
+            if not remainingOID:  # We have reached the target node
                 currentLevel[node]["reader"] = reader
                 currentLevel[node]["writer"] = writer
                 if dynamic is not None:
@@ -207,7 +207,7 @@ class PacketControl:
         # loop body split out to separate the one-shot/run-forever switches
         # from the actual logic
         self.packetEater()
-        while len(self.receivedPackets) > 0:
+        while self.receivedPackets:
             packet = self.receivedPackets.pop(0)
             if packet.sessionID != self.sessionID:
                 self.log(
@@ -252,7 +252,7 @@ class PacketControl:
         "Wait for a response to a specific packet, dropping everything else"
         while True:
             self.packetEater()
-            while len(self.receivedPackets) > 0:
+            while self.receivedPackets:
                 packet = self.receivedPackets.pop(0)
                 if packet.__class__ != ax.ResponsePDU:
                     continue
@@ -352,11 +352,11 @@ class PacketControl:
         data = b""
         while True:
             tmp = select.select([self.socket], [], [], 0)[0]
-            if len(tmp) == 0:  # No socket, means no data available
+            if not tmp:  # No socket, means no data available
                 break
             tmp = tmp[0]
             newdata = tmp.recv(4096)  # Arbitrary value
-            if len(newdata) > 0:
+            if newdata:
                 self.log("Received data: %s" % repr(newdata), 5)
                 data += newdata
                 self.lastReception = time.time()
@@ -397,7 +397,7 @@ class PacketControl:
         for oidr in packet.oidranges:
             while True:
                 oids = self.database.getOIDsInRange(oidr, True)
-                if len(oids) == 0:  # Nothing found
+                if not oids:  # Nothing found
                     binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW,
                                             oidr.start))
                     break
@@ -424,7 +424,7 @@ class PacketControl:
         # Handle non-repeats
         for oidr in nonreps:
             oids = self.database.getOIDsInRange(oidr, True)
-            if len(oids) == 0:  # Nothing found
+            if not oids:  # Nothing found
                 binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
             else:
                 oid, reader, _ = oids[0]
@@ -432,7 +432,7 @@ class PacketControl:
         # Handle repeaters
         for oidr in repeats:
             oids = self.database.getOIDsInRange(oidr)
-            if len(oids) == 0:  # Nothing found
+            if not oids:  # Nothing found
                 binds.append(ax.Varbind(ax.VALUE_END_OF_MIB_VIEW, oidr.start))
             else:
                 for oid, reader, _ in oids[:packet.maxReps]:
@@ -553,7 +553,7 @@ def walkMIBTree(tree, rootpath=()):
     keyID = 0
     while True:
         if keyID >= len(currentKeys):
-            if len(nodeStack) > 0:
+            if nodeStack:
                 # No more nodes this level, pop higher node
                 current, currentKeys, keyID, key = nodeStack.pop()
                 oidStack.pop()

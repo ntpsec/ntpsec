@@ -182,9 +182,9 @@ def parseConf(text):
         current[:] = []
 
     def pushLine():
-        if len(current) > 0:
+        if current:
             pushToken()
-        if len(tokens) > 0:
+        if tokens:
             lines.append(tokens[:])
             tokens[:] = []
 
@@ -210,7 +210,7 @@ def parseConf(text):
             elif text[i] in "'\"":  # Starting a text string
                 inQuote = True
                 quoteStarter = text[i]
-                if len(current) > 0:
+                if current:
                     pushToken()
             elif text[i] == "\\":  # Linebreak escape
                 i += 1
@@ -219,7 +219,7 @@ def parseConf(text):
             elif text[i] == "\n":  # EOL: break the lines
                 pushLine()
             elif text[i] in string.whitespace:
-                if len(current) > 0:
+                if current:
                     pushToken()
             else:
                 current.append(text[i])
@@ -316,7 +316,7 @@ def gluenumberstring(above, below, isnegative):
     "Glues together parts of a number string"
     if above == "":
         above = "0"
-    if len(below) > 0:
+    if below:
         newvalue = ".".join((above, below))
     else:
         newvalue = above

@@ -592,7 +592,7 @@ SERR_NOTRUST = "***No trusted keys have been declared"
 def dump_hex_printable(xdata, outfp=sys.stdout):
     "Dump a packet in hex, in a familiar hex format"
     rowsize = 16
-    while len(xdata) > 0:
+    while xdata:
         # Slice one row off of our data
         linedata, xdata = ntp.util.slicedata(xdata, rowsize)
         # Output data in hex form
@@ -946,7 +946,7 @@ class ControlSession:
             if bail >= (2*MAXFRAGS):
                 raise ControlException(SERR_TOOMUCH)
 
-            if len(fragments) == 0:
+            if not fragments:
                 tvo = self.primary_timeout / 1000
             else:
                 tvo = self.secondary_timeout / 1000
@@ -962,7 +962,7 @@ class ControlSession:
 
             if not rd:
                 # Timed out.  Return what we have
-                if len(fragments) == 0:
+                if not fragments:
                     if timeo:
                         raise ControlException(SERR_TIMEOUT)
                 if timeo:
@@ -1014,7 +1014,7 @@ class ControlSession:
             # Find the most recent fragment with a
             not_earlier = [frag for frag in fragments
                            if frag.offset >= rpkt.offset]
-            if len(not_earlier):
+            if not_earlier:
                 not_earlier = not_earlier[0]
                 if not_earlier.offset == rpkt.offset:
                     warn("duplicate %d octets at %d ignored, prior "
@@ -1023,7 +1023,7 @@ class ControlSession:
                             not_earlier.count, not_earlier.offset))
                     continue
 
-            if len(fragments) > 0:
+            if fragments:
                 last = fragments[-1]
                 if last.end() > rpkt.offset:
                     warn("received frag at %d overlaps with %d octet "
@@ -1202,7 +1202,7 @@ class ControlSession:
             elif 0 < cord < 127:
                 # if it isn't a special case or garbage, add it
                 response += c
-        if len(response) > 0:  # The last item won't be caught by the loop
+        if response:  # The last item won't be caught by the loop
             kvpairs.append(response.strip())
         items = []
         for pair in kvpairs:

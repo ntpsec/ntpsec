@@ -113,7 +113,7 @@ class Ntpq(cmd.Cmd):
             elif len(cmdprefixlist) > 1:
                 self.warn("***Command `%s' ambiguous\n" % cmd)
                 return
-            elif len(cmdprefixlist) == 0:
+            elif not cmdprefixlist:
                 self.warn("***Command `%s' unknown\n" % cmd)
                 return
 
@@ -127,7 +127,7 @@ class Ntpq(cmd.Cmd):
                     elif len(argprefixlist) > 1:
                         self.warn("Command `%s' is ambiguous\n" % arg)
                         return
-                    elif len(argprefixlist) == 0:
+                    elif not argprefixlist:
                         self.warn("Command `%s' is unknown\n" % arg)
                         return
 
@@ -178,7 +178,7 @@ usage: help [ command ]
             print(e.strerror)
             return False
 
-        if len(self.peers) == 0:
+        if not self.peers:
             if self.chosts:
                 self.say("server=%s " % self.session.hostname)
             self.say("No association IDs returned\n")
@@ -857,7 +857,7 @@ usage: clearvars
 
     def do_showvars(self, line):
         "print variables on the variable list"
-        if len(self.uservars) == 0:
+        if not self.uservars:
             print("No variables on list.")
         for (name, value) in self.uservars.items():
             if value:
@@ -1666,17 +1666,17 @@ if __name__ == '__main__':
         else:
             interpreter.chosts.append((token, session.ai_family))
 
-    if len(arguments) == 0:
+    if not arguments:
         interpreter.chosts.append((DEFHOST, session.ai_family))
 
-    if (len(interpreter.ccmds) == 0 and
+    if (not interpreter.ccmds and
             not interpreter.interactive and
             os.isatty(0) and
             os.isatty(1)):
         interpreter.interactive = True
 
     try:
-        if len(interpreter.ccmds) == 0:
+        if not interpreter.ccmds:
             if len(interpreter.chosts) > 1:
                 interpreter.warn(
                     "ntpq can only work interactively on one host.\n")

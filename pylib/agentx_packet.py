@@ -673,7 +673,7 @@ def decode_ResponsePDU(data, header):
     temp, data = slicedata(data, 8)
     sysUptime, resError, resIndex = struct.unpack(endianToken + "IHH",
                                                   ntp.poly.polybytes(temp))
-    if len(data) > 0:
+    if data:
         varbinds = decode_varbindlist(data, header)
     else:
         varbinds = None
@@ -828,7 +828,7 @@ class OID:
             raise ValueError
 
     def isNull(self):
-        if (len(self.subids) == 0) and (self.include is False):
+        if not self.subids and self.include is False:
             return True
         return False
 
@@ -1095,7 +1095,7 @@ def encode_searchrange_list(bigEndian, searchranges):
 
 def decode_searchrange_list(data, header):  # Cannot handle extra data
     oidranges = []
-    while len(data) > 0:
+    while data:
         oids, data = decode_SearchRange(data, header)
         oidranges.append(oids)
     return tuple(oidranges)
@@ -1109,9 +1109,9 @@ def encode_varbindlist(bigEndian, varbinds):
 
 
 def decode_varbindlist(data, header):
-    if len(data) > 0:
+    if data:
         varbinds = []
-        while len(data) > 0:
+        while data:
             vb, data = decode_Varbind(data, header)
             varbinds.append(vb)
         varbinds = tuple(varbinds)

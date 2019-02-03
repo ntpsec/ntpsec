@@ -33,7 +33,7 @@ class FileJig:
         self.flushed = True
 
     def readline(self):
-        if len(self.readline_return) > 0:
+        if self.readline_return:
             return self.readline_return.pop(0)
         return ""
 
@@ -70,7 +70,7 @@ class SocketJig:
         self.connected = addr
 
     def recv(self, bytecount):
-        if len(self.return_data) > 0:
+        if self.return_data:
             current = self.return_data.pop(0)
             if len(current) > bytecount:
                 ret = current[:bytecount]
@@ -89,7 +89,7 @@ class HasherJig:
 
     def update(self, data):
         self.update_calls.append(data)
-        if len(data) > 0:
+        if data:
             self.digest_size += 1
 
     def digest(self):
@@ -214,7 +214,7 @@ class SelectModuleJig:
         if self.select_fail > 0:
             self.select_fail -= 1
             raise select.error
-        if len(self.do_return) == 0:  # simplify code that doesn't need it
+        if not self.do_return:  # simplify code that doesn't need it
             self.do_return.append(True)
         doreturn = self.do_return.pop(0)
         if doreturn is True:

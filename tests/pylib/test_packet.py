@@ -1548,7 +1548,7 @@ class TestControlSession(unittest.TestCase):
                 query_fail[0] -= 1
                 code = query_fail_code.pop(0)
                 raise ctlerr("foo", errorcode=code)
-            if len(query_results) > 0:
+            if query_results:
                 setresponse(query_results.pop(0))
         logjig = jigs.FileJig()
         # Init

@@ -26,14 +26,14 @@ leap = time.time()
 days = int(leap/86400)
 leap = (days+1)*86400
 
-if len(args) > 0:
+if args:
     leapdate = datetime.datetime.strptime(args[0], "%Y-%m-%d")
     leap = (leapdate - epoch).total_seconds()
     leap = int(leap)
     args = args[1:]
 
 expire = leap + 28*86400
-if len(args) > 0:
+if args:
     expiredate = datetime.datetime.strptime(args[0], "%Y-%m-%d")
     expire = (expiredate - epoch).total_seconds()
     expire = int(expire)
