@@ -9,7 +9,7 @@ The NTS implementation shall:
 * Address RFC5705 Keying Material Exporting and AES_SIV (RFC5297) code
   support which may not be natively supported in OpenSSL.
 
-* Comply with the standardized specification of 
+* Comply with the standardized specification of
   link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp[NTS]
 
 * Be interoperable with the other reference implementations in IETF hackathons.
@@ -70,7 +70,7 @@ Charlies, e.g. in a data-center deployment or for load sharing.
   \-------------------/
 ----
 
-In this diagram, an arrow means "initiates requests to". 
+In this diagram, an arrow means "initiates requests to".
 Responses flow in the other direction.  Each connection
 is used for one request/response transaction.
 
@@ -161,8 +161,8 @@ specified in the NTS draft.
 The NTS-KE client (Bravo) and NTS-KE server (Delta) independently
 derive the C2S and S2C keys.  For OpenSSL, this is implemented by
 making two calls to SSL_export_keying_material(), which implements
-RFC5705.  The label and context inputs are provided in 
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]. 
+RFC5705.  The label and context inputs are provided in
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1].
 This process is deterministic, so both ends generate the same C2S and S2C.
 
 The NTS-KE client passes C2S and S2C to the NTP client.  The NTS-KE
@@ -184,7 +184,7 @@ link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.3[5.
 link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.4[5.4]
 -  Authentication using C2S
 link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.6[5.6]
-  
+
 It gets back the same, with the cookie replaced with a new cookie
 and S2C used for authentication and to encrypt the new cookie.
 
@@ -194,8 +194,8 @@ All the extra data is in real NTP extensions.  (No more of
 the magic length kludgery for the current shared key authentication.)
 
 If packets (and hence cookies) are lost, the client will include
-a cookie-placeholder for each extra cookie it wants. 
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.5[5.5] 
+a cookie-placeholder for each extra cookie it wants.
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.5[5.5]
 Those slots will be returned with new cookies.
 
 The AEAD algorithm used for authentication is setup to encrypt some
@@ -368,7 +368,7 @@ authenticate the return packet.
 
 How many cookies should the NTP client try to hold?  8
 
-There is no hard reason, but it is what the NTS-KE server SHOULD return. 
+There is no hard reason, but it is what the NTS-KE server SHOULD return.
 link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.6[4.1.6]
 It also matches the number of samples that ntpd remembers (the reach bit
 mask in ntpq/peers) and running out of responses is a good time to do
@@ -388,12 +388,40 @@ Both connections contain C2S and S2C keys.
 
 == Potential cookie recipe(s)
 
-. Form a plaintext according to cookie variation
-.. the AEAD algorthm number, and c2s/s2c keys.
-.. a countdown word, the AEAD algorthm number, and c2s/s2c keys.
-.. a countdown word, client IPv6 address, the AEAD algorthm number, and c2s/s2c keys.
-. encrypt it with the master key (which has nothing to do w/ TLS)
-. form the cookie w/ cookie recipe number, master key number, a nonce and the ciphertext.
+. Form a plaintext "P" comprised of records
+.. minimum of an AEAD algorithm record, c2s, and s2c key records
+.. (optional) previously connected network address (for academic purposes)
+.. (optional) a timestamp when to stop honoring the current cookie series
+.. (optional) a timestamp when the current cookie series began (for expiration)
+.. (optional) a Modified Julian Date when to stop honoring the current cookie series
+.. (optional) a MJD when the current cookie series began (for expiration)
+.. (optional) a number of cookies remaining before series expiration.
+.. (optional) the number of cookies (estimated) since series began for expiration.
+. encrypt it with the master key "K" (which has nothing to do w/ TLS)
+. form the cookie w/ records for the master key number "I", an unsized nonce "N", and the ciphertext "C".
+
+----
+base	29	NThkZGExNTYxZGY3YWQzMTkxOGI4OTQ0ZWQ5YTU3MTc=	ZGZmZTg0MTBhZjk2YTgxOGE2ZDMwOGQ0Nzg0ZGMxNzg
+track	192.168.1.107
+btai	3753708891
+etai	3761747291
+bmjd	58460
+emjd	58557
+cdown	3460
+cup	4210
+----
+
+An overly complicated example plaintext. records are carriage return terminated and fields are horizontal tab separated.
+The example is set in January of 2019 for a chain starting mid-December and ending mid-March.
+It is likely that only one of the expiry fields is desirable.
+The cookie count up/down counter should change by the number of cookies issued (8).
+The c2s/s2c fields should be base64 encoded.
+
+----
+27391	MjI4MGVlYWY2ZWMzOGZjNmQ4MmFjMjhmMGViYzYxZTQ=	U2FsdGVkX1/dO8WX4e+daOzR2dcRvbHOUv3jAMT51NttWrK+CnBUDWuhm54Hz31TG1P+VkWlrMGHAIHea9gQ3+shZj+I8pdPLrEn9V/E+1VJMC96qBo+x55yQmOyRLEJJSJMs25dSQ0idndKAOYqUOyulwruTe7QuPr+L5fVB9qSw2n18w/6BtnXsivAEjMpfxP9X7ZDZ46LHm1ayAcmMoccdjuwKqgPaa2ez33rlruXmcsF5omlguBZWxjm/iNZ
+----
+
+A wholly made up example cookie.
 
 == Unresolved issues for the next RFC WG
 
@@ -406,10 +434,8 @@ the encode/decode overhead shouldn't be an issue.
 == Ridiculous questions
 
 === link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.3[4.1.3], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.4[4.1.4]
-Is the response in case of abuse 'continue abuse, just wait a minute'?
 
-=== link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.4[5.4], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.5[5.5]
-When sending a cookie placeholder, are multiple cookie extensions sent?
+Is the response in case of abuse 'continue the abuse, just wait a minute'?
 
 === link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.7[5.7]
 Does the unique identifier extension need to be omniversally unique?
