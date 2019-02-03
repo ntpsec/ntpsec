@@ -1,4 +1,4 @@
-= A Tour of the NTP Internals =
+= A Tour of the NTP Internals
 
 This document is intended to be helpful to people trying to understand
 and modify the NTP code.  It aims to explain how the pieces fit
@@ -13,9 +13,9 @@ However, try not to replicate comments here; it's better to point
 at where they live in the code.  This document is intended to convey
 a higher-level view than individual comments.
 
-== Key Types ==
+== Key Types
 
-=== l_fp, s_fp, u_fp ===
+=== l_fp, s_fp, u_fp
 
 C doesn't have any native fixed-point types, only float types.
 To do certain time calculations without loss of precision, NTP
@@ -56,7 +56,7 @@ will be, by a factor of at least five million) we can map all incoming
 timestamps from whatever cycle into the nearest time in modular
 arithmetic relative to the cycle length.
 
-=== time64_t ===
+=== time64_t
 
 NTP was written well before the 64-bit word size became common. While
 compilers on 32-bit machines sometimes have had "long long" as an
@@ -70,7 +70,7 @@ way but implemented as a uint64_t has already replaced this.
 This still has some utility because NTP still runs on 32-bit machines
 with a 32-bit time_t.
 
-=== refid ===
+=== refid
 
 A refid is not a type of its own, but a convention that overloads
 different kinds of information in a 32-bit field that occurs in a
@@ -100,7 +100,7 @@ The conflation of ID-for-humans with the loop-detection cookie is not quite
 the design error it looks like, as refclocks aren't implicated in
 loop detection.
 
-=== struct timespec vs. struct timeval ===
+=== struct timespec vs. struct timeval
 
 These aren't local types themselves - both are standardized in
 ANSI/POSIX.  They're both second/subsecond pairs intended to represent
@@ -127,7 +127,7 @@ or to nanosecond precision as close to these call sites as possible;
 this doesn't pull additional accuracy out of thin air, but it does
 avoid loss-of-precision bugs due to mixing these structures.
 
-=== struct peer ===
+=== struct peer
 
 In ntpd, there are peer control blocks - one per upstream synchronization
 source - that have an IP address in them.  That's what the main
@@ -140,12 +140,12 @@ internet.  Refclock data always has a round trip time of zero, and the
 code that finds the lowest RTT picks the most recent slot when the
 RTTs are equal.
 
-== config file parser ==
+== config file parser
 
 There is a minor quirk: numbers come in as integers, type T_Integer.
 There is no type T_Unsigned.  Range checking may not work right.
 
-== ntpd control flow ==
+== ntpd control flow
 
 In normal operation, after initialization, ntpd loops forever
 waiting for a UDP packet to arrive on some set of open interfaces, or
@@ -201,7 +201,7 @@ There was internal evidence in the NTP Classic build machinery that
 asynchronous I/O on Unix machines probably hadn't worked for
 quite a while before NTPsec removed it.
 
-== System call interface and the PLL ==
+== System call interface and the PLL
 
 All of ntpds clock management is done through four system calls:
 clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or (in
@@ -327,7 +327,7 @@ RFC 1589 covers the above timekeeping and slewing and kernel PLL.
 RFC 2783 covers the API for reading a time stamp the kernel grabs when a PPS
 happens.
 
-== Refclock management ==
+== Refclock management
 
 There is an illuminating comment in ntpd/ntp_refclock.c that begins
 "Reference clock support is provided here by maintaining the fiction
@@ -350,7 +350,7 @@ The process everything step sorts the contents of the FIFO, then discards
 outliers, roughly 1/3 of the samples, and then figures out the average and
 injects that into the peer buffer for the refclock.
 
-== Asynchronous DNS lookup ==
+== Asynchronous DNS lookup
 
 The DNS code runs in a separate thread to avoid stalling
 the main loop while it waits for a DNS lookup to return. And DNS
@@ -383,7 +383,7 @@ isn't a way to do that yet - the pool doesn't have any DNS support
 for it.)  The other would be to try replacing the poorest server
 rather than only replacing dead servers.
 
-== The build recipe ==
+== The build recipe
 
 The build recipe is, essentially, a big Python program using a set of
 specialized procedures called 'waf'.  To learn about waf itself see
@@ -432,7 +432,7 @@ a loadable Python module.  Here are a few useful generalizations:
   You will usually be able to model your implementation on code that
   is already there.
 
-== The Python tools ==
+== The Python tools
 
 Project policy is that (a) anything that does not have to be written
 in C shouldn't be, and (b) our preferred non-C language is Python.
@@ -446,7 +446,7 @@ layering of the three most important ones - ntpq, ntpdig, and ntpmon.
 These are front ends to a back-end library of Python service routines that
 installs as 'ntp' and lives in the source tree at pylib/.
 
-=== ntpq and ntpmon ===
+=== ntpq and ntpmon
 
 ntpq and ntpmon are front ends to back-end class called ControlSession
 that lives in ntp.packet.
@@ -474,13 +474,13 @@ doesn't live in the front end.  It's in ntp.util, well separated from
 both the command interpreter and the protocol back end so it can be
 re-used.
 
-=== ntpdig ===
+=== ntpdig
 
 ntpdig also uses the pylib library but doesn't speak Mode 6.
 Instead, it builds and interprets time-synchronization packets
 using some of the same machinery.
 
-=== MRU reporting ===
+=== MRU reporting
 
 The mrulist() method in ControlSession is more complex than the rest of the
 back-end code put together except do_query() itself.  It is the one part

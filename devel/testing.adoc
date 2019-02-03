@@ -1,4 +1,4 @@
-= How To Test NTPsec =
+= How To Test NTPsec
 
 This assumes you have downloaded the source and built a system
 and now you want to test your new ntpd.
@@ -6,7 +6,7 @@ and now you want to test your new ntpd.
 For help on getting that far, see the file INSTALL in the top-level
 directory.
 
-== Path problems with the test tools ==
+== Path problems with the test tools
 
 The build tree has been set up so that if you first waf builid then cd to
 build/main/ntpclients/ and run (say) ntpq, you should be able to test
@@ -47,7 +47,7 @@ bug but a packaging error that the NTPsec maintainers themselves can't
 fix. In that case, you need to report it to your distribution
 maintainers.
 
-== Preliminary one-off test ==
+== Preliminary one-off test
 
 For a one-off test:
 
@@ -66,7 +66,7 @@ Your current /etc/ntp.conf should work correctly.
 Check your log files to see if there is anything strange.
 Run "ntpq -p" to see if things look normal.
 
-== Full qualification test ==
+== Full qualification test
 
 For a longer test, including over reboots.
 
@@ -76,7 +76,7 @@ That will install your new ntpd into /usr/local/sbin/ntpd
 Now you have to patch your (re)start scripts to look there
 and restart ntpd.  The details vary by OS/distro.
 
-=== Distributions using systemd ===
+=== Distributions using systemd
 
 1. Edit /usr/lib/systemd/system/ntpd.service
 
@@ -98,7 +98,7 @@ gets sourced into the init script so you can put the real code in there
     PATH="/usr/local/sbin:$PATH"
 --------------------------------------------------
 
-=== Debian, Ubuntu, Raspbian ===
+=== Debian, Ubuntu, Raspbian
 
 Many newer versions use systemd; follow those directions. The
 rest of this section describes the older set of conventions used
@@ -142,7 +142,7 @@ rather than the one it wants you to:
 
 apt-get upgrade may undo those edits and revert to running the system version.
 
-=== FreeBSD ===
+=== FreeBSD
 
 Edit /etc/rc.conf It needs to contain this:
 
@@ -154,7 +154,7 @@ ntpd_program="/usr/local/sbin/ntpd"
 If you are running ntpd, the first line will be there
 already.  The default is NO.
 
-=== NetBSD ===
+=== NetBSD
 
 Edit /etc/rc.d/ntpd. Change
 

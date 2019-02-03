@@ -1,4 +1,4 @@
-= Preliminary design notes for the NTPv5 protocol =
+= Preliminary design notes for the NTPv5 protocol
 
 NTPv4 is showing its age.  There are functional capabilities that
 would be very useful if they could be standardized but
@@ -7,9 +7,9 @@ currently are not.
 This document will first list these missing bits, then discuss
 ways to incorporate them.
 
-== The missing data: a semantic view ==
+== The missing data: a semantic view
 
-=== REFIDs ===
+=== REFIDs
 
 Reference IDs are used by Stratum 1 sources to identify clocks and
 clock types, and by hosts at higher strata to perform loop detection.
@@ -23,7 +23,7 @@ loop detection.
 The new protocol should support REFIDs at least as long as an IPv6
 address (16 octets).
 
-=== Timescale ===
+=== Timescale
 
 Most servers ship UTC.  Some ship TAI. Some perform leap-second
 smearing, some do not.
@@ -31,14 +31,14 @@ smearing, some do not.
 The new protocol should enable a server to advertise its timescale,
 including, if applicable in its timescale, its current leap second offset.
 
-=== Era ===
+=== Era
 
 NTP dates are 64-bit counters based on an epoch.
 
 The new protocol should enable a server to ship a year identifying its
 epoch.
 
-=== NTS ===
+=== NTS
 
 The IETF is attempting to develop a new cryptographic standard for
 secure/authenticated time exchange: Network Time Security.
@@ -48,11 +48,11 @@ https://tools.ietf.org/wg/ntp/
 The new protocol needs to allow a block of data of as-yet unspecified
 and possibly variable size to be dedicated to NTS use.
 
-== Extensions vs. replacement ==
+== Extensions vs. replacement
 
 There are three possible scenarios for NTPv5 design.
 
-=== NTPv4+ ===
+=== NTPv4+
 
 In this incremental approach, the NTP port number (123) is retained
 and the 48-byte header v4 header is preserved. New data fields are
@@ -64,7 +64,7 @@ known to silently discard RFC7822 extension blocks as a way of
 preventing DoS attacks; this would create propagation issues
 difficult to diagnose.
 
-=== NTPNG ===
+=== NTPNG
 
 In this approach, a new port number is allocated. The protocol
 design is unconstrained except that it must carry the semantic
@@ -74,7 +74,7 @@ field.
 The principal difficulty with this approach is that getting all the
 world's firewalls to pass through a new port is not easy.
 
-=== Newmode ===
+=== Newmode
 
 In this approach, the NTP port number is retained.  So is at least
 the first byte of the v4 packet header structure, so that the version
@@ -89,7 +89,7 @@ The principal difficulty with this approach is that implementations
 might not reject Version 5 packets, and therefore mis-parse the
 header.  NTP Classic and NTPsec *do* perform this check.
 
-== Payload format design for the NTPNG and Newmode cases ==
+== Payload format design for the NTPNG and Newmode cases
 
 NTP is running out of version numbers.  The version field is only 3
 bits wide.  Accordingly, the Newmode payload should be structured like
@@ -125,7 +125,7 @@ that PNG chunks have only two-byte lengths and always end with a CRC.
 This chunk system is deliberately more similar to RFC7822 extension
 blocks.
 
-== Daniel weighs in ==
+== Daniel weighs in
 
 There aren't many deficiencies in NTPv4 which can't be fixed by adding
 extension fields. A change big enough to make a version bump

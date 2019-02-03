@@ -1,4 +1,4 @@
-= How-to for NTPsec hackers =
+= How-to for NTPsec hackers
 
 Annoying but necessary legalese:
 
@@ -13,7 +13,7 @@ and project conventions.
 You may also find the articles at https://blog.ntpsec.org/
 interesting.
 
-== Choice of language ==
+== Choice of language
 
 In order to reduce the complexity of maintenance and testing
 due to multiple languages, we hold the set of allowed languages
@@ -32,7 +32,7 @@ it's easier to verify portability in Python than it is in sh.
 Please read our C and Python guidelines carefully; they're not just
 about style, they're serious measures to reduce defect rates.
 
-== Inclusions from other projects ==
+== Inclusions from other projects
 
 Git subtrees and submodules are clever but full of traps. Discussion
 here:
@@ -46,9 +46,9 @@ builds.  For this reason, we use naive textual inclusion.
 So far this has only been an issue with libaes_siv. If you notice
 there's an inclusion not listed here, file an issue.
 
-== C Guidelines ==
+== C Guidelines
 
-=== C API standards ===
+=== C API standards
 
 The baseline C standard to write to is ISO/IEC 9899:1999, also known
 as C99 (but see the following section on banned functions).  Note that
@@ -93,7 +93,7 @@ Here are the non-standardized APIs that may be used:
   UDP packet layer.  See ntpd/ntp_packetstamp.c for details - if you
   add a local hack to do this, it needs to be sealed inside that module.
 
-=== Banned functions ===
+=== Banned functions
 
 The following C99/POSIX functions are BANNED.  They are unsafe, tending to
 cause buffer overruns and (all too often) exploitable security holes:
@@ -113,11 +113,11 @@ property is not portable.
 In general, avoid functions that are non-reentrant.  When in doubt, see
 http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
 
-=== Banned features ===
+=== Banned features
 
 All C files should be in plain US-ASCII encoding; do not use trigraphs.
 
-=== Other interfaces to be avoided ===
+=== Other interfaces to be avoided
 
 Don't use gettimeofday(2).  While this is nominally POSIX, it is
 deprecated and may be removed in the future.  Use clock_gettime(2)
@@ -134,7 +134,7 @@ want that to happen again. Thus, if you must refer to struct timeval due to
 an external interface, move the data to/from a struct timespec as
 close to that call site as possible.
 
-=== Coding style and indentation ===
+=== Coding style and indentation
 
 Dr. Dave Mills liked this code indented formatted in a consistent way.
 The file "dot.emacs" has the emacs C-mode indentation style that Dave
@@ -147,7 +147,7 @@ result in a coordinated flag day in ongoing development, it will be
 carefully announced in the mailto:devel@ntpsec.org mailing list before
 being merged and pushed.
 
-=== Conventions for #ifdef guard names ===
+=== Conventions for #ifdef guard names
 
 Parts of this code are a thicket of C preprocessor conditionals.
 In an attempt to make these halfway comprehensible, we use the
@@ -189,7 +189,7 @@ USE_*::
 	gate use of sections of code that must be conditionally
 	compiled depending on *combinations* of HAVE and NEED symbols.
 
-=== Cross-platform portability ===
+=== Cross-platform portability
 
 Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
 to assume the code will never run on a 16-bit machine.  When in doubt,
@@ -219,7 +219,7 @@ is true on effectively all modern hardware, the code runs on some
 sufficiently old iron that this is not necessarily the case even if
 the compiler and toolchain have been modernized.
 
-== Python guidelines ==
+== Python guidelines
 
 You may assume Python 2 at 2.6 or later, or Python 3 at 3.3 or later.
 
@@ -249,9 +249,9 @@ Note: In the future, the Python baseline may
 http://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[change
 t 2.7.2].
 
-== General notes ==
+== General notes
 
-=== Build system ===
+=== Build system
 
 The build uses waf, replacing a huge ancient autoconf hairball that
 caused many problems. The waf script is embedded in the top level of
@@ -260,7 +260,7 @@ instructions.
 
 Full waf documentation is at https://waf.io/
 
-=== Naming conventions ===
+=== Naming conventions
 
 Almost every binary and script we install has an "ntp" prefix on the name
 because namespace pollution is rude. (The only exception is "ntsd", the
@@ -270,7 +270,7 @@ want us to install, follow this convention.
 Generally, we favor "ntp" rather than "ntp-" for consistency and to
 reduce the amount people have to type. Choose tastefully.
 
-=== Well-tempered output ===
+=== Well-tempered output
 
 We are devotees of the Unix rule that programs should play nicely
 with other programs.  We like output formats that are simple,
@@ -305,7 +305,7 @@ UTC with some options frozen; full year required, medial T required,
 explicit Zulu timezone). Local times should be expressed in ISO 8601,
 always with the full 4-digit year.
 
-=== Copyrights and licenses ===
+=== Copyrights and licenses
 
 Much of the historic code in this distribution is under the "NTP
 License" resembling BSD-2-clause.  Our favored licenses are
@@ -361,7 +361,7 @@ the historic copyright is no longer appropriate, but such decisions
 cannot be made casually. Discuss it with the project management
 before moving.
 
-=== Document what you do ===
+=== Document what you do
 
 When you change anything user-visible, you are expected to update the
 relevant documentation *in the same commit*.  No exceptions.
@@ -369,7 +369,7 @@ relevant documentation *in the same commit*.  No exceptions.
 Otherwise, we'd have to inflict long, tedious document reviews on
 everybody. Nobody wants that.
 
-=== Documentation format and structure ===
+=== Documentation format and structure
 
 All our documentation is mastered in asciidoc.  That includes internal
 documentation like this file. We do this because asciidoc is easy to
@@ -396,7 +396,7 @@ a large common include file. These includes live in docs/includes
 and are probably what you need to edit if you're updating anything
 that appears on a man page.
 
-=== Version number ===
+=== Version number
 
 We use a variant of three-part Semantic Versioning, of the form X.Y.Z.
 X, Y, and Z are non-negative decimal integers.
@@ -424,7 +424,7 @@ Note that this is a different numbering system from NTP Classic. In
 their A.B.C numbers, A was the protocol version, B was the major, and
 C was the minor.  They also use release-candidate suffixes.
 
-== Version string ==
+== Version string
 
 We use the BUILD_EPOCH as described in packaging/packaging.adoc for
 the timestamp (converted to RFC 3339 format) part of the version
@@ -438,7 +438,7 @@ Development builds have version strings of the form:
 
 <base version number>+ <BUILD_EPOCH in RFC 3339 format> (git rev <git shorthash>)
 
-== Contribution workflow and conventions ==
+== Contribution workflow and conventions
 
 Please work on one piece of conceptual work at a time.
 
@@ -450,14 +450,14 @@ mailto:devel@ntpsec.org mailing list.  Other people may have
 suggestions, will want to collaborate, and will wish to review your
 code.
 
-=== Git ===
+=== Git
 
 We use Git as our distributed version control system.
 
 If you ever get stuck or confused while using Git, please consult
 http://ohshitgit.com/
 
-=== GitLab.com ===
+=== GitLab.com
 
 We use GitLab.com as our forge.
 
@@ -477,7 +477,7 @@ of the Project Manager, after consulting with the existing core team.
 Generally, other levels of access will not be granted, as they are not
 necessary to be a welcome and effective contributor.
 
-=== Optional: Send patches by email ===
+=== Optional: Send patches by email
 
 If you do not want to use GitLab pull requests, we welcome simple fix
 and "drive-by" patches submitted by email.
@@ -501,7 +501,7 @@ parameter ---author from the email From header and the git parameter
 
 For complex patches and contribution narratives, please use GitLab.
 
-== Commit comments ==
+== Commit comments
 
 And please follow git conventions for change comments. That means your comment
 should consist of:
@@ -538,7 +538,7 @@ summary.
 Yes, we know the pre-git portions of the history violate some of these.
 That was then; this is now.
 
-=== How to refer to previous commits ===
+=== How to refer to previous commits
 
 The best (most human-friendly) way to reference a commit is by quoting its
 summary line; if you need to disambiguate, give its date and author.
@@ -548,7 +548,7 @@ keeping random strings of hex digits in working memory.  Besides, hashes
 will break if the history is ever moved to another VCS or the repository
 has to be surgically altered.
 
-=== Avoid unnecessary merge bubbles ===
+=== Avoid unnecessary merge bubbles
 
 There are two kinds of merge bubbles in git commit graphs. The
 necessary kind happens because branches have genuinely diverged enough
@@ -579,7 +579,7 @@ Setting this option adds --rebase to all your pulls; this may cause
 a minor inconvenience when you have uncommitted local changes; you
 should be able to use "git stash" to get around that.
 
-== Logging tags ==
+== Logging tags
 
 To facilitate analysis of logs, log messages are tagged with an initial
 topic group token.  These are:
@@ -598,7 +598,7 @@ PROTO:: Protocol machine actions
 REFCLOCK:: Reference clock and driver actions
 MODE6:: Processing of Mode 6 requests
 
-== Release Checklist ==
+== Release Checklist
 
 This is the release checklist to be used by the project manager to cut
 each release.

@@ -1,10 +1,10 @@
-= Y2K certification =
+= Y2K certification
 
 The NTP suite version 4.0.91 (dating from before continuous
 version-control history) was tested for Y2K conformance by the AT&T
 Freeware project.
 
-== Test notes ==
+== Test notes
 
 ............................................................................
 Name of the Application: xntp
@@ -117,7 +117,7 @@ Non-Y2K Problems Observed:
 
 The "Non-Y2K Problems Observed" have been fixed.
 
-== Test results ==
+== Test results
 
 ............................................................................
 Script started on Sat Jan  1 04:14:09 2000
@@ -192,7 +192,7 @@ server 135.25.xxxx.xxxx, stratum 1, offset -0.000023, delay 0.02731
 29 Feb 00:02:15 ntpdate[8353]: adjust time server 135.25.xxxx.xxxx offset -0.000023 sec
 ............................................................................
 
-== AT&T README ==
+== AT&T README
 
 This is most of the AT&T README file for the Y2K patches.
 Some now-irrelevant material has been removed.

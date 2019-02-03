@@ -1,12 +1,12 @@
-= Guidance for package builders =
+= Guidance for package builders
 
-== Package parts ==
+== Package parts
 
 Some useful components for package building can be found in the etc/
 subdirectory, including init boot time scripts, systemd unit files,
 and boilerplate for default ntpd configuration.
 
-== ntp.conf installation ==
+== ntp.conf installation
 
 Installation from source (waf install) does not attempt to put an ntp.conf
 or ntp.d in place. Your installable package should do this.
@@ -14,7 +14,7 @@ or ntp.d in place. Your installable package should do this.
 The reason this is so is that NTPsec does not yet have an authorized
 pool group of its own. This may change in the future.
 
-== Platforms without Python ==
+== Platforms without Python
 
 Many tools (actually, almost everything except the core daemon itself)
 have been moved from C to Python. This is an important step for
@@ -56,7 +56,7 @@ not have Python installed and execute the programs there.
 There appears to be no speed advantage, or disadvantage, to running the
 binaries created by cx_freeze.
 
-== Hacking Python shebangs ==
+== Hacking Python shebangs
 
 The shebang lines in our Python scripts point to "python".  Part of
 our standard tests check that you can change that to "python3" without
@@ -75,7 +75,7 @@ their distro's Python policy.
 We think the choice that minimizes overall pain, and directs it to
 the party best able to cope, is clear.  We choose (b).
 
-== Cross-era interoperability in modular calendar arithmetic ==
+== Cross-era interoperability in modular calendar arithmetic
 
 The protocol necessarily uses time/date stamps of finite length in
 order to fit into fixed-size fields; they happen to have a 136-year
@@ -100,7 +100,7 @@ environment variable.
 More information on reproducible builds is at:
 https://reproducible-builds.org/[https://reproducible-builds.org/]
 
-== Disambiguation of NMEA dates ==
+== Disambiguation of NMEA dates
 
 Due to bad design of NMEA0183, the reporting protocol used by many GPS
 sensors, the NMEA driver in NTPsec sometimes has to make an assumption

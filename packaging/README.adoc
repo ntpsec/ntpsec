@@ -1,4 +1,4 @@
-== Packaging ==
+== Packaging
 
 Packaging scripts go in this directory.
 
