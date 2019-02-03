@@ -13,7 +13,8 @@
 #define FLAG_NTS_NOVAL	0x08u	/* do not validate the server certificate */
 
 extern float mintls;		/* minimum TLS version allowed */
-extern float maxtls;		/* force this version for testing */
+extern float maxtls;		/* maximum TLS version allowed */
+extern bool enclair;		/* if on, disable TLS and talk en clair */
 
 /* Configuration data for an NTS association */
 struct ntscfg_t {

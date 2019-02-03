@@ -2001,6 +2001,9 @@ config_crypto(
 		    	mintls = crypto->value.d;
 			break;
 
+		case T_Enclair:
+			enclair = (bool)crypto->value.i;
+			break;
 		}
 	}
 }

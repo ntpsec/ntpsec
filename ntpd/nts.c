@@ -16,7 +16,8 @@
 #include "ntpd.h"
 
 float mintls = 1.2;		/* minimum TLS version allowed */
-float maxtls;			/* force this version for testing */
+float maxtls;			/* maximum TLS version allowed */
+bool enclair;			/* if on, disable TLS and talk en clair */
 
 /* By design, there is no per-client-side state on the server */
 

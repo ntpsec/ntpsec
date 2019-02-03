@@ -36,7 +36,7 @@ The following command controls NTS authentication. It overrides
 normal TLS protocol negotiation, which is not usually necessary.
 
 [[crypto]]
-+crypto+ [+mintls+ _version_] [+maxtls+ _version_]
++crypto+ [+mintls+ _version_] [+maxtls+ _version_] [+enclair+]
 
 The options are as follows:
 
@@ -47,6 +47,12 @@ The options are as follows:
 +maxtls+ _number_::
   Set the highest allowable TLS version to negotiate. By setting
   mintls and maxtls equal you can force the TLS version for testing.
+
++enclair+ _bool_::
+  Turning this on disables crypto. Code requiring installed
+  certificates is bypassed.  Useful for testing if you have a
+  cooperating implementation on the other end that can also
+  disable crypto. {ntsdman} will do this.
 
 The following options of the +server+ command configure NTS.
 

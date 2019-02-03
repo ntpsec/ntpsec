@@ -79,6 +79,7 @@
 %token	<Integer>	T_Driftfile
 %token	<Integer>	T_Drop
 %token	<Integer>	T_Dscp
+%token	<Integer>	T_Enclair
 %token	<Integer>	T_Expire
 %token	<Integer>	T_Ellipsis	/* "..." not "ellipsis" */
 %token	<Integer>	T_Enable
@@ -1122,6 +1123,8 @@ crypto_option_list
 crypto_option
 	:	crypto_option_keyword number
 			{ $$ = create_attr_dval($1, $2); }
+	|	T_Enclair boolean
+			{ $$ = create_attr_ival($1, 1); }
 	;
 
 crypto_option_keyword
