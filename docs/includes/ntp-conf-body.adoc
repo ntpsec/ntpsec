@@ -1,4 +1,4 @@
-// This is the body of the manual page for ntpd.
+// This is the body of the manual page for ntpd.conf.
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
@@ -78,7 +78,7 @@ include::../includes/assoc-options.adoc[]
 
 include::../includes/assoc-auxcommands.adoc[]
 
-== Authentication Commands ==
+=== Authentication Commands ===
 
 include::../includes/auth-commands.adoc[]
 
