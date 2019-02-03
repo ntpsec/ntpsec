@@ -1891,7 +1891,7 @@ local_input(
 			{	/* simulate receive */
 // FIXME - this copy is no longer needed
 // This code is the result of a simple fix for SINGLEBUFFER
-// The copy used to go to add_full_recv_buffer, but that's not needed any more
+// The copy used to go to add_full_recv_buffer, but that's not needed anymore
 // I'm not sure the local_receive below is correct
 // Hal, 2018-Sep-21
 				buf = get_free_recv_buffer();

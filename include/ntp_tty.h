@@ -21,7 +21,7 @@
  */
 #define LDISC_STD	0x000	/* standard */
 #define LDISC_RAW	0x020	/* raw binary */
-#define	LDISC_7O1	0x100	/* 7-bit, odd parity for Z3801A */
+#define	LDISC_7O1	0x100	/* 7-bit odd parity for Z3801A */
 #define	LDISC_REMOTE	0x080	/* remote mode */
 
 #endif /* GUARD_NTP_TTY_H */

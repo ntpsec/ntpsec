@@ -444,7 +444,7 @@ my_fprintf(FILE *stream, const char *fmt, ...) {
 
 
 // ----------------------------------------------------------------------
-// test query in pristine state (bug#2745 misbehaviour)
+// test query in pristine state (bug#2745 misbehavior)
 TEST(leapsec, lsQueryPristineState) {
 	int            rc;
 	leap_result_t  qr;
@@ -943,7 +943,7 @@ TEST(leapsec, ls2012seqInsDumb) {
 	TEST_ASSERT_EQUAL(0,            qr.warped   );
 	TEST_ASSERT_EQUAL(LSPROX_ALERT, qr.proximity);
 
-	// NOW the insert/backwarp must happen
+	// NOW the insert/delete must happen
 	rc = leapsec_query(&qr, lsec2012+1);
 	TEST_ASSERT_TRUE(rc);
 	TEST_ASSERT_EQUAL(-1,            qr.warped   );

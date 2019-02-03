@@ -38,7 +38,7 @@
 // character and end it when we see the \n.
 //
 // The q or quality character indicates satellite lock and sync.   For the
-// purposes of NTP we are going to call it valid when we receive anything but
+// purposes of NTP, we are going to call it valid when we receive anything but
 // a '?'.  But we are only going to call it synced when we receive a ' '
 //////////////////////////////////////////////////////////////////////////////
 

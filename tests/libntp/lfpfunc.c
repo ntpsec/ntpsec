@@ -66,7 +66,7 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 }
 
 //----------------------------------------------------------------------
-// imlementation of the LFP stuff
+// implementation of the LFP stuff
 // This should be easy enough...
 //----------------------------------------------------------------------
 
@@ -144,7 +144,7 @@ static const size_t addsub_tot = (sizeof(addsub_tab)/sizeof(addsub_tab[0][0]));
 //  * The 'l_fp' fixed point fraction has 32 bits precision, so we allow
 //    for the LSB to toggle by clamping the epsilon to be at least 2^(-31)
 //
-//  * The double mantissa has a precsion 54 bits, so the other minimum is
+//  * The double mantissa has a precision 54 bits, so the other minimum is
 //    dval * (2^(-53))
 //
 //  The maximum of those two boundaries is used for the check.

@@ -902,7 +902,7 @@ do_hash_data(
 	EVP_MD_CTX * mdctx,
 	char const * cp   )
 {
-	unsigned char  text[32]; // must be power of two!
+	unsigned char  text[32]; // must be a power of two!
 	unsigned int   tlen =  0;
 	unsigned char  ch;
 

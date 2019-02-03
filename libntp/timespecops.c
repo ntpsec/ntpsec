@@ -19,7 +19,7 @@
  * nanoseconds of a timespec are signed values. IMHO, the easiest way is
  * to use a complement representation where the nanoseconds are still
  * normalised, no matter what the sign of the seconds value. This makes
- * normalisation easier, since the sign of the integer part is
+ * normalization easier, since the sign of the integer part is
  * irrelevant, and it removes several sign decision cases during the
  * calculations.
  *
@@ -28,7 +28,7 @@
  * normalised result.
  *
  * The exception to this are functions fix a '_fast' suffix, which do no
- * normalisation on input data and therefore expect the input data to be
+ * normalization on input data and therefore expect the input data to be
  * normalised.
  *
  * Input and output operands may overlap; all input is consumed before
@@ -72,7 +72,7 @@ normalize_tspec(
 	}
 #else
 	/* since 10**9 is close to 2**32, we don't divide but do a
-	 * normalisation in a loop; this takes 3 steps max, and should
+	 * normalization in a loop; this takes 3 steps max, and should
 	 * outperform a division even if the mul-by-inverse trick is
 	 * employed. */
 	if (x.tv_nsec < 0)

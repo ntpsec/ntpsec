@@ -153,7 +153,7 @@ TEST(timespecops, Helpers1) {
 }
 
 //----------------------------------------------------------------------
-// test normalisation
+// test normalization
 //----------------------------------------------------------------------
 
 TEST(timespecops, Normalise) {
@@ -558,7 +558,7 @@ TEST(timespecops, test_ToLFPabs) {
 TEST(timespecops, test_FromLFPbittest) {
 	struct timespec limit = timespec_init(0, 2);
 
-	// Not *exactly* a bittest, because 2**32 tests would take a
+	// Not *exactly* a bit test, because 2**32 tests would take a
 	// really long time even on very fast machines! So we do test
 	// every 1000 fractional units.
 	uint32_t tsf;
@@ -631,13 +631,13 @@ TEST(timespecops, test_LFProundtrip) {
 }
 
 //----------------------------------------------------------------------
-// conversion from l_fp, unsigned
+// conversion from l_fp unsigned
 //----------------------------------------------------------------------
 
 TEST(timespecops, test_FromLFPuBittest) {
 	struct timespec limit = timespec_init(0, 2);
 
-	// Not *exactly* a bittest, because 2**32 tests would take a
+	// Not *exactly* a bit test, because 2**32 tests would take a
 	// really long time even on very fast machines! So we do test
 	// every 1000 fractional units.
 	uint32_t tsf;

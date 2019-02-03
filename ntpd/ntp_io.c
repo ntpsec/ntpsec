@@ -2968,7 +2968,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 
 	if (disable_dynamic_updates) {
 		/*
-		 * discard ourselves if we are not needed any more
+		 * discard ourselves if we are not needed anymore
 		 * usually happens when running unprivileged
 		 */
 		remove_asyncio_reader(reader);
