@@ -1,5 +1,6 @@
 [Unit]
 Description=Wait for ntpd to synchronize system clock
+Documentation=man:ntpwait(8)
 Requisite=ntpd.service
 After=ntpd.service
 Conflicts=systemd-timesyncd.service
