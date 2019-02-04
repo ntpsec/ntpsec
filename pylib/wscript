@@ -83,7 +83,6 @@ def build(ctx):
     egg = ['ntp-%s.info' % ctx.env.NTPSEC_VERSION]
     ctx(
         features="subst",
-        is_copy=True,
         source=['ntp-in.info'],
         target=egg
     )
