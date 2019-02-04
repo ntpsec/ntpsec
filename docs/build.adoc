@@ -1,4 +1,4 @@
-= Building and Installing the Distribution =
+= Building and Installing the Distribution
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ For putting out compiler fires.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/install.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#waf[Autoconf has been replaced with waf]
 * link:#build[Building and Installing the Distribution]
@@ -26,7 +26,7 @@ include::includes/install.adoc[]
 '''''
 
 [[waf]]
-=== Autoconf has been replaced with waf ===
+=== Autoconf has been replaced with waf
 
 The autoconf build system used in NTP Classic has been replaced with
 waf, a more modern and much faster build engine.  It is not necessary
@@ -34,7 +34,7 @@ to install any separate waf package; the build engine is a Python
 script included in your NTPsec distribution.
 
 [[build]]
-== Building and Installing the Distribution ==
+== Building and Installing the Distribution
 
 It is not possible in a software distribution such as this to support
 every individual computer and operating system with a common
@@ -51,7 +51,7 @@ most detailed information on build-time dependencies and configuration
 options.
 
 [[unix]]
-== Building and Installing for Unix ==
+== Building and Installing for Unix
 
 This distribution uses common compilers and tools that come with most
 Unix distributions. Not all of these tools exist in the standard
@@ -69,7 +69,7 @@ compile and link the distribution and the +./waf install+ command to install
 the executables by default in +/usr/local/bin+.
 
 [[conf]]
-== Configuration ==
+== Configuration
 
 You are now ready to configure the daemon. You will need to create an NTP
 configuration file by default in +/etc/{ntpconf}+. Newbies should see the
@@ -79,7 +79,7 @@ daemon] page and move on to the specific configuration option pages from
 there.
 
 [[prob]]
-== If You Have Problems ==
+== If You Have Problems
 
 If you have problems with your hardware and software environment,
 a tutorial on debugging technique is in
@@ -97,7 +97,7 @@ Users are invited to report bugs and offer suggestions via the
 link:bugs.html[NTP Bug Reporting Procedures] page.
 
 [[additional]]
-== Additional +waf+ commands ==
+== Additional +waf+ commands
 
 +./waf clean+::
   Cleans out object files, programs and temporary files.

@@ -1,4 +1,4 @@
-= Command Index =
+= Command Index
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,7 +10,7 @@ The Mad Hatter says "Bring it on".
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/accopt.adoc[]
 include::includes/authopt.adoc[]

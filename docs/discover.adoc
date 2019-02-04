@@ -1,4 +1,4 @@
-= Automatic Server Discovery Schemes =
+= Automatic Server Discovery Schemes
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ Make sure who your friends are.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#assoc[Association Management]
 * link:#pool[Server Pool Scheme]
@@ -22,7 +22,7 @@ include::includes/hand.adoc[]
 '''''
 
 [[modes]]
-== Introduction ==
+== Introduction
 
 The NTPv4 *reference specification* supports three automatic server discovery
 schemes: broadcast, manycast, and server pool. However, NTPsec only supports
@@ -40,7 +40,7 @@ from the configuration file, and they are ordered from best to worst according
 to the NTP mitigation algorithms, and surplus associations are pruned.
 
 [[assoc]]
-== Association Management ==
+== Association Management
 
 Pool discovery uses an iterated process to discover new preemptable client
 associations as long as the total number of client associations is less
@@ -81,7 +81,7 @@ link:confopt.html[Configuration Options] page. See that page
 for applicability and defaults.
 
 [[pool]]
-== Pool Scheme ==
+== Pool Scheme
 
 The idea of targeting servers on a random basis to distribute and
 balance the load is not a new one; however, the

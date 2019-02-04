@@ -1,4 +1,4 @@
-== History of NTP ==
+== History of NTP
 
 // Early history was found at https://www.galsys.co.uk/about-NTP.html
 

@@ -1,4 +1,4 @@
-= Access Control Support =
+= Access Control Support
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,14 +10,14 @@ The skunk watches for intruders and sprays.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 include::includes/accopt.adoc[]
 
 '''''
 
-== Access Control Support ==
+== Access Control Support
 
 The +ntpd+ daemon implements a general purpose access control list (ACL)
 containing address/match entries sorted first by increasing address

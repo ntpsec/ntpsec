@@ -1,4 +1,4 @@
-= NTP Debugging Techniques =
+= NTP Debugging Techniques
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,13 +10,13 @@ We make house calls and bring our own bugs.
 
 |==============================
 
-== More Help ==
+== More Help
 
 include::includes/install.adoc[]
 
 '''''
 
-== Initial Startup ==
+== Initial Startup
 
 This page discusses +ntpd+ program monitoring and debugging techniques
 using the link:ntpq.html[+ntpq+ - standard NTP query program], either
@@ -59,7 +59,7 @@ utility can be used to verify a partial or complete path exists. Most
 problems reported to the NTP newsgroup are not NTP problems, but
 problems with the network or firewall configuration.
 
-== Verifying Correct Operation ==
+== Verifying Correct Operation
 
 Unless using the +iburst+ option, the client normally takes a few
 minutes to synchronize to a server. If the client time at startup
@@ -136,7 +136,7 @@ Sometimes the time distribution of errors can be revealing. It's a
 good idea to look occasionally at the plots produced by
 link:ntpviz.html[ntpviz].
 
-== Large Frequency Errors ==
+== Large Frequency Errors
 
 The frequency tolerance of computer clock oscillators varies widely,
 sometimes above 500 ppm. While the daemon can handle frequency errors up
@@ -154,7 +154,7 @@ kernel clock frequency below that value. For systems that do not support
 this program, this might be one using a command in the system startup
 file.
 
-== Access Controls ==
+== Access Controls
 
 Provisions are included in +ntpd+ for access controls which deflect
 unwanted traffic from selected hosts or networks. The controls described
@@ -175,7 +175,7 @@ association has synchronized, the association is not disabled, but a
 message is sent to the system log. See the link:accopt.html[Access
 Control Options] page for further information.
 
-== Large Delay Variations ==
+== Large Delay Variations
 
 In some reported scenarios an access line may show low to moderate
 network delays during some period of the day and moderate to high delays
@@ -198,7 +198,7 @@ Solaris, Tru64, Linux and FreeBSD, the kernel continuously disciplines
 the frequency so that the residual correction produced by +ntpd+ is
 usually less than a few milliseconds.
 
-== Cryptographic Authentication ==
+== Cryptographic Authentication
 
 Reliable source authentication requires the use of symmetric key
 link:authopt.html[Authentication Options] page. In symmetric key
@@ -216,7 +216,7 @@ displayed which shows the authentication status in the +auth+ field. A
 status of 1 indicates the packet was successful authenticated; otherwise
 it has failed.
 
-== Debugging Checklist ==
+== Debugging Checklist
 
 If the +ntpq+ or program does not show that messages are being
 received by the daemon or that received messages do not result in

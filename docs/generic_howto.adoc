@@ -1,4 +1,4 @@
-= How to build new GENERIC clocks =
+= How to build new GENERIC clocks
 include::html.include[]
 
 Here is an attempt to sketch out what you need to do to add
@@ -6,7 +6,7 @@ another clock to the generic driver: Currently the implementation is being
 cleaned up - so not all information in here is completely correct. Refer
 to the included code where in doubt.
 
-== Prerequisites ==
+== Prerequisites
 
 * Does the system you want the clock connect to have the include file
 termios.h? (You need that for the generic driver)
@@ -15,7 +15,7 @@ What to do:
 
 Make a conversion module (libparse/clk_*.c)
 
-== What is the time code format? ==
+== What is the time code format?
 
 Find year, month, day, hour, minute, second, status (synchronised or
 not), possibly time zone information (you need to give the offset to
@@ -132,7 +132,7 @@ closest to yours and tweak the code to match your clock.
 In order to make your clk_*.c file usable, a reference to the clockformat
 structure must be put into parse_conf.c.
 
-== Driver initialization ==
+== Driver initialization
 
 TTY setup and initialization/configuration will be done in
 ntpd/refclock_generic.c.

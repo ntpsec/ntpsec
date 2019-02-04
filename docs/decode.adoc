@@ -1,4 +1,4 @@
-= Event Messages and Status Words =
+= Event Messages and Status Words
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -12,11 +12,11 @@ Caterpillar knows all the error codes, which is more than most of us do.
 
 
 
-== Related Links ==
+== Related Links
 
 include::includes/install.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#sys[System Status Word]
@@ -31,7 +31,7 @@ include::includes/install.adoc[]
 '''''
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 This page lists the status words, event messages and error codes used
 for +ntpd+ reporting and monitoring. Status words are used to display
@@ -57,7 +57,7 @@ status or event. Some messages include additional information useful for
 error diagnosis and performance assessment.
 
 [[sys]]
-== System Status Word ==
+== System Status Word
 
 The system status word consists of four fields LI (0-1), Source (2-7),
 Count (8-11) and Event (12-15). It is reported in the first line of the
@@ -125,7 +125,7 @@ The Event Field displays the most recent event message coded as follows:
 |============================================================================
 
 [[peer]]
-== Peer Status Word ==
+== Peer Status Word
 
 The peer status word consists of four fields: Status (0-4), Select
 (5-7), Count (8-11) and Code (12-15). It is reported in the first line
@@ -194,7 +194,7 @@ The Event Field displays the most recent event message coded as follows:
 |============================================================================
 
 [[clock]]
-== Clock Status Word ==
+== Clock Status Word
 
 The clock status word consists of four fields: Unused (0-7), Count
 (8-11) and Code (12-15). It is reported in the first line of the
@@ -225,7 +225,7 @@ When the clock driver sets the code to a new value, a +clock_alarm+ (11)
 peer event is reported.
 
 [[flash]]
-== Flash Status Word ==
+== Flash Status Word
 
 The flash status word is displayed by the +ntpq+ program +rv+ command.
 It consists of a number of bits coded in hexadecimal as follows:
@@ -250,7 +250,7 @@ The "Tag" field is the name the source code uses for the status bit.
 Not all bits are in use, but have been kept for backwards compatibility.
 
 [[kiss]]
-== Kiss Codes ==
+== Kiss Codes
 
 Kiss codes are used in kiss-o'-death (KoD) packets, billboard displays
 and log messages. They consist of a string of four zero-padded ASCII

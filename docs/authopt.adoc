@@ -1,4 +1,4 @@
-= Authentication Commands and Options =
+= Authentication Commands and Options
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,13 +10,13 @@ Our resident cryptographer; now you see him, now you don't.
 
 |===============================
 
-== Related Links ==
+== Related Links
 
 include::includes/authopt.adoc[]
 
 '''''
 
-== Commands and Options ==
+== Commands and Options
 
 Unless noted otherwise, further information about these commands is on
 the link:authentic.html[Authentication Support] page.

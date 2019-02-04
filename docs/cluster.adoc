@@ -1,4 +1,4 @@
-= Clock Cluster Algorithm =
+= Clock Cluster Algorithm
 include::html.include[]
 
 The clock cluster algorithm processes the truechimers produced by the

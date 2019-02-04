@@ -1,4 +1,4 @@
-= Clock Filter Algorithm =
+= Clock Filter Algorithm
 include::html.include[]
 
 The clock filter algorithm processes the offset and delay samples

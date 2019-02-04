@@ -1,4 +1,4 @@
-= The Secure Network Time Protocol (NTPsec) Distribution =
+= The Secure Network Time Protocol (NTPsec) Distribution
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,13 +10,13 @@ Pleased to meet you.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 * A list of all links is on the link:sitemap.html[Site Map] page.
 
 '''''
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#platforms[Supported Platforms]
@@ -27,7 +27,7 @@ Pleased to meet you.
 * link:#info[Further Information]
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 The Network Time Protocol software contained in this
 distribution is available without charge under the conditions set
@@ -62,7 +62,7 @@ For differences between NTPsec and legacy versions, see
 link:ntpsec.html[this summary].
 
 [[platforms]]
-== Supported platforms ==
+== Supported platforms
 
 NTPsec supports all operating systems conforming to POSIX.1-2001 and
 ISO/IEC 9899:1999 (aka C99).  The POSIX.1-2008 clock calls
@@ -85,7 +85,7 @@ development; our only hard condition is that all joint results must be
 redistributable as open source.
 
 [[hand]]
-== The Handbook ==
+== The Handbook
 
 A good deal of tutorial and directive information is available in the
 handbook pages. These should be read in conjunction with the command and
@@ -120,7 +120,7 @@ link:outside-tools.html[Outside Tools]::
   collects some references and links.
 
 [[build]]
-== Building and Installing NTP ==
+== Building and Installing NTP
 
 The link:build.html[Building and Installing the Distribution] page
 gives an overview of the procedures for building and installing NTPsec
@@ -131,7 +131,7 @@ distribution root.
 include::includes/manual.adoc[]
 
 [[prob]]
-== Resolving Problems ==
+== Resolving Problems
 
 Like other things in modern Internet life, NTP problems can be
 devilishly intricate. This distribution includes a number of utilities
@@ -147,7 +147,7 @@ Users are invited to report bugs and offer suggestions via the
 link:bugs.html[NTP Bug Reporting Procedures] page.
 
 [[info]]
-== Further Information ==
+== Further Information
 
 The link:sitemap.html[Site Map] page contains a list of document
 collections arranged by topic. The Program Manual Pages collection may

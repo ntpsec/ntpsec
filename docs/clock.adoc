@@ -1,7 +1,7 @@
-= Clock State Machine =
+= Clock State Machine
 include::html.include[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[General Overview]
 * link:#panic[Panic Threshold]
@@ -13,7 +13,7 @@ include::html.include[]
 '''''
 
 [[intro]]
-== General Overview ==
+== General Overview
 
 In the NTPv4 specification and reference implementation a state machine
 is used to manage the system clock under exceptional conditions, as when
@@ -28,7 +28,7 @@ determined using three thresholds: _panic_, _step_ and _stepout_, and
 one timer: _hold_.
 
 [[panic]]
-== Panic Threshold ==
+== Panic Threshold
 
 Most computers today incorporate a real-time-clock (RTC) chip (sometimes
 referred to as a "time-of-year" (TOY) chip in the past) to maintain
@@ -44,7 +44,7 @@ but it can be changed with the +panic+ option of the
 link:miscopt.html#tinker[+tinker+] command.
 
 [[step]]
-== Step and Stepout Thresholds ==
+== Step and Stepout Thresholds
 
 Under ordinary conditions, the clock discipline gradually slews the
 clock to the correct time, so that the time is effectively continuous
@@ -83,7 +83,7 @@ for distributed applications that require correctly synchronized network
 time.
 
 [[hold]]
-== Hold Timer ==
+== Hold Timer
 
 When the daemon is started after a considerable downtime, it could be
 that the RTC chip clock has drifted significantly from NTP time. This can
@@ -104,7 +104,7 @@ file or by the training interval described later, the clock is set to
 within 0.5 ms in less than 300 s.
 
 [[inter]]
-== Operating Intervals ==
+== Operating Intervals
 
 The state machine operates in one of four nonoverlapping intervals.
 
@@ -139,7 +139,7 @@ Sync Interval::
   intervals are used.
 
 [[state]]
-== State Transition Function ==
+== State Transition Function
 
 The state machine consists of five states. An event is created when an
 update is received by the discipline algorithm. Depending on the state

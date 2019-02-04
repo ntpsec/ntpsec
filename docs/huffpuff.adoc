@@ -1,4 +1,4 @@
-= The Huff-n'-Puff Filter =
+= The Huff-n'-Puff Filter
 include::html.include[]
 
 In scenarios where a considerable amount of data are downloaded or

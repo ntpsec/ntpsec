@@ -1,4 +1,4 @@
-= NTP Bug Reporting Procedures =
+= NTP Bug Reporting Procedures
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -12,13 +12,13 @@ The rabbit toots to make sure you read this.
 
 '''''
 
-== Security Bug Reporting Procedures ==
+== Security Bug Reporting Procedures
 
 If you find or suspect a security related program bug in this
 distribution, please send a report to {project-security-list}. Please do not
 contact developers directly.
 
-== Non-Security Bug Reporting Procedures ==
+== Non-Security Bug Reporting Procedures
 
 If you find or suspect a non-security related program or documentation
 bug in this distribution, please enter a report on the project's

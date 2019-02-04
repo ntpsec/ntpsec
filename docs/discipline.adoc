@@ -1,7 +1,7 @@
-= Clock Discipline Algorithm =
+= Clock Discipline Algorithm
 include::html.include[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[General Overview]
 * link:#pll[Phase-Lock Loop Operations]
@@ -11,7 +11,7 @@ include::html.include[]
 '''''
 
 [[intro]]
-== General Overview ==
+== General Overview
 
 At the heart of the NTP specification and reference implementation is
 the clock discipline algorithm, which is best described as an adaptive
@@ -27,7 +27,7 @@ image::pic/discipline.gif[align="center"]
 Figure 1. Clock Discipline Algorithm
 
 [[pll]]
-== Clock Discipline Operations ==
+== Clock Discipline Operations
 
 A block diagram of the clock discipline is shown in Figure 1. The
 timestamp of a reference clock or remote server is compared with the
@@ -60,7 +60,7 @@ such cases, either peer uses the minimum of its poll interval and
 that of the other peer, which is included in the NTP packet header.
 
 [[loop]]
-== Loop Dynamics ==
+== Loop Dynamics
 
 It is necessary to verify that the clock discipline algorithm is stable
 and satisfies the Nyquist criterion, which requires that the sampling
@@ -128,7 +128,7 @@ operation, the system time can be stepped forward or backward more than
 page.
 
 [[house]]
-== Clock Initialization and Management ==
+== Clock Initialization and Management
 
 If left running continuously, an NTP client on a fast LAN in a home or
 office environment can maintain synchronization nominally within one

@@ -1,4 +1,4 @@
-= Server Commands and Options =
+= Server Commands and Options
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ The chicken is getting configuration advice.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/confopt.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#address[Server and Peer Addresses]
 * link:#association[Association Commands]
@@ -23,7 +23,7 @@ include::includes/confopt.adoc[]
 '''''
 
 [[address]]
-== Server and Peer Addresses ==
+== Server and Peer Addresses
 
 Following is a description of the server configuration commands in
 NTPv4. There are two classes of commands, configuration commands that
@@ -48,7 +48,7 @@ the host name forces DNS resolution to the IPv4 namespace, while a
 +-6+ qualifier forces DNS resolution to the IPv6 namespace.
 
 [[association]]
-== Association Commands ==
+== Association Commands
 
 Unless noted otherwise, further information about these commands is at
 link:discover.html#pool[Automatic Server Discovery].
@@ -61,12 +61,12 @@ otherwise.
 include::includes/assoc-commands.adoc[]
 
 [[options]]
-== Server Command Options ==
+== Server Command Options
 
 include::includes/assoc-options.adoc[]
 
 [[aux]]
-== Auxiliary Commands ==
+== Auxiliary Commands
 
 Information on authentication for broadcast options can be found at
 link:authopt.html[Authentication Options].

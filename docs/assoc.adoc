@@ -1,4 +1,4 @@
-= Association Management =
+= Association Management
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -11,11 +11,11 @@ Make sure who your friends are.
 |==============================
 
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#modes[Association Modes]
 * link:#client[Client/Server Mode]
@@ -28,7 +28,7 @@ include::includes/hand.adoc[]
 '''''
 
 [[modes]]
-== Association Modes ==
+== Association Modes
 
 This page describes the various modes of operation provided in NTPv4.
 There are three types of associations in NTP: _persistent_,
@@ -53,7 +53,7 @@ link:confopt.html[Server Commands and Options] page. See that page for
 applicability and defaults.
 
 [[client]]
-== Client/Server Mode ==
+== Client/Server Mode
 
 Client/server mode is the most common configuration in the Internet
 today. It operates in the classic remote-procedure-call (RPC) paradigm
@@ -78,7 +78,7 @@ options can be used to bracket the range. Unless noted otherwise, these
 options should not be used with reference clock drivers.
 
 [[symact]]
-== Symmetric Active/Passive Mode ==
+== Symmetric Active/Passive Mode
 
 Symmetric active/passive mode is intended for configurations where a
 clique of low-stratum peers operate as mutual backups for each other.
@@ -111,7 +111,7 @@ like client-mode messages, aside from putting a different mode number
 into the response.
 
 [[broad]]
-== Broadcast/Multicast Modes ==
+== Broadcast/Multicast Modes
 
 These modes cannot be effectively secured and are deprecated in
 NTPsec.  Client-mode support has been removed; server-side support
@@ -128,7 +128,7 @@ A server is configured to send broadcast messages using the
 +broadcast+ command and specifying the subnet address for broadcast.
 
 [[many]]
-== Manycast and Pool Modes ==
+== Manycast and Pool Modes
 
 Manycast and pool modes are automatic discovery and configuration
 paradigms. They are intended as a means for a client to troll the
@@ -142,7 +142,7 @@ servers should one or another fail. Additional information is on the
 link:discover.html[Automatic Server Discovery Schemes] page.
 
 [[poll]]
-== Poll Interval Management ==
+== Poll Interval Management
 
 NTP uses an intricate heuristic algorithm to automatically control the
 poll interval for maximum accuracy consistent with minimum network
@@ -195,7 +195,7 @@ recommended minimum and maximum intervals are 12 (1.1 hr) and 17 (36
 hr), respectively.
 
 [[burst]]
-== Burst Options ==
+== Burst Options
 
 Occasionally it is necessary to send packets temporarily at intervals
 less than the poll interval. For instance, with the +burst+ and +iburst+

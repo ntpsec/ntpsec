@@ -1,4 +1,4 @@
-= Access Control Commands and Options =
+= Access Control Commands and Options
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,13 +10,13 @@ The skunk watches for intruders and sprays.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/accopt.adoc[]
 
 '''''
 
-== Commands and Options ==
+== Commands and Options
 
 Unless noted otherwise, further information about these commands is on
 the link:access.html[Access Control Support] page.
