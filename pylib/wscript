@@ -80,10 +80,10 @@ def build(ctx):
     )
 
     # pep241  lay an egg
-    egg = ['ntp-%s.info' % ctx.env.NTPSEC_VERSION]
+    egg = ['ntp-%s.egg-info' % ctx.env.NTPSEC_VERSION]
     ctx(
         features="subst",
-        source=['ntp-in.info'],
+        source=['ntp-in.egg-info'],
         target=egg
     )
     ctx.install_files(ctx.env.PYTHONARCHDIR, egg)
