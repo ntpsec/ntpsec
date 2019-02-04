@@ -12,7 +12,7 @@ Requires: a dial-out device.
 
 == Warning ==
 
-The ACTS mode of this driver reports only two-digit years, and is thus
+The ACTS and USNO modes of this driver report only two-digit years, and is thus
 reliant on the system clock to be near correct before samples will be
 processed properly. You will not be able to use it to run
 autonomously, nor will it reliably recover from a trashed or zeroed
@@ -28,14 +28,15 @@ clock correction. It is designed primarily for backup when neither a
 radio clock nor connectivity to Internet time servers are available. It
 can also be configured to operate full period.
 
-For best results the indicated time must be corrected for the modem and
-telephone circuit propagation delays, which can reach 200 ms or more.
-For the NIST service, corrections are determined automatically by
-measuring the roundtrip delay of echoed characters. With this service,
-the absolute accuracy is typically a millisecond or two. Determining corrections for
-the other services must be by other means. With these
-services variations from call to call and between messages during a call
-are typically a few milliseconds, occasionally higher.
+For best results the indicated time must be corrected for the modem
+and telephone circuit propagation delays, which can reach 200 ms or
+more.  For the NIST service, corrections are determined automatically
+by measuring the roundtrip delay of echoed characters. With this
+service, the absolute accuracy is typically a millisecond or
+two. Determining corrections for the other services must be by other
+means. With these services variations from call to call and between
+messages during a call are typically a few milliseconds, occasionally
+higher.
 
 This driver requires a 9600 bps modem with a Hayes-compatible command
 set and control over the modem data terminal ready (DTR) control line.
