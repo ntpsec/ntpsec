@@ -1,4 +1,4 @@
-= ntp.keys - NTP symmetric key file format =
+= ntp.keys - NTP symmetric key file format
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ Three can keep a secret, if two are dead.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_description[DESCRIPTION]
 * link:#_usage[USAGE]
@@ -27,7 +27,7 @@ include::includes/ntp.keys-body.adoc[]
 
 '''''
 
-== SEE ALSO ==
+== SEE ALSO
 
 link:ntp_conf.html[{ntpdconfman}],
 link:ntpd.html[{ntpdman}],

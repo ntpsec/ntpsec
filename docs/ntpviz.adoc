@@ -1,4 +1,4 @@
-= ntpviz - make data visualizations from statistics files =
+= ntpviz - make data visualizations from statistics files
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,13 +10,13 @@ You could have a butterfly on your head and not even know it.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
 '''''
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[SYNOPSIS]
 * link:#_description[DESCRIPTION]

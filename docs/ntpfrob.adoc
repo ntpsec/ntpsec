@@ -1,4 +1,4 @@
-= ntpfrob - frob the local clock hardware =
+= ntpfrob - frob the local clock hardware
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ Assorted doohickeys for clock-frobbing are in the backpack.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[Synopsis]
 * link:#_description[Description]

@@ -1,4 +1,4 @@
-= ntptrace - trace a chain of NTP servers back to the primary source =
+= ntptrace - trace a chain of NTP servers back to the primary source
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ The rabbit knows the way back.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[SYNOPSIS]
 * link:#_description[DESCRIPTION]
@@ -25,7 +25,7 @@ include::includes/manual.adoc[]
 
 include::includes/ntptrace-body.adoc[]
 
-== Bugs ==
+== Bugs
 
 This program makes no attempt to improve accuracy by doing multiple
 samples.

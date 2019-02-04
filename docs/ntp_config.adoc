@@ -1,4 +1,4 @@
-= Configuration File Definition (Advanced) =
+= Configuration File Definition (Advanced)
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,7 +10,7 @@ Racoon is shooting configuration bugs.
 
 |==============================
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#synopsis[Synopsis]
 * link:#files[Files]
@@ -21,7 +21,7 @@ Racoon is shooting configuration bugs.
 '''''
 
 [[synopsis]]
-== Synopsis ==
+== Synopsis
 
 The NTP configuration process is driven by a phrase-structure grammar
 which is used to specify the format of the configuration commands and
@@ -41,7 +41,7 @@ contains a description of the files used in the configuration process as
 well as guidelines on how to construct them.
 
 [[files]]
-== Files ==
+== Files
 
 A brief description of the files used by the configuration code is given
 below:
@@ -57,7 +57,7 @@ below:
 |==============================================================================
 
 [[high-level]]
-== High-Level Description ==
+== High-Level Description
 
 A high-level description of the configuration process showing where all
 the files fit in is given below:
@@ -71,7 +71,7 @@ configure parts of NTP on the basis of what is on the tree. A more
 detailed description of these parts and the files used is given below:
 
 [[detailed]]
-== Detailed Description ==
+== Detailed Description
 
 *ntp_scanner.c*::
   This file contains the scanner. The scanner is a small program that
@@ -128,7 +128,7 @@ traditionally used to code the support functions needed to build the
 ASTs. Since we have moved all the support functions to *ntp_config.c*,
 this section is left empty.
 
-== Prologue and Bison Declarations ==
+== Prologue and Bison Declarations
 
 All the terminal symbols (also known as tokens) have to be declared in
 the prologue section. Note that terminals and non-terminals may have
@@ -194,7 +194,7 @@ with a +%type+ declaration as shown below:
 The +%type+ declaration may be omitted for non-terminals that do not
 return any value and do not have type information associated with them.
 
-== The Rules Section ==
+== The Rules Section
 
 The rule section only consists of phrase-structure grammar rules. Each
 rule typically has the following format:
@@ -231,7 +231,7 @@ rule. +$$+ is used to refer to the value of the LHS terminal symbol - it
 is used to return a value for the non-terminal symbol specified in the
 LHS of the rule.
 
-== Invoking Bison ==
+== Invoking Bison
 
 Bison needs to be invoked in order to convert the *ntp_config.y* file
 into a C source file. To invoke Bison, simply enter the command:
@@ -273,7 +273,7 @@ traverse the AST and configure NTP according to the nodes present on the
 tree.
 
 [[guidelines]]
-== Guidelines for Adding Configuration Commands ==
+== Guidelines for Adding Configuration Commands
 
 The following steps may be used to add a new configuration command to
 the NTP reference implementation:

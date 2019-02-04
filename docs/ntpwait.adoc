@@ -1,11 +1,11 @@
-= ntpwait - wait until ntpd is in synchronized state =
+= ntpwait - wait until ntpd is in synchronized state
 include::html.include[]
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[SYNOPSIS]
 * link:#_description[DESCRIPTION]

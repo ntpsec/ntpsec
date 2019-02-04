@@ -1,4 +1,4 @@
-= ntptime - read and set kernel time variables =
+= ntptime - read and set kernel time variables
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ The turtle has been swimming in the kernel.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[Synopsis]
 * link:#_description[Description]

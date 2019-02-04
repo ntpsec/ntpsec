@@ -1,4 +1,4 @@
-= ntpd - Network Time Protocol (NTP) Daemon =
+= ntpd - Network Time Protocol (NTP) Daemon
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ You need help from the monkeys.
 
 |===============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[SYNOPSIS]
 * link:#_description[DESCRIPTION]

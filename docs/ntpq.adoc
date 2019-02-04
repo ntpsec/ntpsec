@@ -1,4 +1,4 @@
-= ntpq - standard NTP query program =
+= ntpq - standard NTP query program
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,12 +10,12 @@ A typical NTP monitoring packet
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
 '''''
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[Synopsis]
 * link:#_description[Description]
@@ -33,7 +33,7 @@ include::includes/manual.adoc[]
 
 include::includes/ntpq-body.adoc[]
 
-== Mode 6 Protocol ==
+== Mode 6 Protocol
 
 The Mode 6 protocol used by ntpq to communicate with ntpd
 is described link:mode6.html[here].

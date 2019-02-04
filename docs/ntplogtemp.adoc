@@ -1,4 +1,4 @@
-= ntplogtemp - log system temperature data for use by ntpviz =
+= ntplogtemp - log system temperature data for use by ntpviz
 include::html.include[]
 //FIXME: Image duplicates the one used for panda.adoc
 
@@ -11,11 +11,11 @@ P is for patching.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[SYNOPSIS]
 * link:#_description[DESCRIPTION]

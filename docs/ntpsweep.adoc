@@ -1,4 +1,4 @@
-= ntpsweep - print information about NTP servers =
+= ntpsweep - print information about NTP servers
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ A new broom sweeps clean.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[Synopsis]
 * link:#_description[Description]

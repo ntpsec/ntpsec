@@ -1,4 +1,4 @@
-= ntpleapfetch - fetch and manage local leapfile =
+= ntpleapfetch - fetch and manage local leapfile
 include::html.include[]
 
 //FIXME: Image duplicates the one used for ntpfrob
@@ -11,11 +11,11 @@ Occasionally, the leap second needs an update.
 
 |==============================
 
-== Manual Pages ==
+== Manual Pages
 
 include::includes/manual.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#_synopsis[SYNOPSIS]
 * link:#_description[DESCRIPTION]
