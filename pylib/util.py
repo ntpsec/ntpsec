@@ -169,7 +169,7 @@ def parseConf(text):
 
     def pushToken():
         token = "".join(current)
-        if inQuote is False:  # Attempt type conversion
+        if not inQuote:  # Attempt type conversion
             try:
                 token = int(token)
             except ValueError:
@@ -191,7 +191,7 @@ def parseConf(text):
     i = 0
     tlen = len(text)
     while i < tlen:
-        if inQuote is True:
+        if inQuote:
             if text[i] == quoteStarter:  # Ending a text string
                 pushToken()
                 quoteStarter = ""
@@ -320,7 +320,7 @@ def gluenumberstring(above, below, isnegative):
         newvalue = ".".join((above, below))
     else:
         newvalue = above
-    if isnegative is True:
+    if isnegative:
         newvalue = "-" + newvalue
     return newvalue
 
@@ -507,7 +507,7 @@ def unitify(value, startingunit, baseunit=None, width=8, unitSpace=False):
         newvalue = cropprecision(value, ooms)
         newvalue, unitsmoved = scalestring(newvalue)
     unitget = unitrelativeto(startingunit, unitsmoved)
-    if unitSpace is True:
+    if unitSpace:
         spaceWidthAdjustment = 1
         spacer = " "
     else:

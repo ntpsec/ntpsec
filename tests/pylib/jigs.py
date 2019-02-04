@@ -62,7 +62,7 @@ class SocketJig:
         self.closed = True
 
     def connect(self, addr):
-        if self.fail_connect is True:
+        if self.fail_connect:
             err = socket.error()
             err.strerror = "socket!"
             err.errno = 16
@@ -150,13 +150,13 @@ class SocketModuleJig:
 
     def socket(self, family, socktype, protocol):
         self.socket_calls.append((family, socktype, protocol))
-        if self.socket_fail is True:
+        if self.socket_fail:
             err = self.error()
             err.strerror = "error!"
             err.errno = 23
             raise err
         sock = SocketJig()
-        if self.socket_fail_connect is True:
+        if self.socket_fail_connect:
             sock.fail_connect = True
         self.socketsReturned.append(sock)
         return sock
@@ -217,7 +217,7 @@ class SelectModuleJig:
         if not self.do_return:  # simplify code that doesn't need it
             self.do_return.append(True)
         doreturn = self.do_return.pop(0)
-        if doreturn is True:
+        if doreturn:
             return (ins, [], [])
         else:
             return ([], [], [])

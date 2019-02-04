@@ -993,7 +993,7 @@ class ControlSession:
 
             # Validate that packet header is sane, and the correct type
             valid = self.__validate_packet(rpkt, rawdata, opcode, associd)
-            if valid is False:  # pragma: no cover
+            if not valid:  # pragma: no cover
                 continue
 
             # Someday, perhaps, check authentication here
@@ -1195,7 +1195,7 @@ class ControlSession:
             if c == '"':
                 response += c
                 instring = not instring
-            elif (instring is False) and (c == ","):
+            elif not instring and c == ",":
                 # Separator between key=value pairs, done with this pair
                 kvpairs.append(response.strip())
                 response = ""
@@ -1219,7 +1219,7 @@ class ControlSession:
                 except ValueError:
                     try:
                         castedvalue = float(value)
-                        if (key == "delay") and (raw is False):
+                        if key == "delay" and not raw:
                             # Hack for non-raw-mode to get precision
                             items.append(("delay-s", value))
                     except ValueError:
@@ -1228,7 +1228,7 @@ class ControlSession:
                         castedvalue = value  # str / unknown, stillneed casted
             else:  # no value
                 castedvalue = value
-            if raw is True:
+            if raw:
                 items.append((key, (castedvalue, value)))
             else:
                 items.append((key, castedvalue))

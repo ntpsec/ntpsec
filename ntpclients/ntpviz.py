@@ -1524,14 +1524,14 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     args.statsdirs = [os.path.expanduser(path)
                       for path in args.statsdirs.split(",")]
 
-    if args.show_peer_offsets is True:
+    if args.show_peer_offsets:
         args.show_peer_offsets = []
     elif args.peer_offsets:
         args.show_peer_offsets = args.peer_offsets.split(",")
     else:
         args.show_peer_offsets = None
 
-    if args.show_peer_jitters is True:
+    if args.show_peer_jitters:
         args.show_peer_jitters = []
     elif args.peer_jitters:
         args.show_peer_jitters = args.peer_jitters.split(",")

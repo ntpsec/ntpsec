@@ -173,7 +173,7 @@ class Fatal(Exception):
 class OutputContext:
     def __enter__(self):
         "Begin critical region."
-        if (sys.version_info[0] < 3) and (disableunicode is False):
+        if sys.version_info[0] < 3 and not disableunicode:
             # This appears to only be needed under python 2, it is only
             # activated when we already have UTF-8. Otherwise we drop
             # down to non-unicode versions.

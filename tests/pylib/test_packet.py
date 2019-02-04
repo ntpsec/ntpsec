@@ -59,7 +59,7 @@ class AuthenticatorJig:
         self.compute_mac_calls = []
 
     def __getitem__(self, key):
-        if self.fail_getitem is True:
+        if self.fail_getitem:
             raise IndexError
         return ("passtype", "pass")
 
@@ -795,9 +795,9 @@ class TestControlSession(unittest.TestCase):
 
         def lookup_jig(hostname, family):
             lookups.append((hostname, family))
-            if returnNothing is True:
+            if returnNothing:
                 return None
-            elif noCanon is True:
+            elif noCanon:
                 return [("family", "socktype", "protocol", None,
                          ("1.2.3.4", 80)), ]
             else:

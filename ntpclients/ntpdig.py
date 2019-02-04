@@ -402,7 +402,7 @@ if __name__ == '__main__':
             for s in range(samples):
                 if needgap and not firstloop:
                     time.sleep(gap)
-                if firstloop is True:
+                if firstloop:
                     firstloop = False
                 for server in concurrent_hosts:
                     try:

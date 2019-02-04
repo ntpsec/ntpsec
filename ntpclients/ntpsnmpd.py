@@ -543,7 +543,7 @@ class DataSource(ntp.agentx.MIBControl):
                 ipv6 = None
             # Convert address string to octets
             srcadr = []
-            if ipv6 is False:
+            if not ipv6:
                 pieces = addr.split(".")
                 for piece in pieces:
                     try:
@@ -553,7 +553,7 @@ class DataSource(ntp.agentx.MIBControl):
                         # Still try to return data because it is potential
                         # debugging information.
                         continue
-            elif ipv6 is True:
+            elif ipv6:
                 pieces = addr.split(":")
                 for piece in pieces:
                     srcadr.append(ntp.util.hexstr2octets(piece))
@@ -630,32 +630,31 @@ class DataSource(ntp.agentx.MIBControl):
             return
         self.lastNotifyCheck = currentTime
 
-        if self.notifyModeChange is True:
+        if self.notifyModeChange:
             self.doNotifyModeChange(control)
 
-        if self.notifyStratumChange is True:
+        if self.notifyStratumChange:
             self.doNotifyStratumChange(control)
 
-        if self.notifySyspeerChange is True:
+        if self.notifySyspeerChange:
             self.doNotifySyspeerChange(control)
 
         # Both add and remove have to look at the same data, don't want them
         # stepping on each other. Therefore the functions are combined.
-        if (self.notifyAddAssociation is True) and \
-           (self.notifyRMAssociation is True):
+        if self.notifyAddAssociation and self.notifyRMAssociation:
             self.doNotifyChangeAssociation(control, "both")
-        elif self.notifyAddAssociation is True:
+        elif self.notifyAddAssociation:
             self.doNotifyChangeAssociation(control, "add")
-        elif self.notifyRMAssociation is True:
+        elif self.notifyRMAssociation:
             self.doNotifyChangeAssociation(control, "rm")
 
-        if self.notifyConfigChange is True:
+        if self.notifyConfigChange:
             self.doNotifyConfigChange(control)
 
-        if self.notifyLeapSecondAnnounced is True:
+        if self.notifyLeapSecondAnnounced:
             self.doNotifyLeapSecondAnnounced(control)
 
-        if self.notifyHeartbeat is True:
+        if self.notifyHeartbeat:
             self.doNotifyHeartbeat(control)
 
     def doNotifyModeChange(self, control):
@@ -947,7 +946,7 @@ class DataSource(ntp.agentx.MIBControl):
             return None
 
     def dynamicCallbackPeerdata(self, variable, raw, valueType):
-        rawindex = 1 if raw is True else 0
+        rawindex = 1 if raw else 0
 
         def handler(oid, associd):
             pdata = self.misc_getPeerData()
@@ -1032,7 +1031,7 @@ def mainloop(snmpSocket, reconnectionAddr, host=None):
         control = PacketControl(snmpSocket, dbase, logfp=logfp, debug=debug)
         control.loopCallback = dbase.checkNotifications
         control.initNewSession()
-        if control.mainloop(True) is False:  # disconnected
+        if not control.mainloop(True):  # disconnected
             snmpSocket.close()
             snmpSocket = connect(reconnectionAddr)
             log("disconnected from master, attempting reconnect", 2)
@@ -1073,7 +1072,7 @@ def daemonize(runfunc, *runArgs):
 
 def loadSettings(filename, optionList):
     log("Loading config file: %s" % filename, 3)
-    if os.path.isfile(filename) is False:
+    if not os.path.isfile(filename):
         return None
     options = {}
     with open(filename) as f:
@@ -1088,7 +1087,7 @@ def loadSettings(filename, optionList):
 
 def storeSettings(filename, settings):
     dirname = os.path.dirname(filename)
-    if os.path.exists(dirname) is False:
+    if not os.path.exists(dirname):
         os.makedirs(dirname)
     data = []
     for key in settings.keys():
@@ -1189,10 +1188,10 @@ if __name__ == "__main__":
             logfile = val
             fileLogging = True
 
-    if nofork is False:
+    if not nofork:
         fileLogging = True
 
-    if fileLogging is True:
+    if fileLogging:
         if logfp != sys.stderr:
             logfp.close()
         logfp = open(logfile, "a", 1)  # 1 => line buffered
@@ -1202,7 +1201,7 @@ if __name__ == "__main__":
     # Connect here so it can always report a connection error
     sock = connect(masterAddr)
 
-    if nofork is True:
+    if nofork:
         mainloop(sock, hostname)
     else:
         daemonize(mainloop, sock, hostname)
