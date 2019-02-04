@@ -1,4 +1,4 @@
-= PPSAPI Interface for Precision Time Signals =
+= PPSAPI Interface for Precision Time Signals
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -8,13 +8,13 @@ include::html.include[]
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/misc.adoc[]
 
 '''''
 
-== Introduction ==
+== Introduction
 
 RFC 2783 describes the PPSAPI application programming interface for
 external precision time signals, such as the pulse-per-second (PPS)
@@ -44,7 +44,7 @@ NTP server as a reference clock. The driver can also use the PPSAPI as
 an interface directly to the kernel PPS facility as described on the
 link:kern.html[Kernel Model for Precision Timekeeping] page.
 
-== PPSAPI Application Program Interface ==
+== PPSAPI Application Program Interface
 
 The PPSAPI interface provides the following functions:
 

@@ -1,4 +1,4 @@
-= European Automated Computer Time Services =
+= European Automated Computer Time Services
 include::html.include[]
 
 The National Laboratories of many European countries provide
@@ -39,7 +39,7 @@ timecode service. Phone number: +46 33 415783.
 +
 For more detail, see https://www.sp.se/en/index/services/time_sync/modem_time/Sidor/default.aspx
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 

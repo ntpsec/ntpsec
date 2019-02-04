@@ -1,4 +1,4 @@
-= Kernel Model for Precision Timekeeping =
+= Kernel Model for Precision Timekeeping
 include::html.include[]
 
 image:pic/alice61.gif[]
@@ -6,7 +6,7 @@ image:pic/alice61.gif[]
 
 Alice finds the kernel a house of cards.
 
-== Related Links ==
+== Related Links
 
 include::includes/misc.adoc[]
 
@@ -42,7 +42,7 @@ provide synchronization limited in principle only by the accuracy and
 stability of the external timing source. Typical results with the PPS
 signal from a GPS receiver and a modern computer are in the 3 μs range.
 
-== References ==
+== References
 
 1.  Mills, D.L., and P.-H. Kamp. The nanokernel. _Proc. Precision Time
 and Time Interval (PTTI) Applications and Planning Meeting_ (Reston VA,

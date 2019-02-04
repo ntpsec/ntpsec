@@ -1,4 +1,4 @@
-= Differences from NTP Classic =
+= Differences from NTP Classic
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -8,13 +8,13 @@ include::html.include[]
 Accept no imitations.
 |==============================
 
-== Related Links ==
+== Related Links
 
 * A list of all links is on the link:sitemap.html[Site Map] page.
 
 '''''
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#incompatible[Incompatible Changes]
@@ -24,7 +24,7 @@ Accept no imitations.
 * link:#other[Other user-visible changes]
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 The design objectives of this distribution, NTPsec, are in
 many ways a break with NTP's past.  We have deliberately jettisoned
@@ -47,7 +47,7 @@ Most of the changes are under the hood, internal to the codebase.  A
 few will be user-visible.
 
 [[incompatible]]
-== Incompatible Changes ==
+== Incompatible Changes
 
 Normally NTPsec is a drop-in replacement for legacy versions. We have
 tried to hold incompatible changes to a minimum, but there are a
@@ -95,7 +95,7 @@ a build-time switch, not a run-time one).
   of at least two CVEs.
 
 [[security]]
-== Security Improvements ==
+== Security Improvements
 
 We have spent more effort than anything else on reducing attack
 surface and hardening code.  In toto, more than 74% of the NTP Classic
@@ -154,7 +154,7 @@ to the security-critical core.
   copy and formatting functions replaced by safe (bounded) ones.
 
 [[timesync]]
-== Time-synchronization improvements ==
+== Time-synchronization improvements
 
 * Internally, there is more consistent use of nanosecond precision.
   A visible effect of this is that time stepping with sufficiently
@@ -180,7 +180,7 @@ to the security-critical core.
   code was lost without trace by the time NTPsec forked.
 
 [[clients]]
-== Client Tool Improvements ==
+== Client Tool Improvements
 
 * A new tool, +ntpmon+, performs real-time monitoring of your
   peer and MRU status with efficient (least-cost) querying.
@@ -226,7 +226,7 @@ to the security-critical core.
 * ntpq displays the root distance (aka. synchronization distance) in the
   sysinfo command.
 
-== Configuration Improvements ==
+== Configuration Improvements
 
 * The notorious collision between pool and nopeer in older
   implementations has been fixed; the pool keyword is now fully
@@ -294,7 +294,7 @@ to the security-critical core.
   option.
 
 [[other]]
-== Other user-visible changes ==
+== Other user-visible changes
 
 * The documentation has been extensively updated and revised.  One
   important change is that manual pages are now generated from the
@@ -302,7 +302,7 @@ to the security-critical core.
   drift out of synchronization.
 
 [[future]]
-== Future directions ==
+== Future directions
 
 * We intend to fully support Network Time Security and to be first or
   second interop on that standard once it is finalized.  At that

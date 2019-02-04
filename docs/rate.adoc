@@ -1,4 +1,4 @@
-= Rate Management and the Kiss-o'-Death Packet =
+= Rate Management and the Kiss-o'-Death Packet
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ Our junior managers and the administrators.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#guard[Minimum Headway Time]
@@ -25,7 +25,7 @@ include::includes/hand.adoc[]
 '''''
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 This page describes the various rate management provisions in NTPv4.
 Some national time metrology laboratories, including NIST and USNO, use
@@ -74,7 +74,7 @@ time. The first two algorithms are described on the link:poll.html[Poll
 Program] page; the remaining two are described in following sections.
 
 [[guard]]
-== Minimum Headway Time ==
+== Minimum Headway Time
 
 The headway is defined for each source as the interval between the last
 packet sent or received and the next packet for that source. The minimum
@@ -89,7 +89,7 @@ implementations that violate this constraint will be dropped and a KoD
 packet returned, if enabled.
 
 [[mah]]
-== Minimum Average Headway Time ==
+== Minimum Average Headway Time
 
 There are two features in the reference implementation to manage the
 minimum average headway time between one packet and the next, and thus
@@ -151,7 +151,7 @@ means that the few seconds retained on the list is sufficient to
 identify and discard by far the majority of the abusive traffic.
 
 [[kiss]]
-== The Kiss-of-Death Packet ==
+== The Kiss-of-Death Packet
 
 Ordinarily, packets denied service are simply dropped with no further
 action except incrementing statistics counters. Sometimes a more
@@ -180,7 +180,7 @@ themselves are rate limited to no more than one packet per guard time,
 in order to defend against flood attacks.
 
 [[ref]]
-== References ==
+== References
 
 1.  Mills, D.L., J. Levine, R. Schmidt and D. Plonka. Coping with
 overload on the Network Time Protocol public servers. _Proc. Precision

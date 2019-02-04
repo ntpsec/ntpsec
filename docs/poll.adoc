@@ -1,4 +1,4 @@
-= Poll Process =
+= Poll Process
 include::html.include[]
 
 The poll process sends NTP packets at intervals determined by the clock

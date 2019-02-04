@@ -1,4 +1,4 @@
-= Site Map =
+= Site Map
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,7 +10,7 @@ Welcome to the tea party.
 |==============================
 
 
-== Links ==
+== Links
 
 include::includes/install.adoc[]
 include::includes/manual.adoc[]

@@ -1,4 +1,4 @@
-= Mode 6 Protocol =
+= Mode 6 Protocol
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ Keeping control of the situation.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#packet[Mode 6 packet structure]
@@ -25,7 +25,7 @@ include::includes/hand.adoc[]
 '''''
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 This page describes the Mode 6 protocol used to get status information
 from a running ntpd and configure some of its behaviors on the fly.
@@ -38,7 +38,7 @@ the Python Mode 6 libraries included in the distribution. Both 'ntpq'
 and 'ntpmon' use these.)
 
 [[packet]]
-== Mode 6 packet structure ==
+== Mode 6 packet structure
 
 The protocol uses UDP packets transmitted and received over port 123.
 They use the same structure (header, plus extension, plus optional
@@ -103,7 +103,7 @@ it's 500 octets, which is far in excess of any plausible request or
 response size in the actual protocol.
 
 [[varlists]]
-== Variable-Value Lists ==
+== Variable-Value Lists
 
 Several requests and responses (in fact, all but one) use a common
 textual payload format consisting of a comma-separated list of items.
@@ -148,7 +148,7 @@ quoted-string = %x22 *(%21 | %x23-7E) %x22
 -----------------------------------------------------------
 
 [[requests]]
-== Mode 6 Requests ==
+== Mode 6 Requests
 
 Request-response types are distinguished by operation codes.  The
 table below lists them all. The "Auth?" column tells whether a
@@ -177,7 +177,7 @@ software. CTL_OP_WRITECLOCK is unimplemented and will throw a
 permission error. CTL_OP_ASYNCMSG is reserved for expansion. The
 remaining opcodes are as follows:
 
-=== CTL_OP_READSTAT ===
+=== CTL_OP_READSTAT
 
 This requests ntpd to ship up a list of association IDs and status
 words for all peers currently associated with the ntpd instance. It
@@ -197,7 +197,7 @@ divided by 4.
 Interpretation of the peer status word is described
 link:decode.html#peer[here].
 
-=== CTL_OP_READVAR ===
+=== CTL_OP_READVAR
 
 This requests ntpd to ship up a list of peer variable settings for an
 association specified by ID, or system variables if the ID is zero. It
@@ -209,7 +209,7 @@ calls for a report on all known variables.
 
 The response payload is a textual varlist.
 
-=== CTL_OP_WRITEVAR ===
+=== CTL_OP_WRITEVAR
 
 Some system variable are defined as being settable from a mode 6
 client. This request provides a general way to do that. It requires
@@ -223,7 +223,7 @@ association ID of 0. There is no response payload.
 No system variables are currently settable.  This may change in a
 future release.
 
-=== CTL_OP_READCLOCK ===
+=== CTL_OP_READCLOCK
 
 This requests ntpd to ship up a list of peer variable settings for a
 reference clock association specified by ID. It does not require
@@ -235,7 +235,7 @@ calls for a report on all known variables.
 
 The response payload is a textual varlist.
 
-=== CTL_OP_CONFIGURE ===
+=== CTL_OP_CONFIGURE
 
 This request is used to change the configuration of ntpd without
 restarting the daemon.  It requires authentication.
@@ -248,7 +248,7 @@ Note: Due to an implementation error, the response packet may and
 typically will contain trailing garbage. Implementations should
 expect this and truncate it at the first NUL.
 
-=== CTL_OP_READ_MRU ===
+=== CTL_OP_READ_MRU
 
 This request is used to retrieve information about recent traffic
 between ntpd and its clients and peers; in NTP-speak this traffic summary is
@@ -398,7 +398,7 @@ displaying or passing on the report (that is, as opposed to
 incremental display with an attempt to suppress stale records on the
 fly).
 
-=== CTL_OP_READ_ORDLIST_A ===
+=== CTL_OP_READ_ORDLIST_A
 
 This request is used for two purposes: to retrieve restriction lists
 and to retrieve interface statistics.  For the former use, the request
@@ -480,7 +480,7 @@ up.#:: Uptime in seconds.
 |INT_BCASTXMIT	| 0x400 | socket setup to allow broadcasts
 |==========================================================================
 
-=== CTL_OP_REQ_NONCE ===
+=== CTL_OP_REQ_NONCE
 
 This request is used to initialize an MRU-list conversation.  It
 informs ntpd that the Mode 6 client is ready to receive.  It does
@@ -504,7 +504,7 @@ the last nonce transmission time in your client and re-request based
 on that.
 
 [[auth]]
-== Authentication ==
+== Authentication
 
 Authenticated requests require a MAC (message authentication code)
 trailer following the payload data, if any. Such requests must be
@@ -528,7 +528,7 @@ octets for SHA-1.  Longer digests are truncated.
 The key length for AES is 16 bytes.  Longer keys are truncated.  Shorter
 keys are padded with 0s.  MD5 and SHA-1 can use any key length.
 
-== Compatibility Notes ==
+== Compatibility Notes
 
 The "recent" parameter of CTL_OP_READ_MRU is not supported in versions
 prior to NTPsec 0.9.6.

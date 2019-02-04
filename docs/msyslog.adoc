@@ -1,4 +1,4 @@
-= ntpd System Log Messages =
+= ntpd System Log Messages
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -11,7 +11,7 @@ The log can be shrill at times.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/install.adoc[]
 
@@ -32,20 +32,20 @@ something about the system operations, but do not affect the time.
 In the following a \'?' character stands for text in the message. The
 meaning should be clear from context.
 
-== Protocol Module ==
+== Protocol Module
 
-=== LOG_ERR ===
+=== LOG_ERR
 
 +buffer overflow ?+::
   Fatal error. An input packet is too long for processing.
 
-=== LOG_NOTICE ===
+=== LOG_NOTICE
 
 +no reply; clock not set+::
   No servers have been found. The server(s) and/or
   network may be down. Standard debugging procedures apply.
 
-=== LOG_INFO ===
+=== LOG_INFO
 
 +proto_config: illegal item ?, value ?+::
   Program error. Bugs can be reported link:bugs.html[here].
@@ -64,9 +64,9 @@ meaning should be clear from context.
   The system clock is running on internal batteries. The server(s)
   and/or network may be down.
 
-== Clock Discipline Module ==
+== Clock Discipline Module
 
-=== LOG_ERR ===
+=== LOG_ERR
 --
 +time correction of ? seconds exceeds sanity limit (?); set clock manually to the correct UTC time+. ::
    Fatal error. Better do what it says, then restart the daemon. Be advised
@@ -79,7 +79,7 @@ meaning should be clear from context.
     Program error. Bugs can be reported link:bugs.html[here].::
 --
 
-=== LOG_NOTICE ===
+=== LOG_NOTICE
 
 +frequency error ? exceeds tolerance 500 PPM+::
   The hardware clock frequency error exceeds the rate the kernel can
@@ -97,7 +97,7 @@ meaning should be clear from context.
   The PPS signal has died, probably due to a dead radio, broken wire or
   loose connector.
 
-=== LOG_INFO ===
+=== LOG_INFO
 
 +kernel time sync status ?+::
   For information only. See the codes in the +timex.h+ file.

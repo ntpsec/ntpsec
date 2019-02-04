@@ -1,4 +1,4 @@
-= Leap Second Processing =
+= Leap Second Processing
 include::html.include[]
 
 Every six months the International Earth Rotation Service

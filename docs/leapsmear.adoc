@@ -1,4 +1,4 @@
-= Leap Second Smearing with NTP =
+= Leap Second Smearing with NTP
 include::html.include[]
 
 By Martin Burnicki
@@ -28,7 +28,7 @@ the normal NTP packet exchange, so clients also become aware of an
 approaching leap second, and can handle the leap second appropriately.
 
 
-== The Problem on Unix-like Systems ==
+== The Problem on Unix-like Systems
 
 If a leap second is to be inserted, then in most Unix-like systems the OS
 kernel just steps the time back by 1 second at the beginning of the leap
@@ -51,7 +51,7 @@ though this mechanism has been available for decades, almost
 nobody uses it.
 
 
-== The Leap Smear Approach ==
+== The Leap Smear Approach
 
 Due to the reasons mentioned above, some support for leap smearing has
 recently been implemented in ntpd.  This means that to insert a leap second
@@ -79,7 +79,7 @@ transparent to the clients, and the clients don't even notice there's a
 leap second.
 
 
-== Pros and Cons of the Smearing Approach ==
+== Pros and Cons of the Smearing Approach
 
 The disadvantages of this approach are:
 
@@ -98,7 +98,7 @@ better approach may be to slew the time in a well defined way, over a
 certain interval, thus "smearing" the leap second.
 
 
-== The Motivation to Implement Leap Smearing ==
+== The Motivation to Implement Leap Smearing
 
 Here is some historical background for ntpd, related to smearing/slewing
 time.
@@ -174,7 +174,7 @@ The leap smear implementation is optionally available in ntp-4.2.8p3 and
 later, and the changes can be tracked via http://bugs.ntp.org/2855.
 
 
-== Using NTP's Leap Second Smearing ==
+== Using NTP's Leap Second Smearing
 
 * Leap Second Smearing MUST NOT be used for public servers, e.g. servers
 provided by metrology institutes, or servers participating in the NTP pool
@@ -217,7 +217,7 @@ servers at the same time.  During the smear interval they would get
 different times from different servers and wouldn't know which server(s) to
 accept.
 
-== Setting Up A Smearing NTP Server ==
+== Setting Up A Smearing NTP Server
 
 If an NTP server should perform leap smearing then the leap smear interval
 (in seconds) needs to be specified in the NTP configuration file ntp.conf,

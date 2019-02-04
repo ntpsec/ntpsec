@@ -1,4 +1,4 @@
-= Quick Start for Client Configurations =
+= Quick Start for Client Configurations
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -11,11 +11,11 @@ Take it away, boys!
 |==============================
 
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#introduction[Introduction]
 * link:#basics[Configuration Basics]
@@ -28,7 +28,7 @@ include::includes/hand.adoc[]
 '''''
 
 [[introduction]]
-== Introduction ==
+== Introduction
 
 This page is a quick start for the 99% of NTP configurations that are
 not intended to serve time to others, but just run in client mode and
@@ -57,7 +57,7 @@ can write independent segments rather than having to do the kind of
 edit-in-place on a flat ntp.conf that comes naturally to a human.
 
 [[basics]]
-== Configuration basics ==
+== Configuration basics
 
 An NTP configuration file normally consists of three sections: logging
 controls, security/access controls, and server/refclock declarations.  In
@@ -140,7 +140,7 @@ The next section will explain what pool servers are and why you might
 want to change them.
 
 [[pool]]
-== Configuring Pool Servers ==
+== Configuring Pool Servers
 
 The NTP pool is a dynamic collection of networked computers that
 provide highly accurate time via the Network Time Protocol to clients
@@ -220,7 +220,7 @@ clients.
 One pool declaration will normally get you four or more servers.
 
 [[gps]]
-== Configuring A Local GPS ==
+== Configuring A Local GPS
 
 Connecting a local GPS to your machine will provide extremely
 accurate time, provided it has link:ntpspeak.html[PPS] capability.
@@ -254,7 +254,7 @@ https://www.ntpsec.org/white-papers/stratum-1-microserver-howto/
 very helpful.
 
 [[dhcp]]
-== Special considerations when using DHCP ==
+== Special considerations when using DHCP
 
 If your machine uses DHCP to get a dynamic IP address from your ISP,
 that handshake may provide you with a list of NTP servers.
@@ -289,7 +289,7 @@ all is well.  If it does not, you may have to modify the hook scripts
 that generate that file, or disable the generation process.
 
 [[sanity]]
-== Sanity-Checking Your Time Service ==
+== Sanity-Checking Your Time Service
 
 Here's how to tell if and/or how well your time service is working.
 Wait a few minutes for it to sync with upstream servers, then fire

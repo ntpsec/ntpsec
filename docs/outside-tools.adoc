@@ -1,4 +1,4 @@
-= Outside Tools =
+= Outside Tools
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -9,11 +9,11 @@ include::html.include[]
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#introduction[Introduction]
 * link:#wireshark[Wireshark]
@@ -23,7 +23,7 @@ include::includes/hand.adoc[]
 '''''
 
 [[introduction]]
-== Introduction ==
+== Introduction
 
 Because NTP is a widely-used an well-established service, people
 who write tools for system administrators frequently have
@@ -31,21 +31,21 @@ features and plugins designed to help you work with it. This
 page collects some references that may be useful.
 
 [[wireshark]]
-== Wireshark ==
+== Wireshark
 
 The https://www.wireshark.org/[Wireshark] protocol analyzer has
 support for displaying NTP packets with the fields broken out
 and interpreted.
 
 [[nagios]]
-== Nagios ==
+== Nagios
 
 The https://www.nagios.org/[Nagios] monitoring suite has native
 support for querying NTP servers.  The 'check_ntp_peer' and
 'check_ntp_time' programs may be of particular interest.
 
 [[netdata]]
-== Netdata ==
+== Netdata
 
 The https://github.com/firehol/netdata/wiki[Netdata] monitoring
 solution has native support for realtime monitoring of ntpd,

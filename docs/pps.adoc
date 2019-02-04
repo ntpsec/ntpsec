@@ -1,4 +1,4 @@
-= Pulse-Per-Second (PPS) Signal Interfacing =
+= Pulse-Per-Second (PPS) Signal Interfacing
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ Alice is trying to find the PPS signal connector.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/misc.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#opsys[Operating System Support]
@@ -23,7 +23,7 @@ include::includes/misc.adoc[]
 '''''
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 Most conventional time sources (radio clocks and GPSes) are connected
 using a serial or USB port operating at speeds of 9600 bps. The
@@ -49,7 +49,7 @@ serial port interface signals.  Note that NTPsec no
 longer supports connection via the RD pin of a serial port.
 
 [[opsys]]
-== Operating System Support ==
+== Operating System Support
 
 Both the serial and parallel port connection require operating system
 support, which is available in a few operating systems, including
@@ -61,7 +61,7 @@ The interface consists of the +timepps.h+ header file, which should be
 in the /usr/include/ or /usr/include/sys directory of your file
 system.
 
-== PPS Driver ==
+== PPS Driver
 
 PPS support is built into some drivers, in particular the NMEA
 driver, and may be added to other drivers in future.  Alternatively,
@@ -76,7 +76,7 @@ Internet server could be designated preferred. Note that the +pps+
 configuration command has been obsoleted by this driver.
 
 [[use]]
-== Using the Pulse-per-Second (PPS) Signal ==
+== Using the Pulse-per-Second (PPS) Signal
 
 The PPS signal can be used in three ways: using the NTP
 grooming and mitigation algorithms, or using the kernel PPS

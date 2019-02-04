@@ -1,4 +1,4 @@
-= Debugging Reference Clock Drivers =
+= Debugging Reference Clock Drivers
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,7 +10,7 @@ Call the girls and they'll sweep your bugs.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/refclock.adoc[]
 include::includes/install.adoc[]

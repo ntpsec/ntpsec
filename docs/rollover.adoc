@@ -1,9 +1,9 @@
-= Rollover issues in time sources =
+= Rollover issues in time sources
 include::html.include[]
 
 '''''
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#terminology[Terminology]
@@ -12,7 +12,7 @@ include::html.include[]
 * link:#ntp_pivots[NTP pivot dates]
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 All time-handling software and hardware suffers from a fundamental
 problem: finite-sized data representations for times means that,
@@ -27,7 +27,7 @@ interact, the consequences of rollover and common workarounds for
 rollover problems.
 
 [[terminology]]
-== Terminology ==
+== Terminology
 
 Every calendar cycle has at least three basic properties: a start date
 (usually referenced to a solar astronomical date in the Gregorian
@@ -56,13 +56,13 @@ cases are difficult to test, they are defect attractors even when
 system designers have been careful and conscientious.
 
 [[cycles]]
-== Major cycles of interest ==
+== Major cycles of interest
 
 For purposes related to NTP there are four major cyclic calendars of
 interest: two-digit years, Unix time, NTP time, GPS time (because GPSes
 are so often used as primary time sources).
 
-=== Two-digit year reports ===
+=== Two-digit year reports
 
 A well-known historical rollover problem was "Y2K", which derived from
 the use of two-digit decimal year counters in mainframe software
@@ -101,7 +101,7 @@ that may have a vulnerability here.  Notably, the NMEA and SHM drivers
 NMEA driver uses a clever calendrical trick to deduce a 4-digit year
 that should work until 2399.
 
-=== Unix time ===
+=== Unix time
 
 The basics of Unix time have already been described.
 
@@ -145,7 +145,7 @@ use 32-bit fields.  A more serious worry is embedded 32-bit hardware
 quietly ticking away in life-critical systems everywhere from medical
 devices to avionics.
 
-=== NTP time ===
+=== NTP time
 
 NTP time has a 32-bit cycle with an epoch of 1900-01-01T00:00:00.  NTP
 time is unsigned; the cycle is thus twice that from a signed 32-bit
@@ -162,7 +162,7 @@ called https://developers.google.com/time/smear["leap smearing"] used
 by some servers that avoids these by changing the length of the issued
 second slightly near scheduled corrections.
 
-=== GPS time ===
+=== GPS time
 
 Raw GPS time is expressed as weeks since the GPS epoch
 1980-01-06T00:00:00, and seconds within the week.  Due to cost
@@ -208,7 +208,7 @@ an NTP clock is not around either jitter or leap second corrections,
 but rather the behavior near GPS and century rollovers.
 
 [[gps_pivots]]
-== GPS pivot dates and rollover compensation ==
+== GPS pivot dates and rollover compensation
 
 To yield a UTC date, the weeks+second information from the GPS satellites
 has to be used as an offset to a base date.
@@ -269,7 +269,7 @@ autonomously, is to have multiple GPS clocks per server and replace
 each individual one at least once every nine years (half a GPS era).
 
 [[ntp_pivots]]
-== NTP pivot dates ==
+== NTP pivot dates
 
 For purposes of this discussion, a 'resolved' timestamp is one that
 has been mapped from a 32-bit seconds offset in some era to a full

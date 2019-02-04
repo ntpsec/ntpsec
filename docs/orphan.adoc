@@ -1,4 +1,4 @@
-= Orphan Mode =
+= Orphan Mode
 include::html.include[]
 
 Sometimes an NTP subnet becomes isolated from all UTC sources such as

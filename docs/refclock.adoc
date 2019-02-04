@@ -1,16 +1,16 @@
-= Reference Clock Support =
+= Reference Clock Support
 include::html.include[]
 
 image:pic/stack1a.jpg[gif]Master Time Facility at the
 {millshome}lab.html[UDel Internet Research
 Laboratory]
 
-== Related Links ==
+== Related Links
 
 include::includes/hand.adoc[]
 include::includes/refclock.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction]
 * link:#spec[Special Considerations]
@@ -19,7 +19,7 @@ include::includes/refclock.adoc[]
 '''''
 
 [[intro]]
-== Introduction ==
+== Introduction
 
 NTP supports a large number of satellite, radio and telephone modem
 reference clocks, plus a special pseudo-clock used for backup or when no other
@@ -89,7 +89,7 @@ purpose. Except where noted, these options apply to all clock drivers.
 
 
 [[spec]]
-== Special Considerations ==
+== Special Considerations
 
 The link:driver_local.html[Undisciplined Local Clock] driver can
 simulate a reference clock when no external synchronization sources are
@@ -135,7 +135,7 @@ feature which automatically calculates a correction factor for each
 driver relative to an association designated the prefer peer.
 
 [[list]]
-== List of Reference Clock Drivers ==
+== List of Reference Clock Drivers
 
 Following is a list showing the type name and title of each driver
 currently implemented. Click on a selected type for specific

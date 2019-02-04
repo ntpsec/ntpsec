@@ -1,4 +1,4 @@
-= Miscellaneous Commands and Options =
+= Miscellaneous Commands and Options
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,13 +10,13 @@ We have three, now looking for more.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/miscopt.adoc[]
 
 '''''
 
-== Commands and Options ==
+== Commands and Options
 
 include::includes/misc-options.adoc[]
 

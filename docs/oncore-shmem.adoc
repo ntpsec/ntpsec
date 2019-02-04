@@ -1,7 +1,7 @@
-= Motorola ONCORE - The Shared Memory Interface =
+= Motorola ONCORE - The Shared Memory Interface
 include::html.include[]
 
-== Introduction ==
+== Introduction
 
 In NMEA mode, the Oncore GPS receiver provides the user with the same
 information as other GPS receivers. In BINARY mode, it can provide a lot
@@ -30,7 +30,7 @@ This interface was written by Poul-Henning Kamp (phk@FreeBSD.org), and
 modified by Reg Clemens (reg@dwf.com). The interface is known to work in
 FreeBSD, Linux, and Solaris.
 
-== Activating the Interface ==
+== Activating the Interface
 
 Although the Shared Memory Interface will be compiled into the Oncore
 driver on those systems where Shared Memory is supported, to activate
@@ -66,7 +66,7 @@ like
 
 would be required.
 
-== Storage of Messages in Shared Memory ==
+== Storage of Messages in Shared Memory
 
 With the shared memory interface, the oncore driver (refclock_oncore)
 allocates space for all of the messages that it is configured to
@@ -139,7 +139,7 @@ appropriate slot. The additional slots are for messages containing 0D,
 2D and 3D positions. These messages can be distinguished by different
 bit patterns in the last data byte of the record.
 
-== Opening the Shared Memory File ==
+== Opening the Shared Memory File
 
 The shared memory segment is accessed through a file name given on a
 *SHMEM* card in the +/etc/ntp.oncore+ input file. The following code
@@ -168,7 +168,7 @@ could be used to open the Shared Memory Segment:
         }
 ---------------------------------------------------------------------------------
 
-== Accessing the data ==
+== Accessing the data
 
 The following code shows how to get to the individual records.
 
@@ -241,7 +241,7 @@ messages that we want to examine, and the name of a program to call when
 a new message of that type is arrives. The loop can be run every few
 seconds to check for new data.
 
-== Examples ==
+== Examples
 
 There are two complete examples available. The first plots satellite
 positions and the station position as affected by SA, and keeps track of

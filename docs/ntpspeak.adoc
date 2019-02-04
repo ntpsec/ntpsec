@@ -1,4 +1,4 @@
-= A Glossary of NTP-speak =
+= A Glossary of NTP-speak
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]

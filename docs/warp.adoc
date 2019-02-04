@@ -1,12 +1,12 @@
-= How NTP Works =
+= How NTP Works
 include::html.include[]
 
-== Related Links ==
+== Related Links
 
 include::includes/special.adoc[]
 include::includes/external.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Introduction and Overview]
 * link:#scale[NTP Timescale and Data Formats]
@@ -15,7 +15,7 @@ include::includes/external.adoc[]
 
 '''''
 
-== Abstract ==
+== Abstract
 
 [abstract]
 This page and its dependencies contain a technical description of the
@@ -36,7 +36,7 @@ Research Project] web site.
 
 
 [[intro]]
-== Introduction and Overview ==
+== Introduction and Overview
 
 NTP time synchronization services are widely available in the public
 Internet. The public NTP subnet currently includes several thousand
@@ -65,7 +65,7 @@ planning purposes is in the white paper
 Network Time Synchronization].
 
 [[scale]]
-== NTP Timescale and Data Formats ==
+== NTP Timescale and Data Formats
 
 NTP clients and servers synchronize to the Coordinated Universal Time
 (UTC) timescale used by national laboratories and disseminated by radio,
@@ -117,7 +117,7 @@ half-era) of the correct time. Further discussion on this issue is in
 the white paper {millshome}time.html[NTP Timestamp Calculations].
 
 [[arch]]
-== Architecture and Algorithms ==
+== Architecture and Algorithms
 
 image:pic/fig_3_1.gif[]
 
@@ -187,7 +187,7 @@ principles and performance metrics, see the link:stats.html[Performance
 Metrics] page.
 
 [[standards]]
-== Standards Conformance ==
+== Standards Conformance
 
 The principal standard informing the NTPsec software is
 https://tools.ietf.org/html/rfc5905[RFC 5905].
@@ -204,7 +204,7 @@ been pretty short.
 https://tools.ietf.org/rfc/rfc2030.txt[RFC 2030] describes
 Simple Network Time Protocol (SNTP) version 4.
 
-=== Divergences from RFC 5905 ===
+=== Divergences from RFC 5905
 
 Code conformance was never quite exact even before the NTPsec fork.
 In this section we attempt to list divergences.  This list is probably
@@ -239,7 +239,7 @@ but persist as peer statuses that may be reported by {ntpqman}/{ntpmon}.
 
 The continuing relevance of much of Appendix A is doubtful.
 
-=== Divergences from RFC 2030 ===
+=== Divergences from RFC 2030
 
 In the packet-format illustration of section 4 (NTP Message Format)
 128 is not the only possible bit length for a MAC.  However, this

@@ -1,4 +1,4 @@
-= Monitoring Commands and Options =
+= Monitoring Commands and Options
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ Pig was hired to watch the logs.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/monopt.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#intro[Naming Conventions]
 * link:#cmd[Monitoring Commands and Options]
@@ -23,7 +23,7 @@ include::includes/monopt.adoc[]
 '''''
 
 [[intro]]
-== Naming Conventions ==
+== Naming Conventions
 
 The +ntpd+ daemon includes a comprehensive monitoring facility which
 collects statistical data of various types and writes the data to
@@ -48,7 +48,7 @@ There is a visualization tool, link:ntpviz.html[ntpviz], which assists
 in making sense of statistics files.
 
 [[cmd]]
-== Monitoring Commands and Options ==
+== Monitoring Commands and Options
 
 Unless noted otherwise, further information about these commands is on
 the link:decode.html[Event Messages and Status Codes] page.

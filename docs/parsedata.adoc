@@ -1,4 +1,4 @@
-= NTP PARSE clock data formats =
+= NTP PARSE clock data formats
 include::html.include[]
 
 The parse driver currently supports several clocks with different query
@@ -9,7 +9,7 @@ parse/clk_*.c and ntpd/refclock_parse.c files).
 
 '''''
 
-== Meinberg clocks ==
+== Meinberg clocks
 
 ------------------------------------------------------------------------------
 Meinberg: start=<STX>, end=<ETX>, sync on start
@@ -155,7 +155,7 @@ there may be a special firmware version available.
 
 '''''
 
-== Raw DCF77 Data via serial line ==
+== Raw DCF77 Data via serial line
 
 RAWDCF: end=TIMEOUT>1.5s, sync each char (any char),generate pseudo time
 codes, fixed format
@@ -177,7 +177,7 @@ one minute. A bit of the time code is sent once a second.
         LFLAG       0
 ----------------------------------------------
 
-== DCF77 raw time code ==
+== DCF77 raw time code
 
 From "Zur Zeit", Physikalisch-Technische Bundesanstalt (PTB),
 
@@ -232,7 +232,7 @@ encoding:
 
 '''''
 
-== Schmid clock ==
+== Schmid clock
 
 Schmid clock: needs poll, binary input, end='\xFC', sync start
 
@@ -273,7 +273,7 @@ for the lsb is sent first).
 
 '''''
 
-== Trimble SV6 ASCII time code (TAIP) ==
+== Trimble SV6 ASCII time code (TAIP)
 
 Trimble SV6: needs poll, ascii timecode, start='>', end='<',
 query='>QTM<', eol='<'
@@ -307,7 +307,7 @@ Special flags are:
 
 '''''
 
-== ELV DCF7000 ==
+== ELV DCF7000
 
 ELV DCF7000: end='\r', pattern=" - - - - - - - \r"
 
@@ -325,7 +325,7 @@ code (though not very precise!) delimited by '\r'
 
 '''''
 
-== HOPF 6021 und Kompatible ==
+== HOPF 6021 und Kompatible
 
 HOPF Funkuhr 6021 mit serieller Schnittstelle Created by F.Schnekenbuehl
 <frank@comsys.dofn.de> from clk_rcc8000.c Nortel DASA Network Systems
@@ -384,7 +384,7 @@ Type 6021 Serial Output format
 
 '''''
 
-== Diem Computime Clock ==
+== Diem Computime Clock
 
 The Computime receiver sends a datagram in the following format every
 minute
@@ -409,7 +409,7 @@ minute
 
 '''''
 
-== WHARTON 400A Series Clock with a 404.2 Serial interface ==
+== WHARTON 400A Series Clock with a 404.2 Serial interface
 
 The WHARTON 400A Series clock is able to send date/time serial messages
 in 7 output formats. We use format 1 here because it is the shortest. We
