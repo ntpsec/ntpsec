@@ -1,13 +1,13 @@
-= Shared Memory Driver =
+= Shared Memory Driver
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: shm
 Reference ID: SHM
 
-== Description ==
+== Description
 
 This driver receives its reference clock info from a shared
 memory-segment. The shared memory-segment is created with owner-only
@@ -15,7 +15,7 @@ access by default, unless otherwise requested by the mode word for units
 ≥2. Units 0 and 1 are always created with owner-only access for backward
 compatibility.
 
-== Structure of shared memory-segment ==
+== Structure of shared memory-segment
 
 ------------------------------------------------------------------------------
 struct shmTime {
@@ -42,7 +42,7 @@ struct shmTime {
 };
 ------------------------------------------------------------------------------
 
-== Operation mode=0 ==
+== Operation mode=0
 
 Each second, the value of +valid+ of the shared memory-segment is
 checked:
@@ -53,7 +53,7 @@ to +ntpd+, and +valid+ is cleared and +count+ is incremented.
 
 If not set, +count+ is incremented.
 
-== Operation mode=1 ==
+== Operation mode=1
 
 Each second, +valid+ in the shared memory-segment is checked:
 
@@ -68,7 +68,7 @@ _ntpd_. The +valid+ flag is cleared and +count+ is incremented.
 
 If not set, +count+ is incremented.
 
-== Mode-independent post-processing ==
+== Mode-independent post-processing
 
 After the time stamps have been successfully plucked from the SHM
 segment, some sanity checks take place:
@@ -80,7 +80,7 @@ data.
 limit (either _time2_ or the default of 4 h), then the sample is
 discarded. This check is disabled when _flag1_ is set to 1.
 
-== GPSD ==
+== GPSD
 
 http://www.catb.org/gpsd/[_GPSD_] knows how to talk to many GPS devices.
 It can work with _ntpd_ through the SHM driver.
@@ -100,7 +100,7 @@ between PPS and serial data can easily cause trouble here because _ntpd_
 has no way to join the two data streams and correlate the serial data
 with the PPS events.
 
-== Clockstats ==
+== Clockstats
 
 If flag4 is set when the driver is polled, a clockstats record is
 written. The first 3 fields are the normal date, time, and source
@@ -136,7 +136,7 @@ your ntpd was built in strict Classic compatibility mode it will
 be a magic clock address expressing the same information in a more
 opaque way.
 
-== The \'mode' word ==
+== The \'mode' word
 
 Some aspects of the driver behavior can be adjusted by setting bits of
 the mode option of the refclock declaration.
@@ -153,7 +153,7 @@ for the specific unit.
 |1-31 |  -  |  -  | _reserved -- do not use_
 |=============================================================
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -193,7 +193,7 @@ for the specific unit.
 +baud+ 'number'::
   Not used by this driver.
 
-== Configuration Example ==
+== Configuration Example
 
 The most common use of this driver is to get samples from a gpsd instance:
 
@@ -202,7 +202,7 @@ refclock shm unit 0 refid GPS
 refclock shm unit 1 prefer refid PPS
 ----------------------------------------------------------------------------
 
-== Public vs. Private SHM segments ==
+== Public vs. Private SHM segments
 
 The driver attempts to create a shared memory segment with an
 identifier depending on the unit number. Unix creates a shared memory
@@ -224,7 +224,7 @@ ntpd does not permit the use of a refclock option if this is to be avoided;
 this is the reason why a mode bit is used for the configuration of a
 public segment.
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 

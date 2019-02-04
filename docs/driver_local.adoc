@@ -1,13 +1,13 @@
-= Undisciplined Local Clock =
+= Undisciplined Local Clock
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: localclock
 Reference ID: LOCL
 
-== Description ==
+== Description
 
 Note: *We recommend against using this driver.* A much more flexible
 replacement is described on the link:orphan.html[Orphan Mode] page.
@@ -32,11 +32,11 @@ network are available. To further protect the Internet infrastructure
 from accidental or malicious exposure to this driver, the driver is
 disabled if another source is available and operating.
 
-== Monitor Data ==
+== Monitor Data
 
 No +filegen clockstats+ monitor data are produced by this driver.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   Not used by this driver.
@@ -73,17 +73,17 @@ No +filegen clockstats+ monitor data are produced by this driver.
 +baud+ 'number'::
   Not used by this driver.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock local
 ----------------------------------------------------------------------------
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 
-== Authors ==
+== Authors
 
 David L. Mills <mills@udel.edu>
 

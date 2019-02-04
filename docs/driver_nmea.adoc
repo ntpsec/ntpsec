@@ -1,7 +1,7 @@
-= Generic NMEA GPS Receiver =
+= Generic NMEA GPS Receiver
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: nmea
@@ -10,7 +10,7 @@ Serial Port: /dev/gps__u__; 4800-115200bps, 8N1
 Serial Port: /dev/gpspps__u__; for PPS
 Features: +tty_clk+
 
-== Description ==
+== Description
 
 This driver supports GPS receivers with the +$GPRMC+, +$GPGLL+,
 +$GPGGA+, +$GPZDA+ and +$GPZDG+ NMEA sentences by default.  Note that
@@ -89,7 +89,7 @@ The various GPS sentences that this driver recognises look like this
 |<cr><lf>|Sentence terminator.
 |=============================================================================
 
-== The \'mode' byte ==
+== The \'mode' byte
 
 Specific GPS sentences and bitrates may be selected by setting bits of the \'mode' in the refclock configuration line:
 
@@ -144,7 +144,7 @@ purposes should be configured to transmit the relevant data only,
 e.g. one +$GPRMC+ or +$GPZDA+ per second; this will slightly reduce
 jitter by reducing variation in transmission times.
 
-== Monitor Data ==
+== Monitor Data
 
 The last GPS sentence that is accepted or rejected is written to the
 clockstats file and available with +ntpq -c clockvar+. (Logging the
@@ -195,7 +195,7 @@ To make a specific setting, select the corresponding decimal values from
 the mode byte table, add them all together and enter the resulting
 decimal value into the clock configuration line.
 
-== Setting up the Garmin GPS-25XL ==
+== Setting up the Garmin GPS-25XL
 
 Switch off all output by sending it the following string.
 
@@ -216,7 +216,7 @@ switched on by sending the following string.
 "$PGRMC,,,,,,,,,,,,2<cr><lf>"
 -----------------------------
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -254,7 +254,7 @@ switched on by sending the following string.
 +baud+ 'number'::
   Overrides the default baud/bps rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ------------------------------------------------------------------------------
 refclock nmea baud 19200	# All sentences from /dev/gps0 at 19200 bps
@@ -265,7 +265,7 @@ link:refclock.html[Reference Clock Drivers]
 
 '''''
 
-== Known bugs ==
+== Known bugs
 
 If your GPS has firmware made more than 1024 weeks (19 years and 36
 weeks) in the past, its internal date counter will almost certainly

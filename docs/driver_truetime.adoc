@@ -1,7 +1,7 @@
-= TrueTime GPS/GOES Receivers =
+= TrueTime GPS/GOES Receivers
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: truetime
@@ -9,7 +9,7 @@ Reference ID: TRUE
 Serial Port: +/dev/true+'u'; 9600 bps 8N1
 Features: +tty_clk+
 
-== Deprecation warning ==
+== Deprecation warning
 
 This refclock is deprecated and obsolete. The NTPsec maintainers plan
 to remove it in a future release.  If you have a requirement for it,
@@ -20,7 +20,7 @@ system clock to be near correct before samples will be processed
 properly. You will not be able to use it to run autonomously, nor will
 it reliably recover from a trashed or zeroed system clock.
 
-== Description ==
+== Description
 
 This driver supports several models of Kinemetrics/TrueTime
 timing receivers, including GPS- DC MK III and GPS/TM-TMD GPS
@@ -55,7 +55,7 @@ initial synchronization and when received signal is lost for an
 extended period; unlock condition is indicated by other than <SP>
 in the quality field.
 
-== Notes on the TL-3 receiver: ==
+== Notes on the TL-3 receiver:
 
 The mini-DIN RS-232 port uses the Apple pinout.
 
@@ -71,12 +71,12 @@ antennas. You may wish to turn the loss interval down from 4 h (04) to 1 h
 drift can be on the order of 10 ms/hr since there is no high quality
 reference oscillator.
 
-== Monitor Data ==
+== Monitor Data
 
 When enabled by the +flag4+ option, every received timecode is
 written as-is to the +clockstats+ file.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -112,13 +112,13 @@ written as-is to the +clockstats+ file.
 +baud+ 'number'::
   Overrides the default baud rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock truetime
 ----------------------------------------------------------------------------
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 

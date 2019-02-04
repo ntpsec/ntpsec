@@ -1,7 +1,7 @@
-= NeoClock4X - DCF77 / TDF serial line receiver + =
+= NeoClock4X - DCF77 / TDF serial line receiver +
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: neoclock
@@ -10,14 +10,14 @@ Serial Port: /dev/neoclock4x-u
 
 image:pic/neoclock4x.gif[float="right",link="http://www.linum.com"]
 
-== Warning ==
+== Warning
 
 This driver reports only two-digit years, and is thus reliant on the
 system clock to be near correct before samples will be processed
 properly. You will not be able to use it to run autonomously, nor will
 it reliably recover from a trashed or zeroed system clock.
 
-== Description ==
+== Description
 
 The refclock_neoclock4x driver supports the NeoClock4X receiver
 available from http://www.linum.com[Linum Software GmbH]. The receiver
@@ -25,7 +25,7 @@ is available as a http://www.dcf77.de[DCF77] or TDF receiver. Both
 receivers have the same output string. For more information about the
 NeoClock4X receiver please visit http://www.linux-funkuhr.de.
 
-== Driver Options ==
+== Driver Options
 
 link:clockopt.html[+time1+ time]::
    Specifies the time offset calibration factor with the default value of
@@ -86,13 +86,13 @@ Default setting is 0 = don't log received data and converted utc time.
 +baud+ 'number'::
   Overrides the default baud rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock neoclock
 ----------------------------------------------------------------------------
 
-== Author ==
+== Author
 
 Please send any comments or question to
 mailto:neoclock4@linum.com[neoclock4x@linum.com].

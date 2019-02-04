@@ -1,7 +1,7 @@
-= Arbiter 1088A/B GPS Receiver =
+= Arbiter 1088A/B GPS Receiver
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: arbiter
@@ -10,7 +10,7 @@ Driver ID: GPS_ARBITER
 Serial Port: /dev/gps__u__; 9600bps 8N1
 Features: tty_clk
 
-== Deprecation warning ==
+== Deprecation warning
 
 This refclock is deprecated and obsolete. The NTPsec maintainers plan
 to remove it in a future release.  If you have a requirement for it,
@@ -21,7 +21,7 @@ system clock to be near correct before samples will be processed
 properly. You will not be able to use it to run autonomously, nor will
 it reliably recover from a trashed or zeroed system clock.
 
-== Description ==
+== Description
 
 This driver supports the Arbiter 1088A/B Satellite Controlled Clock. The
 claimed accuracy of this clock is 100 ns relative to the PPS output when
@@ -91,7 +91,7 @@ A three-stage median filter is used to reduce jitter and provide a
 dispersion measure. The driver makes no attempt to correct for the
 intrinsic jitter of the radio itself.
 
-== Monitor Data ==
+== Monitor Data
 
 When enabled by the +flag4+ option, an additional line containing
 the latitude, longitude, elevation and optional deviation data is
@@ -103,7 +103,7 @@ The deviation data consists of the mean offset and standard deviation of
 the external PPS signal relative the GPS signal, both in microseconds
 over the last 16 seconds.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -137,21 +137,21 @@ over the last 16 seconds.
 +baud+ 'number'::
   Overrides the default baud rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock arbiter
 ----------------------------------------------------------------------------
 
-== Author ==
+== Author
 
 David L. Mills <mills@udel.edu>
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 
-== Known bugs ==
+== Known bugs
 
 If your Arbiter has firmware made more than 1024 weeks (19 years and 36
 weeks) in the past, its internal date counter may wrap around

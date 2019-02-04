@@ -1,14 +1,14 @@
-= JJY Receivers =
+= JJY Receivers
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: jjy
 Reference ID: JJY
 Serial Port: +/dev/jjyu+; See corresponding receiver
 
-== Warning ==
+== Warning
 
 Some modes of this driver report only two-digit years, and are thus
 reliant on the system clock to be near correct before samples will be
@@ -16,7 +16,7 @@ processed properly. You will not be able to use them to run
 autonomously, nor will it reliably recover from a trashed or zeroed
 system clock.
 
-== Description ==
+== Description
 
 This driver supports the following the JJY receivers and the GPS clock
 sold in Japan, and the time service through a telephone line.
@@ -346,7 +346,7 @@ link:
 ln -s /dev/ttyUSB0 /dev/jjy0
 ----------------------------------------------------------------
 
-== Monitor Data ==
+== Monitor Data
 
 The driver writes sent and received data to/from the JJY receivers, GPS
 clock, and the modem into the +clockstats+ file.
@@ -369,7 +369,7 @@ filegen clockstats file clockstats type day enable
 |+-X-+ | Error message
 |============================================================
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -403,7 +403,7 @@ filegen clockstats file clockstats type day enable
 +baud+ 'number'::
   Not used by this driver. The subtype implies the baud rate.
 
-== Configuration Examples ==
+== Configuration Examples
 
 See the examples in the Description section.
 

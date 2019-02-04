@@ -1,15 +1,15 @@
-= GPSD JSON client driver =
+= GPSD JSON client driver
 include::html.include[]
 
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: gpsd
 Reference ID: GPSD
 Serial Port: /dev/gps__u__
 
-== Description ==
+== Description
 
 This driver is a client driver to the _GPSD_ daemon, which over time has
 become increasingly popular for UN*Xish platforms. _GPSD_ can manage
@@ -53,7 +53,7 @@ The acronym [underline]#IBT# is used here as a synonym for "in-band
 time" from the data channel of the receiver, no matter what objects
 were used to obtain it.
 
-== Naming a Device ==
+== Naming a Device
 
 The _GPSD_ driver uses the same device name as the NMEA driver, namely
 +/dev/gpsu+. There is a simple reason for that: While the NMEA driver
@@ -75,7 +75,7 @@ discipline to the character special file, which is not possible when
 running with root privileges already dropped. This is not likely to
 change in the future.
 
-== The \'mode' word ==
+== The \'mode' word
 
 A few operational modes can be selected with the mode word.
 
@@ -117,7 +117,7 @@ use IBT alone over not getting synchronised at all.
 | 2..31 2+|'(reserved for future extension, do not use)'
 |===========================================================================
 
-== Syslog flood throttle ==
+== Syslog flood throttle
 
 This driver can create a lot of syslog messages when things go wrong,
 and cluttering the log files is frowned upon. So we attempt to log
@@ -130,7 +130,7 @@ flood throttle disabled for extended periods is not recommended unless the
 log files are closely monitored.
 
 
-== PPS secondary clock unit ==
+== PPS secondary clock unit
 
 Units with numbers ≥128 act as secondary clock unit for the primary
 clock unit (u mod 128). A secondary unit processes only the PPS data
@@ -161,7 +161,7 @@ sample buffer at this point to avoid the use of stale PPS data.
 as fudge +time1+. Only the fudge values +time1+ and the +flag1+ option
 have an impact on secondary units.
 
-== Clockstats ==
+== Clockstats
 
 If flag4 is set when the driver is polled, a clockstats record is
 written for the primary clock unit. (The secondary PPS unit does not
@@ -193,7 +193,7 @@ the last poll.
 since the last poll.
 |===========================================================================
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -248,7 +248,7 @@ signal, it should not be used to create a possible PPS peer: These get
 extra clout and can effectively become the sole source of input for the
 control loop. You do not want to use sloppy data for that.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 # Conentional mode 2 on unit 0, IBD only, experimental automatic mode
@@ -259,7 +259,7 @@ server gpsd unit 0 minpoll 4 maxpoll 4 time1 0.142
 server gpsd unit 128 minpoll 4 maxpoll 4 time1 0.001500
 ----------------------------------------------------------------------------
 
-== Known bugs ==
+== Known bugs
 
 If your GPS has firmware made more than 1024 weeks (19 years and 36
 weeks) in the past, its internal date counter may well wrap around

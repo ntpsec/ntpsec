@@ -1,7 +1,7 @@
-= PPS Clock Discipline =
+= PPS Clock Discipline
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: pps
@@ -10,7 +10,7 @@ Driver ID: PPS
 Serial or Parallel Port: /dev/pps__u__
 Requires: link:kernpps.html[PPSAPI Interface for Precision Time Signals]
 
-== Description ==
+== Description
 
 This driver furnishes an interface for the pulse-per-second (PPS) signal
 produced by a cesium clock, radio clock or related devices. It can be
@@ -87,7 +87,7 @@ In a similar scenario a PPS signal can be used to discipline the clock
 between updates produced by the modem driver. This would provide precise
 synchronization without needing the Internet at all.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -124,7 +124,7 @@ synchronization without needing the Internet at all.
 +baud+ 'number'::
    Not used by this driver.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock pps unit 0 flag2 1	# Capture PPS on trailing edge of pps0
@@ -135,7 +135,7 @@ active; thus no "refclock pps" is required unless you need to set a
 driver option. It is initialized by whatever other driver is using
 it, which will be one of generic, nmea, or spectracom.
 
-== Clockstats  ==
+== Clockstats
 
 If clockstats is enabled, the driver will log a few counters.  Examples:
 
@@ -167,17 +167,17 @@ your ntpd was built in strict Classic compatibility mode it will
 be a magic clock address expressing the same information in a more
 opaque way.
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 
-== Reference ==
+== Reference
 
 RFC 2783::
   Mogul, J., D. Mills, J. Brittenson, J. Stone and U. Windl, _Pulse-Per-Second
   API for Unix-like Operating Systems, Version 1.0_, RFC 2783
 
-== Author ==
+== Author
 
 David L. Mills <mills@udel.edu>
 

@@ -1,4 +1,4 @@
-= How to Write a Reference Clock Driver =
+= How to Write a Reference Clock Driver
 include::html.include[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -10,11 +10,11 @@ You need a little magic.
 
 |==============================
 
-== Related Links ==
+== Related Links
 
 include::includes/misc.adoc[]
 
-== Table of Contents ==
+== Table of Contents
 
 * link:#desc[Description]
 * link:#file[Files Which Need to be Changed]
@@ -23,7 +23,7 @@ include::includes/misc.adoc[]
 
 '''''
 
-== When Not to Write a Driver ==
+== When Not to Write a Driver
 
 If the device you are trying to support is an exotic GPS, you should
 probably not write an +ntpd+ driver for it.  Instead, check to see if
@@ -43,7 +43,7 @@ allowing you support a new device type by writing only a parser for
 its sentences.
 
 [[desc]]
-== Structure of a Driver ==
+== Structure of a Driver
 
 NTP reference clock support maintains the fiction that the clock is
 actually an ordinary server in the NTP tradition, but operating at a
@@ -128,7 +128,7 @@ assigned a unique long-form driver name, short-form driver name and
 device name. The existing assignments are in the
 link:refclock.html[Reference Clock Drivers] page and its dependencies.
 
-== Conventions, Fudge Factors and Flags ==
+== Conventions, Fudge Factors and Flags
 
 Most drivers support manual or automatic calibration for systematic
 offset bias using values encoded in the +refclock+ configuration command.
@@ -144,7 +144,7 @@ Once the its value has stabilized, the value can be inserted in the
 configuration file and the calibration feature disabled.
 
 [[file]]
-== Files Which Need to be Changed ==
+== Files Which Need to be Changed
 
 When a new reference clock driver is installed, the following files need
 to be edited. Note that changes are also necessary to properly integrate
@@ -174,7 +174,7 @@ decidedly beyond the scope of this page.
   correspondence with the type number.
 
 [[intf]]
-== Interface Routine Overview ==
+== Interface Routine Overview
 
 +refclock_newpeer+ - initialize and start a reference clock.::
   Allocates and initializes the interface structure which
@@ -226,7 +226,7 @@ decidedly beyond the scope of this page.
   and save it in the circular buffer (see below).
 
 [[pps]]
-== Pulse-per-Second Interface ==
+== Pulse-per-Second Interface
 
 When the Pulse-per-Second Application Interface (RFC 2783) is present, a
 compact PPS interface is available to all drivers. See the

@@ -1,7 +1,7 @@
-= Spectracom =
+= Spectracom
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: spectracom
@@ -10,7 +10,7 @@ Serial Port: +/dev/spectracom+'u'; 9600 bps 8N1
 Features: Optional PPS signal processing, +tty_clk+
 Requires: Optional PPS signal processing requires the PPSAPI signal interface.
 
-== Deprecation warning ==
+== Deprecation warning
 
 This refclock is deprecated and obsolete. The NTPsec maintainers plan
 to remove it in a future release.  If you have a requirement for it,
@@ -21,7 +21,7 @@ system clock to be near correct before samples will be processed
 properly. You will not be able to use it to run autonomously, nor will
 it reliably recover from a trashed or zeroed system clock.
 
-== Description ==
+== Description
 
 This driver supports the "Type 2" format emitted by Spectracom time
 servers including the 9483, 9489, and SecureSync.
@@ -77,7 +77,7 @@ filter is used to reduce jitter and provide a dispersion measure. The
 driver makes no attempt to correct for the intrinsic jitter of the radio
 itself, which is a known problem with the older radios.
 
-== PPS Signal Processing ==
+== PPS Signal Processing
 
 When PPS signal processing is enabled; and when the system clock has
 been set by this or another driver; and the PPS signal offset is within
@@ -87,7 +87,7 @@ signal fails for one or more poll intervals, the driver reverts to the
 timecode. If the timecode fails for one or more poll intervals, the PPS
 signal is disconnected.
 
-== Monitor Data ==
+== Monitor Data
 
 The driver writes each timecode as received to the +clockstats+ file.
 When enabled by the +flag4+ option, a table of quality data
@@ -95,7 +95,7 @@ maintained internally by the Netclock/2 is retrieved and written to the
 +clockstats+ file when the first timecode message of a new day is
 received.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -133,13 +133,13 @@ received.
 +baud+ 'number'::
   Overrides the default baud rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock spectracom
 ----------------------------------------------------------------------------
 
-== Author ==
+== Author
 
 David L. Mills <mills@udel.edu>
 

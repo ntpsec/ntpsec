@@ -1,7 +1,7 @@
-= NIST/USNO/PTB Modem Time Services =
+= NIST/USNO/PTB Modem Time Services
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: modem
@@ -10,7 +10,7 @@ Serial Port: /dev/modem__u__; 9600 8N1
 Features: tty_clk
 Requires: a dial-out device.
 
-== Warning ==
+== Warning
 
 The ACTS and USNO modes of this driver report only two-digit years, and is thus
 reliant on the system clock to be near correct before samples will be
@@ -18,7 +18,7 @@ processed properly. You will not be able to use it to run
 autonomously, nor will it reliably recover from a trashed or zeroed
 system clock.
 
-== Description ==
+== Description
 
 This driver supports the US (NIST and USNO) and European (PTB (Germany),
 NPL (UK), etc.) modem time services, as well as Spectracom GPS receivers
@@ -84,7 +84,7 @@ settings are 12 (1.1 hours) for +minpoll+ and 17 (36 hours) for
 +maxpoll+. Ordinarily, the poll interval will start at +minpoll+ and
 ramp up to +maxpoll+ in a day or two.
 
-== US Phone Numbers and Formats ==
+== US Phone Numbers and Formats
 
 Note: Phone numbers include the entire Hayes modem command, including
 the +ATDT+ and other control codes as may be necessary. For most cases
@@ -135,12 +135,12 @@ receiver requires a +T+ in order to return the timecode. As this driver
 does not send data via the modem, it must either be configured in
 continuous mode or be polled by another local driver.
 
-== Monitor Data ==
+== Monitor Data
 
 The received timecode is written as-is to the +clockstats+ file along
 with the Hayes connection and hang-up commands and result codes.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -173,17 +173,17 @@ with the Hayes connection and hang-up commands and result codes.
 +baud+ 'number'::
   Overrides the default baud rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock modem
 ----------------------------------------------------------------------------
 
-== Author ==
+== Author
 
 David L. Mills <mills@udel.edu>
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 

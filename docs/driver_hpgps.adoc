@@ -1,7 +1,7 @@
-= Hewlett Packard GPS Receivers -  HP 58503A and HP Z3801A =
+= Hewlett Packard GPS Receivers -  HP 58503A and HP Z3801A
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: hpgps
@@ -9,14 +9,14 @@ Reference ID: GPS
 Driver ID: GPS_HP
 Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
 
-== Warning ==
+== Warning
 
 As of September 2017 we have reports that the internal clock on a
 Z3801A was observed to roll over to 1998 (see
 link:rollover.html[Rollover issues in time sources]). Users should
 audit for rollover before deploying any of these devices.
 
-== Description ==
+== Description
 
 This driver supports the HP 58503A Time and Frequency Reference Receiver
 and HP Z3801A GPS Receiver. It will probably work with other Z38xx models.
@@ -74,14 +74,14 @@ the right line parameters.
 The timekeeping portion of HP's business was sold to Symmetricom; Symmetricom
 was later acquired by https://www.microsemi.com/[Microsemi].
 
-== Rollover compensation ==
+== Rollover compensation
 
 Some devices in this product line have a front-panel display of
 date-time and controls to manipulate it.  On these, it is possible to
 reset the device's hidden base date for your current era. Consult
 your documentation for details.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -115,7 +115,7 @@ your documentation for details.
 +baud+ 'number'::
   Overrides the default baud rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock hpgps

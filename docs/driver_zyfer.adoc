@@ -1,14 +1,14 @@
-= Zyfer GPStarplus Receiver =
+= Zyfer GPStarplus Receiver
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: zyfer
 Reference ID: GPS
 Serial Port: /dev/zyfer__u__; 9600 bps 8N1
 
-== Description ==
+== Description
 
 This driver supports the http://www.zyfer.com/[Zyfer GPStarplus]
 receiver.
@@ -20,11 +20,11 @@ once-per-second timestamp.
 Additionally, there are BNC connectors on the back for things like PPS
 and IRIG output.
 
-== Additional Information ==
+== Additional Information
 
 link:refclock.html[Reference Clock Drivers]
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -57,7 +57,7 @@ link:refclock.html[Reference Clock Drivers]
 +baud+ 'number'::
   Overrides the default baud rate.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock zyfer

@@ -1,11 +1,11 @@
-= Generic Reference Driver =
+= Generic Reference Driver
 include::html.include[]
 
-== Name ==
+== Name
 
 refclock_generic - multidevice parse driver for generic time radios and GPSDOs.
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: generic
@@ -13,7 +13,7 @@ Reference ID: DCF | DCFa | DCFp | GPS | MSF
 Serial Port: /dev/refclock-'u'; TTY mode according to clock type
 PPS device: /dev/refclockpps-'u'; alternate PPS device
 
-== Warning ==
+== Warning
 
 Most modes of this driver report only two-digit years, and are thus
 reliant on the system clock to be near correct before samples will be
@@ -22,7 +22,7 @@ autonomously, nor will they reliably recover from a trashed or zeroed
 system clock.  The only exceptions are the Schweitzer 240x and the
 Trimble TAIP/TSIP modes.
 
-== Description ==
+== Description
 
 The generic driver supports many different clock
 types/configurations by plugging type-specific packet-parsing
@@ -57,7 +57,7 @@ controls the way time offsets are determined.
 The use of the PPS option requires receivers with an accuracy of better
 than 1ms.
 
-== Timecode variables listed by {ntpqman} ==
+== Timecode variables listed by {ntpqman}
 
 The ntpq program can read and display several clock variables. These
 hold the following information:
@@ -83,7 +83,7 @@ refclock_ppsskew::
 refclock_ppstime::
   The PPS timestamp.
 
-== Supported Devices ==
+== Supported Devices
 
 Twenty-five clock types are supported by the GENERIC driver
 and any number of these clocks may be operational at any one time.
@@ -311,7 +311,7 @@ See comment from subtype 20 clock.
 Actual data formats and setup requirements of the various clocks can be
 found in link:parsedata.html[NTP GENERIC clock data formats].
 
-== Operation ==
+== Operation
 
 The reference clock support software carefully monitors the state
 transitions of the receiver. All state changes and exceptional events
@@ -348,7 +348,7 @@ hardware used. To select PPS support, the subtype parameter is the subtype
 value as above plus 128. If 128 is not added to the subtype value, PPS will
 be detected to be available but will not be used.
 
-== Hardware PPS support ==
+== Hardware PPS support
 
 For PPS to be used, add 128 to the subtype parameter.
 
@@ -359,7 +359,7 @@ information to be fed in e.g. via the parallel port (if supported by the
 underlying operation system) and the date/time telegrams to be handled
 via the serial port.
 
-== Monitor Data ==
+== Monitor Data
 
 Clock state statistics are written hourly to the syslog
 service. Online information can be found by examining the clock
@@ -445,7 +445,7 @@ screen width and looks similar to:
   gps_cfg[5]="[0x9] BLOCK II"
 ----------------------------------------
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -484,11 +484,11 @@ screen width and looks similar to:
 +baud+ 'number'::
   Not used by this driver.  Baud rate is implied by the selected mode.
 
-== Configuration Examples ==
+== Configuration Examples
 
 See the examples above under "Supported devices"
 
-== Making your own generic clocks ==
+== Making your own generic clocks
 
 The generic clock mechanism deviates from the way other NTP reference
 clocks work. For a short description of how to build generic reference

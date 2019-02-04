@@ -1,7 +1,7 @@
-= Motorola Oncore GPS receiver =
+= Motorola Oncore GPS receiver
 include::html.include[]
 
-== Synopsis ==
+== Synopsis
 
 ["verse",subs="normal"]
 Name: oncore
@@ -9,7 +9,7 @@ Reference ID: GPS
 Serial Port: /dev/oncore.serial._u_; 9600 bps 8N1.
 PPS Port: /dev/oncore.pps._u_
 
-== Deprecation warning ==
+== Deprecation warning
 
 This refclock is deprecated and obsolete; the entire Oncore line has
 been end-of-lifed. The NTPsec maintainers plan to remove it in a
@@ -21,7 +21,7 @@ system clock to be near correct before samples will be processed
 properly. You will not be able to use it to run autonomously, nor will
 it reliably recover from a trashed or zeroed system clock.
 
-== Description ==
+== Description
 
 This driver supports most models of the
 https://web.archive.org/web/19990427102123/http://www.mot.com/AECS/PNSB/products/produt.html[Motorola Oncore GPS receivers]
@@ -53,7 +53,7 @@ The driver will use the "position hold" mode with user provided
 coordinates, the receiver's built-in site-survey, or a similar algorithm
 implemented in this driver to determine the antenna position.
 
-== Monitor Data ==
+== Monitor Data
 
 The driver always puts a lot of useful information in the clockstats
 file, and when run with debugging can be quite chatty on stdout. When
@@ -68,7 +68,7 @@ manual page for information on how to use this option. For either
 debugging or using the SHMEM option, an Oncore Reference Manual for the
 specific receiver in use will be required.
 
-== Driver Options ==
+== Driver Options
 
 +unit+ 'number'::
   The driver unit number, defaulting to 0. Used as a distinguishing
@@ -102,18 +102,18 @@ specific receiver in use will be required.
 +baud+ 'number'::
    Not used by this driver.
 
-== Configuration Example ==
+== Configuration Example
 
 ----------------------------------------------------------------------------
 refclock oncore
 ----------------------------------------------------------------------------
 
-== Additional Information ==
+== Additional Information
 
 The driver was initially developed on FreeBSD, and has since been tested
 on Linux, SunOS and Solaris.
 
-=== Configuration ===
+=== Configuration
 
 There is a driver specific configuration file +ntp.oncore+ (or
 +ntp.oncore.+'u' or +ntp.oncore+'u' if you must distinguish between more
@@ -131,7 +131,7 @@ the PPS signal that is `on-time' can be set with the keywords
 [ASSERT/CLEAR] and the word HARDPPS will cause the PPS signal to control
 the kernel PLL.
 
-=== Performance ===
+=== Performance
 
 Even the newest of these variants, the M12+T with firmware dated 9 Jun
 2004 now reports bad dates due to era rollover.
