@@ -1202,7 +1202,7 @@ ctl_putdblf(
         char buf[50];
 
         strlcpy(buffer, tag, sizeof(buffer));
-        snprintf(buf, sizeof(buf), use_f ? "=%.*f" : "%.*g", precision, d);
+        snprintf(buf, sizeof(buf), use_f ? "=%.*f" : "=%.*g", precision, d);
         strlcat(buffer, buf, sizeof(buffer));
 
         ctl_putdata(buffer, strlen(buffer), false);
