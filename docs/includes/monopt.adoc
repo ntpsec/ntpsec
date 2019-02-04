@@ -1,4 +1,4 @@
-== Monitoring Commands and Options ==
+== Monitoring Commands and Options
 * link:monopt.html#filegen[filegen - specify monitor files]
 * link:monopt.html#statistics[statistics - enable writing of statistics records]
 * link:monopt.html#statsdir[statsdir - specify monitor files directory]

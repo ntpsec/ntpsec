@@ -1,4 +1,4 @@
-=== Build and Install ===
+=== Build and Install
 * link:build.html[Building and Installing the Distribution]
 * link:rdebug.html[Debugging Reference Clock Drivers]
 * link:quick.html[Quick Start for Client Configurations]

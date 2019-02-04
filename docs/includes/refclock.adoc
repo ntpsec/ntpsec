@@ -1,4 +1,4 @@
-=== Reference Clock Support ===
+=== Reference Clock Support
 * link:extern.html[External Clock Discipline and the Local Clock Driver]
 * link:driver_howto.html[How to Write a Reference Clock Driver]
 * link:generic_howto.html[How to build new generic clocks]

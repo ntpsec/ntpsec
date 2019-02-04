@@ -1,4 +1,4 @@
-=== Authentication Commands and Options ===
+=== Authentication Commands and Options
 * link:authopt.html#controlkey[controlkey - specify control key ID]
 * link:authopt.html#keys[keys - specify symmetric keys filename]
 * link:authopt.html#trustedkey[trustedkey - specify trusted key IDs]

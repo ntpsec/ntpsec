@@ -1,4 +1,4 @@
-=== Miscellaneous Pages ===
+=== Miscellaneous Pages
 * link:copyright.html[Copyright Notice]
 * link:ntpspeak.html[A Glossary of NTP-speak]
 * link:decode.html[Event Messages and Status Words]

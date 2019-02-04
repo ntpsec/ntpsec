@@ -1,4 +1,4 @@
-=== Client and Server Configuration ===
+=== Client and Server Configuration
 * link:assoc.html[Association Management]
 * link:discover.html[Automatic Server Discovery Schemes]
 * link:sitemap.html[Site Map]

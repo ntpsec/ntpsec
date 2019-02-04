@@ -1,4 +1,4 @@
-=== Server Commands and Options ===
+=== Server Commands and Options
 * link:confopt.html#server[server - configure client association]
 * link:confopt.html#pool[pool - configure pool association]
 * link:confopt.html#unpeer[unpeer - remove association]

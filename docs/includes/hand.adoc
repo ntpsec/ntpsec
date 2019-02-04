@@ -1,4 +1,4 @@
-=== Handbook Pages ===
+=== Handbook Pages
 * link:comdex.html[Command Index]
 * link:access.html[Access Control Support]
 * link:assoc.html[Association Management]

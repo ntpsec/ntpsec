@@ -1,4 +1,4 @@
-=== Special Topics ===
+=== Special Topics
 * link:warp.html[How NTP Works]
 * link:prefer.html[Mitigation Rules and the `prefer` Keyword]
 * link:orphan.html[Orphan Mode]
