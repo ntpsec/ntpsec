@@ -1,4 +1,4 @@
-= ntpsweep(1) =
+= ntpsweep(1)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpsweep - print various information about given NTP servers
 
 include::../docs/includes/ntpsweep-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 

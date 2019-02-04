@@ -1,4 +1,4 @@
-= ntpmon(1) =
+= ntpmon(1)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpmon - real-time NTP status monitor
 
 include::../docs/includes/ntpmon-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 Always returns 0.
 

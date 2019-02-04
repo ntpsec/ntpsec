@@ -1,4 +1,4 @@
-= ntpkeygen(8) =
+= ntpkeygen(8)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpkeygen - create and manage NTP host keys
 
 include::../docs/includes/ntpkeygen-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 

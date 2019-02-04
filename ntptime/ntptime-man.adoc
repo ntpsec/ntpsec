@@ -1,4 +1,4 @@
-= ntptime(8) =
+= ntptime(8)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntptime - read and set kernel time variables
 
 include::../docs/includes/ntptime-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 

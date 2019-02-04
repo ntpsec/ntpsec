@@ -1,4 +1,4 @@
-= ntp.conf(5) =
+= ntp.conf(5)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 

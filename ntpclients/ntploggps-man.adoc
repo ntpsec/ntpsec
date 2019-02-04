@@ -1,4 +1,4 @@
-= ntploggps(1) =
+= ntploggps(1)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntploggps - log gpsd data
 
 include::../docs/includes/ntploggps-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 

@@ -1,4 +1,4 @@
-= ntpfrob(8) =
+= ntpfrob(8)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpfrob - frob the clock hardware
 
 include::../docs/includes/ntpfrob-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 

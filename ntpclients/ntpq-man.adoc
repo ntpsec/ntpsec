@@ -1,4 +1,4 @@
-= ntpq(1) =
+= ntpq(1)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpq - standard NTP query program
 
 include::../docs/includes/ntpq-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 

@@ -1,4 +1,4 @@
-= ntpleapfetch(8) =
+= ntpleapfetch(8)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpleapfetch - leap-seconds file manager/updater
 
 include::../docs/includes/ntpleapfetch-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 
@@ -17,7 +17,7 @@ One of the following exit values will be returned:
 2::
   Internal error - restart command failed.
 
-== AUTHORS ==
+== AUTHORS
 
 Timothe Litt
 

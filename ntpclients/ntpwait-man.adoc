@@ -1,4 +1,4 @@
-= ntpwait(8) =
+= ntpwait(8)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpwait - wait for ntpd to stabilize the system clock
 
 include::../docs/includes/ntpwait-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 

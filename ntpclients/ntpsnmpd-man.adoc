@@ -1,4 +1,4 @@
-= ntpsnmpd(8) =
+= ntpsnmpd(8)
 :man version: @NTPSEC_VERSION@
 include::../docs/manual.include[]
 
@@ -6,7 +6,7 @@ ntpsnmpd - NTP Simple Network Management Protcol sub-sgent
 
 include::../docs/includes/ntpsnmpd-body.adoc[]
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 Always returns 0.
 

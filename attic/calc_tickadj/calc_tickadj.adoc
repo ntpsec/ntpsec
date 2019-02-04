@@ -1,13 +1,13 @@
-= calc_tickadj(8) =
+= calc_tickadj(8)
 :doctype: manpage
 
-== NAME ==
+== NAME
 calc_tickadj - Calculates optimal value for tick given NTP drift file.
 
-== SYNOPSIS ==
+== SYNOPSIS
 calc_tickadj [-d 'string' | --drift-file='string'] [-t 'number' | --tick='number']
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 The _calc_tickadj_ script uses provided NTP drift file to generate
 optimal tick value. Generally, +ntpd+ can do better job if the drift value
@@ -35,7 +35,7 @@ _calc_tickadj_ tries to determine the tick value by using the
 +ntpfrob+ program from the +NTPSec+ package. If this
 doesn't work you can specify current tick manually on command line.
 
-== OPTIONS ==
+== OPTIONS
 
 -d string, --drift-file=string::
   Ntp drift file to use. The default string for this option is:
@@ -49,7 +49,7 @@ Use the specified drift file for calculations
 +
 The current tick which to adjustment will be calculated
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 
@@ -58,7 +58,7 @@ One of the following exit values will be returned:
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
 
-== STATUS ==
+== STATUS
 
 calc_tickadj has been updated to work in the NTPSec
 distribution, but is not actively maintained.
