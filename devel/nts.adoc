@@ -90,19 +90,19 @@ NTP client to NTS-KE client (Alpha to Bravo) is pretty simple.
 As these will both be inside ntpd, this will be function calls,
 not a network connection.
 
-====  NTS-KE client sends: ===
+====  NTS-KE client sends:
 -    Hostname of NTS-KE server
 -    Optional preferred NTPD server hostname or IP Address
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
 -    A sorted list of AEAD algorithms
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
 
-====  NTS-KE server and NTS-KE client compute from the TLS connection: ===
+====  NTS-KE server and NTS-KE client compute from the TLS connection:
 -    C2S and S2C encryption keys
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.2[4.2],
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]
 
-====  NTS-KE client gets back: ===
+====  NTS-KE client gets back:
 -    NTPD server hostname or IP Address
      link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
 -    1 to 8 cookies
@@ -386,7 +386,7 @@ needs to be kept private.  (aka encrypted if it goes over the net)
 Same for NTS-KE server and NTP server.
 Both connections contain C2S and S2C keys.
 
-== Potential cookie recipe(s) ==
+== Potential cookie recipe(s)
 
 . Form a plaintext "P" comprised of records
 .. minimum of an AEAD algorithm record, c2s, and s2c key records
@@ -557,7 +557,7 @@ All the numbers should be in _decimal_ without the hexadecimal timestamps and su
 ----
 
 
-=== link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.3[4.1.3], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.4[4.1.4] ===
+=== link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.3[4.1.3], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.4[4.1.4]
 
 Is the response in case of abuse 'continue the abuse, just wait a minute'?
 
