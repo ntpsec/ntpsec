@@ -2,11 +2,11 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== Synopsis ==
+== Synopsis
 
 +ntpq+ [+-46adhinpkwWu+] [+-c+ 'command'] ['host'] [...]
 
-== Description ==
+== Description
 
 The +ntpq+ utility program is used to monitor NTP daemon +ntpd+
 operations and determine performance. It uses the standard NTP mode 6
@@ -47,7 +47,7 @@ Techniques] page.
 
 For a simpler near-real-time monitor, see {ntpmonman}.
 
-== Options ==
+== Options
 
 Command line options are described following. Specifying the command line
 options +-c+ or +-p+ will cause the specified query (queries) to be sent
@@ -97,7 +97,7 @@ read interactive format commands from the standard input.
 +-u+, +--units+::
   Display timing information with units.
 
-== Internal Commands ==
+== Internal Commands
 
 Interactive format commands consist of a keyword followed by zero to
 four arguments. Only enough characters of the full keyword to uniquely
@@ -207,7 +207,7 @@ as following.
 +version+::
   Print the version of the +ntpq+ program.
 
-== Control Message Commands ==
+== Control Message Commands
 
 Association IDs are used to identify system, peer and clock variables.
 System variables are assigned an association ID of zero and system name
@@ -392,7 +392,7 @@ displayed.
   than one way, for example by having both a bad length and an old version.
 
 [[auth]]
-== Authentication ==
+== Authentication
 
 Four commands require authentication to the server: config-from-file,
 config, ifstats, and reslist.  An authkey file must be in place and
@@ -406,7 +406,7 @@ Credentials once entered, are retained and used for the duration
 of your ntpq session.
 
 [[status]]
-== Status Words and Kiss Codes ==
+== Status Words and Kiss Codes
 
 The current state of the operating program is shown in a set of status
 words maintained by the system and each association separately. These
@@ -424,7 +424,7 @@ an unusual condition. They are now displayed, when appropriate, in the
 reference identifier field in various billboards.
 
 [[system]]
-== System Variables ==
+== System Variables
 
 The following system variables appear in the +rv+ billboard. Not all
 variables are displayed in some configurations.
@@ -462,7 +462,7 @@ averages. The system jitter is defined in the NTPv4 specification; the
 clock jitter statistic is computed by the clock discipline module.
 
 [[peer]]
-== Peer Variables ==
+== Peer Variables
 
 The following peer variables appear in the +rv+ billboard for each
 association. Not all variables are displayed in some configurations.
@@ -498,7 +498,7 @@ association. Not all variables are displayed in some configurations.
 |=======================================================================
 
 [[clock]]
-== Clock Variables ==
+== Clock Variables
 
 The following clock variables appear in the +cv+ billboard for each
 association with a reference clock. Not all variables are displayed in
@@ -522,7 +522,7 @@ some configurations.
 |+flags+       |driver flags
 |==========================================
 
-== Compatibility ==
+== Compatibility
 
 When listing refids, addresses of the form 127.127.x.x are no longer
 automatically interpreted as local refclocks as in older versions of
@@ -539,7 +539,7 @@ In older versions, no count of control packets was listed under sysstats.
 
 The +-O+ (+--old-rv+) option of legacy versions has been retired.
 
-== Known Limitations ==
+== Known Limitations
 
 It is possible for a ":config unpeer" command to fail silently, yielding
 "Config Succeeded", if it is given a peer identifier that looks like

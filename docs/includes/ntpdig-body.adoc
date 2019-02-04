@@ -2,7 +2,7 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS ==
+== SYNOPSIS
 [verse]
 ntpdig
     [--help | -?] [-4 | -6] [-a keynum] [-p samples]
@@ -10,7 +10,7 @@ ntpdig
     [-l logfile] [-M steplimit] [-S] [-s]
     [--wait] [--no-wait] [--version] [address...]+
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 ntpdig can be used as an SNTP client to query an NTP or SNTP server and
 either display the time or set the local system's time (given suitable
@@ -58,7 +58,7 @@ reports whether ntpdig determined it should have slewed or stepped the
 time. This may be shown as true even if time was not actually
 adjusted due to lack of clock-setting privileges.
 
-== OPTIONS ==
+== OPTIONS
 
 +-h, --help+::
   Displays usage information and exits.
@@ -181,7 +181,7 @@ If we are not setting the time, wait for all pending responses.
 +--version+::
   Output version of program and exit.
 
-== USAGE ==
+== USAGE
 
 +ntpdig ntpserver.somewhere+::
   is the simplest use of this program and can be run as an unprivileged
@@ -199,7 +199,7 @@ If we are not setting the time, wait for all pending responses.
   synchronized specified server, like the +ntpdate+ utility from older
   NTP implementations.
 
-== COMPATIBILITY ==
+== COMPATIBILITY
 
 Not all options of the NTP classic sntp(1) utility have been retained;
 don't expect -b, -K, -o, -r, -w, or -W to work.  These have either
@@ -214,7 +214,7 @@ different from that found in sntp(1), tracking the newer formula used
 in {ntpdman}.  Expect offset computations to match but synch-distances
 not to.
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 
@@ -223,7 +223,7 @@ One of the following exit values will be returned:
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
 
-== AUTHORS ==
+== AUTHORS
 
 Johannes Maximilian Kuehn, Harlan Stenn, Dave Hart.
 

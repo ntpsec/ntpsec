@@ -1,4 +1,4 @@
-=== Manual Pages ===
+=== Manual Pages
 
 * link:ntp_conf.html[+ntp.conf(5)+ - ntpd Configuration File]
 * link:ntp_keys.html[+ntp.keys(5)+ - NTP symmetric key file format]

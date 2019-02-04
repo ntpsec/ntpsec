@@ -2,7 +2,7 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS ==
+== SYNOPSIS
 [verse]
 ntploggps [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
 
@@ -14,7 +14,7 @@ ntploggps [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
   -v, --verbose         be verbose
   -V, --version         show program's version number and exit
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 ntploggps connects to a local gpsd daemon and logs the number of satellites
 in use and the Time Dilution of Precision (TDOP).  ntploggps can run as
@@ -39,7 +39,7 @@ GPS always output a static TDOP.
 
 +nSat+ is the number of satellites in use.
 
-== OPTIONS ==
+== OPTIONS
 
 +-h, --help+::
   Displays usage information and exits.
@@ -61,7 +61,7 @@ GPS always output a static TDOP.
 +-V, --version+::
  show program's version number and exit
 
-== USAGE ==
+== USAGE
 
 +ntploggps+::
   This the simplest use of this program. It can be used to check the
@@ -71,7 +71,7 @@ GPS always output a static TDOP.
   This will continuously log the gpsd data in the background to the file
   /var/log/ntpstats/gpsd.  Only log every 60 seconds.
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 
@@ -80,7 +80,7 @@ One of the following exit values will be returned:
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
 
-== AUTHORS ==
+== AUTHORS
 
 Gary E. Miller
 

@@ -1,8 +1,8 @@
-== SYNOPSIS ==
+== SYNOPSIS
 
 +ntpwait+ [+-vV+] [+-n+ 'number'] [+-s+ 'secs']
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 The +ntpwait+ program blocks until ntpd is in synchronized state. This
 can be useful at boot time, to delay the boot sequence until after "ntpd
@@ -14,7 +14,7 @@ yet produced a synchronized and stable system clock.
 
 +ntpwait+ will do this quietly, unless the +-v+ flag is provided.
 
-== OPTIONS ==
+== OPTIONS
 
 +-n+ _number_, +--tries+=_number_::
   Number of times to check ntpd. This option takes an integer number as
@@ -40,7 +40,7 @@ provide status information, including time to synchronization in seconds.
 +-V+, +--version+::
   Print the version string and exit.
 
-== BUGS ==
+== BUGS
 
 If you are running Python at a version older than 3.3, the report on time
 to synchronization may be thrown off by NTP clock stepping.

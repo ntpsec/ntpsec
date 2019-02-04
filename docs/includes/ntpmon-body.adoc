@@ -2,11 +2,11 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== Synopsis ==
+== Synopsis
 
 +ntpmon+ [-dhnuV] [-D lvl] [-l logfile] [host]
 
-== Description ==
+== Description
 
 This program is a real-time status monitor for NTP.  It presents the
 same information as the 'peers', 'mrulist', 'rv', and 'cv' commands of
@@ -43,7 +43,7 @@ And the MRU list in the bottom window:
 
 include::mrufmt.adoc[]
 
-== Commands ==
+== Commands
 
 a:: Change peer display to apeers mode, showing association IDs.
 
@@ -81,7 +81,7 @@ x:: Cleanly terminate the program.
 
 ?:: Display help screen
 
-== Options ==
+== Options
 
 -d:: Increase output debug message level
 - may appear multiple times
@@ -99,7 +99,7 @@ x:: Cleanly terminate the program.
 
 -V:: Display version and exit.
 
-== Known Bugs ==
+== Known Bugs
 
 When run in a terminal that does not allow UTF-8 ntpmon will downgrade
 its unit display to a non-unicode version. ntpmon has to interact with

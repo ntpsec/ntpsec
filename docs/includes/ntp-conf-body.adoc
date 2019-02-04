@@ -2,10 +2,10 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS ==
+== SYNOPSIS
 /etc/ntp.conf
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 The `ntp.conf` configuration file is read at initial startup by the
 {ntpdman} daemon in order to specify the synchronization
@@ -49,7 +49,7 @@ While there is a rich set of options available, the only required
 option is one or more `pool`, `server`, `peer`, or `broadcast`
 commands.
 
-== Configuration Support ==
+== Configuration Support
 
 Following is a description of the configuration commands in
 NTPv4. There are two classes of commands, association commands that
@@ -57,7 +57,7 @@ configure a persistent association with a remote server or peer or
 reference clock, and auxiliary commands that specify environment
 variables that control various related operations.
 
-=== Association Commands ===
+=== Association Commands
 
 Only those options applicable to each command are listed below. Use of
 options not listed may not be caught as an error, but may result in
@@ -70,20 +70,20 @@ the IPv6 namespace.
 
 include::../includes/assoc-commands.adoc[]
 
-=== Association Options ===
+=== Association Options
 
 include::../includes/assoc-options.adoc[]
 
-=== Association Auxiliary Commands ===
+=== Association Auxiliary Commands
 
 include::../includes/assoc-auxcommands.adoc[]
 
-=== Authentication Commands ===
+=== Authentication Commands
 
 include::../includes/auth-commands.adoc[]
 
 [[monit]]
-== Monitoring Support ==
+== Monitoring Support
 
 {ntpdman} includes a comprehensive monitoring facility suitable
 for continuous, long term recording of server and client timekeeping
@@ -94,11 +94,11 @@ distribution. Using these facilities and UNIX cron(8) jobs, the data
 can be automatically summarized and archived for retrospective
 analysis.
 
-=== Monitoring Commands ===
+=== Monitoring Commands
 
 include::../includes/mon-commands.adoc[]
 
-== Access Control Support ==
+== Access Control Support
 
 The {ntpdman} daemon implements a general purpose address/mask
 based restriction list. The list contains address/match entries sorted
@@ -132,7 +132,7 @@ When a client or network is denied access for an indefinite period, the
 only way at present to remove the restrictions is by restarting the
 server.
 
-=== The Kiss-of-Death Packet ===
+=== The Kiss-of-Death Packet
 
 Ordinarily, packets denied service are simply dropped with no further
 action except incrementing statistics counters. Sometimes a more
@@ -157,18 +157,18 @@ both the client and server. This happens automatically at the client
 when the association times out. It will happen at the server only if the
 server operator cooperates.
 
-== Access Control Commands ==
+== Access Control Commands
 
 include::../includes/access-commands.adoc[]
 
-== Automatic NTP Configuration Options ==
+== Automatic NTP Configuration Options
 
-=== Manycasting ===
+=== Manycasting
 
 For a detailed description of manycast operation, see the "Server
 Discovery" page (available as part of the HTML documentation).
 
-=== Manycast Options ===
+=== Manycast Options
 
 // This is a subset of the tos options applicable to manycast.
 // It omits the more general tinkering options.  If you change this,
@@ -202,7 +202,7 @@ Discovery" page (available as part of the HTML documentation).
     agreement, _minsane_ should be at least 4 in order to detect and
     discard a single falseticker.
 
-== Reference Clock Support ==
+== Reference Clock Support
 
 For a detailed description of reference-clock configuration, see the
 "Reference Clock Drivers" page (available as part of the HTML
@@ -212,11 +212,11 @@ documentation provided in `/usr/share/doc/ntp`).
 
 include::../includes/clock-options.adoc[]
 
-== Miscellaneous Options ==
+== Miscellaneous Options
 
 include::../includes/misc-options.adoc[]
 
-== FILES ==
+== FILES
 
 `/etc/ntp.conf`::
   the default name of the configuration file
@@ -230,7 +230,7 @@ One of the following exit values will be returned:
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
 
-== SEE ALSO ==
+== SEE ALSO
 
 {ntpdman}, {ntpqman}.
 
@@ -240,7 +240,7 @@ this documentation is available in HTML format in `/usr/share/doc/ntp`.
 
 David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
 
-== BUGS ==
+== BUGS
 
 The syntax checking is not picky; some combinations of ridiculous and
 even hilarious options and modes may not be detected.

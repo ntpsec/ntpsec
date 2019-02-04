@@ -1,4 +1,4 @@
-== DESCRIPTION ==
+== DESCRIPTION
 
 This document describes the format of an NTP symmetric key file. For a
 description of the use of this type of file, see the "Authentication
@@ -49,7 +49,7 @@ checked against passwords entered by hand, so it is generally
 appropriate to specify these keys in ASCII format.  Or you can
 cut-paste a hex string from your password manager.
 
-== USAGE ==
+== USAGE
 
 In order to use symmetric keys, the client side configuration file needs:
 -----
@@ -67,7 +67,7 @@ Note that the client and server key files must both contain identical
 copies of the line specified by keyno.
 
 
-== FILES ==
+== FILES
 
 `/etc/ntp.keys`::
   is a common location for the keys file

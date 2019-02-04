@@ -2,7 +2,7 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS ==
+== SYNOPSIS
 [verse]
 ntplogtemp [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
 
@@ -15,7 +15,7 @@ ntplogtemp [-h] [-l LOGFILE] [-o] [-w WAIT] [-v] [-V]
   -v, --verbose         be verbose
   -V, --version         show program's version number and exit
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 ntplogtemp gathers temperature readings across a system. The standard user
 is ntpuser and should have permissions to execute lm_sensors and smartctl.
@@ -37,7 +37,7 @@ The log file looks like:
 
 +Value+ is the temperature reading in celsius.
 
-== OPTIONS ==
+== OPTIONS
 
 +-h, --help+::
   Displays usage information and exits.
@@ -61,7 +61,7 @@ The log file looks like:
 +-V, --version+::
  show program's version number and exit
 
-== USAGE ==
+== USAGE
 
 +ntplogtemp+::
   This the simplest use of this program. It can be used to check the
@@ -71,7 +71,7 @@ The log file looks like:
   This will continuously log the temperature data in the background
   to the file /var/log/ntpstats/temperature.  Only log every 60 seconds.
 
-== EXIT STATUS ==
+== EXIT STATUS
 
 One of the following exit values will be returned:
 
@@ -80,7 +80,7 @@ One of the following exit values will be returned:
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
 
-== AUTHORS ==
+== AUTHORS
 
 Gary E. Miller
 

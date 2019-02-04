@@ -2,11 +2,11 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== Synopsis ==
+== Synopsis
 
 +ntpfrob+ [+-A+] [+-b+ 'bump'] [+-a+ 'tick'] [+-p+ 'ppsdev'] [+-c+] [+-e+] [+-r+] [+-?+] [+-h+]
 
-== Description ==
+== Description
 
 The ntpfrob program frobs the local clock hardware.  It collects
 several small diagnostic functions into a set that will differ
@@ -15,7 +15,7 @@ it formerly traveled as +tickadj+ and some undocumented small
 utilities.
 
 [[cmd]]
-== Command Line Options ==
+== Command Line Options
 
 +-a+ 'tick'::
   Set the kernel variable +tick+ to the value _tick_ specifies.
@@ -46,7 +46,7 @@ utilities.
   Print the version string and exit.
 
 [[usage]]
-== Usage ==
+== Usage
 
 Documentation for some of these functions is scanty; this is a problem
 inherited from ancient days along with their code. If you suspect you
@@ -62,7 +62,7 @@ The reporting formats of this tool should be considered unstable;
 they may change as diagnostics are added or improved.  JSON
 reports will be kept forward-compatible through changes.
 
-=== Clock tick adjustment ===
+=== Clock tick adjustment
 
 The -A function reads your clock's tick rate in microseconds.  The -a
 function sets it. Both rely on the adjtimex(2) system call.  This
@@ -74,13 +74,13 @@ The -j option applies to this mode.
 Tweaking your tick rate is almost never necessary on hardware new
 enough to have a fully POSIX.1-2001-conformant Unix.
 
-=== Clock bump ===
+=== Clock bump
 
 Sometimes it is diagnostically interesting to perturb your clock
 to watch how ntpd responds and makes corrections. This
 option does that.
 
-=== Clock jitter measurement ===
+=== Clock jitter measurement
 
 The -c option can be used to determine the timing jitter due to the
 operating system in a gettimeofday() call.  For most systems, the
@@ -93,12 +93,12 @@ The -j option applies to this mode.  With the -r option, write
 the raw, unsorted clock samples to standard output for post-analysis.
 All but the last -j or -r option before the -c mode flag is ignored.
 
-=== Pulse-per-second check ===
+=== Pulse-per-second check
 
 The -p option shows whether the  PPS-API (RFC 2783 kernel
 PPS interface) finds PPS on a specified device.
 
-=== Measure clock precision ===
+=== Measure clock precision
 
 The -e option measure the resolution of the system clock, watching how
 the current time changes as we read it repeatedly.

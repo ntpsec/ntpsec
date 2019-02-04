@@ -2,13 +2,13 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== Synopsis ==
+== Synopsis
 [verse]
 ntptime [+-chr+] [+-e+ 'est_error'] [+-f+ 'frequency'] [-j]
         [+-m+ 'max_error'] [+-o+ 'offset'] [+-s+ 'status']
         [+-t+ 'time_constant']
 
-== Description ==
+== Description
 
 Checks the kernel configuration for the NTP user interface
 syscalls +ntp_gettime()+ and +ntp_adjtime()+.  If present, the current
@@ -23,7 +23,7 @@ This program is useful only with kernels featuring the ntp_adjtime(2)
 system call or local equivalent, as described in the link:kern.html[A
 Kernel Model for Precision Timekeeping] page,
 
-== Options ==
+== Options
 
 +-c+::
   Display the execution time of +ntptime+ itself.
@@ -48,7 +48,7 @@ Kernel Model for Precision Timekeeping] page,
 +-V+::
   Print the version string and exit.
 
-== Bugs ==
+== Bugs
 
 The format for modes and status in the JSON report is less than ideal.
 

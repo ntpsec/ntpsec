@@ -2,7 +2,7 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS ==
+== SYNOPSIS
 [verse]
 ntpviz [OPTIONS]
          [-c | --clip]
@@ -31,7 +31,7 @@ ntpviz [OPTIONS]
          [@OPTIONFILE]
 
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 ntpviz analyzes files in an NTP log directory and generates
 statistical plots from them.  It can output either PNG images or the
@@ -40,7 +40,7 @@ mode it generates an HTML directory containing an index page and
 either (a) all plots, for a single statfiles directory, or (b) a
 subset of comparative plots for multiple directories.
 
-=== Basic Options ===
+=== Basic Options
 
 -c or --clip::
     Normally all data are plotted.  This option limits the range of
@@ -100,7 +100,7 @@ subset of comparative plots for multiple directories.
     's' is for browser on small screens (1024x768).  'm' for medium screens
     (1388x768).  'l' for large screens (1920x1080).  'm' is the default.
 
-=== Individual Plots ===
+=== Individual Plots
 
 The plot options choose what graph is generated; invoke only one.  By
 default, the gnuplot for the graph is reported; with -g you get the
@@ -183,7 +183,7 @@ The code includes various sanity checks and will bail out with a message
 to standard error on, for example, missing logfile data required for a
 plot.
 
-=== Argument File ===
+=== Argument File
 
 Any command line options may also be placed into a command file.  The
 command file name (OPTIONFILE) is prefixed on the command line with an
@@ -207,12 +207,12 @@ These two ways to invoke ntpviz are equivalent:
     --outdir=day
     $ ntpviz @day/config
 
-== REQUIREMENTS ==
+== REQUIREMENTS
 
 Python and gnuplot.  The plots will look better with the 'liberation'
 font package installed.
 
-== AUTHORS ==
+== AUTHORS
 
 Eric S. Raymond, Gary E. Miller, and Daniel Drown. The gnuplot in this
 package is largely based on templates in Daniel Drown's 'chrony-graph'

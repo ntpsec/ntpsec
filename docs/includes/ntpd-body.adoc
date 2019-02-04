@@ -2,7 +2,7 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS ==
+== SYNOPSIS
 [verse]
 ntpd
     [-46aghLmnNqx] [assert] [-c 'conffile'] [-f 'driftfile']
@@ -11,7 +11,7 @@ ntpd
     [-u 'user'[:'group']] [-U 'interface_update_interval']
     [-v 'variable'] [-V 'variable'] [server...]
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 The +ntpd+ utility is an operating system daemon which sets and
 maintains the system time of day in synchronism with Internet standard
@@ -53,7 +53,7 @@ monitored using {ntpmonman}.
 When +ntpd+ starts it looks at the value of umask(2), and if
 zero +ntpd+ will set the umask(2) to 022.
 
-== OPTIONS ==
+== OPTIONS
 
 +-4+, +--ipv4+::
   Force IPv4 DNS name resolution. This option must not appear in
@@ -273,9 +273,9 @@ or hostnames, with the _iburst_ option implied. Associations with
 these are formed before any associations implied by the configuration
 file.
 
-== USAGE ==
+== USAGE
 
-=== How NTP Operates ===
+=== How NTP Operates
 
 The +ntpd+ utility operates by exchanging messages with one or more
 configured servers over a range of designated poll intervals. When
@@ -365,7 +365,7 @@ There is a way to start {ntpdman} that often addresses all of
 the problems mentioned above.
 
 [[starting]]
-=== Starting NTP (Best Current Practice) ===
+=== Starting NTP (Best Current Practice)
 
 First, use the _iburst_ option on your _server_ and _pool_ entries.
 
@@ -385,7 +385,7 @@ late as possible in the boot sequence (perhaps with the +-v+ flag) and
 after {ntpwaitman} exits successfully it is as safe as it
 will ever be to start any processes that require stable time.
 
-=== Frequency Discipline ===
+=== Frequency Discipline
 
 The +ntpd+ behavior at startup depends on whether the frequency file,
 usually _ntp.drift_, exists. This file contains the latest estimate of
@@ -401,7 +401,7 @@ written to it. When the +ntpd+ is started and the file does exist, the
 immediately. After that, the current frequency offset is written to the
 file at hourly intervals.
 
-=== Operating Modes ===
+=== Operating Modes
 
 +ntpd+ normally operates continuously while monitoring for small
 changes in frequency and trimming the clock for the ultimate
@@ -442,7 +442,7 @@ the +ntpd+ is stopped and run in one-time mode as required. At each
 startup, the frequency is read from the file and initializes the kernel
 frequency.
 
-=== Poll Interval Control ===
+=== Poll Interval Control
 
 This version of NTP includes an intricate state machine to reduce the
 network load while maintaining a quality of synchronization consistent
@@ -474,7 +474,7 @@ this limit. Once this is done, the drift file is automatically updated
 once per hour and is available to initialize the frequency on subsequent
 daemon restarts.
 
-=== The huff-n'-puff Filter ===
+=== The huff-n'-puff Filter
 
 In scenarios where a considerable amount of data are to be downloaded or
 uploaded over telephone modems, timekeeping quality can be seriously
@@ -498,7 +498,7 @@ sign of the offset.
 The filter is activated by the _tinker_ command and _huffpuff_ keyword,
 as described in {ntpdconfman}.
 
-== FILES ==
+== FILES
 
 [options="header"]
 |===================================================================
@@ -528,7 +528,7 @@ Configuration files are parsed according to the following rules:
   of their pathnames.  Files with other extensions or no extensions
   are ignored.
 
-== SIGNALS ==
+== SIGNALS
 
 SIGQUIT, SIGINT, and SIGTERM will cause ntpd to clean up and exit.
 
@@ -546,12 +546,12 @@ SIGUSR2 will decrease it by 1.  This may be helpful if you are
 running with +-n+, either just to see the logging on your screen
 or with gdb.
 
-== BUGS ==
+== BUGS
 
 The '-V' option is not backward-compatible with its use (as the
 equivalent of -Z) in older versions.
 
-== STANDARDS ==
+== STANDARDS
 
 RFC 1059::
   David L. Mills, _Network Time Protocol (Version 1)_, RFC 1059

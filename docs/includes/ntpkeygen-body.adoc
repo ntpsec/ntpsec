@@ -2,11 +2,11 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== Synopsis ==
+== Synopsis
 [verse]
 +ntpkeygen+ [+-MV+]
 
-== Description ==
+== Description
 
 This program generates a file containing keys that can be used
 in NTP's symmetric key cryptography.
@@ -21,7 +21,7 @@ beyond the scope of NTP itself. The keys can also be used as
 passwords for the link:ntpq.html[+ntpq+] utility program.
 
 [[cmd]]
-== Command Line Options ==
+== Command Line Options
 
 +-M+, +--md5key+::
   Dummy option for backward compatibility in old scripts.  This
@@ -30,7 +30,7 @@ passwords for the link:ntpq.html[+ntpq+] utility program.
   Print the version string and exit.
 
 [[run]]
-== Running the program ==
+== Running the program
 
 The simplest way to run the +ntpkeygen+ program is logged in directly as
 root. The recommended procedure is to change to the keys directory,
@@ -44,7 +44,7 @@ perform well.  Do not run this program from any startup scripts.  Only
 run this program on an active host with a lot of available entropy.
 
 [[access]]
-== Key file access and location ==
+== Key file access and location
 
 File names begin with the prefix _ntpkey_ and end with the postfix
 _hostname.filestamp_, where _hostname_ is the owner name, usually the
@@ -55,7 +55,7 @@ the NTP seconds when the file was generated, in decimal digits.
 file.  +ntp.keys+ is the normal file used in +ntp.conf+.
 
 [[random]]
-== Random Seed File ==
+== Random Seed File
 
 All key generation schemes must have means to randomize the
 entropy seed used to initialize the internal pseudo-random
@@ -72,7 +72,7 @@ os.urandom().  The security of os.urandom() is improved in
 https://docs.python.org/library/os.html#os.urandom[Python 3.5+].
 
 [[crypto]]
-== Cryptographic Data Files ==
+== Cryptographic Data Files
 
 Since the file contains private shared keys, it should be visible
 only to root or ntp.

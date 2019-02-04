@@ -2,11 +2,11 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== Synopsis ==
+== Synopsis
 +ntpsweep+ [+-V+ | +--version+] [+-l+ 'host']... [-p] [+-m+ 'number'] [+-s+ 'prefix'] [+-h+ 'string'] [hostfile...]
 
 
-== Description ==
+== Description
 
 `ntpsweep` prints per host the NTP stratum level, the clock offset in
 seconds, the daemon version, the operating system and the processor.
@@ -20,7 +20,7 @@ queries. Nowadays effectively all public hosts set _noquery_, so this
 script is unlikely to be useful unless you have multiple specially-
 configured timeservers on a LAN.
 
-== Options ==
+== Options
 
 +-l+ string, +--host-list+=_string_::
   Host to execute actions on. This option may appear an unlimited number

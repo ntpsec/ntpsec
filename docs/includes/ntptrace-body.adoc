@@ -2,7 +2,7 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS ==
+== SYNOPSIS
 
 [verse]
 +ntptrace+ [+-V+ | +--version+] [+-n+ |+--numeric+]
@@ -10,7 +10,7 @@
     [+-r+ 'host' | +--host=+'remote']
     'hostname'
 
-== DESCRIPTION ==
+== DESCRIPTION
 
 +ntptrace+ is a python script that uses the ntpq utility program to
 follow the chain of NTP servers from a given host back to the primary
@@ -42,7 +42,7 @@ that the stratum is the server hop count to the primary source, while
 the synchronization distance is the estimated error relative to the
 primary source. These terms are precisely defined in RFC 1305.
 
-== OPTIONS ==
+== OPTIONS
 
 +-n+, +--numeric+::
   Print IP addresses instead of hostnames.
