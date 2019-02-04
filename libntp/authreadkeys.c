@@ -358,7 +358,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 			if ((2*sizeof(keystr)) < jlim) {
 			  jlim =  2 * sizeof(keystr);
 			  msyslog(LOG_ERR,
-			    "AUTH: authreadkeys: key %u trucated to %u bytes",
+			    "AUTH: authreadkeys: key %u truncated to %u bytes",
 			    keyno, (unsigned int)jlim);
 
 			}
