@@ -227,7 +227,7 @@ generation of some packet headers.
 
 NTPsec also conforms to the
 https://datatracker.ietf.org/doc/draft-ietf-ntp-mac/[MAC for NTP]
-draft RFC, inolementing AES-CMAC (128 bits).
+draft RFC, implementing AES-CMAC (128 bits).
 
 The table of reference identifiers in Figure 12 is largely obsolete
 and somewhat incomplete relative to the code.
