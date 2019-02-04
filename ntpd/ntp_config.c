@@ -1998,7 +1998,7 @@ config_crypto(
 			break;
 
 		case T_Mintls:
-		    	mintls = crypto->value.d;
+			mintls = crypto->value.d;
 			break;
 
 		case T_Tlsciphers:
