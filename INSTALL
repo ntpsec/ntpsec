@@ -46,6 +46,11 @@ huge tail of dependencies and you probably don't want it unless you're
 planning to modify the documentation.  psutil may require different
 packages depending on whether your base Python version is 2 or 3.
 
+As of February 2019 libaes_siv is not yet packaged anywhere. You
+will need to install it by hand.  At some point it will probably
+land in libcrypto, and some time after that this paragraph
+will disappear.
+
 === Details ===
 
 Python 2.x, x >= 6, or Python 3.x, x >= 3::
