@@ -44,7 +44,7 @@ The actual line speed ranges from 1200 bps with USNO to 14,400 bps
 with NIST. The modem setup string is hard-coded in the driver and may
 require changes for nonstandard modems or special circumstances. It
 can be overridden by setting the extended system variable
-"modem_setup" via ntpq.
+"modemsetup" via ntpq.
 
 There are three modes of operation selected by the +mode+ keyword in the
 +server+ configuration command. In auto mode (0) +flag1+ is set at each poll
