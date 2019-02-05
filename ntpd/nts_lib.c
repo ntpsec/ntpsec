@@ -1,3 +1,4 @@
+#include "nts_lib.h"
 #include "config.h"
 #include "nts_lib.h"
 #include "ntp_types.h"
@@ -21,7 +22,22 @@ __u8 *upf(void *src, void *dest, size_t n) {
  * returns 0 on success
  */
 int nts_record_parse(record_bits *in) {
-  UNUSED_ARG(in);
+  in->bit = upf(in->record, &in->now, sizeof(__u16));
+
+  if (0x80 & in->record[0]) {
+     in->critical = true;
+     in->now &= htons(~0x8000);
+  }
+  in->record_type = ntohs(in->now);
+
+  in->bit = upf(in->bit, &in->now, sizeof(__u16));
+  in->body_length = ntohs(in->now);
+  if (0 != in->body_length) {
+    in->body = in->bit;
+    in->bit += in->body_length;
+  } else {
+    in->body = NULL;
+  }
   return 0;
 }
 
@@ -36,7 +52,21 @@ int nts_record_parse(record_bits *in) {
  * returns 1 on memory allcation failure;
  */
 int nts_record_form(record_bits *in) {
-  UNUSED_ARG(in);
+  in->record_length = (4 + in->body_length);
+  in->record = malloc(in->record_length);
+  if (NULL == in->record) {
+    return 1;
+  }
+  in->now = htons(in->record_type);
+  if (in->critical) {
+    in->now |= htons(0x8000);
+  }
+  in->bit = mempcpy(in->record, &in->now, sizeof(__u16));
+  in->now = htons(in->body_length);
+  in->bit = mempcpy(in->bit, &in->now, sizeof(__u16));
+  if (0 < in->body_length) {
+    in->bit = mempcpy(in->bit, in->body, in->body_length);
+  }
   return 0;
 }
 
