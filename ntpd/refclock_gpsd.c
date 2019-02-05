@@ -410,7 +410,7 @@ static void
 gpsd_init(void)
 {
 	addrinfoT   hints;
-	int         rc, idx;
+	int         idx;
 
 	memset(s_svcerr, 0, sizeof(s_svcerr));
 	memset(&hints, 0, sizeof(hints));
@@ -419,8 +419,8 @@ gpsd_init(void)
 	hints.ai_socktype = SOCK_STREAM;
 
 	for (idx = 0; s_svctab[idx][0] && !s_gpsd_addr; idx++) {
-		rc = getaddrinfo(s_svctab[idx][0], s_svctab[idx][1],
-				 &hints, &s_gpsd_addr);
+		int rc = getaddrinfo(s_svctab[idx][0], s_svctab[idx][1],
+				     &hints, &s_gpsd_addr);
 		s_svcerr[idx] = rc;
 		if (0 == rc)
 			break;

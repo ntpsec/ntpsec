@@ -1048,7 +1048,6 @@ wait_child_sync_if(
 	long	wait_sync1
 	)
 {
-	int	rc;
 	int	exit_code;
 	time_t	wait_end_time;
 	time_t	cur_time;
@@ -1071,8 +1070,8 @@ wait_child_sync_if(
 		wtimeout.tv_nsec = 0;
 		FD_ZERO(&readset);
 		FD_SET(pipe_read_fd, &readset);
-		rc = pselect(pipe_read_fd + 1, &readset, NULL, NULL,
-			     &wtimeout, NULL);
+		int rc = pselect(pipe_read_fd + 1, &readset, NULL, NULL,
+				 &wtimeout, NULL);
 		if (-1 == rc) {
 			if (EINTR == errno)
 				continue;

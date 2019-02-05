@@ -2397,18 +2397,16 @@ config_fudge(
 # ifdef REFCLOCK
 	attr_val *curr_opt;
 	sockaddr_u addr_sock;
-	address_node *addr_node;
 	struct refclockstat clock_stat;
-	bool err_flag;
 
 	curr_fudge = HEAD_PFIFO(ptree->fudge);
 	for (; curr_fudge != NULL; curr_fudge = curr_fudge->link) {
-		err_flag = false;
+		bool err_flag = false;
 
 		/* Get the reference clock address and
 		 * ensure that it is sane
 		 */
-		addr_node = curr_fudge->addr;
+		address_node *addr_node = curr_fudge->addr;
 		ZERO_SOCK(&addr_sock);
 		if (getnetnum(addr_node->address, &addr_sock)
 		    != 1) {
@@ -2719,7 +2717,6 @@ config_peers(
 	)
 {
     sockaddr_u		peeraddr;
-    peer_node *		curr_peer;
 
     /* add servers named on the command line with iburst implied */
     for ( ; cmdline_server_count > 0;
@@ -2763,7 +2760,7 @@ config_peers(
     }
 
     /* add associations from the configuration file */
-    curr_peer = HEAD_PFIFO(ptree->peers);
+    peer_node * curr_peer = HEAD_PFIFO(ptree->peers);
     for (; curr_peer != NULL; curr_peer = curr_peer->link) {
 	ZERO_SOCK(&peeraddr);
 
@@ -2886,12 +2883,11 @@ config_unpeers(
 	)
 {
 	sockaddr_u		peeraddr;
-	unpeer_node *		curr_unpeer;
 	struct peer *		p;
 	const char *		name;
 	int			rc;
 
-	curr_unpeer = HEAD_PFIFO(ptree->unpeers);
+	unpeer_node * curr_unpeer = HEAD_PFIFO(ptree->unpeers);
 	for (; curr_unpeer != NULL; curr_unpeer = curr_unpeer->link) {
 		/*
 		 * Either AssocID will be zero, and we unpeer by name/

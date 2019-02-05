@@ -922,7 +922,7 @@ oncore_init_shmem(
 	struct instance *instance
 	)
 {
-	int l, fd;
+	int fd;
 	uint8_t *cp, *cp1, *buf, *shmem_old;
 	struct msg_desc *mp;
 	struct stat sbuf;
@@ -989,7 +989,7 @@ oncore_init_shmem(
 	/* next build the new SHMEM buffer in memory */
 
 	for (mp=oncore_messages; mp->flag[0]; mp++) {
-		l = mp->shmem;
+		int l = mp->shmem;
 		buf[l + 0] = mp->len >> 8;
 		buf[l + 1] = mp->len & 0xff;
 		buf[l + 2] = 0;

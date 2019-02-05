@@ -1796,7 +1796,6 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 
 	char	*pBuf, sLog [ MAX_LOGTEXT ], sMsg [ 16 ] ;
 	int	iLen ;
-	int	rc ;
 	char	cApostrophe, sStatus[3] ;
 	int	iWeekday ;
 
@@ -1839,10 +1838,10 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 
 	/* 'XX YY/MM/DD W HH:MM:SS<CR> */
 
-	rc = sscanf ( pBuf, "%c%2s %2d/%2d/%2d %1d %2d:%2d:%2d",
-		      &cApostrophe, sStatus,
-		      &up->year, &up->month, &up->day, &iWeekday,
-		      &up->hour, &up->minute, &up->second ) ;
+	int rc = sscanf ( pBuf, "%c%2s %2d/%2d/%2d %1d %2d:%2d:%2d",
+			  &cApostrophe, sStatus,
+			  &up->year, &up->month, &up->day, &iWeekday,
+			  &up->hour, &up->minute, &up->second ) ;
 	sStatus[2] = 0 ;
 
 	if ( rc != 9 || cApostrophe != '\''
