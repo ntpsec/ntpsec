@@ -569,6 +569,12 @@ the hexadecimal timestamps and such.
 ...
 ----
 
+== Unresolved issues for the next RFC revision
+
+The binary KE request-response format is unfortunate for all the usual
+reasons (endianness issues etc). At the expected transaction volume,
+the encode/decode overhead shouldn't be an issue.
+
 == Martin Langer's notes == 
 
 um... maybe the first hint... The current OpenSSL version doesn't
