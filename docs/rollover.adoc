@@ -78,7 +78,7 @@ is in service.
 
 Many GPSes have this problem due to NMEA0183's inadequacies as a
 reporting format (and analogous problems in various proprietary GPS
-protocols). Unless the device ships a particular $GZDA sentence
+protocols). Unless the device ships a particular $GPZDA sentence
 (which many do not) the year parts of time stamps are the low two
 digits only.
 
