@@ -73,6 +73,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(leapsec);
 	RUN_TEST_GROUP(hackrestrict);
 	RUN_TEST_GROUP(recvbuff);
+	RUN_TEST_GROUP(nts_lib);
 #endif
 
 }

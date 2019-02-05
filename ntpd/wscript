@@ -57,6 +57,7 @@ def build(ctx):
         "ntp_restrict.c",
         "ntp_util.c",
         "nts.c",
+        "nts_lib.c",
     ]
 
     ctx(
