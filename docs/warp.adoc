@@ -192,6 +192,9 @@ Metrics] page.
 The principal standard informing the NTPsec software is
 https://tools.ietf.org/html/rfc5905[RFC 5905].
 
+Extension fields are described by
+https://tools.ietf.org/html/rfc5905[RFC 7822].
+
 Older NTP RFCs such as https://tools.ietf.org/html/rfc1305[RFC 1305]
 are no longer relevant.
 

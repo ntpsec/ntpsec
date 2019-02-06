@@ -40,13 +40,7 @@ epoch.
 
 === NTS
 
-The IETF is attempting to develop a new cryptographic standard for
-secure/authenticated time exchange: Network Time Security.
-Further information on this is available at:
-https://tools.ietf.org/wg/ntp/
-
-The new protocol needs to allow a block of data of as-yet unspecified
-and possibly variable size to be dedicated to NTS use.
+The new protocol needs to support NTS extension fields.
 
 == Extensions vs. replacement
 
@@ -58,6 +52,10 @@ In this incremental approach, the NTP port number (123) is retained
 and the 48-byte header v4 header is preserved. New data fields are
 passed in RFC7822 extension blocks.  The NTP version number is
 not incremented; "v5" becomes a set of required extension blocks.
+
+There can be a way to unambiguously detect v5 packets.  The stratum
+field is 8 bits, but only the low five bits are used.  We can mark
+v5 packets by setting the high three bits.
 
 A difficulty with this approach is that some firewalls and routers are
 known to silently discard RFC7822 extension blocks as a way of
@@ -159,6 +157,124 @@ lifespan of the solar system.
 always report accurate, unsmeared time), but standardize a formula for
 translating NTP time into smeared UNIX time seen by other
 applications.
+
+== Decruftifying Mode 6
+
+It should be possible to shift a copy of mode 6 to UTF-8 JSON-RPC and
+rebadge it as a new mode 7.  The following is an overly verbose
+partial mockup of a transaction chain querying peer-stats.  All the
+numbers should be in _decimal_ without the hexadecimal timestamps and
+such.
+
+[source, json]
+----
+{
+   "jsonrpc" : "2.0",
+   "id" : 1,
+   "params" : {},
+   "method" : "readstat"
+}
+{
+   "jsonrpc" : "2.0",
+   "id" : 1,
+   "result" : {
+      "answer" : {
+         "associations" : [
+            62414,
+            62413,
+            62408,
+            62407,
+            62406,
+            62405,
+            62402,
+            62401,
+            62400,
+            62399,
+            62398
+         ]
+      }
+   }
+}
+
+{
+   "jsonrpc" : "2.0",
+   "id" : 2,
+   "params" : {
+      "association" : 62398
+   },
+   "method" : "readvar"
+}
+{
+   "jsonrpc" : "2.0",
+   "id" : 2,
+   "result" : {
+      "answer" : {
+         "hmode" : 3,
+         "filtdisp" : [
+            14.68,
+            1.5,
+            2.36,
+            3.45,
+            4.75,
+            5.19,
+            6.19,
+            7.12
+         ],
+         "keyid" : 0,
+         "dstadr" : "127.0.0.1",
+         "jitter" : 2.792031,
+         "dstport" : 123,
+         "rootdelay" : 0,
+         "dispersion" : 8.528601,
+         "flash" : 0,
+         "filtoffset" : [
+            -829.24,
+            -831.68,
+            -833.19,
+            -832.72,
+            -832.48,
+            -831.32,
+            -831.14,
+            -830.83
+         ],
+         "reach" : 255,
+         "mode" : 2,
+         "rootdisp" : 0,
+         "ppoll" : 6,
+         "reftime" : 3757323811.47605,
+         "delay" : 0,
+         "offset" : -829.240892,
+         "pmode" : 4,
+         "srcadr" : "127.127.46.0",
+         "precision" : -8,
+         "headway" : 0,
+         "hpoll" : 6,
+         "rec" : 3757323811.5776,
+         "xmt" : 3757323811.57759,
+         "stratum" : 0,
+         "srchost" : "GPSD(0)",
+         "unreach" : 0,
+         "srcport" : 123,
+         "leap" : 0,
+         "refid" : "GPSD",
+         "filtdelay" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+         ]
+      },
+      "association" : 62398
+   }
+}
+
+
+...
+----
 
 
 // end

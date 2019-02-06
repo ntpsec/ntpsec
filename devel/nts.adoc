@@ -425,6 +425,10 @@ A wholly made up example cookie.
 
 == Unresolved issues for the next RFC WG
 
+The binary KE request-response format is unfortunate for all the usual
+reasons (endianness issues etc). At the expected transaction volume,
+the encode/decode overhead shouldn't be an issue.
+
 How to make NTS-KE work, securely, with pooled servers?
 
 The binary KE request-response format is unfortunate for all the usual
@@ -451,129 +455,7 @@ Network Time Security explicitly only supports modes 3 and 4 at this time.
 I see no reason why NTS could not be expanded to cover modes 1, 2, 6, and 7.
 Expansion to cover modes 6&7 should require an authentication token extension.
 
-=== mode 6 -> mode 7 next
-
-I feel that in keeping with comments. It should be possible to shift a
-copy of mode 6 to UTF-8 JSON-RPC and rebadge it as a new mode 7.  The
-following is an overly verbose partial mockup of a transaction chain
-querying peer-stats.  All the numbers should be in _decimal_ without
-the hexadecimal timestamps and such.
-
-[source, json]
-----
-{
-   "jsonrpc" : "2.0",
-   "id" : 1,
-   "params" : {},
-   "method" : "readstat"
-}
-{
-   "jsonrpc" : "2.0",
-   "id" : 1,
-   "result" : {
-      "answer" : {
-         "associations" : [
-            62414,
-            62413,
-            62408,
-            62407,
-            62406,
-            62405,
-            62402,
-            62401,
-            62400,
-            62399,
-            62398
-         ]
-      }
-   }
-}
-
-{
-   "jsonrpc" : "2.0",
-   "id" : 2,
-   "params" : {
-      "association" : 62398
-   },
-   "method" : "readvar"
-}
-{
-   "jsonrpc" : "2.0",
-   "id" : 2,
-   "result" : {
-      "answer" : {
-         "hmode" : 3,
-         "filtdisp" : [
-            14.68,
-            1.5,
-            2.36,
-            3.45,
-            4.75,
-            5.19,
-            6.19,
-            7.12
-         ],
-         "keyid" : 0,
-         "dstadr" : "127.0.0.1",
-         "jitter" : 2.792031,
-         "dstport" : 123,
-         "rootdelay" : 0,
-         "dispersion" : 8.528601,
-         "flash" : 0,
-         "filtoffset" : [
-            -829.24,
-            -831.68,
-            -833.19,
-            -832.72,
-            -832.48,
-            -831.32,
-            -831.14,
-            -830.83
-         ],
-         "reach" : 255,
-         "mode" : 2,
-         "rootdisp" : 0,
-         "ppoll" : 6,
-         "reftime" : 3757323811.47605,
-         "delay" : 0,
-         "offset" : -829.240892,
-         "pmode" : 4,
-         "srcadr" : "127.127.46.0",
-         "precision" : -8,
-         "headway" : 0,
-         "hpoll" : 6,
-         "rec" : 3757323811.5776,
-         "xmt" : 3757323811.57759,
-         "stratum" : 0,
-         "srchost" : "GPSD(0)",
-         "unreach" : 0,
-         "srcport" : 123,
-         "leap" : 0,
-         "refid" : "GPSD",
-         "filtdelay" : [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-         ]
-      },
-      "association" : 62398
-   }
-}
-
-
-...
-----
-
-== Unresolved issues for the next RFC revision
-
-The binary KE request-response format is unfortunate for all the usual
-reasons (endianness issues etc). At the expected transaction volume,
-the encode/decode overhead shouldn't be an issue.
+More discussion of how to re-do Mode 6 has been moved to ntpv5.adoc.
 
 == Martin Langer's notes == 
 

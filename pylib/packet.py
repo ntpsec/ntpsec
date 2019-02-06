@@ -17,7 +17,7 @@ the general structure of an NTP packet (Figure 8):
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |LI | VN  |Mode |    Stratum     |     Poll      |  Precision   |
+      |LI | VN  |Mode |    Stratum    |     Poll      |  Precision    |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |                         Root Delay                            |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -65,6 +65,27 @@ NTP packet is the minimal SNTP request, a mode 3 packet with the
 Stratum and all following fields zeroed out to byte 47.
 
 How to interpret these fields:
+
+Mode is decoded as follows:
+
++-------+--------------------------+
+| Value | Meaning                  |
++-------+--------------------------+
+| 0     | reserved                 |
+| 1     | symmetric active         |
+| 2     | symmetric passive        |
+| 3     | client                   |
+| 4     | server                   |
+| 5     | broadcast                |
+| 6     | NTP control message      |
+| 7     | reserved for private use |
++-------+--------------------------+
+
+While the Stratum field has 8 bytes, only values 0-16 (low 5 bits)
+are legal. Value 16 means 'unsychronized' Value 17-255 are reserved.
+
+LI (Leap Indicator), Version, Poll, and Precision are not described
+here; see RFC5905.
 
 t_1, the origin timestamp, is the time according to the client at
 which the request was sent.
