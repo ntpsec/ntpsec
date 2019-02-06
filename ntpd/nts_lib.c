@@ -61,11 +61,15 @@ int nts_record_form(record_bits *in) {
 	if (in->critical) {
 		in->now |= htons(0x8000);
 	}
-	in->bit = mempcpy(in->record, &in->now, sizeof(uint16_t));
+	in->bit = in->record;
+	in->bit = memcpy(in->bit, &in->now, sizeof(uint16_t));
+	in->bit += sizeof(uint16_t);
 	in->now = htons(in->body_length);
-	in->bit = mempcpy(in->bit, &in->now, sizeof(uint16_t));
+	memcpy(in->bit, &in->now, sizeof(uint16_t));
+	in->bit += sizeof(uint16_t);
 	if (0 < in->body_length) {
-		in->bit = mempcpy(in->bit, in->body, in->body_length);
+		memcpy(in->bit, in->body, in->body_length);
+		in->bit += in->body_length;
 	}
 	return 0;
 }
