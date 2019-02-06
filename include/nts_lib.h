@@ -1,7 +1,7 @@
 #ifndef GUARD_NTS_LIB_H
 #define GUARD_NTS_LIB_H
 
-#include <linux/types.h>
+#include <stdint.h>
 #include <openssl/evp.h>
 #include <stdbool.h>
 
@@ -14,32 +14,32 @@ typedef struct {
   char *cookie;
   void *iv;
   void *bit; // pointer for mempcpy, upf
-  __u8 addr_peer[16];
+  uint8_t addr_peer[16];
 
   int tally;
 
-  __u16 size_iv;
-  __u16 size_key_csc;
-  __u16 size_nonce;
-  __u16 size_ciphertext;
-  __u16 size_plaintext;
-  __u16 nts_algo;
-  __u16 cookie_key_id;
-  __u16 recipe;
-  __u16 countdown;
-  __u16 now; // network order word
+  uint16_t size_iv;
+  uint16_t size_key_csc;
+  uint16_t size_nonce;
+  uint16_t size_ciphertext;
+  uint16_t size_plaintext;
+  uint16_t nts_algo;
+  uint16_t cookie_key_id;
+  uint16_t recipe;
+  uint16_t countdown;
+  uint16_t now; // network order word
 } cookie_bits;
 
 typedef struct {
-  __u8 *next;
-  __u8 *record;
-  __u8 *body;
-  __u8 *bit; // pointer for mempcpy, upf
+  uint8_t *next;
+  uint8_t *record;
+  uint8_t *body;
+  uint8_t *bit; // pointer for mempcpy, upf
 
-  __u16 body_length;
-  __u16 record_type;
-  __u16 record_length;
-  __u16 now; // network order word
+  uint16_t body_length;
+  uint16_t record_type;
+  uint16_t record_length;
+  uint16_t now; // network order word
   bool critical;
 } record_bits;
 
@@ -97,7 +97,7 @@ enum aead_ciphers {
   AEAD_CHACHA20_POLY1305 = 29
 };
 
-extern __u8 *upf(void *src, void *dest, size_t n);
+extern uint8_t *upf(void *src, void *dest, size_t n);
 
 extern int nts_record_form(record_bits *in);
 extern int nts_record_parse(record_bits *in);

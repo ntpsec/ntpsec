@@ -8,9 +8,9 @@
 #include <string.h>
 
 // a binary unpack function it should sort of reverse mempcpy
-__u8 *upf(void *src, void *dest, size_t n) {
-  (void)memcpy(dest, src, n);
-  return (__u8 *)src + n;
+uint8_t *upf(void *src, void *dest, size_t n) {
+	(void)memcpy(dest, src, n);
+	return (uint8_t *)src + n;
 }
 
 /* parse an NTS record to retrieve the body, body_length and record_type
@@ -22,23 +22,23 @@ __u8 *upf(void *src, void *dest, size_t n) {
  * returns 0 on success
  */
 int nts_record_parse(record_bits *in) {
-  in->bit = upf(in->record, &in->now, sizeof(__u16));
+	in->bit = upf(in->record, &in->now, sizeof(uint16_t));
 
-  if (0x80 & in->record[0]) {
-     in->critical = true;
-     in->now &= htons(~0x8000);
-  }
-  in->record_type = ntohs(in->now);
+	if (0x80 & in->record[0]) {
+		in->critical = true;
+		in->now &= htons(~0x8000);
+	}
+	in->record_type = ntohs(in->now);
 
-  in->bit = upf(in->bit, &in->now, sizeof(__u16));
-  in->body_length = ntohs(in->now);
-  if (0 != in->body_length) {
-    in->body = in->bit;
-    in->bit += in->body_length;
-  } else {
-    in->body = NULL;
-  }
-  return 0;
+	in->bit = upf(in->bit, &in->now, sizeof(uint16_t));
+	in->body_length = ntohs(in->now);
+	if (0 != in->body_length) {
+		in->body = in->bit;
+		in->bit += in->body_length;
+	} else {
+		in->body = NULL;
+	}
+	return 0;
 }
 
 /* form an NTS record
@@ -52,34 +52,34 @@ int nts_record_parse(record_bits *in) {
  * returns 1 on memory allcation failure;
  */
 int nts_record_form(record_bits *in) {
-  in->record_length = (4 + in->body_length);
-  in->record = malloc(in->record_length);
-  if (NULL == in->record) {
-    return 1;
-  }
-  in->now = htons(in->record_type);
-  if (in->critical) {
-    in->now |= htons(0x8000);
-  }
-  in->bit = mempcpy(in->record, &in->now, sizeof(__u16));
-  in->now = htons(in->body_length);
-  in->bit = mempcpy(in->bit, &in->now, sizeof(__u16));
-  if (0 < in->body_length) {
-    in->bit = mempcpy(in->bit, in->body, in->body_length);
-  }
-  return 0;
+	in->record_length = (4 + in->body_length);
+	in->record = malloc(in->record_length);
+	if (NULL == in->record) {
+		return 1;
+	}
+	in->now = htons(in->record_type);
+	if (in->critical) {
+		in->now |= htons(0x8000);
+	}
+	in->bit = mempcpy(in->record, &in->now, sizeof(uint16_t));
+	in->now = htons(in->body_length);
+	in->bit = mempcpy(in->bit, &in->now, sizeof(uint16_t));
+	if (0 < in->body_length) {
+		in->bit = mempcpy(in->bit, in->body, in->body_length);
+	}
+	return 0;
 }
 
 // Allocate & initialize structure & fields for NTS cookie generation/parsing
 int nts_cookie_prep(cookie_bits *input) {
-  UNUSED_ARG(input);
-  return 0;
+	UNUSED_ARG(input);
+	return 0;
 }
 
 // Free (most) storage used by NTS cookie generation/parsing routines
 int nts_cookie_clean(cookie_bits *a) {
-  UNUSED_ARG(a);
-  return 0;
+	UNUSED_ARG(a);
+	return 0;
 }
 
 /* Parse the plaintext to retrieve the AEAD algorithm to use when processing,
@@ -94,8 +94,8 @@ int nts_cookie_clean(cookie_bits *a) {
  * returns number of bytes remaining in the plaintext (should be 0)
  */
 int nts_cookie_plaintext_parse(cookie_bits *out) {
-  UNUSED_ARG(out);
-  return 0;
+	UNUSED_ARG(out);
+	return 0;
 }
 
 /* Form the cookie plaintext from the AEAD algorithm number, the c2s key and
@@ -109,6 +109,6 @@ int nts_cookie_plaintext_parse(cookie_bits *out) {
  * returns 0 on success
  */
 int nts_cookie_plaintext_form(cookie_bits *in) {
-  UNUSED_ARG(in);
-  return 0;
+	UNUSED_ARG(in);
+	return 0;
 }
