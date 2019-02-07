@@ -9,9 +9,11 @@
 
 #include <unistd.h>
 
+#ifdef HAVE_RES_INIT
 #include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
+#endif
 
 #include <openssl/ssl.h>
 
@@ -73,7 +75,9 @@ int open_TCP_socket(const char *hostname) {
   int gai_rc, err;
   int sockfd;
 
+#ifdef HAVE_RES_INIT
   res_init();
+#endif
 
   ZERO(hints);
   hints.ai_protocol = IPPROTO_TCP;
