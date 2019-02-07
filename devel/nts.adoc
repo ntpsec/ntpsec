@@ -296,7 +296,7 @@ Default on.
 TLSHonorCipherOrder on|off
 ....
 
-Option to prefer the server's cipher preference order for the cookie.
+Option to prefer the server's cipher preference order for the NTP packets.
 Default on.
 
 ....
