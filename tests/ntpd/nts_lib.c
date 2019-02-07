@@ -269,7 +269,7 @@ TEST(nts_lib, record_encode_text) {
 	free(record);
 }
 
-/*TEST(nts_lib, existance) {
+/*TEST(nts_lib, existence) {
   TEST_ASSERT_NOT_NULL(upf);
   TEST_ASSERT_NOT_NULL(nts_record_form)
   TEST_ASSERT_NOT_NULL(nts_record_parse)
@@ -280,7 +280,7 @@ TEST(nts_lib, record_encode_text) {
 }*/
 
 TEST_GROUP_RUNNER(nts_lib) {
-//  RUN_TEST_CASE(nts_lib, existance);
+//  RUN_TEST_CASE(nts_lib, existence);
 
 	RUN_TEST_CASE(nts_lib, record_decode_null);
 	RUN_TEST_CASE(nts_lib, record_decode_u16);

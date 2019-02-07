@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// a binary unpack function it should sort of reverse mempcpy
+// a binary unpack function it should sort of reverse memcpy
 uint8_t *upf(void *src, void *dest, size_t n) {
 	(void)memcpy(dest, src, n);
 	return (uint8_t *)src + n;
@@ -49,7 +49,7 @@ int nts_record_parse(record_bits *in) {
  * sets the record_length and record fields.
  *
  * returns 0 on success
- * returns 1 on memory allcation failure;
+ * returns 1 on memory allocation failure;
  */
 int nts_record_form(record_bits *in) {
 	in->record_length = (4 + in->body_length);
@@ -87,8 +87,8 @@ int nts_cookie_clean(cookie_bits *a) {
 }
 
 /* Parse the plaintext to retrieve the AEAD algorithm to use when processing,
- * the c2s key used to decipher the AEAF extension from the client and the
- * s2c key used to encipher the AEAF extension returned to the client.
+ * the c2s key used to decipher the AEAD extension from the client and the
+ * s2c key used to encipher the AEAD extension returned to the client.
  *
  * Assumes the plaintext and recipe fields are set.
  *
