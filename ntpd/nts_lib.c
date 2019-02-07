@@ -24,9 +24,9 @@ uint8_t *upf(void *src, void *dest, size_t n) {
 int nts_record_parse(record_bits *in) {
 	in->bit = upf(in->record, &in->now, sizeof(uint16_t));
 
-	if (0x80 & in->record[0]) {
+	if (0x80 & in->record[0]) {          // FIXME
 		in->critical = true;
-		in->now &= htons(~0x8000);
+		in->now &= htons(0x7FFF);    // FIXME
 	}
 	in->record_type = ntohs(in->now);
 
