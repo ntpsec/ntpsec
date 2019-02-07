@@ -218,7 +218,7 @@ This SHOULD be provided as an OpenSSL cipher string.
 The NTS-KE server SHOULD have a configuration parameter to specify
 its preferred AEAD algorithms for the NTPD connection in preference
 order.  This SHOULD be provided as an OpenSSL cipher string.
-AEAD_AES_SIV_CMAC_256 [RFC5297] must be supported[4.1.5]
+AEAD_AES_SIV_CMAC_256 [RFC5297] MUST be supported[4.1.5].
 
 Honoring the NTS-KE client's AEAD preference order for the NTPD
 connection is OPTIONAL[4.1.5].  How we reconcile the NTS-KE client
