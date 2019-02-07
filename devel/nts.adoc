@@ -200,8 +200,8 @@ Those slots will be returned with new cookies.
 
 The AEAD algorithm used for authentication is set up to encrypt some
 data as well.  For the request, the encrypted data is empty.  For the
-response, it contains a new cookie (or cookies). AEAD also needs a nonce.
-
+response, it contains a new cookie (or cookies). AEAD also needs a nonce;
+see below for discussion and security concerns.
 
 == Configuration
 
@@ -219,6 +219,36 @@ The NTS-KE server SHOULD have a configuration parameter to specify
 its preferred AEAD algorithms for the NTPD connection in preference
 order.  This SHOULD be provided as an OpenSSL cipher string.
 AEAD_AES_SIV_CMAC_256 [RFC5297] MUST be supported[4.1.5].
+
+The nonce situation has impacts on algorithm choice.  There are two ways
+to generate a nonce: randomly or as a counter.  Given the hard
+requirement that the server be stateless, the only place for the server
+to store state is in the cookie.  Clients are allowed to reuse cookies,
+so the server cannot use the cookie to store nonce state.  No matter what
+state the server stores in the cookie, if the client replays a cookie,
+the server would replay the nonce.
+
+Unless the AEAD algorithm is specifically designed to be nonce-misuse
+resistant, then reusing the nonce catastrophically breaks the security.
+For example, the AES-GCM RFC [RFC5116] says, "
+   The inadvertent reuse of the same nonce by two invocations of the GCM
+   encryption operation, with the same key, but with distinct plaintext
+   values, undermines the confidentiality of the plaintexts protected in
+   those two invocations, and undermines all of the authenticity and
+   integrity protection provided by that key.  For this reason, GCM
+   should only be used whenever nonce uniqueness can be provided with
+   assurance."
+
+So we might as well generate the nonce randomly rather than jumping
+through hoops to try to implement a counter-based nonce that will fail
+anyway under cookie reuse.  A random nonce also prevents the client from
+gaining some advantage by reusing the cookie maliciously.  But a
+randomly-generated nonce also does not _guarantee_ that nonce reuse will
+not happen.  Thus, absent contrary guidance from a cryptography expert,
+the AEAD algorithm MUST be nonce-misuse resistant.  The only current AEAD
+algorithms with this property are AEAD_AES_SIV_CMAC in 256, 384, and 512
+variants and AEAD_AES_128_GCM_SIV in 128 and 256 variants.  This can be
+verified by checking each AEAD algorithm's specification.
 
 Honoring the NTS-KE client's AEAD preference order for the NTPD
 connection is OPTIONAL[4.1.5].  The typical approach is to honor the
@@ -245,8 +275,10 @@ library and the remote both support. If the remote can't cope, you
 abort.
 
 To avoid having to hand-configure ciphers offered to the remote, we
-can initially have a list of common known-good ones wired in.
-Eventually, look into how openssl-ciphers does this and autoconfigure.
+can initially have a list of common known-good ones wired in.  Eventually,
+this list should be configurable.  For the reasons discussed above in the
+server section, the client's default list of ciphers SHOULD be restricted
+to only those algorithms known to be nonce-misuse resistant.
 
 == NTS-KE Server Configuration parameters
 
@@ -283,6 +315,20 @@ TLSCipherSuite TLS1.3 cipher-spec
 
 A colon-separated cipher-spec string consisting of OpenSSL AEAD cipher
 specifications to configure the cipher suite for the NTP traffic.
+
+Therefore, the server MUST restrict the list of AEAD algorithms to only
+those algorithms known to be nonce-misuse resistant.
+
+For the reasons discussed above, the server MUST limit the accepted AEAD
+algorithms in this to only those algorithms known to be nonce-misuse
+resistant.  Maybe this should be downgraded to a SHOULD, because a new
+nonce-misuse resistant algorithm could be added to OpenSSL and ntpd would
+not know about it.  If it is possible to just pass a cipher string to
+OpenSSL and let it filter the list of AEAD algorithms (as is possible with
+TLS), that makes sense.  But if the NTS-KE server implementation has to
+parse this list itself and switch-case on the value, then it would have to
+be updated for new algorithms anyway, and it makes sense to leave this at
+a MUST.
 
 If no list is specified, the default list MUST include
 AEAD_AES_SIV_CMAC_256.  However, if the user specifies a list, the server
