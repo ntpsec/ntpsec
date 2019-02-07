@@ -221,8 +221,11 @@ order.  This SHOULD be provided as an OpenSSL cipher string.
 AEAD_AES_SIV_CMAC_256 [RFC5297] MUST be supported[4.1.5].
 
 Honoring the NTS-KE client's AEAD preference order for the NTPD
-connection is OPTIONAL[4.1.5].  How we reconcile the NTS-KE client
-and NTS-KE server preference order is TBD.
+connection is OPTIONAL[4.1.5].  The typical approach is to honor the
+client's order by default (i.e. pick the first algorithm in the client's
+list which is supported by the server), unless a configuration option has
+been set on the server to reverse that (i.e. pick the first algorithm in
+the server's list which is supported by the client).
 
 The NTS-KE server SHOULD have a configuration parameter to specify
 the TLS key, certificate, and intermediate certificate bundles.
