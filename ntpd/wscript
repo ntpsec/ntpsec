@@ -57,6 +57,7 @@ def build(ctx):
         "ntp_restrict.c",
         "ntp_util.c",
         "nts.c",
+        "nts_client.c",
         "nts_lib.c",
     ]
 
@@ -65,7 +66,7 @@ def build(ctx):
         includes=ctx.env.PLATFORM_INCLUDES,
         source=libntpd_source,
         target="libntpd_obj",
-        use="CRYPTO",
+        use="SSL CRYPTO",
     )
 
     ctx(
@@ -124,7 +125,7 @@ def build(ctx):
         source=ntpd_source,
         target="ntpd",
         use="libntpd_obj ntp M parse RT CAP SECCOMP PTHREAD NTPD "
-            "CRYPTO DNS_SD %s SOCKET NSL SCF" % use_refclock,
+            "SSL CRYPTO DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
 
     ntsd_source = [

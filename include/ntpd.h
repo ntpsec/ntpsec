@@ -421,6 +421,7 @@ extern const uint8_t	num_refclock_conf;
 #endif
 
 /* nts.c */
+bool nts_probe(struct peer *peer);
 int nts_client_ke_request(struct ntscfg_t *);
 int nts_server_ke_verify(struct ntscfg_t *);
 int nts_client_ke_verify(struct ntscfg_t *, struct ntsstate_t *);
