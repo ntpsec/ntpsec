@@ -283,7 +283,12 @@ TLSCipherSuite TLS1.3 cipher-spec
 
 A colon-separated cipher-spec string consisting of OpenSSL AEAD cipher
 specifications to configure the cipher suite for the NTP traffic.
-AEAD_AES_SIV_CMAC_256 is mandatory, and need not be specified.
+
+If no list is specified, the default list MUST include
+AEAD_AES_SIV_CMAC_256.  However, if the user specifies a list, the server
+MUST NOT add AEAD_AES_SIV_CMAC_256 to that list implicitly, as this would
+preclude the user from disabling AEAD_AES_SIV_CMAC_256 in the future,
+should that become necessary.
 
 ....
 NTPCipherSuite cipher-spec
