@@ -597,7 +597,7 @@ int main(int argc, char **argv) {
     # Check via pkg-config first, then fall back to a direct search
     if not ctx.check_cfg(
         package='libssl', uselib_store='SSL',
-        args=['libcrypto', '--cflags', '--libs'],
+        args=['libssl', '--cflags', '--libs'],
         msg="Checking for OpenSSL/libssl (via pkg-config)",
         define_name='', mandatory=False,
     ):
