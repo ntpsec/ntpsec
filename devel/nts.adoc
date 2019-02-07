@@ -282,13 +282,11 @@ TLSCipherSuite TLS1.3 cipher-spec
 ....
 
 A colon-separated cipher-spec string consisting of OpenSSL AEAD cipher
-specifications to configure the Cipher Suite for the NTS cookie.  TLS1.2
-and TLS1.3 must be specified separately. AEAD_AES_SIV_CMAC_256 is
-mandatory, and need not be specified.
+specifications to configure the cipher suite for the NTP traffic.
+AEAD_AES_SIV_CMAC_256 is mandatory, and need not be specified.
 
 ....
-NTPCipherSuite TLS1.2 cipher-spec
-NTPCipherSuite TLS1.3 cipher-spec
+NTPCipherSuite cipher-spec
 ....
 
 Option to prefer the server's cipher preference order for the TLS connection.
