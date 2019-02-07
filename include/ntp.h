@@ -395,7 +395,7 @@ struct peer {
 #define	FLAG_NOSELECT	0x0200u	/* never select */
 #define	FLAG_TRUE	0x0400u	/* force truechimer */
 #define	FLAG_DNS	0x0800u	/* needs DNS lookup */
-#define FLAG_TSTAMP_PPS	0x4cd000u	/* PPS source provides absolute timestamp */
+#define FLAG_TSTAMP_PPS	0x1000u	/* PPS source provides absolute timestamp */
 
 /* This is the new, sane way of representing packets. All fields are
    in host byte order, and the fixed-point time fields are just integers,
