@@ -9,8 +9,8 @@
 
 TEST_GROUP(gpstolfp);
 
-TEST_SETUP(gpstolfp){};
-TEST_TEAR_DOWN(gpstolfp){};
+TEST_SETUP(gpstolfp){}
+TEST_TEAR_DOWN(gpstolfp){}
 
 TEST(gpstolfp, check) {
 	uint64_t build_t, gps_t;

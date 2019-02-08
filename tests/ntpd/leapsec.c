@@ -440,7 +440,7 @@ my_fprintf(FILE *stream, const char *fmt, ...) {
 	vfprintf(stream, fmt, ap);
 	va_end(ap);
 
-};
+}
 
 
 // ----------------------------------------------------------------------

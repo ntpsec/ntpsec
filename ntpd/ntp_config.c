@@ -3184,7 +3184,7 @@ void readconfig(const char *config_file)
 void set_keys_file(char* keys)
 {
 	cfgt.auth.keys = estrdup(keys);
-};
+}
 
 void set_trustedkey(keyid_t tkey)
 {
@@ -3192,7 +3192,7 @@ void set_trustedkey(keyid_t tkey)
 	attr_val *val2 = NULL;
 	APPEND_G_FIFO(val2, val);
 	CONCAT_G_FIFOS(cfgt.auth.trusted_key_list, val2);
-};
+}
 
 
 

@@ -22,7 +22,7 @@
 #endif
 
 #ifndef __sysloglike
-#define __sysloglike(fmt, args) ;
+#define __sysloglike(fmt, args)
 #endif /* __sysloglike */
 
 #ifdef __GNUC__

@@ -78,7 +78,7 @@ bool dns_probe(struct peer* pp)
         pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 
 	return true;
-};
+}
 
 void dns_check(void)
 {
@@ -133,7 +133,7 @@ void dns_check(void)
 	if (NULL != answer)
 		freeaddrinfo(answer);
 	active = NULL;
-};
+}
 
 /* Beware: no calls to msyslog from here.
  * It's not thread safe.
@@ -166,5 +166,5 @@ static void* dns_lookup(void* arg)
 	 * More portable than an attribute or directive
 	 */
 	return (void *)NULL;
-};
+}
 
