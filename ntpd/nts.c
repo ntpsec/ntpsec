@@ -15,6 +15,7 @@
 #include "ntp_types.h"
 #include "ntpd.h"
 
+bool ntsenable = true; 		/* enable NTS on this ntpd instance */
 float mintls = 1.2;		/* minimum TLS version allowed */
 float maxtls;			/* maximum TLS version allowed */
 char *tlsciphers;		/* allowed TLS 1.2 ciphers */

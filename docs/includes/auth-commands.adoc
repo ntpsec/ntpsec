@@ -36,9 +36,15 @@ The following command controls NTS authentication. It overrides
 normal TLS protocol negotiation, which is not usually necessary.
 
 [[crypto]]
-+crypto+ [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphers+ _name_] [+tlsciphersuites+ _name_]
++crypto+ [enable|disable] [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphers+ _name_] [+tlsciphersuites+ _name_]
 
 The options are as follows:
+
++enable+::
+  Enable NTS service. The default.
+
++disable+::
+  Disable NTS service.
 
 +mintls+ _number_::
   Set the lowest allowable TLS version to negotiate. Will be useful in

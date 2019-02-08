@@ -1128,6 +1128,10 @@ crypto_option
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Tlsciphersuites T_String
 			{ $$ = create_attr_sval($1, $2); }
+	|	T_Disable
+			{ $$ = create_attr_ival($1, 0); }
+	|	T_Enable
+			{ $$ = create_attr_ival($1, 1); }
 	;
 
 crypto_option_keyword

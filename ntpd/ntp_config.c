@@ -2008,6 +2008,14 @@ config_crypto(
 		case T_Tlsciphersuites:
 			tlsciphersuites = estrdup(crypto->value.s);
 			break;
+
+		case T_Enable:
+			ntsenable = true;
+			break;
+
+		case T_Disable:
+			ntsenable = false;
+			break;
 		}
 	}
 }

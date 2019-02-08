@@ -12,6 +12,7 @@
 #define FLAG_NTS_REQ	0x04u	/* NTS, ask for specified server */
 #define FLAG_NTS_NOVAL	0x08u	/* do not validate the server certificate */
 
+extern bool ntsenable; 		/* enable NTS on this ntpd instance */
 extern float mintls;		/* minimum TLS version allowed */
 extern float maxtls;		/* maximum TLS version allowed */
 extern char *tlsciphers;	/* allowed TLS 1.2 ciphers */
