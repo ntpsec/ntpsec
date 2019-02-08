@@ -829,6 +829,13 @@ transmit(
 		return;
 	}
 
+	/* Does server need NTS lookup? */
+	if (peer->cfg.nts_cfg.flags & FLAG_NTS) {
+                peer->cfg.nts_cfg.flags &= !FLAG_NTS;
+                nts_probe(peer);
+		return;
+        }
+
 	/* Does server need DNS lookup? */
 	if (peer->cfg.flags & FLAG_DNS) {
 		peer->outdate = current_time;
