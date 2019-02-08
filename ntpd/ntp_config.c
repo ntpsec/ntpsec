@@ -1993,6 +1993,22 @@ config_crypto(
 			INSIST(0);
 			break;
 
+		case T_Ca:
+			ntsconfig.ca = estrdup(crypto->value.s);
+			break;
+
+		case T_Cert:
+			ntsconfig.cert = estrdup(crypto->value.s);
+			break;
+
+		case T_Disable:
+			ntsconfig.ntsenable = false;
+			break;
+
+		case T_Enable:
+			ntsconfig.ntsenable = true;
+			break;
+
 		case T_Maxtls:
 			ntsconfig.maxtls = crypto->value.d;
 			break;
@@ -2007,14 +2023,6 @@ config_crypto(
 
 		case T_Tlsciphersuites:
 			ntsconfig.tlsciphersuites = estrdup(crypto->value.s);
-			break;
-
-		case T_Enable:
-			ntsconfig.ntsenable = true;
-			break;
-
-		case T_Disable:
-			ntsconfig.ntsenable = false;
 			break;
 		}
 	}

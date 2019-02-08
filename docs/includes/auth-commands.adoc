@@ -40,6 +40,15 @@ normal TLS protocol negotiation, which is not usually necessary.
 
 The options are as follows:
 
++cert+ _file_::
+  Present the certificate in _file_ as our certificate.
+  This is a default for all client and server connections.
+
++ca+ _location_::
+  Use the file (or directory) specified by _location_ to
+  validate NTS-KE server certificates. This is a default
+  for all client and server connections.
+
 +enable+::
   Enable NTS service. The default.
 
@@ -93,9 +102,12 @@ The following options of the +server+ command configure NTS.
   NTS-KE server.
 
 +cert+ _file_::
-  Present the certificate in _file_ as our client certificate
+  Present the certificate in _file_ as our client certificate,
+  overriding the site default.
 
 +ca+ _location_::
-  Use the file, or directory, specified by _location_ to
-  validate the NTS-KE server certificate.  Do not use any other CA.
+  Use the file, or directory, specified by _location_ to validate the
+  NTS-KE server certificate, overriding the site default.  Do not use
+  any other CA.
+
 // end

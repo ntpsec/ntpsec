@@ -296,7 +296,8 @@
 %type	<Integer>	tinker_option_keyword
 %type	<Attr_val>	tinker_option
 %type	<Attr_val_fifo>	tinker_option_list
-%type	<Integer>	crypto_option_keyword
+%type	<Integer>	crypto_int_option_keyword
+%type	<Integer>	crypto_string_option_keyword
 %type	<Attr_val>	crypto_option
 %type	<Attr_val_fifo>	crypto_option_list
 %type	<Attr_val>	tos_option
@@ -1122,11 +1123,9 @@ crypto_option_list
 	;
 
 crypto_option
-	:	crypto_option_keyword number
+	:	crypto_int_option_keyword number
 			{ $$ = create_attr_dval($1, $2); }
-	|	T_Tlsciphers T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Tlsciphersuites T_String
+	|	crypto_string_option_keyword T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Disable
 			{ $$ = create_attr_ival($1, 0); }
@@ -1134,10 +1133,16 @@ crypto_option
 			{ $$ = create_attr_ival($1, 1); }
 	;
 
-crypto_option_keyword
+crypto_int_option_keyword
 	:	T_Maxtls
 	|	T_Mintls
 	;
+
+crypto_string_option_keyword
+	:	T_Ca
+	|	T_Cert
+	|	T_Tlsciphers
+	|	T_Tlsciphersuites
 
 
 /* Miscellaneous Commands
