@@ -21,8 +21,13 @@
 #include "ntp_types.h"
 #include "ntpd.h"
 
+// FIXME
+// For AEAD_AES_SIV_CMAC_256, from RFC 5297
+#define KEYLEN 32
+
 
 int open_TCP_socket(const char *hostname);
+bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen);
 
 bool nts_probe(struct peer * peer) {
 
@@ -79,6 +84,11 @@ bool nts_probe(struct peer * peer) {
       break;
     }
 
+  /* This may be clutter, but this is how to do it. */
+  msyslog(LOG_INFO, "NTS: Using %s with %d secret bits",
+    SSL_get_cipher_name(ssl),
+    SSL_get_cipher_bits(ssl, NULL));
+
   cert = SSL_get_peer_certificate(ssl);
   if (NULL == cert) {
     msyslog(LOG_INFO, "NTS: No certificate");
@@ -98,8 +108,10 @@ bool nts_probe(struct peer * peer) {
     } else {
       msyslog(LOG_ERR, "NTS: certificate invalid: %d", certok);
     }
-
   }
+
+  peer->nts_state.keylen = KEYLEN;
+  nts_make_keys(ssl, peer->nts_state.c2s, peer->nts_state.s2c, KEYLEN);
 
   {
     uint8_t req[16] = {
@@ -119,6 +131,10 @@ bool nts_probe(struct peer * peer) {
     }
     msyslog(LOG_ERR, "NTS-KE-client: read %d bytes", transfered);
   }
+
+  SSL_shutdown(ssl);
+
+  // unpack buffer
 
 bail:
   SSL_free(ssl);
@@ -168,6 +184,37 @@ int open_TCP_socket(const char *hostname) {
 
   freeaddrinfo(answer);
   return sockfd;
+}
+
+bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
+  // char *label = "EXPORTER-network-time-security/1";
+  // Subject: [Ntp] [NTS4NTP] info for NTS developers
+  // From: Martin Langer <mart.langer@ostfalia.de>
+  // Date: Tue, 15 Jan 2019 11:40:13 +0100
+  // bug in OpenSSL 1.1.1a
+  const char *label = "EXPORTER-nts/1";
+  unsigned char context[5] = {0x00, 0x00, 0x00, 0x0f, 0x00};
+  if (1 != SSL_export_keying_material(ssl, c2s, keylen,
+        label, strlen(label),
+        context, 5, 1)) {
+     msyslog(LOG_ERR, "NTS: Error making c2s\n");
+     return false;
+     // ERR_print_errors_fp(stderr);
+  }
+  context[4] = 0x01;
+  if (1 != SSL_export_keying_material(ssl, s2c, keylen,
+        label, strlen(label),
+        context, 5, 1)) {
+     msyslog(LOG_ERR, "NTS: Error making s2c\n");
+     return false;
+     // ERR_print_errors_fp(stderr);
+  }
+  // Hack for debugging - obviously not good for security
+  msyslog(LOG_INFO, "NTS: C2S %02x %02x %02x %02x %02x\n",
+    c2s[0], c2s[1], c2s[2], c2s[3], c2s[4]);
+  msyslog(LOG_INFO, "NTS: S2C %02x %02x %02x %02x %02x\n",
+    s2c[0], s2c[1], s2c[2], s2c[3], s2c[4]);
+  return true;
 }
 
 /* end */

@@ -21,11 +21,14 @@ struct ntscfg_t {
     uint32_t expire;
 };
 
+#define NTS_MAX_KEYLEN 64
 /* Client-side state per connection to server */
 struct ntsstate_t {
     char cookies[NTS_MAX_COOKIES][NTS_COOKIELEN];
     int current_cookie;
     int cookie_count;
+    uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
+    int keylen;
 };
 
 /* Configuration data for an NTS server or client instance */
