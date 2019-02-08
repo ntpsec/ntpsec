@@ -60,7 +60,7 @@ v5 packets by setting the high three bits.
 A difficulty with this approach is that some firewalls and routers are
 known to silently discard RFC7822 extension blocks as a way of
 preventing DoS attacks. However, by checking the mark described in the
-previos paragraph, an ntpd can at least detect this.
+previous paragraph, an ntpd can at least detect this.
 
 === NTPNG
 
