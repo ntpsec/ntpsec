@@ -12,12 +12,6 @@
 #define FLAG_NTS_REQ	0x04u	/* NTS, ask for specified server */
 #define FLAG_NTS_NOVAL	0x08u	/* do not validate the server certificate */
 
-extern bool ntsenable; 		/* enable NTS on this ntpd instance */
-extern float mintls;		/* minimum TLS version allowed */
-extern float maxtls;		/* maximum TLS version allowed */
-extern char *tlsciphers;	/* allowed TLS 1.2 ciphers */
-extern char *tlsciphersuites;	/* allowed TLS 1.3 ciphersuites */
-
 /* Configuration data for an NTS association */
 struct ntscfg_t {
     char *server;	/* if NULL, use the peer itself (normal case) */
@@ -33,5 +27,16 @@ struct ntsstate_t {
     int current_cookie;
     int cookie_count;
 };
+
+/* Configuration data for an NTS server of client instance */
+struct ntsconfig_t {
+    bool ntsenable; 		/* enable NTS on this ntpd instance */
+    float mintls;		/* minimum TLS version allowed */
+    float maxtls;		/* maximum TLS version allowed */
+    char *tlsciphers;	/* allowed TLS 1.2 ciphers */
+    char *tlsciphersuites;	/* allowed TLS 1.3 ciphersuites */
+};
+
+extern struct ntsconfig_t ntsconfig;
 
 #endif /* GUARD_NTS_H */

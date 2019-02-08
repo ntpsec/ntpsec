@@ -1994,27 +1994,27 @@ config_crypto(
 			break;
 
 		case T_Maxtls:
-			maxtls = crypto->value.d;
+			ntsconfig.maxtls = crypto->value.d;
 			break;
 
 		case T_Mintls:
-			mintls = crypto->value.d;
+			ntsconfig.mintls = crypto->value.d;
 			break;
 
 		case T_Tlsciphers:
-			tlsciphers = estrdup(crypto->value.s);
+			ntsconfig.tlsciphers = estrdup(crypto->value.s);
 			break;
 
 		case T_Tlsciphersuites:
-			tlsciphersuites = estrdup(crypto->value.s);
+			ntsconfig.tlsciphersuites = estrdup(crypto->value.s);
 			break;
 
 		case T_Enable:
-			ntsenable = true;
+			ntsconfig.ntsenable = true;
 			break;
 
 		case T_Disable:
-			ntsenable = false;
+			ntsconfig.ntsenable = false;
 			break;
 		}
 	}
