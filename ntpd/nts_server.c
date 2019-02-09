@@ -29,8 +29,20 @@ void nts_start_server(void) {
     sigset_t block_mask, saved_sig_mask;
     int rc;
 
+#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
     ctx = SSL_CTX_new(TLS_server_method());
-    // FIXME set min/max versions
+    SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);  // FIXME
+    SSL_CTX_set_max_proto_version(ctx, 0);
+#else
+    /* Older versions of OpenSSL don't support min/max version requests.
+     * That's OK, since we don't want anything older than 1.2 and
+     * they don't support anything newer.
+     * There is similar code in nts_probe(). */
+    ctx = SSL_CTX_new(TLSv1_2_server_method());
+    SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
+    if (1) // FIXME if (non-default version request)
+      msyslog(LOG_INFO, "NTSc: can't set min/max TLS versions.");
+#endif
 
     if (1 != SSL_CTX_use_certificate_chain_file(ctx, "/etc/ntp/cert-chain.pem")) {
         // FIXME log SSL errors

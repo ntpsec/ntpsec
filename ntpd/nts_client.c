@@ -51,8 +51,10 @@ bool nts_probe(struct peer * peer) {
 #else
   /* Older versions of OpenSSL don't support min/max version requests.
    * That's OK, since we don't want anything older than 1.2 and
-   * they don't support anything newer. */
+   * they don't support anything newer.
+   * There is similar code in nts_start_server(). */
   ctx = SSL_CTX_new(TLSv1_2_client_method());
+  SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
   if (1) // FIXME if (non-default version request)
     msyslog(LOG_INFO, "NTSc: can't set min/max TLS versions.");
 #endif
@@ -64,11 +66,13 @@ bool nts_probe(struct peer * peer) {
       msyslog(LOG_ERR, "NTSc: error setting TLS ciphers");
     }
   }
+#ifdef TLS1_3_VERSION
   if (NULL != ntsconfig.tlsciphersuites) {
     if (1 != SSL_CTX_set_ciphersuites(ctx, ntsconfig.tlsciphersuites)) {
       msyslog(LOG_ERR, "NTSc: error setting TLS ciphersuites");
     }
   }
+#endif
 
   ssl = SSL_new(ctx);
 

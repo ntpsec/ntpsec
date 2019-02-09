@@ -54,5 +54,7 @@ extern struct ntsconfig_t ntsconfig;
 
 bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen);
 
+#define NO_OLD_VERSIONS SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1
+
 
 #endif /* GUARD_NTS_H */

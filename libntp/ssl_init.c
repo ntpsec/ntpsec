@@ -33,10 +33,8 @@ ssl_init(void)
 		return;
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-	SSL_library_init();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
-	SSL_load_error_strings();
 	atexit(&atexit_ssl_cleanup);
 #endif
 
