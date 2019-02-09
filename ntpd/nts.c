@@ -15,7 +15,15 @@
 #include "ntp_types.h"
 #include "ntpd.h"
 
-struct ntsconfig_t ntsconfig;
+struct ntsconfig_t ntsconfig = {
+  .ntsenable = false,
+  .mintls = 0,
+  .maxtls = 0,
+  .tlsciphers = NULL,
+  .tlsciphersuites = NULL,
+  .ca = NULL,
+  .cert = NULL
+};
 
 /* By design, there is no per-client-side state on the server */
 

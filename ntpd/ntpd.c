@@ -500,9 +500,7 @@ ntpdmain(
 	int		pipe_fds[2];
 	int		rc;
 	int		exit_code;
-#  ifdef SIGDANGER
 	struct sigaction sa;
-#  endif
 # endif	/* HAVE_WORKING_FORK*/
 	int op;
 
@@ -628,6 +626,10 @@ ntpdmain(
 #  endif	/* SIGDANGER */
 # endif		/* HAVE_WORKING_FORK */
 	}
+
+	/* Ignore SIGPIPE - from OpenSSL */
+	sa.sa_handler = SIG_IGN;
+ 	sigaction(SIGPIPE, &sa, NULL);
 
 	/*
 	 * Set up signals we pay attention to locally.
@@ -901,6 +903,9 @@ ntpdmain(
 	if (access(statsdir, W_OK) != 0) {
 	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
 	}
+
+	if (ntsconfig.ntsenable)
+            nts_start_server();
 
 	mainloop();
         /* unreachable, mainloop() never returns */

@@ -4,6 +4,8 @@
 #ifndef GUARD_NTS_H
 #define GUARD_NTS_H
 
+#include <openssl/ssl.h>
+
 #define NTS_MAX_COOKIES	8	/* RFC 4.1.6 */
 #define NTS_COOKIELEN	128	/* placeholder - see RFC 6 */
 
@@ -20,6 +22,12 @@ struct ntscfg_t {
     uint32_t flags;
     uint32_t expire;
 };
+
+// FIXME AEAD_AES_SIV_CMAC_256
+// We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
+// There is no clean API yet
+#define IANA_AEAD_AES_SIV_CMAC_256 15
+#define AEAD_AES_SIV_CMAC_256_KEYLEN 32
 
 #define NTS_MAX_KEYLEN 64
 /* Client-side state per connection to server */
@@ -43,5 +51,8 @@ struct ntsconfig_t {
 };
 
 extern struct ntsconfig_t ntsconfig;
+
+bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen);
+
 
 #endif /* GUARD_NTS_H */
