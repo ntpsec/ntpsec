@@ -416,6 +416,119 @@ NTS Master Key to recover C2S and S2C.  It uses C2S to authenticate the
 packet. For the response, S2C is used to encrypt the new cookies and
 authenticate the return packet.
 
+== Certificate Verification
+
+To recap: In normal operation, the client MUST verify the NTS-KE
+server's TLS certificate in the usual way, checking the certificate
+chain and the hostname.  For testing or workaround purposes, a
+`noval` or similar configuration option SHOULD be provided which
+skips certificate validation.
+
+It is desirable to include a middle-ground option, where the
+certificate chain is validated, but certificate timestamps (`notBefore`
+and `notAfter`) are ignored.  This would be useful to allow the client to
+correct for a bogus system clock.  A specific subset of bogus system
+clock scenarios is that the system lacks an RTC, or the RTC's battery
+has died.  However, such a mode should be carefully constructed to
+minimize the loss of security.  If such a mode is implemented, the client
+MUST have a configuration option to enable/disable it.
+
+One possible implementation is as follows.
+
+If certificate validation is disabled entirely with the `noval` option,
+pass `SSL_VERIFY_NONE` to `SSL_CTX_set_verify()` and do not register any
+custom verification hook.  These peers will be treated as if certificate
+verification succeeded, without any of the special "suspect" behavior
+or `notBefore`/`notAfter` checks.
+
+If the configuration option is set to strict security or if ntpd has
+already set the system clock, let OpenSSL handle certificate verification
+normally.  That is, do not register a custom verification callback.  This
+way, the risk of any bugs in the custom certificate verification code is
+contained to initial startup.  Otherwise, register a custom callback
+with `SSL_CTX_set_cert_verify_callback()`, passing some state (e.g. a
+`peer` object) as the `arg` parameter.  When the callback is called,
+perform certificate verification (leveraging built-in OpenSSL
+functionality to the extent possible!).  If the verification fails for a
+reason other than certificate validity times, return failure.  If a
+verification step fails due to certificate validity times, set a
+`peer->suspect` flag, but otherwise continue.
+
+As each certificate in the chain is inspected, save the _latest_
+`notBefore` and _earliest_ `notAfter` into the peer object.  In other
+words, if no value is saved (i.e. this is the first certificate), save
+the certificate's values; otherwise save the certificate's `notBefore`
+only if it is later than the existing `peer->notBefore` and save the
+certificate's `notAfter` only if it is earlier than the existing
+`peer->notAfter`.  If an OCSP stapled response is present, similarly
+limit the peer's `notBefore` and `notAfter` values to the validity range
+of the OCSP stapled response.
+
+The objective of this is to limit the possible forged times that the
+client will accept.  If the client is configured to require multiple
+sources of time (e.g. `minsane 3`), an attacker trying to re-use
+compromised expired certificates would need multiple such certificates
+with overlapping validity, and would still only be able to get the
+client to accept times within that period of overlap.  This helps limit
+attacks.  If a certificate uses OCSP "must staple", the attacker needs to
+replay OCSP responses too, which have much shorter validity periods (e.g.
+7 days), significantly limiting this even further.
+
+In the clock selection algorithm, very early on, add something like:
+
+----
+if (peer->suspect) {
+    /* Suspect peers are ignored ("leave the island"), unless
+     * <some condition>.
+     */
+
+    // <some condition> is something that indicates we would have
+    // "normally" synced the clock by now.  My example was that
+    // reach (as output by ntpq -p) was 377 (i.e. we had 8 successful
+    // polls on that peer), or maybe allow for one missed? It probably
+    // cannot be time passed because the network could be down for an
+    // indeterminate length of time when ntpd comes up.
+
+    if (!<some condition>)
+        continue;
+}
+----
+
+The idea here is that we spin up the suspect associations normally, but
+we ignore them for "a while" which would normally be sufficient to set
+the clock.  If there are enough other associations working, great, we
+didn't use the suspect association(s) at all, so there was no loss in
+security.  Only if we couldn't set the clock in a reasonable amount of
+time or whatever would we then fall back to considering the suspect
+associations.  But, because they have been running the whole time rather
+than just starting now, we minimize the time to clock update when we do
+need to use the suspect associations.
+
+Once the clock is set the first time, kill all suspect associations
+(including those used to set the time), forcing those peers to re-run
+NTS-KE and start over.  They will either pass normally or fail normally.
+Since the clock has now been set, only normal certificate validation will
+be allowed moving forward.
+
+Additionally, if the NTP server gives (authenticated) time earlier than
+the `peer->notBefore` value (if set), discard that time or mark the peer
+as a falseticker.  If the server gives valid time, set a flag in the peer
+indicating that.  If the server gives time after the `notAfter` and the
+peer's valid time flag is unset (the server has never given valid time),
+discard that time or mark the peer as a falseticker.  These checks should
+never trigger on legitimate traffic, as that would mean the NTP server
+disagrees with its NTS-KE server's CA about time.
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-9.3[9.3]
+
+It might be considered useful to always apply these
+`notBefore`/`notAfter` sanity checks, not just for "suspect"
+associations.  If that is the case, then the `peer->notBefore` and
+`peer->notAfter` values will have to be set in all cases.  However, in
+that event, it is still probably desirable to skip the custom certificate
+verification code, so determining the `notBefore` and `notAfter` values
+should be moved from the custom certificate verification callback to
+happen after certificate validation.
+
 == Odds and ends
 
 How many cookies should the NTP client try to hold?  8
@@ -437,6 +550,17 @@ Note that the communication between NTS-KE client and NTP client
 needs to be kept private.  (aka encrypted if it goes over the net)
 Same for NTS-KE server and NTP server.
 Both connections contain C2S and S2C keys.
+
+---
+
+Some interesting notes on OCSP stapling:
+https://blog.cloudflare.com/high-reliability-ocsp-stapling/
+
+Also, here are some notes about how to implement good OCSP stapling on
+the server side:
+https://gist.github.com/sleevi/5efe9ef98961ecfb4da8
+linked from:
+https://community.letsencrypt.org/t/ocsp-stapling-advantages-and-disadvantages/34465/11
 
 == Potential cookie recipe(s)
 
