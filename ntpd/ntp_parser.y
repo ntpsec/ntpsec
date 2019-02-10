@@ -68,7 +68,6 @@
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
 %token	<Integer>	T_ControlKey
-%token	<Integer>	T_Crypto
 %token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
@@ -296,10 +295,10 @@
 %type	<Integer>	tinker_option_keyword
 %type	<Attr_val>	tinker_option
 %type	<Attr_val_fifo>	tinker_option_list
-%type	<Integer>	crypto_int_option_keyword
-%type	<Integer>	crypto_string_option_keyword
-%type	<Attr_val>	crypto_option
-%type	<Attr_val_fifo>	crypto_option_list
+%type	<Integer>	nts_int_option_keyword
+%type	<Integer>	nts_string_option_keyword
+%type	<Attr_val>	nts_option
+%type	<Attr_val_fifo>	nts_option_list
 %type	<Attr_val>	tos_option
 %type	<Integer>	tos_option_dbl_keyword
 %type	<Integer>	tos_option_int_keyword
@@ -350,7 +349,7 @@ command :	/* NULL STATEMENT */
 	|	rlimit_command
 	|	system_option_command
 	|	tinker_command
-	|	crypto_command
+	|	nts_command
 	|	miscellaneous_command
 	;
 
@@ -1100,32 +1099,32 @@ tinker_option_keyword
 	;
 
 
-/* Crypto Commands
+/* NTS Commands
  * ---------------
  */
 
-crypto_command
-	:	T_Crypto crypto_option_list
-			{ CONCAT_G_FIFOS(cfgt.crypto, $2); }
+nts_command
+	:	T_Nts nts_option_list
+			{ CONCAT_G_FIFOS(cfgt.nts, $2); }
 	;
 
-crypto_option_list
-	:	crypto_option_list crypto_option
+nts_option_list
+	:	nts_option_list nts_option
 		{
 			$$ = $1;
 			APPEND_G_FIFO($$, $2);
 		}
-	|	crypto_option
+	|	nts_option
 		{
 			$$ = NULL;
 			APPEND_G_FIFO($$, $1);
 		}
 	;
 
-crypto_option
-	:	crypto_int_option_keyword number
+nts_option
+	:	nts_int_option_keyword number
 			{ $$ = create_attr_dval($1, $2); }
-	|	crypto_string_option_keyword T_String
+	|	nts_string_option_keyword T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Disable
 			{ $$ = create_attr_ival($1, 0); }
@@ -1133,12 +1132,12 @@ crypto_option
 			{ $$ = create_attr_ival($1, 1); }
 	;
 
-crypto_int_option_keyword
+nts_int_option_keyword
 	:	T_Maxtls
 	|	T_Mintls
 	;
 
-crypto_string_option_keyword
+nts_string_option_keyword
 	:	T_Ca
 	|	T_Cert
 	|	T_Tlsciphers

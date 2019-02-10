@@ -209,7 +209,7 @@ static void free_config_rlimit(config_tree *);
 static void free_config_setvar(config_tree *);
 static void free_config_system_opts(config_tree *);
 static void free_config_tinker(config_tree *);
-static void free_config_crypto(config_tree *);
+static void free_config_nts(config_tree *);
 static void free_config_tos(config_tree *);
 static void free_config_unpeers(config_tree *);
 static void free_config_vars(config_tree *);
@@ -267,7 +267,7 @@ static void config_monitor(config_tree *);
 static void config_rlimit(config_tree *);
 static void config_system_opts(config_tree *);
 static void config_tinker(config_tree *);
-static void config_crypto(config_tree *);
+static void config_nts(config_tree *);
 static void config_tos(config_tree *);
 static void config_logfile(config_tree *);
 static void config_vars(config_tree *);
@@ -357,7 +357,7 @@ free_config_tree(
 	free_config_monitor(ptree);
 	free_config_access(ptree);
 	free_config_tinker(ptree);
-	free_config_crypto(ptree);
+	free_config_nts(ptree);
 	free_config_rlimit(ptree);
 	free_config_system_opts(ptree);
 	free_config_logconfig(ptree);
@@ -1979,26 +1979,26 @@ config_tinker(
 }
 
 static void
-config_crypto(
+config_nts(
 	config_tree *ptree
 	)
 {
-	attr_val *	crypto;
+	attr_val *	nts;
 
-	crypto = HEAD_PFIFO(ptree->crypto);
-	for (; crypto != NULL; crypto = crypto->link) {
-		switch (crypto->attr) {
+	nts = HEAD_PFIFO(ptree->nts);
+	for (; nts != NULL; nts = nts->link) {
+		switch (nts->attr) {
 
 		default:
 			INSIST(0);
 			break;
 
 		case T_Ca:
-			ntsconfig.ca = estrdup(crypto->value.s);
+			ntsconfig.ca = estrdup(nts->value.s);
 			break;
 
 		case T_Cert:
-			ntsconfig.cert = estrdup(crypto->value.s);
+			ntsconfig.cert = estrdup(nts->value.s);
 			break;
 
 		case T_Disable:
@@ -2010,19 +2010,19 @@ config_crypto(
 			break;
 
 		case T_Maxtls:
-			ntsconfig.maxtls = crypto->value.d;
+			ntsconfig.maxtls = nts->value.d;
 			break;
 
 		case T_Mintls:
-			ntsconfig.mintls = crypto->value.d;
+			ntsconfig.mintls = nts->value.d;
 			break;
 
 		case T_Tlsciphers:
-			ntsconfig.tlsciphers = estrdup(crypto->value.s);
+			ntsconfig.tlsciphers = estrdup(nts->value.s);
 			break;
 
 		case T_Tlsciphersuites:
-			ntsconfig.tlsciphersuites = estrdup(crypto->value.s);
+			ntsconfig.tlsciphersuites = estrdup(nts->value.s);
 			break;
 		}
 	}
@@ -2047,11 +2047,11 @@ free_config_tinker(
 
 
 static void
-free_config_crypto(
+free_config_nts(
 	config_tree *ptree
 	)
 {
-	FREE_ATTR_VAL_FIFO(ptree->crypto);
+	FREE_ATTR_VAL_FIFO(ptree->nts);
 }
 
 
@@ -3036,7 +3036,7 @@ config_ntpd(
 	config_tos(ptree);
 	config_access(ptree);
 	config_tinker(ptree);
-	config_crypto(ptree);
+	config_nts(ptree);
 	config_rlimit(ptree);
 	config_system_opts(ptree);
 	config_logconfig(ptree);
