@@ -43,6 +43,7 @@ typedef struct {
   bool critical;
 } record_bits;
 
+#define CRITICAL 0x8000
 enum record_type {
   end_of_message = 0,
   next_protocol_negotiation = 1,

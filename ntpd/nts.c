@@ -12,6 +12,9 @@
  * to be set by the config parser.
  */
 #include "config.h"
+
+#include <arpa/inet.h>
+
 #include "ntp_types.h"
 #include "ntpd.h"
 
@@ -119,5 +122,49 @@ int nts_decorate(struct ntscfg_t *cfg, struct ntsstate_t *state,
 	UNUSED_ARG(state);
 	return 0;
 }
+
+/*****************************************************/
+
+void nts_append_record(BufCtl* buf, uint16_t type, uint16_t length) {
+  uint16_t * ptr = (uint16_t *)buf->next;
+  *ptr++ = htons(type);
+  *ptr++ = htons(length);
+  buf->next += sizeof(type)+sizeof(length);
+  buf->left -= sizeof(type)+sizeof(length);
+  /* leaves buf pointing to where data will go */
+  return;
+}
+
+void nts_append_uint16(BufCtl* buf, uint16_t data) {
+  uint16_t * ptr = (uint16_t *)buf->next;
+  *ptr++ = htons(data);
+  buf->next += sizeof(data);
+  buf->left -= sizeof(data);
+  return;
+}
+
+void nts_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data) {
+  nts_append_record(buf, type, sizeof(uint16_t));
+  nts_append_uint16(buf, data);
+}
+
+
+uint16_t nts_next_record(BufCtl* buf, uint16_t *length) {
+  uint16_t *ptr = (uint16_t *)buf->next;
+  uint16_t type = ntohs(*ptr++);
+  *length = ntohs(*ptr++);
+  buf->next += sizeof(type)+sizeof(*length);
+  buf->left -= sizeof(type)+sizeof(*length);
+  return type;
+}
+
+uint16_t nts_next_uint16(BufCtl* buf) {
+  uint16_t *ptr = (uint16_t *)buf->next;
+  uint16_t data = ntohs(*ptr++);
+  buf->next += sizeof(data);
+  buf->left -= sizeof(data);
+  return data;
+}
+
 
 /* end */

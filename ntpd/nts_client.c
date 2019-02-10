@@ -17,12 +17,15 @@
 
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
+#include <openssl/x509v3.h>
 
 #include "ntp_types.h"
 #include "ntpd.h"
+#include "nts_lib.h"
 
 
 int open_TCP_socket(const char *hostname);
+bool process_recv_data(struct peer* peer, SSL *ssl);
 
 bool nts_probe(struct peer * peer) {
 
@@ -41,6 +44,8 @@ bool nts_probe(struct peer * peer) {
 
 // Fedora 29:  0x1010101fL  1.1.1a
 // Fedora 28:  0x1010009fL  1.1.0i
+// Debian 9:   0x101000afL  1.1.0j
+// CentOS 7:   0x100020bfL  1.0.2k
 // CentOS 6:   0x1000105fL  1.0.1e
 // NetBSD 8:   0x100020bfL  1.0.2k
 // FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
@@ -55,8 +60,6 @@ bool nts_probe(struct peer * peer) {
    * There is similar code in nts_start_server(). */
   ctx = SSL_CTX_new(TLSv1_2_client_method());
   SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
-  if (1) // FIXME if (non-default version request)
-    msyslog(LOG_INFO, "NTSc: can't set min/max TLS versions.");
 #endif
 
   SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
@@ -75,9 +78,25 @@ bool nts_probe(struct peer * peer) {
 #endif
 
   ssl = SSL_new(ctx);
-
   SSL_set_fd(ssl, server);
-  SSL_set_tlsext_host_name(ssl, peer->hostname);
+
+// https://wiki.openssl.org/index.php/Hostname_validation
+#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+  SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
+  SSL_set1_host(ssl, peer->hostname);
+#elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+{
+  X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
+  X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_WILDCARDS);
+  if (1 != X509_VERIFY_PARAM_set1_host(param,
+          peer->hostname, strlen(peer->hostname))) {
+      msyslog(LOG_ERR, "NTSc: troubles setting hostflags");
+  }
+  SSL_set_verify(ssl, SSL_VERIFY_PEER, NULL);
+}
+#else
+  msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
+#endif
 
   SSL_connect(ssl);
   SSL_do_handshake(ssl);
@@ -123,40 +142,46 @@ bool nts_probe(struct peer * peer) {
     }
   }
 
-  // FIXME AEAD_AES_SIV_CMAC_256
+
+  {
+    struct BufCtl_t buf;
+    int used;
+    buf.next = buff;
+    buf.left = sizeof(buff);
+
+    /* 4.1.2 Next Protocol, 0 for NTP */
+    nts_append_record_uint16(&buf, next_protocol_negotiation, 0);
+
+    /* 4.1.5 AEAD Algorithm List
+     * AEAD_AES_SIV_CMAC_256 is the only one for now */
+    nts_append_record_uint16(&buf, algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
+
+    /* 4.1.1: End, Critical */
+    nts_append_record(&buf, CRITICAL+end_of_message, 0);
+
+    used = sizeof(buff)-buf.left;
+    transfered = SSL_write(ssl, buff, used);
+    if (used != transfered) {
+      msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %m", used, transfered);
+      goto bail;
+    }
+
+  process_recv_data(peer, ssl);
+
+  }
+
+  // FIXME
   /* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
-   * There is no clean API yet.
+   * There are no alternatives and no clean API yet.
    */
-  peer->nts_state.keylen = AEAD_AES_SIV_CMAC_256_KEYLEN;
+  peer->nts_state.keylen = get_key_length(AEAD_AES_SIV_CMAC_256_KEYLEN);
   nts_make_keys(ssl,
     peer->nts_state.c2s,
     peer->nts_state.s2c,
     peer->nts_state.keylen);
 
-  {
-    uint8_t req[16] = {
-      0x00, 0x01, 0x00, 0x02,
-      0x00, 0x00, 0x00, 0x04,
-      0x00, 0x02, 0x00, 0x0f,
-      0x80, 0x00, 0x00, 0x00 };
-    transfered = SSL_write(ssl, req, sizeof(req));
-    if (sizeof(req) != transfered) {
-      msyslog(LOG_ERR, "NTSc: write failed: %d, %m", transfered);
-      goto bail;
-    }
-    transfered = SSL_read(ssl, buff, sizeof(buff));
-    if (0 > transfered) {
-      msyslog(LOG_ERR, "NTSc: read failed: %d, %m", transfered);
-      goto bail;
-    }
-    msyslog(LOG_ERR, "NTSc: read %d bytes", transfered);
-  }
-
-  SSL_shutdown(ssl);
-
-  // unpack buffer
-
 bail:
+  SSL_shutdown(ssl);
   SSL_free(ssl);
   close(server);
   SSL_CTX_free(ctx);
@@ -234,6 +259,122 @@ bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
     c2s[0], c2s[1], c2s[2], c2s[3], c2s[4]);
   msyslog(LOG_INFO, "NTS: S2C %02x %02x %02x %02x %02x\n",
     s2c[0], s2c[1], s2c[2], s2c[3], s2c[4]);
+  return true;
+}
+
+bool process_recv_data(struct peer* peer, SSL *ssl) {
+  uint8_t  buff[2000];
+  int transfered, idx;
+  struct BufCtl_t buf;
+
+  transfered = SSL_read(ssl, buff, sizeof(buff));
+  if (0 > transfered) {
+    msyslog(LOG_ERR, "NTSc: read failed: %d, %m", transfered);
+    return false;
+  }
+  msyslog(LOG_ERR, "NTSc: read %d bytes", transfered);
+
+  peer->nts_state.aead = -1;
+  peer->nts_state.keylen = 0;
+  peer->nts_state.next_cookie = 0;
+  peer->nts_state.cookie_count = 0;
+  for (int i=0; i<NTS_MAX_COOKIES; i++) peer->nts_state.valid[i] = false;
+
+  buf.next = buff;
+  buf.left = transfered;
+  while (buf.left > 0) {
+    uint16_t length, data;
+    uint16_t type = nts_next_record(&buf, &length);
+    bool critical = false;
+
+    if (CRITICAL & type) {
+      critical = true;
+      type &= ~CRITICAL;
+    }
+    switch (type) {
+      case error:
+        data = nts_next_uint16(&buf);
+        if (sizeof(data) != length)
+          msyslog(LOG_ERR, "NTSc: wrong length on error: %d", length);
+        msyslog(LOG_ERR, "NTSc: error: %d", data);
+        return false;
+      case next_protocol_negotiation:
+        data = nts_next_uint16(&buf);
+        if ((sizeof(data) != length) || (data != 0)) {
+          msyslog(LOG_ERR, "NTSc: NPN-Wrong length or bad data: %d, %d",
+              length, data);
+          return false;
+        }
+        break;
+      case algorithm_negotiation:
+        data = nts_next_uint16(&buf);
+        if ((sizeof(data) != length) || (data != AEAD_AES_SIV_CMAC_256)) {
+          msyslog(LOG_ERR, "NTSc: AN-Wrong length or bad data: %d, %d",
+              length, data);
+          return false;
+        }
+        peer->nts_state.aead = data;
+        break;
+      case new_cookie:
+        if (NTS_COOKIELEN < length) {
+          msyslog(LOG_ERR, "NTSc: NC cookie too big: %d", length);
+          return false;
+        }
+        if (0 == peer->nts_state.cookie_length)
+           peer->nts_state.cookie_length = length;
+        if (length != peer->nts_state.cookie_length) {
+          msyslog(LOG_ERR, "NTSc: Cookie length mismatch %d, %d.",
+            length, peer->nts_state.cookie_length);
+          break;
+          return false;
+        }
+        idx = peer->nts_state.next_cookie;
+        if (NTS_MAX_COOKIES <= peer->nts_state.cookie_count) {
+          msyslog(LOG_ERR, "NTSc: Extra cookie ignored.");
+          buf.next += length;
+          buf.left -= length;
+          break;
+        }
+        memcpy(&peer->nts_state.cookies[idx], buf.next, length);
+        peer->nts_state.valid[idx] = true;
+        peer->nts_state.next_cookie++;
+        peer->nts_state.cookie_count++;
+        buf.next += length;
+        buf.left -= length;
+        break;
+      case end_of_message:
+        if ((0 != length) || !critical) {
+          msyslog(LOG_ERR, "NTSc: EOM-Wrong length or not Critical: %d, %d",
+              length, critical);
+          return false;
+        }
+        if (0 != buf.left) {
+          msyslog(LOG_ERR, "NTSc: EOM not at end: %d", buf.left);
+          return false;
+        }
+        break;
+      default:
+        msyslog(LOG_ERR, "NTSc: received strange type: T=%d, C=%d, L=%d",
+          type, critical, length);
+        if (critical) return false;
+        buf.next += length;
+        buf.left -= length;
+        break;
+    } /* case */
+  }   /* while */
+
+  // FIXME lots of other checks
+  if (-1 == peer->nts_state.aead) {
+    msyslog(LOG_ERR, "NTSc: No AEAD algorithim.");
+    return false;
+  }
+  if (0 == peer->nts_state.cookie_count) {
+    msyslog(LOG_ERR, "NTSc: No cookies.");
+    return false;
+  }
+
+  msyslog(LOG_ERR, "NTSc: Got %d cookies, length %d.",
+    peer->nts_state.cookie_count, peer->nts_state.cookie_length);
   return true;
 }
 

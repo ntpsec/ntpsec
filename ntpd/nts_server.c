@@ -19,15 +19,20 @@
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 
-int create_listener(int port);
-void* nts_ke_listener(void*);
-void nts_ke_request(SSL *ssl);
+static int create_listener(int port);
+static void* nts_ke_listener(void*);
+static void nts_ke_request(SSL *ssl);
+
+int nts_ke_port = 123;
 
 void nts_start_server(void) {
     SSL_CTX *ctx;
     pthread_t worker;
     sigset_t block_mask, saved_sig_mask;
     int rc;
+
+    msyslog(LOG_INFO, "NTSs: starting NTS-KE server listening on port %d",
+        nts_ke_port);
 
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
     ctx = SSL_CTX_new(TLS_server_method());
@@ -40,8 +45,11 @@ void nts_start_server(void) {
      * There is similar code in nts_probe(). */
     ctx = SSL_CTX_new(TLSv1_2_server_method());
     SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
-    if (1) // FIXME if (non-default version request)
-      msyslog(LOG_INFO, "NTSc: can't set min/max TLS versions.");
+#endif
+
+#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+    msyslog(LOG_INFO, "NTSs: OpenSSL security level is %d",
+        SSL_CTX_get_security_level(ctx));
 #endif
 
     if (1 != SSL_CTX_use_certificate_chain_file(ctx, "/etc/ntp/cert-chain.pem")) {
@@ -69,12 +77,12 @@ void nts_start_server(void) {
 
 }
 
-void nts_ke_request(SSL *ssl);
 void* nts_ke_listener(void* arg) {
     SSL_CTX *ctx = (SSL_CTX *)arg;
     int sock;
 
-    sock = create_listener(123);
+    // FIXME - need IPv6 too
+    sock = create_listener(nts_ke_port);
     if (sock < 0) return NULL;
 
     while(1) {
@@ -116,9 +124,10 @@ void* nts_ke_listener(void* arg) {
 
 void nts_ke_request(SSL *ssl) {
     uint8_t buff[1000];
-    size_t bytes_read, bytes_written;
+    int bytes_read, bytes_written;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-    int keylen = AEAD_AES_SIV_CMAC_256_KEYLEN;
+    uint8_t cookie[NTS_COOKIELEN];
+    int aead, keylen, cookielen;
 
 
     bytes_read = SSL_read(ssl, buff, sizeof(buff));
@@ -127,6 +136,16 @@ void nts_ke_request(SSL *ssl) {
         return;
     }
 
+    aead = IANA_AEAD_AES_SIV_CMAC_256;
+
+    keylen = get_key_length(aead);
+    nts_make_keys(ssl, c2s, s2c, keylen);
+
+    for (int i=0; i<NTS_MAX_COOKIES; i++) {
+      cookielen = make_cookie(cookie, aead, c2s, s2c, keylen);
+    }
+    cookielen = cookielen;
+    
     // Hack, echo it back
     bytes_written = SSL_write(ssl, buff, bytes_read);
     if (bytes_written != bytes_read) {
@@ -134,9 +153,9 @@ void nts_ke_request(SSL *ssl) {
         return;
     }
 
-    if (!nts_make_keys(ssl, c2s, s2c, keylen))
-      return;
-
+    msyslog(LOG_INFO, "NTSs: Echoed %d bytes", bytes_written);
+    
+    return;
 }
 
 int create_listener(int port)
@@ -164,7 +183,34 @@ int create_listener(int port)
         return -1;
     }
     return sock;
-}   
+}
+
+int get_key_length(int aead) {
+  switch (aead) {
+    case IANA_AEAD_AES_SIV_CMAC_256:
+      return AEAD_AES_SIV_CMAC_256_KEYLEN;
+    default:
+      msyslog(LOG_ERR, "NTS: Strange AEAD code: %d", aead);
+      return 16;
+  }
+}
+
+/* returns actual length */
+int make_cookie(uint8_t *cookie,
+  uint16_t aead,
+  uint8_t *c2s, uint8_t *s2c, int keylen) {
+
+  int length = NTS_COOKIELEN/2;
+
+  if (keylen < length)
+    length = keylen;
+  *cookie = aead & 0xFF;
+  for (int i=0; i<length; i++) {
+    *cookie++ = *c2s++^*s2c++;
+  }
+
+  return length;
+}
 
 
 /* end */
