@@ -48,6 +48,7 @@ bool nts_probe(struct peer * peer) {
 // CentOS 7:   0x100020bfL  1.0.2k
 // CentOS 6:   0x1000105fL  1.0.1e
 // NetBSD 8:   0x100020bfL  1.0.2k
+// NetBSD 7:   0x1000115fL  1.0.1u
 // FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
   ctx = SSL_CTX_new(TLS_client_method());
@@ -157,7 +158,7 @@ bool nts_probe(struct peer * peer) {
     nts_append_record_uint16(&buf, algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
 
     /* 4.1.1: End, Critical */
-    nts_append_record(&buf, CRITICAL+end_of_message, 0);
+    nts_append_record_null(&buf, CRITICAL+end_of_message);
 
     used = sizeof(buff)-buf.left;
     transfered = SSL_write(ssl, buff, used);
@@ -283,10 +284,11 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
   buf.next = buff;
   buf.left = transfered;
   while (buf.left > 0) {
-    uint16_t length, data;
-    uint16_t type = nts_next_record(&buf, &length);
+    uint16_t type, data;
     bool critical = false;
+    int length;
 
+    type = nts_next_record(&buf, &length);
     if (CRITICAL & type) {
       critical = true;
       type &= ~CRITICAL;

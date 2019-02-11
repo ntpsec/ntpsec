@@ -80,16 +80,22 @@ int make_cookie(uint8_t *cookie, uint16_t aead,
 /* working finger into a buffer - updated by append/unpack routines */
 struct BufCtl_t {
   uint8_t *next;  /* pointer to next data/space */
-  int      left;  /* data/space left */
+  int left;       /* data left or  space available */
 };
 typedef struct BufCtl_t BufCtl;
 
-void nts_append_record(BufCtl* buf, uint16_t type, uint16_t length);
-void nts_append_uint16(BufCtl* buf, uint16_t data);
-
+/* maybe should return bool to indicate overflow */
+/* nts_append_record_foo makes whole record with one foo */
+/* ntp_append_foo appends foo to existing partial record */
+void nts_append_record_null(BufCtl* buf, uint16_t type);
 void nts_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data);
+void nts_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data, int length);
 
-uint16_t nts_next_record(BufCtl* buf, uint16_t *length);
+void nts_append_header(BufCtl* buf, uint16_t type, uint16_t length);
+void nts_append_uint16(BufCtl* buf, uint16_t data);
+void nts_append_bytes(BufCtl* buf, uint8_t *data, int length);
+
+uint16_t nts_next_record(BufCtl* buf, int *length);
 uint16_t nts_next_uint16(BufCtl* buf);
 
 

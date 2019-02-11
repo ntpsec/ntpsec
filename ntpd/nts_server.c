@@ -18,6 +18,7 @@
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#include "nts_lib.h"
 
 static int create_listener(int port);
 static void* nts_ke_listener(void*);
@@ -128,7 +129,8 @@ void nts_ke_request(SSL *ssl) {
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
     uint8_t cookie[NTS_COOKIELEN];
     int aead, keylen, cookielen;
-
+    struct BufCtl_t buf;
+    int used;
 
     bytes_read = SSL_read(ssl, buff, sizeof(buff));
     if (0 >= bytes_read) {
@@ -136,30 +138,40 @@ void nts_ke_request(SSL *ssl) {
         return;
     }
 
+    // FIXME Ignore request for now
     aead = IANA_AEAD_AES_SIV_CMAC_256;
 
+    buf.next = buff;
+    buf.left = sizeof(buff);
     keylen = get_key_length(aead);
     nts_make_keys(ssl, c2s, s2c, keylen);
 
+    /* 4.1.2 Next Protocol, 0 for NTP */
+    nts_append_record_uint16(&buf, next_protocol_negotiation, 0);
+    /* 4.1.5 AEAD Algorithm List */
+    nts_append_record_uint16(&buf, algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
+
     for (int i=0; i<NTS_MAX_COOKIES; i++) {
       cookielen = make_cookie(cookie, aead, c2s, s2c, keylen);
+      nts_append_record_bytes(&buf, new_cookie, cookie, cookielen);
     }
-    cookielen = cookielen;
     
-    // Hack, echo it back
-    bytes_written = SSL_write(ssl, buff, bytes_read);
+    /* 4.1.1: End, Critical */
+    nts_append_record_null(&buf, CRITICAL+end_of_message);
+    used = sizeof(buff)-buf.left;
+
+    bytes_written = SSL_write(ssl, buff, used);
     if (bytes_written != bytes_read) {
         msyslog(LOG_INFO, "NTSs: SSL_write error");
         return;
     }
 
-    msyslog(LOG_INFO, "NTSs: Echoed %d bytes", bytes_written);
+    msyslog(LOG_INFO, "NTSs: Returned %d bytes", bytes_written);
     
     return;
 }
 
-int create_listener(int port)
-{
+int create_listener(int port) {
     int sock;
     struct sockaddr_in addr;
 

@@ -125,31 +125,60 @@ int nts_decorate(struct ntscfg_t *cfg, struct ntsstate_t *state,
 
 /*****************************************************/
 
-void nts_append_record(BufCtl* buf, uint16_t type, uint16_t length) {
+// 2 byte type, 2 byte length
+#define NTS_KE_HDR_LNG 4
+#define NTS_KE_DATA2_LNG 2
+
+/* Troubles with signed/unsigned compares when using sizeof() */
+
+void nts_append_record_null(BufCtl* buf, uint16_t type) {
+  nts_append_header(buf, type, NTS_KE_DATA2_LNG);
+}
+
+void nts_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data) {
+  if (NTS_KE_HDR_LNG+NTS_KE_DATA2_LNG > buf->left)
+    return;
+  nts_append_header(buf, type, NTS_KE_DATA2_LNG);
+  nts_append_uint16(buf, data);
+}
+
+void nts_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data, int length) {
+  if (NTS_KE_HDR_LNG+length > buf->left)
+    return;
+  nts_append_header(buf, type, length);
+  nts_append_bytes(buf, data, length);
+}
+
+void nts_append_header(BufCtl* buf, uint16_t type, uint16_t length) {
   uint16_t * ptr = (uint16_t *)buf->next;
+  if (NTS_KE_HDR_LNG > buf->left)
+    return;
   *ptr++ = htons(type);
   *ptr++ = htons(length);
-  buf->next += sizeof(type)+sizeof(length);
-  buf->left -= sizeof(type)+sizeof(length);
+  buf->next += NTS_KE_HDR_LNG;
+  buf->left -= NTS_KE_HDR_LNG;
   /* leaves buf pointing to where data will go */
-  return;
 }
 
 void nts_append_uint16(BufCtl* buf, uint16_t data) {
   uint16_t * ptr = (uint16_t *)buf->next;
+  if (NTS_KE_DATA2_LNG > buf->left)
+    return;
   *ptr++ = htons(data);
-  buf->next += sizeof(data);
-  buf->left -= sizeof(data);
-  return;
+  buf->next += NTS_KE_DATA2_LNG;
+  buf->left -= NTS_KE_DATA2_LNG;
 }
 
-void nts_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data) {
-  nts_append_record(buf, type, sizeof(uint16_t));
-  nts_append_uint16(buf, data);
+void nts_append_bytes(BufCtl* buf, uint8_t *data, int length) {
+  if (length > buf->left)
+    return;
+  memcpy(buf->next, data, length);
+  buf->next += length;
+  buf->left -= length;
 }
 
 
-uint16_t nts_next_record(BufCtl* buf, uint16_t *length) {
+uint16_t nts_next_record(BufCtl* buf, int *length) {
   uint16_t *ptr = (uint16_t *)buf->next;
   uint16_t type = ntohs(*ptr++);
   *length = ntohs(*ptr++);
