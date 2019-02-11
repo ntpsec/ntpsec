@@ -149,7 +149,7 @@ void nts_ke_request(SSL *ssl) {
     /* 4.1.2 Next Protocol, 0 for NTP */
     nts_append_record_uint16(&buf, next_protocol_negotiation, 0);
     /* 4.1.5 AEAD Algorithm List */
-    nts_append_record_uint16(&buf, algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
+    nts_append_record_uint16(&buf, algorithm_negotiation, aead);
 
     for (int i=0; i<NTS_MAX_COOKIES; i++) {
       cookielen = make_cookie(cookie, aead, c2s, s2c, keylen);
@@ -161,7 +161,7 @@ void nts_ke_request(SSL *ssl) {
     used = sizeof(buff)-buf.left;
 
     bytes_written = SSL_write(ssl, buff, used);
-    if (bytes_written != bytes_read) {
+    if (bytes_written != used) {
         msyslog(LOG_INFO, "NTSs: SSL_write error");
         return;
     }
@@ -207,6 +207,7 @@ int get_key_length(int aead) {
   }
 }
 
+// FIXME - this is a total hack to test pack/unpack
 /* returns actual length */
 int make_cookie(uint8_t *cookie,
   uint16_t aead,

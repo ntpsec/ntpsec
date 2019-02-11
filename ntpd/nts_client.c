@@ -45,11 +45,13 @@ bool nts_probe(struct peer * peer) {
 // Fedora 29:  0x1010101fL  1.1.1a
 // Fedora 28:  0x1010009fL  1.1.0i
 // Debian 9:   0x101000afL  1.1.0j
+// Debian 8:   0x1000114fL  1.0.1t
 // CentOS 7:   0x100020bfL  1.0.2k
 // CentOS 6:   0x1000105fL  1.0.1e
 // NetBSD 8:   0x100020bfL  1.0.2k
 // NetBSD 7:   0x1000115fL  1.0.1u
 // FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
+// FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
   ctx = SSL_CTX_new(TLS_client_method());
   SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);  // FIXME
@@ -61,6 +63,14 @@ bool nts_probe(struct peer * peer) {
    * There is similar code in nts_start_server(). */
   ctx = SSL_CTX_new(TLSv1_2_client_method());
   SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
+#endif
+
+#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+  {
+  // 4., ALPN, RFC 7301
+  static unsigned char alpn [] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
+  SSL_CTX_set_alpn_protos(ctx, alpn, sizeof(alpn));
+  }
 #endif
 
   SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
@@ -175,7 +185,7 @@ bool nts_probe(struct peer * peer) {
   /* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
    * There are no alternatives and no clean API yet.
    */
-  peer->nts_state.keylen = get_key_length(AEAD_AES_SIV_CMAC_256_KEYLEN);
+  peer->nts_state.keylen = get_key_length(AEAD_AES_SIV_CMAC_256);
   nts_make_keys(ssl,
     peer->nts_state.c2s,
     peer->nts_state.s2c,
@@ -205,7 +215,7 @@ int open_TCP_socket(const char *hostname) {
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_family = AF_UNSPEC;
-  gai_rc = getaddrinfo(hostname, "8123", &hints, &answer);  // FIXME
+  gai_rc = getaddrinfo(hostname, "123", &hints, &answer);  // FIXME
   if (0 != gai_rc) {
     msyslog(LOG_INFO, "NTSc: nts_probe: DNS error: %d, %s",
       gai_rc, gai_strerror(gai_rc));
@@ -293,6 +303,8 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
       critical = true;
       type &= ~CRITICAL;
     }
+    if (0) // Handy for debugging but very verbose
+      msyslog(LOG_ERR, "NTSc: Record: T=%d, L=%d, C=%d", type, length, critical);
     switch (type) {
       case error:
         data = nts_next_uint16(&buf);
@@ -327,22 +339,17 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
         if (length != peer->nts_state.cookie_length) {
           msyslog(LOG_ERR, "NTSc: Cookie length mismatch %d, %d.",
             length, peer->nts_state.cookie_length);
-          break;
           return false;
         }
         idx = peer->nts_state.next_cookie;
+        nts_next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
         if (NTS_MAX_COOKIES <= peer->nts_state.cookie_count) {
-          msyslog(LOG_ERR, "NTSc: Extra cookie ignored.");
-          buf.next += length;
-          buf.left -= length;
+          msyslog(LOG_ERR, "NTSc: Extra cookie.");
           break;
         }
-        memcpy(&peer->nts_state.cookies[idx], buf.next, length);
         peer->nts_state.valid[idx] = true;
         peer->nts_state.next_cookie++;
         peer->nts_state.cookie_count++;
-        buf.next += length;
-        buf.left -= length;
         break;
       case end_of_message:
         if ((0 != length) || !critical) {
@@ -354,6 +361,7 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
           msyslog(LOG_ERR, "NTSc: EOM not at end: %d", buf.left);
           return false;
         }
+       // FIXME check for no more
         break;
       default:
         msyslog(LOG_ERR, "NTSc: received strange type: T=%d, C=%d, L=%d",

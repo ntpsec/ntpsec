@@ -97,6 +97,7 @@ void nts_append_bytes(BufCtl* buf, uint8_t *data, int length);
 
 uint16_t nts_next_record(BufCtl* buf, int *length);
 uint16_t nts_next_uint16(BufCtl* buf);
+uint16_t nts_next_bytes(BufCtl* buf, uint8_t *data, int length);
 
 
 #endif /* GUARD_NTS_H */

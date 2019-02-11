@@ -132,7 +132,7 @@ int nts_decorate(struct ntscfg_t *cfg, struct ntsstate_t *state,
 /* Troubles with signed/unsigned compares when using sizeof() */
 
 void nts_append_record_null(BufCtl* buf, uint16_t type) {
-  nts_append_header(buf, type, NTS_KE_DATA2_LNG);
+  nts_append_header(buf, type, 0);
 }
 
 void nts_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data) {
@@ -182,17 +182,24 @@ uint16_t nts_next_record(BufCtl* buf, int *length) {
   uint16_t *ptr = (uint16_t *)buf->next;
   uint16_t type = ntohs(*ptr++);
   *length = ntohs(*ptr++);
-  buf->next += sizeof(type)+sizeof(*length);
-  buf->left -= sizeof(type)+sizeof(*length);
+  buf->next += NTS_KE_HDR_LNG;
+  buf->left -= NTS_KE_HDR_LNG;
   return type;
 }
 
 uint16_t nts_next_uint16(BufCtl* buf) {
   uint16_t *ptr = (uint16_t *)buf->next;
   uint16_t data = ntohs(*ptr++);
-  buf->next += sizeof(data);
-  buf->left -= sizeof(data);
+  buf->next += NTS_KE_DATA2_LNG;
+  buf->left -= NTS_KE_DATA2_LNG;
   return data;
+}
+
+uint16_t nts_next_bytes(BufCtl* buf, uint8_t *data, int length) {
+  memcpy(data, buf->next, length);
+  buf->next += length;
+  buf->left -= length;
+  return length;
 }
 
 
