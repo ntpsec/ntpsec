@@ -7,7 +7,7 @@ update rate to maximize accuracy while minimizing network overhead. The
 process is designed to operate over a poll exponent range between 3 (8
 s) and 17 (36 hr). The minimum and maximum poll exponent within this
 range can be set using the +minpoll+ and +maxpoll+ options of the
-link:confopt.html#option[+server+] command, with default 6 (64 s) and 10
+link:confopt.html#options[+server+] command, with default 6 (64 s) and 10
 (1024 s), respectively.
 
 The poll interval is managed by a heuristic algorithm developed over
