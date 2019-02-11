@@ -2289,40 +2289,28 @@ fast_xmit(
 #endif /* ENABLE_MSSNTP */
 
 
-	/*
-	 * If the received packet contains a MAC, the transmitted packet
-	 * is authenticated and contains a MAC. If not, the transmitted
-	 * packet is not authenticated.
+	/* 3 way branch to add authentication:
+         *  1) NTS
+         *  2) Shared KEY
+         *  3) none
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	if (NULL == auth) {
-		sendlen += nts_decorate(NULL, NULL,
-					xpkt.exten, sizeof(xpkt.exten));
-		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
-		DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
-			   current_time, socktoa(&rbufp->dstadr->sin),
-			   socktoa(&rbufp->recv_srcadr), xmode, sendlen));
-		return;
-	}
-
-	/*
-	 * The received packet contains a MAC, so the transmitted packet
-	 * must be authenticated. For symmetric key cryptography, use
-	 * the predefined and trusted symmetric keys to generate the
-	 * cryptosum.
-	 *
-	 * No nts_decorate() call before the sendpkt() because we don't expect
-	 * to ever combine old-style auth with NTS.
-	 */
 	get_systime(&xmt_tx);
-	sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
+	if (0) {
+	  sendlen += nts_decorate(NULL, NULL, xpkt.exten, sizeof(xpkt.exten));
+        } else if (NULL != auth) {
+	  sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
+        }
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 	get_systime(&xmt_ty);
 	xmt_ty -= xmt_tx;
 	sys_authdelay = xmt_ty;
-	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %zu\n",
+	/* Previous versions of this code had separate DPRINT-s so it
+	 * could print the key on the auth case.  That requires separate
+	 * sendpkt-s on each branch or the DPRINT pollutes the timing. */
+	DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
 		   current_time, socktoa(&rbufp->dstadr->sin),
-		   socktoa(&rbufp->recv_srcadr), xmode, auth->keyid, sendlen));
+		   socktoa(&rbufp->recv_srcadr), xmode, sendlen));
 }
 
 
