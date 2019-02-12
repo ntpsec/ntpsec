@@ -4,6 +4,7 @@
 #ifndef GUARD_NTS_H
 #define GUARD_NTS_H
 
+#include <stdbool.h>
 #include <openssl/ssl.h>
 
 #define NTS_MAX_KEYLEN		64	/* used in cookies */
