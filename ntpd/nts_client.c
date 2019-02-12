@@ -7,6 +7,8 @@
  */
 #include "config.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #ifdef HAVE_RES_INIT
@@ -25,6 +27,7 @@
 
 
 int open_TCP_socket(const char *hostname);
+void nts_set_cert_search(SSL_CTX *ctx);
 bool process_recv_data(struct peer* peer, SSL *ssl);
 
 // FIXME - hack until we move this to a thread
@@ -85,8 +88,6 @@ bool nts_probe(struct peer * peer) {
   }
 #endif
 
-  SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
-
   if (NULL != ntsconfig.tlsciphers) {
     if (1 != SSL_CTX_set_cipher_list(ctx, ntsconfig.tlsciphers)) {
       msyslog(LOG_ERR, "NTSc: error setting TLS ciphers");
@@ -99,6 +100,8 @@ bool nts_probe(struct peer * peer) {
     }
   }
 #endif
+
+  nts_set_cert_search(ctx);
 
   ssl = SSL_new(ctx);
   SSL_set_fd(ssl, server);
@@ -154,7 +157,8 @@ bool nts_probe(struct peer * peer) {
     if (X509_V_OK == certok) {
       msyslog(LOG_INFO, "NTSc: certificate is valid.");
     } else {
-      msyslog(LOG_ERR, "NTSc: certificate invalid: %d", certok);
+      msyslog(LOG_ERR, "NTSc: certificate invalid: %d=>%s",
+          certok, X509_verify_cert_error_string(certok));
     }
   }
 
@@ -221,7 +225,7 @@ int open_TCP_socket(const char *hostname) {
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_family = AF_UNSPEC;
-  gai_rc = getaddrinfo(hostname, "123", &hints, &answer);  // FIXME
+  gai_rc = getaddrinfo(hostname, "443", &hints, &answer);  // FIXME
   if (0 != gai_rc) {
     msyslog(LOG_INFO, "NTSc: nts_probe: DNS error: %d, %s",
       gai_rc, gai_strerror(gai_rc));
@@ -393,6 +397,29 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
     peer->nts_state.cookie_count, peer->nts_state.cookie_length);
   return true;
 }
+
+void nts_set_cert_search(SSL_CTX *ctx) {
+  struct stat statbuf;
+  if (NULL == ntsconfig.ca) {
+    SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
+    return;
+  }
+  if (0 == stat(ntsconfig.ca, &statbuf)) {
+    if (S_ISDIR(statbuf.st_mode)) {
+      SSL_CTX_load_verify_locations(ctx, NULL, ntsconfig.ca);
+      return;
+    }
+    if (S_ISREG(statbuf.st_mode)) {
+      SSL_CTX_load_verify_locations(ctx, ntsconfig.ca, NULL);
+      return;
+    }
+    msyslog(LOG_ERR, "NTSc: cert dir/file isn't dir or file: %s. mode 0x%x",
+        ntsconfig.ca, statbuf.st_mode);
+    return;
+  }
+  msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %m", ntsconfig.ca);
+}
+
 
 /* ********************************** */
 
