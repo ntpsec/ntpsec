@@ -45,9 +45,9 @@ typedef struct {
 
 #define CRITICAL 0x8000
 enum record_type {
-  end_of_message = 0,
-  next_protocol_negotiation = 1,
-  error = 2,
+  end_of_message = 0,			/* CRITICAL */
+  next_protocol_negotiation = 1,	/* CRITICAL */
+  error = 2,				/* CRITICAL */
   warning = 3,
   algorithm_negotiation = 4,
   new_cookie = 5,

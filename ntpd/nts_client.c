@@ -27,6 +27,12 @@
 int open_TCP_socket(const char *hostname);
 bool process_recv_data(struct peer* peer, SSL *ssl);
 
+// FIXME - hack until we move this to a thread
+void HackBlockSignals(void);
+void HackUnblockSignals(void);
+
+
+
 bool nts_probe(struct peer * peer) {
 
   SSL_CTX *ctx;
@@ -36,10 +42,16 @@ bool nts_probe(struct peer * peer) {
   uint8_t  buff[1000];
   int      transfered;
 
-  server = open_TCP_socket(peer->hostname);
-  if (-1 == server) return false;
+  HackBlockSignals();
 
-  // No error checking yet.
+  server = open_TCP_socket(peer->hostname);
+  if (-1 == server) {
+    HackUnblockSignals();
+    return false;
+  }
+
+  // FIXME
+  // Not much error checking yet.
   // Ugly since most SSL routines return 1 on success.
 
 // Fedora 29:  0x1010101fL  1.1.1a
@@ -109,26 +121,19 @@ bool nts_probe(struct peer * peer) {
   msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
 #endif
 
-  SSL_connect(ssl);
-  SSL_do_handshake(ssl);
-
-  switch (SSL_version(ssl)) {
-#ifdef TLS1_3_VERSION
-    case TLS1_3_VERSION:
-      msyslog(LOG_INFO, "NTSc: Using TLS1.3");
-      break;
-#endif
-    case TLS1_2_VERSION:
-      msyslog(LOG_INFO, "NTSc: Using TLS1.2");
-      break;
-    default:
-      msyslog(LOG_INFO, "NTSc: Strange version: %d, \"%s\"",
-        SSL_version(ssl), SSL_get_version(ssl));
-      break;
-    }
+  // SSL_set_timeout(SSL_get_session(ssl), 2);  // FIXME
+  if (1 != SSL_connect(ssl)) {
+    msyslog(LOG_INFO, "NTSc: SSL_connect failed");
+    goto bail;
+  }
+  if (1 != SSL_do_handshake(ssl)) {
+    msyslog(LOG_INFO, "NTSc: SSL_do_handshake failed");
+    goto bail;
+  }
 
   /* This may be clutter, but this is how to do it. */
-  msyslog(LOG_INFO, "NTSc: Using %s with %d secret bits",
+  msyslog(LOG_INFO, "NTSc: Using %s, %s with %d secret bits",
+    SSL_get_version(ssl),
     SSL_get_cipher_name(ssl),
     SSL_get_cipher_bits(ssl, NULL));
 
@@ -161,7 +166,7 @@ bool nts_probe(struct peer * peer) {
     buf.left = sizeof(buff);
 
     /* 4.1.2 Next Protocol, 0 for NTP */
-    nts_append_record_uint16(&buf, next_protocol_negotiation, 0);
+    nts_append_record_uint16(&buf, CRITICAL+next_protocol_negotiation, 0);
 
     /* 4.1.5 AEAD Algorithm List
      * AEAD_AES_SIV_CMAC_256 is the only one for now */
@@ -196,6 +201,7 @@ bail:
   SSL_free(ssl);
   close(server);
   SSL_CTX_free(ctx);
+  HackUnblockSignals();
 
   return false;
 }
@@ -232,7 +238,7 @@ int open_TCP_socket(const char *hostname) {
     // Use first answer
     err = connect(sockfd, answer->ai_addr, answer->ai_addrlen);
     if (-1 == err) {
-      msyslog(LOG_INFO, "NTSc: nts_probe: can't connect: %m");
+      msyslog(LOG_INFO, "NTSc: nts_probe: connect failed: %m");
       close(sockfd);
       sockfd = -1;
     }
@@ -386,6 +392,27 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
   msyslog(LOG_ERR, "NTSc: Got %d cookies, length %d.",
     peer->nts_state.cookie_count, peer->nts_state.cookie_length);
   return true;
+}
+
+/* ********************************** */
+
+// FIXME - hack until we move this to a thread
+static sigset_t blockMask, runMask;
+
+void HackBlockSignals(void) {
+  sigemptyset(&blockMask);
+  sigaddset(&blockMask, SIGALRM);
+  sigaddset(&blockMask, MOREDEBUGSIG);
+  sigaddset(&blockMask, LESSDEBUGSIG);
+  sigaddset(&blockMask, SIGINT);
+  sigaddset(&blockMask, SIGQUIT);
+  sigaddset(&blockMask, SIGTERM);
+  sigaddset(&blockMask, SIGHUP);
+  pthread_sigmask(SIG_BLOCK, &blockMask, &runMask);
+}
+
+void HackUnblockSignals(void) {
+  pthread_sigmask(SIG_SETMASK, &runMask, NULL);
 }
 
 /* end */

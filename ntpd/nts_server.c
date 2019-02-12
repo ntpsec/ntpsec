@@ -108,12 +108,14 @@ void* nts_ke_listener(void* arg) {
             close(client);
             continue;
         }
+        SSL_set_timeout(SSL_get_session(ssl), 2);  // FIXME
         msyslog(LOG_INFO, "NTSs: SSL accept-ed from %s",
             socktoa((sockaddr_u *)&addr));
         msyslog(LOG_INFO, "NTSs: Using TLS version %s, cipher %s with %d secret bits",
             SSL_get_version(ssl),
             SSL_get_cipher_name(ssl),
             SSL_get_cipher_bits(ssl, NULL));
+
 
         nts_ke_request(ssl);
 
@@ -147,7 +149,7 @@ void nts_ke_request(SSL *ssl) {
     nts_make_keys(ssl, c2s, s2c, keylen);
 
     /* 4.1.2 Next Protocol, 0 for NTP */
-    nts_append_record_uint16(&buf, next_protocol_negotiation, 0);
+    nts_append_record_uint16(&buf, CRITICAL+next_protocol_negotiation, 0);
     /* 4.1.5 AEAD Algorithm List */
     nts_append_record_uint16(&buf, algorithm_negotiation, aead);
 
