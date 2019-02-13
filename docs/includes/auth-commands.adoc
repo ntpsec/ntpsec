@@ -42,18 +42,20 @@ The options are as follows:
 
 +cert+ _file_::
   Present the certificate in _file_ as our certificate.
-  This is a default for all client and server connections.
+
++key+ _file_::
+  Read the private key to our certificate from _file_.
 
 +ca+ _location_::
   Use the file (or directory) specified by _location_ to
-  validate NTS-KE server certificates. This is a default
-  for all client and server connections.
+  validate NTS-KE server certificates instead of the system
+  default root certificates.
 
 +enable+::
-  Enable NTS key service. The default.
+  Enable NTS-KE server. The default.
 
 +disable+::
-  Disable NTS service.
+  Disable NTS-KE server.
 
 +mintls+ _number_::
   Set the lowest allowable TLS version to negotiate. Will be useful in

@@ -44,13 +44,14 @@ struct ntsstate_t {
 
 /* Configuration data for an NTS server or client instance */
 struct ntsconfig_t {
-    bool ntsenable; 		/* enable NTS key service on this ntpd */
+    bool ntsenable; 		/* enable NTS KE server on this ntpd */
     float mintls;		/* minimum TLS version allowed */
     float maxtls;		/* maximum TLS version allowed */
-    char *tlsciphers;		/* allowed TLS 1.2 ciphers */
-    char *tlsciphersuites;	/* allowed TLS 1.3 ciphersuites */
-    char *ca;			/* site default */
-    char *cert;			/* site default */
+    const char *tlsciphers;	/* allowed TLS 1.2 ciphers */
+    const char *tlsciphersuites;/* allowed TLS 1.3 ciphersuites */
+    const char *cert;		/* server certificate key */
+    const char *key;		/* server private key */
+    const char *ca;		/* root cert dir/file */
 };
 
 /* NTS protocol constants */

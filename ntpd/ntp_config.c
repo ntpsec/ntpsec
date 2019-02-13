@@ -2009,6 +2009,10 @@ config_nts(
 			ntsconfig.ntsenable = true;
 			break;
 
+		case T_Key:
+			ntsconfig.key = estrdup(nts->value.s);
+			break;
+
 		case T_Maxtls:
 			ntsconfig.maxtls = nts->value.d;
 			break;

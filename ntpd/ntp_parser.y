@@ -1140,6 +1140,7 @@ nts_int_option_keyword
 nts_string_option_keyword
 	:	T_Ca
 	|	T_Cert
+	|	T_Key
 	|	T_Tlsciphers
 	|	T_Tlsciphersuites
 

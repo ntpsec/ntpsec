@@ -24,8 +24,9 @@ struct ntsconfig_t ntsconfig = {
   .maxtls = 0,
   .tlsciphers = NULL,
   .tlsciphersuites = NULL,
-  .ca = NULL,
-  .cert = NULL
+  .cert = NULL,
+  .key = NULL,
+  .ca = NULL
 };
 
 /* By design, there is no per-client-side state on the server */

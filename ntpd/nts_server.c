@@ -20,9 +20,14 @@
 #include "ntp_stdlib.h"
 #include "nts.h"
 
+/* default file names */
+#define NTS_CERT_FILE "/etc/ntp/cert-chain.pem"
+#define NTS_KEY_FILE "/etc/ntp/key.pem"
+
 static int create_listener(int port);
 static void* nts_ke_listener(void*);
 static void nts_ke_request(SSL *ssl);
+static void nts_load_certificate(SSL_CTX *ctx);
 
 int nts_ke_port = 123;
 
@@ -53,20 +58,7 @@ void nts_start_server(void) {
         SSL_CTX_get_security_level(ctx));
 #endif
 
-    if (1 != SSL_CTX_use_certificate_chain_file(ctx, "/etc/ntp/cert-chain.pem")) {
-        // FIXME log SSL errors
-        msyslog(LOG_ERR, "NTSs: can't load cert-chain");
-    }
-
-    if (1 != SSL_CTX_use_PrivateKey_file(ctx, "/etc/ntp/key.pem", SSL_FILETYPE_PEM)) {
-        // FIXME log SSL errors
-        msyslog(LOG_ERR, "NTSs: can't load private key");
-    }
-    if (1 != SSL_CTX_check_private_key(ctx)) {
-        msyslog(LOG_ERR, "NTSs: Private Key doesn't work ******");
-    } else {
-        msyslog(LOG_INFO, "NTSs: Private Key OK");
-    }
+    nts_load_certificate(ctx);
 
     sigfillset(&block_mask);
     pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
@@ -227,5 +219,35 @@ int make_cookie(uint8_t *cookie,
   return length;
 }
 
+
+void nts_load_certificate(SSL_CTX *ctx) {
+    const char *cert = NTS_CERT_FILE;
+    const char *key = NTS_KEY_FILE;
+
+    if (NULL != ntsconfig.cert)
+       cert = ntsconfig.cert;
+    if (NULL != ntsconfig.key)
+       key = ntsconfig.key;
+
+    if (1 != SSL_CTX_use_certificate_chain_file(ctx, cert)) {
+        // FIXME log SSL errors
+        msyslog(LOG_ERR, "NTSs: can't load certicicate (chain) from %s", cert);
+    } else {
+        msyslog(LOG_ERR, "NTSs: loaded certicicate (chain) from %s", cert);
+    }
+
+    if (1 != SSL_CTX_use_PrivateKey_file(ctx, key, SSL_FILETYPE_PEM)) {
+        // FIXME log SSL errors
+        msyslog(LOG_ERR, "NTSs: can't load private key from %s", key);
+    } else {
+        msyslog(LOG_ERR, "NTSs: loaded private key from %s", key);
+    }
+
+    if (1 != SSL_CTX_check_private_key(ctx)) {
+        msyslog(LOG_ERR, "NTSs: Private Key doesn't work ******");
+    } else {
+        msyslog(LOG_INFO, "NTSs: Private Key OK");
+    }
+}
 
 /* end */
