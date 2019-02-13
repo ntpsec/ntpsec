@@ -18,7 +18,7 @@
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
-#include "nts_lib.h"
+#include "nts.h"
 
 static int create_listener(int port);
 static void* nts_ke_listener(void*);

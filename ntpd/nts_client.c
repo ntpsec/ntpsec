@@ -23,7 +23,7 @@
 
 #include "ntp_types.h"
 #include "ntpd.h"
-#include "nts_lib.h"
+#include "nts.h"
 
 
 int open_TCP_socket(const char *hostname);
