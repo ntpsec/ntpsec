@@ -27,7 +27,7 @@
 
 
 int open_TCP_socket(const char *hostname);
-void nts_set_cert_search(SSL_CTX *ctx);
+bool nts_set_cert_search(SSL_CTX *ctx);
 bool process_recv_data(struct peer* peer, SSL *ssl);
 
 // FIXME - hack until we move this to a thread
@@ -44,6 +44,7 @@ bool nts_probe(struct peer * peer) {
   X509    *cert = NULL;
   uint8_t  buff[1000];
   int      transfered;
+  bool     ok = true;
 
   HackBlockSignals();
 
@@ -69,15 +70,8 @@ bool nts_probe(struct peer * peer) {
 // FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
   ctx = SSL_CTX_new(TLS_client_method());
-  SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);  // FIXME
-  SSL_CTX_set_max_proto_version(ctx, 0);
 #else
-  /* Older versions of OpenSSL don't support min/max version requests.
-   * That's OK, since we don't want anything older than 1.2 and
-   * they don't support anything newer.
-   * There is similar code in nts_start_server(). */
   ctx = SSL_CTX_new(TLSv1_2_client_method());
-  SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
 #endif
 
 #if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
@@ -88,20 +82,20 @@ bool nts_probe(struct peer * peer) {
   }
 #endif
 
-  if (NULL != ntsconfig.tlsciphers) {
-    if (1 != SSL_CTX_set_cipher_list(ctx, ntsconfig.tlsciphers)) {
-      msyslog(LOG_ERR, "NTSc: error setting TLS ciphers");
-    }
-  }
-#ifdef TLS1_3_VERSION
-  if (NULL != ntsconfig.tlsciphersuites) {
-    if (1 != SSL_CTX_set_ciphersuites(ctx, ntsconfig.tlsciphersuites)) {
-      msyslog(LOG_ERR, "NTSc: error setting TLS ciphersuites");
-    }
-  }
-#endif
+  SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
 
-  nts_set_cert_search(ctx);
+  ok &= nts_load_versions(ctx);
+  ok &= nts_load_ciphers(ctx);
+  ok &= nts_set_cert_search(ctx);
+
+  if (!ok) {
+    msyslog(LOG_ERR, "NTSc: Troubles setting up SSL CTX: %s", peer->hostname);
+    msyslog(LOG_ERR, "NTSc: Maybe should bail.");
+    // close(server);
+    // SSL_CTX_free(ctx);
+    // HackUnblockSignals();
+    // return;
+  };
 
   ssl = SSL_new(ctx);
   SSL_set_fd(ssl, server);
@@ -194,7 +188,7 @@ bool nts_probe(struct peer * peer) {
   /* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
    * There are no alternatives and no clean API yet.
    */
-  peer->nts_state.keylen = get_key_length(AEAD_AES_SIV_CMAC_256);
+  peer->nts_state.keylen = nts_get_key_length(AEAD_AES_SIV_CMAC_256);
   nts_make_keys(ssl,
     peer->nts_state.c2s,
     peer->nts_state.s2c,
@@ -398,26 +392,27 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
   return true;
 }
 
-void nts_set_cert_search(SSL_CTX *ctx) {
+bool nts_set_cert_search(SSL_CTX *ctx) {
   struct stat statbuf;
   if (NULL == ntsconfig.ca) {
     SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
-    return;
+    return true;
   }
   if (0 == stat(ntsconfig.ca, &statbuf)) {
     if (S_ISDIR(statbuf.st_mode)) {
       SSL_CTX_load_verify_locations(ctx, NULL, ntsconfig.ca);
-      return;
+      return true;
     }
     if (S_ISREG(statbuf.st_mode)) {
       SSL_CTX_load_verify_locations(ctx, ntsconfig.ca, NULL);
-      return;
+      return true;
     }
     msyslog(LOG_ERR, "NTSc: cert dir/file isn't dir or file: %s. mode 0x%x",
         ntsconfig.ca, statbuf.st_mode);
-    return;
+    return false;
   }
   msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %m", ntsconfig.ca);
+  return false;
 }
 
 

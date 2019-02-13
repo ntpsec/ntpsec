@@ -20,8 +20,8 @@
 
 struct ntsconfig_t ntsconfig = {
   .ntsenable = false,
-  .mintls = 0,
-  .maxtls = 0,
+  .mintls = NULL,
+  .maxtls = NULL,
   .tlsciphers = NULL,
   .tlsciphersuites = NULL,
   .cert = NULL,

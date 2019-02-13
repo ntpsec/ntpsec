@@ -57,11 +57,13 @@ The options are as follows:
 +disable+::
   Disable NTS-KE server.
 
-+mintls+ _number_::
++mintls+ _string_::
   Set the lowest allowable TLS version to negotiate. Will be useful in
-  the wake of a TLS compromise.
+  the wake of a TLS compromise.  Reasonable values are _TLS1.2_ and
+  _TLS1.3_ if your system supports it.  TLS1.3 was first supported in
+  OpenSSL version 1.1.1.
 
-+maxtls+ _number_::
++maxtls+ _string_::
   Set the highest allowable TLS version to negotiate. By setting
   +mintls+ and +maxtls+ equal, you can force the TLS version for testing.
 

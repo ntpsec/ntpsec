@@ -2014,11 +2014,11 @@ config_nts(
 			break;
 
 		case T_Maxtls:
-			ntsconfig.maxtls = nts->value.d;
+			ntsconfig.maxtls = estrdup(nts->value.s);
 			break;
 
 		case T_Mintls:
-			ntsconfig.mintls = nts->value.d;
+			ntsconfig.mintls = estrdup(nts->value.s);
 			break;
 
 		case T_Tlsciphers:

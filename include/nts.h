@@ -45,8 +45,8 @@ struct ntsstate_t {
 /* Configuration data for an NTS server or client instance */
 struct ntsconfig_t {
     bool ntsenable; 		/* enable NTS KE server on this ntpd */
-    float mintls;		/* minimum TLS version allowed */
-    float maxtls;		/* maximum TLS version allowed */
+    const char * mintls;	/* minimum TLS version allowed */
+    const char * maxtls;	/* maximum TLS version allowed */
     const char *tlsciphers;	/* allowed TLS 1.2 ciphers */
     const char *tlsciphersuites;/* allowed TLS 1.3 ciphersuites */
     const char *cert;		/* server certificate key */
@@ -115,9 +115,11 @@ enum aead_ciphers {
 
 extern struct ntsconfig_t ntsconfig;
 
-int get_key_length(int aead);
+int nts_get_key_length(int aead);
+bool nts_load_ciphers(SSL_CTX *ctx);
+bool nts_load_versions(SSL_CTX *ctx);
 bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen);
-int make_cookie(uint8_t *cookie, uint16_t aead,
+int nts_make_cookie(uint8_t *cookie, uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen);
 
 #define NO_OLD_VERSIONS SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1
