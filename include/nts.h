@@ -67,9 +67,9 @@ enum nts_record_type {
   nts_port_negotiation = 7
 };
 
-enum errors_type {
-  unrecognized_critical_section = 0,
-  bad_request = 1
+enum nts_errors_type {
+  nts_unrecognized_critical_section = 0,
+  nts_bad_request = 1
 };
 
 enum aead_ciphers {
