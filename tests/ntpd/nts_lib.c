@@ -42,7 +42,7 @@ TEST(nts_lib, record_decode_null) {
 }
 
 TEST(nts_lib, record_decode_u16) {
-	uint8_t expected[6] = {0, port_negotiation, 0, 2, 0, 123};
+	uint8_t expected[6] = {0, nts_port_negotiation, 0, 2, 0, 123};
 	record_bits *record;
 	int lints[1];
 
@@ -66,7 +66,7 @@ TEST(nts_lib, record_decode_u16) {
 	memcpy(lints, record->body, 2);
 
 	TEST_ASSERT_FALSE(record->critical);
-	TEST_ASSERT_EQUAL_INT16(port_negotiation, record->record_type);
+	TEST_ASSERT_EQUAL_INT16(nts_port_negotiation, record->record_type);
 	TEST_ASSERT_EQUAL_INT16(2, record->body_length);
 	TEST_ASSERT_NOT_NULL(record->body);
 
@@ -78,7 +78,7 @@ TEST(nts_lib, record_decode_u16) {
 }
 
 TEST(nts_lib, record_decode_u16s) {
-	uint8_t expected[8] = {0, algorithm_negotiation, 0, 4,
+	uint8_t expected[8] = {0, nts_algorithm_negotiation, 0, 4,
 			       0, AEAD_AES_SIV_CMAC_512, 0, AEAD_CHACHA20_POLY1305};
 	record_bits *record;
 	int lints[2];
@@ -107,7 +107,7 @@ TEST(nts_lib, record_decode_u16s) {
 	}
 
 	TEST_ASSERT_FALSE(record->critical);
-	TEST_ASSERT_EQUAL_INT16(algorithm_negotiation, record->record_type);
+	TEST_ASSERT_EQUAL_INT16(nts_algorithm_negotiation, record->record_type);
 	TEST_ASSERT_EQUAL_INT16(4, record->body_length);
 	TEST_ASSERT_NOT_NULL(record->body);
 
@@ -122,7 +122,7 @@ TEST(nts_lib, record_decode_u16s) {
 TEST(nts_lib, record_decode_text) {
 	record_bits *record;
 	const char *expserv = "asus.internal.jamesb192.com";
-	uint8_t expected[31] = {0,   server_negotiation,
+	uint8_t expected[31] = {0,   nts_server_negotiation,
 				0,   27,
 				'a', 's', 'u', 's', '.', 'i', 'n', 't', 'e',
 				'r', 'n', 'a', 'l', '.', 'j', 'a', 'm', 'e',
@@ -144,7 +144,7 @@ TEST(nts_lib, record_decode_text) {
 	nts_record_parse(record);
 
 	TEST_ASSERT_FALSE(record->critical);
-	TEST_ASSERT_EQUAL_INT16(server_negotiation, record->record_type);
+	TEST_ASSERT_EQUAL_INT16(nts_server_negotiation, record->record_type);
 	TEST_ASSERT_EQUAL_INT16(27, record->body_length);
 	TEST_ASSERT_NOT_NULL(record->body);
 
@@ -156,7 +156,7 @@ TEST(nts_lib, record_decode_text) {
 }
 
 TEST(nts_lib, record_encode_null) {
-	uint8_t expected[4] = {0x80, end_of_message, 0, 0};
+	uint8_t expected[4] = {0x80, nts_end_of_message, 0, 0};
 	record_bits *record;
 
 	record = calloc(1, sizeof(record_bits));
@@ -166,7 +166,7 @@ TEST(nts_lib, record_encode_null) {
 	}
 	record->critical = true;
 	record->body_length = 0;
-	record->record_type = end_of_message;
+	record->record_type = nts_end_of_message;
 
 	nts_record_form(record);
 
@@ -178,7 +178,7 @@ TEST(nts_lib, record_encode_null) {
 }
 
 TEST(nts_lib, record_encode_u16) {
-	uint8_t expected[6] = {0, port_negotiation, 0, 2, 0, 123};
+	uint8_t expected[6] = {0, nts_port_negotiation, 0, 2, 0, 123};
 	uint16_t exp_port = htons(123);
 	record_bits *record;
 
@@ -189,7 +189,7 @@ TEST(nts_lib, record_encode_u16) {
 	}
 	record->critical = false;
 	record->body_length = 2;
-	record->record_type = port_negotiation;
+	record->record_type = nts_port_negotiation;
 	record->body = malloc(2);
 	if (NULL == record->body) {
 		TEST_FAIL_MESSAGE("body malloc");
@@ -207,7 +207,7 @@ TEST(nts_lib, record_encode_u16) {
 }
 
 TEST(nts_lib, record_encode_u16s) {
-	uint8_t expected[8] = {0, algorithm_negotiation, 0, 4, 0, 2, 0, 4};
+	uint8_t expected[8] = {0, nts_algorithm_negotiation, 0, 4, 0, 2, 0, 4};
 	uint16_t exp_algos[2] = {htons(2), htons(4)};
 	record_bits *record;
 
@@ -218,7 +218,7 @@ TEST(nts_lib, record_encode_u16s) {
 	}
 	record->critical = false;
 	record->body_length = 4;
-	record->record_type = algorithm_negotiation;
+	record->record_type = nts_algorithm_negotiation;
 	record->body = malloc(4);
 	if (NULL == record->body) {
 		TEST_FAIL_MESSAGE("body malloc");
@@ -237,7 +237,7 @@ TEST(nts_lib, record_encode_u16s) {
 
 TEST(nts_lib, record_encode_text) {
 	const char *expserv = "asus.internal.jamesb192.com";
-	uint8_t expected[31] = {  0,  server_negotiation,
+	uint8_t expected[31] = {  0,  nts_server_negotiation,
 				  0,  27,
 				  'a', 's', 'u', 's', '.', 'i', 'n', 't', 'e',
 				  'r', 'n', 'a', 'l', '.', 'j', 'a', 'm', 'e',
@@ -252,7 +252,7 @@ TEST(nts_lib, record_encode_text) {
 	}
 	record->critical = false;
 	record->body_length = 27;
-	record->record_type = server_negotiation;
+	record->record_type = nts_server_negotiation;
 	record->body = malloc(27);
 	if (NULL == record->body) {
 		TEST_FAIL_MESSAGE("body calloc");

@@ -170,14 +170,14 @@ bool nts_probe(struct peer * peer) {
     buf.left = sizeof(buff);
 
     /* 4.1.2 Next Protocol, 0 for NTP */
-    nts_append_record_uint16(&buf, CRITICAL+next_protocol_negotiation, 0);
+    nts_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
 
     /* 4.1.5 AEAD Algorithm List
      * AEAD_AES_SIV_CMAC_256 is the only one for now */
-    nts_append_record_uint16(&buf, algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
+    nts_append_record_uint16(&buf, nts_algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
 
     /* 4.1.1: End, Critical */
-    nts_append_record_null(&buf, CRITICAL+end_of_message);
+    nts_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
 
     used = sizeof(buff)-buf.left;
     transfered = SSL_write(ssl, buff, used);
@@ -309,20 +309,20 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
     int length;
 
     type = nts_next_record(&buf, &length);
-    if (CRITICAL & type) {
+    if (NTS_CRITICAL & type) {
       critical = true;
-      type &= ~CRITICAL;
+      type &= ~NTS_CRITICAL;
     }
     if (0) // Handy for debugging but very verbose
       msyslog(LOG_ERR, "NTSc: Record: T=%d, L=%d, C=%d", type, length, critical);
     switch (type) {
-      case error:
+      case nts_error:
         data = nts_next_uint16(&buf);
         if (sizeof(data) != length)
           msyslog(LOG_ERR, "NTSc: wrong length on error: %d", length);
         msyslog(LOG_ERR, "NTSc: error: %d", data);
         return false;
-      case next_protocol_negotiation:
+      case nts_next_protocol_negotiation:
         data = nts_next_uint16(&buf);
         if ((sizeof(data) != length) || (data != 0)) {
           msyslog(LOG_ERR, "NTSc: NPN-Wrong length or bad data: %d, %d",
@@ -330,7 +330,7 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
           return false;
         }
         break;
-      case algorithm_negotiation:
+      case nts_algorithm_negotiation:
         data = nts_next_uint16(&buf);
         if ((sizeof(data) != length) || (data != AEAD_AES_SIV_CMAC_256)) {
           msyslog(LOG_ERR, "NTSc: AN-Wrong length or bad data: %d, %d",
@@ -339,7 +339,7 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
         }
         peer->nts_state.aead = data;
         break;
-      case new_cookie:
+      case nts_new_cookie:
         if (NTS_COOKIELEN < length) {
           msyslog(LOG_ERR, "NTSc: NC cookie too big: %d", length);
           return false;
@@ -361,7 +361,7 @@ bool process_recv_data(struct peer* peer, SSL *ssl) {
         peer->nts_state.next_cookie++;
         peer->nts_state.cookie_count++;
         break;
-      case end_of_message:
+      case nts_end_of_message:
         if ((0 != length) || !critical) {
           msyslog(LOG_ERR, "NTSc: EOM-Wrong length or not Critical: %d, %d",
               length, critical);

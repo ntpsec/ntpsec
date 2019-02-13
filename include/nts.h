@@ -55,16 +55,16 @@ struct ntsconfig_t {
 
 /* NTS protocol constants */
 
-#define CRITICAL 0x8000
-enum record_type {
-  end_of_message = 0,			/* CRITICAL */
-  next_protocol_negotiation = 1,	/* CRITICAL */
-  error = 2,				/* CRITICAL */
-  warning = 3,
-  algorithm_negotiation = 4,
-  new_cookie = 5,
-  server_negotiation = 6,
-  port_negotiation = 7
+#define NTS_CRITICAL 0x8000
+enum nts_record_type {
+  nts_end_of_message = 0,		/* CRITICAL */
+  nts_next_protocol_negotiation = 1,	/* CRITICAL */
+  nts_error = 2,			/* CRITICAL */
+  nts_warning = 3,
+  nts_algorithm_negotiation = 4,
+  nts_new_cookie = 5,
+  nts_server_negotiation = 6,
+  nts_port_negotiation = 7
 };
 
 enum errors_type {
