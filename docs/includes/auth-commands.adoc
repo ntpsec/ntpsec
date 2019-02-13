@@ -50,7 +50,7 @@ The options are as follows:
   for all client and server connections.
 
 +enable+::
-  Enable NTS service. The default.
+  Enable NTS key service. The default.
 
 +disable+::
   Disable NTS service.

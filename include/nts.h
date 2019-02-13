@@ -44,7 +44,7 @@ struct ntsstate_t {
 
 /* Configuration data for an NTS server or client instance */
 struct ntsconfig_t {
-    bool ntsenable; 		/* enable NTS on this ntpd instance */
+    bool ntsenable; 		/* enable NTS key service on this ntpd */
     float mintls;		/* minimum TLS version allowed */
     float maxtls;		/* maximum TLS version allowed */
     char *tlsciphers;		/* allowed TLS 1.2 ciphers */
