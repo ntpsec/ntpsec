@@ -3,7 +3,6 @@
 * link:ntp_conf.html[+ntp.conf(5)+ - ntpd Configuration File]
 * link:ntp_keys.html[+ntp.keys(5)+ - NTP symmetric key file format]
 * link:ntpd.html[+ntpd(8)+ - Network Time Protocol (NTP) daemon]
-* link:ntsd.html[+ntsd(8)+ - Network Time Security (NTS) daemon]
 * link:ntpdig.html[+ntpdig(1)+ - Simple Network Time Protocol (SNTP) client]
 * link:ntpfrob.html[+ntpfrob(8)+ - frob the local clock hardware]
 * link:ntpkeygen.html[+ntpkeygen(8)+ - generate public and private keys]

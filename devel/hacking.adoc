@@ -263,8 +263,7 @@ Full waf documentation is at https://waf.io/
 === Naming conventions
 
 Almost every binary and script we install has an "ntp" prefix on the name
-because namespace pollution is rude. (The only exception is "ntsd", the
-network time security key-exchange daemon.) If you write a new tool that you
+because namespace pollution is rude. If you write a new tool that you
 want us to install, follow this convention.
 
 Generally, we favor "ntp" rather than "ntp-" for consistency and to
