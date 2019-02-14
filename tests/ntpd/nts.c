@@ -1,3 +1,4 @@
+#include "nts_lib.h"
 #include "nts.h"
 #include "unity.h"
 #include "unity_fixture.h"
