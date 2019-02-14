@@ -89,8 +89,27 @@ TEST(nts, nts_append_record_bytes) {
   TEST_ASSERT_EQUAL(cursor.left, 0);
 }
 
+TEST(nts, nts_append_header) {
+  // Setup
+  uint8_t buf[16];
+  BufCtl cursor;
+  cursor.next = buf;
+  cursor.left = 16;
+  // Run test
+  nts_append_header(&cursor, 0xFADE, 0x1234);
+  // Check
+  TEST_ASSERT_EQUAL(buf[0], 0xFA);
+  TEST_ASSERT_EQUAL(buf[1], 0xDE);
+  TEST_ASSERT_EQUAL(buf[2], 0x12);
+  TEST_ASSERT_EQUAL(buf[3], 0x34);
+  TEST_ASSERT_EQUAL(buf[4], 0);
+  TEST_ASSERT_EQUAL(cursor.next, &buf[4]);
+  TEST_ASSERT_EQUAL(cursor.left, 12);
+}
+
 TEST_GROUP_RUNNER(nts) {
   RUN_TEST_CASE(nts, nts_append_record_null);
   RUN_TEST_CASE(nts, nts_append_record_uint16);
   RUN_TEST_CASE(nts, nts_append_record_bytes);
+  RUN_TEST_CASE(nts, nts_append_header);
 }
