@@ -85,6 +85,10 @@ The following options of the +server+ command configure NTS.
   key service running in the same host as the NTP server adding this
   option is normally all you need to do.
 
+Note that the server name must match the name on the certificate.
+That is probably a FQDN rather than a short alias that you would
+probably use to talk to an internal server.
+
 +ask+ _address_::
   Use Network Time Security for authentication and encryption.  Ask
   for a specific NTS server, which may differ from the NTP server.
