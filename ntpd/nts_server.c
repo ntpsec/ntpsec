@@ -24,16 +24,28 @@
 #define NTS_CERT_FILE "/etc/ntp/cert-chain.pem"
 #define NTS_KEY_FILE "/etc/ntp/key.pem"
 
+int nts_ke_port = 123;
+
 static bool nts_load_certificate(SSL_CTX *ctx);
 static int create_listener(int port);
 static void* nts_ke_listener(void*);
 static void nts_ke_request(SSL *ssl);
 static int nts_translate_version(const char *arg);
 
-int nts_ke_port = 123;
+static SSL_CTX *server_ctx = NULL;
 
-void nts_start_server(void) {
-    SSL_CTX *ctx;
+void nts_init(void) {
+    bool ok = true;
+    if (ntsconfig.ntsenable)
+        ok &= nts_server_init();
+    ok &= nts_client_init();
+    if (!ok) {
+      msyslog(LOG_ERR, "NTS: troubles during init.  Bailing.");
+      exit(1);
+    }
+}
+
+bool nts_server_init(void) {
     pthread_t worker;
     sigset_t block_mask, saved_sig_mask;
     int rc;
@@ -43,36 +55,38 @@ void nts_start_server(void) {
         nts_ke_port);
 
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-    ctx = SSL_CTX_new(TLS_server_method());
+    server_ctx = SSL_CTX_new(TLS_server_method());
 #else
-    ctx = SSL_CTX_new(TLSv1_2_server_method());
+    server_ctx = SSL_CTX_new(TLSv1_2_server_method());
 #endif
 
-    SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
+    SSL_CTX_set_session_cache_mode(server_ctx, SSL_SESS_CACHE_OFF);
 
-    ok &= nts_load_versions(ctx);
-    ok &= nts_load_ciphers(ctx);
-    ok &= nts_load_certificate(ctx);
+    ok &= nts_load_versions(server_ctx);
+    ok &= nts_load_ciphers(server_ctx);
+    ok &= nts_load_certificate(server_ctx);
 
     if (!ok) {
       msyslog(LOG_ERR, "NTSs: Disabling NTS-KE server");
-      SSL_CTX_free(ctx);
-      return;
+      SSL_CTX_free(server_ctx);
+      server_ctx = NULL;
+      return false;
     };
 
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
     msyslog(LOG_INFO, "NTSs: OpenSSL security level is %d",
-        SSL_CTX_get_security_level(ctx));
+        SSL_CTX_get_security_level(server_ctx));
 #endif
 
     sigfillset(&block_mask);
     pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
-    rc = pthread_create(&worker, NULL, nts_ke_listener, ctx);
+    rc = pthread_create(&worker, NULL, nts_ke_listener, server_ctx);
     if (rc) {
       msyslog(LOG_ERR, "NTSs: nts_start_server: error from pthread_create: %m");
     }
     pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 
+    return true;
 }
 
 void* nts_ke_listener(void* arg) {

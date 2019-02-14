@@ -25,6 +25,7 @@
 #include "ntpd.h"
 #include "nts.h"
 
+#define PORT "123"
 
 int open_TCP_socket(const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx);
@@ -35,16 +36,64 @@ void HackBlockSignals(void);
 void HackUnblockSignals(void);
 
 
+SSL_CTX *client_ctx = NULL;
+
+// Fedora 29:  0x1010101fL  1.1.1a
+// Fedora 28:  0x1010009fL  1.1.0i
+// Debian 9:   0x101000afL  1.1.0j
+// Debian 8:   0x1000114fL  1.0.1t
+// CentOS 7:   0x100020bfL  1.0.2k
+// CentOS 6:   0x1000105fL  1.0.1e
+// NetBSD 8:   0x100020bfL  1.0.2k
+// NetBSD 7:   0x1000115fL  1.0.1u
+// FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
+// FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
+//
+bool nts_client_init(void) {
+  bool     ok = true;
+#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+  client_ctx = SSL_CTX_new(TLS_client_method());
+#else
+  client_ctx = SSL_CTX_new(TLSv1_2_client_method());
+#endif
+
+#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+  {
+  // 4., ALPN, RFC 7301
+  static unsigned char alpn [] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
+  SSL_CTX_set_alpn_protos(client_ctx, alpn, sizeof(alpn));
+  }
+#endif
+
+  SSL_CTX_set_session_cache_mode(client_ctx, SSL_SESS_CACHE_OFF);
+
+  ok &= nts_load_versions(client_ctx);
+  ok &= nts_load_ciphers(client_ctx);
+  ok &= nts_set_cert_search(client_ctx);
+
+  if (!ok) {
+    msyslog(LOG_ERR, "NTSc: Troubles setting up client SSL CTX");
+    if (1) {
+      msyslog(LOG_ERR, "NTSc: Maybe should bail.");   // FIXME
+      return true;
+    }
+    SSL_CTX_free(client_ctx);
+    client_ctx = NULL;
+    return false;
+  };
+
+  return true;
+}
 
 bool nts_probe(struct peer * peer) {
-
-  SSL_CTX *ctx;
   SSL     *ssl;
   int      server = 0;
   X509    *cert = NULL;
   uint8_t  buff[1000];
   int      transfered;
-  bool     ok = true;
+
+  if (NULL == client_ctx)
+    return false;
 
   HackBlockSignals();
 
@@ -58,46 +107,7 @@ bool nts_probe(struct peer * peer) {
   // Not much error checking yet.
   // Ugly since most SSL routines return 1 on success.
 
-// Fedora 29:  0x1010101fL  1.1.1a
-// Fedora 28:  0x1010009fL  1.1.0i
-// Debian 9:   0x101000afL  1.1.0j
-// Debian 8:   0x1000114fL  1.0.1t
-// CentOS 7:   0x100020bfL  1.0.2k
-// CentOS 6:   0x1000105fL  1.0.1e
-// NetBSD 8:   0x100020bfL  1.0.2k
-// NetBSD 7:   0x1000115fL  1.0.1u
-// FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
-// FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-  ctx = SSL_CTX_new(TLS_client_method());
-#else
-  ctx = SSL_CTX_new(TLSv1_2_client_method());
-#endif
-
-#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
-  {
-  // 4., ALPN, RFC 7301
-  static unsigned char alpn [] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
-  SSL_CTX_set_alpn_protos(ctx, alpn, sizeof(alpn));
-  }
-#endif
-
-  SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
-
-  ok &= nts_load_versions(ctx);
-  ok &= nts_load_ciphers(ctx);
-  ok &= nts_set_cert_search(ctx);
-
-  if (!ok) {
-    msyslog(LOG_ERR, "NTSc: Troubles setting up SSL CTX: %s", peer->hostname);
-    msyslog(LOG_ERR, "NTSc: Maybe should bail.");
-    // close(server);
-    // SSL_CTX_free(ctx);
-    // HackUnblockSignals();
-    // return;
-  };
-
-  ssl = SSL_new(ctx);
+  ssl = SSL_new(client_ctx);
   SSL_set_fd(ssl, server);
 
 // https://wiki.openssl.org/index.php/Hostname_validation
@@ -198,7 +208,6 @@ bail:
   SSL_shutdown(ssl);
   SSL_free(ssl);
   close(server);
-  SSL_CTX_free(ctx);
   HackUnblockSignals();
 
   return false;
@@ -219,7 +228,7 @@ int open_TCP_socket(const char *hostname) {
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_family = AF_UNSPEC;
-  gai_rc = getaddrinfo(hostname, "443", &hints, &answer);  // FIXME
+  gai_rc = getaddrinfo(hostname, PORT, &hints, &answer);  // FIXME
   if (0 != gai_rc) {
     msyslog(LOG_INFO, "NTSc: nts_probe: DNS error: %d, %s",
       gai_rc, gai_strerror(gai_rc));
@@ -227,8 +236,8 @@ int open_TCP_socket(const char *hostname) {
   }
 
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
-  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s=%s",
-    hostname, socktoa(&sockaddr));
+  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s=%s, port %s",
+    hostname, socktoa(&sockaddr), PORT);
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == sockfd) {
     msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %m");

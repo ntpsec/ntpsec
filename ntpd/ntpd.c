@@ -906,8 +906,7 @@ ntpdmain(
 	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
 	}
 
-	if (ntsconfig.ntsenable)
-            nts_start_server();
+        nts_init();
 
 	mainloop();
         /* unreachable, mainloop() never returns */

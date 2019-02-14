@@ -115,6 +115,9 @@ enum aead_ciphers {
 
 extern struct ntsconfig_t ntsconfig;
 
+bool nts_server_init(void);
+bool nts_client_init(void);
+
 int nts_get_key_length(int aead);
 bool nts_load_ciphers(SSL_CTX *ctx);
 bool nts_load_versions(SSL_CTX *ctx);
