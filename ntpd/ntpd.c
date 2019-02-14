@@ -894,6 +894,8 @@ ntpdmain(
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 
+	nts_init();   /* NetBSD: open NTS listner before droproot */
+
 #ifndef ENABLE_EARLY_DROPROOT
 	/* drop root privileges */
 	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0) && interface_interval) {
@@ -905,8 +907,6 @@ ntpdmain(
 	if (access(statsdir, W_OK) != 0) {
 	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
 	}
-
-        nts_init();
 
 	mainloop();
         /* unreachable, mainloop() never returns */
