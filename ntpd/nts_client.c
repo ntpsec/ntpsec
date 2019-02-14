@@ -47,11 +47,19 @@ SSL_CTX *client_ctx = NULL;
 
 bool nts_client_init(void) {
   bool     ok = true;
+
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
   client_ctx = SSL_CTX_new(TLS_client_method());
 #else
+  OpenSSL_add_all_ciphers();  // FIXME needed on NetBSD
   client_ctx = SSL_CTX_new(TLSv1_2_client_method());
 #endif
+  if (NULL == client_ctx) {
+    // ?? Happens on NetBSD - says no ciphers
+    msyslog(LOG_INFO, "NTSs: NULL client_ctx");
+    nts_log_ssl_error();
+    return false;
+  }
 
 #if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
   {
@@ -60,12 +68,6 @@ bool nts_client_init(void) {
   SSL_CTX_set_alpn_protos(client_ctx, alpn, sizeof(alpn));
   }
 #endif
-  if (NULL == server_ctx) {
-    // ?? Happens on NetBSD - says no ciphers
-    msyslog(LOG_INFO, "NTSs: NULL server_ctx");
-    nts_log_ssl_error();
-    return false;
-  }
 
   SSL_CTX_set_session_cache_mode(client_ctx, SSL_SESS_CACHE_OFF);
 

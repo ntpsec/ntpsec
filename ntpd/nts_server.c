@@ -57,6 +57,7 @@ bool nts_server_init(void) {
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
     server_ctx = SSL_CTX_new(TLS_server_method());
 #else
+    OpenSSL_add_all_ciphers();  // FIXME needed on NetBSD
     server_ctx = SSL_CTX_new(TLSv1_2_server_method());
 #endif
     if (NULL == server_ctx) {
