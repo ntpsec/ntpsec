@@ -130,23 +130,6 @@ def build(ctx):
             "SSL CRYPTO DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
 
-    ntsd_source = [
-        "nts.c",
-        "ntsd.c",
-    ]
-
-    ctx(
-        features="c rtems_trace cprogram bld_include src_include",
-        includes=["%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
-                  "%s/ntpd/" % srcnode,
-                  ] + ctx.env.PLATFORM_INCLUDES,
-        install_path='${SBINDIR}',
-        source=ntsd_source,
-        target="ntsd",
-        use="ntp M parse RT CAP SECCOMP PTHREAD CRYPTO DNS_SD SOCKET NSL SCF",
-    )
-
-    ctx.manpage(8, "ntsd-man.adoc")
     ctx.manpage(8, "ntpd-man.adoc")
     ctx.manpage(5, "ntp.conf-man.adoc")
     ctx.manpage(5, "ntp.keys-man.adoc")
