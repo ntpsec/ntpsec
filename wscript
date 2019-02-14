@@ -613,6 +613,9 @@ int main(int argc, char **argv) {
     ):
         ctx.check_cc(msg="Checking for OpenSSL's crypto library",
                      lib="crypto", mandatory=True)
+    # Someday this will likely become part of OpenSSL.
+    ctx.check_cc(msg="Checking for libaes_siv",
+                 lib="aes_siv", mandatory=True)
 
     # Optional functions.  Do all function checks here, otherwise
     # we're likely to duplicate them.
