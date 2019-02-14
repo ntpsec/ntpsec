@@ -102,12 +102,12 @@ bool nts_probe(struct peer * peer) {
 
 // https://wiki.openssl.org/index.php/Hostname_validation
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-  SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
+  // SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
   SSL_set1_host(ssl, peer->hostname);
 #elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
 {
   X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
-  X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_WILDCARDS);
+  // X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_WILDCARDS);
   if (1 != X509_VERIFY_PARAM_set1_host(param,
           peer->hostname, strlen(peer->hostname))) {
       msyslog(LOG_ERR, "NTSc: troubles setting hostflags");
