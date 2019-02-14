@@ -59,6 +59,12 @@ bool nts_server_init(void) {
 #else
     server_ctx = SSL_CTX_new(TLSv1_2_server_method());
 #endif
+    if (NULL == server_ctx) {
+      // ?? Happens on NetBSD - says no ciphers
+      msyslog(LOG_INFO, "NTSs: NULL server_ctx");
+      nts_log_ssl_error();
+      return false;
+    }
 
     SSL_CTX_set_session_cache_mode(server_ctx, SSL_SESS_CACHE_OFF);
 
