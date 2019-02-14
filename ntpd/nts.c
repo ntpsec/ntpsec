@@ -14,6 +14,7 @@
 #include "config.h"
 
 #include <arpa/inet.h>
+#include <openssl/err.h>
 
 #include "ntp_types.h"
 #include "ntpd.h"
@@ -122,6 +123,18 @@ int nts_decorate(struct ntscfg_t *cfg, struct ntsstate_t *state,
 	UNUSED_ARG(extlen);
 	UNUSED_ARG(state);
 	return 0;
+}
+
+/*****************************************************/
+
+void nts_log_ssl_error(void) {
+  char buff[256];
+  int err = ERR_get_error();
+  while (0 != err) {
+    ERR_error_string_n(err, buff, sizeof(buff));
+    msyslog(LOG_INFO, "NTS: err %s", buff);
+    err = ERR_get_error();
+  }
 }
 
 /*****************************************************/

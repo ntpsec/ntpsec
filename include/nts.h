@@ -117,6 +117,7 @@ extern struct ntsconfig_t ntsconfig;
 
 bool nts_server_init(void);
 bool nts_client_init(void);
+void nts_log_ssl_error(void);
 
 int nts_get_key_length(int aead);
 bool nts_load_ciphers(SSL_CTX *ctx);
