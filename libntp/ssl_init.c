@@ -9,6 +9,7 @@
 #include "ntp_stdlib.h"
 
 #include <stdbool.h>
+#include <openssl/ssl.h>
 #include <openssl/evp.h>
 #include <openssl/cmac.h>
 
@@ -33,6 +34,7 @@ ssl_init(void)
 		return;
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+	SSL_library_init();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	atexit(&atexit_ssl_cleanup);
