@@ -130,6 +130,7 @@ int nts_decorate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
 void nts_log_ssl_error(void) {
   char buff[256];
   int err = ERR_get_error();
+  SSL_load_error_strings();        /* Needed on NetBSD */
   while (0 != err) {
     ERR_error_string_n(err, buff, sizeof(buff));
     msyslog(LOG_INFO, "NTS: err %s", buff);
