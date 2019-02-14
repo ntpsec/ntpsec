@@ -252,6 +252,7 @@ int open_TCP_socket(const char *hostname) {
   return sockfd;
 }
 
+// FIXME - context shouldn't be magic
 bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
   // char *label = "EXPORTER-network-time-security/1";
   // Subject: [Ntp] [NTS4NTP] info for NTS developers
@@ -264,16 +265,16 @@ bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
         label, strlen(label),
         context, 5, 1)) {
      msyslog(LOG_ERR, "NTS: Error making c2s\n");
+     nts_log_ssl_error();
      return false;
-     // ERR_print_errors_fp(stderr);
   }
   context[4] = 0x01;
   if (1 != SSL_export_keying_material(ssl, s2c, keylen,
         label, strlen(label),
         context, 5, 1)) {
      msyslog(LOG_ERR, "NTS: Error making s2c\n");
+     nts_log_ssl_error();
      return false;
-     // ERR_print_errors_fp(stderr);
   }
   // Hack for debugging - obviously not good for security
   msyslog(LOG_INFO, "NTS: C2S %02x %02x %02x %02x %02x\n",
