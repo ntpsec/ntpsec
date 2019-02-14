@@ -113,6 +113,7 @@ def build(ctx):
         "ntp_scanner.c",
         "ntp_signd.c",
         "ntp_timer.c",
+        "ntp_dns.c",
         "ntpd.c",
         ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
     ]

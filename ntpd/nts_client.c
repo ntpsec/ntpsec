@@ -31,10 +31,6 @@ int open_TCP_socket(const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx);
 bool process_recv_data(struct peer* peer, SSL *ssl);
 
-// FIXME - hack until we move this to a thread
-void HackBlockSignals(void);
-void HackUnblockSignals(void);
-
 
 SSL_CTX *client_ctx = NULL;
 
@@ -48,7 +44,7 @@ SSL_CTX *client_ctx = NULL;
 // NetBSD 7:   0x1000115fL  1.0.1u
 // FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
 // FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
-//
+
 bool nts_client_init(void) {
   bool     ok = true;
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
@@ -95,13 +91,9 @@ bool nts_probe(struct peer * peer) {
   if (NULL == client_ctx)
     return false;
 
-  HackBlockSignals();
-
   server = open_TCP_socket(peer->hostname);
-  if (-1 == server) {
-    HackUnblockSignals();
+  if (-1 == server)
     return false;
-  }
 
   // FIXME
   // Not much error checking yet.
@@ -208,7 +200,6 @@ bail:
   SSL_shutdown(ssl);
   SSL_free(ssl);
   close(server);
-  HackUnblockSignals();
 
   return false;
 }
@@ -219,10 +210,6 @@ int open_TCP_socket(const char *hostname) {
   sockaddr_u sockaddr;
   int gai_rc, err;
   int sockfd;
-
-#ifdef HAVE_RES_INIT
-  res_init();  /* see comment in ntp_dns */
-#endif
 
   ZERO(hints);
   hints.ai_protocol = IPPROTO_TCP;
@@ -422,28 +409,6 @@ bool nts_set_cert_search(SSL_CTX *ctx) {
   }
   msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %m", ntsconfig.ca);
   return false;
-}
-
-
-/* ********************************** */
-
-// FIXME - hack until we move this to a thread
-static sigset_t blockMask, runMask;
-
-void HackBlockSignals(void) {
-  sigemptyset(&blockMask);
-  sigaddset(&blockMask, SIGALRM);
-  sigaddset(&blockMask, MOREDEBUGSIG);
-  sigaddset(&blockMask, LESSDEBUGSIG);
-  sigaddset(&blockMask, SIGINT);
-  sigaddset(&blockMask, SIGQUIT);
-  sigaddset(&blockMask, SIGTERM);
-  sigaddset(&blockMask, SIGHUP);
-  pthread_sigmask(SIG_BLOCK, &blockMask, &runMask);
-}
-
-void HackUnblockSignals(void) {
-  pthread_sigmask(SIG_SETMASK, &runMask, NULL);
 }
 
 /* end */

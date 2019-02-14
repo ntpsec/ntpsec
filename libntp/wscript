@@ -16,7 +16,6 @@ def build(ctx):
         "macencrypt.c",
         "netof.c",
         "ntp_endian.c",
-        "ntp_dns.c",
         "numtoa.c",
         "refidsmear.c",
         "socket.c",
