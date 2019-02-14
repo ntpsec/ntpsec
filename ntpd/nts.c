@@ -100,7 +100,7 @@ int nts_daily(struct ntscfg_t *cfg)
  * there is no per-client server state.  A nonzero return causes the
  * packet to be discarded.
  */
-int nts_validate(struct ntscfg_t *cfg, struct ntsstate_t *state,
+int nts_validate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
 		 struct parsed_pkt *pkt)
 {
 	UNUSED_ARG(cfg);
@@ -115,7 +115,7 @@ int nts_validate(struct ntscfg_t *cfg, struct ntsstate_t *state,
  * the ntscfg and state pointers are expected to be NULL as there
  * is no per-client server state.  Return the count of words appended.
  */
-int nts_decorate(struct ntscfg_t *cfg, struct ntsstate_t *state,
+int nts_decorate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
 		 uint32_t *extdata, size_t extlen)
 {
 	UNUSED_ARG(cfg);
