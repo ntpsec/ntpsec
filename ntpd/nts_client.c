@@ -131,10 +131,12 @@ bool nts_probe(struct peer * peer) {
   // SSL_set_timeout(SSL_get_session(ssl), 2);  // FIXME
   if (1 != SSL_connect(ssl)) {
     msyslog(LOG_INFO, "NTSc: SSL_connect failed");
+    nts_log_ssl_error();
     goto bail;
   }
   if (1 != SSL_do_handshake(ssl)) {
     msyslog(LOG_INFO, "NTSc: SSL_do_handshake failed");
+    nts_log_ssl_error();
     goto bail;
   }
 

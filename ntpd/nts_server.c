@@ -122,7 +122,8 @@ void* nts_ke_listener(void* arg) {
         SSL_set_fd(ssl, client);
 
         if (SSL_accept(ssl) <= 0) {
-            msyslog(LOG_ERR, "NTSs: SSL accept failed: %m");
+            msyslog(LOG_ERR, "NTSs: SSL accept failed");
+            nts_log_ssl_error();
             close(client);
             continue;
         }
