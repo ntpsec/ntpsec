@@ -29,7 +29,8 @@
 
 int open_TCP_socket(const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx);
-bool process_recv_data(struct peer* peer, SSL *ssl);
+bool nts_client_build_request(struct peer* peer, SSL *ssl);
+bool nts_client_process_response(struct peer* peer, SSL *ssl);
 
 
 SSL_CTX *client_ctx = NULL;
@@ -93,8 +94,6 @@ bool nts_probe(struct peer * peer) {
   SSL     *ssl;
   int      server = 0;
   X509    *cert = NULL;
-  uint8_t  buff[1000];
-  int      transfered;
 
   if (NULL == client_ctx)
     return false;
@@ -168,33 +167,10 @@ bool nts_probe(struct peer * peer) {
     }
   }
 
-
-  {
-    struct BufCtl_t buf;
-    int used;
-    buf.next = buff;
-    buf.left = sizeof(buff);
-
-    /* 4.1.2 Next Protocol, 0 for NTP */
-    nts_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
-
-    /* 4.1.5 AEAD Algorithm List
-     * AEAD_AES_SIV_CMAC_256 is the only one for now */
-    nts_append_record_uint16(&buf, nts_algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
-
-    /* 4.1.1: End, Critical */
-    nts_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
-
-    used = sizeof(buff)-buf.left;
-    transfered = SSL_write(ssl, buff, used);
-    if (used != transfered) {
-      msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %m", used, transfered);
-      goto bail;
-    }
-
-  process_recv_data(peer, ssl);
-
-  }
+  if (!nts_client_build_request(peer, ssl))
+    goto bail;
+  if (!nts_client_process_response(peer, ssl))
+    goto bail;
 
   // FIXME
   /* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
@@ -284,7 +260,41 @@ bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
   return true;
 }
 
-bool process_recv_data(struct peer* peer, SSL *ssl) {
+bool nts_client_build_request(struct peer* peer, SSL *ssl) {
+  uint8_t buff[1000];
+  int     used, transfered;
+  struct BufCtl_t buf;
+
+  UNUSED_ARG(peer);
+
+  buf.next = buff;
+  buf.left = sizeof(buff);
+
+  /* 4.1.2 Next Protocol, 0 for NTP */
+  nts_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
+
+  /* 4.1.5 AEAD Algorithm List
+   * AEAD_AES_SIV_CMAC_256 is the only one for now */
+  nts_append_record_uint16(&buf, nts_algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
+
+  /* 4.1.1: End, Critical */
+  nts_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
+
+  used = sizeof(buff)-buf.left;
+  if (used >= (int)(sizeof(buff)-10)) {
+    msyslog(LOG_ERR, "NTSc: write failed: %d, %ld, %m",
+        used, (long)sizeof(buff));
+    return false;
+  }
+  transfered = SSL_write(ssl, buff, used);
+  if (used != transfered) {
+    msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %m", used, transfered);
+    return false;
+  }
+  return true;
+}
+
+bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   uint8_t  buff[2000];
   int transfered, idx;
   struct BufCtl_t buf;
