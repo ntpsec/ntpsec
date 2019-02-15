@@ -133,7 +133,7 @@ void nts_log_ssl_error(void) {
   SSL_load_error_strings();        /* Needed on NetBSD */
   while (0 != err) {
     ERR_error_string_n(err, buff, sizeof(buff));
-    msyslog(LOG_INFO, "NTS: err %s", buff);
+    msyslog(LOG_INFO, "NTS: %s", buff);
     err = ERR_get_error();
   }
 }
