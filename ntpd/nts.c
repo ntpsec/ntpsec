@@ -193,7 +193,7 @@ void nts_append_bytes(BufCtl* buf, uint8_t *data, int length) {
   buf->left -= length;
 }
 
-
+/* Reads type and length of the next record, and moves cursor to the data */
 uint16_t nts_next_record(BufCtl* buf, int *length) {
   uint16_t *ptr = (uint16_t *)buf->next;
   uint16_t type = ntohs(*ptr++);
