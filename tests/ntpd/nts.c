@@ -209,6 +209,31 @@ TEST(nts, nts_next_uint16) {
   TEST_ASSERT_EQUAL(cursor.left, 14);
 }
 
+TEST(nts, nts_next_bytes) {
+  // Setup
+  uint8_t buf[16] = {0xFA, 0xCE, 0, 4, 0xFF, 0xEE, 0xDD, 0xCC,
+					 0, 0, 0, 0, 0, 0, 0, 0};
+  BufCtl cursor;
+  cursor.next = buf;
+  cursor.left = 16;
+  uint8_t data[8];
+  uint16_t length;
+  // Run test
+  length = nts_next_bytes(&cursor, data, 8);
+  // Check
+  TEST_ASSERT_EQUAL(length, 8);
+  TEST_ASSERT_EQUAL(data[0], 0xFA);
+  TEST_ASSERT_EQUAL(data[1], 0xCE);
+  TEST_ASSERT_EQUAL(data[2], 0);
+  TEST_ASSERT_EQUAL(data[3], 4);
+  TEST_ASSERT_EQUAL(data[4], 0xFF);
+  TEST_ASSERT_EQUAL(data[5], 0xEE);
+  TEST_ASSERT_EQUAL(data[6], 0xDD);
+  TEST_ASSERT_EQUAL(data[7], 0xCC);
+  TEST_ASSERT_EQUAL(cursor.next, &buf[8]);
+  TEST_ASSERT_EQUAL(cursor.left, 8);
+}
+
 TEST_GROUP_RUNNER(nts) {
   RUN_TEST_CASE(nts, nts_append_record_null);
   RUN_TEST_CASE(nts, nts_append_record_uint16);
@@ -218,4 +243,5 @@ TEST_GROUP_RUNNER(nts) {
   RUN_TEST_CASE(nts, nts_append_bytes);
   RUN_TEST_CASE(nts, nts_next_record);
   RUN_TEST_CASE(nts, nts_next_uint16);
+  RUN_TEST_CASE(nts, nts_next_bytes);
 }

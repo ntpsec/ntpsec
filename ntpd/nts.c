@@ -212,6 +212,7 @@ uint16_t nts_next_uint16(BufCtl* buf) {
   return data;
 }
 
+/* Reads a string of bytes from the record and advances to the next data */
 uint16_t nts_next_bytes(BufCtl* buf, uint8_t *data, int length) {
   memcpy(data, buf->next, length);
   buf->next += length;
