@@ -203,6 +203,7 @@ uint16_t nts_next_record(BufCtl* buf, int *length) {
   return type;
 }
 
+/* Reads a uint16 from the record and advances to the next data */
 uint16_t nts_next_uint16(BufCtl* buf) {
   uint16_t *ptr = (uint16_t *)buf->next;
   uint16_t data = ntohs(*ptr++);
