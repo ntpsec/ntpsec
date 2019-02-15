@@ -366,6 +366,7 @@ int scmp_sc[] = {
 #ifdef __NR_time
 	SCMP_SYS(time),		/* not in ARM */
 #endif
+	SCMP_SYS(sysinfo),
 #ifdef HAVE_TIMER_CREATE
 	SCMP_SYS(timer_create),
 	SCMP_SYS(timer_gettime),
