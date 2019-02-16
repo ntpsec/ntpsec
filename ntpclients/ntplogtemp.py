@@ -177,7 +177,7 @@ class Temper:
                 if args.verbose:
                     sys.stderr.write("TEMPer-poll failed\n")
 
-        if 0 == len(data):
+        if not data:
             self.has_temper = False
         return data
 

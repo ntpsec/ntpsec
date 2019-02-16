@@ -202,7 +202,7 @@ class NTPStats:
     def peersplit(self):
         """Return a dictionary mapping peerstats IPs to entry subsets.
         This is very expensive, so cache the result"""
-        if len(self.peermap):
+        if self.peermap:
             return self.peermap
 
         for row in self.peerstats:

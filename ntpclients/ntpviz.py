@@ -139,7 +139,7 @@ class MyArgumentParser(argparse.ArgumentParser):
         arg_line = re.sub('\s+#.*$', '', arg_line)
 
         # ignore blank lines
-        if 0 == len(arg_line):
+        if not arg_line:
             return []
         # ignore comment lines
         if '#' == arg_line[0]:
@@ -257,7 +257,7 @@ class VizStats(ntp.statfiles.NTPStats):
             target = max(self.percs["p99"], -self.percs["p1"],
                          self.percs["p100"]/5, -self.percs["p0"]/5)
 
-        if len(units):
+        if units:
             # fixed scale
             self.multiplier = 1
             self.unit = units
@@ -393,7 +393,7 @@ def gnuplot_fmt(min_val, max_val):
 def gnuplot(template, outfile=None):
     "Run a specified gnuplot program."
 
-    if not len(template):
+    if not template:
         # silently ignore empty plots
         return ''
     if outfile is None:
@@ -511,7 +511,7 @@ set rmargin 10
 
     def local_offset_gnuplot(self):
         "Generate gnuplot code graphing local clock loop statistics"
-        if not len(self.loopstats):
+        if not self.loopstats:
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
@@ -574,14 +574,14 @@ file.</p>
 
     def local_freq_temps_plot(self):
         "Generate gnuplot code graphing local frequency and temps"
-        if not len(self.loopstats):
+        if not self.loopstats:
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
         tempsmap = self.tempssplit()
         tempslist = list(tempsmap.keys())
         tempslist.sort()
-        if not len(tempsmap) or not len(tempslist):
+        if not tempsmap or not tempslist:
             sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
 
@@ -672,7 +672,7 @@ file, and field 3 from the tempstats log file.</p>
         tempslist = list(tempsmap.keys())
         tempslist.sort()
 
-        if not len(tempsmap) or not len(tempslist):
+        if not tempsmap or not tempslist:
             sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
 
@@ -734,7 +734,7 @@ component of frequency drift.</p>
         gpslist = list(gpsmap.keys())
         gpslist.sort()
 
-        if not len(gpsmap) or not len(gpslist):
+        if not gpsmap or not gpslist:
             if 1 <= args.debug_level:
                 sys.stderr.write("ntpviz: INFO: no GPS data to graph\n")
             return ''
@@ -811,7 +811,7 @@ Greater than 20 means there will be significant inaccuracy and error.</p>
 
     def local_error_gnuplot(self):
         "Plot the local clock frequency error."
-        if not len(self.loopstats):
+        if not self.loopstats:
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 

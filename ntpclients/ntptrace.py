@@ -51,7 +51,7 @@ def ntp_read_vars(peer, vars, host):
     obsolete = {'phase': 'offset',
                 'rootdispersion': 'rootdisp'}
 
-    if not len(vars):
+    if not vars:
         do_all = True
     else:
         do_all = False
@@ -149,7 +149,7 @@ for (switch, val) in options:
         print("ntptrace %s" % ntp.util.stdversion())
         raise SystemExit(0)
 
-if len(arguments):
+if arguments:
     host = arguments[0]
 
 hostcount = 0

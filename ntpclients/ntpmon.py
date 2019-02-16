@@ -306,7 +306,7 @@ if __name__ == '__main__':
                     else:
                         peer_report.polls = [1]  # Kluge!
                         peers = []
-                    if showpeers and len(peers) == 0:
+                    if showpeers and not peers:
                         raise Fatal("no peers reported")
                     try:
                         initphase = False
