@@ -139,13 +139,13 @@ pps_start(
 
 	/*
 	 * Open PPS device. This can be any serial or parallel port and
-	 * not necessarily the port used for the associated radio.
+	 * not necessarily the port used for the associated clock.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	up->fddev = open(peer->cfg.ppspath ? peer->cfg.ppspath : device,
-		O_RDWR);
+	char *pps_path = peer->cfg.ppspath ? peer->cfg.ppspath : device;
+	up->fddev = open(pps_path, O_RDWR);
 	if (up->fddev <= 0) {
-		msyslog(LOG_ERR, "REFCLOCK: refclock_pps: %m");
+	    msyslog(LOG_ERR, "REFCLOCK: refclock_pps: %s open failed: %m", pps_path);
 		return false;
 	}
 
