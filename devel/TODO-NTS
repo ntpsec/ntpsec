@@ -1,0 +1,18 @@
+flag for require NTS
+
+security level
+
+multithread msyslog
+
+fixup seccomp
+
+show NTS flag via ntpq
+  extra credit if we can find a place on the peers display
+show NTS statistics
+
+documentation:
+  HOWTO on NTS
+  HOWTO on certificates
+  glossary: https://letsencrypt.org/docs/glossary/
+
+client certificates

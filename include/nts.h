@@ -6,8 +6,9 @@
 
 #include <openssl/ssl.h>
 
-#define NTS_MAX_COOKIES	8	/* RFC 4.1.6 */
-#define NTS_COOKIELEN	128	/* placeholder - see RFC 6 */
+#define NTS_MAX_KEYLEN		64	/* used in cookies */
+#define NTS_MAX_COOKIELEN	192	/* see nts_cookie.c */
+#define NTS_MAX_COOKIES		8	/* RFC 4.1.6 */
 
 #define FLAG_NTS	0x01u	/* use NTS (network time security) */
 #define FLAG_NTS_ASK	0x02u	/* NTS, ask for specified server */
@@ -23,13 +24,14 @@ struct ntscfg_t {
     uint32_t expire;
 };
 
-// FIXME AEAD_AES_SIV_CMAC_256
 // We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
-// There is no clean API yet
 #define IANA_AEAD_AES_SIV_CMAC_256 15
+#define IANA_AEAD_AES_SIV_CMAC_384 16
+#define IANA_AEAD_AES_SIV_CMAC_512 17
 #define AEAD_AES_SIV_CMAC_256_KEYLEN 32
+#define AEAD_AES_SIV_CMAC_384_KEYLEN 48
+#define AEAD_AES_SIV_CMAC_512_KEYLEN 64
 
-#define NTS_MAX_KEYLEN 64
 /* Client-side state per connection to server */
 struct ntsstate_t {
     int aead;
@@ -38,7 +40,7 @@ struct ntsstate_t {
     int cookie_count;
     int cookie_length;
     bool valid[NTS_MAX_COOKIES];
-    uint8_t cookies[NTS_MAX_COOKIES][NTS_COOKIELEN];
+    uint8_t cookies[NTS_MAX_COOKIES][NTS_MAX_COOKIELEN];
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
 };
 
@@ -91,8 +93,8 @@ enum aead_ciphers {
   AEAD_AES_128_CCM_SHORT_12 = 13,
   AEAD_AES_256_CCM_SHORT_12 = 14,
 
-  AEAD_AES_SIV_CMAC_256 = 15,
-  AEAD_AES_SIV_CMAC_384 = 16,
+  AEAD_AES_SIV_CMAC_256 = 15,     /* RFC 5297 */
+  AEAD_AES_SIV_CMAC_384 = 16,     /* These 3 are the ones we use */
   AEAD_AES_SIV_CMAC_512 = 17,
 
   AEAD_AES_128_CCM_8 = 18,
@@ -117,14 +119,21 @@ extern struct ntsconfig_t ntsconfig;
 
 bool nts_server_init(void);
 bool nts_client_init(void);
+bool nts_cookie_init(void);
 void nts_log_ssl_error(void);
 
-int nts_get_key_length(int aead);
 bool nts_load_ciphers(SSL_CTX *ctx);
 bool nts_load_versions(SSL_CTX *ctx);
+
+int nts_get_key_length(int aead);
 bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen);
-int nts_make_cookie(uint8_t *cookie, uint16_t aead,
+
+int nts_make_cookie(uint8_t *cookie,
+  uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen);
+bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
+  uint16_t *aead,
+  uint8_t *c2s, uint8_t *s2c, int *keylen);
 
 #define NO_OLD_VERSIONS SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1
 

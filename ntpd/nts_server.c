@@ -36,6 +36,7 @@ static SSL_CTX *server_ctx = NULL;
 
 void nts_init(void) {
     bool ok = true;
+    ok &= nts_cookie_init();
     if (ntsconfig.ntsenable)
         ok &= nts_server_init();
     ok &= nts_client_init();
@@ -148,7 +149,7 @@ void nts_ke_request(SSL *ssl) {
     uint8_t buff[1000];
     int bytes_read, bytes_written;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-    uint8_t cookie[NTS_COOKIELEN];
+    uint8_t cookie[NTS_MAX_COOKIELEN];
     int aead, keylen, cookielen;
     struct BufCtl_t buf;
     int used;
@@ -218,34 +219,20 @@ int create_listener(int port) {
     return sock;
 }
 
+/* returns key length, 0 if unknown arg */
 int nts_get_key_length(int aead) {
   switch (aead) {
     case IANA_AEAD_AES_SIV_CMAC_256:
       return AEAD_AES_SIV_CMAC_256_KEYLEN;
+    case IANA_AEAD_AES_SIV_CMAC_384:
+      return AEAD_AES_SIV_CMAC_384_KEYLEN;
+    case IANA_AEAD_AES_SIV_CMAC_512:
+      return AEAD_AES_SIV_CMAC_512_KEYLEN;
     default:
       msyslog(LOG_ERR, "NTS: Strange AEAD code: %d", aead);
-      return 16;
+      return 0;
   }
 }
-
-// FIXME - this is a total hack to test pack/unpack
-/* returns actual length */
-int nts_make_cookie(uint8_t *cookie,
-  uint16_t aead,
-  uint8_t *c2s, uint8_t *s2c, int keylen) {
-
-  int length = NTS_COOKIELEN/2;
-
-  if (keylen < length)
-    length = keylen;
-  *cookie = aead & 0xFF;
-  for (int i=0; i<length; i++) {
-    *cookie++ = *c2s++^*s2c++;
-  }
-
-  return length;
-}
-
 
 bool nts_load_versions(SSL_CTX *ctx) {
   int minver, maxver;

@@ -59,6 +59,7 @@ def build(ctx):
         "nts.c",
         "nts_server.c",
         "nts_client.c",
+        "nts_cookie.c",
         "nts_lib.c",
     ]
 
@@ -67,7 +68,7 @@ def build(ctx):
         includes=ctx.env.PLATFORM_INCLUDES,
         source=libntpd_source,
         target="libntpd_obj",
-        use="SSL CRYPTO",
+        use="SSL CRYPTO AES_SIV",
     )
 
     ctx(
@@ -127,7 +128,7 @@ def build(ctx):
         source=ntpd_source,
         target="ntpd",
         use="libntpd_obj ntp M parse RT CAP SECCOMP PTHREAD NTPD "
-            "SSL CRYPTO DNS_SD %s SOCKET NSL SCF" % use_refclock,
+            "SSL CRYPTO AES_SIV DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
 
     ctx.manpage(8, "ntpd-man.adoc")

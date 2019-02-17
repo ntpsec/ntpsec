@@ -351,7 +351,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         peer->nts_state.aead = data;
         break;
       case nts_new_cookie:
-        if (NTS_COOKIELEN < length) {
+        if (NTS_MAX_COOKIELEN < length) {
           msyslog(LOG_ERR, "NTSc: NC cookie too big: %d", length);
           return false;
         }
