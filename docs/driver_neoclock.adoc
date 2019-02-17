@@ -1,4 +1,4 @@
-= NeoClock4X - DCF77 / TDF serial line receiver +
+= NeoClock4X - DCF77 / TDF serial line receiver
 include::html.include[]
 
 == Synopsis
