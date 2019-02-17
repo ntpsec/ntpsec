@@ -59,7 +59,8 @@ best to use only the HTML and manpages that come with your
 distribution.
 
 For differences between NTPsec and legacy versions, see
-link:ntpsec.html[this summary].
+link:ntpsec.html[this summary].  For details on relevant
+RFCs and standards, see link:standards.html[here].
 
 [[platforms]]
 == Supported platforms

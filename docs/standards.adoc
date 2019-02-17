@@ -1,0 +1,86 @@
+= Standards Conformance
+include::html.include[]
+
+== Table of Contents
+
+* link:#standards-overview[Overview of relevant standards]
+* link:#against5905[Divergences from RFC 5905]
+* link:#against2030[Divergences from RFC 2030]
+
+[[standards-overview]]
+== Overview of relevant standards
+
+The principal standard informing the NTPsec software is
+https://tools.ietf.org/html/rfc5905[RFC 5905: Network Time Protocol
+Version 4: Protocol and Algorithms Specification].
+
+SNTP is specified by https://tools.ietf.org/html/rfc2030[RFC 2030:
+Simple Network Time Protocol (SNTP) Version 4 for IPv4, IPv6 and OSI].
+
+Extension fields are described by
+https://tools.ietf.org/html/rfc5905[RFC 7822: Network Time Protocol
+Version 4 (NTPv4) Extension Fields].
+
+NTPsec has entirely dropped conformance with the Autokey feature
+described in https://tools.ietf.org/html/rfc5905[RFC 5906].  Autokey
+never quite worked, and the design was unstable enough that if there
+was ever actually a time when it fully conformed to its RFC that span
+must have been pretty short.
+
+Older NTP RFCs such as https://tools.ietf.org/html/rfc1305[RFC 1305]
+are no longer relevant.
+
+https://tools.ietf.org/rfc/rfc5297.txt[RFC 5297] describes the
+authenticated encryption used in Network Time Security
+key exchanges.
+
+[[against5905]]
+== Divergences from RFC 5905
+
+Code conformance was never quite exact even before the NTPsec fork.
+In this section we attempt to list divergences.  This list is probably
+not exhaustive.
+
+Modes 5 (Broadcast) and 6 (Broadcast client) are no longer implemented
+in NTPsec, as they were impossible to secure.  Mode 1 (Symmetric
+Active) is no longer implemented; such packets are treated as ordinary
+client (mode 3) packets. Mode 2 (Symmetric Passive) is still distinct
+from mode 3 but its only effect is on initial poll interval.
+
+In figure 8 of section 7.3, 128 bits (16 octets, corresponding to an
+MD5 or AES-CMAC digest) is not the only possible length for the MAC. This was
+a pre-NTPsec change present in NTP Classic versions after 2010.
+
+NTPsec conforms to the
+https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/[NTP
+Client Data Minimization] draft RFC, which changes the client-side
+generation of some packet headers.
+
+NTPsec also conforms to the
+https://datatracker.ietf.org/doc/draft-ietf-ntp-mac/[MAC for NTP]
+draft RFC, implementing AES-CMAC (128 bits).
+
+The table of reference identifiers in Figure 12 is largely obsolete
+and somewhat incomplete relative to the code.
+
+In the table of KISS codes (Figure 13), only RATE still exists and is
+implemented in NTPsec; others proved unnecessary or (in the cases of
+DENY and RSTR) outright dangerous. INIT and STEP are no lonkrt KoD types
+but persist as peer statuses that may be reported by {ntpqman}/{ntpmon}.
+
+The continuing relevance of much of Appendix A is doubtful.
+
+[[against2030]]
+== Divergences from RFC 2030
+
+In the packet-format illustration of section 4 (NTP Message Format)
+128 is not the only possible bit length for a MAC.  However, this
+field is not shipped in SNTP operation, so the flaw is theoretical.
+
+Some packet mode values are, as previously noted, no longer
+implemented. Many External Reference Source types are obsolete.
+Broadcast, multicast and anycast modes are no longer implemented.
+
+'''''
+
+Include::includes/footer.adoc[]
