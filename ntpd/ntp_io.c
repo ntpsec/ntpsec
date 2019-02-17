@@ -1992,22 +1992,18 @@ open_socket(
 
 
 /*
- * sendpkt - send a packet to the specified destination. Maintain a
- * send error cache so that only the first consecutive error for a
- * destination is logged.
+ * sendpkt - send a packet to the specified destination.
  */
 void
 sendpkt(
 	sockaddr_u *		dest,
-	endpt *	ep,
+	endpt *			src,
 	void *			pkt,
 	int			len
 	)
 {
-	endpt *	src;
 	ssize_t	cc;
 
-	src = ep;
 	if (NULL == src) {
 		/*
 		 * unbound peer - drop request and wait for better
