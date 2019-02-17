@@ -204,6 +204,10 @@ worked, and the design was unstable enough that if there was ever
 actually a time when it fully conformed to its RFC that span must have
 been pretty short.
 
+https://tools.ietf.org/rfc/rfc5297.txt[RFC 5297] describes the
+authenticated encryption used in Network Time Security
+key exchanges.
+
 https://tools.ietf.org/rfc/rfc2030.txt[RFC 2030] describes
 Simple Network Time Protocol (SNTP) version 4.
 
