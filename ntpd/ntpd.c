@@ -894,7 +894,7 @@ ntpdmain(
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 
-	nts_init();   /* NetBSD: open NTS listner before droproot */
+	nts_init();   /* NetBSD: open NTS listener before droproot */
 
 #ifndef ENABLE_EARLY_DROPROOT
 	/* drop root privileges */
