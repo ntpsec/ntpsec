@@ -1,4 +1,4 @@
-SUSE packageing scripts go here
+SUSE packaging scripts go here
 
 Upstream project for them is located at:
 
