@@ -430,6 +430,6 @@ int nts_daily(struct ntscfg_t *);
 int nts_validate(const struct ntscfg_t *, struct ntsstate_t *,
 		 struct parsed_pkt *);
 int nts_decorate(const struct ntscfg_t *, struct ntsstate_t *,
-		 uint32_t *, size_t);
+		 uint8_t *, size_t);
 
 #endif	/* GUARD_NTPD_H */

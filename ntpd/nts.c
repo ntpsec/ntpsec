@@ -116,7 +116,7 @@ int nts_validate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
  * is no per-client server state.  Return the count of words appended.
  */
 int nts_decorate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
-		 uint32_t *extdata, size_t extlen)
+		 uint8_t *extdata, size_t extlen)
 {
 	UNUSED_ARG(cfg);
 	UNUSED_ARG(extdata);

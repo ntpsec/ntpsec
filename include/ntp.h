@@ -450,7 +450,7 @@ struct pkt {
 #define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
 #define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* MAX of old style */
 
-	uint32_t	exten[(MAX_MAC_LEN + MAX_EXT_LEN) / sizeof(uint32_t)];
+	uint8_t	exten[MAX_MAC_LEN + MAX_EXT_LEN];
 } __attribute__ ((aligned));
 
 /* pythonize-header: stop ignoring */
