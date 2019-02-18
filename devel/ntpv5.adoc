@@ -30,20 +30,31 @@ The Mills reference version of NTP and all codebases descended from
 it (including NTPSec) *do* recognize Version 5 as out of band
 and will not pass such packets to a Version 4 protocol machine.
 
-The remainder of the packet is encoded in a strict subset of JSON
-intended to avoid known edge cases decribed in <<<Seriot2016>>>.  The
-outermost enclosing {} is required. Trailing commas on elements are
-disallowed. UTF-8 may occur but only within string literals, all else
-must be 7-bit ASCII. Scientific notation is not used.
+The leader byte is followed by an ASCII decimal numeric literal,
+which is interpreted as a packet mode.
+
+Following the mode, the body of the packet is encoded in a strict
+subset of JSON intended to avoid known edge cases decribed in
+<<<Seriot2016>>>.  The outermost enclosing {} is required. Trailing
+commas on elements are disallowed. Scientific notation is
+not used.  String literas may not contain the characters TAB, LF, CR,
+"{", "}", or "|". The JSON MUST use only ASCII space (0x20) as a
+whitespace character and MUST NOT use TAB, LF, CR or other Unicode
+characters.
+
+The packet body MAY optionally be followed by an authentication
+trailer. If present, the trailer consists of an ASCII "|" followed
+by an octet string encoded as hex-digit pairs.
+
+//FIXME: Add a description of how to compute the authentication trailer.
+
+The packet MUST be terminated with an LF.
 
 Transmitted packet sizes MUST be limited to 65,506 octets, so that the
 largest possible NTPv5 packet and a trailing NUL will fit in one UDP
 datagram.  To prevent DoS attacks, implementations MAY limit the
 packet size they will receive to a lower value; however implementations
 MUST accept packets of at least 512 octets.
-
-Packets SHOULD use only ASCII space (0x20) as a JSON whitespace
-character. Packets MAY ship with no whitespace.
 
 In the remainder of this document, packet fields will be described as
 keyword-value pairs. The keyword *is* explicit in the JSON, and the
@@ -65,12 +76,12 @@ We define five packet types:
 
 [options="header"]
 |===========================================================
-| Type name        | NTPv4 equivalent | Description
-| time poll        | mode 2 or 3      | request for time update
-| time response    | mode 4           | time update
-| control request  | mode 6           | request for server information
-| control response | mode 6           | response with server information
-| error            | KOD              | error notification
+| Type name        | NTPv4 equivalent | mode | Description
+| time poll        | mode 2 or 3      |  3   | request for time update
+| time response    | mode 4           |  4   | time update
+| control request  | mode 6           |  6   | request for server information
+| control response | mode 6           |  6   | response with server information
+| error            | KOD              |  7   | error notification
 |===========================================================
 
 Conforming implementations MUST respond to unknown packet types with
@@ -91,7 +102,8 @@ all.
 
 == Time request packet
 
-A time request packet MUST specify mode 3. No other content is required
+A time request packet MUST specify mode 3. No other content is
+required.  The packet body may be omitted.
 
 Note: this corresponds to a minimal SNTP packet under RFC2030.
 
@@ -99,14 +111,12 @@ Note: this corresponds to a minimal SNTP packet under RFC2030.
 
 A time response packet MUST specify mode 4.
 
-The following fields are retyained from NTPv4:
+The following fields are retained from NTPv4:
 
 "l":: Leap Indicator. Decimal numeric. Interpreted as in RFC5905.
       Optional, defaulting to 0 = no warning. Conforming
       implementations MUST report warning or unsynchronized
       status when appropriate.
-
-"m":: Mode: Decimal numeric. Interpreted as in RFC5905.
 
 "s":: Stratum. Decimal numeric. Interpreted as in RFC5905.
 
@@ -128,7 +138,7 @@ NTPv4 fields explicitly omitted from NTPv5 are version, reference ID,
 origin timestamp, and reference timestamp.
 
 //FIXME: How do we do the NTPv4 refid's anti-looping job?
-//FIXME:: Daniel get to make the case why poll and stratum are useless.
+//FIXME: Daniel gets to make the case why poll and stratum are useless.
 
 Additional NTPv5 fields:
 
@@ -150,13 +160,11 @@ chain querying peer-stats.
 [source, json]
 ----
 {
-   "mode" : 6,
    "id" : 1,
    "params" : {},
    "method" : "readstat"
 }
 {
-   "mode" : 6,
    "id" : 1,
    "result" : {
       "answer" : {
@@ -178,7 +186,6 @@ chain querying peer-stats.
 }
 
 {
-   "mode" : 6,
    "id" : 2,
    "params" : {
       "association" : 62398
@@ -186,7 +193,6 @@ chain querying peer-stats.
    "method" : "readvar"
 }
 {
-   "mode" : 6,
    "id" : 2,
    "result" : {
       "answer" : {
@@ -259,11 +265,9 @@ chain querying peer-stats.
 
 == Error notifications ==
 
-An error notification has the following fields:
+An error notification has a mode of 7 and has the following fields:
 
-"mode":: Must be a decimal integer 7.
-
-"id":: ID of the response to which thid corresponsds, if here is one.
+"id":: ID of the response to which this corresponsds, if here is one.
 
 "kod":: Kiss O'Death code. String. Interpreted as in RFC 5905. Optional.
 
