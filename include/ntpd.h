@@ -93,21 +93,21 @@ extern	endpt *	select_peerinterface	(struct peer *, sockaddr_u *,
 extern	endpt *	findinterface		(sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
 extern  void    io_handler              (void);
-extern	void	init_io 	(void);
+extern	void	init_io		(void);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
-extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, unsigned int);
+extern	void	sendpkt		(sockaddr_u *, endpt *, void *, unsigned int);
 extern const char * latoa(endpt *);
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);
-extern	int 	local_clock(struct peer *, double);
+extern	int	local_clock(struct peer *, double);
 extern	void	adj_host_clock(void);
 extern	void	loop_config(int, double);
 extern	void	select_loop(int);
 extern	void	huffpuff(void);
 extern	unsigned int	sys_tai;
-extern 	int	freq_cnt;
+extern	int	freq_cnt;
 
 /* ntp_monitor.c */
 #define MON_HASH_SIZE		(1U << mon_data.mon_hash_bits)
@@ -142,7 +142,7 @@ extern	void	peer_cleanup	(void);
 
 /* ntp_proto.c */
 extern	void	transmit	(struct peer *);
-extern	void	receive 	(struct recvbuf *);
+extern	void	receive		(struct recvbuf *);
 extern	void	peer_clear	(struct peer *, const char *, const bool);
 extern	void	set_sys_leap	(uint8_t);
 
@@ -244,7 +244,7 @@ struct packet_counters {
    uint64_t packets_ignored;	/* received on wild card interface */
    uint64_t packets_received;	/* total number of packets received */
    uint64_t packets_sent;		/* total number of packets sent */
-   uint64_t packets_notsent; 	/* total number of packets which couldn't be sent */
+   uint64_t packets_notsent;	/* total number of packets which couldn't be sent */
   /* There used to be a signal handler for received packets. */
   /* It's not needed now that the kernel time stamps packets. */
   uint64_t handler_calls;	/* number of calls to interrupt handler */
@@ -321,7 +321,7 @@ struct monitor_data {
     uint64_t	mru_mindepth;		/* preempt above this */
     int	mru_maxage;		/* recycle if older than this */
     int	mru_minage;		/* recycle if older than this & full */
-    uint64_t	mru_maxdepth; 		/* MRU size hard limit */
+    uint64_t	mru_maxdepth;		/* MRU size hard limit */
     uint64_t	mru_exists;		/* slot already exists */
     uint64_t	mru_new;		/* allocated new slot */
     uint64_t	mru_recycleold;		/* recycle: age > maxage */
@@ -371,7 +371,7 @@ struct statistics_counters {
     uptime_t	sys_stattime;		/* time since sysstats reset */
     uint64_t	sys_received;		/* packets received */
     uint64_t	sys_processed;		/* packets for this host */
-    uint64_t	sys_restricted;	 	/* restricted packets */
+    uint64_t	sys_restricted;		/* restricted packets */
     uint64_t	sys_newversion;		/* current version  */
     uint64_t	sys_oldversion;		/* old version */
     uint64_t	sys_badlength;		/* bad length or format */
