@@ -36,14 +36,14 @@ which is interpreted as a packet type.
 Following the mode, the body of the packet is encoded in a strict
 subset of JSON intended to avoid known edge cases decribed in
 <<<Seriot2016>>>.  The outermost enclosing {} is required. Trailing
-commas on elements are disallowed. Scientific notation is
-not used.  String literals may not contain the characters TAB, LF, CR,
-"{", "}", or "|". The JSON MUST use only ASCII space (0x20) as a
-whitespace character and MUST NOT use TAB, LF, CR or other Unicode
-characters.
+commas on elements are disallowed. Scientific notation is not used.
+String literals may not contain the characters TAB (0x09), LF (0x0A),
+CR (0x0D), "{", "}", or "|". The JSON MUST use only ASCII space (0x20)
+as a whitespace character and MUST NOT use TAB, LF, CR or UTF-8
+characters outside the ASCII range as whitespace.
 
 The packet body MAY optionally be followed by an authentication
-trailer. If present, the trailer consists of an ASCII "|" followed
+trailer. If present, the trailer consists of an ASCII "|" (0x7C) followed
 by an octet string encoded as hex-digit pairs.
 
 //FIXME: Add a description of how to compute the authentication trailer.
@@ -102,7 +102,7 @@ smearing locally if at all.
 == Time request packet
 
 A time request packet MUST specify type 0. No other content is
-required.  The packet body may be omitted.  (Thius, the minimal
+required.  The packet body may be omitted.  (Thus, the minimal
 request packet is "+0\n" where \n is a LF (ASCII 10),
 
 Note: this corresponds to a minimal SNTP packet under RFC2030.
@@ -134,11 +134,13 @@ The following fields are retained from NTPv4:
 
 "tt":: Transmit Timestamp. String, interpreted as timestamp format.
 
+"nc":: Cycle-detection ID. String, interpreted as an IPv4 or IPv6 address.
+       Identifies the source host of the time update.
+
 NTPv4 fields explicitly omitted from NTPv5 are version, reference ID,
 origin timestamp, and reference timestamp.  The reference ID field
 becomes the NTPv5 clock-type field.
 
-//FIXME: How do we do the NTPv4 refid's anti-looping job?
 //FIXME: Daniel gets to make the case why poll and stratum are useless.
 
 Additional NTPv5 fields:
