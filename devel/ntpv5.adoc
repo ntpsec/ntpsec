@@ -10,13 +10,13 @@ software's behavior space.
 
 NTPv4 is showing its age in other ways as well.  Its mechanism for
 avoiding source loops does not play well with IPv6, and collisions
-have vbeen observed in the wild.
+have been observed in the wild.
 
 There are various other functional capabilities that would be very
 useful if they could be standardized but currently are not.  Since
 we need to deal with the 32-bit-counter issues anyway, the time
 is right to design a protocol which (a) includes what we now know
-is needed, and (b) is extensible for future use.
+is needed, and (b) is extensible for future uses.
 
 == Packet metaprotocol
 
@@ -31,13 +31,13 @@ it (including NTPSec) *do* recognize Version 5 as out of band
 and will not pass such packets to a Version 4 protocol machine.
 
 The leader byte is followed by an ASCII decimal numeric literal,
-which is interpreted as a packet mode.
+which is interpreted as a packet type.
 
 Following the mode, the body of the packet is encoded in a strict
 subset of JSON intended to avoid known edge cases decribed in
 <<<Seriot2016>>>.  The outermost enclosing {} is required. Trailing
 commas on elements are disallowed. Scientific notation is
-not used.  String literas may not contain the characters TAB, LF, CR,
+not used.  String literals may not contain the characters TAB, LF, CR,
 "{", "}", or "|". The JSON MUST use only ASCII space (0x20) as a
 whitespace character and MUST NOT use TAB, LF, CR or other Unicode
 characters.
@@ -76,12 +76,12 @@ We define five packet types:
 
 [options="header"]
 |===========================================================
-| Type name        | NTPv4 equivalent | mode | Description
-| time poll        | mode 2 or 3      |  3   | request for time update
-| time response    | mode 4           |  4   | time update
-| control request  | mode 6           |  6   | request for server information
-| control response | mode 6           |  6   | response with server information
-| error            | KOD              |  7   | error notification
+| Type name        | NTPv4 equivalent | type | Description
+| time poll        | mode 2 or 3      |  0   | request for time update
+| time response    | mode 4           |  1   | time update
+| control request  | mode 6           |  2   | request for server information
+| control response | mode 6           |  3   | response with server information
+| error            | KOD              |  4   | error notification
 |===========================================================
 
 Conforming implementations MUST respond to unknown packet types with
@@ -89,40 +89,40 @@ an error response.
 
 == Time format and scale ==
 
-A timestamp field is an MJD (Modified Julian Date) literal in the form
-"YYYY/DDD/SSSS.SSSS"; Calendar year, day within year, seconds and
-fractional seconds from midnight.  Fields are not length limited, thus
-the year may have more than four digits and the subsecond precision of
-the timestamp is not limited by this format.
+A timestamp field is an MJD (Modified Julian Date) literal expressed
+as a decimal integer with decimal fractional part.  The year may have
+a leading minus sign, but is not expected to in normal operation.  The
+epoch is midnight of November 17, 1858. Day fraction assumes the
+TAI/UTC second.
 
-Conforming implementations MUST report in TAI/UTC seconds and servers
-MUST NOT transmmit leap-smeared or otherwise "adjusted" time; client
-implementations are expected to perform leap smearing locally if at
-all.
+Conforming servers MUST NOT transmit leap-smeared or otherwise
+"adjusted" time; client implementations are expected to perform leap
+smearing locally if at all.
 
 == Time request packet
 
-A time request packet MUST specify mode 3. No other content is
-required.  The packet body may be omitted.
+A time request packet MUST specify type 0. No other content is
+required.  The packet body may be omitted.  (Thius, the minimal
+request packet is "+0\n" where \n is a LF (ASCII 10),
 
 Note: this corresponds to a minimal SNTP packet under RFC2030.
 
 == Time response packet
 
-A time response packet MUST specify mode 4.
+A time response packet MUST specify type 1.
 
 The following fields are retained from NTPv4:
 
-"l":: Leap Indicator. Decimal numeric. Interpreted as in RFC5905.
+"li":: Leap Indicator. Decimal numeric. Interpreted as in RFC5905.
       Optional, defaulting to 0 = no warning. Conforming
       implementations MUST report warning or unsynchronized
       status when appropriate.
 
-"s":: Stratum. Decimal numeric. Interpreted as in RFC5905.
+"st":: Stratum. Decimal numeric. Interpreted as in RFC5905. Optional.
 
-"i":: Poll. Decimal numeric. Interpreted as in RFC5905.
+"in":: Poll. Decimal numeric. Interpreted as in RFC5905. Optional.
 
-"p":: Precision.   Decimal numeric. Interpreted as in RFC5905.
+"pr":: Precision.   Decimal numeric. Interpreted as in RFC5905.
 
 "de":: Root delay. Decimal numeric (seconds and fractional seconds).
        Interpreted as in RFC5905.
@@ -135,7 +135,8 @@ The following fields are retained from NTPv4:
 "tt":: Transmit Timestamp. String, interpreted as timestamp format.
 
 NTPv4 fields explicitly omitted from NTPv5 are version, reference ID,
-origin timestamp, and reference timestamp.
+origin timestamp, and reference timestamp.  The reference ID field
+becomes the NTPv5 clock-type field.
 
 //FIXME: How do we do the NTPv4 refid's anti-looping job?
 //FIXME: Daniel gets to make the case why poll and stratum are useless.
@@ -144,15 +145,19 @@ Additional NTPv5 fields:
 
 "id":: Request ID to be echoed in the response. Decimal numeric. Optional.
 
-"leap":: Current leap-second offset from UTC. Decimal numeric. Optional.
+"lo":: Current leap-second offset from UTC. Decimal numeric. Optional.
 
-"nts":: NTS authentication cookie. String, interpreted as hex digit pairs.
+"ct":: Clock type. String. Optional.  Identifies a clock source.
+       Limited to 64 octets or less.
+
+"au":: NTS authentication cookie for next exchange. String,
+       interpreted as hex digit pairs.
 
 == Control requests and responses.
 
-Control request and responses MUST specify mode 6.  A request is
-distinguished by the presence of a "params" field, a response by
-the prsence of a "result" field.
+Control request and responses MUST specify type 2 and 3 respectively.
+A request is distinguished by the presence of a "params" field, a
+response by the presence of a "result" field.
 
 The following is an overly verbose partial mockup of a transaction
 chain querying peer-stats.
@@ -265,13 +270,29 @@ chain querying peer-stats.
 
 == Error notifications ==
 
-An error notification has a mode of 7 and has the following fields:
+An error notification has a type of 4 and has the following fields:
 
-"id":: ID of the response to which this corresponsds, if here is one.
+"id":: ID of the response to which this corresponsds. Optional.
 
-"kod":: Kiss O'Death code. String. Interpreted as in RFC 5905. Optional.
+"err":: Error code. String.
 
 "msg":: Notification to human operator. String. Optional.
+
+If none of these fields are present the JSON body may be omitted.
+However, error notifications MUST be authenticated to prevent
+destructive spoofing.
+
+[options="header"]
+|===========================================================
+| Code | Description
+| rate | Server telling client that the client's polling rate is excessive.
+| down | Server telling client that the server cannot provide a time update.
+| info | Informative message for operator.
+|===========================================================
+
+Other error types are reserved for expansion.
+
+Historical note: These correspond to Kiss O'Death packets in NTPv4.
 
 == Daniel weighs in
 
@@ -296,7 +317,8 @@ in plaintext, then the whole rest of the packet is encrypted.
 5. Ditch the useless poll, stratum, refid, and reference timestamp
 fields. Given that all of the above are implemented, origin timestamp
 also becomes redundant (NTS takes the place of its anti-spoofing
-role).  (Achieved with JSON)
+role).  (Achieved with JSON. but the poll and stratum may optionally
+be reported.)
 
 6. Represent timestamps as days, seconds, and fractions so that the
 time can be represented unambiguously during leap seconds. Make the
@@ -319,6 +341,9 @@ We chose *not* to optimize for least possible size of packet. In NTPv4
 this was is a choice that doesn't age well. Data and transaction
 volumes in real-world NTP service are low enough that the overhead
 of JSON with respect to packed binary is quite affordable.
+
+(Note, however, that a minimal poll packet is 3 bytes rather than the
+48 it would be in NTPv4.)
 
 Two approaches we considered and rejected follow, with the
 reasoning abbout why we rejected them.
