@@ -12,11 +12,9 @@ NTPv4 is showing its age in other ways as well.  Its mechanism for
 avoiding source loops does not play well with IPv6, and collisions
 have been observed in the wild.
 
-There are various other functional capabilities that would be very
-useful if they could be standardized but currently are not.  Since
-we need to deal with the 32-bit-counter issues anyway, the time
-is right to design a protocol which (a) includes what we now know
-is needed, and (b) is extensible for future uses.
+Since we need to deal with the 32-bit-counter issues anyway, the time
+is right to design a protocol which (a) includes what we now know is
+needed, and (b) is extensible for future uses.
 
 == Packet metaprotocol
 
@@ -95,6 +93,11 @@ a leading minus sign, but is not expected to in normal operation.  The
 epoch is midnight of November 17, 1858. Day fraction assumes the
 TAI/UTC second.
 
+An NTPv5 timestamp unambiguously represents leap seconds as values in
+a monotonically increasing sequence.  This is a significant change
+from the NTPv4 time representation, which is a UTC seconds counter
+that stutters or skips on leap seconds.
+
 Conforming servers MUST NOT transmit leap-smeared or otherwise
 "adjusted" time; client implementations are expected to perform leap
 smearing locally if at all.
@@ -113,7 +116,7 @@ A time response packet MUST specify type 1.
 
 The following fields are retained from NTPv4:
 
-"li":: Leap Indicator. Decimal numeric. Interpreted as in RFC5905.
+"li":: Leap Indicator. Decimal numeric. Interpreted as in <<<RFC5905>>>.
       Optional, defaulting to 0 = no warning. Conforming
       implementations MUST report warning or unsynchronized
       status when appropriate.
@@ -348,7 +351,7 @@ of JSON with respect to packed binary is quite affordable.
 48 it would be in NTPv4.)
 
 Two approaches we considered and rejected follow, with the
-reasoning abbout why we rejected them.
+reasoning about why we rejected them.
 
 === NTPv4+
 
@@ -383,28 +386,8 @@ desirable degree of flexibility.
 
 The PNG standard can be found at https://www.w3.org/TR/PNG/
 
-A chunk system appropriate for NTP can be summarized as follows:
-
-* Each chunk begins with a four-octet big-endian length.  The length
-  does not count itself.
-
-* Each chunk continues with a 4-octet type identifier composed of
-  printable ASCII characters.
-
-* If the first character is uppercase, the chunk is *critical*; that
-  is, implementations encountering a critical chunk type they do not
-  recognize should treat the packet as erroneous.
-
-* If the first character is not uppercase, the chunk is non-critical
-  and may be skipped.
-
-* Chunk content is not constrained and is interpreted based on the
-  chunk type.
-
-Note that this is not identical to PNG chunk layout; one difference is
-that PNG chunks have only two-byte lengths and always end with a CRC.
-This chunk system is deliberately more similar to RFC7822 extension
-blocks.
+This space used to contain a description of a chunk system appropriate
+for NTP, now omitted.
 
 The principal difficulty with this approach is that getting all the
 world's firewalls to pass through a new port is far from easy.  We
@@ -413,11 +396,14 @@ rejected it on these grounds.
 == References
 [bibiography]
 
-- [[[Seriot2016]]] Seriot, Nicholas; "Parsing JSON is a Minefield"
-  http://seriot.ch/parsing_json.php
+- [[[RFC5905]]] https://tools.ietf.org/html/rfc5905[Network Time
+  Protocol Version 4: Protocol and Algorithms Specification]
 
 - [[[RFC8259]]] https://tools.ietf.org/html/rfc8259[The JavaScript
   Object Notation (JSON) Data Interchange Format]
+
+- [[[Seriot2016]]] Seriot, Nicholas; "Parsing JSON is a Minefield"
+  http://seriot.ch/parsing_json.php
 
 // end
 
