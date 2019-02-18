@@ -4,6 +4,7 @@
 #include "ntp.h"
 #include "ntp_net.h"
 #include "ntp_lists.h"
+#include "nts.h"
 
 /*
  * recvbuf memory management
@@ -46,6 +47,8 @@ struct recvbuf {
 	bool keyid_present;
 	keyid_t keyid;
 	int mac_len;
+	bool extens_present;
+	struct ntspacket_t ntspacket;
 #ifdef REFCLOCK
 	struct peer *	recv_peer;
 #endif /* REFCLOCK */

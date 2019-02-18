@@ -216,25 +216,6 @@ is_control_packet(
 	    PKT_MODE(rbufp->recv_buffer[0]) == MODE_CONTROL;
 }
 
-/* There used to be a calloc/free for each received packet.
-   Now, the parse_pkt version lives in a recvbuf.
-   The alloc/free only happens for extensions and we don't support
-   any of them.
-*/
-static void
-free_extens(
-	struct parsed_pkt *pkt
-	)
-{
-	if(pkt->extensions != NULL) {
-		for(size_t i = 0; i < pkt->num_extensions; i++) {
-			free(pkt->extensions[i].body);
-			pkt->extensions[i].body = NULL;
-		}
-		free(pkt->extensions);
-		pkt->extensions = NULL;
-	}
-}
 
 static bool
 parse_packet(
@@ -248,12 +229,6 @@ parse_packet(
 
 	if(recv_length < LEN_PKT_NOMAC) {
 		/* Data is too short to possibly be a valid packet. */
-		return false;
-	}
-
-	if(recv_length > sizeof(struct pkt)) {
-		/* Data is too long to be punned into the wire-packet struct. */
-		/* If this happens it will be due to too much extension data. */
 		return false;
 	}
 
@@ -273,53 +248,24 @@ parse_packet(
 	pkt->rec = ntp_be64dec(recv_buf + 32);
 	pkt->xmt = ntp_be64dec(recv_buf + 40);
 
-	/* Make sure these are clean before we might bail. */
-        pkt->num_extensions = 0;
-	pkt->extensions = NULL;
-
 	rbufp->keyid_present = false;
 	rbufp->keyid = 0;
 	rbufp->mac_len = 0;
 
+	rbufp->extens_present = false;
+	rbufp->ntspacket.valid = false;
+	rbufp->ntspacket.extra = 0;
+	rbufp->ntspacket.uidlen = 0;
+
 	if(PKT_VERSION(pkt->li_vn_mode) > 4) {
 		/* Unsupported version */
-		goto fail;
+		return false;
 	} else if(PKT_VERSION(pkt->li_vn_mode) == 4) {
 		/* Only version 4 packets support extensions. */
-
-		/* Count and validate extensions */
-		size_t ext_count = 0;
-		size_t extlen = 0;
-		while(bufptr <= recv_buf + recv_length - 28) {
-			extlen = ntp_be16dec(bufptr + 2);
-			if(extlen % 4 != 0 || extlen < 16) {
-				/* Illegal extension length */
-				goto fail;
-			}
-			if((size_t)(recv_buf + recv_length - bufptr) < extlen) {
-				/* Extension length field points past
-				 * end of packet */
-				goto fail;
-			}
-			bufptr += extlen;
-			ext_count++;
-		}
-
-		pkt->num_extensions = (unsigned int)ext_count;
-		pkt->extensions = calloc(ext_count, sizeof (struct exten));
-		if(pkt->extensions == NULL) { goto fail; }
-
-		/* Copy extensions */
-		bufptr = recv_buf + LEN_PKT_NOMAC;
-		for(size_t i = 0; i < ext_count; i++) {
-			pkt->extensions[i].type = ntp_be16dec(bufptr);
-			pkt->extensions[i].len = ntp_be16dec(bufptr + 2) - 4;
-			pkt->extensions[i].body =
-			    calloc(1, pkt->extensions[i].len);
-			if(pkt->extensions[i].body == NULL) { goto fail; }
-			memcpy(pkt->extensions[i].body, bufptr + 4,
-			       pkt->extensions[i].len);
-			bufptr += pkt->extensions[i].len + 4;
+		/* But they also support shared key authentication. */
+		if (recv_length > (LEN_PKT_NOMAC+MAX_MAC_LEN)) {
+			rbufp->extens_present = true;
+			return true;
 		}
 	}
 
@@ -335,7 +281,7 @@ parse_packet(
 		/* crypto-NAK */
 		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
 			/* Only allowed as of NTPv3 */
-			goto fail;
+			return false;
 		}
 		rbufp->keyid_present = true;
 		rbufp->keyid = ntp_be32dec(bufptr);
@@ -344,7 +290,7 @@ parse_packet(
 	    case 6:
 		/* NTPv2 authenticator, which we allow but strip because
 		   we don't support it any more */
-		if(PKT_VERSION(pkt->li_vn_mode) != 2) { goto fail; }
+		if(PKT_VERSION(pkt->li_vn_mode) != 2) { return false; }
 		rbufp->keyid_present = false;
 		rbufp->keyid = 0;
 		rbufp->mac_len = 0;
@@ -353,7 +299,7 @@ parse_packet(
 		/* AES-128 CMAC, MD5 digest */
 		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
 			/* Only allowed as of NTPv3 */
-			goto fail;
+			return false;
 		}
 		rbufp->keyid_present = true;
 		rbufp->keyid = ntp_be32dec(bufptr);
@@ -363,7 +309,7 @@ parse_packet(
 		/* SHA-1 digest */
 		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
 			/* Only allowed as of NTPv3 */
-			goto fail;
+			return false;
 		}
 		rbufp->keyid_present = true;
 		rbufp->keyid = ntp_be32dec(bufptr);
@@ -373,7 +319,7 @@ parse_packet(
 		/* MS-SNTP */
 		if(PKT_VERSION(pkt->li_vn_mode) != 3) {
 			/* Only allowed for NTPv3 */
-			goto fail;
+			return false;
 		}
 
 		/* We don't deal with the MS-SNTP fields, so just strip
@@ -386,13 +332,10 @@ parse_packet(
 		break;
 	    default:
 		/* Any other length is illegal */
-		goto fail;
+		return false;
 	}
 
 	return true;
-  fail:
-	free_extens(&rbufp->pkt);
-	return false;
 }
 
 /* Returns true if we should not accept any unauthenticated packets from
@@ -656,7 +599,7 @@ receive(
 
 	if(!is_vn_mode_acceptable(rbufp)) {
 		stat_count.sys_badlength++;
-		goto done;
+		return;
 	}
 
 	/* FIXME: This is lots more cleanup to do in this area. */
@@ -665,19 +608,19 @@ receive(
 
 	if(check_early_restrictions(rbufp, restrict_mask)) {
 		stat_count.sys_restricted++;
-		goto done;
+		return;
 	}
 
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
 		stat_count.sys_limitrejected++;
-		if(!(restrict_mask & RES_KOD)) { goto done; }
+		if(!(restrict_mask & RES_KOD)) { return; }
 	}
 
 	if(is_control_packet(rbufp)) {
 		process_control(rbufp, restrict_mask);
 		stat_count.sys_processed++;
-		goto done;
+		return;
 	}
 
 	/*
@@ -693,13 +636,13 @@ receive(
 		stat_count.sys_oldversion++;		/* previous version */
 	} else {
 		stat_count.sys_badlength++;
-		goto done;			/* old version */
+		return;			/* old version */
 	}
 	}
 
 	if (!parse_packet(rbufp)) {
 		stat_count.sys_badlength++;
-		goto done;
+		return;
 	}
 
 	if (MODE_SERVER == PKT_MODE(rbufp->pkt.li_vn_mode)) {
@@ -710,7 +653,7 @@ receive(
 	    peer = findpeer(rbufp);
 	    if (NULL == peer) {
 		stat_count.sys_declined++;
-		goto done;
+		return;
 	    }
 	}
 
@@ -748,7 +691,7 @@ receive(
 				peer->cfg.flags &= ~FLAG_AUTHENTIC;
 				peer->flash |= BOGON5;
 			}
-			goto done;
+			return;
 		}
 	}
 
@@ -761,9 +704,12 @@ receive(
 	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
-		if (nts_validate(NULL, NULL, &rbufp->pkt) != 0) {
+		if (rbufp->extens_present) {
+		    if (!extens_server_recv(&rbufp->ntspacket,
+			  rbufp->recv_buffer, rbufp->recv_length)) {
 			stat_count.sys_declined++;
 			break;
+		    }
 		}
 		handle_fastxmit(rbufp, restrict_mask, auth);
 		stat_count.sys_processed++;
@@ -787,8 +733,6 @@ receive(
 		break;
 	}
 
-  done:
-	free_extens(&rbufp->pkt);
 }
 
 /*

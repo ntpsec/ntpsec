@@ -255,7 +255,7 @@ struct peer {
 	uint8_t	cast_flags;	/* additional flags */
 	uint8_t	last_event;	/* last peer error code */
 	uint8_t	num_events;	/* number of error events */
-	struct ntsstate_t nts_state;	/* per-peer Network Time Security state */
+	struct ntsclient_t nts_state;	/* per-peer NTS state */
 
 	/*
 	 * Variables used by reference clock support
@@ -413,14 +413,6 @@ struct parsed_pkt {
         uint64_t org;
         uint64_t rec;
         uint64_t xmt;
-        unsigned num_extensions;
-        struct exten *extensions;
-};
-
-struct exten {
-        uint16_t type;
-        uint16_t len;
-        uint8_t *body;
 };
 
 /* This is the old, insane way of representing packets. It'll gradually

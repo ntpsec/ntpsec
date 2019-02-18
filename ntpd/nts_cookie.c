@@ -166,6 +166,7 @@ int nts_make_cookie(uint8_t *cookie,
 bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   uint16_t *aead,
   uint8_t *c2s, uint8_t *s2c, int *keylen) {
+
   uint8_t *finger;
   uint8_t plaintext[NTS_MAX_COOKIELEN];
   uint8_t *nonce;
@@ -173,6 +174,10 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   size_t plainlength;
   int cipherlength;
   bool ok;
+
+// FIXME - these are our cookies.  We should know the exact length
+  if (cookielen > NTS_MAX_COOKIELEN)
+    return false;
 
   finger = cookie;
   // FIXME should call routine to return key
@@ -192,7 +197,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
            K, K_length,
            nonce, NONCE_LENGTH,
            finger, cipherlength,
-           cookie, AEAD_LENGTH);
+           cookie, AD_LENGTH);
   if (!ok)
     return false;
 

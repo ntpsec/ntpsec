@@ -75,7 +75,7 @@ int nts_server_ke_verify(struct ntscfg_t *cfg)
  * - Verify server response message
  * - Extract cookie(s).
  */
-int nts_client_ke_verify(struct ntscfg_t *cfg, struct ntsstate_t *state)
+int nts_client_ke_verify(struct ntscfg_t *cfg, struct ntsclient_t *state)
 {
 	UNUSED_ARG(cfg);
 	UNUSED_ARG(state);
@@ -100,7 +100,7 @@ int nts_daily(struct ntscfg_t *cfg)
  * there is no per-client server state.  A nonzero return causes the
  * packet to be discarded.
  */
-int nts_validate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
+int nts_validate(const struct ntscfg_t *cfg, struct ntsclient_t *state,
 		 struct parsed_pkt *pkt)
 {
 	UNUSED_ARG(cfg);
@@ -115,7 +115,7 @@ int nts_validate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
  * the ntscfg and state pointers are expected to be NULL as there
  * is no per-client server state.  Return the count of words appended.
  */
-int nts_decorate(const struct ntscfg_t *cfg, struct ntsstate_t *state,
+int nts_decorate(const struct ntscfg_t *cfg, struct ntsclient_t *state,
 		 uint8_t *extdata, size_t extlen)
 {
 	UNUSED_ARG(cfg);
@@ -142,7 +142,7 @@ void nts_log_ssl_error(void) {
 
 // 2 byte type, 2 byte length
 #define NTS_KE_HDR_LNG 4
-#define NTS_KE_DATA2_LNG 2
+#define NTS_KE_U16_LNG 2
 
 /* Troubles with signed/unsigned compares when using sizeof() */
 
@@ -151,9 +151,9 @@ void nts_append_record_null(BufCtl* buf, uint16_t type) {
 }
 
 void nts_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data) {
-  if (NTS_KE_HDR_LNG+NTS_KE_DATA2_LNG > buf->left)
+  if (NTS_KE_HDR_LNG+NTS_KE_U16_LNG > buf->left)
     return;
-  nts_append_header(buf, type, NTS_KE_DATA2_LNG);
+  nts_append_header(buf, type, NTS_KE_U16_LNG);
   nts_append_uint16(buf, data);
 }
 
@@ -177,11 +177,11 @@ void nts_append_header(BufCtl* buf, uint16_t type, uint16_t length) {
 
 void nts_append_uint16(BufCtl* buf, uint16_t data) {
   uint16_t * ptr = (uint16_t *)buf->next;
-  if (NTS_KE_DATA2_LNG > buf->left)
+  if (NTS_KE_U16_LNG > buf->left)
     return;
   *ptr++ = htons(data);
-  buf->next += NTS_KE_DATA2_LNG;
-  buf->left -= NTS_KE_DATA2_LNG;
+  buf->next += NTS_KE_U16_LNG;
+  buf->left -= NTS_KE_U16_LNG;
 }
 
 void nts_append_bytes(BufCtl* buf, uint8_t *data, int length) {
@@ -205,8 +205,8 @@ uint16_t nts_next_record(BufCtl* buf, int *length) {
 uint16_t nts_next_uint16(BufCtl* buf) {
   uint16_t *ptr = (uint16_t *)buf->next;
   uint16_t data = ntohs(*ptr++);
-  buf->next += NTS_KE_DATA2_LNG;
-  buf->left -= NTS_KE_DATA2_LNG;
+  buf->next += NTS_KE_U16_LNG;
+  buf->left -= NTS_KE_U16_LNG;
   return data;
 }
 
