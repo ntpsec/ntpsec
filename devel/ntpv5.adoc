@@ -1,13 +1,26 @@
 = Preliminary design notes for the NTPv5 protocol
 
-NTPv4 is showing its age.  There are functional capabilities that
-would be very useful if they could be standardized but
-currently are not.
+== Why NTPv5? ==
+
+Why an NTPv5?  Why not muddle through with NTPv4?  The principal
+reason to avoid rollover cases in its time representation.  There is an
+epoch turnover in 2036; it would be wise to have moved to full 64-bit
+timestamps well before we have to deal with uncharted parts of the
+software's behavior space.
+
+NTPv4 is showing its age in other ways as well.  Its mechanism for
+avoiding source loops does not play well with IPv6, and collisions
+have vbeen observed in the wild.
+
+There are various other functional capabilities that would be very
+useful if they could be standardized but currently are not.  Since
+we need to deal with the 32-bit-counter issues anyway, the time
+is right to design 
+
+== The missing data: a semantic view
 
 This document will first list these missing bits, then discuss
 ways to incorporate them.
-
-== The missing data: a semantic view
 
 === REFIDs
 
@@ -16,17 +29,18 @@ clock types, and by hosts at higher strata to perform loop detection.
 
 The REFID field is four octets long, sufficient to hold an IPv4 address
 for loop detection; this is inadequate for IPv6, so the reference ID of
-an IPv6 host is a 4-octet hash of its actual address. Hash collisions
-have been observed in the wild, possibly resulting in false-positive
-loop detection.
+an IPv6 host is a 4-octet hash of its actual address. AS previously
+noted, hash collisions have been observed in the wild - possibly
+resulting in false-positive loop detection.
 
 The new protocol should support REFIDs at least as long as an IPv6
 address (16 octets).
 
 === Timescale
 
-Most servers ship UTC.  Some ship TAI. Some perform leap-second
-smearing, some do not.
+Most servers ship UTC in seconds since the current era start.  Some
+ship TAI since current era start. Some perform leap-second smearing,
+some do not.
 
 The new protocol should enable a server to advertise its timescale,
 including, if applicable in its timescale, its current leap second offset.
@@ -35,12 +49,19 @@ including, if applicable in its timescale, its current leap second offset.
 
 NTP dates are 64-bit counters based on an epoch.
 
-The new protocol should enable a server to ship a year identifying its
-epoch.
+The new protocol should either enable a server to ship a year identifying the
+epoch on which its counters are based or ship a non-counter timestamp
+format such as MJD plus seconds and fractional seconds since midnight.
+
+=== Leap offset
+
+Regardless of what timescale is shipped, the protocol should allow
+leap second notications, warnings, and the current offset to be passed
+from IERS and/or national time authorities to users.
 
 === NTS
 
-The new protocol needs to support NTS extension fields.
+The new protocol needs to (continue to) support NTS extension fields.
 
 == Extensions vs. replacement
 
