@@ -5,7 +5,7 @@
 Why an NTPv5?  Why not muddle through with NTPv4?  The principal
 reason to avoid rollover cases in its time representation.  There is an
 epoch turnover in 2036; it would be wise to have moved to full 64-bit
-timestamps well before we have to deal with uncharted parts of the
+dates well before we have to deal with uncharted parts of the
 software's behavior space.
 
 NTPv4 is showing its age in other ways as well.  Its mechanism for
@@ -15,7 +15,32 @@ have vbeen observed in the wild.
 There are various other functional capabilities that would be very
 useful if they could be standardized but currently are not.  Since
 we need to deal with the 32-bit-counter issues anyway, the time
-is right to design 
+is right to design a protocol which (a) includes what we now know
+is needed, and (b) is extensible for future use.
+
+== Packet metaprotocol
+
+Every packet is led with a character '+'. This is chosen so that when
+a packet analyzer for NTPv4 looks the first byte, it sees 0x02B, which
+unpacks to LI:00 VN:5 MODE:3.  The version 5, which is out of band for
+an NTPv4 packet, will cause the packet to be rejected by conforming
+NTPv4 implementations that do not handle v5.
+
+The Mills reference version of NTP and all codebases descended from
+it (including NTPSec) *do* recognize Version 5 as out of band
+and will not pass such packets to a Version 5 protocol machine.
+
+The remainder of the packet is encoded in a strict subset of JSON
+intended to avoid known edge cases decribed in <<<Seriot16>>>.  The
+outermost enclosing {} is required. Trailing commas on elements are
+disallowed. UTF-8 may occur but only within string literals, all else
+must be 7-bit ASCII.
+
+In the remainder of this document, packet fields will be described as
+keyword-value pairs. The keyword *is* explicit in the JSON, and the
+mapping is as implied in <<<RFC8259>>>.
+
+The Appendix discusses some paths not taken and the reasons they weren't.
 
 == The missing data: a semantic view
 
@@ -62,87 +87,6 @@ from IERS and/or national time authorities to users.
 === NTS
 
 The new protocol needs to (continue to) support NTS extension fields.
-
-== Extensions vs. replacement
-
-There are three possible scenarios for NTPv5 design.
-
-=== NTPv4+
-
-In this incremental approach, the NTP port number (123) is retained
-and the 48-byte header v4 header is preserved. New data fields are
-passed in RFC7822 extension blocks.  The NTP version number is
-not incremented; "v5" becomes a set of required extension blocks.
-
-There can be a way to unambiguously detect v5 packets.  The stratum
-field is 8 bits, but only the low five bits are used.  We can mark
-v5 packets by setting the high three bits.
-
-A difficulty with this approach is that some firewalls and routers are
-known to silently discard RFC7822 extension blocks as a way of
-preventing DoS attacks. However, by checking the mark described in the
-previous paragraph, an ntpd can at least detect this.
-
-=== NTPNG
-
-In this approach, a new port number is allocated. The protocol
-design is unconstrained except that it must carry the semantic
-content of the v4 header minus the unused Reference Timestamp
-field.
-
-The principal difficulty with this approach is that getting all the
-world's firewalls to pass through a new port is not easy.
-
-=== Newmode
-
-In this approach, the NTP port number is retained.  So is at least
-the first byte of the v4 packet header structure, so that the version
-number and packet mode are at the same offset as in v4. The version
-field *is* incremented to 5.
-
-The following payload design is unconstrained except that it must
-carry the semantic content of the v4 header minus the unused Reference
-Timestamp field.
-
-The principal difficulty with this approach is that implementations
-might not reject Version 5 packets, and therefore mis-parse the
-header.  NTP Classic and NTPsec *do* perform this check.
-
-== Payload format design for the NTPNG and Newmode cases
-
-NTP is running out of version numbers.  The version field is only 3
-bits wide.  Accordingly, the Newmode payload should be structured like
-PNG, as a sequence of self-describing chunks that can be retired and
-replaced as needed to change payload semantics.
-
-Though NTPNG is not constrained by the width of the v4 mode field,
-the versionless semantics of a PNG-style chunk stream would confer a
-desirable degree of flexibility.
-
-The PNG standard can be found at https://www.w3.org/TR/PNG/
-
-A chunk system appropriate for NTP can be summarized as follows:
-
-* Each chunk begins with a four-octet big-endian length.  The length
-  does not count itself.
-
-* Each chunk continues with a 4-octet type identifier composed of
-  printable ASCII characters.
-
-* If the first character is uppercase, the chunk is *critical*; that
-  is, implementations encountering a critical chunk type they do not
-  recognize should treat the packet as erroneous.
-
-* If the first character is not uppercase, the chunk is non-critical
-  and may be skipped.
-
-* Chunk content is not constrained and is interpreted based on the
-  chunk type.
-
-Note that this is not identical to PNG chunk layout; one difference is
-that PNG chunks have only two-byte lengths and always end with a CRC.
-This chunk system is deliberately more similar to RFC7822 extension
-blocks.
 
 == Daniel weighs in
 
@@ -297,6 +241,90 @@ such.
 ...
 ----
 
+== Appendix: Paths not taken
+
+We chose a JSON-based metaprotocol to achieve the following qualities:
+(a) extensibility, (b) auditability by eyeball and simple tools, (c)
+avoidance of endianness or fixed-length issues in numeric
+representations.
+
+We chose *not* to optimize for least possible size of packet. In NTPv4
+this was is a choice that doesn't age well. Data and transaction
+volumes in real-world NTP service are low enough that the overhead
+of JSON with respect to packed binary is quite affordable.
+
+=== NTPv4+
+
+In this incremental approach, the NTP port number (123) is retained
+and the 48-byte header v4 header is preserved. New data fields are
+passed in RFC7822 extension blocks.  The NTP version number is
+not incremented; "v5" becomes a set of required extension blocks.
+
+There can be a way to unambiguously detect v5 packets.  The stratum
+field is 8 bits, but only the low five bits are used.  We can mark
+v5 packets by setting the high three bits.
+
+A difficulty with this approach is that some firewalls and routers are
+known to silently discard RFC7822 extension blocks as a way of
+preventing DoS attacks. However, by checking the mark described in the
+previous paragraph, an ntpd can at least detect this.
+
+=== NTPNG
+
+In this approach, a new port number is allocated. The protocol
+design is unconstrained except that it must carry the semantic
+content of the v4 header minus the unused Reference Timestamp field.
+The version field *is* incremented to 5.
+
+The principal difficulty with this approach is that getting all the
+world's firewalls to pass through a new port is far from easy.  We
+rejected it on these grounds.
+
+== Payload format design for the NTPNG and Newmode cases
+
+NTP is running out of version numbers.  The version field is only 3
+bits wide.  Accordingly, the Newmode payload should be structured like
+PNG, as a sequence of self-describing chunks that can be retired and
+replaced as needed to change payload semantics.
+
+Though NTPNG is not constrained by the width of the v4 mode field,
+the versionless semantics of a PNG-style chunk stream would confer a
+desirable degree of flexibility.
+
+The PNG standard can be found at https://www.w3.org/TR/PNG/
+
+A chunk system appropriate for NTP can be summarized as follows:
+
+* Each chunk begins with a four-octet big-endian length.  The length
+  does not count itself.
+
+* Each chunk continues with a 4-octet type identifier composed of
+  printable ASCII characters.
+
+* If the first character is uppercase, the chunk is *critical*; that
+  is, implementations encountering a critical chunk type they do not
+  recognize should treat the packet as erroneous.
+
+* If the first character is not uppercase, the chunk is non-critical
+  and may be skipped.
+
+* Chunk content is not constrained and is interpreted based on the
+  chunk type.
+
+Note that this is not identical to PNG chunk layout; one difference is
+that PNG chunks have only two-byte lengths and always end with a CRC.
+This chunk system is deliberately more similar to RFC7822 extension
+blocks.
+
+
+== References
+[bibiography]
+
+- [[[Seriot2016]]] Seriot, Nicholas; "Parsing JSON is a Minefield"
+  http://seriot.ch/parsing_json.php
+
+- [[[RFC8259]]] https://tools.ietf.org/html/rfc8259[The JavaScript
+  Object Notation (JSON) Data Interchange Format]
 
 // end
 
