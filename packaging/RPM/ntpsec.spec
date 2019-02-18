@@ -1,11 +1,11 @@
 Name:		ntpsec
-Version:	0.9.7
+Version:	1.1.3
 Release:	1%{?dist}
 Summary:	A secure, hardened, and improved implementation of Network Time Protocol derived from NTP Classic, Dave Mills’s original.
 
 License:	BSD
 URL:		https://www.ntpsec.org/
-Source0:	ftp://ftp.ntpsec.org/pub/releases/ntpsec-0.9.7.tar.gz
+Source0:	ftp://ftp.ntpsec.org/pub/releases/ntpsec-1.1.3.tar.gz
 
 %description
 NTPsec, as its name implies, is a more secure NTP. Our goal is to deliver code that can be used with confidence in deployments with the most stringent security, availability, and assurance requirements.
