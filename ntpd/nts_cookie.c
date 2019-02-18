@@ -56,16 +56,22 @@
  * 168
  */
 
-/* cookies use same algorithms as wire */
+// FIXME - save K/I on disk
+// FIXME - rotate K/I occasionally
+
+/* cookies use same AEAD algorithms as wire */
 uint8_t K[NTS_MAX_KEYLEN];
 uint32_t I;
 
 AES_SIV_CTX* cookie_ctx;  /* need one per thread */
 
-/* This determines which algorithm we use. */
-/* making this a variable rather than #define
+/* This determines which algorithm we use.
+ * Valid choices are 32, 48, and 64
+ * making this a variable rather than #define
  * opens up the opportunity to pick one at run time. */
 int K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
+
+// FIXME duplicated in ntp_extens
 #define NONCE_LENGTH 16
 
 /* Associated data: aead (rounded up to 4) plus NONCE */
@@ -82,8 +88,10 @@ bool nts_cookie_init(void) {
   OK &= RAND_bytes((uint8_t *)&I, sizeof(I));
 #endif
   cookie_ctx = AES_SIV_CTX_new();
-  if (NULL == cookie_ctx)
-    OK = false;
+  if (NULL == cookie_ctx) {
+    msyslog(LOG_ERR, "NTS: Can't init cookie_ctx");
+    exit(1);
+  }
   return OK;
 }
 
@@ -138,7 +146,12 @@ int nts_make_cookie(uint8_t *cookie,
            plaintext, plainlength,
            cookie, AD_LENGTH);
   if (!ok) {
-    msyslog(LOG_ERR, "NTS: Error from AES_SIV_Encrypt");
+    msyslog(LOG_ERR, "NTS: nts_make_cookie - Error from AES_SIV_Encrypt");
+    /* I don't think this should happen,
+     * so crash rather than work incorrectly.
+     * Hal, 2019-Feb-17
+     * Similar code in ntp_extens
+     */
     exit(1);
   }
 

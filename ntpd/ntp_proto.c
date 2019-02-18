@@ -2108,17 +2108,17 @@ peer_xmit(
 		peer->org_rand = peer->org_ts;
 	}
 
+	/* Maybe we should bump org_ts to compensate for crypto */
 	xpkt.xmt = htonl_fp(peer->org_rand);	/* out in xmt, back in org */
 
-
-	sendlen += nts_decorate(&peer->cfg.nts_cfg, &peer->nts_state,
-				xpkt.exten, sizeof(xpkt.exten));
-
-	/*
-	 * If the peer (aka server) was configured with a key, authenticate
-	 * the packet.  Else, the packet is not authenticated.
+	/* 3 way branch to add authentication:
+         *  1) NTS
+         *  2) Shared KEY
+         *  3) none
 	 */
-	if (0 != peer->cfg.peerkey) {
+	if (0 < peer->nts_state.count) {
+		sendlen += extens_client_send(peer, &xpkt);
+        } else if (0 != peer->cfg.peerkey) {
 		auth_info *auth = authlookup(peer->cfg.peerkey, true);
 		if (NULL == auth) {
 			report_event(PEVNT_AUTH, peer, "no key");
@@ -2126,12 +2126,7 @@ peer_xmit(
 			peer->badauth++;
 			return;
 		}
-		/* Maybe bump peer->org_ts to account for crypto time */
 		sendlen += authencrypt(auth, (uint32_t *)&xpkt, sendlen);
-		if (sendlen > sizeof(xpkt)) {
-			msyslog(LOG_ERR, "PROTO: buffer overflow %u", sendlen);
-			exit(1);
-		}
 	}
 
 	sendpkt(&peer->srcadr, peer->dstadr, &xpkt, sendlen);

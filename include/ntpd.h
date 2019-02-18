@@ -96,7 +96,7 @@ extern  void    io_handler              (void);
 extern	void	init_io 	(void);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
-extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, int);
+extern	void	sendpkt 	(sockaddr_u *, endpt *, void *, unsigned int);
 extern const char * latoa(endpt *);
 
 /* ntp_loopfilter.c */
@@ -191,6 +191,21 @@ extern	void	record_raw_stats (struct peer *,
 				  int ppoll, int precision, double root_delay,
 				  double root_dispersion, refid_t refid,
 				  unsigned int outcount);
+extern void record_ref_stats(
+    const struct peer *peer,
+    int     n,              /* Number of samples */
+    int     i,              /* Index of first sample used */
+    int     j,              /* Index of last sample used */
+    double  t1,             /* Value of first sample */
+    double  t2,             /* Value of first sample used */
+    double  t3,             /* answer/median */
+    double  t4,             /* Value of last sample used */
+    double  t5,             /* Value of last sample */
+    double  jitter,
+    double  std_dev,        /* std deviation of trimmed subset */
+    double  std_dev_all     /* std deviation of everything */
+    );
+
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 
 /* packetstamp.c */
@@ -419,6 +434,9 @@ extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
 extern struct refclock * const refclock_conf[];
 extern const uint8_t	num_refclock_conf;
 #endif
+
+/* ntd_extens.c */
+int extens_client_send(struct peer *peer, struct pkt *xpkt);
 
 /* nts.c */
 void nts_init(void);

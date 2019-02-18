@@ -9,6 +9,7 @@
 #define NTS_MAX_KEYLEN		64	/* used in cookies */
 #define NTS_MAX_COOKIELEN	192	/* see nts_cookie.c */
 #define NTS_MAX_COOKIES		8	/* RFC 4.1.6 */
+#define NTS_UID_LENGTH		32	/* RFC 5.3 */
 
 #define FLAG_NTS	0x01u	/* use NTS (network time security) */
 #define FLAG_NTS_ASK	0x02u	/* NTS, ask for specified server */
@@ -34,14 +35,18 @@ struct ntscfg_t {
 
 /* Client-side state per connection to server */
 struct ntsstate_t {
-    int aead;
+    /* wire connection */
+    int aead;   /* AEAD algorithm used on wire */
     int keylen;
-    int next_cookie;
-    int cookie_count;
-    int cookie_length;
+    uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
+    /* UID of last request sent - RFC 5.3 */
+    uint8_t UID[NTS_UID_LENGTH];
+    /* cookies */
+    int readIdx, writeIdx;
+    int count;
+    int cookielen;
     bool valid[NTS_MAX_COOKIES];
     uint8_t cookies[NTS_MAX_COOKIES][NTS_MAX_COOKIELEN];
-    uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
 };
 
 /* Configuration data for an NTS server or client instance */

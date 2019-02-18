@@ -1999,10 +1999,15 @@ sendpkt(
 	sockaddr_u *		dest,
 	endpt *			src,
 	void *			pkt,
-	int			len
+	unsigned int		len
 	)
 {
 	ssize_t	cc;
+
+	if (len > sizeof(struct pkt)) {
+		msyslog(LOG_ERR, "Err: sendpkt - buffer overflow %u", len);
+		exit(1);
+	}
 
 	if (NULL == src) {
 		/*

@@ -308,8 +308,9 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
 
   peer->nts_state.aead = -1;
   peer->nts_state.keylen = 0;
-  peer->nts_state.next_cookie = 0;
-  peer->nts_state.cookie_count = 0;
+  peer->nts_state.writeIdx = 0;
+  peer->nts_state.readIdx = 0;
+  peer->nts_state.count = 0;
   for (int i=0; i<NTS_MAX_COOKIES; i++) peer->nts_state.valid[i] = false;
 
   buf.next = buff;
@@ -355,22 +356,22 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
           msyslog(LOG_ERR, "NTSc: NC cookie too big: %d", length);
           return false;
         }
-        if (0 == peer->nts_state.cookie_length)
-           peer->nts_state.cookie_length = length;
-        if (length != peer->nts_state.cookie_length) {
+        if (0 == peer->nts_state.cookielen)
+           peer->nts_state.cookielen = length;
+        if (length != peer->nts_state.cookielen) {
           msyslog(LOG_ERR, "NTSc: Cookie length mismatch %d, %d.",
-            length, peer->nts_state.cookie_length);
+            length, peer->nts_state.cookielen);
           return false;
         }
-        idx = peer->nts_state.next_cookie;
-        nts_next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
-        if (NTS_MAX_COOKIES <= peer->nts_state.cookie_count) {
-          msyslog(LOG_ERR, "NTSc: Extra cookie.");
+        idx = peer->nts_state.writeIdx;
+        if (NTS_MAX_COOKIES <= peer->nts_state.count) {
+          msyslog(LOG_ERR, "NTSc: Extra cookie ignored.");
           break;
         }
+        nts_next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
         peer->nts_state.valid[idx] = true;
-        peer->nts_state.next_cookie++;
-        peer->nts_state.cookie_count++;
+        peer->nts_state.writeIdx++;
+        peer->nts_state.count++;
         break;
       case nts_end_of_message:
         if ((0 != length) || !critical) {
@@ -399,13 +400,13 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
     msyslog(LOG_ERR, "NTSc: No AEAD algorithim.");
     return false;
   }
-  if (0 == peer->nts_state.cookie_count) {
+  if (0 == peer->nts_state.count) {
     msyslog(LOG_ERR, "NTSc: No cookies.");
     return false;
   }
 
   msyslog(LOG_ERR, "NTSc: Got %d cookies, length %d.",
-    peer->nts_state.cookie_count, peer->nts_state.cookie_length);
+    peer->nts_state.count, peer->nts_state.cookielen);
   return true;
 }
 
