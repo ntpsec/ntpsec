@@ -1,11 +1,11 @@
-= Preliminary design notes for the NTPv5 protocol
+= Design notes for the NTPv5 protocol
 
 == Why NTPv5? ==
 
 Why an NTPv5?  Why not muddle through with NTPv4?  The principal
 reason to avoid rollover cases in its time representation.  There is an
 epoch turnover in 2036; it would be wise to have moved to full 64-bit
-dates well before we have to deal with uncharted parts of the
+date stamps well before we have to deal with uncharted parts of the
 software's behavior space.
 
 NTPv4 is showing its age in other ways as well.  Its mechanism for
@@ -21,126 +21,142 @@ is needed, and (b) is extensible for future use.
 == Packet metaprotocol
 
 Every packet is led with a character '+'. This is chosen so that when
-a packet analyzer for NTPv4 looks the first byte, it sees 0x02B, which
-unpacks to LI:00 VN:5 MODE:3.  The version 5, which is out of band for
-an NTPv4 packet, will cause the packet to be rejected by conforming
-NTPv4 implementations that do not handle v5.
+a packet analyzer for NTPv4 looks at the first byte, it sees 0x02B,
+which unpacks to LI:00 VN:5 MODE:3.  The version 5, which is out of
+band for an NTPv4 packet, will cause the packet to be rejected by
+conforming NTPv4 implementations that do not handle v5.
 
 The Mills reference version of NTP and all codebases descended from
 it (including NTPSec) *do* recognize Version 5 as out of band
-and will not pass such packets to a Version 5 protocol machine.
+and will not pass such packets to a Version 4 protocol machine.
 
 The remainder of the packet is encoded in a strict subset of JSON
-intended to avoid known edge cases decribed in <<<Seriot16>>>.  The
+intended to avoid known edge cases decribed in <<<Seriot2016>>>.  The
 outermost enclosing {} is required. Trailing commas on elements are
 disallowed. UTF-8 may occur but only within string literals, all else
-must be 7-bit ASCII.
+must be 7-bit ASCII. Scientific notation is not used.
+
+Transmitted packet sizes MUST be limited to 65,506 octets, so that the
+largest possible NTPv5 packet and a trailing NUL will fit in one UDP
+datagram.  To prevent DoS attacks, implementations MAY limit the
+packet size they will receive to a lower value; however implementations
+MUST accept packets of at least 512 octets.
+
+Packets SHOULD use only ASCII space (0x20) as a JSON whitespace
+character. Packets MAY ship with no whitespace.
 
 In the remainder of this document, packet fields will be described as
 keyword-value pairs. The keyword *is* explicit in the JSON, and the
-mapping is as implied in <<<RFC8259>>>.
+mapping to on-the-wire representation is as implied in <<<RFC8259>>>.
+
+Once the semantics of a packet field has been defined, it MAY be
+omitted but MUST NOT change incompatibly. Protocol extensions MUST be
+done with new fields.
+
+Implementations MAY ignore fields they do not recognize, but SHOULD
+make some effort to generate error notifications when this occurs.
+Policy for rate-limiting such notifications is implementor's choice.
 
 The Appendix discusses some paths not taken and the reasons they weren't.
 
-== The missing data: a semantic view
+== Packet types ==
 
-This document will first list these missing bits, then discuss
-ways to incorporate them.
+We define five packet types:
 
-=== REFIDs
+[options="header"]
+|===========================================================
+| Type name        | NTPv4 equivalent | Description
+| time poll        | mode 2 or 3      | request for time update
+| time response    | mode 4           | time update
+| control request  | mode 6           | request for server information
+| control response | mode 6           | response with server information
+| error            | KOD              | error notification
+|===========================================================
 
-Reference IDs are used by Stratum 1 sources to identify clocks and
-clock types, and by hosts at higher strata to perform loop detection.
+Conforming implementations MUST respond to unknown packet types with
+an error response.
 
-The REFID field is four octets long, sufficient to hold an IPv4 address
-for loop detection; this is inadequate for IPv6, so the reference ID of
-an IPv6 host is a 4-octet hash of its actual address. AS previously
-noted, hash collisions have been observed in the wild - possibly
-resulting in false-positive loop detection.
+== Time format and scale ==
 
-The new protocol should support REFIDs at least as long as an IPv6
-address (16 octets).
+A timestamp field is an MJD (Modified Julian Date) literal in the form
+"YYYY/DDD/SSSS.SSSS"; Calendar year, day within year, seconds and
+fractional seconds from midnight.  Fields are not length limited, thus
+the year may have more than four digits and the subsecond precision of
+the timestamp is not limited by this format.
 
-=== Timescale
+Conforming implementations MUST report in TAI/UTC seconds and servers
+MUST NOT transmmit leap-smeared or otherwise "adjusted" time; client
+implementations are expected to perform leap smearing locally if at
+all.
 
-Most servers ship UTC in seconds since the current era start.  Some
-ship TAI since current era start. Some perform leap-second smearing,
-some do not.
+== Time request packet
 
-The new protocol should enable a server to advertise its timescale,
-including, if applicable in its timescale, its current leap second offset.
+A time request packet MUST specify mode 3. No other content is required
 
-=== Era
+Note: this corresponds to a minimal SNTP packet under RFC2030.
 
-NTP dates are 64-bit counters based on an epoch.
+== Time response packet
 
-The new protocol should either enable a server to ship a year identifying the
-epoch on which its counters are based or ship a non-counter timestamp
-format such as MJD plus seconds and fractional seconds since midnight.
+A time response packet MUST specify mode 4.
 
-=== Leap offset
+The following fields are retyained from NTPv4:
 
-Regardless of what timescale is shipped, the protocol should allow
-leap second notications, warnings, and the current offset to be passed
-from IERS and/or national time authorities to users.
+"l":: Leap Indicator. Decimal numeric. Interpreted as in RFC5905.
+      Optional, defaulting to 0 = no warning. Conforming
+      implementations MUST report warning or unsynchronized
+      status when appropriate.
 
-=== NTS
+"m":: Mode: Decimal numeric. Interpreted as in RFC5905.
 
-The new protocol needs to (continue to) support NTS extension fields.
+"s":: Stratum. Decimal numeric. Interpreted as in RFC5905.
 
-== Daniel weighs in
+"i":: Poll. Decimal numeric. Interpreted as in RFC5905.
 
-There aren't many deficiencies in NTPv4 which can't be fixed by adding
-extension fields. A change big enough to make a version bump
-worthwhile would incorporate at least most of the following:
+"p":: Precision.   Decimal numeric. Interpreted as in RFC5905.
 
-1. Drop everything other than client/server mode. Replace mode 6 with
-something that runs over HTTPS on the NTS-KE port.
+"de":: Root delay. Decimal numeric (seconds and fractional seconds).
+       Interpreted as in RFC5905.
 
-2. Let client and server packets be formatted differently. Achieve
-data minimization by just taking unnecessary fields out of client
-packets altogether.
+"di":: Root dispersion. Decimal numeric (seconds and fractional seconds).
+       Interpreted as in RFC5905.
 
-3. Forbid the use of the legacy MAC field, thus fixing the hairiness
-around extension parsing.
+"rt":: Receive Timestamp. String, interpreted as timestamp format.
 
-4. Make NTS mandatory. In the NTPv5 packet format, the version, mode,
-NTS unique identifier, and (in client packets) NTS cookie come first
-in plaintext, then the whole rest of the packet is encrypted.
+"tt":: Transmit Timestamp. String, interpreted as timestamp format.
 
-5. Ditch the useless poll, stratum, refid, and reference timestamp
-fields. Given that all of the above are implemented, origin timestamp
-also becomes redundant (NTS takes the place of its anti-spoofing
-role).
+NTPv4 fields explicitly omitted from NTPv5 are version, reference ID,
+origin timestamp, and reference timestamp.
 
-6. Represent timestamps as days, seconds, and fractions so that the
-time can be represented unambiguously during leap seconds. Make the
-day field 64 bits wide so that its range comfortable exceeds the
-lifespan of the solar system.
+//FIXME: How do we do the NTPv4 refid's anti-looping job?
+//FIXME:: Daniel get to make the case why poll and stratum are useless.
 
-7. Don't implement leap smearing in the wire protocol (servers should
-always report accurate, unsmeared time), but standardize a formula for
-translating NTP time into smeared UNIX time seen by other
-applications.
+Additional NTPv5 fields:
 
-== Decruftifying Mode 6
+"id":: Request ID to be echoed in the response. Decimal numeric. Optional.
 
-It should be possible to shift a copy of mode 6 to UTF-8 JSON-RPC and
-rebadge it as a new mode 7.  The following is an overly verbose
-partial mockup of a transaction chain querying peer-stats.  All the
-numbers should be in _decimal_ without the hexadecimal timestamps and
-such.
+"leap":: Current leap-second offset from UTC. Decimal numeric. Optional.
+
+"nts":: NTS authentication cookie. String, interpreted as hex digit pairs.
+
+== Control requests and responses.
+
+Control request and responses MUST specify mode 6.  A request is
+distinguished by the presence of a "params" field, a response by
+the prsence of a "result" field.
+
+The following is an overly verbose partial mockup of a transaction
+chain querying peer-stats.
 
 [source, json]
 ----
 {
-   "jsonrpc" : "2.0",
+   "mode" : 6,
    "id" : 1,
    "params" : {},
    "method" : "readstat"
 }
 {
-   "jsonrpc" : "2.0",
+   "mode" : 6,
    "id" : 1,
    "result" : {
       "answer" : {
@@ -162,7 +178,7 @@ such.
 }
 
 {
-   "jsonrpc" : "2.0",
+   "mode" : 6,
    "id" : 2,
    "params" : {
       "association" : 62398
@@ -170,7 +186,7 @@ such.
    "method" : "readvar"
 }
 {
-   "jsonrpc" : "2.0",
+   "mode" : 6,
    "id" : 2,
    "result" : {
       "answer" : {
@@ -241,6 +257,53 @@ such.
 ...
 ----
 
+== Error notifications ==
+
+An error notification has the following fields:
+
+"mode":: Must be a decimal integer 7.
+
+"id":: ID of the response to which thid corresponsds, if here is one.
+
+"kod":: Kiss O'Death code. String. Interpreted as in RFC 5905. Optional.
+
+"msg":: Notification to human operator. String. Optional.
+
+== Daniel weighs in
+
+There aren't many deficiencies in NTPv4 which can't be fixed by adding
+extension fields. A change big enough to make a version bump
+worthwhile would incorporate at least most of the following:
+
+1. Drop everything other than client/server mode. Replace mode 6 with
+something that runs over HTTPS on the NTS-KE port.
+
+2. Let client and server packets be formatted differently. Achieve
+data minimization by just taking unnecessary fields out of client
+packets altogether. (Achieved with JSON)
+
+3. Forbid the use of the legacy MAC field, thus fixing the hairiness
+around extension parsing. (Achieved with JSON)
+
+4. Make NTS mandatory. In the NTPv5 packet format, the version, mode,
+NTS unique identifier, and (in client packets) NTS cookie come first
+in plaintext, then the whole rest of the packet is encrypted.
+
+5. Ditch the useless poll, stratum, refid, and reference timestamp
+fields. Given that all of the above are implemented, origin timestamp
+also becomes redundant (NTS takes the place of its anti-spoofing
+role).  (Achieved with JSON)
+
+6. Represent timestamps as days, seconds, and fractions so that the
+time can be represented unambiguously during leap seconds. Make the
+day field 64 bits wide so that its range comfortable exceeds the
+lifespan of the solar system.  (Achieved with JSON)
+
+7. Don't implement leap smearing in the wire protocol (servers should
+always report accurate, unsmeared time), but standardize a formula for
+translating NTP time into smeared UNIX time seen by other
+applications. (Specified.)
+
 == Appendix: Paths not taken
 
 We chose a JSON-based metaprotocol to achieve the following qualities:
@@ -253,12 +316,15 @@ this was is a choice that doesn't age well. Data and transaction
 volumes in real-world NTP service are low enough that the overhead
 of JSON with respect to packed binary is quite affordable.
 
+Two approaches we considered and rejected follow, with the
+reasoning abbout why we rejected them.
+
 === NTPv4+
 
-In this incremental approach, the NTP port number (123) is retained
-and the 48-byte header v4 header is preserved. New data fields are
-passed in RFC7822 extension blocks.  The NTP version number is
-not incremented; "v5" becomes a set of required extension blocks.
+In this incremental approach, the NTP port number (123) would be
+retained and the 48-byte v4 header would be preserved. New data
+fields are passed in RFC7822 extension blocks.  The NTP version number
+is not incremented; "v5" becomes a set of required extension blocks.
 
 There can be a way to unambiguously detect v5 packets.  The stratum
 field is 8 bits, but only the low five bits are used.  We can mark
@@ -276,16 +342,9 @@ design is unconstrained except that it must carry the semantic
 content of the v4 header minus the unused Reference Timestamp field.
 The version field *is* incremented to 5.
 
-The principal difficulty with this approach is that getting all the
-world's firewalls to pass through a new port is far from easy.  We
-rejected it on these grounds.
-
-== Payload format design for the NTPNG and Newmode cases
-
-NTP is running out of version numbers.  The version field is only 3
-bits wide.  Accordingly, the Newmode payload should be structured like
-PNG, as a sequence of self-describing chunks that can be retired and
-replaced as needed to change payload semantics.
+the NTPNG payload should be structured like PNG, as a sequence of
+self-describing chunks that can be retired and replaced as needed to
+change payload semantics.
 
 Though NTPNG is not constrained by the width of the v4 mode field,
 the versionless semantics of a PNG-style chunk stream would confer a
@@ -316,6 +375,9 @@ that PNG chunks have only two-byte lengths and always end with a CRC.
 This chunk system is deliberately more similar to RFC7822 extension
 blocks.
 
+The principal difficulty with this approach is that getting all the
+world's firewalls to pass through a new port is far from easy.  We
+rejected it on these grounds.
 
 == References
 [bibiography]
