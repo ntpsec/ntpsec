@@ -34,10 +34,9 @@
 typedef struct recvbuf recvbuf_t;
 
 struct recvbuf {
-	recvbuf_t *	link;	/* next in list */
-	sockaddr_u	recv_srcadr;
-	sockaddr_u	srcadr;		/* where packet came from */
-	struct netendpt *	dstadr;		/* address pkt arrived on */
+	recvbuf_t *	link;		/* next in list */
+	sockaddr_u	recv_srcadr;	/* where packet came from */
+	struct netendpt *	dstadr;	/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
 	l_fp		recv_time;	/* time of arrival */
 	size_t		recv_length;	/* number of octets received */
