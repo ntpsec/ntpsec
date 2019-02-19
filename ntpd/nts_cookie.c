@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <openssl/rand.h>
 #include <aes_siv.h>
@@ -64,6 +65,7 @@ uint8_t K[NTS_MAX_KEYLEN];
 uint32_t I;
 
 AES_SIV_CTX* cookie_ctx;  /* need one per thread */
+pthread_mutex_t cookie_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /* This determines which algorithm we use.
  * Valid choices are 32, 48, and 64
@@ -92,6 +94,11 @@ bool nts_cookie_init(void) {
     msyslog(LOG_ERR, "NTS: Can't init cookie_ctx");
     exit(1);
   }
+// FIXME hack to allow testing
+if (1) {
+  I = 13;
+  for (unsigned int i=0; i<sizeof(K); i++) K[i] = i;
+}
   return OK;
 }
 
@@ -103,12 +110,19 @@ int nts_make_cookie(uint8_t *cookie,
   uint8_t *nonce;
   int used, plainlength;
   bool ok;
+  int err;
 
   // ASSERT(keylen<NTS_MAX_KEYLEN);
   
   uint8_t * finger;
   uint32_t temp;      /* keep 4 byte alignment */
   size_t left;
+
+  err = pthread_mutex_lock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
+    exit(2);
+  }
 
   /* collect plaintext
    * separate buffer avoids encrypt in place
@@ -159,6 +173,11 @@ int nts_make_cookie(uint8_t *cookie,
   // ASSERT(length < NTS_MAX_COOKIELEN);
   // Need to encrypt
 
+  err = pthread_mutex_unlock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
+    exit(2);
+  }
   return used;
 }
 
