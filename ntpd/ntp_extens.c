@@ -192,6 +192,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	  return false;
         buf.next += length;
 	buf.left -= length;
+	if (0 != buf.left)
+	  return false;		/* Reject extens after AEEF block */
         break;
       default:
         if (critical)
