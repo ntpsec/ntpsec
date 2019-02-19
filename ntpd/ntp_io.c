@@ -2014,12 +2014,12 @@ sendpkt(
 		 * unbound peer - drop request and wait for better
 		 * network conditions
 		 */
-		DPRINT(2, ("sendpkt(dst=%s, len=%d): no interface - IGNORED\n",
+		DPRINT(2, ("sendpkt(dst=%s, len=%u): no interface - IGNORED\n",
 			   socktoa(dest), len));
 		return;
 	}
 
-	DPRINT(2, ("sendpkt(%d, dst=%s, src=%s, len=%d)\n",
+	DPRINT(2, ("sendpkt(%d, dst=%s, src=%s, len=%u)\n",
 		   src->fd, socktoa(dest), socktoa(&src->sin), len));
 
 	cc = sendto(src->fd, pkt, (unsigned int)len, 0,
