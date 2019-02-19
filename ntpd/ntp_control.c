@@ -26,6 +26,7 @@
 #include "lib_strbuf.h"
 #include "ntp_syscall.h"
 #include "ntp_auth.h"
+#include "nts.h"
 #include "timespecops.h"
 
 /* undefine to suppress random tags and get fixed emission order */
@@ -231,7 +232,10 @@ static const struct ctl_proc control_codes[] = {
 #define CS_AUTHCMACFAIL		104
 /* Should be above with other CS_K_xxx, but that requires big renumbering */
 #define CS_K_LOCKCLOCK		105
-#define	CS_MAXCODE		CS_K_LOCKCLOCK
+#define CS_NTSKEYFETCHES	106
+#define	CS_NTSVALIDATIONS	107
+#define	CS_NTSDECORATIONS	108
+#define	CS_MAXCODE		CS_NTSDECORATIONS
 
 /*
  * Peer variables we understand
@@ -416,6 +420,9 @@ static const struct ctl_var sys_var[] = {
 	{ CS_AUTHCMACDECRYPT,	RO, "authcmacdecrypts" },	/* 103 */
 	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },		/* 104 */
 	{ CS_K_LOCKCLOCK,	RO, "lockclock" },		/* 105 */
+	{ CS_NTSKEYFETCHES,	RO, "ntskeyfetches" },		/* 106 */
+	{ CS_NTSVALIDATIONS,	RO, "ntsvalidations" },		/* 107 */
+	{ CS_NTSDECORATIONS,	RO, "ntsdecoratiuons" },	/* 108 */
 	{ 0,                    EOV, "" }
 };
 
@@ -2022,6 +2029,18 @@ ctl_putsys(
 	case CS_ROOTDISTANCE:
 		ctl_putdbl(sys_var[CS_ROOTDISTANCE].text,
 			   sys_vars.sys_rootdist * MS_PER_S);
+		break;
+
+	case CS_NTSKEYFETCHES:
+		ctl_putuint(sys_var[varid].text, ntskeyfetches);
+		break;
+
+	case CS_NTSVALIDATIONS:
+		ctl_putuint(sys_var[varid].text, ntsvalidations);
+		break;
+
+	case CS_NTSDECORATIONS:
+		ctl_putuint(sys_var[varid].text, ntsdecorations);
 		break;
 
         default:

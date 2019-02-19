@@ -1487,6 +1487,24 @@ usage: authinfo
 
 # FIXME: This table should move to ntpd
 #          so the answers track when ntpd is updated
+    def do_ntsinfo(self, _line):
+        "display NTS authentication counters"
+        ntsinfo = (
+            ("ntskeyfetches",      "NTS key fetches:         ", NTP_INT),
+            ("ntsvalidations",     "NTS validations:         ", NTP_INT),
+            ("ntsdecorations",     "NTS decorations:         ", NTP_INT),
+        )
+        self.collect_display(associd=0, variables=ntsinfo, decodestatus=False)
+
+    def help_ntsinfo(self):
+        self.say("""\
+function: display NTS authentication counters
+usage: ntsinfo
+""")
+
+
+# FIXME: This table should move to ntpd
+#          so the answers track when ntpd is updated
     def do_iostats(self, _line):
         "display network input and output counters"
         iostats = (

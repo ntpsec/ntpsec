@@ -372,6 +372,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         peer->nts_state.valid[idx] = true;
         peer->nts_state.writeIdx++;
         peer->nts_state.count++;
+	ntskeyfetches++;
         break;
       case nts_end_of_message:
         if ((0 != length) || !critical) {
