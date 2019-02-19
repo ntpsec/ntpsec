@@ -305,7 +305,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CC_FUDGEVAL2	10
 #define	CC_FLAGS	11
 #define	CC_DEVICE	12
-#define	CC_VARLIST	13U
+#define	CC_VARLIST	13
 #define	CC_MAXCODE	CC_VARLIST
 
 /*
@@ -313,30 +313,30 @@ static const struct ctl_proc control_codes[] = {
  * index to find the textual name.
  */
 static const struct ctl_var sys_var[] = {
-	{ 0,		PADDING, "" },		/* 0 */
-	{ CS_LEAP,	RW|DEF, "leap" },	/* 1 */
-	{ CS_STRATUM,	RO|DEF, "stratum" },	/* 2 */
-	{ CS_PRECISION, RO|DEF, "precision" },	/* 3 */
-	{ CS_ROOTDELAY, RO|DEF, "rootdelay" },	/* 4 */
-	{ CS_ROOTDISPERSION, RO|DEF, "rootdisp" },	/* 5 */
-	{ CS_REFID,	RO|DEF, "refid" },	/* 6 */
-	{ CS_REFTIME,	RO|DEF, "reftime" },	/* 7 */
-	{ CS_POLL,	RO|DEF, "tc" },		/* 8 */
-	{ CS_PEERID,	RO|DEF, "peer" },		/* 9 */
-	{ CS_OFFSET,	RO|DEF, "offset" },		/* 10 */
-	{ CS_DRIFT,	RO|DEF, "frequency" },	/* 11 */
-	{ CS_JITTER,	RO|DEF, "sys_jitter" },	/* 12 */
-	{ CS_ERROR,	RO|DEF, "clk_jitter" },	/* 13 */
-	{ CS_CLOCK,	RO|DEF, "clock" },	/* 14 */
-	{ CS_PROCESSOR, RO|DEF, "processor" },	/* 15 */
-	{ CS_SYSTEM,	RO|DEF, "system" },	/* 16 */
-	{ CS_VERSION,	RO|DEF, "version" },	/* 17 */
-	{ CS_STABIL,	RO|DEF, "clk_wander" },	/* 18 */
-	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
-	{ CS_TAI,	RO|DEF, "tai" },		/* 20 */
-	{ CS_LEAPTAB,	RO|DEF, "leapsec" },	/* 21 */
-	{ CS_LEAPEND,	RO|DEF, "expire" },		/* 22 */
-	{ CS_RATE,	RO|DEF, "mintc" },		/* 23 */
+	{ 0,			PADDING, "" },		/* 0 */
+	{ CS_LEAP,		RW|DEF, "leap" },	/* 1 */
+	{ CS_STRATUM,		RO|DEF, "stratum" },	/* 2 */
+	{ CS_PRECISION, 	RO|DEF, "precision" },	/* 3 */
+	{ CS_ROOTDELAY, 	RO|DEF, "rootdelay" },	/* 4 */
+	{ CS_ROOTDISPERSION,	RO|DEF, "rootdisp" },	/* 5 */
+	{ CS_REFID,		RO|DEF, "refid" },	/* 6 */
+	{ CS_REFTIME,		RO|DEF, "reftime" },	/* 7 */
+	{ CS_POLL,		RO|DEF, "tc" },		/* 8 */
+	{ CS_PEERID,		RO|DEF, "peer" },	/* 9 */
+	{ CS_OFFSET,		RO|DEF, "offset" },	/* 10 */
+	{ CS_DRIFT,		RO|DEF, "frequency" },	/* 11 */
+	{ CS_JITTER,		RO|DEF, "sys_jitter" },	/* 12 */
+	{ CS_ERROR,		RO|DEF, "clk_jitter" },	/* 13 */
+	{ CS_CLOCK,		RO|DEF, "clock" },	/* 14 */
+	{ CS_PROCESSOR, 	RO|DEF, "processor" },	/* 15 */
+	{ CS_SYSTEM,		RO|DEF, "system" },	/* 16 */
+	{ CS_VERSION,		RO|DEF, "version" },	/* 17 */
+	{ CS_STABIL,		RO|DEF, "clk_wander" },	/* 18 */
+	{ CS_VARLIST,		RO, "sys_var_list" },	/* 19 */
+	{ CS_TAI,		RO|DEF, "tai" },	/* 20 */
+	{ CS_LEAPTAB,		RO|DEF, "leapsec" },	/* 21 */
+	{ CS_LEAPEND,		RO|DEF, "expire" },	/* 22 */
+	{ CS_RATE,		RO|DEF, "mintc" },	/* 23 */
 	{ CS_MRU_ENABLED,	RO, "mru_enabled" },	/* 24 */
 	{ CS_MRU_DEPTH,		RO, "mru_depth" },	/* 25 */
 	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },	/* 26 */
@@ -438,44 +438,44 @@ static const struct ctl_var peer_var[] = {
 	{ CP_CONFIG,	RO, "config" },		/* 1 */
 	{ CP_AUTHENABLE, RO,	"authenable" },	/* 2 */
 	{ CP_AUTHENTIC, RO, "authentic" },	/* 3 */
-	{ CP_SRCADR,	RO, "srcadr" },		/* 4 */
-	{ CP_SRCPORT,	RO, "srcport" },	/* 5 */
-	{ CP_DSTADR,	RO, "dstadr" },		/* 6 */
-	{ CP_DSTPORT,	RO, "dstport" },	/* 7 */
-	{ CP_LEAP,	RO, "leap" },		/* 8 */
-	{ CP_HMODE,	RO, "hmode" },		/* 9 */
-	{ CP_STRATUM,	RO, "stratum" },	/* 10 */
-	{ CP_PPOLL,	RO, "ppoll" },		/* 11 */
-	{ CP_HPOLL,	RO, "hpoll" },		/* 12 */
-	{ CP_PRECISION,	RO, "precision" },	/* 13 */
-	{ CP_ROOTDELAY,	RO, "rootdelay" },	/* 14 */
-	{ CP_ROOTDISPERSION, RO, "rootdisp" },	/* 15 */
-	{ CP_REFID,	RO, "refid" },		/* 16 */
-	{ CP_REFTIME,	RO, "reftime" },	/* 17 */
+	{ CP_SRCADR,	RO|DEF , "srcadr" },		/* 4 */
+	{ CP_SRCPORT,	RO|DEF, "srcport" },	/* 5 */
+	{ CP_DSTADR,	RO|DEF, "dstadr" },		/* 6 */
+	{ CP_DSTPORT,	RO|DEF, "dstport" },	/* 7 */
+	{ CP_LEAP,	RO|DEF, "leap" },		/* 8 */
+	{ CP_HMODE,	RO|DEF, "hmode" },		/* 9 */
+	{ CP_STRATUM,	RO|DEF, "stratum" },	/* 10 */
+	{ CP_PPOLL,	RO|DEF, "ppoll" },		/* 11 */
+	{ CP_HPOLL,	RO|DEF, "hpoll" },		/* 12 */
+	{ CP_PRECISION,	RO|DEF, "precision" },	/* 13 */
+	{ CP_ROOTDELAY,	RO|DEF, "rootdelay" },	/* 14 */
+	{ CP_ROOTDISPERSION, RO|DEF, "rootdisp" },	/* 15 */
+	{ CP_REFID,	RO|DEF, "refid" },		/* 16 */
+	{ CP_REFTIME,	RO|DEF, "reftime" },	/* 17 */
         /* Placeholder. Reporting of this variable is disabled because
            leaking it creates a vulnerability */
         { CP_ORG,	RO, "org" },	        /* 18 */
-	{ CP_REC,	RO, "rec" },		/* 19 */
-	{ CP_XMT,	RO, "xmt" },		/* 20 */
-	{ CP_REACH,	RO, "reach" },		/* 21 */
-	{ CP_UNREACH,	RO, "unreach" },	/* 22 */
+	{ CP_REC,	RO|DEF, "rec" },		/* 19 */
+	{ CP_XMT,	RO|DEF, "xmt" },		/* 20 */
+	{ CP_REACH,	RO|DEF, "reach" },		/* 21 */
+	{ CP_UNREACH,	RO|DEF, "unreach" },	/* 22 */
 	{ CP_TIMER,	RO, "timer" },		/* 23 */
-	{ CP_DELAY,	RO, "delay" },		/* 24 */
-	{ CP_OFFSET,	RO, "offset" },		/* 25 */
-	{ CP_JITTER,	RO, "jitter" },		/* 26 */
-	{ CP_DISPERSION, RO, "dispersion" },	/* 27 */
-	{ CP_KEYID,	RO, "keyid" },		/* 28 */
-	{ CP_FILTDELAY,	RO, "filtdelay" },	/* 29 */
-	{ CP_FILTOFFSET, RO, "filtoffset" },	/* 30 */
-	{ CP_PMODE,	RO, "pmode" },		/* 31 */
+	{ CP_DELAY,	RO|DEF, "delay" },		/* 24 */
+	{ CP_OFFSET,	RO|DEF, "offset" },		/* 25 */
+	{ CP_JITTER,	RO|DEF, "jitter" },		/* 26 */
+	{ CP_DISPERSION, RO|DEF, "dispersion" },	/* 27 */
+	{ CP_KEYID,	RO|DEF, "keyid" },		/* 28 */
+	{ CP_FILTDELAY,	RO|DEF, "filtdelay" },	/* 29 */
+	{ CP_FILTOFFSET, RO|DEF, "filtoffset" },	/* 30 */
+	{ CP_PMODE,	RO|DEF, "pmode" },		/* 31 */
 	{ CP_RECEIVED,	RO, "received"},	/* 32 */
 	{ CP_SENT,	RO, "sent" },		/* 33 */
-	{ CP_FILTERROR,	RO, "filtdisp" },	/* 34 */
-	{ CP_FLASH,	RO, "flash" },		/* 35 */
+	{ CP_FILTERROR,	RO|DEF, "filtdisp" },	/* 34 */
+	{ CP_FLASH,	RO|DEF, "flash" },		/* 35 */
 	{ CP_MODE,	RO, "mode" },		/* 36 */
 	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
-	{ CP_RATE,	RO, "headway" },	/* 38 */
-	{ CP_BIAS,	RO, "bias" },		/* 39 */
+	{ CP_RATE,	RO|DEF, "headway" },	/* 38 */
+	{ CP_BIAS,	RO|DEF, "bias" },		/* 39 */
 	{ CP_SRCHOST,	RO, "srchost" },	/* 40 */
 	{ CP_TIMEREC,	RO, "timerec" },	/* 41 */
 	{ CP_TIMEREACH,	RO, "timereach" },	/* 42 */
@@ -487,47 +487,6 @@ static const struct ctl_var peer_var[] = {
 	{ CP_CANDIDATE, RO, "candidate" },	/* 48 */
 	{ 0,		EOV, "" }
 };
-
-
-/*
- * Peer variables we print by default
- */
-static const uint8_t def_peer_var[] = {
-	CP_SRCADR,
-	CP_SRCPORT,
-	CP_SRCHOST,
-	CP_DSTADR,
-	CP_DSTPORT,
-	CP_LEAP,
-	CP_STRATUM,
-	CP_PRECISION,
-	CP_ROOTDELAY,
-	CP_ROOTDISPERSION,
-	CP_REFID,
-	CP_REFTIME,
-	CP_REC,
-	CP_REACH,
-	CP_UNREACH,
-	CP_HMODE,
-	CP_PMODE,
-	CP_HPOLL,
-	CP_PPOLL,
-	CP_RATE,
-	CP_FLASH,
-	CP_KEYID,
-	CP_MODE,
-	CP_OFFSET,
-	CP_DELAY,
-	CP_DISPERSION,
-	CP_JITTER,
-	CP_XMT,
-	CP_BIAS,
-	CP_FILTDELAY,
-	CP_FILTOFFSET,
-	CP_FILTERROR,
-	0
-};
-
 
 #ifdef REFCLOCK
 /*
@@ -2638,7 +2597,6 @@ read_status(
 	)
 {
 	struct peer *peer;
-	const uint8_t *cp;
 	size_t n;
 	/* a_st holds association ID, status pairs alternating */
 	unsigned short a_st[CTL_MAX_DATA_LEN / sizeof(unsigned short)];
@@ -2664,8 +2622,9 @@ read_status(
 		 * For now, output everything we know about the
 		 * peer. May be more selective later.
 		 */
-		for (cp = def_peer_var; *cp != 0; cp++)
-			ctl_putpeer((int)*cp, peer);
+		for (const struct ctl_var *kv = sys_var; kv && !(EOV & kv->flags); kv++)
+			if (kv->flags & DEF)
+				ctl_putpeer(kv->code, peer);
 		ctl_flushpkt(0);
 		return;
 	}
@@ -2695,7 +2654,6 @@ read_peervars(void)
 {
 	const struct ctl_var *v;
 	struct peer *peer;
-	const uint8_t *cp;
 	size_t i;
 	char *	valuep;
 	bool	wants[CP_MAXCODE + 1];
@@ -2729,8 +2687,9 @@ read_peervars(void)
 			if (wants[i])
 				ctl_putpeer((int)i, peer);
 	} else
-		for (cp = def_peer_var; *cp != 0; cp++)
-			ctl_putpeer((int)*cp, peer);
+		for (const struct ctl_var *kv = sys_var; kv && !(EOV & kv->flags); kv++)
+			if (kv->flags & DEF)
+				ctl_putpeer(kv->code, peer);
 	ctl_flushpkt(0);
 }
 
@@ -2794,9 +2753,9 @@ read_sysvars(void)
 				ctl_putdata(pch, strlen(pch), false);
 			}
 	} else {
-	    for (kv = (struct ctl_var *)sys_var; kv && !(EOV & kv->flags); kv++)
-			if (DEF & kv->flags)
-				ctl_putsys(kv->code);
+		for (v = sys_var; v && !(EOV & v->flags); v++)
+			if (DEF & v->flags)
+				ctl_putsys(v->code);
 		for (kv = ext_sys_var; kv && !(EOV & kv->flags); kv++)
 			if (DEF & kv->flags)
 				ctl_putdata(kv->text, strlen(kv->text),
