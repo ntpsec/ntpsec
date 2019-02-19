@@ -40,6 +40,7 @@ void nts_init(void) {
     if (ntsconfig.ntsenable)
         ok &= nts_server_init();
     ok &= nts_client_init();
+    ok &= extens_init();
     if (!ok) {
       msyslog(LOG_ERR, "NTS: troubles during init.  Bailing.");
       exit(1);

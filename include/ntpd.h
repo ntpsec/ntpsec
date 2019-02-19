@@ -436,6 +436,7 @@ extern const uint8_t	num_refclock_conf;
 #endif
 
 /* ntd_extens.c */
+bool extens_init(void);
 int extens_client_send(struct peer *peer, struct pkt *xpkt);
 bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng);
 

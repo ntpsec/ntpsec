@@ -41,21 +41,21 @@ enum NtpExtFieldType {
 AES_SIV_CTX* wire_ctx = NULL;  /* need one per thread */
 
 
+bool extens_init(void) {
+    wire_ctx = AES_SIV_CTX_new();
+    if (NULL == wire_ctx) {
+      msyslog(LOG_ERR, "NTS: Can't init wire_ctx");
+      exit(1);
+    }
+    return true;
+}
+
 int extens_client_send(struct peer *peer, struct pkt *xpkt) {
   struct BufCtl_t buf;
   int used, adlength, idx;
   size_t left;
   uint8_t *nonce, *packet;
   bool ok;
-
-  // FIXME - need init routine
-  if (NULL == wire_ctx) {
-    wire_ctx = AES_SIV_CTX_new();
-    if (NULL == wire_ctx) {
-      msyslog(LOG_ERR, "NTS: Can't init wire_ctx");
-      exit(1);
-    }
-  }
 
   packet = (uint8_t*)xpkt;
   buf.next = xpkt->exten;
@@ -112,15 +112,6 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
   struct BufCtl_t buf;
   uint16_t aead;
   int noncelen, cmaclen;
-
-  // FIXME - need init routine
-  if (NULL == wire_ctx) {
-    wire_ctx = AES_SIV_CTX_new();
-    if (NULL == wire_ctx) {
-      msyslog(LOG_ERR, "NTS: Can't init wire_ctx");
-      exit(1);
-    }
-  }
 
   buf.next = pkt+LEN_PKT_NOMAC;
   buf.left = lng-LEN_PKT_NOMAC;
