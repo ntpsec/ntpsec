@@ -314,29 +314,29 @@ static const struct ctl_proc control_codes[] = {
  */
 static const struct ctl_var sys_var[] = {
 	{ 0,		PADDING, "" },		/* 0 */
-	{ CS_LEAP,	RW, "leap" },		/* 1 */
-	{ CS_STRATUM,	RO, "stratum" },	/* 2 */
-	{ CS_PRECISION, RO, "precision" },	/* 3 */
-	{ CS_ROOTDELAY, RO, "rootdelay" },	/* 4 */
-	{ CS_ROOTDISPERSION, RO, "rootdisp" },	/* 5 */
-	{ CS_REFID,	RO, "refid" },		/* 6 */
-	{ CS_REFTIME,	RO, "reftime" },	/* 7 */
-	{ CS_POLL,	RO, "tc" },		/* 8 */
-	{ CS_PEERID,	RO, "peer" },		/* 9 */
-	{ CS_OFFSET,	RO, "offset" },		/* 10 */
-	{ CS_DRIFT,	RO, "frequency" },	/* 11 */
-	{ CS_JITTER,	RO, "sys_jitter" },	/* 12 */
-	{ CS_ERROR,	RO, "clk_jitter" },	/* 13 */
-	{ CS_CLOCK,	RO, "clock" },		/* 14 */
-	{ CS_PROCESSOR, RO, "processor" },	/* 15 */
-	{ CS_SYSTEM,	RO, "system" },		/* 16 */
-	{ CS_VERSION,	RO, "version" },	/* 17 */
-	{ CS_STABIL,	RO, "clk_wander" },	/* 18 */
+	{ CS_LEAP,	RW|DEF, "leap" },	/* 1 */
+	{ CS_STRATUM,	RO|DEF, "stratum" },	/* 2 */
+	{ CS_PRECISION, RO|DEF, "precision" },	/* 3 */
+	{ CS_ROOTDELAY, RO|DEF, "rootdelay" },	/* 4 */
+	{ CS_ROOTDISPERSION, RO|DEF, "rootdisp" },	/* 5 */
+	{ CS_REFID,	RO|DEF, "refid" },	/* 6 */
+	{ CS_REFTIME,	RO|DEF, "reftime" },	/* 7 */
+	{ CS_POLL,	RO|DEF, "tc" },		/* 8 */
+	{ CS_PEERID,	RO|DEF, "peer" },		/* 9 */
+	{ CS_OFFSET,	RO|DEF, "offset" },		/* 10 */
+	{ CS_DRIFT,	RO|DEF, "frequency" },	/* 11 */
+	{ CS_JITTER,	RO|DEF, "sys_jitter" },	/* 12 */
+	{ CS_ERROR,	RO|DEF, "clk_jitter" },	/* 13 */
+	{ CS_CLOCK,	RO|DEF, "clock" },	/* 14 */
+	{ CS_PROCESSOR, RO|DEF, "processor" },	/* 15 */
+	{ CS_SYSTEM,	RO|DEF, "system" },	/* 16 */
+	{ CS_VERSION,	RO|DEF, "version" },	/* 17 */
+	{ CS_STABIL,	RO|DEF, "clk_wander" },	/* 18 */
 	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
-	{ CS_TAI,	RO, "tai" },		/* 20 */
-	{ CS_LEAPTAB,	RO, "leapsec" },	/* 21 */
-	{ CS_LEAPEND,	RO, "expire" },		/* 22 */
-	{ CS_RATE,	RO, "mintc" },		/* 23 */
+	{ CS_TAI,	RO|DEF, "tai" },		/* 20 */
+	{ CS_LEAPTAB,	RO|DEF, "leapsec" },	/* 21 */
+	{ CS_LEAPEND,	RO|DEF, "expire" },		/* 22 */
+	{ CS_RATE,	RO|DEF, "mintc" },		/* 23 */
 	{ CS_MRU_ENABLED,	RO, "mru_enabled" },	/* 24 */
 	{ CS_MRU_DEPTH,		RO, "mru_depth" },	/* 25 */
 	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },	/* 26 */
@@ -409,8 +409,10 @@ static const struct ctl_var sys_var[] = {
 	{ CS_MRU_RECYCLEFULL,	RO, "mru_recyclefull" },/* 93 */
 	{ CS_MRU_NONE,		RO, "mru_none" },	/* 94 */
 	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },	/* 95 */
-	{ CS_LEAPSMEARINTV,	RO, "leapsmearinterval" },    /* 96 */
-	{ CS_LEAPSMEAROFFS,	RO, "leapsmearoffset" },      /* 97 */
+#ifdef ENABLE_LEAP_SMEAR
+	{ CS_LEAPSMEARINTV,	RO|DEF, "leapsmearinterval" },    /* 96 */
+	{ CS_LEAPSMEAROFFS,	RO|DEF, "leapsmearoffset" },      /* 97 */
+#endif	/* ENABLE_LEAP_SMEAR */
 	{ CS_TICK,		RO, "tick" },		/* 98 */
 	/* new in NTPsec */
 	{ CS_NUMCTLREQ,		RO, "ss_numctlreq" },	/* 99 */
@@ -427,41 +429,6 @@ static const struct ctl_var sys_var[] = {
 };
 
 static struct ctl_var *ext_sys_var = NULL;
-
-/*
- * System variables we print by default (in fuzzball order,
- * more-or-less)
- */
-static const uint8_t def_sys_var[] = {
-	CS_VERSION,
-	CS_PROCESSOR,
-	CS_SYSTEM,
-	CS_LEAP,
-	CS_STRATUM,
-	CS_PRECISION,
-	CS_ROOTDELAY,
-	CS_ROOTDISPERSION,
-	CS_REFID,
-	CS_REFTIME,
-	CS_CLOCK,
-	CS_PEERID,
-	CS_POLL,
-	CS_RATE,
-	CS_OFFSET,
-	CS_DRIFT,
-	CS_JITTER,
-	CS_ERROR,
-	CS_STABIL,
-	CS_TAI,
-	CS_LEAPTAB,
-	CS_LEAPEND,
-#ifdef ENABLE_LEAP_SMEAR
-	CS_LEAPSMEARINTV,
-	CS_LEAPSMEAROFFS,
-#endif	/* ENABLE_LEAP_SMEAR */
-	0
-};
-
 
 /*
  * Peer variable list
@@ -2778,7 +2745,6 @@ read_sysvars(void)
 	struct ctl_var *kv;
 	unsigned int	n;
 	bool	gotvar;
-	const uint8_t *cs;
 	char *	valuep;
 	const char * pch;
 	uint8_t *wants;
@@ -2828,8 +2794,9 @@ read_sysvars(void)
 				ctl_putdata(pch, strlen(pch), false);
 			}
 	} else {
-		for (cs = def_sys_var; *cs != 0; cs++)
-			ctl_putsys((int)*cs);
+	    for (kv = (struct ctl_var *)sys_var; kv && !(EOV & kv->flags); kv++)
+			if (DEF & kv->flags)
+				ctl_putsys(kv->code);
 		for (kv = ext_sys_var; kv && !(EOV & kv->flags); kv++)
 			if (DEF & kv->flags)
 				ctl_putdata(kv->text, strlen(kv->text),

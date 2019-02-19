@@ -89,7 +89,8 @@ a build-time switch, not a run-time one).
   getting it fully IPv6-ready.
 
 * ntpq no longer has the +-i+/+--interactive+ option, as there was no
-  situation in which it was meaningful.
+  situation in which it was meaningful.  The order in which the
+  default set of system variavles is dumped has changed.
 
 * Interleave mode has been removed.  It was buggy and the root cause
   of at least two CVEs.
