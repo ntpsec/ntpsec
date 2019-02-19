@@ -1901,7 +1901,7 @@ local_input(
 						sizeof(parsetime_t));
 					buf->recv_length  = sizeof(parsetime_t);
 					buf->recv_time    = rbufp->recv_time;
-					buf->srcadr       = rbufp->srcadr;
+					buf->recv_srcadr  = rbufp->recv_srcadr;
 					buf->dstadr       = rbufp->dstadr;
 					buf->fd           = rbufp->fd;
 					buf->recv_peer    = rbufp->recv_peer;
