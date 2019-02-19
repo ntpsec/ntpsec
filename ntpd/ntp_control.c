@@ -493,41 +493,21 @@ static const struct ctl_var peer_var[] = {
  * Clock variable list
  */
 static const struct ctl_var clock_var[] = {
-	{ 0,		PADDING, "" },		/* 0 */
-	{ CC_NAME,	RO, "name" },		/* 1 */
-	{ CC_TIMECODE,	RO, "timecode" },	/* 2 */
-	{ CC_POLL,	RO, "poll" },		/* 3 */
-	{ CC_NOREPLY,	RO, "noreply" },	/* 4 */
-	{ CC_BADFORMAT, RO, "badformat" },	/* 5 */
-	{ CC_BADDATA,	RO, "baddata" },	/* 6 */
-	{ CC_FUDGETIME1, RO, "fudgetime1" },	/* 7 */
-	{ CC_FUDGETIME2, RO, "fudgetime2" },	/* 8 */
-	{ CC_FUDGEVAL1, RO, "stratum" },	/* 9 */
-	{ CC_FUDGEVAL2, RO, "refid" },		/* 10 */
-	{ CC_FLAGS,	RO, "flags" },		/* 11 */
-	{ CC_DEVICE,	RO, "device" },		/* 12 */
-	{ CC_VARLIST,	RO, "clock_var_list" },	/* 13 */
-	{ 0,		EOV, ""  }		/* 14 */
-};
-
-
-/*
- * Clock variables printed by default
- */
-static const uint8_t def_clock_var[] = {
-	CC_DEVICE,
-	CC_NAME,
-	CC_TIMECODE,
-	CC_POLL,
-	CC_NOREPLY,
-	CC_BADFORMAT,
-	CC_BADDATA,
-	CC_FUDGETIME1,
-	CC_FUDGETIME2,
-	CC_FUDGEVAL1,
-	CC_FUDGEVAL2,
-	CC_FLAGS,
-	0
+	{ 0,			PADDING, "" },		/* 0 */
+	{ CC_NAME,		RO|DEF, "name" },	/* 1 */
+	{ CC_TIMECODE,		RO|DEF, "timecode" },	/* 2 */
+	{ CC_POLL,		RO|DEF, "poll" },	/* 3 */
+	{ CC_NOREPLY,		RO|DEF, "noreply" },	/* 4 */
+	{ CC_BADFORMAT, 	RO|DEF, "badformat" },	/* 5 */
+	{ CC_BADDATA,		RO|DEF, "baddata" },	/* 6 */
+	{ CC_FUDGETIME1,	RO|DEF, "fudgetime1" },	/* 7 */
+	{ CC_FUDGETIME2,	RO|DEF, "fudgetime2" },	/* 8 */
+	{ CC_FUDGEVAL1, 	RO|DEF, "stratum" },	/* 9 */
+	{ CC_FUDGEVAL2, 	RO|DEF, "refid" },	/* 10 */
+	{ CC_FLAGS,		RO|DEF, "flags" },	/* 11 */
+	{ CC_DEVICE,		RO, 	"device" },	/* 12 */
+	{ CC_VARLIST,		RO, 	"clock_var_list"},	/* 13 */
+	{ 0,			EOV,	""  }		/* 14 */
 };
 #endif
 
@@ -4002,7 +3982,6 @@ read_clockstatus(
 	uint8_t *		wants;
 	size_t			wants_alloc;
 	bool			gotvar;
-	const uint8_t *		cc;
 	struct ctl_var *	kv;
 	struct refclockstat	cs;
 
@@ -4079,8 +4058,9 @@ read_clockstatus(
 						    strlen(kv[i].text),
 						    false);
 	} else {
-		for (cc = def_clock_var; *cc != 0; cc++)
-			ctl_putclock((int)*cc, &cs, false);
+		for (v = clock_var; v != NULL && !(EOV & v->flags); v++)
+			if (DEF & v->flags)
+				ctl_putclock(v->code, &cs, false);
 		for ( ; kv != NULL && !(EOV & kv->flags); kv++)
 			if (DEF & kv->flags)
 				ctl_putdata(kv->text, strlen(kv->text),
