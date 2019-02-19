@@ -45,7 +45,7 @@ into account.
 Most time offsets are much smaller than the NTP epoch, so a 32-bit
 representation is used for these. There were two of these:
 s_fp for signed offsets and u_fp for strictly non-negative ones.
-NTPsec has already removed the singed version
+NTPsec has already removed the signed version
 
 The comments in libntp/ntp_calendar.c are pretty illuminating about
 calendar representations.  A high-level point they don't make is
@@ -84,11 +84,6 @@ an IPv6 address.  (If and when the protocol is redesigned for
 IPv6 the field length will go to 128 bits and it will become a full
 IPv6 address.)
 
-Internally the refid is used for loop detection. (Which is why hashing
-IPv6 addresses is risky - hash collisions happen.) It's also part of
-ntpq's display in the status line for a reference clock, if you have
-one locally attached.
-
 The driver structure for reference clocks has a refid field that is
 (by default) copied into samples issued from that clock. It is
 not necessarily unique to a driver type; notably, all GPS driver
@@ -96,9 +91,20 @@ types ship the refid "GPS". It is possible to fudge this ID to
 something more informative in the ntpd configuration command
 for the driver.
 
+It's also part of
+ntpq's display in the status line for a reference clock, if you have
+one locally attached.
+
 The conflation of ID-for-humans with the loop-detection cookie is not quite
 the design error it looks like, as refclocks aren't implicated in
 loop detection.
+
+The address refid you get from a peer is used for loop detection.
+(Which is why hashing IPv6 addresses is risky - hash collisions
+happen.)  It's supposeed to be an address identifying the host on
+which the time sample was generated. You never want that system
+to be one of your clients, for exactly the same reason you don't
+want positive feedback in your stereo system.
 
 === struct timespec vs. struct timeval
 
@@ -142,7 +148,59 @@ RTTs are equal.
 
 == config file parser
 
-There is a minor quirk: numbers come in as integers, type T_Integer.
+There are two stages of processing that translate from ntp.conf syntax
+to configuration state that the code actually uses.  One level grovels
+through the syntax using a yacc-generared parser and collects stuff
+from it into intermediate configuration blocks - these are just C
+structures.  Another layer does some simple operations on the
+intermediate configuration blocks to initialize things like the peer
+structures.
+
+Here's a diagram:
+
+--------------------------------------------------------------------
+    +-----------------+
+    | ntp.conf syntax |
+    +-----------------+
+             |
+             | <----------------- Yacc-generated parser
+	     |
+    +--------------------+
+    |configuration blocks|
+    +--------------------+
+             |
+	     |<------------------- Fancy copy operation.
+	     |
+   +---------------------+
+   |struct peer instances|
+   +---------------------+
+--------------------------------------------------------------------
+
+The server/pool/refclock declarations all use the same branch of the
+yacc grammar; thus they take a set of options that is grammatically
+identical.  You can, for example, specify a 'refid' string for a
+server, or an outgoing 'version' for a refclock, even though doing
+either of those things doesn't make any semantic sense.  The parser
+doesn't care.
+
+This is slightly odd because normally configuration languages try to
+be more restrictive at the grammar level in order to generate better
+error messages.  But the NTP parser won't complain when you specify that
+'refid' string for a server.
+
+The documentation *pretends* that the different declaration types have
+different option subgrammars, but it's lying by omission.  The parser
+doesn't care.  It just takes any option values you feed it and stuffs
+them into a configuration block associated with the hostname in the
+declaration.  The configuration block has slots in it for every
+possible option in all three declaration types.  The declaration type
+(server/refclock/pool) is just another slot in that block.
+
+A later stage of configuration walks through the configuration blocks
+and massages them ("Fancy copy operation") into instances of the
+internal peer structure that NTP uses.
+
+Here is a quirk of the grammar: numbers come in as integers, type T_Integer.
 There is no type T_Unsigned.  Range checking may not work right.
 
 == ntpd control flow
@@ -435,8 +493,8 @@ a loadable Python module.  Here are a few useful generalizations:
 == The Python tools
 
 Project policy is that (a) anything that does not have to be written
-in C shouldn't be, and (b) our preferred non-C language is Python.
-Most of the auxiliary tools have already been moved.  This section
+in C shouldn't be, and (b) our preferred non-C language is Python
+All the auxiliary tools have already been moved.  This section
 describes how they fit together.
 
 == The pylib/ntp library
