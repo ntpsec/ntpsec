@@ -24,4 +24,6 @@
 :ntpwaitman: ntpwait(8)
 :ntpdigman: ntpdig(1)
 :ntpvizman: ntpviz(1)
-:
+// Be very careful about changing things here.
+// Everything is included in HTML doc forming.
+// Borrow a second set of eyes. -- JamesB192
