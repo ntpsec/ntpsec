@@ -311,7 +311,6 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   peer->nts_state.writeIdx = 0;
   peer->nts_state.readIdx = 0;
   peer->nts_state.count = 0;
-  for (int i=0; i<NTS_MAX_COOKIES; i++) peer->nts_state.valid[i] = false;
 
   buf.next = buff;
   buf.left = transfered;
@@ -369,7 +368,6 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
           break;
         }
         nts_next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
-        peer->nts_state.valid[idx] = true;
         peer->nts_state.writeIdx++;
         peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
         peer->nts_state.count++;

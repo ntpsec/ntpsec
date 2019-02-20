@@ -629,6 +629,9 @@ newpeer(
 	 */
 	memcpy(&peer->cfg, ctl, sizeof(peer->cfg));
 
+	/* reset NTS */
+	peer->nts_state.count = -1;
+
 	peer->cast_flags = cast_flags;
 	set_peerdstadr(peer,
 		       select_peerinterface(peer, srcadr, dstadr));

@@ -44,9 +44,8 @@ struct ntsclient_t {
     uint8_t UID[NTS_UID_LENGTH];
     /* cookies */
     int readIdx, writeIdx;
-    int count;
+    int count;			/* -1 if not in NTS mode */
     int cookielen;
-    bool valid[NTS_MAX_COOKIES];
     uint8_t cookies[NTS_MAX_COOKIES][NTS_MAX_COOKIELEN];
 };
 
