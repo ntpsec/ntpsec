@@ -122,311 +122,236 @@ static const struct ctl_proc control_codes[] = {
 };
 
 /*
- * System variables we understand
- */
-#define	CS_LEAP			1
-#define	CS_STRATUM		2
-#define	CS_PRECISION		3
-#define	CS_ROOTDELAY		4
-#define	CS_ROOTDISPERSION	5
-#define	CS_REFID		6
-#define	CS_REFTIME		7
-#define	CS_POLL			8
-#define	CS_PEERID		9
-#define	CS_OFFSET		10
-#define	CS_DRIFT		11
-#define	CS_JITTER		12
-#define	CS_ERROR		13
-#define	CS_CLOCK		14
-#define	CS_PROCESSOR		15
-#define	CS_SYSTEM		16
-#define	CS_VERSION		17
-#define	CS_STABIL		18
-#define	CS_VARLIST		19
-#define	CS_TAI			20
-#define	CS_LEAPTAB		21
-#define	CS_LEAPEND		22
-#define	CS_RATE			23
-#define	CS_MRU_ENABLED		24
-#define	CS_MRU_DEPTH		25
-#define	CS_MRU_DEEPEST		26
-#define	CS_MRU_MINDEPTH		27
-#define	CS_MRU_MAXAGE		28
-#define	CS_MRU_MINAGE		29
-#define	CS_MRU_MAXDEPTH		30
-#define	CS_MRU_MEM		31
-#define	CS_MRU_MAXMEM		32
-#define	CS_SS_UPTIME		33
-#define	CS_SS_RESET		34
-#define	CS_SS_RECEIVED		35
-#define	CS_SS_THISVER		36
-#define	CS_SS_OLDVER		37
-#define	CS_SS_BADFORMAT		38
-#define	CS_SS_BADAUTH		39
-#define	CS_SS_DECLINED		40
-#define	CS_SS_RESTRICTED	41
-#define	CS_SS_LIMITED		42
-#define	CS_SS_KODSENT		43
-#define	CS_SS_PROCESSED		44
-#define	CS_PEERADR		45
-#define	CS_PEERMODE		46
-#define	CS_AUTHDELAY		47
-#define	CS_AUTHKEYS		48
-#define	CS_AUTHFREEK		49
-#define	CS_AUTHKLOOKUPS		50
-#define	CS_AUTHKNOTFOUND	51
-#define	CS_AUTHENCRYPTS		52
-#define CS_AUTHDIGESTENCRYPT	53
-#define CS_AUTHCMACENCRYPT	54
-#define	CS_AUTHDECRYPTS		55
-#define	CS_AUTHRESET		56
-#define	CS_K_OFFSET		57
-#define	CS_K_FREQ		58
-#define	CS_K_MAXERR		59
-#define	CS_K_ESTERR		60
-#define	CS_K_STFLAGS		61
-#define	CS_K_TIMECONST		62
-#define	CS_K_PRECISION		63
-#define	CS_K_FREQTOL		64
-#define	CS_K_PPS_FREQ		65
-#define	CS_K_PPS_STABIL		66
-#define	CS_K_PPS_JITTER		67
-#define	CS_K_PPS_CALIBDUR	68
-#define	CS_K_PPS_CALIBS		69
-#define	CS_K_PPS_CALIBERRS	70
-#define	CS_K_PPS_JITEXC		71
-#define	CS_K_PPS_STBEXC		72
-#define	CS_KERN_FIRST		CS_K_OFFSET
-#define	CS_KERN_LAST		CS_K_PPS_STBEXC
-#define	CS_IOSTATS_RESET	73
-#define	CS_TOTAL_RBUF		74
-#define	CS_FREE_RBUF		75
-#define	CS_USED_RBUF		76
-#define	CS_RBUF_LOWATER		77
-#define	CS_IO_DROPPED		78
-#define	CS_IO_IGNORED		79
-#define	CS_IO_RECEIVED		80
-#define	CS_IO_SENT		81
-#define	CS_IO_SENDFAILED	82
-#define	CS_IO_WAKEUPS		83
-#define	CS_IO_GOODWAKEUPS	84
-#define	CS_TIMERSTATS_RESET	85
-#define	CS_TIMER_OVERRUNS	86
-#define	CS_TIMER_XMTS		87
-#define	CS_FUZZ			88
-#define	CS_WANDER_THRESH	89
-#define CS_MRU_EXISTS		90
-#define CS_MRU_NEW		91
-#define CS_MRU_RECYCLEOLD	92
-#define CS_MRU_RECYCLEFULL	93
-#define CS_MRU_NONE		94
-#define CS_MRU_OLDEST_AGE	95
-#define	CS_LEAPSMEARINTV	96
-#define	CS_LEAPSMEAROFFS	97
-#define	CS_TICK                 98
-#define	CS_NUMCTLREQ		99
-#define CS_ROOTDISTANCE		100
-#define CS_AUTHDIGESTDECRYPT	101
-#define CS_AUTHDIGESTFAIL	102
-#define CS_AUTHCMACDECRYPT	103
-#define CS_AUTHCMACFAIL		104
-/* Should be above with other CS_K_xxx, but that requires big renumbering */
-#define CS_K_LOCKCLOCK		105
-#define CS_NTSKEYFETCHES	106
-#define	CS_NTSVALIDATIONS	107
-#define	CS_NTSDECORATIONS	108
-#define	CS_MAXCODE		CS_NTSDECORATIONS
-
-/*
- * Peer variables we understand
- */
-#define	CP_CONFIG		1
-#define	CP_AUTHENABLE		2
-#define	CP_AUTHENTIC		3
-#define	CP_SRCADR		4
-#define	CP_SRCPORT		5
-#define	CP_DSTADR		6
-#define	CP_DSTPORT		7
-#define	CP_LEAP			8
-#define	CP_HMODE		9
-#define	CP_STRATUM		10
-#define	CP_PPOLL		11
-#define	CP_HPOLL		12
-#define	CP_PRECISION		13
-#define	CP_ROOTDELAY		14
-#define	CP_ROOTDISPERSION	15
-#define	CP_REFID		16
-#define	CP_REFTIME		17
-#define	CP_ORG			18
-#define	CP_REC			19
-#define	CP_XMT			20
-#define	CP_REACH		21
-#define	CP_UNREACH		22
-#define	CP_TIMER		23
-#define	CP_DELAY		24
-#define	CP_OFFSET		25
-#define	CP_JITTER		26
-#define	CP_DISPERSION		27
-#define	CP_KEYID		28
-#define	CP_FILTDELAY		29
-#define	CP_FILTOFFSET		30
-#define	CP_PMODE		31
-#define	CP_RECEIVED		32
-#define	CP_SENT			33
-#define	CP_FILTERROR		34
-#define	CP_FLASH		35
-#define	CP_MODE			36
-#define	CP_VARLIST		37
-#define	CP_RATE			38
-#define	CP_BIAS			39
-#define	CP_SRCHOST		40
-#define	CP_TIMEREC		41
-#define	CP_TIMEREACH		42
-#define	CP_BADAUTH		43
-#define	CP_BOGUSORG		44
-#define	CP_OLDPKT		45
-#define	CP_SELDISP		46
-#define	CP_SELBROKEN		47
-#define	CP_CANDIDATE		48
-#define	CP_MAXCODE		CP_CANDIDATE
-
-/*
- * Clock variables we understand
- */
-#define	CC_NAME		1
-#define	CC_TIMECODE	2
-#define	CC_POLL		3
-#define	CC_NOREPLY	4
-#define	CC_BADFORMAT	5
-#define	CC_BADDATA	6
-#define	CC_FUDGETIME1	7
-#define	CC_FUDGETIME2	8
-#define	CC_FUDGEVAL1	9
-#define	CC_FUDGEVAL2	10
-#define	CC_FLAGS	11
-#define	CC_DEVICE	12
-#define	CC_VARLIST	13
-#define	CC_MAXCODE	CC_VARLIST
-
-/*
  * System variable values. The array can be indexed by the variable
  * index to find the textual name.
  */
 static const struct ctl_var sys_var[] = {
-	{ 0,			PADDING, "" },		/* 0 */
-	{ CS_LEAP,		RW|DEF, "leap" },	/* 1 */
-	{ CS_STRATUM,		RO|DEF, "stratum" },	/* 2 */
-	{ CS_PRECISION, 	RO|DEF, "precision" },	/* 3 */
-	{ CS_ROOTDELAY, 	RO|DEF, "rootdelay" },	/* 4 */
-	{ CS_ROOTDISPERSION,	RO|DEF, "rootdisp" },	/* 5 */
-	{ CS_REFID,		RO|DEF, "refid" },	/* 6 */
-	{ CS_REFTIME,		RO|DEF, "reftime" },	/* 7 */
-	{ CS_POLL,		RO|DEF, "tc" },		/* 8 */
-	{ CS_PEERID,		RO|DEF, "peer" },	/* 9 */
-	{ CS_OFFSET,		RO|DEF, "offset" },	/* 10 */
-	{ CS_DRIFT,		RO|DEF, "frequency" },	/* 11 */
-	{ CS_JITTER,		RO|DEF, "sys_jitter" },	/* 12 */
-	{ CS_ERROR,		RO|DEF, "clk_jitter" },	/* 13 */
-	{ CS_CLOCK,		RO|DEF, "clock" },	/* 14 */
-	{ CS_PROCESSOR, 	RO|DEF, "processor" },	/* 15 */
-	{ CS_SYSTEM,		RO|DEF, "system" },	/* 16 */
-	{ CS_VERSION,		RO|DEF, "version" },	/* 17 */
-	{ CS_STABIL,		RO|DEF, "clk_wander" },	/* 18 */
-	{ CS_VARLIST,		RO, "sys_var_list" },	/* 19 */
-	{ CS_TAI,		RO|DEF, "tai" },	/* 20 */
-	{ CS_LEAPTAB,		RO|DEF, "leapsec" },	/* 21 */
-	{ CS_LEAPEND,		RO|DEF, "expire" },	/* 22 */
-	{ CS_RATE,		RO|DEF, "mintc" },	/* 23 */
-	{ CS_MRU_ENABLED,	RO, "mru_enabled" },	/* 24 */
-	{ CS_MRU_DEPTH,		RO, "mru_depth" },	/* 25 */
-	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },	/* 26 */
-	{ CS_MRU_MINDEPTH,	RO, "mru_mindepth" },	/* 27 */
-	{ CS_MRU_MAXAGE,	RO, "mru_maxage" },	/* 28 */
-	{ CS_MRU_MINAGE,	RO, "mru_minage" },     /* 29 */
-	{ CS_MRU_MAXDEPTH,	RO, "mru_maxdepth" },	/* 30 */
-	{ CS_MRU_MEM,		RO, "mru_mem" },	/* 31 */
-	{ CS_MRU_MAXMEM,	RO, "mru_maxmem" },	/* 32 */
-	{ CS_SS_UPTIME,		RO, "ss_uptime" },	/* 33 */
-	{ CS_SS_RESET,		RO, "ss_reset" },	/* 34 */
-	{ CS_SS_RECEIVED,	RO, "ss_received" },	/* 35 */
-	{ CS_SS_THISVER,	RO, "ss_thisver" },	/* 36 */
-	{ CS_SS_OLDVER,		RO, "ss_oldver" },	/* 37 */
-	{ CS_SS_BADFORMAT,	RO, "ss_badformat" },	/* 38 */
-	{ CS_SS_BADAUTH,	RO, "ss_badauth" },	/* 39 */
-	{ CS_SS_DECLINED,	RO, "ss_declined" },	/* 40 */
-	{ CS_SS_RESTRICTED,	RO, "ss_restricted" },	/* 41 */
-	{ CS_SS_LIMITED,	RO, "ss_limited" },	/* 42 */
-	{ CS_SS_KODSENT,	RO, "ss_kodsent" },	/* 43 */
-	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 44 */
-	{ CS_PEERADR,		RO, "peeradr" },	/* 45 */
-	{ CS_PEERMODE,		RO, "peermode" },	/* 46 */
-	{ CS_AUTHDELAY,		RO, "authdelay" },	/* 47 */
-	{ CS_AUTHKEYS,		RO, "authkeys" },	/* 48 */
-	{ CS_AUTHFREEK,		RO, "authfreek" },	/* 49 */
-	{ CS_AUTHKLOOKUPS,	RO, "authklookups" },	/* 50 */
-	{ CS_AUTHKNOTFOUND,	RO, "authknotfound" },	/* 51 */
-	{ CS_AUTHENCRYPTS,	RO, "authencrypts" },	/* 52 */
-	{ CS_AUTHDIGESTENCRYPT,	RO, "authdigestencrypts" },	/* 53 */
-	{ CS_AUTHCMACENCRYPT,	RO, "authcmacencrypts" },	/* 54 */
-	{ CS_AUTHDECRYPTS,	RO, "authdecrypts" },	/* 55 */
-	{ CS_AUTHRESET,		RO, "authreset" },	/* 56 */
-	{ CS_K_OFFSET,		RO, "koffset" },	/* 57 */
-	{ CS_K_FREQ,		RO, "kfreq" },		/* 58 */
-	{ CS_K_MAXERR,		RO, "kmaxerr" },	/* 59 */
-	{ CS_K_ESTERR,		RO, "kesterr" },	/* 60 */
-	{ CS_K_STFLAGS,		RO, "kstflags" },	/* 61 */
-	{ CS_K_TIMECONST,	RO, "ktimeconst" },	/* 62 */
-	{ CS_K_PRECISION,	RO, "kprecis" },	/* 63 */
-	{ CS_K_FREQTOL,		RO, "kfreqtol" },	/* 64 */
-	{ CS_K_PPS_FREQ,	RO, "kppsfreq" },	/* 65 */
-	{ CS_K_PPS_STABIL,	RO, "kppsstab" },	/* 66 */
-	{ CS_K_PPS_JITTER,	RO, "kppsjitter" },	/* 67 */
-	{ CS_K_PPS_CALIBDUR,	RO, "kppscalibdur" },	/* 68 */
-	{ CS_K_PPS_CALIBS,	RO, "kppscalibs" },	/* 69 */
-	{ CS_K_PPS_CALIBERRS,	RO, "kppscaliberrs" },	/* 70 */
-	{ CS_K_PPS_JITEXC,	RO, "kppsjitexc" },	/* 71 */
-	{ CS_K_PPS_STBEXC,	RO, "kppsstbexc" },	/* 72 */
-	{ CS_IOSTATS_RESET,	RO, "iostats_reset" },	/* 73 */
-	{ CS_TOTAL_RBUF,	RO, "total_rbuf" },	/* 74 */
-	{ CS_FREE_RBUF,		RO, "free_rbuf" },	/* 75 */
-	{ CS_USED_RBUF,		RO, "used_rbuf" },	/* 76 */
-	{ CS_RBUF_LOWATER,	RO, "rbuf_lowater" },	/* 77 */
-	{ CS_IO_DROPPED,	RO, "io_dropped" },	/* 78 */
-	{ CS_IO_IGNORED,	RO, "io_ignored" },	/* 79 */
-	{ CS_IO_RECEIVED,	RO, "io_received" },	/* 80 */
-	{ CS_IO_SENT,		RO, "io_sent" },	/* 81 */
-	{ CS_IO_SENDFAILED,	RO, "io_sendfailed" },	/* 82 */
-	{ CS_IO_WAKEUPS,	RO, "io_wakeups" },	/* 83 */
-	{ CS_IO_GOODWAKEUPS,	RO, "io_goodwakeups" },	/* 84 */
-	{ CS_TIMERSTATS_RESET,	RO, "timerstats_reset" },/* 85 */
-	{ CS_TIMER_OVERRUNS,	RO, "timer_overruns" },	/* 86 */
-	{ CS_TIMER_XMTS,	RO, "timer_xmts" },	/* 87 */
-	{ CS_FUZZ,		RO, "fuzz" },		/* 88 */
-	{ CS_WANDER_THRESH,	RO, "clk_wander_threshold" }, /* 89 */
-	{ CS_MRU_EXISTS,	RO, "mru_exists" },	/* 90 */
-	{ CS_MRU_NEW,		RO, "mru_new" },	/* 91 */
-	{ CS_MRU_RECYCLEOLD,	RO, "mru_recycleold" },	/* 92 */
-	{ CS_MRU_RECYCLEFULL,	RO, "mru_recyclefull" },/* 93 */
-	{ CS_MRU_NONE,		RO, "mru_none" },	/* 94 */
-	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },	/* 95 */
+	{ 0,			PADDING, "" },
+#define	CS_LEAP			1
+	{ CS_LEAP,		RW|DEF, "leap" },
+#define	CS_STRATUM		2
+	{ CS_STRATUM,		RO|DEF, "stratum" },
+#define	CS_PRECISION		3
+	{ CS_PRECISION, 	RO|DEF, "precision" },
+#define	CS_ROOTDELAY		4
+	{ CS_ROOTDELAY, 	RO|DEF, "rootdelay" },
+#define	CS_ROOTDISPERSION	5
+	{ CS_ROOTDISPERSION,	RO|DEF, "rootdisp" },
+#define	CS_REFID		6
+	{ CS_REFID,		RO|DEF, "refid" },
+#define	CS_REFTIME		7
+	{ CS_REFTIME,		RO|DEF, "reftime" },
+#define	CS_POLL			8
+	{ CS_POLL,		RO|DEF, "tc" },
+#define	CS_PEERID		9
+	{ CS_PEERID,		RO|DEF, "peer" },
+#define	CS_OFFSET		10
+	{ CS_OFFSET,		RO|DEF, "offset" },
+#define	CS_DRIFT		11
+	{ CS_DRIFT,		RO|DEF, "frequency" },
+#define	CS_JITTER		12
+	{ CS_JITTER,		RO|DEF, "sys_jitter" },
+#define	CS_ERROR		13
+	{ CS_ERROR,		RO|DEF, "clk_jitter" },
+#define	CS_CLOCK		14
+	{ CS_CLOCK,		RO|DEF, "clock" },
+#define	CS_PROCESSOR		15
+	{ CS_PROCESSOR, 	RO|DEF, "processor" },
+#define	CS_SYSTEM		16
+	{ CS_SYSTEM,		RO|DEF, "system" },
+#define	CS_VERSION		17
+	{ CS_VERSION,		RO|DEF, "version" },
+#define	CS_STABIL		18
+	{ CS_STABIL,		RO|DEF, "clk_wander" },
+#define	CS_VARLIST		19
+	{ CS_VARLIST,		RO, "sys_var_list" },
+#define	CS_TAI			20
+	{ CS_TAI,		RO|DEF, "tai" },
+#define	CS_LEAPTAB		21
+	{ CS_LEAPTAB,		RO|DEF, "leapsec" },
+#define	CS_LEAPEND		22
+	{ CS_LEAPEND,		RO|DEF, "expire" },
+#define	CS_RATE			23
+	{ CS_RATE,		RO|DEF, "mintc" },
+#define	CS_MRU_ENABLED		24
+	{ CS_MRU_ENABLED,	RO, "mru_enabled" },
+#define	CS_MRU_DEPTH		25
+	{ CS_MRU_DEPTH,		RO, "mru_depth" },
+#define	CS_MRU_DEEPEST		26
+	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },
+#define	CS_MRU_MINDEPTH		27
+	{ CS_MRU_MINDEPTH,	RO, "mru_mindepth" },
+#define	CS_MRU_MAXAGE		28
+	{ CS_MRU_MAXAGE,	RO, "mru_maxage" },
+#define	CS_MRU_MINAGE		29
+	{ CS_MRU_MINAGE,	RO, "mru_minage" },    
+#define	CS_MRU_MAXDEPTH		30
+	{ CS_MRU_MAXDEPTH,	RO, "mru_maxdepth" },
+#define	CS_MRU_MEM		31
+	{ CS_MRU_MEM,		RO, "mru_mem" },
+#define	CS_MRU_MAXMEM		32
+	{ CS_MRU_MAXMEM,	RO, "mru_maxmem" },
+#define	CS_SS_UPTIME		33
+	{ CS_SS_UPTIME,		RO, "ss_uptime" },
+#define	CS_SS_RESET		34
+	{ CS_SS_RESET,		RO, "ss_reset" },
+#define	CS_SS_RECEIVED		35
+	{ CS_SS_RECEIVED,	RO, "ss_received" },
+#define	CS_SS_THISVER		36
+	{ CS_SS_THISVER,	RO, "ss_thisver" },
+#define	CS_SS_OLDVER		37
+	{ CS_SS_OLDVER,		RO, "ss_oldver" },
+#define	CS_SS_BADFORMAT		38
+	{ CS_SS_BADFORMAT,	RO, "ss_badformat" },
+#define	CS_SS_BADAUTH		39
+	{ CS_SS_BADAUTH,	RO, "ss_badauth" },
+#define	CS_SS_DECLINED		40
+	{ CS_SS_DECLINED,	RO, "ss_declined" },
+#define	CS_SS_RESTRICTED	41
+	{ CS_SS_RESTRICTED,	RO, "ss_restricted" },
+#define	CS_SS_LIMITED		42
+	{ CS_SS_LIMITED,	RO, "ss_limited" },
+#define	CS_SS_KODSENT		43
+	{ CS_SS_KODSENT,	RO, "ss_kodsent" },
+#define	CS_SS_PROCESSED		44
+	{ CS_SS_PROCESSED,	RO, "ss_processed" },
+#define	CS_PEERADR		45
+	{ CS_PEERADR,		RO, "peeradr" },
+#define	CS_PEERMODE		46
+	{ CS_PEERMODE,		RO, "peermode" },
+#define	CS_AUTHDELAY		47
+	{ CS_AUTHDELAY,		RO, "authdelay" },
+#define	CS_AUTHKEYS		48
+	{ CS_AUTHKEYS,		RO, "authkeys" },
+#define	CS_AUTHFREEK		49
+	{ CS_AUTHFREEK,		RO, "authfreek" },
+#define	CS_AUTHKLOOKUPS		50
+	{ CS_AUTHKLOOKUPS,	RO, "authklookups" },
+#define	CS_AUTHKNOTFOUND	51
+	{ CS_AUTHKNOTFOUND,	RO, "authknotfound" },
+#define	CS_AUTHENCRYPTS		52
+	{ CS_AUTHENCRYPTS,	RO, "authencrypts" },
+#define CS_AUTHDIGESTENCRYPT	53
+	{ CS_AUTHDIGESTENCRYPT,	RO, "authdigestencrypts" },
+#define CS_AUTHCMACENCRYPT	54
+	{ CS_AUTHCMACENCRYPT,	RO, "authcmacencrypts" },
+#define	CS_AUTHDECRYPTS		55
+	{ CS_AUTHDECRYPTS,	RO, "authdecrypts" },
+#define	CS_AUTHRESET		56
+	{ CS_AUTHRESET,		RO, "authreset" },
+#define	CS_K_OFFSET		57
+	{ CS_K_OFFSET,		RO, "koffset" },
+#define	CS_K_FREQ		58
+	{ CS_K_FREQ,		RO, "kfreq" },
+#define	CS_K_MAXERR		59
+	{ CS_K_MAXERR,		RO, "kmaxerr" },
+#define	CS_K_ESTERR		60
+	{ CS_K_ESTERR,		RO, "kesterr" },
+#define	CS_K_STFLAGS		61
+	{ CS_K_STFLAGS,		RO, "kstflags" },
+#define	CS_K_TIMECONST		62
+	{ CS_K_TIMECONST,	RO, "ktimeconst" },
+#define	CS_K_PRECISION		63
+	{ CS_K_PRECISION,	RO, "kprecis" },
+#define	CS_K_FREQTOL		64
+	{ CS_K_FREQTOL,		RO, "kfreqtol" },
+#define	CS_K_PPS_FREQ		65
+	{ CS_K_PPS_FREQ,	RO, "kppsfreq" },
+#define	CS_K_PPS_STABIL		66
+	{ CS_K_PPS_STABIL,	RO, "kppsstab" },
+#define	CS_K_PPS_JITTER		67
+	{ CS_K_PPS_JITTER,	RO, "kppsjitter" },
+#define	CS_K_PPS_CALIBDUR	68
+	{ CS_K_PPS_CALIBDUR,	RO, "kppscalibdur" },
+#define	CS_K_PPS_CALIBS		69
+	{ CS_K_PPS_CALIBS,	RO, "kppscalibs" },
+#define	CS_K_PPS_CALIBERRS	70
+	{ CS_K_PPS_CALIBERRS,	RO, "kppscaliberrs" },
+#define	CS_K_PPS_JITEXC		71
+	{ CS_K_PPS_JITEXC,	RO, "kppsjitexc" },
+#define	CS_K_PPS_STBEXC		72
+	{ CS_K_PPS_STBEXC,	RO, "kppsstbexc" },
+#define	CS_IOSTATS_RESET	73
+	{ CS_IOSTATS_RESET,	RO, "iostats_reset" },
+#define	CS_TOTAL_RBUF		74
+	{ CS_TOTAL_RBUF,	RO, "total_rbuf" },
+#define	CS_FREE_RBUF		75
+	{ CS_FREE_RBUF,		RO, "free_rbuf" },
+#define	CS_USED_RBUF		76
+	{ CS_USED_RBUF,		RO, "used_rbuf" },
+#define	CS_RBUF_LOWATER		77
+	{ CS_RBUF_LOWATER,	RO, "rbuf_lowater" },
+#define	CS_IO_DROPPED		78
+	{ CS_IO_DROPPED,	RO, "io_dropped" },
+#define	CS_IO_IGNORED		79
+	{ CS_IO_IGNORED,	RO, "io_ignored" },
+#define	CS_IO_RECEIVED		80
+	{ CS_IO_RECEIVED,	RO, "io_received" },
+#define	CS_IO_SENT		81
+	{ CS_IO_SENT,		RO, "io_sent" },
+#define	CS_IO_SENDFAILED	82
+	{ CS_IO_SENDFAILED,	RO, "io_sendfailed" },
+#define	CS_IO_WAKEUPS		83
+	{ CS_IO_WAKEUPS,	RO, "io_wakeups" },
+#define	CS_IO_GOODWAKEUPS	84
+	{ CS_IO_GOODWAKEUPS,	RO, "io_goodwakeups" },
+#define	CS_TIMERSTATS_RESET	85
+	{ CS_TIMERSTATS_RESET,	RO, "timerstats_reset" },
+#define	CS_TIMER_OVERRUNS	86
+	{ CS_TIMER_OVERRUNS,	RO, "timer_overruns" },
+#define	CS_TIMER_XMTS		87
+	{ CS_TIMER_XMTS,	RO, "timer_xmts" },
+#define	CS_FUZZ			88
+	{ CS_FUZZ,		RO, "fuzz" },
+#define	CS_WANDER_THRESH	89
+	{ CS_WANDER_THRESH,	RO, "clk_wander_threshold" },
+#define CS_MRU_EXISTS		90
+	{ CS_MRU_EXISTS,	RO, "mru_exists" },
+#define CS_MRU_NEW		91
+	{ CS_MRU_NEW,		RO, "mru_new" },
+#define CS_MRU_RECYCLEOLD	92
+	{ CS_MRU_RECYCLEOLD,	RO, "mru_recycleold" },
+#define CS_MRU_RECYCLEFULL	93
+	{ CS_MRU_RECYCLEFULL,	RO, "mru_recyclefull" },
+#define CS_MRU_NONE		94
+	{ CS_MRU_NONE,		RO, "mru_none" },
+#define CS_MRU_OLDEST_AGE	95
+	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
 #ifdef ENABLE_LEAP_SMEAR
-	{ CS_LEAPSMEARINTV,	RO|DEF, "leapsmearinterval" },    /* 96 */
-	{ CS_LEAPSMEAROFFS,	RO|DEF, "leapsmearoffset" },      /* 97 */
-#endif	/* ENABLE_LEAP_SMEAR */
-	{ CS_TICK,		RO, "tick" },		/* 98 */
-	/* new in NTPsec */
-	{ CS_NUMCTLREQ,		RO, "ss_numctlreq" },	/* 99 */
-	{ CS_ROOTDISTANCE,	RO, "rootdist" },	/* 100 */
-	{ CS_AUTHDIGESTDECRYPT,	RO, "authdigestdecrypts" },	/* 101 */
-	{ CS_AUTHDIGESTFAIL,	RO, "authdigestfails" },	/* 102 */
-	{ CS_AUTHCMACDECRYPT,	RO, "authcmacdecrypts" },	/* 103 */
-	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },		/* 104 */
-	{ CS_K_LOCKCLOCK,	RO, "lockclock" },		/* 105 */
-	{ CS_NTSKEYFETCHES,	RO, "ntskeyfetches" },		/* 106 */
-	{ CS_NTSVALIDATIONS,	RO, "ntsvalidations" },		/* 107 */
-	{ CS_NTSDECORATIONS,	RO, "ntsdecoratiuons" },	/* 108 */
+#define	CS_LEAPSMEARINTV	96
+	{ CS_LEAPSMEARINTV,	RO|DEF, "leapsmearinterval" },   
+#define	CS_LEAPSMEAROFFS	97
+	{ CS_LEAPSMEAROFFS,	RO|DEF, "leapsmearoffset" },     
+#endif
+#define	CS_TICK                 98
+	{ CS_TICK,		RO, "tick" },
+#define	CS_NUMCTLREQ		99
+	{ CS_NUMCTLREQ,		RO, "ss_numctlreq" },
+#define CS_ROOTDISTANCE		100
+	{ CS_ROOTDISTANCE,	RO, "rootdist" },
+#define CS_AUTHDIGESTDECRYPT	101
+	{ CS_AUTHDIGESTDECRYPT,	RO, "authdigestdecrypts" },
+#define CS_AUTHDIGESTFAIL	102
+	{ CS_AUTHDIGESTFAIL,	RO, "authdigestfails" },
+#define CS_AUTHCMACDECRYPT	103
+	{ CS_AUTHCMACDECRYPT,	RO, "authcmacdecrypts" },
+#define CS_AUTHCMACFAIL		104
+	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },
+#define CS_K_LOCKCLOCK		105
+	{ CS_K_LOCKCLOCK,	RO, "lockclock" },
+#define CS_NTSKEYFETCHES	106
+	{ CS_NTSKEYFETCHES,	RO, "ntskeyfetches" },
+#define	CS_NTSVALIDATIONS	107
+	{ CS_NTSVALIDATIONS,	RO, "ntsvalidations" },
+#define	CS_NTSDECORATIONS	108
+	{ CS_NTSDECORATIONS,	RO, "ntsdecorations" },
+#define	CS_MAXCODE		CS_NTSDECORATIONS
 	{ 0,                    EOV, "" }
 };
+
+/* LOCKCLOCK: should be above with other CS_K_xxx, but that requires big renumbering */
+#define	CS_KERN_FIRST		CS_K_OFFSET
+#define	CS_KERN_LAST		CS_K_PPS_STBEXC
 
 static struct ctl_var *ext_sys_var = NULL;
 
@@ -434,58 +359,107 @@ static struct ctl_var *ext_sys_var = NULL;
  * Peer variable list
  */
 static const struct ctl_var peer_var[] = {
-	{ 0,		PADDING, "" },		/* 0 */
-	{ CP_CONFIG,	RO, "config" },		/* 1 */
-	{ CP_AUTHENABLE, RO,	"authenable" },	/* 2 */
-	{ CP_AUTHENTIC, RO, "authentic" },	/* 3 */
-	{ CP_SRCADR,	RO|DEF , "srcadr" },		/* 4 */
-	{ CP_SRCPORT,	RO|DEF, "srcport" },	/* 5 */
-	{ CP_DSTADR,	RO|DEF, "dstadr" },		/* 6 */
-	{ CP_DSTPORT,	RO|DEF, "dstport" },	/* 7 */
-	{ CP_LEAP,	RO|DEF, "leap" },		/* 8 */
-	{ CP_HMODE,	RO|DEF, "hmode" },		/* 9 */
-	{ CP_STRATUM,	RO|DEF, "stratum" },	/* 10 */
-	{ CP_PPOLL,	RO|DEF, "ppoll" },		/* 11 */
-	{ CP_HPOLL,	RO|DEF, "hpoll" },		/* 12 */
-	{ CP_PRECISION,	RO|DEF, "precision" },	/* 13 */
-	{ CP_ROOTDELAY,	RO|DEF, "rootdelay" },	/* 14 */
-	{ CP_ROOTDISPERSION, RO|DEF, "rootdisp" },	/* 15 */
-	{ CP_REFID,	RO|DEF, "refid" },		/* 16 */
-	{ CP_REFTIME,	RO|DEF, "reftime" },	/* 17 */
-        /* Placeholder. Reporting of this variable is disabled because
+	{ 0,		PADDING, "" },
+#define	CP_CONFIG		1
+	{ CP_CONFIG,	RO, "config" },
+#define	CP_AUTHENABLE		2
+	{ CP_AUTHENABLE, RO,	"authenable" },
+#define	CP_AUTHENTIC		3
+	{ CP_AUTHENTIC, RO, "authentic" },
+#define	CP_SRCADR		4
+	{ CP_SRCADR,	RO|DEF , "srcadr" },
+#define	CP_SRCPORT		5
+	{ CP_SRCPORT,	RO|DEF, "srcport" },
+#define	CP_DSTADR		6
+	{ CP_DSTADR,	RO|DEF, "dstadr" },
+#define	CP_DSTPORT		7
+	{ CP_DSTPORT,	RO|DEF, "dstport" },
+#define	CP_LEAP			8
+	{ CP_LEAP,	RO|DEF, "leap" },
+#define	CP_HMODE		9
+	{ CP_HMODE,	RO|DEF, "hmode" },
+#define	CP_STRATUM		10
+	{ CP_STRATUM,	RO|DEF, "stratum" },
+#define	CP_PPOLL		11
+	{ CP_PPOLL,	RO|DEF, "ppoll" },
+#define	CP_HPOLL		12
+	{ CP_HPOLL,	RO|DEF, "hpoll" },
+#define	CP_PRECISION		13
+	{ CP_PRECISION,	RO|DEF, "precision" },
+#define	CP_ROOTDELAY		14
+	{ CP_ROOTDELAY,	RO|DEF, "rootdelay" },
+#define	CP_ROOTDISPERSION	15
+	{ CP_ROOTDISPERSION, RO|DEF, "rootdisp" },
+#define	CP_REFID		16
+	{ CP_REFID,	RO|DEF, "refid" },
+#define	CP_REFTIME		17
+	{ CP_REFTIME,	RO|DEF, "reftime" },
+        /* Placeholder. Reporting of "org" is disabled because
            leaking it creates a vulnerability */
-        { CP_ORG,	RO, "org" },	        /* 18 */
-	{ CP_REC,	RO|DEF, "rec" },		/* 19 */
-	{ CP_XMT,	RO|DEF, "xmt" },		/* 20 */
-	{ CP_REACH,	RO|DEF, "reach" },		/* 21 */
-	{ CP_UNREACH,	RO|DEF, "unreach" },	/* 22 */
-	{ CP_TIMER,	RO, "timer" },		/* 23 */
-	{ CP_DELAY,	RO|DEF, "delay" },		/* 24 */
-	{ CP_OFFSET,	RO|DEF, "offset" },		/* 25 */
-	{ CP_JITTER,	RO|DEF, "jitter" },		/* 26 */
-	{ CP_DISPERSION, RO|DEF, "dispersion" },	/* 27 */
-	{ CP_KEYID,	RO|DEF, "keyid" },		/* 28 */
-	{ CP_FILTDELAY,	RO|DEF, "filtdelay" },	/* 29 */
-	{ CP_FILTOFFSET, RO|DEF, "filtoffset" },	/* 30 */
-	{ CP_PMODE,	RO|DEF, "pmode" },		/* 31 */
-	{ CP_RECEIVED,	RO, "received"},	/* 32 */
-	{ CP_SENT,	RO, "sent" },		/* 33 */
-	{ CP_FILTERROR,	RO|DEF, "filtdisp" },	/* 34 */
-	{ CP_FLASH,	RO|DEF, "flash" },		/* 35 */
-	{ CP_MODE,	RO, "mode" },		/* 36 */
-	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
-	{ CP_RATE,	RO|DEF, "headway" },	/* 38 */
-	{ CP_BIAS,	RO|DEF, "bias" },		/* 39 */
-	{ CP_SRCHOST,	RO, "srchost" },	/* 40 */
-	{ CP_TIMEREC,	RO, "timerec" },	/* 41 */
-	{ CP_TIMEREACH,	RO, "timereach" },	/* 42 */
-	{ CP_BADAUTH,	RO, "badauth" },	/* 43 */
-	{ CP_BOGUSORG,	RO, "bogusorg" },	/* 44 */
-	{ CP_OLDPKT,	RO, "oldpkt" },		/* 45 */
-	{ CP_SELDISP,	RO, "seldisp" },	/* 46 */
-	{ CP_SELBROKEN,	RO, "selbroken" },	/* 47 */
-	{ CP_CANDIDATE, RO, "candidate" },	/* 48 */
+#define	CP_ORG			18
+        { CP_ORG,	RO, "org" },     
+#define	CP_REC			19
+	{ CP_REC,	RO|DEF, "rec" },
+#define	CP_XMT			20
+	{ CP_XMT,	RO|DEF, "xmt" },
+#define	CP_REACH		21
+	{ CP_REACH,	RO|DEF, "reach" },
+#define	CP_UNREACH		22
+	{ CP_UNREACH,	RO|DEF, "unreach" },
+#define	CP_TIMER		23
+	{ CP_TIMER,	RO, "timer" },
+#define	CP_DELAY		24
+	{ CP_DELAY,	RO|DEF, "delay" },
+#define	CP_OFFSET		25
+	{ CP_OFFSET,	RO|DEF, "offset" },
+#define	CP_JITTER		26
+	{ CP_JITTER,	RO|DEF, "jitter" },
+#define	CP_DISPERSION		27
+	{ CP_DISPERSION, RO|DEF, "dispersion" },
+#define	CP_KEYID		28
+	{ CP_KEYID,	RO|DEF, "keyid" },
+#define	CP_FILTDELAY		29
+	{ CP_FILTDELAY,	RO|DEF, "filtdelay" },
+#define	CP_FILTOFFSET		30
+	{ CP_FILTOFFSET, RO|DEF, "filtoffset" },
+#define	CP_PMODE		31
+	{ CP_PMODE,	RO|DEF, "pmode" },
+#define	CP_RECEIVED		32
+	{ CP_RECEIVED,	RO, "received"},
+#define	CP_SENT			33
+	{ CP_SENT,	RO, "sent" },
+#define	CP_FILTERROR		34
+	{ CP_FILTERROR,	RO|DEF, "filtdisp" },
+#define	CP_FLASH		35
+	{ CP_FLASH,	RO|DEF, "flash" },
+#define	CP_MODE			36
+	{ CP_MODE,	RO, "mode" },
+#define	CP_VARLIST		37
+	{ CP_VARLIST,	RO, "peer_var_list" },
+#define	CP_RATE			38
+	{ CP_RATE,	RO|DEF, "headway" },
+#define	CP_BIAS			39
+	{ CP_BIAS,	RO|DEF, "bias" },
+#define	CP_SRCHOST		40
+	{ CP_SRCHOST,	RO, "srchost" },
+#define	CP_TIMEREC		41
+	{ CP_TIMEREC,	RO, "timerec" },
+#define	CP_TIMEREACH		42
+	{ CP_TIMEREACH,	RO, "timereach" },
+#define	CP_BADAUTH		43
+	{ CP_BADAUTH,	RO, "badauth" },
+#define	CP_BOGUSORG		44
+	{ CP_BOGUSORG,	RO, "bogusorg" },
+#define	CP_OLDPKT		45
+	{ CP_OLDPKT,	RO, "oldpkt" },
+#define	CP_SELDISP		46
+	{ CP_SELDISP,	RO, "seldisp" },
+#define	CP_SELBROKEN		47
+	{ CP_SELBROKEN,	RO, "selbroken" },
+#define	CP_CANDIDATE		48
+	{ CP_CANDIDATE, RO, "candidate" },
 	{ 0,		EOV, "" }
+#define	CP_MAXCODE		CP_CANDIDATE
 };
 
 #ifdef REFCLOCK
@@ -493,21 +467,35 @@ static const struct ctl_var peer_var[] = {
  * Clock variable list
  */
 static const struct ctl_var clock_var[] = {
-	{ 0,			PADDING, "" },		/* 0 */
-	{ CC_NAME,		RO|DEF, "name" },	/* 1 */
-	{ CC_TIMECODE,		RO|DEF, "timecode" },	/* 2 */
-	{ CC_POLL,		RO|DEF, "poll" },	/* 3 */
-	{ CC_NOREPLY,		RO|DEF, "noreply" },	/* 4 */
-	{ CC_BADFORMAT, 	RO|DEF, "badformat" },	/* 5 */
-	{ CC_BADDATA,		RO|DEF, "baddata" },	/* 6 */
-	{ CC_FUDGETIME1,	RO|DEF, "fudgetime1" },	/* 7 */
-	{ CC_FUDGETIME2,	RO|DEF, "fudgetime2" },	/* 8 */
-	{ CC_FUDGEVAL1, 	RO|DEF, "stratum" },	/* 9 */
-	{ CC_FUDGEVAL2, 	RO|DEF, "refid" },	/* 10 */
-	{ CC_FLAGS,		RO|DEF, "flags" },	/* 11 */
-	{ CC_DEVICE,		RO, 	"device" },	/* 12 */
-	{ CC_VARLIST,		RO, 	"clock_var_list"},	/* 13 */
-	{ 0,			EOV,	""  }		/* 14 */
+	{ 0,			PADDING, "" },
+#define	CC_NAME		1
+	{ CC_NAME,		RO|DEF, "name" },
+#define	CC_TIMECODE	2
+	{ CC_TIMECODE,		RO|DEF, "timecode" },
+#define	CC_POLL		3
+	{ CC_POLL,		RO|DEF, "poll" },
+#define	CC_NOREPLY	4
+	{ CC_NOREPLY,		RO|DEF, "noreply" },
+#define	CC_BADFORMAT	5
+	{ CC_BADFORMAT, 	RO|DEF, "badformat" },
+#define	CC_BADDATA	6
+	{ CC_BADDATA,		RO|DEF, "baddata" },
+#define	CC_FUDGETIME1	7
+	{ CC_FUDGETIME1,	RO|DEF, "fudgetime1" },
+#define	CC_FUDGETIME2	8
+	{ CC_FUDGETIME2,	RO|DEF, "fudgetime2" },
+#define	CC_FUDGEVAL1	9
+	{ CC_FUDGEVAL1, 	RO|DEF, "stratum" },
+#define	CC_FUDGEVAL2	10
+	{ CC_FUDGEVAL2, 	RO|DEF, "refid" },
+#define	CC_FLAGS	11
+	{ CC_FLAGS,		RO|DEF, "flags" },
+#define	CC_DEVICE	12
+	{ CC_DEVICE,		RO, 	"device" },
+#define	CC_VARLIST	13
+	{ CC_VARLIST,		RO, 	"clock_var_list"},
+#define	CC_MAXCODE	CC_VARLIST
+	{ 0,			EOV,	""  }	
 };
 #endif
 
