@@ -984,6 +984,7 @@ class PeerSummary:
         mode = 0
         unreach = 0
         xmt = 0
+        ntscookies = 0
 
         now = time.time()
 
@@ -1085,6 +1086,8 @@ class PeerSummary:
             elif name == "xmt":
                 # FIXME, xmt never used.
                 xmt = value
+            elif name == "ntscookies":
+                ntscookies = value
             else:
                 # unknown name?
                 # line = " name=%s " % (name)    # debug
@@ -1105,7 +1108,9 @@ class PeerSummary:
             elif dstadr_refid == "POOL":
                 ptype = 'p'     # pool
             elif srcadr.startswith("224."):
-                ptype = 'a'     # manycastclient
+                ptype = 'a'     # manycastclient (compatibility with Classic)
+            elif ntscookies != 0:
+                ptype = str(ntscookies)
             else:
                 ptype = 'u'     # unicast
         elif hmode == ntp.magic.MODE_ACTIVE:

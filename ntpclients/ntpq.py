@@ -1064,19 +1064,20 @@ usage: cv [ assocID ] [ name=value[,...] ]
     def do_pstats(self, line):
         "show statistics for a peer"
         pstats = (
-            ("srcadr", "remote host:         ", NTP_ADD),
-            ("dstadr", "local address:       ", NTP_ADD),
-            ("timerec", "time last received:  ", NTP_INT),
-            ("timer", "time until next send:", NTP_INT),
-            ("timereach", "reachability change: ", NTP_INT),
-            ("sent", "packets sent:        ", NTP_INT),
-            ("received", "packets received:    ", NTP_INT),
-            ("badauth", "bad authentication:  ", NTP_INT),
-            ("bogusorg", "bogus origin:        ", NTP_INT),
-            ("oldpkt", "duplicate:           ", NTP_INT),
-            ("seldisp", "bad dispersion:      ", NTP_INT),
-            ("selbroken", "bad reference time:  ", NTP_INT),
-            ("candidate", "candidate order:     ", NTP_INT),
+            ("srcadr", "remote host:          ", NTP_ADD),
+            ("dstadr", "local address:        ", NTP_ADD),
+            ("timerec", "time last received:   ", NTP_INT),
+            ("timer", "time until next send: ", NTP_INT),
+            ("timereach", "reachability change:  ", NTP_INT),
+            ("sent", "packets sent:         ", NTP_INT),
+            ("received", "packets received:     ", NTP_INT),
+            ("badauth", "bad authentication:   ", NTP_INT),
+            ("bogusorg", "bogus origin:         ", NTP_INT),
+            ("oldpkt", "duplicate:            ", NTP_INT),
+            ("seldisp", "bad dispersion:       ", NTP_INT),
+            ("selbroken", "bad reference time:   ", NTP_INT),
+            ("candidate", "candidate order:      ", NTP_INT),
+            ("ntscookies", "count of nts cookies: ", NTP_INT),
         )
         if not line:
             self.warn("usage: pstats assocID\n")

@@ -10,7 +10,8 @@ of the link:decode.html#peer[peer status word]
 |+st+            |stratum
 |+t+             |
 +u+: unicast or manycast client,
-+l+: local (reference clock), +s+: symmetric (peer), server, +B+: broadcast server,
++l+: local (reference clock), +s+: symmetric (peer), server, +B+:
+broadcast server, 1-8 NTS unicast with this number of cookies stored.
 |+when+          |sec/min/hr since last received packet
 |+poll+          |poll interval (log~2~ s)
 |+reach+         |reach shift register (octal)

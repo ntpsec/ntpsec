@@ -123,7 +123,7 @@ static const struct ctl_proc control_codes[] = {
 
 /*
  * System variable values. The array can be indexed by the variable
- * index to find the textual name.
+ * index to find the textual name.  Mostly not order-senstive.
  */
 static const struct ctl_var sys_var[] = {
 	{ 0,			PADDING, "" },
@@ -329,6 +329,7 @@ static const struct ctl_var sys_var[] = {
 #endif
 #define	CS_TICK                 98
 	{ CS_TICK,		RO, "tick" },
+	/* new in NTPsec */
 #define	CS_NUMCTLREQ		99
 	{ CS_NUMCTLREQ,		RO, "ss_numctlreq" },
 #define CS_ROOTDISTANCE		100
@@ -359,18 +360,18 @@ static const struct ctl_var sys_var[] = {
 	{ CS_nts_ke_serves,	RO, "nts_ke_serves" },
 #define CS_nts_ke_probes	113
 	{ CS_nts_ke_probes,	RO, "nts_ke_probes" },
-#define	CS_MAXCODE		CS_nts_ke_probes
+#define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
 };
 
-/* LOCKCLOCK: should be above with other CS_K_xxx, but that requires big renumbering */
+/* This makes sys_vars partially order-sensitive */
 #define	CS_KERN_FIRST		CS_K_OFFSET
 #define	CS_KERN_LAST		CS_K_PPS_STBEXC
 
 static struct ctl_var *ext_sys_var = NULL;
 
 /*
- * Peer variable list
+ * Peer variable list. Not order-sensitive.
  */
 static const struct ctl_var peer_var[] = {
 	{ 0,		PADDING, "" },
@@ -472,13 +473,16 @@ static const struct ctl_var peer_var[] = {
 	{ CP_SELBROKEN,	RO, "selbroken" },
 #define	CP_CANDIDATE		48
 	{ CP_CANDIDATE, RO, "candidate" },
+	/* new in NTPsec */
+#define	CP_NTSCOOKIES		49
+	{ CP_NTSCOOKIES, RO|DEF, "ntscookies" },
+#define	CP_MAXCODE		((sizeof(peer_var)/sizeof(peer_var[0])) - 1)
 	{ 0,		EOV, "" }
-#define	CP_MAXCODE		CP_CANDIDATE
 };
 
 #ifdef REFCLOCK
 /*
- * Clock variable list
+ * Clock variable list. Not order-sensitive.
  */
 static const struct ctl_var clock_var[] = {
 	{ 0,			PADDING, "" },
@@ -2247,6 +2251,10 @@ ctl_putpeer(
 
 	case CP_CANDIDATE:
 		ctl_putuint(peer_var[id].text, p->status);
+		break;
+
+	case CP_NTSCOOKIES:
+		ctl_putuint(peer_var[id].text, p->nts_state.count);
 		break;
 
 	default:
