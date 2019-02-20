@@ -319,9 +319,13 @@ static const struct ctl_var sys_var[] = {
 	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
 #ifdef ENABLE_LEAP_SMEAR
 #define	CS_LEAPSMEARINTV	96
-	{ CS_LEAPSMEARINTV,	RO|DEF, "leapsmearinterval" },   
+	{ CS_LEAPSMEARINTV,	RO|DEF, "leapsmearinterval" },
 #define	CS_LEAPSMEAROFFS	97
-	{ CS_LEAPSMEAROFFS,	RO|DEF, "leapsmearoffset" },     
+	{ CS_LEAPSMEAROFFS,	RO|DEF, "leapsmearoffset" },
+#else
+/* hack to keep table aligned */
+	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
+	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
 #endif
 #define	CS_TICK                 98
 	{ CS_TICK,		RO, "tick" },
