@@ -1,0 +1,114 @@
+AES_SIV_Init(3)
+===============
+:doctype: manpage
+
+NAME
+----
+
+AES_SIV_Init, AES_SIV_AssociateData, AES_SIV_EncryptFinal, AES_SIV_DecryptFinal - AES-SIV low-level interface
+
+SYNOPSIS
+--------
+
+[source,c]
+----
+#include <aes_siv.h>
+
+int AES_SIV_Init(AES_SIV_CTX *ctx, unsigned char const* key, size_t key_len);
+int AES_SIV_AssociateData(AES_SIV_CTX *ctx, unsigned char const* data, size_t len);
+int AES_SIV_EncryptFinal(AES_SIV_CTX *ctx,
+                         unsigned char *v_out, unsigned char *c_out,
+                         unsigned char const* plaintext, size_t len);
+int AES_SIV_DecryptFinal(AES_SIV_CTX *ctx, unsigned char *out,
+                         unsigned char const* v, unsigned char const* c,
+                         size_t len);
+----
+
+DESCRIPTION
+-----------
+
+These functions provide a low-level interface for AES-SIV encryption
+and decryption, complying with RFC 5297.
+
+*AES_SIV_Init()* prepares _ctx_ for encrypting or decrypting data
+under the given _key_.
+
+*AES_SIV_AssociateData*() adds a block of associated data to *ctx*.
+This function is also used for adding a _nonce_; see NOTES for details.
+
+*AES_SIV_EncryptFinal()* encrypts the provided _plaintext_, writing a
+16-byte authentication tag to _v_out_ and ciphertext to _c_out_.  The
+ciphertext written to _c_out_ will be equal in length to the
+plaintext, with both lengths given by _len_.
+
+*AES_SIV_DecryptFinal()* decrypts and verifies the provided ciphertext
+_c_ and 16-byte authentication tag _v_, writing plaintext to _out_.
+The plaintext will be equal in length to _c_, with both lengths
+given by _len_.
+
+RETURN VALUE
+------------
+
+These functions return 1 on success, 0 on failure.
+
+NOTES
+-----
+
+When encrypting or decrypting/authenticating multiple messages under
+the same key, these functions may be used to achieve better
+performance than is possible using the high-level API by caching the
+result of of key setup. After calling +AES_SIV_Init+(), retain the
+resulting _ctx_ structure and use +AES_SIV_CTX_copy+() to make a copy
+of it for each message being encrypted or decrypted.
+
+The arguments to a typical AEAD encryption function consist of a key,
+a nonce, associated data, and plaintext. However, RFC 5297 defines
+AES-SIV as accepting an arbitrary number of associated data arguments,
+and specifies that the nonce should be given as the final such
+argument.  This low-level API is structured accordingly. The
+high-level functions +AES_SIV_Encrypt+() and +AES_SIV_Decrypt+() are
+implemented on top of it approximately as follows; error-handling is
+omitted for brevity.
+
+[source,c]
+----
+int AES_SIV_Encrypt(AES_SIV_CTX *ctx,
+                    unsigned char *out, size_t *out_len,
+                    unsigned char const* key, size_t key_len,
+                    unsigned char const* nonce, size_t nonce_len,
+                    unsigned char const* plaintext, size_t plaintext_len,
+                    unsigned char const *ad, size_t ad_len) {
+        *out_len = plaintext_len + 16;
+
+        /* Do not copy-paste this code; it is missing return-value
+           checking.*/
+        AES_SIV_Init(ctx, key, key_len);
+        AES_SIV_AssociateData(ctx, ad, ad_len;
+        if(nonce) AES_SIV_AssociateData(ctx, nonce, nonce_len);
+        AES_SIV_EncryptFinal(ctx, out, out+16, plaintext, plaintext_len);
+        return 1;
+}
+
+int AES_SIV_Decrypt(AES_SIV_CTX *ctx,
+                    unsigned char *out, size_t *out_len,
+                    unsigned char const* key, size_t key_len,
+                    unsigned char const* nonce, size_t nonce_len,
+                    unsigned char const* ciphertext, size_t ciphertext_len,
+                    unsigned char const *ad, size_t ad_len) {
+        *out_len = ciphertext_len - 16;
+
+        /* Do not copy-paste this code; it is missing return-value
+           checking.*/
+        AES_SIV_Init(ctx, key, key_len);
+        AES_SIV_AssociateData(ctx, ad, ad_len);
+        if(nonce) AES_SIV_AssociateData(ctx, nonce, nonce_len);
+        AES_SIV_DecryptFinal(ctx, out, ciphertext, ciphertext + 16,
+                             ciphertext_len - 16);
+        return 1;
+}
+----
+
+SEE ALSO
+--------
+
+*AES_SIV_CTX_new*(3), *AES_SIV_Encrypt*(3), RFC 5297

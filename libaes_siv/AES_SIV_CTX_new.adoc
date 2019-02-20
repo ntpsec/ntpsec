@@ -1,0 +1,69 @@
+AES_SIV_CTX_new(3)
+==================
+:doctype: manpage
+
+NAME
+----
+
+AES_SIV_CTX_new, AES_SIV_CTX_copy, AES_SIV_CTX_cleanup, AES_SIV_CTX_free - manage AES-SIV contexts
+
+SYNOPSIS
+--------
+
+[source,c]
+----
+#include <aes_siv.h>
+
+typedef struct AES_SIV_CTX_st AES_SIV_CTX;
+
+AES_SIV_CTX* AES_SIV_CTX_new();
+int AES_SIV_CTX_copy(AES_SIV_CTX *dst, AES_SIV_CTX const* src);
+void AES_SIV_CTX_cleanup(AES_SIV_CTX *ctx);
+void AES_SIV_CTX_free(AES_SIV_CTX *ctx);
+----
+
+DESCRIPTION
+-----------
+
+An *AES_SIV_CTX* is an opaque structure which holds context for
+AES-SIV operations.  A single +AES_SIV_CTX+ may be allocated and used
+repeatedly for multiple operations, so long as it is only used for one
+operation at a time.
+
+The *AES_SIV_CTX_new()* function allocates and returns a new,
+uninitialized +AES_SIV_CTX+.
+
+The *AES_SIV_CTX_copy()* function copies the contents of _src_
+into _dst_.
+
+The *AES_SIV_CTX_cleanup()* function erases the contents of _ctx_,
+rendering it uninitialized but still allocated.
+
+The *AES_SIV_CTX_free()* function frees the memory associated with
+`ctx`.
+
+NOTES
+-----
+
+AES_SIV_CTX_new() and AES_SIV_CTX_free() are the only functions in
+libaes_siv which allocate or free heap memory. They do so by calling
+OPENSSL_malloc() and OPENSSL_free(), so they will make use of any
+custom allocators provided to OpenSSL via CRYPTO_set_mem_functions().
+
+AES_SIV_CTX_cleanup() will securely erase all heap data asociated with
+the AES_SIV_CTX. libaes_siv does not attempt to sanitize the stack
+since compiler behaviors such as register spilling make such attempts
+too unreliable to be worthwhile.
+
+RETURN VALUES
+-------------
+
+*AES_SIV_CTX_new()* returns a pointer to the newly-allocated context
+structure on success, or NULL on failure.
+
+*AES_SIV_CTX_copy()* returns 1 on success, 0 on failure.
+
+SEE ALSO
+--------
+
+*AES_SIV_Encrypt*(3), *AES_SIV_Init*(3), RFC 5297
