@@ -53,13 +53,12 @@ struct ntsclient_t {
 /* Server-side state per packet */
 struct ntspacket_t {
     bool valid;
-    int extra;
     int uidlen;
     uint8_t UID[NTS_UID_MAX_LENGTH];
+    int needed;
+    int aead;
     int keylen;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-    int aead;
-    uint8_t cookie[NTS_MAX_COOKIELEN];
 };
 
 

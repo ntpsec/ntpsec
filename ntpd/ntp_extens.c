@@ -29,7 +29,15 @@
 #define NTP_EX_HDR_LNG 4
 #define NTP_EX_U16_LNG 2
 
-
+/* Statistics */
+uint64_t client_extens_sent = 0;
+uint64_t client_extens_xtra = 0;
+uint64_t client_extens_recv = 0;
+uint64_t client_extens_recv_good = 0;
+uint64_t server_extens_sent = 0;
+uint64_t server_extens_xtra = 0;
+uint64_t server_extens_recv = 0;
+uint64_t server_extens_recv_good = 0;
 
 enum NtpExtFieldType {
    Unique_Identifier = 10,
@@ -105,6 +113,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
   buf.left -= left;
 
   used = buf.next-xpkt->exten;
+  client_extens_sent++;
   return used;
 }
 
@@ -112,9 +121,15 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
   struct BufCtl_t buf;
   uint16_t aead;
   int noncelen, cmaclen;
+  bool sawcookie, sawAEEF;
+
+  server_extens_recv++;
 
   buf.next = pkt+LEN_PKT_NOMAC;
   buf.left = lng-LEN_PKT_NOMAC;
+
+  sawcookie = sawAEEF = false;
+  ntspacket->uidlen = 0;
 
   while (buf.left > 0) {
     uint16_t type;
@@ -125,7 +140,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
     bool ok;
 
     type = nts_next_record(&buf, &length);
-    if (length > buf.left || length < 0)
+    if (length&3 || length > buf.left || length < 0)
       return false;
     if (NTS_CRITICAL & type) {
       critical = true;
@@ -139,6 +154,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
         nts_next_bytes(&buf, ntspacket->UID, length);
 	break;
       case NTS_Cookie:
+        if (sawcookie)
+          return false;			/* second cookie */
         ok = nts_unpack_cookie(buf.next, length,
             &aead,
 	    ntspacket->c2s, ntspacket->s2c, &ntspacket->keylen);
@@ -146,16 +163,18 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	  return false;
         buf.next += length;
 	buf.left -= length;
-	ntspacket->valid = true;
+	sawcookie = true;
+	ntspacket->needed = 1;
 	ntspacket->aead = aead;
 	break;
       case NTS_Cookie_Placeholder:
-        ntspacket->extra++;
+        /* doesn't check length */
+        ntspacket->needed++;
         buf.next += length;
 	buf.left -= length;
         break;
       case NTS_AEEF:
-        if (!ntspacket->valid)
+        if (!sawcookie)
 	  return false;			/* no cookie yet, no c2s */
         if (length != NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH)
 	  return false;
@@ -181,23 +200,201 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	  return false;
 	if (0 != outlen)
 	  return false;
+        /* we already used 2 length slots way above*/
+        length -= (NTP_EX_U16_LNG+NTP_EX_U16_LNG);
         buf.next += length;
 	buf.left -= length;
-	if (0 != buf.left)
+        if (0 != buf.left)
 	  return false;		/* Reject extens after AEEF block */
+        sawAEEF = true;
         break;
       default:
         if (critical)
           return false;
         buf.next += length;
 	buf.left -= length;
+        return false;		// FIXME - for now, it's probably a bug
     }
   }
 
-  if (!ntspacket->valid)
+  if (!sawAEEF)
     return false;
-
+//  printf("ESRx: %d, %d, %d\n",
+//      lng-LEN_PKT_NOMAC, ntspacket->needed, ntspacket->keylen);
+  ntspacket->valid = true;
+  server_extens_recv_good++;
   return true;
 }
 
+int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
+  struct BufCtl_t buf;
+  int used, adlength;
+  size_t left;
+  uint8_t *nonce, *packet;
+  uint8_t *plaintext, *ciphertext;;
+  uint8_t cookie[NTS_MAX_COOKIELEN];
+  int cookielen, plainleng, aeadlen;
+  bool ok;
+
+  /* get first cookie now so we have length */
+  cookielen = nts_make_cookie(cookie, ntspacket->aead,
+        ntspacket->c2s, ntspacket->s2c, ntspacket->keylen);
+
+  packet = (uint8_t*)xpkt;
+  buf.next = xpkt->exten;
+  buf.left = MAX_EXT_LEN;
+
+  /* UID */
+  if (0 < ntspacket->uidlen)
+    nts_append_record_bytes(&buf, Unique_Identifier,
+        ntspacket->UID, ntspacket->uidlen);
+
+  adlength = buf.next-packet;		/* up to here is Additional Data */
+
+  /* length of whole AEEF */
+  plainleng = ntspacket->needed*(NTP_EX_HDR_LNG+cookielen);
+  /* length of whole AEEF header */
+  aeadlen = NTP_EX_U16_LNG*2+NONCE_LENGTH+CMAC_LENGTH + plainleng;
+  nts_append_header(&buf, NTS_AEEF, aeadlen);
+  nts_append_uint16(&buf, NONCE_LENGTH);
+  nts_append_uint16(&buf, plainleng);
+
+  nonce = buf.next;
+  RAND_bytes(nonce, NONCE_LENGTH);
+  buf.next += NONCE_LENGTH;
+  buf.left -= NONCE_LENGTH;
+
+  ciphertext = buf.next;	/* cipher text starts here */
+  left = buf.left;
+  buf.next += CMAC_LENGTH;	/* skip space for CMAC */
+  buf.left -= CMAC_LENGTH;
+  plaintext = buf.next;		/* encrypt in place */
+
+  nts_append_record_bytes(&buf, NTS_Cookie,
+      cookie, cookielen);
+  for (int i=1; i<ntspacket->needed; i++) {
+    nts_make_cookie(cookie, ntspacket->aead,
+        ntspacket->c2s, ntspacket->s2c, ntspacket->keylen);
+    nts_append_record_bytes(&buf, NTS_Cookie,
+        cookie, cookielen);
+  }
+
+//printf("ESSa: %d, %d, %d, %d\n",
+//  adlength, plainleng, cookielen, ntspacket->needed);
+
+  ok = AES_SIV_Encrypt(wire_ctx,
+           ciphertext, &left,   /* left: in: max out length, out: length used */
+           ntspacket->s2c, ntspacket->keylen,
+           nonce, NONCE_LENGTH,
+           plaintext, plainleng,
+           packet, adlength);
+  if (!ok) {
+    msyslog(LOG_ERR, "NTS: extens_server_send - Error from AES_SIV_Encrypt");
+    nts_log_ssl_error();
+    /* I don't think this should happen,
+     * so crash rather than work incorrectly.
+     * Hal, 2019-Feb-17
+     * Similar code in nts_cookie
+     */
+    exit(1);
+  }
+
+  used = buf.next-xpkt->exten;
+
+// printf("ESSx: %lu, %d\n", (long unsigned)left, used);
+
+  server_extens_sent++;
+  return used;
+}
+
+bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
+  struct BufCtl_t buf;
+  int idx;
+  bool sawAEEF = false;
+
+  client_extens_recv++;
+
+  buf.next = pkt+LEN_PKT_NOMAC;
+  buf.left = lng-LEN_PKT_NOMAC;
+
+  while (buf.left > 0) {
+    uint16_t type;
+    bool critical = false;
+    int length, adlength, noncelen;
+    uint8_t *nonce, *ciphertext, *plaintext;
+    size_t outlen;
+    bool ok;
+
+    type = nts_next_record(&buf, &length);
+    if (length&3 || length > buf.left || length < 0)
+      return false;
+    if (NTS_CRITICAL & type) {
+      critical = true;
+      type &= ~NTS_CRITICAL;
+    }
+//     printf("ECR: %d, %d, %d\n", type, length, buf.left);
+    switch (type) {
+      case Unique_Identifier:
+	if (NTS_UID_LENGTH != length)
+	  return false;
+        if (0 != memcmp(buf.next, peer->nts_state.UID, NTS_UID_LENGTH))
+          return false;
+        buf.next += length;
+	buf.left -= length;
+	break;
+      case NTS_Cookie:
+        if (!sawAEEF)
+          return false;			/* reject unencrypted cookies */
+        if (NTS_MAX_COOKIES <= peer->nts_state.count)
+          return false;			/* reject extra cookies */
+        if (length != peer->nts_state.cookielen)
+          return false;			/* reject length change */
+        idx = peer->nts_state.writeIdx++;
+	memcpy((uint8_t*)&peer->nts_state.cookies[idx], buf.next, length);
+        peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
+	peer->nts_state.count++;
+        buf.next += length;
+	buf.left -= length;
+        break;
+      case NTS_AEEF:
+        adlength = buf.next-NTP_EX_HDR_LNG-pkt;  /* backup over header */
+        noncelen = nts_next_uint16(&buf);
+        outlen = nts_next_uint16(&buf);
+        if (noncelen&3 || outlen&3)
+          return false;                 /* else round up */
+        nonce = buf.next;
+        ciphertext = nonce+noncelen;
+        plaintext = ciphertext+CMAC_LENGTH;
+	outlen = buf.left-NONCE_LENGTH-CMAC_LENGTH;
+//      printf("ECRa: %lu, %d\n", (long unsigned)outlen, noncelen);
+        ok = AES_SIV_Decrypt(wire_ctx,
+            plaintext, &outlen,
+            peer->nts_state.s2c, peer->nts_state.keylen,
+            nonce, noncelen,
+            ciphertext, outlen+CMAC_LENGTH,
+            pkt, adlength);
+//      printf("ECRb: %d, %lu\n", ok, (long unsigned)outlen);
+        if (!ok)
+          return false;
+	/* setup to process encrypted headers */
+	buf.next += NONCE_LENGTH+CMAC_LENGTH;
+        buf.left -= NONCE_LENGTH+CMAC_LENGTH;
+	sawAEEF = true;
+        break;
+      default:
+        if (critical)
+          return false;
+        buf.next += length;
+	buf.left -= length;
+        return false;		// FIXME - for now, it's probably a bug
+    }
+  }
+
+//  printf("ECRx: %d, %d  %d, %d\n", sawAEEF, peer->nts_state.count,
+//      peer->nts_state.writeIdx, peer->nts_state.readIdx);
+  if (!sawAEEF)
+    return false;
+  client_extens_recv_good++;
+  return true;
+}
 /* end */

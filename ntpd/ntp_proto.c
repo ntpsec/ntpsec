@@ -254,8 +254,6 @@ parse_packet(
 
 	rbufp->extens_present = false;
 	rbufp->ntspacket.valid = false;
-	rbufp->ntspacket.extra = 0;
-	rbufp->ntspacket.uidlen = 0;
 
 	if(PKT_VERSION(pkt->li_vn_mode) > 4) {
 		/* Unsupported version */
@@ -704,19 +702,23 @@ receive(
 	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
-		if (rbufp->extens_present) {
-		    if (!extens_server_recv(&rbufp->ntspacket,
+		if (rbufp->extens_present
+		    && !extens_server_recv(&rbufp->ntspacket,
 			  rbufp->recv_buffer, rbufp->recv_length)) {
 			stat_count.sys_declined++;
 			break;
-		    }
 		}
 		handle_fastxmit(rbufp, restrict_mask, auth);
 		stat_count.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
-		if (peer == NULL || nts_validate(&peer->cfg.nts_cfg, &peer->nts_state,
-						 &rbufp->pkt) != 0) {
+		if (NULL == peer) {
+		    stat_count.sys_declined++;
+		    break;
+		}	
+		if (rbufp->extens_present
+                     && !extens_client_recv(peer,
+                          rbufp->recv_buffer, rbufp->recv_length)) {
 		    stat_count.sys_declined++;
 		    break;
 		}	
@@ -2215,6 +2217,7 @@ fast_xmit(
 	if (flags & RES_MSSNTP) {
 		keyid_t keyid = 0;
 		if (NULL != auth) keyid = auth->keyid;
+		// FIXME need counter
 		send_via_ntp_signd(rbufp, xmode, keyid, flags, &xpkt);
 		return;
 	}
@@ -2228,8 +2231,8 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	get_systime(&xmt_tx);
-	if (0) {
-	  sendlen += nts_decorate(NULL, NULL, xpkt.exten, sizeof(xpkt.exten));
+	if (rbufp->ntspacket.valid) {
+	  sendlen += extens_server_send(&rbufp->ntspacket, &xpkt);
         } else if (NULL != auth) {
 	  sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
         }
