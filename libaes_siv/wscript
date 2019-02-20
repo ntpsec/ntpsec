@@ -1,0 +1,10 @@
+def build(ctx):
+    # libaes_siv has warnings when built with -Wshadow, so make sure to use
+    # -Wno-shadow
+    ctx.env.CFLAGS_cstlib = ['-Wno-shadow']
+
+    ctx(
+        target="aes_siv",
+        features="c cstlib bld_include" ,
+        source="aes_siv.c",
+    )
