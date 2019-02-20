@@ -30,10 +30,6 @@ struct ntsconfig_t ntsconfig = {
   .ca = NULL
 };
 
-int ntskeyfetches;
-int ntsvalidations;
-int ntsdecorations;
-
 /* By design, there is no per-client-side state on the server */
 
 /*
@@ -110,7 +106,6 @@ int nts_validate(const struct ntscfg_t *cfg, struct ntsclient_t *state,
 	UNUSED_ARG(cfg);
 	UNUSED_ARG(pkt);
 	UNUSED_ARG(state);
-	ntsvalidations++;
 	return 0;
 }
 
@@ -127,7 +122,6 @@ int nts_decorate(const struct ntscfg_t *cfg, struct ntsclient_t *state,
 	UNUSED_ARG(extdata);
 	UNUSED_ARG(extlen);
 	UNUSED_ARG(state);
-	ntsdecorations++;
 	return 0;
 }
 

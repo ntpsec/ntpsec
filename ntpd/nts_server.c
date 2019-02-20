@@ -116,6 +116,7 @@ void* nts_ke_listener(void* arg) {
             msyslog(LOG_ERR, "NTSs: TCP accept failed: %m");
             continue;
         }
+	nts_ke_serves++;
         msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s",
             socktoa((sockaddr_u *)&addr));
 

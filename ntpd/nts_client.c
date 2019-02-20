@@ -32,7 +32,6 @@ bool nts_set_cert_search(SSL_CTX *ctx);
 bool nts_client_build_request(struct peer* peer, SSL *ssl);
 bool nts_client_process_response(struct peer* peer, SSL *ssl);
 
-
 SSL_CTX *client_ctx = NULL;
 
 // Fedora 29:  0x1010101fL  1.1.1a
@@ -97,6 +96,8 @@ bool nts_probe(struct peer * peer) {
 
   if (NULL == client_ctx)
     return false;
+
+  nts_ke_probes++;
 
   server = open_TCP_socket(peer->hostname);
   if (-1 == server)
@@ -371,7 +372,6 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         peer->nts_state.writeIdx++;
         peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
         peer->nts_state.count++;
-	ntskeyfetches++;
         break;
       case nts_end_of_message:
         if ((0 != length) || !critical) {

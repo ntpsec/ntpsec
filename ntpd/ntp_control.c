@@ -343,13 +343,23 @@ static const struct ctl_var sys_var[] = {
 	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },
 #define CS_K_LOCKCLOCK		105
 	{ CS_K_LOCKCLOCK,	RO, "lockclock" },
-#define CS_NTSKEYFETCHES	106
-	{ CS_NTSKEYFETCHES,	RO, "ntskeyfetches" },
-#define	CS_NTSVALIDATIONS	107
-	{ CS_NTSVALIDATIONS,	RO, "ntsvalidations" },
-#define	CS_NTSDECORATIONS	108
-	{ CS_NTSDECORATIONS,	RO, "ntsdecorations" },
-#define	CS_MAXCODE		CS_NTSDECORATIONS
+#define CS_nts_client_send	106
+	{ CS_nts_client_send,	RO, "nts_client_send" },
+#define CS_nts_client_recv	107
+	{ CS_nts_client_recv,	RO, "nts_client_recv" },
+#define CS_nts_client_recv_bad	108
+	{ CS_nts_client_recv_bad,	RO, "nts_client_recv_bad" },
+#define CS_nts_server_send	109
+	{ CS_nts_server_send,	RO, "nts_server_send" },
+#define CS_nts_server_recv	110
+	{ CS_nts_server_recv,	RO, "nts_server_recv" },
+#define CS_nts_server_recv_bad	111
+	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
+#define CS_nts_ke_serves	112
+	{ CS_nts_ke_serves,	RO, "nts_ke_serves" },
+#define CS_nts_ke_probes	113
+	{ CS_nts_ke_probes,	RO, "nts_ke_probes" },
+#define	CS_MAXCODE		CS_nts_ke_probes
 	{ 0,                    EOV, "" }
 };
 
@@ -1929,16 +1939,36 @@ ctl_putsys(
 			   sys_vars.sys_rootdist * MS_PER_S);
 		break;
 
-	case CS_NTSKEYFETCHES:
-		ctl_putuint(sys_var[varid].text, ntskeyfetches);
+	case CS_nts_client_send:
+		ctl_putuint(sys_var[varid].text, nts_client_send);
 		break;
 
-	case CS_NTSVALIDATIONS:
-		ctl_putuint(sys_var[varid].text, ntsvalidations);
+	case CS_nts_client_recv:
+		ctl_putuint(sys_var[varid].text, nts_client_recv);
 		break;
 
-	case CS_NTSDECORATIONS:
-		ctl_putuint(sys_var[varid].text, ntsdecorations);
+	case CS_nts_client_recv_bad:
+		ctl_putuint(sys_var[varid].text, nts_client_recv_bad);
+		break;
+
+	case CS_nts_server_send:
+		ctl_putuint(sys_var[varid].text, nts_server_send);
+		break;
+
+	case CS_nts_server_recv:
+		ctl_putuint(sys_var[varid].text, nts_server_recv);
+		break;
+
+	case CS_nts_server_recv_bad:
+		ctl_putuint(sys_var[varid].text, nts_server_recv_bad);
+		break;
+
+	case CS_nts_ke_serves:
+		ctl_putuint(sys_var[varid].text, nts_ke_serves);
+		break;
+
+	case CS_nts_ke_probes:
+		ctl_putuint(sys_var[varid].text, nts_ke_probes);
 		break;
 
         default:

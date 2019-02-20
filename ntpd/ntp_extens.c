@@ -30,14 +30,14 @@
 #define NTP_EX_U16_LNG 2
 
 /* Statistics */
-uint64_t client_extens_sent = 0;
-uint64_t client_extens_xtra = 0;
-uint64_t client_extens_recv = 0;
-uint64_t client_extens_recv_good = 0;
-uint64_t server_extens_sent = 0;
-uint64_t server_extens_xtra = 0;
-uint64_t server_extens_recv = 0;
-uint64_t server_extens_recv_good = 0;
+uint64_t nts_client_send = 0;
+uint64_t nts_client_recv = 0;
+uint64_t nts_client_recv_bad = 0;
+uint64_t nts_server_send = 0;
+uint64_t nts_server_recv = 0;
+uint64_t nts_server_recv_bad = 0;
+uint64_t nts_ke_serves = 0;
+uint64_t nts_ke_probes = 0;
 
 enum NtpExtFieldType {
    Unique_Identifier = 10,
@@ -113,7 +113,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
   buf.left -= left;
 
   used = buf.next-xpkt->exten;
-  client_extens_sent++;
+  nts_client_send++;
   return used;
 }
 
@@ -123,7 +123,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
   int noncelen, cmaclen;
   bool sawcookie, sawAEEF;
 
-  server_extens_recv++;
+  nts_server_recv++;
+  nts_server_recv_bad++;		/* assume bad, undo if OK */
 
   buf.next = pkt+LEN_PKT_NOMAC;
   buf.left = lng-LEN_PKT_NOMAC;
@@ -222,7 +223,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 //  printf("ESRx: %d, %d, %d\n",
 //      lng-LEN_PKT_NOMAC, ntspacket->needed, ntspacket->keylen);
   ntspacket->valid = true;
-  server_extens_recv_good++;
+  nts_server_recv_bad--;
   return true;
 }
 
@@ -303,7 +304,7 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
 
 // printf("ESSx: %lu, %d\n", (long unsigned)left, used);
 
-  server_extens_sent++;
+  nts_server_send++;
   return used;
 }
 
@@ -312,7 +313,8 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
   int idx;
   bool sawAEEF = false;
 
-  client_extens_recv++;
+  nts_client_recv++;
+  nts_client_recv_bad++;		/* assume bad, undo if OK */
 
   buf.next = pkt+LEN_PKT_NOMAC;
   buf.left = lng-LEN_PKT_NOMAC;
@@ -394,7 +396,7 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 //      peer->nts_state.writeIdx, peer->nts_state.readIdx);
   if (!sawAEEF)
     return false;
-  client_extens_recv_good++;
+  nts_client_recv_bad--;
   return true;
 }
 /* end */
