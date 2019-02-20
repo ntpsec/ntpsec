@@ -371,6 +371,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         nts_next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
         peer->nts_state.valid[idx] = true;
         peer->nts_state.writeIdx++;
+        peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
         peer->nts_state.count++;
 	ntskeyfetches++;
         break;
