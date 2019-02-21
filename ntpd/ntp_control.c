@@ -2254,7 +2254,7 @@ ctl_putpeer(
 		break;
 
 	case CP_NTSCOOKIES:
-		ctl_putuint(peer_var[id].text, p->nts_state.count);
+		ctl_putint(peer_var[id].text, p->nts_state.count);
 		break;
 
 	default:

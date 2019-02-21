@@ -1109,10 +1109,9 @@ class PeerSummary:
                 ptype = 'p'     # pool
             elif srcadr.startswith("224."):
                 ptype = 'a'     # manycastclient (compatibility with Classic)
-            # FIXME: We're getting garbage value for the cookie count
-            #elif ntscookies != 0:
-            #    # FIXME: Will foo up if there are ever more than 9 cookies
-            #    ptype = chr(ntscookies + ord('0'))
+            elif ntscookies > 0:
+                # FIXME: Will foo up if there are ever more than 9 cookies
+                ptype = chr(ntscookies + ord('0'))
             else:
                 ptype = 'u'     # unicast
         elif hmode == ntp.magic.MODE_ACTIVE:
