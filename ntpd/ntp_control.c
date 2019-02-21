@@ -2697,7 +2697,7 @@ read_peervars(void)
 			if (wants[i])
 				ctl_putpeer((int)i, peer);
 	} else
-		for (const struct ctl_var *kv = sys_var; kv && !(EOV & kv->flags); kv++)
+		for (const struct ctl_var *kv = peer_var; kv && !(EOV & kv->flags); kv++)
 			if (kv->flags & DEF)
 				ctl_putpeer(kv->code, peer);
 	ctl_flushpkt(0);
