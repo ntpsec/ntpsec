@@ -192,14 +192,14 @@ uint16_t nts_next_uint16(BufCtl* buf);
 uint16_t nts_next_bytes(BufCtl* buf, uint8_t *data, int length);
 
 /* NTS-related system variables */
-uint64_t nts_client_send;
-uint64_t nts_client_recv;
-uint64_t nts_client_recv_bad;
-uint64_t nts_server_send;
-uint64_t nts_server_recv;
-uint64_t nts_server_recv_bad;
-uint64_t nts_server_recv_bad;
-uint64_t nts_ke_serves;
-uint64_t nts_ke_probes;
+extern uint64_t nts_client_send;
+extern uint64_t nts_client_recv;
+extern uint64_t nts_client_recv_bad;
+extern uint64_t nts_server_send;
+extern uint64_t nts_server_recv;
+extern uint64_t nts_server_recv_bad;
+extern uint64_t nts_server_recv_bad;
+extern uint64_t nts_ke_serves;
+extern uint64_t nts_ke_probes;
 
 #endif /* GUARD_NTS_H */
