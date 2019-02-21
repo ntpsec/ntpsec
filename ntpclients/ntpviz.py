@@ -14,6 +14,7 @@ ntpviz [-d LOGDIR]
        [-p DAYS]
        [-s starttime]
        [-w SIZE | --width SIZE]
+       [-T terminal]
        [--all-peer-jitters |
         --all-peer-offsets |
         --local-error |
@@ -1453,7 +1454,7 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         choices=['s', 'm', 'l'],
                         default='m',
                         dest='width',
-                        help="PNG width: s, m, or l",
+                        help="Image width: s, m, or l",
                         type=str)
     group.add_argument('--all-peer-jitters',
                        action="store_true",
