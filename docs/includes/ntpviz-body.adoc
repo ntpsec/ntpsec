@@ -8,11 +8,15 @@ ntpviz [OPTIONS]
          [-c | --clip]
          [-D DLVL | --debug DLVL]
          [-d LOGDIR]
-         [-g] [-n name]
+         [-e endtime]
+         [-g | --general]
+         [-h | --help]
+         [-n NAME | --name NAME]
          [-N | --nice]
-         [-o OUTDIR]
-         [-p DAYS]
-         [-s starttime] [-e endtime]
+         [-o OUTDIR | --outdir OUTDIR]
+         [-p DAYS | --period DAYS`]
+         [-s STARTTIME | --starttime STARTTIME]
+         [-T TERMINAL | --terminal TERMINAL]
          [-V | --version]
          [-w SIZE | --width SIZE]
          [--all-peer-jitters |
@@ -92,7 +96,12 @@ subset of comparative plots for multiple directories.
 -s TIME or --starttime TIME::
     See -e and -p.
 
--V or --version:
+-T TERMINAL or --terminal TERMINAL::
+    Set the gnuplot terminal type for generating the graphs.  Supported
+    types are 'gif', 'jpg', 'png', 'pngcairo', and 'svg'. The default is
+    'png'.  Some prefer 'pngcairo' or 'svg'.
+
+-V or --version::
     Print program version and exit.
 
 -w SIZE or --width SIZE::

@@ -3,29 +3,33 @@
 """\
 ntpviz - visualizer for NTP log files
 
-ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
-         [-s starttime] [-e endtime]
-         [-o OUTDIR]
-         [-c | --clip]
-         [-w SIZE | --width SIZE]
-         [--all-peer-jitters |
-          --all-peer-offsets |
-          --local-error |
-          --local-freq-temps |
-          --local-gps |
-          --local-jitter |
-          --local-offset |
-          --local-offset-histogram |
-          --local-offset-multiplot |
-          --local-stability |
-          --local-temps |
-          --peer-jitters=hosts |
-          --peer-offsets=hosts |
-         ]
-         [-D DLVL | --debug DLVL]
-         [-N | --nice]
-         [-V | --version]
-         [@OPTIONFILE]
+ntpviz [-d LOGDIR]
+       [-D DLVL | --debug DLVL]
+       [-c | --clip]
+       [-e endtime]
+       [-g]
+       [-n name]
+       [-N | --nice]
+       [-o OUTDIR]
+       [-p DAYS]
+       [-s starttime]
+       [-w SIZE | --width SIZE]
+       [--all-peer-jitters |
+        --all-peer-offsets |
+        --local-error |
+        --local-freq-temps |
+        --local-gps |
+        --local-jitter |
+        --local-offset |
+        --local-offset-histogram |
+        --local-offset-multiplot |
+        --local-stability |
+        --local-temps |
+        --peer-jitters=hosts |
+        --peer-offsets=hosts |
+       ]
+       [-V | --version]
+       [@OPTIONFILE]
 
 See the manual page for details.
 
@@ -50,7 +54,7 @@ try:
     import argparse
 except ImportError:
     sys.stderr.write("""
-ntpviz: can't find the Python argparse module
+ntpviz: ERROR:  can't find the Python argparse module
         If your Python version is < 2.7, then manual installation is needed:
         # pip install argparse
 """)
@@ -522,17 +526,18 @@ set rmargin 10
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         out = stats.percs
-        out["fmt"] = stats.percs["fmt"]
-        out["min_y2"] = stats_f.percs["min_y"]
-        out["max_y2"] = stats_f.percs["max_y"]
-        out["unit_f"] = stats_f.percs["unit"]
         out["fmt_f"] = stats_f.percs["fmt"]
+        out["fmt"] = stats.percs["fmt"]
+        out["max_y2"] = stats_f.percs["max_y"]
+        out["min_y2"] = stats_f.percs["min_y"]
         out["multiplier_f"] = stats_f.percs["multiplier"]
         out["sitename"] = self.sitename
-        out['size'] = args.png_size
+        out['size'] = args.img_size
+        out['terminal'] = args.terminal
+        out["unit_f"] = stats_f.percs["unit"]
 
         plot_template = NTPViz.Common + """\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: Local Clock Time/Frequency Offsets%(clipped)s"
 set ytics format "%(fmt)s %(unit)s" nomirror textcolor rgb '#0060ad'
 set yrange [%(min_y)s:%(max_y)s]
@@ -609,20 +614,21 @@ file.</p>
             out["clipped"] = " (clipped)"
         else:
             out["clipped"] = ""
-        out['fmt'] = gnuplot_fmt(min_temp, max_temp)
         out["fmt_f"] = stats_f.percs["fmt"]
+        out['fmt'] = gnuplot_fmt(min_temp, max_temp)
         out["max_y2"] = stats_f.percs["max_y"]
         out["min_y2"] = stats_f.percs["min_y"]
         out["multiplier_f"] = stats_f.percs["multiplier"]
         out["sitename"] = self.sitename
-        out['size'] = args.png_size
+        out['size'] = args.img_size
+        out['terminal'] = args.terminal
         out["unit"] = '°C'
         out["unit_f"] = stats_f.percs["unit"]
 
         # let temp autoscale
         # set yrange [%(min_y)s:%(max_y)s]
         plot_template = NTPViz.Common + """\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: Local Frequency Offset/Temps%(clipped)s"
 set ytics format "%(fmt)s %(unit)s" nomirror textcolor rgb '#0060ad'
 set y2tics format "%(fmt_f)s %(unit_f)s" nomirror textcolor rgb '#dd181f'
@@ -686,10 +692,11 @@ file, and field 3 from the tempstats log file.</p>
         out = {}
         out['fmt'] = gnuplot_fmt(min_temp, max_temp)
         out['sitename'] = sitename
-        out['size'] = args.png_size
+        out['size'] = args.img_size
+        out['terminal'] = args.terminal
 
         plot_template = NTPViz.Common + """\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: Local Temperatures"
 set ytics format "%(fmt)s °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
@@ -747,7 +754,7 @@ component of frequency drift.</p>
 
         out = stats_tdop.percs
         out['sitename'] = sitename
-        out['size'] = args.png_size
+        out['size'] = args.img_size
         if out['min_y'] == out['max_y']:
             # some GPS always output the same TDOP
             if 0 == out['min_y']:
@@ -763,9 +770,10 @@ component of frequency drift.</p>
 
         # recalc fmt
         out['fmt'] = gnuplot_fmt(out["min_y"], out["max_y"])
+        out['terminal'] = args.terminal
 
         plot_template = NTPViz.Common + """\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: Local GPS%(clipped)s
 set ytics format "%(fmt)s TDOP" nomirror textcolor rgb '#0060ad'
 set yrange [%(min_y)s:%(max_y)s]
@@ -821,10 +829,11 @@ Greater than 20 means there will be significant inaccuracy and error.</p>
         out = stats.percs
         out["fmt"] = stats.percs["fmt"]
         out["sitename"] = self.sitename
-        out['size'] = args.png_size
+        out['size'] = args.img_size
+        out['terminal'] = args.terminal
 
         plot_template = NTPViz.Common + """\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
 set ytics format "%(fmt)s %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
@@ -880,7 +889,8 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         out["legend"] = legend
         out["min_y"] = '0'
         out["sitename"] = self.sitename
-        out['size'] = args.png_size
+        out['size'] = args.img_size
+        out['terminal'] = args.terminal
 
         if freq:
             exp = """\
@@ -904,7 +914,7 @@ how fast the local clock offset is changing.</p>
 """
 
         plot_template = NTPViz.Common + """\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: %(title)s%(clipped)s"
 set ytics format "%(fmt)s %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
@@ -1095,10 +1105,11 @@ at 0s.</p>
             stats.table = ''
 
         out = stats.percs
-        out['sitename'] = self.sitename
-        out['size'] = args.png_size
-        out['title'] = title
         out["fmt"] = stats.percs["fmt"]
+        out['sitename'] = self.sitename
+        out['size'] = args.img_size
+        out['terminal'] = args.terminal
+        out['title'] = title
 
         if 6 >= len(peerlist):
             out['set_key'] = "set key top right"
@@ -1110,7 +1121,7 @@ at 0s.</p>
             out['set_key'] = "set key off"
 
         plot_template = NTPViz.Common + """\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: %(title)s%(clipped)s"
 set ylabel ""
 set ytics format "%(fmt)s %(unit)s" nomirror
@@ -1214,12 +1225,13 @@ set label 2 "+1σ" at %(p1sigma)s, graph 0.96 left front offset -1,-1 \
     textcolor rgb "#009900"
 """ % out
 
-        out['size'] = args.png_size
+        out['size'] = args.img_size
+        out['terminal'] = args.terminal
 
         # in 2016, 25% of screens are 1024x768, 42% are 1388x768
         # but leave some room for the browser frame
         plot_template = '''\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set grid
 set boxwidth %(boxwidth)s
@@ -1271,10 +1283,11 @@ def local_offset_multiplot(statlist):
     "Plot comparative local offsets for a list of NTPViz objects."
 
     out = []
-    out['size'] = args.png_size
+    out['size'] = args.img_size
+    out['terminal'] = args.terminal
 
     plot = NTPViz.Common + '''\
-set terminal png size %(size)s
+set terminal %(terminal)s size %(size)s
 set title "Multiplot Local Clock Offsets"
 set ytics format "%1.2f μs" nomirror textcolor rgb "#0060ad"
 set key bottom right box
@@ -1364,9 +1377,10 @@ AADRxQAAxBEAAA==
 if __name__ == '__main__':
     bin_ver = "ntpsec-@NTPSEC_VERSION_EXTENDED@"
     if ntp.util.stdversion() != bin_ver:
-        sys.stderr.write("Module/Binary version mismatch\n")
-        sys.stderr.write("Binary: %s\n" % bin_ver)
-        sys.stderr.write("Module: %s\n" % ntp.util.stdversion())
+        sys.stderr.write("ntpviz: WARNING: Module/Binary version mismatch\n")
+        sys.stderr.write("ntpviz: WARNING: Binary: %s\n" % bin_ver)
+        sys.stderr.write("ntpviz: WARNING: Module: %s\n" %
+                         ntp.util.stdversion())
 
     parser = MyArgumentParser(description="ntpd stats visualizer",
                               fromfile_prefix_chars='@',
@@ -1388,6 +1402,11 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         dest='statsdirs',
                         help="one or more log file directories to read",
                         type=str)
+    parser.add_argument('-D', '--debug',
+                        default=0,
+                        dest='debug_level',
+                        help="debug level, 0 (none) to 9 (most)",
+                        type=int)
     parser.add_argument('-e', '--endtime',
                         dest='endtime',
                         help="End time in POSIX (seconds) or ISO 8601",
@@ -1395,12 +1414,22 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     parser.add_argument('-g', '--generate',
                         action="store_true",
                         dest='generate',
-                        help="Run plot through gnuplot to make png")
+                        help="Run through gnuplot to make plot images")
     parser.add_argument('-n', '--name',
                         default=socket.getfqdn(),
                         dest='sitename',
                         help="sitename (title)",
                         type=str)
+    # some OS do not support os.nice()
+    try:
+        os.nice(0)
+        parser.add_argument('-N', '--nice',
+                            action="store_true",
+                            dest='nice',
+                            help="Run as lowest priority")
+    except OSError:
+        pass
+
     parser.add_argument('-o', '--outdir',
                         default="ntpgraphs",
                         dest='outdir',
@@ -1415,6 +1444,11 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                         dest='starttime',
                         help="Start time in POSIX (seconds) or ISO 8601",
                         type=str)
+    parser.add_argument('-T', '--terminal',
+                        default='png',
+                        dest='terminal',
+                        help="gnuplot terminal type for graphs",
+                        type=str)
     parser.add_argument('-w', '--width',
                         choices=['s', 'm', 'l'],
                         default='m',
@@ -1425,20 +1459,10 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                        action="store_true",
                        dest='show_peer_jitters',
                        help="Plot all peer jitters")
-    group.add_argument('--peer-jitters',
-                       default='',
-                       dest='peer_jitters',
-                       help="Plot peer jitters.  Comma separated host list.",
-                       type=str)
     group.add_argument('--all-peer-offsets',
                        action="store_true",
                        dest='show_peer_offsets',
                        help="Plot all peer offsets")
-    group.add_argument('--peer-offsets',
-                       default='',
-                       dest='peer_offsets',
-                       help="Plot peer offsets.  Comma separated host list.",
-                       type=str)
     group.add_argument('--local-error',
                        action="store_true",
                        dest='show_local_error',
@@ -1476,21 +1500,16 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                        action="store_true",
                        dest='show_temps',
                        help="Plot local temperature data")
-    parser.add_argument('-D', '--debug',
-                        default=0,
-                        dest='debug_level',
-                        help="debug level, 0 (none) to 9 (most)",
-                        type=int)
-    # some OS do not support os.nice()
-    try:
-        os.nice(0)
-        parser.add_argument('-N', '--nice',
-                            action="store_true",
-                            dest='nice',
-                            help="Run as lowest priority")
-    except OSError:
-        pass
-
+    group.add_argument('--peer-jitters',
+                       default='',
+                       dest='peer_jitters',
+                       help="Plot peer jitters.  Comma separated host list.",
+                       type=str)
+    group.add_argument('--peer-offsets',
+                       default='',
+                       dest='peer_offsets',
+                       help="Plot peer offsets.  Comma separated host list.",
+                       type=str)
     parser.add_argument('-V', '--version',
                         action="version",
                         version="ntpviz %s" % ntp.util.stdversion())
@@ -1506,14 +1525,28 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     if 's' == args.width:
         # fit in 1024x768 browser
         # in 2016 this is 22% of all browsers
-        args.png_size = '1000,720'
+        args.img_size = '1000,720'
     elif 'l' == args.width:
         # fit in 1920x1080 browser
-        args.png_size = '1850,1000'
+        args.img_size = '1850,1000'
     else:
         # fit in 1388x768 browser
         # in 2016 this is 42% of all browsers
-        args.png_size = '1340,720'
+        args.img_size = '1340,720'
+
+    # figure out plot image file extension
+    term_map = {'gif': '.gif',
+                'jpeg': '.jpg',
+                'pngcairo': '.png',
+                'png': '.png',
+                'svg': '.svg',
+               }
+    if args.terminal in term_map:
+        args.img_ext = term_map[args.terminal]
+    else:
+        sys.stderr.write("ntpviz: ERROR: Unknown terminal type: %s\n" %
+                         args.terminal)
+        raise SystemExit(1)
 
     args.period = int(float(args.period) * ntp.statfiles.NTPStats.SecondsInDay)
     if args.endtime is not None:
@@ -1874,7 +1907,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 </body>
 </html>
 '''
-    imagewrapper = "<img src='%s.png' alt='%s plot'>\n"
+    imagewrapper = "<img src='%%s%s' alt='%%s plot'>\n" % args.img_ext
 
     # buffer the index.html output so the index.html is not empty
     # during the run
@@ -1942,7 +1975,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 index_buffer += "<div>\n%s</div>\n" % image['html']
             index_buffer += "<br><br>\n"
             gnuplot(image['plot'], os.path.join(args.outdir,
-                    imagename + ".png"))
+                    imagename + args.img_ext))
             index_buffer += "</div>\n"
 
     # dump stats
