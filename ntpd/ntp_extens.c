@@ -82,7 +82,13 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
   peer->nts_state.count--;
   // FIXME - what to do if out of cookies
 
-  // FIXME - need more cookies?
+  // Need more cookies?
+  for (int i=peer->nts_state.count+1; i<NTS_MAX_COOKIES; i++) {
+    nts_append_header(&buf, NTS_Cookie_Placeholder, peer->nts_state.cookielen);
+    memset(buf.next, 0, peer->nts_state.cookielen);
+    buf.next += peer->nts_state.cookielen;
+    buf.left -= peer->nts_state.cookielen;
+  }
 
   /* AEAD */
   adlength = buf.next-packet;
@@ -131,6 +137,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 
   sawcookie = sawAEEF = false;
   ntspacket->uidlen = 0;
+  ntspacket->needed = 0;
 
   while (buf.left > 0) {
     uint16_t type;
@@ -165,7 +172,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
         buf.next += length;
 	buf.left -= length;
 	sawcookie = true;
-	ntspacket->needed = 1;
+	ntspacket->needed++;
 	ntspacket->aead = aead;
 	break;
       case NTS_Cookie_Placeholder:
