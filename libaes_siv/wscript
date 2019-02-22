@@ -7,4 +7,5 @@ def build(ctx):
         target="aes_siv",
         features="c cstlib bld_include" ,
         source="aes_siv.c",
+        use="CRYPTO",
     )

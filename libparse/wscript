@@ -26,4 +26,5 @@ def build(ctx):
         target="parse",
         features="c cstlib bld_include src_include",
         source=libparse_source,
+        use="CRYPTO",
     )
