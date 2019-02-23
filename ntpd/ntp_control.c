@@ -123,7 +123,7 @@ static const struct ctl_proc control_codes[] = {
 
 /*
  * System variable values. The array can be indexed by the variable
- * index to find the textual name.  Mostly not order-senstive.
+ * index to find the textual name.  Mostly not order-sensitive.
  */
 static const struct ctl_var sys_var[] = {
 	{ 0,			PADDING, "" },
