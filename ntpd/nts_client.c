@@ -253,11 +253,6 @@ bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
      nts_log_ssl_error();
      return false;
   }
-  // Hack for debugging - obviously not good for security
-  msyslog(LOG_INFO, "NTS: C2S %02x %02x %02x %02x %02x\n",
-    c2s[0], c2s[1], c2s[2], c2s[3], c2s[4]);
-  msyslog(LOG_INFO, "NTS: S2C %02x %02x %02x %02x %02x\n",
-    s2c[0], s2c[1], s2c[2], s2c[3], s2c[4]);
   return true;
 }
 
@@ -413,15 +408,18 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
 bool nts_set_cert_search(SSL_CTX *ctx) {
   struct stat statbuf;
   if (NULL == ntsconfig.ca) {
+    msyslog(LOG_INFO, "NTSc: Using system default root certificates.");
     SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
     return true;
   }
   if (0 == stat(ntsconfig.ca, &statbuf)) {
     if (S_ISDIR(statbuf.st_mode)) {
+      msyslog(LOG_INFO, "NTSc: Using dir %s for root certificates.", ntsconfig.ca);
       SSL_CTX_load_verify_locations(ctx, NULL, ntsconfig.ca);
       return true;
     }
     if (S_ISREG(statbuf.st_mode)) {
+      msyslog(LOG_INFO, "NTSc: Using file %s for root certificates.", ntsconfig.ca);
       SSL_CTX_load_verify_locations(ctx, ntsconfig.ca, NULL);
       return true;
     }
