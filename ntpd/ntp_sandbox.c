@@ -297,6 +297,7 @@ int scmp_sc[] = {
 #endif
 #endif  /* ENABLE_EARLY_DROPROOT */
 
+        SCMP_SYS(accept),
         SCMP_SYS(access),
 	SCMP_SYS(adjtimex),
 	SCMP_SYS(bind),
