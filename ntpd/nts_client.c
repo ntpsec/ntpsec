@@ -204,13 +204,13 @@ int open_TCP_socket(const char *hostname) {
   hints.ai_family = AF_UNSPEC;
   gai_rc = getaddrinfo(hostname, PORT, &hints, &answer);  // FIXME
   if (0 != gai_rc) {
-    msyslog(LOG_INFO, "NTSc: nts_probe: DNS error: %d, %s",
-      gai_rc, gai_strerror(gai_rc));
+    msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to contact %s: %d, %s",
+      hostname, gai_rc, gai_strerror(gai_rc));
     return -1;
   }
 
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
-  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s=%s, port %s",
+  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s=%s:%s",
     hostname, socktoa(&sockaddr), PORT);
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == sockfd) {
