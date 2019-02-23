@@ -448,7 +448,7 @@ static const struct ctl_var peer_var[] = {
 #define	CP_FLASH		35
 	{ CP_FLASH,	RO|DEF, "flash" },
 #define	CP_MODE			36
-	{ CP_MODE,	RO, "mode" },
+	{ CP_MODE,	RO|DEF, "mode" },
 #define	CP_VARLIST		37
 	{ CP_VARLIST,	RO, "peer_var_list" },
 #define	CP_RATE			38
@@ -456,7 +456,7 @@ static const struct ctl_var peer_var[] = {
 #define	CP_BIAS			39
 	{ CP_BIAS,	RO|DEF, "bias" },
 #define	CP_SRCHOST		40
-	{ CP_SRCHOST,	RO, "srchost" },
+	{ CP_SRCHOST,	RO|DEF, "srchost" },
 #define	CP_TIMEREC		41
 	{ CP_TIMEREC,	RO, "timerec" },
 #define	CP_TIMEREACH		42
@@ -509,7 +509,7 @@ static const struct ctl_var clock_var[] = {
 #define	CC_FLAGS	11
 	{ CC_FLAGS,		RO|DEF, "flags" },
 #define	CC_DEVICE	12
-	{ CC_DEVICE,		RO, 	"device" },
+	{ CC_DEVICE,		RO|DEF, "device" },
 #define	CC_VARLIST	13
 	{ CC_VARLIST,		RO, 	"clock_var_list"},
 #define	CC_MAXCODE	CC_VARLIST
