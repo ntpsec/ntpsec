@@ -61,7 +61,6 @@ def build(ctx):
         "nts_server.c",
         "nts_client.c",
         "nts_cookie.c",
-        "nts_lib.c",
     ]
 
     ctx(

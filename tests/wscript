@@ -101,8 +101,7 @@ def build(ctx):
         "ntpd/leapsec.c",
         "ntpd/restrict.c",
         "ntpd/recvbuff.c",
-        "ntpd/nts_lib.c",
-		"ntpd/nts.c"
+        "ntpd/nts.c",
     ] + common_source
 
     ctx.ntp_test(
