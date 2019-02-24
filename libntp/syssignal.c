@@ -27,19 +27,7 @@ signal_no_reset(
 	sigemptyset(&vec.sa_mask);
 	vec.sa_handler = func;
 
-	/* Added for PPS clocks on Solaris 7 which get EINTR errors */
-# ifdef SIGPOLL
-	if (SIGPOLL == sig)
-		vec.sa_flags = Z_SA_RESTART;
-# endif
-# ifdef SIGIO
-	if (SIGIO == sig)
-		vec.sa_flags = Z_SA_RESTART;
-# endif
-
-	do
-		n = sigaction(sig, &vec, NULL);
-	while (-1 == n && EINTR == errno);
+	n = sigaction(sig, &vec, NULL);
 	if (-1 == n) {
 		perror("ERROR: signal_no_reset() sigaction");
 		exit(1);
