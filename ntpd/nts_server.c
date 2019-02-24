@@ -27,12 +27,15 @@
 int nts_ke_port = 123;
 
 static bool nts_load_certificate(SSL_CTX *ctx);
-static int create_listener(int port);
+static int create_listener(int port, int family);
 static void* nts_ke_listener(void*);
 static void nts_ke_request(SSL *ssl);
 static int nts_translate_version(const char *arg);
+bool nts_server_init2(void);
 
 static SSL_CTX *server_ctx = NULL;
+static int listner4_sock = -1;
+static int listner6_sock = -1;
 
 void nts_init(void) {
     bool ok = true;
@@ -47,10 +50,17 @@ void nts_init(void) {
     }
 }
 
+void nts_init2(void) {
+    bool ok = true;
+    if (ntsconfig.ntsenable)
+      ok &= nts_server_init2();
+    if (!ok) {
+      msyslog(LOG_ERR, "NTS: troubles during init2.  Bailing.");
+      exit(1);
+    }
+}
+
 bool nts_server_init(void) {
-    pthread_t worker;
-    sigset_t block_mask, saved_sig_mask;
-    int rc;
     bool ok = true;
 
     msyslog(LOG_INFO, "NTSs: starting NTS-KE server listening on port %d",
@@ -87,11 +97,29 @@ bool nts_server_init(void) {
         SSL_CTX_get_security_level(server_ctx));
 #endif
 
+
+    listner4_sock = create_listener(nts_ke_port, AF_INET);
+    if (listner4_sock < 0) return false;
+    listner6_sock = create_listener(nts_ke_port, AF_INET6);
+    if (listner6_sock < 0) return false;
+
+    return true;
+}
+
+bool nts_server_init2(void) {
+    pthread_t worker;
+    sigset_t block_mask, saved_sig_mask;
+    int rc;
+
     sigfillset(&block_mask);
     pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
-    rc = pthread_create(&worker, NULL, nts_ke_listener, server_ctx);
+    rc = pthread_create(&worker, NULL, nts_ke_listener, &listner4_sock);
     if (rc) {
-      msyslog(LOG_ERR, "NTSs: nts_start_server: error from pthread_create: %m");
+      msyslog(LOG_ERR, "NTSs: nts_start_server4: error from pthread_create: %m");
+    }
+    rc = pthread_create(&worker, NULL, nts_ke_listener, &listner6_sock);
+    if (rc) {
+      msyslog(LOG_ERR, "NTSs: nts_start_server6: error from pthread_create: %m");
     }
     pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 
@@ -99,12 +127,7 @@ bool nts_server_init(void) {
 }
 
 void* nts_ke_listener(void* arg) {
-    SSL_CTX *ctx = (SSL_CTX *)arg;
-    int sock;
-
-    // FIXME - need IPv6 too
-    sock = create_listener(nts_ke_port);
-    if (sock < 0) return NULL;
+    int sock = *(int*)arg;
 
     while(1) {
         struct sockaddr addr;
@@ -114,6 +137,9 @@ void* nts_ke_listener(void* arg) {
         int client = accept(sock, &addr, &len);
         if (client < 0) {
             msyslog(LOG_ERR, "NTSs: TCP accept failed: %m");
+            if (EBADF == errno)
+                return NULL;
+            sleep(1);		/* avoid log clutter on bug */
             continue;
         }
 	nts_ke_serves++;
@@ -121,7 +147,7 @@ void* nts_ke_listener(void* arg) {
             socktoa((sockaddr_u *)&addr));
 
         /* This could/should go in a new thread. */  // FIXME
-        ssl = SSL_new(ctx);
+        ssl = SSL_new(server_ctx);
         SSL_set_fd(ssl, client);
 
         if (SSL_accept(ssl) <= 0) {
@@ -145,6 +171,7 @@ void* nts_ke_listener(void* arg) {
         SSL_free(ssl);
         close(client);
     }
+return NULL;
 }
 
 void nts_ke_request(SSL *ssl) {
@@ -195,29 +222,74 @@ void nts_ke_request(SSL *ssl) {
     return;
 }
 
-int create_listener(int port) {
-    int sock;
+int create_listener(int port, int family) {
+    int sock = -1;
     struct sockaddr_in addr;
+    struct sockaddr_in6 addr6;
+    int on = 1;
+    int err;
 
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        msyslog(LOG_ERR, "NTSs: Can't create socket: %m");
-        return -1;
+    switch (family) {
+      case AF_INET:
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr= htonl(INADDR_ANY);
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (sock < 0) {
+          msyslog(LOG_ERR, "NTSs: Can't create socket4: %m");
+          return -1;
+        }
+	err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+        if (0 > err) {
+          msyslog(LOG_ERR, "NTSs: can't setsockopt4: %m");
+          return -1;
+        }
+        err = bind(sock, (struct sockaddr*)&addr, sizeof(addr));
+        if (0 > err) {
+          msyslog(LOG_ERR, "NTSs: can't bind4: %m");
+          return -1;
+        }
+        if (listen(sock, 6) < 0) {
+          msyslog(LOG_ERR, "NTSs: can't listen4: %m");
+          return -1;
+        }
+        msyslog(LOG_INFO, "NTSs: listen4 worked");
+        break;
+      case AF_INET6:
+        addr6.sin6_family = AF_INET6;
+        addr6.sin6_port = htons(port);
+        addr6.sin6_addr = in6addr_any;
+        sock = socket(AF_INET6, SOCK_STREAM, 0);
+        if (sock < 0) {
+          msyslog(LOG_ERR, "NTSs: Can't create socket6: %m");
+          return -1;
+        }
+        /* Hack to keep IPV6 from listening on IPV4 too */
+        err = setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
+        if (0 > err) {
+          msyslog(LOG_ERR, "NTSs: can't setsockopt6only: %m");
+          return -1;
+        }
+	err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+        if (0 > err) {
+          msyslog(LOG_ERR, "NTSs: can't setsockopt6: %m");
+          return -1;
+        }
+        err = bind(sock, (struct sockaddr*)&addr6, sizeof(addr6));
+        if (0 > err) {
+          msyslog(LOG_ERR, "NTSs: can't bind6: %m");
+          return -1;
+        }
+        if (listen(sock, 6) < 0) {
+          msyslog(LOG_ERR, "NTSs: can't listen6: %m");
+          return -1;
+        }
+        msyslog(LOG_INFO, "NTSs: listen6 worked");
+        break;
+      default:
+        break;
     }
 
-    if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        msyslog(LOG_ERR, "NTSs: can't bind: %m");
-        return -1;
-    }
-
-    if (listen(sock, 1) < 0) {
-        msyslog(LOG_ERR, "NTSs: can't listen: %m");
-        return -1;
-    }
     return sock;
 }
 

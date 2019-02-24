@@ -894,7 +894,7 @@ ntpdmain(
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 
-	nts_init();   /* NetBSD: open NTS listener before droproot */
+	nts_init();		/* Before droproot */
 
 #ifndef ENABLE_EARLY_DROPROOT
 	/* drop root privileges */
@@ -903,6 +903,8 @@ ntpdmain(
 		msyslog(LOG_INFO, "INIT: running as non-root disables dynamic interface tracking");
 	}
 #endif
+
+	nts_init2();		/* Before droproot */
 
 	if (access(statsdir, W_OK) != 0) {
 	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
