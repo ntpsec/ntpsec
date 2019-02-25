@@ -128,51 +128,51 @@ static const struct ctl_proc control_codes[] = {
 static const struct ctl_var sys_var[] = {
 	{ 0,			PADDING, "" },
 #define	CS_LEAP			1
-	{ CS_LEAP,		RW|DEF, "leap" },
+	{ CS_LEAP,		RW, "leap" },
 #define	CS_STRATUM		2
-	{ CS_STRATUM,		RO|DEF, "stratum" },
+	{ CS_STRATUM,		RO, "stratum" },
 #define	CS_PRECISION		3
-	{ CS_PRECISION, 	RO|DEF, "precision" },
+	{ CS_PRECISION, 	RO, "precision" },
 #define	CS_ROOTDELAY		4
-	{ CS_ROOTDELAY, 	RO|DEF, "rootdelay" },
+	{ CS_ROOTDELAY, 	RO, "rootdelay" },
 #define	CS_ROOTDISPERSION	5
-	{ CS_ROOTDISPERSION,	RO|DEF, "rootdisp" },
+	{ CS_ROOTDISPERSION,	RO, "rootdisp" },
 #define	CS_REFID		6
-	{ CS_REFID,		RO|DEF, "refid" },
+	{ CS_REFID,		RO, "refid" },
 #define	CS_REFTIME		7
-	{ CS_REFTIME,		RO|DEF, "reftime" },
+	{ CS_REFTIME,		RO, "reftime" },
 #define	CS_POLL			8
-	{ CS_POLL,		RO|DEF, "tc" },
+	{ CS_POLL,		RO, "tc" },
 #define	CS_PEERID		9
-	{ CS_PEERID,		RO|DEF, "peer" },
+	{ CS_PEERID,		RO, "peer" },
 #define	CS_OFFSET		10
-	{ CS_OFFSET,		RO|DEF, "offset" },
+	{ CS_OFFSET,		RO, "offset" },
 #define	CS_DRIFT		11
-	{ CS_DRIFT,		RO|DEF, "frequency" },
+	{ CS_DRIFT,		RO, "frequency" },
 #define	CS_JITTER		12
-	{ CS_JITTER,		RO|DEF, "sys_jitter" },
+	{ CS_JITTER,		RO, "sys_jitter" },
 #define	CS_ERROR		13
-	{ CS_ERROR,		RO|DEF, "clk_jitter" },
+	{ CS_ERROR,		RO, "clk_jitter" },
 #define	CS_CLOCK		14
-	{ CS_CLOCK,		RO|DEF, "clock" },
+	{ CS_CLOCK,		RO, "clock" },
 #define	CS_PROCESSOR		15
-	{ CS_PROCESSOR, 	RO|DEF, "processor" },
+	{ CS_PROCESSOR, 	RO, "processor" },
 #define	CS_SYSTEM		16
-	{ CS_SYSTEM,		RO|DEF, "system" },
+	{ CS_SYSTEM,		RO, "system" },
 #define	CS_VERSION		17
-	{ CS_VERSION,		RO|DEF, "version" },
+	{ CS_VERSION,		RO, "version" },
 #define	CS_STABIL		18
-	{ CS_STABIL,		RO|DEF, "clk_wander" },
+	{ CS_STABIL,		RO, "clk_wander" },
 #define	CS_VARLIST		19
 	{ CS_VARLIST,		RO, "sys_var_list" },
 #define	CS_TAI			20
-	{ CS_TAI,		RO|DEF, "tai" },
+	{ CS_TAI,		RO, "tai" },
 #define	CS_LEAPTAB		21
-	{ CS_LEAPTAB,		RO|DEF, "leapsec" },
+	{ CS_LEAPTAB,		RO, "leapsec" },
 #define	CS_LEAPEND		22
-	{ CS_LEAPEND,		RO|DEF, "expire" },
+	{ CS_LEAPEND,		RO, "expire" },
 #define	CS_RATE			23
-	{ CS_RATE,		RO|DEF, "mintc" },
+	{ CS_RATE,		RO, "mintc" },
 #define	CS_MRU_ENABLED		24
 	{ CS_MRU_ENABLED,	RO, "mru_enabled" },
 #define	CS_MRU_DEPTH		25
@@ -319,9 +319,9 @@ static const struct ctl_var sys_var[] = {
 	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
 #ifdef ENABLE_LEAP_SMEAR
 #define	CS_LEAPSMEARINTV	96
-	{ CS_LEAPSMEARINTV,	RO|DEF, "leapsmearinterval" },
+	{ CS_LEAPSMEARINTV,	RO, "leapsmearinterval" },
 #define	CS_LEAPSMEAROFFS	97
-	{ CS_LEAPSMEAROFFS,	RO|DEF, "leapsmearoffset" },
+	{ CS_LEAPSMEAROFFS,	RO, "leapsmearoffset" },
 #else
 /* hack to keep table aligned */
 	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
@@ -386,81 +386,81 @@ static const struct ctl_var peer_var[] = {
 #define	CP_AUTHENTIC		3
 	{ CP_AUTHENTIC, RO, "authentic" },
 #define	CP_SRCADR		4
-	{ CP_SRCADR,	RO|DEF , "srcadr" },
+	{ CP_SRCADR,	RO , "srcadr" },
 #define	CP_SRCPORT		5
-	{ CP_SRCPORT,	RO|DEF, "srcport" },
+	{ CP_SRCPORT,	RO, "srcport" },
 #define	CP_DSTADR		6
-	{ CP_DSTADR,	RO|DEF, "dstadr" },
+	{ CP_DSTADR,	RO, "dstadr" },
 #define	CP_DSTPORT		7
-	{ CP_DSTPORT,	RO|DEF, "dstport" },
+	{ CP_DSTPORT,	RO, "dstport" },
 #define	CP_LEAP			8
-	{ CP_LEAP,	RO|DEF, "leap" },
+	{ CP_LEAP,	RO, "leap" },
 #define	CP_HMODE		9
-	{ CP_HMODE,	RO|DEF, "hmode" },
+	{ CP_HMODE,	RO, "hmode" },
 #define	CP_STRATUM		10
-	{ CP_STRATUM,	RO|DEF, "stratum" },
+	{ CP_STRATUM,	RO, "stratum" },
 #define	CP_PPOLL		11
-	{ CP_PPOLL,	RO|DEF, "ppoll" },
+	{ CP_PPOLL,	RO, "ppoll" },
 #define	CP_HPOLL		12
-	{ CP_HPOLL,	RO|DEF, "hpoll" },
+	{ CP_HPOLL,	RO, "hpoll" },
 #define	CP_PRECISION		13
-	{ CP_PRECISION,	RO|DEF, "precision" },
+	{ CP_PRECISION,	RO, "precision" },
 #define	CP_ROOTDELAY		14
-	{ CP_ROOTDELAY,	RO|DEF, "rootdelay" },
+	{ CP_ROOTDELAY,	RO, "rootdelay" },
 #define	CP_ROOTDISPERSION	15
-	{ CP_ROOTDISPERSION, RO|DEF, "rootdisp" },
+	{ CP_ROOTDISPERSION, RO, "rootdisp" },
 #define	CP_REFID		16
-	{ CP_REFID,	RO|DEF, "refid" },
+	{ CP_REFID,	RO, "refid" },
 #define	CP_REFTIME		17
-	{ CP_REFTIME,	RO|DEF, "reftime" },
+	{ CP_REFTIME,	RO, "reftime" },
         /* Placeholder. Reporting of "org" is disabled because
            leaking it creates a vulnerability */
 #define	CP_ORG			18
         { CP_ORG,	RO, "org" },
 #define	CP_REC			19
-	{ CP_REC,	RO|DEF, "rec" },
+	{ CP_REC,	RO, "rec" },
 #define	CP_XMT			20
-	{ CP_XMT,	RO|DEF, "xmt" },
+	{ CP_XMT,	RO, "xmt" },
 #define	CP_REACH		21
-	{ CP_REACH,	RO|DEF, "reach" },
+	{ CP_REACH,	RO, "reach" },
 #define	CP_UNREACH		22
-	{ CP_UNREACH,	RO|DEF, "unreach" },
+	{ CP_UNREACH,	RO, "unreach" },
 #define	CP_TIMER		23
 	{ CP_TIMER,	RO, "timer" },
 #define	CP_DELAY		24
-	{ CP_DELAY,	RO|DEF, "delay" },
+	{ CP_DELAY,	RO, "delay" },
 #define	CP_OFFSET		25
-	{ CP_OFFSET,	RO|DEF, "offset" },
+	{ CP_OFFSET,	RO, "offset" },
 #define	CP_JITTER		26
-	{ CP_JITTER,	RO|DEF, "jitter" },
+	{ CP_JITTER,	RO, "jitter" },
 #define	CP_DISPERSION		27
-	{ CP_DISPERSION, RO|DEF, "dispersion" },
+	{ CP_DISPERSION, RO, "dispersion" },
 #define	CP_KEYID		28
-	{ CP_KEYID,	RO|DEF, "keyid" },
+	{ CP_KEYID,	RO, "keyid" },
 #define	CP_FILTDELAY		29
-	{ CP_FILTDELAY,	RO|DEF, "filtdelay" },
+	{ CP_FILTDELAY,	RO, "filtdelay" },
 #define	CP_FILTOFFSET		30
-	{ CP_FILTOFFSET, RO|DEF, "filtoffset" },
+	{ CP_FILTOFFSET, RO, "filtoffset" },
 #define	CP_PMODE		31
-	{ CP_PMODE,	RO|DEF, "pmode" },
+	{ CP_PMODE,	RO, "pmode" },
 #define	CP_RECEIVED		32
 	{ CP_RECEIVED,	RO, "received"},
 #define	CP_SENT			33
 	{ CP_SENT,	RO, "sent" },
 #define	CP_FILTERROR		34
-	{ CP_FILTERROR,	RO|DEF, "filtdisp" },
+	{ CP_FILTERROR,	RO, "filtdisp" },
 #define	CP_FLASH		35
-	{ CP_FLASH,	RO|DEF, "flash" },
+	{ CP_FLASH,	RO, "flash" },
 #define	CP_MODE			36
-	{ CP_MODE,	RO|DEF, "mode" },
+	{ CP_MODE,	RO, "mode" },
 #define	CP_VARLIST		37
 	{ CP_VARLIST,	RO, "peer_var_list" },
 #define	CP_RATE			38
-	{ CP_RATE,	RO|DEF, "headway" },
+	{ CP_RATE,	RO, "headway" },
 #define	CP_BIAS			39
-	{ CP_BIAS,	RO|DEF, "bias" },
+	{ CP_BIAS,	RO, "bias" },
 #define	CP_SRCHOST		40
-	{ CP_SRCHOST,	RO|DEF, "srchost" },
+	{ CP_SRCHOST,	RO, "srchost" },
 #define	CP_TIMEREC		41
 	{ CP_TIMEREC,	RO, "timerec" },
 #define	CP_TIMEREACH		42
@@ -479,7 +479,7 @@ static const struct ctl_var peer_var[] = {
 	{ CP_CANDIDATE, RO, "candidate" },
 	/* new in NTPsec */
 #define	CP_NTSCOOKIES		49
-	{ CP_NTSCOOKIES, RO|DEF, "ntscookies" },
+	{ CP_NTSCOOKIES, RO, "ntscookies" },
 #define	CP_MAXCODE		((sizeof(peer_var)/sizeof(peer_var[0])) - 1)
 	{ 0,		EOV, "" }
 };
@@ -491,29 +491,29 @@ static const struct ctl_var peer_var[] = {
 static const struct ctl_var clock_var[] = {
 	{ 0,			PADDING, "" },
 #define	CC_NAME		1
-	{ CC_NAME,		RO|DEF, "name" },
+	{ CC_NAME,		RO, "name" },
 #define	CC_TIMECODE	2
-	{ CC_TIMECODE,		RO|DEF, "timecode" },
+	{ CC_TIMECODE,		RO, "timecode" },
 #define	CC_POLL		3
-	{ CC_POLL,		RO|DEF, "poll" },
+	{ CC_POLL,		RO, "poll" },
 #define	CC_NOREPLY	4
-	{ CC_NOREPLY,		RO|DEF, "noreply" },
+	{ CC_NOREPLY,		RO, "noreply" },
 #define	CC_BADFORMAT	5
-	{ CC_BADFORMAT, 	RO|DEF, "badformat" },
+	{ CC_BADFORMAT, 	RO, "badformat" },
 #define	CC_BADDATA	6
-	{ CC_BADDATA,		RO|DEF, "baddata" },
+	{ CC_BADDATA,		RO, "baddata" },
 #define	CC_FUDGETIME1	7
-	{ CC_FUDGETIME1,	RO|DEF, "fudgetime1" },
+	{ CC_FUDGETIME1,	RO, "fudgetime1" },
 #define	CC_FUDGETIME2	8
-	{ CC_FUDGETIME2,	RO|DEF, "fudgetime2" },
+	{ CC_FUDGETIME2,	RO, "fudgetime2" },
 #define	CC_FUDGEVAL1	9
-	{ CC_FUDGEVAL1, 	RO|DEF, "stratum" },
+	{ CC_FUDGEVAL1, 	RO, "stratum" },
 #define	CC_FUDGEVAL2	10
-	{ CC_FUDGEVAL2, 	RO|DEF, "refid" },
+	{ CC_FUDGEVAL2, 	RO, "refid" },
 #define	CC_FLAGS	11
-	{ CC_FLAGS,		RO|DEF, "flags" },
+	{ CC_FLAGS,		RO, "flags" },
 #define	CC_DEVICE	12
-	{ CC_DEVICE,		RO|DEF, "device" },
+	{ CC_DEVICE,		RO, "device" },
 #define	CC_VARLIST	13
 	{ CC_VARLIST,		RO, 	"clock_var_list"},
 #define	CC_MAXCODE	CC_VARLIST
