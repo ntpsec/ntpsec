@@ -331,6 +331,7 @@ int scmp_sc[] = {
 	SCMP_SYS(gettimeofday),	/* mkstemp */
 	SCMP_SYS(ioctl),
 	SCMP_SYS(link),
+	SCMP_SYS(listen),
 	SCMP_SYS(lseek),
 	SCMP_SYS(munmap),
 	SCMP_SYS(open),
