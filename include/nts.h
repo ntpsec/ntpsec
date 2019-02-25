@@ -14,21 +14,16 @@
 #define NTS_UID_LENGTH		32	/* RFC 5.3 */
 #define NTS_UID_MAX_LENGTH	64
 
-#define FLAG_NTS	0x01u	/* use NTS (network time security) */
-#define FLAG_NTS_ASK	0x02u	/* NTS, ask for specified server */
-#define FLAG_NTS_REQ	0x04u	/* NTS, ask for specified server */
-#define FLAG_NTS_NOVAL	0x08u	/* do not validate the server certificate */
-
-/* Configuration data for an NTS association */
+/* Client side configuration data for an NTS association */
+/* part of peer struct */
 struct ntscfg_t {
     char *server;	/* if NULL, use the peer itself (normal case) */
     char *ca;		/* if NULL, use the site default (normal case) */
     char *cert;		/* if NULL, use the site default (normal case) */
-    uint32_t flags;
     uint32_t expire;
 };
 
-// We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
+/* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297 */
 #define IANA_AEAD_AES_SIV_CMAC_256 15
 #define IANA_AEAD_AES_SIV_CMAC_384 16
 #define IANA_AEAD_AES_SIV_CMAC_512 17

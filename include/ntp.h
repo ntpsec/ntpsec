@@ -383,19 +383,29 @@ struct peer {
 /*
  * Values for peer.flags (unsigned int)
  */
-#define	FLAG_CONFIG	0x0001u	/* association was configured */
-#define	FLAG_PREEMPT	0x0002u	/* preemptable association */
-#define	FLAG_AUTHENTIC	0x0004u	/* last message was authentic */
-#define	FLAG_REFCLOCK	0x0008u	/* this is actually a reference clock */
-#define	FLAG_BC_VOL	0x0010u	/* broadcast client volleying */
-#define	FLAG_PREFER	0x0020u	/* prefer peer */
-#define	FLAG_BURST	0x0040u	/* burst mode */
-#define	FLAG_PPS	0x0080u	/* steered by PPS */
-#define	FLAG_IBURST	0x0100u	/* initial burst mode */
-#define	FLAG_NOSELECT	0x0200u	/* never select */
-#define	FLAG_TRUE	0x0400u	/* force truechimer */
-#define	FLAG_DNS	0x0800u	/* needs DNS lookup */
-#define FLAG_TSTAMP_PPS	0x1000u	/* PPS source provides absolute timestamp */
+#define	FLAG_CONFIG	 0x0001u   /* association was configured */
+#define	FLAG_PREEMPT	 0x0002u   /* preemptable association */
+#define	FLAG_AUTHENTIC	 0x0004u   /* last message was authentic */
+#define	FLAG_REFCLOCK	 0x0008u   /* this is actually a reference clock */
+/* #define	FLAG_BC_VOL	 0x0010u   ** broadcast client volleying */
+#define	FLAG_PREFER	 0x0020u   /* prefer peer */
+#define	FLAG_BURST	 0x0040u   /* burst mode */
+#define	FLAG_PPS	 0x0080u   /* steered by PPS */
+#define	FLAG_IBURST	 0x0100u   /* initial burst mode */
+#define	FLAG_NOSELECT	 0x0200u   /* never select */
+#define	FLAG_TRUE	 0x0400u   /* force truechimer */
+#define	FLAG_DNS	 0x0800u   /* Server name, not number: needs DNS */
+#define FLAG_NTS         0x1000u   /* use NTS (network time security) */
+#define FLAG_NTS_ASK     0x2000u   /* NTS, ask for specified server */
+#define FLAG_NTS_REQ     0x4000u   /* NTS, require specified server */
+#define FLAG_NTS_NOVAL   0x8000u   /* do not validate the server certificate */
+#define FLAG_TSTAMP_PPS	0x10000u   /* PPS source provides absolute timestamp */
+#define	FLAG_DNSNTS	0x20000u   /* needs DNS or NTS lookup */
+
+/* FLAG_DNS and FLAG_NTS stay on.
+ * FLAG_DNSNTS gets turned off when lookup succeeds.
+ */
+
 
 /* This is the new, sane way of representing packets. All fields are
    in host byte order, and the fixed-point time fields are just integers,

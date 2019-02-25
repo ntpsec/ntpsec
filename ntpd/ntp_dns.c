@@ -154,8 +154,8 @@ static void* dns_lookup(void* arg)
 	res_init();
 #endif
 
-	if (pp->cfg.nts_cfg.flags & FLAG_NTS) {
-		pp->cfg.nts_cfg.flags &= !FLAG_NTS;
+	if (pp->cfg.flags & FLAG_NTS) {
+		pp->cfg.flags &= !FLAG_NTS;
 		nts_probe(pp);
 	}
 

@@ -447,14 +447,6 @@ set_peerdstadr(
 	if (p == NULL || p->dstadr == dstadr)
 		return;
 
-	/*
-	 * Don't accept updates to a separate multicast receive-only
-	 * endpt while a BCLNT peer is running its unicast protocol.
-	 */
-	if (dstadr != NULL && (FLAG_BC_VOL & p->cfg.flags) &&
-	    (INT_MCASTIF & dstadr->flags) && MODE_CLIENT == p->hmode) {
-		return;
-	}
 	if (p->dstadr != NULL) {
 		p->dstadr->peercnt--;
 		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,

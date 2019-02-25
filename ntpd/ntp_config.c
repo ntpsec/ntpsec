@@ -632,11 +632,11 @@ create_peer_node(
 				break;
 
 			case T_Noval:
-				my_node->ctl.nts_cfg.flags |= FLAG_NTS_NOVAL;
+				my_node->ctl.flags |= FLAG_NTS_NOVAL;
 				break;
 
 			case T_Nts:
-				my_node->ctl.nts_cfg.flags |= FLAG_NTS;
+				my_node->ctl.flags |= (FLAG_NTS | FLAG_DNSNTS);
 				break;
 
 			case T_Prefer:
@@ -729,12 +729,12 @@ create_peer_node(
 			break;
 
 		case T_Ask:
-			my_node->ctl.nts_cfg.flags |= FLAG_NTS_ASK;
+			my_node->ctl.flags |= FLAG_NTS_ASK;
 			my_node->ctl.nts_cfg.server = estrdup(option->value.s);
 			break;
 
 		case T_Require:
-			my_node->ctl.nts_cfg.flags |= FLAG_NTS_REQ;
+			my_node->ctl.flags |= FLAG_NTS_REQ;
 			my_node->ctl.nts_cfg.server = estrdup(option->value.s);
 			break;
 
@@ -2687,7 +2687,7 @@ peer_config(
 		cast_flags = MDF_UCAST;
 		hmode = MODE_CLIENT;
 		if (NULL != hostname)
-			ctl->flags |= FLAG_DNS;
+			ctl->flags |= (FLAG_DNS | FLAG_DNSNTS);
 		break;
 
 	default:
