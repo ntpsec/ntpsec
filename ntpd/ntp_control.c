@@ -2645,8 +2645,7 @@ read_status(
 		 * peer. May be more selective later.
 		 */
 		for (const struct ctl_var *kv = sys_var; kv && !(EOV & kv->flags); kv++)
-			if (kv->flags & DEF)
-				ctl_putpeer(kv->code, peer);
+			ctl_putpeer(kv->code, peer);
 		ctl_flushpkt(0);
 		return;
 	}
@@ -2710,8 +2709,7 @@ read_peervars(void)
 				ctl_putpeer((int)i, peer);
 	} else
 		for (const struct ctl_var *kv = peer_var; kv && !(EOV & kv->flags); kv++)
-			if (kv->flags & DEF)
-				ctl_putpeer(kv->code, peer);
+			ctl_putpeer(kv->code, peer);
 	ctl_flushpkt(0);
 }
 
@@ -2776,12 +2774,10 @@ read_sysvars(void)
 			}
 	} else {
 		for (v = sys_var; v && !(EOV & v->flags); v++)
-			if (DEF & v->flags)
-				ctl_putsys(v->code);
+			ctl_putsys(v->code);
 		for (kv = ext_sys_var; kv && !(EOV & kv->flags); kv++)
-			if (DEF & kv->flags)
-				ctl_putdata(kv->text, strlen(kv->text),
-					    false);
+			ctl_putdata(kv->text, strlen(kv->text),
+				    false);
 	}
 	free(wants);
 	ctl_flushpkt(0);
@@ -4101,12 +4097,10 @@ read_clockstatus(
 						    false);
 	} else {
 		for (v = clock_var; v != NULL && !(EOV & v->flags); v++)
-			if (DEF & v->flags)
-				ctl_putclock(v->code, &cs, false);
+			ctl_putclock(v->code, &cs, false);
 		for ( ; kv != NULL && !(EOV & kv->flags); kv++)
-			if (DEF & kv->flags)
-				ctl_putdata(kv->text, strlen(kv->text),
-					    false);
+			ctl_putdata(kv->text, strlen(kv->text),
+				    false);
 	}
 
 	free(wants);
