@@ -217,6 +217,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
         sawAEEF = true;
         break;
       default:
+        /* Non NTS extensions on requests at server.
+         * Call out when we get some that we want. */
         if (critical)
           return false;
         buf.next += length;
@@ -391,6 +393,8 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 	sawAEEF = true;
         break;
       default:
+        /* Non NTS extensions on reply from server.
+         * Call out when we get some that we want. */
         if (critical)
           return false;
         buf.next += length;
