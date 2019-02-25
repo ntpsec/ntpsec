@@ -36,12 +36,15 @@ cmd_map3 = {    # Need curses
 
 test_logs = []
 
+
 def addLog(color, text):
     test_logs.append((color, text))
+
 
 def bin_test_summary(ctx):
     for i in test_logs:
         waflib.Logs.pprint(i[0], i[1])
+
 
 def run(cmd, reg, pythonic):
     """Run an individual non-python test."""
@@ -85,8 +88,8 @@ def cmd_bin_test(ctx, config):
     fails = 0
 
     if ctx.env['PYTHON_CURSES']:
-      for cmd in cmd_map3:
-        cmd_map2[cmd] = cmd_map3[cmd]
+        for cmd in cmd_map3:
+            cmd_map2[cmd] = cmd_map3[cmd]
 
     for cmd in sorted(cmd_map):
         if not run(cmd, cmd_map[cmd], False):
