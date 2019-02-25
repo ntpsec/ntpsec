@@ -25,7 +25,7 @@
  *  The maximum length NTP packet contains the NTP header, one Autokey
  *  request, one Autokey response, the MAC, and extension fields
  *  (Autokey has been removed from NTPsec, but we need to deal with
- *  the largest packets from legacy versions).  The only free prameter
+ *  the largest packets from legacy versions).  The only free parameter
  *  here is the maximum length of extension data.
  */
 #define	RX_BUFF_SIZE	(LEN_PKT_NOMAC + MAX_MAC_LEN + MAX_EXT_LEN)

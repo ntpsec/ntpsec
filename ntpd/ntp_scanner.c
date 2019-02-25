@@ -103,7 +103,7 @@ keyword(
  * 'ntpq'.
  *
  * Now there are a few functions to maintain a stack of nested input
- * sources (though nesting is only allowd for disk files) and from the
+ * sources (though nesting is only allowed for disk files) and from the
  * scanner / parser point of view there's no difference between both
  * types of sources.
  *

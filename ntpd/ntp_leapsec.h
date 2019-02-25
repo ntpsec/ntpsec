@@ -219,7 +219,7 @@ extern bool leapsec_add_dyn(bool insert, time_t ntp_now);
 extern bool leapsec_query(leap_result_t *qr, time_t when);
 
 /* Get the current leap frame info. Returns true if the result contains
- * useable data, false if there is currently no leap second frame.
+ * usable data, false if there is currently no leap second frame.
  * This merely replicates some results from a previous query, but since
  * it does not check the current time, only the following entries are
  * meaningful:

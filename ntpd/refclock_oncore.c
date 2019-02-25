@@ -1734,7 +1734,7 @@ oncore_get_timestamp(
 
 		/* or current and mine */
 	current_params.mode |= instance->pps_p.mode;
-		/* but only set whats legal */
+		/* but only set what's legal */
 	current_params.mode &= current_mode;
 
 	current_params.assert_offset.tv_sec = 0;
@@ -3223,7 +3223,7 @@ oncore_msg_Gj(
 
 	instance->saw_Gj = 1; /* flag, saw_Gj, don't need to try Bj in check_leap */
 
-	/* print the message to verify whats there */
+	/* print the message to verify what's there */
 
 	dt = buf[5] - buf[4];
 

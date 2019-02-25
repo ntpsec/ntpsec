@@ -1319,7 +1319,7 @@ config_monitor(
 
 	/* NOTE:
 	 * Calling filegen_get is brain dead. Doing a string
-	 * comparison to find the relavant filegen structure is
+	 * comparison to find the relevant filegen structure is
 	 * expensive.
 	 *
 	 * Through the parser, we already know which filegen is

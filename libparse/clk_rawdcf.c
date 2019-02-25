@@ -613,7 +613,7 @@ inp_rawdcf(
 			 * Sun kernel driver, and this could always be called
 			 * from userspace.  Problem discovered while eliminating
 			 * the timestamp_t union; this was one of only two
-			 * referebces to the timrspec member. It is unknown
+			 * references to the timespec member. It is unknown
 			 * whether this change actually corrects the code.
 			 */
 			if (lfpuint(t->timeout) != 0)

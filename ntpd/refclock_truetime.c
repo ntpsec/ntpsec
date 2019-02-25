@@ -436,7 +436,7 @@ true_receive(
 
 		/*
 		 * The clock will blurt a timecode every second but we only
-		 * want one when polled.  If we havn't been polled, bail out.
+		 * want one when polled.  If we haven't been polled, bail out.
 		 */
 		if (!up->polled)
 			return;

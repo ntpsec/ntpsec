@@ -606,7 +606,7 @@ refclock_gtlin(
  * canonical or raw modes. The terminal interface routines map CR to LF.
  * In canonical mode this results in two lines, one containing data
  * followed by LF and another containing only LF. In raw mode the
- * interface routines can deliver arbitraty chunks of data from one
+ * interface routines can deliver arbitrary chunks of data from one
  * character to a maximum specified by the calling routine. In either
  * mode the routine returns the number of characters in the line
  * followed by a NULL character ('\0'), which is not included in the

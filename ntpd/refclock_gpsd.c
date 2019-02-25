@@ -1467,7 +1467,7 @@ process_version(
 	/* request watch for our GPS device if not yet watched.
 	 *
 	 * The version string is also sent as a life signal, if we have
-	 * seen useable data. So if we're already watching the device,
+	 * seen usable data. So if we're already watching the device,
 	 * skip the request.
 	 *
 	 * Reuse the input buffer, which is no longer needed in the

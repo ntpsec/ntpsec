@@ -133,7 +133,7 @@ ntpc_step_systime(PyObject *self, PyObject *args)
     /*
      * What we really want is for Python to parse a long double.
      * As this is, it's a potential source of problems in the Python
-     * utilties if and when the time difference between the Unix epoch
+     * utilities if and when the time difference between the Unix epoch
      * and now exceeds the range of a double.
      */
     if (!PyArg_ParseTuple(args, "d", &adjustment))

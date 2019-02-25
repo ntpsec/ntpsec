@@ -236,7 +236,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         isc_interfaceiter_t *iter;
         isc_result_t result;
         char strbuf[BUFSIZ];
-        int trys, ret = 0;
+        int tries, ret = 0;
 
         REQUIRE(mctx != NULL);
         REQUIRE(iterp != NULL);
@@ -270,7 +270,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 #endif
 
         /* If interrupted, try again */
-        for (trys = 0; trys < 3; trys++) {
+        for (tries = 0; tries < 3; tries++) {
                 if ((ret = getifaddrs(&iter->ifaddrs)) >= 0)
                         break;
                 if (errno != EINTR)
@@ -812,10 +812,10 @@ isc_ioctl(int fildes, int req, char *arg);
 
 static int
 isc_ioctl(int fildes, int req, char *arg) {
-        int trys;
+        int tries;
         int ret;
 
-        for (trys = 0; trys < 3; trys++) {
+        for (tries = 0; tries < 3; tries++) {
                 if ((ret = ioctl(fildes, req, arg)) < 0) {
                         if (errno == EINTR)
                                 continue;

@@ -188,7 +188,7 @@ write_stats(void)
 		 * reduce the wander_resid by half each hour. When
 		 * the difference between the prev_drift_comp and
 		 * drift_comp is less than the wander_resid, update
-		 * the frequncy file. This minimizes the file writes to
+		 * the frequency file. This minimizes the file writes to
 		 * nonvolaile storage.
 		 */
 	        DPRINT(1, ("write_stats: frequency %.6lf thresh %.6lf, freq %.6lf\n",

@@ -840,7 +840,7 @@ leapsec_raw(
 		return false;
 	}
 #endif
-	/* Start 28 days earler.  Avoids month arithmetic.  */
+	/* Start 28 days earlier.  Avoids month arithmetic.  */
 	starttime = ttime - 28*SECSPERDAY;
 	li.ttime = ttime;
 	li.stime = ttime - starttime;

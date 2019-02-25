@@ -341,7 +341,7 @@ int nts_translate_version(const char *arg) {
     return -1;
 #endif
   }
-  msyslog(LOG_ERR, "NTS: unreconized version string: %s.", arg);
+  msyslog(LOG_ERR, "NTS: unrecognized version string: %s.", arg);
   return -1;
 }
 

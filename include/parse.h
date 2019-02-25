@@ -189,7 +189,7 @@ struct parse			/* parse module local data */
   unsigned long  parse_lstate;	/* last state code */
   char          *parse_ldata;	/* last data buffer */
   unsigned short parse_ldsize;	/* last data buffer length */
-  unsigned long  parse_badformat;	/* number of unparsable pakets */
+  unsigned long  parse_badformat;	/* number of unparsable packets */
 
   timestamp_t    parse_lastchar; /* last time a character was received */
   parsetime_t    parse_dtime;	/* external data prototype */

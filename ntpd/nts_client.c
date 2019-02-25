@@ -258,7 +258,7 @@ bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
 
 bool nts_client_build_request(struct peer* peer, SSL *ssl) {
   uint8_t buff[1000];
-  int     used, transfered;
+  int     used, transferred;
   struct BufCtl_t buf;
 
   UNUSED_ARG(peer);
@@ -282,9 +282,9 @@ bool nts_client_build_request(struct peer* peer, SSL *ssl) {
         used, (long)sizeof(buff));
     return false;
   }
-  transfered = SSL_write(ssl, buff, used);
-  if (used != transfered) {
-    msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %m", used, transfered);
+  transferred = SSL_write(ssl, buff, used);
+  if (used != transferred) {
+    msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %m", used, transferred);
     return false;
   }
   return true;
@@ -292,15 +292,15 @@ bool nts_client_build_request(struct peer* peer, SSL *ssl) {
 
 bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   uint8_t  buff[2000];
-  int transfered, idx;
+  int transferred, idx;
   struct BufCtl_t buf;
 
-  transfered = SSL_read(ssl, buff, sizeof(buff));
-  if (0 > transfered) {
-    msyslog(LOG_ERR, "NTSc: read failed: %d, %m", transfered);
+  transferred = SSL_read(ssl, buff, sizeof(buff));
+  if (0 > transferred) {
+    msyslog(LOG_ERR, "NTSc: read failed: %d, %m", transferred);
     return false;
   }
-  msyslog(LOG_ERR, "NTSc: read %d bytes", transfered);
+  msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);
 
   peer->nts_state.aead = -1;
   peer->nts_state.keylen = 0;
@@ -309,7 +309,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   peer->nts_state.count = 0;
 
   buf.next = buff;
-  buf.left = transfered;
+  buf.left = transferred;
   while (buf.left > 0) {
     uint16_t type, data;
     bool critical = false;
