@@ -112,10 +112,13 @@ int nts_make_cookie(uint8_t *cookie,
   bool ok;
   int err;
 
+  if (NULL == cookie_ctx)
+    return 0;		/* We aren't initialized yet. */
+
   // ASSERT(keylen<NTS_MAX_KEYLEN);
   
   uint8_t * finger;
-  uint32_t temp;      /* keep 4 byte alignment */
+  uint32_t temp;	/* keep 4 byte alignment */
   size_t left;
 
   err = pthread_mutex_lock(&cookie_lock);
@@ -193,6 +196,9 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   size_t plainlength;
   int cipherlength;
   bool ok;
+
+  if (NULL == cookie_ctx)
+    return false;	/* We aren't initialized yet. */
 
 // FIXME - these are our cookies.  We should know the exact length
   if (cookielen > NTS_MAX_COOKIELEN)
