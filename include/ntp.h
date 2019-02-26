@@ -400,10 +400,10 @@ struct peer {
 #define FLAG_NTS_REQ     0x4000u   /* NTS, require specified server */
 #define FLAG_NTS_NOVAL   0x8000u   /* do not validate the server certificate */
 #define FLAG_TSTAMP_PPS	0x10000u   /* PPS source provides absolute timestamp */
-#define	FLAG_DNSNTS	0x20000u   /* needs DNS or NTS lookup */
+#define	FLAG_LOOKUP	0x20000u   /* needs DNS or NTS lookup */
 
 /* FLAG_DNS and FLAG_NTS stay on.
- * FLAG_DNSNTS gets turned off when lookup succeeds.
+ * FLAG_LOOKUP gets turned off when lookup succeeds.
  */
 
 

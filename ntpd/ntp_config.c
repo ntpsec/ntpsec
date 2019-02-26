@@ -636,7 +636,7 @@ create_peer_node(
 				break;
 
 			case T_Nts:
-				my_node->ctl.flags |= (FLAG_NTS | FLAG_DNSNTS);
+				my_node->ctl.flags |= (FLAG_NTS | FLAG_LOOKUP);
 				break;
 
 			case T_Prefer:
@@ -2687,7 +2687,7 @@ peer_config(
 		cast_flags = MDF_UCAST;
 		hmode = MODE_CLIENT;
 		if (NULL != hostname)
-			ctl->flags |= (FLAG_DNS | FLAG_DNSNTS);
+			ctl->flags |= (FLAG_DNS | FLAG_LOOKUP);
 		break;
 
 	default:

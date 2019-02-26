@@ -776,7 +776,7 @@ transmit(
 	}
 
 	/* Does server need DNS or NTS lookup? */
-	if (peer->cfg.flags & FLAG_DNS) {
+	if (peer->cfg.flags & FLAG_LOOKUP) {
 		peer->outdate = current_time;
 		if (!dns_probe(peer)) return;
 		poll_update(peer, hpoll);
@@ -2261,7 +2261,7 @@ dns_take_server(
 	int		restrict_mask;
 	struct peer *	pp;
 
-	if(!(server->cfg.flags & FLAG_DNS))
+	if(!(server->cfg.flags & FLAG_LOOKUP))
 		/* Already got an address for this slot. */
 		return;
 
@@ -2273,7 +2273,7 @@ dns_take_server(
 	}
 
 	msyslog(LOG_INFO, "DNS: Server taking: %s", socktoa(rmtadr));
-	server->cfg.flags &= (unsigned)~FLAG_DNS;
+	server->cfg.flags &= (unsigned)~FLAG_LOOKUP;
 
 	server->srcadr = *rmtadr;
 	peer_update_hash(server);
@@ -2361,7 +2361,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	switch (status) {
 		case DNS_good:
 			txt = "good";
-			if (FLAG_DNS & peer->cfg.flags)
+			if (FLAG_LOOKUP & peer->cfg.flags)
 				/* server: got answer, but didn't like any */
 				/* (all) already in use ?? */
 				hpoll += 1;
@@ -2384,7 +2384,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	if (hpoll > 12)
 		hpoll = 12;  /* 4096, a bit over an hour */
 	if ((DNS_good == status) &&
-		(MDF_UCAST & peer->cast_flags) && !(FLAG_DNS & peer->cfg.flags))
+		(MDF_UCAST & peer->cast_flags) && !(FLAG_LOOKUP & peer->cfg.flags))
 		hpoll = 0;  /* server: no more */
 	msyslog(LOG_INFO, "DNS: dns_take_status: %s=>%s, %d",
 		peer->hostname, txt, hpoll);
@@ -2402,7 +2402,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 void dns_new_interface(void) {
     struct peer *p;
     for (p = peer_list; p != NULL; p = p->p_link) {
-	if ((p->cfg.flags & FLAG_DNS) || (p->cast_flags & MDF_POOL)) {
+	if ((p->cfg.flags & FLAG_LOOKUP) || (p->cast_flags & MDF_POOL)) {
 	    p->hpoll = p->cfg.minpoll;
 	    transmit(p);   /* does all the work */
 	}
