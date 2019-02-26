@@ -987,7 +987,7 @@ plot \
             if "offset" == ptype:
                 # doing offset, not jitter
                 rtt = 1
-                if "127.127." == peerlist[0][:8]:
+                if peerlist[0].startswith("127.127."):
                     # don't do rtt for reclocks
                     rtt = 0
                     title = "Refclock Offset " + str(peerlist[0])
@@ -1023,7 +1023,7 @@ Time (rtt) is field 6 in the peerstats log file.</p>
 
             else:
                 # doing jitter, not offset
-                if "127.127." == peerlist[0][:8]:
+                if peerlist[0].startswith("127.127."):
                     title = "Refclock RMS Jitter " + str(peerlist[0])
                     exp = """\
 <p>The RMS Jitter of a local refclock.  Jitter is the
