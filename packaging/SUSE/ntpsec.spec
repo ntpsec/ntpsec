@@ -47,7 +47,6 @@ BuildRequires:  netcfg
 BuildRequires:  openssl-devel
 BuildRequires:  pkgconfig
 BuildRequires:  pps-tools-devel
-BuildRequires:  pkgconfig(libevent)
 BuildRequires:  pkgconfig(libseccomp)
 BuildRequires:  pkgconfig(python)
 Requires:       netcfg
