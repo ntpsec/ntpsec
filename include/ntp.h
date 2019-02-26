@@ -475,7 +475,6 @@ struct pkt {
  * Event codes. Used for reporting errors/events to the control module
  */
 #define	PEER_EVENT	0x080	/* this is a peer event */
-#define CRPT_EVENT	0x100	/* this is a crypto event */
 
 /*
  * System event codes
