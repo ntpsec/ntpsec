@@ -2054,7 +2054,7 @@ peer_xmit(
 		peer->org_rand = peer->org_ts;
 	}
 
-	/* Maybe we should bump org_ts to compensate for crypto */
+	/* FIXME bump org_ts to compensate for crypto */
 	xpkt.xmt = htonl_fp(peer->org_rand);	/* out in xmt, back in org */
 
 	/* 3 way branch to add authentication:
@@ -2062,8 +2062,13 @@ peer_xmit(
          *  2) Shared KEY
          *  3) none
 	 */
-	if (0 < peer->nts_state.count) {
-		sendlen += extens_client_send(peer, &xpkt);
+	if (FLAG_NTS & peer->cfg.flags) {
+		if (0 < peer->nts_state.count)
+		  sendlen += extens_client_send(peer, &xpkt);
+		else {
+		  // FIXME - out of cookies
+		  return;
+		}
         } else if (0 != peer->cfg.peerkey) {
 		auth_info *auth = authlookup(peer->cfg.peerkey, true);
 		if (NULL == auth) {

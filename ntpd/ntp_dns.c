@@ -24,18 +24,18 @@
 
 /* Notes:
 
-  Only one DNS lookup active at a time
+  This module also handles the start of NTS-KE.
+
+  Only one DNS/NTS lookup active at a time
 
   peer->srcadr holds IPv4/IPv6/UNSPEC flag
   peer->hmode holds DNS retry time (log 2)
-  FLAG_DNS used in server case to indicate need DNS
 
-  Server can't lookup again after finding an answer
-    answer uses same peer slot, turns off FLAG_DNS
-    srcadr+hmode changed by normal code
-    server can't lookup again if answer stops responding
-  Pool case makes new peer slots, pool slot unchanged
-    so OK for another lookup
+  Older versions of this code turned off FLAG_DNS
+  so there wasn't any way to do another DNS lookup.
+  Now, we turn off FLAG_DNSNTS to indicate success.
+
+  Pool case makes new peer slots.
 */
 
 static struct peer* active = NULL;  /* busy flag */
@@ -94,6 +94,13 @@ void dns_check(void)
 		msyslog(LOG_ERR, "DNS: dns_check: join failed %s", strerror(rc));
 		return;  /* leaves active set */
 	}
+
+	if (active->cfg.flags & FLAG_NTS) {
+		nts_check(active);
+		active = NULL;
+		return;
+	}
+
 	if (0 != gai_rc) {
 		msyslog(LOG_INFO, "DNS: dns_check: DNS error: %d, %s",
 			gai_rc, gai_strerror(gai_rc));
@@ -102,6 +109,8 @@ void dns_check(void)
 
 	for (ai = answer; NULL != ai; ai = ai->ai_next) {
 		sockaddr_u sockaddr;
+		if (sizeof(sockaddr_u) < ai->ai_addrlen)
+			continue;  /* Weird */
 		memcpy(&sockaddr, ai->ai_addr, ai->ai_addrlen);
 		/* Both dns_take_pool and dns_take_server log something. */
 		// msyslog(LOG_INFO, "DNS: Take %s=>%s",
@@ -155,16 +164,14 @@ static void* dns_lookup(void* arg)
 #endif
 
 	if (pp->cfg.flags & FLAG_NTS) {
-		pp->cfg.flags &= !FLAG_NTS;
 		nts_probe(pp);
+	} else {
+		ZERO(hints);
+		hints.ai_protocol = IPPROTO_UDP;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_family = AF(&pp->srcadr);
+		gai_rc = getaddrinfo(pp->hostname, "ntp", &hints, &answer);
 	}
-
-
-	ZERO(hints);
-	hints.ai_protocol = IPPROTO_UDP;
-	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_family = AF(&pp->srcadr);
-	gai_rc = getaddrinfo(pp->hostname, "ntp", &hints, &answer);
 
 	kill(getpid(), SIGDNS);
 	pthread_exit(NULL);

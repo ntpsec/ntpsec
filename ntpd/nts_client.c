@@ -24,15 +24,17 @@
 #include "ntp_types.h"
 #include "ntpd.h"
 #include "nts.h"
-
-#define PORT "123"
+#include "ntp_dns.h"
 
 int open_TCP_socket(const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx);
-bool nts_client_build_request(struct peer* peer, SSL *ssl);
+bool check_certificate(struct peer* peer, SSL *ssl);
+bool nts_client_send_request(struct peer* peer, SSL *ssl);
 bool nts_client_process_response(struct peer* peer, SSL *ssl);
 
-SSL_CTX *client_ctx = NULL;
+static SSL_CTX *client_ctx = NULL;
+static sockaddr_u sockaddr;
+static bool addrOK;
 
 // Fedora 29:  0x1010101fL  1.1.1a
 // Fedora 28:  0x1010009fL  1.1.0i
@@ -92,12 +94,12 @@ bool nts_client_init(void) {
 bool nts_probe(struct peer * peer) {
   SSL     *ssl;
   int      server = 0;
-  X509    *cert = NULL;
 
   if (NULL == client_ctx)
     return false;
 
   nts_ke_probes++;
+  addrOK = false;
 
   server = open_TCP_socket(peer->hostname);
   if (-1 == server)
@@ -109,24 +111,6 @@ bool nts_probe(struct peer * peer) {
 
   ssl = SSL_new(client_ctx);
   SSL_set_fd(ssl, server);
-
-// https://wiki.openssl.org/index.php/Hostname_validation
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-  // SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
-  SSL_set1_host(ssl, peer->hostname);
-#elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
-{
-  X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
-  // X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_WILDCARDS);
-  if (1 != X509_VERIFY_PARAM_set1_host(param,
-          peer->hostname, strlen(peer->hostname))) {
-      msyslog(LOG_ERR, "NTSc: troubles setting hostflags");
-  }
-  SSL_set_verify(ssl, SSL_VERIFY_PEER, NULL);
-}
-#else
-  msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
-#endif
 
   // SSL_set_timeout(SSL_get_session(ssl), 2);  // FIXME
   if (1 != SSL_connect(ssl)) {
@@ -146,72 +130,86 @@ bool nts_probe(struct peer * peer) {
     SSL_get_cipher_name(ssl),
     SSL_get_cipher_bits(ssl, NULL));
 
-  cert = SSL_get_peer_certificate(ssl);
-  if (NULL == cert) {
-    msyslog(LOG_INFO, "NTSc: No certificate");
-  } else {
-    X509_NAME *certname;
-    char name[200];
-    int certok;
-    certname = X509_get_subject_name(cert);
-    X509_NAME_oneline(certname, name, sizeof(name));
-    msyslog(LOG_INFO, "NTSc: certificate subject name: %s", name);
-    certname = X509_get_issuer_name(cert);
-    X509_NAME_oneline(certname, name, sizeof(name));
-    msyslog(LOG_INFO, "NTSc: certificate issuer name: %s", name);
-    certok = SSL_get_verify_result(ssl);
-    if (X509_V_OK == certok) {
-      msyslog(LOG_INFO, "NTSc: certificate is valid.");
-    } else {
-      msyslog(LOG_ERR, "NTSc: certificate invalid: %d=>%s",
-          certok, X509_verify_cert_error_string(certok));
-    }
-  }
+  if (!check_certificate(peer, ssl))
+    goto bail;
 
-  if (!nts_client_build_request(peer, ssl))
+  if (!nts_client_send_request(peer, ssl))
     goto bail;
   if (!nts_client_process_response(peer, ssl))
     goto bail;
 
-  // FIXME
-  /* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297
-   * There are no alternatives and no clean API yet.
-   */
-  peer->nts_state.keylen = nts_get_key_length(AEAD_AES_SIV_CMAC_256);
+  /* We are using AEAD_AES_SIV_CMAC_xxx, from RFC 5297
+   * key length depends upon which key is selected */
+  peer->nts_state.keylen = nts_get_key_length(peer->nts_state.aead);
+  if (0 == peer->nts_state.keylen)
+    goto bail;		/* unknown AEAD algorithm */
   nts_make_keys(ssl,
     peer->nts_state.c2s,
     peer->nts_state.s2c,
     peer->nts_state.keylen);
+
+  addrOK = true;
 
 bail:
   SSL_shutdown(ssl);
   SSL_free(ssl);
   close(server);
 
-  return false;
+  return addrOK;
+}
+
+bool nts_check(struct peer *peer) {
+//  msyslog(LOG_INFO, "NTSc: nts_check %s, %d", sockporttoa(&sockaddr), addrOK);
+  if (addrOK) {
+    dns_take_server(peer, &sockaddr);
+    dns_take_status(peer, DNS_good);
+  } else
+    dns_take_status(peer, DNS_error);
+  return addrOK;
 }
 
 int open_TCP_socket(const char *hostname) {
+  char host[256], port[32];
+  char *tmp;
   struct addrinfo hints;
   struct addrinfo *answer;
-  sockaddr_u sockaddr;
   int gai_rc, err;
   int sockfd;
+
+  /* copy avoids dancing around const warnings */
+  strlcpy(host, hostname, sizeof(host));
 
   ZERO(hints);
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_family = AF_UNSPEC;
-  gai_rc = getaddrinfo(hostname, PORT, &hints, &answer);  // FIXME
+  tmp = strchr(host, ']');
+  if (NULL == tmp) {
+    tmp = strchr(host, ':');
+  } else {
+    /* IPv6 case, start search after ] */
+    tmp = strchr(tmp, ':');
+  }
+  if (NULL == tmp) {
+    /* simple case, no : */
+    strlcpy(port, "ntp", sizeof(port));
+  } else {
+    /* Complicated case, found a : */
+    *tmp++ = 0;
+    strlcpy(port, tmp, sizeof(port));
+  }
+  gai_rc = getaddrinfo(host, port, &hints, &answer);
   if (0 != gai_rc) {
     msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to contact %s: %d, %s",
       hostname, gai_rc, gai_strerror(gai_rc));
     return -1;
   }
 
+  /* Save first answer for NTP */
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
-  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s=%s:%s",
-    hostname, socktoa(&sockaddr), PORT);
+  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s:%s => %s",
+    host, port, sockporttoa(&sockaddr));
+  SET_PORT(&sockaddr, NTP_PORT);	/* setup default NTP address */
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == sockfd) {
     msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %m");
@@ -229,12 +227,67 @@ int open_TCP_socket(const char *hostname) {
   return sockfd;
 }
 
+bool check_certificate(struct peer* peer, SSL *ssl) {
+  X509 *cert = SSL_get_peer_certificate(ssl);
+  char host[256], *tmp;
+
+  /* chop off trailing :port */
+  strlcpy(host, peer->hostname, sizeof(host));
+  tmp = strchr(host, ']');
+  if (NULL == tmp)
+    tmp = host;			/* not IPv6 [...] format */
+  tmp = strchr(tmp, ':');
+  if (NULL != tmp)
+    *tmp = 0;
+
+// https://wiki.openssl.org/index.php/Hostname_validation
+#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+  SSL_set1_host(ssl, host);
+#elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+{
+  X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
+  if (1 != X509_VERIFY_PARAM_set1_host(param, host, strlen(host))) {
+      msyslog(LOG_ERR, "NTSc: troubles setting hostflags");
+  }
+  SSL_set_verify(ssl, SSL_VERIFY_PEER, NULL);
+}
+#else
+  msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
+#endif
+
+  if (NULL == cert) {
+    msyslog(LOG_INFO, "NTSc: No certificate");
+    return false;
+  } else {
+    X509_NAME *certname;
+    char name[200];
+    int certok;
+    certname = X509_get_subject_name(cert);
+    X509_NAME_oneline(certname, name, sizeof(name));
+    msyslog(LOG_INFO, "NTSc: certificate subject name: %s", name);
+    certname = X509_get_issuer_name(cert);
+    X509_NAME_oneline(certname, name, sizeof(name));
+    msyslog(LOG_INFO, "NTSc: certificate issuer name: %s", name);
+    certok = SSL_get_verify_result(ssl);
+    if (X509_V_OK == certok) {
+      msyslog(LOG_INFO, "NTSc: certificate is valid.");
+    } else {
+      msyslog(LOG_ERR, "NTSc: certificate invalid: %d=>%s",
+          certok, X509_verify_cert_error_string(certok));
+      if (!(FLAG_NTS_NOVAL & peer->cfg.flags))
+        return false;
+    }
+  }
+  return true;
+}
+
 // FIXME - context shouldn't be magic
 bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
   // char *label = "EXPORTER-network-time-security/1";
   // Subject: [Ntp] [NTS4NTP] info for NTS developers
   // From: Martin Langer <mart.langer@ostfalia.de>
   // Date: Tue, 15 Jan 2019 11:40:13 +0100
+  // https://mailarchive.ietf.org/arch/msg/ntp/nkc-9n6XOPt5Glgi_ueLvuD9EfY
   // bug in OpenSSL 1.1.1a
   const char *label = "EXPORTER-nts/1";
   unsigned char context[5] = {0x00, 0x00, 0x00, 0x0f, 0x00};
@@ -256,7 +309,7 @@ bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
   return true;
 }
 
-bool nts_client_build_request(struct peer* peer, SSL *ssl) {
+bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   uint8_t buff[1000];
   int     used, transferred;
   struct BufCtl_t buf;

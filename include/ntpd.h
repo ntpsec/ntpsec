@@ -446,6 +446,7 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng);
 void nts_init(void);   /* Before sandbox() */
 void nts_init2(void);  /* After sandbox() */
 bool nts_probe(struct peer *peer);
+bool nts_check(struct peer *peer);
 int nts_client_ke_request(struct ntscfg_t *);
 int nts_server_ke_verify(struct ntscfg_t *);
 int nts_client_ke_verify(struct ntscfg_t *, struct ntsclient_t *);

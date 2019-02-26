@@ -362,7 +362,7 @@ free_peer(
 	int		hash;
 
 
-	if ((MDF_UCAST & p->cast_flags) && !(FLAG_DNS & p->cfg.flags)) {
+	if ((MDF_UCAST & p->cast_flags) && !(FLAG_LOOKUP & p->cfg.flags)) {
 		hash = NTP_HASH_ADDR(&p->srcadr);
 		peer_hash_count[hash]--;
 
@@ -520,7 +520,7 @@ refresh_all_peerinterfaces(void)
 			continue;
 		if (MDF_POOL & p->cast_flags)
 			continue;	/* Pool slots don't get interfaces. */
-		if (FLAG_DNS & p->cfg.flags)
+		if (FLAG_LOOKUP & p->cfg.flags)
 			continue;	/* Still doing DNS lookup. */
 		peer_refresh_interface(p);
 
@@ -663,6 +663,10 @@ newpeer(
 	peer->hpoll = peer->cfg.minpoll;
 	if (cast_flags & MDF_POOL)
 		peer_clear(peer, "POOL", initializing1);
+	else if (FLAG_NTS & peer->cfg.flags)
+		peer_clear(peer, "NTS", initializing1);
+	else if (FLAG_DNS & peer->cfg.flags)
+		peer_clear(peer, "DNS", initializing1);
 	else
 		peer_clear(peer, "INIT", initializing1);
 	if (clock_ctl.mode_ntpdate)
@@ -678,7 +682,7 @@ newpeer(
 	/*
 	 * Put the new peer in the hash tables.
 	 */
-	if ((MDF_UCAST & cast_flags) && !(FLAG_DNS & ctl->flags))
+	if ((MDF_UCAST & cast_flags) && !(FLAG_LOOKUP & ctl->flags))
 		peer_update_hash(peer);
 	hash = peer->associd & NTP_HASH_MASK;
 	LINK_SLIST(assoc_hash[hash], peer, aid_link);
