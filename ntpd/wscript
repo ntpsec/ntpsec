@@ -52,7 +52,6 @@ def build(ctx):
 
     libntpd_source = [
         "ntp_control.c",
-        "ntp_extens.c",
         "ntp_filegen.c",
         "ntp_leapsec.c",
         "ntp_monitor.c",    # Needed by the restrict code
@@ -63,6 +62,7 @@ def build(ctx):
         "nts_server.c",
         "nts_client.c",
         "nts_cookie.c",
+        "nts_extens.c",
     ]
 
     ctx(
