@@ -73,13 +73,14 @@ bool nts_server_init(void) {
     server_ctx = SSL_CTX_new(TLSv1_2_server_method());
 #endif
     if (NULL == server_ctx) {
-      // ?? Happens on NetBSD - says no ciphers
+      /* Happens if no ciphers */
       msyslog(LOG_INFO, "NTSs: NULL server_ctx");
       nts_log_ssl_error();
       return false;
     }
 
     SSL_CTX_set_session_cache_mode(server_ctx, SSL_SESS_CACHE_OFF);
+    SSL_CTX_set_timeout(server_ctx, NTS_KE_TIMEOUT);
 
     ok &= nts_load_versions(server_ctx);
     ok &= nts_load_ciphers(server_ctx);
@@ -156,7 +157,6 @@ void* nts_ke_listener(void* arg) {
             close(client);
             continue;
         }
-        SSL_set_timeout(SSL_get_session(ssl), 2);  // FIXME
         msyslog(LOG_INFO, "NTSs: SSL accept-ed from %s",
             socktoa((sockaddr_u *)&addr));
         msyslog(LOG_INFO, "NTSs: Using TLS version %s, cipher %s with %d secret bits",
@@ -195,7 +195,7 @@ void nts_ke_request(SSL *ssl) {
     buf.next = buff;
     buf.left = sizeof(buff);
     keylen = nts_get_key_length(aead);
-    nts_make_keys(ssl, c2s, s2c, keylen);
+    nts_make_keys(ssl, aead, c2s, s2c, keylen);
 
     /* 4.1.2 Next Protocol, 0 for NTP */
     nts_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
@@ -384,16 +384,16 @@ bool nts_load_certificate(SSL_CTX *ctx) {
        key = ntsconfig.key;
 
     if (1 != SSL_CTX_use_certificate_chain_file(ctx, cert)) {
-        // FIXME log SSL errors
         msyslog(LOG_ERR, "NTSs: can't load certificate (chain) from %s", cert);
+        nts_log_ssl_error();
         return false;
     } else {
         msyslog(LOG_ERR, "NTSs: loaded certificate (chain) from %s", cert);
     }
 
     if (1 != SSL_CTX_use_PrivateKey_file(ctx, key, SSL_FILETYPE_PEM)) {
-        // FIXME log SSL errors
         msyslog(LOG_ERR, "NTSs: can't load private key from %s", key);
+        nts_log_ssl_error();
         return false;
     } else {
         msyslog(LOG_ERR, "NTSs: loaded private key from %s", key);

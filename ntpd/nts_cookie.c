@@ -151,8 +151,6 @@ int nts_make_cookie(uint8_t *cookie,
   RAND_bytes(finger, NONCE_LENGTH);
   finger += NONCE_LENGTH;
 
-  // require(AD_LENGTH==finger-cookie);
-
   used = finger-cookie;
   left = NTS_MAX_COOKIELEN-used;
 

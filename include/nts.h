@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <openssl/ssl.h>
 
+#define NTS_KE_TIMEOUT		3
+
 #define NTS_MAX_KEYLEN		64	/* used in cookies */
 #define NTS_MAX_COOKIELEN	192	/* see nts_cookie.c */
 #define NTS_MAX_COOKIES		8	/* RFC 4.1.6 */
@@ -140,7 +142,7 @@ bool nts_load_ciphers(SSL_CTX *ctx);
 bool nts_load_versions(SSL_CTX *ctx);
 
 int nts_get_key_length(int aead);
-bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen);
+bool nts_make_keys(SSL *ssl, int aead, uint8_t *c2s, uint8_t *s2c, int keylen);
 
 int nts_make_cookie(uint8_t *cookie,
   uint16_t aead,

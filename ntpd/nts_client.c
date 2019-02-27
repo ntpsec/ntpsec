@@ -57,7 +57,7 @@ bool nts_client_init(void) {
   client_ctx = SSL_CTX_new(TLSv1_2_client_method());
 #endif
   if (NULL == client_ctx) {
-    // ?? Happens on NetBSD - says no ciphers
+    /* Happens if no ciphers */
     msyslog(LOG_INFO, "NTSs: NULL client_ctx");
     nts_log_ssl_error();
     return false;
@@ -72,6 +72,7 @@ bool nts_client_init(void) {
 #endif
 
   SSL_CTX_set_session_cache_mode(client_ctx, SSL_SESS_CACHE_OFF);
+  SSL_CTX_set_timeout(client_ctx, NTS_KE_TIMEOUT);
 
   ok &= nts_load_versions(client_ctx);
   ok &= nts_load_ciphers(client_ctx);
@@ -79,13 +80,7 @@ bool nts_client_init(void) {
 
   if (!ok) {
     msyslog(LOG_ERR, "NTSc: Troubles setting up client SSL CTX");
-    if (1) {
-      msyslog(LOG_ERR, "NTSc: Maybe should bail.");   // FIXME
-      return true;
-    }
-    SSL_CTX_free(client_ctx);
-    client_ctx = NULL;
-    return false;
+    exit(1);
   };
 
   return true;
@@ -112,7 +107,6 @@ bool nts_probe(struct peer * peer) {
   ssl = SSL_new(client_ctx);
   SSL_set_fd(ssl, server);
 
-  // SSL_set_timeout(SSL_get_session(ssl), 2);  // FIXME
   if (1 != SSL_connect(ssl)) {
     msyslog(LOG_INFO, "NTSc: SSL_connect failed");
     nts_log_ssl_error();
@@ -144,6 +138,7 @@ bool nts_probe(struct peer * peer) {
   if (0 == peer->nts_state.keylen)
     goto bail;		/* unknown AEAD algorithm */
   nts_make_keys(ssl,
+    peer->nts_state.aead,
     peer->nts_state.c2s,
     peer->nts_state.s2c,
     peer->nts_state.keylen);
@@ -257,7 +252,9 @@ bool check_certificate(struct peer* peer, SSL *ssl) {
 
   if (NULL == cert) {
     msyslog(LOG_INFO, "NTSc: No certificate");
-    return false;
+    if (!(FLAG_NTS_NOVAL & peer->cfg.flags))
+      return false;
+    return true;
   } else {
     X509_NAME *certname;
     char name[200];
@@ -281,8 +278,7 @@ bool check_certificate(struct peer* peer, SSL *ssl) {
   return true;
 }
 
-// FIXME - context shouldn't be magic
-bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
+bool nts_make_keys(SSL *ssl, int aead, uint8_t *c2s, uint8_t *s2c, int keylen) {
   // char *label = "EXPORTER-network-time-security/1";
   // Subject: [Ntp] [NTS4NTP] info for NTS developers
   // From: Martin Langer <mart.langer@ostfalia.de>
@@ -291,6 +287,8 @@ bool nts_make_keys(SSL *ssl, uint8_t *c2s, uint8_t *s2c, int keylen) {
   // bug in OpenSSL 1.1.1a
   const char *label = "EXPORTER-nts/1";
   unsigned char context[5] = {0x00, 0x00, 0x00, 0x0f, 0x00};
+  context[2] = (aead >> 8) & 0xFF;
+  context[3] = aead & 0xFF;
   if (1 != SSL_export_keying_material(ssl, c2s, keylen,
         label, strlen(label),
         context, 5, 1)) {
