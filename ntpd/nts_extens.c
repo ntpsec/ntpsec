@@ -42,10 +42,10 @@ uint64_t nts_ke_probes = 0;
 uint64_t nts_ke_probes_bad = 0;
 
 enum NtpExtFieldType {
-   Unique_Identifier = 10,
-   NTS_Cookie = 11,
-   NTS_Cookie_Placeholder = 12,
-   NTS_AEEF = 13 /* Authenticated and Encrypted Extension Fields */
+   Unique_Identifier = 0x104,
+   NTS_Cookie = 0x204,
+   NTS_Cookie_Placeholder = 0x304,
+   NTS_AEEF = 0x404 /* Authenticated and Encrypted Extension Fields */
 };
 
 AES_SIV_CTX* wire_ctx = NULL;  /* need one per thread */
