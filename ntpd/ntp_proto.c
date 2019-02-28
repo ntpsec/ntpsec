@@ -715,13 +715,13 @@ receive(
 		if (NULL == peer) {
 		    stat_count.sys_declined++;
 		    break;
-		}	
+		}
 		if (rbufp->extens_present
                      && !extens_client_recv(peer,
                           rbufp->recv_buffer, rbufp->recv_length)) {
 		    stat_count.sys_declined++;
 		    break;
-		}	
+		}
 		handle_procpkt(rbufp, peer);
 		stat_count.sys_processed++;
 		peer->processed++;
