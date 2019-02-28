@@ -87,6 +87,7 @@ bool nts_client_init(void) {
 }
 
 bool nts_probe(struct peer * peer) {
+  struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
   SSL     *ssl;
   int      server = 0;
 
@@ -99,6 +100,8 @@ bool nts_probe(struct peer * peer) {
   server = open_TCP_socket(peer->hostname);
   if (-1 == server)
     return false;
+
+  setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
   // FIXME
   // Not much error checking yet.

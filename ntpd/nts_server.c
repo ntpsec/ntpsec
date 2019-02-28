@@ -80,7 +80,6 @@ bool nts_server_init(void) {
     }
 
     SSL_CTX_set_session_cache_mode(server_ctx, SSL_SESS_CACHE_OFF);
-    SSL_CTX_set_timeout(server_ctx, NTS_KE_TIMEOUT);
 
     ok &= nts_load_versions(server_ctx);
     ok &= nts_load_ciphers(server_ctx);
@@ -128,6 +127,7 @@ bool nts_server_init2(void) {
 }
 
 void* nts_ke_listener(void* arg) {
+    struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
     int sock = *(int*)arg;
 
     while(1) {
@@ -145,7 +145,8 @@ void* nts_ke_listener(void* arg) {
         }
 	nts_ke_serves++;
         msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s",
-            socktoa((sockaddr_u *)&addr));
+            sockporttoa((sockaddr_u *)&addr));
+	setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
         /* This could/should go in a new thread. */  // FIXME
         ssl = SSL_new(server_ctx);
@@ -157,9 +158,7 @@ void* nts_ke_listener(void* arg) {
             close(client);
             continue;
         }
-        msyslog(LOG_INFO, "NTSs: SSL accept-ed from %s",
-            socktoa((sockaddr_u *)&addr));
-        msyslog(LOG_INFO, "NTSs: Using TLS version %s, cipher %s with %d secret bits",
+        msyslog(LOG_INFO, "NTSs: Using %s,  %s (%d)",
             SSL_get_version(ssl),
             SSL_get_cipher_name(ssl),
             SSL_get_cipher_bits(ssl, NULL));
@@ -185,7 +184,7 @@ void nts_ke_request(SSL *ssl) {
 
     bytes_read = SSL_read(ssl, buff, sizeof(buff));
     if (0 >= bytes_read) {
-        msyslog(LOG_INFO, "NTSs: SSL_read error");
+        msyslog(LOG_INFO, "NTSs: SSL_read error: %m");
         nts_log_ssl_error();
         return;
     }
@@ -214,7 +213,7 @@ void nts_ke_request(SSL *ssl) {
 
     bytes_written = SSL_write(ssl, buff, used);
     if (bytes_written != used) {
-        msyslog(LOG_INFO, "NTSs: SSL_write error");
+        msyslog(LOG_INFO, "NTSs: SSL_write error: %m");
         nts_log_ssl_error();
         return;
     }
