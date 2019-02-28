@@ -447,13 +447,7 @@ void nts_init(void);   /* Before sandbox() */
 void nts_init2(void);  /* After sandbox() */
 bool nts_probe(struct peer *peer);
 bool nts_check(struct peer *peer);
-int nts_client_ke_request(struct ntscfg_t *);
-int nts_server_ke_verify(struct ntscfg_t *);
-int nts_client_ke_verify(struct ntscfg_t *, struct ntsclient_t *);
+
 int nts_daily(struct ntscfg_t *);
-int nts_validate(const struct ntscfg_t *, struct ntsclient_t *,
-		 struct parsed_pkt *);
-int nts_decorate(const struct ntscfg_t *, struct ntsclient_t *,
-		 uint8_t *, size_t);
 
 #endif	/* GUARD_NTPD_H */
