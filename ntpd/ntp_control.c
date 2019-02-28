@@ -358,8 +358,12 @@ static const struct ctl_var sys_var[] = {
 	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
 #define CS_nts_ke_serves	112
 	{ CS_nts_ke_serves,	RO, "nts_ke_serves" },
-#define CS_nts_ke_probes	113
+#define CS_nts_ke_serves_bad	113
+	{ CS_nts_ke_serves_bad,	RO, "nts_ke_serves_bad" },
+#define CS_nts_ke_probes	114
 	{ CS_nts_ke_probes,	RO, "nts_ke_probes" },
+#define CS_nts_ke_probes_bad	115
+	{ CS_nts_ke_probes_bad,	RO, "nts_ke_probes_bad" },
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
 };
@@ -1971,8 +1975,16 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, nts_ke_serves);
 		break;
 
+	case CS_nts_ke_serves_bad:
+		ctl_putuint(sys_var[varid].text, nts_ke_serves_bad);
+		break;
+
 	case CS_nts_ke_probes:
 		ctl_putuint(sys_var[varid].text, nts_ke_probes);
+		break;
+
+	case CS_nts_ke_probes_bad:
+		ctl_putuint(sys_var[varid].text, nts_ke_probes_bad);
 		break;
 
         default:

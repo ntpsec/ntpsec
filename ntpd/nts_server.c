@@ -29,7 +29,7 @@ int nts_ke_port = 123;
 static bool nts_load_certificate(SSL_CTX *ctx);
 static int create_listener(int port, int family);
 static void* nts_ke_listener(void*);
-static void nts_ke_request(SSL *ssl);
+static bool nts_ke_request(SSL *ssl);
 static int nts_translate_version(const char *arg);
 bool nts_server_init2(void);
 
@@ -148,7 +148,7 @@ void* nts_ke_listener(void* arg) {
             sockporttoa((sockaddr_u *)&addr));
 	setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
-        /* This could/should go in a new thread. */  // FIXME
+        /* For high volume servers, this should go in a new thread. */
         ssl = SSL_new(server_ctx);
         SSL_set_fd(ssl, client);
 
@@ -156,6 +156,7 @@ void* nts_ke_listener(void* arg) {
             msyslog(LOG_ERR, "NTSs: SSL accept failed");
             nts_log_ssl_error();
             close(client);
+	    nts_ke_serves_bad++;
             continue;
         }
         msyslog(LOG_INFO, "NTSs: Using %s,  %s (%d)",
@@ -164,7 +165,8 @@ void* nts_ke_listener(void* arg) {
             SSL_get_cipher_bits(ssl, NULL));
 
 
-        nts_ke_request(ssl);
+        if (!nts_ke_request(ssl))
+	    nts_ke_serves_bad++;
 
         SSL_shutdown(ssl);
         SSL_free(ssl);
@@ -173,7 +175,7 @@ void* nts_ke_listener(void* arg) {
 return NULL;
 }
 
-void nts_ke_request(SSL *ssl) {
+bool nts_ke_request(SSL *ssl) {
     uint8_t buff[1024];  /* RFC 4. */
     int bytes_read, bytes_written;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
@@ -186,7 +188,7 @@ void nts_ke_request(SSL *ssl) {
     if (0 >= bytes_read) {
         msyslog(LOG_INFO, "NTSs: SSL_read error: %m");
         nts_log_ssl_error();
-        return;
+        return false;
     }
 
     // FIXME Ignore request for now
@@ -215,12 +217,12 @@ void nts_ke_request(SSL *ssl) {
     if (bytes_written != used) {
         msyslog(LOG_INFO, "NTSs: SSL_write error: %m");
         nts_log_ssl_error();
-        return;
+        return false;
     }
 
     msyslog(LOG_INFO, "NTSs: Returned %d bytes", bytes_written);
     
-    return;
+    return true;
 }
 
 int create_listener(int port, int family) {

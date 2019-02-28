@@ -98,8 +98,10 @@ bool nts_probe(struct peer * peer) {
   addrOK = false;
 
   server = open_TCP_socket(peer->hostname);
-  if (-1 == server)
+  if (-1 == server) {
+    nts_ke_probes_bad++;
     return false;
+  }
 
   setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
@@ -149,6 +151,8 @@ bool nts_probe(struct peer * peer) {
   addrOK = true;
 
 bail:
+  if (!addrOK)
+    nts_ke_probes_bad++;
   SSL_shutdown(ssl);
   SSL_free(ssl);
   close(server);
