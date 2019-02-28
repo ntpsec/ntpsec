@@ -336,19 +336,21 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   transferred = SSL_write(ssl, buff, used);
   if (used != transferred) {
     msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %m", used, transferred);
+    nts_log_ssl_error();
     return false;
   }
   return true;
 }
 
 bool nts_client_process_response(struct peer* peer, SSL *ssl) {
-  uint8_t  buff[2000];
+  uint8_t  buff[2048];  /* RFC 4. says SHOULD be 65K */
   int transferred, idx;
   struct BufCtl_t buf;
 
   transferred = SSL_read(ssl, buff, sizeof(buff));
   if (0 > transferred) {
     msyslog(LOG_ERR, "NTSc: read failed: %d, %m", transferred);
+    nts_log_ssl_error();
     return false;
   }
   msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);

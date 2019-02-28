@@ -175,7 +175,7 @@ return NULL;
 }
 
 void nts_ke_request(SSL *ssl) {
-    uint8_t buff[1000];
+    uint8_t buff[1024];  /* RFC 4. */
     int bytes_read, bytes_written;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
     uint8_t cookie[NTS_MAX_COOKIELEN];
@@ -186,6 +186,7 @@ void nts_ke_request(SSL *ssl) {
     bytes_read = SSL_read(ssl, buff, sizeof(buff));
     if (0 >= bytes_read) {
         msyslog(LOG_INFO, "NTSs: SSL_read error");
+        nts_log_ssl_error();
         return;
     }
 
@@ -214,6 +215,7 @@ void nts_ke_request(SSL *ssl) {
     bytes_written = SSL_write(ssl, buff, used);
     if (bytes_written != used) {
         msyslog(LOG_INFO, "NTSs: SSL_write error");
+        nts_log_ssl_error();
         return;
     }
 
