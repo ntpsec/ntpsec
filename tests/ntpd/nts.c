@@ -11,14 +11,14 @@ TEST_SETUP(nts) {}
 
 TEST_TEAR_DOWN(nts) {}
 
-TEST(nts, nts_append_record_null) {
+TEST(nts, ke_append_record_null) {
   // Setup
   uint8_t buf[128];
   BufCtl cursor;
   cursor.next = buf;
   cursor.left = 128;
   // Run test
-  nts_append_record_null(&cursor, 0xFA7E);
+  ke_append_record_null(&cursor, 0xFA7E);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[0], 0xFA);
   TEST_ASSERT_EQUAL_UINT8(buf[1], 0x7E);
@@ -28,7 +28,7 @@ TEST(nts, nts_append_record_null) {
   TEST_ASSERT_EQUAL_INT(cursor.left, 124);
 }
 
-TEST(nts, nts_append_record_uint16) {
+TEST(nts, ke_append_record_uint16) {
   // Test change
   // Setup
   uint8_t buf[16] = {0, 0, 0, 0, 0, 0, 0, 0,
@@ -37,7 +37,7 @@ TEST(nts, nts_append_record_uint16) {
   cursor.next = buf;
   cursor.left = 16;
   // Run test
-  nts_append_record_uint16(&cursor, 0xCAFE, 0x1234);
+  ke_append_record_uint16(&cursor, 0xCAFE, 0x1234);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[0], 0xCA);
   TEST_ASSERT_EQUAL_UINT8(buf[1], 0xFE);
@@ -49,14 +49,14 @@ TEST(nts, nts_append_record_uint16) {
   // Setup
   cursor.left = 0;
   // Run test
-  nts_append_record_uint16(&cursor, 0xCAFE, 0x1234);
+  ke_append_record_uint16(&cursor, 0xCAFE, 0x1234);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[4], 0);
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[4]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 0);
 }
 
-TEST(nts, nts_append_record_bytes) {
+TEST(nts, ke_append_record_bytes) {
   // Test change
   // Setup
   uint8_t buf[16] = {0, 0, 0, 0, 0, 0, 0, 0,
@@ -66,7 +66,7 @@ TEST(nts, nts_append_record_bytes) {
   cursor.left = 16;
   uint8_t data[6] = {0, 1, 2, 3, 4, 5};
   // Run test
-  nts_append_record_bytes(&cursor, 0xCAFE, data, 6);
+  ke_append_record_bytes(&cursor, 0xCAFE, data, 6);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[0], 0xCA);
   TEST_ASSERT_EQUAL_UINT8(buf[1], 0xFE);
@@ -82,14 +82,14 @@ TEST(nts, nts_append_record_bytes) {
   // Setup
   cursor.left = 0;
   // Run test
-  nts_append_record_bytes(&cursor, 0xCAFE, data, 6);
+  ke_append_record_bytes(&cursor, 0xCAFE, data, 6);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[8], 0);
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[8]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 0);
 }
 
-TEST(nts, nts_append_header) {
+TEST(nts, append_header) {
   // Test change
   // Setup
   uint8_t buf[16];
@@ -97,7 +97,7 @@ TEST(nts, nts_append_header) {
   cursor.next = buf;
   cursor.left = 16;
   // Run test
-  nts_append_header(&cursor, 0xFADE, 0x1234);
+  append_header(&cursor, 0xFADE, 0x1234);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[0], 0xFA);
   TEST_ASSERT_EQUAL_UINT8(buf[1], 0xDE);
@@ -110,14 +110,14 @@ TEST(nts, nts_append_header) {
   // Setup
   cursor.left = 0;
   // Run test
-  nts_append_header(&cursor, 0xFEED, 0xABCD);
+  append_header(&cursor, 0xFEED, 0xABCD);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[4], 0);
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[4]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 0);
 }
 
-TEST(nts, nts_append_uint16) {
+TEST(nts, append_uint16) {
   // Test change
   // Setup
   uint8_t buf[16] = {0, 0, 0, 0, 0, 0, 0, 0,
@@ -126,7 +126,7 @@ TEST(nts, nts_append_uint16) {
   cursor.next = buf;
   cursor.left = 16;
   // Run test
-  nts_append_uint16(&cursor, 0x1234);
+  append_uint16(&cursor, 0x1234);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[0], 0x12);
   TEST_ASSERT_EQUAL_UINT8(buf[1], 0x34);
@@ -136,14 +136,14 @@ TEST(nts, nts_append_uint16) {
   // Setup
   cursor.left = 0;
   // Run test
-  nts_append_uint16(&cursor, 0x5678);
+  append_uint16(&cursor, 0x5678);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[2], 0);
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[2]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 0);
 }
 
-TEST(nts, nts_append_bytes) {
+TEST(nts, append_bytes) {
   // Test change
   // Setup
   uint8_t buf[16] = {0, 0, 0, 0, 0, 0, 0, 0,
@@ -153,7 +153,7 @@ TEST(nts, nts_append_bytes) {
   cursor.left = 16;
   uint8_t data[6] = {0, 1, 2, 3, 4, 5};
   // Run test
-  nts_append_bytes(&cursor, data, 6);
+  append_bytes(&cursor, data, 6);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[0], 0);
   TEST_ASSERT_EQUAL_UINT8(buf[1], 1);
@@ -167,14 +167,14 @@ TEST(nts, nts_append_bytes) {
   // Setup
   cursor.left = 0;
   // Run test
-  nts_append_bytes(&cursor, data, 6);
+  append_bytes(&cursor, data, 6);
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[6], 0);
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[6]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 0);
 }
 
-TEST(nts, nts_next_record) {
+TEST(nts, ke_next_record) {
   // Setup
   uint8_t buf[16] = {0xFA, 0xCE, 0, 4, 0xFF, 0xEE, 0xDD, 0xCC,
 					 0, 0, 0, 0, 0, 0, 0, 0};
@@ -184,7 +184,7 @@ TEST(nts, nts_next_record) {
   int length;
   uint16_t type;
   // Run test
-  type = nts_next_record(&cursor, &length);
+  type = ke_next_record(&cursor, &length);
   // Check
   TEST_ASSERT_EQUAL_INT(length, 4);
   TEST_ASSERT_EQUAL_INT(type, 0xFACE);
@@ -192,7 +192,7 @@ TEST(nts, nts_next_record) {
   TEST_ASSERT_EQUAL_INT(cursor.left, 12);
 }
 
-TEST(nts, nts_next_uint16) {
+TEST(nts, next_uint16) {
   // Setup
   uint8_t buf[16] = {0xFA, 0xCE, 0, 4, 0xFF, 0xEE, 0xDD, 0xCC,
 					 0, 0, 0, 0, 0, 0, 0, 0};
@@ -201,14 +201,14 @@ TEST(nts, nts_next_uint16) {
   cursor.left = 16;
   uint16_t data;
   // Run test
-  data = nts_next_uint16(&cursor);
+  data = next_uint16(&cursor);
   // Check
   TEST_ASSERT_EQUAL_UINT8(data, 0xFACE);
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[2]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 14);
 }
 
-TEST(nts, nts_next_bytes) {
+TEST(nts, next_bytes) {
   // Setup
   uint8_t buf[16] = {0xFA, 0xCE, 0, 4, 0xFF, 0xEE, 0xDD, 0xCC,
 					 0, 0, 0, 0, 0, 0, 0, 0};
@@ -218,7 +218,7 @@ TEST(nts, nts_next_bytes) {
   uint8_t data[8];
   uint16_t length;
   // Run test
-  length = nts_next_bytes(&cursor, data, 8);
+  length = next_bytes(&cursor, data, 8);
   // Check
   TEST_ASSERT_EQUAL_INT(length, 8);
   TEST_ASSERT_EQUAL_UINT8(data[0], 0xFA);
@@ -234,13 +234,13 @@ TEST(nts, nts_next_bytes) {
 }
 
 TEST_GROUP_RUNNER(nts) {
-  RUN_TEST_CASE(nts, nts_append_record_null);
-  RUN_TEST_CASE(nts, nts_append_record_uint16);
-  RUN_TEST_CASE(nts, nts_append_record_bytes);
-  RUN_TEST_CASE(nts, nts_append_header);
-  RUN_TEST_CASE(nts, nts_append_uint16);
-  RUN_TEST_CASE(nts, nts_append_bytes);
-  RUN_TEST_CASE(nts, nts_next_record);
-  RUN_TEST_CASE(nts, nts_next_uint16);
-  RUN_TEST_CASE(nts, nts_next_bytes);
+  RUN_TEST_CASE(nts, ke_append_record_null);
+  RUN_TEST_CASE(nts, ke_append_record_uint16);
+  RUN_TEST_CASE(nts, ke_append_record_bytes);
+  RUN_TEST_CASE(nts, append_header);
+  RUN_TEST_CASE(nts, append_uint16);
+  RUN_TEST_CASE(nts, append_bytes);
+  RUN_TEST_CASE(nts, ke_next_record);
+  RUN_TEST_CASE(nts, next_uint16);
+  RUN_TEST_CASE(nts, next_bytes);
 }

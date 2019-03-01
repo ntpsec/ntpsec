@@ -325,14 +325,14 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   buf.left = sizeof(buff);
 
   /* 4.1.2 Next Protocol, 0 for NTP */
-  nts_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
+  ke_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
 
   /* 4.1.5 AEAD Algorithm List
-   * AEAD_AES_SIV_CMAC_256 is the only one for now */
-  nts_append_record_uint16(&buf, nts_algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
+   * AEAD_AES_SIV_CMAC_256 is the only one for now */  // FIXME
+  ke_append_record_uint16(&buf, nts_algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
 
   /* 4.1.1: End, Critical */
-  nts_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
+  ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
 
   used = sizeof(buff)-buf.left;
   if (used >= (int)(sizeof(buff)-10)) {
@@ -375,7 +375,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
     bool critical = false;
     int length;
 
-    type = nts_next_record(&buf, &length);
+    type = ke_next_record(&buf, &length);
     if (NTS_CRITICAL & type) {
       critical = true;
       type &= ~NTS_CRITICAL;
@@ -384,13 +384,13 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
       msyslog(LOG_ERR, "NTSc: Record: T=%d, L=%d, C=%d", type, length, critical);
     switch (type) {
       case nts_error:
-        data = nts_next_uint16(&buf);
+        data = next_uint16(&buf);
         if (sizeof(data) != length)
           msyslog(LOG_ERR, "NTSc: wrong length on error: %d", length);
         msyslog(LOG_ERR, "NTSc: error: %d", data);
         return false;
       case nts_next_protocol_negotiation:
-        data = nts_next_uint16(&buf);
+        data = next_uint16(&buf);
         if ((sizeof(data) != length) || (data != 0)) {
           msyslog(LOG_ERR, "NTSc: NPN-Wrong length or bad data: %d, %d",
               length, data);
@@ -398,7 +398,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         }
         break;
       case nts_algorithm_negotiation:
-        data = nts_next_uint16(&buf);
+        data = next_uint16(&buf);
         if ((sizeof(data) != length) || (data != AEAD_AES_SIV_CMAC_256)) {
           msyslog(LOG_ERR, "NTSc: AN-Wrong length or bad data: %d, %d",
               length, data);
@@ -423,7 +423,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
           msyslog(LOG_ERR, "NTSc: Extra cookie ignored.");
           break;
         }
-        nts_next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
+        next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
         peer->nts_state.writeIdx++;
         peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
         peer->nts_state.count++;

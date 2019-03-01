@@ -16,6 +16,7 @@
 #define NTS_UID_LENGTH		32	/* RFC 5.3 */
 #define NTS_UID_MAX_LENGTH	64
 
+
 /* Client side configuration data for an NTS association */
 /* part of peer struct */
 struct ntscfg_t {
@@ -24,14 +25,6 @@ struct ntscfg_t {
     char *cert;		/* if NULL, use the site default (normal case) */
     uint32_t expire;
 };
-
-/* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297 */
-#define IANA_AEAD_AES_SIV_CMAC_256 15
-#define IANA_AEAD_AES_SIV_CMAC_384 16
-#define IANA_AEAD_AES_SIV_CMAC_512 17
-#define AEAD_AES_SIV_CMAC_256_KEYLEN 32
-#define AEAD_AES_SIV_CMAC_384_KEYLEN 48
-#define AEAD_AES_SIV_CMAC_512_KEYLEN 64
 
 /* Client-side state per connection to server */
 struct ntsclient_t {
@@ -71,6 +64,19 @@ struct ntsconfig_t {
     const char *key;		/* server private key */
     const char *ca;		/* root cert dir/file */
 };
+
+
+/* Only valid for AEAD_AES_SIV_CMAC_nnn
+ * but that's all we use. */
+#define AEAD_CMAC_LNG 16
+
+/* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297 */
+#define IANA_AEAD_AES_SIV_CMAC_256 15
+#define IANA_AEAD_AES_SIV_CMAC_384 16
+#define IANA_AEAD_AES_SIV_CMAC_512 17
+#define AEAD_AES_SIV_CMAC_256_KEYLEN 32
+#define AEAD_AES_SIV_CMAC_384_KEYLEN 48
+#define AEAD_AES_SIV_CMAC_512_KEYLEN 64
 
 /* NTS protocol constants */
 
@@ -155,40 +161,45 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 
 
 /* buffer packing/unpacking routines.
- * These aren't NTS specific, but I'll put them here for now.
- * They work with NTP extensions and NTS-KE data streams.
- *   names should probably be changed too
+ * NB: The length field in NTP extensions includes the header
+ * while the length field in NTS-KE data streams does not.
+ *
+ * These routines do not handle padding.  NTS-KE has no padding.
  * NTP extensions are padded to word (4 byte) boundaries.
- * NTS-KE has no padding.
- * Maybe versions with padding should have names starting with ntp_?
- * and use extn rather than record
+ *
  * Note that data on the wire is big endian.
  * buffer is wire format, not host format.
- * Hal, 2019-Feb-09
  */
 
 
 /* working finger into a buffer - updated by append/unpack routines */
 struct BufCtl_t {
   uint8_t *next;  /* pointer to next data/space */
-  int left;       /* data left or  space available */
+  int left;       /* data left or space available */
 };
 typedef struct BufCtl_t BufCtl;
 
-/* maybe should return bool to indicate overflow */
-/* nts_append_record_foo makes whole record with one foo */
-/* ntp_append_foo appends foo to existing partial record */
-void nts_append_record_null(BufCtl* buf, uint16_t type);
-void nts_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data);
-void nts_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data, int length);
+/* xxx_append_record_foo makes whole record with one foo */
+/* append_foo appends foo to existing partial record */
+void ke_append_record_null(BufCtl* buf, uint16_t type);
+void ke_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data);
+void ke_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data, int length);
 
-void nts_append_header(BufCtl* buf, uint16_t type, uint16_t length);
-void nts_append_uint16(BufCtl* buf, uint16_t data);
-void nts_append_bytes(BufCtl* buf, uint8_t *data, int length);
+void ex_append_record_null(BufCtl* buf, uint16_t type);
+void ex_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data);
+void ex_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data, int length);
 
-uint16_t nts_next_record(BufCtl* buf, int *length);
-uint16_t nts_next_uint16(BufCtl* buf);
-uint16_t nts_next_bytes(BufCtl* buf, uint8_t *data, int length);
+void ex_append_header(BufCtl* buf, uint16_t type, uint16_t length);
+void append_header(BufCtl* buf, uint16_t type, uint16_t length);
+void append_uint16(BufCtl* buf, uint16_t data);
+void append_bytes(BufCtl* buf, uint8_t *data, int length);
+
+uint16_t ke_next_record(BufCtl* buf, int *length);
+uint16_t ex_next_record(BufCtl* buf, int *length);  /* body length */
+uint16_t next_uint16(BufCtl* buf);
+uint16_t next_bytes(BufCtl* buf, uint8_t *data, int length);
+
+
 
 /* NTS-related system variables visible via ntpq -c nts */
 extern uint64_t nts_client_send;

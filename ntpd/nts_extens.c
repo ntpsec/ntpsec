@@ -73,12 +73,12 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 
   /* UID */
   RAND_bytes(peer->nts_state.UID, NTS_UID_LENGTH);
-  nts_append_record_bytes(&buf, Unique_Identifier,
+  ex_append_record_bytes(&buf, Unique_Identifier,
       peer->nts_state.UID, NTS_UID_LENGTH);
 
   /* cookie */
   idx = peer->nts_state.readIdx++;
-  nts_append_record_bytes(&buf, NTS_Cookie,
+  ex_append_record_bytes(&buf, NTS_Cookie,
       peer->nts_state.cookies[idx], peer->nts_state.cookielen);
   peer->nts_state.readIdx = peer->nts_state.readIdx % NTS_MAX_COOKIES;
   peer->nts_state.count--;
@@ -86,7 +86,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 
   // Need more cookies?
   for (int i=peer->nts_state.count+1; i<NTS_MAX_COOKIES; i++) {
-    nts_append_header(&buf, NTS_Cookie_Placeholder, peer->nts_state.cookielen);
+    ex_append_header(&buf, NTS_Cookie_Placeholder, peer->nts_state.cookielen);
     memset(buf.next, 0, peer->nts_state.cookielen);
     buf.next += peer->nts_state.cookielen;
     buf.left -= peer->nts_state.cookielen;
@@ -94,9 +94,9 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 
   /* AEAD */
   adlength = buf.next-packet;
-  nts_append_header(&buf, NTS_AEEF, NTP_EX_U16_LNG*2+NONCE_LENGTH+CMAC_LENGTH);
-  nts_append_uint16(&buf, NONCE_LENGTH);
-  nts_append_uint16(&buf, CMAC_LENGTH);
+  ex_append_header(&buf, NTS_AEEF, NTP_EX_U16_LNG*2+NONCE_LENGTH+CMAC_LENGTH);
+  append_uint16(&buf, NONCE_LENGTH);
+  append_uint16(&buf, CMAC_LENGTH);
   nonce = buf.next;
   RAND_bytes(nonce, NONCE_LENGTH);
   buf.next += NONCE_LENGTH;
@@ -149,7 +149,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
     uint8_t *nonce, *cmac;
     bool ok;
 
-    type = nts_next_record(&buf, &length);
+    type = ex_next_record(&buf, &length);
     if (length&3 || length > buf.left || length < 0)
       return false;
     if (NTS_CRITICAL & type) {
@@ -161,7 +161,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	if (length > NTS_UID_MAX_LENGTH)
 	  return false;
         ntspacket->uidlen = length;
-        nts_next_bytes(&buf, ntspacket->UID, length);
+        next_bytes(&buf, ntspacket->UID, length);
 	break;
       case NTS_Cookie:
         if (sawcookie)
@@ -191,8 +191,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
         /* Additional data is up to this exten. */
 	/* backup over header */
         adlength = buf.next-NTP_EX_HDR_LNG-pkt;
-        noncelen = nts_next_uint16(&buf);
-        cmaclen = nts_next_uint16(&buf);
+        noncelen = next_uint16(&buf);
+        cmaclen = next_uint16(&buf);
 	if (noncelen & 3)
           return false;			/* would require padding */
 	if (CMAC_LENGTH != cmaclen)
@@ -258,7 +258,7 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
 
   /* UID */
   if (0 < ntspacket->uidlen)
-    nts_append_record_bytes(&buf, Unique_Identifier,
+    ex_append_record_bytes(&buf, Unique_Identifier,
         ntspacket->UID, ntspacket->uidlen);
 
   adlength = buf.next-packet;		/* up to here is Additional Data */
@@ -267,9 +267,9 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
   plainleng = ntspacket->needed*(NTP_EX_HDR_LNG+cookielen);
   /* length of whole AEEF header */
   aeadlen = NTP_EX_U16_LNG*2+NONCE_LENGTH+CMAC_LENGTH + plainleng;
-  nts_append_header(&buf, NTS_AEEF, aeadlen);
-  nts_append_uint16(&buf, NONCE_LENGTH);
-  nts_append_uint16(&buf, plainleng);
+  ex_append_header(&buf, NTS_AEEF, aeadlen);
+  append_uint16(&buf, NONCE_LENGTH);
+  append_uint16(&buf, plainleng);
 
   nonce = buf.next;
   RAND_bytes(nonce, NONCE_LENGTH);
@@ -282,12 +282,12 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
   buf.left -= CMAC_LENGTH;
   plaintext = buf.next;		/* encrypt in place */
 
-  nts_append_record_bytes(&buf, NTS_Cookie,
+  ex_append_record_bytes(&buf, NTS_Cookie,
       cookie, cookielen);
   for (int i=1; i<ntspacket->needed; i++) {
     nts_make_cookie(cookie, ntspacket->aead,
         ntspacket->c2s, ntspacket->s2c, ntspacket->keylen);
-    nts_append_record_bytes(&buf, NTS_Cookie,
+    ex_append_record_bytes(&buf, NTS_Cookie,
         cookie, cookielen);
   }
 
@@ -338,7 +338,7 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
     size_t outlen;
     bool ok;
 
-    type = nts_next_record(&buf, &length);
+    type = ex_next_record(&buf, &length);
     if (length&3 || length > buf.left || length < 0)
       return false;
     if (NTS_CRITICAL & type) {
@@ -371,8 +371,8 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
         break;
       case NTS_AEEF:
         adlength = buf.next-NTP_EX_HDR_LNG-pkt;  /* backup over header */
-        noncelen = nts_next_uint16(&buf);
-        outlen = nts_next_uint16(&buf);
+        noncelen = next_uint16(&buf);
+        outlen = next_uint16(&buf);
         if (noncelen&3 || outlen&3)
           return false;                 /* else round up */
         nonce = buf.next;

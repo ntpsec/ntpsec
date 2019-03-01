@@ -200,17 +200,17 @@ bool nts_ke_request(SSL *ssl) {
     nts_make_keys(ssl, aead, c2s, s2c, keylen);
 
     /* 4.1.2 Next Protocol, 0 for NTP */
-    nts_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
+    ke_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
     /* 4.1.5 AEAD Algorithm List */
-    nts_append_record_uint16(&buf, nts_algorithm_negotiation, aead);
+    ke_append_record_uint16(&buf, nts_algorithm_negotiation, aead);
 
     for (int i=0; i<NTS_MAX_COOKIES; i++) {
       cookielen = nts_make_cookie(cookie, aead, c2s, s2c, keylen);
-      nts_append_record_bytes(&buf, nts_new_cookie, cookie, cookielen);
+      ke_append_record_bytes(&buf, nts_new_cookie, cookie, cookielen);
     }
     
     /* 4.1.1: End, Critical */
-    nts_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
+    ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
     used = sizeof(buff)-buf.left;
 
     bytes_written = SSL_write(ssl, buff, used);
