@@ -36,8 +36,11 @@ We retain, however, almost full compatibility and interoperation with
 NTP Classic.  The qualification "almost" is required mainly because we
 do not support the Autokey (RFC 5906) public-key encryption scheme. It
 had interoperability and exploitable vulnerability issues too severe
-to be patched.  We are participating in an IETF's Network Time
-Security effort to develop better security features.
+to be patched.  We have also dropped broadcast and anycast modes
+because they cannot be secured.
+
+A major new feature is that we implement IETF's Network Time Security
+standard for strong cryptographic authentication of time service.
 
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
@@ -104,6 +107,9 @@ surface and hardening code.  In toto, more than 74% of the NTP Classic
 codebase has been outright removed, with less than 5% new code added
 to the security-critical core.
 
+* Network Time Security is implemented. See our page on
+  link:standards.html[Standards Conformance]
+
 * NTPsec conforms to the
   https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/[NTP
   Client Data Minimization] draft RFC, which changes the client-side
@@ -116,7 +122,7 @@ to the security-critical core.
 * Autokey is not supported; that code has been
   removed, as it was chronically prone to security vulnerabilities.
 
-* peer mode has been removed.  The keyword peer in ntp.conf is now
+* Peer mode has been removed.  The keyword peer in ntp.conf is now
   just an alias for keyword server.
 
 * Broadcast- and multicast modes, which are impossible to
