@@ -21,7 +21,7 @@
  * Dependency on NTP packet structure removed by ESR.
  * This code now only knows about the length of an NTP packet header,
  * not its content. Note that the signing technique never handled anything
- * but unextended and MACless packet headers, so it can't be used with NTS. 
+ * but unextended and MACless packet headers, so it can't be used with NTS.
  */
 
 

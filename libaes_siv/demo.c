@@ -164,7 +164,7 @@ int main(int argc, char const* argv[])
     fprintf(stderr, "Invalid key length %zu bytes, must be one of 32, 48, or 64\n", key_len);
     goto fail;
   }
-  
+
   if(load_file(ad_file, &ad, &ad_len) < 0)
   {
     fprintf(stderr, "Could not load associated data file %s : %s\n", ad_file, strerror(errno));
@@ -245,7 +245,7 @@ int main(int argc, char const* argv[])
     perror("fwrite");
     goto fail;
   }
-  
+
   free(plaintext);
   free(key);
   free(ad);

@@ -116,7 +116,7 @@ int nts_make_cookie(uint8_t *cookie,
     return 0;		/* We aren't initialized yet. */
 
   // ASSERT(keylen<NTS_MAX_KEYLEN);
-  
+
   uint8_t * finger;
   uint32_t temp;	/* keep 4 byte alignment */
   size_t left;
@@ -211,7 +211,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   finger += NONCE_LENGTH;
 
   // require(AD_LENGTH==finger-cookie);
-  
+
   cipherlength = cookielen - AD_LENGTH;
   plainlength = NTS_MAX_COOKIELEN;
 

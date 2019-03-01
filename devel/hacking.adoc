@@ -399,7 +399,7 @@ All headers should be asymmetric Atx-style. Text wraps somewhere around
 column 72 (forget semantic writing) and unless otherwise noted refer to
 the January 2019 revision of the draft AsciiDoc Recommended
 link:https://asciidoctor.org/docs/asciidoc-recommended-practices/[Practices].
- 
+
 === Version number
 
 We use a variant of three-part Semantic Versioning, of the form X.Y.Z.

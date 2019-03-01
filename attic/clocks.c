@@ -153,7 +153,7 @@ void do_hist(int type, int fastest) {
   for (  ; i<HISTSIZE; i++) {
     toobig += hist[i];
   }
-  
+
   if (toobig) printf("%d samples were bigger than %d.\n",
                 toobig, miss*nsPerBucket+fastest);
 }
@@ -189,6 +189,6 @@ if (1) {
 }
 
 return 0;
-  
+
 }
 

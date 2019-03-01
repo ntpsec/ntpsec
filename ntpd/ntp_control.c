@@ -184,7 +184,7 @@ static const struct ctl_var sys_var[] = {
 #define	CS_MRU_MAXAGE		28
 	{ CS_MRU_MAXAGE,	RO, "mru_maxage" },
 #define	CS_MRU_MINAGE		29
-	{ CS_MRU_MINAGE,	RO, "mru_minage" },    
+	{ CS_MRU_MINAGE,	RO, "mru_minage" },
 #define	CS_MRU_MAXDEPTH		30
 	{ CS_MRU_MAXDEPTH,	RO, "mru_maxdepth" },
 #define	CS_MRU_MEM		31
@@ -416,7 +416,7 @@ static const struct ctl_var peer_var[] = {
         /* Placeholder. Reporting of "org" is disabled because
            leaking it creates a vulnerability */
 #define	CP_ORG			18
-        { CP_ORG,	RO, "org" },     
+        { CP_ORG,	RO, "org" },
 #define	CP_REC			19
 	{ CP_REC,	RO|DEF, "rec" },
 #define	CP_XMT			20
@@ -517,7 +517,7 @@ static const struct ctl_var clock_var[] = {
 #define	CC_VARLIST	13
 	{ CC_VARLIST,		RO, 	"clock_var_list"},
 #define	CC_MAXCODE	CC_VARLIST
-	{ 0,			EOV,	""  }	
+	{ 0,			EOV,	""  }
 };
 #endif
 

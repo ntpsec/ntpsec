@@ -629,7 +629,7 @@ Expansion to cover modes 6&7 should require an authentication token extension.
 
 More discussion of how to re-do Mode 6 has been moved to ntpv5.adoc.
 
-== Martin Langer's notes == 
+== Martin Langer's notes ==
 
 um... maybe the first hint... The current OpenSSL version doesn't
 work with NTS and TLS1.3. The TLS key exporter function fails

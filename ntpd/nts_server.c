@@ -208,7 +208,7 @@ bool nts_ke_request(SSL *ssl) {
       cookielen = nts_make_cookie(cookie, aead, c2s, s2c, keylen);
       ke_append_record_bytes(&buf, nts_new_cookie, cookie, cookielen);
     }
-    
+
     /* 4.1.1: End, Critical */
     ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
     used = sizeof(buff)-buf.left;
@@ -221,7 +221,7 @@ bool nts_ke_request(SSL *ssl) {
     }
 
     msyslog(LOG_INFO, "NTSs: Returned %d bytes", bytes_written);
-    
+
     return true;
 }
 

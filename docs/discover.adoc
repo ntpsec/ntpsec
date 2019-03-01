@@ -49,7 +49,7 @@ is 10, but it should be changed in typical configuration to some lower
 number, usually two greater than the +minclock+ option of the same
 command.
 
-Pool discovery uses a stratum filter to select just those servers with 
+Pool discovery uses a stratum filter to select just those servers with
 strata considered useful. This can avoid large numbers of clients
 ganging up on a small number of low-stratum servers and avoids servers
 below or above specified stratum levels. By default, servers of all

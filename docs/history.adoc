@@ -58,6 +58,6 @@ Unixes.
 A proposed specification for NTPv4 issued in 2010 as
 https://tools.ietf.org/rfc/rfc5905.txt[RFC 5905].  Despite some
 underspecification and technical difficulties (especially near
-Autokey, its attempt at public-key encryption for authentication) 
+Autokey, its attempt at public-key encryption for authentication)
 NTPv4 implementations were in general use by 2014.
 

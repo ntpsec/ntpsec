@@ -118,7 +118,7 @@ extern uint64_t ntp_random64 (void);
  * hash of the IPv6 address and collisions *have* been observed in the
  * wild
  *
- * Just to contemplate things further, the refid for a local clock source 
+ * Just to contemplate things further, the refid for a local clock source
  * (which doesn't have an IP address) is interpreted as a 4-digit string that
  * identifies the clock device class.
  *
