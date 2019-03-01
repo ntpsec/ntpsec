@@ -34,10 +34,9 @@ https://tools.ietf.org/rfc/rfc5297.txt[RFC 5297] describes the
 authenticated encryption used in Network Time Security
 key exchanges.
 
-Network Time Security does not yet have a final fully accepted RFC. The
-NTPsec implementation is based on the
-https://tools.ietf.org/html/draft-ietf-ntp-network-time-security-15[version
-15 draft].
+Network Time Security does not yet have a final fully accepted
+RFC. The NTPsec implementation is based on the
+draft-ietf-ntp-using-nts-for-ntp-17[version 17 draft].
 
 [[against5905]]
 == Divergences from RFC 5905
