@@ -43,6 +43,9 @@ And the MRU list in the bottom window:
 
 include::mrufmt.adoc[]
 
+The refid field is as described under "Event Messages and Status
+Words" in the NTP documentation on the Web.
+
 == Commands
 
 a:: Change peer display to apeers mode, showing association IDs.

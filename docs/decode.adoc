@@ -92,7 +92,7 @@ follows:
 | +4+   | +sync_uhf_radio+ | VHF/UHF radio/satellite (GPS, Galileo, etc.)
 | +5+   | +sync_local+     | local timecode (IRIG, LOCAL driver, etc.)
 | +6+   | +sync_ntp+       | NTP
-| +7+   | +sync_other+     | other (IEEE 1588, openntp, crony, etc.)
+| +7+   | +sync_other+     | other (IEEE 1588, openntp, chrony, etc.)
 | +8+   | +sync_wristwatch+| eyeball and wristwatch
 | +9+   | +sync_telephone+ | telephone modem (ACTS, PTB, etc.)
 |=============================================================================
@@ -145,7 +145,7 @@ Field is listed in the following table:
 [width="70%",cols=">10%,<30%,<60%",]
 |==============================================================
 | Code | Message   | Description
-| +08+ | +bcst+    | broadcast association
+| +08+ | +bcst+    | broadcast association (not implemented in NTPsec)
 | +10+ | +reach+   | host reachable
 | +20+ | +auth+    | authentication ok
 | +40+ | +authenb+ | authentication enabled
@@ -159,7 +159,7 @@ the following table gives the corresponding tally codes used in the
 [width="70%",cols=">10%,<25%,^10%,<55%",]
 |============================================================================
 | Code| Message         | T   | Description
-| +0+ | +sel_reject+    |     | discarded as not valid (TEST10-TEST13)
+| +0+ | +sel_reject+    |     | discarded as not valid (BOGON10-BOGON13)
 | +1+ | +sel_falsetick+ | +x+ | discarded by intersection algorithm
 | +2+ | +sel_excess+    | +.+ | discarded by table overflow (not used)
 | +3+ | +sel_outlier+   | +-+ | discarded by the cluster algorithm
@@ -250,25 +250,24 @@ The "Tag" field is the name the source code uses for the status bit.
 Not all bits are in use, but have been kept for backwards compatibility.
 
 [[kiss]]
-== Kiss Codes
+== Refid codes
 
-Kiss codes are used in kiss-o'-death (KoD) packets, billboard displays
-and log messages. They consist of a string of four zero-padded ASCII
+Refid codes are used in kiss-o'-death (KoD) packets, the reference
+identifier field in +ntpq+ and +ntpmon+ billboard displays and log
+messages. They consist of a string of four zero-padded ASCII
 characters. In practice they are informal and tend to change with time
-and implementation. Some of these codes can appear in the reference
-identifier field in +ntpq+ billboards. Following is the current list:
+and implementation.  Following is the current list:
 
 [width="50%",cols=">20%,<80%"]
 |==================================================================
 | Code   | Description
-| +ACST+ | manycast server
-| +AUTH+ | authentication error
-| +BCST+ | broadcast server
 | +DENY+ | access denied by server
 | +INIT+ | association initialized
 | +RATE+ | rate exceeded
 | +TIME+ | association timeout
 | +STEP+ | step time change
+| +DNS+  | DNS lookup in progress
+| +NTS+  | NTS key exchange in progress
 |==================================================================
 
 include::includes/footer.adoc[]

@@ -82,6 +82,8 @@ read interactive format commands from the standard input.
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
   their state; this is equivalent to the +peers+ interactive command.
+  The refid field is as described under "Event Messages and Status
+  Words" in the NTP documentation on the Web.
 +-k+ filename, +--keyfile+=filename::
   Specify a keyfile. ntpq will look in this file for the key specified
   with -a.

@@ -65,8 +65,10 @@ and somewhat incomplete relative to the code.
 
 In the table of KISS codes (Figure 13), only RATE still exists and is
 implemented in NTPsec; others proved unnecessary or (in the cases of
-DENY and RSTR) outright dangerous. INIT and STEP are no lonkrt KoD types
-but persist as peer statuses that may be reported by {ntpqman}/{ntpmon}.
+DENY and RSTR) outright dangerous. INIT and STEP are no longer KoD types
+but persist as peer statuses that may be reported by
+{ntpqman}/{ntpmon}.  NTPsec has additional codes DNS and NTS for
+preparatory phases in association setup.
 
 The continuing relevance of much of Appendix A is doubtful.
 
