@@ -45,6 +45,17 @@ except ImportError as e:
     sys.exit(1)
 
 
+class logfile_header_class(logging.handlers.TimedRotatingFileHandler):
+    'A class to modify the file logging handler.'
+    def doRollover(self):
+        'function to add header to new file on rotaion.'
+        if str is bytes:
+            super(logfile_header_class, self).doRollover()
+        else:
+            super().doRollover()
+        self.stream.write('# Time       Device     TDOP     nSat\n')
+
+
 def logging_setup():
     "Create logging object"
     logFormat = logging.Formatter('%(message)s')
@@ -54,8 +65,9 @@ def logging_setup():
     # Create file handler
     if args.logfile:
         # log to logfile
-        file = logging.handlers.TimedRotatingFileHandler(
+        file = logfile_header_class(
             args.logfile[0],
+            utc=True,
             when='midnight',
             interval=1)
     else:
