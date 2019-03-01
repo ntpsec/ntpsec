@@ -1,3 +1,4 @@
+:draft-nts: https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp
 = NTS support specification
 
 == Cisco's Statement of Work requirements
@@ -9,8 +10,7 @@ The NTS implementation shall:
 * Address RFC5705 Keying Material Exporting and AES_SIV (RFC5297) code
   support which may not be natively supported in OpenSSL.
 
-* Comply with the standardized specification of
-  link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp[NTS]
+* Comply with the standardized specification of link:{draft-nts}[NTS]
 
 * Be interoperable with the other reference implementations in IETF hackathons.
 
@@ -94,22 +94,17 @@ not a network connection.
 ====  NTS-KE client sends:
 -    Hostname of NTS-KE server
 -    Optional preferred NTPD server hostname or IP Address
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
--    A sorted list of AEAD algorithms
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
+     link:{draft-nts}#section-4.1.7[4.1.7]
+-    A sorted list of AEAD algorithms link:{draft-nts}#section-4.1.5[4.1.5]
 
 ====  NTS-KE server and NTS-KE client compute from the TLS connection:
--    C2S and S2C encryption keys
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.2[4.2],
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1]
+-    C2S and S2C encryption keys link:{draft-nts}#section-4.2[4.2],
+     link:{draft-nts}#section-5.1[5.1]
 
 ====  NTS-KE client gets back:
--    NTPD server hostname or IP Address
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.7[4.1.7]
--    1 to 8 cookies
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.6[4.1.6]
--    The selected AEAD algorithm
-     link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.5[4.1.5]
+-    NTPD server hostname or IP Address link:{draft-nts}#section-4.1.7[4.1.7]
+-    1 to 8 cookies link:{draft-nts}#section-4.1.6[4.1.6]
+-    The selected AEAD algorithm link:{draft-nts}#section-4.1.5[4.1.5]
 
 For AEAD, we need libaes_siv.so, RFC 5297
 It's not in OpenSSL yet.
@@ -163,7 +158,7 @@ The NTS-KE client (Bravo) and NTS-KE server (Delta) independently
 derive the C2S and S2C keys.  For OpenSSL, this is implemented by
 making two calls to SSL_export_keying_material(), which implements
 RFC5705.  The label and context inputs are provided in
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.1[5.1].
+link:{draft-nts}#section-5.1[5.1].
 This process is deterministic, so both ends generate the same C2S and S2C.
 
 The NTS-KE client passes C2S and S2C to the NTP client.  The NTS-KE
@@ -179,12 +174,9 @@ NTP client to NTP server (Alpha to Charlie)
 If all goes well (no lost packets) the client sends:
 
 -  The normal 48 byte NTP packet
--  A 32+ byte unique ID
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.3[5.3]
--  A cookie
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.4[5.4]
--  Authentication using C2S
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.6[5.6]
+-  A 32+ byte unique ID link:{draft-nts}#section-5.3[5.3]
+-  A cookie link:{draft-nts}#section-5.4[5.4]
+-  Authentication using C2S link:{draft-nts}#section-5.6[5.6]
 
 It gets back the same, with the cookie replaced with a new cookie
 and S2C used for authentication and to encrypt the new cookie.
@@ -196,7 +188,7 @@ the magic length kludgery for the current shared key authentication.)
 
 If packets (and hence cookies) are lost, the client will include
 a cookie-placeholder for each extra cookie it wants.
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.5[5.5]
+link:{draft-nts}#section-5.5[5.5]
 Those slots will be returned with new cookies.
 
 The AEAD algorithm used for authentication is set up to encrypt some
@@ -519,7 +511,7 @@ peer's valid time flag is unset (the server has never given valid time),
 discard that time or mark the peer as a falseticker.  These checks should
 never trigger on legitimate traffic, as that would mean the NTP server
 disagrees with its NTS-KE server's CA about time.
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-9.3[9.3]
+link:{draft-nts}#section-9.3[9.3]
 
 It might be considered useful to always apply these
 `notBefore`/`notAfter` sanity checks, not just for "suspect"
@@ -535,7 +527,7 @@ happen after certificate validation.
 How many cookies should the NTP client try to hold?  8
 
 There is no hard reason, but it is what the NTS-KE server SHOULD return.
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.6[4.1.6]
+link:{draft-nts}#section-4.1.6[4.1.6]
 It also matches the number of samples that ntpd remembers (the reach bit
 mask in ntpq/peers) and running out of responses is a good time to do
 special things like getting a new pool server or getting new cookies by running
@@ -608,11 +600,11 @@ the encode/decode overhead shouldn't be an issue.
 
 How to make NTS-KE work, securely, with pooled servers?
 
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.3[4.1.3], link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-4.1.4[4.1.4]
+link:{draft-nts}#section-4.1.3[4.1.3], link:{draft-nts}#section-4.1.4[4.1.4]
 
 Is the response in case of abuse 'continue the abuse, just wait a minute'?
 
-link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp#section-5.7[5.7]
+link:{draft-nts}#section-5.7[5.7]
 
 Does the unique identifier extension need to be omniversally unique?
 
