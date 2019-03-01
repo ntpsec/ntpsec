@@ -2,6 +2,8 @@ multithread msyslog
 
 security level
 
+thread per instance on NTS-KE server
+
 documentation:
   HOWTO on NTS
   HOWTO on certificates

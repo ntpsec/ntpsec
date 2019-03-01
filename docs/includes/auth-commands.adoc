@@ -80,17 +80,20 @@ The options are as follows:
 The following options of the +server+ command configure NTS.
 
 +nts+::
-  Use Network Time Security for authentication and encryption.
-  Request key exchange from the NTP server.  If there is an NTS
-  key service running in the same host as the NTP server adding this
-  option is normally all you need to do.
+  Use Network Time Security (NTS) for authentication.  Normally,
+  this is all you have to do to activate the client side of NTS.
 
-Note that the server name must match the name on the certificate.
-That is probably a FQDN rather than a short alias that you would
-probably use to talk to an internal server.
+  The hostname following the +server+ command is used as the address
+  of the NTS key exchange server (NTS-KE) rather than the address
+  of a NTP server.  The NTS-KE exchange defaults to using the same
+  IP Address for the NTP server.
+
+  Note that the server name must match the name on the certificate.
+  That is probably a FQDN rather than a short alias that you would
+  probably use to talk to an internal server.
 
 +ask+ _address_::
-  Use Network Time Security for authentication and encryption.  Ask
+  Use Network Time Security for authentication.  Ask
   for a specific NTS server, which may differ from the NTP server.
   Conforms to RFC 3896 section 3.2.2 prescription for the Host part of
   a URI: that is, the _address_ may be a hostname, an FQDN, an IPv4

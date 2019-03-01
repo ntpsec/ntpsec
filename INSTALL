@@ -17,9 +17,8 @@ There are some prerequisites.  Libraries need the binary installed
 to run and in addition, the development headers installed to build.
 
 We need pthreads (It's optional in POSIX)
-We need OpenSSL >= 1.1.1 ???
-We need libaes_siv - it's not in OpenSSL yet
-  https://github.com/dfoxfranke/libaes_siv
+We need OpenSSL >= 1.0.1
+NTS needs TLS1.2 or newer.
 
 === The short version ===
 
@@ -45,11 +44,6 @@ buildprep --help for details on available options.  asciidoc has a
 huge tail of dependencies and you probably don't want it unless you're
 planning to modify the documentation.  psutil may require different
 packages depending on whether your base Python version is 2 or 3.
-
-As of February 2019 libaes_siv is not yet packaged anywhere. You
-will need to install it by hand.  At some point it will probably
-land in libcrypto, and some time after that this paragraph
-will disappear.
 
 === Details ===
 
