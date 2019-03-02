@@ -2114,18 +2114,9 @@ myasprintf(
 
 /* -------------------------------------------------------------------
  * dump a raw data buffer
+ *
+ * Maybe this could be used system wide?
  */
-
-static char *
-add_string(
-	char *dp,
-	char *ep,
-	const char *sp)
-{
-	while (dp != ep && *sp)
-		*dp++ = *sp++;
-	return dp;
-}
 
 static void
 log_data(
@@ -2134,8 +2125,7 @@ log_data(
 	const char *buf ,
 	size_t      len )
 {
-	/* we're running single threaded with regards to the clocks. */
-	static char s_lbuf[2048];
+	char s_lbuf[MAX_PDU_LEN];
 
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
@@ -2144,17 +2134,20 @@ log_data(
 		const char *sptr = buf;
 		const char *stop = buf + len;
 		char       *dptr = s_lbuf;
-		char       *dtop = s_lbuf + sizeof(s_lbuf) - 1; /* for NUL */
+                /* leave room for hex (\\x23) + NUL */
+		char       *dtop = s_lbuf + sizeof(s_lbuf) - 10;
 
-		while (sptr != stop && dptr != dtop) {
+		while (sptr != stop && dptr < dtop) {
 			if (*sptr == '\\') {
-				dptr = add_string(dptr, dtop, "\\\\");
+                                /* replace with two \ */
+				*dptr++ = '\\';
+				*dptr++ = '\\';
 			} else if (isprint(*sptr)) {
 				*dptr++ = *sptr;
 			} else {
-				char fbuf[6];
-				snprintf(fbuf, sizeof(fbuf), "\\%03o", *(const uint8_t*)sptr);
-				dptr = add_string(dptr, dtop, fbuf);
+                               dptr += snprintf(dptr, dtop - dptr, "\\%#.2x",
+                                                *(const uint8_t*)sptr);
+
 			}
 			sptr++;
 		}
