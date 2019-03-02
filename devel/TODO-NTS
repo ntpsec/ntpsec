@@ -1,12 +1,22 @@
+Key rotation and save to disk
+
 multithread msyslog
 
-security level
-
-thread per instance on NTS-KE server
+? thread per instance on NTS-KE server
 
 documentation:
   HOWTO on NTS
   HOWTO on certificates
   glossary: https://letsencrypt.org/docs/glossary/
+
+-------
+
+The current code has the NTS-KE and ntpd in the same package.
+
+There are opportunities beyond that.  TBD.
+
+-------
+
+security level
 
 client certificates
