@@ -29,7 +29,9 @@ include::includes/authopt.adoc[]
 
 Authentication support allows the NTP client to verify that the server
 is in fact known and trusted and not an intruder accidentally
-or intentionally masquerading as that server.
+or intentionally masquerading as that server.  It does nothing
+to verify or guarantee correct time, nor does it even conceal
+timestamp information from anyone who can watch the traffic.
 
 There are three forms of authentication: MAC, NTS, and MS-SNTP.  This
 section describes all three. Each is configured separately for each
