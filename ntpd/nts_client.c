@@ -124,7 +124,7 @@ bool nts_probe(struct peer * peer) {
   }
 
   /* This may be clutter, but this is how to do it. */
-  msyslog(LOG_INFO, "NTSc: Using %s, %s with %d secret bits",
+  msyslog(LOG_INFO, "NTSc: Using %s, %s (%d)",
     SSL_get_version(ssl),
     SSL_get_cipher_name(ssl),
     SSL_get_cipher_bits(ssl, NULL));
