@@ -683,7 +683,7 @@ newpeer(
 	 * Put the new peer in the hash tables.
 	 */
 	if ((MDF_UCAST & cast_flags) && !(FLAG_LOOKUP & ctl->flags))
-		peer_update_hash(peer);
+		peer_add_hash(peer);
 	hash = peer->associd & NTP_HASH_MASK;
 	LINK_SLIST(assoc_hash[hash], peer, aid_link);
 	assoc_hash_count[hash]++;
@@ -698,7 +698,23 @@ newpeer(
 	return peer;
 }
 
-void peer_update_hash (struct peer *peer)
+void peer_del_hash (struct peer *peer)
+{
+        unsigned int hash;
+        struct peer *unlinked;
+
+        hash = NTP_HASH_ADDR(&peer->srcadr);
+        peer_hash_count[hash]--;
+
+        UNLINK_SLIST(unlinked, peer_hash[hash], peer, adr_link, struct peer);
+        if (NULL == unlinked) {
+            peer_hash_count[hash]++;
+            msyslog(LOG_ERR, "ERR: peer %s not in address table!",
+                socktoa(&peer->srcadr));
+        }
+}
+
+void peer_add_hash (struct peer *peer)
 {
 	unsigned int	hash;
 

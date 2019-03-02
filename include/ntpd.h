@@ -130,7 +130,8 @@ extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, uint8_t, struct peer_ctl *,
 				 uint8_t, const bool);
-extern	void	peer_update_hash (struct peer *);
+extern	void	peer_add_hash (struct peer *);
+extern	void	peer_del_hash (struct peer *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	void	refresh_all_peerinterfaces(void);

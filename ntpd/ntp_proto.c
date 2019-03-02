@@ -161,6 +161,7 @@ static	double	measure_tick_fuzz(void);
 static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 static	double	root_distance	(struct peer *);
+static	void	restart_nts_ke	(struct peer *);
 
 
 void
@@ -2066,7 +2067,7 @@ peer_xmit(
 		if (0 < peer->nts_state.count)
 		  sendlen += extens_client_send(peer, &xpkt);
 		else {
-		  // FIXME - out of cookies
+		  restart_nts_ke(peer);  /* out of cookies */
 		  return;
 		}
         } else if (0 != peer->cfg.peerkey) {
@@ -2281,7 +2282,7 @@ dns_take_server(
 	server->cfg.flags &= (unsigned)~FLAG_LOOKUP;
 
 	server->srcadr = *rmtadr;
-	peer_update_hash(server);
+	peer_add_hash(server);
 
 	restrict_mask = restrictions(&server->srcadr);
 	if (RES_FLAGS & restrict_mask) {
@@ -2398,6 +2399,26 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	peer->hpoll = hpoll;
 	peer->nextdate = current_time + (1U << hpoll);
 }
+
+/* NTS out of cookies
+ * Beware of clutter in NTS-KE server logs
+ * There are actually several cases:
+ *   No NTS-KE server
+ *   NTS-KE server answers, but we don't like it.
+ *   NTS-KE works, but NTP server doesn't respond.
+ */
+static void restart_nts_ke(struct peer *peer) {
+    uint8_t hpoll = peer->hpoll;
+    peer_del_hash(peer);
+    hpoll += 2;
+    if (hpoll < 8)
+        hpoll = 8;      /* min retry: 256 seconds, ~5 min */
+    if (hpoll > 12)
+        hpoll = 12;	/* 4096, a bit over an hour */
+    peer->hpoll = hpoll;
+    peer->nextdate = current_time + (1U << hpoll);
+    peer->cfg.flags |= FLAG_LOOKUP;
+};
 
 /*
  * dns_new_interface
