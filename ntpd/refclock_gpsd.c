@@ -166,7 +166,10 @@ typedef unsigned long int json_uint;
 #define	NAME		"GPSD"	/* shortname */
 #define	DESCRIPTION	"GPSD JSON client clock" /* who we are */
 
-#define MAX_PDU_LEN	1600
+/* MAX_PDU_LEN needs to be bigger than GPS_JSON_RESPONSE_MAX from gpsd.
+ * As of March 2019 that is 4096 */
+#define MAX_PDU_LEN	8192
+
 #define TICKOVER_LOW	10
 #define TICKOVER_HIGH	120
 #define LOGTHROTTLE	SECSPERHR
@@ -658,6 +661,7 @@ gpsd_receive(
 	pdst = up->buffer + up->buflen;
 	edst = pdst + sizeof(up->buffer) - 1; /* for trailing NUL */
 
+        /* FIXME!! Check for overrun of "buffer" */
 	while (psrc != esrc) {
 		ch = *psrc++;
 		if (ch == '\n') {
