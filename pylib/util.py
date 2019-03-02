@@ -984,7 +984,7 @@ class PeerSummary:
         mode = 0
         unreach = 0
         xmt = 0
-        ntscookies = 0
+        ntscookies = -1
 
         now = time.time()
 
@@ -1109,7 +1109,7 @@ class PeerSummary:
                 ptype = 'p'     # pool
             elif srcadr.startswith("224."):
                 ptype = 'a'     # manycastclient (compatibility with Classic)
-            elif ntscookies > 0:
+            elif ntscookies > -1:
                 # FIXME: Will foo up if there are ever more than 9 cookies
                 ptype = chr(ntscookies + ord('0'))
             else:
