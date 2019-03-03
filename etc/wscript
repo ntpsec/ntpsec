@@ -3,6 +3,12 @@ def build(ctx):
     units = [
         "ntp-wait.service",
         "ntpd.service",
+        "ntpviz-daily.service",
+        "ntplogtemp.service",
+        "ntplogtemp.timer",
+        "ntpviz-daily.timer",
+        "ntpviz-weekly.service",
+        "ntpviz-weekly.timer",
     ]
 
     # Install unit files

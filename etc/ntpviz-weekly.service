@@ -6,4 +6,4 @@ Requisite=ntpd.service
 [Service]
 Type=simple
 IOSchedulingClass=idle
-ExecStart=/usr/bin/ntpviz -w l -p 7 -o /var/www/localhost/htdocs/week
+ExecStart=@BINDIR@/ntpviz -w l -p 7 -o /var/www/localhost/htdocs/week
