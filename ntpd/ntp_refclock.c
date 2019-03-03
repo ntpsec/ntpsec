@@ -700,7 +700,7 @@ refclock_open(
 		close(0);
 	}
 	if (fd < 0) {
-		msyslog(LOG_ERR, "REFCLOCK: refclock_open %s: %m", dev);
+		msyslog(LOG_ERR, "REFCLOCK: refclock_open %s: %s", dev, strerror(errno));
 		return -1;
 	}
 	if (!refclock_setup(fd, speed, lflags)) {
@@ -746,7 +746,7 @@ refclock_setup(
 	 */
 	if (tcgetattr(fd, ttyp) < 0) {
 		msyslog(LOG_ERR,
-			"REFCLOCK: refclock_setup fd %d tcgetattr: %m", fd);
+			"REFCLOCK: refclock_setup fd %d tcgetattr: %s", fd, strerror(errno));
 		return false;
 	}
 
@@ -777,7 +777,7 @@ refclock_setup(
 		 */
 		if (ioctl(fd, TIOCMGET, (char *)&ltemp) < 0)
 			msyslog(LOG_ERR,
-			    "REFCLOCK: refclock_setup fd %d TIOCMGET: %m", fd);
+			    "REFCLOCK: refclock_setup fd %d TIOCMGET: %s", fd, strerror(errno));
 		DPRINT(1, ("REFCLOCK: refclock_setup fd %d modem status: 0x%x\n",
 			   fd, ltemp));
 		if (ltemp & TIOCM_DSR && lflags & LDISC_REMOTE)
@@ -795,7 +795,7 @@ refclock_setup(
 		ttyp->c_cc[VMIN] = 1;
 	}
 	if (tcsetattr(fd, TCSANOW, ttyp) < 0) {
-		msyslog(LOG_ERR, "REFCLOCK: refclock_setup fd %d TCSANOW: %m", fd);
+		msyslog(LOG_ERR, "REFCLOCK: refclock_setup fd %d TCSANOW: %s", fd, strerror(errno));
 		return false;
 	}
 
@@ -805,8 +805,8 @@ refclock_setup(
 	 * is logged, but we keep our fingers crossed otherwise.
 	 */
 	if (tcflush(fd, TCIOFLUSH) < 0)
-		msyslog(LOG_ERR, "REFCLOCK: refclock_setup fd %d tcflush(): %m",
-			fd);
+		msyslog(LOG_ERR, "REFCLOCK: refclock_setup fd %d tcflush(): %s",
+			fd, strerror(errno));
 	return true;
 }
 
@@ -936,7 +936,7 @@ refclock_ppsapi(
 	if (ap->handle == 0) {
 		if (time_pps_create(fddev, &ap->handle) < 0) {
 			msyslog(LOG_ERR,
-			    "REFCLOCK: refclock_ppsapi: time_pps_create: %m");
+			    "REFCLOCK: refclock_ppsapi: time_pps_create: %s", strerror(errno));
 			return false;
 		}
 	}
@@ -970,7 +970,7 @@ refclock_params(
 		ap->pps_params.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREASSERT;
 	if (time_pps_setparams(ap->handle, &ap->pps_params) < 0) {
 		msyslog(LOG_ERR,
-		    "REFCLOCK: refclock_params: time_pps_setparams: %m");
+		    "REFCLOCK: refclock_params: time_pps_setparams: %s", strerror(errno));
 		return false;
 	}
 
@@ -986,7 +986,7 @@ refclock_params(
 				"REFCLOCK: refclock_params: kernel PLL (hardpps, RFC 1589) not implemented");
 			else
 			    msyslog(LOG_ERR,
-				"REFCLOCK: refclock_params: time_pps_kcbind: %m");
+				"REFCLOCK: refclock_params: time_pps_kcbind: %s", strerror(errno));
 			return false;
 		}
 		clock_ctl.hardpps_enable = true;

@@ -96,8 +96,8 @@ get_ostime(
 	rc = clock_gettime(CLOCK_REALTIME, tsp);
 	if (rc < 0) {
 #ifndef __COVERITY__
-		msyslog(LOG_ERR, "TIME: read system clock failed: %m (%d)",
-			errno);
+		msyslog(LOG_ERR, "TIME: read system clock failed: %s (%d)",
+			strerror(errno), errno);
 #endif /* __COVERITY__ */
 		exit(1);
 	}
@@ -294,7 +294,7 @@ adj_systime(
 	}
 	if (adjtv.tv_sec != 0 || adjtv.tv_usec != 0) {
 		if (ladjtime(&adjtv, &oadjtv) < 0) {
-			msyslog(LOG_ERR, "CLOCK: adj_systime: %m");
+			msyslog(LOG_ERR, "CLOCK: adj_systime: %s", strerror(errno));
 			return false;
 		}
 	}
@@ -383,7 +383,7 @@ step_systime(
 
 	/* now set new system time */
 	if (settime(&timets) != 0) {
-		msyslog(LOG_ERR, "CLOCK: step_systime: %m");
+		msyslog(LOG_ERR, "CLOCK: step_systime: %s", strerror(errno));
 		return false;
 	}
 

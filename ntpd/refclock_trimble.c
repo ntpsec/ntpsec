@@ -332,8 +332,8 @@ trimble_start (
 			  refclock_name(peer), path));
 
 	if (tcgetattr(fd, &tio) < 0) {
-		msyslog(LOG_ERR, "REFCLOCK: %s tcgetattr failed: %m",
-		        refclock_name(peer));
+		msyslog(LOG_ERR, "REFCLOCK: %s tcgetattr failed: %s",
+		        refclock_name(peer), strerror(errno));
 		close(fd);
 		return false;
 	}
@@ -391,9 +391,9 @@ trimble_start (
 	iflag = tio.c_iflag;
 	if (tcsetattr(fd, TCSANOW, &tio) == -1 || tcgetattr(fd, &tio) == -1 ||
 	    tio.c_cflag != cflag || tio.c_iflag != iflag) {
-		msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr failed: wanted cflag 0x%x got 0x%x, wanted iflag 0x%x got 0x%x, return: %m",
+		msyslog(LOG_ERR, "REFCLOCK: %s tcsetattr failed: wanted cflag 0x%x got 0x%x, wanted iflag 0x%x got 0x%x, return: %s",
 		        refclock_name(peer), cflag, (unsigned int)tio.c_cflag,
-		        iflag, (unsigned int)tio.c_iflag);
+		        iflag, (unsigned int)tio.c_iflag, strerror(errno));
 		close(fd);
 		free(up);
 		return false;
@@ -410,8 +410,8 @@ trimble_start (
 		 * voltage and pulsed negative.
 		 */
 		if (ioctl(fd, TIOCMGET, &up->MCR) < 0) {
-			msyslog(LOG_ERR, "REFCLOCK: %s TIOCMGET failed: %m",
-			        refclock_name(peer));
+			msyslog(LOG_ERR, "REFCLOCK: %s TIOCMGET failed: %s",
+			        refclock_name(peer), strerror(errno));
 			close(fd);
 			free(up);
 			return false;
@@ -419,8 +419,8 @@ trimble_start (
 		up->MCR |= TIOCM_RTS;
 		if (ioctl(fd, TIOCMSET, &up->MCR) < 0 ||
 		    !(up->MCR & TIOCM_RTS)) {
-			msyslog(LOG_ERR, "REFCLOCK: %s TIOCMSET failed: MCR=0x%x, return=%m",
-			        refclock_name(peer), (unsigned int)up->MCR);
+			msyslog(LOG_ERR, "REFCLOCK: %s TIOCMSET failed: MCR=0x%x, return=%s",
+			        refclock_name(peer), (unsigned int)up->MCR, strerror(errno));
 			close(fd);
 			free(up);
 			return false;
@@ -915,8 +915,8 @@ trimble_poll (
 	/* ask Praecis for its signal status */
 	if(up->type == CLK_PRAECIS) {
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
-			msyslog(LOG_ERR, "REFCLOCK: %s write: %m:",
-			        refclock_name(peer));
+			msyslog(LOG_ERR, "REFCLOCK: %s write: %s:",
+			        refclock_name(peer), strerror(errno));
 	}
 
 	/* record clockstats */

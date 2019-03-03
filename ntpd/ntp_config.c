@@ -2528,8 +2528,8 @@ config_logfile(
 		case T_Logfile:
 			if (-1 == change_logfile(curr_var->value.s, true))
 				msyslog(LOG_ERR,
-					"CONFIG: Cannot open logfile %s: %m",
-					curr_var->value.s);
+					"CONFIG: Cannot open logfile %s: %s",
+					curr_var->value.s, strerror(errno));
 			break;
 
 		default:
@@ -3630,7 +3630,7 @@ ntp_rlimit(
 			   (int)rl_value / rl_scale, rl_sstr));
 		rl.rlim_cur = rl.rlim_max = rl_value;
 		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
-			msyslog(LOG_ERR, "CONFIG: Cannot set RLIMIT_NOFILE: %m");
+			msyslog(LOG_ERR, "CONFIG: Cannot set RLIMIT_NOFILE: %s", strerror(errno));
 		break;
 #endif /* RLIMIT_NOFILE */
 
@@ -3644,7 +3644,7 @@ ntp_rlimit(
 		DPRINT(2, ("ntp_rlimit: STACK: %d %s pages\n",
 			   (int)rl_value / rl_scale, rl_sstr));
 		if (-1 == getrlimit(RLIMIT_STACK, &rl)) {
-			msyslog(LOG_ERR, "CONFIG: getrlimit(RLIMIT_STACK) failed: %m");
+			msyslog(LOG_ERR, "CONFIG: getrlimit(RLIMIT_STACK) failed: %s", strerror(errno));
 		} else {
 			if (rl_value > rl.rlim_max) {
 				msyslog(LOG_WARNING,
@@ -3656,7 +3656,7 @@ ntp_rlimit(
 			rl.rlim_cur = rl_value;
 			if (-1 == setrlimit(RLIMIT_STACK, &rl)) {
 				msyslog(LOG_ERR,
-					"CONFIG: ntp_rlimit: Cannot set RLIMIT_STACK: %m");
+					"CONFIG: ntp_rlimit: Cannot set RLIMIT_STACK: %s", strerror(errno));
 			}
 		}
 		break;

@@ -145,7 +145,7 @@ pps_start(
 	char *pps_path = peer->cfg.ppspath ? peer->cfg.ppspath : device;
 	up->fddev = open(pps_path, O_RDWR);
 	if (up->fddev <= 0) {
-	    msyslog(LOG_ERR, "REFCLOCK: refclock_pps: %s open failed: %m", pps_path);
+	    msyslog(LOG_ERR, "REFCLOCK: refclock_pps: %s open failed: %s", pps_path, strerror(errno));
 		return false;
 	}
 

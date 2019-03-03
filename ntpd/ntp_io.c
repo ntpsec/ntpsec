@@ -867,8 +867,8 @@ create_wildcards(
 			log_listen_address(wildif);
 		} else {
 			msyslog(LOG_ERR,
-				"IO: unable to bind to wildcard address %s - another process may be running: %m; EXITING",
-				socktoa(&wildif->sin));
+				"IO: unable to bind to wildcard address %s - another process may be running: %s; EXITING",
+				socktoa(&wildif->sin), strerror(errno));
 			exit(1);
 		}
 		DPRINT_INTERFACE(2, (wildif, "created ", "\n"));
@@ -910,8 +910,8 @@ create_wildcards(
 			log_listen_address(wildif);
 		} else {
 			msyslog(LOG_ERR,
-				"IO: unable to bind to wildcard address %s - another process may be running: %m; EXITING",
-				socktoa(&wildif->sin));
+				"IO: unable to bind to wildcard address %s - another process may be running: %s; EXITING",
+				socktoa(&wildif->sin), strerror(errno));
 			exit(1);
 		}
 		DPRINT_INTERFACE(2, (wildif, "created ", "\n"));
@@ -1294,8 +1294,8 @@ set_wildcard_reuse(
 		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
 			       (char *)&on, sizeof(on)))
 			msyslog(LOG_ERR,
-				"IO: set_wildcard_reuse: setsockopt(SO_REUSEADDR, %s) failed: %m",
-				on ? "on" : "off");
+				"IO: set_wildcard_reuse: setsockopt(SO_REUSEADDR, %s) failed: %s",
+				on ? "on" : "off", strerror(errno));
 
 		DPRINT(4, ("set SO_REUSEADDR to %s on %s\n",
 			   on ? "on" : "off",
@@ -1778,8 +1778,8 @@ set_excladdruse(
 		return;
 
 	msyslog(LOG_ERR,
-		"IO: setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %m",
-		(int)fd);
+		"IO: setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %s",
+		(int)fd, strerror(errno));
 }
 #endif  /* SO_EXCLUSIVEADDRUSE */
 
@@ -1812,8 +1812,8 @@ set_reuseaddr(
 		if (ep->fd != INVALID_SOCKET) {
 			if (setsockopt(ep->fd, SOL_SOCKET, SO_REUSEADDR,
 				       (char *)&flag, sizeof(flag))) {
-				msyslog(LOG_ERR, "IO: set_reuseaddr: setsockopt(%s, SO_REUSEADDR, %s) failed: %m",
-					socktoa(&ep->sin), flag ? "on" : "off");
+				msyslog(LOG_ERR, "IO: set_reuseaddr: setsockopt(%s, SO_REUSEADDR, %s) failed: %s",
+					socktoa(&ep->sin), flag ? "on" : "off", strerror(errno));
 			}
 		}
 	}
@@ -1848,8 +1848,8 @@ open_socket(
 	if (INVALID_SOCKET == fd) {
 		errval = errno;
 		msyslog(LOG_ERR,
-			"IO: socket(AF_INET%s, SOCK_DGRAM, 0) failed on address %s: %m",
-			IS_IPV6(addr) ? "6" : "", socktoa(addr));
+			"IO: socket(AF_INET%s, SOCK_DGRAM, 0) failed on address %s: %s",
+			IS_IPV6(addr) ? "6" : "", socktoa(addr), strerror(errno));
 
 		if (errval == EPROTONOSUPPORT ||
 		    errval == EAFNOSUPPORT ||
@@ -1859,8 +1859,8 @@ open_socket(
 		errno = errval;
 #ifndef __COVERITY__
 		msyslog(LOG_ERR,
-			"IO: unexpected socket() error %m code %d (not EPROTONOSUPPORT nor EAFNOSUPPORT nor EPFNOSUPPORT) - exiting",
-			errno);
+			"IO: unexpected socket() error %s code %d (not EPROTONOSUPPORT nor EAFNOSUPPORT nor EPFNOSUPPORT) - exiting",
+			strerror(errno), errno);
 		exit(1);
 #endif /* __COVERITY__ */
 	}
@@ -1882,11 +1882,11 @@ open_socket(
 		       sizeof(on))) {
 
 		msyslog(LOG_ERR,
-			"IO: setsockopt SO_REUSEADDR %s fails for address %s: %m",
+			"IO: setsockopt SO_REUSEADDR %s fails for address %s: %s",
 			(turn_off_reuse)
 			    ? "off"
 			    : "on",
-			socktoa(addr));
+			socktoa(addr), strerror(errno));
 		close(fd);
 		return INVALID_SOCKET;
 	}
@@ -1907,8 +1907,8 @@ open_socket(
 			       sizeof(qos)))
 			msyslog(LOG_ERR,
 				"IO: setsockopt IP_TOS (%02x) fails on "
-                                "address %s: %m",
-				(unsigned)qos, socktoa(addr));
+                                "address %s: %s",
+				(unsigned)qos, socktoa(addr), strerror(errno));
 	}
 
 	/*
@@ -1919,15 +1919,15 @@ open_socket(
 		if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, (char*)&qos,
 			       sizeof(qos)))
 			msyslog(LOG_ERR, "IO: setsockopt IPV6_TCLASS (%02x) "
-                                         "fails on address %s: %m",
-				         (unsigned)qos, socktoa(addr));
+                                         "fails on address %s: %s",
+				         (unsigned)qos, socktoa(addr), strerror(errno));
 #endif /* IPV6_TCLASS */
 		if (isc_net_probe_ipv6only_bool()
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
 		    (const void *)&on, sizeof(on)))
 			msyslog(LOG_ERR,
-				"IO: setsockopt IPV6_V6ONLY on fails on address %s: %m",
-				socktoa(addr));
+				"IO: setsockopt IPV6_V6ONLY on fails on address %s: %s",
+				socktoa(addr), strerror(errno));
 	}
 
 #ifdef NEED_REUSEADDR_FOR_IFADDRBIND
@@ -1960,10 +1960,10 @@ open_socket(
 #endif
 		    ) {
 			msyslog(LOG_ERR,
-				"IO: bind(%d) AF_INET%s %s#%d flags 0x%x failed: %m",
+				"IO: bind(%d) AF_INET%s %s#%d flags 0x%x failed: %s",
 				fd, IS_IPV6(addr) ? "6" : "",
 				socktoa(addr), SRCPORT(addr),
-				interf->flags);
+				interf->flags, strerror(errno));
 		}
 
 		close(fd);
@@ -2182,8 +2182,8 @@ read_network_packet(
 		freerecvbuf(rb);
 		return (buflen);
 	} else if (buflen < 0) {
-		msyslog(LOG_ERR, "IO: recvfrom(%s) fd=%d: %m",
-			socktoa(&rb->recv_srcadr), fd);
+		msyslog(LOG_ERR, "IO: recvfrom(%s) fd=%d: %s",
+			socktoa(&rb->recv_srcadr), fd, strerror(errno));
 		DPRINT(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n",
 			   fd));
 		freerecvbuf(rb);
@@ -2269,13 +2269,13 @@ io_handler(void)
 	if (nfound > 0) {
 		input_handler(&rdfdes);
 	} else if (nfound == -1 && errno != EINTR) {
-		msyslog(LOG_ERR, "IO: select() error: %m");
+		msyslog(LOG_ERR, "IO: select() error: %s", strerror(errno));
 	}
 #   ifdef DEBUG
 	else if (debug > 4) { /* SPECIAL DEBUG */
-		msyslog(LOG_DEBUG, "IO: select(): nfound=%d, error: %m", nfound);
+		msyslog(LOG_DEBUG, "IO: select(): nfound=%d, error: %s", nfound, strerror(errno));
 	} else {
-		DPRINT(1, ("select() returned %d: %m\n", nfound));
+		DPRINT(1, ("select() returned %d: %s\n", nfound, strerror(errno)));
 	}
 #   endif /* DEBUG */
 }
@@ -2337,7 +2337,7 @@ input_handler(
 			saved_errno = errno;
 			clk = refclock_name(rp->srcclock);
 			errno = saved_errno;
-			msyslog(LOG_ERR, "IO: %s read: %m", clk);
+			msyslog(LOG_ERR, "IO: %s read: %s", clk, strerror(errno));
 			maintain_activefds(fd, true);
 		} else if (0 == buflen) {
 			clk = refclock_name(rp->srcclock);
@@ -2977,10 +2977,10 @@ process_routing_msgs(struct asyncio_reader *reader)
 	if (cnt < 0) {
 		if (errno == ENOBUFS) {
 			msyslog(LOG_ERR,
-				"IO: routing socket reports: %m");
+				"IO: routing socket reports: %s", strerror(errno));
 		} else {
 			msyslog(LOG_ERR,
-				"IO: routing socket reports: %m - disabling");
+				"IO: routing socket reports: %s - disabling", strerror(errno));
 			remove_asyncio_reader(reader);
 			delete_asyncio_reader(reader);
 		}
@@ -3091,7 +3091,7 @@ init_async_notifications()
 #endif
 	if (fd < 0) {
 		msyslog(LOG_ERR,
-			"IO: unable to open routing socket (%m) - using polled interface update");
+			"IO: unable to open routing socket (%s) - using polled interface update", strerror(errno));
 		return;
 	}
 
@@ -3105,7 +3105,7 @@ init_async_notifications()
 		       | RTMGRP_IPV6_MROUTE;
 	if (bind(fd, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
 		msyslog(LOG_ERR,
-			"IO: bind failed on routing socket (%m) - using polled interface update");
+			"IO: bind failed on routing socket (%s) - using polled interface update", strerror(errno));
 		return;
 	}
 #endif

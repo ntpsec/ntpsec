@@ -127,7 +127,7 @@ make_socket_nonblocking(
 
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
 		msyslog(LOG_ERR,
-			"ERR: fcntl(O_NONBLOCK) fails on fd #%d: %m", fd);
+			"ERR: fcntl(O_NONBLOCK) fails on fd #%d: %s", fd, strerror(errno));
 		exit(1);
 	}
 }

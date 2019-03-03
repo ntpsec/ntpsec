@@ -1495,8 +1495,8 @@ process_version(
 		 * resulting data timeout will take care of the
 		 * connection!
 		 */
-		msyslog(LOG_ERR, "REFCLOCK: %s: failed to write watch request (%m)",
-			up->logname);
+		msyslog(LOG_ERR, "REFCLOCK: %s: failed to write watch request (%s)",
+			up->logname, strerror(errno));
 	}
 }
 
@@ -1840,8 +1840,8 @@ gpsd_init_socket(
 	if (-1 == up->fdt) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"REFCLOCK: %s: cannot create GPSD socket: %m",
-				up->logname);
+				"REFCLOCK: %s: cannot create GPSD socket: %s",
+				up->logname, strerror(errno));
 		goto no_socket;
 	}
 
@@ -1853,8 +1853,8 @@ gpsd_init_socket(
 	if (-1 == rc) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"REFCLOCK: %s: cannot set GPSD socket to non-blocking: %m",
-				up->logname);
+				"REFCLOCK: %s: cannot set GPSD socket to non-blocking: %s",
+				up->logname, strerror(errno));
 		goto no_socket;
 	}
 	/* Disable nagling. The way both GPSD and NTPD handle the
@@ -1869,8 +1869,8 @@ gpsd_init_socket(
 	if (-1 == rc) {
 		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
-				"REFCLOCK: %s: cannot disable TCP nagle: %m",
-				up->logname);
+				"REFCLOCK: %s: cannot disable TCP nagle: %s",
+				up->logname, strerror(errno));
 	}
 
 	/* Start a non-blocking connect. There might be a synchronous
@@ -1886,8 +1886,8 @@ gpsd_init_socket(
 
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"REFCLOCK: %s: cannot connect GPSD socket: %m",
-				up->logname);
+				"REFCLOCK: %s: cannot connect GPSD socket: %s",
+				up->logname, strerror(errno));
 		goto no_socket;
 	}
 

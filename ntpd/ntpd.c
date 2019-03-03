@@ -430,7 +430,7 @@ main(
 static void
 catch_danger(int signo)
 {
-	msyslog(LOG_INFO, "ERR: setpgid(): %m");
+	msyslog(LOG_INFO, "ERR: setpgid(): %s", strerror(errno));
 	/* Make the system believe we'll free something, but don't do it! */
 	return;
 }
@@ -467,7 +467,7 @@ set_process_priority(void)
 				sched.sched_priority = config_priority;
 		}
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
-			msyslog(LOG_ERR, "INIT: sched_setscheduler(): %m");
+			msyslog(LOG_ERR, "INIT: sched_setscheduler(): %s", strerror(errno));
 		else
 			need_priority = false;
 	}
@@ -573,7 +573,7 @@ ntpdmain(
 		termlogit = true;
 		exit_code = (errno) ? errno : -1;
 		msyslog(LOG_ERR,
-			"INIT: Pipe creation failed for --wait-sync: %m");
+			"INIT: Pipe creation failed for --wait-sync: %s", strerror(errno));
 		exit(exit_code);
 	    }
 	    waitsync_fd_to_close = pipe_fds[1];
@@ -590,7 +590,7 @@ ntpdmain(
 		rc = fork();
 		if (-1 == rc) {
 			exit_code = (errno) ? errno : -1;
-			msyslog(LOG_ERR, "INIT: fork: %m");
+			msyslog(LOG_ERR, "INIT: fork: %s", strerror(errno));
 			exit(exit_code);
 		}
 		if (rc > 0) {
@@ -616,7 +616,7 @@ ntpdmain(
 		setup_logfile(logfilename);
 
 		if (setsid() == (pid_t)-1)
-			msyslog(LOG_ERR, "INIT: setsid(): %m");
+			msyslog(LOG_ERR, "INIT: setsid(): %s", strerror(errno));
 #  ifdef SIGDANGER
 		/* Don't get killed by low-on-memory signal. */
 		sa.sa_handler = catch_danger;
@@ -1079,7 +1079,7 @@ wait_child_sync_if(
 				continue;
 			exit_code = (errno) ? errno : -1;
 			msyslog(LOG_ERR,
-				"ERR: --wait-sync select failed: %m");
+				"ERR: --wait-sync select failed: %s", strerror(errno));
 			return exit_code;
 		}
 		if (0 == rc) {
@@ -1246,7 +1246,7 @@ close_all_beyond(
 	 * calls)
 	 */
 	if (fcntl(keep_fd + 1, F_CLOSEM, 0) == -1)
-		msyslog(LOG_ERR, "INIT: F_CLOSEM(%d): %m", keep_fd + 1);
+		msyslog(LOG_ERR, "INIT: F_CLOSEM(%d): %s", keep_fd + 1, strerror(errno));
 # else  /* !HAVE_CLOSEFROM && !F_CLOSEM follows */
 	int fd;
 	int max_fd;

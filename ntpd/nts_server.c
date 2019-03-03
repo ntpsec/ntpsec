@@ -115,11 +115,11 @@ bool nts_server_init2(void) {
     pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
     rc = pthread_create(&worker, NULL, nts_ke_listener, &listner4_sock);
     if (rc) {
-      msyslog(LOG_ERR, "NTSs: nts_start_server4: error from pthread_create: %m");
+      msyslog(LOG_ERR, "NTSs: nts_start_server4: error from pthread_create: %s", strerror(errno));
     }
     rc = pthread_create(&worker, NULL, nts_ke_listener, &listner6_sock);
     if (rc) {
-      msyslog(LOG_ERR, "NTSs: nts_start_server6: error from pthread_create: %m");
+      msyslog(LOG_ERR, "NTSs: nts_start_server6: error from pthread_create: %s", strerror(errno));
     }
     pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 
@@ -137,7 +137,7 @@ void* nts_ke_listener(void* arg) {
 
         int client = accept(sock, &addr, &len);
         if (client < 0) {
-            msyslog(LOG_ERR, "NTSs: TCP accept failed: %m");
+            msyslog(LOG_ERR, "NTSs: TCP accept failed: %s", strerror(errno));
             if (EBADF == errno)
                 return NULL;
             sleep(1);		/* avoid log clutter on bug */
@@ -186,7 +186,7 @@ bool nts_ke_request(SSL *ssl) {
 
     bytes_read = SSL_read(ssl, buff, sizeof(buff));
     if (0 >= bytes_read) {
-        msyslog(LOG_INFO, "NTSs: SSL_read error: %m");
+        msyslog(LOG_INFO, "NTSs: SSL_read error: %s", strerror(errno));
         nts_log_ssl_error();
         return false;
     }
@@ -215,7 +215,7 @@ bool nts_ke_request(SSL *ssl) {
 
     bytes_written = SSL_write(ssl, buff, used);
     if (bytes_written != used) {
-        msyslog(LOG_INFO, "NTSs: SSL_write error: %m");
+        msyslog(LOG_INFO, "NTSs: SSL_write error: %s", strerror(errno));
         nts_log_ssl_error();
         return false;
     }
@@ -239,21 +239,21 @@ int create_listener(int port, int family) {
         addr.sin_addr.s_addr= htonl(INADDR_ANY);
         sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
-          msyslog(LOG_ERR, "NTSs: Can't create socket4: %m");
+          msyslog(LOG_ERR, "NTSs: Can't create socket4: %s", strerror(errno));
           return -1;
         }
 	err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
         if (0 > err) {
-          msyslog(LOG_ERR, "NTSs: can't setsockopt4: %m");
+          msyslog(LOG_ERR, "NTSs: can't setsockopt4: %s", strerror(errno));
           return -1;
         }
         err = bind(sock, (struct sockaddr*)&addr, sizeof(addr));
         if (0 > err) {
-          msyslog(LOG_ERR, "NTSs: can't bind4: %m");
+          msyslog(LOG_ERR, "NTSs: can't bind4: %s", strerror(errno));
           return -1;
         }
         if (listen(sock, 6) < 0) {
-          msyslog(LOG_ERR, "NTSs: can't listen4: %m");
+          msyslog(LOG_ERR, "NTSs: can't listen4: %s", strerror(errno));
           return -1;
         }
         msyslog(LOG_INFO, "NTSs: listen4 worked");
@@ -264,27 +264,27 @@ int create_listener(int port, int family) {
         addr6.sin6_addr = in6addr_any;
         sock = socket(AF_INET6, SOCK_STREAM, 0);
         if (sock < 0) {
-          msyslog(LOG_ERR, "NTSs: Can't create socket6: %m");
+          msyslog(LOG_ERR, "NTSs: Can't create socket6: %s", strerror(errno));
           return -1;
         }
         /* Hack to keep IPV6 from listening on IPV4 too */
         err = setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
         if (0 > err) {
-          msyslog(LOG_ERR, "NTSs: can't setsockopt6only: %m");
+          msyslog(LOG_ERR, "NTSs: can't setsockopt6only: %s", strerror(errno));
           return -1;
         }
 	err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
         if (0 > err) {
-          msyslog(LOG_ERR, "NTSs: can't setsockopt6: %m");
+          msyslog(LOG_ERR, "NTSs: can't setsockopt6: %s", strerror(errno));
           return -1;
         }
         err = bind(sock, (struct sockaddr*)&addr6, sizeof(addr6));
         if (0 > err) {
-          msyslog(LOG_ERR, "NTSs: can't bind6: %m");
+          msyslog(LOG_ERR, "NTSs: can't bind6: %s", strerror(errno));
           return -1;
         }
         if (listen(sock, 6) < 0) {
-          msyslog(LOG_ERR, "NTSs: can't listen6: %m");
+          msyslog(LOG_ERR, "NTSs: can't listen6: %s", strerror(errno));
           return -1;
         }
         msyslog(LOG_INFO, "NTSs: listen6 worked");

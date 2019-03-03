@@ -259,13 +259,13 @@ ntp_adjtime_error_handler(
 			if (tai_call) {
 			    errno = saved_errno;
 			    msyslog(LOG_ERR,
-				"CLOCK: %s: ntp_adjtime(TAI) failed: %m",
-				caller);
+				"CLOCK: %s: ntp_adjtime(TAI) failed: %s",
+				caller, strerror(errno));
 			}
 			errno = saved_errno;
 			msyslog(LOG_ERR,
-				"CLOCK: %s: %s line %d: ntp_adjtime: %m",
-				caller, file_name(), line
+				"CLOCK: %s: %s line %d: ntp_adjtime: %s",
+				caller, file_name(), line, strerror(errno)
 			);
 		    break;
 		    default:
@@ -1069,7 +1069,7 @@ start_kern_loop(void)
 	newsigsys.sa_handler = pll_trap;
 	newsigsys.sa_flags = 0;
 	if (sigaction(SIGSYS, &newsigsys, &sigsys)) {
-		msyslog(LOG_ERR, "ERR: sigaction() trap SIGSYS: %m");
+		msyslog(LOG_ERR, "ERR: sigaction() trap SIGSYS: %s", strerror(errno));
 		clock_ctl.pll_control = false;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
@@ -1079,7 +1079,7 @@ start_kern_loop(void)
 		}
 		if (sigaction(SIGSYS, &sigsys, NULL)) {
 			msyslog(LOG_ERR,
-			    "ERR: sigaction() restore SIGSYS: %m");
+			    "ERR: sigaction() restore SIGSYS: %s", strerror(errno));
 			clock_ctl.pll_control = false;
 		}
 	}

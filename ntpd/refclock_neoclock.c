@@ -155,7 +155,7 @@ neoclock4x_start(int unit,
 #if 1
   if(tcgetattr(fd, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcgetattr) can't query serial port settings: %s", unit, strerror(errno));
       (void) close(fd);
       return false;
     }
@@ -169,7 +169,7 @@ neoclock4x_start(int unit,
 
   if(tcsetattr(fd, TCSANOW, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %s", unit, strerror(errno));
       (void) close(fd);
       return false;
     }
@@ -177,7 +177,7 @@ neoclock4x_start(int unit,
 #else
   if(tcgetattr(fd, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcgetattr) can't query serial port settings: %s", unit, strerror(errno));
       (void) close(fd);
       return false;
     }
@@ -190,7 +190,7 @@ neoclock4x_start(int unit,
 
   if(tcsetattr(fd, TCSANOW, &termsettings) < 0)
     {
-      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %s", unit, strerror(errno));
       (void) close(fd);
       return false;
     }
@@ -201,7 +201,7 @@ neoclock4x_start(int unit,
   /* NeoClock4x is powered from serial line */
   if(ioctl(fd, TIOCMGET, (void *)&sl232) == -1)
     {
-      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %s", unit, strerror(errno));
       (void) close(fd);
       return false;
     }
@@ -212,7 +212,7 @@ neoclock4x_start(int unit,
 #endif
   if(ioctl(fd, TIOCMSET, (void *)&sl232) == -1)
     {
-      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m", unit);
+      msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %s", unit, strerror(errno));
       (void) close(fd);
       return false;
     }
@@ -226,7 +226,7 @@ neoclock4x_start(int unit,
   up = (struct neoclock4x_unit *) emalloc(sizeof(struct neoclock4x_unit));
   if(!(up))
     {
-      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): can't allocate memory for: %m",unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): can't allocate memory for: %s",unit, strerror(errno));
       (void) close(fd);
       return false;
     }
@@ -315,7 +315,7 @@ neoclock4x_start(int unit,
 
   if(!io_addclock(&pp->io))
     {
-      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): error add peer to ntpd: %m", unit);
+      msyslog(LOG_ERR, "REFCLOCK: NeoClock4X(%d): error add peer to ntpd: %s", unit, strerror(errno));
       (void) close(fd);
       pp->io.fd = -1;
       free(pp->unitptr);
@@ -348,8 +348,8 @@ neoclock4x_shutdown(
 		/* NeoClock4x is powered from serial line */
 		if(ioctl(pp->io.fd, TIOCMGET, (void *)&sl232) == -1)
 		{
-		    msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %m",
-			    pp->refclkunit);
+		    msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't query RTS/DTR state: %s",
+			    pp->refclkunit, strerror(errno));
 		}
 #ifdef TIOCM_RTS
 		/* turn on RTS, and DTR for power supply */
@@ -360,8 +360,8 @@ neoclock4x_shutdown(
 #endif
 		if(ioctl(pp->io.fd, TIOCMSET, (void *)&sl232) == -1)
 		{
-		    msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m",
-			    pp->refclkunit);
+		    msyslog(LOG_CRIT, "REFCLOCK: NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %s",
+			    pp->refclkunit, strerror(errno));
 		}
 #endif
 		io_closeclock(&pp->io);
@@ -881,7 +881,7 @@ neol_query_firmware(int fd,
 	    {
               if(EAGAIN != errno)
                 {
-                  msyslog(LOG_DEBUG, "NeoClock4x(%d): read: %m", unit);
+                  msyslog(LOG_DEBUG, "NeoClock4x(%d): read: %s", unit, strerror(errno));
                   read_errors++;
                 }
               else

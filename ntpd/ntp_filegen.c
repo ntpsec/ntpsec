@@ -228,8 +228,8 @@ filegen_open(
 
 					if (rename(filename, savename) != 0)
 						msyslog(LOG_ERR,
-							"LOG: couldn't save %s: %m",
-							filename);
+							"LOG: couldn't save %s: %s",
+							filename, strerror(errno));
 					free(savename);
 				} else {
 					/*
@@ -240,8 +240,8 @@ filegen_open(
 					/* coverity[toctou] */
 					if (unlink(filename) != 0)
 						msyslog(LOG_ERR,
-							"LOG: couldn't unlink %s: %m",
-							filename);
+							"LOG: couldn't unlink %s: %s",
+							filename, strerror(errno));
 				}
 			} else {
 				/*
@@ -259,8 +259,8 @@ filegen_open(
 			 * 'basename' not to exist
 			 */
 			if (ENOENT != errno)
-				msyslog(LOG_ERR, "LOG: stat(%s) failed: %m",
-						 filename);
+				msyslog(LOG_ERR, "LOG: stat(%s) failed: %s",
+						 filename, strerror(errno));
 		}
 	}
 
@@ -283,7 +283,7 @@ filegen_open(
 		 */
 
 		if (ENOENT != errno)
-			msyslog(LOG_ERR, "LOG: can't open %s: %m", fullname);
+			msyslog(LOG_ERR, "LOG: can't open %s: %s", fullname, strerror(errno));
 	} else {
 		if (NULL != gen->fp) {
 			fclose(gen->fp);
@@ -305,8 +305,8 @@ filegen_open(
 			if (link(fullname, filename) != 0)
 				if (EEXIST != errno)
 					msyslog(LOG_ERR,
-						"LOG: can't link(%s, %s): %m",
-						fullname, filename);
+						"LOG: can't link(%s, %s): %s",
+						fullname, filename, strerror(errno));
 		}		/* flags & FGEN_FLAG_LINK */
 	}			/* else fp == NULL */
 

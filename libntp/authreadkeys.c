@@ -237,8 +237,8 @@ authreadkeys(
 	 */
 	fp = fopen(file, "r");
 	if (fp == NULL) {
-		msyslog(LOG_ERR, "AUTH: authreadkeys: file %s: %m",
-		    file);
+		msyslog(LOG_ERR, "AUTH: authreadkeys: file %s: %s",
+		    file, strerror(errno));
 		return false;
 	}
 	ssl_init();

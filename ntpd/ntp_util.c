@@ -159,7 +159,7 @@ static void drift_write(char *driftfile, double drift)
 	strlcpy(tempfile, driftfile, sizeof(tempfile));
 	strlcat(tempfile, "-tmp", sizeof(tempfile));
 	if ((new = fopen(tempfile, "w")) == NULL) {
-	    msyslog(LOG_ERR, "LOG: frequency file %s: %m", tempfile);
+	    msyslog(LOG_ERR, "LOG: frequency file %s: %s", tempfile, strerror(errno));
 	    return;
 	}
 	fprintf(new, "%.6f\n", drift);
@@ -167,8 +167,8 @@ static void drift_write(char *driftfile, double drift)
 	/* atomic */
 	if (rename(tempfile, driftfile))
 	    msyslog(LOG_WARNING,
-		    "LOG: Unable to rename temp drift file %s to %s, %m",
-		    tempfile, driftfile);
+		    "LOG: Unable to rename temp drift file %s to %s, %s",
+		    tempfile, driftfile, strerror(errno));
 }
 
 
@@ -298,8 +298,8 @@ stats_config(
 	 */
 	case STATS_PID_FILE:
 		if ((fp = fopen(value, "w")) == NULL) {
-			msyslog(LOG_ERR, "LOG: pid file %s: %m",
-			    value);
+			msyslog(LOG_ERR, "LOG: pid file %s: %s",
+			    value, strerror(errno));
 			break;
 		}
 		fprintf(fp, "%d", (int)getpid());

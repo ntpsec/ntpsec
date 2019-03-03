@@ -80,9 +80,9 @@ ntp_set_tod(
 	errno = 0;
 	rc = clock_settime(CLOCK_REALTIME, tvs);
 	saved_errno = errno;
-	TPRINT(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
-	errno = saved_errno;	/* for %m below */
-	TPRINT(1, ("ntp_set_tod: Final result: clock_settime: %d %m\n", rc));
+	TPRINT(1, ("ntp_set_tod: clock_settime: %d %s\n", rc, strerror(errno)));
+	errno = saved_errno;	/* for strerror(errno)) below */
+	TPRINT(1, ("ntp_set_tod: Final result: clock_settime: %d %s\n", rc, strerror(errno)));
 
 	if (rc)
 		errno = saved_errno;

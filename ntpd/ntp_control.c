@@ -1355,7 +1355,7 @@ ctl_putsys(
 		ZERO(ntx);
 		if (ntp_adjtime(&ntx) < 0)
                     msyslog(LOG_ERR,
-                            "MODE6: ntp_adjtime() for mode 6 query failed: %m");
+                            "MODE6: ntp_adjtime() for mode 6 query failed: %s", strerror(errno));
 		else
                     ntp_adjtime_time = current_time;
 	}

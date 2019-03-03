@@ -462,8 +462,8 @@ leapsec_load_file(
 	/* coverity[toctou] */
 	if (0 != stat(fname, &sb_new)) {
 		if (logall)
-			msyslog(LOG_ERR, "CLOCK: %s ('%s'): stat failed: %m",
-				logPrefix, fname);
+			msyslog(LOG_ERR, "CLOCK: %s ('%s'): stat failed: %s",
+				logPrefix, fname, strerror(errno));
 		return false;
 	}
 
@@ -497,8 +497,8 @@ leapsec_load_file(
 	if ((fp = fopen(fname, "r")) == NULL) {
 		if (logall)
 			msyslog(LOG_ERR,
-				"CLOCK: %s ('%s'): open failed: %m",
-				logPrefix, fname);
+				"CLOCK: %s ('%s'): open failed: %s",
+				logPrefix, fname, strerror(errno));
 		return false;
 	}
 

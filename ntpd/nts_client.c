@@ -214,12 +214,12 @@ int open_TCP_socket(const char *hostname) {
   SET_PORT(&sockaddr, NTP_PORT);	/* setup default NTP address */
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == sockfd) {
-    msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %m");
+    msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", strerror(errno));
   } else {
     // Use first answer
     err = connect(sockfd, answer->ai_addr, answer->ai_addrlen);
     if (-1 == err) {
-      msyslog(LOG_INFO, "NTSc: nts_probe: connect failed: %m");
+      msyslog(LOG_INFO, "NTSc: nts_probe: connect failed: %s", strerror(errno));
       close(sockfd);
       sockfd = -1;
     }
@@ -336,13 +336,13 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
 
   used = sizeof(buff)-buf.left;
   if (used >= (int)(sizeof(buff)-10)) {
-    msyslog(LOG_ERR, "NTSc: write failed: %d, %ld, %m",
-        used, (long)sizeof(buff));
+    msyslog(LOG_ERR, "NTSc: write failed: %d, %ld, %s",
+        used, (long)sizeof(buff), strerror(errno));
     return false;
   }
   transferred = SSL_write(ssl, buff, used);
   if (used != transferred) {
-    msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %m", used, transferred);
+    msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %s", used, transferred, strerror(errno));
     nts_log_ssl_error();
     return false;
   }
@@ -356,7 +356,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
 
   transferred = SSL_read(ssl, buff, sizeof(buff));
   if (0 > transferred) {
-    msyslog(LOG_ERR, "NTSc: read failed: %d, %m", transferred);
+    msyslog(LOG_ERR, "NTSc: read failed: %d, %s", transferred, strerror(errno));
     nts_log_ssl_error();
     return false;
   }
@@ -487,7 +487,7 @@ bool nts_set_cert_search(SSL_CTX *ctx) {
         ntsconfig.ca, statbuf.st_mode);
     return false;
   }
-  msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %m", ntsconfig.ca);
+  msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %s", ntsconfig.ca, strerror(errno));
   return false;
 }
 

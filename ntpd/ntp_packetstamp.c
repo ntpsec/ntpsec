@@ -53,8 +53,8 @@ enable_packetstamps(
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
 			       (const void *)&on, sizeof(on)))
 		msyslog(LOG_DEBUG,
-			"ERR: setsockopt SO_TIMESTAMPNS on fails on address %s: %m",
-				socktoa(addr));
+			"ERR: setsockopt SO_TIMESTAMPNS on fails on address %s: %s",
+				socktoa(addr), strerror(errno));
 	else
 		DPRINT(4, ("ERR: setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
 				    fd, socktoa(addr)));
@@ -66,8 +66,8 @@ enable_packetstamps(
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
 			       (const void*)&on, sizeof(on)))
 		msyslog(LOG_DEBUG,
-			"ERR: setsockopt SO_TIMESTAMP on fails on address %s: %m",
-			socktoa(addr));
+			"ERR: setsockopt SO_TIMESTAMP on fails on address %s: %s",
+			socktoa(addr), strerror(errno));
 	else
 		DPRINT(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
 			    fd, socktoa(addr)));

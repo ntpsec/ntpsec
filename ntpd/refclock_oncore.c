@@ -673,8 +673,8 @@ oncore_start(
 	/* coverity[toctou] */
 	if (stat(device2, &stat2)) {
 		stat2.st_dev = stat2.st_ino = (ino_t)-2;
-		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %m",
-			     device2, errno);
+		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %s",
+			     device2, errno, strerror(errno));
 	}
 
 	/* for LINUX the PPS device is the result of a line discipline.
@@ -841,12 +841,12 @@ oncore_ppsapi(
 	const char *cp;
 
 	if (time_pps_getcap(instance->pps_h, &cap) < 0) {
-		oncore_log_f(instance, LOG_ERR, "time_pps_getcap failed: %m");
+		oncore_log_f(instance, LOG_ERR, "time_pps_getcap failed: %s", strerror(errno));
 		return false;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
-		oncore_log_f(instance, LOG_ERR, "time_pps_getparams failed: %m");
+		oncore_log_f(instance, LOG_ERR, "time_pps_getparams failed: %s", strerror(errno));
 		return false;
 	}
 
@@ -884,7 +884,7 @@ oncore_ppsapi(
 	instance->pps_p.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
 
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
-		oncore_log_f(instance, LOG_ERR, "ONCORE: time_pps_setparams fails %m");
+		oncore_log_f(instance, LOG_ERR, "ONCORE: time_pps_setparams fails %s", strerror(errno));
 		return false;	/* exit, can't do time_pps_setparans on PPS file */
 	}
 
@@ -904,7 +904,7 @@ oncore_ppsapi(
 
 		if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
 		    PPS_TSFMT_TSPEC) < 0) {
-			oncore_log_f(instance, LOG_ERR, "time_pps_kcbind failed: %m");
+			oncore_log_f(instance, LOG_ERR, "time_pps_kcbind failed: %s", strerror(errno));
 			oncore_log(instance, LOG_ERR, "HARDPPS failed, abort...");
 			return false;
 		}
@@ -1637,7 +1637,7 @@ oncore_get_timestamp(
 	if (time_pps_fetch(instance->pps_h, PPS_TSFMT_TSPEC, &pps_i,
 	    &timeout) < 0) {
 		oncore_log_f(instance, LOG_ERR,
-			     "time_pps_fetch failed %m");
+			     "time_pps_fetch failed %s", strerror(errno));
 		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
@@ -1720,14 +1720,14 @@ oncore_get_timestamp(
 
 	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
 		oncore_log_f(instance, LOG_ERR,
-			     "time_pps_getcap failed: %m");
+			     "time_pps_getcap failed: %s", strerror(errno));
 		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
 		oncore_log_f(instance, LOG_ERR,
-			     "time_pps_getparams failed: %m");
+			     "time_pps_getparams failed: %s", strerror(errno));
 		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
 		return;
 	}

@@ -95,8 +95,8 @@ set_timer_or_die(
 	rc = setitimer(ITIMER_REAL, &itimer, NULL);
 #endif
 	if (-1 == rc) {
-		msyslog(LOG_ERR, "ERR:interval timer %s failed, %m",
-			setfunc);
+		msyslog(LOG_ERR, "ERR:interval timer %s failed, %s",
+			setfunc, strerror(errno));
 		exit(1);
 	}
 }
@@ -155,7 +155,7 @@ init_timer(void)
 	 */
 #ifdef HAVE_TIMER_CREATE
 	if (TC_ERR == timer_create(CLOCK_REALTIME, NULL, &timer_id)) {
-		msyslog(LOG_ERR, "ERR: timer_create failed, %m");
+		msyslog(LOG_ERR, "ERR: timer_create failed, %s", strerror(errno));
 		exit(1);
 	}
 #endif

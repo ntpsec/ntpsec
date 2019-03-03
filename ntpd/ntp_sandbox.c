@@ -79,7 +79,7 @@ bool sandbox(const bool droproot,
 #  ifdef HAVE_LINUX_CAPABILITY
 		/* set flag: keep privileges across setuid() call. */
 		if (prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1) {
-			msyslog( LOG_ERR, "INIT: prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
+			msyslog( LOG_ERR, "INIT: prctl( PR_SET_KEEPCAPS, 1L ) failed: %s", strerror(errno) );
 			exit(-1);
 		}
 #  elif defined(HAVE_SOLARIS_PRIVS)
@@ -116,7 +116,7 @@ getuser:
 					sw_gid = pw->pw_gid;
 				} else {
 					if (errno)
-						msyslog(LOG_ERR, "INIT: getpwnam(%s) failed: %m", user);
+						msyslog(LOG_ERR, "INIT: getpwnam(%s) failed: %s", user, strerror(errno));
 					else
 						msyslog(LOG_ERR, "INIT: Cannot find user `%s'", user);
 					exit (-1);
@@ -143,67 +143,67 @@ getgroup:
 		if (chrootdir ) {
 			/* make sure cwd is inside the jail: */
 			if (chdir(chrootdir)) {
-				msyslog(LOG_ERR, "INIT: Cannot chdir() to `%s': %m", chrootdir);
+				msyslog(LOG_ERR, "INIT: Cannot chdir() to `%s': %s", chrootdir, strerror(errno));
 				exit (-1);
 			}
 			if (chroot(chrootdir)) {
-				msyslog(LOG_ERR, "INIT: Cannot chroot() to `%s': %m", chrootdir);
+				msyslog(LOG_ERR, "INIT: Cannot chroot() to `%s': %s", chrootdir, strerror(errno));
 				exit (-1);
 			}
 			if (chdir("/")) {
-				msyslog(LOG_ERR, "INIT: Cannot chdir() to root after chroot(): %m");
+				msyslog(LOG_ERR, "INIT: Cannot chdir() to root after chroot(): %s", strerror(errno));
 				exit (-1);
 			}
 		}
 #  ifdef HAVE_SOLARIS_PRIVS
 		if ((lowprivs = priv_str_to_set(LOWPRIVS, ",", NULL)) == NULL) {
-			msyslog(LOG_ERR, "INIT: priv_str_to_set() failed:%m");
+			msyslog(LOG_ERR, "INIT: priv_str_to_set() failed:%s", strerror(errno));
 			exit(-1);
 		}
 		if ((highprivs = priv_allocset()) == NULL) {
-			msyslog(LOG_ERR, "INIT: priv_allocset() failed:%m");
+			msyslog(LOG_ERR, "INIT: priv_allocset() failed:%s", strerror(errno));
 			exit(-1);
 		}
 		(void) getppriv(PRIV_PERMITTED, highprivs);
 		(void) priv_intersect(highprivs, lowprivs);
 		if (setppriv(PRIV_SET, PRIV_PERMITTED, lowprivs) == -1) {
-			msyslog(LOG_ERR, "INIT: setppriv() failed:%m");
+			msyslog(LOG_ERR, "INIT: setppriv() failed:%s", strerror(errno));
 			exit(-1);
 		}
 #  endif /* HAVE_SOLARIS_PRIVS */
                 /* FIXME? Apple takes an int as 2nd argument */
 		if (user && initgroups(user, (gid_t)sw_gid)) {
-			msyslog(LOG_ERR, "INIT: Cannot initgroups() to user `%s': %m", user);
+			msyslog(LOG_ERR, "INIT: Cannot initgroups() to user `%s': %s", user, strerror(errno));
 			exit (-1);
 		}
 		if (group && setgid(sw_gid)) {
-			msyslog(LOG_ERR, "INIT: Cannot setgid() to group `%s': %m", group);
+			msyslog(LOG_ERR, "INIT: Cannot setgid() to group `%s': %s", group, strerror(errno));
 			exit (-1);
 		}
 		if (group && setegid(sw_gid)) {
-			msyslog(LOG_ERR, "INIT: Cannot setegid() to group `%s': %m", group);
+			msyslog(LOG_ERR, "INIT: Cannot setegid() to group `%s': %s", group, strerror(errno));
 			exit (-1);
 		}
 		if (group) {
 			if (0 != setgroups(1, &sw_gid)) {
-				msyslog(LOG_ERR, "INIT: setgroups(1, %u) failed: %m",
-                                        sw_gid);
+				msyslog(LOG_ERR, "INIT: setgroups(1, %u) failed: %s",
+                                        sw_gid, strerror(errno));
 				exit (-1);
 			}
 		}
 		else if (pw)
 			if (0 != initgroups(pw->pw_name, (gid_t)pw->pw_gid)) {
 				msyslog(LOG_ERR,
-                                        "INIT: initgroups(<%s>, %u) filed: %m",
-                                        pw->pw_name, pw->pw_gid);
+                                        "INIT: initgroups(<%s>, %u) filed: %s",
+                                        pw->pw_name, pw->pw_gid, strerror(errno));
 				exit (-1);
 			}
 		if (user && setuid(sw_uid)) {
-			msyslog(LOG_ERR, "INIT: Cannot setuid() to user `%s': %m", user);
+			msyslog(LOG_ERR, "INIT: Cannot setuid() to user `%s': %s", user, strerror(errno));
 			exit (-1);
 		}
 		if (user && seteuid(sw_uid)) {
-			msyslog(LOG_ERR, "INIT: Cannot seteuid() to user `%s': %m", user);
+			msyslog(LOG_ERR, "INIT: Cannot seteuid() to user `%s': %s", user, strerror(errno));
 			exit (-1);
 		}
 
@@ -235,13 +235,13 @@ getgroup:
 			caps = cap_from_text(captext);
 			if (!caps) {
 				msyslog(LOG_ERR,
-					"INIT: cap_from_text(%s) failed: %m",
-					captext);
+					"INIT: cap_from_text(%s) failed: %s",
+					captext, strerror(errno));
 				exit(-1);
 			}
 			if (-1 == cap_set_proc(caps)) {
 				msyslog(LOG_ERR,
-					"INIT: cap_set_proc() failed to drop root privs: %m");
+					"INIT: cap_set_proc() failed to drop root privs: %s", strerror(errno));
 				exit(-1);
 			}
 			cap_free(caps);
@@ -249,11 +249,11 @@ getgroup:
 #  endif	/* HAVE_LINUX_CAPABILITY */
 #  ifdef HAVE_SOLARIS_PRIVS
 		if (priv_delset(lowprivs, "proc_setid") == -1) {
-			msyslog(LOG_ERR, "INIT: priv_delset() failed:%m");
+			msyslog(LOG_ERR, "INIT: priv_delset() failed:%s", strerror(errno));
 			exit(-1);
 		}
 		if (setppriv(PRIV_SET, PRIV_PERMITTED, lowprivs) == -1) {
-			msyslog(LOG_ERR, "INIT: setppriv() failed:%m");
+			msyslog(LOG_ERR, "INIT: setppriv() failed:%s", strerror(errno));
 			exit(-1);
 		}
 		priv_freeset(lowprivs);
@@ -275,7 +275,7 @@ getgroup:
         signal_no_reset1(SIGSYS, catchTrap);
 
 	if (NULL == ctx) {
-		msyslog(LOG_ERR, "INIT: sandbox: seccomp_init() failed: %m");
+		msyslog(LOG_ERR, "INIT: sandbox: seccomp_init() failed: %s", strerror(errno));
 		exit (1);
 		}
 
@@ -434,14 +434,14 @@ int scmp_sc[] = {
 			if (seccomp_rule_add(ctx,
 			    SCMP_ACT_ALLOW, scmp_sc[i], 0) < 0) {
 				msyslog(LOG_ERR,
-				    "INIT: sandbox: seccomp_rule_add() failed: %m");
+				    "INIT: sandbox: seccomp_rule_add() failed: %s", strerror(errno));
 			    exit(1);
 			}
 		}
 	}
 
 	if (seccomp_load(ctx) < 0) {
-		msyslog(LOG_ERR, "INIT: sandbox: seccomp_load() failed: %m");
+		msyslog(LOG_ERR, "INIT: sandbox: seccomp_load() failed: %s", strerror(errno));
 		exit(1);
 	}
 	else {

@@ -508,16 +508,16 @@ setup_logfile(
 {
 	if (NULL == syslog_fname && NULL != name) {
 		if (-1 == change_logfile(name, true))
-			msyslog(LOG_ERR, "LOG: Cannot open log file %s, %m",
-				name);
+			msyslog(LOG_ERR, "LOG: Cannot open log file %s, %s",
+				name, strerror(errno));
 		return ;
 	}
 	if (NULL == syslog_fname)
 		return;
 
 	if (-1 == change_logfile(syslog_fname, false))
-		msyslog(LOG_ERR, "LOG: Cannot reopen log file %s, %m",
-			syslog_fname);
+		msyslog(LOG_ERR, "LOG: Cannot reopen log file %s, %s",
+			syslog_fname, strerror(errno));
 }
 
 /*
@@ -538,8 +538,8 @@ reopen_logfile(void)
 
 	new_file = fopen(syslog_fname, "a");
 	if (NULL == new_file) {
-		msyslog(LOG_ERR, "LOG: reopen_logfile: couldn't open %s %m",
-                        syslog_fname);
+		msyslog(LOG_ERR, "LOG: reopen_logfile: couldn't open %s %s",
+                        syslog_fname, strerror(errno));
 		return;
 	}
 

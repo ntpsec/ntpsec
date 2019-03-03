@@ -12,7 +12,6 @@
  * macro for debugging output - cut down on #ifdef pollution.
  *
  * DPRINT() is the new one debug logger to rule them all.
- * Uses mprintf() and so supports %m, replaced by strerror(errno).
  *
  * The calling convention is not attractive:
  *     DPRINT(debuglevel, (fmt, ...));
