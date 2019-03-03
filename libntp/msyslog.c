@@ -39,7 +39,6 @@ uint32_t ntp_syslogmask = INIT_NTP_SYSLOGMASK;
 extern	char *	progname;
 
 /* Declare the local functions */
-static	int	mvfprintf(FILE *, const char *, va_list) NTP_PRINTF(2, 0);
 const char *	humanlogtime(void);
 static void	addto_syslog	(int, const char *);
 
@@ -164,63 +163,6 @@ addto_syslog(
 }
 
 
-int
-mvsnprintf(
-	char *		buf,
-	size_t		bufsiz,
-	const char *	fmt,
-	va_list		ap
-	)
-{
-	const char *	nfmt = fmt;
-	int		errval;
-
-	/*
-	 * Save the error value as soon as possible
-	 */
-	errval = errno;
-
-	errno = errval;
-	return vsnprintf(buf, bufsiz, nfmt, ap);
-}
-
-
-static int
-mvfprintf(
-	FILE *		fp,
-	const char *	fmt,
-	va_list		ap
-	)
-{
-	const char *	nfmt = fmt;
-	int		errval;
-
-	/*
-	 * Save the error value as soon as possible
-	 */
-	errval = errno;
-
-	errno = errval;
-	return vfprintf(fp, nfmt, ap);
-}
-
-int
-mprintf(
-	const char *	fmt,
-	...
-	)
-{
-	va_list		ap;
-	int		rc;
-
-	va_start(ap, fmt);
-	rc = mvfprintf(stdout, fmt, ap);
-	va_end(ap);
-
-	return rc;
-}
-
-
 void
 msyslog(
 	int		level,
@@ -232,7 +174,7 @@ msyslog(
 	va_list	ap;
 
 	va_start(ap, fmt);
-	mvsnprintf(buf, sizeof(buf), fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 	addto_syslog(level, buf);
 }

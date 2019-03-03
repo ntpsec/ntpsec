@@ -2150,7 +2150,7 @@ log_data(
 			sptr++;
 		}
 		*dptr = '\0';
-		mprintf("%s[%s]: '%s'\n", up->logname, what, s_lbuf);
+		printf("%s[%s]: '%s'\n", up->logname, what, s_lbuf);
 	}
 }
 

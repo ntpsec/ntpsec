@@ -23,7 +23,7 @@
 #define DPRINT(lvl, arg)					\
 	do { 						\
 		if (debug >= (lvl))			\
-			mprintf arg;			\
+			printf arg;			\
 	} while (0)
 #else
 #define DPRINT(lvl, arg)	do {} while (0)
@@ -32,7 +32,7 @@
 #define TPRINT(lvl, arg)				\
 	do { 						\
 		if (debug >= (lvl))			\
-			mprintf arg;			\
+			printf arg;			\
 	} while (0)
 
 #endif	/* GUARD_NTP_DEBUG_H */

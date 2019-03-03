@@ -501,7 +501,7 @@ mprintf_clock_stats(
 	char	msg[512];
 
 	va_start(ap, fmt);
-	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
+	rc = vsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 	if (stats_control)
 		record_clock_stats(peer, msg);

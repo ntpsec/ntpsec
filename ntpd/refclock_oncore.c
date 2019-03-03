@@ -4086,7 +4086,7 @@ oncore_log_f(
 	char	msg[512];
 
 	va_start(ap, fmt);
-	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
+	rc = vsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 	oncore_log(instance, log_level, msg);
 

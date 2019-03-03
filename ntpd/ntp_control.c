@@ -4227,7 +4227,7 @@ mprintf_event(
 	char	msg[512];
 
 	va_start(ap, fmt);
-	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
+	rc = vsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 	report_event(evcode, p, msg);
 
