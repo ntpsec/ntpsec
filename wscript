@@ -791,9 +791,6 @@ int main(int argc, char **argv) {
                "same sockets on alternate interfaces, required "
                "by Linux at least")
 
-    from wafhelpers.check_vsprintfm import check_vsprintfm
-    check_vsprintfm(ctx)
-
     # Check for directory separator
     if ctx.env.DEST_OS == "win32":
         sep = "\\"
