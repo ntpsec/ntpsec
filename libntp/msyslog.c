@@ -42,71 +42,6 @@ extern	char *	progname;
 static	int	mvfprintf(FILE *, const char *, va_list) NTP_PRINTF(2, 0);
 const char *	humanlogtime(void);
 static void	addto_syslog	(int, const char *);
-#ifndef VSNPRINTF_PERCENT_M
-static	void	errno_to_str(int, char *, size_t);
-void	format_errmsg	(char *, size_t, const char *, int);
-
-/* format_errmsg() is under #ifndef VSNPRINTF_PERCENT_M above */
-void
-format_errmsg(
-	char *		nfmt,
-	size_t		lennfmt,
-	const char *	fmt,
-	int		errval
-	)
-{
-	char errmsg[256];
-	char c;
-	char *n;
-	const char *f;
-	size_t len;
-
-	n = nfmt;
-	f = fmt;
-	while ((c = *f++) != '\0' && n < (nfmt + lennfmt - 1)) {
-		if (c != '%') {
-			*n++ = c;
-			continue;
-		}
-		if ((c = *f++) != 'm') {
-			*n++ = '%';
-			if ('\0' == c)
-				break;
-			*n++ = c;
-			continue;
-		}
-		errno_to_str(errval, errmsg, sizeof(errmsg));
-		len = strlen(errmsg);
-
-		/* Make sure we have enough space for the error message */
-		if ((n + len) < (nfmt + lennfmt - 1)) {
-			memcpy(n, errmsg, len);
-			n += len;
-		}
-	}
-	*n = '\0';
-}
-
-
-/*
- * errno_to_str() - a thread-safe strerror() replacement.
- *		    Hides the varied signatures of strerror_r().
- */
-static void
-errno_to_str(
-	int	err,
-	char *	buf,
-	size_t	bufsiz
-	)
-{
-	int rc;
-
-	rc = strerror_r(err, buf, bufsiz);
-	if (rc)
-		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
-			 err, errno);
-}
-#endif	/* VSNPRINTF_PERCENT_M */
 
 
 /* We don't want to clutter up the log with the year and day of the week,
@@ -237,11 +172,7 @@ mvsnprintf(
 	va_list		ap
 	)
 {
-#ifndef VSNPRINTF_PERCENT_M
-	char		nfmt[256];
-#else
 	const char *	nfmt = fmt;
-#endif
 	int		errval;
 
 	/*
@@ -249,11 +180,7 @@ mvsnprintf(
 	 */
 	errval = errno;
 
-#ifndef VSNPRINTF_PERCENT_M
-	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
-#else
 	errno = errval;
-#endif
 	return vsnprintf(buf, bufsiz, nfmt, ap);
 }
 
@@ -265,11 +192,7 @@ mvfprintf(
 	va_list		ap
 	)
 {
-#ifndef VSNPRINTF_PERCENT_M
-	char		nfmt[256];
-#else
 	const char *	nfmt = fmt;
-#endif
 	int		errval;
 
 	/*
@@ -277,11 +200,7 @@ mvfprintf(
 	 */
 	errval = errno;
 
-#ifndef VSNPRINTF_PERCENT_M
-	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
-#else
 	errno = errval;
-#endif
 	return vfprintf(fp, nfmt, ap);
 }
 
