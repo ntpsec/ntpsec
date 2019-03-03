@@ -15,7 +15,7 @@ TEST_TEAR_DOWN(msyslog) {}
 #include <string.h>
 #include <errno.h>
 
-static int     msnprintf(char *, size_t, const char *, ...) __sysloglike(3, 4);
+static int     msnprintf(char *, size_t, const char *, ...) NTP_PRINTF(3, 4);
 
 static int
 msnprintf(

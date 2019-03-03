@@ -21,10 +21,6 @@
 #include <bsd/string.h>
 #endif
 
-#ifndef __sysloglike
-#define __sysloglike(fmt, args)
-#endif /* __sysloglike */
-
 #ifdef __GNUC__
 #define NTP_PRINTF(fmt, args) __attribute__((__format__(__printf__, fmt, args)))
 #else
@@ -33,10 +29,10 @@
 
 extern const char *ntpd_version(void);
 
-extern	int	mprintf(const char *, ...) __sysloglike(1, 2);
+extern	int	mprintf(const char *, ...) NTP_PRINTF(1, 2);
 extern	int	mvsnprintf(char *, size_t, const char *, va_list)
-			__sysloglike(3, 0);
-extern	void	msyslog(int, const char *, ...) __sysloglike(2, 3);
+			NTP_PRINTF(3, 0);
+extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
 extern	void	init_logging	(const char *, uint32_t, int);
 extern	int	change_logfile	(const char *, bool);
 extern	void	reopen_logfile  (void);
