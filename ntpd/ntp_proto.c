@@ -717,9 +717,9 @@ receive(
 		    stat_count.sys_declined++;
 		    break;
 		}
-		if (rbufp->extens_present
-                     && !extens_client_recv(peer,
-                          rbufp->recv_buffer, rbufp->recv_length)) {
+		if ((peer->cfg.flags & FLAG_NTS)
+		     && (!rbufp->extens_present || !extens_client_recv(peer,
+		          rbufp->recv_buffer, rbufp->recv_length))) {
 		    stat_count.sys_declined++;
 		    break;
 		}
