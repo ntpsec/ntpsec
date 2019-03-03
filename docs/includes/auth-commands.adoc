@@ -60,13 +60,14 @@ The options are as follows:
 +mintls+ _string_::
   Set the lowest allowable TLS version to negotiate. Will be useful in
   the wake of a TLS compromise.  Reasonable values are _"TLS1.2"_ and
-  _"TLS1.3"_ if your system supports it (those string fields need to
+  _"TLS1.3"_ if your system supports it (those string quotes need to
   be part of the literal in the configuration file).  1.3 was first supported in
   OpenSSL version 1.1.1.
 
 +maxtls+ _string_::
   Set the highest allowable TLS version to negotiate. By setting
-  +mintls+ and +maxtls+ equal, you can force the TLS version for testing.
+  +mintls+ and +maxtls+ equal, you can force the TLS version for
+  testing. Format is as for +mintls+.
 
 // https://crypto.stackexchange.com/questions/8964/sending-tls-messages-with-out-encryption-using-openssl-code
 +tlsciphers+ _string_::
