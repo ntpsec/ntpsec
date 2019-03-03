@@ -9,7 +9,7 @@ Conflicts=systemd-timesyncd.service
 [Service]
 Type=forking
 PrivateTmp=true
-ExecStart=/usr/sbin/ntpd -g -N -u ntp:ntp
+ExecStart=@SBINDIR@/ntpd -g -N -u ntp:ntp
 # Specifying -g on the command line allows ntpd to make large adjustments to
 # the clock on boot.  However, if Restart=yes is set, a malicious (or broken)
 # server could send the incorrect time, trip the panic threshold, and when

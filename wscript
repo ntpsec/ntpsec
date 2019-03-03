@@ -197,6 +197,14 @@ def configure(ctx):
     if ctx.options.disable_manpage:
         ctx.env.DISABLE_MANPAGE = True
 
+    ctx.check_cfg(
+        package='systemd', variables=['systemdsystemunitdir'],
+        uselib_store='SYSTEMD', mandatory=False,
+        msg="Checking for systemd")
+    if ctx.env.SYSTEMD_systemdsystemunitdir:
+        ctx.start_msg("systemd unit directory:")
+        ctx.end_msg(ctx.env.SYSTEMD_systemdsystemunitdir)
+
     source_date_epoch = os.getenv('SOURCE_DATE_EPOCH', None)
     if ctx.options.build_epoch is not None:
         build_epoch = ctx.options.build_epoch
@@ -1038,6 +1046,7 @@ def build(ctx):
     ctx.recurse("ntptime")
     ctx.recurse("pylib")
     ctx.recurse("attic")
+    ctx.recurse("etc")
     ctx.recurse("tests")
 
     if ctx.env['PYTHON_CURSES']:
@@ -1113,22 +1122,6 @@ def build(ctx):
         elif ctx.env.PYTHONARCHDIR not in os.environ["PYTHONPATH"]:
             print("--- PYTHONARCHDIR not in PYTHONPATH, "
                   "loading the Python ntp library may be troublesome ---")
-
-#
-# Boot script setup
-#
-
-
-def systemdenable(ctx):
-    "Enable boot time start with systemd. Must run as root."
-    ctx.exec_command("cp etc/ntpd.service etc/ntp-wait.service "
-                     "/usr/lib/systemd/system/")
-
-
-def systemddisable(ctx):
-    "Disable boot time start with systemd. Must run as root."
-    ctx.exec_command("rm -f /usr/lib/systemd/system/ntpd.service "
-                     "/usr/lib/systemd/system/ntp-wait.service")
 
 #
 # Miscellaneous utility productions

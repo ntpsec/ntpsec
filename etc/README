@@ -13,9 +13,8 @@ give a sane default configuration.
 The rc files are start/stop scripts for NTP under System-V-style
 init. They are intended as models for distribution packagers.
 
-The ntpd.service file is intended for use with systemd. Note that
-it assumes the waf default installation location /usr/sbin for
-ntpd; you may need to modify this for some distrbutions.
+The *.service and *.timer files are for use with systemd.  Only
+ntpd.service and ntp-wait.service are installed by default.
 
 Additional information can be found in the ./docs subdirectory of the
 base directory.

@@ -8,7 +8,7 @@ ConditionCapability=CAP_SYS_TIME
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/ntpwait -s 1 -n 30000
+ExecStart=@BINDIR@/ntpwait -s 1 -n 30000
 RemainAfterExit=yes
 StandardOutput=null
 

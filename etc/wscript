@@ -1,0 +1,14 @@
+def build(ctx):
+
+    units = [
+        "ntp-wait.service",
+        "ntpd.service",
+    ]
+
+    # Install unit files
+    ctx(
+        features="subst",
+        source=units,
+        target=units,
+        install_path=ctx.env.SYSTEMD_systemdsystemunitdir,
+    )
