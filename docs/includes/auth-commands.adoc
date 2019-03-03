@@ -59,8 +59,8 @@ The options are as follows:
 
 +mintls+ _string_::
   Set the lowest allowable TLS version to negotiate. Will be useful in
-  the wake of a TLS compromise.  Reasonable values are _TLS1.2_ and
-  _TLS1.3_ if your system supports it.  TLS1.3 was first supported in
+  the wake of a TLS compromise.  Reasonable values are _"1.2"_ and
+  _"1.3"_ if your system supports it.  1.3 was first supported in
   OpenSSL version 1.1.1.
 
 +maxtls+ _string_::
