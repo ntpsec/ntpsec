@@ -295,7 +295,6 @@
 %type	<Integer>	tinker_option_keyword
 %type	<Attr_val>	tinker_option
 %type	<Attr_val_fifo>	tinker_option_list
-%type	<Integer>	nts_int_option_keyword
 %type	<Integer>	nts_string_option_keyword
 %type	<Attr_val>	nts_option
 %type	<Attr_val_fifo>	nts_option_list
@@ -1122,9 +1121,7 @@ nts_option_list
 	;
 
 nts_option
-	:	nts_int_option_keyword number
-			{ $$ = create_attr_dval($1, $2); }
-	|	nts_string_option_keyword T_String
+	:	nts_string_option_keyword T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Disable
 			{ $$ = create_attr_ival($1, 0); }
@@ -1132,9 +1129,6 @@ nts_option
 			{ $$ = create_attr_ival($1, 1); }
 	;
 
-nts_int_option_keyword
-	:	T_Maxtls
-	|	T_Mintls
 	;
 
 nts_string_option_keyword
@@ -1143,6 +1137,8 @@ nts_string_option_keyword
 	|	T_Key
 	|	T_Tlsciphers
 	|	T_Tlsciphersuites
+	|	T_Maxtls
+	|	T_Mintls
 
 
 /* Miscellaneous Commands
