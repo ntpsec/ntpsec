@@ -2072,14 +2072,12 @@ save_ltc(
 	clockprocT * const pp,
 	const char * const tc)
 {
-	size_t len;
 
-	len = (tc) ? strlen(tc) : 0;
-	if (len >= sizeof(pp->a_lastcode))
-		len = sizeof(pp->a_lastcode) - 1;
-	pp->lencode = (unsigned short)len;
-	memcpy(pp->a_lastcode, tc, len);
-	pp->a_lastcode[len] = '\0';
+        if (NULL == tc) {
+	    pp->a_lastcode[0] = '\0';
+        } else {
+	    strlcpy(pp->a_lastcode, tc, sizeof(pp->a_lastcode));
+	}
 }
 
 /* -------------------------------------------------------------------
