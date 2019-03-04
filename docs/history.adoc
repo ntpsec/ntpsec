@@ -61,5 +61,6 @@ underspecification and technical difficulties (especially near
 Autokey, its attempt at public-key encryption for authentication)
 NTPv4 implementations were in general use by 2014.
 
-No extension mechanism for the protocol was defined until
-https://tools.ietf.org/html/rfc7822[RFC 7622] in 2016.
+The extension mechanism for the protocol was partly specified in RFC
+5905, but nor fully defined until
+https://tools.ietf.org/html/rfc7822[RFC 7822] in 2016.
