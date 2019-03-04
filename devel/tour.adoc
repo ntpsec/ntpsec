@@ -408,6 +408,18 @@ The process everything step sorts the contents of the FIFO, then discards
 outliers, roughly 1/3 of the samples, and then figures out the average and
 injects that into the peer buffer for the refclock.
 
+Another way of looking at it: there are two parts to the refclock code.
+
+The first operates on the second time scale.  The main thread calls the 
+refclock receive routine when a "packet" arrives over the serial port and/or 
+the timer routine every second so it can poll SHM and cleanup of the serial 
+port gets unplugged.  That level of code puts samples into a FIFO.
+ 
+The other is at the poll-interval level,16 seconds to 64 seconds.  That takes 
+data out of the FIFO, discards outliers, averages, and injects a sample into 
+the normal NTP processing pipeline where it shows up as a 1 bit in the peers 
+reach mask.  (or a 0 if there weren't any good samples)
+
 == Asynchronous DNS lookup
 
 The DNS code runs in a separate thread to avoid stalling
