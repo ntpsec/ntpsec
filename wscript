@@ -579,6 +579,29 @@ int main(int argc, char **argv) {
         ctx.define("_POSIX_C_SOURCE", "200112L", quote=False)
         ctx.define("__EXTENSIONS__", "1", quote=False)
 
+    # Borrowed from waf-1.9, when type_name and field_name were valid keywords
+    SNIP_TYPE = '''
+    int main(int argc, char **argv) {
+        (void)argc; (void)argv;
+        if ((%(type_name)s *) 0) return 0;
+        if (sizeof (%(type_name)s)) return 0;
+        return 1;
+    }
+    '''
+
+    SNIP_FIELD = '''
+    #include <stddef.h>
+    int main(int argc, char **argv) {
+        char *off;
+        (void)argc; (void)argv;
+        off = (char*) &((%(type_name)s*)0)->%(field_name)s;
+        return (size_t) off < sizeof(%(type_name)s);
+    }
+    '''
+
+    def to_header(header_name):
+        return ''.join(['#include <%s>\n' % x for x in Utils.to_list(header_name)])
+
     structures = (
         ("struct if_laddrconf", ["sys/types.h", "net/if6.h"], False),
         ("struct if_laddrreq", ["sys/types.h", "net/if6.h"], False),
@@ -586,14 +609,12 @@ int main(int argc, char **argv) {
         ("struct ntptimeval", ["sys/time.h", "sys/timex.h"], False),
     )
     for (s, h, r) in structures:
-        ctx.check_cc(type_name=s, header_name=h, mandatory=r)
-
-    # waf's SNIP_FIELD should likely include this header itself
-    # This is needed on some systems to get size_t for following checks
-    ctx.check_cc(auto_add_header_name=True,
-                 header_name="stddef.h",
-                 define_name="",           # omit from config.h
-                 mandatory=False)
+        ctx.check_cc(
+            fragment=to_header(h) + SNIP_TYPE % {'type_name': s},
+            msg='Checking for type %s' % s,
+            define_name=ctx.have_define(s.upper()),
+            mandatory=r,
+        )
 
     structure_fields = (
         ("struct timex", "time_tick", ["sys/time.h", "sys/timex.h"]),
@@ -603,7 +624,12 @@ int main(int argc, char **argv) {
         # first in glibc 2.12
     )
     for (s, f, h) in structure_fields:
-        ctx.check_cc(type_name=s, field_name=f, header_name=h, mandatory=False)
+        ctx.check_cc(
+            fragment=to_header(h) + SNIP_FIELD % {'type_name': s, 'field_name': f},
+            msg='Checking for field %s in %s' % (f, s),
+            define_name=ctx.have_define((s + '_' + f).upper()),
+            mandatory=False,
+        )
 
     # mostly used by timetoa.h and timespecops.h
     sizeofs = [
