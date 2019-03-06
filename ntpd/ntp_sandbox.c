@@ -194,7 +194,7 @@ getgroup:
 		else if (pw)
 			if (0 != initgroups(pw->pw_name, (gid_t)pw->pw_gid)) {
 				msyslog(LOG_ERR,
-                                        "INIT: initgroups(<%s>, %u) filed: %s",
+                                        "INIT: initgroups(<%s>, %u) failed: %s",
                                         pw->pw_name, pw->pw_gid, strerror(errno));
 				exit (-1);
 			}
