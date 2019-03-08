@@ -1,12 +1,10 @@
 def build(ctx):
-    bldnode = ctx.bldnode.abspath()
-
     frob_sources = ['main.c', 'bumpclock.c', 'dump.c', 'jitter.c',
                     'precision.c', 'pps-api.c', 'tickadj.c']
 
     ctx(
-        features="c cprogram bld_include src_include",
-        includes=["%s/ntpfrob/" % bldnode],
+        features="c cprogram",
+        includes=[ctx.bldnode.parent.abspath(), "../include"],
         install_path='${BINDIR}',
         source=frob_sources,
         target="ntpfrob",

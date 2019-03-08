@@ -3,7 +3,6 @@ from waflib import Utils  # pylint: disable=import-error
 
 
 def build(ctx):
-    srcnode = ctx.srcnode.abspath()
     testsrc = ctx.srcnode.make_node('tests')
     pylib = ctx.srcnode.make_node('pylib')
     testpylib = testsrc.make_node('pylib')
@@ -57,15 +56,11 @@ def build(ctx):
     ] + common_source
 
     ctx.ntp_test(
-        features="c cprogram bld_include src_include test",
+        features="c cprogram test",
         target="test_libntp",
         install_path=None,
         defines=unity_config + ["TEST_LIBNTP=1"],
-        includes=["%s/tests/unity/" % srcnode,
-                  "%s/tests/libntp/" % srcnode,
-                  "%s/tests/ntpdig/" % srcnode,
-                  "%s/tests/common/" % srcnode
-                  ] + ctx.env.PLATFORM_INCLUDES,
+        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "common"] + ctx.env.PLATFORM_INCLUDES,
         use="unity ntp parse M PTHREAD CRYPTO RT SOCKET NSL",
         source=libntp_source,
     )
@@ -82,11 +77,8 @@ def build(ctx):
 
         ctx.ntp_test(
             defines=unity_config + ["TEST_LIBPARSE=1"],
-            features="c cprogram bld_include src_include test",
-            includes=["%s/tests/unity/" % srcnode,
-                      "%s/tests/libparse/" % srcnode,
-                      "%s/tests/common/" % srcnode
-                      ] + ctx.env.PLATFORM_INCLUDES,
+            features="c cprogram test",
+            includes=[ctx.bldnode.parent.abspath(), "../include", "unity"] + ctx.env.PLATFORM_INCLUDES,
             install_path=None,
             lib=["parse"],
             libpath=["libparse"],
@@ -105,12 +97,8 @@ def build(ctx):
 
     ctx.ntp_test(
         defines=unity_config + ["TEST_NTPD=1"],
-        features="c cprogram bld_include src_include test",
-        includes=["%s/tests/unity/" % srcnode,
-                  "%s/ntpd/" % srcnode,
-                  "%s/tests/libntp/" % srcnode,
-                  "%s/tests/common/" % srcnode,
-                  ],
+        features="c cprogram test",
+        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "../ntpd", "common"],
         install_path=None,
         source=ntpd_source,
         target="test_ntpd",

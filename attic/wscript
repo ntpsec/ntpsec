@@ -1,14 +1,12 @@
 def build(ctx):
-    bldnode = ctx.bldnode.abspath()
-
     util = ['sht', 'digest-find', 'digest-timing', 'clocks']
 
     for name in util:
         ctx(
             target=name,
-            features="c cprogram bld_include src_include",
+            features="c cprogram",
+            includes=[ctx.bldnode.parent.abspath(), "../include"],
             source=[name + ".c"],
-            includes=["%s/%s/" % (bldnode, name)],
             use="ntp M CRYPTO RT PTHREAD",
             install_path=None,
         )

@@ -41,12 +41,10 @@ def build(ctx):
     if not ctx.env.HAVE_STRLCAT or not ctx.env.HAVE_STRLCPY:
         libntp_source_sharable += ["strl_obsd.c"]
 
-    includes = ctx.env.PLATFORM_INCLUDES
-
     # C library
     ctx(
-        features="c cstlib bld_include src_include",
-        includes=includes,
+        features="c cstlib",
+        includes=[ctx.bldnode.parent.abspath(), "../include"] + ctx.env.PLATFORM_INCLUDES,
         source=libntp_source + libntp_source_sharable,
         target="ntp",
         use="SSL CRYPTO",
@@ -54,9 +52,9 @@ def build(ctx):
 
     # Loadable Python extension
     ctx(
-        features="c cshlib bld_include src_include pyext",
+        features="c cshlib pyext",
         install_path='${PYTHONARCHDIR}/ntp',
-        includes=includes,
+        includes=[ctx.bldnode.parent.abspath(), "../include"] + ctx.env.PLATFORM_INCLUDES,
         source=["pymodule.c"] + libntp_source_sharable,
         target="../pylib/ntpc",  # Put the output in the pylib directory
         use="M RT CRYPTO",

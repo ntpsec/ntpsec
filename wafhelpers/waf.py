@@ -1,19 +1,5 @@
 from waflib.Configure import conf
-from waflib.TaskGen import before_method, feature, re_m4
-
-
-@before_method('apply_incpaths')
-@feature('bld_include')
-def insert_blddir(self):
-    bldnode = self.bld.bldnode.parent.abspath()
-    self.includes += [bldnode]
-
-
-@before_method('apply_incpaths')
-@feature('src_include')
-def insert_srcdir(self):
-    srcnode = self.bld.srcnode.abspath()
-    self.includes += ["%s/include" % srcnode]
+from waflib.TaskGen import re_m4
 
 
 def manpage_subst_fun(self, code):

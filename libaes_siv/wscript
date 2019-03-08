@@ -5,7 +5,8 @@ def build(ctx):
 
     ctx(
         target="aes_siv",
-        features="c cstlib bld_include" ,
+        features="c cstlib",
+        includes=[ctx.bldnode.parent.abspath()],
         source="aes_siv.c",
         use="CRYPTO",
     )
