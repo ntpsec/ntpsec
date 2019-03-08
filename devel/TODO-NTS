@@ -1,22 +1,26 @@
-Key rotation and save to disk
-
 multithread msyslog
 
-? thread per instance on NTS-KE server
+Ratchet for new cookie key
 
 documentation:
   HOWTO on NTS
   HOWTO on certificates
   glossary: https://letsencrypt.org/docs/glossary/
 
+Startup with bad time
+
+? thread per instance on NTS-KE server
+
+Password for certificate's private key and cookie keys file.
+  Need to get it it before daemon mode.
+
 -------
 
-The current code has the NTS-KE and ntpd in the same package.
-
-There are opportunities beyond that.  TBD.
-
--------
+Save cookie to disk for restart without asking NTS-KE server
 
 security level
 
 client certificates
+
+Pool/cluster mode
+
