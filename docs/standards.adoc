@@ -11,32 +11,32 @@ include::html.include[]
 == Overview of relevant standards
 
 The principal standard informing the NTPsec software is
-https://tools.ietf.org/html/rfc5905[RFC 5905: Network Time Protocol
+link:https://tools.ietf.org/html/rfc5905[RFC 5905: Network Time Protocol
 Version 4: Protocol and Algorithms Specification].
 
-SNTP is specified by https://tools.ietf.org/html/rfc2030[RFC 2030:
+SNTP is specified by link:https://tools.ietf.org/html/rfc2030[RFC 2030:
 Simple Network Time Protocol (SNTP) Version 4 for IPv4, IPv6 and OSI].
 
 Extension fields are described by
-https://tools.ietf.org/html/rfc5905[RFC 7822: Network Time Protocol
+link:https://tools.ietf.org/html/rfc5905[RFC 7822: Network Time Protocol
 Version 4 (NTPv4) Extension Fields].
 
 NTPsec has entirely dropped conformance with the Autokey feature
-described in https://tools.ietf.org/html/rfc5905[RFC 5906].  Autokey
+described in link:https://tools.ietf.org/html/rfc5905[RFC 5906].  Autokey
 never quite worked, and the design was unstable enough that if there
 was ever actually a time when it fully conformed to its RFC that span
 must have been pretty short.
 
-Older NTP RFCs such as https://tools.ietf.org/html/rfc1305[RFC 1305]
+Older NTP RFCs such as link:https://tools.ietf.org/html/rfc1305[RFC 1305]
 are no longer relevant.
 
-https://tools.ietf.org/rfc/rfc5297.txt[RFC 5297] describes the
+link:https://tools.ietf.org/rfc/rfc5297.txt[RFC 5297] describes the
 authenticated encryption used in Network Time Security
 key exchanges.
 
 Network Time Security does not yet have a final fully accepted
 RFC. The NTPsec implementation is based on the
-draft-ietf-ntp-using-nts-for-ntp-17[version 17 draft].
+link:https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp-17[version 17 draft].
 
 [[against5905]]
 == Divergences from RFC 5905
@@ -56,12 +56,12 @@ MD5 or AES-CMAC digest) is not the only possible length for the MAC. This was
 a pre-NTPsec change present in NTP Classic versions after 2010.
 
 NTPsec conforms to the
-https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/[NTP
+link:https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/[NTP
 Client Data Minimization] draft RFC, which changes the client-side
 generation of some packet headers.
 
 NTPsec also conforms to the
-https://datatracker.ietf.org/doc/draft-ietf-ntp-mac/[MAC for NTP]
+link:https://datatracker.ietf.org/doc/draft-ietf-ntp-mac/[MAC for NTP]
 draft RFC, implementing AES-CMAC (128 bits).
 
 The table of reference identifiers in Figure 12 is largely obsolete
