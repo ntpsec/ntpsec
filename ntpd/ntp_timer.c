@@ -41,7 +41,8 @@ int interface_interval;     /* init_io() sets def. 300s */
  */
 static uptime_t interface_timer;	/* interface update timer */
 static uptime_t adjust_timer;	/* second timer */
-static uptime_t stats_timer;	/* stats timer */
+static uptime_t stats_timer;
+static uptime_t cookie_timer;
 static uptime_t leapf_timer;	/* Report leapfile problems once/day */
 static uptime_t huffpuff_timer;	/* huff-n'-puff timer */
 static unsigned long	leapsec; /* secs to next leap (proximity class) */
@@ -141,6 +142,7 @@ init_timer(void)
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	stats_timer = SECSPERHR;
+	cookie_timer = SECSPERHR;
 	leapf_timer = SECSPERDAY;
 	huffpuff_timer = 0;
 	interface_timer = 0;
@@ -292,6 +294,12 @@ timer(void)
 		} else {
 			check_leap_file(false, now);
 		}
+	}
+
+	/* time for new NTS K/I ? */
+	if (cookie_timer <= current_time) {
+		cookie_timer += 5*60;
+		nts_timer();
 	}
 }
 

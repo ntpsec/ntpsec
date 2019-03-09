@@ -28,18 +28,10 @@ struct ntsconfig_t ntsconfig = {
   .tlsciphersuites = NULL,
   .cert = NULL,
   .key = NULL,
+  .KI = NULL,
   .ca = NULL
 };
 
-
-/*
- * Daily rotation of server-side master keys.
- */
-int nts_daily(struct ntscfg_t *cfg)
-{
-	UNUSED_ARG(cfg);
-	return 0;
-}
 
 
 /*****************************************************/

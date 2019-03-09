@@ -448,7 +448,6 @@ void nts_init(void);   /* Before sandbox() */
 void nts_init2(void);  /* After sandbox() */
 bool nts_probe(struct peer *peer);
 bool nts_check(struct peer *peer);
-
-int nts_daily(struct ntscfg_t *);
+void nts_timer(void);
 
 #endif	/* GUARD_NTPD_H */

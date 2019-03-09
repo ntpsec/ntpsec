@@ -20,11 +20,6 @@
 #include "ntp_stdlib.h"
 #include "nts.h"
 
-/* default file names */
-#define NTS_CERT_FILE "/etc/ntp/cert-chain.pem"
-#define NTS_KEY_FILE "/etc/ntp/key.pem"
-
-int nts_ke_port = 123;
 
 static bool nts_load_certificate(SSL_CTX *ctx);
 static int create_listener(int port, int family);
@@ -37,12 +32,20 @@ static SSL_CTX *server_ctx = NULL;
 static int listner4_sock = -1;
 static int listner6_sock = -1;
 
+/* Statistics for ntpq */
+uint64_t nts_ke_serves = 0;
+uint64_t nts_ke_serves_bad = 0;
+uint64_t nts_ke_probes = 0;
+uint64_t nts_ke_probes_bad = 0;
+
+
 void nts_init(void) {
     bool ok = true;
-    ok &= nts_cookie_init();
-    if (ntsconfig.ntsenable)
+    if (ntsconfig.ntsenable) {
         ok &= nts_server_init();
+    }
     ok &= nts_client_init();
+    ok &= nts_cookie_init();
     ok &= extens_init();
     if (!ok) {
       msyslog(LOG_ERR, "NTS: troubles during init.  Bailing.");
@@ -52,8 +55,10 @@ void nts_init(void) {
 
 void nts_init2(void) {
     bool ok = true;
-    if (ntsconfig.ntsenable)
+    if (ntsconfig.ntsenable) {
       ok &= nts_server_init2();
+      ok &= nts_cookie_init2();
+    }
     if (!ok) {
       msyslog(LOG_ERR, "NTS: troubles during init2.  Bailing.");
       exit(1);
@@ -64,7 +69,7 @@ bool nts_server_init(void) {
     bool ok = true;
 
     msyslog(LOG_INFO, "NTSs: starting NTS-KE server listening on port %d",
-        nts_ke_port);
+        NTS_KE_PORT);
 
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
     server_ctx = SSL_CTX_new(TLS_server_method());
@@ -98,9 +103,9 @@ bool nts_server_init(void) {
 #endif
 
 
-    listner4_sock = create_listener(nts_ke_port, AF_INET);
+    listner4_sock = create_listener(NTS_KE_PORT, AF_INET);
     if (listner4_sock < 0) return false;
-    listner6_sock = create_listener(nts_ke_port, AF_INET6);
+    listner6_sock = create_listener(NTS_KE_PORT, AF_INET6);
     if (listner6_sock < 0) return false;
 
     return true;
@@ -159,7 +164,7 @@ void* nts_ke_listener(void* arg) {
 	    nts_ke_serves_bad++;
             continue;
         }
-        msyslog(LOG_INFO, "NTSs: Using %s,  %s (%d)",
+        msyslog(LOG_INFO, "NTSs: Using %s, %s (%d)",
             SSL_get_version(ssl),
             SSL_get_cipher_name(ssl),
             SSL_get_cipher_bits(ssl, NULL));

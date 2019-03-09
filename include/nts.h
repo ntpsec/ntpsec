@@ -8,6 +8,13 @@
 #include <stdint.h>
 #include <openssl/ssl.h>
 
+/* default file names */
+#define NTS_CERT_FILE "/etc/ntp/cert-chain.pem"
+#define NTS_KEY_FILE "/etc/ntp/key.pem"
+#define NTS_COOKIE_KEY_FILE "/var/lib/ntp/nts-keys"
+
+#define NTS_KE_PORT		123
+
 #define NTS_KE_TIMEOUT		3
 
 #define NTS_MAX_KEYLEN		64	/* used in cookies */
@@ -62,6 +69,7 @@ struct ntsconfig_t {
     const char *tlsciphersuites;/* allowed TLS 1.3 ciphersuites */
     const char *cert;		/* server certificate key */
     const char *key;		/* server private key */
+    const char *KI;		/* K/I for making cookies */
     const char *ca;		/* root cert dir/file */
 };
 
@@ -142,6 +150,7 @@ extern struct ntsconfig_t ntsconfig;
 bool nts_server_init(void);
 bool nts_client_init(void);
 bool nts_cookie_init(void);
+bool nts_cookie_init2(void);	/* after sandbox */
 void nts_log_ssl_error(void);
 
 bool nts_load_ciphers(SSL_CTX *ctx);
@@ -201,14 +210,18 @@ uint16_t next_bytes(BufCtl* buf, uint8_t *data, int length);
 
 
 
-/* NTS-related system variables visible via ntpq -c nts */
+/* NTS-related statistics visible via ntpq -c nts */
 extern uint64_t nts_client_send;
 extern uint64_t nts_client_recv;
 extern uint64_t nts_client_recv_bad;
 extern uint64_t nts_server_send;
 extern uint64_t nts_server_recv;
 extern uint64_t nts_server_recv_bad;
-extern uint64_t nts_server_recv_bad;
+extern uint64_t nts_cookie_make;
+extern uint64_t nts_cookie_decode;
+extern uint64_t nts_cookie_decode_old;
+extern uint64_t nts_cookie_decode_too_old;
+extern uint64_t nts_cookie_decode_error;
 extern uint64_t nts_ke_serves;
 extern uint64_t nts_ke_serves_bad;
 extern uint64_t nts_ke_probes;

@@ -1491,17 +1491,22 @@ usage: authinfo
     def do_ntsinfo(self, _line):
         "display NTS authentication counters"
         ntsinfo = (
-            ("nts_client_send",      "NTS client sends:         ", NTP_INT),
-            ("nts_client_recv",      "NTS client recvs:         ", NTP_INT),
-            ("nts_client_recv_bad",  "NTS client recvs w error: ", NTP_INT),
-            ("nts_server_recv",      "NTS server recvs:         ", NTP_INT),
-            ("nts_server_recv_bad",  "NTS server recvs w error: ", NTP_INT),
-            ("nts_server_send",      "NTS server sends:         ", NTP_INT),
-            ("nts_ke_probes",        "NTS KE probes:            ", NTP_INT),
-            ("nts_ke_probes_bad",    "NTS KE probes_bad:        ", NTP_INT),
-            ("nts_ke_serves",        "NTS KE serves:            ", NTP_INT),
-            ("nts_ke_serves_bad",    "NTS KE serves_bad:        ", NTP_INT),
-        )
+   ("nts_client_send",           "NTS client sends:          ", NTP_INT),
+   ("nts_client_recv",           "NTS client recvs:          ", NTP_INT),
+   ("nts_client_recv_bad",       "NTS client recvs w error:  ", NTP_INT),
+   ("nts_server_recv",           "NTS server recvs:          ", NTP_INT),
+   ("nts_server_recv_bad",       "NTS server recvs w error:  ", NTP_INT),
+   ("nts_server_send",           "NTS server sends:          ", NTP_INT),
+   ("nts_cookie_make",           "NTS make cookies:          ", NTP_INT),
+   ("nts_cookie_decode",         "NTS decode cookies:        ", NTP_INT),
+   ("nts_cookie_decode_old",     "NTS decode cookies old:    ", NTP_INT),
+   ("nts_cookie_decode_too_old", "NTS decode cookies too old:", NTP_INT),
+   ("nts_cookie_decode_error",   "NTS decode cookies error:  ", NTP_INT),
+   ("nts_ke_probes",             "NTS KE probes:             ", NTP_INT),
+   ("nts_ke_probes_bad",         "NTS KE probes_bad:         ", NTP_INT),
+   ("nts_ke_serves",             "NTS KE serves:             ", NTP_INT),
+   ("nts_ke_serves_bad",         "NTS KE serves_bad:         ", NTP_INT),
+  )
         self.collect_display(associd=0, variables=ntsinfo, decodestatus=False)
 
     def help_ntsinfo(self):

@@ -356,13 +356,25 @@ static const struct ctl_var sys_var[] = {
 	{ CS_nts_server_recv,	RO, "nts_server_recv" },
 #define CS_nts_server_recv_bad	111
 	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
-#define CS_nts_ke_serves	112
+
+#define CS_nts_cookie_make		112
+	{ CS_nts_cookie_make,		RO, "nts_cookie_make" },
+#define CS_nts_cookie_decode		113
+	{ CS_nts_cookie_decode,		RO, "nts_cookie_decode" },
+#define CS_nts_cookie_decode_old	114
+	{ CS_nts_cookie_decode_old,	RO, "nts_cookie_decode_old" },
+#define CS_nts_cookie_decode_too_old	115
+	{ CS_nts_cookie_decode_too_old,	RO, "nts_cookie_decode_too_old" },
+#define CS_nts_cookie_decode_error	116
+	{ CS_nts_cookie_decode_error,	RO, "nts_cookie_decode_error" },
+
+#define CS_nts_ke_serves	117
 	{ CS_nts_ke_serves,	RO, "nts_ke_serves" },
-#define CS_nts_ke_serves_bad	113
+#define CS_nts_ke_serves_bad	118
 	{ CS_nts_ke_serves_bad,	RO, "nts_ke_serves_bad" },
-#define CS_nts_ke_probes	114
+#define CS_nts_ke_probes	119
 	{ CS_nts_ke_probes,	RO, "nts_ke_probes" },
-#define CS_nts_ke_probes_bad	115
+#define CS_nts_ke_probes_bad	120
 	{ CS_nts_ke_probes_bad,	RO, "nts_ke_probes_bad" },
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
@@ -1969,6 +1981,26 @@ ctl_putsys(
 
 	case CS_nts_server_recv_bad:
 		ctl_putuint(sys_var[varid].text, nts_server_recv_bad);
+		break;
+
+	case CS_nts_cookie_make:
+		ctl_putuint(sys_var[varid].text, nts_cookie_make);
+		break;
+
+	case CS_nts_cookie_decode:
+		ctl_putuint(sys_var[varid].text, nts_cookie_decode);
+		break;
+
+	case CS_nts_cookie_decode_old:
+		ctl_putuint(sys_var[varid].text, nts_cookie_decode_old);
+		break;
+
+	case CS_nts_cookie_decode_too_old:
+		ctl_putuint(sys_var[varid].text, nts_cookie_decode_too_old);
+		break;
+
+	case CS_nts_cookie_decode_error:
+		ctl_putuint(sys_var[varid].text, nts_cookie_decode_error);
 		break;
 
 	case CS_nts_ke_serves:

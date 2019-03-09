@@ -29,17 +29,13 @@
 #define NTP_EX_HDR_LNG 4
 #define NTP_EX_U16_LNG 2
 
-/* Statistics */
+/* Statistics for ntpq */
 uint64_t nts_client_send = 0;
 uint64_t nts_client_recv = 0;
 uint64_t nts_client_recv_bad = 0;
 uint64_t nts_server_send = 0;
 uint64_t nts_server_recv = 0;
 uint64_t nts_server_recv_bad = 0;
-uint64_t nts_ke_serves = 0;
-uint64_t nts_ke_serves_bad = 0;
-uint64_t nts_ke_probes = 0;
-uint64_t nts_ke_probes_bad = 0;
 
 enum NtpExtFieldType {
    Unique_Identifier = 0x104,
