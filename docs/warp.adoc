@@ -187,4 +187,4 @@ Metrics] page.
 
 '''''
 
-Include::includes/footer.adoc[]
+include::includes/footer.adoc[]

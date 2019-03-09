@@ -89,4 +89,4 @@ Broadcast, multicast and anycast modes are no longer implemented.
 
 '''''
 
-Include::includes/footer.adoc[]
+include::includes/footer.adoc[]
