@@ -19,6 +19,7 @@
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 #include "nts.h"
+#include "nts2.h"
 
 
 static bool nts_load_certificate(SSL_CTX *ctx);

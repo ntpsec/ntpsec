@@ -21,6 +21,7 @@
 #include "ntp.h"
 #include "ntpd.h"
 #include "nts.h"
+#include "nts2.h"
 
 // FIXME Duplicated in nts_cookie
 #define NONCE_LENGTH 16

@@ -1,4 +1,5 @@
 #include "nts.h"
+#include "nts2.h"
 #include "unity.h"
 #include "unity_fixture.h"
 #include <stdio.h>

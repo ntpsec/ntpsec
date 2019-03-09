@@ -24,6 +24,7 @@
 #include "ntp_types.h"
 #include "ntpd.h"
 #include "nts.h"
+#include "nts2.h"
 #include "ntp_dns.h"
 
 int open_TCP_socket(const char *hostname);

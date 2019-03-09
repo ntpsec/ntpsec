@@ -19,6 +19,8 @@
 
 #include "ntp_types.h"
 #include "ntpd.h"
+#include "nts.h"
+#include "nts2.h"
 
 struct ntsconfig_t ntsconfig = {
   .ntsenable = false,

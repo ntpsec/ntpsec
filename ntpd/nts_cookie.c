@@ -31,6 +31,7 @@
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 #include "nts.h"
+#include "nts2.h"
 
 /* Cookie format:
  *  cookie is I,N,CMAC,C
