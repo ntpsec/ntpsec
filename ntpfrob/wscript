@@ -8,7 +8,7 @@ def build(ctx):
         install_path='${BINDIR}',
         source=frob_sources,
         target="ntpfrob",
-        use="M RT CRYPTO",
+        use="M RT",
     )
 
     ctx.manpage(8, "ntpfrob-man.adoc")

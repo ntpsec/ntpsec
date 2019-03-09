@@ -10,7 +10,6 @@ def build(ctx):
             includes=[ctx.bldnode.parent.abspath(), "../include", "."],
             source=bison_source,
             target="bison_obj",
-            use="CRYPTO",
         )
 
         # Generate Bison file first.
@@ -24,7 +23,6 @@ def build(ctx):
             install_path=None,
             source=keyword_gen_source,
             target="keyword-gen",
-            use="CRYPTO",
         )
 
         # XXX: needs a dependency to rebuild ntp_keyword.h
@@ -87,7 +85,6 @@ def build(ctx):
             features="c",
             includes=[ctx.bldnode.parent.abspath(), "../include"],
             source=refclock_source,
-            use="CRYPTO",
         )
         use_refclock += "refclock"
 
@@ -100,7 +97,6 @@ def build(ctx):
                 #      rather than the command line for the individual drivers
                 source="refclock_%s.c" % file,
                 target="refclock_%s" % file,
-                use="CRYPTO",
             )
             use_refclock += " refclock_%s" % file
 

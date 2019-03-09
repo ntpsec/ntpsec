@@ -254,18 +254,6 @@ def configure(ctx):
     #
     ctx.env.CFLAGS = ["-std=c99", "-D_GNU_SOURCE"] + ctx.env.CFLAGS
 
-    # We need libcrypto in the "host" variant for now (until ntp.h/nts.h are
-    # reorganized)
-    # Check via pkg-config first, then fall back to a direct search
-    if not ctx.check_cfg(
-        package='libcrypto', uselib_store='CRYPTO',
-        args=['libcrypto', '--cflags', '--libs'],
-        msg="Checking for OpenSSL/libcrypto (via pkg-config)",
-        define_name='', mandatory=False,
-    ):
-        ctx.check_cc(msg="Checking for OpenSSL's crypto library",
-                     lib="crypto", mandatory=True)
-
     msg("--- Configuring main ---")
     ctx.setenv("main", ctx.env.derive())
 

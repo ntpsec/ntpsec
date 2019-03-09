@@ -84,7 +84,7 @@ def build(ctx):
             libpath=["libparse"],
             source=libparse_source,
             target="test_libparse",
-            use="unity ntp parse M PTHREAD CRYPTO RT SOCKET NSL",
+            use="unity ntp parse M PTHREAD RT SOCKET NSL",
         )
 
     ntpd_source = [

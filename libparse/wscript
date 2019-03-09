@@ -27,5 +27,4 @@ def build(ctx):
         features="c cstlib",
         includes=[ctx.bldnode.parent.abspath(), "../include"],
         source=libparse_source,
-        use="CRYPTO",
     )
