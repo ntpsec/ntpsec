@@ -103,9 +103,9 @@ else:  # Python 3
                                 newline="\n", line_buffering=True)
 
     # This is the one situation where we *can* force unicode.
-    if "UTF-8" != sys.stdout.encoding:
+    if "utf-8" != sys.stdout.encoding.lower():
         forced_utf8 = True
         sys.stdout = make_std_wrapper(sys.stdout)
-    if "UTF-8" != sys.stderr.encoding:
+    if "utf-8" != sys.stderr.encoding.lower():
         forced_utf8 = True
         sys.stderr = make_std_wrapper(sys.stderr)
