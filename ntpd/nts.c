@@ -31,7 +31,8 @@ struct ntsconfig_t ntsconfig = {
   .cert = NULL,
   .key = NULL,
   .KI = NULL,
-  .ca = NULL
+  .ca = NULL,
+  .aean = NULL
 };
 
 

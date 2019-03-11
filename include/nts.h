@@ -23,12 +23,14 @@
 #define NTS_UID_MAX_LENGTH	64
 
 
-/* Client side configuration data for an NTS association */
-/* part of peer struct */
+/* Client side configuration data for an NTS association
+ * All are optional.
+ * part of peer struct */
 struct ntscfg_t {
-    char *server;	/* if NULL, use the peer itself (normal case) */
-    char *ca;		/* if NULL, use the site default (normal case) */
-    char *cert;		/* if NULL, use the site default (normal case) */
+    char *server;	/* desired server; default is same as NTS-KE server */
+    char *ca;		/* root/trusted certificates */
+    char *cert;		/* client certificate  */
+    char *aean;		/* AEAN algorithms on wire */
     uint32_t expire;
 };
 
@@ -66,10 +68,11 @@ struct ntsconfig_t {
     const char * maxtls;	/* maximum TLS version allowed */
     const char *tlsciphers;	/* allowed TLS 1.2 ciphers */
     const char *tlsciphersuites;/* allowed TLS 1.3 ciphersuites */
-    const char *cert;		/* server certificate key */
-    const char *key;		/* server private key */
-    const char *KI;		/* K/I for making cookies */
+    const char *cert;		/* file holding server certificate key */
+    const char *key;		/* file holding server private key */
+    const char *KI;		/* file holding K/I for making cookies */
     const char *ca;		/* root cert dir/file */
+    const char *aean;		/* AEAN algorithms on wire */
 };
 
 

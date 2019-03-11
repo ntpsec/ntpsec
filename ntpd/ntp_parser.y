@@ -50,6 +50,7 @@
 }
 
 /* Terminals (do not appear left of colon) */
+%token	<Integer>	T_Aean
 %token	<Integer>	T_Age
 %token	<Integer>	T_All
 %token	<Integer>	T_Allan
@@ -1132,7 +1133,8 @@ nts_option
 	;
 
 nts_string_option_keyword
-	:	T_Ca
+	:	T_Aean
+	|	T_Ca
 	|	T_Cert
 	|	T_Key
 	|	T_Tlsciphers
