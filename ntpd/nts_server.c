@@ -182,7 +182,12 @@ return NULL;
 }
 
 bool nts_ke_request(SSL *ssl) {
-    uint8_t buff[1024];  /* RFC 4. */
+    /* buff is used for both read and write.
+     * RFC 4: servers must accept 1024
+     * cookies can be 104, 136, or 168 for IANA_AEAD_AES_SIV_CMAC_xxx
+     * 8*168 fits comfortably into 2K.
+     */
+    uint8_t buff[2048];
     int bytes_read, bytes_written;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
     uint8_t cookie[NTS_MAX_COOKIELEN];
@@ -312,7 +317,6 @@ int nts_get_key_length(int aead) {
     case IANA_AEAD_AES_SIV_CMAC_512:
       return AEAD_AES_SIV_CMAC_512_KEYLEN;
     default:
-      msyslog(LOG_ERR, "NTS: Strange AEAD code: %d", aead);
       return 0;
   }
 }

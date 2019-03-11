@@ -73,7 +73,10 @@ bool nts_write_cookie_keys(void);
 /* This determines which algorithm we use.
  * Valid choices are 32, 48, and 64
  * making this a variable rather than #define
- * opens up the opportunity to pick one at run time. */
+ * opens up the opportunity to pick one at run time.
+ * The default (below) is 32/AEAD_AES_SIV_CMAC_256
+ * You can change that by editing the keys file.
+ */
 int K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
 uint8_t K[NTS_MAX_KEYLEN], K2[NTS_MAX_KEYLEN];
 uint32_t I, I2;

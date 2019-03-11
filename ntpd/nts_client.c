@@ -141,8 +141,10 @@ bool nts_probe(struct peer * peer) {
   /* We are using AEAD_AES_SIV_CMAC_xxx, from RFC 5297
    * key length depends upon which key is selected */
   peer->nts_state.keylen = nts_get_key_length(peer->nts_state.aead);
-  if (0 == peer->nts_state.keylen)
-    goto bail;		/* unknown AEAD algorithm */
+  if (0 == peer->nts_state.keylen) {
+    msyslog(LOG_ERR, "NTSc: Unknown AEAD code: %d", peer->nts_state.aead);
+    goto bail;
+  }
   nts_make_keys(ssl,
     peer->nts_state.aead,
     peer->nts_state.c2s,
@@ -374,7 +376,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   while (buf.left > 0) {
     uint16_t type, data;
     bool critical = false;
-    int length;
+    int length, keylength;
 
     type = ke_next_record(&buf, &length);
     if (NTS_CRITICAL & type) {
@@ -400,9 +402,13 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         break;
       case nts_algorithm_negotiation:
         data = next_uint16(&buf);
-        if ((sizeof(data) != length) || (data != AEAD_AES_SIV_CMAC_256)) {
-          msyslog(LOG_ERR, "NTSc: AN-Wrong length or bad data: %d, %d",
-              length, data);
+        if (sizeof(data) != length) {
+          msyslog(LOG_ERR, "NTSc: AN-Wrong length: %d", length);
+          return false;
+        }
+        keylength = nts_get_key_length(data);
+        if (0 == keylength) {
+          msyslog(LOG_ERR, "NTSc: AN-Unsupported AEAN type: %d", data);
           return false;
         }
         peer->nts_state.aead = data;
@@ -461,8 +467,8 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
     return false;
   }
 
-  msyslog(LOG_ERR, "NTSc: Got %d cookies, length %d.",
-    peer->nts_state.count, peer->nts_state.cookielen);
+  msyslog(LOG_ERR, "NTSc: Got %d cookies, length %d, aead=%d.",
+    peer->nts_state.count, peer->nts_state.cookielen, peer->nts_state.aead);
   return true;
 }
 
