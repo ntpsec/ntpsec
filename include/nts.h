@@ -30,14 +30,14 @@ struct ntscfg_t {
     char *server;	/* desired server; default is same as NTS-KE server */
     char *ca;		/* root/trusted certificates */
     char *cert;		/* client certificate  */
-    char *aean;		/* AEAN algorithms on wire */
+    char *aead;		/* AEAD algorithms on wire */
     uint32_t expire;
 };
 
 /* Client-side state per connection to server */
 struct ntsclient_t {
     /* wire connection */
-    int aead;   /* AEAD algorithm used on wire */
+    int16_t aead;   /* AEAD algorithm used on wire */
     int keylen;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
     /* UID of last request sent - RFC 5.3 */
@@ -72,7 +72,7 @@ struct ntsconfig_t {
     const char *key;		/* file holding server private key */
     const char *KI;		/* file holding K/I for making cookies */
     const char *ca;		/* root cert dir/file */
-    const char *aean;		/* AEAN algorithms on wire */
+    const char *aead;		/* AEAD algorithms on wire */
 };
 
 

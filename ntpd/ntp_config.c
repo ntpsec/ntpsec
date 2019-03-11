@@ -653,8 +653,8 @@ create_peer_node(
 		    my_node->ctl.nts_cfg.expire = option->value.u;
 		    break;
 
-		case T_Aean:
-		    my_node->ctl.nts_cfg.aean = option->value.s;
+		case T_Aead:
+		    my_node->ctl.nts_cfg.aead = option->value.s;
 		    break;
 
 		case T_Ca:
@@ -1997,8 +1997,8 @@ config_nts(
 			INSIST(0);
 			break;
 
-		case T_Aean:
-			ntsconfig.aean = estrdup(nts->value.s);
+		case T_Aead:
+			ntsconfig.aead = estrdup(nts->value.s);
 			break;
 
 		case T_Ca:

@@ -32,7 +32,7 @@ struct ntsconfig_t ntsconfig = {
   .key = NULL,
   .KI = NULL,
   .ca = NULL,
-  .aean = NULL
+  .aead = NULL
 };
 
 
