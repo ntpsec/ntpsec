@@ -288,7 +288,7 @@ bool check_certificate(struct peer* peer, SSL *ssl) {
   return true;
 }
 
-bool nts_make_keys(SSL *ssl, int aead, uint8_t *c2s, uint8_t *s2c, int keylen) {
+bool nts_make_keys(SSL *ssl, int16_t aead, uint8_t *c2s, uint8_t *s2c, int keylen) {
   // char *label = "EXPORTER-network-time-security/1";
   // Subject: [Ntp] [NTS4NTP] info for NTS developers
   // From: Martin Langer <mart.langer@ostfalia.de>
@@ -320,7 +320,8 @@ bool nts_make_keys(SSL *ssl, int aead, uint8_t *c2s, uint8_t *s2c, int keylen) {
 bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   uint8_t buff[1000];
   int     used, transferred;
-  struct BufCtl_t buf;
+  struct  BufCtl_t buf;
+  int16_t aead = -1;
 
   UNUSED_ARG(peer);
 
@@ -330,9 +331,15 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   /* 4.1.2 Next Protocol, 0 for NTP */
   ke_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
 
-  /* 4.1.5 AEAD Algorithm List
-   * AEAD_AES_SIV_CMAC_256 is the only one for now */  // FIXME
-  ke_append_record_uint16(&buf, nts_algorithm_negotiation, AEAD_AES_SIV_CMAC_256);
+  /* 4.1.5 AEAD Algorithm List */
+  // FIXME should be : separated list
+  if ((-1 == aead) && (NULL != peer->cfg.nts_cfg.aead))
+    aead = nts_string_to_aead(peer->cfg.nts_cfg.aead);
+  if ((-1 == aead) && (NULL != ntsconfig.aead))
+    aead = nts_string_to_aead(ntsconfig.aead);
+  if (-1 == aead)
+    aead = AEAD_AES_SIV_CMAC_256;
+  ke_append_record_uint16(&buf, nts_algorithm_negotiation, aead);
 
   /* 4.1.1: End, Critical */
   ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);

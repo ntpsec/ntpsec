@@ -39,6 +39,18 @@ struct ntsconfig_t ntsconfig = {
 
 /*****************************************************/
 
+/* Translate text to AEAD code.  -1 for none/error */
+int16_t nts_string_to_aead(const char* text) {
+  if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_256"))
+      return AEAD_AES_SIV_CMAC_256;
+  else if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_384"))
+      return AEAD_AES_SIV_CMAC_384;
+  else if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_384"))
+      return AEAD_AES_SIV_CMAC_512;
+  else
+      return -1;
+}
+
 void nts_log_ssl_error(void) {
   char buff[256];
   int err = ERR_get_error();

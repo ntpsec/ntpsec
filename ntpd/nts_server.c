@@ -308,7 +308,7 @@ int create_listener(int port, int family) {
 }
 
 /* returns key length, 0 if unknown arg */
-int nts_get_key_length(int aead) {
+int nts_get_key_length(int16_t aead) {
   switch (aead) {
     case IANA_AEAD_AES_SIV_CMAC_256:
       return AEAD_AES_SIV_CMAC_256_KEYLEN;
