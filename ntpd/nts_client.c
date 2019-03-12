@@ -288,7 +288,7 @@ bool check_certificate(struct peer* peer, SSL *ssl) {
   return true;
 }
 
-bool nts_make_keys(SSL *ssl, int16_t aead, uint8_t *c2s, uint8_t *s2c, int keylen) {
+bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keylen) {
   // char *label = "EXPORTER-network-time-security/1";
   // Subject: [Ntp] [NTS4NTP] info for NTS developers
   // From: Martin Langer <mart.langer@ostfalia.de>
@@ -321,7 +321,7 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   uint8_t buff[1000];
   int     used, transferred;
   struct  BufCtl_t buf;
-  int16_t aead = -1;
+  uint16_t aead = NO_AEAD;
 
   UNUSED_ARG(peer);
 
@@ -333,11 +333,11 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
 
   /* 4.1.5 AEAD Algorithm List */
   // FIXME should be : separated list
-  if ((-1 == aead) && (NULL != peer->cfg.nts_cfg.aead))
+  if ((NO_AEAD == aead) && (NULL != peer->cfg.nts_cfg.aead))
     aead = nts_string_to_aead(peer->cfg.nts_cfg.aead);
-  if ((-1 == aead) && (NULL != ntsconfig.aead))
+  if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
     aead = nts_string_to_aead(ntsconfig.aead);
-  if (-1 == aead)
+  if (NO_AEAD == aead)
     aead = AEAD_AES_SIV_CMAC_256;
   ke_append_record_uint16(&buf, nts_algorithm_negotiation, aead);
 
@@ -372,7 +372,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   }
   msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);
 
-  peer->nts_state.aead = -1;
+  peer->nts_state.aead = NO_AEAD;
   peer->nts_state.keylen = 0;
   peer->nts_state.writeIdx = 0;
   peer->nts_state.readIdx = 0;
@@ -465,7 +465,7 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   }   /* while */
 
   // FIXME lots of other checks
-  if (-1 == peer->nts_state.aead) {
+  if (NO_AEAD == peer->nts_state.aead) {
     msyslog(LOG_ERR, "NTSc: No AEAD algorithim.");
     return false;
   }

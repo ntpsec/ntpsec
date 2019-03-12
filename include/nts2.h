@@ -16,18 +16,18 @@ bool nts_load_versions(SSL_CTX *ctx);
 
 void nts_log_ssl_error(void);
 
-int nts_get_key_length(int16_t aead);
+int nts_get_key_length(uint16_t aead);
 int nts_translate_version(const char *arg);
-int16_t nts_string_to_aead(const char* text);
+uint16_t nts_string_to_aead(const char* text);
 
-bool nts_make_keys(SSL *ssl, int16_t aead,
+bool nts_make_keys(SSL *ssl, uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen);
 
 int nts_make_cookie(uint8_t *cookie,
-  int16_t aead,
+  uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen);
 bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
-  int16_t *aead,
+  uint16_t *aead,
   uint8_t *c2s, uint8_t *s2c, int *keylen);
 
 

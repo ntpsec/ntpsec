@@ -85,7 +85,7 @@ int nts_translate_version(const char *arg) {
 }
 
 /* Translate text to AEAD code.  -1 for none/error */
-int16_t nts_string_to_aead(const char* text) {
+uint16_t nts_string_to_aead(const char* text) {
   if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_256"))
       return AEAD_AES_SIV_CMAC_256;
   else if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_384"))
@@ -97,7 +97,7 @@ int16_t nts_string_to_aead(const char* text) {
 }
 
 /* returns key length, 0 if unknown arg */
-int nts_get_key_length(int16_t aead) {
+int nts_get_key_length(uint16_t aead) {
   switch (aead) {
     case IANA_AEAD_AES_SIV_CMAC_256:
       return AEAD_AES_SIV_CMAC_256_KEYLEN;
@@ -135,10 +135,10 @@ bool nts_load_versions(SSL_CTX *ctx) {
 
 bool nts_load_ciphers(SSL_CTX *ctx) {
   /* SSL set_ciphers(uites) ignores typos or ciphers it doesn't support.
- *    * There is no SSL_CTX_get_cipher_list, so we can't easily read back
- *       * the ciphers to see what it took.
- *          * We could make a dummy SSL, read the list, then free it.
- *             */
+   * There is no SSL_CTX_get_cipher_list, so we can't easily read back
+   * the ciphers to see what it took.
+   * We could make a dummy SSL, read the list, then free it.
+   */
   if (NULL != ntsconfig.tlsciphers) {
     if (1 != SSL_CTX_set_cipher_list(ctx, ntsconfig.tlsciphers)) {
       msyslog(LOG_ERR, "NTS: troubles setting ciphers.");

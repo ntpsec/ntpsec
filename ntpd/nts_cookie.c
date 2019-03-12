@@ -235,7 +235,7 @@ bool nts_write_cookie_keys(void) {
 
 /* returns actual length */
 int nts_make_cookie(uint8_t *cookie,
-  int16_t aead,
+  uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen) {
   uint8_t plaintext[NTS_MAX_COOKIELEN];
   uint8_t *nonce;
@@ -315,7 +315,7 @@ int nts_make_cookie(uint8_t *cookie,
 
 /* can't decrypt in place - that would trash the unauthenticated packet */
 bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
-  int16_t *aead,
+  uint16_t *aead,
   uint8_t *c2s, uint8_t *s2c, int *keylen) {
 
   uint8_t *finger;

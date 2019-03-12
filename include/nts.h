@@ -48,7 +48,7 @@ struct ntscfg_t {
 /* Client-side state per connection to server */
 struct ntsclient_t {
     /* wire connection */
-    int16_t aead;   /* AEAD algorithm used on wire */
+    uint16_t aead;	/* AEAD algorithm used on wire */
     int keylen;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
     /* UID of last request sent - RFC 5.3 */
@@ -66,7 +66,7 @@ struct ntspacket_t {
     int uidlen;
     uint8_t UID[NTS_UID_MAX_LENGTH];
     int needed;
-    int aead;
+    uint16_t aead;
     int keylen;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
 };
@@ -98,6 +98,7 @@ struct ntsconfig_t {
 #define AEAD_AES_SIV_CMAC_256_KEYLEN 32
 #define AEAD_AES_SIV_CMAC_384_KEYLEN 48
 #define AEAD_AES_SIV_CMAC_512_KEYLEN 64
+#define NO_AEAD 0xffff
 
 /* NTS protocol constants */
 
