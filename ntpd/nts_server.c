@@ -22,12 +22,10 @@
 #include "nts2.h"
 
 
-static bool nts_load_certificate(SSL_CTX *ctx);
 static int create_listener(int port, int family);
 static void* nts_ke_listener(void*);
 static bool nts_ke_request(SSL *ssl);
-static int nts_translate_version(const char *arg);
-bool nts_server_init2(void);
+
 
 static SSL_CTX *server_ctx = NULL;
 static int listner4_sock = -1;
@@ -39,32 +37,6 @@ uint64_t nts_ke_serves_bad = 0;
 uint64_t nts_ke_probes = 0;
 uint64_t nts_ke_probes_bad = 0;
 
-
-void nts_init(void) {
-    bool ok = true;
-    if (ntsconfig.ntsenable) {
-        ok &= nts_server_init();
-    }
-    ok &= nts_client_init();
-    ok &= nts_cookie_init();
-    ok &= extens_init();
-    if (!ok) {
-      msyslog(LOG_ERR, "NTS: troubles during init.  Bailing.");
-      exit(1);
-    }
-}
-
-void nts_init2(void) {
-    bool ok = true;
-    if (ntsconfig.ntsenable) {
-      ok &= nts_server_init2();
-      ok &= nts_cookie_init2();
-    }
-    if (!ok) {
-      msyslog(LOG_ERR, "NTS: troubles during init2.  Bailing.");
-      exit(1);
-    }
-}
 
 bool nts_server_init(void) {
     bool ok = true;
@@ -102,7 +74,6 @@ bool nts_server_init(void) {
     msyslog(LOG_INFO, "NTSs: OpenSSL security level is %d",
         SSL_CTX_get_security_level(server_ctx));
 #endif
-
 
     listner4_sock = create_listener(NTS_KE_PORT, AF_INET);
     if (listner4_sock < 0) return false;
@@ -307,118 +278,5 @@ int create_listener(int port, int family) {
     return sock;
 }
 
-/* returns key length, 0 if unknown arg */
-int nts_get_key_length(int16_t aead) {
-  switch (aead) {
-    case IANA_AEAD_AES_SIV_CMAC_256:
-      return AEAD_AES_SIV_CMAC_256_KEYLEN;
-    case IANA_AEAD_AES_SIV_CMAC_384:
-      return AEAD_AES_SIV_CMAC_384_KEYLEN;
-    case IANA_AEAD_AES_SIV_CMAC_512:
-      return AEAD_AES_SIV_CMAC_512_KEYLEN;
-    default:
-      return 0;
-  }
-}
-
-bool nts_load_versions(SSL_CTX *ctx) {
-  int minver, maxver;
-  minver = nts_translate_version(ntsconfig.mintls);
-  maxver = nts_translate_version(ntsconfig.maxtls);
-  if ((-1 == minver) || (-1 == maxver))
-    return false;
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-  if(0 == minver) minver = TLS1_2_VERSION;   // 3.
-  SSL_CTX_set_min_proto_version(ctx, minver);
-  SSL_CTX_set_max_proto_version(ctx, maxver);
-#else
-  /* Older versions of OpenSSL don't support min/max version requests.
-   * That's OK, since we don't want anything older than 1.2 and
-   * they don't support anything newer. */
-  SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
-#endif
-  return true;
-}
-
-/* 0 is default, -1 is error */
-int nts_translate_version(const char *arg) {
-  if (NULL == arg)
-    return 0;
-  if (0 == strcmp(arg, "TLS1.2"))
-    return TLS1_2_VERSION;
-  if (0 == strcmp(arg, "TLS1.3")) {
-#ifdef TLS1_3_VERSION
-    return TLS1_3_VERSION;
-#else
-    msyslog(LOG_ERR, "NTS: TLS1.3 not supported by this version of OpenSSL.");
-    return -1;
-#endif
-  }
-  msyslog(LOG_ERR, "NTS: unrecognized version string: %s.", arg);
-  return -1;
-}
-
-bool nts_load_ciphers(SSL_CTX *ctx) {
-  /* SSL set_ciphers(uites) ignores typos or ciphers it doesn't support.
-   * There is no SSL_CTX_get_cipher_list, so we can't easily read back
-   * the ciphers to see what it took.
-   * We could make a dummy SSL, read the list, then free it.
-   */
-  if (NULL != ntsconfig.tlsciphers) {
-    if (1 != SSL_CTX_set_cipher_list(ctx, ntsconfig.tlsciphers)) {
-      msyslog(LOG_ERR, "NTS: troubles setting ciphers.");
-      return false;
-    } else {
-      msyslog(LOG_INFO, "NTS: set ciphers.");
-    }
-  }
-  if (NULL != ntsconfig.tlsciphersuites) {
-#ifdef TLS1_3_VERSION
-    if (1 != SSL_CTX_set_ciphersuites(ctx, ntsconfig.tlsciphersuites)) {
-      msyslog(LOG_ERR, "NTS: troubles setting ciphersuites.");
-      return false;
-    } else {
-      msyslog(LOG_INFO, "NTS: set ciphersuites.");
-    }
-#else
-    msyslog(LOG_ERR, "NTS: ciphersuites not supported on this version of OpenSSL.");
-#endif
-  }
-  return true;
-}
-
-bool nts_load_certificate(SSL_CTX *ctx) {
-    const char *cert = NTS_CERT_FILE;
-    const char *key = NTS_KEY_FILE;
-
-    if (NULL != ntsconfig.cert)
-       cert = ntsconfig.cert;
-    if (NULL != ntsconfig.key)
-       key = ntsconfig.key;
-
-    if (1 != SSL_CTX_use_certificate_chain_file(ctx, cert)) {
-        msyslog(LOG_ERR, "NTSs: can't load certificate (chain) from %s", cert);
-        nts_log_ssl_error();
-        return false;
-    } else {
-        msyslog(LOG_ERR, "NTSs: loaded certificate (chain) from %s", cert);
-    }
-
-    if (1 != SSL_CTX_use_PrivateKey_file(ctx, key, SSL_FILETYPE_PEM)) {
-        msyslog(LOG_ERR, "NTSs: can't load private key from %s", key);
-        nts_log_ssl_error();
-        return false;
-    } else {
-        msyslog(LOG_ERR, "NTSs: loaded private key from %s", key);
-    }
-
-    if (1 != SSL_CTX_check_private_key(ctx)) {
-        msyslog(LOG_ERR, "NTSs: Private Key doesn't work ******");
-        return false;
-    } else {
-        msyslog(LOG_INFO, "NTSs: Private Key OK");
-    }
-    return true;
-}
 
 /* end */

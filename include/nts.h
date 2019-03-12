@@ -16,6 +16,17 @@
 
 #define NTS_KE_TIMEOUT		3
 
+bool nts_server_init(void);
+bool nts_client_init(void);
+bool nts_cookie_init(void);
+bool nts_server_init2(void);    /* after sandbox */
+bool nts_cookie_init2(void);
+
+
+
+
+
+
 #define NTS_MAX_KEYLEN		64	/* used in cookies */
 #define NTS_MAX_COOKIELEN	192	/* see nts_cookie.c */
 #define NTS_MAX_COOKIES		8	/* RFC 4.1.6 */

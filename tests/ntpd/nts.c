@@ -1,3 +1,4 @@
+#include "ntpd.h"
 #include "nts.h"
 #include "nts2.h"
 #include "unity.h"
@@ -233,6 +234,16 @@ TEST(nts, next_bytes) {
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[8]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 8);
 }
+
+/* Hacks to keep linker happy after moving nts_init to nts.c */
+bool nts_server_init (void) { return true; }
+bool nts_client_init (void) { return true; }
+bool nts_cookie_init (void) { return true; }
+bool nts_server_init2 (void) { return true; }
+bool nts_cookie_init2 (void) { return true; }
+bool extens_init (void) { return true; }
+
+
 
 TEST_GROUP_RUNNER(nts) {
   RUN_TEST_CASE(nts, ke_append_record_null);

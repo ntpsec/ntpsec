@@ -10,20 +10,18 @@
 #include <openssl/ssl.h>
 
 
-
-bool nts_server_init(void);
-bool nts_client_init(void);
-bool nts_cookie_init(void);
-bool nts_cookie_init2(void);	/* after sandbox */
-void nts_log_ssl_error(void);
-
+bool nts_load_certificate(SSL_CTX *ctx);
 bool nts_load_ciphers(SSL_CTX *ctx);
 bool nts_load_versions(SSL_CTX *ctx);
 
+void nts_log_ssl_error(void);
+
 int nts_get_key_length(int16_t aead);
+int nts_translate_version(const char *arg);
 int16_t nts_string_to_aead(const char* text);
 
-bool nts_make_keys(SSL *ssl, int16_t aead, uint8_t *c2s, uint8_t *s2c, int keylen);
+bool nts_make_keys(SSL *ssl, int16_t aead,
+  uint8_t *c2s, uint8_t *s2c, int keylen);
 
 int nts_make_cookie(uint8_t *cookie,
   int16_t aead,
