@@ -3187,13 +3187,13 @@ parse_control(
 		tt = ap(start, LEN_STATES, tt,
 		    "; running time: %s\"", l_mktime(sum));
 
-		add_var(&out->kv_list, 32, RO);
+		tt = add_var(&out->kv_list, 32, RO);
 		snprintf(tt, 32,  "refclock_id=\"%s\"", parse->parse_type->cl_id);
 
-		add_var(&out->kv_list, 80, RO);
+		tt = add_var(&out->kv_list, 80, RO);
 		snprintf(tt, 80,  "refclock_iomode=\"%s\"", parse->binding->bd_description);
 
-		add_var(&out->kv_list, 128, RO);
+		tt = add_var(&out->kv_list, 128, RO);
 		snprintf(tt, 128, "refclock_driver_version=\"%s\"", VERSION);
 
 		{
