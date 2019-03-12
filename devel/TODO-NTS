@@ -1,6 +1,5 @@
 multithread msyslog
-
-Ratchet for new cookie key
+  libntp/lib_strbuf.c too
 
 documentation:
   HOWTO on NTS
@@ -12,15 +11,15 @@ Startup with bad time
 ? thread per instance on NTS-KE server
 
 Password for certificate's private key and cookie keys file.
-  Need to get it it before daemon mode.
+  Need to get it before daemon mode.
 
 -------
-
-Save cookie to disk for restart without asking NTS-KE server
 
 security level
 
 client certificates
 
 Pool/cluster mode
+  ??  Ratchet for new cookie key
+
 
