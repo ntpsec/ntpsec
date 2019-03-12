@@ -125,8 +125,9 @@ bool nts_load_versions(SSL_CTX *ctx) {
   SSL_CTX_set_max_proto_version(ctx, maxver);
 #else
   /* Older versions of OpenSSL don't support min/max version requests.
- *    * That's OK, since we don't want anything older than 1.2 and
- *       * they don't support anything newer. */
+   * That's OK, since we don't want anything older than 1.2 and
+   * they don't support anything newer. */
+#define NO_OLD_VERSIONS SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1
   SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
 #endif
   return true;

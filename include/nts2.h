@@ -30,7 +30,6 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   int16_t *aead,
   uint8_t *c2s, uint8_t *s2c, int *keylen);
 
-#define NO_OLD_VERSIONS SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1
 
 
 /* buffer packing/unpacking routines.
