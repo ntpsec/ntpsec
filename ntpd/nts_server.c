@@ -111,6 +111,7 @@ void* nts_ke_listener(void* arg) {
         struct sockaddr addr;
         uint len = sizeof(addr);
         SSL *ssl;
+        l_fp start, finish;
 
         int client = accept(sock, &addr, &len);
         if (client < 0) {
@@ -121,6 +122,7 @@ void* nts_ke_listener(void* arg) {
             continue;
         }
 	nts_ke_serves++;
+        get_systime(&start);
         msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s",
             sockporttoa((sockaddr_u *)&addr));
 	setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
@@ -148,6 +150,11 @@ void* nts_ke_listener(void* arg) {
         SSL_shutdown(ssl);
         SSL_free(ssl);
         close(client);
+
+        get_systime(&finish);
+        finish -= start;
+        msyslog(LOG_INFO, "NTSs: NTS-KE server took %.3Lf sec", lfptod(finish));
+
     }
 return NULL;
 }

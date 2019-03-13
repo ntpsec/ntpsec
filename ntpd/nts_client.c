@@ -90,13 +90,15 @@ bool nts_client_init(void) {
 bool nts_probe(struct peer * peer) {
   struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
   SSL     *ssl;
-  int      server = 0;
+  int      server;
+  l_fp     start, finish;
 
   if (NULL == client_ctx)
     return false;
 
   nts_ke_probes++;
   addrOK = false;
+  get_systime(&start);
 
   server = open_TCP_socket(peer->hostname);
   if (-1 == server) {
@@ -160,6 +162,12 @@ bail:
   SSL_free(ssl);
   close(server);
 
+  get_systime(&finish);
+  finish -= start;
+  msyslog(LOG_INFO, "NTSc: NTS-KE req to %s took %.3Lf sec, %s",
+    peer->hostname, lfptod(finish),
+    addrOK? "OK" : "fail");
+
   return addrOK;
 }
 
@@ -180,6 +188,7 @@ int open_TCP_socket(const char *hostname) {
   struct addrinfo *answer;
   int gai_rc, err;
   int sockfd;
+  l_fp start, finish;
 
   /* copy avoids dancing around const warnings */
   strlcpy(host, hostname, sizeof(host));
@@ -203,19 +212,25 @@ int open_TCP_socket(const char *hostname) {
     *tmp++ = 0;
     strlcpy(port, tmp, sizeof(port));
   }
+
+  get_systime(&start);
   gai_rc = getaddrinfo(host, port, &hints, &answer);
   if (0 != gai_rc) {
     msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to contact %s: %d, %s",
       hostname, gai_rc, gai_strerror(gai_rc));
     return -1;
   }
+  get_systime(&finish);
+  finish -= start;
+  msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3Lf sec",
+    hostname, lfptod(finish));
 
   /* Save first answer for NTP */
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
   msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s:%s => %s",
     host, port, sockporttoa(&sockaddr));
   SET_PORT(&sockaddr, NTP_PORT);	/* setup default NTP address */
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
   if (-1 == sockfd) {
     msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", strerror(errno));
   } else {
