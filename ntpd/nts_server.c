@@ -132,10 +132,14 @@ void* nts_ke_listener(void* arg) {
         SSL_set_fd(ssl, client);
 
         if (SSL_accept(ssl) <= 0) {
-            msyslog(LOG_ERR, "NTSs: SSL accept failed");
+            get_systime(&finish);
+            finish -= start;
+            msyslog(LOG_ERR, "NTSs: SSL accept from %s failed, %.3Lf sec",
+                sockporttoa((sockaddr_u *)&addr), lfptod(finish));
             nts_log_ssl_error();
+            SSL_free(ssl);
             close(client);
-	    nts_ke_serves_bad++;
+            nts_ke_serves_bad++;
             continue;
         }
         msyslog(LOG_INFO, "NTSs: Using %s, %s (%d)",
@@ -163,6 +167,7 @@ bool nts_ke_request(SSL *ssl) {
     /* buff is used for both read and write.
      * RFC 4: servers must accept 1024
      * cookies can be 104, 136, or 168 for IANA_AEAD_AES_SIV_CMAC_xxx
+     * 8*104 fits in 1K.  With 168, we only get 5.
      * 8*168 fits comfortably into 2K.
      */
     uint8_t buff[2048];
