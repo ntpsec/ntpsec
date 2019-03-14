@@ -1,3 +1,4 @@
+#include "config.h"
 #include "ntpd.h"
 #include "nts.h"
 #include "nts2.h"
