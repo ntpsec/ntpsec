@@ -771,7 +771,11 @@ transmit(
 		if ((peer_associations <= 2 * sys_maxclock) &&
 		    (peer_associations < sys_maxclock ||
 		     sys_survivors < sys_minclock))
-			if (!dns_probe(peer)) return;
+			if (!dns_probe(peer)) {
+			    /* DNS thread busy, try again soon */
+			    peer->nextdate = current_time;
+			    return;
+                     }
 		poll_update(peer, hpoll);
 		return;
 	}
@@ -779,7 +783,10 @@ transmit(
 	/* Does server need DNS or NTS lookup? */
 	if (peer->cfg.flags & FLAG_LOOKUP) {
 		peer->outdate = current_time;
-		if (!dns_probe(peer)) return;
+		if (!dns_probe(peer)) {
+			peer->nextdate = current_time;
+			return;
+		}
 		poll_update(peer, hpoll);
 		return;
         }
@@ -2376,8 +2383,15 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 				hpoll = 8;
 			break;
 		case DNS_temp:
+			/* DNS not working yet.  ??
+			 * Want to retry soon,
+			 * but also want to avoid log clutter.
+			 * Beware, Fedora 29 lies:
+			 *   What I expect to be temp (no Wifi)
+			 *   gets EAI_NONAME, Name or service not known
+			 */
 			txt = "temp";
-			hpoll += 1;
+			hpoll = 3;
 			break;
 		case DNS_error:
 			txt = "error";
