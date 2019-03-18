@@ -631,7 +631,7 @@ ntpdmain(
 	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
- 	sigaction(SIGPIPE, &sa, NULL);
+ 	(void)sigaction(SIGPIPE, &sa, NULL);
 
 	/*
 	 * Set up signals we pay attention to locally.
