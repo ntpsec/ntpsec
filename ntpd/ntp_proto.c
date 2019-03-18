@@ -162,7 +162,7 @@ static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 static	double	root_distance	(struct peer *);
 static	void	restart_nts_ke	(struct peer *);
-
+static	void	maybe_log_junk	(struct recvbuf *rbuf);
 
 void
 set_sys_leap(unsigned char new_sys_leap) {
@@ -707,6 +707,7 @@ receive(
 		    && !extens_server_recv(&rbufp->ntspacket,
 			  rbufp->recv_buffer, rbufp->recv_length)) {
 			stat_count.sys_declined++;
+			maybe_log_junk(rbufp);
 			break;
 		}
 		handle_fastxmit(rbufp, restrict_mask, auth);
@@ -721,6 +722,7 @@ receive(
 		     && (!rbufp->extens_present || !extens_client_recv(peer,
 		          rbufp->recv_buffer, rbufp->recv_length))) {
 		    stat_count.sys_declined++;
+		    maybe_log_junk(rbufp);
 		    break;
 		}
 		handle_procpkt(rbufp, peer);
@@ -2841,5 +2843,26 @@ proto_clr_stats(void)
 	stat_count.sys_badauth = 0;
 	stat_count.sys_limitrejected = 0;
 	stat_count.sys_kodsent = 0;
+}
+
+
+/* limit logging so bad guys can't DDoS us by sending crap
+ * log first 100 and 10/hour
+ */
+
+void maybe_log_junk(struct recvbuf *rbufp) {
+    static unsigned int noise_try = 0;
+    noise_try++;
+    if ((noise_try>100) && (((noise_try-90)*3600/current_time) < 10))
+      return;
+    msyslog(LOG_INFO,
+	"JUNK: M%d V%d 0/%2x%2x%2x%2x 48/%2x%2x%2x%2x from %s, lng=%ld",
+	PKT_MODE(rbufp->pkt.li_vn_mode), PKT_VERSION(rbufp->pkt.li_vn_mode),
+	rbufp->recv_buffer[0], rbufp->recv_buffer[1],
+	rbufp->recv_buffer[2], rbufp->recv_buffer[3],
+	rbufp->recv_buffer[48+0], rbufp->recv_buffer[48+1],
+	rbufp->recv_buffer[48+2], rbufp->recv_buffer[48+3],
+	sockporttoa(&rbufp->recv_srcadr),
+	(long)rbufp->recv_length);
 }
 
