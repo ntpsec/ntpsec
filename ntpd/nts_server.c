@@ -239,15 +239,18 @@ int create_listener(int port, int family) {
 	err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
         if (0 > err) {
           msyslog(LOG_ERR, "NTSs: can't setsockopt4: %s", strerror(errno));
+	  close(sock);
           return -1;
         }
         err = bind(sock, (struct sockaddr*)&addr, sizeof(addr));
         if (0 > err) {
           msyslog(LOG_ERR, "NTSs: can't bind4: %s", strerror(errno));
+	  close(sock);
           return -1;
         }
         if (listen(sock, 6) < 0) {
           msyslog(LOG_ERR, "NTSs: can't listen4: %s", strerror(errno));
+	  close(sock);
           return -1;
         }
         msyslog(LOG_INFO, "NTSs: listen4 worked");
@@ -265,20 +268,24 @@ int create_listener(int port, int family) {
         err = setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
         if (0 > err) {
           msyslog(LOG_ERR, "NTSs: can't setsockopt6only: %s", strerror(errno));
+	  close(sock);
           return -1;
         }
 	err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
         if (0 > err) {
           msyslog(LOG_ERR, "NTSs: can't setsockopt6: %s", strerror(errno));
+	  close(sock);
           return -1;
         }
         err = bind(sock, (struct sockaddr*)&addr6, sizeof(addr6));
         if (0 > err) {
           msyslog(LOG_ERR, "NTSs: can't bind6: %s", strerror(errno));
+	  close(sock);
           return -1;
         }
         if (listen(sock, 6) < 0) {
           msyslog(LOG_ERR, "NTSs: can't listen6: %s", strerror(errno));
+	  close(sock);
           return -1;
         }
         msyslog(LOG_INFO, "NTSs: listen6 worked");
