@@ -23,7 +23,7 @@
 #include "nts.h"
 #include "nts2.h"
 
-// FIXME Duplicated in nts_cookie
+// FIXME duplicated in nts_cookie
 #define NONCE_LENGTH 16
 #define CMAC_LENGTH 16
 
@@ -79,7 +79,6 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
       peer->nts_state.cookies[idx], peer->nts_state.cookielen);
   peer->nts_state.readIdx = peer->nts_state.readIdx % NTS_MAX_COOKIES;
   peer->nts_state.count--;
-  // FIXME - what to do if out of cookies
 
   // Need more cookies?
   for (int i=peer->nts_state.count+1; i<NTS_MAX_COOKIES; i++) {
