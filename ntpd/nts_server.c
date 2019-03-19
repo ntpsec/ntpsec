@@ -25,6 +25,7 @@
 static int create_listener(int port, int family);
 static void* nts_ke_listener(void*);
 static bool nts_ke_request(SSL *ssl);
+static bool nts_ke_do_receive(SSL *ssl, int *aead);
 
 
 static SSL_CTX *server_ctx = NULL;
@@ -164,29 +165,25 @@ return NULL;
 }
 
 bool nts_ke_request(SSL *ssl) {
-    /* buff is used for both read and write.
-     * RFC 4: servers must accept 1024
-     * cookies can be 104, 136, or 168 for IANA_AEAD_AES_SIV_CMAC_xxx
-     * 8*104 fits in 1K.  With 168, we only get 5.
+    /* Our cookies can be 104, 136, or 168 for AES_SIV_CMAC_xxx
      * 8*168 fits comfortably into 2K.
      */
     uint8_t buff[2048];
-    int bytes_read, bytes_written;
+    int bytes_written;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
     uint8_t cookie[NTS_MAX_COOKIELEN];
     int aead, keylen, cookielen;
     struct BufCtl_t buf;
     int used;
 
-    bytes_read = SSL_read(ssl, buff, sizeof(buff));
-    if (0 >= bytes_read) {
-        msyslog(LOG_INFO, "NTSs: SSL_read error: %s", strerror(errno));
-        nts_log_ssl_error();
+    aead = NO_AEAD;
+    if (!nts_ke_do_receive(ssl, &aead))
         return false;
-    }
 
-    // FIXME Ignore request for now
-    aead = IANA_AEAD_AES_SIV_CMAC_256;
+    if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
+      aead = nts_string_to_aead(ntsconfig.aead);
+    if (NO_AEAD == aead)
+      aead = AEAD_AES_SIV_CMAC_256;    /* default */
 
     buf.next = buff;
     buf.left = sizeof(buff);
@@ -297,5 +294,84 @@ int create_listener(int port, int family) {
     return sock;
 }
 
+bool nts_ke_do_receive(SSL *ssl, int *aead) {
+    /* RFC 4: servers must accept 1024 */
+    uint8_t buff[1024];
+    int bytes_read;
+    struct BufCtl_t buf;
+
+    bytes_read = SSL_read(ssl, buff, sizeof(buff));
+    if (0 >= bytes_read) {
+        msyslog(LOG_INFO, "NTSs: SSL_read error: %s", strerror(errno));
+        nts_log_ssl_error();
+        return false;
+    }
+
+    buf.next = buff;
+    buf.left = bytes_read;
+    while (buf.left > 0) {
+      uint16_t type, data;
+      int length;
+      bool critical = false;
+
+      type = ke_next_record(&buf, &length);
+      if (NTS_CRITICAL & type) {
+        critical = true;
+        type &= ~NTS_CRITICAL;
+      }
+      if (0) // Handy for debugging but very verbose
+        msyslog(LOG_ERR, "NTSs: Record: T=%d, L=%d, C=%d", type, length, critical);
+      switch (type) {
+        case nts_error:
+          data = next_uint16(&buf);
+          if (sizeof(data) != length)
+            msyslog(LOG_ERR, "NTSs: wrong length on error: %d", length);
+          msyslog(LOG_ERR, "NTSs: error: %d", data);
+          return false;
+        case nts_next_protocol_negotiation:
+          data = next_uint16(&buf);
+          if ((sizeof(data) != length) || (data != 0)) {
+            msyslog(LOG_ERR, "NTSs: NPN-Wrong length or bad data: %d, %d",
+                length, data);
+            return false;
+          }
+          break;
+        case nts_algorithm_negotiation:
+          for (int i=0; i<length; i+=sizeof(uint16_t)) {
+            data = next_uint16(&buf);
+            if (0 == nts_get_key_length(data)) {
+              if (0)  /* for debugging */
+                msyslog(LOG_ERR, "NTSs: AN-Unsupported AEAN type: %d", data);
+              continue;     /* ignore types we don't support */
+            }
+            if (*aead != NO_AEAD)
+              continue;     /* already got one */
+            *aead = data;   /* take this one */
+          }
+          break;
+        case nts_end_of_message:
+          if ((0 != length) || !critical) {
+            msyslog(LOG_ERR, "NTSs: EOM-Wrong length or not Critical: %d, %d",
+                length, critical);
+            return false;
+          }
+          if (0 != buf.left) {
+            msyslog(LOG_ERR, "NTSs: EOM not at end: %d", buf.left);
+            return false;
+          }
+          break;
+        default:
+          msyslog(LOG_ERR, "NTSs: received strange type: T=%d, C=%d, L=%d",
+            type, critical, length);
+          if (critical) return false;
+          buf.next += length;
+          buf.left -= length;
+          break;
+      } /* case */
+    }   /* while */
+
+  return true;
+
+}
 
 /* end */

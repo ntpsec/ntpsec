@@ -91,15 +91,6 @@ struct ntsconfig_t {
  * but that's all we use. */
 #define AEAD_CMAC_LNG 16
 
-/* We are using AEAD_AES_SIV_CMAC_256, from RFC 5297 */
-#define IANA_AEAD_AES_SIV_CMAC_256 15
-#define IANA_AEAD_AES_SIV_CMAC_384 16
-#define IANA_AEAD_AES_SIV_CMAC_512 17
-#define AEAD_AES_SIV_CMAC_256_KEYLEN 32
-#define AEAD_AES_SIV_CMAC_384_KEYLEN 48
-#define AEAD_AES_SIV_CMAC_512_KEYLEN 64
-#define NO_AEAD 0xffff
-
 /* NTS protocol constants */
 
 #define NTS_CRITICAL 0x8000
@@ -120,6 +111,7 @@ enum nts_errors_type {
 };
 
 enum aead_ciphers {
+#define NO_AEAD 0xffff
   AEAD_AES_128_GCM = 1,
   AEAD_AES_256_GCM = 2,
   AEAD_AES_128_CCM = 3,
@@ -140,6 +132,9 @@ enum aead_ciphers {
   AEAD_AES_SIV_CMAC_256 = 15,     /* RFC 5297 */
   AEAD_AES_SIV_CMAC_384 = 16,     /* These 3 are the ones we use */
   AEAD_AES_SIV_CMAC_512 = 17,
+#define AEAD_AES_SIV_CMAC_256_KEYLEN 32
+#define AEAD_AES_SIV_CMAC_384_KEYLEN 48
+#define AEAD_AES_SIV_CMAC_512_KEYLEN 64
 
   AEAD_AES_128_CCM_8 = 18,
   AEAD_AES_256_CCM_8 = 19,

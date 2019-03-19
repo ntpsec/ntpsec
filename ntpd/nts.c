@@ -84,26 +84,28 @@ int nts_translate_version(const char *arg) {
   return -1;
 }
 
-/* Translate text to AEAD code.  -1 for none/error */
+/* Translate text to AEAD code.  NO_AEAD for none/error */
 uint16_t nts_string_to_aead(const char* text) {
-  if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_256"))
+  if (false)
+      {}
+  else if (0 == strcmp(text, "AES_SIV_CMAC_256"))
       return AEAD_AES_SIV_CMAC_256;
-  else if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_384"))
+  else if (0 == strcmp(text, "AES_SIV_CMAC_384"))
       return AEAD_AES_SIV_CMAC_384;
-  else if (0 == strcmp( text, "IANA_AEAD_AES_SIV_CMAC_384"))
+  else if (0 == strcmp(text, "AES_SIV_CMAC_512"))
       return AEAD_AES_SIV_CMAC_512;
   else
-      return -1;
+      return NO_AEAD;
 }
 
 /* returns key length, 0 if unknown arg */
 int nts_get_key_length(uint16_t aead) {
   switch (aead) {
-    case IANA_AEAD_AES_SIV_CMAC_256:
+    case AEAD_AES_SIV_CMAC_256:
       return AEAD_AES_SIV_CMAC_256_KEYLEN;
-    case IANA_AEAD_AES_SIV_CMAC_384:
+    case AEAD_AES_SIV_CMAC_384:
       return AEAD_AES_SIV_CMAC_384_KEYLEN;
-    case IANA_AEAD_AES_SIV_CMAC_512:
+    case AEAD_AES_SIV_CMAC_512:
       return AEAD_AES_SIV_CMAC_512_KEYLEN;
     default:
       return 0;

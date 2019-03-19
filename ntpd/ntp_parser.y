@@ -477,6 +477,8 @@ option_string
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Cert T_String
 			{ $$ = create_attr_sval($1, $2); }
+	|	T_Aead T_String
+			{ $$ = create_attr_sval($1, $2); }
 	;
 
 option_double_keyword

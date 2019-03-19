@@ -79,6 +79,15 @@ The options are as follows:
    An OpenSSL ciphersuite list to configure the allowed ciphersuites for
    TLS 1.3.  A single NULL cipher disables encryption and use of certificates.
 
++aead+ _string_::
+   Specify the crypto algorithm to be used on the wire.  The choices
+   come from RFC 5297.  The only options supported are AES_SIV_CMAC_256,
+   AES_SIV_CMAC_384, and AES_SIV_CMAC_512.  This slot is dual use.
+   It is the server default if the remote client doesn't request a
+   valid choice and it is also the preference passed to the
+   remote client if the server command doesn't specify a preference.
+   The default is AES_SIV_CMAC_256.
+
 The following options of the +server+ command configure NTS.
 
 +nts+::
@@ -122,5 +131,23 @@ The following options of the +server+ command configure NTS.
   Use the file, or directory, specified by _location_ to validate the
   NTS-KE server certificate, overriding the site default.  Do not use
   any other CA.
+
++aead+ _string_::
+   Specify the prefered crypto algorithm to be used on the wire.
+   The only options supported are AES_SIV_CMAC_256, AES_SIV_CMAC_384, and
+   AES_SIV_CMAC_512.  The server may ignore the request.  See the _aead_
+   option above.
+
+
+The same _aead_ algorithms are also used to encrypt cookies.
+  The default is AES_SIV_CMAC_256.  There is no config file option to
+  change it, but you can change it by editing the saved cookie key
+  file, probably /var/lib/ntp/nts-keys.  Adjust the _L:_ slot to be
+  48 or 64 and adjust the _I:_ slots to have the right number of bytes.
+  Then restart the server.  (All old cookies held by clients will be
+  rejected so their next 8 NTP requests will be ignored.  They should
+  recover by retrying NTS-KE to get fresh cookies.)
+
+
 
 // end

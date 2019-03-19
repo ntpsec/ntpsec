@@ -37,7 +37,7 @@ static SSL_CTX *client_ctx = NULL;
 static sockaddr_u sockaddr;
 static bool addrOK;
 
-// Fedora 29:  0x1010101fL  1.1.1a
+// Fedora 29:  0x1010102fL  1.1.1b
 // Fedora 28:  0x1010009fL  1.1.0i
 // Debian 9:   0x101000afL  1.1.0j
 // Debian 8:   0x1000114fL  1.0.1t
@@ -338,8 +338,6 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   struct  BufCtl_t buf;
   uint16_t aead = NO_AEAD;
 
-  UNUSED_ARG(peer);
-
   buf.next = buff;
   buf.left = sizeof(buff);
 
@@ -348,6 +346,7 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
 
   /* 4.1.5 AEAD Algorithm List */
   // FIXME should be : separated list
+
   if ((NO_AEAD == aead) && (NULL != peer->cfg.nts_cfg.aead))
     aead = nts_string_to_aead(peer->cfg.nts_cfg.aead);
   if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
@@ -467,7 +466,6 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
           msyslog(LOG_ERR, "NTSc: EOM not at end: %d", buf.left);
           return false;
         }
-       // FIXME check for no more
         break;
       default:
         msyslog(LOG_ERR, "NTSc: received strange type: T=%d, C=%d, L=%d",
