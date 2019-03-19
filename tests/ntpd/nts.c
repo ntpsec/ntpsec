@@ -14,6 +14,37 @@ TEST_SETUP(nts) {}
 
 TEST_TEAR_DOWN(nts) {}
 
+TEST(nts, nts_translate_version) {
+  TEST_ASSERT_EQUAL_INT32(nts_translate_version(NULL), 0);
+  TEST_ASSERT_EQUAL_INT32(nts_translate_version("TLS1.2"), TLS1_2_VERSION);
+#ifdef TLS1_3_VERSION
+  TEST_ASSERT_EQUAL_INT32(nts_translate_version("TLS1.3"), TLS1_3_VERSION);
+#else
+  TEST_ASSERT_EQUAL_INT32(nts_translate_version("TLS1.3"), -1);
+#endif
+  TEST_ASSERT_EQUAL_INT32(nts_translate_version("blah"), -1);
+}
+
+TEST(nts, nts_string_to_aead) {
+  TEST_ASSERT_EQUAL_INT16(nts_string_to_aead("AEAD_AES_SIV_CMAC_256"),
+						  AEAD_AES_SIV_CMAC_256);
+  TEST_ASSERT_EQUAL_INT16(nts_string_to_aead("AEAD_AES_SIV_CMAC_384"),
+						  AEAD_AES_SIV_CMAC_384);
+  TEST_ASSERT_EQUAL_INT16(nts_string_to_aead("AEAD_AES_SIV_CMAC_512"),
+						  AEAD_AES_SIV_CMAC_512);
+  TEST_ASSERT_EQUAL_INT16(nts_string_to_aead("blah"), NO_AEAD);
+}
+
+TEST(nts, nts_get_key_length) {
+  TEST_ASSERT_EQUAL_INT32(nts_get_key_length(AEAD_AES_SIV_CMAC_256),
+						  AEAD_AES_SIV_CMAC_256_KEYLEN);
+  TEST_ASSERT_EQUAL_INT32(nts_get_key_length(AEAD_AES_SIV_CMAC_384),
+						  AEAD_AES_SIV_CMAC_384_KEYLEN);
+  TEST_ASSERT_EQUAL_INT32(nts_get_key_length(AEAD_AES_SIV_CMAC_512),
+						  AEAD_AES_SIV_CMAC_512_KEYLEN);
+  TEST_ASSERT_EQUAL_INT32(nts_get_key_length(-23), 0);
+}
+
 TEST(nts, ke_append_record_null) {
   // Setup
   uint8_t buf[128];
@@ -89,6 +120,110 @@ TEST(nts, ke_append_record_bytes) {
   // Check
   TEST_ASSERT_EQUAL_UINT8(buf[8], 0);
   TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[8]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 0);
+}
+
+TEST(nts, ex_append_record_null) {
+  // Setup
+  uint8_t buf[16];
+  BufCtl cursor;
+  cursor.next = buf;
+  cursor.left = 16;
+  // Run test
+  ex_append_record_null(&cursor, 0xFADE);
+  // Check
+  TEST_ASSERT_EQUAL_UINT8(buf[0], 0xFA);
+  TEST_ASSERT_EQUAL_UINT8(buf[1], 0xDE);
+  TEST_ASSERT_EQUAL_UINT8(buf[2], 0);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[2]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 14);
+}
+
+TEST(nts, ex_append_record_uint16) {
+  // Setup
+  uint8_t buf[16];
+  BufCtl cursor;
+  cursor.next = buf;
+  cursor.left = 16;
+  // Run test
+  ex_append_record_uint16(&cursor, 0xFADE, 0x1234);
+  // Check
+  TEST_ASSERT_EQUAL_UINT8(buf[0], 0xFA);
+  TEST_ASSERT_EQUAL_UINT8(buf[1], 0xDE);
+  TEST_ASSERT_EQUAL_UINT8(buf[2], 0x12);
+  TEST_ASSERT_EQUAL_UINT8(buf[3], 0x34);
+  TEST_ASSERT_EQUAL_UINT8(buf[4], 0);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[4]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 12);
+  // Test no change
+  // Setup
+  cursor.left = 0;
+  // Run test
+  ke_append_record_uint16(&cursor, 0xCAFE, 0x1234);
+  // Check
+  TEST_ASSERT_EQUAL_UINT8(buf[4], 0);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[4]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 0);
+}
+
+TEST(nts, ex_append_record_bytes) {
+  // Test change
+  // Setup
+  uint8_t buf[16] = {0, 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0, 0};
+  BufCtl cursor;
+  cursor.next = buf;
+  cursor.left = 16;
+  uint8_t data[6] = {0, 1, 2, 3, 4, 5};
+  // Run test
+  ex_append_record_bytes(&cursor, 0xCAFE, data, 6);
+  // Check
+  TEST_ASSERT_EQUAL_UINT8(buf[0], 0xCA);
+  TEST_ASSERT_EQUAL_UINT8(buf[1], 0xFE);
+  TEST_ASSERT_EQUAL_UINT8(buf[2], 0);
+  TEST_ASSERT_EQUAL_UINT8(buf[3], 1);
+  TEST_ASSERT_EQUAL_UINT8(buf[4], 2);
+  TEST_ASSERT_EQUAL_UINT8(buf[5], 3);
+  TEST_ASSERT_EQUAL_UINT8(buf[6], 4);
+  TEST_ASSERT_EQUAL_UINT8(buf[7], 5);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[8]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 8);
+  // Test no change
+  // Setup
+  cursor.left = 0;
+  // Run test
+  ex_append_record_bytes(&cursor, 0xCAFE, data, 6);
+  // Check
+  TEST_ASSERT_EQUAL_UINT8(buf[8], 0);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[8]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 0);
+}
+
+TEST(nts, ex_append_header) {
+  // Test change
+  // Setup
+  uint8_t buf[16];
+  BufCtl cursor;
+  cursor.next = buf;
+  cursor.left = 16;
+  // Run test
+  ex_append_header(&cursor, 0xFADE, 0x1234);
+  // Check
+  TEST_ASSERT_EQUAL_UINT8(buf[0], 0xFA);
+  TEST_ASSERT_EQUAL_UINT8(buf[1], 0xDE);
+  TEST_ASSERT_EQUAL_UINT8(buf[2], 0x12);
+  TEST_ASSERT_EQUAL_UINT8(buf[3], 0x34);
+  TEST_ASSERT_EQUAL_UINT8(buf[4], 0);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[4]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 12);
+  // Test no change
+  // Setup
+  cursor.left = 0;
+  // Run test
+  ex_append_header(&cursor, 0xFEED, 0xABCD);
+  // Check
+  TEST_ASSERT_EQUAL_UINT8(buf[4], 0);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[4]);
   TEST_ASSERT_EQUAL_INT(cursor.left, 0);
 }
 
@@ -195,6 +330,24 @@ TEST(nts, ke_next_record) {
   TEST_ASSERT_EQUAL_INT(cursor.left, 12);
 }
 
+TEST(nts, ex_next_record) {
+  // Setup
+  uint8_t buf[16] = {0xFA, 0xCE, 0, 4, 0xFF, 0xEE, 0xDD, 0xCC,
+					 0, 0, 0, 0, 0, 0, 0, 0};
+  BufCtl cursor;
+  cursor.next = buf;
+  cursor.left = 16;
+  int length;
+  uint16_t type;
+  // Run test
+  type = ex_next_record(&cursor, &length);
+  // Check
+  TEST_ASSERT_EQUAL_INT(length, 4);
+  TEST_ASSERT_EQUAL_INT(type, 0xFACE);
+  TEST_ASSERT_POINTERS_EQUAL(cursor.next, &buf[4]);
+  TEST_ASSERT_EQUAL_INT(cursor.left, 12);
+}
+
 TEST(nts, next_uint16) {
   // Setup
   uint8_t buf[16] = {0xFA, 0xCE, 0, 4, 0xFF, 0xEE, 0xDD, 0xCC,
@@ -247,13 +400,21 @@ bool extens_init (void) { return true; }
 
 
 TEST_GROUP_RUNNER(nts) {
+  RUN_TEST_CASE(nts, nts_translate_version);
+  RUN_TEST_CASE(nts, nts_string_to_aead);
+  RUN_TEST_CASE(nts, nts_get_key_length);
   RUN_TEST_CASE(nts, ke_append_record_null);
   RUN_TEST_CASE(nts, ke_append_record_uint16);
   RUN_TEST_CASE(nts, ke_append_record_bytes);
+  RUN_TEST_CASE(nts, ex_append_record_null);
+  RUN_TEST_CASE(nts, ex_append_record_uint16);
+  RUN_TEST_CASE(nts, ex_append_record_bytes);
+  RUN_TEST_CASE(nts, ex_append_header);
   RUN_TEST_CASE(nts, append_header);
   RUN_TEST_CASE(nts, append_uint16);
   RUN_TEST_CASE(nts, append_bytes);
   RUN_TEST_CASE(nts, ke_next_record);
+  RUN_TEST_CASE(nts, ex_next_record);
   RUN_TEST_CASE(nts, next_uint16);
   RUN_TEST_CASE(nts, next_bytes);
 }
