@@ -311,6 +311,7 @@ bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keyl
   // https://mailarchive.ietf.org/arch/msg/ntp/nkc-9n6XOPt5Glgi_ueLvuD9EfY
   // bug in OpenSSL 1.1.1a
   const char *label = "EXPORTER-nts/1";
+  // FIXME, first 2 bytes, next protocol ID (0)
   unsigned char context[5] = {0x00, 0x00, 0x00, 0x0f, 0x00};
   context[2] = (aead >> 8) & 0xFF;
   context[3] = aead & 0xFF;
