@@ -419,9 +419,6 @@ handle_procpkt(
 {
 	int outcount = peer->outcount;
 
-	/* Shouldn't happen, but include this for safety. */
-	if(peer == NULL) { return; }
-
 	peer->flash &= ~PKT_BOGON_MASK;
 
 	/* Duplicate detection */
