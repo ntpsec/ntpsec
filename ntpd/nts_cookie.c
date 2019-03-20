@@ -131,7 +131,6 @@ bool nts_cookie_init2(void) {
 #define SecondsPerDay 3600
 void nts_timer(void) {
   time_t now;
-  long int steps;
   if (0 == K_time)
     return;
   now = time(NULL);
@@ -139,8 +138,8 @@ void nts_timer(void) {
     return;
   nts_make_cookie_key();
   /* In case we were off for many days. */
-  steps = (now-K_time) % SecondsPerDay;
-  K_time += steps*SecondsPerDay;
+  while (SecondsPerDay < (now-K_time))
+    K_time += SecondsPerDay;
   if (nts_write_cookie_keys() )
     msyslog(LOG_INFO, "NTS: Wrote new cookie key.");
   else
