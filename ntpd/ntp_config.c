@@ -2009,6 +2009,10 @@ config_nts(
 			ntsconfig.cert = estrdup(nts->value.s);
 			break;
 
+		case T_Cookie:
+			ntsconfig.KI = estrdup(nts->value.s);
+			break;
+
 		case T_Disable:
 			ntsconfig.ntsenable = false;
 			break;

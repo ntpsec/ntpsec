@@ -68,6 +68,7 @@
 %token	<Integer>	T_Clock
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
+%token	<Integer>	T_Cookie
 %token	<Integer>	T_ControlKey
 %token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
@@ -1138,6 +1139,7 @@ nts_string_option_keyword
 	:	T_Aead
 	|	T_Ca
 	|	T_Cert
+	|	T_Cookie
 	|	T_Key
 	|	T_Tlsciphers
 	|	T_Tlsciphersuites

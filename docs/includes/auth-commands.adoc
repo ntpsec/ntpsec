@@ -51,6 +51,11 @@ The options are as follows:
   validate NTS-KE server certificates instead of the system
   default root certificates.
 
++cookie+ _location_::
+  Use the file (or directory) specified by _location_ to
+  store the keys used to make and decode cookies.  The default
+  is _/var/lib/ntp/nts-keys_.
+
 +enable+::
   Enable NTS-KE server.
   When enabled, _cert_ and _key_ are required.
@@ -103,7 +108,7 @@ The following options of the +server+ command configure NTS.
   That is probably a FQDN rather than a short alias that you would
   probably use to talk to an internal server.
 
-+ask+ _address_::
++ask+ _address_:: (not implemented)
   Use Network Time Security for authentication.  Ask
   for a specific NTS server, which may differ from the NTP server.
   Conforms to RFC 3896 section 3.2.2 prescription for the Host part of
@@ -111,7 +116,7 @@ The following options of the +server+ command configure NTS.
   numeric address, or an IPv6 numeric address (in square brackets).
   The address may have the suffix +:port+ to specify a UDP port.
 
-+require+ _address_::
++require+ _address_:: (not implemented)
   Use Network Time Security for authentication and encryption.
   Require a specific NTS server, which may differ from the NTP server.
   Address syntax is as for +ask+.
@@ -119,15 +124,15 @@ The following options of the +server+ command configure NTS.
 +noval+::
   Do not validate the server certificate.
 
-+expire+::
++expire+:: (not implemented)
   How long to use a secured NTP association before rekeying with the
   NTS-KE server.
 
-+cert+ _file_::
++cert+ _file_:: (not implemented)
   Present the certificate in _file_ as our client certificate,
   overriding the site default.
 
-+ca+ _location_::
++ca+ _location_:: (not implemented)
   Use the file, or directory, specified by _location_ to validate the
   NTS-KE server certificate, overriding the site default.  Do not use
   any other CA.
