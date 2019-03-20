@@ -113,6 +113,7 @@ void* nts_ke_listener(void* arg) {
         uint len = sizeof(addr);
         SSL *ssl;
         l_fp start, finish;
+        int err;
 
         int client = accept(sock, &addr, &len);
         if (client < 0) {
@@ -126,7 +127,13 @@ void* nts_ke_listener(void* arg) {
         get_systime(&start);
         msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s",
             sockporttoa((sockaddr_u *)&addr));
-	setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        err = setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        if (0 > err) {
+            msyslog(LOG_ERR, "NTSs: can't setsockopt: %s", strerror(errno));
+            close(client);
+            nts_ke_serves_bad++;
+            continue;
+        }
 
         /* For high volume servers, this should go in a new thread. */
         ssl = SSL_new(server_ctx);

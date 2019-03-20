@@ -92,6 +92,7 @@ bool nts_probe(struct peer * peer) {
   SSL     *ssl;
   int      server;
   l_fp     start, finish;
+  int      err;
 
   if (NULL == client_ctx)
     return false;
@@ -106,7 +107,13 @@ bool nts_probe(struct peer * peer) {
     return false;
   }
 
-  setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+  err = setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+  if (0 > err) {
+    msyslog(LOG_ERR, "NTSc: can't setsockopt: %s", strerror(errno));
+    close(server);
+    nts_ke_probes_bad++;
+    return false;
+  }
 
   // FIXME
   // Not much error checking yet.
