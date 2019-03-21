@@ -27,7 +27,7 @@
 #include "nts2.h"
 #include "ntp_dns.h"
 
-int open_TCP_socket(const char *hostname);
+int open_TCP_socket(struct peer* peer);
 bool nts_set_cert_search(SSL_CTX *ctx);
 bool check_certificate(struct peer* peer, SSL *ssl);
 bool nts_client_send_request(struct peer* peer, SSL *ssl);
@@ -101,7 +101,7 @@ bool nts_probe(struct peer * peer) {
   addrOK = false;
   get_systime(&start);
 
-  server = open_TCP_socket(peer->hostname);
+  server = open_TCP_socket(peer);
   if (-1 == server) {
     nts_ke_probes_bad++;
     return false;
@@ -188,7 +188,7 @@ bool nts_check(struct peer *peer) {
   return addrOK;
 }
 
-int open_TCP_socket(const char *hostname) {
+int open_TCP_socket(struct peer *peer) {
   char host[256], port[32];
   char *tmp;
   struct addrinfo hints;
@@ -198,12 +198,12 @@ int open_TCP_socket(const char *hostname) {
   l_fp start, finish;
 
   /* copy avoids dancing around const warnings */
-  strlcpy(host, hostname, sizeof(host));
+  strlcpy(host, peer->hostname, sizeof(host));
 
   ZERO(hints);
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_socktype = SOCK_STREAM;
-  hints.ai_family = AF_UNSPEC;
+  hints.ai_family = AF(&peer->srcadr);
   tmp = strchr(host, ']');
   if (NULL == tmp) {
     tmp = strchr(host, ':');
@@ -224,13 +224,13 @@ int open_TCP_socket(const char *hostname) {
   gai_rc = getaddrinfo(host, port, &hints, &answer);
   if (0 != gai_rc) {
     msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to contact %s: %d, %s",
-      hostname, gai_rc, gai_strerror(gai_rc));
+      peer->hostname, gai_rc, gai_strerror(gai_rc));
     return -1;
   }
   get_systime(&finish);
   finish -= start;
   msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3Lf sec",
-    hostname, lfptod(finish));
+    peer->hostname, lfptod(finish));
 
   /* Save first answer for NTP */
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
