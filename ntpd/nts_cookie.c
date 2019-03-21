@@ -161,8 +161,7 @@ bool nts_read_cookie_keys(void) {
   if (1 != fscanf(in, "T: %lu\n", &templ)) goto bail;
   K_time = templ;
   if (1 != fscanf(in, "L: %d\n", &K_length)) goto bail;
-  if (NTS_MAX_KEYLEN < K_length) goto bail;
-  // FIXME check K_length is 32, 48, or 64
+  if ( !((32 == K_length) || (48 == K_length) || (64 == K_length))) goto bail;
   if (1 != fscanf(in, "I: %u\n", &I)) goto bail;
   if (0 != fscanf(in, "K: ")) goto bail;
   for (int i=0; i< K_length; i++) {
