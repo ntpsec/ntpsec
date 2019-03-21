@@ -70,14 +70,14 @@ static void test_malloc_failure(void) {
         int ret, i=0;
         AES_SIV_CTX *ctx;
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L	
         ret = CRYPTO_set_mem_functions(mock_malloc, realloc, free);
 #else
 	ret = CRYPTO_set_mem_functions(mock_malloc_ex, mock_realloc_ex, mock_free_ex);
 #endif
         assert(ret == 1);
 
-        printf("Test allocation failure:\n" );
+        printf("Test allocation failure cases:\n" );
 
         do {
                 fail_allocation_counter = i++;
@@ -95,7 +95,7 @@ static void test_cleanup_before_free(void) {
 	AES_SIV_CTX_cleanup(ctx);
 	AES_SIV_CTX_free(ctx);
 	printf("OK\n");
-}
+}	
 
 static void test_vector_1(void) {
         const unsigned char key[] = {

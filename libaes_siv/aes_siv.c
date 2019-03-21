@@ -239,8 +239,13 @@ void AES_SIV_CTX_cleanup(AES_SIV_CTX *ctx) {
 void AES_SIV_CTX_free(AES_SIV_CTX *ctx) {
         if (ctx) {
                 EVP_CIPHER_CTX_free(ctx->cipher_ctx);
-                CMAC_CTX_free(ctx->cmac_ctx_init);
-                CMAC_CTX_free(ctx->cmac_ctx);
+                /* Prior to OpenSSL 1.0.2b, CMAC_CTX_free() crashes on NULL */
+                if (LIKELY(ctx->cmac_ctx_init != NULL)) {
+                        CMAC_CTX_free(ctx->cmac_ctx_init);
+                }
+                if (LIKELY(ctx->cmac_ctx != NULL)) {
+                        CMAC_CTX_free(ctx->cmac_ctx);
+                }
 		OPENSSL_cleanse(&ctx->d, sizeof ctx->d);
                 free(ctx);
         }
@@ -287,7 +292,7 @@ int AES_SIV_Init(AES_SIV_CTX *ctx, unsigned char const *key, size_t key_len) {
         size_t out_len;
         int ret = 0;
 
-        ct_poison(key, sizeof key);
+        ct_poison(key, key_len);
 
         switch (key_len) {
         case 32:
