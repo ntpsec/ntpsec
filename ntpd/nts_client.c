@@ -213,7 +213,7 @@ int open_TCP_socket(struct peer *peer) {
   }
   if (NULL == tmp) {
     /* simple case, no : */
-    strlcpy(port, "ntp", sizeof(port));
+    strlcpy(port, "123", sizeof(port));
   } else {
     /* Complicated case, found a : */
     *tmp++ = 0;
