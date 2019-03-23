@@ -96,26 +96,6 @@ alpine-edge-refclocks:
   tags:
     - gitlab-org
 
-debian-oldoldstable-basic:
-  <<: *job_definition
-  image: debian:oldoldstable-slim
-  script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
-  tags:
-    - gitlab-org
-
-debian-oldoldstable-refclocks:
-  <<: *job_definition
-  image: debian:oldoldstable-slim
-  script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
-  tags:
-    - gitlab-org
-
 debian-oldstable-basic:
   <<: *job_definition
   image: debian:oldstable-slim
