@@ -265,7 +265,7 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
   aeadlen = NTP_EX_U16_LNG*2+NONCE_LENGTH+CMAC_LENGTH + plainleng;
   ex_append_header(&buf, NTS_AEEF, aeadlen);
   append_uint16(&buf, NONCE_LENGTH);
-  append_uint16(&buf, plainleng);
+  append_uint16(&buf, plainleng+CMAC_LENGTH);
 
   nonce = buf.next;
   RAND_bytes(nonce, NONCE_LENGTH);
