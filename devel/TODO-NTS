@@ -1,5 +1,6 @@
 multithread msyslog
   libntp/lib_strbuf.c too
+  strerror
 
 documentation:
   HOWTO on NTS
