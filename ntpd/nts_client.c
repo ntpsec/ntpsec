@@ -236,7 +236,8 @@ int open_TCP_socket(struct peer *peer) {
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
   msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s:%s => %s",
     host, port, sockporttoa(&sockaddr));
-  SET_PORT(&sockaddr, NTP_PORT);	/* setup default NTP address */
+  /* switch to NTP port in case of server-name:port */
+  SET_PORT(&sockaddr, NTP_PORT);
   sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
   if (-1 == sockfd) {
     msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", strerror(errno));
@@ -463,6 +464,11 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         peer->nts_state.writeIdx++;
         peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
         peer->nts_state.count++;
+        break;
+      case nts_port_negotiation:
+        data = next_uint16(&buf);
+        SET_PORT(&sockaddr, data);
+        msyslog(LOG_ERR, "NTSc: Using port %d", data);
         break;
       case nts_end_of_message:
         if ((0 != length) || !critical) {
