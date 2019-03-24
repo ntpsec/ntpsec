@@ -2284,7 +2284,10 @@ dns_take_server(
 		return;
 	}
 
-	msyslog(LOG_INFO, "DNS: Server taking: %s", socktoa(rmtadr));
+	if (NTP_PORT == SRCPORT(rmtadr))
+          msyslog(LOG_INFO, "DNS: Server taking: %s", socktoa(rmtadr));
+        else
+          msyslog(LOG_INFO, "DNS: Server taking: %s", sockporttoa(rmtadr));
 	server->cfg.flags &= (unsigned)~FLAG_LOOKUP;
 
 	server->srcadr = *rmtadr;
