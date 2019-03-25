@@ -2853,7 +2853,7 @@ proto_clr_stats(void)
 void maybe_log_junk(struct recvbuf *rbufp) {
     static unsigned int noise_try = 0;
     noise_try++;
-    if ((noise_try>100) && (((noise_try-90)*3600/current_time) < 10))
+    if ((noise_try>100) && (((noise_try-90)*3600/current_time) > 10))
       return;
     msyslog(LOG_INFO,
 	"JUNK: M%d V%d 0/%2x%2x%2x%2x 48/%2x%2x%2x%2x from %s, lng=%ld",
