@@ -32,6 +32,7 @@ bool nts_set_cert_search(SSL_CTX *ctx);
 bool check_certificate(struct peer* peer, SSL *ssl);
 bool nts_client_send_request(struct peer* peer, SSL *ssl);
 bool nts_client_process_response(struct peer* peer, SSL *ssl);
+bool nts_server_lookup(char *server, sockaddr_u *addr);
 
 static SSL_CTX *client_ctx = NULL;
 static sockaddr_u sockaddr;
@@ -405,9 +406,11 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
   buf.next = buff;
   buf.left = transferred;
   while (buf.left > 0) {
-    uint16_t type, data;
+    uint16_t type, data, port;
     bool critical = false;
     int length, keylength;
+#define MAX_SERVER 100
+    char server[MAX_SERVER];
 
     type = ke_next_record(&buf, &length);
     if (NTS_CRITICAL & type) {
@@ -466,10 +469,24 @@ bool nts_client_process_response(struct peer* peer, SSL *ssl) {
         peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
         peer->nts_state.count++;
         break;
+      case nts_server_negotiation:
+        if (MAX_SERVER < length) {
+          msyslog(LOG_ERR, "NTSc: server string too long %d.", length);
+          return false;
+        }
+        next_bytes(&buf, (uint8_t *)server, length);
+        /* save port in case port specified before server */
+        port = SRCPORT(&sockaddr);
+        if (!nts_server_lookup(server, &sockaddr))
+          return false;
+        SET_PORT(&sockaddr, port);
+        msyslog(LOG_ERR, "NTSc: Using server %s=>%s", server, socktoa(&sockaddr));
+        break;
       case nts_port_negotiation:
-        data = next_uint16(&buf);
-        SET_PORT(&sockaddr, data);
-        msyslog(LOG_ERR, "NTSc: Using port %d", data);
+        // FIXME check length
+        port = next_uint16(&buf);
+        SET_PORT(&sockaddr, port);
+        msyslog(LOG_ERR, "NTSc: Using port %d", port);
         break;
       case nts_end_of_message:
         if ((0 != length) || !critical) {
@@ -531,6 +548,35 @@ bool nts_set_cert_search(SSL_CTX *ctx) {
   }
   msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %s", ntsconfig.ca, strerror(errno));
   return false;
+}
+
+bool nts_server_lookup(char *server, sockaddr_u *addr) {
+  struct addrinfo hints;
+  struct addrinfo *answer;
+  int gai_rc;
+
+  ZERO(hints);
+  hints.ai_protocol = IPPROTO_UDP;
+  hints.ai_socktype = SOCK_DGRAM;
+  hints.ai_family = AF_UNSPEC;
+
+  gai_rc = getaddrinfo(server, "123", &hints, &answer);
+  if (0 != gai_rc) {
+    msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to lookup %s: %d, %s",
+      server, gai_rc, gai_strerror(gai_rc));
+    return false;
+  }
+
+  if (NULL == answer)
+    return false;
+
+  if (sizeof(sockaddr_u) >= answer->ai_addrlen)
+    memcpy(addr, answer->ai_addr, answer->ai_addrlen);
+
+  freeaddrinfo(answer);
+
+  return true;
+
 }
 
 /* end */
