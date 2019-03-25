@@ -131,7 +131,7 @@ decodenetnum(
 	   either the IP address or the port is well-formed, but at
 	   least they're unambiguously delimited from each other.
 	   Let getaddrinfo() perform all further validation. */
-	retcode = getaddrinfo(ip, port_start == NULL ? "ntp" : port_start,
+	retcode = getaddrinfo(ip, port_start == NULL ? "123" : port_start,
 		       &hints, &ai);
 	if(retcode) {
 		return retcode;
