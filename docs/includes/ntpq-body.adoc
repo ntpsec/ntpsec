@@ -393,6 +393,13 @@ displayed.
   packets can get flagged for inclusion in exception statistics in more
   than one way, for example by having both a bad length and an old version.
 
++ntsinfo+::
+  Display a summary of the NTS state, including
+  both the the NTS client and NTS server components.  Note that
+  the format of the output text may change as this feature is
+  developed.  This command is experimental until further notice
+  and clarification.
+
 [[auth]]
 == Authentication
 

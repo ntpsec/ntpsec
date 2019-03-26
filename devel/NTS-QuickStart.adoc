@@ -1,0 +1,160 @@
+== Quick way to get NTS working
+
+This is a recipe, useful during the development and
+stabilization phase of NTS landing, to get your NTPsec
+instance talking with other instances.
+
+This will get dated quite fast, and is neither the best
+way to setup, nor the more conformant, but should be enough
+to get you up.
+
+=== Get git head
+This has been tested with NTPsec_1_1_3-437-g2bb7f8fb9 .
+As the NTS implementation continues, this
+may no longer work.  YMMV.
+
+=== Ensure you have the right dependencies
+You need a very recent version of Openssl, 1.1.1a is known
+to work.  Earlier versons may work, depending on
+distributions.  You can check with the following:
+`openssl version`
+
+=== ntp.conf (you are a client)
+
+Append the keyword `nts` to the end of your `server`
+lines.  Do these only for servers that speak NTS.  As of
+late March, the following should work:
+
+```
+server ntpmon.dcs1.biz nts
+server pi3.rellim.com nts
+server kong.rellim.com nts
+server ntp1.glypnod.com nts
+server ntp2.glypnod.com nts
+server zoo.weinigel.se:4447 nts
+server nts-test.strangled.net:443 nts
+server nts3-e.ostfalia.de:443 nts noval
+```
+
+Note that these are development machines, so uptime is
+poor.   The last three are servers not running NTPsec, which
+were available for interop testing during the March 2019
+IETF Hackathon.  Note the _noval_ for the last server, this
+is because its certificate is not issued by a trusted root.
+
+Restart ntpd, and skip to <<Verification>>, below.
+
+=== ntp.conf (you are a server)
+Being an NTS server requires a well-formed SSL cert.  The
+easiest way to do this is if your server has a FQDN, using
+LetsEncrypt.  Please see the Certbot client site
+[[https://certbot.eff.org/]] for instructions.
+
+If you already have an SSL Cert for your server, and you are
+serving time using the same FQDN, you can reuse that Cert.
+
+Add the line:
+`nts enable`
+to your conf file.
+
+Locate the following two files:
+* Your Cert Private Key
+* Your Cert Public Key, fully chained up
+
+Then add the lines below to your ntp.conf, replacing
+with your pathnames.
+
+Example, for my server:
+
+```
+nts key /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
+nts cert /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
+```
+
+Restart your server, and skip to <<Verification>>, below.
+
+=== Verification
+
+Check your log file.  You should see lines like this:
+
+```
+2019-03-22T08:06:32 ntpd[12915]: NTSs: starting NTS-KE server listening on port 123
+2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded certificate (chain) from /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
+2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded private key from /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
+2019-03-22T08:06:32 ntpd[12915]: NTSs: Private Key OK
+2019-03-22T08:06:32 ntpd[12915]: NTSs: OpenSSL security level is 2
+2019-03-22T08:06:32 ntpd[12915]: NTSs: listen4 worked
+2019-03-22T08:06:32 ntpd[12915]: NTSs: listen6 worked
+2019-03-22T08:06:32 ntpd[12915]: NTSc: Using system default root certificates.
+2019-03-22T08:06:33 ntpd[12915]: DNS: dns_probe: pi3.rellim.com, cast_flags:1, flags:21801
+2019-03-22T08:06:33 ntpd[12915]: NTSc: DNS lookup of pi3.rellim.com took 0.003 sec
+2019-03-22T08:06:33 ntpd[12915]: NTSc: nts_probe connecting to pi3.rellim.com:ntp => 204.17.205.23:123
+2019-03-22T08:06:34 ntpd[12915]: NTSc: Using TLSv1.2, AES256-GCM-SHA384 (256)
+2019-03-22T08:06:34 ntpd[12915]: NTSc: certificate subject name: /CN=pi3.rellim.com
+2019-03-22T08:06:34 ntpd[12915]: NTSc: certificate issuer name: /C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3
+2019-03-22T08:06:34 ntpd[12915]: NTSc: certificate is valid.
+2019-03-22T08:06:34 ntpd[12915]: NTSc: read 880 bytes
+2019-03-22T08:06:34 ntpd[12915]: NTSc: Got 8 cookies, length 104, aead=15.
+2019-03-22T08:06:34 ntpd[12915]: NTSc: NTS-KE req to pi3.rellim.com took 0.882 sec, OK
+```
+
+This is because of the 
+
+`server pi3.rellim.com nts`
+
+line in ntp.conf.  You should see similar stanzas for each server.
+The logging prefix *NTSs* is for the NTS Server component, eg
+initializing your keys.  The *NTSc* component is for the NTS Client
+part, where you are talking to *other* NTS servers.
+
+==== Check with ntpq
+
+The output of ntpq will be slightly different when NTS is in use,
+note the `t` column.  Example:
+
+```
+root@ntpmon:/var/www/html/ntp# ntpq -p
+     remote                                   refid      st t when poll reach   delay   offset   jitter
+=======================================================================================================
+*SHM(1)                                  .PPS.            0 l   20   64  377   0.0000   0.0007   0.0281
+xSHM(0)                                  .GPS.            0 l   19   64  377   0.0000 233.3966  19.2212
++pi3.rellim.com                          .PPS.            1 8   56   64  371 197.4484   0.0932   0.9660
++kong.rellim.com                         204.17.205.17    2 8   17   64  273 210.7230  -1.3924   0.6086
+-ntp1.glypnod.com                        204.123.2.72     2 8   50   64  277 178.5749   3.8921   0.9611
+-ntp2.glypnod.com                        17.253.34.253    2 8    -   64  177 185.7582  -2.6534   0.0275
+ 2407:8000:8001:80::8                    .DNS.           16 u    - 1024    0   0.0000   0.0000   0.0005
+-navobs1.wustl.edu                       .GPS.            1 u  105   64  356 221.5282  -2.4354   0.0293
+```
+
+The `t` column shows how many cookies your NTS client is holding for the
+appropriate servers.  The number should be close to 8 (the default).
+
+==== Check with ntp variables
+
+Try `ntpq -c nts` . This will show various counters related
+to NTS.  This feature is under active development, so the
+format might change.  An example:
+
+```
+root@ntpmon:/var/www/html/ntp# ntpq -c nts
+NTS client sends:            7491
+NTS client recvs:            6562
+NTS client recvs w error:    0
+NTS server recvs:            5591
+NTS server recvs w error:    38
+NTS server sends:            5553
+NTS make cookies:            6392
+NTS decode cookies:          4734
+NTS decode cookies old:      819
+NTS decode cookies too old:  0
+NTS decode cookies error:    0
+NTS KE probes:               8
+NTS KE probes_bad:           0
+NTS KE serves:               75
+NTS KE serves_bad:           56
+```
+
+
+=== Thanks for the handholding
+Much thanks to Hal Murray and Gary Miller, for most of the
+stuff above, and talking me through this.
