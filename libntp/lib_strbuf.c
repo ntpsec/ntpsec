@@ -21,12 +21,12 @@ static pthread_mutex_t cookie_lock = PTHREAD_MUTEX_INITIALIZER;
 /*
  * Function to get a pointer to the next buffer.  Needs to be thread-safe because
  * it's used in callers that need to be thread-safe, notably msyslog.  For the 
- * same reason, we don't try to log a log-acquisition failure.
+ * same reason, we don't try to log a lock-acquisition failure.
  *
  * ESR: Yes, this is ugly and kludgy. I'm not getting rid of of it
  * because I have an eye forward on translation to a garbage-collected
  * language, at which point something with this behavior will be
- * better than all the conttorions we'd have to go through to get rid
+ * better than all the contortions we'd have to go through to get rid
  * of it in C.
  */
 char *lib_getbuf(void)
