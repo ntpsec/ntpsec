@@ -154,11 +154,23 @@ addto_syslog(
 	}
 
 	if (log_to_file) {
+	 	/*
+		 * Thread-safe write, the de-facto way.  It's not
+		 * actually guaranteed by standards that a write of
+		 * PIPE_BUF chars or less is atomic anywhere but on a
+		 * pipe.  In ancient times this was 512 and happened to
+		 * be equal to the usual size of a hardware disk sector,
+		 * which was what really bounded atomicity. The actual
+		 * answer under POSIX is SSIZE_MAX, which is far larger
+		 * than we want or need to allocate here.
+		 */
+		char buf[PIPE_BUF];
+		buf[0] = '\0';
 		if (msyslog_include_timestamp)
-			fprintf(syslog_file, "%s ", human_time);
-		fprintf(syslog_file, "%s[%d]: %s%s", prog, pid, msg,
-			nl_or_empty);
-		fflush(syslog_file);
+			snprintf(buf, sizeof(buf), "%s ", human_time);
+		snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf) - 1,
+			 "%s[%d]: %s%s", prog, pid, msg, nl_or_empty);
+		IGNORE(write(fileno(syslog_file), buf, strlen(buf)));
 	}
 }
 
