@@ -27,12 +27,12 @@
 #include "nts2.h"
 #include "ntp_dns.h"
 
-int open_TCP_socket(const char *hostname);
+int open_TCP_socket(struct peer *peer, const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx);
 void set_hostname(SSL *ssl, const char *hostname);
-bool check_certificate(SSL *ssl, struct peer* peer);
-bool nts_client_send_request(SSL *ssl, struct peer* peer);
-bool nts_client_process_response(SSL *ssl, struct peer* peer);
+bool check_certificate(SSL *ssl, struct peer *peer);
+bool nts_client_send_request(SSL *ssl, struct peer *peer);
+bool nts_client_process_response(SSL *ssl, struct peer *peer);
 bool nts_server_lookup(char *server, sockaddr_u *addr);
 
 static SSL_CTX *client_ctx = NULL;
@@ -121,7 +121,7 @@ bool nts_probe(struct peer * peer) {
     hostname = hostbuf;
   }
 
-  server = open_TCP_socket(hostname);
+  server = open_TCP_socket(peer, hostname);
   if (-1 == server) {
     nts_ke_probes_bad++;
     return false;
@@ -209,7 +209,7 @@ bool nts_check(struct peer *peer) {
   return addrOK;
 }
 
-int open_TCP_socket(const char *hostname) {
+int open_TCP_socket(struct peer *peer, const char *hostname) {
   char host[256], port[32];
   char *tmp;
   struct addrinfo hints;
@@ -241,7 +241,7 @@ int open_TCP_socket(const char *hostname) {
   ZERO(hints);
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_socktype = SOCK_STREAM;
-  hints.ai_family = AF_UNSPEC;
+  hints.ai_family = AF(&peer->srcadr);  /* -4, -6 switch */
   get_systime(&start);
   gai_rc = getaddrinfo(host, port, &hints, &answer);
   if (0 != gai_rc) {
