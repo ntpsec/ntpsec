@@ -58,10 +58,6 @@ bool dns_probe(struct peer* pp)
         if (NULL != active)
 		return false;
 
-        if (NULL == pp ||
-            NULL == pp->hostname)
-		return false;
-
 	if (NULL != active)
 		busy = ", busy";
 	msyslog(LOG_INFO, "DNS: dns_probe: %s, cast_flags:%x, flags:%x%s",
