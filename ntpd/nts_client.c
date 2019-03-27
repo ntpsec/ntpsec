@@ -27,11 +27,12 @@
 #include "nts2.h"
 #include "ntp_dns.h"
 
-int open_TCP_socket(struct peer* peer);
+int open_TCP_socket(const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx);
-bool check_certificate(struct peer* peer, SSL *ssl);
-bool nts_client_send_request(struct peer* peer, SSL *ssl);
-bool nts_client_process_response(struct peer* peer, SSL *ssl);
+void set_hostname(SSL *ssl, const char *hostname);
+bool check_certificate(SSL *ssl, struct peer* peer);
+bool nts_client_send_request(SSL *ssl, struct peer* peer);
+bool nts_client_process_response(SSL *ssl, struct peer* peer);
 bool nts_server_lookup(char *server, sockaddr_u *addr);
 
 static SSL_CTX *client_ctx = NULL;
@@ -90,6 +91,8 @@ bool nts_client_init(void) {
 
 bool nts_probe(struct peer * peer) {
   struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
+  const char *hostname = peer->hostname;
+  char hostbuf[100];
   SSL     *ssl;
   int      server;
   l_fp     start, finish;
@@ -102,7 +105,23 @@ bool nts_probe(struct peer * peer) {
   addrOK = false;
   get_systime(&start);
 
-  server = open_TCP_socket(peer);
+  if (NULL == hostname) {
+    /* IP Address case */
+    int af = AF(&peer->srcadr);
+    switch (af) {
+      case AF_INET:
+        inet_ntop(af, PSOCK_ADDR4(&peer->srcadr), hostbuf, sizeof(hostbuf));
+        break;
+      case AF_INET6:
+        inet_ntop(af, PSOCK_ADDR6(&peer->srcadr), hostbuf, sizeof(hostbuf));
+        break;
+      default:
+        return false;
+    }
+    hostname = hostbuf;
+  }
+
+  server = open_TCP_socket(hostname);
   if (-1 == server) {
     nts_ke_probes_bad++;
     return false;
@@ -121,6 +140,7 @@ bool nts_probe(struct peer * peer) {
   // Ugly since most SSL routines return 1 on success.
 
   ssl = SSL_new(client_ctx);
+  set_hostname(ssl, hostname);
   SSL_set_fd(ssl, server);
 
   if (1 != SSL_connect(ssl)) {
@@ -140,12 +160,12 @@ bool nts_probe(struct peer * peer) {
     SSL_get_cipher_name(ssl),
     SSL_get_cipher_bits(ssl, NULL));
 
-  if (!check_certificate(peer, ssl))
+  if (!check_certificate(ssl, peer))
     goto bail;
 
-  if (!nts_client_send_request(peer, ssl))
+  if (!nts_client_send_request(ssl, peer))
     goto bail;
-  if (!nts_client_process_response(peer, ssl))
+  if (!nts_client_process_response(ssl, peer))
     goto bail;
 
   /* We are using AEAD_AES_SIV_CMAC_xxx, from RFC 5297
@@ -173,7 +193,7 @@ bail:
   get_systime(&finish);
   finish -= start;
   msyslog(LOG_INFO, "NTSc: NTS-KE req to %s took %.3Lf sec, %s",
-    peer->hostname, lfptod(finish),
+    hostname, lfptod(finish),
     addrOK? "OK" : "fail");
 
   return addrOK;
@@ -189,7 +209,7 @@ bool nts_check(struct peer *peer) {
   return addrOK;
 }
 
-int open_TCP_socket(struct peer *peer) {
+int open_TCP_socket(const char *hostname) {
   char host[256], port[32];
   char *tmp;
   struct addrinfo hints;
@@ -199,12 +219,9 @@ int open_TCP_socket(struct peer *peer) {
   l_fp start, finish;
 
   /* copy avoids dancing around const warnings */
-  strlcpy(host, peer->hostname, sizeof(host));
+  strlcpy(host, hostname, sizeof(host));
 
-  ZERO(hints);
-  hints.ai_protocol = IPPROTO_TCP;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_family = AF(&peer->srcadr);
+  /* handle xxx:port case */
   tmp = strchr(host, ']');
   if (NULL == tmp) {
     tmp = strchr(host, ':');
@@ -221,17 +238,21 @@ int open_TCP_socket(struct peer *peer) {
     strlcpy(port, tmp, sizeof(port));
   }
 
+  ZERO(hints);
+  hints.ai_protocol = IPPROTO_TCP;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_family = AF_UNSPEC;
   get_systime(&start);
   gai_rc = getaddrinfo(host, port, &hints, &answer);
   if (0 != gai_rc) {
     msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to contact %s: %d, %s",
-      peer->hostname, gai_rc, gai_strerror(gai_rc));
+      hostname, gai_rc, gai_strerror(gai_rc));
     return -1;
   }
   get_systime(&finish);
   finish -= start;
   msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3Lf sec",
-    peer->hostname, lfptod(finish));
+    hostname, lfptod(finish));
 
   /* Save first answer for NTP */
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
@@ -256,12 +277,11 @@ int open_TCP_socket(struct peer *peer) {
   return sockfd;
 }
 
-bool check_certificate(struct peer* peer, SSL *ssl) {
-  X509 *cert = SSL_get_peer_certificate(ssl);
+void set_hostname(SSL *ssl, const char *hostname) {
   char host[256], *tmp;
 
   /* chop off trailing :port */
-  strlcpy(host, peer->hostname, sizeof(host));
+  strlcpy(host, hostname, sizeof(host));
   tmp = strchr(host, ']');
   if (NULL == tmp)
     tmp = host;			/* not IPv6 [...] format */
@@ -272,6 +292,7 @@ bool check_certificate(struct peer* peer, SSL *ssl) {
 // https://wiki.openssl.org/index.php/Hostname_validation
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
   SSL_set1_host(ssl, host);
+  msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 #elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
 {
   X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
@@ -281,8 +302,14 @@ bool check_certificate(struct peer* peer, SSL *ssl) {
   SSL_set_verify(ssl, SSL_VERIFY_PEER, NULL);
 }
 #else
+  UNUSED_ARG(ssl);
   msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
 #endif
+
+}
+
+bool check_certificate(SSL *ssl, struct peer* peer) {
+  X509 *cert = SSL_get_peer_certificate(ssl);
 
   if (NULL == cert) {
     msyslog(LOG_INFO, "NTSc: No certificate");
@@ -309,6 +336,9 @@ bool check_certificate(struct peer* peer, SSL *ssl) {
         return false;
     }
   }
+#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+  msyslog(LOG_DEBUG, "NTSc: matched cert host: %s", SSL_get0_peername(ssl));
+#endif
   return true;
 }
 
@@ -343,7 +373,7 @@ bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keyl
   return true;
 }
 
-bool nts_client_send_request(struct peer* peer, SSL *ssl) {
+bool nts_client_send_request(SSL *ssl, struct peer* peer) {
   uint8_t buff[1000];
   int     used, transferred;
   struct  BufCtl_t buf;
@@ -384,7 +414,7 @@ bool nts_client_send_request(struct peer* peer, SSL *ssl) {
   return true;
 }
 
-bool nts_client_process_response(struct peer* peer, SSL *ssl) {
+bool nts_client_process_response(SSL *ssl, struct peer* peer) {
   uint8_t  buff[2048];  /* RFC 4. says SHOULD be 65K */
   int transferred, idx;
   struct BufCtl_t buf;
