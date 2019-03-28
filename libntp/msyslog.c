@@ -39,25 +39,25 @@ uint32_t ntp_syslogmask = INIT_NTP_SYSLOGMASK;
 extern	char *	progname;
 
 /* Declare the local functions */
-const char *	humanlogtime(void);
+#define TIMESTAMP_LEN  128
+static void	humanlogtime(char buf[TIMESTAMP_LEN]);
 static void	addto_syslog	(int, const char *);
 
 
 /* We don't want to clutter up the log with the year and day of the week,
    etc.; just the minimal date and time.  */
-const char *
-humanlogtime(void)
+static void
+humanlogtime(char buf[TIMESTAMP_LEN])
 {
-	char *		bp;
 	time_t		cursec;
 	struct tm	tmbuf, *tm;
 
 	cursec = time(NULL);
 	tm = localtime_r(&cursec, &tmbuf);
-	if (!tm)
-		return "-- --- --:--:--";
-
-	bp = lib_getbuf();
+	if (!tm) {
+		strlcpy(buf, "-- --- --:--:--", TIMESTAMP_LEN);
+		return;
+	}
 
 #ifdef ENABLE_CLASSIC_MODE
 	const char * const months[12] = {
@@ -65,17 +65,15 @@ humanlogtime(void)
 	    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 
-	snprintf(bp, LIB_BUFLENGTH, "%2d %s %02d:%02d:%02d",
+	snprintf(buf, TIMESTAMP_LEN, "%2d %s %02d:%02d:%02d",
 		 tm->tm_mday, months[tm->tm_mon],
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);
 #else
 	/* ISO 8601 is a better format, sort order equals time order */
-	snprintf(bp, LIB_BUFLENGTH, "%04d-%02d-%02dT%02d:%02d:%02d",
+	snprintf(buf, TIMESTAMP_LEN, "%04d-%02d-%02dT%02d:%02d:%02d",
 		 tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);
 #endif /* ENABLE_CLASSIC_MODE */
-
-	return bp;
 }
 
 
@@ -100,6 +98,7 @@ addto_syslog(
 	int		pid;
 	const char *	nl_or_empty;
 	const char *	human_time;
+	char            tbuf[TIMESTAMP_LEN];
 
 	/* setup program basename static var prog if needed */
 	if (progname != prevcall_progname) {
@@ -126,9 +125,10 @@ addto_syslog(
 		return;
 
 	/* syslog() adds the timestamp, name, and pid */
-	if (msyslog_include_timestamp)
-		human_time = humanlogtime();
-	else	/* suppress gcc pot. uninit. warning */
+	if (msyslog_include_timestamp) {
+		humanlogtime(tbuf);
+		human_time = tbuf;
+	} else	/* suppress gcc pot. uninit. warning */
 		human_time = NULL;
 	if (termlogit_pid || log_to_file)
 		pid = getpid();
