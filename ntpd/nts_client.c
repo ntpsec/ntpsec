@@ -326,6 +326,7 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
     certname = X509_get_issuer_name(cert);
     X509_NAME_oneline(certname, name, sizeof(name));
     msyslog(LOG_INFO, "NTSc: certificate issuer name: %s", name);
+    X509_free(cert);
     certok = SSL_get_verify_result(ssl);
     if (X509_V_OK == certok) {
       msyslog(LOG_INFO, "NTSc: certificate is valid.");
