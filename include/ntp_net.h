@@ -14,10 +14,10 @@
 
 #include "ntp_malloc.h"
 
-typedef union {
-	struct sockaddr		sa;
-	struct sockaddr_in	sa4;
-	struct sockaddr_in6	sa6;
+typedef union {				/* On Linux, these come from: */
+	struct sockaddr		sa;	/* /usr/include/bits/socket.h */
+	struct sockaddr_in	sa4;	/* /usr/include/linux/in.h */
+	struct sockaddr_in6	sa6;	/* /usr/include/linux/in6.h */
 } sockaddr_u;
 
 /*
