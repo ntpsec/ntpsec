@@ -109,13 +109,13 @@ void* nts_ke_listener(void* arg) {
     int sock = *(int*)arg;
 
     while(1) {
-        struct sockaddr addr;
+        sockaddr_u addr;
         uint len = sizeof(addr);
         SSL *ssl;
         l_fp start, finish;
-        int err;
+        int client, err;
 
-        int client = accept(sock, &addr, &len);
+        client = accept(sock, &addr.sa, &len);
         if (client < 0) {
             msyslog(LOG_ERR, "NTSs: TCP accept failed: %s", strerror(errno));
             if (EBADF == errno)
@@ -123,7 +123,7 @@ void* nts_ke_listener(void* arg) {
             sleep(1);		/* avoid log clutter on bug */
             continue;
         }
-	nts_ke_serves++;
+        nts_ke_serves++;
         get_systime(&start);
         msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s",
             sockporttoa((sockaddr_u *)&addr));
