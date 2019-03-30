@@ -1,3 +1,8 @@
+BUGS:
+  timeout on client connect too long (system default)
+  Is 3 seconds timeout OK? (both client and server)
+
+
 multithread msyslog
   libntp/lib_strbuf.c too
   strerror
