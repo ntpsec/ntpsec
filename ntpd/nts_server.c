@@ -195,7 +195,8 @@ bool nts_ke_request(SSL *ssl) {
     buf.next = buff;
     buf.left = sizeof(buff);
     keylen = nts_get_key_length(aead);
-    nts_make_keys(ssl, aead, c2s, s2c, keylen);
+    if (!nts_make_keys(ssl, aead, c2s, s2c, keylen))
+        return false;
 
     /* 4.1.2 Next Protocol, 0 for NTP */
     ke_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);

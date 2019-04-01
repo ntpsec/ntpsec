@@ -175,17 +175,20 @@ bool nts_probe(struct peer * peer) {
     msyslog(LOG_ERR, "NTSc: Unknown AEAD code: %d", peer->nts_state.aead);
     goto bail;
   }
-  nts_make_keys(ssl,
-    peer->nts_state.aead,
-    peer->nts_state.c2s,
-    peer->nts_state.s2c,
-    peer->nts_state.keylen);
+  if (!nts_make_keys(ssl,
+        peer->nts_state.aead,
+        peer->nts_state.c2s,
+        peer->nts_state.s2c,
+        peer->nts_state.keylen))
+    goto bail;
 
   addrOK = true;
 
 bail:
-  if (!addrOK)
+  if (!addrOK) {
     nts_ke_probes_bad++;
+    peer->nts_state.count = -1;
+  }
   SSL_shutdown(ssl);
   SSL_free(ssl);
   close(server);
