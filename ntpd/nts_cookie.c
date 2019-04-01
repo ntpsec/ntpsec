@@ -349,6 +349,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   cipherlength = cookielen - AD_LENGTH;
   plainlength = NTS_MAX_COOKIELEN;
 
+  // FIXME - needs lock
   ok = AES_SIV_Decrypt(cookie_ctx,
            plaintext, &plainlength,
            key, K_length,
