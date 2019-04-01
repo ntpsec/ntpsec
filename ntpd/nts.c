@@ -121,6 +121,12 @@ bool nts_load_versions(SSL_CTX *ctx) {
   maxver = nts_translate_version(ntsconfig.maxtls);
   if ((-1 == minver) || (-1 == maxver))
     return false;
+#if (OPENSSL_VERSION_NUMBER == 0x1010101fL)
+  if (0 == maxver) {
+      msyslog(LOG_INFO, "NTS: Using TLS1.2 to avoid bug in OpenSSL 1.1.1a.");
+      maxver = TLS1_2_VERSION;
+  }
+#endif
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
   if(0 == minver) minver = TLS1_2_VERSION;   // 3.
   SSL_CTX_set_min_proto_version(ctx, minver);
