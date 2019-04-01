@@ -23,14 +23,6 @@ uint16_t nts_string_to_aead(const char* text);
 bool nts_make_keys(SSL *ssl, uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen);
 
-int nts_make_cookie(uint8_t *cookie,
-  uint16_t aead,
-  uint8_t *c2s, uint8_t *s2c, int keylen);
-bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
-  uint16_t *aead,
-  uint8_t *c2s, uint8_t *s2c, int *keylen);
-
-
 
 /* buffer packing/unpacking routines.
  * NB: The length field in NTP extensions includes the header

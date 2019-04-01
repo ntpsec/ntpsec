@@ -23,6 +23,16 @@ bool nts_server_init2(void);    /* after sandbox */
 bool nts_cookie_init2(void);
 
 
+bool nts_read_cookie_keys(void);
+bool nts_make_cookie_key(void);
+bool nts_write_cookie_keys(void);
+
+int nts_make_cookie(uint8_t *cookie,
+  uint16_t aead,
+  uint8_t *c2s, uint8_t *s2c, int keylen);
+bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
+  uint16_t *aead,
+  uint8_t *c2s, uint8_t *s2c, int *keylen);
 
 
 

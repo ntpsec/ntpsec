@@ -64,11 +64,6 @@
  * 168
  */
 
-bool nts_read_cookie_keys(void);
-bool nts_make_cookie_key(void);
-bool nts_write_cookie_keys(void);
-
-
 /* cookies use same AEAD algorithms as wire */
 /* This determines which algorithm we use.
  * Valid choices are 32, 48, and 64
