@@ -409,12 +409,11 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
         used, (long)sizeof(buff), strerror(errno));
     return false;
   }
-  transferred = SSL_write(ssl, buff, used);
-  if (used != transferred) {
-    msyslog(LOG_ERR, "NTSc: write failed: %d, %d, %s", used, transferred, strerror(errno));
-    nts_log_ssl_error();
+
+  transferred = nts_ssl_write(ssl, buff, used);
+  if (used != transferred)
     return false;
-  }
+
   return true;
 }
 
@@ -423,12 +422,9 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
   int transferred, idx;
   struct BufCtl_t buf;
 
-  transferred = SSL_read(ssl, buff, sizeof(buff));
-  if (0 > transferred) {
-    msyslog(LOG_ERR, "NTSc: read failed: %d, %s", transferred, strerror(errno));
-    nts_log_ssl_error();
+  transferred = nts_ssl_read(ssl, buff, sizeof(buff));
+  if (0 > transferred)
     return false;
-  }
   msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);
 
   peer->nts_state.aead = NO_AEAD;

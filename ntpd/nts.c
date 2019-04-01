@@ -205,6 +205,28 @@ bool nts_load_certificate(SSL_CTX *ctx) {
 }
 
 
+int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length) {
+    int bytes_read;
+    bytes_read = SSL_read(ssl, buff, buff_length);
+    if (0 >= bytes_read) {
+        msyslog(LOG_INFO, "NTS: SSL_read error: %s", strerror(errno));
+        nts_log_ssl_error();
+        return -1;
+    }
+    return bytes_read;
+}
+
+int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length) {
+    int bytes_written;
+    bytes_written = SSL_write(ssl, buff, buff_length);
+    if (0 >= bytes_written) {
+        msyslog(LOG_INFO, "NTS: SSL_write error: %s", strerror(errno));
+        nts_log_ssl_error();
+        return -1;
+    }
+    return bytes_written;
+}
+
 void nts_log_ssl_error(void) {
   char buff[256];
   int err = ERR_get_error();

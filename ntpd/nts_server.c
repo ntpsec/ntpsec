@@ -25,7 +25,6 @@
 static int create_listener(int port, int family);
 static void* nts_ke_listener(void*);
 static bool nts_ke_request(SSL *ssl);
-static bool nts_ke_do_receive(SSL *ssl, int *aead);
 
 
 static SSL_CTX *server_ctx = NULL;
@@ -172,19 +171,25 @@ return NULL;
 }
 
 bool nts_ke_request(SSL *ssl) {
-    /* Our cookies can be 104, 136, or 168 for AES_SIV_CMAC_xxx
+    /* RFC 4: servers must accept 1024
+     * Our cookies can be 104, 136, or 168 for AES_SIV_CMAC_xxx
      * 8*168 fits comfortably into 2K.
      */
     uint8_t buff[2048];
-    int bytes_written;
     uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-    uint8_t cookie[NTS_MAX_COOKIELEN];
-    int aead, keylen, cookielen;
+    int aead, keylen;
     struct BufCtl_t buf;
+    int bytes_read, bytes_written;
     int used;
 
+    bytes_read = nts_ssl_read(ssl, buff, sizeof(buff));
+    if (0 > bytes_read)
+        return false;
+
+    buf.next = buff;
+    buf.left = bytes_read;
     aead = NO_AEAD;
-    if (!nts_ke_do_receive(ssl, &aead))
+    if (!nts_ke_process_receive(&buf, &aead))
         return false;
 
     if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
@@ -192,34 +197,22 @@ bool nts_ke_request(SSL *ssl) {
     if (NO_AEAD == aead)
       aead = AEAD_AES_SIV_CMAC_256;    /* default */
 
-    buf.next = buff;
-    buf.left = sizeof(buff);
     keylen = nts_get_key_length(aead);
     if (!nts_make_keys(ssl, aead, c2s, s2c, keylen))
         return false;
 
-    /* 4.1.2 Next Protocol, 0 for NTP */
-    ke_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
-    /* 4.1.5 AEAD Algorithm List */
-    ke_append_record_uint16(&buf, nts_algorithm_negotiation, aead);
-
-    for (int i=0; i<NTS_MAX_COOKIES; i++) {
-      cookielen = nts_make_cookie(cookie, aead, c2s, s2c, keylen);
-      ke_append_record_bytes(&buf, nts_new_cookie, cookie, cookielen);
-    }
-
-    /* 4.1.1: End, Critical */
-    ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
-    used = sizeof(buff)-buf.left;
-
-    bytes_written = SSL_write(ssl, buff, used);
-    if (bytes_written != used) {
-        msyslog(LOG_INFO, "NTSs: SSL_write error: %s", strerror(errno));
-        nts_log_ssl_error();
+    buf.next = buff;
+    buf.left = sizeof(buff);
+    if (!nts_ke_setup_send(&buf, aead, c2s, s2c, keylen))
         return false;
-    }
 
-    msyslog(LOG_INFO, "NTSs: Returned %d bytes", bytes_written);
+    used = sizeof(buff)-buf.left;
+    bytes_written = nts_ssl_write(ssl, buff, used);
+    if (bytes_written != used)
+        return false;
+
+    msyslog(LOG_INFO, "NTSs: Read %d, wrote %d bytes.  AEAD=%d",
+        bytes_read, bytes_written, aead);
 
     return true;
 }
@@ -290,7 +283,7 @@ int create_listener(int port, int family) {
         }
         if (listen(sock, 6) < 0) {
           msyslog(LOG_ERR, "NTSs: can't listen6: %s", strerror(errno));
-	  close(sock);
+          close(sock);
           return -1;
         }
         msyslog(LOG_INFO, "NTSs: listen6 worked");
@@ -302,27 +295,13 @@ int create_listener(int port, int family) {
     return sock;
 }
 
-bool nts_ke_do_receive(SSL *ssl, int *aead) {
-    /* RFC 4: servers must accept 1024 */
-    uint8_t buff[1024];
-    int bytes_read;
-    struct BufCtl_t buf;
-
-    bytes_read = SSL_read(ssl, buff, sizeof(buff));
-    if (0 >= bytes_read) {
-        msyslog(LOG_INFO, "NTSs: SSL_read error: %s", strerror(errno));
-        nts_log_ssl_error();
-        return false;
-    }
-
-    buf.next = buff;
-    buf.left = bytes_read;
-    while (buf.left > 0) {
+bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
+    while (buf->left > 0) {
       uint16_t type, data;
       int length;
       bool critical = false;
 
-      type = ke_next_record(&buf, &length);
+      type = ke_next_record(buf, &length);
       if (NTS_CRITICAL & type) {
         critical = true;
         type &= ~NTS_CRITICAL;
@@ -331,13 +310,13 @@ bool nts_ke_do_receive(SSL *ssl, int *aead) {
         msyslog(LOG_ERR, "NTSs: Record: T=%d, L=%d, C=%d", type, length, critical);
       switch (type) {
         case nts_error:
-          data = next_uint16(&buf);
+          data = next_uint16(buf);
           if (sizeof(data) != length)
             msyslog(LOG_ERR, "NTSs: wrong length on error: %d", length);
           msyslog(LOG_ERR, "NTSs: error: %d", data);
           return false;
         case nts_next_protocol_negotiation:
-          data = next_uint16(&buf);
+          data = next_uint16(buf);
           if ((sizeof(data) != length) || (data != 0)) {
             msyslog(LOG_ERR, "NTSs: NPN-Wrong length or bad data: %d, %d",
                 length, data);
@@ -346,7 +325,7 @@ bool nts_ke_do_receive(SSL *ssl, int *aead) {
           break;
         case nts_algorithm_negotiation:
           for (int i=0; i<length; i+=sizeof(uint16_t)) {
-            data = next_uint16(&buf);
+            data = next_uint16(buf);
             if (0 == nts_get_key_length(data)) {
               if (0)  /* for debugging */
                 msyslog(LOG_ERR, "NTSs: AN-Unsupported AEAN type: %d", data);
@@ -363,8 +342,8 @@ bool nts_ke_do_receive(SSL *ssl, int *aead) {
                 length, critical);
             return false;
           }
-          if (0 != buf.left) {
-            msyslog(LOG_ERR, "NTSs: EOM not at end: %d", buf.left);
+          if (0 != buf->left) {
+            msyslog(LOG_ERR, "NTSs: EOM not at end: %d", buf->left);
             return false;
           }
           break;
@@ -372,13 +351,35 @@ bool nts_ke_do_receive(SSL *ssl, int *aead) {
           msyslog(LOG_ERR, "NTSs: received strange type: T=%d, C=%d, L=%d",
             type, critical, length);
           if (critical) return false;
-          buf.next += length;
-          buf.left -= length;
+          buf->next += length;
+          buf->left -= length;
           break;
       } /* case */
     }   /* while */
 
   return true;
+
+}
+
+bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
+       uint8_t *c2s, uint8_t *s2c, int keylen) {
+    uint8_t cookie[NTS_MAX_COOKIELEN];
+    int cookielen;
+
+    /* 4.1.2 Next Protocol, 0 for NTP */
+    ke_append_record_uint16(buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
+    /* 4.1.5 AEAD Algorithm List */
+    ke_append_record_uint16(buf, nts_algorithm_negotiation, aead);
+
+    for (int i=0; i<NTS_MAX_COOKIES; i++) {
+      cookielen = nts_make_cookie(cookie, aead, c2s, s2c, keylen);
+      ke_append_record_bytes(buf, nts_new_cookie, cookie, cookielen);
+    }
+
+    /* 4.1.1: End, Critical */
+    ke_append_record_null(buf, NTS_CRITICAL+nts_end_of_message);
+
+    return true;
 
 }
 
