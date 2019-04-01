@@ -2,9 +2,14 @@ BUGS:
   timeout on client connect too long (system default)
   Is 3 seconds timeout OK? (both client and server)
 
+nts_log_ssl_error()  No SSL param ??
+  ERR_error_string_n
+
+Fix SecondsPerDay in nts_cookie.c
+  Set to 3600 for testing
 
 multithread msyslog
-  libntp/lib_strbuf.c too
+  libntp/lib_strbuf.c is used by socktoa and sockporttoa
   strerror
 
 documentation:
