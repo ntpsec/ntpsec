@@ -664,8 +664,7 @@ gpsd_receive(
 	pdst = up->buffer + up->buflen;
 	edst = pdst + sizeof(up->buffer) - 1; /* for trailing NUL */
 
-        /* FIXME!! Check for overrun of "buffer" */
-	while (psrc != esrc) {
+	while (psrc < esrc) {
 		ch = *psrc++;
 		if (ch == '\n') {
 			/* trim trailing whitespace & terminate buffer */
@@ -676,7 +675,7 @@ gpsd_receive(
 			up->buflen = (int)(pdst - up->buffer);
 			gpsd_parse(peer, &rbufp->recv_time);
 			pdst = up->buffer;
-		} else if (pdst != edst) {
+		} else if (pdst < edst) {
 			/* add next char, ignoring leading whitespace */
 			if (ch > ' ' || pdst != up->buffer)
 				*pdst++ = ch;
