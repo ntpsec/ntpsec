@@ -27,8 +27,9 @@
 #include "nts2.h"
 #include "ntp_dns.h"
 
+SSL_CTX* make_ssl_client_ctx(const char *filename);
 int open_TCP_socket(struct peer *peer, const char *hostname);
-bool nts_set_cert_search(SSL_CTX *ctx);
+bool nts_set_cert_search(SSL_CTX *ctx, const char *filename);
 void set_hostname(SSL *ssl, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
 bool nts_client_send_request(SSL *ssl, struct peer *peer);
@@ -51,40 +52,8 @@ static bool addrOK;
 // FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
 
 bool nts_client_init(void) {
-  bool     ok = true;
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-  client_ctx = SSL_CTX_new(TLS_client_method());
-#else
-  OpenSSL_add_all_ciphers();  // FIXME needed on NetBSD
-  client_ctx = SSL_CTX_new(TLSv1_2_client_method());
-#endif
-  if (NULL == client_ctx) {
-    /* Happens if no ciphers */
-    msyslog(LOG_INFO, "NTSs: NULL client_ctx");
-    nts_log_ssl_error();
-    return false;
-  }
-
-#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
-  {
-  // 4., ALPN, RFC 7301
-  static unsigned char alpn [] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
-  SSL_CTX_set_alpn_protos(client_ctx, alpn, sizeof(alpn));
-  }
-#endif
-
-  SSL_CTX_set_session_cache_mode(client_ctx, SSL_SESS_CACHE_OFF);
-  SSL_CTX_set_timeout(client_ctx, NTS_KE_TIMEOUT);
-
-  ok &= nts_load_versions(client_ctx);
-  ok &= nts_load_ciphers(client_ctx);
-  ok &= nts_set_cert_search(client_ctx);
-
-  if (!ok) {
-    msyslog(LOG_ERR, "NTSc: Troubles setting up client SSL CTX");
-    exit(1);
-  };
+  client_ctx = make_ssl_client_ctx(ntsconfig.ca);
 
   return true;
 }
@@ -139,7 +108,14 @@ bool nts_probe(struct peer * peer) {
   // Not much error checking yet.
   // Ugly since most SSL routines return 1 on success.
 
-  ssl = SSL_new(client_ctx);
+  if (NULL == peer->cfg.nts_cfg.ca)
+    ssl = SSL_new(client_ctx);
+  else {
+    SSL_CTX *ctx; 
+    ctx = make_ssl_client_ctx(peer->cfg.nts_cfg.ca);
+    ssl = SSL_new(ctx);
+    SSL_CTX_free(ctx);
+  }
   set_hostname(ssl, hostname);
   SSL_set_fd(ssl, server);
 
@@ -210,6 +186,46 @@ bool nts_check(struct peer *peer) {
   } else
     dns_take_status(peer, DNS_error);
   return addrOK;
+}
+
+SSL_CTX* make_ssl_client_ctx(const char * filename) {
+  bool ok = true;
+  SSL_CTX *ctx;
+
+#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+  ctx = SSL_CTX_new(TLS_client_method());
+#else
+  OpenSSL_add_all_ciphers();  // FIXME needed on NetBSD
+  ctx = SSL_CTX_new(TLSv1_2_client_method());
+#endif
+  if (NULL == ctx) {
+    /* Happens if no ciphers */
+    msyslog(LOG_ERR, "NTSc: NULL ctx");
+    nts_log_ssl_error();
+    exit(1);
+  }
+
+#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+  {
+  // 4., ALPN, RFC 7301
+  static unsigned char alpn [] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
+  SSL_CTX_set_alpn_protos(ctx, alpn, sizeof(alpn));
+  }
+#endif
+
+  SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
+  SSL_CTX_set_timeout(ctx, NTS_KE_TIMEOUT);
+
+  ok &= nts_load_versions(ctx);
+  ok &= nts_load_ciphers(ctx);
+  ok &= nts_set_cert_search(ctx, filename);
+
+  if (!ok) {
+    msyslog(LOG_ERR, "NTSc: Troubles setting up client SSL CTX");
+    exit(1);
+  };
+
+  return ctx;
 }
 
 int open_TCP_socket(struct peer *peer, const char *hostname) {
@@ -554,26 +570,26 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
   return true;
 }
 
-bool nts_set_cert_search(SSL_CTX *ctx) {
+bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
   struct stat statbuf;
-  if (NULL == ntsconfig.ca) {
+  if (NULL == filename) {
     msyslog(LOG_INFO, "NTSc: Using system default root certificates.");
     SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
     return true;
   }
-  if (0 == stat(ntsconfig.ca, &statbuf)) {
+  if (0 == stat(filename, &statbuf)) {
     if (S_ISDIR(statbuf.st_mode)) {
-      msyslog(LOG_INFO, "NTSc: Using dir %s for root certificates.", ntsconfig.ca);
-      SSL_CTX_load_verify_locations(ctx, NULL, ntsconfig.ca);
+      msyslog(LOG_INFO, "NTSc: Using dir %s for root certificates.", filename);
+      SSL_CTX_load_verify_locations(ctx, NULL, filename);
       return true;
     }
     if (S_ISREG(statbuf.st_mode)) {
-      msyslog(LOG_INFO, "NTSc: Using file %s for root certificates.", ntsconfig.ca);
-      SSL_CTX_load_verify_locations(ctx, ntsconfig.ca, NULL);
+      msyslog(LOG_INFO, "NTSc: Using file %s for root certificates.", filename);
+      SSL_CTX_load_verify_locations(ctx, filename, NULL);
       return true;
     }
     msyslog(LOG_ERR, "NTSc: cert dir/file isn't dir or file: %s. mode 0x%x",
-        ntsconfig.ca, statbuf.st_mode);
+        filename, statbuf.st_mode);
     return false;
   }
   msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %s", ntsconfig.ca, strerror(errno));

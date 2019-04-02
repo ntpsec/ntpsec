@@ -2848,6 +2848,7 @@ proto_clr_stats(void)
 
 /* limit logging so bad guys can't DDoS us by sending crap
  * log first 100 and 10/hour
+ * This gets too-old cookies
  */
 
 void maybe_log_junk(struct recvbuf *rbufp) {
