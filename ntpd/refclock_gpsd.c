@@ -519,12 +519,14 @@ gpsd_start(
                 }
 		if (-1 == ret ) {
                         /* more likely out of RAM */
-			msyslog(LOG_ERR, "REFCLOCK: %s: clock device name too long",
+			msyslog(LOG_ERR,
+                                "REFCLOCK: %s: clock device name too long",
 				up->logname);
 			goto dev_fail;
 		}
 		if (-1 == stat(up->device, &sb) || !S_ISCHR(sb.st_mode)) {
-			msyslog(LOG_ERR, "REFCLOCK: %s: '%s' is not a character device",
+			msyslog(LOG_ERR,
+                                "REFCLOCK: %s: '%s' is not a character device",
 				up->logname, up->device);
 			goto dev_fail;
 		}
@@ -554,7 +556,8 @@ gpsd_start(
 
 	/* If the daemon name lookup failed, just give up now. */
 	if (NULL == up->addr) {
-		msyslog(LOG_ERR, "REFCLOCK: %s: no GPSD socket address, giving up",
+		msyslog(LOG_ERR,
+			"REFCLOCK: %s: no GPSD socket address, giving up",
 			up->logname);
 		goto dev_fail;
 	}
@@ -1446,7 +1449,8 @@ process_version(
 	if (0 == errno) {
 		if ( ! up->fl_vers)
 			msyslog(LOG_INFO,
-				"REFCLOCK: %s: GPSD revision=%s release=%s protocol=%u.%u",
+				"REFCLOCK: %s: GPSD revision=%s release=%s "
+				"protocol=%u.%u",
 				up->logname, revision, release,
 				pvhi, pvlo);
 		up->proto_version = PROTO_VERSION(pvhi, pvlo);
@@ -1495,7 +1499,8 @@ process_version(
 		 * resulting data timeout will take care of the
 		 * connection!
 		 */
-		msyslog(LOG_ERR, "REFCLOCK: %s: failed to write watch request (%s)",
+		msyslog(LOG_ERR,
+                        "REFCLOCK: %s: failed to write watch request (%s)",
 			up->logname, strerror(errno));
 	}
 }
@@ -1853,7 +1858,8 @@ gpsd_init_socket(
 	if (-1 == rc) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"REFCLOCK: %s: cannot set GPSD socket to non-blocking: %s",
+				"REFCLOCK: %s: cannot set GPSD socket "
+                                "to non-blocking: %s",
 				up->logname, strerror(errno));
 		goto no_socket;
 	}
@@ -1904,7 +1910,8 @@ gpsd_init_socket(
 	if (0 == io_addclock(&pp->io)) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"REFCLOCK: %s: failed to register with I/O engine",
+				"REFCLOCK: %s: failed to register "
+                                "with I/O engine",
 				up->logname);
 		goto no_socket;
 	}
@@ -1986,8 +1993,8 @@ gpsd_test_socket(
 	if (0 == io_addclock(&pp->io)) {
 		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
-				"REFCLOCK: %s: failed to register with I/O engine",
-				up->logname);
+			    "REFCLOCK: %s: failed to register with I/O engine",
+			    up->logname);
 		goto no_socket;
 	}
 	return;
