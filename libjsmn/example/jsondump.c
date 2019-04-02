@@ -1,8 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include "../jsmn.h"
+
+/* Function realloc_it() is a wrapper function for standard realloc()
+ * with one difference - it frees old memory pointer in case of realloc
+ * failure. Thus, DO NOT use old data pointer in anyway after call to
+ * realloc_it(). If your code has some kind of fallback algorithm if
+ * memory can't be re-allocated - use standard realloc() instead.
+ */
+static inline void *realloc_it(void *ptrmem, size_t size) {
+	void *p = realloc(ptrmem, size);
+	if (!p)  {
+		free (ptrmem);
+		fprintf(stderr, "realloc(): errno=%d\n", errno);
+	}
+	return p;
+}
 
 /*
  * An example of reading JSON from stdin and printing its content to stdout.
@@ -82,12 +98,11 @@ int main() {
 			}
 		}
 
-		js = realloc(js, jslen + r + 1);
+		js = realloc_it(js, jslen + r + 1);
 		if (js == NULL) {
-			fprintf(stderr, "realloc(): errno=%d\n", errno);
 			return 3;
 		}
-		strlcpy(js + jslen, buf, r + 1);
+		strncpy(js + jslen, buf, r);
 		jslen = jslen + r;
 
 again:
@@ -95,9 +110,8 @@ again:
 		if (r < 0) {
 			if (r == JSMN_ERROR_NOMEM) {
 				tokcount = tokcount * 2;
-				tok = realloc(tok, sizeof(*tok) * tokcount);
+				tok = realloc_it(tok, sizeof(*tok) * tokcount);
 				if (tok == NULL) {
-					fprintf(stderr, "realloc(): errno=%d\n", errno);
 					return 3;
 				}
 				goto again;
@@ -108,5 +122,5 @@ again:
 		}
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
