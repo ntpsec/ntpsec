@@ -32,6 +32,8 @@ static FILE *	syslog_file;
 static char *	syslog_fname;
 static char *	syslog_abs_fname;
 
+int		debug;
+
 /* libntp default ntp_syslogmask is all bits lit */
 #define INIT_NTP_SYSLOGMASK	~(uint32_t)0
 uint32_t ntp_syslogmask = INIT_NTP_SYSLOGMASK;

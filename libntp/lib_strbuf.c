@@ -14,8 +14,6 @@
 /*
  * Storage declarations
  */
-int		debug;
-
 static pthread_mutex_t cookie_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /*
