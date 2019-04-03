@@ -47,9 +47,11 @@ The options are as follows:
   Read the private key to our certificate from _file_.
 
 +ca+ _location_::
-  Use the file (or directory) specified by _location_ to
+  Use the file, or directory, specified by _location_ to
   validate NTS-KE server certificates instead of the system
-  default root certificates.
+  default root certificates.  If a directory is specified, it
+  must have files named with their hash, as created by
+  +openssl rehash+.
 
 +cookie+ _location_::
   Use the file (or directory) specified by _location_ to
@@ -135,7 +137,8 @@ The following options of the +server+ command configure NTS.
 +ca+ _location_::
   Use the file, or directory, specified by _location_ to validate the
   NTS-KE server certificate, overriding the site default.  Do not use
-  any other CA.
+  any other CA.  If a directory is specified, it must have files named
+  with their hash, as created by +openssl rehash+.
 
 +aead+ _string_::
    Specify the prefered crypto algorithm to be used on the wire.
