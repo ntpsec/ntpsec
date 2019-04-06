@@ -25,6 +25,7 @@ def build(ctx):
     ]
 
     libntp_source_sharable = [
+        "assert.c",
         "clockwork.c",
         "emalloc.c",
         "hextolfp.c",

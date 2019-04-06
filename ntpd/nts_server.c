@@ -129,8 +129,9 @@ void* nts_ke_listener(void* arg) {
         }
         nts_ke_serves++;
         get_systime(&start);
-        msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s",
-            sockporttoa((sockaddr_u *)&addr));
+
+        sockporttoa_r((sockaddr_u *)&addr, errbuf, sizeof(errbuf));
+        msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s", errbuf);
         err = setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
         if (0 > err) {
             strerror_r(errno, errbuf, sizeof(errbuf));
@@ -147,8 +148,9 @@ void* nts_ke_listener(void* arg) {
         if (SSL_accept(ssl) <= 0) {
             get_systime(&finish);
             finish -= start;
+            sockporttoa_r((sockaddr_u *)&addr, errbuf, sizeof(errbuf));
             msyslog(LOG_ERR, "NTSs: SSL accept from %s failed, %.3Lf sec",
-                sockporttoa((sockaddr_u *)&addr), lfptod(finish));
+                errbuf, lfptod(finish));
             nts_log_ssl_error();
             SSL_free(ssl);
             close(client);

@@ -79,6 +79,7 @@ static void RunAllTests(void)
 
 int main(int argc, const char * argv[]) {
 
+	getbuf_init();
 	ssl_init();
 	auth_init();
 	init_network();

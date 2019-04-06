@@ -512,6 +512,8 @@ ntpdmain(
 	saved_argc = argc;
 	saved_argv = argv;
 	progname = argv[0];
+
+	getbuf_init();
 	parse_cmdline_opts(argc, argv);
 # ifdef DEBUG
 	setvbuf(stdout, NULL, _IOLBF, 0);

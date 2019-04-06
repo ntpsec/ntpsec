@@ -25,47 +25,52 @@ socktoa(
 	const sockaddr_u *sock
 	)
 {
+	char *buf = lib_getbuf();
+	socktoa_r(sock, buf, LIB_BUFLENGTH);
+	return buf;
+}
+
+const char *
+socktoa_r(
+	const sockaddr_u *sock, char *buf, size_t buflen
+	)
+{
 	int		saved_errno;
-	char *		res;
-	char *		addr;
 	unsigned long	scope;
 
 	saved_errno = errno;
-	res = lib_getbuf();
 
 	if (NULL == sock) {
-		strlcpy(res, "(null)", LIB_BUFLENGTH);
+		strlcpy(buf, "(null)", buflen);
 	} else {
 		switch(AF(sock)) {
 
 		case AF_INET:
 		case AF_UNSPEC:
-			inet_ntop(AF_INET, PSOCK_ADDR4(sock), res,
-				  LIB_BUFLENGTH);
+			inet_ntop(AF_INET, PSOCK_ADDR4(sock), buf, buflen);
 			break;
 
 		case AF_INET6:
-			inet_ntop(AF_INET6, PSOCK_ADDR6(sock), res,
-				  LIB_BUFLENGTH);
+			inet_ntop(AF_INET6, PSOCK_ADDR6(sock), buf, buflen);
 			scope = SCOPE_VAR(sock);
-			if (0 != scope && !strchr(res, '%')) {
-				addr = res;
-				res = lib_getbuf();
-				snprintf(res, LIB_BUFLENGTH, "%s%%%lu",
-					 addr, scope);
-				res[LIB_BUFLENGTH - 1] = '\0';
+			if (0 != scope && !strchr(buf, '%')) {
+				char buf2[LIB_BUFLENGTH];
+				snprintf(buf2, sizeof(buf2), "%s%%%lu",
+					 buf, scope);
+				buf2[LIB_BUFLENGTH - 1] = '\0';
+				strlcpy(buf, buf2, buflen);
 			}
 			break;
 
 		default:
-			snprintf(res, LIB_BUFLENGTH,
+			snprintf(buf, buflen,
 				 "(socktoa unknown family %d)",
 				 AF(sock));
 		}
 	}
 	errno = saved_errno;
 
-	return res;
+	return buf;
 }
 
 
@@ -74,18 +79,26 @@ sockporttoa(
 	const sockaddr_u *sock
 	)
 {
-	int		saved_errno;
-	const char *	atext;
-	char *		buf;
+	char *buf = lib_getbuf();
+	sockporttoa_r(sock, buf, LIB_BUFLENGTH);
+	return buf;
+}
+
+const char *
+sockporttoa_r(
+	const sockaddr_u *sock, char *buf, size_t buflen
+	)
+{
+	int saved_errno;
+        char buf2[LIB_BUFLENGTH];
 
 	saved_errno = errno;
-	atext = socktoa(sock);
-	buf = lib_getbuf();
-	snprintf(buf, LIB_BUFLENGTH,
+	socktoa_r(sock, buf2, sizeof(buf2));
+	snprintf(buf, buflen,
 		 (IS_IPV6(sock))
 		     ? "[%s]:%hu"
 		     : "%s:%hu",
-		 atext, SRCPORT(sock));
+		 buf2, SRCPORT(sock));
 	errno = saved_errno;
 
 	return buf;

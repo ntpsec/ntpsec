@@ -181,7 +181,11 @@ bail:
 }
 
 bool nts_check(struct peer *peer) {
-//  msyslog(LOG_INFO, "NTSc: nts_check %s, %d", sockporttoa(&sockaddr), addrOK);
+  if (0) {
+    char errbuf[100];
+    sockporttoa_r(&sockaddr, errbuf, sizeof(errbuf));
+    msyslog(LOG_INFO, "NTSc: nts_check %s, %d", errbuf, addrOK);
+}
   if (addrOK) {
     dns_take_server(peer, &sockaddr);
     dns_take_status(peer, DNS_good);
@@ -276,12 +280,14 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
   msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3Lf sec",
     hostname, lfptod(finish));
 
-  /* Save first answer for NTP */
+  /* Save first answer for NTP, switch to NTP port in case of server-name:port */
   memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
-  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s:%s => %s",
-    host, port, sockporttoa(&sockaddr));
-  /* switch to NTP port in case of server-name:port */
   SET_PORT(&sockaddr, NTP_PORT);
+
+  sockporttoa_r(&sockaddr, errbuf, sizeof(errbuf));
+  msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s:%s => %s",
+    host, port, errbuf);
+
   sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
   if (-1 == sockfd) {
     strerror_r(errno, errbuf, sizeof(errbuf));
@@ -462,6 +468,7 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
     uint16_t type, data, port;
     bool critical = false;
     int length, keylength;
+    char errbuf[100];
 #define MAX_SERVER 100
     char server[MAX_SERVER];
 
@@ -533,7 +540,8 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
         if (!nts_server_lookup(server, &sockaddr))
           return false;
         SET_PORT(&sockaddr, port);
-        msyslog(LOG_ERR, "NTSc: Using server %s=>%s", server, socktoa(&sockaddr));
+        socktoa_r(&sockaddr, errbuf, sizeof(errbuf));
+        msyslog(LOG_ERR, "NTSc: Using server %s=>%s", server, errbuf);
         break;
       case nts_port_negotiation:
         // FIXME check length

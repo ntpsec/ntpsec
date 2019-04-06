@@ -99,7 +99,9 @@ extern	const char * k_st_flags	(uint32_t);
 extern	char *	statustoa	(int, int);
 extern	sockaddr_u * netof6	(sockaddr_u *);
 extern	const char * socktoa	(const sockaddr_u *);
+extern	const char * socktoa_r	(const sockaddr_u *sock, char *buf, size_t buflen);
 extern	const char * sockporttoa(const sockaddr_u *);
+extern	const char * sockporttoa_r(const sockaddr_u *sock, char *buf, size_t buflen);
 extern	unsigned short	sock_hash(const sockaddr_u *) __attribute__((pure));
 extern	const char *refid_str	(uint32_t, int);
 
@@ -119,6 +121,7 @@ extern char *	ntp_optarg;		/* global argument pointer */
 extern int	ntp_optind;		/* global argv index */
 
 /* lib_strbuf.c */
+extern  void    getbuf_init (void);
 extern bool	ipv4_works;
 extern bool	ipv6_works;
 
