@@ -62,6 +62,7 @@ bool nts_probe(struct peer * peer) {
   struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
   const char *hostname = peer->hostname;
   char hostbuf[100];
+  char errbuf[100];
   SSL     *ssl;
   int      server;
   l_fp     start, finish;
@@ -98,7 +99,8 @@ bool nts_probe(struct peer * peer) {
 
   err = setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
   if (0 > err) {
-    msyslog(LOG_ERR, "NTSc: can't setsockopt: %s", strerror(errno));
+    strerror_r(errno, errbuf, sizeof(errbuf));
+    msyslog(LOG_ERR, "NTSc: can't setsockopt: %s", errbuf);
     close(server);
     nts_ke_probes_bad++;
     return false;
@@ -230,6 +232,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 
 int open_TCP_socket(struct peer *peer, const char *hostname) {
   char host[256], port[32];
+  char errbuf[100];
   char *tmp;
   struct addrinfo hints;
   struct addrinfo *answer;
@@ -281,12 +284,14 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
   SET_PORT(&sockaddr, NTP_PORT);
   sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
   if (-1 == sockfd) {
-    msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", strerror(errno));
+    strerror_r(errno, errbuf, sizeof(errbuf));
+    msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", errbuf);
   } else {
     // Use first answer
     err = connect(sockfd, answer->ai_addr, answer->ai_addrlen);
     if (-1 == err) {
-      msyslog(LOG_INFO, "NTSc: nts_probe: connect failed: %s", strerror(errno));
+      strerror_r(errno, errbuf, sizeof(errbuf));
+      msyslog(LOG_INFO, "NTSc: nts_probe: connect failed: %s", errbuf);
       close(sockfd);
       sockfd = -1;
     }
@@ -395,6 +400,7 @@ bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keyl
 
 bool nts_client_send_request(SSL *ssl, struct peer* peer) {
   uint8_t buff[1000];
+  char errbuf[100];
   int     used, transferred;
   struct  BufCtl_t buf;
   uint16_t aead = NO_AEAD;
@@ -421,8 +427,9 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
 
   used = sizeof(buff)-buf.left;
   if (used >= (int)(sizeof(buff)-10)) {
+    strerror_r(errno, errbuf, sizeof(errbuf));
     msyslog(LOG_ERR, "NTSc: write failed: %d, %ld, %s",
-        used, (long)sizeof(buff), strerror(errno));
+        used, (long)sizeof(buff), errbuf);
     return false;
   }
 
@@ -572,6 +579,7 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
 
 bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
   struct stat statbuf;
+  char errbuf[100];
   if (NULL == filename) {
     msyslog(LOG_INFO, "NTSc: Using system default root certificates.");
     SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
@@ -592,7 +600,9 @@ bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
         filename, statbuf.st_mode);
     return false;
   }
-  msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %s", ntsconfig.ca, strerror(errno));
+  strerror_r(errno, errbuf, sizeof(errbuf));
+  msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %s",
+      ntsconfig.ca, errbuf);
   return false;
 }
 

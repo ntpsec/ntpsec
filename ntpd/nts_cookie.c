@@ -200,16 +200,19 @@ bool nts_write_cookie_keys(void) {
   const char *cookie_filename = NTS_COOKIE_KEY_FILE;
   int fd;
   FILE *out;
+  char errbuf[100];
   if (NULL != ntsconfig.KI)
     cookie_filename = ntsconfig.KI;
   fd = open(cookie_filename, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
   if (-1 == fd) {
-    msyslog(LOG_ERR, "ERR: can't open %s: %s", cookie_filename, strerror(errno));
+    strerror_r(errno, errbuf, sizeof(errbuf));
+    msyslog(LOG_ERR, "ERR: can't open %s: %s", cookie_filename, errbuf);
     return false;
   }
   out = fdopen(fd, "w");
   if (NULL == out) {
-    msyslog(LOG_ERR, "ERR: can't fdopen %s: %s", cookie_filename, strerror(errno));
+    strerror_r(errno, errbuf, sizeof(errbuf));
+    msyslog(LOG_ERR, "ERR: can't fdopen %s: %s", cookie_filename, errbuf);
     close(fd);
     return false;
   }
