@@ -18,6 +18,7 @@
 #include <openssl/err.h>
 
 #include "ntp_types.h"
+#include "ntp_stdlib.h"
 #include "ntpd.h"
 #include "nts.h"
 #include "nts2.h"
@@ -210,7 +211,7 @@ int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length) {
     char errbuf[100];
     bytes_read = SSL_read(ssl, buff, buff_length);
     if (0 >= bytes_read) {
-        strerror_r(errno, errbuf, sizeof(errbuf));
+        IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
         msyslog(LOG_INFO, "NTS: SSL_read error: %s", errbuf);
         nts_log_ssl_error();
         return -1;
@@ -223,7 +224,7 @@ int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length) {
     char errbuf[100];
     bytes_written = SSL_write(ssl, buff, buff_length);
     if (0 >= bytes_written) {
-        strerror_r(errno, errbuf, sizeof(errbuf));
+        IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
         msyslog(LOG_INFO, "NTS: SSL_write error: %s", errbuf);
         nts_log_ssl_error();
         return -1;

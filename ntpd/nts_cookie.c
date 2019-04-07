@@ -205,13 +205,13 @@ bool nts_write_cookie_keys(void) {
     cookie_filename = ntsconfig.KI;
   fd = open(cookie_filename, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
   if (-1 == fd) {
-    strerror_r(errno, errbuf, sizeof(errbuf));
+    IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
     msyslog(LOG_ERR, "ERR: can't open %s: %s", cookie_filename, errbuf);
     return false;
   }
   out = fdopen(fd, "w");
   if (NULL == out) {
-    strerror_r(errno, errbuf, sizeof(errbuf));
+    IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
     msyslog(LOG_ERR, "ERR: can't fdopen %s: %s", cookie_filename, errbuf);
     close(fd);
     return false;
