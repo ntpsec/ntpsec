@@ -73,7 +73,13 @@ You can read POSIX-1.2001, with 2004 Corrigendum, online for free here:
 You can see POSIX.1-2001, SUSv3, online for free here:
     http://www.unix-systems.org/version3/
 
-POSIX threads *are* considered part of the standardized API and may be used.
+POSIX threads *are* considered part of the standardized API, but their
+use requires extreme care.  The main part of ntpd assumes it is the only
+thread.  One interesting area is msyslog.  The DNS thread doesn't call msyslog.
+That was impractical for NTS, so msyslog is thread safe as of 2019-Apr.
+Beware of calling strerror() from non-main threads.  Use strerror_r()
+into a buffer on the stack.  Similarly, use socktoa_r() and sockporttoa_r()
+and don't call lib_getbuf().
 
 You *may* assume the clock_gettime(2) and clock_settime(2) calls, and
 the related getitimer(2)/setitimer(2), from POSIX-1.2008.
