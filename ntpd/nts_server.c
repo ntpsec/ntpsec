@@ -21,6 +21,9 @@
 #include "nts.h"
 #include "nts2.h"
 
+/* Beware: bind and accept take type sockaddr, but that's not big
+ *         enough for an IPv6 address.
+ */
 
 static int create_listener(int port, int family);
 static void* nts_ke_listener(void*);
@@ -130,7 +133,7 @@ void* nts_ke_listener(void* arg) {
         nts_ke_serves++;
         get_systime(&start);
 
-        sockporttoa_r((sockaddr_u *)&addr, errbuf, sizeof(errbuf));
+        sockporttoa_r(&addr, errbuf, sizeof(errbuf));
         msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s", errbuf);
         err = setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
         if (0 > err) {
@@ -148,7 +151,7 @@ void* nts_ke_listener(void* arg) {
         if (SSL_accept(ssl) <= 0) {
             get_systime(&finish);
             finish -= start;
-            sockporttoa_r((sockaddr_u *)&addr, errbuf, sizeof(errbuf));
+            sockporttoa_r(&addr, errbuf, sizeof(errbuf));
             msyslog(LOG_ERR, "NTSs: SSL accept from %s failed, %.3Lf sec",
                 errbuf, lfptod(finish));
             nts_log_ssl_error();
@@ -227,17 +230,16 @@ bool nts_ke_request(SSL *ssl) {
 
 int create_listener(int port, int family) {
     int sock = -1;
-    struct sockaddr_in addr;
-    struct sockaddr_in6 addr6;
+    sockaddr_u addr;
     int on = 1;
     int err;
     char errbuf[100];
 
     switch (family) {
       case AF_INET:
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr= htonl(INADDR_ANY);
+        addr.sa4.sin_family = AF_INET;
+        addr.sa4.sin_port = htons(port);
+        addr.sa4.sin_addr.s_addr= htonl(INADDR_ANY);
         sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
           strerror_r(errno, errbuf, sizeof(errbuf));
@@ -251,7 +253,7 @@ int create_listener(int port, int family) {
 	  close(sock);
           return -1;
         }
-        err = bind(sock, (struct sockaddr*)&addr, sizeof(addr));
+        err = bind(sock, &addr.sa, sizeof(addr.sa4));
         if (0 > err) {
           strerror_r(errno, errbuf, sizeof(errbuf));
           msyslog(LOG_ERR, "NTSs: can't bind4: %s", errbuf);
@@ -267,9 +269,9 @@ int create_listener(int port, int family) {
         msyslog(LOG_INFO, "NTSs: listen4 worked");
         break;
       case AF_INET6:
-        addr6.sin6_family = AF_INET6;
-        addr6.sin6_port = htons(port);
-        addr6.sin6_addr = in6addr_any;
+        addr.sa6.sin6_family = AF_INET6;
+        addr.sa6.sin6_port = htons(port);
+        addr.sa6.sin6_addr = in6addr_any;
         sock = socket(AF_INET6, SOCK_STREAM, 0);
         if (sock < 0) {
           strerror_r(errno, errbuf, sizeof(errbuf));
@@ -291,7 +293,7 @@ int create_listener(int port, int family) {
 	  close(sock);
           return -1;
         }
-        err = bind(sock, (struct sockaddr*)&addr6, sizeof(addr6));
+        err = bind(sock, &addr.sa, sizeof(addr.sa6));
         if (0 > err) {
           strerror_r(errno, errbuf, sizeof(errbuf));
           msyslog(LOG_ERR, "NTSs: can't bind6: %s", errbuf);
