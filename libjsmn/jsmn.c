@@ -48,6 +48,9 @@ static int jsmn_parse_primitive(jsmn_parser *parser, const char *js,
 			case '\t' : case '\r' : case '\n' : case ' ' :
 			case ','  : case ']'  : case '}' :
 				goto found;
+                        default:
+                                /* not found, keep going */
+                                break;
 		}
 		if (js[parser->pos] < 32 || js[parser->pos] >= 127) {
 			parser->pos = start;
