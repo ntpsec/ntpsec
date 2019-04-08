@@ -50,7 +50,7 @@ bool nts_server_init(void) {
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
     server_ctx = SSL_CTX_new(TLS_server_method());
 #else
-    OpenSSL_add_all_ciphers();  // FIXME needed on NetBSD
+    // OpenSSL_add_all_ciphers();  // maybe was needed on NetBSD ??
     server_ctx = SSL_CTX_new(TLSv1_2_server_method());
 #endif
     if (NULL == server_ctx) {
@@ -383,8 +383,6 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
 
 bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
        uint8_t *c2s, uint8_t *s2c, int keylen) {
-    uint8_t cookie[NTS_MAX_COOKIELEN];
-    int cookielen;
 
     /* 4.1.2 Next Protocol */
     ke_append_record_uint16(buf,
@@ -393,7 +391,8 @@ bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
     ke_append_record_uint16(buf, nts_algorithm_negotiation, aead);
 
     for (int i=0; i<NTS_MAX_COOKIES; i++) {
-      cookielen = nts_make_cookie(cookie, aead, c2s, s2c, keylen);
+      uint8_t cookie[NTS_MAX_COOKIELEN];
+      int cookielen = nts_make_cookie(cookie, aead, c2s, s2c, keylen);
       ke_append_record_bytes(buf, nts_new_cookie, cookie, cookielen);
     }
 

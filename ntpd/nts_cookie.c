@@ -249,13 +249,7 @@ int nts_make_cookie(uint8_t *cookie,
 
   nts_cookie_make++;
 
-  // ASSERT(keylen<NTS_MAX_KEYLEN);
-
-  err = pthread_mutex_lock(&cookie_lock);
-  if (0 != err) {
-    msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
-    exit(2);
-  }
+  INSIST(keylen < NTS_MAX_KEYLEN);
 
   /* collect plaintext
    * separate buffer avoids encrypt in place
@@ -284,12 +278,25 @@ int nts_make_cookie(uint8_t *cookie,
   used = finger-cookie;
   left = NTS_MAX_COOKIELEN-used;
 
+  err = pthread_mutex_lock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
+    exit(2);
+  }
+
   ok = AES_SIV_Encrypt(cookie_ctx,
            finger, &left,   /* left: in: max out length, out: length used */
            K, K_length,
            nonce, NONCE_LENGTH,
            plaintext, plainlength,
            cookie, AD_LENGTH);
+
+  err = pthread_mutex_unlock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
+    exit(2);
+  }
+
   if (!ok) {
     msyslog(LOG_ERR, "NTS: nts_make_cookie - Error from AES_SIV_Encrypt");
     /* I don't think this should happen,
@@ -301,13 +308,8 @@ int nts_make_cookie(uint8_t *cookie,
   }
 
   used += left;
-  // ASSERT(length < NTS_MAX_COOKIELEN);
+  INSIST(used < NTS_MAX_COOKIELEN);
 
-  err = pthread_mutex_unlock(&cookie_lock);
-  if (0 != err) {
-    msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
-    exit(2);
-  }
   return used;
 }
 
@@ -323,6 +325,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   uint32_t temp;
   size_t plainlength;
   int cipherlength;
+  int err;
   bool ok;
 
   if (NULL == cookie_ctx)
@@ -352,13 +355,25 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   cipherlength = cookielen - AD_LENGTH;
   plainlength = NTS_MAX_COOKIELEN;
 
-  // FIXME - needs lock
+  err = pthread_mutex_lock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
+    exit(2);
+  }
+
   ok = AES_SIV_Decrypt(cookie_ctx,
            plaintext, &plainlength,
            key, K_length,
            nonce, NONCE_LENGTH,
            finger, cipherlength,
            cookie, AD_LENGTH);
+
+  err = pthread_mutex_unlock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
+    exit(2);
+  }
+
   if (!ok) {
     nts_cookie_decode_error++;
     return false;

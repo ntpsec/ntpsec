@@ -6,6 +6,8 @@
  *
  * We carefully arrange things so that no padding is necessary.
  *
+ * This is only called by the main ntpd thread, so we don't need
+ * a lock to protect wire_ctx.
  */
 
 #include "config.h"
@@ -145,7 +147,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
     uint8_t *nonce, *cmac;
     bool ok;
 
-    type = ex_next_record(&buf, &length);
+    type = ex_next_record(&buf, &length); /* length excludes header */
     if (length&3 || length > buf.left || length < 0)
       return false;
     if (NTS_CRITICAL & type) {
@@ -216,12 +218,13 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
         break;
       default:
         /* Non NTS extensions on requests at server.
-         * Call out when we get some that we want. */
+         * Call out when we get some that we want.
+         * Until then, it's probably a bug. */
         if (critical)
           return false;
         buf.next += length;
 	buf.left -= length;
-        return false;		// FIXME - for now, it's probably a bug
+        return false;
     }
   }
 
@@ -334,7 +337,7 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
     size_t outlen;
     bool ok;
 
-    type = ex_next_record(&buf, &length);
+    type = ex_next_record(&buf, &length); /* length excludes header */
     if (length&3 || length > buf.left || length < 0)
       return false;
     if (NTS_CRITICAL & type) {
@@ -392,12 +395,13 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
         break;
       default:
         /* Non NTS extensions on reply from server.
-         * Call out when we get some that we want. */
+         * Call out when we get some that we want.
+         * For now, it's probably a bug. */
         if (critical)
           return false;
         buf.next += length;
 	buf.left -= length;
-        return false;		// FIXME - for now, it's probably a bug
+        return false;
     }
   }
 

@@ -201,7 +201,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
   ctx = SSL_CTX_new(TLS_client_method());
 #else
-  OpenSSL_add_all_ciphers();  // FIXME needed on NetBSD
+ // OpenSSL_add_all_ciphers();  // Maybe was needed on NetBSD ??
   ctx = SSL_CTX_new(TLSv1_2_client_method());
 #endif
   if (NULL == ctx) {
