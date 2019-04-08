@@ -159,6 +159,11 @@ enum nts_record_type {
   nts_port_negotiation = 7
 };
 
+enum nts_protocol_type {
+  nts_protocol_NTP = 0,
+};
+
+
 enum nts_errors_type {
   nts_unrecognized_critical_section = 0,
   nts_bad_request = 1

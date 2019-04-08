@@ -337,7 +337,7 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
           return false;
         case nts_next_protocol_negotiation:
           data = next_uint16(buf);
-          if ((sizeof(data) != length) || (data != 0)) {
+          if ((sizeof(data) != length) || (data != nts_protocol_NTP)) {
             msyslog(LOG_ERR, "NTSs: NPN-Wrong length or bad data: %d, %d",
                 length, data);
             return false;
@@ -386,8 +386,9 @@ bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
     uint8_t cookie[NTS_MAX_COOKIELEN];
     int cookielen;
 
-    /* 4.1.2 Next Protocol, 0 for NTP */
-    ke_append_record_uint16(buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
+    /* 4.1.2 Next Protocol */
+    ke_append_record_uint16(buf,
+      NTS_CRITICAL+nts_next_protocol_negotiation, nts_protocol_NTP);
     /* 4.1.5 AEAD Algorithm List */
     ke_append_record_uint16(buf, nts_algorithm_negotiation, aead);
 

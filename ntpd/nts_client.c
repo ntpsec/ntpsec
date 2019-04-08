@@ -382,10 +382,12 @@ bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keyl
   // Date: Tue, 15 Jan 2019 11:40:13 +0100
   // https://mailarchive.ietf.org/arch/msg/ntp/nkc-9n6XOPt5Glgi_ueLvuD9EfY
   const char *label = "EXPORTER-network-time-security/1";
-  // FIXME, first 2 bytes, next protocol ID (0)
-  unsigned char context[5] = {0x00, 0x00, 0x00, 0x0f, 0x00};
+  unsigned char context[5];
+  context[0] = (nts_protocol_NTP >> 8) & 0xFF;
+  context[1] = nts_protocol_NTP & 0xFF;
   context[2] = (aead >> 8) & 0xFF;
   context[3] = aead & 0xFF;
+  context[4] = 0x00;
   if (1 != SSL_export_keying_material(ssl, c2s, keylen,
         label, strlen(label),
         context, 5, 1)) {
@@ -415,7 +417,8 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
   buf.left = sizeof(buff);
 
   /* 4.1.2 Next Protocol, 0 for NTP */
-  ke_append_record_uint16(&buf, NTS_CRITICAL+nts_next_protocol_negotiation, 0);
+  ke_append_record_uint16(&buf,
+    NTS_CRITICAL+nts_next_protocol_negotiation, nts_protocol_NTP);
 
   /* 4.1.5 AEAD Algorithm List */
   // FIXME should be : separated list
@@ -488,7 +491,7 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
         return false;
       case nts_next_protocol_negotiation:
         data = next_uint16(&buf);
-        if ((sizeof(data) != length) || (data != 0)) {
+        if ((sizeof(data) != length) || (data != nts_protocol_NTP)) {
           msyslog(LOG_ERR, "NTSc: NPN-Wrong length or bad data: %d, %d",
               length, data);
           return false;
