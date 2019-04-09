@@ -141,9 +141,10 @@ struct ntsconfig_t {
 };
 
 
-/* Only valid for AEAD_AES_SIV_CMAC_nnn
- * but that's all we use. */
-#define AEAD_CMAC_LNG 16
+/* CMAC length is wired into AEAD_AES_SIV_CMAC_nnn. */
+#define CMAC_LENGTH 16
+/* The NONCE length comes from RFC 5116 and/or 5297. */
+#define NONCE_LENGTH 16
 
 /* NTS protocol constants */
 

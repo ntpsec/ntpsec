@@ -25,7 +25,6 @@
 #include "nts.h"
 #include "nts2.h"
 
-// FIXME duplicated in nts_cookie
 #define NONCE_LENGTH 16
 #define CMAC_LENGTH 16
 
@@ -47,7 +46,8 @@ enum NtpExtFieldType {
    NTS_AEEF = 0x404 /* Authenticated and Encrypted Extension Fields */
 };
 
-AES_SIV_CTX* wire_ctx = NULL;  /* need one per thread */
+/* This is only called by the main thread so we don't need a lock. */
+AES_SIV_CTX* wire_ctx = NULL;
 
 
 bool extens_init(void) {

@@ -77,8 +77,12 @@ uint8_t K[NTS_MAX_KEYLEN], K2[NTS_MAX_KEYLEN];
 uint32_t I, I2;
 time_t K_time = 0;	/* time K was created, 0 for none */
 
-AES_SIV_CTX* cookie_ctx;  /* one per thread ?? */
+/* The mutex protects cookie_ctx
+ * The NTS-KE servers can make cookies
+ *   while the main NTP server thread is unpacking and making cookies.
+ * If this becomes a bottleneck, we could use a cookie_ctx per thread. */
 pthread_mutex_t cookie_lock = PTHREAD_MUTEX_INITIALIZER;
+AES_SIV_CTX* cookie_ctx;
 
 /* Statistics for ntpq */
 uint64_t nts_cookie_make = 0;
@@ -88,9 +92,7 @@ uint64_t nts_cookie_decode_too_old = 0;
 uint64_t nts_cookie_decode_error = 0;
 
 
-// FIXME duplicated in ntp_extens
-#define NONCE_LENGTH 16
-
+// FIXME  AEAD_LENGTH
 /* Associated data: aead (rounded up to 4) plus NONCE */
 #define AD_LENGTH 20
 #define AEAD_LENGTH 4
@@ -150,9 +152,15 @@ bool nts_read_cookie_keys(void) {
   if (NULL != ntsconfig.KI)
     cookie_filename = ntsconfig.KI;
   in = fopen(cookie_filename, "r");
-  if (NULL == in)
-    // FIXME check errno - crash if exists but can't read
-    return false;
+  if (NULL == in) {
+    char errbuf[100];
+    if (ENOENT == errno)
+      return false;		/* File doesn't exist */
+    IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
+    msyslog(LOG_ERR, "NTSs: can't read old cookie file: %s=>%s",
+        cookie_filename, errbuf);
+    exit(1);
+  }
   if (1 != fscanf(in, "T: %lu\n", &templ)) goto bail;
   K_time = templ;
   if (1 != fscanf(in, "L: %d\n", &K_length)) goto bail;
@@ -182,7 +190,11 @@ bail:
   return false;
 }
 
-// FIXME need ratchet mode to make new keys
+/* The draft describes a ratchet mode to make new keys
+ * That's one way to implement a KE server for a cluster of NTP servers.
+ * The KE server and the NTP servers stay in sync without communication
+ * after a one-time copy of the cookie file from NTP server to KE server.
+ */
 bool nts_make_cookie_key(void) {
   bool OK = true;
   memcpy(&K2, &K, sizeof(K2));	/* Push current cookie to old */
@@ -216,7 +228,6 @@ bool nts_write_cookie_keys(void) {
     close(fd);
     return false;
   }
-  // FIXME check return values
   fprintf(out, "T: %lu\n", (unsigned long)K_time);
   fprintf(out, "L: %d\n", K_length);
   fprintf(out, "I: %u\n", I);

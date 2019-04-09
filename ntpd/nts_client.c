@@ -105,10 +105,6 @@ bool nts_probe(struct peer * peer) {
     return false;
   }
 
-  // FIXME
-  // Not much error checking yet.
-  // Ugly since most SSL routines return 1 on success.
-
   if (NULL == peer->cfg.nts_cfg.ca)
     ssl = SSL_new(client_ctx);
   else {
@@ -234,6 +230,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
   return ctx;
 }
 
+/* return -1 on error */
 int open_TCP_socket(struct peer *peer, const char *hostname) {
   char host[256], port[32];
   char errbuf[100];
@@ -547,7 +544,11 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
         msyslog(LOG_ERR, "NTSc: Using server %s=>%s", server, errbuf);
         break;
       case nts_port_negotiation:
-        // FIXME check length
+        if (sizeof(port) != length) {
+          msyslog(LOG_ERR, "NTSc: PN-Wrong length: %d, %d",
+              length, critical);
+          return false;
+        }
         port = next_uint16(&buf);
         SET_PORT(&sockaddr, port);
         msyslog(LOG_ERR, "NTSc: Using port %d", port);
@@ -573,7 +574,6 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
     } /* case */
   }   /* while */
 
-  // FIXME lots of other checks
   if (NO_AEAD == peer->nts_state.aead) {
     msyslog(LOG_ERR, "NTSc: No AEAD algorithim.");
     return false;
