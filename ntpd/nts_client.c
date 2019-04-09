@@ -71,7 +71,6 @@ bool nts_probe(struct peer * peer) {
   if (NULL == client_ctx)
     return false;
 
-  nts_ke_probes++;
   addrOK = false;
   get_systime(&start);
 
@@ -161,6 +160,7 @@ bool nts_probe(struct peer * peer) {
     goto bail;
 
   addrOK = true;
+  nts_ke_probes_good++;
 
 bail:
   if (!addrOK) {

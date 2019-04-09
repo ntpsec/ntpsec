@@ -344,16 +344,17 @@ static const struct ctl_var sys_var[] = {
 	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },
 #define CS_K_LOCKCLOCK		105
 	{ CS_K_LOCKCLOCK,	RO, "lockclock" },
+
 #define CS_nts_client_send	106
-	{ CS_nts_client_send,	RO, "nts_client_send" },
-#define CS_nts_client_recv	107
-	{ CS_nts_client_recv,	RO, "nts_client_recv" },
+	{ CS_nts_client_send,		RO, "nts_client_send" },
+#define CS_nts_client_recv_good	107
+	{ CS_nts_client_recv_good,	RO, "nts_client_recv_good" },
 #define CS_nts_client_recv_bad	108
 	{ CS_nts_client_recv_bad,	RO, "nts_client_recv_bad" },
 #define CS_nts_server_send	109
-	{ CS_nts_server_send,	RO, "nts_server_send" },
-#define CS_nts_server_recv	110
-	{ CS_nts_server_recv,	RO, "nts_server_recv" },
+	{ CS_nts_server_send,		RO, "nts_server_send" },
+#define CS_nts_server_recv_good	110
+	{ CS_nts_server_recv_good,	RO, "nts_server_recv_good" },
 #define CS_nts_server_recv_bad	111
 	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
 
@@ -368,14 +369,14 @@ static const struct ctl_var sys_var[] = {
 #define CS_nts_cookie_decode_error	116
 	{ CS_nts_cookie_decode_error,	RO, "nts_cookie_decode_error" },
 
-#define CS_nts_ke_serves	117
-	{ CS_nts_ke_serves,	RO, "nts_ke_serves" },
+#define CS_nts_ke_serves_good	117
+	{ CS_nts_ke_serves_good,	RO, "nts_ke_serves_good" },
 #define CS_nts_ke_serves_bad	118
-	{ CS_nts_ke_serves_bad,	RO, "nts_ke_serves_bad" },
-#define CS_nts_ke_probes	119
-	{ CS_nts_ke_probes,	RO, "nts_ke_probes" },
+	{ CS_nts_ke_serves_bad,		RO, "nts_ke_serves_bad" },
+#define CS_nts_ke_probes_good	119
+	{ CS_nts_ke_probes_good,	RO, "nts_ke_probes_good" },
 #define CS_nts_ke_probes_bad	120
-	{ CS_nts_ke_probes_bad,	RO, "nts_ke_probes_bad" },
+	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
 };
@@ -1963,8 +1964,8 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, nts_client_send);
 		break;
 
-	case CS_nts_client_recv:
-		ctl_putuint(sys_var[varid].text, nts_client_recv);
+	case CS_nts_client_recv_good:
+		ctl_putuint(sys_var[varid].text, nts_client_recv_good);
 		break;
 
 	case CS_nts_client_recv_bad:
@@ -1975,8 +1976,8 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, nts_server_send);
 		break;
 
-	case CS_nts_server_recv:
-		ctl_putuint(sys_var[varid].text, nts_server_recv);
+	case CS_nts_server_recv_good:
+		ctl_putuint(sys_var[varid].text, nts_server_recv_good);
 		break;
 
 	case CS_nts_server_recv_bad:
@@ -2003,16 +2004,16 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, nts_cookie_decode_error);
 		break;
 
-	case CS_nts_ke_serves:
-		ctl_putuint(sys_var[varid].text, nts_ke_serves);
+	case CS_nts_ke_serves_good:
+		ctl_putuint(sys_var[varid].text, nts_ke_serves_good);
 		break;
 
 	case CS_nts_ke_serves_bad:
 		ctl_putuint(sys_var[varid].text, nts_ke_serves_bad);
 		break;
 
-	case CS_nts_ke_probes:
-		ctl_putuint(sys_var[varid].text, nts_ke_probes);
+	case CS_nts_ke_probes_good:
+		ctl_putuint(sys_var[varid].text, nts_ke_probes_good);
 		break;
 
 	case CS_nts_ke_probes_bad:

@@ -35,9 +35,9 @@ static int listner4_sock = -1;
 static int listner6_sock = -1;
 
 /* Statistics for ntpq */
-uint64_t nts_ke_serves = 0;
+uint64_t nts_ke_serves_good = 0;
 uint64_t nts_ke_serves_bad = 0;
-uint64_t nts_ke_probes = 0;
+uint64_t nts_ke_probes_good = 0;
 uint64_t nts_ke_probes_bad = 0;
 
 
@@ -130,7 +130,6 @@ void* nts_ke_listener(void* arg) {
             sleep(1);		/* avoid log clutter on bug */
             continue;
         }
-        nts_ke_serves++;
         get_systime(&start);
 
         sockporttoa_r(&addr, errbuf, sizeof(errbuf));
@@ -175,6 +174,7 @@ void* nts_ke_listener(void* arg) {
 
         get_systime(&finish);
         finish -= start;
+        nts_ke_serves_good++;
         msyslog(LOG_INFO, "NTSs: NTS-KE server took %.3Lf sec", lfptod(finish));
 
     }

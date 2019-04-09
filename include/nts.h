@@ -219,19 +219,19 @@ extern struct ntsconfig_t ntsconfig;
 
 /* NTS-related statistics visible via ntpq -c nts */
 extern uint64_t nts_client_send;
-extern uint64_t nts_client_recv;
+extern uint64_t nts_client_recv_good;
 extern uint64_t nts_client_recv_bad;
 extern uint64_t nts_server_send;
-extern uint64_t nts_server_recv;
+extern uint64_t nts_server_recv_good;
 extern uint64_t nts_server_recv_bad;
 extern uint64_t nts_cookie_make;
 extern uint64_t nts_cookie_decode;
 extern uint64_t nts_cookie_decode_old;
 extern uint64_t nts_cookie_decode_too_old;
 extern uint64_t nts_cookie_decode_error;
-extern uint64_t nts_ke_serves;
+extern uint64_t nts_ke_serves_good;
 extern uint64_t nts_ke_serves_bad;
-extern uint64_t nts_ke_probes;
+extern uint64_t nts_ke_probes_good;
 extern uint64_t nts_ke_probes_bad;
 
 #endif /* GUARD_NTS_H */
