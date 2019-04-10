@@ -1,8 +1,12 @@
 /*
  * nts2.h - NTS (Network Time Security) declarations
+ * Copyright 2019 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-4-Clause-UC
+ *
  * other half of nts.h which doesn't include openssl/ssh.h
  * This split helps test routines.
  */
+
 #ifndef GUARD_NTS2_H
 #define GUARD_NTS2_H
 
