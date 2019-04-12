@@ -1,7 +1,5 @@
 /*
  * nts_server.c - Network Time Security (NTS) server side support
- * Copyright 2019 by the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-Clause-UC
  *
  * Section references are to
  * https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp-15
@@ -145,7 +143,7 @@ void* nts_ke_listener(void* arg) {
             continue;
         }
 
-        /* For high volume servers, this should go in a new thread. */
+        /* WARN: For high volume servers, this should go in a new thread. */
         ssl = SSL_new(server_ctx);
         SSL_set_fd(ssl, client);
 

@@ -1,7 +1,5 @@
 /*
  * ntp_extens.c - Network Time Protocol (NTP) extension processing
- * Copyright 2019 by the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-Clause-UC
  *
  * NB: This module is working with the wire format packet.
  *     It must do byte swapping.
@@ -84,8 +82,9 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
   peer->nts_state.readIdx = peer->nts_state.readIdx % NTS_MAX_COOKIES;
   peer->nts_state.count--;
 
-  // Need more cookies?
+  /* Need more cookies? */
   for (int i=peer->nts_state.count+1; i<NTS_MAX_COOKIES; i++) {
+    /* WARN: This may get too big for the MTU. */
     ex_append_header(&buf, NTS_Cookie_Placeholder, peer->nts_state.cookielen);
     memset(buf.next, 0, peer->nts_state.cookielen);
     buf.next += peer->nts_state.cookielen;
@@ -286,6 +285,9 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
   ex_append_record_bytes(&buf, NTS_Cookie,
       cookie, cookielen);
   for (int i=1; i<ntspacket->needed; i++) {
+    /* WARN: This may get too big for the MTU. See length calculation above.
+     * Responses are the same length as requests to avoid DDoS amplification.
+     * So if it got to us, there is a good chance it will get back.  */
     nts_make_cookie(cookie, ntspacket->aead,
         ntspacket->c2s, ntspacket->s2c, ntspacket->keylen);
     ex_append_record_bytes(&buf, NTS_Cookie,
