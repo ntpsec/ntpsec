@@ -93,6 +93,8 @@ uint64_t nts_cookie_decode_old = 0;
 uint64_t nts_cookie_decode_too_old = 0;
 uint64_t nts_cookie_decode_error = 0;
 
+void nts_lock_cookielock(void);
+void nts_unlock_cookielock(void);
 
 // FIXME  AEAD_LENGTH
 /* Associated data: aead (rounded up to 4) plus NONCE */
@@ -252,7 +254,6 @@ int nts_make_cookie(uint8_t *cookie,
   uint8_t *nonce;
   int used, plainlength;
   bool ok;
-  int err;
   uint8_t * finger;
   uint32_t temp;	/* keep 4 byte alignment */
   size_t left;
@@ -291,11 +292,7 @@ int nts_make_cookie(uint8_t *cookie,
   used = finger-cookie;
   left = NTS_MAX_COOKIELEN-used;
 
-  err = pthread_mutex_lock(&cookie_lock);
-  if (0 != err) {
-    msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
-    exit(2);
-  }
+  nts_lock_cookielock();
 
   ok = AES_SIV_Encrypt(cookie_ctx,
            finger, &left,   /* left: in: max out length, out: length used */
@@ -304,11 +301,7 @@ int nts_make_cookie(uint8_t *cookie,
            plaintext, plainlength,
            cookie, AD_LENGTH);
 
-  err = pthread_mutex_unlock(&cookie_lock);
-  if (0 != err) {
-    msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
-    exit(2);
-  }
+  nts_unlock_cookielock();
 
   if (!ok) {
     msyslog(LOG_ERR, "NTS: nts_make_cookie - Error from AES_SIV_Encrypt");
@@ -338,7 +331,6 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   uint32_t temp;
   size_t plainlength;
   int cipherlength;
-  int err;
   bool ok;
 
   if (NULL == cookie_ctx)
@@ -368,11 +360,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   cipherlength = cookielen - AD_LENGTH;
   plainlength = NTS_MAX_COOKIELEN;
 
-  err = pthread_mutex_lock(&cookie_lock);
-  if (0 != err) {
-    msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
-    exit(2);
-  }
+  nts_lock_cookielock();
 
   ok = AES_SIV_Decrypt(cookie_ctx,
            plaintext, &plainlength,
@@ -381,11 +369,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
            finger, cipherlength,
            cookie, AD_LENGTH);
 
-  err = pthread_mutex_unlock(&cookie_lock);
-  if (0 != err) {
-    msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
-    exit(2);
-  }
+  nts_unlock_cookielock();
 
   if (!ok) {
     nts_cookie_decode_error++;
@@ -405,6 +389,20 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   return true;
 }
 
+void nts_lock_cookielock(void) {
+  int err = pthread_mutex_lock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
+    exit(2);
+  }
+}
 
+void nts_unlock_cookielock(void) {
+  int err = pthread_mutex_unlock(&cookie_lock);
+  if (0 != err) {
+    msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
+    exit(2);
+  }
+}
 
 /* end */
