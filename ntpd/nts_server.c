@@ -29,10 +29,17 @@ static int create_listener(int port, int family);
 static void* nts_ke_listener(void*);
 static bool nts_ke_request(SSL *ssl);
 
+static void nts_lock_certlock(void);
+static void nts_unlock_certlock(void);
+
 
 static SSL_CTX *server_ctx = NULL;
 static int listner4_sock = -1;
 static int listner6_sock = -1;
+
+/* We need a lock to protect reloading our certificate.
+ * This seems like overkill, but it doesn't happen often. */
+pthread_mutex_t certificate_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /* Statistics for ntpq */
 uint64_t nts_ke_serves_good = 0;
@@ -109,6 +116,29 @@ bool nts_server_init2(void) {
     return true;
 }
 
+void check_cert_file(void) {
+
+    nts_lock_certlock();
+    nts_reload_certificate(server_ctx);
+    nts_unlock_certlock();
+}
+
+void nts_lock_certlock(void) {
+    int err = pthread_mutex_lock(&certificate_lock);
+    if (0 != err) {
+      msyslog(LOG_ERR, "ERR: Can't lock certificate_lock: %d", err);
+      exit(2);
+    }
+}
+
+void nts_unlock_certlock(void) {
+    int err = pthread_mutex_unlock(&certificate_lock);
+    if (0 != err) {
+      msyslog(LOG_ERR, "ERR: Can't unlock certificate_lock: %d", err);
+      exit(2);
+    }
+}
+
 void* nts_ke_listener(void* arg) {
     struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
     int sock = *(int*)arg;
@@ -144,7 +174,9 @@ void* nts_ke_listener(void* arg) {
         }
 
         /* WARN: For high volume servers, this should go in a new thread. */
+        nts_lock_certlock();
         ssl = SSL_new(server_ctx);
+        nts_unlock_certlock();
         SSL_set_fd(ssl, client);
 
         if (SSL_accept(ssl) <= 0) {

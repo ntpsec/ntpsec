@@ -534,6 +534,8 @@ SIGQUIT, SIGINT, and SIGTERM will cause ntpd to clean up and exit.
 
 SIGHUP will reopen the log file if it has changed and
 check for a new leapseconds file if one was specified.
+If the NTS server is enabled, it will reload the
+certificate file if it has changed.
 
 On most systems, you can send SIGHUP to +ntpd+ with
 -----

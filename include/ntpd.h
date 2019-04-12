@@ -209,6 +209,9 @@ extern void record_ref_stats(
 
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 
+/* NTS */
+extern	void	check_cert_file	(void);
+
 /* packetstamp.c */
 extern void	enable_packetstamps(int, sockaddr_u *);
 extern l_fp	fetch_packetstamp(struct msghdr *);

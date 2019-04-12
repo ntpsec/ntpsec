@@ -18,6 +18,7 @@
 
 
 bool nts_load_certificate(SSL_CTX *ctx);
+void nts_reload_certificate(SSL_CTX *ctx);
 bool nts_load_ciphers(SSL_CTX *ctx);
 bool nts_load_versions(SSL_CTX *ctx);
 

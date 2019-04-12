@@ -16,6 +16,10 @@
 
 #include "config.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <arpa/inet.h>
 #include <openssl/err.h>
 
@@ -174,6 +178,25 @@ bool nts_load_ciphers(SSL_CTX *ctx) {
 }
 
 
+static struct stat certfile_stat;
+
+void nts_reload_certificate(SSL_CTX *ctx) {
+    struct stat temp_stat;
+    const char *cert = NTS_CERT_FILE;
+
+    if (NULL != ntsconfig.cert)
+       cert = ntsconfig.cert;
+
+    stat(cert, &temp_stat);
+
+    if ((certfile_stat.st_mtime == temp_stat.st_mtime)
+            && (certfile_stat.st_ctime == temp_stat.st_ctime))
+        return;  /* avoid clutter in log file */
+
+    nts_load_certificate(ctx);
+
+}
+
 bool nts_load_certificate(SSL_CTX *ctx) {
     const char *cert = NTS_CERT_FILE;
     const char *key = NTS_KEY_FILE;
@@ -182,6 +205,10 @@ bool nts_load_certificate(SSL_CTX *ctx) {
        cert = ntsconfig.cert;
     if (NULL != ntsconfig.key)
        key = ntsconfig.key;
+
+    /* for reload checking */
+    if (stat(cert, &certfile_stat))
+        return false;
 
     if (1 != SSL_CTX_use_certificate_chain_file(ctx, cert)) {
         msyslog(LOG_ERR, "NTSs: can't load certificate (chain) from %s", cert);

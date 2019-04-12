@@ -906,7 +906,7 @@ ntpdmain(
 	}
 #endif
 
-	nts_init2();		/* Before droproot */
+	nts_init2();		/* After droproot */
 
 	if (access(statsdir, W_OK) != 0) {
 	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
@@ -958,11 +958,8 @@ static void mainloop(void)
 
 			reopen_logfile();
 
-			{
-			time_t tnow;
-			time(&tnow);
-			check_leap_file(false, tnow);
-			}
+			check_leap_file(false, time(NULL));
+			check_cert_file();
 		}
 
 		/*
