@@ -1,5 +1,5 @@
 def build(ctx):
-    util = ['sht', 'digest-find', 'digest-timing', 'clocks']
+    util = ['sht', 'digest-find', 'digest-timing', 'clocks', 'backwards']
 
     for name in util:
         ctx(
