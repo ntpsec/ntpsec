@@ -2,8 +2,8 @@
 
 Annoying but necessary legalese:
 
-    By submitting patches to this project, you agree to allow them to be
-    redistributed under the project's license according to the normal
+    By submitting patches to this project you agree to allow them to be
+    redistributed under the project's license, according to the normal
     forms and usages of the open-source community.
 
 If you want to learn more about the code internals, consult the
