@@ -44,6 +44,13 @@ is because its certificate is not issued by a trusted root.
 
 Restart ntpd, and skip to <<Verification>>, below.
 
+=== Pending caveats
+
+Do not use IP addresses in _server_ lines with _nts_, even
+if you use _noval_ .  You can use _/etc/hosts_ to name
+such IP addresses.
+
+
 === ntp.conf (you are a server)
 Being an NTS server requires a well-formed SSL cert.  The
 easiest way to do this is if your server has a FQDN, using
@@ -72,6 +79,7 @@ nts cert /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
 ```
 
 Restart your server, and skip to <<Verification>>, below.
+
 
 === Verification
 
