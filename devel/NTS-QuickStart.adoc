@@ -9,9 +9,9 @@ way to setup, nor the more conformant, but should be enough
 to get you up.
 
 === Get git head
-This has been tested with NTPsec_1_1_3-437-g2bb7f8fb9 .
-As the NTS implementation continues, this
-may no longer work.  YMMV.
+This has been tested with NTPsec_1_1_3-482-g09896eff3 .
+NTS support should be stable, and the configuration commands
+should not change; internals and the output of `ntpq` may.
 
 === Ensure you have the right dependencies
 You need a very recent version of Openssl, 1.1.1a is known
@@ -23,7 +23,7 @@ distributions.  You can check with the following:
 
 Append the keyword `nts` to the end of your `server`
 lines.  Do these only for servers that speak NTS.  As of
-late March, the following should work:
+late March 2019, the following should work:
 
 ```
 server ntpmon.dcs1.biz nts
@@ -106,7 +106,7 @@ Check your log file.  You should see lines like this:
 2019-03-22T08:06:34 ntpd[12915]: NTSc: NTS-KE req to pi3.rellim.com took 0.882 sec, OK
 ```
 
-This is because of the 
+This is because of the
 
 `server pi3.rellim.com nts`
 
