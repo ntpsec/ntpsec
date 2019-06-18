@@ -38,6 +38,7 @@ there are sections describing the following supported functionality and
 the options used to control it:
 
 * Authentication Support
+* NTS Support
 * Monitoring Support
 * Access Control Support
 * Automatic NTP Configuration Options
@@ -81,6 +82,10 @@ include::../includes/assoc-auxcommands.adoc[]
 === Authentication Commands
 
 include::../includes/auth-commands.adoc[]
+
+=== NTS Commands
+
+include::../includes/nts-commands.adoc[]
 
 [[monit]]
 == Monitoring Support
