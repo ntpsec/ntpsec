@@ -96,6 +96,8 @@ link:sitemap.html[Site Map] page.
 link:quick.html[Quick start for client configurations]::
   Basic configuration for 99% of client installations.  Introduces
   concepts used later in the Handbook.
+link:NTS-QuickStart.html[Quick start for NTS]::
+  A short guide for setting up for NTS.
 link:assoc.html[Association Management]::
   Describes how to configure servers and peers and manage the various
   options. Includes automatic server discovery schemes.
