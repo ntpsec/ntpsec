@@ -1,4 +1,15 @@
-== Quick way to get NTS working
+= Quick way to get NTS working
+include::html.include[]
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/beaver.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+For putting out compiler fires.
+
+|==============================
+
 
 This is a recipe, useful during the development and
 stabilization phase of NTS landing, to get your NTPsec
@@ -8,18 +19,18 @@ This will get dated quite fast, and is neither the best
 way to setup, nor the more conformant, but should be enough
 to get you up.
 
-=== Get git head
+== Get git head
 This has been tested with NTPsec_1_1_3-482-g09896eff3 .
 NTS support should be stable, and the configuration commands
 should not change; internals and the output of `ntpq` may.
 
-=== Ensure you have the right dependencies
+== Ensure you have the right dependencies
 You need a very recent version of Openssl, 1.1.1a is known
 to work.  Earlier versons may work, depending on
 distributions.  You can check with the following:
 `openssl version`
 
-=== ntp.conf (you are a client)
+== ntp.conf (you are a client)
 
 Append the keyword `nts` to the end of your `server`
 lines.  Do these only for servers that speak NTS.  As of
@@ -44,14 +55,14 @@ is because its certificate is not issued by a trusted root.
 
 Restart ntpd, and skip to <<Verification>>, below.
 
-=== Pending caveats
+== Pending caveats
 
 Do not use IP addresses in _server_ lines with _nts_, even
 if you use _noval_ .  You can use _/etc/hosts_ to name
 such IP addresses.
 
 
-=== ntp.conf (you are a server)
+== ntp.conf (you are a server)
 Being an NTS server requires a well-formed SSL cert.  The
 easiest way to do this is if your server has a FQDN, using
 LetsEncrypt.  Please see the Certbot client site
@@ -81,7 +92,7 @@ nts cert /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
 Restart your server, and skip to <<Verification>>, below.
 
 
-=== Verification
+== Verification
 
 Check your log file.  You should see lines like this:
 
@@ -115,7 +126,7 @@ The logging prefix *NTSs* is for the NTS Server component, eg
 initializing your keys.  The *NTSc* component is for the NTS Client
 part, where you are talking to *other* NTS servers.
 
-==== Check with ntpq
+=== Check with ntpq
 
 The output of ntpq will be slightly different when NTS is in use,
 note the `t` column.  Example:
@@ -133,11 +144,12 @@ xSHM(0)                                  .GPS.            0 l   19   64  377   0
  2407:8000:8001:80::8                    .DNS.           16 u    - 1024    0   0.0000   0.0000   0.0005
 -navobs1.wustl.edu                       .GPS.            1 u  105   64  356 221.5282  -2.4354   0.0293
 ```
+=======================================================================================================
 
 The `t` column shows how many cookies your NTS client is holding for the
 appropriate servers.  The number should be close to 8 (the default).
 
-==== Check with ntp variables
+=== Check with ntp variables
 
 Try `ntpq -c nts` . This will show various counters related
 to NTS.  This feature is under active development, so the
@@ -166,3 +178,6 @@ NTS KE serves_bad:           56
 === Thanks for the handholding
 Much thanks to Hal Murray and Gary Miller, for most of the
 stuff above, and talking me through this.
+
+include::includes/footer.adoc[]
+
