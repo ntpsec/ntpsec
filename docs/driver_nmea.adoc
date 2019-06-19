@@ -144,6 +144,11 @@ purposes should be configured to transmit the relevant data only,
 e.g. one +$GPRMC+ or +$GPZDA+ per second; this will slightly reduce
 jitter by reducing variation in transmission times.
 
+For backwards compatibility with NTP Classic, some bits of the mode
+byte can be used to set the device baud rate. This is deliberately
+left undocumented here, as new configurations should use the "baud"
+keyword. In future releases the compatibiility shim may be removed.
+
 == Monitor Data
 
 The last GPS sentence that is accepted or rejected is written to the
