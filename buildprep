@@ -253,7 +253,7 @@ ntpviz () {
 		echo "# Looks like a generic Debian system"
 		$install gnuplot
 	    fi
-	    $install fonts-liberation
+	    $install fonts-liberation python-psutil
 	    ;;
 	emerge)
 	    $install sci-visualization/gnuplot
