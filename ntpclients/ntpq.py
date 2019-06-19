@@ -1647,7 +1647,7 @@ if __name__ == '__main__':
             cast = ntp.util.safeargcast(val, int, errmsg, usage)
             session.debug = interpreter.debug = cast
         elif switch in ("-h", "--help"):
-            print(usage)
+            sys.stderr.write(usage)
             raise SystemExit(0)
         elif switch in ("-n", "--numeric"):
             interpreter.showhostnames = False
@@ -1656,7 +1656,7 @@ if __name__ == '__main__':
         elif switch in ("-k", "--keyfile"):
             keyfile = val
         elif switch in ("-V", "--version"):
-            print("ntpq %s" % version)
+            sys.stdout.write("ntpq %s\n" % version)
             raise SystemExit(0)
         elif switch in ("-w", "--wide"):
             interpreter.wideremote = True
@@ -1732,5 +1732,5 @@ if __name__ == '__main__':
     except ntp.packet.ControlException as e:
         interpreter.warn(e.message)
     except IOError:
-        print("Bailing out...")
+        sys.stderr.write("Bailing out...\n")
 # end
