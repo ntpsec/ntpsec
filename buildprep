@@ -9,6 +9,7 @@
 DRYRUN="no"
 NTPVIZ="no"
 DOC="no"
+PYVERS=""
 
 OS=`uname -s`
 
@@ -48,6 +49,16 @@ EOF
 		;;
 	esac
 done
+
+# Some Python 2 packages (e.g python-devel, python-psutils) conventionally have
+# Python 3 equivalents with a python3 prefix.  Compute the correct value for the
+# infix based on system Python.  This eill start to be significant after Python 2
+# EOLs at the beginning of 2020.
+PYVERS=`python --version 2>&1 | sed -n -e '/Python \([0-9]\).*/s//\1/p'`
+if [ "$PYVERS" = "2" ]
+then
+    PYVERS=""
+fi
 
 cat <<EOF
 # Preparing your system for ntpsec source build...
@@ -154,7 +165,7 @@ daemon () {
     case $installer in
 	apk)
 	    $install build-base python                  # basic tools
-	    $install bison python-dev linux-headers
+	    $install bison python${PYVERS}-dev linux-headers
 	    $install openssl-dev libcap-dev libseccomp-dev
 	    # probably needs more, but this builds
 	    # can't find timepps.h: gpsd and chrony have their own ??
@@ -208,7 +219,7 @@ daemon () {
 	    $install libcap-devel libseccomp-devel 	# build
 	    $install openssl-devel			# build
 	    $install libcap2 openssl-libs
-	    $install python-curses
+	    $install python${PYVERS}-curses
 	    ;;
 	zypper)
 	    $install -t pattern devel_basis		# Build environment
@@ -219,7 +230,7 @@ daemon () {
 	    $install pps-tools-devel			# build
 	    $install pps-tools
 	    $install libcap2 openssl-libs
-	    $install python-curses
+	    $install python${PYVERS}-curses
 	    ;;
     esac
 }
@@ -228,10 +239,10 @@ tools () {
     # Prerequisites for the client Python tools: python extensions
     case $installer in
 	apt)
-	    $install python-dev
+	    $install python${PYVERS}-dev
 	    ;;
 	yum|dnf|yast|zypper)
-	    $install python-devel
+	    $install python${PYVERS}-devel
 	    ;;
     esac
 }
@@ -253,7 +264,7 @@ ntpviz () {
 		echo "# Looks like a generic Debian system"
 		$install gnuplot
 	    fi
-	    $install fonts-liberation python-psutil
+	    $install fonts-liberation python${PYVERS}-psutil
 	    ;;
 	emerge)
 	    $install sci-visualization/gnuplot
