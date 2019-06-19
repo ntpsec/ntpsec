@@ -375,7 +375,6 @@ trimble_start (
 	    default:
 	        msyslog(LOG_NOTICE, "REFCLOCK: %s mode unknown",
 			refclock_name(peer));
-		break;
 		close(fd);
 		free(up);
 		return false;
