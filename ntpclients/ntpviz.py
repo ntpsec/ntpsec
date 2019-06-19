@@ -1593,7 +1593,10 @@ Python by ESR, concept and gnuplot code by Dan Drown.
             import psutil
             # set ionice() to idle
             p = psutil.Process(os.getpid())
-            p.ionice(psutil.IOPRIO_CLASS_IDLE)
+            try:
+                p.ionice(psutil.IOPRIO_CLASS_IDLE)
+            except AttributeError:
+                sys.stderr.write("ntpviz: INFO: ionice is not available\n")
 
         except ImportError:
             if 0 < args.debug_level:
