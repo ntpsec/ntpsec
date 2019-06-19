@@ -187,7 +187,8 @@ void nts_reload_certificate(SSL_CTX *ctx) {
     if (NULL != ntsconfig.cert)
        cert = ntsconfig.cert;
 
-    stat(cert, &temp_stat);
+    if (0 != stat(cert, &temp_stat))
+      return;
 
     if ((certfile_stat.st_mtime == temp_stat.st_mtime)
             && (certfile_stat.st_ctime == temp_stat.st_ctime))
@@ -207,7 +208,7 @@ bool nts_load_certificate(SSL_CTX *ctx) {
        key = ntsconfig.key;
 
     /* for reload checking */
-    if (stat(cert, &certfile_stat))
+    if (0 != stat(cert, &certfile_stat))
         return false;
 
     if (1 != SSL_CTX_use_certificate_chain_file(ctx, cert)) {
