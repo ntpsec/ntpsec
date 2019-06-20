@@ -11,30 +11,18 @@ For putting out compiler fires.
 |==============================
 
 
-This is a recipe, useful during the development and
-stabilization phase of NTS landing, to get your NTPsec
-instance talking with other instances.
+NTS is a method for using TLS/SSL to authenticate NTP traffic on the net.
+That means that bad guys can't forge packets that will give your
+system bogus time.
 
-This will get dated quite fast, and is neither the best
-way to setup, nor the more conformant, but should be enough
-to get you up.
-
-== Get git head
-This has been tested with NTPsec_1_1_3-482-g09896eff3 .
-NTS support should be stable, and the configuration commands
-should not change; internals and the output of `ntpq` may.
-
-== Ensure you have the right dependencies
-You need a very recent version of Openssl, 1.1.1a is known
-to work.  Earlier versons may work, depending on
-distributions.  You can check with the following:
-`openssl version`
+The RFC hasn't been published yet (June 2019).  Nothing has changed
+recently, but there may be minor adjustments when it is finalized.
 
 == ntp.conf (you are a client)
 
 Append the keyword `nts` to the end of your `server`
 lines.  Do these only for servers that speak NTS.  As of
-late March 2019, the following should work:
+June 2019, the following should work:
 
 ------------------------------------------------------------
 server ntpmon.dcs1.biz nts
@@ -42,31 +30,37 @@ server pi3.rellim.com nts
 server kong.rellim.com nts
 server ntp1.glypnod.com nts
 server ntp2.glypnod.com nts
-server zoo.weinigel.se:4447 nts
-server nts-test.strangled.net:443 nts
-server nts3-e.ostfalia.de:443 nts noval
 ------------------------------------------------------------
 
-Note that these are development machines, so uptime is
-poor.   The last three are servers not running NTPsec, which
-were available for interop testing during the March 2019
-IETF Hackathon.  Note the _noval_ for the last server, this
-is because its certificate is not issued by a trusted root.
+These are development machines, so uptime may be gaps in availability.
 
-Restart ntpd, and skip to <<Verification>>, below.
+Note that you must use the same host name that was used to create
+the server's certificate.  IP Addresses will not work.
 
-=== Pending caveats
+This assumes that the server is using a certificate covered by
+your OS/distro's root server collection.
 
-Do not use IP addresses in _server_ lines with _nts_, even
-if you use _noval_ .  You can use _/etc/hosts_ to name
-such IP addresses.
+Restart `ntpd`, and skip to <<Verification>>, below.
 
 
 == ntp.conf (you are a server)
-Being an NTS server requires a well-formed SSL cert.  The
-easiest way to do this is if your server has a FQDN, using
-LetsEncrypt.  Please see the Certbot client site
+
+Being an NTS server requires a well-formed SSL certificate.  The
+easiest way to do this is to use LetsEncrypt.  It needs a FQDN.
+Please see the Certbot client site
 [[https://certbot.eff.org/]] for instructions.
+
+The following worked on Fedora:
+
+------------------------------------------------------------
+]$ sudo dnf install certbot
+  
+# Install
+]$ sudo certbot certonly --standalone
+
+# Renew
+]$ sudo certbot renew
+------------------------------------------------------------
 
 If you already have an SSL Cert for your server, and you are
 serving time using the same FQDN, you can reuse that Cert.
@@ -83,11 +77,24 @@ Locate the following two files:
 Then add the lines below to your ntp.conf, replacing
 with your pathnames.
 
-Example, for my server:
+Example, using LetsEncrypt:
 
 ------------------------------------------------------------
 nts key /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
 nts cert /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
+------------------------------------------------------------
+
+Note that `ntpd` must be able to read both files and you want to
+make sure that the bad guys can't read your private key.  It may
+be simpler to copy those files over to `/etc/ntp/` and adjust
+their owner and mode so `ntpd` running as user `ntp` can read them.
+
+You may need to tell your system where to store the keys used
+to encrypt cookies.  The default is `/var/lib/ntp/nts-keys`.
+Some distros use `/var/db/` rather than `/var/lib/`.
+
+------------------------------------------------------------
+nts cookie /var/lib/ntp/nts-keys
 ------------------------------------------------------------
 
 Restart your server, and skip to <<Verification>>, below.
@@ -95,17 +102,11 @@ Restart your server, and skip to <<Verification>>, below.
 
 == Verification
 
-Check your log file.  You should see lines like this:
+Check your log file.
+
+For each client, you should see lines like this:
 
 ------------------------------------------------------------
-2019-03-22T08:06:32 ntpd[12915]: NTSs: starting NTS-KE server listening on port 123
-2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded certificate (chain) from /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
-2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded private key from /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
-2019-03-22T08:06:32 ntpd[12915]: NTSs: Private Key OK
-2019-03-22T08:06:32 ntpd[12915]: NTSs: OpenSSL security level is 2
-2019-03-22T08:06:32 ntpd[12915]: NTSs: listen4 worked
-2019-03-22T08:06:32 ntpd[12915]: NTSs: listen6 worked
-2019-03-22T08:06:32 ntpd[12915]: NTSc: Using system default root certificates.
 2019-03-22T08:06:33 ntpd[12915]: DNS: dns_probe: pi3.rellim.com, cast_flags:1, flags:21801
 2019-03-22T08:06:33 ntpd[12915]: NTSc: DNS lookup of pi3.rellim.com took 0.003 sec
 2019-03-22T08:06:33 ntpd[12915]: NTSc: nts_probe connecting to pi3.rellim.com:ntp => 204.17.205.23:123
@@ -118,11 +119,38 @@ Check your log file.  You should see lines like this:
 2019-03-22T08:06:34 ntpd[12915]: NTSc: NTS-KE req to pi3.rellim.com took 0.882 sec, OK
 ------------------------------------------------------------
 
-This is because of the
+For initializing a server, you should see lines like this:
 
-`server pi3.rellim.com nts`
+------------------------------------------------------------
+2019-03-22T08:06:32 ntpd[12915]: NTSs: starting NTS-KE server listening on port 123
+2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded certificate (chain) from /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
+2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded private key from /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
+2019-03-22T08:06:32 ntpd[12915]: NTSs: Private Key OK
+2019-03-22T08:06:32 ntpd[12915]: NTSs: OpenSSL security level is 2
+2019-03-22T08:06:32 ntpd[12915]: NTSs: listen4 worked
+2019-03-22T08:06:32 ntpd[12915]: NTSs: listen6 worked
+2019-03-22T08:06:32 ntpd[12915]: NTSc: Using system default root certificates.
+------------------------------------------------------------
 
-line in ntp.conf.  You should see similar stanzas for each server.
+On a server, each time a client uses TLS to setup cookies,
+you should see lines like this:
+
+------------------------------------------------------------
+10 Jun 04:50:39 ntpd[823]: NTSs: TCP accept-ed from 64.139.1.69:61561
+10 Jun 04:50:39 ntpd[823]: NTSs: Using TLSv1.3, TLS_AES_256_GCM_SHA384 (256)
+10 Jun 04:50:40 ntpd[823]: NTSs: Read 16, wrote 880 bytes.  AEAD=15
+10 Jun 04:50:40 ntpd[823]: NTSs: NTS-KE server took 1.569 sec
+------------------------------------------------------------
+
+Servers on the big bad internet will get a lot of garbage connections.
+Each one will produce log lines like this:
+
+------------------------------------------------------------
+10 Jun 04:55:11 ntpd[823]: NTSs: TCP accept-ed from 70.95.39.88:49176
+10 Jun 04:55:11 ntpd[823]: NTSs: SSL accept from 70.95.39.88:49176 failed, 0.006 sec
+10 Jun 04:55:11 ntpd[823]: NTS: error:1408F10B:SSL routines:ssl3_get_record:wrong version number
+------------------------------------------------------------
+
 The logging prefix *NTSs* is for the NTS Server component, eg
 initializing your keys.  The *NTSc* component is for the NTS Client
 part, where you are talking to *other* NTS servers.
@@ -146,9 +174,19 @@ xSHM(0)                                  .GPS.            0 l   19   64  377   0
 ------------------------------------------------------------
 
 The `t` column shows how many cookies your NTS client is holding for the
-appropriate servers.  The number should be close to 8 (the default).
+appropriate servers.  The number should be 8. Lower numbers indicate dropped
+packets.  (7 could be a packet in flight.)
 
-=== Check with ntp variables
+The RFC calls for the server to rotate the private key used to
+encrypt cookies every 24 hours.  The server also saves the previous
+key so old cookies will work for at least 24 hours.  24 hours and 8 cookies
+will work for a polling interval of up to 3 hours.  That's much longer
+than the default max of 1024 seconds.  For testing, the server currently
+rotates keys every hour so cookies won't work if the polling interval
+gets over 450 seconds.  The largest power of 2 that will work is 256, or
+8 in the `ntpq -p` `poll` column.
+
+=== Check ntp variables
 
 Try `ntpq -c nts` . This will show various counters related
 to NTS.  This feature is under active development, so the
@@ -172,10 +210,6 @@ NTS KE probes_bad:           0
 NTS KE serves:               75
 NTS KE serves_bad:           56
 ------------------------------------------------------------
-
-=== Thanks for the handholding
-Much thanks to Hal Murray and Gary Miller, for most of the
-stuff above, and talking me through this.
 
 include::includes/footer.adoc[]
 
