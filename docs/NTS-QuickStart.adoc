@@ -26,8 +26,7 @@ June 2019, the following should work:
 
 ------------------------------------------------------------
 server ntpmon.dcs1.biz nts
-server pi3.rellim.com nts
-server kong.rellim.com nts
+server pi4.rellim.com nts
 server ntp1.glypnod.com nts
 server ntp2.glypnod.com nts
 ------------------------------------------------------------
