@@ -9,6 +9,8 @@
 #
 # *Do* test-build before running it.
 
+set -x
+
 if [ `basename $PWD` != devel ]
 then
     echo "You are doomed to fail."
@@ -23,6 +25,8 @@ then
 else
     V=`cat ../VERSION`
 fi
+
+echo version is $V
 
 # Build the tarball
 rm -fr .tmp

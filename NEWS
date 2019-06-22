@@ -10,12 +10,23 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository head ==
+== 2019-06-21: 1.1.4 ==
+
+NTS is now implemented.  See .../devel/nts.adoc
+https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp
+
+We thank Cisco for sponsoring the NTS development.
+
+Lots of fixes and cleanups to PPS, both implementation and documentation.
 
 Pthread support is now required.  --disable-dns-lookup is gone.
 
 NIST lockclock mode is now a runtime option set by the (previously unused)
 flag1 mode bit of the local-clock driver.
+
+As always, lots of minor fixups and cleanups everywhere.  See the git log.
+
+Today marks the summer solstice in the Northern Hemisphere.
 
 == 2019-01-13: 1.1.3 ==
 
