@@ -29,6 +29,7 @@ server ntpmon.dcs1.biz nts
 server pi4.rellim.com nts
 server ntp1.glypnod.com nts
 server ntp2.glypnod.com nts
+server time.cloudflare.com:1234 nts
 ------------------------------------------------------------
 
 These are development machines, so uptime may be gaps in availability.
