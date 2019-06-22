@@ -44,7 +44,7 @@ configurations utilize multiple redundant servers and diverse network
 paths in order to achieve high accuracy and reliability.
 
 For background on the problems NTP solves, see
-http://www.catb.org/gpsd/time-service-intro.html[Introduction to
+https://gpsd.io/time-service-intro.html[Introduction to
 Time Service].  This white paper discusses time source types, relative
 accuracy, relative cost, and how those figures of merit have changed
 in recent decades.

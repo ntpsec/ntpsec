@@ -82,7 +82,7 @@ discarded. This check is disabled when _flag1_ is set to 1.
 
 == GPSD
 
-http://www.catb.org/gpsd/[_GPSD_] knows how to talk to many GPS devices.
+https://gpsd.io/[_GPSD_] knows how to talk to many GPS devices.
 It can work with _ntpd_ through the SHM driver.
 
 The _GPSD_ man page suggests setting minpoll and maxpoll to 4. That was

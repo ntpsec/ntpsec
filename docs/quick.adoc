@@ -228,7 +228,7 @@ accurate time, provided it has link:ntpspeak.html[PPS] capability.
 want check servers from the pool.)
 
 The easiest way to arrange this is by installing
-http://catb.org/gpsd[GPSD] to watch the GPS, and configuring your
+https://gpsd.io[GPSD] to watch the GPS, and configuring your
 +ntpd+ to accept time from it.  It is also possible to do this with
 native +ntpd+ drivers (nmea, trimble, oncore), though these are less
 flexible and a bit more difficult to configure.
@@ -246,7 +246,7 @@ to later.  Your PPS is likely to be more accurate than the
 in-band stream.
 
 For details on setting up the GPSD end, see the
-http://catb.org/gpsd/gpsd-time-service-howto.html[GPSD Time Service
+https://gpsd.io/gpsd-time-service-howto.html[GPSD Time Service
 HOWTO].
 
 If you are looking to set up a Stratum 1 timeserver, you may find

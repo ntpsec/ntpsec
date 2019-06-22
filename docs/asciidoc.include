@@ -8,7 +8,7 @@
 :project-security-list: security@ntpsec.org
 :project-bug-list: bugs@ntpsec.org
 :millshome: http://www.eecis.udel.edu/~mills/
-:GPSD: http://www.catb.org/gpsd/
+:GPSD: https://gpsd.io/
 :ntpconf: ntp.conf
 // Annoyingly, these have to be *manually* synchronized with the headers
 // on their manual pages - asciidoc doesn't expand attributes in header lines.

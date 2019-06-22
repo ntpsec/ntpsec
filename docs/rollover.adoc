@@ -186,7 +186,7 @@ inaccurate; consumer-grade hardware often has jitter of over a tenth
 of a second (100ms). On the other hand, carefully designed GPSes
 easily deliver 1ms accuracy, and some do 1000 times better than that. For
 a more detailed discussion of accuracy budgets see the
-http://www.catb.org/gpsd/time-service-intro.html[Introduction to Time
+https://gpsd.io/time-service-intro.html[Introduction to Time
 Service].
 
 Raw GPS time is not leap second corrected, but the satellite messages
@@ -246,7 +246,7 @@ reporting protocols are an awful mess.  The closest thing to a
 standard is NMEA0183, originally designed for a different purpose; it
 is poorly specified and has no standard device-control functions at
 all, let alone any for querying base and pivot dates.
-http://www.catb.org/gpsd/[GPSD], the ubiquitous open-source GPS
+https://gpsd.io/[GPSD], the ubiquitous open-source GPS
 manager daemon that shares some developers with NTPsec, works around a
 lot of the general messiness, but can't solve this problem
 because the device capabilities to address it are simply absent.

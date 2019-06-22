@@ -16,7 +16,7 @@ become increasingly popular for UN*Xish platforms. _GPSD_ can manage
 several devices in parallel, aggregate information, and acts as a data
 hub for client applications. _GPSD_ can also auto-detect and handle PPS
 hardware signals on serial ports. Have a look at
-http://www.catb.org/gpsd/[the _GPSD_ project page].
+https://gpsd.io/[the _GPSD_ project page].
 
 *It is important to understand that this driver works best using a GPS
 device with PPS support.*
