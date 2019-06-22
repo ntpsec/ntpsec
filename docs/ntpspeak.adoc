@@ -176,7 +176,7 @@ include::html.include[]
    Mode 6 is a control protocol used to get various kinds of
    status information from a running ntpd and configure it on
    the fly.  So-called from the value 6 (0110) in the packet mode
-   field.  It is described in detail mode6.html[here].
+   field.  It is described in detail link:mode6.html[here].
 
 [[NIST]] NIST::
    https://www.nist.gov[National Institute of Standards and
