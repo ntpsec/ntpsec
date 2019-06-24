@@ -28,7 +28,7 @@ The options are as follows:
 
 +enable+::
   Enable NTS-KE server.
-  When enabled, _cert_ and _key_ are required.
+  When enabled, +cert+ and +key+ are required.
 
 +disable+::
   Disable NTS-KE server.
