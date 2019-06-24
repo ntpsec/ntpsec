@@ -116,7 +116,7 @@ The following options of the +server+ command configure NTS (as a client).
   The same +aead+ algorithms are also used to encrypt cookies.
   The default is AES_SIV_CMAC_256.  There is no config file option to
   change it, but you can change it by editing the saved cookie key
-  file, probably +/var/lib/ntp/nts-keys+.  Adjust the _L:_ slot to be
+  file, probably _/var/lib/ntp/nts-keys_.  Adjust the _L:_ slot to be
   48 or 64 and adjust the _I:_ slots to have the right number of bytes.
   Then restart the server.  (All old cookies held by clients will be
   rejected so their next 8 NTP requests will be ignored.  They should
