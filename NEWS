@@ -10,6 +10,8 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+== Repository head ==
+
 == 2019-06-21: 1.1.4 ==
 
 NTS is now implemented.  See .../devel/nts.adoc
