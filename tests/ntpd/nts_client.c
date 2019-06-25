@@ -260,8 +260,16 @@ TEST(nts_client, nts_client_process_response_core) {
 }
 
 /* Hacks to keep linker happy */
-void dns_take_server(struct peer *a, sockaddr_u *b) { return; }
-void dns_take_status(struct peer *a, DNS_Status b) { return; }
+void dns_take_server(struct peer *a, sockaddr_u *b) {
+  UNUSED_ARG(a);
+  UNUSED_ARG(b);
+  return;
+}
+void dns_take_status(struct peer *a, DNS_Status b) {
+  UNUSED_ARG(a);
+  UNUSED_ARG(b);
+  return;
+}
 
 TEST_GROUP_RUNNER(nts_client) {
   RUN_TEST_CASE(nts_client, nts_client_send_request_core);
