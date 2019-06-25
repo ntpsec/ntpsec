@@ -148,88 +148,100 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
     bool ok;
 
     type = ex_next_record(&buf, &length); /* length excludes header */
-    if (length&3 || length > buf.left || length < 0)
+    if (length&3 || length > buf.left || length < 0) {
       return false;
+	}
     if (NTS_CRITICAL & type) {
       critical = true;
       type &= ~NTS_CRITICAL;
     }
     switch (type) {
-      case Unique_Identifier:
-	if (length > NTS_UID_MAX_LENGTH)
-	  return false;
-        ntspacket->uidlen = length;
-        next_bytes(&buf, ntspacket->UID, length);
-	break;
-      case NTS_Cookie:
-        if (sawcookie)
-          return false;			/* second cookie */
-        ok = nts_unpack_cookie(buf.next, length,
-            &aead,
-	    ntspacket->c2s, ntspacket->s2c, &ntspacket->keylen);
-	if (!ok)
-	  return false;
-        buf.next += length;
-	buf.left -= length;
-	sawcookie = true;
-	ntspacket->needed++;
-	ntspacket->aead = aead;
-	break;
-      case NTS_Cookie_Placeholder:
-        /* doesn't check length */
-        ntspacket->needed++;
-        buf.next += length;
-	buf.left -= length;
-        break;
-      case NTS_AEEF:
-        if (!sawcookie)
-	  return false;			/* no cookie yet, no c2s */
-        if (length != NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH)
-	  return false;
-        /* Additional data is up to this exten. */
-	/* backup over header */
-        adlength = buf.next-NTP_EX_HDR_LNG-pkt;
-        noncelen = next_uint16(&buf);
-        cmaclen = next_uint16(&buf);
-	if (noncelen & 3)
-          return false;			/* would require padding */
-	if (CMAC_LENGTH != cmaclen)
-          return false;
-        nonce = buf.next;
-	cmac = nonce+NONCE_LENGTH;
-	outlen = 6;
-        ok = AES_SIV_Decrypt(wire_ctx,
-            NULL, &outlen,
-            ntspacket->c2s, ntspacket->keylen,
-            nonce, noncelen,
-            cmac, CMAC_LENGTH,
-            pkt, adlength);
-	if (!ok)
-	  return false;
-	if (0 != outlen)
-	  return false;
-        /* we already used 2 length slots way above*/
-        length -= (NTP_EX_U16_LNG+NTP_EX_U16_LNG);
-        buf.next += length;
-	buf.left -= length;
-        if (0 != buf.left)
-	  return false;		/* Reject extens after AEEF block */
-        sawAEEF = true;
-        break;
-      default:
-        /* Non NTS extensions on requests at server.
-         * Call out when we get some that we want.
-         * Until then, it's probably a bug. */
-        if (critical)
-          return false;
-        buf.next += length;
-	buf.left -= length;
+    case Unique_Identifier:
+      if (length > NTS_UID_MAX_LENGTH) {
         return false;
+	  }
+      ntspacket->uidlen = length;
+      next_bytes(&buf, ntspacket->UID, length);
+      break;
+    case NTS_Cookie:
+      if (sawcookie) {
+        return false; /* second cookie */
+	  }
+      ok = nts_unpack_cookie(buf.next, length, &aead, ntspacket->c2s,
+                             ntspacket->s2c, &ntspacket->keylen);
+      if (!ok) {
+        return false;
+	  }
+      buf.next += length;
+      buf.left -= length;
+      sawcookie = true;
+      ntspacket->needed++;
+      ntspacket->aead = aead;
+      break;
+    case NTS_Cookie_Placeholder:
+      /* doesn't check length */
+      ntspacket->needed++;
+      buf.next += length;
+      buf.left -= length;
+      break;
+    case NTS_AEEF:
+      if (!sawcookie) {
+        return false; /* no cookie yet, no c2s */
+	  }
+      if (length != NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH) {
+        return false;
+	  }
+      /* Additional data is up to this exten. */
+      /* backup over header */
+      adlength = buf.next-NTP_EX_HDR_LNG-pkt;
+      noncelen = next_uint16(&buf);
+      cmaclen = next_uint16(&buf);
+      if (noncelen & 3) {
+        return false; /* would require padding */
+	  }
+      if (CMAC_LENGTH != cmaclen) {
+        return false;
+	  }
+      nonce = buf.next;
+      cmac = nonce+NONCE_LENGTH;
+      outlen = 6;
+      ok = AES_SIV_Decrypt(wire_ctx,
+                           NULL, &outlen,
+                           ntspacket->c2s, ntspacket->keylen,
+                           nonce, noncelen,
+                           cmac, CMAC_LENGTH,
+                           pkt, adlength);
+      if (!ok) {
+        return false;
+	  }
+      if (0 != outlen) {
+        return false;
+	  }
+      /* we already used 2 length slots way above*/
+      length -= (NTP_EX_U16_LNG+NTP_EX_U16_LNG);
+      buf.next += length;
+      buf.left -= length;
+      if (0 != buf.left) {
+        return false; /* Reject extens after AEEF block */
+	  }
+      sawAEEF = true;
+      break;
+    default:
+      /* Non NTS extensions on requests at server.
+       * Call out when we get some that we want.
+       * Until then, it's probably a bug. */
+      if (critical) {
+        return false;
+	  }
+      buf.next += length;
+      buf.left -= length;
+      return false;
     }
   }
 
-  if (!sawAEEF)
+  if (!sawAEEF) {
     return false;
+  }
 //  printf("ESRx: %d, %d, %d\n",
 //      lng-LEN_PKT_NOMAC, ntspacket->needed, ntspacket->keylen);
   ntspacket->valid = true;
@@ -349,62 +361,62 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
     }
 //     printf("ECR: %d, %d, %d\n", type, length, buf.left);
     switch (type) {
-      case Unique_Identifier:
-	if (NTS_UID_LENGTH != length)
-	  return false;
-        if (0 != memcmp(buf.next, peer->nts_state.UID, NTS_UID_LENGTH))
-          return false;
-        buf.next += length;
-	buf.left -= length;
-	break;
-      case NTS_Cookie:
-        if (!sawAEEF)
-          return false;			/* reject unencrypted cookies */
-        if (NTS_MAX_COOKIES <= peer->nts_state.count)
-          return false;			/* reject extra cookies */
-        if (length != peer->nts_state.cookielen)
-          return false;			/* reject length change */
-        idx = peer->nts_state.writeIdx++;
-	memcpy((uint8_t*)&peer->nts_state.cookies[idx], buf.next, length);
-        peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
-	peer->nts_state.count++;
-        buf.next += length;
-	buf.left -= length;
-        break;
-      case NTS_AEEF:
-        adlength = buf.next-NTP_EX_HDR_LNG-pkt;  /* backup over header */
-        noncelen = next_uint16(&buf);
-        outlen = next_uint16(&buf);
-        if (noncelen&3 || outlen&3)
-          return false;                 /* else round up */
-        nonce = buf.next;
-        ciphertext = nonce+noncelen;
-        plaintext = ciphertext+CMAC_LENGTH;
-	outlen = buf.left-NONCE_LENGTH-CMAC_LENGTH;
-//      printf("ECRa: %lu, %d\n", (long unsigned)outlen, noncelen);
-        ok = AES_SIV_Decrypt(wire_ctx,
-            plaintext, &outlen,
-            peer->nts_state.s2c, peer->nts_state.keylen,
-            nonce, noncelen,
-            ciphertext, outlen+CMAC_LENGTH,
-            pkt, adlength);
-//      printf("ECRb: %d, %lu\n", ok, (long unsigned)outlen);
-        if (!ok)
-          return false;
-	/* setup to process encrypted headers */
-	buf.next += NONCE_LENGTH+CMAC_LENGTH;
-        buf.left -= NONCE_LENGTH+CMAC_LENGTH;
-	sawAEEF = true;
-        break;
-      default:
-        /* Non NTS extensions on reply from server.
-         * Call out when we get some that we want.
-         * For now, it's probably a bug. */
-        if (critical)
-          return false;
-        buf.next += length;
-	buf.left -= length;
+    case Unique_Identifier:
+      if (NTS_UID_LENGTH != length)
         return false;
+      if (0 != memcmp(buf.next, peer->nts_state.UID, NTS_UID_LENGTH))
+        return false;
+      buf.next += length;
+      buf.left -= length;
+      break;
+    case NTS_Cookie:
+      if (!sawAEEF)
+        return false;			/* reject unencrypted cookies */
+      if (NTS_MAX_COOKIES <= peer->nts_state.count)
+        return false;			/* reject extra cookies */
+      if (length != peer->nts_state.cookielen)
+        return false;			/* reject length change */
+      idx = peer->nts_state.writeIdx++;
+      memcpy((uint8_t*)&peer->nts_state.cookies[idx], buf.next, length);
+      peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
+      peer->nts_state.count++;
+      buf.next += length;
+      buf.left -= length;
+      break;
+    case NTS_AEEF:
+      adlength = buf.next-NTP_EX_HDR_LNG-pkt;  /* backup over header */
+      noncelen = next_uint16(&buf);
+      outlen = next_uint16(&buf);
+      if (noncelen&3 || outlen&3)
+        return false;                 /* else round up */
+      nonce = buf.next;
+      ciphertext = nonce+noncelen;
+      plaintext = ciphertext+CMAC_LENGTH;
+      outlen = buf.left-NONCE_LENGTH-CMAC_LENGTH;
+//      printf("ECRa: %lu, %d\n", (long unsigned)outlen, noncelen);
+      ok = AES_SIV_Decrypt(wire_ctx,
+                           plaintext, &outlen,
+                           peer->nts_state.s2c, peer->nts_state.keylen,
+                           nonce, noncelen,
+                           ciphertext, outlen+CMAC_LENGTH,
+                           pkt, adlength);
+//      printf("ECRb: %d, %lu\n", ok, (long unsigned)outlen);
+      if (!ok)
+        return false;
+      /* setup to process encrypted headers */
+      buf.next += NONCE_LENGTH+CMAC_LENGTH;
+      buf.left -= NONCE_LENGTH+CMAC_LENGTH;
+      sawAEEF = true;
+      break;
+    default:
+    /* Non NTS extensions on reply from server.
+     * Call out when we get some that we want.
+     * For now, it's probably a bug. */
+      if (critical)
+        return false;
+      buf.next += length;
+      buf.left -= length;
+      return false;
     }
   }
 

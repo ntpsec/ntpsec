@@ -93,16 +93,20 @@ def build(ctx):
         "ntpd/restrict.c",
         "ntpd/recvbuff.c",
         "ntpd/nts.c",
+        "ntpd/nts_client.c",
+        "ntpd/nts_server.c",
+        "ntpd/nts_cookie.c",
+        "ntpd/nts_extens.c",
     ] + common_source
 
     ctx.ntp_test(
         defines=unity_config + ["TEST_NTPD=1"],
         features="c cprogram test",
-        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "../ntpd", "common"],
+        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "../ntpd", "common", "../libaes_siv"],
         install_path=None,
         source=ntpd_source,
         target="test_ntpd",
-        use="ntpd_lib libntpd_obj unity ntp "
+        use="ntpd_lib libntpd_obj unity ntp aes_siv "
             "M PTHREAD CRYPTO RT SOCKET NSL",
     )
 

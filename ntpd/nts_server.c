@@ -402,7 +402,9 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
         default:
           msyslog(LOG_ERR, "NTSs: received strange type: T=%d, C=%d, L=%d",
             type, critical, length);
-          if (critical) return false;
+          if (critical) {
+            return false;
+          }
           buf->next += length;
           buf->left -= length;
           break;

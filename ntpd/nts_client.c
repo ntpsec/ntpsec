@@ -36,6 +36,8 @@ void set_hostname(SSL *ssl, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
 bool nts_client_send_request(SSL *ssl, struct peer *peer);
 bool nts_client_process_response(SSL *ssl, struct peer *peer);
+bool nts_client_process_response_core(uint8_t *buff, int transferred, struct peer* peer);
+bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer);
 bool nts_server_lookup(char *server, sockaddr_u *addr);
 
 static SSL_CTX *client_ctx = NULL;
@@ -407,13 +409,28 @@ bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keyl
 
 bool nts_client_send_request(SSL *ssl, struct peer* peer) {
   uint8_t buff[1000];
-  char errbuf[100];
   int     used, transferred;
+  bool    success;
+
+  success = nts_client_send_request_core(buff, sizeof(buff), &used, peer);
+  if (!success) {
+    return false;
+  }
+
+  transferred = nts_ssl_write(ssl, buff, used);
+  if (used != transferred)
+    return false;
+
+  return true;
+}
+
+bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer) {
+  char errbuf[100];
   struct  BufCtl_t buf;
   uint16_t aead = NO_AEAD;
 
   buf.next = buff;
-  buf.left = sizeof(buff);
+  buf.left = buf_size;
 
   /* 4.1.2 Next Protocol, 0 for NTP */
   ke_append_record_uint16(&buf,
@@ -433,30 +450,31 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
   /* 4.1.1: End, Critical */
   ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
 
-  used = sizeof(buff)-buf.left;
-  if (used >= (int)(sizeof(buff)-10)) {
+  *used = buf_size-buf.left;
+  if (*used >= (int)(buf_size - 10)) {
     IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
     msyslog(LOG_ERR, "NTSc: write failed: %d, %ld, %s",
-        used, (long)sizeof(buff), errbuf);
+        *used, (long)buf_size, errbuf);
     return false;
   }
-
-  transferred = nts_ssl_write(ssl, buff, used);
-  if (used != transferred)
-    return false;
-
   return true;
 }
 
 bool nts_client_process_response(SSL *ssl, struct peer* peer) {
   uint8_t  buff[2048];  /* RFC 4. says SHOULD be 65K */
-  int transferred, idx;
-  struct BufCtl_t buf;
+  int transferred;
 
   transferred = nts_ssl_read(ssl, buff, sizeof(buff));
   if (0 > transferred)
     return false;
   msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);
+
+  return nts_client_process_response_core(buff, transferred, peer);
+}
+
+bool nts_client_process_response_core(uint8_t *buff, int transferred, struct peer* peer) {
+  int idx;
+  struct BufCtl_t buf;
 
   peer->nts_state.aead = NO_AEAD;
   peer->nts_state.keylen = 0;
@@ -505,7 +523,7 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
         keylength = nts_get_key_length(data);
         if (0 == keylength) {
           msyslog(LOG_ERR, "NTSc: AN-Unsupported AEAN type: %d", data);
-          return false;
+		  return false;
         }
         peer->nts_state.aead = data;
         break;
@@ -569,7 +587,9 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
       default:
         msyslog(LOG_ERR, "NTSc: received strange type: T=%d, C=%d, L=%d",
           type, critical, length);
-        if (critical) return false;
+        if (critical) {
+          return false;
+		}
         buf.next += length;
         buf.left -= length;
         break;
