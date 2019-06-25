@@ -47,6 +47,31 @@ uint64_t nts_ke_serves_bad = 0;
 uint64_t nts_ke_probes_good = 0;
 uint64_t nts_ke_probes_bad = 0;
 
+#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+static int alpn_select_cb(SSL *ssl,
+			  const unsigned char **out,
+			  unsigned char *outlen,
+			  const unsigned char *in,
+			  unsigned int inlen,
+			  void *arg)
+{
+  static const unsigned char alpn[] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
+  unsigned i;
+
+  (void)ssl;
+  (void)arg;
+
+  for (i = 0; i < inlen; i += in[i]) {
+    if (in[i] == alpn[0] && !memcmp(&in[i+1], &alpn[1], alpn[0])) {
+      *outlen = in[i];
+      *out = &in[i+1];
+      return SSL_TLSEXT_ERR_OK;
+    }
+  }
+
+  return SSL_TLSEXT_ERR_NOACK;
+}
+#endif
 
 bool nts_server_init(void) {
     bool ok = true;
@@ -66,6 +91,10 @@ bool nts_server_init(void) {
       nts_log_ssl_error();
       return false;
     }
+
+#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+    SSL_CTX_set_alpn_select_cb(server_ctx, alpn_select_cb, NULL);
+#endif
 
     SSL_CTX_set_session_cache_mode(server_ctx, SSL_SESS_CACHE_OFF);
 
