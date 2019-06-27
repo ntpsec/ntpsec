@@ -56,15 +56,24 @@ static int alpn_select_cb(SSL *ssl,
 			  void *arg)
 {
   static const unsigned char alpn[] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
-  unsigned i;
+  unsigned i, len;
 
-  (void)ssl;
-  (void)arg;
+  UNUSED_ARG(ssl);
+  UNUSED_ARG(arg);
 
-  for (i = 0; i < inlen; i += in[i]) {
-    if (in[i] == alpn[0] && !memcmp(&in[i+1], &alpn[1], alpn[0])) {
-      *outlen = in[i];
-      *out = &in[i+1];
+  for (i = 0; i < inlen; i += len) {
+    len = in[i]+1;  /* includes length byte */
+#if 0
+    char foo[256];
+    strlcpy(foo, (const char*)in+i+1, len);
+    msyslog(LOG_DEBUG, "DEBUG: alpn_select_cb:  %u, %u, %s", inlen-i, len, foo);
+#endif
+    if (len > inlen-i)
+      /* bogus arg: length overlaps end of in buffer */
+      return SSL_TLSEXT_ERR_ALERT_FATAL;
+    if (len == sizeof(alpn) && !memcmp(in+i, alpn, len)) {
+      *out = in+i;
+      *outlen = len;
       return SSL_TLSEXT_ERR_OK;
     }
   }
