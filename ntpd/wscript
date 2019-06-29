@@ -93,7 +93,7 @@ def build(ctx):
             ctx(
                 defines=["%s=1" % define],
                 features="c",
-                includes=[ctx.bldnode.parent.abspath(), "../include"],
+                includes=[ctx.bldnode.parent.abspath(), "../include", "../libjsmn"],
                 # XXX: These need to go into config.h
                 #      rather than the command line for the individual drivers
                 source="refclock_%s.c" % file,

@@ -74,8 +74,9 @@
  * Get the little JSMN library directly into our guts. Use the 'parent
  * link' feature for maximum speed.
  */
+#define JSMN_STATIC
 #define JSMN_PARENT_LINKS
-#include "../libjsmn/jsmn.c"
+#include "jsmn.h"
 
 /* =====================================================================
  * JSON parsing stuff
