@@ -2,7 +2,6 @@ def build(ctx):
 
     libntp_source = [
 	#"aes_siv.c",
-        "assert.c",
         "authkeys.c",
         "authreadkeys.c",
         "clocktime.c",
