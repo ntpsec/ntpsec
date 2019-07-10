@@ -55,7 +55,7 @@
  *   64 => 512
  */
 
-/* Max length:
+/* NTS_MAX_COOKIELEN:
  *   4 I
  *  16 N
  *  16 CMAC
@@ -64,6 +64,10 @@
  *  64 S2C    NTS_MAX_KEYLEN
  * ------
  * 168
+ *
+ * That's the max length for our cookies.
+ * Round up a bit in case another implementation uses more.
+ * #define is in include/nts.h
  */
 
 /* cookies use same AEAD algorithms as wire */
@@ -263,7 +267,7 @@ int nts_make_cookie(uint8_t *cookie,
 
   nts_cookie_make++;
 
-  INSIST(keylen < NTS_MAX_KEYLEN);
+  INSIST(keylen <= NTS_MAX_KEYLEN);
 
   /* collect plaintext
    * separate buffer avoids encrypt in place
@@ -314,7 +318,7 @@ int nts_make_cookie(uint8_t *cookie,
   }
 
   used += left;
-  INSIST(used < NTS_MAX_COOKIELEN);
+  INSIST(used <= NTS_MAX_COOKIELEN);
 
   return used;
 }
