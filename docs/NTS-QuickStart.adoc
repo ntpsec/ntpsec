@@ -24,15 +24,21 @@ Append the keyword `nts` to the end of your `server`
 lines.  Do these only for servers that speak NTS.  As of
 June 2019, the following should work:
 
+Public NTP servers supporting NTS:
+
+------------------------------------------------------------
+server time.cloudflare.com:1234 nts  # TLS1.3 only
+------------------------------------------------------------
+
+Development machines, so there may be gaps in availability:
+
 ------------------------------------------------------------
 server ntpmon.dcs1.biz nts
 server pi4.rellim.com nts
 server ntp1.glypnod.com nts
 server ntp2.glypnod.com nts
-server time.cloudflare.com:1234 nts
 ------------------------------------------------------------
 
-These are development machines, so uptime may be gaps in availability.
 
 Note that you must use the same host name that was used to create
 the server's certificate.  IP Addresses will not work.
