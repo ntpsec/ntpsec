@@ -12,14 +12,20 @@ on user-visible changes.
 
 == Repository head ==
 
+== 2019-07-10: 1.1.6 ==
+
+Fixes to code quality checks.
+
+Fixes to NTS server list.
+
+Fix to bug #600.
+
+On this day in 1913, in Death Valley, the temperature was 56.7°C,
+officially world's highest recorded temperature.
+
 == 2019-06-30: 1.1.5 ==
 
-It is HIGHLY RECOMMENDED that if you are using NTS you upgrade to this
-version.
-
 Add ALPN for the NTS server, as required by the NTP draft.
-
-Fix buffer overrun in debug compile of ALPN implementation.
 
 Revert some ntpq behavior.
 
