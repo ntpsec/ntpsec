@@ -691,12 +691,6 @@ receive(
 		}
 	}
 
-	if (peer != NULL) {
-	    	peer->received++;
-		peer->cfg.flags |= FLAG_AUTHENTIC;
-		peer->timereceived = current_time;
-	}
-
 	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
@@ -722,6 +716,9 @@ receive(
 		    maybe_log_junk(rbufp);
 		    break;
 		}
+		peer->received++;
+		peer->cfg.flags |= FLAG_AUTHENTIC;
+		peer->timereceived = current_time;
 		handle_procpkt(rbufp, peer);
 		stat_count.sys_processed++;
 		peer->processed++;

@@ -874,7 +874,7 @@ ctlpeerstatus(
 	status = p->status;
 	if (FLAG_CONFIG & p->cfg.flags)
 		status |= CTL_PST_CONFIG;
-	if (p->cfg.peerkey)
+	if ((p->cfg.peerkey) || (FLAG_NTS & p->cfg.flags))
 		status |= CTL_PST_AUTHENABLE;
 	if (FLAG_AUTHENTIC & p->cfg.flags)
 		status |= CTL_PST_AUTHENTIC;
