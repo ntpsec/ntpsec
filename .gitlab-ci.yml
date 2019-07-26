@@ -340,8 +340,8 @@ fedora-rawhide-basic:
   image: registry.fedoraproject.org/fedora:rawhide
   allow_failure: true
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure build
+    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
+    - python3 ./waf configure build
   tags:
     - gitlab-org
 
@@ -350,8 +350,8 @@ fedora-rawhide-refclocks:
   image: registry.fedoraproject.org/fedora:rawhide
   allow_failure: true
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure --refclock=all build
+    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
+    - python3 ./waf configure --refclock=all build
   tags:
     - gitlab-org
 
