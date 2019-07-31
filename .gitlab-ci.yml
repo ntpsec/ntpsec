@@ -317,24 +317,6 @@ fedora-latest-refclocks:
   tags:
     - gitlab-org
 
-fedora-branched-basic:
-  <<: *job_definition
-  image: fedora:branched
-  script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure build
-  tags:
-    - gitlab-org
-
-fedora-branched-refclocks:
-  <<: *job_definition
-  image: fedora:branched
-  script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure --refclock=all build
-  tags:
-    - gitlab-org
-
 fedora-rawhide-basic:
   <<: *job_definition
   image: registry.fedoraproject.org/fedora:rawhide
