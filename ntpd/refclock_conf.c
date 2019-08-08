@@ -78,7 +78,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 41 was: REFCLK_TT560 */
 	&refclock_zyfer,	/* 42 REFCLK_ZYFER */
 	&refclock_none,		/* 43 was: REFCLK_RIPENCC */
-	&refclock_neoclock4x,	/* 44 REFCLK_NEOCLOCK4X */
+	&refclock_none,		/* 44 was: REFCLK_NEOCLOCK4X */
 	&refclock_none, 	/* 45 was: REFCLK_TSYNCPCI */
 	&refclock_gpsdjson	/* 46 REFCLK_GPSDJSON */
 };

@@ -95,12 +95,6 @@ refclock_map = {
         "file":     "zyfer"
     },
 
-    "neoclock": {
-        "descr":    "NeoClock4X - DCF77 / TDF serial line",
-        "define":   "CLOCK_NEOCLOCK",
-        "file":     "neoclock"
-    },
-
     "gpsd": {
         "descr":    "GPSD NG client protocol",
         "define":   "CLOCK_GPSDJSON",

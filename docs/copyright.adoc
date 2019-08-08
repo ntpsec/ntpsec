@@ -116,8 +116,6 @@ as authors of this work.
   <jhay@icomtek.csir.co.za>] IPv6 support and testing
 * mailto:davehart@davehart.com[Dave Hart <davehart@davehart.com>]
   General maintenance
-* mailto:neoclock4x@linum.com[Claas Hilbrecht
-  <neoclock4x@linum.com>] NeoClock4X clock driver
 * mailto:glenn@herald.usask.ca[Glenn Hollinger
   <glenn@herald.usask.ca>] GOES clock driver (removed in NTPsec)
 * mailto:jbj@chatham.usdesign.com[Jeff Johnson

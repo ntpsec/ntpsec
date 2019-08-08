@@ -239,12 +239,6 @@ extern	struct refclock	refclock_modem;
 #define refclock_modem	refclock_none
 #endif
 
-#ifdef CLOCK_NEOCLOCK
-extern	struct refclock	refclock_neoclock4x;
-#else
-#define	refclock_neoclock4x	refclock_none
-#endif
-
 #ifdef CLOCK_NMEA
 extern	struct refclock refclock_nmea;
 #else
