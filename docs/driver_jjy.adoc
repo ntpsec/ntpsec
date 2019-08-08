@@ -30,7 +30,7 @@ sold in Japan, and the time service through a telephone line.
 |link:#subtype-5[Tristate Ltd.   TS-GPSclock-01]     |
 |=================================================
 
-* [[subtype-1]]Tristate Ltd.   TS-JJY01, TS-JJY02 http://www.tristate.ne.jp/ (Japanese only)
+* [[subtype-1]]Tristate Ltd.   TS-JJY01, TS-JJY02 https://www.tristate.ne.jp/ (Japanese only)
 +
 NTP configuration ( {ntpconf} )::
 +
@@ -126,7 +126,7 @@ Time code format::
 |(Every second)| -\-> |+'XX YY/MM/DD W HH:MM:SS{CR}+
 |======================================
 
-* [[subtype-5]]Tristate Ltd. TS-GPSclock-01 http://www.tristate.ne.jp/ (Japanese only)
+* [[subtype-5]]Tristate Ltd. TS-GPSclock-01 https://www.tristate.ne.jp/ (Japanese only)
 +
 This driver supports the Tristate TS-GPSclock-01 in command/response
 subtype, though it is a GPS clock, not JJY radio clock. Using the
@@ -171,7 +171,7 @@ The date and time are requested separately. The time is requested
 before and after the date request to check uncertainty of the date
 whether it's before or after midnight.
 
-* [[subtype-6]]SEIKO TIME SYSTEMS INC. TDC-300 http://www.seiko-sts.co.jp/ (English and Japanese)
+* [[subtype-6]]SEIKO TIME SYSTEMS INC. TDC-300 https://www.seiko-sts.co.jp/ (English and Japanese)
 +
 The TDC-300 must be set to the type 3 data format using the front panel
 menu display and the switches.

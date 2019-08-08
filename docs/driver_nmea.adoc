@@ -30,7 +30,7 @@ limited by the precision of the timecode and the latencies of the serial
 interface and operating system.
 
 If the operating system supports PPSAPI
-(http://www.ietf.org/rfc/rfc2783.txt[RFC 2783]), the +flag1 1+ option
+(https://www.ietf.org/rfc/rfc2783.txt[RFC 2783]), the +flag1 1+ option
 enables its use.
 
 If there is a /dev/gpspps__u__ it is tried first for PPS, before /dev/gps__u__.
@@ -190,7 +190,7 @@ in a more opaque way.
 Sentences like $GPGSV that don't contain the time will get counted in
 the total but otherwise ignored.
 
-http://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
+https://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
 NMEA Refclocks] might give further useful hints for specific hardware
 devices that exhibit strange or curious behaviour. Note that it
 describes NTP Classic and the old refclock configuration syntax, and

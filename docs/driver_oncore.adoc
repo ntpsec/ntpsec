@@ -33,7 +33,7 @@ UT+, the "Remote" which is a prepackaged UT+, and the M12 Timing. The
 Motorola evaluation kit can be recommended. It interfaces to a PC
 straightaway, using the serial (DCD) or parallel port for PPS input
 and packs the receiver in a nice and sturdy box. Less expensive
-interface kits are available from http://www.tapr.org[TAPR].
+interface kits are available from https://www.tapr.org[TAPR].
 
 [width="100%",cols="<34%,<33%,<33%",align="center",frame="none",grid="none"]
 |==========================================================================

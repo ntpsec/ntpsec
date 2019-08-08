@@ -112,7 +112,7 @@ but "slews" the 1-second correction, which takes 33 minutes and 20 seconds
 to complete.  This could be considered a bug, but certainly this was only an
 accidental behavior.
 
-However, as we learned in the discussion in http://bugs.ntp.org/2745, this
+However, as we learned in the discussion in https://bugs.ntp.org/2745, this
 behavior was very much appreciated since indeed the time was never stepped
 back, even though the start of the slewing was not strictly defined and
 depended on the poll interval.  The system time was off by 1 second for
@@ -171,7 +171,7 @@ exchanged with other NTP servers are based on the real UTC system time and
 the normal refid, as usual.
 
 The leap smear implementation is optionally available in ntp-4.2.8p3 and
-later, and the changes can be tracked via http://bugs.ntp.org/2855.
+later, and the changes can be tracked via https://bugs.ntp.org/2855.
 
 
 == Using NTP's Leap Second Smearing

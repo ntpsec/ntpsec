@@ -127,7 +127,7 @@ as authors of this work.
   mailto:H.Lambermont@chello.nl[<H.Lambermont@chello.nl>] ntpsweep
 * mailto:phk@FreeBSD.ORG[Poul-Henning Kamp <phk@FreeBSD.ORG>]
   Oncore driver (Original author)
-* http://www4.informatik.uni-erlangen.de/%7ekardel[Frank Kardel]
+* https://www4.informatik.uni-erlangen.de/%7ekardel[Frank Kardel]
   mailto:kardel@ntp.org[<kardel (at) ntp
   (dot) org>] PARSE <GENERIC> (driver 14 reference clocks), STREAMS
   modules for PARSE, support scripts, syslog cleanup, dynamic interface

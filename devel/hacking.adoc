@@ -68,7 +68,7 @@ which is used, when available, for increased accuracy, and has a
 fallback implementation using native time calls.
 
 You can read POSIX-1.2001, with 2004 Corrigendum, online for free here:
-    http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
+    https://pubs.opengroup.org/onlinepubs/009695399/toc.htm
 
 You can see POSIX.1-2001, SUSv3, online for free here:
     http://www.unix-systems.org/version3/
@@ -252,7 +252,7 @@ a Pyflakes test, we probably will not merge it.
 https://pypi.python.org/pypi/pyflakes
 
 Note: In the future, the Python baseline may
-http://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[change
+https://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[change
 t 2.7.2].
 
 == General notes
@@ -300,7 +300,7 @@ standard output should be able to emit two formats. The default can be
 should also be a -j/--json option that emits a self-describing JSON
 object.
 
-You can read about JSON at http://www.json.org/
+You can read about JSON at https://www.json.org/
 
 Be aware that if you present a tool design with a messy output format
 and no JSON option, it is quite likely to be rejected.
@@ -465,7 +465,7 @@ code.
 We use Git as our distributed version control system.
 
 If you ever get stuck or confused while using Git, please consult
-http://ohshitgit.com/
+https://ohshitgit.com/
 
 === GitLab.com
 

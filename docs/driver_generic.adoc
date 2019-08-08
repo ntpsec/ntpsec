@@ -119,21 +119,21 @@ receivers have a seemingly unlimited number of ways to draw power from
 the RS-232 port and to encode the DCF77 datastream. You are mainly on
 your own here unless I have a sample of the receiver.
 
-* * http://www.meinberg.de[Meinberg clocks] *
+* * https://www.meinberg.de[Meinberg clocks] *
 +
 These implementations have been verified by the Meinberg people
 themselves and I have access to one of these clocks.
 
 
-* http://www.selinc.com[Schweitzer Engineering Laboratories SEL-240x clocks] *
+* https://selinc.com[Schweitzer Engineering Laboratories SEL-240x clocks] *
 +
 This implementation was provided and verified by SEL and
-http://networktimefoundation.org[Network Time Foundation] has an
+https://www.nwtime.org/[Network Time Foundation] has an
 SEL-2407 in one of its development labs.
 
 * *refclock generic subtype 0*
 +
-*http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
+*https://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See:
@@ -141,36 +141,36 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *refclock generic subtype 1*
 +
-*http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
+*https://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-image::pic/pzf511.jpg[http://www.meinberg.de/english/products/pzf-eurocard.htm]
+image::pic/pzf511.jpg[https://www.meinberg.de/english/products/pzf-eurocard.htm]
 
 * *refclock generic subtype 2*
 +
-*http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/c51.htm[DCF C51 receiver and similar] (AM demodulation / 4ms)*
+*https://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/c51.htm[DCF C51 receiver and similar] (AM demodulation / 4ms)*
 +
-image:pic/c51.jpg[http://www.meinberg.de/english/products/c51.htm]
+image:pic/c51.jpg[https://www.meinberg.de/english/products/c51.htm]
 +
 This subtype expects the Meinberg standard time string format with 9600/7E2.
 +
 *Note:* subtype 2 must also be used for
-http://www.meinberg.de/english/products/formfactor.htm#slot_card[Meinberg
+https://www.meinberg.de/english/products/formfactor.htm#slot_card[Meinberg
 PCI cards] under Linux, e.g.
-http://www.meinberg.de/english/products/gps-pcicard.htm[the GPS PCI
-card] or http://www.meinberg.de/english/products/dcf-pcicard.htm[the
+https://www.meinberg.de/english/products/gps-pcicard.htm[the GPS PCI
+card] or https://www.meinberg.de/english/products/dcf-pcicard.htm[the
 DCF77 PCI card]. Please note the
-http://www.meinberg.de/english/sw/#linux[Meinberg Linux driver] must be
+https://www.meinberg.de/english/sw/#linux[Meinberg Linux driver] must be
 installed. That driver emulates a refclock device in order to allow ntpd
 to access those cards. For details, please refer to the README file
 that comes with the Meinberg driver package.
 
 * *refclock generic subtype 3*
 +
-http://www.elv.de/[ELV] *DCF7000 (sloppy AM demodulation / 50ms)*
+https://www.elv.de/[ELV] *DCF7000 (sloppy AM demodulation / 50ms)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See:
@@ -194,9 +194,9 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *refclock generic subtype 7*
 +
-* http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s) *
+* https://www.meinberg.de[Meinberg] https://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s) *
 +
-image:pic/gps167.jpg[http://www.meinberg.de/english/products/gps-eurocard.htm]
+image:pic/gps167.jpg[https://www.meinberg.de/english/products/gps-eurocard.htm]
 +
 This subtype expects either the University of Erlangen time string format
 or the Meinberg standard time string format at 19200/8N1.
@@ -213,13 +213,13 @@ xref:subtype18[Subtype 18] should be used if the device is accessed by a multidr
 
 * *refclock generic subtype 8*
 +
-http://www.igel.de/[IGEL] http://www.igel.de/eigelmn.html[clock]
+https://www.igel.de/[IGEL] https://www.igel.de/eigelmn.html[clock]
 +
-image:pic/igclock.gif[http://www.igel.de/eigelmn.html]
+image:pic/igclock.gif[https://www.igel.de/eigelmn.html]
 
 * *refclock generic subtype 9*
 +
-*http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
+*https://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See:
@@ -227,15 +227,15 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *refclock generic subtype 10*
 +
-*http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TSIP protocol (GPS / <<1&mu;s) (no kernel support yet)*
+*https://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TSIP protocol (GPS / <<1&mu;s) (no kernel support yet)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 +
-image:pic/pd_om011.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
+image:pic/pd_om011.gif[https://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
 +
-image:pic/pd_om006.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om006.html]
+image:pic/pd_om006.gif[https://www.trimble.com/cgi/omprod.cgi/pd_om006.html]
 
 * *refclock generic subtype 11*
 +
@@ -243,9 +243,9 @@ image:pic/pd_om006.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om006.html]
 
 * *refclock generic subtype 12*
 +
-*http://www.hopf-time.com[HOPF] http://www.hopf.com/downloads/manuals/6021gps_v0601_en.pdf[Funkuhr 6021]*
+*https://www.hopf-time.com[HOPF] https://www.hopf.com/downloads/manuals/6021gps_v0601_en.pdf[Funkuhr 6021]*
 +
-image:pic/fg6021.gif[http://www.hopf-time.com/engl/kart6021.html]
+image:pic/fg6021.gif[https://www.hopf-time.com/engl/kart6021.html]
 
 * *refclock generic subtype 13*
 +
@@ -269,7 +269,7 @@ image:pic/fg6021.gif[http://www.hopf-time.com/engl/kart6021.html]
 
 * [[subtype18]]*refclock generic subtype 18*
 +
-*http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s)*
+*https://www.meinberg.de[Meinberg] https://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s)*
 +
 This subtype works without additional data communication (version, GPS
 status etc.) and thus should be used with multidrop, heterogeneous
@@ -306,7 +306,7 @@ See comment from subtype 20 clock.
 
 * *refclock generic subtype 24*
 +
-*http://www.selinc.com/[Schweitzer Engineering Laboratories]*
+*https://selinc.com/[Schweitzer Engineering Laboratories]*
 
 Actual data formats and setup requirements of the various clocks can be
 found in link:parsedata.html[NTP GENERIC clock data formats].

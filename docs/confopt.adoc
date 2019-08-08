@@ -53,7 +53,7 @@ the host name forces DNS resolution to the IPv4 namespace, while a
 Unless noted otherwise, further information about these commands is at
 link:discover.html#pool[Automatic Server Discovery].
 
-The http://www.pool.ntp.org/[www.pool.ntp.org] page describes a
+The https://www.ntppool.org/[www.ntppool.org] page describes a
 compatible pool of public NTP servers, which are probably what you
 want to define associations with unless you specifically know
 otherwise.

@@ -438,8 +438,8 @@ mailto:sven_dietrich@trimble.com[*Sven-Thorsten Dietrich*] +
   Sunnyvale, CA 94088-3642 +
 
 mailto:fernandoph@iar.unlp.edu.ar[*Fernando P. Hauscarriaga*] +
-  http://www.iar.unlp.edu.ar/~fernandoph +
+  https://www.iar.unlp.edu.ar/~fernandoph +
   Instituto Argentino de Radioastronomia +
-  http://www.iar.unlp.edu.ar +
+  https://www.iar.unlp.edu.ar +
 
 include::includes/footer.adoc[]

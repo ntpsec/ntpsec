@@ -109,11 +109,11 @@ MJD YR MO DA H M S ST S UT1 msADV <OTM>
 The +<OTM>+ on-time character "+*+" changes to "+#+" when the delay
 correction is valid.
 
-http://www.usno.navy.mil/USNO/time/telephone-time[US Naval Observatory (USNO)]
+https://www.usno.navy.mil/USNO/time/telephone-time[US Naval Observatory (USNO)]
 
 Phone: (202) 762-1594 (Washington, DC); (719) 567-6743 (Colorado Springs, CO)
 
-http://tycho.usno.navy.mil/modem_time.html[Data Format] (two lines,
+https://tycho.usno.navy.mil/modem_time.html[Data Format] (two lines,
 repeating at one-second intervals)
 
 ----------------------------------------------------
@@ -127,7 +127,7 @@ hhmmss second of day
 
 link:tf582_4.html[European Phone Numbers and Formats]
 
-http://www.spectracomcorp.com[Spectracom GPS Receivers]
+https://www.orolia.com/[Orolia GPS Receivers] (formerly Spectracom)
 
 If a modem is connected to a Spectracom receiver, this driver will call
 it and retrieve the time in one of two formats, 0 and 2. Ordinarily, the

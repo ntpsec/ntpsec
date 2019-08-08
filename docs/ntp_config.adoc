@@ -257,7 +257,7 @@ bison -v ntp_config.y
 -----------------------
 
 For more information, refer to the
-http://www.gnu.org/software/bison/manual/[Bison manual].
+https://www.gnu.org/software/bison/manual/[Bison manual].
 
 *ntp_config.c*
 
