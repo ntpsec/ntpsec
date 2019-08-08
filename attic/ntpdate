@@ -28,7 +28,7 @@
 # -p N            -q      How many samples to take
 # -q      default -q      query/report only, don't set clock
 #                         (implies -u for ntpdate)
-# -s      -p              log to syslog (always enabled in ntpd)
+# -s                      log to syslog (always enabled in ntpd)
 # -t N.N  -t N.N          request timeout
 # -u      default         unpriv port      
 # -v                      verbose (ntpd is always more verbose than ntpdate)
@@ -43,7 +43,8 @@
 PASSTHROUGH=""
 TIMEOUT="-t 1"
 setclock=yes
-echo=""
+echo=no
+log=no
 while getopts 46a:bBe:k:no:p:qst:uv opt
 do
     case $opt in
@@ -55,11 +56,11 @@ do
 	d) PASSTHROUGH="$PASSTHROUGH -d";;
 	e) echo "ntpdate: -e is no longer supported." >&2;;
 	k) PASSTHROUGH="$PASSTHROUGH -k $OPTARG";;
-	n) echo=echo ;;			# Echo generated command, don't execute
+	n) echo=yes;;			# Echo generated command, don't execute
 	o) PASSTHROUGH="$PASSTHROUGH -o $OPTARG";;
 	p) echo "ntpdate: -p is no longer supported." >&2;;
 	q) setclock=no;;
-	s) PASSTHROUGH="$PASSTHROUGH -p";;
+	s) log=yes;;
 	t) PASSTHROUGH="$PASSTHROUGH -t $OPTARG"; TIMEOUT="";;
 	u) ;;
 	v) ;;
@@ -72,7 +73,17 @@ then
     ADJUST="-s -j"
 fi
 
-$echo ntpdig $ADJUST $TIMEOUT $PASSTHROUGH $*
+if [ "$echo" = yes ]
+then
+    echo ntpdig $ADJUST $TIMEOUT $PASSTHROUGH $*
+else
+    if [ "$log" = yes ]
+    then
+        ntpdig $ADJUST $TIMEOUT $PASSTHROUGH $* 2>&1 | logger -t ntpdate
+    else
+        ntpdig $ADJUST $TIMEOUT $PASSTHROUGH $*
+    fi
+fi
 
 #end
 
