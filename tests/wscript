@@ -129,16 +129,16 @@ def build(ctx):
                "pylib/test_packet.py",
                "pylib/test_statfiles.py"]
 
-    for path in pytests:
-        ctx(
-            features="pytest",
-            pytest_source=path,
-            ut_str="${PYTHON} ${SRC}"
-        )
-
     ctx(
         features="subst",
         source=testpysrc,
         target=[x.get_bld() for x in testpysrc],
         chmod=Utils.O755,
     )
+
+    for path in pytests:
+        ctx(
+            features="pytest",
+            pytest_source=path,
+            ut_str="${PYTHON} ${SRC}"
+        )
