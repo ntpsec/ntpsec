@@ -91,14 +91,9 @@ volatile struct packet_counters pkt_count;
 /*
  * Interface stuff
  */
-endpt *	any_interface;		/* wildcard ipv4 interface */
-endpt *	any6_interface;		/* wildcard ipv6 interface */
-endpt *	loopback_interface;	/* loopback ipv4 interface */
-
-unsigned int sys_ifnum;			/* next .ifnum to assign */
+struct ntp_io_data io_data;
 static int ninterfaces;			/* total # of interfaces */
 
-bool disable_dynamic_updates;	/* if true, scan interfaces once only */
 extern  SOCKET  open_socket     (sockaddr_u *, bool, endpt *);
 
 static bool
@@ -214,7 +209,6 @@ struct remaddr {
 };
 
 static remaddr_t * remoteaddr_list;
-endpt *		ep_list;	/* complete endpt list */
 
 static endpt *	wildipv4;
 static endpt *	wildipv6;
@@ -717,7 +711,7 @@ new_interface(
 		memcpy(iface, interface, sizeof(*iface));
 
 	/* count every new instance of an interface in the system */
-	iface->ifnum = sys_ifnum++;
+	iface->ifnum = io_data.sys_ifnum++;
 	iface->starttime = current_time;
 
 	return iface;
@@ -747,7 +741,7 @@ add_interface(
 	/* Calculate the refid */
 	ep->addr_refid = addr2refid(&ep->sin);
 	/* link at tail so ntpq -c ifstats index increases each row */
-	LINK_TAIL_SLIST(ep_list, ep, elink, endpt);
+	LINK_TAIL_SLIST(io_data.ep_list, ep, elink, endpt);
 	ninterfaces++;
 }
 
@@ -764,7 +758,7 @@ remove_interface(
 	endpt *		unlinked;
 	sockaddr_u	resmask;
 
-	UNLINK_SLIST(unlinked, ep_list, ep, elink, endpt);
+	UNLINK_SLIST(unlinked, io_data.ep_list, ep, elink, endpt);
 	delete_interface_from_list(ep);
 
 	if (ep->fd != INVALID_SOCKET) {
@@ -861,7 +855,7 @@ create_wildcards(
 
 		if (wildif->fd != INVALID_SOCKET) {
 			wildipv6 = wildif;
-			any6_interface = wildif;
+			io_data.any6_interface = wildif;
 			add_addr_to_list(&wildif->sin, wildif);
 			add_interface(wildif);
 			log_listen_address(wildif);
@@ -903,7 +897,7 @@ create_wildcards(
 
 		if (wildif->fd != INVALID_SOCKET) {
 			wildipv4 = wildif;
-			any_interface = wildif;
+			io_data.any_interface = wildif;
 
 			add_addr_to_list(&wildif->sin, wildif);
 			add_interface(wildif);
@@ -1243,7 +1237,7 @@ interface_update(
 {
 	bool new_interface_found;
 
-	if (disable_dynamic_updates)
+	if (io_data.disable_dynamic_updates)
 		return;
 
 	new_interface_found = update_interfaces(NTP_PORT, receiver, data);
@@ -1624,7 +1618,7 @@ update_interfaces(
 	 * phase 2 - delete gone interfaces - reassigning peers to
 	 * other interfaces
 	 */
-	for (ep = ep_list; ep != NULL; ep = next_ep) {
+	for (ep = io_data.ep_list; ep != NULL; ep = next_ep) {
 		next_ep = ep->elink;
 
 		/*
@@ -1653,8 +1647,8 @@ update_interfaces(
 		 * update globals in case we lose
 		 * a loopback interface
 		 */
-		if (ep == loopback_interface)
-			loopback_interface = NULL;
+		if (ep == io_data.loopback_interface)
+			io_data.loopback_interface = NULL;
 
 		delete_interface(ep);
 	}
@@ -1747,9 +1741,9 @@ create_interface(
 	 * set globals with the first found
 	 * loopback interface of the appropriate class
 	 */
-	if (NULL == loopback_interface && AF_INET == iface->family
+	if (NULL == io_data.loopback_interface && AF_INET == iface->family
 	    && (INT_LOOPBACK & iface->flags))
-		loopback_interface = iface;
+		io_data.loopback_interface = iface;
 
 	/*
 	 * put into our interface list
@@ -1797,7 +1791,7 @@ set_reuseaddr(
 #ifndef SO_EXCLUSIVEADDRUSE
 	endpt *ep;
 
-	for (ep = ep_list; ep != NULL; ep = ep->elink) {
+	for (ep = io_data.ep_list; ep != NULL; ep = ep->elink) {
 		if (ep->flags & INT_WILDCARD)
 			continue;
 
@@ -2355,7 +2349,7 @@ input_handler(
 	/*
 	 * Loop through the interfaces looking for data to read.
 	 */
-	for (ep = ep_list; ep != NULL; ep = ep->elink) {
+	for (ep = io_data.ep_list; ep != NULL; ep = ep->elink) {
 		fd = ep->fd;
 		if (FD_ISSET(fd, fds))
 			do {
@@ -2428,7 +2422,7 @@ select_peerinterface(
 	 * operation with public key cryptography.
 	 */
 	if (IS_PEER_REFCLOCK(peer)) {
-		ep = loopback_interface;
+		ep = io_data.loopback_interface;
 	} else {
 		ep = dstadr;
 		if (NULL == ep)
@@ -2594,7 +2588,7 @@ findclosestinterface(
 	ZERO_SOCK(&min_dist);
 	winner = NULL;
 
-	for (ep = ep_list; ep != NULL; ep = ep->elink) {
+	for (ep = io_data.ep_list; ep != NULL; ep = ep->elink) {
 		if (ep->ignore_packets ||
 		    AF(addr) != ep->family ||
 		    (unsigned int)flags & ep->flags)
@@ -2962,7 +2956,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 	char *p;
 #endif
 
-	if (disable_dynamic_updates) {
+	if (io_data.disable_dynamic_updates) {
 		/*
 		 * discard ourselves if we are not needed anymore
 		 * usually happens when running unprivileged

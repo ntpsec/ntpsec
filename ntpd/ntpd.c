@@ -821,7 +821,7 @@ ntpdmain(
 		 * is associated with running with uid 0 - should be refined on
 		 * ports that allow binding to NTP_PORT with uid != 0
 		 */
-		disable_dynamic_updates = true;
+		io_data.disable_dynamic_updates = true;
 		msyslog(LOG_INFO, "INIT: running as non-root disables dynamic interface tracking");
 	}
 #endif

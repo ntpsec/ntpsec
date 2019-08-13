@@ -258,12 +258,15 @@ struct packet_counters {
 extern volatile struct packet_counters pkt_count;
 
 /* ntp_io.c */
-extern bool	disable_dynamic_updates;
-extern unsigned int	sys_ifnum;		/* next .ifnum to assign */
-extern endpt *	any_interface;		/* IPv4 wildcard */
-extern endpt *	any6_interface;		/* IPv6 wildcard */
-extern endpt *	loopback_interface;	/* IPv4 loopback for refclocks */
-extern endpt *	ep_list;		/* linked list */
+struct ntp_io_data {
+  bool disable_dynamic_updates; /* if true, scan interfaces once only */
+  unsigned int sys_ifnum;       /* next .ifnum to assign */
+  endpt *any_interface;         /* IPv4 wildcard */
+  endpt *any6_interface;        /* IPv6 wildcard */
+  endpt *loopback_interface;    /* IPv4 loopback for refclocks */
+  endpt *ep_list;               /* complete endpt list */
+};
+extern struct ntp_io_data io_data;
 
 /* ntp_loopfilter.c */
 extern bool	lockclock;		/* lock to the system clock? */

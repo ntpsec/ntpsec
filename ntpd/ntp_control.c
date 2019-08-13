@@ -3797,8 +3797,8 @@ read_ifstats(
 	 * loop over [0..sys_ifnum] searching ep_list for each
 	 * ifnum in turn.
 	 */
-	for (ifidx = 0; ifidx < sys_ifnum; ifidx++) {
-		for (la = ep_list; la != NULL; la = la->elink)
+	for (ifidx = 0; ifidx < io_data.sys_ifnum; ifidx++) {
+		for (la = io_data.ep_list; la != NULL; la = la->elink)
 			if (ifidx == la->ifnum)
 				break;
 		if (NULL == la)
