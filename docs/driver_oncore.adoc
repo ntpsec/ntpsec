@@ -26,30 +26,24 @@ it reliably recover from a trashed or zeroed system clock.
 This driver supports most models of the
 https://web.archive.org/web/19990427102123/http://www.mot.com/AECS/PNSB/products/produt.html[Motorola Oncore GPS receivers]
 (Basic, PVT6, VP, UT, UT+, GT, GT+, SL, M12, M12+T), as long as they
-support the _Motorola Binary Protocol_.
+support the _Motorola Binary Protocol_. All are long end-of-lifed as of 2019. 
 
 The (formerly) interesting versions of the Oncore were the VP, the
-UT+, the "Remote" which is a prepackaged UT+, and the M12 Timing. The
-Motorola evaluation kit can be recommended. It interfaces to a PC
-straightaway, using the serial (DCD) or parallel port for PPS input
-and packs the receiver in a nice and sturdy box. Less expensive
-interface kits are available from https://www.tapr.org[TAPR].
+UT+, the "Remote" which is a prepackaged UT+, and the M12 Timing
+variant. 
 
-[width="100%",cols="<34%,<33%,<33%",align="center",frame="none",grid="none"]
-|==========================================================================
-|image:pic/oncore_utplusbig.gif[]|image:pic/oncore_evalbig.gif[]|image:pic/oncore_remoteant.jpg[gif]
-|UT+ oncore                      |Evaluation kit                |Oncore Remote
-|==========================================================================
+However, there is one current hardware product that is reported good
+with this driver; the
+https://www.cnssys.com/cnsclock/CNSClockII.php[CNS Clock II].  It
+ships 1PPS on the DCD line of its RS232 port or as a DCD priority
+packet on USB.  Older revisions of the productr use M12 hardware,
+newer ones use a u-blox engine but emulate OnCore behavior.  Future
+versions will drop OnCore reporting enturely, at which time the
+possibility of removing this driver will be revisited.
 
-The driver requires a standard +PPS+ interface for the pulse-per-second
-output from the receiver. The serial data stream alone does not provide
-precision time stamps (0-50 ms variance, according to the manual),
-whereas the PPS output is precise down to 50 ns (1 sigma) for the
-VP/UT models and 25 ns for the M12 Timing. If you do not have the PPS
-signal available, then you should probably be using the NMEA driver
-rather than the Oncore driver.
+See the CNS Clock vendor product page for specfications.
 
-The driver will use the "position hold" mode with user provided
+The driver can use use the "position hold" mode with user provided
 coordinates, the receiver's built-in site-survey, or a similar algorithm
 implemented in this driver to determine the antenna position.
 
@@ -133,7 +127,7 @@ the kernel PLL.
 
 === Performance
 
-Even the newest of these variants, the M12+T with firmware dated 9 Jun
+Even the newest of the Motorola variants, the M12+T with firmware dated 9 Jun
 2004 now reports bad dates due to era rollover.
 
 Performance is really good, other than the rollover issue. With the
