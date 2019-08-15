@@ -459,16 +459,16 @@ check_leapsec(
 	  	if (fired) {
 			const char *leapmsg = NULL;
 			if (lsdata.warped < 0) {
-				if (clock_max_back > 0.0 &&
-				    clock_max_back < abs(lsdata.warped)) {
+				if (loop_data.clock_max_back > 0.0 &&
+				    loop_data.clock_max_back < abs(lsdata.warped)) {
 					step_systime(lsdata.warped, ntp_set_tod);
 					leapmsg = leapmsg_p_step;
 				} else {
 					leapmsg = leapmsg_p_slew;
 				}
 			} else 	if (lsdata.warped > 0) {
-				if (clock_max_fwd > 0.0 &&
-				    clock_max_fwd < abs(lsdata.warped)) {
+				if (loop_data.clock_max_fwd > 0.0 &&
+				    loop_data.clock_max_fwd < abs(lsdata.warped)) {
 					step_systime(lsdata.warped, ntp_set_tod);
 					leapmsg = leapmsg_n_step;
 				} else {

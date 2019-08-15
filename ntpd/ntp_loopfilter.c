@@ -103,13 +103,15 @@
 /*
  * Program variables that can be tinkered.
  */
-double	clock_max_back = CLOCK_MAX;	/* step threshold */
-double	clock_max_fwd =  CLOCK_MAX;	/* step threshold */
 static double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
 static double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
 uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
-bool lockclock;		/* hardware clock is externally disciplined? */
+struct ntp_loop_data loop_data = {
+  .clock_max_back = CLOCK_MAX, /* step threshold */
+  .clock_max_fwd =  CLOCK_MAX, /* step threshold */
+  .clock_phi = CLOCK_PHI       /* dispersion rate (s/s) */
+};
 
 /*
  * Program variables
@@ -117,9 +119,7 @@ bool lockclock;		/* hardware clock is externally disciplined? */
 static double clock_offset;	/* offset (non-lockclock case only) */
 static uptime_t clock_epoch;	/* last update (non-lockclock case only) */
 double	clock_jitter;		/* offset jitter */
-double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
-double	clock_stability;	/* frequency stability (wander) (s/s) */
 unsigned int	sys_tai;		/* TAI offset from UTC */
 /* following variables are non-lockclock case only */
 static bool loop_started;	/* true after LOOP_DRIFTINIT */
@@ -445,9 +445,9 @@ local_clock(
 	 * monitor and record the offsets anyway in order to determine
 	 * the open-loop response and then go home.
 	 */
-	if (lockclock || !clock_ctl.ntp_enable) {
-		record_loop_stats(fp_offset, drift_comp, clock_jitter,
-		    clock_stability, sys_poll);
+	if (loop_data.lockclock || !clock_ctl.ntp_enable) {
+		record_loop_stats(fp_offset, loop_data.drift_comp, clock_jitter,
+		    loop_data.clock_stability, sys_poll);
 		return (0);
 	}
 
@@ -487,8 +487,8 @@ local_clock(
 	 * directly to the terminal.
 	 */
 	if (clock_ctl.mode_ntpdate) {
-		if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
-		   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
+		if (  ( fp_offset > loop_data.clock_max_fwd  && loop_data.clock_max_fwd  > 0)
+		   || (-fp_offset > loop_data.clock_max_back && loop_data.clock_max_back > 0)) {
 			step_systime(fp_offset, ntp_set_tod);
 			msyslog(LOG_NOTICE, "CLOCK: time set %+.6f s",
 			    fp_offset);
@@ -499,8 +499,8 @@ local_clock(
 			    fp_offset);
 			printf("ntpd: time slew %+.6fs\n", fp_offset);
 		}
-		record_loop_stats(fp_offset, drift_comp, clock_jitter,
-		    clock_stability, sys_poll);
+		record_loop_stats(fp_offset, loop_data.drift_comp, clock_jitter,
+		    loop_data.clock_stability, sys_poll);
 		exit(0);
 	}
 
@@ -544,10 +544,10 @@ local_clock(
 	if (sys_poll > peer->cfg.maxpoll)
 		sys_poll = peer->cfg.maxpoll;
 	mu = current_time - clock_epoch;
-	clock_frequency = drift_comp;
+	clock_frequency = loop_data.drift_comp;
 	rval = 1;
-	if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
-	   || (-fp_offset > clock_max_back && clock_max_back > 0)
+	if (  ( fp_offset > loop_data.clock_max_fwd  && loop_data.clock_max_fwd  > 0)
+	   || (-fp_offset > loop_data.clock_max_back && loop_data.clock_max_back > 0)
 	   || clock_ctl.force_step_once ) {
 		if (clock_ctl.force_step_once) {
 			clock_ctl.force_step_once = false;  /* we want this only once after startup */
@@ -829,21 +829,21 @@ local_clock(
 		msyslog(LOG_NOTICE,
 		    "CLOCK: frequency error %.0f PPM exceeds tolerance %.0f PPM",
 		    clock_frequency * US_PER_S, NTP_MAXFREQ * US_PER_S);
-	dtemp = SQUARE(clock_frequency - drift_comp);
+	dtemp = SQUARE(clock_frequency - loop_data.drift_comp);
 	if (clock_frequency > NTP_MAXFREQ)
-		drift_comp = NTP_MAXFREQ;
+		loop_data.drift_comp = NTP_MAXFREQ;
 	else if (clock_frequency < -NTP_MAXFREQ)
-		drift_comp = -NTP_MAXFREQ;
+		loop_data.drift_comp = -NTP_MAXFREQ;
 	else
-		drift_comp = clock_frequency;
+		loop_data.drift_comp = clock_frequency;
 
 	/*
 	 * Calculate the wander as the exponentially weighted RMS
 	 * frequency differences. Record the change for the frequency
 	 * file update.
 	 */
-	etemp = SQUARE(clock_stability);
-	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
+	etemp = SQUARE(loop_data.clock_stability);
+	loop_data.clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
 	 * Here we adjust the time constant by comparing the current
@@ -884,11 +884,11 @@ local_clock(
 	/*
 	 * Yibbidy, yibbbidy, yibbidy; that'h all folks.
 	 */
-	record_loop_stats(clock_offset, drift_comp, clock_jitter,
-	    clock_stability, sys_poll);
+	record_loop_stats(clock_offset, loop_data.drift_comp, clock_jitter,
+	    loop_data.clock_stability, sys_poll);
 	DPRINT(1, ("local_clock: offset %.9f jit %.9f freq %.6f stab %.3f poll %d\n",
 		   clock_offset, clock_jitter, drift_comp * US_PER_S,
-		   clock_stability * US_PER_S, sys_poll));
+		   loop_data.clock_stability * US_PER_S, sys_poll));
 	return (rval);
 }
 
@@ -915,8 +915,8 @@ adj_host_clock(
 	 * would be counterproductive. During the startup clamp period, the
 	 * time constant is clamped at 2.
 	 */
-	sys_vars.sys_rootdisp += clock_phi;
-	if (lockclock || !clock_ctl.ntp_enable || clock_ctl.mode_ntpdate)
+	sys_vars.sys_rootdisp += loop_data.clock_phi;
+	if (loop_data.lockclock || !clock_ctl.ntp_enable || clock_ctl.mode_ntpdate)
 		return;
 	/*
 	 * Determine the phase adjustment. The gain factor (denominator)
@@ -944,7 +944,7 @@ adj_host_clock(
 	if (clock_ctl.pll_control && clock_ctl.kern_enable)
 		freq_adj = 0.;
 	else
-		freq_adj = drift_comp;
+		freq_adj = loop_data.drift_comp;
 
 	/* Bound absolute value of total adjustment to NTP_MAXFREQ. */
 	if (offset_adj + freq_adj > NTP_MAXFREQ)
@@ -1007,7 +1007,7 @@ direct_freq(
 {
 	set_freq(fp_offset / (current_time - clock_epoch));
 
-	return drift_comp;
+	return loop_data.drift_comp;
 }
 
 /*
@@ -1029,7 +1029,7 @@ set_freq(
 {
 	const char *	loop_desc;
 
-	drift_comp = freq;
+	loop_data.drift_comp = freq;
 	loop_desc = "ntpd";
 	if (clock_ctl.pll_control) {
 		int ntp_adj_ret;
@@ -1037,14 +1037,14 @@ set_freq(
 		ntv.modes = MOD_FREQUENCY;
 		if (clock_ctl.kern_enable) {
 			loop_desc = "kernel";
-			ntv.freq = DTOFREQ(drift_comp);
+			ntv.freq = DTOFREQ(loop_data.drift_comp);
 		}
 		if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
 	mprintf_event(EVNT_FSET, NULL, "%s %.6f PPM", loop_desc,
-	    drift_comp * US_PER_S);
+	    loop_data.drift_comp * US_PER_S);
 }
 
 static void
@@ -1138,8 +1138,8 @@ select_loop(
 	 * call set_freq() to switch the frequency compensation to or
 	 * from the kernel loop.
 	 */
-	if (!lockclock && clock_ctl.pll_control && loop_started)
-		set_freq(drift_comp);
+	if (!loop_data.lockclock && clock_ctl.pll_control && loop_started)
+		set_freq(loop_data.drift_comp);
 }
 
 
@@ -1186,7 +1186,7 @@ loop_config(
 	 * variables. Otherwise, continue leaving no harm behind.
 	 */
 	case LOOP_DRIFTINIT:
-		if (lockclock || clock_ctl.mode_ntpdate)
+		if (loop_data.lockclock || clock_ctl.mode_ntpdate)
 			break;
 
 		start_kern_loop();
@@ -1212,7 +1212,7 @@ loop_config(
 
 	case LOOP_KERN_CLEAR:
 #if 0		/* XXX: needs more review, and how can we get here? */
-		if (!lockclock && (clock_ctl.pll_control && clock_ctl.kern_enable)) {
+		if (!loop_data.lockclock && (clock_ctl.pll_control && clock_ctl.kern_enable)) {
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
 			ntv.status = STA_UNSYNC;
@@ -1232,7 +1232,7 @@ loop_config(
 		break;
 
 	case LOOP_PHI:		/* dispersion threshold (dispersion) */
-		clock_phi = freq / US_PER_S;
+		loop_data.clock_phi = freq / US_PER_S;
 		break;
 
 	case LOOP_FREQ:		/* initial frequency (freq) */
@@ -1256,27 +1256,27 @@ loop_config(
 		break;
 
 	case LOOP_MAX:		/* step threshold (step) */
-		clock_max_fwd = clock_max_back = freq;
+		loop_data.clock_max_fwd = loop_data.clock_max_back = freq;
 		if ( D_ISZERO_NS(freq) || freq > 0.5)
 			select_loop(false);
 		break;
 
 	case LOOP_MAX_BACK:	/* step threshold (step) */
-		clock_max_back = freq;
+		loop_data.clock_max_back = freq;
 		/*
 		 * Leave using the kernel discipline code unless both
 		 * limits are massive.  This assumes the reason to stop
 		 * using it is that it's pointless, not that it goes wrong.
 		 */
-		if ( D_ISZERO_NS(clock_max_back) || (clock_max_back > 0.5)
-		   || D_ISZERO_NS(clock_max_fwd) || (clock_max_fwd  > 0.5))
+		if ( D_ISZERO_NS(loop_data.clock_max_back) || (loop_data.clock_max_back > 0.5)
+		   || D_ISZERO_NS(loop_data.clock_max_fwd) || (loop_data.clock_max_fwd  > 0.5))
 			select_loop(false);
 		break;
 
 	case LOOP_MAX_FWD:	/* step threshold (step) */
-		clock_max_fwd = freq;
-		if ( D_ISZERO_NS(clock_max_back) || (clock_max_back > 0.5)
-		   || D_ISZERO_NS(clock_max_fwd) || (clock_max_fwd  > 0.5))
+		loop_data.clock_max_fwd = freq;
+		if ( D_ISZERO_NS(loop_data.clock_max_back) || (loop_data.clock_max_back > 0.5)
+		   || D_ISZERO_NS(loop_data.clock_max_fwd) || (loop_data.clock_max_fwd  > 0.5))
 			select_loop(false);
 		break;
 

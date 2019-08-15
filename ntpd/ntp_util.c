@@ -192,15 +192,15 @@ write_stats(void)
 		 * nonvolaile storage.
 		 */
 	        DPRINT(1, ("write_stats: frequency %.6lf thresh %.6lf, freq %.6lf\n",
-			   (prev_drift_comp - drift_comp) * US_PER_S,
-			   wander_resid * US_PER_S, drift_comp * US_PER_S));
-		if (fabs(prev_drift_comp - drift_comp) < wander_resid) {
+			   (prev_drift_comp - loop_data.drift_comp) * US_PER_S,
+			   wander_resid * US_PER_S, loop_data.drift_comp * US_PER_S));
+		if (fabs(prev_drift_comp - loop_data.drift_comp) < wander_resid) {
 			wander_resid *= 0.5;
 			return;
 		}
-		prev_drift_comp = drift_comp;
+		prev_drift_comp = loop_data.drift_comp;
 		wander_resid = wander_threshold;
-		drift_write(stats_drift_file, drift_comp * US_PER_S);
+		drift_write(stats_drift_file, loop_data.drift_comp * US_PER_S);
 	}
 }
 
@@ -257,7 +257,7 @@ stats_config(
 		 */
 		if (drift_read(stats_drift_file, &new_drift)) {
 		    loop_config(LOOP_FREQ, new_drift);
-		    prev_drift_comp = drift_comp;
+		    prev_drift_comp = loop_data.drift_comp;
 		}
 		break;
 

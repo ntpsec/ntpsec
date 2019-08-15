@@ -504,7 +504,7 @@ handle_procpkt(
 	const double delta = fabs(t21 - t34);
 	const double epsilon = LOGTOD(sys_vars.sys_precision) +
 	    LOGTOD(peer->precision) +
-	    clock_phi * delta;
+	    loop_data.clock_phi * delta;
 
 	/* One final test before we touch any variables that could
 	   affect the clock: don't accept any packets with a round
@@ -943,7 +943,7 @@ clock_update(
 	dtemp	= peer->rootdisp
 		+ peer->disp
 		+ sys_jitter
-		+ clock_phi * (current_time - peer->update)
+		+ loop_data.clock_phi * (current_time - peer->update)
 		+ fabs(sys_offset);
 
 	if (dtemp > sys_mindisp)
@@ -1268,7 +1268,7 @@ clock_filter(
 	 * less than the Allan intercept use the delay; otherwise, use
 	 * the sum of the delay and dispersion.
 	 */
-	dtemp = clock_phi * (current_time - peer->update);
+	dtemp = loop_data.clock_phi * (current_time - peer->update);
 	peer->update = current_time;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		if (i != 0)
@@ -1447,7 +1447,7 @@ clock_select(void)
 	 */
 	osys_peer = sys_vars.sys_peer;
 	sys_survivors = 0;
-	if (lockclock) {
+	if (loop_data.lockclock) {
 		set_sys_leap(LEAP_NOTINSYNC);
 		sys_vars.sys_stratum = STRATUM_UNSPEC;
 		memcpy(&sys_vars.sys_refid, "DOWN", REFIDLEN);
@@ -1994,7 +1994,7 @@ root_distance(
 	dtemp = (peer->delay + peer->rootdelay) / 2
 		+ LOGTOD(peer->precision)
 		  + LOGTOD(sys_vars.sys_precision)
-		  + clock_phi * (current_time - peer->update)
+		  + loop_data.clock_phi * (current_time - peer->update)
 		+ peer->rootdisp
 		+ peer->jitter;
 	/*
@@ -2504,14 +2504,14 @@ peer_unfit(
 	 * plus the increment due to one host poll interval.
 	 */
 	if (!(peer->cfg.flags & FLAG_REFCLOCK) && root_distance(peer) >=
-	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
+	    sys_maxdist + loop_data.clock_phi * ULOGTOD(peer->hpoll))
 		rval |= BOGON11;		/* distance exceeded */
 /* Startup bug, https://gitlab.com/NTPsec/ntpsec/issues/68
  *   introduced with ntp-dev-4.2.7p385
  * [2085] Fix root distance and root dispersion calculations.
  */
 	if (!(peer->cfg.flags & FLAG_REFCLOCK) && peer->disp >=
-	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
+	    sys_maxdist + loop_data.clock_phi * ULOGTOD(peer->hpoll))
 		rval |= BOGON11;		/* Initialization */
 
 	/*

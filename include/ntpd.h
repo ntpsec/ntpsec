@@ -269,12 +269,15 @@ struct ntp_io_data {
 extern struct ntp_io_data io_data;
 
 /* ntp_loopfilter.c */
-extern bool	lockclock;		/* lock to the system clock? */
-extern double	drift_comp;		/* clock frequency (s/s) */
-extern double	clock_stability;	/* clock stability (s/s) */
-extern double	clock_max_back;		/* max backward offset before step (s) */
-extern double	clock_max_fwd;		/* max forward offset before step (s) */
-extern double	clock_phi;		/* dispersion rate (s/s) */
+struct ntp_loop_data {
+  bool   lockclock;       /* lock to system clock? (externally disciplined?) */
+  double drift_comp;      /* clock frequency (s/s) */
+  double clock_stability; /* clock stability (wander) (s/s) */
+  double clock_max_back;  /* max backward offset before step (s) */
+  double clock_max_fwd;   /* max forward offset before step (s) */
+  double clock_phi;       /* dispersion rate (s/s) */
+};
+extern struct ntp_loop_data loop_data;
 
 /*
  * Clock state machine control flags

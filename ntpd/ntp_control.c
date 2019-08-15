@@ -1446,7 +1446,7 @@ ctl_putsys(
 
 	case CS_DRIFT:
                 /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
-		ctl_putdbl6(sys_var[CS_DRIFT].text, drift_comp * US_PER_S);
+		ctl_putdbl6(sys_var[CS_DRIFT].text, loop_data.drift_comp * US_PER_S);
 		break;
 
 	case CS_JITTER:
@@ -1482,7 +1482,7 @@ ctl_putsys(
 	case CS_STABIL:
 		/* a.k.a clk_wander (s/s), output as us/s */
 		ctl_putdbl6(sys_var[CS_STABIL].text,
-                            clock_stability * US_PER_S);
+                            loop_data.clock_stability * US_PER_S);
 		break;
 
 	case CS_VARLIST:
@@ -1871,7 +1871,7 @@ ctl_putsys(
 		break;
 
 	case CS_K_LOCKCLOCK:
-		ctl_putuint(sys_var[varid].text, lockclock);
+		ctl_putuint(sys_var[varid].text, loop_data.lockclock);
 		break;
 
 	case CS_IOSTATS_RESET:

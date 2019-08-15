@@ -110,7 +110,7 @@ local_start(
 	peer->sstclktype = CTL_SST_TS_LOCAL;
 	poll_time = current_time;
 	if (pp->sloppyclockflag & CLK_FLAG1)
-	    lockclock = true;
+	    loop_data.lockclock = true;
 	return true;
 }
 
@@ -158,7 +158,7 @@ local_poll(
 	 * If another process is disciplining the system clock, we set
 	 * the leap bits and quality indicators from the kernel.
 	 */
-	if (lockclock) {
+	if (loop_data.lockclock) {
 		struct timex ntv;
 		memset(&ntv,  0, sizeof ntv);
 		switch (ntp_adjtime(&ntv)) {
