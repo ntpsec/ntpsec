@@ -887,7 +887,7 @@ local_clock(
 	record_loop_stats(clock_offset, loop_data.drift_comp, clock_jitter,
 	    loop_data.clock_stability, sys_poll);
 	DPRINT(1, ("local_clock: offset %.9f jit %.9f freq %.6f stab %.3f poll %d\n",
-		   clock_offset, clock_jitter, drift_comp * US_PER_S,
+		   clock_offset, clock_jitter, loop_data.drift_comp * US_PER_S,
 		   loop_data.clock_stability * US_PER_S, sys_poll));
 	return (rval);
 }
