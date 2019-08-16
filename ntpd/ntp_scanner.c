@@ -34,7 +34,11 @@
 /* ntp_keyword.h declares finite state machine and token text */
 #include "ntp_keyword.h"
 
-
+/* used to implement g and G suffixes for numeric literals in fudge offset declarations */
+#define SECONDS_IN_WEEK	(7 * 24 * 60 * 60)
+#define GPS_ERA_10BIT	(1024L * SECONDS_IN_WEEK)
+#define GPS_ERA_13BIT	(8192L * SECONDS_IN_WEEK)
+#define ERA_SUFFIX(c)	((c) == 'g' || (c) == 'G')
 
 /* SCANNER GLOBAL VARIABLES
  * ------------------------
@@ -673,6 +677,10 @@ is_double(
 	while (lexeme[i] && isdigit((uint8_t)lexeme[i]))
 		i++;
 
+	/* Allow trailing multipliers */
+	while (ERA_SUFFIX(lexeme[i]))
+	    i++;
+
 	/* Check if we are done */
 	if (!lexeme[i])
 		return true;
@@ -921,9 +929,19 @@ yylex(void)
 			token = T_U_int;
 			goto normal_return;
 		} else if (is_double(yytext)) {
+		    double era_offset = 0;
 			yylval_was_set = true;
 			errno = 0;
-			yylval.Double = atof(yytext);
+			while (ERA_SUFFIX(yytext[strlen(yytext)-1])) {
+				if (yytext[strlen(yytext)-1] == 'g') {
+					era_offset += GPS_ERA_10BIT;
+				}
+				if (yytext[strlen(yytext)-1] == 'G') {
+					era_offset += GPS_ERA_13BIT;
+				}
+				yytext[strlen(yytext)-1] = '\0';
+			}
+			yylval.Double = era_offset + atof(yytext);
 			if ( D_ISZERO_NS(yylval.Double) && errno == ERANGE) {
 			    /* FIXME, POSIX says atof() never returns errors */
 			    msyslog(LOG_ERR,

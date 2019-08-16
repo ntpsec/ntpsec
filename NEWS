@@ -12,6 +12,12 @@ on user-visible changes.
 
 == Repository head ==
 
+The numeric literal argument of the 'time1' fudge option on a clock
+can now have one or more letter suffixes that compensate for era
+rollover in a GPS device.  Each "g" adds the number of seconds in a
+1024-week (10-bit) GPS era. Each "G" adds the number of seconds in a
+8192-week (13-bit) GPS era.
+
 == 2019-07-10: 1.1.6 ==
 
 Fixes to code quality checks.

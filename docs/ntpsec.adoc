@@ -247,6 +247,11 @@ to the security-critical core.
   each refclock page.  One major feature of the new syntax is that
   refclock drivers are referred to by names, not numbers.
 
+* Entries for GPS devices can be fudged for era wraparound using the
+  +time1+ offset. Each 'g' on the end of the offset adds the number of
+  seconds in a 10-bit GPS era (1024 weeks); each 'G' adds the number
+  of seconds in a 13-bit GPS era (8192 weeks).
+
 * The unpeer command now takes a type-unit specification when
   unpeering a clock.
 

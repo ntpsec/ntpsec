@@ -170,9 +170,9 @@ constraints at the time the system was designed, the week counters are
 only 10 bits long; thus, GPS time has a period of 1024 weeks (a bit
 over 19 years) footnote:[It is planned that future GPS satellites will
 increase the week counter length to 13 bits, for a period of 8192
-weeks or more than 157 years].  At time of writing, one GPS rollover
-has occurred at 1999-08-22T00:00:00 and the next will occur on
-2019-05-06.
+weeks or more than 157 years].  At time of writing, two GPS rollovers
+have occurred; the first at 1999-08-22T00:00:00 and the second at
+2019-05-06T00:00:00.
 
 (GPS was originally designed for military geolocation, not time
 service. It does not seem to have occurred to the originators that
@@ -217,7 +217,7 @@ The most naive way to do this would be to simply use the zero date of the
 current GPS era (1024-week cycle) as the base.  Some very early GPS
 equipment seems to have worked this way, but it has the drawback that
 the device time-warps at the next GPS era rollover - which, if your
-device first shipped only a few years before that rollover - is a
+device first shipped only a few years before that rollover is a
 serious drawback.
 
 There is a relatively simple way to extend the useful life of a GPS
@@ -228,7 +228,7 @@ a GPS rollover has occurred and add 1024 weeks to the base date.
 This technique will postpone time-warping to a full 1024 weeks after
 the pivot date - which the vendor typically makes the release date
 of the device firmware.  But it won't do any better than that; without the
-ability to change the base date, the device will ship incorrect
+ability to reconfigure the base date, the device will ship incorrect
 reports forever afterwards.  A few refclocks, like the HP-GPS line,
 have that ability; most do not.
 
@@ -260,9 +260,15 @@ ready to compensate by dropping in a device with a newer pivot date.
 
 Actionable advice that follows from this: If you don't know the
 manufacturing date of a GPS-based device to within a couple of years,
-don't trust that it won't be rolled over and useless *the first time
+don't trust that it won't be rolled over *the first time
 you start it*.  Shopping for cheap refclocks at surplus houses or
 on the Web is particularly hazardous this way.
+
+NTPsec includes a workaround option for these old devices. Each "g"
+suffix on the 'time1' offset option for a device adds the number of seconds
+in a 1024-week era; this corresponds to the 10-bit week counters used
+in today's GNSS. "G"  adds the number of seconds in the 8192-week era
+of te future.
 
 A fairly bulletproof mitigation strategy, if you are running
 autonomously, is to have multiple GPS clocks per server and replace

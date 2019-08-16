@@ -21,6 +21,10 @@ system clock to be near correct before samples will be processed
 properly. You will not be able to use it to run autonomously, nor will
 it reliably recover from a trashed or zeroed system clock.
 
+It is likely any surving instances of this hardware will have
+era-rollover issues when reporting dates. One or more "g" suffixes
+on your 'time1' option may be useful as a workaround.
+
 == Description
 
 This driver supports the Arbiter 1088A/B Satellite Controlled Clock. The

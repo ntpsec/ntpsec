@@ -49,6 +49,13 @@ The various GPS sentences that this driver recognises look like this
 |$GPZDG,GPSTIME,DD,MM,YYYY,AA.BB,V*CS<cr><lf>|Accord
 |=============================================================================
 
+Important caveats: If your NMEA device does not ship GPZDA, you cannot
+use it to run autonomously without a check peer, or expect recovery
+from a trashed system clock.  Also, dates from old NMEA devices are
+vulnerable to era wraparound; the NMEA dtiver has an internal trick
+that attempts to detect this, but one or more "g" suffixes on your
+'time1' option may be useful as a workaround.
+
 .NMEA data items
 [cols="15%,85%",options="header"]
 [options="header"]
@@ -220,6 +227,10 @@ switched on by sending the following string.
 -----------------------------
 "$PGRMC,,,,,,,,,,,,2<cr><lf>"
 -----------------------------
+
+It is likely any surving instances of this hardware will have
+era-rollover issues when reporting dates. One or more "g" suffixes
+on your 'time1' option may be useful as a workaround.
 
 == Driver Options
 
