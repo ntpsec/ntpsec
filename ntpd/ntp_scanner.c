@@ -35,7 +35,7 @@
 #include "ntp_keyword.h"
 
 /* used to implement g and G suffixes for numeric literals in fudge offset declarations */
-#define SECONDS_IN_WEEK	(long double)(7 * 24 * 60 * 60) /* Cast for 32bit */
+#define SECONDS_IN_WEEK	(unsigned long long)(7 * 24 * 60 * 60) /* 32bit systems*/
 #define GPS_ERA_10BIT	(1024L * SECONDS_IN_WEEK)
 #define GPS_ERA_13BIT	(8192L * SECONDS_IN_WEEK)
 #define ERA_SUFFIX(c)	((c) == 'g' || (c) == 'G')
