@@ -47,6 +47,10 @@ possibility of removing this driver will be revisited.
 
 See the CNS Clock vendor product page for specfications.
 
+We except this should also work with the Furuno line of
+M12 compatibles, including the GT8736 and (now discontinued) GT8536,
+but we don't yet have confirmation from the field.
+
 The driver can use use the "position hold" mode with user provided
 coordinates, the receiver's built-in site-survey, or a similar algorithm
 implemented in this driver to determine the antenna position.
