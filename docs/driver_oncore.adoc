@@ -36,7 +36,7 @@ However, there is one current hardware product that is reported good
 with this driver; the
 https://www.cnssys.com/cnsclock/CNSClockII.php[CNS Clock II].  It
 ships 1PPS on the DCD line of its RS232 port or as a DCD priority
-packet on USB.  Older revisions of the productr use M12 hardware,
+packet on USB.  Older revisions of the product used M12 hardware,
 newer ones use a u-blox engine but emulate OnCore behavior.  Future
 versions will drop OnCore reporting enturely, at which time the
 possibility of removing this driver will be revisited.
