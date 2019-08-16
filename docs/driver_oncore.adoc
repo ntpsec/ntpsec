@@ -47,7 +47,7 @@ possibility of removing this driver will be revisited.
 
 See the CNS Clock vendor product page for specfications.
 
-We except this should also work with the Furuno line of
+We expect this should also work with the Furuno line of
 M12 compatibles, including the GT8736 and (now discontinued) GT8536,
 but we don't yet have confirmation from the field.
 
