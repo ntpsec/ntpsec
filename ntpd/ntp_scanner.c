@@ -664,21 +664,21 @@ is_double(
 		return true;
 
 	/* There is still more input, read the exponent */
-	if ('e' == tolower((uint8_t)lexeme[i]))
-		i++;
-	else
-		return false;
-
-	/* Read an optional Sign */
-	if ('+' == lexeme[i] || '-' == lexeme[i])
+	if ('e' == tolower((uint8_t)lexeme[i])) {
 		i++;
 
-	/* Now read the exponent part */
-	while (lexeme[i] && isdigit((uint8_t)lexeme[i]))
-		i++;
+		/* Read an optional Sign */
+		if ('+' == lexeme[i] || '-' == lexeme[i])
+			i++;
+
+		/* Now read the exponent part */
+		while (lexeme[i] && isdigit((uint8_t)lexeme[i]))
+			i++;
+
+	}
 
 	/* Allow trailing multipliers */
-	while (ERA_SUFFIX(lexeme[i]))
+	while (lexeme[i] && ERA_SUFFIX(lexeme[i]))
 	    i++;
 
 	/* Check if we are done */
