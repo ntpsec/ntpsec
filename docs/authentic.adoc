@@ -209,13 +209,12 @@ infrastructure to secure and authenticate associations.
 
 This section is a placeholder for complete documentation on NTS. The
 NTS implementation is work in progress conforming to a draft RFC not
-yet accepted.
+yet (Aug 2019) accepted.  A Quick Start Guide on the current implementation
+of NTS is available at
+link:NTS-QuickStart.html[Quick way to get NTS working] .
 
 NTPsec's future direction is to fully support NTS and eventually
 remove older, insecure authentication methods.
-
-There is some documentation of client-side configuration on the
-link:confopt.html#options[Server Commands and Options] page.
 
 [[windows]]
 == Microsoft Windows Authentication
