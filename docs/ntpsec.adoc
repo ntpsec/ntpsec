@@ -293,7 +293,7 @@ to the security-critical core.
   maxdisp". See RFC 5905 for discussion of this synchronization
   parameter.
 
-* The default baudrate of the NMEA driver has been changed to 9600 to
+* The default bitrate of the NMEA driver has been changed to 9600 to
   match the default speed of almost all modern GPSes.  The code can be
   built in a strict NTP Classic compatibility mode that restores the
   old 4800bps default.
