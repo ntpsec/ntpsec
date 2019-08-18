@@ -59,6 +59,10 @@ utility can be used to verify a partial or complete path exists. Most
 problems reported to the NTP newsgroup are not NTP problems, but
 problems with the network or firewall configuration.
 
+If you use GPS, and your time is off by 19 years, you may have been
+bitten by the GPS rollover bug.
+Please see link:rollover.html[Rollover issues in time sources]
+
 == Verifying Correct Operation
 
 Unless using the +iburst+ option, the client normally takes a few
