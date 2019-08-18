@@ -52,7 +52,7 @@ The various GPS sentences that this driver recognises look like this
 Important caveats: If your NMEA device does not ship GPZDA, you cannot
 use it to run autonomously without a check peer, or expect recovery
 from a trashed system clock.  Also, dates from old NMEA devices are
-vulnerable to era wraparound; the NMEA dtiver has an internal trick
+vulnerable to era wraparound; the NMEA driver has an internal trick
 that attempts to detect this, but one or more "g" suffixes on your
 'time1' option may be useful as a workaround.
 

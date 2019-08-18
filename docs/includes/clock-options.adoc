@@ -37,11 +37,11 @@
     Specifies a constant to be added to the time offset produced by the
     driver, a fixed-point decimal number in seconds. Each "g" on the
     end of the constant adds the number of seconds in a 10-bit GPS
-    era; each "G" adds the number of seconds in a 13-bit GPS era. This is used as a
-    calibration constant to adjust the nominal time offset of a
-    particular clock to agree with an external standard, such as a
+    era; each "G" adds the number of seconds in a 13-bit GPS era. This
+    is used as a calibration constant to adjust the nominal time offset
+    of a particular clock to agree with an external standard, such as a
     precision PPS signal. It also provides a way to correct a systematic
-    error or bias due to era wraparound from a GPS device, 
+    error or bias due to era wraparound from a GPS device,
     serial port or operating system latencies,
     different cable lengths or receiver internal delay. The specified
     offset is in addition to the propagation delay provided by other
