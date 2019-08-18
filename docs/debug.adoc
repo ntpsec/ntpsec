@@ -227,9 +227,8 @@ If the +ntpq+ or program does not show that messages are being
 received by the daemon or that received messages do not result in
 correct synchronization, verify the following:
 
-1.  Verify the +/etc/services+ file host machine is configured to accept
-UDP packets on the NTP port 123. NTP is specifically designed to use UDP
-and does not respond to TCP.
+1.  Verify the +/etc/services+ file host machine has an entry for 123/udp.
+If you are using NTS, you must also have an entry for 123/tcp.
 
 2.  Check the system log for +ntpd+ messages about configuration errors,
 name-lookup failures or initialization problems. Common system log
