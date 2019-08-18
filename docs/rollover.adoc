@@ -168,12 +168,14 @@ Raw GPS time is expressed as weeks since the GPS epoch
 1980-01-06T00:00:00, and seconds within the week.  Due to cost
 constraints at the time the system was designed, the week counters are
 only 10 bits long; thus, GPS time has a period of 1024 weeks (a bit
-over 19 years) footnote:[It is planned that future GPS satellites will
-increase the week counter length to 13 bits, for a period of 8192
-weeks or more than 157 years].  At time of writing, two GPS rollovers
+over 19 years).  At time of writing, two GPS rollovers
 have occurred; the first at 1999-08-22T00:00:00 and the second at
 2019-04-06T00:00:00.  Note that these times are "GPS Time", not
 UTC.
+
+It is planned that future GPS satellites will increase the week
+counter length to 13 bits, for a period of 8192 weeks or more
+than 157 years.
 
 (GPS was originally designed for military geolocation, not time
 service. It does not seem to have occurred to the originators that
