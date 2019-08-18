@@ -38,9 +38,10 @@ with configuration and network troubles.
 Some problems are immediately apparent when the daemon first starts
 running. The most common of these are the lack of a UDP port for NTP
 (123) in the Unix +/etc/services+ file (or equivalent in some systems).
-*Note that NTP does not use TCP in any form. Also note that NTP requires
-port 123 for both source and destination ports.* These facts should be
-pointed out to firewall administrators.
+*Note that NTP requires port 123 for both source and destination ports.*
+These facts should be pointed out to firewall administrators.
+If you are using link:NTS-QuickStart.html[NTS], you also need to
+add an entry for TCP port 123.
 
 Other problems are apparent in the system log, which ordinarily shows
 the startup banner, some cryptic initialization data and the computed
