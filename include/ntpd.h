@@ -298,13 +298,16 @@ extern int	peer_ntpdate;		/* count of ntpdate peers */
 /*
  * Clock state machine variables
  */
-extern uint8_t	sys_poll;		/* system poll interval (log2 s) */
-extern int	tc_counter;		/* poll-adjust counter */
-extern double	last_offset;		/* last clock offset (s) */
-extern uint8_t	allan_xpt;		/* Allan intercept (log2 s) */
-extern double	clock_jitter;		/* clock jitter (s) */
-extern double	sys_offset;		/* system offset (s) */
-extern double	sys_jitter;		/* system jitter (s) */
+struct clock_state_machine {
+  uint8_t sys_poll;     /* system poll interval time constant/poll (log2 s) */
+  int     tc_counter;   /* poll-adjust counter */
+  double  last_offset;  /* last clock offset (s) */
+  uint8_t allan_xpt;    /* Allan intercept (log2 s) */
+  double  clock_jitter; /* clock jitter (s) */
+  double  sys_offset;   /* system offset (s) */
+  double  sys_jitter;   /* system jitter (s) */
+};
+extern struct clock_state_machine clkstate;
 
 /* ntp_monitor.c */
 struct monitor_data {

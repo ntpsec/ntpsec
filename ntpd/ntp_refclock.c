@@ -537,8 +537,8 @@ refclock_receive(
 		return;
 
 	clock_filter(peer, pp->offset, 0., pp->jitter);
-	if (cal_enable && fabs(last_offset) < sys_mindisp && sys_vars.sys_peer !=
-	    NULL) {
+	if (cal_enable && fabs(clkstate.last_offset) < sys_mindisp &&
+		sys_vars.sys_peer != NULL) {
 		if (sys_vars.sys_peer->is_pps_driver &&
 		    !peer->is_pps_driver)
 			pp->fudgetime1 -= pp->offset * FUDGEFAC;

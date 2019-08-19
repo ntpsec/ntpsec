@@ -240,7 +240,7 @@ timer(void)
 			sys_vars.sys_refid = htonl(LOOPBACKADR);
 		else
 			memcpy(&sys_vars.sys_refid, "LOOP", REFIDLEN);
-		sys_offset = 0;
+		clkstate.sys_offset = 0;
 		sys_vars.sys_rootdelay = 0;
 		sys_vars.sys_rootdisp = 0;
 	}

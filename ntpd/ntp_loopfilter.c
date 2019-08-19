@@ -106,7 +106,6 @@
 static double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
 static double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
-uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
 struct ntp_loop_data loop_data = {
   .clock_max_back = CLOCK_MAX, /* step threshold */
   .clock_max_fwd =  CLOCK_MAX, /* step threshold */
@@ -118,7 +117,6 @@ struct ntp_loop_data loop_data = {
  */
 static double clock_offset;	/* offset (non-lockclock case only) */
 static uptime_t clock_epoch;	/* last update (non-lockclock case only) */
-double	clock_jitter;		/* offset jitter */
 static double init_drift_comp; /* initial frequency (PPM) */
 unsigned int	sys_tai;		/* TAI offset from UTC */
 /* following variables are non-lockclock case only */
@@ -162,9 +160,9 @@ static bool	ext_enable;	/* external clock enabled */
  * Clock state machine variables
  */
 static int	state = 0;	/* clock discipline state (non-lockclock only) */
-uint8_t	sys_poll;		/* time constant/poll (log2 s) */
-int	tc_counter;		/* jiggle counter */
-double	last_offset;		/* last offset (s) */
+struct clock_state_machine clkstate = {
+  .allan_xpt = CLOCK_ALLAN,
+};
 
 /*
  * Huff-n'-puff filter variables
@@ -218,8 +216,8 @@ init_loopfilter(void)
 	/*
 	 * Initialize state variables.
 	 */
-	sys_poll = ntp_minpoll;
-	clock_jitter = LOGTOD(sys_vars.sys_precision);
+	clkstate.sys_poll = ntp_minpoll;
+	clkstate.clock_jitter = LOGTOD(sys_vars.sys_precision);
 	freq_cnt = (int)clock_minstep;
 }
 
@@ -446,8 +444,9 @@ local_clock(
 	 * the open-loop response and then go home.
 	 */
 	if (loop_data.lockclock || !clock_ctl.ntp_enable) {
-		record_loop_stats(fp_offset, loop_data.drift_comp, clock_jitter,
-		    loop_data.clock_stability, sys_poll);
+		record_loop_stats(fp_offset, loop_data.drift_comp,
+            clkstate.clock_jitter, loop_data.clock_stability,
+            clkstate.sys_poll);
 		return (0);
 	}
 
@@ -499,8 +498,9 @@ local_clock(
 			    fp_offset);
 			printf("ntpd: time slew %+.6fs\n", fp_offset);
 		}
-		record_loop_stats(fp_offset, loop_data.drift_comp, clock_jitter,
-		    loop_data.clock_stability, sys_poll);
+		record_loop_stats(fp_offset, loop_data.drift_comp,
+            clkstate.clock_jitter, loop_data.clock_stability,
+            clkstate.sys_poll);
 		exit(0);
 	}
 
@@ -538,11 +538,11 @@ local_clock(
 	 * Note the kernel is disabled if step is disabled or greater
 	 * than 0.5 s or in ntpdate mode.
 	 */
-	osys_poll = sys_poll;
-	if (sys_poll < peer->cfg.minpoll)
-		sys_poll = peer->cfg.minpoll;
-	if (sys_poll > peer->cfg.maxpoll)
-		sys_poll = peer->cfg.maxpoll;
+	osys_poll = clkstate.sys_poll;
+	if (clkstate.sys_poll < peer->cfg.minpoll)
+		clkstate.sys_poll = peer->cfg.minpoll;
+	if (clkstate.sys_poll > peer->cfg.maxpoll)
+		clkstate.sys_poll = peer->cfg.maxpoll;
 	mu = current_time - clock_epoch;
 	clock_frequency = loop_data.drift_comp;
 	rval = 1;
@@ -620,8 +620,8 @@ local_clock(
 			report_event(EVNT_CLOCKRESET, NULL, tbuf);
 			step_systime(fp_offset, ntp_set_tod);
 			reinit_timer();
-			tc_counter = 0;
-			clock_jitter = LOGTOD(sys_vars.sys_precision);
+			clkstate.tc_counter = 0;
+			clkstate.clock_jitter = LOGTOD(sys_vars.sys_precision);
 			rval = 2;
 			if (state == EVNT_NSET) {
 				rstclock(EVNT_FREQ, 0);
@@ -636,9 +636,9 @@ local_clock(
 		 * the jitter as the exponentially weighted offset
 		 * differences.
 		 */
-		etemp = SQUARE(clock_jitter);
-		dtemp = SQUARE(fp_offset - last_offset);
-		clock_jitter = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
+		etemp = SQUARE(clkstate.clock_jitter);
+		dtemp = SQUARE(fp_offset - clkstate.last_offset);
+		clkstate.clock_jitter = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 		switch (state) {
 
 		/*
@@ -682,9 +682,9 @@ local_clock(
 				 * becomes ineffective above the Allan intercept
 				 * where the FLL becomes effective.
 				 */
-				if (sys_poll >= allan_xpt)
+				if (clkstate.sys_poll >= clkstate.allan_xpt)
 					clock_frequency += (fp_offset -
-					    clock_offset) / (max(ULOGTOD(sys_poll),
+					    clock_offset) / (max(ULOGTOD(clkstate.sys_poll),
 					    mu) * CLOCK_FLL);
 
 				/*
@@ -693,8 +693,8 @@ local_clock(
 				 * intercept. This reduces the PLL gain when the
 				 * FLL becomes effective.
 				 */
-				etemp = min(ULOGTOD(allan_xpt), mu);
-				dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
+				etemp = min(ULOGTOD(clkstate.allan_xpt), mu);
+				dtemp = 4 * CLOCK_PLL * ULOGTOD(clkstate.sys_poll);
 				clock_frequency += fp_offset * etemp / (dtemp *
 				    dtemp);
 			}
@@ -749,14 +749,14 @@ local_clock(
 				dtemp = .5;
 			ntv.offset = (long)(clock_offset * NS_PER_S + dtemp);
 #ifdef STA_NANO
-			ntv.constant = sys_poll;
+			ntv.constant = clkstate.sys_poll;
 #else /* STA_NANO */
-			ntv.constant = sys_poll - 4;
+			ntv.constant = clkstate.sys_poll - 4;
 #endif /* STA_NANO */
 			if (ntv.constant < 0)
 				ntv.constant = 0;
 
-			ntv.esterror = (long)(clock_jitter * US_PER_S);
+			ntv.esterror = (long)(clkstate.clock_jitter * US_PER_S);
 			ntv.maxerror = (long)((sys_vars.sys_rootdelay / 2 +
 			    sys_vars.sys_rootdisp) * US_PER_S);
 			ntv.status = STA_PLL;
@@ -803,7 +803,7 @@ local_clock(
 		 * If the kernel PPS is lit, monitor its performance.
 		 */
 		if (ntv.status & STA_PPSTIME) {
-			clock_jitter = ntv.jitter * S_PER_NS;
+			clkstate.clock_jitter = ntv.jitter * S_PER_NS;
 		}
 
 #if defined(STA_NANO) && defined(NTP_API) && NTP_API == 4
@@ -854,23 +854,23 @@ local_clock(
 	 * fiddle with the poll during the startup clamp period.
 	 */
 	if (freq_cnt > 0) {
-		tc_counter = 0;
-	} else if (fabs(clock_offset) < CLOCK_PGATE * clock_jitter) {
-		tc_counter += sys_poll;
-		if (tc_counter > CLOCK_LIMIT) {
-			tc_counter = CLOCK_LIMIT;
-			if (sys_poll < peer->cfg.maxpoll) {
-				tc_counter = 0;
-				sys_poll++;
+		clkstate.tc_counter = 0;
+	} else if (fabs(clock_offset) < CLOCK_PGATE * clkstate.clock_jitter) {
+		clkstate.tc_counter += clkstate.sys_poll;
+		if (clkstate.tc_counter > CLOCK_LIMIT) {
+			clkstate.tc_counter = CLOCK_LIMIT;
+			if (clkstate.sys_poll < peer->cfg.maxpoll) {
+				clkstate.tc_counter = 0;
+				clkstate.sys_poll++;
 			}
 		}
 	} else {
-		tc_counter -= sys_poll << 1;
-		if (tc_counter < -CLOCK_LIMIT) {
-			tc_counter = -CLOCK_LIMIT;
-			if (sys_poll > peer->cfg.minpoll) {
-				tc_counter = 0;
-				sys_poll--;
+		clkstate.tc_counter -= clkstate.sys_poll << 1;
+		if (clkstate.tc_counter < -CLOCK_LIMIT) {
+			clkstate.tc_counter = -CLOCK_LIMIT;
+			if (clkstate.sys_poll > peer->cfg.minpoll) {
+				clkstate.tc_counter = 0;
+				clkstate.sys_poll--;
 			}
 		}
 	}
@@ -878,17 +878,18 @@ local_clock(
 	/*
 	 * If the time constant has changed, update the poll variables.
 	 */
-	if (osys_poll != sys_poll)
-		poll_update(peer, sys_poll);
+	if (osys_poll != clkstate.sys_poll)
+		poll_update(peer, clkstate.sys_poll);
 
 	/*
 	 * Yibbidy, yibbbidy, yibbidy; that'h all folks.
 	 */
-	record_loop_stats(clock_offset, loop_data.drift_comp, clock_jitter,
-	    loop_data.clock_stability, sys_poll);
+	record_loop_stats(clock_offset, loop_data.drift_comp,
+        clkstate.clock_jitter, loop_data.clock_stability, clkstate.sys_poll);
 	DPRINT(1, ("local_clock: offset %.9f jit %.9f freq %.6f stab %.3f poll %d\n",
-		   clock_offset, clock_jitter, loop_data.drift_comp * US_PER_S,
-		   loop_data.clock_stability * US_PER_S, sys_poll));
+		   clock_offset, clkstate.clock_jitter,
+           loop_data.drift_comp * US_PER_S,
+           loop_data.clock_stability * US_PER_S, clkstate.sys_poll));
 	return (rval);
 }
 
@@ -932,7 +933,7 @@ adj_host_clock(
 	} else if (clock_ctl.pll_control && clock_ctl.kern_enable) {
 		offset_adj = 0.;
 	} else {
-		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
+		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(clkstate.sys_poll));
 	}
 
 	/*
@@ -979,12 +980,12 @@ rstclock(
 	)
 {
         DPRINT(2, ("local_clock: mu %" PRIu32 " state %d poll %d count %d\n",
-                  current_time - clock_epoch, trans, sys_poll,
-                  tc_counter));
+                  current_time - clock_epoch, trans, clkstate.sys_poll,
+                  clkstate.tc_counter));
 	if (trans != state && trans != EVNT_FSET)
 		report_event(trans, NULL, NULL);
 	state = trans;
-	last_offset = clock_offset = offset;
+	clkstate.last_offset = clock_offset = offset;
 	clock_epoch = current_time;
 }
 
@@ -1059,7 +1060,7 @@ start_kern_loop(void)
 	ntv.status = STA_PLL;
 	ntv.maxerror = sys_maxdisp;
 	ntv.esterror = sys_maxdisp;
-	ntv.constant = sys_poll; /* why is it that here constant is unconditionally set to sys_poll, whereas elsewhere is is modified depending on nanosecond vs. microsecond kernel? */
+	ntv.constant = clkstate.sys_poll; /* why is it that here constant is unconditionally set to sys_poll, whereas elsewhere is is modified depending on nanosecond vs. microsecond kernel? */
 #ifdef SIGSYS
 	/*
 	 * Use sigsetjmp() to save state and then call ntp_adjtime(); if
@@ -1228,7 +1229,7 @@ loop_config(
 	 * Tinker command variables for Ulrich Windl. Very dangerous.
 	 */
 	case LOOP_ALLAN:	/* Allan intercept (log2) (allan) */
-		allan_xpt = (uint8_t)freq;
+		clkstate.allan_xpt = (uint8_t)freq;
 		break;
 
 	case LOOP_PHI:		/* dispersion threshold (dispersion) */

@@ -1411,7 +1411,7 @@ ctl_putsys(
 		break;
 
 	case CS_POLL:
-		ctl_putuint(sys_var[CS_POLL].text, sys_poll);
+		ctl_putuint(sys_var[CS_POLL].text, clkstate.sys_poll);
 		break;
 
 	case CS_PEERID:
@@ -1441,7 +1441,7 @@ ctl_putsys(
 		}
 
 	case CS_OFFSET:
-		ctl_putdbl6(sys_var[CS_OFFSET].text, last_offset * MS_PER_S);
+		ctl_putdbl6(sys_var[CS_OFFSET].text, clkstate.last_offset * MS_PER_S);
 		break;
 
 	case CS_DRIFT:
@@ -1450,12 +1450,12 @@ ctl_putsys(
 		break;
 
 	case CS_JITTER:
-		ctl_putdbl6(sys_var[CS_JITTER].text, sys_jitter * MS_PER_S);
+		ctl_putdbl6(sys_var[CS_JITTER].text, clkstate.sys_jitter * MS_PER_S);
 		break;
 
 	case CS_ERROR:
 		/* a.k.a clk_jitter (s).  output as ms */
-		ctl_putdbl6(sys_var[CS_ERROR].text, clock_jitter * MS_PER_S);
+		ctl_putdbl6(sys_var[CS_ERROR].text, clkstate.clock_jitter * MS_PER_S);
 		break;
 
 	case CS_CLOCK:

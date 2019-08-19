@@ -119,11 +119,9 @@ bool leap_sec_in_progress;
  * Nonspecified system state variables
  */
 l_fp	sys_authdelay;		/* authentication delay */
-double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 static double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_maxdisp = MAXDISPERSE; /* maximum dispersion */
-double	sys_jitter;		/* system jitter */
 static unsigned long	sys_epoch;	/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
 static int leap_vote_ins;	/* leap consensus for insert */
@@ -828,7 +826,7 @@ transmit(
 			 * Unreach is also reset for survivors in
 			 * clock_select().
 			 */
-			hpoll = sys_poll;
+			hpoll = clkstate.sys_poll;
 			if (!(peer->cfg.flags & FLAG_PREEMPT))
 				peer->unreach = 0;
 			if ((peer->cfg.flags & FLAG_BURST) && peer->retry ==
@@ -911,11 +909,11 @@ clock_update(
 	 */
 	sys_vars.sys_peer = peer;
 	sys_epoch = peer->epoch;
-	if (sys_poll < peer->cfg.minpoll)
-		sys_poll = peer->cfg.minpoll;
-	if (sys_poll > peer->cfg.maxpoll)
-		sys_poll = peer->cfg.maxpoll;
-	poll_update(peer, sys_poll);
+	if (clkstate.sys_poll < peer->cfg.minpoll)
+		clkstate.sys_poll = peer->cfg.minpoll;
+	if (clkstate.sys_poll > peer->cfg.maxpoll)
+		clkstate.sys_poll = peer->cfg.maxpoll;
+	poll_update(peer, clkstate.sys_poll);
 	sys_vars.sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 	if (peer->stratum == STRATUM_REFCLOCK ||
 	    peer->stratum == STRATUM_UNSPEC)
@@ -942,9 +940,9 @@ clock_update(
 	 */
 	dtemp	= peer->rootdisp
 		+ peer->disp
-		+ sys_jitter
+		+ clkstate.sys_jitter
 		+ loop_data.clock_phi * (current_time - peer->update)
-		+ fabs(sys_offset);
+		+ fabs(clkstate.sys_offset);
 
 	if (dtemp > sys_mindisp)
 		sys_vars.sys_rootdisp = dtemp;
@@ -960,7 +958,7 @@ clock_update(
 	 * Comes now the moment of truth. Crank the clock discipline and
 	 * see what comes out.
 	 */
-	switch (local_clock(peer, sys_offset)) {
+	switch (local_clock(peer, clkstate.sys_offset)) {
 
 	/*
 	 * Clock exceeds panic threshold. Life as we know it ends.
@@ -983,7 +981,8 @@ clock_update(
 				pause();
 		}
 #endif /* HAVE_LIBSCF_H */
-		msyslog(LOG_ERR, "CLOCK: Panic: offset too big: %.3f", sys_offset);
+		msyslog(LOG_ERR, "CLOCK: Panic: offset too big: %.3f",
+            clkstate.sys_offset);
 		exit (1);
 		/* not reached */
 
@@ -998,7 +997,7 @@ clock_update(
 		sys_vars.sys_rootdelay = 0;
 		sys_vars.sys_rootdisp = 0;
 		sys_vars.sys_reftime = 0;
-		sys_jitter = LOGTOD(sys_vars.sys_precision);
+		clkstate.sys_jitter = LOGTOD(sys_vars.sys_precision);
 		leapsec_reset_frame();
 		break;
 
@@ -1277,7 +1276,7 @@ clock_filter(
 			peer->filter_disp[j] = sys_maxdisp;
 			dst[i] = sys_maxdisp;
 		} else if (peer->update - peer->filter_epoch[j] >
-		    (unsigned long)ULOGTOD(allan_xpt)) {
+		    (unsigned long)ULOGTOD(clkstate.allan_xpt)) {
 			dst[i] = peer->filter_delay[j] +
 			    peer->filter_disp[j];
 		} else {
@@ -1869,12 +1868,12 @@ clock_select(void)
 			typesystem = sys_prefer;
 			sys_clockhop = 0;
 			typesystem->new_status = CTL_PST_SEL_SYSPEER;
-			sys_offset = typesystem->offset;
-			sys_jitter = typesystem->jitter;
+			clkstate.sys_offset = typesystem->offset;
+			clkstate.sys_jitter = typesystem->jitter;
 			sys_vars.sys_rootdist = root_distance(typesystem);
 		}
 		DPRINT(1, ("select: combine offset %.9f jitter %.9f\n",
-			   sys_offset, sys_jitter));
+			   clkstate.sys_offset, clkstate.sys_jitter));
 	}
 #ifdef REFCLOCK
 	/*
@@ -1884,7 +1883,7 @@ clock_select(void)
 	 * if there is a prefer peer or there are no survivors and none
 	 * are required.
 	 */
-	if (typepps != NULL && fabs(sys_offset) < 0.4 &&
+	if (typepps != NULL && fabs(clkstate.sys_offset) < 0.4 &&
 	    (!typepps->is_pps_driver ||
 	     sys_prefer != NULL ||
 	     (typesystem != NULL && typepps->cfg.flags & FLAG_PREFER) ||
@@ -1892,11 +1891,11 @@ clock_select(void)
 		typesystem = typepps;
 		sys_clockhop = 0;
 		typesystem->new_status = CTL_PST_SEL_PPS;
-		sys_offset = typesystem->offset;
-		sys_jitter = typesystem->jitter;
+		clkstate.sys_offset = typesystem->offset;
+		clkstate.sys_jitter = typesystem->jitter;
 		sys_vars.sys_rootdist = root_distance(typesystem);
 		DPRINT(1, ("select: pps offset %.9f jitter %.9f\n",
-			   sys_offset, sys_jitter));
+			   clkstate.sys_offset, clkstate.sys_jitter));
 	} else if ( typepps &&
                     ( CTL_PST_SEL_PPS == typepps->new_status )) {
                 /* uh, oh, it WAS a valid PPS, but no longer */
@@ -1957,8 +1956,8 @@ clock_combine(
 		w += x * DIFF(peers[i].peer->offset,
 		    peers[syspeer].peer->offset);
 	}
-	sys_offset = z / y;
-	sys_jitter = SQRT(w / y + SQUARE(peers[syspeer].seljit));
+	clkstate.sys_offset = z / y;
+	clkstate.sys_jitter = SQRT(w / y + SQUARE(peers[syspeer].seljit));
 	sys_vars.sys_rootdist = peers[syspeer].synch;
 }
 
@@ -2700,7 +2699,7 @@ init_proto(const bool verbose)
 	sys_vars.sys_rootdelay = 0;
 	sys_vars.sys_rootdisp = 0;
 	sys_vars.sys_reftime = 0;
-	sys_jitter = 0;
+	clkstate.sys_jitter = 0;
 	measure_precision(verbose);
 	get_systime(&dummy);
 	sys_survivors = 0;
