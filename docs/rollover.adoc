@@ -274,7 +274,7 @@ NTPsec includes a workaround option for these old devices. Each "g"
 suffix on the 'time1' offset option for a device adds the number of seconds
 in a 1024-week era; this corresponds to the 10-bit week counters used
 in today's GNSS. "G"  adds the number of seconds in the 8192-week era
-of te future.  Unfortunately, this will only be useful *after* you
+of the future.  Unfortunately, this will only be useful *after* you
 detect a rollover.
 
 A fairly bulletproof mitigation strategy, if you are running
