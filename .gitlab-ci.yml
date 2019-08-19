@@ -43,7 +43,6 @@ include:
       - build/main/ntpclients/ntpwait
       - build/main/ntpd/ntpd
       - build/main/ntpfrob/ntpfrob
-  retry: 2
 
 alpine-basic:
   <<: *job_definition
