@@ -61,19 +61,18 @@ static int alpn_select_cb(SSL *ssl,
 	UNUSED_ARG(ssl);
 	UNUSED_ARG(arg);
 
-	for (i = 0; i < inlen; i += len) {
-		len = in[i]+1;  /* includes length byte */
+	for (i = 0; i < inlen; i += len+1) {
+		len = in[i]; // first byte is the length
 #if 0
 		char foo[256];
 		strlcpy(foo, (const char*)in+i+1, len);
 		msyslog(LOG_DEBUG, "DEBUG: alpn_select_cb:  %u, %u, %s", inlen-i, len, foo);
 #endif
-		if (len > inlen-i) {
+		if (len+1 > inlen-i)
 			/* bogus arg: length overlaps end of in buffer */
 			return SSL_TLSEXT_ERR_ALERT_FATAL;
-		}
-		if (len == sizeof(alpn) && !memcmp(in+i, alpn, len)) {
-			*out = in+i;
+		if (len == sizeof(alpn) && !memcmp(in+i+1, alpn, len)) {
+			*out = in+i+1;
 			*outlen = len;
 			return SSL_TLSEXT_ERR_OK;
 		}
