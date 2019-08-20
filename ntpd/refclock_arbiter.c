@@ -232,13 +232,15 @@ arb_receive(
 	 * If flag4 is set, the program snatches the latitude, longitude
 	 * and elevation and writes it to the clockstats file.
 	 */
-	if (temp == 0)
+	if (temp == 0) {
 		return;
+	}
 
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
-	if (temp < 3)
+	if (temp < 3) {
 		return;
+	}
 
 	if (up->tcswitch == 0) {
 
@@ -301,8 +303,9 @@ arb_receive(
 	 * tacked on the end for clockstats display.
 	 */
 	up->tcswitch++;
-	if (up->tcswitch <= 1 || temp < LENARB)
+	if (up->tcswitch <= 1 || temp < LENARB) {
 		return;
+	}
 
 	/*
 	 * Timecode format B5: "i yy ddd hh:mm:ss.000   "
@@ -375,19 +378,21 @@ arb_receive(
 		IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 		return;
 	}
-	if (syncchar != ' ')
+	if (syncchar != ' ') {
 		pp->leap = LEAP_NOTINSYNC;
-	else
+	} else {
 		pp->leap = LEAP_NOWARNING;
+	}
 
 	/*
 	 * Process the new sample in the median filter and determine the
 	 * timecode timestamp.
 	 */
-	if (!refclock_process(pp))
+	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
-	else if (peer->disp > MAXDISTANCE)
+	} else if (peer->disp > MAXDISTANCE) {
 		refclock_receive(peer);
+	}
 
 	/* if (up->tcswitch >= MAXSTAGE) { */
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));

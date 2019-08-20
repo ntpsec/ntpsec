@@ -15,14 +15,15 @@ trimble_convert(
 		cmd_info_t   *tbl
 		)
 {
-  int i;
+	int i;
 
-  for (i = 0; tbl[i].cmd != 0xFF; i++)
-    {
-      if (tbl[i].cmd == cmd)
-	return &tbl[i];
-    }
-  return 0;
+	for (i = 0; tbl[i].cmd != 0xFF; i++)
+	{
+		if (tbl[i].cmd == cmd) {
+			return &tbl[i];
+		}
+	}
+	return 0;
 }
 
 /*

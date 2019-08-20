@@ -211,8 +211,9 @@ auth_prealloc(
 
 	allocated = (int)authnumkeys + authnumfreekeys;
 	additional = keycount - allocated;
-	if (additional > 0)
+	if (additional > 0) {
 		auth_moremem(additional);
+	}
 	auth_resize_hashtable();
 }
 
@@ -278,8 +279,9 @@ alloc_auth_info(
 {
 	auth_info *	auth;
 
-	if (authnumfreekeys < 1)
+	if (authnumfreekeys < 1) {
 		auth_moremem(-1);
+	}
 	UNLINK_HEAD_SLIST(auth, authfreekeys, llink.f);
 	//ENSURE(sk != NULL);
 	auth->keyid = keyid;

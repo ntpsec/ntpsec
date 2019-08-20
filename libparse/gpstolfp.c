@@ -20,17 +20,17 @@ gpstolfp(
 	 l_fp * lfp
 	 )
 {
-  if (weeks < GPSWRAP)
-    {
-      weeks += GPSWEEKS;
-    }
+	if (weeks < GPSWRAP)
+	{
+		weeks += GPSWEEKS;
+	}
 
-   /* convert to NTP time, note no fractional seconds */
-  *lfp = lfptouint((uint64_t)weeks * SECSPERWEEK
-                   + (uint64_t)days * SECSPERDAY
-                   + (uint64_t)seconds
-                   + GPSORIGIN);
-  setlfpfrac(*lfp, 0);
+	/* convert to NTP time, note no fractional seconds */
+	*lfp = lfptouint((uint64_t)weeks * SECSPERWEEK
+			 + (uint64_t)days * SECSPERDAY
+			 + (uint64_t)seconds
+			 + GPSORIGIN);
+	setlfpfrac(*lfp, 0);
 }
 
 
@@ -41,8 +41,9 @@ gpsweekadj(
 	)
 {
 	/* adjust for rollover */
-	while (*week < build_week)
+	while (*week < build_week) {
 		*week += GPSWEEKS;
+	}
 }
 
 
@@ -78,8 +79,9 @@ caltogps(
 	                             ntpcal_date_to_daysec(in));
 	t -= (uint64_t)((int64_t)GPSORIGIN - UTC_offset);
 	*week = t / SECSPERWEEK;
-	if (NULL != TOW)
+	if (NULL != TOW) {
 		*TOW = t % SECSPERWEEK;
+	}
 }
 
 /*

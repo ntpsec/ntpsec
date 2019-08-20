@@ -4487,21 +4487,24 @@ printableString ( char *sOutput, int iOutputLen, const char *sInput, int iInputL
 	for ( i = j = 0 ; i < InputLen && j < OutputLen ; i ++ ) {
 		if ( isprint( (unsigned char)sInput[i] ) ) {
 			n = 1 ;
-			if ( j + 1 >= OutputLen )
+			if ( j + 1 >= OutputLen ) {
 				break ;
+			}
 			sOutput[j] = sInput[i] ;
 		} else if ( ( sInput[i] & 0xFF ) <
 			    COUNTOF(printableControlChar) ) {
 			n = strlen( printableControlChar[sInput[i] & 0xFF] ) ;
-			if ( j + n + 1 >= OutputLen )
+			if ( j + n + 1 >= OutputLen ) {
 				break ;
+			}
 			strlcpy( sOutput + j,
 				 printableControlChar[sInput[i] & 0xFF],
 				 OutputLen - j ) ;
 		} else {
 			n = 5 ;
-			if ( j + n + 1 >= OutputLen )
+			if ( j + n + 1 >= OutputLen ) {
 				break ;
+			}
 			snprintf( sOutput + j, OutputLen - j, "<x%X>",
 				  (unsigned)(sInput[i] & 0xFF) ) ;
 		}

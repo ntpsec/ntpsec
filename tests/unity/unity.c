@@ -211,8 +211,9 @@ void UnityPrintNumberHex(const UNITY_UINT number, const char nibbles_to_print)
 {
     int nibble;
     char nibbles = nibbles_to_print;
-    if ((unsigned)nibbles > (2 * sizeof(number)))
+    if ((unsigned)nibbles > (2 * sizeof(number))) {
         nibbles = 2 * sizeof(number);
+}
 
     while (nibbles > 0)
     {
@@ -275,10 +276,10 @@ void UnityPrintFloat(const UNITY_DOUBLE input_number)
     }
 
     /* handle zero, NaN, and +/- infinity */
-    if (number == 0.0f) UnityPrint("0");
-    else if (isnan(number)) UnityPrint("nan");
-    else if (isinf(number)) UnityPrint("inf");
-    else
+    if (number == 0.0f) { UnityPrint("0");
+    } else if (isnan(number)) { UnityPrint("nan");
+    } else if (isinf(number)) { UnityPrint("inf");
+    } else
     {
         int exponent = 0;
         int decimals, digits;
@@ -319,7 +320,8 @@ void UnityPrintFloat(const UNITY_DOUBLE input_number)
         }
         while (digits > 0)
         {
-            if(digits == decimals) UNITY_OUTPUT_CHAR('.');
+            if(digits == decimals) { UNITY_OUTPUT_CHAR('.');
+}
             UNITY_OUTPUT_CHAR(buf[--digits]);
         }
 
@@ -483,7 +485,8 @@ static int UnityIsOneArrayNull(UNITY_INTERNAL_PTR expected,
                                const UNITY_LINE_TYPE lineNumber,
                                const char* msg)
 {
-    if (expected == actual) return 0; /* Both are NULL or same pointer */
+    if (expected == actual) { return 0; /* Both are NULL or same pointer */
+}
 
     /* print and return true if just expected is NULL */
     if (expected == NULL)
@@ -562,18 +565,24 @@ void UnityAssertGreaterOrLessOrEqualNumber(const UNITY_INT threshold,
     int failed = 0;
     RETURN_IF_FAIL_OR_IGNORE;
 
-    if (threshold == actual && compare & UNITY_EQUAL_TO) return;
-    if (threshold == actual) failed = 1;
+    if (threshold == actual && compare & UNITY_EQUAL_TO) { return;
+}
+    if (threshold == actual) { failed = 1;
+}
 
     if ((style & UNITY_DISPLAY_RANGE_INT) == UNITY_DISPLAY_RANGE_INT)
     {
-        if (actual > threshold && compare & UNITY_SMALLER_THAN) failed = 1;
-        if (actual < threshold && compare & UNITY_GREATER_THAN) failed = 1;
+        if (actual > threshold && compare & UNITY_SMALLER_THAN) { failed = 1;
+}
+        if (actual < threshold && compare & UNITY_GREATER_THAN) { failed = 1;
+}
     }
     else /* UINT or HEX */
     {
-        if ((UNITY_UINT)actual > (UNITY_UINT)threshold && compare & UNITY_SMALLER_THAN) failed = 1;
-        if ((UNITY_UINT)actual < (UNITY_UINT)threshold && compare & UNITY_GREATER_THAN) failed = 1;
+        if ((UNITY_UINT)actual > (UNITY_UINT)threshold && compare & UNITY_SMALLER_THAN) { failed = 1;
+}
+        if ((UNITY_UINT)actual < (UNITY_UINT)threshold && compare & UNITY_GREATER_THAN) { failed = 1;
+}
     }
 
     if (failed)
@@ -581,9 +590,12 @@ void UnityAssertGreaterOrLessOrEqualNumber(const UNITY_INT threshold,
         UnityTestResultsFailBegin(lineNumber);
         UnityPrint(UnityStrExpected);
         UnityPrintNumberByStyle(actual, style);
-        if (compare & UNITY_GREATER_THAN) UnityPrint(UnityStrGt);
-        if (compare & UNITY_SMALLER_THAN) UnityPrint(UnityStrLt);
-        if (compare & UNITY_EQUAL_TO)     UnityPrint(UnityStrOrEqual);
+        if (compare & UNITY_GREATER_THAN) { UnityPrint(UnityStrGt);
+}
+        if (compare & UNITY_SMALLER_THAN) { UnityPrint(UnityStrLt);
+}
+        if (compare & UNITY_EQUAL_TO) {     UnityPrint(UnityStrOrEqual);
+}
         UnityPrintNumberByStyle(threshold, style);
         UnityAddMsgIfSpecified(msg);
         UNITY_FAIL_AND_BAIL;
@@ -616,7 +628,8 @@ void UnityAssertEqualIntArray(UNITY_INTERNAL_PTR expected,
         UnityPrintPointlessAndBail();
     }
 
-    if (expected == actual) return; /* Both are NULL or same pointer */
+    if (expected == actual) { return; /* Both are NULL or same pointer */
+}
     if (UnityIsOneArrayNull(expected, actual, lineNumber, msg))
         UNITY_FAIL_AND_BAIL;
 
@@ -727,7 +740,8 @@ void UnityAssertEqualFloatArray(UNITY_PTR_ATTRIBUTE const UNITY_FLOAT* expected,
         UnityPrintPointlessAndBail();
     }
 
-    if (expected == actual) return; /* Both are NULL or same pointer */
+    if (expected == actual) { return; /* Both are NULL or same pointer */
+}
     if (UnityIsOneArrayNull((UNITY_INTERNAL_PTR)expected, (UNITY_INTERNAL_PTR)actual, lineNumber, msg))
         UNITY_FAIL_AND_BAIL;
 
@@ -813,8 +827,9 @@ void UnityAssertFloatSpecial(const UNITY_FLOAT actual,
     {
         UnityTestResultsFailBegin(lineNumber);
         UnityPrint(UnityStrExpected);
-        if (!should_be_trait)
+        if (!should_be_trait) {
             UnityPrint(UnityStrNot);
+}
         UnityPrint(trait_names[trait_index]);
         UnityPrint(UnityStrWas);
 #ifndef UNITY_EXCLUDE_FLOAT_PRINT
@@ -973,17 +988,19 @@ void UnityAssertNumbersWithin(const UNITY_UINT delta,
 
     if ((style & UNITY_DISPLAY_RANGE_INT) == UNITY_DISPLAY_RANGE_INT)
     {
-        if (actual > expected)
+        if (actual > expected) {
           Unity.CurrentTestFailed = (UNITY_UINT)((UNITY_UINT)(actual - expected) > delta);
-        else
+        } else {
             Unity.CurrentTestFailed = (UNITY_UINT)((UNITY_UINT)(expected - actual) > delta);
+}
     }
     else
     {
-        if ((UNITY_UINT)actual > (UNITY_UINT)expected)
+        if ((UNITY_UINT)actual > (UNITY_UINT)expected) {
             Unity.CurrentTestFailed = (UNITY_UINT)((UNITY_UINT)(actual - expected) > delta);
-        else
+        } else {
             Unity.CurrentTestFailed = (UNITY_UINT)((UNITY_UINT)(expected - actual) > delta);
+}
     }
 
     if (Unity.CurrentTestFailed)
@@ -1179,7 +1196,8 @@ void UnityAssertEqualMemory(UNITY_INTERNAL_PTR expected,
         UnityPrintPointlessAndBail();
     }
 
-    if (expected == actual) return; /* Both are NULL or same pointer */
+    if (expected == actual) { return; /* Both are NULL or same pointer */
+}
     if (UnityIsOneArrayNull(expected, actual, lineNumber, msg))
         UNITY_FAIL_AND_BAIL;
 

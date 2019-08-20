@@ -96,9 +96,9 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
                 sa6 = (struct sockaddr_in6 *)(void *)src;
                 memcpy(&dst->type.in6, &sa6->sin6_addr,
                        sizeof(struct in6_addr));
-                if (sa6->sin6_scope_id != 0)
+                if (sa6->sin6_scope_id != 0) {
                         isc_netaddr_setzone(dst, sa6->sin6_scope_id);
-                else {
+                } else {
                         /*
                          * BSD variants embed scope zone IDs in the 128bit
                          * address as a kernel internal form.  Unfortunately,
@@ -172,17 +172,17 @@ static bool seenv6 = false;
 
 bool
 isc_interfaceiter_next_bool(isc_interfaceiter_t *iter) {
-  return (ISC_R_SUCCESS == isc_interfaceiter_next(iter));
+	return (ISC_R_SUCCESS == isc_interfaceiter_next(iter));
 }
 
 bool
 isc_interfaceiter_create_bool(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
-  return (ISC_R_SUCCESS == isc_interfaceiter_create(mctx, iterp));
+	return (ISC_R_SUCCESS == isc_interfaceiter_create(mctx, iterp));
 }
 
 bool
 isc_interfaceiter_first_bool(isc_interfaceiter_t *iter) {
-  return (ISC_R_SUCCESS == isc_interfaceiter_first(iter));
+	return (ISC_R_SUCCESS == isc_interfaceiter_first(iter));
 }
 
 bool
@@ -817,8 +817,9 @@ isc_ioctl(int fildes, int req, char *arg) {
 
         for (tries = 0; tries < 3; tries++) {
                 if ((ret = ioctl(fildes, req, arg)) < 0) {
-                        if (errno == EINTR)
+                        if (errno == EINTR) {
                                 continue;
+			}
                 }
                 break;
         }
@@ -1163,8 +1164,9 @@ internal_current4(isc_interfaceiter_t *iter) {
                 iter->current.flags |= INTERFACE_F_MULTICAST;
 #endif
 
-        if (family == AF_INET)
+        if (family == AF_INET) {
                 goto inet;
+	}
 
         memset(&lifreq, 0, sizeof(lifreq));
         memcpy(lifreq.lifr_name, iter->current.name, sizeof(lifreq.lifr_name));

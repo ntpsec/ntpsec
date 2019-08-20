@@ -264,10 +264,11 @@ adj_systime(
 	}
 	adjtv.tv_sec = (long)dtemp;
 	dtemp -= adjtv.tv_sec;
-	if (sys_tick > sys_fuzz)
+	if (sys_tick > sys_fuzz) {
 		quant = sys_tick;
-	else
+	} else {
 		quant = S_PER_US;
+	}
 	ticks = (long)(dtemp / quant + .5);
 	adjtv.tv_usec = (long)(ticks * quant * US_PER_S + .5);
 	/* The rounding in the conversions could push us over the

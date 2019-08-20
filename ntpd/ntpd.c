@@ -212,8 +212,9 @@ parse_cmdline_opts(
 {
 	static bool	parsed = false;
 
-	if (parsed)
+	if (parsed) {
 	    return;
+	}
 
 	int op;
 
@@ -249,8 +250,9 @@ parse_cmdline_opts(
 		break;
 	    case 'D':
 #ifdef DEBUG
-		if (ntp_optarg != NULL)
+		if (ntp_optarg != NULL) {
 			debug = atoi(ntp_optarg);
+		}
 #endif
 		break;
 	    case 'f':
@@ -269,8 +271,9 @@ parse_cmdline_opts(
 	    case 'i':
 #ifdef ENABLE_DROPROOT
 		droproot = true;
-		if (ntp_optarg != NULL)
+		if (ntp_optarg != NULL) {
 			chrootdir = ntp_optarg;
+		}
 #endif
 		break;
 	    case 'I':
@@ -505,10 +508,11 @@ ntpdmain(
 	int op;
 
 	uv = umask(0);
-	if (uv)
+	if (uv) {
 		umask(uv);
-	else
+	} else {
 		umask(022);
+	}
 	saved_argc = argc;
 	saved_argv = argv;
 	progname = argv[0];
@@ -828,13 +832,15 @@ ntpdmain(
 
      	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
-	    if (explicit_config)
+	    if (explicit_config) {
 		fprintf(stdout, "conffile \"%s\";\n", explicit_config);
+	    }
 #ifdef DEBUG
 	    fprintf(stdout, "#debug = %d\n", debug);
 #endif /* DEBUG */
-	    if (driftfile)
+	    if (driftfile) {
 		fprintf(stdout, "driftfile \"%s\";\n", driftfile);
+	    }
 	    fprintf(stdout, "#allow_panic = %s\n",
 		    clock_ctl.allow_panic ? "true" : "false");
 	    fprintf(stdout, "#force_step_once = %s\n",
@@ -849,16 +855,18 @@ ntpdmain(
 #endif
 	    /* FIXME: dump interfaces */
 	    /* FIXME: dump authkeys */
-	    if (logfilename)
+	    if (logfilename) {
 		fprintf(stdout, "logfile \"%s\";\n", logfilename);
+	    }
 	    fprintf(stdout, "#listen_to_virtual_ips = %s\n",
 		    listen_to_virtual_ips ? "true" : "false");
 #if defined(HAVE_DNS_SD_H)
 	    fprintf(stdout, "#mdnsreg = %s\n",
 		    mdnsreg ? "true" : "false");
 #endif  /* HAVE_DNS_SD_H */
-	    if (pidfile)
+	    if (pidfile) {
 		fprintf(stdout, "pidfile \"%s\";\n", pidfile);
+	    }
 	    /* FIXME: dump priority */
 	    fprintf(stdout, "#mode_ntpdate = %s\n",
 		    clock_ctl.mode_ntpdate ? "true" : "false");
@@ -999,8 +1007,9 @@ finish_safe(
 	const char *sig_desc;
 
 	sig_desc = strsignal(sig);
-	if (sig_desc == NULL)
+	if (sig_desc == NULL) {
 		sig_desc = "";
+	}
 	msyslog(LOG_NOTICE, "ERR: %s exiting on signal %d (%s)", progname,
 		sig, sig_desc);
 	/* See Classic Bugs 2513 and Bug 2522 re the unlink of PIDFILE */
@@ -1122,26 +1131,26 @@ wait_child_sync_if(
  */
 static void check_minsane()
 {
-    struct peer *peer;
-    int servers = 0;
+	struct peer *peer;
+	int servers = 0;
 
-    if (sys_minsane > 1) return;  /* already adjusted, assume reasonable */
+	if (sys_minsane > 1) return;  /* already adjusted, assume reasonable */
 
-    for (peer = peer_list; peer != NULL; peer = peer->p_link) {
-	if (peer->cfg.flags & FLAG_NOSELECT) continue;
-	servers++;
-	if (peer->cast_flags & MDF_POOL) {
-	    /* pool server */
-	    servers = sys_maxclock;
-	    break;
+	for (peer = peer_list; peer != NULL; peer = peer->p_link) {
+		if (peer->cfg.flags & FLAG_NOSELECT) continue;
+		servers++;
+		if (peer->cast_flags & MDF_POOL) {
+			/* pool server */
+			servers = sys_maxclock;
+			break;
+		}
+		/* ?? multicast and such */
 	}
-	/* ?? multicast and such */
-    }
 
-    if (servers >= 5)
-	msyslog(LOG_ERR, "SYNC: Found %d servers, suggest minsane at least 3", servers);
-    else if (servers == 4)
-        msyslog(LOG_ERR, "SYNC: Found 4 servers, suggest minsane of 2");
+	if (servers >= 5)
+		msyslog(LOG_ERR, "SYNC: Found %d servers, suggest minsane at least 3", servers);
+	else if (servers == 4)
+		msyslog(LOG_ERR, "SYNC: Found 4 servers, suggest minsane of 2");
 
 }
 
@@ -1216,8 +1225,9 @@ close_all_except(
 {
 	int fd;
 
-	for (fd = 0; fd < keep_fd; fd++)
+	for (fd = 0; fd < keep_fd; fd++) {
 		close(fd);
+	}
 
 	close_all_beyond(keep_fd);
 }
@@ -1254,8 +1264,9 @@ close_all_beyond(
 	max_fd = sysconf(_SC_OPEN_MAX);
 	if (10000 < max_fd)
 		msyslog(LOG_ERR, "INIT: close_all_beyond: closing %d files", max_fd);
-	for (fd = keep_fd + 1; fd < max_fd; fd++)
+	for (fd = keep_fd + 1; fd < max_fd; fd++) {
 		close(fd);
+	}
 # endif /* !HAVE_CLOSEFROM && !F_CLOSEM */
 }
 

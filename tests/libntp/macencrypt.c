@@ -49,25 +49,28 @@ TEST(macencrypt, Encrypt) {
 	TEST_ASSERT_NOT_NULL(auth.digest);
 
 	int length = digest_encrypt(&auth,
-		(uint32_t*)packetPtr, packetLength);
+				    (uint32_t*)packetPtr, packetLength);
 
 	TEST_ASSERT_EQUAL(4+16, length);
 
 	TEST_ASSERT_TRUE(digest_decrypt(&auth,
-		(uint32_t*)packetPtr, packetLength, length));
+					(uint32_t*)packetPtr, packetLength, length));
 
-if (0) {
-        printf("\n");
-	for (int i = 0; i< totalLength; i++)
-	  printf("%02x ", (unsigned int)expectedMD5Packet[i] & 0xff);
-        printf("\n");
-	for (int i = 0; i< totalLength; i++)
-	  printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
-        printf("\n");
-}
+	if (0) {
+		printf("\n");
+		for (int i = 0; i< totalLength; i++) {
+			printf("%02x ", (unsigned int)expectedMD5Packet[i] & 0xff);
+		}
+		printf("\n");
+		for (int i = 0; i< totalLength; i++) {
+			printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
+		}
+		printf("\n");
+	}
 	TEST_ASSERT_TRUE(memcmp(expectedMD5Packet, packetPtr, totalLength) == 0);
 
 }
+
 TEST(macencrypt, CMAC_Encrypt) {
 	char packetPtr[totalLength];
 	memset(packetPtr+packetLength, 0, (size_t)keyIdLength);
@@ -84,22 +87,24 @@ TEST(macencrypt, CMAC_Encrypt) {
 	TEST_ASSERT_NOT_NULL(auth.cipher);
 
 	int length = cmac_encrypt(&auth,
-		(uint32_t*)packetPtr, packetLength);
+				  (uint32_t*)packetPtr, packetLength);
 
 	TEST_ASSERT_EQUAL(4+16, length);            /* AES-128 */
 
 	TEST_ASSERT_TRUE(cmac_decrypt(&auth,
-		(uint32_t*)packetPtr, packetLength, length));
+				      (uint32_t*)packetPtr, packetLength, length));
 
-if (0) {
-        printf("\n");
-	for (int i = 0; i< totalLength; i++)
-	  printf("%02x ", (unsigned int)expectedCMACPacket[i] & 0xff);
-        printf("\n");
-	for (int i = 0; i< totalLength; i++)
-	  printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
-        printf("\n");
-}
+	if (0) {
+		printf("\n");
+		for (int i = 0; i< totalLength; i++) {
+			printf("%02x ", (unsigned int)expectedCMACPacket[i] & 0xff);
+		}
+		printf("\n");
+		for (int i = 0; i< totalLength; i++) {
+			printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
+		}
+		printf("\n");
+	}
 	TEST_ASSERT_TRUE(memcmp(expectedCMACPacket, packetPtr, totalLength) == 0);
 
 }

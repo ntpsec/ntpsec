@@ -52,19 +52,22 @@ void bumpclock(int64_t bump)
     er3 = errno;
 
     /* Defer printing so it doesn't distort timing. */
-    if (rc1)
+    if (rc1) {
 	printf("Couldn't get old time: %s\n", strerror(er1));
-    else
+    } else {
 	printf("Was: %ld.%09ld\n", (long)was.tv_sec, was.tv_nsec);
+    }
 
     if (rc2) {
 	printf("Couldn't set time: %s\n", strerror(er2));
 	printf("Try: %ld.%09ld\n", (long)set.tv_sec, set.tv_nsec);
-    } else
+    } else {
 	printf("Set: %ld.%09ld\n", (long)set.tv_sec, set.tv_nsec);
+    }
 
-   if (rc3)
+    if (rc3) {
 	printf("Couldn't get new time: %s\n", strerror(er3));
-    else
+    } else {
 	printf("Now: %ld.%09ld\n", (long)now.tv_sec, now.tv_nsec);
+    }
 }

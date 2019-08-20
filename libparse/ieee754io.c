@@ -25,23 +25,23 @@ fmt_blong(
           int cnt
           )
 {
-    char *buf, *s;
-    int i = cnt;
+	char *buf, *s;
+	int i = cnt;
 
-    val <<= 32 - cnt;
-    buf = lib_getbuf();
-    s = buf;
+	val <<= 32 - cnt;
+	buf = lib_getbuf();
+	s = buf;
 
-    while (i--) {
-        if (val & 0x80000000) {
-            *s++ = '1';
-        } else {
-            *s++ = '0';
-        }
-        val <<= 1;
-    }
-    *s = '\0';
-    return buf;
+	while (i--) {
+		if (val & 0x80000000) {
+			*s++ = '1';
+		} else {
+			*s++ = '0';
+		}
+		val <<= 1;
+	}
+	*s = '\0';
+	return buf;
 }
 
 static char *
@@ -98,11 +98,11 @@ get_byte(
          int *fieldindex
          )
 {
-    unsigned char val;
+	unsigned char val;
 
-    val = *(bufp + offset[*fieldindex]);
-    (*fieldindex)++;
-    return val;
+	val = *(bufp + offset[*fieldindex]);
+	(*fieldindex)++;
+	return val;
 }
 
 /*
@@ -117,136 +117,136 @@ fetch_ieee754(
               offsets_t offsets
               )
 {
-    unsigned char *bufp = *buffpp;
-    bool sign;
-    int bias;                       /* bias 127 or 1023 */
-    int maxexp;
-    int mbits;                      /* length of mantissa, 23 or 52 */
-    uint64_t mantissa;              /* mantissa, 23 or 52 bits used, +1 */
-    int characteristic;             /* biased exponent, 0 to 255 or 2047 */
-    int exponent;                   /* unbiased exponent */
-    int maxexp_lfp;                 /* maximum exponent that fits in an l_fp */
-    unsigned char val;
-    int fieldindex = 0;             /* index into bufp */
-    int fudge;                      /* shift difference of l_fp and IEEE */
-    int shift;                      /* amount to shift IEEE to get l_fp */
+	unsigned char *bufp = *buffpp;
+	bool sign;
+	int bias;                       /* bias 127 or 1023 */
+	int maxexp;
+	int mbits;                      /* length of mantissa, 23 or 52 */
+	uint64_t mantissa;              /* mantissa, 23 or 52 bits used, +1 */
+	int characteristic;             /* biased exponent, 0 to 255 or 2047 */
+	int exponent;                   /* unbiased exponent */
+	int maxexp_lfp;                 /* maximum exponent that fits in an l_fp */
+	unsigned char val;
+	int fieldindex = 0;             /* index into bufp */
+	int fudge;                      /* shift difference of l_fp and IEEE */
+	int shift;                      /* amount to shift IEEE to get l_fp */
 
 
-    *lfpp = 0;          /* return zero for all errors: NAN, +INF, -INF, etc. */
+	*lfpp = 0;          /* return zero for all errors: NAN, +INF, -INF, etc. */
 
-    /* fetch sign byte & first part of characteristic */
-    val = (unsigned char)get_byte(bufp, offsets, &fieldindex);
+	/* fetch sign byte & first part of characteristic */
+	val = (unsigned char)get_byte(bufp, offsets, &fieldindex);
 
-    sign = (val & 0x80) != 0;
-    characteristic = (val & 0x7F);
+	sign = (val & 0x80) != 0;
+	characteristic = (val & 0x7F);
 
-    /* fetch rest of characteristic and start of mantissa */
-    val = (unsigned char)get_byte(bufp, offsets, &fieldindex);
+	/* fetch rest of characteristic and start of mantissa */
+	val = (unsigned char)get_byte(bufp, offsets, &fieldindex);
 
-    switch (size) {
-    case IEEE_DOUBLE:
-        fudge = -20;
-        maxexp_lfp = 31;
-        mbits  = 52;
-        bias   = 1023;
-        maxexp = 2047;
-        characteristic <<= 4;
-        /* grab lower characteristic bits */
-        characteristic  |= (val & 0xF0) >> 4;
+	switch (size) {
+	    case IEEE_DOUBLE:
+		fudge = -20;
+		maxexp_lfp = 31;
+		mbits  = 52;
+		bias   = 1023;
+		maxexp = 2047;
+		characteristic <<= 4;
+		/* grab lower characteristic bits */
+		characteristic  |= (val & 0xF0) >> 4;
 
-        mantissa  = (val & 0x0FULL) << 48;
-        mantissa |= get_byte(bufp, offsets, &fieldindex) << 40;
-        mantissa |= get_byte(bufp, offsets, &fieldindex) << 32;
+		mantissa  = (val & 0x0FULL) << 48;
+		mantissa |= get_byte(bufp, offsets, &fieldindex) << 40;
+		mantissa |= get_byte(bufp, offsets, &fieldindex) << 32;
 
-        mantissa |= get_byte(bufp, offsets, &fieldindex) << 24;
-        mantissa |= get_byte(bufp, offsets, &fieldindex) << 16;
-        mantissa |= get_byte(bufp, offsets, &fieldindex) << 8;
-        mantissa |= get_byte(bufp, offsets, &fieldindex);
-        break;
+		mantissa |= get_byte(bufp, offsets, &fieldindex) << 24;
+		mantissa |= get_byte(bufp, offsets, &fieldindex) << 16;
+		mantissa |= get_byte(bufp, offsets, &fieldindex) << 8;
+		mantissa |= get_byte(bufp, offsets, &fieldindex);
+		break;
 
-    case IEEE_SINGLE:
-        fudge = 9;
-        maxexp_lfp = 30;
-        mbits  = 23;
-        bias   = 127;
-        maxexp = 255;
-        characteristic <<= 1;
-        /* grab last characteristic bit from 2nd byte */
-        characteristic |= (val & 0x80) ? 1 : 0 ;
+	    case IEEE_SINGLE:
+		fudge = 9;
+		maxexp_lfp = 30;
+		mbits  = 23;
+		bias   = 127;
+		maxexp = 255;
+		characteristic <<= 1;
+		/* grab last characteristic bit from 2nd byte */
+		characteristic |= (val & 0x80) ? 1 : 0 ;
 
-        mantissa   = (val & 0x7FU) << 16;
-        mantissa  |= get_byte(bufp, offsets, &fieldindex) << 8;
-        mantissa  |= get_byte(bufp, offsets, &fieldindex);
-        break;
+		mantissa   = (val & 0x7FU) << 16;
+		mantissa  |= get_byte(bufp, offsets, &fieldindex) << 8;
+		mantissa  |= get_byte(bufp, offsets, &fieldindex);
+		break;
 
-    default:
-        return IEEE_BADCALL;
-    }
+	    default:
+		return IEEE_BADCALL;
+	}
 
-    exponent = characteristic - bias;
-    shift = exponent + fudge;
+	exponent = characteristic - bias;
+	shift = exponent + fudge;
 
 #ifdef DEBUG_PARSELIB
-    if ( debug > 4) { /* SPECIAL DEBUG */
-        int length = 8;
-        if ( IEEE_SINGLE == size ) {
-            length = 4;
-        }
+	if ( debug > 4) { /* SPECIAL DEBUG */
+		int length = 8;
+		if ( IEEE_SINGLE == size ) {
+			length = 4;
+		}
 
-        printf("\nfetchieee754: FP: %s -> %s\n", fmt_hex(*buffpp, length),
-               fmt_flt(sign, mantissa, characteristic, length));
-        printf("fetchieee754: Char: %d, Exp: %d, mbits %d, shift %d\n",
-               characteristic, exponent, mbits, shift);
-    }
+		printf("\nfetchieee754: FP: %s -> %s\n", fmt_hex(*buffpp, length),
+		       fmt_flt(sign, mantissa, characteristic, length));
+		printf("fetchieee754: Char: %d, Exp: %d, mbits %d, shift %d\n",
+		       characteristic, exponent, mbits, shift);
+	}
 #endif
 
-    *buffpp += fieldindex;
+	*buffpp += fieldindex;
 
-    /* detect funny numbers */
-    if (characteristic == maxexp) {
-        /* NaN or Infinity */
-        if (mantissa) {
-            /* NaN */
-            return IEEE_NAN;
-        }
-        /* +Inf or -Inf */
-        return sign ? IEEE_NEGINFINITY : IEEE_POSINFINITY;
-    }
+	/* detect funny numbers */
+	if (characteristic == maxexp) {
+		/* NaN or Infinity */
+		if (mantissa) {
+			/* NaN */
+			return IEEE_NAN;
+		}
+		/* +Inf or -Inf */
+		return sign ? IEEE_NEGINFINITY : IEEE_POSINFINITY;
+	}
 
-    /* check for overflows */
-    if (exponent > maxexp_lfp) {
-        /*
-        * sorry an l_fp only so long
-        * overflow only in respect to NTP-FP representation
-        */
-        return sign ? IEEE_NEGOVERFLOW : IEEE_POSOVERFLOW;
-    }
+	/* check for overflows */
+	if (exponent > maxexp_lfp) {
+		/*
+		 * sorry an l_fp only so long
+		 * overflow only in respect to NTP-FP representation
+		 */
+		return sign ? IEEE_NEGOVERFLOW : IEEE_POSOVERFLOW;
+	}
 
-    if (characteristic == 0) {
-        /* de-normalized or tiny number - fits only as 0 */
-        return IEEE_OK;
-    }
+	if (characteristic == 0) {
+		/* de-normalized or tiny number - fits only as 0 */
+		return IEEE_OK;
+	}
 
-    /* build the real number */
+	/* build the real number */
 
-    /* add in implied 1 */
-    mantissa  |= 1ULL << mbits;
+	/* add in implied 1 */
+	mantissa  |= 1ULL << mbits;
 
-    if ( 0 == shift ) {
-        /* no shift */
-        *lfpp = mantissa;
-    } else if ( 0 > shift ) {
-        /* right shift */
-        *lfpp = mantissa >> -shift;
-    } else {
-        /* left shift */
-        *lfpp = mantissa << shift;
-    }
+	if ( 0 == shift ) {
+		/* no shift */
+		*lfpp = mantissa;
+	} else if ( 0 > shift ) {
+		/* right shift */
+		*lfpp = mantissa >> -shift;
+	} else {
+		/* left shift */
+		*lfpp = mantissa << shift;
+	}
 
-    /* adjust for sign */
-    if (sign) {
-      L_NEG(*lfpp);
-    }
+	/* adjust for sign */
+	if (sign) {
+		L_NEG(*lfpp);
+	}
 
-    return IEEE_OK;
+	return IEEE_OK;
 }

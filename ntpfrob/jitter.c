@@ -65,9 +65,13 @@ get_clocktime(
 // modified from https://stackoverflow.com/questions/11931547/qsort-does-not-work-for-double-array
 static int doublecmp(const void * a, const void * b)
 {
-  if (*(const double*)a > *(const double*)b) return -1;
-  else if (*(const double*)a < *(const double*)b) return 1;
-  else return 0;
+	if (*(const double*)a > *(const double*)b) { 
+		return -1;
+	} else if (*(const double*)a < *(const double*)b) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 void jitter(const iomode mode)
@@ -79,8 +83,9 @@ void jitter(const iomode mode)
 	/*
 	 * Force pages into memory
 	 */
-	for (int i = 0; i < NBUF; i ++)
-	    gtod[i] = 0;
+	for (int i = 0; i < NBUF; i ++) {
+		gtod[i] = 0;
+	}
 
 	/*
 	 * Construct gtod array
@@ -96,13 +101,15 @@ void jitter(const iomode mode)
 	average = 0;
 	for (int i = 0; i < (NBUF - 1); i++) {
 		gtod[i] = gtod[i + 1] - gtod[i];
-		if (mode == raw)
+		if (mode == raw) {
 			printf("%13.9f\n", gtod[i]);
+		}
 		average += gtod[i];
 	}
 
-	if (mode == raw)
-	    exit(0);
+	if (mode == raw) {
+		exit(0);
+	}
 
 	average = average / (NBUF - 1);
 
@@ -123,15 +130,17 @@ void jitter(const iomode mode)
 	if (mode == json) {
 		fprintf(stdout, "{\"Mean\": %.9Lf, \"High\": [", average);
 		for (int i = 0; i < NSAMPLES; i++) {
-		    fprintf(stdout, "%.9f", gtod[i]);
-		    if (i < NSAMPLES - 1)
-			fputs(", ", stdout);
+			fprintf(stdout, "%.9f", gtod[i]);
+			if (i < NSAMPLES - 1) {
+				fputs(", ", stdout);
+			}
 		}
 		fputs("], \"Low\": [", stdout);
 		for (int i = NBUF - NSAMPLES - 2; i < NBUF - 2; i++) {
-		    fprintf(stdout, "%.9f", gtod[i]);
-		    if (i < NBUF - 3)
-			fputs(", ", stdout);
+			fprintf(stdout, "%.9f", gtod[i]);
+			if (i < NBUF - 3) {
+				fputs(", ", stdout);
+			}
 		}
 		fprintf(stdout, "], \"Jitter\": %.9Lf}\n", jitterx);
 	}
@@ -140,11 +149,13 @@ void jitter(const iomode mode)
 		fprintf(stdout, "Mean %13.9Lf\n", average);
 		fprintf(stdout, "Jitter %13.9Lf\n", jitterx);
 		fprintf(stdout, "High\n");
-		for (int i = 0; i < NSAMPLES; i++)
-		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
+		for (int i = 0; i < NSAMPLES; i++) {
+			fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
+		}
 		fprintf(stdout, "Low\n");
-		for (int i = NBUF - NSAMPLES - 2; i < NBUF - 2; i++)
-		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
+		for (int i = NBUF - NSAMPLES - 2; i < NBUF - 2; i++) {
+			fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
+		}
 	}
 
 	exit(0);

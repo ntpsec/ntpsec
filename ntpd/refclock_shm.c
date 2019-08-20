@@ -215,14 +215,16 @@ shm_control(
 	UNUSED_ARG(unit);
 	UNUSED_ARG(in_st);
 	UNUSED_ARG(out_st);
-	if (NULL == up)
+	if (NULL == up) {
 		return;
-	if (!(pp->sloppyclockflag & CLK_FLAG1))
+	}
+	if (!(pp->sloppyclockflag & CLK_FLAG1)) {
 		up->max_delta = 0;
-	else if (pp->fudgetime2 < 1. || pp->fudgetime2 > SECSPERDAY)
+	} else if (pp->fudgetime2 < 1. || pp->fudgetime2 > SECSPERDAY) {
 		up->max_delta = 4 * SECSPERHR;
-	else
+	} else {
 		up->max_delta = (time_t)floor(pp->fudgetime2 + 0.5);
+	}
 }
 
 
@@ -236,8 +238,9 @@ shm_shutdown(
 {
 	struct shmunit *      const up = pp->unitptr;
 
-	if (NULL == up)
+	if (NULL == up) {
 		return;
+	}
 
 	(void)shmdt((char *)up->shm);
 
@@ -291,151 +294,149 @@ shm_poll(
 
 
 enum segstat_t {
-    OK, NO_SEGMENT, NOT_READY, BAD_MODE, CLASH
+	OK, NO_SEGMENT, NOT_READY, BAD_MODE, CLASH
 };
 
 struct shm_stat_t {
-    int status;
-    int mode;
-    struct timespec tvc, tvr, tvt;
-    int precision;
-    int leap;
+	int status;
+	int mode;
+	struct timespec tvc, tvr, tvt;
+	int precision;
+	int leap;
 };
 
-static inline void memory_barrier(void)
-{
+static inline void memory_barrier(void) {
 #if defined(HAVE_STDATOMIC_H) && !defined(__COVERITY__)
-    atomic_thread_fence(memory_order_seq_cst);
+	atomic_thread_fence(memory_order_seq_cst);
 #endif /* HAVE_STDATOMIC_H */
 }
 
-static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat_t *shm_stat)
+static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat_t *shm_stat) {
 /* try to grab a sample from the specified SHM segment */
-{
-    volatile struct shmTime shmcopy, *shm = shm_in;
-    volatile int cnt;
+	volatile struct shmTime shmcopy, *shm = shm_in;
+	volatile int cnt;
 
-    unsigned int cns_new, rns_new;
+	unsigned int cns_new, rns_new;
 
-    /*
-     * This is the main routine. It snatches the time from the shm
-     * board and tacks on a local timestamp.
-     */
-    if (shm == NULL) {
-	shm_stat->status = NO_SEGMENT;
-	return NO_SEGMENT;
-    }
+	/*
+	 * This is the main routine. It snatches the time from the shm
+	 * board and tacks on a local timestamp.
+	 */
+	if (shm == NULL) {
+		shm_stat->status = NO_SEGMENT;
+		return NO_SEGMENT;
+	}
 
-    /*@-type@*//* splint is confused about struct timespec */
-    shm_stat->tvc.tv_sec = shm_stat->tvc.tv_nsec = 0;
-    {
-	time_t now;
+	/*@-type@*//* splint is confused about struct timespec */
+	shm_stat->tvc.tv_sec = shm_stat->tvc.tv_nsec = 0;
+	{
+		time_t now;
 
-	time(&now);
-	shm_stat->tvc.tv_sec = now;
-    }
+		time(&now);
+		shm_stat->tvc.tv_sec = now;
+	}
 
-    /* relying on word access to be atomic here */
-    if (shm->valid == 0) {
-	shm_stat->status = NOT_READY;
-	return NOT_READY;
-    }
+	/* relying on word access to be atomic here */
+	if (shm->valid == 0) {
+		shm_stat->status = NOT_READY;
+		return NOT_READY;
+	}
 
-    cnt = shm->count;
+	cnt = shm->count;
 
-    /*
-     * This is proof against concurrency issues if either
-     * (a) the memory_barrier() call works on this host, or
-     * (b) memset compiles to an uninterruptible single-instruction bitblt.
-     */
-    memory_barrier();
-    /* structure copy, to preserve volatile */
-    shmcopy = *shm;
-    shm->valid = 0;
-    memory_barrier();
+	/*
+	 * This is proof against concurrency issues if either
+	 * (a) the memory_barrier() call works on this host, or
+	 * (b) memset compiles to an uninterruptible single-instruction bitblt.
+	 */
+	memory_barrier();
+	/* structure copy, to preserve volatile */
+	shmcopy = *shm;
+	shm->valid = 0;
+	memory_barrier();
 
-    /*
-     * Clash detection in case neither (a) nor (b) was true.
-     * Not supported in mode 0, and word access to the count field
-     * must be atomic for this to work.
-     */
-    if (shmcopy.mode > 0 && cnt != shm->count) {
-	shm_stat->status = CLASH;
+	/*
+	 * Clash detection in case neither (a) nor (b) was true.
+	 * Not supported in mode 0, and word access to the count field
+	 * must be atomic for this to work.
+	 */
+	if (shmcopy.mode > 0 && cnt != shm->count) {
+		shm_stat->status = CLASH;
+		return (enum segstat_t)shm_stat->status;
+	}
+
+	shm_stat->status = OK;
+	shm_stat->mode = shmcopy.mode;
+
+	switch (shmcopy.mode) {
+	    case 0:
+		shm_stat->tvr.tv_sec	= shmcopy.receiveTimeStampSec;
+		shm_stat->tvr.tv_nsec	= shmcopy.receiveTimeStampUSec * 1000;
+		rns_new		= shmcopy.receiveTimeStampNSec;
+		shm_stat->tvt.tv_sec	= shmcopy.clockTimeStampSec;
+		shm_stat->tvt.tv_nsec	= shmcopy.clockTimeStampUSec * 1000;
+		cns_new		= shmcopy.clockTimeStampNSec;
+
+		/* Since the following comparisons are between unsigned
+		** variables they are always well defined, and any
+		** (signed) underflow will turn into very large unsigned
+		** values, well above the 1000 cutoff.
+		**
+		** Note: The usecs *must* be a *truncated*
+		** representation of the nsecs. This code will fail for
+		** *rounded* usecs, and the logic to deal with
+		** wrap-arounds in the presence of rounded values is
+		** much more convoluted.
+		*/
+		if (   ((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
+		       && ((rns_new - (unsigned)shm_stat->tvr.tv_nsec) < 1000)) {
+			shm_stat->tvt.tv_nsec = (long)cns_new;
+			shm_stat->tvr.tv_nsec = (long)rns_new;
+		}
+		/* At this point shm_stat->tvr and shm_stat->tvt contain valid ns-level
+		** timestamps, possibly generated by extending the old
+		** us-level timestamps
+		*/
+		break;
+
+	    case 1:
+
+		shm_stat->tvr.tv_sec	= shmcopy.receiveTimeStampSec;
+		shm_stat->tvr.tv_nsec	= shmcopy.receiveTimeStampUSec * 1000;
+		rns_new		= shmcopy.receiveTimeStampNSec;
+		shm_stat->tvt.tv_sec	= shmcopy.clockTimeStampSec;
+		shm_stat->tvt.tv_nsec	= shmcopy.clockTimeStampUSec * 1000;
+		cns_new		= shmcopy.clockTimeStampNSec;
+
+		/* See the case above for an explanation of the
+		** following test.
+		*/
+		if (   ((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
+		       && ((rns_new - (unsigned)shm_stat->tvr.tv_nsec) < 1000)) {
+			shm_stat->tvt.tv_nsec = (long)cns_new;
+			shm_stat->tvr.tv_nsec = (long)rns_new;
+		}
+		/* At this point shm_stat->tvr and shm_stat->tvt contains valid ns-level
+		** timestamps, possibly generated by extending the old
+		** us-level timestamps
+		*/
+		break;
+
+	    default:
+		shm_stat->status = BAD_MODE;
+		break;
+	}
+	/*@-type@*/
+
+	/*
+	 * leap field is not a leap offset but a leap notification code.
+	 * The values are magic numbers used by NTP and set by GPSD, if at all, in
+	 * the subframe code.
+	 */
+	shm_stat->leap = shmcopy.leap;
+	shm_stat->precision = shmcopy.precision;
+
 	return (enum segstat_t)shm_stat->status;
-    }
-
-    shm_stat->status = OK;
-    shm_stat->mode = shmcopy.mode;
-
-    switch (shmcopy.mode) {
-    case 0:
-	shm_stat->tvr.tv_sec	= shmcopy.receiveTimeStampSec;
-	shm_stat->tvr.tv_nsec	= shmcopy.receiveTimeStampUSec * 1000;
-	rns_new		= shmcopy.receiveTimeStampNSec;
-	shm_stat->tvt.tv_sec	= shmcopy.clockTimeStampSec;
-	shm_stat->tvt.tv_nsec	= shmcopy.clockTimeStampUSec * 1000;
-	cns_new		= shmcopy.clockTimeStampNSec;
-
-	/* Since the following comparisons are between unsigned
-	** variables they are always well defined, and any
-	** (signed) underflow will turn into very large unsigned
-	** values, well above the 1000 cutoff.
-	**
-	** Note: The usecs *must* be a *truncated*
-	** representation of the nsecs. This code will fail for
-	** *rounded* usecs, and the logic to deal with
-	** wrap-arounds in the presence of rounded values is
-	** much more convoluted.
-	*/
-	if (   ((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
-	       && ((rns_new - (unsigned)shm_stat->tvr.tv_nsec) < 1000)) {
-	    shm_stat->tvt.tv_nsec = (long)cns_new;
-	    shm_stat->tvr.tv_nsec = (long)rns_new;
-	}
-	/* At this point shm_stat->tvr and shm_stat->tvt contain valid ns-level
-	** timestamps, possibly generated by extending the old
-	** us-level timestamps
-	*/
-	break;
-
-    case 1:
-
-	shm_stat->tvr.tv_sec	= shmcopy.receiveTimeStampSec;
-	shm_stat->tvr.tv_nsec	= shmcopy.receiveTimeStampUSec * 1000;
-	rns_new		= shmcopy.receiveTimeStampNSec;
-	shm_stat->tvt.tv_sec	= shmcopy.clockTimeStampSec;
-	shm_stat->tvt.tv_nsec	= shmcopy.clockTimeStampUSec * 1000;
-	cns_new		= shmcopy.clockTimeStampNSec;
-
-	/* See the case above for an explanation of the
-	** following test.
-	*/
-	if (   ((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
-	       && ((rns_new - (unsigned)shm_stat->tvr.tv_nsec) < 1000)) {
-	    shm_stat->tvt.tv_nsec = (long)cns_new;
-	    shm_stat->tvr.tv_nsec = (long)rns_new;
-	}
-	/* At this point shm_stat->tvr and shm_stat->tvt contains valid ns-level
-	** timestamps, possibly generated by extending the old
-	** us-level timestamps
-	*/
-	break;
-
-    default:
-	shm_stat->status = BAD_MODE;
-	break;
-    }
-    /*@-type@*/
-
-    /*
-     * leap field is not a leap offset but a leap notification code.
-     * The values are magic numbers used by NTP and set by GPSD, if at all, in
-     * the subframe code.
-     */
-    shm_stat->leap = shmcopy.leap;
-    shm_stat->precision = shmcopy.precision;
-
-    return (enum segstat_t)shm_stat->status;
 }
 
 /*
@@ -537,8 +538,9 @@ shm_timer(
 
 	/* check 2: delta check */
 	tt = shm_stat.tvr.tv_sec - shm_stat.tvt.tv_sec - (shm_stat.tvr.tv_nsec < shm_stat.tvt.tv_nsec);
-	if (tt < 0)
+	if (tt < 0) {
 		tt = -tt;
+	}
 	if (up->max_delta > 0 && tt > up->max_delta) {
 		DPRINT(1, ("%s: SHM(%d) diff limit exceeded, delta=%llds\n",
 			   refclock_name(peer), unit, (long long)tt));

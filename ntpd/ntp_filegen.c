@@ -396,8 +396,9 @@ filegen_config(
 	/*
 	 * validate parameters
 	 */
-	if (!valid_fileref(dir, fname))
+	if (!valid_fileref(dir, fname)) {
 		return;
+}
 
 	if (NULL != gen->fp) {
 		fclose(gen->fp);

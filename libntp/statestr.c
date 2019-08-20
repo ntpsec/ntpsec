@@ -232,8 +232,9 @@ getcode(
 	char *	buf;
 
 	while (codetab->code != -1) {
-		if (codetab->code == code)
+		if (codetab->code == code) {
 			return codetab->string;
+		}
 		codetab++;
 	}
 
@@ -253,8 +254,9 @@ getevents(
 {
 	char *	buf;
 
-	if (cnt == 0)
+	if (cnt == 0) {
 		return "no events";
+	}
 
 	buf = lib_getbuf();
 	snprintf(buf, LIB_BUFLENGTH, "%d event%s", cnt,
@@ -298,11 +300,13 @@ decode_bitflags(
 		if (tab[b].code & bits) {
 			rc = snprintf(pch, (size_t)(lim - pch), "%s%s", sep,
 				      tab[b].string);
-			if (rc < 0)
+			if (rc < 0) {
 				goto toosmall;
+			}
 			pch += (unsigned int)rc;
-			if (pch >= lim)
+			if (pch >= lim) {
 				goto toosmall;
+			}
 			sep = sep2;
 		}
 	}

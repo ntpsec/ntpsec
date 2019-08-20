@@ -20,7 +20,7 @@ static pthread_mutex_t cookie_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_t me;
 
 void getbuf_init(void) {
-  me = pthread_self();
+	me = pthread_self();
 }
 
 /*
@@ -42,29 +42,29 @@ void getbuf_init(void) {
 
 char *lib_getbuf(void)
 {
-    static libbufstr	lib_stringbuf[LIB_NUMBUF];
-    static int		lib_nextbuf;
-    char *bufp;
+	static libbufstr	lib_stringbuf[LIB_NUMBUF];
+	static int		lib_nextbuf;
+	char *bufp;
 
 // FIXME - need this until python tests can call getbuf_init 
-static bool init_done = false;
-    if (!init_done) {
-      getbuf_init();
-      init_done = true;
-    }
+	static bool init_done = false;
+	if (!init_done) {
+		getbuf_init();
+		init_done = true;
+	}
 
-    if (pthread_self() != me) {
-	msyslog(LOG_ERR, "ERR: lib_getbuf() called from non-main thread.");
+	if (pthread_self() != me) {
+		msyslog(LOG_ERR, "ERR: lib_getbuf() called from non-main thread.");
 #ifndef BACKTRACE_DISABLED
 //        backtrace_log();
 #endif
 //        exit(1);
-    }
+	}
 
-    pthread_mutex_lock(&cookie_lock);
-    ZERO(lib_stringbuf[lib_nextbuf]);
-    (bufp) = &lib_stringbuf[lib_nextbuf++][0];
-    lib_nextbuf %= (int)COUNTOF(lib_stringbuf);
-    pthread_mutex_unlock(&cookie_lock);
-    return bufp;
+	pthread_mutex_lock(&cookie_lock);
+	ZERO(lib_stringbuf[lib_nextbuf]);
+	(bufp) = &lib_stringbuf[lib_nextbuf++][0];
+	lib_nextbuf %= (int)COUNTOF(lib_stringbuf);
+	pthread_mutex_unlock(&cookie_lock);
+	return bufp;
 }

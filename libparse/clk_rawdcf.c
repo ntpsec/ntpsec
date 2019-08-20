@@ -75,16 +75,15 @@ typedef struct last_tcode {
 
 #define BUFFER_MAX	61
 
-clockformat_t clock_rawdcf =
-{
-  inp_rawdcf,			/* DCF77 input handling */
-  cvt_rawdcf,			/* raw dcf input conversion */
-  pps_rawdcf,			/* examining PPS information */
-  0,				/* no private configuration data */
-  "RAW DCF77 Timecode",		/* direct decoding / time synthesis */
+clockformat_t clock_rawdcf = {
+	inp_rawdcf,			/* DCF77 input handling */
+	cvt_rawdcf,			/* raw dcf input conversion */
+	pps_rawdcf,			/* examining PPS information */
+	0,				/* no private configuration data */
+	"RAW DCF77 Timecode",		/* direct decoding / time synthesis */
 
-  BUFFER_MAX,			/* bit buffer */
-  sizeof(last_tcode_t)
+	BUFFER_MAX,			/* bit buffer */
+	sizeof(last_tcode_t)
 };
 
 static struct dcfparam
@@ -97,11 +96,9 @@ static struct dcfparam
 	(const unsigned char *)"--------------------s-------p------p----------------------p__"  /* 'ZERO' representation */
 };
 
-static struct rawdcfcode
-{
+static struct rawdcfcode {
 	char offset;			/* start bit */
-} rawdcfcode[] =
-{
+} rawdcfcode[] = {
 	{  0 }, { 15 }, { 16 }, { 17 }, { 19 }, { 20 }, { 21 }, { 25 }, { 28 }, { 29 },
 	{ 33 }, { 35 }, { 36 }, { 40 }, { 42 }, { 45 }, { 49 }, { 50 }, { 54 }, { 58 }, { 59 }
 };
@@ -177,8 +174,9 @@ pcheck(
 
 	last = partab[idx+1].offset;
 
-	for (i = partab[idx].offset; i < last; i++)
+	for (i = partab[idx].offset; i < last; i++) {
 	    psum ^= (buf[i] != zero[i]);
+	}
 
 	return psum;
 }
@@ -214,8 +212,12 @@ convert_rawdcf(
 			msyslog(LOG_ERR, "ERR: parse: convert_rawdcf: BAD DATA - no conversion");
 			return CVT_NONE;
 		}
-		if (*b) b++;
-		if (*c) c++;
+		if (*b) {
+			b++;
+		}
+		if (*c) {
+			c++;
+		}
 		s++;
 	}
 
@@ -264,14 +266,17 @@ convert_rawdcf(
 			return CVT_FAIL|CVT_BADFMT;
 		}
 
-		if (ext_bf(buffer, DCF_A1, dcfprm->zerobits))
+		if (ext_bf(buffer, DCF_A1, dcfprm->zerobits)) {
 		    clock_time->flags |= PARSEB_ANNOUNCE;
+		}
 
-		if (ext_bf(buffer, DCF_A2, dcfprm->zerobits))
+		if (ext_bf(buffer, DCF_A2, dcfprm->zerobits)) {
 		    clock_time->flags |= PARSEB_LEAPADD; /* default: DCF77 data format deficiency */
-
-		if (ext_bf(buffer, DCF_R, dcfprm->zerobits))
+		}
+		    
+		if (ext_bf(buffer, DCF_R, dcfprm->zerobits)) {
 		    clock_time->flags |= PARSEB_CALLBIT;
+		}
 
 		parseprintf(DD_RAWDCF,("parse: convert_rawdcf: TIME CODE OK: %02d:%02d, %02d.%02d.%02d, flags 0x%lx\n",
 				       (int)clock_time->hour, (int)clock_time->minute, (int)clock_time->day, (int)clock_time->month,(int) clock_time->year,
@@ -322,25 +327,21 @@ cvt_rawdcf(
 
 	UNUSED_ARG(param);
 
-	for (i = 0; i < BITS; i++)
-	{
+	for (i = 0; i < BITS; i++) {
 		histbuf[i] = 0;
 	}
 
 	cutoff = 0;
 	lowmax = 0;
 
-	while (s < e)
-	{
+	while (s < e) {
 		unsigned int ch = *s ^ 0xFF;
 		/*
 		 * these lines are left as an exercise to the reader 8-)
 		 */
-		if (!((ch+1) & ch) || !*s)
-		{
+		if (!((ch+1) & ch) || !*s) {
 
-			for (i = 0; ch; i++)
-			{
+			for (i = 0; ch; i++) {
 				ch >>= 1;
 			}
 
@@ -348,9 +349,7 @@ cvt_rawdcf(
 			histbuf[i]++;
 			cutoff += i;
 			lowmax++;
-		}
-		else
-		{
+		} else {
 			parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: character check for 0x%x@%d FAILED\n", *s, (int)(s - (unsigned char *)buffer)));
 			*s = (unsigned char)~0;
 			rtc = CVT_FAIL|CVT_BADFMT;
@@ -358,12 +357,9 @@ cvt_rawdcf(
 		s++;
 	}
 
-	if (lowmax)
-	{
+	if (lowmax) {
 		cutoff /= lowmax;
-	}
-	else
-	{
+	} else {
 		cutoff = 4;	/* doesn't really matter - it'll fail anyway, but gives error output */
 	}
 
@@ -374,8 +370,7 @@ cvt_rawdcf(
 	highmax = 0;
 
 	parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: histogram:"));
-	for (i = 0; i <= cutoff; i++)
-	{
+	for (i = 0; i <= cutoff; i++) {
 		lowmax+=histbuf[i] * i;
 		highmax += histbuf[i];
 		parseprintf(DD_RAWDCF,(" %d", histbuf[i]));
@@ -384,48 +379,36 @@ cvt_rawdcf(
 
 	lowmax += highmax / 2;
 
-	if (highmax)
-	{
+	if (highmax) {
 		lowmax /= highmax;
-	}
-	else
-	{
+	} else {
 		lowmax = 0;
 	}
 
 	highmax = 0;
 	cutoff = 0;
 
-	for (; i < BITS; i++)
-	{
+	for (; i < BITS; i++) {
 		highmax+=histbuf[i] * i;
 		cutoff +=histbuf[i];
 		parseprintf(DD_RAWDCF,(" %d", histbuf[i]));
 	}
 	parseprintf(DD_RAWDCF,("\n"));
 
-	if (cutoff)
-	{
+	if (cutoff) {
 		highmax /= cutoff;
-	}
-	else
-	{
+	} else {
 		highmax = BITS-1;
 	}
 
 	span = cutoff = lowmax;
-	for (i = lowmax; i <= highmax; i++)
-	{
-		if (histbuf[cutoff] > histbuf[i])
-		{
+	for (i = lowmax; i <= highmax; i++) {
+		if (histbuf[cutoff] > histbuf[i]) {
 			cutoff = i;
 			span = i;
+		} else if (histbuf[cutoff] == histbuf[i]) {
+			span = i;
 		}
-		else
-		    if (histbuf[cutoff] == histbuf[i])
-		    {
-			    span = i;
-		    }
 	}
 
 	cutoff = (cutoff + span) / 2;
@@ -446,22 +429,21 @@ cvt_rawdcf(
 			*s = (*s >= cutoff) ? *b : *c;
 		}
 		s++;
-		if (*b) b++;
-		if (*c) c++;
+		if (*b) { b++;
+}
+		if (*c) { c++;
+}
 	}
 
 	*s = '\0';
 
-        if (rtc == CVT_NONE)
-        {
+        if (rtc == CVT_NONE) {
 	       rtc = convert_rawdcf(buffer, size, &dcfparameter, clock_time);
-	       if (rtc == CVT_OK)
-	       {
+	       if (rtc == CVT_OK) {
 			time_t newtime;
 
 			newtime = parse_to_unixtime(clock_time, &rtc);
-			if ((rtc == CVT_OK) && t)
-			{
+			if ((rtc == CVT_OK) && t) {
 				if ((newtime - t->tcode) <= 600) /* require a successful telegram within last 10 minutes */
 				{
 				        parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: recent timestamp check OK\n"));
@@ -551,8 +533,9 @@ snt_rawdcf(
 	 */
 	if (t != NULL && lfpuint(t->tminute) != 0) {
 		delta_usec = calc_usecdiff(ptime, &t->tminute, parseio->parse_index - 1);
-		if (delta_usec < 0)
+		if (delta_usec < 0) {
 			delta_usec = -delta_usec;
+		}
 	}
 
 	parseprintf(DD_RAWDCF,("parse: snt_rawdcf: synth for offset %d seconds - absolute usec error %ld\n",
@@ -602,8 +585,7 @@ inp_rawdcf(
 		/* finish collection */
 		(void) parse_end(parseio);
 
-		if (t != NULL)
-		{
+		if (t != NULL) {
 			/* remember minute start sample time if timeouts occur in minute raster */
 			/*
 			 * 2017-01-07: Emergency repair.  This used to test
@@ -616,25 +598,20 @@ inp_rawdcf(
 			 * references to the timespec member. It is unknown
 			 * whether this change actually corrects the code.
 			 */
-			if (lfpuint(t->timeout) != 0)
-			{
+			if (lfpuint(t->timeout) != 0) {
 				delta_usec = calc_usecdiff(tstamp, &t->timeout, 60);
-				if (delta_usec < 0)
+				if (delta_usec < 0) {
 					delta_usec = -delta_usec;
-			}
-			else
-			{
+				}
+			} else {
 				delta_usec = -1;
 			}
-
-                       if (delta_usec < (NS_PER_S/2000) && delta_usec >= 0)
-			{
+			
+			if (delta_usec < (NS_PER_S/2000) && delta_usec >= 0) {
 				parseprintf(DD_RAWDCF, ("inp_rawdcf: timeout time difference %ld usec - minute marker set\n", delta_usec));
 				/* collect minute markers only if spaced by 60 seconds */
 				t->tminute = *tstamp;
-			}
-			else
-			{
+			} else {
 				parseprintf(DD_RAWDCF, ("inp_rawdcf: timeout time difference %ld usec - minute marker cleared\n", delta_usec));
 				memset((char *)&t->tminute, 0, sizeof(t->tminute));
 			}
@@ -650,10 +627,10 @@ inp_rawdcf(
 		unsigned int rtc;
 
 		rtc = parse_addchar(parseio, ch);
-		if (rtc == PARSE_INP_SKIP)
-		{
-			if (snt_rawdcf(parseio, tstamp) == CVT_OK)
+		if (rtc == PARSE_INP_SKIP) {
+			if (snt_rawdcf(parseio, tstamp) == CVT_OK) {
 				return PARSE_INP_SYNTH;
+			}
 		}
 		return rtc;
 	}

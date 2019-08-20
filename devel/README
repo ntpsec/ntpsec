@@ -49,6 +49,9 @@ y2k.adoc::
 release.nix::
 	NixOS build recipe.
 
+tidy::
+	Wrapper for clang-tidy, use ut to canicalize code.
+
 trace/::
 	Configuration files for the RTEMS trace utility.  These
 	are for an experimental cross-port that is not yet

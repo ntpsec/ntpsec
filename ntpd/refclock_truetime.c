@@ -290,8 +290,9 @@ true_receive(
 	/*
 	 * There is a case where <cr><lf> generates 2 timestamps.
 	 */
-	if (rd_lencode == 0)
+	if (rd_lencode == 0) {
 		return;
+}
 	pp->lencode = rd_lencode;
 	strlcpy(pp->a_lastcode, rd_lastcode, sizeof(pp->a_lastcode));
 	pp->lastrec = rd_tmp;
@@ -597,8 +598,9 @@ true_doevent(
 	case t_unknown:
 		switch (up->state) {
 		case s_Base:
-			if (event != e_Init)
+			if (event != e_Init) {
 			    abort();
+			}
 			true_send(peer, "P\r");
 			up->state = s_InqGOES;
 			break;

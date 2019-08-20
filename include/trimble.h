@@ -93,13 +93,12 @@
 #define CMD_RDGPSSTAT	0x85	/* differential correction status:trimble_dgpsstatus:RO */
 #define CMD_RSUPER	0x8F	/* super packet::0 */
 
-typedef struct cmd_info
-{
-  unsigned char cmd;		/* command code */
-  const char   *cmdname;	/* command name */
-  const char   *cmddesc;	/* command description */
-  const char   *varname;	/* name of variable */
-  int           varmode;	/* mode of variable */
+typedef struct cmd_info {
+	unsigned char cmd;		/* command code */
+	const char   *cmdname;	/* command name */
+	const char   *cmddesc;	/* command description */
+	const char   *varname;	/* name of variable */
+	int           varmode;	/* mode of variable */
 } cmd_info_t;
 
 extern cmd_info_t trimble_rcmds[];

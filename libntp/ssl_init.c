@@ -30,8 +30,9 @@ CMAC_CTX *cmac_ctx;
 void
 ssl_init(void)
 {
-	if (ssl_init_done)
+	if (ssl_init_done) {
 		return;
+}
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	SSL_library_init();

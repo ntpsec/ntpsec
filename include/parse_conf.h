@@ -30,15 +30,13 @@
  * see below for field offsets
  */
 
-struct format
-{
-  struct foff
-    {
-      unsigned short offset;		/* offset into buffer */
-      unsigned short length;		/* length of field */
-    }         field_offsets[O_COUNT];
-  const unsigned char *fixed_string;		/* string with must be chars (blanks = wildcards) */
-  unsigned long      flags;
+struct format {
+	struct foff {
+		unsigned short offset;		/* offset into buffer */
+		unsigned short length;		/* length of field */
+	}         field_offsets[O_COUNT];
+	const unsigned char *fixed_string;		/* string with must be chars (blanks = wildcards) */
+	unsigned long      flags;
 };
 #endif
 

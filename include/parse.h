@@ -113,17 +113,16 @@ typedef l_fp timestamp_t;
 /*
  * standard time stamp structure
  */
-struct parsetime
-{
-  unsigned long  parse_status;	/* data status - CVT_OK, CVT_NONE, CVT_FAIL ... */
-  timestamp_t	 parse_time;	/* PARSE timestamp */
-  timestamp_t	 parse_stime;	/* telegram sample timestamp */
-  timestamp_t	 parse_ptime;	/* PPS time stamp */
-  long           parse_usecerror;	/* sampled usec error */
-  unsigned long	 parse_state;	/* current receiver state */
-  unsigned short parse_format;	/* format code */
-  unsigned short parse_msglen;	/* length of message */
-  unsigned char  parse_msg[PARSE_TCMAX]; /* original messages */
+struct parsetime {
+	unsigned long  parse_status;	/* data status - CVT_OK, CVT_NONE, CVT_FAIL ... */
+	timestamp_t	 parse_time;	/* PARSE timestamp */
+	timestamp_t	 parse_stime;	/* telegram sample timestamp */
+	timestamp_t	 parse_ptime;	/* PPS time stamp */
+	long           parse_usecerror;	/* sampled usec error */
+	unsigned long	 parse_state;	/* current receiver state */
+	unsigned short parse_format;	/* format code */
+	unsigned short parse_msglen;	/* length of message */
+	unsigned char  parse_msg[PARSE_TCMAX]; /* original messages */
 };
 
 typedef struct parsetime parsetime_t;
@@ -139,76 +138,70 @@ typedef struct parsetime parsetime_t;
 /*
  * ioctl structure
  */
-union parsectl
-{
-  struct parsegettc
-    {
-      unsigned long         parse_state;	/* last state */
-      unsigned long         parse_badformat; /* number of bad packets since last query */
-      unsigned short parse_format;/* last decoded format */
-      unsigned short parse_count;	/* count of valid time code bytes */
-      char           parse_buffer[PARSE_TCMAX+1]; /* timecode buffer */
-    } parsegettc;
+union parsectl {
+	struct parsegettc {
+		unsigned long         parse_state;	/* last state */
+		unsigned long         parse_badformat; /* number of bad packets since last query */
+		unsigned short parse_format;/* last decoded format */
+		unsigned short parse_count;	/* count of valid time code bytes */
+		char           parse_buffer[PARSE_TCMAX+1]; /* timecode buffer */
+	} parsegettc;
 
-  struct parseformat
-    {
-      unsigned short parse_format;/* number of examined format */
-      unsigned short parse_count;	/* count of valid string bytes */
-      char           parse_buffer[PARSE_TCMAX+1]; /* format code string */
-    } parseformat;
+	struct parseformat {
+		unsigned short parse_format;/* number of examined format */
+		unsigned short parse_count;	/* count of valid string bytes */
+		char           parse_buffer[PARSE_TCMAX+1]; /* format code string */
+	} parseformat;
 
-  struct parsesetcs
-    {
-      unsigned long         parse_cs;	/* character size (needed for stripping) */
-    } parsesetcs;
+	struct parsesetcs {
+		unsigned long         parse_cs;	/* character size (needed for stripping) */
+	} parsesetcs;
 };
 
 typedef union parsectl parsectl_t;
 
 /*------ for conversion routines --------*/
 
-struct parse			/* parse module local data */
-{
-  int            parse_flags;	/* operation and current status flags */
+struct parse {			/* parse module local data */
+	int            parse_flags;	/* operation and current status flags */
 
-  int		 parse_ioflags;	   /* io handling flags (5-8 Bit control currently) */
+	int		 parse_ioflags;	   /* io handling flags (5-8 Bit control currently) */
 
-  /*
-   * private data - fixed format only
-   */
-  unsigned short parse_plen;	/* length of private data */
-  void          *parse_pdata;	/* private data pointer */
+	/*
+	 * private data - fixed format only
+	 */
+	unsigned short parse_plen;	/* length of private data */
+	void          *parse_pdata;	/* private data pointer */
 
-  /*
-   * time code input buffer (from RS232 or PPS)
-   */
-  unsigned short parse_index;	/* current buffer index */
-  char          *parse_data;    /* data buffer */
-  unsigned short parse_dsize;	/* size of data buffer */
-  unsigned short parse_lformat;	/* last format used */
-  unsigned long  parse_lstate;	/* last state code */
-  char          *parse_ldata;	/* last data buffer */
-  unsigned short parse_ldsize;	/* last data buffer length */
-  unsigned long  parse_badformat;	/* number of unparsable packets */
+	/*
+	 * time code input buffer (from RS232 or PPS)
+	 */
+	unsigned short parse_index;	/* current buffer index */
+	char          *parse_data;    /* data buffer */
+	unsigned short parse_dsize;	/* size of data buffer */
+	unsigned short parse_lformat;	/* last format used */
+	unsigned long  parse_lstate;	/* last state code */
+	char          *parse_ldata;	/* last data buffer */
+	unsigned short parse_ldsize;	/* last data buffer length */
+	unsigned long  parse_badformat;	/* number of unparsable packets */
 
-  timestamp_t    parse_lastchar; /* last time a character was received */
-  parsetime_t    parse_dtime;	/* external data prototype */
+	timestamp_t    parse_lastchar; /* last time a character was received */
+	parsetime_t    parse_dtime;	/* external data prototype */
 };
 
 typedef struct parse parse_t;
 
-struct clocktime		/* clock time broken up from time code */
-{
-  long day;
-  long month;
-  long year;
-  long hour;
-  long minute;
-  long second;
-  long usecond;
-  long utcoffset;	/* in seconds */
-  time_t utctime;	/* the actual time - alternative to date/time */
-  unsigned long flags;	/* current clock status */
+struct clocktime {		/* clock time broken up from time code */
+	long day;
+	long month;
+	long year;
+	long hour;
+	long minute;
+	long second;
+	long usecond;
+	long utcoffset;	/* in seconds */
+	time_t utctime;	/* the actual time - alternative to date/time */
+	unsigned long flags;	/* current clock status */
 };
 
 typedef struct clocktime clocktime_t;
@@ -239,21 +232,20 @@ typedef unsigned long parse_inp_fnc_t(parse_t *, char, timestamp_t *);
 typedef unsigned long parse_cvt_fnc_t(unsigned char *, int, struct format *, clocktime_t *, void *);
 typedef unsigned long parse_pps_fnc_t(parse_t *, int, timestamp_t *);
 
-struct clockformat
-{
-  /* special input protocol - implies fixed format */
-  parse_inp_fnc_t *input;
-  /* conversion routine */
-  parse_cvt_fnc_t *convert;
-  /* routine for handling RS232 sync events (time stamps) */
-  /* PPS input routine */
-  parse_pps_fnc_t *syncpps;
-  /* time code synthesizer */
+struct clockformat {
+	/* special input protocol - implies fixed format */
+	parse_inp_fnc_t *input;
+	/* conversion routine */
+	parse_cvt_fnc_t *convert;
+	/* routine for handling RS232 sync events (time stamps) */
+	/* PPS input routine */
+	parse_pps_fnc_t *syncpps;
+	/* time code synthesizer */
 
-  void           *data;		/* local parameters */
-  const char     *name;		/* clock format name */
-  unsigned short  length;	/* maximum length of data packet */
-  unsigned short  plen;		/* length of private data - implies fixed format */
+	void           *data;		/* local parameters */
+	const char     *name;		/* clock format name */
+	unsigned short  length;	/* maximum length of data packet */
+	unsigned short  plen;		/* length of private data - implies fixed format */
 };
 
 typedef struct clockformat clockformat_t;

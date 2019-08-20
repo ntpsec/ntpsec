@@ -122,13 +122,15 @@ mbg_csum(
 	 unsigned int n
 	 )
 {
-  unsigned int sum = 0;
-  unsigned int i;
+	unsigned int sum = 0;
+	unsigned int i;
 
-  for ( i = 0; i < n; i++ )
-    sum += *p++;
+	for ( i = 0; i < n; i++ ) {
+		sum += *p++;
 
-  return (CSUM) sum;
+	}
+
+	return (CSUM) sum;
 
 }  /* csum */
 
@@ -138,10 +140,10 @@ get_mbg_header(
 	       GPS_MSG_HDR *headerp
 	       )
 {
-  headerp->cmd = (GPS_CMD) get_lsb_uint16(bufpp);
-  headerp->len = get_lsb_uint16(bufpp);
-  headerp->data_csum = (CSUM) get_lsb_uint16(bufpp);
-  headerp->hdr_csum  = (CSUM) get_lsb_uint16(bufpp);
+	headerp->cmd = (GPS_CMD) get_lsb_uint16(bufpp);
+	headerp->len = get_lsb_uint16(bufpp);
+	headerp->data_csum = (CSUM) get_lsb_uint16(bufpp);
+	headerp->hdr_csum  = (CSUM) get_lsb_uint16(bufpp);
 }
 
 static struct format meinberg_fmt[] =
@@ -183,8 +185,8 @@ static parse_inp_fnc_t gps_input;
 
 struct msg_buf
 {
-  unsigned short len;		/* len to fill */
-  unsigned short phase;		/* current input phase */
+	unsigned short len;		/* len to fill */
+	unsigned short phase;		/* current input phase */
 };
 
 #define MBG_NONE	0	/* no data input */
@@ -246,18 +248,12 @@ cvt_meinberg(
 	/*
 	 * select automagically correct data format
 	 */
-	if (Strok(buffer, meinberg_fmt[0].fixed_string))
-	{
+	if (Strok(buffer, meinberg_fmt[0].fixed_string)) {
 		format = &meinberg_fmt[0];
-	}
-	else
-	{
-		if (Strok(buffer, meinberg_fmt[1].fixed_string))
-		{
+	} else {
+		if (Strok(buffer, meinberg_fmt[1].fixed_string)) {
 			format = &meinberg_fmt[1];
-		}
-		else
-		{
+		} else {
 			return CVT_FAIL|CVT_BADFMT;
 		}
 	}
@@ -276,19 +272,17 @@ cvt_meinberg(
 	    Stoi(&buffer[format->field_offsets[O_MIN].offset], &clock_time->minute,
 		 format->field_offsets[O_MIN].length) ||
 	    Stoi(&buffer[format->field_offsets[O_SEC].offset], &clock_time->second,
-		 format->field_offsets[O_SEC].length))
-	{
+		 format->field_offsets[O_SEC].length)) {
 		return CVT_FAIL|CVT_BADFMT;
-	}
-	else
-	{
+	} else {
 		unsigned char *f = &buffer[format->field_offsets[O_FLAGS].offset];
 
 		clock_time->usecond = 0;
 		clock_time->flags   = PARSEB_S_LEAP;
 
-		if (clock_time->second == 60)
+		if (clock_time->second == 60) {
 			clock_time->flags |= PARSEB_LEAPSECOND;
+		}
 
 		/*
 		 * in the extended timecode format we have also the
@@ -297,16 +291,13 @@ cvt_meinberg(
 		 * offset (POWERUP flag) and know that the UTC indication
 		 * is the character before the powerup flag
 		 */
-		if ((format->flags & MBG_EXTENDED) && (f[-1] == 'U'))
-		{
+		if ((format->flags & MBG_EXTENDED) && (f[-1] == 'U')) {
 			/*
 			 * timecode is in UTC
 			 */
 			clock_time->utcoffset = 0; /* UTC */
 			clock_time->flags    |= PARSEB_UTC;
-		}
-		else
-		{
+		} else {
 			/*
 			 * only calculate UTC offset if MET/MED is in time code
 			 * or we have the old time code format, where we do not
@@ -340,32 +331,36 @@ cvt_meinberg(
 		/*
 		 * gather status flags
 		 */
-		if (buffer[format->field_offsets[O_ZONE].offset] == 'S')
+		if (buffer[format->field_offsets[O_ZONE].offset] == 'S') {
 			clock_time->flags    |= PARSEB_DST;
+		}
 
-		if (f[0] == '#')
+		if (f[0] == '#') {
 			clock_time->flags |= PARSEB_POWERUP;
-
-		if (f[1] == '*')
+		}
+			
+		if (f[1] == '*') {
 			clock_time->flags |= PARSEB_NOSYNC;
+		}
 
-		if (f[3] == '!')
+		if (f[3] == '!') {
 			clock_time->flags |= PARSEB_ANNOUNCE;
-
+		}
+			
 		/*
 		 * oncoming leap second
 		 * 'a' code not confirmed - earth is not
 		 * expected to speed up
 		 */
-		if (f[3] == 'A')
+		if (f[3] == 'A') {
 			clock_time->flags |= PARSEB_LEAPADD;
-
-		if (f[3] == 'a')
+		}
+			
+		if (f[3] == 'a') {
 			clock_time->flags |= PARSEB_LEAPDEL;
+		}
 
-
-		if (format->flags & MBG_EXTENDED)
-		{
+		if (format->flags & MBG_EXTENDED) {
 			clock_time->flags |= PARSEB_S_CALLBIT;
 
 			/*
@@ -404,7 +399,7 @@ mbg_input(
                     (unsigned long)parseio, (unsigned)ch));
 
 	switch (ch)
-	{
+       {
 	case STX:
 		parseprintf(DD_PARSE, ("mbg_input: STX seen\n"));
 
@@ -415,10 +410,11 @@ mbg_input(
 
 	case ETX:
 		parseprintf(DD_PARSE, ("mbg_input: ETX seen\n"));
-		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP)
+		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP) {
 			return parse_end(parseio);
-		else
+		} else {
 			return rtc;
+		}
 
 	default:
 		return parse_addchar(parseio, ch);
@@ -440,12 +436,9 @@ cvt_mgps(
 	 void          *local
 	)
 {
-	if (!Strok(buffer, format->fixed_string))
-	{
+	if (!Strok(buffer, format->fixed_string)) {
 		return cvt_meinberg(buffer, size, format, clock_time, local);
-	}
-	else
-	{
+	} else {
 		if (Stoi(&buffer[format->field_offsets[O_DAY].offset], &clock_time->day,
 			 format->field_offsets[O_DAY].length) ||
 		    Stoi(&buffer[format->field_offsets[O_MONTH].offset], &clock_time->month,
@@ -457,12 +450,9 @@ cvt_mgps(
 		    Stoi(&buffer[format->field_offsets[O_MIN].offset], &clock_time->minute,
 			 format->field_offsets[O_MIN].length) ||
 		    Stoi(&buffer[format->field_offsets[O_SEC].offset], &clock_time->second,
-			 format->field_offsets[O_SEC].length))
-		{
+			 format->field_offsets[O_SEC].length)) {
 			return CVT_FAIL|CVT_BADFMT;
-		}
-		else
-		{
+		} else {
 			long h;
 			unsigned char *f = &buffer[format->field_offsets[O_FLAGS].offset];
 
@@ -474,23 +464,18 @@ cvt_mgps(
 			 * calculate UTC offset
 			 */
 			if (Stoi(&buffer[format->field_offsets[O_UTCHOFFSET].offset], &h,
-				 format->field_offsets[O_UTCHOFFSET].length))
-			{
+				 format->field_offsets[O_UTCHOFFSET].length)) {
 				return CVT_FAIL|CVT_BADFMT;
-			}
-			else
-			{
+			} else {
 				if (Stoi(&buffer[format->field_offsets[O_UTCMOFFSET].offset], &clock_time->utcoffset,
-					 format->field_offsets[O_UTCMOFFSET].length))
-				{
+					 format->field_offsets[O_UTCMOFFSET].length)) {
 					return CVT_FAIL|CVT_BADFMT;
 				}
 
 				clock_time->utcoffset += h * 60;
 				clock_time->utcoffset  = clock_time->utcoffset * 60;
 
-				if (buffer[format->field_offsets[O_UTCSOFFSET].offset] != '-')
-				{
+				if (buffer[format->field_offsets[O_UTCSOFFSET].offset] != '-') {
 					clock_time->utcoffset = -clock_time->utcoffset;
 				}
 			}
@@ -498,44 +483,49 @@ cvt_mgps(
 			/*
 			 * gather status flags
 			 */
-			if (buffer[format->field_offsets[O_ZONE].offset] == 'S')
+			if (buffer[format->field_offsets[O_ZONE].offset] == 'S') {
 			    clock_time->flags    |= PARSEB_DST;
+			}
 
-			if (clock_time->utcoffset == 0)
+			if (clock_time->utcoffset == 0) {
 			    clock_time->flags |= PARSEB_UTC;
-
+			}
+			    
 			/*
 			 * no sv's seen - no time & position
 			 */
-			if (f[0] == '#')
+			if (f[0] == '#') {
 			    clock_time->flags |= PARSEB_POWERUP;
-
+			}
+			    
 			/*
 			 * at least one sv seen - time (for last position)
 			 */
-			if (f[1] == '*')
+			if (f[1] == '*') {
 			    clock_time->flags |= PARSEB_NOSYNC;
-			else
-			    if (!(clock_time->flags & PARSEB_POWERUP))
+			} else if (!(clock_time->flags & PARSEB_POWERUP)) {
 				clock_time->flags |= PARSEB_POSITION;
-
+			}
 			/*
 			 * oncoming zone switch
 			 */
-			if (f[3] == '!')
+			if (f[3] == '!') {
 			    clock_time->flags |= PARSEB_ANNOUNCE;
-
+			}
+			    
 			/*
 			 * oncoming leap second
 			 * 'a' code not confirmed - earth is not
 			 * expected to speed up
 			 */
-			if (f[4] == 'A')
+			if (f[4] == 'A') {
 			    clock_time->flags |= PARSEB_LEAPADD;
-
-			if (f[4] == 'a')
+			}
+			    
+			if (f[4] == 'a') {
 			    clock_time->flags |= PARSEB_LEAPDEL;
-
+			}
+			    
 			/*
 			 * f[5] == ' '
 			 */
@@ -543,9 +533,10 @@ cvt_mgps(
 			/*
 			 * this is the leap second
 			 */
-			if ((f[6] == 'L') || (clock_time->second == 60))
+			if ((f[6] == 'L') || (clock_time->second == 60)) {
 			    clock_time->flags |= PARSEB_LEAPSECOND;
-
+			}
+			    
 			return CVT_OK;
 		}
 	}
@@ -563,144 +554,143 @@ gps_input(
 	  timestamp_t  *tstamp
 	  )
 {
-  CSUM calc_csum;                    /* used to compare the incoming csums */
-  GPS_MSG_HDR header;
-  struct msg_buf *msg_buf;
+	CSUM calc_csum;                    /* used to compare the incoming csums */
+	GPS_MSG_HDR header;
+	struct msg_buf *msg_buf;
 
-  msg_buf = (struct msg_buf *)parseio->parse_pdata;
+	msg_buf = (struct msg_buf *)parseio->parse_pdata;
 
-  parseprintf(DD_PARSE, ("gps_input(0x%lx, 0x%x, ...)\n",
-              (unsigned long)parseio, (unsigned)ch));
+	parseprintf(DD_PARSE, ("gps_input(0x%lx, 0x%x, ...)\n",
+			       (unsigned long)parseio, (unsigned)ch));
 
-  if (!msg_buf)
-    return PARSE_INP_SKIP;
+	if (!msg_buf) {
+		return PARSE_INP_SKIP;
+	}
+		
+	if ( msg_buf->phase == MBG_NONE ) {                  /* not receiving yet */
+		switch (ch)
+		{
+		    case SOH:
+			parseprintf(DD_PARSE, ("gps_input: SOH seen\n"));
 
-  if ( msg_buf->phase == MBG_NONE )
-    {                  /* not receiving yet */
-      switch (ch)
-	{
-	case SOH:
-	  parseprintf(DD_PARSE, ("gps_input: SOH seen\n"));
+			msg_buf->len = sizeof( header ); /* prepare to receive msg header */
+			msg_buf->phase = MBG_HEADER; /* receiving header */
+			break;
 
-	  msg_buf->len = sizeof( header ); /* prepare to receive msg header */
-	  msg_buf->phase = MBG_HEADER; /* receiving header */
-	  break;
+		    case STX:
+			parseprintf(DD_PARSE, ("gps_input: STX seen\n"));
 
-	case STX:
-	  parseprintf(DD_PARSE, ("gps_input: STX seen\n"));
+			msg_buf->len = 0;
+			msg_buf->phase = MBG_STRING; /* prepare to receive ASCII ETX delimited message */
+			parseio->parse_index = 1;
+			parseio->parse_data[0] = ch;
+			break;
 
-	  msg_buf->len = 0;
-	  msg_buf->phase = MBG_STRING; /* prepare to receive ASCII ETX delimited message */
-	  parseio->parse_index = 1;
-	  parseio->parse_data[0] = ch;
-	  break;
+		    default:
+			return PARSE_INP_SKIP;	/* keep searching */
+		}
 
-	default:
-	  return PARSE_INP_SKIP;	/* keep searching */
+		parseio->parse_dtime.parse_msglen = 1; /* reset buffer pointer */
+		/* fill in first character */
+		parseio->parse_dtime.parse_msg[0] = (unsigned char)ch;
+		parseio->parse_dtime.parse_stime  = *tstamp; /* collect timestamp */
+		return PARSE_INP_SKIP;
 	}
 
-      parseio->parse_dtime.parse_msglen = 1; /* reset buffer pointer */
-      /* fill in first character */
-      parseio->parse_dtime.parse_msg[0] = (unsigned char)ch;
-      parseio->parse_dtime.parse_stime  = *tstamp; /* collect timestamp */
-      return PARSE_INP_SKIP;
-    }
+	/* SOH/STX has already been received */
 
-  /* SOH/STX has already been received */
-
-  /* save incoming character in both buffers if needbe */
-  if ((msg_buf->phase == MBG_STRING) &&
-      (parseio->parse_index < parseio->parse_dsize))
-    parseio->parse_data[parseio->parse_index++] = ch;
-
-  parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] \
-     = (unsigned char)ch;
-
-  if (parseio->parse_dtime.parse_msglen > sizeof(parseio->parse_dtime.parse_msg))
-    {
-      msg_buf->phase = MBG_NONE; /* buffer overflow - discard */
-      parseio->parse_data[parseio->parse_index] = '\0';
-      memcpy(parseio->parse_ldata, parseio->parse_data, (unsigned)(parseio->parse_index+1));
-      parseio->parse_ldsize = parseio->parse_index;
-      return PARSE_INP_DATA;
-    }
-
-  switch (msg_buf->phase)
-    {
-    case MBG_HEADER:
-    case MBG_DATA:
-      msg_buf->len--;
-
-      if ( msg_buf->len )               /* transfer not complete */
-	return PARSE_INP_SKIP;
-
-      parseprintf(DD_PARSE, ("gps_input: %s complete\n", (msg_buf->phase == MBG_DATA) ? "data" : "header"));
-
-      break;
-
-    case MBG_STRING:
-      if ((ch == ETX) || (parseio->parse_index >= parseio->parse_dsize))
-	{
-	  msg_buf->phase = MBG_NONE;
-	  parseprintf(DD_PARSE, ("gps_input: string complete\n"));
-	  parseio->parse_data[parseio->parse_index] = '\0';
-	  memcpy(parseio->parse_ldata, parseio->parse_data, (unsigned)(parseio->parse_index+1));
-	  parseio->parse_ldsize = parseio->parse_index;
-	  parseio->parse_index = 0;
-	  return PARSE_INP_TIME;
+	/* save incoming character in both buffers if needbe */
+	if ((msg_buf->phase == MBG_STRING) &&
+	    (parseio->parse_index < parseio->parse_dsize)) {
+		parseio->parse_data[parseio->parse_index++] = ch;
 	}
-      return PARSE_INP_SKIP;
+		
+	parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] \
+	    = (unsigned char)ch;
 
-    default:
-      /* huh? */
-      break;
-    }
-
-  /* cnt == 0, so the header or the whole message is complete */
-
-  if ( msg_buf->phase == MBG_HEADER )
-    {         /* header complete now */
-      unsigned char *datap = parseio->parse_dtime.parse_msg + 1;
-
-      get_mbg_header(&datap, &header);
-
-      parseprintf(DD_PARSE, ("gps_input: header: cmd 0x%x, len %d, dcsum 0x%x, hcsum 0x%x\n",
-			     (int)header.cmd, (int)header.len, (int)header.data_csum,
-			     (int)header.hdr_csum));
-
-
-      calc_csum = mbg_csum( (unsigned char *) parseio->parse_dtime.parse_msg + 1, (unsigned short)6 );
-
-      if ( calc_csum != header.hdr_csum )
-	{
-	  parseprintf(DD_PARSE, ("gps_input: header checksum mismatch expected 0x%x, got 0x%x\n",
-				 (int)calc_csum, (int)mbg_csum( (unsigned char *) parseio->parse_dtime.parse_msg, (unsigned short)6 )));
-
-	  msg_buf->phase = MBG_NONE;  /* back to hunting mode */
-	  return PARSE_INP_DATA;      /* invalid header checksum received - pass up for detection */
+	if (parseio->parse_dtime.parse_msglen > sizeof(parseio->parse_dtime.parse_msg)) {
+		msg_buf->phase = MBG_NONE; /* buffer overflow - discard */
+		parseio->parse_data[parseio->parse_index] = '\0';
+		memcpy(parseio->parse_ldata, parseio->parse_data, (unsigned)(parseio->parse_index+1));
+		parseio->parse_ldsize = parseio->parse_index;
+		return PARSE_INP_DATA;
 	}
 
-      if ((header.len == 0)  ||       /* no data to wait for */
-	  (header.len >= (sizeof (parseio->parse_dtime.parse_msg) - sizeof(header) - 1)))	/* blows anything we have space for */
+	switch (msg_buf->phase)
 	{
-	  msg_buf->phase = MBG_NONE;  /* back to hunting mode */
-	  return (header.len == 0) ? PARSE_INP_DATA : PARSE_INP_SKIP; /* message complete/throwaway */
+	    case MBG_HEADER:
+	    case MBG_DATA:
+		msg_buf->len--;
+
+		if ( msg_buf->len )               /* transfer not complete */
+			return PARSE_INP_SKIP;
+
+		parseprintf(DD_PARSE, ("gps_input: %s complete\n", (msg_buf->phase == MBG_DATA) ? "data" : "header"));
+
+		break;
+
+	    case MBG_STRING:
+		if ((ch == ETX) || (parseio->parse_index >= parseio->parse_dsize))
+		{
+			msg_buf->phase = MBG_NONE;
+			parseprintf(DD_PARSE, ("gps_input: string complete\n"));
+			parseio->parse_data[parseio->parse_index] = '\0';
+			memcpy(parseio->parse_ldata, parseio->parse_data, (unsigned)(parseio->parse_index+1));
+			parseio->parse_ldsize = parseio->parse_index;
+			parseio->parse_index = 0;
+			return PARSE_INP_TIME;
+		}
+		return PARSE_INP_SKIP;
+
+	    default:
+		/* huh? */
+		break;
 	}
 
-      parseprintf(DD_PARSE, ("gps_input: expecting %d bytes of data message\n", (int)header.len));
+	/* cnt == 0, so the header or the whole message is complete */
 
-      msg_buf->len   = header.len;/* save number of bytes to wait for */
-      msg_buf->phase = MBG_DATA;      /* flag header already complete */
-      return PARSE_INP_SKIP;
-    }
+	if ( msg_buf->phase == MBG_HEADER )
+	{         /* header complete now */
+		unsigned char *datap = parseio->parse_dtime.parse_msg + 1;
 
-  parseprintf(DD_PARSE, ("gps_input: message data complete\n"));
+		get_mbg_header(&datap, &header);
 
-  /* Header and data have been received. The header checksum has been */
-  /* checked */
+		parseprintf(DD_PARSE, ("gps_input: header: cmd 0x%x, len %d, dcsum 0x%x, hcsum 0x%x\n",
+				       (int)header.cmd, (int)header.len, (int)header.data_csum,
+				       (int)header.hdr_csum));
 
-  msg_buf->phase = MBG_NONE;	      /* back to hunting mode */
-  return PARSE_INP_DATA;              /* message complete, must be evaluated */
+
+		calc_csum = mbg_csum( (unsigned char *) parseio->parse_dtime.parse_msg + 1, (unsigned short)6 );
+
+		if ( calc_csum != header.hdr_csum ) {
+			parseprintf(DD_PARSE, ("gps_input: header checksum mismatch expected 0x%x, got 0x%x\n",
+					       (int)calc_csum, (int)mbg_csum( (unsigned char *) parseio->parse_dtime.parse_msg, (unsigned short)6 )));
+
+			msg_buf->phase = MBG_NONE;  /* back to hunting mode */
+			return PARSE_INP_DATA;      /* invalid header checksum received - pass up for detection */
+		}
+
+		if ((header.len == 0)  ||       /* no data to wait for */
+		    (header.len >= (sizeof (parseio->parse_dtime.parse_msg) - sizeof(header) - 1)))	/* blows anything we have space for */
+		{
+			msg_buf->phase = MBG_NONE;  /* back to hunting mode */
+			return (header.len == 0) ? PARSE_INP_DATA : PARSE_INP_SKIP; /* message complete/throwaway */
+		}
+
+		parseprintf(DD_PARSE, ("gps_input: expecting %d bytes of data message\n", (int)header.len));
+
+		msg_buf->len   = header.len;/* save number of bytes to wait for */
+		msg_buf->phase = MBG_DATA;      /* flag header already complete */
+		return PARSE_INP_SKIP;
+	}
+
+	parseprintf(DD_PARSE, ("gps_input: message data complete\n"));
+
+	/* Header and data have been received. The header checksum has been */
+	/* checked */
+
+	msg_buf->phase = MBG_NONE;	      /* back to hunting mode */
+	return PARSE_INP_DATA;              /* message complete, must be evaluated */
 }
 
 /*

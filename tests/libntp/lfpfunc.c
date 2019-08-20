@@ -230,15 +230,15 @@ TEST(lfpfunc, Absolute) {
 }
 
 static const l_fp roundtab[] = {
-  0,
-  0x140000000,
-  0x1c0000000,
-  0xffffffff80000000,
-  0x7fffffff7fffffff,
-  0x7fffffffffffffff,
-  0x55555555aaaaaaaa,
-  0x5555555555555555,
-  0x8000000000000001
+	0,
+	0x140000000,
+	0x1c0000000,
+	0xffffffff80000000,
+	0x7fffffff7fffffff,
+	0x7fffffffffffffff,
+	0x55555555aaaaaaaa,
+	0x5555555555555555,
+	0x8000000000000001
 };
 static const size_t round_cnt = (sizeof(roundtab)/sizeof(roundtab[0]));
 

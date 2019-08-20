@@ -505,8 +505,9 @@ create_attr_sval(
 
 	my_val = emalloc_zero(sizeof(*my_val));
 	my_val->attr = attr;
-	if (NULL == s)			/* free() hates NULL */
+	if (NULL == s) {			/* free() hates NULL */
 		s = estrdup("");
+	}
 	my_val->value.s = _UC(s);
 	my_val->type = T_String;
 
@@ -857,8 +858,9 @@ create_unpeer_node(
 	 * We treat all valid 16-bit numbers as association IDs.
 	 */
 	pch = addr->address;
-	while (*pch && isdigit((unsigned char)*pch))
+	while (*pch && isdigit((unsigned char)*pch)) {
 		pch++;
+	}
 
 	if (!*pch
 	    && 1 == sscanf(addr->address, "%u", &u)
@@ -1080,8 +1082,9 @@ create_setvar_node(
 
 	/* do not allow = in the variable name */
 	pch = strchr(var, '=');
-	if (NULL != pch)
+	if (NULL != pch) {
 		*pch = '\0';
+}
 
 	/* Now store the string into a setvar_node */
 	my_node = emalloc_zero(sizeof(*my_node));
@@ -1145,8 +1148,9 @@ config_auth(
 
 	/* ntp_signd_socket Command */
 	if (ptree->auth.ntp_signd_socket) {
-		if (ntp_signd_socket != default_ntp_signd_socket)
+		if (ntp_signd_socket != default_ntp_signd_socket) {
 			free(ntp_signd_socket);
+		}
 		ntp_signd_socket = estrdup(ptree->auth.ntp_signd_socket);
 	}
 
@@ -2386,8 +2390,9 @@ config_setvar(
 						? DEF
 						: 0);
 	}
-	if (str != NULL)
+	if (str != NULL) {
 		free(str);
+	}
 }
 
 
@@ -2728,144 +2733,144 @@ config_peers(
 	config_tree *ptree
 	)
 {
-    sockaddr_u		peeraddr;
+	sockaddr_u		peeraddr;
 
-    /* add servers named on the command line with iburst implied */
-    for ( ; cmdline_server_count > 0;
-	cmdline_server_count--, cmdline_servers++) {
-	     struct peer_ctl client_ctl;
-	     /* so any new members we introduce will be zeroed */
-	     memset(&client_ctl, '\0', sizeof(struct peer_ctl));
-	     client_ctl.version = NTP_VERSION;
-	     client_ctl.minpoll = NTP_MINDPOLL;
-	     client_ctl.maxpoll = NTP_MAXPOLL_UNK;
-	     client_ctl.flags = FLAG_IBURST;
-	     client_ctl.mode = 0;
-	     client_ctl.peerkey = 0;
-	     client_ctl.bias = 0;
+	/* add servers named on the command line with iburst implied */
+	for ( ; cmdline_server_count > 0;
+	      cmdline_server_count--, cmdline_servers++) {
+		struct peer_ctl client_ctl;
+		/* so any new members we introduce will be zeroed */
+		memset(&client_ctl, '\0', sizeof(struct peer_ctl));
+		client_ctl.version = NTP_VERSION;
+		client_ctl.minpoll = NTP_MINDPOLL;
+		client_ctl.maxpoll = NTP_MAXPOLL_UNK;
+		client_ctl.flags = FLAG_IBURST;
+		client_ctl.mode = 0;
+		client_ctl.peerkey = 0;
+		client_ctl.bias = 0;
 
-	    ZERO_SOCK(&peeraddr);
-	    /*
-	     * If we have a numeric address, we can safely
-	     * proceed in the mainline with it.  Otherwise, hand
-	     * the hostname off to the blocking child.
-	     */
-	    if (is_ip_address(*cmdline_servers, AF_UNSPEC, &peeraddr)) {
-		SET_PORT(&peeraddr, NTP_PORT);
-		if (is_sane_resolved_address(&peeraddr,
-					     T_Server))
+		ZERO_SOCK(&peeraddr);
+		/*
+		 * If we have a numeric address, we can safely
+		 * proceed in the mainline with it.  Otherwise, hand
+		 * the hostname off to the blocking child.
+		 */
+		if (is_ip_address(*cmdline_servers, AF_UNSPEC, &peeraddr)) {
+			SET_PORT(&peeraddr, NTP_PORT);
+			if (is_sane_resolved_address(&peeraddr,
+						     T_Server))
+				peer_config(
+					&peeraddr,
+					NULL,
+					NULL,
+					T_Server,
+					&client_ctl);
+		} else {
+			/* we have a hostname to resolve */
 			peer_config(
 				&peeraddr,
-				NULL,
+				*cmdline_servers,
 				NULL,
 				T_Server,
 				&client_ctl);
-	    } else {
-		/* we have a hostname to resolve */
-		peer_config(
-			&peeraddr,
-			*cmdline_servers,
-			NULL,
-			T_Server,
-			&client_ctl);
-	    }
-    }
-
-    /* add associations from the configuration file */
-    peer_node * curr_peer = HEAD_PFIFO(ptree->peers);
-    for (; curr_peer != NULL; curr_peer = curr_peer->link) {
-	ZERO_SOCK(&peeraddr);
-
-	if (T_Pool == curr_peer->host_mode) {
-	    AF(&peeraddr) = curr_peer->addr->type;
-	    peer_config(
-		    &peeraddr,
-		    curr_peer->addr->address,
-		    NULL,
-		    curr_peer->host_mode,
-		    &curr_peer->ctl);
-	/*
-	 * If we have a numeric address, we can safely
-	 * proceed in the mainline with it.
-	 */
-	} else if (is_ip_address(curr_peer->addr->address,
-			  curr_peer->addr->type, &peeraddr)) {
-
-	    SET_PORT(&peeraddr, NTP_PORT);
-	    if (is_sane_resolved_address(&peeraddr, curr_peer->host_mode)) {
-#ifdef REFCLOCK
-		/* save maxpoll from config line
-		 * newpeer smashes it
-		 */
-		uint8_t maxpoll = curr_peer->ctl.maxpoll;
-#endif
-		struct peer *peer = peer_config(
-			&peeraddr,
-			NULL,
-			NULL,
-			curr_peer->host_mode,
-			&curr_peer->ctl);
-		if ( NULL == peer )
-		{
-		    /* duplicate peer !?, ignore */
-		    msyslog(LOG_INFO, "CONFIG: configpeers: Ignoring duplicate '%s'",
-			socktoa(&peeraddr));
-		    continue;
 		}
-		if (ISREFCLOCKADR(&peeraddr))
-		{
-#ifdef REFCLOCK
-		    uint8_t clktype;
-		    int unit;
-		    /*
-		     * We let the reference clock
-		     * support do clock dependent
-		     * initialization.  This
-		     * includes setting the peer
-		     * timer, since the clock may
-		     * have requirements for this.
-		     */
-		    if (NTP_MAXPOLL_UNK == maxpoll)
-			    /* default maxpoll for
-			     * refclocks is minpoll
-			     */
-			    peer->cfg.maxpoll = peer->cfg.minpoll;
-		    clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
-		    unit = REFCLOCKUNIT(&peer->srcadr);
-
-		    peer->cfg.path = curr_peer->ctl.path;
-		    peer->cfg.ppspath = curr_peer->ctl.ppspath;
-		    peer->cfg.baud = curr_peer->ctl.baud;
-		    if (refclock_newpeer(clktype,
-					  unit,
-					  peer))
-			    refclock_control(&peeraddr,
-					     &curr_peer->clock_stat,
-					     NULL);
-		    else
-			    /*
-			     * Dump it, something screwed up
-			     */
-			    unpeer(peer);
-#else /* REFCLOCK */
-		    msyslog(LOG_ERR,
-			 "INIT: ntpd was compiled without refclock support.");
-		    unpeer(peer);
-#endif /* REFCLOCK */
-		}
-
-	    }
-	/* DNS lookup */
-	} else {
-	    AF(&peeraddr) = curr_peer->addr->type;
-	    peer_config(
-		&peeraddr,
-		curr_peer->addr->address,
-		NULL,
-		curr_peer->host_mode,
-		&curr_peer->ctl);
 	}
-    }
+
+	/* add associations from the configuration file */
+	peer_node * curr_peer = HEAD_PFIFO(ptree->peers);
+	for (; curr_peer != NULL; curr_peer = curr_peer->link) {
+		ZERO_SOCK(&peeraddr);
+
+		if (T_Pool == curr_peer->host_mode) {
+			AF(&peeraddr) = curr_peer->addr->type;
+			peer_config(
+				&peeraddr,
+				curr_peer->addr->address,
+				NULL,
+				curr_peer->host_mode,
+				&curr_peer->ctl);
+			/*
+			 * If we have a numeric address, we can safely
+			 * proceed in the mainline with it.
+			 */
+		} else if (is_ip_address(curr_peer->addr->address,
+					 curr_peer->addr->type, &peeraddr)) {
+
+			SET_PORT(&peeraddr, NTP_PORT);
+			if (is_sane_resolved_address(&peeraddr, curr_peer->host_mode)) {
+#ifdef REFCLOCK
+				/* save maxpoll from config line
+				 * newpeer smashes it
+				 */
+				uint8_t maxpoll = curr_peer->ctl.maxpoll;
+#endif
+				struct peer *peer = peer_config(
+					&peeraddr,
+					NULL,
+					NULL,
+					curr_peer->host_mode,
+					&curr_peer->ctl);
+				if ( NULL == peer )
+				{
+					/* duplicate peer !?, ignore */
+					msyslog(LOG_INFO, "CONFIG: configpeers: Ignoring duplicate '%s'",
+						socktoa(&peeraddr));
+					continue;
+				}
+				if (ISREFCLOCKADR(&peeraddr))
+				{
+#ifdef REFCLOCK
+					uint8_t clktype;
+					int unit;
+					/*
+					 * We let the reference clock
+					 * support do clock dependent
+					 * initialization.  This
+					 * includes setting the peer
+					 * timer, since the clock may
+					 * have requirements for this.
+					 */
+					if (NTP_MAXPOLL_UNK == maxpoll)
+						/* default maxpoll for
+						 * refclocks is minpoll
+						 */
+						peer->cfg.maxpoll = peer->cfg.minpoll;
+					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
+					unit = REFCLOCKUNIT(&peer->srcadr);
+
+					peer->cfg.path = curr_peer->ctl.path;
+					peer->cfg.ppspath = curr_peer->ctl.ppspath;
+					peer->cfg.baud = curr_peer->ctl.baud;
+					if (refclock_newpeer(clktype,
+							     unit,
+							     peer))
+						refclock_control(&peeraddr,
+								 &curr_peer->clock_stat,
+								 NULL);
+					else
+						/*
+						 * Dump it, something screwed up
+						 */
+						unpeer(peer);
+#else /* REFCLOCK */
+					msyslog(LOG_ERR,
+						"INIT: ntpd was compiled without refclock support.");
+					unpeer(peer);
+#endif /* REFCLOCK */
+				}
+
+			}
+			/* DNS lookup */
+		} else {
+			AF(&peeraddr) = curr_peer->addr->type;
+			peer_config(
+				&peeraddr,
+				curr_peer->addr->address,
+				NULL,
+				curr_peer->host_mode,
+				&curr_peer->ctl);
+		}
+	}
 }
 
 static void
@@ -3275,10 +3280,11 @@ get_match(
 	)
 {
 	while (m->name != NULL) {
-		if (strcmp(str, m->name) == 0)
+		if (strcmp(str, m->name) == 0) {
 			return m->mask;
-		else
+		} else {
 			m++;
+		}
 	}
 	return 0;
 }
@@ -3497,84 +3503,84 @@ static void
 fix_node_cidr(
     restrict_node *my_node)
 {
-    address_node *addr;
-    char mask_s[40], *mask_p;
-    char *cidr_p;
-    char *colon_p;
-    char *endptr;
-    long cidr_len;
-    int i;
-    unsigned a[8];
+	address_node *addr;
+	char mask_s[40], *mask_p;
+	char *cidr_p;
+	char *colon_p;
+	char *endptr;
+	long cidr_len;
+	int i;
+	unsigned a[8];
 
-    REQUIRE(my_node);
-    addr = my_node->addr;
-    REQUIRE(addr);
+	REQUIRE(my_node);
+	addr = my_node->addr;
+	REQUIRE(addr);
 
-    cidr_p = strrchr(addr->address, '/');
-    if (!cidr_p) {
-        /* not CIDR, leave silently */
-        return;
-    }
-    *cidr_p++ = '\0'; /* remove the '/' and beyond from address */
-    /* get CIDR as int */
-    errno = 0;
-    cidr_len = strtol(cidr_p, &endptr, 10);
-    if ( errno || (endptr == cidr_p) ) {
-        /* conversion fail, leave silently */
-        return;
-    }
-    if ( 0 >= cidr_len ) {
-        /* negative or zero?  leave silently */
-	/* exiting on 0 avoids a bad shift warning from Coverity */
-        return;
-    }
-    /* sadly, addr->type not previously set, look for colon */
-    colon_p = strrchr(addr->address, ':');
-    if (colon_p) {
-        /* IPv6 */
-        uint64_t mask_top = 0xFFFFFFFFFFFFFFFFU;
-        uint64_t mask_bot = 0xFFFFFFFFFFFFFFFFU;
-
-	if ( 128 < cidr_len ) {
-	    /* out of range, leave silently */
-	    return;
+	cidr_p = strrchr(addr->address, '/');
+	if (!cidr_p) {
+		/* not CIDR, leave silently */
+		return;
 	}
-        if ( 64 >= cidr_len ) {
-	    mask_bot = 0;
-	    mask_top <<= 64 - cidr_len ;
-        } else {
-	    mask_bot <<= 128 - cidr_len ;
-        }
-        for (i = 0; i < 4; i++)
-                a[i] = mask_top >> (16 * (3 - i)) & 0xffffU;
-        for (i = 0; i < 4; i++)
-                a[i + 4] = mask_bot >> (16 * (3 - i)) & 0xffffU;
+	*cidr_p++ = '\0'; /* remove the '/' and beyond from address */
+	/* get CIDR as int */
+	errno = 0;
+	cidr_len = strtol(cidr_p, &endptr, 10);
+	if ( errno || (endptr == cidr_p) ) {
+		/* conversion fail, leave silently */
+		return;
+	}
+	if ( 0 >= cidr_len ) {
+		/* negative or zero?  leave silently */
+		/* exiting on 0 avoids a bad shift warning from Coverity */
+		return;
+	}
+	/* sadly, addr->type not previously set, look for colon */
+	colon_p = strrchr(addr->address, ':');
+	if (colon_p) {
+		/* IPv6 */
+		uint64_t mask_top = 0xFFFFFFFFFFFFFFFFU;
+		uint64_t mask_bot = 0xFFFFFFFFFFFFFFFFU;
 
-        snprintf(mask_s, sizeof(mask_s), "%x:%x:%x:%x:%x:%x:%x:%x",
-                 a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
-    } else {
-        /* must be IPv4 */
-        uint32_t mask_n = 0xFFFFFFFFU;
+		if ( 128 < cidr_len ) {
+			/* out of range, leave silently */
+			return;
+		}
+		if ( 64 >= cidr_len ) {
+			mask_bot = 0;
+			mask_top <<= 64 - cidr_len ;
+		} else {
+			mask_bot <<= 128 - cidr_len ;
+		}
+		for (i = 0; i < 4; i++)
+			a[i] = mask_top >> (16 * (3 - i)) & 0xffffU;
+		for (i = 0; i < 4; i++)
+			a[i + 4] = mask_bot >> (16 * (3 - i)) & 0xffffU;
 
-	if ( 32 < cidr_len ) {
-	    /* out of range, leave silently */
-	    return;
+		snprintf(mask_s, sizeof(mask_s), "%x:%x:%x:%x:%x:%x:%x:%x",
+			 a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
+	} else {
+		/* must be IPv4 */
+		uint32_t mask_n = 0xFFFFFFFFU;
+
+		if ( 32 < cidr_len ) {
+			/* out of range, leave silently */
+			return;
+		}
+
+		mask_n <<= 32 - cidr_len ;
+		for (i = 0; i < 4; i++)
+			a[i] = mask_n >> (8 * (3 - i)) & 0xff;
+
+		snprintf(mask_s, sizeof(mask_s), "%u.%u.%u.%u",
+			 a[0], a[1], a[2], a[3]);
 	}
 
-        mask_n <<= 32 - cidr_len ;
-        for (i = 0; i < 4; i++)
-                a[i] = mask_n >> (8 * (3 - i)) & 0xff;
+	/* lose old mask */
+	destroy_address_node(my_node->mask);
 
-        snprintf(mask_s, sizeof(mask_s), "%u.%u.%u.%u",
-                 a[0], a[1], a[2], a[3]);
-    }
-
-    /* lose old mask */
-    destroy_address_node(my_node->mask);
-
-    /* create mask node, yes AF_UNSPEC is weird... */
-    mask_p = estrdup(mask_s);
-    my_node->mask = create_address_node(mask_p, AF_UNSPEC);
+	/* create mask node, yes AF_UNSPEC is weird... */
+	mask_p = estrdup(mask_s);
+	my_node->mask = create_address_node(mask_p, AF_UNSPEC);
 }
 
 /*

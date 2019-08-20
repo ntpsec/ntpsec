@@ -107,9 +107,9 @@ static double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
 static double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
 struct ntp_loop_data loop_data = {
-  .clock_max_back = CLOCK_MAX, /* step threshold */
-  .clock_max_fwd =  CLOCK_MAX, /* step threshold */
-  .clock_phi = CLOCK_PHI       /* dispersion rate (s/s) */
+	.clock_max_back = CLOCK_MAX, /* step threshold */
+	.clock_max_fwd =  CLOCK_MAX, /* step threshold */
+	.clock_phi = CLOCK_PHI       /* dispersion rate (s/s) */
 };
 
 /*
@@ -183,8 +183,7 @@ static sigjmp_buf env;		/* environment var. for pll_trap() */
 #endif /* SIGSYS */
 
 static void
-sync_status(const char *what, int ostatus, int nstatus)
-{
+sync_status(const char *what, int ostatus, int nstatus) {
 	/* only used in non-lockclock case */
 	char obuf[256], nbuf[256], tbuf[1024];
 	snprintf(obuf, sizeof(obuf), "%04x", (unsigned)ostatus);
@@ -196,13 +195,13 @@ sync_status(const char *what, int ostatus, int nstatus)
 /*
  * file_name - return pointer to non-relative portion of this C file pathname
  */
-static char *file_name(void)
-{
+static char *file_name(void) {
 	if (this_file == NULL) {
 	    (void)strlcpy(relative_path, __FILE__, PATH_MAX);
 	    for (this_file=relative_path;
 		*this_file && ! isalnum((unsigned char)*this_file);
-		this_file++) ;
+		this_file++) { ;
+	    }
 	}
 	return this_file;
 }
@@ -211,8 +210,7 @@ static char *file_name(void)
  * init_loopfilter - initialize loop filter data
  */
 void
-init_loopfilter(void)
-{
+init_loopfilter(void) {
 	/*
 	 * Initialize state variables.
 	 */
@@ -573,8 +571,9 @@ local_clock(
 		 * the apparent frequency correction and step the phase.
 		 */
 		case EVNT_FREQ:
-			if (mu < clock_minstep)
+			if (mu < clock_minstep) {
 				return (0);
+			}
 
 			clock_frequency = direct_freq(fp_offset);
 
@@ -659,8 +658,9 @@ local_clock(
 		 * decrements to zero.
 		 */
 		case EVNT_FREQ:
-			if (mu < clock_minstep)
+			if (mu < clock_minstep) {
 				return (0);
+			}
 
 			clock_frequency = direct_freq(fp_offset);
 			/* fall through */
@@ -682,10 +682,11 @@ local_clock(
 				 * becomes ineffective above the Allan intercept
 				 * where the FLL becomes effective.
 				 */
-				if (clkstate.sys_poll >= clkstate.allan_xpt)
+				if (clkstate.sys_poll >= clkstate.allan_xpt) {
 					clock_frequency += (fp_offset -
 					    clock_offset) / (max(ULOGTOD(clkstate.sys_poll),
 					    mu) * CLOCK_FLL);
+				}
 
 				/*
 				 * The PLL frequency gain (numerator) depends on
@@ -699,8 +700,9 @@ local_clock(
 				    dtemp);
 			}
 			rstclock(EVNT_SYNC, fp_offset);
-			if (fabs(fp_offset) < CLOCK_FLOOR)
+			if (fabs(fp_offset) < CLOCK_FLOOR) {
 				freq_cnt = 0;
+			}
 			break;
 		}
 	}
@@ -743,10 +745,11 @@ local_clock(
 #else /* STA_NANO */
 			ntv.modes = MOD_BITS;
 #endif /* STA_NANO */
-			if (clock_offset < 0)
+			if (clock_offset < 0) {
 				dtemp = -.5;
-			else
+			} else {
 				dtemp = .5;
+			}
 			ntv.offset = (long)(clock_offset * NS_PER_S + dtemp);
 #ifdef STA_NANO
 			ntv.constant = clkstate.sys_poll;
@@ -878,8 +881,9 @@ local_clock(
 	/*
 	 * If the time constant has changed, update the poll variables.
 	 */
-	if (osys_poll != clkstate.sys_poll)
+	if (osys_poll != clkstate.sys_poll) {
 		poll_update(peer, clkstate.sys_poll);
+	}
 
 	/*
 	 * Yibbidy, yibbbidy, yibbidy; that'h all folks.
@@ -948,10 +952,11 @@ adj_host_clock(
 		freq_adj = loop_data.drift_comp;
 
 	/* Bound absolute value of total adjustment to NTP_MAXFREQ. */
-	if (offset_adj + freq_adj > NTP_MAXFREQ)
+	if (offset_adj + freq_adj > NTP_MAXFREQ) {
 		offset_adj = NTP_MAXFREQ - freq_adj;
-	else if (offset_adj + freq_adj < -NTP_MAXFREQ)
+	} else if (offset_adj + freq_adj < -NTP_MAXFREQ) {
 		offset_adj = -NTP_MAXFREQ - freq_adj;
+	}
 
 	clock_offset -= offset_adj;
 	/*
@@ -1152,15 +1157,17 @@ huffpuff(void)
 {
 	int i;
 
-	if (sys_huffpuff == NULL)
+	if (sys_huffpuff == NULL) {
 		return;
+	}
 
 	sys_huffptr = (sys_huffptr + 1) % sys_hufflen;
 	sys_huffpuff[sys_huffptr] = 1e9;
 	sys_mindly = 1e9;
 	for (i = 0; i < sys_hufflen; i++) {
-		if (sys_huffpuff[i] < sys_mindly)
+		if (sys_huffpuff[i] < sys_mindly) {
 			sys_mindly = sys_huffpuff[i];
+		}
 	}
 }
 
@@ -1198,10 +1205,11 @@ loop_config(
 		 */
 		{
 			double ftemp = init_drift_comp / US_PER_S;
-			if (ftemp > NTP_MAXFREQ)
+			if (ftemp > NTP_MAXFREQ) {
 				ftemp = NTP_MAXFREQ;
-			else if (ftemp < -NTP_MAXFREQ)
+			} else if (ftemp < -NTP_MAXFREQ) {
 				ftemp = -NTP_MAXFREQ;
+			}
 			set_freq(ftemp);
 		}
 		if (freq_set)
@@ -1247,8 +1255,9 @@ loop_config(
 		sys_hufflen = (int)(freq / HUFFPUFF);
 		sys_huffpuff = emalloc(sizeof(sys_huffpuff[0]) *
 		    (unsigned long)sys_hufflen);
-		for (i = 0; i < sys_hufflen; i++)
+		for (i = 0; i < sys_hufflen; i++) {
 			sys_huffpuff[i] = 1e9;
+		}
 		sys_mindly = 1e9;
 		break;
 
@@ -1282,10 +1291,11 @@ loop_config(
 		break;
 
 	case LOOP_MINSTEP:	/* stepout threshold (stepout) */
-		if (freq < CLOCK_MINSTEP)
+		if (freq < CLOCK_MINSTEP) {
 			clock_minstep = CLOCK_MINSTEP;
-		else
+		} else {
 			clock_minstep = freq;
+		}
 		break;
 
 	case LOOP_TICK:		/* tick increment (tick) */

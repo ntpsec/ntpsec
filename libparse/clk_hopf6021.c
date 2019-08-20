@@ -227,11 +227,11 @@ inp_hopf6021(
 	case ETX:
 		parseprintf(DD_PARSE, ("inp_hopf6021: EOL seen\n"));
 		parseio->parse_dtime.parse_stime = *tstamp; /* collect timestamp */
-		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP)
+		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP) {
 			return parse_end(parseio);
-		else
+		} else {
 			return rtc;
-
+		}
 	default:
 		return parse_addchar(parseio, ch);
 	}

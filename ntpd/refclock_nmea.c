@@ -825,20 +825,21 @@ nmea_receive(
 	 * start.
 	 */
 	cp = field_parse(&rdata, 0);
-	if      (strncmp(cp + 2, "RMC,", 4) == 0)
+	if      (strncmp(cp + 2, "RMC,", 4) == 0) {
 		sentence = NMEA_GPRMC;
-	else if (strncmp(cp + 2, "GGA,", 4) == 0)
+	} else if (strncmp(cp + 2, "GGA,", 4) == 0) {
 		sentence = NMEA_GPGGA;
-	else if (strncmp(cp + 2, "GLL,", 4) == 0)
+	} else if (strncmp(cp + 2, "GLL,", 4) == 0) {
 		sentence = NMEA_GPGLL;
-	else if (strncmp(cp + 2, "ZDA,", 4) == 0)
+	} else if (strncmp(cp + 2, "ZDA,", 4) == 0) {
 		sentence = NMEA_GPZDA;
-	else if (strncmp(cp + 2, "ZDG,", 4) == 0)
+	} else if (strncmp(cp + 2, "ZDG,", 4) == 0) {
 		sentence = NMEA_GPZDG;
-	else if (strncmp(cp,   "PGRMF,", 6) == 0)
+	} else if (strncmp(cp,   "PGRMF,", 6) == 0) {
 		sentence = NMEA_PGRMF;
-	else
+	} else {
 		return;	/* not something we know about */
+	}
 
 	/* Eventually output delay measurement now. */
 	if (peer->cfg.mode & NMEA_DELAYMEAS_MASK) {
@@ -1138,7 +1139,9 @@ nmea_poll(
 	if (peer->cfg.mode & NMEA_EXTLOG_MASK) {
 		/* Log & reset counters with extended logging */
 		const char *nmea = pp->a_lastcode;
-		if (*nmea == '\0') nmea = "(none)";
+		if (*nmea == '\0') {
+			nmea = "(none)";
+		}
 		mprintf_clock_stats(
 		  peer, "%s  %u %u %u %u %u %u",
 		  nmea,
@@ -1163,8 +1166,9 @@ save_ltc(
 	size_t                      len
 	)
 {
-	if (len >= sizeof(pp->a_lastcode))
+	if (len >= sizeof(pp->a_lastcode)) {
 		len = sizeof(pp->a_lastcode) - 1;
+	}
 	pp->lencode = (unsigned short)len;
 	memcpy(pp->a_lastcode, tc, len);
 	pp->a_lastcode[len] = '\0';
@@ -1280,8 +1284,9 @@ field_init(
 	cs_l = 0;
 	cs_r = 0;
 	/* some basic input constraints */
-	if (dlen < 0)
+	if (dlen < 0) {
 		dlen = 0;
+	}
 	eptr = cptr + dlen;
 	*eptr = '\0';
 
@@ -1298,10 +1303,12 @@ field_init(
 	 */
 
 	/* -*- start character: '^\$' */
-	if (*cptr == '\0')
+	if (*cptr == '\0') {
 		return CHECK_EMPTY;
-	if (*cptr++ != '$')
+	}
+	if (*cptr++ != '$') {
 		return CHECK_INVALID;
+	}
 
 	/* -*- advance context beyond start character */
 	data->base++;
@@ -1309,14 +1316,16 @@ field_init(
 	data->blen--;
 
 	/* -*- field name: '[A-Z][A-Z0-9]{4,},' */
-	if (*cptr < 'A' || *cptr > 'Z')
+	if (*cptr < 'A' || *cptr > 'Z') {
 		return CHECK_INVALID;
+	}
 	cs_l ^= *cptr++;
 	while ((*cptr >= 'A' && *cptr <= 'Z') ||
 	       (*cptr >= '0' && *cptr <= '9')  )
 		cs_l ^= *cptr++;
-	if (*cptr != ',' || (cptr - data->base) < NMEA_PROTO_IDLEN)
+	if (*cptr != ',' || (cptr - data->base) < NMEA_PROTO_IDLEN) {
 		return CHECK_INVALID;
+}
 	cs_l ^= *cptr++;
 
 	/* -*- data: '[^*]*' */
@@ -1324,19 +1333,22 @@ field_init(
 		cs_l ^= *cptr++;
 
 	/* -*- checksum field: (\*[0-9A-F]{2})?$ */
-	if (*cptr == '\0')
+	if (*cptr == '\0') {
 		return CHECK_VALID;
+}
 	if (*cptr != '*' || cptr != eptr - 3 ||
-	    (cptr - data->base) >= NMEA_PROTO_MAXLEN)
+	    (cptr - data->base) >= NMEA_PROTO_MAXLEN) {
 		return CHECK_INVALID;
+}
 
 	for (cptr++; (tmp = *cptr) != '\0'; cptr++) {
-		if (tmp >= '0' && tmp <= '9')
+		if (tmp >= '0' && tmp <= '9') {
 			cs_r = (cs_r << 4) + (tmp - '0');
-		else if (tmp >= 'A' && tmp <= 'F')
+		} else if (tmp >= 'A' && tmp <= 'F') {
 			cs_r = (cs_r << 4) + (tmp - 'A' + 10);
-		else
+		} else {
 			break;
+}
 	}
 
 	/* -*- make sure we are at end of string and csum matches */
@@ -1414,12 +1426,15 @@ field_wipe(
 			cp = field_parse(data, fidx);
 		} else {
 			cp = data->base + data->blen;
-			if (data->blen >= 3 && cp[-3] == '*')
+			if (data->blen >= 3 && cp[-3] == '*') {
 				cp -= 2;
+			}
 		}
-		for ( ; '\0' != *cp && '*' != *cp && ',' != *cp; cp++)
-			if ('.' != *cp)
+		for ( ; '\0' != *cp && '*' != *cp && ',' != *cp; cp++) {
+			if ('.' != *cp) {
 				*cp = '_';
+			}
+		}
 	} while (fcnt-- && fidx >= 0);
 	va_end(va);
 }
@@ -1500,10 +1515,11 @@ parse_time(
 	jd->minute = (uint8_t)m;
 	jd->second = (uint8_t)s;
 	/* if we have a fraction, scale it up to nanoseconds. */
-	if (rc == 4)
+	if (rc == 4) {
 		*ns = (long)(f * weight[p2 - p1 - 1]);
-	else
+	} else {
 		*ns = 0;
+}
 
 	return true;
 }

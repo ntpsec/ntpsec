@@ -56,21 +56,21 @@ TEST(dolfptoa, DoLfpToA) {
 }
 
 TEST(dolfptoa, MfpToA) {
-  l_fp in;
+	l_fp in;
 
-  in = lfpinit(42, 0);
-  TEST_ASSERT_EQUAL_STRING("42.000", mfptoa(in, 3));
-  in = lfpinit(-42, 0);
-  TEST_ASSERT_EQUAL_STRING("-42.000", mfptoa(in, 3));
+	in = lfpinit(42, 0);
+	TEST_ASSERT_EQUAL_STRING("42.000", mfptoa(in, 3));
+	in = lfpinit(-42, 0);
+	TEST_ASSERT_EQUAL_STRING("-42.000", mfptoa(in, 3));
 }
 
 TEST(dolfptoa, MfpToMs) {
-  l_fp in;
+	l_fp in;
 
-  in = lfpinit(42, 0);
-  TEST_ASSERT_EQUAL_STRING("42000.000", mfptoms(in, 3));
-  in = lfpinit(-42, 0);
-  TEST_ASSERT_EQUAL_STRING("-42000.000", mfptoms(in, 3));
+	in = lfpinit(42, 0);
+	TEST_ASSERT_EQUAL_STRING("42000.000", mfptoms(in, 3));
+	in = lfpinit(-42, 0);
+	TEST_ASSERT_EQUAL_STRING("-42000.000", mfptoms(in, 3));
 }
 
 TEST_GROUP_RUNNER(dolfptoa) {

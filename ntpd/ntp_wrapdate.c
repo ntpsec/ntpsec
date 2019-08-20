@@ -193,8 +193,9 @@ gpsfix_century(
 	 */
 	year = jd->year % 100;
 	for (loop = 5; loop > 0; loop--,(*century)++) {
-		if (*century < 19 || *century >= 24)
+		if (*century < 19 || *century >= 24) {
 			*century = 19;
+		}
 		/* Get days and week in GPS epoch */
 		jd->year = year + *century * 100;
 		days = ntpcal_date_to_rd(jd) - DAY_GPS_STARTS + doff;

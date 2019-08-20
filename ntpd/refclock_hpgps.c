@@ -280,8 +280,9 @@ hpgps_receive(
 			memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
 			up->lastptr += pp->lencode;
 		}
-		if (up->linecnt == 0)
+		if (up->linecnt == 0) {
 		    record_clock_stats(peer, up->statscrn);
+		}
 
 		return;
 	}
@@ -312,12 +313,15 @@ hpgps_receive(
 
 	strlcpy(prompt, pp->a_lastcode, sizeof(prompt));
 	tcp = strrchr(pp->a_lastcode,'>');
-	if (tcp == NULL)
+	if (tcp == NULL) {
 	    tcp = pp->a_lastcode;
-	else
+	} else {
 	    tcp++;
+	}
 	prompt[tcp - pp->a_lastcode] = '\0';
-	while ((*tcp == ' ') || (*tcp == '\t')) tcp++;
+	while ((*tcp == ' ') || (*tcp == '\t')) {
+	    tcp++;
+	}
 
 	/*
 	 * deal with an error indication in the prompt here
@@ -401,7 +405,9 @@ hpgps_receive(
 	 * before the expected checksum.  Bail out if incorrect.
 	 */
 	tcodechksm = 0;
-	while (n-- > 0) tcodechksm += *tcp++;
+	while (n-- > 0) {
+		tcodechksm += *tcp++;
+	}
 	tcodechksm &= 0x00ff;
 
 	if (tcodechksm != expectedsm) {
@@ -425,7 +431,9 @@ hpgps_receive(
 			refclock_report(peer, CEVNT_BADTIME);
 			return;
 		}
-		for (i = 0; i < month - 1; i++) day += day1tab[i];
+		for (i = 0; i < month - 1; i++) {
+			day += day1tab[i];
+		}
 		lastday = 365;
 	} else {
 		/* a leap year */
@@ -433,7 +441,9 @@ hpgps_receive(
 			refclock_report(peer, CEVNT_BADTIME);
 			return;
 		}
-		for (i = 0; i < month - 1; i++) day += day2tab[i];
+		for (i = 0; i < month - 1; i++) {
+			day += day2tab[i];
+		}
 		lastday = 366;
 	}
 
@@ -563,10 +573,11 @@ hpgps_poll(
 	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-	if (up->pollcnt == 0)
-	    refclock_report(peer, CEVNT_TIMEOUT);
-	else
-	    up->pollcnt--;
+	if (up->pollcnt == 0) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+	} else {
+		up->pollcnt--;
+	}
 	if (write(pp->io.fd, ":PTIME:TCODE?\r", 14) != 14) {
 		refclock_report(peer, CEVNT_FAULT);
 	}

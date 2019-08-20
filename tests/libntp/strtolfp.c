@@ -58,16 +58,18 @@ atolfp(
 	 *
 	 * [spaces][-|+][digits][.][digits][spaces|\n|\0]
 	 */
-	while (isspace((unsigned char)*cp))
+	while (isspace((unsigned char)*cp)) {
 	    cp++;
+	}
 
 	if (*cp == '-') {
 		cp++;
 		isneg = true;
 	}
 
-	if (*cp == '+')
+	if (*cp == '+') {
 	    cp++;
+	}
 
 	if (*cp != '.' && !isdigit((unsigned char)*cp))
 	    return false;
@@ -90,8 +92,9 @@ atolfp(
 			cp++;
 		}
 
-		while (isdigit((unsigned char)*cp))
+		while (isdigit((unsigned char)*cp)) {
 		    cp++;
+		}
 
 		if (*cp != '\0' && !isspace((unsigned char)*cp))
 		    return false;
@@ -114,8 +117,9 @@ atolfp(
 			}
 			bit >>= 1;
 		}
-		if ((dec_f << 1) > ten_fact)
+		if ((dec_f << 1) > ten_fact) {
 		    tmp++;
+		}
 		dec_f = tmp;
 	}
 
@@ -156,8 +160,9 @@ mstolfp(
 	 */
 	bp = buf;
 	cp = str;
-	while (isspace((unsigned char)*cp))
+	while (isspace((unsigned char)*cp)) {
 	    cp++;
+	}
 
 	if (*cp == '-') {
 		*bp++ = '-';
@@ -172,8 +177,9 @@ mstolfp(
 	 * Search forward for the decimal point or the end of the string.
 	 */
 	cpdec = cp;
-	while (isdigit((unsigned char)*cpdec))
+	while (isdigit((unsigned char)*cpdec)) {
 	    cpdec++;
+	}
 
 	/*
 	 * Found something.  If we have more than three digits copy the
@@ -205,13 +211,15 @@ mstolfp(
 	 * Copy the remainder up to the millisecond decimal.  If cpdec
 	 * is pointing at a decimal point, copy in the trailing number too.
 	 */
-	while (cp < cpdec)
+	while (cp < cpdec) {
 	    *bp++ = (char)*cp++;
+	}
 
 	if (*cp == '.') {
 		cp++;
-		while (isdigit((unsigned char)*cp))
+		while (isdigit((unsigned char)*cp)) {
 		    *bp++ = (char)*cp++;
+		}
 	}
 	*bp = '\0';
 
@@ -223,6 +231,7 @@ mstolfp(
 	    return false;
 	return atolfp(buf, lfp);
 }
+
 TEST_GROUP(strtolfp);
 
 TEST_SETUP(strtolfp) {}

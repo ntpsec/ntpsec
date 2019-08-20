@@ -37,27 +37,26 @@
  */
 
 #define	O_USEC		O_WDAY
-static struct format rcc8000_fmt =
-{ { { 13, 2 }, {16, 2}, { 19, 2}, /* Day, Month, Year */
-    {  0, 2 }, { 3, 2}, {  6, 2}, /* Hour, Minute, Second */
-    {  9, 3 }, {28, 1}, {  0, 0}, /* uSec, Status (Valid,Reject,BST,Leapyear) */  },
-  (const unsigned char *)"  :  :  .      /  /          \r\n",
-  /*"15:50:36.534 30/09/94 273 5 A\x0d\x0a" */
-  0
+static struct format rcc8000_fmt = { 
+	{ { 13, 2 }, {16, 2}, { 19, 2}, /* Day, Month, Year */
+	  {  0, 2 }, { 3, 2}, {  6, 2}, /* Hour, Minute, Second */
+	  {  9, 3 }, {28, 1}, {  0, 0}, /* uSec, Status (Valid,Reject,BST,Leapyear) */  },
+	(const unsigned char *)"  :  :  .      /  /          \r\n",
+	/*"15:50:36.534 30/09/94 273 5 A\x0d\x0a" */
+	0
 };
 
 static parse_cvt_fnc_t cvt_rcc8000;
 static parse_inp_fnc_t inp_rcc8000;
 
-clockformat_t clock_rcc8000 =
-{
-  inp_rcc8000,			/* no input handling */
-  cvt_rcc8000,			/* Radiocode clock conversion */
-  0,				/* no direct PPS monitoring */
-  (void *)&rcc8000_fmt,		/* conversion configuration */
-  "Radiocode RCC8000",
-  31,				/* string buffer */
-  0				/* no private data */
+clockformat_t clock_rcc8000 = {
+	inp_rcc8000,			/* no input handling */
+	cvt_rcc8000,			/* Radiocode clock conversion */
+	0,				/* no direct PPS monitoring */
+	(void *)&rcc8000_fmt,		/* conversion configuration */
+	"Radiocode RCC8000",
+	31,				/* string buffer */
+	0				/* no private data */
 };
 
 /* parse_cvt_fnc_t cvt_rcc8000 */
@@ -70,10 +69,10 @@ cvt_rcc8000(
 	    void          *local
 	    )
 {
-    UNUSED_ARG(size);
-    UNUSED_ARG(local);
+	UNUSED_ARG(size);
+	UNUSED_ARG(local);
 
-    if (!Strok(buffer, format->fixed_string)) return CVT_NONE;
+	if (!Strok(buffer, format->fixed_string)) return CVT_NONE;
 #define	OFFS(x) format->field_offsets[(x)].offset
 #define STOI(x, y) Stoi(&buffer[OFFS(x)], y, format->field_offsets[(x)].length)
 	if (	STOI(O_DAY,	&clock_time->day)	||
@@ -110,8 +109,9 @@ cvt_rcc8000(
 
 		flag = (RCCP >= '0' && RCCP <= '9' ) ?  RCCP - '0' : RCCP - 'A' + 10;
 
-		if (!(flag & RCC8000_VALID))
-		    clock_time->flags |= PARSEB_POWERUP;
+		if (!(flag & RCC8000_VALID)) {
+			clock_time->flags |= PARSEB_POWERUP;
+		}
 
 		clock_time->flags |= PARSEB_UTC; /* British special - guess why 8-) */
 
@@ -140,11 +140,11 @@ inp_rcc8000(
 	{
 	case '\n':
 		parseprintf(DD_PARSE, ("inp_rcc8000: EOL seen\n"));
-		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP)
+		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP) {
 			return parse_end(parseio);
-		else
+		} else {
 			return rtc;
-
+		}
 
 	default:
 		if (parseio->parse_index == 0) /* take sample at start of message */

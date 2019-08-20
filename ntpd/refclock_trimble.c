@@ -216,8 +216,9 @@ sendbyte (
 	int b
 	)
 {
-	if (b == DLE)
+	if (b == DLE) {
 		*(buffer->data+buffer->size++) = DLE;
+	}
 	*(buffer->data+buffer->size++) = (unsigned char)b;
 }
 
@@ -467,8 +468,9 @@ trimble_start (
 		return false;
 	}
 
-	if (up->type == CLK_THUNDERBOLT)
+	if (up->type == CLK_THUNDERBOLT) {
 		init_thunderbolt(fd);
+	}
 
 	return true;
 }
@@ -602,8 +604,9 @@ TSIP_decode (
 
 			/* flags checked in 8f-0b for Palisade and Acutime */
 			up->trk_status = (unsigned char)mb(18);
-			if (up->trk_status > PAL_TSTATS)
+			if (up->trk_status > PAL_TSTATS) {
 				up->trk_status = PAL_TSTATS;
+}
 			up->UTC_flags = (unsigned char)mb(19);
 
 			/* get timecode from 8f-0b except with Praecis */
@@ -672,11 +675,13 @@ TSIP_decode (
 			}
 #endif
 			decod_stat = (unsigned char)mb(12);
-			if (decod_stat > TB_DECOD_STATS)
+			if (decod_stat > TB_DECOD_STATS) {
 				decod_stat = TB_DECOD_STATS;
+}
 			disc_mode = (unsigned char)mb(2);
-			if (disc_mode > TB_DISC_MODES)
+			if (disc_mode > TB_DISC_MODES) {
 				disc_mode = TB_DISC_MODES;
+}
 			DPRINT(2, ("TSIP_decode: unit %d: leap=%d  decod.stat=%s  disc.mode=%s\n",
 			       up->unit, pp->leap,
 			       tracking_status[tb_decod_conv[decod_stat]],
@@ -979,9 +984,9 @@ trimble_io (
 			break;
 
 		    case TSIP_PARSED_DATA:
-			if (*c == DLE)
+			if (*c == DLE) {
 				up->rpt_status = TSIP_PARSED_DLE_2;
-			else if (up->parity_chk && *c == '\377')
+			} else if (up->parity_chk && *c == '\377')
 				up->rpt_status = TSIP_PARSED_PARITY;
 			else
 				mb(up->rpt_cnt++) = *c;

@@ -58,8 +58,9 @@ bool dns_probe(struct peer* pp)
         if (NULL != active)
 		return false;
 
-	if (NULL != active)
+	if (NULL != active) {
 		busy = ", busy";
+	}
 	msyslog(LOG_INFO, "DNS: dns_probe: %s, cast_flags:%x, flags:%x%s",
 		pp->hostname, pp->cast_flags, pp->cfg.flags, busy);
         if (NULL != active)	/* normally redundant */
@@ -139,8 +140,9 @@ void dns_check(void)
 
 	dns_take_status(active, status);
 
-	if (NULL != answer)
+	if (NULL != answer) {
 		freeaddrinfo(answer);
+	}
 	active = NULL;
 }
 

@@ -10,10 +10,10 @@ struct refclock_ppsctl {
 };
 
 typedef enum {
-  PPS_OK,
-  PPS_SETUP,  /* PPS not setup */
-  PPS_KERNEL, /* PPS error from kernel */
-  PPS_NREADY  /* PPS not ready */
+    PPS_OK,
+    PPS_SETUP,  /* PPS not setup */
+    PPS_KERNEL, /* PPS error from kernel */
+    PPS_NREADY  /* PPS not ready */
 } pps_status;
 
 extern	bool	refclock_ppsapi(int, struct refclock_ppsctl *);

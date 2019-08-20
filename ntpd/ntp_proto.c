@@ -1457,8 +1457,9 @@ clock_select(void)
 	 * associations.
 	 */
 	nlist = 1;
-	for (peer = peer_list; peer != NULL; peer = peer->p_link)
+	for (peer = peer_list; peer != NULL; peer = peer->p_link) {
 		nlist++;
+	}
 	endpoint_size = ALIGNED_SIZE((unsigned int)nlist * 2 * sizeof(*endpoint));
 	peers_size = ALIGNED_SIZE((unsigned int)nlist * sizeof(*peers));
 	indx_size = ALIGNED_SIZE((unsigned int)nlist * 2 * sizeof(*indx));
@@ -1485,8 +1486,9 @@ clock_select(void)
 		 * Leave the island immediately if the peer is
 		 * unfit to synchronize.
 		 */
-		if (peer_unfit(peer))
+		if (peer_unfit(peer)) {
 			continue;
+}
 
 		/*
 		 * If this peer is an orphan parent, elect the
@@ -1574,8 +1576,9 @@ clock_select(void)
 	 * Construct sorted indx[] of endpoint[] indexes ordered by
 	 * offset.
 	 */
-	for (i = 0; i < nl2; i++)
+	for (i = 0; i < nl2; i++) {
 		indx[i] = i;
+	}
 	for (i = 0; i < nl2; i++) {
 		endp = endpoint[indx[i]];
 		e = endp.val;
@@ -1631,15 +1634,17 @@ clock_select(void)
 		for (i = 0; i < nl2; i++) {
 			low = endpoint[indx[i]].val;
 			n -= endpoint[indx[i]].type;
-			if (n >= nlist - allow)
+			if (n >= nlist - allow) {
 				break;
+}
 		}
 		n = 0;
 		for (j = nl2 - 1; j >= 0; j--) {
 			high = endpoint[indx[j]].val;
 			n += endpoint[indx[j]].type;
-			if (n >= nlist - allow)
+			if (n >= nlist - allow) {
 				break;
+}
 		}
 
 		/*
@@ -1647,8 +1652,9 @@ clock_select(void)
 		 * If not, increase the number of falsetickers and go
 		 * around again.
 		 */
-		if (high > low)
+		if (high > low) {
 			break;
+}
 	}
 
 	/*
@@ -1687,8 +1693,9 @@ clock_select(void)
 		}
 #endif /* REFCLOCK */
 
-		if (j != i)
+		if (j != i) {
 			peers[j] = peers[i];
+		}
 		j++;
 	}
 	nlist = j;
@@ -1740,8 +1747,9 @@ clock_select(void)
 		g = 0; // Worst peer select jitter
 		k = 0; // Index of the worst peer
 		for (i = 0; i < nlist; i++) {
-			if (peers[i].error < d)
+			if (peers[i].error < d) {
 				d = peers[i].error;
+			}
 			peers[i].seljit = 0;
 			if (nlist > 1) {
 				f = 0;
@@ -1764,8 +1772,9 @@ clock_select(void)
 			   socktoa(&peers[k].peer->srcadr), g, d));
 		if (nlist > sys_maxclock)
 			peers[k].peer->new_status = CTL_PST_SEL_EXCESS;
-		for (j = k + 1; j < nlist; j++)
+		for (j = k + 1; j < nlist; j++) {
 			peers[j - 1] = peers[j];
+		}
 		nlist--;
 	}
 
@@ -1805,14 +1814,16 @@ clock_select(void)
 		if (peer->leap == LEAP_ADDSECOND) {
 			if (peer->cfg.flags & FLAG_REFCLOCK)
 				leap_vote_ins = nlist;
-			else if (leap_vote_ins < nlist)
+			else if (leap_vote_ins < nlist) {
 				leap_vote_ins++;
+			}
 		}
 		if (peer->leap == LEAP_DELSECOND) {
 			if (peer->cfg.flags & FLAG_REFCLOCK)
 				leap_vote_del = nlist;
-			else if (leap_vote_del < nlist)
+			else if (leap_vote_del < nlist) {
 				leap_vote_del++;
+			}
 		}
 		if (peer->cfg.flags & FLAG_PREFER)
 			sys_prefer = peer;
@@ -1839,16 +1850,18 @@ clock_select(void)
 			sys_clockhop = 0;
 		} else if ((x = fabs(typesystem->offset -
 		    osys_peer->offset)) < sys_mindisp) {
-			if ( D_ISZERO_NS(sys_clockhop) )
+			if ( D_ISZERO_NS(sys_clockhop) ) {
 				sys_clockhop = sys_mindisp;
-			else
+			} else {
 				sys_clockhop *= .5;
+			}
 			DPRINT(1, ("select: clockhop %d %.6f %.6f\n",
 				   j, x, sys_clockhop));
-			if (fabs(x) < sys_clockhop)
+			if (fabs(x) < sys_clockhop) {
 				typesystem = osys_peer;
-			else
+			} else {
 				sys_clockhop = 0;
+			}
 		} else {
 			sys_clockhop = 0;
 		}
@@ -2003,8 +2016,9 @@ root_distance(
 	 * cannot exceed the sys_maxdist, as this is the cutoff by the
 	 * selection algorithm.
 	 */
-	if (dtemp < sys_mindisp)
+	if (dtemp < sys_mindisp) {
 		dtemp = sys_mindisp;
+	}
 	return (dtemp);
 }
 
@@ -2420,16 +2434,16 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
  *   NTS-KE works, but NTP server doesn't respond.
  */
 static void restart_nts_ke(struct peer *peer) {
-    uint8_t hpoll = peer->hpoll;
-    peer_del_hash(peer);
-    hpoll += 2;
-    if (hpoll < 8)
-        hpoll = 8;      /* min retry: 256 seconds, ~5 min */
-    if (hpoll > 12)
-        hpoll = 12;	/* 4096, a bit over an hour */
-    peer->hpoll = hpoll;
-    peer->nextdate = current_time + (1U << hpoll);
-    peer->cfg.flags |= FLAG_LOOKUP;
+	uint8_t hpoll = peer->hpoll;
+	peer_del_hash(peer);
+	hpoll += 2;
+	if (hpoll < 8)
+		hpoll = 8;      /* min retry: 256 seconds, ~5 min */
+	if (hpoll > 12)
+		hpoll = 12;	/* 4096, a bit over an hour */
+	peer->hpoll = hpoll;
+	peer->nextdate = current_time + (1U << hpoll);
+	peer->cfg.flags |= FLAG_LOOKUP;
 };
 
 /*
@@ -2438,13 +2452,13 @@ static void restart_nts_ke(struct peer *peer) {
  *   retry danging DNS lookups
  */
 void dns_new_interface(void) {
-    struct peer *p;
-    for (p = peer_list; p != NULL; p = p->p_link) {
-	if ((p->cfg.flags & FLAG_LOOKUP) || (p->cast_flags & MDF_POOL)) {
-	    p->hpoll = p->cfg.minpoll;
-	    transmit(p);   /* does all the work */
+	struct peer *p;
+	for (p = peer_list; p != NULL; p = p->p_link) {
+		if ((p->cfg.flags & FLAG_LOOKUP) || (p->cast_flags & MDF_POOL)) {
+			p->hpoll = p->cfg.minpoll;
+			transmit(p);   /* does all the work */
+		}
 	}
-    }
 }
 
 
@@ -2671,10 +2685,12 @@ set_sys_tick_precision(
 	/*
 	 * Find the nearest power of two.
 	 */
-	for (i = 0; tick <= 1; i--)
+	for (i = 0; tick <= 1; i--) {
 		tick *= 2;
-	if (tick - 1 > 1 - tick / 2)
+}
+	if (tick - 1 > 1 - tick / 2) {
 		i++;
+}
 
 	sys_vars.sys_precision = (int8_t)i;
 }
@@ -2744,9 +2760,9 @@ proto_config(
 		break;
 
 	case PROTO_MONITOR:	/* monitoring (monitor) */
-		if (value)
+		if (value) {
 			mon_start(MON_ON);
-		else {
+		} else {
 			mon_stop(MON_ON);
 			if (mon_data.mon_enabled)
 				msyslog(LOG_WARNING,

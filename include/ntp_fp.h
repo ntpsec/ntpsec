@@ -65,16 +65,14 @@ typedef uint64_t l_fp;
 #define setlfpfrac(n, v)        ((n)  = (lfptouint(lfpuint(n)) | lfpfrac(v)))
 #define setlfpuint(n, v)        ((n)  = (lfptouint(v) | lfpfrac(n)))
 
-static inline l_fp lfpinit(int32_t sec, uint32_t frac)
-{
-    l_fp tmp = lfptouint(sec) | lfpfrac(frac);
-    return tmp;
+static inline l_fp lfpinit(int32_t sec, uint32_t frac) {
+	l_fp tmp = lfptouint(sec) | lfpfrac(frac);
+	return tmp;
 }
 
-static inline l_fp lfpinit_u(uint32_t sec, uint32_t frac)
-{
-    l_fp tmp = lfptouint(sec) | lfpfrac(frac);
-    return tmp;
+static inline l_fp lfpinit_u(uint32_t sec, uint32_t frac) {
+	l_fp tmp = lfptouint(sec) | lfpfrac(frac);
+	return tmp;
 }
 
 /*
@@ -135,20 +133,18 @@ typedef struct {
 
 #include <math.h>	/* ldexpl() */
 
-static inline l_fp dtolfp(doubletime_t d)
+static inline l_fp dtolfp(doubletime_t d) {
 /* long double to l_fp
  * assumes signed l_fp, i.e. a time offset
  * undefined return if d in NaN
  */
-{
 	return (l_fp)(int64_t)(ldexpl(d, 32));
 }
 
-static inline doubletime_t lfptod(l_fp r)
+static inline doubletime_t lfptod(l_fp r) {
 /* l_fp to long double
  * assumes signed l_fp, i.e. a time offset
  */
-{
 	return ldexpl((double)((int64_t)r), -32);
 }
 

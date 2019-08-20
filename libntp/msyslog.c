@@ -106,10 +106,11 @@ addto_syslog(
 	if (progname != prevcall_progname) {
 		prevcall_progname = progname;
 		prog = strrchr(progname, DIR_SEP);
-		if (prog != NULL)
+		if (prog != NULL) {
 			prog++;
-		else
+		} else {
 			prog = progname;
+		}
 	}
 
 	log_to_term = termlogit;
@@ -138,10 +139,11 @@ addto_syslog(
 		pid = -1;
 
 	/* syslog() adds trailing \n if not present */
-	if ('\n' != msg[strlen(msg) - 1])
+	if ('\n' != msg[strlen(msg) - 1]) {
 		nl_or_empty = nl;
-	else
+	} else {
 		nl_or_empty = empty;
+}
 
 	if (log_to_term) {
 		term_file = (level <= LOG_ERR)
@@ -230,10 +232,11 @@ init_logging(
 	 * to log with by using the basename
 	 */
 	cp = strrchr(name, DIR_SEP);
-	if (NULL == cp)
+	if (NULL == cp) {
 		pname = name;
-	else
+	} else {
 		pname = 1 + cp;	/* skip DIR_SEP */
+	}
 	progname = estrdup(pname);
 
 	if (is_daemon)
@@ -291,8 +294,9 @@ change_logfile(
 	 * and it's still open, there's nothing to do here.
 	 */
 	if (syslog_file != NULL && syslog_fname != NULL &&
-	    0 == strcmp(syslog_fname, log_fname))
+	    0 == strcmp(syslog_fname, log_fname)) {
 		return 0;
+	}
 
 	if (0 == strcmp(log_fname, "stderr")) {
 		new_file = stderr;
@@ -302,8 +306,9 @@ change_logfile(
 		abs_fname = estrdup(log_fname);
 	} else {
 		if (syslog_fname != NULL &&
-		    0 == strcmp(log_fname, syslog_fname))
+		    0 == strcmp(log_fname, syslog_fname)) {
 			log_fname = syslog_abs_fname;
+		}
 		if (log_fname != syslog_abs_fname &&
 		    DIR_SEP != log_fname[0] &&
 		    0 != strcmp(log_fname, "stderr") &&
@@ -340,17 +345,20 @@ change_logfile(
 
 	if (syslog_file != NULL &&
 	    syslog_file != stderr && syslog_file != stdout &&
-	    fileno(syslog_file) != fileno(new_file))
+	    fileno(syslog_file) != fileno(new_file)) {
 		fclose(syslog_file);
+	}
 	syslog_file = new_file;
 	if (log_fname == syslog_abs_fname) {
 		free(abs_fname);
 	} else {
 		if (syslog_abs_fname != NULL &&
-		    syslog_abs_fname != syslog_fname)
+		    syslog_abs_fname != syslog_fname) {
 			free(syslog_abs_fname);
-		if (syslog_fname != NULL)
+		}
+		if (syslog_fname != NULL) {
 			free(syslog_fname);
+		}
 		syslog_fname = estrdup(log_fname);
 		syslog_abs_fname = abs_fname;
 	}
@@ -387,8 +395,9 @@ setup_logfile(
 				name, strerror(errno));
 		return ;
 	}
-	if (NULL == syslog_fname)
+	if (NULL == syslog_fname) {
 		return;
+	}
 
 	if (-1 == change_logfile(syslog_fname, false))
 		msyslog(LOG_ERR, "LOG: Cannot reopen log file %s, %s",

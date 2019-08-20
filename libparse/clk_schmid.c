@@ -57,15 +57,14 @@
 static parse_cvt_fnc_t cvt_schmid;
 static parse_inp_fnc_t inp_schmid;
 
-clockformat_t clock_schmid =
-{
-  inp_schmid,			/* no input handling */
-  cvt_schmid,			/* Schmid conversion */
-  0,				/* not direct PPS monitoring */
-  0,				/* conversion configuration */
-  "Schmid",			/* Schmid receiver */
-  12,				/* binary data buffer */
-  0,				/* no private data (complete messages) */
+clockformat_t clock_schmid = {
+	inp_schmid,			/* no input handling */
+	cvt_schmid,			/* Schmid conversion */
+	0,				/* not direct PPS monitoring */
+	0,				/* conversion configuration */
+	"Schmid",			/* Schmid receiver */
+	12,				/* binary data buffer */
+	0,				/* no private data (complete messages) */
 };
 
 /* parse_cvt_fnc_t */
@@ -81,81 +80,64 @@ cvt_schmid(
 	UNUSED_ARG(format);
 	UNUSED_ARG(local);
 
-	if ((size != 11) || (buffer[10] != (unsigned char)'\375'))
-	{
+	if ((size != 11) || (buffer[10] != (unsigned char)'\375')) {
 		return CVT_NONE;
-	}
-	else
-	{
-		if (buffer[0] > 23 || buffer[1] > 59 || buffer[2] > 59 || buffer[3] >  9) /* Time */
-		{
+	} else {
+		if (buffer[0] > 23 || buffer[1] > 59 || buffer[2] > 59 || buffer[3] >  9) /* Time */ {
 			return CVT_FAIL|CVT_BADTIME;
+		} else if (buffer[4] <  1 || buffer[4] > 31 || buffer[5] <  1 || buffer[5] > 12	||  buffer[6] > 99) {
+			return CVT_FAIL|CVT_BADDATE;
+		} else {
+			clock_time->hour    = buffer[0];
+			clock_time->minute  = buffer[1];
+			clock_time->second  = buffer[2];
+			clock_time->usecond = buffer[3] * 100000;
+			clock_time->day     = buffer[4];
+			clock_time->month   = buffer[5];
+			clock_time->year    = buffer[6];
+
+			clock_time->flags   = 0;
+
+			switch (buffer[8] & WS_TZ) {
+			    case WS_MET:
+				clock_time->utcoffset = -1*60*60;
+				break;
+
+			    case WS_MEST:
+				clock_time->utcoffset = -2*60*60;
+				clock_time->flags    |= PARSEB_DST;
+				break;
+
+			    default:
+				return CVT_FAIL|CVT_BADFMT;
+			}
+
+			if (!(buffer[7] & WS_TIME)) {
+				clock_time->flags |= PARSEB_POWERUP;
+			}
+
+			if (!(buffer[7] & WS_SIGNAL)) {
+				clock_time->flags |= PARSEB_NOSYNC;
+			}
+
+			if (buffer[7] & WS_SIGNAL) {
+				if (buffer[8] & WS_CALLBIT) {
+					clock_time->flags |= PARSEB_CALLBIT;
+				}
+
+				if (buffer[8] & WS_ANNOUNCE) {
+					clock_time->flags |= PARSEB_ANNOUNCE;
+				}
+
+				if (buffer[8] & WS_LEAP) {
+					clock_time->flags |= PARSEB_LEAPADD; /* default: DCF77 data format deficiency */
+				}
+			}
+
+			clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_CALLBIT;
+
+			return CVT_OK;
 		}
-		else
-		    if (buffer[4] <  1 || buffer[4] > 31 || buffer[5] <  1 || buffer[5] > 12
-			||  buffer[6] > 99)
-		    {
-			    return CVT_FAIL|CVT_BADDATE;
-		    }
-		    else
-		    {
-			    clock_time->hour    = buffer[0];
-			    clock_time->minute  = buffer[1];
-			    clock_time->second  = buffer[2];
-			    clock_time->usecond = buffer[3] * 100000;
-			    clock_time->day     = buffer[4];
-			    clock_time->month   = buffer[5];
-			    clock_time->year    = buffer[6];
-
-			    clock_time->flags   = 0;
-
-			    switch (buffer[8] & WS_TZ)
-			    {
-				case WS_MET:
-				    clock_time->utcoffset = -1*60*60;
-				    break;
-
-				case WS_MEST:
-				    clock_time->utcoffset = -2*60*60;
-				    clock_time->flags    |= PARSEB_DST;
-				    break;
-
-				default:
-				    return CVT_FAIL|CVT_BADFMT;
-			    }
-
-			    if (!(buffer[7] & WS_TIME))
-			    {
-				    clock_time->flags |= PARSEB_POWERUP;
-			    }
-
-			    if (!(buffer[7] & WS_SIGNAL))
-			    {
-				    clock_time->flags |= PARSEB_NOSYNC;
-			    }
-
-			    if (buffer[7] & WS_SIGNAL)
-			    {
-				    if (buffer[8] & WS_CALLBIT)
-				    {
-					    clock_time->flags |= PARSEB_CALLBIT;
-				    }
-
-				    if (buffer[8] & WS_ANNOUNCE)
-				    {
-					    clock_time->flags |= PARSEB_ANNOUNCE;
-				    }
-
-				    if (buffer[8] & WS_LEAP)
-				    {
-					    clock_time->flags |= PARSEB_LEAPADD; /* default: DCF77 data format deficiency */
-				    }
-			    }
-
-			    clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_CALLBIT;
-
-			    return CVT_OK;
-		    }
 	}
 }
 
@@ -178,14 +160,14 @@ inp_schmid(
 	parseprintf(DD_PARSE, ("inp_schmid(0x%lx, 0x%x, ...)\n",
                     (unsigned long)parseio, (unsigned)ch));
 
-	switch ((uint8_t)ch)
-	{
+	switch ((uint8_t)ch) {
 	case 0xFD:		/*  */
 		parseprintf(DD_PARSE, ("inp_schmid: 0xFD seen\n"));
-		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP)
+		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP) {
 			return parse_end(parseio);
-		else
+		} else {
 			return rtc;
+		}
 
 	default:
 		return parse_addchar(parseio, ch);

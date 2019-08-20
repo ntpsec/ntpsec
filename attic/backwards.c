@@ -42,10 +42,10 @@ main(int argc, char *argv[])
 		} else {
 			ts_print(&ts0, &ts1);
 			if (ts0.tv_sec == ts1.tv_sec
-				&& ts0.tv_nsec == ts1.tv_nsec)
+				&& ts0.tv_nsec == ts1.tv_nsec) {
 			    equal++;
+			}
 		}
-
 	}
 
 	for(;;) {
@@ -60,7 +60,6 @@ main(int argc, char *argv[])
 		} else {
 			ts_print(&ts0, &ts1);
 		}
-
 	}
 }
 

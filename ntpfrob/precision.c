@@ -19,14 +19,15 @@ int default_get_precision(void);
 
 void precision(const iomode mode)
 {
-	if (mode == json)
+	if (mode == json) {
 		printf("{\"log2 of resolution\":%d, \"log2 of precision\":%d}\n",
 		       default_get_resolution(),
 		       default_get_precision());
-	else
+	} else {
 		printf("log2(resolution) = %d, log2(precision) = %d\n",
 			default_get_resolution(),
 			default_get_precision());
+	}
 }
 
 /* Find the resolution of the system clock by watching how the current time
@@ -81,29 +82,34 @@ default_get_resolution(void)
 	for (i = - --minsteps; i< MAXLOOPS; i++) {
 		clock_gettime(CLOCK_REALTIME, &tp);
 		diff = tp.tv_nsec - last;
-		if (diff < 0) diff += DNSECS;
-		if (diff > MINSTEP && minsteps-- <= 0)
+		if (diff < 0) { diff += DNSECS;
+		}
+		if (diff > MINSTEP && minsteps-- <= 0) {
 			break;
+		}
 		last = tp.tv_nsec;
 	}
 	diff /= 1000;	/* step down to milliseconds */
 
 	fprintf(stderr, "resolution = %ld usec after %d loop%s\n",
-	       diff, i, (i==1) ? "" : "s");
+		diff, i, (i==1) ? "" : "s");
 
 	diff = (diff *3)/2;
 	if (i >= MAXLOOPS) {
-	    fprintf(stderr,
-		"     (Boy this machine is fast ! %d loops without a step)\n",
-		MAXLOOPS);
-	    diff = 1; /* No STEP, so FAST machine */
+		fprintf(stderr,
+			"     (Boy this machine is fast ! %d loops without a step)\n",
+			MAXLOOPS);
+		diff = 1; /* No STEP, so FAST machine */
 	}
 	if (i == 0) {
-	    fprintf(stderr,
-		"     (The resolution is less than the time to read the clock -- Assume 1us)\n");
-	    diff = 1; /* time to read clock >= resolution */
+		fprintf(stderr,
+			"     (The resolution is less than the time to read the clock -- Assume 1us)\n");
+		diff = 1; /* time to read clock >= resolution */
 	}
-	for (i=0, val=HUSECS; val>0; i--, val >>= 1) if (diff >= val) return i;
+	for (i=0, val=HUSECS; val>0; i--, val >>= 1) { if (diff >= val) {
+			return i;
+		}
+	}
 	fprintf(stderr,
 		"     (Oh dear -- that wasn't expected ! I'll guess !)\n");
 	return DEFAULT_SYS_PRECISION /* Something's BUST, so lie ! */;
@@ -141,13 +147,15 @@ default_get_precision(void)
 	    clock_gettime(CLOCK_REALTIME, &tp);
 		diff = tp.tv_nsec - last;
 		last = tp.tv_nsec;
-		if (diff < 0)
+		if (diff < 0) {
 		    diff += DNSECS;
+		}
 		nsec += diff;
 		if (diff > MINSTEP) {
 			i++;
-			if (diff < val)
+			if (diff < val) {
 			    val = diff;
+			}
 		}
 	}
 	val /= 1000;	/* step down to milliseconds */
@@ -159,8 +167,9 @@ default_get_precision(void)
 		val = MINSTEP;	/* val <= MINSTEP; fast machine */
 	}
 	diff = HUSECS;
-	for (i = 0; diff > val; i--)
+	for (i = 0; diff > val; i--) {
 	    diff >>= 1;
+	}
 	return (i);
 }
 

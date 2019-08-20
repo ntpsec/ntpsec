@@ -276,8 +276,9 @@ modem_start(
 	up->bufptr = up->buf;
 	if (def_modem_setup == modem_setup) {
 		setup = get_ext_sys_var("modemsetup");
-		if (setup != NULL)
+		if (setup != NULL) {
 			modem_setup = estrdup(setup);
+		}
 	}
 
 	return true;
@@ -437,10 +438,11 @@ modem_message(
 	case S_MSG:
 		if (strcmp(tbuf, "NO") == 0)
 			report_event(PEVNT_CLOCK, peer, msg);
-		if (up->msgcnt < MAXCODE)
+		if (up->msgcnt < MAXCODE) {
 			modem_timecode(peer, msg);
-		else
+		} else {
 			modem_timeout(peer, S_MSG);
+		}
 		return;
 
         default:
@@ -724,8 +726,9 @@ modem_timer(
 		}
 	} else {
 		up->timer--;
-		if (up->timer == 0)
+		if (up->timer == 0) {
 			modem_timeout(peer, (teModemState)up->state);
+		}
 	}
 }
 
@@ -775,8 +778,9 @@ modem_timecode(
 	 * itself. Be sure a timecode has been received.
 	 */
 	case 1:
-		if (*str == '*' && up->msgcnt > 0)
+		if (*str == '*' && up->msgcnt > 0) {
 			break;
+		}
 
 		return;
 
@@ -802,8 +806,9 @@ modem_timecode(
 		memcpy(&pp->refid, REFACTS, REFIDLEN);
 		peer->sstclktype = CTL_SST_TS_TELEPHONE;
 		up->msgcnt++;
-		if (flag != '#' && up->msgcnt < 10)
+		if (flag != '#' && up->msgcnt < 10) {
 			return;
+		}
 
 		break;
 
@@ -911,8 +916,9 @@ modem_timecode(
 	 */
 	peer->refid = pp->refid;
 	pp->lastrec = up->tstamp;
-	if (up->msgcnt == 0)
+	if (up->msgcnt == 0) {
 		return;
+	}
 
 	strlcpy(pp->a_lastcode, str, sizeof(pp->a_lastcode));
 	pp->lencode = (int)strlen(pp->a_lastcode);

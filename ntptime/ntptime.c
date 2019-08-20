@@ -36,8 +36,7 @@
 #define NS_PER_US_FLOAT	1000.0
 
 #ifndef HAVE_STRUCT_NTPTIMEVAL
-struct ntptimeval
-{
+struct ntptimeval {
 	struct timeval	time;		/* current time (ro) */
 	long int	maxerror;	/* maximum error (us) (ro) */
 	long int	esterror;	/* estimated error (us) (ro) */
@@ -47,8 +46,7 @@ struct ntptimeval
 
 /* MUSL port shim */
 #ifndef HAVE_NTP_GETTIME
-static int ntp_gettime(struct ntptimeval *ntv)
-{
+static int ntp_gettime(struct ntptimeval *ntv) {
 	struct timex tntx;
 	int result;
 
@@ -254,8 +252,9 @@ main(
 				status = ntp_gettime(&ntv);
 				if ((status < 0) && (errno == ENOSYS))
 					--pll_control;
-				if (pll_control < 0)
+				if (pll_control < 0) {
 					break;
+				}
 				times[c] = ntv.time.tv_frac_sec;
 			}
 #ifdef SIGSYS
@@ -263,8 +262,9 @@ main(
 #endif
 		if (pll_control >= 0) {
 			printf("[ us %06d:", times[0]);
-			for (c = 1; c < COUNTOF(times); c++)
+			for (c = 1; c < COUNTOF(times); c++) {
 			    printf(" %d", times[c] - times[c - 1]);
+			}
 			printf(" ]\n");
 		}
 	}
@@ -429,8 +429,9 @@ main(
 		exit(1);
 	}
 #endif
-	if (json)
+	if (json) {
 	    fputs("}\n", stdout);
+	}
 	exit(status < 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -466,10 +467,11 @@ snprintb(
 	bool any;
 	char c;
 
-	if (bits != NULL && *bits == 8)
+	if (bits != NULL && *bits == 8) {
 		snprintf(buf, buflen, "0%o", v);
-	else
+	} else {
 		snprintf(buf, buflen, "0x%x", v);
+	}
 	cp = buf + strlen(buf);
 	cplim = buf + buflen;
 	if (bits != NULL) {
@@ -481,23 +483,27 @@ snprintb(
 			if (v & (unsigned int)(1 << (i - 1))) {
 				if (any) {
 					*cp++ = ',';
-					if (cp >= cplim)
+					if (cp >= cplim) {
 						goto overrun;
+					}
 				}
 				any = true;
 				for (; (c = *bits) > 32; bits++) {
 					*cp++ = c;
-					if (cp >= cplim)
+					if (cp >= cplim) {
 						goto overrun;
+					}
 				}
 			} else {
-				for (; *bits > 32; bits++)
+				for (; *bits > 32; bits++) {
 					continue;
+				}
 			}
 		}
 		*cp++ = ')';
-		if (cp >= cplim)
+		if (cp >= cplim) {
 			goto overrun;
+		}
 	}
 	*cp = '\0';
 	return buf;
@@ -517,8 +523,9 @@ timex_state(
 {
 	static char buf[32];
 
-	if ((size_t)s < COUNTOF(timex_states))
+	if ((size_t)s < COUNTOF(timex_states)) {
 		return timex_states[s];
+	}
 	snprintf(buf, sizeof(buf), "TIME-#%d", s);
 	return buf;
 }

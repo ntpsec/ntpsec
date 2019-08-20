@@ -86,10 +86,11 @@ keyword(
 
 	i = (size_t)(token - LOWEST_KEYWORD_ID);
 
-	if (i < COUNTOF(keyword_text))
+	if (i < COUNTOF(keyword_text)) {
 		text = keyword_text[i];
-	else
+	} else {
 		text = NULL;
+	}
 
 	return (text != NULL)
 		   ? text
@@ -179,8 +180,9 @@ lex_getch(
 			conf_file_sum += (unsigned int)ch;
 	} else if (stream->fpi) {
 		/* fetch next 7-bit ASCII char (or EOF) from file */
-		while ((ch = fgetc(stream->fpi)) != EOF && ch > SCHAR_MAX)
+		while ((ch = fgetc(stream->fpi)) != EOF && ch > SCHAR_MAX) {
 			stream->curpos.ncol++;
+		}
 		if (EOF != ch) {
 			conf_file_sum += (unsigned int)ch;
 			stream->curpos.ncol++;
@@ -206,8 +208,9 @@ lex_getch(
 	 * happens most likely on Windows, where editors often have a
 	 * sloppy concept of a line.
 	 */
-	if (EOF == ch && stream->curpos.ncol != 0)
+	if (EOF == ch && stream->curpos.ncol != 0) {
 		ch = '\n';
+	}
 
 	/* update scan position tallies */
 	if (ch == '\n') {
@@ -232,8 +235,9 @@ lex_ungetch(
 	/* check preconditions */
 	if (NULL == stream || stream->force_eof)
 		return EOF;
-	if (EOF != stream->backch || EOF == ch)
+	if (EOF != stream->backch || EOF == ch) {
 		return EOF;
+	}
 
 	/* keep for later reference and update checksum */
 	stream->backch = (uint8_t)ch;
@@ -258,8 +262,9 @@ lex_close(
 	)
 {
 	if (NULL != stream) {
-		if (NULL != stream->fpi)
+		if (NULL != stream->fpi) {
 			fclose(stream->fpi);
+		}
 		free(stream);
 	}
 }
@@ -335,8 +340,7 @@ lex_drop_stack()
  * in the force-eof mode before this call.
  */
 bool
-lex_flush_stack()
-{
+lex_flush_stack() {
 	bool retv = false;
 
 	if (NULL != lex_stack) {
@@ -351,13 +355,11 @@ lex_flush_stack()
 /* Reversed string comparison - we want to LIFO directory subfiles so they
  * actually get evaluated in sort order.
  */
-static int rcmpstring(const void *p1, const void *p2)
-{
-    return strcmp(*(const char * const *)p1, *(const char * const *)p2);
+static int rcmpstring(const void *p1, const void *p2) {
+	return strcmp(*(const char * const *)p1, *(const char * const *)p2);
 }
 
-bool is_directory(const char *path)
-{
+bool is_directory(const char *path) {
 	struct stat sb;
 	return stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
 }
@@ -402,10 +404,11 @@ bool lex_push_file(
 
 	if (NULL != path) {
 		char fullpath[PATH_MAX];
-		if (lex_stack != NULL)
-		    reparent(fullpath, sizeof(fullpath), lex_stack->fname, path);
-		else
-		    strlcpy(fullpath, path, sizeof(fullpath));
+		if (lex_stack != NULL) {
+			reparent(fullpath, sizeof(fullpath), lex_stack->fname, path);
+		} else {
+			strlcpy(fullpath, path, sizeof(fullpath));
+		}
 		//fprintf(stderr, "lex_push_file(%s)\n", fullpath);
 		if (is_directory(fullpath)) {
 			/* directory scanning */
@@ -418,11 +421,12 @@ bool lex_push_file(
 			baselist = (char **)malloc(sizeof(char *));
 			while ((dp = readdir(dfd)) != NULL)
 			{
-			    if (!CONF_ENABLE(dp->d_name))
-			    	continue;
-			    baselist[basecount++] = strdup(dp->d_name);
-			    baselist = realloc(baselist,
-                                       (size_t)(basecount+1) * sizeof(char *));
+				if (!CONF_ENABLE(dp->d_name)) {
+					continue;
+				}
+				baselist[basecount++] = strdup(dp->d_name);
+				baselist = realloc(baselist,
+						   (size_t)(basecount+1) * sizeof(char *));
 			}
 			closedir(dfd);
 			qsort(baselist, (size_t)basecount, sizeof(char *),
@@ -431,9 +435,9 @@ bool lex_push_file(
 				char subpath[PATH_MAX];
 				strlcpy(subpath, fullpath, PATH_MAX);
 				if (strlen(subpath) < PATH_MAX - 1) {
-				    char *ep = subpath + strlen(subpath);
-				    *ep++ = DIR_SEP;
-				    *ep = '\0';
+					char *ep = subpath + strlen(subpath);
+					*ep++ = DIR_SEP;
+					*ep = '\0';
 				}
 				strlcat(subpath, baselist[i], PATH_MAX);
 				/* This should barf safely if the complete
@@ -441,8 +445,9 @@ bool lex_push_file(
 				 */
 				lex_push_file(subpath);
 			}
-			for (int i = 0; i < basecount; i++)
+			for (int i = 0; i < basecount; i++) {
 				free(baselist[i]);
+			}
 			free(baselist);
 			return basecount > 0;
 		} else {
@@ -589,10 +594,11 @@ is_integer(
 		return true;
 
 	/* Reject numbers that fit in unsigned but not in signed int */
-	if (1 == sscanf(lexeme, "%u", &u_val))
+	if (1 == sscanf(lexeme, "%u", &u_val)) {
 		return (u_val <= INT_MAX);
-	else
+	} else {
 		return false;
+	}
 }
 
 
@@ -637,8 +643,9 @@ is_double(
 	i = 0;
 
 	/* Check for an optional '+' or '-' */
-	if ('+' == lexeme[i] || '-' == lexeme[i])
+	if ('+' == lexeme[i] || '-' == lexeme[i]) {
 		i++;
+	}
 
 	/* Read the integer part */
 	for (; lexeme[i] && isdigit((uint8_t)lexeme[i]); i++)
@@ -668,8 +675,9 @@ is_double(
 		i++;
 
 		/* Read an optional Sign */
-		if ('+' == lexeme[i] || '-' == lexeme[i])
+		if ('+' == lexeme[i] || '-' == lexeme[i]) {
 			i++;
+		}
 
 		/* Now read the exponent part */
 		while (lexeme[i] && isdigit((uint8_t)lexeme[i]))
@@ -678,8 +686,9 @@ is_double(
 	}
 
 	/* Allow trailing multipliers */
-	while (lexeme[i] && ERA_SUFFIX(lexeme[i]))
+	while (lexeme[i] && ERA_SUFFIX(lexeme[i])) {
 	    i++;
+	}
 
 	/* Check if we are done */
 	if (!lexeme[i])
@@ -711,8 +720,7 @@ is_EOC(
 
 
 char *
-quote_if_needed(char *str)
-{
+quote_if_needed(char *str) {
 	char *ret;
 	size_t len;
 	size_t octets;
@@ -724,8 +732,9 @@ quote_if_needed(char *str)
 	    && (strcspn(str, special_chars) < len
 		|| strchr(str, ' ') != NULL)) {
 		snprintf(ret, octets, "\"%s\"", str);
-	} else
+	} else {
 		strlcpy(ret, str, octets);
+	}
 
 	return ret;
 }
@@ -806,8 +815,9 @@ yylex(void)
 			 * a single string following as in:
 			 * setvar Owner = "The Boss" default
 			 */
-			if ('=' == ch )
+			if ('=' == ch ) {
 				followedby = FOLLBY_STRING;
+			}
 			yytext[0] = (char)ch;
 			yytext[1] = '\0';
 			goto normal_return;
@@ -834,14 +844,16 @@ yylex(void)
 			   of comment character */
 			if ('#' == ch) {
 				while (EOF != (ch = lex_getch(lex_stack))
-				       && '\n' != ch)
+				       && '\n' != ch) {
 					; /* Null Statement */
+				}
 				break;
 			}
 
 			i++;
-			if (i >= (int)COUNTOF(yytext))
+			if (i >= (int)COUNTOF(yytext)) {
 				goto lex_too_long;
+			}
 		}
 		/* Pick up all of the string inside between " marks, to
 		 * end of line.  If we make it to EOL without a
@@ -854,16 +866,18 @@ yylex(void)
 			while (EOF != (ch = lex_getch(lex_stack)) &&
 			       ch != '"' && ch != '\n') {
 				yytext[i++] = (char)ch;
-				if (i >= (int)COUNTOF(yytext))
+				if (i >= (int)COUNTOF(yytext)) {
 					goto lex_too_long;
+				}
 			}
 			/*
 			 * yytext[i] will be pushed back as not part of
 			 * this lexeme, but any closing quote should
 			 * not be pushed back, so we read another char.
 			 */
-			if ('"' == ch)
+			if ('"' == ch) {
 				ch = lex_getch(lex_stack);
+			}
 		}
 		/* Pushback the last character read that is not a part
 		 * of this lexeme. This fails silently if ch is EOF,
@@ -993,8 +1007,9 @@ yylex(void)
 	}
 
 	instring = false;
-	if (FOLLBY_STRING == followedby)
+	if (FOLLBY_STRING == followedby) {
 		followedby = FOLLBY_TOKEN;
+	}
 
 	yylval_was_set = true;
 	token = create_string_token(yytext);

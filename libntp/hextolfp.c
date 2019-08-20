@@ -30,8 +30,9 @@ hextolfp(
 	 *
 	 * [spaces]8_hex_digits[.]8_hex_digits[spaces|\n|\0]
 	 */
-	while (isspace((unsigned char)*cp))
+	while (isspace((unsigned char)*cp)) {
 	    cp++;
+	}
 
 	cpstart = cp;
 	while (*cp != '\0' && (cp - cpstart) < 8 &&
@@ -44,8 +45,9 @@ hextolfp(
 
 	if ((cp - cpstart) < 8 || ind == NULL)
 	    return false;
-	if (*cp == '.')
+	if (*cp == '.') {
 	    cp++;
+	}
 
 	cpstart = cp;
 	while (*cp != '\0' && (cp - cpstart) < 8 &&

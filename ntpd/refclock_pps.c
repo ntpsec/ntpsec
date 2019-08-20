@@ -167,8 +167,9 @@ pps_shutdown(
 	struct ppsunit *up;
 
 	up = pp->unitptr;
-	if (up->fddev > 0)
+	if (up->fddev > 0) {
 		close(up->fddev);
+	}
 	free(up);
 }
 

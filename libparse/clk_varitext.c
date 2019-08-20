@@ -57,37 +57,35 @@ static const uint8_t VT_BST              = 0x08;
  * XXX	Checksum calculated using Fletcher's method (ignored for now).
  */
 
-static struct format varitext_fmt =
-{
-  {
-    {8, 2},  {5,  2}, {2,  2},	/* day, month, year */
-    {14, 2}, {17, 2}, {20, 2},	/* hour, minute, second */
-    {11, 2}, {24, 1}		/* dayofweek, status */
-  },
-  (const unsigned char*)"T:  :  :  :  :  :  :  \r\n    ",
-  0
+static struct format varitext_fmt = {
+	{
+		{8, 2},  {5,  2}, {2,  2},	/* day, month, year */
+		{14, 2}, {17, 2}, {20, 2},	/* hour, minute, second */
+		{11, 2}, {24, 1}		/* dayofweek, status */
+	},
+	(const unsigned char*)"T:  :  :  :  :  :  :  \r\n    ",
+	0
 };
 
 static parse_cvt_fnc_t cvt_varitext;
 static parse_inp_fnc_t inp_varitext;
 
 struct varitext {
-  unsigned char start_found;
-  unsigned char end_found;
-  unsigned char end_count;
-  unsigned char previous_ch;
-  timestamp_t   tstamp;
+	unsigned char start_found;
+	unsigned char end_found;
+	unsigned char end_count;
+	unsigned char previous_ch;
+	timestamp_t   tstamp;
 };
 
-clockformat_t   clock_varitext =
-{
-  inp_varitext,			/* Because of the strange format we need to parse it ourselves */
-  cvt_varitext,			/* Varitext conversion */
-  0,				/* no PPS monitoring */
-  (void *)&varitext_fmt,	/* conversion configuration */
-  "Varitext Radio Clock",	/* Varitext Radio Clock */
-  30,				/* string buffer */
-  sizeof(struct varitext),	/* Private data size required to hold current parse state */
+clockformat_t   clock_varitext = {
+	inp_varitext,			/* Because of the strange format we need to parse it ourselves */
+	cvt_varitext,			/* Varitext conversion */
+	0,				/* no PPS monitoring */
+	(void *)&varitext_fmt,	/* conversion configuration */
+	"Varitext Radio Clock",	/* Varitext Radio Clock */
+	30,				/* string buffer */
+	sizeof(struct varitext),	/* Private data size required to hold current parse state */
 };
 
 /*
@@ -104,49 +102,48 @@ cvt_varitext(
 	     void		*local
 	     )
 {
-  UNUSED_ARG(size);
-  UNUSED_ARG(local);
+	UNUSED_ARG(size);
+	UNUSED_ARG(local);
 
-  if (!Strok(buffer, format->fixed_string)) {
-    return CVT_NONE;
-  } else {
-    if (Stoi(&buffer[format->field_offsets[O_DAY].offset], &clock_time->day,
-	     format->field_offsets[O_DAY].length) ||
-	Stoi(&buffer[format->field_offsets[O_MONTH].offset], &clock_time->month,
-	     format->field_offsets[O_MONTH].length) ||
-	Stoi(&buffer[format->field_offsets[O_YEAR].offset], &clock_time->year,
-	     format->field_offsets[O_YEAR].length) ||
-	Stoi(&buffer[format->field_offsets[O_HOUR].offset], &clock_time->hour,
-	     format->field_offsets[O_HOUR].length) ||
-	Stoi(&buffer[format->field_offsets[O_MIN].offset], &clock_time->minute,
-	     format->field_offsets[O_MIN].length) ||
-	Stoi(&buffer[format->field_offsets[O_SEC].offset], &clock_time->second,
-	     format->field_offsets[O_SEC].length)) {
-      return CVT_FAIL | CVT_BADFMT;
-    } else {
-      uint8_t *f = (uint8_t*) &buffer[format->field_offsets[O_FLAGS].offset];
+	if (!Strok(buffer, format->fixed_string)) {
+		return CVT_NONE;
+	} else {
+		if (Stoi(&buffer[format->field_offsets[O_DAY].offset], &clock_time->day,
+			 format->field_offsets[O_DAY].length) ||
+		    Stoi(&buffer[format->field_offsets[O_MONTH].offset], &clock_time->month,
+			 format->field_offsets[O_MONTH].length) ||
+		    Stoi(&buffer[format->field_offsets[O_YEAR].offset], &clock_time->year,
+			 format->field_offsets[O_YEAR].length) ||
+		    Stoi(&buffer[format->field_offsets[O_HOUR].offset], &clock_time->hour,
+			 format->field_offsets[O_HOUR].length) ||
+		    Stoi(&buffer[format->field_offsets[O_MIN].offset], &clock_time->minute,
+			 format->field_offsets[O_MIN].length) ||
+		    Stoi(&buffer[format->field_offsets[O_SEC].offset], &clock_time->second,
+			 format->field_offsets[O_SEC].length)) {
+			return CVT_FAIL | CVT_BADFMT;
+		} else {
+			uint8_t *f = (uint8_t*) &buffer[format->field_offsets[O_FLAGS].offset];
 
-      clock_time->flags = 0;
-      clock_time->utcoffset = 0;
+			clock_time->flags = 0;
+			clock_time->utcoffset = 0;
 
-      if (((*f) & VT_BST))	/* BST flag is set so set to indicate daylight saving time is active and utc offset */
-	{
-	  clock_time->utcoffset = -1*60*60;
-	  clock_time->flags |= PARSEB_DST;
+			if (((*f) & VT_BST)) {	/* BST flag is set so set to indicate daylight saving time is active and utc offset */
+				clock_time->utcoffset = -1*60*60;
+				clock_time->flags |= PARSEB_DST;
+			}
+			/*
+			  if (!((*f) & VT_INITIALISED))  Clock not initialised
+			  clock_time->flags |= PARSEB_POWERUP;
+
+			  if (!((*f) & VT_SYNCHRONISED))   Clock not synchronised
+			  clock_time->flags |= PARSEB_NOSYNC;
+
+			  if (((*f) & VT_SEASON_CHANGE))  Seasonal change expected in the next hour
+			  clock_time->flags |= PARSEB_ANNOUNCE;
+			*/
+			return CVT_OK;
+		}
 	}
-      /*
-	 if (!((*f) & VT_INITIALISED))  Clock not initialised
-	 clock_time->flags |= PARSEB_POWERUP;
-
-	 if (!((*f) & VT_SYNCHRONISED))   Clock not synchronised
-	 clock_time->flags |= PARSEB_NOSYNC;
-
-	 if (((*f) & VT_SEASON_CHANGE))  Seasonal change expected in the next hour
-	 clock_time->flags |= PARSEB_ANNOUNCE;
-	 */
-      return CVT_OK;
-    }
-  }
 }
 
 /* parse_inp_fnc_t inp_varitext */
@@ -157,64 +154,61 @@ inp_varitext(
 	     timestamp_t *tstamp
 	     )
 {
-  struct varitext *t = (struct varitext *)parseio->parse_pdata;
-  int    rtc;
+	struct varitext *t = (struct varitext *)parseio->parse_pdata;
+	int    rtc;
 
-  parseprintf(DD_PARSE, ("inp_varitext(0x%lx, 0x%x, ...)\n",
-              (unsigned long)parseio, (unsigned)ch));
+	parseprintf(DD_PARSE, ("inp_varitext(0x%lx, 0x%x, ...)\n",
+			       (unsigned long)parseio, (unsigned)ch));
 
-  if (!t)
-    return PARSE_INP_SKIP;	/* local data not allocated - sigh! */
+	if (!t) {
+		return PARSE_INP_SKIP;	/* local data not allocated - sigh! */
+	}
+		
+	if (ch == 'T') {
+		t->tstamp = *tstamp;
+	}
+		
+	if ((t->previous_ch == 'T') && (ch == ':')) {
+		parseprintf(DD_PARSE, ("inp_varitext: START seen\n"));
 
-  if (ch == 'T')
-    t->tstamp = *tstamp;
-
-  if ((t->previous_ch == 'T') && (ch == ':'))
-    {
-      parseprintf(DD_PARSE, ("inp_varitext: START seen\n"));
-
-      parseio->parse_data[0] = 'T';
-      parseio->parse_index=1;
-      parseio->parse_dtime.parse_stime = t->tstamp; /* Time stamp at packet start */
-      t->start_found = 1;
-      t->end_found = 0;
-      t->end_count = 0;
-    }
-
-  if (t->start_found)
-    {
-      if ((rtc = (int)parse_addchar(parseio, ch)) != PARSE_INP_SKIP)
-	{
-	  parseprintf(DD_PARSE, ("inp_varitext: ABORTED due to too many characters\n"));
-
-	  memset(t, 0, sizeof(struct varitext));
-	  return (unsigned long)rtc;
+		parseio->parse_data[0] = 'T';
+		parseio->parse_index=1;
+		parseio->parse_dtime.parse_stime = t->tstamp; /* Time stamp at packet start */
+		t->start_found = 1;
+		t->end_found = 0;
+		t->end_count = 0;
 	}
 
-      if (t->end_found)
-	{
-	  if (++(t->end_count) == 4) /* Finally found the end of the message */
-	    {
-	      parseprintf(DD_PARSE, ("inp_varitext: END seen\n"));
+	if (t->start_found) {
+		if ((rtc = (int)parse_addchar(parseio, ch)) != PARSE_INP_SKIP)
+		{
+			parseprintf(DD_PARSE, ("inp_varitext: ABORTED due to too many characters\n"));
 
-	      memset(t, 0, sizeof(struct varitext));
-	      if ((rtc = (int)parse_addchar(parseio, 0)) == PARSE_INP_SKIP)
-		return parse_end(parseio);
-	      else
-		return (unsigned long)rtc;
-	    }
+			memset(t, 0, sizeof(struct varitext));
+			return (unsigned long)rtc;
+		}
+
+		if (t->end_found) {
+			if (++(t->end_count) == 4) /* Finally found the end of the message */ {
+				parseprintf(DD_PARSE, ("inp_varitext: END seen\n"));
+
+				memset(t, 0, sizeof(struct varitext));
+				if ((rtc = (int)parse_addchar(parseio, 0)) == PARSE_INP_SKIP)
+					return parse_end(parseio);
+				else
+					return (unsigned long)rtc;
+			}
+		}
+
+		if ((t->previous_ch == '\r') && (ch == '\n')) {
+			t->end_found = 1;
+		}
+
 	}
 
-      if ((t->previous_ch == '\r') && (ch == '\n'))
-	{
-	  t->end_found = 1;
-	}
+	t->previous_ch = (unsigned char)ch;
 
-    }
-
-  t->previous_ch = (unsigned char)ch;
-
-  return PARSE_INP_SKIP;
+	return PARSE_INP_SKIP;
 }
 
 /*

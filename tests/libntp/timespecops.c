@@ -200,7 +200,7 @@ TEST(timespecops, SignWithFrac) {
 //----------------------------------------------------------------------
 TEST(timespecops, CmpFracEQ) {
 	// fractions are equal
-	for (int i = -4; i <= 4; ++i)
+	for (int i = -4; i <= 4; ++i) {
 		for (int j = -4; j <= 4; ++j) {
 			struct timespec a = timespec_init( i , 200);
 			struct timespec b = timespec_init( j , 200);
@@ -209,13 +209,14 @@ TEST(timespecops, CmpFracEQ) {
 
 			TEST_ASSERT_EQUAL(E, r);
 		}
+	}
 
 	return;
 }
 
 TEST(timespecops, CmpFracGT) {
 	// fraction a bigger fraction b
-	for (int i = -4; i <= 4; ++i)
+	for (int i = -4; i <= 4; ++i) {
 		for (int j = -4; j <= 4; ++j) {
 			struct timespec a = timespec_init(i, 999999800);
 			struct timespec b = timespec_init(j, 200);
@@ -224,13 +225,14 @@ TEST(timespecops, CmpFracGT) {
 
 			TEST_ASSERT_EQUAL(E, r);
 		}
+	}
 
 	return;
 }
 
 TEST(timespecops, CmpFracLT) {
 	// fraction a less fraction b
-	for (int i = -4; i <= 4; ++i)
+	for (int i = -4; i <= 4; ++i) {
 		for (int j = -4; j <= 4; ++j) {
 			struct timespec a = timespec_init(i, 200);
 			struct timespec b = timespec_init(j, 999999800);
@@ -239,6 +241,7 @@ TEST(timespecops, CmpFracLT) {
 
 			TEST_ASSERT_EQUAL(E, r);
 		}
+	}
 
 	return;
 }
@@ -248,7 +251,7 @@ TEST(timespecops, CmpFracLT) {
 //----------------------------------------------------------------------
 
 TEST(timespecops, AddFullNorm) {
-	for (int i = -4; i <= 4; ++i)
+	for (int i = -4; i <= 4; ++i) {
 		for (int j = -4; j <= 4; ++j) {
 			struct timespec a = timespec_init(i, 200);
 			struct timespec b = timespec_init(j, 400);
@@ -256,13 +259,14 @@ TEST(timespecops, AddFullNorm) {
 			struct timespec c = add_tspec(a, b);
 			TEST_ASSERT_EQUAL_timespec(E, c);
 		}
+	}
 
 	return;
 }
 
 
 TEST(timespecops, AddFullOflow1) {
-	for (int i = -4; i <= 4; ++i)
+	for (int i = -4; i <= 4; ++i) {
 		for (int j = -4; j <= 4; ++j) {
 			struct timespec a = timespec_init(i, 200);
 			struct timespec b = timespec_init(j, 999999900);
@@ -270,6 +274,7 @@ TEST(timespecops, AddFullOflow1) {
 			struct timespec c = add_tspec(a, b);
 			TEST_ASSERT_EQUAL_timespec(E, c);
 		}
+	}
 
 	return;
 }
@@ -303,7 +308,7 @@ TEST(timespecops, AddNsecOflow1) {
 //----------------------------------------------------------------------
 
 TEST(timespecops, SubFullNorm) {
-	for (int i = -4; i <= 4; ++i)
+	for (int i = -4; i <= 4; ++i) {
 		for (int j = -4; j <= 4; ++j) {
 			struct timespec a = timespec_init( i , 600);
 			struct timespec b = timespec_init( j , 400);
@@ -311,13 +316,14 @@ TEST(timespecops, SubFullNorm) {
 			struct timespec c = sub_tspec(a, b);
 			TEST_ASSERT_EQUAL_timespec(E, c);
 		}
+	}
 
 	return;
 }
 
 
 TEST(timespecops, SubFullOflow) {
-	for (int i = -4; i <= 4; ++i)
+	for (int i = -4; i <= 4; ++i) {
 		for (int j = -4; j <= 4; ++j) {
 			struct timespec a = timespec_init(i, 100);
 			struct timespec b = timespec_init(j, 999999900);
@@ -325,6 +331,7 @@ TEST(timespecops, SubFullOflow) {
 			struct timespec c = sub_tspec(a, b);
 			TEST_ASSERT_EQUAL_timespec(E, c);
 		}
+	}
 
 	return;
 }
@@ -403,7 +410,7 @@ TEST(timespecops, test_Helpers2) {
 	struct timespec limit = timespec_init(0, 2);
 	struct timespec x;
 
-	for (x.tv_sec = -2; x.tv_sec < 3; x.tv_sec++)
+	for (x.tv_sec = -2; x.tv_sec < 3; x.tv_sec++) {
 		for (x.tv_nsec = 1;
 		     x.tv_nsec < 1000000000;
 		     x.tv_nsec += 499999999) {
@@ -419,7 +426,7 @@ TEST(timespecops, test_Helpers2) {
 				}
 			}
 		}
-
+	}
 	return;
 }
 

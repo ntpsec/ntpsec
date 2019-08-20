@@ -65,8 +65,9 @@ dolfptoa(
 	 * determine the number of decimal places.
 	 */
 	dec = ndec;
-	if (dec < 0)
+	if (dec < 0) {
 		dec = 0;
+	}
 	if (msec) {
 		dec   += 3;
 		cpdec += 3;

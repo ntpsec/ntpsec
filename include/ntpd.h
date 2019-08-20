@@ -244,16 +244,16 @@ extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests 
  * Other statistics of possible interest
  */
 struct packet_counters {
-   uint64_t packets_dropped;	/* # packets dropped on reception */
-   uint64_t packets_ignored;	/* received on wild card interface */
-   uint64_t packets_received;	/* total number of packets received */
-   uint64_t packets_sent;		/* total number of packets sent */
-   uint64_t packets_notsent;	/* total number of packets which couldn't be sent */
-  /* There used to be a signal handler for received packets. */
-  /* It's not needed now that the kernel time stamps packets. */
-  uint64_t handler_calls;	/* number of calls to interrupt handler */
-  uint64_t handler_pkts;	/* number of pkts received by handler */
-  uptime_t io_timereset;	/* time counters were reset */
+	uint64_t packets_dropped;	/* # packets dropped on reception */
+	uint64_t packets_ignored;	/* received on wild card interface */
+	uint64_t packets_received;	/* total number of packets received */
+	uint64_t packets_sent;		/* total number of packets sent */
+	uint64_t packets_notsent;	/* total number of packets which couldn't be sent */
+	/* There used to be a signal handler for received packets. */
+	/* It's not needed now that the kernel time stamps packets. */
+	uint64_t handler_calls;	/* number of calls to interrupt handler */
+	uint64_t handler_pkts;	/* number of pkts received by handler */
+	uptime_t io_timereset;	/* time counters were reset */
 };
 extern volatile struct packet_counters pkt_count;
 
@@ -311,36 +311,36 @@ extern struct clock_state_machine clkstate;
 
 /* ntp_monitor.c */
 struct monitor_data {
-    uint8_t	mon_hash_bits;		/* log2 size of hash table */
-    /*
+	uint8_t	mon_hash_bits;		/* log2 size of hash table */
+	/*
 	 * Pointers to the hash table and the MRU list.  Memory for the hash
 	 * table is allocated only if monitoring is enabled.
 	 * Total size can easily exceed 32 bits (4 GB)
 	 * Total count is unlikely to exceed 32 bits in 2017
 	 *   but memories keep growing.
 	 */
-    mon_entry ** mon_hash;		/* MRU hash table */
-    mon_entry mon_mru_list;		/* mru listhead */
-    uint64_t	mru_entries;		/* mru list count */
-    /*
+	mon_entry ** mon_hash;		/* MRU hash table */
+	mon_entry mon_mru_list;		/* mru listhead */
+	uint64_t	mru_entries;		/* mru list count */
+	/*
 	 * Initialization state.  We may be monitoring, we may not.  If
 	 * we aren't, we may not even have allocated any memory yet.
 	 */
-    unsigned int	mon_enabled;		/* MON_OFF (0) or other MON_* */
+	unsigned int	mon_enabled;		/* MON_OFF (0) or other MON_* */
 
-    uint64_t	mru_peakentries;	/* highest mru_entries */
-    uint64_t	mru_initalloc;		/* entries to preallocate */
-    uint64_t	mru_incalloc;		/* allocation batch factor */
-    uint64_t	mru_mindepth;		/* preempt above this */
-    int	mru_maxage;		/* recycle if older than this */
-    int	mru_minage;		/* recycle if older than this & full */
-    uint64_t	mru_maxdepth;		/* MRU size hard limit */
-    uint64_t	mru_exists;		/* slot already exists */
-    uint64_t	mru_new;		/* allocated new slot */
-    uint64_t	mru_recycleold;		/* recycle: age > maxage */
-    uint64_t	mru_recyclefull;	/* recycle: full and age > minage */
-    uint64_t	mru_none;		/* couldn't allocate slot */
-    int	mon_age;		/* preemption limit */
+	uint64_t	mru_peakentries;	/* highest mru_entries */
+	uint64_t	mru_initalloc;		/* entries to preallocate */
+	uint64_t	mru_incalloc;		/* allocation batch factor */
+	uint64_t	mru_mindepth;		/* preempt above this */
+	int	mru_maxage;		/* recycle if older than this */
+	int	mru_minage;		/* recycle if older than this & full */
+	uint64_t	mru_maxdepth;		/* MRU size hard limit */
+	uint64_t	mru_exists;		/* slot already exists */
+	uint64_t	mru_new;		/* allocated new slot */
+	uint64_t	mru_recycleold;		/* recycle: age > maxage */
+	uint64_t	mru_recyclefull;	/* recycle: full and age > minage */
+	uint64_t	mru_none;		/* couldn't allocate slot */
+	int	mon_age;		/* preemption limit */
 };
 extern struct monitor_data mon_data;
 
@@ -359,15 +359,15 @@ extern int	peer_associations;	/* mobilized associations */
  */
 int	sys_maxclock;		/* maximum candidates */
 struct system_variables {
-    uint8_t	sys_leap;		/* system leap indicator */
-    uint8_t	sys_stratum;		/* system stratum */
-    int8_t	sys_precision;		/* local clock precision */
-    double	sys_rootdelay;		/* roundtrip delay to primary source */
-    double	sys_rootdisp;		/* dispersion to primary source */
-    double	sys_rootdist;		/* distance to primary source */
-    refid_t	sys_refid;		/* reference id */
-    l_fp	sys_reftime;		/* last update time */
-    struct peer *sys_peer;		/* current peer */
+	uint8_t	sys_leap;		/* system leap indicator */
+	uint8_t	sys_stratum;		/* system stratum */
+	int8_t	sys_precision;		/* local clock precision */
+	double	sys_rootdelay;		/* roundtrip delay to primary source */
+	double	sys_rootdisp;		/* dispersion to primary source */
+	double	sys_rootdist;		/* distance to primary source */
+	refid_t	sys_refid;		/* reference id */
+	l_fp	sys_reftime;		/* last update time */
+	struct peer *sys_peer;		/* current peer */
 };
 extern struct system_variables sys_vars;
 
@@ -381,27 +381,27 @@ extern int	sys_minsane;		/* minimum candidates */
  * Statistics counters
  */
 struct statistics_counters {
-    uptime_t	sys_stattime;		/* time since sysstats reset */
-    uint64_t	sys_received;		/* packets received */
-    uint64_t	sys_processed;		/* packets for this host */
-    uint64_t	sys_restricted;		/* restricted packets */
-    uint64_t	sys_newversion;		/* current version  */
-    uint64_t	sys_oldversion;		/* old version */
-    uint64_t	sys_badlength;		/* bad length or format */
-    uint64_t	sys_badauth;		/* bad authentication */
-    uint64_t	sys_declined;		/* declined */
-    uint64_t	sys_limitrejected;	/* rate exceeded */
-    uint64_t	sys_kodsent;		/* KoD sent */
-    uptime_t	use_stattime;		/* time since usestats reset */
+	uptime_t	sys_stattime;		/* time since sysstats reset */
+	uint64_t	sys_received;		/* packets received */
+	uint64_t	sys_processed;		/* packets for this host */
+	uint64_t	sys_restricted;		/* restricted packets */
+	uint64_t	sys_newversion;		/* current version  */
+	uint64_t	sys_oldversion;		/* old version */
+	uint64_t	sys_badlength;		/* bad length or format */
+	uint64_t	sys_badauth;		/* bad authentication */
+	uint64_t	sys_declined;		/* declined */
+	uint64_t	sys_limitrejected;	/* rate exceeded */
+	uint64_t	sys_kodsent;		/* KoD sent */
+	uptime_t	use_stattime;		/* time since usestats reset */
 };
 extern volatile struct statistics_counters stat_count;
 
 /* Signalling: Set by signal handlers */
 struct signals_detected {
-    bool sawALRM;
-    bool sawHUP;
-    bool sawDNS;
-    bool sawQuit;                   /* SIGQUIT, SIGINT, SIGTERM */
+	bool sawALRM;
+	bool sawHUP;
+	bool sawDNS;
+	bool sawQuit;                   /* SIGQUIT, SIGINT, SIGTERM */
 };
 extern volatile struct signals_detected sig_flags;
 

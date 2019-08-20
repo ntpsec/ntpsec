@@ -79,9 +79,9 @@ try_proto(int domain) {
 */
 			result = ISC_R_NOTFOUND;
 		} else {
-			if (len == sizeof(struct sockaddr_in6))
+			if (len == sizeof(struct sockaddr_in6)) {
 				result = ISC_R_SUCCESS;
-			else {
+			} else {
 /*				isc_log_write(isc_lctx,
 					      ISC_LOGCATEGORY_GENERAL,
 					      ISC_LOGMODULE_SOCKET,
@@ -116,13 +116,13 @@ initialize(void) {
 
 bool
 isc_net_probeipv4_bool(void) {
-    initialize();
-    return (ISC_R_SUCCESS == ipv4_result);
+	initialize();
+	return (ISC_R_SUCCESS == ipv4_result);
 }
 
 bool
 isc_net_probeipv6_bool(void) {
-  return (ISC_R_SUCCESS == isc_net_probeipv6());
+	return (ISC_R_SUCCESS == isc_net_probeipv6());
 }
 
 isc_result_t

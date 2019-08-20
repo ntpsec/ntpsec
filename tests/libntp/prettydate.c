@@ -20,11 +20,11 @@ TEST_TEAR_DOWN(prettydate) {}
 static const uint32_t HALF = 2147483648UL;
 
 TEST(prettydate, Rfc3339Date1) {
-    TEST_ASSERT_EQUAL_STRING("2036-02-07T06:28:16.000Z", rfc3339date(0));
+	TEST_ASSERT_EQUAL_STRING("2036-02-07T06:28:16.000Z", rfc3339date(0));
 }
 
 TEST(prettydate, Rfc3339Time1) {
-    TEST_ASSERT_EQUAL_STRING("2036-02-07T06:28:16.000Z", rfc3339date(0));
+	TEST_ASSERT_EQUAL_STRING("2036-02-07T06:28:16.000Z", rfc3339date(0));
 }
 
 TEST(prettydate, ConstantDate) {

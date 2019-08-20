@@ -41,10 +41,10 @@ extern	int	ymd2yd		(int, int, int);
 
 /* getopt.c */
 struct option {
-    const char* name;
-    int has_arg;
-    int* flag;
-    int val;
+	const char* name;
+	int has_arg;
+	int* flag;
+	int val;
 };
 
 int ntp_getopt(int argc, char *const argv[], const char *optstring);

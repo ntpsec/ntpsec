@@ -385,17 +385,17 @@ res_sorts_before6(
 	int cmp;
 
 	cmp = ADDR6_CMP(&r1->u.v6.addr, &r2->u.v6.addr);
-	if (cmp > 0)		/* r1->addr > r2->addr */
+	if (cmp > 0) {		/* r1->addr > r2->addr */
 		r1_before_r2 = 1;
-	else if (cmp < 0)	/* r2->addr > r1->addr */
+	} else if (cmp < 0) {	/* r2->addr > r1->addr */
 		r1_before_r2 = 0;
-	else {
+	} else {
 		cmp = ADDR6_CMP(&r1->u.v6.mask, &r2->u.v6.mask);
-		if (cmp > 0)		/* r1->mask > r2->mask*/
+		if (cmp > 0) {		/* r1->mask > r2->mask*/
 			r1_before_r2 = 1;
-		else if (cmp < 0)	/* r2->mask > r1->mask */
+		} else if (cmp < 0) {	/* r2->mask > r1->mask */
 			r1_before_r2 = 0;
-		else if (r1->mflags > r2->mflags)
+		} else if (r1->mflags > r2->mflags)
 			r1_before_r2 = 1;
 		else
 			r1_before_r2 = 0;
@@ -653,8 +653,9 @@ restrict_source(
 		found_specific = 0;
 		free_res(res, IS_IPV6(addr));
 	}
-	if (found_specific)
+	if (found_specific) {
 		return;
+	}
 
 	hack_restrict(RESTRICT_FLAGS, addr, &onesmask,
 		      restrict_source_mflags, restrict_source_flags,

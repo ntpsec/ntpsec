@@ -147,11 +147,11 @@ refclock_name(
  * point.
  */
 void
-init_refclock(void)
-{
+init_refclock(void) {
 	for (int i = 0; i < (int)num_refclock_conf; i++)
-		if (refclock_conf[i]->clock_init)
+	    if (refclock_conf[i]->clock_init) {
 			(refclock_conf[i]->clock_init)();
+	    }
 }
 
 
@@ -337,10 +337,12 @@ refclock_cmpl_fp(
 	const double *dp1 = (const double *)p1;
 	const double *dp2 = (const double *)p2;
 
-	if (*dp1 < *dp2)
+	if (*dp1 < *dp2) {
 		return COMPARE_LESSTHAN;
-	if (*dp1 > *dp2)
+	}
+	if (*dp1 > *dp2) {
 		return COMPARE_GREATERTHAN;
+	}
 	return COMPARE_EQUAL;
 }
 
@@ -405,8 +407,9 @@ refclock_process_f(
 	 * it finds only a 2-digit year in the timecode.
 	 */
 	if (!clocktime(pp->year, pp->day, pp->hour, pp->minute, pp->second,
-		       time(NULL), lfpuint(pp->lastrec), &pp->yearstart, &sec))
+		       time(NULL), lfpuint(pp->lastrec), &pp->yearstart, &sec)) {
 		return false;
+	}
 
 	setlfpuint(offset, sec);
 	setlfpfrac(offset, 0);
@@ -519,8 +522,9 @@ refclock_receive(
 	 */
 	pp = peer->procptr;
 	peer->leap = pp->leap;
-	if (peer->leap == LEAP_NOTINSYNC)
+	if (peer->leap == LEAP_NOTINSYNC) {
 		return;
+	}
 
 	peer->received++;
 	peer->timereceived = current_time;
@@ -625,8 +629,9 @@ refclock_gtraw(
 	if (bmax <= 0)
 		return (0);
 	bmax -= 1; /* leave room for trailing NUL */
-	if (bmax > rbufp->recv_length)
+	if (bmax > rbufp->recv_length) {
 		bmax = rbufp->recv_length;
+	}
 	memcpy(lineptr, rbufp->recv_buffer, bmax);
 	lineptr[bmax] = '\0';
 
@@ -836,11 +841,13 @@ refclock_control(
 	 */
 	peer = findexistingpeer(srcadr, NULL, NULL, -1);
 
-	if (NULL == peer)
+	if (NULL == peer) {
 		return;
+	}
 
-	if (!IS_PEER_REFCLOCK(peer))
+	if (!IS_PEER_REFCLOCK(peer)) {
 		return;
+	}
 
 	pp = peer->procptr;
 	unit = peer->procptr->refclkunit;
@@ -883,20 +890,26 @@ refclock_control(
 		out->fudgeval2 = pp->refid;
 		out->haveflags = CLK_HAVEVAL1 | CLK_HAVEVAL2;
 		out->fudgetime1 = pp->fudgetime1;
-		if (!D_ISZERO_NS(out->fudgetime1))
+		if (!D_ISZERO_NS(out->fudgetime1)) {
 			out->haveflags |= CLK_HAVETIME1;
+		}
 		out->fudgetime2 = pp->fudgetime2;
-		if (!D_ISZERO_NS(out->fudgetime2))
+		if (!D_ISZERO_NS(out->fudgetime2)) {
 			out->haveflags |= CLK_HAVETIME2;
+		}
 		out->flags = (uint8_t) pp->sloppyclockflag;
-		if (CLK_FLAG1 & out->flags)
+		if (CLK_FLAG1 & out->flags) {
 			out->haveflags |= CLK_HAVEFLAG1;
-		if (CLK_FLAG2 & out->flags)
+		}
+		if (CLK_FLAG2 & out->flags) {
 			out->haveflags |= CLK_HAVEFLAG2;
-		if (CLK_FLAG3 & out->flags)
+		}
+		if (CLK_FLAG3 & out->flags) {
 			out->haveflags |= CLK_HAVEFLAG3;
-		if (CLK_FLAG4 & out->flags)
+		}
+		if (CLK_FLAG4 & out->flags) {
 			out->haveflags |= CLK_HAVEFLAG4;
+		}
 
 		out->timereset = current_time - pp->timestarted;
 		out->polls = pp->polls;
@@ -1041,20 +1054,20 @@ refclock_catcher(
 	if (ap->pps_params.mode & PPS_CAPTUREASSERT) {
 		ap->ts = pps_info.assert_timestamp;
 		ap->sequence = pps_info.assert_sequence;
-	}
-	else if (ap->pps_params.mode & PPS_CAPTURECLEAR) {
+	} else if (ap->pps_params.mode & PPS_CAPTURECLEAR) {
 		ap->ts = pps_info.clear_timestamp;
 		ap->sequence = pps_info.clear_sequence;
-	}
-	else
+	} else {
 		return PPS_NREADY;
+	}
 
 	/* Check for duplicates.
 	 * Sequence number might not be implemented.
 	 * saved (above) for debugging.
 	 */
-	if (0 == memcmp(&timeout, &ap->ts, sizeof(timeout)))
+	if (0 == memcmp(&timeout, &ap->ts, sizeof(timeout))) {
 		return PPS_NREADY;
+	}
 
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.
@@ -1062,8 +1075,9 @@ refclock_catcher(
 	setlfpuint(pp->lastrec, (uint32_t)ap->ts.tv_sec + JAN_1970);
 	dtemp = ap->ts.tv_nsec * S_PER_NS;
 	setlfpfrac(pp->lastrec, (uint32_t)(dtemp * FRAC));
-	if (dtemp > .5)
+	if (dtemp > .5) {
 		dtemp -= 1.;
+	}
 	SAMPLE(-dtemp + pp->fudgetime1);
 	DPRINT(2, ("refclock_pps: %u %f %f\n", current_time,
 		   dtemp, pp->fudgetime1));

@@ -152,8 +152,7 @@ init_util(void)
  * There is no security problem with reading the drift file since
  * you can get the data via ntp_adjtime(2) or ntptime(8).
  */
-static void drift_write(char *driftfile, double drift)
-{
+static void drift_write(char *driftfile, double drift) {
 	FILE *new;
 	char tempfile[PATH_MAX];
 	strlcpy(tempfile, driftfile, sizeof(tempfile));
@@ -176,8 +175,7 @@ static void drift_write(char *driftfile, double drift)
  * write_stats - hourly: sysstats, usestats, and maybe drift
  */
 void
-write_stats(void)
-{
+write_stats(void) {
 	record_sys_stats();
 	record_use_stats();
 	if (stats_drift_file != 0) {
@@ -245,8 +243,9 @@ stats_config(
 	 * Open and read frequency file.
 	 */
 	case STATS_FREQ_FILE:
-		if (!value || (len = strlen(value)) == 0)
+		if (!value || (len = strlen(value)) == 0) {
 			break;
+		}
 
 		stats_drift_file = erealloc(stats_drift_file, len + 1);
 		memcpy(stats_drift_file, value, len+1);
@@ -314,8 +313,9 @@ stats_config(
 	 * must be valid or the file is rejected.
 	 */
 	case STATS_LEAP_FILE:
-		if (!value || (len = strlen(value)) == 0)
+		if (!value || (len = strlen(value)) == 0) {
 			break;
+		}
 
 		leapfile_name = erealloc(leapfile_name, len + 1);
 		memcpy(leapfile_name, value, len + 1);
@@ -354,8 +354,7 @@ stats_config(
  */
 
 static char *
-timespec_to_MJDtime(const struct timespec *ts)
-{
+timespec_to_MJDtime(const struct timespec *ts) {
 	char *buf;
 	unsigned long	day, sec, msec;
 
@@ -371,8 +370,7 @@ timespec_to_MJDtime(const struct timespec *ts)
 
 
 static const char *
-peerlabel(const struct peer *peer)
-{
+peerlabel(const struct peer *peer) {
 #if defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)
 	if (peer->procptr != NULL)
 		return refclock_name(peer);
@@ -700,8 +698,9 @@ check_leap_file(
 	)
 {
 	/* just do nothing if there is no leap file */
-	if ( ! (leapfile_name && *leapfile_name))
+	if ( ! (leapfile_name && *leapfile_name)) {
 		return;
+	}
 
 	/* try to load leapfile, force it if no leapfile loaded yet */
 	if (leapsec_load_file(
@@ -759,8 +758,9 @@ getauthkeys(
 	size_t len;
 
 	len = strlen(keyfile);
-	if (!len)
+	if (!len) {
 		return;
+	}
 
 	key_file_name = erealloc(key_file_name, len + 1);
 	memcpy(key_file_name, keyfile, len + 1);
@@ -773,8 +773,7 @@ getauthkeys(
  * to do any one-time processing necessitated by the step.
  */
 void
-ntpd_time_stepped(void)
-{
+ntpd_time_stepped(void) {
 	unsigned int saved_mon_enabled;
 
 	/*

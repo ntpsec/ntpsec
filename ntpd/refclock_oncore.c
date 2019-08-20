@@ -681,9 +681,9 @@ oncore_start(
 	   It seems simplest to let an external program create the appropriate
 	   /dev/pps<n> file, and only check (carefully) for its existence here
 	 */
-	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
+	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {	/* same device here */
 		fd2 = fd1;
-	else
+	} else
 	{	/* different devices here */
 		/* coverity[toctou] */
 		if ((fd2=open(device2, O_RDWR, 0777)) < 0) {
@@ -778,11 +778,13 @@ oncore_shutdown(
 
 		close(instance->ttyfd);
 
-		if ((instance->ppsfd != -1) && (instance->ppsfd != instance->ttyfd))
+		if ((instance->ppsfd != -1) && (instance->ppsfd != instance->ttyfd)) {
 			close(instance->ppsfd);
+		}
 
-		if (instance->shmemfd)
+		if (instance->shmemfd) {
 			close(instance->shmemfd);
+		}
 
 		free(instance);
 	}
@@ -1212,15 +1214,18 @@ oncore_read_config(
 		cp = *cpp;
 		snprintf(device, sizeof(device), "%s/ntp.oncore.%d",
 			 cp, instance->unit);  /* try "ntp.oncore.0 */
-		if ((fd=fopen(device, "r")))
+		if ((fd=fopen(device, "r"))) {
 			break;
+		}
 		snprintf(device, sizeof(device), "%s/ntp.oncore%d",
 			 cp, instance->unit);  /* try "ntp.oncore0" */
-		if ((fd=fopen(device, "r")))
+		if ((fd=fopen(device, "r"))) {
 			break;
+		}
 		snprintf(device, sizeof(device), "%s/ntp.oncore", cp);
-		if ((fd=fopen(device, "r")))   /* last try "ntp.oncore" */
+		if ((fd=fopen(device, "r"))) {   /* last try "ntp.oncore" */
 			break;
+		}
 	}
 
 	if (!fd) {	/* no inputfile, default to the works ... */
@@ -1234,36 +1239,42 @@ oncore_read_config(
 		char *cpw;
 
 		/* Remove comments */
-		if ((cpw = strchr(line, '#')))
+		if ((cpw = strchr(line, '#'))) {
 			*cpw = '\0';
+		}
 
 		/* Remove trailing space */
 		for (i = (int)strlen(line);
 		     i > 0 && isascii((unsigned char)line[i - 1]) && isspace((unsigned char)line[i - 1]);
-			)
+			) {
 			line[--i] = '\0';
+		}
 
 		/* Remove leading space */
-		for (cc = line; *cc && isascii((unsigned char)*cc) && isspace((unsigned char)*cc); cc++)
+		for (cc = line; *cc && isascii((unsigned char)*cc) && isspace((unsigned char)*cc); cc++) {
 			continue;
+		}
 
 		/* Stop if nothing left */
-		if (!*cc)
+		if (!*cc) {
 			continue;
+		}
 
 		/* Uppercase the command and find the arg */
 		for (ca = cc; *ca; ca++) {
 			if (isascii((unsigned char)*ca)) {
 				if (islower((unsigned char)*ca)) {
 					*ca = toupper((unsigned char)*ca);
-				} else if (isspace((unsigned char)*ca) || (*ca == '='))
+				} else if (isspace((unsigned char)*ca) || (*ca == '=')) {
 					break;
+				}
 			}
 		}
 
 		/* Remove space (and possible =) leading the arg */
-		for (; *ca && isascii((unsigned char)*ca) && (isspace((unsigned char)*ca) || (*ca == '=')); ca++)
+		for (; *ca && isascii((unsigned char)*ca) && (isspace((unsigned char)*ca) || (*ca == '=')); ca++) {
 			continue;
+		}
 
 		if (!strncmp(cc, "STATUS", (size_t) 6) || !strncmp(cc, "SHMEM", (size_t) 5)) {
 			instance->shmem_fname = estrdup(ca);
@@ -1271,14 +1282,17 @@ oncore_read_config(
 		}
 
 		/* Uppercase argument as well */
-		for (cpw = ca; *cpw; cpw++)
-			if (isascii((unsigned char)*cpw) && islower((unsigned char)*cpw))
+		for (cpw = ca; *cpw; cpw++) {
+			if (isascii((unsigned char)*cpw) && islower((unsigned char)*cpw)) {
 				*cpw = toupper((unsigned char)*cpw);
+			}
+		}
 
 		if (!strncmp(cc, "LAT", (size_t) 3)) {
 			f1 = f2 = f3 = 0;
-			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3))
+			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3)) {
                                 continue;
+			}
 			sign = 1;
 			if (f1 < 0) {
 				f1 = -f1;
@@ -1288,8 +1302,9 @@ oncore_read_config(
 			lat_flg++;
 		} else if (!strncmp(cc, "LON", (size_t) 3)) {
 			f1 = f2 = f3 = 0;
-			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3))
+			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3)) {
                                 continue;
+			}
 			sign = 1;
 			if (f1 < 0) {
 				f1 = -f1;
@@ -1300,59 +1315,71 @@ oncore_read_config(
 		} else if (!strncmp(cc, "HT", (size_t) 2)) {
 			f1 = 0;
 			units[0] = '\0';
-			if ( 2 != sscanf(ca, "%lf %1s", &f1, units))
+			if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
                                 continue;
-			if (units[0] == 'F')
+			}
+			if (units[0] == 'F') {
 				f1 = 0.3048 * f1;
+			}
 			instance->ss_ht = 100 * f1;    /* cm */
 			ht_flg++;
 		} else if (!strncmp(cc, "DELAY", (size_t) 5)) {
 			f1 = 0;
 			units[0] = '\0';
-			if ( 2 != sscanf(ca, "%lf %1s", &f1, units))
+			if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
                                 continue;
-			if (units[0] == 'N')
+			}
+			if (units[0] == 'N') {
 				;
-			else if (units[0] == 'U')
+			} else if (units[0] == 'U') {
 				f1 = 1000 * f1;
-			else if (units[0] == 'M')
+			} else if (units[0] == 'M') {
 				f1 = 1000000 * f1;
-			else
+			} else {
 				f1 = 1000000000 * f1;
-			if (f1 < 0 || f1 > 1.e9)
+			}
+			if (f1 < 0 || f1 > 1.e9) {
 				f1 = 0;
-			if (f1 < 0 || f1 > 999999)
+			}
+			if (f1 < 0 || f1 > 999999) {
 				oncore_log_f(instance, LOG_WARNING,
 					     "PPS Cable delay of %fns out of Range, ignored",
 					     f1);
-			else
+			} else {
 				instance->delay = f1;		/* delay in ns */
+			}
 		} else if (!strncmp(cc, "OFFSET", (size_t) 6)) {
 			f1 = 0;
 			units[0] = '\0';
-			if ( 2 != sscanf(ca, "%lf %1s", &f1, units))
+			if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
                                 continue;
-			if (units[0] == 'N')
+			}
+			if (units[0] == 'N') {
 				;
-			else if (units[0] == 'U')
+			} else if (units[0] == 'U') {
 				f1 = 1000 * f1;
-			else if (units[0] == 'M')
+			} else if (units[0] == 'M') {
 				f1 = 1000000 * f1;
-			else
+			} else {
 				f1 = 1000000000 * f1;
-			if (f1 < 0 || f1 > 1.e9)
+			}
+			if (f1 < 0 || f1 > 1.e9) {
 				f1 = 0;
-			if (f1 < 0 || f1 > 999999999.)
+			}
+			if (f1 < 0 || f1 > 999999999.) {
 				oncore_log_f(instance, LOG_WARNING,
 					     "PPS Offset of %fns out of Range, ignored",
 					     f1);
-			else
+			} else {
 				instance->offset = f1;		/* offset in ns */
+			}
 		} else if (!strncmp(cc, "MODE", (size_t) 4)) {
-			if ( 1 != sscanf(ca, "%d", &mode))
+			if ( 1 != sscanf(ca, "%d", &mode)) {
                                 continue;
-			if (mode < 0 || mode > 4)
+			}
+			if (mode < 0 || mode > 4) {
 				mode = 4;
+			}
 		} else if (!strncmp(cc, "ASSERT", (size_t) 6)) {
 			instance->assert = 1;
 		} else if (!strncmp(cc, "CLEAR", (size_t) 5)) {
@@ -1364,8 +1391,9 @@ oncore_read_config(
 		} else if (!strncmp(cc, "POSN3D", (size_t) 6)) {
 			instance->shmem_Posn = 3;
 		} else if (!strncmp(cc, "CHAN", (size_t) 4)) {
-			if ( 1 != sscanf(ca, "%d", &i))
+			if ( 1 != sscanf(ca, "%d", &i)) {
                                 continue;
+			}
 			if ((i == 6) || (i == 8) || (i == 12))
 				instance->chan_in = i;
 		} else if (!strncmp(cc, "TRAIM", (size_t) 5)) {
@@ -1373,8 +1401,9 @@ oncore_read_config(
 			if (!strcmp(ca, "NO") || !strcmp(ca, "OFF"))    /* Yes/No, On/Off */
 				instance->traim_in = 0;
 		} else if (!strncmp(cc, "MASK", (size_t) 4)) {
-			if ( 1 != sscanf(ca, "%d", &mask) )
+			if ( 1 != sscanf(ca, "%d", &mask) ) {
                                 continue;
+			}
 			if (mask > -1 && mask < 90)
 				instance->Ag = mask;			/* Satellite mask angle */
 		} else if (!strncmp(cc,"PPSCONTROL",10)) {              /* pps control M12 only */
@@ -1483,9 +1512,10 @@ oncore_consume(
 	while (rcvptr >= 7) {
 		if (rcvbuf[0] != '@' || rcvbuf[1] != '@') {
 			/* We're not in sync, lets try to get there */
-			for (i=1; i < rcvptr-1; i++)
+			for (i=1; i < rcvptr-1; i++) {
 				if (rcvbuf[i] == '@' && rcvbuf[i+1] == '@')
 					break;
+			}
 #ifdef ONCORE_VERBOSE_CONSUME
 			if (debug > 4) /* SPECIAL DEBUG */
 				oncore_log_f(instance, LOG_DEBUG,
@@ -1500,9 +1530,10 @@ oncore_consume(
 
 		/* Ok, we have a header now */
 		l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) -1;
-		for(m = 0; m < l; m++)
+		for(m = 0; m < l; m++) {
 			if (!strncmp(oncore_messages[m].flag, (char *)(rcvbuf+2), (size_t) 2))
 				break;
+		}
 		if (m == l) {
 #ifdef ONCORE_VERBOSE_CONSUME
 			if (debug > 4) /* SPECIAL DEBUG */
@@ -1525,8 +1556,9 @@ oncore_consume(
 #endif
 		/* Got the entire message ? */
 
-		if (rcvptr < l)
+		if (rcvptr < l) {
 			return;
+		}
 
 		/* are we at the end of message? should be <Cksum><CR><LF> */
 
@@ -1962,8 +1994,9 @@ oncore_msg_Ag(
 	UNUSED_ARG(len);
 
 	cp = "set to";
-	if (instance->o_state == ONCORE_RUN)
+	if (instance->o_state == ONCORE_RUN) {
 		cp = "is";
+	}
 
 	instance->Ag = buf[4];
 	oncore_log_f(instance, LOG_INFO,
@@ -2135,8 +2168,9 @@ oncore_msg_BaEaHa(
 		return;
 	}
 
-	if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN)
+	if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN) {
 		return;
+	}
 
 	/* PAUSE 5sec - make sure results are stable, before using position */
 
@@ -2165,9 +2199,10 @@ oncore_msg_BaEaHa(
 	/* If we are in Almanac mode, waiting for Almanac, we can't do anything till we have it */
 	/* When we have an almanac, we will start the Bn/En/@@Hn messages */
 
-	if (instance->o_state == ONCORE_ALMANAC)
+	if (instance->o_state == ONCORE_ALMANAC) {
 		if (oncore_wait_almanac(instance))
 			return;
+}
 
 	/* do some things once when we get this far in BaEaHa */
 
@@ -2313,12 +2348,13 @@ oncore_msg_BaEaHa(
 		int bits;
 
 		bits = (instance->BEHa[129]>>5) & 0x7;	/* actually Ha */
-		if (bits == 0x4)
+		if (bits == 0x4) {
 			instance->mode = MODE_0D;
-		else if (bits == 0x6)
+		} else if (bits == 0x6) {
 			instance->mode = MODE_2D;
-		else if (bits == 0x7)
+		} else if (bits == 0x7) {
 			instance->mode = MODE_3D;
+		}
 	}
 
 	/* copy the record to the (extra) location in SHMEM */
@@ -2386,8 +2422,9 @@ oncore_msg_BaEaHa(
 	 * Are we doing a Hardware or Software Site Survey?
 	 */
 
-	if (instance->site_survey == ONCORE_SS_HW || instance->site_survey == ONCORE_SS_SW)
+	if (instance->site_survey == ONCORE_SS_HW || instance->site_survey == ONCORE_SS_SW) {
 		oncore_ss(instance);
+	}
 
 	/* see if we ever saw a response from the @@Ayx above */
 
@@ -2541,8 +2578,9 @@ oncore_msg_Bl(
 		/* have everything I need, doit */
 
 		i = (instance->Bl.WN_lsf - instance->Bl.WN);
-		if (i < 0)
+		if (i < 0) {
 			i += 1024;
+		}
 		day_now = instance->Bl.DN;
 		day_lsf = 7*i + instance->Bl.DN_lsf;
 
@@ -2625,8 +2663,9 @@ oncore_msg_BnEnHn(
 {
 	long	dt1, dt2;
 
-	if (instance->o_state != ONCORE_RUN)
+	if (instance->o_state != ONCORE_RUN) {
 		return;
+	}
 
 	if (instance->traim_delay) {	 /* flag that @@Bn/@@En/Hn returned */
 			instance->traim_ck = 1;
@@ -2918,12 +2957,14 @@ oncore_msg_Cj_id(
 	/* from model number decide which Oncore this is,
 		and then the number of channels */
 
-	for (cp= (char *) &instance->Cj[160]; *cp == ' '; cp++)   /* start right after 'Model #' */
+	for (cp= (char *) &instance->Cj[160]; *cp == ' '; cp++) {   /* start right after 'Model #' */
 		;
+	}
 	cp1 = cp;
 	cp2 = Model;
-	for (; !isspace((unsigned char)*cp) && cp-cp1 < 20; cp++, cp2++)
+	for (; !isspace((unsigned char)*cp) && cp-cp1 < 20; cp++, cp2++) {
 		*cp2 = *cp;
+	}
 	*cp2 = '\0';
 
 	cp = 0;
@@ -3304,8 +3345,9 @@ oncore_antenna_report(
 {
 	const char *cp;
 
-	if (instance->ant_state == new_state)
+	if (instance->ant_state == new_state) {
 		return;
+	}
 
 	switch (new_state) {
 	case ONCORE_ANTENNA_OK: cp = "GPS antenna: OK";                   break;
@@ -3978,16 +4020,18 @@ oncore_ss(
 		if (instance->rsm.bad_fix)	/* Not if poor geometry or less than 3 sats */
 			return;
 
-		if (instance->mode != MODE_3D)	/* Use only 3D Fixes */
+		if (instance->mode != MODE_3D) {	/* Use only 3D Fixes */
 			return;
+		}
 
 		instance->ss_lat  += buf_w32(&instance->BEHa[15]);
 		instance->ss_long += buf_w32(&instance->BEHa[19]);
 		instance->ss_ht   += buf_w32(&instance->BEHa[23]);  /* GPS ellipsoid */
 		instance->ss_count++;
 
-		if (instance->ss_count != POS_HOLD_AVERAGE)
+		if (instance->ss_count != POS_HOLD_AVERAGE) {
 			return;
+		}
 
 		instance->ss_lat  /= POS_HOLD_AVERAGE;
 		instance->ss_long /= POS_HOLD_AVERAGE;

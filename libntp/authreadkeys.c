@@ -37,28 +37,32 @@ nexttok(
 	/*
 	 * Space past white space
 	 */
-	while (*cp == ' ' || *cp == '\t')
+	while (*cp == ' ' || *cp == '\t') {
 		cp++;
+}
 
 	/*
 	 * Save this and space to end of token
 	 */
 	starttok = cp;
 	while (*cp != '\0' && *cp != '\n' && *cp != ' '
-	       && *cp != '\t' && *cp != '#')
+	       && *cp != '\t' && *cp != '#') {
 		cp++;
+	}
 
 	/*
 	 * If token length is zero return an error, else set end of
 	 * token to zero and return start.
 	 */
-	if (starttok == cp)
+	if (starttok == cp) {
 		return NULL;
+	}
 
-	if (*cp == ' ' || *cp == '\t')
+	if (*cp == ' ' || *cp == '\t') {
 		*cp++ = '\0';
-	else
+	} else {
 		*cp = '\0';
+	}
 
 	*str = cp;
 	return starttok;
@@ -67,26 +71,30 @@ nexttok(
 static char*
 try_cmac(const char *upcased, char* namebuf) {
 	strlcpy(namebuf, upcased, NAMEBUFSIZE);
-	if ((strcmp(namebuf, "AES") == 0) || (strcmp(namebuf, "AES128CMAC") == 0))
+	if ((strcmp(namebuf, "AES") == 0) || (strcmp(namebuf, "AES128CMAC") == 0)) {
 		strlcpy(namebuf, "AES-128", NAMEBUFSIZE);
+	}
 	strlcat(namebuf, "-CBC", NAMEBUFSIZE);
 	namebuf[NAMEBUFSIZE-1] = '\0';
 	if (0) msyslog(LOG_INFO, "DEBUG try_cmac: %s=>%s", upcased, namebuf);
-	if (EVP_get_cipherbyname(namebuf) == NULL)
+	if (EVP_get_cipherbyname(namebuf) == NULL) {
 		return NULL;
+	}
 	return namebuf;
 }
 
 static char*
 try_digest(char *upcased, char *namebuf) {
 	strlcpy(namebuf, upcased, NAMEBUFSIZE);
-	if (EVP_get_digestbyname(namebuf) != NULL)
+	if (EVP_get_digestbyname(namebuf) != NULL) {
 	  return namebuf;
+	}
 	if ('M' == upcased[0]) {
 		/* hack for backward compatibility */
 		strlcpy(namebuf, "MD5", NAMEBUFSIZE);
-		if (EVP_get_digestbyname(namebuf) != NULL)
+		if (EVP_get_digestbyname(namebuf) != NULL) {
 	 		return namebuf;
+		}
 	}
 	return NULL;
 }
@@ -95,50 +103,50 @@ static void
 check_digest_mac_length(
 	keyid_t keyno,
 	char *name) {
-    unsigned char digest[EVP_MAX_MD_SIZE];
-    unsigned int length = 0;
-    EVP_MD_CTX *ctx;
-    const EVP_MD *md;
+	unsigned char digest[EVP_MAX_MD_SIZE];
+	unsigned int length = 0;
+	EVP_MD_CTX *ctx;
+	const EVP_MD *md;
 
-    md = EVP_get_digestbyname(name);
-    ctx = EVP_MD_CTX_create();
-    EVP_DigestInit_ex(ctx, md, NULL);
-    EVP_DigestFinal_ex(ctx, digest, &length);
-    EVP_MD_CTX_destroy(ctx);
+	md = EVP_get_digestbyname(name);
+	ctx = EVP_MD_CTX_create();
+	EVP_DigestInit_ex(ctx, md, NULL);
+	EVP_DigestFinal_ex(ctx, digest, &length);
+	EVP_MD_CTX_destroy(ctx);
 
-    if (MAX_BARE_MAC_LENGTH < length) {
-	msyslog(LOG_ERR, "AUTH: authreadkeys: digest for key %u, %s will be truncated.", keyno, name);
-    }
+	if (MAX_BARE_MAC_LENGTH < length) {
+		msyslog(LOG_ERR, "AUTH: authreadkeys: digest for key %u, %s will be truncated.", keyno, name);
+	}
 }
 
 static void
 check_cmac_mac_length(
 	keyid_t keyno,
 	char *name) {
-    unsigned char mac[CMAC_MAX_MAC_LENGTH+1024];
-    size_t length = 0;
-    char key[EVP_MAX_KEY_LENGTH];  /* garbage is OK */
-    CMAC_CTX *ctx;
-    const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
+	unsigned char mac[CMAC_MAX_MAC_LENGTH+1024];
+	size_t length = 0;
+	char key[EVP_MAX_KEY_LENGTH];  /* garbage is OK */
+	CMAC_CTX *ctx;
+	const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
 
-    ctx = CMAC_CTX_new();
-    CMAC_Init(ctx, key, EVP_CIPHER_key_length(cmac_cipher), cmac_cipher, NULL);
-    CMAC_Final(ctx, mac, &length);
-    CMAC_CTX_free(ctx);
+	ctx = CMAC_CTX_new();
+	CMAC_Init(ctx, key, EVP_CIPHER_key_length(cmac_cipher), cmac_cipher, NULL);
+	CMAC_Final(ctx, mac, &length);
+	CMAC_CTX_free(ctx);
 
-    /* CMAC_MAX_MAC_LENGTH isn't in API
-     * Check here to avoid buffer overrun in cmac_decrypt and cmac_encrypt
-     */
-    if (CMAC_MAX_MAC_LENGTH < length) {
-	msyslog(LOG_ERR,
-		"AUTH: authreadkeys: CMAC for key %u, %s is too big: %lu",
-		keyno, name, (long unsigned int)length);
-	exit(1);
-    }
+	/* CMAC_MAX_MAC_LENGTH isn't in API
+	 * Check here to avoid buffer overrun in cmac_decrypt and cmac_encrypt
+	 */
+	if (CMAC_MAX_MAC_LENGTH < length) {
+		msyslog(LOG_ERR,
+			"AUTH: authreadkeys: CMAC for key %u, %s is too big: %lu",
+			keyno, name, (long unsigned int)length);
+		exit(1);
+	}
 
-    if (MAX_BARE_MAC_LENGTH < length) {
-	msyslog(LOG_ERR, "AUTH: authreadkeys: CMAC for key %u, %s will be truncated.", keyno, name);
-    }
+	if (MAX_BARE_MAC_LENGTH < length) {
+		msyslog(LOG_ERR, "AUTH: authreadkeys: CMAC for key %u, %s will be truncated.", keyno, name);
+	}
 }
 
 /* check_mac_length - Check for CMAC/digest too long.
@@ -150,16 +158,16 @@ check_mac_length(
 	AUTH_Type type,
 	char * name,
 	char *upcased) {
-    switch (type) {
-	case AUTH_CMAC:
-	    check_cmac_mac_length(keyno, name);
-	    break;
-    	case AUTH_DIGEST:
-	    check_digest_mac_length(keyno, name);
-	    break;
-    	default:
-	    msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u, %s", keyno, upcased);
-    }
+	switch (type) {
+	    case AUTH_CMAC:
+		check_cmac_mac_length(keyno, name);
+		break;
+	    case AUTH_DIGEST:
+		check_digest_mac_length(keyno, name);
+		break;
+	    default:
+		msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u, %s", keyno, upcased);
+	}
 }
 
 /* check_cmac_key_length: check and fix CMAC key length
@@ -174,21 +182,22 @@ check_cmac_key_length(
 	char *name,
 	char *key,
 	int keylength) {
-    const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
-    int len = EVP_CIPHER_key_length(cmac_cipher);
+	const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
+	int len = EVP_CIPHER_key_length(cmac_cipher);
 
-    if (len < keylength) {
-	    msyslog(LOG_ERR, "AUTH: CMAC key %u will be truncated %d=>%d",
-		keyno, keylength, len);
-    } else if ( len > keylength) {
-	    msyslog(LOG_ERR, "AUTH: CMAC key %u will be padded %d=>%d",
-		keyno, keylength, len);
-	    for (int i=keylength; i<len; i++) key[i] = 0;
-    } else {
-	    if (0) msyslog(LOG_ERR, "AUTH: CMAC key %u is right size", keyno);
-    }
+	if (len < keylength) {
+		msyslog(LOG_ERR, "AUTH: CMAC key %u will be truncated %d=>%d",
+			keyno, keylength, len);
+	} else if ( len > keylength) {
+		msyslog(LOG_ERR, "AUTH: CMAC key %u will be padded %d=>%d",
+			keyno, keylength, len);
+		for (int i=keylength; i<len; i++) { key[i] = 0;
+		}
+	} else {
+		if (0) msyslog(LOG_ERR, "AUTH: CMAC key %u is right size", keyno);
+	}
 
-    return len;
+	return len;
 }
 
 static int
@@ -198,18 +207,18 @@ check_key_length(
 	char *name,
 	char *key,
 	int keylength) {
-    int length = keylength;
-    switch (type) {
-	case AUTH_CMAC:
-	    length = check_cmac_key_length(keyno, name, key, keylength);
-	    break;
-    	case AUTH_DIGEST:
-	    /* any length key works */
-	    break;
-    	default:
-	    msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u", keyno);
-    }
-    return length;
+	int length = keylength;
+	switch (type) {
+	    case AUTH_CMAC:
+		length = check_cmac_key_length(keyno, name, key, keylength);
+		break;
+	    case AUTH_DIGEST:
+		/* any length key works */
+		break;
+	    default:
+		msyslog(LOG_ERR, "BUG: authreadkeys: unknown AUTH type for key %u", keyno);
+	}
+	return length;
 }
 
 
@@ -254,8 +263,9 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 	 */
 	while ((line = fgets(buf, sizeof(buf), fp)) != NULL) {
 		char *token = nexttok(&line);
-		if (token == NULL)
+		if (token == NULL) {
 			continue;
+		}
 
 		/*
 		 * First is key number.  See if it is okay.
@@ -307,8 +317,9 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		char *pch;
 		upcased = lib_getbuf();
 		strlcpy(upcased, token, LIB_BUFLENGTH);
-		for (pch = upcased; '\0' != *pch; pch++)
+		for (pch = upcased; '\0' != *pch; pch++) {
 			*pch = (char)toupper((unsigned char)*pch);
+		}
 
 		name = NULL;
 		if (NULL == name) {
@@ -363,13 +374,15 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 			size_t j;
 			for (j = 0; j < jlim; j++) {
 				char *ptr = strchr(hex, tolower((unsigned char)token[j]));
-				if (ptr == NULL)
+				if (ptr == NULL) {
 					break;	/* abort decoding */
+				}
 				uint8_t temp = (uint8_t)(ptr - hex);
-				if (j & 1)
+				if (j & 1) {
 					keystr[j / 2] |= temp;
-				else
+				} else {
 					keystr[j / 2] = (uint8_t)(temp << 4);
+				}
 			}
 			if (j < jlim) {
 			    msyslog(LOG_ERR,

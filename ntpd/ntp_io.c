@@ -276,11 +276,12 @@ maintain_activefds(
 	} else {
 		FD_CLR(fd, &activefds);
 		if (maxactivefd && fd == maxactivefd) {
-			for (int i = maxactivefd - 1; i >= 0; i--)
+			for (int i = maxactivefd - 1; i >= 0; i--) {
 				if (FD_ISSET(i, &activefds)) {
 					maxactivefd = i;
 					break;
 				}
+			}
 			INSIST(fd != maxactivefd);
 		}
 	}
@@ -556,8 +557,9 @@ netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 	/*
 	 * Don't crash if we get a pattern like 10.0.0.1/9999999.
 	 */
-	if (prefixlen > ipabytes * 8)
+	if (prefixlen > ipabytes * 8) {
 		prefixlen = ipabytes * 8;
+	}
 
 	nbytes = prefixlen / 8;
 	nbits = prefixlen % 8;
@@ -652,8 +654,9 @@ is_ip_address(
 			if ('[' == host[0]) {
 				strlcpy(tmpbuf, &host[1], sizeof(tmpbuf));
 				pch = strchr(tmpbuf, ']');
-				if (pch != NULL)
+				if (pch != NULL) {
 					*pch = '\0';
+				}
 			} else {
 				strlcpy(tmpbuf, host, sizeof(tmpbuf));
 			}
@@ -2135,8 +2138,9 @@ read_network_packet(
 		char buf[RX_BUFF_SIZE];
 		sockaddr_u from;
 
-		if (rb != NULL)
+		if (rb != NULL) {
 			freerecvbuf(rb);
+		}
 
 		fromlen = sizeof(from);
 		buflen = recvfrom(fd, buf, sizeof(buf), 0,
@@ -2826,8 +2830,9 @@ close_and_delete_fd_from_list(
 	UNLINK_EXPR_SLIST(lsock, fd_list, fd ==
 	    UNLINK_EXPR_SLIST_CURRENT()->fd, link, vsock_t);
 
-	if (NULL == lsock)
+	if (NULL == lsock) {
 		return;
+	}
 
 	switch (lsock->type) {
 
@@ -2894,8 +2899,9 @@ delete_interface_from_list(
 		    UNLINK_EXPR_SLIST_CURRENT()->ep, link,
 		    remaddr_t);
 
-		if (unlinked == NULL)
+		if (unlinked == NULL) {
 			break;
+		}
 		DPRINT(4, ("Deleted addr %s for interface #%u %s "
 			   "from list of addresses\n",
 			   socktoa(&unlinked->addr), iface->ifnum,
@@ -2917,11 +2923,12 @@ find_addr_in_list(
 
 	for (entry = remoteaddr_list;
 	     entry != NULL;
-	     entry = entry->link)
+	     entry = entry->link) {
 		if (SOCK_EQ(&entry->addr, addr)) {
 			DPRINT(4, ("FOUND\n"));
 			return entry->ep;
 		}
+	}
 
 	DPRINT(4, ("NOT FOUND\n"));
 	return NULL;

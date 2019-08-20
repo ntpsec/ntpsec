@@ -290,10 +290,11 @@ zyfer_poll(
 	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-	if (!up->pollcnt)
+	if (!up->pollcnt) {
 		refclock_report(peer, CEVNT_TIMEOUT);
-	else
+	} else {
 		up->pollcnt--;
+	}
 	pp->polls++;
 	up->polled = 1;
 }

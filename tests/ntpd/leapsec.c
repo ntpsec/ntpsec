@@ -243,10 +243,11 @@ static time_t lsec2012 = 3550089600U - JAN_1970; // 1 Jul 2012, 00:00:00 utc
 static int stringreader(void* farg)
 {
 	const char ** cpp = (const char**)farg;
-	if (**cpp)
+	if (**cpp) {
 		return *(*cpp)++;
-	else
-		return EOF;
+	} else {
+	    return EOF; 
+	}
 }
 
 static bool

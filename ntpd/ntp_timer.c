@@ -514,10 +514,11 @@ check_leapsec(
 		leapsec = lsprox;
 	}
 
-	if (leapsec >= LSPROX_SCHEDULE)
+	if (leapsec >= LSPROX_SCHEDULE) {
 		leapdif = lsdata.tai_diff;
-	else
+	} else {
 		leapdif = 0;
+	}
 
 	check_leap_sec_in_progress(&lsdata);
 }

@@ -615,8 +615,7 @@ static	char *reqend;
  * init_control - initialize request data
  */
 void
-init_control(void)
-{
+init_control(void) {
 	uname(&utsnamebuf);
 
 	ctl_clr_stats();
@@ -639,25 +638,23 @@ init_control(void)
  * unmarshall_ntp_control - unmarshall data stream into a ntp_sontrol struct
  */
 void
-unmarshall_ntp_control(struct ntp_control *pkt, struct recvbuf *rbufp)
-{
-    pkt->li_vn_mode = (uint8_t)rbufp->recv_buffer[0];
-    pkt->r_m_e_op = (uint8_t)rbufp->recv_buffer[1];
+unmarshall_ntp_control(struct ntp_control *pkt, struct recvbuf *rbufp) {
+	pkt->li_vn_mode = (uint8_t)rbufp->recv_buffer[0];
+	pkt->r_m_e_op = (uint8_t)rbufp->recv_buffer[1];
 	pkt->sequence = extract_16bits_from_stream(&rbufp->recv_buffer[2]);
 	pkt->status = extract_16bits_from_stream(&rbufp->recv_buffer[4]);
 	pkt->associd = extract_16bits_from_stream(&rbufp->recv_buffer[6]);
 	pkt->offset = extract_16bits_from_stream(&rbufp->recv_buffer[8]);
 	pkt->count = extract_16bits_from_stream(&rbufp->recv_buffer[10]);
-    memcpy(&pkt->data, rbufp->recv_buffer + 12, 480 + MAX_MAC_LEN);
+	memcpy(&pkt->data, rbufp->recv_buffer + 12, 480 + MAX_MAC_LEN);
 }
 
 uint16_t
-extract_16bits_from_stream(uint8_t *addr)
-{
-    uint16_t var = 0;
-    var = (uint16_t)*addr << 8;
-    var |= (uint16_t)*(addr + 1);
-    var = ntohs(var);
+extract_16bits_from_stream(uint8_t *addr) {
+	uint16_t var = 0;
+	var = (uint16_t)*addr << 8;
+	var |= (uint16_t)*(addr + 1);
+	var = ntohs(var);
 	return var;
 }
 
@@ -991,10 +988,11 @@ ctl_flushpkt(
 	} else {
 		sendpkt(rmt_addr, lcl_inter, &rpkt, sendlen);
 	}
-	if (more)
+	if (more) {
 		numctlfrags++;
-	else
+	} else {
 		numctlresponses++;
+	}
 
 	/*
 	 * Set us up for another go around.
@@ -1086,8 +1084,9 @@ ctl_putstr(
 
         strlcpy(buffer, tag, sizeof(buffer));
         strlcat(buffer, "=\"", sizeof(buffer));
-        if (0 < len)
-            strlcat(buffer, data, sizeof(buffer));
+        if (0 < len) {
+		strlcat(buffer, data, sizeof(buffer));
+	}
         strlcat(buffer, "\"", sizeof(buffer));
 
 	ctl_putdata(buffer, strlen(buffer), false);
@@ -1112,13 +1111,15 @@ ctl_putunqstr(
 {
 	char buffer[512];
 
-	if ((strlen(tag) + 2 + len) >= sizeof(buffer))
-	    return;
+	if ((strlen(tag) + 2 + len) >= sizeof(buffer)) {
+		return;
+	}
 
         strlcpy(buffer, tag, sizeof(buffer));
         strlcat(buffer, "=", sizeof(buffer));
-	if (len > 0)
-            strlcat(buffer, data, sizeof(buffer));
+	if (len > 0) {
+		strlcat(buffer, data, sizeof(buffer));
+	}
 	ctl_putdata(buffer, strlen(buffer), false);
 }
 
@@ -1180,8 +1181,9 @@ ctl_puttime(
         strlcpy(buffer, tag, sizeof(buffer));
 
 	tm = gmtime_r(&uval, &tmbuf);
-	if (NULL == tm)
+	if (NULL == tm) {
 		return;
+	}
 	snprintf(buf, sizeof(buf), "=%04d-%02d-%02dT%02d:%02dZ",
                  tm->tm_year + 1900,
 		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
@@ -1536,8 +1538,9 @@ ctl_putsys(
 			memcpy(buffp, k->text, len);
 			buffp += len;
 		}
-		if (buffp + 2 >= buffend)
+		if (buffp + 2 >= buffend) {
 			break;
+		}
 
 		*buffp++ = '"';
 		*buffp = '\0';
@@ -2501,18 +2504,22 @@ ctl_getitem(
 
 	/* Delete leading commas and white space */
 	while (reqpt < reqend && (*reqpt == ',' ||
-				  isspace((unsigned char)*reqpt)))
+				  isspace((unsigned char)*reqpt))) {
 		reqpt++;
-	if (reqpt >= reqend)
+	}
+	if (reqpt >= reqend) {
 		return NULL;
+	}
 
 	/* Scan the string in the packet until we hit comma or
 	 * EoB. Register position of first '=' on the fly. */
 	for (tp = NULL, cp = reqpt; cp < reqend; ++cp) {
-		if (*cp == '=' && tp == NULL)
+		if (*cp == '=' && tp == NULL) {
 			tp = cp;
-		if (*cp == ',')
+		}
+		if (*cp == ',') {
 			break;
+		}
 	}
 
 	/* Process payload, if any. */
@@ -2523,15 +2530,18 @@ ctl_getitem(
 		const char *pltail = cp;
 		size_t      plsize;
 
-		while (plhead != pltail && isspace((u_char)plhead[0]))
+		while (plhead != pltail && isspace((u_char)plhead[0])) {
 			++plhead;
-		while (plhead != pltail && isspace((u_char)pltail[-1]))
+		}
+		while (plhead != pltail && isspace((u_char)pltail[-1])) {
 			--pltail;
+		}
 
 		/* check payload size, terminate packet on overflow */
 		plsize = (size_t)(pltail - plhead);
-		if (plsize >= sizeof(buf))
+		if (plsize >= sizeof(buf)) {
 			goto badpacket;
+		}
 
 		/* copy data, NUL terminate, and set result data ptr */
 		memcpy(buf, plhead, plsize);
@@ -3544,13 +3554,15 @@ static void read_mru_list(
 	in_parms = NULL;
 
 	/* return no responses until the nonce is validated */
-	if (NULL == pnonce)
+	if (NULL == pnonce) {
 		return;
+	}
 
 	nonce_valid = validate_nonce(pnonce, rbufp);
 	free(pnonce);
-	if (!nonce_valid)
+	if (!nonce_valid) {
 		return;
+	}
 
 	if ((0 == frags && !(0 < limit && limit <= MRU_ROW_LIMIT)) ||
 	    frags > MRU_FRAGS_LIMIT) {
@@ -3561,9 +3573,9 @@ static void read_mru_list(
 	/*
 	 * If either frags or limit is not given, use the max.
 	 */
-	if (0 != frags && 0 == limit)
+	if (0 != frags && 0 == limit) {
 		limit = UINT_MAX;
-	else if (0 != limit && 0 == frags)
+	} else if (0 != limit && 0 == frags)
 		frags = MRU_FRAGS_LIMIT;
 
 	/*
@@ -3648,8 +3660,9 @@ static void read_mru_list(
 	 */
 	if (NULL == mon) {
 #ifdef USE_RANDOMIZE_RESPONSES
-		if (count > 1)
+		if (count > 1) {
 			send_random_tag_value((int)count - 1);
+		}
 #endif /* USE_RANDOMIZE_RESPONSES */
 		ctl_putts("now", &now);
 		/* if any entries were returned confirm the last */
@@ -4192,8 +4205,9 @@ report_event(
 		 * Discard a system report if the number of reports of
 		 * the same type exceeds the maximum.
 		 */
-		if (ctl_sys_last_event != (uint8_t)err)
+		if (ctl_sys_last_event != (uint8_t)err) {
 			ctl_sys_num_events= 0;
+		}
 		if (ctl_sys_num_events >= CTL_SYS_MAXEVENTS)
 			return;
 
@@ -4305,8 +4319,9 @@ count_var(
 {
 	unsigned int c;
 
-	if (NULL == k)
+	if (NULL == k) {
 		return 0;
+	}
 
 	c = 0;
 	while (!(EOV & (k++)->flags))
@@ -4356,8 +4371,9 @@ set_var(
 	const char *t;
 	char *td;
 
-	if (NULL == data || !size)
+	if (NULL == data || !size) {
 		return;
+	}
 
 	k = *kv;
 	if (k != NULL) {

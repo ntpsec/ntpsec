@@ -146,8 +146,9 @@ sock_hash(
                 break;
 	}
 
-	for (unsigned int j = 0; j < len ; j++)
+	for (unsigned int j = 0; j < len ; j++) {
 		hashVal = 37 * hashVal + pch[j];
+	}
 
 	return (unsigned short)(hashVal & USHRT_MAX);
 }

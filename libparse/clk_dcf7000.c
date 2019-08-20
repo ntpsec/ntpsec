@@ -29,15 +29,14 @@ static struct format dcf7000_fmt =
 static parse_cvt_fnc_t cvt_dcf7000;
 static parse_inp_fnc_t inp_dcf7000;
 
-clockformat_t clock_dcf7000 =
-{
-  inp_dcf7000,			/* DCF7000 input handling */
-  cvt_dcf7000,			/* ELV DCF77 conversion */
-  0,				/* no direct PPS monitoring */
-  (void *)&dcf7000_fmt,		/* conversion configuration */
-  "ELV DCF7000",		/* ELV clock */
-  24,				/* string buffer */
-  0				/* no private data (complete packets) */
+clockformat_t clock_dcf7000 = {
+	inp_dcf7000,			/* DCF7000 input handling */
+	cvt_dcf7000,			/* ELV DCF77 conversion */
+	0,				/* no direct PPS monitoring */
+	(void *)&dcf7000_fmt,		/* conversion configuration */
+	"ELV DCF7000",		/* ELV clock */
+	24,				/* string buffer */
+	0				/* no private data (complete packets) */
 };
 
 /*
@@ -54,10 +53,10 @@ cvt_dcf7000(
 	    void          *local
 	    )
 {
-    UNUSED_ARG(size);
-    UNUSED_ARG(local);
+	UNUSED_ARG(size);
+	UNUSED_ARG(local);
 
-    if (!Strok(buffer, format->fixed_string))
+	if (!Strok(buffer, format->fixed_string))
 	{
 		return CVT_NONE;
 	}
@@ -92,16 +91,17 @@ cvt_dcf7000(
 			}
 			else
 			{
-				if (flags & 0x1)
-				    clock_time->utcoffset = -2*60*60;
-				else
-				    clock_time->utcoffset = -1*60*60;
-
-				if (flags & 0x2)
-				    clock_time->flags |= PARSEB_ANNOUNCE;
-
-				if (flags & 0x4)
-				    clock_time->flags |= PARSEB_NOSYNC;
+				if (flags & 0x1) {
+					clock_time->utcoffset = -2*60*60;
+				} else {
+					clock_time->utcoffset = -1*60*60;
+				}
+				if (flags & 0x2) {
+					clock_time->flags |= PARSEB_ANNOUNCE;
+				}
+				if (flags & 0x4) {
+					clock_time->flags |= PARSEB_NOSYNC;
+				}
 			}
 			return CVT_OK;
 		}

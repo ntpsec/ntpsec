@@ -126,8 +126,9 @@ bool
 leapsec_set_table(
 	leap_table_t * pt)
 {
-	if (pt == &_ltab[0] || pt == &_ltab[1])
+	if (pt == &_ltab[0] || pt == &_ltab[1]) {
 		_lptr = pt;
+}
 	return _lptr == pt;
 }
 
@@ -137,15 +138,17 @@ leapsec_electric(
 	electric_mode el)
 {
 	int res = _electric;
-	if (el == electric_query)
+	if (el == electric_query) {
 		return res;
+}
 
 	_electric = (el == electric_on);
 	if (_electric == res)
 		return res;
 
-	if (_lptr == &_ltab[0] || _lptr == &_ltab[1])
+	if (_lptr == &_ltab[0] || _lptr == &_ltab[1]) {
 		reset_times(_lptr);
+}
 
 	return res;
 }
@@ -377,8 +380,9 @@ leapsec_load_stream(
 	leap_table_t *pt;
 	int           rcheck;
 
-	if (NULL == fname)
+	if (NULL == fname) {
 		fname = "<unknown>";
+	}
 
 	rcheck = leapsec_validate((leapsec_reader)getc, ifp);
 	if (logall)
@@ -653,18 +657,21 @@ get_line(
 	char *ptr;
 
 	/* if we cannot even store the delimiter, declare failure */
-	if (buff == NULL || size == 0)
+	if (buff == NULL || size == 0) {
 		return NULL;
+	}
 
 	ptr = buff;
-	while (EOF != (ch = (*func)(farg)) && '\n' != ch)
+	while (EOF != (ch = (*func)(farg)) && '\n' != ch) {
 		if (size > 1) {
 			size--;
 			*ptr++ = (char)ch;
 		}
+	}
 	/* discard trailing whitespace */
-	while (ptr != buff && isspace((uint8_t)ptr[-1]))
+	while (ptr != buff && isspace((uint8_t)ptr[-1])) {
 		ptr--;
+	}
 	*ptr = '\0';
 	return (ptr == buff && ch == EOF) ? NULL : buff;
 }
@@ -674,8 +681,9 @@ static char *
 skipws(
 	char *ptr)
 {
-	while (isspace((uint8_t)*ptr))
+	while (isspace((uint8_t)*ptr)) {
 		ptr++;
+	}
 	return ptr;
 }
 
@@ -885,12 +893,13 @@ do_leap_hash(
 		return false;
 
 	/* now do the byte twiddle */
-	for (wi=0; wi < 5; ++wi)
+	for (wi=0; wi < 5; ++wi) {
 		for (di=3; di >= 0; --di) {
 			mac->hv[wi*4 + di] =
 				(unsigned char)(tmp[wi] & 0x0FF);
 			tmp[wi] >>= 8;
 		}
+}
 	return true;
 }
 
@@ -906,17 +915,20 @@ do_hash_data(
 	unsigned int   tlen =  0;
 	unsigned char  ch;
 
-	while ('\0' != (ch = (unsigned char)(*cp++)) && '#' != ch)
+	while ('\0' != (ch = (unsigned char)(*cp++)) && '#' != ch) {
 		if (isdigit(ch)) {
 			text[tlen++] = ch;
 			tlen &= (sizeof(text)-1);
-			if (0 == tlen)
+			if (0 == tlen) {
 				EVP_DigestUpdate(
 				    mdctx, (const void *)text, sizeof(text));
+			}
 		}
+	}
 
-	if (0 < tlen)
+	if (0 < tlen) {
 		EVP_DigestUpdate(mdctx, (const void *)text, (size_t)tlen);
+	}
 }
 
 /* given a reader and a reader arg, calculate and validate the hash
@@ -935,24 +947,28 @@ leapsec_validate(
 	mdctx = EVP_MD_CTX_create();
 	EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
 	while (get_line(func, farg, line, sizeof(line))) {
-		if (!strncmp(line, "#h", 2))
+		if (!strncmp(line, "#h", 2)) {
 			hlseen = do_leap_hash(&rdig, line+2);
-		else if (!strncmp(line, "#@", 2))
+		} else if (!strncmp(line, "#@", 2)) {
 			do_hash_data(mdctx, line+2);
-		else if (!strncmp(line, "#$", 2))
+		} else if (!strncmp(line, "#$", 2)) {
 			do_hash_data(mdctx, line+2);
-		else if (isdigit((unsigned char)line[0]))
+		} else if (isdigit((unsigned char)line[0])) {
 			do_hash_data(mdctx, line);
+		}
 	}
 	EVP_DigestFinal_ex(mdctx, ldig.hv, NULL);
 	EVP_MD_CTX_destroy(mdctx);
 
-	if (0 > hlseen)
+	if (0 > hlseen) {
 		return LSVALID_NOHASH;
-	if (0 == hlseen)
+	}
+	if (0 == hlseen) {
 		return LSVALID_BADFORMAT;
-	if (0 != memcmp(&rdig, &ldig, sizeof(sha1_digest)))
+	}
+	if (0 != memcmp(&rdig, &ldig, sizeof(sha1_digest))) {
 		return LSVALID_BADHASH;
+	}
 	return LSVALID_GOODHASH;
 }
 

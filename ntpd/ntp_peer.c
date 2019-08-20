@@ -133,11 +133,12 @@ findexistingpeer_name(
 {
 	struct peer *p;
 
-	if (NULL == start_peer)
+	if (NULL == start_peer) {
 		p = peer_list;
-	else
+	} else {
 		p = start_peer->p_link;
-	for (; p != NULL; p = p->p_link)
+	}
+	for (; p != NULL; p = p->p_link) {
 		if (p->hostname != NULL
 		    && (-1 == mode || p->hmode == mode)
 		    && (AF_UNSPEC == hname_fam
@@ -145,6 +146,7 @@ findexistingpeer_name(
 			|| hname_fam == AF(&p->srcadr))
 		    && !strcasecmp(p->hostname, hostname))
 			break;
+	}
 	return p;
 }
 
@@ -255,9 +257,10 @@ findpeerbyassoc(
 
 	assocpeer_calls++;
 	hash = assoc & NTP_HASH_MASK;
-	for (p = assoc_hash[hash]; p != NULL; p = p->aid_link)
+	for (p = assoc_hash[hash]; p != NULL; p = p->aid_link) {
 		if (assoc == p->associd)
 			break;
+	}
 	return p;
 }
 
@@ -301,17 +304,20 @@ score_all(
 	 */
 	tamp = score(peer);
 	temp = 100;
-	for (speer = peer_list; speer != NULL; speer = speer->p_link)
+	for (speer = peer_list; speer != NULL; speer = speer->p_link) {
 		if (speer->cfg.flags & FLAG_PREEMPT) {
 			x = score(speer);
-			if (x < temp)
+			if (x < temp) {
 				temp = x;
+			}
 		}
+	}
 	DPRINT(1, ("score_all: at %u score %d min %d\n",
 		   current_time, tamp, temp));
 
-	if (tamp != temp)
+	if (tamp != temp) {
 		temp = 0;
+	}
 
 	return temp;
 }
@@ -495,7 +501,6 @@ peer_refresh_interface(
 	}
 
 	set_peerdstadr(p, niface);
-
 }
 
 
@@ -549,10 +554,11 @@ newpeer(
 	unsigned int	hash;
 	const char *	name;	/* for error messages */
 
-	if (NULL != hostname)
+	if (NULL != hostname) {
 		name = hostname;
-	else
-		name = socktoa(srcadr);
+	} else {
+		name = socktoa(srcadr); 
+	}
 
 	/*
 	 * First search from the beginning for an association with given
@@ -596,8 +602,9 @@ newpeer(
 	 * Allocate a new peer structure. Some dirt here, since some of
 	 * the initialization requires knowledge of our system state.
 	 */
-	if (peer_free_count == 0)
+	if (peer_free_count == 0) {
 		getmorepeermem();
+	}
 	UNLINK_HEAD_SLIST(peer, peer_free, p_link);
 	peer_free_count--;
 	peer_associations++;
@@ -745,8 +752,9 @@ peer_reset(
 	struct peer *peer
 	)
 {
-	if (peer == NULL)
+	if (peer == NULL) {
 		return;
+}
 
 	peer->timereset = current_time;
 	peer->sent = 0;
@@ -764,30 +772,30 @@ peer_reset(
  * peer_all_reset - reset all peer statistics counters
  */
 void
-peer_all_reset(void)
-{
+peer_all_reset(void) {
 	struct peer *peer;
 
-	for (peer = peer_list; peer != NULL; peer = peer->p_link)
+	for (peer = peer_list; peer != NULL; peer = peer->p_link) {
 		peer_reset(peer);
+	}
 }
 
 
 
 /* peer_cleanup - clean peer list prior to shutdown */
-void peer_cleanup(void)
-{
+void peer_cleanup(void) {
         struct peer *peer;
         associd_t assoc;
 
         for (assoc = initial_association_ID; assoc != current_association_ID; assoc++) {
-            if (assoc != 0U) {
-                peer = findpeerbyassoc(assoc);
-                if (peer != NULL)
-                    unpeer(peer);
-            }
+		if (assoc != 0U) {
+			peer = findpeerbyassoc(assoc);
+			if (peer != NULL)
+				unpeer(peer);
+		}
         }
         peer = findpeerbyassoc(current_association_ID);
-        if (peer != NULL)
-            unpeer(peer);
+        if (peer != NULL) {
+		unpeer(peer);
+	}
 }
