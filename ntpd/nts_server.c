@@ -55,7 +55,8 @@ static int alpn_select_cb(SSL *ssl,
 			  unsigned int inlen,
 			  void *arg)
 {
-	static const unsigned char alpn[] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
+	static const unsigned char alpn[] = {
+            'n', 't', 's', 'k', 'e', '/', '1' };
 	unsigned i, len;
 
 	UNUSED_ARG(ssl);
