@@ -1102,7 +1102,7 @@ poll_update(
 	 * reference clock, otherwise 2 s.
 	 */
 	utemp = current_time + (unsigned long)max(peer->throttle - (NTP_SHIFT - 1) *
-	    (1 << peer->cfg.minpoll), ntp_minpkt);
+	    (1 << peer->cfg.minpoll), rstrct.ntp_minpkt);
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
 			return;
@@ -1141,7 +1141,7 @@ poll_update(
 		else
 			peer->nextdate = utemp;
 		if (peer->throttle > (1 << peer->cfg.minpoll))
-			peer->nextdate += (unsigned long)ntp_minpkt;
+			peer->nextdate += (unsigned long)rstrct.ntp_minpkt;
 	}
 	DPRINT(2, ("poll_update: at %u %s poll %d burst %d retry %d head %d early %u next %u\n",
 		   current_time, socktoa(&peer->srcadr), peer->hpoll,
@@ -1200,7 +1200,7 @@ peer_clear(
 	if (initializing1) {
 		peer->nextdate += (unsigned long)peer_associations;
 	} else if (MODE_PASSIVE == peer->hmode) {
-		peer->nextdate += (unsigned long)ntp_minpkt;
+		peer->nextdate += (unsigned long)rstrct.ntp_minpkt;
 	} else {
 	    /*
 	     * Randomizing the next poll interval used to be done with
@@ -2157,7 +2157,7 @@ fast_xmit(
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
-		xpkt.ppoll = max(rbufp->pkt.ppoll, ntp_minpoll);
+		xpkt.ppoll = max(rbufp->pkt.ppoll, rstrct.ntp_minpoll);
 		xpkt.precision = rbufp->pkt.precision;
 		memcpy(&xpkt.refid, "RATE", REFIDLEN);
 		xpkt.rootdelay = htonl(rbufp->pkt.rootdelay);
@@ -2193,7 +2193,7 @@ fast_xmit(
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
-		xpkt.ppoll = max(rbufp->pkt.ppoll, ntp_minpoll);
+		xpkt.ppoll = max(rbufp->pkt.ppoll, rstrct.ntp_minpoll);
 		xpkt.precision = sys_vars.sys_precision;
 		xpkt.refid = sys_vars.sys_refid;
 		xpkt.rootdelay = HTONS_FP(DTOUFP(sys_vars.sys_rootdelay));

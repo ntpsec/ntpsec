@@ -407,10 +407,13 @@ extern volatile struct signals_detected sig_flags;
 
 
 /* ntp_restrict.c */
-extern restrict_u *	restrictlist4;	/* IPv4 restriction list */
-extern restrict_u *	restrictlist6;	/* IPv6 restriction list */
-extern int		ntp_minpkt;
-extern uint8_t		ntp_minpoll;
+struct restriction_data {
+  restrict_u *restrictlist4; /* IPv4 restriction list */
+  restrict_u *restrictlist6; /* IPv6 restriction list */
+  int        ntp_minpkt;     /* minimum (log 2 s) */
+  uint8_t    ntp_minpoll;    /* increment (log 2 s) */
+};
+extern struct restriction_data rstrct;
 
 /* ntp_signd.c */
 

@@ -214,7 +214,7 @@ init_loopfilter(void) {
 	/*
 	 * Initialize state variables.
 	 */
-	clkstate.sys_poll = ntp_minpoll;
+	clkstate.sys_poll = rstrct.ntp_minpoll;
 	clkstate.clock_jitter = LOGTOD(sys_vars.sys_precision);
 	freq_cnt = (int)clock_minstep;
 }

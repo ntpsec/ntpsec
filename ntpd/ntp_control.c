@@ -1587,7 +1587,7 @@ ctl_putsys(
 #endif	/* ENABLE_LEAP_SMEAR */
 
 	case CS_RATE:
-		ctl_putuint(sys_var[CS_RATE].text, ntp_minpoll);
+		ctl_putuint(sys_var[CS_RATE].text, rstrct.ntp_minpoll);
 		break;
 
 	case CS_MRU_ENABLED:
@@ -3973,8 +3973,8 @@ read_addr_restrictions(
 	UNUSED_ARG(rbufp);
 
 	idx = 0;
-	send_restrict_list(restrictlist4, false, &idx);
-	send_restrict_list(restrictlist6, true, &idx);
+	send_restrict_list(rstrct.restrictlist4, false, &idx);
+	send_restrict_list(rstrct.restrictlist6, true, &idx);
 	ctl_flushpkt(0);
 }
 

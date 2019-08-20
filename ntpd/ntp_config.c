@@ -1593,7 +1593,7 @@ config_access(
 		case T_Average:
 			if (0 <= my_opt->value.i &&
 			    my_opt->value.i <= UCHAR_MAX)
-				ntp_minpoll = (uint8_t)my_opt->value.u;
+				rstrct.ntp_minpoll = (uint8_t)my_opt->value.u;
 			else
 				msyslog(LOG_ERR,
 					"CONFIG: discard average %d out of range, ignored.",
@@ -1601,7 +1601,7 @@ config_access(
 			break;
 
 		case T_Minimum:
-			ntp_minpkt = my_opt->value.i;
+			rstrct.ntp_minpkt = my_opt->value.i;
 			break;
 
 		case T_Monitor:

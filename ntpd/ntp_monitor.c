@@ -64,15 +64,6 @@ static  mon_entry *mon_free;		/* free list or null if none */
 static	uint64_t mru_alloc;		/* mru list + free list count */
 static	uint64_t mon_mem_increments;	/* times called malloc() */
 
-/*
- * Parameters of the RES_LIMITED restriction option. We define headway
- * as the idle time between packets. A packet is discarded if the
- * headway is less than the minimum, as well as if the average headway
- * is less than eight times the increment.
- */
-int	ntp_minpkt = NTP_MINPKT;	/* minimum (log 2 s) */
-uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
-
 static	void	mon_getmoremem(void);
 static	void	remove_from_hash(mon_entry *);
 static	void	mon_free_entry(mon_entry *);
@@ -354,7 +345,7 @@ ntp_monitor(
 		 */
 		mon->leak -= interval;
 		mon->leak = max(0, mon->leak);
-		head = 1 << ntp_minpoll;
+		head = 1 << rstrct.ntp_minpoll;
 		leak = mon->leak + head;
 		limit = NTP_SHIFT * head;
 
@@ -375,7 +366,7 @@ ntp_monitor(
 		 * This rate-limits the KoDs to no less than the average
 		 * headway.
 		 */
-		if (interval + 1 >= ntp_minpkt && leak < limit) {
+		if (interval + 1 >= rstrct.ntp_minpkt && leak < limit) {
 			mon->leak = leak - 2;
 			restrict_mask &= ~(RES_LIMITED | RES_KOD);
 		} else if (mon->leak < limit)

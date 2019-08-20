@@ -61,8 +61,17 @@
 /*
  * The restriction list
  */
-restrict_u *restrictlist4;
-restrict_u *restrictlist6;
+struct restriction_data rstrct = {
+  /*
+   * (MOVED FROM ntp_monitor.c)
+   * Parameters of the RES_LIMITED restriction option. We define headway
+   * as the idle time between packets. A packet is discarded if the
+   * headway is less than the minimum, as well as if the average headway
+   * is less than eight times the increment. 
+   */
+  .ntp_minpkt = NTP_MINPKT,   /* minimum (log 2 s) */
+  .ntp_minpoll = NTP_MINPOLL, /* increment (log 2 s) */
+};
 static int restrictcount;	/* count in the restrict lists */
 
 /*
@@ -145,8 +154,8 @@ init_restrict(void)
 	 * behavior as but reversed implementation compared to the docs.
 	 *
 	 */
-	LINK_SLIST(restrictlist4, &restrict_def4, link);
-	LINK_SLIST(restrictlist6, &restrict_def6, link);
+	LINK_SLIST(rstrct.restrictlist4, &restrict_def4, link);
+	LINK_SLIST(rstrct.restrictlist6, &restrict_def6, link);
 	restrictcount = 2;
 }
 
@@ -215,9 +224,9 @@ free_res(
 		dec_res_limited();
 
 	if (v6)
-		plisthead = &restrictlist6;
+		plisthead = &rstrct.restrictlist6;
 	else
-		plisthead = &restrictlist4;
+		plisthead = &rstrct.restrictlist4;
 	UNLINK_SLIST(unlinked, *plisthead, res, link, restrict_u);
 	INSIST(unlinked == res);
 
@@ -260,7 +269,7 @@ match_restrict4_addr(
 	restrict_u *	res;
 	restrict_u *	next;
 
-	for (res = restrictlist4; res != NULL; res = next) {
+	for (res = rstrct.restrictlist4; res != NULL; res = next) {
 		next = res->link;
 		if (res->expire &&
 		    res->expire <= current_time)
@@ -285,7 +294,7 @@ match_restrict6_addr(
 	restrict_u *	next;
 	struct in6_addr	masked;
 
-	for (res = restrictlist6; res != NULL; res = next) {
+	for (res = rstrct.restrictlist6; res != NULL; res = next) {
 		next = res->link;
 		INSIST(next != res);
 		if (res->expire &&
@@ -321,10 +330,10 @@ match_restrict_entry(
 	size_t cb;
 
 	if (v6) {
-		rlist = restrictlist6;
+		rlist = rstrct.restrictlist6;
 		cb = sizeof(pmatch->u.v6);
 	} else {
-		rlist = restrictlist4;
+		rlist = rstrct.restrictlist4;
 		cb = sizeof(pmatch->u.v4);
 	}
 
@@ -543,12 +552,12 @@ hack_restrict(
 				res = alloc_res6();
 				memcpy(res, &match,
 				       V6_SIZEOF_RESTRICT_U);
-				plisthead = &restrictlist6;
+				plisthead = &rstrct.restrictlist6;
 			} else {
 				res = alloc_res4();
 				memcpy(res, &match,
 				       V4_SIZEOF_RESTRICT_U);
-				plisthead = &restrictlist4;
+				plisthead = &rstrct.restrictlist4;
 			}
 			LINK_SORT_SLIST(
 				*plisthead, res,

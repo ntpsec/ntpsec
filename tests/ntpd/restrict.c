@@ -36,7 +36,7 @@ TEST_TEAR_DOWN(hackrestrict) {
 	restrict_u *current;
 
 	do {
-		UNLINK_HEAD_SLIST(current, restrictlist4, link);
+		UNLINK_HEAD_SLIST(current, rstrct.restrictlist4, link);
 		if (current != NULL)
 		{
 			*current = *empty_restrict;
@@ -44,7 +44,7 @@ TEST_TEAR_DOWN(hackrestrict) {
 	} while (current != NULL);
 
 	do {
-		UNLINK_HEAD_SLIST(current, restrictlist6, link);
+		UNLINK_HEAD_SLIST(current, rstrct.restrictlist6, link);
 		if (current != NULL)
 		{
 			*current = *empty_restrict;
@@ -63,17 +63,17 @@ TEST(hackrestrict, RestrictionsAreEmptyAfterInit) {
 	memset(rl4, 0, sizeof(restrict_u));
 	memset(rl6, 0, sizeof(restrict_u));
 
-	TEST_ASSERT_EQUAL(rl4->hitcount, restrictlist4->hitcount);
-	TEST_ASSERT_EQUAL(rl4->flags, restrictlist4->flags);
-	TEST_ASSERT_EQUAL(rl4->mflags, restrictlist4->mflags);
-	TEST_ASSERT_EQUAL(rl4->expire, restrictlist4->expire);
-	TEST_ASSERT_EQUAL(rl4->u.v4.addr, restrictlist4->u.v4.addr);
-	TEST_ASSERT_EQUAL(rl4->u.v4.mask, restrictlist4->u.v4.mask);
+	TEST_ASSERT_EQUAL(rl4->hitcount, rstrct.restrictlist4->hitcount);
+	TEST_ASSERT_EQUAL(rl4->flags, rstrct.restrictlist4->flags);
+	TEST_ASSERT_EQUAL(rl4->mflags, rstrct.restrictlist4->mflags);
+	TEST_ASSERT_EQUAL(rl4->expire, rstrct.restrictlist4->expire);
+	TEST_ASSERT_EQUAL(rl4->u.v4.addr, rstrct.restrictlist4->u.v4.addr);
+	TEST_ASSERT_EQUAL(rl4->u.v4.mask, rstrct.restrictlist4->u.v4.mask);
 
-	TEST_ASSERT_EQUAL(rl6->hitcount, restrictlist6->hitcount);
-	TEST_ASSERT_EQUAL(rl6->flags, restrictlist6->flags);
-	TEST_ASSERT_EQUAL(rl6->mflags, restrictlist6->mflags);
-	TEST_ASSERT_EQUAL(rl6->expire, restrictlist6->expire);
+	TEST_ASSERT_EQUAL(rl6->hitcount, rstrct.restrictlist6->hitcount);
+	TEST_ASSERT_EQUAL(rl6->flags, rstrct.restrictlist6->flags);
+	TEST_ASSERT_EQUAL(rl6->mflags, rstrct.restrictlist6->mflags);
+	TEST_ASSERT_EQUAL(rl6->expire, rstrct.restrictlist6->expire);
 
 	free(rl4);
 	free(rl6);
