@@ -170,8 +170,10 @@ constraints at the time the system was designed, the week counters are
 only 10 bits long; thus, GPS time has a period of 1024 weeks (a bit
 over 19 years).  At time of writing, two GPS rollovers
 have occurred; the first at 1999-08-22T00:00:00 and the second at
-2019-04-06T00:00:00.  Note that these times are "GPS Time", not
-UTC.
+2019-04-07T00:00:00.  Note that these times are "GPS Time", not
+UTC, the corresponding UTC was 2019-04-06T23:59:42Z , ie a
+difference of the 18 leapseconds that had elapsed since the
+GPS epoch.
 
 It is planned that future GPS satellites will increase the week
 counter length to 13 bits, for a period of 8192 weeks or more
@@ -206,7 +208,7 @@ every possible dime out of their costs.  Even major vendors like
 SiRF have a history of embarrassing firmware glitches, and the
 semi-anonymous outfits in Shenzhen and Taiwan are worse.
 
-Cheaper,consumer-grade, GPS devices also suffer from early EOL, and
+Cheaper, consumer-grade, GPS devices also suffer from early EOL, and
 manufacturers may never release firmware updates.
 
 The worst impact of careless, low-budget design when using a GPS as
