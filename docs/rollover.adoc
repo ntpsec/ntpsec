@@ -157,10 +157,16 @@ seconds, which does not participate in the seconds counter's rollover
 problems.
 
 NTP time is leap second corrected, and the reference implementation
-may exhibit stutter or skip.  There is a controversial technique
-called https://developers.google.com/time/smear["leap smearing"] used
+may exhibit stutter or skip.
+
+There is a technique called
+https://developers.google.com/time/smear["leap smearing"] used
 by some servers that avoids these by changing the length of the issued
-second slightly near scheduled corrections.
+second slightly before and after the leap. The AWS equivalent is at
+https://aws.amazon.com/blogs/aws/look-before-you-leap-the-coming-leap-second-and-aws/["Look Before You Leap"] .
+
+Leap Smear is supported by NTPSec, please see
+link:leapsmear.html[Leap Second Smearing with NTP] .
 
 === GPS time
 
