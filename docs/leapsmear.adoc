@@ -37,8 +37,8 @@ timestamps can occur.
 
 Unfortunately there are lots of applications which get confused if the
 system time is stepped back, e.g. due to a leap second insertion.  Thus,
-many users have been looking for ways to avoid this, and have tried to introduce
-workarounds which may or may not work properly.
+many users have been looking for ways to avoid this, and have tried to
+introduce workarounds which may or may not work properly.
 
 So even though these Unix kernels normally can handle leap seconds, the way
 they do this is not always optimal for applications.
@@ -173,6 +173,8 @@ the normal refid, as usual.
 The leap smear implementation is optionally available in ntp-4.2.8p3 and
 later, and the changes can be tracked via https://bugs.ntp.org/2855.
 
+Please note that the above is historical, NTPSec forked from Classic
+after this point.
 
 == Using NTP's Leap Second Smearing
 
@@ -232,6 +234,11 @@ hours' long.  With shorter values clients may not be able to follow the
 drift caused by the smeared time, and with longer values the discrepancy
 between system time and UTC will cause more problems when reconciling
 timestamp differences.
+
+A value of 86400 is what is implemented by
+https://developers.google.com/time/smear["Leap Smear"] and
+https://aws.amazon.com/blogs/aws/look-before-you-leap-the-coming-leap-second-and-aws/["Look Before You Leap"] .
+
 
 When ntpd starts and a smear interval has been specified then a log message
 is generated, e.g.:
