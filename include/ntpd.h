@@ -244,11 +244,11 @@ extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests 
  * Other statistics of possible interest
  */
 struct packet_counters {
-	uint64_t packets_dropped;	/* # packets dropped on reception */
-	uint64_t packets_ignored;	/* received on wild card interface */
-	uint64_t packets_received;	/* total number of packets received */
-	uint64_t packets_sent;		/* total number of packets sent */
-	uint64_t packets_notsent;	/* total number of packets which couldn't be sent */
+	uint64_t dropped;	/* # packets dropped on reception */
+	uint64_t ignored;	/* received on wild card interface */
+	uint64_t received;	/* total number of packets received */
+	uint64_t sent;		/* total number of packets sent */
+	uint64_t notsent;	/* total number of packets which couldn't be sent */
 	/* There used to be a signal handler for received packets. */
 	/* It's not needed now that the kernel time stamps packets. */
 	uint64_t handler_calls;	/* number of calls to interrupt handler */

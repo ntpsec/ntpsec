@@ -2023,10 +2023,10 @@ sendpkt(
 		    &dest->sa, SOCKLEN(dest));
 	if (cc == -1) {
 		src->notsent++;
-		pkt_count.packets_notsent++;
+		pkt_count.notsent++;
 	} else	{
 		src->sent++;
-		pkt_count.packets_sent++;
+		pkt_count.sent++;
 	}
 }
 
@@ -2068,7 +2068,7 @@ read_refclock_packet(
 		char buf[RX_BUFF_SIZE];
 
 		buflen = read(fd, buf, sizeof buf);
-		pkt_count.packets_dropped++;
+		pkt_count.dropped++;
 		return (buflen);
 	}
 
@@ -2101,7 +2101,7 @@ read_refclock_packet(
 	if (!consumed) {
 		rp->recvcount++;
 		// FIXME: should have separate slot for refclock packets
-		pkt_count.packets_received++;
+		pkt_count.received++;
 	}
 
 	return (int)buflen;
@@ -2151,9 +2151,9 @@ read_network_packet(
 			    : "drop",
 			free_recvbuffs(), fd, socktoa(&from)));
 		if (itf->ignore_packets)
-			pkt_count.packets_ignored++;
+			pkt_count.ignored++;
 		else
-			pkt_count.packets_dropped++;
+			pkt_count.dropped++;
 		return (buflen);
 	}
 
@@ -2212,7 +2212,7 @@ read_network_packet(
 		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr))
 		    && !IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 		   ) {
-			pkt_count.packets_dropped++;
+			pkt_count.dropped++;
 			DPRINT(2, ("DROPPING that packet\n"));
 			freerecvbuf(rb);
 			return buflen;
@@ -2232,7 +2232,7 @@ read_network_packet(
 	freerecvbuf(rb);
 
 	itf->received++;
-	pkt_count.packets_received++;
+	pkt_count.received++;
 	return (buflen);
 }
 
@@ -2733,11 +2733,11 @@ getinterface(
 void
 io_clr_stats(void)
 {
-	pkt_count.packets_dropped = 0;
-	pkt_count.packets_ignored = 0;
-	pkt_count.packets_received = 0;
-	pkt_count.packets_sent = 0;
-	pkt_count.packets_notsent = 0;
+	pkt_count.dropped = 0;
+	pkt_count.ignored = 0;
+	pkt_count.received = 0;
+	pkt_count.sent = 0;
+	pkt_count.notsent = 0;
 
 	pkt_count.handler_calls = 0;
 	pkt_count.handler_pkts = 0;
