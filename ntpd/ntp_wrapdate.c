@@ -224,7 +224,7 @@ gpsfix_century(
  */
 l_fp
 eval_gps_time(
-	const char            * refclock_name,  /* ffor logging */
+	const char            * clockname,  /* ffor logging */
 	const struct calendar * gpst,           /* GPS time stamp  */
 	const struct timespec * tofs,           /* GPS frac second & offset */
 	const bool            trusted,          /* do we fully trust dates from this GPS? */
@@ -309,7 +309,7 @@ eval_gps_time(
 		*epoch_warp = (short)weeks;
 		LOGIF(CLOCKINFO, (LOG_INFO,
 				  "%s Changed GPS epoch warp to %d weeks",
-				  refclock_name, weeks));
+				  clockname, weeks));
 	}
 
 	/* - build result and be done */
