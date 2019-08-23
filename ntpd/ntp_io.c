@@ -86,6 +86,18 @@ static nic_rule *nic_rule_list;
 /*
  * Other statistics of possible interest
  */
+struct packet_counters {
+	uint64_t dropped;	/* # packets dropped on reception */
+	uint64_t ignored;	/* received on wild card interface */
+	uint64_t received;	/* total number of packets received */
+	uint64_t sent;		/* total number of packets sent */
+	uint64_t notsent;	/* total number of packets which couldn't be sent */
+	/* There used to be a signal handler for received packets. */
+	/* It's not needed now that the kernel time stamps packets. */
+	uint64_t handler_calls;	/* number of calls to interrupt handler */
+	uint64_t handler_pkts;	/* number of pkts received by handler */
+	uptime_t io_timereset;	/* time counters were reset */
+};
 volatile struct packet_counters pkt_count;
 
 /*
@@ -2742,6 +2754,69 @@ io_clr_stats(void)
 	pkt_count.handler_calls = 0;
 	pkt_count.handler_pkts = 0;
 	pkt_count.io_timereset = current_time;
+}
+
+/*
+ * dropped_count - return the number of dropped packets
+ */
+uint64_t dropped_count(void) {
+  return pkt_count.dropped;
+}
+
+/*
+ * ignored_count - return the number of ignored packets
+ */
+uint64_t ignored_count(void) {
+  return pkt_count.ignored;
+}
+
+/*
+ * received_count - return the number of received packets
+ */
+uint64_t received_count(void) {
+  return pkt_count.received;
+}
+
+/*
+ * inc_recieved_count - increment the number of received packets
+ * required so that refclock_generic.c can track its packets
+ */
+void inc_received_count(void) {
+  pkt_count.received++;
+}
+
+/*
+ * sent_count - return the number of sent packets
+ */
+uint64_t sent_count(void) {
+  return pkt_count.sent;
+}
+/*
+ * notsent_count - return the number of not sent packets
+ */
+uint64_t notsent_count(void) {
+  return pkt_count.notsent;
+}
+
+/*
+ * handler_calls_count - return the number of handler calls
+ */
+uint64_t handler_calls_count(void) {
+  return pkt_count.handler_calls;
+}
+
+/*
+ * handler_pkts_count - return the number of handler packets
+ */
+uint64_t handler_pkts_count(void) {
+  return pkt_count.handler_pkts;
+}
+
+/*
+ * counter_reset_time - return the time of the last counter reset
+ */
+uptime_t counter_reset_time(void) {
+  return pkt_count.io_timereset;
 }
 
 

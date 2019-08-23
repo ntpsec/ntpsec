@@ -1909,7 +1909,7 @@ local_input(
 					buf->fd           = rbufp->fd;
 					buf->recv_peer    = rbufp->recv_peer;
 					parse->generic->io.recvcount++;
-					pkt_count.received++;
+					inc_received_count();
 					local_receive(buf);
 					freerecvbuf(buf);
 				}

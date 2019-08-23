@@ -98,6 +98,15 @@ extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
 extern	void	sendpkt		(sockaddr_u *, endpt *, void *, unsigned int);
 extern const char * latoa(endpt *);
+extern  uint64_t dropped_count(void);
+extern  uint64_t ignored_count(void);
+extern  uint64_t received_count(void);
+extern  void     inc_received_count(void);
+extern  uint64_t sent_count(void);
+extern  uint64_t notsent_count(void);
+extern  uint64_t handler_calls_count(void);
+extern  uint64_t handler_pkts_count(void);
+extern  uptime_t counter_reset_time(void);
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);
@@ -239,23 +248,6 @@ extern char *ntp_signd_socket;
 
 /* ntp_control.c */
 extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
-
-/*
- * Other statistics of possible interest
- */
-struct packet_counters {
-	uint64_t dropped;	/* # packets dropped on reception */
-	uint64_t ignored;	/* received on wild card interface */
-	uint64_t received;	/* total number of packets received */
-	uint64_t sent;		/* total number of packets sent */
-	uint64_t notsent;	/* total number of packets which couldn't be sent */
-	/* There used to be a signal handler for received packets. */
-	/* It's not needed now that the kernel time stamps packets. */
-	uint64_t handler_calls;	/* number of calls to interrupt handler */
-	uint64_t handler_pkts;	/* number of pkts received by handler */
-	uptime_t io_timereset;	/* time counters were reset */
-};
-extern volatile struct packet_counters pkt_count;
 
 /* ntp_io.c */
 struct ntp_io_data {
