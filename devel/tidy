@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Use clang-tidy to fill in all optional control structure braces.
+#
+# Doesn't do the right thing with trailing braces; you must indent hthese by hand.
+# This could be fixed by running clang-format, but this script exists because
+# we're not yet ready for that churn.
+#
+# This sometimes messes up slightly.  It can miss single-statement ifs -
+# that is, nott wrap the body in { } when it should. More seriously, t sometimes
+# places generated closing braces in the middle of assignments and return
+# expressions that should precede them.
+#
+allfiles=`find . \( -name \*.c -or -name \*.cpp -or -name \*.cc \)`
+for sourcefile in $allfiles;
+do
+	clang-tidy \
+		-fix \
+		-fix-errors \
+		--checks=readability-braces-around-statements \
+		$sourcefile
+
+done
+
