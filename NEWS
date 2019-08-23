@@ -18,6 +18,12 @@ rollover in a GPS device.  Each "g" adds the number of seconds in a
 1024-week (10-bit) GPS era. Each "G" adds the number of seconds in a
 8192-week (13-bit) GPS era.
 
+The neoclock4x driver has been removed, due to the hardware and the
+vendor having utterly vanished from the face of the earth.
+
+The NTS ALPN negotiation sequence has been modified for improved
+interoperability with orther NTS implementations.
+
 == 2019-07-10: 1.1.6 ==
 
 Fixes to code quality checks.
