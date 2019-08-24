@@ -9,6 +9,7 @@
  */
 #include "config.h"
 
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -34,6 +35,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx, const char *filename);
 void set_hostname(SSL *ssl, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
+bool check_aead(SSL *ssl, struct peer *peer, const char *hostname);
 bool nts_client_send_request(SSL *ssl, struct peer *peer);
 bool nts_client_process_response(SSL *ssl, struct peer *peer);
 bool nts_client_process_response_core(uint8_t *buff, int transferred, struct peer* peer);
@@ -138,6 +140,8 @@ bool nts_probe(struct peer * peer) {
 		SSL_get_cipher_bits(ssl, NULL));
 
 	if (!check_certificate(ssl, peer))
+		goto bail;
+	if (!check_aead(ssl, peer, hostname))
 		goto bail;
 
 	if (!nts_client_send_request(ssl, peer))
@@ -372,6 +376,42 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
 	}
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
 	msyslog(LOG_DEBUG, "NTSc: matched cert host: %s", SSL_get0_peername(ssl));
+#endif
+	return true;
+}
+
+bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
+	UNUSED_ARG(peer);
+#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+	bool bad = true;  /* Always return OK for now. */
+	const unsigned char *data;
+	unsigned int len;
+	unsigned int i;
+	char buff [100];
+	SSL_get0_alpn_selected(ssl, &data, &len);
+	if (0 == len) {
+		/* This happens when talking to old/TLSv1.2 systems. */
+		msyslog(LOG_DEBUG, "NTSc: No ALPN from %s (%s)",
+			hostname, SSL_get_version(ssl));
+		return bad;
+	}
+	strlcpy(buff, (const char*)data, sizeof(buff));	/* NUL terminate */
+	for (i=0; i<len; i++) {
+		if (!isgraph(buff[i])) {
+			buff[i] = '*'; /* fix non-printing crap */
+		}
+	}
+	/* For now, we only support one version.
+	 * This gets more complicated when version 2 arrives. */
+	if (0 != strcmp((const char*)data, "ntske/1")) {
+		msyslog(LOG_DEBUG, "NTSc: Strange ALPN returned: %s (%u)", buff, len);
+		return bad;
+	}
+        msyslog(LOG_DEBUG, "NTSc: Good ALPN from: %s", hostname);
+
+#else
+	UNUSED_ARG(ssl);
+	UNUSED_ARG(hostname);
 #endif
 	return true;
 }
