@@ -67,7 +67,7 @@ struct restriction_data rstrct = {
    * Parameters of the RES_LIMITED restriction option. We define headway
    * as the idle time between packets. A packet is discarded if the
    * headway is less than the minimum, as well as if the average headway
-   * is less than eight times the increment. 
+   * is less than eight times the increment.
    */
   .ntp_minpkt = NTP_MINPKT,   /* minimum (log 2 s) */
   .ntp_minpoll = NTP_MINPOLL, /* increment (log 2 s) */

@@ -50,7 +50,7 @@ release.nix::
 	NixOS build recipe.
 
 tidy::
-	Wrapper for clang-tidy, use ut to canicalize code.
+	Wrapper for clang-tidy, use it to canonicalize code.
 
 trace/::
 	Configuration files for the RTEMS trace utility.  These

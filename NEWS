@@ -22,7 +22,7 @@ The neoclock4x driver has been removed, due to the hardware and the
 vendor having utterly vanished from the face of the earth.
 
 The NTS ALPN negotiation sequence has been modified for improved
-interoperability with orther NTS implementations.
+interoperability with other NTS implementations.
 
 NTS key rotation now happens every 24 hours.  It used to rotate
 every hour to enable testing of recovery from stale cookies.

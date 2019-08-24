@@ -1,7 +1,7 @@
 /*
  * Calendar-oriented stuff -- perhaps a bit hard to grok.
  *
- * Used for interpreting GPS sentences and resolving wrap issies
+ * Used for interpreting GPS sentences and resolving wrap issues
  * around 2-digit years.  Formerly part of refclock_nmea.c,
  * dissected out so it can be used by other drivers.
  */
@@ -45,7 +45,7 @@ wrapdate_init(void)
 	 * This assumes that the build system was roughly in sync with
 	 * the world, and that really synchronising to a time before the
 	 * program was created would be unsafe or insane. If the build
-	 * date cannot be stablished, at least use the start of GPS
+	 * date cannot be established, at least use the start of GPS
 	 * (1980-01-06) as minimum, because GPS can surely NOT
 	 * synchronise beyond it's own big bang. We add a little safety
 	 * margin for the fuzziness of the build date, which is in an
@@ -92,7 +92,7 @@ unfold_day(
 	ntpcal_split rec_ds;
 
 	/*
-	 * basically this is the peridiodic extension of the receive
+	 * basically this is the periodic extension of the receive
 	 * time - 12hrs to the time-of-day with a period of 1 day.
 	 * But we would have to execute this in 64bit arithmetic, and we
 	 * cannot assume we can do this; therefore this is done
@@ -210,10 +210,10 @@ gpsfix_century(
 
 /*
  * -------------------------------------------------------------------
- * And now the final execise: Considering the fact that many (most?)
+ * And now the final exercise: Considering the fact that many (most?)
  * GPS receivers cannot handle a GPS epoch wrap well, we try to
  * compensate for that problem by unwrapping a GPS epoch around the
- * receive stamp. Another execise in periodic unfolding, of course,
+ * receive stamp. Another exercise in periodic unfolding, of course,
  * but with enough points to take care of.
  *
  * Note: The integral part of 'tofs' is intended to handle small(!)
@@ -224,7 +224,7 @@ gpsfix_century(
  */
 l_fp
 eval_gps_time(
-	const char            * clockname,  /* ffor logging */
+	const char            * clockname,      /* for logging */
 	const struct calendar * gpst,           /* GPS time stamp  */
 	const struct timespec * tofs,           /* GPS frac second & offset */
 	const bool            trusted,          /* do we fully trust dates from this GPS? */
