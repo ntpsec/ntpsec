@@ -131,9 +131,11 @@ bool nts_cookie_init2(void) {
  * That allows a cluster NTS-KE server to keep in sync
  * if we use ratchet rather than random.
  */
-// #define SecondsPerDay 86400   FIXME
-// Shorter for debugging
-#define SecondsPerDay 3600
+#define SecondsPerDay (24*60*60)
+// Set this shorter for debugging
+//  keys will timeout, packets will get dropped
+//  after 8 lost packets, it should go through the NTS-KE dance again
+// #define SecondsPerDay 3600
 void nts_timer(void) {
 	time_t now;
 	if (0 == K_time) {
