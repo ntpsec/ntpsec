@@ -36,8 +36,6 @@ of the current startup logic gets discussed.
 * Test that the pool code properly replaces a server if it goes dark. (Not
   clear how to arrange this.)
 
-* Full support for NTS, once IETF has the spec ready
-
 * We could open only IPv6 sockets and allow them to handle mapped IPv4 addresses,
   as described at http://man7.org/linux/man-pages/man7/ipv6.7.html
 
@@ -74,21 +72,11 @@ Plug restrict holes:
   a nohole flag to prevent this so you can really block pool servers if
   you know there are some you don't want to use.
 
-
 Solaris maintenance mode
   There is code in ntp_proto.c that drops into Solaris maintenance mode
   if the clock offset exceeds the panic threshold.  We should either
   drop that code or move it to where it can be used on all fatal errors.
   (Search for HAVE_LIBSCF_H)
-
-Logging cleanup:
-  Most OSes/distros have a cron job that scans log files and mails
-  a summary to the sysadmin.  They look in /var/log/messages or similar
-  rather than in ntpd's private log files.  We should teach ntpd to
-  log "interesting" messages to syslog as well as its log file.
-  We should review the log messages that those utilities can
-  process and update them to process any new messages we consider
-  to be important.
 
 Remove clock fuzzing:
   ntpd has code to fuzz the clocks.  It's scattered all over the place.
@@ -125,12 +113,6 @@ Recvbuff cleanup:
   ntpd currently has a pool of recv buffers.  That made sense
   when it was using SIGIO to get time stamps.  Now it is useless
   and just adds useless cycles moving things to/from the free list.
-
-Receive packet processing cleanup:
-  There is an AM table in the top of ntp_peer that does a table lookup
-  to figure out how to process a received packet.  We can eliminate that.
-  I think it's leftover from peer and broadcast modes.
-
 
 [quote, Hal]
 __________
