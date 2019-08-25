@@ -1666,48 +1666,47 @@ ctl_putsys(
 		break;
 
 	case CS_SS_RESET:
-		ctl_putuint(sys_var[varid].text,
-			    current_time - stat_count.sys_stattime);
+		ctl_putuint(sys_var[varid].text, current_time - stat_stattime());
 		break;
 
 	case CS_SS_RECEIVED:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_received);
+        ctl_putuint(sys_var[varid].text, stat_received());
 		break;
 
 	case CS_SS_THISVER:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_newversion);
+		ctl_putuint(sys_var[varid].text, stat_newversion());
 		break;
 
 	case CS_SS_OLDVER:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_oldversion);
+		ctl_putuint(sys_var[varid].text, stat_oldversion());
 		break;
 
 	case CS_SS_BADFORMAT:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_badlength);
+		ctl_putuint(sys_var[varid].text, stat_badlength());
 		break;
 
 	case CS_SS_BADAUTH:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_badauth);
+		ctl_putuint(sys_var[varid].text, stat_badauth());
 		break;
 
 	case CS_SS_DECLINED:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_declined);
+		ctl_putuint(sys_var[varid].text, stat_declined());
 		break;
 
 	case CS_SS_RESTRICTED:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_restricted);
+		ctl_putuint(sys_var[varid].text, stat_restricted());
 		break;
 
 	case CS_SS_LIMITED:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_limitrejected);
+		ctl_putuint(sys_var[varid].text, stat_limitrejected());
 		break;
 
 	case CS_SS_KODSENT:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_kodsent);
+		ctl_putuint(sys_var[varid].text, stat_kodsent());
 		break;
 
 	case CS_SS_PROCESSED:
-		ctl_putuint(sys_var[varid].text, stat_count.sys_processed);
+		ctl_putuint(sys_var[varid].text, stat_processed());
 		break;
 
 	case CS_AUTHDELAY:
@@ -2990,7 +2989,7 @@ static void configure(
 				"MODE6: runtime config from %s rejected due"
                                 " to nomodify restriction",
 				socktoa(&rbufp->recv_srcadr));
-		stat_count.sys_restricted++;
+		increment_restricted();
 		return;
 	}
 
@@ -3445,7 +3444,7 @@ static void read_mru_list(
 				"MODE6: mrulist from %s rejected due to"
                                 " nomrulist restriction",
 				socktoa(&rbufp->recv_srcadr));
-		stat_count.sys_restricted++;
+		increment_restricted();
 		return;
 	}
 	/*

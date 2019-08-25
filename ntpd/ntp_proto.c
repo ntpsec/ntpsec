@@ -145,7 +145,91 @@ static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
  * Statistics counters - first the good, then the bad
  * These get reset every hour if sysstats is enabled.
  */
+struct statistics_counters {
+	uptime_t	sys_stattime;		/* time since sysstats reset */
+	uint64_t	sys_received;		/* packets received */
+	uint64_t	sys_processed;		/* packets for this host */
+	uint64_t	sys_restricted;		/* restricted packets */
+	uint64_t	sys_newversion;		/* current version  */
+	uint64_t	sys_oldversion;		/* old version */
+	uint64_t	sys_badlength;		/* bad length or format */
+	uint64_t	sys_badauth;		/* bad authentication */
+	uint64_t	sys_declined;		/* declined */
+	uint64_t	sys_limitrejected;	/* rate exceeded */
+	uint64_t	sys_kodsent;		/* KoD sent */
+	uptime_t	use_stattime;		/* time since usestats reset */
+};
 volatile struct statistics_counters stat_count;
+
+uptime_t stat_stattime(void)
+{
+  return stat_count.sys_stattime;
+}
+
+uint64_t stat_received(void)
+{
+  return stat_count.sys_received;
+}
+
+uint64_t stat_processed(void)
+{
+  return stat_count.sys_processed;
+}
+
+uint64_t stat_restricted(void)
+{
+  return stat_count.sys_restricted;
+}
+
+void increment_restricted(void)
+{
+  stat_count.sys_restricted++;
+}
+
+uint64_t stat_newversion(void)
+{
+  return stat_count.sys_newversion;
+}
+
+uint64_t stat_oldversion(void)
+{
+  return stat_count.sys_oldversion;
+}
+
+uint64_t stat_badlength(void)
+{
+  return stat_count.sys_badlength;
+}
+
+uint64_t stat_badauth(void)
+{
+  return stat_count.sys_badauth;
+}
+
+uint64_t stat_declined(void)
+{
+  return stat_count.sys_declined;
+}
+
+uint64_t stat_limitrejected(void)
+{
+  return stat_count.sys_limitrejected;
+}
+
+uint64_t stat_kodsent(void)
+{
+  return stat_count.sys_kodsent;
+}
+
+uptime_t stat_use_stattime(void)
+{
+  return stat_count.sys_stattime;
+}
+
+void set_use_stattime(uptime_t stime) {
+  stat_count.sys_stattime = stime;
+}
+
 
 double	measured_tick;		/* non-overridable sys_tick (s) */
 

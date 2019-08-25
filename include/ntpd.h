@@ -168,6 +168,21 @@ extern	void	set_sys_tick_precision(double);
 extern	void	proto_config	(int, unsigned long, double);
 extern	void	proto_clr_stats (void);
 
+extern uptime_t stat_stattime(void);
+extern uint64_t stat_received(void);
+extern uint64_t stat_processed(void);
+extern uint64_t stat_restricted(void);
+extern void increment_restricted(void);
+extern uint64_t stat_newversion(void);
+extern uint64_t stat_oldversion(void);
+extern uint64_t stat_badlength(void);
+extern uint64_t stat_badauth(void);
+extern uint64_t stat_declined(void);
+extern uint64_t stat_limitrejected(void);
+extern uint64_t stat_kodsent(void);
+extern uptime_t stat_use_stattime(void);
+extern void set_use_stattime(uptime_t stime);
+
 
 
 /* ntp_restrict.c */
@@ -368,25 +383,6 @@ extern struct system_variables sys_vars;
  */
 extern l_fp	sys_authdelay;		/* authentication delay */
 extern int	sys_minsane;		/* minimum candidates */
-
-/*
- * Statistics counters
- */
-struct statistics_counters {
-	uptime_t	sys_stattime;		/* time since sysstats reset */
-	uint64_t	sys_received;		/* packets received */
-	uint64_t	sys_processed;		/* packets for this host */
-	uint64_t	sys_restricted;		/* restricted packets */
-	uint64_t	sys_newversion;		/* current version  */
-	uint64_t	sys_oldversion;		/* old version */
-	uint64_t	sys_badlength;		/* bad length or format */
-	uint64_t	sys_badauth;		/* bad authentication */
-	uint64_t	sys_declined;		/* declined */
-	uint64_t	sys_limitrejected;	/* rate exceeded */
-	uint64_t	sys_kodsent;		/* KoD sent */
-	uptime_t	use_stattime;		/* time since usestats reset */
-};
-extern volatile struct statistics_counters stat_count;
 
 /* Signalling: Set by signal handlers */
 struct signals_detected {
