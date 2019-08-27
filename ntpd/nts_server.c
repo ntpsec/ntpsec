@@ -188,7 +188,7 @@ void* nts_ke_listener(void* arg) {
 
 	while(1) {
 		sockaddr_u addr;
-		uint len = sizeof(addr);
+		socklen_t len = sizeof(addr);
 		SSL *ssl;
 		l_fp start, finish;
 		int client, err;
