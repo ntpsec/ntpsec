@@ -169,7 +169,7 @@ bool nts_read_cookie_keys(void) {
 		char errbuf[100];
 		if (ENOENT == errno)
 			return false;		/* File doesn't exist */
-		IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
+		mystrerror(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_ERR, "NTSs: can't read old cookie file: %s=>%s",
 			cookie_filename, errbuf);
 		exit(1);
@@ -252,13 +252,13 @@ bool nts_write_cookie_keys(void) {
 		cookie_filename = ntsconfig.KI;
 	fd = open(cookie_filename, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
 	if (-1 == fd) {
-		IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
+		mystrerror(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_ERR, "ERR: can't open %s: %s", cookie_filename, errbuf);
 		return false;
 	}
 	out = fdopen(fd, "w");
 	if (NULL == out) {
-		IGNORE(strerror_r(errno, errbuf, sizeof(errbuf)));
+		mystrerror(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_ERR, "ERR: can't fdopen %s: %s", cookie_filename, errbuf);
 		close(fd);
 		return false;

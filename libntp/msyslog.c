@@ -447,3 +447,16 @@ reopen_logfile(void)
 	msyslog(LOG_INFO, "LOG: reopen_logfile: using %s", syslog_fname);
 }
 
+/* Hack because there are 2 APIs to strerror_r()  */
+void mystrerror(int errnum, char *buf, size_t buflen) {
+#ifdef STRERROR_CHAR
+	char *answer = strerror_r(errnum, buf, buflen);
+	if (answer != buf) {
+		strlcpy(buf, answer, buflen);
+	}
+#else
+	int answer = strerror_r(errnum, buf, buflen);
+	UNUSED_LOCAL(answer);
+#endif
+}
+

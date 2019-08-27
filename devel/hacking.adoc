@@ -79,7 +79,11 @@ thread.  One interesting area is msyslog.  The DNS thread doesn't call msyslog.
 That was impractical for NTS, so msyslog is thread safe as of 2019-Apr.
 Beware of calling strerror() from non-main threads.  Use strerror_r()
 into a buffer on the stack.  Similarly, use socktoa_r() and sockporttoa_r()
-and don't call lib_getbuf().
+and don't call lib_getbuf() or refclock_name().
+
+Actually, don't use strerror_r() since our build environment
+has troubles getting a consistent version of the API.
+Use mystrerror() until we clean this up.
 
 You *may* assume the clock_gettime(2) and clock_settime(2) calls, and
 the related getitimer(2)/setitimer(2), from POSIX-1.2008.

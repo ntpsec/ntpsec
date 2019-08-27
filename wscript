@@ -757,6 +757,9 @@ int main(int argc, char **argv) {
     from wafhelpers.check_sockaddr import check_sockaddr
     check_sockaddr(ctx)
 
+    from wafhelpers.check_strerror import check_strerror
+    check_strerror(ctx)
+
     # Check for Solaris's service configuration facility library
     ctx.check_cc(header_name="libscf.h", lib="scf", mandatory=False,
                  uselib_store="SCF")
