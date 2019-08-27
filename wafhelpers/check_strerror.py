@@ -1,5 +1,22 @@
 # check to see if strerror_r has type char*
 
+# streror_r() has 2 APIs.
+# our environment doesn't make a clean choice.
+
+# There is code for mystrerror() in the bottom of msyslog.c
+# This code tried to setup a #define for STRERROR_CHAR
+# if strerror_r() returns char* rather than int
+
+# Unfortunately, this test code compiles in the other case.
+# It generates a warning on the type conversion from char* to int,
+# but that's only a warning, so it "works".
+
+# This uses -Werror which may not be portable.
+
+# Another possibility is to run the test code,
+# and have it check for 0/NULL which the int mode should return.
+
+
 STRERROR_FRAG = """
 #include <string.h>
 int main(void) {
