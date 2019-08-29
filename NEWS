@@ -551,4 +551,8 @@ a future release.
 NTPsec is not impacted by CVE-2015-7848 (mode 7 loop counter underrun)
 because ntpdc and support for mode 7 packets have been removed.
 
+== HISTORIC-NEWS ==
+
+For older NEWS items, see the file devel/HISTORIC-NEWS.
+
 // end
