@@ -194,6 +194,11 @@ CVE-2017-6463: Authenticated DoS via Malicious Config Option
 CVE-2017-6458: Potential Overflows in ctl_put() functions
 CVE-2017-6451: Improper use of snprintf() in mx4200_send()
 
+A Pentest report by Cure53 noted that a previously fixed CVE had been
+reintroduced into the code.  This was resolved, again.
+
+CVE-2014-9295: Multiple stack-based buffer overflows in ntpd
+
 The following CVEs, announced simultaneously, affected NTP Classic but
 not NTPsec, because we had already removed the attack surface:
 
