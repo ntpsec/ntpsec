@@ -29,7 +29,7 @@
 extern const char *ntpd_version(void);
 
 extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
-extern	void	mystrerror(int errnum, char *buf, size_t buflen);
+extern	void	ntp_strerror_r(int errnum, char *buf, size_t buflen);
 extern	void	init_logging	(const char *, uint32_t, int);
 extern	int	change_logfile	(const char *, bool);
 extern	void	reopen_logfile  (void);

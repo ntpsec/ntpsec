@@ -13,6 +13,7 @@
 
 #include "ntp.h"
 #include "ntp_debug.h"
+#include "ntp_stdlib.h"
 #include "ntp_syslog.h"
 #include "lib_strbuf.h"
 
@@ -448,7 +449,7 @@ reopen_logfile(void)
 }
 
 /* Hack because there are 2 APIs to strerror_r()  */
-void mystrerror(int errnum, char *buf, size_t buflen) {
+void ntp_strerror_r(int errnum, char *buf, size_t buflen) {
 #ifdef STRERROR_CHAR
 	char *answer = strerror_r(errnum, buf, buflen);
 	if (answer != buf) {

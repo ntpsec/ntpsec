@@ -29,6 +29,7 @@
 #include "nts.h"
 #include "nts2.h"
 #include "ntp_dns.h"
+#include "ntp_stdlib.h"
 
 SSL_CTX* make_ssl_client_ctx(const char *filename);
 int open_TCP_socket(struct peer *peer, const char *hostname);
@@ -104,7 +105,7 @@ bool nts_probe(struct peer * peer) {
 
 	err = setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 	if (0 > err) {
-		mystrerror(errno, errbuf, sizeof(errbuf));
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_ERR, "NTSc: can't setsockopt: %s", errbuf);
 		close(server);
 		nts_ke_probes_bad++;
@@ -295,13 +296,13 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 
 	sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
 	if (-1 == sockfd) {
-		mystrerror(errno, errbuf, sizeof(errbuf));
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", errbuf);
 	} else {
 		// Use first answer
 		err = connect(sockfd, answer->ai_addr, answer->ai_addrlen);
 		if (-1 == err) {
-			mystrerror(errno, errbuf, sizeof(errbuf));
+			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 			msyslog(LOG_INFO, "NTSc: nts_probe: connect failed: %s", errbuf);
 			close(sockfd);
 			sockfd = -1;
@@ -502,7 +503,7 @@ bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct
 
 	*used = buf_size-buf.left;
 	if (*used >= (int)(buf_size - 10)) {
-		mystrerror(errno, errbuf, sizeof(errbuf));
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_ERR, "NTSc: write failed: %d, %ld, %s",
 			*used, (long)buf_size, errbuf);
 		return false;
@@ -683,7 +684,7 @@ bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
 			filename, statbuf.st_mode);
 		return false;
 	}
-	mystrerror(errno, errbuf, sizeof(errbuf));
+	ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 	msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %s",
 		ntsconfig.ca, errbuf);
 	return false;

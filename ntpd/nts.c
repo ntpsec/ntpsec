@@ -260,7 +260,7 @@ int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length) {
 	char errbuf[100];
 	bytes_read = SSL_read(ssl, buff, buff_length);
 	if (0 >= bytes_read) {
-		mystrerror(errno, errbuf, sizeof(errbuf));
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_INFO, "NTS: SSL_read error: %s", errbuf);
 		nts_log_ssl_error();
 		return -1;
@@ -273,7 +273,7 @@ int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length) {
 	char errbuf[100];
 	bytes_written = SSL_write(ssl, buff, buff_length);
 	if (0 >= bytes_written) {
-		mystrerror(errno, errbuf, sizeof(errbuf));
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_INFO, "NTS: SSL_write error: %s", errbuf);
 		nts_log_ssl_error();
 		return -1;
