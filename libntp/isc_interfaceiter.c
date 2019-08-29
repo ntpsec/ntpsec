@@ -258,7 +258,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         if (!seenv6) {
                 iter->proc = fopen("/proc/net/if_inet6", "r");
                 if (iter->proc == NULL) {
-			IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
+			ntp_strerror_r(errno, strbuf, sizeof(strbuf));
 /*                      isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
                                       ISC_LOGMODULE_SOCKET, ISC_LOG_WARNING,
                                       "failed to open /proc/net/if_inet6");
@@ -277,7 +277,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
                         break;
         }
         if (ret < 0) {
-		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
+		ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "getting interface addresses: getifaddrs: %s",
                                  strbuf);
                 result = ISC_R_UNEXPECTED;
@@ -525,7 +525,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
          */
         bufsize = 0;
         if (sysctl(mib, 6, NULL, &bufsize, NULL, (size_t) 0) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "getting interface list size: sysctl: %s",
                                  strbuf);
                 result = ISC_R_UNEXPECTED;
@@ -541,7 +541,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 
         bufused = bufsize;
         if (sysctl(mib, 6, iter->buf, &bufused, NULL, (size_t) 0) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "getting interface list: sysctl: %s",
                                  strbuf);
                 result = ISC_R_UNEXPECTED;
@@ -848,7 +848,7 @@ getbuf4(isc_interfaceiter_t *iter) {
                 if (isc_ioctl(iter->socket, SIOCGIFCONF, (char *)&iter->ifc)
                     == -1) {
                         if (errno != EINVAL) {
-                                strerror_r(errno, strbuf, sizeof(strbuf));
+                                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                                 msyslog(LOG_ERR, "get interface "
                                                  "configuration: %s",
                                                  strbuf);
@@ -918,7 +918,7 @@ getbuf6(isc_interfaceiter_t *iter) {
                 if (isc_ioctl(iter->socket6, SIOCGLIFCONF, (char *)&iter->lifc)
                     == -1) {
                         if (errno != EINVAL) {
-                                strerror_r(errno, strbuf, sizeof(strbuf));
+                                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                                 msyslog(LOG_ERR, "get interface "
                                                  "configuration: %s",
                                                  strbuf);
@@ -1004,7 +1004,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
                  * SIOCGLIFCONF to get IPv6 addresses.
                  */
                 if ((iter->socket6 = socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
-                        strerror_r(errno, strbuf, sizeof(strbuf));
+                        ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                         msyslog(LOG_ERR, "making interface scan socket: %s",
                                          strbuf);
                         result = ISC_R_UNEXPECTED;
@@ -1016,7 +1016,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
         }
 #endif
         if ((iter->socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "making interface scan socket: %s",
                                  strbuf);
                 result = ISC_R_UNEXPECTED;
@@ -1139,7 +1139,7 @@ internal_current4(isc_interfaceiter_t *iter) {
          * and is really hard to shut up.
          */
         if (isc_ioctl(iter->socket, SIOCGIFFLAGS, (char *) &ifreq) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "%s: getting interface flags: %s",
                                  ifreq.ifr_name, strbuf);
                 return (ISC_R_IGNORE);
@@ -1174,7 +1174,7 @@ internal_current4(isc_interfaceiter_t *iter) {
                sizeof(iter->current.address.type.in6));
 
         if (isc_ioctl(iter->socket, SIOCGLIFADDR, &lifreq) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "%s: getting interface address: %s",
                                  ifreq.ifr_name, strbuf);
                 return (ISC_R_IGNORE);
@@ -1213,7 +1213,7 @@ internal_current4(isc_interfaceiter_t *iter) {
                  */
                 if (isc_ioctl(iter->socket, SIOCGIFDSTADDR, (char *)&ifreq)
                     < 0) {
-                        strerror_r(errno, strbuf, sizeof(strbuf));
+                        ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                         msyslog(LOG_ERR, "%s: getting destination address: %s",
                                          ifreq.ifr_name, strbuf);
                         return (ISC_R_IGNORE);
@@ -1231,7 +1231,7 @@ internal_current4(isc_interfaceiter_t *iter) {
                  */
                 if (isc_ioctl(iter->socket, SIOCGIFBRDADDR, (char *)&ifreq)
                     < 0) {
-                        strerror_r(errno, strbuf, sizeof(strbuf));
+                        ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                         msyslog(LOG_ERR, "%s: getting broadcast address: %s",
                                          ifreq.ifr_name, strbuf);
                         return (ISC_R_IGNORE);
@@ -1251,7 +1251,7 @@ internal_current4(isc_interfaceiter_t *iter) {
          * and is really hard to shut up.
          */
         if (isc_ioctl(iter->socket, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "%s: getting netmask: %s",
                                  ifreq.ifr_name, strbuf);
                 return (ISC_R_IGNORE);
@@ -1331,7 +1331,7 @@ internal_current6(isc_interfaceiter_t *iter) {
          * and is really hard to shut up.
          */
         if (isc_ioctl(fd, SIOCGLIFFLAGS, (char *) &lifreq) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "%s: getting interface flags: %s",
                                  lifreq.lifr_name, strbuf);
                 return (ISC_R_IGNORE);
@@ -1370,7 +1370,7 @@ internal_current6(isc_interfaceiter_t *iter) {
                  */
                 if (isc_ioctl(fd, SIOCGLIFDSTADDR, (char *)&lifreq)
                     < 0) {
-                        strerror_r(errno, strbuf, sizeof(strbuf));
+                        ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                         msyslog(LOG_ERR, "%s: getting destination address: %s",
                                          lifreq.lifr_name, strbuf);
                         return (ISC_R_IGNORE);
@@ -1390,7 +1390,7 @@ internal_current6(isc_interfaceiter_t *iter) {
                  */
                 if (isc_ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
                     < 0) {
-                        strerror_r(errno, strbuf, sizeof(strbuf));
+                        ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                         msyslog(LOG_ERR, "%s: getting broadcast address: %s",
                                          lifreq.lifr_name, strbuf);
                         return (ISC_R_IGNORE);
@@ -1434,7 +1434,7 @@ internal_current6(isc_interfaceiter_t *iter) {
          * and is really hard to shut up.
          */
         if (isc_ioctl(fd, SIOCGLIFNETMASK, (char *)&lifreq) < 0) {
-                strerror_r(errno, strbuf, sizeof(strbuf));
+                ntp_strerror_r(errno, strbuf, sizeof(strbuf));
                 msyslog(LOG_ERR, "%s: getting netmask: %s",
                                  lifreq.lifr_name, strbuf);
                 return (ISC_R_IGNORE);
