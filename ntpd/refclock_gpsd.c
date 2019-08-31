@@ -60,12 +60,6 @@
  */
 
 
-/* The strptime prototype is not provided unless explicitly requested.
- * See the POSIX spec for more info:
- * http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01_02
- */
-#define _XOPEN_SOURCE 600
-
 #include "config.h"
 #include "ntp.h"
 #include "ntp_types.h"
