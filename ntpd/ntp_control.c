@@ -2609,7 +2609,7 @@ ctl_getitem(
 		    msyslog(LOG_WARNING,
 			    "Possible 'ntpdx' exploit from %s#%" PRIu16
                             " (possibly spoofed)",
-			    socktoa(rmt_addr), (unsigned)SRCPORT(rmt_addr));
+			    socktoa(rmt_addr), (uint16_t)SRCPORT(rmt_addr));
 	    }
 	reqpt = reqend; /* never again for this packet! */
 	return NULL;
