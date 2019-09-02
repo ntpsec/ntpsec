@@ -26,7 +26,7 @@
 #include <netinet/in.h>                /* Contractual promise. */
 
 #include "isc_netaddr.h"
-#include "isc_error.h"
+#include "ntp_stdlib.h"
 #include "isc_result.h"
 
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;
@@ -54,7 +54,7 @@ try_proto(int domain) {
 			return (ISC_R_NOTFOUND);
 		default:
 			IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
-			UNEXPECTED_ERROR("socket() failed: %s", strbuf);
+			msyslog(LOG_ERR, "socket() failed: %s", strbuf);
 			return (ISC_R_UNEXPECTED);
 		}
 	}
@@ -157,7 +157,7 @@ initialize_ipv6only(void) {
 	s = socket(PF_INET6, SOCK_STREAM, 0);
 	if (s == -1) {
 		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
-		UNEXPECTED_ERROR("socket() failed: %s", strbuf);
+		msyslog(LOG_ERR, "socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
 	}
@@ -174,7 +174,7 @@ initialize_ipv6only(void) {
 	s = socket(PF_INET6, SOCK_DGRAM, 0);
 	if (s == -1) {
 	    IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
-		UNEXPECTED_ERROR("socket() failed: %s", strbuf);
+		msyslog(LOG_ERR, "socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
 	}

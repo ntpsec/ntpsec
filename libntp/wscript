@@ -1,7 +1,6 @@
 def build(ctx):
 
     libntp_source = [
-	#"aes_siv.c",
         "authkeys.c",
         "authreadkeys.c",
         "clocktime.c",
@@ -9,7 +8,6 @@ def build(ctx):
         "dolfptoa.c",
         "getopt.c",
         "initnetwork.c",
-        "isc_error.c",
         "isc_interfaceiter.c",
         "isc_net.c",
         "macencrypt.c",

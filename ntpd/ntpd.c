@@ -14,7 +14,6 @@
 #include "ntp_assert.h"
 #include "ntp_auth.h"
 #include "ntp_dns.h"
-#include "isc_error.h"
 
 #include <unistd.h>
 #include <sys/stat.h>
