@@ -656,28 +656,57 @@ each release.
 
 . Post release announcement
 
-== Release Notes.  Ignore this if you are not Mark
+== Release Prep Steps.  Ignore this if you are not Mark
 
-. start a new Debian 8 instance
+. start a new Debian instance, note it's public IP address, and ssh into it.
 
+LOCAL
 ssh -v -i ~/.ssh/aws-mra.key admin@IPADDRESS
 
+REMOTE
 sudo apt-get update
-
 sudo apt-get install build-essential m4 bison git gnupg libssl-dev emacs-nox python-pip
 
-copy over ssh key fef13aa2242229293c0762d2b4e2f2e0
+. copy over gitlab ssh access key
 
-copy over gpg signing key 0x5A22E330161C3978
+LOCAL
+scp ~/.ssh/gitlab.key  admin@52.91.165.241:.ssh
 
+REMOTE
+cat >> ~/.ssh/config
+Host gitlab.com
+  Hostname gitlab.com
+  User git
+  Port 22
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/gitlab.key
+
+ssh git@gitlab.com  # expect "Welcome to GitLab, @fallenpegasus!"
+
+. clone the repo
+
+REMOTE
+git clone git@gitlab.com:NTPsec/ntpsec.git
+
+. copy over gpg signing key
+
+LOCAL
 gpg --export-secret-key 0x5A22E330161C3978 >secret.gkey
-scp ~/.ssh/aws-mra.key  secret.gkey admin@IPADDRESS:.
+scp secret.gkey admin@IPADDRESS:.
 
-gpg --import-secret-key secret.gkey
+REMOTE
+gpg --import ~/secret.gkey
 GPG_TTY=$(tty); export GPG_TTY
 echo "test" | gpg --clearsign
 
+. setup gitconfig
 
+REMOTE
+
+cat > ~/.gitconfig
+[user]
+        name = Mark Atwood
+        email = mark.atwood@ntpsec.org
 
 
 //end
