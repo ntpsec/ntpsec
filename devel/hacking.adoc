@@ -654,7 +654,9 @@ each release.
 
 . Run the "release" script in this (devel) directory.
 
-. Post release announcement
+. Post release announcement to blog
+
+. Post release announcement to email announce@ntpsec.org, devel@ntpsec.org, gpsd-dev@nongnu.org, ntp@ietf.org, time-nuts@lists.febo.com
 
 == Release Prep Steps.  Ignore this if you are not Mark
 
@@ -663,9 +665,13 @@ each release.
 LOCAL
 ssh -v -i ~/.ssh/aws-mra.key admin@IPADDRESS
 
+. install build dependencies
+
 REMOTE
 sudo apt-get update
 sudo apt-get install build-essential m4 bison git gnupg libssl-dev emacs-nox python-pip
+sudo apt-get install asciidoc xsltproc
+sudo pip install gps
 
 . copy over gitlab ssh access key
 
@@ -702,7 +708,6 @@ echo "test" | gpg --clearsign
 . setup gitconfig
 
 REMOTE
-
 cat > ~/.gitconfig
 [user]
         name = Mark Atwood

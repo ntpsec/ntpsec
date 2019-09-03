@@ -3,7 +3,7 @@
 #
 # VERSION must contain the correct release number.
 
-KEY=161C3978	# Release manager's GPG key ID
+KEY=B48237761A2690222C995F445A22E330161C3978	# Release manager's GPG key ID
 DST=markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
 
 # No user-serviceable parts below this line
@@ -24,7 +24,7 @@ TAR=ntpsec-${V}.tar.gz
 git commit -Ssecurity@ntpsec.org -a -s -m 'version ${V}'
 
 # Tag the new head version
-git tag -u ${K} -m 'version ${V}' NTPsec_${UV}
+git tag -u ${KEY} -m 'version ${V}' NTPsec_${UV}
 
 # Push the repository upstream.
 git push  
