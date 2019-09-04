@@ -181,7 +181,7 @@ extern uint64_t stat_declined(void);
 extern uint64_t stat_limitrejected(void);
 extern uint64_t stat_kodsent(void);
 extern uptime_t stat_use_stattime(void);
-extern void set_use_stattime(uptime_t stime);
+extern void set_use_stattime(uptime_t stattime);
 
 
 

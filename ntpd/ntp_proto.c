@@ -226,8 +226,8 @@ uptime_t stat_use_stattime(void)
   return stat_count.sys_stattime;
 }
 
-void set_use_stattime(uptime_t stime) {
-  stat_count.sys_stattime = stime;
+void set_use_stattime(uptime_t stattime) {
+  stat_count.sys_stattime = stattime;
 }
 
 
