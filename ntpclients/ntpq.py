@@ -1723,7 +1723,7 @@ if __name__ == '__main__':
             for ihost in interpreter.chosts:
                 if session.openhost(*ihost):
                     for command in interpreter.ccmds:
-                        interpreter.onecmd(command)
+                        interpreter.onecmd(interpreter.precmd(command))
                     session.close()
         raise SystemExit(0)
     except (KeyboardInterrupt, EOFError):
