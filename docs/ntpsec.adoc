@@ -317,10 +317,9 @@ to the security-critical core.
 [[future]]
 == Future directions
 
-* We intend to fully support Network Time Security and to be first or
-  second interop on that standard once it is finalized.  At that
-  point, older insecure authentication methods (MAC and MS-SNTP) may
-  be removed.
+* Now that we have full Network Time Security, a neasr-future
+  direction is to remove older insecure authentication methods (MAC
+  and MS-SNTP).
 
 '''''
 
