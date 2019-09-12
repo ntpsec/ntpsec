@@ -272,7 +272,7 @@ to the security-critical core.
 
 * You can now turn off restriction flags with an _unrestrict_
   statement that takes arguments exactly like a _restrict_. With
-  no aruments it removes any rule matching the address mask
+  no arguments it removes any rule matching the address mask
   entirely.  This is expected to be useful mainly with the "ntpq
   :config" command.
 
