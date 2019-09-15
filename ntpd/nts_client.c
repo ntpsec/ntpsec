@@ -395,7 +395,14 @@ bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
 			hostname, SSL_get_version(ssl));
 		return bad;
 	}
-	strlcpy(buff, (const char*)data, sizeof(buff));	/* NUL terminate */
+	if (sizeof(buff) <= len) {
+		/* Broken or malicious server */
+		msyslog(LOG_DEBUG, "NTSc: Very long ALPN from %s (%u)",
+			hostname, len);
+		return bad;
+	}
+	memcpy(buff, data, len);
+	buff[len] = '\0';
 	for (i=0; i<len; i++) {
 		if (!isgraph(buff[i])) {
 			buff[i] = '*'; /* fix non-printing crap */
@@ -404,7 +411,8 @@ bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
 	/* For now, we only support one version.
 	 * This gets more complicated when version 2 arrives. */
 	if (0 != strcmp((const char*)data, "ntske/1")) {
-		msyslog(LOG_DEBUG, "NTSc: Strange ALPN returned: %s (%u)", buff, len);
+		msyslog(LOG_DEBUG, "NTSc: Strange ALPN returned: %s (%u) from %s",
+			buff, len, hostname);
 		return bad;
 	}
         msyslog(LOG_DEBUG, "NTSc: Good ALPN from: %s", hostname);
