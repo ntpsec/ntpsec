@@ -47,6 +47,22 @@ struct ntsconfig_t ntsconfig = {
 
 void nts_init(void) {
 	bool ok = true;
+#if (OPENSSL_VERSION_NUMBER > 0x101000afL)
+	unsigned long buildVersion = OPENSSL_VERSION_NUMBER;
+	msyslog(LOG_INFO, "INIT: %s, %lx",
+		OpenSSL_version(OPENSSL_VERSION),
+		OpenSSL_version_num());
+	/* Assuming we are built with 1.1.1c
+         *   This allows running with 1.1.1d
+	 *   It won't allow running with 1.0.0x
+	 * Maybe we should reject trying to run with 1.2.1x
+	 */
+	if (buildVersion > OpenSSL_version_num()) {
+		msyslog(LOG_ERR, "INIT: running with old OpenSSL library: %lx, %lx, bailing",
+			buildVersion, OpenSSL_version_num());
+		exit(1);
+	}
+#endif
 	if (ntsconfig.ntsenable) {
 		ok &= nts_server_init();
 	}
