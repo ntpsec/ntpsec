@@ -547,9 +547,10 @@ int main(int argc, char **argv) {
     if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
         ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
         ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
-    elif ctx.env.DEST_OS == "netbsd":
-        ctx.env.PLATFORM_INCLUDES = ["/usr/pkg/include"]
-        ctx.env.PLATFORM_LIBPATH = ["/usr/lib", "/usr/pkg/lib"]
+    elif ctx.env.DEST_OS == "netbsd" and os.path.isdir("/usr/pkg/include"):
+        ctx.env.INCLUDES = ["/usr/pkg/include"]
+        ctx.env.LIBPATH = ["/usr/pkg/lib"]
+        ctx.env.LDFLAGS += ["-rpath=/usr/pkg/lib"]
     elif ctx.env.DEST_OS == "win32":
         ctx.load("msvc")
     elif ctx.env.DEST_OS == "darwin":
