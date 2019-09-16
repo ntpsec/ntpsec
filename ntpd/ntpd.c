@@ -804,13 +804,8 @@ ntpdmain(
 	{
 	    struct rlimit rlim;
 	    rlim.rlim_max = rlim.rlim_cur = RLIM_INFINITY;
-#ifdef RLIMIT_MEMLOCK
 	    if (setrlimit(RLIMIT_MEMLOCK, &rlim) < 0)
 		msyslog(LOG_WARNING, "INIT: setrlimit() failed: not locking into RAM");
-	    else
-#endif
-	    if (mlockall(MCL_CURRENT|MCL_FUTURE) < 0)
-		msyslog(LOG_WARNING, "INIT: mlockall() failed: not locking into RAM");
 	    else
 		msyslog(LOG_INFO, "INIT: successfully locked into RAM");
 	}

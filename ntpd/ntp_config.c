@@ -3632,13 +3632,10 @@ ntp_rlimit(
 #endif
 
 	switch (rl_what) {
-#ifdef RLIMIT_MEMLOCK
 	    case RLIMIT_MEMLOCK:
 		/* ignore - for backward compatibility only */
 		break;
-#endif /* RLIMIT_MEMLOCK */
 
-#ifdef RLIMIT_NOFILE
 	    case RLIMIT_NOFILE:
 		/*
 		 * For large systems the default file descriptor limit may
@@ -3650,9 +3647,7 @@ ntp_rlimit(
 		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
 			msyslog(LOG_ERR, "CONFIG: Cannot set RLIMIT_NOFILE: %s", strerror(errno));
 		break;
-#endif /* RLIMIT_NOFILE */
 
-#ifdef RLIMIT_STACK
 	    case RLIMIT_STACK:
 		/*
 		 * Provide a way to set the stack limit to something
@@ -3678,7 +3673,6 @@ ntp_rlimit(
 			}
 		}
 		break;
-#endif /* RLIMIT_STACK */
 
 	    default:
 		INSIST(!"Unexpected setrlimit() case!");
