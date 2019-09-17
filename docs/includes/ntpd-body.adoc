@@ -75,7 +75,7 @@ the IPv6 namespace.
 +-c+ _string_, +--configfile+=_string_::
   configuration file name.
 +
-The name and path of the configuration file, +/etc/{ntpconf}+ by
+The name and path of the configuration file, `/etc/{ntpconf}` by
 default.
 
 +-d+, +--debug-level+::
@@ -91,7 +91,7 @@ default.
 +
 The name and path of the frequency file, +/etc/ntp.drift+ by default.
 This is the same operation as the _driftfile_
-configuration specification in the +/etc/{ntpconf}+ file.
+configuration specification in the `/etc/{ntpconf}` file.
 
 +-g+, +--panicgate+::
   Allow the first adjustment to be big. This option may appear an
@@ -503,7 +503,7 @@ as described in {ntpdconfman}.
 [options="header"]
 |===================================================================
 |File                    |Default           |Option      |Option
-|configuration file      |+/etc/{ntpconf}+  |+-c+        |+conffile+
+|configuration file      |`/etc/{ntpconf}`  |+-c+        |+conffile+
 |configuration directory |+/etc/ntp.d+      |+-c+        |+conffile+
 |frequency file          |none              |+-f+        |+driftfile+
 |leapseconds file        |none              |            |+leapfile+
@@ -516,7 +516,7 @@ as described in {ntpdconfman}.
 
 Configuration files are parsed according to the following rules:
 
-. The plain config file (normally +/etc/{ntpconf}+ but the path can be
+. The plain config file (normally `/etc/{ntpconf}` but the path can be
   overridden by the -c option) is read first if it exists.
 
 . Then the configuration directory, if it exists, is scanned. Normally
