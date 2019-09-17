@@ -1,6 +1,6 @@
 = ntplogtemp(1)
 :man version: @NTPSEC_VERSION@
-include::../docs/manual.include[]
+include::../docs/include-man.ad[]
 
 ntplogtemp - log temperature data
 

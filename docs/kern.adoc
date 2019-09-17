@@ -1,5 +1,5 @@
 = Kernel Model for Precision Timekeeping
-include::html.include[]
+include::include-html.ad[]
 
 image:pic/alice61.gif[]
 {millshome}pictures.html[from 'Pogo', Walt Kelly]

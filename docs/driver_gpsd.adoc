@@ -1,5 +1,5 @@
 = GPSD JSON client driver
-include::html.include[]
+include::include-html.ad[]
 
 
 == Synopsis

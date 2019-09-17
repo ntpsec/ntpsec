@@ -1,5 +1,5 @@
 = Generic Reference Driver
-include::html.include[]
+include::include-html.ad[]
 
 == Name
 

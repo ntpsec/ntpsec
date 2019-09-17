@@ -1,5 +1,5 @@
 = TrueTime GPS/GOES Receivers
-include::html.include[]
+include::include-html.ad[]
 
 == Synopsis
 

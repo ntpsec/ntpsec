@@ -1,5 +1,5 @@
 = Motorola Oncore GPS receiver
-include::html.include[]
+include::include-html.ad[]
 
 == Synopsis
 

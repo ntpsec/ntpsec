@@ -1,5 +1,5 @@
 = ntploggps - log gpsd data for use by ntpviz
-include::html.include[]
+include::include-html.ad[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

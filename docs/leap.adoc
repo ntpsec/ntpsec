@@ -1,5 +1,5 @@
 = Leap Second Processing
-include::html.include[]
+include::include-html.ad[]
 
 Every six months the International Earth Rotation Service
 (IERS) issues a bulletin announcing if there will be a leap second in

@@ -1,6 +1,6 @@
 = ntpsweep(1)
 :man version: @NTPSEC_VERSION@
-include::../docs/manual.include[]
+include::../docs/include-man.ad[]
 
 ntpsweep - print various information about given NTP servers
 

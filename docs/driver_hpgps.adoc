@@ -1,5 +1,5 @@
 = Hewlett Packard GPS Receivers -  HP 58503A and HP Z3801A
-include::html.include[]
+include::include-html.ad[]
 
 == Synopsis
 

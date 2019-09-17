@@ -1,5 +1,5 @@
 = Zyfer GPStarplus Receiver
-include::html.include[]
+include::include-html.ad[]
 
 == Synopsis
 

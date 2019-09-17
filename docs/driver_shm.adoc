@@ -1,5 +1,5 @@
 = Shared Memory Driver
-include::html.include[]
+include::include-html.ad[]
 
 == Synopsis
 

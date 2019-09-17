@@ -1,6 +1,7 @@
+` `
 :doctype: manpage
 :man source: NTPsec
 :man manual: NTPsec
-include::asciidoc.include[]
+include::include.ad[]
 
 == NAME ==

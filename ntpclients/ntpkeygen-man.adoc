@@ -1,6 +1,6 @@
 = ntpkeygen(8)
 :man version: @NTPSEC_VERSION@
-include::../docs/manual.include[]
+include::../docs/include-man.ad[]
 
 ntpkeygen - create and manage NTP host keys
 

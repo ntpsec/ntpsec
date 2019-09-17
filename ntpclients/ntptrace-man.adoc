@@ -1,6 +1,6 @@
 = ntptrace(1)
 :man version: @NTPSEC_VERSION@
-include::../docs/manual.include[]
+include::../docs/include-man.ad[]
 
 ntptrace - trace peers of an NTP server
 

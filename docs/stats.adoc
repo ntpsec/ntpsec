@@ -1,5 +1,5 @@
 = Performance Metrics
-include::html.include[]
+include::include-html.ad[]
 
 == Related Links
 

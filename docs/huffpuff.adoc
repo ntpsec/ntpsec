@@ -1,5 +1,5 @@
 = The Huff-n'-Puff Filter
-include::html.include[]
+include::include-html.ad[]
 
 In scenarios where a considerable amount of data are downloaded or
 uploaded using DSL or telephone modem lines, timekeeping quality can be

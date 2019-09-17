@@ -1,5 +1,5 @@
 = ntplogtemp - log system temperature data for use by ntpviz
-include::html.include[]
+include::include-html.ad[]
 //FIXME: Image duplicates the one used for panda.adoc
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]

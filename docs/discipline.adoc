@@ -1,5 +1,5 @@
 = Clock Discipline Algorithm
-include::html.include[]
+include::include-html.ad[]
 
 == Table of Contents
 

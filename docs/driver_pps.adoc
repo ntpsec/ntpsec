@@ -1,5 +1,5 @@
 = PPS Clock Discipline
-include::html.include[]
+include::include-html.ad[]
 
 == Synopsis
 

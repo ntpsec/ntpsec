@@ -1,6 +1,6 @@
 = ntp.keys(5)
 :man version: @NTPSEC_VERSION@
-include::../docs/manual.include[]
+include::../docs/include-man.ad[]
 
 ntp.keys - NTP symmetric key file format
 
