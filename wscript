@@ -544,21 +544,19 @@ int main(int argc, char **argv) {
     ctx.env.CFLAGS = ['-DUNITY_EXCLUDE_FLOAT_PRINT'] + ctx.env.CFLAGS
 
     # XXX: hack
-    if ctx.env.DEST_OS in ["freebsd", "openbsd"]:
-        ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
-        ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
+    if ctx.env.DEST_OS in ["freebsd"]:
+        ctx.env.INCLUDES = ["/usr/local/include"]
+        ctx.env.LIBPATH = ["/usr/local/lib"]
     elif ctx.env.DEST_OS == "netbsd" and os.path.isdir("/usr/pkg/include"):
         ctx.env.INCLUDES = ["/usr/pkg/include"]
         ctx.env.LIBPATH = ["/usr/pkg/lib"]
         ctx.env.LDFLAGS += ["-rpath=/usr/pkg/lib"]
-    elif ctx.env.DEST_OS == "win32":
-        ctx.load("msvc")
     elif ctx.env.DEST_OS == "darwin":
         # macports location
         if os.path.isdir("/opt/local/include"):
-            ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
+            ctx.env.INCLUDES = ["/opt/local/include"]
         if os.path.isdir("/opt/local/lib"):
-            ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
+            ctx.env.LIBPATH = ["/opt/local/lib"]
         # OS X needs this for IPv6
         ctx.define("__APPLE_USE_RFC_3542", 1,
                    comment="Needed for IPv6 support")

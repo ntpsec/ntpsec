@@ -59,7 +59,7 @@ def build(ctx):
         target="test_libntp",
         install_path=None,
         defines=unity_config + ["TEST_LIBNTP=1"],
-        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "common"] + ctx.env.PLATFORM_INCLUDES,
+        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "common"],
         use="unity ntp parse M PTHREAD CRYPTO RT SOCKET NSL",
         source=libntp_source,
     )
@@ -77,7 +77,7 @@ def build(ctx):
         ctx.ntp_test(
             defines=unity_config + ["TEST_LIBPARSE=1"],
             features="c cprogram test",
-            includes=[ctx.bldnode.parent.abspath(), "../include", "unity"] + ctx.env.PLATFORM_INCLUDES,
+            includes=[ctx.bldnode.parent.abspath(), "../include", "unity"],
             install_path=None,
             lib=["parse"],
             libpath=["libparse"],

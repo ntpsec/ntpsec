@@ -41,7 +41,7 @@ def build(ctx):
     # C library
     ctx(
         features="c cstlib",
-        includes=[ctx.bldnode.parent.abspath(), "../include"] + ctx.env.PLATFORM_INCLUDES,
+        includes=[ctx.bldnode.parent.abspath(), "../include"],
         source=libntp_source + libntp_source_sharable,
         target="ntp",
         use="SSL CRYPTO",
@@ -51,7 +51,7 @@ def build(ctx):
     ctx(
         features="c cshlib pyext",
         install_path='${PYTHONARCHDIR}/ntp',
-        includes=[ctx.bldnode.parent.abspath(), "../include"] + ctx.env.PLATFORM_INCLUDES,
+        includes=[ctx.bldnode.parent.abspath(), "../include"],
         source=["pymodule.c"] + libntp_source_sharable,
         target="../pylib/ntpc",  # Put the output in the pylib directory
         use="M RT CRYPTO",

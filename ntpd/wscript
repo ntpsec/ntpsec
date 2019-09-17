@@ -60,7 +60,7 @@ def build(ctx):
 
     ctx(
         features="c",
-        includes=[ctx.bldnode.parent.abspath(), "../include", "../libaes_siv"] + ctx.env.PLATFORM_INCLUDES,
+        includes=[ctx.bldnode.parent.abspath(), "../include", "../libaes_siv"],
         source=libntpd_source,
         target="libntpd_obj",
         use="CRYPTO aes_siv",
@@ -121,8 +121,7 @@ def build(ctx):
         features="c rtems_trace cprogram",
         includes=[
             ctx.bldnode.parent.abspath(), "../include",
-            "%s/host/ntpd/" % ctx.bldnode.parent.abspath(), "."
-        ] + ctx.env.PLATFORM_INCLUDES,
+            "%s/host/ntpd/" % ctx.bldnode.parent.abspath(), "." ],
         install_path='${SBINDIR}',
         source=ntpd_source,
         target="ntpd",
