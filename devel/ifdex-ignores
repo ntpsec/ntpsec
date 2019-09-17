@@ -41,12 +41,6 @@ DEBUG_PARSELIB		# Enable debugging in the parse library.
 NTP_DEBUG_LISTS		# Debug list handling
 DEBUG_PPS720		# Only in refclock_true.c
 
-# AIX and Solaris had at one time a bug in the way they declared
-# PTHREAD_ONCE_INIT.  This enables a workaround.  It may no longer be
-# needed, so let's wait on report rather than pre-complexifying the
-# waf logic.
-ISC_PLATFORM_BRACEPTHREADONCEINIT
-
 # This is from a Python compatibility hack
 PY_MAJOR_VERSION
 
