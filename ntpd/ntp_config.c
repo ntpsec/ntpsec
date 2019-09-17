@@ -1897,27 +1897,17 @@ config_rlimit(
 			break;
 
 		case T_Stacksize:
-#if defined(RLIMIT_STACK)
 			ntp_rlimit(RLIMIT_STACK,
 				   (rlim_t)(rlimit_av->value.i * 4096),
 				   4096,
 				   "4k");
-#else
-			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "CONFIG: 'rlimit stacksize' specified but is not available on this system.");
-#endif /* RLIMIT_STACK */
 			break;
 
 		case T_Filenum:
-#if defined(RLIMIT_NOFILE)
 			ntp_rlimit(RLIMIT_NOFILE,
 				  (rlim_t)(rlimit_av->value.i),
 				  1,
 				  "");
-#else
-			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "CONFIG: 'rlimit filenum' specified but is not available on this system.");
-#endif /* RLIMIT_NOFILE */
 			break;
 
 		}
@@ -3632,9 +3622,6 @@ ntp_rlimit(
 #endif
 
 	switch (rl_what) {
-	    case RLIMIT_MEMLOCK:
-		/* ignore - for backward compatibility only */
-		break;
 
 	    case RLIMIT_NOFILE:
 		/*
