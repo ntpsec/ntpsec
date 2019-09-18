@@ -98,7 +98,6 @@ extern	const char * res_match_flags(unsigned short);
 extern	const char * res_access_flags(unsigned short);
 extern	const char * k_st_flags	(uint32_t);
 extern	char *	statustoa	(int, int);
-extern	sockaddr_u * netof6	(sockaddr_u *);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * socktoa_r	(const sockaddr_u *sock, char *buf, size_t buflen);
 extern	const char * sockporttoa(const sockaddr_u *);

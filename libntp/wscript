@@ -13,7 +13,6 @@ def build(ctx):
         "isc_interfaceiter.c",
         "isc_net.c",
         "macencrypt.c",
-        "netof.c",
         "ntp_endian.c",
         "numtoa.c",
         "refidsmear.c",

@@ -43,7 +43,6 @@ def build(ctx):
         "libntp/lfpfunc.c",
         "libntp/lfptostr.c",
         "libntp/macencrypt.c",
-        "libntp/netof.c",
         "libntp/numtoa.c",
         "libntp/prettydate.c",
         "libntp/refidsmear.c",
