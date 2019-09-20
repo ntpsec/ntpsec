@@ -1893,7 +1893,7 @@ config_rlimit(
 			break;
 
 		case T_Memlock:
-			/* ignore, for backward compatibility */
+			msyslog(LOG_WARNING, "CONFIG: memlock ignored");
 			break;
 
 		case T_Stacksize:
