@@ -26,23 +26,6 @@ include:
   stage: build
   except:
     - schedules
-  artifacts:
-    expire_in: 7d
-    paths:
-      - build/main/attic/sht
-      - build/main/ntpclients/ntpdig
-      - build/main/ntpclients/ntpkeygen
-      - build/main/ntpclients/ntpleapfetch
-      - build/main/ntpclients/ntploggps
-      - build/main/ntpclients/ntplogtemp
-      - build/main/ntpclients/ntpmon
-      - build/main/ntpclients/ntpq
-      - build/main/ntpclients/ntpsweep
-      - build/main/ntpclients/ntptrace
-      - build/main/ntpclients/ntpviz
-      - build/main/ntpclients/ntpwait
-      - build/main/ntpd/ntpd
-      - build/main/ntpfrob/ntpfrob
 
 alpine-basic:
   <<: *job_definition
