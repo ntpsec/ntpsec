@@ -284,7 +284,7 @@ if __name__ == '__main__':
         sysvars = session.readvar(raw=True)
         with OutputContext() as ctx:
             while True:
-                stdscr.clear()
+                stdscr.erase()
                 stdscr.addstr(0, 0, u"".encode('UTF-8'))
                 if helpmode:
                     stdscr.addstr(__doc__.encode('UTF-8'))
