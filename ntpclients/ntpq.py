@@ -257,7 +257,8 @@ usage: help [ command ]
                     continue
                 if len(self.chosts) > 1:
                     self.say(ntp.util.PeerSummary.high_truncate(
-                             self.session.hostname, maxhostlen) + " ")
+                             self.session.hostname, maxhostlen) + " " *
+                             (maxhostlen + 1 - len(self.session.hostname)))
                 self.say(report.summary(self.session.rstatus,
                                         variables, peer.associd))
         except KeyboardInterrupt:
