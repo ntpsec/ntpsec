@@ -71,7 +71,7 @@ class Ntpq(cmd.Cmd):
         #  so I am leaving them, and possibly duplicating them.
         self.rawmode = False            # Flag which indicates raw mode output.
         self.directmode = False         # Flag for direct MRU output.
-        self.showhostnames = True       # If false, display numeric IPs
+        self.showhostnames = 1          # If & 1 false, display numeric IPs
         self.showunits = False          # If False, show old style float
         self.auth_delay = 20            # delay time (default 20msec)
         self.wideremote = False         # show wide remote names?
@@ -442,7 +442,7 @@ usage: timeout [ msec ]
                 value = queried[name][0]
                 rawvalue = queried[name][1]
                 if fmt in (NTP_ADD, NTP_ADP):
-                    if self.showhostnames:
+                    if self.showhostnames[0]:
                         if self.debug:
                             self.say("DNS lookup begins...")
                         value = ntp.util.canonicalize_dns(
@@ -563,20 +563,29 @@ usage: passwd []
         if not line:
             pass
         elif line == "yes":
-            self.showhostnames = True
+            self.showhostnames = 1
         elif line == "no":
-            self.showhostnames = False
+            self.showhostnames = 0
+        elif line == 'hostnum':
+            self.showhostnames = 2
+        elif line == 'hostname':
+            self.showhostnames = 3
         else:
             self.say("What?\n")
-        if self.showhostnames:
-            self.say("hostnames being shown\n")
+            pass
+        if self.showhostnames & 1:
+            self.say('resolved hostnames being shown\n')
         else:
-            self.say("hostnames not being shown\n")
+            self.say('resolved hostnames not being shown\n')
+        if self.showhostnames & 2:
+            self.say('supplied hostnames being shown\n')
+        else:
+            self.say('supplied hostnames not being shown\n')
 
     def help_hostnames(self):
         self.say("""\
 function: specify whether hostnames or net numbers are printed
-usage: hostnames [yes|no]
+usage: hostnames [yes|no|hostname|hostnum]
 """)
 
     def do_debug(self, line):
@@ -1610,12 +1619,12 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(
             sys.argv[1:],
-            "46a:c:dD:hk:npVwW:ul:",
+            "46a:c:dD:hk:npsSVwW:ul:",
             ["ipv4", "ipv6", "authentication=",
              "command=", "debug", "set-debug-level=",
              "help", "keyfile", "numeric", "peers",
              "version", "wide", "width=", "units",
-             "logfile="])
+             "logfile=", "srcname", "srcnumber"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1650,11 +1659,15 @@ if __name__ == '__main__':
             sys.stderr.write(usage)
             raise SystemExit(0)
         elif switch in ("-n", "--numeric"):
-            interpreter.showhostnames = False
+            interpreter.showhostnames = 0
         elif switch in ("-p", "--peers"):
             interpreter.ccmds.append("peers")
         elif switch in ("-k", "--keyfile"):
             keyfile = val
+        elif switch in ("-s", "--srcname"):
+            interpreter.showhostnames = 3
+        elif switch in ("-S", "--srcnumber"):
+            interpreter.showhostnames = 2
         elif switch in ("-V", "--version"):
             sys.stdout.write("ntpq %s\n" % version)
             raise SystemExit(0)

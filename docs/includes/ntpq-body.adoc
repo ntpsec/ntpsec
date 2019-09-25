@@ -79,6 +79,12 @@ read interactive format commands from the standard input.
   converting to the canonical host names.  You may get hostnames
   anyway for peers in the initialization phase before DNS has resolved
   the peer name.
++-s+, +--srcname+::
+  Output host adresses by: Names passed to ntpd, then names reverse
+  resolved from addresses and finally, ip addresses themselves 
++-S+, +--srcnumber+::
+  Output host adresses by: Names passed to ntpd, then ip addresses
+  themselves 
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
   their state; this is equivalent to the +peers+ interactive command.

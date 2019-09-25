@@ -1139,7 +1139,9 @@ class PeerSummary:
                 and srcadr != "0.0.0.0" \
                 and not srcadr.startswith("127.127") \
                 and srcadr != "::":
-            if self.showhostnames:
+            if self.showhostnames & 2 and 'srchost' in locals() and srchost:
+                clock_name = srchost
+            elif self.showhostnames & 1:
                 try:
                     if self.debug:
                         self.logfp.write("DNS lookup begins...\n")
@@ -1231,7 +1233,7 @@ class MRUSummary:
         self.debug = debug
         self.logfp = logfp
         self.now = None
-        self.showhostnames = showhostnames      # If false, display numeric IPs
+        self.showhostnames = showhostnames  # If not [0], display numeric IPs
         self.wideremote = wideremote
 
     header = " lstint avgint rstr r m v  count    score   drop rport remote address"
@@ -1267,7 +1269,7 @@ class MRUSummary:
             rscode = '.'
         (ip, port) = portsplit(entry.addr)
         try:
-            if not self.showhostnames:
+            if not self.showhostnames & 1:
                 dns = ip
             else:
                 dns = canonicalize_dns(ip)
