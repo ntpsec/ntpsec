@@ -56,7 +56,7 @@ the general structure of an NTP packet (Figure 8):
       |                          Key Identifier                       |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |                                                               |
-      |                            dgst (128)                         |
+      |                           digest (128)                        |
       |                                                               |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
@@ -66,7 +66,7 @@ Stratum and all following fields zeroed out to byte 47.
 
 How to interpret these fields:
 
-Mode is decoded as follows:
+The modes are as follows:
 
 +-------+--------------------------+
 | Value | Meaning                  |
@@ -96,7 +96,7 @@ which the request was received.
 t_3, the transmit timestamp, is the time according to the server at
 which the reply was sent.
 
-You also need t_4, the destination timestamp, is the time according to
+You also need t_4, the destination timestamp, which is the time according to
 the client at which the reply was received.  This is not in the reply packet,
 it's the packet receipt time collected by the client.
 
@@ -114,7 +114,7 @@ estimate is predicated upon network latency being symmetrical.
 
 Delta is the network round trip time, i.e. (t_4-t_1)-(t_3-t_2). Here's
 how the terms work: (t_4-t_1) is the total time that the request was
-in flight, and (t_3-t_2) is time that the server spent processing it;
+in flight, and (t_3-t_2) is the time that the server spent processing it;
 when you subtract that out you're left with just network delays.
 
 Lambda nominally represents the maximum amount by which theta could be
@@ -143,7 +143,7 @@ If you look at the raw data, there are 3 unknowns:
    * clock offset
 but there are only two equations, so you can't solve it.
 
-NTP gets a 3rd equation by assuming the transit times are equal.  That lets
+NTP gets the 3rd equation by assuming the transit times are equal.  That lets
 it solve for the clock offset.
 
 If you assume that both clocks are accurate which is reasonable if you have
@@ -153,7 +153,7 @@ direction.
 The RFC 5905 diagram is slightly out of date in that the digest header assumes
 a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
 128-bit AES_CMAC hash or 160-bit (20-octet) SHA-1 hash.  NTPsec will
-support any 128- or 160-bit MAC type in lincrypto.
+support any 128- or 160-bit MAC type in libcrypto.
 
 An extension field consists of a 16-bit network-order type field
 length, followed by a 16-bit network-order payload length in octets,
@@ -189,11 +189,11 @@ Here's what a Mode 6 packet looks like:
       |                          Key Identifier                       |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |                                                               |
-      |                            dgst (128)                         |
+      |                           digest (128)                        |
       |                                                               |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-In this case the fixed header is 24 bytes long.
+In this case, the fixed header is 24 bytes long.
 
 R = Response bit
 E = Error bit
