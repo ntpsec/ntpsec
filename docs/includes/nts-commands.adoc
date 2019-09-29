@@ -108,7 +108,7 @@ The following options of the +server+ command configure NTS (as a client).
   with their hash, as created by +openssl rehash+.
 
 +aead+ _string_::
-  Specify the prefered crypto algorithm to be used on the wire.
+  Specify the preferred crypto algorithm to be used on the wire.
   The only options supported are AES_SIV_CMAC_256, AES_SIV_CMAC_384, and
   AES_SIV_CMAC_512.  The server may ignore the request.  See the +aead+
   option above.
