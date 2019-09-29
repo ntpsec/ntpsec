@@ -63,6 +63,7 @@
 #include "config.h"
 #include "ntp.h"
 #include "ntp_types.h"
+#include "ntp_debug.h"
 
 /* =====================================================================
  * Get the little JSMN library directly into our guts. Use the 'parent
@@ -2157,6 +2158,12 @@ log_data(
 	const char *buf ,
 	size_t      len )
 {
+#ifndef DEBUG
+	UNUSED_ARG(peer);
+	UNUSED_ARG(what);
+	UNUSED_ARG(buf);
+	UNUSED_ARG(len);
+#else
 	char s_lbuf[MAX_PDU_LEN];
 
 	clockprocT * const pp = peer->procptr;
@@ -2186,5 +2193,6 @@ log_data(
 		*dptr = '\0';
 		printf("%s[%s]: '%s'\n", up->logname, what, s_lbuf);
 	}
+#endif
 }
 

@@ -11,7 +11,6 @@
 #include <errno.h>
 #include <stdarg.h>
 
-#include "declcond.h"	/* ntpd uses ntpd/declcond.h, others include/ */
 #include "ntp_net.h"
 #include "ntp_debug.h"
 #include "ntp_malloc.h"

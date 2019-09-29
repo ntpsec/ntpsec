@@ -288,7 +288,7 @@ decode_bitflags(
 	char *		lim;
 	size_t		b;
 	int		rc;
-	int		saved_errno;	/* for use in DPRINT/TPRINT with strerror(errno) */
+	int		saved_errno;	/* for use in DPRINT with strerror(errno) */
 
 	saved_errno = errno;
 	buf = lib_getbuf();

@@ -79,7 +79,7 @@ move_fd(
 	if (socket_boundary == -1) {
 		socket_boundary = max(0, min(sysconf(_SC_OPEN_MAX) - FD_CHUNK,
 					     min(FOPEN_MAX, FD_PREFERRED_SOCKBOUNDARY)));
-		TPRINT(1, ("move_fd: estimated max descriptors: %d, "
+		DPRINT(1, ("move_fd: estimated max descriptors: %d, "
 			   "initial socket boundary: %d\n",
 			   (int)sysconf(_SC_OPEN_MAX), socket_boundary));
 	}
@@ -103,7 +103,7 @@ move_fd(
 			return fd;
 		}
 		socket_boundary = max(0, socket_boundary - FD_CHUNK);
-		TPRINT(1, ("move_fd: selecting new socket boundary: %d\n",
+		DPRINT(1, ("move_fd: selecting new socket boundary: %d\n",
 			   socket_boundary));
 	} while (socket_boundary > 0);
 #else

@@ -329,7 +329,7 @@ change_logfile(
 				 log_fname);
 		} else
 			abs_fname = estrdup(log_fname);
-		TPRINT(1, ("attempting to open log %s\n", abs_fname));
+		DPRINT(1, ("attempting to open log %s\n", abs_fname));
 		new_file = fopen(abs_fname, "a");
 	}
 
