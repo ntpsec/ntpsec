@@ -3,14 +3,6 @@
 //        Schweitzer Engineering Laboratories, Inc. <opensource@selinc.com>
 //////////////////////////////////////////////////////////////////////////////
 
-// Need to have _XOPEN_SOURCE properly defined for time.h to give the
-// correct strptime signature.  As per feature_test_macros(7),
-// define this before including any header files.
-
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE	600
-#endif
-
 #include "config.h"
 #include "ntp.h"	/* only for the u_* typedefs from GCC; remove someday */
 #include "ntp_syslog.h"
