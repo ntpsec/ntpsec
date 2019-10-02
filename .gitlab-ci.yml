@@ -267,8 +267,8 @@ centos-latest-basic:
   <<: *job_definition
   image: centos:latest
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure build
+    - dnf -y install bison gcc openssl-devel libcap-devel python3-devel
+    - python3 ./waf configure build
   tags:
     - gitlab-org
 
@@ -276,8 +276,8 @@ centos-latest-refclocks:
   <<: *job_definition
   image: centos:latest
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python-devel
-    - python ./waf configure --refclock=all build
+    - dnf -y --enablerepo=PowerTools install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel
+    - python3 ./waf configure --refclock=all build
   tags:
     - gitlab-org
 
