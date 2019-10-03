@@ -243,7 +243,7 @@ def configure(ctx):
     #      if >=200112L, all of IEEE 1003.1-2004
     #      if >=200809L, all of IEEE 1003.1-2008
     #
-    # FIXME: We'd like this to be -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=600
+    # FIXME: We'd like this to be -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
     # rather than -D_GNU_SOURCE, but that runs into problems in two places:
     # (1) The ISC net handling stuff, where struct in6_addr’ loses a member
     # named s6_addr32 that the macros need, and (2) three BSD functions
