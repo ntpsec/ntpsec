@@ -19,18 +19,22 @@ cmd_map = {
     ("main/ntpfrob/ntpfrob", "-V"): "ntpfrob %s\n" % verStr,
     ("main/ntptime/ntptime", "-V"): "ntptime %s\n" % verStr
 }
-cmd_map2 = {
+cmd_map_python = {
     ("main/ntpclients/ntpdig", "--version"): "ntpdig %s\n" % verStr,
     ("main/ntpclients/ntpkeygen", "--version"): "ntpkeygen %s\n" % verStr,
     ("main/ntpclients/ntpq", "--version"): "ntpq %s\n" % verStr,
-    ("main/ntpclients/ntplogtemp", "--version"): "ntplogtemp %s\n" % verStr,
     ("main/ntpclients/ntpsnmpd", "--version"): "ntpsnmpd %s\n" % verStr,
     ("main/ntpclients/ntpsweep", "--version"): "ntpsweep %s\n" % verStr,
     ("main/ntpclients/ntptrace", "--version"): "ntptrace %s\n" % verStr,
-    ("main/ntpclients/ntpviz", "--version"): "ntpviz %s\n" % verStr,
     ("main/ntpclients/ntpwait", "--version"): "ntpwait %s\n" % verStr
 }
-cmd_map3 = {    # Need curses
+# Need argparse
+cmd_map_python_argparse = {
+    ("main/ntpclients/ntplogtemp", "--version"): "ntplogtemp %s\n" % verStr,
+    ("main/ntpclients/ntpviz", "--version"): "ntpviz %s\n" % verStr,
+}
+# Need python curses
+cmd_map_python_curses = {
     ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n" % verStr,
 }
 
@@ -87,16 +91,18 @@ def cmd_bin_test(ctx, config):
     """Run a suite of binary tests."""
     fails = 0
 
+    if ctx.env['PYTHON_ARGPARSE']:
+        cmd_map_python.update(cmd_map_python_argparse)
+
     if ctx.env['PYTHON_CURSES']:
-        for cmd in cmd_map3:
-            cmd_map2[cmd] = cmd_map3[cmd]
+        cmd_map_python.update(cmd_map_python_curses)
 
     for cmd in sorted(cmd_map):
         if not run(cmd, cmd_map[cmd], False):
             fails += 1
 
-    for cmd in sorted(cmd_map2):
-        if not run(cmd, cmd_map2[cmd], True):
+    for cmd in sorted(cmd_map_python):
+        if not run(cmd, cmd_map_python[cmd], True):
             fails += 1
 
     if 1 == fails:

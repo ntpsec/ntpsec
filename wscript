@@ -1018,9 +1018,7 @@ python_scripts = [
     "ntpclients/ntpq.py",
     "ntpclients/ntpsweep.py",
     "ntpclients/ntptrace.py",
-    "ntpclients/ntpviz.py",
     "ntpclients/ntpwait.py",
-    "ntpclients/ntplogtemp.py",
     "ntpclients/ntpsnmpd.py",
 ]
 
@@ -1062,10 +1060,13 @@ def build(ctx):
     ctx.recurse("etc")
     ctx.recurse("tests")
 
+    if ctx.env['PYTHON_ARGPARSE']:
+        python_scripts.append("ntpclients/ntplogtemp.py")
+        python_scripts.append("ntpclients/ntpviz.py")
+    if ctx.env['PYTHON_ARGPARSE'] and ctx.env['PYTHON_GPS']:
+        python_scripts.append("ntpclients/ntploggps.py")
     if ctx.env['PYTHON_CURSES']:
         python_scripts.append("ntpclients/ntpmon.py")
-    if ctx.env['PYTHON_GPS']:
-        python_scripts.append("ntpclients/ntploggps.py")
 
     # Make sure the python scripts compile, but don't install them
     ctx(
@@ -1088,16 +1089,17 @@ def build(ctx):
     if ctx.cmd == 'clean':
         afterparty(ctx)
 
-    if ctx.env['PYTHON_GPS']:
+    if ctx.env['PYTHON_ARGPARSE']:
+        ctx.manpage(1, "ntpclients/ntplogtemp-man.adoc")
+        ctx.manpage(1, "ntpclients/ntpviz-man.adoc")
+    if ctx.env['PYTHON_ARGPARSE'] and ctx.env['PYTHON_GPS']:
         ctx.manpage(1, "ntpclients/ntploggps-man.adoc")
-    ctx.manpage(1, "ntpclients/ntpdig-man.adoc")
     if ctx.env['PYTHON_CURSES']:
         ctx.manpage(1, "ntpclients/ntpmon-man.adoc")
+    ctx.manpage(1, "ntpclients/ntpdig-man.adoc")
     ctx.manpage(1, "ntpclients/ntpq-man.adoc")
     ctx.manpage(1, "ntpclients/ntpsweep-man.adoc")
     ctx.manpage(1, "ntpclients/ntptrace-man.adoc")
-    ctx.manpage(1, "ntpclients/ntpviz-man.adoc")
-    ctx.manpage(1, "ntpclients/ntplogtemp-man.adoc")
     ctx.manpage(8, "ntpclients/ntpkeygen-man.adoc")
     ctx.manpage(8, "ntpclients/ntpleapfetch-man.adoc")
     ctx.manpage(8, "ntpclients/ntpwait-man.adoc")
