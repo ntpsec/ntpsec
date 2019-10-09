@@ -18,11 +18,11 @@ SNTP is specified by link:https://tools.ietf.org/html/rfc2030[RFC 2030:
 Simple Network Time Protocol (SNTP) Version 4 for IPv4, IPv6 and OSI].
 
 Extension fields are described by
-link:https://tools.ietf.org/html/rfc5905[RFC 7822: Network Time Protocol
+link:https://tools.ietf.org/html/rfc7822[RFC 7822: Network Time Protocol
 Version 4 (NTPv4) Extension Fields].
 
 NTPsec has entirely dropped conformance with the Autokey feature
-described in link:https://tools.ietf.org/html/rfc5905[RFC 5906].  Autokey
+described in link:https://tools.ietf.org/html/rfc5906[RFC 5906].  Autokey
 never quite worked, and the design was unstable enough that if there
 was ever actually a time when it fully conformed to its RFC that span
 must have been pretty short.
@@ -60,9 +60,9 @@ link:https://datatracker.ietf.org/doc/draft-ietf-ntp-data-minimization/[NTP
 Client Data Minimization] draft RFC, which changes the client-side
 generation of some packet headers.
 
-NTPsec also conforms to the
-link:https://datatracker.ietf.org/doc/draft-ietf-ntp-mac/[MAC for NTP]
-draft RFC, implementing AES-CMAC (128 bits).
+NTPsec also implements
+link:https://tools.ietf.org/html/rfc8573[RFC 8573:
+Message Authentication Code for the Network Time Protocol].
 
 The table of reference identifiers in Figure 12 is largely obsolete
 and somewhat incomplete relative to the code.

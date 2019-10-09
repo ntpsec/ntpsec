@@ -7,7 +7,7 @@
 # mode.
 #
 # Optional argument is the root directory of the tree, otherwise it
-# is run from the corrent directory.
+# is run from the current directory.
 #
 # SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
