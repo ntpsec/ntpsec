@@ -634,7 +634,7 @@ void record_use_stats(void)
 		stimex += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
 		    "%s %u %.3f %.3f %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
-		    timespec_to_MJDtime(&now), current_time - stat_stattime(),
+		    timespec_to_MJDtime(&now), current_time - stat_use_stattime(),
 		    utime, stimex,
 		    usage.ru_minflt -   oldusage.ru_minflt,
 		    usage.ru_majflt -   oldusage.ru_majflt,

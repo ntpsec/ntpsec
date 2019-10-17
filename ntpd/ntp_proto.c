@@ -223,11 +223,11 @@ uint64_t stat_kodsent(void)
 
 uptime_t stat_use_stattime(void)
 {
-  return stat_count.sys_stattime;
+  return stat_count.use_stattime;
 }
 
 void set_use_stattime(uptime_t stattime) {
-  stat_count.sys_stattime = stattime;
+  stat_count.use_stattime = stattime;
 }
 
 
