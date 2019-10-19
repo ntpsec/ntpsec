@@ -5,6 +5,7 @@
 
 /var/log/ntpd.log {
     monthly
+    missingok
     postrotate
       /usr/bin/killall -HUP ntpd
     endscript
