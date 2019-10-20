@@ -104,33 +104,33 @@ specific platforms follow this section.
 
 Under Unix, the simplest way to compile this package is:
 
-  1. `cd' to the directory containing the package's source code.
+  1. `cd` to the directory containing the package's source code.
 
-  2. Run `./buildprep' as root to get your prerequisites installed.
+  2. Run `./buildprep` as root to get your prerequisites installed.
 
-  3. Run `./waf configure' to configure the package for your system.
+  3. Run `./waf configure` to configure the package for your system.
   You may want to add configuration options after the verb 'configure';
   see below. NOTE: if you will be using any local reference clocks (GPS,
   PTP, SHM, etc.) then you need to configure for them by running the
   command: `./waf configure --refclock=all`.
 
-  4. Run `./waf build' to compile the package.
+  4. Run `./waf build` to compile the package.
 
-  5. Run `./waf install' to install the programs and any data files and
+  5. Run `./waf install` to install the programs and any data files and
      documentation.
 
-  6. You can uninstall cleanly by running `./waf uninstall' as root.
+  6. You can uninstall cleanly by running `./waf uninstall` as root.
 
   7. Look under "Boot script setup" in wscript for how to set up
      boot time startup of ntpd; this will vary according to your
      init system.
 
   8. You can remove the program binaries and object files from the
-     source code directory by running `./waf clean'.
+     source code directory by running `./waf clean`.
 
-  9. To also remove the files that `./waf configure' created (so you can
+  9. To also remove the files that `./waf configure` created (so you can
      configure and compile the package for a different kind of
-     computer), run `./waf distclean'.
+     computer), run `./waf distclean`.
 
 === Solaris ===
 
@@ -174,16 +174,16 @@ binary package.
 
 == Installation Names ==
 
-By default, `waf install' will install the package's files in
-`/usr/local/bin', `/usr/local/man', etc.  You can specify an
-installation prefix other than `/usr/local' by giving waf the
-option `--prefix=PATH'.
+By default, `waf install` will install the package's files in
+`/usr/local/bin`, `/usr/local/man`, etc.  You can specify an
+installation prefix other than `/usr/local` by giving waf the
+option `--prefix=PATH`.
 
 You should read the section "Path problems with the test tools" in
 devel/testing.adoc before setting a non-default prefix.
 
-There is a separate `--destdir' option that changes the root of the
-entire installation hierarchy, prepending all paths.  It defaults to `/'.
+There is a separate `--destdir` option that changes the root of the
+entire installation hierarchy, prepending all paths.  It defaults to `/`.
 You might, say, use --destdir=/tmp/ntp for a test install to see what
 the installation paths look like without running as root or touching
 system directories.
@@ -221,12 +221,12 @@ Other behaviors may be added in future releases.
 
 == Optional Features ==
 
-The waf builder accepts `--enable-FEATURE' options to where FEATURE
-indicates an optional part of the package.  Do `waf --help' for a list
+The waf builder accepts `--enable-FEATURE` options to where FEATURE
+indicates an optional part of the package.  Do `waf --help` for a list
 of options.
 
-refclocks are enabled with `--refclock=<n1,n2,n3..> or --refclock=all'
-`waf configure --list' will print a list of available refclocks.
+refclocks are enabled with `--refclock=<n1,n2,n3..>` or `--refclock=all`
+`waf configure --list` will print a list of available refclocks.
 
 === --enable-early-droproot ===
 
@@ -248,10 +248,10 @@ The waf builder recognizes the following options to control how it
 operates.
 
 --help::
-     Print a summary of the options to `waf configure', and exit.
+     Print a summary of the options to `waf configure`, and exit.
 
 --version::
-     Print the version of waf used to generate the `configure'
+     Print the version of waf used to generate the `configure`
      script, and exit.
 
 == Cross-compiling ==
@@ -273,8 +273,11 @@ with appropriate values.
 If you want to generate the ntpviz graphs regularly, add these lines to
 your root crontab:
 
+[source,cron]
+----
 53 * * * * cd /usr/local/src/NTP/ntpsec/ntpstats; ./ntpviz -p 1 -o day
 45 11,23 * * * cd /usr/local/src/NTP/ntpsec/ntpstats; ./ntpviz -p 7 -o week
+----
 
 // end
 

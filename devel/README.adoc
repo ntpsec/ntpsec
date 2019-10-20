@@ -31,7 +31,7 @@ pre-release.adoc::
 release::
 	The script for shipping a release.
 
-TODO::
+TODO.adoc::
 	List of items the NTPsec developers are working on.
 
 testing.adoc::

@@ -12,15 +12,17 @@ subdirectories are usually given in the README files in each subdirectory.
 The base directory ./ contains the configuration files, source
 directories and related stuff:
 
-INSTALL::	Generic installation instructions.
+INSTALL.adoc::	Generic installation instructions.
 
-NEWS::		What's new in this release.
+LICENSE.adoc::	Software licensing agreement.
 
-README::	This file.
+NEWS.adoc::	What's new in this release.
+
+README.adoc::	This file.
 
 VERSION::	The version stamp, to be used by scripts and programs.
 
-attic/:: 	Directory containing source code that is *not* part of a
+attic/::	Directory containing source code that is *not* part of a
 		normal installation. Things can disappear from here at any
 		time.
 
@@ -49,7 +51,7 @@ libjsmn/::	A minimal JSON library used by the GPSD-JSON driver.
 libntp/::	Directory containing library source code used by most
 		programs in the distribution.
 
-libparse/:: 	This directory contains the files making up the parser for
+libparse/::	This directory contains the files making up the parser for
 		the parse refclock driver. For reasonably sane clocks
 		this refclock drivers allows a refclock implementation
 		by just providing a conversion routine and the
@@ -68,7 +70,7 @@ ntpfrob/::      The ntpfrob utility collects several small diagnostic
 		hardware, including reading the clock tick rate,
 		precision, and jitter.
 
-ntptime/:: 	Directory containing a utility for reading and modifying
+ntptime/::	Directory containing a utility for reading and modifying
 		kernel parameters related to the local clock.
 
 packaging/::	Parts and guidance for distribution packagers.
