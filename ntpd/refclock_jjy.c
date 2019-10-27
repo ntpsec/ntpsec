@@ -4099,7 +4099,7 @@ modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 		break ;
 
 	case 4 :
-		/* +MS = Protocol  V22B:1200,2400bpsÅiV.22bis) */
+		/* +MS = Protocol  V22B:1200,2400bps V.22bis) */
 		pCmd = "AT+MS=V22B\r\n" ;
 		break ;
 
