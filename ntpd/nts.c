@@ -42,27 +42,13 @@ struct ntsconfig_t ntsconfig = {
 	.aead = NULL
 };
 
+void nts_log_version(void);
 
 /*****************************************************/
 
 void nts_init(void) {
 	bool ok = true;
-#if (OPENSSL_VERSION_NUMBER > 0x101000afL)
-	unsigned long buildVersion = OPENSSL_VERSION_NUMBER;
-	msyslog(LOG_INFO, "INIT: %s, %lx",
-		OpenSSL_version(OPENSSL_VERSION),
-		OpenSSL_version_num());
-	/* Assuming we are built with 1.1.1c
-         *   This allows running with 1.1.1d
-	 *   It won't allow running with 1.0.0x
-	 * Maybe we should reject trying to run with 1.2.1x
-	 */
-	if (buildVersion > OpenSSL_version_num()) {
-		msyslog(LOG_ERR, "INIT: running with old OpenSSL library: %lx, %lx, bailing",
-			buildVersion, OpenSSL_version_num());
-		exit(1);
-	}
-#endif
+	nts_log_version();
 	if (ntsconfig.ntsenable) {
 		ok &= nts_server_init();
 	}
@@ -85,6 +71,40 @@ void nts_init2(void) {
 		msyslog(LOG_ERR, "NTS: troubles during init2.  Bailing.");
 		exit(1);
 	}
+}
+
+/* There are 3 cases:
+ *  1: old, log build version
+ *  2: new, match, log version
+ *  3: new, mismatch, log both build and run
+ */
+void nts_log_version(void) {
+	unsigned long buildVersion = OPENSSL_VERSION_NUMBER;
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+	/* Case 1 */
+	msyslog(LOG_INFO, "INIT: %s, %lx",
+		OPENSSL_VERSION_TEXT, buildVersion);
+#else
+	const char * text = OpenSSL_version(OPENSSL_VERSION);
+	bool match = (buildVersion == OpenSSL_version_num()) &&
+		(0 == strcmp(OPENSSL_VERSION_TEXT, text));
+	if (match) {
+		/* Case 2 */
+		msyslog(LOG_INFO, "INIT: %s, %lx",
+			OPENSSL_VERSION_TEXT, buildVersion);
+	} else {
+                /* Case 3 */
+		msyslog(LOG_INFO, "INIT: Built with %s, %lx",
+			OPENSSL_VERSION_TEXT, buildVersion);
+		msyslog(LOG_INFO, "INIT: Running with %s, %lx",
+			OpenSSL_version(OPENSSL_VERSION),
+			OpenSSL_version_num());
+		if (buildVersion > OpenSSL_version_num()) {
+			msyslog(LOG_ERR, "INIT: Old OpenSSL library, bailing");
+			exit(1);
+		}
+	}
+#endif
 }
 
 /*****************************************************/
@@ -156,7 +176,9 @@ bool nts_load_versions(SSL_CTX *ctx) {
 	SSL_CTX_set_min_proto_version(ctx, minver);
 	SSL_CTX_set_max_proto_version(ctx, maxver);
 #else
-	/* Older versions of OpenSSL don't support min/max version requests.
+	/* TLS 1.2 was added in 1.0.1, 14 Mar 2012
+	 * HGM hasn't seen anything older.  2019-Oct-26
+	 * versions older than 1.1.0  don't support min/max version requests.
 	 * That's OK, since we don't want anything older than 1.2 and
 	 * they don't support anything newer. */
 #define NO_OLD_VERSIONS SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1
