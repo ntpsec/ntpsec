@@ -41,7 +41,7 @@ bool nts_client_send_request(SSL *ssl, struct peer *peer);
 bool nts_client_process_response(SSL *ssl, struct peer *peer);
 bool nts_client_process_response_core(uint8_t *buff, int transferred, struct peer* peer);
 bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer);
-bool nts_server_lookup(char *server, sockaddr_u *addr);
+bool nts_server_lookup(char *server, sockaddr_u *addr, int af);
 
 static SSL_CTX *client_ctx = NULL;
 static sockaddr_u sockaddr;
@@ -609,7 +609,7 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 			server[length] = '\0';
 			/* save port in case port specified before server */
 			port = SRCPORT(&sockaddr);
-			if (!nts_server_lookup(server, &sockaddr))
+			if (!nts_server_lookup(server, &sockaddr, AF(&peer->srcadr)))
 				return false;
 			SET_PORT(&sockaddr, port);
 			socktoa_r(&sockaddr, errbuf, sizeof(errbuf));
@@ -690,8 +690,12 @@ bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
 		ntsconfig.ca, errbuf);
 	return false;
 }
-
-bool nts_server_lookup(char *server, sockaddr_u *addr) {
+/* The -4/-6 option is used for both the NTS-KE server and the NTP server.
+ * That will break if the KE server returns a name that returns only an
+ * address of the other type.
+ * We could fix that by trying again with AF_UNSPEC.
+ */
+bool nts_server_lookup(char *server, sockaddr_u *addr, int af) {
 	struct addrinfo hints;
 	struct addrinfo *answer;
 	int gai_rc;
@@ -699,7 +703,7 @@ bool nts_server_lookup(char *server, sockaddr_u *addr) {
 	ZERO(hints);
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_family = AF_UNSPEC;
+	hints.ai_family = af;
 
 	gai_rc = getaddrinfo(server, "123", &hints, &answer);
 	if (0 != gai_rc) {
