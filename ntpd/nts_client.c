@@ -601,11 +601,12 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 			peer->nts_state.count++;
 			break;
 		    case nts_server_negotiation:
-			if (MAX_SERVER < length) {
+			if (MAX_SERVER < (length+1)) {
 				msyslog(LOG_ERR, "NTSc: server string too long %d.", length);
 				return false;
 			}
 			next_bytes(&buf, (uint8_t *)server, length);
+			server[length] = '\0';
 			/* save port in case port specified before server */
 			port = SRCPORT(&sockaddr);
 			if (!nts_server_lookup(server, &sockaddr))
