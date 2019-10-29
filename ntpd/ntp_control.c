@@ -2602,14 +2602,16 @@ ctl_getitem(
 	numctlbadpkts++;
 	NLOG(NLOG_SYSEVENT)
 	    if (quiet_until <= current_time) {
+		    unsigned int port = SRCPORT(rmt_addr);
 		    quiet_until = current_time + 300;
-	/* The cast on SRCPORT is required to suppress a warning on NetBSD 8.0
-	 * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53618
+	/* The port variable above suppresses a warning on NetBSD 8.0
+	 * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53619
+	 * A cast on SRCPORT without the dummy variable didn't work.
 	 */
 		    msyslog(LOG_WARNING,
-			    "Possible 'ntpdx' exploit from %s#%" PRIu16
+			    "Possible 'ntpdx' exploit from %s#%u"
                             " (possibly spoofed)",
-			    socktoa(rmt_addr), (uint16_t)SRCPORT(rmt_addr));
+			    socktoa(rmt_addr), port);
 	    }
 	reqpt = reqend; /* never again for this packet! */
 	return NULL;
