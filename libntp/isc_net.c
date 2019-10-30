@@ -10,10 +10,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#if defined(HAVE_SYS_SYSCTL_H)
-#include <sys/sysctl.h>
-#endif
-
 /* hack to ignore GCC Unused Result */
 #define IGNORE(r) do{if(r){}}while(0)
 
