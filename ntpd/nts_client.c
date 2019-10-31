@@ -47,14 +47,16 @@ static SSL_CTX *client_ctx = NULL;
 static sockaddr_u sockaddr;
 static bool addrOK;
 
+// Fedora 30:  0x1010104fL  1.1.1d
 // Fedora 29:  0x1010102fL  1.1.1b
 // Fedora 28:  0x1010009fL  1.1.0i
+// Debian 10:  0x1010104fL  1.1.1d
 // Debian 9:   0x101000afL  1.1.0j
 // Debian 8:   0x1000114fL  1.0.1t
 // CentOS 7:   0x100020bfL  1.0.2k
 // CentOS 6:   0x1000105fL  1.0.1e
 // NetBSD 8:   0x100020bfL  1.0.2k
-// NetBSD 7:   0x1000115fL  1.0.1u
+// NetBSD 7:   0x1000115fL  1.0.1u (1.0.2s via pkgin)
 // FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
 // FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
 
@@ -332,17 +334,20 @@ void set_hostname(SSL *ssl, const char *hostname) {
 
 // https://wiki.openssl.org/index.php/Hostname_validation
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
 	SSL_set1_host(ssl, host);
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 #elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
-	{
-		X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
-		if (1 != X509_VERIFY_PARAM_set1_host(param, host, strlen(host))) {
-			msyslog(LOG_ERR, "NTSc: troubles setting hostflags");
-		}
-		SSL_set_verify(ssl, SSL_VERIFY_PEER, NULL);
+	{  /* enable automatic hostname checks */
+	X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
+	X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_WILDCARDS);
+	if (1 != X509_VERIFY_PARAM_set1_host(param, host, strlen(host))) {
+		msyslog(LOG_ERR, "NTSc: troubles setting hostflags");
+	}
+	SSL_set_verify(ssl, SSL_VERIFY_PEER, NULL);
 	}
 #else
+	/*  Versions prior to 1.0.2 did not perform hostname validation */
 	UNUSED_ARG(ssl);
 	msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
 #endif
@@ -378,9 +383,6 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
 				return false;
 		}
 	}
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-	msyslog(LOG_DEBUG, "NTSc: matched cert host: %s", SSL_get0_peername(ssl));
-#endif
 	return true;
 }
 
