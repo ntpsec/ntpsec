@@ -117,6 +117,8 @@ bool nts_probe(struct peer * peer) {
 	else {
 		SSL_CTX *ctx; 
 		ctx = make_ssl_client_ctx(peer->cfg.nts_cfg.ca);
+		if (NULL == ctx)
+			return false;
 		ssl = SSL_new(ctx);
 		SSL_CTX_free(ctx);
 	}
@@ -213,7 +215,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 		/* Happens if no ciphers */
 		msyslog(LOG_ERR, "NTSc: NULL ctx");
 		nts_log_ssl_error();
-		exit(1);
+		return NULL;
 	}
 
 #if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
@@ -233,7 +235,8 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 
 	if (!ok) {
 		msyslog(LOG_ERR, "NTSc: Troubles setting up client SSL CTX");
-		exit(1);
+		SSL_CTX_free(ctx);
+		return NULL;
 	};
 
 	return ctx;
@@ -687,7 +690,7 @@ bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
 	}
 	ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 	msyslog(LOG_ERR, "NTSc: can't stat cert dir/file: %s, %s",
-		ntsconfig.ca, errbuf);
+		filename, errbuf);
 	return false;
 }
 /* The -4/-6 option is used for both the NTS-KE server and the NTP server.
@@ -707,7 +710,7 @@ bool nts_server_lookup(char *server, sockaddr_u *addr, int af) {
 
 	gai_rc = getaddrinfo(server, "123", &hints, &answer);
 	if (0 != gai_rc) {
-		msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to lookup %s: %d, %s",
+		msyslog(LOG_INFO, "NTSc: DNS error trying to lookup %s: %d, %s",
 			server, gai_rc, gai_strerror(gai_rc));
 		return false;
 	}
