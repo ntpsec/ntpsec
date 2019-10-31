@@ -8,10 +8,11 @@
  *
  * This follows section 6, Suggested Format for NTS Cookies
  * It uses AEAD_AES_SIV_CMAC_256/384/512 from RFC 5297
- * It is currently a stand-alone library
- * but will probably migrate to OpenSSL/libcrypto.
- *
  * The selection is done by the key length.
+ *
+ * We use the implementation in libaes_siv by Daniel Franke (Akamai)
+ * There is a similar implementation in OpenSSL (or soon will be)
+ * It has a slightly different API.  See libaes_siv/README.md
  *
  */
 
