@@ -51,6 +51,7 @@ bool dns_probe(struct peer* pp)
 	int rc;
         sigset_t        block_mask, saved_sig_mask;
 	const char	* busy = "";
+	const char	*hostname = pp->hostname;
 
 	/* Comment out the next two lines to get (much) more
 	 * printout when we are busy.
@@ -61,8 +62,12 @@ bool dns_probe(struct peer* pp)
 	if (NULL != active) {
 		busy = ", busy";
 	}
+	if (NULL == hostname) {
+		hostname = socktoa(&pp->srcadr);
+	}
+
 	msyslog(LOG_INFO, "DNS: dns_probe: %s, cast_flags:%x, flags:%x%s",
-		pp->hostname, pp->cast_flags, pp->cfg.flags, busy);
+		hostname, pp->cast_flags, pp->cfg.flags, busy);
         if (NULL != active)	/* normally redundant */
 		return false;
 
@@ -73,7 +78,8 @@ bool dns_probe(struct peer* pp)
 	rc = pthread_create(&worker, NULL, dns_lookup, pp);
         if (rc) {
 	  msyslog(LOG_ERR, "DNS: dns_probe: error from pthread_create: %s, %s",
-	      pp->hostname, strerror(rc));
+	      hostname, strerror(rc));
+          pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 	  return true;  /* don't try again */
 	}
         pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
