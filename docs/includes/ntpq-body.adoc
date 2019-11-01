@@ -219,8 +219,7 @@ the server and expect a single response message. The exceptions are the
 +peers+ command, which sends a series of messages, and the +mreadlist+
 and +mreadvar+ commands, which iterate over a range of associations.
 
-[[as]]
-+associations+::
+[[as]]+associations+::
   Display a list of mobilized associations in the form
 +
 ---------------------------------------------------------
@@ -332,8 +331,7 @@ include::mrufmt.adoc[]
   Perform the same function as the +associations command+, except that
   it uses previously stored data rather than making a new query.
 
-[[pe]]
-+peers+::
+[[pe]]+peers+::
   Display a list of peers in the form
 +
 +tally remote refid st t when pool reach delay offset jitter+
@@ -354,8 +352,7 @@ displayed.
 +pstats+ _assocID_::
   Show the statistics for the peer with the given _assocID_.
 
-[[rv]]
-+readvar+ 'assocID' [ 'name' ] [,...]::
+[[rv]]+readvar+ 'assocID' [ 'name' ] [,...]::
 +rv+ 'assocID' [ 'name' ] [,...]::
   Display the specified variables. If +assocID+ is zero, the variables
   are from the link:#system[system variables] name space, otherwise they

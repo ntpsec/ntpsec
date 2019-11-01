@@ -1,5 +1,6 @@
 === Access Control Commands and Options
 * link:accopt.html#discard[discard - specify headway parameters]
 * link:accopt.html#restrict[restrict - specify access restrictions]
+* link:accopt.html#unrestrict[unrestrict - remove access restrictions]
 * link:comdex.html[Command Index]
 

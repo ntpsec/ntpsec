@@ -2,22 +2,19 @@
 
 The following declarations control MAC authentication:
 
-[[controlkey]]
-+controlkey+ _key_::
+[[controlkey]]+controlkey+ _key_::
   Specifies the key identifier to use with the
   {ntpqman} utility, which uses the standard protocol defined in
   RFC 5905. The _key_ argument is the key identifier for a trusted key,
   where the value can be in the range 1 to 65,535, inclusive.
 
-[[keys]]
-+keys+ _keyfile_::
+[[keys]]+keys+ _keyfile_::
   Specifies the complete path and location of the key file
   containing the keys and key identifiers used by {ntpdman},
   and {ntpqman} when operating with symmetric-key cryptography.
   This is the same operation as the +-k+ command line option.
 
-[[trustedkey]]
-+trustedkey+ _key..._ ::
+[[trustedkey]]+trustedkey+ _key..._ ::
   Specifies the key identifiers which are trusted for the purposes of
   authenticating peers with symmetric key cryptography, as well as keys
   used by the {ntpqman} program.

@@ -1,7 +1,6 @@
 // Access control commands. Is included twice.
 
-[[discard]]
-+discard+ [+average+ _avg_] [+minimum+ _min_] [+monitor+ _prob_]::
+[[discard]]+discard+ [+average+ _avg_] [+minimum+ _min_] [+monitor+ _prob_]::
   Set the parameters of the +limited+ facility which protects the server
   from client abuse. The +average+ subcommand specifies the minimum
   average packet spacing, while the +minimum+ subcommand specifies the
@@ -22,8 +21,7 @@
     is a performance optimization for servers with aggregate arrivals of
     1000 packets per second or more.
 
-[[restrict]]
-+restrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
+[[restrict]]+restrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
   The _address_ argument expressed in dotted-quad (for IPv4) or
   :-delimited (for IPv6) form is the address of a
   host or network. Alternatively, the _address_ argument can be a valid
@@ -109,8 +107,7 @@ though if it is otherwise unconfigured; no flags are associated with
 the default entry (i.e., everything besides your own NTP server is
 unrestricted).
 
-[[unrestrict]]
-+unrestrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
+[[unrestrict]]+unrestrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
    Like a +restrict+ command, but turns off the specified flags rather
    than turning them on (expected to be useful mainly with ntpq
    :config). An unrestrict with no flags specified removes any rule

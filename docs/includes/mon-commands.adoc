@@ -1,7 +1,6 @@
 // Monitoring commands. Is included twice.
 
-[[statistics]]
-+statistics+ _name..._::
+[[statistics]]+statistics+ _name..._::
   Enables writing of statistics records. Currently, eight kinds of
   _name_ statistics are supported.
 +
@@ -226,15 +225,13 @@ The remaining fields show the values used since the last report.
 
 // End of super-long series of statistics directives
 
-[[statsdir]]
-+statsdir+ _directory_path_::
+[[statsdir]]+statsdir+ _directory_path_::
     Indicates the full path of a directory where statistics files should
     be created (see below). This keyword allows the (otherwise constant)
     _filegen_ filename prefix to be modified for file generation sets,
     which is useful for handling statistics logs.
 
-[[filegen]]
-+filegen+ _name_ [+file+ _filename_] [+type+ _typename_] [+link+ | +nolink+] [+enable+ | +disable+]::
+[[filegen]]+filegen+ _name_ [+file+ _filename_] [+type+ _typename_] [+link+ | +nolink+] [+enable+ | +disable+]::
     Configures setting of the generation file set name. Generation file sets
     provide a means for handling files that are continuously growing
     during the lifetime of a server. Server statistics are a typical

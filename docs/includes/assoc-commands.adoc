@@ -21,28 +21,24 @@ link-local IPV6 address with an interface specified in
   +refclock+ directive; a missing unit clause is interpreted as unit
   0.
 
-[[pool]]
-+pool+::
+[[pool]]+pool+::
   For server addresses, this command mobilizes a persistent client
   mode association with a number of remote servers. In this mode the
   local clock can synchronized to the remote server, but the remote
   server can never be synchronized to the local clock.
 
-[[server]]
-+server+::
+[[server]]+server+::
   For server addresses, this command mobilizes a persistent client
   mode association with the specified remote server or local radio
   clock. In this mode the local clock can synchronized to the remote
   server, but the remote server can never be synchronized to the local
   clock.
 
-[[peer]]
-+peer+::
+[[peer]]+peer+::
   NTP peer mode has been removed for security reasons.  peer is now just
   an alias for the server keyword.  See above.
 
-[[unpeer]]
-+unpeer+::
+[[unpeer]]+unpeer+::
   This command removes a previously configured association. An address
   or association ID can be used to identify the association. Either an
   IP address or DNS name can be used. This command is most useful when
