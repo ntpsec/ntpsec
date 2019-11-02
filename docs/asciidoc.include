@@ -6,7 +6,6 @@
 :project-issuetracker: https://gitlab.com/NTPsec/ntpsec/issues
 :project-contact: https://www.ntpsec.org/channels.html
 :project-security-list: security@ntpsec.org
-:project-bug-list: bugs@ntpsec.org
 :millshome: https://www.eecis.udel.edu/~mills/
 :GPSD: https://gpsd.io/
 :ntpconf: ntp.conf
