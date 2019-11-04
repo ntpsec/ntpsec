@@ -119,8 +119,10 @@ bool nts_probe(struct peer * peer) {
 	else {
 		SSL_CTX *ctx; 
 		ctx = make_ssl_client_ctx(peer->cfg.nts_cfg.ca);
-		if (NULL == ctx)
+		if (NULL == ctx) {
+			close(server);
 			return false;
+		}
 		ssl = SSL_new(ctx);
 		SSL_CTX_free(ctx);
 	}
