@@ -12,6 +12,11 @@ on user-visible changes.
 
 == Repository head ==
 
+Fix bug in NTS-KE client so that NTP server names work.
+
+Fix/tweak several NTS logging messages.
+
+
 == 2019-09-02: 1.1.7 ==
 
 The numeric literal argument of the 'time1' fudge option on a clock

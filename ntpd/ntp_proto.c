@@ -2463,8 +2463,14 @@ dns_take_pool(
  *   (API is broken, no way to get TTL)
  */
 void dns_take_status(struct peer* peer, DNS_Status status) {
-	const char *txt;
 	uint8_t hpoll = peer->hpoll;
+	const char *txt;
+	const char *hostname = peer->hostname;
+
+	if (NULL == hostname) {
+		hostname = socktoa(&peer->srcadr);
+	}
+
 	if (hpoll < 8)
 		hpoll = 8;      /* min retry: 256 seconds, ~5 min */
 	switch (status) {
@@ -2503,7 +2509,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 		(MDF_UCAST & peer->cast_flags) && !(FLAG_LOOKUP & peer->cfg.flags))
 		hpoll = 0;  /* server: no more */
 	msyslog(LOG_INFO, "DNS: dns_take_status: %s=>%s, %d",
-		peer->hostname, txt, hpoll);
+		hostname, txt, hpoll);
 	if (0 == hpoll)
 		return; /* hpoll already in use by new server */
 	peer->hpoll = hpoll;

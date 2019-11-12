@@ -45,7 +45,9 @@ static struct addrinfo *answer;
 
 static void* dns_lookup(void* arg);
 
-
+/* Initially, this was only used for DNS where pp=>hostname was valid.
+ * With NTS, it also gets used for numerical IP Addresses.
+ */
 bool dns_probe(struct peer* pp)
 {
 	int rc;
@@ -91,10 +93,14 @@ void dns_check(void)
 {
 	int rc;
 	struct addrinfo *ai;
+	const char      *hostname = active->hostname;
 	DNS_Status status;
 
+	if (NULL == hostname) {
+		hostname = socktoa(&active->srcadr);
+	}
 	msyslog(LOG_INFO, "DNS: dns_check: processing %s, %x, %x",
-		active->hostname, active->cast_flags, (unsigned int)active->cfg.flags);
+		hostname, active->cast_flags, (unsigned int)active->cfg.flags);
 
 	rc = pthread_join(worker, NULL);
 	if (0 != rc) {

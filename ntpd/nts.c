@@ -242,6 +242,7 @@ void nts_reload_certificate(SSL_CTX *ctx) {
 bool nts_load_certificate(SSL_CTX *ctx) {
 	const char *cert = NTS_CERT_FILE;
 	const char *key = NTS_KEY_FILE;
+        char errbuf[100];
 
 	if (NULL != ntsconfig.cert)
 		cert = ntsconfig.cert;
@@ -249,8 +250,11 @@ bool nts_load_certificate(SSL_CTX *ctx) {
 		key = ntsconfig.key;
 
 	/* for reload checking */
-	if (0 != stat(cert, &certfile_stat))
+	if (0 != stat(cert, &certfile_stat)) {
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+		msyslog(LOG_ERR, "NTSs: can't stat certificate (chain) from %s: %s", cert, errbuf);
 		return false;
+	}
 
 	if (1 != SSL_CTX_use_certificate_chain_file(ctx, cert)) {
 		msyslog(LOG_ERR, "NTSs: can't load certificate (chain) from %s", cert);
