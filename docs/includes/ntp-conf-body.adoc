@@ -22,7 +22,7 @@ lines. Arguments may be host names, host addresses written in numeric,
 dotted-quad form, integers, floating point numbers (when specifying
 times in seconds) and text strings.
 
-Configuration files may have inclusion lines.  The syntax is +include+
+Configuration files may have inclusion lines.  The syntax is +includefile+
 followed by whitespace followed by a file or directory name.  The
 configuration is evaluated as though the text of the file - or all
 files of the directory with the extension ".conf" - were textually
