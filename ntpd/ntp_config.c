@@ -3156,7 +3156,7 @@ void readconfig(const char *config_file)
 	/* parse configs in parallel subdirectory if that exists */
 	reparent(dirpath, sizeof(dirpath), config_file, CONFIG_DIR);
 	if (is_directory(dirpath) && lex_push_file(dirpath)) {
-		msyslog(LOG_INFO, "CONFIG: readconfig: parsing directory: %s", config_file);
+		msyslog(LOG_INFO, "CONFIG: readconfig: parsing directory: %s", dirpath);
 	    yyparse();
 	    ++srccount;
 	}
