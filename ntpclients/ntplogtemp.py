@@ -99,9 +99,9 @@ class CpuTemp:
                 match = self._pattern.match(record)
                 if match and match.group(1):
                     _now = int(time.time())
-                    _cpu_temprature = match.group(1)
+                    _cpu_temperature = match.group(1)
                     _data.append('%d LM%s %s' % (_now, _index,
-                                                 _cpu_temprature))
+                                                 _cpu_temperature))
                     _index += 1
         else:
             self.has_sensors = False
