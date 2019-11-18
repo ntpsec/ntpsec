@@ -10,12 +10,11 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository head ==
+== 2019-11-17: 1.1.8 ==
 
 Fix bug in NTS-KE client so that NTP server names work.
 
 Fix/tweak several NTS logging messages.
-
 
 == 2019-09-02: 1.1.7 ==
 

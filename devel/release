@@ -11,6 +11,8 @@ DST=markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/r
 V=`cat ../VERSION`
 UV=`cat ../VERSION | tr '.' '_'`
 
+TAR=ntpsec-${V}.tar.gz
+
 cat <<EOF
 # Pipe this to sh to actually perform a release.
 
@@ -18,7 +20,12 @@ set -e		# Bail out if the tarball build fails
 set -x		# Echo commands
 
 ./make-tarball	# Build and test the tarball; bail out if that fails
-TAR=ntpsec-${V}.tar.gz
+
+echo V is ${V}
+echo UV is ${UV}
+echo KEY is ${KEY}
+echo DST is ${DST}
+echo TAR is ${TAR}
 
 # Commit pending modifications to the repository.
 git commit -Ssecurity@ntpsec.org -a -s -m 'version ${V}'
