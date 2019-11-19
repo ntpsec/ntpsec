@@ -47,9 +47,9 @@ can be overridden by setting the extended system variable
 "modemsetup" via ntpq.
 
 There are three modes of operation selected by the +mode+ keyword in the
-+server+ configuration command. In auto mode (0) +flag1+ is set at each poll
-event. In backup mode (1) +flag1+ is set at each poll event, but only if
-no other synchronization sources are available. In manual mode (2) the
++server+ configuration command. In backup mode (0) +flag1+ is set at each
+poll event, but only if no other synchronization sources are available. In
+auto mode (1) +flag1+ is set at each poll event. In manual mode (2) the
 calling program is initiated by setting the +flag1+ option. This can be done
 manually using +ntpq+, or by a cron job.
 
@@ -165,7 +165,8 @@ with the Hayes connection and hang-up commands and result codes.
 +subtype+::
   Not used by this driver.
 +mode+::
-  Not used by this driver.
+  Controls when +flag1+ is set to initiate a call: as last resort (backup) if
+  0 (default), each poll cycle (auto) if 1, never (manual) if 2.
 +path+ 'filename'::
   Overrides the default device path.
 +ppspath+ 'filename'::
