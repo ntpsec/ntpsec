@@ -784,6 +784,7 @@ modem_timecode(
 
 	/*
 	 * ACTS format: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa UTC(NIST) *".
+	 * The "*" changes to a "#" when the delay correction is valid.
 	 */
 	case LENACTS:
 		if (sscanf(str,
