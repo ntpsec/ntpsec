@@ -911,7 +911,7 @@ modem_timecode(
 	/*
 	 * We have a valid timecode. The fudge time1 value is added to
 	 * each sample by the main line routines. Note that in current
-	 * telephone networks the propatation time can be different for
+	 * telephone networks the propagation time can be different for
 	 * each call and can reach 200 ms for some calls.
 	 */
 	peer->refid = pp->refid;
