@@ -87,9 +87,7 @@
  *
  * MJD, DST, DUT1 and UTC are not used by this driver. The "*" or "#" is
  * the on-time markers echoed by the driver and used by NIST to measure
- * and correct for the propagation delay. Note: the ACTS timecode has
- * recently been changed to eliminate the * on-time indicator. The
- * reason for this and the long term implications are not clear.
+ * and correct for the propagation delay.
  *
  * US Naval Observatory (USNO)
  *
@@ -153,7 +151,7 @@
  * Service identifiers (message length)
  */
 #define REFACTS		"NIST"	/* NIST reference ID */
-#define LENACTS		50	/* NIST format A */
+#define LENACTS		50	/* NIST format */
 #define REFUSNO		"USNO"	/* USNO reference ID */
 #define LENUSNO		20	/* USNO */
 #define REFPTB		"PTB\0"	/* PTB/NPL reference ID */
@@ -785,8 +783,7 @@ modem_timecode(
 		return;
 
 	/*
-	 * ACTS format A: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa
-	 * UTC(NIST) *".
+	 * ACTS format: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa UTC(NIST) *".
 	 */
 	case LENACTS:
 		if (sscanf(str,
