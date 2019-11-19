@@ -38,9 +38,9 @@ means. With these services variations from call to call and between
 messages during a call are typically a few milliseconds, occasionally
 higher.
 
-This driver requires a 9600 bps modem with a Hayes-compatible command
-set and control over the modem data terminal ready (DTR) control line.
-The actual line speed ranges from 1200 bps with USNO to 14,400 bps
+This driver requires a 1200 bps or faster modem with a Hayes-compatible
+command set and control over the modem data terminal ready (DTR) control
+line. The actual line speed ranges from 1200 bps with USNO to 14,400 bps
 with NIST. The modem setup string is hard-coded in the driver and may
 require changes for nonstandard modems or special circumstances. It
 can be overridden by setting the extended system variable
