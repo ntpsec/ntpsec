@@ -177,7 +177,8 @@ with the Hayes connection and hang-up commands and result codes.
 == Configuration Example
 
 ----------------------------------------------------------------------------
-refclock modem
+refclock modem mode 1 minpoll 12 maxpoll 17
+phone ATDT13034944774 # NIST
 ----------------------------------------------------------------------------
 
 == Author
