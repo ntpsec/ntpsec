@@ -23,6 +23,15 @@ __________
 Also see https://gitlab.com/NTPsec/ntpsec/issues/68 where the dubiousness
 of the current startup logic gets discussed.
 
+=== SHM ===
+
+* Split out the low level code so it can be used by other drivers
+  and a monitor program.
+
+* Fix the code so that the read side is read-only.  This allows
+  multiple readers and cleans up the file access mess.
+
+
 === Future plans ===
 
 * Implement Google's proposed standard smear?
@@ -61,10 +70,6 @@ of the current startup logic gets discussed.
   power on laptops and mobile devices, usually unnecessarily. To fix this,
   go to an event-queue architecture that wakes the daemon up just in time
   for the next scheduled event (rather than a once-per-second timer tick).
-
-* Take another look at SHM.  Hal thinks we can make a version that is
-  read-only and solid.  Maybe write a support package that does all the
-  work if you call it with the date/time.
 
 Plug restrict holes:
   The current code pokes a hole in any restrictions to let servers

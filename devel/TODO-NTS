@@ -1,8 +1,3 @@
-For Release:
-  Fix SecondsPerDay in nts_cookie.c
-    It is set to 3600 for testing
-    That makes too-old cookies if the polling interval is long enough
-
 BUGS:
   timeout on client connect too long (system default)
   Is 3 seconds timeout OK? (both client and server)
@@ -10,14 +5,10 @@ BUGS:
 nts_log_ssl_error()  No SSL param ??
   ERR_error_string_n
 
-multithread msyslog
-  I think this has been fixed.
-
 Hourly logging?
   ntpq get totals vs recent
 
 documentation:
-  HOWTO on NTS
   HOWTO on certificates
   glossary: https://letsencrypt.org/docs/glossary/
 
@@ -36,5 +27,4 @@ client certificates
 
 Pool/cluster mode
   ??  Ratchet for new cookie key
-
 
