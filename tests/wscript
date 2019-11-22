@@ -12,6 +12,7 @@ def build(ctx):
     unity_source = [
         "unity/unity.c",
         "unity/unity_fixture.c",
+        "unity/unity_memory.c",
     ]
 
     unity_config = ["UNITY_INCLUDE_DOUBLE", "UNITY_SUPPORT_64"]

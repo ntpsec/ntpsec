@@ -10,8 +10,11 @@
 
 #include "unity.h"
 #include "unity_internals.h"
-#include "unity_fixture_malloc_overrides.h"
 #include "unity_fixture_internals.h"
+
+#ifndef UNITY_FIXTURE_NO_EXTRAS
+#include "unity_memory.h"
+#endif
 
 int UnityMain(int argc, const char* argv[], void (*runAllTests)(void));
 
@@ -76,8 +79,5 @@ int UnityMain(int argc, const char* argv[], void (*runAllTests)(void));
 #define STRCMP_EQUAL(expected, actual)                 TEST_ASSERT_EQUAL_STRING((expected), (actual))
 #define DOUBLES_EQUAL(expected, actual, delta)         TEST_ASSERT_DOUBLE_WITHIN((delta), (expected), (actual))
 #endif
-
-/* You must compile with malloc replacement, as defined in unity_fixture_malloc_overrides.h */
-void UnityMalloc_MakeMallocFailAfterCount(int count);
 
 #endif /* UNITY_FIXTURE_H_ */
