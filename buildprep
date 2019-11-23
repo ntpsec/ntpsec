@@ -130,7 +130,7 @@ then
     echo "## But you don't get that option on a Raspberry Pi."
     echo "## For the Pi, do something like:"
     echo "## pkg_add ftp://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/earmv7hf/8.0/All/pkgin-0.9.4nb8.tgz"
-    echo "## Adjust the version an arch to match your setup."
+    echo "## Adjust the version and arch to match your setup."
     exit 1
   fi
 elif test "$OS" = "FreeBSD"
