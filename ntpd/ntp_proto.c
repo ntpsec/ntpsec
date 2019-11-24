@@ -2949,23 +2949,27 @@ proto_clr_stats(void)
 
 
 /* limit logging so bad guys can't DDoS us by sending crap
- * log first 100 and 10/hour
+ * Limit to 25 total.  Maybe should be 10/hour
  * This gets too-old cookies
  */
 
 void maybe_log_junk(struct recvbuf *rbufp) {
-    static unsigned int noise_try = 0;
-    noise_try++;
-    if ((noise_try>100) && (((noise_try-90)*3600/current_time) > 10))
-      return;
+    static unsigned int junk = 0;
+#define JUNKSIZE 500
+    char buf[JUNKSIZE];
+    int lng = rbufp->recv_length;
+    int i, j;
+    if (junk++>=25) return;
+    for (i=0,j=0; i<lng; i++) {
+      if ((j+4)>JUNKSIZE) break;
+      if (0 == (i%4)) buf[j++] = ' ';
+      j += snprintf(&buf[j], (JUNKSIZE-j), "%02x", rbufp->recv_buffer[i]);
+    }
     msyslog(LOG_INFO,
-	"JUNK: M%d V%d 0/%2x%2x%2x%2x 48/%2x%2x%2x%2x from %s, lng=%ld",
+	"JUNK: M%d V%d %s from %s, lng=%d",
 	PKT_MODE(rbufp->pkt.li_vn_mode), PKT_VERSION(rbufp->pkt.li_vn_mode),
-	rbufp->recv_buffer[0], rbufp->recv_buffer[1],
-	rbufp->recv_buffer[2], rbufp->recv_buffer[3],
-	rbufp->recv_buffer[48+0], rbufp->recv_buffer[48+1],
-	rbufp->recv_buffer[48+2], rbufp->recv_buffer[48+3],
+	buf,
 	sockporttoa(&rbufp->recv_srcadr),
-	(long)rbufp->recv_length);
+	lng);
 }
 
