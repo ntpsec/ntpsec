@@ -15,6 +15,7 @@
 #include <sys/socket.h>
 
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 #include <openssl/x509.h>
 
 #include "ntp.h"
@@ -27,10 +28,12 @@
  *         enough for an IPv6 address.
  */
 
+
 static bool create_listener4(int port);
 static bool create_listener6(int port);
 static void* nts_ke_listener(void*);
 static bool nts_ke_request(SSL *ssl);
+static void nts_ke_accept_fail(char* addrbuf, l_fp finish);
 
 static void nts_lock_certlock(void);
 static void nts_unlock_certlock(void);
@@ -187,6 +190,8 @@ void* nts_ke_listener(void* arg) {
 	struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
 	int sock = *(int*)arg;
 	char errbuf[100];
+	char addrbuf[100];
+	char usingbuf[100];
 
 	while(1) {
 		sockaddr_u addr;
@@ -205,10 +210,27 @@ void* nts_ke_listener(void* arg) {
 			continue;
 		}
 		get_systime(&start);
+		sockporttoa_r(&addr, addrbuf, sizeof(addrbuf));
 
-		sockporttoa_r(&addr, errbuf, sizeof(errbuf));
-		msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s", errbuf);
-		err = setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+/* This is disabled in order to reduce clutter in the log file.
+ * The client's address is now included in the final message.
+ * That works fine in the normal successful case.  There is one line
+ * per connection.
+ * The failed cases are more complicated.
+ * The common fail case is bad guys probing which fails in SSL_accept.
+ * That branch has its own error handling.  Again, the common cases
+ * have one line per connection and include the client address.
+ * Uncommon cases will include two (or more) lines.
+ * There are many possible error messages after SSL_accept works.
+ * In practice, they don't happen, at least not often enough to notice.
+ * They currently get logged without the client's address.  Then they
+ * fall into the normal (non-error) path which does include the address.
+ * Enabling this might make strange cases easier to understand.
+ */
+/*		msyslog(LOG_INFO, "NTSs: TCP accept-ed from %s", addrbuf); */
+
+		err = setsockopt(client, SOL_SOCKET, SO_RCVTIMEO,
+			&timeout, sizeof(timeout));
 		if (0 > err) {
 			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 			msyslog(LOG_ERR, "NTSs: can't setsockopt: %s", errbuf);
@@ -226,20 +248,18 @@ void* nts_ke_listener(void* arg) {
 		if (SSL_accept(ssl) <= 0) {
 			get_systime(&finish);
 			finish -= start;
-			sockporttoa_r(&addr, errbuf, sizeof(errbuf));
-			msyslog(LOG_ERR, "NTSs: SSL accept from %s failed, %.3Lf sec",
-				errbuf, lfptod(finish));
-			nts_log_ssl_error();
+			nts_ke_accept_fail(addrbuf, finish);
 			SSL_free(ssl);
 			close(client);
 			nts_ke_serves_bad++;
 			continue;
 		}
-		msyslog(LOG_INFO, "NTSs: Using %s, %s (%d)",
+
+		/* Save info for final message. */
+		snprintf(usingbuf, sizeof(usingbuf), "%s, %s (%d)",
 			SSL_get_version(ssl),
 			SSL_get_cipher_name(ssl),
 			SSL_get_cipher_bits(ssl, NULL));
-
 
 		if (!nts_ke_request(ssl))
 			nts_ke_serves_bad++;
@@ -251,10 +271,37 @@ void* nts_ke_listener(void* arg) {
 		get_systime(&finish);
 		finish -= start;
 		nts_ke_serves_good++;
-		msyslog(LOG_INFO, "NTSs: NTS-KE server took %.3Lf sec", lfptod(finish));
+		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, Using %s, took %.3Lf sec",
+			addrbuf, usingbuf, lfptod(finish));
 
 	}
 	return NULL;
+}
+
+/* Analyze failure from SSL_accept
+ * print single error message for common cases.
+ */
+void nts_ke_accept_fail(char* addrbuf, l_fp finish) {
+	unsigned long err = ERR_peek_error();
+	const char *reason;
+	switch(err) {
+	  case 0x1408F10B:
+		reason = "wrong version number";
+		break;
+	  case 0x1408F09C:
+		reason = "http request";
+		break;
+	  case 0x1417A0C1:
+		reason = "no shared cipher";
+		break;
+	  default:
+		msyslog(LOG_INFO, "NTSs: SSL accept from %s failed, took %.3Lf sec",
+			addrbuf, lfptod(finish));
+		nts_log_ssl_error();
+		return;
+	}
+	msyslog(LOG_INFO, "NTSs: SSL accept from %s failed: %s, took %.3Lf sec",
+		addrbuf, reason, lfptod(finish));
 }
 
 bool nts_ke_request(SSL *ssl) {
@@ -298,8 +345,10 @@ bool nts_ke_request(SSL *ssl) {
 	if (bytes_written != used)
 		return false;
 
-	msyslog(LOG_INFO, "NTSs: Read %d, wrote %d bytes.  AEAD=%d",
-		bytes_read, bytes_written, aead);
+	/* Skip logging the normal case. */
+	if ((bytes_read!=16) || (aead!=15) )
+		msyslog(LOG_INFO, "NTSs: Read %d, wrote %d bytes.  AEAD=%d",
+			bytes_read, bytes_written, aead);
 
 	return true;
 }
@@ -416,7 +465,7 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
 			type &= ~NTS_CRITICAL;
 		}
 		if (0) // Handy for debugging but very verbose
-			msyslog(LOG_ERR, "NTSs: Record: T=%d, L=%d, C=%d", type, length, critical);
+			msyslog(LOG_INFO, "NTSs: Record: T=%d, L=%d, C=%d", type, length, critical);
 		switch (type) {
 		    case nts_error:
 			data = next_uint16(buf);
