@@ -411,7 +411,10 @@ int scmp_sc[] = {
 	SCMP_SYS(getpid),
 	SCMP_SYS(gettid),
 	SCMP_SYS(geteuid),
-	SCMP_SYS(ppoll),
+/* __NR_ppoll is not available in Fedora 31.
+ * I can't find where it is needed.  HGM 2019-Nov-23
+ *	SCMP_SYS(ppoll),
+ */
 	SCMP_SYS(sendmsg),
 #ifdef __NR_geteuid32
 	SCMP_SYS(geteuid32),
