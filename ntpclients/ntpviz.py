@@ -798,9 +798,10 @@ plot \\
 The number of visible satellites (nSat) is plotted in red.</p>
 <p>TDOP is field 3, and nSats is field 4, from the gpsd log file.  The
 gpsd log file is created by the ntploggps program.</p>
-<p>TDOP is a dimensionless error factor.  TDOP ranges from 1 to greater
-than 20.  1 denotes the highest possible confidence level.  2 to 5 is good.
-Greater than 20 means there will be significant inaccuracy and error.</p>
+<p>TDOP is a dimensionless error factor.  Smaller numbers are better.
+TDOP ranges from 1 (ideal), 2 to 5 (good), to greater than 20 (poor).
+Some GNSS receivers report TDOP less than one which is theoretically
+impossible.</p>
 """
 
         ret = {'html': VizStats.table_head + stats.table +
