@@ -1356,6 +1356,50 @@ This combats source address spoofing
             del variables['limited']
         return sorter, sortkey, frags
 
+    def __mru_analyze(self, variables, span, direct):
+        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
+                                                  self.debug, th))
+        curidx = -1
+        mru = None
+        for (tag, val) in variables.items():
+            warndbg("tag=%s, val=%s" % (tag, val), 4)
+            if tag == "nonce":
+                nonce = "%s=%s" % (tag, val)
+            elif tag == "last.older":
+                continue
+            elif tag == "addr.older":
+                continue
+            if tag == "now":
+                # finished marker
+                span.now = ntp.ntpc.lfptofloat(val)
+                continue
+            elif tag == "last.newest":
+                # more finished
+                continue
+            for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
+                if tag.startswith(prefix + "."):
+                    (member, idx) = tag.split(".")
+                    try:
+                        idx = int(idx)
+                    except ValueError:
+                        raise ControlException(SERR_BADTAG % tag)
+                    if idx != curidx:
+                        # This makes duplicates
+                        curidx = idx
+
+                        if mru:
+                            # Can't have partial slots on list
+                            # or printing crashes after ^C
+                            # Append full slot now
+                            span.entries.append(mru)
+                        mru = MRUEntry()
+                        self.slots += 1
+                    setattr(mru, prefix, val)
+        if mru:
+            span.entries.append(mru)
+        if direct is not None:
+            direct(span.entries)
+
     def mrulist(self, variables=None, rawhook=None, direct=None):
         "Retrieve MRU list data"
         restarted_count = 0
@@ -1450,46 +1494,7 @@ This combats source address spoofing
                     rawhook(variables)
 
                 # Analyze the contents of this response into a span structure
-                curidx = -1
-                mru = None
-                for (tag, val) in variables.items():
-                    warndbg("tag=%s, val=%s" % (tag, val), 4)
-                    if tag == "nonce":
-                        nonce = "%s=%s" % (tag, val)
-                    elif tag == "last.older":
-                        continue
-                    elif tag == "addr.older":
-                        continue
-                    if tag == "now":
-                        # finished marker
-                        span.now = ntp.ntpc.lfptofloat(val)
-                        continue
-                    elif tag == "last.newest":
-                        # more finished
-                        continue
-                    for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
-                        if tag.startswith(prefix + "."):
-                            (member, idx) = tag.split(".")
-                            try:
-                                idx = int(idx)
-                            except ValueError:
-                                raise ControlException(SERR_BADTAG % tag)
-                            if idx != curidx:
-                                # This makes duplicates
-                                curidx = idx
-
-                                if mru:
-                                    # Can't have partial slots on list
-                                    # or printing crashes after ^C
-                                    # Append full slot now
-                                    span.entries.append(mru)
-                                mru = MRUEntry()
-                                self.slots += 1
-                            setattr(mru, prefix, val)
-                if mru:
-                    span.entries.append(mru)
-                if direct is not None:
-                    direct(span.entries)
+                self.__mru_analyze(variables, span, direct)
 
                 # If we've seen the end sentinel on the span, break out
                 if span.is_complete():
