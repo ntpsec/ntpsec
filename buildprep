@@ -187,6 +187,8 @@ daemon () {
 	    #  There is nothing magic about 3.7.
 	    #  In Dec 2018, 3.6 and 2.7 are also good candidates.
 	    $install bison python37 py37-curses-3.7
+	    # certificates for NTS
+	    $install mozilla-rootcerts
 	    # setup "python" from command line
 	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
 	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
@@ -204,6 +206,8 @@ daemon () {
 	    # FreeBSD
 	    $install bison python3
 	    $do ln -s /usr/local/bin/python3 /usr/local/bin/python
+	    # certificates for NTS
+	    $install ca_root_nss
 	    ;;
 	yum|dnf)
 	    $do $installer groupinstall "Development Tools" 	# Build environment
