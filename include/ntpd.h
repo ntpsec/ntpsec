@@ -37,6 +37,8 @@
 # define FALLTHRU
 #endif
 
+/* ntpd.c */
+extern	void announce_starting(void);
 
 /* ntp_config.c */
 extern	const char	*getconfig	(const char *);

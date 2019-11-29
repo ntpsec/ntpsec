@@ -536,23 +536,7 @@ ntpdmain(
 	}
 
 	if (!dumpopts)
-	{
-		char buf[1024];	/* Secret knowledge of msyslog buf length */
-		char *cp = buf;
-
-		msyslog(LOG_NOTICE, "INIT: %s: Starting", ntpd_version());
-
-		/* Note that every arg has an initial space character */
-		snprintf(cp, sizeof(buf), "Command line:");
-		cp += strlen(cp);
-
-		for (int i = 0; i < saved_argc ; ++i) {
-			snprintf(cp, sizeof(buf) - (size_t)(cp - buf),
-				" %s", saved_argv[i]);
-			cp += strlen(cp);
-		}
-		msyslog(LOG_INFO, "INIT: %s", buf);
-	}
+	announce_starting();
 
 	uid = getuid();
 	if (uid && !dumpopts) {
@@ -898,8 +882,8 @@ ntpdmain(
 	readconfig(getconfig(explicit_config));
 	check_minsane();
         if ( 8 > sizeof(time_t) ) {
-	    msyslog(LOG_ERR, "INIT: This system has a 32-bit time_t.");
-	    msyslog(LOG_ERR, "INIT: This ntpd will fail on 2038-01-19T03:14:07Z.");
+	    msyslog(LOG_NOTICE, "INIT: This system has a 32-bit time_t.");
+	    msyslog(LOG_NOTICE, "INIT: This ntpd will fail on 2038-01-19T03:14:07Z.");
         }
 
 	loop_config(LOOP_DRIFTINIT, 0);
@@ -923,6 +907,24 @@ ntpdmain(
 
 	mainloop();
         /* unreachable, mainloop() never returns */
+}
+
+void announce_starting() {
+	char buf[1024];	/* Secret knowledge of msyslog buf length */
+	char *cp = buf;
+
+	msyslog(LOG_NOTICE, "INIT: %s: Starting", ntpd_version());
+
+	/* Note that every arg gets an initial space character */
+	snprintf(cp, sizeof(buf), "Command line:");
+	cp += strlen(cp);
+
+	for (int i = 0; i < saved_argc ; ++i) {
+		snprintf(cp, sizeof(buf) - (size_t)(cp - buf),
+			" %s", saved_argv[i]);
+		cp += strlen(cp);
+	}
+	msyslog(LOG_NOTICE, "INIT: %s", buf);
 }
 
 /*
@@ -984,7 +986,7 @@ static void mainloop(void)
 				if (!--mdnstries) {
 					msyslog(LOG_ERR, "INIT: Unable to register mDNS, giving up.");
 				} else {
-					msyslog(LOG_INFO, "INIT: Unable to register mDNS, will try later.");
+					msyslog(LOG_NOTICE, "INIT: Unable to register mDNS, will try later.");
 				}
 			} else {
 				msyslog(LOG_INFO, "INIT: mDNS service registered.");

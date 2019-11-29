@@ -2537,6 +2537,8 @@ config_logfile(
 				msyslog(LOG_ERR,
 					"CONFIG: Cannot open logfile %s: %s",
 					curr_var->value.s, strerror(errno));
+			/* Repeat critical info in logfile. Helps debugging. */
+			announce_starting();
 			break;
 
 		default:
