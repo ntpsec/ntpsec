@@ -231,7 +231,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 #endif
 
 	SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
-	SSL_CTX_set_timeout(ctx, NTS_KE_TIMEOUT);
+	SSL_CTX_set_timeout(ctx, NTS_KE_TIMEOUT);   /* session lifetime */
 
 	ok &= nts_load_versions(ctx);
 	ok &= nts_load_ciphers(ctx);
@@ -307,6 +307,9 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 		msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", errbuf);
 	} else {
 		// Use first answer
+		// FIXME: need timeout - no simple way
+		// a) timer, signal, EINTR
+		// b) fcntl(O_NONBLOCK), select/poll
 		err = connect(sockfd, answer->ai_addr, answer->ai_addrlen);
 		if (-1 == err) {
 			ntp_strerror_r(errno, errbuf, sizeof(errbuf));

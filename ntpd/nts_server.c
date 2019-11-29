@@ -17,6 +17,10 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/x509.h>
+/* Old OpenSSL 1.0.2 doesn't have sslerr.h */
+#ifndef SSL_R_WRONG_VERSION_NUMBER
+#include <openssl/sslerr.h>
+#endif
 
 #include "ntp.h"
 #include "ntpd.h"
@@ -113,6 +117,7 @@ bool nts_server_init(void) {
 #endif
 
 	SSL_CTX_set_session_cache_mode(server_ctx, SSL_SESS_CACHE_OFF);
+	SSL_CTX_set_timeout(server_ctx, NTS_KE_TIMEOUT);  /* session lifetime */
 
 	ok &= nts_load_versions(server_ctx);
 	ok &= nts_load_ciphers(server_ctx);
@@ -283,25 +288,23 @@ void* nts_ke_listener(void* arg) {
  */
 void nts_ke_accept_fail(char* addrbuf, l_fp finish) {
 	unsigned long err = ERR_peek_error();
-	const char *reason;
-	switch(err) {
-	  case 0x1408F10B:
-		reason = "wrong version number";
-		break;
-	  case 0x1408F09C:
-		reason = "http request";
-		break;
-	  case 0x1417A0C1:
-		reason = "no shared cipher";
-		break;
-	  default:
+	int lib = ERR_GET_LIB(err);
+	int reason = ERR_GET_REASON(err);
+	const char *msg = NULL;
+	if (ERR_LIB_SSL == lib && SSL_R_WRONG_VERSION_NUMBER == reason)
+		msg = "wrong version number";
+	if (ERR_LIB_SSL == lib && SSL_R_HTTP_REQUEST == reason)
+		msg = "http request";
+	if (ERR_LIB_SSL == lib && SSL_R_NO_SHARED_CIPHER == reason)
+		msg = "no shared cipher";
+	if (NULL == msg) {
 		msyslog(LOG_INFO, "NTSs: SSL accept from %s failed, took %.3Lf sec",
 			addrbuf, lfptod(finish));
 		nts_log_ssl_error();
 		return;
 	}
 	msyslog(LOG_INFO, "NTSs: SSL accept from %s failed: %s, took %.3Lf sec",
-		addrbuf, reason, lfptod(finish));
+		addrbuf, msg, lfptod(finish));
 }
 
 bool nts_ke_request(SSL *ssl) {
