@@ -1427,6 +1427,47 @@ This combats source address spoofing
                 # I don't know how to feed a minus sign to text sort
                 span.entries.reverse()
 
+    def __mru_query_error(self, e, restarted_count, cap_frags, limit, frags):
+        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
+                                                  self.debug, th))
+        if e.errorcode is None:
+            raise e
+        elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
+            # None of the supplied prior entries match, so
+            # toss them from our list and try again.
+            warndbg("no overlap between prior entries and "
+                    "server MRU list", 1)
+            restarted_count += 1
+            if restarted_count > 8:
+                raise ControlException(SERR_STALL)
+            warndbg("--->   Restarting from the beginning, "
+                    "retry #%u" % restarted_count, 1)
+        elif e.errorcode == ntp.control.CERR_BADVALUE:
+            if cap_frags:
+                cap_frags = False
+                warndbg("Reverted to row limit from "
+                        "fragments limit.", 1)
+            else:
+                # ntpd has lower cap on row limit
+                self.ntpd_row_limit -= 1
+                limit = min(limit, self.ntpd_row_limit)
+                warndbg("Row limit reduced to %d following "
+                        "CERR_BADVALUE." % limit, 1)
+        elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
+            # Reduce the number of rows/frags requested by
+            # half to recover from lost response fragments.
+            if cap_frags:
+                frags = max(2, frags / 2)
+                warndbg("Frag limit reduced to %d following "
+                        "incomplete response." % frags, 1)
+            else:
+                limit = max(2, limit / 2)
+                warndbg("Row limit reduced to %d following "
+                        " incomplete response." % limit, 1)
+        elif e.errorcode:
+            raise e
+        return restarted_count, cap_frags, limit, frags
+
     def mrulist(self, variables=None, rawhook=None, direct=None):
         "Retrieve MRU list data"
         restarted_count = 0
@@ -1470,42 +1511,9 @@ This combats source address spoofing
                     recoverable_read_errors = False
                 except ControlException as e:
                     recoverable_read_errors = True
-                    if e.errorcode is None:
-                        raise e
-                    elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
-                        # None of the supplied prior entries match, so
-                        # toss them from our list and try again.
-                        warndbg("no overlap between prior entries and "
-                                "server MRU list", 1)
-                        restarted_count += 1
-                        if restarted_count > 8:
-                            raise ControlException(SERR_STALL)
-                        warndbg("--->   Restarting from the beginning, "
-                                "retry #%u" % restarted_count, 1)
-                    elif e.errorcode == ntp.control.CERR_BADVALUE:
-                        if cap_frags:
-                            cap_frags = False
-                            warndbg("Reverted to row limit from "
-                                    "fragments limit.", 1)
-                        else:
-                            # ntpd has lower cap on row limit
-                            self.ntpd_row_limit -= 1
-                            limit = min(limit, self.ntpd_row_limit)
-                            warndbg("Row limit reduced to %d following "
-                                    "CERR_BADVALUE." % limit, 1)
-                    elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
-                        # Reduce the number of rows/frags requested by
-                        # half to recover from lost response fragments.
-                        if cap_frags:
-                            frags = max(2, frags / 2)
-                            warndbg("Frag limit reduced to %d following "
-                                    "incomplete response." % frags, 1)
-                        else:
-                            limit = max(2, limit / 2)
-                            warndbg("Row limit reduced to %d following "
-                                    " incomplete response." % limit, 1)
-                    elif e.errorcode:
-                        raise e
+                    res = self.__mru_query_error(e, restarted_count,
+                                                 cap_frags, limit, frags)
+                    restarted_count, cap_frags, limit, frags = res
 
                 # Parse the response
                 variables = self.__parse_varlist()
