@@ -334,6 +334,7 @@ command_list
 				ip_ctx->fname,
 				ip_ctx->errpos.nline,
 				ip_ctx->errpos.ncol);
+			parsing_errors++;
 		}
 	;
 

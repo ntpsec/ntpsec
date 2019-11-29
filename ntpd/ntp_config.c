@@ -84,6 +84,9 @@
 #define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
 
 
+/* count of parsing errors - for log file */
+int     parsing_errors = 0;
+
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count = 0;
 char **	cmdline_servers;

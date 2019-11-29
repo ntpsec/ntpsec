@@ -925,6 +925,15 @@ void announce_starting() {
 		cp += strlen(cp);
 	}
 	msyslog(LOG_NOTICE, "INIT: %s", buf);
+
+	/* This is helpful if you specify a log file in ntp.conf
+	 * The error messages while parsing ntp.conf go to syslog.
+	 * You might forget to look there while debugging things.
+	 */
+	if (0 < parsing_errors) {
+		msyslog(LOG_ERR, "INIT: saw %d parsing errors", parsing_errors);
+		parsing_errors = 0;
+	}
 }
 
 /*

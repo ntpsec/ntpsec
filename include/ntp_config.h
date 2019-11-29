@@ -30,6 +30,9 @@
 #define CONF_SOURCE_FILE		0
 #define CONF_SOURCE_NTPQ		1
 
+/* count of parsing errors - for log file */
+extern	int	parsing_errors;
+
 /* list of servers from command line for config_peers() */
 extern	int	cmdline_server_count;
 extern	char **	cmdline_servers;
