@@ -1300,62 +1300,6 @@ This combats source address spoofing
         self.logfp.write("## Nonce expected: %s" % resp)
         raise ControlException(SERR_BADNONCE)
 
-    def __mru_variables(self, variables):
-        sorter = None
-        frags = MAXFRAGS
-        if "sort" in variables:
-            sortkey = variables["sort"]
-            del variables["sort"]
-            # Slots are retrieved oldest first.
-            # Slots are printed in reverse so the normal/no-sort
-            #  case prints youngest first.
-            # That means sort functions are backwards.
-            # Note lstint is backwards again (aka normal/forward)
-            #  since we really want to sort on now-last rather than last.
-            sortdict = {
-                # lstint ascending
-                "lstint": lambda e: ntp.ntpc.lfptofloat(e.last),
-                # lstint descending
-                "-lstint": lambda e: -ntp.ntpc.lfptofloat(e.last),
-                # avgint ascending
-                "avgint": lambda e: -e.avgint(),
-                # avgint descending
-                "-avgint": lambda e: e.avgint(),
-                # IPv4 asc. then IPv6 asc.
-                "addr": lambda e: e.sortaddr(),
-                # IPv6 desc. then IPv4 desc.
-                "-addr": lambda e: e.sortaddr(),
-                # hit count ascending
-                "count": lambda e: -e.ct,
-                # hit count descending
-                "-count": lambda e: e.ct,
-            }
-            if sortkey == "lstint":
-                sortkey = None   # normal/default case, no need to sort
-            if sortkey is not None:
-                sorter = sortdict.get(sortkey)
-                if sorter is None:
-                    raise ControlException(SERR_BADSORT % sortkey)
-        for k in list(variables.keys()):
-            if k in ("mincount", "resall", "resany", "kod", "limited",
-                     "maxlstint", "laddr", "recent", "sort",
-                     "frags", "limit"):
-                continue
-            else:
-                raise ControlException(SERR_BADPARAM % k)
-        if 'frags' in variables:
-            frags = int(variables.get('frags'))
-            del variables['frags']
-        if 'kod' in variables:
-            variables['resany'] = variables.get('resany', 0) \
-                                  | ntp.magic.RES_KOD
-            del variables['kod']
-        if 'limited' in variables:
-            variables['resany'] = variables.get('resany', 0) \
-                                  | ntp.magic.RES_LIMITED
-            del variables['limited']
-        return sorter, sortkey, frags
-
     def __mru_analyze(self, variables, span, direct):
         warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
                                                   self.debug, th))
@@ -1455,7 +1399,7 @@ This combats source address spoofing
             variables = {}
 
         if variables:
-            sorter, sortkey, frags = self.__mru_variables(variables)
+            sorter, sortkey, frags = parse_mru_variables(variables)
 
         nonce = self.fetch_nonce()
 
@@ -1584,6 +1528,63 @@ This combats source address spoofing
     def ifstats(self):
         "Retrieve ifstats data."
         return self.__ordlist("ifstats")
+
+
+def parse_mru_variables(variables):
+    sorter = None
+    frags = MAXFRAGS
+    if "sort" in variables:
+        sortkey = variables["sort"]
+        del variables["sort"]
+        # Slots are retrieved oldest first.
+        # Slots are printed in reverse so the normal/no-sort
+        #  case prints youngest first.
+        # That means sort functions are backwards.
+        # Note lstint is backwards again (aka normal/forward)
+        #  since we really want to sort on now-last rather than last.
+        sortdict = {
+            # lstint ascending
+            "lstint": lambda e: ntp.ntpc.lfptofloat(e.last),
+            # lstint descending
+            "-lstint": lambda e: -ntp.ntpc.lfptofloat(e.last),
+            # avgint ascending
+            "avgint": lambda e: -e.avgint(),
+            # avgint descending
+            "-avgint": lambda e: e.avgint(),
+            # IPv4 asc. then IPv6 asc.
+            "addr": lambda e: e.sortaddr(),
+            # IPv6 desc. then IPv4 desc.
+            "-addr": lambda e: e.sortaddr(),
+            # hit count ascending
+            "count": lambda e: -e.ct,
+            # hit count descending
+            "-count": lambda e: e.ct,
+        }
+        if sortkey == "lstint":
+            sortkey = None   # normal/default case, no need to sort
+        if sortkey is not None:
+            sorter = sortdict.get(sortkey)
+            if sorter is None:
+                raise ControlException(SERR_BADSORT % sortkey)
+    for k in list(variables.keys()):
+        if k in ("mincount", "resall", "resany", "kod", "limited",
+                 "maxlstint", "laddr", "recent", "sort",
+                 "frags", "limit"):
+            continue
+        else:
+            raise ControlException(SERR_BADPARAM % k)
+    if 'frags' in variables:
+        frags = int(variables.get('frags'))
+        del variables['frags']
+    if 'kod' in variables:
+        variables['resany'] = variables.get('resany', 0) \
+                              | ntp.magic.RES_KOD
+        del variables['kod']
+    if 'limited' in variables:
+        variables['resany'] = variables.get('resany', 0) \
+                              | ntp.magic.RES_LIMITED
+        del variables['limited']
+    return sorter, sortkey, frags
 
 
 def stitch_mru(span, sorter, sortkey):
