@@ -1400,33 +1400,6 @@ This combats source address spoofing
         if direct is not None:
             direct(span.entries)
 
-    def __mru_stitch(self, span, sorter, sortkey):
-        # C ntpq's code for stitching together spans was absurdly
-        # overelaborate - all that dancing with last.older and
-        # addr.older was, as far as I can tell, just pointless.
-        # Much simpler to just run through the final list throwing
-        # out every entry with an IP address that is duplicated
-        # with a later most-recent-transmission time.
-        addrdict = {}
-        deletia = []
-        for (i, entry) in enumerate(span.entries):
-            if entry.addr not in addrdict:
-                addrdict[entry.addr] = []
-            addrdict[entry.addr].append((i, entry.last))
-        for addr in addrdict:
-            deletia += sorted(addrdict[addr], key=lambda x: x[1])[:-1]
-        deletia = [x[0] for x in deletia]
-        deletia.sort(reverse=True)
-        for i in deletia:
-            span.entries.pop(i)
-
-        # Sort for presentation
-        if sorter:
-            span.entries.sort(key=sorter)
-            if sortkey == "addr":
-                # I don't know how to feed a minus sign to text sort
-                span.entries.reverse()
-
     def __mru_query_error(self, e, restarted_count, cap_frags, limit, frags):
         warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
                                                   self.debug, th))
@@ -1586,7 +1559,7 @@ This combats source address spoofing
         except KeyboardInterrupt:  # pragma: no cover
             pass        # We can test for interruption with is_complete()
 
-        self.__mru_stitch(span, sorter, sortkey)
+        stitch_mru(span, sorter, sortkey)
         return span
 
     def __ordlist(self, listtype):
@@ -1611,6 +1584,34 @@ This combats source address spoofing
     def ifstats(self):
         "Retrieve ifstats data."
         return self.__ordlist("ifstats")
+
+
+def stitch_mru(span, sorter, sortkey):
+    # C ntpq's code for stitching together spans was absurdly
+    # overelaborate - all that dancing with last.older and
+    # addr.older was, as far as I can tell, just pointless.
+    # Much simpler to just run through the final list throwing
+    # out every entry with an IP address that is duplicated
+    # with a later most-recent-transmission time.
+    addrdict = {}
+    deletia = []
+    for (i, entry) in enumerate(span.entries):
+        if entry.addr not in addrdict:
+            addrdict[entry.addr] = []
+        addrdict[entry.addr].append((i, entry.last))
+    for addr in addrdict:
+        deletia += sorted(addrdict[addr], key=lambda x: x[1])[:-1]
+    deletia = [x[0] for x in deletia]
+    deletia.sort(reverse=True)
+    for i in deletia:
+        span.entries.pop(i)
+
+    # Sort for presentation
+    if sorter:
+        span.entries.sort(key=sorter)
+        if sortkey == "addr":
+            # I don't know how to feed a minus sign to text sort
+            span.entries.reverse()
 
 
 class Authenticator:
