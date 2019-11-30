@@ -1413,12 +1413,8 @@ This combats source address spoofing
                     variables['resall'] = hex(variables['resall'])
                 if 'resany' in variables:
                     variables['resany'] = hex(variables['resany'])
-                parms = ", " + ",".join([("%s=%s" % it)
-                                         for it in list(variables.items())])
-            else:
-                parms = ""
-            req_buf += parms
-            first_time_only = "recent=%s" % variables.get("recent")
+            parms, firstParms = generate_mru_parms(variables)
+            req_buf += firstParms
 
             while True:
                 # Request additions to the MRU list
@@ -1476,9 +1472,6 @@ This combats source address spoofing
                                     self.ntpd_row_limit,
                                     max(limit + 1,
                                         limit * 33 / 32))
-
-                # Only ship 'recent' on the first request
-                parms = parms.replace(first_time_only, "")
 
                 # Prepare next query with as many address and last-seen
                 # timestamps as will fit in a single packet.  A new nonce
@@ -1613,6 +1606,22 @@ def stitch_mru(span, sorter, sortkey):
         if sortkey == "addr":
             # I don't know how to feed a minus sign to text sort
             span.entries.reverse()
+
+
+def generate_mru_parms(variables):
+    if not variables:
+        return "", ""
+    # generate all sans recent
+    parmStrs = [("%s=%s" % it)
+                for it in list(variables.items()) if (it[0] != "recent")]
+    parms = ", " + ", ".join(parmStrs)
+    # Only ship 'recent' on the first request
+    if variables.has_key("recent"):
+        firstParms = ", recent=%s" % variables["recent"]
+        firstParms += parms
+    else:
+        firstParms = parms
+    return parms, firstParms
 
 
 class Authenticator:
