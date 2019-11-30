@@ -1616,7 +1616,7 @@ def generate_mru_parms(variables):
                 for it in list(variables.items()) if (it[0] != "recent")]
     parms = ", " + ", ".join(parmStrs)
     # Only ship 'recent' on the first request
-    if variables.has_key("recent"):
+    if "recent" in variables:
         firstParms = ", recent=%s" % variables["recent"]
         firstParms += parms
     else:
