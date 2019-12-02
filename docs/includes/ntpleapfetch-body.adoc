@@ -38,15 +38,15 @@ For cron-friendly behavior, define CRONJOB=1 in the crontab.
 
 +-4+::
   Use only IPv4 addresses for DNS name resolution. This option must not
-  appear in combination with any of the following options: +-6+.
+  appear in combination with +-6+.
 
 +-6+::
   Use only IPv6 addresses for DNS name resolution. This option must not
-  appear in combination with any of the following options: +-4+.
+  appear in combination with +-4+.
 
 +-c+::
   Command to restart ntpd after installing a new file. Without such a
-  command. ntpd checks the file daily.
+  command, ntpd checks the file daily.
 
 +-e+ 'expiry'::
   Refresh the leapfile this long before it expires.
@@ -58,8 +58,9 @@ frequent refreshes.
 +-f+ 'config'::
   Location of the {ntpconf} file.
 +
-Specify location of {ntpconf} (used to make sure leapfile directive is
-present and to default leapfile) /etc/{ntpconf}
+Specify location of {ntpconf}, which defaults to /etc/{ntpconf}.  It is read
+to make sure the "leapfile" directive is present and to determine the default
+path to the leapfile.
 
 +-F+::
   Force update even if current file is OK and not close to expiring.
