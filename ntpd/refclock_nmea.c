@@ -392,6 +392,85 @@ nmea_start(
 		baudtext = "115200";
 		break;
 #endif
+    /* Speeds faster than 115200 are only available via the baud option. */
+#ifdef B230400
+        case 230400:
+                baudrate = B230400;
+                baudtext = "230400";
+                break;
+#endif
+#ifdef B460800
+        case 460800:
+                baudrate = B460800;
+                baudtext = "460800";
+                break;
+#endif
+#ifdef B500000
+        case 500000:
+                baudrate = B500000;
+                baudtext = "500000";
+                break;
+#endif
+#ifdef B576000
+        case 576000:
+                baudrate = B576000;
+                baudtext = "576000";
+                break;
+#endif
+#ifdef B921600
+        case 921600:
+                baudrate = B921600;
+                baudtext = "921600";
+                break;
+#endif
+#ifdef B1000000
+        case 1000000:
+                baudrate = B1000000;
+                baudtext = "1000000";
+                break;
+#endif
+#ifdef B1152000
+        case 1152000:
+                baudrate = B1152000;
+                baudtext = "1152000";
+                break;
+#endif
+#ifdef B1500000
+        case 1500000:
+                baudrate = B1500000;
+                baudtext = "1500000";
+                break;
+#endif
+#ifdef B2000000
+        case 2000000:
+                baudrate = B2000000;
+                baudtext = "2000000";
+                break;
+#endif
+#ifdef B2500000
+        case 2500000:
+                baudrate = B2500000;
+                baudtext = "2500000";
+                break;
+#endif
+#ifdef B3000000
+        case 3000000:
+                baudrate = B3000000;
+                baudtext = "3000000";
+                break;
+#endif
+#ifdef B3500000
+        case 3500000:
+                baudrate = B3500000;
+                baudtext = "3500000";
+                break;
+#endif
+#ifdef B4000000
+        case 4000000:
+                baudrate = B4000000;
+                baudtext = "4000000";
+                break;
+#endif
 	default:
 		baudrate = SPEED232;
 #ifdef ENABLE_CLASSIC_MODE

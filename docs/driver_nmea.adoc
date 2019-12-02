@@ -6,7 +6,7 @@ include::html.include[]
 ["verse",subs="normal"]
 Name: nmea
 Reference ID: GPS
-Serial Port: /dev/gps__u__; 4800-115200bps, 8N1
+Serial Port: /dev/gps__u__; 4800 bps or faster, 8N1
 Serial Port: /dev/gpspps__u__; for PPS
 Features: +tty_clk+
 
