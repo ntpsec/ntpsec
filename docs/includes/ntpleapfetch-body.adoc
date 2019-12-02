@@ -58,7 +58,7 @@ frequent refreshes.
 +-f+ 'config'::
   Location of the {ntpconf} file.
 +
-Specify location of {ntpconf}, which defaults to /etc/{ntpconf}.  It is read
+Specify location of {ntpconf}, which defaults to +{ntpconfpath}+.  It is read
 to make sure the "leapfile" directive is present and to determine the default
 path to the leapfile.
 

@@ -9,6 +9,7 @@
 :millshome: https://www.eecis.udel.edu/~mills/
 :GPSD: https://gpsd.io/
 :ntpconf: ntp.conf
+:ntpconfpath: /etc/ntp.conf
 // Annoyingly, these have to be *manually* synchronized with the headers
 // on their manual pages - asciidoc doesn't expand attributes in header lines.
 :ntpdconfman: ntp.conf(5)
