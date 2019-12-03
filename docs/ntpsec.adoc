@@ -296,7 +296,7 @@ to the security-critical core.
 * The default bitrate of the NMEA driver has been changed to 9600 to
   match the default speed of almost all modern GPSes.  The code can be
   built in a strict NTP Classic compatibility mode that restores the
-  old 4800bps default.
+  old 4800 bps default.
 
 * Most refclock drivers now support configuration options to override the
   default device path, the default PPS device path (if any) and the

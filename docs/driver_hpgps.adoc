@@ -7,7 +7,7 @@ include::html.include[]
 Name: hpgps
 Reference ID: GPS
 Driver ID: GPS_HP
-Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
+Serial Port: /dev/hpgps__u__; 9600 bps 8N1, 19200 bps 7N2 for the HP Z3801A
 
 == Warning
 

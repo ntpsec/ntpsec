@@ -7,7 +7,7 @@ include::html.include[]
 Name: arbiter
 Reference ID: GPS
 Driver ID: GPS_ARBITER
-Serial Port: /dev/gps__u__; 9600bps 8N1
+Serial Port: /dev/gps__u__; 9600 bps 8N1
 Features: tty_clk
 
 == Deprecation warning
