@@ -27,6 +27,7 @@
 #include "ntp_stdlib.h"
 #include "nts.h"
 #include "nts2.h"
+#include "timespecops.h"
 
 /* Beware: bind and accept take type sockaddr, but that's not big
  *         enough for an IPv6 address.
@@ -37,7 +38,7 @@ static bool create_listener4(int port);
 static bool create_listener6(int port);
 static void* nts_ke_listener(void*);
 static bool nts_ke_request(SSL *ssl);
-static void nts_ke_accept_fail(char* addrbuf, l_fp finish);
+static void nts_ke_accept_fail(char* addrbuf, double sec);
 
 static void nts_lock_certlock(void);
 static void nts_unlock_certlock(void);
@@ -202,7 +203,7 @@ void* nts_ke_listener(void* arg) {
 		sockaddr_u addr;
 		socklen_t len = sizeof(addr);
 		SSL *ssl;
-		l_fp start, finish;
+		struct timespec start, finish;
 		int client, err;
 
 		client = accept(sock, &addr.sa, &len);
@@ -214,7 +215,7 @@ void* nts_ke_listener(void* arg) {
 			sleep(1);		/* avoid log clutter on bug */
 			continue;
 		}
-		get_systime(&start);
+		clock_gettime(CLOCK_REALTIME, &start);
 		sockporttoa_r(&addr, addrbuf, sizeof(addrbuf));
 
 /* This is disabled in order to reduce clutter in the log file.
@@ -251,9 +252,9 @@ void* nts_ke_listener(void* arg) {
 		SSL_set_fd(ssl, client);
 
 		if (SSL_accept(ssl) <= 0) {
-			get_systime(&finish);
-			finish -= start;
-			nts_ke_accept_fail(addrbuf, finish);
+			clock_gettime(CLOCK_REALTIME, &finish);
+			finish = sub_tspec(finish, start);
+			nts_ke_accept_fail(addrbuf, tspec_to_d(finish));
 			SSL_free(ssl);
 			close(client);
 			nts_ke_serves_bad++;
@@ -273,11 +274,11 @@ void* nts_ke_listener(void* arg) {
 		SSL_free(ssl);
 		close(client);
 
-		get_systime(&finish);
-		finish -= start;
+		clock_gettime(CLOCK_REALTIME, &finish);
+		finish = sub_tspec(finish, start);
 		nts_ke_serves_good++;
-		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, Using %s, took %.3Lf sec",
-			addrbuf, usingbuf, lfptod(finish));
+		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, Using %s, took %.3f sec",
+			addrbuf, usingbuf, tspec_to_d(finish));
 
 	}
 	return NULL;
@@ -286,7 +287,7 @@ void* nts_ke_listener(void* arg) {
 /* Analyze failure from SSL_accept
  * print single error message for common cases.
  */
-void nts_ke_accept_fail(char* addrbuf, l_fp finish) {
+void nts_ke_accept_fail(char* addrbuf, double sec) {
 	unsigned long err = ERR_peek_error();
 	int lib = ERR_GET_LIB(err);
 	int reason = ERR_GET_REASON(err);
@@ -298,13 +299,13 @@ void nts_ke_accept_fail(char* addrbuf, l_fp finish) {
 	if (ERR_LIB_SSL == lib && SSL_R_NO_SHARED_CIPHER == reason)
 		msg = "no shared cipher";
 	if (NULL == msg) {
-		msyslog(LOG_INFO, "NTSs: SSL accept from %s failed, took %.3Lf sec",
-			addrbuf, lfptod(finish));
+		msyslog(LOG_INFO, "NTSs: SSL accept from %s failed, took %.3f sec",
+			addrbuf, sec);
 		nts_log_ssl_error();
 		return;
 	}
-	msyslog(LOG_INFO, "NTSs: SSL accept from %s failed: %s, took %.3Lf sec",
-		addrbuf, msg, lfptod(finish));
+	msyslog(LOG_INFO, "NTSs: SSL accept from %s failed: %s, took %.3f sec",
+		addrbuf, msg, sec);
 }
 
 bool nts_ke_request(SSL *ssl) {

@@ -30,6 +30,7 @@
 #include "nts2.h"
 #include "ntp_dns.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 SSL_CTX* make_ssl_client_ctx(const char *filename);
 int open_TCP_socket(struct peer *peer, const char *hostname);
@@ -74,14 +75,14 @@ bool nts_probe(struct peer * peer) {
 	char errbuf[100];
 	SSL     *ssl;
 	int      server;
-	l_fp     start, finish;
+	struct timespec start, finish;
 	int      err;
 
 	if (NULL == client_ctx)
 		return false;
 
 	addrOK = false;
-	get_systime(&start);
+	clock_gettime(CLOCK_REALTIME, &start);
 
 	if (NULL == hostname) {
 		/* IP Address case */
@@ -182,10 +183,10 @@ bool nts_probe(struct peer * peer) {
 	SSL_free(ssl);
 	close(server);
 
-	get_systime(&finish);
-	finish -= start;
-	msyslog(LOG_INFO, "NTSc: NTS-KE req to %s took %.3Lf sec, %s",
-		hostname, lfptod(finish),
+	clock_gettime(CLOCK_REALTIME, &finish);
+	finish = sub_tspec(finish, start);
+	msyslog(LOG_INFO, "NTSc: NTS-KE req to %s took %.3f sec, %s",
+		hostname, tspec_to_d(finish),
 		addrOK? "OK" : "fail");
 
 	return addrOK;
@@ -255,7 +256,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	struct addrinfo *answer;
 	int gai_rc, err;
 	int sockfd;
-	l_fp start, finish;
+	struct timespec start, finish;
 
 	/* copy avoids dancing around const warnings */
 	strlcpy(host, hostname, sizeof(host));
@@ -281,17 +282,17 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_family = AF(&peer->srcadr);  /* -4, -6 switch */
-	get_systime(&start);
+	clock_gettime(CLOCK_REALTIME, &start);
 	gai_rc = getaddrinfo(host, port, &hints, &answer);
 	if (0 != gai_rc) {
 		msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to contact %s: %d, %s",
 			hostname, gai_rc, gai_strerror(gai_rc));
 		return -1;
 	}
-	get_systime(&finish);
-	finish -= start;
-	msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3Lf sec",
-		hostname, lfptod(finish));
+	clock_gettime(CLOCK_REALTIME, &finish);
+	finish = sub_tspec(finish, start);
+	msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3f sec",
+		hostname, tspec_to_d(finish));
 
 	/* Save first answer for NTP, switch to NTP port in case of server-name:port */
 	memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
