@@ -46,6 +46,7 @@
 
 extern struct timespec normalize_tspec(struct timespec);
 extern struct timespec d_to_tspec(double);
+extern double          tspec_to_d(struct timespec);
 extern struct timespec add_tspec(struct timespec, struct timespec);
 extern struct timespec add_tspec_ns(struct timespec, long);
 extern struct timespec sub_tspec(struct timespec, struct timespec);

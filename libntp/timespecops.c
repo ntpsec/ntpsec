@@ -104,6 +104,17 @@ d_to_tspec(
 	return x;
 }
 
+/* convert a timespec to a double
+ * will drop low bits if integer part is big
+ */
+double
+tspec_to_d(
+	struct timespec ts
+	)
+{
+	return (ts.tv_sec + ts.tv_nsec*S_PER_NS);
+}
+
 /* x = a + b */
 struct timespec
 add_tspec(
