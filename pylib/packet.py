@@ -1483,14 +1483,7 @@ This combats source address spoofing
                            "frags" if cap_frags else "limit",
                            frags if cap_frags else limit,
                            parms)
-                for i in range(len(span.entries)):
-                    e = span.entries[len(span.entries) - i - 1]
-                    incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
-                    if (len(req_buf) + len(incr) >=
-                            ntp.control.CTL_MAX_DATA_LEN):
-                        break
-                    else:
-                        req_buf += incr
+                req_buf += generate_mru_lastseen(span, len(req_buf))
                 if direct is not None:
                     span.entries = []
         except KeyboardInterrupt:  # pragma: no cover
@@ -1622,6 +1615,19 @@ def generate_mru_parms(variables):
     else:
         firstParms = parms
     return parms, firstParms
+
+
+def generate_mru_lastseen(span, existingBufferSize):
+    buf = ""
+    for i in range(len(span.entries)):
+        e = span.entries[len(span.entries) - i - 1]
+        incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
+        if (existingBufferSize + len(buf) + len(incr) >=
+                ntp.control.CTL_MAX_DATA_LEN):
+            break
+        else:
+            buf += incr
+    return buf
 
 
 class Authenticator:
