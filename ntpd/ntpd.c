@@ -671,6 +671,7 @@ main(
 		stats_config(STATS_FREQ_FILE, driftfile);
 		break;
             case 'g':
+            case 'G':
             case 'h':
             case 'i':
                 /* handled elsewhere */
