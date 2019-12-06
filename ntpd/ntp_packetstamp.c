@@ -144,7 +144,7 @@ fetch_packetstamp(
 	    ticks = (unsigned long) ((tvp->tv_usec * S_PER_NS) / sys_tick);
 	    tvp->tv_usec = (long)(ticks * US_PER_S * sys_tick);
 	}
-#endif  
+#endif
 	DPRINT(4, ("fetch_timestamp: system usec network time stamp: %jd.%06ld\n",
 		(intmax_t)tvp->tv_sec, (long)tvp->tv_usec));
 	nts = tspec_stamp_to_lfp(tval_to_tspec(*tvp));
