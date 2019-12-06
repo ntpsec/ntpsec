@@ -81,6 +81,9 @@ def options_cmd(ctx, config):
     grp.add_option('--undefine', type='string', action="callback",
                    callback=callback_flags,
                    help="Force undefinition of symbol.")
+    grp.add_option('--disable-fuzz', action='store_true',
+                   default=False,
+                   help="Disable fuzzing of low bits of time")
 
     grp = ctx.add_option_group("NTP documentation configure options")
     grp.add_option('--enable-doc', action='store_true',

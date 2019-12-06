@@ -792,6 +792,9 @@ int main(int argc, char **argv) {
     if ctx.options.enable_early_droproot:
         ctx.define("ENABLE_EARLY_DROPROOT", 1,
                    comment="Enable early drop root")
+    if not ctx.options.disable_fuzz:
+        ctx.define("ENABLE_FUZZ", 1,
+                   comment="Enable fuzzing low bits of time")
 
     # This is true under every Unix-like OS.
     ctx.define("HAVE_WORKING_FORK", 1,

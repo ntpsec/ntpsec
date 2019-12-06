@@ -1941,7 +1941,11 @@ ctl_putsys(
 
 	case CS_FUZZ:
 		/* a.k.a. fuzz (s), output in ms */
+#ifdef ENABLE_FUZZ
 		ctl_putdbl6(sys_var[varid].text, sys_fuzz * MS_PER_S);
+#else
+		ctl_putdbl6(sys_var[varid].text, 0.0);
+#endif
 		break;
 
 	case CS_WANDER_THRESH:
@@ -1950,7 +1954,11 @@ ctl_putsys(
 
 	case CS_TICK:
 		/* a.k.a. sys_tick (s), output in ms */
+#ifdef ENABLE_FUZZ
 		ctl_putdbl6(sys_var[varid].text, sys_tick * MS_PER_S);
+#else
+		ctl_putdbl6(sys_var[varid].text, 0.0);
+#endif
 		break;
 
 	case CS_NUMCTLREQ:

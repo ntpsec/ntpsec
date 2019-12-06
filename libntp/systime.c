@@ -56,12 +56,15 @@
  * adj_systime() and step_systime() will behave sanely with these
  * variables not set, but the adjustments may be in larger steps.
  */
+#ifdef ENABLE_FUZZ
 double	sys_tick = 0;		/* tick size or time to read (s) */
 double	sys_fuzz = 0;		/* min. time to read the clock (s) */
 bool	trunc_os_clock;		/* sys_tick > measured_tick */
+#endif
 time_stepped_callback	step_callback;
 
 static doubletime_t  sys_residual = 0;	/* adjustment residue (s) */
+#ifdef ENABLE_FUZZ
 static long          sys_fuzz_nsec = 0;	/* minimum time to read clock (ns) */
 
 /* perlinger@ntp.org: As 'get_systime()' does its own check for clock
@@ -70,9 +73,11 @@ static long          sys_fuzz_nsec = 0;	/* minimum time to read clock (ns) */
  * static value could be removed after the v4.2.8 release.
  */
 static bool lamport_violated;	/* clock was stepped back */
+#endif
 
 static  void	get_ostime	(struct timespec *tsp);
 
+#ifdef ENABLE_FUZZ
 void
 set_sys_fuzz(
 	double	fuzz_val
@@ -83,6 +88,7 @@ set_sys_fuzz(
 	//INSIST(sys_fuzz <= 1.0);
 	sys_fuzz_nsec = (long)(sys_fuzz * NS_PER_S + 0.5);
 }
+#endif
 
 
 static void
@@ -91,7 +97,6 @@ get_ostime(
 	)
 {
 	int	rc;
-	long	ticks;
 
 	rc = clock_gettime(CLOCK_REALTIME, tsp);
 	if (rc < 0) {
@@ -102,13 +107,17 @@ get_ostime(
 		exit(1);
 	}
 
+#ifdef ENABLE_FUZZ
 	if (trunc_os_clock) {
+		long	ticks;
 		ticks = (long)((tsp->tv_nsec * S_PER_NS) / sys_tick);
 		tsp->tv_nsec = (long)(ticks * NS_PER_S * sys_tick);
 	}
+#endif
 }
 
 
+#ifdef ENABLE_FUZZ
 static	void	normalize_time	(struct timespec, long, l_fp *);
 
 static void
@@ -205,6 +214,7 @@ normalize_time(
 	lamport_violated = false;
 	*now = result;
 }
+#endif
 
 /*
  * get_systime - return system time in NTP timestamp format.
@@ -216,7 +226,11 @@ get_systime(
 {
 	struct timespec ts;	/* seconds and nanoseconds */
 	get_ostime(&ts);
+#ifdef ENABLE_FUZZ
 	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
+#else
+	*now = tspec_stamp_to_lfp(ts);
+#endif
 }
 
 
@@ -264,11 +278,15 @@ adj_systime(
 	}
 	adjtv.tv_sec = (long)dtemp;
 	dtemp -= adjtv.tv_sec;
+#ifdef ENABLE_FUZZ
 	if (sys_tick > sys_fuzz) {
 		quant = sys_tick;
 	} else {
 		quant = S_PER_US;
 	}
+#else
+		quant = S_PER_US;
+#endif
 	ticks = (long)(dtemp / quant + .5);
 	adjtv.tv_usec = (long)(ticks * quant * US_PER_S + .5);
 	/* The rounding in the conversions could push us over the
@@ -415,7 +433,9 @@ step_systime(
 	}
 
 	sys_residual = 0;
+#ifdef ENABLE_FUZZ
 	lamport_violated = (step < 0);
+#endif
 	if (step_callback)
 		(*step_callback)();
 	return true;

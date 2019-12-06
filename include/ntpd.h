@@ -166,7 +166,9 @@ extern	void	poll_update	(struct peer *, uint8_t);
 
 extern	void	clock_filter	(struct peer *, double, double, double);
 extern	void	init_proto	(const bool);
+#ifdef ENABLE_FUZZ
 extern	void	set_sys_tick_precision(double);
+#endif
 extern	void	proto_config	(int, unsigned long, double);
 extern	void	proto_clr_stats (void);
 

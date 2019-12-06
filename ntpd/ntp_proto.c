@@ -238,8 +238,10 @@ static	void	clock_select	(void);
 static	void	clock_update	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, int, auth_info*, int);
 static	int	local_refid	(struct peer *);
+#ifdef ENABLE_FUZZ
 static	void	measure_precision(const bool);
 static	double	measure_tick_fuzz(void);
+#endif
 static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 static	double	root_distance	(struct peer *);
@@ -2639,6 +2641,7 @@ peer_unfit(
 }
 
 
+#ifdef ENABLE_FUZZ
 /*
  * Find the precision of this particular machine
  */
@@ -2746,7 +2749,6 @@ measure_tick_fuzz(void)
 	return tick;
 }
 
-
 void
 set_sys_tick_precision(
 	double tick
@@ -2784,7 +2786,7 @@ set_sys_tick_precision(
 
 	sys_vars.sys_precision = (int8_t)i;
 }
-
+#endif
 
 /*
  * init_proto - initialize the protocol module's data
@@ -2806,7 +2808,11 @@ init_proto(const bool verbose)
 	sys_vars.sys_rootdisp = 0;
 	sys_vars.sys_reftime = 0;
 	clkstate.sys_jitter = 0;
+#ifdef ENABLE_FUZZ
 	measure_precision(verbose);
+#else
+	UNUSED_ARG(verbose);
+#endif
 	get_systime(&dummy);
 	sys_survivors = 0;
 	stat_count.sys_stattime = current_time;

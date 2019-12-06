@@ -150,10 +150,12 @@ extern	size_t	strlcat(char *dst, const char *src, size_t siz);
 /* ntp_proto.c */
 extern double	measured_tick;		/* non-overridable sys_tick */
 
+#ifdef ENABLE_FUZZ
 /* systime.c */
 extern double	sys_tick;		/* tick size or time to read */
 extern double	sys_fuzz;		/* min clock read latency */
 extern bool	trunc_os_clock;		/* sys_tick > measured_tick */
+#endif
 
 /* use these as return values for sort-comparison functions */
 #define COMPARE_GREATERTHAN	1
