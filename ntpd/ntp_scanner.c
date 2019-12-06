@@ -153,7 +153,9 @@ lex_open(
 		stream->fpi = fopen(path, mode);
 		if (NULL == stream->fpi) {
 			free(stream);
-			stream = NULL;
+			msyslog(LOG_ERR, "CONFIG: failed to open \'%s\': %s",
+				path, strerror(errno));
+			exit(1);
 		}
 	}
 	return stream;
