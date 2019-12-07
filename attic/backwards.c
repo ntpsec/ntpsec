@@ -31,10 +31,10 @@ main(int argc, char *argv[])
 	/* Some systems return equal.
 	 * Print first 5 equal examples. */
 	for(int equal = 0; equal < 5; ) {
-		clock_gettime(CLOCK_MONOTONIC, &ts0);  /* warm up cache */
-		clock_gettime(CLOCK_MONOTONIC, &ts1);
-		clock_gettime(CLOCK_MONOTONIC, &ts0);
-		clock_gettime(CLOCK_MONOTONIC, &ts1);
+		clock_gettime(CLOCK_REALTIME, &ts0);  /* warm up cache */
+		clock_gettime(CLOCK_REALTIME, &ts1);
+		clock_gettime(CLOCK_REALTIME, &ts0);
+		clock_gettime(CLOCK_REALTIME, &ts1);
 
 		if ((ts0.tv_sec < ts1.tv_sec) ||
 		    ((ts0.tv_sec == ts1.tv_sec) &&
@@ -49,10 +49,10 @@ main(int argc, char *argv[])
 	}
 
 	for(;;) {
-		clock_gettime(CLOCK_MONOTONIC, &ts0);  /* warm up cache */
-		clock_gettime(CLOCK_MONOTONIC, &ts1);
-		clock_gettime(CLOCK_MONOTONIC, &ts0);
-		clock_gettime(CLOCK_MONOTONIC, &ts1);
+		clock_gettime(CLOCK_REALTIME, &ts0);  /* warm up cache */
+		clock_gettime(CLOCK_REALTIME, &ts1);
+		clock_gettime(CLOCK_REALTIME, &ts0);
+		clock_gettime(CLOCK_REALTIME, &ts1);
 
 		if ((ts0.tv_sec < ts1.tv_sec) ||
 		    ((ts0.tv_sec == ts1.tv_sec) &&
