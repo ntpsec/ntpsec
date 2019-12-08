@@ -12,6 +12,8 @@ on user-visible changes.
 
 == 2019-11-17: 1.1.8 ==
 
+NTS client now requires ALPN on TLSv1.3.
+
 Fix bug in NTS-KE client so that NTP server names work.
 
 Fix/tweak several NTS logging messages.

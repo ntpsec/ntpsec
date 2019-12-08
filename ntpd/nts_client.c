@@ -395,39 +395,41 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
 bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
 	UNUSED_ARG(peer);
 #if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
-	bool bad = true;  /* Always return OK for now. */
 	const unsigned char *data;
 	unsigned int len;
-	unsigned int i;
-	char buff [100];
 	SSL_get0_alpn_selected(ssl, &data, &len);
 	if (0 == len) {
 		/* This happens when talking to old/TLSv1.2 systems. */
+		if (TLS1_2_VERSION == SSL_version(ssl)) {
+			msyslog(LOG_DEBUG, "NTSc: No ALPN from %s, TLSv1.2",
+			hostname);
+			return true;
+		}
 		msyslog(LOG_DEBUG, "NTSc: No ALPN from %s (%s)",
 			hostname, SSL_get_version(ssl));
-		return bad;
-	}
-	if (sizeof(buff) <= len) {
-		/* Broken or malicious server */
-		msyslog(LOG_DEBUG, "NTSc: Very long ALPN from %s (%u)",
-			hostname, len);
-		return bad;
-	}
-	memcpy(buff, data, len);
-	buff[len] = '\0';
-	for (i=0; i<len; i++) {
-		if (!isgraph(buff[i])) {
-			buff[i] = '*'; /* fix non-printing crap */
-		}
+		return false;
 	}
 	/* For now, we only support one version.
-	 * This gets more complicated when version 2 arrives. */
-	if (0 != strcmp((const char*)data, "ntske/1")) {
-		msyslog(LOG_DEBUG, "NTSc: Strange ALPN returned: %s (%u) from %s",
+	 * This will get more complicated when version 2 arrives. */
+	if (len != 7 ||
+	    0 != memcmp(data, "ntske/1", len)) {
+		/* copy data over so we can print it. */
+		/* don't read past end of data */
+		unsigned int i, l;
+		char buff [16];
+		l = min(len, sizeof(buff)-1);
+		memcpy(buff, data, l);
+		buff[l] = '\0';
+		for (i=0; i<l; i++) {
+			if (!isgraph(buff[i])) {
+			  buff[i] = '*'; /* fix non-printing crap */
+			}
+		}
+		msyslog(LOG_DEBUG, "NTSc: Strange ALPN %s (%u) from %s",
 			buff, len, hostname);
-		return bad;
+		return false;
 	}
-        msyslog(LOG_DEBUG, "NTSc: Good ALPN from: %s", hostname);
+	msyslog(LOG_DEBUG, "NTSc: Good ALPN from %s", hostname);
 
 #else
 	UNUSED_ARG(ssl);
