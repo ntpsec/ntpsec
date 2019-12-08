@@ -78,15 +78,11 @@ static char *user;		/* User to switch to */
 static char *group;		/* group to switch to */
 static const char *chrootdir;	/* directory to chroot to */
 
-#ifdef HAVE_WORKING_FORK
 int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
-#endif
 
 const char *progname;
 
-#if defined(HAVE_WORKING_FORK)
 static int	wait_child_sync_if	(int, long);
-#endif
 
 static	void	catchHUP	(int);
 static	void	catchDNS	(int);
@@ -101,7 +97,6 @@ static	void	no_debug	(int);
 static int	saved_argc;
 static char **	saved_argv;
 
-static int	ntpdmain(int, char **) __attribute__((noreturn));
 static void	mainloop		(void)
 			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
@@ -412,19 +407,6 @@ parse_cmdline_opts(
 	}
 }
 
-#ifdef NO_MAIN_ALLOWED
-CALL(ntpd,"ntpd",ntpdmain);
-#else	/* !NO_MAIN_ALLOWED follows */
-int
-main(
-	int argc,
-	char *argv[]
-	)
-{
-	return ntpdmain(argc, argv);
-}
-#endif /* !NO_MAIN_ALLOWED */
-
 #ifdef SIGDANGER
 /*
  * Signal handler for SIGDANGER. (AIX)
@@ -490,20 +472,18 @@ const char *ntpd_version(void)
  * Main program.  Initialize us, disconnect us from the tty if necessary,
  * and loop waiting for I/O and/or timer expiries.
  */
-static int
-ntpdmain(
+int
+main(
 	int argc,
 	char *argv[]
 	)
 {
 	mode_t		uv;
 	uid_t		uid;
-# if defined(HAVE_WORKING_FORK)
 	int		pipe_fds[2];
 	int		rc;
 	int		exit_code;
 	struct sigaction sa;
-# endif	/* HAVE_WORKING_FORK*/
 	int op;
 
 	uv = umask(0);
@@ -548,7 +528,6 @@ ntpdmain(
 
 	set_prettydate_pivot(time(NULL));
 
-# ifdef HAVE_WORKING_FORK
 	/* make sure the FDs are initialised */
 	pipe_fds[0] = -1;
 	pipe_fds[1] = -1;
@@ -567,7 +546,6 @@ ntpdmain(
 	    }
 	    waitsync_fd_to_close = pipe_fds[1];
 	}
-# endif	/* HAVE_WORKING_FORK */
 
 	init_network();
 	/*
@@ -575,7 +553,6 @@ ntpdmain(
 	 */
 	if (!nofork) {
 
-# ifdef HAVE_WORKING_FORK
 		rc = fork();
 		if (-1 == rc) {
 			exit_code = (errno) ? errno : -1;
@@ -606,14 +583,13 @@ ntpdmain(
 
 		if (setsid() == (pid_t)-1)
 			msyslog(LOG_ERR, "INIT: setsid(): %s", strerror(errno));
-#  ifdef SIGDANGER
+#ifdef SIGDANGER
 		/* Don't get killed by low-on-memory signal. */
 		sa.sa_handler = catch_danger;
 		sigemptyset(&sa.sa_mask);
 		sa.sa_flags = SA_RESTART;
 		sigaction(SIGDANGER, &sa, NULL);
-#  endif	/* SIGDANGER */
-# endif		/* HAVE_WORKING_FORK */
+#endif	/* SIGDANGER */
 	}
 
 	/* Ignore SIGPIPE - from OpenSSL */
@@ -1063,7 +1039,6 @@ static void catchDNS(int sig)
 /*
  * wait_child_sync_if - implements parent side of -w/--wait-sync
  */
-# ifdef HAVE_WORKING_FORK
 static int
 wait_child_sync_if(
 	int	pipe_read_fd,
@@ -1127,7 +1102,6 @@ wait_child_sync_if(
 		progname, wait_sync1);
 	return ETIMEDOUT;
 }
-# endif	/* HAVE_WORKING_FORK */
 
 
 /*

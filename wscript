@@ -796,10 +796,6 @@ int main(int argc, char **argv) {
         ctx.define("ENABLE_FUZZ", 1,
                    comment="Enable fuzzing low bits of time")
 
-    # This is true under every Unix-like OS.
-    ctx.define("HAVE_WORKING_FORK", 1,
-               comment="Whether a working fork() exists")
-
     # SO_REUSEADDR socket option is needed to open a socket on an
     # interface when the port number is already in use on another
     # interface. Linux needs this, NetBSD does not, status on

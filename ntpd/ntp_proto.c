@@ -1103,13 +1103,11 @@ clock_update(
 			 * If our parent process is waiting for the
 			 * first clock sync, send them home satisfied.
 			 */
-#ifdef HAVE_WORKING_FORK
 			if (waitsync_fd_to_close != -1) {
 				close(waitsync_fd_to_close);
 				waitsync_fd_to_close = -1;
 				DPRINT(1, ("notified parent --wait-sync is done\n"));
 			}
-#endif /* HAVE_WORKING_FORK */
 
 		}
 

@@ -432,9 +432,7 @@ extern	bool	stats_control;		/* write stats to fileset? */
 extern	double	wander_threshold;
 
 /* ntpd.c */
-#ifdef HAVE_WORKING_FORK
 extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
-#endif
 
 /* refclock_conf.c */
 #ifdef REFCLOCK
