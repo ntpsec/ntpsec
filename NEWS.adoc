@@ -10,9 +10,11 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== 2019-11-17: 1.1.8 ==
+== Repository head ==
 
 NTS client now requires ALPN on TLSv1.3.
+
+== 2019-11-17: 1.1.8 ==
 
 Fix bug in NTS-KE client so that NTP server names work.
 
