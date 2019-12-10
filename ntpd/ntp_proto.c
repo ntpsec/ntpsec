@@ -2537,11 +2537,10 @@ static void restart_nts_ke(struct peer *peer) {
 };
 
 /*
- * dns_new_interface
- *   A new interface is now active
- *   retry danging DNS lookups
+ * dns_try_again
+ *   retry danging DNS and NTS lookups
  */
-void dns_new_interface(void) {
+void dns_try_again(void) {
 	struct peer *p;
 	for (p = peer_list; p != NULL; p = p->p_link) {
 		if ((p->cfg.flags & FLAG_LOOKUP) || (p->cast_flags & MDF_POOL)) {

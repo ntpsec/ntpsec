@@ -536,6 +536,7 @@ SIGHUP will reopen the log file if it has changed and
 check for a new leapseconds file if one was specified.
 If the NTS server is enabled, it will reload the
 certificate file if it has changed.
+It will also retry any pending DNS or NTS lookups.
 
 On most systems, you can send SIGHUP to +ntpd+ with
 -----

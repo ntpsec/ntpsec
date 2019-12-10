@@ -1263,7 +1263,7 @@ interface_update(
 #ifdef DEBUG
 	msyslog(LOG_DEBUG, "IO: new interface(s) found: waking up resolver");
 #endif
-	dns_new_interface();
+	dns_try_again();
 }
 
 

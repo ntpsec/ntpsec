@@ -954,9 +954,9 @@ static void mainloop(void)
 			msyslog(LOG_INFO, "LOG: Saw SIGHUP");
 
 			reopen_logfile();
-
 			check_leap_file(false, time(NULL));
 			check_cert_file();
+			dns_try_again();
 		}
 
 		/*
