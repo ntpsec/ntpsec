@@ -82,10 +82,10 @@ The modes are as follows:
 +-------+--------------------------+
 
 While the Stratum field has 8 bytes, only values 0-16 (low 5 bits)
-are legal. Value 16 means 'unsychronized' Value 17-255 are reserved.
+are legal. Value 16 means 'unsynchronized' Values 17-255 are reserved.
 
 LI (Leap Indicator), Version, Poll, and Precision are not described
-here; see RFC5905.
+here; see RFC 5905.
 
 t_1, the origin timestamp, is the time according to the client at
 which the request was sent.
@@ -107,7 +107,7 @@ most recent reference-clock.
 
 Theta is the thing we want to estimate: the offset between the server
 clock and the client clock. The sign convention is that theta is
-positive iff the server is ahead of the client.
+positive if the server is ahead of the client.
 
 Theta is estimated by [(t_2-t_1)+(t_3-t_4)]/2. The accuracy of this
 estimate is predicated upon network latency being symmetrical.
