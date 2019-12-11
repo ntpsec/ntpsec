@@ -21,6 +21,7 @@ include::includes/hand.adoc[]
 * link:#client[ntp.conf (you are the client)]
 * link:#server[ntp.conf (you are the server)]
 * link:#verify[Verification]
+* link:#refer[References]
 
 '''''
 
@@ -243,6 +244,18 @@ NTS KE probes_bad:           0
 NTS KE serves:               75
 NTS KE serves_bad:           56
 ------------------------------------------------------------
+
+
+[[refer]]
+== References
+
+
+* https://datatracker.ietf.org/doc/draft-ietf-ntp-using-nts-for-ntp/[Current Status of NTS Draft]
+* https://developers.cloudflare.com/time-services/nts/usage/[Cloudflare Public NTS Servers]
+* https://www.netnod.se/blog/what-network-time-security-and-why-it-important[Netnod NTS Service]
+* https://datatracker.ietf.org/meeting/106/materials/slides-106-ntp-nts-deployment-03.pdf[Deployment Review]
+
+'''''
 
 include::includes/footer.adoc[]
 
