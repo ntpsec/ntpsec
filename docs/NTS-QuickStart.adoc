@@ -79,7 +79,7 @@ Restart `ntpd`, and skip to <<Verification>>, below.
 Being an NTS server requires a well-formed SSL certificate.  The
 easiest way to do this is to use Let's Encrypt.  It needs a FQDN.
 Please see the 
-https://certbot.eff.org/[Certbot client site] for instructions.
+https://certbot.eff.org/[certbot client site] for instructions.
 
 The following worked on Fedora:
 
