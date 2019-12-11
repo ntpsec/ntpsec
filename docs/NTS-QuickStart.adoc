@@ -77,7 +77,7 @@ Restart `ntpd`, and skip to <<Verification>>, below.
 == ntp.conf (you are a server)
 
 Being an NTS server requires a well-formed SSL certificate.  The
-easiest way to do this is to use LetsEncrypt.  It needs a FQDN.
+easiest way to do this is to use Let's Encrypt.  It needs a FQDN.
 Please see the 
 https://certbot.eff.org/[Certbot client site] for instructions.
 
@@ -108,7 +108,7 @@ Locate the following two files:
 Then add the lines below to your ntp.conf, replacing
 with your pathnames.
 
-Example, using LetsEncrypt:
+Example, using Let's Encrypt:
 
 ------------------------------------------------------------
 nts key /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
