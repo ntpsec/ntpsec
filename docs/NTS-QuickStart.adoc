@@ -18,8 +18,8 @@ include::includes/hand.adoc[]
 == Table of Contents
 
 * link:#introduction[Introduction]
-* link:#client[ntp.conf (you are the client)]
-* link:#server[ntp.conf (you are the server)]
+* link:#client[NTS Client Configuration]
+* link:#server[NTS Server Configuration]
 * link:#verify[Verification]
 * link:#refer[References]
 
@@ -43,7 +43,7 @@ spent debugging.  The document link:quick.adoc[Quick Start] may
 be helpful.
 
 [[client]]
-== ntp.conf (you are a client)
+== NTS Client Configuration
 
 Append the keyword `nts` to the end of your `server`
 lines.  Do these only for servers that speak NTS.  As of
@@ -74,7 +74,7 @@ your OS/distro's root server collection.
 Restart `ntpd`, and skip to <<Verification>>, below.
 
 [[server]]
-== ntp.conf (you are a server)
+== NTS Server Configuration
 
 Being an NTS server requires a well-formed SSL certificate.  The
 easiest way to do this is to use Let's Encrypt.  It needs a FQDN.
