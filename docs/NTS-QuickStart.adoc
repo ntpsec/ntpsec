@@ -91,6 +91,9 @@ $ sudo certbot certonly --standalone
 
 # Renew
 $ sudo certbot renew
+
+# Signal ntpd to pick up new certificate(s)
+$ sudo killall -HUP ntpd
 ------------------------------------------------------------
 
 If you already have an SSL Cert for your server, and you are
