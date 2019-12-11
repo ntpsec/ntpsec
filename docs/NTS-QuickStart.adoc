@@ -108,8 +108,9 @@ to your conf file.
 
 Locate the following two files:
 
-* Your certificate Private Key
-* Your certificate Public Key, fully chained up
+* Your certificate private key
+* Your certificate chain (i.e. your certificate followed by any intermediate
+  CA certificates)
 
 Then add the lines below to your ntp.conf, replacing
 with your pathnames.
@@ -117,8 +118,8 @@ with your pathnames.
 Example, using Let's Encrypt:
 
 ------------------------------------------------------------
-nts key /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
-nts cert /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
+nts key /etc/letsencrypt/live/ntp.example.com/privkey.pem
+nts cert /etc/letsencrypt/live/ntp.example.com/fullchain.pem
 ------------------------------------------------------------
 
 Note that `ntpd` must be able to read both files and you want to
