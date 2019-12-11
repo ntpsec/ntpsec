@@ -118,30 +118,6 @@ local system.
 The server/refclock declarations are the most variable part of the
 configuration.  They tell +ntpd+ what its sources for time are.
 
-In a pre-configured NTP installation set up by an OS vendor or
-distribution packager, you are likely to see a set of time-server
-declarations pointing at a vendor subdomain of the NTP Pool.
-Under Ubuntu Linux, for example, it probably looks like this:
-
-------------------------------------------------------------------
-server 0.ubuntu.pool.ntp.org
-server 1.ubuntu.pool.ntp.org
-server 2.ubuntu.pool.ntp.org
-server 3.ubuntu.pool.ntp.org
-------------------------------------------------------------------
-
-Multiple declarations of individual pool servers is not the best
-method; they're a workaround for a historical bug in NTP Classic.  It's
-better to say
-
-------------------------------------------------------------------
-pool ubuntu.pool.ntp.org
-------------------------------------------------------------------
-
-This enables your NTP client to periodically check for new servers
-in the NTP Pool, discarding those it finds less useful.  The next section
-will explain what the NTP Pool is and how to use it.
-
 [[pool]]
 == Using the NTP Pool
 
@@ -152,8 +128,55 @@ pool.ntp.org domain as well as many subdomains divided by
 geographical region or software vendor, and are distributed to NTP
 clients via round robin DNS.
 
-Your +ntp.conf+ can use one or several of these DNS names.  These are
-resolved via DNS to the IP addresses of the servers.
+Your +ntp.conf+ can use one or several of these DNS names.  The
+https://www.ntppool.org/en/use.html[NTP Pool documentation] gives this
+example (but see below for a better version):
+
+------------------------------------------------------------------
+server 0.pool.ntp.org
+server 1.pool.ntp.org
+server 2.pool.ntp.org
+server 3.pool.ntp.org
+------------------------------------------------------------------
+
+In a pre-configured NTP installation set up by an OS vendor or distribution
+packager, you are likely to see a set of time-server declarations pointing
+at a vendor subdomain of the NTP Pool (+0.vendor.pool.ntp.org+, etc.).
+
+Multiple declarations of individual pool servers is not the best
+method; they're a workaround for a historical bug in NTP Classic.  It's
+better to use the +pool+ directive:
+
+------------------------------------------------------------------
+pool 0.pool.ntp.org
+pool 1.pool.ntp.org
+pool 2.pool.ntp.org
+pool 3.pool.ntp.org
+------------------------------------------------------------------
+
+This enables +ntpd+ to periodically check for new servers in the NTP Pool,
+discarding those it finds less useful.  The number of associations is
+controlled by link:miscopt.html#tos[+tos maxclock+].
+
+Using only a single pool entry has some limitations:
+
+------------------------------------------------------------------
+# This works, but is IPv4 only and spins up associations slower:
+pool pool.ntp.org
+
+# Likewise for 0, 1, or 3:
+pool 0.pool.ntp.org
+
+# Only the "2" hostname has IPv6 currently, so this works with both IPv4
+# IPv6, but still spins up associations slower than using all four names:
+pool 2.pool.ntp.org
+
+# Vendor domains do not work with only the top-level name:
+pool vendor.pool.ntp.org
+
+# The numbers work with vendor subdomains, with the same caveats:
+pool 0.vendor.pool.ntp.org
+------------------------------------------------------------------
 
 Note: while you could in theory request time service from any specific
 time server in the world, it is considered bad form to use a non-pool
@@ -175,7 +198,10 @@ Pool has subdomains for many countries, named by ISO country code.  If you
 are in Great Britain, for example, you might want to use the UK subdomain:
 
 ------------------------------------------------------------------
-pool uk.pool.ntp.org
+pool 0.uk.pool.ntp.org
+pool 1.uk.pool.ntp.org
+pool 2.uk.pool.ntp.org
+pool 3.uk.pool.ntp.org
 ------------------------------------------------------------------
 
 If you know your ISO country code, it is often possible to find an
@@ -188,9 +214,6 @@ routing problems.  Unfortunately, the random nature of pool allocation
 makes this impossible to guarantee. It is, however, worth keeping in mind if
 you can set up a custom configuration with non-pool servers that you
 have permission to use.
-
-Further information on using the NTP Pool is available at:
-https://www.ntppool.org/en/use.html
 
 [[howmany]]
 == How Many Servers?
