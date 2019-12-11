@@ -270,9 +270,8 @@ that are close to you on its network and will thus have fairly steady
 ping times.  A bad thing is that you may have difficulty making
 configuration of a local reference clock stick.
 
-One family of systems with this behavior is Debian Linux, including
-Ubuntu.  On these systems the DHCP client is NetworkManager.  If you
-look in your +/etc/init.d/ntp+ file, you may see something like this:
+If you look in your +/etc/init.d/ntp+ file, systemd unit, or other scripts
+involved in starting +ntpd+, you may see something like this:
 
 ------------------------------------------------------------------
 if [ -e /var/lib/ntp/ntp.conf.dhcp ]; then
@@ -282,10 +281,16 @@ fi
 
 The -c option tells +ntpd+ that the path to a generated configuration
 file follows.  The generation process might pick up your local changes
-to +ntp.conf+ or it might not; this depends on your OS supplier (Debian
-derivatives normally 'do' base on your local +ntp.conf+). If it does,
+to +ntp.conf+ or it might not; this depends on your OS supplier. (Debian
+derivatives normally 'do' base on your local +ntp.conf+.)  If it does,
 all is well.  If it does not, you may have to modify the hook scripts
 that generate that file, or disable the generation process.
+
+You may also wish to ignore the DHCP-provided servers for other reasons.
+For example, you may wish to use specific servers which support
+link:#security[Network Time Security].  On Debian derivatives, if you
+installed from the package, you can set +IGNORE_DHCP="yes"+ in
++/etc/default/ntpsec+ to ignore DHCP-provided NTP servers.
 
 [[sanity]]
 == Sanity-Checking Your Time Service
