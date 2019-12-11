@@ -196,9 +196,9 @@ routing problems.  Unfortunately, the random nature of pool allocation
 makes this impossible to guarantee. It is, however, worth keeping in mind if
 you can set up a custom configuration with non-pool servers that you
 have permission to use.
-
-Further information on using the Pool is available at
-https://www.ntppool.org/en/use.html
+ 
+You can find find more information on 
+https://www.ntppool.org/en/use.html[using the Pool].
 
 [[howmany]]
 == How Many Servers?
@@ -258,7 +258,7 @@ https://gpsd.io/gpsd-time-service-howto.html[GPSD Time Service
 HOWTO].
 
 If you are looking to set up a Stratum 1 timeserver, you may find
-https://www.ntpsec.org/white-papers/stratum-1-microserver-howto/
+https://www.ntpsec.org/white-papers/stratum-1-microserver-howto/[Stratum-1-Microserver HOWTO]
 very helpful.
 
 [[dhcp]]
@@ -355,7 +355,7 @@ are milliseconds.
 
 The NTP protocol will work with unauthenticated servers, this is what
 makes it feasible to have the Pool.  However, to close of some lines of
-attack, especially spoofing and Man-In-The~ Middle, NTPsec supports
+attack, especially spoofing and Man-In-The-Middle, NTPsec supports
 NTS.  Further information on what NTS is, and how to enable it, is
 available at link:NTS-QuickStart.html[NTS Quick Start].
 
