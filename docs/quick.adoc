@@ -107,13 +107,14 @@ Your security/access section will almost always look a lot like this:
 
 ------------------------------------------------------------------
 restrict default kod limited nomodify nopeer noquery
-restrict -6 default kod limited nomodify nopeer noquery
 restrict 127.0.0.1
-restrict -6 ::1
+restrict ::1
 ------------------------------------------------------------------
 
 This disallows configuration or +ntpq+ queries from anywhere off the
-local system.
+local system.  Older configurations may duplicate the +restrict default+
+line into a +restrict -6 default+ and/or use +-6+ on the IPv6 localhost
+exception. These are no longer necessary, but not harmful.
 
 The server/refclock declarations are the most variable part of the
 configuration.  They tell +ntpd+ what its sources for time are.
