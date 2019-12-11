@@ -192,8 +192,7 @@ Each one will produce log lines like this:
 ------------------------------------------------------------
 
 The logging prefix *NTSs* is for the NTS server component.  The *NTSc*
-component is for the NTS client part, where you are talking to *other*
-NTS servers.
+component is for the NTS client part, where you are talking to NTS servers.
 
 === Check with ntpq
 

@@ -38,10 +38,10 @@ write a basic +{ntpconf}+ configuration file for this common case,
 and introduces some concepts that will be useful later on in the
 Handbook.
 
-If your NTP program was installed from a binary package (such as
-a deb or RPM file under Linux) you can use this introduction as a
-guide to reading the configuration, but may not have to modify that
-at all.
+If you installed NTPsec using a distro package, the package's stock
+configuration may not need any changes.  You can use this guide to
+understand the default configuration.  If you installed NTPsec from
+source, this guide will help you build your configuration.
 
 It is very likely that your NTP configuration file, +{ntpconf}+ ,
 resides in +/etc+ .  On Debian (and derivatives), it is
@@ -62,8 +62,8 @@ edit-in-place on a flat +{ntpconf}+ that comes naturally to a human.
 == Configuration basics
 
 An NTP configuration file normally consists of three sections: logging
-controls, security/access controls, and server/refclock declarations.  In
-most configurations the first two sections will be a boilerplate set
+controls, security/access controls, and +server+/+refclock+ declarations.  In
+most configurations, the first two sections will be a boilerplate set
 of defaults.
 
 Under +/etc/ntp.d/+, the text in these segments can be split up into file

@@ -75,7 +75,8 @@ You are now ready to configure the daemon. You will need to create an NTP
 configuration file by default in +{ntpconfpath}+. Newbies should see the
 link:quick.html[Client Quick Start Guide].  Seasoned
 veterans can start with the link:ntpd.html[+ntpd+ - Network Time Protocol
-(NTP) daemon] page and move on to the specific configuration option pages.
+(NTP) Daemon] and link:ntp_conf.html[+ntpd+ Configuration File] pages and
+move on to the specific configuration option pages.
 
 [[prob]]
 == If You Have Problems

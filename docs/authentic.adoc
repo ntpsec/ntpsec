@@ -209,7 +209,7 @@ infrastructure to secure and authenticate associations.
 
 This section is a placeholder for complete documentation on NTS. The
 NTS implementation is work in progress conforming to a draft RFC not
-yet (December 2019) accepted.  For configuration examples, see th:
+yet (December 2019) accepted.  For configuration examples, see the
 link:NTS-QuickStart.html[NTS Quick Start Guide].
 
 NTPsec's future direction is to fully support NTS and eventually
@@ -233,7 +233,7 @@ with no clients other than MS-SNTP.*
 == Autokey
 
 Old versions of NTP supported Autokey, which used an early form of
-public-key cryptography for authentication. It was described in RFC 5906.
+public-key cryptography for authentication. It is described in RFC 5906.
 
 Unfortunately, autokey was buggy and a source of vulnerabilities; it
 has been removed. NTS is intended to replace it. It is mentioned here
