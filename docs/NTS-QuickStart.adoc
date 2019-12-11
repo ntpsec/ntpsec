@@ -72,7 +72,7 @@ Note that you must use the same host name that was used to create
 the server's certificate.  IP Addresses will not work.
 
 This assumes that the server is using a certificate covered by
-your OS/distro's root server collection.
+your OS/distro's root certificate collection.
 
 Restart `ntpd`, and skip to <<Verification>>, below.
 
