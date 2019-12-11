@@ -43,9 +43,14 @@ include::includes/misc-options.adoc[]
     Server Discovery] page for further details.
   +maxclock+ 'maxclock';;
     Specify the maximum number of servers retained by the server
-    discovery schemes. The default is 10. See the
-    link:discover.html[Automatic Server Discovery] page for further
-    details.
+    discovery schemes. The default is 10, which should typically be changed.
+    This should be an odd number (to most effectively outvote
+    link:ntpspeak.html[falsetickers]) typically two or three more than
+    +minclock+, plus the number of +pool+ entries.  The pool entries
+    must be added as +maxclock+, but not +minclock+, also counts the +pool+
+    entries themselves.  For example, +tos maxclock 11+ with four +pool+ lines
+    would keep 7 associations.  See the link:discover.html[Automatic Server
+    Discovery] page for further details.
   +maxdist+ 'maxdistance';;
     Specify the synchronization distance threshold used by the clock
     selection algorithm. The default is 1.5 s. This determines both the
@@ -72,7 +77,7 @@ include::includes/misc-options.adoc[]
     Specify the number of servers used by the selection algorithm as the
     minimum to set the system clock. The default is 1 for legacy
     purposes; however, for critical applications the value should be
-    somewhat higher but less than +minclock+.
+    somewhat higher (e.g. 3) but less than +minclock+.
   +orphan+ 'stratum';;
     Specify the orphan stratum with default 16. If less than 16 this is
     the stratum assumed by the root servers. See the

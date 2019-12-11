@@ -44,10 +44,8 @@ to the NTP mitigation algorithms, and surplus associations are pruned.
 
 Pool discovery uses an iterated process to discover new preemptable client
 associations as long as the total number of client associations is less
-than the +maxclock+ option of the link:miscopt.html#tos[+tos+] command. The
-+maxclock+ default is 10, but it should be changed in typical configuration
-to some lower number, usually two greater than the +minclock+ option of the
-same command plus the number of +pool+ entries.
+than the +maxclock+ option of the link:miscopt.html#tos[+tos+] command,
+which should typically be changed from the default.
 
 Pool discovery uses a stratum filter to select just those servers with
 strata considered useful. This can avoid large numbers of clients

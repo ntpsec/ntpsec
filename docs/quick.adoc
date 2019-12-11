@@ -159,7 +159,8 @@ will not be re-resolved.  The +pool+ command will use multiple servers that
 the DNS name resolves to, refreshing as required.  For details on the
 refreshing algorithm, see link:discover.html#assoc[Association Management].
 The number of associations is controlled by the +maxclock+ option of the
-link:miscopt.html#tos[+tos+] command.
+link:miscopt.html#tos[+tos+] command, which should typically be changed from
+the default.
 
 Using only a single pool entry has some limitations:
 
