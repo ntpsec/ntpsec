@@ -103,7 +103,7 @@ serving time using the same FQDN, you can reuse that certificate.
 
 Next, add the line:
 `nts enable`
-to your +ntp.conf+ file.
+to your +{ntpconf}+ file.
 
 Locate the following two files:
 
@@ -111,7 +111,7 @@ Locate the following two files:
 * Your certificate chain (i.e. your certificate followed by any intermediate
   CA certificates)
 
-Then add the lines below to your +ntp.conf+, replacing
+Then add the lines below to your +{ntpconf}+, replacing
 with your pathnames.
 
 Example, using Let's Encrypt:

@@ -52,7 +52,7 @@ string returned by the Unix gethostname() routine, and _filestamp_ is
 the NTP seconds when the file was generated, in decimal digits.
 
 +ntpkeygen+ also makes a soft link from +ntp.keys+ to the generated
-file.  +ntp.keys+ is the normal file used in +ntp.conf+.
+file.  +ntp.keys+ is the normal file used in +{ntpconf}+.
 
 [[random]]
 == Random Seed File

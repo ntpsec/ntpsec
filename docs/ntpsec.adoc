@@ -142,7 +142,7 @@ to the security-critical core.
 * Various features related to runtime dumping of the configuration
   state have been removed for security reasons.  These include the
   +saveconfig+ command in +ntpq+, the +--saveconfigquit+ option of ntpd, and
-  the implementation of related config declarations in +ntp.conf+.
+  the implementation of related config declarations in +{ntpconf}+.
 
 * Likewise, the poorly-documented ntpdsim code has also been removed
   to gain a significant reduction in code complexity.

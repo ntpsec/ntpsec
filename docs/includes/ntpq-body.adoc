@@ -171,7 +171,7 @@ as following.
 +keyid+ 'keyid'::
   This command specifies the key number to be used to authenticate
   configuration requests; this must correspond to a key ID configured
-  with the +controlkey+ command in the server's +ntp.conf+
+  with the +controlkey+ command in the server's +{ntpconf}+
 
 +keytype+::
   Specify the digest algorithm to use for authenticated requests, with
