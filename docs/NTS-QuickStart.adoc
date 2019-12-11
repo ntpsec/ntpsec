@@ -32,7 +32,7 @@ NTS is a method for using TLS/SSL to authenticate NTP traffic on the net.
 That means that bad guys can't forge packets that will give your
 system bogus time.
 
-The RFC hasn't been published yet (Dec 2019).  Nothing has changed
+The RFC hasn't been published yet (December 2019).  Nothing has changed
 recently, but there may be minor adjustments when it is finalized.
 
 Note: NTS does not currently work with the NTP Pool.
@@ -47,7 +47,7 @@ be helpful.
 
 Append the keyword `nts` to the end of your `server`
 lines.  Do these only for servers that speak NTS.  As of
-Dec 2019, the following should work:
+December 2019, the following should work:
 
 Public NTP servers supporting NTS:
 
