@@ -71,7 +71,7 @@ server ntp2.glypnod.com nts	# London
 Note that you must use the same host name that was used to create
 the server's certificate.  IP Addresses will not work.
 
-This assumes that the remote server is using a certificate covered by
+This assumes that the server is using a certificate covered by
 your OS/distro's root server collection.
 
 Restart `ntpd`, and skip to <<Verification>>, below.
