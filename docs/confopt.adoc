@@ -53,10 +53,12 @@ the host name forces DNS resolution to the IPv4 namespace, while a
 Unless noted otherwise, further information about these commands is at
 link:discover.html#pool[Automatic Server Discovery].
 
-The https://www.ntppool.org/[www.ntppool.org] page describes a
+
+The https://www.ntppool.org/[NTP Pool Project] coordinates a
 compatible pool of public NTP servers, which are probably what you
 want to define associations with unless you specifically know
-otherwise.
+otherwise. See link:quick.html#pool[Using the NTP Pool] for configuration
+examples.
 
 include::includes/assoc-commands.adoc[]
 
