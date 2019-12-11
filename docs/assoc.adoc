@@ -63,8 +63,8 @@ client (mode 3) request to the specified server and expects a server
 described as a "pull" operation, in that the host pulls the time and
 related values from the server.
 
-A host is configured in client mode using the +server+ (sic)
-or +pool+ command and specifying the server DNS name or IPv4 or
+A host is configured in client mode using the +server+ or +pool+
+command and specifying the server DNS name or IPv4 or
 IPv6 address; the server requires no prior configuration (but
 see link:access.html[Access Control]). The +iburst+ option described
 later on this page is recommended for clients, as this speeds up initial
@@ -122,7 +122,7 @@ NTP broadcast modes are intended for configurations
 involving one or a few servers and a possibly very large client
 population. Broadcast mode can be used with Ethernet, FDDI and WiFi
 spans interconnected by hubs or switches. Ordinarily, broadcast packets
-do not extend beyond a level-3 router.
+do not extend beyond a router.
 
 A server is configured to send broadcast messages using the
 +broadcast+ command and specifying the subnet address for broadcast.
