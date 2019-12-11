@@ -196,9 +196,9 @@ routing problems.  Unfortunately, the random nature of pool allocation
 makes this impossible to guarantee. It is, however, worth keeping in mind if
 you can set up a custom configuration with non-pool servers that you
 have permission to use.
- 
-You can find find more information on 
-https://www.ntppool.org/en/use.html[using the Pool].
+
+Further information on using the Pool is available at
+https://www.ntppool.org/en/use.html
 
 [[howmany]]
 == How Many Servers?
