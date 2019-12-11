@@ -242,8 +242,7 @@ refclock shm unit 0 refid GPS
 ------------------------------------------------------------------
 
 Note the order above; +ntpd+ prefers earlier defined refclocks
-to later.  Your PPS is likely to be more accurate than the
-in-band stream.
+to later.  PPS is significantly more accurate than the in-band stream.
 
 For details on setting up the GPSD end, see the
 https://gpsd.io/gpsd-time-service-howto.html[GPSD Time Service
@@ -251,7 +250,7 @@ HOWTO].
 
 If you are looking to set up a Stratum 1 timeserver, you may find
 https://www.ntpsec.org/white-papers/stratum-1-microserver-howto/[Stratum-1-Microserver HOWTO]
-very helpful.
+helpful.
 
 [[dhcp]]
 == Special considerations when using DHCP
@@ -348,8 +347,8 @@ are milliseconds.
 The NTP protocol will work with unauthenticated servers, this is what
 makes it feasible to have the NTP Pool.  However, to close off some lines of
 attack, especially spoofing and Man-In-The-Middle, NTPsec supports
-NTS.  Further information on what NTS is, and how to enable it, is
-available at link:NTS-QuickStart.html[NTS Quick Start].
+Network Time Security (NTS).  Further information on what NTS is, and how to
+enable it, is available at link:NTS-QuickStart.html[NTS Quick Start].
 
 '''''
 
