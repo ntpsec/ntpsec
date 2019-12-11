@@ -19,7 +19,7 @@ include::includes/hand.adoc[]
 
 * link:#introduction[Introduction]
 * link:#basics[Configuration Basics]
-* link:#pool[Configuring Pool Servers]
+* link:#pool[Using Pool Servers]
 * link:#howmany[How Many Servers?]
 * link:#gps[Configuring A Local GPS]
 * link:#dhcp[Special considerations when using DHCP]
@@ -136,22 +136,24 @@ better to say
 pool ubuntu.pool.ntp.org
 ------------------------------------------------------------------
 
+This enables your NTP client to periodically check for new servers
+in the Pool, discarding those it finds less useful.
 The next section will explain what pool servers are and why you might
 want to change them.
 
 [[pool]]
-== Configuring Pool Servers
+== Using Pool Servers
 
-The NTP pool is a dynamic collection of networked computers that
-provide highly accurate time via the Network Time Protocol to clients
+The NTP pool is a dynamic collection of publicly available computers that
+frely provide highly accurate time via the Network Time Protocol to clients
 worldwide. The machines that are "in the pool" are part of the
 pool.ntp.org domain as well as of many subdomains divided by
 geographical or organizational zone, and are distributed to NTP
 clients via round robin DNS.
 
 The +server+ declarations in your +ntp.conf+ normally point at one or
-several of these DNS names.  These are resolved via DNS to Pool
-servers.
+several of these DNS names.  These are resolved via DNS to IP addresses
+of the servers.
 
 Note: while you could in theory request time service from any specific
 time server in the world, it is considered bad form to use a non-pool
@@ -163,16 +165,18 @@ For high-quality time service it is advantageous if your upstream
 servers are located where packet-transit times to you are short and
 there is little random variation in them.  Because the NTP pool is
 worldwide, asking for a random assignment from it may give you a
-timeserver on the other side of the world.  Thus, the pool is divided
-into subsections.  To improve your service, pick a pool section near
-you on the network.
+timeserver on the other side of the world.
+To improve your service, pick a pool section near you on the network.
 
 Unfortunately, "near you on the network" is often difficult to map
 and changes unpredictably over time.  However, there is a very
 rough correlation with national boundaries - more so when the
 country in question is geographically small and relatively advanced.
-Accordingly, the NTP pool has national sections for many countries,
-named by ISO country code.
+
+The Pool DNS servers try to give you servers in the same country
+or continent, but this is not guaranteed.  Accordingly, the NTP
+pool has national sections for many countries, named by ISO country
+code.  Thus, the pool is divided into subsections.  
 
 If you are in Great Britain, for example, you might want to use the UK
 section of the pool:
@@ -191,6 +195,9 @@ routing problems.  Unfortunately, the random nature of pool allocation
 makes this impossible to guarantee. It is, however, worth keeping in mind if
 you can set up a custom configuration with non-pool servers that you
 have permission to use.
+
+Further information on using the Pool is available at
+https://www.ntppool.org/en/use.html
 
 [[howmany]]
 == How Many Servers?
