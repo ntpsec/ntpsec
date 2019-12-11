@@ -130,15 +130,9 @@ A server is configured to send broadcast messages using the
 [[many]]
 == Manycast and Pool Modes
 
-Manycast and pool modes are automatic discovery and configuration
-paradigms. They are intended as a means for a client to troll the
-nearby network neighborhood to find cooperating willing servers,
-validate them using cryptographic means and evaluate their time values
-with respect to other servers that might be lurking in the
-vicinity. The intended result is that each client mobilizes ephemeral
-client associations with some number of the "best" of the nearby
-servers, yet automatically reconfigures to sustain this number of
-servers should one or another fail. Additional information is on the
+Manycast is no longer supported by NTPsec.
+
+For more information on pool mode, see the
 link:discover.html[Automatic Server Discovery Schemes] page.
 
 [[poll]]
