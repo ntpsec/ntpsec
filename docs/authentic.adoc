@@ -204,14 +204,13 @@ for the +ntpq+ utility.
 [[nts]]
 == Network Time Security
 
-NTS (Network Time security) uses the TLS public-key encryption
+Network Time security (NTS) uses the TLS public-key encryption
 infrastructure to secure and authenticate associations.
 
 This section is a placeholder for complete documentation on NTS. The
 NTS implementation is work in progress conforming to a draft RFC not
-yet (Aug 2019) accepted.  A Quick Start Guide on the current implementation
-of NTS is available at
-link:NTS-QuickStart.html[Quick way to get NTS working] .
+yet (December 2019) accepted.  For configuration examples, see th:
+link:NTS-QuickStart.html[NTS Quick Start Guide].
 
 NTPsec's future direction is to fully support NTS and eventually
 remove older, insecure authentication methods.
@@ -231,7 +230,7 @@ users. Therefore, this flag should be used only for a dedicated server
 with no clients other than MS-SNTP.*
 
 [[autokey]]
-==  Autokey
+== Autokey
 
 Old versions of NTP supported Autokey, which used an early form of
 public-key cryptography for authentication. It was described in RFC 5906.

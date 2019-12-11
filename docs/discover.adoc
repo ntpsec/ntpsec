@@ -31,7 +31,7 @@ please see https://tools.ietf.org/html/rfc5905[RFC 5905].
 
 The pool scheme expands a single DNS name into multiple peer entries.
 This is intended for, but not limited to, the
-https://www.ntppool.org[NTP Pool Project], a worldwide set of servers
+https://www.ntppool.org[NTP Pool], a worldwide set of servers
 volunteered for public use.
 
 The mechanism might be described as _grab-n'-prune._ Through one means or
@@ -85,7 +85,7 @@ for applicability and defaults.
 
 The idea of targeting servers on a random basis to distribute and
 balance the load is not a new one; however, the
-https://www.pool.ntp.org/en/use.html[NTP Pool Project] puts
+https://www.ntppool.org/[NTP Pool Project] puts
 this on steroids. At present, several thousand operators around the
 globe have volunteered their servers for public access. In general,
 NTP is a lightweight service and servers used for other purposes don't

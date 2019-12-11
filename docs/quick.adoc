@@ -1,4 +1,4 @@
-= Quick Start for Client Configurations
+= Client Quick Start Guide
 include::include-html.ad[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -194,8 +194,9 @@ advanced.
 
 The NTP Pool DNS servers try to give you servers in the same country
 or continent, but this is not guaranteed.  Accordingly, the NTP
-Pool has subdomains for many countries, named by ISO country code.  If you
-are in Great Britain, for example, you might want to use the UK subdomain:
+Pool has subdomains for many countries, named by ISO country code.
+If you are in the United Kingdom, for example, you might want to use the UK
+subdomain:
 
 ------------------------------------------------------------------
 pool 0.uk.pool.ntp.org
@@ -247,8 +248,8 @@ One +pool+ declaration will normally get you four or more servers.
 
 Connecting a local GPS to your machine will provide extremely
 accurate time, provided it has link:ntpspeak.html[PPS] capability.
-(However, unless your GPS has a perfect continuous skyview, you will still
-want check servers from link:#pool[the NTP Pool].)
+However, unless your GPS has a perfect continuous skyview, you will still
+want to use servers from the link:#pool[the NTP Pool] or elsewhere.
 
 The easiest way to arrange this is by installing
 https://gpsd.io[GPSD] to watch the GPS, and configuring your
@@ -373,10 +374,10 @@ are milliseconds.
 == Network Time Security
 
 The NTP protocol will work with unauthenticated servers, this is what
-makes it feasible to have the NTP Pool.  However, to close off some lines of
-attack, especially spoofing and Man-In-The-Middle, NTPsec supports
-Network Time Security (NTS).  Further information on what NTS is, and how to
-enable it, is available at link:NTS-QuickStart.html[NTS Quick Start].
+makes the NTP Pool Project feasible.  However, to close off some lines of
+attack on NTP, especially spoofing and Man-In-The-Middle, NTPsec supports
+Network Time Security (NTS).  Further information on how to enable NTS is
+available in the link:NTS-QuickStart.html[NTS Quick Start Guide].
 
 '''''
 

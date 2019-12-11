@@ -1,7 +1,8 @@
 === Build and Install
 * link:build.html[Building and Installing the Distribution]
 * link:rdebug.html[Debugging Reference Clock Drivers]
-* link:quick.html[Quick Start for Client Configurations]
+* link:quick.html[Client Quick Start Guide]
+* link:NTS-QuickStart.html[NTS Quick Start Guide]
 * link:debug.html[NTP Debugging Techniques]
 * link:bugs.html[NTP Bug Reporting Procedures]
 

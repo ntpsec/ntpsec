@@ -1,4 +1,4 @@
-= Quick way to get NTS working
+= NTS Quick Start Guide
 include::include-html.ad[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
@@ -39,8 +39,8 @@ Note: NTS does not currently work with the NTP Pool.
 
 It is strongly suggested that you get a "normal", unauthenticated,
 NTP server working before enabling NTS.  This may reduce the time
-spent debugging.  The document link:quick.adoc[Quick Start] may
-be helpful.
+spent debugging.  The link:quick.adoc[Client Quick Start Guide]
+guide may be helpful.
 
 [[client]]
 == NTS Client Configuration

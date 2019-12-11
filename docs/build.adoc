@@ -73,10 +73,9 @@ the executables by default in +/usr/local/bin+.
 
 You are now ready to configure the daemon. You will need to create an NTP
 configuration file by default in +{ntpconfpath}+. Newbies should see the
-link:quick.html[Quick Start] page for orientation. Seasoned veterans can
-start with the link:ntpd.html[+ntpd+ - Network Time Protocol (NTP)
-daemon] page and move on to the specific configuration option pages from
-there.
+link:quick.html[Client Quick Start Guide].  Seasoned
+veterans can start with the link:ntpd.html[+ntpd+ - Network Time Protocol
+(NTP) daemon] page and move on to the specific configuration option pages.
 
 [[prob]]
 == If You Have Problems

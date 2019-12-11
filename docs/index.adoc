@@ -93,10 +93,10 @@ handbook pages. These should be read in conjunction with the command and
 option information available on the pages listed on the
 link:sitemap.html[Site Map] page.
 
-link:quick.html[Quick start for client configurations]::
+link:quick.html[Client Quick Start Guide]::
   Basic configuration for 99% of client installations.  Introduces
   concepts used later in the Handbook.
-link:NTS-QuickStart.html[Quick start for NTS]::
+link:NTS-QuickStart.html[NTS Quick Start Guide]::
   A short guide for setting up for NTS.
 link:assoc.html[Association Management]::
   Describes how to configure servers and peers and manage the various
