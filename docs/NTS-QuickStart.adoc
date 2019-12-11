@@ -45,9 +45,10 @@ guide may be helpful.
 [[client]]
 == NTS Client Configuration
 
-Append the keyword `nts` to the end of your `server`
-lines.  Do these only for servers that speak NTS.  As of
-December 2019, the following should work:
+Append the keyword `nts` to the end of your `server` lines.  Do this only for
+servers that speak NTS.  If the server uses a port other than 123 for NTS key
+exchange, you also need to specify the port number.  As of December 2019, the
+following should work:
 
 Public NTP servers supporting NTS:
 
@@ -69,7 +70,7 @@ server ntp2.glypnod.com nts	# London
 
 
 Note that you must use the same host name that was used to create
-the server's certificate.  IP Addresses will not work.
+the server's certificate.  IP addresses will not work.
 
 This assumes that the server is using a certificate covered by
 your OS/distro's root certificate collection.
@@ -94,8 +95,6 @@ $ sudo certbot certonly --standalone
 
 # Renew
 $ sudo certbot renew
-
-# Signal ntpd to pick up new certificate(s)
 $ sudo killall -HUP ntpd
 ------------------------------------------------------------
 
@@ -104,7 +103,7 @@ serving time using the same FQDN, you can reuse that certificate.
 
 Next, add the line:
 `nts enable`
-to your conf file.
+to your +ntp.conf+ file.
 
 Locate the following two files:
 
@@ -112,7 +111,7 @@ Locate the following two files:
 * Your certificate chain (i.e. your certificate followed by any intermediate
   CA certificates)
 
-Then add the lines below to your ntp.conf, replacing
+Then add the lines below to your +ntp.conf+, replacing
 with your pathnames.
 
 Example, using Let's Encrypt:
@@ -135,7 +134,7 @@ Some distros use `/var/db/` rather than `/var/lib/`.
 nts cookie /var/lib/ntp/nts-keys
 ------------------------------------------------------------
 
-Restart your server, and skip to <<Verification>>, below.
+Restart your server, and skip to link:#verify[Verification], below.
 
 
 [[verify]]
@@ -192,9 +191,9 @@ Each one will produce log lines like this:
 10 Jun 04:55:11 ntpd[823]: NTS: error:1408F10B:SSL routines:ssl3_get_record:wrong version number
 ------------------------------------------------------------
 
-The logging prefix *NTSs* is for the NTS Server component, eg
-initializing your keys.  The *NTSc* component is for the NTS Client
-part, where you are talking to *other* NTS servers.
+The logging prefix *NTSs* is for the NTS server component.  The *NTSc*
+component is for the NTS client part, where you are talking to *other*
+NTS servers.
 
 === Check with ntpq
 
@@ -222,14 +221,11 @@ The RFC calls for the server to rotate the private key used to
 encrypt cookies every 24 hours.  The server also saves the previous
 key so old cookies will work for at least 24 hours.  24 hours and 8 cookies
 will work for a polling interval of up to 3 hours.  That's much longer
-than the default max of 1024 seconds.  For testing, the server currently
-rotates keys every hour so cookies won't work if the polling interval
-gets over 450 seconds.  The largest power of 2 that will work is 256, or
-8 in the `ntpq -p` `poll` column.
+than the default +maxpoll+ of 10 (1024 seconds).
 
 === Check ntp variables
 
-Try `ntpq -c nts` . This will show various counters related
+Try `ntpq -c nts`. This will show various counters related
 to NTS.  This feature is under active development, so the
 format might change.  An example:
 
