@@ -96,8 +96,8 @@ $ sudo certbot renew
 $ sudo killall -HUP ntpd
 ------------------------------------------------------------
 
-If you already have an SSL Cert for your server, and you are
-serving time using the same FQDN, you can reuse that Cert.
+If you already have an SSL certificate for your server, and you are
+serving time using the same FQDN, you can reuse that certificate.
 
 Next, add the line:
 `nts enable`
@@ -105,8 +105,8 @@ to your conf file.
 
 Locate the following two files:
 
-* Your Cert Private Key
-* Your Cert Public Key, fully chained up
+* Your certificate Private Key
+* Your certificate Public Key, fully chained up
 
 Then add the lines below to your ntp.conf, replacing
 with your pathnames.
