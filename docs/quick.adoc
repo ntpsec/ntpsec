@@ -152,9 +152,8 @@ pool.ntp.org domain as well as many subdomains divided by
 geographical region or software vendor, and are distributed to NTP
 clients via round robin DNS.
 
-The +server+ declarations in your +ntp.conf+ normally point at one or
-several of these DNS names.  These are resolved via DNS to the IP
-addresses of the servers.
+Your +ntp.conf+ can use one or several of these DNS names.  These are
+resolved via DNS to the IP addresses of the servers.
 
 Note: while you could in theory request time service from any specific
 time server in the world, it is considered bad form to use a non-pool
@@ -162,17 +161,13 @@ server unless you know you have permission.  This applies, in
 particular, to various public timeservers maintained by corporations
 or academic institutions and intended to be used by their members.
 
-For high-quality time service it is advantageous if your upstream
+For high-quality time service, it is advantageous if your upstream
 servers are located where packet-transit times to you are short and
-there is little random variation in them.  Because the NTP pool is
-worldwide, asking for a random assignment from it may give you a
-timeserver on the other side of the world.  To improve your service,
-pick a pool section near you on the network.
-
-Unfortunately, "near you on the network" is often difficult to map
-and changes unpredictably over time.  However, there is a very
-rough correlation with national boundaries - more so when the
-country in question is geographically small and relatively advanced.
+there is little random variation in them.  Unfortunately, "near you on the
+network" is often difficult to map and changes unpredictably over time.
+However, there is a very rough correlation with national boundaries--more
+so when the country in question is geographically small and relatively
+advanced.
 
 The NTP Pool DNS servers try to give you servers in the same country
 or continent, but this is not guaranteed.  Accordingly, the NTP
@@ -222,7 +217,7 @@ down and 3 can outvote 2 falsetickers.  That may be appropriate if you
 need high reliability, say because you are serving hundreds of
 clients.
 
-One pool declaration will normally get you four or more servers.
+One +pool+ declaration will normally get you four or more servers.
 
 [[gps]]
 == Configuring A Local GPS
