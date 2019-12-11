@@ -11,67 +11,86 @@ For putting out compiler fires.
 |==============================
 
 
+== Related Links
+
+include::includes/hand.adoc[]
+
+== Table of Contents
+
+* link:#introduction[Introduction]
+* link:#client[ntp.conf (you are the client)]
+* link:#server[ntp.conf (you are the server)]
+* link:#verify[Verification]
+
+'''''
+
+[[introduction]]
+== Introduction
+
 NTS is a method for using TLS/SSL to authenticate NTP traffic on the net.
 That means that bad guys can't forge packets that will give your
 system bogus time.
 
-The RFC hasn't been published yet (June 2019).  Nothing has changed
+The RFC hasn't been published yet (Dec 2019).  Nothing has changed
 recently, but there may be minor adjustments when it is finalized.
 
+Note: NTS does not currently work with the NTP Pool.
+
+[[client]]
 == ntp.conf (you are a client)
 
 Append the keyword `nts` to the end of your `server`
 lines.  Do these only for servers that speak NTS.  As of
-June 2019, the following should work:
+Dec 2019, the following should work:
 
 Public NTP servers supporting NTS:
 
 ------------------------------------------------------------
-server time.cloudflare.com:1234 nts  # TLS1.3 only
+server time.cloudflare.com:1234 nts	# Global, anycast
+server nts.ntp.se:4443 nts		# Sweden
 ------------------------------------------------------------
 
 Development machines, so there may be gaps in availability:
 
 ------------------------------------------------------------
-server ntpmon.dcs1.biz nts
-server pi4.rellim.com nts
-server ntp1.glypnod.com nts
-server ntp2.glypnod.com nts
+server ntpmon.dcs1.biz nts	# Singapore
+server ntp1.glypnod.com nts	# San Francisco
+server ntp2.glypnod.com nts	# London
 ------------------------------------------------------------
 
 
 Note that you must use the same host name that was used to create
 the server's certificate.  IP Addresses will not work.
 
-This assumes that the server is using a certificate covered by
+This assumes that the remote server is using a certificate covered by
 your OS/distro's root server collection.
 
 Restart `ntpd`, and skip to <<Verification>>, below.
 
-
+[[server]]
 == ntp.conf (you are a server)
 
 Being an NTS server requires a well-formed SSL certificate.  The
 easiest way to do this is to use LetsEncrypt.  It needs a FQDN.
-Please see the Certbot client site
-[[https://certbot.eff.org/]] for instructions.
+Please see the 
+https://certbot.eff.org/[Certbot client site] for instructions.
 
 The following worked on Fedora:
 
 ------------------------------------------------------------
-]$ sudo dnf install certbot
+$ sudo dnf install certbot
   
 # Install
-]$ sudo certbot certonly --standalone
+$ sudo certbot certonly --standalone
 
 # Renew
-]$ sudo certbot renew
+$ sudo certbot renew
 ------------------------------------------------------------
 
 If you already have an SSL Cert for your server, and you are
 serving time using the same FQDN, you can reuse that Cert.
 
-Add the line:
+Next, add the line:
 `nts enable`
 to your conf file.
 
@@ -106,11 +125,14 @@ nts cookie /var/lib/ntp/nts-keys
 Restart your server, and skip to <<Verification>>, below.
 
 
+[[verify]]
 == Verification
 
-Check your log file.
+Check your log file.  The current NTS implementation is quite chatty, and the
+log lines may change, so what you see will be similar, but not the same,
+as below.
 
-For each client, you should see lines like this:
+As a client, you should see lines like this:
 
 ------------------------------------------------------------
 2019-03-22T08:06:33 ntpd[12915]: DNS: dns_probe: pi3.rellim.com, cast_flags:1, flags:21801
