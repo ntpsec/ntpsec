@@ -121,12 +121,11 @@ configuration.  They tell +ntpd+ what its sources for time are.
 [[pool]]
 == Using the NTP Pool
 
-The NTP Pool is a dynamic collection of publicly available computers that
-freely provide highly accurate time via the Network Time Protocol to clients
-worldwide. The machines that are "in the pool" are part of the
-pool.ntp.org domain as well as many subdomains divided by
-geographical region or software vendor, and are distributed to NTP
-clients via round robin DNS.
+The NTP Pool is a dynamic collection of publicly available servers
+that freely provide highly accurate time via the Network Time Protocol to
+clients worldwide. The machines that are "in the pool" are part of the
+pool.ntp.org domain as well as many subdomains divided by geographical region
+or software vendor, and are distributed to NTP clients via round robin DNS.
 
 Your +ntp.conf+ can use one or several of these DNS names.  The
 https://www.ntppool.org/en/use.html[NTP Pool documentation] gives this
@@ -154,9 +153,13 @@ pool 2.pool.ntp.org
 pool 3.pool.ntp.org
 ------------------------------------------------------------------
 
-This enables +ntpd+ to periodically check for new servers in the NTP Pool,
-discarding those it finds less useful.  The number of associations is
-controlled by link:miscopt.html#tos[+tos maxclock+].
+Use of the +server+ command does a one-time DNS lookup, and uses the IP
+address returned thereafter.  If the server becomes unavailable, the DNS name
+will not be re-resolved.  The +pool+ command will use multiple servers that
+the DNS name resolves to, refreshing as required.  For details on the
+refreshing algorithm, see link:discover.html#assoc[Association Management].
+The number of associations is controlled by the +maxclock+ option of the
+link:miscopt.html#tos[+tos+] command.
 
 Using only a single pool entry has some limitations:
 
