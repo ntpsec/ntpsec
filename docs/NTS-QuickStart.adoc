@@ -39,8 +39,7 @@ Note: The NTP Pool does not currently support NTS.
 
 It is strongly suggested that you get a "normal", unauthenticated,
 NTP server working before enabling NTS.  This may reduce the time
-spent debugging.  The link:quick.adoc[Client Quick Start Guide]
-guide may be helpful.
+spent debugging.  See the link:quick.adoc[Client Quick Start Guide].
 
 [[client]]
 == NTS Client Configuration
@@ -75,7 +74,7 @@ the server's certificate.  IP addresses will not work.
 This assumes that the server is using a certificate covered by
 your OS/distro's root certificate collection.
 
-Restart `ntpd`, and skip to <<Verification>>, below.
+Restart `ntpd`, and skip to link:#verify[Verification], below.
 
 [[server]]
 == NTS Server Configuration

@@ -47,7 +47,7 @@ times out and exits without setting the clock.
 
 Various internal +ntpd+ variables can be displayed and configuration
 options altered while the +ntpd+ is running using the
-{ntpqman} utility program.  The state of ntpd can be continuously
+{ntpqman} utility program.  The state of +ntpd+ can be continuously
 monitored using {ntpmonman}.
 
 When +ntpd+ starts it looks at the value of umask(2), and if
@@ -346,7 +346,7 @@ are present the resulting time offsets stray outside the 128-ms range
 and an eventual step or slew time correction is required. If following
 such a correction the frequency error is so large that the first sample
 is outside the acceptable range, +ntpd+ enters the same state as when
-the _ntp.drift_ file is not present. The intent of this behavior is to
+the +ntp.drift+ file is not present. The intent of this behavior is to
 quickly correct the frequency and restore operation to the normal
 tracking mode. In the most extreme cases, there may be occasional
 step/slew corrections and subsequent frequency corrections. It helps in
@@ -356,9 +356,9 @@ ONLY when you have permission to do so from the owner of the target host.
 Finally, in the past, many startup scripts would run
 a separate utility to get the system clock close to correct before
 starting {ntpdman}, but this was never more than a mediocre hack
-and is no longer needed. If you are following the instructions
-in <<starting>> and you still need to set the
-system time before starting ntpd, please open a bug report and
+and is no longer needed. If you are following the
+link:#starting[best current practice] and you still need to set the
+system time before starting +ntpd+, please open a bug report and
 document what is going on, and then look at using {ntpdigman}.
 
 There is a way to start {ntpdman} that often addresses all of
@@ -369,7 +369,7 @@ the problems mentioned above.
 
 First, use the _iburst_ option on your _server_ and _pool_ entries.
 
-If you can also keep a good _ntp.drift_ file then {ntpdman} will
+If you can also keep a good +ntp.drift+ file then {ntpdman} will
 effectively "warm-start" and your system's clock will be stable in under
 11 seconds' time.
 
@@ -388,7 +388,7 @@ will ever be to start any processes that require stable time.
 === Frequency Discipline
 
 The +ntpd+ behavior at startup depends on whether the frequency file,
-usually _ntp.drift_, exists. This file contains the latest estimate of
+usually +ntp.drift+, exists. This file contains the latest estimate of
 clock frequency error. When the +ntpd+ is started and the file does not
 exist, the +ntpd+ enters a special mode designed to quickly adapt to the
 particular system clock oscillator time and frequency error. This takes
@@ -468,7 +468,7 @@ intrinsic clock frequency error is small enough for the discipline loop
 correct it. The capture range of the loop is 500 PPM at an interval of
 64s decreasing by a factor of two for each doubling of the interval. At a
 minimum of 1,024 s, for example, the capture range is only 31 PPM. If
-the intrinsic error is greater than this, the drift file _ntp.drift_
+the intrinsic error is greater than this, the drift file +ntp.drift+
 will have to be specially tailored to reduce the residual error below
 this limit. Once this is done, the drift file is automatically updated
 once per hour and is available to initialize the frequency on subsequent
@@ -540,7 +540,7 @@ It will also retry any pending DNS or NTS lookups.
 
 On most systems, you can send SIGHUP to +ntpd+ with
 -----
-  # sigkill -HUP ntpd
+  # killall -HUP ntpd
 -----
 
 If built with debugging enabled (waf configured with +--enable-debug+)
