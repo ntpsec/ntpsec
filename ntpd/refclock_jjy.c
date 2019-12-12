@@ -1906,8 +1906,8 @@ jjy_poll_citizentic_jjy200 ( int unit, struct peer *peer )
 /*################################################################################################*/
 /*################################################################################################*/
 /*                                                                                                */
-/*  This clock has NMEA mode and command/response mode.                                            */
-/*  When this jjy driver are used, set to command/respose mode of this clock                      */
+/*  This clock has NMEA mode and command/response mode.                                           */
+/*  When this jjy driver are used, set to command/response mode of this clock                     */
 /*  by the onboard switch SW4, and make sure the LED-Y is tured on.                               */
 /*  Other than this JJY driver, the refclock driver type 20, generic NMEA driver,                 */
 /*  works with the NMEA mode of this clock.                                                       */

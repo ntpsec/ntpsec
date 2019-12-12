@@ -2,7 +2,7 @@
 :man version: @NTPSEC_VERSION@
 include::../docs/include-man.ad[]
 
-ntpsnmpd - NTP Simple Network Management Protcol sub-sgent
+ntpsnmpd - NTP Simple Network Management Protocol sub-agent
 
 include::../docs/includes/ntpsnmpd-body.adoc[]
 

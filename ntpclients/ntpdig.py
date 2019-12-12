@@ -244,7 +244,7 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -c yes concurrent      Hosts to be queried concurrently
    -d no  debug           Increase debug verbosity
    -D yes set-debug-level Set debug verbosity
-   -g yes gap             Set gap between requests in miliseconds
+   -g yes gap             Set gap between requests in milliseconds
    -j no  json            Use JSON output format
    -l Str logfile         Log to specified logfile
                                  - prohibits the option 'syslog'

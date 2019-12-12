@@ -49,7 +49,7 @@
 /* K and I should be preserved across boots, and rotated every day or so.
  * We need to support the old K/I for another day.
  * Encryption within cookies uses AEAD_AES_SIV_CMAC_nnn.  That's the
- * same family of algorithims as NTS uses on the wire.
+ * same family of algorithms as NTS uses on the wire.
  * The nnn is selected by the key length.
  *   32 => 256
  *   48 => 384

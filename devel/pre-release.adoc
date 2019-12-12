@@ -43,7 +43,7 @@ CONFIG_NO_HZ turned off and CONFIG_NTP_PPS on.
 
 
 We should review any documentation for best-practices and verify
-that any sample code and build recipies work as expected.  In
+that any sample code and build recipes work as expected.  In
 particular, we should make sure the pool option works and that
 the Raspberry Pi Stratum 1 server HOWTO works.
 (There are two sample ntp.conf files in contrib/ .

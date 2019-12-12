@@ -26,7 +26,7 @@
 //              '#' <100 us
 //              '?' >100 us
 //
-// Based on this we need to recored the stime when we receive the <SOH>
+// Based on this we need to record the stime when we receive the <SOH>
 // character and end it when we see the \n.
 //
 // The q or quality character indicates satellite lock and sync.   For the

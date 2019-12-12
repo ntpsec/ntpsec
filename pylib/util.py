@@ -87,7 +87,7 @@ def dolog(logfp, text, debug, threshold):
     """debug is the current debug value
     threshold is the trigger for the current log"""
     if logfp is None:
-        return  # can turn off logging by supplying a None file descriptior
+        return  # can turn off logging by supplying a None file descriptor
     text = rfc3339(time.time()) + " " + text + "\n"
     if debug >= threshold:
         logfp.write(text)
@@ -497,7 +497,7 @@ def unitifyvar(value, varname, baseunit=None, width=8, unitSpace=False):
 
 
 def unitify(value, startingunit, baseunit=None, width=8, unitSpace=False):
-    "Formats a numberstring with relevant units. Attemps to fit in width."
+    "Formats a numberstring with relevant units. Attempts to fit in width."
     if baseunit is None:
         baseunit = getunitgroup(startingunit)[0]
     ooms = oomsbetweenunits(startingunit, baseunit)

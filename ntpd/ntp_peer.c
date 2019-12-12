@@ -334,7 +334,7 @@ score(
 	int	temp;
 
 	/*
-	 * This routine calculates the premption score from the peer
+	 * This routine calculates the preemption score from the peer
 	 * error bits and status. Increasing values are more cherished.
 	 */
 	temp = 0;

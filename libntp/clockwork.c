@@ -1,5 +1,5 @@
 /*
- * clockwork.c - the interface to the hardare clock
+ * clockwork.c - the interface to the hardware clock
  */
 
 #include "config.h"

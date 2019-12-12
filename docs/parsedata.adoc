@@ -341,7 +341,7 @@ Nortel.
       dataformat 6021
       output time and date
       transmit with control characters
-      transmit evry second
+      transmit every second
 --------------------------------------
 
 Type 6021 Serial Output format

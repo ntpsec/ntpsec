@@ -32,7 +32,7 @@ The leader byte is followed by an ASCII decimal numeric literal,
 which is interpreted as a packet type.
 
 Following the mode, the body of the packet is encoded in a strict
-subset of JSON intended to avoid known edge cases decribed in
+subset of JSON intended to avoid known edge cases described in
 <<<Seriot2016>>>.  The outermost enclosing {} is required. Trailing
 commas on elements are disallowed. Scientific notation is not used.
 String literals may not contain the characters TAB (0x09), LF (0x0A),

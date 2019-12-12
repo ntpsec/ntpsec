@@ -45,7 +45,7 @@ newer ones use a u-blox engine but emulate OnCore behavior.  Future
 versions will drop OnCore reporting entirely, at which time the
 possibility of removing this driver will be revisited.
 
-See the CNS Clock vendor product page for specfications.
+See the CNS Clock vendor product page for specifications.
 
 We expect this should also work with the Furuno line of
 M12 compatibles, including the GT8736 and (now discontinued) GT8536,

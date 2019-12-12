@@ -48,7 +48,7 @@ except ImportError as e:
 class logfile_header_class(logging.handlers.TimedRotatingFileHandler):
     'A class to modify the file logging handler.'
     def doRollover(self):
-        'function to add header to new file on rotaion.'
+        'function to add header to new file on rotation.'
         if str is bytes:
             super(logfile_header_class, self).doRollover()
         else:

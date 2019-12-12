@@ -106,7 +106,7 @@ Version string cleanup:
 
 Pivot cleanup:
   Currently, ntpd does a pivot deep in step_systime in libntp/systime.c
-  That handles the problem of 32 bits of seconds wraping in 2038.
+  That handles the problem of 32 bits of seconds wrapping in 2038.
   Posix is shifting to a 64 bit time_t, but we only have 32 bits
   of seconds in l_fp.  We can clean up a lot of code if l_fp is
   only used for offsets except when used in packets.  That requires

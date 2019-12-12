@@ -4,7 +4,7 @@ efforts.
 
 ntpconfigtest: Check your linux configuration for the proper entries.
 
-ntpheat is a program to exercise a CPU until the CPU reachs a certain
+ntpheat is a program to exercise a CPU until the CPU reaches a certain
 temperature.  The idea is to get the temperature around the system
 oscillator to be near the zero TC point.  Tested on RasPi wrapped
 in bubble wrap.  Formerly known as makeheat.
