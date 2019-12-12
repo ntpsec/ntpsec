@@ -35,7 +35,7 @@ system bogus time.
 The RFC hasn't been published yet (December 2019).  Nothing has changed
 recently, but there may be minor adjustments when it is finalized.
 
-Note: NTS does not currently work with the NTP Pool.
+Note: The NTP Pool does not currently support NTS.
 
 It is strongly suggested that you get a "normal", unauthenticated,
 NTP server working before enabling NTS.  This may reduce the time
