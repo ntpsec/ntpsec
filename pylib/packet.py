@@ -1518,6 +1518,7 @@ This combats source address spoofing
 
 def parse_mru_variables(variables):
     sorter = None
+    sortkey = None
     frags = MAXFRAGS
     if "sort" in variables:
         sortkey = variables["sort"]
