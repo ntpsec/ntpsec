@@ -730,6 +730,9 @@ class ControlSession:
         self.logfp = sys.stdout
         self.nonce_xmit = 0
 
+    def warndbg(self, text, threshold):
+        ntp.util.dolog(self.logfp, text, self.debug, threshold)
+
     def close(self):
         if self.sock:
             self.sock.close()
@@ -1301,12 +1304,10 @@ This combats source address spoofing
         raise ControlException(SERR_BADNONCE)
 
     def __mru_analyze(self, variables, span, direct):
-        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
-                                                  self.debug, th))
         curidx = -1
         mru = None
         for (tag, val) in variables.items():
-            warndbg("tag=%s, val=%s" % (tag, val), 4)
+            self.warndbg("tag=%s, val=%s" % (tag, val), 4)
             if tag == "nonce":
                 nonce = "%s=%s" % (tag, val)
             elif tag == "last.older":
@@ -1345,42 +1346,40 @@ This combats source address spoofing
             direct(span.entries)
 
     def __mru_query_error(self, e, restarted_count, cap_frags, limit, frags):
-        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
-                                                  self.debug, th))
         if e.errorcode is None:
             raise e
         elif e.errorcode == ntp.control.CERR_UNKNOWNVAR:
             # None of the supplied prior entries match, so
             # toss them from our list and try again.
-            warndbg("no overlap between prior entries and "
-                    "server MRU list", 1)
+            self.warndbg("no overlap between prior entries and "
+                         "server MRU list", 1)
             restarted_count += 1
             if restarted_count > 8:
                 raise ControlException(SERR_STALL)
-            warndbg("--->   Restarting from the beginning, "
-                    "retry #%u" % restarted_count, 1)
+            self.warndbg("--->   Restarting from the beginning, "
+                         "retry #%u" % restarted_count, 1)
         elif e.errorcode == ntp.control.CERR_BADVALUE:
             if cap_frags:
                 cap_frags = False
-                warndbg("Reverted to row limit from "
-                        "fragments limit.", 1)
+                self.warndbg("Reverted to row limit from "
+                             "fragments limit.", 1)
             else:
                 # ntpd has lower cap on row limit
                 self.ntpd_row_limit -= 1
                 limit = min(limit, self.ntpd_row_limit)
-                warndbg("Row limit reduced to %d following "
-                        "CERR_BADVALUE." % limit, 1)
+                self.warndbg("Row limit reduced to %d following "
+                             "CERR_BADVALUE." % limit, 1)
         elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
             # Reduce the number of rows/frags requested by
             # half to recover from lost response fragments.
             if cap_frags:
                 frags = max(2, frags / 2)
-                warndbg("Frag limit reduced to %d following "
-                        "incomplete response." % frags, 1)
+                self.warndbg("Frag limit reduced to %d following "
+                             "incomplete response." % frags, 1)
             else:
                 limit = max(2, limit / 2)
-                warndbg("Row limit reduced to %d following "
-                        " incomplete response." % limit, 1)
+                self.warndbg("Row limit reduced to %d following "
+                             " incomplete response." % limit, 1)
         elif e.errorcode:
             raise e
         return restarted_count, cap_frags, limit, frags
@@ -1389,8 +1388,6 @@ This combats source address spoofing
         "Retrieve MRU list data"
         restarted_count = 0
         cap_frags = True
-        warndbg = (lambda txt, th: ntp.util.dolog(self.logfp, txt,
-                                                  self.debug, th))
         sorter = None
         sortkey = None
         frags = MAXFRAGS
