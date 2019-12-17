@@ -139,7 +139,7 @@ def build(ctx):
 
     for path in pytests:
         ctx(
-            features="pytest",
-            pytest_source=path,
-            ut_str="${PYTHON} ${SRC}"
+            features="py test_scripts",
+            test_scripts_source=path,
+            test_scripts_template="${PYTHON} ${SRC}",
         )

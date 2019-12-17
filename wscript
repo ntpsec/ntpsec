@@ -93,7 +93,6 @@ def configure(ctx):
     ctx.run_build_cls = 'check'
     ctx.load('waf', tooldir='wafhelpers/')
     ctx.load('waf_unit_test')
-    ctx.load('pytest')
     ctx.load('gnu_dirs')
 
     with open("VERSION", "r") as f:
