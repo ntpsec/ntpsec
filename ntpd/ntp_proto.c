@@ -2217,7 +2217,8 @@ fast_xmit(
 	)
 {
 	struct pkt xpkt;	/* transmit packet structure */
-	l_fp	xmt_tx, xmt_ty;
+	l_fp	xmt_tx;
+	struct timespec	start, finish;
 	size_t	sendlen;
 
 	/*
@@ -2336,16 +2337,15 @@ fast_xmit(
          *  3) none
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	get_systime(&xmt_tx);
+	clock_gettime(CLOCK_REALTIME, &start);
 	if (rbufp->ntspacket.valid) {
 	  sendlen += extens_server_send(&rbufp->ntspacket, &xpkt);
         } else if (NULL != auth) {
 	  sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
         }
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
-	get_systime(&xmt_ty);
-	xmt_ty -= xmt_tx;
-	sys_authdelay = xmt_ty;
+	clock_gettime(CLOCK_REALTIME, &finish);
+	sys_authdelay = tspec_to_d(sub_tspec(finish, start));
 	/* Previous versions of this code had separate DPRINT-s so it
 	 * could print the key on the auth case.  That requires separate
 	 * sendpkt-s on each branch or the DPRINT pollutes the timing. */
