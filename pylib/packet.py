@@ -1306,6 +1306,7 @@ This combats source address spoofing
     def __mru_analyze(self, variables, span, direct):
         curidx = -1
         mru = None
+        nonce = None
         for (tag, val) in variables.items():
             self.warndbg("tag=%s, val=%s" % (tag, val), 4)
             if tag == "nonce":
@@ -1344,6 +1345,7 @@ This combats source address spoofing
             span.entries.append(mru)
         if direct is not None:
             direct(span.entries)
+        return nonce
 
     def __mru_query_error(self, e, restarted_count, cap_frags, limit, frags):
         if e.errorcode is None:
@@ -1440,7 +1442,9 @@ This combats source address spoofing
                     rawhook(variables)
 
                 # Analyze the contents of this response into a span structure
-                self.__mru_analyze(variables, span, direct)
+                newNonce = self.__mru_analyze(variables, span, direct)
+                if newNonce:
+                    nonce = newNonce
 
                 # If we've seen the end sentinel on the span, break out
                 if span.is_complete():
