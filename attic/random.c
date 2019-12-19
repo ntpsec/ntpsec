@@ -4,8 +4,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "ntp.h"
+#include <openssl/rand.h>
 
 #define BATCHSIZE 1000000
 #define BILLION 1000000000
@@ -16,8 +18,55 @@
 /* hack for libntp */
 const char *progname = "foo";
 
-int do_average(void);
-int do_average(void) {
+static int getpid_average(void) {
+        int err;
+        struct timespec start, stop;
+        uint64_t sec, nanos;
+
+        err = clock_gettime(CLOCK_REALTIME, &start);
+        if (-1 == err) {
+                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                return -1;
+        }
+
+        clock_gettime(CLOCK_REALTIME, &start);
+        for (int i = 0; i < BATCHSIZE; i++) {
+                getpid();
+        }
+        clock_gettime(CLOCK_REALTIME, &stop);
+
+        /* Beware of overflowing 32 bits. */
+        sec = (stop.tv_sec-start.tv_sec);
+        nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
+        return nanos/BATCHSIZE;
+
+}
+
+static int clock_average(void) {
+        int err;
+        struct timespec start, stop;
+        uint64_t sec, nanos;
+
+        err = clock_gettime(CLOCK_REALTIME, &start);
+        if (-1 == err) {
+                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                return -1;
+        }
+
+        clock_gettime(CLOCK_REALTIME, &start);
+        for (int i = 0; i < BATCHSIZE; i++) {
+                clock_gettime(CLOCK_REALTIME, &stop);
+        }
+        clock_gettime(CLOCK_REALTIME, &stop);
+
+        /* Beware of overflowing 32 bits. */
+        sec = (stop.tv_sec-start.tv_sec);
+        nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
+        return nanos/BATCHSIZE;
+
+}
+
+static int do_average(void) {
 	long int sum = 0;
 	struct timespec start, stop;
 	uint64_t sec, nanos;
@@ -34,17 +83,28 @@ int do_average(void) {
 	return nanos/BATCHSIZE;
 }
 
-int do_average32(void);
-int do_average32(void) {
-	int32_t sum = 0;
+static int do_avg_bytes(unsigned int bytes) {
+	int err = 0;
 	struct timespec start, stop;
 	uint64_t sec, nanos;
+	unsigned char rnd[512];
+
+	if (bytes > sizeof(rnd)) {
+		printf("## do_avg_bytes - too big\n");
+		exit(1);
+	}
 
 	clock_gettime(CLOCK_REALTIME, &start);
 	for (int i = 0; i < BATCHSIZE; i++) {
-		sum += ntp_random();
+            err += RAND_bytes((unsigned char *)&rnd, bytes);
 	}
 	clock_gettime(CLOCK_REALTIME, &stop);
+
+	if (BATCHSIZE != err) {
+		printf("## do_avg_bytes: troubles from RAND_bytes, %d\n",
+			BATCHSIZE-err);
+		exit(1);
+	}
 
 	/* Beware of overflowing 32 bits. */
 	sec = (stop.tv_sec-start.tv_sec);
@@ -52,17 +112,28 @@ int do_average32(void) {
 	return nanos/BATCHSIZE;
 }
 
-int do_average64(void);
-int do_average64(void) {
-	uint64_t sum = 0;
+static int do_avg_priv(unsigned int bytes) {
+	int err = 0;
 	struct timespec start, stop;
 	uint64_t sec, nanos;
+	unsigned char rnd[512];
+
+	if (bytes > sizeof(rnd)) {
+		printf("## do_avg_priv - too big\n");
+		exit(1);
+	}
 
 	clock_gettime(CLOCK_REALTIME, &start);
 	for (int i = 0; i < BATCHSIZE; i++) {
-		sum += ntp_random64();
+            err += RAND_priv_bytes((unsigned char *)&rnd, bytes);
 	}
 	clock_gettime(CLOCK_REALTIME, &stop);
+
+	if (BATCHSIZE != err) {
+		printf("## do_avg_priv: troubles from RAND_bytes, %d\n",
+			BATCHSIZE-err);
+		exit(1);
+	}
 
 	/* Beware of overflowing 32 bits. */
 	sec = (stop.tv_sec-start.tv_sec);
@@ -70,13 +141,11 @@ int do_average64(void) {
 	return nanos/BATCHSIZE;
 }
 
-int do_fastest(void);
-int do_fastest(void) {
+static int do_fastest(void) {
 	int sum = 0;
 	struct timespec start, stop;
-	uint64_t sec, nanos, fastest;
+	uint64_t sec, nanos, fastest = 999999999;
 
-	fastest = 999999999;
 	for (int i = 0; i < BATCHSIZE; i++) {
                 clock_gettime(CLOCK_REALTIME, &start);
 		sum += random();
@@ -91,16 +160,20 @@ int do_fastest(void) {
 	return fastest;
 }
 
-int do_fastest32(void);
-int do_fastest32(void) {
-	int sum = 0;
+static int do_fast_bytes(unsigned bytes) {
+	int err = 0;
 	struct timespec start, stop;
-	uint64_t sec, nanos, fastest;
+	uint64_t sec, nanos, fastest = 999999999;
+	unsigned char rnd[512];
 
-	fastest = 999999999;
+	if (bytes > sizeof(rnd)) {
+		printf("## do_fast_bytes - too big\n");
+		exit(1);
+	}
+
 	for (int i = 0; i < BATCHSIZE; i++) {
                 clock_gettime(CLOCK_REALTIME, &start);
-		sum += ntp_random();
+                err += RAND_bytes((unsigned char *)&rnd, bytes);
 		clock_gettime(CLOCK_REALTIME, &stop);
 		sec = (stop.tv_sec-start.tv_sec);
 		nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
@@ -109,19 +182,29 @@ int do_fastest32(void) {
 		}
 	}
 
+	if (BATCHSIZE != err) {
+		printf("## do_fast_bytes: troubles from RAND_bytes, %d\n",
+			BATCHSIZE-err);
+		exit(1);
+	}
+
 	return fastest;
 }
 
-int do_fastest64(void);
-int do_fastest64(void) {
-	uint64_t sum = 0;
+static int do_fast_priv(unsigned bytes) {
+	int err = 0;
 	struct timespec start, stop;
-	uint64_t sec, nanos, fastest;
+	uint64_t sec, nanos, fastest = 999999999;
+	unsigned char rnd[512];
 
-	fastest = 999999999;
+	if (bytes > sizeof(rnd)) {
+		printf("## do_fast_priv - too big\n");
+		exit(1);
+	}
+
 	for (int i = 0; i < BATCHSIZE; i++) {
                 clock_gettime(CLOCK_REALTIME, &start);
-		sum += ntp_random64();
+                err += RAND_priv_bytes((unsigned char *)&rnd, bytes);
 		clock_gettime(CLOCK_REALTIME, &stop);
 		sec = (stop.tv_sec-start.tv_sec);
 		nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
@@ -130,93 +213,28 @@ int do_fastest64(void) {
 		}
 	}
 
+	if (BATCHSIZE != err) {
+		printf("## do_fast_priv: troubles from RAND_bytes, %d\n",
+			BATCHSIZE-err);
+		exit(1);
+	}
+
 	return fastest;
 }
 
-int dups = 0;
-int do_hist(int type, int fastest);
-int do_hist(int type, int fastest) {
-	int nsPerBucket = NSPERBUCKET;
-	int i;
-	int delta, lines, toobig, hits, miss;
-	struct timespec start, stop;
-	int64_t sec, nanos;
-	unsigned int hist[HISTSIZE];
-	int faster = 0;
-
-	toobig = 0;
-	for (i = 0; i < HISTSIZE; i++) {
-		hist[i] = 0;
-	}
-
-	for (i = 0; i < BATCHSIZE; i++) {
-		clock_gettime(type, &start);  /* warm up cache */
-		clock_gettime(type, &stop);
-		clock_gettime(type, &start);
-		clock_gettime(type, &stop);
-		sec = (stop.tv_sec-start.tv_sec);
-		nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
-		if (0 > nanos) {
-			printf("## Time went backwards: %ld.%9ld-%ld.%9ld=>%ld\n",
-			       (long)stop.tv_sec, stop.tv_nsec,
-			       (long)start.tv_sec, start.tv_nsec,
-			       (long)nanos);
-			continue;
-		}
-		if (0 == nanos) {
-			/* I've seen this on Pi 1. */
-			dups++;
-			continue;
-		}
-		delta = (nanos-fastest) / nsPerBucket;
-		if (0 > delta) {
-			/* fastest wasn't fast enough */
-			if (0 == faster) {
-				faster = delta;
-			}
-			if (faster > delta) {
-				faster = delta;
-			}
-			continue;
-		}
-		if (delta < HISTSIZE) {
-			hist[delta]++;
-		} else {
-			toobig++;
-		}
-	}
-	if (faster) { return faster;
-	}
-	printf("\n");
-	printf("Histogram: CLOCK_REALTIME, %d ns per bucket, %d samples.\n",
-	       nsPerBucket, BATCHSIZE);
-	printf("        ns      hits\n");
-	lines = 0;
-	hits = 0;
-	for (i=0; i<HISTSIZE; i++) {
-		if ((MAXHISTLINES <= lines) && (0.98*BATCHSIZE < hits)) {
-			break;  /* Avoid clutter of printing long tail */
-		}
-		if (hist[i]) {
-			printf("%10d  %8u\n", i*nsPerBucket+fastest, hist[i]);
-			lines++;
-			hits += hist[i];
-		}
-	}
-	miss = i-1;
-	for (  ; i<HISTSIZE; i++) {
-		toobig += hist[i];
-	}
-
-	if (dups) {
-		printf("%d samples were duplicated.\n", dups);
-	}
-	if (toobig) { printf("%d samples were bigger than %d.\n",
-			     toobig, miss*nsPerBucket+fastest);
-	}
-	return faster;
+static void do_bytes(int bytes) {
+	int average = do_avg_bytes(bytes);
+	int fastest = do_fast_bytes(bytes);
+	printf("RAND_bytes():      %5d %8d %4d\n", average, fastest, bytes);
+	fflush(stdout);
 }
 
+static void do_priv(int bytes) {
+	int average = do_avg_priv(bytes);
+	int fastest = do_fast_priv(bytes);
+	printf("RAND_priv_bytes(): %5d %8d %4d\n", average, fastest, bytes);
+	fflush(stdout);
+}
 
 int main(int argc, char *argv[]) {
 	int average, fastest;
@@ -224,22 +242,28 @@ int main(int argc, char *argv[]) {
 	(void)argc;  /* Squash unused warnings */
 	(void)argv;
 
-	printf("                  avg  fastest\n");
+	printf(" times in ns         avg  fastest  lng\n");
+
+	average = getpid_average();   
+	printf("getpid():          %5d            (simple kernel call)\n",
+		average);
+
+	average = clock_average();   
+	printf("clock_gettime:     %5d            (overhead of fastest)\n",
+		average);
 
 	average = do_average();
 	fastest = do_fastest();
-	printf("random():       %5d %8d\n", average, fastest);
+	printf("random():          %5d %8d\n", average, fastest);
 	fflush(stdout);
 
-	average = do_average32();
-	fastest = do_fastest32();
-	printf("ntp_random():   %5d %8d\n", average, fastest);
-	fflush(stdout);
+	do_bytes(4);
+	do_bytes(16);
+	do_bytes(32);
 
-	average = do_average64();
-	fastest = do_fastest64();
-	printf("ntp_random64(): %5d %8d\n", average, fastest);
-	fflush(stdout);
+	do_priv(4);
+	do_priv(16);
+	do_priv(32);
 
 	return 0;
 
