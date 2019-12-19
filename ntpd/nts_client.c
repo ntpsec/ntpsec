@@ -35,7 +35,7 @@
 SSL_CTX* make_ssl_client_ctx(const char *filename);
 int open_TCP_socket(struct peer *peer, const char *hostname);
 bool nts_set_cert_search(SSL_CTX *ctx, const char *filename);
-void set_hostname(SSL *ssl, const char *hostname);
+void set_hostname(SSL *ssl, struct peer *peer, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
 bool check_aead(SSL *ssl, struct peer *peer, const char *hostname);
 bool nts_client_send_request(SSL *ssl, struct peer *peer);
@@ -127,7 +127,7 @@ bool nts_probe(struct peer * peer) {
 		ssl = SSL_new(ctx);
 		SSL_CTX_free(ctx);
 	}
-	set_hostname(ssl, hostname);
+	set_hostname(ssl, peer, hostname);
 	SSL_set_fd(ssl, server);
 
 	if (1 != SSL_connect(ssl)) {
@@ -324,7 +324,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	return sockfd;
 }
 
-void set_hostname(SSL *ssl, const char *hostname) {
+void set_hostname(SSL *ssl, struct peer *peer, const char *hostname) {
 	char host[256], *tmp;
 
 	/* chop off trailing :port */
@@ -340,10 +340,13 @@ void set_hostname(SSL *ssl, const char *hostname) {
 
 // https://wiki.openssl.org/index.php/Hostname_validation
 #if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
+	UNUSED_ARG(peer);
 	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
 	SSL_set1_host(ssl, host);
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 #elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
+	if (FLAG_NTS_NOVAL & peer->cfg.flags)
+		return;
 	{  /* enable automatic hostname checks */
 	X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
 	X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_WILDCARDS);
@@ -355,6 +358,7 @@ void set_hostname(SSL *ssl, const char *hostname) {
 #else
 	/*  Versions prior to 1.0.2 did not perform hostname validation */
 	UNUSED_ARG(ssl);
+	UNUSED_ARG(peer);
 	msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
 #endif
 
@@ -385,8 +389,11 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
 		} else {
 			msyslog(LOG_ERR, "NTSc: certificate invalid: %d=>%s",
 				certok, X509_verify_cert_error_string(certok));
-			if (!(FLAG_NTS_NOVAL & peer->cfg.flags))
-				return false;
+			if (FLAG_NTS_NOVAL & peer->cfg.flags) {
+				msyslog(LOG_INFO, "NTSc: noval - accepting invalid cert.");
+				return true;
+			}
+			return false;
 		}
 	}
 	return true;
