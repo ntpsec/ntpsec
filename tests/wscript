@@ -66,7 +66,7 @@ def build(ctx):
     )
 
     if ctx.env.REFCLOCK_GENERIC or ctx.env.REFCLOCK_TRIMBLE:
-        # libparse available/required wth generic and Trimble refclocks
+        # libparse available/required with generic and Trimble refclocks
 
         # libparse/
         libparse_source = [
