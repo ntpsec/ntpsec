@@ -231,7 +231,9 @@ void set_use_stattime(uptime_t stattime) {
 }
 
 
+#ifdef ENABLE_FUZZ
 double	measured_tick;		/* non-overridable sys_tick (s) */
+#endif
 
 static	void	clock_combine	(peer_select *, int, int);
 static	void	clock_select	(void);
