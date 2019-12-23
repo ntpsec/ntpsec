@@ -1305,7 +1305,7 @@ ctl_putrefid(
         cp = (char *)&refid;
         /* make sure all printable */
         for (i = 0; sizeof(refid) > i && '\0' != cp[i]; i++) {
-                if (isprint(cp[i]))
+                if (isgraph((int)cp[i]))
                         buf[i] = cp[i];
                 else
                         buf[i] = '.';

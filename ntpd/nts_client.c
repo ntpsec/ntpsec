@@ -428,7 +428,7 @@ bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
 		memcpy(buff, data, l);
 		buff[l] = '\0';
 		for (i=0; i<l; i++) {
-			if (!isgraph(buff[i])) {
+			if (!isgraph((int)buff[i])) {
 			  buff[i] = '*'; /* fix non-printing crap */
 			}
 		}
