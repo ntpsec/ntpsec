@@ -61,7 +61,7 @@ static inline l_fp_w htonl_fp(l_fp lfp) {
  */
 #define	NTP_MINCLOCK	3	/* min survivors */
 #define	NTP_MAXCLOCK	10	/* max candidates */
-#define MINDISPERSE	.001	/* min distance */
+#define MINDISTANCE	.001	/* min distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define	NTP_ORPHWAIT	300	/* orphan wait (s) */
 
@@ -119,7 +119,7 @@ bool leap_sec_in_progress;
  * Nonspecified system state variables
  */
 l_fp	sys_authdelay;		/* authentication delay */
-double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
+double	sys_mindist = MINDISTANCE; /* minimum distance (s) */
 static double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_maxdisp = MAXDISPERSE; /* maximum dispersion */
 static unsigned long	sys_epoch;	/* last clock update time */
@@ -1032,10 +1032,10 @@ clock_update(
 		+ loop_data.clock_phi * (current_time - peer->update)
 		+ fabs(clkstate.sys_offset);
 
-	if (dtemp > sys_mindisp)
+	if (dtemp > sys_mindist)
 		sys_vars.sys_rootdisp = dtemp;
 	else
-		sys_vars.sys_rootdisp = sys_mindisp;
+		sys_vars.sys_rootdisp = sys_mindist;
 	sys_vars.sys_rootdelay = peer->delay + peer->rootdelay;
 	sys_vars.sys_reftime = peer->dst;
 
@@ -1794,7 +1794,7 @@ clock_select(void)
 	 */
 	if (nlist == 0) {
 		peers[0].error = 0;
-		peers[0].synch = sys_mindisp;
+		peers[0].synch = sys_mindist;
 #ifdef REFCLOCK
 		if (typemodem != NULL) {
 			peers[0].peer = typemodem;
@@ -1876,11 +1876,11 @@ clock_select(void)
 	 *
 	 * Choose the system peer using a hybrid metric composed of the
 	 * selection jitter scaled by the root distance augmented by
-	 * stratum scaled by sys_mindisp (.001 by default). The goal of
+	 * stratum scaled by sys_mindist (.001 by default). The goal of
 	 * the small stratum factor is to avoid clockhop between a
 	 * reference clock and a network peer which has a refclock and
 	 * is using an older ntpd, which does not floor sys_rootdisp at
-	 * sys_mindisp.
+	 * sys_mindist.
 	 *
 	 * In contrast, ntpd 4.2.6 and earlier used stratum primarily
 	 * in selecting the system peer, using a weight of 1 second of
@@ -1914,7 +1914,7 @@ clock_select(void)
 		if (peer->cfg.flags & FLAG_PREFER)
 			sys_prefer = peer;
 		speermet = peers[i].seljit * peers[i].synch +
-		    peer->stratum * sys_mindisp;
+		    peer->stratum * sys_mindist;
 		if (speermet < e) {
 			e = speermet;
 			speer = i;
@@ -1935,9 +1935,9 @@ clock_select(void)
 		if (osys_peer == NULL || osys_peer == typesystem) {
 			sys_clockhop = 0;
 		} else if ((x = fabs(typesystem->offset -
-		    osys_peer->offset)) < sys_mindisp) {
+		    osys_peer->offset)) < sys_mindist) {
 			if ( D_ISZERO_NS(sys_clockhop) ) {
-				sys_clockhop = sys_mindisp;
+				sys_clockhop = sys_mindist;
 			} else {
 				sys_clockhop *= .5;
 			}
@@ -2102,8 +2102,8 @@ root_distance(
 	 * cannot exceed the sys_maxdist, as this is the cutoff by the
 	 * selection algorithm.
 	 */
-	if (dtemp < sys_mindisp) {
-		dtemp = sys_mindisp;
+	if (dtemp < sys_mindist) {
+		dtemp = sys_mindist;
 	}
 	return (dtemp);
 }
@@ -2908,8 +2908,8 @@ proto_config(
 		sys_minclock = (int)dvalue;
 		break;
 
-	case PROTO_MINDISP:	/* minimum distance (mindist) */
-		sys_mindisp = dvalue;
+	case PROTO_MINDIST:	/* minimum distance (mindist) */
+		sys_mindist = dvalue;
 		break;
 
 	case PROTO_MINSANE:	/* minimum survivors (minsane) */

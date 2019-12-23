@@ -1272,7 +1272,7 @@ config_tos(
 			break;
 
 		case T_Mindist:
-			item = PROTO_MINDISP;
+			item = PROTO_MINDIST;
 			break;
 
 		case T_Maxdisp:

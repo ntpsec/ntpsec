@@ -159,7 +159,7 @@ extern	void	peer_clear	(struct peer *, const char *, const bool);
 extern	void	set_sys_leap	(uint8_t);
 
 extern	int	sys_orphan;
-extern	double	sys_mindisp;
+extern	double	sys_mindist;
 extern	double	sys_maxdisp;
 
 extern	void	poll_update	(struct peer *, uint8_t);
