@@ -23,9 +23,6 @@ passwords for the link:ntpq.html[+ntpq+] utility program.
 [[cmd]]
 == Command Line Options
 
-+-M+, +--md5key+::
-  Dummy option for backward compatibility in old scripts.  This
-  program always runs in -M mode.
 +-V+, +--version+::
   Print the version string and exit.
 
@@ -74,6 +71,9 @@ https://docs.python.org/library/os.html#os.urandom[Python 3.5+].
 [[crypto]]
 == Cryptographic Data Files
 
+Unlike NTP Classic, this implementation generates only AES keys,
+not MD5 or SHA1.
+
 Since the file contains private shared keys, it should be visible
 only to root or ntp.
 
@@ -93,7 +93,7 @@ format:
 |====================================================================
 |Field	| Meaning
 |keyno	| Positive integer in the range 1-65,535
-|type	| Type of key (MD5, SHA-1, AES-CMAC etc.)
+|type	| Type of key (MD5, SHA-1, AES-CMAC etc). This program generates only AES.
 |key	| the actual key, printable ASCII or hex
 |====================================================================
 

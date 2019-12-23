@@ -84,17 +84,14 @@ def fheader(fileid,     # file name id
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "hMV",
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hV",
                                              ["help", "version"])
     except getopt.GetoptError as e:
         print(e)
         raise SystemExit(1)
 
     for (switch, val) in options:
-        if switch == '-M':
-            # dummy MD5 option for backwards compatibility, ignored
-            pass
-        elif switch in ("-h", "--help"):
+        if switch in ("-h", "--help"):
             print("usage: ntpkeygen")
             raise SystemExit(0)
         elif switch in ("-V", "--version"):
