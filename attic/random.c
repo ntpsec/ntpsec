@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <openssl/opensslv.h>    /* for OPENSSL_VERSION_NUMBER */
 #include <openssl/rand.h>
 
 #define BATCHSIZE 1000000
@@ -112,6 +113,7 @@ static int do_avg_bytes(unsigned int bytes) {
 	return nanos/BATCHSIZE;
 }
 
+#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
 static int do_avg_priv(unsigned int bytes) {
 	int err = 0;
 	struct timespec start, stop;
@@ -140,6 +142,7 @@ static int do_avg_priv(unsigned int bytes) {
 	nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
 	return nanos/BATCHSIZE;
 }
+#endif
 
 static int do_fastest(void) {
 	int sum = 0;
@@ -191,6 +194,7 @@ static int do_fast_bytes(unsigned bytes) {
 	return fastest;
 }
 
+#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
 static int do_fast_priv(unsigned bytes) {
 	int err = 0;
 	struct timespec start, stop;
@@ -221,6 +225,7 @@ static int do_fast_priv(unsigned bytes) {
 
 	return fastest;
 }
+#endif
 
 static void do_bytes(int bytes) {
 	int average = do_avg_bytes(bytes);
@@ -229,12 +234,14 @@ static void do_bytes(int bytes) {
 	fflush(stdout);
 }
 
+#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
 static void do_priv(int bytes) {
 	int average = do_avg_priv(bytes);
 	int fastest = do_fast_priv(bytes);
 	printf("RAND_priv_bytes(): %5d %8d %4d\n", average, fastest, bytes);
 	fflush(stdout);
 }
+#endif
 
 int main(int argc, char *argv[]) {
 	int average, fastest;
@@ -261,9 +268,11 @@ int main(int argc, char *argv[]) {
 	do_bytes(16);
 	do_bytes(32);
 
+#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
 	do_priv(4);
 	do_priv(16);
 	do_priv(32);
+#endif
 
 	return 0;
 
