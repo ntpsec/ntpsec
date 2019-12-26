@@ -227,7 +227,8 @@ get_systime(
 	struct timespec ts;	/* seconds and nanoseconds */
 	get_ostime(&ts);
 #ifdef ENABLE_FUZZ
-	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
+/*	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now); */
+	normalize_time(ts, sys_fuzz > 0.0 ? random() : 0, now);
 #else
 	*now = tspec_stamp_to_lfp(ts);
 #endif

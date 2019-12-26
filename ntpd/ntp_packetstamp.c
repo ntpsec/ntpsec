@@ -29,20 +29,10 @@
  * If SO_xxx exists, we assume that SCM_xxx does too.
  * All flavors assume the CMSG_xxx macros exist.
  *
- * As of 2019-Dec, NetBSD and FreeBSD didn't support SO_TIMESTAMPNS
- *
  * FreeBSD has SO_BINTIME/SCM_BINTIME
  *   It has better resolution, but it doesn't work for IPv6
  *   bintime documentation is at
  *   http://phk.freebsd.dk/pubs/timecounter.pdf
- * As of 2019-Dec, the above is out of date.
- * A few more ifdefs could get ns resolution.
- *
- * Note that this is tangled with clock fuzzing.
- * If using SO_TIMESTAMP, the data is microsecond rather than nanoseconds
- * which has no relation to the clock fuzzing parameters.
- * We could fuzz that case here, but that might result it packets
- * arrving after they are sent.
  */
 
 
@@ -150,8 +140,8 @@ fetch_packetstamp(
 #elif defined(SO_TIMESTAMP)
 	tvp = (struct timeval *)CMSG_DATA(cmsghdr);
 #ifdef ENABLE_FUZZ
-	if (sys_tick > measured_tick && sys_tick > S_PER_US) {
-	    ticks = (unsigned long) ((tvp->tv_usec * S_PER_US) / sys_tick);
+	if (sys_tick > measured_tick && sys_tick > S_PER_NS) {
+	    ticks = (unsigned long) ((tvp->tv_usec * S_PER_NS) / sys_tick);
 	    tvp->tv_usec = (long)(ticks * US_PER_S * sys_tick);
 	}
 #endif
@@ -162,7 +152,8 @@ fetch_packetstamp(
 # error "Can't get packet timestamp"
 #endif
 #ifdef ENABLE_FUZZ
-	fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
+/*	fuzz = ntp_random() * 2. / FRAC * sys_fuzz; */
+	fuzz = random() * 2. / FRAC * sys_fuzz;
 	lfpfuzz = dtolfp(fuzz);
 	nts += lfpfuzz;
 #endif
