@@ -1254,7 +1254,7 @@ peer_clear(
 	 * Clear all values, including the optional crypto values above.
 	 */
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO(peer));
-	peer->ppoll = peer->cfg.maxpoll;
+	peer->ppoll = NTP_MAXPOLL_UNK;
 	peer->hpoll = peer->cfg.minpoll;
 	peer->disp = sys_maxdisp;
 	peer->flash = peer_unfit(peer);
@@ -2533,6 +2533,7 @@ static void restart_nts_ke(struct peer *peer) {
 		hpoll = 8;      /* min retry: 256 seconds, ~5 min */
 	if (hpoll > 12)
 		hpoll = 12;	/* 4096, a bit over an hour */
+	peer->ppoll = NTP_MAXPOLL_UNK;
 	peer->hpoll = hpoll;
 	peer->nextdate = current_time + (1U << hpoll);
 	peer->cfg.flags |= FLAG_LOOKUP;
@@ -2546,6 +2547,7 @@ void dns_try_again(void) {
 	struct peer *p;
 	for (p = peer_list; p != NULL; p = p->p_link) {
 		if ((p->cfg.flags & FLAG_LOOKUP) || (p->cast_flags & MDF_POOL)) {
+			p->ppoll = NTP_MAXPOLL_UNK;
 			p->hpoll = p->cfg.minpoll;
 			transmit(p);   /* does all the work */
 		}
