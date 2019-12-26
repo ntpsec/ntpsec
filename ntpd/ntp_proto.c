@@ -2811,6 +2811,7 @@ init_proto(const bool verbose)
 	measure_precision(verbose);
 #else
 	UNUSED_ARG(verbose);
+	sys_vars.sys_precision = -30; /* ns */
 #endif
 	get_systime(&dummy);
 	sys_survivors = 0;
