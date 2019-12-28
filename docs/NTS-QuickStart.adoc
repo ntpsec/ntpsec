@@ -74,6 +74,8 @@ the server's certificate.  IP addresses will not work.
 This assumes that the server is using a certificate covered by
 your OS/distro's root certificate collection.
 
+NetBSD needs the +mozilla-rootcerts-openssl+ package and `ca /etc/openssl/certs/` added to the +server+ line. 
+
 Restart `ntpd`, and skip to link:#verify[Verification], below.
 
 [[server]]
@@ -139,9 +141,9 @@ Restart your server, and skip to link:#verify[Verification], below.
 [[verify]]
 == Verification
 
-Check your log file.  The current NTS implementation is quite chatty, and the
-log lines may change, so what you see will be similar, but not the same,
-as below.
+Check your log file.  The current client side NTS implementation
+is quite chatty.  The log lines may change, but what you see should be
+similar to below.
 
 As a client, you should see lines like this:
 
@@ -161,34 +163,37 @@ As a client, you should see lines like this:
 For initializing a server, you should see lines like this:
 
 ------------------------------------------------------------
-2019-03-22T08:06:32 ntpd[12915]: NTSs: starting NTS-KE server listening on port 123
-2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded certificate (chain) from /etc/letsencrypt/live/ntpmon.dcs1.biz/fullchain.pem
-2019-03-22T08:06:32 ntpd[12915]: NTSs: loaded private key from /etc/letsencrypt/live/ntpmon.dcs1.biz/privkey.pem
-2019-03-22T08:06:32 ntpd[12915]: NTSs: Private Key OK
-2019-03-22T08:06:32 ntpd[12915]: NTSs: OpenSSL security level is 2
-2019-03-22T08:06:32 ntpd[12915]: NTSs: listen4 worked
-2019-03-22T08:06:32 ntpd[12915]: NTSs: listen6 worked
-2019-03-22T08:06:32 ntpd[12915]: NTSc: Using system default root certificates.
+27 Dec 12:03:47 ntpd[962738]: INIT: OpenSSL 1.1.1d FIPS  10 Sep 2019, 1010104f
+27 Dec 12:03:47 ntpd[962738]: NTSs: starting NTS-KE server listening on port 123
+27 Dec 12:03:47 ntpd[962738]: NTSs: loaded certificate (chain) from /etc/ntp/fullchain.pem
+27 Dec 12:03:47 ntpd[962738]: NTSs: loaded private key from /etc/ntp/privkey.pem
+27 Dec 12:03:47 ntpd[962738]: NTSs: Private Key OK
+27 Dec 12:03:47 ntpd[962738]: NTSs: OpenSSL security level is 1
+27 Dec 12:03:47 ntpd[962738]: NTSs: listen4 worked
+27 Dec 12:03:47 ntpd[962738]: NTSs: listen6 worked
+27 Dec 12:03:47 ntpd[962738]: NTSc: Using system default root certificates.
 ------------------------------------------------------------
 
 On a server, each time a client uses TLS to setup cookies,
-you should see lines like this:
+you should see lines like these.  If all goes well, there is a single
+line for each connection.
 
 ------------------------------------------------------------
-10 Jun 04:50:39 ntpd[823]: NTSs: TCP accept-ed from 64.139.1.69:61561
-10 Jun 04:50:39 ntpd[823]: NTSs: Using TLSv1.3, TLS_AES_256_GCM_SHA384 (256)
-10 Jun 04:50:40 ntpd[823]: NTSs: Read 16, wrote 880 bytes.  AEAD=15
-10 Jun 04:50:40 ntpd[823]: NTSs: NTS-KE server took 1.569 sec
+ 1 Dec 22:42:21 ntpd[237777]: NTSs: NTS-KE from 192.168.1.71:43560, Using TLSv1.3, TLS_CHACHA20_POLY1305_SHA256 (256), took 0.018 sec
+ 1 Dec 22:42:56 ntpd[237777]: NTSs: NTS-KE from 192.168.1.61:33930, Using TLSv1.2, ECDHE-RSA-AES256-GCM-SHA384 (256), took 0.075 sec
 ------------------------------------------------------------
 
 Servers on the big bad internet will get a lot of garbage connections.
-Each one will produce log lines like this:
+The common cases produce a single line.  Less common cases will have additional lines with OpenSSL error data.
 
 ------------------------------------------------------------
-10 Jun 04:55:11 ntpd[823]: NTSs: TCP accept-ed from 70.95.39.88:49176
-10 Jun 04:55:11 ntpd[823]: NTSs: SSL accept from 70.95.39.88:49176 failed, 0.006 sec
-10 Jun 04:55:11 ntpd[823]: NTS: error:1408F10B:SSL routines:ssl3_get_record:wrong version number
+26 Dec 18:13:55 ntpd[940892]: NTSs: SSL accept from 68.134.33.4:52188 failed: wrong version number, took 0.000 sec
+26 Dec 18:24:20 ntpd[940892]: NTSs: SSL accept from 64.139.1.69:56525 failed, took 0.101 sec
+26 Dec 18:24:20 ntpd[940892]: NTS: error:14094418:SSL routines:ssl3_read_bytes:tlsv1 alert unknown ca
 ------------------------------------------------------------
+
+`alert` means the client on the other end encountered troubles and is
+reporting them back to the server.
 
 The logging prefix *NTSs* is for the NTS server component.  The *NTSc*
 component is for the NTS client part, where you are talking to NTS servers.
