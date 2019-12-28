@@ -188,7 +188,8 @@ daemon () {
 	    #  In Dec 2018, 3.6 and 2.7 are also good candidates.
 	    $install bison python37 py37-curses-3.7
 	    # certificates for NTS
-	    $install mozilla-rootcerts
+	    $install mozilla-rootcerts mozilla-rootcerts-openssl
+	    # Also needs "nts ca /etc/openssl/certs/"
 	    # setup "python" from command line
 	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
 	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
