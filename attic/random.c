@@ -267,11 +267,15 @@ int main(int argc, char *argv[]) {
 	do_bytes(4);
 	do_bytes(16);
 	do_bytes(32);
+	do_bytes(160);
+	do_bytes(320);
 
 #if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
 	do_priv(4);
 	do_priv(16);
 	do_priv(32);
+	do_priv(160);
+	do_priv(320);
 #endif
 
 	return 0;
