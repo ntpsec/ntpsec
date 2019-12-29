@@ -477,7 +477,8 @@ static bool check_early_restrictions(
 {
 	return (restrict_mask & RES_IGNORE) ||
 	    ((restrict_mask & RES_FLAKE) &&
-	     (double)ntp_random() / 0x7fffffff < .1) ||
+/*	     (double)ntp_random() / 0x7fffffff < .1) || */
+	     (double)random() / 0x7fffffff < .1) ||
 	    (restrict_mask & (is_control_packet(rbufp) ? RES_NOQUERY : RES_DONTSERVE)) ||
 	    rbufp->recv_length < 1 ||
 	    ((restrict_mask & RES_VERSION) &&
@@ -1219,7 +1220,8 @@ poll_update(
 			next = 1U << hpoll;
 		else
 #endif /* REFCLOCK */
-			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<
+/*			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<  */
+			next = ((0x1000UL | (random() & 0x0ff)) <<
 			    hpoll) >> 12;
 		next += peer->outdate;
 		if (next > utemp)
