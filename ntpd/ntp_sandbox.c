@@ -412,9 +412,10 @@ int scmp_sc[] = {
 	SCMP_SYS(gettid),
 	SCMP_SYS(geteuid),
 /* __NR_ppoll is not available in Fedora 31.
- * I can't find where it is needed.  HGM 2019-Nov-23
- *	SCMP_SYS(ppoll),
- */
+ * Needed by getaddrinfo on Arch Linux. 2019-Dec */
+#ifdef __NR_ppoll
+ 	SCMP_SYS(ppoll),
+#endif
 	SCMP_SYS(sendmsg),
 #ifdef __NR_geteuid32
 	SCMP_SYS(geteuid32),
