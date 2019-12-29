@@ -661,7 +661,7 @@ int main(int argc, char **argv) {
         ('strlcat', ["string.h"])
     )
     for ft in optional_functions:
-            probe_function(ctx, function=ft[0], prerequisites=ft[1])
+        probe_function(ctx, function=ft[0], prerequisites=ft[1])
 
     # This area is still work in progress
     # Need to disable making symbols
