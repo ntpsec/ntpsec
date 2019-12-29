@@ -1304,6 +1304,7 @@ This combats source address spoofing
         raise ControlException(SERR_BADNONCE)
 
     def __mru_analyze(self, variables, span, direct):
+        """Extracts data from the key/value list into a more useful form"""
         curidx = -1
         mru = None
         nonce = None
@@ -1556,8 +1557,7 @@ def parse_mru_variables(variables):
                 raise ControlException(SERR_BADSORT % sortkey)
     for k in list(variables.keys()):
         if k in ("mincount", "resall", "resany", "kod", "limited",
-                 "maxlstint", "laddr", "recent", "sort",
-                 "frags", "limit"):
+                 "maxlstint", "laddr", "recent", "sort", "frags", "limit"):
             continue
         else:
             raise ControlException(SERR_BADPARAM % k)

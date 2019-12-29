@@ -124,6 +124,53 @@ class TestPacket(unittest.TestCase):
         # Test mode
         self.assertEqual(cls.mode(), 4)
 
+    def test_parse_mru_variables(self):
+        f = ntpp.parse_mru_variables
+        # Test working sort
+        data = {"sort": "count", "mincount": 50, "resall": 1, "resany": 5,
+                "kod": True, "limited": True, "maxlstint": 100,
+                "laddr": "foo.test", "recent": "foo", "frags": 20, "limit": 80}
+        sorter, sortkey, frags = f(data)
+        self.assertEqual(sorter != None, True)  # can't directly test lambda
+        self.assertEqual(sortkey, "count")
+        self.assertEqual(frags, 20)
+        self.assertEqual(data,
+                         {"mincount": 50, "resall": 1, "resany": 1061,
+                          "maxlstint": 100, "laddr": "foo.test",
+                          "recent": "foo", "limit": 80})
+        # Test no sort
+        data = {"mincount": 50, "resall": 1, "resany": 5, "kod": True,
+                "limited": True, "maxlstint": 100, "laddr": "foo.test",
+                "recent": "foo", "frags": 20, "limit": 80}
+        sorter, sortkey, frags = f(data)
+        self.assertEqual(sorter, None)  # can't directly test lambda
+        self.assertEqual(sortkey, None)
+        self.assertEqual(frags, 20)
+        self.assertEqual(data,
+                         {"mincount": 50, "resall": 1, "resany": 1061,
+                          "maxlstint": 100, "laddr": "foo.test",
+                          "recent": "foo", "limit": 80})
+        # Test bad sort
+        data = {"sort": "FAIL", "mincount": 50, "resall": 1, "resany": 5,
+                "kod": True, "limited": True, "maxlstint": 100,
+                "laddr": "foo.test", "recent": "foo", "frags": 20, "limit": 80}
+        try:
+            sorter, sortkey, frags = f(data)
+            errored = False
+        except ntpp.ControlException as e:
+            errored = e.message
+        self.assertEqual(errored, "***Sort order FAIL is not implemented")
+        # Test bad variables
+        data = {"FAIL": "FAIL", "mincount": 50, "resall": 1, "resany": 5,
+                "kod": True, "limited": True, "maxlstint": 100,
+                "laddr": "foo.test", "recent": "foo", "frags": 20, "limit": 80}
+        try:
+            sorter, sortkey, frags = f(data)
+            errored = False
+        except ntpp.ControlException as e:
+            errored = e.message
+        self.assertEqual(errored, "***Unknown parameter 'FAIL'")
+
 
 class TestSyncPacket(unittest.TestCase):
     target = ntpp.SyncPacket
