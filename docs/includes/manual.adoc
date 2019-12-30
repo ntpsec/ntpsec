@@ -11,7 +11,7 @@
 * link:ntplogtemp.html[+ntplogtemp(1)+ - log system temperature data for use by ntpviz]
 * link:ntpmon.html[+ntpmon(1)+ - real-time NTP status monitor]
 * link:ntpq.html[+ntpq(1)+ - standard NTP query program]
-* link:ntpsnmp.html[+ntpsnmp(1)+ - an AgentX Simple Network Management Protocol sub-agent +[+experimental+]+]
+* link:ntpsnmp.html[+ntpsnmp(1)+ - an AgentX Simple Network Management Protocol sub-agent [+experimental+]]
 * link:ntpsweep.html[+ntpsweep(1)+ - print information about given NTP servers]
 * link:ntptime.html[+ntptime(8)+ - read and set kernel time variables]
 * link:ntptrace.html[+ntptrace(1)+ - trace a chain of NTP servers back to the primary source]
