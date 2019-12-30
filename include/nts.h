@@ -25,6 +25,8 @@ bool nts_cookie_init(void);
 bool nts_server_init2(void);    /* after sandbox */
 bool nts_cookie_init2(void);
 
+void nts_cert_timer(void);
+void nts_cookie_timer(void);
 
 bool nts_read_cookie_keys(void);
 bool nts_make_cookie_key(void);

@@ -401,14 +401,14 @@ setup_logfile(
 }
 
 /*
- * reopen_logfile()
+ * check_logfile()
  *
  * reopen current logfile in case the old file has been renamed by logrotate
- *
+ * called on SIGHUP and hourly
  */
 
 void
-reopen_logfile(void)
+check_logfile(void)
 {
 	FILE *  new_file;
 
@@ -418,7 +418,7 @@ reopen_logfile(void)
 
 	new_file = fopen(syslog_fname, "a");
 	if (NULL == new_file) {
-		msyslog(LOG_ERR, "LOG: reopen_logfile: couldn't open %s %s",
+		msyslog(LOG_ERR, "LOG: check_logfile: couldn't open %s %s",
                         syslog_fname, strerror(errno));
 		return;
 	}
@@ -431,16 +431,14 @@ reopen_logfile(void)
 	 * This seems to work.
 	 */
 	if (ftell(syslog_file) == ftell(new_file)) {
-		/* just for debugging */
-		msyslog(LOG_INFO, "LOG: reopen_logfile: same length, ignored");
 		fclose(new_file);
 		return;
 	}
 
-	msyslog(LOG_INFO, "LOG: reopen_logfile: closing old file");
+	msyslog(LOG_INFO, "LOG: check_logfile: closing old file");
 	fclose(syslog_file);
 	syslog_file = new_file;
-	msyslog(LOG_INFO, "LOG: reopen_logfile: using %s", syslog_fname);
+	msyslog(LOG_INFO, "LOG: check_logfile: using %s", syslog_fname);
 }
 
 /* Hack because there are 2 APIs to strerror_r()  */

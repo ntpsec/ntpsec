@@ -109,6 +109,13 @@ void nts_log_version(void) {
 
 /*****************************************************/
 
+void nts_timer(void) {
+	nts_cert_timer();
+	nts_cookie_timer();
+}
+
+/*****************************************************/
+
 /* 0 is default, -1 is error */
 int nts_translate_version(const char *arg) {
 	if (NULL == arg) {

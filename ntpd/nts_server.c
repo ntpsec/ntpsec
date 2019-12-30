@@ -169,8 +169,20 @@ bool nts_server_init2(void) {
 	return true;
 }
 
-void check_cert_file(void) {
+#define SecondsPerHour 3600
+void nts_cert_timer(void) {
+	static time_t C_time = 0;
+	time_t now = time(NULL);
+	if (SecondsPerHour > (now-C_time)) {
+		return;
+	}
+	check_cert_file();
+        while (SecondsPerHour < (now-C_time)) {
+                C_time += SecondsPerHour;
+        }
+}
 
+void check_cert_file(void) {
 	nts_lock_certlock();
 	nts_reload_certificate(server_ctx);
 	nts_unlock_certlock();

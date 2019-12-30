@@ -32,7 +32,7 @@ extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
 extern	void	ntp_strerror_r(int errnum, char *buf, size_t buflen);
 extern	void	init_logging	(const char *, uint32_t, int);
 extern	int	change_logfile	(const char *, bool);
-extern	void	reopen_logfile  (void);
+extern	void	check_logfile	(void);
 extern	void	setup_logfile	(const char *);
 
 extern	int	clocktime	(int, int, int, int, int, time_t, uint32_t, uint32_t *, uint32_t *);

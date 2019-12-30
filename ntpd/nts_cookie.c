@@ -137,7 +137,7 @@ bool nts_cookie_init2(void) {
 //  keys will timeout, packets will get dropped
 //  after 8 lost packets, it should go through the NTS-KE dance again
 // #define SecondsPerDay 3600
-void nts_timer(void) {
+void nts_cookie_timer(void) {
 	time_t now;
 	if (0 == K_time) {
 		return;

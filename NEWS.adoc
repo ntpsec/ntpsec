@@ -12,6 +12,12 @@ on user-visible changes.
 
 == Repository head ==
 
+SIGHUP and hourly checks have been unified.  Both now
+  check for a new log file
+  check for a new certificate file
+  check for a new leap file
+SIGHUP also restarts all pending DNS and NTS probes.
+
 NTS client now requires ALPN on TLSv1.3.
 
 == 2019-11-17: 1.1.8 ==
