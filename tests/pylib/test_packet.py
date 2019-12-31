@@ -205,6 +205,29 @@ class TestPacket(unittest.TestCase):
         two = firstParms == ", recent=4, bar=2, foo=1"
         self.assertEqual(one or two, True)
 
+    def test_generate_mru_lastseen(self):
+        f = ntpp.generate_mru_lastseen
+        # Data
+        span = ntpp.MRUList()
+        entry1 = ntpp.MRUEntry()
+        entry1.addr = "1.2.3.4:23"
+        entry1.last = "2019-12-31T00:15:00Z"
+        entry2 = ntpp.MRUEntry()
+        entry2.addr = "10.20.30.40:42"
+        entry2.last = "2019-12-31T03:00:00Z"
+        entry3 = ntpp.MRUEntry()
+        entry3.addr = "2.0.0.1:23"
+        entry3.last = "2019-12-31T03:30:00Z"
+        entry4 = ntpp.MRUEntry()
+        entry4.addr = "3.4.5.6:23"
+        entry4.last = "2019-12-31T04:45:00Z"
+        span.entries = [entry1, entry2, entry3, entry4]
+        # Run test
+        buf = f(span, 370)
+        expected = ", addr.0=3.4.5.6:23, last.0=2019-12-31T04:45:00Z, " \
+                              "addr.1=2.0.0.1:23, last.1=2019-12-31T03:30:00Z"
+        self.assertEqual(buf, expected)
+
 
 class TestSyncPacket(unittest.TestCase):
     target = ntpp.SyncPacket
