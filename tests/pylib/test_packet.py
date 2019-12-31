@@ -193,6 +193,18 @@ class TestPacket(unittest.TestCase):
         f(span, sorter, sortkey)
         self.assertEqual(span.entries, [entry2, entry4])
 
+    def test_generate_mru_parms(self):
+        f = ntpp.generate_mru_parms
+        # Data
+        vars = {"foo": 1, "bar": 2, "recent": 4}
+        # Run test
+        parms, firstParms = f(vars)
+        correct = parms == ", foo=1, bar=2" or parms == ", bar=2, foo=1"
+        self.assertEqual(correct, True)
+        one = firstParms == ", recent=4, foo=1, bar=2"
+        two = firstParms == ", recent=4, bar=2, foo=1"
+        self.assertEqual(one or two, True)
+
 
 class TestSyncPacket(unittest.TestCase):
     target = ntpp.SyncPacket
