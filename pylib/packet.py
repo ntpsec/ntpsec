@@ -1591,7 +1591,7 @@ def stitch_mru(span, sorter, sortkey):
     for addr in addrdict:
         deletia += sorted(addrdict[addr], key=lambda x: x[1])[:-1]
     deletia = [x[0] for x in deletia]
-    deletia.sort(reverse=True)
+    deletia.sort(reverse=True)  # Delete from top down so indices don't change
     for i in deletia:
         span.entries.pop(i)
 

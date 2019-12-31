@@ -171,6 +171,28 @@ class TestPacket(unittest.TestCase):
             errored = e.message
         self.assertEqual(errored, "***Unknown parameter 'FAIL'")
 
+    def test_stitch_mru(self):
+        f = ntpp.stitch_mru
+        # Prepare data
+        span = ntpp.MRUList()
+        entry1 = ntpp.MRUEntry()
+        entry1.addr = "1.2.3.4:23"
+        entry1.last = "2019-12-31T00:15:00Z"
+        entry2 = ntpp.MRUEntry()
+        entry2.addr = "10.20.30.40:42"
+        entry2.last = "2019-12-31T03:00:00Z"
+        entry3 = ntpp.MRUEntry()
+        entry3.addr = "1.2.3.4:23"
+        entry3.last = "2019-12-31T03:30:00Z"
+        entry4 = ntpp.MRUEntry()
+        entry4.addr = "1.2.3.4:23"
+        entry4.last = "2019-12-31T04:45:00Z"
+        span.entries = [entry1, entry2, entry3, entry4]
+        sorter = (lambda e: e.sortaddr())  # Extracted from parse_mru_variables
+        sortkey = "addr"
+        f(span, sorter, sortkey)
+        self.assertEqual(span.entries, [entry2, entry4])
+
 
 class TestSyncPacket(unittest.TestCase):
     target = ntpp.SyncPacket
