@@ -41,8 +41,16 @@
 # define MRU_MAXDEPTH_DEF	(1024 * 1024 / sizeof(mon_entry))
 #endif
 
+#define MON_HASH_SLOTS          (1U << mon_data.mon_hash_bits)
+#define MON_HASH_MASK           (MON_HASH_SLOTS - 1)
+#define MON_HASH(addr)          (sock_hash(addr) & MON_HASH_MASK)
+
+
 struct monitor_data mon_data = {
-    .mru_mindepth = 600, /* preempt above this */
+	.mon_enabled = MON_ON,	/* default to ON */
+	.mru_entries = 0,
+	.mru_hashslots = 0,
+	.mru_mindepth = 600, /* preempt above this */
 	.mru_maxage = 3600,	/* recycle if older than this */
 	.mru_minage = 64,	/* recycle if full and older than this */
 	.mru_maxdepth = MRU_MAXDEPTH_DEF,	/* MRU count hard limit */
@@ -79,7 +87,6 @@ init_mon(void)
 	 * Don't do much of anything here.  We don't allocate memory
 	 * until mon_start().
 	 */
-	mon_data.mon_enabled = MON_OFF;
 	INIT_DLIST(mon_data.mon_mru_list, mru);
 }
 
@@ -101,6 +108,8 @@ remove_from_hash(
 	UNLINK_SLIST(punlinked, mon_data.mon_hash[hash], mon, hash_next,
 		     mon_entry);
 	ENSURE(punlinked == mon);
+	if (NULL == mon_data.mon_hash[hash])
+		mon_data.mru_hashslots--;
 }
 
 
@@ -162,40 +171,47 @@ mon_getmoremem(void)
 }
 
 
+void
+mon_setup(int mode)
+{
+	mon_data.mon_enabled |= mode;
+}
+
+void
+mon_setdown(int mode)
+{
+	mon_data.mon_enabled &= ~mode;
+}
+
 /*
  * mon_start - start up the monitoring software
  */
 void
-mon_start(
-	int mode
-	)
+mon_start(void)
 {
 	size_t octets;
 	unsigned int min_hash_slots;
 
-	if (MON_OFF == mode)		/* MON_OFF is 0 */
+	if (MON_OFF == mon_data.mon_enabled)
 		return;
-	if (mon_data.mon_enabled) {
-		mon_data.mon_enabled |= (unsigned int)mode;
-		return;
-	}
 	if (0 == mon_mem_increments)
 		mon_getmoremem();
-	/*
-	 * Select the MRU hash table size to limit the average count
-	 * per bucket at capacity (mru_maxdepth) to 8, if possible
-	 * given our hash is limited to 16 bits.
+	/* There used to be a 16 bit limit to mon_hash_bits.
+	 * and a target of 8 entries per hash slot.
+	 * That was not good with large MRU lists.
+	 * There was also a startup timing bug that got 13 bits.
 	 */
-	min_hash_slots = (mon_data.mru_maxdepth / 8) + 1;
+	min_hash_slots = mon_data.mru_maxdepth;  /* 1 hash slot per entry */
 	mon_data.mon_hash_bits = 0;
 	while (min_hash_slots >>= 1)
 		mon_data.mon_hash_bits++;
 	mon_data.mon_hash_bits = max(4, mon_data.mon_hash_bits);
-	mon_data.mon_hash_bits = min(16, mon_data.mon_hash_bits);
-	octets = sizeof(*mon_data.mon_hash) * MON_HASH_SIZE;
+	mon_data.mon_hash_bits = min(24, mon_data.mon_hash_bits);
+	octets = sizeof(*mon_data.mon_hash) * MON_HASH_SLOTS;
+	msyslog(LOG_INFO, "INIT: MRU %llu entries, %d hash bits, %llu bytes",
+		(unsigned long long)mon_data.mru_maxdepth,
+		mon_data.mon_hash_bits, (unsigned long long)octets);
 	mon_data.mon_hash = erealloc_zero(mon_data.mon_hash, octets, 0);
-
-	mon_data.mon_enabled = (unsigned int)mode;
 }
 
 
@@ -203,19 +219,11 @@ mon_start(
  * mon_stop - stop the monitoring software
  */
 void
-mon_stop(
-	int mode
-	)
+mon_stop(void)
 {
 	mon_entry *mon;
 
 	if (MON_OFF == mon_data.mon_enabled)
-		return;
-	if ((mon_data.mon_enabled & (unsigned int)mode) == 0 || mode == MON_OFF)
-		return;
-
-	mon_data.mon_enabled &= (unsigned int)~mode;
-	if (mon_data.mon_enabled != MON_OFF)
 		return;
 
 	/*
@@ -229,8 +237,9 @@ mon_stop(
 
 	/* empty the MRU list and hash table. */
 	mon_data.mru_entries = 0;
+	mon_data.mru_hashslots = 0;
 	INIT_DLIST(mon_data.mon_mru_list, mru);
-	memset(mon_data.mon_hash, '\0', sizeof(*mon_data.mon_hash) * MON_HASH_SIZE);
+	memset(mon_data.mon_hash, '\0', sizeof(*mon_data.mon_hash) * MON_HASH_SLOTS);
 }
 
 
@@ -258,6 +267,17 @@ mon_clearinterface(
 	ITER_DLIST_END()
 }
 
+mon_entry *mon_get_slot(sockaddr_u *addr)
+{
+	mon_entry *mon;
+
+	mon = mon_data.mon_hash[MON_HASH(addr)];
+	for (; mon != NULL; mon = mon->hash_next)
+		if (SOCK_EQ(&mon->rmtadr, addr))
+			break;
+	return mon;
+}
+
 int mon_get_oldest_age(l_fp now)
 {
     mon_entry *	oldest;
@@ -269,6 +289,7 @@ int mon_get_oldest_age(l_fp now)
     now += 0x80000000;
     return lfpsint(now);
 }
+
 /*
  * ntp_monitor - record stats about this packet
  *
@@ -460,6 +481,8 @@ ntp_monitor(
 	 * Drop him into front of the hash table. Also put him on top of
 	 * the MRU list.
 	 */
+	if (NULL == mon_data.mon_hash[hash])
+		mon_data.mru_hashslots++;
 	LINK_SLIST(mon_data.mon_hash[hash], mon, hash_next);
 	LINK_DLIST(mon_data.mon_mru_list, mon, mru);
 

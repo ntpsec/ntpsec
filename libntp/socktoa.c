@@ -108,7 +108,7 @@ sockporttoa_r(
 /*
  * sock_hash - hash a sockaddr_u structure
  */
-unsigned short
+unsigned int
 sock_hash(
 	const sockaddr_u *addr
 	)
@@ -150,5 +150,5 @@ sock_hash(
 		hashVal = 37 * hashVal + pch[j];
 	}
 
-	return (unsigned short)(hashVal & USHRT_MAX);
+	return hashVal;
 }

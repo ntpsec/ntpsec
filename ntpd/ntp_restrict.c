@@ -245,7 +245,7 @@ static void
 inc_res_limited(void)
 {
 	if (!res_limited_refcnt)
-		mon_start(MON_RES);
+		mon_setup(MON_RES);
 	res_limited_refcnt++;
 }
 
@@ -255,7 +255,7 @@ dec_res_limited(void)
 {
 	res_limited_refcnt--;
 	if (!res_limited_refcnt)
-		mon_stop(MON_RES);
+		mon_setdown(MON_RES);
 }
 
 

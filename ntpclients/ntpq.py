@@ -1436,21 +1436,22 @@ usage: sysstats
     def do_monstats(self, _line):
         "display monitor (mrulist) counters and limits"
         monstats = (
-            ("mru_enabled", "enabled:              ", NTP_INT),
-            ("mru_depth", "addresses:            ", NTP_INT),
-            ("mru_deepest", "peak addresses:       ", NTP_INT),
-            ("mru_maxdepth", "maximum addresses:    ", NTP_INT),
-            ("mru_mindepth", "reclaim above count:  ", NTP_INT),
-            ("mru_maxage", "reclaim maxage:       ", NTP_INT),
-            ("mru_minage", "reclaim minage:       ", NTP_INT),
-            ("mru_mem", "kilobytes:            ", NTP_INT),
-            ("mru_maxmem", "maximum kilobytes:    ", NTP_INT),
-            ("mru_exists", "alloc: exists:        ", NTP_INT),
-            ("mru_new", "alloc: new:           ", NTP_INT),
-            ("mru_recycleold", "alloc: recycle old:   ", NTP_INT),
+            ("mru_enabled",     "enabled:              ", NTP_INT),
+            ("mru_hashslots",   "hash slots in use:    ", NTP_INT),
+            ("mru_depth",       "addresses in use:     ", NTP_INT),
+            ("mru_deepest",     "peak addresses:       ", NTP_INT),
+            ("mru_maxdepth",    "maximum addresses:    ", NTP_INT),
+            ("mru_mindepth",    "reclaim above count:  ", NTP_INT),
+            ("mru_maxage",      "reclaim maxage:       ", NTP_INT),
+            ("mru_minage",      "reclaim minage:       ", NTP_INT),
+            ("mru_mem",         "kilobytes:            ", NTP_INT),
+            ("mru_maxmem",      "maximum kilobytes:    ", NTP_INT),
+            ("mru_exists",      "alloc: exists:        ", NTP_INT),
+            ("mru_new",         "alloc: new:           ", NTP_INT),
+            ("mru_recycleold",  "alloc: recycle old:   ", NTP_INT),
             ("mru_recyclefull", "alloc: recycle full:  ", NTP_INT),
-            ("mru_none", "alloc: none:          ", NTP_INT),
-            ("mru_oldest_age", "age of oldest slot:   ", NTP_INT),
+            ("mru_none",        "alloc: none:          ", NTP_INT),
+            ("mru_oldest_age",  "age of oldest slot:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=monstats, decodestatus=False)
 

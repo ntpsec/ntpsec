@@ -641,8 +641,6 @@ main(
 	init_io();
 	init_loopfilter();
 	init_readconfig();	/* see readconfig() */
-	mon_start(MON_ON);	/* monitor on by default now	  */
-				/* turn off in config if unwanted */
 
 	/*
 	 * Some option settings have to be deferred until after
@@ -863,6 +861,7 @@ main(
 	    msyslog(LOG_NOTICE, "INIT: This ntpd will fail on 2038-01-19T03:14:07Z.");
         }
 
+	mon_start();
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 

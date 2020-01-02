@@ -61,6 +61,7 @@ static FILEGEN loopstats;
 static FILEGEN peerstats;
 static FILEGEN protostats;
 static FILEGEN rawstats;
+static FILEGEN refstats;
 static FILEGEN sysstats;
 static FILEGEN usestats;
 
@@ -108,6 +109,7 @@ uninit_util(void)
 	filegen_unregister("clockstats");
 	filegen_unregister("loopstats");
 	filegen_unregister("rawstats");
+	filegen_unregister("refstats");
 	filegen_unregister("sysstats");
 	filegen_unregister("peerstats");
 	filegen_unregister("protostats");
@@ -125,6 +127,7 @@ init_util(void)
 	filegen_register(statsdir, "clockstats",  &clockstats);
 	filegen_register(statsdir, "loopstats",	  &loopstats);
 	filegen_register(statsdir, "rawstats",	  &rawstats);
+	filegen_register(statsdir, "refstats",	  &refstats);
 	filegen_register(statsdir, "sysstats",	  &sysstats);
 	filegen_register(statsdir, "peerstats",	  &peerstats);
 	filegen_register(statsdir, "protostats",  &protostats);
@@ -558,6 +561,50 @@ record_raw_stats(
 	}
 }
 
+/*
+ * record_ref_stats - write refclock timestamps to file
+ *
+ * file format
+ * day (MJD)
+ * time (s past midnight)
+ * peer ip address
+ * i, j, n from refclock_sample
+ * t1 t2 t3 t4 t5, timestamps
+ * jitter, std_dev, std_dev_all
+ */
+
+void record_ref_stats(
+    const struct peer *peer,
+    int     n,              /* Number of samples */
+    int     i,              /* Index of first sample used */
+    int     j,              /* Index of last sample used */
+    double  t1,             /* Value of first sample */
+    double  t2,             /* Value of first sample used */
+    double  t3,             /* answer/median */
+    double  t4,             /* Value of last sample used */
+    double  t5,             /* Value of last sample */
+    double  jitter,
+    double  std_dev,        /* std deviation of trimmed subset */
+    double  std_dev_all     /* std deviation of everything */
+    )
+{
+    struct timespec now;
+
+    if (!stats_control)
+        return;
+
+    clock_gettime(CLOCK_REALTIME, &now);
+    filegen_setup(&refstats, now.tv_sec);
+    if (refstats.fp != NULL) {
+        fprintf(refstats.fp,
+            "%s %s %d %d %d  %.9f %.9f %.9f %.9f %.9f  %.9f %.9f %.9f\n",
+            timespec_to_MJDtime(&now), peerlabel(peer),
+            n, i, j,
+            t1, t2, t3, t4, t5, jitter, std_dev, std_dev_all);
+        fflush(refstats.fp);
+    }
+}
+
 
 /*
  * record_sys_stats - write system statistics to file
@@ -773,15 +820,13 @@ getauthkeys(
  */
 void
 ntpd_time_stepped(void) {
-	unsigned int saved_mon_enabled;
 
 	/*
 	 * flush the monitor MRU list which contains l_fp timestamps
 	 * which should not be compared across the step.
 	 */
 	if (MON_OFF != mon_data.mon_enabled) {
-		saved_mon_enabled = mon_data.mon_enabled;
-		mon_stop(MON_OFF);
-		mon_start((int)saved_mon_enabled);
+		mon_stop();
+		mon_start();
 	}
 }

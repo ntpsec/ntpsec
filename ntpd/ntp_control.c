@@ -176,7 +176,7 @@ static const struct ctl_var sys_var[] = {
 #define	CS_MRU_ENABLED		24
 	{ CS_MRU_ENABLED,	RO, "mru_enabled" },
 #define	CS_MRU_DEPTH		25
-	{ CS_MRU_DEPTH,		RO, "mru_depth" },
+	{ CS_MRU_DEPTH,		RO, "mru_depth" },  /* mru_entries */
 #define	CS_MRU_DEEPEST		26
 	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },
 #define	CS_MRU_MINDEPTH		27
@@ -377,6 +377,8 @@ static const struct ctl_var sys_var[] = {
 	{ CS_nts_ke_probes_good,	RO, "nts_ke_probes_good" },
 #define CS_nts_ke_probes_bad	120
 	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
+#define CS_MRU_HASHSLOTS	121
+	{ CS_MRU_HASHSLOTS,		RO, "mru_hashslots" },
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
 };
@@ -1594,8 +1596,12 @@ ctl_putsys(
 		ctl_puthex(sys_var[varid].text, mon_data.mon_enabled);
 		break;
 
-	case CS_MRU_DEPTH:
+	case CS_MRU_DEPTH:  /* mru_entries */
 		ctl_putuint(sys_var[varid].text, mon_data.mru_entries);
+		break;
+
+	case CS_MRU_HASHSLOTS:
+		ctl_putuint(sys_var[varid].text, mon_data.mru_hashslots);
 		break;
 
 	case CS_MRU_MEM: {
@@ -3442,7 +3448,6 @@ static void read_mru_list(
 	int			nonce_valid;
 	size_t			i;
 	int			priors;
-	unsigned short		hash;
 	mon_entry *		mon;
 	mon_entry *		prior_mon;
 	l_fp			now;
@@ -3592,16 +3597,10 @@ static void read_mru_list(
 	 */
 	mon = NULL;
 	for (i = 0; i < (size_t)priors; i++) {
-		hash = MON_HASH(&addr[i]);
-		for (mon = mon_data.mon_hash[hash];
-		     mon != NULL;
-		     mon = mon->hash_next)
-			if (ADDR_PORT_EQ(&mon->rmtadr, &addr[i]))
-				break;
+		mon = mon_get_slot(&addr[i]);
 		if (mon != NULL) {
 			if (mon->last == last[i])
 				break;
-			mon = NULL;
 		}
 	}
 

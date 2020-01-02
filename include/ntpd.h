@@ -121,15 +121,15 @@ extern	unsigned int	sys_tai;
 extern	int	freq_cnt;
 
 /* ntp_monitor.c */
-#define MON_HASH_SIZE		(1U << mon_data.mon_hash_bits)
-#define MON_HASH_MASK		(MON_HASH_SIZE - 1)
-#define	MON_HASH(addr)		(sock_hash(addr) & MON_HASH_MASK)
-extern	void	init_mon	(void);
-extern	void	mon_start	(int);
-extern	void	mon_stop	(int);
+extern	void	init_mon(void);
+extern	void	mon_setup(int);
+extern	void	mon_setdown(int);
+extern	void	mon_start(void);
+extern	void	mon_stop(void);
 extern	unsigned short	ntp_monitor	(struct recvbuf *, unsigned short);
 extern	void	mon_clearinterface(endpt *interface);
 extern  int	mon_get_oldest_age(l_fp);
+extern  mon_entry *mon_get_slot(sockaddr_u *);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
@@ -333,6 +333,7 @@ struct monitor_data {
 	mon_entry ** mon_hash;		/* MRU hash table */
 	mon_entry mon_mru_list;		/* mru listhead */
 	uint64_t	mru_entries;		/* mru list count */
+	uint64_t	mru_hashslots;		/* hash slots in use */
 	/*
 	 * Initialization state.  We may be monitoring, we may not.  If
 	 * we aren't, we may not even have allocated any memory yet.

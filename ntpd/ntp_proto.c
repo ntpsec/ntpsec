@@ -2861,9 +2861,9 @@ proto_config(
 
 	case PROTO_MONITOR:	/* monitoring (monitor) */
 		if (value) {
-			mon_start(MON_ON);
+			mon_setup(MON_ON);
 		} else {
-			mon_stop(MON_ON);
+			mon_setdown(MON_ON);
 			if (mon_data.mon_enabled)
 				msyslog(LOG_WARNING,
 					"CONFIG: 'monitor' cannot be disabled while 'limited' is enabled");

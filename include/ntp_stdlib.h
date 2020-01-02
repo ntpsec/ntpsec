@@ -101,7 +101,7 @@ extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * socktoa_r	(const sockaddr_u *sock, char *buf, size_t buflen);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	const char * sockporttoa_r(const sockaddr_u *sock, char *buf, size_t buflen);
-extern	unsigned short	sock_hash(const sockaddr_u *) __attribute__((pure));
+extern	unsigned int	sock_hash(const sockaddr_u *) __attribute__((pure));
 extern	const char *refid_str	(uint32_t, int);
 
 extern	int	decodenetnum	(const char *, sockaddr_u *);
