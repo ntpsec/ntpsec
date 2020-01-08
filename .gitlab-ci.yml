@@ -4,8 +4,8 @@ pages:
   except:
     - schedules
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoctor findutils gzip
-    - python ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoctor findutils gzip
+    - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
     - cp www/favicon.ico public
     - cp docs/top.html.in public/index.html
     - cp docs/top-asciidoc.css public/asciidoc.css
@@ -32,8 +32,8 @@ alpine-basic:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -41,8 +41,8 @@ alpine-refclocks:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -51,8 +51,8 @@ alpine-edge-basic:
   image: alpine:edge
   allow_failure: true
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -61,8 +61,8 @@ alpine-edge-refclocks:
   image: alpine:edge
   allow_failure: true
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -581,8 +581,8 @@ feature-classic-mode:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-classic-mode build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-classic-mode build
   tags:
     - gitlab-org
 
@@ -590,8 +590,8 @@ feature-seccomp:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev libseccomp-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-seccomp build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev libseccomp-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-seccomp build
   tags:
     - gitlab-org
 
@@ -599,8 +599,8 @@ feature-debug:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-debug build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-debug build
   tags:
     - gitlab-org
 
@@ -608,8 +608,8 @@ feature-debug-gdb:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-debug-gdb build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-debug-gdb build
   tags:
     - gitlab-org
 
@@ -617,8 +617,8 @@ feature-debug-timing:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-debug-timing build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-debug-timing build
   tags:
     - gitlab-org
 
@@ -626,8 +626,8 @@ feature-disable-droproot:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --disable-droproot build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --disable-droproot build
   tags:
     - gitlab-org
 
@@ -635,8 +635,8 @@ feature-early-droproot:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-early-droproot build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-early-droproot build
   tags:
     - gitlab-org
 
@@ -644,8 +644,8 @@ feature-leap-smear:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-leap-smear build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-leap-smear build
   tags:
     - gitlab-org
 
@@ -653,7 +653,7 @@ feature-mssntp:
   <<: *job_definition
   image: alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-mssntp build
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all --enable-mssntp build
   tags:
     - gitlab-org
