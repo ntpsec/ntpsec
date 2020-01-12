@@ -39,9 +39,9 @@ void set_hostname(SSL *ssl, struct peer *peer, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
 bool check_aead(SSL *ssl, struct peer *peer, const char *hostname);
 bool nts_client_send_request(SSL *ssl, struct peer *peer);
+bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer);
 bool nts_client_process_response(SSL *ssl, struct peer *peer);
 bool nts_client_process_response_core(uint8_t *buff, int transferred, struct peer* peer);
-bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer);
 bool nts_server_lookup(char *server, sockaddr_u *addr, int af);
 
 static SSL_CTX *client_ctx = NULL;
@@ -496,7 +496,6 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
 }
 
 bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer) {
-	char errbuf[100];
 	struct  BufCtl_t buf;
 	uint16_t aead = NO_AEAD;
 
@@ -523,10 +522,9 @@ bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct
 
 	*used = buf_size-buf.left;
 	if (*used >= (int)(buf_size - 10)) {
-		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_ERR, "NTSc: write failed: %d, %ld, %s",
-			*used, (long)buf_size, errbuf);
-		return false;
+		msyslog(LOG_ERR, "ERR-NTSc: buffer overflow: %d, %ld",
+			*used, (long)buf_size);
+		exit(2);
 	}
 	return true;
 }
