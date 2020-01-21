@@ -11,8 +11,10 @@
 
 #include <ctype.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #ifdef HAVE_RES_INIT
 #include <netinet/in.h>
@@ -34,6 +36,7 @@
 
 SSL_CTX* make_ssl_client_ctx(const char *filename);
 int open_TCP_socket(struct peer *peer, const char *hostname);
+bool connect_TCP_socket(int sockfd, struct addrinfo *addr);
 bool nts_set_cert_search(SSL_CTX *ctx, const char *filename);
 void set_hostname(SSL *ssl, struct peer *peer, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
@@ -254,7 +257,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	char *tmp;
 	struct addrinfo hints;
 	struct addrinfo *answer;
-	int gai_rc, err;
+	int gai_rc;
 	int sockfd;
 	struct timespec start, finish;
 
@@ -285,7 +288,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	clock_gettime(CLOCK_REALTIME, &start);
 	gai_rc = getaddrinfo(host, port, &hints, &answer);
 	if (0 != gai_rc) {
-		msyslog(LOG_INFO, "NTSc: nts_probe: DNS error trying to contact %s: %d, %s",
+		msyslog(LOG_INFO, "NTSc: open_TCP_socket: DNS error trying to contact %s: %d, %s",
 			hostname, gai_rc, gai_strerror(gai_rc));
 		return -1;
 	}
@@ -294,27 +297,24 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3f sec",
 		hostname, tspec_to_d(finish));
 
-	/* Save first answer for NTP, switch to NTP port in case of server-name:port */
+	/* Save first answer for NTP
+	 * setup default NTP port now
+	 *   in case of server-name:port later on
+	 */
 	memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
 	SET_PORT(&sockaddr, NTP_PORT);
 
 	sockporttoa_r(&sockaddr, errbuf, sizeof(errbuf));
-	msyslog(LOG_INFO, "NTSc: nts_probe connecting to %s:%s => %s",
+	msyslog(LOG_INFO, "NTSc: connecting to %s:%s => %s",
 		host, port, errbuf);
 
 	sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
 	if (-1 == sockfd) {
 		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_INFO, "NTSc: nts_probe: no socket: %s", errbuf);
+		msyslog(LOG_INFO, "NTSc: open_TCP_socket: no socket: %s", errbuf);
 	} else {
-		// Use first answer
-		// FIXME: need timeout - no simple way
-		// a) timer, signal, EINTR
-		// b) fcntl(O_NONBLOCK), select/poll
-		err = connect(sockfd, answer->ai_addr, answer->ai_addrlen);
-		if (-1 == err) {
-			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-			msyslog(LOG_INFO, "NTSc: nts_probe: connect failed: %s", errbuf);
+		/* Use first IP Address */
+		if (!connect_TCP_socket(sockfd, answer)) {
 			close(sockfd);
 			sockfd = -1;
 		}
@@ -322,7 +322,74 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 
 	freeaddrinfo(answer);
 	return sockfd;
+
 }
+
+/* This kludgery is needed to get a sane timeout.
+ * The default is unspecified but long.
+ * On Linux, man connect gets man 2 which doesn't mention O_NONBLOCK
+ * Use man 3 connect.
+ */
+bool connect_TCP_socket(int sockfd, struct addrinfo *addr) {
+	char errbuf[100];
+        int err;
+	fd_set fdset;
+	struct timeval timeout;
+	int so_error;
+	socklen_t so_len = sizeof(so_error);
+
+	err = fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	if (-1 == err) {
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+		msyslog(LOG_INFO, "NTSc: can't set O_NONBLOCK %s", errbuf);
+		return false;
+	}
+	err = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
+	/* The normal case is -1 and errno == EINPROGRESS
+	 * Getting connected should be possible if the scheduler
+	 * avoids us for long enough.
+	 * Other errors may be possible.  No route?
+	 * I haven't seen that yet.  HGM, 2020 Jan 19
+	 */
+	if (-1 != err || EINPROGRESS != errno) {
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: connect failed: %s", errbuf);
+		return false;
+	}
+
+	FD_ZERO(&fdset);
+	FD_SET(sockfd, &fdset);
+	timeout.tv_sec = NTS_KE_TIMEOUT;
+	timeout.tv_usec = 0;
+
+	if (0 == select(sockfd + 1, NULL, &fdset, NULL, &timeout)) {
+		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: timeout");
+		return false;
+	}
+
+	/* It's ready, either connected or error. */
+	if (-1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &so_error, &so_len)) {
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: getsockopt failed: %s", errbuf);
+		return false;
+	}
+
+        if (0 != so_error) {
+		ntp_strerror_r(so_error, errbuf, sizeof(errbuf));
+		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: connect failed: %s", errbuf);
+		return false;
+	}
+
+	err = fcntl(sockfd, F_SETFL, 0); /* turn off O_NONBLOCK */
+	if (-1 == err) {
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+		msyslog(LOG_INFO, "NTSc: can't unset O_NONBLOCK %s", errbuf);
+		return false;
+	}
+
+	return true;
+}
+
 
 void set_hostname(SSL *ssl, struct peer *peer, const char *hostname) {
 	char host[256], *tmp;
