@@ -135,6 +135,8 @@ Some distros use `/var/db/` rather than `/var/lib/`.
 nts cookie /var/lib/ntp/nts-keys
 ------------------------------------------------------------
 
+Again, make sure the bad guys can't read that file.
+
 Restart your server, and skip to link:#verify[Verification], below.
 
 
