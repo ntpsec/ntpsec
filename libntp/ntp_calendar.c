@@ -33,7 +33,7 @@ ntpcal_edate_to_yeardays(int32_t, int32_t, int32_t);
  * Get the build date & time
  *---------------------------------------------------------------------
  */
-int
+bool
 ntpcal_get_build_date(
 	struct calendar * jd
 	)

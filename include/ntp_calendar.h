@@ -50,7 +50,7 @@ typedef time_t (*systime_func_ptr)(time_t *);
  * Get the build date & time in UTC.  This depends on the BUILD_EPOCH
  * which is fixed at configure time.
  */
-extern int
+extern bool
 ntpcal_get_build_date(struct calendar * /* jd */);
 
 /*
