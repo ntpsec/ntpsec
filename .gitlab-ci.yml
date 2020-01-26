@@ -122,8 +122,8 @@ debian-oldstable-basic:
   image: debian:oldstable-slim
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -132,8 +132,8 @@ debian-oldstable-refclocks:
   image: debian:oldstable-slim
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -142,8 +142,8 @@ debian-stable-basic:
   image: debian:stable-slim
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -152,8 +152,8 @@ debian-stable-refclocks:
   image: debian:stable-slim
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -162,8 +162,8 @@ debian-testing-basic:
   image: debian:testing-slim
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -172,8 +172,8 @@ debian-testing-refclocks:
   image: debian:testing-slim
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -183,8 +183,8 @@ debian-unstable-basic:
   allow_failure: true
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -194,8 +194,8 @@ debian-unstable-refclocks:
   allow_failure: true
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -204,8 +204,8 @@ ubuntu-latest-basic:
   image: ubuntu:latest
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -214,8 +214,8 @@ ubuntu-latest-refclocks:
   image: ubuntu:latest
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -224,8 +224,8 @@ ubuntu-rolling-basic:
   image: ubuntu:rolling
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -234,8 +234,8 @@ ubuntu-rolling-refclocks:
   image: ubuntu:rolling
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --disable-doc --disable-man --refclock=all build
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
