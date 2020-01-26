@@ -369,7 +369,7 @@ extern int	peer_associations;	/* mobilized associations */
  * System variables are declared here.	See Section 3.2 of the
  * specification.
  */
-int	sys_maxclock;		/* maximum candidates */
+extern int	sys_maxclock;		/* maximum candidates */
 struct system_variables {
 	uint8_t	sys_leap;		/* system leap indicator */
 	uint8_t	sys_stratum;		/* system stratum */
