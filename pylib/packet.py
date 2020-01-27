@@ -729,6 +729,7 @@ class ControlSession:
         self.ntpd_row_limit = ControlSession.MRU_ROW_LIMIT
         self.logfp = sys.stdout
         self.nonce_xmit = 0
+        self.slots = 0
 
     def warndbg(self, text, threshold):
         ntp.util.dolog(self.logfp, text, self.debug, threshold)
@@ -1308,7 +1309,10 @@ This combats source address spoofing
         curidx = -1
         mru = None
         nonce = None
-        for (tag, val) in variables.items():
+        items = variables.items()
+        if items:
+            items.sort()
+        for (tag, val) in items:
             self.warndbg("tag=%s, val=%s" % (tag, val), 4)
             if tag == "nonce":
                 nonce = "%s=%s" % (tag, val)
@@ -1394,7 +1398,6 @@ This combats source address spoofing
         sorter = None
         sortkey = None
         frags = MAXFRAGS
-        self.slots = 0
         if variables is None:
             variables = {}
 

@@ -1627,6 +1627,41 @@ class TestControlSession(unittest.TestCase):
                           (ntp.control.CTL_OP_REQ_NONCE, 0, "", False),
                           (ntp.control.CTL_OP_REQ_NONCE, 0, "", False)])
 
+    def test___mru_analyze(self):
+        # data: nonce, last.older, addr.older, now, last.newest
+        #       addr, last, first, ct, mv, rs
+        vars = {"nonce":"noncevalue", "last.older":"FAIL0",
+                "addr.older":"FAIL1", "now":"0xcfba1ce0.80000000",
+                "last.newest":"FAIL2", "addr.1":"addrtest",
+                "last.2":"lasttest", "first.3":"firsttest", "ct.4":"cttest",
+                "mv.5":"mvtest", "rs.6":"rstest"}
+        cls = self.target()
+        span = ntpp.MRUList()
+        nonce = cls._ControlSession__mru_analyze(vars, span, None)
+        self.assertEqual(nonce, "nonce=noncevalue")
+        # expected entries, in vars order
+        m1 = ntpp.MRUEntry()
+        m1.addr = "addrtest"
+        m2 = ntpp.MRUEntry()
+        m2.last = "lasttest"
+        m3 = ntpp.MRUEntry()
+        m3.first = "firsttest"
+        m4 = ntpp.MRUEntry()
+        m4.ct = "cttest"
+        m5 = ntpp.MRUEntry()
+        m5.mv = "mvtest"
+        m6 = ntpp.MRUEntry()
+        m6.rs = "rstest"
+        expected = [m1, m4, m3, m2, m5, m6] # sort order
+        self.assertEqual(len(span.entries), len(expected))
+        for i in range(len(span.entries)):
+            self.assertEqual(span.entries[i].addr, expected[i].addr)
+            self.assertEqual(span.entries[i].last, expected[i].last)
+            self.assertEqual(span.entries[i].first, expected[i].first)
+            self.assertEqual(span.entries[i].ct, expected[i].ct)
+            self.assertEqual(span.entries[i].mv, expected[i].mv)
+            self.assertEqual(span.entries[i].rs, expected[i].rs)
+
     def test_mrulist(self):
 
         def setresponse(data):  # needed for doquery_jig
