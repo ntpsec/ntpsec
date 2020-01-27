@@ -1309,7 +1309,7 @@ This combats source address spoofing
         curidx = -1
         mru = None
         nonce = None
-        items = variables.items()
+        items = list(variables.items())
         if items:
             items.sort()
         for (tag, val) in items:
