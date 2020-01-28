@@ -30,7 +30,7 @@ def probe_function(ctx, function, prerequisites, mandatory=False, use=None):
         src += "#include <%s>\n" % hdr
     src += """int main(void) {
         void *p = (void*)(%s);
-        return p ? 1 : 0;
+        return (int)p;
 }
 """ % function
     have_name = "HAVE_%s" % function.upper()
