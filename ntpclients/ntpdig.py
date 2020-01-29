@@ -197,14 +197,14 @@ def report(packet, json):
 
     packet.posixize()
 
-    if time.daylight:
-        tmoffset = time.altzone // 60  # In minutes
-    else:
-        tmoffset = time.timezone // 60  # In minutes
-
     # The server's idea of the time
     t = time.localtime(int(packet.transmit_timestamp))
     ms = int(packet.transmit_timestamp * 1000000) % 1000000
+
+    if t.tm_isdst:
+        tmoffset = -time.altzone // 60  # In minutes
+    else:
+        tmoffset = -time.timezone // 60  # In minutes
 
     # Number of decimal digits of precision indicated by the precision field
     digits = min(6, -int(math.log10(2**packet.precision)))
