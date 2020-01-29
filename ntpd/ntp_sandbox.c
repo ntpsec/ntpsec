@@ -428,6 +428,11 @@ int scmp_sc[] = {
 	/* gentoo 64-bit and 32-bit, Intel and Arm use mmap */
 	SCMP_SYS(mmap),
 #endif
+#if defined(__aarch64__)
+	SCMP_SYS(faccessat),
+	SCMP_SYS(newfstatat),
+	SCMP_SYS(renameat),
+#endif
 #if defined(__i386__) || defined(__arm__) || defined(__powerpc__)
 	SCMP_SYS(_newselect),
 	SCMP_SYS(_llseek),
