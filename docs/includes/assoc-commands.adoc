@@ -3,9 +3,9 @@
 // generating the manual page describing the daemon config file.
 
 In these commands, an _address_ can be any of (a) an IPV4 address in
-a.b.c.d format, (b) an IPV6 address in [a:b:c:d:e:f:g] format, (c) a
+a.b.c.d format, (b) an IPV6 address in [a:b:c:d:e:f:g:h] format, (c) a
 link-local IPV6 address with an interface specified in
-[a:b:c:d:e:f:g]%device format, or (d) a DNS hostname.
+[a:b:c:d:e:f:g:h]%device format, or (d) a DNS hostname.
 
 +pool+ _address_ [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+preempt+]
 

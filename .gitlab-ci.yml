@@ -4,8 +4,8 @@ pages:
   except:
     - schedules
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoc findutils gzip
-    - python ./waf configure --enable-doc --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoctor findutils gzip
+    - python ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
     - cp www/favicon.ico public
     - cp docs/top.html.in public/index.html
     - cp docs/top-asciidoc.css public/asciidoc.css
@@ -33,7 +33,7 @@ alpine-basic:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -42,7 +42,7 @@ alpine-refclocks:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -52,7 +52,7 @@ alpine-edge-basic:
   allow_failure: true
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -62,7 +62,58 @@ alpine-edge-refclocks:
   allow_failure: true
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
+  tags:
+    - gitlab-org
+
+AsciiDoc-3-Fedora:
+  <<: *job_definition
+  image: fedora
+  script:
+    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget unzip libxslt
+    - wget https://asciidoc3.org/asciidoc3-3.1.0.zip
+    - unzip asciidoc3-3.1.0.zip -d asciidoc3
+    - ln -sv a2x3.py asciidoc3/a2x3
+    - ln -sv asciidoc3.py asciidoc3/asciidoc3
+    - asciidoc3/asciidoc3 --version||echo -n
+    - PATH=$PWD/asciidoc3:$PATH python3 ./waf configure build
+  tags:
+    - gitlab-org
+
+AsciiDoc-classic2-Alpine:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoc
+    - python ./waf configure build
+  tags:
+    - gitlab-org
+
+AsciiDoc-classic3-Alpine:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc
+    - python3 ./waf configure build
+  tags:
+    - gitlab-org
+
+AsciiDoc-no:
+  <<: *job_definition
+  image: alpine
+  script:
+    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
+    - python ./waf configure --disable-doc --disable-man build
+  tags:
+    - gitlab-org
+
+AsciiDoc-py3-Ubuntu:
+  <<: *job_definition
+  image: ubuntu:devel
+  script:
+    - apt-get update
+    - DEBIAN_FRONTEND="noninteractive" apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev asciidoc-base
+    - python3 ./waf configure build
   tags:
     - gitlab-org
 
@@ -72,7 +123,7 @@ debian-oldstable-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -82,7 +133,7 @@ debian-oldstable-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -92,7 +143,7 @@ debian-stable-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -102,7 +153,7 @@ debian-stable-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -112,7 +163,7 @@ debian-testing-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -122,7 +173,7 @@ debian-testing-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -133,7 +184,7 @@ debian-unstable-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -144,7 +195,7 @@ debian-unstable-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -154,7 +205,7 @@ ubuntu-latest-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -164,7 +215,7 @@ ubuntu-latest-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -174,7 +225,7 @@ ubuntu-rolling-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -184,7 +235,7 @@ ubuntu-rolling-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -195,7 +246,7 @@ ubuntu-devel-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
-    - python3 ./waf configure build
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -206,7 +257,7 @@ ubuntu-devel-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
-    - python3 ./waf configure --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -215,7 +266,7 @@ gcc-latest-basic:
   image: gcc:latest
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -224,14 +275,14 @@ gcc-latest-refclocks:
   image: gcc:latest
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
 freebsd-11-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - freebsd-11
   only:
@@ -240,7 +291,7 @@ freebsd-11-basic:
 freebsd-11-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - freebsd-11
   only:
@@ -249,7 +300,7 @@ freebsd-11-refclocks:
 freebsd-12-basic:
   <<: *job_definition
   script:
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - freebsd-12
   only:
@@ -258,7 +309,7 @@ freebsd-12-basic:
 freebsd-12-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - freebsd-12
   only:
@@ -269,7 +320,7 @@ centos-latest-basic:
   image: centos:latest
   script:
     - dnf -y install bison gcc openssl-devel libcap-devel python3-devel
-    - python3 ./waf configure build
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -278,7 +329,7 @@ centos-latest-refclocks:
   image: centos:latest
   script:
     - dnf -y --enablerepo=PowerTools install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel
-    - python3 ./waf configure --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -287,7 +338,7 @@ fedora-latest-basic:
   image: fedora:latest
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
-    - python3 ./waf configure build
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -296,7 +347,7 @@ fedora-latest-refclocks:
   image: fedora:latest
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
-    - python3 ./waf configure --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -306,7 +357,7 @@ fedora-rawhide-basic:
   allow_failure: true
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
-    - python3 ./waf configure build
+    - python3 ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -316,7 +367,7 @@ fedora-rawhide-refclocks:
   allow_failure: true
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
-    - python3 ./waf configure --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -326,7 +377,7 @@ fedora-rawhide-refclocks-gpsd:
   allow_failure: true
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python3-gpsd
-    - python3 ./waf configure --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -335,7 +386,7 @@ python3:
   image: python:3
   script:
     - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -343,7 +394,7 @@ python-coverage:
   <<: *job_definition
   script:
     - apt-get update -qq && apt-get install -y -qq netbase bison python-dev python-coverage
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
     - for i in build/main/tests/pylib/test_*; do python-coverage run -a --source build/main/pylib $i; done
     - python-coverage report
   tags:
@@ -355,7 +406,7 @@ clang-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison libssl-dev libcap-dev pps-tools python-dev clang
-    - python ./waf configure --check-c-compiler=clang build
+    - python ./waf configure --disable-doc --disable-man --check-c-compiler=clang build
   tags:
     - gitlab-org
 
@@ -365,7 +416,7 @@ clang-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison libssl-dev libcap-dev pps-tools python-dev clang
-    - python ./waf configure --check-c-compiler=clang --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --check-c-compiler=clang --refclock=all build
   tags:
     - gitlab-org
 
@@ -374,7 +425,7 @@ openSUSE-leap-basic:
   image: opensuse/leap
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -383,7 +434,7 @@ openSUSE-leap-refclocks:
   image: opensuse/leap
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -393,7 +444,7 @@ openSUSE-tumbleweed-basic:
   allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -403,7 +454,7 @@ openSUSE-tumbleweed-refclocks:
   allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -413,7 +464,7 @@ debian-stable-basic-32bit:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -423,7 +474,7 @@ debian-stable-refclocks-32bit:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -433,7 +484,7 @@ debian-stable-mDNS-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev libavahi-compat-libdnssd-dev
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -443,14 +494,14 @@ debian-stable-mDNS-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev libavahi-compat-libdnssd-dev
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
 cross-build:
   <<: *job_definition
   script:
-    - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
+    - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-man --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
   tags:
     - ubuntu-1604-lts
   only:
@@ -462,7 +513,7 @@ gentoo-basic:
   script:
     - emerge-webrsync
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -472,7 +523,7 @@ gentoo-refclocks:
   script:
     - emerge-webrsync
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
@@ -482,7 +533,7 @@ gentoo-hardened-basic:
   script:
     - emerge-webrsync
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
-    - python ./waf configure build
+    - python ./waf configure --disable-doc --disable-man build
   tags:
     - gitlab-org
 
@@ -492,13 +543,13 @@ gentoo-hardened-refclocks:
   script:
     - emerge-webrsync
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
-    - python ./waf configure --refclock=all build
+    - python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - gitlab-org
 
 coverity-scan:
   script:
-    - ./waf configure --refclock=all
+    - ./waf configure --disable-doc --disable-man --refclock=all
     - /opt/cov-analysis/bin/cov-build --dir cov-int ./waf build
     - tar czf ntpsec_coverity.tgz cov-int
     - curl --form token=$COVERITY_TOKEN --form email=security@ntpsec.org --form file=@ntpsec_coverity.tgz --form version="$(git rev-parse --short HEAD)" --form description="Automatic submission by gitlab-ci" https://scan.coverity.com/builds?project=ntpsec
@@ -510,7 +561,7 @@ coverity-scan:
 macos-basic:
   <<: *job_definition
   script:
-    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure build
+    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-man build
   tags:
     - macos
   only:
@@ -519,7 +570,7 @@ macos-basic:
 macos-refclocks:
   <<: *job_definition
   script:
-    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --refclock=all build
+    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-man --refclock=all build
   tags:
     - macos
   only:
@@ -530,7 +581,7 @@ feature-classic-mode:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --enable-classic-mode build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-classic-mode build
   tags:
     - gitlab-org
 
@@ -539,7 +590,7 @@ feature-seccomp:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev libseccomp-dev
-    - python ./waf configure --refclock=all --enable-seccomp build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-seccomp build
   tags:
     - gitlab-org
 
@@ -548,7 +599,7 @@ feature-debug:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --enable-debug build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-debug build
   tags:
     - gitlab-org
 
@@ -557,7 +608,7 @@ feature-debug-gdb:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --enable-debug-gdb build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-debug-gdb build
   tags:
     - gitlab-org
 
@@ -566,7 +617,7 @@ feature-debug-timing:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --enable-debug-timing build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-debug-timing build
   tags:
     - gitlab-org
 
@@ -575,7 +626,7 @@ feature-disable-droproot:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --disable-droproot build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --disable-droproot build
   tags:
     - gitlab-org
 
@@ -584,7 +635,7 @@ feature-early-droproot:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --enable-early-droproot build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-early-droproot build
   tags:
     - gitlab-org
 
@@ -593,7 +644,7 @@ feature-leap-smear:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --enable-leap-smear build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-leap-smear build
   tags:
     - gitlab-org
 
@@ -602,6 +653,6 @@ feature-mssntp:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
-    - python ./waf configure --refclock=all --enable-mssntp build
+    - python ./waf configure --disable-doc --disable-man --refclock=all --enable-mssntp build
   tags:
     - gitlab-org

@@ -40,10 +40,9 @@ are required.
 
 buildprep does not attempt to install dependencies for optional
 components like ntpviz or building documentation unless asked. See
-buildprep --help for details on available options.  asciidoc has a
-huge tail of dependencies and you probably don't want it unless you're
-planning to modify the documentation.  psutil may require different
-packages depending on whether your base Python version is 2 or 3.
+buildprep --help for details on available options.  psutil may require
+different packages depending on whether your base Python version is
+2 or 3.
 
 === Details ===
 
@@ -78,14 +77,33 @@ sys/timepps.h::
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
 
+AsciiDoc:
+   You will need an AsciiDoc processor to make HTML and/or manual pages from
+   the documentation masters.  The supported processors, in order of
+   preference, are asciidoctor, asciidoc(-py3)/a2x, and asciidoc3/a2x3.
+
+asciidoctor::
+   Note: you need asciidoctor 1.5.8 or newer.  Otherwise, use asciidoc or
+   asciidoc3.
+   Debian/Ubuntu: asciidoctor (Debian 10+, Ubuntu 19.04+)
+   Fedora: rubygem-asciidoctor (Fedora 32+)
+   Gentoo: app-text/asciidoctor
+   SLES: asciidoctor
+
 asciidoc, a2x::
-   You will need asciidoc to make HTML and a2x to make manual pages from the
-   documentation masters.  Only required if you configured with --enable-doc.
-   Note, you need asciidoc 8.6.0 at minimum.
+   Note: you need asciidoc 8.6.8 or newer.  Alternatively, use asciidoctor
+   or asciidoc3.
    Debian/Ubuntu: asciidoc
-   Fedora/CentOS: asciidoc  (CentOS/RHEL6 has only 8.4.5, you must upgrade)
+   Fedora/CentOS: asciidoc
+   CentOS 6: asciidoc is only 8.4.5.  You must configure with --disable-doc
+             and --disable-man.
    Gentoo: app-text/asciidoc
    SLES: asciidoc
+
+asciidoc3, a2x3::
+   Note: you need asciidoc 3.0.2 or newer.  Alternatively, use asciidoctor
+   or asciidoc.  There are currently no distro packages of asciidoc3.
+   However, upstream provides deb, pip and rpm packages.
 
 Local copy of DocBook stylesheets:
    Optional: Prevents documentation build failures when your Internet is down

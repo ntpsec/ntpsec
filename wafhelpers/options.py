@@ -84,12 +84,3 @@ def options_cmd(ctx, config):
     grp.add_option('--disable-fuzz', action='store_true',
                    default=False,
                    help="Disable fuzzing of low bits of time")
-
-    grp = ctx.add_option_group("NTP documentation configure options")
-    grp.add_option('--enable-doc', action='store_true',
-                   default=False, help="Build NTP documentation")
-    grp.add_option('--enable-a2x-xmllint', action='store_true',
-                   default=False,
-                   help="Build NTP documentation with a2x XML lint")
-    grp.add_option('--disable-manpage', action='store_true',
-                   default=False, help="Disable Manpage building.")

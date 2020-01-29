@@ -44,7 +44,7 @@ def manpage(ctx, section, source):
     # ctx.install_files('${MANDIR}' + "/man%s/" % section,
     #                   source.replace("-man.adoc", ".%s" % section))
 
-    if not ctx.env.ENABLE_DOC or ctx.env.DISABLE_MANPAGE:
+    if not ctx.env.ARGS_MAN or ctx.env.DISABLE_MANPAGE:
         return
 
     ctx(features="subst",
