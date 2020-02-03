@@ -41,7 +41,7 @@ def manpage_subst_fun(self, code):
 @conf
 def manpage(ctx, section, source):
 
-    if not ctx.env.ARGS_MAN or ctx.env.DISABLE_MANPAGE:
+    if not ctx.env.BUILD_MAN:
         return
 
     ctx(features="subst",

@@ -11,15 +11,26 @@ def options(opt):
     grp = opt.add_option_group('NTP documentation configure options')
     grp.add_option('--disable-doc', action='store_true',
                    default=False, help='Disable HTML document building.')
+    grp.add_option('--enable-doc', action='store_true',
+                   default=False, help='Enable HTML document building.')
     grp.add_option('--disable-manpage', action='store_true',
                    default=False, help='Disable manpage building.')
+    grp.add_option('--enable-manpage', action='store_true',
+                   default=False, help='Enable manpage building.')
 
 
 def configure(ctx):
     'Set options from the extended environment and command line arguments.'
-    if ctx.options.disable_manpage and ctx.options.disable_doc:
+
+    if ctx.options.disable_doc and ctx.options.enable_doc:
+        ctx.fatal('--disable-doc and --enable-doc conflict.')
+    if ctx.options.disable_manpage and ctx.options.enable_manpage:
+        ctx.fatal('--disable-manpage and --enable-manpage conflict.')
+
+    ctx.env.BUILD_DOC = False
+    ctx.env.BUILD_MAN = False
+    if ctx.options.disable_doc and ctx.options.disable_manpage:
         ctx.msg('AsciiDoc processor', 'unnecessary')
-        ctx.env.BIN_ASCIIDOC = []
         return
 
     # asciidoctor versions < 1.5.8 throw warnings for manpages and driver_shm.
@@ -66,15 +77,20 @@ def configure(ctx):
                         version_string, color=color)
 
     if not ctx.env.BIN_ASCIIDOC:
+        if not (ctx.options.enable_doc or ctx.options.enable_manpage):
+            # The user did not require either, so this is fine.
+            return
+
         error = 'no AsciiDoc processor qualified'
-        if not ctx.options.disable_manpage:
-            error += ', add --disable-man'
-        if not ctx.options.disable_doc:
-            error += ', add --disable-doc'
+        if ctx.options.enable_doc:
+            error += ', remove --enable-doc'
+        if ctx.options.enable_manpage:
+            error += ', remove --enable-manpage'
         ctx.fatal(error)
 
-    ctx.env.ARGS_DOC = False
-    ctx.env.ARGS_MAN = False
+    ctx.env.BUILD_DOC = not ctx.options.disable_doc
+    ctx.env.BUILD_MAN = not ctx.options.disable_manpage
+
     if 'asciidoctor' in ctx.env.BIN_ASCIIDOC[0]:
         ctx.env.ARGS_DOC = [
             ctx.env.BIN_ASCIIDOC[0],
@@ -105,12 +121,10 @@ def configure(ctx):
                 '-a', 'attribute-missing=warn',
                 '-f', 'manpage', '--no-xmllint',
                 ]
-        elif not ctx.options.disable_manpage:
-            ctx.fatal('asciidoc(tor) toolchain is required in order '
-                      'to build man pages')
-    else:
-        ctx.fatal('asciidoc(tor) toolchain is required in order '
-                  'to build documentation')
+        else:
+            if ctx.options.enable_manpage:
+                ctx.fatal('a2x/xsltproc not found, remove --enable-manpage')
+            ctx.env.BUILD_MAN = False
 
 
 def build(ctx):
@@ -121,7 +135,7 @@ def build(ctx):
             ctx.env.ARGS_DOC += ['-v']
         if ctx.env.ARGS_MAN:
             ctx.env.ARGS_MAN += ['-v']
-    if ctx.env.ARGS_DOC and ctx.variant == 'main':
+    if ctx.env.BUILD_DOC and ctx.variant == 'main':
         ctx.recurse('docs')
 
 

@@ -5,7 +5,7 @@ pages:
     - schedules
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoctor findutils gzip
-    - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ build install
+    - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ --enable-doc --disable-man build install
     - cp www/favicon.ico public
     - cp docs/top.html.in public/index.html
     - cp docs/top-asciidoc.css public/asciidoc.css
@@ -76,7 +76,7 @@ AsciiDoc-3-Fedora:
     - ln -sv a2x3.py asciidoc3/a2x3
     - ln -sv asciidoc3.py asciidoc3/asciidoc3
     - asciidoc3/asciidoc3 --version||echo -n
-    - PATH=$PWD/asciidoc3:$PATH python3 ./waf configure build
+    - PATH=$PWD/asciidoc3:$PATH python3 ./waf configure --enable-doc --enable-manpage build
   tags:
     - gitlab-org
 
@@ -85,7 +85,7 @@ AsciiDoc-classic2-Alpine:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoc
-    - python ./waf configure build
+    - python ./waf configure --enable-doc --enable-manpage build
   tags:
     - gitlab-org
 
@@ -94,7 +94,7 @@ AsciiDoc-classic3-Alpine:
   image: alpine
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc
-    - python3 ./waf configure build
+    - python3 ./waf configure --enable-doc --enable-manpage build
   tags:
     - gitlab-org
 
@@ -113,7 +113,7 @@ AsciiDoc-py3-Ubuntu:
   script:
     - apt-get update
     - DEBIAN_FRONTEND="noninteractive" apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev asciidoc-base
-    - python3 ./waf configure build
+    - python3 ./waf configure --enable-doc --enable-manpage build
   tags:
     - gitlab-org
 

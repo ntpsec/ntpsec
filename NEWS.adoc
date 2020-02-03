@@ -25,13 +25,9 @@ processor.  asciidoc is still supported, but the minimum supported version
 has been raised from 8.6.0 to 8.6.8.  asciidoc3 (3.0.2 or newer) is also
 supported.
 
-If no supported AsciiDoc processor is installed, you now must explicitly
-pass --disable-man to waf configure.  Previously, --disable-man was implied
-if no processor was found.  For example, CentOS 6 users will have to configure
-with --disable-man, as asciidoc is only version 8.4.5.
-
-HTML docs are now built by default.  The --enable-doc configure option has
-been replaced by --disable-doc.
+HTML docs are now built by default if an AsciiDoc processor is installed.  If
+you do not want HTML docs, configure with --disable-doc.  (Note:  Man pages
+are controlled by a separate --disable-manpage.)
 
 == 2019-11-17: 1.1.8 ==
 

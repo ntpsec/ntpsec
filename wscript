@@ -149,10 +149,6 @@ def configure(ctx):
     ctx.find_program("awk", var="BIN_AWK", mandatory=False)
     ctx.find_program("sh", var="BIN_SH", mandatory=False)
 
-    # Disable manpages within build()
-    if ctx.options.disable_manpage:
-        ctx.env.DISABLE_MANPAGE = True
-
     ctx.check_cfg(
         package='systemd', variables=['systemdsystemunitdir'],
         uselib_store='SYSTEMD', mandatory=False,
@@ -852,8 +848,8 @@ int main(int argc, char **argv) {
     msg_setting("Droproot Support", droproot_type)
     msg_setting("Debug Support", yesno(ctx.options.enable_debug))
     msg_setting("Refclocks", ", ".join(sorted(ctx.env.REFCLOCK_LIST)))
-    msg_setting("Build Manpages",
-                yesno(ctx.env.ENABLE_DOC and not ctx.env.DISABLE_MANPAGE))
+    msg_setting("Build Docs", yesno(ctx.env.BUILD_DOC))
+    msg_setting("Build Manpages", yesno(ctx.env.BUILD_MAN))
 
     ctx.recurse("pylib")
     # Convert the Python directories to absolute paths.

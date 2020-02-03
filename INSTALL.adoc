@@ -95,8 +95,7 @@ asciidoc, a2x::
    or asciidoc3.
    Debian/Ubuntu: asciidoc
    Fedora/CentOS: asciidoc
-   CentOS 6: asciidoc is only 8.4.5.  You must configure with --disable-doc
-             and --disable-man.
+   CentOS 6: asciidoc is only 8.4.5.  You cannot build docs or man pages.
    Gentoo: app-text/asciidoc
    SLES: asciidoc
 
