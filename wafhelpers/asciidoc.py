@@ -22,7 +22,7 @@ def configure(ctx):
         ctx.env.BIN_ASCIIDOC = []
         return
 
-    # asciidoctor verions < 1.5.8 throw warnings for manpages and driver_shm.
+    # asciidoctor versions < 1.5.8 throw warnings for manpages and driver_shm.
     # asciidoc versions 8.6.5-8.6.7 throw warnings for warp.adoc and versions
     # < 8.6.4 have no HTML5 backend.
     # asciidoc3 versions < 3.0.2 throw errors.
