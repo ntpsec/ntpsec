@@ -54,17 +54,17 @@ doit ()
 
 # no --disable-manpage on default and all
 doit default ""
-doit minimal "--disable-droproot --disable-mdns-registration --disable-manpage"
+doit minimal "--disable-droproot --disable-mdns-registration --disable-doc --disable-manpage"
 
 # This also tests refclocks without DEBUG
-doit classic "--enable-classic-mode --refclock=all --disable-manpage"
+doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpage"
 
-doit all     "--enable-warnings --enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot --disable-fuzz $LINUX"
+doit all     "--enable-warnings --enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot --disable-fuzz $LINUX --disable-doc --disable-manpage"
 
 if [ "`which asciidoc 2>/dev/null`" != "" -a \
      "`which xsltproc 2>/dev/null`" != "" ]
 then
-doit doc     "--enable-doc --disable-manpage"
+doit doc     ""
 fi
 
 # should try cross compile
