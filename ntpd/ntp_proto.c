@@ -2201,8 +2201,7 @@ peer_xmit(
 #ifdef ENABLE_LEAP_SMEAR
 
 static void
-leap_smear_add_offs(l_fp *t, l_fp *t_recv) {
-	UNUSED_ARG(t_recv);
+leap_smear_add_offs(l_fp *t) {
 	t += leap_smear.offset;
 }
 
@@ -2291,7 +2290,7 @@ fast_xmit(
 #ifdef ENABLE_LEAP_SMEAR
 		this_ref_time = sys_vars.sys_reftime;
 		if (leap_smear.in_progress) {
-			leap_smear_add_offs(&this_ref_time, NULL);
+			leap_smear_add_offs(&this_ref_time);
 			xpkt.refid = convertLFPToRefID(leap_smear.offset);
 			DPRINT(2, ("fast_xmit: leap_smear.in_progress: refid %8x, smear %s\n",
 				ntohl(xpkt.refid),
@@ -2309,7 +2308,7 @@ fast_xmit(
 #ifdef ENABLE_LEAP_SMEAR
 		this_recv_time = rbufp->recv_time;
 		if (leap_smear.in_progress)
-			leap_smear_add_offs(&this_recv_time, NULL);
+			leap_smear_add_offs(&this_recv_time);
 		xpkt.rec = htonl_fp(this_recv_time);
 #else
 		xpkt.rec = htonl_fp(rbufp->recv_time);
@@ -2318,7 +2317,7 @@ fast_xmit(
 		get_systime(&xmt_tx);
 #ifdef ENABLE_LEAP_SMEAR
 		if (leap_smear.in_progress)
-			leap_smear_add_offs(&xmt_tx, &this_recv_time);
+			leap_smear_add_offs(&xmt_tx);
 #endif
 		xpkt.xmt = htonl_fp(xmt_tx);
 	}
