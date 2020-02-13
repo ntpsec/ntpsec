@@ -23,7 +23,6 @@ TEST_TEAR_DOWN(nts_cookie) {}
 
 TEST(nts_cookie, nts_make_cookie_key) {
 	/* init */
-	bool ok;
 	uint8_t kStart1[NTS_MAX_KEYLEN] = {1, 2, 3, 4, 5};
 	uint8_t kStart2[NTS_MAX_KEYLEN] = {10, 20, 30, 40, 50};
 	uint32_t iStart = I;
@@ -31,8 +30,7 @@ TEST(nts_cookie, nts_make_cookie_key) {
 	memcpy(K, kStart1, sizeof(K));
 	memcpy(K2, kStart2, sizeof(K2));
 	/* run test */
-	ok = nts_make_cookie_key();
-	TEST_ASSERT_EQUAL(true, ok);
+	nts_make_cookie_key();
 	/* check that K2 now equals former-K */
 	TEST_ASSERT_EQUAL_UINT8_ARRAY(kStart1, K2, sizeof(K2));
 	/* check that K does not equal former-K */

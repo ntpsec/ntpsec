@@ -48,7 +48,18 @@
 
 /* K and I should be preserved across boots, and rotated every day or so.
  * We need to support the old K/I for another day.
- * Encryption within cookies uses AEAD_AES_SIV_CMAC_nnn.  That's the
+ *
+ * If the file gets corrupted, blow it away and reboot.  It will get
+ * recreated, we will start using new cookies, packets from clients
+ * with old cookies will get dropped, and eventually clients will
+ * run out of cookies and use NTS-KE to get new ones.
+ *
+ * It would be possible to run without a cookie file.  Nobody would
+ * notice until the server was restarted.  Then there would be a flurry
+ * of NTS-KE requests until all clients obtained new/working cookies.
+ */
+
+/* Encryption within cookies uses AEAD_AES_SIV_CMAC_nnn.  That's the
  * same family of algorithms as NTS uses on the wire.
  * The nnn is selected by the key length.
  *   32 => 256
@@ -231,17 +242,21 @@ bool nts_read_cookie_keys(void) {
  * The KE server and the NTP servers stay in sync without communication
  * after a one-time copy of the cookie file from NTP server to KE server.
  */
-bool nts_make_cookie_key(void) {
-	bool OK = true;
+void nts_make_cookie_key(void) {
+	int err;
 	memcpy(&K2, &K, sizeof(K2));	/* Push current cookie to old */
 	I2 = I;
 #if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
-	OK &= RAND_priv_bytes(K, sizeof(K));
+	err = RAND_priv_bytes(K, sizeof(K));
 #else
-	OK &= RAND_bytes(K, sizeof(K));
+	err = RAND_bytes(K, sizeof(K));
 #endif
-	OK &= RAND_bytes((uint8_t *)&I, sizeof(I));
-	return OK;
+	err += RAND_bytes((uint8_t *)&I, sizeof(I));
+	if (2 != err) {
+		msyslog(LOG_ERR, "ERR: nts_make_cookie_key - RAND_bytes failed");
+		exit(1);
+	}
+	return;
 }
 
 bool nts_write_cookie_keys(void) {
@@ -284,7 +299,7 @@ int nts_make_cookie(uint8_t *cookie,
   uint8_t *c2s, uint8_t *s2c, int keylen) {
 	uint8_t plaintext[NTS_MAX_COOKIELEN];
 	uint8_t *nonce;
-	int used, plainlength;
+	int err, used, plainlength;
 	bool ok;
 	uint8_t * finger;
 	uint32_t temp;	/* keep 4 byte alignment */
@@ -318,7 +333,11 @@ int nts_make_cookie(uint8_t *cookie,
 	finger += sizeof(I);
 
 	nonce = finger;
-	RAND_bytes(finger, NONCE_LENGTH);
+	err = RAND_bytes(finger, NONCE_LENGTH);
+	if (1 != err) {
+		msyslog(LOG_ERR, "ERR: nts_make_cookie - Error from RAND_bytes");
+		exit(1);
+	}
 	finger += NONCE_LENGTH;
 
 	used = finger-cookie;

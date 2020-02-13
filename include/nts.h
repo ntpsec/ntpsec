@@ -29,7 +29,7 @@ void nts_cert_timer(void);
 void nts_cookie_timer(void);
 
 bool nts_read_cookie_keys(void);
-bool nts_make_cookie_key(void);
+void nts_make_cookie_key(void);
 bool nts_write_cookie_keys(void);
 
 int nts_make_cookie(uint8_t *cookie,
