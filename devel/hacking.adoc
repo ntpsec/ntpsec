@@ -674,25 +674,27 @@ each release.
 
 == Release Prep Steps.  Ignore this if you are not Mark
 
-. start a new Debian instance, note it's public IP address, and ssh into it.
+. start a new Debian instance, note it's public IP address
 
-LOCAL
+. copy over keys
+
+scp ~/.ssh/gitlab.key  admin@IPADDRESS:.ssh/gitlab.key
+gpg --export-secret-key 0x5A22E330161C3978 >secret.gkey
+scp secret.gkey admin@IPADDRESS:.
+
+. ssh to remote
+
 ssh -v -i ~/.ssh/aws-mra.key admin@IPADDRESS
 
 . install build dependencies
 
-REMOTE
 sudo apt-get update
 sudo apt-get install build-essential m4 bison git gnupg libssl-dev emacs-nox python-pip
 sudo apt-get install asciidoc xsltproc
 sudo pip install gps
 
-. copy over gitlab ssh access key
+. connect to gitlab
 
-LOCAL
-scp ~/.ssh/gitlab.key  admin@52.91.165.241:.ssh
-
-REMOTE
 cat >> ~/.ssh/config
 Host gitlab.com
   Hostname gitlab.com
@@ -700,32 +702,26 @@ Host gitlab.com
   Port 22
   PreferredAuthentications publickey
   IdentityFile ~/.ssh/gitlab.key
+^D
 
 ssh git@gitlab.com  # expect "Welcome to GitLab, @fallenpegasus!"
 
 . clone the repo
 
-REMOTE
 git clone git@gitlab.com:NTPsec/ntpsec.git
 
-. copy over gpg signing key
+. setup the signing key and init gpg
 
-LOCAL
-gpg --export-secret-key 0x5A22E330161C3978 >secret.gkey
-scp secret.gkey admin@IPADDRESS:.
-
-REMOTE
 gpg --import ~/secret.gkey
 GPG_TTY=$(tty); export GPG_TTY
 echo "test" | gpg --clearsign
 
 . setup gitconfig
 
-REMOTE
 cat > ~/.gitconfig
 [user]
         name = Mark Atwood
         email = mark.atwood@ntpsec.org
-
+^D
 
 //end
