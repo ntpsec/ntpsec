@@ -1,7 +1,10 @@
 /*
  * timespecops.h -- calculations on 'struct timespec' values
  *
- * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
+ * Copyright Juergen Perlinger (perlinger@ntp.org)
+ * Copyright the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
+
  *
  * Rationale
  * ---------
@@ -34,8 +37,6 @@
  * Input and output operands may overlap; all input is consumed before
  * the output is written to.
  *
- * Copyright 2015 by the NTPsec project contributors
- * SPDX-License-Identifier: NTP
  */
 #include "config.h"
 

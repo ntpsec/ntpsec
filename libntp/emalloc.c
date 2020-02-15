@@ -61,7 +61,7 @@ ereallocz(
 }
 
 /* oreallocarray.c is licensed under the following:
- * Copyright (c) 2008 Otto Moerbeek <otto@drijf.net>
+ * Copyright Otto Moerbeek <otto@drijf.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

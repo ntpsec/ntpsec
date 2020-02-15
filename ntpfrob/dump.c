@@ -1,4 +1,4 @@
-/* Copyright 2018 by the NTPsec project contributors
+/* Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  */
 

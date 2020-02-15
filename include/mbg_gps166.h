@@ -1,12 +1,9 @@
 /*
- * Created: Sun Jul 20 09:20:50 1997
- *
- * File GPSSERIO.H Copyright (c) by Meinberg Funkuhren (www.meinberg.de)
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Meinberg Funkuhren (www.meinberg.de)
+ * Copyright Frank Kardel <kardel <AT> ntp.org>
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Linkage to PARSE:
- * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
  */
 #ifndef GUARD_MBG_GPS166_H
 #define GUARD_MBG_GPS166_H
@@ -18,7 +15,7 @@
  *
  *  Author:  Martin Burnicki, Meinberg Funkuhren
  *
- *  Copyright (c) Meinberg Funkuhren, Bad Pyrmont, Germany
+ *  Copyright Meinberg Funkuhren, Bad Pyrmont, Germany
  *
  *  Description:
  *    Structures and codes to be used to access Meinberg GPS clocks via

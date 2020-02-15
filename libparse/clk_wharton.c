@@ -1,8 +1,7 @@
 /*
  * Support for WHARTON 400A Series clock + 404.2 serial interface.
  *
- * Copyright (C) 1999, 2000 by Philippe De Muyter <phdm@macqel.be>
- *
+ * Copyright Philippe De Muyter <phdm@macqel.be>
  * SPDX-License-Identifier: BSD-2-Clause
  *
  */

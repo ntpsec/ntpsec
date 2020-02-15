@@ -2,11 +2,11 @@
  *
  * The header file for a simple lexical analyzer.
  *
- * Written By:	Sachin Kamboj
+ * Written By:	Sachin Kambojq
  *		University of Delaware
  *		Newark, DE 19711
- * Copyright (c) 2006
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Sachin Kamboj
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  */
 

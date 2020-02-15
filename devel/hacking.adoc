@@ -336,16 +336,25 @@ conditions on derived works; we cannot accept such code.
 It is your responsibility to make sure you have the necessary rights
 to contribute a patch to the project.
 
+Do not specify a year in a copyright statement.  Most of the existing
+copyright statements already present in the project have been scrubbed
+of the year.  There is no need to specify the year in a copyright
+statement.  Several large legally sophisticated companies, include
+Amazon, Google, Microsoft, and Facebook, are now publishing open
+source code with copyright statements without a year.  We encourage
+the larger open source community to emulate this.
+
+The string "(c)" is legally meaningless.  Use the word "Copyright".
+
 We use the SPDX convention for inclusion by reference.  You can read
 about this at
 
       https://spdx.org/licenses
 
-When you create a new file, mark it as follows (updating the year)
-as required:
+When you create a new file, mark it as follows as required:
 
 ------------------------------------------------
-/* Copyright 2018 by the NTPsec project contributors
+/* Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  */
 ------------------------------------------------
@@ -353,7 +362,7 @@ as required:
 For documentation:
 
 ------------------------------------------------
-// Copyright 2018 by the NTPsec project contributors
+// Copyright the NTPsec project contributors
 // SPDX-License-Identifier: CC-BY-4.0
 ------------------------------------------------
 
@@ -369,7 +378,7 @@ You *may* add project copyright and replace the inline license
 with an SPDX tag. For example:
 
 ------------------------------------------------
-/* Copyright 2018 by the NTPsec project contributors
+/* Copyright the NTPsec project contributors
  * SPDX-License-Identifier: NTP
  */
 ------------------------------------------------

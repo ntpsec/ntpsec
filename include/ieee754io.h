@@ -1,8 +1,6 @@
 /*
- * Created: Sun Jul 13 12:22:11 1997
- *
- * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Frank Kardel <kardel <AT> ntp.org>
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef GUARD_IEEE754IO_H

@@ -1,8 +1,8 @@
 /*
  * Raw DCF77 pulse clock support
  *
- * Copyright (c) 1989-2015 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Frank Kardel <kardel <AT> ntp.org>
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  */
 

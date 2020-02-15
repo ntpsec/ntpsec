@@ -3,9 +3,9 @@
  *  logfiles and statistic files
  *
  *
- * Copyright (C) 1992, 1996 by Rainer Pruy
- * Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
- *
+ * Copyright Rainer Pruy
+ *           Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
+ * Copyright the NTPsec Project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  */
 

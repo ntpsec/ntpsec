@@ -1,7 +1,7 @@
 /*
  * timespecops.h -- calculations on 'struct timespec' values
  *
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: NTP
  */
 #ifndef GUARD_TIMESPECOPS_H

@@ -1,8 +1,6 @@
 /*
  * ntp_leapsec.c - leap second processing for NTPD
  *
- * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
- *
  * ----------------------------------------------------------------------
  * This is an attempt to get the leap second handling into a dedicated
  * module to make the somewhat convoluted logic testable.
@@ -11,7 +9,8 @@
  * strtoull(3) is large enough to parse any integer literal found in these
  * files, and that C will promote such values to uint64_t properly.
  *
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Juergen Perlinger <perlinger@ntp.org>
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: NTP
  */
 

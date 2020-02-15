@@ -1,9 +1,8 @@
 /*
  * definitions for NTP file generations support
  *
- * Copyright (C) 1992, 1996 by Rainer Pruy
- * Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
- *
+ * Copyright Rainer Pruy, 
+ *           Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  * SPDX-License-Identifier: BSD-2-Clause
  */
 #ifndef GUARD_NTP_FILEGEN_H

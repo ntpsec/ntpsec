@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2004-2007  Internet Systems Consortium, Inc. ("ISC")
- * Copyright (C) 1999-2001  Internet Software Consortium.
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Internet Systems Consortium, Inc. ("ISC")
+ * Copyright Internet Software Consortium.
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: ISC
  */
 

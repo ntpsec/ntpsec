@@ -1,6 +1,6 @@
 /*
  * nts.c - Network Time Security (NTS) support
- * Copyright 2019 by the NTPsec project contributors
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-4-Clause-UC
  *
  * Section references are to

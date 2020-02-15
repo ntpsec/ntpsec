@@ -5,7 +5,7 @@
  *	     Its former support for unsafe /dev/kmem operations
  *	     has been removed.
  *
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  */
 

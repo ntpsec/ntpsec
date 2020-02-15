@@ -1,8 +1,6 @@
 /*
- * Created: Sun Jul 20 12:08:14 1997
- *
- * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Frank Kardel <kardel <AT> ntp.org>
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  */
 

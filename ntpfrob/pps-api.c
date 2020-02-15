@@ -3,10 +3,9 @@
  * Try to run this code to see what the PPS-API finds. You give it the
  * device as argument and you may have to modify the pp.mode = BLA assignment.
  *
- * Code originally by Poul-Henning Kemp.
- *
- * Copyright 2015 by the NTPsec project contributors
- *  SPDX-License-Identifier: BSD-2-Clause
+ * Copyright Poul-Henning Kemp.
+ * Copyright the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include "config.h"

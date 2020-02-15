@@ -18,7 +18,7 @@ if the text was explicitly included in the file.
 -----------------------------------------------------------------------
 ***********************************************************************
 *                                                                     *
-* Copyright (c) University of Delaware 1992-2015                      *
+* Copyright University of Delaware                                    *
 *                                                                     *
 * Permission to use, copy, modify, and distribute this software and   *
 * its documentation for any purpose with or without fee is hereby     *
@@ -41,8 +41,7 @@ Burnicki is:
 -----------------------------------------------------------------------
 ***********************************************************************
 *                                                                     *
-* Copyright (c) Network Time Foundation 2011-2015                     *
-*                                                                     *
+* Copyright Network Time Foundation                                   *
 * All Rights Reserved                                                 *
 *                                                                     *
 * Redistribution and use in source and binary forms, with or without  *

@@ -1,8 +1,8 @@
 #
 # spec file for package ntpsec
 #
-# Copyright (c) 2017 SUSE LINUX GmbH, Nuernberg, Germany.
-# Copyright (c) 2016 Malcolm J Lewis <malcolmlewis@opensuse.org>
+# Copyright SUSE LINUX GmbH, Nuernberg, Germany.
+# Copyright Malcolm J Lewis <malcolmlewis@opensuse.org>
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed

@@ -1,13 +1,9 @@
 /*
- * /src/NTP/ntp4-dev/libparse/clk_schmid.c,v 4.9 2005/04/16 17:32:10 kardel RELEASE_20050508_A
- *
- * clk_schmid.c,v 4.9 2005/04/16 17:32:10 kardel RELEASE_20050508_A
- *
  * Schmid clock support
  * based on information and testing from Adam W. Feigin et. al (Swisstime iis.ethz.ch)
  *
- * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Frank Kardel <kardel@ntp.org>
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  */
 

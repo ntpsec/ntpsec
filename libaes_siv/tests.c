@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2019 Akamai Technologies, Inc.
+/* Copyright Akamai Technologies, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 

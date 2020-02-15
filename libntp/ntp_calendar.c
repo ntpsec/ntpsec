@@ -1,8 +1,8 @@
 /*
  * ntp_calendar.c - calendar and helper functions
  *
- * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright Juergen Perlinger <perlinger@ntp.org> for the NTP project.
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: NTP
  *
  * There is more about these types and calculations in the internals tour

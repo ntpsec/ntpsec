@@ -1,7 +1,8 @@
 /*
  * refclock_gpsdjson.c - clock driver as GPSD JSON client
- *	Juergen Perlinger <perlinger@ntp.org>
- *	Feb 11, 2014 for the NTP project.
+ * Copyright Juergen Perlinger <perlinger@ntp.org>
+ * Copyright the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  *
  *	Heavily inspired by refclock_nmea.c
  *
@@ -55,8 +56,6 @@
  *   should show you what GPSD has to say to NTPD. Replace "/dev/gps0"
  *   with the device link used by GPSD, if necessary.
  *
- * Copyright 2015 by the NTPsec project contributors
- * SPDX-License-Identifier: NTP
  */
 
 

@@ -12,9 +12,8 @@
  * This software was developed by the Software and Component Technologies
  * group of Trimble Navigation, Ltd.
  *
- * Copyright (c) 1997, 1998, 1999, 2000  Trimble Navigation Ltd.
- * All rights reserved.
- * Copyright 2017 by the NTPsec project contributors
+ * Copyright Trimble Navigation Ltd. All rights reserved.
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-4-Clause
  */
 

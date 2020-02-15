@@ -1,6 +1,6 @@
 /* ntp_endian.c - BSD-style big-endian encoding/decoding functions
  *
- * Copyright 2016 by the NTPsec project contributors
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  *
  * These are portable reimplementations of what BSD provides

@@ -1,5 +1,6 @@
-/* Copyright 2008, Red Hat, Inc.
-   Copyright 2008, Andrew Tridgell.
+/* Copyright Red Hat, Inc.
+   Copyright Andrew Tridgell.
+   Copyright the NTPsec Contributors
    Licensed under the same terms as NTP itself.
  */
 #include "config.h"

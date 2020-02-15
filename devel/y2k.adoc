@@ -238,7 +238,7 @@ DISCLAIMER
     they include the credit:
 
       Various Y2K updates and tests provided by AT&T Labs.
-      Copyright 1999 AT&T.
+      Copyright AT&T.
 
     and any AT&T "comments" on the changed code remain intact.
 

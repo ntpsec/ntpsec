@@ -6,7 +6,7 @@
  * later analysis. From this you can determine the jitter and if the
  * clock ever runs backwards.
  *
- * Copyright 2015 by the NTPsec project contributors
+ * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
