@@ -90,8 +90,14 @@ can't find a better way.]
 
 Don't call get_systime() from non-main threads.
 
-You *may* use clock_gettime(2) and clock_settime(2) calls, and
-the related getitimer(2)/setitimer(2), from POSIX-1.2008.
+
+We support some cases where systems are not fully POSIX compliant.
+This is an attempt to collect them.
+
+  MacOS (?? or something) doesn't support timer_create(2).
+  We work around that by using the older setitimer(2).
+  POSIX.1-2008 marks getitimer() and setitimer() obsolete.
+
 
 Here are the non-standardized APIs that may be used:
 
