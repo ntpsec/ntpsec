@@ -261,7 +261,7 @@ quite a while before NTPsec removed it.
 
 == System call interface and the PLL
 
-All of ntpds clock management is done through four system calls:
+All of ntpd's clock management is done through four system calls:
 clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or (in
 exceptional cases) the older BSD adjtime(2) call.  For ntp_adjtime(),
 ntpd uses a thin wrapper that hides the difference between
@@ -359,7 +359,7 @@ You can grep for "MHz" to find these.
 the clock fuzzing to smear the EMI over a broader band to comply with
 FCC rules.  It rounds down to make sure the CPU isn't overclocked.)
 
-There is an API call to adjust the time/cycle.  That adjustment is ntpds
+There is an API call to adjust the time/cycle.  That adjustment is ntpd's
 drift.  That covers manufacturing errors and temperature changes and such.
 The manufacturing error part is typically under 50 PPM.  I have a few systems
 off by over 100.  The temperature part varies by ballpark of 1 PPM / C.
