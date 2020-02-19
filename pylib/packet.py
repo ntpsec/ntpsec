@@ -1310,8 +1310,8 @@ This combats source address spoofing
         mru = None
         nonce = None
         items = list(variables.items())
-        if items:
-            items.sort()
+##      if items:                   # See issue #642
+##          items.sort()
         for (tag, val) in items:
             self.warndbg("tag=%s, val=%s" % (tag, val), 4)
             if tag == "nonce":
