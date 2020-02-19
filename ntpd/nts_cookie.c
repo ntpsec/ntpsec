@@ -28,7 +28,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include <openssl/rand.h>
 #include <aes_siv.h>
 
 #include "ntpd.h"
@@ -243,19 +242,10 @@ bool nts_read_cookie_keys(void) {
  * after a one-time copy of the cookie file from NTP server to KE server.
  */
 void nts_make_cookie_key(void) {
-	int err;
 	memcpy(&K2, &K, sizeof(K2));	/* Push current cookie to old */
 	I2 = I;
-#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
-	err = RAND_priv_bytes(K, sizeof(K));
-#else
-	err = RAND_bytes(K, sizeof(K));
-#endif
-	err += RAND_bytes((uint8_t *)&I, sizeof(I));
-	if (2 != err) {
-		msyslog(LOG_ERR, "ERR: nts_make_cookie_key - RAND_bytes failed");
-		exit(1);
-	}
+	ntp_RAND_priv_bytes(K, sizeof(K));
+	ntp_RAND_bytes((uint8_t *)&I, sizeof(I));
 	return;
 }
 
@@ -299,7 +289,7 @@ int nts_make_cookie(uint8_t *cookie,
   uint8_t *c2s, uint8_t *s2c, int keylen) {
 	uint8_t plaintext[NTS_MAX_COOKIELEN];
 	uint8_t *nonce;
-	int err, used, plainlength;
+	int used, plainlength;
 	bool ok;
 	uint8_t * finger;
 	uint32_t temp;	/* keep 4 byte alignment */
@@ -333,11 +323,7 @@ int nts_make_cookie(uint8_t *cookie,
 	finger += sizeof(I);
 
 	nonce = finger;
-	err = RAND_bytes(finger, NONCE_LENGTH);
-	if (1 != err) {
-		msyslog(LOG_ERR, "ERR: nts_make_cookie - Error from RAND_bytes");
-		exit(1);
-	}
+	ntp_RAND_bytes(finger, NONCE_LENGTH);
 	finger += NONCE_LENGTH;
 
 	used = finger-cookie;

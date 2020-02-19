@@ -155,6 +155,37 @@ want that to happen again. Thus, if you must refer to struct timeval due to
 an external interface, move the data to/from a struct timespec as
 close to that call site as possible.
 
+=== Random numbers
+
+There are 2 types of random numbers - pseudo random and
+cryptographically secure.  For cryptographically secure needs,
+we use RAND_bytes() and RAND_priv_bytes() from OpenSSL.
+The actual use is funneled through ntp_RAND_bytes() to
+check the return code and crash if it doesn't work.
+RAND_bytes() can fail if the system doesn't collect enough
+entropy but we have never seen that happen yet.
+
+For general purpose pseudo randomness, we use random(3).  Note that
+it only returns 31 bits.  It is much faster than RAND_bytes()
+
+RAND_MAX on FreeBSD is 0xfffffffd.
+
+Python also has 2 forms of randomness.  random is older.  secure
+was added in Python 3.6.  We only use it in ntpkeygen.
+Random isn't cryptographically secure.  secure is.
+
+=== Other Packages
+
+We depend on the host distro to provide OpenSSL.
+NTS-KE (key exchange) uses TLS-1.2 or 1.3.
+Shared key authentication uses their crypto package.
+We also use their RAND_bytes().
+
+Note that OpenSSL 1.0.1 is no longer supported.  2020-Feb-17
+
+We also use waf, libaes_siv, and unity but we have local copies
+rather than depending the host distro to provide them.
+
 === Coding style and indentation
 
 Dr. Dave Mills liked this code indented formatted in a consistent way.

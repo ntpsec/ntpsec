@@ -19,6 +19,7 @@
 #endif
 #include <unistd.h>
 
+
 /*
  * Byte order conversion
  */
@@ -477,8 +478,7 @@ static bool check_early_restrictions(
 {
 	return (restrict_mask & RES_IGNORE) ||
 	    ((restrict_mask & RES_FLAKE) &&
-/*	     (double)ntp_random() / 0x7fffffff < .1) || */
-	     (double)random() / 0x7fffffff < .1) ||
+	     (double)random() / RAND_MAX < .1) ||
 	    (restrict_mask & (is_control_packet(rbufp) ? RES_NOQUERY : RES_DONTSERVE)) ||
 	    rbufp->recv_length < 1 ||
 	    ((restrict_mask & RES_VERSION) &&
@@ -1071,7 +1071,7 @@ clock_update(
 		}
 #endif /* HAVE_LIBSCF_H */
 		msyslog(LOG_ERR, "CLOCK: Panic: offset too big: %.3f",
-            clkstate.sys_offset);
+			clkstate.sys_offset);
 		exit (1);
 		/* not reached */
 
@@ -1220,7 +1220,8 @@ poll_update(
 			next = 1U << hpoll;
 		else
 #endif /* REFCLOCK */
-/*			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<  */
+			/* add a bit of randomess to next polling time
+			 * to disperse traffic */
 			next = ((0x1000UL | (random() & 0x0ff)) <<
 			    hpoll) >> 12;
 		next += peer->outdate;
@@ -2128,7 +2129,7 @@ peer_xmit(
 	sendlen = LEN_PKT_NOMAC;
 	if (NTP_VERSION == peer->cfg.version) {
 		/* Hide most of info for privacy
-		 * RFC in progress - draft-ietf-ntp-data-minimization, 2018-Jul-07
+		 * RFC in progress - draft-ietf-ntp-data-minimization, 2020-Feb-16
 		 */
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(
 			LEAP_NOWARNING, peer->cfg.version, MODE_CLIENT);
@@ -2141,7 +2142,8 @@ peer_xmit(
 		xpkt.reftime = htonl_fp(0);
 		xpkt.org = htonl_fp(0);
 		xpkt.rec = htonl_fp(0);
-		peer->org_rand = ntp_random64();
+		ntp_RAND_bytes((unsigned char *)&peer->org_rand,
+			sizeof(peer->org_rand));
 		get_systime(&peer->org_ts);	/* as late as possible */
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(
@@ -2163,9 +2165,9 @@ peer_xmit(
 	xpkt.xmt = htonl_fp(peer->org_rand);	/* out in xmt, back in org */
 
 	/* 3 way branch to add authentication:
-         *  1) NTS
-         *  2) Shared KEY
-         *  3) none
+	 *  1) NTS
+	 *  2) Shared KEY
+	 *  3) none
 	 */
 	if (FLAG_NTS & peer->cfg.flags) {
 		if (0 < peer->nts_state.count)
@@ -2174,7 +2176,7 @@ peer_xmit(
 		  restart_nts_ke(peer);  /* out of cookies */
 		  return;
 		}
-        } else if (0 != peer->cfg.peerkey) {
+	} else if (0 != peer->cfg.peerkey) {
 		auth_info *auth = authlookup(peer->cfg.peerkey, true);
 		if (NULL == auth) {
 			report_event(PEVNT_AUTH, peer, "no key");

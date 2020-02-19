@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "ntp_stdlib.h"
+#include "ntp.h"
 
 #include <stdbool.h>
 #include <openssl/ssl.h>
@@ -30,9 +31,11 @@ CMAC_CTX *cmac_ctx;
 void
 ssl_init(void)
 {
+	unsigned char dummy;
+
 	if (ssl_init_done) {
 		return;
-}
+	}
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	SSL_library_init();
@@ -40,6 +43,10 @@ ssl_init(void)
 	OpenSSL_add_all_ciphers();
 	atexit(&atexit_ssl_cleanup);
 #endif
+
+	/* More initialization help for seccomp */
+	/* RAND_poll in OpenSSL on Raspbian needs get{u,g,eu,eg}id() */
+	ntp_RAND_bytes(&dummy, 1);
 
 	digest_ctx = EVP_MD_CTX_new();
 	cmac_ctx = CMAC_CTX_new();

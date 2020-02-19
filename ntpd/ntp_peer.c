@@ -98,7 +98,7 @@ init_peer(void)
 	 * Initialize our first association ID
 	 */
 	do
-		current_association_ID = ntp_random() & ASSOCID_MAX;
+		current_association_ID = random() & ASSOCID_MAX;
 	while (!current_association_ID);
 	initial_association_ID = current_association_ID;
 }

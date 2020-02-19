@@ -145,7 +145,7 @@ again:
 
 	case 'w': {
 		/* To show some life action, we read the system
-		 * clock and use a bit of fuzz from 'ntp_random()' to get a
+		 * clock and use a bit of fuzz from 'random()' to get a
 		 * bit of wobbling into the values (so we can observe a
 		 * certain jitter!)
 		 */
@@ -163,11 +163,11 @@ again:
 		else
 		{
 			time(&rcv_sec);
-			rcv_frc = (unsigned int)ntp_random() % 1000000000U;
+			rcv_frc = (unsigned int)random() % 1000000000U;
 		}
 		/* add a wobble of ~3.5msec to the clock time */
 		clk_sec = rcv_sec;
-		clk_frc = rcv_frc + (unsigned int)(ntp_random()%7094713 - 3547356);
+		clk_frc = rcv_frc + (unsigned int)(random()%7094713 - 3547356);
 		/* normalise result -- the SHM driver is picky! */
 		while ((int)clk_frc < 0) {
 			clk_frc += 1000000000;

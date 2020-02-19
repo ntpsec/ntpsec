@@ -16,8 +16,10 @@
 #include "ntp_net.h"
 #include "nts.h"
 
-extern int32_t ntp_random (void);
-extern uint64_t ntp_random64 (void);
+/* common place to check/crash on unlikely error return */
+void ntp_RAND_bytes(unsigned char *buf, int num);
+void ntp_RAND_priv_bytes(unsigned char *buf, int num);
+
 
 /*
  * Calendar arithmetic - contributed by G. Healton

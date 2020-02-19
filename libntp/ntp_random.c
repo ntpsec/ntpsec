@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 
+#include <openssl/opensslv.h>
 #include <openssl/rand.h>
 
 #include "config.h"
@@ -13,32 +14,29 @@
 
 /* NB: RAND_bytes comes from OpenSSL
  * Starting in version 1.1.1, it reseeds itself occasionally.
- * That needs access to /dev/urandom which may be blocked by chroot jails.
+ * That may need access to /dev/urandom which may be blocked by chroot jails.
+ * getrandom(2) is used when available.  It was added to Linux kernel 3.17
+ * so this won't be a problem on newer Linux systems.
  */
 
-int32_t
-ntp_random(void)
-{
+void ntp_RAND_bytes(unsigned char *buf, int num) {
 	int err;
-	uint32_t rnd = 0;
-	err = RAND_bytes((unsigned char *)&rnd, sizeof(rnd));
+	err = RAND_bytes(buf, num);
 	if (1 != err) {
-		msyslog(LOG_ERR, "ERR: ntp_random - RAND_bytes failed");
+		msyslog(LOG_ERR, "ERR: RAND_bytes failed");
 		exit(1);
 	}
-	return rnd;
 }
 
-uint64_t
-ntp_random64(void)
-{
+void ntp_RAND_priv_bytes(unsigned char *buf, int num) {
 	int err;
-	uint64_t rnd = 0;
-	err = RAND_bytes((unsigned char *)&rnd, sizeof(rnd));
+#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
+	err = RAND_priv_bytes(buf, num);
+#else
+	err = RAND_bytes(buf, num);
+#endif
 	if (1 != err) {
-		msyslog(LOG_ERR, "ERR: ntp_random64 - RAND_bytes failed");
+		msyslog(LOG_ERR, "ERR: RAND_priv_bytes failed");
 		exit(1);
 	}
-	return rnd;
 }
-

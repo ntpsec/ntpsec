@@ -46,6 +46,8 @@ void nts_log_version(void);
 
 /*****************************************************/
 
+/* More SSL initialization in ssl_init() from libntp/ssl_init.c */
+
 void nts_init(void) {
 	bool ok = true;
 	nts_log_version();

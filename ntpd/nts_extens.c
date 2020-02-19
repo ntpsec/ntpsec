@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <openssl/rand.h>
 #include <aes_siv.h>
 
 #include "ntp_stdlib.h"
@@ -63,7 +62,7 @@ bool extens_init(void) {
 
 int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 	struct BufCtl_t buf;
-	int err, used, adlength, idx;
+	int used, adlength, idx;
 	size_t left;
 	uint8_t *nonce, *packet;
 	bool ok;
@@ -73,11 +72,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 	buf.left = MAX_EXT_LEN;
 
 	/* UID */
-	err = RAND_bytes(peer->nts_state.UID, NTS_UID_LENGTH);
-	if (1 != err) {
-		msyslog(LOG_ERR, "ERR: extens_client_send - RAND_bytes failed");
-		exit(1);
-	}
+	ntp_RAND_bytes(peer->nts_state.UID, NTS_UID_LENGTH);
 	ex_append_record_bytes(&buf, Unique_Identifier,
 			       peer->nts_state.UID, NTS_UID_LENGTH);
 
@@ -103,11 +98,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 	append_uint16(&buf, NONCE_LENGTH);
 	append_uint16(&buf, CMAC_LENGTH);
 	nonce = buf.next;
-	err = RAND_bytes(nonce, NONCE_LENGTH);
-	if (1 != err) {
-		msyslog(LOG_ERR, "ERR: extens_client_send - RAND_bytes failed");
-		exit(1);
-	}
+	ntp_RAND_bytes(nonce, NONCE_LENGTH);
 	buf.next += NONCE_LENGTH;
 	buf.left -= NONCE_LENGTH;
 	left = buf.left;
@@ -267,7 +258,7 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
 	uint8_t *nonce, *packet;
 	uint8_t *plaintext, *ciphertext;;
 	uint8_t cookie[NTS_MAX_COOKIELEN];
-	int err, cookielen, plainleng, aeadlen;
+	int cookielen, plainleng, aeadlen;
 	bool ok;
 
 	/* get first cookie now so we have length */
@@ -294,11 +285,7 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
 	append_uint16(&buf, plainleng+CMAC_LENGTH);
 
 	nonce = buf.next;
-	err = RAND_bytes(nonce, NONCE_LENGTH);
-	if (1 != err) {
-		msyslog(LOG_ERR, "ERR: extens_client_send - RAND_bytes failed");
-		exit(1);
-	}
+	ntp_RAND_bytes(nonce, NONCE_LENGTH);
 	buf.next += NONCE_LENGTH;
 	buf.left -= NONCE_LENGTH;
 

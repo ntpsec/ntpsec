@@ -3091,8 +3091,8 @@ static uint32_t derive_nonce(
 	uint32_t		ts_f
 	)
 {
-	static uint32_t	salt[4];
-	static unsigned long	last_salt_update;
+	static uint8_t	salt[16];
+	static unsigned long	last_salt_update = 0;
 	union d_tag {
 		uint8_t	digest[EVP_MAX_MD_SIZE];
 		uint32_t extract;
@@ -3100,12 +3100,9 @@ static uint32_t derive_nonce(
 	EVP_MD_CTX	*ctx;
 	unsigned int	len;
 
-	while (!salt[0] || current_time - last_salt_update >= SECSPERHR) {
-            salt[0] = (uint32_t)ntp_random();
-            salt[1] = (uint32_t)ntp_random();
-            salt[2] = (uint32_t)ntp_random();
-            salt[3] = (uint32_t)ntp_random();
-            last_salt_update = current_time;
+	while (!last_salt_update || current_time - last_salt_update >= SECSPERHR) {
+		ntp_RAND_bytes(&salt[0], sizeof(salt));
+		last_salt_update = current_time;
 	}
 
 	ctx = EVP_MD_CTX_create();
@@ -3198,7 +3195,7 @@ send_random_tag_value(
 	int	noise;
 	char	buf[32];
 
-	noise = ntp_random();
+	noise = random();
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
 	buf[1] = 'a' + noise % 26;
@@ -3239,7 +3236,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	noise = (uint32_t)ntp_random();
+	noise = (uint32_t)random();
 	while (remaining > 0) {
 #ifdef USE_RANDOMIZE_RESPONSES
 	 	which = (noise & 7) % COUNTOF(sent);
@@ -3718,7 +3715,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			noise = (uint32_t)ntp_random();
+			noise = (uint32_t)random();
 			noisebits = 31;
 		}
 #ifdef USE_RANDOMIZE_RESPONSES
@@ -3895,7 +3892,7 @@ send_restrict_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 2) {
-			noise = (uint32_t)ntp_random();
+			noise = (uint32_t)random();
 			noisebits = 31;
 		}
 #ifdef USE_RANDOMIZE_RESPONSES
