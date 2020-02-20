@@ -1473,7 +1473,7 @@ ctl_putsys(
 		break;
 
 	case CS_SYSTEM:
-		snprintf(str, sizeof(str), "%s/%s", utsnamebuf.sysname,
+		snprintf(str, sizeof(str), "%.100s/%.100s", utsnamebuf.sysname,
 			 utsnamebuf.release);
 		ctl_putstr(sys_var[CS_SYSTEM].text, str, strlen(str));
 		break;
