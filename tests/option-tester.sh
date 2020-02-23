@@ -99,7 +99,7 @@ then
   echo "## PYTHONPATH is" \"$PYTHONPATH\"
 fi
 
-if (set -o pipefail) 2>/dev/null
+if ! (set -o pipefail) 2>/dev/null
 then
   echo "### Old sh - no pipefail"
   echo "### We can't test for errors during build"
