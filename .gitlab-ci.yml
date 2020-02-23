@@ -22,6 +22,7 @@ pages:
 include:
   - template: Code-Quality.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
+  - local: '.gitlab-opttest-ci.yml'
 
 .job_template: &job_definition
   stage: build
@@ -557,7 +558,7 @@ coverity-scan:
   tags:
     - ubuntu-1604-lts
   only:
-    - schedules
+    - schedules AND branches@NTPsec/ntpsec
 
 macos-basic:
   <<: *job_definition
