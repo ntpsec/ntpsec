@@ -233,7 +233,7 @@ static void	delete_interface_from_list(endpt *);
 static void	close_and_delete_fd_from_list(SOCKET);
 static void	add_addr_to_list	(sockaddr_u *, endpt *);
 static void	create_wildcards	(unsigned short);
-static endpt *	findlocalinterface	(sockaddr_u *, int, int);
+static endpt *	findlocalinterface	(sockaddr_u *, int);
 static endpt *	findclosestinterface	(sockaddr_u *, int);
 
 #ifdef DEBUG
@@ -2473,7 +2473,7 @@ findinterface(
 {
 	endpt *iface;
 
-	iface = findlocalinterface(addr, INT_WILDCARD, 0);
+	iface = findlocalinterface(addr, INT_WILDCARD);
 
 	if (NULL == iface) {
 		DPRINT(4, ("Found no interface for address %s - returning wildcard\n",
@@ -2505,8 +2505,7 @@ findinterface(
 static endpt *
 findlocalinterface(
 	sockaddr_u *	addr,
-	int		flags,
-	int		bcast
+	int		flags
 	)
 {
 	socklen_t	sockaddrlen;
@@ -2514,7 +2513,6 @@ findlocalinterface(
 	sockaddr_u	saddr;
 	SOCKET		s;
 	int		rtn;
-	int		on;
 
 	DPRINT(4, ("Finding interface for addr %s in list of addresses\n",
 		   socktoa(addr)));
@@ -2522,21 +2520,6 @@ findlocalinterface(
 	s = socket(AF(addr), SOCK_DGRAM, 0);
 	if (INVALID_SOCKET == s)
 		return NULL;
-
-	/*
-	 * If we are looking for broadcast interface we need to set this
-	 * socket to allow broadcast
-	 */
-	if (bcast) {
-		on = 1;
-		if (SOCKET_ERROR == setsockopt(s, SOL_SOCKET,
-						SO_BROADCAST,
-						(char *)&on,
-						sizeof(on))) {
-			close(s);
-			return NULL;
-		}
-	}
 
 	rtn = connect(s, &addr->sa, SOCKLEN(addr));
 	if (SOCKET_ERROR == rtn) {
