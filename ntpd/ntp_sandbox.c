@@ -333,6 +333,7 @@ int scmp_sc[] = {
 	SCMP_SYS(link),
 	SCMP_SYS(listen),
 	SCMP_SYS(lseek),
+	SCMP_SYS(membarrier),	/* Needed on Alpine 3.11.3 */
 	SCMP_SYS(munmap),
 	SCMP_SYS(open),
 #ifdef __NR_openat
@@ -378,7 +379,8 @@ int scmp_sc[] = {
 	SCMP_SYS(setitimer),
 #endif
 	SCMP_SYS(write),
-        SCMP_SYS(unlink),
+	SCMP_SYS(writev),	/* Needed on Alpine 3.11.3 */
+	SCMP_SYS(unlink),
 
 /* Don't comment out this block for testing.
  * pthread_create blocks signals so it will crash
@@ -411,12 +413,17 @@ int scmp_sc[] = {
 	SCMP_SYS(getpid),
 	SCMP_SYS(gettid),
 	SCMP_SYS(geteuid),
-/* __NR_ppoll is not available in Fedora 31.
- * Needed by getaddrinfo on Arch Linux. 2019-Dec */
-/* But somebody switched to SNR vs NR so we need a way
- * to test for old/new so we can do the right ifdef. */
-// Currently broken on Arch Linux but passes GitLab CI
 #ifdef __NR_ppoll
+#if !defined(__PNR_ppoll) && \
+   (SCMP_VER_MAJOR == 2) && (SCMP_VER_MINOR == 4) && (SCMP_VER_MICRO == 2)
+ /* Hack for Alpine Linux 3.11.3, 2020-Feb-23
+  * Earlier, Fedora had the same problem.
+  *  ppoll is missing from /usr/include/seccomp-syscalls.h
+  */
+ #warning "Hack workaround for seccomp bug."
+ #define __PNR_ppoll                             -10241
+ #define __SNR_ppoll                     __PNR_ppoll
+#endif
 	SCMP_SYS(ppoll),
 	SCMP_SYS(clock_adjtime),
 #endif
@@ -453,13 +460,15 @@ int scmp_sc[] = {
 		}
 	}
 
+	if (0) {
+		 /* maybe helps debugging if it's crashing during msyslog */
+		msyslog(LOG_NOTICE, "INIT: sandbox: enabling seccomp.");
+	}
 	if (seccomp_load(ctx) < 0) {
 		msyslog(LOG_ERR, "INIT: sandbox: seccomp_load() failed: %s", strerror(errno));
 		exit(1);
 	}
-	else {
-		msyslog(LOG_NOTICE, "INIT: sandbox: seccomp enabled.");
-	}
+	msyslog(LOG_NOTICE, "INIT: sandbox: seccomp enabled.");
         seccomp_release(ctx);
 
 #endif /* HAVE_SECCOMP_H */
