@@ -1575,7 +1575,8 @@ clock_select(void)
 		 * Leave the island immediately if the peer is
 		 * unfit to synchronize.
 		 */
-		if (FLAG_LOOKUP & peer->cfg.flags)
+		if ((FLAG_LOOKUP & peer->cfg.flags) ||
+                        (MDF_POOL & peer->cast_flags))
 			continue;
 		if (peer_unfit(peer)) {
 			continue;
