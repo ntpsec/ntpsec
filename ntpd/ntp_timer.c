@@ -74,18 +74,13 @@ typedef struct itimerval intervaltimer;
 #endif
 static intervaltimer itimer;
 
-void	set_timer_or_die(const intervaltimer *);
-
+void	set_timer_or_die(void);
 
 void
-set_timer_or_die(
-	const intervaltimer *	ptimer
-	)
+set_timer_or_die(void)
 {
 	const char *	setfunc;
 	int		rc;
-
-	UNUSED_ARG(ptimer);
 
 #ifdef HAVE_TIMER_CREATE
 	setfunc = "timer_settime";
@@ -124,7 +119,7 @@ reinit_timer(void)
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = 0;
-	set_timer_or_die(&itimer);
+	set_timer_or_die();
 }
 
 
@@ -163,7 +158,7 @@ init_timer(void)
 	itimer.it_interval.tv_sec =
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = itimer.it_value.itv_frac = 0;
-	set_timer_or_die(&itimer);
+	set_timer_or_die();
 }
 
 
