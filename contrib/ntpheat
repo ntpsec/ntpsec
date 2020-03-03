@@ -2,10 +2,10 @@
 #
 # generate some heat!
 #
-# Wrap your RasPi in bubble wrap.  Then run makeheat in the background.
-# It will try to stabilize the CPU temperature at 60C.
+# Wrap your RasPi in bubble wrap.  Then run ntpheat in the background.
+# It will try to stabilize the CPU temperature at 65C by default.
 
-# sometimes one copy of ntpheat can use 100% of one CPU and
+# Sometimes one copy of ntpheat can use 100% of one CPU and
 # still not heat up your RasPi as much as you want.  The temptation
 # is to add more insulation to your RasPi, but then it will overshoot
 # your target temperature if your load factor goes high.
@@ -13,7 +13,7 @@
 # The solution is to run more than one copy of ntpheat.  This is
 # easy to do with the -c option.
 #
-# to run 3 copies of ntpheat; ntpheat -c 3
+# To run 3 copies of ntpheat: ntpheat -c 3
 
 import argparse
 import hashlib
