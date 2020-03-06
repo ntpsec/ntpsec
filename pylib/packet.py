@@ -1310,8 +1310,10 @@ This combats source address spoofing
         mru = None
         nonce = None
         items = list(variables.items())
-##      if items:                   # See issue #642
-##          items.sort()
+        fake_list = []
+        fake_dict = {}
+        if items:                   # See issue #642
+            items.sort()
         for (tag, val) in items:
             self.warndbg("tag=%s, val=%s" % (tag, val), 4)
             if tag == "nonce":
@@ -1334,19 +1336,19 @@ This combats source address spoofing
                         idx = int(idx)
                     except ValueError:
                         raise ControlException(SERR_BADTAG % tag)
-                    if idx != curidx:
-                        # This makes duplicates
-                        curidx = idx
-
-                        if mru:
-                            # Can't have partial slots on list
-                            # or printing crashes after ^C
-                            # Append full slot now
-                            span.entries.append(mru)
-                        mru = MRUEntry()
-                        self.slots += 1
-                    setattr(mru, prefix, val)
-        if mru:
+                    ### Does not check missing/gappy entries
+                    if idx not in fake_list:
+                        fake_dict[str(idx)] = {}
+                        fake_list.append(idx)
+                    fake_dict[str(idx)][member] = val
+        fake_list.sort()
+        for idx in fake_list:
+            mru = MRUEntry()
+            # Always 6 in practice, in the tests not so much
+#            if len(fake_dict[str(idx)]) != 6:
+#                continue
+            for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
+                setattr(mru, prefix, fake_dict[str(idx)][prefix])
             span.entries.append(mru)
         if direct is not None:
             direct(span.entries)
