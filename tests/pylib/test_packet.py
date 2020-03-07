@@ -1630,11 +1630,11 @@ class TestControlSession(unittest.TestCase):
     def test___mru_analyze(self):
         # data: nonce, last.older, addr.older, now, last.newest
         #       addr, last, first, ct, mv, rs
-        vars = {"nonce":"noncevalue", "last.older":"FAIL0",
-                "addr.older":"FAIL1", "now":"0xcfba1ce0.80000000",
-                "last.newest":"FAIL2", "addr.1":"addrtest",
-                "last.2":"lasttest", "first.3":"firsttest", "ct.4":"cttest",
-                "mv.5":"mvtest", "rs.6":"rstest"}
+        vars = odict((("nonce", "noncevalue"), ("last.older", "FAIL0"),
+                ("addr.older", "FAIL1"), ("now", "0xcfba1ce0.80000000"),
+                ("last.newest", "FAIL2"), ("addr.1", "addrtest"),
+                ("last.2", "lasttest"), ("first.3", "firsttest"), ("ct.4", "cttest"),
+                ("mv.5", "mvtest"), ("rs.6", "rstest")))
         cls = self.target()
         span = ntpp.MRUList()
         nonce = cls._ControlSession__mru_analyze(vars, span, None)
@@ -1652,9 +1652,8 @@ class TestControlSession(unittest.TestCase):
         m5.mv = "mvtest"
         m6 = ntpp.MRUEntry()
         m6.rs = "rstest"
-        expected = [m1, m4, m3, m2, m5, m6] # sort order
+        expected = [m1, m2, m3, m4, m5, m6] # sort order
         self.assertEqual(len(span.entries), len(expected))
-        if 1: return          # see issue #642
         for i in range(len(span.entries)):
             self.assertEqual(span.entries[i].addr, expected[i].addr)
             self.assertEqual(span.entries[i].last, expected[i].last)

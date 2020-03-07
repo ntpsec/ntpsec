@@ -1348,7 +1348,8 @@ This combats source address spoofing
 #            if len(fake_dict[str(idx)]) != 6:
 #                continue
             for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
-                setattr(mru, prefix, fake_dict[str(idx)][prefix])
+                if prefix in fake_dict[str(idx)]:  # dodgy test needs this line
+                    setattr(mru, prefix, fake_dict[str(idx)][prefix])
             span.entries.append(mru)
         if direct is not None:
             direct(span.entries)
