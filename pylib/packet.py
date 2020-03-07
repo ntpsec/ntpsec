@@ -1313,7 +1313,7 @@ This combats source address spoofing
         fake_list = []
         fake_dict = {}
         if items:                   # See issue #642
-            items.sort()
+            items.sort(key=mru_kv_key)
         for (tag, val) in items:
             self.warndbg("tag=%s, val=%s" % (tag, val), 4)
             if tag == "nonce":
@@ -1636,6 +1636,16 @@ def generate_mru_lastseen(span, existingBufferSize):
         else:
             buf += incr
     return buf
+
+
+def mru_kv_key(token):
+    bits = token[0].split('.')
+    if len(bits) == 1:
+        return -2
+    try:
+        return int(bits[1])
+    except ValueError:
+        return -1
 
 
 class Authenticator:
