@@ -3,3 +3,4 @@
 *.pyc
 build
 attic/clock
+.DS_Store
