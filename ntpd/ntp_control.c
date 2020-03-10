@@ -3227,8 +3227,10 @@ send_mru_entry(
 	const char ct_fmt[] =		"ct.%d";
 	const char mv_fmt[] =		"mv.%d";
 	const char rs_fmt[] =		"rs.%d";
+	const char sc_fmt[] =		"sc.%d";
+	const char dr_fmt[] =		"dr.%d";
 	char	tag[32];
-	bool	sent[6]; /* 6 tag=value pairs */
+	bool	sent[8]; /* 8 tag=value pairs */
 	uint32_t noise;
 	unsigned int	which = 0;
 	unsigned int	remaining;
@@ -3276,6 +3278,16 @@ send_mru_entry(
 		case 5:
 			snprintf(tag, sizeof(tag), rs_fmt, count);
 			ctl_puthex(tag, mon->flags);
+			break;
+
+		case 6:
+			snprintf(tag, sizeof(tag), sc_fmt, count);
+			ctl_putdblf(tag, true, 3, mon->score);
+			break;
+
+		case 7:
+			snprintf(tag, sizeof(tag), dr_fmt, count);
+			ctl_putuint(tag, mon->dropped);
 			break;
 
 		default:

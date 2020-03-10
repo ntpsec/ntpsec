@@ -637,9 +637,11 @@ class MRUEntry:
         self.addr = None        # text of IPv4 or IPv6 address and port
         self.last = None        # timestamp of last receipt
         self.first = None       # timestamp of first receipt
-        self.ct = 0             # count of packets received
         self.mv = None          # mode and version
         self.rs = None          # restriction mask (RES_* bits)
+        self.ct = 0             # count of packets received
+        self.sc = None          # score
+        self.dr = None          # dropped packets
 
     def avgint(self):
         last = ntp.ntpc.lfptofloat(self.last)
@@ -1329,7 +1331,7 @@ This combats source address spoofing
             elif tag == "last.newest":
                 # more finished
                 continue
-            for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
+            for prefix in ("addr", "last", "first", "ct", "mv", "rs", "sc", "dr"):
                 if tag.startswith(prefix + "."):
                     (member, idx) = tag.split(".")
                     try:
@@ -1344,10 +1346,11 @@ This combats source address spoofing
         fake_list.sort()
         for idx in fake_list:
             mru = MRUEntry()
+            self.slots += 1
             # Always 6 in practice, in the tests not so much
 #            if len(fake_dict[str(idx)]) != 6:
 #                continue
-            for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
+            for prefix in ("addr", "last", "first", "ct", "mv", "rs", "sc", "dr"):
                 if prefix in fake_dict[str(idx)]:  # dodgy test needs this line
                     setattr(mru, prefix, fake_dict[str(idx)][prefix])
             span.entries.append(mru)

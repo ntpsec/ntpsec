@@ -613,8 +613,9 @@ struct mon_data {
 	endpt *		lcladr;		/* address on which this arrived */
 	l_fp		first;		/* first time seen */
 	l_fp		last;		/* last time seen */
-	int		leak;		/* leaky bucket accumulator */
 	int		count;		/* total packet count */
+	unsigned int	dropped;	/* packets dropped */
+	float		score;		/* recent packets/second */
 	unsigned short	flags;		/* restrict flags */
 	uint8_t		vn_mode;	/* packet mode & version */
 	sockaddr_u	rmtadr;		/* address of remote host */

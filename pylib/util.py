@@ -1235,7 +1235,7 @@ class MRUSummary:
         self.showhostnames = showhostnames      # If false, display numeric IPs
         self.wideremote = wideremote
 
-    header = " lstint avgint rstr r m v  count rport remote address"
+    header = " lstint avgint rstr r m v  count    score   drop rport remote address"
 
     def summary(self, entry):
         last = ntp.ntpc.lfptofloat(entry.last)
@@ -1290,11 +1290,25 @@ class MRUSummary:
             if not self.wideremote:
                 # truncate for narrow display
                 dns = dns[:40]
-            stats += " %4hx %c %d %d %6d %5s %s" % \
+            if entry.sc:
+                score = float(entry.sc)
+                if score > 100000.0:
+                  score = "%8.1f" % score
+                elif score > 10000.0:
+                  score = "%8.2f" % score
+                else:
+                  score = "%8.3f" % score
+            else:
+                score = "-"
+            if entry.dr!= None:     # 0 is valid
+                drop = "%4d" % entry.dr
+            else:
+                drop = "-"
+            stats += " %4hx %c %d %d %6d %8s %6s %5s %s" % \
                      (entry.rs, rscode,
                       ntp.magic.PKT_MODE(entry.mv),
                       ntp.magic.PKT_VERSION(entry.mv),
-                      entry.ct, port[1:], dns)
+                      entry.ct, score, drop, port[1:], dns)
             return stats
         except ValueError:
             # This can happen when ntpd ships a corrupt varlist

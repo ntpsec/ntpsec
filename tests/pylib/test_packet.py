@@ -599,6 +599,7 @@ class TestMisc(unittest.TestCase):
         cls.last = "0x00000200.00000000"
         cls.first = "0x00000100.00000000"
         cls.ct = 4
+        cls.sc = "0.12345"
         self.assertEqual(cls.avgint(), 64)
         if socket.has_ipv6:
             # Test sortaddr, ipv6
@@ -624,15 +625,17 @@ class TestMisc(unittest.TestCase):
                              "<MRUEntry: "
                              "'last': '0x00000200.00000000', "
                              "'addr': '11.22.33.44:23', 'rs': None, "
-                             "'mv': None, 'first': '0x00000100.00000000', "
-                             "'ct': 4>")
+                             "'mv': None, 'sc': '0.12345', "
+                             "'first': '0x00000100.00000000', "
+                             "'dr': None, 'ct': 4>")
         elif sys.version_info[1] >= 6:  # Already know it is 3.something
             # Python 3.6+, dicts enumerate in assignment order
             self.assertEqual(cls.__repr__(),
                              "<MRUEntry: 'addr': '11.22.33.44:23', "
                              "'last': '0x00000200.00000000', "
-                             "'first': '0x00000100.00000000', 'ct': 4, "
-                             "'mv': None, 'rs': None>")
+                             "'first': '0x00000100.00000000', "
+                             "'mv': None, 'rs': None, 'ct': 4, "
+                             "'sc': '0.12345', 'dr': None>")
         else:
             # Python 3.x < 3.6, dicts enumerate randomly
             # I can not test randomness of this type

@@ -4,6 +4,8 @@
 
 #include "config.h"
 
+#include <math.h>
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_lists.h"
@@ -54,14 +56,14 @@ struct monitor_data mon_data = {
 	.mru_maxage = 3600,	/* recycle if older than this */
 	.mru_minage = 64,	/* recycle if full and older than this */
 	.mru_maxdepth = MRU_MAXDEPTH_DEF,	/* MRU count hard limit */
-	.mon_age = 3000,		/* preemption limit */
 	.mru_initalloc = INIT_MONLIST, /* entries to preallocate */
 	.mru_incalloc = INC_MONLIST, /* allocation batch factor */
 	.mru_exists = 0,	/* slot already exists */
 	.mru_new = 0,		/* allocate a new slot (2 cases) */
 	.mru_recycleold = 0,	/* recycle slot: age > mru_maxage */
 	.mru_recyclefull = 0,	/* recycle slot: full and age > mru_minage */
-	.mru_none = 0		/* couldn't get one */
+	.mru_none = 0,		/* couldn't get one */
+	.mon_age = 3000		/* preemption limit */
 };
 
 /*
@@ -76,6 +78,11 @@ static	void	mon_getmoremem(void);
 static	void	remove_from_hash(mon_entry *);
 static	void	mon_free_entry(mon_entry *);
 static	void	mon_reclaim_entry(mon_entry *);
+
+/* Rate limiting */
+float rate_limit = 1.0;		/* packets per second */
+float decay_time = 20;		/* seconds, exponential decay time */
+
 
 /*
  * init_mon - initialize monitoring global data
@@ -319,11 +326,8 @@ ntp_monitor(
 	unsigned short	restrict_mask;
 	uint8_t		mode;
 	uint8_t		version;
-	uint8_t     li_vn_mode;
-	int		interval;
-	int		head;		/* headway increment */
-	int		leak;		/* new headway */
-	int		limit;		/* average threshold */
+	uint8_t		li_vn_mode;
+	float		since_last;	/* seconds since last packet */
 
 	if (mon_data.mon_enabled == MON_OFF)
 		return ~(RES_LIMITED | RES_KOD) & flags;
@@ -346,9 +350,6 @@ ntp_monitor(
 		mon_data.mru_exists++;
 		interval_fp = rbufp->recv_time;
 		interval_fp -= mon->last;
-		/* add one-half second to round up */
-		interval_fp += 0x80000000;
-		interval = lfpsint(interval_fp);
 		mon->last = rbufp->recv_time;
 		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);
 		mon->count++;
@@ -359,43 +360,20 @@ ntp_monitor(
 		UNLINK_DLIST(mon, mru);
 		LINK_DLIST(mon_data.mon_mru_list, mon, mru);
 
-		/*
-		 * At this point the most recent arrival is first in the
-		 * MRU list.  Decrease the counter by the headway, but
-		 * not less than zero.
+		/* Keep score:
+		 * if packets arrive at 1/second,
+		 * score will build up to (almost) 1.0
 		 */
-		mon->leak -= interval;
-		mon->leak = max(0, mon->leak);
-		head = 1 << rstrct.ntp_minpoll;
-		leak = mon->leak + head;
-		limit = NTP_SHIFT * head;
-
-		DPRINT(2, ("MRU: interval %d headway %d limit %d\n",
-			   interval, leak, limit));
-
-		/*
-		 * If the minimum and average thresholds are not
-		 * exceeded, douse the RES_LIMITED and RES_KOD bits and
-		 * increase the counter by the headway increment.  Note
-		 * that we give a 1-s grace for the minimum threshold
-		 * and a 2-s grace for the headway increment.  If one or
-		 * both thresholds are exceeded and the old counter is
-		 * less than the average threshold, set the counter to
-		 * the average threshold plus the increment and leave
-		 * the RES_LIMITED and RES_KOD bits lit. Otherwise,
-		 * leave the counter alone and douse the RES_KOD bit.
-		 * This rate-limits the KoDs to no less than the average
-		 * headway.
-		 */
-		if (interval + 1 >= rstrct.ntp_minpkt && leak < limit) {
-			mon->leak = leak - 2;
+		since_last = ldexpf(interval_fp, -32);
+		mon->score *= expf(-since_last/decay_time);
+		mon->score += 1.0/decay_time;
+		if (mon->score < rate_limit) {
 			restrict_mask &= ~(RES_LIMITED | RES_KOD);
-		} else if (mon->leak < limit)
-			mon->leak = limit + head;
-		else
-			restrict_mask &= ~RES_KOD;
+		}
 
 		mon->flags = restrict_mask;
+		if (RES_LIMITED & restrict_mask)
+			mon->dropped++;
 
 		return mon->flags;
 	}
@@ -471,8 +449,9 @@ ntp_monitor(
 	mon->last = rbufp->recv_time;
 	mon->first = mon->last;
 	mon->count = 1;
+	mon->dropped = 0;
+	mon->score = 1.0/decay_time;
 	mon->flags = ~(RES_LIMITED | RES_KOD) & flags;
-	mon->leak = 0;
 	memcpy(&mon->rmtadr, &rbufp->recv_srcadr, sizeof(mon->rmtadr));
 	mon->vn_mode = VN_MODE(version, mode);
 	mon->lcladr = rbufp->dstadr;
