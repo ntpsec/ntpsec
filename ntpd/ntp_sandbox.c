@@ -493,6 +493,11 @@ int scmp_sc[] = {
  *  You will get several hits for various architures/modes.
  *  You can probably guess the right one.
  *
+ *  If this trap doesn't work, systemd may print out the
+ *  critical info.  Look for something like this:
+ *    Main process exited, code=killed, status=31/SYS
+ *  See above for decoding that number.
+ *
  * Option two:
  *  use strace
  *  sudo strace -t -f -o<filename> <path-to-ntpd> <args>
