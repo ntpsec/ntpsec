@@ -5,6 +5,7 @@
 #include "config.h"
 
 #include <math.h>
+#include <stdlib.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -81,6 +82,7 @@ static	void	mon_reclaim_entry(mon_entry *);
 
 /* Rate limiting */
 float rate_limit = 1.0;		/* packets per second */
+float kod_limit = 0.1;		/* KOD per second - see comments below */
 float decay_time = 20;		/* seconds, exponential decay time */
 
 
@@ -368,13 +370,27 @@ ntp_monitor(
 		mon->score *= expf(-since_last/decay_time);
 		mon->score += 1.0/decay_time;
 		if (mon->score < rate_limit) {
+			/* low score, turn off reject bits */
 			restrict_mask &= ~(RES_LIMITED | RES_KOD);
 		}
 
-		mon->flags = restrict_mask;
 		if (RES_LIMITED & restrict_mask)
 			mon->dropped++;
+		if (RES_KOD & restrict_mask) {
+			/* We need rate limiting on KoD too.
+			 * Note that DDoS attackers often send
+			 * >1000 packets/second.  A simple fraction
+			 * would turn into lots of KoDs.
+			 * So we try 1/score-squared.
+			 * kod_limit is roughly packets/second when
+			 * score is close to 1.
+			 */
+			float rand = random()*1.0/RAND_MAX;
+			if (rand > kod_limit/(mon->score*mon->score))
+				restrict_mask &= ~RES_KOD;
+		}
 
+		mon->flags = restrict_mask;
 		return mon->flags;
 	}
 
