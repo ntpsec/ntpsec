@@ -311,8 +311,9 @@ and +resall=+'hexmask' filter entries containing none or less than all,
 respectively, of the bits in 'hexmask', which must begin with +0x+.
 +
 The _sortorder_ defaults to +lstint+ and may be any of +addr+,
-+count+, +avgint+, +lstint+, or any of those preceded by a minus sign
-(hyphen) to reverse the sort order. The output columns are:
++count+, +avgint+, +lstint+, +score+, +drop+ or any of those
+preceded by a minus sign (hyphen) to reverse the sort order.
+The output columns are:
 +
 include::mrufmt.adoc[]
 

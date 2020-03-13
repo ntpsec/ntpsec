@@ -19,6 +19,8 @@ KoD response, respectively.
 |+m+             |Packet mode.
 |+v+             |Packet version number.
 |+count+         |Packets received from this address.
+|+score+         |Packets per second with 20 second decay time.
+|+drop+          |Packets dropped (or KoDed) from this address.
 |+rport+         |Source port of last packet from this address.
 |+remote address+|
 DNS name, numeric address, or address followed by claimed DNS name

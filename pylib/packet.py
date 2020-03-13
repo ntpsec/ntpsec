@@ -1553,10 +1553,18 @@ def parse_mru_variables(variables):
             "addr": lambda e: e.sortaddr(),
             # IPv6 desc. then IPv4 desc.
             "-addr": lambda e: e.sortaddr(),
-            # hit count ascending
+            # hit count ascending 
             "count": lambda e: -e.ct,
             # hit count descending
             "-count": lambda e: e.ct,
+            # score ascending 
+            "score": lambda e: -e.sc,
+            # score descending
+            "-score": lambda e: e.sc,
+            # drop count ascending 
+            "drop": lambda e: -e.dr,
+            # drop count descending
+            "-drop": lambda e: e.dr,
         }
         if sortkey == "lstint":
             sortkey = None   # normal/default case, no need to sort
