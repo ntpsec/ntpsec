@@ -302,6 +302,10 @@ limit::		Limit on MRU entries returned.  One of frags= or limit=
 
 mincount::	(decimal) Return entries with packet count >= mincount.
 
+mindrop::	(decimal) Return entries with drop count >= mindrop.
+
+minscore::	(float) Return entries with score >= minscore.
+
 maxlstint::	(decimal) Return entries with lstint <= maxlstint.
 		(lstint is now-time of most recent packet)
 

@@ -3343,6 +3343,8 @@ send_mru_entry(
  *			address.  When limit is not one and frags= is
  *			provided, the fragment limit controls.
  *	mincount=	(decimal) Return entries with count >= mincount.
+ *	mindrop=	(decimal) Return entries with drop >= mindrop.
+ *	minscore=	(float) Return entries with score >= minscore.
  *	laddr=		Return entries associated with the server's IP
  *			address given.  No port specification is needed,
  *			and any supplied is ignored.
@@ -3426,6 +3428,8 @@ static void read_mru_list(
 	static const char	frags_text[] =		"frags";
 	static const char	limit_text[] =		"limit";
 	static const char	mincount_text[] =	"mincount";
+	static const char	mindrop_text[] =	"mindrop";
+	static const char	minscore_text[] =	"minscore";
 	static const char	resall_text[] =		"resall";
 	static const char	resany_text[] =		"resany";
 	static const char	maxlstint_text[] =	"maxlstint";
@@ -3438,6 +3442,8 @@ static void read_mru_list(
 	unsigned short		resall;
 	unsigned short		resany;
 	int			mincount;
+	unsigned int		mindrop;
+	float			minscore;
 	unsigned int		maxlstint;
 	sockaddr_u		laddr;
 	unsigned int		recent;
@@ -3479,6 +3485,8 @@ static void read_mru_list(
 	set_var(&in_parms, frags_text, sizeof(frags_text), 0);
 	set_var(&in_parms, limit_text, sizeof(limit_text), 0);
 	set_var(&in_parms, mincount_text, sizeof(mincount_text), 0);
+	set_var(&in_parms, mindrop_text, sizeof(mindrop_text), 0);
+	set_var(&in_parms, minscore_text, sizeof(minscore_text), 0);
 	set_var(&in_parms, resall_text, sizeof(resall_text), 0);
 	set_var(&in_parms, resany_text, sizeof(resany_text), 0);
 	set_var(&in_parms, maxlstint_text, sizeof(maxlstint_text), 0);
@@ -3496,6 +3504,8 @@ static void read_mru_list(
 	frags = 0;
 	limit = 0;
 	mincount = 0;
+	mindrop = 0;
+	minscore = 0.0;
 	resall = 0;
 	resany = 0;
 	maxlstint = 0;
@@ -3529,6 +3539,14 @@ static void read_mru_list(
 				goto blooper;
 			if (mincount < 0)
 				mincount = 0;
+		} else if (!strcmp(mindrop_text, v->text)) {
+			if (1 != sscanf(val, "%u", &mindrop))
+				goto blooper;
+		} else if (!strcmp(minscore_text, v->text)) {
+			if (1 != sscanf(val, "%f", &minscore))
+				goto blooper;
+			if (minscore < 0)
+				minscore = 0.0;
 		} else if (!strcmp(resall_text, v->text)) {
 			if (1 != sscanf(val, resaxx_fmt, &resall))
 				goto blooper;
@@ -3650,6 +3668,10 @@ static void read_mru_list(
 	     mon = PREV_DLIST(mon_data.mon_mru_list, mon, mru)) {
 
 		if (mon->count < mincount)
+			continue;
+		if (mon->dropped < mindrop)
+			continue;
+		if (mon->score < minscore)
 			continue;
 		if (resall && resall != (resall & mon->flags))
 			continue;
