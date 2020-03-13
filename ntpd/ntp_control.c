@@ -3433,6 +3433,7 @@ static void read_mru_list(
 	static const char	resall_text[] =		"resall";
 	static const char	resany_text[] =		"resany";
 	static const char	maxlstint_text[] =	"maxlstint";
+	static const char	minlstint_text[] =	"minlstint";
 	static const char	laddr_text[] =		"laddr";
 	static const char	recent_text[] =		"recent";
 	static const char	resaxx_fmt[] =		"0x%hx";
@@ -3445,6 +3446,7 @@ static void read_mru_list(
 	unsigned int		mindrop;
 	float			minscore;
 	unsigned int		maxlstint;
+	unsigned int		minlstint;
 	sockaddr_u		laddr;
 	unsigned int		recent;
 	endpt *                 lcladr;
@@ -3490,6 +3492,7 @@ static void read_mru_list(
 	set_var(&in_parms, resall_text, sizeof(resall_text), 0);
 	set_var(&in_parms, resany_text, sizeof(resany_text), 0);
 	set_var(&in_parms, maxlstint_text, sizeof(maxlstint_text), 0);
+	set_var(&in_parms, minlstint_text, sizeof(minlstint_text), 0);
 	set_var(&in_parms, laddr_text, sizeof(laddr_text), 0);
 	set_var(&in_parms, recent_text, sizeof(recent_text), 0);
 	for (i = 0; i < COUNTOF(last); i++) {
@@ -3509,6 +3512,7 @@ static void read_mru_list(
 	resall = 0;
 	resany = 0;
 	maxlstint = 0;
+	minlstint = 0;
 	recent = 0;
 	lcladr = NULL;
 	priors = 0;
@@ -3555,6 +3559,9 @@ static void read_mru_list(
 				goto blooper;
 		} else if (!strcmp(maxlstint_text, v->text)) {
 			if (1 != sscanf(val, "%u", &maxlstint))
+				goto blooper;
+		} else if (!strcmp(minlstint_text, v->text)) {
+			if (1 != sscanf(val, "%u", &minlstint))
 				goto blooper;
 		} else if (!strcmp(laddr_text, v->text)) {
 			if (decodenetnum(val, &laddr))
@@ -3679,6 +3686,9 @@ static void read_mru_list(
 			continue;
 		if (maxlstint > 0 && lfpuint(now) - lfpuint(mon->last) >
 		    maxlstint)
+			continue;
+		if (minlstint > 0 && lfpuint(now) - lfpuint(mon->last) <
+		    minlstint)
 			continue;
 		if (lcladr != NULL && mon->lcladr != lcladr)
 			continue;

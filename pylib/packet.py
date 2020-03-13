@@ -1575,7 +1575,8 @@ def parse_mru_variables(variables):
     for k in list(variables.keys()):
         if k in ("mincount", "mindrop", "minscore",
                  "resall", "resany", "kod", "limited",
-                 "maxlstint", "laddr", "recent", "sort", "frags", "limit"):
+                 "maxlstint", "minlstint", "laddr", "recent",
+                 "sort", "frags", "limit"):
             continue
         else:
             raise ControlException(SERR_BADPARAM % k)

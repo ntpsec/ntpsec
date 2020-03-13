@@ -295,7 +295,7 @@ ind assid status conf reach auth condition last_event cnt
   server so loaded that none of its MRU entries age out before they
   are shipped. With this option, each segment is reported as it arrives.
 
-+mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +minscore=+'score' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
++mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +mindrop=+'drop' | +minscore=+'score' | +maxlstint=+'seconds' | +minlstint=+'seconds' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
   Obtain and print traffic counts collected and maintained by the
   monitor facility. This is useful for tracking who _uses_ or
   _abuses_ your server.
@@ -310,6 +310,10 @@ The +mindrop=+'drop' option filters entries that have dropped less
 than 'drop' packets.
 The +minscore=+'score' option filters entries with a score less
 than 'score'.
+The +maxlstint=+'seconds' option filters entries where no packets have
+arrived within 'seconds'.
+The +minlstint=+'seconds' option filters entries with a packet has
+arrived within 'seconds'.
 The +laddr=+'localaddr' option filters entries for packets
 received on any local address other than 'localaddr'. +resany=+'hexmask'
 and +resall=+'hexmask' filter entries containing none or less than all,

@@ -306,7 +306,10 @@ mindrop::	(decimal) Return entries with drop count >= mindrop.
 
 minscore::	(float) Return entries with score >= minscore.
 
-maxlstint::	(decimal) Return entries with lstint <= maxlstint.
+maxlstint::	(decimal seconds) Return entries with lstint <= maxlstint.
+		(lstint is now-time of most recent packet)
+
+minlstint::	(decimal seconds) Return entries with lstint >= minlstint.
 		(lstint is now-time of most recent packet)
 
 laddr::		Return entries associated with the server's IP
