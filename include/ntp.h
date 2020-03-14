@@ -729,18 +729,6 @@ struct endpoint {
 	int	type;			/* interval entry/exit */
 };
 
-/*
- * Association matching AM[] return codes
- */
-#define AM_ERR		-1		/* error */
-#define AM_NOMATCH	0		/* no match */
-#define AM_PROCPKT	1		/* server/symmetric packet */
-#define AM_BCST		2		/* broadcast packet */
-#define AM_FXMIT	3		/* client packet */
-#define AM_MANYCAST	4		/* manycast or pool */
-#define AM_NEWPASS	5		/* new passive */
-#define AM_NEWBCL	6		/* new broadcast */
-#define AM_POSSBCL	7		/* discard broadcast */
 
 /* ntpq -c mrulist rows per request limit in ntpd */
 #define MRU_ROW_LIMIT	256
