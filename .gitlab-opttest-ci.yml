@@ -98,8 +98,20 @@ fbsd-12-options-tester:
   stage: test
   script:
     - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python2.7-dev libseccomp-dev bash pkg-config python3-dev
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python2-dev python2-minimal libseccomp-dev bash pkg-config python3-dev python3-minimal
     - PYTHON=python2 bash tests/option-tester.sh
+    - PYTHON=python3 bash tests/option-tester.sh
+  tags:
+    - gitlab-org
+  only:
+    - schedules
+
+.deb_old_option_tester: &deb_old_option_tester
+  stage: test
+  script:
+    - apt-get update
+    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev python-minimal libseccomp-dev bash pkg-config python3-dev python3-minimal
+    - PYTHON=python bash tests/option-tester.sh
     - PYTHON=python3 bash tests/option-tester.sh
   tags:
     - gitlab-org
@@ -112,7 +124,7 @@ debian-i386-options-tester:
 
 debian-oldstable-options-tester:
   image: debian:oldstable-slim
-  <<: *deb_option_tester
+  <<: *deb_old_option_tester
 
 debian-stable-options-tester:
   image: debian:stable-slim
@@ -132,7 +144,7 @@ ubuntu-devel-options-tester:
 
 ubuntu-latest-options-tester:
   image: ubuntu:latest
-  <<: *deb_option_tester
+  <<: *deb_old_option_tester
 
 ubuntu-rolling-options-tester:
   image: ubuntu:rolling
