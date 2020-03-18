@@ -368,6 +368,8 @@ ntp_monitor(
 		 */
 		since_last = ldexpf(interval_fp, -32);
 		mon->score *= expf(-since_last/decay_time);
+		/* count the ones we drop */
+		/* with enough traffic, we drop everything */
 		mon->score += 1.0/decay_time;
 		if (mon->score < rate_limit) {
 			/* low score, turn off reject bits */

@@ -250,6 +250,7 @@ static	int	peer_unfit	(struct peer *);
 static	double	root_distance	(struct peer *);
 static	void	restart_nts_ke	(struct peer *);
 static	void	maybe_log_junk	(struct recvbuf *rbuf);
+static	void	maybe_log_drop	(struct recvbuf *rbuf);
 
 void
 set_sys_leap(unsigned char new_sys_leap) {
@@ -697,6 +698,7 @@ receive(
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
 		stat_count.sys_limitrejected++;
+		maybe_log_drop(rbufp);
 		if(!(restrict_mask & RES_KOD)) { return; }
 	}
 
@@ -2962,28 +2964,89 @@ proto_clr_stats(void)
 }
 
 
-/* limit logging so bad guys can't DDoS us by sending crap
- * Limit to 25 total.  Maybe should be 10/hour
- * This gets too-old cookies
- */
+/* limit logging so bad guys can't DDoS us by sending crap */
 
 void maybe_log_junk(struct recvbuf *rbufp) {
-    static unsigned int junk = 0;
+  static float junk_limit = 2.0;         /* packets per hour */
+  static float junk_score = 0;           /* score, packets/hour */
+  static float junk_decay = 2.0;         /* hours, exponential decay time */
+  static l_fp  junk_last = 0;            /* time of last attempted print */
+  static long  junk_count = 0;           /* total count */
+  static long  junk_print = 0;           /* printed count */
 #define JUNKSIZE 500
     char buf[JUNKSIZE];
     int lng = rbufp->recv_length;
     int i, j;
-    if (junk++>=25) return;
+
+    junk_count++;
+    if (0 == junk_last) {
+      /* first time */
+      junk_last = rbufp->recv_time;
+    } else {
+      l_fp interval_fp = rbufp->recv_time - junk_last;
+      float since_last = ldexpf(interval_fp, -32)/3600.0;
+      junk_last = rbufp->recv_time;
+      junk_score *= expf(-since_last/junk_decay);
+      if (junk_limit < junk_score)
+	return; 
+    }
+    junk_print++;
+    junk_score += 1.0/junk_decay;  /* only count the ones we print */
+
+    msyslog(LOG_INFO,
+	"JUNK: Count=%ld Print=%ld, Score=%.3f, M%d V%d from %s, lng=%d",
+	junk_count, junk_print, junk_score,
+        PKT_MODE(rbufp->pkt.li_vn_mode), PKT_VERSION(rbufp->pkt.li_vn_mode),
+        sockporttoa(&rbufp->recv_srcadr), lng);
     for (i=0,j=0; i<lng; i++) {
       if ((j+4)>JUNKSIZE) break;
       if (0 == (i%4)) buf[j++] = ' ';
       j += snprintf(&buf[j], (JUNKSIZE-j), "%02x", rbufp->recv_buffer[i]);
     }
     msyslog(LOG_INFO,
-	"JUNK: M%d V%d %s from %s, lng=%d",
-	PKT_MODE(rbufp->pkt.li_vn_mode), PKT_VERSION(rbufp->pkt.li_vn_mode),
-	buf,
-	sockporttoa(&rbufp->recv_srcadr),
-	lng);
+	"JUNK: %s", buf);
+}
+
+
+void maybe_log_drop(struct recvbuf *rbufp) {
+  static float drop_limit = 2.0;         /* packets per hour */
+  static float drop_score = 0;           /* score, packets/hour */
+  static float drop_decay = 2.0;         /* hours, exponential decay time */
+  static l_fp  drop_last = 0;            /* time of last attempted print */
+  static long  drop_count = 0;           /* total count */
+  static long  drop_print = 0;           /* printed count */
+#define DROPSIZE 500
+    char buf[DROPSIZE];
+    int lng = rbufp->recv_length;
+    int i, j;
+
+    drop_count++;
+    if (0 == drop_last) {
+      /* first time */
+      drop_last = rbufp->recv_time;
+    } else {
+      l_fp interval_fp = rbufp->recv_time - drop_last;
+      float since_last = ldexpf(interval_fp, -32)/3600.0;
+      drop_last = rbufp->recv_time;
+      drop_score *= expf(-since_last/drop_decay);
+      if (drop_limit < drop_score)
+	return; 
+    }
+    drop_print++;
+    drop_score += 1.0/drop_decay;  /* only count the ones we print */
+
+    rbufp->pkt.li_vn_mode = rbufp->recv_buffer[0]; /* no parse_packet() yet */
+    msyslog(LOG_INFO,
+	"DROP: Count=%ld Print=%ld, Score=%.3f, M%d V%d from %s, lng=%d",
+	drop_count, drop_print, drop_score,
+        PKT_MODE(rbufp->pkt.li_vn_mode), PKT_VERSION(rbufp->pkt.li_vn_mode),
+        sockporttoa(&rbufp->recv_srcadr), lng);
+    for (i=0,j=0; i<lng; i++) {
+      if ((j+4)>DROPSIZE) break;
+      if (0 == (i%4)) buf[j++] = ' ';
+      j += snprintf(&buf[j], (DROPSIZE-j), "%02x", rbufp->recv_buffer[i]);
+    }
+    msyslog(LOG_INFO,
+	"DROP: %s", buf);
 }
 
