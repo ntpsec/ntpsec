@@ -483,8 +483,10 @@ main(
 	int		pipe_fds[2];
 	int		rc;
 	int		exit_code;
-	struct sigaction sa;
 	int op;
+#ifdef SIGDANGER
+	struct sigaction sa;
+#endif
 
 	uv = umask(0);
 	if (uv) {
@@ -591,12 +593,6 @@ main(
 		sigaction(SIGDANGER, &sa, NULL);
 #endif	/* SIGDANGER */
 	}
-
-	/* Ignore SIGPIPE - from OpenSSL */
-	sa.sa_handler = SIG_IGN;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
- 	(void)sigaction(SIGPIPE, &sa, NULL);
 
 	/*
 	 * Set up signals we pay attention to locally.
