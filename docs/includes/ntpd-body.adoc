@@ -5,7 +5,7 @@
 == SYNOPSIS
 [verse]
 ntpd
-    [-46aghLmnNqx] [assert] [-c 'conffile'] [-f 'driftfile']
+    [-46agGhLmnNqx] [assert] [-c 'conffile'] [-f 'driftfile']
     [-i 'jaildir'] [-k 'keyfile'] [-l 'logfile'] [-p 'pidfile']
     [-P 'priority'] [-s 'statsdir']  [-t  'key']
     [-u 'user'[:'group']] [-U 'interface_update_interval']
@@ -105,7 +105,7 @@ this can happen only once. If the threshold is exceeded after that,
 used with the +-q+ and +-x+ options. See the _tinker_ configuration
 file directive for other options.
 
-+-G+, +--force-step-once+::
++-G+::
   Step any initial offset correction.
 +
 Normally, +ntpd+ steps the time if the time offset exceeds the step
