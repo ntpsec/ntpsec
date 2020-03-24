@@ -175,12 +175,6 @@ static double sys_mindly;	/* huff-n'-puff filter min delay */
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
-#ifdef SIGSYS
-static void pll_trap (int);	/* configuration trap */
-static struct sigaction sigsys;	/* current sigaction status */
-static struct sigaction newsigsys; /* new sigaction status */
-static sigjmp_buf env;		/* environment var. for pll_trap() */
-#endif /* SIGSYS */
 
 static void
 sync_status(const char *what, int ostatus, int nstatus) {
@@ -1066,34 +1060,9 @@ start_kern_loop(void)
 	ntv.maxerror = sys_maxdisp;
 	ntv.esterror = sys_maxdisp;
 	ntv.constant = clkstate.sys_poll; /* why is it that here constant is unconditionally set to sys_poll, whereas elsewhere is is modified depending on nanosecond vs. microsecond kernel? */
-#ifdef SIGSYS
-	/*
-	 * Use sigsetjmp() to save state and then call ntp_adjtime(); if
-	 * it fails, then pll_trap() will set pll_control false before
-	 * returning control using siglogjmp().
-	 */
-	newsigsys.sa_handler = pll_trap;
-	newsigsys.sa_flags = 0;
-	if (sigaction(SIGSYS, &newsigsys, &sigsys)) {
-		msyslog(LOG_ERR, "ERR: sigaction() trap SIGSYS: %s", strerror(errno));
-		clock_ctl.pll_control = false;
-	} else {
-		if (sigsetjmp(env, 1) == 0) {
-			if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
-			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
-			}
-		}
-		if (sigaction(SIGSYS, &sigsys, NULL)) {
-			msyslog(LOG_ERR,
-			    "ERR: sigaction() restore SIGSYS: %s", strerror(errno));
-			clock_ctl.pll_control = false;
-		}
-	}
-#else /* SIGSYS */
 	if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 	}
-#endif /* SIGSYS */
 
 	/*
 	 * Save the result status and light up an external clock
@@ -1311,23 +1280,3 @@ loop_config(
 	}
 }
 
-
-#if defined(SIGSYS)
-/*
- * _trap - trap processor for undefined syscalls
- *
- * This nugget is called by the kernel when the SYS_ntp_adjtime()
- * syscall bombs because the silly thing has not been implemented in
- * the kernel. In this case the phase-lock loop is emulated by
- * the stock adjtime() syscall and a lot of indelicate abuse.
- */
-static void
-pll_trap(
-	int arg
-	)
-{
-	UNUSED_ARG(arg);
-	clock_ctl.pll_control = false;
-	siglongjmp(env, 1);
-}
-#endif /* SIGSYS */
