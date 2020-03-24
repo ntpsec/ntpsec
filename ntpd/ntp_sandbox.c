@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "ntpd.h"
 #include "ntp_assert.h"
 
 #ifdef ENABLE_DROPROOT
@@ -272,7 +273,7 @@ getgroup:
 #endif
 	scmp_filter_ctx ctx = seccomp_init(MY_SCMP_ACT);
 
-        signal_no_reset1(SIGSYS, catchTrap);
+	setup_SIGSYS_trap();
 
 	if (NULL == ctx) {
 		msyslog(LOG_ERR, "INIT: sandbox: seccomp_init() failed: %s", strerror(errno));
@@ -477,6 +478,13 @@ int scmp_sc[] = {
 }
 
 #ifdef HAVE_SECCOMP_H
+
+/* New threads default to kill on SIGSYS */
+void setup_SIGSYS_trap(void) {
+        signal_no_reset1(SIGSYS, catchTrap);
+}
+
+
 /*
  * catchTrap - get here if something missing from list above
  * (or a bad guy finds a way in)

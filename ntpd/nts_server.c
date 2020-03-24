@@ -211,6 +211,10 @@ void* nts_ke_listener(void* arg) {
 	char addrbuf[100];
 	char usingbuf[100];
 
+#ifdef HAVE_SECCOMP_H
+        setup_SIGSYS_trap();   /* enable trap for this thread */
+#endif
+
 	while(1) {
 		sockaddr_u addr;
 		socklen_t len = sizeof(addr);

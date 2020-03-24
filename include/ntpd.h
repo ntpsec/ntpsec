@@ -456,4 +456,10 @@ bool nts_probe(struct peer *peer);
 bool nts_check(struct peer *peer);
 void nts_timer(void);
 
+/* ntp_sandbox.c */
+#ifdef HAVE_SECCOMP_H
+void setup_SIGSYS_trap(void);
+#endif
+
+
 #endif	/* GUARD_NTPD_H */

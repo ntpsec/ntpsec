@@ -260,6 +260,13 @@ TEST(nts_client, nts_client_process_response_core) {
 }
 
 /* Hacks to keep linker happy */
+
+#ifdef HAVE_SECCOMP_H
+void setup_SIGSYS_trap(void) {
+        return;         /* dummy to keep linker happy */
+}
+#endif
+
 void dns_take_server(struct peer *a, sockaddr_u *b) {
 	UNUSED_ARG(a);
 	UNUSED_ARG(b);

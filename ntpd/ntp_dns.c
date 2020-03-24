@@ -166,6 +166,10 @@ static void* dns_lookup(void* arg)
 	struct peer *pp = (struct peer *) arg;
 	struct addrinfo hints;
 
+#ifdef HAVE_SECCOMP_H
+        setup_SIGSYS_trap();      /* enable trap for this thread */
+#endif
+
 #ifdef HAVE_RES_INIT
 	/* Reload DNS servers from /etc/resolv.conf in case DHCP has updated it.
 	 * We only need to do this occasionally, but it's not expensive
