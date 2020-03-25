@@ -817,6 +817,10 @@ int main(int argc, char **argv) {
                 msg("WARNING: This system has a 32-bit time_t.")
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
+    # We need TLS 1.3 which isn't supported by older versions of OpenSSL
+    from wafhelpers.openssl import check_SSL_version
+    check_SSL_version(ctx)
+
     # before write_config()
     droproot_type = ""
     if ctx.is_defined("HAVE_LINUX_CAPABILITY"):
