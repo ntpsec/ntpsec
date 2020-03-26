@@ -298,6 +298,8 @@ void nts_ke_accept_fail(char* addrbuf, double sec) {
 		msg = "http request";
 	if (ERR_LIB_SSL == lib && SSL_R_NO_SHARED_CIPHER == reason)
 		msg = "no shared cipher";
+	if (ERR_LIB_SSL == lib && SSL_R_UNSUPPORTED_PROTOCOL == reason)
+		msg = "unsupported protocol (TLSv1.2?)";
 	if (NULL == msg) {
 		msyslog(LOG_INFO, "NTSs: SSL accept from %s failed, took %.3f sec",
 			addrbuf, sec);
