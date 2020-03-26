@@ -17,8 +17,8 @@ There are some prerequisites.  Libraries need the binary installed
 to run and in addition, the development headers installed to build.
 
 We need pthreads (It's optional in POSIX)
-We need OpenSSL >= 1.0.1
-NTS needs TLS1.2 or newer.
+We need OpenSSL > 1.1.1a (1.1.1a has a fatal bug)
+NTS needs TLS1.3 or newer.
 
 === The short version ===
 
@@ -66,7 +66,6 @@ psutil::
    Debian: python-psutil or python3-psutil
    Ubuntu: python-psutil or python3-psutil
    Fedora/CentOS: python-psutil
-   CentOS 6: python-psutil in epel ("Extra Packages for Enterprise Linux").
    Gentoo: dev-python/psutil
    SLES: python-psutil
 
@@ -95,7 +94,6 @@ asciidoc, a2x::
    or asciidoc3.
    Debian/Ubuntu: asciidoc
    Fedora/CentOS: asciidoc
-   CentOS 6: asciidoc is only 8.4.5.  You cannot build docs or man pages.
    Gentoo: app-text/asciidoc
    SLES: asciidoc
 
