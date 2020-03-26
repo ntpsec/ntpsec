@@ -133,16 +133,15 @@ struct ntspacket_t {
 
 /* Configuration data for an NTS server or client instance */
 struct ntsconfig_t {
-	bool ntsenable; 		/* enable NTS KE server on this ntpd */
+	bool ntsenable; 	/* enable NTS KE server on this ntpd */
 	const char * mintls;	/* minimum TLS version allowed */
 	const char * maxtls;	/* maximum TLS version allowed */
-	const char *tlsciphers;	/* allowed TLS 1.2 ciphers */
 	const char *tlsciphersuites;/* allowed TLS 1.3 ciphersuites */
-	const char *cert;		/* file holding server certificate key */
-	const char *key;		/* file holding server private key */
+	const char *cert;	/* file holding server certificate key */
+	const char *key;	/* file holding server private key */
 	const char *KI;		/* file holding K/I for making cookies */
 	const char *ca;		/* root cert dir/file */
-	const char *aead;		/* AEAD algorithms on wire */
+	const char *aead;	/* AEAD algorithms on wire */
 };
 
 

@@ -4,7 +4,7 @@ The following command controls NTS authentication. It overrides
 normal TLS protocol negotiation, which is not usually necessary.
 
 [[nts]]
-+nts+ [enable|disable] [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphers+ _name_] [+tlsciphersuites+ _name_]
++nts+ [enable|disable] [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphersuites+ _name_]
 
 The options are as follows:
 
@@ -45,10 +45,6 @@ The options are as follows:
   testing. Format is as for +mintls+.
 
 // https://crypto.stackexchange.com/questions/8964/sending-tls-messages-with-out-encryption-using-openssl-code
-+tlsciphers+ _string_::
-   An OpenSSL cipher list to configure the allowed ciphers for TLS
-   versions up to and including TLS 1.2. A single NULL cipher disables
-   encryption and use of certificates.
 
 +tlsciphersuites+ _string_::
    An OpenSSL ciphersuite list to configure the allowed ciphersuites for

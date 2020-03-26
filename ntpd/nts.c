@@ -33,7 +33,6 @@ struct ntsconfig_t ntsconfig = {
 	.ntsenable = false,
 	.mintls = NULL,
 	.maxtls = NULL,
-	.tlsciphers = NULL,
 	.tlsciphersuites = NULL,
 	.cert = NULL,
 	.key = NULL,
@@ -75,27 +74,21 @@ void nts_init2(void) {
 	}
 }
 
-/* There are 3 cases:
- *  1: old, log build version
- *  2: new, match, log version
- *  3: new, mismatch, log both build and run
+/* There are 2 cases:
+ *  1: match, log version
+ *  2: mismatch, log both build and run
  */
 void nts_log_version(void) {
 	unsigned long buildVersion = OPENSSL_VERSION_NUMBER;
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
-	/* Case 1 */
-	msyslog(LOG_INFO, "INIT: %s, %lx",
-		OPENSSL_VERSION_TEXT, buildVersion);
-#else
 	const char * text = OpenSSL_version(OPENSSL_VERSION);
 	bool match = (buildVersion == OpenSSL_version_num()) &&
 		(0 == strcmp(OPENSSL_VERSION_TEXT, text));
 	if (match) {
-		/* Case 2 */
+		/* Case 1 */
 		msyslog(LOG_INFO, "INIT: %s, %lx",
 			OPENSSL_VERSION_TEXT, buildVersion);
 	} else {
-                /* Case 3 */
+                /* Case 2 */
 		msyslog(LOG_INFO, "INIT: Built with %s, %lx",
 			OPENSSL_VERSION_TEXT, buildVersion);
 		msyslog(LOG_INFO, "INIT: Running with %s, %lx",
@@ -106,7 +99,6 @@ void nts_log_version(void) {
 			exit(1);
 		}
 	}
-#endif
 }
 
 /*****************************************************/
@@ -123,17 +115,10 @@ int nts_translate_version(const char *arg) {
 	if (NULL == arg) {
 		return 0;
 	}
-	if (0 == strcmp(arg, "TLS1.2"))
-		return TLS1_2_VERSION;
 	if (0 == strcmp(arg, "TLS1.3")) {
-#ifdef TLS1_3_VERSION
 		return TLS1_3_VERSION;
-#else
-		msyslog(LOG_ERR, "NTS: TLS1.3 not supported by this version of OpenSSL.");
-		return -1;
-#endif
 	}
-	msyslog(LOG_ERR, "NTS: unrecognized version string: %s.", arg);
+	msyslog(LOG_ERR, "NTS: TLS unrecognized version string: %s.", arg);
 	return -1;
 }
 
@@ -174,25 +159,9 @@ bool nts_load_versions(SSL_CTX *ctx) {
 	maxver = nts_translate_version(ntsconfig.maxtls);
 	if ((-1 == minver) || (-1 == maxver))
 		return false;
-#if (OPENSSL_VERSION_NUMBER == 0x1010101fL)
-	if (0 == maxver) {
-		msyslog(LOG_INFO, "NTS: Using TLS1.2 to avoid bug in OpenSSL 1.1.1a.");
-		maxver = TLS1_2_VERSION;
-	}
-#endif
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
-	if(0 == minver) minver = TLS1_2_VERSION;   // 3.
+	if(0 == minver) minver = TLS1_3_VERSION;   // 3.
 	SSL_CTX_set_min_proto_version(ctx, minver);
 	SSL_CTX_set_max_proto_version(ctx, maxver);
-#else
-	/* TLS 1.2 was added in 1.0.1, 14 Mar 2012
-	 * HGM hasn't seen anything older.  2019-Oct-26
-	 * versions older than 1.1.0  don't support min/max version requests.
-	 * That's OK, since we don't want anything older than 1.2 and
-	 * they don't support anything newer. */
-#define NO_OLD_VERSIONS SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1
-	SSL_CTX_set_options(ctx, NO_OLD_VERSIONS);
-#endif
 	return true;
 }
 
@@ -202,25 +171,13 @@ bool nts_load_ciphers(SSL_CTX *ctx) {
 	 * the ciphers to see what it took.
 	 * We could make a dummy SSL, read the list, then free it.
 	 */
-	if (NULL != ntsconfig.tlsciphers) {
-		if (1 != SSL_CTX_set_cipher_list(ctx, ntsconfig.tlsciphers)) {
-			msyslog(LOG_ERR, "NTS: troubles setting ciphers.");
-			return false;
-		} else {
-			msyslog(LOG_INFO, "NTS: set ciphers.");
-		}
-	}
 	if (NULL != ntsconfig.tlsciphersuites) {
-#ifdef TLS1_3_VERSION
 		if (1 != SSL_CTX_set_ciphersuites(ctx, ntsconfig.tlsciphersuites)) {
 			msyslog(LOG_ERR, "NTS: troubles setting ciphersuites.");
 			return false;
 		} else {
 			msyslog(LOG_INFO, "NTS: set ciphersuites.");
 		}
-#else
-		msyslog(LOG_ERR, "NTS: ciphersuites not supported on this version of OpenSSL.");
-#endif
 	}
 	return true;
 }

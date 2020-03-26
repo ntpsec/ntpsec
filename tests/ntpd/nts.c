@@ -16,12 +16,7 @@ TEST_TEAR_DOWN(nts) {}
 
 TEST(nts, nts_translate_version) {
 	TEST_ASSERT_EQUAL_INT32(0, nts_translate_version(NULL));
-	TEST_ASSERT_EQUAL_INT32(TLS1_2_VERSION, nts_translate_version("TLS1.2"));
-#ifdef TLS1_3_VERSION
 	TEST_ASSERT_EQUAL_INT32(TLS1_3_VERSION, nts_translate_version("TLS1.3"));
-#else
-	TEST_ASSERT_EQUAL_INT32(-1, nts_translate_version("TLS1.3"));
-#endif
 	TEST_ASSERT_EQUAL_INT32(-1, nts_translate_version("blah"));
 }
 

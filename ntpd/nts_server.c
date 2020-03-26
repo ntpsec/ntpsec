@@ -17,10 +17,6 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/x509.h>
-/* Old OpenSSL 1.0.2 doesn't have sslerr.h */
-#ifndef SSL_R_WRONG_VERSION_NUMBER
-#include <openssl/sslerr.h>
-#endif
 
 #include "ntp.h"
 #include "ntpd.h"
@@ -58,7 +54,6 @@ uint64_t nts_ke_serves_bad = 0;
 uint64_t nts_ke_probes_good = 0;
 uint64_t nts_ke_probes_bad = 0;
 
-#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
 static int alpn_select_cb(SSL *ssl,
 			  const unsigned char **out,
 			  unsigned char *outlen,
@@ -92,7 +87,6 @@ static int alpn_select_cb(SSL *ssl,
 
 	return SSL_TLSEXT_ERR_NOACK;
 }
-#endif
 
 bool nts_server_init(void) {
 	bool ok = true;
@@ -100,12 +94,7 @@ bool nts_server_init(void) {
 	msyslog(LOG_INFO, "NTSs: starting NTS-KE server listening on port %d",
 		NTS_KE_PORT);
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
 	server_ctx = SSL_CTX_new(TLS_server_method());
-#else
-	// OpenSSL_add_all_ciphers();  // maybe was needed on NetBSD ??
-	server_ctx = SSL_CTX_new(TLSv1_2_server_method());
-#endif
 	if (NULL == server_ctx) {
 		/* Happens if no ciphers */
 		msyslog(LOG_INFO, "NTSs: NULL server_ctx");
@@ -113,10 +102,7 @@ bool nts_server_init(void) {
 		return false;
 	}
 
-#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
 	SSL_CTX_set_alpn_select_cb(server_ctx, alpn_select_cb, NULL);
-#endif
-
 	SSL_CTX_set_session_cache_mode(server_ctx, SSL_SESS_CACHE_OFF);
 	SSL_CTX_set_timeout(server_ctx, NTS_KE_TIMEOUT);  /* session lifetime */
 
@@ -131,10 +117,8 @@ bool nts_server_init(void) {
 		return false;
 	};
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
 	msyslog(LOG_INFO, "NTSs: OpenSSL security level is %d",
 		SSL_CTX_get_security_level(server_ctx));
-#endif
 
 	ok &= create_listener4(NTS_KE_PORT);
 	ok &= create_listener6(NTS_KE_PORT);

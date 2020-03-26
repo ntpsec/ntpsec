@@ -207,7 +207,6 @@ struct key_tok ntp_keywords[] = {
 { "ca",			T_Ca,			FOLLBY_TOKEN },
 { "mintls",		T_Mintls,		FOLLBY_TOKEN },
 { "maxtls",		T_Maxtls,		FOLLBY_TOKEN },
-{ "tlsciphers",		T_Tlsciphers,		FOLLBY_STRING },
 { "tlsciphersuites",	T_Tlsciphersuites,	FOLLBY_STRING },
 };
 

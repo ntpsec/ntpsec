@@ -2035,10 +2035,6 @@ config_nts(
 			ntsconfig.mintls = estrdup(nts->value.s);
 			break;
 
-		case T_Tlsciphers:
-			ntsconfig.tlsciphers = estrdup(nts->value.s);
-			break;
-
 		case T_Tlsciphersuites:
 			ntsconfig.tlsciphersuites = estrdup(nts->value.s);
 			break;

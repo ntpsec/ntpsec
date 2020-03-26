@@ -12,6 +12,18 @@ on user-visible changes.
 
 == Repository head ==
 
+The draft RFC for NTS has dropped support for TLSv1.2
+  We now need OpenSSL version 1.1.1 or newer.
+  The config keyword +tlsciphers+ has been removed.
+
+Additional filtering and sort options have been added to ntpq/mrulist
+  Details are in the man page.
+
+Rate limiting has been cleaned up.
+  With "restrict limited", traffic is now limited to
+  an average of 1 packet per second with bursts of 20.
+  (needs doc and maybe config)
+
 SIGHUP and hourly checks have been unified.  Both now
   check for a new log file
   check for a new certificate file

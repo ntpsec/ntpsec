@@ -213,12 +213,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 	bool ok = true;
 	SSL_CTX *ctx;
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
 	ctx = SSL_CTX_new(TLS_client_method());
-#else
-	// OpenSSL_add_all_ciphers();  // Maybe was needed on NetBSD ??
-	ctx = SSL_CTX_new(TLSv1_2_client_method());
-#endif
 	if (NULL == ctx) {
 		/* Happens if no ciphers */
 		msyslog(LOG_ERR, "NTSc: NULL ctx");
@@ -226,13 +221,11 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 		return NULL;
 	}
 
-#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
 	{
 		// 4., ALPN, RFC 7301
 		static unsigned char alpn [] = { 7, 'n', 't', 's', 'k', 'e', '/', '1' };
 		SSL_CTX_set_alpn_protos(ctx, alpn, sizeof(alpn));
 	}
-#endif
 
 	SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
 	SSL_CTX_set_timeout(ctx, NTS_KE_TIMEOUT);   /* session lifetime */
@@ -406,28 +399,10 @@ void set_hostname(SSL *ssl, struct peer *peer, const char *hostname) {
 	}
 
 // https://wiki.openssl.org/index.php/Hostname_validation
-#if (OPENSSL_VERSION_NUMBER > 0x1010000fL)
 	UNUSED_ARG(peer);
 	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
 	SSL_set1_host(ssl, host);
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
-#elif (OPENSSL_VERSION_NUMBER > 0x1000200fL)
-	if (FLAG_NTS_NOVAL & peer->cfg.flags)
-		return;
-	{  /* enable automatic hostname checks */
-	X509_VERIFY_PARAM *param = SSL_get0_param(ssl);
-	X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_WILDCARDS);
-	if (1 != X509_VERIFY_PARAM_set1_host(param, host, strlen(host))) {
-		msyslog(LOG_ERR, "NTSc: troubles setting hostflags");
-	}
-	SSL_set_verify(ssl, SSL_VERIFY_PEER, NULL);
-	}
-#else
-	/*  Versions prior to 1.0.2 did not perform hostname validation */
-	UNUSED_ARG(ssl);
-	UNUSED_ARG(peer);
-	msyslog(LOG_ERR, "NTSc: can't check hostname/certificate");
-#endif
 
 }
 
@@ -468,17 +443,10 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
 
 bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
 	UNUSED_ARG(peer);
-#if (OPENSSL_VERSION_NUMBER > 0x1000200fL)
 	const unsigned char *data;
 	unsigned int len;
 	SSL_get0_alpn_selected(ssl, &data, &len);
 	if (0 == len) {
-		/* This happens when talking to old/TLSv1.2 systems. */
-		if (TLS1_2_VERSION == SSL_version(ssl)) {
-			msyslog(LOG_DEBUG, "NTSc: No ALPN from %s, TLSv1.2",
-			hostname);
-			return true;
-		}
 		msyslog(LOG_DEBUG, "NTSc: No ALPN from %s (%s)",
 			hostname, SSL_get_version(ssl));
 		return false;
@@ -505,10 +473,6 @@ bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
 	}
 	msyslog(LOG_DEBUG, "NTSc: Good ALPN from %s", hostname);
 
-#else
-	UNUSED_ARG(ssl);
-	UNUSED_ARG(hostname);
-#endif
 	return true;
 }
 
