@@ -202,6 +202,7 @@ debian-unstable-refclocks:
 
 ubuntu-latest-basic:
   <<: *job_definition
+  allow_failure: true
   image: ubuntu:latest
   script:
     - apt-get update
@@ -212,6 +213,7 @@ ubuntu-latest-basic:
 
 ubuntu-latest-refclocks:
   <<: *job_definition
+  allow_failure: true
   image: ubuntu:latest
   script:
     - apt-get update
@@ -279,24 +281,6 @@ gcc-latest-refclocks:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
     - gitlab-org
-
-freebsd-11-basic:
-  <<: *job_definition
-  script:
-    - python ./waf configure --disable-doc --disable-manpage build
-  tags:
-    - freebsd-11
-  only:
-    - branches@NTPsec/ntpsec
-
-freebsd-11-refclocks:
-  <<: *job_definition
-  script:
-    - python ./waf configure --disable-doc --disable-manpage --refclock=all build
-  tags:
-    - freebsd-11
-  only:
-    - branches@NTPsec/ntpsec
 
 freebsd-12-basic:
   <<: *job_definition
@@ -425,6 +409,7 @@ clang-refclocks:
 openSUSE-leap-basic:
   <<: *job_definition
   image: opensuse/leap
+  allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
     - python ./waf configure --disable-doc --disable-manpage build
@@ -434,6 +419,7 @@ openSUSE-leap-basic:
 openSUSE-leap-refclocks:
   <<: *job_definition
   image: opensuse/leap
+  allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
@@ -502,6 +488,7 @@ debian-stable-mDNS-refclocks:
 
 cross-build:
   <<: *job_definition
+  allow_failure: true
   script:
     - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
   tags:
@@ -562,6 +549,7 @@ coverity-scan:
 
 macos-basic:
   <<: *job_definition
+  allow_failure: true
   script:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build
   tags:
@@ -571,6 +559,7 @@ macos-basic:
 
 macos-refclocks:
   <<: *job_definition
+  allow_failure: true
   script:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
