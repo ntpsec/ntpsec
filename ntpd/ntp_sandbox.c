@@ -35,6 +35,12 @@ static priv_set_t *lowprivs = NULL;
 static priv_set_t *highprivs = NULL;
 #endif /* HAVE_SOLARIS_PRIVS */
 
+#ifdef HAVE_PRIV_NTP_ADJTIME
+#include <sys/types.h>
+#include <sys/sysctl.h>
+static void CheckFreeBSDdroproot(uid_t uid);
+#endif
+
 #ifdef HAVE_SECCOMP_H
 # include <seccomp.h>
 static void catchTrap(int sig, siginfo_t *, void *);
@@ -68,13 +74,13 @@ bool sandbox(const bool droproot,
 #ifndef HAVE_LINUX_CAPABILITY
 	UNUSED_ARG(want_dynamic_interface_tracking);
 #endif /* HAVE_LINUX_CAPABILITY */
-#if !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS) && !defined(HAVE_SYS_CLOCKCTL_H)
+#if !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS) && !defined(HAVE_SYS_CLOCKCTL_H) && !defined(HAVE_PRIV_NTP_ADJTIME)
 	if (droproot) {
 		msyslog(LOG_ERR,
 			"INIT: root can't be dropped due to missing capabilities.");
 		exit(-1);
 	}
-#endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)  && !defined(HAVE_SYS_CLOCKCTL_H) */
+#endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)  && !defined(HAVE_SYS_CLOCKCTL_H) && !defined(HAVE_PRIV_NTP_ADJTIME) */
 	if (droproot) {
 		/* Drop super-user privileges and chroot now if the OS supports this */
 #  ifdef HAVE_LINUX_CAPABILITY
@@ -172,6 +178,10 @@ getgroup:
 			exit(-1);
 		}
 #  endif /* HAVE_SOLARIS_PRIVS */
+#ifdef HAVE_PRIV_NTP_ADJTIME
+		if (user)
+			CheckFreeBSDdroproot(sw_uid);
+#endif
                 /* FIXME? Apple takes an int as 2nd argument */
 		if (user && initgroups(user, (gid_t)sw_gid)) {
 			msyslog(LOG_ERR, "INIT: Cannot initgroups() to user `%s': %s", user, strerror(errno));
@@ -476,6 +486,29 @@ int scmp_sc[] = {
 
 	return nonroot;
 }
+
+#ifdef HAVE_PRIV_NTP_ADJTIME
+void CheckFreeBSDdroproot(uid_t uid) {
+	/* This checks that mac_ntpd.ko is loaded.
+	 * It defaults to 123 and enabled, aka what we want.
+	 * We could also check security.mac.ntpd.enabled.
+	 */
+	uid_t need;
+	size_t size = sizeof(need);
+	int err;
+	err = sysctlbyname("security.mac.ntpd.uid", &need, &size, NULL, 0);
+	if (err) {
+		msyslog(LOG_ERR, "INIT: sysctl failed. Is mac_ntpd.ko loaded? (%s)", strerror(errno));
+		exit(-1);
+	}
+	if (uid != need) {
+		msyslog(LOG_ERR, "INIT: FreeBSD needs user %d", need);
+		exit(-1);
+	}
+	return;
+}
+#endif
+
 
 #ifdef HAVE_SECCOMP_H
 

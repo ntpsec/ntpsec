@@ -611,7 +611,9 @@ int main(int argc, char **argv) {
         ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),
         ('sched_setscheduler', ["sched.h"]),
         ('strlcpy', ["string.h"]),
-        ('strlcat', ["string.h"])
+        ('strlcat', ["string.h"]),
+	# Hack.  It's not a function, but this works.
+	('PRIV_NTP_ADJTIME', ["sys/priv.h"])		# FreeBSD
     )
     for ft in optional_functions:
         probe_function(ctx, function=ft[0], prerequisites=ft[1])
@@ -822,13 +824,14 @@ int main(int argc, char **argv) {
     check_SSL_version(ctx)
 
     # before write_config()
-    droproot_type = ""
     if ctx.is_defined("HAVE_LINUX_CAPABILITY"):
         droproot_type = "Linux"
     elif ctx.is_defined("HAVE_SOLARIS_PRIVS"):
         droproot_type = "Solaris"
     elif ctx.is_defined("HAVE_SYS_CLOCKCTL_H"):
         droproot_type = "NetBSD"
+    elif ctx.is_defined("HAVE_PRIV_NTP_ADJTIME"):
+        droproot_type = "FreeBSD"
     else:
         droproot_type = "None"
 
