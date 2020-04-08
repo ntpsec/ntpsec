@@ -154,8 +154,15 @@ init_restrict(void)
 	 * behavior as but reversed implementation compared to the docs.
 	 *
 	 */
+
 	LINK_SLIST(rstrct.restrictlist4, &restrict_def4, link);
 	LINK_SLIST(rstrct.restrictlist6, &restrict_def6, link);
+	restrict_def4.flags = RES_Default;
+	restrict_def6.flags = RES_Default;
+	if (RES_Default & RES_LIMITED) {
+		inc_res_limited();
+		inc_res_limited();
+	}
 	restrictcount = 2;
 }
 

@@ -12,6 +12,9 @@ on user-visible changes.
 
 == Repository head ==
 
+The default restrictions now includes noquery and limited
+to reduce the opportunities for being used for DDoS-ing.
+
 The draft RFC for NTS has dropped support for TLSv1.2
   We now need OpenSSL version 1.1.1 or newer.
   The config keyword +tlsciphers+ has been removed.

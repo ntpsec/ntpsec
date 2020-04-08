@@ -62,6 +62,8 @@ TEST(hackrestrict, RestrictionsAreEmptyAfterInit) {
 
 	memset(rl4, 0, sizeof(restrict_u));
 	memset(rl6, 0, sizeof(restrict_u));
+	rl4->flags = RES_Default;
+	rl6->flags = RES_Default;
 
 	TEST_ASSERT_EQUAL(rl4->hitcount, rstrct.restrictlist4->hitcount);
 	TEST_ASSERT_EQUAL(rl4->flags, rstrct.restrictlist4->flags);
@@ -85,7 +87,7 @@ TEST(hackrestrict, ReturnsCorrectDefaultRestrictions) {
 
 	unsigned short retval = restrictions(&sockaddr);
 
-	TEST_ASSERT_EQUAL(0, retval);
+	TEST_ASSERT_EQUAL(RES_Default, retval);
 }
 
 
@@ -103,7 +105,7 @@ TEST(hackrestrict, HackingDefaultRestriction) {
 
 	sockaddr_u sockaddr = create_sockaddr_u(54321, "111.123.251.124");
 
-	TEST_ASSERT_EQUAL(flags, restrictions(&sockaddr));
+	TEST_ASSERT_EQUAL(RES_Default|flags, restrictions(&sockaddr));
 }
 
 
@@ -113,7 +115,7 @@ TEST(hackrestrict, CantRemoveDefaultEntry) {
 
 	hack_restrict(RESTRICT_REMOVE, &resaddr, &resmask, 0, 0, 0);
 
-	TEST_ASSERT_EQUAL(0, restrictions(&resaddr));
+	TEST_ASSERT_EQUAL(RES_Default, restrictions(&resaddr));
 }
 
 

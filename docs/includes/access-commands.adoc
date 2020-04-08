@@ -102,10 +102,10 @@
 Default restriction list entries with the flags ignore, interface,
 ntpport, for each of the local host's interface addresses are inserted
 into the table at startup to prevent the server from attempting to
-synchronize to its own time. A default entry is also always present,
-though if it is otherwise unconfigured; no flags are associated with
-the default entry (i.e., everything besides your own NTP server is
-unrestricted).
+synchronize to its own time. A default entry is also always present.
+It has +noquery+ to avoid packet length amplification which can
+be used for DDoS with a forged return address and +limited+ to
+avoid DDoS reflections.
 
 [[unrestrict]]+unrestrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
    Like a +restrict+ command, but turns off the specified flags rather

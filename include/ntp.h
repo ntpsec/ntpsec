@@ -704,6 +704,9 @@ struct restrict_u_tag {
 #define	RES_FLAKE		0x1000	/* flakeway - drop 10% */
 #define	RES_NOMRULIST		0x2000	/* mode 6 mrulist denied */
 
+/* RES_DEFAULT defined in resolv.h */
+#define RES_Default (RES_NOQUERY|RES_NOQUERY)
+
 /* pythonize-header: start ignoring */
 
 /*
