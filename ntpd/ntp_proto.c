@@ -249,8 +249,7 @@ static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 static	double	root_distance	(struct peer *);
 static	void	restart_nts_ke	(struct peer *);
-static	void	maybe_log_junk	(struct recvbuf *rbuf);
-static	void	maybe_log_drop	(struct recvbuf *rbuf);
+static	void	maybe_log_junk	(const char *tag, struct recvbuf *rbuf);
 
 void
 set_sys_leap(unsigned char new_sys_leap) {
@@ -487,17 +486,6 @@ static bool check_early_restrictions(
 	      PKT_VERSION(rbufp->recv_buffer[0]) != NTP_VERSION));
 }
 
-static void
-handle_fastxmit(
-	struct recvbuf *rbufp,
-	unsigned short restrict_mask,
-	auth_info* auth
-	)
-{
-        int xmode =
-            PKT_MODE(rbufp->pkt.li_vn_mode) == MODE_ACTIVE ? MODE_PASSIVE : MODE_SERVER;
-	fast_xmit(rbufp, xmode, auth, restrict_mask);
-}
 
 static void
 handle_procpkt(
@@ -678,6 +666,7 @@ receive(
 	struct peer *peer = NULL;
 	unsigned short restrict_mask;
 	auth_info* auth = NULL;  /* !NULL if authenticated */
+	int mode, xmode;
 
 	stat_count.sys_received++;
 
@@ -698,7 +687,7 @@ receive(
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
 		stat_count.sys_limitrejected++;
-		maybe_log_drop(rbufp);
+		maybe_log_junk("DROP", rbufp);
 		if(!(restrict_mask & RES_KOD)) { return; }
 	}
 
@@ -730,7 +719,8 @@ receive(
 		return;
 	}
 
-	if (MODE_SERVER == PKT_MODE(rbufp->pkt.li_vn_mode)) {
+	mode = PKT_MODE(rbufp->pkt.li_vn_mode);
+	if (MODE_SERVER == mode) {
 	    /* Reply to our request:
 	     * Auth check breaks if we findpeer for MODE_CLIENT and
 	     * a site we are using as a server uses us as a server
@@ -780,17 +770,18 @@ receive(
 		}
 	}
 
-	switch (PKT_MODE(rbufp->pkt.li_vn_mode)) {
+	switch (mode) {
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
 		if (rbufp->extens_present
 		    && !extens_server_recv(&rbufp->ntspacket,
 			  rbufp->recv_buffer, rbufp->recv_length)) {
 			stat_count.sys_declined++;
-			maybe_log_junk(rbufp);
+			maybe_log_junk("EX-REQ", rbufp);
 			break;
 		}
-		handle_fastxmit(rbufp, restrict_mask, auth);
+		xmode = (mode == MODE_ACTIVE) ? MODE_PASSIVE : MODE_SERVER;
+		fast_xmit(rbufp, xmode, auth, restrict_mask);
 		stat_count.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
@@ -802,7 +793,7 @@ receive(
 		     && (!rbufp->extens_present || !extens_client_recv(peer,
 		          rbufp->recv_buffer, rbufp->recv_length))) {
 		    stat_count.sys_declined++;
-		    maybe_log_junk(rbufp);
+		    maybe_log_junk("EX-REP", rbufp);
 		    break;
 		}
 		peer->received++;
@@ -2353,6 +2344,14 @@ fast_xmit(
         } else if (NULL != auth) {
 	  sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
         }
+	if (sendlen > rbufp->recv_length) {
+	  /* About to send a response that is bigger than the request.
+	   * That can be used for DDoS amplification, so don't do that.
+	   * This shouldn't happen, but check here in case of a bug.
+	   */
+	  maybe_log_junk("DDoS", rbufp);	/* needs a counter */
+	  return;
+	}
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 	clock_gettime(CLOCK_REALTIME, &finish);
 	sys_authdelay = tspec_to_d(sub_tspec(finish, start));
@@ -2966,7 +2965,7 @@ proto_clr_stats(void)
 
 /* limit logging so bad guys can't DDoS us by sending crap */
 
-void maybe_log_junk(struct recvbuf *rbufp) {
+void maybe_log_junk(const char *tag, struct recvbuf *rbufp) {
   static float junk_limit = 2.0;         /* packets per hour */
   static float junk_score = 0;           /* score, packets/hour */
   static float junk_decay = 2.0;         /* hours, exponential decay time */
@@ -2994,8 +2993,8 @@ void maybe_log_junk(struct recvbuf *rbufp) {
     junk_score += 1.0/junk_decay;  /* only count the ones we print */
 
     msyslog(LOG_INFO,
-	"JUNK: Count=%ld Print=%ld, Score=%.3f, M%d V%d from %s, lng=%d",
-	junk_count, junk_print, junk_score,
+	"%s: Count=%ld Print=%ld, Score=%.3f, M%d V%d from %s, lng=%d",
+	tag, junk_count, junk_print, junk_score,
         PKT_MODE(rbufp->pkt.li_vn_mode), PKT_VERSION(rbufp->pkt.li_vn_mode),
         sockporttoa(&rbufp->recv_srcadr), lng);
     for (i=0,j=0; i<lng; i++) {
@@ -3005,48 +3004,5 @@ void maybe_log_junk(struct recvbuf *rbufp) {
     }
     msyslog(LOG_INFO,
 	"JUNK: %s", buf);
-}
-
-
-void maybe_log_drop(struct recvbuf *rbufp) {
-  static float drop_limit = 2.0;         /* packets per hour */
-  static float drop_score = 0;           /* score, packets/hour */
-  static float drop_decay = 2.0;         /* hours, exponential decay time */
-  static l_fp  drop_last = 0;            /* time of last attempted print */
-  static long  drop_count = 0;           /* total count */
-  static long  drop_print = 0;           /* printed count */
-#define DROPSIZE 500
-    char buf[DROPSIZE];
-    int lng = rbufp->recv_length;
-    int i, j;
-
-    drop_count++;
-    if (0 == drop_last) {
-      /* first time */
-      drop_last = rbufp->recv_time;
-    } else {
-      l_fp interval_fp = rbufp->recv_time - drop_last;
-      float since_last = ldexpf(interval_fp, -32)/3600.0;
-      drop_last = rbufp->recv_time;
-      drop_score *= expf(-since_last/drop_decay);
-      if (drop_limit < drop_score)
-	return; 
-    }
-    drop_print++;
-    drop_score += 1.0/drop_decay;  /* only count the ones we print */
-
-    rbufp->pkt.li_vn_mode = rbufp->recv_buffer[0]; /* no parse_packet() yet */
-    msyslog(LOG_INFO,
-	"DROP: Count=%ld Print=%ld, Score=%.3f, M%d V%d from %s, lng=%d",
-	drop_count, drop_print, drop_score,
-        PKT_MODE(rbufp->pkt.li_vn_mode), PKT_VERSION(rbufp->pkt.li_vn_mode),
-        sockporttoa(&rbufp->recv_srcadr), lng);
-    for (i=0,j=0; i<lng; i++) {
-      if ((j+4)>DROPSIZE) break;
-      if (0 == (i%4)) buf[j++] = ' ';
-      j += snprintf(&buf[j], (DROPSIZE-j), "%02x", rbufp->recv_buffer[i]);
-    }
-    msyslog(LOG_INFO,
-	"DROP: %s", buf);
 }
 
