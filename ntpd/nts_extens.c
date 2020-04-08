@@ -130,6 +130,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	uint16_t aead;
 	int noncelen, cmaclen;
 	bool sawcookie, sawAEEF;
+	int cookielen;			/* cookie and placeholder(s) */
 
 	nts_server_recv_bad++;		/* assume bad, undo if OK */
 
@@ -137,6 +138,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	buf.left = lng-LEN_PKT_NOMAC;
 
 	sawcookie = sawAEEF = false;
+	cookielen = 0;
 	ntspacket->uidlen = 0;
 	ntspacket->needed = 0;
 
@@ -165,8 +167,17 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			next_bytes(&buf, ntspacket->UID, length);
 			break;
 		    case NTS_Cookie:
+			/* cookies and placeholders must be the same length
+			 * in order to avoid amplification attacks.
+			 */
 			if (sawcookie) {
 				return false; /* second cookie */
+			}
+			if (0 == cookielen) {
+				cookielen = length;
+			}
+			else if (length != cookielen) {
+				return false;
 			}
 			ok = nts_unpack_cookie(buf.next, length, &aead, ntspacket->c2s,
 					       ntspacket->s2c, &ntspacket->keylen);
@@ -180,7 +191,12 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			ntspacket->aead = aead;
 			break;
 		    case NTS_Cookie_Placeholder:
-			/* doesn't check length */
+			if (0 == cookielen) {
+				cookielen = length;
+			}
+			else if (length != cookielen) {
+				return false;
+			}
 			ntspacket->needed++;
 			buf.next += length;
 			buf.left -= length;
