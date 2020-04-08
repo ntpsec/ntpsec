@@ -17,6 +17,6 @@ def check_SSL_version(ctx):
     ctx.check_cc(
       comment="OpenSSL support",
       fragment=SNIP_OPENSSL_VERSION_CHECK,
-      includes=ctx.env.PLATFORM_INCLUDES,
+      use="SSL",
       msg="Checking for OpenSSL > 1.1.1a",
      )
