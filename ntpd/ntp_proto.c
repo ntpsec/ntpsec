@@ -687,7 +687,6 @@ receive(
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
 		stat_count.sys_limitrejected++;
-		maybe_log_junk("DROP", rbufp);
 		if(!(restrict_mask & RES_KOD)) { return; }
 	}
 
@@ -3003,6 +3002,6 @@ void maybe_log_junk(const char *tag, struct recvbuf *rbufp) {
       j += snprintf(&buf[j], (JUNKSIZE-j), "%02x", rbufp->recv_buffer[i]);
     }
     msyslog(LOG_INFO,
-	"JUNK: %s", buf);
+	"%s: %s", tag, buf);
 }
 
