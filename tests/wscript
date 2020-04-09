@@ -92,12 +92,16 @@ def build(ctx):
         "ntpd/leapsec.c",
         "ntpd/restrict.c",
         "ntpd/recvbuff.c",
+    ] + common_source
+
+    if not ctx.env.DISABLE_NTS:
+      ntpd_source += [
         "ntpd/nts.c",
         "ntpd/nts_client.c",
         "ntpd/nts_server.c",
         "ntpd/nts_cookie.c",
         "ntpd/nts_extens.c",
-    ] + common_source
+    ]
 
     ctx.ntp_test(
         defines=unity_config + ["TEST_NTPD=1"],

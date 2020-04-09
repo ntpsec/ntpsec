@@ -861,7 +861,9 @@ main(
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 
+#ifndef DISABLE_NTS
 	nts_init();		/* Before droproot */
+#endif
 
 #ifndef ENABLE_EARLY_DROPROOT
 	/* drop root privileges */
@@ -871,7 +873,9 @@ main(
 	}
 #endif
 
+#ifndef DISABLE_NTS
 	nts_init2();		/* After droproot */
+#endif
 
 	if (access(statsdir, W_OK) != 0) {
 	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
@@ -950,7 +954,9 @@ static void mainloop(void)
 
 			check_logfile();
 			check_leap_file(false, time(NULL));
+#ifndef DISABLE_NTS
 			check_cert_file();
+#endif
 			dns_try_again();
 		}
 

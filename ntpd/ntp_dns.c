@@ -107,11 +107,13 @@ void dns_check(void)
 		return;  /* leaves active set */
 	}
 
+#ifndef DISABLE_NTS
 	if (active->cfg.flags & FLAG_NTS) {
 		nts_check(active);
 		active = NULL;
 		return;
 	}
+#endif
 
 	if (0 != gai_rc) {
 		msyslog(LOG_INFO, "DNS: dns_check: DNS error: %d, %s",
@@ -181,7 +183,9 @@ static void* dns_lookup(void* arg)
 #endif
 
 	if (pp->cfg.flags & FLAG_NTS) {
+#ifndef DISABLE_NTS
 		nts_probe(pp);
+#endif
 	} else {
 		ZERO(hints);
 		hints.ai_protocol = IPPROTO_UDP;

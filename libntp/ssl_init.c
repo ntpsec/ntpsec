@@ -1,8 +1,5 @@
-/*
- * ssl_init.c	Common OpenSSL initialization code for the various
- *		programs which use it.
- *
- * Moved from ntpd/ntp_crypto.c crypto_setup()
+/* ssl_init.c	Common OpenSSL initialization code
+ * This is needed for crypto as well as NTS
  */
 
 #include "config.h"
@@ -37,8 +34,11 @@ ssl_init(void)
 		return;
 	}
 
+#ifndef DISABLE_NTS
+	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS|OPENSSL_INIT_LOAD_CRYPTO_STRINGS|OPENSSL_INIT_ADD_ALL_CIPHERS|OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
+#endif
+
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-	SSL_library_init();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	atexit(&atexit_ssl_cleanup);

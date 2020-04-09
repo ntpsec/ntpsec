@@ -579,14 +579,15 @@ int main(int argc, char **argv) {
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
 
-    # Check via pkg-config first, then fall back to a direct search
-    if not ctx.check_cfg(
-        package='libssl', uselib_store='SSL',
-        args=['libssl', '--cflags', '--libs'],
-        msg="Checking for OpenSSL/libssl (via pkg-config)",
-        define_name='', mandatory=False,
-    ):
-        ctx.check_cc(msg="Checking for OpenSSL's ssl library",
+    if not ctx.env.DISABLE_NTS:
+        # Check via pkg-config first, then fall back to a direct search
+        if not ctx.check_cfg(
+            package='libssl', uselib_store='SSL',
+            args=['libssl', '--cflags', '--libs'],
+            msg="Checking for OpenSSL/libssl (via pkg-config)",
+            define_name='', mandatory=False,
+        ):
+            ctx.check_cc(msg="Checking for OpenSSL's ssl library",
                      lib="ssl", mandatory=True)
 
     # Check via pkg-config first, then fall back to a direct search
@@ -740,6 +741,11 @@ int main(int argc, char **argv) {
                    comment="Enable MS-SNTP extensions "
                    " https://msdn.microsoft.com/en-us/library/cc212930.aspx")
 
+    if ctx.options.disable_nts:
+        ctx.env.DISABLE_NTS = True
+        ctx.define("DISABLE_NTS", 1,
+                   comment="Disable NTS")
+
     if not ctx.options.disable_droproot:
         ctx.define("ENABLE_DROPROOT", 1,
                    comment="Drop root after initialising")
@@ -819,9 +825,10 @@ int main(int argc, char **argv) {
                 msg("WARNING: This system has a 32-bit time_t.")
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
-    # We need TLS 1.3 which isn't supported by older versions of OpenSSL
-    from wafhelpers.openssl import check_SSL_version
-    check_SSL_version(ctx)
+    if not ctx.env.DISABLE_NTS:
+      # We need TLS 1.3 which isn't supported by older versions of OpenSSL
+      from wafhelpers.openssl import check_SSL_version
+      check_SSL_version(ctx)
 
     # before write_config()
     if ctx.is_defined("HAVE_LINUX_CAPABILITY"):

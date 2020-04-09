@@ -1998,7 +1998,7 @@ config_nts(
 		default:
 			INSIST(0);
 			break;
-
+#ifndef DISABLE_NTS
 		case T_Aead:
 			ntsconfig.aead = estrdup(nts->value.s);
 			break;
@@ -2038,6 +2038,7 @@ config_nts(
 		case T_Tlsciphersuites:
 			ntsconfig.tlsciphersuites = estrdup(nts->value.s);
 			break;
+#endif
 		}
 	}
 }

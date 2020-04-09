@@ -248,7 +248,9 @@ static	double	measure_tick_fuzz(void);
 static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 static	double	root_distance	(struct peer *);
+#ifndef DISABLE_NTS
 static	void	restart_nts_ke	(struct peer *);
+#endif
 static	void	maybe_log_junk	(const char *tag, struct recvbuf *rbuf);
 
 void
@@ -773,8 +775,11 @@ receive(
 	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
 		if (rbufp->extens_present
+#ifndef DISABLE_NTS
 		    && !extens_server_recv(&rbufp->ntspacket,
-			  rbufp->recv_buffer, rbufp->recv_length)) {
+			  rbufp->recv_buffer, rbufp->recv_length)
+#endif
+) {
 			stat_count.sys_declined++;
 			maybe_log_junk("EX-REQ", rbufp);
 			break;
@@ -789,8 +794,12 @@ receive(
 		    break;
 		}
 		if ((peer->cfg.flags & FLAG_NTS)
-		     && (!rbufp->extens_present || !extens_client_recv(peer,
-		          rbufp->recv_buffer, rbufp->recv_length))) {
+		     && (!rbufp->extens_present
+#ifndef DISABLE_NTS
+ || !extens_client_recv(peer,
+		          rbufp->recv_buffer, rbufp->recv_length)
+#endif
+)) {
 		    stat_count.sys_declined++;
 		    maybe_log_junk("EX-REP", rbufp);
 		    break;
@@ -2165,12 +2174,14 @@ peer_xmit(
 	 *  3) none
 	 */
 	if (FLAG_NTS & peer->cfg.flags) {
+#ifndef DISABLE_NTS
 		if (0 < peer->nts_state.count)
 		  sendlen += extens_client_send(peer, &xpkt);
 		else {
 		  restart_nts_ke(peer);  /* out of cookies */
 		  return;
 		}
+#endif
 	} else if (0 != peer->cfg.peerkey) {
 		auth_info *auth = authlookup(peer->cfg.peerkey, true);
 		if (NULL == auth) {
@@ -2339,7 +2350,9 @@ fast_xmit(
 	sendlen = LEN_PKT_NOMAC;
 	clock_gettime(CLOCK_REALTIME, &start);
 	if (rbufp->ntspacket.valid) {
+#ifndef DISABLE_NTS
 	  sendlen += extens_server_send(&rbufp->ntspacket, &xpkt);
+#endif
         } else if (NULL != auth) {
 	  sendlen += (size_t)authencrypt(auth, (uint32_t *)&xpkt, (int)sendlen);
         }
@@ -2524,6 +2537,7 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 	peer->nextdate = current_time + (1U << hpoll);
 }
 
+#ifndef DISABLE_NTS
 /* NTS out of cookies
  * Beware of clutter in NTS-KE server logs
  * There are actually several cases:
@@ -2544,6 +2558,7 @@ static void restart_nts_ke(struct peer *peer) {
 	peer->nextdate = current_time + (1U << hpoll);
 	peer->cfg.flags |= FLAG_LOOKUP;
 };
+#endif
 
 /*
  * dns_try_again
@@ -2559,7 +2574,6 @@ void dns_try_again(void) {
 		}
 	}
 }
-
 
 
 /*

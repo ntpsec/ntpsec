@@ -71,11 +71,13 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(leapsec);
 	RUN_TEST_GROUP(hackrestrict);
 	RUN_TEST_GROUP(recvbuff);
+#ifndef DISABLE_NTS
 	RUN_TEST_GROUP(nts);
 	RUN_TEST_GROUP(nts_client);
 	RUN_TEST_GROUP(nts_server);
 	RUN_TEST_GROUP(nts_cookie);
 	RUN_TEST_GROUP(nts_extens);
+#endif
 #endif
 
 }

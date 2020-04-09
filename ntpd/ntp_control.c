@@ -345,6 +345,7 @@ static const struct ctl_var sys_var[] = {
 #define CS_K_LOCKCLOCK		105
 	{ CS_K_LOCKCLOCK,	RO, "lockclock" },
 
+#ifndef DISABLE_NTS
 #define CS_nts_client_send	106
 	{ CS_nts_client_send,		RO, "nts_client_send" },
 #define CS_nts_client_recv_good	107
@@ -379,6 +380,10 @@ static const struct ctl_var sys_var[] = {
 	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
 #define CS_MRU_HASHSLOTS	121
 	{ CS_MRU_HASHSLOTS,		RO, "mru_hashslots" },
+#else
+#define CS_MRU_HASHSLOTS	106
+	{ CS_MRU_HASHSLOTS,		RO, "mru_hashslots" },
+#endif
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
 };
@@ -1976,6 +1981,7 @@ ctl_putsys(
 			   sys_vars.sys_rootdist * MS_PER_S);
 		break;
 
+#ifndef DISABLE_NTS
 	case CS_nts_client_send:
 		ctl_putuint(sys_var[varid].text, nts_client_send);
 		break;
@@ -2035,6 +2041,7 @@ ctl_putsys(
 	case CS_nts_ke_probes_bad:
 		ctl_putuint(sys_var[varid].text, nts_ke_probes_bad);
 		break;
+#endif
 
         default:
                 /* huh? */

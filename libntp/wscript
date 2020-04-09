@@ -38,13 +38,18 @@ def build(ctx):
     if not ctx.env.HAVE_STRLCAT or not ctx.env.HAVE_STRLCPY:
         libntp_source_sharable += ["strl_obsd.c"]
 
+    if ctx.env.DISABLE_NTS:
+      useSSL = ""
+    else:
+      useSSL = "SSL"
+
     # C library
     ctx(
         features="c cstlib",
         includes=[ctx.bldnode.parent.abspath(), "../include"],
         source=libntp_source + libntp_source_sharable,
         target="ntp",
-        use="SSL CRYPTO",
+        use="%s CRYPTO" % useSSL,
     )
 
     # Loadable Python extension

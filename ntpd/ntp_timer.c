@@ -280,7 +280,9 @@ timer(void)
 	if (hour_timer <= current_time) {
 		hour_timer += SECSPERHR;
 		write_stats();
+#ifndef DISABLE_NTS
 		nts_timer();
+#endif
 		check_logfile();
 		if (leapf_timer <= current_time) {
 			leapf_timer += SECSPERDAY;
