@@ -640,8 +640,13 @@ create_peer_node(
 				break;
 
 			case T_Nts:
+#ifdef DISABLE_NTS
+				msyslog(LOG_ERR, "CONFIG: nts not supported");
+				exit(1);
+#else
 				my_node->ctl.flags |= (FLAG_NTS | FLAG_LOOKUP);
 				break;
+#endif
 
 			case T_Prefer:
 				my_node->ctl.flags |= FLAG_PREFER;
@@ -1996,9 +2001,12 @@ config_nts(
 		switch (nts->attr) {
 
 		default:
+#ifdef DISABLE_NTS
+			msyslog(LOG_ERR, "CONFIG: nts not supported");
+			break;
+#else
 			INSIST(0);
 			break;
-#ifndef DISABLE_NTS
 		case T_Aead:
 			ntsconfig.aead = estrdup(nts->value.s);
 			break;

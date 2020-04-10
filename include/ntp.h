@@ -705,7 +705,7 @@ struct restrict_u_tag {
 #define	RES_NOMRULIST		0x2000	/* mode 6 mrulist denied */
 
 /* RES_DEFAULT defined in resolv.h */
-#define RES_Default (RES_NOQUERY|RES_NOQUERY)
+#define RES_Default (RES_NOQUERY|RES_LIMITED)
 
 /* pythonize-header: start ignoring */
 
