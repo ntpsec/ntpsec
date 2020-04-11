@@ -98,7 +98,17 @@
   +version+;;
     Deny packets that do not match the current NTP version.
 --
-+
+
+Note: A second restrict line with the same address/mask
+does not replace the first one.  The flags are merged.  Thus:
+
+ restrict bob X
+ restrict bob Y
+
+is the same as
+
+ restrict bob X Y
+
 Default restriction list entries with the flags ignore, interface,
 ntpport, for each of the local host's interface addresses are inserted
 into the table at startup to prevent the server from attempting to
@@ -113,5 +123,10 @@ avoid DDoS reflections.
    :config). An unrestrict with no flags specified removes any rule
    with matching address and mask.  Use only on an address/mask or
    CIDR-format address mentioned in a previous +restrict+ statement.
+
+Note: +unrestrict default+ will not do anything;
+you can't remove the builtin defaults.
+If you want to remove them, use +unrestrict default noquery limited+
+to turn off those flags.
 
 // end
