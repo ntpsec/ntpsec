@@ -124,7 +124,7 @@ debian-oldstable-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build
   tags:
     - gitlab-org
 
@@ -134,7 +134,7 @@ debian-oldstable-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
-    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
   tags:
     - gitlab-org
 
@@ -207,7 +207,7 @@ ubuntu-latest-basic:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build
   tags:
     - gitlab-org
 
@@ -218,7 +218,7 @@ ubuntu-latest-refclocks:
   script:
     - apt-get update
     - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
-    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
   tags:
     - gitlab-org
 
@@ -412,7 +412,7 @@ openSUSE-leap-basic:
   allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --disable-doc --disable-manpage build
+    - python ./waf configure --disable-doc --disable-manpage --disable-nts build 
   tags:
     - gitlab-org
 
@@ -422,7 +422,7 @@ openSUSE-leap-refclocks:
   allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --disable-doc --disable-manpage --refclock=all build
+    - python ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
   tags:
     - gitlab-org
 
@@ -490,7 +490,7 @@ cross-build:
   <<: *job_definition
   allow_failure: true
   script:
-    - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
+    - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
   tags:
     - ubuntu-1604-lts
   only:
