@@ -99,6 +99,14 @@ void nts_log_version(void) {
 			exit(1);
 		}
 	}
+	/*
+	 * If the runtime OpenSSL is 1.1.1a, then bail, since we'll run into errors with the
+	 * TLSv1.3 maximum label length
+	 */
+	if (OpenSSL_version_num() == 0x1010101fL) {
+		msyslog(LOG_ERR, "INIT: OpenSSL 1.1.1a has a maximum label length bug, bailing");
+		exit(1);
+	}
 }
 
 /*****************************************************/
