@@ -155,13 +155,13 @@ bool nts_server_init2(void) {
 
 /* called every hour */
 void nts_cert_timer(void) {
-	if (NULL == server_ctx)
-		return;
 	check_cert_file();
 }
 
 /* call hourly and by SIGHUP */
 void check_cert_file(void) {
+	if (NULL == server_ctx)
+		return;
 	nts_lock_certlock();
 	nts_reload_certificate(server_ctx);
 	nts_unlock_certlock();
