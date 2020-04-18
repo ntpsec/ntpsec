@@ -126,6 +126,7 @@ extern	void	mon_setup(int);
 extern	void	mon_setdown(int);
 extern	void	mon_start(void);
 extern	void	mon_stop(void);
+extern	void	mon_timer(void);
 extern	unsigned short	ntp_monitor	(struct recvbuf *, unsigned short);
 extern	void	mon_clearinterface(endpt *interface);
 extern  int	mon_get_oldest_age(l_fp);

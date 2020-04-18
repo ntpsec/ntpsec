@@ -283,6 +283,7 @@ timer(void)
 #ifndef DISABLE_NTS
 		nts_timer();
 #endif
+		mon_timer();
 		check_logfile();
 		if (leapf_timer <= current_time) {
 			leapf_timer += SECSPERDAY;

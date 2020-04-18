@@ -486,4 +486,55 @@ ntp_monitor(
 	return mon->flags;
 }
 
+/* This is a hack to sanity check the MRU list
+ * See issue #648 - duplicate ntpq-mrulist slots
+ * I have no suspicions that the list is broken,
+ * but this code is easy to write.
+ *
+ * We may want to do things like log piggy slots.
+ */
+void mon_timer(void) {
+#ifdef DEBUG
+	long int count = 0, hits = 0;
+	l_fp when = 0;
+	mon_entry *mon, *slot;
+
+	for (	mon = TAIL_DLIST(mon_data.mon_mru_list, mru);
+		mon != NULL;
+		mon = PREV_DLIST(mon_data.mon_mru_list, mon, mru)) {
+	  count++;
+	  /* check if lookup of addr gets this slot */
+	  slot = mon_get_slot(&mon->rmtadr);
+	  if (mon != slot) {
+	    if (10 > hits++) {
+	      if (NULL == slot)
+	        msyslog(LOG_INFO, "MON: Can't find %ld, %s",
+		  count, sockporttoa(&mon->rmtadr));
+	      else
+	        msyslog(LOG_INFO, "MON: Wrong find %ld, %s",
+		  count, sockporttoa(&mon->rmtadr));
+	    }
+	  }
+	  /* check if time stamps are ordered */
+	  if (when > mon->last) {
+	    if (10 > hits++) {
+	      if (NULL == slot)
+	        msyslog(LOG_INFO, "MON: backwards %ld, 0x%08x.%08x 0x%08x.%08x %s",
+		  count,
+		  (unsigned int)lfpuint(mon->last),
+		  (unsigned int)lfpfrac(mon->last),
+		  (unsigned int)lfpuint(when),
+		  (unsigned int)lfpfrac(when),
+		  sockporttoa(&mon->rmtadr) );
+	    }
+	  }
+	  when = mon->last;
+	}
+	if (count == (long)mon_data.mru_entries)
+	    msyslog(LOG_INFO, "MON: Scanned %ld slots", count);
+	else
+	    msyslog(LOG_ERR, "MON: Scan found %ld slots, expected %ld",
+		count, (long)mon_data.mru_entries);
+#endif
+}
 
