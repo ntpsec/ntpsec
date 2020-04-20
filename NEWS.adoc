@@ -47,6 +47,9 @@ HTML docs are now built by default if an AsciiDoc processor is installed.  If
 you do not want HTML docs, configure with --disable-doc.  (Note:  Man pages
 are controlled by a separate --disable-manpage.)
 
+Analysis shows that CVE-2020-11868, affecting NTP Classic,
+cannot affect us, as the peer mode involved has been removed.
+
 == 2019-11-17: 1.1.8 ==
 
 Fix bug in NTS-KE client so that NTP server names work.
