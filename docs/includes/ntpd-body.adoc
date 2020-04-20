@@ -40,11 +40,6 @@ exchanged to groom the data and set the clock in about ten
 seconds. With -q, if nothing is heard after a few minutes, the daemon
 times out and exits without setting the clock.
 
-//If NetInfo support is built into +ntpd+, then +ntpd+ will attempt to
-//read its configuration from the NetInfo if the default
-//{ntpdconfman} file cannot be read and no file is specified by
-//the +-c+ option.
-
 Various internal +ntpd+ variables can be displayed and configuration
 options altered while the +ntpd+ is running using the
 {ntpqman} utility program.  The state of +ntpd+ can be continuously

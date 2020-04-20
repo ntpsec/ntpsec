@@ -12,6 +12,8 @@ on user-visible changes.
 
 == Repository head ==
 
+Remove support for NetInfo. NetInfo was last supported in Mac OS X v10.4
+
 The configure step now supports --disable-nts for running
 on systems with older versions of OpenSSL.
 

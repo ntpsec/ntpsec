@@ -13,10 +13,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_NETINFO_NI_H
-# include <netinfo/ni.h>
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
@@ -47,11 +43,6 @@
 /* Similar for yydebug below */
 #ifndef yyparse
   int yyparse (void);
-#endif
-
-/* NetInfo configuration locations */
-#ifdef HAVE_NETINFO_NI_H
-#define NETINFO_CONFIG_DIR "/config/ntp"
 #endif
 
 /*
@@ -147,11 +138,6 @@ static struct masks logcfg_class_items[] = {
 /*
  * Miscellaneous macros
  */
-#ifdef HAVE_NETINFO_NI_H
-# define ISEOL(c)	((c) == '#' || (c) == '\n' || (c) == '\0')
-# define ISSPACE(c)	((c) == ' ' || (c) == '\t')
-#endif
-
 #define _UC(str)	((char *)(intptr_t)(str))
 
 /*
@@ -168,23 +154,6 @@ static char default_ntp_signd_socket[] =
 					"";
 #endif
 char *ntp_signd_socket = default_ntp_signd_socket;
-#ifdef HAVE_NETINFO_NI_H
-static struct netinfo_config_state *config_netinfo = NULL;
-static bool check_netinfo = true;
-#endif /* HAVE_NETINFO_NI_H */
-
-#ifdef HAVE_NETINFO_NI_H
-/*
- * NetInfo configuration state
- */
-struct netinfo_config_state {
-	void *domain;		/* domain with config */
-	ni_id config_dir;	/* ID config dir      */
-	int prop_index;		/* current property   */
-	int val_index;		/* current value      */
-	char **val_list;	/* value list         */
-};
-#endif
 
 struct REMOTE_CONFIG_INFO remote_config;  /* Remote configuration buffer and
 					     pointer info */
@@ -3109,9 +3078,6 @@ getconfig(const char *explicit_config)
 	config_file = CONFIG_FILE;
 
 	if (explicit_config) {
-#ifdef HAVE_NETINFO_NI_H
-	    check_netinfo = false;
-#endif
 	    config_file = explicit_config;
 	}
 
@@ -3172,11 +3138,6 @@ void readconfig(const char *config_file)
 	}
 
 	if (srccount == 0) {
-#ifdef HAVE_NETINFO_NI_H
-		/* If there is no config_file, try NetInfo. */
-	    if (check_netinfo)
-		config_netinfo = get_netinfo_config();
-#endif /* HAVE_NETINFO_NI_H */
 	    io_open_sockets();
 	}
 
@@ -3188,11 +3149,6 @@ void readconfig(const char *config_file)
 	cfgt.timestamp = time(NULL);
 
 	save_and_apply_config_tree(true);
-
-#ifdef HAVE_NETINFO_NI_H
-	if (config_netinfo)
-		free_netinfo_config(config_netinfo);
-#endif /* HAVE_NETINFO_NI_H */
 }
 
 
@@ -3317,183 +3273,6 @@ get_logmask(
 
 	return 0;
 }
-
-
-#ifdef HAVE_NETINFO_NI_H
-
-/*
- * get_netinfo_config - find the nearest NetInfo domain with an ntp
- * configuration and initialize the configuration state.
- */
-static struct netinfo_config_state *
-get_netinfo_config(void)
-{
-	ni_status status;
-	void *domain;
-	ni_id config_dir;
-	struct netinfo_config_state *config;
-
-	if (ni_open(NULL, ".", &domain) != NI_OK) return NULL;
-
-	while ((status = ni_pathsearch(domain, &config_dir, NETINFO_CONFIG_DIR)) == NI_NODIR) {
-		void *next_domain;
-		if (ni_open(domain, "..", &next_domain) != NI_OK) {
-			ni_free(next_domain);
-			break;
-		}
-		ni_free(domain);
-		domain = next_domain;
-	}
-	if (status != NI_OK) {
-		ni_free(domain);
-		return NULL;
-	}
-
-	config = emalloc(sizeof(*config));
-	config->domain = domain;
-	config->config_dir = config_dir;
-	config->prop_index = 0;
-	config->val_index = 0;
-	config->val_list = NULL;
-
-	return config;
-}
-
-
-/*
- * free_netinfo_config - release NetInfo configuration state
- */
-static void
-free_netinfo_config(
-	struct netinfo_config_state *config
-	)
-{
-	ni_free(config->domain);
-	free(config);
-}
-
-
-/*
- * gettokens_netinfo - return tokens from NetInfo
- */
-static int
-gettokens_netinfo (
-	struct netinfo_config_state *config,
-	char **tokenlist,
-	int *ntokens
-	)
-{
-	int prop_index = config->prop_index;
-	int val_index = config->val_index;
-	char **val_list = config->val_list;
-
-	/*
-	 * Iterate through each keyword and look for a property that matches it.
-	 */
-  again:
-	if (!val_list) {
-		for (; prop_index < COUNTOF(keywords); prop_index++)
-		{
-			ni_namelist namelist;
-			struct keyword current_prop = keywords[prop_index];
-			ni_index index;
-
-			/*
-			 * For each value associated in the property, we're going to return
-			 * a separate line. We squirrel away the values in the config state
-			 * so the next time through, we don't need to do this lookup.
-			 */
-			NI_INIT(&namelist);
-			if (NI_OK == ni_lookupprop(config->domain,
-			    &config->config_dir, current_prop.text,
-			    &namelist)) {
-
-				/* Found the property, but it has no values */
-				if (namelist.ni_namelist_len == 0) continue;
-
-				config->val_list =
-				    eallocarray(
-					(namelist.ni_namelist_len + 1),
-					sizeof(char*));
-				val_list = config->val_list;
-
-				for (index = 0;
-				     index < namelist.ni_namelist_len;
-				     index++) {
-					char *value;
-
-					value = namelist.ni_namelist_val[index];
-					val_list[index] = estrdup(value);
-				}
-				val_list[index] = NULL;
-
-				break;
-			}
-			ni_namelist_free(&namelist);
-		}
-		config->prop_index = prop_index;
-	}
-
-	/* No list; we're done here. */
-	if (!val_list)
-		return CONFIG_UNKNOWN;
-
-	/*
-	 * We have a list of values for the current property.
-	 * Iterate through them and return each in order.
-	 */
-	if (val_list[val_index]) {
-		int ntok = 1;
-		int quoted = 0;
-		char *tokens = val_list[val_index];
-
-		msyslog(LOG_INFO, "CONFIG: %s %s", keywords[prop_index].text, val_list[val_index]);
-
-		(const char*)tokenlist[0] = keywords[prop_index].text;
-		for (ntok = 1; ntok < MAXTOKENS; ntok++) {
-			tokenlist[ntok] = tokens;
-			while (!ISEOL(*tokens) && (!ISSPACE(*tokens) || quoted))
-				quoted ^= (*tokens++ == '"');
-
-			if (ISEOL(*tokens)) {
-				*tokens = '\0';
-				break;
-			} else {		/* must be space */
-				*tokens++ = '\0';
-				while (ISSPACE(*tokens))
-					tokens++;
-				if (ISEOL(*tokens))
-					break;
-			}
-		}
-
-		if (ntok == MAXTOKENS) {
-			/* HMS: chomp it to lose the EOL? */
-			msyslog(LOG_ERR,
-				"CONFIG: gettokens_netinfo: too many tokens.  Ignoring: %s",
-				tokens);
-		} else {
-			*ntokens = ntok + 1;
-		}
-
-		config->val_index++;	/* HMS: Should this be in the 'else'? */
-
-		return keywords[prop_index].keytype;
-	}
-
-	/* We're done with the current property. */
-	prop_index = ++config->prop_index;
-
-	/* Free val_list and reset counters. */
-	for (val_index = 0; val_list[val_index]; val_index++)
-		free(val_list[val_index]);
-	free(val_list);
-	val_list = config->val_list = NULL;
-	val_index = config->val_index = 0;
-
-	goto again;
-}
-#endif /* HAVE_NETINFO_NI_H */
 
 /*
  * check my_node->addr for CIDR notation
