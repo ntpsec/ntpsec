@@ -484,7 +484,7 @@ bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keyl
 	// From: Martin Langer <mart.langer@ostfalia.de>
 	// Date: Tue, 15 Jan 2019 11:40:13 +0100
 	// https://mailarchive.ietf.org/arch/msg/ntp/nkc-9n6XOPt5Glgi_ueLvuD9EfY	// NB: 1.1.1 works and is shipped with Ubuntu 18.04.4 LTS Bionic
-	const char *label = "EXPORTER-network-time-security/1";
+	const char *label = "EXPORTER-network-time-security";
 	unsigned char context[5];
 	context[0] = (nts_protocol_NTP >> 8) & 0xFF;
 	context[1] = nts_protocol_NTP & 0xFF;
