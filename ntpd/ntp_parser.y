@@ -74,7 +74,6 @@
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
 %token	<Integer>	T_Disable
-%token	<Integer>	T_Discard
 %token	<Integer>	T_Dispersion
 %token	<Double>	T_Double		/* Not a token */
 %token	<Integer>	T_Driftfile
@@ -120,6 +119,7 @@
 %token	<Integer>	T_Mssntp
 %token	<Integer>	T_Leapfile
 %token	<Integer>	T_Leapsmearinterval
+%token	<Integer>	T_Limit
 %token	<Integer>	T_Limited
 %token	<Integer>	T_Link
 %token	<Integer>	T_Listen
@@ -142,7 +142,6 @@
 %token	<Integer>	T_Minclock
 %token	<Integer>	T_Mindepth
 %token	<Integer>	T_Mindist
-%token	<Integer>	T_Minimum
 %token	<Integer>	T_Minpoll
 %token	<Integer>	T_Minsane
 %token	<Integer>	T_Mintls
@@ -240,9 +239,9 @@
 %type	<Integer>	client_type
 %type	<Integer>	counter_set_keyword
 %type	<Int_fifo>	counter_set_list
-%type	<Attr_val>	discard_option
-%type	<Integer>	discard_option_keyword
-%type	<Attr_val_fifo>	discard_option_list
+%type	<Attr_val>	limit_option
+%type	<Integer>	limit_option_keyword
+%type	<Attr_val_fifo>	limit_option_list
 %type	<Integer>	enable_disable
 %type	<Attr_val>	filegen_option
 %type	<Attr_val_fifo>	filegen_option_list
@@ -739,9 +738,9 @@ restrict_prefix
 	;
 
 access_control_command
-	:	T_Discard discard_option_list
+	:	T_Limit limit_option_list
 		{
-			CONCAT_G_FIFOS(cfgt.discard_opts, $2);
+			CONCAT_G_FIFOS(cfgt.limit_opts, $2);
 		}
 	|	T_Mru mru_option_list
 		{
@@ -839,28 +838,28 @@ access_control_flag
 	|	T_Version
 	;
 
-discard_option_list
-	:	discard_option_list discard_option
+limit_option_list
+	:	limit_option_list limit_option
 		{
 			$$ = $1;
 			APPEND_G_FIFO($$, $2);
 		}
-	|	discard_option
+	|	limit_option
 		{
 			$$ = NULL;
 			APPEND_G_FIFO($$, $1);
 		}
 	;
 
-discard_option
-	:	discard_option_keyword T_Integer
-			{ $$ = create_attr_ival($1, $2); }
+limit_option
+	:	limit_option_keyword number
+			{ $$ = create_attr_dval($1, $2); }
 	;
 
-discard_option_keyword
+limit_option_keyword
 	:	T_Average
-	|	T_Minimum
-	|	T_Monitor
+	|	T_Burst
+	|	T_Kod
 	;
 
 mru_option_list

@@ -1592,35 +1592,28 @@ config_access(
 				keyword(my_opt->attr), my_opt->value.i);
 	}
 
-	/* Configure the discard options */
-	my_opt = HEAD_PFIFO(ptree->discard_opts);
+	/* Configure the limit options */
+	my_opt = HEAD_PFIFO(ptree->limit_opts);
 	for (; my_opt != NULL; my_opt = my_opt->link) {
 
 		switch (my_opt->attr) {
 
-		case T_Average:
-			if (0 <= my_opt->value.i &&
-			    my_opt->value.i <= UCHAR_MAX)
-				rstrct.ntp_minpoll = (uint8_t)my_opt->value.u;
-			else
-				msyslog(LOG_ERR,
-					"CONFIG: discard average %d out of range, ignored.",
-					my_opt->value.i);
-			break;
-
-		case T_Minimum:
-			rstrct.ntp_minpkt = my_opt->value.i;
-			break;
-
-		case T_Monitor:
-			mon_data.mon_age = my_opt->value.i;
-			break;
-
 		default:
-			msyslog(LOG_ERR,
-				"CONFIG: Unknown discard option %s (%d)",
-				keyword(my_opt->attr), my_opt->attr);
-			exit(1);
+			INSIST(0);
+			break;
+
+		case T_Average:
+			mon_data.rate_limit = my_opt->value.d;
+			break;
+
+		case T_Burst:
+			mon_data.decay_time = my_opt->value.d;
+			break;
+
+		case T_Kod:
+			mon_data.kod_limit = my_opt->value.d;
+			break;
+
 		}
 	}
 
@@ -1880,7 +1873,7 @@ free_config_access(
 	)
 {
 	FREE_ATTR_VAL_FIFO(ptree->mru_opts);
-	FREE_ATTR_VAL_FIFO(ptree->discard_opts);
+	FREE_ATTR_VAL_FIFO(ptree->limit_opts);
 	FREE_RESTRICT_FIFO(ptree->restrict_opts);
 }
 

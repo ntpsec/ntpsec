@@ -2924,9 +2924,6 @@ proto_config(
 		sys_maxdist = dvalue;
 		break;
 
-	case PROTO_CALLDELAY:	/* modem call delay (mdelay) */
-		break;		/* NOT USED */
-
 	case PROTO_MINCLOCK:	/* minimum candidates (minclock) */
 		sys_minclock = (int)dvalue;
 		break;

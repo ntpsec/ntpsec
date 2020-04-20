@@ -567,7 +567,7 @@ struct pkt {
 #define PROTO_FLOOR		17
 #define PROTO_CEILING		18
 /* #define PROTO_COHORT		19 */
-#define PROTO_CALLDELAY		20
+/* #define PROTO_CALLDELAY	20 */
 #define PROTO_MINDIST		21
 #define PROTO_MAXDIST		22
 #define	PROTO_MAXDISP		23

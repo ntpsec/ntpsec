@@ -341,19 +341,25 @@ struct monitor_data {
 	 */
 	unsigned int	mon_enabled;		/* MON_OFF (0) or other MON_* */
 
+/* Slot allocation sizes */
 	uint64_t	mru_peakentries;	/* highest mru_entries */
 	uint64_t	mru_initalloc;		/* entries to preallocate */
 	uint64_t	mru_incalloc;		/* allocation batch factor */
+/* Slot (re)allocation parameters */
 	uint64_t	mru_mindepth;		/* preempt above this */
-	int	mru_maxage;		/* recycle if older than this */
-	int	mru_minage;		/* recycle if older than this & full */
+	int		mru_maxage;		/* recycle if older than this */
+	int		mru_minage;		/* recycle if older & full */
 	uint64_t	mru_maxdepth;		/* MRU size hard limit */
+/* Slot (re)allocation counters */
 	uint64_t	mru_exists;		/* slot already exists */
 	uint64_t	mru_new;		/* allocated new slot */
-	uint64_t	mru_recycleold;		/* recycle: age > maxage */
-	uint64_t	mru_recyclefull;	/* recycle: full and age > minage */
+	uint64_t	mru_recycleold;		/* age > maxage */
+	uint64_t	mru_recyclefull;	/* full & age > minage */
 	uint64_t	mru_none;		/* couldn't allocate slot */
-	int	mon_age;		/* preemption limit */
+/* rate limiting */
+	float		rate_limit;   /* responses per second */
+	float		decay_time;   /* seconds, exponential decay time */
+	float		kod_limit ;   /* KoDs per second */
 };
 extern struct monitor_data mon_data;
 

@@ -51,7 +51,6 @@ struct key_tok ntp_keywords[] = {
 { "pidfile",		T_Pidfile,		FOLLBY_STRING },
 { "pool",		T_Pool,			FOLLBY_STRING },
 { "ppspath",		T_Ppspath,		FOLLBY_STRING },
-{ "discard",		T_Discard,		FOLLBY_TOKEN },
 { "reset",		T_Reset,		FOLLBY_TOKEN },
 { "restrict",		T_Restrict,		FOLLBY_TOKEN },
 { "refclock",		T_Refclock,		FOLLBY_STRING },
@@ -131,6 +130,7 @@ struct key_tok ntp_keywords[] = {
 { "source",		T_Source,		FOLLBY_TOKEN },
 { "flake",		T_Flake,		FOLLBY_TOKEN },
 { "ignore",		T_Ignore,		FOLLBY_TOKEN },
+{ "limit",		T_Limit,		FOLLBY_TOKEN },
 { "limited",		T_Limited,		FOLLBY_TOKEN },
 { "mssntp",		T_Mssntp,		FOLLBY_TOKEN },
 { "kod",		T_Kod,			FOLLBY_TOKEN },
@@ -143,9 +143,8 @@ struct key_tok ntp_keywords[] = {
 { "noserve",		T_Noserve,		FOLLBY_TOKEN },
 { "notrust",		T_Notrust,		FOLLBY_TOKEN },
 { "ntpport",		T_Ntpport,		FOLLBY_TOKEN },
-/* discard_option */
+/* limit_option */
 { "average",		T_Average,		FOLLBY_TOKEN },
-{ "minimum",		T_Minimum,		FOLLBY_TOKEN },
 { "monitor",		T_Monitor,		FOLLBY_TOKEN },
 /* mru_option */
 { "incalloc",		T_Incalloc,		FOLLBY_TOKEN },

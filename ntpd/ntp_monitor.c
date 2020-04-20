@@ -64,7 +64,10 @@ struct monitor_data mon_data = {
 	.mru_recycleold = 0,	/* recycle slot: age > mru_maxage */
 	.mru_recyclefull = 0,	/* recycle slot: full and age > mru_minage */
 	.mru_none = 0,		/* couldn't get one */
-	.mon_age = 3000		/* preemption limit */
+	.rate_limit = 1.0,	/* responses per second */
+	.decay_time = 20,	/* seconds, exponential decay time */
+	.kod_limit = 0.5,	/* KoDs per second */
+
 };
 
 /*
@@ -79,11 +82,6 @@ static	void	mon_getmoremem(void);
 static	void	remove_from_hash(mon_entry *);
 static	void	mon_free_entry(mon_entry *);
 static	void	mon_reclaim_entry(mon_entry *);
-
-/* Rate limiting */
-float rate_limit = 1.0;		/* packets per second */
-float kod_limit = 0.1;		/* KOD per second - see comments below */
-float decay_time = 20;		/* seconds, exponential decay time */
 
 
 /*
@@ -320,7 +318,7 @@ ntp_monitor(
 	unsigned short	flags
 	)
 {
-	l_fp		interval_fp;
+	l_fp		delta_fp;
 	mon_entry *	mon;
 	mon_entry *	oldest;
 	int		oldest_age;
@@ -350,8 +348,7 @@ ntp_monitor(
 
 	if (mon != NULL) {
 		mon_data.mru_exists++;
-		interval_fp = rbufp->recv_time;
-		interval_fp -= mon->last;
+		delta_fp = rbufp->recv_time-mon->last;
 		mon->last = rbufp->recv_time;
 		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);
 		mon->count++;
@@ -366,30 +363,22 @@ ntp_monitor(
 		 * if packets arrive at 1/second,
 		 * score will build up to (almost) 1.0
 		 */
-		since_last = ldexpf(interval_fp, -32);
-		mon->score *= expf(-since_last/decay_time);
-		/* count the ones we drop */
-		/* with enough traffic, we drop everything */
-		mon->score += 1.0/decay_time;
-		if (mon->score < rate_limit) {
+		since_last = ldexpf(delta_fp, -32);
+		mon->score *= expf(-since_last/mon_data.decay_time);
+		mon->score += 1.0/mon_data.decay_time;
+
+		if (mon->score < mon_data.rate_limit) {
 			/* low score, turn off reject bits */
 			restrict_mask &= ~(RES_LIMITED | RES_KOD);
 		}
-
 		if (RES_LIMITED & restrict_mask)
 			mon->dropped++;
-		if (RES_KOD & restrict_mask) {
-			/* We need rate limiting on KoD too.
-			 * Note that DDoS attackers often send
-			 * >1000 packets/second.  A simple fraction
-			 * would turn into lots of KoDs.
-			 * So we try 1/score-squared.
-			 * kod_limit is roughly packets/second when
-			 * score is close to 1.
-			 */
-			float rand = random()*1.0/RAND_MAX;
-			if (rand > kod_limit/(mon->score*mon->score))
-				restrict_mask &= ~RES_KOD;
+
+		/* HACK: Much abusive traffic is big bursts.
+		 * Don't send KoDs for them or we can be used
+		 * as a DDoS reflector to hide the true source. */
+		if (mon->score > (+mon_data.kod_limit+mon_data.rate_limit)) {
+			restrict_mask &= ~RES_KOD;
 		}
 
 		mon->flags = restrict_mask;
@@ -468,7 +457,7 @@ ntp_monitor(
 	mon->first = mon->last;
 	mon->count = 1;
 	mon->dropped = 0;
-	mon->score = 1.0/decay_time;
+	mon->score = 1.0/mon_data.decay_time;
 	mon->flags = ~(RES_LIMITED | RES_KOD) & flags;
 	memcpy(&mon->rmtadr, &rbufp->recv_srcadr, sizeof(mon->rmtadr));
 	mon->vn_mode = VN_MODE(version, mode);

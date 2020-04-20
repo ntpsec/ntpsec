@@ -295,7 +295,7 @@ ind assid status conf reach auth condition last_event cnt
   server so loaded that none of its MRU entries age out before they
   are shipped. With this option, each segment is reported as it arrives.
 
-+mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +mindrop=+'drop' | +minscore=+'score' | +maxlstint=+'seconds' | +minlstint=+'seconds' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
+[[mrulist]]+mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +mindrop=+'drop' | +minscore=+'score' | +maxlstint=+'seconds' | +minlstint=+'seconds' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
   Obtain and print traffic counts collected and maintained by the
   monitor facility. This is useful for tracking who _uses_ or
   _abuses_ your server.

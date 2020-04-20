@@ -1,25 +1,21 @@
 // Access control commands. Is included twice.
 
-[[discard]]+discard+ [+average+ _avg_] [+minimum+ _min_] [+monitor+ _prob_]::
-  Set the parameters of the +limited+ facility which protects the server
-  from client abuse. The +average+ subcommand specifies the minimum
-  average packet spacing, while the +minimum+ subcommand specifies the
-  minimum packet spacing. Packets that violate these minima are
-  discarded and a kiss-o'-death packet returned if enabled. The default
-  minimum average and minimum are 5 and 2, respectively. The monitor
-  subcommand specifies the probability of discard for packets that
-  overflow the rate-control window. The options are:
-  +average+ 'avg';;
-    Specify the minimum average interpacket spacing (minimum average
-    headway time) in log~2~ s with default 3.
-  +minimum+ 'min';;
-    Specify the minimum interpacket spacing (guard time) in seconds with
-    default 2.
-  +monitor+;;
-    Specify the probability of being recorded for packets that overflow
-    the MRU list size limit set by +mru maxmem+ or +mru maxdepth+; this
-    is a performance optimization for servers with aggregate arrivals of
-    1000 packets per second or more.
+[[limit]]+limit+ [+average+ _average_] [+burst+ _burst_] [+kod+ _kod_]::
+  Set the parameters of the _limited_ facility which protects the server
+  from client abuse. Internally, each link:ntpq.html#mrulist[MRU]
+  slot contains a _score_ in units of packets per second.
+  It is updated each time a packet arrives from that IP Address.
+  The _score_ decays exponentially at the _burst_ rate and is bumped
+  by 1.0/burst when a packet arrives.
+  +average+ 'average';;
+    Specify the allowed average rate for response packets
+    in packets per second.  The default is 1.0
+  +burst+ 'burst';;
+    Specify the allowed burst size if the bursts are far enough apart
+    to keep the average rate below _average_.  The default is 20.0
+  +kod+ 'kod';;
+    Specify the allowed average rate for KoD packets
+    in packets per second.  The default is 0.5
 
 [[restrict]]+restrict+ _address_[/_cidr_] [+mask+ _mask_] [+flag+ +...+]::
   The _address_ argument expressed in dotted-quad (for IPv4) or
@@ -51,12 +47,10 @@
     Deny packets of all kinds, including {ntpqman} queries.
   +kod+;;
     If this flag is set when an access violation occurs, a kiss-o'-death
-    (KoD) packet is sent. KoD packets are rate limited to no more than
-    one per second. If another KoD packet occurs within one second after
-    the last one, the packet is dropped.
+    (KoD) packet is sent. KoD packets are rate limited.
   +limited+;;
     Deny service if the packet spacing violates the lower limits
-    specified in the discard command. A history of clients is kept using
+    specified in the _limit_ command. A history of clients is kept using
     the monitoring capability of {ntpdman}. Thus, monitoring is
     always active as long as there is a restriction entry with
     the limited flag.
@@ -71,8 +65,9 @@
     Deny {ntpqman} queries which attempt
     to modify the state of the server (i.e., run time reconfiguration).
     Queries which return information are permitted.
-  +noquery+;;
-    Deny {ntpqman} queries. Time service is not affected.
+  +nomrulist+;;
+    Do not accept MRU-list requests.  These can be expensive to
+    service and may generate a high volume of response traffic.
   +nopeer+;;
     Deny packets which would result in mobilizing a new association;
     this includes symmetric active packets when a
@@ -81,6 +76,8 @@
     We don't support that mode.
     It used to include _pool_ servers, but they now poke a hole in any
     restrictions.
+  +noquery+;;
+    Deny {ntpqman} queries. Time service is not affected.
   +noserve+;;
     Deny all packets except {ntpqman} and queries.
   +notrust+;;
@@ -92,9 +89,6 @@
     UDP port (123). Both +ntpport+ and +non-ntpport+ may be specified.
     The +ntpport+ is considered more specific and is sorted later in the
     list.
-  +nomrulist+;;
-    Do not accept MRU-list requests.  These can be expensive to
-    service and may generate a high volume of response traffic.
   +version+;;
     Deny packets that do not match the current NTP version.
 --

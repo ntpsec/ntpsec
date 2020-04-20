@@ -192,7 +192,7 @@ struct config_tree_tag {
 	filegen_fifo *	filegen_opts;
 
 	/* Access Control Configuration */
-	attr_val_fifo *	discard_opts;
+	attr_val_fifo *	limit_opts;
 	attr_val_fifo *	mru_opts;
 	restrict_fifo *	restrict_opts;
 

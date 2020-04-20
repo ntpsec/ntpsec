@@ -1,10 +1,5 @@
 // Miscellaneous options.  Gets included twice.
 
-+calldelay+ _delay_::
-  This option controls the delay in seconds between the first and second
-  packets sent in burst or iburst mode to allow additional time for a
-  modem or ISDN call to complete.
-
 [[driftfile]]+driftfile+ _driftfile_::
   This command specifies the complete path and name of the file used to
   record the frequency of the local clock oscillator; this is the same
