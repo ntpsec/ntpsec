@@ -389,7 +389,6 @@ clang-refclocks:
 openSUSE-leap-basic:
   <<: *job_definition
   image: opensuse/leap
-  allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build 
@@ -399,7 +398,6 @@ openSUSE-leap-basic:
 openSUSE-leap-refclocks:
   <<: *job_definition
   image: opensuse/leap
-  allow_failure: true
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
@@ -529,7 +527,6 @@ coverity-scan:
 
 macos-basic:
   <<: *job_definition
-  allow_failure: true
   script:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build
   tags:
@@ -539,7 +536,6 @@ macos-basic:
 
 macos-refclocks:
   <<: *job_definition
-  allow_failure: true
   script:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
