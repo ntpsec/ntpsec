@@ -622,20 +622,4 @@ Expansion to cover modes 6&7 should require an authentication token extension.
 
 More discussion of how to re-do Mode 6 has been moved to ntpv5.adoc.
 
-== Martin Langer's notes ==
-
-um... maybe the first hint... The current OpenSSL version doesn't
-work with NTS and TLS1.3. The TLS key exporter function fails
-because the exporter label is too long. It's an OpenSSL bug which is
-already committed and fixed. The next OpenSSL version 1.1.1b should
-work again.
-
-This is my current workaround:
-
---
-// TODO: bug in OpenSSL 1.1.1a --> "EXPORTER-network-time-security/1"
-// doesn't work.
-#define *TLS_Exporter_Labe**l* **"EXPORTER-nts/1"
---
-
 // end
