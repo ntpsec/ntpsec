@@ -391,8 +391,8 @@ openSUSE-leap-basic:
   image: opensuse/leap
   allow_failure: true
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --disable-doc --disable-manpage --disable-nts build 
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build 
   tags:
     - gitlab-org
 
@@ -401,8 +401,8 @@ openSUSE-leap-refclocks:
   image: opensuse/leap
   allow_failure: true
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
   tags:
     - gitlab-org
 
@@ -411,8 +411,8 @@ openSUSE-tumbleweed-basic:
   image: opensuse/tumbleweed
   allow_failure: true
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --disable-doc --disable-manpage build
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
+    - python3 ./waf configure --disable-doc --disable-manpage build
   tags:
     - gitlab-org
 
@@ -421,8 +421,8 @@ openSUSE-tumbleweed-refclocks:
   image: opensuse/tumbleweed
   allow_failure: true
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses
-    - python ./waf configure --disable-doc --disable-manpage --refclock=all build
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
+    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
     - gitlab-org
 
