@@ -265,7 +265,7 @@ ubuntu-devel-refclocks:
 freebsd-11-basic:
   <<: *job_definition
   script:
-    - python ./waf configure --disable-doc --disable-manpage build
+    - python ./waf configure --disable-doc --disable-manpage --disable-nts build
   tags:
     - freebsd-11
   only:
@@ -274,7 +274,7 @@ freebsd-11-basic:
 freebsd-11-refclocks:
   <<: *job_definition
   script:
-    - python ./waf configure --disable-doc --disable-manpage --refclock=all build
+    - python ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
   tags:
     - freebsd-11
   only:
