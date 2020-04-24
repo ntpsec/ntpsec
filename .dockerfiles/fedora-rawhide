@@ -1,0 +1,3 @@
+FROM registry.fedoraproject.org/fedora:rawhide
+
+RUN dnf -y install bison gcc openssl-devel libcap-devel python3-devel
