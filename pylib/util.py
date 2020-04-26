@@ -1096,7 +1096,7 @@ class PeerSummary:
         if hmode == ntp.magic.MODE_BCLIENTX:
             # broadcastclient or multicastclient
             ptype = 'b'
-        elif hmode == ntp.magic.MODE_BROADCAST:
+        elif hmode == ntp.magic.MODE_BROADCASTx:
             # broadcast or multicast server
             if srcadr.startswith("224."):       # IANA multicast address prefix
                 ptype = 'M'
@@ -1114,9 +1114,9 @@ class PeerSummary:
                 ptype = chr(ntscookies + ord('0'))
             else:
                 ptype = 'u'     # unicast
-        elif hmode == ntp.magic.MODE_ACTIVE:
+        elif hmode == ntp.magic.MODE_ACTIVEx:
             ptype = 's'         # symmetric active
-        elif hmode == ntp.magic.MODE_PASSIVE:
+        elif hmode == ntp.magic.MODE_PASSIVEx:
             ptype = 'S'         # symmetric passive
 
         #

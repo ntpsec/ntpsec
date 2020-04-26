@@ -350,17 +350,17 @@ struct peer {
 /* Packet Modes
  */
 #define	MODE_UNSPEC	0	/* unspecified (old version) */
-#define	MODE_ACTIVE	1	/* symmetric active mode */
-#define	MODE_PASSIVE	2	/* symmetric passive mode */
+#define	MODE_ACTIVEx	1	/* symmetric active mode */
+#define	MODE_PASSIVEx	2	/* symmetric passive mode */
 #define	MODE_CLIENT	3	/* client mode */
 #define	MODE_SERVER	4	/* server mode */
-#define	MODE_BROADCAST	5	/* broadcast mode */
+#define	MODE_BROADCASTx	5	/* broadcast mode */
 
 /*
  * These can appear in packets
  */
 #define	MODE_CONTROL	6	/* control mode, ntpq*/
-#define	MODE_PRIVATE	7	/* Dead: private mode, was ntpdc */
+#define	MODE_PRIVATEx	7	/* Dead: private mode, was ntpdc */
 /*
  * This is a madeup mode for broadcast client.  No longer used by ntpd.
  */

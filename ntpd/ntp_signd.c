@@ -121,16 +121,12 @@ recv_packet(int fd, char **buf, uint32_t *len)
 void
 send_via_ntp_signd(
 	struct recvbuf *rbufp,	/* receive packet pointer */
-	int	xmode,
 	keyid_t	xkeyid,
 	int flags,
 	void *xpkt
 	)
 {
 	UNUSED_ARG(flags);
-#ifndef DEBUG
-	UNUSED_ARG(xmode);
-#endif
 
 	/* We are here because it was detected that the client
 	 * sent an all-zero signature, and we therefore know
@@ -220,9 +216,9 @@ send_via_ntp_signd(
 				sendlen = reply_len - offsetof(struct samba_key_out, pkt);
 				xpkt = &samba_reply.pkt;
 				sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, xpkt, sendlen);
-				DPRINT(1, ("transmit ntp_signd packet: at %u %s->%s mode %d keyid %08x len %d\n",
+				DPRINT(1, ("transmit ntp_signd packet: at %u %s->%s keyid %08x len %d\n",
 					   current_time, socktoa(&rbufp->dstadr->sin),
-					   socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen));
+					   socktoa(&rbufp->recv_srcadr), xkeyid, sendlen));
 			}
 		}
 

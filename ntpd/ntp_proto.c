@@ -239,7 +239,7 @@ double	measured_tick;		/* non-overridable sys_tick (s) */
 static	void	clock_combine	(peer_select *, int, int);
 static	void	clock_select	(void);
 static	void	clock_update	(struct peer *);
-static	void	fast_xmit	(struct recvbuf *, int, auth_info*, int);
+static	void	fast_xmit	(struct recvbuf *, auth_info*, int);
 static	int	local_refid	(struct peer *);
 #ifdef ENABLE_FUZZ
 static	void	measure_precision(const bool);
@@ -290,10 +290,11 @@ is_vn_mode_acceptable(
 	)
 {
 	return rbufp->recv_length >= 1 &&
-	    PKT_VERSION(rbufp->recv_buffer[0]) >= 1 &&
-	    PKT_VERSION(rbufp->recv_buffer[0]) <= 4 &&
-	    PKT_MODE(rbufp->recv_buffer[0]) != MODE_PRIVATE &&
-	    PKT_MODE(rbufp->recv_buffer[0]) != MODE_UNSPEC;
+	    PKT_VERSION(rbufp->recv_buffer[0]) >= NTP_OLDVERSION &&
+	    PKT_VERSION(rbufp->recv_buffer[0]) <= NTP_VERSION &&
+	    ( PKT_MODE(rbufp->recv_buffer[0]) == MODE_CLIENT ||
+	      PKT_MODE(rbufp->recv_buffer[0]) == MODE_SERVER ||
+              PKT_MODE(rbufp->recv_buffer[0]) == MODE_CONTROL);
 }
 
 static bool
@@ -302,7 +303,7 @@ is_control_packet(
 	)
 {
 	return rbufp->recv_length >= 1 &&
-	    PKT_VERSION(rbufp->recv_buffer[0]) <= 4 &&
+	    PKT_VERSION(rbufp->recv_buffer[0]) <= NTP_VERSION &&
 	    PKT_MODE(rbufp->recv_buffer[0]) == MODE_CONTROL;
 }
 
@@ -668,7 +669,7 @@ receive(
 	struct peer *peer = NULL;
 	unsigned short restrict_mask;
 	auth_info* auth = NULL;  /* !NULL if authenticated */
-	int mode, xmode;
+	int mode;
 
 	stat_count.sys_received++;
 
@@ -772,7 +773,6 @@ receive(
 	}
 
 	switch (mode) {
-	    case MODE_ACTIVE:  /* remote site using "peer" in config file */
 	    case MODE_CLIENT:  /* Request for us as a server. */
 		if (rbufp->extens_present
 #ifndef DISABLE_NTS
@@ -784,8 +784,7 @@ receive(
 			maybe_log_junk("EX-REQ", rbufp);
 			break;
 		}
-		xmode = (mode == MODE_ACTIVE) ? MODE_PASSIVE : MODE_SERVER;
-		fast_xmit(rbufp, xmode, auth, restrict_mask);
+		fast_xmit(rbufp, auth, restrict_mask);
 		stat_count.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
@@ -1289,8 +1288,6 @@ peer_clear(
 	peer->nextdate = peer->update = peer->outdate = current_time;
 	if (initializing1) {
 		peer->nextdate += (unsigned long)peer_associations;
-	} else if (MODE_PASSIVE == peer->hmode) {
-		peer->nextdate += (unsigned long)rstrct.ntp_minpkt;
 	} else {
 	    /*
 	     * Randomizing the next poll interval used to be done with
@@ -2222,7 +2219,6 @@ leap_smear_add_offs(l_fp *t) {
 static void
 fast_xmit(
 	struct recvbuf *rbufp,	/* receive packet pointer */
-	int	xmode,		/* receive mode */
 	auth_info *auth,	/* !NULL for authentication */
 	int	flags		/* restrict mask */
 	)
@@ -2251,7 +2247,7 @@ fast_xmit(
 	if (flags & RES_KOD) {
 		stat_count.sys_kodsent++;
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
-		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
+		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
 		xpkt.ppoll = max(rbufp->pkt.ppoll, rstrct.ntp_minpoll);
 		xpkt.precision = rbufp->pkt.precision;
@@ -2287,7 +2283,7 @@ fast_xmit(
 		 * the transmit/receive times.
 		 */
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap,
-		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
+		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = max(rbufp->pkt.ppoll, rstrct.ntp_minpoll);
 		xpkt.precision = sys_vars.sys_precision;
@@ -2336,7 +2332,7 @@ fast_xmit(
 		keyid_t keyid = 0;
 		if (NULL != auth) keyid = auth->keyid;
 		// FIXME need counter
-		send_via_ntp_signd(rbufp, xmode, keyid, flags, &xpkt);
+		send_via_ntp_signd(rbufp, keyid, flags, &xpkt);
 		return;
 	}
 #endif /* ENABLE_MSSNTP */
@@ -2370,9 +2366,9 @@ fast_xmit(
 	/* Previous versions of this code had separate DPRINT-s so it
 	 * could print the key on the auth case.  That requires separate
 	 * sendpkt-s on each branch or the DPRINT pollutes the timing. */
-	DPRINT(1, ("transmit: at %u %s->%s mode %d len %zu\n",
+	DPRINT(1, ("transmit: at %u %s->%s len %zu\n",
 		   current_time, socktoa(&rbufp->dstadr->sin),
-		   socktoa(&rbufp->recv_srcadr), xmode, sendlen));
+		   socktoa(&rbufp->recv_srcadr), sendlen));
 }
 
 

@@ -419,8 +419,7 @@ extern struct restriction_data rstrct;
 
 #ifdef ENABLE_MSSNTP
 /* ntp_signd.c */
-extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
-			       void *);
+extern void send_via_ntp_signd(struct recvbuf *, keyid_t, int, void *);
 #endif
 
 /* ntp_timer.c */
