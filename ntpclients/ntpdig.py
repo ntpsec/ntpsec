@@ -63,7 +63,7 @@ def read_append(s, packets, packet, sockaddr):
         if not ntp.packet.Authenticator.have_mac(d):
             if debug:
                 log("no MAC on reply from %s" % packet.hostname)
-        if not credentials.verify_mac(d):
+        if not credentials.verify_mac(d, packet_end=48, mac_begin=48):
             packet.trusted = False
             log("MAC verification on reply from %s failed"
                 % sockaddr[0])

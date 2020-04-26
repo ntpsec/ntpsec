@@ -205,7 +205,7 @@ A Mode 6 packet cannot have extension fields.
 # SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 import getpass
-import hashlib
+import hmac
 import os
 import select
 import socket
@@ -252,6 +252,13 @@ DEFSTIMEOUT = 3000
 
 # The maximum keyid for authentication, keyid is a 16-bit field
 MAX_KEYID = 0xFFFF
+
+# Some constants (in Bytes) for mode6 and authentication
+MODE_SIX_HEADER_LENGTH = 12
+MINIMUM_MAC_LENGTH = 16
+KEYID_LENGTH = 4
+MODE_SIX_ALIGNMENT = 8
+MAX_BARE_MAC_LENGTH = 20
 
 
 class Packet:
@@ -698,6 +705,7 @@ class ControlException(BaseException):
 class ControlSession:
     "A session to a host"
     MRU_ROW_LIMIT = 256
+    _authpass = True
     server_errors = {
         ntp.control.CERR_UNSPEC: "UNSPEC",
         ntp.control.CERR_PERMISSION: "PERMISSION",
@@ -1024,6 +1032,16 @@ class ControlSession:
                 continue
 
             # Someday, perhaps, check authentication here
+            if self._authpass and self.auth:
+                _pend = rpkt.count + MODE_SIX_HEADER_LENGTH
+                _pend += (-_pend % MODE_SIX_ALIGNMENT)
+                if len(rawdata) < (_pend + KEYID_LENGTH + MINIMUM_MAC_LENGTH):
+                    self.logfp.write('AUTH - packet too short for MAC %d < %d\n' %
+                                     (len(rawdata), (_pend + KEYID_LENGTH + MINIMUM_MAC_LENGTH)))
+                    self._authpass = False
+                elif not self.auth.verify_mac(rawdata, packet_end=_pend,
+                                            mac_begin=_pend):
+                    self._authpass = False
 
             # Clip off the MAC, if any
             rpkt.extension = rpkt.extension[:rpkt.count]
@@ -1108,6 +1126,8 @@ class ControlSession:
                         warn("First line:\n%s\n" % repr(firstline))
                     return None
                 break
+        if not self._authpass:
+            warn('AUTH: Content untrusted due to authentication failure!\n')
 
     def __validate_packet(self, rpkt, rawdata, opcode, associd):
         # TODO: refactor to simplify while retaining semantic info
@@ -1553,15 +1573,15 @@ def parse_mru_variables(variables):
             "addr": lambda e: e.sortaddr(),
             # IPv6 desc. then IPv4 desc.
             "-addr": lambda e: e.sortaddr(),
-            # hit count ascending 
+            # hit count ascending
             "count": lambda e: -e.ct,
             # hit count descending
             "-count": lambda e: e.ct,
-            # score ascending 
+            # score ascending
             "score": lambda e: -e.sc,
             # score descending
             "-score": lambda e: e.sc,
-            # drop count ascending 
+            # drop count ascending
             "drop": lambda e: -e.dr,
             # drop count descending
             "-drop": lambda e: e.dr,
@@ -1675,16 +1695,24 @@ class Authenticator:
                 if not line:
                     continue
                 (keyid, keytype, passwd) = line.split()
+                if keytype.upper() in ['AES', 'AES128CMAC']:
+                    keytype = 'AES-128'
+                if len(passwd) > 20:
+                    # if len(passwd) > 64:
+                        # print('AUTH: Truncating key %s to 256bits (32Bytes)' % keyid)
+                    passwd = ntp.util.hexstr2octets(passwd[:64])
                 self.passwords[int(keyid)] = (keytype, passwd)
 
     def __len__(self):
+        'return the number of keytype/passwd tuples stored'
         return len(self.passwords)
 
     def __getitem__(self, keyid):
+        'get a keytype/passwd tuple by keyid'
         return self.passwords.get(keyid)
 
     def control(self, keyid=None):
-        "Get a keyid/passwd pair that is trusted on localhost"
+        "Get the keytype/passwd tuple that controls localhost and its id"
         if keyid is not None:
             if keyid in self.passwords:
                 return (keyid,) + self.passwords[keyid]
@@ -1700,19 +1728,19 @@ class Authenticator:
                 if len(passwd) > 20:
                     passwd = ntp.util.hexstr2octets(passwd)
                 return (keyid, keytype, passwd)
-        else:
-            # No control lines found
-            raise ValueError
+        # No control lines found
+        raise ValueError
 
     @staticmethod
     def compute_mac(payload, keyid, keytype, passwd):
-        hasher = hashlib.new(keytype)
-        hasher.update(ntp.poly.polybytes(passwd))
-        hasher.update(payload)
-        if hasher.digest_size == 0:
-            return None
-        else:
-            return struct.pack("!I", keyid) + hasher.digest()
+        'Create the authentication payload to send'
+        if not ntp.ntpc.checkname(keytype):
+            return False
+        mac2 = ntp.ntpc.mac(ntp.poly.polybytes(payload),
+                            ntp.poly.polybytes(passwd), keytype)
+        if not mac2 or len(mac2) == 0:
+            return b''
+        return struct.pack("!I", keyid) + mac2
 
     @staticmethod
     def have_mac(packet):
@@ -1722,20 +1750,22 @@ class Authenticator:
         # On those you have to go in and look at the count.
         return len(packet) > ntp.magic.LEN_PKT_NOMAC
 
-    def verify_mac(self, packet):
+    def verify_mac(self, packet, packet_end=48, mac_begin=48):
         "Does the MAC on this packet verify according to credentials we have?"
-        # FIXME: Someday, figure out how to handle SHA1?
-        HASHLEN = 16    # Length of MD5 hash.
-        payload = packet[:-HASHLEN-4]
-        keyid = packet[-HASHLEN-4:-HASHLEN]
-        mac = packet[-HASHLEN:]
+        payload = packet[:packet_end]
+        keyid = packet[mac_begin:mac_begin+KEYID_LENGTH]
+        mac = packet[mac_begin+KEYID_LENGTH:]
         (keyid,) = struct.unpack("!I", keyid)
         if keyid not in self.passwords:
+            # print('AUTH: No key %08x...' % keyid)
             return False
         (keytype, passwd) = self.passwords[keyid]
-        hasher = hashlib.new(keytype)
-        hasher.update(passwd)
-        hasher.update(payload)
-        return ntp.poly.polybytes(hasher.digest()) == mac
+        if not ntp.ntpc.checkname(keytype):
+            return False
+        mac2 = ntp.ntpc.mac(ntp.poly.polybytes(payload),
+                            ntp.poly.polybytes(passwd), keytype)
+        if not mac2:
+            return False
+        return hmac.compare_digest(mac, mac2)
 
 # end
