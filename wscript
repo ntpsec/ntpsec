@@ -825,9 +825,9 @@ int main(int argc, char **argv) {
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
     if not ctx.env.DISABLE_NTS:
-      from wafhelpers.openssl import check_libssl_tls13, check_openssl_bad_version
-      check_libssl_tls13(ctx)
-      check_openssl_bad_version(ctx)
+        from wafhelpers.openssl import check_libssl_tls13, check_openssl_bad_version
+        check_libssl_tls13(ctx)
+        check_openssl_bad_version(ctx)
 
     # before write_config()
     if ctx.is_defined("HAVE_LINUX_CAPABILITY"):
