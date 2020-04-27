@@ -1,10 +1,9 @@
 pages:
   stage: build
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-pages
   except:
     - schedules
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoctor findutils gzip
     - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ --enable-doc --disable-manpage build install
     - cp www/favicon.ico public
     - cp docs/top.html.in public/index.html
@@ -39,30 +38,26 @@ include:
 
 alpine-basic:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 alpine-refclocks:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 alpine-edge-basic:
   <<: *job_definition_allow_failure
-  image: alpine:edge
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-edge
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 alpine-edge-refclocks:
   <<: *job_definition_allow_failure
-  image: alpine:edge
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-edge
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 AsciiDoc-3-Fedora:
@@ -108,114 +103,86 @@ AsciiDoc-py3-Ubuntu:
 
 debian-oldstable-basic:
   <<: *job_definition
-  image: debian:oldstable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build
 
 debian-oldstable-refclocks:
   <<: *job_definition
-  image: debian:oldstable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
 
 debian-stable-basic:
   <<: *job_definition
-  image: debian:stable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 debian-stable-refclocks:
   <<: *job_definition
-  image: debian:stable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-testing-basic:
   <<: *job_definition
-  image: debian:testing-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-testing
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 debian-testing-refclocks:
   <<: *job_definition
-  image: debian:testing-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-testing
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-unstable-basic:
   <<: *job_definition_allow_failure
-  image: debian:unstable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 debian-unstable-refclocks:
   <<: *job_definition_allow_failure
-  image: debian:unstable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 ubuntu-latest-basic:
   <<: *job_definition
-  image: ubuntu:latest
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-latest
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 ubuntu-latest-refclocks:
   <<: *job_definition
-  image: ubuntu:latest
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-latest
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 ubuntu-rolling-basic:
   <<: *job_definition
-  image: ubuntu:rolling
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-rolling
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 ubuntu-rolling-refclocks:
   <<: *job_definition
-  image: ubuntu:rolling
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-rolling
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 ubuntu-devel-basic:
   <<: *job_definition_allow_failure
-  image: ubuntu:devel
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 ubuntu-devel-refclocks:
   <<: *job_definition_allow_failure
-  image: ubuntu:devel
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 freebsd-11-basic:
@@ -256,58 +223,50 @@ freebsd-12-refclocks:
 
 centos-latest-basic:
   <<: *job_definition
-  image: centos:latest
+  image: $CI_REGISTRY/ntpsec/ntpsec/centos-latest
   script:
-    - dnf -y install bison gcc openssl-devel libcap-devel python3-devel
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 centos-latest-refclocks:
   <<: *job_definition
-  image: centos:latest
+  image: $CI_REGISTRY/ntpsec/ntpsec/centos-latest
   script:
-    - dnf -y --enablerepo=PowerTools install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 fedora-latest-basic:
   <<: *job_definition
-  image: fedora:latest
+  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 fedora-latest-refclocks:
   <<: *job_definition
-  image: fedora:latest
+  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 fedora-rawhide-basic:
   <<: *job_definition_allow_failure
-  image: registry.fedoraproject.org/fedora:rawhide
+  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-rawhide
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 fedora-rawhide-refclocks:
   <<: *job_definition_allow_failure
-  image: registry.fedoraproject.org/fedora:rawhide
+  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-rawhide
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 fedora-rawhide-refclocks-gpsd:
   <<: *job_definition_allow_failure
-  image: registry.fedoraproject.org/fedora:rawhide
+  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-rawhide-gpsd
   script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python3-gpsd
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 python3-rc:
   <<: *job_definition_allow_failure
-  image: python:rc
+  image: $CI_REGISTRY/ntpsec/ntpsec/python3-rc
   script:
-    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 python-coverage:
@@ -320,78 +279,62 @@ python-coverage:
 
 clang-basic:
   <<: *job_definition
-  image: debian:testing-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/clang
   script:
-    - apt-get update
-    - apt-get install -y netbase bison libssl-dev libcap-dev pps-tools python-dev clang
     - python ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang build
 
 clang-refclocks:
   <<: *job_definition
-  image: debian:testing-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/clang
   script:
-    - apt-get update
-    - apt-get install -y netbase bison libssl-dev libcap-dev pps-tools python-dev clang
     - python ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang --refclock=all build
 
 openSUSE-leap-basic:
   <<: *job_definition
-  image: opensuse/leap
+  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build 
 
 openSUSE-leap-refclocks:
   <<: *job_definition
-  image: opensuse/leap
+  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
 
 openSUSE-tumbleweed-basic:
   <<: *job_definition_allow_failure
-  image: opensuse/tumbleweed
+  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
     - python3 ./waf configure --disable-doc --disable-manpage build
 
 openSUSE-tumbleweed-refclocks:
   <<: *job_definition_allow_failure
-  image: opensuse/tumbleweed
+  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-stable-basic-32bit:
   <<: *job_definition
-  image: i386/debian:stable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --disable-doc --disable-manpage build
 
 debian-stable-refclocks-32bit:
   <<: *job_definition
-  image: i386/debian:stable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-stable-mDNS-basic:
   <<: *job_definition
-  image: debian:stable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-mdns
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev libavahi-compat-libdnssd-dev
     - python ./waf configure --disable-doc --disable-manpage build
 
 debian-stable-mDNS-refclocks:
   <<: *job_definition
-  image: debian:stable-slim
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-mdns
   script:
-    - apt-get update
-    - apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev libavahi-compat-libdnssd-dev
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 cross-build:
@@ -405,34 +348,26 @@ cross-build:
 
 gentoo-basic:
   <<: *job_definition
-  image: gentoo/stage3-amd64
+  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo
   script:
-    - emerge-webrsync
-    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
     - python ./waf configure --disable-doc --disable-manpage build
 
 gentoo-refclocks:
   <<: *job_definition
-  image: gentoo/stage3-amd64
+  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo
   script:
-    - emerge-webrsync
-    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 gentoo-hardened-basic:
   <<: *job_definition
-  image: gentoo/stage3-amd64-hardened
+  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo-hardened
   script:
-    - emerge-webrsync
-    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
     - python ./waf configure --disable-doc --disable-manpage build
 
 gentoo-hardened-refclocks:
   <<: *job_definition
-  image: gentoo/stage3-amd64-hardened
+  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo-hardened
   script:
-    - emerge-webrsync
-    - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 coverity-scan:
@@ -466,63 +401,54 @@ macos-refclocks:
 
 feature-classic-mode:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-classic-mode build
 
 feature-seccomp:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-seccomp
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev libseccomp-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-seccomp build
 
 feature-debug:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-debug build
 
 feature-debug-gdb:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-debug-gdb build
 
 feature-debug-timing:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-debug-timing build
 
 feature-disable-droproot:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --disable-droproot build
 
 feature-early-droproot:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-early-droproot build
 
 feature-leap-smear:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-leap-smear build
 
 feature-mssntp:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-mssntp build
