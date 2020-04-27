@@ -1,3 +1,4 @@
 FROM centos:latest
 
 RUN dnf -y install bison gcc openssl-devel libcap-devel python3-devel
+RUN dnf -y --enablerepo=PowerTools install pps-tools-devel
