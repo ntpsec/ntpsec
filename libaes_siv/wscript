@@ -1,7 +1,8 @@
 def build(ctx):
     # libaes_siv has warnings when built with -Wshadow, so make sure to use
     # -Wno-shadow
-    ctx.env.CFLAGS_cstlib = ['-Wno-shadow']
+    # gcc 10 gives inline warnings, so add no-inline too
+    ctx.env.CFLAGS_cstlib = ['-Wno-shadow', '-Wno-inline']
 
     ctx(
         target="aes_siv",
