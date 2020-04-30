@@ -1,7 +1,7 @@
 /*
  * nts_client.c - Network Time Security (NTS) client side support
  * Copyright the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-Clause-UC
+ * SPDX-License-Identifier: BSD-2-Clause
  *
  * Section references are to
  * https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp-15

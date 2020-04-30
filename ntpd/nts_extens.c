@@ -1,7 +1,7 @@
 /*
  * ntp_extens.c - Network Time Protocol (NTP) extension processing
  * Copyright the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-Clause-UC
+ * SPDX-License-Identifier: BSD-2-Clause
  *
  * NB: This module is working with the wire format packet.
  *     It must do byte swapping.

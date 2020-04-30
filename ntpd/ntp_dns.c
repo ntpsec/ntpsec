@@ -1,7 +1,6 @@
 /*
- * Copyright the Regents of the University of California.  All rights reserved.
  * Copyright the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-Clause-UC
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include "config.h"

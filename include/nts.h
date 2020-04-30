@@ -1,7 +1,7 @@
 /*
  * nts.h - NTS (Network Time Security) declarations
  * Copyright the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-Clause-UC
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #ifndef GUARD_NTS_H
