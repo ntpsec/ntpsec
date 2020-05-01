@@ -976,7 +976,7 @@ def afterparty(ctx):
                 os.symlink(relpath, path_source.abspath())
 
 
-python_scripts = [
+python_scripts = {
     "ntpclients/ntpdig.py",
     "ntpclients/ntpkeygen.py",
     "ntpclients/ntpq.py",
@@ -984,7 +984,7 @@ python_scripts = [
     "ntpclients/ntptrace.py",
     "ntpclients/ntpwait.py",
     "ntpclients/ntpsnmpd.py",
-]
+}
 
 
 def build(ctx):
@@ -1017,12 +1017,12 @@ def build(ctx):
     ctx.recurse("tests")
 
     if ctx.env['PYTHON_ARGPARSE']:
-        python_scripts.append("ntpclients/ntplogtemp.py")
-        python_scripts.append("ntpclients/ntpviz.py")
+        python_scripts.add("ntpclients/ntplogtemp.py")
+        python_scripts.add("ntpclients/ntpviz.py")
     if ctx.env['PYTHON_ARGPARSE'] and ctx.env['PYTHON_GPS']:
-        python_scripts.append("ntpclients/ntploggps.py")
+        python_scripts.add("ntpclients/ntploggps.py")
     if ctx.env['PYTHON_CURSES']:
-        python_scripts.append("ntpclients/ntpmon.py")
+        python_scripts.add("ntpclients/ntpmon.py")
 
     # Make sure the python scripts compile, but don't install them
     ctx(
@@ -1031,7 +1031,7 @@ def build(ctx):
         install_path=None,
     )
 
-    scripts = ["ntpclients/ntpleapfetch"] + python_scripts
+    scripts = ["ntpclients/ntpleapfetch"] + list(python_scripts)
 
     ctx(
         features="subst",
