@@ -4,6 +4,7 @@
  *
  * Python binding for selected libntp library functions
  */
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include "config.h"
@@ -20,6 +21,9 @@
 #include "ntp_assert.h"
 
 #include "ntp_control.h"
+
+#include "ntp_auth.h"
+#include <openssl/evp.h>
 
 #include "python_compatibility.h"
 
@@ -141,6 +145,137 @@ ntpc_step_systime(PyObject *self, PyObject *args)
 	return Py_BuildValue("d", step_systime(full_adjustment, ntp_set_tod));
 }
 
+/* --------------------------------------------------------------- */
+/* Hook for CMAC/HMAC
+ * Not really part of libntp, but this is a handy place to put it.
+ */
+
+/* Slightly older version of OpenSSL */
+/* Similar hack in ssl_init.c and attic/digest-timing.c */
+#ifndef EVP_MD_CTX_new
+#define EVP_MD_CTX_new() EVP_MD_CTX_create()
+#endif
+#ifndef EVP_MD_CTX_reset
+#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
+#endif
+
+
+/* xx = ntp.ntpc.checkname(name)
+ * returns None if algorithm name is invalid. */
+
+static PyObject *
+ntpc_checkname(PyObject *self, PyObject *args)
+{
+	const char *name;
+	char upcase[100];
+	const EVP_MD *digest;
+	const EVP_CIPHER *cipher;
+	UNUSED_ARG(self);
+
+	if (!PyArg_ParseTuple(args, "s", &name))
+		return NULL;
+        strlcpy(upcase, name, sizeof(upcase));
+	for (int i=0; upcase[i]!=0; i++) {
+		upcase[i] = toupper(upcase[i]);
+	}
+
+        digest = EVP_get_digestbyname(upcase);
+	if (NULL != digest) {
+		return Py_BuildValue("i", 1);
+        }
+
+        if ((strcmp(upcase, "AES") == 0) || (strcmp(upcase, "AES128CMAC") == 0)) {
+                strlcpy(upcase, "AES-128", sizeof(upcase));
+        }
+        strlcat(upcase, "-CBC", sizeof(upcase));
+	cipher = EVP_get_cipherbyname(upcase);
+	if (NULL != cipher) {
+		int length = EVP_CIPHER_key_length(cipher);
+		return Py_BuildValue("i", length);
+	}
+
+	Py_RETURN_NONE;
+}
+
+
+/* mac = ntp.ntpc.mac(data, key, name) */
+
+static PyObject *
+ntpc_mac(PyObject *self, PyObject *args)
+{
+	UNUSED_ARG(self);
+	uint8_t *data;
+	Py_ssize_t datalen;
+	uint8_t *key;
+	Py_ssize_t keylen;
+	char *name;
+	uint8_t mac[CMAC_MAX_MAC_LENGTH];
+	size_t maclen;
+	char upcase[100];
+	static EVP_MD_CTX *digest_ctx = NULL;
+	static CMAC_CTX *cmac_ctx = NULL;
+	const EVP_MD *digest;
+	const EVP_CIPHER *cipher;
+	int cipherlen;
+	if (!PyArg_ParseTuple(args, "y#y#s",
+			&data, &datalen, &key, &keylen, &name))
+		Py_RETURN_NONE;
+
+        strlcpy(upcase, name, sizeof(upcase));
+	for (int i=0; upcase[i]!=0; i++) {
+		upcase[i] = toupper(upcase[i]);
+	}
+
+        digest = EVP_get_digestbyname(upcase);
+	if (NULL != digest) {
+		/* Old digest case, MD5, SHA1 */
+		unsigned int maclenint;
+		if (NULL == digest_ctx)
+			digest_ctx = EVP_MD_CTX_new();
+		EVP_MD_CTX_reset(digest_ctx);
+		if (!EVP_DigestInit_ex(digest_ctx, digest, NULL))
+			Py_RETURN_NONE;
+		EVP_DigestUpdate(digest_ctx, key, keylen);
+		EVP_DigestUpdate(digest_ctx, data, (unsigned int)datalen);
+		EVP_DigestFinal_ex(digest_ctx, mac, &maclenint);
+		if (MAX_BARE_MAC_LENGTH < maclenint)
+			maclenint = MAX_BARE_MAC_LENGTH;
+		return Py_BuildValue("y#", &mac, maclenint);
+	}
+
+        if ((strcmp(upcase, "AES") == 0) || (strcmp(upcase, "AES128CMAC") == 0)) {
+                strlcpy(upcase, "AES-128", sizeof(upcase));
+        }
+        strlcat(upcase, "-CBC", sizeof(upcase));
+
+	cipher = EVP_get_cipherbyname(upcase);
+	if (NULL == cipher)
+		Py_RETURN_NONE;
+
+	cipherlen = EVP_CIPHER_key_length(cipher);
+	if (cipherlen < keylen) {
+		keylen = cipherlen;		/* truncate */
+	} else if (cipherlen > keylen) {
+		uint8_t newkey[EVP_MAX_KEY_LENGTH];
+		memcpy(newkey, key, keylen);
+		while (cipherlen > keylen)
+			key[keylen++] = 0;	/* pad with 0s */
+		key = newkey;
+	}
+	if (NULL == cmac_ctx)
+		cmac_ctx = CMAC_CTX_new();
+	CMAC_resume(cmac_ctx);
+        if (!CMAC_Init(cmac_ctx, key, keylen, cipher, NULL)) {
+                /* Shouldn't happen.  Does if wrong key_size. */
+		Py_RETURN_NONE;
+        }
+        CMAC_Update(cmac_ctx, data, (unsigned int)datalen);
+        CMAC_Final(cmac_ctx, mac, &maclen);
+        if (MAX_BARE_MAC_LENGTH < maclen)
+                maclen = MAX_BARE_MAC_LENGTH;
+	return Py_BuildValue("y#", &mac, maclen);
+}
+
 /* List of functions defined in the module */
 
 static PyMethodDef ntpc_methods[] = {
@@ -158,6 +293,10 @@ static PyMethodDef ntpc_methods[] = {
      PyDoc_STR("Adjust system time by slewing.")},
     {"step_systime",    ntpc_step_systime,   	METH_VARARGS,
      PyDoc_STR("Adjust system time by stepping.")},
+    {"checkname",       ntpc_checkname,   	METH_VARARGS,
+     PyDoc_STR("Check if name is a valid algorithm name")},
+    {"mac",             ntpc_mac,   		METH_VARARGS,
+     PyDoc_STR("Compute HMAC or CMAC from data, key, and algorithm name")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
 };
 
