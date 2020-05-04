@@ -121,11 +121,6 @@ def build(ctx):
         ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
     ]
 
-    if ctx.env.DISABLE_NTS:
-      useSSL = ""
-    else:
-      useSSL = "SSL"
-
     ctx(
         features="c rtems_trace cprogram",
         includes=[
@@ -135,7 +130,7 @@ def build(ctx):
         source=ntpd_source,
         target="ntpd",
         use="libntpd_obj ntp M parse RT CAP SECCOMP PTHREAD NTPD "
-            "%s CRYPTO DNS_SD %s SOCKET NSL SCF" % (useSSL, use_refclock),
+            "CRYPTO SSL DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
 
     ctx.manpage(8, "ntpd-man.adoc")

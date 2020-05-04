@@ -579,7 +579,7 @@ int main(int argc, char **argv) {
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
 
-    if not ctx.env.DISABLE_NTS:
+    if not ctx.options.disable_nts:
         # Check via pkg-config first, then fall back to a direct search
         if not ctx.check_cfg(
             package='libssl', uselib_store='SSL',
@@ -588,7 +588,7 @@ int main(int argc, char **argv) {
             define_name='', mandatory=False,
         ):
             ctx.check_cc(msg="Checking for OpenSSL's ssl library",
-                     lib="ssl", mandatory=True)
+                         lib="ssl", mandatory=True)
 
     # Check via pkg-config first, then fall back to a direct search
     if not ctx.check_cfg(
