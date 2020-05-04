@@ -144,7 +144,7 @@ ubuntu-devel-options-tester:
 
 ubuntu-latest-options-tester:
   image: ubuntu:latest
-  <<: *deb_old_option_tester
+  <<: *deb_option_tester
 
 ubuntu-rolling-options-tester:
   image: ubuntu:rolling
