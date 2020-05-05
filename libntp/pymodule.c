@@ -159,6 +159,15 @@ ntpc_step_systime(PyObject *self, PyObject *args)
 #define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
 #endif
 
+/* Needed on old versions of OpenSSL */
+static void SSL_init(void) {
+	static bool init_done = false;
+	if (init_done)
+		return;
+	init_done = true;
+	OpenSSL_add_all_ciphers();
+	OpenSSL_add_all_digests();
+}
 
 /* xx = ntp.ntpc.checkname(name)
  * returns None if algorithm name is invalid. */
@@ -171,6 +180,8 @@ ntpc_checkname(PyObject *self, PyObject *args)
 	const EVP_MD *digest;
 	const EVP_CIPHER *cipher;
 	UNUSED_ARG(self);
+
+	SSL_init();
 
 	if (!PyArg_ParseTuple(args, "s", &name))
 		return NULL;
@@ -217,8 +228,16 @@ ntpc_mac(PyObject *self, PyObject *args)
 	const EVP_MD *digest;
 	const EVP_CIPHER *cipher;
 	int cipherlen;
+
+	SSL_init();
+
+#if PY_MAJOR_VERSION >= 3
 	if (!PyArg_ParseTuple(args, "y#y#s",
 			&data, &datalen, &key, &keylen, &name))
+#else
+	if (!PyArg_ParseTuple(args, "s#s#s",
+			&data, &datalen, &key, &keylen, &name))
+#endif
 		Py_RETURN_NONE;
 
         strlcpy(upcase, name, sizeof(upcase));
@@ -240,7 +259,11 @@ ntpc_mac(PyObject *self, PyObject *args)
 		EVP_DigestFinal_ex(digest_ctx, mac, &maclenint);
 		if (MAX_BARE_MAC_LENGTH < maclenint)
 			maclenint = MAX_BARE_MAC_LENGTH;
+#if PY_MAJOR_VERSION >= 3
 		return Py_BuildValue("y#", &mac, maclenint);
+#else
+		return Py_BuildValue("s#", &mac, maclenint);
+#endif
 	}
 
         if ((strcmp(upcase, "AES") == 0) || (strcmp(upcase, "AES128CMAC") == 0)) {
@@ -273,7 +296,11 @@ ntpc_mac(PyObject *self, PyObject *args)
         CMAC_Final(cmac_ctx, mac, &maclen);
         if (MAX_BARE_MAC_LENGTH < maclen)
                 maclen = MAX_BARE_MAC_LENGTH;
+#if PY_MAJOR_VERSION >= 3
 	return Py_BuildValue("y#", &mac, maclen);
+#else
+	return Py_BuildValue("s#", &mac, maclen);
+#endif
 }
 
 /* List of functions defined in the module */
