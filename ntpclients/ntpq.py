@@ -752,15 +752,12 @@ usage: ntpversion [version number]
         "set key type to use for authenticated requests"
         if not line:
             self.say("Keytype: %s\n" % self.session.keytype)
-        elif line not in "DSA, MD4, MD5, MDC2, RIPEMD160, SHA-1, AES-CMAC":
-            # Above list is somewhat bogus. All but oldest versions of NTPsec
-            # will cheerfully use any 16- or 20-bit MAC supported by libcrypto;
-            # NTP Classic will probably barf on AES-CMAC.
-            self.warn("Keytype %s is not supported by ntpd.\n" % line)
-        elif line not in hashlib.algorithms_available:
-            self.warn("Keytype %s is not supported by ntpq.\n" % line)
+        elif line.upper() in ['AES', 'AES128CMAC']:
+            self.session.keytype = 'AES-128'
+        elif not ntp.ntpc.checkname(line.upper()):
+            self.warn("Keytype %s is not supported by openSSL or ntpq.\n" % line)
         else:
-            self.session.keytype = line
+            self.session.keytype = line.upper()
 
     def help_keytype(self):
         self.say("""\
@@ -1171,6 +1168,7 @@ usage: lopeers
             self.warn("In Config\nKeyword = :config\nCommand = %s" % line)
         try:
             self.session.config(line)
+            self.session.response = ntp.poly.polystr(self.session.response)
             m = re.match("column ([0-9]+) syntax error", self.session.response)
             if m:
                 col = int(m.group(1))
