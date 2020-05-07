@@ -12,6 +12,10 @@ on user-visible changes.
 
 == Repository head ==
 
+Change ntpq to display better and work with new ntp.ntpc authentication.
+
+Change over to cryptographic routines from ntp.ntp_control
+
 Remove support for NetInfo. NetInfo was last supported in Mac OS X v10.4
 
 The configure step now supports --disable-nts for running
