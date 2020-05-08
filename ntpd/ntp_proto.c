@@ -1299,8 +1299,8 @@ peer_clear(
 	     * to be invisible from outside ntpd; the internal
 	     * association ID fits the bill.
 	     */
-	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
-	    peer->nextdate += (unsigned long)(pseudorandom % (1 << peer->cfg.minpoll));
+	    unsigned int pseudorand = peer->associd ^ sock_hash(&peer->srcadr);
+	    peer->nextdate += (pseudorand % (1 << peer->cfg.minpoll));
 	}
 	DPRINT(1, ("peer_clear: at %u next %u associd %d refid %s\n",
 		   current_time, peer->nextdate, peer->associd,
