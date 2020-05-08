@@ -4301,6 +4301,9 @@ report_event(
 			src = refclock_name(peer);
 		else
 #endif /* REFCLOCK */
+		if (AF_UNSPEC == AF(&peer->srcadr))
+		    src = peer->hostname;
+		else
 		    src = socktoa(&peer->srcadr);
 
 		snprintf(statstr, sizeof(statstr),
