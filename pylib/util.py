@@ -266,7 +266,6 @@ def stringfiltcooker(data):
         if count > highestcount:
             mostcommon = key
             highestcount = count
-    newunit = UNITS_SEC[mostcommon + UNITS_SEC.index(UNIT_MS)]
     # Shift all values to the new unit
     cooked = []
     for part in parts:
