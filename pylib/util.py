@@ -1237,28 +1237,28 @@ class MRUSummary:
     header = " lstint avgint rstr r m v  count    score   drop rport remote address"
 
     def summary(self, entry):
+        first = ntp.ntpc.lfptofloat(entry.first)
         last = ntp.ntpc.lfptofloat(entry.last)
+        active = float(last - first)
+        count = int(entry.ct)
         if self.now:
             lstint = int(self.now - last + 0.5)
             stats = "%7d" % lstint
+            if count == 1:
+                favgint = 0
+            else:
+                favgint = active / (count-1)
+            avgint = int(favgint + 0.5)
+            if 5.0 < favgint or 1 == count:
+                stats += " %6d" % avgint
+            elif 1.0 <= favgint:
+                stats += " %6.2f" % favgint
+            else:
+                stats += " %6.3f" % favgint
         else:
-            # direct mode doesn't have a reference time
             MJD_1970 = 40587     # MJD for 1 Jan 1970, Unix epoch
             days, lstint = divmod(int(last), 86400)
-            stats = "%5d %5d" % (days + MJD_1970, lstint)
-        first = ntp.ntpc.lfptofloat(entry.first)
-        active = float(last - first)
-        if entry.ct == 1:
-            favgint = 0
-        else:
-            favgint = active / (entry.ct-1)
-        avgint = int(favgint + 0.5)
-        if 5.0 < favgint or 1 == entry.ct:
-            stats += " %6d" % avgint
-        elif 1.0 <= favgint:
-            stats += " %6.2f" % favgint
-        else:
-            stats += " %6.3f" % favgint
+            stats = "%5d %5d %6d" % (days + MJD_1970, lstint, active)
         if entry.rs & ntp.magic.RES_KOD:
             rscode = 'K'
         elif entry.rs & ntp.magic.RES_LIMITED:
