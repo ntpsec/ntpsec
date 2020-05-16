@@ -34,12 +34,6 @@ struct ntp_control {
 #define	CTL_HEADER_LEN		(offsetof(struct ntp_control, data))
 #define	CTL_MAX_DATA_LEN	468
 
-
-/*
- * Limits and things
- */
-#define	CTL_MAXAUTHSIZE	64		/* maximum size of an authen'ed req */
-
 /*
  * Decoding for the r_m_e_op field
  */
