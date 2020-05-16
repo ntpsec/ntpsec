@@ -397,9 +397,13 @@ def gnuplot(template, outfile=None):
     if not template:
         # silently ignore empty plots
         return ''
+
     if outfile is None:
         out = None
     else:
+        if 2 <= args.debug_level:
+            sys.stderr.write("ntpviz: INFO: sending plot output "
+                             "to %s\n" % outfile)
         out = open(outfile, "w", encoding='utf-8')
     ##
 
