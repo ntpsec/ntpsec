@@ -11,6 +11,7 @@
 #include "ntp_io.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 /*
  * Record statistics based on source address, mode and version. The
@@ -487,7 +488,10 @@ void mon_timer(void) {
 	long int count = 0, hits = 0;
 	l_fp when = 0;
 	mon_entry *mon, *slot;
+	struct timespec start, finish;
+	float scan_time;
 
+	clock_gettime(CLOCK_REALTIME, &start);
 	for (	mon = TAIL_DLIST(mon_data.mon_mru_list, mru);
 		mon != NULL;
 		mon = PREV_DLIST(mon_data.mon_mru_list, mon, mru)) {
@@ -519,8 +523,11 @@ void mon_timer(void) {
 	  }
 	  when = mon->last;
 	}
+	clock_gettime(CLOCK_REALTIME, &finish);
+	scan_time = tspec_to_d(sub_tspec(finish, start));
 	if (count == (long)mon_data.mru_entries)
-	    msyslog(LOG_INFO, "MON: Scanned %ld slots", count);
+	    msyslog(LOG_INFO, "MON: Scanned %ld slots in %.3f",
+		count, scan_time);
 	else
 	    msyslog(LOG_ERR, "MON: Scan found %ld slots, expected %ld",
 		count, (long)mon_data.mru_entries);
