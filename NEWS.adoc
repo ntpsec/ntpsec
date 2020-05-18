@@ -12,9 +12,9 @@ on user-visible changes.
 
 == Repository head ==
 
-Change ntpq to display better and work with new ntp.ntpc authentication.
+Correctly parse ntpq :config output on Python 3 and check return MACs.
 
-Change over to cryptographic routines from ntp.ntp_control
+Add AES and other algorithm support to ntpq and ntpdig, from OpenSSL.
 
 Remove support for NetInfo. NetInfo was last supported in Mac OS X v10.4
 
