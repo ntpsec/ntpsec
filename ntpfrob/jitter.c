@@ -65,7 +65,7 @@ get_clocktime(
 // modified from https://stackoverflow.com/questions/11931547/qsort-does-not-work-for-double-array
 static int doublecmp(const void * a, const void * b)
 {
-	if (*(const double*)a > *(const double*)b) { 
+	if (*(const double*)a > *(const double*)b) {
 		return -1;
 	} else if (*(const double*)a < *(const double*)b) {
 		return 1;

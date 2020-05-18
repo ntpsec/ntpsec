@@ -557,7 +557,7 @@ newpeer(
 	if (NULL != hostname) {
 		name = hostname;
 	} else {
-		name = socktoa(srcadr); 
+		name = socktoa(srcadr);
 	}
 
 	/*

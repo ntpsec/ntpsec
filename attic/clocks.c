@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 			}
 			printf("Found faster: %d => %d\n", fastest, faster);
 			fastest = faster;
-		} 
+		}
 	}
 
 	return 0;

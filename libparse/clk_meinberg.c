@@ -338,7 +338,7 @@ cvt_meinberg(
 		if (f[0] == '#') {
 			clock_time->flags |= PARSEB_POWERUP;
 		}
-			
+
 		if (f[1] == '*') {
 			clock_time->flags |= PARSEB_NOSYNC;
 		}
@@ -346,7 +346,7 @@ cvt_meinberg(
 		if (f[3] == '!') {
 			clock_time->flags |= PARSEB_ANNOUNCE;
 		}
-			
+
 		/*
 		 * oncoming leap second
 		 * 'a' code not confirmed - earth is not
@@ -355,7 +355,7 @@ cvt_meinberg(
 		if (f[3] == 'A') {
 			clock_time->flags |= PARSEB_LEAPADD;
 		}
-			
+
 		if (f[3] == 'a') {
 			clock_time->flags |= PARSEB_LEAPDEL;
 		}
@@ -490,14 +490,14 @@ cvt_mgps(
 			if (clock_time->utcoffset == 0) {
 			    clock_time->flags |= PARSEB_UTC;
 			}
-			    
+
 			/*
 			 * no sv's seen - no time & position
 			 */
 			if (f[0] == '#') {
 			    clock_time->flags |= PARSEB_POWERUP;
 			}
-			    
+
 			/*
 			 * at least one sv seen - time (for last position)
 			 */
@@ -512,7 +512,7 @@ cvt_mgps(
 			if (f[3] == '!') {
 			    clock_time->flags |= PARSEB_ANNOUNCE;
 			}
-			    
+
 			/*
 			 * oncoming leap second
 			 * 'a' code not confirmed - earth is not
@@ -521,11 +521,11 @@ cvt_mgps(
 			if (f[4] == 'A') {
 			    clock_time->flags |= PARSEB_LEAPADD;
 			}
-			    
+
 			if (f[4] == 'a') {
 			    clock_time->flags |= PARSEB_LEAPDEL;
 			}
-			    
+
 			/*
 			 * f[5] == ' '
 			 */
@@ -536,7 +536,7 @@ cvt_mgps(
 			if ((f[6] == 'L') || (clock_time->second == 60)) {
 			    clock_time->flags |= PARSEB_LEAPSECOND;
 			}
-			    
+
 			return CVT_OK;
 		}
 	}
@@ -566,7 +566,7 @@ gps_input(
 	if (!msg_buf) {
 		return PARSE_INP_SKIP;
 	}
-		
+
 	if ( msg_buf->phase == MBG_NONE ) {                  /* not receiving yet */
 		switch (ch)
 		{
@@ -604,7 +604,7 @@ gps_input(
 	    (parseio->parse_index < parseio->parse_dsize)) {
 		parseio->parse_data[parseio->parse_index++] = ch;
 	}
-		
+
 	parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] \
 	    = (unsigned char)ch;
 

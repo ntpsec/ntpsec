@@ -249,7 +249,7 @@ cvt_trimtsip(
 			    if (t->t_leap == DELSECOND) {
 				    clock_time->flags |= PARSEB_LEAPDEL;
 			    }
-				    
+
 			    switch (t->t_operable) {
 				case STATUS_SYNC:
 				    clock_time->flags &= ~(PARSEB_POWERUP|PARSEB_NOSYNC);
@@ -276,7 +276,7 @@ cvt_trimtsip(
 
 		    } /* case 0x41 */
 
-		    case CMD_RRECVHEALTH: 
+		    case CMD_RRECVHEALTH:
 		    {
 			    /* TRIMBLE health */
 			    uint8_t status = mb(0);
@@ -318,7 +318,7 @@ cvt_trimtsip(
 			    if (t->t_weekleap < GPSWRAP) {
 				    t->t_weekleap = (unsigned short)(t->t_weekleap + GPSWEEKS);
 			    }
-				    
+
 			    /* day in week of leap correction */
 			    t->t_dayleap = get_msb_ushort(&mb(22));
 			    /* current week no */
@@ -327,7 +327,7 @@ cvt_trimtsip(
 				    /* coverity[copy_paste_error] */
 				    t->t_week = (unsigned short)(t->t_weekleap + GPSWEEKS);
 			    }
-				    
+
 			    lbp = (unsigned char *)&mb(14); /* last update time */
 			    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t, trim_offsets) != IEEE_OK) {
 				    return CVT_FAIL|CVT_BADFMT;

@@ -163,11 +163,11 @@ inp_varitext(
 	if (!t) {
 		return PARSE_INP_SKIP;	/* local data not allocated - sigh! */
 	}
-		
+
 	if (ch == 'T') {
 		t->tstamp = *tstamp;
 	}
-		
+
 	if ((t->previous_ch == 'T') && (ch == ':')) {
 		parseprintf(DD_PARSE, ("inp_varitext: START seen\n"));
 

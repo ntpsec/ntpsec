@@ -52,7 +52,7 @@ bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
 
 /***********************************************************/
 
-/* buffer packing/unpacking routines. 
+/* buffer packing/unpacking routines.
  * NB: The length field in NTP extensions includes the header
  * while the length field in NTS-KE data streams does not.
  *

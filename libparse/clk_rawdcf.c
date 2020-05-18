@@ -273,7 +273,7 @@ convert_rawdcf(
 		if (ext_bf(buffer, DCF_A2, dcfprm->zerobits)) {
 		    clock_time->flags |= PARSEB_LEAPADD; /* default: DCF77 data format deficiency */
 		}
-		    
+
 		if (ext_bf(buffer, DCF_R, dcfprm->zerobits)) {
 		    clock_time->flags |= PARSEB_CALLBIT;
 		}
@@ -606,7 +606,7 @@ inp_rawdcf(
 			} else {
 				delta_usec = -1;
 			}
-			
+
 			if (delta_usec < (NS_PER_S/2000) && delta_usec >= 0) {
 				parseprintf(DD_RAWDCF, ("inp_rawdcf: timeout time difference %ld usec - minute marker set\n", delta_usec));
 				/* collect minute markers only if spaced by 60 seconds */

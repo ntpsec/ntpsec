@@ -1,7 +1,7 @@
 /*
  * definitions for NTP file generations support
  *
- * Copyright Rainer Pruy, 
+ * Copyright Rainer Pruy,
  *           Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  * SPDX-License-Identifier: BSD-2-Clause
  */

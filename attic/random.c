@@ -251,11 +251,11 @@ int main(int argc, char *argv[]) {
 
 	printf(" times in ns         avg  fastest  lng\n");
 
-	average = getpid_average();   
+	average = getpid_average();
 	printf("getpid():          %5d            (simple kernel call)\n",
 		average);
 
-	average = clock_average();   
+	average = clock_average();
 	printf("clock_gettime:     %5d            (overhead of fastest)\n",
 		average);
 

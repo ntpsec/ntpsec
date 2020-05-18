@@ -57,7 +57,7 @@ types_lengths_list = [
 for type_length_tuple in types_lengths_list:
     length = min(type_length_tuple[0], max_bytes)
     for _ in group_iterator:
-        print("%3d %12s\t%s" % 
+        print("%3d %12s\t%s" %
         (key_number, type_length_tuple[1],
          secrets.token_hex(length)))
         key_number += 1

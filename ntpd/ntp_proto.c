@@ -2993,7 +2993,7 @@ void maybe_log_junk(const char *tag, struct recvbuf *rbufp) {
       junk_last = rbufp->recv_time;
       junk_score *= expf(-since_last/junk_decay);
       if (junk_limit < junk_score)
-	return; 
+	return;
     }
     junk_print++;
     junk_score += 1.0/junk_decay;  /* only count the ones we print */

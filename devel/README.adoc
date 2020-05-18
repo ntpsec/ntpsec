@@ -17,7 +17,7 @@ hacking.adoc::
 	Notes to folks who want to hack on the code.
 
 ifdex-ignores::
-	Lists and explains a large number of internal configuration symbols.	
+	Lists and explains a large number of internal configuration symbols.
 
 make-tarball::
 	The script for building a release tarball.

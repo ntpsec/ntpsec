@@ -3,7 +3,7 @@
  * Copyright the NTPsec project contributors
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * These are portable reimplementations of what BSD provides 
+ * These are portable reimplementations of what BSD provides
  * in <sys/endian.h>.
  */
 #ifndef GUARD_NTP_ENDIAN_H

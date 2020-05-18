@@ -25,7 +25,7 @@ void getbuf_init(void) {
 
 /*
  * Function to get a pointer to the next buffer.  Needs to be thread-safe because
- * it's used in callers that need to be thread-safe, notably msyslog.  For the 
+ * it's used in callers that need to be thread-safe, notably msyslog.  For the
  * same reason, we don't try to log a lock-acquisition failure.
  *
  * ESR: Yes, this is ugly and kludgy. I'm not getting rid of of it
@@ -46,7 +46,7 @@ char *lib_getbuf(void)
 	static int		lib_nextbuf;
 	char *bufp;
 
-// FIXME - need this until python tests can call getbuf_init 
+// FIXME - need this until python tests can call getbuf_init
 	static bool init_done = false;
 	if (!init_done) {
 		getbuf_init();

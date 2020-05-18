@@ -246,7 +246,7 @@ static int stringreader(void* farg)
 	if (**cpp) {
 		return *(*cpp)++;
 	} else {
-	    return EOF; 
+	    return EOF;
 	}
 }
 

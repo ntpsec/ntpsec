@@ -74,7 +74,7 @@ the server's certificate.  IP addresses will not work.
 This assumes that the server is using a certificate covered by
 your OS/distro's root certificate collection.
 
-NetBSD needs the +mozilla-rootcerts-openssl+ package and `ca /etc/openssl/certs/` added to the +server+ line. 
+NetBSD needs the +mozilla-rootcerts-openssl+ package and `ca /etc/openssl/certs/` added to the +server+ line.
 
 Restart `ntpd`, and skip to link:#verify[Verification], below.
 
@@ -83,14 +83,14 @@ Restart `ntpd`, and skip to link:#verify[Verification], below.
 
 Being an NTS server requires a well-formed SSL certificate.  The
 easiest way to do this is to use Let's Encrypt.  It needs a FQDN.
-Please see the 
+Please see the
 https://certbot.eff.org/[certbot client site] for instructions.
 
 The following worked on Fedora:
 
 ------------------------------------------------------------
 $ sudo dnf install certbot
-  
+
 # Install
 $ sudo certbot certonly --standalone
 

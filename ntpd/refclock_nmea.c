@@ -1087,7 +1087,7 @@ nmea_receive(
 	 * timecode timestamp, but only if the PPS is not in control.
 	 * Discard sentence if reference time did not change.
 	 */
-	rd_reftime = eval_gps_time(refclock_name(peer), &date, &tofs, 
+	rd_reftime = eval_gps_time(refclock_name(peer), &date, &tofs,
 				   (peer->cfg.mode & NMEA_DATETRUST_MASK), &up->epoch_warp, &rd_timestamp);
 	if (up->last_reftime == rd_reftime) {
 		/* Do not touch pp->a_lastcode on purpose! */

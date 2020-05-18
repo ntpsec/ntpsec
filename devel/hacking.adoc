@@ -196,7 +196,7 @@ likes. It's a bit archaic, but we've stuck with it to preserve
 continuity; you should, too.
 
 *Do* always add the optional braces around if/for/while/do bodies.
-It helps readability, staves off some subtle errors, and will be 
+It helps readability, staves off some subtle errors, and will be
 helpful if the code is ever moved to Go.
 
 A discussion about using uncrustify to mass convert all the C sources

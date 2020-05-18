@@ -33,7 +33,7 @@
  */
 
 #define	O_USEC		O_WDAY
-static struct format rcc8000_fmt = { 
+static struct format rcc8000_fmt = {
 	{ { 13, 2 }, {16, 2}, { 19, 2}, /* Day, Month, Year */
 	  {  0, 2 }, { 3, 2}, {  6, 2}, /* Hour, Minute, Second */
 	  {  9, 3 }, {28, 1}, {  0, 0}, /* uSec, Status (Valid,Reject,BST,Leapyear) */  },
