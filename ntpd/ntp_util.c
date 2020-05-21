@@ -824,6 +824,12 @@ ntpd_time_stepped(void) {
 	/*
 	 * flush the monitor MRU list which contains l_fp timestamps
 	 * which should not be compared across the step.
+	 *
+	 * This is evil if you are using the MRU list to get a summary
+	 * of all your traffic.  But time-steps don't happen often on
+	 * servers with enough traffic to be interesting.
+	 *
+	 * If we get to logging MRU slots, we should log everything here.
 	 */
 	if (MON_OFF != mon_data.mon_enabled) {
 		mon_stop();
