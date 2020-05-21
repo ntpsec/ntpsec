@@ -482,9 +482,13 @@ ntp_monitor(
  * but this code is easy to write.
  *
  * We may want to do things like log piggy slots.
+ *
+ * model name      : Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
+ * 19 May 11:58:05 ntpd[17475]: MON: Scanned 5439966 slots in 2.303
+ * That's too long for normal usage.  (Was #ifdef DEBUG)
  */
 void mon_timer(void) {
-#ifdef DEBUG
+#if 0
 	long int count = 0, hits = 0;
 	l_fp when = 0;
 	mon_entry *mon, *slot;
