@@ -298,11 +298,9 @@ TLSCertificateKeyFile file-path
 
 A colon-separated cipher-spec string consisting of OpenSSL cipher
 specifications to configure the Cipher Suite the client is permitted
-to negotiate in the TLS handshake phase.  TLS1.2 and TLS1.3 must be
-specified separately.
+to negotiate in the TLS handshake phase.
 
 ....
-TLSCipherSuite TLS1.2 cipher-spec
 TLSCipherSuite TLS1.3 cipher-spec
 ....
 
@@ -350,7 +348,7 @@ NTPHonorCipherOrder on|off
 Which versions of the TLS protocol will be accepted in new TLS connections.
 
 ....
-TLSProtocol [+TLS1.2] [+TLS1.3]
+TLSProtocol [+TLS1.3]
 ....
 
 Configures one or more sources for seeding the Pseudo Random Number
