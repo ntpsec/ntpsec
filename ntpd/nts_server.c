@@ -108,7 +108,6 @@ bool nts_server_init(void) {
 
 	ok &= nts_load_versions(server_ctx);
 	ok &= nts_load_ciphers(server_ctx);
-	ok &= nts_load_certificate(server_ctx);
 
 	if (!ok) {
 		msyslog(LOG_ERR, "NTSs: Disabling NTS-KE server");
@@ -131,6 +130,10 @@ bool nts_server_init2(void) {
 	sigset_t block_mask, saved_sig_mask;
 	int rc;
 	char errbuf[100];
+
+	if (!nts_load_certificate(server_ctx)) {
+		return false;
+	}
 
 	sigfillset(&block_mask);
 	pthread_sigmask(SIG_BLOCK, &block_mask, &saved_sig_mask);
