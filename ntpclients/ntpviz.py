@@ -1612,7 +1612,10 @@ Python by ESR, concept and gnuplot code by Dan Drown.
         if 2 < args.debug_level:
             sys.stderr.write("ntpviz: INFO: now running at nice: %s\n" % nice)
 
-    for fontpath in ("/usr/share/fonts/liberation",
+    for fontpath in ("@PREFIX@/share/fonts/liberation",
+                     "@PREFIX@/share/fonts/liberation-fonts",
+                     "@PREFIX@/share/fonts/truetype/liberation",
+                     "/usr/share/fonts/liberation",
                      "/usr/share/fonts/liberation-fonts",
                      "/usr/share/fonts/truetype/liberation"):
 
