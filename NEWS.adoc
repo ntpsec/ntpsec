@@ -10,6 +10,8 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+== Reposatory Head ==
+
 == 2020-05-23: 1.1.9 ==
 
 Today is Blursday, Maprilay 84th, 2020, of the COVID-19 panic.
