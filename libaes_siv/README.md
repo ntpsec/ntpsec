@@ -135,7 +135,7 @@ In December 2018, OpenSSL merged an AES-SIV implementation derived
 from libaes_siv. As of February 2019 this implementation has not been
 released yet; it will appear some time post-1.1.1. However, despite
 the two implementations' common ancestry, they are not API-compatible.
-The OpenSSL team had to make an ugly-but-necessary compromise into order
+The OpenSSL team had to make an ugly-but-necessary compromise in order
 to shoehorn SIV mode into OpenSSL's EVP API, which is a streaming API
 that was never designed to support SIV's two-pass operation. When used for
 SIV operations, the EVP API is forced to return an error if you invoke
