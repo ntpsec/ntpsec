@@ -1,5 +1,9 @@
 = Software licenses =
 
+By submitting patches to this project you agree to allow them to be
+redistributed under the project's license, according to the normal
+forms and usages of the open-source community.
+
 For historical reasons the code in this distribution is issued under
 several different but compatible licenses.  Each will generally be
 found near a year or years of copyright declaration.

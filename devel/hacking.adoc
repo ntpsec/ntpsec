@@ -537,7 +537,7 @@ Our GitLab group is at https://gitlab.com/groups/NTPsec
 Please use the issue tracker and the pull request process at GitLab.com.
 
 If you wish, you can request to join the GitLab project team at
-https://gitlab.com/groups/NTPsec/group_members, and we will add you to the
+https://gitlab.com/groups/NTPsec/group_members and we will add you to the
 team with Guest access; this will cause GitLab to send issue tracker
 updates and pipeline updates to your email address.  You do not have
 to formally be a member of the GitLab team to participate, contribute,
@@ -570,7 +570,9 @@ The team member who merges your patch will use the git
 parameter ---author from the email From header and the git parameter
 --date from the email Date header.
 
-For complex patches and contribution narratives, please use GitLab.
+We recommend you consult http://esr.ibiblio.org/?p=6802
+
+For complex patches and contribution narratives, do please use GitLab.
 
 == Commit comments
 
@@ -678,10 +680,6 @@ each release.
   by landing a significant new feature, landing a critical fix, or just
   that enough time has passed with ongoing improvements and fixes.
 
-. Make sure inclusions (currently only libaes_siv) are updated, and
-  run the build as a sanity check.  There's a 'pullincludes' target
-  in waf that refreshes the includes. Commit that change.
-
 . Email a warning message to the mailto:devel@ntpsec.org list,
   and ask the major contributors to chime in, and to each assure
   that the .../NEWS file and the .../devel/TODO file is up to date.
@@ -693,10 +691,12 @@ each release.
 . Check with the buildbot reports, assure that there are no unplanned
   regressions on the supported platforms.
 
+. Do the "Release Prep Steps" section below.
+
 . Modify the .../VERSION file with the new version number.
   Version number strings look like "1.1.1"
 
-. Modify the .../NEWS file, changing the "Repository head"
+. Modify the .../NEWS.adoc file, changing the "Repository head"
   to the current date and the version string.
 
 . Run ./waf configure
@@ -705,35 +705,64 @@ each release.
 
 . cd ./devel
 
-. Run the "release" script in this (devel) directory.
+. Run the "./release | sh" script in this (devel) directory.
 
-. Post release announcement to blog
+. Check https://gitlab.com/NTPsec/ntpsec
+
+. Post release announcement to blog.ntpsec.org
+
+. Post release announcement to fediverse @ntpsec@fosstodon.org
 
 . Post release announcement to email announce@ntpsec.org, devel@ntpsec.org, gpsd-dev@nongnu.org, ntp@ietf.org, time-nuts@lists.febo.com
 
-== Release Prep Steps.  Ignore this if you are not Mark
+. Modify the .../NEWS.adoc file, adding a new "Repository head" section.
 
-. start a new Debian instance, note it's public IP address
+
+== Release Prep Steps.  Ignore this if you are not Mark.
+
+. start a new Debian instance, at least 256GiB, note the public IP address
+
+. add/update local .ssh/config
+
+-------------------------------------------------------------
+Host builder
+  Hostname IPADDRESS
+  User admin
+  IdentityFile ~/.ssh/aws-mra.key
+-------------------------------------------------------------
+
+. ssh to it, then disconnect, to test and set ssh fingerprint
+
+-------------------------------------------------------------
+ssh -v builder
+-------------------------------------------------------------
 
 . copy over keys
 
-scp ~/.ssh/gitlab.key  admin@IPADDRESS:.ssh/gitlab.key
+-------------------------------------------------------------
+scp ~/.ssh/gitlab.key  builder:.ssh/gitlab.key
 gpg --export-secret-key 0x5A22E330161C3978 >secret.gkey
-scp secret.gkey admin@IPADDRESS:.
+scp secret.gkey builder:.
+-------------------------------------------------------------
 
 . ssh to remote
 
-ssh -v -i ~/.ssh/aws-mra.key admin@IPADDRESS
+-------------------------------------------------------------
+ssh builder
+-------------------------------------------------------------
 
 . install build dependencies
 
+-------------------------------------------------------------
 sudo apt-get update
 sudo apt-get install build-essential m4 bison git gnupg libssl-dev emacs-nox python-pip
 sudo apt-get install asciidoc xsltproc
 sudo pip install gps
+-------------------------------------------------------------
 
-. connect to gitlab
+. setup gitlab ssh
 
+-------------------------------------------------------------
 cat >> ~/.ssh/config
 Host gitlab.com
   Hostname gitlab.com
@@ -742,25 +771,44 @@ Host gitlab.com
   PreferredAuthentications publickey
   IdentityFile ~/.ssh/gitlab.key
 ^D
+-------------------------------------------------------------
 
-ssh git@gitlab.com  # expect "Welcome to GitLab, @fallenpegasus!"
+. test gitlab ssh, set ssh fingerprint, expect welcome string
+
+-------------------------------------------------------------
+ssh -v git@gitlab.com
+-------------------------------------------------------------
+
+. connect to ftp mirror, set ssh fingerprint, then disconnect
+
+-------------------------------------------------------------
+ssh -v markatwood@service1.ntpsec.org
+-------------------------------------------------------------
 
 . clone the repo
 
+-------------------------------------------------------------
 git clone git@gitlab.com:NTPsec/ntpsec.git
+-------------------------------------------------------------
 
 . setup the signing key and init gpg
 
+-------------------------------------------------------------
 gpg --import ~/secret.gkey
 GPG_TTY=$(tty); export GPG_TTY
 echo "test" | gpg --clearsign
+-------------------------------------------------------------
 
 . setup gitconfig
 
+-------------------------------------------------------------
 cat > ~/.gitconfig
 [user]
         name = Mark Atwood
         email = mark.atwood@ntpsec.org
 ^D
+-------------------------------------------------------------
+
+. 
 
 //end

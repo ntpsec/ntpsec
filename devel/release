@@ -41,7 +41,7 @@ git push --tags
 gpg -u ${KEY} -a --output ${TAR}.asc --detach-sign ${TAR}
 
 # Generate sha256sum file for the release tarball.
-shasum -a 256 -p ${TAR} >${TAR}.sum
+shasum -a 256 ${TAR} >${TAR}.sum
 
 # GPG sign that sha256sum file.
 gpg -u ${KEY} -a --output ${TAR}.sum.asc --clearsign ${TAR}.sum
@@ -50,7 +50,6 @@ gpg -u ${KEY} -a --output ${TAR}.sum.asc --clearsign ${TAR}.sum
 # tarball, and the signed sha256sum file to the ftp artifact server.
 scp ntpsec-${V}.tar* ${DST}
 
-echo "Don't forget to bump the minor version number!"
 EOF
 
 # end
