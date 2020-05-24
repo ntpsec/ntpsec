@@ -16,27 +16,27 @@
 #   This takes the first.
 #
 # ntpdate ntpdig  ntpd    What it does
-# -4      -4      -q -4   Resolve DNS lookups to A records         
-# -6      -6      -q -6   Resolve DNS lookups to AAAA records      
-# -a N    -a N    -q      Authentication   
+# -4      -4      -q -4   Resolve DNS lookups to A records
+# -6      -6      -q -6   Resolve DNS lookups to AAAA records
+# -a N    -a N    -q      Authentication
 # -b      -S      -q      step time adjustments
 # -B      -s      -q      slew time adjustments
 # -d      -d      -d      debugging mode (implies -q)
-# -e N.N          -q      authdelay        
-# -k file -k file -k file key file         
+# -e N.N          -q      authdelay
+# -k file -k file -k file key file
 # -o N    -o N    -q      NTP Protocol version
 # -p N            -q      How many samples to take
 # -q      default -q      query/report only, don't set clock
 #                         (implies -u for ntpdate)
 # -s                      log to syslog (always enabled in ntpd)
 # -t N.N  -t N.N          request timeout
-# -u      default         unpriv port      
+# -u      default         unpriv port
 # -v                      verbose (ntpd is always more verbose than ntpdate)
 #         -c name         Send concurrent requests to resolved IPs for name
-#   
+#
 #         -l file         Log to file
 #         -M msec         Slew adjustments less than msec,
-#                         step adjustments larger than msec.       
+#                         step adjustments larger than msec.
 #
 # SPDX-License-Identifier: BSD-2-Clause
 

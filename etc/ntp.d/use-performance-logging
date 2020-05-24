@@ -9,7 +9,7 @@ filegen loopstats file loopstats type day enable
 filegen peerstats file peerstats type day enable
 filegen clockstats file clockstats type day enable
 
-logfile /var/log/ntpd.log  
+logfile /var/log/ntpd.log
 logconfig =syncall +clockall +peerall +sysall
 
 # The following sets edit modes for GNU EMACS

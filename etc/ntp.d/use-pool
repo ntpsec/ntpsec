@@ -11,7 +11,7 @@
 # using a country-specific potion of the pool, e.g. something like
 #
 # us.pool.ntp.org
-# 
+#
 # If you are not in the USA, then it will probably work to
 # change the 'us' to your two letter country code.
 #
