@@ -1121,7 +1121,7 @@ class ControlSession:
                         warn("Response packet:\n%s\n" % repr(self.response))
                     elif self.debug >= 2:  # pragma: no cover
                         # FIXME: Garbage when retrieving assoc list (binary)
-                        eol = self.response.find("\n")
+                        eol = self.response.find(b"\n")
                         firstline = self.response[:eol]
                         warn("First line:\n%s\n" % repr(firstline))
                     return None
