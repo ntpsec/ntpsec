@@ -314,6 +314,7 @@ int scmp_sc[] = {
 	SCMP_SYS(bind),
 	SCMP_SYS(brk),
 	SCMP_SYS(chdir),
+	SCMP_SYS(clock_adjtime),
 	SCMP_SYS(clock_gettime),
 	SCMP_SYS(clock_settime),
 	SCMP_SYS(close),
@@ -436,7 +437,6 @@ int scmp_sc[] = {
  #define __SNR_ppoll                     __PNR_ppoll
 #endif
 	SCMP_SYS(ppoll),
-	SCMP_SYS(clock_adjtime),
 #endif
 	SCMP_SYS(sendmsg),
 #ifdef __NR_geteuid32
@@ -451,6 +451,8 @@ int scmp_sc[] = {
 	SCMP_SYS(faccessat),
 	SCMP_SYS(newfstatat),
 	SCMP_SYS(renameat),
+	SCMP_SYS(linkat),
+	SCMP_SYS(unlinkat),
 #endif
 #if defined(__i386__) || defined(__arm__) || defined(__powerpc__)
 	SCMP_SYS(_newselect),
