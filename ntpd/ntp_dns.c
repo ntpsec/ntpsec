@@ -190,7 +190,7 @@ static void* dns_lookup(void* arg)
 		hints.ai_protocol = IPPROTO_UDP;
 		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_family = AF(&pp->srcadr);
-		gai_rc = getaddrinfo(pp->hostname, "123", &hints, &answer);
+		gai_rc = getaddrinfo(pp->hostname, NTP_PORTA, &hints, &answer);
 	}
 
 	kill(getpid(), SIGDNS);

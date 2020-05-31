@@ -15,7 +15,10 @@
 #define NTS_KEY_FILE "/etc/ntp/key.pem"
 #define NTS_COOKIE_KEY_FILE "/var/lib/ntp/nts-keys"
 
-#define NTS_KE_PORT		123
+#define NTS_KE_PORT		4460
+#define NTS_KE_PORTA		"4460"
+#define NTS_KE_PORT_OLD		123
+#define NTS_KE_PORTA_OLD	"123"
 
 #define NTS_KE_TIMEOUT		3
 
