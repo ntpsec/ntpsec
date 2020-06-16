@@ -29,6 +29,9 @@
 #include <openssl/md5.h>
 #include <openssl/rand.h>
 #include <openssl/objects.h>
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#include <openssl/ssl.h>
+#endif
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 
@@ -56,6 +59,10 @@ int NUM = 1000000;
 #define MAX_KEY_LENGTH 64
 
 EVP_MD_CTX *ctx;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+SSL_CTX *ssl;
+#endif
+
 
 static void ssl_init(void)
 {
@@ -63,6 +70,9 @@ static void ssl_init(void)
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	ctx = EVP_MD_CTX_new();
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	ssl = SSL_CTX_new(TLS_client_method());
+#endif
 }
 
 static unsigned int SSL_Digest(
@@ -116,8 +126,20 @@ static void DoDigest(
 	unsigned int digestlength = 0;
 
 	if (NULL == digest) {
+		printf("%10s no digest\n", name);
 		return;
 	}
+
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	/* Required for OpenSSL 3.0.0
+	 * This skips SHA224 and SHA512 which work,
+	 * but RIPEMD160 gets Segmentation fault without this.
+	 */
+	if (0 == SSL_CTX_set_cipher_list(ssl, name)) {
+		printf("%10s no cipher_list\n", name);
+		return;
+	}
+#endif
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < NUM; i++) {
@@ -149,6 +171,8 @@ int main(int argc, char *argv[])
 
 	UNUSED_ARG(argc);
 	UNUSED_ARG(argv);
+
+	setlinebuf(stdout);
 
 	ssl_init();
 	RAND_bytes((unsigned char *)&key, MAX_KEY_LENGTH);
