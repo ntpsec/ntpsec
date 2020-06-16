@@ -307,7 +307,8 @@ ind assid status conf reach auth condition last_event cnt
   server so loaded that none of its MRU entries age out before they
   are shipped. With this option, each segment is reported as it arrives.
 
-[[mrulist]]+mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +mindrop=+'drop' | +minscore=+'score' | +maxlstint=+'seconds' | +minlstint=+'seconds' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
+[[mrulist]]+mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +mindrop=+'drop' | +minscore=+'score' | +maxlstint=+'seconds' | +minlstint=+'seconds' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask' | +limit=+'limit' |
++addr.'num'=+'address']::
   Obtain and print traffic counts collected and maintained by the
   monitor facility. This is useful for tracking who _uses_ or
   _abuses_ your server.
@@ -316,6 +317,19 @@ With the exception of +sort=+'sortorder', the options
 filter the list returned by +ntpd+. The +limited+ and +kod+ options
 return only entries representing client addresses from which the last
 packet received triggered either discarding or a KoD response.
+the +addr.'num'=+ option adds specific addresses to retrieve when
++limit=+'1'. Values of 0 to 15 are supported for 'num'. Also, used
+internallly with +last.'num'=+'hextime' to select starting point
+for retrieving continued response.
+the +frags=+'frags' option limits the number of datagrams
+(fragments) in response.  Used by newer ntpq versions instead
+of limit= when retrieving multiple entries.
+The +limit=+ option limits the MRU entries returned. limit=1
+is a special case:  Instead of fetching beginning with the
+supplied starting point's newer neighbor, fetch the supplied
+entries. This enables fetching a multiple entries by IP
+addresses.  When limit is not one and frags= is provided,
+the fragment limit controls.
 The +mincount=+'count' option filters entries that have received less
 than 'count' packets.
 The +mindrop=+'drop' option filters entries that have dropped less

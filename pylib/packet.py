@@ -1603,6 +1603,11 @@ def parse_mru_variables(variables):
                  "maxlstint", "minlstint", "laddr", "recent",
                  "sort", "frags", "limit"):
             continue
+        elif k.startswith('addr.') or k.startswith('last.'):
+            kn = k.split('.')
+            if len(kn) != 2 or kn[1] not in map(str, list(range(16))):
+                raise ControlException(SERR_BADPARAM % k)
+            continue
         else:
             raise ControlException(SERR_BADPARAM % k)
     if 'frags' in variables:
