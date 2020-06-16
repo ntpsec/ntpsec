@@ -64,7 +64,6 @@ cmac_encrypt(
 	size_t	len;
 	CMAC_CTX *ctx = cmac_ctx;
 
-	CMAC_resume(ctx);
 	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
 		/* Shouldn't happen.  Does if wrong key_size. */
 		msyslog(LOG_ERR,
@@ -98,7 +97,6 @@ cmac_decrypt(
 	size_t	len;
 	CMAC_CTX *ctx = cmac_ctx;
 
-	CMAC_resume(ctx);
 	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
 		/* Shouldn't happen.  Does if wrong key_size. */
 		msyslog(LOG_ERR,

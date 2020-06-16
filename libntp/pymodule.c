@@ -287,7 +287,6 @@ ntpc_mac(PyObject *self, PyObject *args)
 	}
 	if (NULL == cmac_ctx)
 		cmac_ctx = CMAC_CTX_new();
-	CMAC_resume(cmac_ctx);
         if (!CMAC_Init(cmac_ctx, key, keylen, cipher, NULL)) {
                 /* Shouldn't happen.  Does if wrong key_size. */
 		Py_RETURN_NONE;
