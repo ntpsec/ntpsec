@@ -503,6 +503,13 @@ int main(int argc, char **argv) {
         ctx.env.INCLUDES = ["/usr/pkg/include"]
         ctx.env.LIBPATH = ["/usr/pkg/lib"]
         ctx.env.LDFLAGS += ["-rpath=/usr/pkg/lib"]
+    elif ctx.env.DEST_OS == "linux" and os.path.isdir("/usr/local/ssl/"):
+        # This supports building OpenSSL from source
+        # That allows using OpenSSL 1.1.1 on older CentOS
+        # or testing pre-release versions of OpenSSL
+        # see HOWTO-OpenSSL
+        ctx.env.INCLUDES = ["/usr/local/ssl/include"]
+        ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "darwin":
         # macports location
         if os.path.isdir("/opt/local/include"):

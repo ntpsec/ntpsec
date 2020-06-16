@@ -1,0 +1,54 @@
+NTS needs TLS 1.3 or newer.
+That was first supported in OpenSSL 1.1.1
+  (1.1.1a is broken)
+Some OSes/Distros don't support a new enough version of OpenSSL
+This file contains notes on how to download, build, and install 1.1.1g
+It also works for testing 3.0.0 alpha
+
+It's rough.  Don't be surprised by bugs/oversights.
+Corrections encouraged.
+
+OpenSSL source here:
+  https://www.openssl.org/source/
+  https://www.openssl.org/source/old/1.1.1/
+
+You should be able to cut/paste many of these lines.
+
+cd xxx
+mkdir OpenSSL
+cd OpenSSL
+for OpenSSL 1.1.1g
+  wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz
+  tar -xzf openssl-1.1.1g.tar.gz
+  cd openssl-1.1.1g
+for OpenSSL 3.0.0 alpha3 
+  wget https://www.openssl.org/source/openssl-3.0.0-alpha3.tar.gz
+  tar -xzf openssl-3.0.0-alpha3.tar.gz
+  cd openssl-3.0.0-alpha3
+
+# Check NOTES.PERL
+#   for CentOS, you need
+  sudo yum install perl-core
+For make test on Fedora
+  sudo dnf install perl-Test-Harness perl perl-Pod-Html
+
+On Linux
+  ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared
+	enable-des
+make
+sudo make install
+
+cd /etc/ld.so.conf.d
+echo "/usr/local/ssl/lib" > openssl-1.1.1g.conf
+echo "/usr/local/ssl/lib" > openssl-3.0.0-alpha.conf
+ldconfig
+
+# check with
+/usr/local/ssl/bin/openssl version
+
+# Note that the directories in the above config line need to
+# match where wscript looks for your OS.
+# The above works for CentOS 7
+
+CentOS 7 needs this if you use real certificates:
+  nts ca /etc/pki/tls/certs/ca-bundle.trust.crt
