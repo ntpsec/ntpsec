@@ -12,6 +12,11 @@ on user-visible changes.
 
 == Repository Head ==
 
+NTS KE client now defaults to port 4460.
+
+NTS KE server now listens on port 4460 as well as 123.
+(Listening on 123 will be removed for 1.2.0)
+
 == 2020-05-23: 1.1.9 ==
 
 Today is Blursday, Maprilay 84th, 2020, of the COVID-19 panic.

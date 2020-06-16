@@ -267,7 +267,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	}
 	if (NULL == tmp) {
 		/* simple case, no : */
-		strlcpy(port, NTS_KE_PORTA_OLD, sizeof(port));
+		strlcpy(port, NTS_KE_PORTA, sizeof(port));
 	} else {
 		/* Complicated case, found a : */
 		*tmp++ = 0;
@@ -747,7 +747,7 @@ bool nts_server_lookup(char *server, sockaddr_u *addr, int af) {
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_family = af;
 
-	gai_rc = getaddrinfo(server, NTS_KE_PORTA_OLD, &hints, &answer);
+	gai_rc = getaddrinfo(server, NTS_KE_PORTA, &hints, &answer);
 	if (0 != gai_rc) {
 		msyslog(LOG_INFO, "NTSc: DNS error trying to lookup %s: %d, %s",
 			server, gai_rc, gai_strerror(gai_rc));
