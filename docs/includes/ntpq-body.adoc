@@ -150,6 +150,12 @@ as following.
 +debug more | less | off+::
   Turns internal query program debugging on and off.
 
++noflake+::
++doflake 'probability'::
+  Disables or enables the dropping of control packets by ntpq for testing.
+  Probabilities 0 and 1 should be certainly accepted and discarded
+  respectively. No default, but 0.1 should be a one in ten loss rate.
+
 +logfile <stderr> | filename+::
   Displays or sets the file for debug logging. <stderr> will send logs
   to standard error.

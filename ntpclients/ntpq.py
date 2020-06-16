@@ -1215,6 +1215,42 @@ usage: config_from_file <configuration filename>
         for entry in entries:
             self.say(self.formatter.summary(entry) + "\n")
 
+    def do_noflake(self):
+        """Disables the dropping of control packets by ntpq for testing."""
+        self.session.flakey = False
+
+    def help_noflake(self):
+        """Print help for noflake."""
+        self.say("""\
+function: Disables the dropping of received packets by ntpq for testing.
+usage: noflake
+""")
+
+    def do_doflake(self, line):
+        """Drop some received packets for testing.
+
+        Probabilities 0 and 1 should be certainly accepted
+        and discarded respectively. No default, but 0.1
+        should be a one in ten loss rate.
+        """
+        try:
+            _ = float(line)
+            if not 0 < _ < 1:
+                raise ValueError
+            self.session.flakey = _
+        except ValueError:
+            self.say('Flakiness must be a (positive) float less than 1.')
+
+    def help_doflake(self):
+        """Print help for doflake."""
+        self.say("""\
+function: Enables the dropping of control packets by
+ntpq for testing. Probabilities 0 and 1 should be
+certainly accepted and discarded respectively. No
+default, but 0.1 should be a one in ten loss rate.
+usage: doflake <probability>
+""")
+
     def do_mrulist(self, line):
         """display the list of most recently seen source addresses,
            tags mincount=... resall=0x... resany=0x..."""

@@ -207,6 +207,7 @@ from __future__ import print_function, division
 import getpass
 import hmac
 import os
+import random
 import select
 import socket
 import string
@@ -740,6 +741,7 @@ class ControlSession:
         self.logfp = sys.stdout
         self.nonce_xmit = 0
         self.slots = 0
+        self.flakey = None
 
     def warndbg(self, text, threshold):
         ntp.util.dolog(self.logfp, text, self.debug, threshold)
@@ -1018,6 +1020,10 @@ class ControlSession:
             except socket.error:  # pragma: no cover
                 # usually, errno 111: connection refused
                 raise ControlException(SERR_SOCKET)
+
+            if self.flakey and self.flakey >= random.random():
+                warndbg('Flaky: I deliberately dropped a packet.', 1)
+                rawdata = None
 
             warndbg("Received %d octets" % len(rawdata), 3)
             rpkt = ControlPacket(self)
