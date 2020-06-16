@@ -3637,10 +3637,25 @@ static void read_mru_list(
 	} else if (0 != limit && 0 == frags)
 		frags = MRU_FRAGS_LIMIT;
 
+	mon = NULL;
+	if (limit == 1) {
+		for (i = 0; i < COUNTOF(last); i++) {
+			mon = mon_get_slot(&addr[i]);
+			if (mon != NULL) {
+				send_mru_entry(mon, i);
+			}
+		}
+		generate_nonce(rbufp, buf, sizeof(buf));
+		ctl_putunqstr("nonce", buf, strlen(buf));
+		get_systime(&now);
+		ctl_putts("now", &now);
+		ctl_flushpkt(0);
+		return;
+	}
+
 	/*
 	 * Find the starting point if one was provided.
 	 */
-	mon = NULL;
 	for (i = 0; i < (size_t)priors; i++) {
 		mon = mon_get_slot(&addr[i]);
 		if (mon != NULL) {
