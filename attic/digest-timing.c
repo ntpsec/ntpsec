@@ -16,7 +16,6 @@
  * 0x10000003  1.0.0b fails
  * 0x1000105fL 1.0.1e works.
  */
-#define CMAC_VERSION_CUTOFF 0x10000003
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -26,9 +25,6 @@
 
 #include <openssl/opensslv.h>
 #include <openssl/err.h>
-#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
-#include <openssl/cmac.h>
-#endif
 #include <openssl/evp.h>
 #include <openssl/md5.h>
 #include <openssl/rand.h>
@@ -60,9 +56,6 @@ int NUM = 1000000;
 #define MAX_KEY_LENGTH 64
 
 EVP_MD_CTX *ctx;
-#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
-CMAC_CTX *cmac;
-#endif
 
 static void ssl_init(void)
 {
@@ -70,9 +63,6 @@ static void ssl_init(void)
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	ctx = EVP_MD_CTX_new();
-#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
-	cmac = CMAC_CTX_new();
-#endif
 }
 
 static unsigned int SSL_Digest(
@@ -110,24 +100,6 @@ static unsigned int SSL_DigestSlow(
 	EVP_MD_CTX_free(ctxx);
 	return len;
 }
-
-#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
-static size_t SSL_CMAC(
-  const EVP_CIPHER *cipher, /* cipher algorithm */
-  uint8_t *key,             /* key pointer */
-  int     keylength,        /* key size */
-  uint8_t *pkt,             /* packet pointer */
-  int     pktlength         /* packet length */
-) {
-	unsigned char answer[EVP_MAX_MD_SIZE];
-	size_t len;
-	CMAC_resume(cmac);
-	CMAC_Init(cmac, key, keylength, cipher, NULL);
-	CMAC_Update(cmac, pkt, pktlength);
-	CMAC_Final(cmac, answer, &len);
-	return len;
-}
-#endif
 
 static void DoDigest(
   const char *name,       /* type of digest */
@@ -169,37 +141,6 @@ static void DoDigest(
 	printf("\n");
 }
 
-#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
-static void DoCMAC(
-  const char *name,       /* name of cipher */
-  const EVP_CIPHER *cipher,
-  uint8_t *key,           /* key pointer */
-  int     keylength,      /* key length */
-  uint8_t *pkt,           /* packet pointer */
-  int     pktlength       /* packet length */
-)
-{
-	struct timespec start, stop;
-	double fast;
-	unsigned long digestlength = 0;
-
-	if (NULL == cipher) {
-		return;
-	}
-
-	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < NUM; i++) {
-		digestlength = SSL_CMAC(cipher, key, keylength, pkt, pktlength);
-	}
-	clock_gettime(CLOCK_MONOTONIC, &stop);
-	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
-	printf("%10s  %2d %2d %2lu %6.0f  %6.3f",
-	       name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
-
-	printf("\n");
-}
-#endif
-
 
 int main(int argc, char *argv[])
 {
@@ -236,22 +177,6 @@ int main(int argc, char *argv[])
 	DoDigest("RIPEMD160", key, 16, packet, PACKET_LENGTH);
 	DoDigest("RIPEMD160", key, 20, packet, PACKET_LENGTH);
 	DoDigest("RIPEMD160", key, 32, packet, PACKET_LENGTH);
-
-#if OPENSSL_VERSION_NUMBER > CMAC_VERSION_CUTOFF
-	printf("\n");
-	printf("# KL=key length, PL=packet length, CL=CMAC length\n");
-	printf("# CMAC      KL PL CL  ns/op sec/run\n");
-
-	DoCMAC("DES",     EVP_des_cbc(),          key,  8, packet, PACKET_LENGTH);
-	DoCMAC("AES-128", EVP_aes_128_cbc(),      key, 16, packet, PACKET_LENGTH);
-	DoCMAC("AES-192", EVP_aes_192_cbc(),      key, 24, packet, PACKET_LENGTH);
-	DoCMAC("AES-256", EVP_aes_256_cbc(),      key, 32, packet, PACKET_LENGTH);
-#ifndef OPENSSL_NO_CAMELLIA
-	DoCMAC("CAM-128", EVP_camellia_128_cbc(), key, 16, packet, PACKET_LENGTH);
-	DoCMAC("CAM-192", EVP_camellia_192_cbc(), key, 24, packet, PACKET_LENGTH);
-	DoCMAC("CAM-256", EVP_camellia_256_cbc(), key, 32, packet, PACKET_LENGTH);
-#endif
-#endif
 
 	return 0;
 }
