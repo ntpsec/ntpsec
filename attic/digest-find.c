@@ -18,6 +18,9 @@
 #include <stdio.h>
 
 #include <openssl/objects.h>
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#include <openssl/ssl.h>
+#endif
 #include <openssl/evp.h>
 
 #define UNUSED_ARG(arg)         ((void)(arg))
@@ -42,6 +45,10 @@ main (
     UNUSED_ARG(argc);
     UNUSED_ARG(argv);
 
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+    SSL_CTX *ssl = SSL_CTX_new(TLS_client_method());
+#endif
+
     unsigned int versionNumber = OPENSSL_VERSION_NUMBER;
     const char *versionText = OPENSSL_VERSION_TEXT;
     printf("OpenSSL xVersion is %x, %s\n", versionNumber, versionText);
@@ -59,16 +66,22 @@ main (
 	const EVP_MD *md;
 	keytype = OBJ_sn2nid(digests[i]);
 	if (NID_undef == keytype) {
-	    printf("%10s\n", digests[i]);
+	    printf("%10s (no keytype)\n", digests[i]);
 	    continue;
 	}
 	md = EVP_get_digestbynid(keytype);
 	if (NULL == md) {
-	    printf("%10s %4d\n", digests[i], keytype);
+	    printf("%10s %4d (no digest)\n", digests[i], keytype);
 	    continue;
 	}
-	ctx = EVP_MD_CTX_create();
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	if (1 && 0 == SSL_CTX_set_cipher_list(ssl, digests[i])) {
+	    printf("%10s (no cipher_list)\n", digests[i]);
+	    continue;
+	}
+#endif
 	/* libntp/macencrypt.c has an ifdef for this */
+	ctx = EVP_MD_CTX_create();
 	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
 	EVP_DigestInit_ex(ctx, md, NULL);
 	EVP_DigestUpdate(ctx, pkt, sizeof(pkt));
