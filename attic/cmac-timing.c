@@ -204,11 +204,13 @@ static void DoPKEY(
 		printf("## Oops, EVP_MD_CTX_new() failed.\n");
 		return;
 	}
+	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_FINALISE);
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < NUM; i++) {
 		digestlength = One_PKEY(pkey, ctx, pkt, pktlength);
 	}
+
 	clock_gettime(CLOCK_MONOTONIC, &stop);
 	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
 	printf("%12s  %2d %2d %2lu %6.0f  %6.3f",
