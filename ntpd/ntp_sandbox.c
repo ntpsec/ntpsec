@@ -301,8 +301,6 @@ int scmp_sc[] = {
  * these from the list.
  */
 
-	SCMP_SYS(getdents),	/* Scanning /etc/ntp.d/ */
-	SCMP_SYS(getdents64),
 #ifdef __NR_prlimit64
 	SCMP_SYS(prlimit64),	/* 64 bit Fedora 26 with early_droproot*/
 #endif
@@ -325,7 +323,8 @@ int scmp_sc[] = {
 	SCMP_SYS(fstat),
 	SCMP_SYS(fsync),
 	SCMP_SYS(futex),	/* sem_xxx, used by threads */
-
+	SCMP_SYS(getdents),	/* Scanning /etc/ntp.d/ */
+	SCMP_SYS(getdents64),
 
 #ifdef __NR_getrandom
 	SCMP_SYS(getrandom),	/* Added in 3.17 kernel */
