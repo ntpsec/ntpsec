@@ -1524,11 +1524,13 @@ usage: kerninfo
         "display system uptime and packet counts"
         sysstats = (
             ("ss_uptime", "uptime:               ", NTP_INT),
-            ("ss_reset", "sysstats reset:       ", NTP_INT),
+            ("ss_numctlreq", "control requests:     ", NTP_INT),
+        )
+        sysstats2 = (
+            ("ss_reset", "sysstats reset:       ", NTP_UPTIME),
             ("ss_received", "packets received:     ", NTP_INT),
             ("ss_thisver", "current version:      ", NTP_INT),
             ("ss_oldver", "older version:        ", NTP_INT),
-            ("ss_numctlreq", "control requests:     ", NTP_INT),
             ("ss_badformat", "bad length or format: ", NTP_INT),
             ("ss_badauth", "authentication failed:", NTP_INT),
             ("ss_declined", "declined:             ", NTP_INT),
@@ -1538,6 +1540,7 @@ usage: kerninfo
             ("ss_processed", "processed for time:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
+        self.collect_display2(variables=sysstats2)
 
     def help_sysstats(self):
         self.say("""\
