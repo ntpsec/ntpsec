@@ -53,6 +53,7 @@ NTP_LFP = 0x7     # NTP timestamp
 NTP_MODE = 0x8    # peer mode
 NTP_2BIT = 0x9    # leap bits
 NTP_FLOAT = 0xa   # Float value
+NTP_UPTIME = 0xb  # uptime in days H:M:S (no frac)
 
 
 class Ntpq(cmd.Cmd):
@@ -392,6 +393,66 @@ usage: units
 function: set the primary receive time out
 usage: timeout [ msec ]
 """)
+
+    def collect_display2(self, variables):
+        "Query and display a collection of variables from the system."
+        try:
+            queried = self.session.readvar(0,
+                                           [v[0] for v in variables] +
+                                           [v[0] + '_r' for v in variables],
+                                           raw=True)
+        except ntp.packet.ControlException as e:
+            if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
+                self.warn("Unknown variable.  Trying one at a time.")
+                varlist = [v[0] for v in variables] + \
+                          [v[0] + '_r' for v in variables]
+                items = []
+                for var in varlist:
+                    try:
+                        queried = self.session.readvar(0, [var],
+                                                       raw=True)
+                        for (name, (value, rawvalue)) in queried.items():
+                            items.append((name, (value, rawvalue)))
+                    except ntp.packet.ControlException as e:
+                        if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
+                            items.append((var, "???"))
+                            continue
+                        raise e
+                queried = ntp.util.OrderedDict(items)
+            else:
+                self.warn(e.message)
+                return
+        except IOError as e:
+            self.warn(e.strerror)
+            return
+        if self.rawmode:
+            self.say(self.session.response)
+            return
+        try:
+            for (name, legend, fmt) in variables:
+                if name not in queried:
+                    continue
+                value = queried[name][0]
+                rawvalue = queried[name][1]
+                value2 = queried[name + '_r'][0]
+                rawvalue2 = queried[name + '_r'][1]
+                if fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
+                    if self.showunits:
+                        displayvalue = ntp.util.unitifyvar(rawvalue, name)
+                        displayvalue2 = ntp.util.unitifyvar(rawvalue2, name)
+                    else:
+                        displayvalue = value
+                        displayvalue2 = value2
+                    self.say("%13s \t%9d\t%9d\n" %
+                             (legend, displayvalue, displayvalue2))
+                elif fmt == NTP_UPTIME:
+                    self.say("%13s  %s\t%s\n" % (legend, ntp.util.prettyuptime(
+                        value), ntp.util.prettyuptime(value2)))
+                else:
+                    self.warn("unexpected vc type %s for %s, value %s"
+                              % (fmt, name, value, value2))
+        except KeyboardInterrupt:
+            self.warn("display interrupted")
 
     def collect_display(self, associd, variables, decodestatus):
         "Query and display a collection of variables from the system."

@@ -1434,4 +1434,12 @@ except ImportError:  # pragma: no cover
             for key in self.__keys:
                 yield key
 
+
+def prettyuptime(uptime):
+    result = ''
+    if uptime >= 86400:
+        result += '%dD ' % (uptime // 86400)
+    result += '%02d:%02d:%02d' % ((uptime % 86400) //
+                                  3600, (uptime % 3600) // 60, uptime % 60)
+    return result
 # end
