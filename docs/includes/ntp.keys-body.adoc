@@ -18,22 +18,33 @@ keyno type key
 --------------
 
 where `keyno` is a positive integer (between 1 and 65535),
-`type` is the message digest algorithm, and
+`type` is the message digest or cipher algorithm, and
 `key` is the key itself.
 
 The file does not need to be sorted by `keyno`.
 
-`type` can be any digest type supported by your OpenSSL package.
-Digests longer than 20 bytes will be truncated.
+`type` can be the name of any digest or cipher supported by your
+OpenSSL package.  Digests or CMACs longer than 20 bytes will be truncated.
 
-You can probably get a list from `man 1 dgst` or `openssl help`.
+You can get a list from `openssl list -digest-algorithms` or
+`openssl list -cipher-algorithms`.
 (As of Jan 2018, they lie.  Be sure to try it.  {ntpdman} will
 print an error on startup if a selected type isn't supported.)
 
 The following types are widely supported:
 -----
   md5, sha1, ripemd160, sha224, sha256, sha384, sha512
+  aes-128, aes-192, aes-256
 -----
+
+Only the +-cbc+ cipher modes are useful.
+The +-cbc+ is appended to the `type` internally. Do not include it in `type`.
+
+AES is an abbreviation for aes-128.
+
+Note that MD5 was depricated by RFC 8573 in June of 2019.
++AES-128+ is currently prefered.  The code still supports
+MD5 for backwards compatibility.
 
 FIPS 140-2, FIPS 180-4, and/or FIPS 202 may restrict your choices.
 If it matters to you, check with your lawyer.  (Let us know if you
@@ -41,7 +52,7 @@ find a good reference.)
 
 The `key` may be printable ASCII excluding "#" or hex encoded.
 Keys longer than 20 characters are assumed to be hex.  The max
-length of a (possibly de-hexified) key is 32 bytes.  If you
+length of a (de-hexified) key is 32 bytes.  If you
 want to use an ASCII key longer than 20 bytes, you must hexify it.
 
 Note that the keys used by the {ntpqman} programs are
