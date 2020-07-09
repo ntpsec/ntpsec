@@ -689,16 +689,15 @@ struct restrict_u_tag {
 #define	RES_DONTSERVE		0x0002	/* access denied */
 #define	RES_DONTTRUST		0x0004	/* authentication required */
 #define	RES_VERSION		0x0008	/* version mismatch */
-#define	RES_NOPEER		0x0010	/* new association denied */
-#define RES_LIMITED		0x0020	/* packet rate exceeded */
-#define RES_FLAGS		(RES_IGNORE | RES_DONTSERVE |\
-				    RES_DONTTRUST | RES_VERSION |\
-				    RES_NOPEER | RES_LIMITED)
+#define	RES_NOPEERx		0x0010  /* new association denied */
+#define	RES_LIMITED		0x0020	/* packet rate exceeded */
+#define	RES_FLAGS (RES_IGNORE | RES_DONTSERVE | RES_DONTTRUST | \
+			RES_VERSION | RES_LIMITED)
 
 #define	RES_NOQUERY		0x0040	/* mode 6 packet denied */
 #define	RES_NOMODIFY		0x0080	/* mode 6 modify denied */
-#define	RES_NOTRAP		0x0100	/* mode 6 set trap denied (not used) */
-#define	RES_LPTRAP		0x0200	/* mode 6 low priority trap (not used) */
+#define	RES_NOTRAPx		0x0100	/* mode 6 set trap denied (not used) */
+#define	RES_LPTRAPx		0x0200	/* mode 6 low priority trap (not used) */
 
 #define	RES_KOD			0x0400	/* send kiss of death packet */
 #define	RES_MSSNTP		0x0800	/* enable MS-SNTP authentication */

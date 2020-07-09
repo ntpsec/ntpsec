@@ -178,7 +178,7 @@ static const struct codestring res_access_bits[] = {
 	{ RES_DONTTRUST,		"notrust" },
 	{ RES_NOQUERY,			"noquery" },
 	{ RES_NOMODIFY,			"nomodify" },
-	{ RES_NOPEER,			"nopeer" },
+	{ RES_NOPEERx,			"nopeer" },
 	{ RES_LIMITED,			"limited" },
 	{ RES_VERSION,			"version" },
 	{ RES_KOD,			"kod" },

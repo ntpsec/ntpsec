@@ -472,7 +472,7 @@ static bool is_kod(
 
 /* Check the restrictions which can be checked just based on the source
    IP address and the first byte of the packet, namely RES_IGNORE,
-   RES_FLAKE, RES_FLAKE, RES_NOQUERY, RES_DONTSERVE, and RES_VERSION. */
+   RES_FLAKE, RES_NOQUERY, RES_DONTSERVE, and RES_VERSION. */
 
 static bool check_early_restrictions(
 	struct recvbuf const* rbufp,
@@ -2460,7 +2460,6 @@ dns_take_pool(
 	poll_update(peer, peer->hpoll);
 
 	restrict_mask = restrictions(&peer->srcadr);
-	/* FIXME-DNS: RES_FLAGS includes RES_DONTSERVE?? */
 	if (RES_FLAGS & restrict_mask) {
 		msyslog(LOG_INFO, "DNS: Pool poking hole in restrictions for: %s",
 				socktoa(&peer->srcadr));

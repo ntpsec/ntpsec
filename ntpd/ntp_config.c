@@ -1643,7 +1643,7 @@ config_access(
 				break;
 
 			case T_Nopeer:
-				flags |= RES_NOPEER;
+				msyslog(LOG_ERR, "CONFIG: restrict nopeer ignored");
 				break;
 
 			case T_Noquery:
@@ -1655,12 +1655,7 @@ config_access(
 				break;
 
 			case T_Notrap:
-				/*
-				 * No-op - included for backward compatibility
-				 * with all the world's boilerplate ntp.conf
-				 * files.
-				 */
-				flags |= RES_NOTRAP;
+				msyslog(LOG_ERR, "CONFIG: restrict notrap ignored");
 				break;
 
 			case T_Notrust:
@@ -1690,16 +1685,6 @@ config_access(
 
 			fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
 			msyslog(LOG_WARNING, "CONFIG: restrict %s: %s", kod_where, kod_warn);
-		}
-
-		if (RES_NOTRAP & flags) {
-			const char *notrap_where = (my_node->addr)
-					  ? my_node->addr->address
-					  : (mflags & RESM_SOURCE)
-					    ? "source"
-					    : "default";
-
-			msyslog(LOG_WARNING, "CONFIG: restrict %s: notrap keyword is ignored.", notrap_where);
 		}
 
 		ZERO_SOCK(&addr);
