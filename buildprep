@@ -164,7 +164,7 @@ daemon () {
     # Prerequisites to build the daemon: bison, pps-tools, service libraries
     case $installer in
 	apk)
-	    $install build-base python3 busybox asciidoc	# basic tools
+	    $install build-base python3 busybox			# basic tools
 	    $install bison python${PYVERS}-dev linux-headers	# deps
 	    $install openssl-dev libcap-dev libseccomp-dev	# deps
 	    $install py3-gpsd libc-dev linux-lts-dev		# deps
