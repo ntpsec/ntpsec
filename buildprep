@@ -52,7 +52,7 @@ done
 
 # Some Python 2 packages (e.g python-devel, python-psutils) conventionally have
 # Python 3 equivalents with a python3 prefix.  Compute the correct value for the
-# infix based on system Python.  This eill start to be significant after Python 2
+# infix based on system Python.  This will start to be significant after Python 2
 # EOLs at the beginning of 2020.
 PYVERS=`python --version 2>&1 | sed -n -e '/Python \([0-9]\).*/s//\1/p'`
 if [ "$PYVERS" = "2" ]
@@ -164,11 +164,10 @@ daemon () {
     # Prerequisites to build the daemon: bison, pps-tools, service libraries
     case $installer in
 	apk)
-	    $install build-base python                  # basic tools
-	    $install bison python${PYVERS}-dev linux-headers
-	    $install openssl-dev libcap-dev libseccomp-dev
-	    # probably needs more, but this builds
-	    # can't find timepps.h: gpsd and chrony have their own ??
+	    $install build-base python3 busybox asciidoc	# basic tools
+	    $install bison python${PYVERS}-dev linux-headers	# deps
+	    $install openssl-dev libcap-dev libseccomp-dev	# deps
+	    $install py3-gpsd libc-dev linux-lts-dev		# deps
 	    ;;
 	apt)
 	    $install build-essential			# Build environment
