@@ -165,9 +165,13 @@ daemon () {
     case $installer in
 	apk)
 	    $install build-base python3 busybox			# basic tools
-	    $install bison python${PYVERS}-dev linux-headers	# deps
-	    $install openssl-dev libcap-dev libseccomp-dev	# deps
-	    $install py3-gpsd libc-dev linux-lts-dev		# deps
+	    $install bison python3-dev linux-headers		# build
+	    $install openssl-dev libseccomp-dev gpsd-dev	# build
+	    $install py3-gpsd libc-dev linux-lts-dev		# build
+            $install avahi-dev libcap-dev			# optional build
+	    $do find ./ \( -type d -name .git -prune \) -o -type f | xargs sed -i 's/env python/env python3/g'
+	    # With just python3 installed, there is no "python".
+	    # It acts up when symlinked, so change all #!'s to python3
 	    ;;
 	apt)
 	    $install build-essential			# Build environment
