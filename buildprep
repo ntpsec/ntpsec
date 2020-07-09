@@ -167,7 +167,7 @@ daemon () {
 	    $install build-base python3 busybox			 # basic tools
 	    $install bison python3-dev linux-headers libbsd-dev	 # build
 	    $install openssl-dev libseccomp-dev gpsd-dev libbsd	 # build
-	    $install py3-gpsd libc-dev linux-lts-dev libexec-dev # build
+	    $install py3-gpsd linux-lts-dev libexec-dev 	 # build
             $install avahi-dev avahi-compat-libdns_sd libcap-dev # optional build
 	    $do find ./ \( -type d -name .git -prune \) -o -type f | xargs sed -i 's/env python/env python3/g'
 	    # With just python3 installed, there is no "python".
