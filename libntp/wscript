@@ -52,7 +52,7 @@ def build(ctx):
         features="c cshlib pyext",
         install_path='${PYTHONARCHDIR}/ntp',
         includes=[ctx.bldnode.parent.abspath(), "../include"],
-        source=["pymodule.c"] + libntp_source_sharable,
+        source=["pymodule.c", "pymodule-mac.c"] + libntp_source_sharable,
         target="../pylib/ntpc",  # Put the output in the pylib directory
         use="M RT CRYPTO",
     )

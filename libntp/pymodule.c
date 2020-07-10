@@ -4,6 +4,10 @@
  *
  * Python binding for selected libntp library functions
  */
+
+/* This include has to come early or we get warnings from redefining
+ * _POSIX_C_SOURCE and _XOPEN_SOURCE on some systems.
+ */
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
@@ -22,10 +26,11 @@
 
 #include "ntp_control.h"
 
-#include "ntp_auth.h"
-#include <openssl/evp.h>
+#include "pymodule-mac.h"
 
 #include "python_compatibility.h"
+
+/* Don't include anything from OpenSSL */
 
 const char *progname = "libntpc";
 
@@ -148,26 +153,14 @@ ntpc_step_systime(PyObject *self, PyObject *args)
 /* --------------------------------------------------------------- */
 /* Hook for CMAC/HMAC
  * Not really part of libntp, but this is a handy place to put it.
+ *
+ * The worker parts have been moved to another module because of
+ * name clash between python and OpenSSL.  Both use freefunc.
+ *
+ * All Python stuff here. All OpenSSL stuff in pymodule-mac.c
+ *
  */
 
-/* Slightly older version of OpenSSL */
-/* Similar hack in ssl_init.c and attic/digest-timing.c */
-#ifndef EVP_MD_CTX_new
-#define EVP_MD_CTX_new() EVP_MD_CTX_create()
-#endif
-#ifndef EVP_MD_CTX_reset
-#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
-#endif
-
-/* Needed on old versions of OpenSSL */
-static void SSL_init(void) {
-	static bool init_done = false;
-	if (init_done)
-		return;
-	init_done = true;
-	OpenSSL_add_all_ciphers();
-	OpenSSL_add_all_digests();
-}
 
 /* xx = ntp.ntpc.checkname(name)
  * returns None if algorithm name is invalid. */
@@ -176,34 +169,15 @@ static PyObject *
 ntpc_checkname(PyObject *self, PyObject *args)
 {
 	const char *name;
-	char upcase[100];
-	const EVP_MD *digest;
-	const EVP_CIPHER *cipher;
 	UNUSED_ARG(self);
-
-	SSL_init();
+	int length;
 
 	if (!PyArg_ParseTuple(args, "s", &name))
-		return NULL;
-        strlcpy(upcase, name, sizeof(upcase));
-	for (int i=0; upcase[i]!=0; i++) {
-		upcase[i] = toupper(upcase[i]);
-	}
+		Py_RETURN_NONE;
 
-        digest = EVP_get_digestbyname(upcase);
-	if (NULL != digest) {
-		return Py_BuildValue("i", 1);
-        }
+	length = do_checkname(name);
 
-        if ((strcmp(upcase, "AES") == 0) || (strcmp(upcase, "AES128CMAC") == 0)) {
-                strlcpy(upcase, "AES-128", sizeof(upcase));
-        }
-        strlcat(upcase, "-CBC", sizeof(upcase));
-	cipher = EVP_get_cipherbyname(upcase);
-	if (NULL != cipher) {
-		int length = EVP_CIPHER_key_length(cipher);
-		return Py_BuildValue("i", length);
-	}
+	if (length != 0) return Py_BuildValue("i", 1);
 
 	Py_RETURN_NONE;
 }
@@ -220,16 +194,9 @@ ntpc_mac(PyObject *self, PyObject *args)
 	uint8_t *key;
 	Py_ssize_t keylen;
 	char *name;
-	uint8_t mac[CMAC_MAX_MAC_LENGTH];
+	uint8_t mac[MAX_MAC_LENGTH];
 	size_t maclen;
-	char upcase[100];
-	static EVP_MD_CTX *digest_ctx = NULL;
-	static CMAC_CTX *cmac_ctx = NULL;
-	const EVP_MD *digest;
-	const EVP_CIPHER *cipher;
-	int cipherlen;
 
-	SSL_init();
 
 #if PY_MAJOR_VERSION >= 3
 	if (!PyArg_ParseTuple(args, "y#y#s",
@@ -240,61 +207,14 @@ ntpc_mac(PyObject *self, PyObject *args)
 #endif
 		Py_RETURN_NONE;
 
-        strlcpy(upcase, name, sizeof(upcase));
-	for (int i=0; upcase[i]!=0; i++) {
-		upcase[i] = toupper(upcase[i]);
-	}
+	do_mac(name,
+		data, datalen,
+      		key, keylen,
+ 	        mac, &maclen);
 
-        digest = EVP_get_digestbyname(upcase);
-	if (NULL != digest) {
-		/* Old digest case, MD5, SHA1 */
-		unsigned int maclenint;
-		if (NULL == digest_ctx)
-			digest_ctx = EVP_MD_CTX_new();
-		EVP_MD_CTX_reset(digest_ctx);
-		if (!EVP_DigestInit_ex(digest_ctx, digest, NULL))
-			Py_RETURN_NONE;
-		EVP_DigestUpdate(digest_ctx, key, keylen);
-		EVP_DigestUpdate(digest_ctx, data, (unsigned int)datalen);
-		EVP_DigestFinal_ex(digest_ctx, mac, &maclenint);
-		if (MAX_BARE_MAC_LENGTH < maclenint)
-			maclenint = MAX_BARE_MAC_LENGTH;
-#if PY_MAJOR_VERSION >= 3
-		return Py_BuildValue("y#", &mac, maclenint);
-#else
-		return Py_BuildValue("s#", &mac, maclenint);
-#endif
-	}
-
-        if ((strcmp(upcase, "AES") == 0) || (strcmp(upcase, "AES128CMAC") == 0)) {
-                strlcpy(upcase, "AES-128", sizeof(upcase));
-        }
-        strlcat(upcase, "-CBC", sizeof(upcase));
-
-	cipher = EVP_get_cipherbyname(upcase);
-	if (NULL == cipher)
-		Py_RETURN_NONE;
-
-	cipherlen = EVP_CIPHER_key_length(cipher);
-	if (cipherlen < keylen) {
-		keylen = cipherlen;		/* truncate */
-	} else if (cipherlen > keylen) {
-		uint8_t newkey[EVP_MAX_KEY_LENGTH];
-		memcpy(newkey, key, keylen);
-		while (cipherlen > keylen)
-			key[keylen++] = 0;	/* pad with 0s */
-		key = newkey;
-	}
-	if (NULL == cmac_ctx)
-		cmac_ctx = CMAC_CTX_new();
-        if (!CMAC_Init(cmac_ctx, key, keylen, cipher, NULL)) {
-                /* Shouldn't happen.  Does if wrong key_size. */
-		Py_RETURN_NONE;
-        }
-        CMAC_Update(cmac_ctx, data, (unsigned int)datalen);
-        CMAC_Final(cmac_ctx, mac, &maclen);
-        if (MAX_BARE_MAC_LENGTH < maclen)
-                maclen = MAX_BARE_MAC_LENGTH;
+	if (maclen == 0)
+                Py_RETURN_NONE;
+	
 #if PY_MAJOR_VERSION >= 3
 	return Py_BuildValue("y#", &mac, maclen);
 #else
