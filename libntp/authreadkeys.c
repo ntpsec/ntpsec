@@ -1,6 +1,8 @@
 /*
  * authreadkeys.c - routines to support the reading of the key file
  */
+#define OPENSSL_SUPPRESS_DEPRECATED 1
+
 #include "config.h"
 #include <stdio.h>
 #include <ctype.h>

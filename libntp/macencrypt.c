@@ -1,6 +1,8 @@
 /*
  *	CMAC and digest support for NTP
  */
+#define OPENSSL_SUPPRESS_DEPRECATED 1
+
 #include "config.h"
 
 #include <string.h>

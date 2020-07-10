@@ -1,6 +1,7 @@
 /* ssl_init.c	Common OpenSSL initialization code
  * This is needed for crypto as well as NTS
  */
+#define OPENSSL_SUPPRESS_DEPRECATED 1
 
 #include "config.h"
 #include "ntp_stdlib.h"
