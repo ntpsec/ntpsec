@@ -25,6 +25,15 @@ then
   LINUX="--enable-seccomp"
 fi
 
+DISABLE_NTS=""
+if pkg-config --version 2>/dev/null 1>/dev/null
+then
+  if ! pkg-config openssl --atleast-version=1.1.1
+  then
+    DISABLE_NTS="--disable-nts"
+  fi
+fi
+
 if [ -z ${PYTHON} ]
 then
     PYTHON="python"
@@ -35,7 +44,7 @@ doit ()
   DIR=test-$1
   [ ! -d $DIR ] && mkdir $DIR
   rm -rf $DIR/*
-  $PYTHON ./waf configure --out=$DIR $2 2>&1 | tee    $DIR/test.log
+  $PYTHON ./waf configure $DISABLE_NTS --out=$DIR $2 2>&1 | tee    $DIR/test.log
   WAF1=$?
   WAF2=0
   WAF3=0
