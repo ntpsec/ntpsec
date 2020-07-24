@@ -290,16 +290,19 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3f sec",
 		hostname, tspec_to_d(finish));
 
-	/* Save first answer for NTP
-	 * setup default NTP port now
-	 *   in case of server-name:port later on
+	/* Use first answer
+	 * sockaddr is global for NTP address
+	 * also use as temp for printing here
 	 */
 	memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
-	SET_PORT(&sockaddr, NTP_PORT);
-
 	sockporttoa_r(&sockaddr, errbuf, sizeof(errbuf));
 	msyslog(LOG_INFO, "NTSc: connecting to %s:%s => %s",
 		host, port, errbuf);
+
+	/* setup default NTP port now
+	 *   in case of server-name:port later on
+	 */
+	SET_PORT(&sockaddr, NTP_PORT);
 
 	sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
 	if (-1 == sockfd) {
