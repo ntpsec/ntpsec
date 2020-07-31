@@ -36,6 +36,7 @@
 
 SSL_CTX* make_ssl_client_ctx(const char *filename);
 int open_TCP_socket(struct peer *peer, const char *hostname);
+struct addrinfo * find_best_addr(struct addrinfo *answer);
 bool connect_TCP_socket(int sockfd, struct addrinfo *addr);
 bool nts_set_cert_search(SSL_CTX *ctx, const char *filename);
 void set_hostname(SSL *ssl, struct peer *peer, const char *hostname);
@@ -48,26 +49,18 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 bool nts_server_lookup(char *server, sockaddr_u *addr, int af);
 
 static SSL_CTX *client_ctx = NULL;
+
+/* Ugly global variables passed from worker thread back to main thread. */
 static sockaddr_u sockaddr;
 static bool addrOK;
 
-// Fedora 30:  0x1010104fL  1.1.1d
-// Fedora 29:  0x1010102fL  1.1.1b
-// Fedora 28:  0x1010009fL  1.1.0i
-// Debian 10:  0x1010104fL  1.1.1d
-// Debian 9:   0x101000afL  1.1.0j
-// Debian 8:   0x1000114fL  1.0.1t
-// CentOS 7:   0x100020bfL  1.0.2k
-// CentOS 6:   0x1000105fL  1.0.1e
-// NetBSD 8:   0x100020bfL  1.0.2k
-// NetBSD 7:   0x1000115fL  1.0.1u (1.0.2s via pkgin)
-// FreeBSD 12: 0x1010101fL  1.1.1a-freebsd
-// FreeBSD 11: 0x100020ffL  1.0.2o-freebsd
 
 bool nts_client_init(void) {
 
 	client_ctx = make_ssl_client_ctx(ntsconfig.ca);
 
+
+/* Ugly global variables passed from worker thread back to main thread. */
 	return true;
 }
 
@@ -249,7 +242,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	char errbuf[100];
 	char *tmp;
 	struct addrinfo hints;
-	struct addrinfo *answer;
+	struct addrinfo *answer, *worker;
 	int gai_rc;
 	int sockfd;
 	struct timespec start, finish;
@@ -294,7 +287,8 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	 * sockaddr is global for NTP address
 	 * also use as temp for printing here
 	 */
-	memcpy(&sockaddr, answer->ai_addr, answer->ai_addrlen);
+	worker = find_best_addr(answer);
+	memcpy(&sockaddr, worker->ai_addr, worker->ai_addrlen);
 	sockporttoa_r(&sockaddr, errbuf, sizeof(errbuf));
 	msyslog(LOG_INFO, "NTSc: connecting to %s:%s => %s",
 		host, port, errbuf);
@@ -303,14 +297,13 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	 *   in case of server-name:port later on
 	 */
 	SET_PORT(&sockaddr, NTP_PORT);
-
-	sockfd = socket(answer->ai_family, SOCK_STREAM, 0);
+	sockfd = socket(worker->ai_family, SOCK_STREAM, 0);
 	if (-1 == sockfd) {
 		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_INFO, "NTSc: open_TCP_socket: no socket: %s", errbuf);
 	} else {
 		/* Use first IP Address */
-		if (!connect_TCP_socket(sockfd, answer)) {
+		if (!connect_TCP_socket(sockfd, worker)) {
 			close(sockfd);
 			sockfd = -1;
 		}
@@ -320,6 +313,12 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	return sockfd;
 
 }
+
+struct addrinfo *find_best_addr(struct addrinfo *answer) {
+	/* default to first one */
+        return(answer);
+}
+
 
 /* This kludgery is needed to get a sane timeout.
  * The default is unspecified but long.
@@ -717,13 +716,23 @@ bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
 	}
 	if (0 == stat(filename, &statbuf)) {
 		if (S_ISDIR(statbuf.st_mode)) {
+			if (1 != SSL_CTX_load_verify_locations(
+				ctx, NULL, filename)) {
+			msyslog(LOG_INFO, "NTSc: Can't use %s as dir for root certificates.", filename);
+			    nts_log_ssl_error();
+			    return false;
+			}
 			msyslog(LOG_INFO, "NTSc: Using dir %s for root certificates.", filename);
-			SSL_CTX_load_verify_locations(ctx, NULL, filename);
 			return true;
 		}
 		if (S_ISREG(statbuf.st_mode)) {
+			if (1 != SSL_CTX_load_verify_locations(
+				ctx, filename, NULL)) {
+			    msyslog(LOG_INFO, "NTSc: Can't use %s as file for root certificates.", filename);
+			    nts_log_ssl_error();
+			    return false;
+			}
 			msyslog(LOG_INFO, "NTSc: Using file %s for root certificates.", filename);
-			SSL_CTX_load_verify_locations(ctx, filename, NULL);
 			return true;
 		}
 		msyslog(LOG_ERR, "NTSc: cert dir/file isn't dir or file: %s. mode 0x%x",
