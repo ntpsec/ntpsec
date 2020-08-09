@@ -1,8 +1,8 @@
 pages:
   stage: build
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine-pages
-  except:
-    - schedules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
   script:
     - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ --enable-doc --disable-manpage build install
     - cp www/favicon.ico public
@@ -27,8 +27,8 @@ include:
 
 .job_template: &job_definition
   stage: build
-  except:
-    - schedules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   tags:
     - gitlab-org
 
@@ -191,8 +191,8 @@ freebsd-11-basic:
     - python ./waf configure --disable-doc --disable-manpage --disable-nts build
   tags:
     - freebsd-11
-  only:
-    - branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 freebsd-11-refclocks:
   <<: *job_definition
@@ -200,8 +200,8 @@ freebsd-11-refclocks:
     - python ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
   tags:
     - freebsd-11
-  only:
-    - branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 freebsd-12-basic:
   <<: *job_definition
@@ -209,8 +209,8 @@ freebsd-12-basic:
     - python ./waf configure --disable-doc --disable-manpage build
   tags:
     - freebsd-12
-  only:
-    - branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 freebsd-12-refclocks:
   <<: *job_definition
@@ -218,8 +218,8 @@ freebsd-12-refclocks:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
     - freebsd-12
-  only:
-    - branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 centos-latest-basic:
   <<: *job_definition
@@ -343,8 +343,8 @@ cross-build:
     - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
   tags:
     - ubuntu-1604-lts
-  only:
-    - branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 gentoo-basic:
   <<: *job_definition
@@ -378,8 +378,8 @@ coverity-scan:
     - curl --form token="$COVERITY_TOKEN" --form email=security@ntpsec.org --form file=@ntpsec_coverity.tgz --form version="$(git rev-parse --short HEAD)" --form description="Automatic submission by gitlab-ci" https://scan.coverity.com/builds?project=ntpsec
   tags:
     - ubuntu-1604-lts
-  only:
-    - schedules AND branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 macos-basic:
   <<: *job_definition
@@ -387,8 +387,8 @@ macos-basic:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build
   tags:
     - macos
-  only:
-    - branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 macos-refclocks:
   <<: *job_definition
@@ -396,8 +396,8 @@ macos-refclocks:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
     - macos
-  only:
-    - branches@NTPsec/ntpsec
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 feature-classic-mode:
   <<: *job_definition

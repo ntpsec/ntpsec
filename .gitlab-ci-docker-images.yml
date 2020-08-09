@@ -20,8 +20,8 @@
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
   allow_failure: true
   retry: 2
-  only:
-    - schedules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
 build-alpine:
   <<: *build_definition
