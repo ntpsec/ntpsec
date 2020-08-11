@@ -1,0 +1,4 @@
+Upstream Source: https://github.com/zserge/jsmn
+Description: Jsmn is a world fastest JSON parser/tokenizer.
+Synchronised on: 2020-05-24
+Synchronised at: 053d3cd29200edb1bfd181d917d140c16c1f8834
