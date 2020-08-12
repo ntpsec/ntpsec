@@ -56,7 +56,7 @@ C99 is a coding standard, not an ABI standard, so it can happily
 coexist with distributions that use C89 conventions.
 
 You can download the C99 standard for free from here:
-    https://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
+    http://www.open-std.org/jtc1/sc22/WG14/www/docs/n1256.pdf
 
 You *may* use C11-style anonymous unions.
 
@@ -69,7 +69,7 @@ You can read POSIX-1.2001, with 2004 Corrigendum, online for free here:
     https://pubs.opengroup.org/onlinepubs/009695399/toc.htm
 
 You can see POSIX.1-2001, SUSv3, online for free here:
-    http://www.unix-systems.org/version3/
+    https://web.archive.org/web/20190501135119/http://www.unix.org/version3/
 
 POSIX threads *are* considered part of the standardized API, but their
 use requires care.  The main part of ntpd assumes it is the only
@@ -157,7 +157,7 @@ close to that call site as possible.
 
 === Random numbers
 
-There are 2 types of random numbers - pseudo random and
+There are 2 types of random numbers - pseudo-random and
 cryptographically secure.  For cryptographically secure needs,
 we use RAND_bytes() and RAND_priv_bytes() from OpenSSL.
 The actual use is funneled through ntp_RAND_bytes() to
@@ -165,7 +165,7 @@ check the return code and crash if it doesn't work.
 RAND_bytes() can fail if the system doesn't collect enough
 entropy but we have never seen that happen yet.
 
-For general purpose pseudo randomness, we use random(3).  Note that
+For general purpose pseudo-randomness, we use random(3).  Note that
 it only returns 31 bits.  It is much faster than RAND_bytes()
 
 RAND_MAX on FreeBSD is 0xfffffffd.
@@ -182,22 +182,22 @@ That means OpenSSL version 1.1.1 or newer.
 Shared key authentication uses their crypto package.
 We also use their RAND_bytes().
 
-Note that OpenSSL 1.0.1 is no longer supported.  2020-Feb-17
-Note that OpenSSL 1.1.0 is no longer supported.  2020-Mar-12
+   Note that OpenSSL 1.0.1 is no longer supported.  2020-Feb-17
+   Note that OpenSSL 1.1.0 is no longer supported.  2020-Mar-12
 
-We also use waf, libaes_siv, and unity but we have local copies
-rather than depending the host distro to provide them.
+We also use waf, libaes_siv, libjsmn, and unity but we have local
+copies rather than depending on the host distro to provide them.
 
 === Coding style and indentation
 
-Dr. Dave Mills liked this code indented formatted in a consistent way.
+Dr. Dave Mills liked this code indented and formatted in a consistent way.
 The file "dot.emacs" has the emacs C-mode indentation style that Dave
 likes. It's a bit archaic, but we've stuck with it to preserve
 continuity; you should, too.
 
 *Do* always add the optional braces around if/for/while/do bodies.
 It helps readability, staves off some subtle errors, and will be
-helpful if the code is ever moved to Go.
+helpful if the code is ever moved to https://golang.org/[Go].
 
 A discussion about using uncrustify to mass convert all the C sources
 to a more current indentation and format style is ongoing.  As it will
@@ -303,9 +303,9 @@ a Pyflakes test, we probably will not merge it.
 
 https://pypi.python.org/pypi/pyflakes
 
-Note: In the future, the Python baseline may
-https://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[change
-t 2.7.2].
+Note: In the future, the Python baseline may be
+https://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[changed
+to 2.7].
 
 == General notes
 
