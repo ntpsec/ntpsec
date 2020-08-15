@@ -42,7 +42,7 @@ The +-cbc+ is appended to the `type` internally. Do not include it in `type`.
 
 AES is an abbreviation for aes-128.
 
-Note that MD5 was depricated by RFC 8573 in June of 2019.
+Note that MD5 was deprecated by RFC 8573 in June of 2019.
 +AES-128+ is currently prefered.  The code still supports
 MD5 for backwards compatibility.
 
