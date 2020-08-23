@@ -198,10 +198,7 @@ struct key_tok ntp_keywords[] = {
 { "drop",		T_Drop,			FOLLBY_TOKEN },
 /* NTS */
 { "nts",		T_Nts,			FOLLBY_TOKEN },
-{ "ask",		T_Ask,			FOLLBY_STRING },
-{ "require",		T_Require,		FOLLBY_STRING },
 { "noval",		T_Noval,		FOLLBY_TOKEN },
-{ "expire",		T_Expire,		FOLLBY_TOKEN },
 { "cert",		T_Cert,			FOLLBY_TOKEN },
 { "ca",			T_Ca,			FOLLBY_TOKEN },
 { "mintls",		T_Mintls,		FOLLBY_TOKEN },

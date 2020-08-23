@@ -627,20 +627,12 @@ create_peer_node(
 			}
 			break;
 
-		case T_Expire:
-		    my_node->ctl.nts_cfg.expire = option->value.u;
-		    break;
-
 		case T_Aead:
 		    my_node->ctl.nts_cfg.aead = option->value.s;
 		    break;
 
 		case T_Ca:
 		    my_node->ctl.nts_cfg.ca = option->value.s;
-		    break;
-
-		case T_Cert:
-		    my_node->ctl.nts_cfg.cert = option->value.s;
 		    break;
 
 		case T_Minpoll:
@@ -708,16 +700,6 @@ create_peer_node(
 
 		case T_Bias:
 			my_node->ctl.bias = option->value.d;
-			break;
-
-		case T_Ask:
-			my_node->ctl.flags |= FLAG_NTS_ASK;
-			my_node->ctl.nts_cfg.server = estrdup(option->value.s);
-			break;
-
-		case T_Require:
-			my_node->ctl.flags |= FLAG_NTS_REQ;
-			my_node->ctl.nts_cfg.server = estrdup(option->value.s);
 			break;
 
 #ifdef REFCLOCK

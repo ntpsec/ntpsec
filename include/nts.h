@@ -100,11 +100,8 @@ uint16_t next_bytes(BufCtl* buf, uint8_t *data, int length);
  * All are optional.
  * part of peer struct */
 struct ntscfg_t {
-	char *server;	/* desired server; default is same as NTS-KE server */
 	char *ca;		/* root/trusted certificates */
-	char *cert;		/* client certificate  */
 	char *aead;		/* AEAD algorithms on wire */
-	uint32_t expire;
 };
 
 /* Client-side state per connection to server */
