@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
+#include "ntp.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
@@ -131,7 +132,7 @@ decodenetnum(
 	   either the IP address or the port is well-formed, but at
 	   least they're unambiguously delimited from each other.
 	   Let getaddrinfo() perform all further validation. */
-	retcode = getaddrinfo(ip, port_start == NULL ? "123" : port_start,
+	retcode = getaddrinfo(ip, port_start == NULL ? NTP_PORTA : port_start,
 		       &hints, &ai);
 	if(retcode) {
 		return retcode;

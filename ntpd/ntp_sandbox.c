@@ -492,6 +492,7 @@ int scmp_sc[] = {
 void CheckFreeBSDdroproot(uid_t uid) {
 	/* This checks that mac_ntpd.ko is loaded.
 	 * It defaults to 123 and enabled, aka what we want.
+	 * (That 123 is a user number, not a port number.)
 	 * We could also check security.mac.ntpd.enabled.
 	 */
 	uid_t need;
