@@ -32,7 +32,7 @@ NTS is a method for using TLS/SSL to authenticate NTP traffic on the net.
 That means that bad guys can't forge packets that will give your
 system bogus time.
 
-The RFC hasn't been published yet (December 2019).  Nothing has changed
+The RFC hasn't been published yet (August 2020).  Nothing has changed
 recently, but there may be minor adjustments when it is finalized.
 
 Note: The NTP Pool does not currently support NTS.
@@ -45,8 +45,8 @@ spent debugging.  See the link:quick.adoc[Client Quick Start Guide].
 == NTS Client Configuration
 
 Append the keyword `nts` to the end of your `server` lines.  Do this only for
-servers that speak NTS.  If the server uses a port other than 123 for NTS key
-exchange, you also need to specify the port number.  As of December 2019, the
+servers that speak NTS.  If the server uses a port other than 4460 for NTS key
+exchange, you also need to specify the port number.  As of August 2020, the
 following should work:
 
 Public NTP servers supporting NTS:
@@ -56,10 +56,7 @@ server time.cloudflare.com:1234 nts	# Global, anycast
 server nts.ntp.se:4443 nts		# Sweden
 ------------------------------------------------------------
 
-CloudFlare supports only TLS 1.3.  To use TLS 1.3, you must have OpenSSL 1.1.1
-or higher.
-
-Development machines, so there may be gaps in availability:
+These are development machines, so there may be gaps in availability:
 
 ------------------------------------------------------------
 server ntpmon.dcs1.biz nts	# Singapore
@@ -150,30 +147,37 @@ similar to below.
 As a client, you should see lines like this:
 
 ------------------------------------------------------------
-2019-03-22T08:06:33 ntpd[12915]: DNS: dns_probe: pi3.rellim.com, cast_flags:1, flags:21801
-2019-03-22T08:06:33 ntpd[12915]: NTSc: DNS lookup of pi3.rellim.com took 0.003 sec
-2019-03-22T08:06:33 ntpd[12915]: NTSc: nts_probe connecting to pi3.rellim.com:ntp => 204.17.205.23:123
-2019-03-22T08:06:34 ntpd[12915]: NTSc: Using TLSv1.2, AES256-GCM-SHA384 (256)
-2019-03-22T08:06:34 ntpd[12915]: NTSc: certificate subject name: /CN=pi3.rellim.com
-2019-03-22T08:06:34 ntpd[12915]: NTSc: certificate issuer name: /C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3
-2019-03-22T08:06:34 ntpd[12915]: NTSc: certificate is valid.
-2019-03-22T08:06:34 ntpd[12915]: NTSc: read 880 bytes
-2019-03-22T08:06:34 ntpd[12915]: NTSc: Got 8 cookies, length 104, aead=15.
-2019-03-22T08:06:34 ntpd[12915]: NTSc: NTS-KE req to pi3.rellim.com took 0.882 sec, OK
+ 1 Aug 01:58:47 ntpd[43278]: DNS: dns_probe: time.cloudflare.com:1234, cast_flags:1, flags:21901
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: DNS lookup of time.cloudflare.com:1234 took 0.022 sec
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: connecting to time.cloudflare.com:1234 => 162.159.200.1:1234
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: set cert host: time.cloudflare.com
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: Using TLSv1.3, TLS_AES_256_GCM_SHA384 (256)
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: certificate subject name: /C=US/ST=California/L=San Francisco/O=Cloudflare, Inc./CN=time.cloudflare.com
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: certificate issuer name: /C=US/O=DigiCert Inc/CN=DigiCert ECC Secure Server CA
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: certificate is valid.
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: Good ALPN from time.cloudflare.com:1234
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: read 750 bytes
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: Using port 123
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: Got 7 cookies, length 100, aead=15.
+ 1 Aug 01:58:47 ntpd[43278]: NTSc: NTS-KE req to time.cloudflare.com:1234 took 0.033 sec, OK
+ 1 Aug 01:58:47 ntpd[43278]: DNS: dns_check: processing time.cloudflare.com:1234, 1, 21901
+ 1 Aug 01:58:47 ntpd[43278]: DNS: Server taking: 162.159.200.1
+ 1 Aug 01:58:47 ntpd[43278]: DNS: dns_take_status: time.cloudflare.com:1234=>good, 0
 ------------------------------------------------------------
 
 For initializing a server, you should see lines like this:
 
 ------------------------------------------------------------
-27 Dec 12:03:47 ntpd[962738]: INIT: OpenSSL 1.1.1d FIPS  10 Sep 2019, 1010104f
-27 Dec 12:03:47 ntpd[962738]: NTSs: starting NTS-KE server listening on port 123
-27 Dec 12:03:47 ntpd[962738]: NTSs: loaded certificate (chain) from /etc/ntp/fullchain.pem
-27 Dec 12:03:47 ntpd[962738]: NTSs: loaded private key from /etc/ntp/privkey.pem
-27 Dec 12:03:47 ntpd[962738]: NTSs: Private Key OK
-27 Dec 12:03:47 ntpd[962738]: NTSs: OpenSSL security level is 1
-27 Dec 12:03:47 ntpd[962738]: NTSs: listen4 worked
-27 Dec 12:03:47 ntpd[962738]: NTSs: listen6 worked
-27 Dec 12:03:47 ntpd[962738]: NTSc: Using system default root certificates.
+11 Aug 12:24:12 ntpd[789]: INIT: OpenSSL 1.1.1g FIPS  21 Apr 2020, 1010107f
+11 Aug 12:24:12 ntpd[789]: NTSs: starting NTS-KE server listening on port 4460
+11 Aug 12:24:12 ntpd[789]: NTSs: OpenSSL security level is 1
+11 Aug 12:24:12 ntpd[789]: NTSs: starting NTS-KE server listening on port 4460
+11 Aug 12:24:12 ntpd[789]: NTSs: listen4 worked
+11 Aug 12:24:12 ntpd[789]: NTSs: listen6 worked
+11 Aug 12:24:12 ntpd[789]: NTSc: Using system default root certificates.
+11 Aug 12:24:12 ntpd[789]: NTSs: loaded certificate (chain) from /etc/ntp/fullchain.pem
+11 Aug 12:24:12 ntpd[789]: NTSs: loaded private key from /etc/ntp/privkey.pem
+11 Aug 12:24:12 ntpd[789]: NTSs: Private Key OK
 ------------------------------------------------------------
 
 On a server, each time a client uses TLS to setup cookies,
@@ -181,8 +185,7 @@ you should see lines like these.  If all goes well, there is a single
 line for each connection.
 
 ------------------------------------------------------------
- 1 Dec 22:42:21 ntpd[237777]: NTSs: NTS-KE from 192.168.1.71:43560, Using TLSv1.3, TLS_CHACHA20_POLY1305_SHA256 (256), took 0.018 sec
- 1 Dec 22:42:56 ntpd[237777]: NTSs: NTS-KE from 192.168.1.61:33930, Using TLSv1.2, ECDHE-RSA-AES256-GCM-SHA384 (256), took 0.075 sec
+11 Aug 12:29:38 ntpd[789]: NTSs: NTS-KE from 64.139.1.69:49253, Using TLSv1.3, TLS_AES_256_GCM_SHA384 (256), took 0.437 sec
 ------------------------------------------------------------
 
 Servers on the big bad internet will get a lot of garbage connections.
@@ -198,7 +201,8 @@ The common cases produce a single line.  Less common cases will have additional 
 reporting them back to the server.
 
 The logging prefix *NTSs* is for the NTS server component.  The *NTSc*
-component is for the NTS client part, where you are talking to NTS servers.
+component is for the NTS client part, where your +ntpd+ is talking
+to other NTS servers.
 
 === Check with ntpq
 

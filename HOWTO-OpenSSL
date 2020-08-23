@@ -6,9 +6,9 @@ This file contains notes on how to download, build, and install 1.1.1g
 It also works for testing 3.0.0 alpha
 
 It's rough.  Don't be surprised by bugs/oversights.
-Corrections encouraged.
+Corrections, clarifications and feedback encouraged.
 
-OpenSSL source here:
+Download OpenSSL source from here:
   https://www.openssl.org/source/
   https://www.openssl.org/source/old/1.1.1/
 
@@ -21,14 +21,16 @@ for OpenSSL 1.1.1g
   wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz
   tar -xzf openssl-1.1.1g.tar.gz
   cd openssl-1.1.1g
-for OpenSSL 3.0.0 alpha3 
-  wget https://www.openssl.org/source/openssl-3.0.0-alpha3.tar.gz
-  tar -xzf openssl-3.0.0-alpha3.tar.gz
-  cd openssl-3.0.0-alpha3
+for OpenSSL 3.0.0 alpha6
+  wget https://www.openssl.org/source/openssl-3.0.0-alpha6.tar.gz
+  tar -xzf openssl-3.0.0-alpha6.tar.gz
+  cd openssl-3.0.0-alpha6
 
 # Check NOTES.PERL
 #   for CentOS, you need
   sudo yum install perl-core
+    Fedora needs
+  sudo dnf install perl-IPC-Cmd
 For make test on Fedora
   sudo dnf install perl-Test-Harness perl perl-Pod-Html
 
@@ -50,5 +52,6 @@ ldconfig
 # match where wscript looks for your OS.
 # The above works for CentOS 7
 
-CentOS 7 needs this if you use real certificates:
+Fedora and CentOS 7 need this if you use real certificates:
   nts ca /etc/pki/tls/certs/ca-bundle.trust.crt
+

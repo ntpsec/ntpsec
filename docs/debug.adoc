@@ -35,13 +35,12 @@ requires reference to the sources. However, a single +-d+ does produce
 only mildly cryptic output and can be very useful in finding problems
 with configuration and network troubles.
 
-Some problems are immediately apparent when the daemon first starts
-running. The most common of these are the lack of a UDP port for NTP
-(123) in the Unix +/etc/services+ file (or equivalent in some systems).
-*Note that NTP requires port 123 for both source and destination ports.*
-These facts should be pointed out to firewall administrators.
-If you are using link:authentic.html#nts[NTS], you also need to
-add an entry for TCP port 123.
+Any Firewall needs to allow NTP traffic.
+The server side of +ntpd+ listens on UDP port 123.  The client side
+also sends from port 123 but not all implementations do that
+and +ntpq+ sends from system assigned ports.
+If you are running an link:authentic.html#nts[NTS] server, you also
+need to allow TCP port 4460.
 
 Other problems are apparent in the system log, which ordinarily shows
 the startup banner, some cryptic initialization data and the computed
@@ -61,7 +60,7 @@ problems reported to the NTP newsgroup are not NTP problems, but
 problems with the network or firewall configuration.
 
 If you use GPS, and your time is off by 19 years, you may have been
-bitten by the GPS rollover bug.
+bitten by the GPS 1024 week number rollover bug - WNRO.
 Please see link:rollover.html[Rollover issues in time sources]
 
 == Verifying Correct Operation
@@ -227,14 +226,15 @@ If the +ntpq+ or program does not show that messages are being
 received by the daemon or that received messages do not result in
 correct synchronization, verify the following:
 
-1.  Verify the +/etc/services+ file host machine has an entry for 123/udp.
-If you are using NTS, you must also have an entry for 123/tcp.
-
-2.  Check the system log for +ntpd+ messages about configuration errors,
+1.  Check the system log for +ntpd+ messages about configuration errors,
 name-lookup failures or initialization problems. Common system log
 messages are summarized on the link:msyslog.html[+ntpd+ System Log
-Messages] page. Check to be sure that only one copy of +ntpd+ is
-running.
+Messages] page.  If you specify a log file, be sure to check in
+your main syslog file (and be sure it logs entries from ntpd) since
+some of the errors are logged before it switches to the specified
+log file.
+
+2. Check to be sure that only one copy of +ntpd+ is running.
 
 3.  Verify using +ping+ or other utility that packets actually do make
 the round trip between the client and server. Verify using +dig+,
