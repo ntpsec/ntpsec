@@ -450,8 +450,8 @@ set_process_priority(void)
 			else
 				sched.sched_priority = config_priority;
 		}
-		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
-			msyslog(LOG_ERR, "INIT: sched_setscheduler(): %s", strerror(errno));
+		if ( pthread_setschedparam(pthread_self(), SCHED_FIFO, &sched) != 0 )
+			msyslog(LOG_ERR, "INIT: pthread_setschedparam(): %s", strerror(errno));
 		else
 			need_priority = false;
 	}
