@@ -7,7 +7,6 @@ import waflib.Context
 import waflib.Logs
 import waflib.Utils
 sys.path.insert(0, "%s/main/tests/pylib" % waflib.Context.out_dir)
-import ntp.poly
 import ntp.util
 
 verStr = ntp.util.stdversion()
@@ -54,8 +53,6 @@ def run(cmd, reg, pythonic):
     """Run an individual non-python test."""
     check = False
 
-    breg = ntp.poly.polybytes(reg)
-
     prefix = "running: " + " ".join(cmd)
 
     if not os.path.exists("%s/%s" % (waflib.Context.out_dir, cmd[0])):
@@ -66,24 +63,25 @@ def run(cmd, reg, pythonic):
         cmd = [sys.executable] + list(cmd)
     p = waflib.Utils.subprocess.Popen(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
                                                  waflib.Context.out_dir},
+                         universal_newlines=True,
                          stdin=waflib.Utils.subprocess.PIPE,
                          stdout=waflib.Utils.subprocess.PIPE,
                          stderr=waflib.Utils.subprocess.PIPE, cwd=waflib.Context.out_dir)
 
     stdout, stderr = p.communicate()
 
-    if (stdout == breg) or (stderr == breg):
+    if (stdout == reg) or (stderr == reg):
         check = True
 
     if check:
         addLog("GREEN", prefix + "  OK")
         return True
     addLog("RED", prefix + "  FAILED")
-    addLog("PINK", "Expected: " + breg)
+    addLog("PINK", "Expected: " + reg)
     if stdout:
-        addLog("PINK", "Got (stdout): " + ntp.poly.polystr(stdout))
+        addLog("PINK", "Got (stdout): " + stdout)
     if stderr:
-        addLog("PINK", "Got (stderr): " + ntp.poly.polystr(stderr))
+        addLog("PINK", "Got (stderr): " + stderr)
     return False
 
 
