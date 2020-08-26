@@ -181,7 +181,7 @@ configuration file directive.
   Process priority. This option takes an integer number as its argument.
 +
 To the extent permitted by the operating system, run +ntpd+ at the
-specified _sched_setscheduler(SCHED_FIFO)_ priority.
+specified _pthread_setschedparam(SCHED_FIFO)_ priority.
 
 +-q+, +--quit+::
   Set the time and quit. This option must not appear in combination with

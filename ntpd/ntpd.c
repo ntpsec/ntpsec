@@ -434,7 +434,6 @@ set_process_priority(void)
 			 : "Attempt to set priority"
 				));
 # endif /* DEBUG */
-#ifdef HAVE_SCHED_SETSCHEDULER
 	if (need_priority) {
 		int pmax, pmin;
 		struct sched_param sched;
@@ -455,7 +454,6 @@ set_process_priority(void)
 		else
 			need_priority = false;
 	}
-#endif
 	if (need_priority)
 		msyslog(LOG_ERR, "INIT: set_process_priority: No way found to improve our priority");
 }

@@ -617,7 +617,6 @@ int main(int argc, char **argv) {
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),
-        ('sched_setscheduler', ["sched.h"]),
         ('strlcpy', ["string.h"]),
         ('strlcat', ["string.h"]),
 	# Hack.  It's not a function, but this works.
