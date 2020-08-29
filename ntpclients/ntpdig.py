@@ -216,7 +216,7 @@ def report(packet, json):
 
     if json:
         say('{"time":"%sT%s%s","offset":%f,"precision":%f,"host":"%s",'
-            'ip:"%s","stratum":%s,"leap":"%s","adjusted":%s}\n'
+            '"ip":"%s","stratum":%s,"leap":"%s","adjusted":%s}\n'
             % (date, tod, tz,
                packet.adjust(), packet.synchd(),
                packet.hostname, packet.resolved or packet.hostname,
