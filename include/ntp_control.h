@@ -56,13 +56,14 @@ struct ntp_control {
 #define	CTL_OP_WRITEVAR		3	/* write variables */
 #define	CTL_OP_READCLOCK	4	/* read clock variables */
 #define	CTL_OP_WRITECLOCK	5	/* write clock variables */
-#define	CTL_OP_SETTRAP		6	/* set trap address (obsolete, unused) */
-#define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
+/* #def	CTL_OP_SETTRAP		6	** set trap address (unused) */
+/* #def	CTL_OP_ASYNCMSG		7	** trap message (unused) */
 #define CTL_OP_CONFIGURE	8	/* runtime configuration */
+/* #def	CTL_OP_EXCONFIG		9	**  export config to file (unused) */
 #define CTL_OP_READ_MRU		10	/* retrieve MRU (mrulist) */
 #define CTL_OP_READ_ORDLIST_A	11	/* ordered list req. auth. */
 #define CTL_OP_REQ_NONCE	12	/* request a client nonce */
-#define	CTL_OP_UNSETTRAP	31	/* unset trap (obsolete, unused) */
+/* #def	CTL_OP_UNSETTRAP	31	** unset trap (unused) */
 
 /*
  * {En,De}coding of the system status word
