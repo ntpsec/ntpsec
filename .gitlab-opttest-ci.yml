@@ -77,7 +77,7 @@ macos-options-tester:
 fbsd-11-options-tester:
   stage: test
   script:
-    - PYTHON=python2 tests/option-tester.sh
+    - PYTHON=python2.7 tests/option-tester.sh
     - PYTHON=python3 tests/option-tester.sh
   tags:
     - freebsd-11
@@ -87,7 +87,7 @@ fbsd-11-options-tester:
 fbsd-12-options-tester:
   stage: test
   script:
-    - PYTHON=python2 tests/option-tester.sh
+    - PYTHON=python2.7 tests/option-tester.sh
     - PYTHON=python3 tests/option-tester.sh
   tags:
     - freebsd-11
