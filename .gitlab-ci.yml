@@ -371,13 +371,13 @@ gentoo-hardened-refclocks:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 coverity-scan:
+  <<: *job_definition
+  image: $CI_REGISTRY/ntpsec/ntpsec/coverity
   script:
-    - ./waf configure --disable-doc --disable-manpage --refclock=all --disable-nts
-    - /opt/cov-analysis/bin/cov-build --dir cov-int ./waf build
+    - ./waf configure --disable-doc --disable-manpage --refclock=all
+    - cov-analysis-linux64-*/bin/cov-build --dir cov-int ./waf build
     - tar czf ntpsec_coverity.tgz cov-int
-    - curl --form token="$COVERITY_TOKEN" --form email=security@ntpsec.org --form file=@ntpsec_coverity.tgz --form version="$(git rev-parse --short HEAD)" --form description="Automatic submission by gitlab-ci" https://scan.coverity.com/builds?project=ntpsec
-  tags:
-    - ubuntu-1604-lts
+    - curl --form token="${COVERITY_TOKEN}" --form email=security@ntpsec.org --form file=@ntpsec_coverity.tgz --form version="$(git rev-parse --short HEAD)" --form description="Automatic submission by gitlab-ci" https://scan.coverity.com/builds?project=${COVERITY_PROJECT_NAME}
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
