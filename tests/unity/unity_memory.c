@@ -196,8 +196,11 @@ void* unity_realloc(void* oldMem, size_t size)
     }
 #endif
     newMem = unity_malloc(size);
-    if (newMem == NULL) return NULL; /* Do not release old memory */
-    memcpy(newMem, oldMem, guard->size);
-    release_memory(oldMem);
-    return newMem;
+    if (newMem == NULL)
+	return NULL; /* Do not release old memory */
+    else {
+	memcpy(newMem, oldMem, guard->size);
+	release_memory(oldMem);
+	return newMem;
+    }
 }
