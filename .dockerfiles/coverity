@@ -1,6 +1,0 @@
-FROM debian:unstable-slim
-
-RUN apt-get update
-RUN apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev curl
-RUN curl -o /tmp/cov-analysis-linux64.tgz --form project=${COVERITY_PROJECT_NAME} --form token=${COVERITY_TOKEN}  https://scan.coverity.com/download/linux64
-RUN tar zxf /tmp/cov-analysis-linux64.tgz

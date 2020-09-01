@@ -41,9 +41,6 @@ build-centos-latest:
 build-clang:
   <<: *build_definition
 
-build-coverity:
-  <<: *build_definition
-
 build-debian-oldstable:
   <<: *build_definition
 
