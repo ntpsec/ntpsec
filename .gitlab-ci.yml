@@ -371,9 +371,8 @@ gentoo-hardened-refclocks:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 coverity-scan:
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
+  image: $CI_REGISTRY/ntpsec/ntpsec/coverity
   script:
-    - apt-get install -y curl git
     - curl -o /tmp/cov-analysis-linux64.tgz --form project=ntpsec --form token="${COVERITY_TOKEN}" https://scan.coverity.com/download/linux64
     - tar zxf /tmp/cov-analysis-linux64.tgz
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all
