@@ -830,8 +830,8 @@ process_control(
 	 */
 	reqpt = (char *)pkt->data;
 	if (CTL_MAX_DATA_LEN < req_count) {
-                /* count too big */
-		/* coverity[deadcode] backstop to prevent stack overflow */
+                /* count too big - backstop to prevent stack overflow*/
+		/* coverity[deadcode] */
 		ctl_error(CERR_BADFMT);
 		numctlbadpkts++;
 		return;
