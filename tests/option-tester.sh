@@ -25,6 +25,11 @@ then
   LINUX="--enable-seccomp"
 fi
 
+if [ -z ${PYTHON} ]
+then
+    PYTHON="python"
+fi
+
 DISABLE_NTS=""
 if pkg-config --version 2>/dev/null 1>/dev/null
 then
@@ -32,11 +37,11 @@ then
   then
     DISABLE_NTS="--disable-nts"
   fi
-fi
-
-if [ -z ${PYTHON} ]
-then
-    PYTHON="python"
+else
+  if ! $PYTHON ../wafhelpers/tlscheck
+  then
+    DISABLE_NTS="--disable-nts"
+  fi
 fi
 
 doit ()
