@@ -788,10 +788,6 @@ receive(
 		stat_count.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
-		if (NULL == peer) {
-		    stat_count.sys_declined++;
-		    break;
-		}
 		if ((peer->cfg.flags & FLAG_NTS)
 		     && (!rbufp->extens_present
 #ifndef DISABLE_NTS
