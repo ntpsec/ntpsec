@@ -179,8 +179,9 @@ void* unity_realloc(void* oldMem, size_t size)
         release_memory(oldMem);
         return NULL;
     }
-
-    if (guard->size >= size) return oldMem;
+    else if (guard->size >= size) {
+	return oldMem;
+    }
 
 #ifdef UNITY_EXCLUDE_STDLIB_MALLOC /* Optimization if memory is expandable */
     {

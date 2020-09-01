@@ -92,6 +92,7 @@ void do_mac(char *name,
 	const EVP_MD *digest;
 	const EVP_CIPHER *cipher;
 	size_t cipherlen;
+	uint8_t newkey[EVP_MAX_KEY_LENGTH];
 
 	SSL_init();
 
@@ -134,7 +135,6 @@ void do_mac(char *name,
 	if (cipherlen < keylen) {
 		keylen = cipherlen;		/* truncate */
 	} else if (cipherlen > keylen) {
-		uint8_t newkey[EVP_MAX_KEY_LENGTH];
 		memcpy(newkey, key, keylen);
 		while (cipherlen > keylen)
 			key[keylen++] = 0;	/* pad with 0s */
