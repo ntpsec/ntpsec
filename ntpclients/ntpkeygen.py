@@ -23,10 +23,31 @@ from __future__ import print_function
 import os
 import sys
 import socket
-import random
 import time
 import getopt
 import stat
+
+try:
+    import secrets
+    def gen_key(bytes, asciified=True):
+        if asciified:
+            result = ''
+            for index in range(bytes):
+                result += chr(0x21 + secrets.randbelow(0x5d))
+            return result
+        else:
+            return secrets.token_hex(bytes)
+except ImportError:
+    import random
+    def gen_key(bytes, asciified=True):
+        result = ''
+        if asciified:
+            for index in range(bytes):
+                result += chr(random.randint(0x21, 0x7e))
+        else:
+            for index in range(bytes):
+                result += "%02x" % random.randint(0x0, 0xff)
+        return result
 
 #
 # Cryptodefines
@@ -39,18 +60,10 @@ def gen_keys(ident, groupname):
     "Generate semi-random AES keys for versions of ntpd with CMAC support."
     with fheader("AES", ident, groupname) as wp:
         for i in range(1, NUMKEYS+1):
-            key = ""
-            for j in range(KEYSIZE):
-                while True:
-                    r = randomizer.randint(0x21, 0x7e)
-                    if r != ord('#'):
-                        break
-                key += chr(r)
+            key = gen_key(KEYSIZE, True)
             wp.write("%2d AES %s\n" % (i, key))
         for i in range(1, NUMKEYS+1):
-            key = ""
-            for j in range(KEYSIZE):
-                key += "%02x" % randomizer.randint(0x00, 0xff)
+            key = gen_key(KEYSIZE, False)
             wp.write("%2d AES %s\n" % (i + NUMKEYS, key))
 
 
@@ -100,7 +113,6 @@ if __name__ == '__main__':
 
     # The seed is ignored by random.SystemRandom,
     # even though the docs do not say so.
-    randomizer = random.SystemRandom()
     gen_keys("AES", socket.gethostname())
     raise SystemExit(0)
 
