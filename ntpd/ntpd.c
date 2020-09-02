@@ -759,7 +759,8 @@ main(
 	    struct rlimit rlim;
 	    rlim.rlim_max = rlim.rlim_cur = RLIM_INFINITY;
 	    if (setrlimit(RLIMIT_MEMLOCK, &rlim) < 0)
-		msyslog(LOG_DEBUG, "INIT: setrlimit(RLIMIT_CORE, [%lld, %lld]) failed", (long long)rlim.rlim_cur, (long long)rlim.rlim_max);
+		msyslog(LOG_DEBUG, "INIT: setrlimit(RLIMIT_CORE, [%ju, %ju]) failed",
+			(uintmax_t)rlim.rlim_cur, (uintmax_t)rlim.rlim_max);
 	    else
 #endif
 
