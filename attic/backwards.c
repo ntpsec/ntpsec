@@ -39,6 +39,7 @@ main(int argc, char *argv[])
 		if ((ts0.tv_sec < ts1.tv_sec) ||
 		    ((ts0.tv_sec == ts1.tv_sec) &&
 		     (ts0.tv_nsec <= ts1.tv_nsec))) {
+		    continue;
 		} else {
 			ts_print(&ts0, &ts1);
 			if (ts0.tv_sec == ts1.tv_sec

@@ -38,7 +38,7 @@
 #define UNUSED_ARG(arg)         ((void)(arg))
 
 
-int NUM = 1000000;
+int SAMPLESIZE = 1000000;
 
 #define PACKET_LENGTH 48
 #define MAX_KEY_LENGTH 64
@@ -139,7 +139,7 @@ static void DoCMAC(
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < NUM; i++) {
+	for (int i = 0; i < SAMPLESIZE; i++) {
 		digestlength = One_CMAC(cipher, key, keylength, pkt, pktlength);
 		if (0 == digestlength)
 			break;
@@ -147,7 +147,7 @@ static void DoCMAC(
 	clock_gettime(CLOCK_MONOTONIC, &stop);
 	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
 	printf("%12s  %2d %2d %2lu %6.0f  %6.3f",
-	       name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
+	       name, keylength, pktlength, digestlength, fast/SAMPLESIZE,  fast/1E9);
 	PrintHex(answer, digestlength);
 	printf("\n");
 }
@@ -207,14 +207,14 @@ static void DoPKEY(
 	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_FINALISE);
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < NUM; i++) {
+	for (int i = 0; i < SAMPLESIZE; i++) {
 		digestlength = One_PKEY(pkey, ctx, pkt, pktlength);
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &stop);
 	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
 	printf("%12s  %2d %2d %2lu %6.0f  %6.3f",
-	       name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
+	       name, keylength, pktlength, digestlength, fast/SAMPLESIZE,  fast/1E9);
 	PrintHex(answer, digestlength);
 	printf("\n");
 	EVP_MD_CTX_free(ctx);
@@ -289,14 +289,14 @@ static void Do_EVP_MAC(
 
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < NUM; i++) {
+	for (int i = 0; i < SAMPLESIZE; i++) {
 		digestlength = One_EVP_MAC(evp, cbc, key, keylength, pkt, pktlength);
 if (0 == digestlength) break;
 	}
 	clock_gettime(CLOCK_MONOTONIC, &stop);
 	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
 	printf("%12s  %2d %2d %2lu %6.0f  %6.3f",
-	       name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
+	       name, keylength, pktlength, digestlength, fast/SAMPLESIZE,  fast/1E9);
 	PrintHex(answer, digestlength);
 	printf("\n");
 }
@@ -363,14 +363,14 @@ static void Do_EVP_MAC2(
 
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < NUM; i++) {
+	for (int i = 0; i < SAMPLESIZE; i++) {
 		digestlength = One_EVP_MAC2(evp, pkt, pktlength);
 if (0 == digestlength) break;
 	}
 	clock_gettime(CLOCK_MONOTONIC, &stop);
 	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
 	printf("%12s  %2d %2d %2lu %6.0f  %6.3f",
-	       name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
+	       name, keylength, pktlength, digestlength, fast/SAMPLESIZE,  fast/1E9);
 	PrintHex(answer, digestlength);
 	printf("\n");
 }

@@ -170,4 +170,4 @@ def run_manpage(self, node):
     out_n = self.bld.path.find_or_declare(out)
     self.create_task('man', node, out_n)
     self.bld.install_files('${MANDIR}/man%s/' % self.section, out_n)
-    weight = 3
+    #weight = 3

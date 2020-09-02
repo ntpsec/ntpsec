@@ -14,7 +14,6 @@ from __future__ import print_function, division
 
 import cmd
 import getopt
-import hashlib
 import os
 import re
 import resource
