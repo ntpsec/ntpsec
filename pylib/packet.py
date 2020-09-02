@@ -1328,7 +1328,6 @@ This combats source address spoofing
 
     def __mru_analyze(self, variables, span, direct):
         """Extracts data from the key/value list into a more useful form"""
-        curidx = -1
         mru = None
         nonce = None
         items = list(variables.items())
