@@ -22,6 +22,8 @@ README.adoc::	This file.
 
 VERSION::	The version stamp, to be used by scripts and programs.
 
+lgtm.template.yml:: Configuration file for LGTM code analysis
+
 attic/::	Directory containing source code that is *not* part of a
 		normal installation. Things can disappear from here at any
 		time.
