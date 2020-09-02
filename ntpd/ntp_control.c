@@ -829,6 +829,7 @@ process_control(
 	 * Set up translate pointers
 	 */
 	reqpt = (char *)pkt->data;
+#ifndef __COVERITY__
 	if (CTL_MAX_DATA_LEN < req_count) {
                 /* count too big - backstop to prevent stack overflow*/
 		/* coverity[deadcode] */
@@ -836,6 +837,7 @@ process_control(
 		numctlbadpkts++;
 		return;
 	}
+#endif /* __COVERITY__ */
 	reqend = reqpt + req_count;
 
 	/*
@@ -3202,7 +3204,7 @@ send_random_tag_value(
 	int	noise;
 	char	buf[32];
 
-	/* coverity[dc.weak_crypto] */
+	/* coverity[weak_crypto] */
 	noise = random();
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
@@ -3246,7 +3248,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	/* coverity[dc.weak_crypto] */
+	/* coverity[weak_crypto] */
 	noise = (uint32_t)random();
 	while (remaining > 0) {
 #ifdef USE_RANDOMIZE_RESPONSES
@@ -3768,7 +3770,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			/* coverity[dc.weak_crypto] */
+			/* coverity[weak_crypto] */
 			noise = (uint32_t)random();
 			noisebits = 31;
 		}
@@ -3946,7 +3948,7 @@ send_restrict_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 2) {
-			/* coverity[dc.weak_crypto] */
+			/* coverity[weak_crypto] */
 			noise = (uint32_t)random();
 			noisebits = 31;
 		}
