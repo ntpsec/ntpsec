@@ -172,6 +172,7 @@ void* unity_realloc(void* oldMem, size_t size)
     {
         release_memory(oldMem);
         UNITY_TEST_FAIL(Unity.CurrentTestLineNumber, "Buffer overrun detected during realloc()");
+	return NULL;
     }
     else if (size == 0)
     {
