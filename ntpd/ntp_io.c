@@ -233,7 +233,7 @@ static void	delete_interface_from_list(endpt *);
 static void	close_and_delete_fd_from_list(SOCKET);
 static void	add_addr_to_list	(sockaddr_u *, endpt *);
 static void	create_wildcards	(unsigned short);
-static endpt *	findlocalinterface	(sockaddr_u *, int);
+static endpt *	findlocalinterface	(sockaddr_u *);
 static endpt *	findclosestinterface	(sockaddr_u *, int);
 
 #ifdef DEBUG
@@ -2473,7 +2473,7 @@ findinterface(
 {
 	endpt *iface;
 
-	iface = findlocalinterface(addr, INT_WILDCARD);
+	iface = findlocalinterface(addr);
 
 	if (NULL == iface) {
 		DPRINT(4, ("Found no interface for address %s - returning wildcard\n",
@@ -2504,8 +2504,7 @@ findinterface(
  */
 static endpt *
 findlocalinterface(
-	sockaddr_u *	addr,
-	int		flags
+	sockaddr_u *	addr
 	)
 {
 	socklen_t	sockaddrlen;
@@ -2513,6 +2512,7 @@ findlocalinterface(
 	sockaddr_u	saddr;
 	SOCKET		s;
 	int		rtn;
+	int		flags = INT_WILDCARD;
 
 	DPRINT(4, ("Finding interface for addr %s in list of addresses\n",
 		   socktoa(addr)));
