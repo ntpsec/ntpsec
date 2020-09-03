@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # Use clang-tidy to fill in all optional control structure braces.
 #

@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # ntpdate - emulate the crufty old ntpdate utility from NTP Classic
 #

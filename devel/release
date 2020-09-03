@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 # Generate commands to cut an ntpsec release.
 #
 # VERSION must contain the correct release number.

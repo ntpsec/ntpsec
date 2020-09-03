@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
 """Find all Pythons in the command path, and corresponding exe/lib locations.
 

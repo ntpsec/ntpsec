@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 # PROVIDE: ntpd
 # REQUIRE: syslogd cleanvar devfs

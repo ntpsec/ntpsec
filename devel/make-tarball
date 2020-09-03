@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # Make a release tarball from current head.  If you give an argument, it
 # will override the version normally taken from ../VERSION.  Produces

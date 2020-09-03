@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 # print version string of NTP daemon
 # Copyright Ulrich Windl
 # Modified 970318: Harlan Stenn: rewritten...

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 """\
 make-leap-seconds.py - make leap second file for testing
 

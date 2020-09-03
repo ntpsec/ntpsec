@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 # Hack to measure startup timing
 
 if test "$#" -ge 1

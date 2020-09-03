@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 #
 # drift of 104.8576 -> +1 tick.  Base  of 10000 ticks.
 #

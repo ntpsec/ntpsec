@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 # keep this POSIX sh compatible. No bash-isms!
 # replace |& with 2>&1 |
 

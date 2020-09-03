@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """\
 ntpwait - Wait for ntpd to stabilize the system clock.
