@@ -1765,6 +1765,10 @@ class Authenticator:
                             ntp.poly.polybytes(passwd), keytype)
         if not mac2:
             return False
-        return hmac.compare_digest(mac, mac2)
+        # typically prefered to avoid timing attacks client-side (in theory)
+        try:
+            return hmac.compare_digest(mac, mac2) # supported 2.7.7+ and 3.3+
+        except AttributeError:
+            return mac == mac2  # solves issue #666
 
 # end
