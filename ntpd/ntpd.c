@@ -24,6 +24,7 @@
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 #include <sched.h>
+#include <pthread.h>  /* For pthread_setschedparam() */
 #include <sys/mman.h>
 
 #include <termios.h>
