@@ -2,6 +2,11 @@ This is a collection of ideas about how/what to test when
 we are preparing for a release.  Most of them require
 manual action.
 
+It's a good idea to run all the validators first:
+
+https://lgtm.com/projects/g/ntpsec/ntpsec?mode=list
+https://app.codacy.com/gl/NTPsec/ntpsec/dashboard
+
 It assumes we have a release candidate tarball and git tag.
 
 
