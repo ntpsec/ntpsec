@@ -1,3 +1,3 @@
 FROM opensuse/tumbleweed
 
-RUN zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses
+RUN zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses libbsd-devel
