@@ -172,16 +172,15 @@ void* unity_realloc(void* oldMem, size_t size)
     {
         release_memory(oldMem);
         UNITY_TEST_FAIL(Unity.CurrentTestLineNumber, "Buffer overrun detected during realloc()");
-	return NULL;
     }
-    else if (size == 0)
+
+    if (size == 0)
     {
         release_memory(oldMem);
         return NULL;
     }
-    else if (guard->size >= size) {
-	return oldMem;
-    }
+
+    if (guard->size >= size) return oldMem;
 
 #ifdef UNITY_EXCLUDE_STDLIB_MALLOC /* Optimization if memory is expandable */
     {
@@ -196,11 +195,8 @@ void* unity_realloc(void* oldMem, size_t size)
     }
 #endif
     newMem = unity_malloc(size);
-    if (newMem == NULL)
-	return NULL; /* Do not release old memory */
-    else {
-	memcpy(newMem, oldMem, guard->size);
-	release_memory(oldMem);
-	return newMem;
-    }
+    if (newMem == NULL) return NULL; /* Do not release old memory */
+    memcpy(newMem, oldMem, guard->size);
+    release_memory(oldMem);
+    return newMem;
 }
