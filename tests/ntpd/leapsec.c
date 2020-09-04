@@ -768,7 +768,7 @@ TEST(leapsec, ls2009seqInsDumb) {
 	TEST_ASSERT_EQUAL(LSPROX_ALERT,    qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009+1);
-	TEST_ASSERT_TRUE(rc)
+	TEST_ASSERT_TRUE(rc);
 	TEST_ASSERT_EQUAL(-1,             qr.warped   );
 	TEST_ASSERT_EQUAL(LSPROX_NOWARN, qr.proximity);
 
