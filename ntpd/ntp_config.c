@@ -2799,12 +2799,14 @@ config_peers(
 			/* DNS lookup */
 		} else {
 			AF(&peeraddr) = curr_peer->addr->type;
-			peer_config(
+			struct peer *peer = peer_config(
 				&peeraddr,
 				curr_peer->addr->address,
 				NULL,
 				curr_peer->host_mode,
 				&curr_peer->ctl);
+			if (NULL == peer)
+				msyslog(LOG_INFO, "CONFIG: configpeers: Ignoring duplicate '%s'", curr_peer->addr->address);
 		}
 	}
 }
