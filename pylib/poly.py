@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: BSD-2-Clause
 """Handle bytes and strings in a polyglot fashion.
