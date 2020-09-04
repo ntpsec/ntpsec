@@ -68,6 +68,7 @@ queries:
       severity: "error"
   # Specifically hide the results of FIXMEs
   - exclude: python/FIXME-comment
+  - exclude: c/FIXME-comment
 
 #########################################################################################
 # Define changes to the default code extraction process.                                #

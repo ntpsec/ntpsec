@@ -243,7 +243,7 @@ class PacketControl:
                                   self.database.mib_upperBound(),
                                   self.database.mib_context())
         self.sendPacket(register, False)
-        response = self.waitForResponse(register)
+        self.waitForResponse(register)
         self.stillConnected = True
 
     def waitForResponse(self, opkt, ignoreSID=False):

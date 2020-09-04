@@ -35,7 +35,7 @@ const char* digests[] = {
     "ChaCha20", "Poly1305",
     NULL };
 
-unsigned char pkt[100];
+unsigned char packet[100];
 int
 main (
 	int argc,
@@ -84,7 +84,7 @@ main (
 	ctx = EVP_MD_CTX_create();
 	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
 	EVP_DigestInit_ex(ctx, md, NULL);
-	EVP_DigestUpdate(ctx, pkt, sizeof(pkt));
+	EVP_DigestUpdate(ctx, packet, sizeof(packet));
 	EVP_DigestFinal_ex(ctx, digest, &length);
 	EVP_MD_CTX_destroy(ctx);
 	printf("%10s %4d %6u\n", digests[i], keytype, length);
