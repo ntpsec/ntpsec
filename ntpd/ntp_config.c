@@ -1719,7 +1719,7 @@ config_access(
 				hints.ai_socktype = SOCK_DGRAM;
 				hints.ai_family = my_node->addr->type;
 				rc = getaddrinfo(my_node->addr->address,
-						 "ntp", &hints,
+						 NTP_PORTA, &hints,
 						 &ai_list);
 				if (rc) {
 					msyslog(LOG_ERR,
