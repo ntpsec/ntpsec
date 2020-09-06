@@ -68,14 +68,12 @@ TEST(hackrestrict, RestrictionsAreEmptyAfterInit) {
 	TEST_ASSERT_EQUAL(rl4->hitcount, rstrct.restrictlist4->hitcount);
 	TEST_ASSERT_EQUAL(rl4->flags, rstrct.restrictlist4->flags);
 	TEST_ASSERT_EQUAL(rl4->mflags, rstrct.restrictlist4->mflags);
-	TEST_ASSERT_EQUAL(rl4->expire, rstrct.restrictlist4->expire);
 	TEST_ASSERT_EQUAL(rl4->u.v4.addr, rstrct.restrictlist4->u.v4.addr);
 	TEST_ASSERT_EQUAL(rl4->u.v4.mask, rstrct.restrictlist4->u.v4.mask);
 
 	TEST_ASSERT_EQUAL(rl6->hitcount, rstrct.restrictlist6->hitcount);
 	TEST_ASSERT_EQUAL(rl6->flags, rstrct.restrictlist6->flags);
 	TEST_ASSERT_EQUAL(rl6->mflags, rstrct.restrictlist6->mflags);
-	TEST_ASSERT_EQUAL(rl6->expire, rstrct.restrictlist6->expire);
 
 	free(rl4);
 	free(rl6);
@@ -101,7 +99,7 @@ TEST(hackrestrict, HackingDefaultRestriction) {
 	sockaddr_u resaddr = create_sockaddr_u(54321, "0.0.0.0");
 	sockaddr_u resmask = create_sockaddr_u(54321, "0.0.0.0");
 
-	hack_restrict(RESTRICT_FLAGS, &resaddr, &resmask, 0, flags, 0);
+	hack_restrict(RESTRICT_FLAGS, &resaddr, &resmask, 0, flags);
 
 	sockaddr_u sockaddr = create_sockaddr_u(54321, "111.123.251.124");
 
@@ -113,7 +111,7 @@ TEST(hackrestrict, CantRemoveDefaultEntry) {
 	sockaddr_u resaddr = create_sockaddr_u(54321, "0.0.0.0");
 	sockaddr_u resmask = create_sockaddr_u(54321, "0.0.0.0");
 
-	hack_restrict(RESTRICT_REMOVE, &resaddr, &resmask, 0, 0, 0);
+	hack_restrict(RESTRICT_REMOVE, &resaddr, &resmask, 0, 0);
 
 	TEST_ASSERT_EQUAL(RES_Default, restrictions(&resaddr));
 }
@@ -125,7 +123,7 @@ TEST(hackrestrict, AddingNewRestriction) {
 
 	const unsigned short flags = 42;
 
-	hack_restrict(RESTRICT_FLAGS, &resaddr, &resmask, 0, flags, 0);
+	hack_restrict(RESTRICT_FLAGS, &resaddr, &resmask, 0, flags);
 
 	TEST_ASSERT_EQUAL(flags, restrictions(&resaddr));
 }
@@ -144,9 +142,9 @@ TEST(hackrestrict, TheMostFittingRestrictionIsMatched) {
 	sockaddr_u resaddr_second_match = create_sockaddr_u(54321, "11.99.33.44");
 	sockaddr_u resmask_second_match = create_sockaddr_u(54321, "255.0.0.0");
 
-	hack_restrict(RESTRICT_FLAGS, &resaddr_not_matching, &resmask_not_matching, 0, 11, 0);
-	hack_restrict(RESTRICT_FLAGS, &resaddr_best_match, &resmask_best_match, 0, 22, 0);
-	hack_restrict(RESTRICT_FLAGS, &resaddr_second_match, &resmask_second_match, 0, 128, 0);
+	hack_restrict(RESTRICT_FLAGS, &resaddr_not_matching, &resmask_not_matching, 0, 11);
+	hack_restrict(RESTRICT_FLAGS, &resaddr_best_match, &resmask_best_match, 0, 22);
+	hack_restrict(RESTRICT_FLAGS, &resaddr_second_match, &resmask_second_match, 0, 128);
 
 	TEST_ASSERT_EQUAL(22, restrictions(&resaddr_target));
 }
@@ -164,12 +162,12 @@ TEST(hackrestrict, DeletedRestrictionIsNotMatched) {
 	sockaddr_u resaddr_second_match = create_sockaddr_u(54321, "11.99.33.44");
 	sockaddr_u resmask_second_match = create_sockaddr_u(54321, "255.0.0.0");
 
-	hack_restrict(RESTRICT_FLAGS, &resaddr_not_matching, &resmask_not_matching, 0, 11, 0);
-	hack_restrict(RESTRICT_FLAGS, &resaddr_best_match, &resmask_best_match, 0, 22, 0);
-	hack_restrict(RESTRICT_FLAGS, &resaddr_second_match, &resmask_second_match, 0, 128, 0);
+	hack_restrict(RESTRICT_FLAGS, &resaddr_not_matching, &resmask_not_matching, 0, 11);
+	hack_restrict(RESTRICT_FLAGS, &resaddr_best_match, &resmask_best_match, 0, 22);
+	hack_restrict(RESTRICT_FLAGS, &resaddr_second_match, &resmask_second_match, 0, 128);
 
 	/* deleting the best match*/
-	hack_restrict(RESTRICT_REMOVE, &resaddr_best_match, &resmask_best_match, 0, 22, 0);
+	hack_restrict(RESTRICT_REMOVE, &resaddr_best_match, &resmask_best_match, 0, 22);
 
 	TEST_ASSERT_EQUAL(128, restrictions(&resaddr_target));
 }
@@ -179,9 +177,9 @@ TEST(hackrestrict, RestrictUnflagWorks) {
 	sockaddr_u resaddr = create_sockaddr_u(54321, "11.22.30.20");
 	sockaddr_u resmask = create_sockaddr_u(54321, "255.255.0.0");
 
-	hack_restrict(RESTRICT_FLAGS, &resaddr, &resmask, 0, 11, 0);
+	hack_restrict(RESTRICT_FLAGS, &resaddr, &resmask, 0, 11);
 
-	hack_restrict(RESTRICT_UNFLAG, &resaddr, &resmask, 0, 10, 0);
+	hack_restrict(RESTRICT_UNFLAG, &resaddr, &resmask, 0, 10);
 
 	TEST_ASSERT_EQUAL(1, restrictions(&resaddr));
 }

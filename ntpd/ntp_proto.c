@@ -66,11 +66,6 @@ static inline l_fp_w htonl_fp(l_fp lfp) {
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define	NTP_ORPHWAIT	300	/* orphan wait (s) */
 
-/*
- * pool soliciting restriction duration (s)
- */
-#define	POOL_SOLICIT_WINDOW	8
-
 #define DIFF(x, y) (SQUARE((x) - (y)))
 
 /*
@@ -2404,7 +2399,7 @@ dns_take_server(
 	if (RES_FLAGS & restrict_mask) {
 		msyslog(LOG_INFO, "DNS: Server poking hole in restrictions for: %s",
 			socktoa(&server->srcadr));
-		restrict_source(&server->srcadr, false, 0);
+		restrict_source(&server->srcadr, false);
 	}
 
 	peer_refresh_interface(server);
@@ -2459,8 +2454,7 @@ dns_take_pool(
 	if (RES_FLAGS & restrict_mask) {
 		msyslog(LOG_INFO, "DNS: Pool poking hole in restrictions for: %s",
 				socktoa(&peer->srcadr));
-		restrict_source(&peer->srcadr, false,
-				current_time + POOL_SOLICIT_WINDOW + 1);
+		restrict_source(&peer->srcadr, false);
 	}
 
 	DPRINT(1, ("dns_take_pool: at %u %s->%s pool\n",

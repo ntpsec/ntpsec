@@ -668,7 +668,6 @@ struct restrict_u_tag {
 	uint32_t		hitcount;	/* number of packets matched */
 	unsigned short		flags;	/* accesslist flags */
 	unsigned short		mflags;	/* match flags */
-	unsigned long		expire;	/* valid until time */
 	union {				/* variant starting here */
 		res_addr4 v4;
 		res_addr6 v6;

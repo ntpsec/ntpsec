@@ -109,7 +109,7 @@ static	unsigned short	restrict_source_mflags;
  */
 static restrict_u *	alloc_res4(void);
 static restrict_u *	alloc_res6(void);
-static void		free_res(restrict_u *, int);
+static void		free_res(restrict_u *, bool);
 static void		inc_res_limited(void);
 static void		dec_res_limited(void);
 static restrict_u *	match_restrict4_addr(uint32_t, unsigned short);
@@ -220,7 +220,7 @@ alloc_res6(void)
 static void
 free_res(
 	restrict_u *	res,
-	int		v6
+	bool		v6
 	)
 {
 	restrict_u **	plisthead;
@@ -272,15 +272,11 @@ match_restrict4_addr(
 	unsigned short	port
 	)
 {
-	const int	v6 = 0;
 	restrict_u *	res;
 	restrict_u *	next;
 
 	for (res = rstrct.restrictlist4; res != NULL; res = next) {
 		next = res->link;
-		if (res->expire &&
-		    res->expire <= current_time)
-			free_res(res, v6);
 		if (res->u.v4.addr == (addr & res->u.v4.mask)
 		    && (!(RESM_NTPONLY & res->mflags)
 			|| NTP_PORT == port))
@@ -296,7 +292,6 @@ match_restrict6_addr(
 	unsigned short		port
 	)
 {
-	const int	v6 = 1;
 	restrict_u *	res;
 	restrict_u *	next;
 	struct in6_addr	masked;
@@ -304,9 +299,6 @@ match_restrict6_addr(
 	for (res = rstrct.restrictlist6; res != NULL; res = next) {
 		next = res->link;
 		INSIST(next != res);
-		if (res->expire &&
-		    res->expire <= current_time)
-			free_res(res, v6);
 		MASK_IPV6_ADDR(&masked, addr, &res->u.v6.mask);
 		if (ADDR6_EQ(&masked, &res->u.v6.addr)
 		    && (!(RESM_NTPONLY & res->mflags)
@@ -493,11 +485,10 @@ hack_restrict(
 	sockaddr_u *	resaddr,
 	sockaddr_u *	resmask,
 	unsigned short	mflags,
-	unsigned short	flags,
-	unsigned long	expire
+	unsigned short	flags
 	)
 {
-	int		v6;
+	bool		v6;
 	restrict_u	match;
 	restrict_u *	res;
 	restrict_u **	plisthead;
@@ -506,6 +497,7 @@ hack_restrict(
 		   op, socktoa(resaddr), socktoa(resmask), mflags, flags));
 
 	if (NULL == resaddr) {
+		/* restrict source */
 		REQUIRE(NULL == resmask);
 		REQUIRE(RESTRICT_FLAGS == op);
 		restrict_source_flags = flags;
@@ -517,10 +509,10 @@ hack_restrict(
 	ZERO(match);
 	/* silence VC9 potentially uninit warnings */
 	res = NULL;
-	v6 = 0;
+	v6 = false;
 
 	if (IS_IPV4(resaddr)) {
-		v6 = 0;
+		v6 = false;
 		/*
 		 * Get address and mask in host byte order for easy
 		 * comparison as uint32_t
@@ -530,7 +522,7 @@ hack_restrict(
 		match.u.v4.addr &= match.u.v4.mask;
 
 	} else if (IS_IPV6(resaddr)) {
-		v6 = 1;
+		v6 = true;
 		/*
 		 * Get address and mask in network byte order for easy
 		 * comparison as byte sequences (e.g. memcmp())
@@ -544,7 +536,6 @@ hack_restrict(
 
 	match.flags = flags;
 	match.mflags = mflags;
-	match.expire = expire;
 	res = match_restrict_entry(&match, v6);
 
 	switch (op) {
@@ -626,8 +617,7 @@ hack_restrict(
 void
 restrict_source(
 	sockaddr_u *	addr,
-	bool		farewell,	/* false to add, true to remove */
-	unsigned long	expire		/* 0 is infinite, valid until */
+	bool		farewell	/* false to add, true to remove */
 	)
 {
 	sockaddr_u	onesmask;
@@ -641,8 +631,7 @@ restrict_source(
 
 	SET_HOSTMASK(&onesmask, AF(addr));
 	if (farewell) {
-		hack_restrict(RESTRICT_REMOVE, addr, &onesmask,
-			      0, 0, 0);
+		hack_restrict(RESTRICT_REMOVE, addr, &onesmask, 0, 0);
 		DPRINT(1, ("restrict_source: %s removed", socktoa(addr)));
 		return;
 	}
@@ -651,10 +640,6 @@ restrict_source(
 	 * If there is a specific entry for this address, hands
 	 * off, as it is condidered more specific than "restrict
 	 * server ...".
-	 * However, if the specific entry found is a fleeting one
-	 * added by pool_xmit() before soliciting, replace it
-	 * immediately regardless of the expire value to make way
-	 * for the more persistent entry.
 	 */
 	if (IS_IPV4(addr)) {
 		res = match_restrict4_addr(SRCADR(addr), SRCPORT(addr));
@@ -665,17 +650,12 @@ restrict_source(
 		found_specific = ADDR6_EQ(&res->u.v6.mask,
 					  &SOCK_ADDR6(&onesmask));
 	}
-	if (!expire && found_specific && res->expire) {
-		found_specific = 0;
-		free_res(res, IS_IPV6(addr));
-	}
 	if (found_specific) {
 		return;
 	}
 
 	hack_restrict(RESTRICT_FLAGS, addr, &onesmask,
-		      restrict_source_mflags, restrict_source_flags,
-		      expire);
+		      restrict_source_mflags, restrict_source_flags);
 	DPRINT(1, ("restrict_source: %s host restriction added\n",
 		   socktoa(addr)));
 }

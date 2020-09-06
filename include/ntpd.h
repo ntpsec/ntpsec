@@ -194,8 +194,8 @@ extern void set_use_stattime(uptime_t stattime);
 extern	void	init_restrict	(void);
 extern	unsigned short	restrictions	(sockaddr_u *);
 extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *,
-				 unsigned short, unsigned short, unsigned long);
-extern	void	restrict_source	(sockaddr_u *, bool, unsigned long);
+				 unsigned short, unsigned short);
+extern	void	restrict_source	(sockaddr_u *, bool);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);

@@ -1688,7 +1688,7 @@ config_access(
 				DPRINT(1, ("restrict source template mflags %x flags %x\n",
 					   mflags, flags));
 				hack_restrict(RESTRICT_FLAGS, NULL,
-					      NULL, mflags, flags, 0);
+					      NULL, mflags, flags);
 				continue;
 			}
 		} else {
@@ -1756,7 +1756,6 @@ config_access(
 				}
 			}
 		}
-
 		if (my_node->mode == T_Restrict)
 			op = RESTRICT_FLAGS;
 		else if (my_node->mode == T_Unrestrict
@@ -1769,16 +1768,16 @@ config_access(
 
 		/* Set the flags */
 		if (restrict_default) {
+			/* default case, do both -4 and -6 */
 			AF(&addr) = AF_INET;
 			AF(&mask) = AF_INET;
-			hack_restrict(op, &addr, &mask, mflags, flags, 0);
+			hack_restrict(op, &addr, &mask, mflags, flags);
 			AF(&addr) = AF_INET6;
 			AF(&mask) = AF_INET6;
 		}
 
 		do {
-			hack_restrict(op, &addr,
-				      &mask, mflags, flags, 0);
+			hack_restrict(op, &addr, &mask, mflags, flags);
 			if (pai != NULL &&
 			    NULL != (pai = pai->ai_next)) {
 				INSIST(pai->ai_addr != NULL);
