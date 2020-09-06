@@ -1571,6 +1571,7 @@ config_access(
 	/* Configure the restrict options */
 	my_node = HEAD_PFIFO(ptree->restrict_opts);
 	for (; my_node != NULL; my_node = my_node->link) {
+		int op;
 		if (ai_list != NULL) {
                         /* we do this here, to not need at every continue */
 			freeaddrinfo(ai_list);
@@ -1756,27 +1757,26 @@ config_access(
 			}
 		}
 
+		if (my_node->mode == T_Restrict)
+			op = RESTRICT_FLAGS;
+		else if (my_node->mode == T_Unrestrict
+				&& flags == 0 && mflags == 0)
+			op = RESTRICT_REMOVE;
+		else if (my_node->mode == T_Unrestrict)
+			op = RESTRICT_UNFLAG;
+		else
+			continue;	/* should never happen */
+
 		/* Set the flags */
 		if (restrict_default) {
 			AF(&addr) = AF_INET;
 			AF(&mask) = AF_INET;
-			hack_restrict(RESTRICT_FLAGS, &addr,
-				      &mask, mflags, flags, 0);
+			hack_restrict(op, &addr, &mask, mflags, flags, 0);
 			AF(&addr) = AF_INET6;
 			AF(&mask) = AF_INET6;
 		}
 
 		do {
-			int op;
-			if (my_node->mode == T_Restrict)
-				op = RESTRICT_FLAGS;
-			else if (my_node->mode == T_Unrestrict
-					&& flags == 0 && mflags == 0)
-				op = RESTRICT_REMOVE;
-			else if (my_node->mode == T_Unrestrict)
-				op = RESTRICT_UNFLAG;
-			else
-				continue;	/* should never happen */
 			hack_restrict(op, &addr,
 				      &mask, mflags, flags, 0);
 			if (pai != NULL &&
