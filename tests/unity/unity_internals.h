@@ -611,8 +611,8 @@ void UnityAssertNumbersArrayWithin(const UNITY_UINT delta,
                                    const UNITY_DISPLAY_STYLE_T style,
                                    const UNITY_FLAGS_T flags);
 
-void UnityFail(const char* message, const UNITY_LINE_TYPE line);
-void UnityIgnore(const char* message, const UNITY_LINE_TYPE line);
+void UnityFail(const char* message, const UNITY_LINE_TYPE line) __attribute__((noreturn));
+void UnityIgnore(const char* message, const UNITY_LINE_TYPE line) __attribute__((noreturn));
 void UnityMessage(const char* message, const UNITY_LINE_TYPE line);
 
 #ifndef UNITY_EXCLUDE_FLOAT
