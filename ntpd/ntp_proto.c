@@ -2372,7 +2372,6 @@ dns_take_server(
 	sockaddr_u *rmtadr
 	)
 {
-	int		restrict_mask;
 	struct peer *	pp;
 
 	if(!(server->cfg.flags & FLAG_LOOKUP))
@@ -2390,17 +2389,11 @@ dns_take_server(
           msyslog(LOG_INFO, "DNS: Server taking: %s", socktoa(rmtadr));
         else
           msyslog(LOG_INFO, "DNS: Server taking: %s", sockporttoa(rmtadr));
-	server->cfg.flags &= (unsigned)~FLAG_LOOKUP;
 
+	server->cfg.flags &= (unsigned)~FLAG_LOOKUP;
 	server->srcadr = *rmtadr;
 	peer_add_hash(server);
-
-	restrict_mask = restrictions(&server->srcadr);
-	if (RES_FLAGS & restrict_mask) {
-		msyslog(LOG_INFO, "DNS: Server poking hole in restrictions for: %s",
-			socktoa(&server->srcadr));
-		restrict_source(&server->srcadr, false);
-	}
+	restrict_source(server);
 
 	peer_refresh_interface(server);
 
@@ -2423,7 +2416,6 @@ dns_take_pool(
 {
 	struct peer_ctl		pctl;
 	struct peer *		peer;
-	int			restrict_mask;
 	endpt *			lcladr;
 
 	peer = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
@@ -2449,13 +2441,6 @@ dns_take_pool(
 	if (peer->cfg.flags & FLAG_IBURST)
 	  peer->retry = NTP_RETRY;
 	poll_update(peer, peer->hpoll);
-
-	restrict_mask = restrictions(&peer->srcadr);
-	if (RES_FLAGS & restrict_mask) {
-		msyslog(LOG_INFO, "DNS: Pool poking hole in restrictions for: %s",
-				socktoa(&peer->srcadr));
-		restrict_source(&peer->srcadr, false);
-	}
 
 	DPRINT(1, ("dns_take_pool: at %u %s->%s pool\n",
 		   current_time, latoa(lcladr), socktoa(rmtadr)));

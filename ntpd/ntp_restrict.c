@@ -610,31 +610,31 @@ hack_restrict(
 }
 
 
-/*
- * restrict_source - maintains dynamic "restrict source ..." entries as
- *		     peers come and go.
+/* restrict_source - poke hole in restrictions if needed
+ *   requires "restrict source <flags|NULL>"
+ * Called in 3 cases:
+ *   newpeer when allocating a slot with IP Address
+ *   dns_check/dns_take_server when DNS assigns an IP Address
+ *   nts_check/dns_take_server when NTS assigns an IP Address
+ *
+ * Holes created have RESM_SOURCE in mflags
+ * Restrictions must be initialized before adding servers
  */
 void
 restrict_source(
-	sockaddr_u *	addr,
-	bool		farewell	/* false to add, true to remove */
+	struct peer *	peer
 	)
 {
+	sockaddr_u *	addr = &peer->srcadr;
 	sockaddr_u	onesmask;
 	restrict_u *	res;
-	int		found_specific;
-
-	if (!restrict_source_enabled || SOCK_UNSPEC(addr) || IS_MCAST(addr))
-		return;
+	bool		found_specific = false;
+	bool		need_poke = false;
+	bool		auth, nts;
 
 	REQUIRE(AF_INET == AF(addr) || AF_INET6 == AF(addr));
 
 	SET_HOSTMASK(&onesmask, AF(addr));
-	if (farewell) {
-		hack_restrict(RESTRICT_REMOVE, addr, &onesmask, 0, 0);
-		DPRINT(1, ("restrict_source: %s removed", socktoa(addr)));
-		return;
-	}
 
 	/*
 	 * If there is a specific entry for this address, hands
@@ -650,12 +650,65 @@ restrict_source(
 		found_specific = ADDR6_EQ(&res->u.v6.mask,
 					  &SOCK_ADDR6(&onesmask));
 	}
+
+	if (RES_IGNORE & res->flags) {
+		need_poke = true;
+	}
+	auth = (0 != peer->cfg.peerkey);
+	nts = peer->cfg.flags & FLAG_NTS;
+	if (RES_DONTTRUST & res->flags && !auth && !nts) {
+		/* needs authentication, but this slot doesn't have any */
+		need_poke = true;
+	}
+	if (!need_poke) {
+		/* works without a hole */
+		return;
+	}
 	if (found_specific) {
+		msyslog(LOG_ERR, "RESTRICT: Specific restriction will break %s",
+			socktoa(addr));
+		return;
+	}
+	if (!restrict_source_enabled) {
+		msyslog(LOG_ERR, "RESTRICT: Can't poke hole in restrictions for %s - need \"restrict source <flags>\"",
+			socktoa(addr));
 		return;
 	}
 
+	msyslog(LOG_INFO, "RESTRICT: Poking hole in restrictions for %s",
+		socktoa(addr));
+
 	hack_restrict(RESTRICT_FLAGS, addr, &onesmask,
 		      restrict_source_mflags, restrict_source_flags);
-	DPRINT(1, ("restrict_source: %s host restriction added\n",
-		   socktoa(addr)));
 }
+
+/* unrestrict_source - remove hole poked in restrictions
+ */
+void
+unrestrict_source(
+	struct peer *	peer
+	)
+{
+	sockaddr_u *	addr = &peer->srcadr;
+	sockaddr_u	onesmask;
+	restrict_u *	res;
+
+	if (IS_IPV4(addr)) {
+		res = match_restrict4_addr(SRCADR(addr), SRCPORT(addr));
+	} else {
+		res = match_restrict6_addr(&SOCK_ADDR6(addr),
+					   SRCPORT(addr));
+	}
+	if (!(res->mflags & RESM_SOURCE)) {
+		return;		/* nothing to cleanup */
+	}
+
+	msyslog(LOG_INFO, "RESTRICT: Removing hole in restrictions for %s",
+		socktoa(addr));
+
+	SET_HOSTMASK(&onesmask, AF(addr));
+	hack_restrict(RESTRICT_REMOVE, addr, &onesmask, 0, 0);
+
+}
+
+

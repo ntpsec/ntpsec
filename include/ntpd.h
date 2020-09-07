@@ -195,7 +195,8 @@ extern	void	init_restrict	(void);
 extern	unsigned short	restrictions	(sockaddr_u *);
 extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *,
 				 unsigned short, unsigned short);
-extern	void	restrict_source	(sockaddr_u *, bool);
+extern	void	restrict_source		(struct peer *);
+extern	void	unrestrict_source	(struct peer *);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);

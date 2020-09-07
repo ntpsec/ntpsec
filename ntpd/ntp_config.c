@@ -2594,6 +2594,7 @@ is_sane_resolved_address(
 	}
 
 	if (IS_IPV6(peeraddr) && !ipv6_works)
+		/* FIXME: error message */
 		return false;
 
 	/* Ok, all tests succeeded, now we can return true */
@@ -2724,10 +2725,10 @@ config_peers(
 				NULL,
 				curr_peer->host_mode,
 				&curr_peer->ctl);
-			/*
-			 * If we have a numeric address, we can safely
-			 * proceed in the mainline with it.
-			 */
+		/*
+		 * If we have a numeric address, we can safely
+		 * proceed in the mainline with it.
+		 */
 		} else if (is_ip_address(curr_peer->addr->address,
 					 curr_peer->addr->type, &peeraddr)) {
 
@@ -2988,7 +2989,7 @@ config_ntpd(
 	config_monitor(ptree);
 	config_auth(ptree);
 	config_tos(ptree);
-	config_access(ptree);
+	config_access(ptree);	/* before config_peers */
 	config_tinker(ptree);
 	config_nts(ptree);
 	config_rlimit(ptree);
