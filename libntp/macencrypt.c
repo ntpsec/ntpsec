@@ -69,7 +69,7 @@ cmac_encrypt(
 	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
 		/* Shouldn't happen.  Does if wrong key_size. */
 		msyslog(LOG_ERR,
-		    "CMAC: encrypt: CMAC init failed, %u, %u",
+		    "MAC: encrypt: CMAC init failed, %u, %u",
 			auth->keyid, auth->key_size);
 		return (0);
 	}
@@ -102,7 +102,7 @@ cmac_decrypt(
 	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
 		/* Shouldn't happen.  Does if wrong key_size. */
 		msyslog(LOG_ERR,
-		    "CMAC: decrypt: CMAC init failed, %u, %u",
+		    "MAC: decrypt: CMAC init failed, %u, %u",
 			auth->keyid, auth->key_size);
 		return false;
 	}
@@ -117,7 +117,7 @@ cmac_decrypt(
 		 * Similar code at digest_decrypt.
 		 */
 		if (0) msyslog(LOG_ERR,
-		    "CMAC: decrypt: MAC length error");
+		    "MAC: decrypt: MAC length error");
 		return false;
 	}
 	return ctmemeq(mac, (char *)pkt + length + 4, len);

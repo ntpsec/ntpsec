@@ -657,19 +657,22 @@ should be able to use "git stash" to get around that.
 To facilitate analysis of logs, log messages are tagged with an initial
 topic group token.  These are:
 
-DNS:: DNS Lookup
-MAC:: Message authentication hash computation
 AUTH:: Authorization-key handling
-ERR:: Low-level errors from resource-management libraries
 BUG:: Bugs in the code
-LOG:: Log switching and debug levels
 CLOCK:: Low-level clock manipulation and validation checks & leap-second code
 CONFIG:: Configuration parsing and interpretation
+DEBUG:: Debugging, normally commented out
+DNS:: DNS Lookup
+ERR:: Low-level errors from resource-management libraries
 INIT:: Daemon setup
-SYNC:: Server synchronization
+LOG:: Log switching and debug levels
+MAC:: Message authentication hash computation
+MODE6:: Processing of Mode 6 requests
+NTS, NTSc, NTSs:: Network Time Security, RFC xxxx, NTSs=>server, NTSc=>client
 PROTO:: Protocol machine actions
 REFCLOCK:: Reference clock and driver actions
-MODE6:: Processing of Mode 6 requests
+RESTRICT:: Restrictions
+SYNC:: Server synchronization
 
 == Release Checklist
 

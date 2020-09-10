@@ -133,9 +133,9 @@ check_cmac_mac_length(
 
 	ctx = CMAC_CTX_new();
 	if (!CMAC_Init(ctx, key, EVP_CIPHER_key_length(cmac_cipher), cmac_cipher, NULL)) {
-		/* Shouldnv't happen. */
+		/* Shouldn't happen. */
 		msyslog(LOG_ERR,
-			"CMAC: encrypt: CMAC init failed during MAC length check");
+			"MAC: encrypt: CMAC init failed during MAC length check");
 		return;
 	}
 
