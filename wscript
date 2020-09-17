@@ -28,7 +28,7 @@ from wafhelpers.test import test_write_log, test_print_log
 
 pprint.__doc__ = None
 
-APPNAME='ntpsec'
+APPNAME = 'ntpsec'
 
 out = "build"
 
@@ -61,6 +61,7 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('asciidoc', tooldir='wafhelpers/')
+
     class oc(Build.BuildContext):
         cmd = 'oc'
 
@@ -165,22 +166,28 @@ def configure(ctx):
         if not source_date_epoch.isdigit():
             ctx.fatal("ERROR: malformed SOURCE_DATE_EPOCH")
         build_epoch = int(source_date_epoch)
-        ctx.define("BUILD_EPOCH", build_epoch, comment="Using SOURCE_DATE_EPOCH")
+        ctx.define("BUILD_EPOCH", build_epoch,
+                   comment="Using SOURCE_DATE_EPOCH")
     else:
         build_epoch = int(time.time())
         ctx.define("BUILD_EPOCH", build_epoch, comment="Using default")
 
-    build_epoch_formatted = datetime.utcfromtimestamp(build_epoch).strftime("%Y-%m-%dT%H:%M:%SZ")
+    build_epoch_formatted = datetime.utcfromtimestamp(build_epoch).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
     if ((os.path.exists(".git") and
             ctx.find_program("git", var="BIN_GIT", mandatory=False))):
         cmd = ctx.env.BIN_GIT + shlex.split("log -1 --format=%h")
         git_short_hash = ctx.cmd_and_log(cmd).strip()
 
         ctx.env.NTPSEC_VERSION = "%s+" % ntpsec_release
-        ctx.env.NTPSEC_VERSION_EXTENDED = "%s+ %s (git rev %s)" % (ntpsec_release, build_epoch_formatted, git_short_hash)
+        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s+ %s (git rev %s)" %
+                                           (ntpsec_release,
+                                            build_epoch_formatted,
+                                            git_short_hash))
     else:
         ctx.env.NTPSEC_VERSION = "%s" % ntpsec_release
-        ctx.env.NTPSEC_VERSION_EXTENDED = "%s %s" % (ntpsec_release, build_epoch_formatted)
+        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s %s" % (ntpsec_release,
+                                                      build_epoch_formatted))
     ctx.define("NTPSEC_VERSION", ctx.env.NTPSEC_VERSION)
     ctx.define("NTPSEC_VERSION_EXTENDED", ctx.env.NTPSEC_VERSION_EXTENDED)
 
@@ -288,7 +295,7 @@ def configure(ctx):
         # perfectionism, but the GCC directives that ought to be
         # useful for forcing structure alignment in order to suppress
         # it locally don't seem to be working quite right.
-        #('w_cast_align', "-Wcast-align"),
+        # ('w_cast_align', "-Wcast-align"),
         ('w_cast_qual', "-Wcast-qual"),
         ('w_disabled_optimization', "-Wdisabled-optimization"),
         ('w_float_equal', "-Wfloat-equal"),
@@ -442,8 +449,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wimplicit-function-declaration'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_disabled_optimization:
         ctx.env.CFLAGS = ['-Wdisabled-optimization'] + ctx.env.CFLAGS
-    #if ctx.env.HAS_w_cast_align:
-    #    ctx.env.CFLAGS = ['-Wcast-align'] + ctx.env.CFLAGS
+    # if ctx.env.HAS_w_cast_align:
+    #     ctx.env.CFLAGS = ['-Wcast-align'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_missing_declarations:
         ctx.env.CFLAGS = ['-Wmissing-declarations'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_cast_qual:
@@ -452,8 +459,8 @@ int main(int argc, char **argv) {
         ctx.env.CFLAGS = ['-Wpacked'] + ctx.env.CFLAGS
     if ctx.env.HAS_w_shadow:
         ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
-    #if ctx.env.HAS_w_sign_conversion:
-    #    ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
+    # if ctx.env.HAS_w_sign_conversion:
+    #     ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
     if ctx.env.HAS_f_stack_protector_all:
         ctx.env.CFLAGS = ['-fstack-protector-all'] + ctx.env.CFLAGS
 
@@ -481,7 +488,7 @@ int main(int argc, char **argv) {
         # FORTIFY needs LTO to work well
         if ctx.env.DEST_OS not in ["darwin", "freebsd"]:
             # -flto and friends breaks tests on macOS
-            #ctx.env.CFLAGS = [
+            # ctx.env.CFLAGS = [
             #    "-flto"
             #    "-fsanitize=cfi",           # hardening
             #    "-fsanitize=safe-stack",    # hardening
@@ -491,7 +498,8 @@ int main(int argc, char **argv) {
                 ]
     # else:  # gcc, probably
 
-    # Exclude Unity's support for printing floating point numbers since it triggers warnings
+    # Exclude Unity's support for printing floating point numbers
+    # since it triggers warnings
     # with -Wfloat-equal
     ctx.env.CFLAGS = ['-DUNITY_EXCLUDE_FLOAT_PRINT'] + ctx.env.CFLAGS
 
@@ -546,7 +554,8 @@ int main(int argc, char **argv) {
     '''
 
     def to_header(header_name):
-        return ''.join(['#include <%s>\n' % x for x in Utils.to_list(header_name)])
+        return ''.join(['#include <%s>\n' %
+                       x for x in Utils.to_list(header_name)])
 
     structures = (
         ("struct if_laddrconf", ["sys/types.h", "net/if6.h"], False),
@@ -571,7 +580,8 @@ int main(int argc, char **argv) {
     )
     for (s, f, h) in structure_fields:
         ctx.check_cc(
-            fragment=to_header(h) + SNIP_FIELD % {'type_name': s, 'field_name': f},
+            fragment=(to_header(h) + SNIP_FIELD %
+                      {'type_name': s, 'field_name': f}),
             msg='Checking for field %s in %s' % (f, s),
             define_name=ctx.have_define((s + '_' + f).upper()),
             mandatory=False,
@@ -619,8 +629,8 @@ int main(int argc, char **argv) {
         ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),
         ('strlcpy', ["string.h"]),
         ('strlcat', ["string.h"]),
-	# Hack.  It's not a function, but this works.
-	('PRIV_NTP_ADJTIME', ["sys/priv.h"])		# FreeBSD
+        # Hack.  It's not a function, but this works.
+        ('PRIV_NTP_ADJTIME', ["sys/priv.h"])            # FreeBSD
     )
     for ft in optional_functions:
         probe_function(ctx, function=ft[0], prerequisites=ft[1])
@@ -831,7 +841,8 @@ int main(int argc, char **argv) {
                 msg("WARNING: Your ntpd will fail on 2038-01-19T03:14:07Z.")
 
     if not ctx.env.DISABLE_NTS:
-        from wafhelpers.openssl import check_libssl_tls13, check_openssl_bad_version
+        from wafhelpers.openssl import check_libssl_tls13
+        from wafhelpers.openssl import check_openssl_bad_version
         check_libssl_tls13(ctx)
         check_openssl_bad_version(ctx)
 
@@ -973,7 +984,8 @@ def afterparty(ctx):
         # List used to be longer...
         path_build = ctx.bldnode.make_node("pylib")
         path_source = ctx.bldnode.make_node(x + "/ntp")
-        relpath = ("../" * (x.count("/")+1)) + path_build.path_from(ctx.bldnode)
+        relpath = (("../" * (x.count("/")+1)) +
+                   path_build.path_from(ctx.bldnode))
         if ctx.cmd in ('install', 'build'):
             if ((not path_source.exists() or
                     os.readlink(path_source.abspath()) != relpath)):
@@ -1110,6 +1122,7 @@ def build(ctx):
 def ifdex(ctx):
     "Get a report on configuration symbols not accounted for."
     ctx.exec_command("ifdex -X build/config.h -X devel/ifdex-ignores .")
+
 
 # See https://gitlab.com/esr/loccount
 def loccount(ctx):
