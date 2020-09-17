@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! @PYSHEBANG@
 # -*- coding: utf-8 -*-
 
 """\

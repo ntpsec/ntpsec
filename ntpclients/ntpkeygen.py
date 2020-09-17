@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! @PYSHEBANG@
 # -*- coding: utf-8 -*-
 '''
 ntpkeygen - generate cryptographic keys for NTP clients and servers

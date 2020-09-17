@@ -871,6 +871,8 @@ int main(int argc, char **argv) {
     msg_setting("Build Manpages", yesno(ctx.env.BUILD_MAN))
 
     ctx.recurse("pylib")
+    ctx.env.PYSHEBANG = ctx.options.pyshebang
+    msg_setting("PYSHEBANG", ctx.env.PYSHEBANG)
     # Convert the Python directories to absolute paths.
     # This makes them behave the same as PREFIX.
     ctx.env.PYTHONDIR = os.path.abspath(ctx.env.PYTHONDIR)

@@ -86,3 +86,10 @@ def options_cmd(ctx, config):
     grp.add_option('--disable-fuzz', action='store_true',
                    default=False,
                    help="Disable fuzzing of low bits of time")
+    # This option group name needs to exactly match the name from
+    # waflib/Tools/python.py so this option groups with the other Python
+    # options.
+    grp = ctx.add_option_group("Python Options")
+    grp.add_option('--pyshebang', type='string',
+                   default='/usr/bin/env python',
+                   help="Shebang for Python scripts [Default: %(default)s}")

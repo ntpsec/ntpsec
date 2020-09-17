@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! @PYSHEBANG@
 # -*- coding: utf-8 -*-
 #
 # ntpq - query an NTP server using mode 6 commands
