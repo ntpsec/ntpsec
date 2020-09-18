@@ -6,36 +6,32 @@ import sys
 import waflib.Context
 import waflib.Logs
 import waflib.Utils
-sys.path.insert(0, "%s/main/tests/pylib" % waflib.Context.out_dir)
-import ntp.util
 
-version = ntp.util.stdversion()
 Popen = waflib.Utils.subprocess.Popen
 
 cmd_map = {
-    ("main/ntpclients/ntpleapfetch", "--version"): "ntpleapfetch %s\n"
-                                                   % version,
-    ("main/ntpd/ntpd", "--version"): "ntpd %s\n" % version,
-    ("main/ntpfrob/ntpfrob", "-V"): "ntpfrob %s\n" % version,
-    ("main/ntptime/ntptime", "-V"): "ntptime %s\n" % version
+    ("main/ntpclients/ntpleapfetch", "--version"): "ntpleapfetch %s\n",
+    ("main/ntpd/ntpd", "--version"): "ntpd %s\n",
+    ("main/ntpfrob/ntpfrob", "-V"): "ntpfrob %s\n",
+    ("main/ntptime/ntptime", "-V"): "ntptime %s\n"
 }
 cmd_map_python = {
-    ("main/ntpclients/ntpdig", "--version"): "ntpdig %s\n" % version,
-    ("main/ntpclients/ntpkeygen", "--version"): "ntpkeygen %s\n" % version,
-    ("main/ntpclients/ntpq", "--version"): "ntpq %s\n" % version,
-    ("main/ntpclients/ntpsnmpd", "--version"): "ntpsnmpd %s\n" % version,
-    ("main/ntpclients/ntpsweep", "--version"): "ntpsweep %s\n" % version,
-    ("main/ntpclients/ntptrace", "--version"): "ntptrace %s\n" % version,
-    ("main/ntpclients/ntpwait", "--version"): "ntpwait %s\n" % version
+    ("main/ntpclients/ntpdig", "--version"): "ntpdig %s\n",
+    ("main/ntpclients/ntpkeygen", "--version"): "ntpkeygen %s\n",
+    ("main/ntpclients/ntpq", "--version"): "ntpq %s\n",
+    ("main/ntpclients/ntpsnmpd", "--version"): "ntpsnmpd %s\n",
+    ("main/ntpclients/ntpsweep", "--version"): "ntpsweep %s\n",
+    ("main/ntpclients/ntptrace", "--version"): "ntptrace %s\n",
+    ("main/ntpclients/ntpwait", "--version"): "ntpwait %s\n"
 }
 # Need argparse
 cmd_map_python_argparse = {
-    ("main/ntpclients/ntplogtemp", "--version"): "ntplogtemp %s\n" % version,
-    ("main/ntpclients/ntpviz", "--version"): "ntpviz %s\n" % version,
+    ("main/ntpclients/ntplogtemp", "--version"): "ntplogtemp %s\n",
+    ("main/ntpclients/ntpviz", "--version"): "ntpviz %s\n",
 }
 # Need python curses
 cmd_map_python_curses = {
-    ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n" % version,
+    ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n",
 }
 
 test_logs = []
@@ -88,6 +84,10 @@ def cmd_bin_test(ctx):
     """Run a suite of binary tests."""
     fails = 0
 
+    sys.path.insert(0, "%s/main/tests/pylib" % waflib.Context.out_dir)
+    import ntp.util
+    version = ntp.util.stdversion()
+
     if ctx.env['PYTHON_ARGPARSE']:
         cmd_map_python.update(cmd_map_python_argparse)
 
@@ -95,11 +95,11 @@ def cmd_bin_test(ctx):
         cmd_map_python.update(cmd_map_python_curses)
 
     for cmd in sorted(cmd_map):
-        if not run(cmd, cmd_map[cmd], False):
+        if not run(cmd, cmd_map[cmd] % version, False):
             fails += 1
 
     for cmd in sorted(cmd_map_python):
-        if not run(cmd, cmd_map_python[cmd], True):
+        if not run(cmd, cmd_map_python[cmd] % version, True):
             fails += 1
 
     if 1 == fails:
