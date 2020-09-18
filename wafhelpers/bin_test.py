@@ -48,16 +48,17 @@ def bin_test_summary(ctx):
         waflib.Logs.pprint(i[0], i[1])
 
 
-def run(cmd, expected, pythonic):
+def run(cmd, expected, python=None):
     """Run an individual test."""
+
     prefix = "running: " + " ".join(cmd)
 
     if not os.path.exists("%s/%s" % (waflib.Context.out_dir, cmd[0])):
         addLog("YELLOW", prefix + " SKIPPING (does not exist)")
         return False
 
-    if pythonic:
-        cmd = [sys.executable] + list(cmd)
+    if python:
+        cmd = python + list(cmd)
     p = Popen(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
                         waflib.Context.out_dir},
               universal_newlines=True,
@@ -84,9 +85,17 @@ def cmd_bin_test(ctx):
     """Run a suite of binary tests."""
     fails = 0
 
-    sys.path.insert(0, "%s/main/tests/pylib" % waflib.Context.out_dir)
-    import ntp.util
-    version = ntp.util.stdversion()
+    cmd = ctx.env['PYTHON'] + ['-c',
+        'from __future__ import print_function;'
+        'import ntp.util;'
+        'print(ntp.util.stdversion())']
+    p = waflib.Utils.subprocess.Popen(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
+                                                 waflib.Context.out_dir},
+                         universal_newlines=True,
+                         stdin=waflib.Utils.subprocess.PIPE,
+                         stdout=waflib.Utils.subprocess.PIPE,
+                         stderr=waflib.Utils.subprocess.PIPE, cwd=waflib.Context.out_dir)
+    version = p.communicate()[0].rstrip()
 
     if ctx.env['PYTHON_ARGPARSE']:
         cmd_map_python.update(cmd_map_python_argparse)
@@ -95,11 +104,11 @@ def cmd_bin_test(ctx):
         cmd_map_python.update(cmd_map_python_curses)
 
     for cmd in sorted(cmd_map):
-        if not run(cmd, cmd_map[cmd] % version, False):
+        if not run(cmd, cmd_map[cmd] % version):
             fails += 1
 
     for cmd in sorted(cmd_map_python):
-        if not run(cmd, cmd_map_python[cmd] % version, True):
+        if not run(cmd, cmd_map_python[cmd] % version, ctx.env['PYTHON']):
             fails += 1
 
     if 1 == fails:
