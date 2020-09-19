@@ -42,9 +42,7 @@ static void nts_unlock_certlock(void);
 
 static SSL_CTX *server_ctx = NULL;
 static int listener4_sock = -1;
-static int listener4_sock_old = -1;
 static int listener6_sock = -1;
-static int listener6_sock_old = -1;
 
 /* We need a lock to protect reloading our certificate.
  * This seems like overkill, but it doesn't happen often. */
@@ -121,12 +119,6 @@ bool nts_server_init(void) {
 	msyslog(LOG_INFO, "NTSs: OpenSSL security level is %d",
 		SSL_CTX_get_security_level(server_ctx));
 
-	msyslog(LOG_INFO, "NTSs: starting NTS-KE server listening on old port %d",
-		NTS_KE_PORT_OLD);
-	ok &= create_listener4(NTS_KE_PORT_OLD);
-	ok &= create_listener6(NTS_KE_PORT_OLD);
-	listener4_sock_old = listener4_sock;
-	listener6_sock_old = listener6_sock;
 	msyslog(LOG_INFO, "NTSs: starting NTS-KE server listening on port %d",
 		NTS_KE_PORT);
 	ok &= create_listener4(NTS_KE_PORT);
@@ -154,22 +146,8 @@ bool nts_server_init2(void) {
 			msyslog(LOG_ERR, "NTSs: nts_start_server4: error from pthread_create: %s", errbuf);
 		}
 	}
-	if (listener4_sock_old != -1) {
-		rc = pthread_create(&worker, NULL, nts_ke_listener, &listener4_sock_old);
-		if (rc) {
-			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-			msyslog(LOG_ERR, "NTSs: nts_start_server4: error from pthread_create: %s", errbuf);
-		}
-	}
 	if (listener6_sock != -1) {
 		rc = pthread_create(&worker, NULL, nts_ke_listener, &listener6_sock);
-		if (rc) {
-			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-			msyslog(LOG_ERR, "NTSs: nts_start_server6: error from pthread_create: %s", errbuf);
-		}
-	}
-	if (listener6_sock_old != -1) {
-		rc = pthread_create(&worker, NULL, nts_ke_listener, &listener6_sock_old);
 		if (rc) {
 			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 			msyslog(LOG_ERR, "NTSs: nts_start_server6: error from pthread_create: %s", errbuf);

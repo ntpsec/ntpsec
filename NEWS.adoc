@@ -12,10 +12,10 @@ on user-visible changes.
 
 == Repository Head ==
 
-NTS KE client now defaults to port 4460.
+NTS-KE client now defaults to port 4460.
 
-NTS KE server now listens on port 4460 as well as 123.
-(Listening on 123 will be removed for 1.2.0)
+NTS-KE server now listens on port 4460.
+(Listening on port 123 has been removed.)
 
 == 2020-05-23: 1.1.9 ==
 
