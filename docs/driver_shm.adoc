@@ -80,26 +80,6 @@ data.
 limit (either _time2_ or the default of 4 h), then the sample is
 discarded. This check is disabled when _flag1_ is set to 1.
 
-== GPSD
-
-https://gpsd.io/[_GPSD_] knows how to talk to many GPS devices.
-It can work with _ntpd_ through the SHM driver.
-
-The _GPSD_ man page suggests setting minpoll and maxpoll to 4. That was
-an attempt to reduce jitter. The SHM driver was fixed (ntp-4.2.5p138) to
-collect data each second rather than once per polling interval so that
-suggestion is no longer reasonable.
-
-*Note:* The _GPSD_ client driver uses the _GPSD_ client
-protocol to connect and talk to _GPSD_, but using the SHM driver is the
-ancient way to have _GPSD_ talk to _ntpd_. There are some tricky points
-when using the SHM interface to interface with _GPSD_, because _GPSD_
-will use two SHM clocks, one for the serial data stream and one for the
-PPS information when available. Receivers with a loose/sloppy timing
-between PPS and serial data can easily cause trouble here because _ntpd_
-has no way to join the two data streams and correlate the serial data
-with the PPS events.
-
 == Clockstats
 
 If flag4 is set when the driver is polled, a clockstats record is
@@ -193,14 +173,34 @@ for the specific unit.
 +baud+ 'number'::
   Not used by this driver.
 
-== Configuration Example
+== GPSD Configuration Example
 
-The most common use of this driver is to get samples from a gpsd instance:
+The most common use of this driver is to get samples from a
+https://gpsd.io/[_gpsd_] instance.  _GPSD_ knows how to talk to many GPS
+devices.  _GPSD_ will provide one or more SHM clocks depending on its
+configuration.
+
+For a GPS receiver with a pulse-per-second (PPS) connected to the host, there
+will be one SHM clock for the serial data stream only and another SHM clock
+with the PPS timing (when available):
 
 ----------------------------------------------------------------------------
 refclock shm unit 0 refid GPS
 refclock shm unit 1 prefer refid PPS
 ----------------------------------------------------------------------------
+
+Note that there may be additional SHM clocks.  For example, the PPS might be
+on +unit 2+.
+
+The ntpd default minpoll is 6, and can be set as low as 0.  Changing
+minpoll to 3, 2, 1 or maybe even as low as 0, may reduce your PPS jitter
+by over a factor of 4.
+
+Any change will require several hours for ntpd to converge with the new
+settings.  Use ntpviz to find the best poll interval for your system.
+
+The value that yields the lowest jitter may not be the one that yields
+the best offset.
 
 == Public vs. Private SHM segments
 
