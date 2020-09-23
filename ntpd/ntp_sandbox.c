@@ -324,6 +324,8 @@ int scmp_sc[] = {
 	SCMP_SYS(fsync),
 	SCMP_SYS(futex),	/* sem_xxx, used by threads */
 	SCMP_SYS(getdents),	/* Scanning /etc/ntp.d/ */
+	SCMP_SYS(getegid),	/* Needed on Alpine */
+	SCMP_SYS(getgid),	/* Needed on Alpine */
 	SCMP_SYS(getdents64),
 
 #ifdef __NR_getrandom
@@ -340,6 +342,7 @@ int scmp_sc[] = {
 	SCMP_SYS(getsockname),
 	SCMP_SYS(getsockopt),
 	SCMP_SYS(gettimeofday),	/* mkstemp */
+	SCMP_SYS(getuid),	/* Needed on Alpine */
 	SCMP_SYS(ioctl),
 	SCMP_SYS(link),
 	SCMP_SYS(listen),
