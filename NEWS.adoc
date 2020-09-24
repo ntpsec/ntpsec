@@ -17,6 +17,12 @@ NTS-KE client now defaults to port 4460.
 NTS-KE server now listens on port 4460.
 (Listening on port 123 has been removed.)
 
+The shebang of installed Python scripts can now be customized with:
+  waf configure --pyshebang="..."
+This has multiple uses, but one example is for distros (like CentOS 8 or
+Ubuntu 20.04) with no `python` executable:
+  python3 waf configure --pyshebang="/usr/bin/env python3"
+
 == 2020-05-23: 1.1.9 ==
 
 Today is Blursday, Maprilay 84th, 2020, of the COVID-19 panic.
