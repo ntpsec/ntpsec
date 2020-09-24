@@ -55,7 +55,7 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
 
    If you are running on a distro with no `python` executable, you will
    need to run waf as `python3 waf` rather than `./waf`.  You will also
-   need `python3 waf configure --pyshebang=/usr/bin/python3` or similar.
+   need `python3 waf configure --pyshebang=/usr/bin/env python3` or similar.
 
    Some OS distros won't find our installed python libraries.
    More info in README-PYTHON.
