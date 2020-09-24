@@ -1,0 +1,6 @@
+# Coverity is picky about the versions of gcc that it has support for, so
+# please test this thoroughly before switching to a newer Debian distribution
+FROM debian:stable-slim
+
+RUN apt-get update
+RUN apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev libbsd-dev curl git
