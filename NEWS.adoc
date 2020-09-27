@@ -23,6 +23,12 @@ This has multiple uses, but one example is for distros (like CentOS 8 or
 Ubuntu 20.04) with no `python` executable:
   python3 waf configure --pyshebang="/usr/bin/env python3"
 
+NTP clients now use a shared library with Python instead of an extension.
+
+Add flakiness option to ntpq and fixed limit=1 in mrulist.
+
+Fixed a minor formatting issue in rate page.
+
 == 2020-05-23: 1.1.9 ==
 
 Today is Blursday, Maprilay 84th, 2020, of the COVID-19 panic.
