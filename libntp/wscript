@@ -1,3 +1,5 @@
+import os
+
 def build(ctx):
 
     libntp_source = [
@@ -47,12 +49,24 @@ def build(ctx):
         use="CRYPTO SSL",
     )
 
-    # Loadable Python extension
-    ctx(
-        features="c cshlib pyext",
-        install_path='${PYTHONARCHDIR}/ntp',
-        includes=[ctx.bldnode.parent.abspath(), "../include"],
-        source=["pymodule.c", "pymodule-mac.c"] + libntp_source_sharable,
-        target="../pylib/ntpc",  # Put the output in the pylib directory
-        use="M RT CRYPTO",
-    )
+    if ctx.env['ntpc'] == 'ffi':
+        # Loadable FFI stub
+        ctx(
+            features="c cshlib",
+            install_path='${LIBDIR}/ntp',
+            includes=[ctx.bldnode.parent.abspath(), "../include"],
+            source=["ntp_c.c", "pymodule-mac.c"] + libntp_source_sharable,
+            target="../pylib/ntpc",  # Put the output in the pylib directory
+            use="M RT CRYPTO",
+            vnum=ctx.env['ntpcver'],
+        )
+    elif ctx.env['ntpc'] == 'ext':
+        # Loadable Python extension
+        ctx(
+            features="c cshlib pyext",
+            install_path='${PYTHONARCHDIR}/ntp',
+            includes=[ctx.bldnode.parent.abspath(), "../include"],
+            source=["pymodule.c", "pymodule-mac.c"] + libntp_source_sharable,
+            target="../pylib/ntpc",  # Put the output in the pylib directory
+            use="M RT CRYPTO",
+        )

@@ -120,6 +120,9 @@ def configure(ctx):
             opt = flag.replace("--", "").upper()
             opt_map[opt] = ctx.env.OPT_STORE[flag]
 
+    ctx.env['ntpc'] = ctx.options.enable_pylib
+    ctx.env['ntpcver'] = '1.1.0'
+
     msg("--- Configuring host ---")
     ctx.setenv('host', ctx.env.derive())
 
@@ -1013,15 +1016,24 @@ def build(ctx):
     ctx.load('asciidoc', tooldir='wafhelpers/')
     ctx.load('rtems_trace', tooldir='wafhelpers/')
 
+    if ctx.variant == "host":
+        ctx.recurse("ntpd")
+        return
+
     if ctx.cmd == "build":
         # It's a waf gotcha that if there are object files (including
         # .pyc and .pyo files) in a source directory, compilation to
         # the build directory never happens.  This is how we foil that.
         ctx.add_pre_fun(lambda ctx: ctx.exec_command("rm -f pylib/*.py[co]"))
-
-    if ctx.variant == "host":
-        ctx.recurse("ntpd")
-        return
+        # Start purging ntp.ntpc files from build dir
+        # so old extension won't clobber FFI or reverse
+        bldnode = ctx.bldnode.make_node('pylib')
+        bldnode.mkdir()
+        target3 = bldnode.ant_glob('*ntpc*')
+        for _ in target3:
+            ctx.exec_command("rm -f %s" % _.abspath())
+        # Finish purging ntp.ntpc 
+        ctx.add_group()
 
     if ctx.env.REFCLOCK_GENERIC or ctx.env.REFCLOCK_TRIMBLE:
         # required by the generic and Trimble refclocks

@@ -31,6 +31,10 @@ def options_cmd(ctx, config):
     grp.add_option('--enable-debug-timing', action='store_true',
                    default=False,
                    help="Collect timing statistics for debugging.")
+    grp.add_option('--enable-pylib', action='store',
+                   default='ffi', choices=['ext', 'ffi', 'none'],
+                   help="""Choose which Python library to build.\n
+ext, ffi, or none. defaults to ffi.""", nargs=1)
 
     grp = ctx.add_option_group("NTP cross compile options")
     grp.add_option('--cross-compiler', type='string',
