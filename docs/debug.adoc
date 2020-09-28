@@ -75,7 +75,7 @@ restarts automatically.
 
 When started for the first time and a frequency file - usually ntp.drift -
 is not present, the daemon enters a special mode in order to calibrate the
-frequency. This takes 900 s during which the time is not disciplined. When
+frequency. This takes 900 ms during which the time is not disciplined. When
 calibration is complete, the daemon creates the frequency file and enters
 normal mode to amortize whatever residual offset remains.
 
