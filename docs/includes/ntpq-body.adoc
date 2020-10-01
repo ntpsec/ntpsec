@@ -326,10 +326,11 @@ the +frags=+'frags' option limits the number of datagrams
 of limit= when retrieving multiple entries.
 The +limit=+ option limits the MRU entries returned per response.
 limit=1 is a special case:  Instead of fetching beginning with
-the supplied starting points newer neighbor, fetch the supplied
-entries. This enables fetching multiple entries from given IP
-addresses (provided by addr.x= entries where 0 <= x <= 15).
-When limit is not one and frags= is provided,
+the supplied starting points (provided by a last.x and addr.x
+where 0 <= x <= 15, default the beginning of time) newer neighbor,
+fetch the supplied entries. This enables fetching multiple entries
+from given IP addresses (provided by addr.x= entries where 0 <= x
+<= 15). When limit is not one and frags= is provided,
 the fragment limit controls. NOTE: a single mrulist command may
 cause many query/response rounds allowing limits as low as 3 to
 potentially retrieve thousands of entries in responses.

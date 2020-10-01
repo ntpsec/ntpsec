@@ -3348,9 +3348,11 @@ send_mru_entry(
  *			limit= must be provided.
  *			limit=1 is a special case:  Instead of fetching
  *			beginning with the supplied starting points
- *			newer neighbor, fetch the supplied entries
- *			(provided by addr.x= entries where 0 <= x <= 15), and
- *			in that case the #.last timestamp can be zero.
+ *			(provided by a last.x and addr.x where 0 <= x
+ *			<= 15, default the beginning of time) newer
+ *			neighbor, fetch the supplied entries (provided
+ *			by addr.x= entries where 0 <= x <= 15), and in
+ *			that case the #.last timestamp can be zero.
  *			This enables fetching a multiple entries from
  *			given  IP addresses.  When limit is not one and
  *			frags= is provided, the fragment limit controls.
