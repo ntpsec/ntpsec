@@ -313,34 +313,36 @@ ind assid status conf reach auth condition last_event cnt
   monitor facility. This is useful for tracking who _uses_ or
   _abuses_ your server.
 +
-With the exception of +sort=+'sortorder', the options
+Except for of +sort=+'sortorder', the options
 filter the list returned by +ntpd+. The +limited+ and +kod+ options
 return only entries representing client addresses from which the last
 packet received triggered either discarding or a KoD response.
 the +addr.'num'=+ option adds specific addresses to retrieve when
 +limit=+'1'. Values of 0 to 15 are supported for 'num'. Also, used
-internallly with +last.'num'=+'hextime' to select starting point
+internally with +last.'num'=+'hextime' to select the starting point
 for retrieving continued response.
 the +frags=+'frags' option limits the number of datagrams
 (fragments) in response.  Used by newer ntpq versions instead
 of limit= when retrieving multiple entries.
-The +limit=+ option limits the MRU entries returned. limit=1
-is a special case:  Instead of fetching beginning with the
-supplied starting point's newer neighbor, fetch the supplied
-entries. This enables fetching a multiple entries by IP
+The +limit=+ option limits the MRU entries returned per response.
+limit=1 is a special case:  Instead of fetching beginning with
+the supplied starting point's newer neighbor, fetch the supplied
+entries. This enables fetching multiple entries from given IP
 addresses.  When limit is not one and frags= is provided,
-the fragment limit controls.
-The +mincount=+'count' option filters entries that have received less
+the fragment limit controls. NOTE: a single mrulist command may
+cause many query/response rounds allowing limits as low as 3 to
+potentially retrieve thousands of entries in responses.
+The +mincount=+'count' option filters out entries that have received less
 than 'count' packets.
-The +mindrop=+'drop' option filters entries that have dropped less
+The +mindrop=+'drop' option filters out entries that have dropped less
 than 'drop' packets.
-The +minscore=+'score' option filters entries with a score less
+The +minscore=+'score' option filters out entries with a score less
 than 'score'.
-The +maxlstint=+'seconds' option filters entries where no packets have
+The +maxlstint=+'seconds' option filters out entries where no packets have
 arrived within 'seconds'.
-The +minlstint=+'seconds' option filters entries with a packet has
+The +minlstint=+'seconds' option filters out entries with a packet has
 arrived within 'seconds'.
-The +laddr=+'localaddr' option filters entries for packets
+The +laddr=+'localaddr' option filters out entries for packets
 received on any local address other than 'localaddr'. +resany=+'hexmask'
 and +resall=+'hexmask' filter entries containing none or less than all,
 respectively, of the bits in 'hexmask', which must begin with +0x+.

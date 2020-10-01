@@ -3350,9 +3350,13 @@ send_mru_entry(
  *			beginning with the supplied starting point's
  *			newer neighbor, fetch the supplied entry, and
  *			in that case the #.last timestamp can be zero.
- *			This enables fetching a single entry by IP
- *			address.  When limit is not one and frags= is
- *			provided, the fragment limit controls.
+ *			This enables fetching a multiple entries from
+ *			given  IP addresses.  When limit is not one and
+ *			frags= is provided, the fragment limit controls.
+ *			NOTE: a single mrulist command may cause many
+ *			query/response rounds allowing limits as low as
+ *			3 to potentially retrieve thousands of entries
+ *			in responses.
  *	mincount=	(decimal) Return entries with count >= mincount.
  *	mindrop=	(decimal) Return entries with drop >= mindrop.
  *	minscore=	(float) Return entries with score >= minscore.
