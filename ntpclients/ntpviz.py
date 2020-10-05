@@ -793,7 +793,7 @@ plot \\
             plot_template += """\
 '-' using 1:2 title '%s TDOP' with line ls 1, \\
 '-' using 1:3 title '%s nSat' with line ls 2 axis x1y2, \\
-""" % (key,)
+""" % (key, key)
 
         # strip the trailing ", \\n"
         plot_template = plot_template[:-4] + "\n"
