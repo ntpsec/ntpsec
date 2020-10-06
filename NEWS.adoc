@@ -10,6 +10,8 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+== Repository Head ==
+
 == 2020-10-06: 1.2.0 ==
 
 The minor version bump is to indicate official official support of
