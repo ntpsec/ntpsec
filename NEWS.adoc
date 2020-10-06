@@ -10,8 +10,17 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository Head ==
+== 2020-10-06: 1.2.0 ==
 
+The minor version bump is to indicate official official support of
+RFC8915 "Network Time Security for the Network Time Protocol" which
+was released 2020-09-30.
+
+On this day in 1783, Benjamin Hanks received a patent for a
+self-winding clock he planned to install in the Old Dutch Church in
+Kingston, New York, supposedly making it the first public clock in
+what became the New York City metropolitan area.
+ 
 NTS-KE client now defaults to port 4460.
 
 NTS-KE server now listens on port 4460.
