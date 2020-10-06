@@ -13,6 +13,8 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -194,16 +196,31 @@ void* nts_ke_listener(void* arg) {
 	char errbuf[100];
 	char addrbuf[100];
 	char usingbuf[100];
+	struct timespec start, finish;		/* wall clock */
+#ifdef RUSAGE_THREAD
+	struct timespec start_u, finish_u;	/* CPU user */
+	struct timespec start_s, finish_s;	/* CPU system */
+	struct rusage usage;
+#endif
 
 #ifdef HAVE_SECCOMP_H
         setup_SIGSYS_trap();   /* enable trap for this thread */
+#endif
+
+#ifdef RUSAGE_THREAD
+	/* NB: start_u and start_s are from near the end of the previous cycle.
+	 * Thus usage timing includes the TCP accept and
+	 * writing the previous msyslog message.
+	 */
+	getrusage(RUSAGE_THREAD, &usage);
+	start_u = tval_to_tspec(usage.ru_utime);
+	start_s = tval_to_tspec(usage.ru_stime);
 #endif
 
 	while(1) {
 		sockaddr_u addr;
 		socklen_t len = sizeof(addr);
 		SSL *ssl;
-		struct timespec start, finish;
 		int client, err;
 
 		client = accept(sock, &addr.sa, &len);
@@ -276,10 +293,24 @@ void* nts_ke_listener(void* arg) {
 
 		clock_gettime(CLOCK_REALTIME, &finish);
 		finish = sub_tspec(finish, start);
+#ifdef RUSAGE_THREAD
+		getrusage(RUSAGE_THREAD, &usage);
+		finish_u = tval_to_tspec(usage.ru_utime);
+		finish_s = tval_to_tspec(usage.ru_stime);
+		start_u = sub_tspec(finish_u, start_u);
+		start_s = sub_tspec(finish_s, start_s);
+#endif
 		nts_ke_serves_good++;
+#ifdef RUSAGE_THREAD
+		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
+			addrbuf, usingbuf, tspec_to_d(finish),
+			tspec_to_d(start_u)*1000, tspec_to_d(start_s)*1000);
+		start_u = finish_u;
+		start_s = finish_s;
+#else
 		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, Using %s, took %.3f sec",
 			addrbuf, usingbuf, tspec_to_d(finish));
-
+#endif
 	}
 	return NULL;
 }
