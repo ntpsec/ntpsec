@@ -648,7 +648,10 @@ int main(int argc, char **argv) {
         # Very old versions of OpenSSL don't have cmac.h
         #  We could add ifdefs, but old crypto is deprecated in favor of CMAC
         #  and so far, all the systems that we want to support are new enough.
-        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True))
+        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True),
+	# Next should be above, but it needs a library
+	# EVP_PKEY_new_CMAC_key added in OpenSSL 1.1.1
+        ('EVP_PKEY_new_CMAC_key', ["openssl/cmac.h"], "CRYPTO", False))
     for ft in required_functions:
         probe_function(ctx, function=ft[0],
                        prerequisites=ft[1], use=ft[2],
@@ -1039,7 +1042,8 @@ def build(ctx):
         # required by the generic and Trimble refclocks
         ctx.recurse("libparse")
     ctx.recurse("libntp")
-    ctx.recurse("libaes_siv")
+    if not ctx.env.DISABLE_NTS:
+      ctx.recurse("libaes_siv")
     ctx.recurse("ntpd")
     ctx.recurse("ntpfrob")
     ctx.recurse("ntptime")
