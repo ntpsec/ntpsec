@@ -53,7 +53,6 @@ def build(ctx):
         # Loadable FFI stub
         ctx(
             features="c cshlib",
-            install_path='${LIBDIR}/ntp',
             includes=[ctx.bldnode.parent.abspath(), "../include"],
             source=["ntp_c.c", "pymodule-mac.c"] + libntp_source_sharable,
             target="../pylib/ntpc",  # Put the output in the pylib directory
