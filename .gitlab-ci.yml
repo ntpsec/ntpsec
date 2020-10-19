@@ -281,7 +281,7 @@ clang-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/clang
   script:
-    - python ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang build
+    - python3 ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang build
 
 clang-refclocks:
   <<: *job_definition
