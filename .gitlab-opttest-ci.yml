@@ -65,7 +65,7 @@ gentoo-hardened-options-tester:
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools app-text/asciidoc sys-libs/libseccomp app-shells/bash
 
 macos-options-tester:
-  stage: test
+  stage: build
   script:
     - which python || true
     - which python2 || true
