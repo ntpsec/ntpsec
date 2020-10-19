@@ -67,12 +67,13 @@ gentoo-hardened-options-tester:
 macos-options-tester:
   stage: test
   script:
+    - which python || true
+    - which python2 || true
+    - which python3 || true
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python2 tests/option-tester.sh
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python3 tests/option-tester.sh
   tags:
     - macos
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 fbsd-11-options-tester:
   stage: test
