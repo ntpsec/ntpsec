@@ -250,6 +250,7 @@ int main(int argc, char *argv[]) {
 	(void)argc;  /* Squash unused warnings */
 	(void)argv;
 
+	printf("Running on %s\n", OPENSSL_VERSION_TEXT);
 	printf(" times in ns         avg  fastest  lng\n");
 
 	average = getpid_average();
