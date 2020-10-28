@@ -287,7 +287,7 @@ clang-refclocks:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/clang
   script:
-    - python ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang --refclock=all build
+    - python3 ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang --refclock=all build
 
 openSUSE-leap-basic:
   <<: *job_definition
