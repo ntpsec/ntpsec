@@ -1540,21 +1540,21 @@ usage: authinfo
     def do_ntsinfo(self, _line):
         "display NTS authentication counters"
         ntsinfo = (
-   ("nts_client_send",           "NTS client sends:          ", NTP_INT),
-   ("nts_client_recv_good",      "NTS client recvs good:     ", NTP_INT),
-   ("nts_client_recv_bad",       "NTS client recvs w error:  ", NTP_INT),
-   ("nts_server_recv_good",      "NTS server recvs good:     ", NTP_INT),
-   ("nts_server_recv_bad",       "NTS server recvs w error:  ", NTP_INT),
-   ("nts_server_send",           "NTS server sends:          ", NTP_INT),
-   ("nts_cookie_make",           "NTS make cookies:          ", NTP_INT),
-   ("nts_cookie_decode",         "NTS decode cookies:        ", NTP_INT),
-   ("nts_cookie_decode_old",     "NTS decode cookies old:    ", NTP_INT),
-   ("nts_cookie_decode_too_old", "NTS decode cookies too old:", NTP_INT),
-   ("nts_cookie_decode_error",   "NTS decode cookies error:  ", NTP_INT),
-   ("nts_ke_probes_good",        "NTS KE probes good:        ", NTP_INT),
-   ("nts_ke_probes_bad",         "NTS KE probes_bad:         ", NTP_INT),
-   ("nts_ke_serves_good",        "NTS KE serves good:        ", NTP_INT),
-   ("nts_ke_serves_bad",         "NTS KE serves_bad:         ", NTP_INT),
+   ("nts_client_send",           "NTS client sends:          ", NTP_UINT),
+   ("nts_client_recv_good",      "NTS client recvs good:     ", NTP_UINT),
+   ("nts_client_recv_bad",       "NTS client recvs w error:  ", NTP_UINT),
+   ("nts_server_recv_good",      "NTS server recvs good:     ", NTP_UINT),
+   ("nts_server_recv_bad",       "NTS server recvs w error:  ", NTP_UINT),
+   ("nts_server_send",           "NTS server sends:          ", NTP_UINT),
+   ("nts_cookie_make",           "NTS make cookies:          ", NTP_UINT),
+   ("nts_cookie_decode",         "NTS decode cookies:        ", NTP_UINT),
+   ("nts_cookie_decode_old",     "NTS decode cookies old:    ", NTP_UINT),
+   ("nts_cookie_decode_too_old", "NTS decode cookies too old:", NTP_UINT),
+   ("nts_cookie_decode_error",   "NTS decode cookies error:  ", NTP_UINT),
+   ("nts_ke_probes_good",        "NTS KE client probes good: ", NTP_UINT),
+   ("nts_ke_probes_bad",         "NTS KE client probes bad:  ", NTP_UINT),
+   ("nts_ke_serves_good",        "NTS KE serves good:        ", NTP_UINT),
+   ("nts_ke_serves_bad",         "NTS KE serves bad:         ", NTP_UINT),
   )
         self.collect_display(associd=0, variables=ntsinfo, decodestatus=False)
 
