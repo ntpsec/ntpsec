@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 
 struct table {
   const int type;
@@ -33,16 +37,62 @@ struct table clocks [] = {
 	{0, NULL}
 };
 
+static int getpid_average(void) {
+        int err;
+        struct timespec start, stop;
+        uint64_t sec, nanos;
+
+        err = clock_gettime(CLOCK_REALTIME, &start);
+        if (-1 == err) {
+                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                return -1;
+        }
+
+        clock_gettime(CLOCK_REALTIME, &start);
+        for (int i = 0; i < BATCHSIZE; i++) {
+                getpid();
+        }
+        clock_gettime(CLOCK_REALTIME, &stop);
+
+        /* Beware of overflowing 32 bits. */
+        sec = (stop.tv_sec-start.tv_sec);
+        nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
+        return nanos/BATCHSIZE;
+
+}
+
+
+static int gettimeofday_average(void) {
+        int err;
+        struct timespec start, stop;
+        uint64_t sec, nanos;
+	struct timeval now;
+
+        err = clock_gettime(CLOCK_REALTIME, &start);
+        if (-1 == err) {
+                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                return -1;
+        }
+
+        clock_gettime(CLOCK_REALTIME, &start);
+        for (int i = 0; i < BATCHSIZE; i++) {
+                gettimeofday(&now, NULL);
+        }
+        clock_gettime(CLOCK_REALTIME, &stop);
+
+        /* Beware of overflowing 32 bits. */
+        sec = (stop.tv_sec-start.tv_sec);
+        nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
+        return nanos/BATCHSIZE;
+
+}
+
+
 /* This is the number of paired reads with no change in time. */
 /* Hack: Making this global avoids returning more than one item.  */
 int dups;
 
-int do_res(int type, const char* name);
-int do_average(int type, const char* name);
-int do_fastest(int type, const char* name);
-int do_hist(int type, int fastest);
-
-int do_res(int type, const char* name) {
+static int do_res(int type, const char* name) {
 	int err;
 	struct timespec ts;
 
@@ -54,7 +104,7 @@ int do_res(int type, const char* name) {
 	return ts.tv_nsec;
 }
 
-int do_average(int type, const char* name) {
+static int do_average(int type, const char* name) {
 	int err;
 	struct timespec start, stop;
 	uint64_t sec, nanos;
@@ -78,7 +128,7 @@ int do_average(int type, const char* name) {
 
 }
 
-int do_fastest(int type, const char* name) {
+static int do_fastest(int type, const char* name) {
 	struct timespec start, stop;
 	uint64_t sec, nanos, fastest;
 
@@ -104,7 +154,7 @@ int do_fastest(int type, const char* name) {
 	return fastest;
 }
 
-int do_hist(int type, int fastest) {
+static int do_hist(int type, int fastest) {
 	int nsPerBucket = NSPERBUCKET;
 	int i;
 	int delta, lines, toobig, hits, miss;
@@ -195,6 +245,12 @@ int main(int argc, char *argv[]) {
 	(void)argv;
 
 	printf("      res   avg      min  dups  CLOCK\n");
+	average = getpid_average();
+	printf("          %5d                 %s\n",
+		average, "getpid() [kernel call]");
+	average = gettimeofday_average();
+	printf("     1000 %5d                 %s\n",
+		average, "gettimeofday() [usec]");
 	for (int i=0; (NULL != clocks[i].name); i++) {
 		res = do_res(clocks[i].type, clocks[i].name);
 		average = do_average(clocks[i].type, clocks[i].name);
