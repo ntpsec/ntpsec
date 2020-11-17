@@ -49,3 +49,37 @@ This works for all users, including root.
 Note that the pth file must be on the default Python search path.
 
 
+OTOH if you run into something like:
+    Traceback (most recent call last):
+      File "/usr/bin/ntpdig", line 419, in <module>
+        timeout=timeout)
+      File "/usr/bin/ntpdig", line 109, in queryhost
+        keyid, keytype, passwd)
+      File "/usr/lib/python3/dist-packages/ntp/packet.py", line 1747, in compute_mac
+        if not ntp.ntpc.checkname(keytype):
+    AttributeError: module 'ntp.ntpc' has no attribute 'checkname'
+
+Then you probably want to either uninstall the previous Python extension, or
+install one after 1.1.9 (798b93) by adding the '--enable-pylib ext' option
+without quotes.
+
+OTOH if you are running into something like:
+    Traceback (most recent call last):
+    File "/usr/bin/ntpdig", line 19, in <module>
+        import ntp.packet
+    File "/usr/lib/python3/dist-packages/ntp/packet.py", line 219, in <module>
+        import ntp.ntpc
+    File "/usr/lib/python3/dist-packages/ntp/ntpc.py", line 52, in <module>
+        _ntpc = _importado()
+    File "/usr/lib/python3/dist-packages/ntp/ntpc.py", line 38, in _importado
+        return _dlo(ntpc_paths)
+    File "/usr/lib/python3/dist-packages/ntp/ntpc.py", line 49, in _dlo
+        raise OSError("Can't find %s library" % LIB)
+    OSError: Can't find ntpc library
+
+That means is that ntpc.py looked for libnptc.so in the usual places and could
+not find it either because it was installed in a subdirectory or in a
+directory that was not checked by Python. In either case, the recommendation is
+to update to a post 1.2.0 (2c81d1) install. Alternatively one could move the
+file and symlinks into a directory in the search path. This is left as an
+exercise for the reader.

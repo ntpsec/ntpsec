@@ -66,7 +66,8 @@ source tree. In the distribution base directory use the
 This command inspects the hardware and software environment and
 configures the build process accordingly. Use the +./waf build+ command to
 compile and link the distribution and the +./waf install+ command to install
-the executables by default in +/usr/local/bin+.
+the executables by default in +/usr/local/bin+. It may be necessary to run
++ldconfig+ on Linux systems if using the FFI library (default).
 
 [[conf]]
 == Configuration

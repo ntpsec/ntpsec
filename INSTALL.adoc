@@ -150,6 +150,11 @@ Under Unix, the simplest way to compile this package is:
      configure and compile the package for a different kind of
      computer), run `./waf distclean`.
 
+=== ldconfig ===
+
+It may be necessary after installing on some systems (incl. Linux) to
+rebuild the ld.so cache or equivalent if using the FFI library (default).
+
 === Solaris ===
 
 When building the NTPsec suite using gcc under Solaris, you may see
