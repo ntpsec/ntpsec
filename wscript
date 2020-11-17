@@ -903,7 +903,7 @@ class check(BuildContext):
 def bin_test(ctx):
     """Run binary check, use after tests."""
     from wafhelpers.bin_test import cmd_bin_test
-    cmd_bin_test(ctx, config)
+    cmd_bin_test(ctx)
 
 
 def bin_test_summary(ctx):
