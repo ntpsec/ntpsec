@@ -81,9 +81,9 @@ read interactive format commands from the standard input.
   the peer name.
 +-s+, +--srcname+::
   Output host addresses by: Names passed to ntpd, then names reverse
-  resolved from addresses and finally, ip addresses themselves 
+  resolved from addresses and finally, IP addresses themselves
 +-S+, +--srcnumber+::
-  Output host addresses by: Names passed to ntpd, then ip addresses
+  Output host addresses by: Names passed to ntpd, then IP addresses
   themselves 
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of

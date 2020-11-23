@@ -567,7 +567,7 @@ record_raw_stats(
  * file format
  * day (MJD)
  * time (s past midnight)
- * peer ip address
+ * peer IP address
  * i, j, n from refclock_sample
  * t1 t2 t3 t4 t5, timestamps
  * jitter, std_dev, std_dev_all

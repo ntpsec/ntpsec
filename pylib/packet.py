@@ -759,8 +759,8 @@ class ControlSession:
         "Try different ways to interpret an address and family"
         if hname.startswith("["):
             hname = hname[1:-1]
-        # First try to resolve it as an ip address and if that fails,
-        # do a fullblown (DNS) lookup. That way we only use the dns
+        # First try to resolve it as an IP address and if that fails,
+        # do a fullblown (DNS) lookup. That way we only use the DNS
         # when it is needed and work around some implementations that
         # will return an "IPv4-mapped IPv6 address" address if you
         # give it an IPv4 address to lookup.
