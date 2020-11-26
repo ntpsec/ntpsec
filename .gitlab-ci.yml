@@ -40,7 +40,9 @@ alpine-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 alpine-refclocks:
   <<: *job_definition
@@ -52,7 +54,9 @@ alpine-edge-basic:
   <<: *job_definition_allow_failure
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine-edge
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 alpine-edge-refclocks:
   <<: *job_definition_allow_failure
@@ -105,7 +109,9 @@ debian-oldstable-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 debian-oldstable-refclocks:
   <<: *job_definition
@@ -117,7 +123,9 @@ debian-stable-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 debian-stable-refclocks:
   <<: *job_definition
@@ -129,7 +137,9 @@ debian-testing-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/debian-testing
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 debian-testing-refclocks:
   <<: *job_definition
@@ -141,7 +151,9 @@ debian-unstable-basic:
   <<: *job_definition_allow_failure
   image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 debian-unstable-refclocks:
   <<: *job_definition_allow_failure
@@ -153,7 +165,9 @@ ubuntu-latest-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-latest
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 ubuntu-latest-refclocks:
   <<: *job_definition
@@ -165,7 +179,9 @@ ubuntu-rolling-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-rolling
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 ubuntu-rolling-refclocks:
   <<: *job_definition
@@ -177,7 +193,9 @@ ubuntu-devel-basic:
   <<: *job_definition_allow_failure
   image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 ubuntu-devel-refclocks:
   <<: *job_definition_allow_failure
@@ -189,6 +207,10 @@ freebsd-11-basic:
   <<: *job_definition
   script:
     - python ./waf configure --disable-doc --disable-manpage --disable-nts build
+    - DESTDIR=build/prison python ./waf install
+    - DESTDIR=./prison python ./waf install
+    - DESTDIR=../prison python ./waf install
+    - rm -rvf build/prison ./prison ../prison
   tags:
     - freebsd-11
   rules:
@@ -207,6 +229,10 @@ freebsd-12-basic:
   <<: *job_definition
   script:
     - python ./waf configure --disable-doc --disable-manpage build
+    - DESTDIR=build/prison python ./waf install
+    - DESTDIR=./prison python ./waf install
+    - DESTDIR=../prison python ./waf install
+    - rm -rvf build/prison ./prison ../prison
   tags:
     - freebsd-12
   rules:
@@ -225,7 +251,9 @@ centos-latest-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/centos-latest
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 centos-latest-refclocks:
   <<: *job_definition
@@ -237,7 +265,9 @@ fedora-latest-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 fedora-latest-refclocks:
   <<: *job_definition
@@ -249,7 +279,9 @@ fedora-rawhide-basic:
   <<: *job_definition_allow_failure
   image: $CI_REGISTRY/ntpsec/ntpsec/fedora-rawhide
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 fedora-rawhide-refclocks:
   <<: *job_definition_allow_failure
@@ -281,7 +313,9 @@ clang-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/clang
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang build
+    - python3 ./waf configure --disable-doc --disable-manpage --check-c-compiler=clang build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 clang-refclocks:
   <<: *job_definition
@@ -293,7 +327,9 @@ openSUSE-leap-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build 
+    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build  --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 openSUSE-leap-refclocks:
   <<: *job_definition
@@ -305,7 +341,9 @@ openSUSE-tumbleweed-basic:
   <<: *job_definition_allow_failure
   image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage build
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
 
 openSUSE-tumbleweed-refclocks:
   <<: *job_definition_allow_failure
@@ -351,6 +389,12 @@ gentoo-basic:
   image: $CI_REGISTRY/ntpsec/ntpsec/gentoo
   script:
     - python ./waf configure --disable-doc --disable-manpage build
+    - DESTDIR=build/prison python ./waf install
+    - DESTDIR=./prison python ./waf install
+    - DESTDIR=../prison python ./waf install
+    - python ./waf install
+    - python ./waf uninstall
+    - rm -rvf build/prison ./prison ../prison
 
 gentoo-refclocks:
   <<: *job_definition
@@ -363,6 +407,12 @@ gentoo-hardened-basic:
   image: $CI_REGISTRY/ntpsec/ntpsec/gentoo-hardened
   script:
     - python ./waf configure --disable-doc --disable-manpage build
+    - DESTDIR=build/prison python ./waf install
+    - DESTDIR=./prison python ./waf install
+    - DESTDIR=../prison python ./waf install
+    - python ./waf install
+    - python ./waf uninstall
+    - rm -rvf build/prison ./prison ../prison
 
 gentoo-hardened-refclocks:
   <<: *job_definition
@@ -387,7 +437,13 @@ coverity-scan:
 macos-basic:
   <<: *job_definition
   script:
-    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build
+    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - DESTDIR=build/prison python ./waf install
+    - DESTDIR=./prison python ./waf install
+    - DESTDIR=../prison python ./waf install
+    - python ./waf install
+    - python ./waf uninstall
+    - rm -rvf build/prison ./prison ../prison
   tags:
     - macos
   rules:
