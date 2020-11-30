@@ -30,6 +30,11 @@
 #
 pool pool.ntp.org iburst
 
+# The following setting reduces the maximum number of sources to not use more
+# than four servers from the pool.ntp.org pool.  If you have specified other
+# servers, you can increase the maxclock number accordingly.
+tos maxclock 5
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:conf
