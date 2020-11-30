@@ -78,8 +78,13 @@ OTOH if you are running into something like:
     OSError: Can't find ntpc library
 
 That means is that ntpc.py looked for libnptc.so in the usual places and could
-not find it either because it was installed in a subdirectory or in a
-directory that was not checked by Python. In either case, the recommendation is
-to update to a post 1.2.0 (2c81d1) install. Alternatively one could move the
-file and symlinks into a directory in the search path. This is left as an
-exercise for the reader.
+not find it.  If it is being installed to the wrong location on your platform,
+you can correct the install location using: waf configure --libdir=  If you
+are intentionally installing to a non-default location, you can modify the
+dynamic linker's search path globally (e.g. /etc/ld.so.conf or
+/etc/ld.so.conf.d/) or in your environment (e.g. LD_LIBRARY_PATH).
+
+On some platforms, it is necessary to run ldconfig after installing libraries.
+This is normally done by the waf install step, but it may have failed.  When
+using a temporary --destdir (e.g. as part of package builds), ldconfig must be
+run manually after the library is installed to its final location.

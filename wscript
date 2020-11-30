@@ -129,6 +129,14 @@ def configure(ctx):
     ctx.load('compiler_c')
     ctx.start_msg('Checking compiler version')
     ctx.end_msg("%s" % ".".join(ctx.env.CC_VERSION))
+
+    # Some distros do not have /sbin in the PATH for non-root users.  We honor
+    # the real PATH first, but append the sbin directories.
+    ctx.find_program(
+        "ldconfig", var="BIN_LDCONFIG", mandatory=False,
+        path_list=(os.environ.get('PATH','').split(os.pathsep) +
+            ["/sbin", "/usr/sbin", "/usr/local/sbin"]))
+
     # Ensure m4 is present, or bison will fail with SIGPIPE
     ctx.find_program('m4')
     ctx.load('bison')

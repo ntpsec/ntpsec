@@ -1,5 +1,9 @@
 import os
 
+import waflib
+from waflib import Errors, Options
+from waflib.Logs import pprint
+
 def build(ctx):
 
     libntp_source = [
@@ -59,6 +63,7 @@ def build(ctx):
             use="M RT CRYPTO",
             vnum=ctx.env['ntpcver'],
         )
+        ctx.add_post_fun(post)
     elif ctx.env['ntpc'] == 'ext':
         # Loadable Python extension
         ctx(
@@ -69,3 +74,33 @@ def build(ctx):
             target="../pylib/ntpc",  # Put the output in the pylib directory
             use="M RT CRYPTO",
         )
+
+def post(ctx):
+    if not (ctx.cmd == 'install' and ctx.env.BIN_LDCONFIG):
+        return
+
+    destdir = Options.options.destdir
+    if destdir:
+        # When --destdir is set, we are by definition not installing to the
+        # real location, so running ldconfig is pointless.  It will need to
+        # be run manually by the user (or the package install process, if
+        # this is a package build).
+        pprint("YELLOW", "WARNING:")
+        pprint("YELLOW", "WARNING: Run ldconfig manually.")
+        pprint("YELLOW", "WARNING:")
+        return
+
+    # Try to run ldconfig.  It is not a fatal error here if it fails, as the
+    # install could be run by a non-root user.
+    ldconfig = ' '.join(ctx.env.BIN_LDCONFIG)
+    try:
+        out = ctx.cmd_and_log(
+            ctx.env.BIN_LDCONFIG, output=waflib.Context.STDOUT,
+            quiet=waflib.Context.BOTH)
+        pprint("GREEN", "running: %s  OK" % ldconfig)
+    except Errors.WafError as e:
+        pprint("RED", "running: %s  FAILED" % ldconfig)
+        if e.stdout:
+            pprint("RED", e.stdout)
+        if e.stderr:
+            pprint("RED", e.stderr)
