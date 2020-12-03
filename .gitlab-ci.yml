@@ -61,7 +61,7 @@ alpine-edge-refclocks:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 AsciiDoc-3-Fedora:
-  <<: *job_definition
+  <<: *job_definition_allow_failure
   image: fedora
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget unzip libxslt docbook-style-xsl
