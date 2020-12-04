@@ -41,7 +41,7 @@ bool connect_TCP_socket(int sockfd, struct addrinfo *addr);
 bool nts_set_cert_search(SSL_CTX *ctx, const char *filename);
 void set_hostname(SSL *ssl, struct peer *peer, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
-bool check_aead(SSL *ssl, struct peer *peer, const char *hostname);
+bool check_alpn(SSL *ssl, struct peer *peer, const char *hostname);
 bool nts_client_send_request(SSL *ssl, struct peer *peer);
 bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer);
 bool nts_client_process_response(SSL *ssl, struct peer *peer);
@@ -145,7 +145,7 @@ bool nts_probe(struct peer * peer) {
 
 	if (!check_certificate(ssl, peer))
 		goto bail;
-	if (!check_aead(ssl, peer, hostname))
+	if (!check_alpn(ssl, peer, hostname))
 		goto bail;
 
 	if (!nts_client_send_request(ssl, peer))
@@ -443,7 +443,7 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
 	return true;
 }
 
-bool check_aead(SSL *ssl, struct peer* peer, const char *hostname) {
+bool check_alpn(SSL *ssl, struct peer* peer, const char *hostname) {
 	UNUSED_ARG(peer);
 	const unsigned char *data;
 	unsigned int len;
