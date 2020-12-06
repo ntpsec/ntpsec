@@ -116,7 +116,7 @@ def queryhost(server, concurrent, timeout=5, port=123):
             s.sendto(packet, sockaddr)
         except socket.error as e:
             log("socket error on transmission: %s" % e)
-            raise SystemExit(1)
+            continue
         if debug >= 2:
             log("Sent to %s:" % (sockaddr[0],))
             ntp.packet.dump_hex_printable(packet)
