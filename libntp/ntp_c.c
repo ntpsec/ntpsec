@@ -34,6 +34,7 @@ bool ntpc_step_systime(double);
 
 /* Don't include anything from OpenSSL */
 
+const char *version = NTPSEC_VERSION_EXTENDED;
 const char *progname = "libntpc";
 int   SYS_TYPE = TYPE_SYS;
 int  PEER_TYPE = TYPE_PEER;

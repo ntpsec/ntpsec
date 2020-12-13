@@ -43,6 +43,10 @@ def _dlo(paths):
     for ntpc_path in paths:
         try:
             lib = ctypes.CDLL(ntpc_path, use_errno=True)
+            wrap_version = "@NTPSEC_VERSION_EXTENDED@"
+            clib_version = ctypes.c_char_p.in_dll(lib, 'version').value
+            if clib_version != wrap_version:
+                sys.stderr.write("ntp.ntpc wrong version %s !== %s" % (clib_version, wrap_version))
             return lib
         except OSError:
             pass
