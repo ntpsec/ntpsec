@@ -886,6 +886,7 @@ int main(int argc, char **argv) {
     msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
     msg_setting("LINKFLAGS_NTPD", " ".join(ctx.env.LINKFLAGS_NTPD))
     msg_setting("PREFIX", ctx.env.PREFIX)
+    msg_setting("LIBDIR", ctx.env.LIBDIR)
     msg_setting("Droproot Support", droproot_type)
     msg_setting("Debug Support", yesno(ctx.options.enable_debug))
     msg_setting("Refclocks", ", ".join(sorted(ctx.env.REFCLOCK_LIST)))
