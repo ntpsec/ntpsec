@@ -169,6 +169,10 @@ def configure(ctx):
         ctx.start_msg("systemd unit directory:")
         ctx.end_msg(ctx.env.SYSTEMD_systemdsystemunitdir)
 
+    ctx.env.BIN_GIT = False
+    if os.path.exists(".git"):
+        ctx.find_program("git", var="BIN_GIT", mandatory=False)
+
     source_date_epoch = os.getenv('SOURCE_DATE_EPOCH', None)
     if ctx.options.build_epoch is not None:
         build_epoch = ctx.options.build_epoch
@@ -179,14 +183,17 @@ def configure(ctx):
         build_epoch = int(source_date_epoch)
         ctx.define("BUILD_EPOCH", build_epoch,
                    comment="Using SOURCE_DATE_EPOCH")
+    elif ctx.env.BIN_GIT:
+        cmd = ctx.env.BIN_GIT + shlex.split("log -1 --pretty=%ct")
+        build_epoch = int(ctx.cmd_and_log(cmd).strip())
+        ctx.define("BUILD_EPOCH", build_epoch, comment="last git commit")
     else:
         build_epoch = int(time.time())
         ctx.define("BUILD_EPOCH", build_epoch, comment="Using default")
 
     build_epoch_formatted = datetime.utcfromtimestamp(build_epoch).strftime(
         "%Y-%m-%dT%H:%M:%SZ")
-    if ((os.path.exists(".git") and
-            ctx.find_program("git", var="BIN_GIT", mandatory=False))):
+    if ctx.env.BIN_GIT:
         cmd = ctx.env.BIN_GIT + shlex.split("log -1 --format=%h")
         git_short_hash = ctx.cmd_and_log(cmd).strip()
 
