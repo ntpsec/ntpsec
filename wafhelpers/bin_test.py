@@ -12,12 +12,10 @@ import ntp.util
 version = ntp.util.stdversion()
 Popen = waflib.Utils.subprocess.Popen
 
-cmd_smap = {
-    ("main/ntpd/ntpd", "--version"): "ntpd %s\n" % version,
-}
 cmd_map = {
     ("main/ntpclients/ntpleapfetch", "--version"): "ntpleapfetch %s\n"
                                                    % version,
+    ("main/ntpd/ntpd", "--version"): "ntpd %s\n" % version,
     ("main/ntpfrob/ntpfrob", "-V"): "ntpfrob %s\n" % version,
     ("main/ntptime/ntptime", "-V"): "ntptime %s\n" % version
 }
@@ -48,45 +46,37 @@ def addLog(color, text):
     test_logs.append((color, text))
 
 
-def bin_test_summary(_):
+def bin_test_summary(ctx):
     """Print out the log."""
     for i in test_logs:
         waflib.Logs.pprint(i[0], i[1])
 
 
-def run(cmd, reg, pythonic, apath=None, environ=None):
+def run(cmd, expected, pythonic):
     """Run an individual non-python test."""
-    check = False
-    odir = apath if apath else waflib.Context.out_dir
-
-    environ = {} if environ is None else environ
-    if apath:
-        cmd = [os.sep.join(['.'] + cmd[0].split(os.sep)[-1:])] + list(cmd[1:])
     prefix = "running: " + " ".join(cmd)
-    if not os.path.exists("%s/%s" % (odir, cmd[0])):
-        addLog("YELLOW", '"%s" SKIPPING (does not exist)' % "%s/%s" % (odir, cmd[0]))
-        return None
-    if not apath:
-        if pythonic:
-            cmd = [sys.executable] + list(cmd)
-            prefix = "running: " + " ".join(cmd)
 
-    p = Popen(cmd, universal_newlines=True,
-              env=environ, cwd=odir,
+    if not os.path.exists("%s/%s" % (waflib.Context.out_dir, cmd[0])):
+        addLog("YELLOW", prefix + " SKIPPING (does not exist)")
+        return False
+
+    if pythonic:
+        cmd = [sys.executable] + list(cmd)
+    p = Popen(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
+                        waflib.Context.out_dir},
+              universal_newlines=True,
               stdin=waflib.Utils.subprocess.PIPE,
               stdout=waflib.Utils.subprocess.PIPE,
-              stderr=waflib.Utils.subprocess.PIPE)
+              stderr=waflib.Utils.subprocess.PIPE,
+              cwd=waflib.Context.out_dir)
 
     stdout, stderr = p.communicate()
 
-    if reg in (stdout, stderr):
-        check = True
-
-    if check:
+    if expected in (stdout, stderr):
         addLog("GREEN", prefix + "  OK")
         return True
     addLog("RED", prefix + "  FAILED")
-    addLog("PINK", "Expected: " + reg)
+    addLog("PINK", "Expected: " + expected)
     if stdout:
         addLog("PINK", "Got (stdout): " + stdout)
     if stderr:
@@ -97,19 +87,6 @@ def run(cmd, reg, pythonic, apath=None, environ=None):
 def cmd_bin_test(ctx):
     """Run a suite of binary tests."""
     fails = 0
-    skips = 0
-    env = {}
-
-    destdir = os.path.abspath(os.environ.get('DESTDIR', '/'))
-    path = spath = None
-
-    if ctx.cmd == 'install':
-        pypath = destdir + ctx.env.PYTHONARCHDIR  # + os.sep + 'ntp'
-        env = {'PYTHONPATH': pypath} if destdir != '/' else {}
-        path = destdir + os.sep if destdir != '/' else '/'
-        spath = path + ctx.env.SBINDIR[1:] + os.sep
-        path = path + ctx.env.BINDIR[1:] + os.sep
-        addLog('BLUE', 'Following relative to: %s' % spath)
 
     if ctx.env['PYTHON_ARGPARSE']:
         cmd_map_python.update(cmd_map_python_argparse)
@@ -117,34 +94,17 @@ def cmd_bin_test(ctx):
     if ctx.env['PYTHON_CURSES']:
         cmd_map_python.update(cmd_map_python_curses)
 
-    for cmd in sorted(cmd_smap):
-        status = run(cmd, cmd_smap[cmd], False, spath, env)
-        fails = fails + 1 if status is False else fails
-        skips = skips + 1 if status is None else skips
-
-    if ctx.cmd == 'install':
-        addLog('BLUE', 'Following relative to: %s' % path)
-
     for cmd in sorted(cmd_map):
-        status = run(cmd, cmd_map[cmd], False, path, env)
-        fails = fails + 1 if status is False else fails
-        skips = skips + 1 if status is None else skips
+        if not run(cmd, cmd_map[cmd], False):
+            fails += 1
 
     for cmd in sorted(cmd_map_python):
-        status = run(cmd, cmd_map_python[cmd], True, path, env)
-        fails = fails + 1 if status is False else fails
-        skips = skips + 1 if status is None else skips
+        if not run(cmd, cmd_map_python[cmd], True):
+            fails += 1
 
-    if skips > 0 or fails > 0:
+    if 1 == fails:
         bin_test_summary(ctx)
-    if skips == 1:
-        waflib.Logs.warn("1 binary test skipped!")
-    elif skips > 1:
-        waflib.Logs.warn("%d binary tests skipped!" % skips)
-
-    if fails >= 7:
-        pass
-    if fails == 1:
         ctx.fatal("1 binary test failed!")
-    elif fails > 1:
+    elif 1 < fails:
+        bin_test_summary(ctx)
         ctx.fatal("%d binary tests failed!" % fails)
