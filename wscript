@@ -194,14 +194,15 @@ def configure(ctx):
     build_epoch_formatted = datetime.utcfromtimestamp(build_epoch).strftime(
         "%Y-%m-%dT%H:%M:%SZ")
     if ctx.env.BIN_GIT:
-        cmd = ctx.env.BIN_GIT + shlex.split("log -1 --format=%h")
+        cmd = ctx.env.BIN_GIT + shlex.split("describe --dirty")
         git_short_hash = ctx.cmd_and_log(cmd).strip()
+        git_short_hash = '-'.join(git_short_hash.split('-')[1:])
 
         ctx.env.NTPSEC_VERSION = "%s+" % ntpsec_release
-        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s+ %s (git rev %s)" %
+        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s+%s %s" %
                                            (ntpsec_release,
-                                            build_epoch_formatted,
-                                            git_short_hash))
+                                            git_short_hash,
+                                            build_epoch_formatted))
     else:
         ctx.env.NTPSEC_VERSION = "%s" % ntpsec_release
         ctx.env.NTPSEC_VERSION_EXTENDED = ("%s %s" % (ntpsec_release,
