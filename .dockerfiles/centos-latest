@@ -1,6 +1,6 @@
 FROM centos:latest
 
 RUN dnf -y install dnf-plugins-core
-RUN dnf config-manager --set-enabled PowerTools
+RUN dnf config-manager --set-enabled powertools
 RUN dnf -y install epel-release
 RUN dnf -y install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libbsd-devel
