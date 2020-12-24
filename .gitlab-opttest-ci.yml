@@ -86,6 +86,8 @@ fbsd-11-options-tester:
     - freebsd-11
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
+      when: never
+    - when: never
 
 fbsd-12-options-tester:
   stage: test
@@ -97,6 +99,8 @@ fbsd-12-options-tester:
     - freebsd-11
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
+      when: never
+    - when: never
 
 .deb_option_tester: &deb_option_tester
   stage: test
