@@ -25,7 +25,7 @@ centos-options-tester:
   <<: *option_tester
   image: centos:latest
   script:
-    - dnf -y --enablerepo=PowerTools install bison gcc openssl-devel libcap-devel python3-devel python2-devel pps-tools-devel libseccomp-devel bash
+    - dnf -y --enablerepo=powertools install bison gcc openssl-devel libcap-devel python3-devel python2-devel pps-tools-devel libseccomp-devel bash
 
 fedora-latest-options-tester:
   image: fedora:latest
