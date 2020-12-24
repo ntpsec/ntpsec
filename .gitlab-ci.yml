@@ -285,22 +285,25 @@ fedora-latest-refclocks:
 
 fedora-rawhide-basic:
   <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-rawhide
+  image: fedora:rawhide
   script:
+    - dnf -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel libbsd-devel
     - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
 
 fedora-rawhide-refclocks:
   <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-rawhide
+  image: fedora:rawhide
   script:
+    - dnf -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel libbsd-devel
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 fedora-rawhide-refclocks-gpsd:
   <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-rawhide-gpsd
+  image: fedora:rawhide
   script:
+    - dnf -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python3-gpsd libbsd-devel
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 python3-rc:

@@ -34,7 +34,7 @@ fedora-latest-options-tester:
   <<: *option_tester
 
 fedora-rawhide-options-tester:
-  image: registry.fedoraproject.org/fedora:rawhide
+  image: fedora:rawhide
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python2-devel libseccomp-devel bash
   <<: *option_tester

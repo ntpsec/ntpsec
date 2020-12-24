@@ -65,12 +65,6 @@ build-debian-unstable:
 build-fedora-latest:
   <<: *build_definition
 
-build-fedora-rawhide:
-  <<: *build_definition
-
-build-fedora-rawhide-gpsd:
-  <<: *build_definition
-
 build-gentoo:
   <<: *build_definition
 
