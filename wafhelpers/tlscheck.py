@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """tlscheck - Helper for checking SSL library bits."""
 import ctypes
 import ctypes.util
