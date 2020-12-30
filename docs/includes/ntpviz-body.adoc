@@ -7,7 +7,7 @@
 ntpviz [OPTIONS]
          [-c | --clip]
          [-D DLVL | --debug DLVL]
-         [-d LOGDIR]
+         [-d LOGDIR[,LOGDIR]...]
          [-e endtime]
          [-g | --general]
          [-h | --help]
@@ -51,7 +51,7 @@ subset of comparative plots for multiple directories.
     the plots to the data between 1% and 99%; this is useful for
     ignoring a few spikes in the data.
 
--d LOGDIR or --datadir LOGDIR::
+-d LOGDIR[,LOGDIR]... or --datadir LOGDIR[,LOGDIR]...::
     Specifies one or more logfile directories to examine; the default is
     the single directory /var/log/ntpstats.
 
