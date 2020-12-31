@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from waflib.Logs import pprint
+from pylib.poly import polystr
 
 
 def test_write_log(ctx):
@@ -16,9 +17,9 @@ def test_write_log(ctx):
             fp.write("BINARY      : %s\n" % binary)
             fp.write("RETURN VALUE: %s\n" % retval)
             fp.write("\n*** stdout ***\n")
-            fp.write(str(lines))
+            fp.write(polystr(lines))
             fp.write("\n*** stderr ***\n")
-            fp.write(str(error))
+            fp.write(polystr(error))
             fp.write("\n\n\n")
 
     pprint("BLUE", "Wrote test log to: ", file_out)
