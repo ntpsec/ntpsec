@@ -12,6 +12,12 @@ on user-visible changes.
 
 == Repository Head ==
 
+Reduce maxclocks to 5 to reduce the NTP pool load.
+
+Print LIBDIR during ./waf configure.
+
+Documentation, new GPG key, and miscellaneous cleanups.
+
 == 2020-10-06: 1.2.0 ==
 
 The minor version bump is to indicate official official support of
@@ -22,7 +28,7 @@ On this day in 1783, Benjamin Hanks received a patent for a
 self-winding clock he planned to install in the Old Dutch Church in
 Kingston, New York, supposedly making it the first public clock in
 what became the New York City metropolitan area.
- 
+
 NTS-KE client now defaults to port 4460.
 
 NTS-KE server now listens on port 4460.
