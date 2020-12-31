@@ -12,6 +12,9 @@ on user-visible changes.
 
 == Repository Head ==
 
+Compare versions of ntp.ntpc and libntpc printing a warning is
+mismatched. Fix libntpc install path if using it.
+
 Reduce maxclocks to 5 to reduce the NTP pool load.
 
 Print LIBDIR during ./waf configure.
