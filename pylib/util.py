@@ -1233,7 +1233,7 @@ class MRUSummary:
         self.debug = debug
         self.logfp = logfp
         self.now = None
-        self.showhostnames = showhostnames  # If not [0], display numeric IPs
+        self.showhostnames = showhostnames  # if & 1, display names 
         self.wideremote = wideremote
 
     header = " lstint avgint rstr r m v  count    score   drop rport remote address"
@@ -1269,7 +1269,7 @@ class MRUSummary:
             rscode = '.'
         (ip, port) = portsplit(entry.addr)
         try:
-            if not self.showhostnames & 1:
+            if not self.showhostnames & 1:  # if not & 1 display numeric IPs
                 dns = ip
             else:
                 dns = canonicalize_dns(ip)

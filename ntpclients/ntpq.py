@@ -70,7 +70,7 @@ class Ntpq(cmd.Cmd):
         #  so I am leaving them, and possibly duplicating them.
         self.rawmode = False            # Flag which indicates raw mode output.
         self.directmode = False         # Flag for direct MRU output.
-        self.showhostnames = 1          # If & 1 false, display numeric IPs
+        self.showhostnames = 1          # If & 1, display names
         self.showunits = False          # If False, show old style float
         self.auth_delay = 20            # delay time (default 20msec)
         self.wideremote = False         # show wide remote names?
@@ -441,7 +441,7 @@ usage: timeout [ msec ]
                 value = queried[name][0]
                 rawvalue = queried[name][1]
                 if fmt in (NTP_ADD, NTP_ADP):
-                    if self.showhostnames[0]:
+                    if self.showhostnames & 1:  # if & 1, display names 
                         if self.debug:
                             self.say("DNS lookup begins...")
                         value = ntp.util.canonicalize_dns(
