@@ -23,15 +23,15 @@ error measured during routine and exceptional operation. These
 statistics provide the following information.
 
 * Nominal estimate of the server clock time relative to the client clock
-time. This is called _clock offset_ symbolized by the Greek letter θ.
+time. This is called _clock offset_ symbolized by the Greek letter θ (theta).
 * Roundtrip system and network delay measured by the on-wire protocol.
-This is call _roundtrip delay_ symbolized by the Greek letter δ.
+This is call _roundtrip delay_ symbolized by the Greek letter δ (delta).
 * Potential clock offset error due to the maximum uncorrected system
 clock frequency error. This is called _dispersion_ symbolized by the
-Greek letter ε.
+Greek letter ε (epsilon).
 * Expected error, consisting of the root mean square (RMS) nominal clock
 offset sample differences in a sliding window of several samples. This
-is called _jitter_ symbolized by the Greek letter φ.
+is called _jitter_ symbolized by the Greek letter φ (phi).
 
 Figure 1 shows how the various measured statistics are collected and
 compiled to calibrate NTP performance.
