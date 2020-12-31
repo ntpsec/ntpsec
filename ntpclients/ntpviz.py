@@ -1295,7 +1295,7 @@ def local_offset_multiplot(statlist):
     plot = NTPViz.Common + '''\
 set terminal %(terminal)s size %(size)s
 set title "Multiplot Local Clock Offsets"
-set ytics format "%1.2f μs" nomirror textcolor rgb "#0060ad"
+set ytics format "%%1.2f μs" nomirror textcolor rgb "#0060ad"
 set key bottom right box
 plot \\
 ''' % out
@@ -1311,7 +1311,7 @@ plot \\
     for stats in statlist:
         # speed up by only sending gnuplot the data it will actually use
         # fields: time, offset
-        pt = NTPViz.plot_slice(stats.loopstats, 2)
+        pt = stats.plot_slice(stats.loopstats, 2)
         plot_data += pt[0]
 
     ret = {'html': '', 'stats': []}
