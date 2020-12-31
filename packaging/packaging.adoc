@@ -68,35 +68,33 @@ Python 2.
 
 == Cross-era interoperability in modular calendar arithmetic
 
-The protocol necessarily uses time/date stamps of finite length in
-order to fit into fixed-size fields; they happen to have a 136-year
-cycle, but the problems this produces aren't dependent on the specific
-cycle length.  Thus, each instance of ntpd speaks time based on a
-specific epoch (cycle start date).  The epoch of era 0 was at the
-beginning of 1900; the epoch of era 1 will be in 2036.
+The protocol necessarily uses time/date stamps of finite length
+to fit into fixed-size fields; they happen to have a 136-year cycle, but
+the problems this produces aren't dependent on the specific cycle
+length.  Thus, each instance of ntpd speaks time based on a specific
+epoch (cycle start date).  The epoch of era 0 was at the beginning of
+1900; the epoch of era 1 will be in 2036.
 
 Two instances talking to each other have no way to know that they're
-based in the same era. To mitigate this problem, each instance
-has a pivot date and resolves incoming timestamps to the era that
-minimizes distance between now and the timestamp.  This procedure
-is part of the core protocol specification.
+based in the same era. To mitigate this problem, each instance has a
+pivot date and resolves incoming timestamps to the era that minimizes
+the distance between now and the timestamp.  This procedure is part of the
+core protocol specification.
 
-An instance's pivot time is constructed from BUILD_EPOCH defined at
-configure time in config.h.  If BUILD_EPOCH is set to a known time
-then the binaries are reproducible.  By default the BUILD_EPOCH is the
-time when the last './waf configure' was run.  You can override the
-BUILD_EPOCH with './waf configure --build-epoch' or using the SOURCE_DATE_EPOCH
-environment variable.
+An instance's pivot time is constructed from a hardcoded timestamp
+in the source code. This is also used to disambiguate the current
+GPS era. This number should be updated every nine years or so (approx
+512w). This should make the binaries reproducible.
 
 More information on reproducible builds is at:
 https://reproducible-builds.org/[https://reproducible-builds.org/]
 
 == Disambiguation of NMEA dates
 
-Due to bad design of NMEA0183, the reporting protocol used by many GPS
-sensors, the NMEA driver in NTPsec sometimes has to make an assumption
-about what century it is.  Choice of a base-century hits the same
-issues; so here the year derived from the BUILD_EPOCH is also used.  The
+Due to the bad design of NMEA0183, the reporting protocol used by many GPS
+sensors, the NMEA driver in NTPsec sometimes has to assume
+what century it is.  Choice of a base-century hits the same
+issues, so here the year derived from a hardcoded timestamp. The
 alternative - trusting the system clock to report the right century -
 could produce very bad behavior near century boundaries, and also on
 cold-start of systems without an RTC.

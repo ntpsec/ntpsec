@@ -38,7 +38,7 @@ ntpcal_get_build_date(
 	struct calendar * jd
 	)
 {
-        time_t epoch = (time_t)BUILD_EPOCH;
+        time_t epoch = (time_t)1577836800; // 2020 Jan 01 -> 1863820800 - 2029 Jan 23
         struct tm epoch_tm;
 
 	ZERO(*jd);

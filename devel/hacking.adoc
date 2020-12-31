@@ -497,17 +497,13 @@ C was the minor.  They also use release-candidate suffixes.
 
 == Version string
 
-We use the BUILD_EPOCH as described in packaging/packaging.adoc for
-the timestamp (converted to RFC 3339 format) part of the version
-string reported in ntpd and other binaries.
-
 Release builds have version strings of the form:
 
-<base version number> <BUILD_EPOCH in RFC 3339 format>
+<base version number><trim()d --build-desc with a prepended space>
 
 Development builds have version strings of the form:
 
-<base version number>+ <BUILD_EPOCH in RFC 3339 format> (git rev <git shorthash>)
+<base version number>+<commits since last tag>-g<git short hash><conditional '-dirty'> <trim()d --build-desc with a prepended space>
 
 == Contribution workflow and conventions
 
@@ -812,6 +808,6 @@ cat > ~/.gitconfig
 ^D
 -------------------------------------------------------------
 
-. 
+.
 
 //end

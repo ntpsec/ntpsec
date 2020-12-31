@@ -12,6 +12,14 @@ on user-visible changes.
 
 == Repository Head ==
 
+Remove --build-epoch and replace it with arbitrary --build-desc text.
+Passing '--build-desc=$(date -u +%Y-%m-%dT%H:%M:%Sz)' restores the previous
+default extended version.
+
+The build epoch has been replaced with a hardcoded timestamp which will be
+manually updated every nine years or so (approx 512w).  This makes the
+binaries reproducible by default.
+
 Compare versions of ntp.ntpc and libntpc printing a warning is
 mismatched. Fix libntpc install path if using it.
 

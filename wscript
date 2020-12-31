@@ -173,40 +173,23 @@ def configure(ctx):
     if os.path.exists(".git"):
         ctx.find_program("git", var="BIN_GIT", mandatory=False)
 
-    source_date_epoch = os.getenv('SOURCE_DATE_EPOCH', None)
-    if ctx.options.build_epoch is not None:
-        build_epoch = ctx.options.build_epoch
-        ctx.define("BUILD_EPOCH", build_epoch, comment="Using --build-epoch")
-    elif source_date_epoch:
-        if not source_date_epoch.isdigit():
-            ctx.fatal("ERROR: malformed SOURCE_DATE_EPOCH")
-        build_epoch = int(source_date_epoch)
-        ctx.define("BUILD_EPOCH", build_epoch,
-                   comment="Using SOURCE_DATE_EPOCH")
-    elif ctx.env.BIN_GIT:
-        cmd = ctx.env.BIN_GIT + shlex.split("log -1 --pretty=%ct")
-        build_epoch = int(ctx.cmd_and_log(cmd).strip())
-        ctx.define("BUILD_EPOCH", build_epoch, comment="last git commit")
-    else:
-        build_epoch = int(time.time())
-        ctx.define("BUILD_EPOCH", build_epoch, comment="Using default")
-
-    build_epoch_formatted = datetime.utcfromtimestamp(build_epoch).strftime(
-        "%Y-%m-%dT%H:%M:%SZ")
+    build_desc = ctx.options.build_desc.strip()
+    if build_desc:
+        build_desc = ' ' + build_desc
     if ctx.env.BIN_GIT:
         cmd = ctx.env.BIN_GIT + shlex.split("describe --dirty")
         git_short_hash = ctx.cmd_and_log(cmd).strip()
         git_short_hash = '-'.join(git_short_hash.split('-')[1:])
 
         ctx.env.NTPSEC_VERSION = "%s+" % ntpsec_release
-        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s+%s %s" %
+        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s+%s%s" %
                                            (ntpsec_release,
                                             git_short_hash,
-                                            build_epoch_formatted))
+                                            build_desc))
     else:
         ctx.env.NTPSEC_VERSION = "%s" % ntpsec_release
-        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s %s" % (ntpsec_release,
-                                                      build_epoch_formatted))
+        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s%s" % (ntpsec_release,
+                                                      build_desc))
     ctx.define("NTPSEC_VERSION", ctx.env.NTPSEC_VERSION)
     ctx.define("NTPSEC_VERSION_EXTENDED", ctx.env.NTPSEC_VERSION_EXTENDED)
 
