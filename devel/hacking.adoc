@@ -499,11 +499,11 @@ C was the minor.  They also use release-candidate suffixes.
 
 Release builds have version strings of the form:
 
-<base version number><trim()d --build-desc with a prepended space>
+<X.Y.Z>[ <build-desc>]
 
 Development builds have version strings of the form:
 
-<base version number>+<commits since last tag>-g<git short hash><conditional '-dirty'> <trim()d --build-desc with a prepended space>
+<X.Y.Z>+<# of commits since tag>-g<git short hash>[-dirty][ <build-desc>]
 
 == Contribution workflow and conventions
 
