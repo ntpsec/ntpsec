@@ -1183,35 +1183,18 @@ class PeerSummary:
         if last_sync is None:
             last_sync = now
         jd = estjitter if have_jitter else estdisp
+        if self.showunits:
+            fini = lambda x : unitify(x, UNIT_MS)
+        elif saw6:
+            fini = lambda x : f8dot4(x)
+        else:
+            fini = lambda x : f8dot3(x)
         line += (
-            " %2ld %c %4.4s %4.4s  %3lo"
+            " %2ld %c %4.4s %4.4s  %3lo %s %s %s"
             % (stratum, ptype,
                PeerSummary.prettyinterval(last_sync),
-               PeerSummary.prettyinterval(poll_sec), reach))
-        if saw6:
-            if self.showunits:
-                line += (
-                    " %s %s %s" %
-                    (unitify(estdelay, UNIT_MS),
-                     unitify(estoffset, UNIT_MS),
-                     unitify(jd, UNIT_MS)))
-            else:
-                line += (
-                    " %s %s %s" %
-                    (f8dot4(estdelay), f8dot4(estoffset), f8dot4(jd)))
-        else:
-            # old servers only have 3 digits of fraction
-            # don't print a fake 4th digit
-            if self.showunits:
-                line += (
-                    " %s %s %s" %
-                    (unitify(estdelay, UNIT_MS),
-                     unitify(estoffset, UNIT_MS),
-                     unitify(jd, UNIT_MS)))
-            else:
-                line += (
-                    " %s %s %s" %
-                    (f8dot3(estdelay), f8dot3(estoffset), f8dot3(jd)))
+               PeerSummary.prettyinterval(poll_sec), reach,
+               fini(estdelay), fini(estoffset), fini(jd)))
         line += "\n"
         # for debugging both case
         # if srcadr != None and srchost != None:
