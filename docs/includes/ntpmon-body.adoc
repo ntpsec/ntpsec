@@ -69,6 +69,9 @@ p:: Change peer display to default mode, showing refid.
 
 q:: Cleanly terminate the program.
 
+r:: Change to dextral mode, identical to 'p' save that the refid, tally \
+and remote clock are on the right.
+
 s:: Toggle display of only reachable hosts (default is all hosts).
 
 u:: Toggle display of units for time values. (default is off)

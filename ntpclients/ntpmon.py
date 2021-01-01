@@ -19,7 +19,7 @@ Any keystroke causes a poll and update. Keystroke commands:
 'u': Toggle display of units.
 'w': Toggle wide mode.
 'x': Cleanly terminate the program.
-' ': Rotate through a/n/o/p display modes.
+' ': Rotate through a/n/o/p/r display modes.
 '+': Increase debugging level.  Output goes to ntpmon.log
 '-': Decrease debugging level.
 '?': Display helpscreen.
@@ -438,6 +438,8 @@ if __name__ == '__main__':
                         peer_report.displaymode = 'opeers'
                     elif key == 'p':
                         peer_report.displaymode = 'peers'
+                    elif key == 'r':
+                        peer_report.displaymode = 'rpeers'
                     elif key == 's':
                         showall = not showall
                     elif key == 'u':
@@ -452,6 +454,8 @@ if __name__ == '__main__':
                             peer_report.displaymode = 'apeers'
                         elif peer_report.displaymode == 'apeers':
                             peer_report.displaymode = 'opeers'
+                        elif peer_report.displaymode == 'opeers':
+                            peer_report.displaymode = 'rpeers'
                         else:
                             peer_report.displaymode = 'peers'
                     elif key == 'j' or key == "KEY_DOWN":

@@ -389,6 +389,12 @@ where the output is just like the +peers+ command except that the
 +refid+ is displayed in hex format and the association number is also
 displayed.
 
++rpeers+::
+  Display a list of peers in the form
++
++st t when pool reach delay offset jitter refid tally remote+
++
+
 +pstats+ _assocID_::
   Show the statistics for the peer with the given _assocID_.
 
