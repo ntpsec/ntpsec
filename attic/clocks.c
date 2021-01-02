@@ -34,6 +34,9 @@ struct table clocks [] = {
 #ifdef CLOCK_BOOTTIME
 	{CLOCK_BOOTTIME, "CLOCK_BOOTTIME"},
 #endif
+#ifdef CLOCK_TAI
+	{CLOCK_TAI, "CLOCK_TAI"},
+#endif
 	{0, NULL}
 };
 
