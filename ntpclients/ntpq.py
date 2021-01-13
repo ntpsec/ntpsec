@@ -325,8 +325,7 @@ usage: help [ command ]
             # files a bug, Mode 6 never seems to generate those in
             # variable fetches.
             text = ntp.poly.polystr(session.response.replace(
-                ntp.poly.polybytes(",\r\n"),
-                ntp.poly.polybytes(",\n")))
+                ",\r\n", ",\n"))
         else:
             if not quiet:
                 self.say("status=%04x %s,\n"
