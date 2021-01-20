@@ -24,7 +24,7 @@
 # -d      -d      -d      debugging mode (implies -q)
 # -e N.N          -q      authdelay
 # -k file -k file -k file key file
-# -o N    -o N    -q      NTP Protocol version
+# -o N            -q      NTP Protocol version
 # -p N            -q      How many samples to take
 # -q      default -q      query/report only, don't set clock
 #                         (implies -u for ntpdate)
@@ -40,12 +40,29 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 
+print_help() {
+	echo "Usage: ntpdate [OPTIONS] HOST..."
+	echo
+	echo "Options:"
+	echo "	-4	Force IPv4 DNS name resolution"
+	echo "	-6	Force IPv6 DNS name resolution"
+	echo "	-a N	Specify key number for authentication"
+	echo "	-b	Force time step"
+	echo "	-B	Force time slew"
+	echo "	-k FILE	Specify key file"
+	echo "	-q	Query only"
+	echo "	-s	Log to syslog"
+	echo "	-t N.N	Specify timeout"
+	echo "	-h 	Print help"
+}
+
 PASSTHROUGH=""
+ADJUST=""
 TIMEOUT="-t 1"
 setclock=yes
 echo=no
 log=no
-while getopts 46a:bBe:k:no:p:qst:uv opt
+while getopts 46a:bBe:hk:no:p:qst:uv opt
 do
     case $opt in
 	4) PASSTHROUGH="$PASSTHROUGH -4";;
@@ -55,9 +72,10 @@ do
 	B) ADJUST="$ADJUST -s";;
 	d) PASSTHROUGH="$PASSTHROUGH -d";;
 	e) echo "ntpdate: -e is no longer supported." >&2;;
+	h) print_help; exit;;
 	k) PASSTHROUGH="$PASSTHROUGH -k $OPTARG";;
 	n) echo=yes;;			# Echo generated command, don't execute
-	o) PASSTHROUGH="$PASSTHROUGH -o $OPTARG";;
+	o) echo "ntpdate: -o is no longer supported." >&2;;
 	p) echo "ntpdate: -p is no longer supported." >&2;;
 	q) setclock=no;;
 	s) log=yes;;
@@ -70,7 +88,7 @@ shift $(($OPTIND - 1))
 
 if [ "$setclock" = yes -a -z "$ADJUST" ]
 then
-    ADJUST="-s -j"
+    ADJUST="-s -S -M 500 -j"
 fi
 
 if [ "$echo" = yes ]
