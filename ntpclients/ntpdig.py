@@ -336,6 +336,7 @@ if __name__ == '__main__':
                 elif switch in ("-M", "--steplimit"):
                     errmsg = "Error: -M parameter '%s' not a number\n"
                     steplimit = ntp.util.safeargcast(val, int, errmsg, usage)
+                    steplimit /= 1000.0
                 elif switch in ("-p", "--samples"):
                     errmsg = "Error: -p parameter '%s' not a number\n"
                     samples = ntp.util.safeargcast(val, int, errmsg, usage)
