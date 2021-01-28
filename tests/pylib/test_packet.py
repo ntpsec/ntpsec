@@ -1145,16 +1145,16 @@ class TestControlSession(unittest.TestCase):
             ntpp.select = fakeselectmod
             # Test empty
             sockjig.return_data = [
-                "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"]
+                "\x16\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"]
             cls.getresponse(1, 2, True)
             self.assertEqual(cls.response, ntp.poly.polybytes(""))
             # Test with data
             sockjig.return_data = [
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
                 "foo=4223,\x00\x00\x00",
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
                 "blah=248,x=23,\x00\x00",
-                "\x0E\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
+                "\x16\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
                 "quux=1\x00\x00"]
             cls.sequence = 1
             cls.getresponse(1, 3, True)
@@ -1162,13 +1162,13 @@ class TestControlSession(unittest.TestCase):
                              ntp.poly.polybytes("foo=4223,blah=248,x=23,quux=1"))
             # Test with data, duplicate packet
             sockjig.return_data = [
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
                 "foo=4223,\x00\x00\x00",
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
                 "blah=248,x=23,\x00\x00",
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
                 "blah=248,x=23,\x00\x00",
-                "\x0E\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
+                "\x16\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
                 "quux=1\x00\x00"]
             cls.sequence = 1
             cls.getresponse(1, 3, True)
@@ -1178,7 +1178,7 @@ class TestControlSession(unittest.TestCase):
             maxtemp = ntpp.MAXFRAGS
             ntpp.MAXFRAGS = 1
             sockjig.return_data = [
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
                 "foo=4223,\x00\x00\x00",
                 "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
                 "blah=248,x=23,\x00\x00",
@@ -1210,11 +1210,11 @@ class TestControlSession(unittest.TestCase):
             self.assertEqual(errored, ntpp.SERR_TIMEOUT)
             # Test partial data and no timeout
             sockjig.return_data = [
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09"
                 "foo=4223,\x00\x00\x00",
-                "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
+                "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x09\x00\x0E"
                 "blah=248,x=23,\x00\x00",
-                "\x0E\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
+                "\x16\x81\x00\x01\x00\x02\x00\x03\x00\x17\x00\x06"
                 "quux=1\x00\x00"]
             fakeselectmod.do_return = [True, False]
             try:
@@ -1225,7 +1225,7 @@ class TestControlSession(unittest.TestCase):
             self.assertEqual(errored, ntpp.SERR_INCOMPLETE)
             # Test header parse fail
             sockjig.return_data = [
-                "\x0E\x81\x00\x00\x00\x03"]
+                "\x16\x81\x00\x00\x00\x03"]
             try:
                 cls.getresponse(1, 2, True)
                 errored = False
@@ -1247,7 +1247,7 @@ class TestControlSession(unittest.TestCase):
             ntp.util.time = faketimemod
             faketimemod.time_returns = [0] * 10
             # Test good packet, empty data
-            raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+            raw = "\x16\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             self.assertEqual(cls._ControlSession__validate_packet(pkt, raw,
@@ -1256,7 +1256,7 @@ class TestControlSession(unittest.TestCase):
             self.assertEqual(logjig.data, [])
             # Test good packet, with data
             logjig.data = []
-            raw = "\x0E\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09" \
+            raw = "\x16\xA1\x00\x01\x00\x02\x00\x03\x00\x00\x00\x09" \
                   "foo=4223,\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
@@ -1280,7 +1280,7 @@ class TestControlSession(unittest.TestCase):
                               "received with version 0\n"])
             # Test bad packet, bad mode
             logjig.data = []
-            raw = "\x0D\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+            raw = "\x15\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             self.assertEqual(cls._ControlSession__validate_packet(pkt, raw,
@@ -1291,7 +1291,7 @@ class TestControlSession(unittest.TestCase):
                               "with mode 5\n"])
             # Test bad packet, bad response bit
             logjig.data = []
-            raw = "\x0E\x01\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+            raw = "\x16\x01\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             self.assertEqual(cls._ControlSession__validate_packet(pkt, raw,
@@ -1302,7 +1302,7 @@ class TestControlSession(unittest.TestCase):
                               "wanted response\n"])
             # Test bad packet, bad sequence
             logjig.data = []
-            raw = "\x0E\x81\x00\x01\x00\x03\x00\x02\x00\x00\x00\x00"
+            raw = "\x16\x81\x00\x01\x00\x03\x00\x02\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             self.assertEqual(cls._ControlSession__validate_packet(pkt, raw,
@@ -1313,7 +1313,7 @@ class TestControlSession(unittest.TestCase):
                               "number 1, wanted 0\n"])
             # Test bad packet, bad opcode
             logjig.data = []
-            raw = "\x0E\x80\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
+            raw = "\x16\x80\x00\x00\x00\x03\x00\x02\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             self.assertEqual(cls._ControlSession__validate_packet(pkt, raw,
@@ -1324,7 +1324,7 @@ class TestControlSession(unittest.TestCase):
                               "wanted 1\n"])
             # Test error packet
             logjig.data = []
-            raw = "\x0E\xC1\x00\x00" + \
+            raw = "\x16\xC1\x00\x00" + \
                   chr(ntp.control.CERR_BADVALUE) + \
                   "\x03\x00\x02\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
@@ -1338,7 +1338,7 @@ class TestControlSession(unittest.TestCase):
             # Test error packet, with more bit
             logjig.data = []
             errcs = chr(ntp.control.CERR_BADVALUE)
-            raw = "\x0E\xE1\x00\x00" + errcs + "\x03\x00\x02\x00\x00\x00\x00"
+            raw = "\x16\xE1\x00\x00" + errcs + "\x03\x00\x02\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             try:
@@ -1351,7 +1351,7 @@ class TestControlSession(unittest.TestCase):
             self.assertEqual(logjig.data, [errstr])
             # Test ok-ish packet, bad associd
             logjig.data = []
-            raw = "\x0E\x81\x00\x00\x00\x03\x00\xFF\x00\x00\x00\x00"
+            raw = "\x16\x81\x00\x00\x00\x03\x00\xFF\x00\x00\x00\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             self.assertEqual(cls._ControlSession__validate_packet(pkt, raw,
@@ -1361,7 +1361,7 @@ class TestControlSession(unittest.TestCase):
                              ["Association ID 255 doesn't match expected 2\n"])
             # Test bad data padding
             logjig.data = []
-            raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x01@"
+            raw = "\x16\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x01@"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             self.assertEqual(cls._ControlSession__validate_packet(pkt, raw,
@@ -1371,7 +1371,7 @@ class TestControlSession(unittest.TestCase):
                              ["Response fragment not padded, size = 13\n"])
             # Test too little data
             logjig.data = []
-            raw = "\x0E\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x10foo\x00"
+            raw = "\x16\x81\x00\x00\x00\x03\x00\x02\x00\x00\x00\x10foo\x00"
             pkt = ntpp.ControlPacket(cls)
             pkt.analyze(raw)
             try:

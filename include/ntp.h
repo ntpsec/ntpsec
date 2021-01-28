@@ -60,7 +60,7 @@ void ntp_RAND_priv_bytes(unsigned char *buf, int num);
  * NTP protocol parameters.  See section 3.2.6 of the specification.
  */
 #define	NTP_VERSION	4	/* current version number */
-#define	NTP_OLDVERSION	1 	/* oldest credible version */
+#define	NTP_OLDVERSION	2 	/* oldest credible version */
 #define	NTP_PORT	123	/* included for non-unix machines */
 #define	NTP_PORTA	"123"	/* or unix without /etc/services */
 

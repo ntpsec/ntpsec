@@ -277,14 +277,14 @@ set_sys_leap(unsigned char new_sys_leap) {
 }
 
 /* Returns false for packets we want to reject out of hand: those with an
-   out-of-range version number or an unsupported mode.
+   out-of-range version number, an unsupported mode, or too short.
 */
 static bool
-is_vn_mode_acceptable(
+is_packet_not_low_rot(
 	struct recvbuf const* rbufp
 	)
 {
-	return rbufp->recv_length >= 1 &&
+	return rbufp->recv_length >= 12 &&
 	    PKT_VERSION(rbufp->recv_buffer[0]) >= NTP_OLDVERSION &&
 	    PKT_VERSION(rbufp->recv_buffer[0]) <= NTP_VERSION &&
 	    ( PKT_MODE(rbufp->recv_buffer[0]) == MODE_CLIENT ||
@@ -668,7 +668,7 @@ receive(
 
 	stat_count.sys_received++;
 
-	if(!is_vn_mode_acceptable(rbufp)) {
+	if(!is_packet_not_low_rot(rbufp)) {
 		stat_count.sys_badlength++;
 		return;
 	}
