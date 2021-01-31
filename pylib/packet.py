@@ -584,7 +584,7 @@ class Peer:
         self.variables = {}
 
     def readvars(self):
-        self.variables = self.session.readvars()
+        self.variables = self.session.readvar()
 
     def __str__(self):
         return "<Peer: associd=%s status=%0x>" % (self.associd, self.status)
