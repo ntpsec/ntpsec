@@ -13,15 +13,21 @@ Welcome to the tea party.
 == Links
 
 include::includes/install.adoc[]
+
 include::includes/manual.adoc[]
+
 xref:_links[Back to Top]
 
 include::includes/hand.adoc[]
+
 include::includes/refclock.adoc[]
+
 xref:_links[Back to Top]
 
 include::includes/misc.adoc[]
+
 include::includes/special.adoc[]
+
 xref:_links[Back to Top]
 
 include::includes/external.adoc[]
