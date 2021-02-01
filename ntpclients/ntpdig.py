@@ -84,7 +84,7 @@ def queryhost(server, concurrent, timeout=5, port=123):
                                       af, socket.SOCK_DGRAM,
                                       socket.IPPROTO_UDP)
     except socket.gaierror as e:
-        log("lookup of %s failed, errno %d = %s" % (server, e[0], e[1]))
+        log("lookup of %s failed, errno %d = %s" % (server, e.args[0], e.args[1]))
         return []
     sockets = []
     packets = []
