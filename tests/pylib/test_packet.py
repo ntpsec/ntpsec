@@ -25,7 +25,7 @@ class SessionJig:
     def __init__(self):
         self.readvars_calls = 0
 
-    def readvars(self):
+    def readvar(self):
         self.readvars_calls += 1
         return {"foo": 23, "bar": 42}
 
