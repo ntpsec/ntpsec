@@ -29,6 +29,10 @@
 #include "nts.h"
 #include "timespecops.h"
 
+// Refactored C?_VARLIST innards
+ssize_t CI_VARLIST(char*, char*, const struct ctl_var*, bool*);
+bool CF_VARLIST(const struct ctl_var*, const struct ctl_var*, const struct ctl_var*);
+
 /* undefine to suppress random tags and get fixed emission order */
 #define USE_RANDOMIZE_RESPONSES
 
@@ -1498,63 +1502,7 @@ ctl_putsys(
 
 	case CS_VARLIST:
 	{
-		char buf[CTL_MAX_DATA_LEN];
-		//buffPointer, firstElementPointer, buffEndPointer
-		char *buffp, *buffend;
-		bool firstVarName;
-		const char *ss1;
-		size_t len;
-		const struct ctl_var *k;
-
-		buffp = buf;
-		buffend = buf + sizeof(buf);
-		if (buffp + strlen(sys_var[CS_VARLIST].text) + 4 > buffend)
-			break;	/* really long var name */
-
-		snprintf(buffp, sizeof(buf), "%s=\"",sys_var[CS_VARLIST].text);
-		buffp += strlen(buffp);
-		firstVarName = true;
-		for (k = sys_var; !(k->flags & EOV); k++) {
-			if (k->flags & PADDING)
-				continue;
-			len = strlen(k->text);
-			if (buffp + len + 1 >= buffend)
-				break;
-			if (!firstVarName)
-				*buffp++ = ',';
-			else
-				firstVarName = false;
-			memcpy(buffp, k->text, len);
-			buffp += len;
-		}
-
-		for (k = ext_sys_var; k && !(k->flags & EOV); k++) {
-			if (k->flags & PADDING)
-				continue;
-			if (NULL == k->text)
-				continue;
-			ss1 = strchr(k->text, '=');
-			if (NULL == ss1)
-				len = strlen(k->text);
-			else
-				len = (size_t)(ss1 - k->text);
-			if (buffp + len + 1 >= buffend)
-				break;
-			if (firstVarName) {
-				*buffp++ = ',';
-				firstVarName = false;
-			}
-			memcpy(buffp, k->text, len);
-			buffp += len;
-		}
-		if (buffp + 2 >= buffend) {
-			break;
-		}
-
-		*buffp++ = '"';
-		*buffp = '\0';
-
-		ctl_putdata(buf, (unsigned)( buffp - buf ), false);
+		(void)CF_VARLIST(&sys_var[CS_VARLIST], sys_var, ext_sys_var);
 		break;
 	}
 
@@ -2061,13 +2009,6 @@ ctl_putpeer(
 	struct peer *p
 	)
 {
-	char buf[CTL_MAX_DATA_LEN];
-	char *s;
-	char *t;
-	char *be;
-	size_t sz;
-	const struct ctl_var *k;
-
 	switch (id) {
 
 	case CP_CONFIG:
@@ -2263,30 +2204,7 @@ ctl_putpeer(
 		break;
 
 	case CP_VARLIST:
-		s = buf;
-		be = buf + sizeof(buf);
-		if (strlen(peer_var[id].text) + 4 > sizeof(buf))
-			break;	/* really long var name */
-
-		snprintf(s, sizeof(buf), "%s=\"", peer_var[id].text);
-		s += strlen(s);
-		t = s;
-		for (k = peer_var; !(EOV & k->flags); k++) {
-			if (PADDING & k->flags)
-				continue;
-			sz = strlen(k->text);
-			if (s + sz + 1 >= be)
-				break;
-			if (s != t)
-				*s++ = ',';
-			memcpy(s, k->text, sz);
-			s += sz;
-		}
-		if (s + 2 < be) {
-			*s++ = '"';
-			*s = '\0';
-			ctl_putdata(buf, (unsigned int)(s - buf), false);
-		}
+		(void)CF_VARLIST(&peer_var[id], peer_var, NULL);
 		break;
 
 	case CP_TIMEREC:
@@ -2333,6 +2251,85 @@ ctl_putpeer(
 }
 
 
+ssize_t CI_VARLIST(
+    char *buffer_lap,
+    char *buf_end,
+    const struct ctl_var *table,
+    bool *first
+    ) {
+	char *start = buffer_lap;
+	char *string_split;
+	size_t string_length;
+	const struct ctl_var *row;
+	if (NULL == table) {
+		return 0;
+	}
+	for (row = table; !(EOV & row->flags); row++) {
+		if (PADDING & row->flags)
+			continue;
+		string_split = strchr(row->text, '=');
+		if (string_split == NULL) {
+			string_length = strlen(row->text);
+		} else {
+			string_length = string_split - row->text; 
+		}
+		if (string_length >= buf_end - buffer_lap - 1) {
+			return -1;
+		}
+		if (!*first) {
+			*buffer_lap++ = ',';
+		} else {
+			*first = false;
+		}
+		memcpy(buffer_lap, row->text, string_length);
+		buffer_lap+= string_length;
+	}
+	*buffer_lap = '\0';
+	return buffer_lap - start;
+}
+
+
+bool CF_VARLIST(
+    const struct ctl_var *entry,
+    const struct ctl_var *table1,
+    const struct ctl_var *table2
+    ) {
+	char buf[1500];  // Arbitrary length greeter than used to be.
+	char *buffer_lap, *buffer_end;
+	bool first = true;
+	ssize_t increment;
+	memset(buf, '.', sizeof(buf));
+	buf[0] = '\0';
+	buffer_lap = buf;
+	buffer_end = buf + sizeof(buf);
+	if (strlen(entry->text) + 4 > sizeof(buf)) {
+		return false;	// really long var name
+	}
+
+	snprintf(buffer_lap, sizeof(buf), "%s=\"", entry->text);
+	buffer_lap += strlen(buffer_lap);
+	increment = CI_VARLIST(buffer_lap, buffer_end,
+			    table1, &first);
+	if (increment <= 0) {
+		return false;
+	}
+	buffer_lap += increment;
+	increment = CI_VARLIST(buffer_lap, buffer_end,
+			       table2, &first);
+	if (increment < 0) {
+		return false;
+	}
+	buffer_lap += increment;
+	if (buffer_lap + 2 >= buffer_end)
+		return false;
+
+	*buffer_lap++ = '"';
+	*buffer_lap = '\0';
+	ctl_putdata(buf, (unsigned)(buffer_lap - buf), false);
+	return true;
+}
+
+
 #ifdef REFCLOCK
 /*
  * ctl_putclock - output clock variables
@@ -2344,12 +2341,6 @@ ctl_putclock(
 	int mustput
 	)
 {
-	char buf[CTL_MAX_DATA_LEN];
-	char *s, *t, *be;
-	const char *ss;
-	size_t sz;
-	const struct ctl_var *k;
-
 	switch (id) {
 
 	case CC_NAME:
@@ -2436,57 +2427,7 @@ ctl_putclock(
 		break;
 
 	case CC_VARLIST:
-		s = buf;
-		be = buf + sizeof(buf);
-		if (strlen(clock_var[CC_VARLIST].text) + 4 >
-		    sizeof(buf))
-			break;	/* really long var name */
-
-		snprintf(s, sizeof(buf), "%s=\"",
-			 clock_var[CC_VARLIST].text);
-		s += strlen(s);
-		t = s;
-
-		for (k = clock_var; !(EOV & k->flags); k++) {
-			if (PADDING & k->flags)
-				continue;
-
-			sz = strlen(k->text);
-			if (s + sz + 1 >= be)
-				break;
-
-			if (s != t)
-				*s++ = ',';
-			memcpy(s, k->text, sz);
-			s += sz;
-		}
-
-		for (k = pcs->kv_list; k && !(EOV & k->flags); k++) {
-			if (PADDING & k->flags)
-				continue;
-
-			ss = k->text;
-			if (NULL == ss)
-				continue;
-
-			while (*ss && *ss != '=')
-				ss++;
-			sz = (size_t)(ss - k->text);
-			if (s + sz + 1 >= be)
-				break;
-
-			if (s != t)
-				*s++ = ',';
-			memcpy(s, k->text, sz);
-			s += sz;
-			*s = '\0';
-		}
-		if (s + 2 >= be)
-			break;
-
-		*s++ = '"';
-		*s = '\0';
-		ctl_putdata(buf, (unsigned)(s - buf), false);
+		(void)CF_VARLIST(&clock_var[id], clock_var, pcs->kv_list);
 		break;
 
         default:
