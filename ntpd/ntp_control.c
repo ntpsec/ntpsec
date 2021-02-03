@@ -1148,14 +1148,9 @@ ctl_putdblf(
 	double		d
 	)
 {
-        char buffer[200];
         char buf[50];
-
-        strlcpy(buffer, tag, sizeof(buffer));
-        snprintf(buf, sizeof(buf), use_f ? "=%.*f" : "=%.*g", precision, d);
-        strlcat(buffer, buf, sizeof(buffer));
-
-        ctl_putdata(buffer, strlen(buffer), false);
+        snprintf(buf, sizeof(buf), use_f ? "%.*f" : "%.*g", precision, d);
+	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
 /*
@@ -1167,15 +1162,9 @@ ctl_putuint(
 	uint64_t uval
 	)
 {
-        char buffer[200];
         char buf[50];
-
-        strlcpy(buffer, tag, sizeof(buffer));
-
-        snprintf(buf, sizeof(buf), "=%" PRIu64, uval);
-        strlcat(buffer, buf, sizeof(buffer));
-
-        ctl_putdata(buffer, strlen(buffer), false);
+        snprintf(buf, sizeof(buf), "%" PRIu64, uval);
+	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
 /*
@@ -1187,22 +1176,16 @@ ctl_puttime(
 	time_t uval
 	)
 {
-	char buffer[200];
 	struct tm tmbuf, *tm = NULL;
         char buf[50];
-
-        strlcpy(buffer, tag, sizeof(buffer));
-
 	tm = gmtime_r(&uval, &tmbuf);
 	if (NULL == tm) {
 		return;
 	}
-	snprintf(buf, sizeof(buf), "=%04d-%02d-%02dT%02d:%02dZ",
+	snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02dZ",
                  tm->tm_year + 1900,
 		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
-        strlcat(buffer, buf, sizeof(buffer));
-
-	ctl_putdata(buffer, strlen(buf), false);
+	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
 
@@ -1216,15 +1199,9 @@ ctl_puthex(
 	uint64_t uval
 	)
 {
-	char buffer[200];
         char buf[50];
-
-        strlcpy(buffer, tag, sizeof(buffer));
-
-	snprintf(buf, sizeof(buf), "=0x%" PRIx64, uval);
-        strlcat(buffer, buf, sizeof(buffer));
-
-	ctl_putdata(buffer, strlen(buffer), false);
+	snprintf(buf, sizeof(buf), "0x%" PRIx64, uval);
+	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
 
@@ -1237,15 +1214,9 @@ ctl_putint(
 	long ival
 	)
 {
-	char buffer[200];
         char buf[50];
-
-        strlcpy(buffer, tag, sizeof(buffer));
-
-	snprintf(buf, sizeof(buf), "=%ld", ival);
-        strlcat(buffer, buf, sizeof(buffer));
-
-	ctl_putdata(buffer, strlen(buffer), false);
+	snprintf(buf, sizeof(buf), "%ld", ival);
+	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
 
@@ -1258,15 +1229,10 @@ ctl_putts(
 	l_fp *ts
 	)
 {
-	char buffer[200];
 	char buf[50];
-
-        strlcpy(buffer, tag, sizeof(buffer));
-
-	snprintf(buf, sizeof(buf), "=0x%08x.%08x",
+	snprintf(buf, sizeof(buf), "0x%08x.%08x",
 		 (unsigned int)lfpuint(*ts), (unsigned int)lfpfrac(*ts));
-        strlcat(buffer, buf, sizeof(buffer));
-	ctl_putdata(buffer, strlen(buffer), false);
+	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
 
@@ -1281,20 +1247,13 @@ ctl_putadr(
 	)
 {
         const char *cq;
-	char buffer[200];
-
-        strlcpy(buffer, tag, sizeof(buffer));
-        strlcat(buffer, "=", sizeof(buffer));
-
 	if (NULL == addr) {
 		struct in_addr in4;
 		in4.s_addr = addr32;
 		cq = inet_ntoa(in4);
 	} else
 		cq = socktoa(addr);
-
-        strlcat(buffer, cq, sizeof(buffer));
-	ctl_putdata(buffer, strlen(buffer), false);
+	ctl_putunqstr(tag, cq, strlen(cq));
 }
 
 
@@ -1307,13 +1266,10 @@ ctl_putrefid(
 	refid_t		refid
 	)
 {
-        char	output[16];
         char    buf[sizeof(refid) + 1];
         char *  cp;
         unsigned int i;
 
-        strlcpy(output, tag, sizeof(output));
-        strlcat(output, "=", sizeof(output));
         /* refid is really a 4 byte, un-terminated, string */
         cp = (char *)&refid;
         /* make sure all printable */
@@ -1324,9 +1280,7 @@ ctl_putrefid(
                         buf[i] = '.';
         }
         buf[i] = '\0';
-
-        strlcat(output, buf, sizeof(output));
-        ctl_putdata(output, strlen(output), false);
+	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
 
@@ -1343,10 +1297,6 @@ ctl_putarray(
 	char buffer[200];
 	char buf[50];
 	int i;
-
-        strlcpy(buffer, tag, sizeof(buffer));
-        strlcat(buffer, "=", sizeof(buffer));
-
 	i = start;
 	do {
 		if (i == 0)
@@ -1355,8 +1305,7 @@ ctl_putarray(
 		snprintf(buf, sizeof(buf), " %.2f", arr[i] * MS_PER_S);
                 strlcat(buffer, buf, sizeof(buffer));
 	} while (i != start);
-
-	ctl_putdata(buffer, strlen(buffer), false);
+	ctl_putunqstr(tag, buffer, strlen(buf));
 }
 
 
@@ -2072,7 +2021,7 @@ ssize_t CI_VARLIST(
 		} else {
 			string_length = string_split - row->text; 
 		}
-		if (string_length >= buf_end - buffer_lap - 1) {
+		if (string_length >= buf_end - buffer_lap - (size_t)1) {
 			return -1;
 		}
 		if (!*first) {
