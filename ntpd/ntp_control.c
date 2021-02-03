@@ -1360,6 +1360,28 @@ ctl_putarray(
 }
 
 
+#define CASE_DBL(number, variable)	case number: \
+		ctl_putdbl(CV_NAME, variable); \
+		break
+#define CASE_DBL6(number, variable)	case number: \
+		ctl_putdbl6(CV_NAME, variable); \
+		break
+#define CASE_HEX(number, variable)	case number: \
+		ctl_puthex(CV_NAME, variable); \
+		break
+#define CASE_INT(number, variable)	case number: \
+		ctl_putint(CV_NAME, variable); \
+		break
+#define CASE_SFP(number, variable)	case number: \
+		ctl_putsfp(CV_NAME, variable); \
+		break
+#define CASE_TS(number, variable)	case number: \
+		ctl_putts(CV_NAME, variable); \
+		break
+#define CASE_UINT(number, variable)	case number: \
+		ctl_putuint(CV_NAME, variable); \
+		break
+#define CV_NAME sys_var[varid].text
 /*
  * ctl_putsys - output a system variable
  */
@@ -1431,9 +1453,9 @@ ctl_putsys(
 
 	case CS_PEERID:
 		if (sys_vars.sys_peer == NULL)
-			ctl_putuint(sys_vars[varid].text, 0);
+			ctl_putuint(sys_var[varid].text, 0);
 		else
-			ctl_putuint(sys_vars[varid].text,
+			ctl_putuint(sys_var[varid].text,
 				    sys_vars.sys_peer->associd);
 		break;
 
@@ -1443,7 +1465,7 @@ ctl_putsys(
 			ss = sockporttoa(&sys_vars.sys_peer->srcadr);
 		else
 			ss = "0.0.0.0:0";
-		ctl_putunqstr(sys_vars[varid].text, ss, strlen(ss));
+		ctl_putunqstr(sys_var[varid].text, ss, strlen(ss));
 		break;
 
 	case CS_PEERMODE: {
@@ -1451,7 +1473,7 @@ ctl_putsys(
 		u = (sys_vars.sys_peer != NULL)
 			? sys_vars.sys_peer->hmode
 			: MODE_UNSPEC;
-		ctl_putuint(sys_vars[varid].text, u);
+		ctl_putuint(sys_var[varid].text, u);
 		break;
 		}
 
@@ -1461,7 +1483,7 @@ ctl_putsys(
 
 	case CS_DRIFT:
                 /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
-		ctl_putdbl6(sys_vars[varid].text, loop_data.drift_comp * US_PER_S);
+		ctl_putdbl6(sys_var[varid].text, loop_data.drift_comp * US_PER_S);
 		break;
 
 	case CS_JITTER:
@@ -1470,45 +1492,45 @@ ctl_putsys(
 
 	case CS_ERROR:
 		/* a.k.a clk_jitter (s).  output as ms */
-		ctl_putdbl6(sys_vars[varid].text, clkstate.clock_jitter * MS_PER_S);
+		ctl_putdbl6(sys_var[varid].text, clkstate.clock_jitter * MS_PER_S);
 		break;
 
 	case CS_CLOCK:
 		get_systime(&tmp);
-		ctl_putts(sys_vars[varid].text, &tmp);
+		ctl_putts(sys_var[varid].text, &tmp);
 		break;
 
 	case CS_PROCESSOR:
-		ctl_putstr(sys_vars[varid].text,
+		ctl_putstr(sys_var[varid].text,
 			   utsnamebuf.machine, strlen(utsnamebuf.machine));
 		break;
 
 	case CS_SYSTEM:
 		snprintf(str, sizeof(str), "%.100s/%.100s", utsnamebuf.sysname,
 			 utsnamebuf.release);
-		ctl_putstr(sys_vars[varid].text, str, strlen(str));
+		ctl_putstr(sys_var[varid].text, str, strlen(str));
 		break;
 
 	case CS_VERSION:
 		ss = ntpd_version();
-		ctl_putstr(sys_vars[varid].text, ss, strlen(ss));
+		ctl_putstr(sys_var[varid].text, ss, strlen(ss));
 		break;
 
 	case CS_STABIL:
 		/* a.k.a clk_wander (s/s), output as us/s */
-		ctl_putdbl6(sys_vars[varid].text,
+		ctl_putdbl6(sys_var[varid].text,
                             loop_data.clock_stability * US_PER_S);
 		break;
 
 	case CS_VARLIST:
 	{
-		(void)CF_VARLIST(&sys_vars[varid], sys_var, ext_sys_var);
+		(void)CF_VARLIST(&sys_var[varid], sys_var, ext_sys_var);
 		break;
 	}
 
 	case CS_TAI:
 		if (sys_tai > 0)
-			ctl_putuint(sys_vars[varid].text, sys_tai);
+			ctl_putuint(sys_var[varid].text, sys_tai);
 		break;
 
 	case CS_LEAPTAB:
@@ -1516,7 +1538,7 @@ ctl_putsys(
 		leap_signature_t lsig;
 		leapsec_getsig(&lsig);
 		if (lsig.ttime > 0)
-			ctl_puttime(sys_vars[varid].text, lsig.ttime);
+			ctl_puttime(sys_var[varid].text, lsig.ttime);
 		break;
 	}
 
@@ -1525,20 +1547,20 @@ ctl_putsys(
 		leap_signature_t lsig;
 		leapsec_getsig(&lsig);
 		if (lsig.etime > 0)
-			ctl_puttime(sys_vars[varid].text, lsig.etime);
+			ctl_puttime(sys_var[varid].text, lsig.etime);
 		break;
 	}
 
 #ifdef ENABLE_LEAP_SMEAR
 	case CS_LEAPSMEARINTV:
 		if (leap_smear_intv > 0)
-			ctl_putuint(sys_vars[varid].text,
+			ctl_putuint(sys_var[varid].text,
                                     leap_smear_intv);
 		break;
 
 	case CS_LEAPSMEAROFFS:
 		if (leap_smear_intv > 0)
-			ctl_putdbl(sys_vars[varid].text,
+			ctl_putdbl(sys_var[varid].text,
 				   leap_smear.doffset * MS_PER_S);
 		break;
 #endif	/* ENABLE_LEAP_SMEAR */
@@ -1998,8 +2020,10 @@ ctl_putsys(
                 break;
 	}
 }
+#undef CV_NAME
 
 
+#define CV_NAME peer_var[id].text
 /*
  * ctl_putpeer - output a peer variable
  */
@@ -2249,6 +2273,7 @@ ctl_putpeer(
 		break;
 	}
 }
+#undef CV_NAME
 
 
 ssize_t CI_VARLIST(
@@ -2331,6 +2356,7 @@ bool CF_VARLIST(
 
 
 #ifdef REFCLOCK
+#define CV_NAME clock_var[id].text
 /*
  * ctl_putclock - output clock variables
  */
@@ -2435,7 +2461,15 @@ ctl_putclock(
                 break;
 	}
 }
+#undef CV_NAME
 #endif
+#undef CASE_UINT
+#undef CASE_TS
+#undef CASE_SFP
+#undef CASE_INT
+#undef CASE_HEX
+#undef CASE_DBL6
+#undef CASE_DBL
 
 
 /*
