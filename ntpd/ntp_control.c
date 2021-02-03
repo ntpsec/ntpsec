@@ -1412,27 +1412,15 @@ ctl_putsys(
 
 	switch (varid) {
 
-	case CS_LEAP:
-		ctl_putuint(sys_vars[varid].text, sys_vars.sys_leap);
-		break;
+	CASE_UINT(CS_LEAP, sys_vars.sys_leap);
 
-	case CS_STRATUM:
-		ctl_putuint(sys_vars[varid].text, sys_vars.sys_stratum);
-		break;
+	CASE_UINT(CS_STRATUM, sys_vars.sys_stratum);
 
-	case CS_PRECISION:
-		ctl_putint(sys_vars[varid].text, sys_vars.sys_precision);
-		break;
+	CASE_INT(CS_PRECISION, sys_vars.sys_precision);
 
-	case CS_ROOTDELAY:
-		ctl_putdbl(sys_vars[varid].text,
-                           sys_vars.sys_rootdelay * MS_PER_S);
-		break;
+	CASE_DBL(CS_ROOTDELAY, sys_vars.sys_rootdelay * MS_PER_S);
 
-	case CS_ROOTDISPERSION:
-		ctl_putdbl(sys_vars[varid].text,
-			   sys_vars.sys_rootdisp * MS_PER_S);
-		break;
+	CASE_DBL(CS_ROOTDISPERSION, sys_vars.sys_rootdisp * MS_PER_S);
 
 	case CS_REFID:
 		if (sys_vars.sys_stratum > 1 &&
@@ -1443,13 +1431,9 @@ ctl_putsys(
 			ctl_putrefid(sys_var[varid].text, sys_vars.sys_refid);
 		break;
 
-	case CS_REFTIME:
-		ctl_putts(sys_vars[varid].text, &sys_vars.sys_reftime);
-		break;
+	CASE_TS(CS_REFTIME, &sys_vars.sys_reftime);
 
-	case CS_POLL:
-		ctl_putuint(sys_vars[varid].text, clkstate.sys_poll);
-		break;
+	CASE_UINT(CS_POLL, clkstate.sys_poll);
 
 	case CS_PEERID:
 		if (sys_vars.sys_peer == NULL)
@@ -1477,18 +1461,14 @@ ctl_putsys(
 		break;
 		}
 
-	case CS_OFFSET:
-		ctl_putdbl6(sys_vars[varid].text, clkstate.last_offset * MS_PER_S);
-		break;
+	CASE_DBL6(CS_OFFSET, clkstate.last_offset * MS_PER_S);
 
 	case CS_DRIFT:
                 /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
 		ctl_putdbl6(sys_var[varid].text, loop_data.drift_comp * US_PER_S);
 		break;
 
-	case CS_JITTER:
-		ctl_putdbl6(sys_vars[varid].text, clkstate.sys_jitter * MS_PER_S);
-		break;
+	CASE_DBL6(CS_JITTER, clkstate.sys_jitter * MS_PER_S);
 
 	case CS_ERROR:
 		/* a.k.a clk_jitter (s).  output as ms */
@@ -1565,21 +1545,13 @@ ctl_putsys(
 		break;
 #endif	/* ENABLE_LEAP_SMEAR */
 
-	case CS_RATE:
-		ctl_putuint(sys_vars[varid].text, rstrct.ntp_minpoll);
-		break;
+	CASE_UINT(CS_RATE, rstrct.ntp_minpoll);
 
-	case CS_MRU_ENABLED:
-		ctl_puthex(sys_var[varid].text, mon_data.mon_enabled);
-		break;
+	CASE_HEX(CS_MRU_ENABLED, mon_data.mon_enabled);
 
-	case CS_MRU_DEPTH:  /* mru_entries */
-		ctl_putuint(sys_var[varid].text, mon_data.mru_entries);
-		break;
+	CASE_UINT(CS_MRU_DEPTH, mon_data.mru_entries);
 
-	case CS_MRU_HASHSLOTS:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_hashslots);
-		break;
+	CASE_UINT(CS_MRU_HASHSLOTS, mon_data.mru_hashslots);
 
 	case CS_MRU_MEM: {
 		uint64_t u;
@@ -1589,25 +1561,15 @@ ctl_putsys(
 		break;
 		}
 
-	case CS_MRU_DEEPEST:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_peakentries);
-		break;
+	CASE_UINT(CS_MRU_DEEPEST, mon_data.mru_peakentries);
 
-	case CS_MRU_MINDEPTH:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_mindepth);
-		break;
+	CASE_UINT(CS_MRU_MINDEPTH, mon_data.mru_mindepth);
 
-	case CS_MRU_MAXAGE:
-		ctl_putint(sys_var[varid].text, mon_data.mru_maxage);
-		break;
+	CASE_INT(CS_MRU_MAXAGE, mon_data.mru_maxage);
 
-	case CS_MRU_MINAGE:
-		ctl_putint(sys_var[varid].text, mon_data.mru_minage);
-		break;
+	CASE_INT(CS_MRU_MINAGE, mon_data.mru_minage);
 
-	case CS_MRU_MAXDEPTH:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_maxdepth);
-		break;
+	CASE_UINT(CS_MRU_MAXDEPTH, mon_data.mru_maxdepth);
 
 	case CS_MRU_MAXMEM: {
 		uint64_t u;
@@ -1617,25 +1579,15 @@ ctl_putsys(
 		break;
 		}
 
-	case CS_MRU_EXISTS:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_exists);
-		break;
+	CASE_UINT(CS_MRU_EXISTS, mon_data.mru_exists);
 
-	case CS_MRU_NEW:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_new);
-		break;
+	CASE_UINT(CS_MRU_NEW, mon_data.mru_new);
 
-	case CS_MRU_RECYCLEOLD:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_recycleold);
-		break;
+	CASE_UINT(CS_MRU_RECYCLEOLD, mon_data.mru_recycleold);
 
-	case CS_MRU_RECYCLEFULL:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_recyclefull);
-		break;
+	CASE_UINT(CS_MRU_RECYCLEFULL, mon_data.mru_recyclefull);
 
-	case CS_MRU_NONE:
-		ctl_putuint(sys_var[varid].text, mon_data.mru_none);
-		break;
+	CASE_UINT(CS_MRU_NONE, mon_data.mru_none);
 
 	case CS_MRU_OLDEST_AGE: {
 		l_fp now;
@@ -1644,112 +1596,63 @@ ctl_putsys(
 		break;
 		}
 
-	case CS_SS_UPTIME:
-		ctl_putuint(sys_var[varid].text, current_time);
-		break;
+	CASE_UINT(CS_SS_UPTIME, current_time);
 
-	case CS_SS_RESET:
-		ctl_putuint(sys_var[varid].text, current_time - stat_stattime());
-		break;
+	CASE_UINT(CS_SS_RESET, current_time - stat_stattime());
 
-	case CS_SS_RECEIVED:
-        ctl_putuint(sys_var[varid].text, stat_received());
-		break;
+	CASE_UINT(CS_SS_RECEIVED, stat_received());
 
-	case CS_SS_THISVER:
-		ctl_putuint(sys_var[varid].text, stat_newversion());
-		break;
+	CASE_UINT(CS_SS_THISVER, stat_newversion());
+	
+	CASE_UINT(CS_SS_OLDVER, stat_oldversion());
 
-	case CS_SS_OLDVER:
-		ctl_putuint(sys_var[varid].text, stat_oldversion());
-		break;
+	CASE_UINT(CS_SS_BADFORMAT, stat_badlength());
 
-	case CS_SS_BADFORMAT:
-		ctl_putuint(sys_var[varid].text, stat_badlength());
-		break;
+	CASE_UINT(CS_SS_BADAUTH, stat_badauth());
 
-	case CS_SS_BADAUTH:
-		ctl_putuint(sys_var[varid].text, stat_badauth());
-		break;
+	CASE_UINT(CS_SS_DECLINED, stat_declined());
 
-	case CS_SS_DECLINED:
-		ctl_putuint(sys_var[varid].text, stat_declined());
-		break;
+	CASE_UINT(CS_SS_RESTRICTED, stat_restricted());
 
-	case CS_SS_RESTRICTED:
-		ctl_putuint(sys_var[varid].text, stat_restricted());
-		break;
+	CASE_UINT(CS_SS_LIMITED, stat_limitrejected());
 
-	case CS_SS_LIMITED:
-		ctl_putuint(sys_var[varid].text, stat_limitrejected());
-		break;
+	CASE_UINT(CS_SS_KODSENT, stat_kodsent());
 
-	case CS_SS_KODSENT:
-		ctl_putuint(sys_var[varid].text, stat_kodsent());
-		break;
-
-	case CS_SS_PROCESSED:
-		ctl_putuint(sys_var[varid].text, stat_processed());
-		break;
+	CASE_UINT(CS_SS_PROCESSED, stat_processed());
 
 	case CS_AUTHDELAY:
 		dtemp = lfptod(sys_authdelay);
 		ctl_putdbl(sys_var[varid].text, dtemp * MS_PER_S);
 		break;
 
-	case CS_AUTHKEYS:
-		ctl_putuint(sys_var[varid].text, authnumkeys);
-		break;
+	CASE_UINT(CS_AUTHKEYS, authnumkeys);
 
 	case CS_AUTHFREEK:
 		ctl_putuint(sys_var[varid].text,
                             (unsigned long)authnumfreekeys);
 		break;
 
-	case CS_AUTHKLOOKUPS:
-		ctl_putuint(sys_var[varid].text, authkeylookups);
-		break;
+	CASE_UINT(CS_AUTHKLOOKUPS, authkeylookups);
 
-	case CS_AUTHKNOTFOUND:
-		ctl_putuint(sys_var[varid].text, authkeynotfound);
-		break;
+	CASE_UINT(CS_AUTHKNOTFOUND, authkeynotfound);
 
-	case CS_AUTHENCRYPTS:
-		ctl_putuint(sys_var[varid].text, authencryptions);
-		break;
+	CASE_UINT(CS_AUTHENCRYPTS, authencryptions);
 
-	case CS_AUTHDIGESTENCRYPT:
-		ctl_putuint(sys_var[varid].text, authdigestencrypt);
-		break;
+	CASE_UINT(CS_AUTHDIGESTENCRYPT, authdigestencrypt);
 
-	case CS_AUTHCMACENCRYPT:
-		ctl_putuint(sys_var[varid].text, authcmacencrypt);
-		break;
+	CASE_UINT(CS_AUTHCMACENCRYPT, authcmacencrypt);
 
-	case CS_AUTHDECRYPTS:
-		ctl_putuint(sys_var[varid].text, authdecryptions);
-		break;
+	CASE_UINT(CS_AUTHDECRYPTS, authdecryptions);
 
-	case CS_AUTHDIGESTDECRYPT:
-		ctl_putuint(sys_var[varid].text, authdigestdecrypt);
-		break;
+	CASE_UINT(CS_AUTHDIGESTDECRYPT, authdigestdecrypt);
 
-	case CS_AUTHDIGESTFAIL:
-		ctl_putuint(sys_var[varid].text, authdigestfail);
-		break;
+	CASE_UINT(CS_AUTHDIGESTFAIL, authdigestfail);
 
-	case CS_AUTHCMACDECRYPT:
-		ctl_putuint(sys_var[varid].text, authcmacdecrypt);
-		break;
+	CASE_UINT(CS_AUTHCMACDECRYPT, authcmacdecrypt);
 
-	case CS_AUTHCMACFAIL:
-		ctl_putuint(sys_var[varid].text, authcmacfail);
-		break;
+	CASE_UINT(CS_AUTHCMACFAIL, authcmacfail);
 
-	case CS_AUTHRESET:
-		ctl_putuint(sys_var[varid].text,
-			    current_time - auth_timereset);
-		break;
+	CASE_UINT(CS_AUTHRESET, current_time - auth_timereset);
 
 		/*
 		 * CTL_IF_KERNPPS() puts a zero if kernel hard PPS is not
@@ -1766,9 +1669,7 @@ ctl_putsys(
 			ntp_error_in_seconds(ntx.offset) * MS_PER_S);
 		break;
 
-	case CS_K_FREQ:
-		ctl_putsfp(sys_var[varid].text, ntx.freq);
-		break;
+	CASE_SFP(CS_K_FREQ, ntx.freq);
 
 	case CS_K_MAXERR:
 		ctl_putdblf(sys_var[varid].text, false, 6,
@@ -1785,18 +1686,14 @@ ctl_putsys(
 		ctl_putstr(sys_var[varid].text, ss, strlen(ss));
 		break;
 
-	case CS_K_TIMECONST:
-		ctl_putint(sys_var[varid].text, ntx.constant);
-		break;
+	CASE_INT(CS_K_TIMECONST, ntx.constant);
 
 	case CS_K_PRECISION:
 		ctl_putdblf(sys_var[varid].text, false, 6,
 			    ntp_error_in_seconds(ntx.precision) * MS_PER_S);
 		break;
 
-	case CS_K_FREQTOL:
-	        ctl_putsfp(sys_var[varid].text, ntx.tolerance);
-		break;
+	CASE_SFP(CS_K_FREQTOL, ntx.tolerance);
 
 	case CS_K_PPS_FREQ:
 		CTL_IF_KERNPPS(
@@ -1855,31 +1752,23 @@ ctl_putsys(
 		);
 		break;
 
-	case CS_K_LOCKCLOCK:
-		ctl_putuint(sys_var[varid].text, loop_data.lockclock);
-		break;
+	CASE_UINT(CS_K_LOCKCLOCK, loop_data.lockclock);
 
 	case CS_IOSTATS_RESET:
 		ctl_putuint(sys_var[varid].text,
             current_time - counter_reset_time());
 		break;
 
-	case CS_TOTAL_RBUF:
-		ctl_putuint(sys_var[varid].text, total_recvbuffs());
-		break;
+	CASE_UINT(CS_TOTAL_RBUF, total_recvbuffs());
 
-	case CS_FREE_RBUF:
-		ctl_putuint(sys_var[varid].text, free_recvbuffs());
-		break;
+	CASE_UINT(CS_FREE_RBUF, free_recvbuffs());
 
 	case CS_USED_RBUF:
 		// FIXME: nuke this slot
 		ctl_putuint(sys_var[varid].text, 0);
 		break;
 
-	case CS_RBUF_LOWATER:
-		ctl_putuint(sys_var[varid].text, lowater_additions());
-		break;
+	CASE_UINT(CS_RBUF_LOWATER, lowater_additions());
 
 	case CS_IO_DROPPED:
         ctl_putuint(sys_var[varid].text, dropped_count());
@@ -1909,18 +1798,11 @@ ctl_putsys(
         ctl_putuint(sys_var[varid].text, handler_pkts_count());
 		break;
 
-	case CS_TIMERSTATS_RESET:
-		ctl_putuint(sys_var[varid].text,
-			    current_time - timer_timereset);
-		break;
+	CASE_UINT(CS_TIMERSTATS_RESET, current_time - timer_timereset);
 
-	case CS_TIMER_OVERRUNS:
-		ctl_putuint(sys_var[varid].text, alarm_overflow);
-		break;
+	CASE_UINT(CS_TIMER_OVERRUNS, alarm_overflow);
 
-	case CS_TIMER_XMTS:
-		ctl_putuint(sys_var[varid].text, timer_xmtcalls);
-		break;
+	CASE_UINT(CS_TIMER_XMTS, timer_xmtcalls);
 
 	case CS_FUZZ:
 		/* a.k.a. fuzz (s), output in ms */
@@ -1931,9 +1813,7 @@ ctl_putsys(
 #endif
 		break;
 
-	case CS_WANDER_THRESH:
-		ctl_putdbl(sys_var[varid].text, wander_threshold * US_PER_S);
-		break;
+	CASE_DBL(CS_WANDER_THRESH, wander_threshold * US_PER_S);
 
 	case CS_TICK:
 		/* a.k.a. sys_tick (s), output in ms */
@@ -1944,75 +1824,40 @@ ctl_putsys(
 #endif
 		break;
 
-	case CS_NUMCTLREQ:
-		ctl_putuint(sys_var[varid].text, numctlreq);
-		break;
+	CASE_UINT(CS_NUMCTLREQ, numctlreq);
 
-	case CS_ROOTDISTANCE:
-		ctl_putdbl(sys_vars[varid].text,
-			   sys_vars.sys_rootdist * MS_PER_S);
-		break;
+	CASE_DBL(CS_ROOTDISTANCE, sys_vars.sys_rootdist * MS_PER_S);
 
 #ifndef DISABLE_NTS
-	case CS_nts_client_send:
-		ctl_putuint(sys_var[varid].text, nts_client_send);
-		break;
+	CASE_UINT(CS_nts_client_send, nts_client_send);
 
-	case CS_nts_client_recv_good:
-		ctl_putuint(sys_var[varid].text, nts_client_recv_good);
-		break;
+	CASE_UINT(CS_nts_client_recv_good, nts_client_recv_good);
 
-	case CS_nts_client_recv_bad:
-		ctl_putuint(sys_var[varid].text, nts_client_recv_bad);
-		break;
+	CASE_UINT(CS_nts_client_recv_bad, nts_client_recv_bad);
 
-	case CS_nts_server_send:
-		ctl_putuint(sys_var[varid].text, nts_server_send);
-		break;
+	CASE_UINT(CS_nts_server_send, nts_server_send);
 
-	case CS_nts_server_recv_good:
-		ctl_putuint(sys_var[varid].text, nts_server_recv_good);
-		break;
+	CASE_UINT(CS_nts_server_recv_good, nts_server_recv_good);
 
-	case CS_nts_server_recv_bad:
-		ctl_putuint(sys_var[varid].text, nts_server_recv_bad);
-		break;
+	CASE_UINT(CS_nts_server_recv_bad, nts_server_recv_bad);
 
-	case CS_nts_cookie_make:
-		ctl_putuint(sys_var[varid].text, nts_cookie_make);
-		break;
+	CASE_UINT(CS_nts_cookie_make, nts_cookie_make);
 
-	case CS_nts_cookie_decode:
-		ctl_putuint(sys_var[varid].text, nts_cookie_decode);
-		break;
+	CASE_UINT(CS_nts_cookie_decode, nts_cookie_decode);
 
-	case CS_nts_cookie_decode_old:
-		ctl_putuint(sys_var[varid].text, nts_cookie_decode_old);
-		break;
+	CASE_UINT(CS_nts_cookie_decode_old, nts_cookie_decode_old);
 
-	case CS_nts_cookie_decode_too_old:
-		ctl_putuint(sys_var[varid].text, nts_cookie_decode_too_old);
-		break;
+	CASE_UINT(CS_nts_cookie_decode_too_old, nts_cookie_decode_too_old);
 
-	case CS_nts_cookie_decode_error:
-		ctl_putuint(sys_var[varid].text, nts_cookie_decode_error);
-		break;
+	CASE_UINT(CS_nts_cookie_decode_error, nts_cookie_decode_error);
 
-	case CS_nts_ke_serves_good:
-		ctl_putuint(sys_var[varid].text, nts_ke_serves_good);
-		break;
+	CASE_UINT(CS_nts_ke_serves_good, nts_ke_serves_good);
 
-	case CS_nts_ke_serves_bad:
-		ctl_putuint(sys_var[varid].text, nts_ke_serves_bad);
-		break;
+	CASE_UINT(CS_nts_ke_serves_bad, nts_ke_serves_bad);
 
-	case CS_nts_ke_probes_good:
-		ctl_putuint(sys_var[varid].text, nts_ke_probes_good);
-		break;
+	CASE_UINT(CS_nts_ke_probes_good, nts_ke_probes_good);
 
-	case CS_nts_ke_probes_bad:
-		ctl_putuint(sys_var[varid].text, nts_ke_probes_bad);
-		break;
+	CASE_UINT(CS_nts_ke_probes_bad, nts_ke_probes_bad);
 #endif
 
         default:
@@ -2040,9 +1885,7 @@ ctl_putpeer(
 			    !(FLAG_PREEMPT & p->cfg.flags));
 		break;
 
-	case CP_AUTHENABLE:
-		ctl_putuint(peer_var[id].text, !(p->cfg.peerkey));
-		break;
+	CASE_UINT(CP_AUTHENABLE, !(p->cfg.peerkey));
 
 	case CP_AUTHENTIC:
 		ctl_putuint(peer_var[id].text,
@@ -2053,9 +1896,7 @@ ctl_putpeer(
 		ctl_putadr(peer_var[id].text, 0, &p->srcadr);
 		break;
 
-	case CP_SRCPORT:
-		ctl_putuint(peer_var[id].text, SRCPORT(&p->srcadr));
-		break;
+	CASE_UINT(CP_SRCPORT, SRCPORT(&p->srcadr));
 
 	case CP_SRCHOST:
 		if (p->hostname != NULL)
@@ -2084,41 +1925,23 @@ ctl_putpeer(
 				: 0);
 		break;
 
-	case CP_RATE:
-		ctl_putuint(peer_var[id].text, p->throttle);
-		break;
+	CASE_UINT(CP_RATE, p->throttle);
 
-	case CP_LEAP:
-		ctl_putuint(peer_var[id].text, p->leap);
-		break;
+	CASE_UINT(CP_LEAP, p->leap);
 
-	case CP_HMODE:
-		ctl_putuint(peer_var[id].text, p->hmode);
-		break;
+	CASE_UINT(CP_HMODE, p->hmode);
 
-	case CP_STRATUM:
-		ctl_putuint(peer_var[id].text, p->stratum);
-		break;
+	CASE_UINT(CP_STRATUM, p->stratum);
 
-	case CP_PPOLL:
-		ctl_putuint(peer_var[id].text, p->ppoll);
-		break;
+	CASE_UINT(CP_PPOLL, p->ppoll);
 
-	case CP_HPOLL:
-		ctl_putuint(peer_var[id].text, p->hpoll);
-		break;
+	CASE_UINT(CP_HPOLL, p->hpoll);
 
-	case CP_PRECISION:
-		ctl_putint(peer_var[id].text, p->precision);
-		break;
+	CASE_INT(CP_PRECISION, p->precision);
 
-	case CP_ROOTDELAY:
-		ctl_putdbl(peer_var[id].text, p->rootdelay * MS_PER_S);
-		break;
+	CASE_DBL(CP_ROOTDELAY, p->rootdelay * MS_PER_S);
 
-	case CP_ROOTDISPERSION:
-		ctl_putdbl(peer_var[id].text, p->rootdisp * MS_PER_S);
-		break;
+	CASE_DBL(CP_ROOTDISPERSION, p->rootdisp * MS_PER_S);
 
 	case CP_REFID:
 #ifdef REFCLOCK
@@ -2134,30 +1957,20 @@ ctl_putpeer(
 			ctl_putrefid(peer_var[id].text, p->refid);
 		break;
 
-	case CP_REFTIME:
-		ctl_putts(peer_var[id].text, &p->reftime);
-		break;
+	CASE_TS(CP_REFTIME, &p->reftime);
 
-	case CP_REC:
-		ctl_putts(peer_var[id].text, &p->dst);
-		break;
+	CASE_TS(CP_REC, &p->dst);
 
-	case CP_XMT:
-		ctl_putts(peer_var[id].text, &p->xmt);
-		break;
+	CASE_TS(CP_XMT, &p->xmt);
 
 	case CP_BIAS:
 		if ( !D_ISZERO_NS(p->cfg.bias) )
 			ctl_putdbl(peer_var[id].text, p->cfg.bias);
 		break;
 
-	case CP_REACH:
-		ctl_puthex(peer_var[id].text, p->reach);
-		break;
+	CASE_HEX(CP_REACH, p->reach);
 
-	case CP_FLASH:
-		ctl_puthex(peer_var[id].text, p->flash);
-		break;
+	CASE_HEX(CP_FLASH, p->flash);
 
 	case CP_MODE:
 #ifdef REFCLOCK
@@ -2168,30 +1981,17 @@ ctl_putpeer(
 #endif
 		break;
 
-	case CP_UNREACH:
-		ctl_putuint(peer_var[id].text, (unsigned long)p->unreach);
-		break;
+	CASE_UINT(CP_UNREACH, (unsigned long)p->unreach);
 
-	case CP_TIMER:
-		ctl_putuint(peer_var[id].text,
-			    p->nextdate - current_time);
-		break;
+	CASE_UINT(CP_TIMER, p->nextdate - current_time);
 
-	case CP_DELAY:
-		ctl_putdbl6(peer_var[id].text, p->delay * MS_PER_S);
-		break;
+	CASE_DBL6(CP_DELAY, p->delay * MS_PER_S);
 
-	case CP_OFFSET:
-		ctl_putdbl6(peer_var[id].text, p->offset * MS_PER_S);
-		break;
+	CASE_DBL6(CP_OFFSET, p->offset * MS_PER_S);
 
-	case CP_JITTER:
-		ctl_putdbl6(peer_var[id].text, p->jitter * MS_PER_S);
-		break;
+	CASE_DBL6(CP_JITTER, p->jitter * MS_PER_S);
 
-	case CP_DISPERSION:
-		ctl_putdbl6(peer_var[id].text, p->disp * MS_PER_S);
-		break;
+	CASE_DBL6(CP_DISPERSION, p->disp * MS_PER_S);
 
 	case CP_KEYID:
 		if (p->cfg.peerkey > NTP_MAXKEY)
@@ -2215,59 +2015,33 @@ ctl_putpeer(
 			     p->filter_nextpt);
 		break;
 
-	case CP_PMODE:
-		ctl_putuint(peer_var[id].text, p->pmode);
-		break;
+	CASE_UINT(CP_PMODE, p->pmode);
 
-	case CP_RECEIVED:
-		ctl_putuint(peer_var[id].text, p->received);
-		break;
+	CASE_UINT(CP_RECEIVED, p->received);
 
-	case CP_SENT:
-		ctl_putuint(peer_var[id].text, p->sent);
-		break;
+	CASE_UINT(CP_SENT, p->sent);
 
 	case CP_VARLIST:
 		(void)CF_VARLIST(&peer_var[id], peer_var, NULL);
 		break;
 
-	case CP_TIMEREC:
-		ctl_putuint(peer_var[id].text,
-			    current_time - p->timereceived);
-		break;
+	CASE_UINT(CP_TIMEREC, current_time - p->timereceived);
 
-	case CP_TIMEREACH:
-		ctl_putuint(peer_var[id].text,
-			    current_time - p->timereachable);
-		break;
+	CASE_UINT(CP_TIMEREACH, current_time - p->timereachable);
 
-	case CP_BADAUTH:
-		ctl_putuint(peer_var[id].text, p->badauth);
-		break;
+	CASE_UINT(CP_BADAUTH, p->badauth);
 
-	case CP_BOGUSORG:
-		ctl_putuint(peer_var[id].text, p->bogusorg);
-		break;
+	CASE_UINT(CP_BOGUSORG, p->bogusorg);
 
-	case CP_OLDPKT:
-		ctl_putuint(peer_var[id].text, p->oldpkt);
-		break;
+	CASE_UINT(CP_OLDPKT, p->oldpkt);
 
-	case CP_SELDISP:
-		ctl_putuint(peer_var[id].text, p->seldisptoolarge);
-		break;
+	CASE_UINT(CP_SELDISP, p->seldisptoolarge);
 
-	case CP_SELBROKEN:
-		ctl_putuint(peer_var[id].text, p->selbroken);
-		break;
+	CASE_UINT(CP_SELBROKEN, p->selbroken);
 
-	case CP_CANDIDATE:
-		ctl_putuint(peer_var[id].text, p->status);
-		break;
+	CASE_UINT(CP_CANDIDATE, p->status);
 
-	case CP_NTSCOOKIES:
-		ctl_putint(peer_var[id].text, p->nts_state.count);
-		break;
+	CASE_INT(CP_NTSCOOKIES, p->nts_state.count);
 
 	default:
 		break;
@@ -2387,24 +2161,13 @@ ctl_putclock(
 			   (unsigned)pcs->lencode);
 		break;
 
-	case CC_POLL:
-		ctl_putuint(clock_var[id].text, pcs->polls);
-		break;
+	CASE_UINT(CC_POLL, pcs->polls);
 
-	case CC_NOREPLY:
-		ctl_putuint(clock_var[id].text,
-			    pcs->noresponse);
-		break;
+	CASE_UINT(CC_NOREPLY, pcs->noresponse);
 
-	case CC_BADFORMAT:
-		ctl_putuint(clock_var[id].text,
-			    pcs->badformat);
-		break;
+	CASE_UINT(CC_BADFORMAT, pcs->badformat);
 
-	case CC_BADDATA:
-		ctl_putuint(clock_var[id].text,
-			    pcs->baddata);
-		break;
+	CASE_UINT(CC_BADDATA, pcs->baddata);
 
 	case CC_FUDGETIME1:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME1))
@@ -2435,9 +2198,7 @@ ctl_putclock(
 		}
 		break;
 
-	case CC_FLAGS:
-		ctl_putuint(clock_var[id].text, pcs->flags);
-		break;
+	CASE_UINT(CC_FLAGS, pcs->flags);
 
 	case CC_DEVICE:
 		if (pcs->clockdesc == NULL ||
