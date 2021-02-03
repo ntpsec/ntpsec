@@ -1391,24 +1391,24 @@ ctl_putsys(
 	switch (varid) {
 
 	case CS_LEAP:
-		ctl_putuint(sys_var[CS_LEAP].text, sys_vars.sys_leap);
+		ctl_putuint(sys_vars[varid].text, sys_vars.sys_leap);
 		break;
 
 	case CS_STRATUM:
-		ctl_putuint(sys_var[CS_STRATUM].text, sys_vars.sys_stratum);
+		ctl_putuint(sys_vars[varid].text, sys_vars.sys_stratum);
 		break;
 
 	case CS_PRECISION:
-		ctl_putint(sys_var[CS_PRECISION].text, sys_vars.sys_precision);
+		ctl_putint(sys_vars[varid].text, sys_vars.sys_precision);
 		break;
 
 	case CS_ROOTDELAY:
-		ctl_putdbl(sys_var[CS_ROOTDELAY].text,
+		ctl_putdbl(sys_vars[varid].text,
                            sys_vars.sys_rootdelay * MS_PER_S);
 		break;
 
 	case CS_ROOTDISPERSION:
-		ctl_putdbl(sys_var[CS_ROOTDISPERSION].text,
+		ctl_putdbl(sys_vars[varid].text,
 			   sys_vars.sys_rootdisp * MS_PER_S);
 		break;
 
@@ -1422,18 +1422,18 @@ ctl_putsys(
 		break;
 
 	case CS_REFTIME:
-		ctl_putts(sys_var[CS_REFTIME].text, &sys_vars.sys_reftime);
+		ctl_putts(sys_vars[varid].text, &sys_vars.sys_reftime);
 		break;
 
 	case CS_POLL:
-		ctl_putuint(sys_var[CS_POLL].text, clkstate.sys_poll);
+		ctl_putuint(sys_vars[varid].text, clkstate.sys_poll);
 		break;
 
 	case CS_PEERID:
 		if (sys_vars.sys_peer == NULL)
-			ctl_putuint(sys_var[CS_PEERID].text, 0);
+			ctl_putuint(sys_vars[varid].text, 0);
 		else
-			ctl_putuint(sys_var[CS_PEERID].text,
+			ctl_putuint(sys_vars[varid].text,
 				    sys_vars.sys_peer->associd);
 		break;
 
@@ -1443,7 +1443,7 @@ ctl_putsys(
 			ss = sockporttoa(&sys_vars.sys_peer->srcadr);
 		else
 			ss = "0.0.0.0:0";
-		ctl_putunqstr(sys_var[CS_PEERADR].text, ss, strlen(ss));
+		ctl_putunqstr(sys_vars[varid].text, ss, strlen(ss));
 		break;
 
 	case CS_PEERMODE: {
@@ -1451,64 +1451,64 @@ ctl_putsys(
 		u = (sys_vars.sys_peer != NULL)
 			? sys_vars.sys_peer->hmode
 			: MODE_UNSPEC;
-		ctl_putuint(sys_var[CS_PEERMODE].text, u);
+		ctl_putuint(sys_vars[varid].text, u);
 		break;
 		}
 
 	case CS_OFFSET:
-		ctl_putdbl6(sys_var[CS_OFFSET].text, clkstate.last_offset * MS_PER_S);
+		ctl_putdbl6(sys_vars[varid].text, clkstate.last_offset * MS_PER_S);
 		break;
 
 	case CS_DRIFT:
                 /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
-		ctl_putdbl6(sys_var[CS_DRIFT].text, loop_data.drift_comp * US_PER_S);
+		ctl_putdbl6(sys_vars[varid].text, loop_data.drift_comp * US_PER_S);
 		break;
 
 	case CS_JITTER:
-		ctl_putdbl6(sys_var[CS_JITTER].text, clkstate.sys_jitter * MS_PER_S);
+		ctl_putdbl6(sys_vars[varid].text, clkstate.sys_jitter * MS_PER_S);
 		break;
 
 	case CS_ERROR:
 		/* a.k.a clk_jitter (s).  output as ms */
-		ctl_putdbl6(sys_var[CS_ERROR].text, clkstate.clock_jitter * MS_PER_S);
+		ctl_putdbl6(sys_vars[varid].text, clkstate.clock_jitter * MS_PER_S);
 		break;
 
 	case CS_CLOCK:
 		get_systime(&tmp);
-		ctl_putts(sys_var[CS_CLOCK].text, &tmp);
+		ctl_putts(sys_vars[varid].text, &tmp);
 		break;
 
 	case CS_PROCESSOR:
-		ctl_putstr(sys_var[CS_PROCESSOR].text,
+		ctl_putstr(sys_vars[varid].text,
 			   utsnamebuf.machine, strlen(utsnamebuf.machine));
 		break;
 
 	case CS_SYSTEM:
 		snprintf(str, sizeof(str), "%.100s/%.100s", utsnamebuf.sysname,
 			 utsnamebuf.release);
-		ctl_putstr(sys_var[CS_SYSTEM].text, str, strlen(str));
+		ctl_putstr(sys_vars[varid].text, str, strlen(str));
 		break;
 
 	case CS_VERSION:
 		ss = ntpd_version();
-		ctl_putstr(sys_var[CS_VERSION].text, ss, strlen(ss));
+		ctl_putstr(sys_vars[varid].text, ss, strlen(ss));
 		break;
 
 	case CS_STABIL:
 		/* a.k.a clk_wander (s/s), output as us/s */
-		ctl_putdbl6(sys_var[CS_STABIL].text,
+		ctl_putdbl6(sys_vars[varid].text,
                             loop_data.clock_stability * US_PER_S);
 		break;
 
 	case CS_VARLIST:
 	{
-		(void)CF_VARLIST(&sys_var[CS_VARLIST], sys_var, ext_sys_var);
+		(void)CF_VARLIST(&sys_vars[varid], sys_var, ext_sys_var);
 		break;
 	}
 
 	case CS_TAI:
 		if (sys_tai > 0)
-			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
+			ctl_putuint(sys_vars[varid].text, sys_tai);
 		break;
 
 	case CS_LEAPTAB:
@@ -1516,7 +1516,7 @@ ctl_putsys(
 		leap_signature_t lsig;
 		leapsec_getsig(&lsig);
 		if (lsig.ttime > 0)
-			ctl_puttime(sys_var[CS_LEAPTAB].text, lsig.ttime);
+			ctl_puttime(sys_vars[varid].text, lsig.ttime);
 		break;
 	}
 
@@ -1525,26 +1525,26 @@ ctl_putsys(
 		leap_signature_t lsig;
 		leapsec_getsig(&lsig);
 		if (lsig.etime > 0)
-			ctl_puttime(sys_var[CS_LEAPEND].text, lsig.etime);
+			ctl_puttime(sys_vars[varid].text, lsig.etime);
 		break;
 	}
 
 #ifdef ENABLE_LEAP_SMEAR
 	case CS_LEAPSMEARINTV:
 		if (leap_smear_intv > 0)
-			ctl_putuint(sys_var[CS_LEAPSMEARINTV].text,
+			ctl_putuint(sys_vars[varid].text,
                                     leap_smear_intv);
 		break;
 
 	case CS_LEAPSMEAROFFS:
 		if (leap_smear_intv > 0)
-			ctl_putdbl(sys_var[CS_LEAPSMEAROFFS].text,
+			ctl_putdbl(sys_vars[varid].text,
 				   leap_smear.doffset * MS_PER_S);
 		break;
 #endif	/* ENABLE_LEAP_SMEAR */
 
 	case CS_RATE:
-		ctl_putuint(sys_var[CS_RATE].text, rstrct.ntp_minpoll);
+		ctl_putuint(sys_vars[varid].text, rstrct.ntp_minpoll);
 		break;
 
 	case CS_MRU_ENABLED:
@@ -1927,7 +1927,7 @@ ctl_putsys(
 		break;
 
 	case CS_ROOTDISTANCE:
-		ctl_putdbl(sys_var[CS_ROOTDISTANCE].text,
+		ctl_putdbl(sys_vars[varid].text,
 			   sys_vars.sys_rootdist * MS_PER_S);
 		break;
 
