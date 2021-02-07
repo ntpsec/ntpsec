@@ -981,9 +981,10 @@ usage: writelist [ assocID ]
         associd = self.__assoc_valid(line)
         if associd >= 0:
             qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
+            silence = bool(len(line.split()) >= 2)
             # Some scripts written for C ntpq need associd printed here
             self.__dolist(line.split()[1:], associd,
-                          ntp.control.CTL_OP_READVAR, qtype)
+                          ntp.control.CTL_OP_READVAR, qtype, quiet=silence)
 
     def help_readvar(self):
         self.say("""\
