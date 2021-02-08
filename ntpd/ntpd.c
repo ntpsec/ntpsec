@@ -105,7 +105,7 @@ static  void    close_all_beyond(int);
 static  void    close_all_except(int);
 
 
-#define ALL_OPTIONS "46abc:dD:f:gGhi:I:k:l:LmnNp:Pqr:Rs:t:u:U:Vw:xzZ"
+#define ALL_OPTIONS "46abc:dD:f:gGhi:I:k:l:LmnNp:P:qr:Rs:t:u:U:Vw:xzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
