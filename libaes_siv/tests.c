@@ -24,11 +24,11 @@ static void debug(const char *label, const unsigned char *hex, size_t len) {
         for (i = 0; i < len; i++) {
                 if (i > 0 && i % 16 == 0) {
                         printf("\n                  ");
-}
+                }
                 printf("%.2x", (int)hex[i]);
                 if (i > 0 && i % 4 == 3) {
                         printf(" ");
-}
+                }
         }
         printf("\n");
 }
