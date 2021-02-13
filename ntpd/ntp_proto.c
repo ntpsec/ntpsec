@@ -137,10 +137,7 @@ int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
 static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 
-/*
- * Statistics counters - first the good, then the bad
- * These get reset every hour if sysstats is enabled.
- */
+// proto stats structure and variables
 struct statistics_counters {
 	uptime_t	sys_stattime;		/* time since sysstats reset */
 	uint64_t	sys_received;		/* packets received */
@@ -153,77 +150,54 @@ struct statistics_counters {
 	uint64_t	sys_declined;		/* declined */
 	uint64_t	sys_limitrejected;	/* rate exceeded */
 	uint64_t	sys_kodsent;		/* KoD sent */
-	uptime_t	use_stattime;		/* time since usestats reset */
 };
-volatile struct statistics_counters stat_count;
+volatile struct statistics_counters stat_proto_hourago, stat_proto_total;
+
+uptime_t	use_stattime;		/* time since usestats reset */
 
 uptime_t stat_stattime(void)
 {
-  return stat_count.sys_stattime;
+  return current_time - stat_proto_hourago.sys_stattime;
 }
 
-uint64_t stat_received(void)
+uptime_t stat_total_stattime(void)
 {
-  return stat_count.sys_received;
+  return current_time - stat_proto_total.sys_stattime;
 }
 
-uint64_t stat_processed(void)
-{
-  return stat_count.sys_processed;
+#define stat_sys_dumps(member)\
+uint64_t stat_##member(void) {\
+  return stat_proto_total.sys_##member - stat_proto_hourago.sys_##member;\
+}\
+uint64_t stat_total_##member(void) {\
+  return stat_proto_total.sys_##member;\
 }
 
-uint64_t stat_restricted(void)
-{
-  return stat_count.sys_restricted;
-}
+stat_sys_dumps(received)
+stat_sys_dumps(processed)
+stat_sys_dumps(restricted)
+stat_sys_dumps(newversion)
+stat_sys_dumps(oldversion)
+stat_sys_dumps(badlength)
+stat_sys_dumps(badauth)
+stat_sys_dumps(declined)
+stat_sys_dumps(limitrejected)
+stat_sys_dumps(kodsent)
+
+#undef stat_sys_dumps
 
 void increment_restricted(void)
 {
-  stat_count.sys_restricted++;
-}
-
-uint64_t stat_newversion(void)
-{
-  return stat_count.sys_newversion;
-}
-
-uint64_t stat_oldversion(void)
-{
-  return stat_count.sys_oldversion;
-}
-
-uint64_t stat_badlength(void)
-{
-  return stat_count.sys_badlength;
-}
-
-uint64_t stat_badauth(void)
-{
-  return stat_count.sys_badauth;
-}
-
-uint64_t stat_declined(void)
-{
-  return stat_count.sys_declined;
-}
-
-uint64_t stat_limitrejected(void)
-{
-  return stat_count.sys_limitrejected;
-}
-
-uint64_t stat_kodsent(void)
-{
-  return stat_count.sys_kodsent;
+  stat_proto_total.sys_restricted++;
 }
 
 uptime_t stat_use_stattime(void)
 {
-  return stat_count.use_stattime;
+  return current_time - use_stattime;
 }
 
 void set_use_stattime(uptime_t stattime) {
-  stat_count.use_stattime = stattime;
+  use_stattime = stattime;
 }
 
 
@@ -520,7 +494,7 @@ handle_procpkt(
 		}
 	} else {
 		/* This case should be unreachable. */
-		stat_count.sys_declined++;
+		stat_proto_total.sys_declined++;
 		return;
 	}
 
@@ -666,10 +640,10 @@ receive(
 	auth_info* auth = NULL;  /* !NULL if authenticated */
 	int mode;
 
-	stat_count.sys_received++;
+	stat_proto_total.sys_received++;
 
 	if(!is_packet_not_low_rot(rbufp)) {
-		stat_count.sys_badlength++;
+		stat_proto_total.sys_badlength++;
 		return;
 	}
 
@@ -678,19 +652,19 @@ receive(
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 
 	if(check_early_restrictions(rbufp, restrict_mask)) {
-		stat_count.sys_restricted++;
+		stat_proto_total.sys_restricted++;
 		return;
 	}
 
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
-		stat_count.sys_limitrejected++;
+		stat_proto_total.sys_limitrejected++;
 		if(!(restrict_mask & RES_KOD)) { return; }
 	}
 
 	if(is_control_packet(rbufp)) {
 		process_control(rbufp, restrict_mask);
-		stat_count.sys_processed++;
+		stat_proto_total.sys_processed++;
 		return;
 	}
 
@@ -701,18 +675,18 @@ receive(
 	{
 	uint8_t hisversion = PKT_VERSION(rbufp->recv_buffer[0]);
 	if (hisversion == NTP_VERSION) {
-		stat_count.sys_newversion++;		/* new version */
+		stat_proto_total.sys_newversion++;		/* new version */
 	} else if (!(restrict_mask & RES_VERSION) && hisversion >=
 	    NTP_OLDVERSION) {
-		stat_count.sys_oldversion++;		/* previous version */
+		stat_proto_total.sys_oldversion++;		/* previous version */
 	} else {
-		stat_count.sys_badlength++;
+		stat_proto_total.sys_badlength++;
 		return;			/* old version */
 	}
 	}
 
 	if (!parse_packet(rbufp)) {
-		stat_count.sys_badlength++;
+		stat_proto_total.sys_badlength++;
 		return;
 	}
 
@@ -724,7 +698,7 @@ receive(
 	     * with a different key. */
 	    peer = findpeer(rbufp);
 	    if (NULL == peer) {
-		stat_count.sys_declined++;
+		stat_proto_total.sys_declined++;
 		return;
 	    }
 	}
@@ -757,7 +731,7 @@ receive(
 				 (int)(rbufp->recv_length - (rbufp->mac_len + 4)),
 				 (int)(rbufp->mac_len + 4))) {
 
-			stat_count.sys_badauth++;
+			stat_proto_total.sys_badauth++;
 			if(peer != NULL) {
 				peer->badauth++;
 				peer->cfg.flags &= ~FLAG_AUTHENTIC;
@@ -775,12 +749,12 @@ receive(
 			  rbufp->recv_buffer, rbufp->recv_length)
 #endif
 ) {
-			stat_count.sys_declined++;
+			stat_proto_total.sys_declined++;
 			maybe_log_junk("EX-REQ", rbufp);
 			break;
 		}
 		fast_xmit(rbufp, auth, restrict_mask);
-		stat_count.sys_processed++;
+		stat_proto_total.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
 		if ((peer->cfg.flags & FLAG_NTS)
@@ -790,7 +764,7 @@ receive(
 		          rbufp->recv_buffer, rbufp->recv_length)
 #endif
 )) {
-		    stat_count.sys_declined++;
+		    stat_proto_total.sys_declined++;
 		    maybe_log_junk("EX-REP", rbufp);
 		    break;
 		}
@@ -798,7 +772,7 @@ receive(
 		peer->cfg.flags |= FLAG_AUTHENTIC;
 		peer->timereceived = current_time;
 		handle_procpkt(rbufp, peer);
-		stat_count.sys_processed++;
+		stat_proto_total.sys_processed++;
 		peer->processed++;
 		break;
 	    default:
@@ -806,7 +780,7 @@ receive(
 		   which are a security nightmare.  So they go to the
 		   bit bucket until this improves.
 		*/
-		stat_count.sys_declined++;
+		stat_proto_total.sys_declined++;
 		break;
 	}
 
@@ -2236,7 +2210,7 @@ fast_xmit(
 	 * synchronization.
 	 */
 	if (flags & RES_KOD) {
-		stat_count.sys_kodsent++;
+		stat_proto_total.sys_kodsent++;
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
@@ -2807,10 +2781,10 @@ init_proto(const bool verbose)
 #endif
 	get_systime(&dummy);
 	sys_survivors = 0;
-	stat_count.sys_stattime = current_time;
+	stat_proto_total.sys_stattime = current_time;
 	orphwait = current_time + (unsigned long)sys_orphwait;
 	proto_clr_stats();
-	stat_count.use_stattime = current_time;
+	use_stattime = current_time;
 	clock_ctl.hardpps_enable = false;
 	stats_control = true;
 }
@@ -2929,17 +2903,8 @@ proto_config(
 void
 proto_clr_stats(void)
 {
-	stat_count.sys_stattime = current_time;
-	stat_count.sys_received = 0;
-	stat_count.sys_processed = 0;
-	stat_count.sys_newversion = 0;
-	stat_count.sys_oldversion = 0;
-	stat_count.sys_declined = 0;
-	stat_count.sys_restricted = 0;
-	stat_count.sys_badlength = 0;
-	stat_count.sys_badauth = 0;
-	stat_count.sys_limitrejected = 0;
-	stat_count.sys_kodsent = 0;
+    stat_proto_hourago = stat_proto_total;
+	stat_proto_hourago.sys_stattime = current_time;
 }
 
 

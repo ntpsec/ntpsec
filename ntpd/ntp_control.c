@@ -348,45 +348,63 @@ static const struct ctl_var sys_var[] = {
 	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },
 #define CS_K_LOCKCLOCK		105
 	{ CS_K_LOCKCLOCK,	RO, "lockclock" },
-
-#ifndef DISABLE_NTS
-#define CS_nts_client_send	106
-	{ CS_nts_client_send,		RO, "nts_client_send" },
-#define CS_nts_client_recv_good	107
-	{ CS_nts_client_recv_good,	RO, "nts_client_recv_good" },
-#define CS_nts_client_recv_bad	108
-	{ CS_nts_client_recv_bad,	RO, "nts_client_recv_bad" },
-#define CS_nts_server_send	109
-	{ CS_nts_server_send,		RO, "nts_server_send" },
-#define CS_nts_server_recv_good	110
-	{ CS_nts_server_recv_good,	RO, "nts_server_recv_good" },
-#define CS_nts_server_recv_bad	111
-	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
-
-#define CS_nts_cookie_make		112
-	{ CS_nts_cookie_make,		RO, "nts_cookie_make" },
-#define CS_nts_cookie_decode		113
-	{ CS_nts_cookie_decode,		RO, "nts_cookie_decode" },
-#define CS_nts_cookie_decode_old	114
-	{ CS_nts_cookie_decode_old,	RO, "nts_cookie_decode_old" },
-#define CS_nts_cookie_decode_too_old	115
-	{ CS_nts_cookie_decode_too_old,	RO, "nts_cookie_decode_too_old" },
-#define CS_nts_cookie_decode_error	116
-	{ CS_nts_cookie_decode_error,	RO, "nts_cookie_decode_error" },
-
-#define CS_nts_ke_serves_good	117
-	{ CS_nts_ke_serves_good,	RO, "nts_ke_serves_good" },
-#define CS_nts_ke_serves_bad	118
-	{ CS_nts_ke_serves_bad,		RO, "nts_ke_serves_bad" },
-#define CS_nts_ke_probes_good	119
-	{ CS_nts_ke_probes_good,	RO, "nts_ke_probes_good" },
-#define CS_nts_ke_probes_bad	120
-	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
-#define CS_MRU_HASHSLOTS	121
-	{ CS_MRU_HASHSLOTS,		RO, "mru_hashslots" },
-#else
 #define CS_MRU_HASHSLOTS	106
 	{ CS_MRU_HASHSLOTS,		RO, "mru_hashslots" },
+#define	CS_SS_RESET_R		107
+	{ CS_SS_RESET_R,		RO, "ss_reset_r" },
+#define	CS_SS_RECEIVED_R		108
+	{ CS_SS_RECEIVED_R,	RO, "ss_received_r" },
+#define	CS_SS_THISVER_R		109
+	{ CS_SS_THISVER_R,	RO, "ss_thisver_r" },
+#define	CS_SS_OLDVER_R		110
+	{ CS_SS_OLDVER_R,		RO, "ss_oldver_r" },
+#define	CS_SS_BADFORMAT_R		111
+	{ CS_SS_BADFORMAT_R,	RO, "ss_badformat_r" },
+#define	CS_SS_BADAUTH_R		112
+	{ CS_SS_BADAUTH_R,	RO, "ss_badauth_r" },
+#define	CS_SS_DECLINED_R		113
+	{ CS_SS_DECLINED_R,	RO, "ss_declined_r" },
+#define	CS_SS_RESTRICTED_R	114
+	{ CS_SS_RESTRICTED_R,	RO, "ss_restricted_r" },
+#define	CS_SS_LIMITED_R		115
+	{ CS_SS_LIMITED_R,	RO, "ss_limited_r" },
+#define	CS_SS_KODSENT_R		116
+	{ CS_SS_KODSENT_R,	RO, "ss_kodsent_r" },
+#define	CS_SS_PROCESSED_R		117
+	{ CS_SS_PROCESSED_R,	RO, "ss_processed_r" },
+#ifndef DISABLE_NTS
+#define CS_nts_client_send	118
+	{ CS_nts_client_send,		RO, "nts_client_send" },
+#define CS_nts_client_recv_good	119
+	{ CS_nts_client_recv_good,	RO, "nts_client_recv_good" },
+#define CS_nts_client_recv_bad	120
+	{ CS_nts_client_recv_bad,	RO, "nts_client_recv_bad" },
+#define CS_nts_server_send	121
+	{ CS_nts_server_send,		RO, "nts_server_send" },
+#define CS_nts_server_recv_good	122
+	{ CS_nts_server_recv_good,	RO, "nts_server_recv_good" },
+#define CS_nts_server_recv_bad	123
+	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
+
+#define CS_nts_cookie_make		124
+	{ CS_nts_cookie_make,		RO, "nts_cookie_make" },
+#define CS_nts_cookie_decode		125
+	{ CS_nts_cookie_decode,		RO, "nts_cookie_decode" },
+#define CS_nts_cookie_decode_old	126
+	{ CS_nts_cookie_decode_old,	RO, "nts_cookie_decode_old" },
+#define CS_nts_cookie_decode_too_old	127
+	{ CS_nts_cookie_decode_too_old,	RO, "nts_cookie_decode_too_old" },
+#define CS_nts_cookie_decode_error	128
+	{ CS_nts_cookie_decode_error,	RO, "nts_cookie_decode_error" },
+
+#define CS_nts_ke_serves_good	129
+	{ CS_nts_ke_serves_good,	RO, "nts_ke_serves_good" },
+#define CS_nts_ke_serves_bad	130
+	{ CS_nts_ke_serves_bad,		RO, "nts_ke_serves_bad" },
+#define CS_nts_ke_probes_good	131
+	{ CS_nts_ke_probes_good,	RO, "nts_ke_probes_good" },
+#define CS_nts_ke_probes_bad	132
+	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
 #endif
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
@@ -1547,7 +1565,7 @@ ctl_putsys(
 
 	CASE_UINT(CS_SS_UPTIME, current_time);
 
-	CASE_UINT(CS_SS_RESET, current_time - stat_stattime());
+	CASE_UINT(CS_SS_RESET, stat_stattime());
 
 	CASE_UINT(CS_SS_RECEIVED, stat_received());
 
@@ -1568,6 +1586,50 @@ ctl_putsys(
 	CASE_UINT(CS_SS_KODSENT, stat_kodsent());
 
 	CASE_UINT(CS_SS_PROCESSED, stat_processed());
+
+	case CS_SS_RESET_R:
+		ctl_putuint(sys_var[varid].text, stat_total_stattime());
+		break;
+
+	case CS_SS_RECEIVED_R:
+        ctl_putuint(sys_var[varid].text, stat_total_received());
+		break;
+
+	case CS_SS_THISVER_R:
+		ctl_putuint(sys_var[varid].text, stat_total_newversion());
+		break;
+
+	case CS_SS_OLDVER_R:
+		ctl_putuint(sys_var[varid].text, stat_total_oldversion());
+		break;
+
+	case CS_SS_BADFORMAT_R:
+		ctl_putuint(sys_var[varid].text, stat_total_badlength());
+		break;
+
+	case CS_SS_BADAUTH_R:
+		ctl_putuint(sys_var[varid].text, stat_total_badauth());
+		break;
+
+	case CS_SS_DECLINED_R:
+		ctl_putuint(sys_var[varid].text, stat_total_declined());
+		break;
+
+	case CS_SS_RESTRICTED_R:
+		ctl_putuint(sys_var[varid].text, stat_total_restricted());
+		break;
+
+	case CS_SS_LIMITED_R:
+		ctl_putuint(sys_var[varid].text, stat_total_limitrejected());
+		break;
+
+	case CS_SS_KODSENT_R:
+		ctl_putuint(sys_var[varid].text, stat_total_kodsent());
+		break;
+
+	case CS_SS_PROCESSED_R:
+		ctl_putuint(sys_var[varid].text, stat_total_processed());
+		break;
 
 	case CS_AUTHDELAY:
 		dtemp = lfptod(sys_authdelay);

@@ -163,6 +163,29 @@ extern	int	sys_orphan;
 extern	double	sys_mindist;
 extern	double	sys_maxdisp;
 
+#define stat_sys_form(member)\
+extern uint64_t stat_##member(void);\
+extern uint64_t stat_total_##member(void)
+stat_sys_form(received);
+stat_sys_form(processed);
+stat_sys_form(restricted);
+stat_sys_form(newversion);
+stat_sys_form(oldversion);
+stat_sys_form(badlength);
+stat_sys_form(badauth);
+stat_sys_form(declined);
+stat_sys_form(limitrejected);
+stat_sys_form(kodsent);
+#undef stat_sys_form
+
+extern uptime_t stat_total_stattime(void);
+extern uptime_t stat_stattime(void);
+
+extern void increment_restricted(void);
+extern uptime_t stat_use_stattime(void);
+extern void set_use_stattime(uptime_t stattime);
+extern uptime_t	use_stattime;		/* time since usestats reset */
+
 extern	void	poll_update	(struct peer *, uint8_t);
 
 extern	void	clock_filter	(struct peer *, double, double, double);
@@ -172,23 +195,6 @@ extern	void	set_sys_tick_precision(double);
 #endif
 extern	void	proto_config	(int, unsigned long, double);
 extern	void	proto_clr_stats (void);
-
-extern uptime_t stat_stattime(void);
-extern uint64_t stat_received(void);
-extern uint64_t stat_processed(void);
-extern uint64_t stat_restricted(void);
-extern void increment_restricted(void);
-extern uint64_t stat_newversion(void);
-extern uint64_t stat_oldversion(void);
-extern uint64_t stat_badlength(void);
-extern uint64_t stat_badauth(void);
-extern uint64_t stat_declined(void);
-extern uint64_t stat_limitrejected(void);
-extern uint64_t stat_kodsent(void);
-extern uptime_t stat_use_stattime(void);
-extern void set_use_stattime(uptime_t stattime);
-
-
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
