@@ -215,8 +215,6 @@ freebsd-11-basic:
     - freebsd-11
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-      when: never
-    - when: never
 
 freebsd-11-refclocks:
   <<: *job_definition
@@ -226,8 +224,6 @@ freebsd-11-refclocks:
     - freebsd-11
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-      when: never
-    - when: never
 
 freebsd-12-basic:
   <<: *job_definition
@@ -241,8 +237,6 @@ freebsd-12-basic:
     - freebsd-12
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-      when: never
-    - when: never
 
 freebsd-12-refclocks:
   <<: *job_definition
@@ -252,8 +246,6 @@ freebsd-12-refclocks:
     - freebsd-12
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-      when: never
-    - when: never
 
 centos-latest-basic:
   <<: *job_definition
@@ -371,8 +363,6 @@ cross-build:
     - ubuntu-1604-lts
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-      when: never
-    - when: never
 
 gentoo-basic:
   <<: *job_definition
