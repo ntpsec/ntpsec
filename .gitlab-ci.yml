@@ -76,12 +76,12 @@ AsciiDoc-3-Fedora:
     - asciidoc3/asciidoc3 --version || echo -n
     - PATH="$PWD/asciidoc3:$PATH" python3 ./waf configure --enable-doc --enable-manpage build
 
-AsciiDoc-classic2-Alpine:
+AsciiDoc-py3-Alpine:
   <<: *job_definition
-  image: alpine
+  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev asciidoc
-    - python ./waf configure --enable-doc --enable-manpage build
+    - apk update && apk add python3-dev asciidoc
+    - python3 ./waf configure --enable-doc --enable-manpage build
 
 AsciiDoc-classic3-Alpine:
   <<: *job_definition
@@ -97,13 +97,21 @@ AsciiDoc-no:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python2-dev
     - python ./waf configure --disable-doc --disable-manpage build
 
-AsciiDoc-py3-Ubuntu:
+AsciiDoc-classic3-Debian-Old:
   <<: *job_definition
-  image: ubuntu:devel
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
   script:
     - apt-get update
-    - DEBIAN_FRONTEND="noninteractive" apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev asciidoc-base
-    - python3 ./waf configure --enable-doc --enable-manpage build
+    - DEBIAN_FRONTEND="noninteractive" apt-get install -y python3-dev asciidoc-base
+    - python3 ./waf configure --enable-doc --enable-manpage build --disable-nts
+
+AsciiDoc-classic2-Debian-Old:
+  <<: *job_definition
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
+  script:
+    - apt-get update
+    - DEBIAN_FRONTEND="noninteractive" apt-get install -y python2.7-dev asciidoc-base
+    - python2 ./waf configure --enable-doc --enable-manpage build --disable-nts
 
 debian-oldstable-basic:
   <<: *job_definition
