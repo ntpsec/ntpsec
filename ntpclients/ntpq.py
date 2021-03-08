@@ -415,7 +415,7 @@ usage: timeout [ msec ]
                             items.append((name, (value, rawvalue)))
                     except ntp.packet.ControlException as e:
                         if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
-                            items.append((var, "???"))
+                            items.append((var, ("???", None)))
                             continue
                         raise e
                 queried = ntp.util.OrderedDict(items)
@@ -437,17 +437,22 @@ usage: timeout [ msec ]
                 value2 = queried[name + '_r'][0]
                 rawvalue2 = queried[name + '_r'][1]
                 if fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
-                    if self.showunits:
-                        displayvalue = ntp.util.unitifyvar(rawvalue, name)
-                        displayvalue2 = ntp.util.unitifyvar(rawvalue2, name)
+                    if self.showunits and isinstance(rawvalue, (int, float)):
+                        display = ntp.util.unitifyvar(rawvalue, name)
                     else:
-                        displayvalue = value
-                        displayvalue2 = value2
-                    self.say("%13s \t%9d\t%9d\n" %
-                             (legend, displayvalue, displayvalue2))
+                        display = value
+                    if self.showunits and isinstance(rawvalue2, (int, float)):
+                        display2 = ntp.util.unitifyvar(rawvalue2, name)
+                    else:
+                        display2 = value2
+                    self.say("%13s \t%9s\t%9s\n" %
+                             (legend, display, display2))
                 elif fmt == NTP_UPTIME:
-                    self.say("%13s  %s\t%s\n" % (legend, ntp.util.prettyuptime(
-                        value), ntp.util.prettyuptime(value2)))
+                    self.say("%13s  %s\t%s\n" % (legend,
+                             value if not isinstance(value, int) else
+                                  ntp.util.prettyuptime(value),
+                             value2 if not isinstance(value2, int) else
+                                  ntp.util.prettyuptime(value2)))
                 else:
                     self.warn("unexpected vc type %s for %s, value %s"
                               % (fmt, name, value, value2))
@@ -1544,10 +1549,7 @@ usage: kerninfo
             ("ss_processed", "processed for time:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
-        try:
-            self.collect_display2(variables=sysstats2)
-        except:
-            self.collect_display(associd=0, variables=sysstats2, decodestatus=False)
+        self.collect_display2(variables=sysstats2)
 
     def help_sysstats(self):
         self.say("""\
