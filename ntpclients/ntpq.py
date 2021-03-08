@@ -533,6 +533,9 @@ usage: timeout [ msec ]
                         self.say("%s  %s\n" % (legend, modes[value]))
                     except IndexError:
                         self.say("%s  %s%d\n" % (legend, "mode#", value))
+                elif fmt == NTP_UPTIME:
+                    self.say("%13s  %s\n" % (legend, ntp.util.prettyuptime(
+                        value)))
                 else:
                     self.warn("unexpected vc type %s for %s, value %s"
                               % (fmt, name, value))
@@ -1541,7 +1544,10 @@ usage: kerninfo
             ("ss_processed", "processed for time:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
-        self.collect_display2(variables=sysstats2)
+        try:
+            self.collect_display2(variables=sysstats2)
+        except:
+            self.collect_display(associd=0, variables=sysstats2, decodestatus=False)
 
     def help_sysstats(self):
         self.say("""\
