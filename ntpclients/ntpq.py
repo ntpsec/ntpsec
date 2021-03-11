@@ -54,7 +54,7 @@ NTP_MODE = 0x8    # peer mode
 NTP_2BIT = 0x9    # leap bits
 NTP_FLOAT = 0xa   # Float value
 NTP_UPTIME = 0xb  # uptime in days H:M:S (no frac)
-
+NTP_PACKETS = 0xc # packet counts
 
 class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
@@ -429,6 +429,7 @@ usage: timeout [ msec ]
             self.say(self.session.response)
             return
         try:
+            runs, runl = -1, -1
             for (name, legend, fmt) in variables:
                 if name not in queried:
                     continue
@@ -445,16 +446,30 @@ usage: timeout [ msec ]
                         display2 = ntp.util.unitifyvar(rawvalue2, name)
                     else:
                         display2 = value2
-                    self.say("%13s \t%9s\t%9s\n" %
+                    self.say("%13s   %12s %12s\n" %
                              (legend, display, display2))
+                elif fmt == NTP_PACKETS:
+                    dump = [legend, value, value2]
+                    if isinstance(value, (int, float)):
+                        dump += ['%dp/s' % int(value / runs)]
+                    else:
+                        dump += ['???']
+                    if isinstance(value2, (int, float)):
+                        dump += ['%dp/s' % int(value2 / runs)]
+                    else:
+                        dump += ['???']
+
+                    self.say("%13s   %12s %12s %12s %12s\n" % tuple(dump))
                 elif fmt == NTP_UPTIME:
-                    self.say("%13s  %s\t%s\n" % (legend,
-                             value if not isinstance(value, int) else
-                                  ntp.util.prettyuptime(value),
-                             value2 if not isinstance(value2, int) else
-                                  ntp.util.prettyuptime(value2)))
+                    runs = value if isinstance(value, (int, float)) else -1
+                    runl = value2 if isinstance(value2, (int, float)) else -1
+                    self.say("%13s   %12s %12s\n" % (legend,
+                             runs if runs == -1 else
+                                  ntp.util.prettyuptime(runs),
+                             runl if runl == -1 else
+                                  ntp.util.prettyuptime(runl)))
                 else:
-                    self.warn("unexpected vc type %s for %s, value %s"
+                    self.warn("unexpected vc type %s for %s, value %s %s    "
                               % (fmt, name, value, value2))
         except KeyboardInterrupt:
             self.warn("display interrupted")
@@ -522,7 +537,7 @@ usage: timeout [ msec ]
                         displayvalue = ntp.util.unitifyvar(rawvalue, name)
                     else:
                         displayvalue = value
-                    self.say("%s  %s\n" % (legend, displayvalue))
+                    self.say("%13s   %12s\n" % (legend, displayvalue))
                 elif fmt == NTP_LFP:
                     self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
                 elif fmt == NTP_2BIT:
@@ -539,7 +554,7 @@ usage: timeout [ msec ]
                     except IndexError:
                         self.say("%s  %s%d\n" % (legend, "mode#", value))
                 elif fmt == NTP_UPTIME:
-                    self.say("%13s  %s\n" % (legend, ntp.util.prettyuptime(
+                    self.say("%13s   %12s\n" % (legend, ntp.util.prettyuptime(
                         value)))
                 else:
                     self.warn("unexpected vc type %s for %s, value %s"
@@ -1537,16 +1552,16 @@ usage: kerninfo
         )
         sysstats2 = (
             ("ss_reset", "sysstats reset:       ", NTP_UPTIME),
-            ("ss_received", "packets received:     ", NTP_INT),
-            ("ss_thisver", "current version:      ", NTP_INT),
-            ("ss_oldver", "older version:        ", NTP_INT),
-            ("ss_badformat", "bad length or format: ", NTP_INT),
-            ("ss_badauth", "authentication failed:", NTP_INT),
-            ("ss_declined", "declined:             ", NTP_INT),
-            ("ss_restricted", "restricted:           ", NTP_INT),
-            ("ss_limited", "rate limited:         ", NTP_INT),
-            ("ss_kodsent", "KoD responses:        ", NTP_INT),
-            ("ss_processed", "processed for time:   ", NTP_INT),
+            ("ss_received", "packets received:     ", NTP_PACKETS),
+            ("ss_thisver", "current version:      ", NTP_PACKETS),
+            ("ss_oldver", "older version:        ", NTP_PACKETS),
+            ("ss_badformat", "bad length or format: ", NTP_PACKETS),
+            ("ss_badauth", "authentication failed:", NTP_PACKETS),
+            ("ss_declined", "declined:             ", NTP_PACKETS),
+            ("ss_restricted", "restricted:           ", NTP_PACKETS),
+            ("ss_limited", "rate limited:         ", NTP_PACKETS),
+            ("ss_kodsent", "KoD responses:        ", NTP_PACKETS),
+            ("ss_processed", "processed for time:   ", NTP_PACKETS),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
         self.collect_display2(variables=sysstats2)
