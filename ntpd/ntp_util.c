@@ -670,14 +670,14 @@ void record_use_stats(void)
 	clock_gettime(CLOCK_REALTIME, &now);
 	filegen_setup(&usestats, now.tv_sec);
 	if (usestats.fp != NULL) {
-		double utime, stimex;
+		double utime, stimex; /* stime() is in time.h */
 		getrusage(RUSAGE_SELF, &usage);
-		utime =  usage.ru_utime.tv_usec - oldusage.ru_utime.tv_usec;
+		utime = usage.ru_utime.tv_usec - oldusage.ru_utime.tv_usec;
 		utime /= 1E6;
-		utime += usage.ru_utime.tv_sec -  oldusage.ru_utime.tv_sec;
-		stimex =  usage.ru_stime.tv_usec - oldusage.ru_stime.tv_usec;
+		utime += usage.ru_utime.tv_sec - oldusage.ru_utime.tv_sec;
+		stimex = usage.ru_stime.tv_usec - oldusage.ru_stime.tv_usec;
 		stimex /= 1E6;
-		stimex += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
+		stimex += usage.ru_stime.tv_sec - oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
 		    "%s %u %.3f %.3f %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
 		    timespec_to_MJDtime(&now), current_time - stat_use_stattime(),
