@@ -83,13 +83,6 @@ AsciiDoc-py3-Alpine:
     - apk update && apk add python3-dev asciidoc
     - python3 ./waf configure --enable-doc --enable-manpage build
 
-AsciiDoc-classic3-Alpine:
-  <<: *job_definition
-  image: alpine
-  script:
-    - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc
-    - python3 ./waf configure --enable-doc --enable-manpage build
-
 AsciiDoc-no:
   <<: *job_definition
   image: alpine
