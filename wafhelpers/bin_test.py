@@ -53,7 +53,7 @@ def bin_test_summary(ctx):
 
 
 def run(cmd, expected, pythonic):
-    """Run an individual non-python test."""
+    """Run an individual test."""
     prefix = "running: " + " ".join(cmd)
 
     if not os.path.exists("%s/%s" % (waflib.Context.out_dir, cmd[0])):
