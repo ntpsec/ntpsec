@@ -56,11 +56,12 @@ gentoo-hardened-options-tester:
 macos-options-tester:
   stage: test
   needs: []
+  image: macos-11-xcode-12
   script:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python2.7 tests/option-tester.sh||true
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python3 tests/option-tester.sh
   tags:
-    - macos
+    - shared-macos-amd64
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 

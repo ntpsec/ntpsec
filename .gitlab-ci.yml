@@ -389,6 +389,7 @@ coverity-scan:
 
 macos-basic:
   <<: *job_definition
+  image: macos-11-xcode-12
   script:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - DESTDIR=build/prison python ./waf install
@@ -398,16 +399,17 @@ macos-basic:
     - python ./waf uninstall
     - rm -rvf build/prison ./prison ../prison
   tags:
-    - macos
+    - shared-macos-amd64
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 macos-refclocks:
   <<: *job_definition
+  image: macos-11-xcode-12
   script:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
-    - macos
+    - shared-macos-amd64
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
