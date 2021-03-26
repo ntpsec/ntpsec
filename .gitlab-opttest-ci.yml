@@ -39,13 +39,6 @@ opensuse-leap-options-tester:
   script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses libseccomp-devel python3-devel python3-curses bash
 
-opensuse-tumbleweed-options-tester:
-  <<: *option_tester
-  image: opensuse/tumbleweed
-  allow_failure: true
-  script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses libseccomp-devel python3-devel python3-curses bash
-
 gentoo-options-tester:
   <<: *option_tester
   image: gentoo/stage3-amd64
@@ -141,10 +134,6 @@ debian-testing-options-tester:
 
 debian-unstable-options-tester:
   image: debian:unstable-slim
-  <<: *deb_option_tester
-
-ubuntu-devel-options-tester:
-  image: ubuntu:devel
   <<: *deb_option_tester
 
 ubuntu-latest-options-tester:

@@ -74,9 +74,6 @@ build-gentoo-hardened:
 build-opensuse-leap:
   <<: *build_definition
 
-build-opensuse-tumbleweed:
-  <<: *build_definition
-
 build-python3-rc:
   <<: *build_definition
 
@@ -84,7 +81,4 @@ build-ubuntu-latest:
   <<: *build_definition
 
 build-ubuntu-rolling:
-  <<: *build_definition
-
-build-ubuntu-devel:
   <<: *build_definition

@@ -190,20 +190,6 @@ ubuntu-rolling-refclocks:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
-ubuntu-devel-basic:
-  <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
-  script:
-    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
-    - python3 ./waf install
-    - python3 ./waf uninstall
-
-ubuntu-devel-refclocks:
-  <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
-  script:
-    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
-
 freebsd-11-basic:
   <<: *job_definition
   script:
@@ -317,20 +303,6 @@ openSUSE-leap-refclocks:
   image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
-
-openSUSE-tumbleweed-basic:
-  <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
-  script:
-    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
-    - python3 ./waf install
-    - python3 ./waf uninstall
-
-openSUSE-tumbleweed-refclocks:
-  <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
-  script:
-    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-stable-basic-32bit:
   <<: *job_definition
