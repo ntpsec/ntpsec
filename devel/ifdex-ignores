@@ -85,11 +85,6 @@ TEST_LIBPARSE
 
 # Purely internal symbols
 CONFIG_H
-BITSPERCHAR		# Only used in the Arcron refclock
-BACKTRACE_MAXFRAME	# Internal to the ISC backtrace code
-BACKTRACE_LIBC
-BACKTRACE_GCC
-BACKTRACE_DISABLED
 CMOCK			# Internal to the Unity test framework
 CONFIG_FILE		# Only used in ntp_config.h
 DEVOLATILE		# Only used in work_thread.c
@@ -133,10 +128,6 @@ UNUSED_LOCAL		# Used to quiet compiler warnings
 UPDATE_GRACE		# ntp_io.c only
 USE_COMPILETIME_PIVOT	# Use build date in disambiguating time.
 
-USE_SCM_BINTIME		# to grab timestamp for recv packet
-USE_SCM_TIMESTAMP	# "
-USE_SCM_TIMESTAMPNS	# "
-
 USE_IPV6_MULTICAST_SUPPORT
 USE_LIFC_FAMILY
 USE_LIFC_FLAGS
@@ -145,13 +136,10 @@ USE_PCM_STYLE_SOUND
 USE_ROUTING_SOCKET
 YY_YY_NTP_PARSER_TAB_H_INCLUDED
 calloc			# In Unity
-close			# In Windows port config
 free			# In Unity and ntpd/ntp_parser.tab.c
 malloc			# In Unity and ntpd/ntp_parser.tab.c
-in_addr6		# In Windows port config
 lifr_addrlen		# ISC interface-iterator code
 mac			# Avoid name conflict.
-ntohl			# In Windows port config
 realloc			# Internal to Unity
 sem_timedwait		# In worker-thread code
 short			# In ntpd/ntp_parser.tab.c
@@ -176,9 +164,7 @@ CMAC_VERSION_CUTOFF	# Cruft from the attic
 DoSLOW			# Cruft from the attic
 
 # seccomp-related symbols that may not be available on all systems
-__NR_mmap
-__NR_openat
-__NR_prlimit64
+__NR_*
 
 # Exposed by some versions of glibc
 NI_MAXSERV
