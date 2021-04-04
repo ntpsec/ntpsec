@@ -3,14 +3,18 @@
 
 #include "ntp_fp.h"
 
+
+#define Frac10(x) ((unsigned long long)(ldexp(lfpfrac(x), -32)*1E10))
+
 static bool IsEqual(const l_fp *expected, const l_fp *actual) {
 	if (*expected == *actual) {
 		return true;
 	}
-	printf("Expected: %s (%u.%u) but was: %s (%u.%u)\n",
-		lfptoa(*expected, FRACTION_PREC), lfpuint(*expected),
-		lfpfrac(*expected), lfptoa(*actual, FRACTION_PREC),
-		lfpuint(*actual), lfpfrac(*actual));
+	printf("Expected: 0x%8x.%08x (%u.%010llu) but was: 0x%8x.%08x (%u.%010llu)\n",
+		lfpuint(*expected), lfpfrac(*expected), \
+		lfpuint(*expected), Frac10(*expected), \
+		lfpuint(*actual), lfpfrac(*actual), \
+		lfpuint(*actual), Frac10(*actual));
 	return false;
 }
 

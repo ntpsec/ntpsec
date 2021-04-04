@@ -13,6 +13,20 @@ TEST_TEAR_DOWN(hextolfp) {}
 
 #include "lfptest.h"
 
+TEST(hextolfp, ExerciseIsEqualPrinting) {
+	const char *str = "12345678.00800001";
+	l_fp actual, expected;
+
+	TEST_ASSERT_TRUE(hextolfp(str, &actual));
+        expected = actual;
+	/* uncomment the next line to generate an error
+         * and exercise the printout burried in IsEqual
+         * which lives in tests/libntp/lfptest.h
+         */
+        // expected += 1;
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
+}
+
 TEST(hextolfp, PositiveInteger) {
 	const char *str = "00001000.00000000";
 	l_fp actual;
@@ -68,6 +82,7 @@ TEST(hextolfp, IllegalChar) {
 }
 
 TEST_GROUP_RUNNER(hextolfp) {
+	RUN_TEST_CASE(hextolfp, ExerciseIsEqualPrinting);
 	RUN_TEST_CASE(hextolfp, PositiveInteger);
 	RUN_TEST_CASE(hextolfp, NegativeInteger);
 	RUN_TEST_CASE(hextolfp, PositiveFraction);
