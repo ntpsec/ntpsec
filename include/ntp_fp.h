@@ -76,12 +76,6 @@ static inline l_fp lfpinit_u(uint32_t sec, uint32_t frac) {
 }
 
 /*
- * Fractional precision (of an l_fp) is actually the number of
- * bits in an int32_t/uint32_t.
- */
-#define	FRACTION_PREC	(32)
-
-/*
  * The second fixed point format is 32 bits, with the decimal between
  * bits 15 and 16.  There is a signed version (s_fp) and an unsigned
  * version (u_fp).  This is used to represent synchronizing distance
@@ -90,7 +84,7 @@ static inline l_fp lfpinit_u(uint32_t sec, uint32_t frac) {
  * dispersion values (in local byte order).  In network byte order
  * it looks like:
  *
- *    0               1               2               3
+ *    0                   1                   2                   3
  *    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *   |		  Integer Part	     |	   Fraction Part	     |
