@@ -12,6 +12,20 @@ on user-visible changes.
 
 == Repository Head ==
 
+Update ntpkeygen, keygone and docs to reflect updated keyfile issues.
+
+Print protostats since start of execution for 'ntpq -c sysstats'
+
+Add dextral peers mode in ntpq and ntpmon.
+
+Drop NTPv1 as the support was not RFC compliant, maybe v2 except mode 6 next.
+
+Fix argument P for ntpd parsing fixed and ntpdate improvements.
+
+Fix crash for raw ntpq readvar.
+
+Add processor usage to NTS-KE logging except on NetBSD.
+
 Remove --build-epoch and replace it with arbitrary --build-desc text.
 Passing '--build-desc=$(date -u +%Y-%m-%dT%H:%M:%Sz)' restores the previous
 default extended version.
@@ -20,14 +34,14 @@ The build epoch has been replaced with a hardcoded timestamp which will be
 manually updated every nine years or so (approx 512w).  This makes the
 binaries reproducible by default.
 
-Compare versions of ntp.ntpc and libntpc printing a warning is
+Compare versions of ntp.ntpc and libntpc printing a warning if
 mismatched. Fix libntpc install path if using it.
 
-Reduce maxclocks to 5 to reduce the NTP pool load.
+Reduce maxclocks default to 5 to reduce the NTP pool load.
 
 Print LIBDIR during ./waf configure.
 
-Documentation, new GPG key, and miscellaneous cleanups.
+Add documentation, new GPG key, and other cleanups.
 
 == 2020-10-06: 1.2.0 ==
 
