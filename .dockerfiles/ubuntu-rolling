@@ -1,4 +1,5 @@
 FROM ubuntu:rolling
 
+RUN apt install gpgv
 RUN apt-get update
-RUN apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev libbsd-dev gpgv
+RUN apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev libbsd-dev
