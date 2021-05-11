@@ -4,7 +4,7 @@
 
 == Synopsis
 [verse]
-+ntpkeygen+ [+-MV+]
++ntpkeygen+ [+-V+]
 
 == Description
 
