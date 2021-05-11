@@ -106,7 +106,7 @@ class KeyGone():
             return secrets.token_hex(length)
         result = ''
         for _ in range(length):
-            result += chr(0x21 + secrets.randbelow(0x5d))
+            result += chr(0x24 + secrets.randbelow(0x5a))
         return result
 
 
