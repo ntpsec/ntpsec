@@ -33,7 +33,8 @@ try:
         if asciified:
             result = ''
             for index in range(bytes):
-                result += chr(0x21 + secrets.randbelow(0x5d))
+                # Start ASCII characters with 0x24 so as not to include comment-beginning #
+                result += chr(0x24 + secrets.randbelow(0x5a))
             return result
         else:
             return secrets.token_hex(bytes)
@@ -43,7 +44,8 @@ except ImportError:
         result = ''
         if asciified:
             for index in range(bytes):
-                result += chr(random.randint(0x21, 0x7e))
+                # Start ASCII characters with 0x24 so as not to include comment-beginning #
+                result += chr(random.randint(0x24, 0x7e))
         else:
             for index in range(bytes):
                 result += "%02x" % random.randint(0x0, 0xff)
