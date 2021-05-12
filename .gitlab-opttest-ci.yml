@@ -28,7 +28,9 @@ centos-options-tester:
     - dnf -y --enablerepo=powertools install bison gcc openssl-devel libcap-devel python3-devel python2-devel pps-tools-devel libseccomp-devel bash
 
 fedora-latest-options-tester:
-  image: fedora:latest
+  image:
+    name: fedora:latest
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python2-devel libseccomp-devel bash
   <<: *option_tester
@@ -141,6 +143,14 @@ ubuntu-latest-options-tester:
   image: ubuntu:latest
   <<: *deb_option_tester
 
+ubuntu-devel-options-tester:
+  image:
+    name: ubuntu:devel
+    entrypoint: [ '/bin/sh', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0']
+  <<: *deb_option_tester
+
 ubuntu-rolling-options-tester:
-  image: ubuntu:rolling
+  image:
+    name: ubuntu:rolling
+    entrypoint: [ '/bin/sh', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0']
   <<: *deb_option_tester

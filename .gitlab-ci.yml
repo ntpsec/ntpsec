@@ -66,7 +66,9 @@ alpine-edge-refclocks:
 
 AsciiDoc-3-Fedora:
   <<: *job_definition_allow_failure
-  image: fedora
+  image:
+    name: fedora
+    entrypoint: [ '/bin/bash', '-c' ]
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget unzip libxslt docbook-style-xsl
     - wget https://asciidoc3.org/asciidoc3-3.2.0.zip
@@ -176,6 +178,24 @@ ubuntu-latest-refclocks:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
+ubuntu-devel-basic:
+  <<: *job_definition_allow_failure
+  image:
+    name: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  script:
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
+
+ubuntu-devel-refclocks:
+  <<: *job_definition_allow_failure
+  image:
+    name: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  script:
+    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
+
 ubuntu-rolling-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-rolling
@@ -250,7 +270,9 @@ centos-latest-refclocks:
 
 fedora-latest-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
+  image:
+    name: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
+    entrypoint: [ '/bin/bash', '-c' ]
   script:
     - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
@@ -258,7 +280,9 @@ fedora-latest-basic:
 
 fedora-latest-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
+  image:
+    name: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
+    entrypoint: [ '/bin/bash', '-c' ]
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
@@ -303,6 +327,24 @@ openSUSE-leap-refclocks:
   image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
+
+openSUSE-tumbleweed-basic:
+  <<: *job_definition_allow_failure
+  image:
+    name: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
+    entrypoint: [ '/bin/bash', '-c' ]
+  script:
+    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - python3 ./waf install
+    - python3 ./waf uninstall
+
+openSUSE-tumbleweed-refclocks:
+  <<: *job_definition_allow_failure
+  image:
+    name: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
+    entrypoint: [ '/bin/bash', '-c' ]
+  script:
+    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-stable-basic-32bit:
   <<: *job_definition
