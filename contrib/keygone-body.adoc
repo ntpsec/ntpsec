@@ -38,7 +38,7 @@ passwords for the link:ntpq.html[+ntpq+] utility program.
   delete algorithm (repeatable) or "everything"
 
 +-f+ FILE, +--file+ FILE::
-  Output to a file
+  Output to a file defaults to "ntp.keygone"
 
 +-s+ LINK, +--link+ LINK::
   create a symlink (requires file)
@@ -56,7 +56,7 @@ passwords for the link:ntpq.html[+ntpq+] utility program.
   gap between subsequent groups (default 0)
 
 +-t+, +--text+::
-  generate text keys (base-95 default)
+  generate text keys (base-92 default)
 
 +-x+, +--hex+::
   generate hexadecimal keys (lowercase base-16)
@@ -121,11 +121,11 @@ Following any headers the keys are entered one per line in the
 format:
 
 [options="header"]
-|====================================================================
+|====
 |Field	| Meaning
 |keyno	| Positive integer in the range 1-65,535
 |type	| Type of key (md5, sha224, aes-128 etc).
 |key	| the actual key, printable ASCII or hex
-|====================================================================
+|====
 
 // end

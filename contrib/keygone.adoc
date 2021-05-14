@@ -2,13 +2,13 @@
 include::include-html.ad[]
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
-|==============================
+|====
 |image:pic/alice23.gif[]|
 {millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
 
 Alice holds the key.
 
-|==============================
+|====
 
 == Manual Pages
 
@@ -30,11 +30,47 @@ include::keygone-body.adoc[]
 
 // The end of "Cryptographic Data Files" runs into this following text.
 
-image:pic/sx5.gif[]
+.Figure 1. Atypical Symmetric Key File
+----
+# ntpkey_taos.lan.1620985116
+# Fri May 14 09:38:36 2021
+    1         aes-128   Sn0mdtd)-[ecHF}w
+    2        aria-128   EaN>^b3-_2dHX+,\
+    3    camellia-128   o$cO.]TFU{(DE>s,
+    4             sm4   F)jK&L@bU%$Qz@zu
+    5          sha224   bJbF:)G0Ngtcs.t}A&]d
+    6        sha3-224   qav0OY<9w,TK=0TQjkBQ
+    7      blake2s256   q?&^(FNn@a'CrFbHiWKC
+    8          sha256   l4h.|47};\ZgbzpyQF%(
+    9        sha3-256   .LiSr(UX+v(J*ZUcNA}5
+   10          sha384   *s$HZ<+0n*(8(@AiJJ})
+   11        sha3-384   ^wJy$c'_NlB{-%*:.Pt;
+   12      blake2b512   &1e[cY`vch(-pSVY^ZQ7
+   13          sha512   VjijOAk@C%_ZIhQht>Pg
+   14        sha3-512   =:+@xwSf:cn>Mcq1TaBJ
+   15         aes-128   e40122f7db128d0714c97947dfd9312c
+   16        aria-128   4d29f0c699b1cd8244be71ee85cc20f0
+   17    camellia-128   cd6588cc4278f430c7ab57ac06015a19
+   18         aes-192   cc2da35450866eebd37375b646bc5384412125f00cab94e8
+   19        aria-192   b0a28c291e248608545d621fef564c2ab7907d72db9b1bc5
+   20    camellia-192   e2235a1a30378872b7a28fa28114c717beaee78f163740fd
+   21         aes-256   4872fd4649019190ccb9600cf0d7d6e21068531eafc80d5d377aa5be7edb6c57
+   22        aria-256   327f630491b008f11578177f8cff0f853a159e099ac2be83e5b7a09d59022452
+   23    camellia-256   a6b0258e17c018b8acf91f04092a61907a91c97bc54096147f2c6a6df6f16774
+   24             sm4   c2ae033683fe1188f34454eab1e09f67
+   25          sha224   271c511127c68f0c520aade3c3ca691352c9c55bcc62676b553f33b6
+   26        sha3-224   67b843a209849715a56faafd2ad8bc3db434563184bbf6af81818474
+   27      blake2s256   7e8f97644f4cb8e8041e0d12a260aee16b124cece3c541f44647ce487718f4be
+   28          sha256   5f60aa9ab115f0f85ec881f08d6f55b9f0ee2f6ad5643a2ef2f4a3e1807eadd5
+   29        sha3-256   0dc5183aba8a233c858492428c3c4560654c376edcec7d10d4a2153810c57fb8
+   30          sha384   adaa8221ba060a578536ef46c3534da0f672f8463671b2d2681cbedf5727a2ec
+   31        sha3-384   519939e44a2e99b1a5c77ba34a8c7e313dcd8262de7f8211265fcb15baa49268
+   32      blake2b512   434ee92506ba32a9ce7fea6796ab191a91f75f3adb061e6ce997fa916b23ebcf
+   33          sha512   7b37b67ab3fb6bc962295b91fff79a3a6b91aff3739e7aaeba9afcd194f876c2
+   34        sha3-512   9a2a59ad41ac993d3501f0001f36efdfee049635ba4624660e14194fe0e45657
+----
 
-Figure 1. Typical Symmetric Key File
-
-Figure 1 shows a typical symmetric keys file used by the reference
+Figure 1 shows an atypical symmetric keys file used by the reference
 implementation. Each line of the file contains three fields, first
 keyno an integer between 1 and 65535, inclusive, representing the
 key identifier used in the `server` configuration commands. Next

@@ -24,42 +24,42 @@ import stat
 import sys
 
 list_md_bad = [
-    [16, 'md5'],
+    [16, 16, 'md5'],
 
-    [20, 'sha1'],
-    [20, 'rmd160']
+    [20, 16, 'sha1'],
+    [20, 16, 'rmd160']
 ]
 list_md_good = [
-    [16, 'sm4'],
+    [16, 16, 'sm4'],
 
-    [28, 'sha224'],
-    [28, 'sha3-224'],
+    [28, 16, 'sha224'],
+    [28, 16, 'sha3-224'],
 
-    [32, 'blake2s256'],
-    [32, 'sha256'],
-    [32, 'sha3-256'],
+    [32, 16, 'blake2s256'],
+    [32, 16, 'sha256'],
+    [32, 16, 'sha3-256'],
 
-    [48, 'sha384'],
-    [48, 'sha3-384'],
+    [48, 16, 'sha384'],
+    [48, 16, 'sha3-384'],
 
-    [64, 'blake2b512'],
-    [64, 'sha512'],
-    [64, 'sha3-512']
+    [64, 16, 'blake2b512'],
+    [64, 16, 'sha512'],
+    [64, 16,  'sha3-512']
 ]
 list_cmac_bad = [
 ]
 list_cmac_good = [
-    [16, 'aes-128'],
-    [16, 'aria-128'],
-    [16, 'camellia-128'],
+    [16, 16, 'aes-128'],
+    [16, 16, 'aria-128'],
+    [16, 16, 'camellia-128'],
 
-    [24, 'aes-192'],
-    [24, 'aria-192'],
-    [24, 'camellia-192'],
+    [24, 24, 'aes-192'],
+    [24, 24, 'aria-192'],
+    [24, 24, 'camellia-192'],
 
-    [32, 'aes-256'],
-    [32, 'aria-256'],
-    [32, 'camellia-256'],
+    [32, 32, 'aes-256'],
+    [32, 32, 'aria-256'],
+    [32, 32, 'camellia-256'],
 ]
 
 
@@ -76,7 +76,7 @@ class KeyGone():
         'Return a string containing the generated keys.'
         _ = ''
         for row in self.backing:
-            _ += '%d\t%s\t%s\n' % (row, *self.backing[row])
+            _ += '%5d\t%13s\t%s\n' % (row, *self.backing[row])
         return _
 
     def to_file(self, oname: str):
@@ -93,14 +93,19 @@ class KeyGone():
             os.remove(link)    # The symlink() line below matters
         os.symlink(oname, link)
 
-    def add(self, algor: str, keys: int, length: int, hexed: bool = False):
+    def add(self, algo: list, keys: int, hexed: bool = False):
         'Generate a slew of new keys according to specs.'
+        length, mlength, algor = algo
+        newlength = min(length, 32 if hexed else 20)  # Yuck, hardcoded magic
+        if mlength > newlength:
+            sys.stderr.write('"%s" excluded because minimum length %d exceeds truncation %d\n' % (algor, mlength, newlength))
+            return
         for _ in range(keys):
-            self.backing[self.index] = [algor, self.gen_key(length, hexed)]
+            self.backing[self.index] = [algor, self._gen_key(newlength, hexed)]
             self.index += 1
         self.index += self.gap
 
-    def gen_key(self, length: int, hexed: bool) -> str:
+    def _gen_key(self, length: int, hexed: bool) -> str:
         'Generate a single key.'
         if hexed:
             return secrets.token_hex(length)
@@ -135,7 +140,8 @@ if __name__ == '__main__':
                         help='delete algorithm (repeatable) or "everything"')
     parser.add_argument('-a', '--add', nargs='+',
                         help='delete algorithm (repeatable) or "everything"')
-    parser.add_argument('-f', '--file', help='Output to a file')
+    parser.add_argument('-f', '--file', help='Output to a file defaults to "ntp.keygone"',
+                        default='ntp.keygone')
     parser.add_argument(
         '-s', '--link', help='create a symlink (requires file)')
     parser.add_argument('-c', '--console', action='store_true',
@@ -154,8 +160,8 @@ if __name__ == '__main__':
     if args.list:
         list_algos()
     kg = KeyGone(args.initial, args.gap)
-    set_cur = set(map(lambda x: x[1], list_cmac_good + list_md_good))
-    set_all = set(map(lambda x: x[1], list_cmac_bad + list_md_bad))
+    set_cur = set(map(lambda x: x[2], list_cmac_good + list_md_good))
+    set_all = set(map(lambda x: x[2], list_cmac_bad + list_md_bad))
     set_all.update(set_cur)
     if isinstance(args.delete, str):
         args.delete = [args.delete]
@@ -203,8 +209,8 @@ if __name__ == '__main__':
     if fail:
         sys.exit(1)
     for algo in algos:
-        if algo[1] in set_cur:
-            kg.add(algo[1], args.number, algo[0], args.fmt)
+        if algo[2] in set_cur:
+            kg.add(algo, args.number, args.fmt)
     if args.file is not None:
         if args.link is not None:
             kg.do_link(args.file, args.link)
