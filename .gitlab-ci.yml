@@ -379,6 +379,14 @@ cross-build:
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
+cross-armhf-build:
+  <<: *job_definition_allow_failure
+  image: $CI_REGISTRY/ntpsec/ntpsec/cross-armhf
+  script:
+    - PYTHON_VERSION=3.9 PYTAG=cpython39 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags '-I/usr/include/ -I/usr/include/python3.9' --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python3.9/dist-packages --pythonarchdir=/usr/libhf/python3.9/dist-packages build -pp --enable-pylib=ffi
+    - PYTHON_VERSION=3.9 PYTAG=cpython39 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags '-I/usr/include/ -I/usr/include/python3.9' --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python3.9/dist-packages --pythonarchdir=/usr/libhf/python3.9/dist-packages build -pp --enable-pylib=ext
+  tags:
+
 gentoo-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/gentoo

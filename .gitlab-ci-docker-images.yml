@@ -82,3 +82,6 @@ build-ubuntu-latest:
 
 build-ubuntu-rolling:
   <<: *build_definition
+
+build-cross-armhf:
+  <<: *build_definition
