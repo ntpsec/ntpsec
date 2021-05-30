@@ -14,8 +14,6 @@ on user-visible changes.
 
 Update ntpkeygen, keygone and docs to reflect updated keyfile issues.
 
-Print protostats since start of execution for 'ntpq -c sysstats'
-
 Add dextral peers mode in ntpq and ntpmon.
 
 Drop NTPv1 as the support was not RFC compliant, maybe v2 except mode 6 next.
