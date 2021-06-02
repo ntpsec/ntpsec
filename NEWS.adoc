@@ -12,7 +12,7 @@ on user-visible changes.
 
 == Repository Head ==
 
-Update ntpkeygen, keygone and docs to reflect updated keyfile issues.
+Update ntpkeygen/keygone to properly filter `#` characters. (CVE-2021-22212)
 
 Add dextral peers mode in ntpq and ntpmon.
 
