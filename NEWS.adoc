@@ -10,6 +10,8 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+== Reposatory Head ==
+
 == 2021-06-06: 1.2.1 ==
 
 Update ntpkeygen/keygone to properly filter `#` characters. (CVE-2021-22212)

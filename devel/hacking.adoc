@@ -672,8 +672,8 @@ SYNC:: Server synchronization
 
 == Release Checklist
 
-This is the release checklist to be used by the project manager to cut
-each release.
+This is the release checklist to be used by the release captain and
+the project manager to cut each release.
 
 . Decide that it is time to cut a release.  This decision can be driven
   by landing a significant new feature, landing a critical fix, or just
@@ -706,18 +706,26 @@ each release.
 
 . Run the "./release | sh" script in this (devel) directory.
 
-. Check https://gitlab.com/NTPsec/ntpsec
+. Check https://gitlab.com/NTPsec/ntpsec to assure the tag is there
 
-. Post release announcement to blog.ntpsec.org
+. Post release announcement to blog.ntpsec.org  gitlab.com/ntpsec/blog
 
 . Post release announcement to fediverse @ntpsec@fosstodon.org
 
-. Post release announcement to email announce@ntpsec.org, devel@ntpsec.org, gpsd-dev@nongnu.org, ntp@ietf.org, time-nuts@lists.febo.com
+. Post release announcement to @ntpsec@twitter.com
+
+. Post release announcement to email announce@ntpsec.org
 
 . Modify the .../NEWS.adoc file, adding a new "Repository head" section.
 
 
-== Release Prep Steps.  Ignore this if you are not Mark.
+== Release Prep Steps.  Ignore this if you are not the release captain
+
+What you need:
+  the gpg secret key for signing the tag
+  your ssh key to new cloud instances
+  your gitlab ssh key
+  your service1 ssh key
 
 . start a new Debian instance, at least 256GiB, note the public IP address
 
@@ -727,7 +735,7 @@ each release.
 Host builder
   Hostname IPADDRESS
   User admin
-  IdentityFile ~/.ssh/aws-mra.key
+  IdentityFile ~/.ssh/THESSHKEYFILE
 -------------------------------------------------------------
 
 . ssh to it, then disconnect, to test and set ssh fingerprint
@@ -778,19 +786,19 @@ Host gitlab.com
 ssh -v git@gitlab.com
 -------------------------------------------------------------
 
-. connect to ftp mirror, set ssh fingerprint, then disconnect
+. connect to ftp mirror, init local ssh fingerprint, then disconnect
 
 -------------------------------------------------------------
-ssh -v markatwood@service1.ntpsec.org
+ssh -v mattselsky@service1.ntpsec.org date
 -------------------------------------------------------------
 
-. clone the repo
+. clone the repo to local
 
 -------------------------------------------------------------
 git clone git@gitlab.com:NTPsec/ntpsec.git
 -------------------------------------------------------------
 
-. setup the signing key and init gpg
+. setup the signing key and init the gpg tty interface.
 
 -------------------------------------------------------------
 gpg --import ~/secret.gkey
@@ -798,13 +806,13 @@ GPG_TTY=$(tty); export GPG_TTY
 echo "test" | gpg --clearsign
 -------------------------------------------------------------
 
-. setup gitconfig
+. setup gitconfig, must be set to someone who can push tags
 
 -------------------------------------------------------------
 cat > ~/.gitconfig
 [user]
-        name = Mark Atwood
-        email = mark.atwood@ntpsec.org
+        name = Matt Selsky
+        email = mattselsky@ntpsec.org
 ^D
 -------------------------------------------------------------
 
