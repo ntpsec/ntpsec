@@ -22,10 +22,10 @@ for OpenSSL 1.1.1k
   wget https://www.openssl.org/source/openssl-1.1.1k.tar.gz
   tar -xzf openssl-1.1.1k.tar.gz
   cd openssl-1.1.1k
-for OpenSSL 3.0.0 alpha16
-  wget https://www.openssl.org/source/openssl-3.0.0-alpha16.tar.gz
-  tar -xzf openssl-3.0.0-alpha16.tar.gz
-  cd openssl-3.0.0-alpha16
+for OpenSSL 3.0.0 alpha17
+  wget https://www.openssl.org/source/openssl-3.0.0-alpha17.tar.gz
+  tar -xzf openssl-3.0.0-alpha17.tar.gz
+  cd openssl-3.0.0-alpha17
 
 # Check NOTES.PERL
 #   for CentOS, you need
