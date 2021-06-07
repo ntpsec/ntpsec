@@ -310,7 +310,7 @@ verifySHA1() {
     # or maybe a space and a tab.  remove the tab, wherever it may be.  Add some 0x
     # so it can be run through printf to restore missing leading zeros.
     #
-    local FSHA1="`grep '^#h' $1 | tr -d '[:cntrl:]' | sed -e's/^#h/0x/' -e's/ / 0x/g'`"
+    local FSHA1="`grep '^#h' $1 | tr -d '[:cntrl:]' | sed -e's/^#h[ \t]*/0x/' -e's/ / 0x/g'`"
     FSHA1=`printf '%08x%08x%08x%08x%08x' $FSHA1`
 
     if [ -n "$FSHA1" -a \( "$FSHA1" = "$DSHA1" \) ]; then

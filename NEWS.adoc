@@ -12,6 +12,8 @@ on user-visible changes.
 
 == Reposatory Head ==
 
+Fix hash validation in ntpleapfetch again.
+
 == 2021-06-06: 1.2.1 ==
 
 Update ntpkeygen/keygone to properly filter `#` characters. (CVE-2021-22212)
