@@ -94,9 +94,9 @@ Don't call get_systime() from non-main threads.
 We support some cases where systems are not fully POSIX compliant.
 This is an attempt to collect them.
 
-  MacOS (?? or something) doesn't support timer_create(2).
-  We work around that by using the older setitimer(2).
-  POSIX.1-2008 marks getitimer() and setitimer() obsolete.
+MacOS (?? or something) doesn't support timer_create(2).
+We work around that by using the older setitimer(2).
+POSIX.1-2008 marks getitimer() and setitimer() obsolete.
 
 
 Here are the non-standardized APIs that may be used:
@@ -127,7 +127,7 @@ cause buffer overruns and (all too often) exploitable security holes:
 * gmtime(), localtime(), asctime(), ctime(): use the reentrant *_r variants.
 * tmpnam(): use mkstemp() or tmpfile() instead.
 
-Do not rely on dirname() being reentrant, and assume it will modify
+Do not rely on dirname() being reentrant, and do assume it will modify
 (truncate) its argument. The Linux version is re-entrant, but this
 property is not portable.
 
@@ -464,8 +464,8 @@ that appears on a man page.
 
 All headers should be asymmetric Atx-style. Text wraps somewhere around
 column 72 (forget semantic writing) and unless otherwise noted refer to
-the January 2019 revision of the draft AsciiDoc Recommended
-link:https://asciidoctor.org/docs/asciidoc-recommended-practices/[Practices].
+the draft
+link:https://asciidoctor.org/docs/asciidoc-recommended-practices/[AsciiDoc Recommended Practices].
 
 === Version number
 
