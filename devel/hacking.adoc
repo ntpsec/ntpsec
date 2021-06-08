@@ -664,7 +664,7 @@ INIT:: Daemon setup
 LOG:: Log switching and debug levels
 MAC:: Message authentication hash computation
 MODE6:: Processing of Mode 6 requests
-NTS, NTSc, NTSs:: Network Time Security, RFC xxxx, NTSs=>server, NTSc=>client
+NTS, NTSc, NTSs:: Network Time Security, link:https://datatracker.ietf.org/doc/html/rfc8195[RFC 8195], NTSs=>server, NTSc=>client
 PROTO:: Protocol machine actions
 REFCLOCK:: Reference clock and driver actions
 RESTRICT:: Restrictions
