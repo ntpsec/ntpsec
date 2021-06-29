@@ -3,7 +3,7 @@ That was first supported in OpenSSL 1.1.1
   (1.1.1a is broken)
 Some OSes/Distros don't support a new enough version of OpenSSL
 This file contains notes on how to download, build, and install 1.1.1k
-It also works for testing 3.0.0 alpha
+It also works for testing 3.0.0 alpha and beta
 
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
@@ -22,15 +22,15 @@ for OpenSSL 1.1.1k
   wget https://www.openssl.org/source/openssl-1.1.1k.tar.gz
   tar -xzf openssl-1.1.1k.tar.gz
   cd openssl-1.1.1k
-for OpenSSL 3.0.0 alpha17
-  wget https://www.openssl.org/source/openssl-3.0.0-alpha17.tar.gz
-  tar -xzf openssl-3.0.0-alpha17.tar.gz
-  cd openssl-3.0.0-alpha17
+for OpenSSL 3.0.0 beta1
+  wget https://www.openssl.org/source/openssl-3.0.0-beta1.tar.gz
+  tar -xzf openssl-3.0.0-beta1.tar.gz
+  cd openssl-3.0.0-beta1
 
 # Check NOTES.PERL
 #   for CentOS, you need
   sudo yum install perl-core
-# Fedora 33+34 for 3.0.0-alpha
+# Fedora 33+34 for 3.0.0-alpha and beta
   # ./config needs
   sudo dnf install perl-FindBin 'perl(IPC::Cmd)' 'perl(File::Compare)'
   # make needs
@@ -38,7 +38,7 @@ for OpenSSL 3.0.0 alpha17
   sudo dnf install 'perl(Test::Harness)' 'perl(Test::More)' 'perl(File::Copy)'
   # make install also needs:
   sudo dnf install 'perl(Pod::Html)'
-# On FreeBSD for 3.0.0-alpha
+# On FreeBSD for 3.0.0-alpha and beta
   sudo pkg install perl5
 
 On Linux
@@ -59,7 +59,7 @@ sudo make install
 sudo su
   cd /etc/ld.so.conf.d
   echo "/usr/local/ssl/lib" > openssl-1.1.1k.conf
-  echo "/usr/local/ssl/lib" > openssl-3.0.0-alpha.conf
+  echo "/usr/local/ssl/lib" > openssl-3.0.0-beta.conf
   ldconfig
 
 On FreeBSD, I couldn't figure out how it is supposed to work.
