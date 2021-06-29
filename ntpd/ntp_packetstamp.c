@@ -14,13 +14,15 @@
 #include "ntp_stdlib.h"
 #include "timespecops.h"
 
-/* We handle 2 flavors of timestamp:
- * SO_TIMESTAMPNS/SCM_TIMESTAMPNS  Linux
- * SO_TIMESTAMP/SCM_TIMESTAMP      FreeBSD, NetBSD, OpenBSD, Linux, macOS,
- *                                 Solaris
+/* We handle 3 flavors of timestamp:
+ * SO_TIMESTAMPNS/SCM_TIMESTAMPNS  Linux (maybe others)
+ * SO_TS_CLOCK/SCM_REALTIME        FreeBSD
+ * SO_TIMESTAMP/SCM_TIMESTAMP      Everybody else
  *
  * Linux supports both SO_TIMESTAMP and SO_TIMESTAMPNS so it's
  * important to check for SO_TIMESTAMPNS first to get the better accuracy.
+ *
+ * FreeBSD needs 2 setsockopt, SO_TIMESTAMP and SO_TS_CLOCK
  *
  * Note that the if/elif tests are done in several places.
  * It's important that they all check in the same order to
@@ -29,10 +31,6 @@
  * If SO_xxx exists, we assume that SCM_xxx does too.
  * All flavors assume the CMSG_xxx macros exist.
  *
- * FreeBSD has SO_BINTIME/SCM_BINTIME
- *   It has better resolution, but it doesn't work for IPv6
- *   bintime documentation is at
- *   http://phk.freebsd.dk/pubs/timecounter.pdf
  */
 
 
@@ -44,11 +42,14 @@ enable_packetstamps(
 {
 	const int	on = 1;
 	static bool	once = false;
+#if defined(SO_TS_CLOCK)
+	const int	ts_type = SO_TS_REALTIME;
+#endif
 
 #if defined (SO_TIMESTAMPNS)
 	if (!once) {
 		once = true;
-		msyslog(LOG_INFO, "INIT: Using SO_TIMESTAMPNS");
+		msyslog(LOG_INFO, "INIT: Using SO_TIMESTAMPNS(ns)");
 	}
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
 			       (const void *)&on, sizeof(on)))
@@ -59,10 +60,12 @@ enable_packetstamps(
 		DPRINT(4, ("ERR: setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
 				    fd, socktoa(addr)));
 #elif defined(SO_TIMESTAMP)
+#if !defined(SO_TS_CLOCK)
 	if (!once) {
 		once = true;
-		msyslog(LOG_INFO, "INIT: Using SO_TIMESTAMP");
+		msyslog(LOG_INFO, "INIT: Using SO_TIMESTAMP(us)");
 	}
+#endif
 	if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
 			       (const void*)&on, sizeof(on)))
 		msyslog(LOG_DEBUG,
@@ -71,6 +74,21 @@ enable_packetstamps(
 	else
 		DPRINT(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
 			    fd, socktoa(addr)));
+#if defined(SO_TS_CLOCK)
+	/* FreeBSD */
+	if (!once) {
+		once = true;
+		msyslog(LOG_INFO, "INIT: Using SO_TS_CLOCK(ns)");
+	}
+	if (setsockopt(fd, SOL_SOCKET, SO_TS_CLOCK,
+			       (const void*)&ts_type, sizeof(ts_type)))
+		msyslog(LOG_DEBUG,
+			"ERR: setsockop SO_TS_CLOCK on fails on address %s: %s",
+			socktoa(addr), strerror(errno));
+	else
+		DPRINT(4, ("setsockopt SO_TS_CLOCK enabled on fd %d address %s\n",
+			    fd, socktoa(addr)));
+#endif
 #else
 # error "Can't get packet timestamp"
 #endif
@@ -86,7 +104,7 @@ fetch_packetstamp(
 	)
 {
 	struct cmsghdr *	cmsghdr;
-#if defined(SO_TIMESTAMPNS)
+#if defined(SO_TIMESTAMPNS) || defined(SO_TS_CLOCK)
 	struct timespec *	tsp;
 #elif defined(SO_TIMESTAMP)
 	struct timeval *	tvp;
@@ -107,7 +125,11 @@ fetch_packetstamp(
 		/* return ts;	** Kludge to use time from select. */
 	}
 #if defined(SO_TIMESTAMPNS)
+	/* Linux and ?? */
 	if (SCM_TIMESTAMPNS != cmsghdr->cmsg_type) {
+#elif defined(SO_TS_CLOCK)
+	/* FreeBSD */
+	if (SCM_REALTIME != cmsghdr->cmsg_type) {
 #elif defined(SO_TIMESTAMP)
 	if (SCM_TIMESTAMP != cmsghdr->cmsg_type) {
 #else
@@ -126,7 +148,7 @@ fetch_packetstamp(
 
 /* cmsghdr now points to a timestamp slot */
 
-#if defined(SO_TIMESTAMPNS)
+#if defined(SO_TIMESTAMPNS) || defined(SO_TS_CLOCK)
 	tsp = (struct timespec *)CMSG_DATA(cmsghdr);
 #ifdef ENABLE_FUZZ
 	if (sys_tick > measured_tick && sys_tick > S_PER_NS) {
@@ -135,7 +157,7 @@ fetch_packetstamp(
 	}
 #endif
 	DPRINT(4, ("fetch_timestamp: system nsec network time stamp: %ld.%09ld\n",
-		tsp->tv_sec, tsp->tv_nsec));
+		(long)tsp->tv_sec, tsp->tv_nsec));
 	nts = tspec_stamp_to_lfp(*tsp);
 #elif defined(SO_TIMESTAMP)
 	tvp = (struct timeval *)CMSG_DATA(cmsghdr);
