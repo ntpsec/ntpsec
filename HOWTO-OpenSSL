@@ -3,7 +3,7 @@ That was first supported in OpenSSL 1.1.1
   (1.1.1a is broken)
 Some OSes/Distros don't support a new enough version of OpenSSL
 This file contains notes on how to download, build, and install 1.1.1k
-It also works for testing 3.0.0 alpha and beta
+It also works for testing 3.0.0 beta
 
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
