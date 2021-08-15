@@ -519,7 +519,10 @@ int main(int argc, char **argv) {
         # or testing pre-release versions of OpenSSL
         # see HOWTO-OpenSSL
         ctx.env.INCLUDES = ["/usr/local/ssl/include"]
-        ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
+        if os.path.isdir("/usr/local/ssl/lib64/"):
+          ctx.env.LIBPATH = ["/usr/local/ssl/lib64"]
+        else:
+          ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "darwin":
         # macports location
         if os.path.isdir("/opt/local/include"):
