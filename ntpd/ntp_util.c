@@ -637,7 +637,7 @@ record_sys_stats(void)
 		fprintf(sysstats.fp,
 		    "%s %u %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64
 		    " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 "\n",
-			timespec_to_MJDtime(&now), current_time - stat_stattime(),
+			timespec_to_MJDtime(&now), stat_stattime(),
 			stat_received(), stat_processed(), stat_newversion(),
 			stat_oldversion(), stat_restricted(), stat_badlength(),
 			stat_badauth(), stat_declined(), stat_limitrejected(),
@@ -680,7 +680,7 @@ void record_use_stats(void)
 		stimex += usage.ru_stime.tv_sec - oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
 		    "%s %u %.3f %.3f %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
-		    timespec_to_MJDtime(&now), current_time - stat_use_stattime(),
+		    timespec_to_MJDtime(&now), stat_use_stattime(),
 		    utime, stimex,
 		    usage.ru_minflt -   oldusage.ru_minflt,
 		    usage.ru_majflt -   oldusage.ru_majflt,

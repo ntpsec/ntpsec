@@ -139,7 +139,6 @@ static int sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 
 // proto stats structure and variables
 struct statistics_counters {
-	uptime_t	sys_stattime;		/* time since sysstats reset */
 	uint64_t	sys_received;		/* packets received */
 	uint64_t	sys_processed;		/* packets for this host */
 	uint64_t	sys_restricted;		/* restricted packets */
@@ -152,17 +151,18 @@ struct statistics_counters {
 	uint64_t	sys_kodsent;		/* KoD sent */
 };
 volatile struct statistics_counters stat_proto_hourago, stat_proto_total;
+uptime_t	sys_stattime;		/* time since sysstats "reset" */
 
 uptime_t	use_stattime;		/* time since usestats reset */
 
 uptime_t stat_stattime(void)
 {
-  return current_time - stat_proto_hourago.sys_stattime;
+  return current_time - sys_stattime;
 }
 
 uptime_t stat_total_stattime(void)
 {
-  return current_time - stat_proto_total.sys_stattime;
+  return current_time;
 }
 
 #define stat_sys_dumps(member)\
@@ -2781,7 +2781,7 @@ init_proto(const bool verbose)
 #endif
 	get_systime(&dummy);
 	sys_survivors = 0;
-	stat_proto_total.sys_stattime = current_time;
+	sys_stattime = current_time;
 	orphwait = current_time + (unsigned long)sys_orphwait;
 	proto_clr_stats();
 	use_stattime = current_time;
@@ -2904,7 +2904,7 @@ void
 proto_clr_stats(void)
 {
     stat_proto_hourago = stat_proto_total;
-	stat_proto_hourago.sys_stattime = current_time;
+    sys_stattime = current_time;
 }
 
 
