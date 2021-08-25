@@ -628,7 +628,6 @@ int main(int argc, char **argv) {
         ('_Unwind_Backtrace', ["unwind.h"]),
         ('adjtimex', ["sys/time.h", "sys/timex.h"]),
         ('backtrace_symbols_fd', ["execinfo.h"]),
-        ('closefrom', ["stdlib.h"]),
         ('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),     # BSD
         ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),

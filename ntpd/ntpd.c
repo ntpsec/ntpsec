@@ -101,8 +101,6 @@ static char **	saved_argv;
 static void	mainloop		(void)
 			__attribute__	((__noreturn__));
 static void	set_process_priority	(void);
-static  void    close_all_beyond(int);
-static  void    close_all_except(int);
 
 
 #define ALL_OPTIONS "46abc:dD:f:gGhi:I:k:l:LmnNp:P:qr:Rs:t:u:U:Vw:xzZ"
@@ -516,8 +514,9 @@ main(
 			syslogit = false;
 	}
 
-	if (!dumpopts)
-	announce_starting();
+	if (!dumpopts) {
+		announce_starting();
+	}
 
 	uid = getuid();
 	if (uid && !dumpopts) {
@@ -569,18 +568,14 @@ main(
 
 		/*
 		 * child/daemon
-		 * close all open files excepting waitsync_fd_to_close.
-		 * msyslog() unreliable until after init_logging().
 		 */
 		termlogit = false;    /* do not use stderr after fork */
-		closelog();
-		close_all_except(waitsync_fd_to_close);
-		INSIST(0 == open("/dev/null", 0) && 1 == dup2(0, 1) \
-			&& 2 == dup2(0, 2));
-
-		init_logging(progname, 0, true);
-		/* we lost our logfile (if any) daemonizing */
-		setup_logfile(logfilename);
+		fclose(stdin);
+		fclose(stdout);
+		fclose(stderr);
+		INSIST(STDIN_FILENO == open("/dev/null", 0) \
+			&& STDOUT_FILENO == dup2(0, 1) \
+			&& STDERR_FILENO == dup2(0, 2));
 
 		if (setsid() == (pid_t)-1)
 			msyslog(LOG_ERR, "INIT: setsid(): %s", strerror(errno));
@@ -1200,61 +1195,4 @@ no_debug(
 	errno = saved_errno;
 }
 # endif	/* !DEBUG */
-
-/*
- * close_all_except()
- *
- * Close all file descriptors except the given keep_fd.
- */
-static void
-close_all_except(
-	int keep_fd
-	)
-{
-	int fd;
-
-	for (fd = 0; fd < keep_fd; fd++) {
-		close(fd);
-	}
-
-	close_all_beyond(keep_fd);
-}
-
-
-/*
- * close_all_beyond()
- *
- * Close all file descriptors after the given keep_fd, which is the
- * highest fd to keep open.  See
- *
- * http://stackoverflow.com/questions/899038/getting-the-highest-allocated-file-descriptor
- */
-static void
-close_all_beyond(
-	int keep_fd
-	)
-{
-# ifdef HAVE_CLOSEFROM
-	closefrom(keep_fd + 1);
-# elif defined(F_CLOSEM)
-	/*
-	 * From 'Writing Reliable AIX Daemons,' SG24-4946-00,
-	 * by Eric Agar (saves us from doing 32767 system
-	 * calls)
-	 */
-	if (fcntl(keep_fd + 1, F_CLOSEM, 0) == -1)
-		msyslog(LOG_ERR, "INIT: F_CLOSEM(%d): %s", keep_fd + 1, strerror(errno));
-# else  /* !HAVE_CLOSEFROM && !F_CLOSEM follows */
-	int fd;
-	int max_fd;
-
-	/* includes POSIX case */
-	max_fd = sysconf(_SC_OPEN_MAX);
-	if (10000 < max_fd)
-		msyslog(LOG_ERR, "INIT: close_all_beyond: closing %d files", max_fd);
-	for (fd = keep_fd + 1; fd < max_fd; fd++) {
-		close(fd);
-	}
-# endif /* !HAVE_CLOSEFROM && !F_CLOSEM */
-}
 
