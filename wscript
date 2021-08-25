@@ -509,10 +509,18 @@ int main(int argc, char **argv) {
     if ctx.env.DEST_OS in ["freebsd"]:
         ctx.env.INCLUDES = ["/usr/local/include"]
         ctx.env.LIBPATH = ["/usr/local/lib"]
+        if os.path.isdir("/usr/local/ssl/"):
+          # This assumes OpenSSL is the only thing that was in /usr/local/
+          ctx.env.INCLUDES = ["/usr/local/ssl/include"]
+          ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "netbsd" and os.path.isdir("/usr/pkg/include"):
         ctx.env.INCLUDES = ["/usr/pkg/include"]
         ctx.env.LIBPATH = ["/usr/pkg/lib"]
         ctx.env.LDFLAGS += ["-rpath=/usr/pkg/lib"]
+        if os.path.isdir("/usr/local/ssl/"):
+          # This assumes OpenSSL is the only thing that was in /usr/pkg/
+          ctx.env.INCLUDES = ["/usr/local/ssl/include"]
+          ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "linux" and os.path.isdir("/usr/local/ssl/"):
         # This supports building OpenSSL from source
         # That allows using OpenSSL 1.1.1 on older CentOS
