@@ -502,20 +502,24 @@ main(
 # endif
 
 	init_logging(progname, NLOG_SYNCMASK, true);
+
+	if (!dumpopts) {
+		/* log to syslog before setting up log file */
+		announce_starting();
+	}
+
 	/* honor -l/--logfile option to log to a file */
 	if (logfilename != NULL) {
 		syslogit = false;
 		termlogit = false;
 		change_logfile(logfilename, false);
+		/* Repeat critical info in logfile. Helps debugging. */
+		announce_starting();
 	} else {
 		if (nofork)
 		    termlogit = true;
 		if (dumpopts)
 			syslogit = false;
-	}
-
-	if (!dumpopts) {
-		announce_starting();
 	}
 
 	uid = getuid();
@@ -880,6 +884,18 @@ main(
         /* unreachable, mainloop() never returns */
 }
 
+
+/* This goes to syslog.
+ * And again to a log file if you are using one.
+ *
+ * The first copy also goes to stderr.
+ * systemd adds that to syslog.
+ *
+ * Switching log files also logs a message before switching.
+ *
+ * If using a log file, there should be enough info in syslog
+ * to debug things with minimal extra clutter.
+ */
 void announce_starting() {
 	char buf[1024];	/* Secret knowledge of msyslog buf length */
 	char *cp = buf;
