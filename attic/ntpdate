@@ -62,7 +62,7 @@ TIMEOUT="-t 1"
 setclock=yes
 echo=no
 log=no
-while getopts 46a:bBe:hk:no:p:qst:uv opt
+while getopts 46a:bBde:hk:no:p:qst:uv opt
 do
     case $opt in
 	4) PASSTHROUGH="$PASSTHROUGH -4";;
