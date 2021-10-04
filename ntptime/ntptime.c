@@ -138,7 +138,7 @@ main(
 			ntx.modes |= MOD_NANO;
 			break;
 #endif
-#if defined NTP_API && NTP_API > 3
+#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
 		case 'T':
 			ntx.modes = MOD_TAI;
 			ntx.constant = atoi(ntp_optarg);
@@ -222,7 +222,7 @@ main(
 #else
 "",
 #endif
-#if defined NTP_API && NTP_API > 3
+#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
 "-T tai_offset	set TAI offset\n",
 #else
 "",
@@ -305,21 +305,21 @@ main(
 		const char *ofmt2 = "  time %s, (.%0*d),\n";
 		const char *ofmt3 = "  maximum error %lu us, estimated error %lu us";
 		const char *ofmt4 = "  ntptime=%x.%x unixtime=%x.%0*d %s";
-#if defined NTP_API && NTP_API > 3
+#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
 		const char *ofmt5 = ", TAI offset %ld\n";
 #else
 		const char *ofmt6 = "\n";
-#endif /* NTP_API */
+#endif /* HAVE_STRUCT_NTPTIMEVAL_TAI */
 		/* JSON formats */
 		const char *jfmt1 = "{\"gettime-code\":%d,\"gettime-status\":\"%s\",";
 		const char *jfmt2 = "\"time\":\"%s\",\"fractional-time\":\".%0*d\",";
 		const char *jfmt3 = "\"maximum-error\":%lu,\"estimated-error\":%lu,";
 		const char *jfmt4 = "\"raw-ntp-time\":\"%x.%x\",\"raw-unix-time\":\"%x.%0*d %s\",";
-#if defined NTP_API && NTP_API > 3
+#if defined(HAVE_STRUCT_NTPTIMEVAL_TAI)
 		const char *jfmt5 = "\"TAI-offset\":%d,";
 #else
 		const char *jfmt6 = "";
-#endif /* NTP_API */
+#endif /* HAVE_STRUCT_NTPTIMEVAL_TAI */
 		printf(json ? jfmt1 : ofmt1, status, timex_state(status));
 		time_frac = ntv.time.tv_frac_sec;
 #ifdef STA_NANO
