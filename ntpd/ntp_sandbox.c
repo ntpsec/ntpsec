@@ -401,6 +401,7 @@ int scmp_sc[] = {
  * rather than generate a trap.
  */
 	SCMP_SYS(clone),	/* threads */
+	SCMP_SYS(clone3),
 	SCMP_SYS(kill),		/* generate signal */
 	SCMP_SYS(madvise),
 	SCMP_SYS(mprotect),
