@@ -292,6 +292,17 @@ int mon_get_oldest_age(l_fp now)
     if (mon_data.mru_entries == 0)
 	return 0;
     oldest = TAIL_DLIST(mon_data.mon_mru_list, mru);
+    if (1) {
+      /* FIXME -fanalyze
+       * Hack to keep compiler -fanalyze happy
+       * If mru_entries !=0, the list is not empty
+       * and TAIL_DLIST will return a valid pointer
+       */
+	if (NULL == oldest) {
+		msyslog(LOG_ERR, "MON: Bug in mon_get_oldest_age");
+		exit(3);
+        }
+    }
     now -= oldest->last;
     /* add one-half second to round up */
     now += 0x80000000;

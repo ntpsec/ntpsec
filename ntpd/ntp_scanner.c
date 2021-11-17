@@ -421,6 +421,10 @@ bool lex_push_file(
 			if ((dfd = opendir(fullpath)) == NULL)
 				return false;
 			baselist = (char **)malloc(sizeof(char *));
+			if (NULL == baselist) {
+				msyslog(LOG_ERR, "CONFIG: lex_push_file: NULL from malloc");
+				exit(3);
+			}
 			while ((dp = readdir(dfd)) != NULL)
 			{
 				if (!CONF_ENABLE(dp->d_name)) {

@@ -283,6 +283,17 @@ alloc_auth_info(
 		auth_moremem(-1);
 	}
 	UNLINK_HEAD_SLIST(auth, authfreekeys, llink.f);
+	if (1) {
+		/* FIXME -fanalyze
+		 * Hack to keep compiler -fanalyze happy
+		 * If mru_entries !=0, the list is not empty
+		 * and TAIL_DLIST will return a valid pointer
+		 */
+		if (NULL == auth) {
+                	msyslog(LOG_ERR, "AUTH: Bug in alloc_auth_info");
+			exit(3);
+		}
+	}
 	//ENSURE(sk != NULL);
 	auth->keyid = keyid;
 	auth->type = type;

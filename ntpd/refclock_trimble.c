@@ -269,6 +269,11 @@ init_thunderbolt (
 	tx.size = 0;
 	tx.data = (uint8_t *) malloc(100);
 
+	if (NULL == tx.data) {
+	        msyslog(LOG_ERR, "REFCLOCK: init_thunderbolt malloc failed");
+		exit(3);
+	}
+
 	/* set UTC time */
 	sendsupercmd (&tx, 0x8E, 0xA2);
 	sendbyte     (&tx, 0x3);
