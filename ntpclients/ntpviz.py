@@ -479,8 +479,8 @@ set rmargin 10
         if item2:
             for row in rows:
                 try:
-                    values1.append(float(row[item1]))
-                    values2.append(float(row[item2]))
+                    val1 = float(row[item1])
+                    val2 = float(row[item2])
                     if 2200000 < row[0] - last_time:
                         # more than 2,200 seconds between points
                         # data loss, add a break in the plot line
@@ -491,6 +491,10 @@ set rmargin 10
                     last_time = row[0]
                 except IndexError:
                     pass
+                except ValueError:
+                    pass
+                values1.append(val1)
+                values2.append(val2)
         else:
             for row in rows:
                 try:
@@ -503,6 +507,8 @@ set rmargin 10
                     plot_data += row[1] + ' ' + row[item1] + '\n'
                     last_time = row[0]
                 except IndexError:
+                    pass
+                except ValueError:
                     pass
 
         # I know you want to replace the plot_data string concat with
