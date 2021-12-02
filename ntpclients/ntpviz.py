@@ -490,9 +490,10 @@ set rmargin 10
                         + row[item2] + '\n'
                     last_time = row[0]
                 except IndexError:
-                    pass
+                    continue
                 except ValueError:
-                    pass
+                    continue
+                # both values are good, append them.
                 values1.append(val1)
                 values2.append(val2)
         else:
