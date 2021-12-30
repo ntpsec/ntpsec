@@ -349,6 +349,7 @@ int scmp_sc[] = {
 	SCMP_SYS(lseek),
 	SCMP_SYS(membarrier),	/* Needed on Alpine 3.11.3 */
 	SCMP_SYS(munmap),
+	SCMP_SYS(newfstatat),
 	SCMP_SYS(open),
 #ifdef __NR_openat
 	SCMP_SYS(openat),	/* SUSE */
@@ -452,7 +453,6 @@ int scmp_sc[] = {
 #endif
 #if defined(__aarch64__)
 	SCMP_SYS(faccessat),
-	SCMP_SYS(newfstatat),
 	SCMP_SYS(renameat),
 	SCMP_SYS(linkat),
 	SCMP_SYS(unlinkat),
