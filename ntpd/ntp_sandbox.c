@@ -451,7 +451,7 @@ int scmp_sc[] = {
 	/* gentoo 64-bit and 32-bit, Intel and Arm use mmap */
 	SCMP_SYS(mmap),
 #endif
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(__riscv)
 	SCMP_SYS(faccessat),
 	SCMP_SYS(renameat),
 	SCMP_SYS(linkat),
