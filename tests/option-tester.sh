@@ -16,8 +16,13 @@ then
 fi
 
 PURGE=""
-SECCOMP="$(pkg-config libseccomp --variable=includedir)"
-SECCOMP="$SECCOMP/seccomp.h"
+if which pkg-config
+then
+  SECCOMP="$(pkg-config libseccomp --variable=includedir)"
+  SECCOMP="$SECCOMP/seccomp.h"
+else
+  SECCOMP=""
+fi
 LINUX=""
 if [ `uname -s` = "Linux" -a -n "$SECCOMP" -a -f "$SECCOMPH" ]
 then
@@ -38,7 +43,7 @@ then
     DISABLE_NTS="--disable-nts"
   fi
 else
-  if ! $PYTHON ../wafhelpers/tlscheck.py
+  if ! $PYTHON ./wafhelpers/tlscheck.py
   then
     DISABLE_NTS="--disable-nts"
   fi
