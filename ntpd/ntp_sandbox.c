@@ -35,7 +35,7 @@ static priv_set_t *lowprivs = NULL;
 static priv_set_t *highprivs = NULL;
 #endif /* HAVE_SOLARIS_PRIVS */
 
-#ifdef HAVE_PRIV_NTP_ADJTIME
+#if defined(HAVE_PRIV_NTP_ADJTIME) && defined(ENABLE_DROPROOT)
 #include <sys/types.h>
 #include <sys/sysctl.h>
 static void CheckFreeBSDdroproot(uid_t uid);
@@ -492,7 +492,7 @@ int scmp_sc[] = {
 	return nonroot;
 }
 
-#ifdef HAVE_PRIV_NTP_ADJTIME
+#if defined(HAVE_PRIV_NTP_ADJTIME) && defined(ENABLE_DROPROOT)
 void CheckFreeBSDdroproot(uid_t uid) {
 	/* This checks that mac_ntpd.ko is loaded.
 	 * It defaults to 123 and enabled, aka what we want.
