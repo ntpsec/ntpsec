@@ -789,7 +789,7 @@ set terminal %(terminal)s size %(size)s
 set title "%(sitename)s: Local GPS%(clipped)s
 set ytics format "%(fmt)s TDOP" nomirror textcolor rgb '#0060ad'
 set yrange [%(min_y)s:%(max_y)s]
-set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
+set y2tics format "%%4.1f nSat"  nomirror textcolor rgb '#dd181f'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 set key top right
