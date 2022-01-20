@@ -177,9 +177,21 @@ def configure(ctx):
     if build_desc:
         build_desc = ' ' + build_desc
     if ctx.env.BIN_GIT:
-        cmd = ctx.env.BIN_GIT + shlex.split("describe --dirty")
-        git_short_hash = ctx.cmd_and_log(cmd).strip()
-        git_short_hash = '-'.join(git_short_hash.split('-')[1:])
+        # 'tag', '7', and 'deadbeef' are fill ins for
+        # a previous tag (always dropped), commits since that tag,
+        # the short commit hash. I can see 5 'git describe' outputs
+        # buildbots and prepush should get: tag-7-gdeadbeef
+        # working developers should get: tag-7-gdeadbeef-dirty
+        # patched shallow builders should get: gdeadbeef-dirty
+        # other shallow builder should get: gdeadbeef
+        # the thorium poisoned get errors and burst into flame
+        # 1-2 tokens gets appended verbatim
+        # 3-4 gets the first token dropped and the rest added
+        # I have never seen 5+ tokens, we should be safe
+        cmd = ctx.env.BIN_GIT + shlex.split("describe --tags --dirty --always")
+        git_short_hash = ctx.cmd_and_log(cmd).strip().split('-')
+        clip = 1 if len(git_short_hash) > 2 else 0
+        git_short_hash = '-'.join(git_short_hash[clip:])
 
         ctx.env.NTPSEC_VERSION = "%s+" % ntpsec_release
         ctx.env.NTPSEC_VERSION_EXTENDED = ("%s+%s%s" %
@@ -1055,7 +1067,7 @@ def build(ctx):
         target3 = bldnode.ant_glob('*ntpc*')
         for _ in target3:
             ctx.exec_command("rm -f %s" % _.abspath())
-        # Finish purging ntp.ntpc 
+        # Finish purging ntp.ntpc
         ctx.add_group()
 
     if ctx.env.REFCLOCK_GENERIC or ctx.env.REFCLOCK_TRIMBLE:
