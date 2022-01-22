@@ -2848,7 +2848,7 @@ static uint32_t derive_nonce(
 	)
 {
 	static uint8_t	salt[16];
-	static unsigned long	last_salt_update = 0;
+	static unsigned long	next_salt_update = 0;
 	union d_tag {
 		uint8_t	digest[EVP_MAX_MD_SIZE];
 		uint32_t extract;
@@ -2856,9 +2856,11 @@ static uint32_t derive_nonce(
 	EVP_MD_CTX	*ctx;
 	unsigned int	len;
 
-	while (!last_salt_update || current_time - last_salt_update >= SECSPERHR) {
+	if (current_time >= next_salt_update) {
 		ntp_RAND_bytes(&salt[0], sizeof(salt));
-		last_salt_update = current_time;
+		next_salt_update = current_time+SECSPERHR;
+		if (0) msyslog(LOG_INFO, "derive_nonce: update salt, %lld", \
+			(long long)next_salt_update);
 	}
 
 	ctx = EVP_MD_CTX_create();
