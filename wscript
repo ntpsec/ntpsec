@@ -641,6 +641,7 @@ int main(int argc, char **argv) {
         ('res_init', ["netinet/in.h", "arpa/nameser.h", "resolv.h"]),
         ('strlcpy', ["string.h"]),
         ('strlcat', ["string.h"]),
+        ('timegm', ["time.h"]),
         # Hack.  It's not a function, but this works.
         ('PRIV_NTP_ADJTIME', ["sys/priv.h"])            # FreeBSD
     )
@@ -755,6 +756,12 @@ int main(int argc, char **argv) {
     if ctx.options.refclocks:
         from wafhelpers.refclock import refclock_config
         refclock_config(ctx)
+        # timegm needed by refclock_nmea, it's not in POSIX
+        # It's in Linux, FreeBSD, and NetBSD
+        if not ctx.get_define("HAVE_TIMEGM") and ctx.get_define("CLOCK_NMEA"):
+            ctx.fatal("Refclock NMEA needs timegm")
+            # We should provide an implementation.
+            # Like we do for BSD string functions.
 
     # NetBSD (used to) need to recreate sockets on changed routing.
     # Perhaps it still does. If so, this should be set.  The autoconf

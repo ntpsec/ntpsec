@@ -81,7 +81,6 @@ def build(ctx):
     if ctx.env.REFCLOCK_ENABLE:
 
         refclock_source = ["ntp_refclock.c",
-			   "ntp_wrapdate.c",
                            "refclock_conf.c"
                            ]
 

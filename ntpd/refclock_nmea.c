@@ -30,8 +30,6 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
-#include "ntp_calendar.h"
-#include "ntp_wrapdate.h"
 #include "timespecops.h"
 
 #ifdef HAVE_PPSAPI
@@ -220,9 +218,8 @@ typedef struct {
 	bool	ppsapi_gate;	/* system is on PPS */
 #endif /* HAVE_PPSAPI */
 	bool	gps_time;	/* use GPS time, not UTC */
-	unsigned short century_cache;	/* cached current century */
 	l_fp	last_reftime;	/* last processed reference stamp */
-	short 	epoch_warp;	/* last epoch warp, for logging */
+	int 	wnro;		/* last epoch warp, for logging */
 	/* tally stats, reset each poll cycle */
 	struct
 	{
@@ -248,18 +245,10 @@ typedef struct {
 	int    cidx;	/* current field index	*/
 } nmea_data;
 
-/*
- * The GPS week time scale starts on Sunday, 1980-01-06. We need the
- * rata die number of this day.
- */
-#ifndef DAY_GPS_STARTS
-#define DAY_GPS_STARTS 722820
-#endif
 
 /*
  * Function prototypes
  */
-static	void	nmea_init	(void);
 static	bool	nmea_start	(int, struct peer *);
 static	void	nmea_shutdown	(struct refclockproc *);
 static	void	nmea_receive	(struct recvbuf *);
@@ -279,12 +268,12 @@ static char *	field_parse	(nmea_data * data, int fn);
 static void	field_wipe	(nmea_data * data, ...);
 static uint8_t	parse_qual	(nmea_data * data, int idx,
 				 char tag, int inv);
-static bool	parse_time	(struct calendar * jd, long * nsec,
-				 nmea_data *, int idx);
-static bool	parse_date	(struct calendar *jd, nmea_data*,
-				 int idx, enum date_fmt fmt);
-static bool	parse_weekdata	(gps_weektm *, nmea_data *,
-				 int weekidx, int timeidx, int leapidx);
+static bool	parse_time	(struct timespec *dt, nmea_data *, int idx);
+static bool	parse_date	(struct timespec *dt, nmea_data*,
+					int idx, enum date_fmt fmt);
+static bool	kludge_day	(struct timespec *dt);
+static bool	fix_WNRO	(struct timespec *dt, int *wnro, \
+					const struct peer *peer);
 
 static void     save_ltc        (struct refclockproc * const, const char * const,
 				 size_t);
@@ -308,23 +297,9 @@ struct refclock refclock_nmea = {
 	nmea_shutdown,		/* shut down driver */
 	nmea_poll,		/* transmit poll message */
 	NMEA_CONTROL,		/* fudge control */
-	nmea_init,		/* initialize driver */
+	NULL,			/* initialize driver */
 	nmea_timer		/* called once per second */
 };
-
-/*
- * -------------------------------------------------------------------
- * nmea_init - initialise data
- *
- * calculates a few runtime constants that cannot be made compile time
- * constants.
- * -------------------------------------------------------------------
- */
-static void
-nmea_init(void)
-{
-    wrapdate_init();
-}
 
 /*
  * -------------------------------------------------------------------
@@ -849,9 +824,7 @@ nmea_receive(
 	double	  rd_fudge;
 
 	/* working stuff */
-	struct calendar date;	/* to keep & convert the time stamp */
-	struct timespec tofs;	/* offset to full-second reftime */
-	gps_weektm      gpsw;	/* week time storage */
+	struct timespec date;	/* to keep & convert the time stamp */
 	/* results of sentence/date/time parsing */
 	uint8_t		sentence;	/* sentence tag */
 	int		checkres;
@@ -860,9 +833,7 @@ nmea_receive(
 	bool		rc_time;
 
 	/* make sure data has defined pristine state */
-	ZERO(tofs);
 	ZERO(date);
-	ZERO(gpsw);
 	sentence = 0;
 	rc_date = false;
 	rc_time = false;
@@ -983,28 +954,27 @@ nmea_receive(
 
 	case NMEA_GPRMC:
 		/* Check quality byte, fetch data & time */
-		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 1);
+		rc_time	 = parse_time(&date, &rdata, 1);
 		pp->leap = parse_qual(&rdata, 2, 'A', 0);
-		rc_date	 = parse_date(&date, &rdata, 9, DATE_1_DDMMYY)
-			&& unfold_century(&date, lfpuint(rd_timestamp));
+		rc_date	 = parse_date(&date, &rdata, 9, DATE_1_DDMMYY);
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 3, 4, 5, 6, -1);
 		break;
 
 	case NMEA_GPGGA:
 		/* Check quality byte, fetch time only */
-		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 1);
+		rc_time	 = parse_time(&date, &rdata, 1);
 		pp->leap = parse_qual(&rdata, 6, '0', 1);
-		rc_date	 = unfold_day(&date, lfpuint(rd_timestamp));
+		rc_date	 = kludge_day(&date);
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 2, 4, -1);
 		break;
 
 	case NMEA_GPGLL:
 		/* Check quality byte, fetch time only */
-		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 5);
+		rc_time	 = parse_time(&date, &rdata, 5);
 		pp->leap = parse_qual(&rdata, 6, 'A', 0);
-		rc_date	 = unfold_day(&date, lfpuint(rd_timestamp));
+		rc_date	 = kludge_day(&date);
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 1, 3, -1);
 		break;
@@ -1012,29 +982,25 @@ nmea_receive(
 	case NMEA_GPZDA:
 		/* No quality.	Assume best, fetch time & full date */
 		pp->leap = LEAP_NOWARNING;
-		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 1);
+		rc_time	 = parse_time(&date, &rdata, 1);
 		rc_date	 = parse_date(&date, &rdata, 2, DATE_3_DDMMYYYY);
 		break;
 
 	case NMEA_GPZDG:
 		/* Check quality byte, fetch time & full date */
-		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 1);
+		rc_time	 = parse_time(&date, &rdata, 1);
 		rc_date	 = parse_date(&date, &rdata, 2, DATE_3_DDMMYYYY);
 		pp->leap = parse_qual(&rdata, 4, '0', 1);
-		tofs.tv_sec = -1; /* GPZDG is following second */
+/* May be wrong sign: HGM, 2022-Jan-17 */
+		date.tv_sec = -1; /* GPZDG is following second */
 		break;
 
 	case NMEA_PGRMF:
-		/* get date, time, qualifier and GPS weektime. We need
-		 * date and time-of-day for the century fix, so we read
-		 * them first.
+		/* Ignore week stuff.  Use date and time fields. 
 		 */
-		rc_date  = parse_weekdata(&gpsw, &rdata, 1, 2, 5)
-		        && parse_date(&date, &rdata, 3, DATE_1_DDMMYY);
-		rc_time  = parse_time(&date, &tofs.tv_nsec, &rdata, 4);
+		rc_time  = parse_time(&date, &rdata, 4);
+		rc_date  = parse_date(&date, &rdata, 3, DATE_1_DDMMYY);
 		pp->leap = parse_qual(&rdata, 11, '0', 1);
-		rc_date  = rc_date
-		        && gpsfix_century(&date, &gpsw, &up->century_cache);
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 6, 8, -1);
 		break;
@@ -1068,10 +1034,9 @@ nmea_receive(
 		return;
 	}
 
-	DPRINT(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
-		   refclock_name(peer),
-		   date.year, date.month, date.monthday,
-		   date.hour, date.minute, date.second));
+	/* FIXME: should use ctime_r */
+	DPRINT(1, ("%s effective timecode: %s",
+		   refclock_name(peer), ctime(&date.tv_sec)));
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
@@ -1081,14 +1046,16 @@ nmea_receive(
 		up->gps_time = true;
 	}
 
+	/* Check/fix WNRO */
+	fix_WNRO(&date, &up->wnro, peer);
+	rd_reftime = tspec_stamp_to_lfp(date);
+
 	/*
 	 * Get the reference time stamp from the calendar buffer.
 	 * Process the new sample in the median filter and determine the
 	 * timecode timestamp, but only if the PPS is not in control.
 	 * Discard sentence if reference time did not change.
 	 */
-	rd_reftime = eval_gps_time(refclock_name(peer), &date, &tofs,
-				   (peer->cfg.mode & NMEA_DATETRUST_MASK), &up->epoch_warp, &rd_timestamp);
 	if (up->last_reftime == rd_reftime) {
 		/* Do not touch pp->a_lastcode on purpose! */
 		up->tally.filtered++;
@@ -1552,13 +1519,14 @@ parse_qual(
  * -------------------------------------------------------------------
  * Parse a time stamp in HHMMSS[.sss] format with error checking.
  *
+ * Add result to arg
+ *
  * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
 static bool
 parse_time(
-	struct calendar * jd,	/* result calendar pointer */
-	long		* ns,	/* storage for nsec fraction */
+	struct timespec * dt,	/* result date+time */
 	nmea_data       * rd,
 	int		  idx
 	)
@@ -1590,14 +1558,10 @@ parse_time(
 		return false;
 	}
 
-	jd->hour   = (uint8_t)h;
-	jd->minute = (uint8_t)m;
-	jd->second = (uint8_t)s;
+	dt->tv_sec += h*3600 + m*60 + s;
 	/* if we have a fraction, scale it up to nanoseconds. */
 	if (rc == 4) {
-		*ns = (long)(f * weight[p2 - p1 - 1]);
-	} else {
-		*ns = 0;
+		dt->tv_nsec += (f * weight[p2 - p1 - 1]);
 }
 
 	return true;
@@ -1610,12 +1574,14 @@ parse_time(
  * spec spanning three fields. This function does some extensive error
  * checking to make sure the date string was consistent.
  *
+ * Add result to arg
+ *
  * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
 static bool
 parse_date(
-	struct calendar * jd,	/* result pointer */
+	struct timespec * dt,	/* result pointer */
 	nmea_data       * rd,
 	int		  idx,
 	enum date_fmt	  fmt
@@ -1627,6 +1593,7 @@ parse_date(
 	unsigned int	d;
 	int		p;
 	char  	      * dp;
+	struct tm	tm;
 
 	dp = field_parse(rd, idx);
 	switch (fmt) {
@@ -1637,6 +1604,19 @@ parse_date(
 			DPRINT(1, ("nmea: invalid date code: '%.6s'\n",
 				   dp));
 			return false;
+		}
+		if (y > 80) {
+			/* We know the time is now > 2000 but
+			 * GPS might be off by n*1024 weeks.
+			 * WNRO: Week Number Roll Over, ~20 years
+			 * Don't break that correction.
+			 *
+			 * GPS time started in 1980
+			 *   anything < 80 is from the next century.
+			 */
+			y += 1900;
+		} else {
+			y += 2000;
 		}
 		break;
 
@@ -1661,46 +1641,77 @@ parse_date(
 		return false;
 	}
 
-	/* store results */
-	jd->monthday = (uint8_t)d;
-	jd->month    = (uint8_t)m;
-	jd->year     = (unsigned short)y;
+	/* timegm is non-Posix. */
+	ZERO(tm);
+	tm.tm_year = y-1900;
+	tm.tm_mon = m-1;
+	tm.tm_mday = d;
+	dt->tv_sec += timegm(&tm);	/* No error checking */
 
 	return true;
 }
 
-/*
- * -------------------------------------------------------------------
- * Parse GPS week time info from an NMEA sentence. This info contains
- * the GPS week number, the GPS time-of-week and the leap seconds GPS
- * to UTC.
+/* Use system time for missing date field.
+ * Time from GPS is in dt.  We add a day offset.
+ * This assumes the system time is within 12 hours.
+ * Note the 2 interesting cases:
+ *   If GPS time is late in the day and we are early in the day
+ *   we are actually early in the following day.
+ *   If GPS time is early in the day and we are late in the day
+ *   we are actually late in the previous day.
  *
- * returns true on success, false on failure
- * -------------------------------------------------------------------
+ * This code hasn't been tested yet.
+ *
  */
-static bool
-parse_weekdata(
-	gps_weektm * wd,
-	nmea_data  * rd,
-	int          weekidx,
-	int          timeidx,
-	int          leapidx
-	)
-{
-	unsigned long secs;
-	int    fcnt;
+static bool kludge_day (struct timespec *dt) {
+  struct timespec now;
 
-	/* parse fields and count success */
-	fcnt  = sscanf(field_parse(rd, weekidx), "%hu", &wd->wt_week);
-	fcnt += sscanf(field_parse(rd, timeidx), "%lu", &secs);
-	fcnt += sscanf(field_parse(rd, leapidx), "%hd", &wd->wt_leap);
-	if (fcnt != 3 || wd->wt_week >= 1024 || secs >= 7*SECSPERDAY) {
-		DPRINT(1, ("nmea: parse_weekdata: invalid weektime spec\n"));
-		return false;
-	}
-	wd->wt_time = (uint32_t)secs;
+/* FIXME: check if clock is valid. */
 
-	return true;
+  clock_gettime(CLOCK_REALTIME, &now);
+  int nowday = now.tv_sec / 86400;
+  int nowsec = now.tv_sec % 86400;
+  int gpssec = (int)dt->tv_sec;
+  if ((gpssec-nowsec) > 12*3600) nowday -= 1;
+  if ((nowsec-gpssec) > 12*3600) nowday += 1;
+  dt->tv_sec += nowday*86400;
+  return true;
 }
+
+/* FIXME move this to a better place */
+/* Get this from date +%s */
+#define GPS_PIVOT 1642417438
+
+/* Early GPS has a 10 bit week number field.
+ * That's a bit less than 20 years.
+ * GPS started in 1980.  We have now wrapped twice: Aug 1999 and Apr 2019.
+ * https://en.wikipedia.org/wiki/GPS_week_number_rollover
+ *
+ * Some firmware fixes the date to be at least the firmware build date.
+ * That gives valid time for 20 years from the build date.
+ * It also means that old GPS units can break at any time,
+ *   not just on 1024 week boundaries.
+ *
+ * This code wraps based on our build date.
+ * But using a build date would break repeatable builds.
+ * So we use a pivot date that gets updated at release time.
+ * So our code should work for 1024 weeks from the release date.
+ *
+ * Modern GPS satellites have added 3 more bits.
+ * Old firmware doesn't know about them.
+ */
+
+static bool fix_WNRO (struct timespec *dt, int *wnro, const struct peer *peer) {
+  int i;
+  for (i=0; dt->tv_sec < GPS_PIVOT; i++) {
+    dt->tv_sec += 1024*7*86400;
+  }
+  if (*wnro != i) {
+    *wnro = i;
+    msyslog(LOG_INFO, "REFCLOCK: %s date advanced by %d weeks, WNRO", \
+      refclock_name(peer), *wnro*1024);
+  }
+  return true;
+};
 
 // end
