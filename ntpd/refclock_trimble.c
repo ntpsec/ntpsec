@@ -1,7 +1,7 @@
 /*
  * refclock_trimble - clock driver for the Trimble Palisade, Thunderbolt,
- * Acutime 2000, Acutime Gold and EndRun Technologies Praecis Ct/Cf/Ce/II
- * timing receivers
+ * Acutime 2000, Acutime Gold, Resolution, ACE III, Copernicus II and
+ * EndRun Technologies Praecis Ct/Cf/Ce/II timing receivers
  *
  * For detailed information on this program, please refer to the
  * driver_trimble.html document accompanying the NTPsec distribution.
@@ -41,7 +41,7 @@
 /*
  * GPS Definitions
  */
-#define	DESCRIPTION	"Trimble Palisade/Thunderbolt/Acutime GPSes" /* Long name */
+#define	DESCRIPTION	"Trimble Palisade/Thunderbolt/Acutime/Resolution/ACE/Copernicus GPSes" /* Long name */
 #define NAME		"TRIMBLE"	/* shortname */
 #define	PRECISION	(-20)		/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"		/* reference ID */
@@ -58,6 +58,7 @@
 #define	DEVICE		"/dev/palisade%d" 	/* device name and unit */
 #endif
 #define	SPEED232	B9600		  	/* uart speed (9600 baud) */
+#define	SPEED232COP	B38400		  	/* uart speed for Copernicus II (38400 baud) */
 
 /* parse consts */
 #define RMAX 172 /* TSIP packet 0x58 can be 172 bytes */
@@ -85,7 +86,7 @@
 #endif
 
 /*
- * Structure for build data packets for send (thunderbolt uses it only)
+ * Structure for build data packets for send (used by thunderbolt, ACE III and resolution)
  * taken from Markus Prosch
  */
 struct packettx
@@ -109,6 +110,7 @@ struct trimble_unit {
 	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
 	bool		use_event;	/* receiver has event input */
+	bool		event_reply;	/* response to event input has been received */
 	int		MCR;		/* modem control register value at startup */
 	bool		parity_chk;	/* enable parity checking */
 	l_fp		p_recv_time;	/* timestamp of last received packet */
@@ -129,14 +131,17 @@ static	void 	trimble_io		(struct recvbuf *);
 static	void	trimble_receive		(struct peer *, int);
 static	bool	TSIP_decode		(struct peer *);
 static	void	HW_poll			(struct refclockproc *);
+static	float	getsgl			(uint8_t *);
 static	double	getdbl 			(uint8_t *);
 static	short	getint 			(uint8_t *);
 static	int32_t	getlong			(uint8_t *);
+static  void	sendcmd			(struct packettx *buffer, int c);
 static  void	sendsupercmd		(struct packettx *buffer, int c1, int c2);
 static  void	sendbyte		(struct packettx *buffer, int b);
 static  void	sendint			(struct packettx *buffer, int a);
 static  int	sendetx			(struct packettx *buffer, int fd);
 static  void	init_thunderbolt	(int fd);
+static  void	init_resolution		(int fd);
 
 #define PAL_TSTATS 14
 #ifdef DEBUG
@@ -185,10 +190,27 @@ struct refclock refclock_trimble = {
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
+#define CLK_RESOLUTION  5	/* Trimble Resolution Receivers */
+#define CLK_ACE		6	/* Trimble ACE III */
+#define CLK_COPERNICUS	7	/* Trimble Copernicus II */
 
 /* packet 8f-ad UTC flags */
 #define UTC_AVAILABLE	0x01
 #define LEAP_SCHEDULED	0x10
+
+/*
+ * sendcmd - Build data packet for sending
+ */
+static void
+sendcmd (
+	struct packettx *buffer,
+	int c
+	)
+{
+	*buffer->data = DLE;
+	*(buffer->data + 1) = (unsigned char)c;
+	buffer->size = 2;
+}
 
 /*
  * sendsupercmd - Build super data packet for sending
@@ -288,6 +310,43 @@ init_thunderbolt (
 }
 
 /*
+ * init_resolution - Prepares Resolution receiver to be used with
+ *		      NTP (also taken from Markus Prosch).
+ */
+static void
+init_resolution (
+	int fd
+	)
+{
+	struct packettx tx;
+
+	tx.size = 0;
+	tx.data = (uint8_t *) malloc(100);
+
+	if (NULL == tx.data) {
+	        msyslog(LOG_ERR, "REFCLOCK: init_resolution malloc failed");
+		exit(3);
+	}
+
+	/* set UTC time */
+	sendsupercmd (&tx, 0x8E, 0xA2);
+	sendbyte     (&tx, 0x3);
+	sendetx      (&tx, fd);
+
+	/* squelch PPS output unless locked to at least one satellite */
+	sendsupercmd (&tx, 0x8E, 0x4E);
+	sendbyte     (&tx, 0x3);
+	sendetx      (&tx, fd);
+
+	/* activate packets 0x8F-AB and 0x8F-AC */
+	sendsupercmd (&tx, 0x8E, 0xA5);
+	sendint      (&tx, 0x5);
+	sendetx      (&tx, fd);
+
+	free(tx.data);
+}
+
+/*
  * trimble_start - open the devices and initialize data for processing
  */
 static bool
@@ -324,7 +383,8 @@ trimble_start (
 	    path = device;
         }
 	fd = refclock_open(path,
-				  peer->cfg.baud ? peer->cfg.baud : SPEED232,
+				  peer->cfg.baud ? peer->cfg.baud :
+				  (CLK_TYPE(peer) == CLK_COPERNICUS) ? SPEED232COP : SPEED232,
 				  LDISC_RAW);
 	if (0 > fd) {
 	        msyslog(LOG_ERR, "REFCLOCK: %s Trimble device open(%s) failed",
@@ -377,6 +437,21 @@ trimble_start (
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Acutime Gold mode enabled",
 			refclock_name(peer));
 		break;
+	    case CLK_RESOLUTION:
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Resolution mode enabled",
+			refclock_name(peer));
+		up->use_event = false;
+		break;
+	    case CLK_ACE:
+		msyslog(LOG_NOTICE, "REFCLOCK: %s ACE III mode enabled",
+			refclock_name(peer));
+		break;
+	    case CLK_COPERNICUS:
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Copernicus II mode enabled",
+			refclock_name(peer));
+		up->use_event = false;
+		up->parity_chk = false;
+		break;
 	    default:
 	        msyslog(LOG_NOTICE, "REFCLOCK: %s mode unknown",
 			refclock_name(peer));
@@ -402,7 +477,20 @@ trimble_start (
 		free(up);
 		return false;
 	}
-	if (up->use_event) {
+	/*
+	 * On some OS's, the calls to tcsetattr and tcgetattr above reset the baud
+	 * rate to 0 as a side effect. Surprisingly, this doesn't appear to affect
+	 * the operation of devices running at 9600 baud but it certainly does
+	 * affect the 38400 baud Copernicus II.
+	 * As a workaround, apply the baud rate once more here.
+	 */
+	cfsetispeed(&tio, peer->cfg.baud ? peer->cfg.baud :
+	                  (CLK_TYPE(peer) == CLK_COPERNICUS) ? SPEED232COP : SPEED232);
+	cfsetospeed(&tio, peer->cfg.baud ? peer->cfg.baud :
+	                  (CLK_TYPE(peer) == CLK_COPERNICUS) ? SPEED232COP : SPEED232);
+	tcsetattr(fd, TCSANOW, &tio);
+
+	if (up->use_event && (up->type != CLK_ACE)) {
 		/*
 		 * The width of the RTS pulse must be either less than 5us or
 		 * greater than 600ms or the Acutime 2000 may try to switch its
@@ -476,6 +564,10 @@ trimble_start (
 		init_thunderbolt(fd);
 	}
 
+	if (up->type == CLK_RESOLUTION) {
+		init_resolution(fd);
+	}
+
 	return true;
 }
 
@@ -492,6 +584,8 @@ TSIP_decode (
 	double secs, secfrac;
 	unsigned short event, m_alarms;
 	uint32_t holdover_t;
+	float TOWfloat;
+	uint32_t lastrec_frac;
 
 	struct trimble_unit *up;
 	struct refclockproc *pp;
@@ -503,7 +597,7 @@ TSIP_decode (
 	if (id == 0x8f) {
 		/* Superpackets */
 		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
-		if ((up->type != CLK_THUNDERBOLT) && !event)
+		if ((up->type != CLK_THUNDERBOLT) && (up->type != CLK_RESOLUTION) && !event)
 			/* ignore auto-report */
 			return false;
 
@@ -659,7 +753,7 @@ TSIP_decode (
 		    case 0xAC:
 			/*
 			 * supplemental timing packet: sent after 8f-ab from
-			 * Thunderbolt
+			 * Thunderbolt and Resolution
 			 */
 			if (up->rpt_cnt != 68) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ac packet length is not 68 (%d)\n",
@@ -744,7 +838,7 @@ TSIP_decode (
 		    case 0xAB:
 			/*
 			 * primary timing packet: first packet sent after PPS
-			 * from Thunderbolt
+			 * from Thunderbolt and Resolution
 			 */
 			if (up->rpt_cnt != 17) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ab packet length is not 17 (%d)\n",
@@ -817,6 +911,64 @@ TSIP_decode (
 			break;
 		} /* switch */
 	}
+
+	else if (id == 0x41) {
+		/*
+		 * GPS time packet from ACE III or Copernicus II receiver.
+		 * The ACE III issues these in response to a HW poll.
+		 * The Copernicus II receiver issues these by default once a second.
+		 */
+		if ((up->type != CLK_ACE) && (up->type != CLK_COPERNICUS))
+			return false;
+
+		if (up->rpt_cnt != 10) {
+			DPRINT(1, ("TSIP_decode: unit %d: 41 packet length is not 10 (%d)\n",
+			       up->unit, (int)up->rpt_cnt));
+			refclock_report(peer, CEVNT_BADREPLY);
+			return false;
+		}
+
+		/*
+                 * A negative value of TOW indicates the receiver has not established the time.
+		 * This can occur even if UTC_offset is correct.
+		 */
+		TOWfloat = getsgl((uint8_t *) &mb(0));
+		up->got_time = (TOWfloat >= 0);
+		if (!up->got_time)
+			return false;
+		up->TOW  = (unsigned int)TOWfloat;
+		up->week = (unsigned int)getint((uint8_t *) &mb(4));
+		up->UTC_offset =    (int)getsgl((uint8_t *) &mb(6));
+		if (up->UTC_offset == 0) {
+			DPRINT(1, ("TSIP_decode: unit %d: UTC data not available\n",
+			       up->unit));
+			return false;
+		}
+
+		gpsweekadj(&up->week, up->build_week);
+		gpstocal(up->week, up->TOW, up->UTC_offset, &up->date);
+
+		/*
+                 * The HW_poll occurs at 1Hz but with random phase w.r.t the system clock.
+                 * If we are using polling, cancel out the random phase offset by setting
+		 * pp->nsec to the fractional part of lastrec.
+		 */
+		if (up->use_event) {
+			lastrec_frac = pp->lastrec & 0xFFFFFFFF;
+			secfrac = (double)lastrec_frac / (double)(0xFFFFFFFF);
+			pp->nsec = (long) (secfrac * NS_PER_S);
+		} else {
+			pp->lastrec = up->p_recv_time;
+			pp->nsec = 0;
+		}
+
+		DPRINT(2, ("TSIP_decode: unit %d: 41 TOW: %u week: %u UTC %d adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
+		       up->unit, up->TOW, up->week, up->UTC_offset,
+		       up->date.hour, up->date.minute, up->date.second,
+		       up->date.month, up->date.monthday, up->date.year));
+		return true;
+	}
+
 	return false;
 }
 
@@ -857,22 +1009,31 @@ trimble_receive (
 	}
 
 	/* add sample to filter */
-	pp->lastref = pp->lastrec;
-	pp->year = up->date.year;
-	pp->yday = up->date.yearday;
-	pp->hour = up->date.hour;
-	pp->minute = up->date.minute;
-	pp->second = up->date.second;
-	DPRINT(2, ("trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
-		   up->unit, pp->year, pp->yday, pp->hour, pp->minute,
-		   pp->second, pp->nsec));
-	if (!refclock_process(pp)) {
-		refclock_report(peer, CEVNT_BADTIME);
-		DPRINT(1, ("trimble_receive: unit %d: refclock_process failed!\n",
-		       up->unit));
-		return;
+	/*
+         * The ACE III receiver periodically outputs 0x41 packets by itself,
+         * i.e. in addition to those output in response to a poll command.
+	 * When this happens, two 0x41 packets with the same contents will be
+	 * received back to back.  Only process the first of these.
+	 */
+	if (!((up->type == CLK_ACE) && up->event_reply)) {
+		pp->lastref = pp->lastrec;
+		pp->year = up->date.year;
+		pp->yday = up->date.yearday;
+		pp->hour = up->date.hour;
+		pp->minute = up->date.minute;
+		pp->second = up->date.second;
+		DPRINT(2, ("trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
+			   up->unit, pp->year, pp->day, pp->hour, pp->minute,
+			   pp->second, pp->nsec));
+		if (!refclock_process(pp)) {
+			refclock_report(peer, CEVNT_BADTIME);
+			DPRINT(1, ("trimble_receive: unit %d: refclock_process failed!\n",
+			       up->unit));
+			return;
+		}
+		up->samples++;
+		up->event_reply = true;
 	}
-	up->samples++;
 }
 
 /*
@@ -1092,27 +1253,73 @@ HW_poll (
 
 	up = pp->unitptr;
 
-	/* Edge trigger */
-	if (pp->sloppyclockflag & CLK_FLAG3) {
-		IGNORE(write (pp->io.fd, "", 1));
+	/* Poll ACE III by sending a 0x21 command */
+	struct packettx tx;
+	if (up->type == CLK_ACE) {
+		tx.size = 0;
+		tx.data = (uint8_t *) malloc(100);
+		if (NULL == tx.data) {
+	        	msyslog(LOG_ERR, "REFCLOCK: poll Trimble ACE III malloc failed");
+			exit(3);
+		}
+		sendcmd (&tx, 0x21);
+		sendetx (&tx, pp->io.fd);
+		free(tx.data);
 	} else {
-		up->MCR &= ~TIOCM_RTS; /* set RTS low from high idle state */
-		IGNORE(ioctl(pp->io.fd, TIOCMSET, &up->MCR));
+		/* Edge trigger */
+		if (pp->sloppyclockflag & CLK_FLAG3) {
+			IGNORE(write (pp->io.fd, "", 1));
+		} else {
+			up->MCR &= ~TIOCM_RTS; /* set RTS low from high idle state */
+			IGNORE(ioctl(pp->io.fd, TIOCMSET, &up->MCR));
 
-		/*
-		 * The Acutime 2000 will occasionally transmit with parity
-		 * errors if the low state is held for less than 1ms, and the
-		 * Praecis will produce unstable timestamps if the low state is
-		 * held for less than 12ms.
-		 */
-		nanosleep(&ts, NULL);
+			/*
+			 * The Acutime 2000 will occasionally transmit with parity
+			 * errors if the low state is held for less than 1ms, and the
+			 * Praecis will produce unstable timestamps if the low state is
+			 * held for less than 12ms.
+			 */
+			nanosleep(&ts, NULL);
 
-		up->MCR |= TIOCM_RTS;  /* make edge / restore idle */
-		IGNORE(ioctl(pp->io.fd, TIOCMSET, &up->MCR));
+			up->MCR |= TIOCM_RTS;  /* make edge / restore idle */
+			IGNORE(ioctl(pp->io.fd, TIOCMSET, &up->MCR));
+		}
 	}
+	up->event_reply = 0;
 
 	/* get timestamp after triggering since RAND_bytes is slow */
 	get_systime(&pp->lastrec);
+}
+
+/*
+ * getsgl - copy/swap a big-endian palisade single into a host float
+ */
+static float
+getsgl (
+	uint8_t *bp
+	)
+{
+#ifdef WORDS_BIGENDIAN
+	float out;
+
+	memcpy(&out, bp, sizeof(out));
+	return out;
+#else
+	union {
+		uint8_t ch[4];
+		uint32_t u32;
+	} ui;
+
+	union {
+		float out;
+		uint32_t u32;
+	} uo;
+
+	memcpy(ui.ch, bp, sizeof(ui.ch));
+	uo.u32 = ntohl(ui.u32);
+
+	return uo.out;
+#endif
 }
 
 /*
