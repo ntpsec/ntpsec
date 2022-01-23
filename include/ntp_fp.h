@@ -159,7 +159,7 @@ extern	char *	rfc3339time     (time_t);
 extern	void	set_sys_fuzz	(double);
 #endif
 extern	void	get_systime	(l_fp *);
-extern	bool	step_systime	(doubletime_t, int (*settime)(struct timespec *));
+extern	bool	step_systime	(doubletime_t);
 extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct timeval *));
 
 #define	lfptoa(fpv, ndec)	mfptoa((fpv), (ndec))

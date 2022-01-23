@@ -28,7 +28,6 @@
 void ntpc_setprogname(char*);
 char *ntpc_prettydate(char*);
 double ntpc_lfptofloat(char*);
-int ntpc_set_tod(int, int);
 bool ntpc_adj_systime(double);
 bool ntpc_step_systime(double);
 
@@ -88,16 +87,6 @@ ntpc_lfptofloat(char *s)
 	return tt.tv_sec + (tt.tv_nsec * S_PER_NS);
 }
 
-int
-ntpc_set_tod(int seconds, int fractional)
-{
-	struct timespec ts;
-	ts.tv_sec = seconds;
-	ts.tv_nsec = fractional;
-
-	return ntp_set_tod(&ts);
-}
-
 bool
 ntpc_adj_systime(double adjustment)
 {
@@ -116,5 +105,5 @@ ntpc_step_systime(double adjustment)
 	 * and now exceeds the range of a double.
 	 */
 	full_adjustment = adjustment;
-	return step_systime(full_adjustment, ntp_set_tod);
+	return step_systime(full_adjustment);
 }

@@ -147,11 +147,6 @@ _statustoa = _ntpc.statustoa
 _statustoa.restype = ctypes.c_char_p
 _statustoa.argtypes = [ctypes.c_int, ctypes.c_int]
 
-# Set time to nanosecond precision.
-set_tod = _ntpc.ntpc_set_tod
-set_tod.restype = ctypes.c_int
-set_tod.argtypes = [ctypes.c_int, ctypes.c_int]
-
 # Adjust system time by slewing.
 adj_systime = _ntpc.ntpc_adj_systime
 adj_systime.restype = ctypes.c_bool

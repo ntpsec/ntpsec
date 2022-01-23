@@ -480,7 +480,7 @@ local_clock(
 	if (clock_ctl.mode_ntpdate) {
 		if (  ( fp_offset > loop_data.clock_max_fwd  && loop_data.clock_max_fwd  > 0)
 		   || (-fp_offset > loop_data.clock_max_back && loop_data.clock_max_back > 0)) {
-			step_systime(fp_offset, ntp_set_tod);
+			step_systime(fp_offset);
 			msyslog(LOG_NOTICE, "CLOCK: time set %+.6f s",
 			    fp_offset);
 			printf("ntpd: time set %+.6fs\n", fp_offset);
@@ -611,7 +611,7 @@ local_clock(
 			snprintf(tbuf, sizeof(tbuf), "%+.6f s",
 			    fp_offset);
 			report_event(EVNT_CLOCKRESET, NULL, tbuf);
-			step_systime(fp_offset, ntp_set_tod);
+			step_systime(fp_offset);
 			reinit_timer();
 			clkstate.tc_counter = 0;
 			clkstate.clock_jitter = LOGTOD(sys_vars.sys_precision);

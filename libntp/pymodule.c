@@ -110,17 +110,6 @@ ntpc_lfptofloat(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-ntpc_set_tod(PyObject *self, PyObject *args)
-{
-	struct timespec ts;
-
-	UNUSED_ARG(self);
-	if (!PyArg_ParseTuple(args, "ii", &ts.tv_sec, &ts.tv_nsec))
-		return NULL;
-	return Py_BuildValue("d", ntp_set_tod(&ts));
-}
-
-static PyObject *
 ntpc_adj_systime(PyObject *self, PyObject *args)
 {
 	double adjustment;
@@ -147,7 +136,7 @@ ntpc_step_systime(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "d", &adjustment))
 		return NULL;
 	full_adjustment = adjustment;
-	return Py_BuildValue("d", step_systime(full_adjustment, ntp_set_tod));
+	return Py_BuildValue("d", step_systime(full_adjustment));
 }
 
 /* --------------------------------------------------------------- */

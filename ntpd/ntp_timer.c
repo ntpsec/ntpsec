@@ -453,7 +453,7 @@ check_leapsec(
 			if (lsdata.warped < 0) {
 				if (loop_data.clock_max_back > 0.0 &&
 				    loop_data.clock_max_back < abs(lsdata.warped)) {
-					step_systime(lsdata.warped, ntp_set_tod);
+					step_systime(lsdata.warped);
 					leapmsg = leapmsg_p_step;
 				} else {
 					leapmsg = leapmsg_p_slew;
@@ -461,7 +461,7 @@ check_leapsec(
 			} else 	if (lsdata.warped > 0) {
 				if (loop_data.clock_max_fwd > 0.0 &&
 				    loop_data.clock_max_fwd < abs(lsdata.warped)) {
-					step_systime(lsdata.warped, ntp_set_tod);
+					step_systime(lsdata.warped);
 					leapmsg = leapmsg_n_step;
 				} else {
 					leapmsg = leapmsg_n_slew;
