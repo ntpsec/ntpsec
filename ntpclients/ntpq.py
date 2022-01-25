@@ -415,7 +415,7 @@ usage: timeout [ msec ]
                             items.append((name, (value, rawvalue)))
                     except ntp.packet.ControlException as e:
                         if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
-                            items.append((var, "???"))
+                            items.append((var, ("???", None)))
                             continue
                         raise e
                 queried = ntp.util.OrderedDict(items)
