@@ -6,7 +6,7 @@
  * For detailed information on this program, please refer to the
  * driver_trimble.html document accompanying the NTPsec distribution.
  *
- * Version 3.00; September 17, 2017
+ * Version 4.00; January 26, 2021
  * refer to driver_trimble.html for change log
  *
  * This software was developed by the Software and Component Technologies
