@@ -1,4 +1,4 @@
-= Trimble Palisade/Thunderbolt/Acutime & Praecis Receivers
+= Trimble Palisade/Thunderbolt/Acutime/Resolution/ACE/Copernicus & Praecis Receivers
 include::include-html.ad[]
 
 [width="100%",cols="<50%,<50%",frame="none",grid="none"]
@@ -10,14 +10,15 @@ include::include-html.ad[]
 ["verse",subs="normal"]
 Name: trimble
 Reference ID: GPS
-Serial Port: /dev/trimble__u__; 9600 bps 8N1/8O1
+Serial Port: /dev/trimble__u__; 9600/38400 bps 8N1/8O1
 
 == Description
 
-The *refclock trimble* driver version 3.00 supports
+The *refclock trimble* driver version 4.00 supports
 ftp://ftp.trimble.com/pub/sct/embedded/bin/Manuals/Old%20Manuals/PALISADE.PDF[Trimble
-Navigation's Palisade Smart Antenna GPS receiver], Thunderbolt, Acutime 2000
-and Acutime Gold. The EndRun Technologies Praecis Cf, Ct, Ce, and II modules
+Navigation's Palisade Smart Antenna GPS receiver], Thunderbolt, Acutime 2000,
+Acutime Gold, Resolution, ACE III and Copernicus II.
+The EndRun Technologies Praecis Cf, Ct, Ce, and II modules
 (in Palisade emulation mode) are also supported.
 
 == Tested Receivers
@@ -31,10 +32,13 @@ The driver has been tested with the following receivers :
 | Thunderbolt  48051-61    | 3.00
 | Acutime 2000 39091-00    | 2.02
 | Acutime Gold 55238-00    | 1.12
+| Resolution SMT 66974-45  | 1.14
+| ACE III 39818-00-C       | 8.08
+| Copernicus II 63530-00   | 1.07.01
 |============================================
 
-The driver has been tested with the receivers listed above on the
-following host computers:
+The driver has been tested with the Palisade, Praecis, Thunderbolt and Acutime
+receivers on the following host computers:
 
 [width="50%",cols="<40%,<40%,<20%",options="header"]
 |===========================================
@@ -49,6 +53,9 @@ following host computers:
 3. Power Mac G5(7,2), DP 1.8GHz, StarTech PCI1S550, kernel 4.9.34
 4. Sun SPARC Enterprise T5220, onboard serial port, gcc 4.8.2
 
+The driver has been tested with the Resolution, ACE and Copernicus
+receivers on a Rapsberry Pi 3B running Raspberry Pi OS (Legacy).
+
 
 [[sym]]
 == Operating System Serial Port Configuration
@@ -60,16 +67,19 @@ address when using the legacy syntax.
 The user must provide a symbolic link to an available serial port device. This
 is typically performed by a command such as:
 
-[width="50%",cols="<20%,<80%",options="header"]
-|=========================================
-|OS      | Command
-|FreeBSD | ln -s /dev/ttyu0 /dev/trimble0
-|Linux   | ln -s /dev/ttyS0 /dev/trimble0
-|Solaris | ln -s /dev/term/a /dev/trimble0
-|=========================================
+[width="50%",cols="<40%,<80%",options="header"]
+|=================================================
+|OS              | Command
+|FreeBSD         | ln -s /dev/ttyu0 /dev/trimble0
+|Linux           | ln -s /dev/ttyS0 /dev/trimble0
+|Solaris         | ln -s /dev/term/a /dev/trimble0
+|Raspberry Pi OS | ln -s /dev/ttyAMA0 /dev/trimble0
+|=================================================
 
-All receivers except the Thunderbolt have a factory default serial port
-configuration of 8O1 (odd parity). The Thunderbolt defaults to 8N1 (no parity).
+All receivers except the Thunderbolt and Copernicus II have a factory default serial port
+configuration of 8O1 (odd parity). The Thunderbolt and Copernicus II default to 8N1 (no parity).
+All receivers except the Copernicus II have a factory default serial port
+speed of 9600 baud. The Copernicus II defaults to 38400 baud.
 The driver automatically sets the baud rate and parity of the host to
 match the receiver's factory default values.
 
@@ -86,6 +96,21 @@ refclock trimble unit 0 subtype 3
 Thunderbolt:
 ---------------------------------------------
 refclock trimble unit 0 subtype 2 time1 0.020
+---------------------------------------------
+
+Resolution:
+---------------------------------------------
+refclock trimble unit 0 subtype 5 time1 0.420
+---------------------------------------------
+
+ACE III:
+---------------------------------------------
+refclock trimble unit 0 subtype 6
+---------------------------------------------
+
+Copernicus II:
+---------------------------------------------
+refclock trimble unit 0 subtype 7 time1 0.140
 ---------------------------------------------
 
 
@@ -186,6 +211,74 @@ refclock trimble unit 0 subtype 2 time1 0.020
     set ON. See the Praecis manual for the command to change this setting.
 
 
+== Initial Setup and Testing for Resolution Receivers
+1.  Read the xref:Res[Resolution] notes.
+2.  Power up and allow the receiver to obtain UTC offset data. This can take
+    13 to 30 minutes.
+3.  Configure the serial I/O port and its xref:sym[symbolic link] on the host.
+4.  Add the refclock to your +ntpd+ xref:cfg[configuration file].
+5.  Run +ntpd+ with debug level 2 without detaching from the terminal
+    (-d -d -n). Note: debug level 1 may also be used; only errors will be
+	printed to stdout.
+6.  Check the ntpd xref:log[event log] or stdout for a line similar to
+'TRIMBLE(0) open at /dev/trimble0' to verify that your serial port opened.
+7.  The driver will print +TSIP_decode+ lines to stdout as it processes
+    message packets from the receiver. Note: ntpd must be built with debugging
+	enabled to see +TSIP_decode+ +trimble_poll+ and +trimble_receive+ messages
+..  Check your serial connection if 'trimble_poll: unit __u__: no packets found'
+    appears.
+... The driver may print the message
+    'trimble_poll: unit __u__: packets found but none were usable' to stdout if
+    it failed to reconfigure the receiver to transmit auto-report superpackets.
+8. The driver will print a +trimble_poll+ line with a timecode to stdout when
+    time is successfully transferred.
+..  If TSIP_decode lines are seen but trimble_receive never appears:
+... TSIP_decode lines with 'misconfigured' will appear if the driver failed
+    to reconfigure the receiver at startup.
+
+
+== Initial Setup and Testing for ACI III Receivers
+1.  Read the xref:ACE[ACI III] notes.
+2.  Place the GPS antenna outdoors, with a clear view of the sky for best
+    results -- ACI III is not very good at tracking weak signals.
+3.  Power up and allow the receiver to obtain UTC offset data. This can take
+    13 to 30 minutes.
+4.  Configure the serial I/O port and its xref:sym[symbolic link] on the host.
+5.  Add the refclock to your +ntpd+ xref:cfg[configuration file].
+6.  Run +ntpd+ with debug level 2 without detaching from the terminal
+    (-d -d -n). Note: debug level 1 may also be used; only errors will be
+	printed to stdout.
+7.  Check the ntpd xref:log[event log] or stdout for a line similar to
+'TRIMBLE(0) open at /dev/trimble0' to verify that your serial port opened.
+8.  The driver will print +TSIP_decode+ lines to stdout as it processes
+    message packets from the receiver. Note: ntpd must be built with debugging
+	enabled to see +TSIP_decode+ +trimble_poll+ and +trimble_receive+ messages
+..  Check your serial connection if 'trimble_poll: unit __u__: no packets found'
+    appears.
+9. The driver will print a +trimble_poll+ line with a timecode to stdout when
+    time is successfully transferred.
+
+
+== Initial Setup and Testing for Copernicus II Receivers
+1.  Read the xref:Cop[Copernicus II] notes.
+2.  Power up and allow the receiver to obtain UTC offset data. This can take
+    13 to 30 minutes.
+3.  Configure the serial I/O port and its xref:sym[symbolic link] on the host.
+4.  Add the refclock to your +ntpd+ xref:cfg[configuration file].
+5.  Run +ntpd+ with debug level 2 without detaching from the terminal
+    (-d -d -n). Note: debug level 1 may also be used; only errors will be
+	printed to stdout.
+6.  Check the ntpd xref:log[event log] or stdout for a line similar to
+'TRIMBLE(0) open at /dev/trimble0' to verify that your serial port opened.
+7.  The driver will print +TSIP_decode+ lines to stdout as it processes
+    message packets from the receiver. Note: ntpd must be built with debugging
+	enabled to see +TSIP_decode+ +trimble_poll+ and +trimble_receive+ messages
+..  Check your serial connection if 'trimble_poll: unit __u__: no packets found'
+    appears.
+8. The driver will print a +trimble_poll+ line with a timecode to stdout when
+    time is successfully transferred.
+
+
 [[log]]
 == Event Logging
 
@@ -225,12 +318,13 @@ NTP error messages. Log entries generated by the driver will be of the form:
 +flag2 {0 | 1}+::
   Not used by this driver. NOTE: Versions of the driver before 3.00 used flag2
   to disable hardware event capture. Event capture is now required for all
-  receivers except the Thunderbolt.
+  receivers except the Thunderbolt, Resolution and Copernicus II.
 
 [[f3]]+flag3 {0 | 1}+::
   Specifies the method used for triggering the receiver's hardware event input.
   The default of 0 uses the serial port RTS line. Set to 1 to use the serial
-  port's TXD line instead of RTS. Value is ignored when using a Thunderbolt.
+  port's TXD line instead of RTS. Value is ignored when using a Thunderbolt, 
+  Resolution, ACE III or Copernicus II.
 
 +flag4 {0 | 1}+::
   Not used by this driver.
@@ -244,6 +338,9 @@ NTP error messages. Log entries generated by the driver will be of the form:
 | 1 | Praecis
 | 2 | Thunderbolt
 | 3 | Acutime 2000 & Acutime Gold
+| 5 | Resolution
+| 6 | ACE III
+| 7 | Copernicus II
 |================================
 note: There is currently no difference between subtype 0 and subtype 3 other
 than the driver startup message.
@@ -417,7 +514,93 @@ Time transfer during holdover may be enabled by setting xref:t2[time2] to the
 maximum allowable holdover duration in seconds.
 
 
+[[Res]]
+== Resolution Notes
+
+The driver will attempt to set the time report packet and PPS output alignment
+to UTC time since the Resolution defaults to GPS alignment. Time transfer will
+not be allowed unless the receiver reports that it is aligned to UTC time.  The
+driver will also set the receiver not to output a PPS unless at least one
+satellite is being received.
+
+The Resolution does not have an event input.  The driver therefore uses the
+timecode packets transmitted by the Resolution after the beginning of each
+second.  It takes approximately 0.42s to receive the primary and secondary
+timecode packets.  For this reason the xref:t1[+time1+] should be
+set to about 420 ms. The link:driver_pps.html[+pps+] driver should be used along
+with this driver for best results.
+
+The Resolution will have a "GPS Week Number Rollover" problem after
+the following dates:
+[width="50%",cols="<50%,<50%",options="header"]
+|=============================
+| F/W version  | Rollover Date
+| pre-v1.14    | 19-Jun-2027
+| v1.14        | 10-May-2031
+| v2.02        | 21-Aug-2032
+|=============================
+The same workaround mentioned in the
+xref:Pal[Palisade / Acutime Notes] section is implemented for the Resolution.
+
+The receiver must know the current UTC offset from GPS time to be usable with
+ntpd. The receiver automatically decodes the UTC offset data from the +Almanac+
+transmitted by GPS satellites. With good antenna placement, Almanac reception
+can be expected to take 13 minutes or more after receiver power-up. The driver
+will wait for the receiver to report that its UTC offset is valid before
+enabling time transfer.
+
+
+[[ACE]]
+== ACE III Notes
+
+The ACE III does not have an event input.  Rather, the receiver is polled
+by the driver transmitting a 0x21 command to the receiver every second.  The
+link:driver_pps.html[+pps+] driver should be used along
+with this driver for best results.
+
+The timecode packet output by the ACE III contains only the GPS week number,
+time within the week and UTC offset.  A "GPS Week Number Rollover" workaround
+is therefore needed to convert the reported time to UTC.  The same
+workaround mentioned in the xref:Pal[Palisade / Acutime Notes] section is
+implemented for the ACE III.
+
+The receiver must know the current UTC offset from GPS time to be usable with
+ntpd. The receiver automatically decodes the UTC offset data from the +Almanac+
+transmitted by GPS satellites. With good antenna placement, Almanac reception
+can be expected to take 13 minutes or more after receiver power-up. The driver
+will wait for the receiver to report that its UTC offset is valid before
+enabling time transfer.
+
+
+[[Cop]]
+== Copernicus II Notes
+
+The Copernicus II does not have an event input.  The driver therefore uses the
+timecode packet transmitted by the Copernicus II after the beginning of each
+second.  It takes approximately 0.14s to receive the timecode packet.
+For this reason the xref:t1[+time1+] should be set to about 140 ms.
+The link:driver_pps.html[+pps+] driver should be used along
+with this driver for best results.
+
+The timecode packet output by the ACE III contains only the GPS week number,
+time within the week and UTC offset.  A "GPS Week Number Rollover" workaround
+is therefore needed to convert the reported time to UTC.  The same
+workaround mentioned in the xref:Pal[Palisade / Acutime Notes] section is
+implemented for the Copernicus II.
+
+The receiver must know the current UTC offset from GPS time to be usable with
+ntpd. The receiver automatically decodes the UTC offset data from the +Almanac+
+transmitted by GPS satellites. With good antenna placement, Almanac reception
+can be expected to take 13 minutes or more after receiver power-up. The driver
+will wait for the receiver to report that its UTC offset is valid before
+enabling time transfer.
+
+
 == Change Log
+Since version 3.00 (2017-23-09) +
+4.00 +
+* add support for Resolution, ACE III and Copernicus II receivers +
+
 Since version 2.45 (2008-30-09) +
 3.00 +
 * add GPS week number rollover workaround +
