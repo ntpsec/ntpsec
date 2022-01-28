@@ -67,7 +67,7 @@ address when using the legacy syntax.
 The user must provide a symbolic link to an available serial port device. This
 is typically performed by a command such as:
 
-[width="50%",cols="<40%,<80%",options="header"]
+[width="50%",cols="<35%,<65%",options="header"]
 |=================================================
 |OS              | Command
 |FreeBSD         | ln -s /dev/ttyu0 /dev/trimble0
