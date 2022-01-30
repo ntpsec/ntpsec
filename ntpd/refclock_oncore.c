@@ -2530,7 +2530,8 @@ oncore_msg_Bl(
 	size_t	len
 	)
 {
-	int	subframe, valid, page, i, j, tow;
+	int	subframe, valid, page, i, j;
+	long int tow;
 	int	day_now, day_lsf;
 	const char	*cp;
 	enum {

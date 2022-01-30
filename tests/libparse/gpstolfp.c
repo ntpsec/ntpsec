@@ -15,7 +15,8 @@ TEST_TEAR_DOWN(gpstolfp){}
 TEST(gpstolfp, check) {
 	uint64_t build_t, gps_t;
 	struct calendar in, out;
-	unsigned int build_week, week, TOW;
+	unsigned int build_week, week;
+	unsigned long int TOW;
 
 	unsigned int bw[] = {MIN_BUILD_GPSWEEK, 2048, MAX_BUILD_GPSWEEK};
 	uint16_t by[] = {2016, 2019, 2096};

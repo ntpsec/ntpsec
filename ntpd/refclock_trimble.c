@@ -99,26 +99,26 @@ struct packettx
  * Trimble unit control structure.
  */
 struct trimble_unit {
-	short		unit;		/* NTP refclock unit number */
-	bool		got_pkt;	/* decoded a packet this poll */
-	bool		got_time;	/* got a time packet this poll */
-	int		samples;	/* samples in filter this poll */
-	unsigned char	UTC_flags;	/* UTC & leap second flag */
-	unsigned char	trk_status;	/* reported tracking status */
-	char		rpt_status;	/* TSIP Parser State */
-	size_t 		rpt_cnt;	/* TSIP packet length so far */
-	char 		rpt_buf[RMAX]; 	/* packet assembly buffer */
-	int		type;		/* Clock mode type */
-	bool		use_event;	/* receiver has event input */
-	bool		event_reply;	/* response to event input has been received */
-	int		MCR;		/* modem control register value at startup */
-	bool		parity_chk;	/* enable parity checking */
-	l_fp		p_recv_time;	/* timestamp of last received packet */
-	unsigned int	week;		/* GPS week number */
-	unsigned int	TOW;		/* GPS time of week */
-	int		UTC_offset;	/* GPS-UTC offset */
-	struct calendar	date;		/* calendar to avoid leap early announce */
-	unsigned int	build_week;	/* GPS week number of ntpd build date */
+	short			unit;		/* NTP refclock unit number */
+	bool			got_pkt;	/* decoded a packet this poll */
+	bool			got_time;	/* got a time packet this poll */
+	int			samples;	/* samples in filter this poll */
+	unsigned char		UTC_flags;	/* UTC & leap second flag */
+	unsigned char		trk_status;	/* reported tracking status */
+	char			rpt_status;	/* TSIP Parser State */
+	size_t 			rpt_cnt;	/* TSIP packet length so far */
+	char 			rpt_buf[RMAX];	/* packet assembly buffer */
+	int			type;		/* Clock mode type */
+	bool			use_event;	/* receiver has event input */
+	bool			event_reply;	/* response to event input has been received */
+	int			MCR;		/* modem control register value at startup */
+	bool			parity_chk;	/* enable parity checking */
+	l_fp			p_recv_time;	/* timestamp of last received packet */
+	unsigned int		week;		/* GPS week number */
+	unsigned long int	TOW;		/* GPS time of week */
+	int			UTC_offset;	/* GPS-UTC offset */
+	struct  calendar	date;		/* calendar to avoid leap early announce */
+	unsigned int		build_week;	/* GPS week number of ntpd build date */
 };
 
 /*
@@ -289,12 +289,7 @@ init_thunderbolt (
 	struct packettx tx;
 
 	tx.size = 0;
-	tx.data = (uint8_t *) malloc(100);
-
-	if (NULL == tx.data) {
-	        msyslog(LOG_ERR, "REFCLOCK: init_thunderbolt malloc failed");
-		exit(3);
-	}
+	tx.data = (uint8_t *) emalloc_zero(100);
 
 	/* set UTC time */
 	sendsupercmd (&tx, 0x8E, 0xA2);
@@ -321,12 +316,7 @@ init_resolution (
 	struct packettx tx;
 
 	tx.size = 0;
-	tx.data = (uint8_t *) malloc(100);
-
-	if (NULL == tx.data) {
-	        msyslog(LOG_ERR, "REFCLOCK: init_resolution malloc failed");
-		exit(3);
-	}
+	tx.data = (uint8_t *) emalloc_zero(100);
 
 	/* set UTC time */
 	sendsupercmd (&tx, 0x8E, 0xA2);
@@ -359,6 +349,7 @@ trimble_start (
 	struct refclockproc *pp;
 	int fd;
 	struct termios tio;
+	speed_t desired_speed;
 	struct calendar build_date;
 	unsigned int cflag, iflag;
 	char device[20], *path;
@@ -484,11 +475,16 @@ trimble_start (
 	 * affect the 38400 baud Copernicus II.
 	 * As a workaround, apply the baud rate once more here.
 	 */
-	cfsetispeed(&tio, peer->cfg.baud ? peer->cfg.baud :
-	                  (CLK_TYPE(peer) == CLK_COPERNICUS) ? SPEED232COP : SPEED232);
-	cfsetospeed(&tio, peer->cfg.baud ? peer->cfg.baud :
-	                  (CLK_TYPE(peer) == CLK_COPERNICUS) ? SPEED232COP : SPEED232);
-	tcsetattr(fd, TCSANOW, &tio);
+	desired_speed = peer->cfg.baud ? peer->cfg.baud :
+	                (CLK_TYPE(peer) == CLK_COPERNICUS) ? SPEED232COP : SPEED232;
+	if (cfsetispeed(&tio, desired_speed) == -1 || cfsetospeed(&tio, desired_speed) == -1 ||
+	    tcsetattr(fd, TCSANOW, &tio) == -1) {
+		msyslog(LOG_ERR, "REFCLOCK: %s: failed to set device baud rate",
+		        refclock_name(peer));
+		close(fd);
+		free(up);
+		return false;
+	}
 
 	if (up->use_event && (up->type != CLK_ACE)) {
 		/*
@@ -828,7 +824,7 @@ TSIP_decode (
 			else
 				pp->leap = LEAP_NOWARNING;
 
-			DPRINT(2, ("TSIP_decode: unit %d: 8f-ac TOW: %u week: %u adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
+			DPRINT(2, ("TSIP_decode: unit %d: 8f-ac TOW: %lu week: %u adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
 			       up->unit, up->TOW, up->week,
 			       up->date.hour, up->date.minute, up->date.second,
 			       up->date.month, up->date.monthday, up->date.year));
@@ -898,8 +894,8 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADTIME);
 				return false;
 			}
-			up->TOW = (uint32_t)getlong((uint8_t *) &mb(1));
-			up->week = (uint32_t)getint((uint8_t *) &mb(5));
+			up->TOW = (unsigned long int)getlong((uint8_t *) &mb(1));
+			up->week = (unsigned int)getint((uint8_t *) &mb(5));
 
 			pp->lastrec = up->p_recv_time;
 			pp->nsec = 0;
@@ -936,7 +932,7 @@ TSIP_decode (
 		up->got_time = (TOWfloat >= 0);
 		if (!up->got_time)
 			return false;
-		up->TOW  = (unsigned int)TOWfloat;
+		up->TOW  = (unsigned long int)TOWfloat;
 		up->week = (unsigned int)getint((uint8_t *) &mb(4));
 		up->UTC_offset =    (int)getsgl((uint8_t *) &mb(6));
 		if (up->UTC_offset == 0) {
@@ -962,7 +958,7 @@ TSIP_decode (
 			pp->nsec = 0;
 		}
 
-		DPRINT(2, ("TSIP_decode: unit %d: 41 TOW: %u week: %u UTC %d adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
+		DPRINT(2, ("TSIP_decode: unit %d: 41 TOW: %lu week: %u UTC %d adj.t: %02d:%02d:%02d.0 %02d/%02d/%04d\n",
 		       up->unit, up->TOW, up->week, up->UTC_offset,
 		       up->date.hour, up->date.minute, up->date.second,
 		       up->date.month, up->date.monthday, up->date.year));
@@ -1257,11 +1253,7 @@ HW_poll (
 	struct packettx tx;
 	if (up->type == CLK_ACE) {
 		tx.size = 0;
-		tx.data = (uint8_t *) malloc(100);
-		if (NULL == tx.data) {
-	        	msyslog(LOG_ERR, "REFCLOCK: poll Trimble ACE III malloc failed");
-			exit(3);
-		}
+		tx.data = (uint8_t *) emalloc_zero(100);
 		sendcmd (&tx, 0x21);
 		sendetx (&tx, pp->io.fd);
 		free(tx.data);

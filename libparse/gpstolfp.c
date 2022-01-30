@@ -48,7 +48,7 @@ gpsweekadj(
 void
 gpstocal(
 	unsigned int week,
-	unsigned int TOW,
+	unsigned long int TOW,
 	int UTC_offset,
 	struct calendar * out
 	)
@@ -57,7 +57,7 @@ gpstocal(
 
 	t = (time64_t)((int64_t)GPSORIGIN - UTC_offset);
 	t += (time64_t)week * SECSPERWEEK;
-	t += TOW;
+	t += (time64_t)TOW;
 
 	ntpcal_ntp64_to_date(out, t);
 }
@@ -68,7 +68,7 @@ caltogps(
 	const struct calendar * in,
 	int UTC_offset,
 	unsigned int * week,
-	unsigned int * TOW
+	unsigned long int * TOW
 	)
 {
 	time64_t t;
@@ -76,9 +76,9 @@ caltogps(
 	t = ntpcal_dayjoin(ntpcal_date_to_rd(in) - DAY_NTP_STARTS,
 	                             ntpcal_date_to_daysec(in));
 	t -= (uint64_t)((int64_t)GPSORIGIN - UTC_offset);
-	*week = t / SECSPERWEEK;
+	*week = (unsigned int)(t / SECSPERWEEK);
 	if (NULL != TOW) {
-		*TOW = t % SECSPERWEEK;
+		*TOW = (unsigned long int)(t % SECSPERWEEK);
 	}
 }
 
