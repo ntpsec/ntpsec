@@ -8,14 +8,10 @@
 
 TEST_GROUP(prettydate);
 
-TEST_SETUP(prettydate) {
-    set_prettydate_pivot(settime(2000, 1, 1, 0, 0, 0));
-}
+TEST_SETUP(prettydate) {}
 
 TEST_TEAR_DOWN(prettydate) {}
 
-
-#include "ntp_fp.h"
 
 static const uint32_t HALF = 2147483648UL;
 
@@ -24,7 +20,7 @@ TEST(prettydate, Rfc3339Date1) {
 }
 
 TEST(prettydate, Rfc3339Time1) {
-	TEST_ASSERT_EQUAL_STRING("2036-02-07T06:28:16.000Z", rfc3339date(0));
+	TEST_ASSERT_EQUAL_STRING("1970-01-01T00:00Z", rfc3339time(0));
 }
 
 TEST(prettydate, ConstantDate) {

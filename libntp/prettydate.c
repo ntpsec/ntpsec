@@ -9,6 +9,7 @@
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
+#include "PIVOT.h"
 
 #if NTP_SIZEOF_TIME_T < 4
 # error sizeof(time_t) < 4 -- this will not work!
@@ -114,13 +115,6 @@ get_struct_tm(
 	return tm;
 }
 
-static time_t prettypivot;
-
-void
-set_prettydate_pivot(time_t pivot) {
-    prettypivot = pivot;
-}
-
 static char *
 common_prettydate(
 	const l_fp ts
@@ -144,7 +138,7 @@ common_prettydate(
 		msec -= 1000U;
 		ntps++;
 	}
-	sec = ntpcal_ntp_to_time(ntps, prettypivot);
+	sec = ntpcal_ntp_to_time(ntps, RELEASE_DATE);
 	tm  = get_struct_tm(&sec, &tmbuf);
 	if (!tm) {
 		/*

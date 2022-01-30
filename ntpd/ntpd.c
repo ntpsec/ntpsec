@@ -530,8 +530,6 @@ main(
 		exit(1);
 	}
 
-	set_prettydate_pivot(time(NULL));
-
 	/* make sure the FDs are initialised */
 	pipe_fds[0] = -1;
 	pipe_fds[1] = -1;

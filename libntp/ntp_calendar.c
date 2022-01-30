@@ -15,6 +15,7 @@
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 #include "ntp_fp.h"
+#include "PIVOT.h"
 
 /*
  *---------------------------------------------------------------------
@@ -38,7 +39,7 @@ ntpcal_get_build_date(
 	struct calendar * jd
 	)
 {
-        time_t epoch = (time_t)1577836800; // 2020 Jan 01 -> 1863820800 - 2029 Jan 23
+        time_t epoch = RELEASE_DATE;
         struct tm epoch_tm;
 
 	ZERO(*jd);

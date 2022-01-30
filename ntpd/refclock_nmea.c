@@ -31,6 +31,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "timespecops.h"
+#include "PIVOT.h"
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
@@ -1678,10 +1679,6 @@ static bool kludge_day (struct timespec *dt) {
   return true;
 }
 
-/* FIXME move this to a better place */
-/* Get this from date +%s */
-#define GPS_PIVOT 1642417438
-
 /* Early GPS has a 10 bit week number field.
  * That's a bit less than 20 years.
  * GPS started in 1980.  We have now wrapped twice: Aug 1999 and Apr 2019.
@@ -1703,7 +1700,7 @@ static bool kludge_day (struct timespec *dt) {
 
 static bool fix_WNRO (struct timespec *dt, int *wnro, const struct peer *peer) {
   int i;
-  for (i=0; dt->tv_sec < GPS_PIVOT; i++) {
+  for (i=0; dt->tv_sec < RELEASE_DATE; i++) {
     dt->tv_sec += 1024*7*86400;
   }
   if (*wnro != i) {
