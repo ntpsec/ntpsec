@@ -297,7 +297,7 @@ spectracom_receive(
 		 */
 		if (sscanf(pp->a_lastcode,
 		    "%c %3d %2d:%2d:%2d%c%cTZ=%2d",
-		    &syncchar, &pp->day, &pp->hour, &pp->minute,
+		    &syncchar, &pp->yday, &pp->hour, &pp->minute,
 		    &pp->second, &tmpchar, &dstchar, &tz) == 8) {
 			pp->nsec = 0;
 			break;
@@ -310,7 +310,7 @@ spectracom_receive(
 		 * Timecode format 2: "IQyy ddd hh:mm:ss.mmm LD" */
 		if (sscanf(pp->a_lastcode,
 		    "%c%c %2d %3d %2d:%2d:%2d.%3ld %c",
-		    &syncchar, &qualchar, &pp->year, &pp->day,
+		    &syncchar, &qualchar, &pp->year, &pp->yday,
 		    &pp->hour, &pp->minute, &pp->second, &pp->nsec,
 		    &leapchar) == 9) {
 			pp->nsec *= 1000000;
@@ -331,7 +331,7 @@ spectracom_receive(
 		    &syncchar, &pp->year, &month, &day, &pp->hour,
 		    &pp->minute, &pp->second, &dstchar, &leapchar) == 8)
 		    {
-			pp->day = ymd2yd(pp->year, month, day);
+			pp->yday = ymd2yd(pp->year, month, day);
 			pp->nsec = 0;
 			break;
 		}

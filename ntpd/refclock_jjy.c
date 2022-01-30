@@ -939,7 +939,7 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 	const char	*pStatus ;
 
 	pp->year   = up->year ;
-	pp->day    = ymd2yd( up->year, up->month, up->day ) ;
+	pp->yday   = ymd2yd( up->year, up->month, up->day ) ;
 	pp->hour   = up->hour ;
 	pp->minute = up->minute ;
 	pp->second = up->second ;
@@ -951,10 +951,10 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 	pp->hour -= 9 ;
 	if ( pp->hour < 0 ) {
 		pp->hour += 24 ;
-		pp->day -- ;
-		if ( pp->day < 1 ) {
+		pp->yday -- ;
+		if ( pp->yday < 1 ) {
 			pp->year -- ;
-			pp->day  = ymd2yd( pp->year, 12, 31 ) ;
+			pp->yday  = ymd2yd( pp->year, 12, 31 ) ;
 		}
 	}
 
@@ -979,7 +979,7 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 		   "%04d/%02d/%02d %02d:%02d:%02d.%03d JST   ( %04d/%03d %02d:%02d:%02d.%03d UTC )",
 		   up->year, up->month, up->day,
 		   up->hour, up->minute, up->second, up->msecond,
-		   pp->year, pp->day, pp->hour, pp->minute, pp->second,
+		   pp->year, pp->yday, pp->hour, pp->minute, pp->second,
 		   (int)(pp->nsec/1000000) ) ;
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ATTENTION, sLog ) ;
 

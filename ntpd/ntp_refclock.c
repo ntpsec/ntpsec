@@ -406,7 +406,7 @@ refclock_process_f(
 	 * to deducing the year from the receipt time of the sample if
 	 * it finds only a 2-digit year in the timecode.
 	 */
-	if (!clocktime(pp->year, pp->day, pp->hour, pp->minute, pp->second,
+	if (!clocktime(pp->year, pp->yday, pp->hour, pp->minute, pp->second,
 		       time(NULL), lfpuint(pp->lastrec), &pp->yearstart, &sec)) {
 		return false;
 	}

@@ -485,7 +485,7 @@ hpgps_receive(
 		}
 	}
 
-	pp->day = day;
+	pp->yday = day;
 
 	/*
 	 * Decode the MFLRV indicators.

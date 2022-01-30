@@ -1817,7 +1817,7 @@ oncore_get_timestamp(
 		snprintf(Msg, sizeof(Msg),	/* MAX length 128, currently at 127 */
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d",
 		    lfpuint(ts), j,
-		    instance->pp->year, instance->pp->day,
+		    instance->pp->year, instance->pp->yday,
 		    instance->pp->hour, instance->pp->minute,
                     instance->pp->second,
 		    (long) tsp->tv_sec % 60,
@@ -1855,7 +1855,7 @@ oncore_get_timestamp(
 		snprintf(Msg, sizeof(Msg),
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d%d%d%d%d",
 		    lfpuint(ts), j,
-		    instance->pp->year, instance->pp->day,
+		    instance->pp->year, instance->pp->yday,
 		    instance->pp->hour, instance->pp->minute,
                     instance->pp->second,
 		    (long) tsp->tv_sec % 60,
@@ -2413,7 +2413,7 @@ oncore_msg_BaEaHa(
 	 */
 
 	instance->pp->year   = buf[6]*256+buf[7];
-	instance->pp->day    = ymd2yd(buf[6]*256+buf[7], buf[4], buf[5]);
+	instance->pp->yday   = ymd2yd(buf[6]*256+buf[7], buf[4], buf[5]);
 	instance->pp->hour   = buf[8];
 	instance->pp->minute = buf[9];
 	instance->pp->second = buf[10];

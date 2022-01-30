@@ -376,7 +376,7 @@ true_receive(
 	    pp->a_lastcode[6] == ':' &&
 	    pp->a_lastcode[9] == ':' &&
 	    sscanf(pp->a_lastcode, "%3d:%2d:%2d:%2d%c",
-		   &pp->day, &pp->hour, &pp->minute,
+		   &pp->yday, &pp->hour, &pp->minute,
 		   &pp->second, &synced) == 5) {
 
 		/*
@@ -402,7 +402,7 @@ true_receive(
 			 * find out what time it really is. Include
 			 * the count from the PCL720
 			 */
-			if (!clocktime(pp->year, pp->day, pp->hour, pp->minute,
+			if (!clocktime(pp->year, pp->yday, pp->hour, pp->minute,
 				       pp->second, lfpuint(pp->lastrec),
 				       &pp->yearstart, &sec)) {
 				refclock_report(peer, CEVNT_BADTIME);

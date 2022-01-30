@@ -316,7 +316,7 @@ arb_receive(
 	pp->lencode = (int)strlen(pp->a_lastcode);
 	syncchar = ' ';
 	if (sscanf(pp->a_lastcode, "%c%2d %3d %2d:%2d:%2d",
-	    &syncchar, &pp->year, &pp->day, &pp->hour,
+	    &syncchar, &pp->year, &pp->yday, &pp->hour,
 	    &pp->minute, &pp->second) != 6) {
 		refclock_report(peer, CEVNT_BADREPLY);
 		IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));

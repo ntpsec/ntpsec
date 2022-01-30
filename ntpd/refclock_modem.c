@@ -795,7 +795,7 @@ modem_timecode(
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
-		pp->day = ymd2yd(pp->year, month, day);
+		pp->yday = ymd2yd(pp->year, month, day);
 		pp->leap = LEAP_NOWARNING;
 		if (leap == 1)
 			pp->leap = LEAP_ADDSECOND;
@@ -815,7 +815,7 @@ modem_timecode(
 	 */
 	case LENUSNO:
 		if (sscanf(str, "%5lu %3d %2d%2d%2d %3s",
-		    &mjd, &pp->day, &pp->hour, &pp->minute,
+		    &mjd, &pp->yday, &pp->hour, &pp->minute,
 		    &pp->second, utc) != 6) {
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
@@ -851,7 +851,7 @@ modem_timecode(
 			else if (leapdir == '-')
 				pp->leap = LEAP_DELSECOND;
 		}
-		pp->day = ymd2yd(pp->year, month, day);
+		pp->yday = ymd2yd(pp->year, month, day);
 		memcpy(&pp->refid, REFPTB, REFIDLEN);
 		peer->sstclktype = CTL_SST_TS_TELEPHONE;
 		up->msgcnt++;
@@ -863,7 +863,7 @@ modem_timecode(
 	 */
 	case LENTYPE0:
 		if (sscanf(str, "%c %3d %2d:%2d:%2d %cTZ=%2d",
-		    &synchar, &pp->day, &pp->hour, &pp->minute,
+		    &synchar, &pp->yday, &pp->hour, &pp->minute,
 		    &pp->second, &dstchar, &tz) != 7) {
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
@@ -881,7 +881,7 @@ modem_timecode(
 	 */
 	case LENTYPE2:
 		if (sscanf(str, "%c%c%2d %3d %2d:%2d:%2d.%3ld%c%c%c",
-		    &synchar, &qualchar, &pp->year, &pp->day,
+		    &synchar, &qualchar, &pp->year, &pp->yday,
 		    &pp->hour, &pp->minute, &pp->second, &pp->nsec,
 		    &dstchar, &leapchar, &dstchar) != 11) {
 			refclock_report(peer, CEVNT_BADREPLY);

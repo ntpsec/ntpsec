@@ -235,7 +235,7 @@ zyfer_receive(
 	 * Timecode sample: "!TIME,2002,017,07,59,32,2,4,1"
 	 */
 	if (sscanf(pp->a_lastcode, "!TIME,%4d,%3d,%2d,%2d,%2d,%d,%d,%d",
-		   &pp->year, &pp->day, &pp->hour, &pp->minute, &pp->second,
+		   &pp->year, &pp->yday, &pp->hour, &pp->minute, &pp->second,
 		   &tmode, &tfom, &omode) != 8) {
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;

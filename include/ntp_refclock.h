@@ -116,7 +116,7 @@ struct refclockproc {
 	int	lencode;	/* length of last timecode */
 
 	int	year;		/* year of eternity */
-	int	day;		/* day of year */
+	int	yday;		/* day of year */
 	int	hour;		/* hour of day */
 	int	minute;		/* minute of hour */
 	int	second;		/* second of minute */

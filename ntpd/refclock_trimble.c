@@ -859,12 +859,12 @@ trimble_receive (
 	/* add sample to filter */
 	pp->lastref = pp->lastrec;
 	pp->year = up->date.year;
-	pp->day = up->date.yearday;
+	pp->yday = up->date.yearday;
 	pp->hour = up->date.hour;
 	pp->minute = up->date.minute;
 	pp->second = up->date.second;
 	DPRINT(2, ("trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
-		   up->unit, pp->year, pp->day, pp->hour, pp->minute,
+		   up->unit, pp->year, pp->yday, pp->hour, pp->minute,
 		   pp->second, pp->nsec));
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
@@ -930,7 +930,7 @@ trimble_poll (
 	/* record clockstats */
 	cl = snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
 		 "%4d %03d %02d:%02d:%02d.%09ld",
-		 pp->year, pp->day, pp->hour,pp->minute, pp->second, pp->nsec);
+		 pp->year, pp->yday, pp->hour,pp->minute, pp->second, pp->nsec);
 	pp->lencode = (cl < (int)sizeof(pp->a_lastcode)) ? cl : 0;
 	record_clock_stats(peer, pp->a_lastcode);
 
