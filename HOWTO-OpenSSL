@@ -2,8 +2,8 @@ NTS needs TLS 1.3 or newer.
 That was first supported in OpenSSL 1.1.1
   (1.1.1a is broken)
 Some OSes/Distros don't support a new enough version of OpenSSL
-This file contains notes on how to download, build, and install 1.1.1k
-It also works for testing 3.0.0 beta
+This file contains notes on how to download, build, and install 1.1.1m
+It also works for testing 3.0.1
 
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
@@ -18,19 +18,19 @@ But check for the latest versions first.
 cd xxx
 mkdir OpenSSL
 cd OpenSSL
-for OpenSSL 1.1.1k
-  wget https://www.openssl.org/source/openssl-1.1.1k.tar.gz
-  tar -xzf openssl-1.1.1k.tar.gz
-  cd openssl-1.1.1k
-for OpenSSL 3.0.0 beta2
-  wget https://www.openssl.org/source/openssl-3.0.0-beta2.tar.gz
-  tar -xzf openssl-3.0.0-beta2.tar.gz
-  cd openssl-3.0.0-beta2
+for OpenSSL 1.1.1m
+  wget https://www.openssl.org/source/openssl-1.1.1m.tar.gz
+  tar -xzf openssl-1.1.1m.tar.gz
+  cd openssl-1.1.1m
+for OpenSSL 3.0.1
+  wget https://www.openssl.org/source/openssl-3.0.1.tar.gz
+  tar -xzf openssl-3.0.1.tar.gz
+  cd openssl-3.0.1
 
 # Check NOTES.PERL
 #   for CentOS, you need
   sudo yum install perl-core
-# Fedora 33+34 for 3.0.0-alpha and beta
+# Fedora 35 for 3.0.1
   # ./config needs
   sudo dnf install perl-FindBin 'perl(IPC::Cmd)' 'perl(File::Compare)'
   # make needs
@@ -38,12 +38,15 @@ for OpenSSL 3.0.0 beta2
   sudo dnf install 'perl(Test::Harness)' 'perl(Test::More)' 'perl(File::Copy)'
   # make install also needs:
   sudo dnf install 'perl(Pod::Html)'
-# On FreeBSD for 3.0.0-alpha and beta
+# On FreeBSD for 3.0.1
   sudo pkg install perl5
 
 On Linux
-  ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared
-	enable-des
+  openssl version -d
+  OPENSSLDIR=`openssl version -d | sed "s/OPENSSLDIR: //"`
+  OPENSSLDIR=`echo $OPENSSLDIR | sed s/\"//g`
+  echo $OPENSSLDIR
+  ./Configure --prefix=/usr/local/ssl --openssldir=$OPENSSLDIR shared
 
 ***   If you encounter a problem while building, please open an    ***
 ***   issue on GitHub <https://github.com/openssl/openssl/issues>  ***
@@ -52,17 +55,19 @@ On Linux
 ***       perl configdata.pm --dump                                ***
 
 time make -j4
+  # Check that we got it right.  These should match.
+  openssl version -d
+  util/shlib_wrap.sh ./apps/openssl version -d
+  # ./apps/openssl without the wrapper will use the installed libraries
 time make test
-time make build_docs
+time make build_docs  # doesn't work on 1.1.1
 sudo make install
 
 sudo su
   cd /etc/ld.so.conf.d
-  echo "/usr/local/ssl/lib" > openssl-1.1.1k.conf
-  ## NB: beta2 changed from lib to lib64
-  ## If you have tested with alpha or beta1,
-  ## you need to fix beta.conf and remove alpha.conf
-  echo "/usr/local/ssl/lib64" > openssl-3.0.0-beta.conf
+  echo "/usr/local/ssl/lib" > openssl-1.1.1m.conf
+  echo "/usr/local/ssl/lib" > openssl-3.0.1.conf    # 32 bit systems
+  echo "/usr/local/ssl/lib64" > openssl-3.0.1.conf  # 64 bit systems
   # running ldconfig before install doesn't work
   ldconfig
 
@@ -83,6 +88,10 @@ NetBSD:
 # match where wscript looks for your OS.
 # The above works for CentOS 7
 
-Fedora and CentOS 7 need this if you use real certificates:
+----------
+
+On earlier versions of the Configure step (above)
+Fedora and CentOS 7 needed this if you use real certificates:
   nts ca /etc/pki/tls/certs/ca-bundle.trust.crt
+It works correctly now.
 
