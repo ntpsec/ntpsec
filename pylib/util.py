@@ -1221,7 +1221,7 @@ class MRUSummary:
         self.debug = debug
         self.logfp = logfp
         self.now = None
-        self.showhostnames = showhostnames  # if & 1, display names 
+        self.showhostnames = showhostnames  # if & 1, display names
         self.wideremote = wideremote
 
     header = " lstint avgint rstr r m v  count    score   drop rport remote address"

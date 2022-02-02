@@ -519,7 +519,7 @@ usage: timeout [ msec ]
                 value = queried[name][0]
                 rawvalue = queried[name][1]
                 if fmt in (NTP_ADD, NTP_ADP):
-                    if self.showhostnames & 1:  # if & 1, display names 
+                    if self.showhostnames & 1:  # if & 1, display names
                         if self.debug:
                             self.say("DNS lookup begins...")
                         value = ntp.util.canonicalize_dns(
