@@ -53,7 +53,8 @@ NTP_LFP = 0x7     # NTP timestamp
 NTP_MODE = 0x8    # peer mode
 NTP_2BIT = 0x9    # leap bits
 NTP_FLOAT = 0xa   # Float value
-NTP_UPTIME = 0xb  # uptime in days H:M:S (no frac)
+NTP_UPTIME = 0xb  # uptime in daysD H:M:S (usually no frac)
+NTP_PACKETS = 0xc # packet counts
 
 
 class Ntpq(cmd.Cmd):
@@ -429,6 +430,7 @@ usage: timeout [ msec ]
             self.say(self.session.response)
             return
         try:
+            runs, runl = None, None
             for (name, legend, fmt) in variables:
                 if name not in queried:
                     continue
@@ -437,9 +439,8 @@ usage: timeout [ msec ]
                 value2 = queried[name + '_r'][0]
                 rawvalue2 = queried[name + '_r'][1]
                 if fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
-                    if self.showunits:
-                        displayvalue = ntp.util.unitifyvar(rawvalue, name)
-                        displayvalue2 = ntp.util.unitifyvar(rawvalue2, name)
+                    if self.showunits and isinstance(rawvalue, (int, float)):
+                        display = ntp.util.unitifyvar(rawvalue, name)
                     else:
                         display = value
                     if self.showunits and isinstance(rawvalue2, (int, float)):
@@ -465,7 +466,7 @@ usage: timeout [ msec ]
                         "{0:<13} {1:>15} {2:>15}\n".format(legend, display, display2)
                     )
                 else:
-                    self.warn("unexpected vc type %s for %s, value %s"
+                    self.warn("unexpected vc type %s for %s, value %s %s    "
                               % (fmt, name, value, value2))
         except KeyboardInterrupt:
             self.warn("display interrupted")
@@ -511,6 +512,7 @@ usage: timeout [ msec ]
                      % (associd, self.session.rstatus,
                         ntp.ntpc.statustoa(statype, self.session.rstatus)))
         try:
+            run = 1
             for (name, legend, fmt) in variables:
                 if name not in queried:
                     continue
@@ -533,7 +535,7 @@ usage: timeout [ msec ]
                         displayvalue = ntp.util.unitifyvar(rawvalue, name)
                     else:
                         displayvalue = value
-                    self.say("%s  %s\n" % (legend, displayvalue))
+                    self.say("%13s   %13s\n" % (legend, displayvalue))
                 elif fmt == NTP_LFP:
                     self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
                 elif fmt == NTP_2BIT:
