@@ -441,13 +441,29 @@ usage: timeout [ msec ]
                         displayvalue = ntp.util.unitifyvar(rawvalue, name)
                         displayvalue2 = ntp.util.unitifyvar(rawvalue2, name)
                     else:
-                        displayvalue = value
-                        displayvalue2 = value2
-                    self.say("%13s \t%9d\t%9d\n" %
-                             (legend, displayvalue, displayvalue2))
+                        display = value
+                    if self.showunits and isinstance(rawvalue2, (int, float)):
+                        display2 = ntp.util.unitifyvar(rawvalue2, name)
+                    else:
+                        display2 = value2
+                    self.say("%13s   %12s %12s\n" %
+                             (legend, display, display2))
+                elif fmt == NTP_PACKETS:
+                    self.say(
+                        "{0:<13} {1[0]:>15} {2[0]:>15} {1[1]:>12}{1[2]:<3} {2[1]:>12}{2[2]:<3}\n".format(
+                            legend,
+                            ntp.util.packetize(value, runs),
+                            ntp.util.packetize(
+                                value2, runl, periodized=True, clipdigits=3
+                            ),
+                        )
+                    )
                 elif fmt == NTP_UPTIME:
-                    self.say("%13s  %s\t%s\n" % (legend, ntp.util.prettyuptime(
-                        value), ntp.util.prettyuptime(value2)))
+                    runs, display = ntp.util.periodize(value)
+                    runl, display2 = ntp.util.periodize(value2)
+                    self.say(
+                        "{0:<13} {1:>15} {2:>15}\n".format(legend, display, display2)
+                    )
                 else:
                     self.warn("unexpected vc type %s for %s, value %s"
                               % (fmt, name, value, value2))
@@ -533,6 +549,15 @@ usage: timeout [ msec ]
                         self.say("%s  %s\n" % (legend, modes[value]))
                     except IndexError:
                         self.say("%s  %s%d\n" % (legend, "mode#", value))
+                elif fmt == NTP_PACKETS:
+                    self.say(
+                        "{0:<13} {1[0]:>15} {1[1]:>8}{1[2]:<3}\n".format(
+                            legend, ntp.util.packetize(value, run)
+                        )
+                    )
+                elif fmt == NTP_UPTIME:
+                    run, display = ntp.util.periodize(value)
+                    self.say("{0:<13} {1:>15}\n".format(legend, display))
                 else:
                     self.warn("unexpected vc type %s for %s, value %s"
                               % (fmt, name, value))

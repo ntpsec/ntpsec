@@ -1435,11 +1435,42 @@ except ImportError:  # pragma: no cover
                 yield key
 
 
-def prettyuptime(uptime):
-    result = ''
-    if uptime >= 86400:
-        result += '%dD ' % (uptime // 86400)
-    result += '%02d:%02d:%02d' % ((uptime % 86400) //
-                                  3600, (uptime % 3600) // 60, uptime % 60)
-    return result
+def packetize(packets, period, clipdigits=0, periodized=False):
+    """Given a number of packets and a duration (s) return a tuple.
+
+    return the packet quantity, and a two part rate in packets/seconds
+    or seconds/packet. On error the latter fields should be blank, the
+    first the number of packets if zero otherwise unhelpful text."""
+    if not isinstance(packets, int):
+        return ("???", "", "")
+    if packets == 0 or not isinstance(period, (int, float)):
+        return (packets, "", "")
+    if packets > period:
+        return (packets, round(packets / period, clipdigits), "p/s")
+    if periodized:
+        return (packets, periodize(period / packets, clipdigits)[1], "/p")
+    return (packets, round(period / packets, clipdigits), "s/p")
+
+
+def periodize(period, clipdigits=0):
+    """Given a number of seconds, return number and pretty string.
+
+    On error return None for the number and an unhelpful string."""
+    clip = clipdigits if isinstance(clipdigits, (int, float)) else 0
+    if not isinstance(period, (int, float)):
+        return (None, "???")
+    result = ""
+    _ = round(period, clip)
+    nperiod = int(_) if clip < 1 else _
+    if nperiod >= 86400:
+        result += "%dD " % (nperiod // 86400)
+    result += "%02d:%02d:%02d" % (
+        (nperiod % 86400) // 3600,
+        (nperiod % 3600) // 60,
+        nperiod % 60,
+    )
+    return (nperiod, result)
+
+
+uptime = lambda p: periodize(p)[1]
 # end
