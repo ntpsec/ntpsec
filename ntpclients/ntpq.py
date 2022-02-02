@@ -1166,8 +1166,8 @@ usage: cv [ assocID ] [ name=value[,...] ]
         pstats = (
             ("srcadr", "remote host:          ", NTP_ADD),
             ("dstadr", "local address:        ", NTP_ADD),
-            ("timerec", "time last received:   ", NTP_INT),
-            ("timer", "time until next send: ", NTP_INT),
+            ("timerec", "time last received:   ", NTP_UPTIME),
+            ("timer", "time until next send: ", NTP_UPTIME),
             ("timereach", "reachability change:  ", NTP_INT),
             ("sent", "packets sent:         ", NTP_INT),
             ("received", "packets received:     ", NTP_INT),
@@ -1551,21 +1551,24 @@ usage: kerninfo
     def do_sysstats(self, _line):
         "display system uptime and packet counts"
         sysstats = (
-            ("ss_uptime", "uptime:               ", NTP_INT),
+            ("ss_uptime", "uptime:               ", NTP_UPTIME),
             ("ss_numctlreq", "control requests:     ", NTP_INT),
+        )
+        sysstats2 = (
             ("ss_reset", "sysstats reset:       ", NTP_UPTIME),
-            ("ss_received", "packets received:     ", NTP_INT),
-            ("ss_thisver", "current version:      ", NTP_INT),
-            ("ss_oldver", "older version:        ", NTP_INT),
-            ("ss_badformat", "bad length or format: ", NTP_INT),
-            ("ss_badauth", "authentication failed:", NTP_INT),
-            ("ss_declined", "declined:             ", NTP_INT),
-            ("ss_restricted", "restricted:           ", NTP_INT),
-            ("ss_limited", "rate limited:         ", NTP_INT),
-            ("ss_kodsent", "KoD responses:        ", NTP_INT),
-            ("ss_processed", "processed for time:   ", NTP_INT),
+            ("ss_received", "packets received:     ", NTP_PACKETS),
+            ("ss_thisver", "current version:      ", NTP_PACKETS),
+            ("ss_oldver", "older version:        ", NTP_PACKETS),
+            ("ss_badformat", "bad length or format: ", NTP_PACKETS),
+            ("ss_badauth", "authentication failed:", NTP_PACKETS),
+            ("ss_declined", "declined:             ", NTP_PACKETS),
+            ("ss_restricted", "restricted:           ", NTP_PACKETS),
+            ("ss_limited", "rate limited:         ", NTP_PACKETS),
+            ("ss_kodsent", "KoD responses:        ", NTP_PACKETS),
+            ("ss_processed", "processed for time:   ", NTP_PACKETS),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
+        self.collect_display2(variables=sysstats2)
 
     def help_sysstats(self):
         self.say("""\
@@ -1584,8 +1587,8 @@ usage: sysstats
             ("mru_deepest",     "peak addresses:       ", NTP_INT),
             ("mru_maxdepth",    "maximum addresses:    ", NTP_INT),
             ("mru_mindepth",    "reclaim above count:  ", NTP_INT),
-            ("mru_maxage",      "reclaim maxage:       ", NTP_INT),
-            ("mru_minage",      "reclaim minage:       ", NTP_INT),
+            ("mru_maxage",      "reclaim maxage:       ", NTP_UPTIME),
+            ("mru_minage",      "reclaim minage:       ", NTP_UPTIME),
             ("mru_mem",         "kilobytes:            ", NTP_INT),
             ("mru_maxmem",      "maximum kilobytes:    ", NTP_INT),
             ("mru_exists",      "alloc: exists:        ", NTP_INT),
@@ -1593,7 +1596,7 @@ usage: sysstats
             ("mru_recycleold",  "alloc: recycle old:   ", NTP_INT),
             ("mru_recyclefull", "alloc: recycle full:  ", NTP_INT),
             ("mru_none",        "alloc: none:          ", NTP_INT),
-            ("mru_oldest_age",  "age of oldest slot:   ", NTP_INT),
+            ("mru_oldest_age",  "age of oldest slot:   ", NTP_UPTIME),
         )
         self.collect_display(associd=0, variables=monstats, decodestatus=False)
 
@@ -1608,19 +1611,19 @@ usage: monstats
     def do_authinfo(self, _line):
         "display symmetric authentication counters"
         authinfo = (
-            ("authreset",          "time since reset:    ", NTP_INT),
+            ("authreset",          "time since reset:    ", NTP_UPTIME),
             ("authkeys",           "stored keys:         ", NTP_INT),
             ("authfreek",          "free keys:           ", NTP_INT),
             ("authklookups",       "key lookups:         ", NTP_INT),
             ("authknotfound",      "keys not found:      ", NTP_INT),
-            ("authencrypts",       "encryptions:         ", NTP_INT),
-            ("authdigestencrypts", "digest encryptions:  ", NTP_INT),
-            ("authcmacencrypts",   "CMAC encryptions:    ", NTP_INT),
-            ("authdecrypts",       "decryptions:         ", NTP_INT),
-            ("authdigestdecrypts", "digest decryptions:  ", NTP_INT),
-            ("authdigestfails",    "digest failures:     ", NTP_INT),
-            ("authcmacdecrypts",   "CMAC decryptions:    ", NTP_INT),
-            ("authcmacfails",      "CMAC failures:       ", NTP_INT),
+            ("authencrypts",       "encryptions:         ", NTP_PACKETS),
+            ("authdigestencrypts", "digest encryptions:  ", NTP_PACKETS),
+            ("authcmacencrypts",   "CMAC encryptions:    ", NTP_PACKETS),
+            ("authdecrypts",       "decryptions:         ", NTP_PACKETS),
+            ("authdigestdecrypts", "digest decryptions:  ", NTP_PACKETS),
+            ("authdigestfails",    "digest failures:     ", NTP_PACKETS),
+            ("authcmacdecrypts",   "CMAC decryptions:    ", NTP_PACKETS),
+            ("authcmacfails",      "CMAC failures:       ", NTP_PACKETS),
             # Old variables no longer supported.
             # Interesting if looking at an old system.
             ("authkuncached",      "uncached keys:       ", NTP_INT),
@@ -1669,16 +1672,16 @@ usage: ntsinfo
     def do_iostats(self, _line):
         "display network input and output counters"
         iostats = (
-            ("iostats_reset", "time since reset:     ", NTP_INT),
+            ("iostats_reset", "time since reset:     ", NTP_UPTIME),
             ("total_rbuf", "receive buffers:      ", NTP_INT),
             ("free_rbuf", "free receive buffers: ", NTP_INT),
             ("used_rbuf", "used receive buffers: ", NTP_INT),
             ("rbuf_lowater", "low water refills:    ", NTP_INT),
-            ("io_dropped", "dropped packets:      ", NTP_INT),
-            ("io_ignored", "ignored packets:      ", NTP_INT),
-            ("io_received", "received packets:     ", NTP_INT),
-            ("io_sent", "packets sent:         ", NTP_INT),
-            ("io_sendfailed", "packet send failures: ", NTP_INT),
+            ("io_dropped", "dropped packets:      ", NTP_PACKETS),
+            ("io_ignored", "ignored packets:      ", NTP_PACKETS),
+            ("io_received", "received packets:     ", NTP_PACKETS),
+            ("io_sent", "packets sent:         ", NTP_PACKETS),
+            ("io_sendfailed", "packet send failures: ", NTP_PACKETS),
             ("io_wakeups", "input wakeups:        ", NTP_INT),
             ("io_goodwakeups", "useful input wakeups: ", NTP_INT),
         )
@@ -1695,7 +1698,7 @@ usage: iostats
     def do_timerstats(self, line):
         "display interval timer counters"
         timerstats = (
-            ("timerstats_reset", "time since reset:  ", NTP_INT),
+            ("timerstats_reset", "time since reset:  ", NTP_UPTIME),
             ("timer_overruns", "timer overruns:    ", NTP_INT),
             ("timer_xmts", "calls to transmit: ", NTP_INT),
         )
