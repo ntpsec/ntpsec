@@ -54,7 +54,7 @@ receivers on the following host computers:
 4. Sun SPARC Enterprise T5220, onboard serial port, gcc 4.8.2
 
 The driver has been tested with the Resolution, ACE and Copernicus
-receivers on a Rapsberry Pi 3B running Raspberry Pi OS (Legacy).
+receivers on a Rapsberry Pi 3 running Raspberry Pi OS (Legacy).
 
 
 [[sym]]
@@ -88,30 +88,24 @@ match the receiver's factory default values.
 
 NTP configuration file "{ntpconf}"
 
-Acutime 2000 or Acutime Gold:
----------------------------------
-refclock trimble unit 0 subtype 3
----------------------------------
-
-Thunderbolt:
 ---------------------------------------------
-refclock trimble unit 0 subtype 2 time1 0.020
+refclock trimble unit X subtype Y time1 Z.ZZZ
 ---------------------------------------------
 
-Resolution:
----------------------------------------------
-refclock trimble unit 0 subtype 5 time1 0.420
----------------------------------------------
+Substituting an appropriate unit number for X. For subtype Y and time offset Z.ZZZ refer to this table:
 
-ACE III:
----------------------------------------------
-refclock trimble unit 0 subtype 6
----------------------------------------------
+[width="60%",cols="<25%,<25%,<50%",options="header"]
+|====================================
+| subtype | time1 (ms) | Model
+| 0 | - | Palisade
+| 1 | - | Praecis
+| 2 | 0.020 | Thunderbolt
+| 3 | - | Acutime 2000 & Acutime Gold
+| 5 | 0.420 | Resolution
+| 6 | - | ACE III
+| 7 | 0.140 | Copernicus II
+|====================================
 
-Copernicus II:
----------------------------------------------
-refclock trimble unit 0 subtype 7 time1 0.140
----------------------------------------------
 
 
 == Initial Setup and Testing for Palisade / Acutime Receivers
