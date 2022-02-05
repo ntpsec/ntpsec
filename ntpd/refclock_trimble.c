@@ -1,6 +1,6 @@
 /*
  * refclock_trimble - clock driver for the Trimble Palisade, Thunderbolt,
- * Acutime 2000, Acutime Gold, Resolution, ACE III, Copernicus II and
+ * Acutime 2000, Acutime Gold, Resolution 360, ACE III, Copernicus II and
  * EndRun Technologies Praecis Ct/Cf/Ce/II timing receivers
  *
  * For detailed information on this program, please refer to the
@@ -41,7 +41,7 @@
 /*
  * GPS Definitions
  */
-#define	DESCRIPTION	"Trimble Palisade/Thunderbolt/Acutime/Resolution/ACE/Copernicus GPSes" /* Long name */
+#define	DESCRIPTION	"Trimble Palisade/Thunderbolt/Acutime/Resolution 360/ACE/Copernicus GPSes" /* Long name */
 #define NAME		"TRIMBLE"	/* shortname */
 #define	PRECISION	(-20)		/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"		/* reference ID */
@@ -86,7 +86,7 @@
 #endif
 
 /*
- * Structure for build data packets for send (used by thunderbolt, ACE III and resolution)
+ * Structure for build data packets for send (used by thunderbolt, ACE III and resolution 360)
  * taken from Markus Prosch
  */
 struct packettx
@@ -124,24 +124,24 @@ struct trimble_unit {
 /*
  * Function prototypes
  */
-static	bool	trimble_start		(int, struct peer *);
-static	void	trimble_poll		(int, struct peer *);
-static	void	trimble_timer		(int, struct peer *);
-static	void 	trimble_io		(struct recvbuf *);
-static	void	trimble_receive		(struct peer *, int);
-static	bool	TSIP_decode		(struct peer *);
-static	void	HW_poll			(struct refclockproc *);
-static	float	getsgl			(uint8_t *);
-static	double	getdbl 			(uint8_t *);
-static	short	getint 			(uint8_t *);
-static	int32_t	getlong			(uint8_t *);
-static  void	sendcmd			(struct packettx *buffer, int c);
-static  void	sendsupercmd		(struct packettx *buffer, int c1, int c2);
-static  void	sendbyte		(struct packettx *buffer, int b);
-static  void	sendint			(struct packettx *buffer, int a);
-static  int	sendetx			(struct packettx *buffer, int fd);
-static  void	init_thunderbolt	(int fd);
-static  void	init_resolution		(int fd);
+static	bool		trimble_start		(int, struct peer *);
+static	void		trimble_poll		(int, struct peer *);
+static	void		trimble_timer		(int, struct peer *);
+static	void 		trimble_io		(struct recvbuf *);
+static	void		trimble_receive		(struct peer *, int);
+static	bool		TSIP_decode		(struct peer *);
+static	void		HW_poll			(struct refclockproc *);
+static	float		getsgl			(uint8_t *);
+static	double		getdbl 			(uint8_t *);
+static	unsigned short	getuint 		(uint8_t *);
+static	unsigned long	getulong		(uint8_t *);
+static  void		sendcmd			(struct packettx *buffer, int c);
+static  void		sendsupercmd		(struct packettx *buffer, int c1, int c2);
+static  void		sendbyte		(struct packettx *buffer, int b);
+static  void		sendint			(struct packettx *buffer, int a);
+static  int		sendetx			(struct packettx *buffer, int fd);
+static  void		init_thunderbolt	(int fd);
+static  void		init_resolution360	(int fd);
 
 #define PAL_TSTATS 14
 #ifdef DEBUG
@@ -186,13 +186,13 @@ struct refclock refclock_trimble = {
 #define CLK_TYPE(x) ((int)(((x)->cfg.mode) & 0x7F))
 
 /* Supported clock types */
-#define CLK_PALISADE	0	/* Trimble Palisade */
-#define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
-#define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
-#define CLK_ACUTIME     3	/* Trimble Acutime Gold */
-#define CLK_RESOLUTION  5	/* Trimble Resolution Receivers */
-#define CLK_ACE		6	/* Trimble ACE III */
-#define CLK_COPERNICUS	7	/* Trimble Copernicus II */
+#define CLK_PALISADE		0	/* Trimble Palisade */
+#define CLK_PRAECIS		1	/* Endrun Technologies Praecis */
+#define CLK_THUNDERBOLT		2	/* Trimble Thunderbolt GPS Receiver */
+#define CLK_ACUTIME   		3	/* Trimble Acutime Gold */
+#define CLK_RESOLUTION360	5	/* Trimble Resolution 360 Receivers */
+#define CLK_ACE			6	/* Trimble ACE III */
+#define CLK_COPERNICUS		7	/* Trimble Copernicus II */
 
 /* packet 8f-ad UTC flags */
 #define UTC_AVAILABLE	0x01
@@ -305,11 +305,11 @@ init_thunderbolt (
 }
 
 /*
- * init_resolution - Prepares Resolution receiver to be used with
- *		      NTP (also taken from Markus Prosch).
+ * init_resolution360 - Prepares Resolution 360 receiver to be used with
+ *		        NTP (also taken from Markus Prosch).
  */
 static void
-init_resolution (
+init_resolution360 (
 	int fd
 	)
 {
@@ -428,8 +428,8 @@ trimble_start (
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Acutime Gold mode enabled",
 			refclock_name(peer));
 		break;
-	    case CLK_RESOLUTION:
-		msyslog(LOG_NOTICE, "REFCLOCK: %s Resolution mode enabled",
+	    case CLK_RESOLUTION360:
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Resolution 360 mode enabled",
 			refclock_name(peer));
 		up->use_event = false;
 		break;
@@ -560,8 +560,8 @@ trimble_start (
 		init_thunderbolt(fd);
 	}
 
-	if (up->type == CLK_RESOLUTION) {
-		init_resolution(fd);
+	if (up->type == CLK_RESOLUTION360) {
+		init_resolution360(fd);
 	}
 
 	return true;
@@ -592,8 +592,8 @@ TSIP_decode (
 
 	if (id == 0x8f) {
 		/* Superpackets */
-		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
-		if ((up->type != CLK_THUNDERBOLT) && (up->type != CLK_RESOLUTION) && !event)
+		event = getuint((uint8_t *) &mb(1)) & 0xffff;
+		if ((up->type != CLK_THUNDERBOLT) && (up->type != CLK_RESOLUTION360) && !event)
 			/* ignore auto-report */
 			return false;
 
@@ -636,7 +636,7 @@ TSIP_decode (
 				       tracking_status[up->trk_status]));
 				return false;
 			}
-			up->UTC_offset = getint((uint8_t *) &mb(16));
+			up->UTC_offset = getuint((uint8_t *) &mb(16));
 			if (!(up->UTC_flags & UTC_AVAILABLE) ||
 			    (up->UTC_offset == 0)) {
 				pp->leap = LEAP_NOTINSYNC;
@@ -659,7 +659,7 @@ TSIP_decode (
 			up->date.second = secint % 60;
 			up->date.monthday = (uint8_t)mb(11);
 			up->date.month = (uint8_t)mb(12);
-			up->date.year = (uint16_t)getint((uint8_t *) &mb(13));
+			up->date.year = getuint((uint8_t *) &mb(13));
 			up->date.yearday = 0;
 			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
 			gpsweekadj(&up->week, up->build_week);
@@ -721,7 +721,7 @@ TSIP_decode (
 			}
 
 			pp->nsec = (long) (getdbl((uint8_t *) &mb(3)) * NS_PER_S);
-			up->date.year = (uint16_t)getint((uint8_t *) &mb(16));
+			up->date.year = getuint((uint8_t *) &mb(16));
 			up->date.hour = (uint8_t)mb(11);
 			up->date.minute = (uint8_t)mb(12);
 			up->date.second = (uint8_t)mb(13);
@@ -749,7 +749,7 @@ TSIP_decode (
 		    case 0xAC:
 			/*
 			 * supplemental timing packet: sent after 8f-ab from
-			 * Thunderbolt and Resolution
+			 * Thunderbolt and Resolution 360
 			 */
 			if (up->rpt_cnt != 68) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ac packet length is not 68 (%d)\n",
@@ -781,14 +781,14 @@ TSIP_decode (
 			       tracking_status[tb_decod_conv[decod_stat]],
 			       tb_disc_mode[disc_mode]));
 
-			m_alarms = (unsigned short)getint((uint8_t *) &mb(10));
+			m_alarms = getuint((uint8_t *) &mb(10));
 			if (m_alarms & 0x200) {
 				DPRINT(1, ("TSIP_decode: unit %d: 'position questionable' flag is set,\n    you must update the unit's stored position.\n",
 				       up->unit));
 				return false;
 			}
 
-			holdover_t = (uint32_t)getlong((uint8_t *) &mb(4));
+			holdover_t = getulong((uint8_t *) &mb(4));
 			if (!tracking_status_usable[tb_decod_conv[decod_stat]])	{
 				if (pp->fudgetime2 < 0.5) {
 					/* holdover not enabled */
@@ -834,7 +834,7 @@ TSIP_decode (
 		    case 0xAB:
 			/*
 			 * primary timing packet: first packet sent after PPS
-			 * from Thunderbolt and Resolution
+			 * from Thunderbolt and Resolution 360
 			 */
 			if (up->rpt_cnt != 17) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ab packet length is not 17 (%d)\n",
@@ -874,7 +874,7 @@ TSIP_decode (
 			}
 #endif
 			up->UTC_flags = 0;
-			up->UTC_offset = getint((uint8_t *) &mb(7));
+			up->UTC_offset = getuint((uint8_t *) &mb(7));
 			if (timing_flags & 0x04 || timing_flags & 0x08 ||
 			    up->UTC_offset == 0) {
 				DPRINT(1, ("TSIP_decode: unit %d: time not set or UTC offset unavailable\n",
@@ -894,8 +894,8 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADTIME);
 				return false;
 			}
-			up->TOW = (unsigned long int)getlong((uint8_t *) &mb(1));
-			up->week = (unsigned int)getint((uint8_t *) &mb(5));
+			up->TOW = getulong((uint8_t *) &mb(1));
+			up->week = getuint((uint8_t *) &mb(5));
 
 			pp->lastrec = up->p_recv_time;
 			pp->nsec = 0;
@@ -933,8 +933,8 @@ TSIP_decode (
 		if (!up->got_time)
 			return false;
 		up->TOW  = (unsigned long int)TOWfloat;
-		up->week = (unsigned int)getint((uint8_t *) &mb(4));
-		up->UTC_offset =    (int)getsgl((uint8_t *) &mb(6));
+		up->week = getuint((uint8_t *) &mb(4));
+		up->UTC_offset = (int)getsgl((uint8_t *) &mb(6));
 		if (up->UTC_offset == 0) {
 			DPRINT(1, ("TSIP_decode: unit %d: UTC data not available\n",
 			       up->unit));
@@ -1284,7 +1284,7 @@ HW_poll (
 }
 
 /*
- * getsgl - copy/swap a big-endian palisade single into a host float
+ * getsgl - copy/swap a big-endian Trimble single into a host float
  */
 static float
 getsgl (
@@ -1315,7 +1315,7 @@ getsgl (
 }
 
 /*
- * getdbl - copy/swap a big-endian palisade double into a host double
+ * getdbl - copy/swap a big-endian Trimble double into a host double
  */
 static double
 getdbl (
@@ -1349,29 +1349,29 @@ getdbl (
 }
 
 /*
- * getint - copy/swap a big-endian palisade short into a host short
+ * getuint - copy/swap a big-endian Trimble UINT16 into a host unsigned short
  */
-static short
-getint (
+static unsigned short
+getuint (
 	uint8_t *bp
 	)
 {
-	unsigned short us;
+	uint16_t us;
 
 	memcpy(&us, bp, sizeof(us));
-	return (short)ntohs(us);
+	return (unsigned short)ntohs(us);
 }
 
 /*
- * getlong -copy/swap a big-endian palisade 32-bit int into a host 32-bit int
+ * getulong -copy/swap a big-endian Trimble UINT32 into a host unsigned long
  */
-static int32_t
-getlong(
+static unsigned long
+getulong(
 	uint8_t *bp
 	)
 {
 	uint32_t u32;
 
 	memcpy(&u32, bp, sizeof(u32));
-	return (int32_t)(uint32_t)ntohl(u32);
+	return (unsigned long)ntohl(u32);
 }
