@@ -222,8 +222,6 @@ static PyMethodDef ntpc_methods[] = {
      PyDoc_STR("Convert a time stamp to something readable.")},
     {"lfptofloat",     	ntpc_lfptofloat,  	METH_VARARGS,
      PyDoc_STR("NTP l_fp to Python-style float time.")},
-    {"set_tod",     	ntpc_set_tod,   	METH_VARARGS,
-     PyDoc_STR("Set time to nanosecond precision.")},
     {"adj_systime",    	ntpc_adj_systime,   	METH_VARARGS,
      PyDoc_STR("Adjust system time by slewing.")},
     {"step_systime",    ntpc_step_systime,   	METH_VARARGS,
