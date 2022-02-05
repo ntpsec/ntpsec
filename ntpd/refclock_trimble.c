@@ -950,8 +950,8 @@ TSIP_decode (
 		 * pp->nsec to the fractional part of lastrec.
 		 */
 		if (up->use_event) {
-			lastrec_frac = pp->lastrec & 0xFFFFFFFF;
-			secfrac = (double)lastrec_frac / (double)(0xFFFFFFFF);
+			lastrec_frac = lfpfrac(pp->lastrec);
+			secfrac = (double)lastrec_frac / FRAC;
 			pp->nsec = (long) (secfrac * NS_PER_S);
 		} else {
 			pp->lastrec = up->p_recv_time;
