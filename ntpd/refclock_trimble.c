@@ -133,8 +133,8 @@ static	bool		TSIP_decode		(struct peer *);
 static	void		HW_poll			(struct refclockproc *);
 static	float		getsgl			(uint8_t *);
 static	double		getdbl 			(uint8_t *);
-static	unsigned short	getuint 		(uint8_t *);
-static	unsigned long	getulong		(uint8_t *);
+static	uint16_t	getu16	 		(uint8_t *);
+static	uint32_t	getu32			(uint8_t *);
 static  void		sendcmd			(struct packettx *buffer, int c);
 static  void		sendsupercmd		(struct packettx *buffer, int c1, int c2);
 static  void		sendbyte		(struct packettx *buffer, int b);
@@ -592,7 +592,7 @@ TSIP_decode (
 
 	if (id == 0x8f) {
 		/* Superpackets */
-		event = getuint((uint8_t *) &mb(1)) & 0xffff;
+		event = getu16((uint8_t *) &mb(1));
 		if ((up->type != CLK_THUNDERBOLT) && (up->type != CLK_RESOLUTION360) && !event)
 			/* ignore auto-report */
 			return false;
@@ -636,7 +636,7 @@ TSIP_decode (
 				       tracking_status[up->trk_status]));
 				return false;
 			}
-			up->UTC_offset = getuint((uint8_t *) &mb(16));
+			up->UTC_offset = getu16((uint8_t *) &mb(16));
 			if (!(up->UTC_flags & UTC_AVAILABLE) ||
 			    (up->UTC_offset == 0)) {
 				pp->leap = LEAP_NOTINSYNC;
@@ -659,7 +659,7 @@ TSIP_decode (
 			up->date.second = secint % 60;
 			up->date.monthday = (uint8_t)mb(11);
 			up->date.month = (uint8_t)mb(12);
-			up->date.year = getuint((uint8_t *) &mb(13));
+			up->date.year = getu16((uint8_t *) &mb(13));
 			up->date.yearday = 0;
 			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
 			gpsweekadj(&up->week, up->build_week);
@@ -721,7 +721,7 @@ TSIP_decode (
 			}
 
 			pp->nsec = (long) (getdbl((uint8_t *) &mb(3)) * NS_PER_S);
-			up->date.year = getuint((uint8_t *) &mb(16));
+			up->date.year = getu16((uint8_t *) &mb(16));
 			up->date.hour = (uint8_t)mb(11);
 			up->date.minute = (uint8_t)mb(12);
 			up->date.second = (uint8_t)mb(13);
@@ -781,14 +781,14 @@ TSIP_decode (
 			       tracking_status[tb_decod_conv[decod_stat]],
 			       tb_disc_mode[disc_mode]));
 
-			m_alarms = getuint((uint8_t *) &mb(10));
+			m_alarms = getu16((uint8_t *) &mb(10));
 			if (m_alarms & 0x200) {
 				DPRINT(1, ("TSIP_decode: unit %d: 'position questionable' flag is set,\n    you must update the unit's stored position.\n",
 				       up->unit));
 				return false;
 			}
 
-			holdover_t = getulong((uint8_t *) &mb(4));
+			holdover_t = getu32((uint8_t *) &mb(4));
 			if (!tracking_status_usable[tb_decod_conv[decod_stat]])	{
 				if (pp->fudgetime2 < 0.5) {
 					/* holdover not enabled */
@@ -874,7 +874,7 @@ TSIP_decode (
 			}
 #endif
 			up->UTC_flags = 0;
-			up->UTC_offset = getuint((uint8_t *) &mb(7));
+			up->UTC_offset = getu16((uint8_t *) &mb(7));
 			if (timing_flags & 0x04 || timing_flags & 0x08 ||
 			    up->UTC_offset == 0) {
 				DPRINT(1, ("TSIP_decode: unit %d: time not set or UTC offset unavailable\n",
@@ -894,8 +894,8 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADTIME);
 				return false;
 			}
-			up->TOW = getulong((uint8_t *) &mb(1));
-			up->week = getuint((uint8_t *) &mb(5));
+			up->TOW = getu32((uint8_t *) &mb(1));
+			up->week = getu16((uint8_t *) &mb(5));
 
 			pp->lastrec = up->p_recv_time;
 			pp->nsec = 0;
@@ -933,7 +933,7 @@ TSIP_decode (
 		if (!up->got_time)
 			return false;
 		up->TOW  = (unsigned long int)TOWfloat;
-		up->week = getuint((uint8_t *) &mb(4));
+		up->week = getu16((uint8_t *) &mb(4));
 		up->UTC_offset = (int)getsgl((uint8_t *) &mb(6));
 		if (up->UTC_offset == 0) {
 			DPRINT(1, ("TSIP_decode: unit %d: UTC data not available\n",
@@ -1249,14 +1249,14 @@ HW_poll (
 
 	up = pp->unitptr;
 
-	/* Poll ACE III by sending a 0x21 command */
 	struct packettx tx;
+	uint8_t tx_data[10];
 	if (up->type == CLK_ACE) {
+		/* Poll ACE III by sending a 0x21 command */
 		tx.size = 0;
-		tx.data = (uint8_t *) emalloc_zero(100);
+		tx.data = tx_data;
 		sendcmd (&tx, 0x21);
 		sendetx (&tx, pp->io.fd);
-		free(tx.data);
 	} else {
 		/* Edge trigger */
 		if (pp->sloppyclockflag & CLK_FLAG3) {
@@ -1349,29 +1349,29 @@ getdbl (
 }
 
 /*
- * getuint - copy/swap a big-endian Trimble UINT16 into a host unsigned short
+ * getu16 - copy/swap a big-endian Trimble UINT16 into a host uint16_t
  */
-static unsigned short
-getuint (
+static uint16_t
+getu16 (
 	uint8_t *bp
 	)
 {
 	uint16_t us;
 
 	memcpy(&us, bp, sizeof(us));
-	return (unsigned short)ntohs(us);
+	return ntohs(us);
 }
 
 /*
- * getulong -copy/swap a big-endian Trimble UINT32 into a host unsigned long
+ * getu32 -copy/swap a big-endian Trimble UINT32 into a host uint32_t
  */
-static unsigned long
-getulong(
+static uint32_t
+getu32(
 	uint8_t *bp
 	)
 {
 	uint32_t u32;
 
 	memcpy(&u32, bp, sizeof(u32));
-	return (unsigned long)ntohl(u32);
+	return ntohl(u32);
 }
