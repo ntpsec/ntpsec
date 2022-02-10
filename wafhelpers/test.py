@@ -34,9 +34,12 @@ def test_print_log(ctx):
         if retval or error:
             pprint("RED", "****** ERROR ******\n")
 
-            print(error or lines)
+            print("\n*** stdout ***\n")
+            print(polystr(lines))
+            print("\n*** stderr ***\n")
+            print(polystr(error))
 
         if (not retval) and (not error):
-            pprint("GREEN", "****** LOG ******\n", lines)
+            pprint("GREEN", "****** LOG ******\n", polystr(lines))
 
         print("")
