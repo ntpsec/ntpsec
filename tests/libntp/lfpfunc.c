@@ -167,6 +167,11 @@ TEST(lfpfunc, Extraction) {
     const uint32_t hi = 0xFFEEDDBB;
     const uint32_t lo = 0x66554433;
     l_fp lfp = lfpinit_u(hi, lo);
+
+    // rumor that some cc gets this wrong
+    TEST_ASSERT_EQUAL(sizeof(hi), 4);
+    TEST_ASSERT_EQUAL(sizeof(lfp), 8);
+
     TEST_ASSERT_EQUAL(lfpuint(lfp), hi);
     TEST_ASSERT_EQUAL(lfpfrac(lfp), lo);
     TEST_ASSERT_EQUAL(lfpsint(lfp), -1122885);
