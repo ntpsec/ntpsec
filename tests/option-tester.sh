@@ -92,9 +92,9 @@ doit default ""
 doit minimal "--disable-droproot --disable-mdns-registration --disable-doc --disable-manpage"
 
 # This also tests refclocks without DEBUG
-doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpage"
+doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpage --enable-pylib=ffi"
 
-doit all     "--enable-warnings --enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot --disable-fuzz $LINUX --disable-doc --disable-manpage"
+doit all     "--enable-warnings --enable-debug --enable-debug-gdb --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot --disable-fuzz $LINUX --disable-doc --disable-manpage --enable-pylib=ext"
 
 if [ "`which asciidoc 2>/dev/null`" != "" -a \
      "`which xsltproc 2>/dev/null`" != "" ]
