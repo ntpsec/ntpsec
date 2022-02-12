@@ -958,6 +958,7 @@ nmea_receive(
 		rc_time	 = parse_time(&date, &rdata, 1);
 		pp->leap = parse_qual(&rdata, 2, 'A', 0);
 		rc_date	 = parse_date(&date, &rdata, 9, DATE_1_DDMMYY);
+		fix_WNRO(&date, &up->wnro, peer);
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 3, 4, 5, 6, -1);
 		break;
@@ -985,12 +986,14 @@ nmea_receive(
 		pp->leap = LEAP_NOWARNING;
 		rc_time	 = parse_time(&date, &rdata, 1);
 		rc_date	 = parse_date(&date, &rdata, 2, DATE_3_DDMMYYYY);
+		fix_WNRO(&date, &up->wnro, peer);
 		break;
 
 	case NMEA_GPZDG:
 		/* Check quality byte, fetch time & full date */
 		rc_time	 = parse_time(&date, &rdata, 1);
 		rc_date	 = parse_date(&date, &rdata, 2, DATE_3_DDMMYYYY);
+		fix_WNRO(&date, &up->wnro, peer);
 		pp->leap = parse_qual(&rdata, 4, '0', 1);
 /* May be wrong sign: HGM, 2022-Jan-17 */
 		date.tv_sec = -1; /* GPZDG is following second */
@@ -1047,16 +1050,13 @@ nmea_receive(
 		up->gps_time = true;
 	}
 
-	/* Check/fix WNRO */
-	fix_WNRO(&date, &up->wnro, peer);
-	rd_reftime = tspec_stamp_to_lfp(date);
-
 	/*
 	 * Get the reference time stamp from the calendar buffer.
 	 * Process the new sample in the median filter and determine the
 	 * timecode timestamp, but only if the PPS is not in control.
 	 * Discard sentence if reference time did not change.
 	 */
+	rd_reftime = tspec_stamp_to_lfp(date);
 	if (up->last_reftime == rd_reftime) {
 		/* Do not touch pp->a_lastcode on purpose! */
 		up->tally.filtered++;
