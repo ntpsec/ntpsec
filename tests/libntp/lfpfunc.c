@@ -32,12 +32,13 @@ static int cmp_work(uint32_t a[3], uint32_t b[3])
 		tmp = a[idx]; cy  = (a[idx] -=   cy  ) > tmp;
 		tmp = a[idx]; cy |= (a[idx] -= b[idx]) > tmp;
 	}
-	if (a[2])
+	if (a[2]) {
 		return -1;
+        }
 	return a[0] || a[1];
 }
 
-static int l_fp_scmp(const l_fp first, const l_fp second)
+static int l_fp_scmp(l_fp first, l_fp second)
 {
 	uint32_t a[3], b[3];
 
@@ -53,7 +54,7 @@ static int l_fp_scmp(const l_fp first, const l_fp second)
 	return cmp_work(a,b);
 }
 
-static int l_fp_ucmp(const l_fp first, l_fp second)
+static int l_fp_ucmp(l_fp first, l_fp second)
 {
 	uint32_t a[3], b[3];
 	const l_fp op1 = first;
@@ -70,26 +71,26 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 // This should be easy enough...
 //----------------------------------------------------------------------
 
-static l_fp l_fp_negate(const l_fp first)
+static l_fp l_fp_negate(l_fp first)
 {
-	l_fp temp = first;
-	L_NEG(temp);
+	L_NEG(first);
 
-	return temp;
+	return first;
 }
 
-static l_fp l_fp_abs(const l_fp first)
+static l_fp l_fp_abs(l_fp first)
 {
-	l_fp temp = first;
-	if (L_ISNEG(temp))
-		L_NEG(temp);
-	return temp;
+	if (L_ISNEG(first)) {
+		L_NEG(first);
+        }
+	return first;
 }
 
-static int l_fp_signum(const l_fp first)
+static int l_fp_signum(l_fp first)
 {
-	if (lfpuint(first) & 0x80000000U)
+	if (lfpuint(first) & 0x80000000U) {
 		return -1;
+        }
 	return (lfpuint(first) || lfpfrac(first));
 }
 
@@ -100,12 +101,12 @@ static int l_fp_signum(const l_fp first)
 //----------------------------------------------------------------------
 
 
-static bool l_isgt (const l_fp first, const l_fp second)
+static bool l_isgt (l_fp first, l_fp second)
 {
 	return L_ISGT(first, second);
 }
 
-static bool l_isgtu(const l_fp first, const l_fp second)
+static bool l_isgtu(l_fp first, l_fp second)
 {
 	return L_ISGTU(first, second);
 }
@@ -226,9 +227,9 @@ TEST(lfpfunc, Absolute) {
 	// value cannot be negated, or, to be more precise, the
 	// negation reproduces the original pattern.
 	l_fp minVal = lfpinit_u(0x80000000, 0x00000000);
-	l_fp minAbs = l_fp_abs(minVal);
 	TEST_ASSERT_EQUAL(-1, l_fp_signum(minVal));
 
+	l_fp minAbs = l_fp_abs(minVal);
 	TEST_ASSERT_EQUAL(minVal, minAbs);
 
 	return;
