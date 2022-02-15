@@ -1,12 +1,12 @@
 /*
  * refclock_trimble - clock driver for the Trimble Palisade, Thunderbolt,
- * Acutime 2000, Acutime Gold, Resolution 360, ACE III, Copernicus II and
+ * Acutime 2000, Acutime Gold, Resolution SMT, ACE III, Copernicus II and
  * EndRun Technologies Praecis Ct/Cf/Ce/II timing receivers
  *
  * For detailed information on this program, please refer to the
  * driver_trimble.html document accompanying the NTPsec distribution.
  *
- * Version 4.00; January 26, 2021
+ * Version 4.00; Febuary 15, 2022
  * refer to driver_trimble.html for change log
  *
  * This software was developed by the Software and Component Technologies
@@ -41,7 +41,7 @@
 /*
  * GPS Definitions
  */
-#define	DESCRIPTION	"Trimble Palisade/Thunderbolt/Acutime/Resolution 360/ACE/Copernicus GPSes" /* Long name */
+#define	DESCRIPTION	"Trimble Palisade/Thunderbolt/Acutime/Resolution SMT/ACE/Copernicus GPSes" /* Long name */
 #define NAME		"TRIMBLE"	/* shortname */
 #define	PRECISION	(-20)		/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"		/* reference ID */
@@ -86,7 +86,7 @@
 #endif
 
 /*
- * Structure for build data packets for send (used by thunderbolt, ACE III and resolution 360)
+ * Structure for build data packets for send (used by thunderbolt, ACE III and resolution SMT)
  * taken from Markus Prosch
  */
 struct packettx
@@ -107,7 +107,7 @@ struct trimble_unit {
 	unsigned char		trk_status;	/* reported tracking status */
 	char			rpt_status;	/* TSIP Parser State */
 	size_t 			rpt_cnt;	/* TSIP packet length so far */
-	char 			rpt_buf[RMAX];	/* packet assembly buffer */
+	unsigned char 		rpt_buf[RMAX];	/* packet assembly buffer */
 	int			type;		/* Clock mode type */
 	bool			use_event;	/* receiver has event input */
 	bool			event_reply;	/* response to event input has been received */
@@ -133,6 +133,7 @@ static	bool		TSIP_decode		(struct peer *);
 static	void		HW_poll			(struct refclockproc *);
 static	float		getsgl			(uint8_t *);
 static	double		getdbl 			(uint8_t *);
+static	int16_t		gets16	 		(uint8_t *);
 static	uint16_t	getu16	 		(uint8_t *);
 static	uint32_t	getu32			(uint8_t *);
 static  void		sendcmd			(struct packettx *buffer, int c);
@@ -141,7 +142,7 @@ static  void		sendbyte		(struct packettx *buffer, int b);
 static  void		sendint			(struct packettx *buffer, int a);
 static  int		sendetx			(struct packettx *buffer, int fd);
 static  void		init_thunderbolt	(int fd);
-static  void		init_resolution360	(int fd);
+static  void		init_resolution_smt	(int fd);
 
 #define PAL_TSTATS 14
 #ifdef DEBUG
@@ -190,7 +191,7 @@ struct refclock refclock_trimble = {
 #define CLK_PRAECIS		1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT		2	/* Trimble Thunderbolt GPS Receiver */
 #define CLK_ACUTIME   		3	/* Trimble Acutime Gold */
-#define CLK_RESOLUTION360	5	/* Trimble Resolution 360 Receivers */
+#define CLK_RESOLUTIONSMT	5	/* Trimble Resolution SMT Receivers */
 #define CLK_ACE			6	/* Trimble ACE III */
 #define CLK_COPERNICUS		7	/* Trimble Copernicus II */
 
@@ -305,11 +306,11 @@ init_thunderbolt (
 }
 
 /*
- * init_resolution360 - Prepares Resolution 360 receiver to be used with
+ * init_resolutionSMT - Prepares Resolution SMT receiver to be used with
  *		        NTP (also taken from Markus Prosch).
  */
 static void
-init_resolution360 (
+init_resolution_smt (
 	int fd
 	)
 {
@@ -428,8 +429,8 @@ trimble_start (
 		msyslog(LOG_NOTICE, "REFCLOCK: %s Acutime Gold mode enabled",
 			refclock_name(peer));
 		break;
-	    case CLK_RESOLUTION360:
-		msyslog(LOG_NOTICE, "REFCLOCK: %s Resolution 360 mode enabled",
+	    case CLK_RESOLUTIONSMT:
+		msyslog(LOG_NOTICE, "REFCLOCK: %s Resolution SMT mode enabled",
 			refclock_name(peer));
 		up->use_event = false;
 		break;
@@ -560,8 +561,8 @@ trimble_start (
 		init_thunderbolt(fd);
 	}
 
-	if (up->type == CLK_RESOLUTION360) {
-		init_resolution360(fd);
+	if (up->type == CLK_RESOLUTIONSMT) {
+		init_resolution_smt(fd);
 	}
 
 	return true;
@@ -592,8 +593,8 @@ TSIP_decode (
 
 	if (id == 0x8f) {
 		/* Superpackets */
-		event = getu16((uint8_t *) &mb(1));
-		if ((up->type != CLK_THUNDERBOLT) && (up->type != CLK_RESOLUTION360) && !event)
+		event = getu16(&mb(1));
+		if ((up->type != CLK_THUNDERBOLT) && (up->type != CLK_RESOLUTIONSMT) && !event)
 			/* ignore auto-report */
 			return false;
 
@@ -614,9 +615,9 @@ TSIP_decode (
 			if (debug > 1) { /* SPECIAL DEBUG */
 				int st, ts;
 				double lat, lon, alt;
-				lat = getdbl((uint8_t *) &mb(42)) * R2D;
-				lon = getdbl((uint8_t *) &mb(50)) * R2D;
-				alt = getdbl((uint8_t *) &mb(58));
+				lat = getdbl(&mb(42)) * R2D;
+				lon = getdbl(&mb(50)) * R2D;
+				alt = getdbl(&mb(58));
 
 				printf("TSIP_decode: unit %d: Latitude: %03.4f Longitude: %03.4f Alt: %05.2f m\n",
 				       up->unit, lat,lon,alt);
@@ -636,7 +637,7 @@ TSIP_decode (
 				       tracking_status[up->trk_status]));
 				return false;
 			}
-			up->UTC_offset = getu16((uint8_t *) &mb(16));
+			up->UTC_offset = gets16(&mb(16));
 			if (!(up->UTC_flags & UTC_AVAILABLE) ||
 			    (up->UTC_offset == 0)) {
 				pp->leap = LEAP_NOTINSYNC;
@@ -645,7 +646,7 @@ TSIP_decode (
 				return false;
 			}
 
-			secs = getdbl((uint8_t *) &mb(3));
+			secs = getdbl(&mb(3));
 			secint = (long) secs;
 			secfrac = secs - secint; /* 0.0 <= secfrac < 1.0 */
 
@@ -657,9 +658,9 @@ TSIP_decode (
 			up->date.minute = (int)(secint / 60);
 			secint %= 60;
 			up->date.second = secint % 60;
-			up->date.monthday = (uint8_t)mb(11);
-			up->date.month = (uint8_t)mb(12);
-			up->date.year = getu16((uint8_t *) &mb(13));
+			up->date.monthday = mb(11);
+			up->date.month = mb(12);
+			up->date.year = getu16(&mb(13));
 			up->date.yearday = 0;
 			caltogps(&up->date, up->UTC_offset, &up->week, &up->TOW);
 			gpsweekadj(&up->week, up->build_week);
@@ -697,11 +698,11 @@ TSIP_decode (
 			}
 
 			/* flags checked in 8f-0b for Palisade and Acutime */
-			up->trk_status = (unsigned char)mb(18);
+			up->trk_status = mb(18);
 			if (up->trk_status > PAL_TSTATS) {
 				up->trk_status = PAL_TSTATS;
 }
-			up->UTC_flags = (unsigned char)mb(19);
+			up->UTC_flags = mb(19);
 
 			/* get timecode from 8f-0b except with Praecis */
 			if (up->type != CLK_PRAECIS)
@@ -720,13 +721,13 @@ TSIP_decode (
 				return false;
 			}
 
-			pp->nsec = (long) (getdbl((uint8_t *) &mb(3)) * NS_PER_S);
-			up->date.year = getu16((uint8_t *) &mb(16));
-			up->date.hour = (uint8_t)mb(11);
-			up->date.minute = (uint8_t)mb(12);
-			up->date.second = (uint8_t)mb(13);
-			up->date.month = (uint8_t)mb(15);
-			up->date.monthday = (uint8_t)mb(14);
+			pp->nsec = (long) (getdbl(&mb(3)) * NS_PER_S);
+			up->date.year = getu16(&mb(16));
+			up->date.hour = mb(11);
+			up->date.minute = mb(12);
+			up->date.second = mb(13);
+			up->date.month = mb(15);
+			up->date.monthday = mb(14);
 			caltogps(&up->date, 0, &up->week, &up->TOW);
 			gpsweekadj(&up->week, up->build_week);
 			gpstocal(up->week, up->TOW, 0, &up->date);
@@ -749,7 +750,7 @@ TSIP_decode (
 		    case 0xAC:
 			/*
 			 * supplemental timing packet: sent after 8f-ab from
-			 * Thunderbolt and Resolution 360
+			 * Thunderbolt and Resolution SMT
 			 */
 			if (up->rpt_cnt != 68) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ac packet length is not 68 (%d)\n",
@@ -761,18 +762,18 @@ TSIP_decode (
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
 				double lat, lon, alt;
-				lat = getdbl((uint8_t *) &mb(36)) * R2D;
-				lon = getdbl((uint8_t *) &mb(44)) * R2D;
-				alt = getdbl((uint8_t *) &mb(52));
+				lat = getdbl(&mb(36)) * R2D;
+				lon = getdbl(&mb(44)) * R2D;
+				alt = getdbl(&mb(52));
 				printf("TSIP_decode: unit %d: Latitude: %03.4f Longitude: %03.4f Alt: %05.2f m\n",
 				       up->unit, lat,lon,alt);
 			}
 #endif
-			decod_stat = (unsigned char)mb(12);
+			decod_stat = mb(12);
 			if (decod_stat > TB_DECOD_STATS) {
 				decod_stat = TB_DECOD_STATS;
 }
-			disc_mode = (unsigned char)mb(2);
+			disc_mode = mb(2);
 			if (disc_mode > TB_DISC_MODES) {
 				disc_mode = TB_DISC_MODES;
 }
@@ -781,14 +782,14 @@ TSIP_decode (
 			       tracking_status[tb_decod_conv[decod_stat]],
 			       tb_disc_mode[disc_mode]));
 
-			m_alarms = getu16((uint8_t *) &mb(10));
+			m_alarms = getu16(&mb(10));
 			if (m_alarms & 0x200) {
 				DPRINT(1, ("TSIP_decode: unit %d: 'position questionable' flag is set,\n    you must update the unit's stored position.\n",
 				       up->unit));
 				return false;
 			}
 
-			holdover_t = getu32((uint8_t *) &mb(4));
+			holdover_t = getu32(&mb(4));
 			if (!tracking_status_usable[tb_decod_conv[decod_stat]])	{
 				if (pp->fudgetime2 < 0.5) {
 					/* holdover not enabled */
@@ -834,7 +835,7 @@ TSIP_decode (
 		    case 0xAB:
 			/*
 			 * primary timing packet: first packet sent after PPS
-			 * from Thunderbolt and Resolution 360
+			 * from Thunderbolt and Resolution SMT
 			 */
 			if (up->rpt_cnt != 17) {
 				DPRINT(1, ("TSIP_decode: unit %d: 8f-ab packet length is not 17 (%d)\n",
@@ -842,7 +843,7 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADREPLY);
 				return 0;
 			}
-			timing_flags = (unsigned char)mb(9);
+			timing_flags = mb(9);
 #ifdef DEBUG
 			if (debug > 1) { /* SPECIAL DEBUG */
 				printf("TSIP_decode: unit %d: timing flags:0x%02X=\n",
@@ -874,7 +875,7 @@ TSIP_decode (
 			}
 #endif
 			up->UTC_flags = 0;
-			up->UTC_offset = getu16((uint8_t *) &mb(7));
+			up->UTC_offset = gets16(&mb(7));
 			if (timing_flags & 0x04 || timing_flags & 0x08 ||
 			    up->UTC_offset == 0) {
 				DPRINT(1, ("TSIP_decode: unit %d: time not set or UTC offset unavailable\n",
@@ -894,8 +895,8 @@ TSIP_decode (
 				refclock_report(peer, CEVNT_BADTIME);
 				return false;
 			}
-			up->TOW = getu32((uint8_t *) &mb(1));
-			up->week = getu16((uint8_t *) &mb(5));
+			up->TOW = getu32(&mb(1));
+			up->week = getu16(&mb(5));
 
 			pp->lastrec = up->p_recv_time;
 			pp->nsec = 0;
@@ -928,13 +929,13 @@ TSIP_decode (
                  * A negative value of TOW indicates the receiver has not established the time.
 		 * This can occur even if UTC_offset is correct.
 		 */
-		TOWfloat = getsgl((uint8_t *) &mb(0));
+		TOWfloat = getsgl(&mb(0));
 		up->got_time = (TOWfloat >= 0);
 		if (!up->got_time)
 			return false;
 		up->TOW  = (unsigned long int)TOWfloat;
-		up->week = getu16((uint8_t *) &mb(4));
-		up->UTC_offset = (int)getsgl((uint8_t *) &mb(6));
+		up->week = getu16(&mb(4));
+		up->UTC_offset = (int)getsgl(&mb(6));
 		if (up->UTC_offset == 0) {
 			DPRINT(1, ("TSIP_decode: unit %d: UTC data not available\n",
 			       up->unit));
@@ -999,7 +1000,7 @@ trimble_receive (
 		if (SPSTAT_LEN == up->rpt_cnt &&
 		    up->rpt_buf[up->rpt_cnt - 1] == '\r') {
 			up->rpt_buf[up->rpt_cnt - 1] = '\0';
-			record_clock_stats(peer, up->rpt_buf);
+			record_clock_stats(peer, (char *) up->rpt_buf);
 		}
 		return;
 	}
@@ -1346,6 +1347,20 @@ getdbl (
 
 	return uo.out;
 #endif
+}
+
+/*
+ * gets16 - copy/swap a big-endian Trimble SINT16 into a host int16_t
+ */
+static int16_t
+gets16 (
+	uint8_t *bp
+	)
+{
+	int16_t us;
+
+	memcpy(&us, bp, sizeof(us));
+	return ntohs(us);
 }
 
 /*
