@@ -21,6 +21,12 @@ Acutime Gold, Resolution SMT, ACE III and Copernicus II.
 The EndRun Technologies Praecis Cf, Ct, Ce, and II modules
 (in Palisade emulation mode) are also supported.
 
+There are a number of different Trimble receivers with "Resolution" as part of their name.
+The particular receiver supported by this driver is the "Resolution SMT", part number 66974-45.
+This receiver returns hardware code 3009 decimal when queried by a TSIP Hardware Component
+Information command packet.  It may also support the "Resolution T" receiver (hardware code 3002
+decimal) but has not been tested on that device.
+
 == Tested Receivers
 The driver has been tested with the following receivers :
 
