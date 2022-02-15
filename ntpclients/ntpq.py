@@ -447,23 +447,24 @@ usage: timeout [ msec ]
                         display2 = ntp.util.unitifyvar(rawvalue2, name)
                     else:
                         display2 = value2
-                    self.say("%13s   %12s %12s\n" %
-                             (legend, display, display2))
+                        self.say(
+                            "{0:<13} {1:>13} {2:>13}\n".format(
+                                legend, display, display2)
+                        )
                 elif fmt == NTP_PACKETS:
                     self.say(
-                        "{0:<13} {1[0]:>15} {2[0]:>15} {1[1]:>12}{1[2]:<3} {2[1]:>12}{2[2]:<3}\n".format(
-                            legend,
-                            ntp.util.packetize(value, runs),
-                            ntp.util.packetize(
-                                value2, runl, periodized=True, clipdigits=3
-                            ),
+                        "{0:<13} {1[0]:>13} {2[0]:>13} {1[1]:>10}{1[2]:<3} {2[1]:>10}{2[2]:<3}\n".format(
+                                legend,
+                                ntp.util.packetize(value, runs),
+                                ntp.util.packetize(value2, runl),
                         )
                     )
                 elif fmt == NTP_UPTIME:
                     runs, display = ntp.util.periodize(value)
                     runl, display2 = ntp.util.periodize(value2)
                     self.say(
-                        "{0:<13} {1:>15} {2:>15}\n".format(legend, display, display2)
+                        "{0:<13} {1:>13} {2:>13}\n".format(
+                            legend, display, display2)
                     )
                 else:
                     self.warn("unexpected vc type %s for %s, value %s %s    "
@@ -526,20 +527,21 @@ usage: timeout [ msec ]
                             value, family=self.ai_family)
                         if self.debug:
                             self.say("DNS lookup complete.")
-                    self.say("%s  %s\n" % (legend, value))
+                    self.say("%13s %13s\n" % (legend, value))
                 elif fmt == NTP_STR:
                     if value:
-                        self.say("%s  %s\n" % (legend, value))
+                        self.say("%13s %13s\n" % (legend, value))
                 elif fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
                     if self.showunits:
                         displayvalue = ntp.util.unitifyvar(rawvalue, name)
                     else:
                         displayvalue = value
-                    self.say("%13s   %13s\n" % (legend, displayvalue))
+                    self.say("%13s %13s\n" % (legend, displayvalue))
                 elif fmt == NTP_LFP:
-                    self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
+                    self.say("%13s %13s\n" % (
+                        legend, ntp.ntpc.prettydate(value)))
                 elif fmt == NTP_2BIT:
-                    self.say("%s  %s\n"
+                    self.say("%13s %13s\n"
                              % (legend, ("00", "01", "10", "11")[value]))
                 elif fmt == NTP_MODE:
                     modes = (
@@ -553,13 +555,13 @@ usage: timeout [ msec ]
                         self.say("%s  %s%d\n" % (legend, "mode#", value))
                 elif fmt == NTP_PACKETS:
                     self.say(
-                        "{0:<13} {1[0]:>15} {1[1]:>8}{1[2]:<3}\n".format(
+                        "{0:<13} {1[0]:>13} {1[1]:>10}{1[2]:<3}\n".format(
                             legend, ntp.util.packetize(value, run)
                         )
                     )
                 elif fmt == NTP_UPTIME:
                     run, display = ntp.util.periodize(value)
-                    self.say("{0:<13} {1:>15}\n".format(legend, display))
+                    self.say("{0:<13} {1:>13}\n".format(legend, display))
                 else:
                     self.warn("unexpected vc type %s for %s, value %s"
                               % (fmt, name, value))
