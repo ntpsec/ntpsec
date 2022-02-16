@@ -12,6 +12,8 @@ on user-visible changes.
 
 == Reposatory Head ==
 
+Works with OpenSSL 3.0
+
 Fix hash validation in ntpleapfetch again.
 
 FreeBSD now gets ns resolution on receive time stamps.
