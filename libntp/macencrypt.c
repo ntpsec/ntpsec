@@ -28,28 +28,6 @@
 extern EVP_MD_CTX *digest_ctx;
 extern CMAC_CTX *cmac_ctx;
 
-/* ctmemeq - test two blocks memory for equality without leaking
- * timing information.
- *
- * Return value: true if the two blocks of memory are equal, false
- * otherwise.
- *
- * TODO: find out if this is useful elsewhere and if so move
- * it to a more appropriate place and give it a prototype in a
- * header file.
- */
-static bool ctmemeq(const void *s1, const void *s2, size_t n) {
-	const uint8_t *a = s1;
-	const uint8_t *b = s2;
-	uint8_t accum = 0;
-
-	for(size_t i = 0; i < n; i++) {
-		accum |= a[i] ^ b[i];
-	}
-
-	return accum == 0;
-}
-
 /*
  * cmac_encrypt - generate CMAC authenticator
  *
@@ -120,7 +98,7 @@ cmac_decrypt(
 		    "MAC: decrypt: MAC length error");
 		return false;
 	}
-	return ctmemeq(mac, (char *)pkt + length + 4, len);
+	return !CRYPTO_memcmp(mac, (char *)pkt + length + 4, len);
 }
 
 /*
@@ -203,7 +181,7 @@ digest_decrypt(
 		    "ERR: decrypt: digest length error");
 		return false;
 	}
-	return ctmemeq(digest, (char *)pkt + length + 4, len);
+	return !CRYPTO_memcmp(digest, (char *)pkt + length + 4, len);
 }
 
 /*
