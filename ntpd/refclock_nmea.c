@@ -995,8 +995,7 @@ nmea_receive(
 		rc_date	 = parse_date(&date, &rdata, 2, DATE_3_DDMMYYYY);
 		fix_WNRO(&date, &up->wnro, peer);
 		pp->leap = parse_qual(&rdata, 4, '0', 1);
-/* May be wrong sign: HGM, 2022-Jan-17 */
-		date.tv_sec = -1; /* GPZDG is following second */
+		date.tv_sec -= 1; /* GPZDG is following second */
 		break;
 
 	case NMEA_PGRMF:
@@ -1038,9 +1037,13 @@ nmea_receive(
 		return;
 	}
 
-	/* FIXME: should use ctime_r */
+#ifdef DEBUG
+	{
+	char temp[100];
 	DPRINT(1, ("%s effective timecode: %s",
-		   refclock_name(peer), ctime(&date.tv_sec)));
+		   refclock_name(peer), ctime_r(&date.tv_sec, temp)));
+	}
+#endif
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
@@ -1667,8 +1670,6 @@ parse_date(
 static bool kludge_day (struct timespec *dt) {
   struct timespec now;
 
-/* FIXME: check if clock is valid. */
-
   clock_gettime(CLOCK_REALTIME, &now);
   int nowday = now.tv_sec / 86400;
   int nowsec = now.tv_sec % 86400;
@@ -1676,6 +1677,10 @@ static bool kludge_day (struct timespec *dt) {
   if ((gpssec-nowsec) > 12*3600) nowday -= 1;
   if ((nowsec-gpssec) > 12*3600) nowday += 1;
   dt->tv_sec += nowday*86400;
+
+  if (LEAP_NOTINSYNC == sys_vars.sys_leap) {
+    return false;
+  }
   return true;
 }
 
