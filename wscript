@@ -1182,10 +1182,26 @@ def linkcheck(ctx):
 
 def dist(fil):
     fil.base_name = repo_version(fil)
+    fil.files = file_list(fil)
 
 
 def distcheck(fil):
     fil.base_name = repo_version(fil)
+    fil.files = file_list(fil)
+
+
+def file_list(fil):
+    ## FIXME: find a way to get rid of those stupid shared library  symlinks.
+    git = fil.path.ant_glob("* */*", excl=".* build/")
+    htm = fil.path.ant_glob("build/**/*html")
+    man = fil.path.ant_glob("build/**/*.[01234567890]", excl=["*.so.*"])
+    files = git + man + htm
+    if 'file_list' == fil.cmd:
+        print('\r\n'.join(list(map(lambda x: str(x), files))))
+        print(repr(man))
+        print(repr(htm))
+    return files
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
