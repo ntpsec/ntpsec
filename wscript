@@ -28,7 +28,11 @@ from wafhelpers.test import test_write_log, test_print_log
 
 pprint.__doc__ = None
 
+# Have the name and version here, or the dist, distcheck and configure
+# will mess up from not having name and proper version.
 APPNAME = 'ntpsec'
+with open("VERSION", "r") as f:
+    VERSION = f.read().split(" ")[0].strip()
 
 out = "build"
 
@@ -36,6 +40,12 @@ config = {
     "out": out,
     "OPT_STORE": {}
 }
+
+
+def repo_version(ctx):
+    cmd = shlex.split("git describe --dirty --always --long")
+    git_short_hash = ctx.cmd_and_log(cmd).strip().split("-")
+    return APPNAME + '-' + VERSION + '+' + '-'.join(git_short_hash[1:])
 
 
 def help(ctx):
@@ -97,9 +107,6 @@ def configure(ctx):
     ctx.load('waf', tooldir='wafhelpers/')
     ctx.load('waf_unit_test')
     ctx.load('gnu_dirs')
-
-    with open("VERSION", "r") as f:
-        ntpsec_release = f.read().split(" ")[0].strip()
 
     ctx.env.OPT_STORE = config["OPT_STORE"]
 
@@ -177,18 +184,13 @@ def configure(ctx):
     if build_desc:
         build_desc = ' ' + build_desc
     if ctx.env.BIN_GIT:
-        cmd = ctx.env.BIN_GIT + shlex.split("describe --dirty")
-        git_short_hash = ctx.cmd_and_log(cmd).strip()
-        git_short_hash = '-'.join(git_short_hash.split('-')[1:])
-
-        ctx.env.NTPSEC_VERSION = "%s+" % ntpsec_release
-        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s+%s%s" %
-                                           (ntpsec_release,
-                                            git_short_hash,
+        ctx.env.NTPSEC_VERSION = repo_version(ctx)
+        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s%s" %
+                                           (ctx.env.NTPSEC_VERSION,
                                             build_desc))
     else:
-        ctx.env.NTPSEC_VERSION = "%s" % ntpsec_release
-        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s%s" % (ntpsec_release,
+        ctx.env.NTPSEC_VERSION = "%s" % VERSION
+        ctx.env.NTPSEC_VERSION_EXTENDED = ("%s%s" % (VERSION,
                                                       build_desc))
     ctx.define("NTPSEC_VERSION", ctx.env.NTPSEC_VERSION)
     ctx.define("NTPSEC_VERSION_EXTENDED", ctx.env.NTPSEC_VERSION_EXTENDED)
