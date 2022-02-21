@@ -9,41 +9,46 @@
 DRYRUN="no"
 NTPVIZ="no"
 DOC="no"
+UPDATE="no"
 PYVERS=""
 
-OS=`uname -s`
+OS=$(uname -s)
 
 # Loop through option flags
-for optflag in "$@"
-do
+for optflag in "$@"; do
 	case "$optflag" in
-	 -h|--help)
+	-h | --help)
 		cat <<EOF
 $0 - prepare your system for an NTPsec source build
 
-  Options:
-    -h --help    Show usage information and exit
-    -n --dry-run Only show what would be done instead of doing it
-       --ntpviz  Install dependencies for ntpviz tool
-       --doc     Install dependencies for building documentation
-    -a --all     Install all possible dependencies
+Options:
+	-h --help	Show usage information and exit
+	-n --dry-run	Only show what would be done instead of doing it
+	--ntpviz	Install dependencies for ntpviz tool
+	--doc		Install dependencies for building documentation
+	--update	Update package repositories
+	-a --all	Update repositories and install all dependencies
 EOF
 		exit 0
 		;;
-	 -n|--dry-run)
+	-n | --dry-run)
 		DRYRUN="yes"
 		;;
-	 --ntpviz)
+	--ntpviz)
 		NTPVIZ="yes"
 		;;
-	 --doc)
+	--doc)
 		DOC="yes"
 		;;
-	 -a|--all)
+	-a | --all)
+		UPDATE="yes"
 		NTPVIZ="yes"
 		DOC="yes"
 		;;
-	 *)
+	--update)
+		UPDATE="yes"
+		;;
+	*)
 		echo "# WARNING: Unknown argument: $optflag"
 		echo "#"
 		;;
@@ -52,16 +57,15 @@ done
 
 # Some Python 2 packages (e.g python-devel, python-psutils) conventionally have
 # Python 3 equivalents with a python3 prefix.  Compute the correct value for the
-# infix based on system Python.  This eill start to be significant after Python 2
+# infix based on system Python.  This will start to be significant after Python 2
 # EOLs at the beginning of 2020.
-PYVERS=`python --version 2>&1 | sed -n -e '/Python \([0-9]\).*/s//\1/p'`
-if [ "$PYVERS" = "2" ]
-then
-    PYVERS=""
+PYVERS=$(python --version 2>&1 | sed -n -e '/Python \([0-9]\).*/s//\1/p')
+if [ "$PYVERS" = "2" ]; then
+	PYVERS=""
 fi
 
 cat <<EOF
-# Preparing your system for ntpsec source build...
+# Preparing your system for NTPsec source build...
 # This script presently knows about:
 #   CentOS, Debian, Fedora, Gentoo, NetBSD, FreeBSD,
 $   SLES, Ubuntu, and Alpine Linux
@@ -71,79 +75,66 @@ $   SLES, Ubuntu, and Alpine Linux
 #
 EOF
 
-if [ "$DRYRUN" = "yes" ]
-then
+if [ "$DRYRUN" = "yes" ]; then
 	do=echo
 	echo "# Run this without -n|--dry-run, as root, for actual installation."
 	echo "#"
 else
 	do=""
-	if [ "$(id -u)" != 0 ]
-	then
+	if [ "$(id -u)" != 0 ]; then
 		echo "# ERROR: You must be running as root for your installer to do its thing."
 		echo "# ERROR: If you just wish to see what would be done, use the -n option."
 		exit 1
 	fi
 fi
 
-if emerge --version 2>/dev/null
-then
-    installer=emerge
-    install="$do $installer -q y"
-elif yum version 2>/dev/null
-then
-    installer=yum
-    install="$do $installer -y install"
-elif dnf --version >/dev/null 2>&1
-then
-    installer=dnf
-    install="$do $installer -y install"
-elif apt-get --version >/dev/null 2>&1
-then
-    installer=apt
-    install="$do apt-get install -y"
-elif zypper -h >/dev/null 2>&1
-then
-    # OpenSUSE prefers zypper over yast
-    installer=zypper
-    install="$do $installer install -y"
-elif yast -h >/dev/null 2>&1
-then
-    installer=yast
-    install="$do $installer --install"
-elif  apk --version >/dev/null 2>&1
-then
-    # Alpine Linux, musl rather than glibc
-    installer=apk
-    install="$do $installer add"
-elif test "$OS" = "NetBSD"
-then
-  if pkgin -v
-  then
-    # NetBSD binary package installer
-    installer=pkgin
-    install="$do $installer install"
-  else
-    echo "## Looks like a NetBSD system"
-    echo "## You need to setup pkgin"
-    echo "## The last page of install disk has a check-box to do it"
-    echo "## But you don't get that option on a Raspberry Pi."
-    echo "## For the Pi, do something like:"
-    echo "## pkg_add ftp://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/earmv7hf/8.0/All/pkgin-0.9.4nb8.tgz"
-    echo "## Adjust the version and arch to match your setup."
-    exit 1
-  fi
-elif test "$OS" = "FreeBSD"
-then
-  if pkg -v
-  then
-    # FreeBSD binary package installer
-    installer=pkg
-    install="$do $installer install"
-  fi
+if emerge --version 2>/dev/null; then
+	installer=emerge
+	install="$do $installer -q y"
+elif yum version 2>/dev/null; then
+	installer=yum
+	install="$do $installer -y install"
+elif dnf --version >/dev/null 2>&1; then
+	installer=dnf
+	install="$do $installer -y install"
+elif apt-get --version >/dev/null 2>&1; then
+	installer=apt
+	install="$do apt-get install -y"
+elif zypper -h >/dev/null 2>&1; then
+	# OpenSUSE prefers zypper over yast
+	installer=zypper
+	install="$do $installer install -y"
+elif yast -h >/dev/null 2>&1; then
+	installer=yast
+	install="$do $installer --install"
+elif apk --version >/dev/null 2>&1; then
+	# Alpine Linux, musl rather than glibc
+	installer=apk
+	install="$do $installer add"
+elif test "$OS" = "NetBSD"; then
+	if pkgin -v; then
+		# NetBSD binary package installer
+		installer=pkgin
+		install="$do $installer install"
+	else
+		echo "## Looks like a NetBSD system"
+		echo "## You need to setup pkgin"
+		echo "## The last page of install disk has a check-box to do it"
+		echo "## But you don't get that option on a Raspberry Pi."
+		echo "## For the Pi, do something like:"
+		echo "## pkg_add ftp://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/earmv7hf/8.0/All/pkgin-0.9.4nb8.tgz"
+		echo "## Adjust the version and arch to match your setup."
+		exit 1
+	fi
+elif test "$OS" = "FreeBSD"; then
+	if pkg -v; then
+		# FreeBSD binary package installer
+		installer=pkg
+		install="$do $installer install"
+	fi
 else
-    echo "# ERROR: Package manager unidentified - Unsupported operating system"
-    exit 1
+	echo "# ERROR: Package manager unidentified - Unsupported operating system"
+	exit 1
 fi
 echo "# Your package installer is ${installer}."
 echo ""
@@ -160,178 +151,187 @@ echo ""
 # libdnssd is optional for ntpd. Support for mDNS Service Discovery registration
 # libcap (under Linux) enables dropping root and is not strictly required.
 
-daemon () {
-    # Prerequisites to build the daemon: bison, pps-tools, service libraries
-    case $installer in
+daemon() {
+	# Prerequisites to build the daemon: bison, pps-tools, service libraries
+	case $installer in
 	apk)
-	    $install build-base python                  # basic tools
-	    $install bison python${PYVERS}-dev linux-headers
-	    $install openssl-dev libcap-dev libseccomp-dev
-	    # probably needs more, but this builds
-	    # can't find timepps.h: gpsd and chrony have their own ??
-	    ;;
+		$install build-base python \
+				     bison "python${PYVERS}-dev" linux-headers \
+				     openssl-dev libcap-dev libseccomp-dev
+		# probably needs more, but this builds
+		# can't find timepps.h: gpsd and chrony have their own ??
+		;;
 	apt)
-	    $install build-essential			# Build environment
-	    $install bison libssl-dev			# build
-	    $install libcap-dev libseccomp-dev		# build
-	    $install libavahi-compat-libdnssd-dev	# optional build
-	    $install pps-tools
-	    ;;
+		$install build-essential \
+				     bison libssl-dev \
+				     libcap-dev libseccomp-dev \
+				     libavahi-compat-libdnssd-dev \
+				     pps-tools
+		;;
 	emerge)
-						# Build environment included!
-	    $install sys-libs/libcap sys-libs/libseccomp
-	    $install sys-devel/bison net-misc/pps-tools
-	    ;;
+		# Build environment included!
+		$install sys-libs/libcap sys-libs/libseccomp \
+				     sys-devel/bison net-misc/pps-tools
+		;;
 	pkgin)
-	    # NetBSD
-	    #  There is nothing magic about 3.7.
-	    #  In Dec 2018, 3.6 and 2.7 are also good candidates.
-	    $install bison python37 py37-curses-3.7
-	    # certificates for NTS
-	    $install mozilla-rootcerts mozilla-rootcerts-openssl
-	    # Also needs "nts ca /etc/openssl/certs/"
-	    # setup "python" from command line
-	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
-	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
-	    # Add to Python search path
-	    if [ "$DRYRUN" = "yes" ]
-            then
-		echo echo /usr/local/lib/python3.7/site-packages \> \\
-		echo "  " /usr/pkg/lib/python3.7/site-packages/ntpsec.pth
-	    else
-		echo /usr/local/lib/python3.7/site-packages > \
-			/usr/pkg/lib/python3.7/site-packages/ntpsec.pth
-	    fi
-	    ;;
+		# NetBSD
+		$install bison python37 py37-curses-3.7 \
+				     mozilla-rootcerts mozilla-rootcerts-openssl
+		# Also needs "nts ca /etc/openssl/certs/"
+		# setup "python" from command line
+		$do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
+		$do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
+		# Add to Python search path
+		if [ "$DRYRUN" = "yes" ]; then
+			echo echo /usr/local/lib/python3.7/site-packages \> \\
+			echo "  " /usr/pkg/lib/python3.7/site-packages/ntpsec.pth
+		else
+			echo /usr/local/lib/python3.7/site-packages > \
+				/usr/pkg/lib/python3.7/site-packages/ntpsec.pth
+		fi
+		;;
 	pkg)
-	    # FreeBSD
-	    $install bison python3
-	    $do ln -s /usr/local/bin/python3 /usr/local/bin/python
-	    # certificates for NTS
-	    $install ca_root_nss
-	    ;;
-	yum|dnf)
-	    $do $installer groupinstall "Development Tools" 	# Build environment
-	    $install bison openssl-devel 		# build
-	    $install libcap-devel libseccomp-devel	# build
-	    $install pps-tools-devel			# build
-	    $install avahi-compat-libdns_sd-devel	# optional build
-	    $install libcap openssl-libs pps-tools
-	    ;;
+		# FreeBSD
+		$install bison python3 \
+				     ca_root_nss
+		$do ln -s /usr/local/bin/python3 /usr/local/bin/python
+		;;
+	yum | dnf)
+		$do $installer groupinstall "Development Tools" # Build environment
+		$install bison openssl-devel \
+				     libcap-devel libseccomp-devel \
+				     pps-tools-devel \
+				     avahi-compat-libdns_sd-devel \
+				     libcap openssl-libs pps-tools
+		;;
 	yast)
-	    echo "# SLES versions 12 and earlier do not have pps-tools"
-	    $install basis-devel 			# Build environment
-	    $install libcap-devel libseccomp-devel 	# build
-	    $install openssl-devel			# build
-	    $install libcap2 openssl-libs
-	    $install python${PYVERS}-curses
-	    ;;
+		echo "# SLES versions 12 and earlier do not have pps-tools"
+		$install basis-devel \
+				     libcap-devel libseccomp-devel \
+				     openssl-devel \
+				     libcap2 openssl-libs \
+				     "python${PYVERS}-curses"
+		;;
 	zypper)
-	    $install -t pattern devel_basis		# Build environment
-	    $install bison				# build
-	    $install libcap-devel libseccomp-devel	# build
-	    $install openssl-devel			# build
-	    echo "# SLES versions 12 and earlier do not have pps-tools"
-	    $install pps-tools-devel			# build
-	    $install pps-tools
-	    $install libcap2 openssl-libs
-	    $install python${PYVERS}-curses
-	    ;;
-    esac
+		$install -t pattern devel_basis \
+				        bison \
+				        libcap-devel libseccomp-devel \
+				        openssl-devel                 # build
+		echo "# SLES versions 12 and earlier do not have pps-tools"
+		$install pps-tools-devel\
+				     pps-tools \
+				     libcap2 openssl-libs \
+				     "python${PYVERS}-curses"
+		;;
+	esac
 }
 
-tools () {
-    # Prerequisites for the client Python tools: python extensions
-    case $installer in
+tools() {
+	# Prerequisites for the client Python tools: python extensions
+	case $installer in
 	apt)
-	    $install python${PYVERS}-dev
-	    ;;
-	yum|dnf|yast|zypper)
-	    $install python${PYVERS}-devel
-	    ;;
-    esac
+		$install "python${PYVERS}-dev"
+		;;
+	yum | dnf | yast | zypper)
+		$install "python${PYVERS}-devel"
+		;;
+	esac
 }
 
-ntpviz () {
-    # Prerequisites to use ntpviz: gnuplot and liberation fonts
-    case $installer in
+ntpviz() {
+	# Prerequisites to use ntpviz: gnuplot and liberation fonts
+	case $installer in
 	apk)
-	    $install gnuplot || echo "# You need to enable the community repository"
-	    $install ttf-liberation
-	    ;;
+		$install gnuplot || echo "# You need to enable the community repository"
+		$install ttf-liberation
+		;;
 	apt)
-	    distro=`lsb_release -i -s`
-	    if [ "$distro" = "Ubuntu" ]
-	    then
-		echo "# Looks like an Ubuntu system"
-		$install gnuplot5
-	    else
-		echo "# Looks like a generic Debian system"
-		$install gnuplot
-	    fi
-	    $install fonts-liberation python${PYVERS}-psutil
-	    ;;
+		distro=$(lsb_release -i -s)
+		if [ "$distro" = "Ubuntu" ]; then
+			echo "# Looks like an Ubuntu system"
+			$install gnuplot5
+		else
+			echo "# Looks like a generic Debian system"
+			$install gnuplot
+		fi
+		$install fonts-liberation "python${PYVERS}-psutil"
+		;;
 	emerge)
-	    $install sci-visualization/gnuplot
-	    $install media-fonts/liberation-fonts
-	    ;;
-	yum|dnf)
-	    $install gnuplot
-	    $install liberation-fonts-common.noarch
-	    $install liberation-mono-fonts.noarch
-	    $install liberation-narrow-fonts.noarch
-	    $install liberation-sans-fonts.noarch
-	    $install liberation-serif-fonts.noarch
-	    ;;
-	yast|zypper)
-	    $install gnuplot liberation-fonts
-	    ;;
-    esac
+		$install sci-visualization/gnuplot \
+				     media-fonts/liberation-fonts
+		;;
+	yum | dnf)
+		$install gnuplot \
+				     liberation-fonts-common.noarch \
+				     liberation-mono-fonts.noarch \
+				     liberation-narrow-fonts.noarch \
+				     liberation-sans-fonts.noarch \
+				     liberation-serif-fonts.noarch
+		;;
+	yast | zypper)
+		$install gnuplot liberation-fonts
+		;;
+	esac
 }
 
-doc () {
+doc() {
 	# prerequisites to build documentation
 	case $installer in
-	 apk)
+	apk | apt | pkgin | pkg | yast | zypper)
 		$install asciidoc
 		;;
-	 apt)
-		$install asciidoc
-		;;
-	 emerge)
+	emerge)
 		$install app-text/asciidoc
 		;;
-	 yum|dnf)
+	yum | dnf)
 		echo "# Please check that your asciidoc is at least 8.6.0"
 		echo "# You may need to enable EPEL repositories"
-		$install asciidoc
-		;;
-	 pkgin)
-		$install asciidoc
-		;;
-	 pkg)
-		$install asciidoc
-		;;
-	 yast|zypper)
 		$install asciidoc
 		;;
 	esac
 }
 
+update() {
+	# prerequisites to build documentation
+	case $installer in
+	emerge)
+		$do $installer --sync
+		;;
+	yum | apk | pkgin | pkg)
+		$do $installer update
+		;;
+	dnf)
+		$do $installer distro-sync
+		;;
+	apt)
+		$do $installer-get update
+		;;
+	zypper)
+		$do $installer refresh
+		;;
+	#yast)
+	esac
+}
+
+if [ "$UPDATE" = "yes" ]; then
+	update
+else
+	echo ""
+	echo "# Skipping update of package repositories [-u] [--update]"
+fi
+
 # Main sequence
 daemon
 tools
 
-if [ "$NTPVIZ" = "yes" ]
-then
+if [ "$NTPVIZ" = "yes" ]; then
 	ntpviz
 else
 	echo ""
 	echo "# Skipping ntpviz dependencies [--ntpviz]"
 fi
 
-if [ "$DOC" = "yes" ]
-then
+if [ "$DOC" = "yes" ]; then
 	doc
 else
 	echo ""
