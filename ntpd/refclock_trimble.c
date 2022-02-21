@@ -288,9 +288,10 @@ init_thunderbolt (
 	)
 {
 	struct packettx tx;
+	uint8_t tx_data[10];
 
 	tx.size = 0;
-	tx.data = (uint8_t *) emalloc_zero(100);
+	tx.data = tx_data;
 
 	/* set UTC time */
 	sendsupercmd (&tx, 0x8E, 0xA2);
@@ -301,13 +302,11 @@ init_thunderbolt (
 	sendsupercmd (&tx, 0x8E, 0xA5);
 	sendint      (&tx, 0x5);
 	sendetx      (&tx, fd);
-
-	free(tx.data);
 }
 
 /*
- * init_resolutionSMT - Prepares Resolution SMT receiver to be used with
- *		        NTP (also taken from Markus Prosch).
+ * init_resolution_smt - Prepares Resolution SMT receiver to be used with
+ *		         NTP (also taken from Markus Prosch).
  */
 static void
 init_resolution_smt (
@@ -315,9 +314,10 @@ init_resolution_smt (
 	)
 {
 	struct packettx tx;
+	uint8_t tx_data[10];
 
 	tx.size = 0;
-	tx.data = (uint8_t *) emalloc_zero(100);
+	tx.data = tx_data;
 
 	/* set UTC time */
 	sendsupercmd (&tx, 0x8E, 0xA2);
@@ -333,8 +333,6 @@ init_resolution_smt (
 	sendsupercmd (&tx, 0x8E, 0xA5);
 	sendint      (&tx, 0x5);
 	sendetx      (&tx, fd);
-
-	free(tx.data);
 }
 
 /*
