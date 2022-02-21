@@ -245,10 +245,10 @@ Use the 'time Z.ZZZ' option if the delay introduced by decoding of serial messag
     to reconfigure the receiver at startup.
 
 
-== Initial Setup and Testing for ACI III Receivers
-1.  Read the xref:ACE[ACI III] notes.
+== Initial Setup and Testing for ACE III Receivers
+1.  Read the xref:ACE[ACE III] notes.
 2.  Place the GPS antenna outdoors, with a clear view of the sky for best
-    results -- ACI III is not very good at tracking weak signals.
+    results -- ACE III is not very good at tracking weak signals.
 3.  Power up and allow the receiver to obtain UTC offset data. This can take
     13 to 30 minutes.
 4.  Configure the serial I/O port and its xref:sym[symbolic link] on the host.
