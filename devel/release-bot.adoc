@@ -1,0 +1,66 @@
+= Abusing the release 'bot
+
+. Decide that it is time to cut a release. This decision can be driven
+by landing a significant new feature, landing a critical fix, or just
+that enough time has passed with ongoing improvements and fixes.
+
+. Email a warning message to the mailto:devel@ntpsec.org list, and ask
+the major contributors to chime in, and to each ensure that the …​/NEWS
+file and the …​/devel/TODO file are up to date.
+
+. Wait for the contributors to answer and for the discussion to settle
+down. If the discussion suggests that now is not a good time to cut a
+release, wait until the raised issues are resolved.
+
+. Check with the CI build bot reports, assure that there are no unplanned
+regressions on the supported platforms.
+
+***
+
+. Hit the local branch with ClF_3... j/k hard cleaning and restore.
+
+. Put data into the state of the release builder by editing the file.
+  The following might be included. Also, edit the known_hosts file!
++
+....
+.Keys you would need
+* a GPG key to sign tarball, checksums, commits, tags whatever.
+* an SSH key to push tags to GitLab, also the blog post. `Horace`
+* an SSH key to push release object to service1 in Oregon. `Helena`
+* a GitLab API token to shim the release into shape attaching dist files
+* ~~Fingerprints for Helena and Horace.~~
+....
++
+....
+.There may be other things you want.
+* The version number, d'oh.
+* An external directory for Blog post mockup.
+* I do not know what else though...
+....
+
+. Fire up the release builder.
++
+....
+.The steps release-bot takes while setting checkpoints along the way.
+* Set echo and bail options.
+* git checkout current trunk head as detached.
+* Bump `~/Version`, `~/NEWS.adoc`, and `~/PIVOT.h` indicating release.
+* Generates an archive with all of that using devel/make-tarball
+* Wait until make-tarball induced build stops
+* Generate Mock post in outside directory templated from the previous head.
+* Commits and tags the changes.
+* Edit NEWS.adoc to add new development head.
+* commit that change.
+* Load secrets into keychain
+* Checksumming and Signing of dist archive(s)
+* Sign commits
+* push the release files to Oregon
+* Push the commits to GitLab.
+* kill family of keychain.
+* Git checkout trunk to the current head.
+* use curl for templated API call(s) to GitLab to form release record.
+....
+
+***
+
+. Push posts to blog and other socials.
