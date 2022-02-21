@@ -778,6 +778,9 @@ int main(int argc, char **argv) {
                    comment="Enable MS-SNTP extensions "
                    " https://msdn.microsoft.com/en-us/library/cc212930.aspx")
 
+    if ctx.options.enable_attic:
+        ctx.env.ENABLE_ATTIC = True
+
     if ctx.options.disable_nts:
         ctx.env.DISABLE_NTS = True
         ctx.define("DISABLE_NTS", 1,
@@ -1065,7 +1068,8 @@ def build(ctx):
     ctx.recurse("ntpfrob")
     ctx.recurse("ntptime")
     ctx.recurse("pylib")
-    ctx.recurse("attic")
+    if ctx.env.ENABLE_ATTIC:
+      ctx.recurse("attic")
     ctx.recurse("etc")
     ctx.recurse("tests")
 

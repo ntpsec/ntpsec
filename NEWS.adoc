@@ -12,6 +12,8 @@ on user-visible changes.
 
 == Reposatory Head ==
 
+Add --enable-attic (default off)
+
 Works with OpenSSL 3.0
 
 Fix hash validation in ntpleapfetch again.
