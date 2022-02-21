@@ -1179,6 +1179,13 @@ def linkcheck(ctx):
     "Report references without anchors in the documentation."
     ctx.exec_command("devel/linkcheck docs/")
 
+
+def dist(fil):
+    fil.base_name = repo_version(fil)
+
+
+def distcheck(fil):
+    fil.base_name = repo_version(fil)
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
