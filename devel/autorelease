@@ -1,38 +1,150 @@
 #! /usr/bin/env sh
 
-### Given the following
-V="1.2.1+61"
-KEY="69D1AAE20C7293813340FD812366A9A061CBFD54"
+V="1.2.1+65"
+BLOGDIR="/home/jamesb/ntpsec-blog/_posts/"
+FLAG_CONFIG="--refclock=all --enable-doc -p --alltests --check"
+FLAG_BUILD="-ppvj1"
+GPGKEY="69D1AAE20C7293813340FD812366A9A061CBFD54"
+
+#GITLABKEY="id_gitlab"
+#DESTKEY="id_jamesb192"
+#GITLAB_TOKEN="20C7293813340FD812"
+#GITLAB_PROJECT="553594"
+#DEST="ubuntu@www.jamesb.com:/var/www/html/ftp/"
+
+# No User Serviceable Parts Inside
+TAG="$(echo $V|sed 's|[\.-\+]|_|g')"
+TAR="ntpsec-${V}"
+
+set -e -x
+
+[ -z "${STEP}" ] && STEP=1
+
+if [ "${STEP}" -eq "1" ]; then
+        apt-get update;
+        apt-get install -y asciidoctor bison build-essential git \
+            libavahi-compat-libdnssd-dev libcap-dev libseccomp-dev \
+            libssl-dev pps-tools python-dev-is-python3 python-is-python3;
+        STEP=2;
+fi
+
+if [ "${STEP}" -eq "2" ]; then
+        git clone https://gitlab.com/NTPsec/ntpsec;
+        STEP=3;
+fi
 
 
-DST=jamesb@www.jamesb192.com:/var/www/scrap/html/releases/
-UV=$(echo $V|sed 's|[-\-]|_|g')
+(cd ntpsec;
 
+if [ "${STEP}" -eq "3" ]; then
+        sed -r "1s|[0123456789]+$|$(date '+%s')|" -i PIVOT.h;
+        echo "${V}" > VERSION;
+        sed "0,/^== .*/s/^== .*/== $(date -u \+%Y-%m-%d): ${V}  ==/" \
+            -i NEWS.adoc;
+        git add NEWS.adoc PIVOT.h VERSION;
+        STEP=4;
+fi
 
+if [ "${STEP}" -eq "4" ]; then
+        ./waf configure $FLAG_CONFIG;
+        ./waf build $FLAG_BUILD;
+        STEP=5;
+fi
 
-sed "0,/^== .*/{s/^== .*/== `date -u \+%Y-%m-%d`: ${V} ==/}" -i NEWS.adoc
+if [ "${STEP}" -eq "5" ]; then
 
-(cd devel&&./make-tarball)
+#sh make-tarball
+        (find build -type f |sed -n "/\.[0-9]$/p;/\.html$/p";
+            git ls-files |sed "/^\./d") |sort > "devel/MANIFEST";
+        tar --transform="s:^:ntpsec-${V}/:Sr" -T "devel/MANIFEST" \
+            -czf "${TAR}.tar";
+        bzip2 -c "${TAR}.tar" > "${TAR}.tar.bz2";
+        rm devel/MANIFEST;
+        STEP=6;
+fi
 
+if [ "${STEP}" -eq "6" ]; then
+        tar -xpvf "${TAR}.tar";
+        (cd "${TAR}";
+            ./waf configure $FLAG_CONFIG;
+            ./waf build $FLAG_BUILD);
+        rm -rf "${TAR}".tar "$TAR";
+        STEP=7;
+fi
 
+if [ "${STEP}" -eq "7" ]; then
+        BLURB=$(sed -n "0,/^==/d;0,/^==/{/^==/d;p}" < NEWS.adoc);
+        #echo ${BLURB};
+        cat - >"${BLOGDIR}/$(date -u '+%Y-%m-%d')-${TAR}.adoc" <<EEND;
+---
+layout: post
+title:  "Version ${V}"
+date:   $(date -uIsec)
+---
+== version ${V}
 
-keychain --agents pgp,ssh id_gitlab id_service ${KEY}
-### BEGIN -- stuff swiped from ~/devel/release
-git commit -S${KEY} -a -s -m 'version ${V}'
-git tag -u ${KEY} -m 'version ${V}' NTPsec_${UV}
-sed '0,/^== .*/s/^== .*/== Repository Head ==\n\n&/' -i NEWS.adoc
-git add NEWS.adoc
-git commit -S${KEY} -a -s -m 'start new NEWS.adoc section'
-git push
-git push --tags
+The NTPsec Project is pleased to announce the tagging of version ${V}
 
-gpg -u ${KEY} -a --output ${TAR}.asc --detach-sign ${TAR}
-shasum -a 256 ${TAR} >${TAR}.sum
-gpg -u ${KEY} -a --output ${TAR}.sum.asc --clearsign ${TAR}.sum
-scp ntpsec-${V}.tar* ${DST}
-### END -- stuff swiped from ~/devel/release
+${BLURB}
 
-keychain -k mine
-curl --header "PRIVATE-TOKEN: ${cookie}" --header 'Content-Type: application/json' --request PUT --data '{"released_at":"${gitlogtime}"}' "https://gitlab.com/api/v4/projects/${PROJ}/releases/${tag}"
-git clean -dxf
-git reset --hard
+For other changes since the previous release, please consult
+the project NEWS.adoc file at 
+https://gitlab.com/NTPsec/ntpsec/-/blob/master/NEWS.adoc
+
+== Getting this release
+
+You can clone the git repo from 
+https://gitlab.com/NTPsec/ntpsec.git
+and you can download the release tarballs with sums and signatures from 
+ftp://ftp.ntpsec.org/pub/releases/
+
+This release is signed with the GPG key id
+${GPGKEY}
+EEND
+        STEP=8;
+fi
+
+if [ "${STEP}" -eq "8" ]; then
+        keychain ${GPGKEY};
+        git commit -S${GPGKEY} -a -s -m "version ${V}"
+        git tag -u ${GPGKEY} -m "version ${V}" "${TAG}";
+
+        sed "0,/^== .*/s/^== .*/== Repository Head ==\n\n&/" -i NEWS.adoc;
+
+        git add NEWS.adoc;
+        git commit -S${GPGKEY} -a -s -m "start new NEWS.adoc section";
+
+        BLOB="${TAR}.tar.bz2";
+        gpg -u ${GPGKEY} -a --output ${BLOB}.asc \
+            --detach-sign ${BLOB};
+        shasum -a 256 ${BLOB} >${BLOB}.sum;
+        gpg -u ${GPGKEY} -a --output ${BLOB}.sum.asc \
+            --detach-sign ${BLOB}.sum;
+        keychain -k mine
+        STEP=9;
+fi
+
+if [ "${STEP}" -eq "10" ]; then
+        keychain "${DESTKEY}" "${GITLABKEY}";
+        scp devel/${TAR}.tar* "${DEST}";
+        git push origin master --tags;
+        curl \
+            --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}"\
+            --header "Content-Type: application/json"\
+            --data "{
+                \"released_at\":\"$(git log -2 --pretty=%cI|tail -n 1)\",
+                \"name\":\"${V}\",
+                \"tag_name\":\"${UV}\",
+                \"description\":\"${BLURB}\"
+            }" --request POST \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/releases"
+        keychain -k mine
+        STEP=11;
+fi
+
+if [ "${STEP}" -eq "11" ]; then
+        git clean -dxf;
+        git reset --hard;
+        git checkout -B master;
+fi
+)
