@@ -39,7 +39,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname);
 struct addrinfo * find_best_addr(struct addrinfo *answer);
 bool connect_TCP_socket(int sockfd, struct addrinfo *addr);
 bool nts_set_cert_search(SSL_CTX *ctx, const char *filename);
-void set_hostname(SSL *ssl, struct peer *peer, const char *hostname);
+void set_hostname(SSL *ssl, const char *hostname);
 bool check_certificate(SSL *ssl, struct peer *peer);
 bool check_alpn(SSL *ssl, struct peer *peer, const char *hostname);
 bool nts_client_send_request(SSL *ssl, struct peer *peer);
@@ -123,7 +123,7 @@ bool nts_probe(struct peer * peer) {
 		ssl = SSL_new(ctx);
 		SSL_CTX_free(ctx);
 	}
-	set_hostname(ssl, peer, hostname);
+	set_hostname(ssl, hostname);
 	SSL_set_fd(ssl, server);
 
 	if (1 != SSL_connect(ssl)) {
@@ -386,7 +386,7 @@ bool connect_TCP_socket(int sockfd, struct addrinfo *addr) {
 }
 
 
-void set_hostname(SSL *ssl, struct peer *peer, const char *hostname) {
+void set_hostname(SSL *ssl, const char *hostname) {
 	char host[256], *tmp;
 
 	/* chop off trailing :port */
@@ -401,7 +401,6 @@ void set_hostname(SSL *ssl, struct peer *peer, const char *hostname) {
 	}
 
 // https://wiki.openssl.org/index.php/Hostname_validation
-	UNUSED_ARG(peer);
 	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
 	SSL_set1_host(ssl, host);
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
