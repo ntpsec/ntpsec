@@ -159,14 +159,28 @@ class GpsPoller(threading.Thread):
                 self.running = False
                 break
             if hasattr(self.gpsd, "data"):
-                if self.gpsd.data.get("class") == "SKY":
-                    self.satellites_used = 0
-                    self.tdop = self.gpsd.data.get("tdop", 0)
-                    for sat in self.gpsd.data.get("satellites", []):
-                        if sat["used"]:
-                            self.satellites_used += 1
-                elif self.gpsd.data.get("class") == "TPV":
-                    self.device = self.gpsd.data.get("device")
+                if self.gpsd.data.get("class", None) == "SKY":
+                    satellite_list = self.gpsd.data.get(
+                        "satellites", None
+                    )
+                    if satellite_list is not None:
+                        count_used_satellites = sum(
+                            map(lambda x: x.used, satellite_list)
+                        )
+                    time_dilution = self.gpsd.data.get("tdop", None)
+                    device_path = self.gpsd.data.get("device", None)
+                    if count_used_satellites is None:
+                        count_used_satellites = self.gpsd.data.get(
+                            "uSat", None
+                        )
+                    if None not in [
+                        count_used_satellites,
+                        time_dilution,
+                        device_path,
+                    ]:
+                        self.satellites_used = count_used_satellites
+                        self.tdop = time_dilution
+                        self.device = device_path
 
     @property
     def time(self):
