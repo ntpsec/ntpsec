@@ -108,6 +108,12 @@ TEST(nts_client, nts_client_process_response_core) {
 	peer.nts_state.cookielen = 0;
 	peer.nts_state.writeIdx = 0;
 	peer.nts_state.count = 0;
+	/* Coverity barfed on uninitialized peer.srcadr, 2022-Mar-16
+	 * ** CID 349664:  Uninitialized variables  (UNINIT)
+	 * So initialize it with something. */
+	peer.srcadr.sa4.sin_family = AF_INET;
+	peer.srcadr.sa4.sin_port = htons(9999);
+	peer.srcadr.sa4.sin_addr.s_addr= htonl(0x04030201);
 	/* ===== Test: all correct ===== */
 	/* data */
 	uint8_t buf0[] = {
