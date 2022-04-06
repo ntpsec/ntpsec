@@ -32,14 +32,21 @@ NTS is a method for using TLS/SSL to authenticate NTP traffic on the net.
 That means that bad guys can't forge packets that will give your
 system bogus time.
 
-The RFC hasn't been published yet (August 2020).  Nothing has changed
-recently, but there may be minor adjustments when it is finalized.
+It is specified in RFC 8915, published in September 2020.
 
-Note: The NTP Pool does not currently support NTS.
+Note: The https://www.ntppool.org/[NTP Pool] does not currently support NTS.
 
 It is strongly suggested that you get a "normal", unauthenticated,
 NTP server working before enabling NTS.  This may reduce the time
 spent debugging.  See the link:quick.adoc[Client Quick Start Guide].
+
+While ntpsec already supported NTS as RFC 8915 still was in the draft
+phase, there unfortunately were incompatible changes introduced shortly
+before it was published. As a result, while ntpsec-versions before 1.2.0
+do in principle support NTS, they cannot talk to any NTS servers or
+clients that implement the final RFC, which includes ntpsec-versions from
+1.2.0 onwards. 1.2.0 is the first version of ntpsec to fully support NTS
+as specified in RFC 8915.
 
 [[client]]
 == NTS Client Configuration
@@ -53,7 +60,8 @@ Public NTP servers supporting NTS:
 
 ------------------------------------------------------------
 server time.cloudflare.com nts     # Global, anycast
-server nts.ntp.se:4443 nts         # Sweden
+server nts.ntp.se nts              # Sweden
+server nts.ntp.se:4443 nts         # Sweden: only for ntpsec <1.2.0
 ------------------------------------------------------------
 
 These are development machines, so there may be gaps in availability:
