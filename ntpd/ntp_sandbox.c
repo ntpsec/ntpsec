@@ -366,6 +366,9 @@ int scmp_sc[] = {
 	SCMP_SYS(rt_sigaction),
 	SCMP_SYS(rt_sigprocmask),
 	SCMP_SYS(rt_sigreturn),
+#ifdef __NR_rseq
+	SCMP_SYS(rseq),		/* needed by glibc-2.35+ for resumable sequences */
+#endif
 	SCMP_SYS(sigaction),
 	SCMP_SYS(sigprocmask),
 	SCMP_SYS(sigreturn),
