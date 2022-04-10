@@ -1131,6 +1131,7 @@ def build(ctx):
     ctx.manpage(8, "ntpclients/ntpsnmpd-man.adoc")
 
     # Skip running unit tests on a cross compile build
+    from waflib import Options
     if not ctx.env.ENABLE_CROSS:
         # Force re-running of tests.  Same as 'waf --alltests'
         if ctx.cmd == "check":
@@ -1139,6 +1140,8 @@ def build(ctx):
             # Print log if -v is supplied
             if verbose > 0:
                 ctx.add_post_fun(test_print_log)
+        elif Options.options.no_tests:
+            return
 
         # Test binaries
         ctx.add_post_fun(bin_test)
@@ -1152,7 +1155,6 @@ def build(ctx):
         ctx.add_post_fun(bin_test_summary)
     else:
         pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
-        from waflib import Options
         Options.options.no_tests = True
 
     if ctx.cmd == "build":
