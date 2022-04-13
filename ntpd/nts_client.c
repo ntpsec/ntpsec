@@ -401,10 +401,11 @@ void set_hostname(SSL *ssl, const char *hostname) {
 	}
 
 /* https://wiki.openssl.org/index.php/Hostname_validation
- * Wildcards are deprecated by RFC 6125
- * https://datatracker.ietf.org/doc/html/rfc6125#section-7.2
+ * draft-ietf-uta-rfc6125bis section 3 relaxes the restrictions around the use
+ * of wildcards to make it clear that they're permitted unless specifically
+ * prohibited in an RFC
  */
-	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_WILDCARDS);
+	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
 	SSL_set1_host(ssl, host);
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 
