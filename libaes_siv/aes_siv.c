@@ -2,6 +2,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* Hack to supress a blizzard of warnings when built on OpenSSL 3
+ * Drop this patch when upstream is fixed. */
+#define OPENSSL_SUPPRESS_DEPRECATED 1
+
 #define _POSIX_C_SOURCE 200112L
 #define _ISOC99_SOURCE 1
 
