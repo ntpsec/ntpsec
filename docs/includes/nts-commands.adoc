@@ -9,7 +9,12 @@ normal TLS protocol negotiation, which is not usually necessary.
 The options are as follows:
 
 +cert+ _file_::
-  Present the certificate in _file_ as our certificate.
+  Present the certificate (chain) in _file_ as our certificate.
+  +
+  Note that there is no checking on the certificate.
+  In particular, it may have expired or may not cover the host name
+  used to get to this server or may not be signed by a CA that
+  is in the clients root-server collection.
 
 +key+ _file_::
   Read the private key to our certificate from _file_.
