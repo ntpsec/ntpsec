@@ -8,6 +8,15 @@ It also works for testing 3.0.1
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
 
+FreeBSD 13.0 has OpenSSL 3.0.2 available as a package.
+You can just install it and ignore the rest of this note.
+  sudo pkg update
+  sudo pkg install openssl-devel-3.0.2
+openssl-devel-3.0.2            TLSv1.3 capable SSL and crypto library
+
+
+
+
 Download OpenSSL source from here:
   https://www.openssl.org/source/
   https://www.openssl.org/source/old/1.1.1/
