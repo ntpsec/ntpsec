@@ -316,7 +316,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 
 struct addrinfo *find_best_addr(struct addrinfo *answer) {
 	/* default to first one */
-        return(answer);
+	return(answer);
 }
 
 
@@ -327,7 +327,7 @@ struct addrinfo *find_best_addr(struct addrinfo *answer) {
  */
 bool connect_TCP_socket(int sockfd, struct addrinfo *addr) {
 	char errbuf[100];
-        int err;
+	int err;
 	fd_set fdset;
 	struct timeval timeout;
 	int so_error;
@@ -369,7 +369,7 @@ bool connect_TCP_socket(int sockfd, struct addrinfo *addr) {
 		return false;
 	}
 
-        if (0 != so_error) {
+	if (0 != so_error) {
 		ntp_strerror_r(so_error, errbuf, sizeof(errbuf));
 		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: connect failed: %s", errbuf);
 		return false;
@@ -413,35 +413,69 @@ void set_hostname(SSL *ssl, const char *hostname) {
 
 bool check_certificate(SSL *ssl, struct peer* peer) {
 	X509 *cert = SSL_get_peer_certificate(ssl);
+	X509_NAME *certname;
+	GENERAL_NAMES *gens;
+	char name[200];
+	int certok;
+	int numgens = 0;
 
 	if (NULL == cert) {
 		msyslog(LOG_INFO, "NTSc: No certificate");
 		if (!(FLAG_NTS_NOVAL & peer->cfg.flags))
 			return false;
 		return true;
+	}
+
+	certname = X509_get_subject_name(cert);
+	X509_NAME_oneline(certname, name, sizeof(name));
+	msyslog(LOG_INFO, "NTSc: certificate subject name: %s", name);
+	certname = X509_get_issuer_name(cert);
+	X509_NAME_oneline(certname, name, sizeof(name));
+	msyslog(LOG_INFO, "NTSc: certificate issuer name: %s", name);
+	/* print SAN:DNS strings */
+	gens = X509_get_ext_d2i(cert, NID_subject_alt_name, 0, 0);
+	if (gens) {
+	  char buff[150];
+	  numgens = sk_GENERAL_NAME_num(gens);
+	  buff[0] = 0;
+	  for (int i = 0; i<numgens; i++) {
+	    const GENERAL_NAME *gen;
+	    const char *dnsname;
+	    unsigned int len;
+	    gen = sk_GENERAL_NAME_value(gens, i);
+	    if (gen->type != GEN_DNS)
+	      continue;
+	    // string is NUL terminated but may have internal NULs
+	    len = (unsigned int)ASN1_STRING_length(gen->d.ia5);
+	    dnsname = (const char *)ASN1_STRING_get0_data(gen->d.ia5);
+	    if (0 != buff[0])
+	      strlcat(buff, ", ", sizeof(buff));
+	    strlcat(buff, dnsname, sizeof(buff));
+	    if (len != strlen(dnsname))
+	      strlcat(buff, "??", sizeof(buff));
+	  }
+	  msyslog(LOG_INFO, "NTSc: SAN:DNS %s", buff);
+	  GENERAL_NAMES_free(gens);
+	}
+	if (0 == numgens) {
+	  const char *peername = SSL_get0_peername(ssl);
+	  msyslog(LOG_INFO, "NTSc: matching with subject:CN %s", peername);
+	} else if (1 > numgens) {
+	  const char *peername = SSL_get0_peername(ssl);
+	  msyslog(LOG_INFO, "NTSc: matching with SAN:DNS: %s", peername);
+	}
+	X509_free(cert);
+	certok = SSL_get_verify_result(ssl);
+	if (X509_V_OK == certok) {
+		msyslog(LOG_INFO, "NTSc: certificate is valid.");
 	} else {
-		X509_NAME *certname;
-		char name[200];
-		int certok;
-		certname = X509_get_subject_name(cert);
-		X509_NAME_oneline(certname, name, sizeof(name));
-		msyslog(LOG_INFO, "NTSc: certificate subject name: %s", name);
-		certname = X509_get_issuer_name(cert);
-		X509_NAME_oneline(certname, name, sizeof(name));
-		msyslog(LOG_INFO, "NTSc: certificate issuer name: %s", name);
-		X509_free(cert);
-		certok = SSL_get_verify_result(ssl);
-		if (X509_V_OK == certok) {
-			msyslog(LOG_INFO, "NTSc: certificate is valid.");
-		} else {
-			msyslog(LOG_ERR, "NTSc: certificate invalid: %d=>%s",
-				certok, X509_verify_cert_error_string(certok));
-			if (FLAG_NTS_NOVAL & peer->cfg.flags) {
-				msyslog(LOG_INFO, "NTSc: noval - accepting invalid cert.");
-				return true;
-			}
-			return false;
+		msyslog(LOG_ERR, "NTSc: certificate invalid: %d=>%s",
+			certok, X509_verify_cert_error_string(certok));
+		if (FLAG_NTS_NOVAL & peer->cfg.flags) {
+			msyslog(LOG_INFO, "NTSc: noval - accepting invalid cert.");
+			return true;
 		}
+		return false;
 	}
 	return true;
 }
