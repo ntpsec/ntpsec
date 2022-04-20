@@ -75,7 +75,7 @@ while True:
     delta = temp_gate - temp
     if 0 < delta:
         # heat it up
-        m.update("Nobody inspects the spammish repetition")
+        m.update("Nobody inspects the spammish repetition".encode('utf-8'))
     else:
         cnt = max_cnt
         # cools off slower than it heats up.
