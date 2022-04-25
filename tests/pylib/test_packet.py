@@ -2115,19 +2115,6 @@ class TestAuthenticator(unittest.TestCase):
         self.assertEqual(cls.verify_mac(ntp.poly.polybytes(
             ntp.util.hexstr2octets(bad_pkt)), packet_end=48, mac_begin=48), False)
 
-    def test_nul_trunc(self):
-        k_type = "aria-128"
-        key = ntp.util.hexstr2octets("74a98aedbd555de8016bc61bd3030a5e")
-        sample = ntp.util.hexstr2octets("240100eb000000000000005050505300" + \
-            "e60c1ccd1a87cb02e60c1cc930725000" + \
-            "e60c1cdc4fc6d5bde60c1cdc4fd93178" + \
-            "0000006eb30b6d000cdb7aee4a5e15a1" + \
-            "607ba83d")
-        len2, mac = ntp.ntpc.mac(ntp.poly.polybytes(sample[:48]),
-                            ntp.poly.polybytes(key), k_type)
-        mac1 = ntp.poly.polybytes(sample[52:])
-        mac2 = mac[:len2]
-        self.assertEqual([len(mac1), mac1], [len(mac2), mac2], 'nulltrunc')
 
 if __name__ == "__main__":
     unittest.main()

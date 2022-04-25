@@ -1746,9 +1746,9 @@ class Authenticator:
         'Create the authentication payload to send'
         if not ntp.ntpc.checkname(keytype):
             return False
-        rlen, mac2 = ntp.ntpc.mac(payload, passwd, keytype)
-        mac2 = mac2[:min(len(passwd),MAX_BARE_MAC_LENGTH)]
-        if not (mac2 and len(mac2) in (16, 20)):
+        mac2 = ntp.ntpc.mac(ntp.poly.polybytes(payload),
+                            ntp.poly.polybytes(passwd), keytype)
+        if not mac2 or len(mac2) == 0:
             return b''
         return struct.pack("!I", keyid) + mac2
 
@@ -1772,11 +1772,9 @@ class Authenticator:
         (keytype, passwd) = self.passwords[keyid]
         if not ntp.ntpc.checkname(keytype):
             return False
-        len2, mac2 = ntp.ntpc.mac(payload, passwd, keytype)
-        mac2 = mac2[:min(len2,MAX_BARE_MAC_LENGTH)] # clip to current standard
-        mac2 = bytes(mac2)
-        len2 = len(mac2)
-        if not mac2 or len2 != len(mac):
+        mac2 = ntp.ntpc.mac(ntp.poly.polybytes(payload),
+                            ntp.poly.polybytes(passwd), keytype)
+        if not mac2:
             return False
         # typically preferred to avoid timing attacks client-side (in theory)
         try:
