@@ -76,14 +76,14 @@ def checkname(name):
 def mac(data, key, name):
     """Compute HMAC or CMAC from data, key, and algorithm name."""
     resultlen = ctypes.c_size_t()
-    result = (ctypes.c_char * 64)()
+    result = (ctypes.c_ubyte * 64)()
     result.value = b'\0' * 64
     _ntpc.do_mac.restype = None
     _ntpc.do_mac(ntp.poly.polybytes(name),
                  ntp.poly.polybytes(data), len(data),
                  ntp.poly.polybytes(key), len(key),
                  ctypes.byref(result), ctypes.byref(resultlen))
-    return result.value
+    return ntp.poly.polybytes(bytearray(result)[:resultlen.value])
 
 
 def setprogname(in_string):
