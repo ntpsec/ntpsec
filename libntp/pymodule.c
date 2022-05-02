@@ -198,11 +198,11 @@ ntpc_mac(PyObject *self, PyObject *args)
 
 	do_mac(name,
 		data, datalen,
-      		key, keylen,
- 	        mac, &maclen);
+		key, keylen,
+		mac, &maclen);
 
 	if (maclen == 0)
-                Py_RETURN_NONE;
+		Py_RETURN_NONE;
 	
 #if PY_MAJOR_VERSION >= 3
 	return Py_BuildValue("y#", &mac, maclen);
@@ -214,23 +214,23 @@ ntpc_mac(PyObject *self, PyObject *args)
 /* List of functions defined in the module */
 
 static PyMethodDef ntpc_methods[] = {
-    {"setprogname",    ntpc_setprogname,  	METH_VARARGS,
-     PyDoc_STR("Set program name for logging purposes.")},
-    {"statustoa",      	ntpc_statustoa,  	METH_VARARGS,
-     PyDoc_STR("Status string display from peer status word.")},
-    {"prettydate",     	ntpc_prettydate,  	METH_VARARGS,
-     PyDoc_STR("Convert a time stamp to something readable.")},
-    {"lfptofloat",     	ntpc_lfptofloat,  	METH_VARARGS,
-     PyDoc_STR("NTP l_fp to Python-style float time.")},
-    {"adj_systime",    	ntpc_adj_systime,   	METH_VARARGS,
-     PyDoc_STR("Adjust system time by slewing.")},
-    {"step_systime",    ntpc_step_systime,   	METH_VARARGS,
-     PyDoc_STR("Adjust system time by stepping.")},
-    {"checkname",       ntpc_checkname,   	METH_VARARGS,
-     PyDoc_STR("Check if name is a valid algorithm name")},
-    {"mac",             ntpc_mac,   		METH_VARARGS,
-     PyDoc_STR("Compute HMAC or CMAC from data, key, and algorithm name")},
-    {NULL,		NULL, 0, NULL}		/* sentinel */
+	{"setprogname",		ntpc_setprogname,	METH_VARARGS,
+	 PyDoc_STR("Set program name for logging purposes.")},
+	{"statustoa",		ntpc_statustoa,		METH_VARARGS,
+	 PyDoc_STR("Status string display from peer status word.")},
+	{"prettydate",		ntpc_prettydate,	METH_VARARGS,
+	 PyDoc_STR("Convert a time stamp to something readable.")},
+	{"lfptofloat",		ntpc_lfptofloat,	METH_VARARGS,
+	 PyDoc_STR("NTP l_fp to Python-style float time.")},
+	{"adj_systime",		ntpc_adj_systime,	METH_VARARGS,
+	 PyDoc_STR("Adjust system time by slewing.")},
+	{"step_systime",	ntpc_step_systime,	METH_VARARGS,
+	 PyDoc_STR("Adjust system time by stepping.")},
+	{"checkname",		ntpc_checkname,		METH_VARARGS,
+	 PyDoc_STR("Check if name is a valid algorithm name")},
+	{"mac",			ntpc_mac,		METH_VARARGS,
+	 PyDoc_STR("Compute HMAC or CMAC from data, key, and algorithm name")},
+	{NULL,			NULL, 0, NULL}		/* sentinel */
 };
 
 PyDoc_STRVAR(module_doc,
@@ -249,8 +249,8 @@ NTPSEC_PY_MODULE_INIT(ntpc)
 	/* Create the module and add the functions */
 	NTPSEC_PY_MODULE_DEF(m, "ntpc", module_doc, ntpc_methods)
 
-	    /* for statustoa() */
-	    PyModule_AddIntConstant(m, "TYPE_SYS", TYPE_SYS);
+	/* for statustoa() */
+	PyModule_AddIntConstant(m, "TYPE_SYS", TYPE_SYS);
 	PyModule_AddIntConstant(m, "TYPE_PEER", TYPE_PEER);
 	PyModule_AddIntConstant(m, "TYPE_CLOCK", TYPE_CLOCK);
 
