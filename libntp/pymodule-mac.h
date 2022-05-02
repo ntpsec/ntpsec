@@ -10,8 +10,8 @@
 #ifndef GUARD_PYMODULE_MAC_H
 #define GUARD_PYMODULE_MAC_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /* can't include Python.h or anything from openssl */
 
