@@ -25,7 +25,7 @@ const int packetLength = 16;
 const int keyIdLength = 4;
 const int digestLength = 16;
 
-/* Need #define to avoie VLA (variable length array) */
+/* Need #define to avoid VLA (variable length array) */
 #define totalLength 36
 
 char expectedMD5Packet[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
