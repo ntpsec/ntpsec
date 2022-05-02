@@ -29,8 +29,8 @@
 #define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
 #endif
 
-/* Needed on old versions of OpenSSL */
-static void SSL_init(void) {
+/* Needed on OpenSSL < 1.1.0 */
+static void init_ssl(void) {
 	static bool init_done = false;
 	if (init_done)
 		return;
@@ -48,7 +48,7 @@ int do_checkname(const char *name)
 	const EVP_MD *digest;
 	const EVP_CIPHER *cipher;
 
-	SSL_init();
+	init_ssl();
 
         strlcpy(upcase, name, sizeof(upcase));
 	for (int i=0; upcase[i]!=0; i++) {
@@ -94,7 +94,7 @@ void do_mac(char *name,
 	size_t cipherlen;
 	uint8_t newkey[EVP_MAX_KEY_LENGTH];
 
-	SSL_init();
+	init_ssl();
 
         strlcpy(upcase, name, sizeof(upcase));
 	for (int i=0; upcase[i]!=0; i++) {
