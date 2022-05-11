@@ -107,7 +107,7 @@ class CpuTemp:
             self.has_sensors = False
             if args.verbose:
                 sys.stderr.write("No sensors returned temperatures. ",
-                                 "Have you run sensors-detect?")
+                                 "Have you run sensors-detect?\n")
 
         return _data
 
@@ -308,11 +308,10 @@ def log_data():
 
 args = parser.parse_args()
 if os.getuid():
-    sys.stderr.write("You must be root!")
+    sys.stderr.write("You must be root!\n")
     sys.exit(1)
 
 try:
     log_data()
-except (KeyboardInterrupt, SystemExit):
+except KeyboardInterrupt:
     print("")    # be nice to bash
-    sys.exit(0)
