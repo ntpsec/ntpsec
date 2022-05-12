@@ -67,27 +67,14 @@ macos-options-tester:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
-fbsd-11-options-tester:
+freebsd-options-tester:
   stage: test
   needs: []
   script:
     - PYTHON=python2.7 tests/option-tester.sh
     - PYTHON=python3 tests/option-tester.sh
   tags:
-    - freebsd-11
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-      when: never
-    - when: never
-
-fbsd-12-options-tester:
-  stage: test
-  needs: []
-  script:
-    - PYTHON=python2.7 tests/option-tester.sh
-    - PYTHON=python3 tests/option-tester.sh
-  tags:
-    - freebsd-11
+    - freebsd
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
       when: never

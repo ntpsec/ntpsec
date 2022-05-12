@@ -211,29 +211,7 @@ ubuntu-rolling-refclocks:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
-freebsd-11-basic:
-  <<: *job_definition
-  script:
-    - python ./waf configure --disable-doc --disable-manpage --disable-nts build
-    - DESTDIR=build/prison python ./waf install
-    - DESTDIR=./prison python ./waf install
-    - DESTDIR=../prison python ./waf install
-    - rm -rvf build/prison ./prison ../prison
-  tags:
-    - freebsd-11
-  rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-
-freebsd-11-refclocks:
-  <<: *job_definition
-  script:
-    - python ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
-  tags:
-    - freebsd-11
-  rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-
-freebsd-12-basic:
+freebsd-basic:
   <<: *job_definition
   script:
     - python ./waf configure --disable-doc --disable-manpage build
@@ -242,16 +220,16 @@ freebsd-12-basic:
     - DESTDIR=../prison python ./waf install
     - rm -rvf build/prison ./prison ../prison
   tags:
-    - freebsd-12
+    - freebsd
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
-freebsd-12-refclocks:
+freebsd-refclocks:
   <<: *job_definition
   script:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
   tags:
-    - freebsd-12
+    - freebsd
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
