@@ -230,7 +230,7 @@ TEST(lfpfunc, Absolute) {
 	TEST_ASSERT_EQUAL(-1, l_fp_signum(minVal));
 
 	l_fp minAbs = l_fp_abs(minVal);
-	TEST_ASSERT_EQUAL(minVal, minAbs);
+	TEST_ASSERT_EQUAL_UINT64(minVal, minAbs);
 
 	return;
 }
