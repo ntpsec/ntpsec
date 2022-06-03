@@ -23,7 +23,7 @@ include:
   - template: SAST.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
   - local: '.gitlab-opttest-ci.yml'
-  - local: '.gitlab-ci-docker-images.yml'
+  - local: '.gitlab-docker-ci.yml'
 
 .job_template: &job_definition
   stage: build
