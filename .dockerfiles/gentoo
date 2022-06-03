@@ -1,4 +1,4 @@
 FROM gentoo/stage3-amd64
 
 RUN emerge-webrsync
-RUN emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools dev-libs/libbsd
+RUN emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
