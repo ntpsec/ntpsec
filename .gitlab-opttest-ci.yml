@@ -43,14 +43,14 @@ opensuse-leap-options-tester:
 
 gentoo-options-tester:
   <<: *option_tester
-  image: gentoo/stage3-amd64
+  image: gentoo/stage3
   script:
     - emerge-webrsync
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools app-text/asciidoc sys-libs/libseccomp app-shells/bash
 
 gentoo-hardened-options-tester:
   <<: *option_tester
-  image: gentoo/stage3-amd64-hardened
+  image: gentoo/stage3:hardened
   script:
     - emerge-webrsync
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools app-text/asciidoc sys-libs/libseccomp app-shells/bash
