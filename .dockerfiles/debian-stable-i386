@@ -1,4 +1,4 @@
-FROM i386/debian:stable-slim
+FROM i386/debian:oldoldstable-slim
 
 RUN apt-get update
 RUN apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python-dev libbsd-dev

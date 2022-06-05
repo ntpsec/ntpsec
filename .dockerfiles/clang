@@ -1,4 +1,4 @@
-FROM debian:testing-slim
+FROM debian:stable
 
 RUN apt-get update
 RUN apt-get install -y netbase bison libssl-dev libcap-dev pps-tools python3-dev libbsd-dev clang

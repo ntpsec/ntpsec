@@ -19,7 +19,6 @@
       --file .dockerfiles/$IMAGE_NAME
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
   allow_failure: true
-  retry: 2
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
