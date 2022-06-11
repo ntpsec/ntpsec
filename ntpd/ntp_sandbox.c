@@ -357,6 +357,7 @@ int scmp_sc[] = {
 	SCMP_SYS(poll),
 	SCMP_SYS(pselect6),
 	SCMP_SYS(read),
+	SCMP_SYS(readv),	/* nscd getaddrinfo() provider */
 	SCMP_SYS(recvfrom),    /* Comment this out for testing.
 				* It will die on the first reply.
 				* (Or maybe sooner if a request arrives.)
