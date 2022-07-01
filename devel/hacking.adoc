@@ -13,6 +13,36 @@ and project conventions.
 You may also find the articles at https://blog.ntpsec.org/
 interesting.
 
+== Software licenses
+
+For historical reasons the code in this distribution is issued under
+several different but compatible licenses.
+
+Refer to .../docs/copyright.txt for more information about copyrights,
+licensing, and contributor attribution.
+
+Much of the existing and historical code is licensed under the NTP
+license.  Additionally, small portions of the code are licensed under
+the BSD-3-clause and MIT licenses.
+
+The preferred license for new code contributions is BSD-2-clause.
+
+The preferred license for documentation is
+"Creative Commons Attribution 4.0 International" (CC-BY-4.0).
+
+License texts are in the .../LICENSES/ directory in compliance with
+the REUSE specificaton.
+
+== Historicity reconstruction of the git repo
+
+A great deal of effort has been spent researching old file archives
+and old source control data sets and then integrating and correcting
+it all into the git history of this repository.  As near as we can
+tell, this git repo contains all of the currently surviving
+history of the NTP reference implementation.  If you know of or
+possess tarballs or source trees of the project that are not contained
+in this git repo, please let us know, so that we can add them.
+
 == Choice of language
 
 In order to reduce the complexity of maintenance and testing
@@ -362,11 +392,11 @@ UTC with some options frozen; full year required, medial T required,
 explicit Zulu timezone). Local times should be expressed in ISO 8601,
 always with the full 4-digit year.
 
-=== Copyrights and licenses
+=== Copyright declarations and license tagging
 
-Much of the historic code in this distribution is under the "NTP
-License" resembling BSD-2-Clause.  Our favored licenses are
-BSD-2-Clause for code and Creative Commons Attribution 4.0 License
+Much of the historic code in this distribution is under the NTP
+license resembling BSD-2-Clause.  Our favored licenses are
+BSD-2-Clause for code and Creative Commons Attribution 4.0 International
 for documentation.
 
 Please do *not* submit code under GPL or other licenses which place
@@ -378,17 +408,17 @@ to contribute a patch to the project.
 Do not specify a year in a copyright statement.  Most of the existing
 copyright statements already present in the project have been scrubbed
 of the year.  There is no need to specify the year in a copyright
-statement.  Several large legally sophisticated companies, include
+statement.  Several large legally sophisticated companies, including
 Amazon, Google, Microsoft, and Facebook, are now publishing open
 source code with copyright statements without a year.  We encourage
 the larger open source community to emulate this.
 
 The string "(c)" is legally meaningless.  Use the word "Copyright".
 
-We use the SPDX convention for inclusion by reference.  You can read
-about this at
+We use SPDX and REUSE to declare and tag licenses.  Refer to
 
       https://spdx.org/licenses
+      https://reuse.software/
 
 When you create a new file, mark it as follows as required:
 

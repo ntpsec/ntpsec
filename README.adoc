@@ -14,11 +14,11 @@ directories and related stuff:
 
 INSTALL.adoc::	Generic installation instructions.
 
-LICENSE.adoc::	Software licensing agreement.
-
 NEWS.adoc::	What's new in this release.
 
 README.adoc::	This file.
+
+LICENSES/::	License texts in REUSE format. See http://reuse.software
 
 VERSION::	The version stamp, to be used by scripts and programs.
 
