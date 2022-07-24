@@ -266,8 +266,13 @@ and implementation.  Following is the current list:
 | +RATE+ | rate exceeded
 | +TIME+ | association timeout
 | +STEP+ | step time change
-| +DNS+  | DNS lookup in progress
-| +NTS+  | NTS key exchange in progress
+| +DNS+  | Waiting for DNS lookup
+| +DNS4+, +DNS6+  | DNS lookup succeeded, no NTP response yet
+| +NTS+  | Waiting for NTS key exchange
+| +NTS4+, +NTS6+  | NTS-KE succeeded, no NTP response yet
 |==================================================================
+
+The +4+ or +6+ in the 4th position indicates that the +DNS+ or +NTS-KE+
+resulted in an +IPv4+ or +IPv6+ address.
 
 include::includes/footer.adoc[]

@@ -2366,6 +2366,25 @@ dns_take_server(
 
 	server->cfg.flags &= (unsigned)~FLAG_LOOKUP;
 	server->srcadr = *rmtadr;
+	{ /* HACK: fixup refid to show progress */
+	char tag[REFIDLEN];
+	if (server->cfg.flags & FLAG_NTS) {
+		memcpy(tag, "NTS?", REFIDLEN);
+	} else {
+		memcpy(tag, "DNS?", REFIDLEN);
+	}
+	switch(AF(rmtadr)) {
+	  case AF_INET:
+		tag[REFIDLEN-1] = '4';
+		break;
+	  case AF_INET6:
+		tag[REFIDLEN-1] = '6';
+		break;
+	  default:
+		break;
+	}
+	memcpy(&server->refid, tag, REFIDLEN);
+	}
 	peer_add_hash(server);
 	restrict_source(server);
 

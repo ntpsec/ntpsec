@@ -12,6 +12,9 @@ on user-visible changes.
 
 == Reposatory Head ==
 
+Add 4 or 6 to DNS/NTS RefID tags to indicate that the
+DNS or NTS-KE has succeeded but NTP has not worked yet.
+
 Add --enable-attic (default off)
 
 Works with OpenSSL 3.0
