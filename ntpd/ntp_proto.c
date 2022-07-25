@@ -315,10 +315,10 @@ parse_packet(
 	rbufp->extens_present = false;
 	rbufp->ntspacket.valid = false;
 
-	if(PKT_VERSION(pkt->li_vn_mode) > 4) {
+	if(PKT_VERSION(pkt->li_vn_mode) > NTP_VERSION) {
 		/* Unsupported version */
 		return false;
-	} else if(PKT_VERSION(pkt->li_vn_mode) == 4) {
+	} else if(PKT_VERSION(pkt->li_vn_mode) == MODE_SERVER) {
 		/* Only version 4 packets support extensions. */
 		/* But they also support shared key authentication. */
 		if (recv_length > (LEN_PKT_NOMAC+MAX_MAC_LEN)) {
@@ -2246,6 +2246,13 @@ fast_xmit(
 		 * the packet transmit time, and eventually to the
 		 * reftime to make sure the reftime isn't later than
 		 * the transmit/receive times.
+		 */
+		/* Note: This returns the same data for all versions.
+		 * Currently, the mode is always Server.
+		 * The version is copied from the request.
+		 * There are minor differences between v3 and v4.
+		 * So far, nobody cares.
+		 * Note: There is significant v1 traffic.  See #707
 		 */
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);
