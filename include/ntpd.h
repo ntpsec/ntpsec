@@ -223,11 +223,12 @@ extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (struct peer *, const char *);
 extern	int	mprintf_clock_stats(struct peer *, const char *, ...)
 			NTP_PRINTF(2, 3);
-extern	void	record_raw_stats (struct peer *,
-				  int leap, int version, int mode, int stratum,
-				  int ppoll, int precision, double root_delay,
-				  double root_dispersion, refid_t refid,
-				  unsigned int outcount);
+extern	void	record_raw_stats (
+  struct peer *peer,
+  struct recvbuf *rbufp,
+  unsigned int flag,
+  unsigned int outcount);
+
 extern void record_ref_stats(
     const struct peer *peer,
     int     n,              /* Number of samples */

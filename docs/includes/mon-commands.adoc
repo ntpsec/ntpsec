@@ -119,42 +119,48 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
     form to the file generation set named _rawstats_:
 +
 ---------------------------------------------------------------------------------
-56285 54575.160 128.4.1.1 192.168.1.5 3565350574.400229473
-    3565350574.442385200 3565350574.442436000
-    3565350575.154505763 0 4 4 1 8 -21 0.000000 0.000320
-    PPS 0
+59786 36302.768 2610:20:6f15:15::27 2604:a880:1:20::17:5001 3867818701.119346355 3867818701.152009264 3867818701.152010426 3867818702.768490825 0 3 4 1 13 -29 0.000244 0.000488 .NIST. 0 1 2000
 ---------------------------------------------------------------------------------
 +
 [width="100%"]
 |==============================================================================
 |Item                |Units                             |Description
-|56285               |MJD                               |date
-|54575.160           |s                                 |time past midnight
-|128.4.1.1           |IP                                |source address
-|192.168.1.5         |IP                                |destination address
-|3565350574.400229473|NTP s                             |origin timestamp
-|3565350574.442385200|NTP s                             |receive timestamp
-|3565350574.442436000|NTP s                             |transmit timestamp
-|3565350575.154505763|NTP s                             |destination timestamp
+|59786               |MJD                               |date
+|36302.768           |s                                 |time past midnight
+|2610:20:6f15:15::27 |IP                                |source address
+|2604:a880:1:20::17:5001 |IP                            |destination address
+|3867818701.119346355|NTP s                             |origin timestamp
+|3867818701.152009264|NTP s                             |receive timestamp
+|3867818701.152010426|NTP s                             |transmit timestamp
+|3867818702.768490825|NTP s                             |destination timestamp
 |0                   |0: OK, 1: insert pending, 2: delete pending, 3: not synced  |leap warning indicator
-|4                   |4 was current in 2012             |NTP version
+|3                   |4 was current in 2012             |NTP version
 |4                   |3: client, 4: server, 6: ntpq     |mode
 |1                   |1-15, 16: not synced              |stratum
-|8                   |log~2~ seconds                    |poll
-|-21                 |log~2~ seconds                    |precision
-|0.000000            |seconds                           |total roundtrip delay from the remote server to the primary reference clock
-|0.000320            |seconds                           |total dispersion from the remote server to the primary reference clock
-|.PPS.               |IP or text                        |refid, association ID
+|13                  |log~2~ seconds                    |poll
+|-29                 |log~2~ seconds                    |precision
+|0.000244            |seconds                           |total roundtrip delay from the remote server to the primary reference clock
+|0.000488            |seconds                           |total dispersion from the remote server to the primary reference clock
+|.NIST.              |IP or text                        |refid, association ID
 | 0                  |integer                           |lost packets since last response
+| 1                  |integer                           |dropped packets since last request
+| 2000               |hex integer                       |0 if packet accecpted, BOGON flag if packet is discarded
 |==============================================================================
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next two fields show
-the remote peer or clock identification followed by the local address in
-dotted-quad notation. The final four fields show the originate,
+the remote IP Address followed by the local address.
+The next four fields show the originate,
 receive, transmit and final NTP timestamps in order. The timestamp
 values are as received and before processing by the various data
 smoothing and mitigation algorithms.
++
+A packet that is accecpted is logged.
+At most the first dropped packet per request is logged.
+That avoids DDoSing the log file.
++
+The BOGON flags are decoded link:decode.html#flash[here].
+
 +
   +sysstats+;;
     Enables recording of ntpd statistics counters on a periodic basis.

@@ -518,46 +518,60 @@ mprintf_clock_stats(
  * source IP address (old format) or drivername(unit) (new format)
  * destination peer address
  * t1 t2 t3 t4 timestamps
- * various other local statistics
+ * various other chunks of the packet
  */
 void
 record_raw_stats(
-	struct peer *peer,
-	int	leap,
-	int	version,
-	int	mode,
-	int	stratum,
-	int	ppoll,
-	int	precision,
-	double	root_delay,	/* seconds */
-	double	root_dispersion,/* seconds */
-	refid_t	refid,
-	unsigned int	outcount
-	)
+  struct peer *peer,
+  struct recvbuf *rbufp,
+  unsigned int flag,
+  unsigned int outcount)
 {
 	struct timespec	now;
 	const sockaddr_u *dstaddr = peer->dstadr ? &peer->dstadr->sin : NULL;
+	/* This lies.  It shows the time we sent it rather than the
+	 * data from the packet which was probably random.
+	 * See data minimization in peer_xmit()
+	 * That's what code processing rawstats expects.
+	 */
 	l_fp	t1 = peer->org_ts;	/* originate timestamp */
-	l_fp	t2 = peer->rec;		/* receive timestamp */
-	l_fp	t3 = peer->xmt;		/* transmit timestamp */
-	l_fp	t4 = peer->dst;		/* destination timestamp */
+	l_fp	t2 = rbufp->pkt.rec;	/* receive timestamp */
+	l_fp	t3 = rbufp->pkt.xmt;	/* transmit timestamp */
+	l_fp	t4 = rbufp->recv_time;	/* destination timestamp */
+	int	stratum;
+	refid_t refid = *(const uint32_t*)rbufp->pkt.refid;
+	double rootdelay, rootdisp;
 
 	if (!stats_control)
 		return;
 
 	clock_gettime(CLOCK_REALTIME, &now);
 	filegen_setup(&rawstats, now.tv_sec);
-	if (rawstats.fp != NULL) {
-		fprintf(rawstats.fp, "%s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %u\n",
-		    timespec_to_MJDtime(&now),
-		    peerlabel(peer), dstaddr ?  socktoa(dstaddr) : "-",
-		    ulfptoa(t1, 9), ulfptoa(t2, 9),
-		    ulfptoa(t3, 9), ulfptoa(t4, 9),
-		    leap, version, mode, stratum, ppoll, precision,
-		    root_delay, root_dispersion, refid_str(refid, stratum),
-		    outcount);
-		fflush(rawstats.fp);
-	}
+	if (rawstats.fp == NULL) return;
+
+	/* copy of PKT_TO_STRATUM from ntp_proto.c */
+	stratum = rbufp->pkt.stratum;
+	if (stratum == STRATUM_PKT_UNSPEC) stratum = STRATUM_UNSPEC;
+
+	rootdelay = scalbn((double)rbufp->pkt.rootdelay, -16);
+	rootdisp = scalbn((double)rbufp->pkt.rootdisp, -16);
+
+	fprintf(rawstats.fp, "%s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %u %u %x\n",
+	    timespec_to_MJDtime(&now),
+	    peerlabel(peer), dstaddr ?  socktoa(dstaddr) : "-",
+	    ulfptoa(t1, 9), ulfptoa(t2, 9),
+	    ulfptoa(t3, 9), ulfptoa(t4, 9),
+	    PKT_LEAP(rbufp->pkt.li_vn_mode),
+	    PKT_VERSION(rbufp->pkt.li_vn_mode),
+	    PKT_MODE(rbufp->pkt.li_vn_mode),
+	    stratum,
+	    rbufp->pkt.ppoll,
+	    rbufp->pkt.precision,
+	    rootdelay,
+	    rootdisp,
+	    refid_str(refid, stratum),
+	    outcount, peer->bogons, flag);
+	fflush(rawstats.fp);
 }
 
 /*

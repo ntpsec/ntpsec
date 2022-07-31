@@ -12,6 +12,10 @@ on user-visible changes.
 
 == Reposatory Head ==
 
+rawstats now logs dropped packets and their BOGON code
+  Only one per request to avoid DoSing the log file
+  This lets you see packets that take too long.
+
 Add 4 or 6 to DNS/NTS RefID tags to indicate that the
 DNS or NTS-KE has succeeded but NTP has not worked yet.
 

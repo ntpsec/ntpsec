@@ -244,6 +244,7 @@ It consists of a number of bits coded in hexadecimal as follows:
 | +0400+ | BOGON11 | +peer_dist+    | distance threshold exceeded
 | +0800+ | BOGON12 | +peer_loop+    | synchronization loop
 | +1000+ | BOGON13 | +peer_unreach+ | unreachable or nonselect
+| +2000+ | BOGON14 | +pkt_oldpkt+   | response took too long
 |==============================================================================
 
 The "Tag" field is the name the source code uses for the status bit.

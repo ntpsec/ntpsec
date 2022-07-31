@@ -458,43 +458,73 @@ static bool check_early_restrictions(
 	      PKT_VERSION(rbufp->recv_buffer[0]) != NTP_VERSION));
 }
 
+/* rawstats_filter
+ * Don't print all rejectioned packets or we could get DoSed.
+ * Print the packet we use.
+ * Print the first rejection.
+ *   In particular, we get to see why a response is rejected.
+ *   Took-too-long, BOGON14 is common.
+ *   This lets us see how long it did take.
+ */
+static void rawstats_filter(
+  struct peer *peer,
+  struct recvbuf *rbufp,
+  unsigned int flag,
+  unsigned int outcount) {
+	peer->flash |= flag;
+	peer->bogons += 1;
+	if (peer->bogons > 1) {
+		/* only print one bogon */
+		return;
+	}
+	record_raw_stats(peer, rbufp, flag, outcount);
+#if 0
+	record_raw_stats(peer,
+			 PKT_LEAP(rbufp->pkt.li_vn_mode),
+			 PKT_VERSION(rbufp->pkt.li_vn_mode),
+			 PKT_MODE(rbufp->pkt.li_vn_mode),
+			 PKT_TO_STRATUM(rbufp->pkt.stratum),
+			 rbufp->pkt.ppoll, rbufp->pkt.precision,
+			 rbufp->pkt.rootdelay, rbufp->pkt.rootdisp,
+			 /* FIXME: this cast is disgusting */
+			 *(const uint32_t*)rbufp->pkt.refid,
+			 outcount);
+#endif
+}
 
+/* Handle MODE_SERVER, replies to our requests.
+ * Authentication done upstream.
+ */
 static void
 handle_procpkt(
 	struct recvbuf *rbufp,
 	struct peer *peer
 	)
 {
-	int outcount = peer->outcount;
+	unsigned int outcount = peer->outcount;
 
 	peer->flash &= ~PKT_BOGON_MASK;
 
 	/* Duplicate detection */
 	if(rbufp->pkt.xmt == peer->xmt) {
-		peer->flash |= BOGON1;
+		rawstats_filter(peer, rbufp, BOGON1, outcount);
+		peer->oldpkt++;
+		return;
+	}
+	if(outcount == 0) {
+		rawstats_filter(peer, rbufp, BOGON1, outcount);
 		peer->oldpkt++;
 		return;
 	}
 
 	/* Origin timestamp validation */
-	if(PKT_MODE(rbufp->pkt.li_vn_mode) == MODE_SERVER) {
-		if(outcount == 0) {
-			peer->flash |= BOGON1;
-			peer->oldpkt++;
-			return;
-		}
-		if(rbufp->pkt.org == 0) {
-			peer->flash |= BOGON3;
-			peer->bogusorg++;
-			return;
-		} else if(rbufp->pkt.org != peer->org_rand) {
-			peer->flash |= BOGON2;
-			peer->bogusorg++;
-			return;
-		}
-	} else {
-		/* This case should be unreachable. */
-		stat_proto_total.sys_declined++;
+	if(rbufp->pkt.org == 0) {
+		rawstats_filter(peer, rbufp, BOGON3, outcount);
+		peer->bogusorg++;
+		return;
+	} else if(rbufp->pkt.org != peer->org_rand) {
+		rawstats_filter(peer, rbufp, BOGON2, outcount);
+		peer->bogusorg++;
 		return;
 	}
 
@@ -523,13 +553,13 @@ handle_procpkt(
 	if (PKT_LEAP(rbufp->pkt.li_vn_mode) == LEAP_NOTINSYNC ||
 	    PKT_TO_STRATUM(rbufp->pkt.stratum) < sys_floor ||
 	    PKT_TO_STRATUM(rbufp->pkt.stratum) >= sys_ceiling) {
-		peer->flash |= BOGON6;
+		rawstats_filter(peer, rbufp, BOGON6, outcount);
 		return;
 	}
 
 	if(scalbn((double)rbufp->pkt.rootdelay/2.0 + (double)rbufp->pkt.rootdisp, -16) >=
 	   sys_maxdisp) {
-		peer->flash |= BOGON7;
+		rawstats_filter(peer, rbufp, BOGON7, outcount);
 		return;
 	}
 
@@ -565,9 +595,7 @@ handle_procpkt(
 	   makes the desired security invariant easier to verify.
 	*/
 	if(delta > sys_maxdist) {
-	  peer->flash |= BOGON1; /*XXX we should probably allocate a
-				   new bogon bit here rather than
-				   recycling BOGON1. */
+	  rawstats_filter(peer, rbufp, BOGON14, outcount);
 	  peer->oldpkt++;
 	  return;
 	}
@@ -584,23 +612,8 @@ handle_procpkt(
 	peer->xmt = rbufp->pkt.xmt;
 	peer->dst = rbufp->recv_time;
 
-	record_raw_stats(peer,
-			 /* What we want to be reporting is values in
-			    the packet, not the values in the peer
-			    structure, but when we reach here they're
-			    the same thing. Passing the values in the
-			    peer structure is a convenience, because
-			    they're already in the l_fp format that
-			    record_raw_stats() expects. */
-			 PKT_LEAP(rbufp->pkt.li_vn_mode),
-			 PKT_VERSION(rbufp->pkt.li_vn_mode),
-			 PKT_MODE(rbufp->pkt.li_vn_mode),
-			 PKT_TO_STRATUM(rbufp->pkt.stratum),
-			 rbufp->pkt.ppoll, rbufp->pkt.precision,
-			 rbufp->pkt.rootdelay, rbufp->pkt.rootdisp,
-			 /* FIXME: this cast is disgusting */
-			 *(const uint32_t*)rbufp->pkt.refid,
-			 outcount);
+	/* Record good packet */
+	record_raw_stats(peer, rbufp, 0, outcount);
 
 	/* If either burst mode is armed, enable the burst.
 	 * Compute the headway for the next packet and delay if
@@ -757,6 +770,7 @@ receive(
 		stat_proto_total.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
+/* FIXME: Where is the shared key case tested? */
 		if ((peer->cfg.flags & FLAG_NTS)
 		     && (!rbufp->extens_present
 #ifndef DISABLE_NTS
@@ -2159,6 +2173,7 @@ peer_xmit(
 
 	peer->sent++;
         peer->outcount++;
+        peer->bogons = 0;
 	peer->throttle += (1 << peer->cfg.minpoll) - 2;
 	DPRINT(1, ("transmit: at %u %s->%s mode %d keyid %08x len %u\n",
 		   current_time, peer->dstadr ?
