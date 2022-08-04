@@ -65,7 +65,7 @@ server nts.ntp.se nts              # Sweden
 server nts.ntp.se:4443 nts         # Sweden: only for NTPsec <1.1.9
 ------------------------------------------------------------
 
-These are development machines, so there may be gaps in availability:
+These are development machines, so there may be gaps in availability, and they may run unreleased versions of NTPsec:
 
 ------------------------------------------------------------
 server ntpmon.dcs1.biz nts	# Singapore
@@ -73,6 +73,8 @@ server ntp1.glypnod.com nts	# San Francisco
 server ntp2.glypnod.com nts	# London
 ------------------------------------------------------------
 
+A https://netfuture.ch/2021/12/transparent-trustworthy-time-with-ntp-and-nts/#server-list
+[list of public NTS servers] is availabe, with more info on NTS.
 
 Note that you must use the same host name that was used to create
 the server's certificate.  IP addresses will not work.
