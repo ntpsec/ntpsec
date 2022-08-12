@@ -204,7 +204,9 @@ static void DoPKEY(
 		printf("## Oops, EVP_MD_CTX_new() failed.\n");
 		return;
 	}
+#ifdef EVP_MD_CTX_FLAG_FINALISE
 	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_FINALISE);
+#endif
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < SAMPLESIZE; i++) {

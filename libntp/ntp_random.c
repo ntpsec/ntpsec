@@ -29,7 +29,7 @@ void ntp_RAND_bytes(unsigned char *buf, int num) {
 
 void ntp_RAND_priv_bytes(unsigned char *buf, int num) {
 	int err;
-#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
+#if (OPENSSL_VERSION_NUMBER > 0x1010100fL) && !defined(LIBRESSL_VERSION_NUMBER)
 	err = RAND_priv_bytes(buf, num);
 #else
 	err = RAND_bytes(buf, num);
