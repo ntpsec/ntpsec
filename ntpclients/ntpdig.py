@@ -115,7 +115,8 @@ def queryhost(server, concurrent, timeout=5, port=123):
         try:
             s.sendto(packet, sockaddr)
         except socket.error as e:
-            log("socket error on transmission: %s" % e)
+            if debug:
+                log("socket error on transmission: %s" % e)
             continue
         if debug >= 2:
             log("Sent to %s:" % (sockaddr[0],))
