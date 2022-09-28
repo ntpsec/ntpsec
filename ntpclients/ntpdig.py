@@ -125,9 +125,8 @@ def queryhost(server, concurrent, timeout=5, port=123):
             sockets.append(s)
         else:
             r, _, _ = select.select([s], [], [], timeout)
-            if not r:
-                return []
-            read_append(s, packets, packet, sockaddr)
+            if r:
+                read_append(s, packets, packet, sockaddr)
         while sockets:
             r, _, _ = select.select(sockets, [], [], timeout)
             if not r:
