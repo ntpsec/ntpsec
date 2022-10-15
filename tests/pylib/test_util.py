@@ -1361,28 +1361,38 @@ class NtpqRvInfoStats(unittest.TestCase):
 
 
 def shot_test(classy, hook, cases):
-    if "msg" in inspect.getargspec(classy.assertEqual).args:
-        aeq = lambda r, l, d: classy.assertEqual(r, l, d)
-    else:
-        aeq = lambda r, l, d: classy.assertEqual(r, l)  # d
+    """"Run some tests using inputs and outputs from 2.5d iterable.
 
-    if hasattr(NtpqRvInfoStats, "subTest"):
+    Iterate through the cases iterable, and using a hook function to run
+    tests with parameters, result, and a message from the child iterable.
+    Parameters and results can themselves be iterable.
+
+    Parameters
+        ----------
+        classy : unittest.TestCase derivative class
+            Where the testing happens and where any backing state resides.
+        hook : callable
+            The function that does the testing.
+        cases : iterable
+            Where inputs, comparison outputs, and messages are stored.
+    """
+    if hasattr(classy, "subTest"):
 
         def st(h, c):
             for s in c:
                 with classy.subTest(s=s):
-                    aeq(h(*s[0]), s[1], s[2])
+                    classy.assertEqual(h(*s[0]), s[1], msg=s[2])
 
     else:
 
         def st(h, c):
-            l_e, l_r, m = [], [], []
+            # Does not handle errors well, as a test tool
+            l_f, l_s = [], []
             for s in c:
                 i = h(*s[0])
-                l_r.append([i])
-                l_e.append([s[1]])
-                m.append([s[2]])
-            aeq(l_e, l_r, m)
+                l_f.append([i])
+                l_s.append([s[1]])
+            classy.assertEqual(l_f, l_s)
 
     st(hook, cases)
 
