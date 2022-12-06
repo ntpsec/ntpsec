@@ -325,17 +325,17 @@ openSUSE-tumbleweed-refclocks:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
-debian-stable-basic-32bit:
-  <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
-  script:
-    - python ./waf configure --disable-doc --disable-manpage build
+# debian-stable-basic-32bit:
+#   <<: *job_definition
+#   image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
+#   script:
+#     - python ./waf configure --disable-doc --disable-manpage build
 
-debian-stable-refclocks-32bit:
-  <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
-  script:
-    - python ./waf configure --disable-doc --disable-manpage --refclock=all build
+# debian-stable-refclocks-32bit:
+#   <<: *job_definition
+#   image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
+#   script:
+#     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-stable-mDNS-basic:
   <<: *job_definition
