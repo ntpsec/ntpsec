@@ -307,24 +307,6 @@ openSUSE-leap-refclocks:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
 
-openSUSE-tumbleweed-basic:
-  <<: *job_definition_allow_failure
-  image:
-    name: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
-    entrypoint: [ '/bin/bash', '-c' ]
-  script:
-    - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
-    - python3 ./waf install
-    - python3 ./waf uninstall
-
-openSUSE-tumbleweed-refclocks:
-  <<: *job_definition_allow_failure
-  image:
-    name: $CI_REGISTRY/ntpsec/ntpsec/opensuse-tumbleweed
-    entrypoint: [ '/bin/bash', '-c' ]
-  script:
-    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
-
 # debian-stable-basic-32bit:
 #   <<: *job_definition
 #   image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
