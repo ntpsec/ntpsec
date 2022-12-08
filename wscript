@@ -1034,7 +1034,7 @@ def afterparty(ctx):
                 os.symlink(relpath, path_source.abspath())
 
 
-python_scripts = {
+python_scripts = set([
     "ntpclients/ntpdig.py",
     "ntpclients/ntpkeygen.py",
     "ntpclients/ntpq.py",
@@ -1042,7 +1042,7 @@ python_scripts = {
     "ntpclients/ntptrace.py",
     "ntpclients/ntpwait.py",
     "ntpclients/ntpsnmpd.py",
-}
+])
 
 
 def build(ctx):
