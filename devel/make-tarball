@@ -31,7 +31,7 @@ echo version is $V
 # Build the tarball
 rm -fr .tmp
 (cd ..; git ls-files; find build -print | grep '\.[0-9]$') >MANIFEST
-(cd ..; tar --transform="s:^:ntpsec-${V}/:" -T devel/MANIFEST -czf ntpsec-${V}.tar.gz)
+(cd ..; tar --transform="s:^:ntpsec-${V}/:S" -T devel/MANIFEST -czf ntpsec-${V}.tar.gz)
 rm MANIFEST
 mv ../ntpsec-${V}.tar.gz .
 
