@@ -10,7 +10,14 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Reposatory Head ==
+## Repository Head
+
+Restore NTPv1 support.
+
+Work on documentation, ntpdate, ntpheat, ntploggpg,
+  ntpqs' sysstats, ntpviz, and seccomp.
+
+NTP auth no longer breaks on NULs.
 
 The NTS server now saves 10 days worth of cookie keys.
   This will allow clients that only poll once a day to
@@ -23,9 +30,17 @@ rawstats now logs dropped packets and their BOGON code
 Add 4 or 6 to DNS/NTS RefID tags to indicate that the
 DNS or NTS-KE has succeeded but NTP has not worked yet.
 
-Add --enable-attic (default off)
+Build improvements
 
-Works with OpenSSL 3.0
+* Respect --notests configure option for build
+
+* Add --enable-attic (default off)
+
+* Works with Python 2.6
+
+* Works with LibreSSL
+
+* Works with OpenSSL 3.0
 
 Fix hash validation in ntpleapfetch again.
 
