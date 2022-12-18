@@ -392,18 +392,22 @@ static const struct ctl_var sys_var[] = {
 	{ CS_nts_cookie_decode,		RO, "nts_cookie_decode" },
 #define CS_nts_cookie_decode_old	126
 	{ CS_nts_cookie_decode_old,	RO, "nts_cookie_decode_old" },
-#define CS_nts_cookie_decode_too_old	127
+#define CS_nts_cookie_decode_old2	127
+	{ CS_nts_cookie_decode_old2,	RO, "nts_cookie_decode_old2" },
+#define CS_nts_cookie_decode_older	128
+	{ CS_nts_cookie_decode_older,	RO, "nts_cookie_decode_older" },
+#define CS_nts_cookie_decode_too_old	129
 	{ CS_nts_cookie_decode_too_old,	RO, "nts_cookie_decode_too_old" },
-#define CS_nts_cookie_decode_error	128
+#define CS_nts_cookie_decode_error	130
 	{ CS_nts_cookie_decode_error,	RO, "nts_cookie_decode_error" },
 
-#define CS_nts_ke_serves_good	129
+#define CS_nts_ke_serves_good	131
 	{ CS_nts_ke_serves_good,	RO, "nts_ke_serves_good" },
-#define CS_nts_ke_serves_bad	130
+#define CS_nts_ke_serves_bad	132
 	{ CS_nts_ke_serves_bad,		RO, "nts_ke_serves_bad" },
-#define CS_nts_ke_probes_good	131
+#define CS_nts_ke_probes_good	133
 	{ CS_nts_ke_probes_good,	RO, "nts_ke_probes_good" },
-#define CS_nts_ke_probes_bad	132
+#define CS_nts_ke_probes_bad	134
 	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
 #endif
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
@@ -1857,7 +1861,8 @@ ctl_putsys(
 	CASE_UINT(CS_nts_cookie_decode, nts_cookie_decode);
 
 	CASE_UINT(CS_nts_cookie_decode_old, nts_cookie_decode_old);
-
+	CASE_UINT(CS_nts_cookie_decode_old2, nts_cookie_decode_old2);
+	CASE_UINT(CS_nts_cookie_decode_older, nts_cookie_decode_older);
 	CASE_UINT(CS_nts_cookie_decode_too_old, nts_cookie_decode_too_old);
 
 	CASE_UINT(CS_nts_cookie_decode_error, nts_cookie_decode_error);

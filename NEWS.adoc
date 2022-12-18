@@ -12,6 +12,10 @@ on user-visible changes.
 
 == Reposatory Head ==
 
+The NTS server now saves 10 days worth of cookie keys.
+  This will allow clients that only poll once a day to
+  use NTS without using NTS-KE to keep cookies up to date.
+
 rawstats now logs dropped packets and their BOGON code
   Only one per request to avoid DoSing the log file
   This lets you see packets that take too long.

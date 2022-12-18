@@ -1653,6 +1653,8 @@ usage: authinfo
    ("nts_cookie_make",           "NTS make cookies:          ", NTP_UINT),
    ("nts_cookie_decode",         "NTS decode cookies:        ", NTP_UINT),
    ("nts_cookie_decode_old",     "NTS decode cookies old:    ", NTP_UINT),
+   ("nts_cookie_decode_old2",    "NTS decode cookies old2:   ", NTP_UINT),
+   ("nts_cookie_decode_older",   "NTS decode cookies older:  ", NTP_UINT),
    ("nts_cookie_decode_too_old", "NTS decode cookies too old:", NTP_UINT),
    ("nts_cookie_decode_error",   "NTS decode cookies error:  ", NTP_UINT),
    ("nts_ke_probes_good",        "NTS KE client probes good: ", NTP_UINT),
