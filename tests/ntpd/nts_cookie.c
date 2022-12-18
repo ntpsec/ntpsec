@@ -61,6 +61,8 @@ TEST(nts_cookie, nts_make_unpack_cookie) {
 	uint16_t aead; /* retrieved on unpack */
 	/* Init for cookie_ctx */
 	nts_cookie_init();
+	nts_nKeys = 0;
+	nts_make_cookie_key();
 	/* Test */
 	len = nts_make_cookie(cookie, AEAD_AES_SIV_CMAC_256, c2s, s2c, sizeof(c2s));
 	TEST_ASSERT_EQUAL(72, len);
