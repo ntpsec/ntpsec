@@ -1,3 +1,17 @@
+make-tarball:
+  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable
+  stage: test
+  script:
+    - apt-get update
+    - DEBIAN_FRONTEND="noninteractive" apt-get install -y git asciidoctor
+    - ln -svf /usr/bin/python{3,}
+    - ./waf configure build --enable-doc --enable-man
+    - cd devel&&/bin/sh make-tarball
+  tags:
+    - gitlab-org
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+
 .option_tester: &option_tester
   stage: test
   needs: []
