@@ -265,9 +265,9 @@ fedora-latest-refclocks:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
-python3-rc:
+python3:
   <<: *job_definition_allow_failure
-  image: $CI_REGISTRY/ntpsec/ntpsec/python3-rc
+  image: $CI_REGISTRY/ntpsec/ntpsec/python3
   script:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
