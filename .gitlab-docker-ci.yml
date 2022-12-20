@@ -73,7 +73,7 @@ build-gentoo-hardened:
 build-opensuse-leap:
   <<: *build_definition
 
-build-python3-rc:
+build-python3:
   <<: *build_definition
 
 build-ubuntu-latest:

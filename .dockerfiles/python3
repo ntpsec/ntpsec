@@ -1,4 +1,4 @@
-FROM python:rc
+FROM python:3-slim
 
 RUN apt-get update -qq
 RUN apt-get install -y -qq bison libcap-dev pps-tools libbsd-dev
