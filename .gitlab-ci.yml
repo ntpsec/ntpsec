@@ -366,24 +366,6 @@ gentoo-refclocks:
   script:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
 
-gentoo-hardened-basic:
-  <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo-hardened
-  script:
-    - python ./waf configure --disable-doc --disable-manpage build
-    - DESTDIR=build/prison python ./waf install
-    - DESTDIR=./prison python ./waf install
-    - DESTDIR=../prison python ./waf install
-    - python ./waf install
-    - python ./waf uninstall
-    - rm -rvf build/prison ./prison ../prison
-
-gentoo-hardened-refclocks:
-  <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo-hardened
-  script:
-    - python ./waf configure --disable-doc --disable-manpage --refclock=all build
-
 coverity-scan:
   image: $CI_REGISTRY/ntpsec/ntpsec/coverity
   script:

@@ -67,9 +67,6 @@ build-fedora-latest:
 build-gentoo:
   <<: *build_definition
 
-build-gentoo-hardened:
-  <<: *build_definition
-
 build-opensuse-leap:
   <<: *build_definition
 
