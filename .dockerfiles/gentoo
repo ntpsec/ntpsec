@@ -1,4 +1,8 @@
+FROM gentoo/portage as portage
+
 FROM gentoo/stage3
+
+COPY --from=portage /var/db/repos/gentoo /var/db/repos/gentoo
 
 RUN emerge-webrsync
 RUN emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
