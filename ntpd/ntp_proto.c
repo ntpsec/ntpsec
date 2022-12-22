@@ -2187,7 +2187,7 @@ peer_xmit(
 
 static void
 leap_smear_add_offs(l_fp *t) {
-	t += leap_smear.offset;
+	*t += leap_smear.offset;
 }
 
 #endif	/* ENABLE_LEAP_SMEAR */

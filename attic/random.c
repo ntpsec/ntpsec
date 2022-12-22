@@ -77,6 +77,7 @@ static int do_average(void) {
 		sum += random();
 	}
 	clock_gettime(CLOCK_REALTIME, &stop);
+	(void)sum;	/* Squash unused warning */
 
 	/* Beware of overflowing 32 bits. */
 	sec = (stop.tv_sec-start.tv_sec);
@@ -164,7 +165,7 @@ static int do_fastest(void) {
 			fastest = nanos;
 		}
 	}
-
+	(void)sum;	/* Squash unused warning */
 	return fastest;
 }
 
