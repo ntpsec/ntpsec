@@ -14,6 +14,8 @@ on user-visible changes.
 
 Restore NTPv1 support.
 
+NTS supports partial wildcards, for example *.example.com
+
 Work on documentation, ntpdate, ntpheat, ntploggpg,
   ntpqs' sysstats, ntpviz, and seccomp.
 
