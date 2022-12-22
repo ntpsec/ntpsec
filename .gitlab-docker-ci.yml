@@ -3,9 +3,9 @@
     # Try to save some time by only grabbing the most recent commit
     GIT_DEPTH: '1'
   stage: build
-  image: docker:stable
+  image: docker
   services:
-    - docker:stable-dind
+    - docker:dind
   script:
     - IMAGE_NAME=${CI_JOB_NAME/build-/}
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
