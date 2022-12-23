@@ -144,6 +144,10 @@ struct statistics_counters {
 	uint64_t	sys_restricted;		/* restricted packets */
 	uint64_t	sys_newversion;		/* current version  */
 	uint64_t	sys_oldversion;		/* old version */
+	uint64_t	sys_version1;		/* old cruft: NTPv1 */
+	uint64_t	sys_version1client;	/*  NTPv1: mode 3 many */
+	uint64_t	sys_version1zero;	/*  NTPv1: mode 0 as per RFC */
+	uint64_t	sys_version1symm;	/*  NTPv1: mode 1 old Windows */
 	uint64_t	sys_badlength;		/* bad length or format */
 	uint64_t	sys_badauth;		/* bad authentication */
 	uint64_t	sys_declined;		/* declined */
@@ -178,6 +182,10 @@ stat_sys_dumps(processed)
 stat_sys_dumps(restricted)
 stat_sys_dumps(newversion)
 stat_sys_dumps(oldversion)
+stat_sys_dumps(version1)
+stat_sys_dumps(version1client)
+stat_sys_dumps(version1zero)
+stat_sys_dumps(version1symm)
 stat_sys_dumps(badlength)
 stat_sys_dumps(badauth)
 stat_sys_dumps(declined)
@@ -655,6 +663,37 @@ receive(
 
 	stat_proto_total.sys_received++;
 
+#ifdef NTPv1
+	/*Hack for NTPv1.  See #707 */
+	if ((NTPv1 == PKT_VERSION(rbufp->recv_buffer[0])) && \
+		(48 == rbufp->recv_length)) {
+	  mode = PKT_MODE(rbufp->recv_buffer[0]);
+	  stat_proto_total.sys_version1++;
+	  /* There is a lot of crufty old NTPv1 SNTP traffic.
+	   * NTPv1 has no mode field. */
+	  switch (mode) {
+	    case MODE_CLIENT:
+		/* Some packets come with MODE_CLIENT. They will just work. */
+		stat_proto_total.sys_version1client++;
+		break;
+	    case MODE_UNSPEC:
+		/* Some packets come with 0. Patch them.
+		 *   This assumes the client doesn't check the returned mode. */
+		rbufp->recv_buffer[0] = PKT_LI_VN_MODE(0, NTPv1, MODE_CLIENT);
+		stat_proto_total.sys_version1zero++;
+		break;
+	    case MODE_ACTIVEx:
+		/* Windows XP and Server 2003 send MODE_ACTIVE
+		 *   https://kb.meinbergglobal.com/kb/time_sync/timekeeping_on_windows/configuring_w32time_as_ntp_client
+		 * Again, this assumes the client doesn't check the returned mode. */
+		rbufp->recv_buffer[0] = PKT_LI_VN_MODE(0, NTPv1, MODE_CLIENT);
+		stat_proto_total.sys_version1symm++;
+		break;
+	    default:
+		break;
+	  }
+	}
+#endif
 	if(!is_packet_not_low_rot(rbufp)) {
 		stat_proto_total.sys_badlength++;
 		return;
@@ -2267,7 +2306,7 @@ fast_xmit(
 		 * The version is copied from the request.
 		 * There are minor differences between v3 and v4.
 		 * So far, nobody cares.
-		 * Note: There is significant v1 traffic.  See #707
+		 * Note: There is significant NTPv1 traffic.  See #707
 		 */
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);

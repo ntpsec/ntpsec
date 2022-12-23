@@ -12,7 +12,9 @@ on user-visible changes.
 
 ## Repository Head
 
-Restore NTPv1 support.
+Restore/cleanup NTPv1 support.
+  ntpq sysstats now shows NTPv1 traffic.
+  NTPv1 counter added to sysstats log file.
 
 NTS supports partial wildcards, for example *.example.com
 

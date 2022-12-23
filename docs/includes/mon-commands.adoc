@@ -168,25 +168,26 @@ The BOGON flags are decoded link:decode.html#flash[here].
     generation set named _sysstats_:
 +
 -----------------------------------------------------------
-50928 2132.543 36000 81965 0 9546 56 71793 512 540 10 147 1
+59935 82782.547 3600 36082754 31287166 26510580 4779042 113 19698 1997 428 4773352 0 366120
 -----------------------------------------------------------
 +
 [width="100%",cols="<34%,<33%,<33%",]
 |==================================================
-|Item      |Units    |Description
-|+50928+   |MJD      |date
-|+2132.543+|s        |time past midnight
-|+3600+    |s        |time since reset
-|+81965+   |#        |packets received
-|+0+       |#        |packets for this host
-|+9546+    |#        |current versions
-|+56+      |#        |old version
-|+512+     |#        |access denied
-|+540+     |#        |bad length or format
-|+10+      |#        |bad authentication
-|+4+       |#        |declined
-|+147+     |#        |rate exceeded
-|+1+       |#        |kiss-o'-death packets sent
+|Item       |Units    |Description
+|+59935+    |MJD      |date
+|+82782.547+|s        |time past midnight
+|+3600+     |s        |time since reset
+|+36082754+ |#        |packets received
+|+31287166+ |#        |packets processed
+|+26510580+ |#        |current version
+|+4779042+  |#        |old version(s)
+|+113+      |#        |access denied
+|+19698+    |#        |bad length or format
+|+1997+     |#        |bad authentication
+|+428+      |#        |declined
+|+4773352+  |#        |rate exceeded
+|+0+        |#        |kiss-o'-death packets sent
+|+366120+   |#        |NTPv1 packets received
 |==================================================
 +
 The first two fields show the date (Modified Julian Day) and time

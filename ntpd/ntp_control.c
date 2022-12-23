@@ -205,6 +205,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_SS_THISVER,	RO, "ss_thisver" },
 #define	CS_SS_OLDVER		37
 	{ CS_SS_OLDVER,		RO, "ss_oldver" },
+/* CS_SS_VER1 is way below */
 #define	CS_SS_BADFORMAT		38
 	{ CS_SS_BADFORMAT,	RO, "ss_badformat" },
 #define	CS_SS_BADAUTH		39
@@ -358,6 +359,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_SS_THISVER_R,	RO, "ss_thisver_r" },
 #define	CS_SS_OLDVER_R		110
 	{ CS_SS_OLDVER_R,		RO, "ss_oldver_r" },
+/* CS_SS_VER1_R is way below */
 #define	CS_SS_BADFORMAT_R		111
 	{ CS_SS_BADFORMAT_R,	RO, "ss_badformat_r" },
 #define	CS_SS_BADAUTH_R		112
@@ -370,46 +372,67 @@ static const struct ctl_var sys_var[] = {
 	{ CS_SS_LIMITED_R,	RO, "ss_limited_r" },
 #define	CS_SS_KODSENT_R		116
 	{ CS_SS_KODSENT_R,	RO, "ss_kodsent_r" },
-#define	CS_SS_PROCESSED_R		117
+#define	CS_SS_PROCESSED_R	117
 	{ CS_SS_PROCESSED_R,	RO, "ss_processed_r" },
+
+/* These belong way above. */
+#define	CS_SS_VER1		118
+	{ CS_SS_VER1,		RO, "ss_ver1" },
+#define	CS_SS_VER1_R		119
+	{ CS_SS_VER1_R,		RO, "ss_ver1_r" },
+#define	CS_SS_VER1CLIENT	120
+	{ CS_SS_VER1CLIENT,	RO, "ss_ver1client" },
+#define	CS_SS_VER1CLIENT_R	121
+	{ CS_SS_VER1CLIENT_R,	RO, "ss_ver1client_r" },
+#define	CS_SS_VER1ZERO		122
+	{ CS_SS_VER1ZERO,	RO, "ss_ver1zero" },
+#define	CS_SS_VER1ZERO_R	123
+	{ CS_SS_VER1ZERO_R,	RO, "ss_ver1zero_r" },
+#define	CS_SS_VER1SYMM		124
+	{ CS_SS_VER1SYMM,	RO, "ss_ver1symm" },
+#define	CS_SS_VER1SYMM_R	125
+	{ CS_SS_VER1SYMM_R,	RO, "ss_ver1symm_r" },
+
 #ifndef DISABLE_NTS
-#define CS_nts_client_send	118
+#define CS_nts_client_send		126
 	{ CS_nts_client_send,		RO, "nts_client_send" },
-#define CS_nts_client_recv_good	119
+#define CS_nts_client_recv_good		127
 	{ CS_nts_client_recv_good,	RO, "nts_client_recv_good" },
-#define CS_nts_client_recv_bad	120
+#define CS_nts_client_recv_bad		128
 	{ CS_nts_client_recv_bad,	RO, "nts_client_recv_bad" },
-#define CS_nts_server_send	121
+#define CS_nts_server_send		129
 	{ CS_nts_server_send,		RO, "nts_server_send" },
-#define CS_nts_server_recv_good	122
+#define CS_nts_server_recv_good		130
 	{ CS_nts_server_recv_good,	RO, "nts_server_recv_good" },
-#define CS_nts_server_recv_bad	123
+#define CS_nts_server_recv_bad		131
 	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
 
-#define CS_nts_cookie_make		124
+#define CS_nts_cookie_make		132
 	{ CS_nts_cookie_make,		RO, "nts_cookie_make" },
-#define CS_nts_cookie_decode		125
+#define CS_nts_cookie_decode		133
 	{ CS_nts_cookie_decode,		RO, "nts_cookie_decode" },
-#define CS_nts_cookie_decode_old	126
+#define CS_nts_cookie_decode_old	134
 	{ CS_nts_cookie_decode_old,	RO, "nts_cookie_decode_old" },
-#define CS_nts_cookie_decode_old2	127
+#define CS_nts_cookie_decode_old2	135
 	{ CS_nts_cookie_decode_old2,	RO, "nts_cookie_decode_old2" },
-#define CS_nts_cookie_decode_older	128
+#define CS_nts_cookie_decode_older	136
 	{ CS_nts_cookie_decode_older,	RO, "nts_cookie_decode_older" },
-#define CS_nts_cookie_decode_too_old	129
+#define CS_nts_cookie_decode_too_old	137
 	{ CS_nts_cookie_decode_too_old,	RO, "nts_cookie_decode_too_old" },
-#define CS_nts_cookie_decode_error	130
+#define CS_nts_cookie_decode_error	138
 	{ CS_nts_cookie_decode_error,	RO, "nts_cookie_decode_error" },
 
-#define CS_nts_ke_serves_good	131
+#define CS_nts_ke_serves_good		139
 	{ CS_nts_ke_serves_good,	RO, "nts_ke_serves_good" },
-#define CS_nts_ke_serves_bad	132
+#define CS_nts_ke_serves_bad		140
 	{ CS_nts_ke_serves_bad,		RO, "nts_ke_serves_bad" },
-#define CS_nts_ke_probes_good	133
+#define CS_nts_ke_probes_good		141
 	{ CS_nts_ke_probes_good,	RO, "nts_ke_probes_good" },
-#define CS_nts_ke_probes_bad	134
+#define CS_nts_ke_probes_bad		142
 	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
 #endif
+/* Can't insert things here -- need dummy slots for ifdef case */
+
 #define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
 	{ 0,                    EOV, "" }
 };
@@ -1576,6 +1599,16 @@ ctl_putsys(
 	CASE_UINT(CS_SS_THISVER, stat_newversion());
 	
 	CASE_UINT(CS_SS_OLDVER, stat_oldversion());
+
+	CASE_UINT(CS_SS_VER1, stat_version1());
+	CASE_UINT(CS_SS_VER1CLIENT, stat_version1client());
+	CASE_UINT(CS_SS_VER1ZERO, stat_version1zero());
+	CASE_UINT(CS_SS_VER1SYMM, stat_version1symm());
+
+	CASE_UINT(CS_SS_VER1_R, stat_total_version1());
+	CASE_UINT(CS_SS_VER1CLIENT_R, stat_total_version1client());
+	CASE_UINT(CS_SS_VER1ZERO_R, stat_total_version1zero());
+	CASE_UINT(CS_SS_VER1SYMM_R, stat_total_version1symm());
 
 	CASE_UINT(CS_SS_BADFORMAT, stat_badlength());
 

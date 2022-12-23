@@ -1553,20 +1553,24 @@ usage: kerninfo
     def do_sysstats(self, _line):
         "display system uptime and packet counts"
         sysstats = (
-            ("ss_uptime", "uptime:               ", NTP_UPTIME),
+            ("ss_uptime",    "uptime:               ", NTP_UPTIME),
             ("ss_numctlreq", "control requests:     ", NTP_INT),
         )
         sysstats2 = (
-            ("ss_reset", "sysstats reset:       ", NTP_UPTIME),
-            ("ss_received", "packets received:     ", NTP_PACKETS),
-            ("ss_thisver", "current version:      ", NTP_PACKETS),
-            ("ss_oldver", "older version:        ", NTP_PACKETS),
+            ("ss_reset",     "sysstats reset:       ", NTP_UPTIME),
+            ("ss_received",  "packets received:     ", NTP_PACKETS),
+            ("ss_thisver",   "current version:      ", NTP_PACKETS),
+            ("ss_oldver",    "older version:        ", NTP_PACKETS),
+            ("ss_ver1",      "NTPv1 total:          ", NTP_PACKETS),
+            ("ss_ver1client","NTPv1 clients:        ", NTP_PACKETS),
+            ("ss_ver1zero",  "NTPv1 mode0:          ", NTP_PACKETS),
+            ("ss_ver1symm",  "NTPv1 symm act:       ", NTP_PACKETS),
             ("ss_badformat", "bad length or format: ", NTP_PACKETS),
-            ("ss_badauth", "authentication failed:", NTP_PACKETS),
-            ("ss_declined", "declined:             ", NTP_PACKETS),
-            ("ss_restricted", "restricted:           ", NTP_PACKETS),
-            ("ss_limited", "rate limited:         ", NTP_PACKETS),
-            ("ss_kodsent", "KoD responses:        ", NTP_PACKETS),
+            ("ss_badauth",   "authentication failed:", NTP_PACKETS),
+            ("ss_declined",  "declined:             ", NTP_PACKETS),
+            ("ss_restricted","restricted:           ", NTP_PACKETS),
+            ("ss_limited",   "rate limited:         ", NTP_PACKETS),
+            ("ss_kodsent",   "KoD responses:        ", NTP_PACKETS),
             ("ss_processed", "processed for time:   ", NTP_PACKETS),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)

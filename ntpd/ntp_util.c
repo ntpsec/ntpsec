@@ -636,6 +636,7 @@ void record_ref_stats(
  * declined
  * rate exceeded
  * KoD sent
+ * NTPv1 packets
  */
 void
 record_sys_stats(void)
@@ -650,12 +651,13 @@ record_sys_stats(void)
 	if (sysstats.fp != NULL) {
 		fprintf(sysstats.fp,
 		    "%s %u %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64
-		    " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 "\n",
+		    " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 \
+		    " %" PRIu64 " %" PRIu64"\n",
 			timespec_to_MJDtime(&now), stat_stattime(),
 			stat_received(), stat_processed(), stat_newversion(),
 			stat_oldversion(), stat_restricted(), stat_badlength(),
 			stat_badauth(), stat_declined(), stat_limitrejected(),
-			stat_kodsent());
+			stat_kodsent(), stat_version1());
 		fflush(sysstats.fp);
 		proto_clr_stats();
 	}
