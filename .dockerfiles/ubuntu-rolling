@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:rolling
 
 RUN apt install gpgv
 RUN apt-get update

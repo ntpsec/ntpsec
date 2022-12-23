@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:latest
 
 RUN apt-get update
 RUN apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev libbsd-dev
