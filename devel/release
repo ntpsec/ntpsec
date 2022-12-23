@@ -5,7 +5,7 @@
 
 # KEY=B48237761A2690222C995F445A22E330161C3978
 KEY=E57235D22764129FA4F2F4D17F52608ED0E49D76	# Release manager's GPG key ID
-DST=markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
+DST=selsky@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
 
 # No user-serviceable parts below this line
 
