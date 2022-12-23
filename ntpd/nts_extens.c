@@ -142,7 +142,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	ntspacket->uidlen = 0;
 	ntspacket->needed = 0;
 
-	while (buf.left > 0) {
+	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type;
 		bool critical = false;
 		int length, adlength;
@@ -259,6 +259,9 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	if (!sawAEEF) {
 		return false;
 	}
+	if (buf.left > 0)
+		return false;
+
 	//  printf("ESRx: %d, %d, %d\n",
 	//      lng-LEN_PKT_NOMAC, ntspacket->needed, ntspacket->keylen);
 	ntspacket->valid = true;
@@ -361,7 +364,7 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 	buf.next = pkt+LEN_PKT_NOMAC;
 	buf.left = lng-LEN_PKT_NOMAC;
 
-	while (buf.left > 0) {
+	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type;
 		bool critical = false;
 		int length, adlength, noncelen;
@@ -442,6 +445,8 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 	if (!sawAEEF) {
 		return false;
 	}
+	if (buf.left > 0)
+		return false;
 	nts_client_recv_good++;
 	nts_client_recv_bad--;
 	return true;

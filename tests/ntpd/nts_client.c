@@ -117,11 +117,15 @@ TEST(nts_client, nts_client_process_response_core) {
 	/* ===== Test: all correct ===== */
 	/* data */
 	uint8_t buf0[] = {
-		0x80, nts_next_protocol_negotiation, 0, 2, 0, nts_protocol_NTP,
-		0x80, nts_algorithm_negotiation, 0, 2, 0, AEAD_AES_SIV_CMAC_256,
-		0x80, nts_new_cookie, 0, 8, 1, 2, 3, 4, 5, 6, 7, 8,
+		0x80, nts_next_protocol_negotiation, 0, 2,
+			0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2,
+			0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_new_cookie, 0, 8,
+			1, 2, 3, 4, 5, 6, 7, 8,
 		/* server_negotiation skipped due to getaddrinfo() containment breach */
-		0x80, nts_port_negotiation, 0, 2, 0, 3,
+		0x80, nts_port_negotiation, 0, 2,
+			0, 123,
 		0x80, nts_end_of_message, 0, 0
 	};
 	/* run */

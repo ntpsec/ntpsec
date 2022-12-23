@@ -296,10 +296,6 @@ void nts_log_ssl_error(void) {
 
 /* NB: KE length is body length, Extension length includes header. */
 
-/* 2 byte type, 2 byte length */
-#define NTS_KE_HDR_LNG 4
-#define NTS_KE_U16_LNG 2
-
 /* Troubles with signed/unsigned compares when using sizeof() */
 
 void ke_append_record_null(BufCtl* buf, uint16_t type) {

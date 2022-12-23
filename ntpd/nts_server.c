@@ -491,7 +491,7 @@ bool create_listener6(int port) {
 }
 
 bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
-	while (buf->left > 0) {
+	while (buf->left >= NTS_KE_HDR_LNG) {
 		uint16_t type, data;
 		int length;
 		bool critical = false;
@@ -553,6 +553,9 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
 			break;
 		} /* case */
 	}   /* while */
+
+	if (buf->left > 0)
+		return false;
 
 	return true;
 

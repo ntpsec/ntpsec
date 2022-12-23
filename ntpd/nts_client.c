@@ -616,7 +616,7 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 
 	buf.next = buff;
 	buf.left = transferred;
-	while (buf.left > 0) {
+	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type, data, port;
 		bool critical = false;
 		int length, keylength;
@@ -728,6 +728,9 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 			break;
 		} /* case */
 	}   /* while */
+
+	if (buf.left > 0)
+		return false;
 
 	if (NO_AEAD == peer->nts_state.aead) {
 		msyslog(LOG_ERR, "NTSc: No AEAD algorithim.");

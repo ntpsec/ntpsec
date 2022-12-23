@@ -65,6 +65,10 @@ bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
  */
 
 
+/* 2 byte type, 2 byte length */
+#define NTS_KE_HDR_LNG 4
+#define NTS_KE_U16_LNG 2
+
 /* xxx_append_record_foo makes whole record with one foo */
 /* append_foo appends foo to existing partial record */
 void ke_append_record_null(BufCtl* buf, uint16_t type);
