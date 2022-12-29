@@ -738,13 +738,15 @@ the project manager to cut each release.
 
 . Check https://gitlab.com/NTPsec/ntpsec to assure the tag is there
 
+. Create a "release" at https://gitlab.com/NTPsec/ntpsec/-/releases/new
+
 . Post release announcement to blog.ntpsec.org  gitlab.com/ntpsec/blog
 
 . Post release announcement to fediverse @ntpsec@fosstodon.org
 
 . Post release announcement to @ntpsec@twitter.com
 
-. Post release announcement to email announce@ntpsec.org
+. Post release announcement to email announce@ntpsec.org, devel@ntpsec.org, users@ntpsec.org
 
 . Modify the .../NEWS.adoc file, adding a new "Repository head" section.
 
