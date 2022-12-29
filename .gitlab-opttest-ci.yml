@@ -37,7 +37,7 @@ alpine-options-tester:
 
 centos-options-tester:
   <<: *option_tester
-  image: quay.io/centos/centos:stream8
+  image: quay.io/centos/centos:stream9
   script:
     - dnf -y --enablerepo=powertools install bison gcc openssl-devel libcap-devel python3-devel python2-devel pps-tools-devel libseccomp-devel bash
 
