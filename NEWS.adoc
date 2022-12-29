@@ -10,6 +10,8 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+## Repository Head
+
 ## 2022-12-28: 1.2.2
 
 Restore/cleanup NTPv1 support
