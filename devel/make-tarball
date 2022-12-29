@@ -42,8 +42,8 @@ mkdir .tmp
 cd .tmp
 tar -xzf ../ntpsec-${V}.tar.gz
 cd ntpsec-${V}
-./waf configure --refclock=all --enable-doc
-./waf build
+python3 ./waf configure --refclock=all --enable-doc
+python3 ./waf build
 cd ../..
 rm -fr .tmp
 
