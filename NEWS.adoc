@@ -12,11 +12,11 @@ on user-visible changes.
 
 ## Repository Head
 
-Restore/cleanup NTPv1 support.
-  ntpq sysstats now shows NTPv1 traffic.
-  NTPv1 counter added to sysstats log file.
+Restore/cleanup NTPv1 support
+* ntpq sysstats now shows NTPv1 traffic.
+* NTPv1 counter added to sysstats log file.
 
-NTS supports partial wildcards, for example *.example.com
+NTS supports partial wildcards, for example `*.example.com`
 
 Work on documentation, ntpdate, ntpheat, ntploggpg,
   ntpqs' sysstats, ntpviz, and seccomp.
@@ -24,31 +24,26 @@ Work on documentation, ntpdate, ntpheat, ntploggpg,
 NTP auth no longer breaks on NULs.
 
 The NTS server now saves 10 days worth of cookie keys.
-  This will allow clients that only poll once a day to
-  use NTS without using NTS-KE to keep cookies up to date.
+* This will allow clients that only poll once a day to
+* use NTS without using NTS-KE to keep cookies up to date.
 
 rawstats now logs dropped packets and their BOGON code
-  Only one per request to avoid DoSing the log file
-  This lets you see packets that take too long.
+* Only one per request to avoid DoSing the log file
+* This lets you see packets that take too long.
 
 Add 4 or 6 to DNS/NTS RefID tags to indicate that the
 DNS or NTS-KE has succeeded but NTP has not worked yet.
 
 Build improvements
-
-* Respect --notests configure option for build
-
-* Add --enable-attic (default off)
-
-* Works with Python 2.6
-
-* Works with LibreSSL
-
-* Works with OpenSSL 3.0
+* Respect `--notests` configure option for build
+* Add `--enable-attic` (default off)
+* Restore Python 2.6 support
+* Restore LibreSSL support
+* Add support for OpenSSL 3.0
 
 Fix hash validation in ntpleapfetch again.
 
-FreeBSD now gets ns resolution on receive time stamps.
+FreeBSD now gets nanosecond resolution on receive time stamps.
 
 == 2021-06-06: 1.2.1 ==
 
