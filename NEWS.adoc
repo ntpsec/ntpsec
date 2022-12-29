@@ -14,47 +14,47 @@ on user-visible changes.
 
 ## 2022-12-28: 1.2.2
 
-Restore/cleanup NTPv1 support
+* Restore/cleanup NTPv1 support
 
-* ntpq sysstats now shows NTPv1 traffic.
+** ntpq sysstats now shows NTPv1 traffic.
 
-* NTPv1 counter added to sysstats log file.
+** NTPv1 counter added to sysstats log file.
 
-NTS supports partial wildcards, for example `*.example.com`
+* NTS supports partial wildcards, for example `*.example.com`
 
-Work on documentation, ntpdate, ntpheat, ntploggpg, ntpq's sysstats, ntpviz,
+* Work on documentation, ntpdate, ntpheat, ntploggpg, ntpq's sysstats, ntpviz,
 and seccomp.
 
-NTP auth no longer breaks on NULs.
+* NTP auth no longer breaks on NULs.
 
-The NTS server now saves 10 days worth of cookie keys.  This will allow clients
+* The NTS server now saves 10 days worth of cookie keys.  This will allow clients
 that only poll once a day to use NTS without using NTS-KE to keep cookies up to
 date.
 
-rawstats now logs dropped packets and their BOGON code
+* rawstats now logs dropped packets and their BOGON code
 
-* Only one per request to avoid DoSing the log file
+** Only one per request to avoid DoSing the log file
 
-* This lets you see packets that take too long.
+** This lets you see packets that take too long.
 
-Add 4 or 6 to DNS/NTS RefID tags to indicate that the
+* Add 4 or 6 to DNS/NTS RefID tags to indicate that the
 DNS or NTS-KE has succeeded but NTP has not worked yet.
 
-Build improvements
+* Build improvements
 
-* Respect `--notests` configure option for build
+** Respect `--notests` configure option for build
 
-* Add `--enable-attic` (default off)
+** Add `--enable-attic` (default off)
 
-* Restore Python 2.6 support
+** Restore Python 2.6 support
 
-* Restore LibreSSL support
+** Restore LibreSSL support
 
-* Add support for OpenSSL 3.0
+** Add support for OpenSSL 3.0
 
-Fix hash validation in ntpleapfetch again.
+* Fix hash validation in ntpleapfetch again.
 
-FreeBSD now gets nanosecond resolution on receive time stamps.
+* FreeBSD now gets nanosecond resolution on receive time stamps.
 
 == 2021-06-06: 1.2.1 ==
 
