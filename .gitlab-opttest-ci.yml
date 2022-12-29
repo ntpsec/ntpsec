@@ -101,6 +101,18 @@ freebsd-options-tester:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
+.deb_option_tester_py3_only: &deb_option_tester_py3_only
+  stage: test
+  needs: []
+  script:
+    - apt-get update
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools libseccomp-dev bash pkg-config python3-dev python3-minimal
+    - PYTHON=python3 bash tests/option-tester.sh
+  tags:
+    - gitlab-org
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+
 .deb_old_option_tester: &deb_old_option_tester
   stage: test
   needs: []
@@ -128,11 +140,11 @@ debian-stable-options-tester:
 
 debian-testing-options-tester:
   image: debian:testing-slim
-  <<: *deb_option_tester
+  <<: *deb_option_tester_py3_only
 
 debian-unstable-options-tester:
   image: debian:unstable-slim
-  <<: *deb_option_tester
+  <<: *deb_option_tester_py3_only
 
 ubuntu-latest-options-tester:
   image: ubuntu:latest
