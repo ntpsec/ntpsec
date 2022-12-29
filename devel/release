@@ -29,7 +29,7 @@ echo DST is ${DST}
 echo TAR is ${TAR}
 
 # Commit pending modifications to the repository.
-git commit -Ssecurity@ntpsec.org -a -s -m 'version ${V}'
+git commit -S${KEY} -a -s -m 'version ${V}'
 
 # Tag the new head version
 git tag -u ${KEY} -m 'version ${V}' NTPsec_${UV}
