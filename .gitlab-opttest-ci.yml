@@ -23,6 +23,16 @@ make-tarball:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
+.option_tester_py3_only: &option_tester_py3_only
+  stage: test
+  needs: []
+  after_script:
+    - PYTHON=python3 bash tests/option-tester.sh
+  tags:
+    - gitlab-org
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+
 alpine-edge-options-tester:
   <<: *option_tester
   image: alpine:edge
@@ -36,10 +46,10 @@ alpine-options-tester:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc libseccomp-dev bash
 
 centos-options-tester:
-  <<: *option_tester
+  <<: *option_tester_py3_only
   image: quay.io/centos/centos:stream9
   script:
-    - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel python2-devel pps-tools-devel libseccomp-devel bash
+    - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel bash
 
 fedora-latest-options-tester:
   image:
