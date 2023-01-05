@@ -170,7 +170,7 @@ daemon () {
     case $installer in
 	apk)
 	    $install build-base python                  # basic tools
-	    $install bison python${PYVERS}-dev linux-headers
+	    $install bison "python${PYVERS}-dev" linux-headers
 	    $install openssl-dev libcap-dev libseccomp-dev
 	    # probably needs more, but this builds
 	    # can't find timepps.h: gpsd and chrony have their own ??
@@ -229,7 +229,7 @@ daemon () {
 	    $install libcap-devel libseccomp-devel 	# build
 	    $install openssl-devel			# build
 	    $install libcap2 openssl-libs
-	    $install python${PYVERS}-curses
+	    $install "python${PYVERS}-curses"
 	    ;;
 	zypper)
 	    $install -t pattern devel_basis		# Build environment
@@ -240,7 +240,7 @@ daemon () {
 	    $install pps-tools-devel			# build
 	    $install pps-tools
 	    $install libcap2 openssl-libs
-	    $install python${PYVERS}-curses
+	    $install "python${PYVERS}-curses"
 	    ;;
     esac
 }
@@ -249,10 +249,10 @@ tools () {
     # Prerequisites for the client Python tools: python extensions
     case $installer in
 	apt)
-	    $install python${PYVERS}-dev
+	    $install "python${PYVERS}-dev"
 	    ;;
 	yum|dnf|yast|zypper)
-	    $install python${PYVERS}-devel
+	    $install "python${PYVERS}-devel"
 	    ;;
     esac
 }
@@ -274,7 +274,7 @@ ntpviz () {
 		echo "# Looks like a generic Debian system"
 		$install gnuplot
 	    fi
-	    $install fonts-liberation python${PYVERS}-psutil
+	    $install fonts-liberation "python${PYVERS}-psutil"
 	    ;;
 	emerge)
 	    $install sci-visualization/gnuplot
