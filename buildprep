@@ -12,7 +12,7 @@ DOC="no"
 UPDATE="no"
 PYVERS=""
 
-OS=`uname -s`
+OS=$(uname -s)
 
 # Loop through option flags
 for optflag in "$@"
@@ -59,7 +59,7 @@ done
 # Python 3 equivalents with a python3 prefix.  Compute the correct value for the
 # infix based on system Python.  This eill start to be significant after Python 2
 # EOLs at the beginning of 2020.
-PYVERS=`python --version 2>&1 | sed -n -e '/Python \([0-9]\).*/s//\1/p'`
+PYVERS=$(python --version 2>&1 | sed -n -e '/Python \([0-9]\).*/s//\1/p')
 if [ "$PYVERS" = "2" ]
 then
     PYVERS=""
@@ -265,7 +265,7 @@ ntpviz () {
 	    $install ttf-liberation
 	    ;;
 	apt)
-	    distro=`lsb_release -i -s`
+	    distro=$(lsb_release -i -s)
 	    if [ "$distro" = "Ubuntu" ]
 	    then
 		echo "# Looks like an Ubuntu system"
