@@ -9,6 +9,7 @@
 DRYRUN="no"
 NTPVIZ="no"
 DOC="no"
+UPDATE="no"
 PYVERS=""
 
 OS=`uname -s`
@@ -26,6 +27,7 @@ $0 - prepare your system for an NTPsec source build
     -n --dry-run Only show what would be done instead of doing it
        --ntpviz  Install dependencies for ntpviz tool
        --doc     Install dependencies for building documentation
+       --update  Update package repositories
     -a --all     Install all possible dependencies
 EOF
 		exit 0
@@ -42,6 +44,9 @@ EOF
 	 -a|--all)
 		NTPVIZ="yes"
 		DOC="yes"
+		;;
+	 --update)
+		UPDATE="yes"
 		;;
 	 *)
 		echo "# WARNING: Unknown argument: $optflag"
@@ -317,6 +322,35 @@ doc () {
 		;;
 	esac
 }
+
+update() {
+	# prerequisites to build documentation
+	case $installer in
+	emerge)
+		$do $installer --sync
+		;;
+	apk|pkg|pkgin|yum)
+		$do $installer update
+		;;
+	dnf)
+		$do $installer distro-sync
+		;;
+	apt)
+		$do $installer-get update
+		;;
+	zypper)
+		$do $installer-get refresh
+		;;
+	esac
+}
+
+if [ "$UPDATE" = "yes" ]
+then
+	update
+else
+	echo ""
+	echo "# Skipping update of package repositories [-u] [--update]"
+fi
 
 # Main sequence
 daemon
