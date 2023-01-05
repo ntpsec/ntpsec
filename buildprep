@@ -78,7 +78,7 @@ EOF
 
 if [ "$DRYRUN" = "yes" ]
 then
-	do=echo
+	do="echo"
 	echo "# Run this without -n|--dry-run, as root, for actual installation."
 	echo "#"
 else
