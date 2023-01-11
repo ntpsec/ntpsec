@@ -12,7 +12,9 @@
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
 
-/* Convert a refid & stratum to a string */
+/* Convert a refid & stratum to a string
+ * Only used by record_raw_stats
+ */
 const char *
 refid_str(
 	uint32_t	refid,
@@ -29,12 +31,18 @@ refid_str(
 	}
 
 	text = lib_getbuf();
-	text[0] = '.';
-	memcpy(&text[1], &refid, sizeof(refid));
+	memcpy(&text[0], &refid, sizeof(refid));
 	text[1 + sizeof(refid)] = '\0';
+	// Chop off trailing spaces. Facebook was sending "FB  "
+	for (int i=sizeof(refid)-1; i>0; i--) {
+	  if (text[i] != ' ') break;
+	  text[i] = '\0';
+	}
 	tlen = strlen(text);
-	text[tlen] = '.';
-	text[tlen + 1] = '\0';
+	if (0 == tlen) {
+	  strlcat(text, "?", sizeof(text));
+	}
+	text[tlen] = '\0';
 
 	return text;
 }

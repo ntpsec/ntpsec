@@ -19,7 +19,10 @@ TEST(numtoa, RefidStr) {
 	TEST_ASSERT_EQUAL_STRING("68.51.34.17", res);
 	// Test !(stratum > 1)
 	res = refid_str(htonl(0x47505300), 0);
-	TEST_ASSERT_EQUAL_STRING(".GPS.", res);
+	TEST_ASSERT_EQUAL_STRING("GPS", res);
+	// Test dropping trailing spaces
+	res = refid_str(htonl(0x46422020), 0);
+	TEST_ASSERT_EQUAL_STRING("FB", res);
 }
 
 TEST_GROUP_RUNNER(numtoa) {
