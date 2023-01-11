@@ -76,10 +76,12 @@ TEST(nts_cookie, nts_make_unpack_cookie) {
 	TEST_ASSERT_EQUAL_UINT8_ARRAY(s2c, s2c_2, 16);
 }
 
+const char *cookie_file_name = "test-cookie-keys";
+
 TEST(nts_cookie, nts_read_write_cookies) {
 	struct NTS_Key k0, k1, k2;
 	bool ok;
-	ntsconfig.KI = "test-cookie-keys";
+	ntsconfig.KI = cookie_file_name;
 	nts_nKeys = 0;
 	nts_make_cookie_key();
 	nts_make_cookie_key();
@@ -108,4 +110,10 @@ TEST_GROUP_RUNNER(nts_cookie) {
 	RUN_TEST_CASE(nts_cookie, nts_make_unpack_cookie);
 	RUN_TEST_CASE(nts_cookie, nts_make_cookie_key);
 	RUN_TEST_CASE(nts_cookie, nts_read_write_cookies);
+	/* This test gets run as root during install
+	 * that leaves the cookie file that we can't read/write
+	 * so clean it up now.
+	 * If we crash, we don't get here so the evidence is still
+	 * left around in case it helps debugging.  */
+	unlink(cookie_file_name);
 }
