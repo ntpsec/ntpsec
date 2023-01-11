@@ -166,6 +166,7 @@ static int do_fastest(void) {
 		}
 	}
 	(void)sum;	/* Squash unused warning */
+
 	return fastest;
 }
 

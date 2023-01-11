@@ -131,11 +131,9 @@ static int do_average(int type, const char* name) {
 
 }
 
-static int do_fastest(int type, const char* name) {
+static int do_fastest(int type) {
 	struct timespec start, stop;
 	uint64_t sec, nanos, fastest;
-
-	(void)name;  /* Squash unused warnings */
 
 	dups = 0;
 	fastest = 999999999;
@@ -257,7 +255,7 @@ int main(int argc, char *argv[]) {
 	for (int i=0; (NULL != clocks[i].name); i++) {
 		res = do_res(clocks[i].type, clocks[i].name);
 		average = do_average(clocks[i].type, clocks[i].name);
-		fastest = do_fastest(clocks[i].type, clocks[i].name);
+		fastest = do_fastest(clocks[i].type);
 		printf("%9d %5d %8d", res, average, fastest);
 		if (0.9*BATCHSIZE < dups) {
 			/* Hack: negative to show good if close to all are bad */
@@ -273,7 +271,7 @@ int main(int argc, char *argv[]) {
 
 	if (1) {
 		int faster;
-		fastest = do_fastest(CLOCK_REALTIME, "CLOCK_REALTIME");
+		fastest = do_fastest(CLOCK_REALTIME);
 		while (1) {
 			faster = do_hist(CLOCK_REALTIME, fastest);
 			if (0 == faster) { break;

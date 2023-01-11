@@ -25,12 +25,18 @@
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 
-
+/* 2023-Jan-10
+ * This program is close to useless since
+ * most distros support the first 4 and no others..
+ */
 const char* digests[] = {
-    "MD2", "MD4", "MD5",
-    "SHA", "SHA1",
+    "MD5",
+    "SHA1",
+    "SHA256", "SHA384",
+    "MD2", "MD4"
+    "SHA", "SHA3",
+    "SHA224", "SHA512",
     "RMD160", "RIPEMD160",
-    "SHA224", "SHA256", "SHA384", "SHA512",
     "MDC2", "GOST", "DSS1",
     "ChaCha20", "Poly1305",
     NULL };
