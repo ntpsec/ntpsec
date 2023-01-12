@@ -274,10 +274,10 @@ python3:
 python-coverage:
   <<: *job_definition
   script:
-    - apt-get update -qq && apt-get install -y -qq netbase bison python-dev python-coverage
+    - apt-get update -qq && apt-get install -y -qq netbase bison python-dev-is-python3 python3-coverage
     - python ./waf configure --disable-doc --disable-manpage build
-    - for i in build/main/tests/pylib/test_*; do python-coverage run -a --source build/main/pylib "$i"; done
-    - python-coverage report
+    - for i in build/main/tests/pylib/test_*; do python3-coverage run -a --source build/main/pylib "$i"; done
+    - python3-coverage report
 
 clang-basic:
   <<: *job_definition
