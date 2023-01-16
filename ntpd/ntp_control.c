@@ -2496,7 +2496,7 @@ read_status(
 		 * For now, output everything we know about the
 		 * peer. May be more selective later.
 		 */
-		for (const struct ctl_var *kv = sys_var; kv && !(EOV & kv->flags); kv++)
+		for (const struct ctl_var *kv = peer_var; kv && !(EOV & kv->flags); kv++)
 			if (kv->flags & DEF)
 				ctl_putpeer(kv->code, peer);
 		ctl_flushpkt(0);

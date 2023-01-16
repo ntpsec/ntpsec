@@ -2388,7 +2388,7 @@ fast_xmit(
 	}
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
 	clock_gettime(CLOCK_REALTIME, &finish);
-	sys_authdelay = tspec_to_d(sub_tspec(finish, start));
+	sys_authdelay = tspec_intv_to_lfp(sub_tspec(finish, start));
 	/* Previous versions of this code had separate DPRINT-s so it
 	 * could print the key on the auth case.  That requires separate
 	 * sendpkt-s on each branch or the DPRINT pollutes the timing. */
