@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "aes_siv.h"
 
 extern AES_SIV_CTX* cookie_ctx;
