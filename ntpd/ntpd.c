@@ -561,6 +561,8 @@ main(
 		}
 		if (rc > 0) {
 			/* parent */
+			if (pidfile)
+				write_pidfile(pidfile, rc);
 			exit_code = wait_child_sync_if(pipe_fds[0],
 						       wait_sync);
 			exit(exit_code);
@@ -586,6 +588,8 @@ main(
 		sa.sa_flags = SA_RESTART;
 		sigaction(SIGDANGER, &sa, NULL);
 #endif	/* SIGDANGER */
+	} else if (pidfile) {
+		write_pidfile(pidfile, getpid());
 	}
 
 	/*
@@ -684,11 +688,7 @@ main(
             case 'm':
             case 'n':
             case 'N':
-                /* handled elsewhere */
-                break;
-	    case 'p':
-		stats_config(STATS_PID_FILE, pidfile);
-		break;
+            case 'p':
             case 'P':
             case 'q':
                 /* handled elsewhere */

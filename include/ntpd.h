@@ -231,6 +231,7 @@ extern	uptime_t	orphwait;		/* orphan wait time */
 
 /* ntp_util.c */
 extern	void	init_util	(void);
+extern	void 	write_pidfile	(const char *, pid_t);
 extern	void	write_stats	(void);
 extern	void	stats_config	(int, const char *);
 extern	void	record_peer_stats (struct peer *, int);

@@ -142,6 +142,24 @@ init_util(void)
 #endif /* DEBUG */
 }
 
+/*
+ * write_pidfile - write the PID file
+ */
+void
+write_pidfile(
+	const char *pidfile,
+	pid_t pid)
+{
+	FILE	*fp;
+
+	if ((fp = fopen(pidfile, "w")) == NULL) {
+		msyslog(LOG_ERR, "LOG: pid file %s: %s",
+		    pidfile, strerror(errno));
+		return;
+	}
+	fprintf(fp, "%ld", (long)pid);
+	fclose(fp);
+}
 
 /*
  * drift_write - write drift to file, speeds up restart
@@ -231,7 +249,6 @@ stats_config(
 	const char *invalue	/* only one type so far */
 	)
 {
-	FILE	*fp;
 	const char *value;
 	size_t	len;
 	double	new_drift = 0;
@@ -298,13 +315,7 @@ stats_config(
 	 * Open pid file.
 	 */
 	case STATS_PID_FILE:
-		if ((fp = fopen(value, "w")) == NULL) {
-			msyslog(LOG_ERR, "LOG: pid file %s: %s",
-			    value, strerror(errno));
-			break;
-		}
-		fprintf(fp, "%d", (int)getpid());
-		fclose(fp);
+		write_pidfile(value, getpid());
 		break;
 
 	/*
