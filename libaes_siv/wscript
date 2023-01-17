@@ -27,6 +27,7 @@ def build(ctx):
             "aes_siv_test.c",
             "tests.c",
         ],
+        install_path=None,
         use="aes_siv",
         cflags=aes_cflags,
     )
