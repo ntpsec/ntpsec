@@ -638,7 +638,7 @@ def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     if resname is not None:
         return resname
     # Catch garbaged hostnames in corrupted Mode 6 responses
-    m = re.match("([:.[\]]|\w)*", inhost)
+    m = re.match(r"([:.[\]]|\w)*", inhost)
     if not m:
         raise TypeError
     (hostname, portsuffix) = portsplit(inhost)
@@ -1395,7 +1395,7 @@ class IfstatsSummary:
         # FIXME, a brutal and slow way to check for invalid chars..
         # maybe just strip non-printing chars?
         for c in s:
-            if not c.isalnum() and c not in "/.:[] \%\n":
+            if not c.isalnum() and c not in "/.:[] %\n":
                 return ''
         return s
 

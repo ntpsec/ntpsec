@@ -137,7 +137,7 @@ class MyArgumentParser(argparse.ArgumentParser):
     def convert_arg_line_to_args(self, arg_line):
         '''Make options file more tolerant'''
         # strip out trailing comments
-        arg_line = re.sub('\s+#.*$', '', arg_line)
+        arg_line = re.sub(r'\s+#.*$', '', arg_line)
 
         # ignore blank lines
         if not arg_line:

@@ -82,7 +82,7 @@ class CpuTemp:
             self.has_sensors = True
 
         # pattern that matches the string that has the cpu temp
-        self._pattern = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
+        self._pattern = re.compile(r'^\s+temp\d+_input:\s+([\d\.]+).*$')
 
     def get_data(self):
         "Collects the data and return the output as an array"
