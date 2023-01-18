@@ -12,6 +12,12 @@ on user-visible changes.
 
 ## Repository Head
 
+* Do not install libaes_siv test anymore.
+
+* Add update option to buildprep.
+
+* ntpdig shows packet delay in JSON output.
+
 ## 2022-12-28: 1.2.2
 
 * Restore/cleanup NTPv1 support
