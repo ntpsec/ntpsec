@@ -103,7 +103,8 @@ AES_SIV_CTX* cookie_ctx;
 
 /* Statistics for ntpq */
 uint64_t nts_cookie_make = 0;
-uint64_t nts_cookie_decode = 0;
+uint64_t nts_cookie_decode_total = 0;
+uint64_t nts_cookie_decode_current = 0;
 uint64_t nts_cookie_decode_old = 0;	/* one day old */
 uint64_t nts_cookie_decode_old2 = 0;	/* two days old */
 uint64_t nts_cookie_decode_older = 0;	/* more than 2 days old */
@@ -394,11 +395,13 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 		break;
 	  }
 	}
-	if (0 == i) {
-		nts_cookie_decode++;
-	} else if (nts_nKeys == i) {
+	nts_cookie_decode_total++;  /* total attempts, includes too old */
+	if (nts_nKeys == i) {
 		nts_cookie_decode_too_old++;
 		return false;
+        }
+	if (0 == i) {
+		nts_cookie_decode_current++;
 	} else if (1 == i) {
 		nts_cookie_decode_old++;
 	} else if (2 == i) {

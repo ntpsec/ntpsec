@@ -243,11 +243,12 @@ extern uint64_t nts_server_send;
 extern uint64_t nts_server_recv_good;
 extern uint64_t nts_server_recv_bad;
 extern uint64_t nts_cookie_make;
-extern uint64_t nts_cookie_decode;
+extern uint64_t nts_cookie_decode_total;  /* total attempts, includes too old */
+extern uint64_t nts_cookie_decode_current;
 extern uint64_t nts_cookie_decode_old;
 extern uint64_t nts_cookie_decode_old2;
 extern uint64_t nts_cookie_decode_older;
-extern uint64_t nts_cookie_decode_too_old;
+extern uint64_t nts_cookie_decode_too_old; /* or garbage */
 extern uint64_t nts_cookie_decode_error;
 extern uint64_t nts_ke_serves_good;
 extern uint64_t nts_ke_serves_bad;

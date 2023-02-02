@@ -29,6 +29,34 @@
 #include "nts.h"
 #include "timespecops.h"
 
+/* Run time constants  */
+# include <sys/utsname.h>
+struct utsname utsnamebuf;
+// ?? linker strings don't work in const arrays
+static const char ntpd_version_str[] = "ntpd ntpsec-" NTPSEC_VERSION_EXTENDED;
+
+/* Variables that need updating each time. */
+static leap_signature_t lsig;
+static struct timex ntx;
+
+/*
+ * Statistic counters to keep track of requests and responses.
+ */
+static unsigned long ctltimereset;	/* time stats reset */
+static uint64_t numctlreq;		/* # of requests we've received */
+static uint64_t numctlbadpkts;		/* # of bad control packets */
+static uint64_t numctlresponses;	/* # of resp packets sent with data */
+static uint64_t numctlfrags;		/* # of fragments sent */
+static uint64_t numctlerrors;		/* # of error responses sent */
+static uint64_t numctltooshort;		/* # of too short input packets */
+static uint64_t numctlinputresp;	/* # of responses on input */
+static uint64_t numctlinputfrag;	/* # of fragments on input */
+static uint64_t numctlinputerr;		/* # of input pkts with err bit set */
+static uint64_t numctlbadoffset;	/* # of input pkts with nonzero offset */
+static uint64_t numctlbadversion;	/* # of input pkts with unknown version */
+static uint64_t numctldatatooshort;	/* data too short for count */
+static uint64_t numctlbadop;		/* bad op code found in packet */
+
 // Refactored C?_VARLIST innards
 ssize_t CI_VARLIST(char*, char*, const struct ctl_var*, bool*);
 bool CF_VARLIST(const struct ctl_var*, const struct ctl_var*, const struct ctl_var*);
@@ -70,18 +98,24 @@ static	void	ctl_putdblf	(const char *, bool, int, double);
 static	void	ctl_putuint	(const char *, uint64_t);
 static	void	ctl_puthex	(const char *, uint64_t);
 static	void	ctl_putint	(const char *, long);
-static	void	ctl_putts	(const char *, l_fp *);
+static	void	ctl_putts	(const char *, l_fp);
 static	void	ctl_putadr	(const char *, refid_t, sockaddr_u *);
 static	void	ctl_putrefid	(const char *, refid_t);
 static	void	ctl_putarray	(const char *, double *, int);
-static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
 static	void	ctl_puttime	(const char *, time_t);
 #ifdef REFCLOCK
-static	void	ctl_putclock	(int, struct refclockstat *, int);
+static	void	ctl_putclock	(int, struct refclockstat *, bool);
 #endif	/* REFCLOCK */
-static	const struct ctl_var *ctl_getitem(const struct ctl_var *,
-					  char **);
+
+/* 2023-Jan-14 Fedora c compiler barfs on function with
+ * arg of const struct foo * unless that is used as a result previously.
+ */
+static	const struct var * ctl_getitem(const struct var *, char **);
+static	void	ctl_putsys	(const struct var *);
+static	void	ctl_putspecial	(const struct var *);
+
+static	const struct ctl_var *ctl_getitem2(const struct ctl_var *, char **);
 static	unsigned short ctlsysstatus	(void);
 static	unsigned short	count_var	(const struct ctl_var *);
 static	void	control_unspec	(struct recvbuf *, int);
@@ -89,9 +123,7 @@ static	void	read_status	(struct recvbuf *, int);
 static	void	read_sysvars	(void);
 static	void	read_peervars	(void);
 static	void	read_variables	(struct recvbuf *, int);
-static	void	write_variables (struct recvbuf *, int);
 static	void	read_clockstatus(struct recvbuf *, int);
-static	void	write_clockstatus(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
 static	void	send_mru_entry	(mon_entry *, int);
 #ifdef USE_RANDOMIZE_RESPONSES
@@ -115,9 +147,9 @@ static const struct ctl_proc control_codes[] = {
 	{ CTL_OP_UNSPEC,		NOAUTH,	control_unspec },
 	{ CTL_OP_READSTAT,		NOAUTH,	read_status },
 	{ CTL_OP_READVAR,		NOAUTH,	read_variables },
-	{ CTL_OP_WRITEVAR,		AUTH,	write_variables },
+	{ CTL_OP_WRITEVAR,		AUTH,	NULL },
 	{ CTL_OP_READCLOCK,		NOAUTH,	read_clockstatus },
-	{ CTL_OP_WRITECLOCK,		NOAUTH,	write_clockstatus },
+	{ CTL_OP_WRITECLOCK,		NOAUTH,	NULL },
 	{ CTL_OP_CONFIGURE,		AUTH,	configure },
 	{ CTL_OP_READ_MRU,		NOAUTH,	read_mru_list },
 	{ CTL_OP_READ_ORDLIST_A,	AUTH,	read_ordlist },
@@ -125,328 +157,292 @@ static const struct ctl_proc control_codes[] = {
 	{ NO_REQUEST,			0,	NULL }
 };
 
-/*
- * System variable values. The array can be indexed by the variable
- * index to find the textual name.  Mostly not order-sensitive.
- */
-static const struct ctl_var sys_var[] = {
-	{ 0,			PADDING, "" },
-#define	CS_LEAP			1
-	{ CS_LEAP,		RW|DEF, "leap" },
-#define	CS_STRATUM		2
-	{ CS_STRATUM,		RO|DEF, "stratum" },
-#define	CS_PRECISION		3
-	{ CS_PRECISION, 	RO|DEF, "precision" },
-#define	CS_ROOTDELAY		4
-	{ CS_ROOTDELAY, 	RO|DEF, "rootdelay" },
-#define	CS_ROOTDISPERSION	5
-	{ CS_ROOTDISPERSION,	RO|DEF, "rootdisp" },
-#define	CS_REFID		6
-	{ CS_REFID,		RO|DEF, "refid" },
-#define	CS_REFTIME		7
-	{ CS_REFTIME,		RO|DEF, "reftime" },
-#define	CS_POLL			8
-	{ CS_POLL,		RO|DEF, "tc" },
-#define	CS_PEERID		9
-	{ CS_PEERID,		RO|DEF, "peer" },
-#define	CS_OFFSET		10
-	{ CS_OFFSET,		RO|DEF, "offset" },
-#define	CS_DRIFT		11
-	{ CS_DRIFT,		RO|DEF, "frequency" },
-#define	CS_JITTER		12
-	{ CS_JITTER,		RO|DEF, "sys_jitter" },
-#define	CS_ERROR		13
-	{ CS_ERROR,		RO|DEF, "clk_jitter" },
-#define	CS_CLOCK		14
-	{ CS_CLOCK,		RO|DEF, "clock" },
-#define	CS_PROCESSOR		15
-	{ CS_PROCESSOR, 	RO|DEF, "processor" },
-#define	CS_SYSTEM		16
-	{ CS_SYSTEM,		RO|DEF, "system" },
-#define	CS_VERSION		17
-	{ CS_VERSION,		RO|DEF, "version" },
-#define	CS_STABIL		18
-	{ CS_STABIL,		RO|DEF, "clk_wander" },
-#define	CS_VARLIST		19
-	{ CS_VARLIST,		RO, "sys_var_list" },
-#define	CS_TAI			20
-	{ CS_TAI,		RO|DEF, "tai" },
-#define	CS_LEAPTAB		21
-	{ CS_LEAPTAB,		RO|DEF, "leapsec" },
-#define	CS_LEAPEND		22
-	{ CS_LEAPEND,		RO|DEF, "expire" },
-#define	CS_RATE			23
-	{ CS_RATE,		RO|DEF, "mintc" },
-#define	CS_MRU_ENABLED		24
-	{ CS_MRU_ENABLED,	RO, "mru_enabled" },
-#define	CS_MRU_DEPTH		25
-	{ CS_MRU_DEPTH,		RO, "mru_depth" },  /* mru_entries */
-#define	CS_MRU_DEEPEST		26
-	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },
-#define	CS_MRU_MINDEPTH		27
-	{ CS_MRU_MINDEPTH,	RO, "mru_mindepth" },
-#define	CS_MRU_MAXAGE		28
-	{ CS_MRU_MAXAGE,	RO, "mru_maxage" },
-#define	CS_MRU_MINAGE		29
-	{ CS_MRU_MINAGE,	RO, "mru_minage" },
-#define	CS_MRU_MAXDEPTH		30
-	{ CS_MRU_MAXDEPTH,	RO, "mru_maxdepth" },
-#define	CS_MRU_MEM		31
-	{ CS_MRU_MEM,		RO, "mru_mem" },
-#define	CS_MRU_MAXMEM		32
-	{ CS_MRU_MAXMEM,	RO, "mru_maxmem" },
-#define	CS_SS_UPTIME		33
-	{ CS_SS_UPTIME,		RO, "ss_uptime" },
-#define	CS_SS_RESET		34
-	{ CS_SS_RESET,		RO, "ss_reset" },
-#define	CS_SS_RECEIVED		35
-	{ CS_SS_RECEIVED,	RO, "ss_received" },
-#define	CS_SS_THISVER		36
-	{ CS_SS_THISVER,	RO, "ss_thisver" },
-#define	CS_SS_OLDVER		37
-	{ CS_SS_OLDVER,		RO, "ss_oldver" },
-/* CS_SS_VER1 is way below */
-#define	CS_SS_BADFORMAT		38
-	{ CS_SS_BADFORMAT,	RO, "ss_badformat" },
-#define	CS_SS_BADAUTH		39
-	{ CS_SS_BADAUTH,	RO, "ss_badauth" },
-#define	CS_SS_DECLINED		40
-	{ CS_SS_DECLINED,	RO, "ss_declined" },
-#define	CS_SS_RESTRICTED	41
-	{ CS_SS_RESTRICTED,	RO, "ss_restricted" },
-#define	CS_SS_LIMITED		42
-	{ CS_SS_LIMITED,	RO, "ss_limited" },
-#define	CS_SS_KODSENT		43
-	{ CS_SS_KODSENT,	RO, "ss_kodsent" },
-#define	CS_SS_PROCESSED		44
-	{ CS_SS_PROCESSED,	RO, "ss_processed" },
-#define	CS_PEERADR		45
-	{ CS_PEERADR,		RO, "peeradr" },
-#define	CS_PEERMODE		46
-	{ CS_PEERMODE,		RO, "peermode" },
-#define	CS_AUTHDELAY		47
-	{ CS_AUTHDELAY,		RO, "authdelay" },
-#define	CS_AUTHKEYS		48
-	{ CS_AUTHKEYS,		RO, "authkeys" },
-#define	CS_AUTHFREEK		49
-	{ CS_AUTHFREEK,		RO, "authfreek" },
-#define	CS_AUTHKLOOKUPS		50
-	{ CS_AUTHKLOOKUPS,	RO, "authklookups" },
-#define	CS_AUTHKNOTFOUND	51
-	{ CS_AUTHKNOTFOUND,	RO, "authknotfound" },
-#define	CS_AUTHENCRYPTS		52
-	{ CS_AUTHENCRYPTS,	RO, "authencrypts" },
-#define CS_AUTHDIGESTENCRYPT	53
-	{ CS_AUTHDIGESTENCRYPT,	RO, "authdigestencrypts" },
-#define CS_AUTHCMACENCRYPT	54
-	{ CS_AUTHCMACENCRYPT,	RO, "authcmacencrypts" },
-#define	CS_AUTHDECRYPTS		55
-	{ CS_AUTHDECRYPTS,	RO, "authdecrypts" },
-#define	CS_AUTHRESET		56
-	{ CS_AUTHRESET,		RO, "authreset" },
-#define	CS_K_OFFSET		57
-	{ CS_K_OFFSET,		RO, "koffset" },
-#define	CS_K_FREQ		58
-	{ CS_K_FREQ,		RO, "kfreq" },
-#define	CS_K_MAXERR		59
-	{ CS_K_MAXERR,		RO, "kmaxerr" },
-#define	CS_K_ESTERR		60
-	{ CS_K_ESTERR,		RO, "kesterr" },
-#define	CS_K_STFLAGS		61
-	{ CS_K_STFLAGS,		RO, "kstflags" },
-#define	CS_K_TIMECONST		62
-	{ CS_K_TIMECONST,	RO, "ktimeconst" },
-#define	CS_K_PRECISION		63
-	{ CS_K_PRECISION,	RO, "kprecis" },
-#define	CS_K_FREQTOL		64
-	{ CS_K_FREQTOL,		RO, "kfreqtol" },
-#define	CS_K_PPS_FREQ		65
-	{ CS_K_PPS_FREQ,	RO, "kppsfreq" },
-#define	CS_K_PPS_STABIL		66
-	{ CS_K_PPS_STABIL,	RO, "kppsstab" },
-#define	CS_K_PPS_JITTER		67
-	{ CS_K_PPS_JITTER,	RO, "kppsjitter" },
-#define	CS_K_PPS_CALIBDUR	68
-	{ CS_K_PPS_CALIBDUR,	RO, "kppscalibdur" },
-#define	CS_K_PPS_CALIBS		69
-	{ CS_K_PPS_CALIBS,	RO, "kppscalibs" },
-#define	CS_K_PPS_CALIBERRS	70
-	{ CS_K_PPS_CALIBERRS,	RO, "kppscaliberrs" },
-#define	CS_K_PPS_JITEXC		71
-	{ CS_K_PPS_JITEXC,	RO, "kppsjitexc" },
-#define	CS_K_PPS_STBEXC		72
-	{ CS_K_PPS_STBEXC,	RO, "kppsstbexc" },
-#define	CS_IOSTATS_RESET	73
-	{ CS_IOSTATS_RESET,	RO, "iostats_reset" },
-#define	CS_TOTAL_RBUF		74
-	{ CS_TOTAL_RBUF,	RO, "total_rbuf" },
-#define	CS_FREE_RBUF		75
-	{ CS_FREE_RBUF,		RO, "free_rbuf" },
-#define	CS_USED_RBUF		76
-	{ CS_USED_RBUF,		RO, "used_rbuf" },
-#define	CS_RBUF_LOWATER		77
-	{ CS_RBUF_LOWATER,	RO, "rbuf_lowater" },
-#define	CS_IO_DROPPED		78
-	{ CS_IO_DROPPED,	RO, "io_dropped" },
-#define	CS_IO_IGNORED		79
-	{ CS_IO_IGNORED,	RO, "io_ignored" },
-#define	CS_IO_RECEIVED		80
-	{ CS_IO_RECEIVED,	RO, "io_received" },
-#define	CS_IO_SENT		81
-	{ CS_IO_SENT,		RO, "io_sent" },
-#define	CS_IO_SENDFAILED	82
-	{ CS_IO_SENDFAILED,	RO, "io_sendfailed" },
-#define	CS_IO_WAKEUPS		83
-	{ CS_IO_WAKEUPS,	RO, "io_wakeups" },
-#define	CS_IO_GOODWAKEUPS	84
-	{ CS_IO_GOODWAKEUPS,	RO, "io_goodwakeups" },
-#define	CS_TIMERSTATS_RESET	85
-	{ CS_TIMERSTATS_RESET,	RO, "timerstats_reset" },
-#define	CS_TIMER_OVERRUNS	86
-	{ CS_TIMER_OVERRUNS,	RO, "timer_overruns" },
-#define	CS_TIMER_XMTS		87
-	{ CS_TIMER_XMTS,	RO, "timer_xmts" },
-#define	CS_FUZZ			88
-	{ CS_FUZZ,		RO, "fuzz" },
-#define	CS_WANDER_THRESH	89
-	{ CS_WANDER_THRESH,	RO, "clk_wander_threshold" },
-#define CS_MRU_EXISTS		90
-	{ CS_MRU_EXISTS,	RO, "mru_exists" },
-#define CS_MRU_NEW		91
-	{ CS_MRU_NEW,		RO, "mru_new" },
-#define CS_MRU_RECYCLEOLD	92
-	{ CS_MRU_RECYCLEOLD,	RO, "mru_recycleold" },
-#define CS_MRU_RECYCLEFULL	93
-	{ CS_MRU_RECYCLEFULL,	RO, "mru_recyclefull" },
-#define CS_MRU_NONE		94
-	{ CS_MRU_NONE,		RO, "mru_none" },
-#define CS_MRU_OLDEST_AGE	95
-	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
-#ifdef ENABLE_LEAP_SMEAR
-#define	CS_LEAPSMEARINTV	96
-	{ CS_LEAPSMEARINTV,	RO|DEF, "leapsmearinterval" },
-#define	CS_LEAPSMEAROFFS	97
-	{ CS_LEAPSMEAROFFS,	RO|DEF, "leapsmearoffset" },
-#else
-/* hack to keep table aligned */
-	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
-	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },
+#ifndef ENABLE_FUZZ
+static const double dbl_zero = 0.0;
 #endif
-#define	CS_TICK                 98
-	{ CS_TICK,		RO, "tick" },
-	/* new in NTPsec */
-#define	CS_NUMCTLREQ		99
-	{ CS_NUMCTLREQ,		RO, "ss_numctlreq" },
-#define CS_ROOTDISTANCE		100
-	{ CS_ROOTDISTANCE,	RO, "rootdist" },
-#define CS_AUTHDIGESTDECRYPT	101
-	{ CS_AUTHDIGESTDECRYPT,	RO, "authdigestdecrypts" },
-#define CS_AUTHDIGESTFAIL	102
-	{ CS_AUTHDIGESTFAIL,	RO, "authdigestfails" },
-#define CS_AUTHCMACDECRYPT	103
-	{ CS_AUTHCMACDECRYPT,	RO, "authcmacdecrypts" },
-#define CS_AUTHCMACFAIL		104
-	{ CS_AUTHCMACFAIL,	RO, "authcmacfails" },
-#define CS_K_LOCKCLOCK		105
-	{ CS_K_LOCKCLOCK,	RO, "lockclock" },
-#define CS_MRU_HASHSLOTS	106
-	{ CS_MRU_HASHSLOTS,		RO, "mru_hashslots" },
-#define	CS_SS_RESET_R		107
-	{ CS_SS_RESET_R,		RO, "ss_reset_r" },
-#define	CS_SS_RECEIVED_R		108
-	{ CS_SS_RECEIVED_R,	RO, "ss_received_r" },
-#define	CS_SS_THISVER_R		109
-	{ CS_SS_THISVER_R,	RO, "ss_thisver_r" },
-#define	CS_SS_OLDVER_R		110
-	{ CS_SS_OLDVER_R,		RO, "ss_oldver_r" },
-/* CS_SS_VER1_R is way below */
-#define	CS_SS_BADFORMAT_R		111
-	{ CS_SS_BADFORMAT_R,	RO, "ss_badformat_r" },
-#define	CS_SS_BADAUTH_R		112
-	{ CS_SS_BADAUTH_R,	RO, "ss_badauth_r" },
-#define	CS_SS_DECLINED_R		113
-	{ CS_SS_DECLINED_R,	RO, "ss_declined_r" },
-#define	CS_SS_RESTRICTED_R	114
-	{ CS_SS_RESTRICTED_R,	RO, "ss_restricted_r" },
-#define	CS_SS_LIMITED_R		115
-	{ CS_SS_LIMITED_R,	RO, "ss_limited_r" },
-#define	CS_SS_KODSENT_R		116
-	{ CS_SS_KODSENT_R,	RO, "ss_kodsent_r" },
-#define	CS_SS_PROCESSED_R	117
-	{ CS_SS_PROCESSED_R,	RO, "ss_processed_r" },
+static int int_zero = 0;
 
-/* These belong way above. */
-#define	CS_SS_VER1		118
-	{ CS_SS_VER1,		RO, "ss_ver1" },
-#define	CS_SS_VER1_R		119
-	{ CS_SS_VER1_R,		RO, "ss_ver1_r" },
-#define	CS_SS_VER1CLIENT	120
-	{ CS_SS_VER1CLIENT,	RO, "ss_ver1client" },
-#define	CS_SS_VER1CLIENT_R	121
-	{ CS_SS_VER1CLIENT_R,	RO, "ss_ver1client_r" },
-#define	CS_SS_VER1ZERO		122
-	{ CS_SS_VER1ZERO,	RO, "ss_ver1zero" },
-#define	CS_SS_VER1ZERO_R	123
-	{ CS_SS_VER1ZERO_R,	RO, "ss_ver1zero_r" },
-#define	CS_SS_VER1SYMM		124
-	{ CS_SS_VER1SYMM,	RO, "ss_ver1symm" },
-#define	CS_SS_VER1SYMM_R	125
-	{ CS_SS_VER1SYMM_R,	RO, "ss_ver1symm_r" },
+enum var_type {v_time,
+	v_str, v_dbl, v_uli, v_li, v_uint, v_int,
+	v_u64, v_i64, v_u32, v_i32, v_u8, v_i8, v_bool,
+	v_u64P, v_u32P, v_uliP,
+	v_l_fp, v_l_fp_ms,
+	v_mrumem,
+	v_since, v_kli, v_special};
+enum var_type_special {
+	vs_peer, vs_peeradr, vs_peermode,
+	vs_systime,
+	vs_refid, vs_mruoldest, vs_varlist};
+struct var {
+  const char* name;
+  const int flags;
+  const enum var_type type;
+  union {
+    const time_t* p_time;
+    const char* p_str;
+    const double* p_dbl;
+    const unsigned long int* p_uli;
+    const long int* p_li;
+    const unsigned int* p_uint;
+    const int* p_int;
+    const uint64_t* p_u64;
+    const int64_t* p_i64;
+    const uint32_t* p_u32;
+    const int32_t* p_i32;
+    const uint8_t* p_u8;
+    const int8_t* p_i8;
+    const bool* p_bool;
+    const l_fp* p_l_fp;
+    const uptime_t* p_up;
+    uint64_t (*p_u64P)(void);
+    uint32_t (*p_u32P)(void);
+    unsigned long int (*p_uliP)(void);
+    const enum var_type_special special;
+    };
+  };
+
+#define Var_time(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_time, .p_time = &xlocation }
+#define Var_str(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_str, .p_str = xlocation }
+#define Var_dbl(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_dbl, .p_dbl = &xlocation }
+#define Var_uli(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_uli, .p_uli = &xlocation }
+#define Var_li(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_li, .p_li = &xlocation }
+#define Var_uint(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_uint, .p_uint = &xlocation }
+#define Var_int(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_int, .p_int = &xlocation }
+
+#define Var_u64P(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_u64P, .p_u64P = xlocation }
+#define Var_u32P(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_u32P, .p_u32P = xlocation }
+#define Var_uliP(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_uliP, .p_uliP = xlocation }
+
+#define Var_u64(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_u64, .p_u64 = &xlocation }
+#define Var_i64(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_i64, .p_i84 = &xlocation }
+#define Var_u32(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_u32, .p_u32 = &xlocation }
+#define Var_i32(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_i32, .p_i32 = &xlocation }
+#define Var_u8(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_u8, .p_u8 = &xlocation }
+#define Var_i8(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_i8, .p_i8 = &xlocation }
+#define Var_bool(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_bool, .p_bool = &xlocation }
+
+#define Var_l_fp(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_l_fp, .p_l_fp = &xlocation }
+#define Var_l_fp_ms(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_l_fp_ms, .p_l_fp = &xlocation }
+#define Var_since(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_since, .p_up = &xlocation }
+
+#define Var_mrumem(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_mrumem, .p_u64 = &xlocation }
+#define Var_kli(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_kli, .p_li = &xlocation }
+#define Var_special(xname, xflags, xspecial) { \
+  .name = xname, .flags = xflags, .type = v_special, .special = xspecial }
+
+static const struct var sys_var[] = {
+  Var_u32("ss_uptime", RO, current_time),
+  Var_u8("leap", RO|DEF, sys_vars.sys_leap),        // Was RW
+  Var_u8("stratum", RO|DEF, sys_vars.sys_stratum),
+  Var_i8("precision", RO|DEF, sys_vars.sys_precision),
+  Var_dbl("rootdelay", RO|DEF|ToMS, sys_vars.sys_rootdelay),
+  Var_dbl("rootdisp", RO|DEF|ToMS, sys_vars.sys_rootdisp),
+  Var_dbl("rootdist", RO|DEF|ToMS, sys_vars.sys_rootdist),
+  Var_special("refid", RO|DEF, vs_refid),
+  Var_l_fp("reftime", RO|DEF, sys_vars.sys_reftime),
+  Var_u8("tc", RO|DEF, clkstate.sys_poll),
+  Var_special("peer", RO|DEF, vs_peer),
+  Var_dbl("offset", RO|DEF|ToMS|DBL6, clkstate.last_offset),
+  Var_dbl("frequency", RO|DEF|ToPPM, loop_data.drift_comp),
+
+  Var_dbl("sys_jitter", RO|DEF|ToMS|DBL6, clkstate.sys_jitter),
+  Var_dbl("clk_jitter", RO|DEF|ToMS|DBL6, clkstate.clock_jitter),
+  Var_special("clock", RO|DEF, vs_systime),
+  Var_str("processor", RO|DEF, utsnamebuf.machine),
+  Var_str("system", RO|DEF, utsnamebuf.sysname),
+  // old code appended release to system
+  Var_str("release", RO|DEF, utsnamebuf.release),
+  Var_str("version", RO|DEF, ntpd_version_str),
+
+  Var_dbl("clk_wander", RO|DEF|ToPPM|DBL6, loop_data.clock_stability),
+  Var_special("sys_var_list", RO|DEF, vs_varlist),
+  Var_uint("tai", RO|DEF, sys_tai),
+  Var_time("leapsec", RO|DEF|N_LEAP, lsig.ttime),
+  Var_time("expire", RO|DEF|N_LEAP, lsig.etime),
+  Var_u8("mintc", RO|DEF, rstrct.ntp_minpoll),
+
+  Var_uint("mru_enabled", RO, mon_data.mon_enabled),
+  Var_u64("mru_hashslots", RO, mon_data.mru_hashslots),
+  Var_u64("mru_depth", RO, mon_data.mru_entries),
+  Var_u64("mru_deepest", RO, mon_data.mru_peakentries),
+  Var_u64("mru_mindepth", RO, mon_data.mru_mindepth),
+  Var_int("mru_maxage", RO, mon_data.mru_maxage),
+  Var_int("mru_minage", RO, mon_data.mru_minage),
+  Var_u64("mru_maxdepth", RO, mon_data.mru_maxdepth),
+  Var_mrumem("mru_mem", RO, mon_data.mru_entries),
+  Var_mrumem("mru_maxmem", RO, mon_data.mru_maxdepth),
+  Var_u64("mru_exists", RO, mon_data.mru_exists),
+  Var_u64("mru_new", RO, mon_data.mru_new),
+  Var_u64("mru_recycleold", RO, mon_data.mru_recycleold),
+  Var_u64("mru_recyclefull", RO, mon_data.mru_recyclefull),
+  Var_u64("mru_none", RO, mon_data.mru_none),
+  Var_special("mru_oldest_age", RO, vs_mruoldest),
+
+#define Var_Pair(name, location) \
+  Var_u64P(name, RO, stat_##location), \
+  Var_u64P(name "_r", RO, stat_total_##location)
+
+  Var_u32("ss_uptime", RO, current_time),
+  Var_u32P("ss_reset", RO, stat_stattime),
+  Var_u32P("ss_reset_r", RO, stat_total_stattime),
+  Var_Pair("ss_received", received),
+  Var_Pair("ss_thisver", newversion),
+  Var_Pair("ss_oldver", oldversion),
+  Var_Pair("ss_ver1", version1),
+  Var_Pair("ss_ver1client", version1client),
+  Var_Pair("ss_ver1zero", version1zero),
+  Var_Pair("ss_ver1symm", version1symm),
+  Var_Pair("ss_badformat", badlength),
+  Var_Pair("ss_badauth", badauth),
+  Var_Pair("ss_declined", declined),
+  Var_Pair("ss_restricted", restricted),
+  Var_Pair("ss_limited", limitrejected),
+  Var_Pair("ss_kodsent", kodsent),
+  Var_Pair("ss_processed", processed),
+
+/* We own this one.  See above.  No proc mode.
+ * Note that lots of others are not (yet?) in this table.  */
+  Var_u64("ss_numctlreq", RO, numctlreq),
+
+  Var_special("peeradr", RO, vs_peeradr),
+  Var_special("peermode", RO, vs_peermode),
+
+/* authinfo: Shared Key Authentication */
+  Var_since("authreset", RO, auth_timereset),
+  Var_l_fp_ms("authdelay", RO, sys_authdelay),
+  Var_uint("authkeys", RO, authnumkeys),
+  Var_uint("authfreek", RO, authnumfreekeys),
+  Var_uli("authklookups", RO, authkeylookups),
+  Var_uli("authknotfound", RO, authkeynotfound),
+  Var_uli("authencrypts", RO, authencryptions),
+  Var_uli("authdigestencrypts", RO, authdigestencrypt),
+  Var_uli("authcmacencrypts", RO, authcmacencrypt),
+  Var_uli("authdecrypts", RO, authdecryptions),
+  Var_uli("authdigestdecrypts", RO, authdigestdecrypt),
+  Var_uli("authdigestfails", RO, authdigestfail),
+  Var_uli("authcmacdecrypts", RO, authcmacdecrypt),
+  Var_uli("authcmacfails", RO, authcmacfail),
+
+/* kerninfo: Kernel timekeeping info */
+  Var_kli("koffset", RO|N_CLOCK|KToMS, ntx.offset),
+  Var_kli("kfreq", RO|N_CLOCK|K_16, ntx.freq),
+  Var_kli("kmaxerr", RO|N_CLOCK|KToMS, ntx.maxerror),
+  Var_kli("kesterr", RO|N_CLOCK|KToMS, ntx.esterror),
+  Var_int("kstflags", RO|N_CLOCK, ntx.status),           // turn to text
+  Var_li("ktimeconst", RO|N_CLOCK, ntx.constant),
+  Var_kli("kprecis", RO|N_CLOCK|KToMS, ntx.precision),
+  Var_kli("kfreqtol", RO|N_CLOCK|K_16, ntx.tolerance),  // Not in man page
+  Var_kli("kppsfreq", RO|N_CLOCK|K_16, ntx.ppsfreq),
+  Var_kli("kppsstab", RO|N_CLOCK|K_16, ntx.stabil),
+  Var_kli("kppsjitter", RO|N_CLOCK|KToMS, ntx.jitter),
+  Var_int("kppscalibdur", RO|N_CLOCK, ntx.shift),       // 1<<shift
+  Var_li("kppscalibs", RO|N_CLOCK, ntx.calcnt),
+  Var_li("kppscaliberrs", RO|N_CLOCK, ntx.errcnt),
+  Var_li("kppsjitexc", RO|N_CLOCK, ntx.jitcnt),
+  Var_li("kppsstbexc", RO|N_CLOCK, ntx.stbcnt),
+
+
+/* refclock stuff in ntp_io */
+  Var_since("iostats_reset", RO, io_timereset),
+  Var_u64P("io_dropped", RO, dropped_count),
+  Var_u64P("io_ignored", RO, ignored_count),
+  Var_u64P("io_received", RO, received_count),
+  Var_u64P("io_sent", RO, sent_count),
+  Var_u64P("io_sendfailed", RO, notsent_count),
+  Var_u64P("io_wakeups", RO, handler_calls_count),
+  Var_u64P("io_pkt_reads", RO, handler_pkts_count),
+#ifdef REFCLOCK
+  Var_u64P("io_ref_reads", RO, handler_refrds_count),
+#endif
+
+// receive buffers
+  Var_uliP("total_rbuf", RO, total_recvbuffs),
+  Var_uliP("free_rbuf", RO, free_recvbuffs),
+  Var_int("used_rbuf", RO, int_zero),
+  Var_uliP("used_rbuf", RO, lowater_additions),
+
+
+  Var_since("timerstats_reset", RO, timer_timereset),
+  Var_uli("timer_overruns", RO, alarm_overflow),
+  Var_uli("timer_xmts", RO, timer_xmtcalls),
+
+#ifdef ENABLE_FUZZ
+  Var_dbl("fuzz", RO|DBL6|ToMS, sys_fuzz),
+  Var_dbl("tick", RO|DBL6|ToMS, sys_tick),
+#else
+  Var_dbl("fuzz", RO, dbl_zero),
+  Var_dbl("tick", RO, dbl_zero),
+#endif
+
+  Var_uli("clk_wander_threshold", RO|ToPPM, timer_xmtcalls),
+
+#ifdef ENABLE_LEAP_SMEAR
+  /* Old code returned nothing if leap_smear_intv was 0 */
+  Var_uint("leapsmearinterval", RO, leap_smear_intv),
+  Var_dbl("leapsmearoffset", RO|ToMS, leap_smear.doffset),
+#endif
+
+  Var_bool("lockclock", RO, loop_data.lockclock),
 
 #ifndef DISABLE_NTS
-#define CS_nts_client_send		126
-	{ CS_nts_client_send,		RO, "nts_client_send" },
-#define CS_nts_client_recv_good		127
-	{ CS_nts_client_recv_good,	RO, "nts_client_recv_good" },
-#define CS_nts_client_recv_bad		128
-	{ CS_nts_client_recv_bad,	RO, "nts_client_recv_bad" },
-#define CS_nts_server_send		129
-	{ CS_nts_server_send,		RO, "nts_server_send" },
-#define CS_nts_server_recv_good		130
-	{ CS_nts_server_recv_good,	RO, "nts_server_recv_good" },
-#define CS_nts_server_recv_bad		131
-	{ CS_nts_server_recv_bad,	RO, "nts_server_recv_bad" },
-
-#define CS_nts_cookie_make		132
-	{ CS_nts_cookie_make,		RO, "nts_cookie_make" },
-#define CS_nts_cookie_decode		133
-	{ CS_nts_cookie_decode,		RO, "nts_cookie_decode" },
-#define CS_nts_cookie_decode_old	134
-	{ CS_nts_cookie_decode_old,	RO, "nts_cookie_decode_old" },
-#define CS_nts_cookie_decode_old2	135
-	{ CS_nts_cookie_decode_old2,	RO, "nts_cookie_decode_old2" },
-#define CS_nts_cookie_decode_older	136
-	{ CS_nts_cookie_decode_older,	RO, "nts_cookie_decode_older" },
-#define CS_nts_cookie_decode_too_old	137
-	{ CS_nts_cookie_decode_too_old,	RO, "nts_cookie_decode_too_old" },
-#define CS_nts_cookie_decode_error	138
-	{ CS_nts_cookie_decode_error,	RO, "nts_cookie_decode_error" },
-
-#define CS_nts_ke_serves_good		139
-	{ CS_nts_ke_serves_good,	RO, "nts_ke_serves_good" },
-#define CS_nts_ke_serves_bad		140
-	{ CS_nts_ke_serves_bad,		RO, "nts_ke_serves_bad" },
-#define CS_nts_ke_probes_good		141
-	{ CS_nts_ke_probes_good,	RO, "nts_ke_probes_good" },
-#define CS_nts_ke_probes_bad		142
-	{ CS_nts_ke_probes_bad,		RO, "nts_ke_probes_bad" },
+/* ntsinfo: NTS statistics */
+  Var_u64("nts_client_send", RO, nts_client_send),
+  Var_u64("nts_client_recv_good", RO, nts_client_recv_good),
+  Var_u64("nts_client_recv_bad", RO, nts_client_recv_bad),
+  Var_u64("nts_server_send", RO, nts_server_send),
+  Var_u64("nts_server_recv_good", RO, nts_server_recv_good),
+  Var_u64("nts_server_recv_bad", RO, nts_server_recv_bad),
+  Var_u64("nts_cookie_make", RO, nts_cookie_make),
+  Var_u64("nts_cookie_decode_total", RO, nts_cookie_decode_total),
+  Var_u64("nts_cookie_decode_current", RO, nts_cookie_decode_current),
+  /* Following line is a hack for old versions of ntpq
+   * nts_cookie_decode is old name for nts_cookie_decode_current */
+  Var_u64("nts_cookie_decode", RO, nts_cookie_decode_current),
+  Var_u64("nts_cookie_decode_old", RO, nts_cookie_decode_old),
+  Var_u64("nts_cookie_decode_old2", RO, nts_cookie_decode_old2),
+  Var_u64("nts_cookie_decode_older", RO, nts_cookie_decode_older),
+  Var_u64("nts_cookie_decode_too_old", RO, nts_cookie_decode_too_old),
+  Var_u64("nts_cookie_decode_error", RO, nts_cookie_decode_error),
+  Var_u64("nts_ke_serves_good", RO, nts_ke_serves_good),
+  Var_u64("nts_ke_serves_bad", RO, nts_ke_serves_bad),
+  Var_u64("nts_ke_probes_good", RO, nts_ke_probes_good),
+  Var_u64("nts_ke_probes_bad", RO, nts_ke_probes_bad),
 #endif
-/* Can't insert things here -- need dummy slots for ifdef case */
 
-#define	CS_MAXCODE		((sizeof(sys_var)/sizeof(sys_var[0])) - 1)
-	{ 0,                    EOV, "" }
+  { .flags=EOV }                  // end marker for scans
+
 };
 
-/* This makes sys_vars partially order-sensitive */
-#define	CS_KERN_FIRST		CS_K_OFFSET
-#define	CS_KERN_LAST		CS_K_PPS_STBEXC
+
 
 static struct ctl_var *ext_sys_var = NULL;
 
 /*
  * Peer variable list. Not order-sensitive.
  */
-static const struct ctl_var peer_var[] = {
+static const struct ctl_var peer_var2[] = {
 	{ 0,		PADDING, "" },
 #define	CP_CONFIG		1
 	{ CP_CONFIG,	RO, "config" },
@@ -549,7 +545,7 @@ static const struct ctl_var peer_var[] = {
 	/* new in NTPsec */
 #define	CP_NTSCOOKIES		49
 	{ CP_NTSCOOKIES, RO|DEF, "ntscookies" },
-#define	CP_MAXCODE		((sizeof(peer_var)/sizeof(peer_var[0])) - 1)
+#define	CP_MAXCODE		((sizeof(peer_var2)/sizeof(peer_var2[0])) - 1)
 	{ 0,		EOV, "" }
 };
 
@@ -557,7 +553,8 @@ static const struct ctl_var peer_var[] = {
 /*
  * Clock variable list. Not order-sensitive.
  */
-static const struct ctl_var clock_var[] = {
+
+static const struct ctl_var clock_var2[] = {
 	{ 0,			PADDING, "" },
 #define	CC_NAME		1
 	{ CC_NAME,		RO|DEF, "name" },
@@ -597,12 +594,6 @@ static const char addr_fmt[] =		"addr.%d";
 static const char last_fmt[] =		"last.%d";
 
 /*
- * System and processor definitions.
- */
-# include <sys/utsname.h>
-static struct utsname utsnamebuf;
-
-/*
  * Keyid used for authenticating write requests.
  */
 keyid_t ctl_auth_keyid;
@@ -614,24 +605,6 @@ static	uint8_t ctl_sys_last_event;
 static	uint8_t ctl_sys_num_events;
 
 
-/*
- * Statistic counters to keep track of requests and responses.
- */
-static unsigned long ctltimereset;	/* time stats reset */
-static uint64_t numctlreq;		/* # of requests we've received */
-static uint64_t numctlbadpkts;		/* # of bad control packets */
-static uint64_t numctlresponses;	/* # of resp packets sent with data */
-static uint64_t numctlfrags;		/* # of fragments sent */
-static uint64_t numctlerrors;		/* # of error responses sent */
-static uint64_t numctltooshort;		/* # of too short input packets */
-static uint64_t numctlinputresp;	/* # of responses on input */
-static uint64_t numctlinputfrag;	/* # of fragments on input */
-static uint64_t numctlinputerr;		/* # of input pkts with err bit set */
-static uint64_t numctlbadoffset;	/* # of input pkts with nonzero offset */
-static uint64_t numctlbadversion;	/* # of input pkts with unknown version */
-static uint64_t numctldatatooshort;	/* data too short for count */
-static uint64_t numctlbadop;		/* bad op code found in packet */
-static uint64_t numasyncmsgs;		/* # of async messages we've sent */
 
 /*
  * Response packet used by these routines. Also some state information
@@ -662,10 +635,6 @@ static auth_info* res_auth;  /* !NULL => authenticate */
  */
 static	char *reqpt;
 static	char *reqend;
-
-#ifndef MIN
-#define MIN(a, b) (((a) <= (b)) ? (a) : (b))
-#endif
 
 /*
  * init_control - initialize request data
@@ -896,6 +865,10 @@ process_control(
 		if (cc->control_code == res_opcode) {
 			DPRINT(3, ("opcode %d, found command handler\n",
 				   res_opcode));
+			if (NULL == cc->handler) {
+				ctl_error(CERR_BADOP);  // Not Implemented
+				return;
+			}
 			if (cc->flags == AUTH
 			    && (NULL == res_auth
 				|| res_auth->keyid != ctl_auth_keyid)) {
@@ -1101,7 +1074,8 @@ ctl_putdata(
 		/*
 		 * Not enough room in this one, flush it out.
 		 */
-		currentlen = MIN(dlen, (unsigned int)(dataend - datapt));
+		currentlen = (unsigned int)(dataend - datapt);
+                if (dlen < currentlen) currentlen = dlen;
 
 		memcpy(datapt, dp, currentlen);
 
@@ -1198,6 +1172,7 @@ ctl_putdblf(
 	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
+
 /*
  * ctl_putuint - write a tagged unsigned integer into the response
  */
@@ -1271,12 +1246,12 @@ ctl_putint(
 static void
 ctl_putts(
 	const char *tag,
-	l_fp *ts
+	l_fp ts
 	)
 {
 	char buf[50];
 	snprintf(buf, sizeof(buf), "0x%08x.%08x",
-		 (unsigned int)lfpuint(*ts), (unsigned int)lfpfrac(*ts));
+		 (unsigned int)lfpuint(ts), (unsigned int)lfpfrac(ts));
 	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
@@ -1354,570 +1329,201 @@ ctl_putarray(
 }
 
 
-#define CASE_DBL(number, variable)	case number: \
-		ctl_putdbl(CV_NAME, variable); \
-		break
-#define CASE_DBL6(number, variable)	case number: \
-		ctl_putdbl6(CV_NAME, variable); \
-		break
-#define CASE_HEX(number, variable)	case number: \
-		ctl_puthex(CV_NAME, variable); \
-		break
-#define CASE_INT(number, variable)	case number: \
-		ctl_putint(CV_NAME, variable); \
-		break
-#define CASE_SFP(number, variable)	case number: \
-		ctl_putsfp(CV_NAME, variable); \
-		break
-#define CASE_TS(number, variable)	case number: \
-		ctl_putts(CV_NAME, variable); \
-		break
-#define CASE_UINT(number, variable)	case number: \
-		ctl_putuint(CV_NAME, variable); \
-		break
-#define CV_NAME sys_var[varid].text
 /*
  * ctl_putsys - output a system variable
  */
 static void
-ctl_putsys(
-	int varid
-	)
-{
-	l_fp tmp;
-	char str[256];
-	double dtemp;
-	const char *ss;
-	static struct timex ntx;
+ctl_putsys(const struct var * v) {
 	static unsigned long ntp_adjtime_time;
+	static unsigned long ntp_leap_time;
 
-	/*
-	 * CS_K_* variables depend on up-to-date output of ntp_adjtime()
-	 */
-	if (CS_KERN_FIRST <= varid && varid <= CS_KERN_LAST &&
-	    current_time != ntp_adjtime_time) {
+/* older compilers don't allow delecrations on each case */
+	    double temp_d;
+	    uptime_t temp_up;
+            uint64_t mem;
+
+/* FIXME: ****
+ * This should get pushed up a layer: flag, once per request
+ * This could get data from 2 samples if the clock ticks while we are working..
+ */
+	/* The Kernel clock variables need up-to-date output of ntp_adjtime() */
+	if (v->flags&N_CLOCK && current_time != ntp_adjtime_time) {
 		ZERO(ntx);
 		if (ntp_adjtime(&ntx) < 0)
                     msyslog(LOG_ERR,
                             "MODE6: ntp_adjtime() for mode 6 query failed: %s", strerror(errno));
-		else
-                    ntp_adjtime_time = current_time;
+                ntp_adjtime_time = current_time;
 	}
 
-	switch (varid) {
-
-	CASE_UINT(CS_LEAP, sys_vars.sys_leap);
-
-	CASE_UINT(CS_STRATUM, sys_vars.sys_stratum);
-
-	CASE_INT(CS_PRECISION, sys_vars.sys_precision);
-
-	CASE_DBL(CS_ROOTDELAY, sys_vars.sys_rootdelay * MS_PER_S);
-
-	CASE_DBL(CS_ROOTDISPERSION, sys_vars.sys_rootdisp * MS_PER_S);
-
-	case CS_REFID:
-		if (sys_vars.sys_stratum > 1 &&
-                    sys_vars.sys_stratum < STRATUM_UNSPEC)
-			ctl_putadr(sys_var[varid].text, sys_vars.sys_refid,
-                                   NULL);
-		else
-			ctl_putrefid(sys_var[varid].text, sys_vars.sys_refid);
-		break;
-
-	CASE_TS(CS_REFTIME, &sys_vars.sys_reftime);
-
-	CASE_UINT(CS_POLL, clkstate.sys_poll);
-
-	case CS_PEERID:
-		if (sys_vars.sys_peer == NULL)
-			ctl_putuint(sys_var[varid].text, 0);
-		else
-			ctl_putuint(sys_var[varid].text,
-				    sys_vars.sys_peer->associd);
-		break;
-
-	case CS_PEERADR:
-		if (sys_vars.sys_peer != NULL &&
-                    sys_vars.sys_peer->dstadr != NULL)
-			ss = sockporttoa(&sys_vars.sys_peer->srcadr);
-		else
-			ss = "0.0.0.0:0";
-		ctl_putunqstr(sys_var[varid].text, ss, strlen(ss));
-		break;
-
-	case CS_PEERMODE: {
-		uint64_t u;
-		u = (sys_vars.sys_peer != NULL)
-			? sys_vars.sys_peer->hmode
-			: MODE_UNSPEC;
-		ctl_putuint(sys_var[varid].text, u);
-		break;
-		}
-
-	CASE_DBL6(CS_OFFSET, clkstate.last_offset * MS_PER_S);
-
-	case CS_DRIFT:
-                /* a.k.a frequency.  (s/s), reported as us/s a.k.a. ppm */
-		ctl_putdbl6(sys_var[varid].text, loop_data.drift_comp * US_PER_S);
-		break;
-
-	CASE_DBL6(CS_JITTER, clkstate.sys_jitter * MS_PER_S);
-
-	case CS_ERROR:
-		/* a.k.a clk_jitter (s).  output as ms */
-		ctl_putdbl6(sys_var[varid].text, clkstate.clock_jitter * MS_PER_S);
-		break;
-
-	case CS_CLOCK:
-		get_systime(&tmp);
-		ctl_putts(sys_var[varid].text, &tmp);
-		break;
-
-	case CS_PROCESSOR:
-		ctl_putstr(sys_var[varid].text,
-			   utsnamebuf.machine, strlen(utsnamebuf.machine));
-		break;
-
-	case CS_SYSTEM:
-		snprintf(str, sizeof(str), "%.100s/%.100s", utsnamebuf.sysname,
-			 utsnamebuf.release);
-		ctl_putstr(sys_var[varid].text, str, strlen(str));
-		break;
-
-	case CS_VERSION:
-		ss = ntpd_version();
-		ctl_putstr(sys_var[varid].text, ss, strlen(ss));
-		break;
-
-	case CS_STABIL:
-		/* a.k.a clk_wander (s/s), output as us/s */
-		ctl_putdbl6(sys_var[varid].text,
-                            loop_data.clock_stability * US_PER_S);
-		break;
-
-	case CS_VARLIST:
-	{
-		(void)CF_VARLIST(&sys_var[varid], sys_var, ext_sys_var);
-		break;
-	}
-
-	case CS_TAI:
-		if (sys_tai > 0)
-			ctl_putuint(sys_var[varid].text, sys_tai);
-		break;
-
-	case CS_LEAPTAB:
-	{
-		leap_signature_t lsig;
-		leapsec_getsig(&lsig);
-		if (lsig.ttime > 0)
-			ctl_puttime(sys_var[varid].text, lsig.ttime);
-		break;
-	}
-
-	case CS_LEAPEND:
-	{
-		leap_signature_t lsig;
-		leapsec_getsig(&lsig);
-		if (lsig.etime > 0)
-			ctl_puttime(sys_var[varid].text, lsig.etime);
-		break;
-	}
-
-#ifdef ENABLE_LEAP_SMEAR
-	case CS_LEAPSMEARINTV:
-		if (leap_smear_intv > 0)
-			ctl_putuint(sys_var[varid].text,
-                                    leap_smear_intv);
-		break;
-
-	case CS_LEAPSMEAROFFS:
-		if (leap_smear_intv > 0)
-			ctl_putdbl(sys_var[varid].text,
-				   leap_smear.doffset * MS_PER_S);
-		break;
-#endif	/* ENABLE_LEAP_SMEAR */
-
-	CASE_UINT(CS_RATE, rstrct.ntp_minpoll);
-
-	CASE_HEX(CS_MRU_ENABLED, mon_data.mon_enabled);
-
-	CASE_UINT(CS_MRU_DEPTH, mon_data.mru_entries);
-
-	CASE_UINT(CS_MRU_HASHSLOTS, mon_data.mru_hashslots);
-
-	case CS_MRU_MEM: {
-		uint64_t u;
-		u = mon_data.mru_entries * sizeof(mon_entry);
-		u = (u + 512) / 1024;
-		ctl_putuint(sys_var[varid].text, u);
-		break;
-		}
-
-	CASE_UINT(CS_MRU_DEEPEST, mon_data.mru_peakentries);
-
-	CASE_UINT(CS_MRU_MINDEPTH, mon_data.mru_mindepth);
-
-	CASE_INT(CS_MRU_MAXAGE, mon_data.mru_maxage);
-
-	CASE_INT(CS_MRU_MINAGE, mon_data.mru_minage);
-
-	CASE_UINT(CS_MRU_MAXDEPTH, mon_data.mru_maxdepth);
-
-	case CS_MRU_MAXMEM: {
-		uint64_t u;
-		u = mon_data.mru_maxdepth * sizeof(mon_entry);
-		u = (u + 512) / 1024;
-		ctl_putuint(sys_var[varid].text, u);
-		break;
-		}
-
-	CASE_UINT(CS_MRU_EXISTS, mon_data.mru_exists);
-
-	CASE_UINT(CS_MRU_NEW, mon_data.mru_new);
-
-	CASE_UINT(CS_MRU_RECYCLEOLD, mon_data.mru_recycleold);
-
-	CASE_UINT(CS_MRU_RECYCLEFULL, mon_data.mru_recyclefull);
-
-	CASE_UINT(CS_MRU_NONE, mon_data.mru_none);
-
-	case CS_MRU_OLDEST_AGE: {
-		l_fp now;
-		get_systime(&now);
-		ctl_putuint(sys_var[varid].text, mon_get_oldest_age(now));
-		break;
-		}
-
-	CASE_UINT(CS_SS_UPTIME, current_time);
-
-	CASE_UINT(CS_SS_RESET, stat_stattime());
-
-	CASE_UINT(CS_SS_RECEIVED, stat_received());
-
-	CASE_UINT(CS_SS_THISVER, stat_newversion());
-	
-	CASE_UINT(CS_SS_OLDVER, stat_oldversion());
-
-	CASE_UINT(CS_SS_VER1, stat_version1());
-	CASE_UINT(CS_SS_VER1CLIENT, stat_version1client());
-	CASE_UINT(CS_SS_VER1ZERO, stat_version1zero());
-	CASE_UINT(CS_SS_VER1SYMM, stat_version1symm());
-
-	CASE_UINT(CS_SS_VER1_R, stat_total_version1());
-	CASE_UINT(CS_SS_VER1CLIENT_R, stat_total_version1client());
-	CASE_UINT(CS_SS_VER1ZERO_R, stat_total_version1zero());
-	CASE_UINT(CS_SS_VER1SYMM_R, stat_total_version1symm());
-
-	CASE_UINT(CS_SS_BADFORMAT, stat_badlength());
-
-	CASE_UINT(CS_SS_BADAUTH, stat_badauth());
-
-	CASE_UINT(CS_SS_DECLINED, stat_declined());
-
-	CASE_UINT(CS_SS_RESTRICTED, stat_restricted());
-
-	CASE_UINT(CS_SS_LIMITED, stat_limitrejected());
-
-	CASE_UINT(CS_SS_KODSENT, stat_kodsent());
-
-	CASE_UINT(CS_SS_PROCESSED, stat_processed());
-
-	case CS_SS_RESET_R:
-		ctl_putuint(sys_var[varid].text, stat_total_stattime());
-		break;
-
-	case CS_SS_RECEIVED_R:
-        ctl_putuint(sys_var[varid].text, stat_total_received());
-		break;
-
-	case CS_SS_THISVER_R:
-		ctl_putuint(sys_var[varid].text, stat_total_newversion());
-		break;
-
-	case CS_SS_OLDVER_R:
-		ctl_putuint(sys_var[varid].text, stat_total_oldversion());
-		break;
-
-	case CS_SS_BADFORMAT_R:
-		ctl_putuint(sys_var[varid].text, stat_total_badlength());
-		break;
-
-	case CS_SS_BADAUTH_R:
-		ctl_putuint(sys_var[varid].text, stat_total_badauth());
-		break;
-
-	case CS_SS_DECLINED_R:
-		ctl_putuint(sys_var[varid].text, stat_total_declined());
-		break;
-
-	case CS_SS_RESTRICTED_R:
-		ctl_putuint(sys_var[varid].text, stat_total_restricted());
-		break;
-
-	case CS_SS_LIMITED_R:
-		ctl_putuint(sys_var[varid].text, stat_total_limitrejected());
-		break;
-
-	case CS_SS_KODSENT_R:
-		ctl_putuint(sys_var[varid].text, stat_total_kodsent());
-		break;
-
-	case CS_SS_PROCESSED_R:
-		ctl_putuint(sys_var[varid].text, stat_total_processed());
-		break;
-
-	case CS_AUTHDELAY:
-		dtemp = lfptod(sys_authdelay);
-		ctl_putdbl(sys_var[varid].text, dtemp * MS_PER_S);
-		break;
-
-	CASE_UINT(CS_AUTHKEYS, authnumkeys);
-
-	case CS_AUTHFREEK:
-		ctl_putuint(sys_var[varid].text,
-                            (unsigned long)authnumfreekeys);
-		break;
-
-	CASE_UINT(CS_AUTHKLOOKUPS, authkeylookups);
-
-	CASE_UINT(CS_AUTHKNOTFOUND, authkeynotfound);
-
-	CASE_UINT(CS_AUTHENCRYPTS, authencryptions);
-
-	CASE_UINT(CS_AUTHDIGESTENCRYPT, authdigestencrypt);
-
-	CASE_UINT(CS_AUTHCMACENCRYPT, authcmacencrypt);
-
-	CASE_UINT(CS_AUTHDECRYPTS, authdecryptions);
-
-	CASE_UINT(CS_AUTHDIGESTDECRYPT, authdigestdecrypt);
-
-	CASE_UINT(CS_AUTHDIGESTFAIL, authdigestfail);
-
-	CASE_UINT(CS_AUTHCMACDECRYPT, authcmacdecrypt);
-
-	CASE_UINT(CS_AUTHCMACFAIL, authcmacfail);
-
-	CASE_UINT(CS_AUTHRESET, current_time - auth_timereset);
-
-		/*
-		 * CTL_IF_KERNPPS() puts a zero if kernel hard PPS is not
-		 * active, otherwise calls putfunc with args.
-		 */
-# define	CTL_IF_KERNPPS(putfunc, args)			\
-		if (0 == ntx.shift)				\
-			ctl_putint(sys_var[varid].text, 0);	\
-		else						\
-			putfunc args	/* no trailing ; */
-
-	case CS_K_OFFSET:
-		ctl_putdblf(sys_var[varid].text, false, -1,
-			ntp_error_in_seconds(ntx.offset) * MS_PER_S);
-		break;
-
-	CASE_SFP(CS_K_FREQ, ntx.freq);
-
-	case CS_K_MAXERR:
-		ctl_putdblf(sys_var[varid].text, false, 6,
-			    ntp_error_in_seconds(ntx.maxerror) * MS_PER_S);
-		break;
-
-	case CS_K_ESTERR:
-		ctl_putdblf(sys_var[varid].text, false, 6,
-			 ntp_error_in_seconds(ntx.esterror) * MS_PER_S);
-		break;
-
-	case CS_K_STFLAGS:
-		ss = k_st_flags((uint32_t)ntx.status);
-		ctl_putstr(sys_var[varid].text, ss, strlen(ss));
-		break;
-
-	CASE_INT(CS_K_TIMECONST, ntx.constant);
-
-	case CS_K_PRECISION:
-		ctl_putdblf(sys_var[varid].text, false, 6,
-			    ntp_error_in_seconds(ntx.precision) * MS_PER_S);
-		break;
-
-	CASE_SFP(CS_K_FREQTOL, ntx.tolerance);
-
-	case CS_K_PPS_FREQ:
-		CTL_IF_KERNPPS(
-			ctl_putsfp,
-			(sys_var[varid].text, ntx.ppsfreq)
-		);
-		break;
-
-	case CS_K_PPS_STABIL:
-		CTL_IF_KERNPPS(
-			ctl_putsfp,
-			(sys_var[varid].text, ntx.stabil)
-		);
-		break;
-
-	case CS_K_PPS_JITTER:
-		CTL_IF_KERNPPS(
-			ctl_putdbl,
-			(sys_var[varid].text,
-			 ntp_error_in_seconds(ntx.jitter) * MS_PER_S)
-		);
-		break;
-
-	case CS_K_PPS_CALIBDUR:
-		CTL_IF_KERNPPS(
-			ctl_putint,
-			(sys_var[varid].text, 1 << ntx.shift)
-		);
-		break;
-
-	case CS_K_PPS_CALIBS:
-		CTL_IF_KERNPPS(
-			ctl_putint,
-			(sys_var[varid].text, ntx.calcnt)
-		);
-		break;
-
-	case CS_K_PPS_CALIBERRS:
-		CTL_IF_KERNPPS(
-			ctl_putint,
-			(sys_var[varid].text, ntx.errcnt)
-		);
-		break;
-
-	case CS_K_PPS_JITEXC:
-		CTL_IF_KERNPPS(
-			ctl_putint,
-			(sys_var[varid].text, ntx.jitcnt)
-		);
-		break;
-
-	case CS_K_PPS_STBEXC:
-		CTL_IF_KERNPPS(
-			ctl_putint,
-			(sys_var[varid].text, ntx.stbcnt)
-		);
-		break;
-
-	CASE_UINT(CS_K_LOCKCLOCK, loop_data.lockclock);
-
-	case CS_IOSTATS_RESET:
-		ctl_putuint(sys_var[varid].text,
-            current_time - counter_reset_time());
-		break;
-
-	CASE_UINT(CS_TOTAL_RBUF, total_recvbuffs());
-
-	CASE_UINT(CS_FREE_RBUF, free_recvbuffs());
-
-	case CS_USED_RBUF:
-		// FIXME: nuke this slot
-		ctl_putuint(sys_var[varid].text, 0);
-		break;
-
-	CASE_UINT(CS_RBUF_LOWATER, lowater_additions());
-
-	case CS_IO_DROPPED:
-        ctl_putuint(sys_var[varid].text, dropped_count());
-		break;
-
-	case CS_IO_IGNORED:
-        ctl_putuint(sys_var[varid].text, ignored_count());
-		break;
-
-	case CS_IO_RECEIVED:
-        ctl_putuint(sys_var[varid].text, received_count());
-		break;
-
-	case CS_IO_SENT:
-        ctl_putuint(sys_var[varid].text, sent_count());
-		break;
-
-	case CS_IO_SENDFAILED:
-        ctl_putuint(sys_var[varid].text, notsent_count());
-		break;
-
-	case CS_IO_WAKEUPS:
-        ctl_putuint(sys_var[varid].text, handler_calls_count());
-		break;
-
-	case CS_IO_GOODWAKEUPS:
-        ctl_putuint(sys_var[varid].text, handler_pkts_count());
-		break;
-
-	CASE_UINT(CS_TIMERSTATS_RESET, current_time - timer_timereset);
-
-	CASE_UINT(CS_TIMER_OVERRUNS, alarm_overflow);
-
-	CASE_UINT(CS_TIMER_XMTS, timer_xmtcalls);
-
-	case CS_FUZZ:
-		/* a.k.a. fuzz (s), output in ms */
-#ifdef ENABLE_FUZZ
-		ctl_putdbl6(sys_var[varid].text, sys_fuzz * MS_PER_S);
-#else
-		ctl_putdbl6(sys_var[varid].text, 0.0);
-#endif
-		break;
-
-	CASE_DBL(CS_WANDER_THRESH, wander_threshold * US_PER_S);
-
-	case CS_TICK:
-		/* a.k.a. sys_tick (s), output in ms */
-#ifdef ENABLE_FUZZ
-		ctl_putdbl6(sys_var[varid].text, sys_tick * MS_PER_S);
-#else
-		ctl_putdbl6(sys_var[varid].text, 0.0);
-#endif
-		break;
-
-	CASE_UINT(CS_NUMCTLREQ, numctlreq);
-
-	CASE_DBL(CS_ROOTDISTANCE, sys_vars.sys_rootdist * MS_PER_S);
-
-#ifndef DISABLE_NTS
-	CASE_UINT(CS_nts_client_send, nts_client_send);
-
-	CASE_UINT(CS_nts_client_recv_good, nts_client_recv_good);
-
-	CASE_UINT(CS_nts_client_recv_bad, nts_client_recv_bad);
-
-	CASE_UINT(CS_nts_server_send, nts_server_send);
-
-	CASE_UINT(CS_nts_server_recv_good, nts_server_recv_good);
-
-	CASE_UINT(CS_nts_server_recv_bad, nts_server_recv_bad);
-
-	CASE_UINT(CS_nts_cookie_make, nts_cookie_make);
-
-	CASE_UINT(CS_nts_cookie_decode, nts_cookie_decode);
-
-	CASE_UINT(CS_nts_cookie_decode_old, nts_cookie_decode_old);
-	CASE_UINT(CS_nts_cookie_decode_old2, nts_cookie_decode_old2);
-	CASE_UINT(CS_nts_cookie_decode_older, nts_cookie_decode_older);
-	CASE_UINT(CS_nts_cookie_decode_too_old, nts_cookie_decode_too_old);
-
-	CASE_UINT(CS_nts_cookie_decode_error, nts_cookie_decode_error);
-
-	CASE_UINT(CS_nts_ke_serves_good, nts_ke_serves_good);
-
-	CASE_UINT(CS_nts_ke_serves_bad, nts_ke_serves_bad);
-
-	CASE_UINT(CS_nts_ke_probes_good, nts_ke_probes_good);
-
-	CASE_UINT(CS_nts_ke_probes_bad, nts_ke_probes_bad);
-#endif
-
-        default:
-                /* huh? */
-                break;
+	/* The leap second variables need up-to-date info */
+        if (v->flags&N_LEAP && current_time != ntp_leap_time) {
+                leapsec_getsig(&lsig);
+                ntp_leap_time = current_time;
+        }
+
+	switch (v->type) {
+
+	case v_str: ctl_putstr(v->name, v->p_str, strlen(v->p_str)); break;
+
+	case v_dbl:
+	    temp_d = *v->p_dbl;
+	    if (v->flags&ToMS) temp_d *= MS_PER_S;   // to Milliseconds
+	    if (v->flags&ToPPM) temp_d *= US_PER_S;  // to PPM
+	    if (v->flags&DBL6)
+		ctl_putdbl6(v->name, temp_d);
+	    else
+		ctl_putdbl(v->name, temp_d);
+	    break;
+
+	case v_kli:
+	    if (v->flags&K_16) {
+		/* value is scaled by 16 bits */
+		temp_d = FP_UNSCALE(*v->p_uint);
+	    } else {
+		temp_d = (double)*v->p_uint;
+	    };
+	    if (v->flags&ToMS) {
+		/* value is in nanoseconds or microseconds */
+# ifdef STA_NANO
+		temp_d *= 1E-9;
+# else
+		temp_d *= 1E-6;
+# endif
+		temp_d *= MS_PER_S;
+	    }
+            ctl_putdbl(v->name, temp_d);
+	    break;
+
+	case v_since:
+	    temp_up = current_time - *v->p_up;
+            ctl_putuint(v->name, temp_up);
+	    break;
+
+	case v_uli: ctl_putuint(v->name, *v->p_uli); break;
+	case v_uint: ctl_putuint(v->name, *v->p_uint); break;
+	case v_u64: ctl_putuint(v->name, *v->p_u64); break;
+	case v_u32: ctl_putuint(v->name, *v->p_u32); break;
+	case v_u8: ctl_putuint(v->name, *v->p_u8); break;
+
+	case v_u64P: ctl_putuint(v->name, v->p_u64P()); break;
+	case v_u32P: ctl_putuint(v->name, v->p_u32P()); break;
+	case v_uliP: ctl_putuint(v->name, v->p_uliP()); break;
+
+	case v_li: ctl_putint(v->name, *v->p_li); break;
+	case v_int: ctl_putint(v->name, *v->p_int); break;
+	case v_i64: ctl_putint(v->name, *v->p_i64); break;
+	case v_i32: ctl_putint(v->name, *v->p_i32); break;
+	case v_i8: ctl_putint(v->name, *v->p_i8); break;
+
+	case v_bool: ctl_putint(v->name, *v->p_bool); break;
+
+	case v_time: ctl_puttime(v->name, *v->p_time); break;
+
+	/* time of day */
+	case v_l_fp: ctl_putts(v->name, *v->p_l_fp); break;
+	/* time differences */
+	case v_l_fp_ms:
+	    temp_d = lfptod(*v->p_l_fp);
+	    temp_d *= MS_PER_S;
+	    ctl_putdbl(v->name, temp_d);
+            break;
+
+	case v_mrumem:
+            mem = *v->p_u64 * sizeof(mon_entry);
+            mem = (mem + 512) / 1024;
+            ctl_putuint(v->name, mem);
+            break;
+
+	case v_special: ctl_putspecial(v); break;
+
+        default: {
+	    /* There should be a way for the compiler to check this. */
+            bool once = false;
+            if (once) return;		/* Avoid log file clutter/DDoS */
+            msyslog(LOG_ERR, "ERR: ctl_putsys() needs work type=%u\n", v->type);
+            break;
+            }
 	}
 }
-#undef CV_NAME
 
+/*
+ * ctl_putspecial - output a system variable -- special cases
+ */
+static void
+ctl_putspecial(const struct var * v) {
 
-#define CV_NAME peer_var[id].text
+/* older compilers don't allow delecrations on each case */
+        int64_t i;
+	const char *ss = "0.0.0.0:0";
+        l_fp tmp;
+        uint64_t u;
+        l_fp now;
+        struct ctl_var *cv;
+
+  switch (v->special) {
+    case vs_peer:
+        i = 0;
+        if (NULL != sys_vars.sys_peer)
+            i = sys_vars.sys_peer->associd;
+        ctl_putuint(v->name, i);
+        break;
+    case vs_peeradr:
+        if (NULL != sys_vars.sys_peer)
+           ss = sockporttoa(&sys_vars.sys_peer->srcadr);
+        ctl_putstr(v->name, ss, strlen(ss));
+        break;
+    case vs_peermode:
+        u = MODE_UNSPEC;
+        if (NULL != sys_vars.sys_peer)
+            u = sys_vars.sys_peer->hmode;
+        ctl_putuint(v->name, u);
+        break;
+    case vs_systime:
+	get_systime(&tmp);
+        ctl_putts(v->name, tmp);
+        break;
+    case vs_refid:
+        if (sys_vars.sys_stratum > 1 &&
+            sys_vars.sys_stratum < STRATUM_UNSPEC)
+            ctl_putadr(v->name, sys_vars.sys_refid, NULL);
+        else
+            ctl_putrefid(v->name, sys_vars.sys_refid);
+        break;
+    case vs_mruoldest:
+        get_systime(&now);
+        ctl_putuint(v->name, mon_get_oldest_age(now));
+        break;
+    case vs_varlist:
+        for (cv = ext_sys_var; !(EOV & cv->flags); cv++) {
+            ctl_putdata(cv->text, strlen(cv->text), false);
+        }
+        break;
+    default:
+printf("ERR: ctl_putsys() needs work special=%u\n", v->special);
+        break;
+    }
+}
+
+#define CASE_DBL(number, variable)      case number: \
+                ctl_putdbl(CV_NAME, variable); \
+                break
+#define CASE_DBL6(number, variable)     case number: \
+                ctl_putdbl6(CV_NAME, variable); \
+                break
+#define CASE_HEX(number, variable)      case number: \
+                ctl_puthex(CV_NAME, variable); \
+                break
+#define CASE_INT(number, variable)      case number: \
+                ctl_putint(CV_NAME, variable); \
+                break
+#define CASE_UINT(number, variable)     case number: \
+                ctl_putuint(CV_NAME, variable); \
+                break
+#define CASE_TS(number, variable)       case number: \
+                ctl_putts(CV_NAME, variable); \
+                break
+
+#define CV_NAME peer_var2[id].text
 /*
  * ctl_putpeer - output a peer variable
  */
@@ -1930,45 +1536,45 @@ ctl_putpeer(
 	switch (id) {
 
 	case CP_CONFIG:
-		ctl_putuint(peer_var[id].text,
+		ctl_putuint(CV_NAME,
 			    !(FLAG_PREEMPT & p->cfg.flags));
 		break;
 
 	CASE_UINT(CP_AUTHENABLE, !(p->cfg.peerkey));
 
 	case CP_AUTHENTIC:
-		ctl_putuint(peer_var[id].text,
+		ctl_putuint(CV_NAME,
 			    !!(FLAG_AUTHENTIC & p->cfg.flags));
 		break;
 
 	case CP_SRCADR:
-		ctl_putadr(peer_var[id].text, 0, &p->srcadr);
+		ctl_putadr(CV_NAME, 0, &p->srcadr);
 		break;
 
 	CASE_UINT(CP_SRCPORT, SRCPORT(&p->srcadr));
 
 	case CP_SRCHOST:
 		if (p->hostname != NULL)
-			ctl_putstr(peer_var[id].text, p->hostname,
+			ctl_putstr(CV_NAME, p->hostname,
 				   strlen(p->hostname));
 #ifdef REFCLOCK
 		if (p->procptr != NULL) {
 		    char buf1[256];
 		    strlcpy(buf1, refclock_name(p), sizeof(buf1));
-		    ctl_putstr(peer_var[id].text, buf1, strlen(buf1));
+		    ctl_putstr(CV_NAME, buf1, strlen(buf1));
 		}
 #endif /* REFCLOCK */
 		break;
 
 	case CP_DSTADR:
-		ctl_putadr(peer_var[id].text, 0,
+		ctl_putadr(CV_NAME, 0,
 			   (p->dstadr != NULL)
 				? &p->dstadr->sin
 				: NULL);
 		break;
 
 	case CP_DSTPORT:
-		ctl_putuint(peer_var[id].text,
+		ctl_putuint(CV_NAME,
 			    (p->dstadr != NULL)
 				? SRCPORT(&p->dstadr->sin)
 				: 0);
@@ -1995,26 +1601,26 @@ ctl_putpeer(
 	case CP_REFID:
 #ifdef REFCLOCK
 		if (p->cfg.flags & FLAG_REFCLOCK) {
-			ctl_putrefid(peer_var[id].text, p->refid);
+			ctl_putrefid(CV_NAME, p->refid);
 			break;
 		}
 #endif
 		if (p->stratum > 1 && p->stratum < STRATUM_UNSPEC)
-			ctl_putadr(peer_var[id].text, p->refid,
+			ctl_putadr(CV_NAME, p->refid,
 				   NULL);
 		else
-			ctl_putrefid(peer_var[id].text, p->refid);
+			ctl_putrefid(CV_NAME, p->refid);
 		break;
 
-	CASE_TS(CP_REFTIME, &p->reftime);
+	CASE_TS(CP_REFTIME, p->reftime);
 
-	CASE_TS(CP_REC, &p->dst);
+	CASE_TS(CP_REC, p->dst);
 
-	CASE_TS(CP_XMT, &p->xmt);
+	CASE_TS(CP_XMT, p->xmt);
 
 	case CP_BIAS:
 		if ( !D_ISZERO_NS(p->cfg.bias) )
-			ctl_putdbl(peer_var[id].text, p->cfg.bias);
+			ctl_putdbl(CV_NAME, p->cfg.bias);
 		break;
 
 	CASE_HEX(CP_REACH, p->reach);
@@ -2024,7 +1630,7 @@ ctl_putpeer(
 	case CP_MODE:
 #ifdef REFCLOCK
 		if (p->cfg.flags & FLAG_REFCLOCK) {
-			ctl_putuint(peer_var[id].text, p->cfg.mode);
+			ctl_putuint(CV_NAME, p->cfg.mode);
 			break;
 		}
 #endif
@@ -2044,23 +1650,23 @@ ctl_putpeer(
 
 	case CP_KEYID:
 		if (p->cfg.peerkey > NTP_MAXKEY)
-			ctl_puthex(peer_var[id].text, p->cfg.peerkey);
+			ctl_puthex(CV_NAME, p->cfg.peerkey);
 		else
-			ctl_putuint(peer_var[id].text, p->cfg.peerkey);
+			ctl_putuint(CV_NAME, p->cfg.peerkey);
 		break;
 
 	case CP_FILTDELAY:
-		ctl_putarray(peer_var[id].text, p->filter_delay,
+		ctl_putarray(CV_NAME, p->filter_delay,
 			     p->filter_nextpt);
 		break;
 
 	case CP_FILTOFFSET:
-		ctl_putarray(peer_var[id].text, p->filter_offset,
+		ctl_putarray(CV_NAME, p->filter_offset,
 			     p->filter_nextpt);
 		break;
 
 	case CP_FILTERROR:
-		ctl_putarray(peer_var[id].text, p->filter_disp,
+		ctl_putarray(CV_NAME, p->filter_disp,
 			     p->filter_nextpt);
 		break;
 
@@ -2071,7 +1677,7 @@ ctl_putpeer(
 	CASE_UINT(CP_SENT, p->sent);
 
 	case CP_VARLIST:
-		(void)CF_VARLIST(&peer_var[id], peer_var, NULL);
+		(void)CF_VARLIST(&peer_var2[id], peer_var2, NULL);
 		break;
 
 	CASE_UINT(CP_TIMEREC, current_time - p->timereceived);
@@ -2179,7 +1785,7 @@ bool CF_VARLIST(
 
 
 #ifdef REFCLOCK
-#define CV_NAME clock_var[id].text
+#define CV_NAME clock_var2[id].text
 /*
  * ctl_putclock - output clock variables
  */
@@ -2187,7 +1793,7 @@ static void
 ctl_putclock(
 	int id,
 	struct refclockstat *pcs,
-	int mustput
+	bool mustput
 	)
 {
 	switch (id) {
@@ -2196,16 +1802,16 @@ ctl_putclock(
 		if (pcs->clockname == NULL ||
 		    *(pcs->clockname) == '\0') {
 			if (mustput)
-				ctl_putstr(clock_var[id].text,
+				ctl_putstr(CV_NAME,
 					   "", 0);
 		} else {
-			ctl_putstr(clock_var[id].text,
+			ctl_putstr(CV_NAME,
 				   pcs->clockname,
 				   strlen(pcs->clockname));
 		}
 		break;
 	case CC_TIMECODE:
-		ctl_putstr(clock_var[id].text,
+		ctl_putstr(CV_NAME,
 			   pcs->p_lastcode,
 			   (unsigned)pcs->lencode);
 		break;
@@ -2220,29 +1826,29 @@ ctl_putclock(
 
 	case CC_FUDGETIME1:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME1))
-			ctl_putdbl(clock_var[id].text,
+			ctl_putdbl(CV_NAME,
 				   pcs->fudgetime1 * MS_PER_S);
 		break;
 
 	case CC_FUDGETIME2:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME2))
-			ctl_putdbl(clock_var[id].text,
+			ctl_putdbl(CV_NAME,
 				   pcs->fudgetime2 * MS_PER_S);
 		break;
 
 	case CC_FUDGEVAL1:
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL1))
-			ctl_putint(clock_var[id].text,
+			ctl_putint(CV_NAME,
 				   pcs->fudgeval1);
 		break;
 
 	case CC_FUDGEVAL2:
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL2)) {
 			if (pcs->fudgeval1 > 1)
-				ctl_putadr(clock_var[id].text,
+				ctl_putadr(CV_NAME,
 					   pcs->fudgeval2, NULL);
 			else
-				ctl_putrefid(clock_var[id].text,
+				ctl_putrefid(CV_NAME,
 					     pcs->fudgeval2);
 		}
 		break;
@@ -2253,17 +1859,17 @@ ctl_putclock(
 		if (pcs->clockdesc == NULL ||
 		    *(pcs->clockdesc) == '\0') {
 			if (mustput)
-				ctl_putstr(clock_var[id].text,
+				ctl_putstr(CV_NAME,
 					   "", 0);
 		} else {
-			ctl_putstr(clock_var[id].text,
+			ctl_putstr(CV_NAME,
 				   pcs->clockdesc,
 				   strlen(pcs->clockdesc));
 		}
 		break;
 
 	case CC_VARLIST:
-		(void)CF_VARLIST(&clock_var[id], clock_var, pcs->kv_list);
+		(void)CF_VARLIST(&clock_var2[id], clock_var2, pcs->kv_list);
 		break;
 
         default:
@@ -2284,9 +1890,101 @@ ctl_putclock(
 
 /*
  * ctl_getitem - get the next data item from the incoming packet
+ * Return NULL on error, pointer to EOV on can't find.
+ * Advance reqpt on success.
+ */
+static const struct var *
+ctl_getitem(
+	const struct var *var_list,
+	char **data                 // for writes
+	)
+{
+	static char buf[128];
+	static u_long quiet_until;
+	const struct var *v;
+	size_t len;
+	char *cp;
+	char *tp;
+
+	/* Old code deleted white space.  Don't send it. */
+
+	/* Scan the string in the packet until we hit comma or
+	 * EoB. Register position of first '=' on the fly. */
+	for (tp = NULL, cp = reqpt; cp < reqend; ++cp) {
+		if (*cp == '=' && tp == NULL) {
+			tp = cp;
+		}
+		if (*cp == ',') {
+			break;
+		}
+	}
+
+	/* Process payload for write requests, if any. */
+	*data = NULL;
+	if (NULL != tp) {
+		const char *plhead = tp + 1; /* skip the '=' */
+		const char *pltail = cp;
+		size_t      plsize;
+
+		/* check payload size, terminate packet on overflow */
+		plsize = (size_t)(pltail - plhead);
+		if (plsize >= sizeof(buf)-1) {
+			goto badpacket;
+		}
+
+		/* copy data, NUL terminate, and set result data ptr */
+		memcpy(buf, plhead, plsize);
+		buf[plsize] = '\0';
+		*data = buf;
+	} else {
+		/* no payload, current end --> current name termination */
+		tp = cp;
+	}
+
+	len = tp-reqpt;
+	for (v = var_list; !(EOV & v->flags); ++v) {
+		/* Check if the var name matches the buffer. The
+		 * name is bracketed by [reqpt..tp] and not NUL
+		 * terminated, and it contains no '=' char.
+		 */
+		if (len == strlen(v->name) 
+                    && 0 == memcmp(reqpt, v->name, len)) {
+			break;
+		}
+	}
+	if (EOV & v->flags) {
+		return v;
+	}
+	if (cp < reqend) cp++;  // skip over ","
+	reqpt = cp;		// advance past this slot
+	return v;
+
+  badpacket:
+	/*TODO? somehow indicate this packet was bad, apart from syslog? */
+	numctlbadpkts++;
+	NLOG(NLOG_SYSEVENT)
+	if (quiet_until <= current_time) {
+		unsigned int port = SRCPORT(rmt_addr);
+		quiet_until = current_time + 300;
+	/* The port variable above suppresses a warning on NetBSD 8.0
+	 * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53619
+	 * A cast on SRCPORT without the dummy variable didn't work.
+	 */
+	msyslog(LOG_WARNING,
+		"Possible 'ntpdx' exploit from %s#%u"
+		" (possibly spoofed)",
+	 	socktoa(rmt_addr), port);
+	    }
+	reqpt = reqend; /* never again for this packet! */
+	return NULL;
+}
+
+
+/*
+ * ctl_getitem2 - get the next data item from the incoming packet
  */
 static const struct ctl_var *
-ctl_getitem(
+ctl_getitem2(
 	const struct ctl_var *var_list,
 	char **data
 	)
@@ -2496,7 +2194,7 @@ read_status(
 		 * For now, output everything we know about the
 		 * peer. May be more selective later.
 		 */
-		for (const struct ctl_var *kv = peer_var; kv && !(EOV & kv->flags); kv++)
+		for (const struct ctl_var *kv = peer_var2; kv && !(EOV & kv->flags); kv++)
 			if (kv->flags & DEF)
 				ctl_putpeer(kv->code, peer);
 		ctl_flushpkt(0);
@@ -2547,7 +2245,7 @@ read_peervars(void)
 		peer->num_events = 0;
 	ZERO(wants);
 	gotvar = false;
-	while (NULL != (v = ctl_getitem(peer_var, &valuep))) {
+	while (NULL != (v = ctl_getitem2(peer_var2, &valuep))) {
 		if (v->flags & EOV) {
 			ctl_error(CERR_UNKNOWNVAR);
 			return;
@@ -2561,7 +2259,7 @@ read_peervars(void)
 			if (wants[i])
 				ctl_putpeer((int)i, peer);
 	} else
-		for (const struct ctl_var *kv = peer_var; kv && !(EOV & kv->flags); kv++)
+		for (const struct ctl_var *kv = peer_var2; kv && !(EOV & kv->flags); kv++)
 			if (kv->flags & DEF)
 				ctl_putpeer(kv->code, peer);
 	ctl_flushpkt(0);
@@ -2574,68 +2272,63 @@ read_peervars(void)
 static void
 read_sysvars(void)
 {
-	const struct ctl_var *v;
-	struct ctl_var *kv;
-	unsigned int	n;
-	bool	gotvar;
+	const struct var *v;
+	const struct ctl_var *v2;
 	char *	valuep;
 	const char * pch;
-	uint8_t *wants;
-	size_t	wants_count;
 
 	/*
 	 * Wants system variables. Figure out which he wants
 	 * and give them to him.
 	 */
+
+	/* Old code had a wants bit map.  Two passes.
+	 * Maybe to verify all target names before giving a partial answer.
+	 */
 	rpkt.status = htons(ctlsysstatus());
-	if (NULL != res_auth)  /* FIXME: what's this for?? */
-		ctl_sys_num_events = 0;
-	wants_count = CS_MAXCODE + 1 + count_var(ext_sys_var);
-	wants = emalloc_zero(wants_count);
-	gotvar = false;
-	while (NULL != (v = ctl_getitem(sys_var, &valuep))) {
-		if (!(EOV & v->flags)) {
-			INSIST(v->code < wants_count);
-			wants[v->code] = 1;
-			gotvar = true;
+
+	if (reqpt == reqend) {
+		/* No names provided, send back defaults */
+		for (v = sys_var; v && !(EOV & v->flags); v++)
+			if (DEF & v->flags)
+				ctl_putsys(v);
+		for (v2 = ext_sys_var; v2 && !(EOV & v2->flags); v2++)
+			if (DEF & v2->flags)
+				ctl_putdata(v2->text, strlen(v2->text),
+					    false);
+		ctl_flushpkt(0);
+		return;
+	}
+
+/* This code structure is ugly.
+ * The basic problem is that parsing the input stream is burried in ctl_getitem
+ * and we need to know if parsing failed or it couldn't find a name.
+ * If it can't find a name, we try ext_sys_var.
+ * Return NULL on error, pointer to EOV on can't find.
+ * Advance reqpt on success.
+ */
+	while (reqpt < reqend) {
+		v = ctl_getitem(sys_var, &valuep);
+		if (NULL == v)
+			break;  // parsing error
+		if (!(v->flags & EOV)) {
+			ctl_putsys(v);
 		} else {
-			v = ctl_getitem(ext_sys_var, &valuep);
-			if (NULL == v) {
+			v2 = ctl_getitem2(ext_sys_var, &valuep);
+			if (NULL == v2) {
 				ctl_error(CERR_BADVALUE);
-				free(wants);
 				return;
 			}
 
-			if (EOV & v->flags) {
+			if (EOV & v2->flags) {
 				ctl_error(CERR_UNKNOWNVAR);
-				free(wants);
 				return;
 			}
-			n = v->code + CS_MAXCODE + 1;
-			INSIST(n < wants_count);
-			wants[n] = 1;
-			gotvar = true;
+			pch = ext_sys_var[v2->code].text;
+			ctl_putdata(pch, strlen(pch), false);
 		}
 	}
-	if (gotvar) {
-		for (n = 1; n <= CS_MAXCODE; n++)
-			if (wants[n])
-				ctl_putsys((int)n);
-		for (n = 0; n + CS_MAXCODE + 1 < wants_count; n++)
-			if (wants[n + CS_MAXCODE + 1]) {
-				pch = ext_sys_var[n].text;
-				ctl_putdata(pch, strlen(pch), false);
-			}
-	} else {
-		for (v = sys_var; v && !(EOV & v->flags); v++)
-			if (DEF & v->flags)
-				ctl_putsys(v->code);
-		for (kv = ext_sys_var; kv && !(EOV & kv->flags); kv++)
-			if (DEF & kv->flags)
-				ctl_putdata(kv->text, strlen(kv->text),
-					    false);
-	}
-	free(wants);
+
 	ctl_flushpkt(0);
 }
 
@@ -2659,111 +2352,6 @@ read_variables(
 		read_sysvars();
 }
 
-
-/*
- * write_variables - write into variables. We only allow leap bit
- * writing this way.
- */
-/*ARGSUSED*/
-static void
-write_variables(
-	struct recvbuf *rbufp,
-	int restrict_mask
-	)
-{
-	const struct ctl_var *v;
-	int ext_var;
-	char *valuep;
-	char nulltxt[1] = { '\0' };
-	long val;
-	size_t octets;
-	char *vareqv;
-	const char *t;
-	char *tt;
-
-	UNUSED_ARG(rbufp);
-	UNUSED_ARG(restrict_mask);
-
-	val = 0;
-	/*
-	 * If he's trying to write into a peer tell him no way
-	 */
-	if (res_associd != 0) {
-		ctl_error(CERR_PERMISSION);
-		return;
-	}
-
-	/*
-	 * Set status
-	 */
-	rpkt.status = htons(ctlsysstatus());
-
-	/*
-	 * Look through the variables. Dump out at the first sign of
-	 * trouble.
-	 */
-	while (NULL != (v = ctl_getitem(sys_var, &valuep))) {
-		ext_var = 0;
-		if (v->flags & EOV) {
-			if (NULL != (v = ctl_getitem(ext_sys_var, &valuep))) {
-				if (v->flags & EOV) {
-					ctl_error(CERR_UNKNOWNVAR);
-					return;
-				}
-				ext_var = 1;
-			} else {
-				break;
-			}
-		}
-		if (!(v->flags & CAN_WRITE)) {
-			ctl_error(CERR_PERMISSION);
-			return;
-		}
-		if (NULL == valuep)
-			valuep = nulltxt;
-
-		errno = 0;
-		if (!ext_var &&
-                    (*valuep == '\0' ||
-                     (val = strtol(valuep, NULL, 10), errno != 0))) {
-			ctl_error(CERR_BADFMT);
-			return;
-		}
-		if (!ext_var && (val & ~LEAP_NOTINSYNC) != 0) {
-			ctl_error(CERR_BADVALUE);
-			return;
-		}
-
-		if (ext_var) {
-			octets = strlen(v->text) + strlen(valuep) + 2;
-			vareqv = emalloc(octets);
-			tt = vareqv;
-			t = v->text;
-			while (*t && *t != '=')
-				*tt++ = *t++;
-			*tt++ = '=';
-			memcpy(tt, valuep, 1 + strlen(valuep));
-			set_sys_var(vareqv, 1 + strlen(vareqv), v->flags);
-			free(vareqv);
-		} else {
-			ctl_error(CERR_UNSPEC); /* really */
-			return;
-		}
-	}
-
-	/*
-	 * If we got anything, do it. xxx nothing to do ***
-	 */
-	/*
-	  if (leapind != ~0 || leapwarn != ~0) {
-	  if (!leap_setleap((int)leapind, (int)leapwarn)) {
-	  ctl_error(CERR_PERMISSION);
-	  return;
-	  }
-	  }
-	*/
-	ctl_flushpkt(0);
-}
 
 /*
  * configure() processes ntpq :config/config-from-file, allowing
@@ -3055,12 +2643,12 @@ send_mru_entry(
 
 		case 1:
 			snprintf(tag, sizeof(tag), last_fmt, count);
-			ctl_putts(tag, &mon->last);
+			ctl_putts(tag, mon->last);
 			break;
 
 		case 2:
 			snprintf(tag, sizeof(tag), first_fmt, count);
-			ctl_putts(tag, &mon->first);
+			ctl_putts(tag, mon->first);
 			break;
 
 		case 3:
@@ -3325,9 +2913,9 @@ static void read_mru_list(
 	ZERO(addr);
 
 	/* have to go through '(void*)' to drop 'const' property from pointer.
-	 * ctl_getitem()' needs some cleanup, too.... perlinger@ntp.org
+	 * ctl_getitem2()' needs some cleanup, too.... perlinger@ntp.org
 	 */
-	while (NULL != (v = ctl_getitem(in_parms, (void*)&val)) &&
+	while (NULL != (v = ctl_getitem2(in_parms, (void*)&val)) &&
 	       !(EOV & v->flags)) {
 		int si;
 
@@ -3442,7 +3030,7 @@ static void read_mru_list(
 		generate_nonce(rbufp, buf, sizeof(buf));
 		ctl_putunqstr("nonce", buf, strlen(buf));
 		get_systime(&now);
-		ctl_putts("now", &now);
+		ctl_putts("now", now);
 		ctl_flushpkt(0);
 		return;
 	}
@@ -3467,7 +3055,7 @@ static void read_mru_list(
 			return;
 		}
 		/* confirm the prior entry used as starting point */
-		ctl_putts("last.older", &mon->last);
+		ctl_putts("last.older", mon->last);
 		pch = sockporttoa(&mon->rmtadr);
 		ctl_putunqstr("addr.older", pch, strlen(pch));
 
@@ -3533,10 +3121,10 @@ static void read_mru_list(
 			send_random_tag_value((int)count - 1);
 		}
 #endif /* USE_RANDOMIZE_RESPONSES */
-		ctl_putts("now", &now);
+		ctl_putts("now", now);
 		/* if any entries were returned confirm the last */
 		if (prior_mon != NULL)
-			ctl_putts("last.newest", &prior_mon->last);
+			ctl_putts("last.newest", prior_mon->last);
 	}
 	ctl_flushpkt(0);
 }
@@ -3982,12 +3570,12 @@ read_clockstatus(
 	wants_alloc = CC_MAXCODE + 1 + count_var(kv);
 	wants = emalloc_zero(wants_alloc);
 	gotvar = false;
-	while (NULL != (v = ctl_getitem(clock_var, &valuep))) {
+	while (NULL != (v = ctl_getitem2(clock_var2, &valuep))) {
 		if (!(EOV & v->flags)) {
 			wants[v->code] = true;
 			gotvar = true;
 		} else {
-			v = ctl_getitem(kv, &valuep);
+			v = ctl_getitem2(kv, &valuep);
 			if (NULL == v) {
 				ctl_error(CERR_BADVALUE);
 				free(wants);
@@ -4017,7 +3605,7 @@ read_clockstatus(
 						    strlen(kv[i].text),
 						    false);
 	} else {
-		for (v = clock_var; v != NULL && !(EOV & v->flags); v++)
+		for (v = clock_var2; v != NULL && !(EOV & v->flags); v++)
 			if (DEF & v->flags)
 				ctl_putclock(v->code, &cs, false);
 		for ( ; kv != NULL && !(EOV & kv->flags); kv++)
@@ -4033,22 +3621,6 @@ read_clockstatus(
 #endif
 }
 
-
-/*
- * write_clockstatus - we don't do this
- */
-/*ARGSUSED*/
-static void
-write_clockstatus(
-	struct recvbuf *rbufp,
-	int restrict_mask
-	)
-{
-	UNUSED_ARG(rbufp);
-	UNUSED_ARG(restrict_mask);
-
-	ctl_error(CERR_PERMISSION);
-}
 
 /*
  * report_event - report an event to log files
@@ -4183,7 +3755,6 @@ ctl_clr_stats(void)
 	numctlbadversion = 0;
 	numctldatatooshort = 0;
 	numctlbadop = 0;
-	numasyncmsgs = 0;
 }
 
 static unsigned short

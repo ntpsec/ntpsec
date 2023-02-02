@@ -92,13 +92,17 @@ struct packet_counters {
 	uint64_t received;	/* total number of packets received */
 	uint64_t sent;		/* total number of packets sent */
 	uint64_t notsent;	/* total number of packets which couldn't be sent */
-	/* There used to be a signal handler for received packets. */
-	/* It's not needed now that the kernel time stamps packets. */
-	uint64_t handler_calls;	/* number of calls to interrupt handler */
-	uint64_t handler_pkts;	/* number of pkts received by handler */
-	uptime_t io_timereset;	/* time counters were reset */
+
+	uint64_t handler_calls; /* wakeups -- may batch packets */
+	uint64_t handler_pkts;  /* input packets -- redundant */
+
+#ifdef REFCLOCK
+	uint64_t handler_refrds;/* refclock reads */
+#endif
+
 };
 volatile struct packet_counters pkt_count;
+uptime_t io_timereset;	/* time counters were reset */
 
 /*
  * Interface stuff
@@ -2320,7 +2324,6 @@ input_handler(
 	 * See below for the other cases (nothing left to do or error)
 	 */
 
-	++pkt_count.handler_pkts;
 
 #ifdef REFCLOCK
 	/*
@@ -2370,6 +2373,7 @@ input_handler(
 		if (FD_ISSET(fd, fds))
 			do {
 				++select_count;
+				++pkt_count.handler_pkts;
 				buflen = read_network_packet(fd, ep);
 			} while (buflen > 0);
 	}
@@ -2736,7 +2740,10 @@ io_clr_stats(void)
 
 	pkt_count.handler_calls = 0;
 	pkt_count.handler_pkts = 0;
-	pkt_count.io_timereset = current_time;
+#ifdef REFCLOCK
+	pkt_count.handler_refrds = 0;
+#endif
+	io_timereset = current_time;
 }
 
 /*
@@ -2795,12 +2802,14 @@ uint64_t handler_pkts_count(void) {
   return pkt_count.handler_pkts;
 }
 
+#ifdef REFCLOCK
 /*
- * counter_reset_time - return the time of the last counter reset
+ * handler_pkts_refrds - return the number of refclock reads
  */
-uptime_t counter_reset_time(void) {
-  return pkt_count.io_timereset;
+uint64_t handler_refrds_count(void) {
+  return pkt_count.handler_refrds;
 }
+#endif
 
 
 #ifdef REFCLOCK

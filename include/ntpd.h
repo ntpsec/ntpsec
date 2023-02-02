@@ -70,6 +70,15 @@ struct ctl_var {
 #define DEF		0x20
 #define	PADDING		0x40
 #define	EOV		0x80
+#define ToMS		0x100
+#define ToPPM		0x200
+#define DBL6		0x400
+#define N_LEAP          0x800   /* Need to read Leap Second info */
+#define N_CLOCK         0x1000  /* Need to read kernel Clock info */
+
+/* Conversions for ntp_adjtime's timex */
+#define KToMS           0x10000  /* nano vs old micro */
+#define K_16            0x20000  /* 16 bit scaling */
 
 #define	RO	(CAN_READ)
 #define	RW	(CAN_READ|CAN_WRITE)
@@ -108,7 +117,10 @@ extern  uint64_t sent_count(void);
 extern  uint64_t notsent_count(void);
 extern  uint64_t handler_calls_count(void);
 extern  uint64_t handler_pkts_count(void);
-extern  uptime_t counter_reset_time(void);
+#ifdef REFCLOCK
+extern  uint64_t handler_refrds_count(void);
+#endif
+extern  uptime_t io_timereset;
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);
