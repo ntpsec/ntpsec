@@ -112,6 +112,14 @@ def stdversion():
     return "ntpsec-%s" % "@NTPSEC_VERSION_EXTENDED@"
 
 
+def stdversioncheck(foreign):
+    "Print a warning to stderr if module and foreign versions do not match."
+    if stdversion() != foreign:
+        sys.stderr.write("Module/Binary version mismatch\n")
+        sys.stderr.write("Binary: %s\n" % foreign)
+        sys.stderr.write("Module: %s\n" % ntp.util.stdversion())
+
+
 def rfc3339(t):
     "RFC 3339 string from Unix time, including fractional second."
     rep = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t))

@@ -1389,11 +1389,7 @@ AADRxQAAxBEAAA==
 
 if __name__ == '__main__':
     bin_ver = "ntpsec-@NTPSEC_VERSION_EXTENDED@"
-    if ntp.util.stdversion() != bin_ver:
-        sys.stderr.write("ntpviz: WARNING: Module/Binary version mismatch\n")
-        sys.stderr.write("ntpviz: WARNING: Binary: %s\n" % bin_ver)
-        sys.stderr.write("ntpviz: WARNING: Module: %s\n" %
-                         ntp.util.stdversion())
+    ntp.util.stdversioncheck(bin_ver)
 
     parser = MyArgumentParser(description="ntpd stats visualizer",
                               fromfile_prefix_chars='@',

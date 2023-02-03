@@ -117,10 +117,7 @@ Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.""" + "\n"
 
 bin_ver = "ntpsec-@NTPSEC_VERSION_EXTENDED@"
-if ntp.util.stdversion() != bin_ver:
-    sys.stderr.write("Module/Binary version mismatch\n")
-    sys.stderr.write("Binary: %s\n" % bin_ver)
-    sys.stderr.write("Module: %s\n" % ntp.util.stdversion())
+ntp.util.stdversioncheck(bin_ver)
 
 try:
     (options, arguments) = getopt.getopt(
