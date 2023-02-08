@@ -2626,7 +2626,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	/* coverity[weak_crypto] */
+	/* coverity[DC.WEAK_CRYPTO] */
 	noise = (uint32_t)random();
 	while (remaining > 0) {
 #ifdef USE_RANDOMIZE_RESPONSES
