@@ -366,7 +366,9 @@ def configure(ctx):
             # "-Wnested-externs",     # incompatible w/ Unity...
             # "-Wpadded",             # duck... over 3k warnings
             # "-Wredundant-decls",    # incompatible w/ Unity
-            "-Wswitch-default",       # warns on Bison bug
+            "-Wswitch-default",       # warns on missing switch-default
+                                        # old Bison triggers this
+            "-Wswitch-enum",          # warns on missing enum case handler
         ] + ctx.env.CFLAGS
         cc_test_flags += [
             ('w_implicit_fallthru', "-Wimplicit-fallthrough=3"),

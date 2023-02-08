@@ -1172,6 +1172,7 @@ json_token_skip(
 
                 case JSMN_PRIMITIVE:
                 case JSMN_STRING:
+                case JSMN_UNDEFINED:
 		default:
 			++tid;
 			break;

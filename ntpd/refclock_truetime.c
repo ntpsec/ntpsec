@@ -560,6 +560,9 @@ true_doevent(
 			}
 			up->state = s_Auto;
 			break;
+		case e_Huh:
+		case e_Location:
+		case e_Max:
 		default:
 			break;
 		}
@@ -579,6 +582,12 @@ true_doevent(
 			}
 			up->state = s_Auto;
 			break;
+		case e_Huh:
+		case e_F18:
+		case e_F50:
+		case e_F51:
+		case e_Location:
+		case e_Max:
 		default:
 			break;
 		}
@@ -591,6 +600,12 @@ true_doevent(
                     case e_TS:
                         up->state = s_Auto;
                         break;
+                    case e_Huh:
+                    case e_F18:
+                    case e_F50:
+                    case e_F51:
+                    case e_Location:
+                    case e_Max:
                     default:
                         break;
                 }
@@ -610,6 +625,12 @@ true_doevent(
 			case e_Huh:
                                 sleep(1);               /* wait for it */
                                 break;
+			case e_F18:
+			case e_F50:
+			case e_F51:
+			case e_TS:
+			case e_Location:
+			case e_Max:
                         default:
                                 abort();
                         }
@@ -625,6 +646,11 @@ true_doevent(
 				true_send(peer, "PO\r");
 				up->state = s_InqTCU;
 				break;
+			case e_F50:
+			case e_F51:
+			case e_Location:
+			case e_TS:
+			case e_Max:
 			default:
                                 msyslog(LOG_INFO,
                                         "REFCLOCK: TRUETIME: TM/TMD init fellthrough!");
@@ -642,6 +668,11 @@ true_doevent(
 				up->state = s_Base;
 				sleep(1);	/* XXX */
 				break;
+			case e_F18:
+			case e_F50:
+			case e_F51:
+			case e_TS:
+			case e_Max:
 			default:
                                 msyslog(LOG_INFO,
                                         "REFCLOCK: TRUETIME: TCU init fellthrough!");
@@ -665,6 +696,7 @@ true_doevent(
 			break;
 		}
 		break;
+	case t_Max:
 	default:
                 msyslog(LOG_INFO, "REFCLOCK: TRUETIME: cannot identify refclock!");
 		abort();

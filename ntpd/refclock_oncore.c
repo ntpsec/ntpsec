@@ -2374,6 +2374,7 @@ oncore_msg_BaEaHa(
 		case MODE_0D:	i = 1; break;	/* 0D, Position Hold */
 		case MODE_2D:	i = 2; break;	/* 2D, Altitude Hold */
 		case MODE_3D:	i = 3; break;	/* 3D fix */
+		case MODE_UNKNOWN:
 		default:	i = 0; break;
 		}
 
@@ -3355,6 +3356,7 @@ oncore_antenna_report(
 	case ONCORE_ANTENNA_OC: cp = "GPS antenna: short (overcurrent)";  break;
 	case ONCORE_ANTENNA_UC: cp = "GPS antenna: open (not connected)"; break;
 	case ONCORE_ANTENNA_NV: cp = "GPS antenna: short (no voltage)";   break;
+	case ONCORE_ANTENNA_UNKNOWN:
 	default:		cp = "GPS antenna: ?";                    break;
 	}
 

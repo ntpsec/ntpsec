@@ -555,6 +555,7 @@ authencrypt(
 	    case AUTH_CMAC:
 		authcmacencrypt++;
 		return cmac_encrypt(auth, pkt, length);
+	    case AUTH_NONE:
 	    default:
 		msyslog(LOG_ERR, "BUG: authencrypt: bogus type %u", auth->type);
 		exit(1);
@@ -594,6 +595,7 @@ authdecrypt(
 		answer = cmac_decrypt(auth, pkt, length, size);
 		if (!answer) authcmacfail++;
 		return answer;
+	    case AUTH_NONE:
 	    default:
 		msyslog(LOG_ERR, "BUG: authdecrypt: bogus type %u", auth->type);
 		exit(1);
