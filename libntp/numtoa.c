@@ -40,9 +40,8 @@ refid_str(
 	}
 	tlen = strlen(text);
 	if (0 == tlen) {
-	  strlcat(text, "?", sizeof(text));
+	  strlcat(text, "?", LIB_BUFLENGTH);
 	}
-	text[tlen] = '\0';
 
 	return text;
 }
