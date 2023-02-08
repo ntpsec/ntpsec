@@ -32,8 +32,6 @@
 /* Run time constants  */
 # include <sys/utsname.h>
 struct utsname utsnamebuf;
-// ?? linker strings don't work in const arrays
-static const char ntpd_version_str[] = "ntpd ntpsec-" NTPSEC_VERSION_EXTENDED;
 
 /* Variables that need updating each time. */
 static leap_signature_t lsig;
@@ -56,6 +54,8 @@ static uint64_t numctlbadoffset;	/* # of input pkts with nonzero offset */
 static uint64_t numctlbadversion;	/* # of input pkts with unknown version */
 static uint64_t numctldatatooshort;	/* data too short for count */
 static uint64_t numctlbadop;		/* bad op code found in packet */
+
+static int log_limit = 0;               /* Avoid DDoS to log file */ 
 
 // Refactored C?_VARLIST innards
 ssize_t CI_VARLIST(char*, char*, const struct ctl_var*, bool*);
@@ -160,12 +160,11 @@ static const struct ctl_proc control_codes[] = {
 #ifndef ENABLE_FUZZ
 static const double dbl_zero = 0.0;
 #endif
-static int int_zero = 0;
 
 enum var_type {v_time,
 	v_str, v_dbl, v_uli, v_li, v_uint, v_int,
 	v_u64, v_i64, v_u32, v_i32, v_u8, v_i8, v_bool,
-	v_u64P, v_u32P, v_uliP,
+	v_strP, v_u64P, v_u32P, v_uliP,
 	v_l_fp, v_l_fp_ms,
 	v_mrumem,
 	v_since, v_kli, v_special};
@@ -194,6 +193,7 @@ struct var {
     const bool* p_bool;
     const l_fp* p_l_fp;
     const uptime_t* p_up;
+    const char* (*p_strP)(void);
     uint64_t (*p_u64P)(void);
     uint32_t (*p_u32P)(void);
     unsigned long int (*p_uliP)(void);
@@ -216,6 +216,8 @@ struct var {
 #define Var_int(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_int, .p_int = &xlocation }
 
+#define Var_strP(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_strP, .p_strP = xlocation }
 #define Var_u64P(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_u64P, .p_u64P = xlocation }
 #define Var_u32P(xname, xflags, xlocation) { \
@@ -274,7 +276,7 @@ static const struct var sys_var[] = {
   Var_str("system", RO|DEF, utsnamebuf.sysname),
   // old code appended release to system
   Var_str("release", RO|DEF, utsnamebuf.release),
-  Var_str("version", RO|DEF, ntpd_version_str),
+  Var_strP("version", RO|DEF, ntpd_version),
 
   Var_dbl("clk_wander", RO|DEF|ToPPM|DBL6, loop_data.clock_stability),
   Var_special("sys_var_list", RO|DEF, vs_varlist),
@@ -380,9 +382,7 @@ static const struct var sys_var[] = {
 // receive buffers
   Var_uliP("total_rbuf", RO, total_recvbuffs),
   Var_uliP("free_rbuf", RO, free_recvbuffs),
-  Var_int("used_rbuf", RO, int_zero),
   Var_uliP("used_rbuf", RO, lowater_additions),
-
 
   Var_since("timerstats_reset", RO, timer_timereset),
   Var_uli("timer_overruns", RO, alarm_overflow),
@@ -1317,6 +1317,7 @@ ctl_putarray(
 	char buffer[200];
 	char buf[50];
 	int i;
+	buffer[0] = 0;
 	i = start;
 	do {
 		if (i == 0)
@@ -1337,7 +1338,7 @@ ctl_putsys(const struct var * v) {
 	static unsigned long ntp_adjtime_time;
 	static unsigned long ntp_leap_time;
 
-/* older compilers don't allow delecrations on each case */
+/* older compilers don't allow declarations on each case without {} */
 	    double temp_d;
 	    uptime_t temp_up;
             uint64_t mem;
@@ -1364,6 +1365,7 @@ ctl_putsys(const struct var * v) {
 	switch (v->type) {
 
 	case v_str: ctl_putstr(v->name, v->p_str, strlen(v->p_str)); break;
+	case v_strP: ctl_putstr(v->name, v->p_strP(), strlen(v->p_strP())); break;
 
 	case v_dbl:
 	    temp_d = *v->p_dbl;
@@ -1437,9 +1439,8 @@ ctl_putsys(const struct var * v) {
 	case v_special: ctl_putspecial(v); break;
 
         default: {
-	    /* There should be a way for the compiler to check this. */
-            bool once = false;
-            if (once) return;		/* Avoid log file clutter/DDoS */
+            /* -Wswitch-enum will warn if this is possible */
+            if (log_limit++ > 10) return;  /* Avoid log file clutter/DDoS */
             msyslog(LOG_ERR, "ERR: ctl_putsys() needs work type=%u\n", v->type);
             break;
             }
@@ -1499,7 +1500,9 @@ ctl_putspecial(const struct var * v) {
         }
         break;
     default:
-printf("ERR: ctl_putsys() needs work special=%u\n", v->special);
+        /* -Wswitch-enum will warn if this is possible */
+        if (log_limit++ > 10) return;  /* Avoid log file clutter/DDoS */
+        msyslog(LOG_ERR, "ERR: ctl_putspecial() needs work special=%u\n", v->special);
         break;
     }
 }

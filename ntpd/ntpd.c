@@ -457,12 +457,10 @@ set_process_priority(void)
 		msyslog(LOG_ERR, "INIT: set_process_priority: No way found to improve our priority");
 }
 
+const char *ntpd_version_string = "ntpd ntpsec-" NTPSEC_VERSION_EXTENDED;
 const char *ntpd_version(void)
 {
-    static char versionbuf[64];
-    snprintf(versionbuf, sizeof(versionbuf),
-	     "ntpd ntpsec-%s", NTPSEC_VERSION_EXTENDED);
-    return versionbuf;
+    return ntpd_version_string;
 }
 
 /*
