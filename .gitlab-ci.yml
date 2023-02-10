@@ -344,8 +344,9 @@ cross-armhf-build:
   <<: *job_definition_allow_failure
   image: $CI_REGISTRY/ntpsec/ntpsec/cross-armhf
   script:
-    - PYTHON_VERSION=3.10 PYTAG=cpython3 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags '-I/usr/include/ -I/usr/include/python3.10' --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python3.10/dist-packages --pythonarchdir=/usr/libhf/python3.10/dist-packages build -pp --enable-pylib=ffi
-    - PYTHON_VERSION=3.10 PYTAG=cpython3 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags '-I/usr/include/ -I/usr/include/python3.10' --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python3.10/dist-packages --pythonarchdir=/usr/libhf/python3.10/dist-packages build -pp --enable-pylib=ext
+    - pyver=$(python3 -c 'import sys;print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+    - PYTHON_VERSION=${pyver} PYTAG=cpython3 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags "-I/usr/include/ -I/usr/include/python${pyver}" --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python${pyver}/dist-packages --pythonarchdir=/usr/libhf/python${pyver}/dist-packages build --enable-pylib=ffi
+    - PYTHON_VERSION=${pyver} PYTAG=cpython3 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags "-I/usr/include/ -I/usr/include/python${pyver}" --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python${pyver}/dist-packages --pythonarchdir=/usr/libhf/python${pyver}/dist-packages build --enable-pylib=ext
   tags:
 
 gentoo-basic:
