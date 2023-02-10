@@ -378,7 +378,7 @@ coverity-scan:
   tags:
     - gitlab-org
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
+    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 macos-basic:
   <<: *job_definition
