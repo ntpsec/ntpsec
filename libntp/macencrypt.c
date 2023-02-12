@@ -18,12 +18,6 @@
 #include "ntp_auth.h"
 #include "ntp.h"
 
-#ifndef EVP_MD_CTX_reset
-/* Slightly older version of OpenSSL */
-/* Similar hack in ssl_init.c and attic/digest-timing.c */
-#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
-#endif
-
 /* Need one per thread. */
 extern EVP_MD_CTX *digest_ctx;
 extern CMAC_CTX *cmac_ctx;
@@ -122,7 +116,6 @@ digest_encrypt(
 	 * key type and digest type have been verified when the key
 	 * was created.
 	 */
-	EVP_MD_CTX_reset(ctx);
 	if (!EVP_DigestInit_ex(ctx, auth->digest, NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC: encrypt: digest init failed");
@@ -160,7 +153,6 @@ digest_decrypt(
 	 * key type and digest type have been verified when the key
 	 * was created.
 	 */
-	EVP_MD_CTX_reset(ctx);
 	if (!EVP_DigestInit_ex(ctx, auth->digest, NULL)) {
 		msyslog(LOG_ERR,
 		    "MAC: decrypt: digest init failed");

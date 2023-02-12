@@ -25,9 +25,6 @@
 #ifndef EVP_MD_CTX_new
 #define EVP_MD_CTX_new() EVP_MD_CTX_create()
 #endif
-#ifndef EVP_MD_CTX_reset
-#define EVP_MD_CTX_reset(ctx) EVP_MD_CTX_init(ctx)
-#endif
 
 /* Needed on OpenSSL < 1.1.0 */
 static void init_ssl(void) {
@@ -107,7 +104,6 @@ void do_mac(char *name,
 		unsigned int maclenint;
 		if (NULL == digest_ctx)
 			digest_ctx = EVP_MD_CTX_new();
-		EVP_MD_CTX_reset(digest_ctx);
 		if (!EVP_DigestInit_ex(digest_ctx, digest, NULL)) {
 			*maclen = 0;
 			return;
