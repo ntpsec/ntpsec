@@ -156,7 +156,7 @@ static int do_fastest(void) {
 
 	for (int i = 0; i < BATCHSIZE; i++) {
                 clock_gettime(CLOCK_REALTIME, &start);
-		/* coverity[dc,weak_crypto] */
+		/* coverity[DC.WEAK_CRYPTO] */
 		sum += random();
 		clock_gettime(CLOCK_REALTIME, &stop);
 		sec = (stop.tv_sec-start.tv_sec);

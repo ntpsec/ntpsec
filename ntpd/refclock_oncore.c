@@ -1626,6 +1626,7 @@ oncore_get_timestamp(
 	char Msg[160];
 
 	peer = instance->peer;
+	strlcpy(Msg, "bug-coverity-uninitalized", sizeof(Msg));
 
 #if 1
 	/* If we are in SiteSurvey mode, then we are in 3D mode, and we fall through.

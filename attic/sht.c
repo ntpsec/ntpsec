@@ -163,7 +163,7 @@ again:
 		else
 		{
 			time(&rcv_sec);
-			/* coverity[dc.weak_crypto] */
+			/* coverity[DC.WEAK_CRYPTO] */
 			rcv_frc = (unsigned int)random() % 1000000000U;
 		}
 		/* add a wobble of ~3.5msec to the clock time */

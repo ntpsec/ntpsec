@@ -2582,7 +2582,7 @@ send_random_tag_value(
 	int	noise;
 	char	buf[32];
 
-	/* coverity[weak_crypto] */
+	/* coverity[DC.WEAK_CRYPTO] */
 	noise = random();
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
@@ -3170,7 +3170,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			/* coverity[weak_crypto] */
+			/* coverity[DC.WEAK_CRYPTO] */
 			noise = (uint32_t)random();
 			noisebits = 31;
 		}
@@ -3348,7 +3348,7 @@ send_restrict_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 2) {
-			/* coverity[weak_crypto] */
+			/* coverity[DC.WEAK_CRYPTO] */
 			noise = (uint32_t)random();
 			noisebits = 31;
 		}

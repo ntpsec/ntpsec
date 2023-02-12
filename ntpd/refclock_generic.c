@@ -2557,15 +2557,19 @@ parse_start(
 	/*
 	 * Unit okay, attempt to open the device.
 	 */
-	if (peer->cfg.path)
+	if (peer->cfg.path) {
 	    path = peer->cfg.path;
-	else {
+	    /* parsedef (may?) get printed later.  Coverity */
+	    strlcpy(parsedev, path, sizeof(parsedev));
+	} else {
 	    (void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
 	    path = parsedev;
 	}
-	if (peer->cfg.ppspath)
+	if (peer->cfg.ppspath) {
 	    ppspath = peer->cfg.ppspath;
-	else {
+	    /* parseppsdef (may?) get printed later.  Coverity */
+	    strlcpy(parseppsdev, ppspath, sizeof(parseppsdev));
+	} else {
 	    (void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
 	    ppspath = parseppsdev;
 	}
