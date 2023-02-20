@@ -42,7 +42,11 @@ TEST(macencrypt, Encrypt) {
 	auth.keyid = 123;
 	auth.type = AUTH_DIGEST;
 	auth.digest = EVP_get_digestbyname("MD5");
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	auth.mac_ctx = NULL;
+#else
 	auth.cipher = NULL;
+#endif
 	auth.key = (uint8_t *)MD5key;
 	auth.key_size = (unsigned short)strlen(MD5key);
 
@@ -80,11 +84,15 @@ TEST(macencrypt, CMAC_Encrypt) {
 	auth.keyid = 1234;
 	auth.type = AUTH_CMAC;
 	auth.digest = NULL;
-	auth.cipher = EVP_get_cipherbyname("AES-128-CBC");
 	auth.key = (uint8_t *)CMACkey;
 	auth.key_size = (unsigned short)strlen(CMACkey);
-
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	auth.mac_ctx = Setup_MAC_CTX("AES-128-CBC", auth.key, auth.key_size);
+	TEST_ASSERT_NOT_NULL(auth.mac_ctx);
+#else
+	auth.cipher = EVP_get_cipherbyname("AES-128-CBC");
 	TEST_ASSERT_NOT_NULL(auth.cipher);
+#endif
 
 	int length = cmac_encrypt(&auth,
 				  (uint32_t*)packetPtr, packetLength);
@@ -162,7 +170,6 @@ TEST(macencrypt, IPv6AddressToRefId) {
 }
 
 TEST(macencrypt, null_trunc) {
-	const char *algo = "aes-128-cbc";
 	unsigned char key[] = {
 		0x0f, 0xd2, 0x28, 0x7c, 0x1e, 0x97, 0xa5, 0x0c,
 		0xb9, 0xd3, 0xcb, 0x9f, 0x80, 0xde, 0xbc, 0xb6,
@@ -192,15 +199,21 @@ TEST(macencrypt, null_trunc) {
 	auth.keyid = 100;
 	auth.type = AUTH_CMAC;
 	auth.digest = NULL;
-	auth.cipher = EVP_get_cipherbyname(algo);
 	auth.key = (uint8_t *)key;
 	auth.key_size = (unsigned short)strlen(CMACkey);
+
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	auth.mac_ctx = Setup_MAC_CTX("AES-128-CBC", auth.key, auth.key_size);
+	TEST_ASSERT_NOT_NULL(auth.mac_ctx);
+#else
+	auth.cipher = EVP_get_cipherbyname("AES-128-CBC");
 	TEST_ASSERT_NOT_NULL(auth.cipher);
+#endif
 
 	int length = cmac_encrypt(&auth,
 				  (uint32_t*)sample, len_pack);
 
-	TEST_ASSERT_EQUAL(4+16, length);            /* aria-128 */
+	TEST_ASSERT_EQUAL(4+16, length);            /* AES-128 */
 
 	TEST_ASSERT_EQUAL_MEMORY(
 	    &(expected_sample[52]),

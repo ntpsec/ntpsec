@@ -1,7 +1,46 @@
 /*
  *	CMAC and digest support for NTP
  */
-#define OPENSSL_SUPPRESS_DEPRECATED 1
+
+/*  Notes:
+ *
+ * This module covers the simple shared-key authentication.
+ * This is the working code that has to go fast.
+ * The setup code in authreadkeys is not time critical.
+ *
+ * There are 3 main options: MD5, SHA1, and AES.
+ * MD5 and SHA1 are digests.
+ *   https://en.wikipedia.org/wiki/Message_digest
+ * AES is a MAC.
+ *   https://en.wikipedia.org/wiki/Message_authentication_code
+ * OpenSSL has different APIs for them.
+ *
+ * Before OpenSSL 3, we (and many others) used the undocumented
+ * CMAC interface via openssl/cmac.h which is now (loudly) deprecated.
+ *
+ * The per packet operations all have this form:
+ *   EVP_MAC_init()
+ *   EVP_MAC_update()
+ *   EVP_MAC_final()
+ *
+ * The init step involves setting things up for the desired algorithm
+ * and key.  This can be an expensive step.  Some or much of the work
+ * can be pushed back to the one-time setup routines at the cost of
+ * more memory.  I call that preloading.
+ *
+ * This code now expects both the cipher and key to be preloaded.
+ * Just preloading the cipher will save a lot of memory if you
+ * are using a lot of keys.  The edit in this code is simple.
+ *
+ * Play with attic/cmac-timing for numbers.
+ *
+ *
+ * Modern CPUs come with support to speed up AES operations.
+ * On Intel, it's the aes capabilitiy.  You can see them
+ * under flags in /proc/cpuinfo
+ *
+ * Maybe more info in attic/cmac-timing and friends.
+ */
 
 #include "config.h"
 
@@ -10,6 +49,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <openssl/err.h>
 #include <openssl/evp.h>	/* provides OpenSSL digest API */
 #include <openssl/md5.h>
 
@@ -20,7 +60,14 @@
 
 /* Need one per thread. */
 extern EVP_MD_CTX *digest_ctx;
+
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#include <openssl/params.h>
+#else
+#include <openssl/cmac.h>
 extern CMAC_CTX *cmac_ctx;
+#endif
+
 
 /*
  * cmac_encrypt - generate CMAC authenticator
@@ -36,17 +83,39 @@ cmac_encrypt(
 {
 	uint8_t	mac[CMAC_MAX_MAC_LENGTH];
 	size_t	len;
-	CMAC_CTX *ctx = cmac_ctx;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+        EVP_MAC_CTX *ctx = auth->mac_ctx;
 
+        if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "encrypt: EVP_MAC_init() failed: %s.", str);
+                exit(1);
+        }
+        if (0 == EVP_MAC_update(ctx, (unsigned char *)pkt, length)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "encrypt: EVP_MAC_update() failed: %s.", str);
+                exit(1);
+        }
+        if (0 == EVP_MAC_final(ctx, mac, &len, sizeof(mac))) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "encrypt: EVP_MAC_final() failed: %s.", str);
+                exit(1);
+        }
+#else
+	CMAC_CTX *ctx = cmac_ctx;
 	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
 		/* Shouldn't happen.  Does if wrong key_size. */
 		msyslog(LOG_ERR,
-		    "MAC: encrypt: CMAC init failed, %u, %u",
+		    "encrypt: CMAC init failed, %u, %u",
 			auth->keyid, auth->key_size);
 		return (0);
 	}
 	CMAC_Update(ctx, (uint8_t *)pkt, (unsigned int)length);
 	CMAC_Final(ctx, mac, &len);
+#endif
 	if (MAX_BARE_MAC_LENGTH < len)
 		len = MAX_BARE_MAC_LENGTH;
 	memmove((uint8_t *)pkt + length + 4, mac, len);
@@ -69,19 +138,42 @@ cmac_decrypt(
 {
 	uint8_t	mac[CMAC_MAX_MAC_LENGTH];
 	size_t	len;
-	CMAC_CTX *ctx = cmac_ctx;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+        EVP_MAC_CTX *ctx = auth->mac_ctx;
 
+        if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "decrypt: EVP_MAC_init() failed: %s.", str);
+                return false;
+        }
+        if (0 == EVP_MAC_update(ctx, (unsigned char *)pkt, length)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "decrypt: EVP_MAC_update() failed: %s.", str);
+                return false;
+        }
+        if (0 == EVP_MAC_final(ctx, mac, &len, sizeof(mac))) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "decrypt: EVP_MAC_final() failed: %s.", str);
+                return false;
+        }
+#else
+	CMAC_CTX *ctx = cmac_ctx;
 	if (!CMAC_Init(ctx, auth->key, auth->key_size, auth->cipher, NULL)) {
 		/* Shouldn't happen.  Does if wrong key_size. */
 		msyslog(LOG_ERR,
-		    "MAC: decrypt: CMAC init failed, %u, %u",
+		    "decrypt: CMAC init failed, %u, %u",
 			auth->keyid, auth->key_size);
 		return false;
 	}
 	CMAC_Update(ctx, (uint8_t *)pkt, (unsigned int)length);
 	CMAC_Final(ctx, mac, &len);
+#endif
 	if (MAX_BARE_MAC_LENGTH < len)
 		len = MAX_BARE_MAC_LENGTH;
+
 	if ((unsigned int)size != len + 4) {
 		/* Beware of DoS attack.
 		 * This indicates either the sender is broken

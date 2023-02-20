@@ -5,7 +5,6 @@
 #include "ntp_lists.h"
 
 #include <openssl/evp.h>
-#include <openssl/cmac.h>
 
 typedef enum {AUTH_NONE, AUTH_CMAC, AUTH_DIGEST} AUTH_Type;
 
@@ -23,7 +22,11 @@ struct auth_data {
 	uint8_t *	key;			/* shared secret */
 	unsigned short	key_size;		/* secret length */
 	const EVP_MD *	digest;			/* Digest mode only */
-	const EVP_CIPHER *cipher;		/* CMAC mode only */
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	EVP_MAC_CTX *mac_ctx;			/* EVP CMAC mode only */
+#else
+	const EVP_CIPHER *cipher;		/* Old CMAC mode only */
+#endif
 };
 
 extern  void    auth_init       (void);
@@ -62,6 +65,12 @@ extern	unsigned long authcmacdecrypt;	/* calls to cmac_decrypt*/
 extern	unsigned long authcmacfail;	/* fails from cmac_decrypt*/
 extern	uptime_t auth_timereset;	/* current_time when stats reset */
 
+
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+extern EVP_MAC_CTX *evp_ctx;   /* used by authreadkeys and authkeys */
+/* For testing */
+extern EVP_MAC_CTX* Setup_MAC_CTX(const char *name, uint8_t *key, int keylen);
+#endif
 
 /* Not in CMAC API */
 #define CMAC_MAX_MAC_LENGTH 64

@@ -14,6 +14,8 @@
 #include "ntp_stdlib.h"
 #include "ntp_auth.h"
 
+#include <openssl/err.h>
+
 
 /* define the payload region of auth_data beyond the list pointers */
 #define auth_info_payload	keyid
@@ -303,15 +305,27 @@ alloc_auth_info(
 	switch (type) {
 	  case AUTH_NONE:
 		auth->digest = NULL;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+		auth->mac_ctx = NULL;
+#else
 		auth->cipher = NULL;
+#endif
 		break;
 	  case AUTH_DIGEST:
 		auth->digest = EVP_get_digestbyname(name);
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+		auth->mac_ctx = NULL;
+#else
 		auth->cipher = NULL;
+#endif
 		break;
 	  case AUTH_CMAC:
 		auth->digest = NULL;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+		auth->mac_ctx = Setup_MAC_CTX(name, auth->key, auth->key_size);
+#else
 		auth->cipher = EVP_get_cipherbyname(name);
+#endif
 		break;
 	  default:
 		msyslog(LOG_ERR, "BUG: alloc_auth_info: bogus type %u", type);
@@ -340,6 +354,9 @@ free_auth_info(
 		free(auth->key);
                 auth->key = NULL;
 	}
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	EVP_MAC_CTX_free(auth->mac_ctx);
+#endif
 	UNLINK_SLIST(unlinked, *bucket, auth, hlink, auth_info);
 	//ENSURE(sk == unlinked);
 	UNLINK_DLIST(auth, llink);
@@ -454,15 +471,29 @@ auth_setkey(
 			switch (type) {
 			  case AUTH_NONE:
 				auth->digest = NULL;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+				auth->mac_ctx = NULL;
+#else
 				auth->cipher = NULL;
+#endif
 				break;
 			  case AUTH_DIGEST:
 				auth->digest = EVP_get_digestbyname(name);
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+				auth->mac_ctx = NULL;
+#else
 				auth->cipher = NULL;
+#endif
 				break;
 			  case AUTH_CMAC:
 				auth->digest = NULL;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+				EVP_MAC_CTX_free(auth->mac_ctx);
+				auth->mac_ctx = Setup_MAC_CTX(name, \
+					auth->key, auth->key_size);
+#else
 				auth->cipher = EVP_get_cipherbyname(name);
+#endif
 				break;
 			  default:
 				msyslog(LOG_ERR, "BUG: auth_setkey: bogus type %u", type);
@@ -521,7 +552,11 @@ auth_delkeys(void)
 			auth->key_size = 0;
 			auth->type = AUTH_NONE;
 			auth->digest = NULL;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+			auth->mac_ctx = NULL;
+#else
 			auth->cipher = NULL;
+#endif
 		} else {
 			free_auth_info(auth, &key_hash[KEYHASH(auth->keyid)]);
 		}
@@ -602,3 +637,33 @@ authdecrypt(
 	}
 	return false;
 }
+
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+/* Name needs "-CBC" already appended */
+EVP_MAC_CTX* Setup_MAC_CTX(const char *name, uint8_t *key, int keylen) {
+	OSSL_PARAM params[3];
+	char temp[100];		/* Hack: OSSL_PARAM doesn't like const */
+
+	EVP_MAC_CTX *ctx = EVP_MAC_CTX_dup(evp_ctx);
+	if (NULL == ctx) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "Setup_MAC_CTX: EVP_MAC_CTX_dup failed: %s", str);
+		exit(1);
+	}
+
+	strlcpy(temp, name, sizeof(temp));
+        params[0] = OSSL_PARAM_construct_utf8_string("cipher", temp, 0);
+        params[1] = OSSL_PARAM_construct_octet_string("key", key, keylen);
+	params[2] = OSSL_PARAM_construct_end();
+        if (0 == EVP_MAC_CTX_set_params(ctx, params)) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "EVP_MAC_CTX_set_params() failed: %s: %s.",
+			str, name);
+		exit(1);
+	}
+	return ctx;
+}
+#endif
+

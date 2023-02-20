@@ -1,7 +1,13 @@
 /*
  * authreadkeys.c - routines to support the reading of the key file
+ * See comment at top of macencrypt.c
  */
-#define OPENSSL_SUPPRESS_DEPRECATED 1
+
+
+/* FIXME: use Fetch
+ * shift to one ctx per crypto type rather than one per key
+ */
+// #warning "FIXME: fetch. preload"
 
 #include "config.h"
 #include <stdio.h>
@@ -15,8 +21,11 @@
 
 #include <openssl/objects.h>
 #include <openssl/evp.h>
+#include <openssl/err.h>
 
+#if OPENSSL_VERSION_NUMBER < 0x20000000L
 #include <openssl/cmac.h>
+#endif
 
 #define NAMEBUFSIZE 100
 
@@ -82,6 +91,7 @@ try_cmac(const char *upcased, char* namebuf) {
 	if (EVP_get_cipherbyname(namebuf) == NULL) {
 		return NULL;
 	}
+	/* FIXME: 3.0 needs a Fetch to be sure it really exists. */
 	return namebuf;
 }
 
@@ -121,6 +131,56 @@ check_digest_mac_length(
 	}
 }
 
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+static void
+check_cmac_mac_length(
+	keyid_t keyno,
+	char *name) {
+	size_t length = 0;
+	unsigned char key[EVP_MAX_KEY_LENGTH];  /* garbage is OK */
+	const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
+	int keylength = EVP_CIPHER_key_length(cmac_cipher);
+	EVP_MAC_CTX *ctx = evp_ctx; 
+	OSSL_PARAM params[2];
+
+	params[0] = OSSL_PARAM_construct_utf8_string("cipher", name, 0);
+	params[1] = OSSL_PARAM_construct_end();
+	if (0 == EVP_MAC_CTX_set_params(ctx, params)) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "EVP_MAC_CTX_set_params() failed: %s: %lu=>%s.\n",
+			str, (unsigned long)keyno, name);
+		exit(1);
+        }
+        if (0 == EVP_MAC_init(ctx, key, keylength, NULL)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "EVP_MAC_init() failed: %s.\n", str);
+                exit(1);
+        }
+	/* No need for EVP_MAC_update() */
+        if (0 == EVP_MAC_final(ctx, NULL, &length, 0)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "EVP_MAC_final() failed: %s.\n", str);
+                exit(1);
+        }
+
+	/* CMAC_MAX_MAC_LENGTH isn't in API
+	 * Check here to avoid buffer overrun in cmac_decrypt and cmac_encrypt
+	 */
+	if (CMAC_MAX_MAC_LENGTH < length) {
+		msyslog(LOG_ERR,
+			"AUTH: authreadkeys: CMAC for key %u, %s is too big: %lu",
+			keyno, name, (long unsigned int)length);
+		exit(1);
+	}
+
+	if (MAX_BARE_MAC_LENGTH < length) {
+		msyslog(LOG_ERR, "AUTH: authreadkeys: CMAC for key %u, %s will be truncated.", keyno, name);
+	}
+}
+#else
 static void
 check_cmac_mac_length(
 	keyid_t keyno,
@@ -157,6 +217,7 @@ check_cmac_mac_length(
 		msyslog(LOG_ERR, "AUTH: authreadkeys: CMAC for key %u, %s will be truncated.", keyno, name);
 	}
 }
+#endif
 
 /* check_mac_length - Check for CMAC/digest too long.
  * maybe should check for too short.
@@ -165,7 +226,7 @@ static void
 check_mac_length(
 	keyid_t keyno,
 	AUTH_Type type,
-	char * name,
+	char *name,
 	char *upcased) {
 	switch (type) {
 	    case AUTH_CMAC:
