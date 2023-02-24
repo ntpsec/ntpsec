@@ -298,7 +298,6 @@ def configure(ctx):
         ctx.env.LDFLAGS += ["-lssp_nonshared"]
 
     cc_test_flags = [
-        ('f_stack_protector_all', '-fstack-protector-all'),
         ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
         # this quiets most of macOS warnings on -fpie
@@ -332,6 +331,7 @@ def configure(ctx):
 
     # Check which linker flags are supported
     ld_hardening_flags = [
+        ('f_stack_protector_all', '-fstack-protector-all'),
         ("z_now", "-Wl,-z,now"),     # no deferred symbol resolution
     ]
 
