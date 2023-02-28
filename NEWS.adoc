@@ -12,6 +12,9 @@ on user-visible changes.
 
 ## Repository Head
 
+* Fix ntpdig crash when using 2.ntp.pool.org
+  with a host without IPv6 support.
+
 * Do not install libaes_siv test anymore.
 
 * Add update option to buildprep.

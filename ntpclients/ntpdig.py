@@ -101,7 +101,14 @@ def queryhost(server, concurrent, timeout=5, port=123):
             firstloop = False
         if debug:
             log("querying %s (%s)" % (sockaddr[0], server))
-        s = socket.socket(family, socktype)
+        try:
+            s = socket.socket(family, socktype)
+        except OSError:
+            if debug:
+                log("Skipping because socket for %s of family"
+                    " %d, type %d could not be formed." %
+                    (sockaddr[0], family, socktype))
+            continue
         if keyid and keytype and passwd:
             if debug:
                 log("authenticating with %s key %d" % (keytype, keyid))
