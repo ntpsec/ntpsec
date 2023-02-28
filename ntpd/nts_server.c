@@ -110,7 +110,7 @@ bool nts_server_init(void) {
 
 	ok &= nts_load_versions(server_ctx);
 	ok &= nts_load_ciphers(server_ctx);
-
+	ok &= nts_load_ecdhcurves(server_ctx);
 	if (!ok) {
 		msyslog(LOG_ERR, "NTSs: Disabling NTS-KE server");
 		SSL_CTX_free(server_ctx);

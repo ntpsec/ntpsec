@@ -34,6 +34,7 @@ struct ntsconfig_t ntsconfig = {
 	.mintls = NULL,
 	.maxtls = NULL,
 	.tlsciphersuites = NULL,
+	.tlsecdhcurves = NULL,
 	.cert = NULL,
 	.key = NULL,
 	.KI = NULL,
@@ -190,7 +191,22 @@ bool nts_load_ciphers(SSL_CTX *ctx) {
 	return true;
 }
 
-
+bool nts_load_ecdhcurves(SSL_CTX *ctx) {
+	/* SSL_CTX_set1_curves_list ignores typos or curves it doesn't support.
+	 * There is no SSL_CTX_get_curves_list, so we can't easily read back
+	 * the ciphers to see what it took.
+	 * We could make a dummy SSL, read the list, then free it.
+	 */
+	if (NULL != ntsconfig.tlsecdhcurves) {
+		if (1 != SSL_CTX_set1_groups_list(ctx, ntsconfig.tlsecdhcurves)) {
+			msyslog(LOG_ERR, "NTS: troubles setting ecdhcurves.");
+			return false;
+		} else {
+			msyslog(LOG_INFO, "NTS: set ecdhcurves.");
+		}
+	}
+	return true;
+}
 static struct stat certfile_stat;
 
 void nts_reload_certificate(SSL_CTX *ctx) {
