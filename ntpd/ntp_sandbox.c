@@ -568,8 +568,11 @@ static void catchTrap(int sig, siginfo_t *si, void *u)
 	UNUSED_ARG(u);	        /* unused ucontext_t */
 	msyslog(LOG_ERR, "ERR: SIGSYS: got a trap.\n");
 	if ( si->si_syscall ) {
-	    msyslog(LOG_ERR, "ERR: SIGSYS/seccomp bad syscall %d/%#x\n",
-		    si->si_syscall, si->si_arch);
+	    char *call = seccomp_syscall_resolve_num_arch(
+		si->si_arch, si->si_syscall);
+	    msyslog(LOG_ERR, "ERR: SIGSYS/seccomp bad syscall %d(%s)/%#x\n",
+		    si->si_syscall, call, si->si_arch);
+	    free(call);
         }
 #ifndef BACKTRACE_DISABLED
         backtrace_log();
