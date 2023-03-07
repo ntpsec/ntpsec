@@ -4,7 +4,7 @@ The following command controls NTS authentication. It overrides
 normal TLS protocol negotiation, which is not usually necessary.
 
 [[nts]]
-+nts+ [enable|disable] [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphersuites+ _name_]
++nts+ [enable|disable] [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphersuites+ _name_] [+tlsecdhcurves+ _name_]
 
 The options are as follows:
 
