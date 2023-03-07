@@ -55,6 +55,10 @@ The options are as follows:
    An OpenSSL ciphersuite list to configure the allowed ciphersuites for
    TLS 1.3.  A single NULL cipher disables encryption and use of certificates.
 
++tlsecdhcurves+ _string_::
+   An OpenSSL ecdhcurves list to configure the allowed ecdhcurves for
+   TLS 1.3.  A single NULL ecdhcurves disables encryption and use of certificates.
+
 +aead+ _string_::
    Specify the crypto algorithm to be used on the wire.  The choices
    come from RFC 5297.  The only options supported are AES_SIV_CMAC_256,
