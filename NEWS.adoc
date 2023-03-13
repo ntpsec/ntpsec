@@ -12,6 +12,8 @@ on user-visible changes.
 
 ## Repository Head
 
+* Add support for ecdhcurves list.
+
 * Fix build on platforms where `-fstack-protector` relies on libssp, like musl.
 
 * Fix ntpdig crash when using 2.ntp.pool.org with a host without IPv6 support.

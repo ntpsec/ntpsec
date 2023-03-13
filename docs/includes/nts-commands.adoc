@@ -4,7 +4,7 @@ The following command controls NTS authentication. It overrides
 normal TLS protocol negotiation, which is not usually necessary.
 
 [[nts]]
-+nts+ [enable|disable] [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphersuites+ _name_]
++nts+ [enable|disable] [+mintls+ _version_] [+maxtls+ _version_] [+tlsciphersuites+ _name_] [+tlsecdhcurves+ _name_]
 
 The options are as follows:
 
@@ -54,6 +54,10 @@ The options are as follows:
 +tlsciphersuites+ _string_::
    An OpenSSL ciphersuite list to configure the allowed ciphersuites for
    TLS 1.3.  A single NULL cipher disables encryption and use of certificates.
+
++tlsecdhcurves+ _string_::
+   An OpenSSL ecdhcurves list to configure the allowed ecdhcurves for
+   TLS 1.3.  A single NULL ecdhcurves disables encryption and use of certificates.
 
 +aead+ _string_::
    Specify the crypto algorithm to be used on the wire.  The choices

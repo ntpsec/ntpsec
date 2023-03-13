@@ -150,6 +150,7 @@ struct ntsconfig_t {
 	const char * mintls;	/* minimum TLS version allowed */
 	const char * maxtls;	/* maximum TLS version allowed */
 	const char *tlsciphersuites;/* allowed TLS 1.3 ciphersuites */
+	const char *tlsecdhcurves; /* allowed ecdhcurves list*/
 	const char *cert;	/* file holding server certificate key */
 	const char *key;	/* file holding server private key */
 	const char *KI;		/* file holding K/I for making cookies */

@@ -212,6 +212,7 @@
 %token	<Integer>	T_Tinker
 %token	<Integer>	T_Tlsciphers
 %token	<Integer>	T_Tlsciphersuites
+%token	<Integer>	T_Tlsecdhcurves
 %token	<Integer>	T_Tos
 %token	<Integer>	T_True
 %token	<Integer>	T_Trustedkey
@@ -1143,6 +1144,7 @@ nts_string_option_keyword
 	|	T_Key
 	|	T_Tlsciphers
 	|	T_Tlsciphersuites
+	|	T_Tlsecdhcurves
 	|	T_Maxtls
 	|	T_Mintls
 

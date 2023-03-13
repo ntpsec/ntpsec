@@ -225,6 +225,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 
 	ok &= nts_load_versions(ctx);
 	ok &= nts_load_ciphers(ctx);
+	ok &= nts_load_ecdhcurves(ctx);
 	ok &= nts_set_cert_search(ctx, filename);
 
 	if (!ok) {
