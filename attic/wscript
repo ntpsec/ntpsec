@@ -1,15 +1,19 @@
 def build(ctx):
-    util = [	'sht',
-		'digest-find', 'clocks', "random",
-		'digest-timing', 'cmac-timing',
-		'backwards']
+    util = [    'sht',
+                'digest-find', 'clocks', "random",
+                'digest-timing', 'cmac-timing',
+                'backwards']
+
+    if not ctx.env.DISABLE_NTS:
+        util.append('aes-siv-timing')
 
     for name in util:
         ctx(
             target=name,
             features="c cprogram",
-            includes=[ctx.bldnode.parent.abspath(), "../include"],
+            includes=[ctx.bldnode.parent.abspath(), "../include", "../libaes_siv"],
             source=[name + ".c"],
-            use="ntp M CRYPTO RT PTHREAD",
+            use="ntp M CRYPTO RT PTHREAD aes_siv",
             install_path=None,
         )
+
