@@ -115,17 +115,19 @@ static void
 check_digest_mac_length(
 	keyid_t keyno,
 	char *name) {
-	unsigned char digest[EVP_MAX_MD_SIZE];
 	unsigned int length = 0;
-	EVP_MD_CTX *ctx;
-	const EVP_MD *md;
 
-	md = EVP_get_digestbyname(name);
-	ctx = EVP_MD_CTX_create();
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	const EVP_MD *md = EVP_get_digestbyname(name);
+	length = EVP_MD_get_size(md);
+#else
+	const EVP_MD *md = EVP_get_digestbyname(name);
+	EVP_MD_CTX *ctx = EVP_MD_CTX_create();
+	unsigned char digest[EVP_MAX_MD_SIZE];
 	EVP_DigestInit_ex(ctx, md, NULL);
 	EVP_DigestFinal_ex(ctx, digest, &length);
 	EVP_MD_CTX_destroy(ctx);
-
+#endif
 	if (MAX_BARE_MAC_LENGTH < length) {
 		msyslog(LOG_ERR, "AUTH: authreadkeys: digest for key %u, %s will be truncated.", keyno, name);
 	}
@@ -137,9 +139,6 @@ check_cmac_mac_length(
 	keyid_t keyno,
 	char *name) {
 	size_t length = 0;
-	unsigned char key[EVP_MAX_KEY_LENGTH];  /* garbage is OK */
-	const EVP_CIPHER *cmac_cipher = EVP_get_cipherbyname(name);
-	int keylength = EVP_CIPHER_key_length(cmac_cipher);
 	EVP_MAC_CTX *ctx = evp_ctx; 
 	OSSL_PARAM params[2];
 
@@ -152,21 +151,9 @@ check_cmac_mac_length(
 			str, (unsigned long)keyno, name);
 		exit(1);
         }
-        if (0 == EVP_MAC_init(ctx, key, keylength, NULL)) {
-                unsigned long err = ERR_get_error();
-                char * str = ERR_error_string(err, NULL);
-                msyslog(LOG_ERR, "EVP_MAC_init() failed: %s.\n", str);
-                exit(1);
-        }
-	/* No need for EVP_MAC_update() */
-        if (0 == EVP_MAC_final(ctx, NULL, &length, 0)) {
-                unsigned long err = ERR_get_error();
-                char * str = ERR_error_string(err, NULL);
-                msyslog(LOG_ERR, "EVP_MAC_final() failed: %s.\n", str);
-                exit(1);
-        }
+	length = EVP_MAC_CTX_get_mac_size(ctx);
 
-	/* CMAC_MAX_MAC_LENGTH isn't in API
+	/* CMAC_MAX_MAC_LENGTH isn't in the OpenSSL API
 	 * Check here to avoid buffer overrun in cmac_decrypt and cmac_encrypt
 	 */
 	if (CMAC_MAX_MAC_LENGTH < length) {
