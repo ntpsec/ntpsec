@@ -2,6 +2,8 @@
 
 /* Hack to time various implementations of CMAC.
  *
+ * Build with: cc cmac-timing.c -o cmac-timing -lcrypto
+ *
  * This is just the CMAC timing.
  * It doesn't include the copy or compare or finding the right key.
  *
@@ -11,8 +13,6 @@
  *    OPENSSL_ia32cap="~0x200000200000000"
  * Check /proc/cpuinfo flags for "aes" to see if you have it.
  */
-
-#define CMAC_VERSION_CUTOFF 0x10000003
 
 #include <stdbool.h>
 #include <stdint.h>
