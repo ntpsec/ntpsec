@@ -86,7 +86,13 @@ cmac_encrypt(
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
         EVP_MAC_CTX *ctx = auth->mac_ctx;
 
+#if OPENSSL_VERSION_NUMBER > 0x30000020L
         if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
+#else
+// Bug in OpenSSL 3.0.2
+// Need to reload key which is slow.  See attic/cmac-timing
+        if (0 == EVP_MAC_init(ctx, auth->key, auth->key_size, NULL)) {
+#endif
                 unsigned long err = ERR_get_error();
                 char * str = ERR_error_string(err, NULL);
                 msyslog(LOG_ERR, "encrypt: EVP_MAC_init() failed: %s.", str);
@@ -141,7 +147,13 @@ cmac_decrypt(
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
         EVP_MAC_CTX *ctx = auth->mac_ctx;
 
+#if OPENSSL_VERSION_NUMBER > 0x30000020L
         if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
+#else
+// Bug in OpenSSL 3.0.2
+// Need to reload key which is slow.  See attic/cmac-timing
+        if (0 == EVP_MAC_init(ctx, auth->key, auth->key_size, NULL)) {
+#endif
                 unsigned long err = ERR_get_error();
                 char * str = ERR_error_string(err, NULL);
                 msyslog(LOG_ERR, "decrypt: EVP_MAC_init() failed: %s.", str);
