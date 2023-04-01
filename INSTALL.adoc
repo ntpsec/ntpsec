@@ -262,8 +262,8 @@ device symlinks for the refclocks.
 
 == Developer options ==
 
---enable-debug-gdb::
-     Enable GDB debugging symbols.
+--disable-debug-gdb::
+     Disable GDB debugging symbols.
 
 == Operation Controls ==
 

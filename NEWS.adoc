@@ -12,6 +12,8 @@ on user-visible changes.
 
 ## Repository Head
 
+* Enable debug symbols by default, with only an option to disable.
+
 * Add support for ecdhcurves list.
 
 * Fix build on platforms where `-fstack-protector` relies on libssp, like musl.

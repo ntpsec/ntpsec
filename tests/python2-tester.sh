@@ -51,7 +51,7 @@ doit ()
 # Build with only one set of options.  The options don't change
 # the Python side of things.
 
-doit python2 "--disable-droproot --disable-mdns-registration --disable-manpage"
+doit python2 "--disable-droproot --disable-mdns-registration --disable-manpage --disable-debug-gdb"
 
 
 grep warning:                    test*/test.log

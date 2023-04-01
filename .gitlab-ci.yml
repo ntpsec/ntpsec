@@ -425,11 +425,11 @@ feature-debug:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-debug build
 
-feature-debug-gdb:
+feature-disable-debug-gdb:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --enable-debug-gdb build
+    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all --disable-debug-gdb build
 
 feature-debug-timing:
   <<: *job_definition

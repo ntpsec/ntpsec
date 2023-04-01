@@ -108,7 +108,6 @@ export CCFLAGS="%{optflags}"
     --pythonarchdir=%{python_sitearch} \
     --pythondir=%{python_sitearch} \
     --enable-seccomp \
-    --enable-debug-gdb \
     --enable-early-droproot \
     --enable-leap-smear \
     --enable-mssntp \
