@@ -42,7 +42,6 @@ struct recvbuf {
 	size_t		recv_length;	/* number of octets received */
 	uint8_t		recv_buffer[RX_BUFF_SIZE];
 	struct parsed_pkt pkt;  /* host-order copy of data from wire */
-	int used;		/* reference count */
 	bool keyid_present;
 	keyid_t keyid;
 	int mac_len;

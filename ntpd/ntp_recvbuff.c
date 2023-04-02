@@ -121,7 +121,6 @@ get_free_recv_buffer(void)
         if (buffer != NULL) {
                 free_recvbufs--;
                 initialise_buffer(buffer);
-                buffer->used++;
         } else {
                 buffer_shortfall++;
         }
@@ -140,9 +139,6 @@ freerecvbuf(recvbuf_t *rb)
 		return;
 	}
 
-	rb->used--;
-	if (rb->used != 0)
-		msyslog(LOG_ERR, "ERR: ******** freerecvbuff non-zero usage: %d *******", rb->used);
 	LINK_SLIST(free_recv_list, rb, link);
 	free_recvbufs++;
 }
