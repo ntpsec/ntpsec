@@ -1,5 +1,7 @@
 #! @PYSHEBANG@
 # -*- coding: utf-8 -*-
+# Copyright the NTPsec project contributors
+# SPDX-License-Identifier: BSD-2-Clause
 
 """\
 usage: ntploggps [-h] [-o] [-l LOGFILE] [-v] [-V]
@@ -163,6 +165,7 @@ class GpsPoller(threading.Thread):
                     satellite_list = self.gpsd.data.get(
                         "satellites", None
                     )
+                    count_used_satellites = None
                     if satellite_list is not None:
                         count_used_satellites = sum(
                             map(lambda x: x.used, satellite_list)

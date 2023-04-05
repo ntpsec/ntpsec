@@ -14,6 +14,8 @@ on user-visible changes.
 
 * Update license file names for REUSE compliance.
 
+* Fix ntploggps issue where count_used_satellites checked before it is initialized.
+
 * Print out OpenSSL version at configure time.
 
 * Enable debug symbols by default, with only an option to disable.
