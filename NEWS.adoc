@@ -12,6 +12,8 @@ on user-visible changes.
 
 ## Repository Head
 
+* Print out OpenSSL version at configure time.
+
 * Enable debug symbols by default, with only an option to disable.
 
 * Add support for ecdhcurves list.
