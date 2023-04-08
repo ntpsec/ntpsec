@@ -164,7 +164,7 @@ ubuntu-devel-options-tester:
   image:
     name: ubuntu:devel
     entrypoint: [ '/bin/sh', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0']
-  <<: *deb_option_tester
+  <<: *deb_option_tester_py3_only
 
 ubuntu-rolling-options-tester:
   image:
