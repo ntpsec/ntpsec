@@ -22,20 +22,24 @@ link:https://tools.ietf.org/html/rfc7822[RFC 7822: Network Time Protocol
 Version 4 (NTPv4) Extension Fields].
 
 NTPsec has entirely dropped conformance with the Autokey feature
-described in link:https://tools.ietf.org/html/rfc5906[RFC 5906].  Autokey
+described in link:https://tools.ietf.org/html/rfc5906[RFC 5906: Network Time
+Protocol Version 4: Autokey Specification].  Autokey
 never quite worked, and the design was unstable enough that if there
 was ever actually a time when it fully conformed to its RFC that span
 must have been pretty short.
 
-Older NTP RFCs such as link:https://tools.ietf.org/html/rfc1305[RFC 1305]
+Older NTP RFCs such as link:https://tools.ietf.org/html/rfc1305[RFC 1305:
+Network Time Protocol (Version 3) Specification, Implementation and Analysis]
 are no longer relevant.
 
-link:https://tools.ietf.org/rfc/rfc5297.txt[RFC 5297] describes the
-authenticated encryption used in Network Time Security
-key exchanges.
+link:https://tools.ietf.org/rfc/rfc5297.txt[RFC 5297: Synthetic Initialization
+Vector (SIV) Authenticated Encryption Using the Advanced Encryption Standard
+(AES)] describes the authenticated encryption used in Network Time Security key
+exchanges.
 
 Network Time Security is described by
-link:https://tools.ietf.org/html/rfc8915[RFC 8915].
+link:https://tools.ietf.org/html/rfc8915[RFC 8915: Network Time Security for
+the Network Time Protocol].
 
 [[against5905]]
 == Divergences from RFC 5905
