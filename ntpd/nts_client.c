@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  *
  * Section references are to
- * https://tools.ietf.org/html/draft-ietf-ntp-using-nts-for-ntp-15
+ * https://tools.ietf.org/html/rfc8915
  *
  */
 #include "config.h"
