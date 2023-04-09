@@ -1,8 +1,6 @@
 pages:
   stage: build
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine-pages
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
   script:
     - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ --enable-doc --disable-manpage build install
     - cp www/favicon.ico public
