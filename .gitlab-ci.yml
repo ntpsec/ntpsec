@@ -399,7 +399,7 @@ macos-refclocks:
   <<: *job_definition
   image: macos-12-xcode-14
   script:
-    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build
+    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build || cat build/config.log
   tags:
     - shared-macos-amd64
   rules:
