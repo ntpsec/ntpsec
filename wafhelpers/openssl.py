@@ -42,7 +42,11 @@ def check_openssl_bad_version(ctx):
 
 SNIP_OPENSSL_DUMP_VERSION = """
 #include <stdio.h>
+#ifdef HAVE_OPENSSL_OPENSSLV_H
 #include <openssl/opensslv.h>
+#else
+#define OPENSSL_VERSION_TEXT "something not_OpenSSL_or_LibreSSL something"
+#endif // HAVE_OPENSSL_OPENSSLV_H
 
 int main(void) {
   printf("%s\\n", OPENSSL_VERSION_TEXT);
@@ -53,12 +57,16 @@ int main(void) {
 
 def dump_openssl_version(ctx):
     _ = "XXX_LIBSSL_VERSION"
-    ctx.start_msg("OpenSSL version")
-    ctx.check_cc(
+    ctx.start_msg("LibSSL version")
+    ret = ctx.check_cc(
         fragment=SNIP_OPENSSL_DUMP_VERSION,
         execute=True,
         define_ret=True,
         define_name=_,
+        mandatory=False,
     )
-    ctx.end_msg(ctx.get_define(_).split()[1])
-    ctx.undefine(_)
+    if ret:
+        ctx.end_msg(' '.join(ctx.get_define(_).split()[0:2])[1:])
+        ctx.undefine(_)
+    else:
+        ctx.end_msg("Failed")

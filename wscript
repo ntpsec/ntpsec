@@ -720,6 +720,7 @@ int main(int argc, char **argv) {
         "linux/serial.h",
         "net/if6.h",
         ("net/route.h", ["sys/types.h", "sys/socket.h", "net/if.h"]),
+        "openssl/opensslv.h",  # just for wafhelper OpenSSL 
         "priv.h",           # Solaris
         "stdatomic.h",
         "sys/clockctl.h",   # NetBSD
