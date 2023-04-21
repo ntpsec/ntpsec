@@ -49,7 +49,6 @@ def build(ctx):
         "libntp/refidsmear.c",
         "libntp/socktoa.c",
         "libntp/statestr.c",
-        "libntp/strtolfp.c",
         "libntp/timespecops.c",
         "libntp/vi64ops.c",
         "libntp/ymd2yd.c"

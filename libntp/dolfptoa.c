@@ -2,9 +2,8 @@
  * dolfptoa - do the grunge work of converting an l_fp number to decimal
  *
  * Warning: this conversion is lossy in the low-order bits of the fractional
- * part.  It's good enough for statistics and logging, but do not expect
- * it to round-trip through atolfp(). 1444359386.1798776096, for example, may
- * dump as ...095 or ...097.
+ * part.  It's good enough for statistics and logging. 1444359386.1798776096,
+ * for example, may dump as ...095 or ...097.
  */
 #include "config.h"
 #include <stdio.h>
