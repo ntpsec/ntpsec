@@ -1,0 +1,29 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: NTPsec
+Upstream-Contact: https://gitlab.com/NTPsec/ntpsec
+Source: https://gitlab.com/NTPsec/ntpsec
+
+#
+# THIRDPARTY MODULES
+#
+
+# Library: libaes_siv:
+
+Files: libaes_siv/*
+Copyright: Akamai Technologies, Inc.
+License: Apache-2.0
+Comment: https://github.com/dfoxfranke/libaes_siv
+
+# Library: libjsmn:
+
+Files: libjsmn/*
+Copyright: Serge A. Zaitsev
+License: MIT
+Comment: https://github.com/zserge/jsmn
+
+# Library: Unity Test:
+
+Files: tests/unity/*
+Copyright: Unity Project by Mike Karlesky, Mark VanderVoord, and Greg Williams
+License: MIT
+Comment: https://github.com/ThrowTheSwitch/Unity
