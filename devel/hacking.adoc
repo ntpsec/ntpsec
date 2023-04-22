@@ -25,7 +25,7 @@ Much of the existing and historical code is licensed under the NTP
 license.  Additionally, small portions of the code are licensed under
 the BSD-3-clause and MIT licenses.
 
-The preferred license for new code contributions is BSD-2-clause.
+The preferred license for new code contributions is BSD-2-Clause.
 
 The preferred license for documentation is
 "Creative Commons Attribution 4.0 International" (CC-BY-4.0).

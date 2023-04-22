@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 FROM debian:unstable-slim
 
 RUN apt-get update
