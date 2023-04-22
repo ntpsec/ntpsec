@@ -102,11 +102,11 @@ struct NTS_Key {
   uint8_t K[NTS_MAX_KEYLEN];
   uint32_t I;
   };
-#ifndef NTS_KEYS
+#ifndef NTS_nKEYS
   #define NTS_nKEYS 10
 #endif
 extern struct NTS_Key nts_keys[NTS_nKEYS];
-extern int nts_nKeys;
+extern int nts_nKeys;		/* for tester */
 
 
 /* Client side configuration data for an NTS association
