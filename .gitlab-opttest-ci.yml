@@ -52,9 +52,7 @@ centos-options-tester:
     - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel bash
 
 fedora-latest-options-tester:
-  image:
-    name: fedora:latest
-    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  image: fedora:latest
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python2-devel libseccomp-devel bash
   <<: *option_tester
@@ -161,13 +159,9 @@ ubuntu-latest-options-tester:
   <<: *deb_option_tester
 
 ubuntu-devel-options-tester:
-  image:
-    name: ubuntu:devel
-    entrypoint: [ '/bin/sh', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0']
+  image: ubuntu:devel
   <<: *deb_option_tester_py3_only
 
 ubuntu-rolling-options-tester:
-  image:
-    name: ubuntu:rolling
-    entrypoint: [ '/bin/sh', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0']
+  image: ubuntu:rolling
   <<: *deb_option_tester_py3_only

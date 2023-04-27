@@ -64,9 +64,7 @@ alpine-edge-refclocks:
 
 AsciiDoc-3-Fedora:
   <<: *job_definition_allow_failure
-  image:
-    name: fedora
-    entrypoint: [ '/bin/bash', '-c' ]
+  image: fedora
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget libxslt docbook-style-xsl
     - mkdir asciidoc3
@@ -179,9 +177,7 @@ ubuntu-latest-refclocks:
 
 ubuntu-devel-basic:
   <<: *job_definition_allow_failure
-  image:
-    name: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
-    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
     - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
@@ -189,9 +185,7 @@ ubuntu-devel-basic:
 
 ubuntu-devel-refclocks:
   <<: *job_definition_allow_failure
-  image:
-    name: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
-    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
@@ -247,9 +241,7 @@ centos-latest-refclocks:
 
 fedora-latest-basic:
   <<: *job_definition
-  image:
-    name: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
-    entrypoint: [ '/bin/bash', '-c' ]
+  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
   script:
     - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
@@ -257,9 +249,7 @@ fedora-latest-basic:
 
 fedora-latest-refclocks:
   <<: *job_definition
-  image:
-    name: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
-    entrypoint: [ '/bin/bash', '-c' ]
+  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
