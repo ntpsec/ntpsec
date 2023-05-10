@@ -670,7 +670,7 @@ typedef struct res_addr6_tag {
 typedef struct restrict_u_tag	restrict_u;
 struct restrict_u_tag {
 	restrict_u *		link;	/* link to next entry */
-	uint32_t		hitcount;	/* number of packets matched */
+	uint64_t		hitcount;	/* number of packets matched */
 	unsigned short		flags;	/* accesslist flags */
 	unsigned short		mflags;	/* match flags */
 	union {				/* variant starting here */
@@ -695,8 +695,6 @@ struct restrict_u_tag {
 #define	RES_VERSION		0x0008	/* version mismatch */
 #define	RES_NOPEERx		0x0010  /* new association denied */
 #define	RES_LIMITED		0x0020	/* packet rate exceeded */
-#define	RES_FLAGS (RES_IGNORE | RES_DONTSERVE | RES_DONTTRUST | \
-			RES_VERSION | RES_LIMITED)
 
 #define	RES_NOQUERY		0x0040	/* mode 6 packet denied */
 #define	RES_NOMODIFY		0x0080	/* mode 6 modify denied */
@@ -708,7 +706,7 @@ struct restrict_u_tag {
 #define	RES_FLAKE		0x1000	/* flakeway - drop 10% */
 #define	RES_NOMRULIST		0x2000	/* mode 6 mrulist denied */
 
-/* RES_DEFAULT defined in resolv.h */
+/* RES_DEFAULT defined in /usr/include/resolv.h */
 #define RES_Default (RES_NOQUERY|RES_LIMITED)
 
 /* pythonize-header: start ignoring */

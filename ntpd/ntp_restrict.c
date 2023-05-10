@@ -160,8 +160,8 @@ init_restrict(void)
 	restrict_def4.flags = RES_Default;
 	restrict_def6.flags = RES_Default;
 	if (RES_Default & RES_LIMITED) {
-		inc_res_limited();
-		inc_res_limited();
+		inc_res_limited();  /* IPv4 */
+		inc_res_limited();  /* IPv6 */
 	}
 	restrictcount = 2;
 }
