@@ -76,7 +76,6 @@ macos-options-tester:
   needs: []
   image: macos-12-xcode-14
   script:
-    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python2.7 tests/option-tester.sh||true
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python3 tests/option-tester.sh
   tags:
     - saas-macos-medium-m1
