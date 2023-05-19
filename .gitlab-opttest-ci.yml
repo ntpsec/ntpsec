@@ -79,7 +79,7 @@ macos-options-tester:
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python2.7 tests/option-tester.sh||true
     - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig PYTHON=python3 tests/option-tester.sh
   tags:
-    - shared-macos-amd64
+    - saas-macos-medium-m1
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
