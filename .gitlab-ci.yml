@@ -373,7 +373,7 @@ macos-basic:
   <<: *job_definition
   image: macos-12-xcode-14
   script:
-    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
+    - PKG_CONFIG_PATH=/opt/homebrew/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - DESTDIR=build/prison python ./waf install
     - DESTDIR=./prison python ./waf install
     - DESTDIR=../prison python ./waf install
@@ -389,7 +389,7 @@ macos-refclocks:
   <<: *job_definition
   image: macos-12-xcode-14
   script:
-    - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build || cat build/config.log
+    - PKG_CONFIG_PATH=/opt/homebrew/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build || cat build/config.log
   tags:
     - saas-macos-medium-m1
   rules:
