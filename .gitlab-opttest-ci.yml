@@ -58,11 +58,11 @@ fedora-latest-options-tester:
   <<: *option_tester
 
 opensuse-leap-options-tester:
-  <<: *option_tester
+  <<: *option_tester_py3_only
   image: opensuse/leap
   allow_failure: true
   script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python-devel python-curses libseccomp-devel python3-devel python3-curses bash
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel libseccomp-devel python3-devel python3-curses bash
 
 gentoo-options-tester:
   <<: *option_tester
