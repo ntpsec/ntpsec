@@ -135,7 +135,7 @@ freebsd-options-tester:
 
 debian-i386-options-tester:
   image: i386/debian:stable-slim
-  <<: *deb_option_tester
+  <<: *deb_option_tester_py3_only
 
 debian-oldstable-options-tester:
   image: debian:oldstable-slim
@@ -143,7 +143,7 @@ debian-oldstable-options-tester:
 
 debian-stable-options-tester:
   image: debian:stable-slim
-  <<: *deb_option_tester
+  <<: *deb_option_tester_py3_only
 
 debian-testing-options-tester:
   image: debian:testing-slim
