@@ -34,6 +34,11 @@ include:
   <<: *job_definition
   allow_failure: true
 
+.macos_saas_runners:
+  tags:
+    - saas-macos-medium-m1
+  image: macos-12-xcode-14
+
 alpine-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine
@@ -371,7 +376,8 @@ coverity-scan:
 
 macos-basic:
   <<: *job_definition
-  image: macos-12-xcode-14
+  extends:
+    - .macos_saas_runners
   script:
     - PKG_CONFIG_PATH=${HOMEBREW_PREFIX}/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - DESTDIR=build/prison python ./waf install
@@ -380,18 +386,15 @@ macos-basic:
     - sudo python ./waf install
     - sudo python ./waf uninstall
     - rm -rvf build/prison ./prison ../prison
-  tags:
-    - saas-macos-medium-m1
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 macos-refclocks:
   <<: *job_definition
-  image: macos-12-xcode-14
+  extends:
+    - .macos_saas_runners
   script:
     - PKG_CONFIG_PATH=${HOMEBREW_PREFIX}/opt/openssl/lib/pkgconfig python ./waf configure --disable-doc --disable-manpage --refclock=all build || cat build/config.log
-  tags:
-    - saas-macos-medium-m1
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
