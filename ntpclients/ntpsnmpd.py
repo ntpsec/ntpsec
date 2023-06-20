@@ -8,7 +8,6 @@ import os
 import getopt
 import time
 import socket
-import subprocess
 
 try:
     import ntp.packet
@@ -193,9 +192,9 @@ class DataSource(ntp.agentx.MIBControl):
         elif category == "vendor":  # vendor/author name
             data = "Internet Civil Engineering Institute"
         elif category == "system":  # system / hardware info
-            proc = subprocess.Popen(["uname", "-srm"],
-                                    stdout=subprocess.PIPE)
-            data = proc.communicate()[0]
+            # Extract sysname, release, machine from os.uname() tuple
+            uname = os.uname()
+            data = " ".join([uname[0], uname[2], uname[4]])
         vb = ax.Varbind(ax.VALUE_OCTET_STR, oid, data)
         return vb
 

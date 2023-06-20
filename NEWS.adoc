@@ -12,6 +12,8 @@ on user-visible changes.
 
 ## Repository Head
 
+* Update ntpsnmpd to use python built-in to get uname information. NTPsec/ntpsec#791
+
 * Update license file names for REUSE compliance.
 
 * Fix ntploggps issue where count_used_satellites checked before it is initialized.
