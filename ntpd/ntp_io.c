@@ -3148,7 +3148,7 @@ process_routing_msgs(struct asyncio_reader *reader)
  * set up routing notifications
  */
 static void
-init_async_notifications()
+init_async_notifications(void)
 {
 	struct asyncio_reader *reader;
 #ifdef HAVE_LINUX_RTNETLINK_H

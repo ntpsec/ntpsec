@@ -892,7 +892,7 @@ main(
  * If using a log file, there should be enough info in syslog
  * to debug things with minimal extra clutter.
  */
-void announce_starting() {
+void announce_starting(void) {
 	char buf[1024];	/* Secret knowledge of msyslog buf length */
 	char *cp = buf;
 
@@ -1124,7 +1124,7 @@ wait_child_sync_if(
  * With 3 working servers, 2 can outvote a falseticker
  * With 4 servers, you still have 3 if one is down.
  */
-static void check_minsane()
+static void check_minsane(void)
 {
 	struct peer *peer;
 	int servers = 0;
