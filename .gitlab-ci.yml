@@ -107,7 +107,7 @@ AsciiDoc-classic2-Debian-Old:
   image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
   script:
     - apt-get update
-    - DEBIAN_FRONTEND="noninteractive" apt-get install -y python2.7-dev asciidoc-base
+    - DEBIAN_FRONTEND="noninteractive" apt-get install -y python2-dev asciidoc-base
     - python2 ./waf configure --enable-doc --enable-manpage build --disable-nts
 
 debian-oldstable-basic:
