@@ -34,13 +34,13 @@ make-tarball:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
 alpine-edge-options-tester:
-  <<: *option_tester
+  <<: *option_tester_py3_only
   image: alpine:edge
   before_script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc libseccomp-dev bash
 
 alpine-options-tester:
-  <<: *option_tester
+  <<: *option_tester_py3_only
   image: alpine
   before_script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc libseccomp-dev bash
@@ -65,7 +65,7 @@ opensuse-leap-options-tester:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel libseccomp-devel python3-devel python3-curses bash
 
 gentoo-options-tester:
-  <<: *option_tester
+  <<: *option_tester_py3_only
   image: gentoo/stage3
   before_script:
     - emerge-webrsync
