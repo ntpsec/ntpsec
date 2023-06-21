@@ -15,7 +15,7 @@ make-tarball:
 .option_tester: &option_tester
   stage: test
   needs: []
-  after_script:
+  script:
     - PYTHON=python2 bash tests/option-tester.sh
     - PYTHON=python3 bash tests/option-tester.sh
   tags:
@@ -26,7 +26,7 @@ make-tarball:
 .option_tester_py3_only: &option_tester_py3_only
   stage: test
   needs: []
-  after_script:
+  script:
     - PYTHON=python3 bash tests/option-tester.sh
   tags:
     - gitlab-org
@@ -36,24 +36,24 @@ make-tarball:
 alpine-edge-options-tester:
   <<: *option_tester
   image: alpine:edge
-  script:
+  before_script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc libseccomp-dev bash
 
 alpine-options-tester:
   <<: *option_tester
   image: alpine
-  script:
+  before_script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev asciidoc libseccomp-dev bash
 
 centos-options-tester:
   <<: *option_tester_py3_only
   image: quay.io/centos/centos:stream9
-  script:
-    - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel bash
+  before_script:
+    - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel pkgconfig bash
 
 fedora-latest-options-tester:
   image: fedora:latest
-  script:
+  before_script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python2-devel libseccomp-devel bash
   <<: *option_tester
 
@@ -61,13 +61,13 @@ opensuse-leap-options-tester:
   <<: *option_tester_py3_only
   image: opensuse/leap
   allow_failure: true
-  script:
+  before_script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel libseccomp-devel python3-devel python3-curses bash
 
 gentoo-options-tester:
   <<: *option_tester
   image: gentoo/stage3
-  script:
+  before_script:
     - emerge-webrsync
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools app-text/asciidoc sys-libs/libseccomp app-shells/bash
 
