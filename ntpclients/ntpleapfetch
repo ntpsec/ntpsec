@@ -224,7 +224,7 @@ export PATH="$PATHLIST$PATH"
 # Add to path to deal with embedded systems
 #
 for P in $REQUIREDCMDS ; do
-    if >/dev/null 2>&1 which "$P" ; then
+    if >/dev/null 2>&1 command -v "$P" ; then
         continue
     fi
     [ "$P" = "logger" ] && continue
@@ -233,9 +233,9 @@ for P in $REQUIREDCMDS ; do
 done
 
 # find sha1sum or shasum
-if >/dev/null 2>&1 which "sha1sum" ; then
+if >/dev/null 2>&1 command -v "sha1sum" ; then
     SHASUM="sha1sum"
-elif >/dev/null 2>&1 which "shasum" ; then
+elif >/dev/null 2>&1 command -v "shasum" ; then
     SHASUM="shasum"
 else
     echo "FATAL: Can not find sha1sum or shasum command, please install"
@@ -244,7 +244,7 @@ fi
 
 # Handle logging
 
-if ! LOGGER="`2>/dev/null which logger`" ; then
+if ! LOGGER="`2>/dev/null command -v logger`" ; then
     LOGGER=
 fi
 
@@ -412,7 +412,7 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
                 # the above chown fails on macOS and BSD, just force it
                 chown root:wheel $TMPFILE
             fi
-            ( which selinuxenabled && selinuxenabled && which chcon ) >/dev/null 2>&1
+            ( command -v selinuxenabled && selinuxenabled && command -v chcon ) >/dev/null 2>&1
             if  [ $? -eq 0 ] ; then
                 chcon --reference $REFFILE $TMPFILE
             fi

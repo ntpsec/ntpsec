@@ -5,7 +5,7 @@
 # This is a clone of option-tester.sh
 # to build with python2 and do minimal (version) testing.
 
-if [ "`which python2 2>/dev/null`" = "" ]
+if [ "`command -v python2 2>/dev/null`" = "" ]
 then
   echo "# Error: No python2 on this system."
   exit 1

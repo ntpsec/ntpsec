@@ -16,7 +16,7 @@ then
 fi
 
 PURGE=""
-if which pkg-config
+if command -v pkg-config
 then
   SECCOMP="$(pkg-config libseccomp --variable=includedir)"
   SECCOMP="$SECCOMP/seccomp.h"
@@ -96,8 +96,8 @@ doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpa
 
 doit all     "--enable-warnings --enable-attic --enable-debug --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot --disable-fuzz $LINUX --disable-doc --disable-manpage --enable-pylib=ext"
 
-if [ "`which asciidoc 2>/dev/null`" != "" -a \
-     "`which xsltproc 2>/dev/null`" != "" ]
+if [ "`command -v asciidoc 2>/dev/null`" != "" -a \
+     "`command -v xsltproc 2>/dev/null`" != "" ]
 then
 doit doc     ""
 fi
