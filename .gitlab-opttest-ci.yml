@@ -49,12 +49,12 @@ centos-options-tester:
   <<: *option_tester_py3_only
   image: quay.io/centos/centos:stream9
   before_script:
-    - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel pkgconfig bash
+    - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel pkgconf-pkg-config bash
 
 fedora-latest-options-tester:
   image: fedora:latest
   before_script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python2-devel libseccomp-devel bash
+    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel python2-devel libseccomp-devel pkgconf-pkg-config bash
   <<: *option_tester
 
 opensuse-leap-options-tester:
@@ -62,7 +62,7 @@ opensuse-leap-options-tester:
   image: opensuse/leap
   allow_failure: true
   before_script:
-    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel libseccomp-devel python3-devel python3-curses bash
+    - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel libseccomp-devel python3-devel python3-curses pkg-config bash
 
 gentoo-options-tester:
   <<: *option_tester_py3_only
