@@ -1878,9 +1878,13 @@ if __name__ == '__main__':
             session.openhost(*interpreter.chosts[0])
             interpreter.cmdloop()
         else:
+            latter = False
             for ihost in interpreter.chosts:
                 if session.openhost(*ihost):
                     for command in interpreter.ccmds:
+                        if latter:
+                            print()
+                        latter = True
                         interpreter.onecmd(interpreter.precmd(command))
                     session.close()
         raise SystemExit(0)
