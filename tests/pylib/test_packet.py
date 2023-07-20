@@ -2091,13 +2091,18 @@ class TestAuthenticator(unittest.TestCase):
 
     def test_compute_mac(self):
         f = self.target.compute_mac
-        pkt = ntp.util.hexstr2octets('240300e8000012ce0000091941138e89' +
-                                     'e25b102e9fe94dc9e25b1175bd5a3000' + 'e25b1175bd6cf48ee25b1175bd70e594')
+        pkt = ntp.util.hexstr2octets('240300e8000012ce0000091941138e89'
+                                     'e25b102e9fe94dc9e25b1175bd5a3000'
+                                     'e25b1175bd6cf48ee25b1175bd70e594')
         mac1 = b'\x00\x00\x00\rL\x7f\xc1\xd1\xe9\xd3\xf8\xec\x91\xdf\xecS\x89e\xc5\xf3'
+        mac2 = b'\x00\x00\x00\x0e\'\xca\xf3\xa8G\xbe\x99\xaf\x96!<\x1a\x95\xd6\xc7i'
         key1 = ntp.util.hexstr2octets('2f3badbb640bf975fec519df8a83e829')
-        key2 = ''
+        key2 = ntp.util.hexstr2octets('fc0af35640142bb85ad03a892a81fa9d'
+                                      '891b108289c3f6725a01a10f697c1b4c')
+        key3 = ''
         self.assertEqual(f(pkt, 0x0d, 'aes', key1), mac1)
-        self.assertEqual(f(pkt, 0x0e, 'neun', key2), False)
+        self.assertEqual(f(pkt, 0x0e, 'aes-256', key2), mac2)
+        self.assertEqual(f(pkt, 0x0f, 'neun', key3), False)
 
     def test_have_mac(self):
         f = self.target.have_mac
@@ -2112,12 +2117,16 @@ class TestAuthenticator(unittest.TestCase):
         cls = self.target()
         cls.passwords[0x0d] = (
             'aes-128', ntp.util.hexstr2octets('2f3badbb640bf975fec519df8a83e829'))
-        good_pkt = '240300e80000139a00000ae8cc0286a2' + 'e25c0c4dfff93ee2e25c0cca53f45000' + \
-            'e25c0cca54048d79e25c0cca5408646b' + \
-            '0000000dbe93e3f1d530d9252147c298' + 'c00c85f9'
-        bad_pkt = '240300e80000131f00000779cc0286a2' + 'e25c0d54ff6e4835e25c0dc2bea43000' + \
-            'e25c0dc2beb78905e25c0dc2bebc0737' + \
-            '0000000d4c2d64c447e701b74e3ad98c' + 'e65d13c3'
+        good_pkt = ('240300e80000139a00000ae8cc0286a2'
+                    'e25c0c4dfff93ee2e25c0cca53f45000'
+                    'e25c0cca54048d79e25c0cca5408646b'
+                    '0000000d'
+                    'be93e3f1d530d9252147c298c00c85f9')
+        bad_pkt = ('240300e80000131f00000779cc0286a2'
+                   'e25c0d54ff6e4835e25c0dc2bea43000'
+                   'e25c0dc2beb78905e25c0dc2bebc0737'
+                   '0000000d'
+                   '4c2d64c447e701b74e3ad98ce65d13c3')
         # Test good
         self.assertEqual(cls.verify_mac(ntp.poly.polybytes(
             ntp.util.hexstr2octets(good_pkt)), packet_end=48, mac_begin=48), True)

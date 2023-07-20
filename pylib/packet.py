@@ -1747,7 +1747,7 @@ class Authenticator:
         if not ntp.ntpc.checkname(keytype):
             return False
         mac2 = ntp.ntpc.mac(ntp.poly.polybytes(payload),
-                            ntp.poly.polybytes(passwd), keytype)
+                            ntp.poly.polybytes(passwd), keytype)[:20]
         if not mac2 or len(mac2) == 0:
             return b''
         return struct.pack("!I", keyid) + mac2
@@ -1773,7 +1773,7 @@ class Authenticator:
         if not ntp.ntpc.checkname(keytype):
             return False
         mac2 = ntp.ntpc.mac(ntp.poly.polybytes(payload),
-                            ntp.poly.polybytes(passwd), keytype)
+                            ntp.poly.polybytes(passwd), keytype)[:20]
         if not mac2:
             return False
         # typically preferred to avoid timing attacks client-side (in theory)

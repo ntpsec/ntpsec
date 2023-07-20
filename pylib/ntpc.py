@@ -83,7 +83,7 @@ def mac(data, key, name):
                  ntp.poly.polybytes(data), len(data),
                  ntp.poly.polybytes(key), len(key),
                  ctypes.byref(result), ctypes.byref(resultlen))
-    return ntp.poly.polybytes(bytearray(result)[:resultlen.value])
+    return ntp.poly.polybytes(bytearray(result)[:min(resultlen.value, 20)])
 
 
 def setprogname(in_string):
