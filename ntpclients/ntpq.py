@@ -1657,6 +1657,7 @@ usage: authinfo
    ("nts_server_recv_bad",       "NTS server recvs w error:   ", NTP_UINT),
    ("nts_server_send",           "NTS server sends:           ", NTP_UINT),
    ("nts_cookie_make",           "NTS make cookies:           ", NTP_UINT),
+   ("nts_cookie_not_server",     "NTS cookies not server:     ", NTP_UINT),
    ("nts_cookie_decode_total",   "NTS decode cookies total:   ", NTP_UINT),
    ("nts_cookie_decode_current", " NTS decode cookies current:", NTP_UINT),
    ("nts_cookie_decode_old",     " NTS decode cookies old:    ", NTP_UINT),

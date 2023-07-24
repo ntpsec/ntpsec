@@ -415,6 +415,7 @@ static const struct var sys_var[] = {
   Var_u64("nts_server_recv_good", RO, nts_server_recv_good),
   Var_u64("nts_server_recv_bad", RO, nts_server_recv_bad),
   Var_u64("nts_cookie_make", RO, nts_cookie_make),
+  Var_u64("nts_cookie_not_server", RO, nts_cookie_not_server),
   Var_u64("nts_cookie_decode_total", RO, nts_cookie_decode_total),
   Var_u64("nts_cookie_decode_current", RO, nts_cookie_decode_current),
   /* Following line is a hack for old versions of ntpq

@@ -244,7 +244,8 @@ extern uint64_t nts_server_send;
 extern uint64_t nts_server_recv_good;
 extern uint64_t nts_server_recv_bad;
 extern uint64_t nts_cookie_make;
-extern uint64_t nts_cookie_decode_total;  /* total attempts, includes too old */
+extern uint64_t nts_cookie_not_server;   /* we are not a NTS server */
+extern uint64_t nts_cookie_decode_total; /* total attempts, includes too old */
 extern uint64_t nts_cookie_decode_current;
 extern uint64_t nts_cookie_decode_old;
 extern uint64_t nts_cookie_decode_old2;

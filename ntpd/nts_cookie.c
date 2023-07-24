@@ -103,10 +103,11 @@ AES_SIV_CTX* cookie_ctx;
 
 /* Statistics for ntpq */
 uint64_t nts_cookie_make = 0;
+uint64_t nts_cookie_not_server = 0;
 uint64_t nts_cookie_decode_total = 0;
-uint64_t nts_cookie_decode_current = 0;
-uint64_t nts_cookie_decode_old = 0;	/* one day old */
-uint64_t nts_cookie_decode_old2 = 0;	/* two days old */
+uint64_t nts_cookie_decode_current = 0; /* less than one day old, current key*/
+uint64_t nts_cookie_decode_old = 0;	/* zero to one day old */
+uint64_t nts_cookie_decode_old2 = 0;	/* one to two days old */
 uint64_t nts_cookie_decode_older = 0;	/* more than 2 days old */
 uint64_t nts_cookie_decode_too_old = 0;
 uint64_t nts_cookie_decode_error = 0;
@@ -382,6 +383,11 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 
 	if (NULL == cookie_ctx)
 		return false;	/* We aren't initialized yet. */
+
+	if (0 == nts_nKeys) {
+		nts_cookie_not_server++;
+		return false;  /* We are not a NTS enabled server. */
+	}
 
 	/* We may get garbage from the net */
 	if (cookielen > NTS_MAX_COOKIELEN)
