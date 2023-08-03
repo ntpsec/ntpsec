@@ -10,6 +10,11 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+## 2023-08-02: 1.2.2a
+
+Fix a crash in ntpd if NTS is disabled and an NTS-enabled client request (mode
+3) is received. (CVE-2023-4012)
+
 ## 2022-12-28: 1.2.2
 
 Restore/cleanup NTPv1 support

@@ -382,6 +382,10 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 	if (NULL == cookie_ctx)
 		return false;	/* We aren't initialized yet. */
 
+	if (0 == nts_nKeys) {
+		return false;  /* We are not a NTS enabled server. */
+	}
+
 	/* We may get garbage from the net */
 	if (cookielen > NTS_MAX_COOKIELEN)
 		return false;
