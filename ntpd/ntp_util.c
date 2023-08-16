@@ -681,8 +681,8 @@ record_sys_stats(void)
 			stat_badauth(), stat_declined(), stat_limitrejected(),
 			stat_kodsent(), stat_version1());
 		fflush(sysstats.fp);
-		proto_clr_stats();
 	}
+	proto_clr_stats();
 }
 
 
