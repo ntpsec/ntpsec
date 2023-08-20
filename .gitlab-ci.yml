@@ -19,7 +19,6 @@ pages:
 include:
   - template: Code-Quality.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
   - local: '.gitlab-opttest-ci.yml'
   - local: '.gitlab-docker-ci.yml'
 
