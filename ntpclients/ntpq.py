@@ -1665,12 +1665,22 @@ usage: authinfo
    ("nts_cookie_decode_older",   " NTS decode cookies older:  ", NTP_UINT),
    ("nts_cookie_decode_too_old", " NTS decode cookies too old:", NTP_UINT),
    ("nts_cookie_decode_error",   "NTS decode cookies error:   ", NTP_UINT),
+  )
+        ntskeinfo = (
    ("nts_ke_probes_good",        "NTS KE client probes good:  ", NTP_UINT),
    ("nts_ke_probes_bad",         "NTS KE client probes bad:   ", NTP_UINT),
    ("nts_ke_serves_good",        "NTS KE serves good:         ", NTP_UINT),
+   ("nts_ke_serves_good_wall",   "NTS KE serves good wall:    ", NTP_FLOAT),
+   ("nts_ke_serves_good_usr",    "NTS KE serves good CPU/usr: ", NTP_FLOAT),
+   ("nts_ke_serves_good_sys",    "NTS KE serves good CPU/sys: ", NTP_FLOAT),
+   ("nts_ke_serves_nossl",       "NTS KE serves no SSL:       ", NTP_UINT),
    ("nts_ke_serves_bad",         "NTS KE serves bad:          ", NTP_UINT),
+   ("nts_ke_serves_bad_wall",    "NTS KE serves bad wall:     ", NTP_FLOAT),
+   ("nts_ke_serves_bad_usr",     "NTS KE serves bad CPU/usr:  ", NTP_FLOAT),
+   ("nts_ke_serves_bad_sys",     "NTS KE serves bad CPU/sys:  ", NTP_FLOAT),
   )
         self.collect_display(associd=0, variables=ntsinfo, decodestatus=False)
+        self.collect_display(associd=0, variables=ntskeinfo, decodestatus=False)
 
     def help_ntsinfo(self):
         self.say("""\

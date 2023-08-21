@@ -101,17 +101,6 @@ int nts_nKeys = 0;
 pthread_mutex_t cookie_lock = PTHREAD_MUTEX_INITIALIZER;
 AES_SIV_CTX* cookie_ctx;
 
-/* Statistics for ntpq */
-uint64_t nts_cookie_make = 0;
-uint64_t nts_cookie_not_server = 0;
-uint64_t nts_cookie_decode_total = 0;
-uint64_t nts_cookie_decode_current = 0; /* less than one day old, current key*/
-uint64_t nts_cookie_decode_old = 0;	/* zero to one day old */
-uint64_t nts_cookie_decode_old2 = 0;	/* one to two days old */
-uint64_t nts_cookie_decode_older = 0;	/* more than 2 days old */
-uint64_t nts_cookie_decode_too_old = 0;
-uint64_t nts_cookie_decode_error = 0;
-
 void nts_lock_cookielock(void);
 void nts_unlock_cookielock(void);
 
@@ -309,7 +298,7 @@ int nts_make_cookie(uint8_t *cookie,
 	if (NULL == cookie_ctx)
 		return 0;		/* We aren't initialized yet. */
 
-	nts_cookie_make++;
+	nts_cnt.cookie_make++;
 
 	INSIST(keylen <= NTS_MAX_KEYLEN);
 
@@ -385,7 +374,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 		return false;	/* We aren't initialized yet. */
 
 	if (0 == nts_nKeys) {
-		nts_cookie_not_server++;
+		nts_cnt.cookie_not_server++;
 		return false;  /* We are not a NTS enabled server. */
 	}
 
@@ -401,19 +390,19 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 		break;
 	  }
 	}
-	nts_cookie_decode_total++;  /* total attempts, includes too old */
+	nts_cnt.cookie_decode_total++;  /* total attempts, includes too old */
 	if (nts_nKeys == i) {
-		nts_cookie_decode_too_old++;
+		nts_cnt.cookie_decode_too_old++;
 		return false;
         }
 	if (0 == i) {
-		nts_cookie_decode_current++;
+		nts_cnt.cookie_decode_current++;
 	} else if (1 == i) {
-		nts_cookie_decode_old++;
+		nts_cnt.cookie_decode_old++;
 	} else if (2 == i) {
-		nts_cookie_decode_old2++;
+		nts_cnt.cookie_decode_old2++;
 	} else {
-		nts_cookie_decode_older++;
+		nts_cnt.cookie_decode_older++;
 	}
 #if 0
 	if (1<i) {
@@ -444,7 +433,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 	nts_unlock_cookielock();
 
 	if (!ok) {
-		nts_cookie_decode_error++;
+		nts_cnt.cookie_decode_error++;
 		return false;
 	}
 

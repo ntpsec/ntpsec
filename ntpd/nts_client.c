@@ -98,7 +98,7 @@ bool nts_probe(struct peer * peer) {
 
 	server = open_TCP_socket(peer, hostname);
 	if (-1 == server) {
-		nts_ke_probes_bad++;
+		ntske_cnt.probes_bad++;
 		return false;
 	}
 
@@ -107,7 +107,7 @@ bool nts_probe(struct peer * peer) {
 		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_ERR, "NTSc: can't setsockopt: %s", errbuf);
 		close(server);
-		nts_ke_probes_bad++;
+		ntske_cnt.probes_bad++;
 		return false;
 	}
 
@@ -168,11 +168,11 @@ bool nts_probe(struct peer * peer) {
 		goto bail;
 
 	addrOK = true;
-	nts_ke_probes_good++;
+	ntske_cnt.probes_good++;
 
   bail:
 	if (!addrOK) {
-		nts_ke_probes_bad++;
+		ntske_cnt.probes_bad++;
 		peer->nts_state.count = -1;
 	}
 	SSL_shutdown(ssl);

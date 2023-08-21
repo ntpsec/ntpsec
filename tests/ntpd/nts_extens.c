@@ -54,7 +54,7 @@ TEST(nts_extens, extens_client_send) {
 	used = extens_client_send(&peer, &xpkt);
 	TEST_ASSERT_EQUAL(1056, used);
 	TEST_ASSERT_EQUAL(1, peer.nts_state.readIdx);
-	TEST_ASSERT_EQUAL(1, nts_client_send);
+	TEST_ASSERT_EQUAL(1, nts_cnt.client_send);
 	TEST_ASSERT_EQUAL(3, peer.nts_state.count);
 }
 

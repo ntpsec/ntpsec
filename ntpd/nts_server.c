@@ -50,12 +50,6 @@ static int listener6_sock = -1;
  * This seems like overkill, but it doesn't happen often. */
 pthread_mutex_t certificate_lock = PTHREAD_MUTEX_INITIALIZER;
 
-/* Statistics for ntpq */
-uint64_t nts_ke_serves_good = 0;
-uint64_t nts_ke_serves_bad = 0;
-uint64_t nts_ke_probes_good = 0;
-uint64_t nts_ke_probes_bad = 0;
-
 static int alpn_select_cb(SSL *ssl,
 			  const unsigned char **out,
 			  unsigned char *outlen,
@@ -199,7 +193,7 @@ void* nts_ke_listener(void* arg) {
 	char usingbuf[100];
 	struct timespec start, finish;		/* wall clock */
 	double wall;
-//	bool worked;
+	bool worked;
 	const char *good;
 #ifdef RUSAGE_THREAD
 	struct timespec start_u, finish_u;	/* CPU user */
@@ -263,7 +257,7 @@ void* nts_ke_listener(void* arg) {
 			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 			msyslog(LOG_ERR, "NTSs: can't setsockopt: %s", errbuf);
 			close(client);
-			nts_ke_serves_bad++;
+			ntske_cnt.serves_bad++;
 			continue;
 		}
 
@@ -279,7 +273,7 @@ void* nts_ke_listener(void* arg) {
 			nts_ke_accept_fail(addrbuf, wall);
 			SSL_free(ssl);
 			close(client);
-			nts_ke_serves_bad++;
+			ntske_cnt.serves_nossl++;
 			continue;
 		}
 
@@ -290,13 +284,11 @@ void* nts_ke_listener(void* arg) {
 			SSL_get_cipher_bits(ssl, NULL));
 
 		if (nts_ke_request(ssl)) {
-//			worked = true;
+			worked = true;
 			good = "OK";
-			nts_ke_serves_good++;
 		} else {
-//			worked = false;
+			worked = false;
 			good = "Failed";
-			nts_ke_serves_bad++;
 		}
 
 		SSL_shutdown(ssl);
@@ -305,6 +297,13 @@ void* nts_ke_listener(void* arg) {
 
 		clock_gettime(CLOCK_REALTIME, &finish);
 		wall = tspec_to_d(sub_tspec(finish, start));
+		if (worked) {
+			ntske_cnt.serves_good++;
+			ntske_cnt.serves_good_wall += wall;
+		} else {
+			ntske_cnt.serves_bad++;
+			ntske_cnt.serves_bad_wall += wall;
+		}
 #ifdef RUSAGE_THREAD
 		getrusage(RUSAGE_THREAD, &usage);
 		finish_u = tval_to_tspec(usage.ru_utime);
@@ -313,6 +312,13 @@ void* nts_ke_listener(void* arg) {
 		sys = tspec_to_d(sub_tspec(finish_s, start_s));
 		start_u = finish_u;
 		start_s = finish_s;
+		if (worked) {
+			ntske_cnt.serves_good_usr += usr;
+			ntske_cnt.serves_good_sys += sys;
+		} else {
+			ntske_cnt.serves_bad_usr += usr;
+			ntske_cnt.serves_bad_sys += sys;
+		}
 		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
 			addrbuf, good, usingbuf, tspec_to_d(finish),
 			usr*1000, sys*1000);

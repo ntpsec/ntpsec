@@ -188,6 +188,7 @@ enum nts_errors_type {
 	nts_bad_request = 1
 };
 
+
 enum aead_ciphers {
 #define NO_AEAD 0xffff
 	AEAD_AES_128_GCM = 1,
@@ -237,24 +238,38 @@ extern struct ntsconfig_t ntsconfig;
 
 
 /* NTS-related statistics visible via ntpq -c nts */
-extern uint64_t nts_client_send;
-extern uint64_t nts_client_recv_good;
-extern uint64_t nts_client_recv_bad;
-extern uint64_t nts_server_send;
-extern uint64_t nts_server_recv_good;
-extern uint64_t nts_server_recv_bad;
-extern uint64_t nts_cookie_make;
-extern uint64_t nts_cookie_not_server;   /* we are not a NTS server */
-extern uint64_t nts_cookie_decode_total; /* total attempts, includes too old */
-extern uint64_t nts_cookie_decode_current;
-extern uint64_t nts_cookie_decode_old;
-extern uint64_t nts_cookie_decode_old2;
-extern uint64_t nts_cookie_decode_older;
-extern uint64_t nts_cookie_decode_too_old; /* or garbage */
-extern uint64_t nts_cookie_decode_error;
-extern uint64_t nts_ke_serves_good;
-extern uint64_t nts_ke_serves_bad;
-extern uint64_t nts_ke_probes_good;
-extern uint64_t nts_ke_probes_bad;
+struct nts_counters {
+  uint64_t client_send;
+  uint64_t client_recv_good;
+  uint64_t client_recv_bad;
+  uint64_t server_send;
+  uint64_t server_recv_good;
+  uint64_t server_recv_bad;
+  uint64_t cookie_make;
+  uint64_t cookie_not_server;   /* we are not a NTS server */
+  uint64_t cookie_decode_total; /* total attempts, includes too old */
+  uint64_t cookie_decode_current;
+  uint64_t cookie_decode_old;
+  uint64_t cookie_decode_old2;
+  uint64_t cookie_decode_older;
+  uint64_t cookie_decode_too_old; /* or garbage */
+  uint64_t cookie_decode_error;
+};
+struct ntske_counters {
+  uint64_t serves_good;
+  double   serves_good_wall;
+  double   serves_good_usr;
+  double   serves_good_sys;
+  uint64_t serves_nossl;
+  uint64_t serves_bad;
+  double   serves_bad_wall;
+  double   serves_bad_usr;
+  double   serves_bad_sys;
+  uint64_t probes_good;
+  uint64_t probes_bad;
+};
+extern struct nts_counters nts_cnt;
+extern struct ntske_counters ntske_cnt;
+
 
 #endif /* GUARD_NTS_H */

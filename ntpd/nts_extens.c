@@ -32,14 +32,6 @@
 #define NTP_EX_HDR_LNG 4
 #define NTP_EX_U16_LNG 2
 
-/* Statistics for ntpq */
-uint64_t nts_client_send = 0;
-uint64_t nts_client_recv_good = 0;
-uint64_t nts_client_recv_bad = 0;
-uint64_t nts_server_send = 0;
-uint64_t nts_server_recv_good = 0;
-uint64_t nts_server_recv_bad = 0;
-
 enum NtpExtFieldType {
 	Unique_Identifier = 0x104,
 	NTS_Cookie = 0x204,
@@ -121,7 +113,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 	buf.left -= left;
 
 	used = buf.next-xpkt->exten;
-	nts_client_send++;
+	nts_cnt.client_send++;
 	return used;
 }
 
@@ -132,7 +124,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	bool sawcookie, sawAEEF;
 	int cookielen;			/* cookie and placeholder(s) */
 
-	nts_server_recv_bad++;		/* assume bad, undo if OK */
+	nts_cnt.server_recv_bad++;		/* assume bad, undo if OK */
 
 	buf.next = pkt+LEN_PKT_NOMAC;
 	buf.left = lng-LEN_PKT_NOMAC;
@@ -265,8 +257,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	//  printf("ESRx: %d, %d, %d\n",
 	//      lng-LEN_PKT_NOMAC, ntspacket->needed, ntspacket->keylen);
 	ntspacket->valid = true;
-	nts_server_recv_good++;
-	nts_server_recv_bad--;
+	nts_cnt.server_recv_good++;
+	nts_cnt.server_recv_bad--;
 	return true;
 }
 
@@ -350,7 +342,7 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
 
 	// printf("ESSx: %lu, %d\n", (long unsigned)left, used);
 
-	nts_server_send++;
+	nts_cnt.server_send++;
 	return used;
 }
 
@@ -359,7 +351,7 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 	int idx;
 	bool sawAEEF = false;
 
-	nts_client_recv_bad++;		/* assume bad, undo if OK */
+	nts_cnt.client_recv_bad++;	/* assume bad, undo if OK */
 
 	buf.next = pkt+LEN_PKT_NOMAC;
 	buf.left = lng-LEN_PKT_NOMAC;
@@ -447,8 +439,8 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 	}
 	if (buf.left > 0)
 		return false;
-	nts_client_recv_good++;
-	nts_client_recv_bad--;
+	nts_cnt.client_recv_good++;
+	nts_cnt.client_recv_bad--;
 	return true;
 }
 /* end */
