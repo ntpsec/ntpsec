@@ -198,9 +198,13 @@ void* nts_ke_listener(void* arg) {
 	char addrbuf[100];
 	char usingbuf[100];
 	struct timespec start, finish;		/* wall clock */
+	double wall;
+//	bool worked;
+	const char *good;
 #ifdef RUSAGE_THREAD
 	struct timespec start_u, finish_u;	/* CPU user */
 	struct timespec start_s, finish_s;	/* CPU system */
+	double usr, sys;			/* seconds */
 	struct rusage usage;
 #endif
 
@@ -271,8 +275,8 @@ void* nts_ke_listener(void* arg) {
 
 		if (SSL_accept(ssl) <= 0) {
 			clock_gettime(CLOCK_REALTIME, &finish);
-			finish = sub_tspec(finish, start);
-			nts_ke_accept_fail(addrbuf, tspec_to_d(finish));
+			wall = tspec_to_d(sub_tspec(finish, start));
+			nts_ke_accept_fail(addrbuf, wall);
 			SSL_free(ssl);
 			close(client);
 			nts_ke_serves_bad++;
@@ -285,32 +289,36 @@ void* nts_ke_listener(void* arg) {
 			SSL_get_cipher_name(ssl),
 			SSL_get_cipher_bits(ssl, NULL));
 
-		if (!nts_ke_request(ssl))
+		if (nts_ke_request(ssl)) {
+//			worked = true;
+			good = "OK";
+			nts_ke_serves_good++;
+		} else {
+//			worked = false;
+			good = "Failed";
 			nts_ke_serves_bad++;
+		}
 
 		SSL_shutdown(ssl);
 		SSL_free(ssl);
 		close(client);
 
 		clock_gettime(CLOCK_REALTIME, &finish);
-		finish = sub_tspec(finish, start);
+		wall = tspec_to_d(sub_tspec(finish, start));
 #ifdef RUSAGE_THREAD
 		getrusage(RUSAGE_THREAD, &usage);
 		finish_u = tval_to_tspec(usage.ru_utime);
 		finish_s = tval_to_tspec(usage.ru_stime);
-		start_u = sub_tspec(finish_u, start_u);
-		start_s = sub_tspec(finish_s, start_s);
-#endif
-		nts_ke_serves_good++;
-#ifdef RUSAGE_THREAD
-		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
-			addrbuf, usingbuf, tspec_to_d(finish),
-			tspec_to_d(start_u)*1000, tspec_to_d(start_s)*1000);
+		usr = tspec_to_d(sub_tspec(finish_u, start_u));
+		sys = tspec_to_d(sub_tspec(finish_s, start_s));
 		start_u = finish_u;
 		start_s = finish_s;
+		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
+			addrbuf, good, usingbuf, tspec_to_d(finish),
+			usr*1000, sys*1000);
 #else
-		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, Using %s, took %.3f sec",
-			addrbuf, usingbuf, tspec_to_d(finish));
+		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec",
+			addrbuf, good, usingbuf, tspec_to_d(finish));
 #endif
 	}
 	return NULL;
