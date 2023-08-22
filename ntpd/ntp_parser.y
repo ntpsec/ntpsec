@@ -208,7 +208,6 @@
 %token	<Integer>	T_Time1
 %token	<Integer>	T_Time2
 %token	<Integer>	T_Timer
-%token	<Integer>	T_Timingstats
 %token	<Integer>	T_Tinker
 %token	<Integer>	T_Tlsciphers
 %token	<Integer>	T_Tlsciphersuites
@@ -655,7 +654,6 @@ stat
 	|	T_Rawstats
 	|	T_Sysstats
 	|	T_Protostats
-	|	T_Timingstats
 	|	T_Usestats
 	;
 
