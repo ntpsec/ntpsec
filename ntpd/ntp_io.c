@@ -1190,10 +1190,6 @@ convert_isc_if(
 			? INT_UP : 0)
 		| ((INTERFACE_F_LOOPBACK & isc_if->flags)
 			? INT_LOOPBACK : 0)
-		| ((INTERFACE_F_POINTTOPOINT & isc_if->flags)
-			? INT_PPP : 0)
-		| ((INTERFACE_F_PRIVACY & isc_if->flags)
-			? INT_PRIVACY : 0)
 		;
 
 	/*

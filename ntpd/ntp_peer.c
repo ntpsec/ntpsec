@@ -571,9 +571,7 @@ newpeer(
 	if (dstadr != NULL) {
 		peer = findexistingpeer(srcadr, hostname, NULL, hmode);
 		while (peer != NULL) {
-			if (peer->dstadr == dstadr ||
-			    ((MDF_BCLNT & cast_flags) &&
-			     (MDF_BCLNT & peer->cast_flags)))
+			if (peer->dstadr == dstadr)
 				break;
 
 			if (dstadr == ANY_INTERFACE_CHOOSE(srcadr) &&

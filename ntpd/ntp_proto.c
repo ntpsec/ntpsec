@@ -2490,7 +2490,7 @@ dns_take_pool(
 	pctl.mode = 0;
 	pctl.peerkey = 0;
 	peer = newpeer(rmtadr, NULL, lcladr,
-		       MODE_CLIENT, &pctl, MDF_UCAST | MDF_UCLNT, false);
+		       MODE_CLIENT, &pctl, MDF_UCAST, false);
 	peer_xmit(peer);
 	if (peer->cfg.flags & FLAG_IBURST)
 	  peer->retry = NTP_RETRY;
@@ -2611,7 +2611,9 @@ local_refid(
 {
 	endpt *	unicast_ep;
 
-	if (p->dstadr != NULL && !(INT_MCASTIF & p->dstadr->flags))
+// FIXME: Is this ever NULL?  MCAST leftover??
+// (actually, just check)
+	if (p->dstadr != NULL)
 		unicast_ep = p->dstadr;
 	else
 		unicast_ep = findinterface(&p->srcadr);
