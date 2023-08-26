@@ -274,6 +274,7 @@ void* nts_ke_listener(void* arg) {
 			SSL_free(ssl);
 			close(client);
 			ntske_cnt.serves_nossl++;
+// FIXME: update start_u and start_s
 			continue;
 		}
 

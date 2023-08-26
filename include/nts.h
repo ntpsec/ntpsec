@@ -268,8 +268,8 @@ struct ntske_counters {
   uint64_t probes_good;
   uint64_t probes_bad;
 };
-extern struct nts_counters nts_cnt;
-extern struct ntske_counters ntske_cnt;
+extern struct nts_counters nts_cnt, old_nts_cnt;
+extern struct ntske_counters ntske_cnt, old_ntske_cnt;
 
 
 #endif /* GUARD_NTS_H */

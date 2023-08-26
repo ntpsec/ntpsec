@@ -29,8 +29,8 @@
 #include "nts.h"
 #include "nts2.h"
 
-struct nts_counters nts_cnt;
-struct ntske_counters ntske_cnt;
+struct nts_counters nts_cnt, old_nts_cnt;
+struct ntske_counters ntske_cnt, old_ntske_cnt;
 
 struct ntsconfig_t ntsconfig = {
 	.ntsenable = false,
