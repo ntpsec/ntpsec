@@ -321,11 +321,11 @@ void* nts_ke_listener(void* arg) {
 			ntske_cnt.serves_bad_sys += sys;
 		}
 		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
-			addrbuf, good, usingbuf, tspec_to_d(finish),
+			addrbuf, good, usingbuf, wall,
 			usr*1000, sys*1000);
 #else
 		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec",
-			addrbuf, good, usingbuf, tspec_to_d(finish));
+			addrbuf, good, usingbuf, wall);
 #endif
 	}
 	return NULL;
