@@ -773,7 +773,7 @@ void record_nts_stats(void) {
 }
 
 #define ntske_since(CNT) ((unsigned long long)(ntske_cnt.CNT - old_ntske_cnt.CNT))
-#define ntske_since_f(CNT) (ntske_cnt.CNT - old_ntske_cnt.CNT)
+#define ntske_since_f(CNT) ((double)lfptod(ntske_cnt.CNT - old_ntske_cnt.CNT))
 uptime_t ntske_stattime;
 void record_ntske_stats(void) {
 #ifndef DISABLE_NTS
@@ -786,17 +786,17 @@ void record_ntske_stats(void) {
 	filegen_setup(&ntskestats, now.tv_sec);
 	if (ntsstats.fp != NULL) {
 		fprintf(ntskestats.fp,
-		    "%s %u %llu %.3f %.3f %.3f %llu %llu %.3f %.3f %.3f %llu %llu\n",
+		    "%s %u %llu %.3f %.3f %llu %.3f %.3f %llu %.3f %.3f %llu %llu\n",
 		    timespec_to_MJDtime(&now), current_time-ntske_stattime,
 		    ntske_since(serves_good),
 		    ntske_since_f(serves_good_wall),
-		    ntske_since_f(serves_good_usr),
-		    ntske_since_f(serves_good_sys),
+		    ntske_since_f(serves_good_cpu),
 		    ntske_since(serves_nossl),
+		    ntske_since_f(serves_nossl_wall),
+		    ntske_since_f(serves_nossl_cpu),
 		    ntske_since(serves_bad),
 		    ntske_since_f(serves_bad_wall),
-		    ntske_since_f(serves_bad_usr),
-		    ntske_since_f(serves_bad_sys),
+		    ntske_since_f(serves_bad_cpu),
 		    ntske_since(probes_good),
 		    ntske_since(probes_bad) );
 		fflush(ntskestats.fp);

@@ -165,7 +165,7 @@ enum var_type {v_time,
 	v_str, v_dbl, v_uli, v_li, v_uint, v_int,
 	v_u64, v_i64, v_u32, v_i32, v_u8, v_i8, v_bool,
 	v_strP, v_u64P, v_u32P, v_uliP,
-	v_l_fp, v_l_fp_ms,
+	v_l_fp, v_l_fp_ms, v_l_fp_sec,
 	v_mrumem,
 	v_since, v_kli, v_special};
 enum var_type_special {
@@ -244,6 +244,8 @@ struct var {
   .name = xname, .flags = xflags, .type = v_l_fp, .p_l_fp = &xlocation }
 #define Var_l_fp_ms(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_l_fp_ms, .p_l_fp = &xlocation }
+#define Var_l_fp_sec(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_l_fp_sec, .p_l_fp = &xlocation }
 #define Var_since(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_since, .p_up = &xlocation }
 
@@ -427,14 +429,14 @@ static const struct var sys_var[] = {
   Var_u64("nts_cookie_decode_too_old", RO, nts_cnt.cookie_decode_too_old),
   Var_u64("nts_cookie_decode_error", RO, nts_cnt.cookie_decode_error),
   Var_u64("nts_ke_serves_good", RO, ntske_cnt.serves_good),
-  Var_dbl("nts_ke_serves_good_wall", RO, ntske_cnt.serves_good_wall),
-  Var_dbl("nts_ke_serves_good_usr", RO, ntske_cnt.serves_good_usr),
-  Var_dbl("nts_ke_serves_good_sys", RO, ntske_cnt.serves_good_sys),
+  Var_l_fp_sec("nts_ke_serves_good_wall", RO, ntske_cnt.serves_good_wall),
+  Var_l_fp_sec("nts_ke_serves_good_cpu", RO, ntske_cnt.serves_good_cpu),
   Var_u64("nts_ke_serves_nossl", RO, ntske_cnt.serves_nossl),
+  Var_l_fp_sec("nts_ke_serves_nossl_wall", RO, ntske_cnt.serves_nossl_wall),
+  Var_l_fp_sec("nts_ke_serves_nossl_cpu", RO, ntske_cnt.serves_nossl_cpu),
   Var_u64("nts_ke_serves_bad", RO, ntske_cnt.serves_bad),
-  Var_dbl("nts_ke_serves_bad_wall", RO, ntske_cnt.serves_bad_wall),
-  Var_dbl("nts_ke_serves_bad_usr", RO, ntske_cnt.serves_bad_usr),
-  Var_dbl("nts_ke_serves_bad_sys", RO, ntske_cnt.serves_bad_sys),
+  Var_l_fp_sec("nts_ke_serves_bad_wall", RO, ntske_cnt.serves_bad_wall),
+  Var_l_fp_sec("nts_ke_serves_bad_cpu", RO, ntske_cnt.serves_bad_cpu),
   Var_u64("nts_ke_probes_good", RO, ntske_cnt.probes_good),
   Var_u64("nts_ke_probes_bad", RO, ntske_cnt.probes_bad),
 #endif
@@ -1431,10 +1433,15 @@ ctl_putsys(const struct var * v) {
 
 	/* time of day */
 	case v_l_fp: ctl_putts(v->name, *v->p_l_fp); break;
+
 	/* time differences */
 	case v_l_fp_ms:
 	    temp_d = lfptod(*v->p_l_fp);
 	    temp_d *= MS_PER_S;
+	    ctl_putdbl(v->name, temp_d);
+            break;
+	case v_l_fp_sec:
+	    temp_d = lfptod(*v->p_l_fp);
 	    ctl_putdbl(v->name, temp_d);
             break;
 

@@ -21,6 +21,7 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include "aes_siv.h"
+#include "ntp_fp.h"
 #include "nts.h"
 
 #define UNUSED_ARG(arg)         ((void)(arg))

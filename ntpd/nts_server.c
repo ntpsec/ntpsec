@@ -185,6 +185,13 @@ void nts_unlock_certlock(void) {
 	}
 }
 
+/* lfptod goes to long double */
+static inline double lfptox(l_fp r) {
+/* l_fp to double */
+        return ldexp((double)((int64_t)r), -32);
+}
+
+
 void* nts_ke_listener(void* arg) {
 	struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
 	int sock = *(int*)arg;
@@ -192,13 +199,13 @@ void* nts_ke_listener(void* arg) {
 	char addrbuf[100];
 	char usingbuf[100];
 	struct timespec start, finish;		/* wall clock */
-	double wall;
+	l_fp wall;
 	bool worked;
 	const char *good;
 #ifdef RUSAGE_THREAD
 	struct timespec start_u, finish_u;	/* CPU user */
 	struct timespec start_s, finish_s;	/* CPU system */
-	double usr, sys;			/* seconds */
+	l_fp usr, sys;
 	struct rusage usage;
 #endif
 
@@ -269,12 +276,23 @@ void* nts_ke_listener(void* arg) {
 
 		if (SSL_accept(ssl) <= 0) {
 			clock_gettime(CLOCK_REALTIME, &finish);
-			wall = tspec_to_d(sub_tspec(finish, start));
-			nts_ke_accept_fail(addrbuf, wall);
+			wall = tspec_intv_to_lfp(sub_tspec(finish, start));
+			nts_ke_accept_fail(addrbuf, lfptox(wall));
 			SSL_free(ssl);
 			close(client);
 			ntske_cnt.serves_nossl++;
-// FIXME: update start_u and start_s
+			ntske_cnt.serves_nossl_wall += wall;
+#ifdef RUSAGE_THREAD
+			getrusage(RUSAGE_THREAD, &usage);
+			finish_u = tval_to_tspec(usage.ru_utime);
+			finish_s = tval_to_tspec(usage.ru_stime);
+			usr = tspec_intv_to_lfp(sub_tspec(finish_u, start_u));
+			sys = tspec_intv_to_lfp(sub_tspec(finish_s, start_s));
+			start_u = finish_u;
+			start_s = finish_s;
+			ntske_cnt.serves_nossl_cpu += usr;
+			ntske_cnt.serves_nossl_cpu += sys;
+#endif
 			continue;
 		}
 
@@ -297,7 +315,7 @@ void* nts_ke_listener(void* arg) {
 		close(client);
 
 		clock_gettime(CLOCK_REALTIME, &finish);
-		wall = tspec_to_d(sub_tspec(finish, start));
+		wall = tspec_intv_to_lfp(sub_tspec(finish, start));
 		if (worked) {
 			ntske_cnt.serves_good++;
 			ntske_cnt.serves_good_wall += wall;
@@ -309,23 +327,23 @@ void* nts_ke_listener(void* arg) {
 		getrusage(RUSAGE_THREAD, &usage);
 		finish_u = tval_to_tspec(usage.ru_utime);
 		finish_s = tval_to_tspec(usage.ru_stime);
-		usr = tspec_to_d(sub_tspec(finish_u, start_u));
-		sys = tspec_to_d(sub_tspec(finish_s, start_s));
+		usr = tspec_intv_to_lfp(sub_tspec(finish_u, start_u));
+		sys = tspec_intv_to_lfp(sub_tspec(finish_s, start_s));
 		start_u = finish_u;
 		start_s = finish_s;
 		if (worked) {
-			ntske_cnt.serves_good_usr += usr;
-			ntske_cnt.serves_good_sys += sys;
+			ntske_cnt.serves_good_cpu += usr;
+			ntske_cnt.serves_good_cpu += sys;
 		} else {
-			ntske_cnt.serves_bad_usr += usr;
-			ntske_cnt.serves_bad_sys += sys;
+			ntske_cnt.serves_bad_cpu += usr;
+			ntske_cnt.serves_bad_cpu += sys;
 		}
 		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
-			addrbuf, good, usingbuf, wall,
-			usr*1000, sys*1000);
+			addrbuf, good, usingbuf, lfptox(wall),
+			lfptox(usr*1000), lfptox(sys*1000));
 #else
 		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec",
-			addrbuf, good, usingbuf, wall);
+			addrbuf, good, usingbuf, lfptox(wall));
 #endif
 	}
 	return NULL;

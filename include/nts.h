@@ -257,14 +257,14 @@ struct nts_counters {
 };
 struct ntske_counters {
   uint64_t serves_good;
-  double   serves_good_wall;
-  double   serves_good_usr;
-  double   serves_good_sys;
+  l_fp     serves_good_wall;
+  l_fp     serves_good_cpu;
   uint64_t serves_nossl;
+  l_fp     serves_nossl_wall;
+  l_fp     serves_nossl_cpu;
   uint64_t serves_bad;
-  double   serves_bad_wall;
-  double   serves_bad_usr;
-  double   serves_bad_sys;
+  l_fp     serves_bad_wall;
+  l_fp     serves_bad_cpu;
   uint64_t probes_good;
   uint64_t probes_bad;
 };
