@@ -166,6 +166,7 @@ enum var_type {v_time,
 	v_u64, v_i64, v_u32, v_i32, v_u8, v_i8, v_bool,
 	v_strP, v_u64P, v_u32P, v_uliP,
 	v_l_fp, v_l_fp_ms, v_l_fp_sec,
+	v_u64_r, v_l_fp_sec_r,
 	v_mrumem,
 	v_since, v_kli, v_special};
 enum var_type_special {
@@ -199,6 +200,11 @@ struct var {
     unsigned long int (*p_uliP)(void);
     const enum var_type_special special;
     };
+  union {
+    /* second pointer for returning recent since-stats-logged */
+    const uint64_t* p2_u64;
+    const uint64_t* p2_l_fp;
+    };
   };
 
 #define Var_time(xname, xflags, xlocation) { \
@@ -227,6 +233,9 @@ struct var {
 
 #define Var_u64(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_u64, .p_u64 = &xlocation }
+#define Var_u64_r(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_u64_r, \
+  .p_u64 = &xlocation, .p2_u64 = &(old_##xlocation) }
 #define Var_i64(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_i64, .p_i84 = &xlocation }
 #define Var_u32(xname, xflags, xlocation) { \
@@ -246,6 +255,9 @@ struct var {
   .name = xname, .flags = xflags, .type = v_l_fp_ms, .p_l_fp = &xlocation }
 #define Var_l_fp_sec(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_l_fp_sec, .p_l_fp = &xlocation }
+#define Var_l_fp_r(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_l_fp_sec_r, \
+  .p_l_fp = &xlocation, .p2_l_fp = &(old_##xlocation) }
 #define Var_since(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_since, .p_up = &xlocation }
 
@@ -325,6 +337,7 @@ static const struct var sys_var[] = {
   Var_Pair("ss_limited", limitrejected),
   Var_Pair("ss_kodsent", kodsent),
   Var_Pair("ss_processed", processed),
+#undef Var_Pair
 
 /* We own this one.  See above.  No proc mode.
  * Note that lots of others are not (yet?) in this table.  */
@@ -409,36 +422,44 @@ static const struct var sys_var[] = {
   Var_bool("lockclock", RO, loop_data.lockclock),
 
 #ifndef DISABLE_NTS
+#define Var_Pair(name, location) \
+  Var_u64(name, RO, location), \
+  Var_u64_r(name "_r", RO, location)
+#define Var_PairF(name, location) \
+  Var_l_fp_sec(name, RO, location), \
+  Var_l_fp_r(name "_r", RO, location)
 /* ntsinfo: NTS statistics */
-  Var_u64("nts_client_send", RO, nts_cnt.client_send),
-  Var_u64("nts_client_recv_good", RO, nts_cnt.client_recv_good),
-  Var_u64("nts_client_recv_bad", RO, nts_cnt.client_recv_bad),
-  Var_u64("nts_server_send", RO, nts_cnt.server_send),
-  Var_u64("nts_server_recv_good", RO, nts_cnt.server_recv_good),
-  Var_u64("nts_server_recv_bad", RO, nts_cnt.server_recv_bad),
-  Var_u64("nts_cookie_make", RO, nts_cnt.cookie_make),
-  Var_u64("nts_cookie_not_server", RO, nts_cnt.cookie_not_server),
-  Var_u64("nts_cookie_decode_total", RO, nts_cnt.cookie_decode_total),
-  Var_u64("nts_cookie_decode_current", RO, nts_cnt.cookie_decode_current),
+  Var_Pair("nts_client_send", nts_cnt.client_send),
+  Var_Pair("nts_client_recv_good", nts_cnt.client_recv_good),
+  Var_Pair("nts_client_recv_bad", nts_cnt.client_recv_bad),
+  Var_Pair("nts_server_send", nts_cnt.server_send),
+  Var_Pair("nts_server_recv_good", nts_cnt.server_recv_good),
+  Var_Pair("nts_server_recv_bad", nts_cnt.server_recv_bad),
+  Var_Pair("nts_cookie_make", nts_cnt.cookie_make),
+  Var_Pair("nts_cookie_not_server", nts_cnt.cookie_not_server),
+  Var_Pair("nts_cookie_decode_total", nts_cnt.cookie_decode_total),
+  Var_Pair("nts_cookie_decode_current", nts_cnt.cookie_decode_current),
   /* Following line is a hack for old versions of ntpq
    * nts_cookie_decode is old name for nts_cookie_decode_current */
-  Var_u64("nts_cookie_decode", RO, nts_cnt.cookie_decode_current),
-  Var_u64("nts_cookie_decode_old", RO, nts_cnt.cookie_decode_old),
-  Var_u64("nts_cookie_decode_old2", RO, nts_cnt.cookie_decode_old2),
-  Var_u64("nts_cookie_decode_older", RO, nts_cnt.cookie_decode_older),
-  Var_u64("nts_cookie_decode_too_old", RO, nts_cnt.cookie_decode_too_old),
-  Var_u64("nts_cookie_decode_error", RO, nts_cnt.cookie_decode_error),
-  Var_u64("nts_ke_serves_good", RO, ntske_cnt.serves_good),
-  Var_l_fp_sec("nts_ke_serves_good_wall", RO, ntske_cnt.serves_good_wall),
-  Var_l_fp_sec("nts_ke_serves_good_cpu", RO, ntske_cnt.serves_good_cpu),
-  Var_u64("nts_ke_serves_nossl", RO, ntske_cnt.serves_nossl),
-  Var_l_fp_sec("nts_ke_serves_nossl_wall", RO, ntske_cnt.serves_nossl_wall),
-  Var_l_fp_sec("nts_ke_serves_nossl_cpu", RO, ntske_cnt.serves_nossl_cpu),
-  Var_u64("nts_ke_serves_bad", RO, ntske_cnt.serves_bad),
-  Var_l_fp_sec("nts_ke_serves_bad_wall", RO, ntske_cnt.serves_bad_wall),
-  Var_l_fp_sec("nts_ke_serves_bad_cpu", RO, ntske_cnt.serves_bad_cpu),
-  Var_u64("nts_ke_probes_good", RO, ntske_cnt.probes_good),
-  Var_u64("nts_ke_probes_bad", RO, ntske_cnt.probes_bad),
+  Var_Pair("nts_cookie_decode", nts_cnt.cookie_decode_current),
+  Var_Pair("nts_cookie_decode_old", nts_cnt.cookie_decode_old),
+  Var_Pair("nts_cookie_decode_old2", nts_cnt.cookie_decode_old2),
+  Var_Pair("nts_cookie_decode_older", nts_cnt.cookie_decode_older),
+  Var_Pair("nts_cookie_decode_too_old", nts_cnt.cookie_decode_too_old),
+  Var_Pair("nts_cookie_decode_error", nts_cnt.cookie_decode_error),
+  Var_Pair("nts_ke_serves_good", ntske_cnt.serves_good),
+  Var_PairF("nts_ke_serves_good_wall", ntske_cnt.serves_good_wall),
+  Var_PairF("nts_ke_serves_good_cpu", ntske_cnt.serves_good_cpu),
+  Var_Pair("nts_ke_serves_nossl", ntske_cnt.serves_nossl),
+  Var_PairF("nts_ke_serves_nossl_wall", ntske_cnt.serves_nossl_wall),
+  Var_PairF("nts_ke_serves_nossl_cpu", ntske_cnt.serves_nossl_cpu),
+  Var_Pair("nts_ke_serves_bad", ntske_cnt.serves_bad),
+  Var_PairF("nts_ke_serves_bad_wall", ntske_cnt.serves_bad_wall),
+  Var_PairF("nts_ke_serves_bad_cpu", ntske_cnt.serves_bad_cpu),
+  Var_Pair("nts_ke_probes_good", ntske_cnt.probes_good),
+  Var_Pair("nts_ke_probes_bad", ntske_cnt.probes_bad),
+#undef Var_Pair
+#undef Var_PairF
 #endif
 
   { .flags=EOV }                  // end marker for scans
@@ -1414,6 +1435,8 @@ ctl_putsys(const struct var * v) {
 	case v_uli: ctl_putuint(v->name, *v->p_uli); break;
 	case v_uint: ctl_putuint(v->name, *v->p_uint); break;
 	case v_u64: ctl_putuint(v->name, *v->p_u64); break;
+	case v_u64_r:
+		ctl_putuint(v->name, *v->p_u64-*v->p2_u64); break;
 	case v_u32: ctl_putuint(v->name, *v->p_u32); break;
 	case v_u8: ctl_putuint(v->name, *v->p_u8); break;
 
@@ -1442,6 +1465,10 @@ ctl_putsys(const struct var * v) {
             break;
 	case v_l_fp_sec:
 	    temp_d = lfptod(*v->p_l_fp);
+	    ctl_putdbl(v->name, temp_d);
+            break;
+	case v_l_fp_sec_r:
+	    temp_d = lfptod(*v->p_l_fp-*v->p2_l_fp);
 	    ctl_putdbl(v->name, temp_d);
             break;
 
