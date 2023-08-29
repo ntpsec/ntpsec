@@ -182,14 +182,22 @@ bool nts_load_ciphers(SSL_CTX *ctx) {
 	 * There is no SSL_CTX_get_cipher_list, so we can't easily read back
 	 * the ciphers to see what it took.
 	 * We could make a dummy SSL, read the list, then free it.
+	 * man SSL_CTX_set_ciphersuites() has info.
 	 */
-	if (NULL != ntsconfig.tlsciphersuites) {
-		if (1 != SSL_CTX_set_ciphersuites(ctx, ntsconfig.tlsciphersuites)) {
-			msyslog(LOG_ERR, "NTS: troubles setting ciphersuites.");
-			return false;
-		} else {
-			msyslog(LOG_INFO, "NTS: set ciphersuites.");
-		}
+	if (NULL == ntsconfig.tlsciphersuites) {
+		return true;
+	}
+	/* The server picks the ciphers.
+	 *  Default is client preference.
+	 *  This switches to server preference if the admin
+	 *  specifies the valid ciphers.  See #797
+	 */
+	SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
+	if (1 != SSL_CTX_set_ciphersuites(ctx, ntsconfig.tlsciphersuites)) {
+		msyslog(LOG_ERR, "NTS: troubles setting ciphersuites.");
+		return false;
+	} else {
+		msyslog(LOG_INFO, "NTS: set ciphersuites %s.", ntsconfig.tlsciphersuites);
 	}
 	return true;
 }
