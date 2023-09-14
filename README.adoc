@@ -1,3 +1,8 @@
+= About this fork =
+
+This fork's only reason is to create a link:https://github.com/ntpsec/ntpsec/pull/8[pull request].
+Only the ntpdig client is affected.
+
 = The NTPsec distribution base directory =
 
 This directory and its subdirectories contain NTPSec, a
