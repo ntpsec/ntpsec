@@ -1,7 +1,7 @@
 // Monitoring commands. Is included twice.
 
 [[statistics]]+statistics+ _name..._::
-  Enables writing of statistics records. Currently, eight kinds of
+  Enables writing of statistics records. Currently, ten kinds of
   _name_ statistics are supported.
 +
   +clockstats+;;
@@ -58,11 +58,85 @@ time offset (seconds), frequency offset (parts per million - PPM),
 RMS jitter (seconds), Allan deviation (PPM) and clock discipline
 time constant.
 +
+  +ntsstats+;;
+    Enables recording of NTS statistics counters on a periodic basis.
+    Each hour a line of the following form is appended to the file
+    generation set named _ntsstats_:
++
+-----------------------------------------------------------
+60209 77147.187 3600 1320 1239 0 2895 2895 11 4104 0 2897 2885 10 0 0 2 0
+-----------------------------------------------------------
++
+[width="100%",cols="<34%,<33%,<33%"]
+|====================================
+|Item         |Units     |Description
+|+60209+      |MJD       |date
+|+77147.187+  |s         |time past midnight
+|+3600+       |s         |time since reset
+|+1320+       |packets   |client requests sent
+|+1239+       |packets   |client responses received good
+|+0+          |packets   |client responses received bad
+|+2895+       |packets   |server responses sent
+|+2895+       |packets   |server requests received good
+|+11+         |packets   |server requests received bad
+|+4104+       |packets   |cookies made
+|+0+          |packets   |cookie decodes not server
+|+2897+       |packets   |cookie decodes total
+|+2885+       |packets   |cookie decodes current
+|+10+         |packets   |cookie decodes 1-2 days
+|+0+          |packets   |cookie decodes 2-3 days
+|+0+          |packets   |cookie decodes 3-10 days
+|+2+          |packets   |cookie decodes too old
+|+0+          |packets   |cookie decodes error
+|====================================
++
+These counters are also available via _ntpq_'s _nts_ command.
++
+  +ntskestats+;;
+    Enables recording of NTS-KE statistics counters on a periodic basis.
+    Each hour a line of the following form is appended to the file
+    generation set named _ntskestats_:
++
+-----------------------------------------------------------
+60209 77147.187 3600 10 2.914 0.026 2 3.218 0.004 0 0.000 0.000 0 0
+-----------------------------------------------------------
++
+[width="100%",cols="<34%,<33%,<33%"]
+|====================================
+|Item         |Units     |Description
+|+60209+      |MJD       |date
+|+77147.187+  |s         |time past midnight
+|+3600+       |s         |time since reset
+|+10+         |requests  |server requests good
+|+2.914+      |seconds   |server good wall clock time
+|+0.026+      |seconds   |server good server cpu time
+|+2+          |requests  |server requests no-TLS
+|+3.218+      |seconds   |server no-TLS wall clock time
+|+0.004+      |seconds   |server no-TLS server cpu time
+|+0+          |requests  |server requests bad
+|+0.000+      |seconds   |server bad wall clock time
+|+0.000+      |seconds   |server bad server cpu time
+|+0+          |requests  |client requests good
+|+0+          |requests  |client requests bad
+|====================================
++
+These counters are also available via _ntpq_'s _nts_ command.
++
+There are two types of failures for NTS-KE server processing.
+The _no-TLS_ slots are for the path when the TLS connection doesn't get setup.
+The _bad_ slots are for the path when the TLS connection does get setup
+but there is an error during the NTS-KE exchange.
++
+Both are typically caused by bad guys probing for servers to abuse.
+A _no-TLS_ event would be caused by a bad guy using unencrypted SMTP while a _bad_ event would be caused by SMTP over TLS.
++
   +protostats+;;
     Record significant peer and system events. Each significant
     event appends one line to the +protostats+ file set:
 +
-+49213 525.624 128.4.1.1 963a 8a+ _message_
+---------------------------------------------------
+49213 525.624 128.4.1.1 963a 8a+ _message_
+---------------------------------------------------
 +
 [width="100%",cols="<34%,<33%,<33%"]
 |====================================
