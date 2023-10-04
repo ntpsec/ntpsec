@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ntp_fp.h"
+
 /* default file names */
 #define NTS_CERT_FILE "/etc/ntp/cert-chain.pem"
 #define NTS_KEY_FILE "/etc/ntp/key.pem"
