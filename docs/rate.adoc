@@ -40,13 +40,6 @@ unfriendly behavior.
 A review of past client abuse incidence shows the most frequent scenario
 is a broken client that attempts to send packets at rates of one per
 second or more. On one occasion due to a defective client design
-footnote:[1.  Mills, D.L., J. Levine, R. Schmidt and D. Plonka. Coping with
-overload on the Network Time Protocol public servers. _Proc. Precision
-Time and Time Interval (PTTI) Applications and Planning Meeting_
-(Washington DC, December 2004), 5-16. Paper:
-{millshome}database/papers/ptti/ptti04a.pdf[PDF],
-Slides: {millshome}database/brief/ptti/ptti04.pdf[PDF] |
-{millshome}database/brief/ptti/ptti04.ppt[PowerPoint]]
 over 750,000 clients demonstrated this abuse. There have been occasions
 where this abuse has persisted for days at a time. These scenarios are
 the most damaging, as they can threaten not only the victim server but

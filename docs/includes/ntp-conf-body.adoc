@@ -243,8 +243,6 @@ In addition to the manual pages provided, comprehensive documentation is
 available on the world wide web at {project-website}. A snapshot of
 this documentation is available in HTML format in `/usr/share/doc/ntp`.
 
-David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
-
 == BUGS
 
 The syntax checking is not picky; some combinations of ridiculous and

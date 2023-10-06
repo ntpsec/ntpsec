@@ -3,24 +3,24 @@
 [[statistics]]+statistics+ _name..._::
   Enables writing of statistics records. Currently, ten kinds of
   _name_ statistics are supported.
-+
+
   +clockstats+;;
     Enables recording of clock driver statistics information. Each
     update received from a clock driver appends a line of the following
     form to the file generation set named _clockstats_:
 +
------------------------------------------------
-49213 525.624 SPECTRACOM(1) 93 226 00:08:29.606
------------------------------------------------
+|===
+|49213 525.624 SPECTRACOM(1) 93 226 00:08:29.606
+|===
 +
-[width="100%",cols="<34%,<33%,<33%"]
-|====================================================================
+[options="header"]
+|===
 |Item                |Units     |Description
 |49213               |MJD       |modified Julian day number
 |525.624             |s         |time of day (s) past midnight UTC
 |SPECTRACOM(1)       |          |receiver identifier (Spectracom unit 1)
 |93 226 00:08:29.606 |          |timecode (format varies by refclock)
-|====================================================================
+|===
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next
@@ -30,18 +30,18 @@ dotted-quad notation). The final field is the last timecode received from the
 clock in decoded ASCII format, where meaningful. For some clock drivers,
 a good deal of additional information can be gathered and displayed as
 well. See information specific to each clock for further details.
-+
+
   +loopstats+;;
     Enables recording of loop filter statistics information. Each update
     of the local clock outputs a line of the following form to the file
     generation set named _loopstats_:
 +
------------------------------------------------------------
-50935 75440.031 0.000006019 13.778190 0.000351733 0.0133806
------------------------------------------------------------
+|===
+|50935 75440.031 0.000006019 13.778190 0.000351733 0.0133806
+|===
 +
-[width="100%",cols="<34%,<33%,<33%"]
-|==================================
+[options="header"]
+|===
 |Item         |Units     |Description
 |+50935+      |MJD       |date
 |+75440.031+  |s         |time past midnight
@@ -50,25 +50,25 @@ well. See information specific to each clock for further details.
 |+0.000351733+|s         |RMS jitter
 |+0.013380+   |PPM       |RMS frequency jitter (aka wander)
 |+6+          |log~2~ s  |clock discipline loop time constant
-|==================================
+|===
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next five fields show
 time offset (seconds), frequency offset (parts per million - PPM),
 RMS jitter (seconds), Allan deviation (PPM) and clock discipline
 time constant.
-+
+
   +ntsstats+;;
     Enables recording of NTS statistics counters on a periodic basis.
     Each hour a line of the following form is appended to the file
     generation set named _ntsstats_:
 +
------------------------------------------------------------
-60209 77147.187 3600 1320 1239 0 2895 2895 11 4104 0 2897 2885 10 0 0 2 0
------------------------------------------------------------
+|===
+|60209 77147.187 3600 1320 1239 0 2895 2895 11 4104 0 2897 2885 10 0 0 2 0
+|===
 +
-[width="100%",cols="<34%,<33%,<33%"]
-|====================================
+[options="header"]
+|===
 |Item         |Units     |Description
 |+60209+      |MJD       |date
 |+77147.187+  |s         |time past midnight
@@ -88,37 +88,37 @@ time constant.
 |+0+          |packets   |cookie decodes 3-10 days
 |+2+          |packets   |cookie decodes too old
 |+0+          |packets   |cookie decodes error
-|====================================
+|===
 +
 These counters are also available via _ntpq_'s _nts_ command.
-+
+
   +ntskestats+;;
     Enables recording of NTS-KE statistics counters on a periodic basis.
     Each hour a line of the following form is appended to the file
     generation set named _ntskestats_:
 +
------------------------------------------------------------
-60209 77147.187 3600 10 2.914 0.026 2 3.218 0.004 0 0.000 0.000 0 0
------------------------------------------------------------
+|===
+|60209 77147.187 3600 10 2.914 0.026 2 3.218 0.004 0 0.000 0.000 0 0
+|===
 +
-[width="100%",cols="<34%,<33%,<33%"]
-|====================================
+[options="header"]
+|===
 |Item         |Units     |Description
 |+60209+      |MJD       |date
 |+77147.187+  |s         |time past midnight
 |+3600+       |s         |time since reset
 |+10+         |requests  |server requests good
 |+2.914+      |seconds   |server good wall clock time
-|+0.026+      |seconds   |server good server cpu time
+|+0.026+      |seconds   |server good CPU time
 |+2+          |requests  |server requests no-TLS
 |+3.218+      |seconds   |server no-TLS wall clock time
-|+0.004+      |seconds   |server no-TLS server cpu time
+|+0.004+      |seconds   |server no-TLS CPU time
 |+0+          |requests  |server requests bad
 |+0.000+      |seconds   |server bad wall clock time
-|+0.000+      |seconds   |server bad server cpu time
+|+0.000+      |seconds   |server bad CPU time
 |+0+          |requests  |client requests good
 |+0+          |requests  |client requests bad
-|====================================
+|===
 +
 These counters are also available via _ntpq_'s _nts_ command.
 +
@@ -129,17 +129,17 @@ but there is an error during the NTS-KE exchange.
 +
 Both are typically caused by bad guys probing for servers to abuse.
 A _no-TLS_ event would be caused by a bad guy using unencrypted SMTP while a _bad_ event would be caused by SMTP over TLS.
-+
+
   +protostats+;;
     Record significant peer and system events. Each significant
     event appends one line to the +protostats+ file set:
 +
----------------------------------------------------
-49213 525.624 128.4.1.1 963a 8a+ _message_
----------------------------------------------------
+|===
+|49213 525.624 128.4.1.1 963a 8a _message_
+|===
 +
-[width="100%",cols="<34%,<33%,<33%"]
-|====================================
+[options="header"]
+|===
 |Item       |Units     |Description
 |+49213+    |MJD       |date
 |+525.624+  |s         |time past midnight
@@ -147,11 +147,11 @@ A _no-TLS_ event would be caused by a bad guy using unencrypted SMTP while a _ba
 |+963a+     |code      |status word
 |+8a+       |code      |event message code
 |_message_  |text      |event message
-|====================================
+|===
 +
 The event message code and _message_ field are described on the
 "Event Messages and Status Words" page.
-+
+
   +peerstats+;;
     Enables recording of peer statistics information. This includes
     statistics records of all peers of an NTP server and of special
@@ -159,13 +159,12 @@ The event message code and _message_ field are described on the
     line of the following form to the current element of a file
     generation set named _peerstats_:
 +
----------------------------------------------------------------------------------
-48773 10847.650 SPECTRACOM(4) 9714 -0.001605376 0.000000000
-    0.001424877 0.000958674
----------------------------------------------------------------------------------
+|===
+|48773 10847.650 SPECTRACOM(4) 9714 -0.001605376 0.000000000 0.001424877 0.000958674
+|===
 +
-[width="100%",cols="<34%,<33%,<33%"]
-|===================================================
+[options="header"]
+|===
 |Item            |Units   |Description
 |+48773+         |MJD     |date
 |+10847.650+     |s       |time past midnight
@@ -175,7 +174,7 @@ The event message code and _message_ field are described on the
 |+0.000000000+   |s       |roundtrip delay
 |+0.001424877+   |s       |dispersion
 |+0.000958674+   |s       |RMS jitter
-|===================================================
+|===
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The third field shows
@@ -184,7 +183,7 @@ the peer address in dotted-quad notation instead) The fourth field
 is a status word, encoded in hex in the format described in
 Appendix A of the NTP specification RFC 1305. The final four fields
 show the offset, delay, dispersion and RMS jitter, all in seconds.
-+
+
   +rawstats+;;
     Enables recording of raw-timestamp statistics information. This
     includes statistics records of all peers of an NTP server and of
@@ -192,12 +191,12 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
     received from a peer or clock driver appends a line of the following
     form to the file generation set named _rawstats_:
 +
----------------------------------------------------------------------------------
-59786 36302.768 2610:20:6f15:15::27 2604:a880:1:20::17:5001 3867818701.119346355 3867818701.152009264 3867818701.152010426 3867818702.768490825 0 3 4 1 13 -29 0.000244 0.000488 .NIST. 0 1 2000
----------------------------------------------------------------------------------
+|===
+|59786 36302.768 2610:20:6f15:15::27 2604:a880:1:20::17:5001 3867818701.119346355 3867818701.152009264 3867818701.152010426 3867818702.768490825 0 3 4 1 13 -29 0.000244 0.000488 .NIST. 0 1 2000
+|===
 +
 [width="100%"]
-|==============================================================================
+|===
 |Item                |Units                             |Description
 |59786               |MJD                               |date
 |36302.768           |s                                 |time past midnight
@@ -219,7 +218,7 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
 | 0                  |integer                           |lost packets since last response
 | 1                  |integer                           |dropped packets since last request
 | 2000               |hex integer                       |0 if packet accecpted, BOGON flag if packet is discarded
-|==============================================================================
+|===
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next two fields show
@@ -235,18 +234,17 @@ That avoids DDoSing the log file.
 +
 The BOGON flags are decoded link:decode.html#flash[here].
 
-+
   +sysstats+;;
     Enables recording of ntpd statistics counters on a periodic basis.
     Each hour a line of the following form is appended to the file
     generation set named _sysstats_:
 +
------------------------------------------------------------
-59935 82782.547 3600 36082754 31287166 26510580 4779042 113 19698 1997 428 4773352 0 366120
------------------------------------------------------------
+|===
+|59935 82782.547 3600 36082754 31287166 26510580 4779042 113 19698 1997 428 4773352 0 366120
+|===
 +
-[width="100%",cols="<34%,<33%,<33%",]
-|==================================================
+[options="header",]
+|===
 |Item       |Units    |Description
 |+59935+    |MJD      |date
 |+82782.547+|s        |time past midnight
@@ -262,24 +260,24 @@ The BOGON flags are decoded link:decode.html#flash[here].
 |+4773352+  |#        |rate exceeded
 |+0+        |#        |kiss-o'-death packets sent
 |+366120+   |#        |NTPv1 packets received
-|==================================================
+|===
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The remaining ten fields
 show the statistics counter values accumulated since the last
 generated line.
-+
+
   +usestats+;;
     Enables recording of ntpd resource usage statistics.
     Each hour a line of the following form is appended to the file
     generation set named _usestats_:
 +
------------------------------------------------------------
-57570 83399.541 3600 0.902 1.451 164 0 0 0 2328 64226 1 0 4308
------------------------------------------------------------
+|===
+|57570 83399.541 3600 0.902 1.451 164 0 0 0 2328 64226 1 0 4308
+|===
 +
-[width="100%",cols="<34%,<33%,<33%",]
-|==================================================
+[options="header",]
+|===
 |Item       |Units    |Description
 |+57570+    |MJD      |date
 |+83399.541+|s        |time past midnight
@@ -295,7 +293,7 @@ generated line.
 |+1+        |#        |ru_nivcsw: context switches, preempts
 |+0+        |#        |ru_nsignals: signals
 |+4308+     |#        |ru_maxrss: resident set size, kilobytes
-|==================================================
+|===
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight).  The ru_ tags are the
@@ -327,17 +325,18 @@ The remaining fields show the values used since the last report.
 +
 Note that this command can be sent from the
 {ntpqman} program running at a remote location.
-+
+
     +name+;;
       This is the type of the statistics records, as shown in the
       _statistics_ command.
+
     +file+ _filename_;;
       This is the file name for the statistics records. Filenames of set
       members are built from three concatenated elements _prefix_,
       _filename_ and _suffix_:
 +
-[width="100%"]
-|====================================
+[options="header"]
+|===
 |Attribute         |Description
 |__prefix__        |This is a constant filename path. It is not subject to
         modifications via the _filegen_ option. It is defined by the
@@ -353,16 +352,16 @@ Note that this command can be sent from the
         parts outside the filesystem hierarchy denoted by _prefix_.
 |__suffix__        |This part is reflects individual elements of a
 	file set. It is generated according to the type of a file set.
-|====================================
-+
+|===
+
     +type+ _typename_;;
       A file generation set is characterized by its type. The following
       types are supported:
       // The following are tables only because indent lists cannot be
       // nested more than 2 deep.
 +
-[width="100%"]
-|====================================
+[options="header"]
+|===
 |Attribute         |Description
 |+none+            |The file set is actually a single plain file.
 |+pid+             |One element of file set is used per incarnation of a ntpd
@@ -398,7 +397,8 @@ Note that this command can be sent from the
         suffix consists of a dot, the letter _a_, and an 8-digit number.
         This number is taken to be the number of seconds the server is
         running at the start of the corresponding 24-hour period.
-|====================================
+|===
+
    +link+ | +nolink+;;
       It is convenient to be able to access the current element of a
       file generation set by a fixed name. This feature is enabled by
@@ -410,6 +410,7 @@ Note that this command can be sent from the
       process. When the number of links is greater than one, the file is
       unlinked. This allows the current file to be accessed by a
       constant name.
+
   +enable+ | +disable+;;
       Enables or disables the recording function.
       Information is only written to a file generation by specifying

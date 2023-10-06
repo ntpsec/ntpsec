@@ -276,4 +276,6 @@ and implementation.  Following is the current list:
 The +4+ or +6+ in the 4th position indicates that the +DNS+ or +NTS-KE+
 resulted in an +IPv4+ or +IPv6+ address.
 
+'''
+
 include::includes/footer.adoc[]

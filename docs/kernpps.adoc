@@ -82,6 +82,4 @@ https://www.eecis.udel.edu/~ntp/ntp_spool/software/nanokernel.tar.gz[nanokernel.
 
 '''''
 
-'''''
-
 include::includes/footer.adoc[]

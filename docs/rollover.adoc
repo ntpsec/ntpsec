@@ -320,6 +320,4 @@ dates.
 
 '''''
 
-image::pic/pogo1a.gif[align="center"]
-
 include::includes/footer.adoc[]

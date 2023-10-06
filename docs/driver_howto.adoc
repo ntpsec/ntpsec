@@ -250,6 +250,4 @@ buffer and update the system clock.
 
 '''''
 
-image:pic/pogo1a.gif[]
-
 include::includes/footer.adoc[]
