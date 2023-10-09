@@ -30,6 +30,14 @@ static char *	syslog_abs_fname;
 
 int		debug;
 
+/* Counters */
+struct log_counters {   /* LOG_EMERG, LOG_ALERT, LOG_CRIT not used */
+  uint64_t errors;      /* LOG_ERR */
+  uint64_t warnings;    /* LOG_WARNING */
+  uint64_t others;      /* LOG_NOTICE, LOG_INFO, and LOG_DEBUG */
+};
+struct log_counters log_cnt;
+
 /* libntp default ntp_syslogmask is all bits lit */
 #define INIT_NTP_SYSLOGMASK	~(uint32_t)0
 uint32_t ntp_syslogmask = INIT_NTP_SYSLOGMASK;
@@ -184,6 +192,22 @@ msyslog(
 {
 	char	buf[1024];
 	va_list	ap;
+
+	switch (level) {
+		case LOG_ERR:
+			log_cnt.errors++;
+			break;
+		case LOG_WARNING:
+			log_cnt.warnings++;
+			break;
+		case LOG_NOTICE:	/* FALLTHROUGH */
+		case LOG_INFO:		/* FALLTHROUGH */
+		case LOG_DEBUG:
+			log_cnt.others++;
+			break;
+		default:
+			break;
+	}
 
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
@@ -359,6 +383,17 @@ change_logfile(
 		syslog_abs_fname = abs_fname;
 	}
 	syslogit = false;
+
+	/* This leaves something in the log file if you have errors
+	 * parsing ntp.conf and you switch to a log file.
+	 * Maybe this should happen only during initialization.
+	 *   two places: commmand line and ntp.conf
+	 */ 
+	if (0<log_cnt.errors || 0<log_cnt.warnings) {
+		msyslog(log_cnt.errors? LOG_ERR: LOG_WARNING,
+		"LOG: %lu errors and %lu warnings in previous log file(s)",
+		(unsigned long)log_cnt.errors, (unsigned long)log_cnt.warnings);
+	}
 
 	return 0;
 }
