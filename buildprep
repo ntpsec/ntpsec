@@ -181,6 +181,7 @@ daemon () {
 	    $install libcap-dev libseccomp-dev		# build
 	    $install libavahi-compat-libdnssd-dev	# optional build
 	    $install pps-tools
+	    $install python3-dev python-is-python3
 	    ;;
 	emerge)
 						# Build environment included!
