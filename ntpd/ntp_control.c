@@ -165,7 +165,7 @@ enum var_type {v_time,
 	v_str, v_dbl, v_uli, v_li, v_uint, v_int,
 	v_u64, v_i64, v_u32, v_i32, v_u8, v_i8, v_bool,
 	v_strP, v_u64P, v_u32P, v_uliP,
-	v_l_fp, v_l_fp_ms, v_l_fp_sec,
+	v_l_fp, v_l_fp_ms, v_l_fp_sec, v_l_fp_sec6,
 	v_u64_r, v_l_fp_sec_r,
 	v_mrumem,
 	v_since, v_kli, v_special};
@@ -258,6 +258,8 @@ struct var {
 #define Var_l_fp_r(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_l_fp_sec_r, \
   .p_l_fp = &xlocation, .p2_l_fp = &(old_##xlocation) }
+#define Var_l_fp_sec6(xname, xflags, xlocation) { \
+  .name = xname, .flags = xflags, .type = v_l_fp_sec6, .p_l_fp = &xlocation }
 #define Var_since(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_since, .p_up = &xlocation }
 
@@ -474,10 +476,16 @@ static const struct var sys_var[] = {
   Var_Pair("mssntp_serves_err", mssntp_cnt.serves_err),
   Var_Pair("mssntp_serves_good", mssntp_cnt.serves_good),
   Var_PairF("mssntp_serves_good_wall", mssntp_cnt.serves_good_wall),
-  Var_PairF("mssntp_serves_good_slowest", mssntp_cnt.serves_good_slowest),
+  Var_l_fp_sec6("mssntp_serves_good_slowest", RO,
+    mssntp_cnt.serves_good_slowest),
+  Var_l_fp_sec6("mssntp_serves_good_slowest_r", RO,
+    old_mssntp_cnt.serves_good_slowest),
   Var_Pair("mssntp_serves_bad", mssntp_cnt.serves_bad),
   Var_PairF("mssntp_serves_bad_wall", mssntp_cnt.serves_bad_wall),
-  Var_PairF("mssntp_serves_bad_slowest", mssntp_cnt.serves_bad_slowest),
+  Var_l_fp_sec6("mssntp_serves_bad_slowest", RO,
+    mssntp_cnt.serves_bad_slowest),
+  Var_l_fp_sec6("mssntp_serves_bad_slowest_r", RO,
+    old_mssntp_cnt.serves_bad_slowest),
 #undef Var_Pair
 #undef Var_PairF
 #endif
@@ -1487,6 +1495,10 @@ ctl_putsys(const struct var * v) {
 	case v_l_fp_sec:
 	    temp_d = lfptod(*v->p_l_fp);
 	    ctl_putdbl(v->name, temp_d);
+            break;
+	case v_l_fp_sec6:
+	    temp_d = lfptod(*v->p_l_fp);
+	    ctl_putdbl6(v->name, temp_d);
             break;
 	case v_l_fp_sec_r:
 	    temp_d = lfptod(*v->p_l_fp-*v->p2_l_fp);
