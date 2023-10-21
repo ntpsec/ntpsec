@@ -462,6 +462,27 @@ static const struct var sys_var[] = {
 #undef Var_PairF
 #endif
 
+#ifdef ENABLE_MSSNTP
+#define Var_Pair(name, location) \
+  Var_u64(name, RO, location), \
+  Var_u64_r(name "_r", RO, location)
+#define Var_PairF(name, location) \
+  Var_l_fp_sec(name, RO, location), \
+  Var_l_fp_r(name "_r", RO, location)
+  Var_Pair("mssntp_serves", mssntp_cnt.serves),
+  Var_Pair("mssntp_serves_no", mssntp_cnt.serves_no),
+  Var_Pair("mssntp_serves_err", mssntp_cnt.serves_err),
+  Var_Pair("mssntp_serves_good", mssntp_cnt.serves_good),
+  Var_PairF("mssntp_serves_good_wall", mssntp_cnt.serves_good_wall),
+  Var_PairF("mssntp_serves_good_slowest", mssntp_cnt.serves_good_slowest),
+  Var_Pair("mssntp_serves_bad", mssntp_cnt.serves_bad),
+  Var_PairF("mssntp_serves_bad_wall", mssntp_cnt.serves_bad_wall),
+  Var_PairF("mssntp_serves_bad_slowest", mssntp_cnt.serves_bad_slowest),
+#undef Var_Pair
+#undef Var_PairF
+#endif
+
+
   { .flags=EOV }                  // end marker for scans
 
 };

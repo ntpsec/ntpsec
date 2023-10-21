@@ -445,6 +445,20 @@ extern struct restriction_data rstrct;
 #ifdef ENABLE_MSSNTP
 /* ntp_signd.c */
 extern void send_via_ntp_signd(struct recvbuf *, void *);
+
+struct mssntp_counters {
+  uint64_t serves;		/* packets to send_via_ntp_signd */
+  uint64_t serves_no;		/* can't contact samba */
+  uint64_t serves_err;		/* troubles talking to samba */
+  uint64_t serves_good;
+  l_fp     serves_good_wall;
+  l_fp     serves_good_slowest;
+  uint64_t serves_bad;		/* samba said error */
+  l_fp     serves_bad_wall;
+  l_fp     serves_bad_slowest;
+};
+
+extern struct mssntp_counters mssntp_cnt, old_mssntp_cnt;
 #endif
 
 /* ntp_timer.c */

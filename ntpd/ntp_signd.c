@@ -12,6 +12,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 #include <string.h>
 #include <stdbool.h>
@@ -29,8 +30,9 @@
  * but unextended and MACless packet headers, so it can't be used with NTS.
  */
 
+struct mssntp_counters mssntp_cnt, old_mssntp_cnt;
+
 #define ERR_BUF_LEN 96 // arbitary length for error buffer (6x16) -- JamesB192
-// some tinkering suggests malloc allocates 16n byte chunks with 8byte gaps
 
 static struct do_we_log do_we_log_signd = {
 	.c_decay=2,	// What is the period length in hours
@@ -214,6 +216,9 @@ send_via_ntp_signd(
 	 * https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sntp/8106cb73-ab3a-4542-8bc8-784dd32031cc
 	 */
 
+	struct timespec start, finish;
+	l_fp wall;
+
 	bool quit = false;
 	int fd;
 	size_t sendlen;
@@ -237,6 +242,9 @@ send_via_ntp_signd(
 	char *reply = NULL;
 	uint32_t reply_len;
 
+	mssntp_cnt.serves++;
+	clock_gettime(CLOCK_MONOTONIC, &start);
+
 	ZERO(samba_pkt);
 	samba_pkt.op = 0; /* Sign message */
 	/* This will be echoed into the reply - a different
@@ -256,6 +264,7 @@ send_via_ntp_signd(
 	fd = ux_socket_connect(full_socket);
 	/* Only continue with this if we can talk to Samba */
 	if (fd < 4) {
+		mssntp_cnt.serves_no++;
 		goto signd_cleanup;
 	}
 	
@@ -272,10 +281,12 @@ send_via_ntp_signd(
 
 	if (send_packet(fd, (char *)&samba_pkt, offsetof(struct samba_key_in, pkt) + LEN_PKT_NOMAC) != 0) {
 		/* Huh?  could not talk to Samba... */
+		mssntp_cnt.serves_err++;
 		goto signd_cleanup;
 	}
 
 	if (recv_packet(fd, &reply, &reply_len) != 0) {
+		mssntp_cnt.serves_err++;
 		goto signd_cleanup;
 	}
 	/* Return packet is also simple:
@@ -302,6 +313,12 @@ send_via_ntp_signd(
 			quit = true;
 		}
 		if (quit) {
+			mssntp_cnt.serves_bad++;
+			clock_gettime(CLOCK_MONOTONIC, &finish);
+			wall = tspec_intv_to_lfp(sub_tspec(finish, start));
+			mssntp_cnt.serves_bad_wall += wall;
+			if (wall > mssntp_cnt.serves_bad_slowest)
+			  mssntp_cnt.serves_bad_slowest = wall;
 			goto signd_cleanup;
 		}
 	}
@@ -309,6 +326,14 @@ send_via_ntp_signd(
 	sendlen = reply_len - header_length;
 	xpkt = reply + header_length;
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, xpkt, (uint32_t)sendlen);
+
+	mssntp_cnt.serves_good++;
+	clock_gettime(CLOCK_MONOTONIC, &finish);
+	wall = tspec_intv_to_lfp(sub_tspec(finish, start));
+	mssntp_cnt.serves_good_wall += wall;
+	if (wall > mssntp_cnt.serves_good_slowest)
+	  mssntp_cnt.serves_good_slowest = wall;
+
 	DPRINT(1, ("transmit ntp_signd packet: at %u %s->%s keyid %08x len %zu\n",
 		   current_time, socktoa(&rbufp->dstadr->sin),
 		   socktoa(&rbufp->recv_srcadr), rbufp->keyid, sendlen));

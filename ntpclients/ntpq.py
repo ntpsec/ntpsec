@@ -1689,6 +1689,28 @@ usage: ntsinfo
 """)
 
 
+    def do_mssntpinfo(self, _line):
+        "display MSSNTP authentication counters"
+        mssntpinfo = (
+   ("mssntp_serves",              "MSSNTP requests processed:     ", NTP_UINT),
+   ("mssntp_serves_no",           "MSSNTP rejected by samba:      ", NTP_UINT),
+   ("mssntp_serves_err",          "MSSNTP errors talking to samba:", NTP_UINT),
+   ("mssntp_serves_good",         "MSSNTP requests good:          ", NTP_UINT),
+   ("mssntp_serves_good_wall",    "MSSNTP requests good wall:     ", NTP_FLOAT),
+   ("mssntp_serves_good_slowest", "MSSNTP requests good slowest:  ", NTP_FLOAT),
+   ("mssntp_serves_bad",          "MSSNTP requests bad:           ", NTP_UINT),
+   ("mssntp_serves_bad_wall",     "MSSNTP requests bad wall:      ", NTP_FLOAT),
+   ("mssntp_serves_bad_slowest",  "MSSNTP requests bad slowest:   ", NTP_FLOAT),
+  )
+        self.collect_display(associd=0, variables=mssntpinfo, decodestatus=False)
+
+    def help_mssntpinfo(self):
+        self.say("""\
+function: display MSSNTP authentication counters
+usage: mssntpinfo
+""")
+
+
 # FIXME: This table should move to ntpd
 #          so the answers track when ntpd is updated
     def do_iostats(self, _line):
