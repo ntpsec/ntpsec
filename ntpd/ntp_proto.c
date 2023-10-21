@@ -4,6 +4,7 @@
  */
 #include "config.h"
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_endian.h"
 #include "ntp_stdlib.h"
@@ -19,6 +20,7 @@
 #endif
 #include <unistd.h>
 
+#define MSSNTP_QUERY_MAC_LEN 16
 
 /*
  * Byte order conversion
@@ -661,6 +663,11 @@ receive(
 	auth_info* auth = NULL;  /* !NULL if authenticated */
 	int mode;
 
+#ifdef ENABLE_MSSNTP
+	uint8_t zero_key[MSSNTP_QUERY_MAC_LEN];
+	memset(&zero_key, 0, MSSNTP_QUERY_MAC_LEN);
+#endif /* ENABLE_MSSNTP */
+
 	stat_proto_total.sys_received++;
 
 #ifdef NTPv1
@@ -754,6 +761,21 @@ receive(
 		return;
 	    }
 	}
+
+#ifdef ENABLE_MSSNTP
+	// If in an MS-SNTP restrict range, with a 16-byte all zero authenticator,
+	if((RES_MSSNTP == (restrict_mask & RES_MSSNTP))
+	    &&(MSSNTP_QUERY_MAC_LEN == rbufp->mac_len)
+	    &&(0 == memcmp(&(rbufp->recv_buffer[LEN_PKT_NOMAC + 4]),
+		                 zero_key, MSSNTP_QUERY_MAC_LEN))
+	) {
+	    // switch off the check that was breaking MS-SNTP;
+	    rbufp->keyid_present = false;
+	} else {
+	    // otherwise, switch off MS-SNTP to not break all other time service.
+	    restrict_mask &= ~RES_MSSNTP;
+	}
+#endif /* ENABLE_MSSNTP */
 
 	if(i_require_authentication(peer, restrict_mask) ||
 	    /* He wants authentication */
@@ -2355,10 +2377,7 @@ fast_xmit(
 
 #ifdef ENABLE_MSSNTP
 	if (flags & RES_MSSNTP) {
-		keyid_t keyid = 0;
-		if (NULL != auth) keyid = auth->keyid;
-		// FIXME need counter
-		send_via_ntp_signd(rbufp, keyid, flags, &xpkt);
+		send_via_ntp_signd(rbufp, &xpkt); // Simplified the API
 		return;
 	}
 #endif /* ENABLE_MSSNTP */

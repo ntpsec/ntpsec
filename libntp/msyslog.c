@@ -7,7 +7,9 @@
 
 #include "config.h"
 
+#include <limits.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,7 +30,9 @@ static FILE *	syslog_file;
 static char *	syslog_fname;
 static char *	syslog_abs_fname;
 
+#ifdef DEBUG
 int		debug;
+#endif // DEBUG
 
 /* Counters */
 struct log_counters {   /* LOG_EMERG, LOG_ALERT, LOG_CRIT not used */
@@ -207,6 +211,49 @@ msyslog(
 			break;
 		default:
 			break;
+	}
+
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	va_end(ap);
+	addto_syslog(level, buf);
+}
+
+
+/*
+  Do we log this sundry error?
+*/
+void
+maybe_log(
+	struct do_we_log *maybe,
+	int		level,
+	const char *	fmt,
+	...
+	)
+{
+	struct timespec now;	/* time of current attempted print */
+	char	buf[PIPE_BUF];
+	va_list	ap;
+
+	if (NULL != maybe) {
+		clock_gettime(CLOCK_MONOTONIC, &now);
+		if (0 == maybe->last) {
+			/* first time */
+			maybe->last = now.tv_sec;
+		} else {
+			time_t interval_fp = now.tv_sec - maybe->last;
+			double since_last = ((double)interval_fp)/3600.0;
+			maybe->last = now.tv_sec;
+			maybe->score *= exp(-since_last/maybe->c_decay);
+			if (maybe->c_limit < maybe->score) {
+				return;
+			}
+		}
+		maybe->score += 1.0/maybe->c_decay;  /* only count the ones we print */
+#if (1)  // Do we reject logging attempts when argument 0 is NULL?
+	} else {
+		return;
+#endif
 	}
 
 	va_start(ap, fmt);

@@ -26,8 +26,16 @@
 #define NTP_PRINTF(fmt, args)
 #endif
 
+struct do_we_log {
+	double c_decay;	/* hours, exponential decay time */
+	double c_limit;	/* packets per hour */
+	double score;	/* score, packets/hour */
+	time_t last;	/* time of last attempted print */
+};
+
 extern const char *ntpd_version(void);
 
+extern	void	maybe_log(struct do_we_log*, int, const char *, ...) NTP_PRINTF(3, 4);
 extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
 extern	void	ntp_strerror_r(int errnum, char *buf, size_t buflen);
 extern	void	init_logging	(const char *, uint32_t, int);
