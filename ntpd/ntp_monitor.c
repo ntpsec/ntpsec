@@ -506,7 +506,7 @@ void mon_timer(void) {
 	struct timespec start, finish;
 	float scan_time;
 
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (	mon = TAIL_DLIST(mon_data.mon_mru_list, mru);
 		mon != NULL;
 		mon = PREV_DLIST(mon_data.mon_mru_list, mon, mru)) {
@@ -538,7 +538,7 @@ void mon_timer(void) {
 	  }
 	  when = mon->last;
 	}
-	clock_gettime(CLOCK_REALTIME, &finish);
+	clock_gettime(CLOCK_MONOTONIC, &finish);
 	scan_time = tspec_to_d(sub_tspec(finish, start));
 	if (count == (long)mon_data.mru_entries)
 	    msyslog(LOG_INFO, "MON: Scanned %ld slots in %.3f",

@@ -149,7 +149,7 @@ init_timer(void)
 	 * seconds.
 	 */
 #ifdef HAVE_TIMER_CREATE
-	if (TC_ERR == timer_create(CLOCK_REALTIME, NULL, &timer_id)) {
+	if (TC_ERR == timer_create(CLOCK_MONOTONIC, NULL, &timer_id)) {
 		msyslog(LOG_ERR, "ERR: timer_create failed, %s", strerror(errno));
 		exit(1);
 	}

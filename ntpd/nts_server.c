@@ -238,7 +238,7 @@ void* nts_ke_listener(void* arg) {
 			sleep(1);		/* avoid log clutter on bug */
 			continue;
 		}
-		clock_gettime(CLOCK_REALTIME, &start);
+		clock_gettime(CLOCK_MONOTONIC, &start);
 		sockporttoa_r(&addr, addrbuf, sizeof(addrbuf));
 
 /* This is disabled in order to reduce clutter in the log file.
@@ -275,7 +275,7 @@ void* nts_ke_listener(void* arg) {
 		SSL_set_fd(ssl, client);
 
 		if (SSL_accept(ssl) <= 0) {
-			clock_gettime(CLOCK_REALTIME, &finish);
+			clock_gettime(CLOCK_MONOTONIC, &finish);
 			wall = tspec_intv_to_lfp(sub_tspec(finish, start));
 			nts_ke_accept_fail(addrbuf, lfptox(wall));
 			SSL_free(ssl);
@@ -314,7 +314,7 @@ void* nts_ke_listener(void* arg) {
 		SSL_free(ssl);
 		close(client);
 
-		clock_gettime(CLOCK_REALTIME, &finish);
+		clock_gettime(CLOCK_MONOTONIC, &finish);
 		wall = tspec_intv_to_lfp(sub_tspec(finish, start));
 		if (worked) {
 			ntske_cnt.serves_good++;

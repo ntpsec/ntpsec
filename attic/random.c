@@ -24,17 +24,17 @@ static int getpid_average(void) {
         struct timespec start, stop;
         uint64_t sec, nanos;
 
-        err = clock_gettime(CLOCK_REALTIME, &start);
+        err = clock_gettime(CLOCK_MONOTONIC, &start);
         if (-1 == err) {
-                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                printf("clock_gettime(CLOCK_MONOTONIC) didn't work, err %d\n", errno);
                 return -1;
         }
 
-        clock_gettime(CLOCK_REALTIME, &start);
+        clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < BATCHSIZE; i++) {
                 getpid();
         }
-        clock_gettime(CLOCK_REALTIME, &stop);
+        clock_gettime(CLOCK_MONOTONIC, &stop);
 
         /* Beware of overflowing 32 bits. */
         sec = (stop.tv_sec-start.tv_sec);
@@ -48,17 +48,17 @@ static int clock_average(void) {
         struct timespec start, stop;
         uint64_t sec, nanos;
 
-        err = clock_gettime(CLOCK_REALTIME, &start);
+        err = clock_gettime(CLOCK_MONOTONIC, &start);
         if (-1 == err) {
-                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                printf("clock_gettime(CLOCK_MONOTONIC) didn't work, err %d\n", errno);
                 return -1;
         }
 
-        clock_gettime(CLOCK_REALTIME, &start);
+        clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < BATCHSIZE; i++) {
                 clock_gettime(CLOCK_REALTIME, &stop);
         }
-        clock_gettime(CLOCK_REALTIME, &stop);
+        clock_gettime(CLOCK_MONOTONIC, &stop);
 
         /* Beware of overflowing 32 bits. */
         sec = (stop.tv_sec-start.tv_sec);
@@ -72,11 +72,11 @@ static int do_average(void) {
 	struct timespec start, stop;
 	uint64_t sec, nanos;
 
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < BATCHSIZE; i++) {
 		sum += random();
 	}
-	clock_gettime(CLOCK_REALTIME, &stop);
+	clock_gettime(CLOCK_MONOTONIC, &stop);
 	(void)sum;	/* Squash unused warning */
 
 	/* Beware of overflowing 32 bits. */
@@ -96,11 +96,11 @@ static int do_avg_bytes(unsigned int bytes) {
 		exit(1);
 	}
 
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < BATCHSIZE; i++) {
             err += RAND_bytes((unsigned char *)&rnd, bytes);
 	}
-	clock_gettime(CLOCK_REALTIME, &stop);
+	clock_gettime(CLOCK_MONOTONIC, &stop);
 
 	if (BATCHSIZE != err) {
 		printf("## do_avg_bytes: troubles from RAND_bytes, %d\n",
@@ -126,7 +126,7 @@ static int do_avg_priv(unsigned int bytes) {
 		exit(1);
 	}
 
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < BATCHSIZE; i++) {
 #ifdef LIBRESSL_VERSION_NUMBER
             err += RAND_bytes((unsigned char *)&rnd, bytes);
@@ -134,7 +134,7 @@ static int do_avg_priv(unsigned int bytes) {
             err += RAND_priv_bytes((unsigned char *)&rnd, bytes);
 #endif
 	}
-	clock_gettime(CLOCK_REALTIME, &stop);
+	clock_gettime(CLOCK_MONOTONIC, &stop);
 
 	if (BATCHSIZE != err) {
 		printf("## do_avg_priv: troubles from RAND_bytes, %d\n",
@@ -155,10 +155,10 @@ static int do_fastest(void) {
 	uint64_t sec, nanos, fastest = 999999999;
 
 	for (int i = 0; i < BATCHSIZE; i++) {
-                clock_gettime(CLOCK_REALTIME, &start);
+                clock_gettime(CLOCK_MONOTONIC, &start);
 		/* coverity[DC.WEAK_CRYPTO] */
 		sum += random();
-		clock_gettime(CLOCK_REALTIME, &stop);
+		clock_gettime(CLOCK_MONOTONIC, &stop);
 		sec = (stop.tv_sec-start.tv_sec);
 		nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
 		if (nanos < fastest) {
@@ -182,9 +182,9 @@ static int do_fast_bytes(unsigned bytes) {
 	}
 
 	for (int i = 0; i < BATCHSIZE; i++) {
-                clock_gettime(CLOCK_REALTIME, &start);
+                clock_gettime(CLOCK_MONOTONIC, &start);
                 err += RAND_bytes((unsigned char *)&rnd, bytes);
-		clock_gettime(CLOCK_REALTIME, &stop);
+		clock_gettime(CLOCK_MONOTONIC, &stop);
 		sec = (stop.tv_sec-start.tv_sec);
 		nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
 		if (nanos < fastest) {
@@ -214,13 +214,13 @@ static int do_fast_priv(unsigned bytes) {
 	}
 
 	for (int i = 0; i < BATCHSIZE; i++) {
-                clock_gettime(CLOCK_REALTIME, &start);
+                clock_gettime(CLOCK_MONOTONIC, &start);
 #ifdef LIBRESSL_VERSION_NUMBER
                 err += RAND_bytes((unsigned char *)&rnd, bytes);
 #else
                 err += RAND_priv_bytes((unsigned char *)&rnd, bytes);
 #endif
-		clock_gettime(CLOCK_REALTIME, &stop);
+		clock_gettime(CLOCK_MONOTONIC, &stop);
 		sec = (stop.tv_sec-start.tv_sec);
 		nanos = sec*BILLION + (stop.tv_nsec-start.tv_nsec);
 		if (nanos < fastest) {

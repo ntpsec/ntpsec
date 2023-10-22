@@ -26,9 +26,7 @@ struct table clocks [] = {
 #ifdef CLOCK_REALTIME_COARSE
 	{CLOCK_REALTIME_COARSE, "CLOCK_REALTIME_COARSE"},
 #endif
-#ifdef CLOCK_MONOTONIC
 	{CLOCK_MONOTONIC, "CLOCK_MONOTONIC"},
-#endif
 #ifdef CLOCK_MONOTONIC_RAW
 	{CLOCK_MONOTONIC_RAW, "CLOCK_MONOTONIC_RAW"},
 #endif
@@ -46,17 +44,17 @@ static int getpid_average(void) {
         struct timespec start, stop;
         uint64_t sec, nanos;
 
-        err = clock_gettime(CLOCK_REALTIME, &start);
+        err = clock_gettime(CLOCK_MONOTONIC, &start);
         if (-1 == err) {
-                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                printf("clock_gettime(CLOCK_MONOTONIC) didn't work, err %d\n", errno);
                 return -1;
         }
 
-        clock_gettime(CLOCK_REALTIME, &start);
+        clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < BATCHSIZE; i++) {
                 getpid();
         }
-        clock_gettime(CLOCK_REALTIME, &stop);
+        clock_gettime(CLOCK_MONOTONIC, &stop);
 
         /* Beware of overflowing 32 bits. */
         sec = (stop.tv_sec-start.tv_sec);
@@ -72,17 +70,17 @@ static int gettimeofday_average(void) {
         uint64_t sec, nanos;
 	struct timeval now;
 
-        err = clock_gettime(CLOCK_REALTIME, &start);
+        err = clock_gettime(CLOCK_MONOTONIC, &start);
         if (-1 == err) {
-                printf("clock_gettime(CLOCK_REALTIME) didn't work, err %d\n", errno);
+                printf("clock_gettime(CLOCK_MONOTONIC) didn't work, err %d\n", errno);
                 return -1;
         }
 
-        clock_gettime(CLOCK_REALTIME, &start);
+        clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < BATCHSIZE; i++) {
                 gettimeofday(&now, NULL);
         }
-        clock_gettime(CLOCK_REALTIME, &stop);
+        clock_gettime(CLOCK_MONOTONIC, &stop);
 
         /* Beware of overflowing 32 bits. */
         sec = (stop.tv_sec-start.tv_sec);
@@ -119,11 +117,11 @@ static int do_average(int type, const char* name) {
 		return -1;
 	}
 
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < BATCHSIZE; i++) {
 		clock_gettime(type, &stop);
 	}
-	clock_gettime(CLOCK_REALTIME, &stop);
+	clock_gettime(CLOCK_MONOTONIC, &stop);
 
 	/* Beware of overflowing 32 bits. */
 	sec = (stop.tv_sec-start.tv_sec);

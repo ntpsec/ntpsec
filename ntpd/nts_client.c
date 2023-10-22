@@ -78,7 +78,7 @@ bool nts_probe(struct peer * peer) {
 		return false;
 
 	addrOK = false;
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 
 	if (NULL == hostname) {
 		/* IP Address case */
@@ -179,7 +179,7 @@ bool nts_probe(struct peer * peer) {
 	SSL_free(ssl);
 	close(server);
 
-	clock_gettime(CLOCK_REALTIME, &finish);
+	clock_gettime(CLOCK_MONOTONIC, &finish);
 	finish = sub_tspec(finish, start);
 	msyslog(LOG_INFO, "NTSc: NTS-KE req to %s took %.3f sec, %s",
 		hostname, tspec_to_d(finish),
@@ -272,14 +272,14 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_family = AF(&peer->srcadr);  /* -4, -6 switch */
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	gai_rc = getaddrinfo(host, port, &hints, &answer);
 	if (0 != gai_rc) {
 		msyslog(LOG_INFO, "NTSc: open_TCP_socket: DNS error trying to contact %s: %d, %s",
 			hostname, gai_rc, gai_strerror(gai_rc));
 		return -1;
 	}
-	clock_gettime(CLOCK_REALTIME, &finish);
+	clock_gettime(CLOCK_MONOTONIC, &finish);
 	finish = sub_tspec(finish, start);
 	msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3f sec",
 		hostname, tspec_to_d(finish));

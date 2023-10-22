@@ -2389,7 +2389,7 @@ fast_xmit(
          *  3) none
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	clock_gettime(CLOCK_REALTIME, &start);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	if (rbufp->ntspacket.valid) {
 #ifndef DISABLE_NTS
 	  sendlen += extens_server_send(&rbufp->ntspacket, &xpkt);
@@ -2406,7 +2406,7 @@ fast_xmit(
 	  return;
 	}
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, &xpkt, (int)sendlen);
-	clock_gettime(CLOCK_REALTIME, &finish);
+	clock_gettime(CLOCK_MONOTONIC, &finish);
 	sys_authdelay = tspec_intv_to_lfp(sub_tspec(finish, start));
 	/* Previous versions of this code had separate DPRINT-s so it
 	 * could print the key on the auth case.  That requires separate
