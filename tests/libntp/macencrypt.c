@@ -47,7 +47,11 @@ TEST(macencrypt, Encrypt) {
 	/* FIXME: Initialization stuff. Needed by other digest tests. */
 	auth.keyid = 123;
 	auth.type = AUTH_DIGEST;
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	auth.digest = EVP_MD_fetch(NULL, "MD5", "fips=no");
+#else
 	auth.digest = EVP_get_digestbyname("MD5");
+#endif
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
 	auth.mac_ctx = NULL;
 #else
