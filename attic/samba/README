@@ -1,0 +1,41 @@
+This is a set of hacks for use when debugging ntpd's MS-SNTP option.
+
+The default is off.
+Use --enable-mssntp with ./waf configure to build a system with that option.
+
+make in .../attic/samba should build them.
+make clean will clean things up.
+
+fake-samba acts like a Samba server.  It will sign packets with a constant.
+That's not real authentication, but it goes through all protocol actions.
+It prints a line for each packet it processes.
+
+fake-ntp-server generates traffic for fake-samba.  It's much simpler/faster
+than using ntpd to generate traffic.
+
+fake-ntp-client generates MS-SNTP traffic for an NTP server.  If you setup
+ntpd connected to fake-samba, this will generate traffic that should get
+all the way to/through fake-samba and back.
+
+fake-ntp-client needs a command line parameter: the name of the ntp server.
+Optional extra paramters are the number of packets to send (default 1) and
+the time to wait between packets in microseconds (default 1000).
+
+This can also be used to generate buggy traffic to Samba.  The keyid
+is unlikely to be anything Samba knows about.
+
+It doesn't work with IPv6.
+
+fake.h has "murray" wired in as part of the name of the UNIX socket
+connecting ntpd and (fake-)samba.  "tmp" didn't work on Fedora.  Systemd
+gives ntpd its own tmp directory.
+
+Your ntp.conf will need something like this:
+  ntpsigndsocket  /home/murray/fake-samba-socket
+  restrict 192.168.1.2 mssntp
+
+Note that ntpd adds "/socket" to the name from the config file.
+
+
+These are simple hacks.  Look at the code and fix it to do what you want.
+
