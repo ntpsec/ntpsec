@@ -255,6 +255,7 @@ main(
 				if (pll_control < 0) {
 					break;
 				}
+				/* FIXME: this should probably check for STA_NANO */
 				times[c] = ntv.time.tv_frac_sec;
 			}
 #ifdef SIGSYS
