@@ -365,17 +365,17 @@ static const struct var sys_var[] = {
   Var_uli("authcmacfails", RO, authcmacfail),
 
 /* kerninfo: Kernel timekeeping info */
-  Var_kli("koffset", RO|N_CLOCK|KToMS, ntx.offset),
+  Var_kli("koffset", RO|N_CLOCK|KNUToMS, ntx.offset),
   Var_kli("kfreq", RO|N_CLOCK|K_16, ntx.freq),
-  Var_kli("kmaxerr", RO|N_CLOCK|KToMS, ntx.maxerror),
-  Var_kli("kesterr", RO|N_CLOCK|KToMS, ntx.esterror),
+  Var_kli("kmaxerr", RO|N_CLOCK|KUToMS, ntx.maxerror),
+  Var_kli("kesterr", RO|N_CLOCK|KUToMS, ntx.esterror),
   Var_int("kstflags", RO|N_CLOCK, ntx.status),           // turn to text
   Var_li("ktimeconst", RO|N_CLOCK, ntx.constant),
-  Var_kli("kprecis", RO|N_CLOCK|KToMS, ntx.precision),
+  Var_kli("kprecis", RO|N_CLOCK|KUToMS, ntx.precision),
   Var_kli("kfreqtol", RO|N_CLOCK|K_16, ntx.tolerance),  // Not in man page
   Var_kli("kppsfreq", RO|N_CLOCK|K_16, ntx.ppsfreq),
   Var_kli("kppsstab", RO|N_CLOCK|K_16, ntx.stabil),
-  Var_kli("kppsjitter", RO|N_CLOCK|KToMS, ntx.jitter),
+  Var_kli("kppsjitter", RO|N_CLOCK|KNUToMS, ntx.jitter),
   Var_int("kppscalibdur", RO|N_CLOCK, ntx.shift),       // 1<<shift
   Var_li("kppscalibs", RO|N_CLOCK, ntx.calcnt),
   Var_li("kppscaliberrs", RO|N_CLOCK, ntx.errcnt),
@@ -1444,13 +1444,17 @@ ctl_putsys(const struct var * v) {
 	    } else {
 		temp_d = (double)*v->p_li;
 	    };
-	    if (v->flags&ToMS) {
+	    if (v->flags & (KNUToMS | KUToMS)) {
 		/* value is in nanoseconds or microseconds */
 # ifdef STA_NANO
-		temp_d *= 1E-9;
-# else
-		temp_d *= 1E-6;
+		if ((v->flags & KNUToMS) && (ntx.status & STA_NANO)) {
+			temp_d *= 1E-9;
+		} else
 # endif
+		{
+			temp_d *= 1E-6;
+		}
+
 		temp_d *= MS_PER_S;
 	    }
             ctl_putdbl(v->name, temp_d);

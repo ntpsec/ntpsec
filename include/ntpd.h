@@ -77,8 +77,9 @@ struct ctl_var {
 #define N_CLOCK         0x1000  /* Need to read kernel Clock info */
 
 /* Conversions for ntp_adjtime's timex */
-#define KToMS           0x10000  /* nano vs old micro */
+#define KNUToMS         0x10000  /* nano vs old micro */
 #define K_16            0x20000  /* 16 bit scaling */
+#define KUToMS          0x40000  /* always micro */
 
 #define	RO	(CAN_READ)
 #define	RW	(CAN_READ|CAN_WRITE)
