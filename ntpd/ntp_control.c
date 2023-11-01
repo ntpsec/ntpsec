@@ -1440,9 +1440,9 @@ ctl_putsys(const struct var * v) {
 	case v_kli:
 	    if (v->flags&K_16) {
 		/* value is scaled by 16 bits */
-		temp_d = FP_UNSCALE(*v->p_uint);
+		temp_d = FP_UNSCALE(*v->p_li);
 	    } else {
-		temp_d = (double)*v->p_uint;
+		temp_d = (double)*v->p_li;
 	    };
 	    if (v->flags&ToMS) {
 		/* value is in nanoseconds or microseconds */
