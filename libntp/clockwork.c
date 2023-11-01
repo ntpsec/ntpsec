@@ -67,6 +67,21 @@ int ntp_adjtime_ns(struct timex *ntx)
 	if (!nanoseconds)
 #endif
 		ntx->offset /= 1000;
+
+#ifdef MOD_TAI
+	if (!(ntx->modes & MOD_TAI))
+#endif
+	{
+		long kernel_constant_adj = nanoseconds ? 0 : 4;
+
+		ntx->constant -= kernel_constant_adj;
+		if (ntx->constant < -kernel_constant_adj)
+		{
+			ntx->constant = 0;
+		}
+	}
+
+
 	int errval = ntp_adjtime(ntx);
 #ifdef STA_NANO
 	nanoseconds = (STA_NANO & ntx->status) != 0;

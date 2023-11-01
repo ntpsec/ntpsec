@@ -745,14 +745,7 @@ local_clock(
 				dtemp = .5;
 			}
 			ntv.offset = (long)(clock_offset * NS_PER_S + dtemp);
-#ifdef STA_NANO
 			ntv.constant = clkstate.sys_poll;
-#else /* STA_NANO */
-			ntv.constant = clkstate.sys_poll - 4;
-#endif /* STA_NANO */
-			if (ntv.constant < 0)
-				ntv.constant = 0;
-
 			ntv.esterror = (long)(clkstate.clock_jitter * US_PER_S);
 			ntv.maxerror = (long)((sys_vars.sys_rootdelay / 2 +
 			    sys_vars.sys_rootdisp) * US_PER_S);
@@ -1059,7 +1052,7 @@ start_kern_loop(void)
 	ntv.status = STA_PLL;
 	ntv.maxerror = sys_maxdisp;
 	ntv.esterror = sys_maxdisp;
-	ntv.constant = clkstate.sys_poll; /* why is it that here constant is unconditionally set to sys_poll, whereas elsewhere is is modified depending on nanosecond vs. microsecond kernel? */
+	ntv.constant = clkstate.sys_poll;
 	if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 	}
