@@ -19,7 +19,7 @@ const char * verbose[] =
   "The system clock is not synchronized to a reliable server.",
   "-30-" };
 const char * adjkey[] =
-{ "time offset (ns)",
+{ "time offset (us/ns)",
   "TAI offset",
   "frequency offset",
   "error max (us)",
@@ -30,7 +30,7 @@ const char * adjkey[] =
   "clock tolerance",
   "tick (us)",
   "PPS frequency",
-  "PPS jitter (ns)",
+  "PPS jitter (us/ns)",
   "PPS interval (s)",
   "PPS stability",
   "PPS jitter limit exceed",
@@ -99,6 +99,7 @@ do_dump(const iomode mode, const int force)
         end = 18;
     }
 
+    /* FIXME: this should probably check for STA_NANO when printing tv_usec */
     if (mode == json) {
         printf("{\"time\":%ld.%09ld, \"verbose\": \"%s\"", txc.time.tv_sec,
           txc.time.tv_usec, verbose[v]);
