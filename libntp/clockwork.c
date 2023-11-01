@@ -41,12 +41,14 @@ int ntp_adjtime_ns(struct timex *ntx)
 {
 #ifdef STA_NANO
 	static bool nanoseconds = false;
-	static int callcount = 0;
-	if (callcount++ == 0){
+	static bool initial_call = true;
+	if (initial_call)
+	{
 		struct timex ztx;
 		memset(&ztx, '\0', sizeof(ztx));
 		ntp_adjtime(&ztx);
 		nanoseconds = (STA_NANO & ztx.status) != 0;
+		initial_call = false;
 	}
 #endif
 
