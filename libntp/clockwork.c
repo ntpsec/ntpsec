@@ -53,6 +53,17 @@ int ntp_adjtime_ns(struct timex *ntx)
 #endif
 
 #ifdef STA_NANO
+	if (!nanoseconds && (ntx->modes & MOD_NANO))
+	{
+		struct timex ztx;
+		memset(&ztx, '\0', sizeof(ztx));
+		ztx.modes = MOD_NANO;
+		ntp_adjtime(&ztx);
+		nanoseconds = (STA_NANO & ztx.status) != 0;
+	}
+#endif
+
+#ifdef STA_NANO
 	if (!nanoseconds)
 #endif
 		ntx->offset /= 1000;
