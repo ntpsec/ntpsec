@@ -8,7 +8,7 @@ where X and Y are the python version numbers.
 
 Unfortunately, that's not on the default search path of several
 OSes/distros, in particular Fedora and NetBSD.
-
+(Fixed in Fedora 39, Sep-2023, ??)
 
 Python has a search path that is used to find library modules when
 you import them.  You can see your search path with:
@@ -43,8 +43,8 @@ including root if root uses any ntp scripts.
 
 3: You can add to the default search path by setting up a .pth file
 with something like this:
-  echo /usr/local/lib/python2.7/site-packages > \
-    /usr/lib/python2.7/site-packages/ntpsec.pth
+  echo /usr/local/lib64/python3.11/site-packages > \
+    /usr/lib/python3.11/site-packages/ntpsec.pth
 This works for all users, including root.
 Note that the pth file must be on the default Python search path.
 
@@ -77,7 +77,7 @@ OTOH if you are running into something like:
         raise OSError("Can't find %s library" % LIB)
     OSError: Can't find ntpc library
 
-That means is that ntpc.py looked for libnptc.so in the usual places and could
+That means that ntpc.py looked for libnptc.so in the usual places and could
 not find it.  If it is being installed to the wrong location on your platform,
 you can correct the install location using: waf configure --libdir=  If you
 are intentionally installing to a non-default location, you can modify the
