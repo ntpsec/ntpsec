@@ -2,8 +2,8 @@ NTS needs TLS 1.3 or newer.
 That was first supported in OpenSSL 1.1.1
   (1.1.1a is broken)
 Some OSes/Distros don't support a new enough version of OpenSSL
-This file contains notes on how to download, build, and install 1.1.1m
-It also works for testing 3.0.1
+This file contains notes on how to download, build, and install 3.2.0
+It it should be close for other 3.x.y versions
 
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
@@ -11,15 +11,12 @@ Corrections, clarifications and feedback encouraged.
 FreeBSD 13.0 has OpenSSL 3.0.2 available as a package.
 You can just install it and ignore the rest of this note.
   sudo pkg update
-  sudo pkg install openssl-devel-3.0.2
-openssl-devel-3.0.2            TLSv1.3 capable SSL and crypto library
-
-
+  sudo pkg install openssl-devel-3.0.8
+openssl-devel-3.0.8            TLSv1.3 capable SSL and crypto library
 
 
 Download OpenSSL source from here:
   https://www.openssl.org/source/
-  https://www.openssl.org/source/old/1.1.1/
 
 You should be able to cut/paste many of these lines.
 But check for the latest versions first.
@@ -27,14 +24,10 @@ But check for the latest versions first.
 cd xxx
 mkdir OpenSSL
 cd OpenSSL
-for OpenSSL 1.1.1m
-  wget https://www.openssl.org/source/openssl-1.1.1m.tar.gz
-  tar -xzf openssl-1.1.1m.tar.gz
-  cd openssl-1.1.1m
-for OpenSSL 3.0.1
-  wget https://www.openssl.org/source/openssl-3.0.1.tar.gz
-  tar -xzf openssl-3.0.1.tar.gz
-  cd openssl-3.0.1
+for OpenSSL 3.2.0
+  wget https://www.openssl.org/source/openssl-3.2.0.tar.gz
+  tar -xzf openssl-3.2.0.tar.gz
+  cd openssl-3.2.0
 
 # Check NOTES.PERL
 #   for CentOS, you need
@@ -50,6 +43,17 @@ for OpenSSL 3.0.1
 # On FreeBSD for 3.0.1
   sudo pkg install perl5
 
+By default, this recipe will install
+  libcrypto.so.3 and libsso.so.3
+  in /usr/local/ssh/lib64/
+and they will be used by all software, not just ntpd.
+
+If you don't want that, edit VERSION.dat and change SHLIB_VERSION
+to something like 6.  That will install the libraries as
+  libcrypto.so.6 and libsso.so.6
+and waf will setup ntpd to use them.
+openssl-3.2-beta breaks sudo on Fedora, so this is a good idea.   <======
+
 On Linux
   openssl version -d
   OPENSSLDIR=`openssl version -d | sed "s/OPENSSLDIR: //"`
@@ -63,28 +67,27 @@ On Linux
 ***                                                                ***
 ***       perl configdata.pm --dump                                ***
 
-time make -j4
+time make -j4         |& tee make.log
   # Check that we got it right.  These should match.
   openssl version -d
-  util/shlib_wrap.sh ./apps/openssl version -d
+  ./util/shlib_wrap.sh ./apps/openssl version -d
   # ./apps/openssl without the wrapper will use the installed libraries
-time make test
-time make build_docs  # doesn't work on 1.1.1
-sudo make install
+The above check is broken for openssl-3.2.0-beta1 on Fedora
+It works on Ubuntu and FreeBSD.
+
+time make test        |& tee test.log
+time make build_docs  |& tee docs.log
+sudo make install     |& tee install.log
 
 sudo su
   cd /etc/ld.so.conf.d
-  echo "/usr/local/ssl/lib" > openssl-1.1.1m.conf
-  echo "/usr/local/ssl/lib" > openssl-3.0.1.conf    # 32 bit systems
-  echo "/usr/local/ssl/lib64" > openssl-3.0.1.conf  # 64 bit systems
+  echo "/usr/local/ssl/lib" > openssl-3.2.0.conf    # 32 bit systems
+  echo "/usr/local/ssl/lib64" > openssl-3.2.0.conf  # 64 bit systems
   # running ldconfig before install doesn't work
   ldconfig
 
-On FreeBSD, I couldn't figure out how it is supposed to work.
-  Probably, I just need the magic to ldconfig.
-  echo "/usr/local/ssl/lib" >> /etc/ld-elf.so.conf
-  reboot
-or something close to that.
+On FreeBSD:
+  ldconfig -m /usr/local/ssl/lib/
 
 NetBSD:
   echo "/usr/local/ssl/lib" >> /etc/ld.so.conf
@@ -96,11 +99,4 @@ NetBSD:
 # Note that the directories in the above config line need to
 # match where wscript looks for your OS.
 # The above works for CentOS 7
-
-----------
-
-On earlier versions of the Configure step (above)
-Fedora and CentOS 7 needed this if you use real certificates:
-  nts ca /etc/pki/tls/certs/ca-bundle.trust.crt
-It works correctly now.
 
