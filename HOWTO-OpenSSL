@@ -8,11 +8,19 @@ It it should be close for other 3.x.y versions
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
 
-FreeBSD 13.0 has OpenSSL 3.0.2 available as a package.
-You can just install it and ignore the rest of this note.
+In 2023-Nov, FreeBSD 13.2 has 1.1.1t as the main version.
+It also has 3 newer versions available as packages.
+You can just install one and ignore the rest of this note.
+waf will find the pkg version and use it.
   sudo pkg update
-  sudo pkg install openssl-devel-3.0.8
-openssl-devel-3.0.8            TLSv1.3 capable SSL and crypto library
+  sudo pkg search openssl
+openssl30-3.0.12_1             TLSv1.3 capable SSL and crypto library
+openssl31-3.1.4_1              TLSv1.3 capable SSL and crypto library
+openssl32-3.2.0.a2             TLSv1.3 capable SSL and crypto library
+  sudo pkg install openssl32
+Note: the "a2" is for "Alpha 2", not for production etc.
+The rest of this recipe works if you want to try a newer version from
+an OpenSSL tarball.
 
 
 Download OpenSSL source from here:
@@ -44,13 +52,13 @@ for OpenSSL 3.2.0
   sudo pkg install perl5
 
 By default, this recipe will install
-  libcrypto.so.3 and libsso.so.3
-  in /usr/local/ssh/lib64/
+  libcrypto.so.3 and libssl.so.3
+  in /usr/local/ssl/lib64/
 and they will be used by all software, not just ntpd.
 
 If you don't want that, edit VERSION.dat and change SHLIB_VERSION
 to something like 6.  That will install the libraries as
-  libcrypto.so.6 and libsso.so.6
+  libcrypto.so.6 and libssl.so.6
 and waf will setup ntpd to use them.
 openssl-3.2-beta breaks sudo on Fedora, so this is a good idea.   <======
 
