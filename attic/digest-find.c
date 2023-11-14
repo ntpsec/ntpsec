@@ -18,9 +18,7 @@
 #include <stdio.h>
 
 #include <openssl/objects.h>
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
 #include <openssl/ssl.h>
-#endif
 #include <openssl/evp.h>
 
 #define UNUSED_ARG(arg)         ((void)(arg))
@@ -31,9 +29,12 @@
  */
 const char* digests[] = {
     "MD5",
+    "SHA",
     "SHA1",
+    "sha1",
+    "SHA-1",
     "SHA256", "SHA384",
-    "MD2", "MD4"
+    "MD2", "MD4",
     "SHA", "SHA3",
     "SHA224", "SHA512",
     "RMD160", "RIPEMD160",
@@ -52,15 +53,21 @@ main (
     UNUSED_ARG(argv);
 
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-    SSL_CTX *ssl = SSL_CTX_new(TLS_client_method());
+    SSL_CTX *ssl;
 #endif
 
     unsigned int versionNumber = OPENSSL_VERSION_NUMBER;
     const char *versionText = OPENSSL_VERSION_TEXT;
-    printf("OpenSSL xVersion is %x, %s\n", versionNumber, versionText);
+    printf("OpenSSL Version is %x, %s\n", versionNumber, versionText);
 
-    /* needed if OPENSSL_VERSION_NUMBER < 0x10100000L */
+
+
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+    OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS|OPENSSL_INIT_LOAD_CRYPTO_STRINGS|OPENSSL_INIT_ADD_ALL_CIPHERS|OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
+    ssl = SSL_CTX_new(TLS_client_method());
+#else
     OpenSSL_add_all_digests();
+#endif
 
 
     printf("      name type length\n");

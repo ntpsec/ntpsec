@@ -30,9 +30,7 @@
 #include <openssl/md5.h>
 #include <openssl/rand.h>
 #include <openssl/objects.h>
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
 #include <openssl/ssl.h>
-#endif
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 
@@ -68,13 +66,19 @@ SSL_CTX *ssl;
 
 static void ssl_init(void)
 {
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+        OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS|OPENSSL_INIT_LOAD_CRYPTO_STRINGS|OPENSSL_INIT_ADD_ALL_CIPHERS|OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
+	ssl = SSL_CTX_new(TLS_client_method());
+	if (NULL == ssl) {
+		printf("SSL_CTX_new() failed.\n");
+		exit(1);
+	}
+#else
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
-	ctx = EVP_MD_CTX_new();
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
-	ssl = SSL_CTX_new(TLS_client_method());
 #endif
+	ctx = EVP_MD_CTX_new();
 }
 
 static unsigned int SSL_Digest(
@@ -94,7 +98,7 @@ static unsigned int SSL_Digest(
 }
 
 static unsigned int SSL_DigestSlow(
-  int type,               /* hash algorithm */
+  const char *name,       /* hash algorithm */
   uint8_t *key,           /* key pointer */
   int     keylength,      /* key size */
   uint8_t *pkt,           /* packet pointer */
@@ -104,7 +108,7 @@ static unsigned int SSL_DigestSlow(
 	unsigned char answer[EVP_MAX_MD_SIZE];
 	unsigned int len;
 	ctxx = EVP_MD_CTX_new();
-	EVP_DigestInit(ctxx, EVP_get_digestbynid(type));
+	EVP_DigestInit(ctxx, EVP_get_digestbyname(name));
 	EVP_DigestUpdate(ctxx, key, keylength);
 	EVP_DigestUpdate(ctxx, pkt, pktlength);
 	EVP_DigestFinal(ctxx, answer, &len);
@@ -120,8 +124,7 @@ static void DoDigest(
   int     pktlength       /* packet length */
 )
 {
-	int type = OBJ_sn2nid(name);
-	const EVP_MD *digest = EVP_get_digestbynid(type);
+	const EVP_MD *digest = EVP_get_digestbyname(name);
 	struct timespec start, stop;
 	double fast, slow;
 	unsigned int digestlength = 0;
@@ -154,7 +157,7 @@ static void DoDigest(
 #ifdef DoSLOW
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < NUM; i++) {
-		digestlength = SSL_DigestSlow(type, key, keylength, pkt, pktlength);
+		digestlength = SSL_DigestSlow(name, key, keylength, pkt, pktlength);
 	}
 	clock_gettime(CLOCK_MONOTONIC, &stop);
 	slow = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
