@@ -623,7 +623,8 @@ int main(int argc, char **argv) {
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
 
-    if not ctx.options.disable_nts:
+    # Parts of attic need libssl
+    if not ctx.options.disable_nts or ctx.options.enable_attic:
         # Check via pkg-config first, then fall back to a direct search
         if not ctx.check_cfg(
             package='libssl', uselib_store='SSL',
