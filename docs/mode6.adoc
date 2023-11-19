@@ -89,7 +89,7 @@ mode 6:
 |=====================================================================
 
 Requests to ntpd are single UDP packets; ntpd expects them to be
-padded to a 4-octet boundary.  Responses may be multiple UDP packets;
+padded to a 8-octet boundary.  Responses may be multiple UDP packets;
 they may arrive out of order, and the client is responsible for
 reassembling the payloads.
 
@@ -513,27 +513,17 @@ on that.
 [[auth]]
 == Authentication
 
-Authenticated requests require a MAC (message authentication code)
-trailer following the payload data, if any. Such requests must be
-padded to an 8-octet boundary, with those bytes not included in the
-header count field.
+Authenticated requests require a link:authentic.html#mac[MAC]
+(message authentication code) trailer following the payload data, if
+any. Pad Such requests to an 8-octet boundary, with those bytes not
+included in the header count field.
 
-The contents of the MAC trailer consists of:
+Ordinary requests with MACs will not receive a MAC with the
+response packet.
 
-1. The 32-bit identifier of the signing key in network byte order.
-
-2a. In digest mode, a cryptographic hash of the following octet spans,
-in order. First, the password entered to use the signing key, then the
-request header fields, then the payload.
-
-2b. In CMAC mode, a cryptographic hash of the packet header and
-payload with the crypto algorithim using the key.
-
-The cryptographic hash is 16 octets for MD5 ir AES-CMAC and AES and 20
-octets for SHA-1.  Longer digests are truncated.
-
-The key length for AES is 16 bytes.  Longer keys are truncated.  Shorter
-keys are padded with 0s.  MD5 and SHA-1 can use any key length.
+MD5 and SHA-1 are primarily available for legacy support.
+MD5 is deprecated by RFC 8573 and not usable for MACs on FIPS 140-2
+compliant systems.
 
 == Compatibility Notes
 
