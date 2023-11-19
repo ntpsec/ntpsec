@@ -1046,7 +1046,7 @@ class ControlSession:
                                      (len(rawdata), (_pend + KEYID_LENGTH + MINIMUM_MAC_LENGTH)))
                     self._authpass = False
                 elif not self.auth.verify_mac(rawdata, packet_end=_pend,
-                                            mac_begin=_pend):
+                                              mac_begin=_pend):
                     self._authpass = False
 
             # Clip off the MAC, if any
@@ -1112,7 +1112,7 @@ class ControlSession:
                                 % (f, len(fragments)), 1)
                         break
                 else:
-                    tempfraglist = [ntp.poly.polystr(f.extension) \
+                    tempfraglist = [ntp.poly.polystr(f.extension)
                                     for f in fragments]
                     self.response = ntp.poly.polybytes("".join(tempfraglist))
                     warndbg("Fragment collection ends. %d bytes "
@@ -1363,7 +1363,7 @@ This combats source address spoofing
                         idx = int(idx)
                     except ValueError:
                         raise ControlException(SERR_BADTAG % tag)
-                    ### Does not check missing/gappy entries
+                    # Does not check missing/gappy entries
                     if idx not in fake_list:
                         fake_dict[str(idx)] = {}
                         fake_list.append(idx)
@@ -1709,7 +1709,7 @@ class Authenticator:
                     keytype = 'AES-128'
                 if len(passwd) > 20:
                     # if len(passwd) > 64:
-                        # print('AUTH: Truncating key %s to 256bits (32Bytes)' % keyid)
+                    #      print('AUTH: Truncating key %s to 256bits (32Bytes)' % keyid)
                     passwd = ntp.util.hexstr2octets(passwd[:64])
                 self.passwords[int(keyid)] = (keytype, passwd)
 
@@ -1778,7 +1778,7 @@ class Authenticator:
             return False
         # typically preferred to avoid timing attacks client-side (in theory)
         try:
-            return hmac.compare_digest(mac, mac2) # supported 2.7.7+ and 3.3+
+            return hmac.compare_digest(mac, mac2)  # supported 2.7.7+ and 3.3+
         except AttributeError:
             return mac == mac2  # solves issue #666
 
