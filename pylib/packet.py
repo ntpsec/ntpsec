@@ -726,7 +726,7 @@ class ControlSession:
         # Packet version number we use
         self.pktversion = ntp.magic.NTP_OLDVERSION + 1
         self.always_auth = False  # Always send authenticated requests
-        self.keytype = "MD5"
+        self.keytype = "AES"
         self.keyid = None
         self.passwd = None
         self.auth = None

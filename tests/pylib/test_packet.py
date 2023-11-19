@@ -778,7 +778,7 @@ class TestControlSession(unittest.TestCase):
         self.assertEqual(cls.secondary_timeout, ntpp.DEFSTIMEOUT)
         self.assertEqual(cls.pktversion, ntp.magic.NTP_OLDVERSION + 1)
         self.assertEqual(cls.always_auth, False)
-        self.assertEqual(cls.keytype, "MD5")
+        self.assertEqual(cls.keytype, "AES")
         self.assertEqual(cls.keyid, None)
         self.assertEqual(cls.passwd, None)
         self.assertEqual(cls.auth, None)
