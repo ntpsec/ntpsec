@@ -328,7 +328,7 @@ class TestSyncPacket(unittest.TestCase):
             errored = False
         except ntpp.SyncException as e:
             errored = e.message
-        self.assertEqual(errored, "Unsupported DES authentication")
+        self.assertEqual(errored, "Packet is a runt")
         # Test with extension, runt 8
         data2 = data + ext + "\x11\x22\x33\x44\x55\x66\x77\x88"
         try:
