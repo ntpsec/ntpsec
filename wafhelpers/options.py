@@ -11,7 +11,7 @@ def options_cmd(ctx, config):
     grp.add_option('--enable-debug', action='store_true',
                    default=False, help="Enable debugging code")
     grp.add_option('--disable-debug-gdb', action='store_true',
-                   default=True, help="Disable GDB debugging symbols")
+                   default=False, help="Disable GDB debugging symbols")
     grp.add_option('--enable-attic', action='store_true',
                    default=False, help="Enable building attic/*.")
     grp.add_option('--disable-nts', action='store_true',
