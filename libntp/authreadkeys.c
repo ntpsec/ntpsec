@@ -98,6 +98,9 @@ try_cmac(const char *upcased, char* namebuf) {
 static char*
 try_digest(char *upcased, char *namebuf) {
 	strlcpy(namebuf, upcased, NAMEBUFSIZE);
+	if (strcmp(namebuf, "SHA-1") == 0) {
+		strlcpy(namebuf, "SHA1", NAMEBUFSIZE);
+	}
 	if (EVP_get_digestbyname(namebuf) != NULL) {
 	  return namebuf;
 	}
@@ -364,6 +367,7 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		 * EVP_get_digestbyname() or EVP_get_cipherbyname().
 		 *
 		 * AES is short for AES-128.
+		 * SHA-1 is short for SHA1.
 		 * CMAC names get "-CBC" appended.
 		 * ntp classic uses AES128CMAC, so we support that too.
 		 *
