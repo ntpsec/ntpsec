@@ -879,7 +879,7 @@ process_control(
 	properlen = req_count + (int)CTL_HEADER_LEN;
 	/* round up proper len to a 8 octet boundary */
 
-	properlen = (properlen + 7) & ~7;
+	properlen = (properlen + 3) & ~3;
 	maclen = rbufp->recv_length - (size_t)properlen;
 	if ((rbufp->recv_length & 3) == 0 &&
 	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN) {
