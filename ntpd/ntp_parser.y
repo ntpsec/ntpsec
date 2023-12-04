@@ -211,7 +211,6 @@
 %token	<Integer>	T_Time2
 %token	<Integer>	T_Timer
 %token	<Integer>	T_Tinker
-%token	<Integer>	T_Tlsciphers
 %token	<Integer>	T_Tlsciphersuites
 %token	<Integer>	T_Tlsecdhcurves
 %token	<Integer>	T_Tos
@@ -1144,7 +1143,6 @@ nts_string_option_keyword
 	|	T_Cert
 	|	T_Cookie
 	|	T_Key
-	|	T_Tlsciphers
 	|	T_Tlsciphersuites
 	|	T_Tlsecdhcurves
 	|	T_Maxtls
