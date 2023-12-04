@@ -17,7 +17,7 @@
 
 #include "fake.h"
 
-char *name = FAKE_SAMBA_SOCKET;
+static char *name = FAKE_SAMBA_SOCKET;
 
 int main(int argc, char *argv[]) {
 	struct timespec start, stop;
@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
 	struct from_samba reply;
 	int len;
 	uint32_t length, net_length, op;
+	((void)(argc));
+	((void)(argv));
 
         clock_gettime(CLOCK_MONOTONIC, &start);
 
@@ -86,17 +88,17 @@ int main(int argc, char *argv[]) {
 
 	/* check stuff */
 	if (length != sizeof(reply)) {
-	  printf("** Wrong length word: %d\n", length);
+	  printf("** Wrong length word: %u\n", length);
 	}
 	op = ntohl(reply.op);
 	if (op != 3) {
-	  printf("** Wrong op field: %d\n", op);
+	  printf("** Wrong op field: %u\n", op);
 	}
 	if (reply.packet_id != HACK_PACKET_ID) {
-	  printf("** Wrong packet_id field: %d\n", reply.packet_id);
+	  printf("** Wrong packet_id field: %u\n", reply.packet_id);
 	}
 	if (reply.key_id != HACK_KEY_ID) {
-	  printf("** Wrong key_id field: %d\n", reply.key_id);
+	  printf("** Wrong key_id field: %u\n", reply.key_id);
 	}
 
 	if (memcmp(reply.pkt, request.pkt, sizeof(reply.pkt))) {

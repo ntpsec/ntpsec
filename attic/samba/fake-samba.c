@@ -17,12 +17,14 @@
 
 #include "fake.h"
 
-char *name = FAKE_SAMBA_SOCKET;
+static char *name = FAKE_SAMBA_SOCKET;
 
 int main(int argc, char *argv[]) {
 	int listener;
 	struct sockaddr_un addr;
 	uint32_t length, net_length;
+	((void)(argc));
+	((void)(argv));
 
 	unlink(name);  /* Don't care if it fails. */
 
@@ -53,7 +55,7 @@ int main(int argc, char *argv[]) {
 	  return 4;
 	}
 
-	for (int i=0; ; i++) {
+	for (;;) {
 	  struct sockaddr_un who;
 	  socklen_t len = sizeof(who);
 	  int client;
@@ -83,7 +85,7 @@ int main(int argc, char *argv[]) {
 	    length = ntohl(net_length);
 	  }
 	  if (length != sizeof(request)) {
-	    printf("** Wrong length word: %d\n", length);
+	    printf("** Wrong length word: %u\n", length);
 	  }
 	  len = read(client, buffer, sizeof(buffer));
 	  if (len <0) {
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]) {
 	    memcpy(&request, buffer, sizeof(request));
 	  }
 	  if (request.op != 0) {
-	    printf("** Wrong op field: %d\n", request.op);
+	    printf("** Wrong op field: %u\n", request.op);
 	  }
 
 	  /* construct reply */
@@ -135,7 +137,7 @@ int main(int argc, char *argv[]) {
 	    printf("## wrote %d bytes\n", len);
           }
 	  close(client);
-	  printf("packet_id: %d, key_id: %d\n",
+	  printf("packet_id: %u, key_id: %d\n",
 	    request.packet_id, request.key_id);
 	  printf("\n");
 	}

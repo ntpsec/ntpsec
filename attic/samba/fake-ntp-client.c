@@ -16,12 +16,12 @@
 
 #include "fake.h"
 
-char* host = "time.example.com";// First arg
-int packets = 1;		// Second arg
-int delay = 1000;		// Third arg, microseconds after each packet
+static char* host = "time.example.com";// First arg
+static int packets = 1;		// Second arg
+static useconds_t delay = 1000;		// Third arg, microseconds after each packet
 
-int sock;
-struct ntp_packet ntp_send, ntp_recv;
+static int sock;
+static struct ntp_packet ntp_send, ntp_recv;
 
 void bailout(char *msg);
 
@@ -37,7 +37,7 @@ void bailout(char *msg)
   printf("** %s %s: errno = %d, %s\n",
     timetxt, msg, saverrr, strerror(saverrr));
   exit(1);
-};
+}
 
 int main (int argc, char *argv[])
 {
@@ -46,7 +46,7 @@ int main (int argc, char *argv[])
   float timeout = 5.0;
   struct timeval tv;
   int addr;
-  int i, ec, len;
+  int i, ec;
 
   if (argc > 3) delay = atoi(argv[3]);
   if (delay < 0) bailout("Bad delay");
@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
     (addr >> 8) & 0xff,
     (addr >> 0) & 0xff);
 
-  if (0) printf("Sending: len = %ld, header=%8x\n",
+  if ((0)) printf("Sending: len = %zu, header=%8x\n",
     sizeof(ntp_send), ntp_send.header); 
 
   bzero((char *)&server, sizeof(server));
@@ -98,6 +98,7 @@ int main (int argc, char *argv[])
   ntp_send.keyid = 56578;  
 
   for (i = 0; i < packets; i++) {
+    int len;
     struct timespec start, stop;
     double elapsed;
     ntp_send.t3.seconds = htonl(i);
