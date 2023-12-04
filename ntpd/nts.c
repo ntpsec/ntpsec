@@ -209,12 +209,16 @@ bool nts_load_ecdhcurves(SSL_CTX *ctx) {
 	 * We could make a dummy SSL, read the list, then free it.
 	 */
 	if (NULL != ntsconfig.tlsecdhcurves) {
-		if (1 != SSL_CTX_set1_groups_list(ctx, ntsconfig.tlsecdhcurves)) {
+		/* FIXME -- const bug in OpenSSL */
+		char *copy = estrdup(ntsconfig.tlsecdhcurves);
+		if (1 != SSL_CTX_set1_groups_list(ctx, copy)) {
 			msyslog(LOG_ERR, "NTS: troubles setting ecdhcurves.");
+			free(copy);
 			return false;
 		} else {
 			msyslog(LOG_INFO, "NTS: set ecdhcurves.");
 		}
+		free(copy);
 	}
 	return true;
 }
@@ -310,6 +314,7 @@ int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length) {
 	return bytes_written;
 }
 
+/* Each thread has it's own queue of errors */
 void nts_log_ssl_error(void) {
 	char buff[256];
 	int err = ERR_get_error();
