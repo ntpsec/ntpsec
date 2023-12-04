@@ -216,7 +216,7 @@ bool nts_load_ecdhcurves(SSL_CTX *ctx) {
 			free(copy);
 			return false;
 		} else {
-			msyslog(LOG_INFO, "NTS: set ecdhcurves.");
+			msyslog(LOG_INFO, "NTS: set ecdhcurves %s.", ntsconfig.tlsecdhcurves);
 		}
 		free(copy);
 	}
