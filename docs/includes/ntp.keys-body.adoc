@@ -31,24 +31,23 @@ You can get a list from `openssl list -digest-algorithms` or
 (As of Jan 2018, they lie.  Be sure to try it.  {ntpdman} will
 print an error on startup if a selected type isn't supported.)
 
-The following types are widely supported:
------
-  md5, sha1, ripemd160, sha224, sha256, sha384, sha512
-  aes-128, aes-192, aes-256
------
+AES-128 is recommended by RFC 8573.  Most modern CPUs have hardware
+support.
 
-Only the +-cbc+ cipher modes are useful.
-The +-cbc+ is appended to the `type` internally. Do not include it in `type`.
+Only the +-CBC+ cipher modes are useful.
+The +-CBC+ is appended to the `type` internally. Do not include it in `type`.
 
-AES is an abbreviation for aes-128.
+AES is an alias for AES-128.
+
+SHA-1 is an alias for SHA1. (NIST uses SHA-1.  OpenSSL uses SHA1.)
 
 Note that MD5 was deprecated by RFC 8573 in June of 2019.
-+AES-128+ is currently preferred.  The code still supports
-MD5 for backwards compatibility.
++AES-128+ is currently preferred.  Most modern CPUs have hardware
+support.  Our code still supports MD5 for backwards compatibility.
 
 FIPS 140-2, FIPS 180-4, and/or FIPS 202 may restrict your choices.
 If it matters to you, check with your lawyer.  (Let us know if you
-find a good reference.)
+find a good reference.)  In particular, they don't allow MD5.
 
 The `key` may be printable ASCII excluding "#" or hex encoded.
 Keys longer than 20 characters are assumed to be hex.  The max

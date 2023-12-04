@@ -16,7 +16,7 @@ The following declarations control MAC authentication:
 
 [[trustedkey]]+trustedkey+ _key..._ ::
   Specifies the key identifiers which are trusted for the purposes of
-  authenticating peers with symmetric key cryptography, as well as keys
+  authenticating servers with symmetric key cryptography, as well as keys
   used by the {ntpqman} program.
   Multiple keys on the same line should be separated by spaces.
   Key ranges can be specified as (first ... last).  The spaces around
@@ -24,9 +24,9 @@ The following declarations control MAC authentication:
   and trusted keys can also be specified on the command line.
 
 The MAC authentication procedures require that both the local and remote
-servers share the same key and key identifier for this purpose,
-although different keys can be used with different servers.
-The _key_ arguments are 32-bit unsigned integers with values from 1 to
-65,535.
+servers share the same key id, key type, and key text.
+The easiest way to do this is to copy the whole line.
+Different keys should be used for each server-client pair.
+The _key_id_ arguments are integers with values from 1 to 65,535.
 
 // end

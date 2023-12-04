@@ -5,13 +5,14 @@
 |+tally+         |
 single-character code indicating current value of the +select+ field
 of the link:decode.html#peer[peer status word]
-|+remote+        |host name (or IP number) of peer
+|+remote+        |host name (or IP address) of server
 |+refid+         |association ID or link:decode.html#kiss[kiss code]
 |+st+            |stratum
 |+t+             |
-+u+: unicast or manycast client,
-+l+: local (reference clock), +s+: symmetric (peer), server, +B+:
-broadcast server, 1-8 NTS unicast with this number of cookies stored.
+  +u+: server (u for unicast),
+  +l+: local (reference clock),
+  +p+: Pool name,
+  1-8 NTS server  with this number of cookies stored.
 |+when+          |sec/min/hr since last received packet
 |+poll+          |poll interval (log~2~ s)
 |+reach+         |reach shift register (octal)
@@ -19,6 +20,11 @@ broadcast server, 1-8 NTS unicast with this number of cookies stored.
 |+offset+        |offset of server relative to this host
 |+jitter+        |jitter
 |=======================================================================
+
+The +t+ column has strange encodings due to historical use by old code.  If you are looking at an old server, you might also see:
+  +s+: symmetric (peer), server,
+  +B+: broadcast server,
+
 
 The tally code is one of the following:
 [width="80%",cols="10%,90%"]
