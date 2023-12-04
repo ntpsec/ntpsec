@@ -40,6 +40,7 @@ const char* digests[] = {
     "RMD160", "RIPEMD160",
     "MDC2", "GOST", "DSS1",
     "ChaCha20", "Poly1305",
+    "DES", "DES3",
     NULL };
 
 unsigned char packet[100];
