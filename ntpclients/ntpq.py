@@ -853,6 +853,8 @@ usage: ntpversion [version number]
             self.say("Keytype: %s\n" % self.session.keytype)
         elif line.upper() in ['AES', 'AES128CMAC']:
             self.session.keytype = 'AES-128'
+        elif line.upper() in ['SHA-1']:
+            self.session.keytype = 'SHA1'
         elif not ntp.ntpc.checkname(line.upper()):
             self.warn("Keytype %s is not supported by openSSL or ntpq.\n" % line)
         else:
