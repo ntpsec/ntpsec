@@ -435,6 +435,11 @@ displayed.
   packets can get flagged for inclusion in exception statistics in more
   than one way, for example by having both a bad length and an old version.
 
++mssntpinfo+::
+  Display a summary of the MS-SNTP traffic to a Samba server.  This
+  won't work unless the server you are looking at was built with the
+  --enable-mssntp option.
+
 +ntsinfo+::
   Display a summary of the NTS state, including
   both the the NTS client and NTS server components.  Note that
