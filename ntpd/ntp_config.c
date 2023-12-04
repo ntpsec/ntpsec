@@ -1974,6 +1974,10 @@ config_nts(
 		case T_Tlsciphersuites:
 			ntsconfig.tlsciphersuites = estrdup(nts->value.s);
 			break;
+
+		case T_Tlsecdhcurves:
+			ntsconfig.tlsecdhcurves = estrdup(nts->value.s);
+			break;
 #endif
 		}
 	}
