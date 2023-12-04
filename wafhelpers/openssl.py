@@ -1,3 +1,5 @@
+"""Report on OpenSSL version and features for OpenSSL."""
+
 SNIP_LIBSSL_TLS13_CHECK = """
 #include <openssl/tls1.h>
 
@@ -12,6 +14,7 @@ int main(void) {
 
 
 def check_libssl_tls13(ctx):
+    """Report if OpenSSL supports TLS 1.3 for ./waf configure."""
     ctx.check_cc(
       fragment=SNIP_LIBSSL_TLS13_CHECK,
       use="SSL CRYPTO",
@@ -33,6 +36,7 @@ int main(void) {
 
 
 def check_openssl_bad_version(ctx):
+    """Report if OpenSSL has a good version to ./waf configure."""
     ctx.check_cc(
       fragment=SNIP_OPENSSL_BAD_VERSION_CHECK,
       use="SSL CRYPTO",
@@ -56,6 +60,7 @@ int main(void) {
 
 
 def dump_openssl_version(ctx):
+    """Report OpenSSL version to ./waf configure."""
     _ = "XXX_LIBSSL_VERSION"
     ctx.start_msg("LibSSL version")
     ret = ctx.check_cc(
