@@ -30,7 +30,7 @@ class TestPylibNtpc(unittest.TestCase):
             self.assertEqual(ntp.ntpc.prettydate(in_string), to_string)
             self.assertAlmostEqual(ntp.ntpc.lfptofloat(in_string), to_float)
 
-    def test_nul_trunc16(self):
+    def test_nul_trunc16b(self):
         k_type = "aes-128"
         key = ntp.util.hexstr2octets(
             "0fd2287c1e97a50cb9d3cb9f80debcb6")
@@ -45,7 +45,7 @@ class TestPylibNtpc(unittest.TestCase):
         mac1 = ntp.poly.polybytes(sample[52:])
         self.assertEqual([len(mac1), mac1], [len(mac2), mac2], msg="nul trunc")
 
-    def test_nul_trunc16(self):
+    def test_nul_trunc16f(self):
         k_type = "aes-256"
         key = ntp.util.hexstr2octets(
             "fc0af35640142bb85ad03a892a81fa9d" +
