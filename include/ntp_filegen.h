@@ -14,13 +14,14 @@
  * supported file generation types
  */
 
+/* FIXME: should be an enum */
 #define FILEGEN_NONE	255	/* no generations - use plain file name */
 #define FILEGEN_PID	1	/* one filegen per process incarnation */
 #define FILEGEN_DAY	2	/* one filegen per day */
 #define FILEGEN_WEEK	3	/* one filegen per week */
 #define FILEGEN_MONTH	4	/* one filegen per month */
 #define FILEGEN_YEAR	5	/* one filegen per year */
-#define FILEGEN_AGE	6	/* change filegen each FG_AGE_SECS */
+#define FILEGEN_AGE	6	/* one filegen per day of uptime */
 
 /*
  * supported file generation flags

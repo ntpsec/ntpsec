@@ -392,7 +392,7 @@ Note that this command can be sent from the
 	number, and a 2-digit month.
 |+year+            |One generation file element is generated per year.
 	The filename  suffix consists of a dot and a 4 digit year number.
-|+age+$$           |This type of file generation sets changes to a new element of
+|+age+           |This type of file generation sets changes to a new element of
         the file set every 24 hours of server operation. The filename
         suffix consists of a dot, the letter _a_, and an 8-digit number.
         This number is taken to be the number of seconds the server is
