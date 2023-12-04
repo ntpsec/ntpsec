@@ -12,6 +12,15 @@ on user-visible changes.
 
 ## Repository Head
 
+* We think we have fixed ms-sntp but we can't test it.
+  If you can test it, please let us know if it does/doesn't work.
+
+* ntpd and ntpq both treat SHA-1 as an alias for SHA1
+  NIST uses SHA-1.  The crypto package from OpenSSL uses SHA1.
+
+* There are now log files with hourly statistics for NTS and
+  NTS-KE traffic: filegen ntsstats and filegen ntskestats,
+
 * Update ntpsnmpd to use python built-in to get uname information. NTPsec/ntpsec#791
 
 * Update license file names for REUSE compliance.
