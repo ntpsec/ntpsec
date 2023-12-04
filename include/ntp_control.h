@@ -1,8 +1,9 @@
 /*
  * ntp_control.h - definitions related to NTP mode 6 control messages
  *
- * mode 6 messages are defined in:
- * https://datatracker.ietf.org/doc/draft-ietf-ntp-mode-6-cmds/
+ * mode 6 messages are defined in RFC 9327
+ *  Control Messages Protocol for Use with Network Time Protocol Version 4
+ *  https://www.rfc-editor.org/rfc/rfc9327.pdf
  *
  */
 #ifndef GUARD_NTP_CONTROL_H
