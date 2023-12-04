@@ -13,6 +13,7 @@
 
 # Disable warnings that are silly
 disable=bad-continuation,
+        consider-using-f-string,
         invalid-name,
         misplaced-comparison-constant,
         no-self-use,
