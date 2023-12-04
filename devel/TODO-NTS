@@ -1,30 +1,22 @@
-BUGS:
-  timeout on client connect too long (system default)
-  Is 3 seconds timeout OK? (both client and server)
-
-nts_log_ssl_error()  No SSL param ??
-  ERR_error_string_n
-
-Hourly logging?
-  ntpq get totals vs recent
-
-documentation:
+Documentation:
   HOWTO on certificates
   glossary: https://letsencrypt.org/docs/glossary/
 
 Startup with bad time
+  Time needs to be close-enough for certificates to work.
+  That's days, not seconds.
+  CMOS/RTC clock is good enough.  Until it breaks.
+  Raspberry Pis don't have them.
+  We could disable time checking on certificates for startup.
+  No good start-from-scratch alternative yet.
+  IETF-NTPWG working on RoughTime -- 2023-Dec.
 
-? thread per instance on NTS-KE server
+OSCP ??
+
+Thread per instance on NTS-KE server
+  When we need it.
 
 Password for certificate's private key and cookie keys file.
   Need to get it before daemon mode.
 
--------
-
-security level
-
-client certificates
-
-Pool/cluster mode
-  ??  Ratchet for new cookie key
 
