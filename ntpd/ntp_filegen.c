@@ -342,11 +342,13 @@ filegen_setup(
 		break;
 
 	case FILEGEN_PID:
-		current = ((int)gen->id_lo == getpid());
+		current = false;
 		break;
 
 	case FILEGEN_AGE:
-		current = true;
+		/* current_time doesn't go backwards
+		 * so don't need to check id_lo */
+		current = (gen->id_hi > current_time);
 		break;
 
 	case FILEGEN_DAY:
