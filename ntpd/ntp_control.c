@@ -1386,7 +1386,7 @@ ctl_putarray(
 		snprintf(buf, sizeof(buf), " %.2f", arr[i] * MS_PER_S);
                 strlcat(buffer, buf, sizeof(buffer));
 	} while (i != start);
-	ctl_putunqstr(tag, buffer, strlen(buf));
+	ctl_putunqstr(tag, buffer, strlen(buffer));
 }
 
 
