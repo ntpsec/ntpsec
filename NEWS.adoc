@@ -18,6 +18,9 @@ on user-visible changes.
 * ntpd and ntpq both treat SHA-1 as an alias for SHA1
   NIST uses SHA-1.  The crypto package from OpenSSL uses SHA1.
 
+* The default crypto type for ntpq is now AES.
+  RFC 8573 deprecated MD5.
+
 * There are now log files with hourly statistics for NTS and
   NTS-KE traffic: filegen ntsstats and filegen ntskestats,
 
