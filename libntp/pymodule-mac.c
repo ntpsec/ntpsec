@@ -14,7 +14,7 @@
 
 #include "pymodule-mac.h"
 
-/* Don't include Python.h */
+// Don't include Python.h
 
 #define OPENSSL_SUPPRESS_DEPRECATED 1
 #include <openssl/evp.h>
@@ -26,7 +26,7 @@
 #define EVP_MD_CTX_new() EVP_MD_CTX_create()
 #endif
 
-/* Needed on OpenSSL < 1.1.0 */
+// Needed on OpenSSL < 1.1.0
 static void init_ssl(void) {
 	static bool init_done = false;
 	if (init_done) {
@@ -38,8 +38,8 @@ static void init_ssl(void) {
 }
 
 /* xx = ntp.ntpc.checkname(name)
- * returns false if algorithm name is invalid. */
-
+ * returns false if algorithm name is invalid.
+ */
 int do_checkname(const char *name)
 {
 	char upcase[100];
@@ -72,11 +72,11 @@ int do_checkname(const char *name)
 }
 
 
-/* mac = ntp.ntpc.mac(data, key, name) */
+// mac = ntp.ntpc.mac(data, key, name)
 
 #if EVP_MAX_MD_SIZE > MAX_MAC_LENGTH
 #error "MAX_MAC_LENGTH isn't big enough"
-/* FIXME: Does this cover CMAC ?? */
+// FIXME: Does this cover CMAC ??
 #endif
 
 void do_mac(char *name,
@@ -101,7 +101,7 @@ void do_mac(char *name,
 
         digest = EVP_get_digestbyname(upcase);
 	if (NULL != digest) {
-		/* Old digest case, MD5, SHA1 */
+		// Old digest case, MD5, SHA1
 		unsigned int maclenint;
 		if (NULL == digest_ctx) {
 			digest_ctx = EVP_MD_CTX_new();
@@ -132,25 +132,26 @@ void do_mac(char *name,
 	}
 	cipherlen = EVP_CIPHER_key_length(cipher);
 	if (cipherlen < keylen) {
-		keylen = cipherlen;		/* truncate */
+		keylen = cipherlen;		// truncate
 	} else if (cipherlen > keylen) {
 		memcpy(newkey, key, keylen);
 		while (cipherlen > keylen) {
-			key[keylen++] = 0;	/* pad with 0s */
+			key[keylen++] = 0;	// pad with 0s
                 }
 		key = newkey;
 	}
+        /* Coverity CID 462307, 2023 June 11
+         * CMAC API is undocumented and deprecated in OpenSSL 3.
+         * See libntp/macencrypt.c
+         */
 	if (NULL == cmac_ctx) {
 		cmac_ctx = CMAC_CTX_new();
         }
         if (!CMAC_Init(cmac_ctx, key, keylen, cipher, NULL)) {
-                /* Shouldn't happen.  Does if wrong key_size. */
+                // Shouldn't happen.  Does if wrong key_size.
 		*maclen = 0;
 		return;
         }
-        /* Coverity CID 462307, 2023 June 11
-         * CMAC API is undocumented and deprecated in OpenSSL 3.
-         * See libntp/macencrypt.c */
         if (!CMAC_Update(cmac_ctx, data, (unsigned int)datalen)) {
                 *maclen = 0;
                 return;
@@ -164,4 +165,3 @@ void do_mac(char *name,
         }
 	return;
 }
-
