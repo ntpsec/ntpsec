@@ -338,17 +338,14 @@ filegen_setup(
 
 	default:
 	case FILEGEN_NONE:
-		current = true;
-		break;
-
 	case FILEGEN_PID:
-		current = false;
+		current = true;
 		break;
 
 	case FILEGEN_AGE:
 		/* current_time doesn't go backwards
 		 * so don't need to check id_lo */
-		current = (gen->id_hi > current_time);
+		current = ((unsigned)gen->id_hi > current_time);
 		break;
 
 	case FILEGEN_DAY:
