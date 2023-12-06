@@ -146,9 +146,14 @@ void do_mac(char *name,
         /* Coverity CID 462307, 2023 June 11
          * CMAC API is undocumented and deprecated in OpenSSL 3.
          * See libntp/macencrypt.c */
-        /* coverity[checked_return] */
-        CMAC_Update(cmac_ctx, data, (unsigned int)datalen);
-        CMAC_Final(cmac_ctx, mac, maclen);
+        if (!CMAC_Update(cmac_ctx, data, (unsigned int)datalen)) {
+                *maclen = 0;
+                return;
+        }
+        if (!CMAC_Final(cmac_ctx, mac, maclen)) {
+                *maclen = 0;
+                return;
+        }
         if (MAX_MAC_LENGTH < *maclen)
                 *maclen = MAX_MAC_LENGTH;
 	return;
