@@ -182,6 +182,7 @@ lex_getch(
 			conf_file_sum += (unsigned int)ch;
 	} else if (stream->fpi) {
 		/* fetch next 7-bit ASCII char (or EOF) from file */
+		/* coverity[tainted_scalar] */
 		while ((ch = fgetc(stream->fpi)) != EOF && ch > SCHAR_MAX) {
 			stream->curpos.ncol++;
 		}
