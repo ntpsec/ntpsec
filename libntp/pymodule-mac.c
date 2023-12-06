@@ -29,8 +29,9 @@
 /* Needed on OpenSSL < 1.1.0 */
 static void init_ssl(void) {
 	static bool init_done = false;
-	if (init_done)
+	if (init_done) {
 		return;
+        }
 	init_done = true;
 	OpenSSL_add_all_ciphers();
 	OpenSSL_add_all_digests();
@@ -102,8 +103,9 @@ void do_mac(char *name,
 	if (NULL != digest) {
 		/* Old digest case, MD5, SHA1 */
 		unsigned int maclenint;
-		if (NULL == digest_ctx)
+		if (NULL == digest_ctx) {
 			digest_ctx = EVP_MD_CTX_new();
+                }
 		if (!EVP_DigestInit_ex(digest_ctx, digest, NULL)) {
 			*maclen = 0;
 			return;
@@ -111,8 +113,9 @@ void do_mac(char *name,
 		EVP_DigestUpdate(digest_ctx, key, keylen);
 		EVP_DigestUpdate(digest_ctx, data, (unsigned int)datalen);
 		EVP_DigestFinal_ex(digest_ctx, mac, &maclenint);
-		if (MAX_MAC_LENGTH < maclenint)
+		if (MAX_MAC_LENGTH < maclenint) {
 			maclenint = MAX_MAC_LENGTH;
+                }
 		*maclen = maclenint;
 		return;
 	}
@@ -132,12 +135,14 @@ void do_mac(char *name,
 		keylen = cipherlen;		/* truncate */
 	} else if (cipherlen > keylen) {
 		memcpy(newkey, key, keylen);
-		while (cipherlen > keylen)
+		while (cipherlen > keylen) {
 			key[keylen++] = 0;	/* pad with 0s */
+                }
 		key = newkey;
 	}
-	if (NULL == cmac_ctx)
+	if (NULL == cmac_ctx) {
 		cmac_ctx = CMAC_CTX_new();
+        }
         if (!CMAC_Init(cmac_ctx, key, keylen, cipher, NULL)) {
                 /* Shouldn't happen.  Does if wrong key_size. */
 		*maclen = 0;
@@ -154,8 +159,9 @@ void do_mac(char *name,
                 *maclen = 0;
                 return;
         }
-        if (MAX_MAC_LENGTH < *maclen)
+        if (MAX_MAC_LENGTH < *maclen) {
                 *maclen = MAX_MAC_LENGTH;
+        }
 	return;
 }
 
