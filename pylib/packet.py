@@ -257,7 +257,7 @@ MAX_KEYID = 0xFFFF
 MODE_SIX_HEADER_LENGTH = 12
 MINIMUM_MAC_LENGTH = 16
 KEYID_LENGTH = 4
-MODE_SIX_ALIGNMENT = 8
+MODE_SIX_ALIGNMENT = 4
 MAX_BARE_MAC_LENGTH = 20
 
 
@@ -936,7 +936,7 @@ class ControlSession:
         # Pad out packet to a multiple of 8 octets to be sure
         # receiver can handle it. Note: these pad bytes should
         # *not* be counted in the header count field.
-        while ((ControlPacket.HEADER_LEN + len(pkt.extension)) & 7):
+        while ((ControlPacket.HEADER_LEN + len(pkt.extension)) & (MODE_SIX_ALIGNMENT - 1)):
             pkt.extension += b"\x00"
 
         # Do the MAC compuation.
