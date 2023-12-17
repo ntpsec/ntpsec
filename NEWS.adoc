@@ -12,6 +12,21 @@ on user-visible changes.
 
 ## Repository Head
 
+* Change mode6 alignment to four, which may
+  break some compatibility with classic NTP.
+
+* Seccomp should now also yield invalid syscall names when dying.
+
+* Make ntpq stop dropping output timestamp leading zeroes.
+
+* Update documents in quite a few places.
+
+* Reset some stats hourly, even when not logged into files.
+
+* Add error logging, and stats for ms-sntp.
+
+* Add spacing between multiple peer views in ntpq.
+
 * We think we have fixed ms-sntp but we can't test it.
   If you can test it, please let us know if it does/doesn't work.
 
