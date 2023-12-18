@@ -178,97 +178,97 @@ struct var {
   const int flags;
   const enum var_type type;
   union {
-    const time_t* p_time;
-    const char* p_str;
-    const double* p_dbl;
-    const unsigned long int* p_uli;
-    const long int* p_li;
-    const unsigned int* p_uint;
-    const int* p_int;
-    const uint64_t* p_u64;
-    const int64_t* p_i64;
-    const uint32_t* p_u32;
-    const int32_t* p_i32;
-    const uint8_t* p_u8;
-    const int8_t* p_i8;
-    const bool* p_bool;
-    const l_fp* p_l_fp;
-    const uptime_t* p_up;
-    const char* (*p_strP)(void);
-    uint64_t (*p_u64P)(void);
-    uint32_t (*p_u32P)(void);
-    unsigned long int (*p_uliP)(void);
+    const time_t* time;
+    const char* str;
+    const double* dbl;
+    const unsigned long int* uli;
+    const long int* li;
+    const unsigned int* uinnt;
+    const int* innt;
+    const uint64_t* u64;
+    const int64_t* i64;
+    const uint32_t* u32;
+    const int32_t* i32;
+    const uint8_t* u8;
+    const int8_t* i8;
+    const bool* boool;
+    const l_fp* l_fp;
+    const uptime_t* up;
+    const char* (*strP)(void);
+    uint64_t (*u64P)(void);
+    uint32_t (*u32P)(void);
+    unsigned long int (*uliP)(void);
     const enum var_type_special special;
-    };
+    } p;
   union {
     /* second pointer for returning recent since-stats-logged */
-    const uint64_t* p2_u64;
-    const uint64_t* p2_l_fp;
-    };
+    const uint64_t* u64;
+    const uint64_t* l_fp;
+    } p2;  
   };
 
 #define Var_time(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_time, .p_time = &xlocation }
+  .name = xname, .flags = xflags, .type = v_time, .p.time = &xlocation }
 #define Var_str(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_str, .p_str = xlocation }
+  .name = xname, .flags = xflags, .type = v_str, .p.str = xlocation }
 #define Var_dbl(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_dbl, .p_dbl = &xlocation }
+  .name = xname, .flags = xflags, .type = v_dbl, .p.dbl = &xlocation }
 #define Var_uli(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_uli, .p_uli = &xlocation }
+  .name = xname, .flags = xflags, .type = v_uli, .p.uli = &xlocation }
 #define Var_li(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_li, .p_li = &xlocation }
+  .name = xname, .flags = xflags, .type = v_li, .p.li = &xlocation }
 #define Var_uint(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_uint, .p_uint = &xlocation }
+  .name = xname, .flags = xflags, .type = v_uint, .p.uinnt = &xlocation }
 #define Var_int(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_int, .p_int = &xlocation }
+  .name = xname, .flags = xflags, .type = v_int, .p.innt = &xlocation }
 
 #define Var_strP(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_strP, .p_strP = xlocation }
+  .name = xname, .flags = xflags, .type = v_strP, .p.strP = xlocation }
 #define Var_u64P(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_u64P, .p_u64P = xlocation }
+  .name = xname, .flags = xflags, .type = v_u64P, .p.u64P = xlocation }
 #define Var_u32P(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_u32P, .p_u32P = xlocation }
+  .name = xname, .flags = xflags, .type = v_u32P, .p.u32P = xlocation }
 #define Var_uliP(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_uliP, .p_uliP = xlocation }
+  .name = xname, .flags = xflags, .type = v_uliP, .p.uliP = xlocation }
 
 #define Var_u64(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_u64, .p_u64 = &xlocation }
+  .name = xname, .flags = xflags, .type = v_u64, .p.u64 = &xlocation }
 #define Var_u64_r(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_u64_r, \
-  .p_u64 = &xlocation, .p2_u64 = &(old_##xlocation) }
+  .p.u64 = &xlocation, .p2.u64 = &(old_##xlocation) }
 #define Var_i64(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_i64, .p_i84 = &xlocation }
+  .name = xname, .flags = xflags, .type = v_i64, .p.i64 = &xlocation }
 #define Var_u32(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_u32, .p_u32 = &xlocation }
+  .name = xname, .flags = xflags, .type = v_u32, .p.u32 = &xlocation }
 #define Var_i32(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_i32, .p_i32 = &xlocation }
+  .name = xname, .flags = xflags, .type = v_i32, .p.i32 = &xlocation }
 #define Var_u8(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_u8, .p_u8 = &xlocation }
+  .name = xname, .flags = xflags, .type = v_u8, .p.u8 = &xlocation }
 #define Var_i8(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_i8, .p_i8 = &xlocation }
+  .name = xname, .flags = xflags, .type = v_i8, .p.i8 = &xlocation }
 #define Var_bool(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_bool, .p_bool = &xlocation }
+  .name = xname, .flags = xflags, .type = v_bool, .p.boool = &xlocation }
 
 #define Var_l_fp(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_l_fp, .p_l_fp = &xlocation }
+  .name = xname, .flags = xflags, .type = v_l_fp, .p.l_fp = &xlocation }
 #define Var_l_fp_ms(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_l_fp_ms, .p_l_fp = &xlocation }
+  .name = xname, .flags = xflags, .type = v_l_fp_ms, .p.l_fp = &xlocation }
 #define Var_l_fp_sec(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_l_fp_sec, .p_l_fp = &xlocation }
+  .name = xname, .flags = xflags, .type = v_l_fp_sec, .p.l_fp = &xlocation }
 #define Var_l_fp_r(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_l_fp_sec_r, \
-  .p_l_fp = &xlocation, .p2_l_fp = &(old_##xlocation) }
+  .p.l_fp = &xlocation, .p2.l_fp = &(old_##xlocation) }
 #define Var_l_fp_sec6(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_l_fp_sec6, .p_l_fp = &xlocation }
+  .name = xname, .flags = xflags, .type = v_l_fp_sec6, .p.l_fp = &xlocation }
 #define Var_since(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_since, .p_up = &xlocation }
+  .name = xname, .flags = xflags, .type = v_since, .p.up = &xlocation }
 
 #define Var_mrumem(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_mrumem, .p_u64 = &xlocation }
+  .name = xname, .flags = xflags, .type = v_mrumem, .p.u64 = &xlocation }
 #define Var_kli(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_kli, .p_li = &xlocation }
+  .name = xname, .flags = xflags, .type = v_kli, .p.li = &xlocation }
 #define Var_special(xname, xflags, xspecial) { \
-  .name = xname, .flags = xflags, .type = v_special, .special = xspecial }
+  .name = xname, .flags = xflags, .type = v_special, .p.special = xspecial }
 
 static const struct var sys_var[] = {
   Var_u32("ss_uptime", RO, current_time),
@@ -416,7 +416,7 @@ static const struct var sys_var[] = {
   Var_uli("clk_wander_threshold", RO|ToPPM, timer_xmtcalls),
 
 #ifdef ENABLE_LEAP_SMEAR
-  /* Old code returned nothing if leap_smear_intv was 0 */
+  /* Old code returned nothing if leap.smear_intv was 0 */
   Var_uint("leapsmearinterval", RO, leap_smear_intv),
   Var_dbl("leapsmearoffset", RO|ToMS, leap_smear.doffset),
 #endif
@@ -1424,11 +1424,11 @@ ctl_putsys(const struct var * v) {
 
 	switch (v->type) {
 
-	case v_str: ctl_putstr(v->name, v->p_str, strlen(v->p_str)); break;
-	case v_strP: ctl_putstr(v->name, v->p_strP(), strlen(v->p_strP())); break;
+	case v_str: ctl_putstr(v->name, v->p.str, strlen(v->p.str)); break;
+	case v_strP: ctl_putstr(v->name, v->p.strP(), strlen(v->p.strP())); break;
 
 	case v_dbl:
-	    temp_d = *v->p_dbl;
+	    temp_d = *v->p.dbl;
 	    if (v->flags&ToMS) temp_d *= MS_PER_S;   // to Milliseconds
 	    if (v->flags&ToPPM) temp_d *= US_PER_S;  // to PPM
 	    if (v->flags&DBL6)
@@ -1440,9 +1440,9 @@ ctl_putsys(const struct var * v) {
 	case v_kli:
 	    if (v->flags&K_16) {
 		/* value is scaled by 16 bits */
-		temp_d = FP_UNSCALE(*v->p_li);
+		temp_d = FP_UNSCALE(*v->p.li);
 	    } else {
-		temp_d = (double)*v->p_li;
+		temp_d = (double)*v->p.li;
 	    };
 	    if (v->flags & (KNUToMS | KUToMS)) {
 		/* value is in nanoseconds or microseconds */
@@ -1461,56 +1461,56 @@ ctl_putsys(const struct var * v) {
 	    break;
 
 	case v_since:
-	    temp_up = current_time - *v->p_up;
+	    temp_up = current_time - *v->p.up;
             ctl_putuint(v->name, temp_up);
 	    break;
 
-	case v_uli: ctl_putuint(v->name, *v->p_uli); break;
-	case v_uint: ctl_putuint(v->name, *v->p_uint); break;
-	case v_u64: ctl_putuint(v->name, *v->p_u64); break;
+	case v_uli: ctl_putuint(v->name, *v->p.uli); break;
+	case v_uint: ctl_putuint(v->name, *v->p.uinnt); break;
+	case v_u64: ctl_putuint(v->name, *v->p.u64); break;
 	case v_u64_r:
-		ctl_putuint(v->name, *v->p_u64-*v->p2_u64); break;
-	case v_u32: ctl_putuint(v->name, *v->p_u32); break;
-	case v_u8: ctl_putuint(v->name, *v->p_u8); break;
+		ctl_putuint(v->name, *v->p.u64-*v->p2.u64); break;
+	case v_u32: ctl_putuint(v->name, *v->p.u32); break;
+	case v_u8: ctl_putuint(v->name, *v->p.u8); break;
 
-	case v_u64P: ctl_putuint(v->name, v->p_u64P()); break;
-	case v_u32P: ctl_putuint(v->name, v->p_u32P()); break;
-	case v_uliP: ctl_putuint(v->name, v->p_uliP()); break;
+	case v_u64P: ctl_putuint(v->name, v->p.u64P()); break;
+	case v_u32P: ctl_putuint(v->name, v->p.u32P()); break;
+	case v_uliP: ctl_putuint(v->name, v->p.uliP()); break;
 
-	case v_li: ctl_putint(v->name, *v->p_li); break;
-	case v_int: ctl_putint(v->name, *v->p_int); break;
-	case v_i64: ctl_putint(v->name, *v->p_i64); break;
-	case v_i32: ctl_putint(v->name, *v->p_i32); break;
-	case v_i8: ctl_putint(v->name, *v->p_i8); break;
+	case v_li: ctl_putint(v->name, *v->p.li); break;
+	case v_int: ctl_putint(v->name, *v->p.innt); break;
+	case v_i64: ctl_putint(v->name, *v->p.i64); break;
+	case v_i32: ctl_putint(v->name, *v->p.i32); break;
+	case v_i8: ctl_putint(v->name, *v->p.i8); break;
 
-	case v_bool: ctl_putint(v->name, *v->p_bool); break;
+	case v_bool: ctl_putint(v->name, *v->p.boool); break;
 
-	case v_time: ctl_puttime(v->name, *v->p_time); break;
+	case v_time: ctl_puttime(v->name, *v->p.time); break;
 
 	/* time of day */
-	case v_l_fp: ctl_putts(v->name, *v->p_l_fp); break;
+	case v_l_fp: ctl_putts(v->name, *v->p.l_fp); break;
 
 	/* time differences */
 	case v_l_fp_ms:
-	    temp_d = lfptod(*v->p_l_fp);
+	    temp_d = lfptod(*v->p.l_fp);
 	    temp_d *= MS_PER_S;
 	    ctl_putdbl(v->name, temp_d);
             break;
 	case v_l_fp_sec:
-	    temp_d = lfptod(*v->p_l_fp);
+	    temp_d = lfptod(*v->p.l_fp);
 	    ctl_putdbl(v->name, temp_d);
             break;
 	case v_l_fp_sec6:
-	    temp_d = lfptod(*v->p_l_fp);
+	    temp_d = lfptod(*v->p.l_fp);
 	    ctl_putdbl6(v->name, temp_d);
             break;
 	case v_l_fp_sec_r:
-	    temp_d = lfptod(*v->p_l_fp-*v->p2_l_fp);
+	    temp_d = lfptod(*v->p.l_fp-*v->p2.l_fp);
 	    ctl_putdbl(v->name, temp_d);
             break;
 
 	case v_mrumem:
-            mem = *v->p_u64 * sizeof(mon_entry);
+            mem = *v->p.u64 * sizeof(mon_entry);
             mem = (mem + 512) / 1024;
             ctl_putuint(v->name, mem);
             break;
@@ -1540,7 +1540,7 @@ ctl_putspecial(const struct var * v) {
         l_fp now;
         struct ctl_var *cv;
 
-  switch (v->special) {
+  switch (v->p.special) {
     case vs_peer:
         i = 0;
         if (NULL != sys_vars.sys_peer)
@@ -1581,7 +1581,7 @@ ctl_putspecial(const struct var * v) {
     default:
         /* -Wswitch-enum will warn if this is possible */
         if (log_limit++ > 10) return;  /* Avoid log file clutter/DDoS */
-        msyslog(LOG_ERR, "ERR: ctl_putspecial() needs work special=%u\n", v->special);
+        msyslog(LOG_ERR, "ERR: ctl_putspecial() needs work special=%u\n", v->p.special);
         break;
     }
 }
