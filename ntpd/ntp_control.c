@@ -762,7 +762,7 @@ ctl_error(
 	 */
 	rpkt.r_m_e_op = (uint8_t)CTL_RESPONSE | CTL_ERROR |
 			(res_opcode & CTL_OP_MASK);
-	rpkt.status = htons((unsigned short)(errcode << 8) & 0xff00);
+	rpkt.status = htons((unsigned short)(errcode & 0xff) << 8);
 	rpkt.count = 0;
 
 	/*
