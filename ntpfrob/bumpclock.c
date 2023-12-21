@@ -19,7 +19,7 @@
 
 void bumpclock(int64_t bump)
 {
-    struct timespec was, set, now;
+    struct timespec was = {0, 0}, now = {0, 0}, set;
     int rc1, rc2, rc3;
     int er1, er2, er3;
 

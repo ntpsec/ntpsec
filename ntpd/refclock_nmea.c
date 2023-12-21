@@ -1668,7 +1668,7 @@ parse_date(
  *
  */
 static bool kludge_day (struct timespec *dt) {
-  struct timespec now;
+  struct timespec now = {0, 0};
 
   clock_gettime(CLOCK_REALTIME, &now);
   int nowday = now.tv_sec / 86400;

@@ -38,7 +38,7 @@ get_clocktime(
 {
 	doubletime_t dtemp;
 
-	struct timespec ts;	/* seconds and nanoseconds */
+	struct timespec ts = {0, 0};	/* seconds and nanoseconds */
 
 	/*
 	 * Convert Unix clock from seconds and nanoseconds to seconds.

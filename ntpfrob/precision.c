@@ -70,7 +70,7 @@ void precision(const iomode mode)
 int
 default_get_resolution(void)
 {
-	struct timespec tp;
+	struct timespec tp = {0, 0};
 	long last;
 	int i;
 	long diff;
@@ -132,7 +132,7 @@ default_get_resolution(void)
 int
 default_get_precision(void)
 {
-	struct timespec tp;
+	struct timespec tp = {0, 0};
 	long last;
 	int i;
 	long diff;
