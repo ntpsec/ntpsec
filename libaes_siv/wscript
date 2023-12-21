@@ -1,7 +1,7 @@
 def build(ctx):
     aes_cflags=['-Wno-shadow',
             # '-Wall', '-Wextra', '-Wstrict-prototypes',  # default
-            '-Wconversion',
+            # '-Wconversion',  # Overzealous in GCC 4.2
             '-O3',
             '-fomit-frame-pointer',
             '-funroll-loops',
