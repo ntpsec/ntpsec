@@ -71,15 +71,6 @@ The log file looks like:
   This will continuously log the temperature data in the background
   to the file /var/log/ntpstats/temperature.  Only log every 60 seconds.
 
-== EXIT STATUS
-
-One of the following exit values will be returned:
-
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
-
 == AUTHORS
 
 Gary E. Miller

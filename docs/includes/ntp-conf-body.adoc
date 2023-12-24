@@ -228,13 +228,6 @@ include::../includes/misc-options.adoc[]
 `ntp.keys`::
   private keys
 
-One of the following exit values will be returned:
-
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
-
 == SEE ALSO
 
 {ntpdman}, {ntpqman}.

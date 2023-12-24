@@ -71,15 +71,6 @@ GPS always output a static TDOP.
   This will continuously log the gpsd data in the background to the file
   /var/log/ntpstats/gpsd.  Only log every 60 seconds.
 
-== EXIT STATUS
-
-One of the following exit values will be returned:
-
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
-
 == AUTHORS
 
 Gary E. Miller

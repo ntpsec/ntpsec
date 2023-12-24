@@ -214,15 +214,6 @@ different from that found in sntp(1), tracking the newer formula used
 in {ntpdman}.  Expect offset computations to match but synch-distances
 not to.
 
-== EXIT STATUS
-
-One of the following exit values will be returned:
-
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
-
 == AUTHORS
 
 Johannes Maximilian Kuehn, Harlan Stenn, Dave Hart.
