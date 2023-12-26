@@ -2,7 +2,7 @@ def build(ctx):
     util = [    'sht',
                 'digest-find', 'cipher-find',
 		'clocks', "random",
-                'digest-timing', 'cmac-timing', 'exp-timing',
+                'digest-timing', 'cmac-timing',
                 'backwards']
 
     if not ctx.env.DISABLE_NTS:
