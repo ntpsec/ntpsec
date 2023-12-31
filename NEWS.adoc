@@ -10,6 +10,8 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+## Repository Head
+
 ## 2023-12-30: 1.2.3
 
 * Change mode6 alignment to four, which may
