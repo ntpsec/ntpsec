@@ -46,7 +46,6 @@
 #include "timespecops.h"
 #include "ntp.h"
 #include "ntp_calendar.h"
-#include "timetoa.h"
 
 /* make sure nanoseconds are in nominal range */
 struct timespec
