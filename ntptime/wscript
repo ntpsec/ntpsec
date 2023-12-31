@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 def build(ctx):
     if ctx.env.HEADER_SYS_TIMEX_H:
         ctx(

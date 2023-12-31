@@ -1,7 +1,10 @@
 #! @PYSHEBANG@
 # -*- coding: utf-8 -*-
 
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
+
 '''\
 Any keystroke causes a poll and update. Keystroke commands:
 

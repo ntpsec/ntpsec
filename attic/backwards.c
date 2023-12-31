@@ -1,3 +1,9 @@
+/*
+ * Copyright the NTPsec project contributors
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 /* backwards.c - check for time going backwards
  * Started from Artturi Alm on port-arm@netbsd.org
  * Fri, 25 Jan 2019 09:54:42 +0200

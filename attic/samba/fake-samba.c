@@ -1,4 +1,10 @@
 /*
+ * Copyright the NTPsec project contributors
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
+/*
  * fake-samba.c -- fake samba server to exercise MS-SNTP option.
  */
 #include <errno.h>

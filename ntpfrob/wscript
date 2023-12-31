@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 def build(ctx):
     frob_sources = ['main.c', 'bumpclock.c', 'dump.c', 'jitter.c',
                     'precision.c', 'pps-api.c', 'tickadj.c']

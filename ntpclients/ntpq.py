@@ -8,8 +8,11 @@
 # mainly command interpretation and a back-end that presents the take
 # from ntpd as objects that can be re-used by other front
 # ends. Reusable pieces live in pylib.
+
+# Copyright the NTPsec project contributors
 #
 # SPDX-License-Identifier: BSD-2-Clause
+
 from __future__ import print_function, division
 
 import cmd

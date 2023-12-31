@@ -10,6 +10,9 @@ Usage: ntptrace [-n | --numeric] [-m number | --max-hosts=number]
 
 See the manual page for details.
 """
+
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
 
 from __future__ import print_function

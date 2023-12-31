@@ -36,7 +36,11 @@ See the manual page for details.
 
 Python by ESR, concept and gnuplot code by Dan Drown.
 """
+
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
+
 from __future__ import print_function, division
 
 import atexit

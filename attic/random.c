@@ -1,3 +1,9 @@
+/*
+ * Copyright the NTPsec project contributors
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 /* Last modified on Sat Aug 28 14:30:11 PDT 1999 by murray */
 
 #include <errno.h>

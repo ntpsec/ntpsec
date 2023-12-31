@@ -1,3 +1,9 @@
+/*
+ * Copyright the NTPsec project contributors
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 /* fake-ntp-server.c
  * fake NTP server to exersize fake-samba
  * it won't work with real samba since we don't know any key-IDs

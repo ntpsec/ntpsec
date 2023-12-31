@@ -38,6 +38,8 @@
 #         -M msec         Slew adjustments less than msec,
 #                         step adjustments larger than msec.
 #
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
 
 print_help() {

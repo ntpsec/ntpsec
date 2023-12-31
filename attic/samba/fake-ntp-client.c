@@ -1,3 +1,9 @@
+/*
+ * Copyright the NTPsec project contributors
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 /*  Last modified on Sat Jan  6 00:11:51 PST 2001 by murray  */
 
 #include <sys/types.h>

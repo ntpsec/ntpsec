@@ -4,8 +4,12 @@
 ntpdig - simple SNTP client
 
 """
+
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
 # This code runs identically under Python 2 and Python 3. Keep it that way!
+
 from __future__ import print_function, division
 import getopt
 import math

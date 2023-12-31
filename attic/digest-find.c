@@ -1,4 +1,10 @@
 /*
+ * Copyright the NTPsec project contributors
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
+/*
  * digest.c - Hack to test various digest types.
  *
  * Fedora mentions blake2b and friends.  They are in the man page

@@ -15,6 +15,9 @@ hyphen and the flag character.
 
 A spurious 'not running' message can result from queries being disabled.
 """
+
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
 
 # Because we've actually seen this fail on a ^C during import of ntp.packet.
