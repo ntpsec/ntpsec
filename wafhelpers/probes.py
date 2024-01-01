@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 """
 This module exists to contain custom probe functions so they don't clutter
 up the logic in the main configure.py.

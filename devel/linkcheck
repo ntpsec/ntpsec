@@ -8,8 +8,11 @@
 #
 # Optional argument is the root directory of the tree, otherwise it
 # is run from the current directory.
+
+# Copyright the NTPsec project contributors
 #
 # SPDX-License-Identifier: BSD-2-Clause
+
 from __future__ import print_function, division
 
 import os

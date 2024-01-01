@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 """Report on OpenSSL version and features for OpenSSL."""
 
 SNIP_LIBSSL_TLS13_CHECK = """

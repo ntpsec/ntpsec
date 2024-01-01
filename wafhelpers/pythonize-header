@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 """
 Generate a Python module from a C file of macro definitions.
 

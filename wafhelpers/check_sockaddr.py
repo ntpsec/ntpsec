@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 SA_LEN_FRAG = """
 #include <sys/types.h>
 #include <sys/socket.h>

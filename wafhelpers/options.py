@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 def options_cmd(ctx, config):
     ctx.load("compiler_c")
     ctx.load("msvc")

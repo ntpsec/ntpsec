@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 '''Most of the functionality for building HTML and man pages from AsciiDoc.'''
 
 import re

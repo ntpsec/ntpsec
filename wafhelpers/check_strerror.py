@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 # check to see if strerror_r has type char*
 
 # streror_r() has 2 APIs.

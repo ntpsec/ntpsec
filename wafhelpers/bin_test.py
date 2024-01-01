@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 """Run a suite of tests on the listed binaries."""
 from __future__ import print_function
 import os

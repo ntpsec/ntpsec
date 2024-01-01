@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
+
 # Copyright the NTPsec project contributors
 #
 # SPDX-License-Identifier: BSD-2-Clause
-
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
 

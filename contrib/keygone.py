@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
+
 '''keygone.py -- A cruddy improvised NTPsec keyfile generator
 
 The number in the group_iterator range is the number of keys to generate

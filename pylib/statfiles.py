@@ -6,7 +6,11 @@ statfiles.py - class for digesting and plotting NTP logfiles
 Requires gnuplot and liberation fonts installed.
 
 """
+
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
+
 from __future__ import print_function, division
 
 import calendar

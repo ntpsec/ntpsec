@@ -1,4 +1,9 @@
 #! /bin/sh
+
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 # Hack to measure startup timing
 
 if test "$#" -ge 1

@@ -7,6 +7,13 @@ Source: https://gitlab.com/NTPsec/ntpsec
 # THIRDPARTY MODULES
 #
 
+# Library: waf::
+
+Files: waf
+Copyright: Thomas Nagy
+License: BSD-3-Clause
+Comment: https://waf.io/
+
 # Library: libaes_siv:
 
 Files: libaes_siv/*

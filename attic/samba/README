@@ -1,3 +1,6 @@
+Copyright the NTPsec project contributors
+SPDX-License-Identifier: CC-BY-4.0
+
 This is a set of hacks for use when debugging ntpd's MS-SNTP option.
 
 The default is off.

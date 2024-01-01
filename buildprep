@@ -1,4 +1,9 @@
 #! /bin/sh
+
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 #
 # buildprep - prepare your system for an NTPsec source build.
 #

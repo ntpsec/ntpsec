@@ -9,7 +9,11 @@ Defaults are start of tomorrow (UTC), and 28 days after the leap.
 "Start of tomorow" is as soon as possible for testing.
 
 """
+
+# Copyright the NTPsec project contributors
+#
 # SPDX-License-Identifier: BSD-2-Clause
+
 from __future__ import print_function, division
 
 import datetime

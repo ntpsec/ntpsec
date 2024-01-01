@@ -1,3 +1,7 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 """tlscheck - Helper for checking SSL library bits."""
 import ctypes
 import ctypes.util

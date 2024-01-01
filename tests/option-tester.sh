@@ -1,4 +1,9 @@
 #! /bin/sh
+
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 # keep this POSIX sh compatible. No bash-isms!
 # replace |& with 2>&1 |
 

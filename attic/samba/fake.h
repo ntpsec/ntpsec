@@ -1,3 +1,9 @@
+/*
+ * Copyright the NTPsec project contributors
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 #include <stdint.h>
 
 #define LEN_PKT_NOMAC 48
