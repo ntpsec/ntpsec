@@ -289,6 +289,8 @@ void dns_take_status(struct peer *a, DNS_Status b) {
 	return;
 }
 
+struct peer *peer_list = NULL;
+
 TEST_GROUP_RUNNER(nts_client) {
 	RUN_TEST_CASE(nts_client, nts_client_send_request_core);
 	RUN_TEST_CASE(nts_client, nts_client_process_response_core);

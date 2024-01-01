@@ -9,6 +9,8 @@
 
 #include "ntp.h"
 
+const unsigned char aes_key[16] = "0123456789abcdef";
+
 TEST_GROUP(authkeys);
 
 TEST_SETUP(authkeys) {
@@ -35,7 +37,7 @@ static void AddTrustedKey(keyid_t keyno) {
 	 * We need to add a type and key in addition to setting the
 	 * trust, because authlookup() requires type != AUTH_NONE.
 	 */
-	auth_setkey(keyno, AUTH_DIGEST, "MD5", NULL, 0);
+	auth_setkey(keyno, AUTH_CMAC, "AES-128-CBC", aes_key, sizeof(aes_key));
 	authtrust(keyno, true);
 }
 
@@ -65,7 +67,7 @@ TEST(authkeys, AddUntrustedKey) {
 	TEST_ASSERT_NULL(authlookup(KEYNO, true));
 	TEST_ASSERT_NULL(authlookup(KEYNO, false));
 
-	auth_setkey(KEYNO, AUTH_DIGEST, "MD5", NULL, 0);
+	auth_setkey(KEYNO, AUTH_CMAC, "AES-128-CBC", aes_key, sizeof(aes_key));
 
 	TEST_ASSERT_NULL(authlookup(KEYNO, true));
 	TEST_ASSERT_NOT_NULL(authlookup(KEYNO, false));
