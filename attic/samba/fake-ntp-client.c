@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-/*  Last modified on Sat Jan  6 00:11:51 PST 2001 by murray  */
+ * fake-ntp-client.c: generate NTP packets for ntpd+samba to sign.
+ * See README.
+ */
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -22,9 +24,9 @@
 
 #include "fake.h"
 
-static char* host = "time.example.com";// First arg
-static int packets = 1;		// Second arg
-static useconds_t delay = 1000;		// Third arg, microseconds after each packet
+static char* host = "time.example.com"; // First arg
+static int packets = 1;	                // Second arg
+static useconds_t delay = 1000;	        // Third arg, microseconds after each packet
 
 static int sock;
 static struct ntp_packet ntp_send, ntp_recv;

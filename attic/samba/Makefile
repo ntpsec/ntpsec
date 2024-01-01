@@ -5,7 +5,7 @@
 # Hi
 
 
-PROGS = fake-samba fake-ntp-server fake-ntp-client
+PROGS = fake-samba fake-ntp-server fake-ntp-client mssntp-blaster
 
 # Compiler flags
 CFLAGS = -O1 -Wall -Wstrict-prototypes -Wmissing-prototypes
@@ -24,5 +24,8 @@ fake-ntp-server: fake.h fake-ntp-server.c
 
 fake-ntp-client: fake.h fake-ntp-client.c
 	cc $(CFLAGS) -g -o fake-ntp-client fake-ntp-client.c
+
+mssntp-blaster: mssntp-blaster.c
+	cc $(CFLAGS) -g -o mssntp-blaster mssntp-blaster.c
 
 

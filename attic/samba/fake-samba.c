@@ -6,6 +6,7 @@
 
 /*
  * fake-samba.c -- fake samba server to exercise MS-SNTP option.
+ * See README
  */
 #include <errno.h>
 #include <string.h>

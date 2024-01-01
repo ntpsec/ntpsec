@@ -5,9 +5,10 @@
  */
 
 /* fake-ntp-server.c
- * fake NTP server to exersize fake-samba
+ * fake-ntp-server.c -- generate traffic for fake-samba
  * it won't work with real samba since we don't know any key-IDs
  * so all it is good for is debugging fake-samba
+ * See README
  */
 #include <errno.h>
 #include <string.h>

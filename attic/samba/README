@@ -39,6 +39,8 @@ Your ntp.conf will need something like this:
 
 Note that ntpd adds "/socket" to the name from the config file.
 
+mssntp-blaster can send lots of traffic.
+ntpq has an mssntpinfo command to print out ntpd's statistics.
 
 These are simple hacks.  Look at the code and fix it to do what you want.
 
