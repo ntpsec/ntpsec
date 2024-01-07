@@ -4,7 +4,14 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-/* Last modified on Sat Aug 28 14:30:11 PDT 1999 by murray */
+/* Hack to time reading clocks.
+ *
+ * Some of the kludgy code is to limit printout.
+ *
+ * On systems with a slow clock tick rate (Raspberry Pi)
+ * the histigrom gives enough info to compute the tick rate.
+ *
+ */
 
 #include <errno.h>
 #include <stdint.h>

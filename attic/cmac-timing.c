@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-/* Last modified on Sat Aug 28 14:30:11 PDT 1999 by murray */
-
 /* Hack to time various implementations of CMAC.
  *
  * Build with: cc cmac-timing.c -o cmac-timing -lcrypto

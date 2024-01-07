@@ -4,7 +4,15 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-/* Last modified on Sat Aug 28 14:30:11 PDT 1999 by murray */
+/* Hack to measure how long it takes to generate randomness.
+ *
+ * The good random generators in OpenSSL are very slow.
+ * Mostly, that's high overhead.
+ *
+ * If generating randomness gets high enough on the list, we
+ * can make a wrapper that gets a big block of randomness and
+ * returns smaller chunks as needed.
+ */
 
 #include <errno.h>
 #include <stdint.h>
