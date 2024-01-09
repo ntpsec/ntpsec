@@ -618,7 +618,7 @@ int main(int argc, char **argv) {
             mandatory=False,
         )
 
-    # mostly used by timetoa.h and timespecops.h
+    # mostly used by timespecops.h
     sizeofs = [
         ("time.h",      "time_t"),
         (None,          "long"),
