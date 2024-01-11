@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+/*
  * fake-ntp-client.c: generate NTP packets for ntpd+samba to sign.
  * See README.
  */
