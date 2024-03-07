@@ -439,7 +439,7 @@ local_clock(
 		record_loop_stats(fp_offset, loop_data.drift_comp,
             clkstate.clock_jitter, loop_data.clock_stability,
             clkstate.sys_poll);
-		return (0);
+		return (1);     /* very tiny slew */
 	}
 
 	int	rval;		/* return code */
