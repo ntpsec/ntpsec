@@ -44,9 +44,14 @@
  * oscillator. In extreme cases, this can cause clients to exceed the
  * 128-ms slew window and drop off the NTP subnet.
  *
- * Fudge Factors
+ * In lockclock mode, ntpd will not call ntp_adjtime() since that
+ * might trample on whatever some other program is trying to do.
+ * NB: setting loop_data.lockclock here is too late.
+ *    There is hack code in ntp_config.c to set it when parsing ntp.conf
  *
- * None currently supported.
+ * Fudge Factors
+ *   flag1 set to 1 enables lockclock mode
+ *
  */
 /*
  * Local interface definitions
@@ -109,6 +114,7 @@ local_start(
 	memcpy(&pp->refid, "LOCL", REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_LOCAL;
 	poll_time = current_time;
+	/* This is too late.  See comment way above. */
 	if (pp->sloppyclockflag & CLK_FLAG1)
 	    loop_data.lockclock = true;
 	return true;
@@ -159,9 +165,10 @@ local_poll(
 	 * the leap bits and quality indicators from the kernel.
 	 */
 	if (loop_data.lockclock) {
-		struct timex ntv;
+		struct ntptimeval ntv;
 		memset(&ntv,  0, sizeof ntv);
-		switch (ntp_adjtime(&ntv)) {
+		/* status info in return value */
+		switch (ntp_gettime(&ntv)) {
 		case TIME_OK:
 		    pp->leap = LEAP_NOWARNING;
 		    peer->stratum = pp->stratum;

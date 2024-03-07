@@ -746,8 +746,18 @@ create_peer_node(
 
 		case T_Flag1:
 			my_node->clock_stat.haveflags |= CLK_HAVEFLAG1;
-			if (option->value.i)
+			if (option->value.i) {
+#ifdef CLOCK_LOCAL
+				/* Ugly hack:
+				 * Need to set loop_data.lockclock early */
+				char * name = my_node->addr->address;
+				if (strstr(name, "127.127.1") == name) {
+				    msyslog(LOG_INFO, "INIT-server: Switching to lockclock mode");
+				    loop_data.lockclock = true;
+				}
+#endif
 				my_node->clock_stat.flags |= CLK_FLAG1;
+			  }
 			else
 				my_node->clock_stat.flags &= ~CLK_FLAG1;
 			break;
@@ -2406,8 +2416,18 @@ config_fudge(
 
 			case T_Flag1:
 				clock_stat.haveflags |= CLK_HAVEFLAG1;
-				if (curr_opt->value.i)
+				if (curr_opt->value.i) {
+#ifdef CLOCK_LOCAL
+					/* Ugly hack:
+					 * Need to set loop_data.lockclock early */
+					char * name = addr_node->address;
+					if (strstr(name, "127.127.1") == name) {
+					    msyslog(LOG_INFO, "INIT-fudge: Switching to lockclock mode");
+					    loop_data.lockclock = true;
+					}
+#endif
 					clock_stat.flags |= CLK_FLAG1;
+				}
 				else
 					clock_stat.flags &= ~CLK_FLAG1;
 				break;
