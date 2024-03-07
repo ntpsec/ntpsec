@@ -2330,7 +2330,7 @@ fast_xmit(
 		 * So far, nobody cares.
 		 * Note: There is significant NTPv1 traffic.  See #707
 		 */
-		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_vars.sys_leap,
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(xmt_leap,
 		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = max(rbufp->pkt.ppoll, rstrct.ntp_minpoll);
