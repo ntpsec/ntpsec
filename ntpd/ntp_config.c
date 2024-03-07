@@ -786,9 +786,6 @@ create_peer_node(
 				my_node->clock_stat.flags &= ~CLK_FLAG4;
 			break;
 
-		case T_Holdover:
-			my_node->clock_stat.flags |= CLK_HOLDOVER;
-			break;
 #endif /* REFCLOCK */
 
 		default:

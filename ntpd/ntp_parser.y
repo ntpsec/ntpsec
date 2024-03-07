@@ -95,7 +95,6 @@
 %token	<Integer>	T_Floor
 %token	<Integer>	T_Freq
 %token	<Integer>	T_Fudge
-%token	<Integer>	T_Holdover
 %token	<Integer>	T_Huffpuff
 %token	<Integer>	T_Iburst
 %token	<Integer>	T_Ignore
@@ -451,7 +450,6 @@ option_int_keyword
 	|	T_Subtype
 	|	T_Version
 	|	T_Baud
-	|	T_Holdover
 	;
 
 option_double

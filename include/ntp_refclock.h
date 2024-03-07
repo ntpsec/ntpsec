@@ -25,7 +25,7 @@
 #define	CLK_FLAG2	0x2
 #define	CLK_FLAG3	0x4
 #define	CLK_FLAG4	0x8
-#define CLK_HOLDOVER	0x10	/* no corresponding HAVE_ flag */
+// #define CLK_HOLDOVER	0x10	/* no corresponding HAVE_ flag */
 
 #define	CLK_HAVEFLAG1	0x10
 #define	CLK_HAVEFLAG2	0x20

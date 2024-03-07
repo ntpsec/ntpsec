@@ -37,7 +37,6 @@ struct key_tok ntp_keywords[] = {
 { "end",		T_End,			FOLLBY_TOKEN },
 { "filegen",		T_Filegen,		FOLLBY_TOKEN },
 { "fudge",		T_Fudge,		FOLLBY_STRING },
-{ "holdover",		T_Holdover,		FOLLBY_TOKEN },
 { "io",			T_Io,			FOLLBY_TOKEN },
 { "includefile",	T_Includefile,		FOLLBY_STRING },
 { "leapfile",		T_Leapfile,		FOLLBY_STRING },
