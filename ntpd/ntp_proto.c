@@ -2863,10 +2863,10 @@ init_proto(const bool verbose)
 	l_fp	dummy;
 
 	/*
-	 * Fill in the sys_* stuff.  Default is don't listen to
-	 * broadcasting, require authentication.
+	 * Fill in the sys_* stuff.
+	 * Default is require authentication.
 	 */
-	sys_vars.sys_leap = LEAP_NOTINSYNC;
+	set_sys_leap(LEAP_NOTINSYNC);
 	sys_vars.sys_stratum = STRATUM_UNSPEC;
 	memcpy(&sys_vars.sys_refid, "INIT", REFIDLEN);
 	sys_vars.sys_peer = NULL;

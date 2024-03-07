@@ -226,7 +226,7 @@ timer(void)
 	if (sys_orphan < STRATUM_UNSPEC && sys_vars.sys_peer == NULL &&
 	    current_time > orphwait) {
 		if (sys_vars.sys_leap == LEAP_NOTINSYNC) {
-			sys_vars.sys_leap = LEAP_NOWARNING;
+			set_sys_leap(LEAP_NOWARNING);
 		}
 		sys_vars.sys_stratum = (uint8_t)sys_orphan;
 		if (sys_vars.sys_stratum > 1)
@@ -249,11 +249,11 @@ timer(void)
 	if (sys_vars.sys_leap != LEAP_NOTINSYNC) {
 		if (leapsec >= LSPROX_ANNOUNCE && leapdif) {
 			if (leapdif > 0)
-				sys_vars.sys_leap = LEAP_ADDSECOND;
+				set_sys_leap(LEAP_ADDSECOND);
 			else
-				sys_vars.sys_leap = LEAP_DELSECOND;
+				set_sys_leap(LEAP_DELSECOND);
 		} else {
-			sys_vars.sys_leap = LEAP_NOWARNING;
+			set_sys_leap(LEAP_NOWARNING);
 		}
 	}
 
