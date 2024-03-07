@@ -1181,20 +1181,6 @@ loop_config(
 		loop_started = true;
 		break;
 
-	case LOOP_KERN_CLEAR:
-#if 0		/* XXX: needs more review, and how can we get here? */
-		if (!loop_data.lockclock && (clock_ctl.pll_control && clock_ctl.kern_enable)) {
-			memset((char *)&ntv, 0, sizeof(ntv));
-			ntv.modes = MOD_STATUS;
-			ntv.status = STA_UNSYNC;
-			ntp_adjtime_ns(&ntv);
-			sync_status("kernel time sync disabled",
-				pll_status,
-				ntv.status);
-		   }
-#endif
-		break;
-
 	/*
 	 * Tinker command variables for Ulrich Windl. Very dangerous.
 	 */

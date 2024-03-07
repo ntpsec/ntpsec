@@ -587,7 +587,7 @@ struct pkt {
  * Configuration items for the loop filter
  */
 #define	LOOP_DRIFTINIT		1	/* iniitialize frequency */
-#define	LOOP_KERN_CLEAR		2	/* set initial frequency offset */
+// #define LOOP_KERN_CLEAR	2	/* set initial frequency offset */
 #define LOOP_MAX		3	/* set both step offsets */
 #define LOOP_MAX_BACK		4	/* set bacward-step offset */
 #define LOOP_MAX_FWD		5	/* set forward-step offset */
