@@ -165,10 +165,25 @@ local_poll(
 	 * the leap bits and quality indicators from the kernel.
 	 */
 	if (loop_data.lockclock) {
+/* Both ntp_adjtime() and ntp_gettime() return the clock status
+ * which includes leap pending info.  See man ntp_adjtime
+ *
+ * Using ntp_gettime() allows putting a breakpoint on ntp_adjtime()
+ * to make sure we don't trash things if somebody else is taking
+ * care of the clock and we are just the server -- lockclock mode.
+ *
+ * Grump.  musl doesn't have ntp_gettime()
+ * This kludge seems simpler than hacking waf to not build this driver.
+ */
+#ifdef HAVE_NTP_GETTIME
 		struct ntptimeval ntv;
-		memset(&ntv,  0, sizeof ntv);
-		/* status info in return value */
+		ZERO(ntv);
 		switch (ntp_gettime(&ntv)) {
+#else
+		struct timex ntv;
+		ZERO(ntv);
+		switch (ntp_adjtime(&ntv)) {
+#endif
 		case TIME_OK:
 		    pp->leap = LEAP_NOWARNING;
 		    peer->stratum = pp->stratum;
