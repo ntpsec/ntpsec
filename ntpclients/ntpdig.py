@@ -59,24 +59,25 @@ except ImportError as e:
 # The one new option in this version is -p, borrowed from ntpdate.
 
 
-def read_append(s, packets, packet, sockaddr):
+def read_append(s, packets, server):
     d, a = s.recvfrom(1024)
-    if debug >= 2:
+    if debug >= 3:
+        log("receiving from %s" % server)
         ntp.packet.dump_hex_printable(d)
     if credentials:
         if not ntp.packet.Authenticator.have_mac(d):
             if debug:
-                log("no MAC on reply from %s" % packet.hostname)
+                log("no MAC on reply from %s" % server)
         if not credentials.verify_mac(d, packet_end=48, mac_begin=48):
             packet.trusted = False
             log("MAC verification on reply from %s failed"
-                % sockaddr[0])
+                % a[0])
         elif debug:
             log("MAC verification on reply from %s succeeded"
-                % sockaddr[0])
+                % a[0])
     pkt = ntp.packet.SyncPacket(d)
     pkt.hostname = server
-    pkt.resolved = sockaddr[0]
+    pkt.resolved = a[0]
     packets.append(pkt)
     return packets
 
@@ -89,17 +90,19 @@ def queryhost(server, concurrent, timeout=5, port=123):
                                       socket.IPPROTO_UDP)
     except socket.gaierror as e:
         log("lookup of %s failed, errno %d = %s" % (server, e.args[0], e.args[1]))
-        return []
+        return [] # not callable
     sockets = []
     packets = []
     request = ntp.packet.SyncPacket()
     request.transmit_timestamp = ntp.packet.SyncPacket.posix_to_ntp(
         time.time())
     packet = request.flatten()
-    needgap = (len(iptuples) > 1) and (gap > 0)
+    needgap = (len(iptuples) > 1) and (gap > 0) and (not concurrent)
     firstloop = True
     for (family, socktype, proto, canonname, sockaddr) in iptuples:
         if needgap and not firstloop:
+            if debug >= 2:
+                log("Sleeping %dms" % (gap * 1000))
             time.sleep(gap)
         if firstloop:
             firstloop = False
@@ -129,24 +132,31 @@ def queryhost(server, concurrent, timeout=5, port=123):
             if debug:
                 log("socket error on transmission: %s" % e)
             continue
-        if debug >= 2:
+        if debug >= 3:
             log("Sent to %s:" % (sockaddr[0],))
             ntp.packet.dump_hex_printable(packet)
         if concurrent:
             sockets.append(s)
         else:
-            r, _, _ = select.select([s], [], [], timeout)
-            if r:
-                read_append(s, packets, packet, sockaddr)
-        while sockets:
-            r, _, _ = select.select(sockets, [], [], timeout)
-            if not r:
-                return packets
-            for s in sockets:
-                read_append(s, packets, packet, sockaddr)
-                sockets.remove(s)
-    return packets
+            ready, _, _ = select.select([s], [], [], timeout)
+            if ready:
+                read_append(s, packets, server)
 
+    if concurrent:
+        def closure():
+            nonlocal sockets, server
+            packets = []
+            while sockets:
+                ready, _, _ = select.select(sockets, [], [], timeout)
+                if not ready:
+                    return packets
+                for s in ready:
+                    read_append(s, packets, server)
+                    sockets.remove(s)
+            return packets;
+        return closure
+    else:
+        return packets
 
 def clock_select(packets):
     "Select the pick-of-the-litter clock from the samples we've got."
@@ -196,7 +206,11 @@ def clock_select(packets):
         return filtered
 
     # Sort by stratum and other figures of merit
-    filtered.sort(key=lambda s: (s.stratum, s.synchd(), s.root_delay))
+    filtered.sort(key=lambda s: (int(s.stratum/4), abs(s.adjust()), s.synchd(), s.root_delay))
+
+    if debug:
+        for pk in filtered:
+           report(pk, json)
 
     # Return the best
     return filtered[:1]
@@ -259,6 +273,7 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -j no  json            Use JSON output format
    -l Str logfile         Log to specified logfile
                                  - prohibits the option 'syslog'
+   -M yes steplimit       Maximum offset for slew in milliseconds
    -p yes samples         Number of samples to take (default 1)
    -S no  step            Set (step) the time with clock_settime()
                                  - prohibits the option 'step'
@@ -303,7 +318,7 @@ if __name__ == '__main__':
         authkey = None
         concurrent_hosts = []
         debug = 0
-        gap = .05
+        gap = 2000
         json = False
         keyfile = None
         steplimit = 0       # Default is intentionally zero
@@ -343,7 +358,7 @@ if __name__ == '__main__':
                         raise SystemExit(1)
                 elif switch in ("-M", "--steplimit"):
                     errmsg = "Error: -M parameter '%s' not a number\n"
-                    steplimit = ntp.util.safeargcast(val, int, errmsg, usage)
+                    steplimit = ntp.util.safeargcast(val, float, errmsg, usage)
                     steplimit /= 1000.0
                 elif switch in ("-p", "--samples"):
                     errmsg = "Error: -p parameter '%s' not a number\n"
@@ -375,7 +390,7 @@ if __name__ == '__main__':
             sys.stderr.write(usage)
             raise SystemExit(1)
 
-        gap /= 1000  # convert to milliseconds
+        gap /= 1000  # convert from milliseconds
 
         credentials = keyid = keytype = passwd = None
         try:
@@ -396,7 +411,7 @@ if __name__ == '__main__':
             sys.stderr.write("-a option requires -k.\n")
             raise SystemExit(1)
 
-        if not arguments:
+        if not arguments and not concurrent_hosts:
             arguments = ["localhost"]
 
         if replay:
@@ -410,17 +425,28 @@ if __name__ == '__main__':
             firstloop = True
             for s in range(samples):
                 if needgap and not firstloop:
+                    if debug >= 2:
+                        log("Sleeping %dms before sample %d" % (gap * 1000, s))
                     time.sleep(gap)
                 if firstloop:
                     firstloop = False
+                results = []
                 for server in concurrent_hosts:
                     try:
-                        returned += queryhost(server=server,
+                        results.append(queryhost(server=server,
                                               concurrent=True,
-                                              timeout=timeout)
+                                              timeout=timeout))
                     except ntp.packet.SyncException as e:
                         log(str(e))
                         continue
+                for r in results:
+                    try:
+                        if callable(r):
+                            returned += r()
+                    except ntp.packet.SyncException as e:
+                        log(str(e))
+                        continue
+
                 for server in arguments:
                     try:
                         returned += queryhost(server=server,
@@ -436,7 +462,8 @@ if __name__ == '__main__':
             pkt = returned[0]
             if debug:
                 # print(repr(pkt))
-                def hexstamp(n):
+                def hexstamp(pn):
+                    n = ntp.packet.SyncPacket.posix_to_ntp(pn)
                     return "%08x.%08x" % (n >> 32, n & 0x00000000ffffffff)
                 print("org t1: %s rec t2: %s"
                       % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
@@ -459,7 +486,11 @@ if __name__ == '__main__':
             if adjusted:
                 rc = ntp.ntpc.step_systime(offset)
             elif slew:
-                rc = ntp.ntpc.adj_systime(offset)
+                if abs(offset) <= steplimit:
+                    rc = ntp.ntpc.adj_systime(offset)
+                else:
+                    log("Adjustment of %fms not done (step limit = %fms)" %
+                        (1000*offset, 1000*steplimit))
             if rc:
                 raise SystemExit(0)
             else:
