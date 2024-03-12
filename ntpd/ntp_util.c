@@ -184,6 +184,8 @@ write_pidfile(
 static void drift_write(char *driftfile, double drift) {
 	FILE *new;
 	char tempfile[PATH_MAX];
+	if (loop_data.lockclock)
+	    return;	/* Don't trash drift file -- we aren't maintaining it */
 	strlcpy(tempfile, driftfile, sizeof(tempfile));
 	strlcat(tempfile, "-tmp", sizeof(tempfile));
 	if ((new = fopen(tempfile, "w")) == NULL) {
@@ -209,7 +211,7 @@ write_stats(void) {
 	record_use_stats();
 	record_nts_stats();
 	record_ntske_stats();
-	if (stats_drift_file != 0) {
+	if (stats_drift_file != NULL) {
 
 		/*
 		 * When the frequency file is written, initialize the
