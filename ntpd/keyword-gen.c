@@ -206,6 +206,7 @@ struct key_tok ntp_keywords[] = {
 { "maxtls",		T_Maxtls,		FOLLBY_TOKEN },
 { "tlsciphersuites",	T_Tlsciphersuites,	FOLLBY_STRING },
 { "tlsecdhcurves",	T_Tlsecdhcurves,	FOLLBY_STRING },
+{ "tlscipherserverpreference",	T_Tlscipherserverpreference,	FOLLBY_TOKEN },
 };
 
 typedef struct big_scan_state_tag {

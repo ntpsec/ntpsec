@@ -1978,6 +1978,10 @@ config_nts(
 			ntsconfig.mintls = estrdup(nts->value.s);
 			break;
 
+		case T_Tlscipherserverpreference:
+			ntsconfig.tlscipherserverpreference = true;
+			break;
+
 		case T_Tlsciphersuites:
 			ntsconfig.tlsciphersuites = estrdup(nts->value.s);
 			break;

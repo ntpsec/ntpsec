@@ -212,6 +212,7 @@
 %token	<Integer>	T_Tinker
 %token	<Integer>	T_Tlsciphersuites
 %token	<Integer>	T_Tlsecdhcurves
+%token	<Integer>	T_Tlscipherserverpreference
 %token	<Integer>	T_Tos
 %token	<Integer>	T_True
 %token	<Integer>	T_Trustedkey
@@ -1130,6 +1131,8 @@ nts_option
 	|	T_Disable
 			{ $$ = create_attr_ival($1, 0); }
 	|	T_Enable
+			{ $$ = create_attr_ival($1, 1); }
+	|	T_Tlscipherserverpreference
 			{ $$ = create_attr_ival($1, 1); }
 	;
 

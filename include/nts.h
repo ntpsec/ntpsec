@@ -158,6 +158,7 @@ struct ntsconfig_t {
 	const char *KI;		/* file holding K/I for making cookies */
 	const char *ca;		/* root cert dir/file */
 	const char *aead;	/* AEAD algorithms on wire */
+	bool tlscipherserverpreference;  /* OpenSSL 3.0 default is client */
 };
 
 

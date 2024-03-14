@@ -42,7 +42,8 @@ struct ntsconfig_t ntsconfig = {
 	.key = NULL,
 	.KI = NULL,
 	.ca = NULL,
-	.aead = NULL
+	.aead = NULL,
+	.tlscipherserverpreference = false,
 };
 
 void nts_log_version(void);
@@ -187,12 +188,7 @@ bool nts_load_ciphers(SSL_CTX *ctx) {
 	if (NULL == ntsconfig.tlsciphersuites) {
 		return true;
 	}
-	/* The server picks the ciphers.
-	 *  Default is client preference.
-	 *  This switches to server preference if the admin
-	 *  specifies the valid ciphers.  See #797
-	 */
-	SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
+	/*  This used to set server-preference See #797 */
 	if (1 != SSL_CTX_set_ciphersuites(ctx, ntsconfig.tlsciphersuites)) {
 		msyslog(LOG_ERR, "NTS: troubles setting ciphersuites.");
 		return false;
@@ -220,6 +216,12 @@ bool nts_load_ecdhcurves(SSL_CTX *ctx) {
 		}
 		free(copy);
 	}
+	return true;
+}
+
+bool nts_set_cipher_order(SSL_CTX *ctx) {
+	if (ntsconfig.tlscipherserverpreference)
+		SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
 	return true;
 }
 
