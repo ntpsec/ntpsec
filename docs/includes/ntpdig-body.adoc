@@ -6,8 +6,8 @@
 [verse]
 ntpdig
     [--help | -?] [-4 | -6] [-a keynum] [-p samples]
-    [-c] [-d] [-D debug-level] [-g delay] [-j] [-k keyfile]
-    [-l logfile] [-M steplimit] [-S] [-s]
+    [-c] [-d] [-D debug-level] [-g delay] [-I ipaddr] [-j]
+    [-k keyfile] [-l logfile] [-M steplimit] [-S] [-s]
     [--wait] [--no-wait] [--version] [address...]+
 
 == DESCRIPTION
@@ -117,6 +117,12 @@ Separate the queries we send out by the specified number of
 milliseconds. A larger _delay_ reduces the query load on the time
 sources, at the cost of increasing the time to receive a valid
 response if the first source attempted is slow or unreachable.
+
++-I+, +--bindaddr+=_IP_Addr_::
+  Bind to Specified IP for requests
++
+Bind to the specified IP address for requests before the request is
+made. This can be useful for systems with multiple interfaces.
 
 +-j+::
   Output to stdout in JSON, suppressing syslog messages.

@@ -81,7 +81,7 @@ def read_append(s, packets, packet, sockaddr):
     return packets
 
 
-def queryhost(server, concurrent, timeout=5, port=123):
+def queryhost(server, concurrent, timeout=5, port=123, bindaddr=None):
     "Query IP addresses associated with a specified host."
     try:
         iptuples = socket.getaddrinfo(server, port,
@@ -90,6 +90,13 @@ def queryhost(server, concurrent, timeout=5, port=123):
     except socket.gaierror as e:
         log("lookup of %s failed, errno %d = %s" % (server, e.args[0], e.args[1]))
         return []
+    if len(bindaddr) > 0:
+        try:
+            bindsock = socket.getaddrinfo(bindaddr,None,af,
+                                          socket.SOCK_DGRAM,socket.IPPROTO_UDP)
+        except socket.gaierror as e:
+            log("lookup of %s failed, errno %d = %s" % (server, e.args[0], e.args[1]))
+            raise SystemExit(1)
     sockets = []
     packets = []
     request = ntp.packet.SyncPacket()
@@ -113,6 +120,14 @@ def queryhost(server, concurrent, timeout=5, port=123):
                     " %d, type %d could not be formed." %
                     (sockaddr[0], family, socktype))
             continue
+        if len(bindaddr) > 0:
+            try:
+                if debug:
+                    log("Binding to Source IP %s," % bindaddr)
+                s.bind(bindsock[0][4])
+            except OSError as e:
+                log("binding to %s failed, errno %d = %s" % (bindaddr, e.args[0], e.args[1]))
+                raise SystemExit(1)
         if keyid and keytype and passwd:
             if debug:
                 log("authenticating with %s key %d" % (keytype, keyid))
@@ -256,6 +271,7 @@ USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -d no  debug           Increase debug verbosity
    -D yes set-debug-level Set debug verbosity
    -g yes gap             Set gap between requests in milliseconds
+   -I IP  bindaddr        Set the source address to send request on
    -j no  json            Use JSON output format
    -l Str logfile         Log to specified logfile
                                  - prohibits the option 'syslog'
@@ -279,8 +295,9 @@ if __name__ == '__main__':
         try:
             (options, arguments) = getopt.getopt(
                 sys.argv[1:],
-                "46a:c:dD:g:hjk:l:M:o:p:r:Sst:wWV",
+                "46a:c:dD:g:hI:jk:l:M:o:p:r:Sst:wWV",
                 ["ipv4", "ipv6",
+                 "bindaddr=",
                  "authentication=",
                  "concurrent=",
                  "gap=", "help", "json",
@@ -300,6 +317,7 @@ if __name__ == '__main__':
         log = lambda m: logfp.write("ntpdig: %s\n" % m)
 
         af = socket.AF_UNSPEC
+        bindaddr = None
         authkey = None
         concurrent_hosts = []
         debug = 0
@@ -331,6 +349,8 @@ if __name__ == '__main__':
                 elif switch in ("-g", "--gap"):
                     errmsg = "Error: -g parameter '%s' not a number\n"
                     gap = ntp.util.safeargcast(val, int, errmsg, usage)
+                elif switch in ("-I", "--bindaddr"):
+                    bindaddr = val
                 elif switch in ("-j", "--json"):
                     json = True
                 elif switch in ("-k", "--keyfile"):
@@ -417,7 +437,8 @@ if __name__ == '__main__':
                     try:
                         returned += queryhost(server=server,
                                               concurrent=True,
-                                              timeout=timeout)
+                                              timeout=timeout,
+                                              bindaddr=bindaddr)
                     except ntp.packet.SyncException as e:
                         log(str(e))
                         continue
@@ -425,7 +446,8 @@ if __name__ == '__main__':
                     try:
                         returned += queryhost(server=server,
                                               concurrent=False,
-                                              timeout=timeout)
+                                              timeout=timeout,
+                                              bindaddr=bindaddr)
                     except ntp.packet.SyncException as e:
                         log(str(e))
                         continue
