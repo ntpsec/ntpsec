@@ -23,6 +23,7 @@
 # -B      -s      -q      slew time adjustments
 # -d      -d      -d      debugging mode (implies -q)
 # -e N.N          -q      authdelay
+# -I IP   -I IP           Bind to specific Source IP for requests
 # -k file -k file -k file key file
 # -o N            -q      NTP Protocol version
 # -p N            -q      How many samples to take
@@ -51,6 +52,7 @@ print_help() {
 	echo "	-a N	Specify key number for authentication"
 	echo "	-b	Force time step"
 	echo "	-B	Force time slew"
+	echo "	-I IP	Bind to specific Source IP for requests"
 	echo "	-k FILE	Specify key file"
 	echo "	-q	Query only"
 	echo "	-s	Log to syslog"
@@ -64,7 +66,7 @@ TIMEOUT="-t 1"
 setclock=yes
 echo=no
 log=no
-while getopts 46a:bBde:hk:no:p:qst:uv opt
+while getopts 46a:bBde:hI:k:no:p:qst:uv opt
 do
     case $opt in
 	4) PASSTHROUGH="$PASSTHROUGH -4";;
@@ -75,6 +77,7 @@ do
 	d) PASSTHROUGH="$PASSTHROUGH -d";;
 	e) echo "ntpdate: -e is no longer supported." >&2;;
 	h) print_help; exit;;
+	I) PASSTHROUGH="$PASSTHROUGH -I $OPTARG";;
 	k) PASSTHROUGH="$PASSTHROUGH -k $OPTARG";;
 	n) echo=yes;;			# Echo generated command, don't execute
 	o) echo "ntpdate: -o is no longer supported." >&2;;
