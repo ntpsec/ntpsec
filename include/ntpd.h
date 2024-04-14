@@ -122,6 +122,7 @@ extern  uint64_t handler_pkts_count(void);
 extern  uint64_t handler_refrds_count(void);
 #endif
 extern  uptime_t io_timereset;
+extern  uint16_t extra_port;
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);

@@ -80,6 +80,7 @@
 %token	<Integer>	T_Drop
 %token	<Integer>	T_Dscp
 %token	<Integer>	T_Expire
+%token	<Integer>	T_Extra
 %token	<Integer>	T_Ellipsis	/* "..." not "ellipsis" */
 %token	<Integer>	T_Enable
 %token	<Integer>	T_End
@@ -177,6 +178,7 @@
 %token	<Integer>	T_Pid
 %token	<Integer>	T_Pidfile
 %token	<Integer>	T_Pool
+%token	<Integer>	T_Port
 %token	<Integer>	T_Ppspath
 %token	<Integer>	T_Prefer
 %token	<Integer>	T_Protostats
@@ -244,6 +246,9 @@
 %type	<Integer>	limit_option_keyword
 %type	<Attr_val_fifo>	limit_option_list
 %type	<Integer>	enable_disable
+%type	<Integer>	extra_option_keyword
+%type	<Attr_val>	extra_option
+%type	<Attr_val_fifo>	extra_option_list
 %type	<Attr_val>	filegen_option
 %type	<Attr_val_fifo>	filegen_option_list
 %type	<Integer>	filegen_type
@@ -298,6 +303,7 @@
 %type	<Attr_val>	tinker_option
 %type	<Attr_val_fifo>	tinker_option_list
 %type	<Integer>	nts_string_option_keyword
+%type	<Integer>	nts_number_option_keyword
 %type	<Attr_val>	nts_option
 %type	<Attr_val_fifo>	nts_option_list
 %type	<Attr_val>	tos_option
@@ -350,6 +356,7 @@ command :	/* NULL STATEMENT */
 	|	refclock_command
 	|	rlimit_command
 	|	system_option_command
+	|	extra_command
 	|	tinker_command
 	|	nts_command
 	|	miscellaneous_command
@@ -1062,6 +1069,38 @@ system_option_local_flag_keyword
 	:	T_Stats
 	;
 
+/* Extra Commands
+ * ---------------
+ */
+
+extra_command
+	:	T_Extra extra_option_list
+			{ CONCAT_G_FIFOS(cfgt.extra, $2); }
+	;
+
+extra_option_list
+	:	extra_option_list extra_option
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	extra_option
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
+	;
+
+extra_option
+	:	extra_option_keyword number
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+extra_option_keyword
+	:	T_Port
+	;
+
+
 /* Tinker Commands
  * ---------------
  */
@@ -1128,12 +1167,16 @@ nts_option_list
 nts_option
 	:	nts_string_option_keyword T_String
 			{ $$ = create_attr_sval($1, $2); }
+	|	nts_number_option_keyword number
+			{ $$ = create_attr_ival($1, $2); }
 	|	T_Disable
 			{ $$ = create_attr_ival($1, 0); }
 	|	T_Enable
 			{ $$ = create_attr_ival($1, 1); }
 	|	T_Tlscipherserverpreference
 			{ $$ = create_attr_ival($1, 1); }
+	|	T_Pool number
+			{ $$ = create_attr_ival($1, $2); }
 	;
 
 	;
@@ -1144,11 +1187,15 @@ nts_string_option_keyword
 	|	T_Cert
 	|	T_Cookie
 	|	T_Key
-	|	T_Tlsciphersuites
-	|	T_Tlsecdhcurves
 	|	T_Maxtls
 	|	T_Mintls
+	|	T_Tlsciphersuites
+	|	T_Tlsecdhcurves
+	;
 
+nts_number_option_keyword
+	:	T_Port
+	;
 
 /* Miscellaneous Commands
  * ----------------------

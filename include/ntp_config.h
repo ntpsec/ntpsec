@@ -198,6 +198,7 @@ struct config_tree_tag {
 
 	addr_opts_fifo *fudge;
 	attr_val_fifo *	rlimit;
+	attr_val_fifo *	extra;
 	attr_val_fifo *	tinker;
 	attr_val_fifo *	nts;
 	attr_val_fifo *	enable_opts;

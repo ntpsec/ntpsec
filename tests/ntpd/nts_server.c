@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Hack to keep linker happy */
+uint16_t extra_port = 0;
+
 TEST_GROUP(nts_server);
 
 TEST_SETUP(nts_server) {}

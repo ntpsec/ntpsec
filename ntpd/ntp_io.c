@@ -44,6 +44,8 @@
 int qos = IPTOS_DSCP_EF;	/* QoS RFC 3246 */
 
 
+uint16_t extra_port = 0;	/* 0 => not used */
+
 /*
  * NIC rule entry
  */
@@ -213,7 +215,7 @@ static void init_async_notifications (void);
 
 static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 				 int);
-static	int	create_sockets	(unsigned short);
+static	int	create_sockets	(void);
 static	void	set_reuseaddr	(int);
 
 typedef struct remaddr remaddr_t;
@@ -376,7 +378,7 @@ io_open_sockets(void)
 	/*
 	 * Create the sockets
 	 */
-	create_sockets(NTP_PORT);
+	create_sockets();
 
 	init_async_notifications();
 
@@ -1256,6 +1258,8 @@ interface_update(
 		return;
 
 	new_interface_found = update_interfaces(NTP_PORT, receiver, data);
+	if (extra_port)
+		new_interface_found |= update_interfaces(extra_port, receiver, data);
 
 	if (!new_interface_found)
 		return;
@@ -1685,18 +1689,18 @@ update_interfaces(
  *			socket for when we don't know where to send
  */
 static int
-create_sockets(
-	unsigned short port
-	)
+create_sockets(void)
 {
 	maxactivefd = 0;
 	FD_ZERO(&activefds);
 
-	DPRINT(2, ("create_sockets(%d)\n", port));
+	DPRINT(2, ("create_sockets(%d %u)\n", NTP_PORT, extra_port));
 
-	create_wildcards(port);
+	create_wildcards(NTP_PORT);
+	if (extra_port) create_wildcards(extra_port);
 
-	update_interfaces(port, NULL, NULL);
+	update_interfaces(NTP_PORT, NULL, NULL);
+	if (extra_port) update_interfaces(extra_port, NULL, NULL);
 
 	/*
 	 * Now that we have opened all the sockets, turn off the reuse
@@ -1795,8 +1799,6 @@ set_excladdruse(
 
 /*
  * set_reuseaddr() - set/clear REUSEADDR on all sockets
- *			NB possible hole - should we be doing this on broadcast
- *			fd's also?
  */
 static void
 set_reuseaddr(

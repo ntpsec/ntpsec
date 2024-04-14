@@ -180,6 +180,7 @@ static void free_config_reset_counters(config_tree *);
 static void free_config_rlimit(config_tree *);
 static void free_config_setvar(config_tree *);
 static void free_config_system_opts(config_tree *);
+static void free_config_extra(config_tree *);
 static void free_config_tinker(config_tree *);
 static void free_config_nts(config_tree *);
 static void free_config_tos(config_tree *);
@@ -238,6 +239,7 @@ static void config_logconfig(config_tree *);
 static void config_monitor(config_tree *);
 static void config_rlimit(config_tree *);
 static void config_system_opts(config_tree *);
+static void config_extra(config_tree *);
 static void config_tinker(config_tree *);
 static void config_nts(config_tree *);
 static void config_tos(config_tree *);
@@ -328,6 +330,7 @@ free_config_tree(
 	free_config_tos(ptree);
 	free_config_monitor(ptree);
 	free_config_access(ptree);
+	free_config_extra(ptree);
 	free_config_tinker(ptree);
 	free_config_nts(ptree);
 	free_config_rlimit(ptree);
@@ -1859,6 +1862,28 @@ config_rlimit(
 
 
 static void
+config_extra(
+	config_tree *ptree
+	)
+{
+	attr_val *	extra;
+
+	extra = HEAD_PFIFO(ptree->extra);
+	for (; extra != NULL; extra = extra->link) {
+		switch (extra->attr) {
+
+		default:
+			INSIST(0);
+			break;
+
+		case T_Port:
+			extra_port = extra->value.i;
+			break;
+		}
+	}
+}
+
+static void
 config_tinker(
 	config_tree *ptree
 	)
@@ -1978,6 +2003,10 @@ config_nts(
 			ntsconfig.mintls = estrdup(nts->value.s);
 			break;
 
+		case T_Port:
+			extra_port = nts->value.i;
+			break;
+
 		case T_Tlscipherserverpreference:
 			ntsconfig.tlscipherserverpreference = true;
 			break;
@@ -2002,6 +2031,15 @@ free_config_rlimit(
 {
 	FREE_ATTR_VAL_FIFO(ptree->rlimit);
 }
+
+static void
+free_config_extra(
+	config_tree *ptree
+	)
+{
+	FREE_ATTR_VAL_FIFO(ptree->extra);
+}
+
 
 static void
 free_config_tinker(
@@ -3015,6 +3053,7 @@ config_ntpd(
 	config_auth(ptree);
 	config_tos(ptree);
 	config_access(ptree);	/* before config_peers */
+	config_extra(ptree);
 	config_tinker(ptree);
 	config_nts(ptree);
 	config_rlimit(ptree);

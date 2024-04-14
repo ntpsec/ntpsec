@@ -605,6 +605,10 @@ bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
 	/* 4.1.5 AEAD Algorithm List */
 	ke_append_record_uint16(buf, nts_algorithm_negotiation, aead);
 
+	if (extra_port)
+	        ke_append_record_uint16(buf, nts_port_negotiation, extra_port);
+
+
 	for (int i=0; i<NTS_MAX_COOKIES; i++) {
 		uint8_t cookie[NTS_MAX_COOKIELEN];
 		int cookielen = nts_make_cookie(cookie, aead, c2s, s2c, keylen);

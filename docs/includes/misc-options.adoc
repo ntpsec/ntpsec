@@ -214,6 +214,13 @@ the log file.
   peer variables and the +clock_var_list+ holds the names of the reference
   clock variables.
 
+[[extra]]+extra+ [+port+ _portnum ]::
+  This is a catchall for various adjustments.  There is only one slow now.
++port+ _portnum_;; (same as +nts port+ _portnum_)
+  This opens another port which will be used for NTP+NTS traffic.
+  This might help bypass ISP blocking on port 123.  Be sure that
+  your firewall doesn't block traffic arriving on this new port.
+
 [[tinker]]+tinker+ [+allan+ _allan_ | +dispersion+ _dispersion_ | +freq+ _freq_ | +huffpuff+ _huffpuff_ | +panic+ _panic_ | +step+ _step_ | +stepback+ _stepback_ | +stepfwd+ _stepfwd_ | +stepout+ _stepout_]::
   This command can be used to alter several system variables in very
   exceptional circumstances. It should occur in the configuration file
