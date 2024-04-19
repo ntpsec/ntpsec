@@ -156,10 +156,6 @@ __SIZE_TYPE__		# In ntpd/ntp_parser.tab.c
 EREALLOC_.*
 INTPTR_MAX		# Unity
 __TMS470__		# Unity
-HAVE_STRUCT_TIMEX_MODES
-HAVE_STRUCT_TIMEX_TIME_TICK
-HAVE_STRUCT_NTPTIMEVAL_TAI
-HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
 DoSLOW			# Cruft from the attic
 
 # seccomp-related symbols that may not be available on all systems

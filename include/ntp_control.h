@@ -100,7 +100,7 @@ struct ntp_control {
 #define	CTL_PST_AUTHENABLE	0x40
 #define	CTL_PST_AUTHENTIC	0x20
 #define	CTL_PST_REACH		0x10
-#define	CTL_PST_BCAST		0x08
+#define	CTL_PST_BCASTx		0x08
 
 #define	CTL_PST_SEL_REJECT	0	/*   reject */
 #define	CTL_PST_SEL_SANE	1	/* x falsetick */
@@ -164,7 +164,7 @@ struct ntp_control {
  * IFSTATS_FIELDS is the number of fields ntpd supplies for each ifstats
  * row.  Similarly RESLIST_FIELDS for reslist.
  */
-#define	IFSTATS_FIELDS	12
+#define	IFSTATS_FIELDS	9
 #define	RESLIST_FIELDS	4
 
 /*

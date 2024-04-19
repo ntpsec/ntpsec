@@ -278,7 +278,7 @@ clear_all(void)
 	 * previously saved time values are untrusted.
 	 */
 	for (p = peer_list; p != NULL; p = p->p_link)
-		if (!(MDF_TXONLY_MASK & p->cast_flags))
+		if (!(MDF_POOL & p->cast_flags))
 		    peer_clear(p, "STEP", false);
 
 	DPRINT(1, ("clear_all: at %u\n", current_time));
@@ -492,10 +492,6 @@ peer_refresh_interface(
 			   niface->fd, niface->name,
 			   niface->flags, niface->ifindex,
 			   socktoa(&niface->sin)));
-		if (niface->flags & INT_BROADCAST)
-			DPRINT(4, (", bcast=%s",
-				   socktoa(&niface->bcast)));
-		DPRINT(4, (", mask=%s\n", socktoa(&niface->mask)));
 	} else {
 		DPRINT(4, ("<NONE>\n"));
 	}
@@ -554,11 +550,13 @@ newpeer(
 	unsigned int	hash;
 	const char *	name;	/* for error messages */
 
+
 	if (NULL != hostname) {
 		name = hostname;
 	} else {
 		name = socktoa(srcadr);
 	}
+msyslog(LOG_INFO, "DEBUG: newpeer: %s => %s", name, sockporttoa(srcadr));
 
 	/*
 	 * First search from the beginning for an association with given

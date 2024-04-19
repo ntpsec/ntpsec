@@ -271,7 +271,7 @@ timer(void)
 	if (interface_interval && interface_timer <= current_time) {
 		timer_interfacetimeout(current_time + interface_interval);
 		DPRINT(2, ("timer: interface update\n"));
-		interface_update(NULL, NULL);
+		interface_update();
 	}
 
 	/*

@@ -723,7 +723,7 @@ class PeerStatusWord:
         else:
             self.conf = "no"
         # Reach
-        if statval & ntp.control.CTL_PST_BCAST:
+        if statval & ntp.control.CTL_PST_BCASTx:
             self.reach = "none"
         elif statval & ntp.control.CTL_PST_REACH:
             self.reach = "yes"

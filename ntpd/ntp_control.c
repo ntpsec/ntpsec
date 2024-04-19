@@ -968,8 +968,6 @@ ctlpeerstatus(
 		status |= CTL_PST_AUTHENTIC;
 	if (p->reach)
 		status |= CTL_PST_REACH;
-	if (MDF_TXONLY_MASK & p->cast_flags)
-		status |= CTL_PST_BCAST;
 
 	return CTL_PEER_STATUS(status, p->num_events, p->last_event);
 }
@@ -3226,7 +3224,6 @@ send_ifstats_entry(
 	)
 {
 	const char addr_fmtu[] =	"addr.%u";
-	const char bcast_fmt[] =	"bcast.%u";
 	const char en_fmt[] =		"en.%u";	/* enabled */
 	const char name_fmt[] =		"name.%u";
 	const char flags_fmt[] =	"flags.%u";
@@ -3236,7 +3233,7 @@ send_ifstats_entry(
 	const char pc_fmt[] =		"pc.%u";	/* peer count */
 	const char up_fmt[] =		"up.%u";	/* uptime */
 	char	tag[32];
-	uint8_t	sent[IFSTATS_FIELDS]; /* 12 tag=value pairs */
+	uint8_t	sent[IFSTATS_FIELDS]; /* 9 tag=value pairs */
 	int	noisebits;
 	uint32_t noise;
 	unsigned int	which = 0;
@@ -3271,50 +3268,41 @@ send_ifstats_entry(
 			break;
 
 		case 1:
-			snprintf(tag, sizeof(tag), bcast_fmt, ifnum);
-			if (INT_BCASTOPEN & la->flags)
-				pch = sockporttoa(&la->bcast);
-			else
-				pch = "";
-			ctl_putunqstr(tag, pch, strlen(pch));
-			break;
-
-		case 2:
 			snprintf(tag, sizeof(tag), en_fmt, ifnum);
 			ctl_putint(tag, !la->ignore_packets);
 			break;
 
-		case 3:
+		case 2:
 			snprintf(tag, sizeof(tag), name_fmt, ifnum);
 			ctl_putstr(tag, la->name, strlen(la->name));
 			break;
 
-		case 4:
+		case 3:
 			snprintf(tag, sizeof(tag), flags_fmt, ifnum);
 			ctl_puthex(tag, la->flags);
 			break;
 
-		case 5:
+		case 4:
 			snprintf(tag, sizeof(tag), rx_fmt, ifnum);
 			ctl_putint(tag, la->received);
 			break;
 
-		case 6:
+		case 5:
 			snprintf(tag, sizeof(tag), tx_fmt, ifnum);
 			ctl_putint(tag, la->sent);
 			break;
 
-		case 7:
+		case 6:
 			snprintf(tag, sizeof(tag), txerr_fmt, ifnum);
 			ctl_putint(tag, la->notsent);
 			break;
 
-		case 8:
+		case 7:
 			snprintf(tag, sizeof(tag), pc_fmt, ifnum);
 			ctl_putuint(tag, la->peercnt);
 			break;
 
-		case 9:
+		case 8:
 			snprintf(tag, sizeof(tag), up_fmt, ifnum);
 			ctl_putuint(tag, current_time - la->starttime);
 			break;

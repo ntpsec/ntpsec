@@ -143,8 +143,6 @@ typedef struct netendpt {
 	SOCKET		fd;		/* socket descriptor */
 	uint32_t	ifnum;		/* endpt instance count */
 	sockaddr_u	sin;		/* unicast address */
-	sockaddr_u	mask;		/* subnet mask */
-	sockaddr_u	bcast;		/* broadcast address */
 	char		name[32];	/* name of interface */
 	unsigned short	family;		/* AF_INET/AF_INET6 */
 	unsigned short	phase;		/* phase in update cycle */
@@ -167,9 +165,9 @@ typedef struct netendpt {
 #define INT_UP		0x001	/* Interface is up */
 /* #define	INT_PPP		0x002	** Point-to-point interface */
 #define	INT_LOOPBACK	0x004U	/* the loopback interface */
-#define	INT_BROADCAST	0x008	/* can broadcast out this interface */
+/* #define	INT_BROADCAST	0x008	** can broadcast out this interface */
 /* #define INT_MULTICAST	0x010	** can multicast out this interface */
-#define	INT_BCASTOPEN	0x020U	/* broadcast receive socket is open */
+/* #define	INT_BCASTOPEN	0x020U	** broadcast receive socket is open */
 /* #define INT_MCASTOPEN	0x040	** multicasting enabled */
 #define INT_WILDCARD	0x080	/* wildcard interface - usually skipped */
 /* #define INT_MCASTIF	0x100	** bound directly to MCAST address */
@@ -587,7 +585,7 @@ struct pkt {
  * Configuration items for the loop filter
  */
 #define	LOOP_DRIFTINIT		1	/* iniitialize frequency */
-// #define LOOP_KERN_CLEAR	2	/* set initial frequency offset */
+/* #define LOOP_KERN_CLEAR	2	** set initial frequency offset */
 #define LOOP_MAX		3	/* set both step offsets */
 #define LOOP_MAX_BACK		4	/* set bacward-step offset */
 #define LOOP_MAX_FWD		5	/* set forward-step offset */
@@ -638,16 +636,7 @@ struct mon_data {
 /* #define MDF_ACAST	0x10	** manycast client solicitor (not used) */
 /* #define MDF_BCLNT	0x20	** eph. broadcast/multicast client */
 /* #define MDF_UCLNT	0x40	** preemptible manycast or pool client */
-/*
- * In the context of struct peer in ntpd, one cast_flags bit
- * represent configured associations which never receive packets, and
- * whose reach is always 0: MDF_BCAST  (Historical)
- */
-#define MDF_TXONLY_MASK	(MDF_POOL)
-/*
- * manycastclient-like solicitor association cast_flags bits
- */
-#define MDF_SOLICIT_MASK	MDF_POOL
+
 /*
  * Values used with mon_enabled to indicate reason for enabling monitoring
  */

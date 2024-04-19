@@ -112,7 +112,7 @@ uptime_t io_timereset;	/* time counters were reset */
 struct ntp_io_data io_data;
 static int ninterfaces;			/* total # of interfaces */
 
-extern  SOCKET  open_socket     (sockaddr_u *, bool, endpt *);
+static  SOCKET  open_socket     (sockaddr_u *, bool, endpt *);
 
 static bool
 netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
@@ -131,7 +131,6 @@ typedef struct isc_sockaddr {
 
 static void
 netaddr_fromsockaddr(isc_netaddr_t *netaddr, const isc_sockaddr_t *source);
-
 
 #ifdef REFCLOCK
 /*
@@ -154,8 +153,7 @@ static int maxactivefd;
 static unsigned short		sys_interphase = 0;
 
 static void	add_interface(endpt *);
-static bool	update_interfaces(unsigned short, interface_receiver_t,
-				  void *);
+static bool	update_interfaces(unsigned short);
 static void	remove_interface(endpt *);
 static endpt *	create_interface(unsigned short, endpt *);
 
@@ -398,10 +396,6 @@ interface_dump(const endpt *itf)
 	printf("fd = %d\n", itf->fd);
 	printf("sin = %s,\n", socktoa(&itf->sin));
 	sockaddr_dump(&itf->sin);
-	printf("bcast = %s,\n", socktoa(&itf->bcast));
-	sockaddr_dump(&itf->bcast);
-	printf("mask = %s,\n", socktoa(&itf->mask));
-	sockaddr_dump(&itf->mask);
 	printf("name = %s\n", itf->name);
 	printf("flags = 0x%08x\n", itf->flags);
 	printf("addr_refid = %08x\n", itf->addr_refid);
@@ -449,11 +443,6 @@ print_interface(const endpt *iface, const char *pfx, const char *sfx)
 	       iface->flags,
 	       iface->ifindex,
 	       socktoa(&iface->sin));
-	if (AF_INET == iface->family) {
-		if (iface->flags & INT_BROADCAST)
-			printf(", bcast=%s", socktoa(&iface->bcast));
-		printf(", mask=%s", socktoa(&iface->mask));
-	}
 	printf(", %s:%s",
 	       (iface->ignore_packets)
 		   ? "Disabled"
@@ -866,26 +855,23 @@ create_wildcards(
 		strlcpy(wildif->name, "v6wildcard", sizeof(wildif->name));
 		memcpy(&wildif->sin, &wildaddr, sizeof(wildif->sin));
 		wildif->family = AF_INET6;
-		AF(&wildif->mask) = AF_INET6;
-		SET_ONESMASK(&wildif->mask);
 
 		wildif->flags = INT_UP | INT_WILDCARD;
 		wildif->ignore_packets = (ACTION_DROP == action);
 
 		wildif->fd = open_socket(&wildif->sin, true, wildif);
 
-		if (wildif->fd != INVALID_SOCKET) {
-			wildipv6 = wildif;
-			io_data.any6_interface = wildif;
-			add_addr_to_list(&wildif->sin, wildif);
-			add_interface(wildif);
-			log_listen_address(wildif);
-		} else {
+		if (wildif->fd == INVALID_SOCKET) {
 			msyslog(LOG_ERR,
 				"IO: unable to bind to wildcard address %s - another process may be running: %s; EXITING",
 				socktoa(&wildif->sin), strerror(errno));
 			exit(1);
 		}
+		wildipv6 = wildif;
+		io_data.any6_interface = wildif;
+		add_addr_to_list(&wildif->sin, wildif);
+		add_interface(wildif);
+		log_listen_address(wildif);
 		DPRINT_INTERFACE(2, (wildif, "created ", "\n"));
 	}
 
@@ -909,26 +895,22 @@ create_wildcards(
 		strlcpy(wildif->name, "v4wildcard", sizeof(wildif->name));
 		memcpy(&wildif->sin, &wildaddr, sizeof(wildif->sin));
 		wildif->family = AF_INET;
-		AF(&wildif->mask) = AF_INET;
-		SET_ONESMASK(&wildif->mask);
 
-		wildif->flags = INT_BROADCAST | INT_UP | INT_WILDCARD;
+		wildif->flags = INT_UP | INT_WILDCARD;
 		wildif->ignore_packets = (ACTION_DROP == action);
 		wildif->fd = open_socket(&wildif->sin, true, wildif);
 
-		if (wildif->fd != INVALID_SOCKET) {
-			wildipv4 = wildif;
-			io_data.any_interface = wildif;
-
-			add_addr_to_list(&wildif->sin, wildif);
-			add_interface(wildif);
-			log_listen_address(wildif);
-		} else {
+		if (wildif->fd == INVALID_SOCKET) {
 			msyslog(LOG_ERR,
 				"IO: unable to bind to wildcard address %s - another process may be running: %s; EXITING",
 				socktoa(&wildif->sin), strerror(errno));
 			exit(1);
 		}
+		wildipv4 = wildif;
+		io_data.any_interface = wildif;
+		add_addr_to_list(&wildif->sin, wildif);
+		add_interface(wildif);
+		log_listen_address(wildif);
 		DPRINT_INTERFACE(2, (wildif, "created ", "\n"));
 	}
 }
@@ -1162,26 +1144,13 @@ convert_isc_if(
 	itf->ifindex = isc_if->ifindex;
 	itf->family = (unsigned short)isc_if->af;
 	AF(&itf->sin) = (sa_family_t)itf->family;
-	AF(&itf->mask) = (sa_family_t)itf->family;
-	AF(&itf->bcast) = (sa_family_t)itf->family;
 	SET_PORT(&itf->sin, port);
-	SET_PORT(&itf->mask, port);
-	SET_PORT(&itf->bcast, port);
 
 	if (IS_IPV4(&itf->sin)) {
 		NSRCADR(&itf->sin) = isc_if->address.type.in.s_addr;
-		NSRCADR(&itf->mask) = isc_if->netmask.type.in.s_addr;
-
-		if (isc_if->flags & INTERFACE_F_BROADCAST) {
-			itf->flags |= INT_BROADCAST;
-			NSRCADR(&itf->bcast) =
-			    isc_if->broadcast.type.in.s_addr;
-		}
 	}
 	else if (IS_IPV6(&itf->sin)) {
 		SET_ADDR6N(&itf->sin, isc_if->address.type.in6);
-		SET_ADDR6N(&itf->mask, isc_if->netmask.type.in6);
-
 		SET_SCOPE(&itf->sin, isc_if->address.zone);
 	}
 
@@ -1248,18 +1217,16 @@ refresh_interface(
  * interface_update - externally callable update function
  */
 void
-interface_update(
-	interface_receiver_t	receiver,
-	void *			data)
+interface_update(void)
 {
 	bool new_interface_found;
 
 	if (io_data.disable_dynamic_updates)
 		return;
 
-	new_interface_found = update_interfaces(NTP_PORT, receiver, data);
+	new_interface_found = update_interfaces(NTP_PORT);
 	if (extra_port)
-		new_interface_found |= update_interfaces(extra_port, receiver, data);
+		new_interface_found |= update_interfaces(extra_port);
 
 	if (!new_interface_found)
 		return;
@@ -1292,7 +1259,7 @@ is_wildcard_addr(
  */
 static void
 set_wildcard_reuse(
-	unsigned short	family,
+	unsigned short  family,
 	int	on
 	)
 {
@@ -1413,14 +1380,9 @@ is_valid(
  */
 
 static bool
-update_interfaces(
-	unsigned short		port,
-	interface_receiver_t	receiver,
-	void *			data
-	)
+update_interfaces(uint16_t port)
 {
 	isc_mem_t *		mctx = (void *)-1;
-	interface_info_t	ifi;
 	isc_interfaceiter_t *	iter;
 	bool			result;
 	isc_interface_t		isc_if;
@@ -1513,17 +1475,26 @@ update_interfaces(
 		 * address - some dhcp clients produce that in the
 		 * wild
 		 */
-		if (is_wildcard_addr(&enumep.sin))
+		if (is_wildcard_addr(&enumep.sin)) {
+			DPRINT(4, ("skipping interface %s (%s) - WILD\n",
+				   enumep.name, socktoa(&enumep.sin)));
 			continue;
+			}
 
-		if (is_anycast(&enumep.sin, isc_if.name))
+		if (is_anycast(&enumep.sin, isc_if.name)) {
+			DPRINT(4, ("skipping interface %s (%s) - ANYCAST\n",
+				   enumep.name, socktoa(&enumep.sin)));
 			continue;
+			}
 
 		/*
 		 * skip any address that is an invalid state to be used
 		 */
-		if (!is_valid(&enumep.sin, isc_if.name))
+		if (!is_valid(&enumep.sin, isc_if.name)) {
+			DPRINT(4, ("skipping interface %s (%s) - ~VALID\n",
+				   enumep.name, socktoa(&enumep.sin)));
 			continue;
+			}
 
 		/*
 		 * map to local *address* in order to map all duplicate
@@ -1593,10 +1564,6 @@ update_interfaces(
 
 			ep->phase = sys_interphase;
 
-			ifi.action = IFS_EXISTS;
-			ifi.ep = ep;
-			if (receiver != NULL)
-				(*receiver)(data, &ifi);
 		} else {
 			/*
 			 * This is new or refreshing failed - add to
@@ -1609,10 +1576,6 @@ update_interfaces(
 			ep = create_interface(port, &enumep);
 
 			if (ep != NULL) {
-				ifi.action = IFS_CREATED;
-				ifi.ep = ep;
-				if (receiver != NULL)
-					(*receiver)(data, &ifi);
 
 				new_interface_found = true;
 				DPRINT_INTERFACE(3,
@@ -1652,11 +1615,6 @@ update_interfaces(
 		DPRINT_INTERFACE(3, (ep, "updating ",
 				     "GONE - deleting\n"));
 		remove_interface(ep);
-
-		ifi.action = IFS_DELETED;
-		ifi.ep = ep;
-		if (receiver != NULL)
-			(*receiver)(data, &ifi);
 
 		/* disconnect peers from deleted endpt. */
 		while (ep->peers != NULL)
@@ -1699,8 +1657,8 @@ create_sockets(void)
 	create_wildcards(NTP_PORT);
 	if (extra_port) create_wildcards(extra_port);
 
-	update_interfaces(NTP_PORT, NULL, NULL);
-	if (extra_port) update_interfaces(extra_port, NULL, NULL);
+	update_interfaces(NTP_PORT);
+	if (extra_port) update_interfaces(extra_port);
 
 	/*
 	 * Now that we have opened all the sockets, turn off the reuse
@@ -2427,7 +2385,6 @@ select_peerinterface(
 #ifndef REFCLOCK
 	UNUSED_ARG(peer);
 #endif
-
 
 	wild = ANY_INTERFACE_CHOOSE(srcadr);
 

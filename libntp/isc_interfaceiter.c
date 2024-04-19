@@ -382,14 +382,6 @@ internal_current(isc_interfaceiter_t *iter) {
         if ((ifa->ifa_flags & IFF_LOOPBACK) != 0)
                 iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-        if ((ifa->ifa_flags & IFF_BROADCAST) != 0)
-                iter->current.flags |= INTERFACE_F_BROADCAST;
-
-#ifdef IFF_MULTICAST
-        if ((ifa->ifa_flags & IFF_MULTICAST) != 0)
-                iter->current.flags |= INTERFACE_F_MULTICAST;
-#endif
-
         iter->current.af = (unsigned int)family;
 
         get_addr((unsigned int)family, &iter->current.address,
@@ -403,12 +395,6 @@ internal_current(isc_interfaceiter_t *iter) {
             (iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0)
                 get_addr((unsigned int)family, &iter->current.dstaddress,
                          ifa->ifa_dstaddr,
-                         ifa->ifa_name);
-
-        if (ifa->ifa_broadaddr != NULL &&
-            (iter->current.flags & INTERFACE_F_BROADCAST) != 0)
-                get_addr((unsigned int)family, &iter->current.broadcast,
-                         ifa->ifa_broadaddr,
                          ifa->ifa_name);
 
         iter->current.ifindex = if_nametoindex(iter->current.name);
@@ -616,14 +602,6 @@ internal_current(isc_interfaceiter_t *iter) {
                 if ((ifam->ifam_flags & IFF_LOOPBACK) != 0)
                         iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-                if ((ifam->ifam_flags & IFF_BROADCAST) != 0)
-                        iter->current.flags |= INTERFACE_F_BROADCAST;
-
-#ifdef IFF_MULTICAST
-                if ((ifam->ifam_flags & IFF_MULTICAST) != 0)
-                        iter->current.flags |= INTERFACE_F_MULTICAST;
-#endif
-
                 /*
                  * This is not an interface address.
                  * Force another iteration.
@@ -686,11 +664,6 @@ internal_current(isc_interfaceiter_t *iter) {
                 if (dst_sa != NULL &&
                     (iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0)
                         get_addr(family, &iter->current.dstaddress, dst_sa,
-                                 iter->current.name);
-
-                if (dst_sa != NULL &&
-                    (iter->current.flags & INTERFACE_F_BROADCAST) != 0)
-                        get_addr(family, &iter->current.broadcast, dst_sa,
                                  iter->current.name);
 
                 return (ISC_R_SUCCESS);
@@ -1156,14 +1129,6 @@ internal_current4(isc_interfaceiter_t *iter) {
         if ((ifreq.ifr_flags & IFF_LOOPBACK) != 0)
                 iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-        if ((ifreq.ifr_flags & IFF_BROADCAST) != 0)
-                iter->current.flags |= INTERFACE_F_BROADCAST;
-
-#ifdef IFF_MULTICAST
-        if ((ifreq.ifr_flags & IFF_MULTICAST) != 0)
-                iter->current.flags |= INTERFACE_F_MULTICAST;
-#endif
-
         if (family == AF_INET) {
                 goto inet;
 	}
@@ -1222,23 +1187,6 @@ internal_current4(isc_interfaceiter_t *iter) {
                          (struct sockaddr *)&ifreq.ifr_dstaddr, ifreq.ifr_name);
         }
 #endif
-
-        if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-                /*
-                 * Ignore the HP/UX warning about "integer overflow during
-                 * conversion.  It comes from its own macro definition,
-                 * and is really hard to shut up.
-                 */
-                if (isc_ioctl(iter->socket, SIOCGIFBRDADDR, (char *)&ifreq)
-                    < 0) {
-                        ntp_strerror_r(errno, strbuf, sizeof(strbuf));
-                        msyslog(LOG_ERR, "%s: getting broadcast address: %s",
-                                         ifreq.ifr_name, strbuf);
-                        return (ISC_R_IGNORE);
-                }
-                get_addr(family, &iter->current.broadcast,
-                         (struct sockaddr *)&ifreq.ifr_broadaddr, ifreq.ifr_name);
-        }
 
         /*
          * Get the network mask.
@@ -1348,15 +1296,7 @@ internal_current6(isc_interfaceiter_t *iter) {
         if ((lifreq.lifr_flags & IFF_LOOPBACK) != 0)
                 iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-        if ((lifreq.lifr_flags & IFF_BROADCAST) != 0) {
-                iter->current.flags |= INTERFACE_F_BROADCAST;
         }
-
-#ifdef IFF_MULTICAST
-        if ((lifreq.lifr_flags & IFF_MULTICAST) != 0) {
-                iter->current.flags |= INTERFACE_F_MULTICAST;
-        }
-#endif
 
 #ifdef IFF_POINTOPOINT
         /*
@@ -1380,26 +1320,6 @@ internal_current6(isc_interfaceiter_t *iter) {
                          lifreq.lifr_name);
         }
 #endif
-
-#ifdef SIOCGLIFBRDADDR
-        if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-                /*
-                 * Ignore the HP/UX warning about "integer overflow during
-                 * conversion.  It comes from its own macro definition,
-                 * and is really hard to shut up.
-                 */
-                if (isc_ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
-                    < 0) {
-                        ntp_strerror_r(errno, strbuf, sizeof(strbuf));
-                        msyslog(LOG_ERR, "%s: getting broadcast address: %s",
-                                         lifreq.lifr_name, strbuf);
-                        return (ISC_R_IGNORE);
-                }
-                get_addr(family, &iter->current.broadcast,
-                         (struct sockaddr *)&lifreq.lifr_broadaddr,
-                         lifreq.lifr_name);
-        }
-#endif  /* SIOCGLIFBRDADDR */
 
         /*
          * Get the network mask.  Netmask already zeroed.

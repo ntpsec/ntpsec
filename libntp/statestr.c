@@ -155,7 +155,7 @@ static const struct codestring peer_st_bits[] = {
 	{ CTL_PST_AUTHENABLE,		"authenb" },
 	{ CTL_PST_AUTHENTIC,		"auth" },
 	{ CTL_PST_REACH,		"reach" },
-	{ CTL_PST_BCAST,		"bcast" },
+	{ CTL_PST_BCASTx,		"bcast" },
 	/* not used with getcode(), no terminating entry needed */
 };
 

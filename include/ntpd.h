@@ -96,14 +96,12 @@ typedef struct interface_info {
 	uint8_t	action;
 } interface_info_t;
 
-typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
-
 extern  bool listen_to_virtual_ips;
 extern	endpt *	getinterface		(sockaddr_u *, uint32_t);
 extern	endpt *	select_peerinterface	(struct peer *, sockaddr_u *,
 					 endpt *);
 extern	endpt *	findinterface		(sockaddr_u *);
-extern	void	interface_update	(interface_receiver_t, void *);
+extern	void	interface_update	(void);
 extern  void    io_handler              (void);
 extern	void	init_io		(void);
 extern	void	io_open_sockets	(void);
