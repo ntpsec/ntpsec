@@ -572,7 +572,7 @@ msyslog(LOG_INFO, "DEBUG: newpeer: %s => %s", name, sockporttoa(srcadr));
 			if (peer->dstadr == dstadr)
 				break;
 
-			if (dstadr == ANY_INTERFACE_CHOOSE(srcadr) &&
+			if (dstadr == wildcard_interface(srcadr) &&
 			    peer->dstadr == findinterface(srcadr))
 				break;
 

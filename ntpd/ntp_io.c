@@ -868,7 +868,11 @@ create_wildcards(
 			exit(1);
 		}
 		wildipv6 = wildif;
-		io_data.any6_interface = wildif;
+		if (NTP_PORT == port) {
+			io_data.wild6_interface_NTP = wildif;
+		} else {
+			io_data.wild6_interface_extra = wildif;
+		}
 		add_addr_to_list(&wildif->sin, wildif);
 		add_interface(wildif);
 		log_listen_address(wildif);
@@ -907,7 +911,11 @@ create_wildcards(
 			exit(1);
 		}
 		wildipv4 = wildif;
-		io_data.any_interface = wildif;
+		if (NTP_PORT == port) {
+			io_data.wild_interface_NTP = wildif;
+		} else {
+			io_data.wild_interface_extra = wildif;
+		}
 		add_addr_to_list(&wildif->sin, wildif);
 		add_interface(wildif);
 		log_listen_address(wildif);
@@ -1259,14 +1267,14 @@ is_wildcard_addr(
  */
 static void
 set_wildcard_reuse(
-	unsigned short  family,
+	sockaddr_u *psau,
 	int	on
 	)
 {
 	endpt *any;
 	SOCKET fd = INVALID_SOCKET;
 
-	any = ANY_INTERFACE_BYFAM(family);
+	any = wildcard_interface(psau);
 	if (any != NULL)
 		fd = any->fd;
 
@@ -1906,7 +1914,7 @@ open_socket(
 	 * to the port and SO_REUSEADDR is not set
 	 */
 	if (!is_wildcard_addr(addr))
-		set_wildcard_reuse(AF(addr), 1);
+		set_wildcard_reuse(addr, 1);
 #endif
 
 	/*
@@ -1916,7 +1924,7 @@ open_socket(
 
 #ifdef NEED_REUSEADDR_FOR_IFADDRBIND
 	if (!is_wildcard_addr(addr))
-		set_wildcard_reuse(AF(addr), 0);
+		set_wildcard_reuse(addr, 0);
 #endif
 
 	if (errval < 0) {
@@ -2386,7 +2394,7 @@ select_peerinterface(
 	UNUSED_ARG(peer);
 #endif
 
-	wild = ANY_INTERFACE_CHOOSE(srcadr);
+	wild = wildcard_interface(srcadr);
 
 	/*
 	 * Initialize the peer structure and dance the interface jig.
@@ -2421,6 +2429,38 @@ select_peerinterface(
 	return ep;
 }
 
+/* FIXME SO_REUSEADDR, Hal 2024-Apr-19
+ * I'm not sure the NULLs below are correct.  It seems to work.
+ * I'm not sure it is worth the effort to turn off SO_REUSEADDR
+ */
+
+/*
+ * find wildcard interface
+ */
+endpt * wildcard_interface(const sockaddr_u *addr) {
+  unsigned short family = AF(addr);
+  uint16_t port = SRCPORT(addr);
+  if (AF_INET == family) {
+    if (NTP_PORT == port) {
+      return io_data.wild_interface_NTP;
+    } else if (extra_port == port) {
+      return io_data.wild_interface_extra;
+    } else {
+      return NULL;
+    }
+  } else if (AF_INET6 == family) {
+    if (NTP_PORT == port) {
+      return io_data.wild6_interface_NTP;
+    } else if (extra_port == port) {
+      return io_data.wild6_interface_extra;
+    } else {
+      return NULL;
+    }
+  } else {
+    return NULL;
+  }
+}
+
 
 /*
  * findinterface - find local interface corresponding to address
@@ -2438,7 +2478,7 @@ findinterface(
 		DPRINT(4, ("Found no interface for address %s - returning wildcard\n",
 			   socktoa(addr)));
 
-		iface = ANY_INTERFACE_CHOOSE(addr);
+		iface = wildcard_interface(addr);
 	} else
 		DPRINT(4, ("Found interface #%u %s for address %s\n",
 			   iface->ifnum, iface->name, socktoa(addr)));

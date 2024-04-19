@@ -96,11 +96,13 @@ typedef struct interface_info {
 	uint8_t	action;
 } interface_info_t;
 
+
 extern  bool listen_to_virtual_ips;
 extern	endpt *	getinterface		(sockaddr_u *, uint32_t);
 extern	endpt *	select_peerinterface	(struct peer *, sockaddr_u *,
 					 endpt *);
 extern	endpt *	findinterface		(sockaddr_u *);
+extern  endpt * wildcard_interface(const sockaddr_u *);
 extern	void	interface_update	(void);
 extern  void    io_handler              (void);
 extern	void	init_io		(void);
@@ -298,8 +300,10 @@ extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests 
 struct ntp_io_data {
   bool disable_dynamic_updates; /* if true, scan interfaces once only */
   unsigned int sys_ifnum;       /* next .ifnum to assign */
-  endpt *any_interface;         /* IPv4 wildcard */
-  endpt *any6_interface;        /* IPv6 wildcard */
+  endpt *wild_interface_NTP;    /* IPv4 wildcard, port 123 */
+  endpt *wild_interface_extra;  /* IPv4 wildcard, extra_port */
+  endpt *wild6_interface_NTP;   /* IPv6 wildcard, port 123*/
+  endpt *wild6_interface_extra; /* IPv6 wildcard, extra_port */
   endpt *loopback_interface;    /* IPv4 loopback for refclocks */
   endpt *ep_list;               /* complete endpt list */
 };

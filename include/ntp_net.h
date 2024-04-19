@@ -178,16 +178,6 @@ typedef union {				/* On Linux, these come from: */
 #define SOCK_UNSPEC_S(psau)					\
 	(SOCK_UNSPEC(psau) && !SCOPE(psau))
 
-/* choose a default net interface (endpt) for v4 or v6 */
-#define ANY_INTERFACE_BYFAM(family) \
-	((AF_INET == family) \
-	     ? io_data.any_interface \
-	     : io_data.any6_interface)
-
-/* choose a default interface for addresses' protocol (addr family) */
-#define ANY_INTERFACE_CHOOSE(psau)				\
-	ANY_INTERFACE_BYFAM(AF(psau))
-
 
 /*
  * Macro for checking for invalid addresses.  This is really, really
