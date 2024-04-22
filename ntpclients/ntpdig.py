@@ -90,7 +90,7 @@ def queryhost(server, concurrent, timeout=5, port=123, bindaddr=None):
     except socket.gaierror as e:
         log("lookup of %s failed, errno %d = %s" % (server, e.args[0], e.args[1]))
         return []
-    if len(bindaddr) > 0:
+    if bindaddr:
         try:
             bindsock = socket.getaddrinfo(bindaddr,None,af,
                                           socket.SOCK_DGRAM,socket.IPPROTO_UDP)
@@ -120,7 +120,7 @@ def queryhost(server, concurrent, timeout=5, port=123, bindaddr=None):
                     " %d, type %d could not be formed." %
                     (sockaddr[0], family, socktype))
             continue
-        if len(bindaddr) > 0:
+        if bindaddr:
             try:
                 if debug:
                     log("Binding to Source IP %s," % bindaddr)
