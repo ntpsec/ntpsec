@@ -37,11 +37,12 @@ the https://www.ietf.org/timezones/data/leap-seconds.list[IETF]
 and installed using the
 link:miscopt.html#leapfile[leapfile] command. The file includes a list
 of historic leap seconds and the NTP time of insertion. It is parsed by
-the +ntpd+ daemon at startup and the latest leap time saved for future
-reference. Each time the clock is set, the current time is compared with
-the last leap time. If the current time is later than the last leap
-time, nothing further is done. If earlier, the leap timer is initialized
-with the time in seconds until the leap time and counts down from there.
+the +ntpd+ daemon at startup, and checked for updates once per hour
+thereafter, and the latest leap time saved for future reference. Each
+time the clock is set, the current time is compared with the last leap
+time. If the current time is later than the last leap time, nothing
+further is done. If earlier, the leap timer is initialized with the time
+in seconds until the leap time and counts down from there.
 When the leap timer is less than one month, a pending leap condition
 exists until the end of the current month. If the leapseconds file is
 present, the leap bits for reference clocks and downstratum servers are

@@ -81,7 +81,7 @@ and that file system links, symbolic or otherwise, should be avoided.
 +
 The _leapfile_ is scanned when +ntpd+ processes the +leapfile+
 directive or when +ntpd+ detects that _leapfile_ has changed. +ntpd+
-checks once a day to see if the _leapfile_ has changed.
+checks once an hour to see if the _leapfile_ has changed.
 
 +leapsmearinterval+ 'interval'::
   This *experimental* option is only available if ntpd was built
