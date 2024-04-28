@@ -69,9 +69,9 @@
     Do not accept MRU-list requests.  These can be expensive to
     service and may generate a high volume of response traffic.
   +nopeer+;;
-    Deny packets which would result in mobilizing a new association;
-    this includes symmetric active packets when a
-    configured association does not exist.  That used to happen
+    Ignored. Was previously used to deny packets which would result in
+    mobilizing a new association; this included symmetric active packets
+    when a configured association did not exist. That used to happen
     when the remote client used the +peer+ command in its config file.
     We don't support that mode.
     It used to include _pool_ servers, but they now poke a hole in any

@@ -417,8 +417,9 @@ parse_packet(
    The 'peer' argument may be NULL to indicate that we have no current
    association.
 
-   In contrast to NTP classic, We don't enforce 'restrict nopeer'
-   against pool-mode responses.
+   In contrast to NTP classic, we ignore 'restrict nopeer'. It used
+   to apply to symmetric mode associations, which we don't support, and
+   to pool-mode associations, which now poke holes into any restrictions.
 
 */
 static bool

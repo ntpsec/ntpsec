@@ -132,7 +132,7 @@ init_restrict(void)
 	 * sorted by descending address followed by descending mask:
 	 *
 	 *   address	  mask
-	 * 192.168.0.0	255.255.255.0	kod limited noquery nopeer
+	 * 192.168.0.0	255.255.255.0	kod limited noquery
 	 * 192.168.0.0	255.255.0.0	kod limited
 	 * 0.0.0.0	0.0.0.0		kod limited noquery
 	 *

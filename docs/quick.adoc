@@ -106,7 +106,7 @@ need to exist, and be writable by the user under which +ntpd+ runs.
 Your security/access section will almost always look a lot like this:
 
 ------------------------------------------------------------------
-restrict default kod limited nomodify nopeer noquery
+restrict default kod limited nomodify noquery
 restrict 127.0.0.1
 restrict ::1
 ------------------------------------------------------------------

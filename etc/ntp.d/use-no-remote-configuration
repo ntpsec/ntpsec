@@ -1,8 +1,8 @@
 # Exchange time with everybody, but don't allow configuration.
 # This is the right security setup for 99% of deployments.
 
-restrict default kod limited nomodify nopeer noquery
-restrict -6 default kod limited nomodify nopeer noquery
+restrict default kod limited nomodify noquery
+restrict -6 default kod limited nomodify noquery
 
 # Local users may interrogate the NTP server more closely.
 restrict 127.0.0.1
