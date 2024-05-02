@@ -50,9 +50,11 @@ The options are as follows:
   testing. Format is as for +mintls+.
 
 +port+ _portnum_:: (same as +extra port+ _portnum_)
-  This opens another port which will be used for NTP+NTS traffic.
+  This opens another port.  NTS-KE will tell clients to use this port.
   This might help bypass ISP blocking on port 123.  Be sure that
   your firewall doesn't block traffic arriving on this new port.
+  It will also be used as the return port when sending requests.
+  Again, that bypasses blocking on port 123.
 
 // https://crypto.stackexchange.com/questions/8964/sending-tls-messages-with-out-encryption-using-openssl-code
 

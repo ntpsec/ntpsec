@@ -12,6 +12,16 @@ on user-visible changes.
 
 ## Repository Head
 
+* ntpd can now listen on a second port.  Add either "nts port xxxx"
+  or "extra port xxxx" in your config file. If either is specified,
+  the NTS-KE server will tell the client to use that port.  This might
+  help get around some of the blocking or filtering that ISPs are
+  doing to port 123.  (Don't forget to let UDP traffic for that port
+  through your firewall.) I've been testing with port 8123.
+
+* Client requests will also be sent from that port.  Again, that will
+  bypass some port 123 filtering.
+
 ## 2023-12-30: 1.2.3
 
 * Change mode6 alignment to four, which may

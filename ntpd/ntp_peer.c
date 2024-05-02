@@ -556,7 +556,6 @@ newpeer(
 	} else {
 		name = socktoa(srcadr);
 	}
-msyslog(LOG_INFO, "DEBUG: newpeer: %s => %s", name, sockporttoa(srcadr));
 
 	/*
 	 * First search from the beginning for an association with given

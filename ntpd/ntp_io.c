@@ -116,7 +116,7 @@ static  SOCKET  open_socket     (sockaddr_u *, bool, endpt *);
 
 static bool
 netaddr_eqprefix(const isc_netaddr_t *, const isc_netaddr_t *,
-                    unsigned int) __attribute__((pure));
+		unsigned int) __attribute__((pure));
 
 /* Socket Address */
 typedef struct isc_sockaddr {
@@ -126,7 +126,7 @@ typedef struct isc_sockaddr {
 		struct sockaddr_in6	sin6;
 	}				type;
 	unsigned int			length;		/* XXXRTH beginning? */
-        struct { struct isc_sockaddr *prev, *next; } link;
+	struct { struct isc_sockaddr *prev, *next; } link;
 } isc_sockaddr_t;
 
 static void
@@ -147,13 +147,12 @@ static	struct refclockio *refio;
 static fd_set activefds;
 static int maxactivefd;
 
-/*
- * bit alternating value to detect verified interfaces during an update cycle
- */
-static unsigned short		sys_interphase = 0;
-
 static void	add_interface(endpt *);
-static bool	update_interfaces(unsigned short);
+static bool	update_interfaces(void);
+static void	update_interfaces_phase0(void);
+static bool	update_interfaces_phase1(uint16_t port);
+static void	update_interfaces_phase2(void);
+static void	update_interfaces_phase3(void);
 static void	remove_interface(endpt *);
 static endpt *	create_interface(unsigned short, endpt *);
 
@@ -225,9 +224,6 @@ struct remaddr {
 };
 
 static remaddr_t * remoteaddr_list;
-
-static endpt *	wildipv4;
-static endpt *	wildipv6;
 
 static const int accept_wildcard_if_for_winnt = false;
 
@@ -404,7 +400,6 @@ interface_dump(const endpt *itf)
 	printf("notsent = %ld\n", itf->notsent);
 	printf("ifindex = %u\n", itf->ifindex);
 	printf("peercnt = %u\n", itf->peercnt);
-	printf("phase = %u\n", itf->phase);
 }
 
 /*
@@ -435,19 +430,18 @@ static void
 print_interface(const endpt *iface, const char *pfx, const char *sfx)
 {
 	printf("%sinterface #%u: fd=%d, name=%s, "
-               "flags=0x%x, ifindex=%u, sin=%s",
-	       pfx,
-	       iface->ifnum,
-	       iface->fd,
-	       iface->name,
-	       iface->flags,
-	       iface->ifindex,
-	       socktoa(&iface->sin));
+		"flags=0x%x, ifindex=%u, sin=%s",
+		pfx,
+		iface->ifnum,
+		iface->fd,
+		iface->name,
+		iface->flags,
+		iface->ifindex,
+		sockporttoa(&iface->sin));
 	printf(", %s:%s",
-	       (iface->ignore_packets)
-		   ? "Disabled"
-		   : "Enabled",
-	       sfx);
+		(iface->ignore_packets)
+		? "Disabled" : "Enabled",
+		sfx);
 	if (debug > 4)	/* in-depth debugging only */ /* SPECIAL DEBUG */
 		interface_dump(iface);
 }
@@ -697,7 +691,6 @@ init_interface(
 {
 	ZERO(*ep);
 	ep->fd = INVALID_SOCKET;
-	ep->phase = sys_interphase;
 }
 
 
@@ -774,8 +767,8 @@ remove_interface(
 	if (ep->fd != INVALID_SOCKET) {
 		msyslog(LOG_INFO,
 			"IO: Deleting interface #%u %s, %s#%d, interface stats: "
-                        "received=%ld, sent=%ld, dropped=%ld, "
-                        "active_time=%lu secs",
+			"received=%ld, sent=%ld, dropped=%ld, "
+			"active_time=%lu secs",
 			ep->ifnum,
 			ep->name,
 			socktoa(&ep->sin),
@@ -867,7 +860,6 @@ create_wildcards(
 				socktoa(&wildif->sin), strerror(errno));
 			exit(1);
 		}
-		wildipv6 = wildif;
 		if (NTP_PORT == port) {
 			io_data.wild6_interface_NTP = wildif;
 		} else {
@@ -910,7 +902,6 @@ create_wildcards(
 				socktoa(&wildif->sin), strerror(errno));
 			exit(1);
 		}
-		wildipv4 = wildif;
 		if (NTP_PORT == port) {
 			io_data.wild_interface_NTP = wildif;
 		} else {
@@ -997,12 +988,12 @@ static nic_rule_action
 interface_action(
 	char *		if_name,
 	sockaddr_u *	if_addr,
-	uint32_t		if_flags
+	uint32_t	if_flags
 	)
 {
 	nic_rule *	rule;
-	int		isloopback;
-	int		iswildcard;
+	bool		isloopback;
+	bool		iswildcard;
 
 	DPRINT(4, ("interface_action: interface %s ",
 		   (if_name != NULL) ? if_name : "wildcard"));
@@ -1017,8 +1008,8 @@ interface_action(
 	for (rule = nic_rule_list; rule != NULL; rule = rule->next) {
 
 		switch (rule->match_type) {
-                default:
-                        /* huh? */
+		default:
+			/* huh? */
 		case MATCH_ALL:
 			/* loopback and wildcard excluded from "all" */
 			if (isloopback || iswildcard)
@@ -1232,9 +1223,7 @@ interface_update(void)
 	if (io_data.disable_dynamic_updates)
 		return;
 
-	new_interface_found = update_interfaces(NTP_PORT);
-	if (extra_port)
-		new_interface_found |= update_interfaces(extra_port);
+	new_interface_found = update_interfaces();
 
 	if (!new_interface_found)
 		return;
@@ -1287,7 +1276,7 @@ set_wildcard_reuse(
 
 		DPRINT(4, ("set SO_REUSEADDR to %s on %s\n",
 			   on ? "on" : "off",
-			   socktoa(&any->sin)));
+			   sockporttoa(&any->sin)));
 	}
 }
 #endif /* NEED_REUSEADDR_FOR_IFADDRBIND */
@@ -1300,7 +1289,7 @@ check_flags6(
 	uint32_t flags6
 	)
 {
-#if defined(SIOCGIFAFLAG_IN6)
+#if defined(SIOCGIFAFLAG_IN6)  /* Apple */
 	struct in6_ifreq ifr6;
 	int fd;
 
@@ -1362,13 +1351,15 @@ is_valid(
 	return check_flags6(psau, name, flags6) ? false : true;
 }
 
-/*
+/* This used to be one giant routine before adding extra_port
+ * The old code couldn't handle a second port.
+ *
  * update_interface strategy
  *
  * toggle configuration phase
  *
  * Phase 1:
- * forall currently existing interfaces
+ * forall currently existing interfaces (and all their addresses)
  *   if address is known:
  *	drop socket - rebind again
  *
@@ -1388,7 +1379,30 @@ is_valid(
  */
 
 static bool
-update_interfaces(uint16_t port)
+update_interfaces(void)
+{
+  bool new_interface = false;
+  update_interfaces_phase0();
+  if (extra_port)
+    /* do first so our requests are sent from extra_port
+     * see select_peerinterface() */
+    new_interface |= update_interfaces_phase1(extra_port);
+  new_interface |= update_interfaces_phase1(NTP_PORT);
+  update_interfaces_phase2();
+  update_interfaces_phase3();
+  return new_interface;
+}
+
+void update_interfaces_phase0(void)
+{
+  endpt *ep;
+  for (ep = io_data.ep_list; ep != NULL; ep = ep->elink) {
+    ep->inuse = false;
+  }
+}
+
+static bool
+update_interfaces_phase1(uint16_t port)
 {
 	isc_mem_t *		mctx = (void *)-1;
 	isc_interfaceiter_t *	iter;
@@ -1398,9 +1412,8 @@ update_interfaces(uint16_t port)
 	unsigned int		family;
 	endpt			enumep;
 	endpt *			ep;
-	endpt *			next_ep;
 
-	DPRINT(3, ("update_interfaces(%d)\n", port));
+	DPRINT(3, ("\n\nupdate_interfaces(%d)\n", port));
 
 	/*
 	 * phase one - scan interfaces
@@ -1414,12 +1427,6 @@ update_interfaces(uint16_t port)
 
 	if (!result)
 		return false;
-
-	/*
-	 * Toggle system interface scan phase to find untouched
-	 * interfaces to be deleted.
-	 */
-	sys_interphase ^= 0x1;
 
 	for (result = isc_interfaceiter_first_bool(iter);
 	     result;
@@ -1452,21 +1459,21 @@ update_interfaces(uint16_t port)
 		switch (interface_action(enumep.name, &enumep.sin,
 					 enumep.flags)) {
 
-                default:
+		default:
 		case ACTION_IGNORE:
 			DPRINT(4, ("ignoring interface %s (%s) - by nic rules\n",
-				   enumep.name, socktoa(&enumep.sin)));
+				   enumep.name, sockporttoa(&enumep.sin)));
 			continue;
 
 		case ACTION_LISTEN:
 			DPRINT(4, ("listen interface %s (%s) - by nic rules\n",
-				   enumep.name, socktoa(&enumep.sin)));
+				   enumep.name, sockporttoa(&enumep.sin)));
 			enumep.ignore_packets = false;
 			break;
 
 		case ACTION_DROP:
 			DPRINT(4, ("drop on interface %s (%s) - by nic rules\n",
-				   enumep.name, socktoa(&enumep.sin)));
+				   enumep.name, sockporttoa(&enumep.sin)));
 			enumep.ignore_packets = true;
 			break;
 		}
@@ -1474,7 +1481,7 @@ update_interfaces(uint16_t port)
 		 /* interfaces must be UP to be usable */
 		if (!(enumep.flags & INT_UP)) {
 			DPRINT(4, ("skipping interface %s (%s) - DOWN\n",
-				   enumep.name, socktoa(&enumep.sin)));
+				   enumep.name, sockporttoa(&enumep.sin)));
 			continue;
 		}
 
@@ -1485,13 +1492,13 @@ update_interfaces(uint16_t port)
 		 */
 		if (is_wildcard_addr(&enumep.sin)) {
 			DPRINT(4, ("skipping interface %s (%s) - WILD\n",
-				   enumep.name, socktoa(&enumep.sin)));
+				   enumep.name, sockporttoa(&enumep.sin)));
 			continue;
 			}
 
 		if (is_anycast(&enumep.sin, isc_if.name)) {
 			DPRINT(4, ("skipping interface %s (%s) - ANYCAST\n",
-				   enumep.name, socktoa(&enumep.sin)));
+				   enumep.name, sockporttoa(&enumep.sin)));
 			continue;
 			}
 
@@ -1500,24 +1507,25 @@ update_interfaces(uint16_t port)
 		 */
 		if (!is_valid(&enumep.sin, isc_if.name)) {
 			DPRINT(4, ("skipping interface %s (%s) - ~VALID\n",
-				   enumep.name, socktoa(&enumep.sin)));
+				   enumep.name, sockporttoa(&enumep.sin)));
 			continue;
 			}
+
 
 		/*
 		 * map to local *address* in order to map all duplicate
 		 * interfaces to an endpt structure with the appropriate
-		 * socket.  Our name space is (ip-address), NOT
+		 * socket.  Our name space is (ip-address+port), NOT
 		 * (interface name, ip-address).
 		 */
 		ep = getinterface(&enumep.sin, INT_WILDCARD);
 
-		if (ep != NULL && refresh_interface(ep)) {
+		if (ep != NULL && SRCPORT(&ep->sin)==port && refresh_interface(ep)) {
 			/*
 			 * found existing and up to date interface -
 			 * mark present.
 			 */
-			if (ep->phase != sys_interphase) {
+			if (!ep->inuse) {
 				/*
 				 * On a new round we reset the name so
 				 * the interface name shows up again if
@@ -1570,7 +1578,7 @@ update_interfaces(uint16_t port)
 				ep->ignore_packets = true;
 			}
 
-			ep->phase = sys_interphase;
+			ep->inuse = true;
 
 		} else {
 			/*
@@ -1583,31 +1591,37 @@ update_interfaces(uint16_t port)
 			 */
 			ep = create_interface(port, &enumep);
 
-			if (ep != NULL) {
-
-				new_interface_found = true;
-				DPRINT_INTERFACE(3,
-					(ep, "updating ",
-					 " new - created\n"));
-			} else {
+			if (ep == NULL) {
 				DPRINT_INTERFACE(3,
 					(&enumep, "updating ",
 					 " new - creation FAILED"));
-
 				msyslog(LOG_INFO,
-					"IO: failed to init interface for address %s",
-					socktoa(&enumep.sin));
+					"IO: failed to init interface for %s",
+					sockporttoa(&enumep.sin));
 				continue;
 			}
+
+			new_interface_found = true;
+			ep->inuse = true;
+			DPRINT_INTERFACE(3,
+				(ep, "updating ", " new - created\n"));
 		}
 	}
 
 	isc_interfaceiter_destroy(&iter);
 
-	/*
-	 * phase 2 - delete gone interfaces - reassigning peers to
-	 * other interfaces
-	 */
+	return new_interface_found;
+}
+
+/*
+ * phase 2 - delete gone interfaces - reassigning peers to
+ * other interfaces
+ */
+void update_interfaces_phase2(void)
+{
+	endpt *			ep;
+	endpt *			next_ep;
+
 	for (ep = io_data.ep_list; ep != NULL; ep = next_ep) {
 		next_ep = ep->elink;
 
@@ -1617,7 +1631,7 @@ update_interfaces(uint16_t port)
 		 * is gone and will be deleted here unless it did not
 		 * originate from interface enumeration INT_WILDCARD,
 		 */
-		if ((INT_WILDCARD & ep->flags) || ep->phase == sys_interphase)
+		if ((INT_WILDCARD & ep->flags) || ep->inuse)
 			continue;
 
 		DPRINT_INTERFACE(3, (ep, "updating ",
@@ -1637,16 +1651,17 @@ update_interfaces(uint16_t port)
 
 		delete_interface(ep);
 	}
+}
 
-	/*
-	 * phase 3 - re-configure as the world has possibly changed
-	 *
-	 * never ever make this conditional again - it is needed to track
-	 * routing updates. see bug #2506
-	 */
+/*
+ * phase 3 - re-configure as the world has possibly changed
+ *
+ * never ever make this conditional again - it is needed to track
+ * routing updates. see bug #2506
+ */
+void update_interfaces_phase3(void)
+{
 	refresh_all_peerinterfaces();
-
-	return new_interface_found;
 }
 
 
@@ -1665,8 +1680,7 @@ create_sockets(void)
 	create_wildcards(NTP_PORT);
 	if (extra_port) create_wildcards(extra_port);
 
-	update_interfaces(NTP_PORT);
-	if (extra_port) update_interfaces(extra_port);
+	update_interfaces();
 
 	/*
 	 * Now that we have opened all the sockets, turn off the reuse
@@ -1691,7 +1705,7 @@ create_interface(
 {
 	sockaddr_u	resmask;
 	endpt *		iface;
-	DPRINT(2, ("create_interface(%s#%d)\n", socktoa(&protot->sin),
+	DPRINT(2, ("create_interface(%s#%d)\n", sockporttoa(&protot->sin),
 		    port));
 
 	/* build an interface */
@@ -1700,7 +1714,7 @@ create_interface(
 	/*
 	 * create socket
 	 */
-	iface->fd = open_socket(&iface->sin, false, iface);
+	iface->fd = open_socket(&iface->sin, true, iface);
 
 	if (iface->fd != INVALID_SOCKET)
 		log_listen_address(iface);
@@ -1741,7 +1755,7 @@ create_interface(
 }
 
 
-#ifdef SO_EXCLUSIVEADDRUSE
+#ifdef SO_EXCLUSIVEADDRUSE  /* Windows */
 static void
 set_excladdruse(
 	SOCKET fd
@@ -1771,7 +1785,7 @@ set_reuseaddr(
 	int flag
 	)
 {
-#ifndef SO_EXCLUSIVEADDRUSE
+#ifndef SO_EXCLUSIVEADDRUSE  /* Windows */
 	endpt *ep;
 
 	for (ep = io_data.ep_list; ep != NULL; ep = ep->elink) {
@@ -1804,7 +1818,7 @@ set_reuseaddr(
 SOCKET
 open_socket(
 	sockaddr_u *	addr,
-	bool		turn_off_reuse,
+	bool		turn_on_reuse,
 	endpt *		interf
 	)
 {
@@ -1850,24 +1864,24 @@ open_socket(
 
 	/*
 	 * set SO_REUSEADDR since we will be binding the same port
-	 * number on each interface according to turn_off_reuse.
+	 * number on each interface according to turn_on_reuse.
 	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-		       (const void *)((turn_off_reuse)
-				    ? &off
-				    : &on),
+		       (const void *)((turn_on_reuse)
+				    ? &on
+				    : &off),
 		       sizeof(on))) {
 
 		msyslog(LOG_ERR,
 			"IO: setsockopt SO_REUSEADDR %s fails for address %s: %s",
-			(turn_off_reuse)
-			    ? "off"
-			    : "on",
+			(turn_on_reuse)
+			    ? "on"
+			    : "off",
 			socktoa(addr), strerror(errno));
 		close(fd);
 		return INVALID_SOCKET;
 	}
-#ifdef SO_EXCLUSIVEADDRUSE
+#ifdef SO_EXCLUSIVEADDRUSE  /* Windows */
 	/*
 	 * setting SO_EXCLUSIVEADDRUSE on the wildcard we open
 	 * first will cause more specific binds to fail.
@@ -1884,7 +1898,7 @@ open_socket(
 			       sizeof(qos)))
 			msyslog(LOG_ERR,
 				"IO: setsockopt IP_TOS (%02x) fails on "
-                                "address %s: %s",
+				"address %s: %s",
 				(unsigned)qos, socktoa(addr), strerror(errno));
 	}
 
@@ -1896,8 +1910,8 @@ open_socket(
 		if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, (char*)&qos,
 			       sizeof(qos)))
 			msyslog(LOG_ERR, "IO: setsockopt IPV6_TCLASS (%02x) "
-                                         "fails on address %s: %s",
-				         (unsigned)qos, socktoa(addr), strerror(errno));
+					"fails on address %s: %s",
+					(unsigned)qos, socktoa(addr), strerror(errno));
 #endif /* IPV6_TCLASS */
 		if (isc_net_probe_ipv6only_bool()
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
@@ -1918,33 +1932,24 @@ open_socket(
 #endif
 
 	/*
-	 * bind the local address.
+	 bind the local address.
 	 */
 	errval = bind(fd, &addr->sa, SOCKLEN(addr));
 
 #ifdef NEED_REUSEADDR_FOR_IFADDRBIND
+
 	if (!is_wildcard_addr(addr))
 		set_wildcard_reuse(addr, 0);
 #endif
 
 	if (errval < 0) {
-		/*
-		 * Don't log this under all conditions
-		 */
-		if (turn_off_reuse == 0
-#ifdef DEBUG
-		    || debug > 1 /* SPECIAL DEBUG */
-#endif
-		    ) {
-			msyslog(LOG_ERR,
-				"IO: bind(%d) AF_INET%s %s#%d flags 0x%x failed: %s",
-				fd, IS_IPV6(addr) ? "6" : "",
-				socktoa(addr), SRCPORT(addr),
-				interf->flags, strerror(errno));
-		}
-
+		// FIXME: set_wildcard_reuse trashes errno??
+		msyslog(LOG_ERR,
+			"IO: bind(%d) AF_INET%s %s#%d flags 0x%x failed: %s",
+			fd, IS_IPV6(addr) ? "6" : "",
+			socktoa(addr), SRCPORT(addr),
+			interf->flags, strerror(errno));
 		close(fd);
-
 		return INVALID_SOCKET;
 	}
 
@@ -2054,7 +2059,7 @@ read_refclock_packet(
 
 	i = (rp->datalen == 0
 	     || rp->datalen > sizeof(rb->recv_buffer))
-	        ? sizeof(rb->recv_buffer)
+		? sizeof(rb->recv_buffer)
 		: rp->datalen;
 	do {
 		buflen = read(fd, (char *)&rb->recv_buffer, i);
@@ -2139,17 +2144,17 @@ read_network_packet(
 
 	fromlen = sizeof(rb->recv_srcadr);
 
-	iovec.iov_base        = &rb->recv_buffer;
-	iovec.iov_len         = sizeof(rb->recv_buffer);
+	iovec.iov_base		= &rb->recv_buffer;
+	iovec.iov_len		= sizeof(rb->recv_buffer);
 	memset(&msghdr, '\0', sizeof(msghdr));
-	msghdr.msg_name       = &rb->recv_srcadr;
-	msghdr.msg_namelen    = fromlen;
-	msghdr.msg_iov        = &iovec;
-	msghdr.msg_iovlen     = 1;
-	msghdr.msg_flags      = 0;
-	msghdr.msg_control    = (void *)&control;
-	msghdr.msg_controllen = sizeof(control);
-	buflen                = recvmsg(fd, &msghdr, 0);
+	msghdr.msg_name		= &rb->recv_srcadr;
+	msghdr.msg_namelen	= fromlen;
+	msghdr.msg_iov		= &iovec;
+	msghdr.msg_iovlen	= 1;
+	msghdr.msg_flags	= 0;
+	msghdr.msg_control	= (void *)&control;
+	msghdr.msg_controllen	= sizeof(control);
+	buflen			= recvmsg(fd, &msghdr, 0);
 
 	rb->recv_length = (size_t)buflen;
 
@@ -2379,6 +2384,10 @@ input_handler(
 
 /*
  * find an interface suitable for the src address
+ * Called by newpeer() and peer_refresh_interface()
+ * if extra_port is active,
+ *   this selects the first one on the chain
+ *   see update_interfaces().
  */
 endpt *
 select_peerinterface(
@@ -2487,9 +2496,7 @@ findinterface(
 }
 
 /*
- * findlocalinterface - find local interface corresponding to addr,
- * which does not have any of flags set.  If bast is nonzero, addr is
- * a broadcast address.
+ * findlocalinterface - find local interface corresponding to addr
  *
  * This code attempts to find the local sending address for an outgoing
  * address by connecting a new socket to destinationaddress:NTP_PORT
@@ -2708,7 +2715,7 @@ cmp_addr_distance(
 endpt *
 getinterface(
 	sockaddr_u *	addr,
-	uint32_t		flags
+	uint32_t	flags
 	)
 {
 	endpt *iface;
@@ -2986,7 +2993,7 @@ find_addr_in_list(
 	for (entry = remoteaddr_list;
 	     entry != NULL;
 	     entry = entry->link) {
-		if (SOCK_EQ(&entry->addr, addr)) {
+		if (ADDR_PORT_EQ(&entry->addr, addr)) {
 			DPRINT(4, ("FOUND\n"));
 			return entry->ep;
 		}
@@ -3017,7 +3024,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 {
 	char buffer[5120];
 	ssize_t cnt;
-        int msg_type;
+	int msg_type;
 #ifdef HAVE_LINUX_RTNETLINK_H
 	struct nlmsghdr *nh;
 #else

@@ -145,7 +145,7 @@ typedef struct netendpt {
 	sockaddr_u	sin;		/* unicast address */
 	char		name[32];	/* name of interface */
 	unsigned short	family;		/* AF_INET/AF_INET6 */
-	unsigned short	phase;		/* phase in update cycle */
+	bool		inuse;		/* needed to drop unused */
 	uint32_t	flags;		/* interface flags */
 	refid_t		addr_refid;	/* IPv4 addr or IPv6 hash */
 	unsigned long	starttime;	/* current_time at creation */
@@ -153,7 +153,7 @@ typedef struct netendpt {
 	long		sent;		/* number of outgoing packets */
 	long		notsent;	/* number of send failures */
 	unsigned int	ifindex;	/* for IPV6_MULTICAST_IF */
-	bool	ignore_packets; /* listen-read-drop this? */
+	bool		ignore_packets; /* listen-read-drop this? */
 	struct peer *	peers;		/* list of peers using endpt */
 	unsigned int	peercnt;	/* count of same */
 } endpt;
@@ -626,8 +626,7 @@ struct mon_data {
 };
 
 /*
- * Values for cast_flags in mon_entry and struct peer.  mon_entry uses
- * only MDF_UCAST and MDF_BCAST.
+ * Values for cast_flags in struct peer.
  */
 #define	MDF_UCAST	0x01	/* unicast client */
 /* #define MDF_MCAST	0x02	** multicast server (not used) */
