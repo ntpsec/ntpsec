@@ -63,7 +63,7 @@ services like class rosters and spread sheets. A suitable ACL might look
 like this:
 
 ------------------------------------------------------------------------------
-restrict default nopeer                 # deny new associations
+restrict default nomodify                   # disallow reconfiguration
 restrict 128.175.0.0 mask 255.255.0.0       # allow campus access
 restrict 128.4.1.0 mask 255.255.255.0 notrust # require authentication on subnet 1
 restrict time.nist.gov                      # allow access
