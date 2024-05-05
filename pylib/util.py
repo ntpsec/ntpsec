@@ -1211,6 +1211,10 @@ class PeerSummary:
                PeerSummary.prettyinterval(last_sync),
                PeerSummary.prettyinterval(poll_sec), reach,
                fini(estdelay), fini(estoffset), fini(jd)))
+        if self.displaymode == "rpeers":
+            line += " " + dstadr_refid
+            line += (" " * (self.refidwidth - len(dstadr_refid)))
+            line += (" %c %s" % (c, clock_name[:76 - len(line)]))
         line += "\n"
         # for debugging both case
         # if srcadr != None and srchost != None:
