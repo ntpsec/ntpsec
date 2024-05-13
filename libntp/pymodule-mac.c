@@ -50,7 +50,7 @@ int do_checkname(const char *name)
 
         strlcpy(upcase, name, sizeof(upcase));
 	for (int i=0; upcase[i]!=0; i++) {
-		upcase[i] = toupper(upcase[i]);
+		upcase[i] = toupper((unsigned char)upcase[i]);
 	}
 
         digest = EVP_get_digestbyname(upcase);
@@ -96,7 +96,7 @@ void do_mac(char *name,
 
         strlcpy(upcase, name, sizeof(upcase));
 	for (int i=0; upcase[i]!=0; i++) {
-		upcase[i] = toupper(upcase[i]);
+		upcase[i] = toupper((unsigned char)upcase[i]);
 	}
 
         digest = EVP_get_digestbyname(upcase);
