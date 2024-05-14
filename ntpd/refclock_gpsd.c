@@ -2181,7 +2181,7 @@ log_data(
                                 /* replace with two \ */
 				*dptr++ = '\\';
 				*dptr++ = '\\';
-			} else if (isprint(*sptr)) {
+			} else if (isprint((unsigned char)*sptr)) {
 				*dptr++ = *sptr;
 			} else {
                                dptr += snprintf(dptr, dtop - dptr, "\\%#.2x",
