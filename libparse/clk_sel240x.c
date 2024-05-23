@@ -3,7 +3,11 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "config.h"
-#include "ntp.h"	/* only for the u_* typedefs from GCC; remove someday */
+
+// _XOPEN_SORUCE needed for strptime()
+#define _XOPEN_SOURCE
+
+#include "ntp.h"	// only for the u_* typedefs from GCC; remove someday
 #include "ntp_syslog.h"
 #include "ntp_types.h"
 #include "ntp_fp.h"
@@ -15,7 +19,7 @@
 
 #include <stdio.h>
 
-#include <time.h>
+#include <time.h>          // for strptime()
 
 //////////////////////////////////////////////////////////////////////////////
 // The B8 output has the following format B8 = '\x01YYYY:ddd:hh:mm:ssq\r\n'
@@ -79,8 +83,7 @@ inp_sel240x( parse_t      *parseio,
 	parseprintf(DD_PARSE, ("inp_sel240x(0x%lx, 0x%x, ...)\n",
                     (unsigned long)parseio, (unsigned)ch));
 
-	switch( ch )
-	{
+	switch( ch ) {
 	case '\x01':
 		parseio->parse_index = 1;
 		parseio->parse_data[0] = ch;
@@ -88,8 +91,7 @@ inp_sel240x( parse_t      *parseio,
 		rc = PARSE_INP_SKIP;
 		break;
 	case '\n':
-		if( (rc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP )
-		{
+		if( (rc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP ) {
 			rc = parse_end( parseio );
 		}
 		break;
@@ -114,18 +116,14 @@ cvt_sel240x( unsigned char *buffer,
 	UNUSED_ARG(size);
 	UNUSED_ARG(local);
 
-	if( Strok(buffer, format->fixed_string) )
-	{
+	if( Strok(buffer, format->fixed_string) ) {
 		struct tm ptime;
 		buffer++;
 		buffer = (unsigned char *)strptime(
 			(const char *)buffer, "%Y:%j:%H:%M:%S", &ptime );
-		if( *(buffer+1) != '\x0d' )
-		{
+		if( *(buffer+1) != '\x0d' ) {
 			rc = CVT_FAIL | CVT_BADFMT;
-		}
-		else
-		{
+		} else {
 			clock_time->day = ptime.tm_mday;
 			clock_time->month = ptime.tm_mon + 1;
 			clock_time->year = ptime.tm_year + 1900;
@@ -136,12 +134,9 @@ cvt_sel240x( unsigned char *buffer,
 			clock_time->utcoffset = 0;
 			clock_time->flags = PARSEB_UTC;
 
-			if( *buffer == '?' )
-			{
+			if( *buffer == '?' ) {
 				clock_time->flags |= PARSEB_POWERUP;
-			}
-			else if( *buffer != ' ' )
-			{
+			} else if( *buffer != ' ' ) {
 				clock_time->flags |= PARSEB_NOSYNC;
 			}
 
