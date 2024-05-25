@@ -52,6 +52,7 @@ print_help() {
 	echo "	-a N	Specify key number for authentication"
 	echo "	-b	Force time step"
 	echo "	-B	Force time slew"
+	echo "	-d      Enable debugging mode (implies -q)"
 	echo "	-I IP	Bind to specific Source IP for requests"
 	echo "	-k FILE	Specify key file"
 	echo "	-q	Query only"
@@ -74,7 +75,7 @@ do
 	a) PASSTHROUGH="$PASSTHROUGH -a $OPTARG";;
 	b) ADJUST="$ADJUST -S";;
 	B) ADJUST="$ADJUST -s";;
-	d) PASSTHROUGH="$PASSTHROUGH -d";;
+	d) PASSTHROUGH="$PASSTHROUGH -d"; setclock=no;;
 	e) echo "ntpdate: -e is no longer supported." >&2;;
 	h) print_help; exit;;
 	I) PASSTHROUGH="$PASSTHROUGH -I $OPTARG";;
