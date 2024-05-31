@@ -10,32 +10,12 @@ import waflib.Context
 import waflib.Logs
 import waflib.Utils
 
-Popen = waflib.Utils.subprocess.Popen
 
-cmd_map = {
-    ("main/ntpclients/ntpleapfetch", "--version"): "ntpleapfetch %s\n",
-    ("main/ntpd/ntpd", "--version"): "ntpd %s\n",
-    ("main/ntpfrob/ntpfrob", "-V"): "ntpfrob %s\n",
-    ("main/ntptime/ntptime", "-V"): "ntptime %s\n"
-}
-cmd_map_python = {
-    ("main/ntpclients/ntpdig", "--version"): "ntpdig %s\n",
-    ("main/ntpclients/ntpkeygen", "--version"): "ntpkeygen %s\n",
-    ("main/ntpclients/ntpq", "--version"): "ntpq %s\n",
-    ("main/ntpclients/ntpsnmpd", "--version"): "ntpsnmpd %s\n",
-    ("main/ntpclients/ntpsweep", "--version"): "ntpsweep %s\n",
-    ("main/ntpclients/ntptrace", "--version"): "ntptrace %s\n",
-    ("main/ntpclients/ntpwait", "--version"): "ntpwait %s\n"
-}
-# Need argparse
-cmd_map_python_argparse = {
-    ("main/ntpclients/ntplogtemp", "--version"): "ntplogtemp %s\n",
-    ("main/ntpclients/ntpviz", "--version"): "ntpviz %s\n",
-}
-# Need python curses
-cmd_map_python_curses = {
-    ("main/ntpclients/ntpmon", "--version"): "ntpmon %s\n",
-}
+NTPCLIENTS = "main/ntpclients"
+NTPD = "main/ntpd"
+NTPFROB = "main/ntpfrob"
+NTPTIME = "main/ntptime"
+POPEN = waflib.Utils.subprocess.Popen
 
 test_logs = []
 
@@ -56,13 +36,13 @@ def run(cmd, expected, python=None):
 
     prefix = "running: " + " ".join(cmd)
 
-    if not os.path.exists("%s/%s" % (waflib.Context.out_dir, cmd[0])):
+    if not os.path.exists(cmd[0]):
         addLog("YELLOW", prefix + " SKIPPING (does not exist)")
-        return False
+        return None
 
     if python:
         cmd = python + list(cmd)
-    p = Popen(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
+    p = POPEN(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
                         waflib.Context.out_dir},
               universal_newlines=True,
               stdin=waflib.Utils.subprocess.PIPE,
@@ -72,7 +52,7 @@ def run(cmd, expected, python=None):
 
     stdout, stderr = p.communicate()
 
-    if expected in (stdout, stderr):
+    if expected in (stdout.strip(), stderr.strip()):
         addLog("GREEN", prefix + "  OK")
         return True
     addLog("RED", prefix + "  FAILED")
@@ -84,25 +64,65 @@ def run(cmd, expected, python=None):
     return False
 
 
+def etl_cases(installed, version, params):
+    """Convert cmd_list_* to run() arguments."""
+    ret = []
+    for dest_dir, bld_dir, name, flag in params:
+        if not installed:
+            prefix = waflib.Context.out_dir + os.sep + bld_dir
+        else:
+            prefix = waflib.Options.options.destdir + dest_dir
+        target = prefix + os.sep + name
+        ret.append([[target, flag], name + " " + version])
+    return sorted(ret)
+
+
 def cmd_bin_test(ctx):
     """Run a suite of binary tests."""
+    BIN = ctx.env.BINDIR
+    SBIN = ctx.env.SBINDIR
     fails = 0
+
+    cmd_list = [
+        (BIN, NTPCLIENTS, "ntpleapfetch", "--version"),
+        (SBIN, NTPD, "ntpd", "--version"),
+        (BIN, NTPFROB, "ntpfrob", "-V"),
+        (BIN, NTPTIME, "ntptime", "-V"),
+    ]
+    cmd_list_python = [
+        (BIN, NTPCLIENTS, "ntpdig", "--version"),
+        (BIN, NTPCLIENTS, "ntpkeygen", "--version"),
+        (BIN, NTPCLIENTS, "ntpq", "--version"),
+        (BIN, NTPCLIENTS, "ntpsnmpd", "--version"),
+        (BIN, NTPCLIENTS, "ntpsweep", "--version"),
+        (BIN, NTPCLIENTS, "ntptrace", "--version"),
+        (BIN, NTPCLIENTS, "ntpwait", "--version"),
+    ]
+    cmd_list_python_argparse = [  # Need argparse
+        (BIN, NTPCLIENTS, "ntplogtemp", "--version"),
+        (BIN, NTPCLIENTS, "ntpviz", "--version"),
+    ]
+    cmd_list_python_curses = [  # Need python curses
+        (BIN, NTPCLIENTS, "ntpmon", "--version"),
+    ]
 
     with open(str(ctx.bldnode) + "/VERSION.bld") as fp:
         version = fp.read().strip()
 
     if ctx.env['PYTHON_ARGPARSE']:
-        cmd_map_python.update(cmd_map_python_argparse)
+        cmd_list_python += cmd_list_python_argparse
 
     if ctx.env['PYTHON_CURSES']:
-        cmd_map_python.update(cmd_map_python_curses)
+        cmd_list_python += cmd_list_python_curses
 
-    for cmd in sorted(cmd_map):
-        if not run(cmd, cmd_map[cmd] % version):
-            fails += 1
+    INSTALL = False
+    if 'install' == ctx.cmd:
+        cmd_list += cmd_list_python
+        cmd_list_python = []
+        INSTALL = True
 
-    for cmd in sorted(cmd_map_python):
-        if not run(cmd, cmd_map_python[cmd] % version, ctx.env['PYTHON']):
+    for cmd in etl_cases(INSTALL, version, cmd_list):
+        if not run(cmd[0], cmd[1]):
             fails += 1
 
     if 1 == fails:
