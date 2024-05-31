@@ -932,16 +932,10 @@ class check(BuildContext):
     variant = "main"
 
 
-def bin_test(ctx):
+class bin_test(BuildContext):
     """Run binary check, use after tests."""
-    from wafhelpers.bin_test import cmd_bin_test
-    cmd_bin_test(ctx)
-
-
-def bin_test_summary(ctx):
-    """Display results of binary check, use after tests."""
-    from wafhelpers.bin_test import bin_test_summary
-    bin_test_summary(ctx)
+    cmd = 'bin_test'
+    variant = "main"
 
 
 variant_cmd = (
@@ -1133,6 +1127,7 @@ def build(ctx):
     # Skip running unit tests on a cross compile build
     from waflib import Options
     if not ctx.env.ENABLE_CROSS:
+        from wafhelpers.bin_test import cmd_bin_test, bin_test_summary
         # Force re-running of tests.  Same as 'waf --alltests'
         if ctx.cmd == "check":
             ctx.options.all_tests = True
@@ -1144,7 +1139,7 @@ def build(ctx):
             return
 
         # Test binaries
-        ctx.add_post_fun(bin_test)
+        ctx.add_post_fun(cmd_bin_test)
 
         # Write test log to a file
         ctx.add_post_fun(test_write_log)
