@@ -20,21 +20,18 @@
 #include <openssl/evp.h>
 #include <openssl/cmac.h>
 
-/* Slightly older version of OpenSSL */
-/* Similar hack in ssl_init.c and attic/digest-timing.c */
-#ifndef EVP_MD_CTX_new
-#define EVP_MD_CTX_new() EVP_MD_CTX_create()
-#endif
-
 // Needed on OpenSSL < 1.1.0
+// I don't think this is needed on modern versions,
+// but I'm leaving this code around for a while in case we do need it.
+// HGM: 2024-Jun-11
 static void init_ssl(void) {
-	static bool init_done = false;
-	if (init_done) {
-		return;
-        }
-	init_done = true;
-	OpenSSL_add_all_ciphers();
-	OpenSSL_add_all_digests();
+//	static bool init_done = false;
+//	if (init_done) {
+//		return;
+//        }
+//	init_done = true;
+//	OpenSSL_add_all_ciphers();
+//	OpenSSL_add_all_digests();
 }
 
 /* xx = ntp.ntpc.checkname(name)

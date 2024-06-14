@@ -125,11 +125,11 @@ check_digest_mac_length(
 	length = EVP_MD_get_size(md);
 #else
 	const EVP_MD *md = EVP_get_digestbyname(name);
-	EVP_MD_CTX *ctx = EVP_MD_CTX_create();
+	EVP_MD_CTX *ctx = EVP_MD_CTX_new();
 	unsigned char digest[EVP_MAX_MD_SIZE];
 	EVP_DigestInit_ex(ctx, md, NULL);
 	EVP_DigestFinal_ex(ctx, digest, &length);
-	EVP_MD_CTX_destroy(ctx);
+	EVP_MD_CTX_free(ctx);
 #endif
 	if (MAX_BARE_MAC_LENGTH < length) {
 		msyslog(LOG_ERR, "AUTH: authreadkeys: digest for key %u, %s will be truncated.", keyno, name);

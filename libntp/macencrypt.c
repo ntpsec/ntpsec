@@ -327,7 +327,7 @@ addr2refid(sockaddr_u *addr)
 	EVP_MD_free(md5);
 #else
 	if(ctx == NULL) {
-		ctx = EVP_MD_CTX_create();
+		ctx = EVP_MD_CTX_new();
 	}
 #ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
 	/* MD5 is not used as a crypto hash here. */

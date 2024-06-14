@@ -38,13 +38,6 @@
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 
-#ifndef EVP_MD_CTX_new
-/* Slightly older version of OpenSSL */
-/* Similar hack in ssl_init.c */
-#define EVP_MD_CTX_new() EVP_MD_CTX_create()
-#define EVP_MD_CTX_free(ctx) EVP_MD_CTX_destroy(ctx)
-#endif
-
 
 /* Get timing for old slower way too.  Pre Feb 2018 */
 #define DoSLOW 1

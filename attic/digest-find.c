@@ -101,12 +101,12 @@ main (
 	}
 #endif
 	/* libntp/macencrypt.c has an ifdef for this */
-	ctx = EVP_MD_CTX_create();
+	ctx = EVP_MD_CTX_new();
 	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
 	EVP_DigestInit_ex(ctx, md, NULL);
 	EVP_DigestUpdate(ctx, packet, sizeof(packet));
 	EVP_DigestFinal_ex(ctx, digest, &length);
-	EVP_MD_CTX_destroy(ctx);
+	EVP_MD_CTX_free(ctx);
 	printf("%10s %4d %6u\n", digests[i], keytype, length);
     }
 

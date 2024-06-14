@@ -17,13 +17,7 @@
 #include <openssl/cmac.h>
 #endif
 
-#ifndef EVP_MD_CTX_new
-/* Slightly older version of OpenSSL */
-/* Similar hack in macencrypt.c and attic/digest-timing.c */
-#define EVP_MD_CTX_new() EVP_MD_CTX_create()
-#endif
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 static void	atexit_ssl_cleanup(void);
 #endif
 
@@ -48,7 +42,7 @@ ssl_init(void)
 	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS|OPENSSL_INIT_LOAD_CRYPTO_STRINGS|OPENSSL_INIT_ADD_ALL_CIPHERS|OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	atexit(&atexit_ssl_cleanup);
@@ -113,7 +107,7 @@ ssl_init(void)
 }
 
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 static void
 atexit_ssl_cleanup(void)
 {

@@ -2569,7 +2569,7 @@ static uint32_t derive_nonce(
 			(long long)next_salt_update);
 	}
 
-	ctx = EVP_MD_CTX_create();
+	ctx = EVP_MD_CTX_new();
 	EVP_DigestInit_ex(ctx, EVP_md5(), NULL);
 	EVP_DigestUpdate(ctx, salt, sizeof(salt));
 	EVP_DigestUpdate(ctx, &ts_i, sizeof(ts_i));
@@ -2583,7 +2583,7 @@ static uint32_t derive_nonce(
 	EVP_DigestUpdate(ctx, &NSRCPORT(addr), sizeof(NSRCPORT(addr)));
 	EVP_DigestUpdate(ctx, salt, sizeof(salt));
 	EVP_DigestFinal_ex(ctx, d.digest, &len);
-	EVP_MD_CTX_destroy(ctx);
+	EVP_MD_CTX_free(ctx);
 
 	return d.extract;
 }

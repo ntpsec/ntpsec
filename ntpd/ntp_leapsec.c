@@ -943,7 +943,7 @@ leapsec_validate(
 	char           line[50];
 	int            hlseen = -1;
 
-	mdctx = EVP_MD_CTX_create();
+	mdctx = EVP_MD_CTX_new();
 	EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
 	while (get_line(func, farg, line, sizeof(line))) {
 		if (!strncmp(line, "#h", 2)) {
@@ -957,7 +957,7 @@ leapsec_validate(
 		}
 	}
 	EVP_DigestFinal_ex(mdctx, ldig.hv, NULL);
-	EVP_MD_CTX_destroy(mdctx);
+	EVP_MD_CTX_free(mdctx);
 
 	if (0 > hlseen) {
 		return LSVALID_NOHASH;
