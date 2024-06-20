@@ -2559,8 +2559,31 @@ static uint32_t derive_nonce(
 		uint8_t	digest[EVP_MAX_MD_SIZE];
 		uint32_t extract;
 	}		d;
-	EVP_MD_CTX	*ctx;
-	unsigned int	len;
+
+	static EVP_MD_CTX *ctx;
+	static const EVP_MD *evp;
+	unsigned int len;
+
+	if (NULL == ctx) {
+	  ctx = EVP_MD_CTX_new();
+	  if (NULL == ctx) {
+	    msyslog(LOG_ERR, "ERR: EVP_MD_CTX_new() failed");
+	    exit(1);
+	  }
+	}
+
+	if (NULL == evp) {
+	  /* EVP_md5() doesn't work on FIPS systems.
+	   * Check here in case EVP_sha1() gets demoted.
+	   * This is making a cookie which is only checked by
+	   * this system so the details of how it is made don't matter.
+	   */
+	  evp = EVP_sha1();
+	  if (NULL == evp) {
+	    msyslog(LOG_ERR, "ERR: EVP_sha1() failed");
+	    exit(1);
+	  }
+	}
 
 	if (current_time >= next_salt_update) {
 		ntp_RAND_bytes(&salt[0], sizeof(salt));
@@ -2569,8 +2592,7 @@ static uint32_t derive_nonce(
 			(long long)next_salt_update);
 	}
 
-	ctx = EVP_MD_CTX_new();
-	EVP_DigestInit_ex(ctx, EVP_md5(), NULL);
+	EVP_DigestInit_ex(ctx, evp, NULL);
 	EVP_DigestUpdate(ctx, salt, sizeof(salt));
 	EVP_DigestUpdate(ctx, &ts_i, sizeof(ts_i));
 	EVP_DigestUpdate(ctx, &ts_f, sizeof(ts_f));
@@ -2583,7 +2605,6 @@ static uint32_t derive_nonce(
 	EVP_DigestUpdate(ctx, &NSRCPORT(addr), sizeof(NSRCPORT(addr)));
 	EVP_DigestUpdate(ctx, salt, sizeof(salt));
 	EVP_DigestFinal_ex(ctx, d.digest, &len);
-	EVP_MD_CTX_free(ctx);
 
 	return d.extract;
 }
