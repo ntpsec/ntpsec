@@ -173,16 +173,16 @@ static const struct codestring res_match_bits[] = {
  * Restriction access bits
  */
 static const struct codestring res_access_bits[] = {
-	{ RES_IGNORE,			"ignore" },
-	{ RES_DONTSERVE,		"noserve" },
-	{ RES_DONTTRUST,		"notrust" },
-	{ RES_NOQUERY,			"noquery" },
-	{ RES_NOMODIFY,			"nomodify" },
-	{ RES_NOPEERx,			"nopeer" },
-	{ RES_LIMITED,			"limited" },
-	{ RES_VERSION,			"version" },
-	{ RES_KOD,			"kod" },
-	{ RES_FLAKE,			"flake" },
+	{ RES_IGNORE,	"ignore" },
+	{ RES_NOSERVE,	"noserve" },
+	{ RES_NOTRUST,	"notrust" },
+	{ RES_NOQUERY,	"noquery" },
+	{ RES_NOMODIFY,	"nomodify" },
+	{ RES_NOPEERx,	"nopeer" },
+	{ RES_LIMITED,	"limited" },
+	{ RES_VERSION,	"version" },
+	{ RES_KOD,	"kod" },
+	{ RES_FLAKE,	"flake" },
 	/* not used with getcode(), no terminating entry needed */
 };
 

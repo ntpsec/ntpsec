@@ -428,7 +428,7 @@ i_require_authentication(
 	unsigned short restrict_mask
 	)
 {
-        bool restrict_notrust = restrict_mask & RES_DONTTRUST;
+        bool restrict_notrust = restrict_mask & RES_NOTRUST;
         bool peer_has_key = peer != NULL && peer->cfg.peerkey != 0;
 
         return restrict_notrust || peer_has_key;
@@ -452,21 +452,25 @@ static bool is_kod(
 
 /* Check the restrictions which can be checked just based on the source
    IP address and the first byte of the packet, namely RES_IGNORE,
-   RES_FLAKE, RES_NOQUERY, RES_DONTSERVE, and RES_VERSION. */
+   RES_FLAKE, RES_NOQUERY, RES_NOSERVE, and RES_VERSION. */
 
+/* return true to reject packet */
 static bool check_early_restrictions(
 	struct recvbuf const* rbufp,
 	unsigned short restrict_mask
 	)
 {
-	return (restrict_mask & RES_IGNORE) ||
-	    ((restrict_mask & RES_FLAKE) &&
-	     (double)random() / RAND_MAX < .1) ||
-	    (restrict_mask & (is_control_packet(rbufp) ? RES_NOQUERY : RES_DONTSERVE)) ||
-	    rbufp->recv_length < 1 ||
-	    ((restrict_mask & RES_VERSION) &&
-	     (rbufp->recv_length < 1 ||
-	      PKT_VERSION(rbufp->recv_buffer[0]) != NTP_VERSION));
+	if (rbufp->recv_length < 1)      // FIXME: should be earlier and bigger
+	  return(true);
+	int mode = PKT_MODE(rbufp->recv_buffer[0]);
+	return (
+	  (restrict_mask & RES_IGNORE) ||
+	  ((restrict_mask & RES_FLAKE) && (double)random() / RAND_MAX < .1) ||
+	  ((restrict_mask & RES_NOQUERY) && (MODE_CONTROL == mode)) ||
+	  ((restrict_mask & RES_NOSERVE) && (MODE_CONTROL != mode)) ||
+	  ((restrict_mask & RES_VERSION) &&
+	      (PKT_VERSION(rbufp->recv_buffer[0]) != NTP_VERSION))
+	  );
 }
 
 /* rawstats_filter

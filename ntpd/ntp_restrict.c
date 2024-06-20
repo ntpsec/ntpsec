@@ -656,7 +656,7 @@ restrict_source(
 	}
 	auth = (0 != peer->cfg.peerkey);
 	nts = peer->cfg.flags & FLAG_NTS;
-	if (RES_DONTTRUST & res->flags && !auth && !nts) {
+	if (RES_NOTRUST & res->flags && !auth && !nts) {
 		/* needs authentication, but this slot doesn't have any */
 		need_poke = true;
 	}

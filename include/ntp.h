@@ -678,8 +678,8 @@ struct restrict_u_tag {
  * through the Mode 6 protocol.
  */
 #define	RES_IGNORE		0x0001	/* ignore packet */
-#define	RES_DONTSERVE		0x0002	/* access denied */
-#define	RES_DONTTRUST		0x0004	/* authentication required */
+#define	RES_NOSERVE		0x0002	/* access denied */
+#define	RES_NOTRUST		0x0004	/* authentication required */
 #define	RES_VERSION		0x0008	/* version mismatch */
 #define	RES_NOPEERx		0x0010  /* new association denied */
 #define	RES_LIMITED		0x0020	/* packet rate exceeded */
@@ -694,7 +694,6 @@ struct restrict_u_tag {
 #define	RES_FLAKE		0x1000	/* flakeway - drop 10% */
 #define	RES_NOMRULIST		0x2000	/* mode 6 mrulist denied */
 
-/* RES_DEFAULT defined in /usr/include/resolv.h */
 #define RES_Default (RES_NOQUERY|RES_LIMITED)
 
 /* pythonize-header: start ignoring */

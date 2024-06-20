@@ -3,7 +3,7 @@ That was first supported in OpenSSL 1.1.1
   (1.1.1a is broken)
 Some OSes/Distros don't support a new enough version of OpenSSL
 This file contains notes on how to download, build, and install 3.2.0
-It it should be close for other 3.x.y versions
+It should be close for other 3.x.y versions
 
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
@@ -80,7 +80,7 @@ time make -j4         |& tee make.log
   openssl version -d
   ./util/shlib_wrap.sh ./apps/openssl version -d
   # ./apps/openssl without the wrapper will use the installed libraries
-The above check is broken for openssl-3.2.0-beta1 on Fedora
+The above check is broken for openssl-3.2.0 on Fedora
 It works on Ubuntu and FreeBSD.
 
 time make test        |& tee test.log
@@ -89,8 +89,8 @@ sudo make install     |& tee install.log
 
 sudo su
   cd /etc/ld.so.conf.d
-  echo "/usr/local/ssl/lib" > openssl-3.2.0.conf    # 32 bit systems
-  echo "/usr/local/ssl/lib64" > openssl-3.2.0.conf  # 64 bit systems
+  echo "/usr/local/ssl/lib" > openssl.conf    # 32 bit systems
+  echo "/usr/local/ssl/lib64" > openssl.conf  # 64 bit systems
   # running ldconfig before install doesn't work
   ldconfig
 

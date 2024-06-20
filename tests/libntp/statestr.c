@@ -24,7 +24,10 @@ TEST(statestr, ResMatchFlags) {
 
 // res_access_flags()
 TEST(statestr, ResAccessFlags) {
-	TEST_ASSERT_EQUAL_STRING("notrust", res_access_flags(RES_DONTTRUST));
+	TEST_ASSERT_EQUAL_STRING("notrust", res_access_flags(RES_NOTRUST));
+}
+TEST(statestr, ResAccessFlags2) {
+	TEST_ASSERT_EQUAL_STRING("noserve", res_access_flags(RES_NOSERVE));
 }
 
 // k_st_flags()
@@ -63,6 +66,7 @@ TEST(statestr, ClockCodeUnknown) {
 TEST_GROUP_RUNNER(statestr) {
 	RUN_TEST_CASE(statestr, ResMatchFlags);
 	RUN_TEST_CASE(statestr, ResAccessFlags);
+	RUN_TEST_CASE(statestr, ResAccessFlags2);
 	RUN_TEST_CASE(statestr, KSTFlags);
 	RUN_TEST_CASE(statestr, StatusToA);
 	RUN_TEST_CASE(statestr, PeerRestart);

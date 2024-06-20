@@ -1644,7 +1644,7 @@ config_access(
 				break;
 
 			case T_Noserve:
-				flags |= RES_DONTSERVE;
+				flags |= RES_NOSERVE;
 				break;
 
 			case T_Notrap:
@@ -1652,7 +1652,7 @@ config_access(
 				break;
 
 			case T_Notrust:
-				flags |= RES_DONTTRUST;
+				flags |= RES_NOTRUST;
 				break;
 
 			case T_Version:

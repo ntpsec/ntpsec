@@ -79,7 +79,10 @@
   +noquery+;;
     Deny {ntpqman} queries. Time service is not affected.
   +noserve+;;
-    Deny all packets except {ntpqman} and queries.
+    Deny all packets except {ntpqman} queries.
+    NB: This blocks requests from other clients and responses to your
+    requests.  If you are using servers in this IP range, you will need
+    to add +restrict+ slots to let them through.
   +notrust+;;
     Deny service unless the packet is cryptographically authenticated.
   +ntpport+;;
