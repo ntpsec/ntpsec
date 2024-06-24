@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-// _XOPEN_SORUCE needed for strptime()
+// _XOPEN_SOURCE needed for strptime()
 #define _XOPEN_SOURCE
 
 #include "ntp.h"	// only for the u_* typedefs from GCC; remove someday
