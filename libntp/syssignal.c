@@ -28,7 +28,7 @@ signal_no_reset(
 	}
 }
 
-#ifndef __NetBSD
+#ifndef __NetBSD__
 /* NetBSD 10.0, May 2024, barfs when it can't find siginfo_t ???
  * There is a similar test in include/ntp_stdlib.h
  * This is only used by ntp_sandbox inside an ifdef for HAVE_SECCOMP_H */

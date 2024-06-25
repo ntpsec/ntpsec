@@ -115,7 +115,7 @@ extern	const char *refid_str	(uint32_t, int);
 extern	int	decodenetnum	(const char *, sockaddr_u *);
 
 extern	void	signal_no_reset (int, void (*func)(int));
-#ifndef __NetBSD
+#ifndef __NetBSD__
 extern void signal_no_reset1(int, void (*func)(int, siginfo_t *, void *));
 #endif
 
