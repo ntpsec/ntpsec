@@ -109,11 +109,6 @@ fetch_packetstamp(
 #elif defined(SO_TIMESTAMP)
 	struct timeval *	tvp;
 #endif
-#ifdef ENABLE_FUZZ
-	unsigned long		ticks;
-	double			fuzz;
-	l_fp			lfpfuzz;
-#endif
 	l_fp			nts = 0;  /* network time stamp */
 
 /* There should be only one cmsg. */
@@ -150,34 +145,16 @@ fetch_packetstamp(
 
 #if defined(SO_TIMESTAMPNS) || defined(SO_TS_CLOCK)
 	tsp = (struct timespec *)CMSG_DATA(cmsghdr);
-#ifdef ENABLE_FUZZ
-	if (sys_tick > measured_tick && sys_tick > S_PER_NS) {
-	    ticks = (unsigned long) ((tsp->tv_nsec * S_PER_NS) / sys_tick);
-	    tsp->tv_nsec = (long) (ticks * NS_PER_S * sys_tick);
-	}
-#endif
 	DPRINT(4, ("fetch_timestamp: system nsec network time stamp: %ld.%09ld\n",
 		(long)tsp->tv_sec, tsp->tv_nsec));
 	nts = tspec_stamp_to_lfp(*tsp);
 #elif defined(SO_TIMESTAMP)
 	tvp = (struct timeval *)CMSG_DATA(cmsghdr);
-#ifdef ENABLE_FUZZ
-	if (sys_tick > measured_tick && sys_tick > S_PER_NS) {
-	    ticks = (unsigned long) ((tvp->tv_usec * S_PER_NS) / sys_tick);
-	    tvp->tv_usec = (long)(ticks * US_PER_S * sys_tick);
-	}
-#endif
 	DPRINT(4, ("fetch_timestamp: system usec network time stamp: %jd.%06ld\n",
 		(intmax_t)tvp->tv_sec, (long)tvp->tv_usec));
 	nts = tspec_stamp_to_lfp(tval_to_tspec(*tvp));
 #else
 # error "Can't get packet timestamp"
-#endif
-#ifdef ENABLE_FUZZ
-/*	fuzz = ntp_random() * 2. / FRAC * sys_fuzz; */
-	fuzz = random() * 2. / FRAC * sys_fuzz;
-	lfpfuzz = dtolfp(fuzz);
-	nts += lfpfuzz;
 #endif
 	return nts;
 }

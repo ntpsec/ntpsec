@@ -157,10 +157,6 @@ static const struct ctl_proc control_codes[] = {
 	{ NO_REQUEST,			0,	NULL }
 };
 
-#ifndef ENABLE_FUZZ
-static const double dbl_zero = 0.0;
-#endif
-
 enum var_type {v_time,
 	v_str, v_dbl, v_uli, v_li, v_uint, v_int,
 	v_u64, v_i64, v_u32, v_i32, v_u8, v_i8, v_bool,
@@ -404,14 +400,6 @@ static const struct var sys_var[] = {
   Var_since("timerstats_reset", RO, timer_timereset),
   Var_uli("timer_overruns", RO, alarm_overflow),
   Var_uli("timer_xmts", RO, timer_xmtcalls),
-
-#ifdef ENABLE_FUZZ
-  Var_dbl("fuzz", RO|DBL6|ToMS, sys_fuzz),
-  Var_dbl("tick", RO|DBL6|ToMS, sys_tick),
-#else
-  Var_dbl("fuzz", RO, dbl_zero),
-  Var_dbl("tick", RO, dbl_zero),
-#endif
 
   Var_uli("clk_wander_threshold", RO|ToPPM, timer_xmtcalls),
 

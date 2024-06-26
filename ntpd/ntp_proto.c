@@ -211,19 +211,11 @@ void set_use_stattime(uptime_t stattime) {
 }
 
 
-#ifdef ENABLE_FUZZ
-double	measured_tick;		/* non-overridable sys_tick (s) */
-#endif
-
 static	void	clock_combine	(peer_select *, int, int);
 static	void	clock_select	(void);
 static	void	clock_update	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, auth_info*, int);
 static	int	local_refid	(struct peer *);
-#ifdef ENABLE_FUZZ
-static	void	measure_precision(const bool);
-static	double	measure_tick_fuzz(void);
-#endif
 static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 static	double	root_distance	(struct peer *);
@@ -2712,152 +2704,6 @@ peer_unfit(
 }
 
 
-#ifdef ENABLE_FUZZ
-/*
- * Find the precision of this particular machine
- */
-#define MINSTEP		20e-9	/* minimum clock increment (s) */
-#define MAXSTEP		1	/* maximum clock increment (s) */
-#define MINCHANGES	12	/* minimum number of step samples */
-#define MAXLOOPS	((int)(1. / MINSTEP))	/* avoid infinite loop */
-
-/*
- * This routine measures the system precision defined as the minimum of
- * a sequence of differences between successive readings of the system
- * clock. However, if a difference is less than MINSTEP, the clock has
- * been read more than once during a clock tick and the difference is
- * ignored. We set MINSTEP greater than zero in case something happens
- * like a cache miss, and to tolerate underlying system clocks which
- * ensure each reading is strictly greater than prior readings while
- * using an underlying stepping (not interpolated) clock.
- *
- * sys_tick and sys_precision represent the time to read the clock for
- * systems with high-precision clocks, and the tick interval or step
- * size for lower-precision stepping clocks.
- *
- * This routine also measures the time to read the clock on stepping
- * system clocks by counting the number of readings between changes of
- * the underlying clock.  With either type of clock, the minimum time
- * to read the clock is saved as sys_fuzz, and used to ensure the
- * get_systime() readings always increase and are fuzzed below sys_fuzz.
- */
-void
-measure_precision(const bool verbose)
-{
-	/*
-	 * With sys_fuzz set to zero, get_systime() fuzzing of low bits
-	 * is effectively disabled.  trunc_os_clock is false to disable
-	 * get_ostime() simulation of a low-precision system clock.
-	 */
-	set_sys_fuzz(0.);
-	trunc_os_clock = false;
-	measured_tick = measure_tick_fuzz();
-	set_sys_tick_precision(measured_tick);
-	if (verbose) {
-		msyslog(LOG_INFO, "INIT: precision = %.3f usec (%d)",
-			sys_tick * US_PER_S, sys_vars.sys_precision);
-		if (sys_fuzz < sys_tick) {
-			msyslog(LOG_NOTICE, "INIT: fuzz beneath %.3f usec",
-				sys_fuzz * US_PER_S);
-		}
-	}
-}
-
-
-/*
- * measure_tick_fuzz()
- *
- * measures the minimum time to read the clock (stored in sys_fuzz)
- * and returns the tick, the larger of the minimum increment observed
- * between successive clock readings and the time to read the clock.
- */
-double
-measure_tick_fuzz(void)
-{
-	l_fp	minstep;	/* MINSTEP as l_fp */
-	l_fp	val;		/* current seconds fraction */
-	l_fp	last;		/* last seconds fraction */
-	l_fp	ldiff;		/* val - last */
-	double	tick;		/* computed tick value */
-	double	diff;
-	long	repeats;
-	long	max_repeats;
-	int	changes;
-	int	i;		/* log2 precision */
-
-	tick = MAXSTEP;
-	max_repeats = 0;
-	repeats = 0;
-	changes = 0;
-	minstep = dtolfp(MINSTEP);
-	get_systime(&last);
-	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
-		get_systime(&val);
-		ldiff = val;
-		ldiff -= last;
-		last = val;
-		if (L_ISGT(ldiff, minstep)) {
-			max_repeats = max(repeats, max_repeats);
-			repeats = 0;
-			changes++;
-			diff = lfptod(ldiff);
-			tick = min(diff, tick);
-		} else {
-			repeats++;
-		}
-	}
-	if (changes < MINCHANGES) {
-		msyslog(LOG_ERR, "PROTO: Fatal error: precision could not be measured (MINSTEP too large?)");
-		exit(1);
-	}
-
-	if (0 == max_repeats) {
-		set_sys_fuzz(tick);
-	} else {
-		set_sys_fuzz(tick / max_repeats);
-	}
-
-	return tick;
-}
-
-void
-set_sys_tick_precision(
-	double tick
-	)
-{
-	int i;
-
-	if (tick > 1.) {
-		msyslog(LOG_ERR,
-			"INIT: unsupported tick %.3f > 1s ignored", tick);
-		return;
-	}
-	if (tick < measured_tick) {
-		msyslog(LOG_ERR,
-			"INIT: tick %.3f less than measured tick %.3f, ignored",
-			tick, measured_tick);
-		return;
-	} else if (tick > measured_tick) {
-		trunc_os_clock = true;
-		msyslog(LOG_NOTICE,
-			"INIT: truncating system clock to multiples of %.9f",
-			tick);
-	}
-	sys_tick = tick;
-
-	/*
-	 * Find the nearest power of two.
-	 */
-	for (i = 0; tick <= 1; i--) {
-		tick *= 2;
-}
-	if (tick - 1 > 1 - tick / 2) {
-		i++;
-}
-
-	sys_vars.sys_precision = (int8_t)i;
-}
-#endif
 
 /*
  * init_proto - initialize the protocol module's data
@@ -2879,12 +2725,8 @@ init_proto(const bool verbose)
 	sys_vars.sys_rootdisp = 0;
 	sys_vars.sys_reftime = 0;
 	clkstate.sys_jitter = 0;
-#ifdef ENABLE_FUZZ
-	measure_precision(verbose);
-#else
 	UNUSED_ARG(verbose);
-	sys_vars.sys_precision = -30; /* ns */
-#endif
+	sys_vars.sys_precision = -30; /* ns */  // FIXME FUZZ
 	get_systime(&dummy);
 	sys_survivors = 0;
 	sys_stattime = current_time;

@@ -812,9 +812,8 @@ int main(int argc, char **argv) {
     if ctx.options.enable_early_droproot:
         ctx.define("ENABLE_EARLY_DROPROOT", 1,
                    comment="Enable early drop root")
-    if not ctx.options.disable_fuzz:
-        ctx.define("ENABLE_FUZZ", 1,
-                   comment="Enable fuzzing low bits of time")
+    if ctx.options.disable_fuzz:
+        pprint("YELLOW", "--disable-fuzz is now standard.  Clock fuzzing is gone.")
 
     # SO_REUSEADDR socket option is needed to open a socket on an
     # interface when the port number is already in use on another

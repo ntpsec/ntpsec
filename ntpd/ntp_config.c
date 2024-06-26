@@ -1935,15 +1935,6 @@ config_tinker(
 		case T_Stepout:
 			item = LOOP_MINSTEP;
 			break;
-
-		case T_Tick:
-#ifdef ENABLE_FUZZ
-			item = LOOP_TICK;
-			break;
-#else
-			msyslog(LOG_ERR, "ERR: tinker tick not supported");
-			continue;
-#endif
 		}
 		loop_config(item, tinker->value.d);
 	}
@@ -2563,12 +2554,6 @@ config_vars(
 	for (; curr_var != NULL; curr_var = curr_var->link) {
 		/* Determine which variable to set and set it */
 		switch (curr_var->attr) {
-
-#ifdef ENABLE_FUZZ
-		case T_Tick:
-			loop_config(LOOP_TICK, curr_var->value.d);
-			break;
-#endif
 
 		case T_Driftfile:
 			if ('\0' == curr_var->value.s[0]) {

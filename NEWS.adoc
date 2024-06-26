@@ -12,6 +12,8 @@ on user-visible changes.
 
 ## Repository Head
 
+* Clock fuzzing is gone.  --disable-fuzz is now standard.
+
 * ntpd can now listen on a second port.  Add either "nts port xxxx"
   or "extra port xxxx" in your config file. If either is specified,
   the NTS-KE server will tell the client to use that port.  This might

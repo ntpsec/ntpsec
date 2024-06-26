@@ -1246,12 +1246,6 @@ loop_config(
 		}
 		break;
 
-#ifdef ENABLE_FUZZ
-	case LOOP_TICK:		/* tick increment (tick) */
-		set_sys_tick_precision(freq);
-		break;
-#endif
-
 	case LOOP_LEAP:		/* not used, fall through */
 	default:
 		msyslog(LOG_NOTICE,

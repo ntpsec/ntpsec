@@ -1138,7 +1138,6 @@ tinker_option_keyword
 	|	T_Stepback
 	|	T_Stepfwd
 	|	T_Stepout
-	|	T_Tick
 	;
 
 

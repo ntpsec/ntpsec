@@ -95,7 +95,7 @@ ext, ffi, or none. defaults to ffi.""", nargs=1)
                    help="Force undefinition of symbol.")
     grp.add_option('--disable-fuzz', action='store_true',
                    default=False,
-                   help="Disable fuzzing of low bits of time")
+                   help="Feature gone")
 
     # This option group name needs to exactly match the name from
     # waflib/Tools/python.py so this option groups with the other Python

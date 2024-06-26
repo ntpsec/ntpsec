@@ -841,7 +841,6 @@ class TestPylibUtilMethods(unittest.TestCase):
                        ("authdelay", (6, "6")), ("koffset", (7, "7")),
                        ("kmaxerr", (8, "8")), ("kesterr", (9, "9")),
                        ("kprecis", (10, "10")), ("kppsjitter", (11, "11")),
-                       ("fuzz", (12, "12")),
                        ("clk_wander_threshold", (13, "13")),
                        ("tick", (14, "14")), ("in", (15, "15")),
                        ("out", (16, "16")), ("bias", (17, "17")),
@@ -851,9 +850,9 @@ class TestPylibUtilMethods(unittest.TestCase):
             self.assertEqual(f(data), "rootdelay=0, rootdisp=1, offset=2, "
                              "sys_jitter=3, clk_jitter=4,\nleapsmearoffset=5, "
                              "authdelay=6, koffset=7, kmaxerr=8, kesterr=9, "
-                             "kprecis=10,\nkppsjitter=11, fuzz=12, "
+                             "kprecis=10,\nkppsjitter=11, "
                              "clk_wander_threshold=13, tick=14, in=15, "
-                             "out=16,\nbias=17, delay=18, jitter=19, "
+                             "out=16, bias=17,\ndelay=18, jitter=19, "
                              "dispersion=20, fudgetime1=21, fudgetime2=21\n")
             # Test MS_VARS, with units
             self.assertEqual(f(data, showunits=True),
@@ -861,10 +860,10 @@ class TestPylibUtilMethods(unittest.TestCase):
                              "sys_jitter=3ms, clk_jitter=4ms,\n"
                              "leapsmearoffset=5ms, authdelay=6ms, "
                              "koffset=7ms, kmaxerr=8ms, kesterr=9ms,\n"
-                             "kprecis=10ms, kppsjitter=11ms, fuzz=12ms, "
-                             "clk_wander_threshold=13ms,\ntick=14ms, in=15ms, "
-                             "out=16ms, bias=17ms, delay=18ms, jitter=19ms,\n"
-                             "dispersion=20ms, fudgetime1=21ms, "
+                             "kprecis=10ms, kppsjitter=11ms, "
+                             "clk_wander_threshold=13ms, tick=14ms, in=15ms,\n"
+                             "out=16ms, bias=17ms, delay=18ms, jitter=19ms, "
+                             "dispersion=20ms,\nfudgetime1=21ms, "
                              "fudgetime2=21ms\n")
             # Test S_VARS
             data = od((("tai", (0, "0")), ("poll", (1, "1"))))
