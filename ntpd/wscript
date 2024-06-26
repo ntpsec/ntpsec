@@ -124,7 +124,7 @@ def build(ctx):
     ]
 
     ctx(
-        features="c rtems_trace cprogram",
+        features="c cprogram",
         includes=[
             ctx.bldnode.parent.abspath(), "../include",
             "%s/host/ntpd/" % ctx.bldnode.parent.abspath(), "." ],

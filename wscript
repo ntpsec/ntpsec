@@ -148,19 +148,6 @@ def configure(ctx):
     for opt in opt_map:
         ctx.env[opt] = opt_map[opt]
 
-    if ctx.options.enable_rtems_trace:
-        ctx.find_program("rtems-tld", var="BIN_RTEMS_TLD",
-                         path_list=[ctx.options.rtems_trace_path,
-                                    '${BINDIR}'])
-        ctx.env.RTEMS_TEST_ENABLE = True
-        ctx.env.RTEMS_TEST_FLAGS = [
-            "-C", "%s/devel/trace/ntpsec-trace.ini" % srcnode,
-            "-W", "%s/ntpsec-wrapper" % bldnode,
-            "-P", "%s/devel/trace/" % srcnode,
-            "-f", "-I%s" % bldnode,
-            "-f", "-I%s/include/" % srcnode,
-        ]
-
     # Not needed to build.  Used by utility scripts.
     ctx.find_program("awk", var="BIN_AWK", mandatory=False)
     ctx.find_program("sh", var="BIN_SH", mandatory=False)
@@ -956,7 +943,6 @@ def bin_test_summary(ctx):
     bin_test_summary(ctx)
 
 
-# Borrowed from https://www.rtems.org/
 variant_cmd = (
     ("build", BuildContext),
     ("clean", CleanContext),
@@ -1058,7 +1044,6 @@ def build(ctx):
     from waflib.Logs import verbose
     ctx.load('waf', tooldir='wafhelpers/')
     ctx.load('asciidoc', tooldir='wafhelpers/')
-    ctx.load('rtems_trace', tooldir='wafhelpers/')
 
     if ctx.variant == "host":
         ctx.recurse("ntpd")
