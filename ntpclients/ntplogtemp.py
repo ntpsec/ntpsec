@@ -130,6 +130,8 @@ class SmartCtl:
             # Which drive to watch
             for child in glob.glob('/dev/sd?'):
                 self._drives.append(child)
+            for child in glob.glob('/dev/nvme?n?'):
+                self._drives.append(child)
             self._drives = sorted(self._drives)
 
     def get_data(self):
@@ -150,6 +152,12 @@ class SmartCtl:
                         now = int(time.time())
                         temp = line.split()[9]
                         data.append('%d %s %s' % (now, _device, temp))
+                        break
+                    if line.startswith('Temperature:'):
+                        now = int(time.time())
+                        temp = line.split()[1]
+                        data.append('%d %s %s' % (now, _device, temp))
+                        break
         return data
 
 
