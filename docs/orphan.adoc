@@ -18,9 +18,9 @@ recover.
 
 A common configuration for private networks includes one or more core
 servers operating at the lowest stratum. Good practice is to configure
-each of these servers as backup for the others using symmetric or
-broadcast modes. As long as at least one core server can reach a UTC
-source, the entire subnet can synchronize to it.
+each of these servers as backup for the others using server mode. As
+long as at least one core server can reach a UTC source, the entire
+subnet can synchronize to it.
 
 If no UTC sources are available to any core server, one of them can
 provide a simulated UTC source for all other hosts in the subnet.
@@ -60,32 +60,17 @@ should operate at the same stratum. All core servers and orphan children
 should include the same tos command in the configuration file. Each
 orphan child should include in the configuration file all core servers.
 
-image:pic/peer.gif[]
+image:pic/orphan.gif[]
 
-Figure 1. Orphan Peer Configuration
+Figure 1. Orphan server Configuration
 
 For example, consider the peer network configuration in Figure 1, where
 two or more campus primary or secondary (stratum 2) servers are
 configured with reference clocks or public Internet primary servers and
-with each other using symmetric modes. With this configuration a server
+with each other using server mode. With this configuration a server
 that loses all sources continues to discipline the system clock using
 the other servers as backup. Only the core servers and orphan children
 need to be enabled for orphan mode.
-
-image:pic/broad.gif[]
-
-Figure 2. Orphan Broadcast Configuration
-
-For broadcast networks each core server is configured in both broadcast
-server and broadcast client modes as shown in Figure 2. Orphan children
-operate as broadcast clients of all core servers. As in peer networks,
-the core servers back up each other and only they and the orphan
-children need to be enabled for orphan mode.
-
-In normal operation subnet hosts operate below stratum 5, so the subnet
-is automatically configured as described in the NTP specification. If
-all UTC sources are lost, all core servers become orphans and the orphan
-children will select the same core server to become the orphan parent.
 
 '''''
 
