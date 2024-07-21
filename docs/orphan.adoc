@@ -64,7 +64,7 @@ image:pic/orphan.gif[]
 
 Figure 1. Orphan server Configuration
 
-For example, consider the peer network configuration in Figure 1, where
+For example, consider the server network configuration in Figure 1, where
 two or more campus primary or secondary (stratum 2) servers are
 configured with reference clocks or public Internet primary servers and
 with each other using server mode. With this configuration a server
