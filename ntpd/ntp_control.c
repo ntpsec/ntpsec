@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <inttypes.h>
+#include <stdbool.h>
 
 #include <openssl/evp.h>	/* provides OpenSSL digest API */
 
@@ -1518,7 +1519,7 @@ ctl_putsys(const struct var * v) {
 static void
 ctl_putspecial(const struct var * v) {
 
-/* older compilers don't allow delecrations on each case */
+/* older compilers don't allow declarations on each case */
         int64_t i;
 	const char *ss = "0.0.0.0:0";
         l_fp tmp;
