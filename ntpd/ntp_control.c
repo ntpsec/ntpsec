@@ -115,6 +115,8 @@ static	void	ctl_putclock	(int, struct refclockstat *, bool);
 static	const struct var * ctl_getitem(const struct var *, char **);
 static	void	ctl_putsys	(const struct var *);
 static	void	ctl_putspecial	(const struct var *);
+void do_sys_var_list(const char* name, const struct var* v);
+
 
 static	const struct ctl_var *ctl_getitem2(const struct ctl_var *, char **);
 static	unsigned short ctlsysstatus	(void);
@@ -1525,7 +1527,6 @@ ctl_putspecial(const struct var * v) {
         l_fp tmp;
         uint64_t u;
         l_fp now;
-        struct ctl_var *cv;
 
   switch (v->p.special) {
     case vs_peer:
@@ -1561,9 +1562,7 @@ ctl_putspecial(const struct var * v) {
         ctl_putuint(v->name, mon_get_oldest_age(now));
         break;
     case vs_varlist:
-        for (cv = ext_sys_var; !(EOV & cv->flags); cv++) {
-            ctl_putdata(cv->text, strlen(cv->text), false);
-        }
+	do_sys_var_list(v->name, sys_var);
         break;
     default:
         /* -Wswitch-enum will warn if this is possible */
@@ -1774,44 +1773,6 @@ ctl_putpeer(
 #undef CV_NAME
 
 
-ssize_t CI_VARLIST(
-    char *buffer_lap,
-    char *buf_end,
-    const struct ctl_var *table,
-    bool *first
-    ) {
-	char *start = buffer_lap;
-	char *string_split;
-	size_t string_length;
-	const struct ctl_var *row;
-	if (NULL == table) {
-		return 0;
-	}
-	for (row = table; !(EOV & row->flags); row++) {
-		if (PADDING & row->flags)
-			continue;
-		string_split = strchr(row->text, '=');
-		if (string_split == NULL) {
-			string_length = strlen(row->text);
-		} else {
-			string_length = string_split - row->text; 
-		}
-		if (string_length >= buf_end - buffer_lap - (size_t)1) {
-			return -1;
-		}
-		if (!*first) {
-			*buffer_lap++ = ',';
-		} else {
-			*first = false;
-		}
-		memcpy(buffer_lap, row->text, string_length);
-		buffer_lap+= string_length;
-	}
-	*buffer_lap = '\0';
-	return buffer_lap - start;
-}
-
-
 bool CF_VARLIST(
     const struct ctl_var *entry,
     const struct ctl_var *table1,
@@ -1850,6 +1811,83 @@ bool CF_VARLIST(
 	*buffer_lap = '\0';
 	ctl_putdata(buf, (unsigned)(buffer_lap - buf), false);
 	return true;
+}
+
+
+ssize_t CI_VARLIST(
+    char *buffer_lap,
+    char *buf_end,
+    const struct ctl_var *table,
+    bool *first
+    ) {
+	char *start = buffer_lap;
+	char *string_split;
+	size_t string_length;
+	const struct ctl_var *row;
+	if (NULL == table) {
+		return 0;
+	}
+	for (row = table; !(EOV & row->flags); row++) {
+		if (PADDING & row->flags)
+			continue;
+		string_split = strchr(row->text, '=');
+		if (string_split == NULL) {
+			string_length = strlen(row->text);
+		} else {
+			string_length = string_split - row->text; 
+		}
+		if (string_length >= buf_end - buffer_lap - (size_t)1) {
+			return -1;
+		}
+		if (!*first) {
+			*buffer_lap++ = ',';
+		} else {
+			*first = false;
+		}
+		memcpy(buffer_lap, row->text, string_length);
+		buffer_lap+= string_length;
+	}
+	*buffer_lap = '\0';
+	return buffer_lap - start;
+}
+
+
+void do_sys_var_list(const char* name, const struct var* v) {
+	/* This has to be big enough for the whole answer -- all names.
+	 * On 2024-Jul-21, that was almost 3000 characters.
+	 * We could split this into two: counters and other. */
+	char buf[5000];
+	char *buffer;
+	bool first = true;
+	int length;
+
+	memset(buf, '.', sizeof(buf));
+	buf[0] = '\0';
+	buffer = buf;
+	if (strlen(v->name) + 10 > sizeof(buf)) {
+		return;	// really long var name
+	}
+	snprintf(buffer, sizeof(buf), "%s=\"", name);
+	buffer += strlen(buffer);
+
+	for ( ;!(EOV & v->flags); v++) {
+                length = strlen(v->name);
+                if (buffer+length+6 >= buf+sizeof(buf)) {
+			/* FIXME -- need bigger buffer */
+                        continue;
+                }
+                if (first) {
+                        first = false;
+                } else {
+                        *buffer++ = ',';
+                }
+                memcpy(buffer, v->name, length);
+                buffer+= length;
+	}
+
+	*buffer++ = '"';
+	*buffer = '\0';
+	ctl_putdata(buf, (unsigned)(buffer - buf), false);
 }
 
 
