@@ -74,7 +74,6 @@ gentoo-options-tester:
 macos-options-tester:
   stage: test
   needs: []
-  image: macos-12-xcode-14
   script:
     - PKG_CONFIG_PATH=${HOMEBREW_PREFIX}/opt/openssl/lib/pkgconfig PYTHON=${HOMEBREW_PREFIX}/bin/python3 tests/option-tester.sh
   tags:
