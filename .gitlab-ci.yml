@@ -318,15 +318,6 @@ debian-stable-mDNS-refclocks:
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
-cross-build:
-  <<: *job_definition_allow_failure
-  script:
-    - PYTHON_VERSION=2.7 PYTAG=cpython27 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc-5 --cross-cflags '-I/srv/arm-local/include -I/srv/arm-local/include/python2.7' --cross-ldflags '-L/srv/arm-local/lib' --pythondir=/srv/arm-local/lib/python2.7/dist-packages --pythonarchdir=/srv/arm-local/lib/python2.7/dist-packages build
-  tags:
-    - ubuntu-1604-lts
-  rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
-
 cross-armhf-build:
   <<: *job_definition_allow_failure
   image: $CI_REGISTRY/ntpsec/ntpsec/cross-armhf
