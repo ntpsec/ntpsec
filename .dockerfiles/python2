@@ -5,4 +5,11 @@
 FROM python:2-slim
 
 RUN apt-get update -qq
-RUN apt-get install -y -qq netbase bison gcc libssl-dev libcap-dev pps-tools libbsd-dev
+RUN apt-get install -y -qq \
+	bison \
+	gcc \
+	libbsd-dev \
+	libcap-dev \
+	libssl-dev \
+	netbase \
+	pps-tools

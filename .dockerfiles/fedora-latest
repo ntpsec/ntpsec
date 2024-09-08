@@ -4,4 +4,11 @@
 
 FROM fedora:latest
 
-RUN dnf -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel libbsd-devel
+RUN dnf -y install \
+	bison \
+	gcc \
+	libbsd-devel \
+	libcap-devel \
+	openssl-devel \
+	pps-tools-devel \
+	python3-devel

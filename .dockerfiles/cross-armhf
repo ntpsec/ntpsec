@@ -6,5 +6,15 @@ FROM debian:testing
 
 RUN dpkg --add-architecture armhf
 RUN apt-get update
-RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y bison gcc gcc-arm-linux-gnueabihf git make netbase pps-tools python-is-python3 wget
-RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y libssl-dev:armhf libpython3-dev:armhf
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
+	bison \
+	gcc \
+	gcc-arm-linux-gnueabihf \
+	git \
+	libpython3-dev:armhf \
+	libssl-dev:armhf \
+	make \
+	netbase \
+	pps-tools \
+	python-is-python3 \
+	wget

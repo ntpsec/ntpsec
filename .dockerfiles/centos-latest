@@ -7,4 +7,11 @@ FROM quay.io/centos/centos:stream9
 RUN dnf -y install dnf-plugins-core
 RUN dnf config-manager --set-enabled crb
 RUN dnf -y install epel-release
-RUN dnf -y install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libbsd-devel
+RUN dnf -y install \
+	bison \
+	gcc \
+	libbsd-devel \
+	libcap-devel \
+	openssl-devel \
+	python3-devel \
+	pps-tools-devel

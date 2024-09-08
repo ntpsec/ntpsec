@@ -5,4 +5,14 @@
 FROM alpine
 
 RUN apk update
-RUN apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev libbsd asciidoctor findutils gzip
+RUN apk add \
+	asciidoctor \
+	bison \
+	findutils \
+	gcc \
+	gzip \
+	libbsd \
+	libcap-dev \
+	musl-dev \
+	openssl-dev \
+	python3-dev

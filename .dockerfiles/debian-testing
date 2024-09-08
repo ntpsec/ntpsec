@@ -5,4 +5,12 @@
 FROM debian:testing-slim
 
 RUN apt-get update
-RUN apt-get install -y netbase bison gcc libssl-dev libcap-dev pps-tools python3-dev libbsd-dev
+RUN apt-get install -y \
+	bison \
+	gcc \
+	libbsd-dev \
+	libcap-dev \
+	libssl-dev \
+	netbase \
+	pps-tools \
+	python3-dev

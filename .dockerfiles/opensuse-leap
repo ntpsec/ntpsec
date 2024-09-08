@@ -4,4 +4,12 @@
 
 FROM opensuse/leap
 
-RUN zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel python3-devel python3-curses libbsd-devel
+RUN zypper -n install \
+	bison \
+	gcc \
+	libbsd-devel \
+	libcap-devel \
+	libopenssl-devel \
+	pps-tools-devel \
+	python3-curses \
+	python3-devel

@@ -8,4 +8,7 @@ FROM gentoo/stage3
 
 COPY --from=portage /var/db/repos/gentoo /var/db/repos/gentoo
 
-RUN emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools
+RUN emerge -q y \
+	net-misc/pps-tools \
+	sys-devel/bison \
+	sys-libs/libcap
