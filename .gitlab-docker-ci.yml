@@ -18,7 +18,6 @@
       --tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest .
       --file .dockerfiles/$IMAGE_NAME
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
-  allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
@@ -26,6 +25,7 @@ build-alpine:
   <<: *build_definition
 
 build-alpine-edge:
+  allow_failure: true
   <<: *build_definition
 
 build-alpine-pages:
@@ -59,6 +59,7 @@ build-debian-testing:
   <<: *build_definition
 
 build-debian-unstable:
+  allow_failure: true
   <<: *build_definition
 
 build-fedora-latest:
@@ -83,4 +84,5 @@ build-ubuntu-rolling:
   <<: *build_definition
 
 build-cross-armhf:
+  allow_failure: true
   <<: *build_definition

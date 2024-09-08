@@ -23,6 +23,7 @@ make-tarball:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
 alpine-edge-options-tester:
+  allow_failure: true
   <<: *option_tester_py3_only
   image: alpine:edge
   before_script:
@@ -49,7 +50,6 @@ fedora-latest-options-tester:
 opensuse-leap-options-tester:
   <<: *option_tester_py3_only
   image: opensuse/leap
-  allow_failure: true
   before_script:
     - zypper -n install bison gcc libopenssl-devel libcap-devel pps-tools-devel libseccomp-devel python3-devel python3-curses pkg-config bash
 
@@ -125,6 +125,7 @@ debian-testing-options-tester:
   <<: *deb_option_tester_py3_only
 
 debian-unstable-options-tester:
+  allow_failure: true
   image: debian:unstable-slim
   <<: *deb_option_tester_py3_only
 
@@ -133,6 +134,7 @@ ubuntu-latest-options-tester:
   <<: *deb_option_tester_py3_only
 
 ubuntu-devel-options-tester:
+  allow_failure: true
   image: ubuntu:devel
   <<: *deb_option_tester_py3_only
 

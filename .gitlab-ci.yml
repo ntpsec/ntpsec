@@ -9,7 +9,6 @@ pages:
     - mv public/latest/404.html public/404.html
     - sed -i -E -e 's!\./(asciidoc\.(js|css))!\./latest/\1!g' public/404.html
     - find public -type f -iregex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -execdir gzip -f --keep {} \;
-  allow_failure: true
   artifacts:
     paths:
        - public
@@ -29,10 +28,6 @@ include:
   tags:
     - gitlab-org
 
-.job_template_allow_failure: &job_definition_allow_failure
-  <<: *job_definition
-  allow_failure: true
-
 alpine-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine
@@ -48,7 +43,8 @@ alpine-refclocks:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 alpine-edge-basic:
-  <<: *job_definition_allow_failure
+  allow_failure: true
+  <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine-edge
   script:
     - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -56,13 +52,14 @@ alpine-edge-basic:
     - python3 ./waf uninstall
 
 alpine-edge-refclocks:
-  <<: *job_definition_allow_failure
+  allow_failure: true
+  <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine-edge
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 AsciiDoc-3-Fedora:
-  <<: *job_definition_allow_failure
+  <<: *job_definition
   image: fedora
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget libxslt docbook-style-xsl
@@ -147,7 +144,8 @@ debian-testing-refclocks:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 debian-unstable-basic:
-  <<: *job_definition_allow_failure
+  allow_failure: true
+  <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
   script:
     - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -155,7 +153,8 @@ debian-unstable-basic:
     - python3 ./waf uninstall
 
 debian-unstable-refclocks:
-  <<: *job_definition_allow_failure
+  allow_failure: true
+  <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
@@ -175,7 +174,8 @@ ubuntu-latest-refclocks:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 ubuntu-devel-basic:
-  <<: *job_definition_allow_failure
+  <<: *job_definition
+  allow_failure: true
   image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
     - python3 ./waf configure --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -183,7 +183,8 @@ ubuntu-devel-basic:
     - python3 ./waf uninstall
 
 ubuntu-devel-refclocks:
-  <<: *job_definition_allow_failure
+  <<: *job_definition
+  allow_failure: true
   image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
@@ -253,7 +254,7 @@ fedora-latest-refclocks:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 python3:
-  <<: *job_definition_allow_failure
+  <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/python3
   script:
     - python ./waf configure --disable-doc --disable-manpage --refclock=all build
@@ -319,7 +320,8 @@ debian-stable-mDNS-refclocks:
     - python3 ./waf configure --disable-doc --disable-manpage --refclock=all build
 
 cross-armhf-build:
-  <<: *job_definition_allow_failure
+  allow_failure: true
+  <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/cross-armhf
   script:
     - pyver=$(python3 -c 'import sys;print(f"{sys.version_info.major}.{sys.version_info.minor}")')
