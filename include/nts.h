@@ -192,6 +192,9 @@ enum nts_errors_type {
 };
 
 
+/* https://www.iana.org/assignments/aead-parameters/aead-parameters.xhtml
+ * Authenticated Encryption with Associated Data (AEAD) Parameters
+ */
 enum aead_ciphers {
 #define NO_AEAD 0xffff
 	AEAD_AES_128_GCM = 1,
@@ -231,7 +234,13 @@ enum aead_ciphers {
 	AEAD_AES_256_OCB_TAGLEN96 = 27,
 	AEAD_AES_256_OCB_TAGLEN64 = 28,
 
-	AEAD_CHACHA20_POLY1305 = 29
+	AEAD_CHACHA20_POLY1305 = 29,
+
+	AEAD_AES_128_GCM_SIV = 30,
+	AEAD_AES_256_GCM_SIV = 31,
+
+	AEAD_AEGIS128L = 32,
+	AEAD_AEGIS256 = 33
 };
 
 
