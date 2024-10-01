@@ -38,6 +38,19 @@ struct utsname utsnamebuf;
 static leap_signature_t lsig;
 static struct timex ntx;
 
+/* Ugh.  timex slots are tough.  The man page says "long"
+ * But the actual implementation on Linux uses something else.
+ * On some 32 bit systems, that may not match the size of a long.
+ * The below kludge of using a special slot for each of the 5 places
+ * where that type would get used is simpler than setting up a
+ * #define for SIZEOF_TIMEX_XX that could be used to setup the
+ * correct type of the pointer in the table.
+ *
+ * See the discussion at:
+ *   https://gitlab.com/NTPsec/ntpsec/-/merge_requests/1403
+ *   https://lists.ntpsec.org/pipermail/devel/2024-September/010492.html
+ */
+
 /*
  * Statistic counters to keep track of requests and responses.
  */
@@ -98,7 +111,7 @@ static	void	ctl_putdblf	(const char *, bool, int, double);
 #define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, false, -1, FP_UNSCALE(sfp))
 static	void	ctl_putuint	(const char *, uint64_t);
 static	void	ctl_puthex	(const char *, uint64_t);
-static	void	ctl_putint	(const char *, long);
+static	void	ctl_putint	(const char *, int64_t);
 static	void	ctl_putts	(const char *, l_fp);
 static	void	ctl_putadr	(const char *, refid_t, sockaddr_u *);
 static	void	ctl_putrefid	(const char *, refid_t);
@@ -171,7 +184,9 @@ enum var_type {v_time,
 enum var_type_special {
 	vs_peer, vs_peeradr, vs_peermode,
 	vs_systime,
-	vs_refid, vs_mruoldest, vs_varlist};
+	vs_refid, vs_mruoldest, vs_varlist,
+	/* for slots in struct timex -- see comment above */
+	vs_tx_con, vs_tx_cal, vs_tx_err, vs_tx_jit, vs_tx_stb};
 struct var {
   const char* name;
   const int flags;
@@ -182,6 +197,7 @@ struct var {
     const double* dbl;
     const unsigned long int* uli;
     const long int* li;
+    const int64_t* timex_li;
     const unsigned int* uinnt;
     const int* innt;
     const uint64_t* u64;
@@ -268,9 +284,10 @@ struct var {
   .name = xname, .flags = xflags, .type = v_kli, .p.li = &xlocation }
 #define Var_special(xname, xflags, xspecial) { \
   .name = xname, .flags = xflags, .type = v_special, .p.special = xspecial }
+#define Var_timex(xname, xflags, xspecial) { \
+  .name = xname, .flags = xflags, .type = v_special, .p.special = xspecial }
 
 static const struct var sys_var[] = {
-  Var_u32("ss_uptime", RO, current_time),
   Var_u8("leap", RO|DEF, sys_vars.sys_leap),        // Was RW
   Var_u8("stratum", RO|DEF, sys_vars.sys_stratum),
   Var_i8("precision", RO|DEF, sys_vars.sys_precision),
@@ -369,17 +386,17 @@ static const struct var sys_var[] = {
   Var_kli("kmaxerr", RO|N_CLOCK|KUToMS, ntx.maxerror),
   Var_kli("kesterr", RO|N_CLOCK|KUToMS, ntx.esterror),
   Var_int("kstflags", RO|N_CLOCK, ntx.status),           // turn to text
-  Var_li("ktimeconst", RO|N_CLOCK, ntx.constant),
+  Var_timex("ktimeconst", RO|N_CLOCK, vs_tx_con),
   Var_kli("kprecis", RO|N_CLOCK|KUToMS, ntx.precision),
   Var_kli("kfreqtol", RO|N_CLOCK|K_16, ntx.tolerance),  // Not in man page
   Var_kli("kppsfreq", RO|N_CLOCK|K_16, ntx.ppsfreq),
   Var_kli("kppsstab", RO|N_CLOCK|K_16, ntx.stabil),
   Var_kli("kppsjitter", RO|N_CLOCK|KNUToMS, ntx.jitter),
   Var_int("kppscalibdur", RO|N_CLOCK, ntx.shift),       // 1<<shift
-  Var_li("kppscalibs", RO|N_CLOCK, ntx.calcnt),
-  Var_li("kppscaliberrs", RO|N_CLOCK, ntx.errcnt),
-  Var_li("kppsjitexc", RO|N_CLOCK, ntx.jitcnt),
-  Var_li("kppsstbexc", RO|N_CLOCK, ntx.stbcnt),
+  Var_timex("kppscalibs", RO|N_CLOCK, vs_tx_cal),
+  Var_timex("kppscaliberrs", RO|N_CLOCK, vs_tx_err),
+  Var_timex("kppsjitexc", RO|N_CLOCK, vs_tx_jit),
+  Var_timex("kppsstbexc", RO|N_CLOCK, vs_tx_stb),
 
 
 /* refclock stuff in ntp_io */
@@ -1280,11 +1297,11 @@ ctl_puthex(
 static void
 ctl_putint(
 	const char *tag,
-	long ival
+	int64_t ival
 	)
 {
-        char buf[50];
-	snprintf(buf, sizeof(buf), "%ld", ival);
+	char buf[50];
+	snprintf(buf, sizeof(buf), "%" PRId64, ival);
 	ctl_putunqstr(tag, buf, strlen(buf));
 }
 
@@ -1564,6 +1581,11 @@ ctl_putspecial(const struct var * v) {
     case vs_varlist:
 	do_sys_var_list(v->name, sys_var);
         break;
+    case vs_tx_con: ctl_putint(v->name, ntx.constant); break;
+    case vs_tx_cal: ctl_putint(v->name, ntx.calcnt); break;
+    case vs_tx_err: ctl_putint(v->name, ntx.errcnt); break;
+    case vs_tx_jit: ctl_putint(v->name, ntx.jitcnt); break;
+    case vs_tx_stb: ctl_putint(v->name, ntx.stbcnt); break;
     default:
         /* -Wswitch-enum will warn if this is possible */
         if (log_limit++ > 10) return;  /* Avoid log file clutter/DDoS */
