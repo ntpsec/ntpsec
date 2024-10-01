@@ -12,6 +12,8 @@ on user-visible changes.
 
 ## Repository Head
 
+* ntpd now runs on FIPS mode systems.
+
 * Clock fuzzing is gone.  --disable-fuzz is now standard.
 
 * ntpd can now listen on a second port.  Add either "nts port xxxx"
