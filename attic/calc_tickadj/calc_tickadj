@@ -71,7 +71,7 @@ if __name__ == '__main__':
         sys.stderr.write("Could not open drift file: %s\n" % drift_file)
         sys.exit(1)
 
-    m = re.match("[+-]?\d+\.?[0-9]+", drift)
+    m = re.match(r"[+-]?\d+\.?[0-9]+", drift)
     if not m:
         sys.stderr.write("Invalid drift file value '%s'\n" % drift)
         sys.exit(1)

@@ -57,7 +57,7 @@ except:
 lines = output.split('\n')
 
 # this regex matches temperature output lines from 'sensors -u'
-pat = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
+pat = re.compile(r'^\s+temp\d+_input:\s+([\d\.]+).*$')
 
 now = int(time.time())
 
