@@ -74,9 +74,9 @@ else:  # Python 3
 
     def polyord(c):
         "Polymorphic ord() function"
-        if isinstance(c, str):
+        try:
             return ord(c)
-        else:
+        except TypeError as te:
             return c
 
     def polychr(c):
