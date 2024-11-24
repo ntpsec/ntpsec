@@ -540,20 +540,29 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
 			msyslog(LOG_INFO, "NTSs: Record: T=%d, L=%d, C=%d", type, length, critical);
 		switch (type) {
 		    case nts_error:
-			data = next_uint16(buf);
-			if (sizeof(data) != length)
+			if (sizeof(data) != length) {
 				msyslog(LOG_ERR, "NTSs: wrong length on error: %d", length);
+				return false;
+			}
+			data = next_uint16(buf);
 			msyslog(LOG_ERR, "NTSs: error: %d", data);
 			return false;
 		    case nts_next_protocol_negotiation:
+			if (sizeof(data) != length) {
+				msyslog(LOG_ERR, "NTSs: NPN-Wrong length: %d", length);
+				return false;
+			}
 			data = next_uint16(buf);
-			if ((sizeof(data) != length) || (data != nts_protocol_NTP)) {
-				msyslog(LOG_ERR, "NTSs: NPN-Wrong length or bad data: %d, %d",
-					length, data);
+			if (data != nts_protocol_NTP) {
+				msyslog(LOG_ERR, "NTSs: NPN-Bad data: %d", data);
 				return false;
 			}
 			break;
 		    case nts_algorithm_negotiation:
+			if (buf->left < length || length % sizeof(uint16_t) > 0) {
+				msyslog(LOG_ERR, "NTSs: AN-Wrong length: %d", length);
+				return false;
+			}
 			for (int i=0; i<length; i+=sizeof(uint16_t)) {
 				data = next_uint16(buf);
 				if (0 == nts_get_key_length(data)) {
