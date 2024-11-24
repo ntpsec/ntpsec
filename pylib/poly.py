@@ -81,9 +81,9 @@ else:  # Python 3
 
     def polychr(c):
         "Polymorphic chr() function"
-        if isinstance(c, int):
+        try:
             return chr(c)
-        else:
+        except TypeError as te:
             return c
 
     def string_escape(s):
