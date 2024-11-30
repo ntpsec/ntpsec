@@ -792,7 +792,7 @@ bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
  */
 bool nts_server_lookup(char *server, sockaddr_u *addr, int af) {
 	struct addrinfo hints;
-	struct addrinfo *answer;
+	struct addrinfo *answer = NULL;  /* init to keep oss-fuzz happy */
 	int gai_rc;
 
 	ZERO(hints);
