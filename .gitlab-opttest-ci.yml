@@ -12,17 +12,6 @@ make-tarball:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
-.option_tester: &option_tester
-  stage: test
-  needs: []
-  script:
-    - PYTHON=python2 bash tests/option-tester.sh
-    - PYTHON=python3 bash tests/option-tester.sh
-  tags:
-    - gitlab-org
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-
 .option_tester_py3_only: &option_tester_py3_only
   stage: test
   needs: []
@@ -55,7 +44,7 @@ fedora-latest-options-tester:
   image: fedora:latest
   before_script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel libseccomp-devel pkgconf-pkg-config
-  <<: *option_tester
+  <<: *option_tester_py3_only
 
 opensuse-leap-options-tester:
   <<: *option_tester_py3_only
