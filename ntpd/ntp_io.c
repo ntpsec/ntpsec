@@ -1381,16 +1381,16 @@ is_valid(
 static bool
 update_interfaces(void)
 {
-  bool new_interface = false;
+  bool have_new_interface = false;
   update_interfaces_phase0();
   if (extra_port)
     /* do first so our requests are sent from extra_port
      * see select_peerinterface() */
-    new_interface |= update_interfaces_phase1(extra_port);
-  new_interface |= update_interfaces_phase1(NTP_PORT);
+    have_new_interface |= update_interfaces_phase1(extra_port);
+  have_new_interface |= update_interfaces_phase1(NTP_PORT);
   update_interfaces_phase2();
   update_interfaces_phase3();
-  return new_interface;
+  return have_new_interface;
 }
 
 void update_interfaces_phase0(void)
