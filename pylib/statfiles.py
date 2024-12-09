@@ -90,7 +90,7 @@ class NTPStats:
     @staticmethod
     def ip_label(key):
         "Produce appropriate label for an IP address."
-        # If it's a new-style NTPsep clock label, pass it through,
+        # If it's a new-style NTPsec clock label, pass it through,
         # Otherwise we expect it to be an IP address and the next guard fires
         if key[0].isdigit():
             # TO BE REMOVED SOMEDAY
