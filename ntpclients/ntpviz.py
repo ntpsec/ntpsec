@@ -195,8 +195,8 @@ class RunningStats(object):
         m3 = 0
         m4 = 0
         for val in values:
-            m3 += pow(val - self.sigma, 3)
-            m4 += pow(val - self.sigma, 4)
+            m3 += pow(val - self.mu, 3)
+            m4 += pow(val - self.mu, 4)
 
         self.skewness = m3 / (self.num * pow(self.sigma, 3))
         self.kurtosis = m4 / (self.num * pow(self.sigma, 4))

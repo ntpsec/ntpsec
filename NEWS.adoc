@@ -12,6 +12,8 @@ on user-visible changes.
 
 ## Repository Head
 
+* Fix ntpviz's skewness and kurtosis formulas. Fix suggested by by Frank Davis.
+
 * ntpd now runs on FIPS mode systems.
 
 * Clock fuzzing is gone.  --disable-fuzz is now standard.
