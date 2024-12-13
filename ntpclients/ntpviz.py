@@ -203,9 +203,10 @@ class RunningStats(object):
         self.variance = sum(pow((v-self.mu), 2) for v in values) / self.num
         self.sigma = math.sqrt(self.variance)
 
-        # Note: math.isnan(float("+Inf")) is false, so avoid isnan()
-        # Use isfinite() instead.
-        if ((not math.isfinite(self.sigma) or
+        # Note: math.isnan(float("+Inf")) is false, so isnan() and isinf()
+        # Python 2 hasa no math.isfinite()
+        if ((math.isinf(self.sigma) or
+             math.isnan(self.sigma) or
              1e-12 >= abs(self.sigma))):
             # Not finite, or too small.  Punt
             self.skewness = float('nan')
