@@ -164,18 +164,35 @@ def print_profile():
 # use this until we can guarantee Python 3.4 and the statistics module
 # http://stackoverflow.com/questions/15389768/standard-deviation-of-a-list#21505523
 
-# class to calc:
-#   Mean, Variance, Standard Deviation, Skewness and Kurtosis
+# RunningStats(), a class to calculate:
+#     Mean, Variance, Standard Deviation, Skewness and Kurtosis
+#
+# References:
+#     https://en.wikipedia.org/wiki/Standard_deviation
+#
+#     NIST/SEMATECH e-Handbook of Statistical Methods, 2012
+#     1.3.5.11.  Measures of Skewness and Kurtosis
+#     https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm
 
 class RunningStats(object):
-    "Calculate mean, variance, sigma, skewness and kurtosis"
+    """Calculate mean, variance, sigma, skewness and kurtosis"""
 
     def __init__(self, values):
+        """Initialize the class, and do all the caculations."""
+
         self.num = len(values)     # number of samples
         self.mu = 0.0              # simple arithmetic mean
         self.variance = 0.0        # variance
-        self.sigma = 0.0           # aka standard deviation
+        # standard deviation, NOT the sample standard deviation
+        self.sigma = 0.0
+        # the Fisher-Pearson coefficient of skewness.
+        # NOT the adjusted Fisher-Pearson coefficient of skewness.
+        # NOT the Galton skewness (a.k.a. Bowley's skewness)
         self.skewness = 0.0
+        # the standard Kurtosis
+        # NOT the Alternative Kurtosis
+        # NOT the Excess Kurtosis
+        # Excess Kurtosis === standard Kurtosis - 3
         self.kurtosis = 3.0
 
         if 0 >= self.num:
@@ -186,8 +203,11 @@ class RunningStats(object):
         self.variance = sum(pow((v-self.mu), 2) for v in values) / self.num
         self.sigma = math.sqrt(self.variance)
 
-        if math.isnan(self.sigma) or 1e-12 >= abs(self.sigma):
-            # punt
+        # Note: math.isnan(float("+Inf")) is false, so avoid isnan()
+        # Use isfinite() instead.
+        if ((not math.isfinite(self.sigma) or
+             1e-12 >= abs(self.sigma))):
+            # Not finite, or too small.  Punt
             self.skewness = float('nan')
             self.kurtosis = float('nan')
             return
@@ -1829,13 +1849,6 @@ Refclock Jitter, and Server Jitter in seconds.  Local Frequency Jitter is
 in ppm or ppb.
 </dd>
 
-<dt>kurtosis, Kurt:</dt>
-<dd>The kurtosis of a random variable X is the fourth standardized
-moment and is a dimension-less ratio. ntpviz uses the Pearson's moment
-coefficient of kurtosis.  A normal distribution has a kurtosis of three.
-NIST describes a kurtosis over three as "heavy tailed" and one under
-three as "light tailed".</dd>
-
 <dt>ms, millisecond:</dt>
 <dd>One thousandth of a second = 0.001 seconds, 1e-3 seconds</dd>
 
@@ -1886,12 +1899,21 @@ The formula for sigma is: "σ = √[ ∑(x<sub>i</sub>-mu)^2 / N ]".
 Where x<sub>i</sub> denotes the data points and N is the number of data
 points.</dd>
 
-<dt>skewness, Skew:</dt>
-<dd>The skewness of a random variable X is the third standardized
-moment and is a dimension-less ratio. ntpviz uses the Pearson's moment
-coefficient of skewness.  Wikipedia describes it best: "The qualitative
-interpretation of the skew is complicated and unintuitive."<br> A normal
-distribution has a skewness of zero. </dd>
+<dt>Skewness, Skew:</dt>
+<dd>The skewness of a random variable X is the third standardized moment
+and is a dimension-less ratio. ntpviz uses the FIsher-Pearson moment
+of skewness.  There are other different ways to calculate Skewness
+Wikipedia describes Skewness best: "The qualitative interpretation of
+the skew is complicated and unintuitive."
+<br>A normal distribution has a skewness of zero. </dd>
+
+<dt>Kurtosis, Kurt:</dt>
+<dd>The kurtosis of a random variable X is the fourth standardized
+moment and is a dimension-less ratio. ntpviz uses standard
+Kurtosis.  There are other different ways to calculate Kurtosis.
+<br>A normal distribution has a Kurtosis of three.  NIST describes a
+kurtosis over three as "heavy tailed" and one under three as "light
+tailed".</dd>
 
 <dt>upstream clock:</dt>
 <dd>Any server or reference clock used as a source of time.</dd>
