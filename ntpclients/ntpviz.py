@@ -1812,9 +1812,9 @@ tbody tr:nth-child(6n+6) {
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:
         start_time = datetime.datetime.fromtimestamp(
-            stats.starttime, datetime.UTC).strftime('%c')
+            stats.starttime, datetime.timezone.utc).strftime('%c')
         end_time = datetime.datetime.fromtimestamp(
-            stats.endtime, datetime.UTC).strftime('%c')
+            stats.endtime, datetime.timezone.utc).strftime('%c')
 
         index_header += '<b>Start Time:</b> %s UTC<br>\n' \
                         '<b>End Time:</b> %s UTC<br>\n' \
