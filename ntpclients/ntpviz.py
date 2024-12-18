@@ -1811,10 +1811,16 @@ tbody tr:nth-child(6n+6) {
 
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:
-        start_time = datetime.datetime.fromtimestamp(
-            stats.starttime, datetime.timezone.utc).strftime('%c')
-        end_time = datetime.datetime.fromtimestamp(
-            stats.endtime, datetime.timezone.utc).strftime('%c')
+        try:
+            start_time = datetime.datetime.fromtimestamp(
+                stats.starttime, datetime.timezone.utc).strftime('%c')
+            end_time = datetime.datetime.fromtimestamp(
+                stats.endtime, datetime.timezone.utc).strftime('%c')
+        except AttributeError:  # No datetime.timezone in Python 2
+            start_time = datetime.datetime.utcfromtimestamp(
+                stats.starttime).strftime('%c')
+            end_time = datetime.datetime.utcfromtimestamp(
+                stats.endtime).strftime('%c')
 
         index_header += '<b>Start Time:</b> %s UTC<br>\n' \
                         '<b>End Time:</b> %s UTC<br>\n' \
