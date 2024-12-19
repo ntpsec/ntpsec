@@ -660,6 +660,8 @@ int main(int argc, char **argv) {
 
     # Sanity checks to give a sensible error message
     required_functions = (
+        # Check for ancient version of OpenSSL.
+        ('EVP_MD_CTX_new', ["openssl/evp.h"], "CRYPTO", False),
         # MacOS doesn't have timer_create ??
         ('timer_create', ["signal.h", "time.h"], "RT", False),
         # Very old versions of OpenSSL don't have cmac.h

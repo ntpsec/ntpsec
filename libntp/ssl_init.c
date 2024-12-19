@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <openssl/ssl.h>
 #include <openssl/evp.h>
+#include "hack-ancient-openssl.h"
 
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
 #include <openssl/params.h>

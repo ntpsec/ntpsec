@@ -52,6 +52,7 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>	/* provides OpenSSL digest API */
 #include <openssl/md5.h>
+#include "hack-ancient-openssl.h"
 
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"

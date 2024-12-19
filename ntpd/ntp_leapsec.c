@@ -29,6 +29,7 @@
 #include "lib_strbuf.h"
 
 #include <openssl/evp.h>
+#include "hack-ancient-openssl.h"
 
 #define ISC_SHA1_DIGESTLENGTH 20U
 

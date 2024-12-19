@@ -13,6 +13,7 @@
 #include "ntp_stdlib.h"
 
 #include "pymodule-mac.h"
+#include "hack-ancient-openssl.h"
 
 // Don't include Python.h
 
