@@ -20,9 +20,9 @@
 #define GUARD_HACK_ANCIENT_OPENSSL_H
 
 #ifndef HAVE_EVP_MD_CTX_NEW
-  #define EVP_MD_CTX_create()     EVP_MD_CTX_new()
-  #define EVP_MD_CTX_init(ctx)    EVP_MD_CTX_reset((ctx)) 
-  #define EVP_MD_CTX_destroy(ctx) EVP_MD_CTX_free((ctx))
+  #define EVP_MD_CTX_new()       EVP_MD_CTX_create()
+  #define EVP_MD_CTX_reset(ctx)  EVP_MD_CTX_init((ctx)) 
+  #define EVP_MD_CTX_free(ctx)   EVP_MD_CTX_destroy((ctx))
 #endif
 
 #endif /* GUARD_HACK_ANCIENT_OPENSSL_H */
