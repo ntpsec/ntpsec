@@ -90,6 +90,14 @@ class TestNTPStats(unittest.TestCase):
         self.assertEqual(f("12345.6789 blah blah"), 12345.6789)
 
     def test_percentiles(self):
+        """
+We try to duplicate what Excel, Libreoffice, R, etc.
+Please test changes against Excel/Libreoffice
+
+    NIST/SEMATECH e-Handbook of Statistical Methods, 2012
+    7.2.6.2.  Percentiles
+    https://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm
+"""
         f = self.target.percentiles
 
         # Test empty
@@ -97,13 +105,50 @@ class TestNTPStats(unittest.TestCase):
         # Test 1 item, empty percentile
         self.assertEqual(f([], [42]), {})
         # Test 1 item, non-empty percentile
-        self.assertEqual(f([10, 90], [42]), {"p10": 42, "p90": 42})
+        self.assertEqual(f([10, 90], [42]),
+                         {"p10": 42, "p90": 42})
         # Test several items, empty percentile
         self.assertEqual(f([], [1, 23, 42, 99]), {})
+        # by 10's, exact
+        vals = range(0, 101, 10)
+        self.assertEqual(f(vals, vals),
+                         {'p0': 0, 'p10': 10, 'p20': 20,
+                          'p30': 30, 'p40': 40, 'p50': 50,
+                          'p60': 60, 'p70': 70, 'p80': 80,
+                          'p90': 90, 'p100': 100})
+
         # Test several items, non-empty percentile
-        self.assertEqual(f([10, 25, 50, 90, 100], [1, 23, 42, 99]),
-                         {"p10": 1, "p25": 23, "p90": 99,
-                          "p50": 42, "p100": 99})
+        vals1 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        self.assertEqual(f(vals1, vals1),
+                         {'p0': 0,
+                          'p10': 10,
+                          'p20': 20,
+                          'p30': 30,
+                          'p40': 40,
+                          'p50': 50,
+                          'p60': 60,
+                          'p70': 70,
+                          'p80': 80,
+                          'p90': 90,
+                          'p100': 100})
+        # test interpolation
+        vals2 = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95]
+        self.assertEqual(f(vals2, vals1),
+                         {'p5': 5.0,
+                          'p15': 15.0,
+                          'p25': 25.0,
+                          'p35': 35.0,
+                          'p45': 45.0,
+                          'p55': 55.0,
+                          'p65': 65.0,
+                          'p75': 75.0,
+                          'p85': 85.0,
+                          'p95': 95.0})
+        self.assertEqual(f([0, 25, 50, 90, 100],
+                           [1, 21, 42, 99]),
+                         {"p0": 1, "p25": 16.0, "p90": 81.9,
+                          "p50": 31.5, "p100": 99})
+
 
     def test_ip_label(self):
         f = self.target.ip_label

@@ -1850,6 +1850,14 @@ Refclock Jitter, and Server Jitter in seconds.  Local Frequency Jitter is
 in ppm or ppb.
 </dd>
 
+<dt>Kurtosis, Kurt:</dt>
+<dd>The kurtosis of a random variable X is the fourth standardized
+moment and is a dimension-less ratio. ntpviz uses standard
+Kurtosis.  There are other different ways to calculate Kurtosis.
+<br>A normal distribution has a Kurtosis of three.  NIST describes a
+kurtosis over three as "heavy tailed" and one under three as "light
+tailed". See <a href="#NIST1">[NIST1]</a></dd>
+
 <dt>ms, millisecond:</dt>
 <dd>One thousandth of a second = 0.001 seconds, 1e-3 seconds</dd>
 
@@ -1865,7 +1873,8 @@ points.</dd>
 0.000000001 seconds and 1e-9 seconds.</dd>
 
 <dt>percentile:</dt>
-<dd>The value below which a given percentage of values fall.</dd>
+<dd>The value below which a given percentage of values fall.
+See <a href="#NIST2">[NIST2]</a></dd>
 
 <dt>ppb, parts per billion:</dt>
 <dd>Ratio between two values. These following are all the same:
@@ -1887,10 +1896,6 @@ points.</dd>
 <dd>Any clock reached over the network, LAN or WAN.  Also called a peer
 or server.</dd>
 
-<dt>time offset:</dt>
-<dd>The difference between the ntpd calculated time and the local system
- clock's time.  Also called phase offset.</dd>
-
 <dt>σ, sigma:</dt>
 <dd>Sigma denotes the standard deviation (SD) and is centered on the
 arithmetic mean of the data set. The SD is simply the square root of
@@ -1903,18 +1908,17 @@ points.</dd>
 <dt>Skewness, Skew:</dt>
 <dd>The skewness of a random variable X is the third standardized moment
 and is a dimension-less ratio. ntpviz uses the FIsher-Pearson moment
-of skewness.  There are other different ways to calculate Skewness
-Wikipedia describes Skewness best: "The qualitative interpretation of
-the skew is complicated and unintuitive."
-<br>A normal distribution has a skewness of zero. </dd>
+of skewness. See <a href="#NIST1">[NIST1]</a>.
+There are other different ways to calculate Skewness.
+<br>
+Some have said: "The qualitative interpretation of the skew is
+complicated and unintuitive".
+<br>
+A normal distribution has a skewness of zero. </dd>
 
-<dt>Kurtosis, Kurt:</dt>
-<dd>The kurtosis of a random variable X is the fourth standardized
-moment and is a dimension-less ratio. ntpviz uses standard
-Kurtosis.  There are other different ways to calculate Kurtosis.
-<br>A normal distribution has a Kurtosis of three.  NIST describes a
-kurtosis over three as "heavy tailed" and one under three as "light
-tailed".</dd>
+<dt>time offset:</dt>
+<dd>The difference between the ntpd calculated time and the local system
+ clock's time.  Also called phase offset.</dd>
 
 <dt>upstream clock:</dt>
 <dd>Any server or reference clock used as a source of time.</dd>
@@ -1925,6 +1929,24 @@ tailed".</dd>
 </dl>
 
 <br>
+<h2>References:</h2>
+<dl>
+<dt id="NIST1">[NIST1]: NIST/SEMATECH e-Handbook of Statistical Methods,
+ 2012</dt>
+<dd>     1.3.5.11.  Measures of Skewness and Kurtosis
+<br>
+<a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm">
+https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm</a></dd>
+
+<dt id="NIST2">[NIST]}: NIST/SEMATECH e-Handbook of Statistical Methods,
+ 2012</dt>
+<dd>7.2.6.2.  Percentiles
+<br>
+<a href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm">
+https://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm</a></dd>
+</dl>
+
+<dd> 
 <br>
 <br>
 <div style="float:left">

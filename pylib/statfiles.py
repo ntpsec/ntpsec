@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
 """
 statfiles.py - class for digesting and plotting NTP logfiles
 
@@ -7,15 +9,12 @@ Requires gnuplot and liberation fonts installed.
 
 """
 
-# Copyright the NTPsec project contributors
-#
-# SPDX-License-Identifier: BSD-2-Clause
-
 from __future__ import print_function, division
 
 import calendar
 import glob
 import gzip
+import math       # for math.modf()
 import os
 import socket
 import sys
@@ -65,26 +64,54 @@ class NTPStats:
 
     @staticmethod
     def percentiles(percents, values):
-        """Return given percentiles of a given row in a given set of entries.
-        assuming values are already split and sorted"""
+        """Calculate percentiles of a given list of values.
+
+percents: A list of integer percentile to calculate.
+values: A sorted list of values.
+
+We try to duplicate  Excel, Libreoffice, R, etc.
+Don't chanage without testing.
+
+    NIST/SEMATECH e-Handbook of Statistical Methods, 2012
+    7.2.6.2.  Percentiles
+    https://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm
+
+"""
         ret = {}
         length = len(values)
-        if 1 >= length:
-            # uh, oh...
-            if 1 == length:
-                # just one data value, set all to that one value
-                value = values[0]
-            else:
-                # no data, set all to zero
-                value = 0
+        if 0 == length:
+            # No  data, return {}
+            return ret
+
+        if 1 == length:
+            # just one data value, set all to that one value
             for perc in percents:
-                ret["p" + str(perc)] = value
-        else:
-            for perc in percents:
-                if perc == 100:
-                    ret["p100"] = values[length - 1]
-                else:
-                    ret["p" + str(perc)] = values[int(length * (perc/100))]
+                perc = int(perc)
+                if ((0 > perc or
+                     100 < perc)):
+                    # invalid percentage
+                    return {}
+                ret["p" + str(perc)] = values[0]
+            return ret
+
+        # else:
+        for perc in percents:
+            perc = int(perc)
+            if ((0 > perc or
+                 100 < perc)):
+                # invalid percentage
+                return {}
+            index = (length - 1) * (perc / 100)
+            lower = values[int(index)]
+
+            (frac, whole) = math.modf(index)
+            if 0.01 <= frac:
+                # interpolate up
+                upper = values[int(index) + 1]
+                lower += (upper - lower) * frac
+
+            ret["p" + str(perc)] = lower
+
         return ret
 
     @staticmethod
