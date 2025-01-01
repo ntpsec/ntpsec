@@ -359,7 +359,9 @@ coverity-scan:
   tags:
     - gitlab-org
   rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
+    - if: $COVERITY_TOKEN =~ "^$"
+      when: never
+    - when: always
 
 macos-basic:
   <<: *job_definition
