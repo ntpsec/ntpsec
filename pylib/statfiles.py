@@ -104,7 +104,7 @@ Don't chanage without testing.
             index = (length - 1) * (perc / 100)
             lower = values[int(index)]
 
-            (frac, whole) = math.modf(index)
+            (frac, _whole) = math.modf(index)
             if 0.01 <= frac:
                 # interpolate up
                 upper = values[int(index) + 1]
