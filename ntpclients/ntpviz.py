@@ -1907,7 +1907,7 @@ points.</dd>
 
 <dt>Skewness, Skew:</dt>
 <dd>The skewness of a random variable X is the third standardized moment
-and is a dimension-less ratio. ntpviz uses the FIsher-Pearson moment
+and is a dimension-less ratio. ntpviz uses the Fisher-Pearson moment
 of skewness. See <a href="#NIST1">[NIST1]</a>.
 There are other different ways to calculate Skewness.
 <br>

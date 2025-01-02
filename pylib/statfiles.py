@@ -69,20 +69,20 @@ class NTPStats:
 percents: A list of integer percentile to calculate.
 values: A sorted list of values.
 
-We try to duplicate  Excel, Libreoffice, R, etc.
-Don't chanage without testing.
+We try to duplicate  Excel, LibreOffice, R, etc.
+Don't change without testing.
 
     NIST/SEMATECH e-Handbook of Statistical Methods, 2012
     7.2.6.2.  Percentiles
     https://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm
 
 """
-        ret = {}
         length = len(values)
         if 0 == length:
             # No  data, return {}
-            return ret
+            return {}
 
+        ret = {}
         if 1 == length:
             # just one data value, set all to that one value
             for perc in percents:
