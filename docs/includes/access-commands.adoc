@@ -83,6 +83,11 @@
     NB: This blocks requests from other clients and responses to your
     requests.  If you are using servers in this IP range, you will need
     to add +restrict+ slots to let them through.
+  +notrap+;;
+    This is an obsolete, ignored option inherited from classic NTP to
+    provide mode 6/7 control message trap service to matching hosts. The
+    trap service was a subsystem of the removed ntpdc support intended
+    for use by remote event logging programs.
   +notrust+;;
     Deny service unless the packet is cryptographically authenticated.
   +ntpport+;;
