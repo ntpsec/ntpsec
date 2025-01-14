@@ -480,9 +480,6 @@ create_attr_sval(
 
 	my_val = emalloc_zero(sizeof(*my_val));
 	my_val->attr = attr;
-	if (NULL == s) {			/* free() hates NULL */
-		s = estrdup("");
-	}
 	my_val->value.s = _UC(s);
 	my_val->type = T_String;
 
