@@ -1959,18 +1959,22 @@ config_nts(
 			INSIST(0);
 			break;
 		case T_Aead:
+			free((void *)(intptr_t)ntsconfig.aead);
 			ntsconfig.aead = estrdup(nts->value.s);
 			break;
 
 		case T_Ca:
+			free((void *)(intptr_t)ntsconfig.ca);
 			ntsconfig.ca = estrdup(nts->value.s);
 			break;
 
 		case T_Cert:
+			free((void *)(intptr_t)ntsconfig.cert);
 			ntsconfig.cert = estrdup(nts->value.s);
 			break;
 
 		case T_Cookie:
+			free((void *)(intptr_t)ntsconfig.KI);
 			ntsconfig.KI = estrdup(nts->value.s);
 			break;
 
@@ -1983,14 +1987,17 @@ config_nts(
 			break;
 
 		case T_Key:
+			free((void *)(intptr_t)ntsconfig.key);
 			ntsconfig.key = estrdup(nts->value.s);
 			break;
 
 		case T_Maxtls:
+			free((void *)(intptr_t)ntsconfig.maxtls);
 			ntsconfig.maxtls = estrdup(nts->value.s);
 			break;
 
 		case T_Mintls:
+			free((void *)(intptr_t)ntsconfig.mintls);
 			ntsconfig.mintls = estrdup(nts->value.s);
 			break;
 
@@ -1999,14 +2006,17 @@ config_nts(
 			break;
 
 		case T_Tlscipherserverpreference:
+			free((void *)(intptr_t)ntsconfig.tlscipherserverpreference);
 			ntsconfig.tlscipherserverpreference = true;
 			break;
 
 		case T_Tlsciphersuites:
+			free((void *)(intptr_t)ntsconfig.tlsciphersuites);
 			ntsconfig.tlsciphersuites = estrdup(nts->value.s);
 			break;
 
 		case T_Tlsecdhcurves:
+			free((void *)(intptr_t)ntsconfig.tlsecdhcurves);
 			ntsconfig.tlsecdhcurves = estrdup(nts->value.s);
 			break;
 #endif
