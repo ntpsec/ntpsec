@@ -469,7 +469,7 @@ refclock_sample(
 	 * approximately 60 percent of the samples remain.
 	 */
 	i = 0; j = n;
-	m = n - (n * 4) / 10;
+	m = n - ((n*4)/10);
 	while ((j - i) > m) {
 		offset = off[(j + i) / 2];
 		if (off[j - 1] - offset < offset - off[i])
