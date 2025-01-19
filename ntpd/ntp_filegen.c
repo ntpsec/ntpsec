@@ -345,7 +345,8 @@ filegen_setup(
 	case FILEGEN_AGE:
 		/* current_time doesn't go backwards
 		 * so don't need to check id_lo */
-		current = ((unsigned)gen->id_hi > current_time);
+		/* Coverity: id_hi is time_t, current_time is 32 bits */
+		current = (gen->id_hi > (time_t)current_time);
 		break;
 
 	case FILEGEN_DAY:
