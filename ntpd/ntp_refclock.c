@@ -470,6 +470,8 @@ refclock_sample(
 	 */
 	i = 0; j = n;
 	m = n - ((n*4)/10);
+	/* coverity[INTEGER_OVERFLOW] CID 497295, 
+	 * Bug in Coverity: goes around loop when it shouldn't */
 	while ((j - i) > m) {
 		offset = off[(j + i) / 2];
 		if (off[j - 1] - offset < offset - off[i])
