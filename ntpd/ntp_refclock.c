@@ -469,7 +469,8 @@ refclock_sample(
 	 * approximately 60 percent of the samples remain.
 	 */
 	i = 0; j = n;
-	m = n*6/10;
+	/* m=n*6/10 doesn't work.  It rounds down.  We need up. */
+	m = n-(n*4/10);
 	/* CID 497295, Bug in Coverity: goes around loop when it shouldn't */
 	/* coverity[INTEGER_OVERFLOW] */
 	while ((j - i) > m) {
