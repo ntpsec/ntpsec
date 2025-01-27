@@ -316,7 +316,7 @@ code (though not very precise!) delimited by '\r'
 
 ------------------------------------
     Timecode
-      YY-MM-DD-HH-MM-SS-FF\r
+      YY-MM-DD-WW-HH-MM-SS-FF\r
 
         FF&0x1  - DST
         FF&0x2  - DST switch warning
