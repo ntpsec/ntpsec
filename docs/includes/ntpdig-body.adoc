@@ -25,8 +25,8 @@ not UTC) to the standard output in a format like:
 2015-10-14 13:46:04.534916 (+0500) -0.000007 +/- 0.084075 localhost 127.0.0.1 s2 no-leap
 -----------------------------------------------------
 
-where the +(+0500)+ means that to get to UTC from the reported local
-time one must add 5 hours and 0 minutes, the +-0.000007+ indicates the
+where +(+0500)+ means that the reported local time is
+ 5 hours and 0 minutes ahead of UTC, the +-0.000007+ indicates the
 local clock is 0.000007 seconds ahead of correct time (so 0.000007 seconds
 must be subtracted from the local clock to get it to be correct). Note that
 the number of decimals printed for this value will change based on the
