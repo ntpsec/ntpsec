@@ -626,6 +626,10 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 		char server[MAX_SERVER];
 
 		type = ke_next_record(&buf, &length);
+		if(buf.left < length){
+			msyslog(LOG_ERR, "NTSc: length cannot be more than buf.left: %d", length);
+			return false;
+		}
 		if (NTS_CRITICAL & type) {
 			critical = true;
 			type &= ~NTS_CRITICAL;
@@ -634,25 +638,30 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 			msyslog(LOG_ERR, "NTSc: Record: T=%d, L=%d, C=%d", type, length, critical);
 		switch (type) {
 		    case nts_error:
-			data = next_uint16(&buf);
-			if (sizeof(data) != length)
+			if (sizeof(data) != length) {
 				msyslog(LOG_ERR, "NTSc: wrong length on error: %d", length);
+				return false;
+			}
+			data = next_uint16(&buf);
 			msyslog(LOG_ERR, "NTSc: error: %d", data);
 			return false;
 		    case nts_next_protocol_negotiation:
+			if (sizeof(data) != length) {
+				msyslog(LOG_ERR, "NTSc: NPN-Wrong length: %d", length);
+				return false;
+			}
 			data = next_uint16(&buf);
-			if ((sizeof(data) != length) || (data != nts_protocol_NTP)) {
-				msyslog(LOG_ERR, "NTSc: NPN-Wrong length or bad data: %d, %d",
-					length, data);
+			if (data != nts_protocol_NTP) {
+				msyslog(LOG_ERR, "NTSc: NPN-Bad data: %d", data);
 				return false;
 			}
 			break;
 		    case nts_algorithm_negotiation:
-			data = next_uint16(&buf);
 			if (sizeof(data) != length) {
 				msyslog(LOG_ERR, "NTSc: AN-Wrong length: %d", length);
 				return false;
 			}
+			data = next_uint16(&buf);
 			keylength = nts_get_key_length(data);
 			if (0 == keylength) {
 				msyslog(LOG_ERR, "NTSc: AN-Unsupported AEAN type: %d", data);
