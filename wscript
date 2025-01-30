@@ -4,12 +4,10 @@
 
 from __future__ import print_function
 
-from datetime import datetime
 import itertools
 import os
 import shlex
 import sys
-import time
 
 from waflib import Build
 from waflib import Context
@@ -138,7 +136,7 @@ def configure(ctx):
     # the real PATH first, but append the sbin directories.
     ctx.find_program(
         "ldconfig", var="BIN_LDCONFIG", mandatory=False,
-        path_list=(os.environ.get('PATH','').split(os.pathsep) +
+        path_list=(os.environ.get('PATH', '').split(os.pathsep) +
             ["/sbin", "/usr/sbin", "/usr/local/sbin"]))
 
     # Ensure m4 is present, or bison will fail with SIGPIPE
@@ -515,17 +513,17 @@ int main(int argc, char **argv) {
         ctx.env.INCLUDES = ["/usr/local/include"]
         ctx.env.LIBPATH = ["/usr/local/lib"]
         if os.path.isdir("/usr/local/ssl/"):
-          # This assumes OpenSSL is the only thing that was in /usr/local/
-          ctx.env.INCLUDES = ["/usr/local/ssl/include"]
-          ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
+            # This assumes OpenSSL is the only thing that was in /usr/local/
+            ctx.env.INCLUDES = ["/usr/local/ssl/include"]
+            ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "netbsd" and os.path.isdir("/usr/pkg/include"):
         ctx.env.INCLUDES = ["/usr/pkg/include"]
         ctx.env.LIBPATH = ["/usr/pkg/lib"]
         ctx.env.LDFLAGS += ["-rpath=/usr/pkg/lib"]
         if os.path.isdir("/usr/local/ssl/"):
-          # This assumes OpenSSL is the only thing that was in /usr/pkg/
-          ctx.env.INCLUDES = ["/usr/local/ssl/include"]
-          ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
+            # This assumes OpenSSL is the only thing that was in /usr/pkg/
+            ctx.env.INCLUDES = ["/usr/local/ssl/include"]
+            ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "linux" and os.path.isdir("/usr/local/ssl/"):
         # This supports building OpenSSL from source
         # That allows using OpenSSL 1.1.1 on older CentOS
@@ -533,9 +531,9 @@ int main(int argc, char **argv) {
         # see HOWTO-OpenSSL
         ctx.env.INCLUDES = ["/usr/local/ssl/include"]
         if os.path.isdir("/usr/local/ssl/lib64/"):
-          ctx.env.LIBPATH = ["/usr/local/ssl/lib64"]
+            ctx.env.LIBPATH = ["/usr/local/ssl/lib64"]
         else:
-          ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
+            ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "darwin":
         # macports location
         if os.path.isdir("/opt/local/include"):
@@ -668,8 +666,8 @@ int main(int argc, char **argv) {
         #  We could add ifdefs, but old crypto is deprecated in favor of CMAC
         #  and so far, all the systems that we want to support are new enough.
         ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True),
-	# Next should be above, but it needs a library
-	# EVP_PKEY_new_CMAC_key added in OpenSSL 1.1.1
+        # Next should be above, but it needs a library
+        # EVP_PKEY_new_CMAC_key added in OpenSSL 1.1.1
         ('EVP_PKEY_new_CMAC_key', ["openssl/cmac.h"], "CRYPTO", False))
     for ft in required_functions:
         probe_function(ctx, function=ft[0],
@@ -714,7 +712,7 @@ int main(int argc, char **argv) {
         "linux/serial.h",
         "net/if6.h",
         ("net/route.h", ["sys/types.h", "sys/socket.h", "net/if.h"]),
-        "openssl/opensslv.h",  # just for wafhelper OpenSSL 
+        "openssl/opensslv.h",  # just for wafhelper OpenSSL
         "priv.h",           # Solaris
         "stdatomic.h",
         "sys/clockctl.h",   # NetBSD
@@ -920,12 +918,13 @@ int main(int argc, char **argv) {
     ctx.recurse("pylib")
     ctx.env.PYSHEBANG = ctx.options.pyshebang
     msg_setting("PYSHEBANG", ctx.env.PYSHEBANG)
-    # Convert the Python directories to absolute paths.
-    # This makes them behave the same as PREFIX.
-    ctx.env.PYTHONDIR = os.path.abspath(ctx.env.PYTHONDIR)
-    ctx.env.PYTHONARCHDIR = os.path.abspath(ctx.env.PYTHONARCHDIR)
-    msg_setting("PYTHONDIR", ctx.env.PYTHONDIR)
-    msg_setting("PYTHONARCHDIR", ctx.env.PYTHONARCHDIR)
+    if 'none' != ctx.env['ntpc']:
+        # Convert the Python directories to absolute paths.
+        # This makes them behave the same as PREFIX.
+        ctx.env.PYTHONDIR = os.path.abspath(ctx.env.PYTHONDIR)
+        ctx.env.PYTHONARCHDIR = os.path.abspath(ctx.env.PYTHONARCHDIR)
+        msg_setting("PYTHONDIR", ctx.env.PYTHONDIR)
+        msg_setting("PYTHONARCHDIR", ctx.env.PYTHONARCHDIR)
 
 
 class check(BuildContext):
@@ -1051,6 +1050,9 @@ def build(ctx):
         ctx.recurse("ntpd")
         return
 
+    with open(str(ctx.bldnode) + "/VERSION.bld", "w") as fp:
+        fp.write("ntpsec-" + ctx.env.NTPSEC_VERSION_EXTENDED)
+
     if ctx.cmd == "build":
         # It's a waf gotcha that if there are object files (including
         # .pyc and .pyo files) in a source directory, compilation to
@@ -1071,13 +1073,13 @@ def build(ctx):
         ctx.recurse("libparse")
     ctx.recurse("libntp")
     if not ctx.env.DISABLE_NTS:
-      ctx.recurse("libaes_siv")
+        ctx.recurse("libaes_siv")
     ctx.recurse("ntpd")
     ctx.recurse("ntpfrob")
     ctx.recurse("ntptime")
     ctx.recurse("pylib")
     if ctx.env.ENABLE_ATTIC:
-      ctx.recurse("attic")
+        ctx.recurse("attic")
     ctx.recurse("etc")
     ctx.recurse("tests")
 
@@ -1089,14 +1091,16 @@ def build(ctx):
     if ctx.env['PYTHON_CURSES']:
         python_scripts.add("ntpclients/ntpmon.py")
 
-    # Make sure the python scripts compile, but don't install them
-    ctx(
-        features="py",
-        source=python_scripts,
-        install_path=None,
-    )
+    scripts = ["ntpclients/ntpleapfetch"]
 
-    scripts = ["ntpclients/ntpleapfetch"] + list(python_scripts)
+    if 'none' != ctx.env['ntpc']:
+        scripts += list(python_scripts)
+        # Make sure the python scripts compile, but don't install them
+        ctx(
+            features="py",
+            source=python_scripts,
+            install_path=None,
+        )
 
     ctx(
         features="subst",

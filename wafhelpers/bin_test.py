@@ -6,7 +6,6 @@
 from __future__ import print_function
 import os
 import os.path
-import sys
 import waflib.Context
 import waflib.Logs
 import waflib.Utils
@@ -89,17 +88,8 @@ def cmd_bin_test(ctx):
     """Run a suite of binary tests."""
     fails = 0
 
-    cmd = ctx.env['PYTHON'] + ['-c',
-        'from __future__ import print_function;'
-        'import ntp.util;'
-        'print(ntp.util.stdversion())']
-    p = waflib.Utils.subprocess.Popen(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
-                                                 waflib.Context.out_dir},
-                         universal_newlines=True,
-                         stdin=waflib.Utils.subprocess.PIPE,
-                         stdout=waflib.Utils.subprocess.PIPE,
-                         stderr=waflib.Utils.subprocess.PIPE, cwd=waflib.Context.out_dir)
-    version = p.communicate()[0].rstrip()
+    with open(str(ctx.bldnode) + "/VERSION.bld") as fp:
+        version = fp.read().strip()
 
     if ctx.env['PYTHON_ARGPARSE']:
         cmd_map_python.update(cmd_map_python_argparse)

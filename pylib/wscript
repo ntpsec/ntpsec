@@ -11,9 +11,11 @@ def options(opt):
 
 def configure(conf):
     conf.load('python')
-    if not conf.env.ENABLE_CROSS:
-        conf.check_python_version((2, 6, 0))
-    conf.check_python_headers(features='pyext')  # Extension-only, no embedded
+    if 'none' == conf.env['ntpc']:
+        return
+    conf.check_python_version((2, 6, 0))  # Check ver even in cross
+    if 'ext' == conf.env['ntpc']:  # Extension-only, no embedded
+        conf.check_python_headers(features='pyext')
     try:
         conf.check_python_module('curses')
         conf.env['PYTHON_CURSES'] = True
@@ -30,11 +32,14 @@ def configure(conf):
         conf.check_python_module('gps', condition="ver >= num(3, 18)")
         conf.env['PYTHON_GPS'] = True
     except conf.errors.ConfigurationError:
-        pprint("YELLOW", "WARNING: ntploggps will not be built/installed since "
-               "python gps module >= 3.18 was not found")
+        pprint("YELLOW", "WARNING: ntploggps will not be built/installed "
+               "since python gps module >= 3.18 was not found")
 
 
 def build(ctx):
+    if 'none' == ctx.env['ntpc']:
+        return
+
     srcnode = ctx.srcnode.make_node('pylib')
     bldnode = ctx.bldnode.make_node('pylib')
     target1 = bldnode.make_node('control.py')
@@ -56,13 +61,10 @@ def build(ctx):
     # including during 'install'. They are now disabled but retained as a
     # comment.
 
-    ## Remove generated files to ensure they are properly updated
-    #ctx.exec_command("rm -f %s" % target1.abspath())
-    #ctx.exec_command("rm -f %s" % target2.abspath())
+    # # Remove generated files to ensure they are properly updated
+    # ctx.exec_command("rm -f %s" % target1.abspath())
+    # ctx.exec_command("rm -f %s" % target2.abspath())
 
-    if ctx.env['ntpc'] is None:
-        return
-        
     # Make sure Python sees .py as well as .pyc/.pyo
     ctx(
         features="subst",
@@ -74,7 +76,10 @@ def build(ctx):
         before=['pyc', 'pyo'],
         cwd=srcnode,
         rule='${PYTHON} ${SRC} >${TGT}',
-        source=["../wafhelpers/pythonize-header", "../include/ntp_control.h"],
+        source=[
+            "../wafhelpers/pythonize-header",
+            "../include/ntp_control.h"
+        ],
         target=target1,
     )
 
