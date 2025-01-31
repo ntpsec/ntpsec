@@ -604,7 +604,9 @@ int main(int argc, char **argv) {
         )
 
     # mostly used by timespecops.h
+    # Also handy for discovering what a system is doing
     sizeofs = [
+        ("time.h",      "struct timespec"),
         ("time.h",      "time_t"),
         (None,          "long"),
     ]
