@@ -87,3 +87,38 @@ def check_sizeof(*kwargs):
         check_sizeof_cross(*kwargs)
     else:
         check_sizeof_host(*kwargs)
+
+
+# timex slots are documented as long
+# #if (__TIMESIZE == 64 && __WORDSIZE == 32)
+#    they turn into long long
+# This fails to build in the normal case.
+# So we set NTP_TIMEX_LONG_LONG to 0
+SIZE_FRAG_TIMEX = """
+#include <sys/time.h>    /* for NetBSD */
+#include <sys/timex.h>
+#include <stdio.h>
+int main(void) {
+  struct timex dummy;
+  long long *foo = &dummy.jitter;
+  *foo = 1;  /* supress unused warning */
+  if (*foo) printf("1");
+  return 0;
+}
+"""
+
+def check_timex(ctx):
+    name = "NTP_TIMEX_LONG_LONG"
+    ctx.start_msg("Checking sizeof struct timex slot")
+    ctx.check_cc(
+        cflags="-Werror",
+        fragment=SIZE_FRAG_TIMEX,
+        define_name=name,
+        execute=not ctx.env.ENABLE_CROSS,
+        define_ret=True,
+        quote=False,
+        mandatory=False,
+        comment="Does struct timex use long long"
+    )
+    ctx.end_msg(ctx.get_define(name))
+

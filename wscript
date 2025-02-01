@@ -219,7 +219,7 @@ def configure(ctx):
     msg("--- Configuring main ---")
     ctx.setenv("main", ctx.env.derive())
 
-    from wafhelpers.check_sizeof import check_sizeof
+    from wafhelpers.check_sizeof import check_sizeof, check_timex
 
     for opt in opt_map:
         ctx.env[opt] = opt_map[opt]
@@ -604,15 +604,18 @@ int main(int argc, char **argv) {
         )
 
     # mostly used by timespecops.h
-    # Also handy for discovering what a system is doing
+    # Some are unused, but handy for discovering what a system is doing
     sizeofs = [
         ("time.h",      "struct timespec"),
+        ("sys/time.h",  "struct timeval"),
         ("time.h",      "time_t"),
         (None,          "long"),
     ]
 
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
+
+    check_timex(ctx)
 
     # Parts of attic need libssl
     if not ctx.options.disable_nts or ctx.options.enable_attic:
