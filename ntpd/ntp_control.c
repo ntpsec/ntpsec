@@ -197,7 +197,11 @@ struct var {
     const unsigned long int* uli;
     const long int* li;
     const long long* ll;
-    const int64_t* timex_li;
+#ifdef NTP_TIMEX_LONG_LONG
+    const long long* timex_li;
+#else
+    const long* timex_li;
+#endif
     const unsigned int* uinnt;
     const int* innt;
     const uint64_t* u64;
@@ -280,14 +284,8 @@ struct var {
 
 #define Var_mrumem(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_mrumem, .p.u64 = &xlocation }
-#ifdef NTP_TIMEX_LONG_LONG
-  DING DING DING:  We got here.  Tell Hal
 #define Var_kli(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_kli, .p.ll = &xlocation }
-#else
-#define Var_kli(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_kli, .p.li = &xlocation }
-#endif
+  .name = xname, .flags = xflags, .type = v_kli, .p.timex_li = &xlocation }
 #define Var_special(xname, xflags, xspecial) { \
   .name = xname, .flags = xflags, .type = v_special, .p.special = xspecial }
 
@@ -1450,9 +1448,9 @@ ctl_putsys(const struct var * v) {
 	case v_kli:
 	    if (v->flags&K_16) {
 		/* value is scaled by 16 bits */
-		temp_d = FP_UNSCALE(*v->p.li);
+		temp_d = FP_UNSCALE(*v->p.timex_li);
 	    } else {
-		temp_d = (double)*v->p.li;
+		temp_d = (double)*v->p.timex_li;
 	    };
 	    if (v->flags & (KNUToMS | KUToMS)) {
 		/* value is in nanoseconds or microseconds */
