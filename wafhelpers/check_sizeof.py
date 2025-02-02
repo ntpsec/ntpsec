@@ -109,7 +109,7 @@ int main(void) {
 
 def check_timex(ctx):
     name = "NTP_TIMEX_LONG_LONG"
-    ctx.start_msg("Checking sizeof struct timex slot")
+    ctx.start_msg("Checking for long long in struct timex" )
     ctx.check_cc(
         cflags="-Werror",
         fragment=SIZE_FRAG_TIMEX,
@@ -118,7 +118,7 @@ def check_timex(ctx):
         define_ret=True,
         quote=False,
         mandatory=False,
-        comment="Does struct timex use long long"
+        comment="struct timex has long long"
     )
     ctx.end_msg(ctx.get_define(name))
 
