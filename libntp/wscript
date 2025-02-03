@@ -63,7 +63,7 @@ def build(ctx):
             features="c cshlib",
             includes=[ctx.bldnode.parent.abspath(), "../include"],
             source=["ntp_c.c", "pymodule-mac.c"] + libntp_source_sharable,
-            target="../pylib/ntpc",  # Put the output in the pylib directory
+            target="../ntpc",  # Put the output in the parent directory
             use="M RT CRYPTO",
             vnum=ctx.env['ntpcver'],
         )
