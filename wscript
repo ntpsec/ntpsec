@@ -1026,7 +1026,8 @@ def afterparty(ctx):
                     os.remove(path_source.abspath())
                 except OSError:
                     pass
-                os.symlink(relpath, path_source.abspath())
+                if 'none' != ctx.env['ntpc']:
+                    os.symlink(relpath, path_source.abspath())
 
 
 python_scripts = set([

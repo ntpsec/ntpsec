@@ -119,6 +119,9 @@ def build(ctx):
 
     testpylib.get_bld().mkdir()
 
+    if 'none' == ctx.env['ntpc']:
+        return
+
     pypath = pylib.get_bld()
     targdir = "tests/pylib"
     linkpath = ctx.bldnode.make_node(targdir + "/ntp").abspath()

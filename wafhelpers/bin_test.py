@@ -101,9 +101,10 @@ def cmd_bin_test(ctx):
         if not run(cmd, cmd_map[cmd] % version):
             fails += 1
 
-    for cmd in sorted(cmd_map_python):
-        if not run(cmd, cmd_map_python[cmd] % version, ctx.env['PYTHON']):
-            fails += 1
+    if 'none' != ctx.env['ntpc']:
+        for cmd in sorted(cmd_map_python):
+            if not run(cmd, cmd_map_python[cmd] % version, ctx.env['PYTHON']):
+                fails += 1
 
     if 1 == fails:
         bin_test_summary(ctx)

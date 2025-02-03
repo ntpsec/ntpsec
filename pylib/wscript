@@ -11,9 +11,9 @@ def options(opt):
 
 def configure(conf):
     conf.load('python')
+    conf.check_python_version((2, 6, 0))  # even when not using it.
     if 'none' == conf.env['ntpc']:
         return
-    conf.check_python_version((2, 6, 0))  # Check ver even in cross
     if 'ext' == conf.env['ntpc']:  # Extension-only, no embedded
         conf.check_python_headers(features='pyext')
     try:
