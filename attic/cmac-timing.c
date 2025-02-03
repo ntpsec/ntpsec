@@ -36,7 +36,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/objects.h>
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 #include <openssl/params.h> 
 #endif
 
@@ -50,7 +50,7 @@ int SAMPLESIZE = 1000000;
 #define MAX_KEY_LENGTH 64
 
 CMAC_CTX *cmac;
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 EVP_MAC_CTX *evp;
 #endif
 
@@ -60,14 +60,14 @@ unsigned char answer[EVP_MAX_MD_SIZE];
 
 static void ssl_init(void)
 {
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 	EVP_MAC *mac;
 #endif
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	cmac = CMAC_CTX_new();
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 	mac = EVP_MAC_fetch(NULL, "cmac", NULL);
 	if (NULL == mac)
 		printf("## Oops, EVP_MAC_fetch() failed.\n");
@@ -163,7 +163,7 @@ static void DoCMAC(
 	printf("\n");
 }
 
-#if OPENSSL_VERSION_NUMBER > 0x10101000L
+#if OPENSSL_VERSION_NUMBER > 0x10101000L && !defined(LIBRESSL_VERSION_NUMBER)
 static size_t One_PKEY(
   EVP_MD_CTX *ctx,        /* context  */
   uint8_t *key,           /* key pointer */
@@ -307,7 +307,7 @@ static void DoPKEY2(
 }
 #endif
 
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 static size_t One_EVP_MAC(
   EVP_MAC_CTX *ctx,         /* context  */
   char *name,               /* name of cipher (with -cbc) */
@@ -578,7 +578,7 @@ int main(int argc, char *argv[])
 	DoCMAC("AES-256",      key, 32, packet, PACKET_LENGTH);
 
 if (do_all) {
-#if OPENSSL_VERSION_NUMBER < 0x20000000L
+#if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 /* Hangs on 3.0.0  Checking OPENSSL_NO_DES doesn't work. */
 	DoCMAC("DES",          key,  8, packet, PACKET_LENGTH);
 #endif
@@ -595,7 +595,7 @@ if (do_all) {
 	DoCMAC("ARIA-256",     key, 32, packet, PACKET_LENGTH);
 }
 
-#if OPENSSL_VERSION_NUMBER > 0x10101000L
+#if OPENSSL_VERSION_NUMBER > 0x10101000L && !defined(LIBRESSL_VERSION_NUMBER)
 	printf("\n");
 	printf("# KL=key length, PL=packet length, CL=CMAC length\n");
 	printf("# PKEY        KL   PL CL  ns/op sec/run\n");
@@ -607,7 +607,7 @@ if (do_all) {
 	DoPKEY("AES-256",      key, 32, packet, PACKET_LENGTH);
 
 if (do_all) {
-#if OPENSSL_VERSION_NUMBER < 0x20000000L
+#if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 	DoPKEY("DES",          key,  8, packet, PACKET_LENGTH);
 #endif
 	DoPKEY("DES-EDE",      key, 16, packet, PACKET_LENGTH);
@@ -633,7 +633,7 @@ if (do_all) {
 	DoPKEY2("AES-256",      key, 32, packet, PACKET_LENGTH);
 
 if (do_all) {
-#if OPENSSL_VERSION_NUMBER < 0x20000000L
+#if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 	DoPKEY2("DES",          key,  8, packet, PACKET_LENGTH);
 #endif
 	DoPKEY2("DES-EDE",      key, 16, packet, PACKET_LENGTH);
@@ -650,7 +650,7 @@ if (do_all) {
 }
 #endif
 
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
+#if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 	printf("\n");
 	printf("# KL=key length, PL=packet length, CL=CMAC length\n");
 	printf("# EVP_MAC     KL   PL CL  ns/op sec/run\n");
@@ -717,7 +717,8 @@ if (do_all) {
 	Do_EVP_MAC3("ARIA-192",     key, 24, packet, PACKET_LENGTH);
 	Do_EVP_MAC3("ARIA-256",     key, 32, packet, PACKET_LENGTH);
 }
-#endif /* OPENSSL_VERSION_NUMBER > 0x20000000L */
+#endif /* OPENSSL_VERSION_NUMBER > 0x20000000L
+          && !defined(LIBRESSL_VERSION_NUMBER) */
 
 	return 0;
 }
