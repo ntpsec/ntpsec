@@ -27,6 +27,8 @@
 #include <openssl/ssl.h>
 #include <openssl/evp.h>
 
+#include "hack-ancient-openssl.h"
+
 #define UNUSED_ARG(arg)         ((void)(arg))
 
 /* 2023-Jan-10

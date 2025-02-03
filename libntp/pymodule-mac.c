@@ -20,19 +20,19 @@
 #define OPENSSL_SUPPRESS_DEPRECATED 1
 #include <openssl/evp.h>
 #include <openssl/cmac.h>
+#include <openssl/opensslv.h>
 
 // Needed on OpenSSL < 1.1.0
-// I don't think this is needed on modern versions,
-// but I'm leaving this code around for a while in case we do need it.
-// HGM: 2024-Jun-11
 static void init_ssl(void) {
-//	static bool init_done = false;
-//	if (init_done) {
-//		return;
-//        }
-//	init_done = true;
-//	OpenSSL_add_all_ciphers();
-//	OpenSSL_add_all_digests();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	static bool init_done = false;
+	if (init_done) {
+		return;
+        }
+	init_done = true;
+	OpenSSL_add_all_ciphers();
+	OpenSSL_add_all_digests();
+#endif
 }
 
 /* xx = ntp.ntpc.checkname(name)

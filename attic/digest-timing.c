@@ -36,8 +36,9 @@
 #include <openssl/objects.h>
 #include <openssl/ssl.h>
 
-#define UNUSED_ARG(arg)         ((void)(arg))
+#include "hack-ancient-openssl.h"
 
+#define UNUSED_ARG(arg)         ((void)(arg))
 
 /* Get timing for old slower way too.  Pre Feb 2018 */
 #define DoSLOW 1

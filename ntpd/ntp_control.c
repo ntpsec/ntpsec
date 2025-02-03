@@ -185,9 +185,7 @@ enum var_type {v_time,
 enum var_type_special {
 	vs_peer, vs_peeradr, vs_peermode,
 	vs_systime,
-	vs_refid, vs_mruoldest, vs_varlist,
-	/* for slots in struct timex -- see comment above */
-	vs_tx_con, vs_tx_cal, vs_tx_err, vs_tx_jit, vs_tx_stb};
+	vs_refid, vs_mruoldest, vs_varlist};
 struct var {
   const char* name;
   const int flags;
@@ -198,7 +196,12 @@ struct var {
     const double* dbl;
     const unsigned long int* uli;
     const long int* li;
-    const int64_t* timex_li;
+    const long long* ll;
+#ifdef NTP_TIMEX_LONG_LONG
+    const long long* timex_li;
+#else
+    const long* timex_li;
+#endif
     const unsigned int* uinnt;
     const int* innt;
     const uint64_t* u64;
@@ -282,10 +285,8 @@ struct var {
 #define Var_mrumem(xname, xflags, xlocation) { \
   .name = xname, .flags = xflags, .type = v_mrumem, .p.u64 = &xlocation }
 #define Var_kli(xname, xflags, xlocation) { \
-  .name = xname, .flags = xflags, .type = v_kli, .p.li = &xlocation }
+  .name = xname, .flags = xflags, .type = v_kli, .p.timex_li = &xlocation }
 #define Var_special(xname, xflags, xspecial) { \
-  .name = xname, .flags = xflags, .type = v_special, .p.special = xspecial }
-#define Var_timex(xname, xflags, xspecial) { \
   .name = xname, .flags = xflags, .type = v_special, .p.special = xspecial }
 
 static const struct var sys_var[] = {
@@ -387,17 +388,17 @@ static const struct var sys_var[] = {
   Var_kli("kmaxerr", RO|N_CLOCK|KUToMS, ntx.maxerror),
   Var_kli("kesterr", RO|N_CLOCK|KUToMS, ntx.esterror),
   Var_int("kstflags", RO|N_CLOCK, ntx.status),           // turn to text
-  Var_timex("ktimeconst", RO|N_CLOCK, vs_tx_con),
+  Var_kli("ktimeconst", RO|N_CLOCK, ntx.constant),
   Var_kli("kprecis", RO|N_CLOCK|KUToMS, ntx.precision),
   Var_kli("kfreqtol", RO|N_CLOCK|K_16, ntx.tolerance),  // Not in man page
   Var_kli("kppsfreq", RO|N_CLOCK|K_16, ntx.ppsfreq),
-  Var_kli("kppsstab", RO|N_CLOCK|K_16, ntx.stabil),
   Var_kli("kppsjitter", RO|N_CLOCK|KNUToMS, ntx.jitter),
   Var_int("kppscalibdur", RO|N_CLOCK, ntx.shift),       // 1<<shift
-  Var_timex("kppscalibs", RO|N_CLOCK, vs_tx_cal),
-  Var_timex("kppscaliberrs", RO|N_CLOCK, vs_tx_err),
-  Var_timex("kppsjitexc", RO|N_CLOCK, vs_tx_jit),
-  Var_timex("kppsstbexc", RO|N_CLOCK, vs_tx_stb),
+  Var_kli("kppsstab", RO|N_CLOCK|K_16, ntx.stabil),
+  Var_kli("kppsjitexc", RO|N_CLOCK, ntx.jitcnt),
+  Var_kli("kppscalibs", RO|N_CLOCK, ntx.calcnt),
+  Var_kli("kppscaliberrs", RO|N_CLOCK, ntx.errcnt),
+  Var_kli("kppsstbexc", RO|N_CLOCK, ntx.stbcnt),
 
 
 /* refclock stuff in ntp_io */
@@ -1447,9 +1448,9 @@ ctl_putsys(const struct var * v) {
 	case v_kli:
 	    if (v->flags&K_16) {
 		/* value is scaled by 16 bits */
-		temp_d = FP_UNSCALE(*v->p.li);
+		temp_d = FP_UNSCALE(*v->p.timex_li);
 	    } else {
-		temp_d = (double)*v->p.li;
+		temp_d = (double)*v->p.timex_li;
 	    };
 	    if (v->flags & (KNUToMS | KUToMS)) {
 		/* value is in nanoseconds or microseconds */
@@ -1582,11 +1583,6 @@ ctl_putspecial(const struct var * v) {
     case vs_varlist:
 	do_sys_var_list(v->name, sys_var);
         break;
-    case vs_tx_con: ctl_putint(v->name, ntx.constant); break;
-    case vs_tx_cal: ctl_putint(v->name, ntx.calcnt); break;
-    case vs_tx_err: ctl_putint(v->name, ntx.errcnt); break;
-    case vs_tx_jit: ctl_putint(v->name, ntx.jitcnt); break;
-    case vs_tx_stb: ctl_putint(v->name, ntx.stbcnt); break;
     default:
         /* -Wswitch-enum will warn if this is possible */
         if (log_limit++ > 10) return;  /* Avoid log file clutter/DDoS */

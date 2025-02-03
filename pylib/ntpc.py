@@ -29,11 +29,18 @@ def _fmt():
 
 def _importado():
     """Load the ntpc library or throw an OSError trying."""
-    ntpc_paths = []         # places to look
+    mod_path_bits = __file__.split(os.sep)
+    library_basename = _fmt() % LIB  # like libntpc.so
+    ntpc_paths = [
+        # look in grandparent folder for plain bin_test,
+        # great-grandparent for pylib tests, and LIBDIR
+        # for the testers under /usr/local/lib running.
+        os.sep.join(mod_path_bits[:-3] + [library_basename]),
+        os.sep.join(mod_path_bits[:-4] + [library_basename]),
+        "@LIBDIR@" + os.sep + library_basename,
+    ]
 
-    j = __file__.split(os.sep)[:-1]
-    ntpc_paths.append(os.sep.join(j + [_fmt() % LIB]))
-
+    # Finally, check in ordinary library folders for production use.
     ntpc_path = ctypes.util.find_library(LIB)
     if ntpc_path:
         ntpc_paths.append(ntpc_path)

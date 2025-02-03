@@ -219,7 +219,7 @@ def configure(ctx):
     msg("--- Configuring main ---")
     ctx.setenv("main", ctx.env.derive())
 
-    from wafhelpers.check_sizeof import check_sizeof
+    from wafhelpers.check_sizeof import check_sizeof, check_timex
 
     for opt in opt_map:
         ctx.env[opt] = opt_map[opt]
@@ -604,13 +604,18 @@ int main(int argc, char **argv) {
         )
 
     # mostly used by timespecops.h
+    # Some are unused, but handy for discovering what a system is doing
     sizeofs = [
+        ("time.h",      "struct timespec"),
+        ("sys/time.h",  "struct timeval"),
         ("time.h",      "time_t"),
         (None,          "long"),
     ]
 
     for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
         check_sizeof(ctx, header, sizeof)
+
+    check_timex(ctx)
 
     # Parts of attic need libssl
     if not ctx.options.disable_nts or ctx.options.enable_attic:
@@ -932,16 +937,10 @@ class check(BuildContext):
     variant = "main"
 
 
-def bin_test(ctx):
+class bin_test(BuildContext):
     """Run binary check, use after tests."""
-    from wafhelpers.bin_test import cmd_bin_test
-    cmd_bin_test(ctx)
-
-
-def bin_test_summary(ctx):
-    """Display results of binary check, use after tests."""
-    from wafhelpers.bin_test import bin_test_summary
-    bin_test_summary(ctx)
+    cmd = 'bin_test'
+    variant = "main"
 
 
 variant_cmd = (
@@ -1027,7 +1026,8 @@ def afterparty(ctx):
                     os.remove(path_source.abspath())
                 except OSError:
                     pass
-                os.symlink(relpath, path_source.abspath())
+                if 'none' != ctx.env['ntpc']:
+                    os.symlink(relpath, path_source.abspath())
 
 
 python_scripts = set([
@@ -1133,6 +1133,7 @@ def build(ctx):
     # Skip running unit tests on a cross compile build
     from waflib import Options
     if not ctx.env.ENABLE_CROSS:
+        from wafhelpers.bin_test import cmd_bin_test, bin_test_summary
         # Force re-running of tests.  Same as 'waf --alltests'
         if ctx.cmd == "check":
             ctx.options.all_tests = True
@@ -1144,7 +1145,7 @@ def build(ctx):
             return
 
         # Test binaries
-        ctx.add_post_fun(bin_test)
+        ctx.add_post_fun(cmd_bin_test)
 
         # Write test log to a file
         ctx.add_post_fun(test_write_log)

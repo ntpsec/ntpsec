@@ -18,7 +18,7 @@
 #include <openssl/cmac.h>
 #endif
 
-#ifdef LIBRESSL_VERSION_NUMBER
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 static void	atexit_ssl_cleanup(void);
 #endif
 
@@ -43,7 +43,7 @@ ssl_init(void)
 	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS|OPENSSL_INIT_LOAD_CRYPTO_STRINGS|OPENSSL_INIT_ADD_ALL_CIPHERS|OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
 #endif
 
-#ifdef LIBRESSL_VERSION_NUMBER
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	atexit(&atexit_ssl_cleanup);
@@ -108,7 +108,7 @@ ssl_init(void)
 }
 
 
-#ifdef LIBRESSL_VERSION_NUMBER
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 static void
 atexit_ssl_cleanup(void)
 {

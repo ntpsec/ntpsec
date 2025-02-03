@@ -94,7 +94,7 @@ doit ()
 
 # no --disable-manpage on default and all
 doit default "--disable-debug-gdb"
-doit minimal "--disable-droproot --disable-mdns-registration --disable-doc --disable-manpage --disable-debug-gdb"
+doit minimal "--disable-droproot --disable-mdns-registration --disable-doc --disable-manpage --disable-debug-gdb --enable-pylib=none"
 
 # This also tests refclocks without DEBUG
 doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpage --enable-pylib=ffi --disable-debug-gdb"
