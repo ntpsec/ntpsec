@@ -11,10 +11,6 @@
 #include "ntp_calendar.h"
 #include "PIVOT.h"
 
-#if NTP_SIZEOF_TIME_T < 4
-# error sizeof(time_t) < 4 -- this will not work!
-#endif
-
 /* Helper function to handle possible wraparound of the ntp epoch.
  *
  * Works by periodic extension of the ntp time stamp in the UN*X epoch.
