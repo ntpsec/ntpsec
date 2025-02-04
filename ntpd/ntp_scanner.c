@@ -423,7 +423,8 @@ bool lex_push_file(
 				return false;
 			baselist = (char **)malloc(sizeof(char *));
 			if (NULL == baselist) {
-				msyslog(LOG_ERR, "CONFIG: lex_push_file: NULL from malloc");
+				msyslog(LOG_ERR,
+                                    "CONFIG: lex_push_file: NULL from malloc");
 				exit(3);
 			}
 			while ((dp = readdir(dfd)) != NULL)
@@ -433,7 +434,13 @@ bool lex_push_file(
 				}
 				baselist[basecount++] = strdup(dp->d_name);
 				baselist = realloc(baselist,
-						   (size_t)(basecount+1) * sizeof(char *));
+                                       (size_t)(basecount+1) * sizeof(char *));
+                                if (NULL == baselist) {
+                                        msyslog(LOG_ERR,
+                                            "CONFIG: lex_push_file: "
+                                            "NULL from realloc");
+                                        exit(3);
+                                }
 			}
 			closedir(dfd);
 			qsort(baselist, (size_t)basecount, sizeof(char *),
