@@ -24,18 +24,19 @@ PURGE=""
 if command -v pkg-config
 then
   SECCOMP="$(pkg-config libseccomp --variable=includedir)"
-  SECCOMP="$SECCOMP/seccomp.h"
+  SECCOMPH="${SECCOMP}/seccomp.h"
 else
   SECCOMP=""
+  SECCOMPH=""
 fi
 LINUX=""
-if [ `uname -s` = "Linux" -a -n "$SECCOMP" -a -f "$SECCOMPH" ]
+if [ "Linux" = "$(uname -s)" ] && [ -n "${SECCOMP}" ] && [ -f "${SECCOMPH}" ]
 then
   # Not supported on CentOS 6
   LINUX="--enable-seccomp"
 fi
 
-if [ -z ${PYTHON} ]
+if [ -z "${PYTHON}" ]
 then
     PYTHON="python"
 fi
@@ -48,46 +49,42 @@ then
     DISABLE_NTS="--disable-nts"
   fi
 else
-  if ! $PYTHON ./wafhelpers/tlscheck.py
+  if ! "$(${PYTHON} ./wafhelpers/tlscheck.py)"
   then
     DISABLE_NTS="--disable-nts"
   fi
 fi
 
+fail ()
+{
+  echo                                          2>&1   | tee -a "${DIR:?}/test.log"
+  echo "Trouble with ${PYTHON}-${DIR}-${1}"     2>&1   | tee -a "${DIR:?}/test.log"
+  PURGE="${PURGE} ${PYTHON}-${DIR}-${1}"
+}
+
 doit ()
 {
-  DIR=test-$1
-  [ ! -d $DIR ] && mkdir $DIR
-  rm -rf $DIR/*
-  $PYTHON ./waf configure $DISABLE_NTS --out=$DIR $2 2>&1 | tee    $DIR/test.log
-  WAF1=$?
-  WAF2=0
-  WAF3=0
-  if [ "$WAF1" = 0 ]
+  DIR="test-${1}"
+  [ ! -d "${DIR:?}" ] && mkdir "${DIR:?}"
+  rm -rf "${DIR:?}"/*
+  "${PYTHON}" ./waf configure ${DISABLE_NTS} --out="${DIR}" ${2} 2>&1 | tee    "${DIR:?}/test.log"
+  if [ "$?" != 0 ]
   then
-  echo                                 2>&1    | tee -a $DIR/test.log
-  $PYTHON ./waf build                   2>&1    | tee -a $DIR/test.log
-  WAF2=$?
-  if [ "$WAF2" = 0 ]
-  then
-  echo                                 2>&1    | tee -a $DIR/test.log
-  $PYTHON ./waf check                   2>&1    | tee -a $DIR/test.log
-  WAF3=$?
-  else
-    PURGE="${PURGE} ${PYTHON}-${DIR}-build"
+    fail "configure"
+    return
   fi
-  else
-    PURGE="${PURGE} ${PYTHON}-${DIR}-config"
-  fi
-  if [ "$WAF1" != 0 -o "$WAF2" != 0 -o "$WAF3" != 0 ]
-  then
-    echo                               2>&1   | tee -a $DIR/test.log
-    echo "Trouble with $DIR"           2>&1   | tee -a $DIR/test.log
-  fi
-  if [ "$WAF3" != 0 ]
-  then
-    PURGE="${PURGE} ${PYTHON-}${DIR}3-check"
-  fi
+
+  for STEP in build check bin_test install uninstall
+  do
+    echo                                        2>&1    | tee -a "${DIR}"/test.log
+    DESTDIR=scratch "${PYTHON}" ./waf "${STEP}" 2>&1    | tee -a "${DIR}"/test.log
+    if [ 0 != "$?" ]
+    then
+      fail "${STEP}"
+      return
+    fi
+  done
+
   echo
   echo
 }
@@ -101,13 +98,28 @@ doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpa
 
 doit all     "--enable-warnings --enable-attic --enable-debug --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot $LINUX --disable-doc --disable-manpage --enable-pylib=ext"
 
-if [ "`command -v asciidoc 2>/dev/null`" != "" -a \
-     "`command -v xsltproc 2>/dev/null`" != "" ]
+DOC=0
+if [ "$(command -v asciidoctor)" ]
+then
+  DOC=1
+else
+  if [ "$(command -v xsltproc)" ]
+  then
+    if [ "$(command -v asciidoc)" ] || \
+      [ "$(command -v asciidoc3)" ]
+    then
+      DOC=1
+    fi
+  fi
+fi
+if [ 0 != "${DOC}" ]
 then
 doit doc     ""
 fi
 
 # should try cross compile
+RET=0
+test -z "${PURGE}" || RET=1
 
 echo
 
@@ -117,10 +129,10 @@ grep "The configuration failed"  test*/test.log
 grep ^Trouble                    test*/test.log
 echo
 
-echo -n "## ";  $PYTHON --version
-if test -n "$PYTHONPATH"
+echo "## $(${PYTHON} --version)"
+if test -n "${PYTHONPATH}"
 then
-  echo "## PYTHONPATH is" \"$PYTHONPATH\"
+  echo "## PYTHONPATH is \"${PYTHONPATH}\""
 fi
 
 if ! (set -o pipefail) 2>/dev/null
@@ -131,7 +143,7 @@ then
   PURGE="${PURGE} pipefail"
 fi
 
-if [ `uname -s` = "Linux" -a -z "$SECCOMP" ]
+if [ "Linux" = "$(uname -s)" ] && [ -z "$SECCOMP" ]
 then
     echo
     echo "### Warning: Missing seccomp.h (on a Linux system)"
@@ -144,3 +156,5 @@ then
     echo "## errors encountered during execution:${PURGE}"
     exit 1
 fi
+
+exit $RET
