@@ -109,20 +109,20 @@ main(
 	struct ntptimeval ntv;
 	struct timeval tv;
 	struct timex ntx, _ntx;
-	int	times[20];
+	int    times[20] = {0};
 	double ftemp, gtemp, htemp;
-	long time_frac;				/* ntv.time.tv_frac_sec (us/ns) */
+	long time_frac;				// ntv.time.tv_frac_sec (us/ns)
 	l_fp ts;
-	volatile unsigned ts_mask = TS_MASK;		/* defaults to 20 bits (us) */
-	volatile unsigned ts_roundbit = TS_ROUNDBIT;	/* defaults to 20 bits (us) */
-	volatile int fdigits = 6;			/* fractional digits for us */
+	volatile unsigned ts_mask = TS_MASK;	     // defaults to 20 bits (us)
+	volatile unsigned ts_roundbit = TS_ROUNDBIT; // defaults to 20 bits (us)
+	volatile int fdigits = 6;               // fractional digits for us
 	size_t c;
 	int ch;
 	int errflg	= 0;
 	int cost	= 0;
 	volatile bool json      = false;
 	volatile int rawtime	= 0;
-	char ascbuf[BUFSIZ];
+	char ascbuf[BUFSIZ] = {0};
 
 	ZERO(ntx);
 	progname = argv[0];
