@@ -25,7 +25,7 @@ def addLog(color, text):
     test_logs.append((color, text))
 
 
-def bin_test_summary(ctx):
+def bin_test_summary(_ctx):
     """Print out the log."""
     for i in test_logs:
         waflib.Logs.pprint(i[0], i[1])
@@ -33,7 +33,6 @@ def bin_test_summary(ctx):
 
 def run(cmd, expected, python=None):
     """Run an individual test."""
-
     prefix = "running: " + " ".join(cmd)
 
     if not os.path.exists(cmd[0]):
@@ -81,6 +80,7 @@ def cmd_bin_test(ctx):
     """Run a suite of binary tests."""
     BIN = ctx.env.BINDIR
     SBIN = ctx.env.SBINDIR
+    skips = 0
     fails = 0
 
     cmd_list = [
@@ -122,12 +122,22 @@ def cmd_bin_test(ctx):
         INSTALL = True
 
     for cmd in etl_cases(INSTALL, version, cmd_list):
-        if not run(cmd[0], cmd[1]):
+        ret = run(cmd[0], cmd[1])
+        if ret is True:
+            pass
+        elif ret is None:
+            skips += 1
+        elif ret is False:
             fails += 1
+
+    if 1 == skips:
+        waflib.Logs.pprint("YELLOW", "Skipped one binary test.")
+    elif 1 < skips:
+        waflib.Logs.pprint("YELLOW", "Skipped %d binary tests." % skips)
 
     if 1 == fails:
         bin_test_summary(ctx)
-        ctx.fatal("1 binary test failed!")
+        ctx.fatal("Failed one binary test!")
     elif 1 < fails:
         bin_test_summary(ctx)
-        ctx.fatal("%d binary tests failed!" % fails)
+        ctx.fatal("Failed %d binary tests!" % fails)
