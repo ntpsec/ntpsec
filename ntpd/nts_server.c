@@ -381,10 +381,10 @@ bool nts_ke_request(SSL *ssl) {
 	 * Our cookies can be 104, 136, or 168 for AES_SIV_CMAC_xxx
 	 * 8*168 fits comfortably into 2K.
 	 */
-	uint8_t buff[2048];
-	uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-	int aead, keylen;
-	struct BufCtl_t buf;
+	uint8_t buff[2048] = {0};
+	uint8_t c2s[NTS_MAX_KEYLEN] = {0}, s2c[NTS_MAX_KEYLEN] = {0};
+	int aead = NO_AEAD, keylen;
+	struct BufCtl_t buf = {0};
 	int bytes_read, bytes_written;
 	int used;
 
@@ -394,7 +394,6 @@ bool nts_ke_request(SSL *ssl) {
 
 	buf.next = buff;
 	buf.left = bytes_read;
-	aead = NO_AEAD;
 	if (!nts_ke_process_receive(&buf, &aead))
 		return false;
 
