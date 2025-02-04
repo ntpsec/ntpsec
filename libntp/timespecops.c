@@ -360,12 +360,12 @@ lfp_stamp_to_tspec(
 	sec = ntpcal_ntp_to_time(lfpuint(x), p);
 	out.tv_nsec = FTOTVN(lfpfrac(x));
 
-	/* copying a time64_t to a time_t needs some care... */
-#if NTP_SIZEOF_TIME_T <= 4
-	out.tv_sec = (time_t)time64lo(sec);
-#else
-	out.tv_sec = (time_t)time64s(sec);
-#endif
+        // copying a time64_t to a time_t needs some care...
+        if (4 >= sizeof(time_t)) {
+            out.tv_sec = (time_t)time64lo(sec);
+        } else {
+            out.tv_sec = (time_t)time64s(sec);
+        }
 
 	return out;
 }
