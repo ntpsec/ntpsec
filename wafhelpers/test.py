@@ -20,10 +20,12 @@ def test_write_log(ctx):
         for binary, retval, lines, error in ctx.utest_results:
             fp.write("BINARY      : %s\n" % binary)
             fp.write("RETURN VALUE: %s\n" % retval)
-            fp.write("\n*** stdout ***\n")
-            fp.write(polystr(lines))
-            fp.write("\n*** stderr ***\n")
-            fp.write(polystr(error))
+            if lines:
+                fp.write("\n*** stdout ***\n")
+                fp.write(polystr(lines))
+            if error:
+                fp.write("\n*** stderr ***\n")
+                fp.write(polystr(error))
             fp.write("\n\n\n")
 
     pprint("BLUE", "Wrote test log to: ", file_out)
@@ -35,15 +37,17 @@ def test_print_log(ctx):
         pprint("YELLOW", "RETURN VALUE:", retval)
         print("")
 
-        if retval or error:
+        if retval:
             pprint("RED", "****** ERROR ******\n")
+        else:
+            pprint("GREEN", "****** LOG ******\n")
 
+        if lines:
             print("\n*** stdout ***\n")
             print(polystr(lines))
+
+        if error:
             print("\n*** stderr ***\n")
             print(polystr(error))
-
-        if (not retval) and (not error):
-            pprint("GREEN", "****** LOG ******\n", polystr(lines))
 
         print("")
