@@ -1003,18 +1003,17 @@ ctlclkstatus(
 static unsigned short
 ctlsysstatus(void)
 {
-	uint8_t this_clock;
+	uint8_t this_clock = CTL_SST_TS_UNSPEC;
 
-	this_clock = CTL_SST_TS_UNSPEC;
+	if (NULL == sys_vars.sys_peer) {
 #ifdef REFCLOCK
-	if (sys_vars.sys_peer != NULL) {
-		if (CTL_SST_TS_UNSPEC != sys_vars.sys_peer->sstclktype)
-			this_clock = sys_vars.sys_peer->sstclktype;
-	}
-#else /* REFCLOCK */
-	if (sys_vars.sys_peer != 0)
+	} else if (CTL_SST_TS_UNSPEC != sys_vars.sys_peer->sstclktype) {
+		this_clock = sys_vars.sys_peer->sstclktype;
+#endif // REFCLOCK
+	} else {
 		this_clock = CTL_SST_TS_NTP;
-#endif /* REFCLOCK */
+	}
+
 	return CTL_SYS_STATUS(sys_vars.sys_leap, this_clock, ctl_sys_num_events,
 			      ctl_sys_last_event);
 }
