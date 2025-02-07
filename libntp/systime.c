@@ -198,43 +198,45 @@ step_systime(
 	 * very often, we can afford to do the whole calculation from
 	 * scratch. And we're not in the time-critical path yet.
 	 */
-#if NTP_SIZEOF_TIME_T > 4
-	/*
-	 * This code makes sure the resulting time stamp for the new
-	 * system time is in the 2^32 seconds starting at 1970-01-01,
-	 * 00:00:00 UTC.
-	 */
-	pivot = 0x80000000;
+        if (4 < sizeof(time_t)) {
+            // 64-bit time_t
+            /*
+             * This code makes sure the resulting time stamp for the new
+             * system time is in the 2^32 seconds starting at 1970-01-01,
+             * 00:00:00 UTC.
+             */
+            pivot = 0x80000000;
 #if USE_COMPILETIME_PIVOT
-	/*
-	 * Add the compile time minus 10 years to get a possible target
-	 * area of (compile time - 10 years) to (compile time + 126
-	 * years).  This should be sufficient for a given binary of
-	 * NTPD.
-	 */
-	if (ntpcal_get_build_date(&jd)) {
-		jd.year -= 10;
-		pivot += ntpcal_date_to_time(&jd);
-	} else {
-		msyslog(LOG_ERR,
-			"CLOCK: step_systime: assume 1970-01-01 as build date");
-	}
+            /*
+             * Add the compile time minus 10 years to get a possible target
+             * area of (compile time - 10 years) to (compile time + 126
+             * years).  This should be sufficient for a given binary of
+             * NTPD.
+             */
+            if (ntpcal_get_build_date(&jd)) {
+                    jd.year -= 10;
+                    pivot += ntpcal_date_to_time(&jd);
+            } else {
+                    msyslog(LOG_ERR,
+                       "CLOCK: step_systime: assume 1970-01-01 as build date");
+            }
 #else
-	UNUSED_LOCAL(jd);
-#endif /* USE_COMPILETIME_PIVOT */
-#else
-	UNUSED_LOCAL(jd);
-	/* This makes sure the resulting time stamp is on or after
-	 * 1969-12-31/23:59:59 UTC and gives us additional two years,
-	 * from the change of NTP era in 2036 to the UNIX rollover in
-	 * 2038. (Minus one second, but that won't hurt.) We *really*
-	 * need a longer 'time_t' after that!  Or a different baseline,
-	 * but that would cause other serious trouble, too.
-	 */
-	pivot = 0x7FFFFFFF;
-#endif
+            UNUSED_LOCAL(jd);
+#endif  // USE_COMPILETIME_PIVOT
+    } else {
+            // 32-bit time_t
+            UNUSED_LOCAL(jd);
+            /* This makes sure the resulting time stamp is on or after
+             * 1969-12-31/23:59:59 UTC and gives us additional two years,
+             * from the change of NTP era in 2036 to the UNIX rollover in
+             * 2038. (Minus one second, but that won't hurt.) We *really*
+             * need a longer 'time_t' after that!  Or a different baseline,
+             * but that would cause other serious trouble, too.
+             */
+            pivot = 0x7FFFFFFF;
+    }
 
-	/* get the complete jump distance as l_fp */
+	// get the complete jump distance as l_fp
 	fp_sys = dtolfp(sys_residual);
 	fp_ofs = dtolfp(step);
 	fp_ofs += fp_sys;

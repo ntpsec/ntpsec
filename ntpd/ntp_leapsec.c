@@ -83,12 +83,8 @@ static void   reset_times(leap_table_t*);
 static bool   leapsec_add(leap_table_t*, time_t, int);
 static bool   leapsec_raw(leap_table_t*, time_t, int, bool);
 
-/* time_t is unsigned.  This is used for infinity in tables */
-#if NTP_SIZEOF_TIME_T == 8
-# define LAST_time_t 0x7fffffffffffffff
-#elif NTP_SIZEOF_TIME_T == 4
-# define LAST_time_t 0x7fffffff
-#endif
+// time_t is unsigned.  This is used for infinity in tables
+#define LAST_time_t ((8 == sizeof(time_t))? 0x7fffffffffffffff : 0x7fffffff)
 
 /* =====================================================================
  * Get & Set the current leap table
