@@ -36,4 +36,8 @@ ntpver::	Simple script using ntpq to print out the suite version.
 
 sht.c::		Test program for shared memory refclock.
 
+timestamp-info:: Hack to test and display various packet timestamp types.
+
+Makefile.mpls::	Simple Makefile to optionally build with MacportsLegacySupport
+
 // end

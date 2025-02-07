@@ -1,0 +1,7 @@
+*
+!.gitignore
+!README
+!*.c
+!ntpdate
+!ntpver
+!Makefile.mpls
