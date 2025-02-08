@@ -153,7 +153,7 @@ get_osver(void)
 
   if (sysctl(mib, miblen, osver, &len, NULL, 0)) return -1;
 #endif /* !__linux__ */
-  if (len <= 0 || len >= sizeof(osver)) return -1;
+  if (len <= 0 || len >= (ssize_t) sizeof(osver)) return -1;
   osver[len] = '\0';
   if (osver[len - 1] == '\n') osver[len - 1] = '\0';
   return 0;
@@ -330,7 +330,7 @@ test_timestamp(const char *name, ts_type_t tstype,
   datalen = cmsglen - hdrlen;
   datap = (uint32_t *) (cbuf + hdrlen);
   printf("    cmsg length = %d (%d+%d), level = %d, type = %d\n",
-         cmsglen, hdrlen, datalen, cmsglvl, cmsgtype);
+         (int) cmsglen, hdrlen, datalen, cmsglvl, cmsgtype);
   if (hdrlen > (int) sizeof(*cmsg)) {
     xdatap = (uint32_t *) (cbuf + sizeof(*cmsg));
     printf("    header padding:\n");
@@ -343,7 +343,8 @@ test_timestamp(const char *name, ts_type_t tstype,
     printf("      %010u\n", *datap++);
   }
   if (cbuflen > cmsglen) {
-    printf("    +%d bytes of additional cmsg data\n", cbuflen - cmsglen);
+    printf("    +%d bytes of additional cmsg data\n",
+           (int) (cbuflen - cmsglen));
   }
 }
 
