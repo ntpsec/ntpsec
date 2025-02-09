@@ -67,33 +67,54 @@
 typedef struct timeval timeval_t;
 const timeval_t timeval_sample;
 
+#define SIZEOF_TIMEVAL (sizeof(timeval_sample.tv_sec) \
+                        + sizeof(timeval_sample.tv_usec))
+
 #ifdef CLOCK_REALTIME
 #define HAVE_TIMESPEC
 typedef struct timespec timespec_t;
 const timespec_t timespec_sample;
+#define SIZEOF_TIMESPEC (sizeof(timespec_sample.tv_sec) \
+                         + sizeof(timespec_sample.tv_nsec))
+#else
+#define SIZEOF_TIMESPEC 0
+#endif
+
+#ifdef SO_TS_BINTIME
+const struct bintime bintime_sample;
+#define SIZEOF_BINTIME (sizeof(bintime_sample.sec) \
+                        + sizeof(bintime_sample.frac))
+#else
+#define SIZEOF_BINTIME 0
 #endif
 
 #define TS_TYPES \
-  TS_ONE(none,) \
-  TS_ONE(tv,struct timeval) \
-  TS_ONE(ts,struct timespec) \
-  TS_ONE(bin,struct bintime) \
-  TS_ONE(u64,uint64_t) \
-  TS_ONE(u64mach,uint64_t (mach)) \
+  TS_ONE(none,,0) \
+  TS_ONE(tv,struct timeval,SIZEOF_TIMEVAL) \
+  TS_ONE(ts,struct timespec,SIZEOF_TIMESPEC) \
+  TS_ONE(bin,struct bintime,SIZEOF_BINTIME) \
+  TS_ONE(u64,uint64_t,sizeof(uint64_t)) \
+  TS_ONE(u64mach,uint64_t (mach),sizeof(uint64_t)) \
 
-#define TS_ONE(name,str) ts_##name,
+#define TS_ONE(name,str,size) ts_##name,
 typedef enum ts_type {
   TS_TYPES
 } ts_type_t;
 #undef TS_ONE
 
-#define TS_ONE(name,str) #str,
-const char * const ts_type_names[] = {
+#define TS_ONE(name,str,size) #str,
+static const char * const ts_type_names[] = {
   TS_TYPES
 };
 #undef TS_ONE
 
-const union {
+#define TS_ONE(name,str,size) size,
+static const int ts_sizes[] = {
+  TS_TYPES
+};
+#undef TS_ONE
+
+static const union {
 	uint8_t c[8];
 	uint64_t i;
 } endian_test = {{1, 2, 3, 4, 5, 6, 7, 8}};
@@ -109,11 +130,11 @@ const union {
                  (sizeof(long) == 4) ? "32" : (sizeof(long) == 8) ? "64" \
                  : "unknown")
 
-const char sample[] = "The Quick Brown Fox";
+static const char sample[] = "The Quick Brown Fox";
 
-char osver[256];
-uint8_t dbuf[256];
-uint8_t cbuf[256];
+static char osver[256];
+static uint8_t dbuf[256];
+static uint8_t cbuf[256];
 
 static void
 report_sizes(const char *name, const char *xname,
@@ -191,9 +212,16 @@ test_packet(int sockopt, int sockopt2, int sockval2,
       .msg_iovlen = 1,
       };
   static const int trueval = 1;
+  uint32_t *cbufp;
 
   hdr.msg_control = cbuf;
   hdr.msg_controllen = *cbuflen;
+
+  /* Make unpopulated buffer obvious */
+  cbufp = (uint32_t *) cbuf;
+  while (cbufp < (uint32_t *) (cbuf + sizeof(cbuf))) {
+    *cbufp++ = 0xDEADBEEFU;
+  }
 
   do {
     if ((sockin = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -289,7 +317,7 @@ test_timestamp(const char *name, ts_type_t tstype,
   double time1d, time2d;
   socklen_t cbuflen, cmsglen;
   struct cmsghdr *cmsg;
-  int cmsglvl, cmsgtype, hdrlen, datalen;
+  int cmsglvl, cmsgtype, hdrlen, datalen, xdatalen;
   uint32_t *datap, *xdatap;
 
   printf("  Testing %s:\n", name);
@@ -335,14 +363,26 @@ test_timestamp(const char *name, ts_type_t tstype,
     xdatap = (uint32_t *) (cbuf + sizeof(*cmsg));
     printf("    header padding:\n");
     while (xdatap < datap) {
-      printf("     (%010u)\n", *xdatap++);
+      printf("     (%10u)\n", *xdatap++);
     }
   }
   printf("    %s%spayload longwords:\n", tsname, tsname[0] ? " " : "");
   while (datap < (uint32_t *) (cbuf + cmsglen)) {
-    printf("      %010u\n", *datap++);
+    printf("      %10u  (0x%08X)\n", *datap, *datap);
+    ++datap;
   }
-  if (cbuflen > cmsglen) {
+  /* Check for extra data assumed by simple pointer cast */
+  xdatalen = ts_sizes[tstype] - datalen;
+  if (xdatalen > 0) {
+    datap = (uint32_t *) ((uint8_t *) CMSG_DATA(cmsg) + datalen);
+    xdatap = datap + xdatalen / sizeof(uint32_t);
+    printf("    erroneously assumed additional payload longwords:\n");
+    while (datap < xdatap) {
+      printf("     (%10u)  (0x%08X)\n", *datap, *datap);
+      ++datap;
+    }
+  } else xdatalen = 0;
+  if (cbuflen > cmsglen + xdatalen) {
     printf("    +%d bytes of additional cmsg data\n",
            (int) (cbuflen - cmsglen));
   }

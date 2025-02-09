@@ -1,4 +1,4 @@
 # Simple (optional) Makefile for building with MacportsLegacySupport
 
 MPPREFIX  ?= /opt/local
-CFLAGS    += -I $(MPPREFIX)/include/LegacySupport -L $(MPPREFIX)/lib -lMacportsLegacySupport
+CFLAGS    += -I$(MPPREFIX)/include/LegacySupport -L$(MPPREFIX)/lib -lMacportsLegacySupport
