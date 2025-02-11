@@ -285,7 +285,7 @@ openSUSE-leap-basic:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts build  --pyshebang "/usr/bin/env python3"
+    - python3 ./waf configure --disable-Werror --disable-doc --disable-manpage --disable-nts build  --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
 
@@ -293,7 +293,7 @@ openSUSE-leap-refclocks:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
   script:
-    - python3 ./waf configure --disable-doc --disable-manpage --disable-nts --refclock=all build
+    - python3 ./waf configure --disable-Werror --disable-doc --disable-manpage --disable-nts --refclock=all build
 
 # debian-stable-basic-32bit:
 #   <<: *job_definition

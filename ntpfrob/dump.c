@@ -108,7 +108,8 @@ do_dump(const iomode mode, const int force)
         }
         puts("}\n");
     } else {
-        printf("time = %ld.%09ld\n", txc.time.tv_sec, txc.time.tv_usec);
+        printf("time = %ld.%09lld\n", \
+          txc.time.tv_sec, (long long)txc.time.tv_usec);
         printf("verbose = \"%s\"\n", verbose[v]);
         for (int i = 0; i < end; i++) {
             printf("%s = %ld\n", adjkey[i], adjval[i]);
