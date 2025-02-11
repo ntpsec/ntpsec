@@ -12,6 +12,11 @@ on user-visible changes.
 
 ## Repository Head
 
+* We have tightened the default compile time checking
+  The default is now --enable-warnings and -Werror
+  Use --disable-warnings and/or --disable-Werror if you can't fix your code.
+  (Old old Bison needs --disable-Werror)
+
 * Fix ntpviz's skewness and kurtosis formulas. Fix suggested by by Frank Davis.
 
 * ntpd now runs on FIPS mode systems.

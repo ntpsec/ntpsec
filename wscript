@@ -342,8 +342,13 @@ def configure(ctx):
         ctx.define("DEBUG", 1, comment="Enable debug mode")
         ctx.env.BISONFLAGS += ["--debug"]
 
-    if ctx.options.enable_warnings:
-        # turn on some annoying warnings
+    if not ctx.options.disable_Werror:
+        ctx.env.CFLAGS = [
+            "-Werror",                # Turn warnings into errors
+        ] + ctx.env.CFLAGS
+
+    if not ctx.options.disable_warnings:
+        # turn on some more warnings
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
             # "-Waggregate-return",   # breaks ldiv(), ntpcal_daysplit(),  etc.
@@ -667,10 +672,10 @@ int main(int argc, char **argv) {
         ('EVP_MD_CTX_new', ["openssl/evp.h"], "CRYPTO", False),
         # MacOS doesn't have timer_create ??
         ('timer_create', ["signal.h", "time.h"], "RT", False),
-        # Very old versions of OpenSSL don't have cmac.h
-        #  We could add ifdefs, but old crypto is deprecated in favor of CMAC
-        #  and so far, all the systems that we want to support are new enough.
-        ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True),
+        ## Very old versions of OpenSSL don't have cmac.h
+        ## We used to test for CMAC_CTX_new here to generate a sane error
+        ## Now that gets a Deprecated warning with OpenSSL 3
+        ## ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True),
         # Next should be above, but it needs a library
         # EVP_PKEY_new_CMAC_key added in OpenSSL 1.1.1
         ('EVP_PKEY_new_CMAC_key', ["openssl/cmac.h"], "CRYPTO", False))

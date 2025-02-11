@@ -9,7 +9,7 @@ SIZE_FRAG = """
 %s
 #include <stdio.h>
 int main(void) {
-    printf("%%lu", sizeof(%s));
+    printf("%%lu", (unsigned long)sizeof(%s));
     return 0;
 }
 """
