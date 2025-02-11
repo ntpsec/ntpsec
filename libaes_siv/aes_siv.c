@@ -81,7 +81,7 @@ static void debug(const char *label, const unsigned char *hex, size_t len) {
                 if (i > 0 && i % 16 == 0) {
                         printf("\n                  ");
                 }
-                printf("%.2x", (int)hex[i]);
+                printf("%.2x", (unsigned int)hex[i]);
                 if (i > 0 && i % 4 == 3) {
                         printf(" ");
                 }
