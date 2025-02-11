@@ -384,7 +384,7 @@ bool nts_ke_request(SSL *ssl) {
 	uint8_t buff[2048] = {0};
 	uint8_t c2s[NTS_MAX_KEYLEN] = {0}, s2c[NTS_MAX_KEYLEN] = {0};
 	int aead = NO_AEAD, keylen;
-	struct BufCtl_t buf = {0};
+	struct BufCtl_t buf = {0, 0};
 	int bytes_read, bytes_written;
 	int used;
 
