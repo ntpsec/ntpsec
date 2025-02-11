@@ -5043,7 +5043,9 @@ trimbletsip_message(
 			switch (mb(0) & 0xFF)
 			{
 			default:
-				t = ap(pbuffer, sizeof(pbuffer), t, "illegal value 0x%02x", mb(0) & 0xFF);
+				t = ap(pbuffer, sizeof(pbuffer), \
+					t, "illegal value 0x%02x", \
+					(unsigned)mb(0) & 0xFF);
 				break;
 			case 0x00:
 				t = ap(pbuffer, sizeof(pbuffer), t, "doing position fixes");
@@ -5106,7 +5108,8 @@ trimbletsip_message(
 
 			int i, bits;
 
-			t = ap(pbuffer, sizeof(pbuffer), t, "machine id 0x%02x", mb(0) & 0xFF);
+			t = ap(pbuffer, sizeof(pbuffer), t, \
+				"machine id 0x%02x", (unsigned)mb(0) & 0xFF);
 			bits = mb(1) & 0xFF;
 
 			for (i = 0; i < 8; i++) {

@@ -101,8 +101,9 @@ do_dump(const iomode mode, const int force)
 
     /* FIXME: this should probably check for STA_NANO when printing tv_usec */
     if (mode == json) {
-        printf("{\"time\":%ld.%09ld, \"verbose\": \"%s\"", txc.time.tv_sec,
-          txc.time.tv_usec, verbose[v]);
+        printf("{\"time\":%lld.%09lld, \"verbose\": \"%s\"", \
+          (long long)txc.time.tv_sec,
+          (long long)txc.time.tv_usec, verbose[v]);
         for (int i = 0; i < end; i++) {
             printf(", \"%s\": %ld", adjkey[i], adjval[i]);
         }
