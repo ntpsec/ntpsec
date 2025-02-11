@@ -6,7 +6,8 @@ def build(ctx):
     util = [    'sht',
                 'digest-find', 'cipher-find',
                 'clocks', "random",
-                'digest-timing', 'cmac-timing', 'exp-timing', 'timestamp-info',
+                'digest-timing', 'cmac-timing', 'exp-timing', 'sign-timing',
+		'timestamp-info',
                 'backwards']
 
     if not ctx.env.DISABLE_NTS:
