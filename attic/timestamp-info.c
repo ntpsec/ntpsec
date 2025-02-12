@@ -66,49 +66,53 @@
 
 typedef struct timeval timeval_t;
 const timeval_t timeval_sample;
-
-#define SIZEOF_TIMEVAL (sizeof(timeval_sample.tv_sec) \
-                        + sizeof(timeval_sample.tv_usec))
+#define SIZEOF_PACKED_TIMEVAL (sizeof(timeval_sample.tv_sec) \
+                               + sizeof(timeval_sample.tv_usec))
+#define SIZEOF_TIMEVAL sizeof(timeval_t)
 
 #ifdef CLOCK_REALTIME
 #define HAVE_TIMESPEC
 typedef struct timespec timespec_t;
 const timespec_t timespec_sample;
-#define SIZEOF_TIMESPEC (sizeof(timespec_sample.tv_sec) \
-                         + sizeof(timespec_sample.tv_nsec))
+#define SIZEOF_PACKED_TIMESPEC (sizeof(timespec_sample.tv_sec) \
+                                + sizeof(timespec_sample.tv_nsec))
+#define SIZEOF_TIMESPEC sizeof(timespec_t)
 #else
+#define SIZEOF_PACKED_TIMESPEC 0
 #define SIZEOF_TIMESPEC 0
 #endif
 
 #ifdef SO_TS_BINTIME
 const struct bintime bintime_sample;
-#define SIZEOF_BINTIME (sizeof(bintime_sample.sec) \
-                        + sizeof(bintime_sample.frac))
+#define SIZEOF_PACKED_BINTIME (sizeof(bintime_sample.sec) \
+                               + sizeof(bintime_sample.frac))
+#define SIZEOF_BINTIME sizeof(struct bintime)
 #else
+#define SIZEOF_PACKED_BINTIME 0
 #define SIZEOF_BINTIME 0
 #endif
 
 #define TS_TYPES \
-  TS_ONE(none,,0) \
-  TS_ONE(tv,struct timeval,SIZEOF_TIMEVAL) \
-  TS_ONE(ts,struct timespec,SIZEOF_TIMESPEC) \
-  TS_ONE(bin,struct bintime,SIZEOF_BINTIME) \
-  TS_ONE(u64,uint64_t,sizeof(uint64_t)) \
-  TS_ONE(u64mach,uint64_t (mach),sizeof(uint64_t)) \
+  TS_ONE(none,,0,NULL) \
+  TS_ONE(tv,struct timeval,SIZEOF_TIMEVAL,check_timeval) \
+  TS_ONE(ts,struct timespec,SIZEOF_TIMESPEC,check_timespec) \
+  TS_ONE(bin,struct bintime,SIZEOF_BINTIME,NULL) \
+  TS_ONE(u64,uint64_t,sizeof(uint64_t),NULL) \
+  TS_ONE(u64mach,uint64_t (mach),sizeof(uint64_t),NULL) \
 
-#define TS_ONE(name,str,size) ts_##name,
+#define TS_ONE(name,str,size,check) ts_##name,
 typedef enum ts_type {
   TS_TYPES
 } ts_type_t;
 #undef TS_ONE
 
-#define TS_ONE(name,str,size) #str,
+#define TS_ONE(name,str,size,check) #str,
 static const char * const ts_type_names[] = {
   TS_TYPES
 };
 #undef TS_ONE
 
-#define TS_ONE(name,str,size) size,
+#define TS_ONE(name,str,size,check) size,
 static const int ts_sizes[] = {
   TS_TYPES
 };
@@ -135,6 +139,31 @@ static const char sample[] = "The Quick Brown Fox";
 static char osver[256];
 static uint8_t dbuf[256];
 static uint8_t cbuf[256];
+
+typedef int check_func_t(void *);
+
+static int
+check_timeval(void *data) {
+  uint64_t usec = ((timeval_t *) data)->tv_usec;
+  return usec >= 1000000;
+}
+
+static int
+check_timespec(void *data) {
+  #ifdef HAVE_TIMESPEC
+  uint64_t nsec = ((timespec_t *) data)->tv_nsec;
+  return nsec >= 1000000000;
+  #else
+  (void) data;
+  return 0;
+  #endif
+}
+
+#define TS_ONE(name,str,size,check) check,
+static check_func_t *ts_checks[] = {
+  TS_TYPES
+};
+#undef TS_ONE
 
 static void
 report_sizes(const char *name, const char *xname,
@@ -307,6 +336,9 @@ test_packet(int sockopt, int sockopt2, int sockval2,
   return err;
 }
 
+#define CMSG_DATALEN(cmsg) ((uint8_t *) (cmsg) + (cmsg)->cmsg_len \
+	                    - (uint8_t *) CMSG_DATA(cmsg))
+
 static void
 test_timestamp(const char *name, ts_type_t tstype,
                int sockopt, int sockopt2, int sockval2, int scmtype)
@@ -354,11 +386,19 @@ test_timestamp(const char *name, ts_type_t tstype,
     return;
   }
 
-  hdrlen = ((uint8_t *) CMSG_DATA(cmsg)) - ((uint8_t *) cmsg);
-  datalen = cmsglen - hdrlen;
-  datap = (uint32_t *) (cbuf + hdrlen);
+  datalen = CMSG_DATALEN(cmsg);
+  hdrlen = cmsglen - datalen;
+  datap = (uint32_t *) CMSG_DATA(cmsg);
   printf("    cmsg length = %d (%d+%d), level = %d, type = %d\n",
          (int) cmsglen, hdrlen, datalen, cmsglvl, cmsgtype);
+  if (ts_sizes[tstype] && datalen != ts_sizes[tstype]) {
+    printf("      XXX payload length %d != expected timestamp size %d\n",
+           datalen, ts_sizes[tstype]);
+  } else {
+    if (ts_checks[tstype] && (*ts_checks[tstype])(datap)) {
+      printf("      XXXXX timestamp has invalid data\n");
+    }
+  }
   if (hdrlen > (int) sizeof(*cmsg)) {
     xdatap = (uint32_t *) (cbuf + sizeof(*cmsg));
     printf("    header padding:\n");
