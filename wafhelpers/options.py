@@ -81,11 +81,9 @@ ext, ffi, or none. defaults to ffi.""", nargs=1)
     grp.add_option('--check', action='store_true', default=False,
                    help="Run tests")
     grp.add_option('--enable-warnings', action='store_true',
-                   default=False, help="Ignored, default is on")
-    grp.add_option('--disable-warnings', action='store_true',
-                   default=False, help="Enable more CC warnings")
-    grp.add_option('--disable-Werror', action='store_true',
-                   default=False, help="turn off -Werror")
+                   default=False, help="Turn on a few more warnings")
+    grp.add_option('--enable-Werror', action='store_true',
+                   default=False, help="Turn on -Werror")
     grp.add_option(
         '--define', type='string', action="callback",
         callback=callback_flags,

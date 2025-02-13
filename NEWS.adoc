@@ -12,10 +12,9 @@ on user-visible changes.
 
 ## Repository Head
 
-* We have tightened the default compile time checking
-  The default is now --enable-warnings and -Werror
-  Use --disable-warnings and/or --disable-Werror if you can't fix your code.
-  (Old old Bison needs --disable-Werror)
+* waf configure --enable-Werror will turn warnings into errors
+  This lets developers and our CI find warnings in a sea of printout.
+  (This will cause builds on old old Bison to fail.)
 
 * Fix ntpviz's skewness and kurtosis formulas. Fix suggested by by Frank Davis.
 

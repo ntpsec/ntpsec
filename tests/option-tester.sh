@@ -96,7 +96,7 @@ doit minimal "--disable-droproot --disable-mdns-registration --disable-doc --dis
 # This also tests refclocks without DEBUG
 doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpage --enable-pylib=ffi --disable-debug-gdb"
 
-doit all     "--enable-warnings --enable-attic --enable-debug --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot $LINUX --disable-doc --disable-manpage --enable-pylib=ext"
+doit all     "--enable-Werror --enable-warnings --enable-attic --enable-debug --enable-debug-timing --refclock=all --enable-leap-smear --enable-mssntp --enable-early-droproot $LINUX --disable-doc --disable-manpage --enable-pylib=ext"
 
 DOC=0
 if [ "$(command -v asciidoctor)" ]

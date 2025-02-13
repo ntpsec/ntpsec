@@ -342,12 +342,12 @@ def configure(ctx):
         ctx.define("DEBUG", 1, comment="Enable debug mode")
         ctx.env.BISONFLAGS += ["--debug"]
 
-    if not ctx.options.disable_Werror:
+    if ctx.options.enable_Werror:
         ctx.env.CFLAGS = [
             "-Werror",                # Turn warnings into errors
         ] + ctx.env.CFLAGS
 
-    if not ctx.options.disable_warnings:
+    if ctx.options.enable_warnings:
         # turn on some more warnings
         ctx.env.CFLAGS = [
             # "-Wall",                # for masochists
