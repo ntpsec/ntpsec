@@ -77,9 +77,9 @@ void tickadj(const bool json_b, const int newtick)
 			       txc.time_tick, txc.tickadj);
 #else
 		if (json_b)
-			printf("{\"tick\":%ld}\n", txc.tick);
+			printf("{\"tick\":%lld}\n", (long long)txc.tick);
 		else
-			printf("tick = %ld\n", txc.tick);
+			printf("tick = %lld\n", (long long)txc.tick);
 #endif /* HAVE_STRUCT_TIMEX_TIME_TICK */
 	}
 
