@@ -80,6 +80,20 @@ def build(ctx):
         # use="libntpd_obj bison_obj",
     )
 
+    # Build the parser separately, so that we can disable -Wswitch-default
+    # on this one build, since old Bisons run afoul of it.  Also, at least
+    # one old Bison generates a couple of references to undefined macros,
+    # so we disable that warning as well.
+    ctx(
+        target="parser_obj",
+        features="c",
+        source=ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c"),
+        includes=[
+            ctx.bldnode.parent.abspath(), "../include",
+            "%s/host/ntpd/" % ctx.bldnode.parent.abspath(), "." ],
+        cflags=["-Wno-switch-default", "-Wno-undef"],  # For old Bisons
+    )
+
     use_refclock = ""      # XXX: there must be a better way to do this
     if ctx.env.REFCLOCK_ENABLE:
 
@@ -120,7 +134,6 @@ def build(ctx):
         "ntp_timer.c",
         "ntp_dns.c",
         "ntpd.c",
-        ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
     ]
 
     ctx(
@@ -131,7 +144,7 @@ def build(ctx):
         install_path='${SBINDIR}',
         source=ntpd_source,
         target="ntpd",
-        use="libntpd_obj ntp M parse RT CAP SECCOMP PTHREAD NTPD "
+        use="libntpd_obj parser_obj ntp M parse RT CAP SECCOMP PTHREAD NTPD "
             "CRYPTO SSL DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
 

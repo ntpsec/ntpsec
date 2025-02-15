@@ -361,7 +361,8 @@ def configure(ctx):
             # "-Wpadded",             # duck... over 3k warnings
             # "-Wredundant-decls",    # incompatible w/ Unity
             "-Wswitch-default",       # warns on missing switch-default
-                                        # old Bison triggers this
+                                        # suppressed on parser build
+                                        # to avoid trouble with old Bisons
             "-Wswitch-enum",          # warns on missing enum case handler
         ] + ctx.env.CFLAGS
         cc_test_flags += [
