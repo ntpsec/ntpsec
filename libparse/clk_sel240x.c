@@ -5,7 +5,9 @@
 #include "config.h"
 
 // _XOPEN_SOURCE needed for strptime()
-#define _XOPEN_SOURCE
+// For OpenBSD, the value must be at least 500
+// For FreeBSD, the value must be at least 700 for ldexpl() in ntp_fp.h
+#define _XOPEN_SOURCE 700
 
 #include "ntp.h"	// only for the u_* typedefs from GCC; remove someday
 #include "ntp_syslog.h"
