@@ -12,11 +12,11 @@
 #include "ntp_types.h"
 
 /* The attribute after this structure is a gcc/clang extension that forces
- * the beginning of a structure instance to be 32-bit aligned.  Without this
- * attempting to compile on a 32-bit host may throw warnings or errors when
- * a pointer to this structure is passed to authdecrypt/authencrypt, both of
- * which expect to be able to treat the structure as an array of uint32_t
- * elements.  Ideally, we'd get rid of that nasty type punning. */
+ * the beginning of a structure instance to be 32-bit aligned.  Without this,
+ * attempting to compile on an alignment-sensitive host may throw warnings or
+ * errors when a pointer to this structure is passed to authdecrypt/authencrypt,
+ * both of which expect to be able to treat the structure as an array of
+ * uint32_t elements.  Ideally, we'd get rid of that nasty type punning. */
 struct ntp_control {
 	uint8_t li_vn_mode;		/* leap, version, mode */
 	uint8_t r_m_e_op;		/* response, more, error, opcode */
@@ -27,7 +27,7 @@ struct ntp_control {
         /* the draft RFC says 0 <= count <= 468 */
 	uint16_t count;			/* byte count of data in this packet */
 	uint8_t data[480 + MAX_MAC_LEN]; /* data + padding + auth */
-} __attribute__((aligned(32)));
+} __attribute__((aligned(4)));
 
 /*
  * Length of the control header, in octets
