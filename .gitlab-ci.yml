@@ -64,10 +64,10 @@ AsciiDoc-3-Fedora:
   script:
     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget libxslt docbook-style-xsl
     - mkdir asciidoc3
-    - wget https://asciidoc3.org/asciidoc3-3.2.3.tar.gz
-    - tar -xpvf asciidoc3-3.2.3.tar.gz -C asciidoc3
-    - ln -sv a2x3.py asciidoc3/a2x3
-    - ln -sv asciidoc3.py asciidoc3/asciidoc3
+    - wget https://asciidoc3.org/download/AsciiDoc3_linux_latest.tar.gz
+    - tar -xpvf AsciiDoc3_linux_latest.tar.gz -C asciidoc3
+    - ln -sv src/a2x3.py asciidoc3/a2x3
+    - ln -sv src/asciidoc3.py asciidoc3/asciidoc3
     - asciidoc3/asciidoc3 --version || echo -n
     - PATH="$PWD/asciidoc3:$PATH" python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build
 
