@@ -116,7 +116,7 @@ static const union {
 #define MAX_TV_USEC 1000000
 #define MAX_TV_NSEC 1000000000
 
-#if defined (__clang__)
+#if defined (__clang_major__) && __clang_major__ >= 3
 #pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
 #endif
 
