@@ -12,9 +12,12 @@ on user-visible changes.
 
 ## Repository Head
 
+* waf install now tests the installed binaries
+  This will complain if your python search path isn't working.
+  See README-PYTHON for more info.
+
 * waf configure --enable-Werror will turn warnings into errors
   This lets developers and our CI find warnings in a sea of printout.
-  (This will cause builds on old old Bison to fail.)
 
 * Fix ntpviz's skewness and kurtosis formulas. Fix suggested by by Frank Davis.
 

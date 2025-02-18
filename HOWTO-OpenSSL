@@ -2,25 +2,36 @@ NTS needs TLS 1.3 or newer.
 That was first supported in OpenSSL 1.1.1
   (1.1.1a is broken)
 Some OSes/Distros don't support a new enough version of OpenSSL
-This file contains notes on how to download, build, and install 3.2.0
-It should be close for other 3.x.y versions
+This file contains notes on how to download, build, and install 3.4.1
+
+It should be close for other 3.x.y versions so you can test newer
+versions than whatever your distro provides.
 
 It's rough.  Don't be surprised by bugs/oversights.
 Corrections, clarifications and feedback encouraged.
 
-In 2023-Nov, FreeBSD 13.2 has 1.1.1t as the main version.
-It also has 3 newer versions available as packages.
+In 2025-Feb-15, FreeBSD 13.4 has 1.1.1w as the main version.
+It also has several newer versions available as packages.
 You can just install one and ignore the rest of this note.
 waf will find the pkg version and use it.
   sudo pkg update
-  sudo pkg search openssl
-openssl30-3.0.12_1             TLSv1.3 capable SSL and crypto library
-openssl31-3.1.4_1              TLSv1.3 capable SSL and crypto library
-openssl32-3.2.0.a2             TLSv1.3 capable SSL and crypto library
-  sudo pkg install openssl32
-Note: the "a2" is for "Alpha 2", not for production etc.
+  sudo pkg search openssl | grep openssl3
+    openssl31-3.1.7_1      TLSv1.3 capable SSL and crypto library
+    openssl31-quictls-3.1.7_1      QUIC capable fork of OpenSSL
+    openssl32-3.2.4        TLSv1.3 capable SSL and crypto library
+    openssl33-3.3.3        TLSv1.3 capable SSL and crypto library
+    openssl34-3.4.1        TLSv1.3 capable SSL and crypto library
+  sudo pkg install openssl34
 The rest of this recipe works if you want to try a newer version from
 an OpenSSL tarball.
+
+2025-Feb-18
+Similarly, NetBSD 9.4 has 1.1.1t
+while pkgin has
+  pkgin avail | grep openssl-3
+    openssl-3.3.2        Secure Socket Layer and cryptographic library
+Again, the rest of this recipe works if you want to try a newer
+version from an OpenSSL tarball.
 
 
 Download OpenSSL source from here:
@@ -32,24 +43,17 @@ But check for the latest versions first.
 cd xxx
 mkdir OpenSSL
 cd OpenSSL
-for OpenSSL 3.2.0
-  wget https://www.openssl.org/source/openssl-3.2.0.tar.gz
-  tar -xzf openssl-3.2.0.tar.gz
-  cd openssl-3.2.0
+for OpenSSL 3.4.1
+  # https://www.openssl.org/source/
+  wget https://github.com/openssl/openssl/releases/download/openssl-3.4.1/openssl-3.4.1.tar.gz
+  tar -xzf openssl-3.4.1.tar.gz
+  cd openssl-3.4.1
 
 # Check NOTES.PERL
-#   for CentOS, you need
-  sudo yum install perl-core
-# Fedora 35 for 3.0.1
-  # ./config needs
-  sudo dnf install perl-FindBin 'perl(IPC::Cmd)' 'perl(File::Compare)'
-  # make needs
-  # make test needs
-  sudo dnf install 'perl(Test::Harness)' 'perl(Test::More)' 'perl(File::Copy)'
-  # make install also needs:
-  sudo dnf install 'perl(Pod::Html)'
-# On FreeBSD for 3.0.1
-  sudo pkg install perl5
+# Fedora needs
+    sudo dnf install perl-core
+# FreeBSD needs
+    sudo pkg install perl5
 
 By default, this recipe will install
   libcrypto.so.3 and libssl.so.3
@@ -60,9 +64,10 @@ If you don't want that, edit VERSION.dat and change SHLIB_VERSION
 to something like 6.  That will install the libraries as
   libcrypto.so.6 and libssl.so.6
 and waf will setup ntpd to use them.
-openssl-3.2-beta breaks sudo on Fedora, so this is a good idea.   <======
+The default configure breaks things on Fedora, so this is a good idea.   <======
 
 On Linux
+  make clean
   openssl version -d
   OPENSSLDIR=`openssl version -d | sed "s/OPENSSLDIR: //"`
   OPENSSLDIR=`echo $OPENSSLDIR | sed s/\"//g`
@@ -72,7 +77,6 @@ On Linux
 ***   If you encounter a problem while building, please open an    ***
 ***   issue on GitHub <https://github.com/openssl/openssl/issues>  ***
 ***   and include the output from the following command:           ***
-***                                                                ***
 ***       perl configdata.pm --dump                                ***
 
 time make -j4         |& tee make.log
@@ -80,31 +84,50 @@ time make -j4         |& tee make.log
   openssl version -d
   ./util/shlib_wrap.sh ./apps/openssl version -d
   # ./apps/openssl without the wrapper will use the installed libraries
-The above check is broken for openssl-3.2.0 on Fedora
-It works on Ubuntu and FreeBSD.
+The above check is broken on Fedora
+  (I think Fedora needs some old/weak crypto that default OpenSSL
+   no longer provides.  I haven't gone donw this rabbit hole.)
+It works on Debian, Ubuntu and FreeBSD.
 
 time make test        |& tee test.log
 time make build_docs  |& tee docs.log
 sudo make install     |& tee install.log
 
-sudo su
-  cd /etc/ld.so.conf.d
-  echo "/usr/local/ssl/lib" > openssl.conf    # 32 bit systems
-  echo "/usr/local/ssl/lib64" > openssl.conf  # 64 bit systems
-  # running ldconfig before install doesn't work
-  ldconfig
+On Linux:
+  sudo su
+    cd /etc/ld.so.conf.d
+    echo "/usr/local/ssl/lib" > openssl.conf    # 32 bit systems
+    echo "/usr/local/ssl/lib64" > openssl.conf  # 64 bit systems
+    # running ldconfig before install doesn't work
+    ldconfig
 
 On FreeBSD:
-  ldconfig -m /usr/local/ssl/lib/
+  sudo ldconfig -m /usr/local/ssl/lib/
+  ?? You have to do this each time you boot
 
 NetBSD:
   echo "/usr/local/ssl/lib" >> /etc/ld.so.conf
 (no ldconfig on my search path.  Doesn't seem to be needed.)
+
+On NetBSD, OpenSSL hangs in the tests.
+This is the last line it prints:
+  04-test_bio_core.t ...................... ok
+It seems to work OK.
+[GPSD had a lot of trouble getting their tests to work on NetBSD.]
+
 
 # check with
 /usr/local/ssl/bin/openssl version
 
 # Note that the directories in the above config line need to
 # match where wscript looks for your OS.
-# The above works for CentOS 7
+
+----------
+
+FIPS:
+  For FIPS mode, add enable-fips to Configure step
+mumble needs config stuff
+
+Fedora:
+  man fips-mode-setup
 
