@@ -58,19 +58,19 @@ alpine-edge-refclocks:
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
-AsciiDoc-3-Fedora:
-  <<: *job_definition
-  image: fedora
-  script:
-    - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget libxslt docbook-style-xsl
-    - mkdir asciidoc3
-    - wget https://asciidoc3.org/download/AsciiDoc3_linux_latest.tar.gz
-    - tar -xpvf AsciiDoc3_linux_latest.tar.gz -C asciidoc3
-    - ln -sv src/a2x3.py asciidoc3/a2x3
-    - ln -sv src/asciidoc3.py asciidoc3/asciidoc3
-    - asciidoc3/asciidoc3 --version || echo -n
-    - PATH="$PWD/asciidoc3:$PATH" python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build
-
+# AsciiDoc-3-Fedora:
+#   <<: *job_definition
+#   image: fedora
+#   script:
+#     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget libxslt docbook-style-xsl
+#     - mkdir asciidoc3
+#     - wget https://asciidoc3.org/download/AsciiDoc3_linux_latest.tar.gz
+#     - tar -xpvf AsciiDoc3_linux_latest.tar.gz -C asciidoc3
+#     - ln -sv src/a2x3.py asciidoc3/a2x3
+#     - ln -sv src/asciidoc3.py asciidoc3/asciidoc3
+#     - asciidoc3/asciidoc3 --version || echo -n
+#     - PATH="$PWD/asciidoc3:$PATH" python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build
+ 
 AsciiDoc-py3-Alpine:
   <<: *job_definition
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine
