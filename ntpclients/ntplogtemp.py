@@ -219,13 +219,16 @@ class ZoneTemp:
         _zone = 0
         _data = []
         for zone in self.zones:
-            _zone_data = open(os.path.join(zone, 'temp'))
-            for line in _zone_data:
-                temp = float(line) / 1000
-                _now = int(time.time())
-                _data.append('%d ZONE%s %s' % (_now, _zone, temp))
-                _zone += 1
-            _zone_data.close()
+            try:
+                with open(os.path.join(zone, 'temp')) as _zone_data:
+                    for line in _zone_data:
+                        temp = float(line) / 1000
+                        _now = int(time.time())
+                        _data.append('%d ZONE%s %s' % (_now, _zone, temp))
+                        _zone += 1
+            except OSError:
+                # temp might not be readable, if so continue on to the next one
+                continue
         return _data
 
 
