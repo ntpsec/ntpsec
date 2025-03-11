@@ -512,7 +512,7 @@ void CheckFreeBSDdroproot(uid_t uid) {
 		exit(-1);
 	}
 	if (uid != need) {
-		msyslog(LOG_ERR, "INIT: FreeBSD needs user %d", need);
+		msyslog(LOG_ERR, "INIT: FreeBSD needs user %d", (int)need);
 		exit(-1);
 	}
 	return;
