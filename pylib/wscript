@@ -11,7 +11,7 @@ def options(opt):
 
 def configure(conf):
     conf.load('python')
-    conf.check_python_version((2, 6, 0))  # even when not using it.
+    conf.check_python_version((2, 7, 0))  # even when not using it.
     if 'none' == conf.env['ntpc']:
         return
     if 'ext' == conf.env['ntpc']:  # Extension-only, no embedded

@@ -12,6 +12,9 @@ on user-visible changes.
 
 ## Repository Head
 
+* Python 2.7 is now the minimum supported version.
+  This is likely to be the last release supporting Python 2.
+
 * waf install now tests the installed binaries
   This will complain if your python search path isn't working.
   See README-PYTHON for more info.
