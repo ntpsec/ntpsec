@@ -83,7 +83,7 @@
  * There have been three versions of the kernel discipline code. The
  * first (microkernel) now in Solaris disciplines the microseconds. The
  * second and third (nanokernel) disciplines the clock in nanoseconds.
- * These versions are identifed if the symbol STA_PLL is present in the
+ * These versions are identified if the symbol STA_PLL is present in the
  * header file /usr/include/sys/timex.h. The third and current version
  * includes TAI offset and is identified by the symbol NTP_API with
  * value 4.
@@ -543,7 +543,7 @@ local_clock(
 	   || clock_ctl.force_step_once ) {
 		if (clock_ctl.force_step_once) {
 			clock_ctl.force_step_once = false;  /* we want this only once after startup */
-			msyslog(LOG_NOTICE, "CLOCK: Doing intital time step" );
+			msyslog(LOG_NOTICE, "CLOCK: Doing initial time step" );
 		}
 
 		switch (state) {
@@ -987,7 +987,7 @@ rstclock(
  *
  * This is very carefully done. When the offset is first computed at the
  * first update, a residual frequency component results. Subsequently,
- * updates are suppresed until the end of the measurement interval while
+ * updates are suppressed until the end of the measurement interval while
  * the offset is amortized. At the end of the interval the frequency is
  * calculated from the current offset, residual offset, length of the
  * interval and residual frequency component. At the same time the

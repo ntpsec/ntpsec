@@ -680,7 +680,7 @@ inp_rawdcf(
  * fix prototypes
  *
  * Revision 4.3  1998/06/06 18:33:36  kardel
- * simplified condidional compile expression
+ * simplified conditional compile expression
  *
  * Revision 4.2  1998/05/24 11:04:18  kardel
  * triggering PPS on negative edge for simpler wiring (Rx->DCD)

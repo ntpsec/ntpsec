@@ -62,7 +62,7 @@ static unsigned long	peer_allocations;	/* allocations from free list */
 static unsigned long	peer_demobilizations;	/* structs freed to free list */
 static int		total_peer_structs;	/* peer structs */
 int			peer_associations;	/* mobilized associations */
-static int		peer_preempt;		/* preemptable associations */
+static int		peer_preempt;		/* preemptible associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static struct peer *	findexistingpeer_name(const char *, unsigned short,

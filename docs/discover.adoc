@@ -42,7 +42,7 @@ to the NTP mitigation algorithms, and surplus associations are pruned.
 [[assoc]]
 == Association Management
 
-Pool discovery uses an iterated process to discover new preemptable client
+Pool discovery uses an iterated process to discover new preemptible client
 associations as long as the total number of client associations is less
 than the +maxclock+ option of the link:miscopt.html#tos[+tos+] command,
 which should typically be changed from the default.
@@ -65,7 +65,7 @@ arrives for an association, the counter is set to zero. If the
 the counter reaches an arbitrary threshold of 10, the association
 becomes a candidate for pruning.
 
-The pruning algorithm is very simple. If an ephemeral or preemptable
+The pruning algorithm is very simple. If an ephemeral or preemptible
 association becomes a candidate for pruning, it is immediately
 demobilized. If a persistent association becomes a candidate for
 pruning, it is not demobilized, but its poll interval is set at the

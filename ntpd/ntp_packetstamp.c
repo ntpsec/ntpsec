@@ -73,7 +73,7 @@
  * the first tv_Xsec longword is guaranteed to be zero, while the second is
  * significant (and should be in the allowable range).  In the padded 64+32
  * case, the first longword is the significant part (and should be in range),
- * while the second is possibly unintialized padding.  Hence, if the first
+ * while the second is possibly uninitialized padding.  Hence, if the first
  * longword is nonzero and in range, then it's clearly the significant part;
  * if the first longword is zero and the second is in range, either the
  * second part is the significant part, or the value is exactly zero while
@@ -99,7 +99,7 @@
  * functions defined here will be used in any given build, but we define
  * both to avoid additional conditionals that need to be kept in sync with
  * other parts of the code.  The void casts within the definitions suppress
- * the usual "unsed function" warnings, and the "unemitted inline" warning
+ * the usual "unused function" warnings, and the "unemitted inline" warning
  * from clang is disabled explicitly.
  */
 

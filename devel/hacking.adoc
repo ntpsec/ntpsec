@@ -31,7 +31,7 @@ The preferred license for documentation is
 "Creative Commons Attribution 4.0 International" (CC-BY-4.0).
 
 License texts are in the .../LICENSES/ directory in compliance with
-the REUSE specificaton.
+the REUSE specification.
 
 == Historicity reconstruction of the git repo
 
@@ -110,7 +110,7 @@ but that is historical.  In the old days, msyslog wasn't thread-safe.
 That was impractical for NTS, so msyslog is thread safe as of 2019-Apr.
 
 Beware of calling strerror() from non-main threads.  Use ntp_strerror_r()
-into a buffer on the stack. (strerror_r() has an ambigious API.)
+into a buffer on the stack. (strerror_r() has an ambiguous API.)
 
 Similarly, use socktoa_r() and sockporttoa_r() and don't call lib_getbuf(),
 refclock_name(), or exit().  [exit() calls the registered cleanup routines
@@ -511,7 +511,7 @@ version number string will be tagged into the git repository.
 
 We have dropped even/odd minor version number stable/development
 release semantics.  Development on NTPsec has been carefully
-incremental with a strong emphasis on stabilty and correctness, such
+incremental with a strong emphasis on stability and correctness, such
 that it turned out to be unneeded.
 
 The first public release was version 0.9.0.

@@ -37,7 +37,7 @@
  * <w>             = day of week (sunday= 0)
  * <hh>,<mm>,<ss>  = hour, minute, second
  * <S>             = '#' if never synced since powerup for DCF C51
- *                 = '#' if not PZF sychronisation available for PZF 535/509
+ *                 = '#' if not PZF synchronisation available for PZF 535/509
  *                 = ' ' if ok
  * <F>             = '*' if time comes from internal quartz
  *                 = ' ' if completely synched
@@ -61,7 +61,7 @@
  * <hh>,<mm>,<ss>  = hour, minute, second
  * <U>             = 'U' UTC time display
  * <S>             = '#' if never synced since powerup else ' ' for DCF C51
- *                   '#' if not PZF sychronisation available else ' ' for PZF 535/509
+ *                   '#' if not PZF synchronisation available else ' ' for PZF 535/509
  * <F>             = '*' if time comes from internal quartz else ' '
  * <D>             = 'S' if daylight saving time is active else ' '
  * <A>             = '!' during the hour preceding a daylight saving time

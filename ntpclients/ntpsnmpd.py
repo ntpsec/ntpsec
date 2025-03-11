@@ -113,7 +113,7 @@ class DataSource(ntp.agentx.MIBControl):
                      self.cbr_statusNotifications)
         self.addNode((1, 2, 17, 1, 1))  # ntpEntStatPktMode INTEGER {...}
         self.addNode((1, 2, 17, 1, 2))  # ntpEntStatPktSent Counter32
-        self.addNode((1, 2, 17, 1, 3))  # ntpEntStatPktRecived Counter32
+        self.addNode((1, 2, 17, 1, 3))  # ntpEntStatPktReceived Counter32
         # block 1, 3
         self.addNode((1, 3, 1, 1, 1),  # ntpAssocId uint32 (1..99999)
                      dynamic=self.sub_assocID)

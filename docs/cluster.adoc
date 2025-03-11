@@ -31,7 +31,7 @@ The object at each round is to prune the entry with the largest metric
 until the termination condition is met. Note that the select jitter must
 be recomputed at each round, but the peer jitter does not change. At
 each round the remaining entries on the list represent the survivors of
-that round. If the candidate to be pruned is preemptable and the number
+that round. If the candidate to be pruned is preemptible and the number
 of candidates is greater than the _maxclock_ _threshold_, the association
 is demobilized. This is useful in the schemes described on the
 link:discover.html[Automatic Server Discovery Schemes] page. The

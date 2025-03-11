@@ -32,8 +32,8 @@ include::includes/hand.adoc[]
 
 This page describes the various modes of operation provided in NTPv4.
 There are three types of associations in NTP: _persistent_,
-_preemptable_ and _ephemeral_. Persistent associations are mobilized by
-a configuration command and never demobilized. Preemptable associations
+_preemptible_ and _ephemeral_. Persistent associations are mobilized by
+a configuration command and never demobilized. Preemptible associations
 are mobilized by a configuration command which
 includes the +preempt+ option or upon arrival of an automatic server
 discovery packet. They are demobilized by timeout or when preempted

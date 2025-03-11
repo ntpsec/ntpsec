@@ -192,7 +192,7 @@ typedef struct bind
  * special handling flags
  */
 #define PARSE_F_PPSONSECOND	0x00000001 /* PPS pulses are on second */
-#define PARSE_F_POWERUPTRUST	0x00000100 /* POWERUP state ist trusted for */
+#define PARSE_F_POWERUPTRUST	0x00000100 /* POWERUP state is trusted for */
                                            /* trusttime after SYNC was seen */
 /**===========================================================================
  ** error message regression handling
@@ -329,7 +329,7 @@ struct parseunit
 	 * clock state handling/reporting
 	 */
 	uint8_t	      	      flags;	        /* flags (leap_control) */
-	uptime_t	      lastchange;       /* time (ntp) when last state change accured */
+	uptime_t	      lastchange;       /* time (ntp) when last state change occurred */
 	unsigned long	      statetime[CEVNT_MAX+1]; /* accumulated time of clock states */
 	unsigned long         pollneeddata; 	/* current_time(!=0) for receive sample expected in PPS mode */
 	unsigned short	      lastformat;       /* last format used */
@@ -783,7 +783,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define VARITEXT_KEEP        20
 
 /*
- * SEL240x Satellite Sychronized Clock
+ * SEL240x Satellite Synchronized Clock
  */
 #define SEL240X_POLLRATE	0 /* only true direct polling */
 #define SEL240X_POLLCMD		"BUB8"
@@ -5543,7 +5543,7 @@ rawdcf_init_2(
  * set hardpps_enable = 1 when binding a kernel PPS source
  *
  * Revision 4.49  2005/04/16 17:29:26  kardel
- * add non polling clock type 18 for just listenning to Meinberg clocks
+ * add non polling clock type 18 for just listening to Meinberg clocks
  *
  * Revision 4.48  2005/04/16 16:22:27  kardel
  * bk sync 20050415 ntp-dev
@@ -5623,7 +5623,7 @@ rawdcf_init_2(
  * (gps16x_message): changed to use mk_utcinfo()
  * (trimbletsip_message): changed to use mk_utcinfo()
  * ignoring position information in unsynchronized mode
- * (parse_start): augument linux support for optional ASYNC_LOW_LATENCY
+ * (parse_start): augment linux support for optional ASYNC_LOW_LATENCY
  *
  * Revision 4.23  1999/02/23 19:47:53  kardel
  * fixed #endifs

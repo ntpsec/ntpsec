@@ -59,7 +59,7 @@
  * --------------------------------------------------------------------------
  * Reg Clemens (June 2009)
  * change exit statements to return(0) in main program.  I had assumed that if the
- * PPS driver did not start for some reason, we shuould stop NTPD itelf.  Others
+ * PPS driver did not start for some reason, we should stop NTPD itself.  Others
  * disagree.  We now give an ERR log message and stop this driver.
  * --------------------------------------------------------------------------
  * Reg Clemens (June 2009)
@@ -1626,7 +1626,7 @@ oncore_get_timestamp(
 	char Msg[160];
 
 	peer = instance->peer;
-	strlcpy(Msg, "bug-coverity-uninitalized", sizeof(Msg));
+	strlcpy(Msg, "bug-coverity-uninitialized", sizeof(Msg));
 
 #if 1
 	/* If we are in SiteSurvey mode, then we are in 3D mode, and we fall through.

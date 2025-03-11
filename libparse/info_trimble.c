@@ -42,6 +42,6 @@ cmd_info_t trimble_rcmds[] = {
 	{ CMD_RDOUBLEXYZ, "CMD_RDOUBLEXYZ", "double precision XYZ (0x83)", "gps_position_ext(XYZ)", RO|DEF },
 	{ CMD_RDOUBLELLA, "CMD_RDOUBLELLA", "double precision LLA (0x84)", "gps_position_ext(LLA)", RO|DEF },
 	{ CMD_RDGPSSTAT, "CMD_RDGPSSTAT", "differential correction status (0x85)", "trimble_dgpsstatus", RO },
-	{ CMD_RSUPER, "CMD_RSUPER", "super paket (0x8F)", "", 0 },
+	{ CMD_RSUPER, "CMD_RSUPER", "super packet (0x8F)", "", 0 },
 	{ 0xFF, "", "", "", 0 }
 };

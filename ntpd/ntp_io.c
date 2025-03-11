@@ -2770,7 +2770,7 @@ uint64_t received_count(void) {
 }
 
 /*
- * inc_recieved_count - increment the number of received packets
+ * inc_received_count - increment the number of received packets
  * required so that refclock_generic.c can track its packets
  */
 void inc_received_count(void) {

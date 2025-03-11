@@ -38,7 +38,7 @@
  *     if at all possible.
  *   - the socket boundary will be reduced until
  *     allocation is possible or 0 is reached - at this
- *     point the algrithm will be disabled
+ *     point the algorithm will be disabled
  */
 SOCKET
 move_fd(

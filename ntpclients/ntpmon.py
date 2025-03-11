@@ -327,7 +327,7 @@ if __name__ == '__main__':
                             except ntp.packet.ControlException as e:
                                 if e.errorcode == ntp.control.CERR_BADASSOC:
                                     # Probable race condition due to pool
-                                    # dropping an associaton during refresh;
+                                    # dropping an association during refresh;
                                     # ignore. (GitLab issue #374.)
                                     break
                                 raise Fatal(e.message + "\n")

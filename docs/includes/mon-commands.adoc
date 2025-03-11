@@ -217,7 +217,7 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
 |.NIST.              |IP or text                        |refid, association ID
 | 0                  |integer                           |lost packets since last response
 | 1                  |integer                           |dropped packets since last request
-| 2000               |hex integer                       |0 if packet accecpted, BOGON flag if packet is discarded
+| 2000               |hex integer                       |0 if packet accepted, BOGON flag if packet is discarded
 |===
 +
 The first two fields show the date (Modified Julian Day) and time
@@ -228,7 +228,7 @@ receive, transmit and final NTP timestamps in order. The timestamp
 values are as received and before processing by the various data
 smoothing and mitigation algorithms.
 +
-A packet that is accecpted is logged.
+A packet that is accepted is logged.
 At most the first dropped packet per request is logged.
 That avoids DDoSing the log file.
 +

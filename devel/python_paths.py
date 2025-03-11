@@ -3,7 +3,7 @@
 """Find all Pythons in the command path, and corresponding exe/lib locations.
 
 An optional argument specifies an SSH host (or user@host) to use for the run.
-Note that the ssh-based version will use the system-defult PATH rather than
+Note that the ssh-based version will use the system-default PATH rather than
 the PATH set up by any login scripts, so it may not find all Pythons that the
 user would see.
 

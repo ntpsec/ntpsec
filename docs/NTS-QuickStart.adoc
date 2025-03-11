@@ -58,7 +58,7 @@ exchange, you also need to specify the port number.  As of August 2022, the
 following should work:
 
 A https://netfuture.ch/2021/12/transparent-trustworthy-time-with-ntp-and-nts/#server-list[list of public NTS servers]
-is availabe, with more info on NTS.  Look here first.
+is available, with more info on NTS.  Look here first.
 
 Listed below are development machines, so there may be gaps in availability, and they may run unreleased versions of NTPsec:
 

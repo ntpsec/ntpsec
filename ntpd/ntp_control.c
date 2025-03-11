@@ -2426,7 +2426,7 @@ read_sysvars(void)
 	}
 
 /* This code structure is ugly.
- * The basic problem is that parsing the input stream is burried in ctl_getitem
+ * The basic problem is that parsing the input stream is buried in ctl_getitem
  * and we need to know if parsing failed or it couldn't find a name.
  * If it can't find a name, we try ext_sys_var.
  * Return NULL on error, pointer to EOV on can't find.

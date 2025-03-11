@@ -178,7 +178,7 @@ class RunningStats(object):
     """Calculate mean, variance, sigma, skewness and kurtosis"""
 
     def __init__(self, values):
-        """Initialize the class, and do all the caculations."""
+        """Initialize the class, and do all the calculations."""
 
         self.num = len(values)     # number of samples
         self.mu = 0.0              # simple arithmetic mean
@@ -347,7 +347,7 @@ class VizStats(ntp.statfiles.NTPStats):
             else:
                 fmt = ".3f"
             if not Python26:
-                # Python 2.6 does not undertand the comma format option
+                # Python 2.6 does not understand the comma format option
                 fmt = "," + fmt
             self.percs_f[k] = format(v, fmt)
 

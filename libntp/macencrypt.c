@@ -36,7 +36,7 @@
  *
  *
  * Modern CPUs come with support to speed up AES operations.
- * On Intel, it's the aes capabilitiy.  You can see them
+ * On Intel, it's the aes capability.  You can see them
  * under flags in /proc/cpuinfo
  *
  * Maybe more info in attic/cmac-timing and friends.

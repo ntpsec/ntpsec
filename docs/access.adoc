@@ -45,7 +45,7 @@ address :: mask :: for IPv6) is always the first entry in the list.
 +restrict default+, with no mask option, modifies both IPv4 and IPv6
 default entries. +restrict source+ configures a template restriction
 automatically added at runtime for each association, whether configured,
-ephemeral, or preemptable, and removed when the association is
+ephemeral, or preemptible, and removed when the association is
 demobilized.
 
 Some flags have the effect to deny service, some have the effect to

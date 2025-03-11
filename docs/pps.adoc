@@ -83,7 +83,7 @@ grooming and mitigation algorithms, or using the kernel PPS
 signal support described in the link:kern.html[Kernel Model for
 Precision Timekeeping] page, or via the shared-memory interface. The presence
 of  kernel support is automatically detected during the NTP build process and
-supporting code automatically compiled. Regardles of mechanism, the PPS signal
+supporting code automatically compiled. Regardless of mechanism, the PPS signal
 must be present and within nominal jitter and wander tolerances. Additionally,
 the prefer peer must be a truechimer; that is, survive the sanity checks and
 intersection algorithm. Finally, the offset of the system clock relative

@@ -32,7 +32,7 @@
 
 struct mssntp_counters mssntp_cnt, old_mssntp_cnt;
 
-#define ERR_BUF_LEN 96 // arbitary length for error buffer (6x16) -- JamesB192
+#define ERR_BUF_LEN 96 // arbitrary length for error buffer (6x16) -- JamesB192
 
 static struct do_we_log do_we_log_signd = {
 	.c_decay=2,	// What is the period length in hours

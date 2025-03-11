@@ -35,7 +35,7 @@ void precision(const iomode mode)
  *
  * If a machine has resolution (i.e. accurate timing info) > 1us, then it will
  * probably use the "unused" low order bits as a counter (to force time to be
- * a strictly increaing variable), incrementing it each time any process
+ * a strictly increasing variable), incrementing it each time any process
  * requests the time [[ or maybe time will stand still ? ]].
  *
  * SO: the logic goes:

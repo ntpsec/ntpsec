@@ -48,7 +48,7 @@
  * functions.
  *
  * The main interface used by these routines is the refclockproc
- * structure, which contains for most drivers the decimal equivalants
+ * structure, which contains for most drivers the decimal equivalents
  * of the year, day, month, hour, second and millisecond/microsecond
  * decoded from the ASCII timecode.  Additional information includes
  * the receive timestamp, exception report, statistics tallies, etc.

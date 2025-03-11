@@ -169,7 +169,7 @@ typedef unsigned long int json_uint;
 #define TICKOVER_HIGH	120
 #define LOGTHROTTLE	SECSPERHR
 
-/* Primary channel PPS avilability dance:
+/* Primary channel PPS availability dance:
  * Every good PPS sample gets us a credit of PPS_INCCOUNT points, every
  * bad/missing PPS sample costs us a debit of PPS_DECCOUNT points. When
  * the account reaches the upper limit we change to a mode where only
@@ -314,7 +314,7 @@ struct gpsd_unit {
 	/* The parse context for the current record */
 	json_ctx    json_parse;
 
-	/* record assemby buffer and saved length */
+	/* record assembly buffer and saved length */
 	int  buflen;
 	char buffer[MAX_PDU_LEN];
 };

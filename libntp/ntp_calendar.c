@@ -674,7 +674,7 @@ ntpcal_days_in_months(
 		res.lo -= 2;
 	}
 
-	/* get cummulated days in year with unshift */
+	/* get cumulated days in year with unshift */
 	res.lo = shift_month_table[res.lo] - 306;
 
 	return res;

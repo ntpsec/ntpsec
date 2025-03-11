@@ -16,7 +16,7 @@ association maintained by soft links. Following is a list of file
 types.
 
 ntpkey_AES_<hostname>.<filestamp>
-AES (128-bit) keys used to compute CMAC mode authentcation
+AES (128-bit) keys used to compute CMAC mode authentication
 using shared key cryptography
 
 The file can be edited by hand to support MD5 and SHA-1 for

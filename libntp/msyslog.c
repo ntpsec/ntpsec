@@ -434,7 +434,7 @@ change_logfile(
 	/* This leaves something in the log file if you have errors
 	 * parsing ntp.conf and you switch to a log file.
 	 * Maybe this should happen only during initialization.
-	 *   two places: commmand line and ntp.conf
+	 *   two places: command line and ntp.conf
 	 */ 
 	if (0<log_cnt.errors || 0<log_cnt.warnings) {
 		msyslog(log_cnt.errors? LOG_ERR: LOG_WARNING,

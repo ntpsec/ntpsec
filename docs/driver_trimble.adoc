@@ -60,7 +60,7 @@ receivers on the following host computers:
 4. Sun SPARC Enterprise T5220, onboard serial port, gcc 4.8.2
 
 The driver has been tested with the Resolution SMT, ACE and Copernicus
-receivers on a Rapsberry Pi 3 running Raspberry Pi OS (Legacy).
+receivers on a Raspberry Pi 3 running Raspberry Pi OS (Legacy).
 
 
 [[sym]]

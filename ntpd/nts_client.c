@@ -743,7 +743,7 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 		return false;
 
 	if (NO_AEAD == peer->nts_state.aead) {
-		msyslog(LOG_ERR, "NTSc: No AEAD algorithim.");
+		msyslog(LOG_ERR, "NTSc: No AEAD algorithm.");
 		return false;
 	}
 	if (0 == peer->nts_state.count) {
