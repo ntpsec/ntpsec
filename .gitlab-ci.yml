@@ -377,9 +377,7 @@ coverity-scan:
   tags:
     - gitlab-org
   rules:
-    - if: $COVERITY_TOKEN =~ "^$"
-      when: never
-    - when: always
+    - if: $COVERITY_TOKEN
 
 macos-basic:
   <<: *job_definition
