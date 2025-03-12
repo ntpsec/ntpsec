@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 	  printf("## socket() failed: %s\n", strerror(errno));
 	  return 1;
 	}
-	
+
 	bzero(&addr, sizeof(addr));
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, name, sizeof(addr.sun_path));

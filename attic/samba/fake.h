@@ -30,7 +30,7 @@ struct to_samba {
 
 struct from_samba {
   uint32_t version;
-  uint32_t op; 
+  uint32_t op;
   uint32_t packet_id;
   char pkt[LEN_PKT_NOMAC];
   uint32_t key_id;

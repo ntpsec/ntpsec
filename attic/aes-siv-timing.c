@@ -6,7 +6,7 @@
 
 /* Last modified on Sat Aug 28 14:30:11 PDT 1999 by murray */
 
-/* 
+/*
  * Hack to time aead routines from libaes_siv
  *
  * RFC5297, October 2008
@@ -58,12 +58,12 @@ static void ssl_init(void)
 
 static void nts_lock_cookielock(void) {
         int err = pthread_mutex_lock(&cookie_lock);
-        if (0 != err) {      
+        if (0 != err) {
                 printf("ERR: Can't lock cookie_lock: %d\n", err);
                 exit(2);
-        }                    
+        }
 }
-        
+
 static void nts_unlock_cookielock(void) {
         int err = pthread_mutex_unlock(&cookie_lock);
         if (0 != err) {
@@ -211,7 +211,7 @@ static void DoMakeCookie(
 	  default:
 		printf("Bogus aead\n");
 		exit(1);
-	} 
+	}
 
         ntp_RAND_bytes(c2s, NTS_MAX_KEYLEN);
         ntp_RAND_bytes(s2c, NTS_MAX_KEYLEN);
@@ -263,7 +263,7 @@ static void DoMakeCrypto(
 	  default:
 		printf("Bogus aead\n");
 		exit(1);
-	} 
+	}
 
         ntp_RAND_bytes(c2s, NTS_MAX_KEYLEN);
         ntp_RAND_bytes(s2c, NTS_MAX_KEYLEN);

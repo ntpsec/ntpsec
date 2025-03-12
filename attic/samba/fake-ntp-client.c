@@ -78,7 +78,7 @@ int main (int argc, char *argv[])
     (addr >> 0) & 0xff);
 
   if ((0)) printf("Sending: len = %zu, header=%8x\n",
-    sizeof(ntp_send), ntp_send.header); 
+    sizeof(ntp_send), ntp_send.header);
 
   bzero((char *)&server, sizeof(server));
   bcopy((char *)target->h_addr, (char *)&server.sin_addr, target->h_length);
@@ -92,10 +92,10 @@ int main (int argc, char *argv[])
   client.sin_family = AF_INET;
   client.sin_addr.s_addr = htonl(INADDR_ANY);
   client.sin_port = htons(0);
-  
+
   ec = bind(sock, (struct sockaddr *)&client, sizeof(client) );
   if (ec) bailout("bind");
-  
+
   ec = connect(sock, (struct sockaddr *)&server, sizeof(server) );
   if (ec) bailout("connect");
 
@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(tv));
 
   ntp_send.header = htonl(0x23000000);
-  ntp_send.keyid = 56578;  
+  ntp_send.keyid = 56578;
 
   for (i = 0; i < packets; i++) {
     int len;
@@ -124,6 +124,6 @@ int main (int argc, char *argv[])
     usleep(delay);
   }
   close(sock);
-  
+
   return 0;
 }
