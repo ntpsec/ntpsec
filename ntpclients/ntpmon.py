@@ -81,7 +81,7 @@ def iso8601(t):
 def statline(_peerlist, _mrulist, nyquist):
     "Generate a status line"
     # We don't use stdversion here because the presence of a date is confusing
-    leader = sysvars['version'][0]
+    leader = sysvars.get('version', ['This value is false!'])[0]
     leader = re.sub(r" \([^\)]*\)", "", leader)
     if span.entries:
         trailer = "Updated: %s (%s)" \
