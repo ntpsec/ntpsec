@@ -1415,41 +1415,6 @@ class IfstatsSummary:
         return s
 
 
-try:
-    from collections import OrderedDict
-except ImportError:  # pragma: no cover
-    class OrderedDict(dict):
-        "A stupid simple implementation in order to be back-portable to 2.6"
-
-        # This can be simple because it doesn't need to be fast.
-        # The programs that use it only have to run at human speed,
-        # and the collections are small.
-        def __init__(self, items=None):
-            dict.__init__(self)
-            self.__keys = []
-            if items:
-                for (k, v) in items:
-                    self[k] = v
-
-        def __setitem__(self, key, val):
-            dict.__setitem__(self, key, val)
-            self.__keys.append(key)
-
-        def __delitem__(self, key):
-            dict.__delitem__(self, key)
-            self.__keys.remove(key)
-
-        def keys(self):
-            return self.__keys
-
-        def items(self):
-            return tuple([(k, self[k]) for k in self.__keys])
-
-        def __iter__(self):
-            for key in self.__keys:
-                yield key
-
-
 def packetize(packets, period, clipdigits=0, periodized=False):
     """Given a number of packets and a duration (s) return a tuple.
 

@@ -207,6 +207,7 @@ A Mode 6 packet cannot have extension fields.
 """
 
 from __future__ import print_function, division
+import collections
 import getpass
 import hmac
 import os
@@ -1284,7 +1285,7 @@ class ControlSession:
                 items.append((key, (castedvalue, value)))
             else:
                 items.append((key, castedvalue))
-        return ntp.util.OrderedDict(items)
+        return collections.OrderedDict(items)
 
     def readvar(self, associd=0, varlist=None,
                 opcode=ntp.control.CTL_OP_READVAR, raw=False):
@@ -1538,7 +1539,7 @@ This combats source address spoofing
                 stanza = int(stanza)
                 if stanza > len(stanzas) - 1:
                     for i in range(len(stanzas), stanza + 1):
-                        stanzas.append(ntp.util.OrderedDict())
+                        stanzas.append(collections.OrderedDict())
                 stanzas[stanza][stem] = value
         return stanzas
 

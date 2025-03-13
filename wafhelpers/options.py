@@ -8,9 +8,6 @@ def options_cmd(ctx, config):
     ctx.load('waf_unit_test')
     ctx.load('gnu_dirs')
 
-    def callback_flags(option, opt, value, parser):
-        config["OPT_STORE"].setdefault(opt, []).append(value)
-
     grp = ctx.add_option_group("NTP configure options")
     grp.add_option('--enable-debug', action='store_true',
                    default=False, help="Enable debugging code")
@@ -43,12 +40,12 @@ def options_cmd(ctx, config):
 ext, ffi, or none. defaults to ffi.""", nargs=1)
 
     grp = ctx.add_option_group("NTP cross compile options")
-    grp.add_option('--cross-compiler', type='string',
+    grp.add_option('--cross-compiler', type=str,
                    help="Path to cross compiler CC. (enables cross-compiling)")
-    grp.add_option('--cross-cflags', type='string',  action="callback",
-                   callback=callback_flags, help="Cross compiler CFLAGS.")
-    grp.add_option('--cross-ldflags', type='string', action="callback",
-                   callback=callback_flags, help="Cross compiler LDFLAGS.")
+    grp.add_option('--cross-cflags', type=str, action='append',
+                   help="Cross compiler CFLAGS.")
+    grp.add_option('--cross-ldflags', type=str, action='append',
+                   help="Cross compiler LDFLAGS.")
 
     grp = ctx.add_option_group("NTP configure features")
     grp.add_option('--enable-leap-smear', action='store_true',
@@ -63,20 +60,18 @@ ext, ffi, or none. defaults to ffi.""", nargs=1)
     grp.add_option(
         '--refclock', dest='refclocks',
         help="Comma-separated list of Refclock IDs to build (or \"all\")",
-        type='string')
+        type=str)
     grp.add_option('--list', action='store_true', default=False,
                    help="List available Refclocks")
 
     grp = ctx.add_option_group("NTP developer configure options")
-    grp.add_option('--build-version-tag', type='string',
+    grp.add_option('--build-version-tag', type=str,
                    help="Append a tag to the version string (unused)")
-    grp.add_option('--cflags', type='string', action="callback",
-                   callback=callback_flags,
+    grp.add_option('--cflags', type=str, action='append',
                    help="Users should use CFLAGS in their environment.")
-    grp.add_option('--build-desc', type='string', default="",
+    grp.add_option('--build-desc', type=str, default="",
                    help="Arbitrary text string to append to extended version.")
-    grp.add_option('--ldflags', type='string', action="callback",
-                   callback=callback_flags,
+    grp.add_option('--ldflags', type=str, action='append',
                    help="Users should use LDFLAGS in their environment.")
     grp.add_option('--check', action='store_true', default=False,
                    help="Run tests")
@@ -85,11 +80,9 @@ ext, ffi, or none. defaults to ffi.""", nargs=1)
     grp.add_option('--enable-Werror', action='store_true',
                    default=False, help="Turn on -Werror")
     grp.add_option(
-        '--define', type='string', action="callback",
-        callback=callback_flags,
+        '--define', type=str, action='append',
         help="Force definition of symbol, wants value of form SYM=VAL.")
-    grp.add_option('--undefine', type='string', action="callback",
-                   callback=callback_flags,
+    grp.add_option('--undefine', type=str, action='append',
                    help="Force undefinition of symbol.")
     grp.add_option('--disable-fuzz', action='store_true',
                    default=False,
@@ -99,6 +92,6 @@ ext, ffi, or none. defaults to ffi.""", nargs=1)
     # waflib/Tools/python.py so this option groups with the other Python
     # options.
     grp = ctx.add_option_group("Python Options")
-    grp.add_option('--pyshebang', type='string',
+    grp.add_option('--pyshebang', type=str,
                    default='/usr/bin/env python',
                    help="Shebang for Python scripts [Default: %(default)s}")

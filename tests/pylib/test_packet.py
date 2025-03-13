@@ -6,6 +6,7 @@
 
 from __future__ import print_function, division
 
+from collections import OrderedDict as odict
 import getpass
 import select
 import socket
@@ -17,8 +18,6 @@ import ntp.magic
 import ntp.packet
 import ntp.poly
 import ntp.util
-
-odict = ntp.util.OrderedDict
 
 ntpp = ntp.packet
 ctlerr = ntp.packet.ControlException

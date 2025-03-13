@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+import collections
 import inspect
 import unittest
 import ntp.util
@@ -719,7 +720,7 @@ class TestPylibUtilMethods(unittest.TestCase):
 
     def test_cook(self):
         f = ntp.util.cook
-        od = ntp.util.OrderedDict
+        od = collections.OrderedDict
 
         termsize = (80, 24)
 
@@ -984,7 +985,7 @@ class TestPylibUtilMethods(unittest.TestCase):
 
     def test_IfstatsSummary(self):
         c = ntp.util.IfstatsSummary
-        od = ntp.util.OrderedDict
+        od = collections.OrderedDict
 
         cls = c()
         # Test with all variables available
@@ -1097,7 +1098,7 @@ class TestPeerSummary(unittest.TestCase):
             cdns_jig_calls.append(ip)
             return cdns_jig_returns.pop(0)
 
-        data = ntp.util.OrderedDict((("delay", (1.234567, "1.234567")),
+        data = collections.OrderedDict((("delay", (1.234567, "1.234567")),
                                      ("dstadr", ("1.2.3.4", "1.2.3.4")),
                                      ("dstport", ("blah0", "blah0")),
                                      ("filtdelay", ("blah1", "blah1")),

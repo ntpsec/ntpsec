@@ -309,7 +309,7 @@ the compiler and toolchain have been modernized.
 
 == Python guidelines
 
-You may assume Python 2 at 2.6 or later, or Python 3 at 3.3 or later.
+You may assume Python 2.7, or Python 3 at 3.3 or later.
 
 Please read https://www.python.org/dev/peps/pep-0008/[PEP 8] and use
 that style.  The only PEP 8 style rule we relax is that you may
@@ -332,10 +332,6 @@ Please check your Python code with Pyflakes.  If your code fails
 a Pyflakes test, we probably will not merge it.
 
 https://pypi.python.org/pypi/pyflakes
-
-Note: In the future, the Python baseline may be
-https://www.curiousefficiency.org/posts/2015/04/stop-supporting-python26.html[changed
-to 2.7].
 
 == General notes
 

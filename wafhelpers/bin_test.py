@@ -42,7 +42,8 @@ def run(cmd, expected, python=None):
 
     if python:
         cmd = [python[0]] + list(cmd)
-    p = POPEN(cmd, env={'PYTHONPATH': '%s/main/tests/pylib' %
+    p = POPEN(cmd, env={'PATH': os.environ['PATH'],
+                        'PYTHONPATH': '%s/main/tests/pylib' %
                         waflib.Context.out_dir},
               universal_newlines=True,
               stdin=waflib.Utils.subprocess.PIPE,
@@ -97,12 +98,10 @@ def cmd_bin_test(ctx):
         (BIN, NTPCLIENTS, "ntpsweep", "--version"),
         (BIN, NTPCLIENTS, "ntptrace", "--version"),
         (BIN, NTPCLIENTS, "ntpwait", "--version"),
-    ]
-    cmd_list_python_argparse = [  # Needs argparse
         (BIN, NTPCLIENTS, "ntplogtemp", "--version"),
         (BIN, NTPCLIENTS, "ntpviz", "--version"),
     ]
-    cmd_list_python_gps = [  # Needs argparse & gps
+    cmd_list_python_gps = [  # Needs gps
         (BIN, NTPCLIENTS, "ntploggps", "--version"),
     ]
     cmd_list_python_curses = [  # Needs python curses
@@ -112,10 +111,8 @@ def cmd_bin_test(ctx):
     with open(str(ctx.bldnode) + "/VERSION.bld") as fp:
         version = fp.read().strip()
 
-    if ctx.env['PYTHON_ARGPARSE']:
-        if ctx.env['PYTHON_GPS']:
-            cmd_list_python += cmd_list_python_gps
-        cmd_list_python += cmd_list_python_argparse
+    if ctx.env['PYTHON_GPS']:
+        cmd_list_python += cmd_list_python_gps
 
     if ctx.env['PYTHON_CURSES']:
         cmd_list_python += cmd_list_python_curses

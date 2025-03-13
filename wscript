@@ -107,22 +107,18 @@ def configure(ctx):
 
     opt_map = {}
     # Wipe out and override flags with those from the commandline
-    for flag in ctx.env.OPT_STORE:
-        if flag == "--undefine":
-            for sym in ctx.env.OPT_STORE[flag]:
-                ctx.undefine(sym)
-        elif flag == "--define":
-            for symval in ctx.env.OPT_STORE[flag]:
-                (sym, val) = symval.split("=")
-                try:
-                    ctx.define(sym, int(val))
-                except ValueError:
-                    ctx.define(sym, val)
-        else:
-            opt = flag.replace("--", "").upper()
-            opt_map[opt] = ctx.env.OPT_STORE[flag]
+    for flag_group in ['cflags', 'ldflags', 'cross_cflags', 'cross_ldflags']:
+        if getattr(ctx.options, flag_group, False):
+            opt = flag_group.upper()
+            opt_map[opt] = [x for x in filter(
+                None,
+                ' '.join(getattr(ctx.options, flag_group)).split()
+            )]
 
-    ctx.env['ntpc'] = ctx.options.enable_pylib
+    if isinstance(ctx.options.enable_pylib, str):
+        ctx.env['ntpc'] = ctx.options.enable_pylib
+    else:
+        ctx.env['ntpc'] = ctx.options.enable_pylib[0]
     ctx.env['ntpcver'] = '1.1.0'
 
     msg("--- Configuring host ---")
@@ -234,14 +230,14 @@ def configure(ctx):
         ctx.env.CC = shlex.split(ctx.options.cross_compiler)
         ctx.env.LINK_CC = shlex.split(ctx.options.cross_compiler)
 
-        if ctx.env["CROSS-CFLAGS"]:
+        if ctx.env["CROSS_CFLAGS"]:
             # Lexically split each part of the CFLAGS, then chain the lists
-            iter = [shlex.split(x) for x in opt_map["CROSS-CFLAGS"]]
+            iter = [shlex.split(x) for x in opt_map["CROSS_CFLAGS"]]
             ctx.env.CFLAGS = list(itertools.chain.from_iterable(iter))
 
-        if ctx.env["CROSS-LDFLAGS"]:
+        if ctx.env["CROSS_LDFLAGS"]:
             # Lexically split each part of the LDFLAGS, then chain the lists
-            iter = [shlex.split(x) for x in opt_map["CROSS-LDFLAGS"]]
+            iter = [shlex.split(x) for x in opt_map["CROSS_LDFLAGS"]]
             ctx.env.LDFLAGS = list(itertools.chain.from_iterable(iter))
 
     if ctx.options.list:
@@ -874,6 +870,17 @@ int main(int argc, char **argv) {
     else:
         ctx.undefine("ENABLE_CLASSIC_MODE")
 
+    if ctx.options.undefine:
+        for sym in ctx.options.undefine:
+            ctx.undefine(sym)
+    if ctx.options.define:
+        for symval in ctx.options.define:
+            (sym, val) = symval.split("=")
+            try:
+                ctx.define(sym, int(val))
+            except ValueError:
+                ctx.define(sym, val)
+
     # Ugly hack to examine config symbols
     for sym in ctx.env.DEFINES:
         if sym.startswith("NTP_SIZEOF_TIME_T="):
@@ -1036,15 +1043,17 @@ def afterparty(ctx):
                     os.symlink(relpath, path_source.abspath())
 
 
-python_scripts = set([
+python_scripts = {
     "ntpclients/ntpdig.py",
     "ntpclients/ntpkeygen.py",
+    "ntpclients/ntplogtemp.py",
     "ntpclients/ntpq.py",
     "ntpclients/ntpsweep.py",
     "ntpclients/ntptrace.py",
     "ntpclients/ntpwait.py",
     "ntpclients/ntpsnmpd.py",
-])
+    "ntpclients/ntpviz.py"
+}
 
 
 def build(ctx):
@@ -1089,10 +1098,7 @@ def build(ctx):
     ctx.recurse("etc")
     ctx.recurse("tests")
 
-    if ctx.env['PYTHON_ARGPARSE']:
-        python_scripts.add("ntpclients/ntplogtemp.py")
-        python_scripts.add("ntpclients/ntpviz.py")
-    if ctx.env['PYTHON_ARGPARSE'] and ctx.env['PYTHON_GPS']:
+    if ctx.env['PYTHON_GPS']:
         python_scripts.add("ntpclients/ntploggps.py")
     if ctx.env['PYTHON_CURSES']:
         python_scripts.add("ntpclients/ntpmon.py")
@@ -1120,10 +1126,9 @@ def build(ctx):
     if ctx.cmd == 'clean':
         afterparty(ctx)
 
-    if ctx.env['PYTHON_ARGPARSE']:
-        ctx.manpage(1, "ntpclients/ntplogtemp-man.adoc")
-        ctx.manpage(1, "ntpclients/ntpviz-man.adoc")
-    if ctx.env['PYTHON_ARGPARSE'] and ctx.env['PYTHON_GPS']:
+    ctx.manpage(1, "ntpclients/ntplogtemp-man.adoc")
+    ctx.manpage(1, "ntpclients/ntpviz-man.adoc")
+    if ctx.env['PYTHON_GPS']:
         ctx.manpage(1, "ntpclients/ntploggps-man.adoc")
     if ctx.env['PYTHON_CURSES']:
         ctx.manpage(1, "ntpclients/ntpmon-man.adoc")

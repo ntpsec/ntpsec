@@ -16,6 +16,7 @@
 from __future__ import print_function, division
 
 import cmd
+import collections
 import getopt
 import os
 import re
@@ -85,7 +86,7 @@ class Ntpq(cmd.Cmd):
         self.debug = 0
         self.logfp = sys.stderr
         self.pktversion = ntp.magic.NTP_OLDVERSION + 1
-        self.uservars = ntp.util.OrderedDict()
+        self.uservars = collections.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
         self.termwidth = ntp.util.termsize()[0]
 
@@ -422,7 +423,7 @@ usage: timeout [ msec ]
                             items.append((var, ("???", None)))
                             continue
                         raise e
-                queried = ntp.util.OrderedDict(items)
+                queried = collections.OrderedDict(items)
             else:
                 self.warn(e.message)
                 return
@@ -497,7 +498,7 @@ usage: timeout [ msec ]
                             items.append((var, "???"))
                             continue
                         raise e
-                queried = ntp.util.OrderedDict(items)
+                queried = collections.OrderedDict(items)
             else:
                 self.warn(e.message)
                 return

@@ -2,7 +2,9 @@ pages:
   stage: build
   image: $CI_REGISTRY/ntpsec/ntpsec/alpine-pages
   script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ --enable-doc --disable-manpage build install
+    - mkdir -p public/latest
+    - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ --enable-doc --disable-manpage build install
+    - tar -C /tmp/docbot-local/share/doc/ntpsec/ -cf - .|tar -C public/latest/ -xf -
     - cp www/favicon.ico public
     - cp docs/top.html.in public/index.html
     - cp docs/top-asciidoc.css public/asciidoc.css
@@ -325,8 +327,24 @@ cross-armhf-build:
   image: $CI_REGISTRY/ntpsec/ntpsec/cross-armhf
   script:
     - pyver=$(python3 -c 'import sys;print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-    - PYTHON_VERSION=${pyver} PYTAG=cpython3 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags "-I/usr/include/ -I/usr/include/python${pyver}" --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python${pyver}/dist-packages --pythonarchdir=/usr/libhf/python${pyver}/dist-packages build --enable-pylib=ffi
-    - PYTHON_VERSION=${pyver} PYTAG=cpython3 pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --disable-nts --cross-compiler=arm-linux-gnueabihf-gcc --cross-cflags "-I/usr/include/ -I/usr/include/python${pyver}" --cross-ldflags '-L/usr/libhf' --pythondir=/usr/libhf/python${pyver}/dist-packages --pythonarchdir=/usr/libhf/python${pyver}/dist-packages build --enable-pylib=ext
+    - PYTHON_VERSION=${pyver} PYTAG=cpython3 pyext_PATTERN="%s.so"
+      PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc
+      --disable-manpage --disable-nts
+      --cross-compiler=arm-linux-gnueabihf-gcc
+      --cross-ldflags="-L/usr/libhf"
+      --cross-cflags="-I/usr/include/ -I/usr/include/python${pyver}"
+      --pythondir=/usr/libhf/python${pyver}/dist-packages
+      --pythonarchdir=/usr/libhf/python${pyver}/dist-packages build
+      --enable-pylib=ext
+    - PYTHON_VERSION=${pyver} PYTAG=cpython3 pyext_PATTERN="%s.so"
+      PYTHON_LDFLAGS='-lpthread -ldl' ./waf configure --disable-doc
+      --disable-manpage --disable-nts
+      --cross-compiler=arm-linux-gnueabihf-gcc
+      --cross-ldflags="-L/usr/libhf"
+      --cross-cflags="-I/usr/include/ -I/usr/include/python${pyver}"
+      --pythondir=/usr/libhf/python${pyver}/dist-packages
+      --pythonarchdir=/usr/libhf/python${pyver}/dist-packages build
+      --enable-pylib=ffi
   tags:
 
 gentoo-basic:
