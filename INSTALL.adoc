@@ -46,7 +46,7 @@ different packages depending on whether your base Python version is
 
 === Details ===
 
-Python 2.x, x >= 6, or Python 3.x, x >= 3::
+Python 2.x, x >= 7, or Python 3.x, x >= 3::
    Required to build, and for various scripts such as ntpviz (but see
    the guidance for packagers in devel/packaging.adoc).  Our Python code
    has been written polyglot to run with either Python 2 or Python 3.
