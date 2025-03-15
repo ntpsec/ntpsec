@@ -559,24 +559,39 @@ equivalent of -Z) in older versions.
 == STANDARDS
 
 RFC 1059::
-  David L. Mills, _Network Time Protocol (Version 1)_, RFC 1059
+  David L. Mills, _Network Time Protocol (Version 1)_
 
 RFC 1119::
-  David L. Mills, _Network Time Protocol (Version 2)_, RFC 1119
+  David L. Mills, _Network Time Protocol (Version 2)_
 
 RFC 1305::
-  David L. Mills, _Network Time Protocol (Version 3)_, RFC 1305
+  David L. Mills, _Network Time Protocol (Version 3)_
+
+RFC 2030::
+  D.{empty} Mills, _Simple Network Time Protocol (SNTP) Version 4 for IPv4, IPv6 and OSI_
 
 RFC 5905::
   David L. Mills and J. Martin, Ed. and J. Burbank and W. Kasch, _Network
-  Time Protocol Version 4: Protocol and Algorithms Specification_, RFC 5905
+  Time Protocol Version 4: Protocol and Algorithms Specification_
 
 RFC 5907::
-  H&#x2e; Gerstung and C. Elliott and B. Haberman, Ed., _Definitions of Managed
-  Objects for Network Time Protocol Version 4: (NTPv4)_, RFC 5907
+  H.{empty} Gerstung and C. Elliott and B. Haberman, Ed., _Definitions of Managed
+  Objects for Network Time Protocol Version 4: (NTPv4)_
 
 RFC 5908::
-  R&#x2e; Gayraud and B. Lourdelet, _Network Time Protocol (NTP) Server Option
-  for DHCPv6_, RFC 5908
+  R.{empty} Gayraud and B. Lourdelet, _Network Time Protocol (NTP) Server Option
+  for DHCPv6_
+
+RFC 7822::
+  T.{empty} Mizrahi and D. Mayer, _Network Time Protocol Version 4 (NTPv4) Extension Fields_
+
+RFC 8573::
+  A.{empty} Malhotra and S. Goldberg, _Message Authentication Code for the Network Time Protocol_
+
+RFC 8633::
+  D.{empty} Reilly, Ed. and H. Stenn and D. Sibold, _Network Time Protocol Best Current Practices_
+
+RFC 8915::
+  D.{empty} Franke and D. Sibold and K. Teichel and M. Dansarie and R. Sundblad _Network Time Security for the Network Time Protocol_
 
 //end
