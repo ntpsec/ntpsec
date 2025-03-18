@@ -98,7 +98,7 @@ def build(ctx):
         features='py',
         source=builds+[target1, target2],
         install_from=bldnode,
-        install_path='${PYTHONARCHDIR}/ntp'
+        install_path='${PYTHONDIR}/ntp'
     )
 
     # pep241  lay an egg
@@ -108,4 +108,4 @@ def build(ctx):
         source=['ntp-in.egg-info'],
         target=egg
     )
-    ctx.install_files(ctx.env.PYTHONARCHDIR, egg)
+    ctx.install_files(ctx.env.PYTHONDIR, egg)
