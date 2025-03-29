@@ -64,6 +64,7 @@ done
 # Python 3 equivalents with a python3 prefix.  Compute the correct value for the
 # infix based on system Python.  This will start to be significant after Python 2
 # EOLs at the beginning of 2020.
+# This doesn't work if python isn't already installed.
 PYVERS=$(python --version 2>&1 | sed -n -e '/Python \([0-9]\).*/s//\1/p')
 if [ "$PYVERS" = "2" ]
 then
@@ -174,24 +175,30 @@ daemon () {
     # Prerequisites to build the daemon: bison, pps-tools, service libraries
     case $installer in
 	apk)
+	    # Alpine Linux
 	    $install build-base python                  # basic tools
 	    $install bison "python${PYVERS}-dev" linux-headers
 	    $install openssl-dev libcap-dev libseccomp-dev
 	    # probably needs more, but this builds
 	    # can't find timepps.h: gpsd and chrony have their own ??
+	    echo "Last tested a long time ago"
 	    ;;
 	apt)
+	    # Debian and derivatives
 	    $install build-essential			# Build environment
 	    $install bison libssl-dev			# build
 	    $install libcap-dev libseccomp-dev		# build
 	    $install libavahi-compat-libdnssd-dev	# optional build
 	    $install pps-tools
 	    $install python3-dev python-is-python3
+	    $install python-dev-is-python3
+	    echo "Last tested: Debian 12, March 2025"
 	    ;;
 	emerge)
 						# Build environment included!
 	    $install sys-libs/libcap sys-libs/libseccomp
 	    $install sys-devel/bison net-misc/pps-tools
+	    echo "Last tested a long time ago"
 	    ;;
 	pkgin)
 	    # NetBSD
@@ -213,21 +220,25 @@ daemon () {
 		echo /usr/local/lib/python3.7/site-packages > \
 			/usr/pkg/lib/python3.7/site-packages/ntpsec.pth
 	    fi
+	    echo "Last tested a long time ago"
 	    ;;
 	pkg)
 	    # FreeBSD
 	    $install bison python3
-	    $do ln -s /usr/local/bin/python3 /usr/local/bin/python
 	    # certificates for NTS
 	    $install ca_root_nss
+	    echo "Last tested: FreeBSD 14.2, March 2025"
 	    ;;
 	yum|dnf)
-	    $do $installer groupinstall "Development Tools" 	# Build environment
+	    $do $installer group install development-tools 	# Build environment
+	    $install python3 python3-devel 		# build
+	    $install python-unversioned-command-3 	# python => python3
 	    $install bison openssl-devel 		# build
 	    $install libcap-devel libseccomp-devel	# build
 	    $install pps-tools-devel			# build
 	    $install avahi-compat-libdns_sd-devel	# optional build
 	    $install libcap openssl-libs pps-tools
+	    echo "Last tested: Fedora 41, March 2025"
 	    ;;
 	yast)
 	    echo "# SLES versions 12 and earlier do not have pps-tools"
@@ -236,6 +247,7 @@ daemon () {
 	    $install openssl-devel			# build
 	    $install libcap2 openssl-libs
 	    $install "python${PYVERS}-curses"
+	    echo "Last tested a long time ago"
 	    ;;
 	zypper)
 	    $install -t pattern devel_basis		# Build environment
@@ -247,6 +259,7 @@ daemon () {
 	    $install pps-tools
 	    $install libcap2 openssl-libs
 	    $install "python${PYVERS}-curses"
+	    echo "Last tested a long time ago"
 	    ;;
     esac
 }
@@ -254,10 +267,7 @@ daemon () {
 tools () {
     # Prerequisites for the client Python tools: python extensions
     case $installer in
-	apt)
-	    $install "python${PYVERS}-dev"
-	    ;;
-	yum|dnf|yast|zypper)
+	yast|zypper)
 	    $install "python${PYVERS}-devel"
 	    ;;
     esac

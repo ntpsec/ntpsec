@@ -12,7 +12,12 @@ on user-visible changes.
 
 ## Repository Head
 
-* Add waf 2.1.4 and add the ability to use it.
+* waf has been upgraded to version 2.1.4
+  NB: on Debian, waf now installs Python programs (ntpq, ntpmon, ...)
+  in /usr/local/lib/python3.xx/site-packages rather than .../dist-packages
+  A quick fix is to link site-packages to dist-packages before installing.
+  You will have to do that again each time your distro updates to a new
+  version of Python.
 
 * Python 2.7 is now the minimum supported version.
   This is likely to be the last release supporting Python 2.

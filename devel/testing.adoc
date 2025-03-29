@@ -10,7 +10,7 @@ directory.
 
 The build tree has been set up so that if you first waf builid then cd to
 build/main/ntpclients/ and run (say) ntpq, you should be able to test
-new bersions of the Python code without installing to rootspace.
+new versions of the Python code without installing to rootspace.
 
 The very first thing to do, even before you start up ntpd, is to try that.
 If you get a message that says
@@ -149,7 +149,17 @@ Edit /etc/rc.conf It needs to contain this:
 --------------------------------------------------
 ntpd_enable="YES"
 ntpd_program="/usr/local/sbin/ntpd"
+kld_list="mac_ntpd"              # for ntpd to droproot
+ntpd_flags=" -N -u ntpd:ntpd"    # Additional flags to ntpd
+ntpd_sync_on_start=YES           # adds -g
 --------------------------------------------------
+
+It doesn't work after a fresh install:
+  INIT: must be run as root, not uid
+That's using /etc/rc.d/ntpd
+I haven't figured out what is going on.
+It worked after I ran it for a while from the command line
+  sudo <command line from log file> -n
 
 If you are running ntpd, the first line will be there
 already.  The default is NO.
