@@ -567,8 +567,14 @@ RFC 1119::
 RFC 1305::
   David L. Mills, _Network Time Protocol (Version 3)_
 
+RFC 1589::
+  David L. Mills, _A Kernel Model for Precision Timekeeping_
+
 RFC 2030::
   D.{empty} Mills, _Simple Network Time Protocol (SNTP) Version 4 for IPv4, IPv6 and OSI_
+
+RFC 2783::
+  J.{empty} Mogul and D. Mills and J. Brittenson and J. Stone and U. Windl, _Pulse-Per-Second API for UNIX-like Operating Systems, Version 1.0_
 
 RFC 5905::
   David L. Mills and J. Martin, Ed. and J. Burbank and W. Kasch, _Network

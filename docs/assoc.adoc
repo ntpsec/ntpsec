@@ -19,9 +19,7 @@ include::includes/hand.adoc[]
 
 * link:#modes[Association Modes]
 * link:#client[Client/Server Mode]
-* link:#symact[Symmetric Active/Passive Mode]
-* link:#broad[Broadcast/Multicast Modes]
-* link:#many[Manycast Mode]
+* link:#pool[Pool Mode]
 * link:#poll[Poll Interval Management]
 * link:#burst[Burst Options]
 
@@ -77,60 +75,8 @@ the default minimum and maximum values. The +minpoll+ and +maxpoll+
 options can be used to bracket the range. Unless noted otherwise, these
 options should not be used with reference clock drivers.
 
-[[symact]]
-== Symmetric Active/Passive Mode
-
-Symmetric active/passive mode is intended for configurations where a
-clique of low-stratum peers operate as mutual backups for each other.
-Each peer operates with one or more primary reference sources, such as a
-reference clock, or a set of secondary (stratum 2) servers known to be
-reliable and authentic. Should one of the peers lose all reference
-sources or simply cease operation, the other peers will automatically
-reconfigure so that time and related values can flow from the surviving
-peers to all hosts in the subnet. In some contexts this would be
-described as a "push-pull" operation, in that the peer either pulls or
-pushes the time and related values depending on the particular
-configuration.
-
-A symmetric active peer sends a symmetric active (mode 1) message to a
-designated peer. If a matching configured symmetric active association
-is found, the designated peer returns a symmetric active message. If no
-matching association is found, the designated peer mobilizes an ephemeral
-symmetric passive association and returns a symmetric passive (mode 2)
-message. Since an intruder can impersonate a symmetric active peer and
-cause a spurious symmetric passive association to be mobilized,
-symmetric passive mode should always be cryptographically validated.
-
-Due to unresolvable security issues with symmetric mode, NTPsec
-includes only partial support for it. The deprecated +peer+ directive
-which formerly set up a symmetric active association is now a synonym
-for +server+. Servers which receive symmetric active messages will
-immediately reply with symmetric passive responses without setting up
-any new association; essentially they treat such messages exactly
-like client-mode messages, aside from putting a different mode number
-into the response.
-
-[[broad]]
-== Broadcast/Multicast Modes
-
-These modes cannot be effectively secured and are deprecated in
-NTPsec.  Client-mode support has been removed; server-side support
-is retained for backward compatibility but may be removed in a
-future release.
-
-NTP broadcast modes are intended for configurations
-involving one or a few servers and a possibly very large client
-population. Broadcast mode can be used with Ethernet, FDDI and WiFi
-spans interconnected by hubs or switches. Ordinarily, broadcast packets
-do not extend beyond a router.
-
-A server is configured to send broadcast messages using the
-+broadcast+ command and specifying the subnet address for broadcast.
-
-[[many]]
-== Manycast and Pool Modes
-
-Manycast is no longer supported by NTPsec.
+[[pool]]
+== Pool Mode
 
 For more information on pool mode, see the
 link:discover.html[Automatic Server Discovery Schemes] page.
