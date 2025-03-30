@@ -176,12 +176,11 @@ daemon () {
     case $installer in
 	apk)
 	    # Alpine Linux
-	    $install build-base python                  # basic tools
-	    $install bison "python${PYVERS}-dev" linux-headers
+	    $install build-base python3                 # basic tools
+	    $install bison python3-dev linux-headers
 	    $install openssl-dev libcap-dev libseccomp-dev
-	    # probably needs more, but this builds
-	    # can't find timepps.h: gpsd and chrony have their own ??
-	    echo "Last tested a long time ago"
+	    $install pps-tools pps-tools-dev
+	    echo "Last tested:  Alpine 3.21.3, March 2025"
 	    ;;
 	apt)
 	    # Debian and derivatives
@@ -224,7 +223,8 @@ daemon () {
 	    ;;
 	pkg)
 	    # FreeBSD
-	    $install bison python3
+	    $install bison python3      # python3 => python3.xx
+	    $install python		# python => python3
 	    # certificates for NTS
 	    $install ca_root_nss
 	    echo "Last tested: FreeBSD 14.2, March 2025"
