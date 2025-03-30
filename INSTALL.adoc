@@ -46,25 +46,21 @@ different packages depending on whether your base Python version is
 
 === Details ===
 
-Python 2.x, x >= 7, or Python 3.x, x >= 3::
-   Required to build, and for various scripts such as ntpviz (but see
-   the guidance for packagers in devel/packaging.adoc).  Our Python code
-   has been written polyglot to run with either Python 2 or Python 3.
-   Note that you will need both the ordinary Python installation and
-   Python dev tools, if your OS makes such a distinction.
+Python 2.x, x >= 7, or Python 3.x, x >= 3;;
+Required to build, and for various scripts such as ntpviz (but see
+the guidance for packagers in devel/packaging.adoc).  Our Python code
+has been written polyglot to run with either Python 2 or Python 3.
+Note that you will need both the ordinary Python installation and
+Python dev tools, if your OS makes such a distinction.
++
+If you are running on a distro with no `python` executable, you will
+need to run waf as `python3 waf` rather than `./waf`.  You will also
+need `python3 waf configure --pyshebang=/usr/bin/env python3` or similar.
++
+Some OS distros won't find our installed python libraries.
+More info in README-PYTHON.
 
-   If you are running on a distro with no `python` executable, you will
-   need to run waf as `python3 waf` rather than `./waf`.  You will also
-   need `python3 waf configure --pyshebang=/usr/bin/env python3` or similar.
-
-   Some OS distros won't find our installed python libraries.
-   More info in README-PYTHON.
-
-argparse::
-   Required for ntpviz when using Python version 2.6
-   Install with pip: pip install argparse
-
-psutil::
+psutil;;
    Optional for ntpviz.  Allows running with ionice()
    Debian: python-psutil or python3-psutil
    Ubuntu: python-psutil or python3-psutil
@@ -72,48 +68,79 @@ psutil::
    Gentoo: dev-python/psutil
    SLES: python-psutil or python3-psutil
 
-sys/timepps.h::
+sys/timepps.h;;
    If you are building to supply Stratum 1 time service (that is, with
    refclocks linked in) you may find that you need the sys/timepps.h
    file to be installed, depending on which refclocks you enable.
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
 
-AsciiDoc:
-   You will need an AsciiDoc processor to make HTML and/or manual pages from
-   the documentation masters.  The supported processors, in order of
-   preference, are asciidoctor, asciidoc(-py3)/a2x, and asciidoc3/a2x3.
-
+AsciiDoc;;
+You will need an AsciiDoc processor to make HTML and/or manual pages from
+the documentation masters.  The supported processors, in order of
+preference, are asciidoctor, asciidoc(-py3)/a2x, and asciidoc3/a2x3.
++
 asciidoctor::
    Note: you need asciidoctor 1.5.8 or newer.  Otherwise, use asciidoc or
-   asciidoc3.
-   Debian/Ubuntu: asciidoctor (Debian 10+, Ubuntu 19.04+)
-   Fedora: rubygem-asciidoctor (Fedora 32+)
-   Gentoo: app-text/asciidoctor
+   asciidoc3. +
+   Debian/Ubuntu: asciidoctor (Debian 10+, Ubuntu 19.04+) +
+   Fedora: rubygem-asciidoctor (Fedora 32+) +
+   Gentoo: app-text/asciidoctor +
    SLES: asciidoctor
-
++
 asciidoc, a2x::
    Note: you need asciidoc 8.6.8 or newer.  Alternatively, use asciidoctor
-   or asciidoc3.
-   Debian/Ubuntu: asciidoc
-   Fedora/CentOS: asciidoc
-   Gentoo: app-text/asciidoc
-   SLES: asciidoc
-
+   or asciidoc3. +
+   Debian/Ubuntu: asciidoc +
+   Fedora/CentOS: asciidoc +
+   Gentoo: app-text/asciidoc +
+   SLES: asciidoc +
++
 asciidoc3, a2x3::
    Note: you need asciidoc 3.0.2 or newer.  Alternatively, use asciidoctor
-   or asciidoc.  There are currently no distro packages of asciidoc3.
+   or asciidoc.  There are currently no distro packages of asciidoc3. +
    However, upstream provides deb, pip and rpm packages.
-
-Local copy of DocBook stylesheets:
-   Optional: Prevents documentation build failures when your Internet is down
-   Debian/Ubuntu: docbook-xsl
-   Fedora/CentOS: docbook-xsl-stylesheets
-   Gentoo: app-text/docbook-xsl-stylesheets
++
+local copy of DocBook stylesheets::
+   Optional: Prevents documentation build failures when your Internet is down +
+   Debian/Ubuntu: docbook-xsl +
+   Fedora/CentOS: docbook-xsl-stylesheets +
+   Gentoo: app-text/docbook-xsl-stylesheets +
    SLES: docbook-xsl-stylesheets - pulled in by `asciidoc`
 
-wget:
+wget;;
    Optional, used by ntpleapfetch
+
+=== waf verification ===
+
+NTPsec ships a trivially modified copy waf 2.1.4; it can be restored
+and then verified with the following steps.
+
+[source,console]
+----
+ntpsec $ wget https://gitlab.com/ita1024/waf/raw/master/utils/pubkey.asc \
+    https://gitlab.com/ita1024/waf/raw/master/utils/verify-sig.py
+Saving 'verify-sig.py'
+HTTP response 200  [https://gitlab.com/ita1024/waf/raw/master/utils/verify-sig.pSaving 'pubkey.asc'
+HTTP response 200  [https://gitlab.com/ita1024/waf/raw/master/utils/pubkey.asc]
+
+pubkey.asc           100% [=============================>]    3.05K    --.-KB/s
+                          [Files: 2  Bytes: 4.33K [8.77KB]
+ntpsec $ gpg --import ./pubkey.asc
+gpg: key 1BAC571DCD772295: public key "Waf Project <noreply@waf.io>" imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+ntpsec $ sed -rn "1s/n$/n3/" -i waf
+ntpsec $ python ./verify-sig.py waf
+-> 'gpg --verify waf-sig.asc'
+gpg: assuming signed data in 'waf-sig'
+gpg: Signature made Tue 12 Nov 2024 11:09:43 AM PST
+gpg:                using RSA key 8C7EB2F93B0C45F5732FE5D11BAC571DCD772295
+gpg: Good signature from "Waf Project <noreply@waf.io>" [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 8C7E B2F9 3B0C 45F5 732F  E5D1 1BAC 571D CD77 2295
+----
 
 == Basic Installation ==
 
@@ -154,6 +181,19 @@ Under Unix, the simplest way to compile this package is:
 
 It may be necessary after installing on some systems (incl. Linux) to
 rebuild the ld.so cache or equivalent if using the FFI library (default).
+
+=== SELinux ===
+
+If installing to an SELinux enabled system you may want to perform the
+following steps. The former line should prevent systemd from not seeing
+the units with NTPsec, the latter should allow the actual executables
+to run.
+
+[source,console]
+----
+# /sbin/restorecon -v /usr/lib/systemd/system/ntp*
+# /sbin/restorecon -v ${PREFIX}/{,s}bin/ntp*
+----
 
 === Solaris ===
 
