@@ -53,9 +53,11 @@ has been written polyglot to run with either Python 2 or Python 3.
 Note that you will need both the ordinary Python installation and
 Python dev tools, if your OS makes such a distinction.
 +
-If you are running on a distro with no `python` executable, you will
+If you are running on a distro with no `python` executable, you may
 need to run waf as `python3 waf` rather than `./waf`.  You will also
-need `python3 waf configure --pyshebang=/usr/bin/env python3` or similar.
+need `python3 waf configure --pyshebang="/usr/bin/env python3"` or similar.
+Alternatively you can link your python3 to python.  
+`ln -s /usr/bin/python3 /usr/bin/python`
 +
 Some OS distros won't find our installed python libraries.
 More info in README-PYTHON.
@@ -74,11 +76,12 @@ sys/timepps.h;;
    file to be installed, depending on which refclocks you enable.
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
+   Gentoo; net-misc/pps-tools
 
 AsciiDoc;;
-You will need an AsciiDoc processor to make HTML and/or manual pages from
-the documentation masters.  The supported processors, in order of
-preference, are asciidoctor, asciidoc(-py3)/a2x, and asciidoc3/a2x3.
+    If you want to build the HTML and/or manual pages then you will
+    need an AsciiDoc processor.  The supported processors, in order of
+    preference, are asciidoctor, asciidoc(-py3)/a2x, and asciidoc3/a2x3.
 +
 asciidoctor::
    Note: you need asciidoctor 1.5.8 or newer.  Otherwise, use asciidoc or
@@ -110,6 +113,7 @@ local copy of DocBook stylesheets::
 
 wget;;
    Optional, used by ntpleapfetch
+   Gentoo: net-misc/wget
 
 === waf verification ===
 
@@ -184,10 +188,9 @@ rebuild the ld.so cache or equivalent if using the FFI library (default).
 
 === SELinux ===
 
-If installing to an SELinux enabled system you may want to perform the
-following steps. The former line should prevent systemd from not seeing
-the units with NTPsec, the latter should allow the actual executables
-to run.
+If installing to an SELinux enabled system you should perform the
+following steps. The first line allows systemd to see the units with
+NTPsec, the second allows the actual executables to run.
 
 [source,console]
 ----
