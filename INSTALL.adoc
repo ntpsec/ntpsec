@@ -55,9 +55,10 @@ Python dev tools, if your OS makes such a distinction.
 +
 If you are running on a distro with no `python` executable, you may
 need to run waf as `python3 waf` rather than `./waf`.  You will also
-need `python3 waf configure --pyshebang="/usr/bin/env python3"` or similar.
-Alternatively you can create a link your python3 called python. Assuming
-your `pythona3` is in /usr/bin: `ln -s usr/bin/python3 /usr/bin/python`
+need `python3 waf configure --pyshebang="/usr/bin/env python3"` or
+similar.  Alternatively you can create a link to your python3 called
+python. Assuming your `pythona3` is in /usr/bin: \
+`ln -s usr/bin/python3 /usr/bin/python`
 +
 FreeBSD keeps python3 in `/usr/local/bin/python3`. \
 NetBSD keeps python3 in `/usr/pkg/bin/python3`.
