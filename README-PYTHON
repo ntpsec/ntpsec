@@ -1,55 +1,128 @@
 If you are trying to debug something like:
+
   ImportError: No module named ntp
+
+or:
+
+  ImportError: No module named gps
+
 you have come to the right place.
 
-The default location where we install our python libraries is
+When building NTPSec for installation, the install procedure asks the
+current python for the proper location to install the python modules.
+On most distributions the default location where we install our python
+libraries is:
+
   /usr/local/lib/pythonX.Y/site-packages/
-where X and Y are the python version numbers.
+
+where X and Y are the python version numbers.  Y may be suffixed with
+'t' for threaded python versions.
+
+Why does NTPSec install into /usr/local?  Look at the Filesystem
+Hierarchy Standard [FHS].  Specifically Version 3, Chapter 4:
+
+    4.9.1. Purpose
+
+    The /usr/local hierarchy is for use by the system administrator
+    when installing software locally. It needs to be safe from being
+    overwritten when the system software is updated. It may be used for
+    programs and data that are shareable amongst a group of hosts, but
+    not found in /usr.
+
+The NTPSec build procedure is for "nstalling software locally", so
+we install into /usr/local, not /usr.  /usr is reserved for
+the "system software".
 
 Unfortunately, that's not on the default search path of several
-OSes/distros, in particular Fedora and NetBSD.
+OSes/distros, in particular Fedora, NetBSD, Gentoo, etc..
 (Fixed in Fedora 39, Sep-2023, ??)
 
-Python has a search path that is used to find library modules when
-you import them.  You can see your search path with:
-  python2 -c "import sys; print sys.path"
-or
-  python3 -c "import sys; print(sys.path)"
+Python has search paths [PATHS] that ares used to find library modules
+when you import them.  You can see your search paths for Python 2 with:
 
-Info on Python's search path:
-  https://docs.python.org/2/tutorial/modules.html
-or
-  https://docs.python.org/3/tutorial/modules.html
+    alice ~ # python2 -m site
+    sys.path = [
+        '/root',
+        '/usr/local/lib/python3.12/site-packages',
+        '/usr/lib64/python27.zip',
+        '/usr/lib64/python2.7',
+        '/usr/lib64/python2.7/plat-linux2',
+        '/usr/lib64/python2.7/lib-tk',
+        '/usr/lib64/python2.7/lib-old',
+        '/usr/lib64/python2.7/lib-dynload',
+        '/usr/lib64/python2.7/site-packages',
+    ]
+    USER_BASE: '/root/.local' (doesn't exist)
+    USER_SITE: '/root/.local/lib64/python2.7/site-packages' (doesn't exist)
+    ENABLE_USER_SITE: True
 
+Or for Python 3:
 
+    kong ~ # python3 -m site
+    sys.path = [
+        '/root',
+        '/usr/local/lib/python3.13t/site-packages',
+        '/usr/lib/python313t.zip',
+        '/usr/lib/python3.13t',
+        '/usr/lib/python3.13t/lib-dynload',
+        '/usr/lib/python3.13t/site-packages',
+    ]
+    USER_BASE: '/root/.local' (exists)
+    USER_SITE: '/root/.local/lib/python3.13t/site-packages' (doesn't exist)
+    ENABLE_USER_SITE: True
+
+What is the difference between 'site-packages' and 'dist-packages'?
+
+This is where pip enters the discussion.  Few distros use pip to install
+python modules.  So pip installed modules do not belong in /usr.  But
+pip installed modules are 'managed' and not just 'locally installed'
+either.  So the compromise is for pip to install into:
+
+     /usr/local/.../dist-packages.
+
+That leave site-packages for locally installed modules that are not
+otherwise managed by the distribution, pip, or other manager.  Thus
+locally installed NTPSec, gpsd, etc. goes into:
+
+     /usr/local/.../sist-packages.
 
 There are several ways to make things work.
 
 1: You can modify the location where waf will install the libraries.
 For NetBSD, something like this should work:
+
   ./waf configure \
     --pythondir=/usr/pkg/lib/python2.7/site-packages \
     --pythonarchdir=/usr/pkg/lib/python2.7/site-packages \
     ...
+
 You need to specify it at configure time.  Install time is too late.
 
+Note: Distros do not want users installing modules in the
+distro reserved areas.  It violates the FHS.
 
 2: You can setup your PYTHONPATH with something like this:
-  export PYTHONPATH=/usr/local/lib/python2.7/site-packages
-For bash, you can add that line to your .bashrc or the system /etc/bashrc
-If you don't put it in the system file, all users will have to do this,
-including root if root uses any ntp scripts.
 
+  export PYTHONPATH=/usr/local/lib/python3.13t/site-packages
+
+See [PATHS].
+
+For bash, you can add that line to your .bashrc or the system
+/etc/bashrc If you don't put it in the system file, all users will have
+to do this, every time they login login.  Including root if root uses
+any ntp scripts.
 
 3: You can add to the default search path by setting up a .pth file
 with something like this:
+
   echo /usr/local/lib64/python3.11/site-packages > \
     /usr/lib/python3.11/site-packages/ntpsec.pth
+
 This works for all users, including root.
 Note that the pth file must be on the default Python search path.
 
-
 OTOH if you run into something like:
+
     Traceback (most recent call last):
       File "/usr/bin/ntpdig", line 419, in <module>
         timeout=timeout)
@@ -64,6 +137,7 @@ install one after 1.1.9 (798b93) by adding the '--enable-pylib ext' option
 without quotes.
 
 OTOH if you are running into something like:
+
     Traceback (most recent call last):
     File "/usr/bin/ntpdig", line 19, in <module>
         import ntp.packet
@@ -88,3 +162,17 @@ On some platforms, it is necessary to run ldconfig after installing libraries.
 This is normally done by the waf install step, but it may have failed.  When
 using a temporary --destdir (e.g. as part of package builds), ldconfig must be
 run manually after the library is installed to its final location.
+
+TODO: 
+
+Look into using .pth files to avoid much of this mess.
+
+References:
+
+[FHS] Filesystem Hierarchy Standard Version 3.0
+      https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
+
+[PATHS] The Module Search Path
+        https://docs.python.org/2/tutorial/modules.html#the-module-search-path
+        https://docs.python.org/3/tutorial/modules.html#the-module-search-path
+
