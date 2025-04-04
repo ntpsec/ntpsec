@@ -346,12 +346,26 @@ fetch_packetstamp(
 #else
 # error "Can't get packet timestamp"
 #endif
-		DPRINT(4,
-                        ("fetch_timestamp: strange control message 0x%x\n",
-			     (unsigned)cmsghdr->cmsg_type));
-		msyslog(LOG_ERR,
-			"ERR: fetch_timestamp: strange control message 0x%x",
-                             (unsigned)cmsghdr->cmsg_type);
+                char errbuf[128];
+
+                snprintf(errbuf, sizeof(errbuf),
+                        "fetch_timestamp: strange control message "
+                        "len x%x, level x%x type x%x\n",
+		       (unsigned)cmsghdr->cmsg_len,
+		       (unsigned)cmsghdr->cmsg_level,
+		       (unsigned)cmsghdr->cmsg_type);
+		DPRINT(4, ("%s", errbuf));
+		msyslog(LOG_ERR, "ERR: %s", errbuf);
+
+                // debug
+                snprintf(errbuf, sizeof(errbuf),
+                        "fetch_timestamp: sizeof(size_t) %lu, sizeof(int) %lu "
+                        "sizeof(cmsghdr) %lu'n",
+                        sizeof(size_t), sizeof(int), sizeof(struct cmsghdr));
+		DPRINT(4, ("%s", errbuf));
+		msyslog(LOG_ERR, "ERR: %s", errbuf);
+                // debug
+
 		exit(2);
 		/* Could loop and skip strange types. */
 		/* cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr); */
