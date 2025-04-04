@@ -195,6 +195,41 @@ system wide python.  Since NTPSec, and gpsd, are intended to be used by
 root, and all users, on a system, it is not appropriate to use install
 them into a venv.
 
+How do 'python', 'python2' and 'python3' differ?
+
+Upstream tackles this issue in Python Enhancement Proposal (PEP) 394,
+named 'The “python” Command on Unix-Like Systems'[PEP394].  Be
+careful to use the latest PEP 394 version, they keep changing their
+minds.
+
+    "Depending on a distribution or system configuration, python may or
+    may not be installed. If python is installed its target interpreter
+    may refer to python2 or python3. "
+
+So, no help at all.  But well worth reading the entire PEP.  You need to
+refer to your distributions documentation, if you can find it.
+
+When in doubt, since python2 is, still, almost dead, use python3.
+
+Sadly, every distribution has a sightly different answer to changing the
+python linkage.  Changing an existing python link often has unintended
+consequences.
+
+Ubuntu: Ubuntu does not trust the sysadmin to understand symlinks.
+To point python to python3:
+
+    apt install python-is-python3
+
+To point python to python2:
+
+    apt install python-is-python2
+
+Gentoo: Gentoo allows the user to configure what Python version the
+'python' command points to with this command:
+
+    eselect python list
+
+
 TODO: 
 
 Look into using .pth files to avoid much of this mess.
@@ -213,3 +248,6 @@ References:
 
 [VENV] venv — Creation of virtual environments¶
        https://docs.python.org/3/library/venv.html
+
+[PEP394] PEP 394 – The “python” Command on Unix-Like Systems
+         https://peps.python.org/pep-0394/
