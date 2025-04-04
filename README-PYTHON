@@ -8,6 +8,11 @@ or:
 
 you have come to the right place.
 
+Warning: Every distribution handles Python slightly differently.  It
+also varies a lot by distribution version.  So grab your distribution
+documentation as you read this.  Expect the examples here to differ
+from what you see on your system.
+
 When building NTPSec for installation, the install procedure asks the
 current python for the proper location to install the python modules.
 On most distributions the default location where we install our python
@@ -18,8 +23,10 @@ libraries is:
 where X and Y are the python version numbers.  Y may be suffixed with
 't' for threaded python versions.
 
-Why does NTPSec install into /usr/local?  Look at the Filesystem
-Hierarchy Standard [FHS].  Specifically Version 3, Chapter 4:
+Why does NTPSec install into /usr/local?
+
+Look at the Filesystem Hierarchy Standard [FHS].  Specifically Version
+3, Chapter 4:
 
     4.9.1. Purpose
 
@@ -29,15 +36,15 @@ Hierarchy Standard [FHS].  Specifically Version 3, Chapter 4:
     programs and data that are shareable amongst a group of hosts, but
     not found in /usr.
 
-The NTPSec build procedure is for "nstalling software locally", so
-we install into /usr/local, not /usr.  /usr is reserved for
+The NTPSec build procedure, by default, is for "nstalling software
+locally", so we install into /usr/local, not /usr. /usr is reserved for
 the "system software".
 
 Unfortunately, that's not on the default search path of several
 OSes/distros, in particular Fedora, NetBSD, Gentoo, etc..
 (Fixed in Fedora 39, Sep-2023, ??)
 
-Python has search paths [PATHS] that ares used to find library modules
+Python has search paths [PATHS] that are used to find library modules
 when you import them.  You can see your search paths for Python 2 with:
 
     alice ~ # python2 -m site
@@ -73,20 +80,36 @@ Or for Python 3:
 
 What is the difference between 'site-packages' and 'dist-packages'?
 
-This is where pip enters the discussion.  Few distros use pip to install
-python modules.  So pip installed modules do not belong in /usr.  But
-pip installed modules are 'managed' and not just 'locally installed'
-either.  So the compromise is for pip to install into:
+This is where pip enters the discussion.  Some (Debian derived) distros
+have the system installed (apt) call pip to install some system python
+modules.  In that case:
 
-     /usr/local/.../dist-packages.
+1. Drectly installed (apt) system python packages go in:
 
-That leave site-packages for locally installed modules that are not
-otherwise managed by the distribution, pip, or other manager.  Thus
-locally installed NTPSec, gpsd, etc. goes into:
+     /usr/lib/pythonX.Y/
 
-     /usr/local/.../sist-packages.
+2. Indirectly installed (apt called pip)  python packages go in
 
-There are several ways to make things work.
+    /usr/lib/pythonX.Y/dist-packages/
+
+3. User installed (user called pip) python packages go in
+
+    /usr/local/lib/pythonX.Y/dist-packages/
+
+4. User installed (user compiled) python packages go in
+
+    /usr/local/lib/pythonX.Y/site-packages/
+
+So dist-packages means the package is managed by pip.  Split into
+when the system installed using pip, or the user installed using pip.
+
+And site-packages means the package is not managed by the system (apt)
+or by pip.  That would be user compilef NTPSec and gpsd.
+
+More detail at [DEVIANT]
+
+There are several ways to make user compiled and installed packages
+work.
 
 1: You can modify the location where waf will install the libraries.
 For NetBSD, something like this should work:
@@ -163,6 +186,15 @@ This is normally done by the waf install step, but it may have failed.  When
 using a temporary --destdir (e.g. as part of package builds), ldconfig must be
 run manually after the library is installed to its final location.
 
+What about "virtuaal environments"?
+
+Virtual Environments (venv) [VENV] are a way for a user to install
+python version 3 modules for a specific user, and specific use, without
+interfering with other modules installed by the specific user, or the
+system wide python.  Since NTPSec, and gpsd, are intended to be used by
+root, and all users, on a system, it is not appropriate to use install
+them into a venv.
+
 TODO: 
 
 Look into using .pth files to avoid much of this mess.
@@ -172,7 +204,12 @@ References:
 [FHS] Filesystem Hierarchy Standard Version 3.0
       https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
 
+[DEVIANT]  Debian Python Wiki -- Deviations from upstream
+           https://wiki.debian.org/Python#Deviations_from_upstream
+
 [PATHS] The Module Search Path
         https://docs.python.org/2/tutorial/modules.html#the-module-search-path
         https://docs.python.org/3/tutorial/modules.html#the-module-search-path
 
+[VENV] venv — Creation of virtual environments¶
+       https://docs.python.org/3/library/venv.html
