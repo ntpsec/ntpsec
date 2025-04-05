@@ -360,8 +360,10 @@ fetch_packetstamp(
                 // debug
                 snprintf(errbuf, sizeof(errbuf),
                         "fetch_timestamp: sizeof(size_t) %lu, sizeof(int) %lu "
-                        "sizeof(cmsghdr) %lu'n",
-                        sizeof(size_t), sizeof(int), sizeof(struct cmsghdr));
+                        "sizeof(cmsghdr) %lu\n",
+                        (unsigned long)sizeof(size_t),
+			(unsigned long)sizeof(int),
+			(unsigned long)sizeof(struct cmsghdr));
 		DPRINT(4, ("%s", errbuf));
 		msyslog(LOG_ERR, "ERR: %s", errbuf);
                 // debug
