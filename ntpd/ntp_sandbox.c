@@ -460,14 +460,38 @@ int scmp_sc[] = {
 	SCMP_SYS(renameat),
 	SCMP_SYS(linkat),
 	SCMP_SYS(unlinkat),
-#endif
+#endif // __aarch64__ or __riscv
 #if defined(__i386__) || defined(__arm__) || defined(__powerpc__)
 	SCMP_SYS(_newselect),
 	SCMP_SYS(_llseek),
 	SCMP_SYS(mmap2),
 	SCMP_SYS(send),
 	SCMP_SYS(stat64),
-#endif
+#endif // __i386__, __arm__, or__powerpc__
+#if defined(__i386__)
+	SCMP_SYS(timer_settime64),
+	SCMP_SYS(clock_gettime64),
+	SCMP_SYS(stat64),
+	SCMP_SYS(statx),
+	SCMP_SYS(clock_settime64),
+	SCMP_SYS(timer_gettime64),
+	SCMP_SYS(clock_adjtime64),
+	SCMP_SYS(clock_getres_time64),
+#endif  // __i386__
+#if defined(HAVE_DNS_SD_H)
+	#if defined(__aarch64__) || defined(__amd64__)
+		SCMP_SYS(readlinkat),
+		SCMP_SYS(pipe2),
+		SCMP_SYS(getresuid),
+		SCMP_SYS(getresgid),
+	#endif // __amd64__ or __aarch64__
+	#if defined(__i386__)
+		SCMP_SYS(readlink),
+		SCMP_SYS(pipe2),
+		SCMP_SYS(getresuid32),
+		SCMP_SYS(getresgid32),
+	#endif // __i386__
+#endif // HAVE_DNS_SD_H
 };
 	{
 		for (unsigned int i = 0; i < COUNTOF(scmp_sc); i++) {
