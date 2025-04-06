@@ -337,7 +337,12 @@ fetch_packetstamp(
 	}
 #if defined(SO_TIMESTAMPNS)
 	/* Linux and ?? */
-	if (SCM_TIMESTAMPNS != cmsghdr->cmsg_type) {
+	if ((SCM_TIMESTAMPNS != cmsghdr->cmsg_type)
+#ifdef SCM_TIMESTAMPNS_OLD
+	    /* Ubuntu 20.04.2 on ZeroPi??, see #842 */
+            && (SCM_TIMESTAMPNS_OLD != cmsghdr->cmsg_type)
+#endif
+          ) {
 #elif defined(SO_TS_CLOCK)
 	/* FreeBSD */
 	if (SCM_REALTIME != cmsghdr->cmsg_type) {
