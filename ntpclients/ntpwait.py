@@ -89,7 +89,7 @@ if __name__ == "__main__":
     if verbose:
         sys.stdout.write("Waiting for ntpd to synchronize...  ")
 
-    for i in range(1, tries):
+    for i in range(tries):
         session = ntp.packet.ControlSession()
         # session.debug = 4
         if not session.openhost("localhost"):
