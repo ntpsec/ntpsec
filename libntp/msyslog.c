@@ -381,7 +381,7 @@ change_logfile(
 		    0 != strcmp(log_fname, "stderr") &&
 		    0 != strcmp(log_fname, "stdout") &&
 		    NULL != getcwd(curdir, sizeof(curdir))) {
-			cd_octets = strlen(curdir);
+			cd_octets = strnlen(curdir, sizeof(curdir));
 			/* trim any trailing '/' */
 			if (cd_octets > 1 &&
 			    DIR_SEP == curdir[cd_octets - 1])

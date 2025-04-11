@@ -22,7 +22,6 @@ refid_str(
 	)
 {
 	char *	text;
-	size_t	tlen;
 
 	if (stratum > 1) {
 		struct in_addr in4;
@@ -38,8 +37,7 @@ refid_str(
 	  if (text[i] != ' ') break;
 	  text[i] = '\0';
 	}
-	tlen = strlen(text);
-	if (0 == tlen) {
+	if ('\0' == *text) {
 	  strlcat(text, "?", LIB_BUFLENGTH);
 	}
 

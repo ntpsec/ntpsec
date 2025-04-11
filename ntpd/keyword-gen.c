@@ -702,7 +702,7 @@ populate_symb(
 		    && token < (int)COUNTOF(symb)) {
 
 			symb[token] = strdup(name);
-			if (strlen(name) > MAX_TOK_LEN) {
+			if (strnlen(name, MAX_TOK_LEN + 1) > MAX_TOK_LEN) {
 				fprintf(stderr,
 					"MAX_TOK_LEN %d too small for '%s'\n"
 					"Edit keyword-gen.c to raise.\n",

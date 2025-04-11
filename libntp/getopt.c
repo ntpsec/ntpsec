@@ -161,7 +161,7 @@ int ntp_getopt_long(int argc, char *const argv[], const char *optstring,
 		return -1;
 	}
 
-	if (strlen(argv[ntp_optind]) < 3 || strncmp(argv[ntp_optind], "--", 2) != 0) {
+	if (strnlen(argv[ntp_optind], 3) < 3 || strncmp(argv[ntp_optind], "--", 2) != 0) {
 		return ntp_getopt(argc, argv, optstring);
 	}
 

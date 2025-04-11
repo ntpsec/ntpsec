@@ -143,14 +143,13 @@ static void DoSign(
   char stupid_api1[20];
   char stupid_api2[50];
 
-  const char* context = "RoughTime v1 delegation signature-";
-  int contextlen = strlen(context)+1;
+  const char context[] = "RoughTime v1 delegation signature-";
   OSSL_PARAM params[3];
 
   strncpy(stupid_api1, "Ed25519ctx", sizeof(stupid_api1));
   params[0] = OSSL_PARAM_construct_utf8_string("instance", stupid_api1, 0);
   strncpy(stupid_api2, context, sizeof(stupid_api2));
-  params[1] = OSSL_PARAM_construct_octet_string("context-string", stupid_api2, contextlen);
+  params[1] = OSSL_PARAM_construct_octet_string("context-string", stupid_api2, sizeof(context));
   params[2] = OSSL_PARAM_construct_end();
   err = EVP_DigestSignInit_ex(ctx, NULL, NULL, NULL, NULL, key, params);
   if (1 != err ) {

@@ -413,9 +413,9 @@ statustoa(
 			 getcode((st) & 0xf, clock_codes));
 		break;
 
-        default:
-                /* huh? */
-                break;
+	default:
+		/* huh? */
+		break;
 	}
 
 	return cb;

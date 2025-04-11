@@ -364,7 +364,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
         memset(&iter->current, 0, sizeof(iter->current));
 
-        namelen = (unsigned int)strlen(ifa->ifa_name);
+        namelen = (unsigned int)strnlen(ifa->ifa_name, sizeof(iter->current.name));
         if (namelen > sizeof(iter->current.name) - 1)
                 namelen = sizeof(iter->current.name) - 1;
 
@@ -1571,7 +1571,7 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 */
                 return (ISC_R_FAILURE);
         }
-        if (strlen(address) != 32) {
+        if (strnlen(address, 33) != 32) {
 /*              isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
                               ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
                               "/proc/net/if_inet6:strlen(%s) != 32", address);

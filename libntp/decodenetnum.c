@@ -55,7 +55,7 @@ decodenetnum(
 	if ( NULL == num) {
                 return -4001;
         }
-	numlen = strlen(num);
+	numlen = strnlen(num, INET6_ADDRSTRLEN + NI_MAXSERV + 2); // 80
 	/* Quickly reject empty or impossibly long inputs. */
 	if(numlen == 0 ||
 	   numlen > ((sizeof(ip) - 1) + (NI_MAXSERV - 1) + (3 /* "[]:" */))) {
