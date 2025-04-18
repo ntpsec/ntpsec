@@ -10,6 +10,8 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+## Repository Head
+
 ## 2025-04-18: 1.2.4
 
 * waf has been upgraded to version 2.1.4
