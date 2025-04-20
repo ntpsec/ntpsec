@@ -25,6 +25,14 @@ import socket
 import sys
 import time
 
+# The BrokenPipeError doesn't exist in Python 2, but the problem that requires
+# catching it also doesn't seem to exist in Python 2, so just make it a dummy
+# in Python 2.
+try:
+    BrokenPipeError
+except NameError:
+    BrokenPipeError = None
+
 try:
     import ntp.control
     import ntp.ntpc
