@@ -36,7 +36,7 @@ Look at the Filesystem Hierarchy Standard [FHS].  Specifically Version
     programs and data that are shareable amongst a group of hosts, but
     not found in /usr.
 
-The NTPSec build procedure, by default, is for "nstalling software
+The NTPSec build procedure, by default, is for "installing software
 locally", so we install into /usr/local, not /usr. /usr is reserved for
 the "system software".
 
@@ -186,7 +186,7 @@ This is normally done by the waf install step, but it may have failed.  When
 using a temporary --destdir (e.g. as part of package builds), ldconfig must be
 run manually after the library is installed to its final location.
 
-What about "virtuaal environments"?
+What about "virtual environments"?
 
 Virtual Environments (venv) [VENV] are a way for a user to install
 python version 3 modules for a specific user, and specific use, without
@@ -211,7 +211,7 @@ refer to your distributions documentation, if you can find it.
 
 When in doubt, since python2 is, still, almost dead, use python3.
 
-Sadly, every distribution has a sightly different answer to changing the
+Sadly, every distribution has a slightly different answer to changing the
 python linkage.  Changing an existing python link often has unintended
 consequences.
 
