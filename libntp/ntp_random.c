@@ -4,12 +4,21 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 
 #include <openssl/opensslv.h>
 #include <openssl/rand.h>
 
 #include "config.h"
 #include "ntp.h"
+#include "ntp_stdlib.h"
+#include "ntp_syslog.h"
+
+#ifndef PRAND_BUF_LEN
+#define PRAND_BUF_LEN 4096l
+#endif
+static uint8_t prand_buffer[PRAND_BUF_LEN];
+static size_t prand_burned = PRAND_BUF_LEN;
 
 /* NB: RAND_bytes comes from OpenSSL
  * Starting in version 1.1.1, it reseeds itself occasionally.
@@ -18,13 +27,30 @@
  * so this won't be a problem on newer Linux systems.
  */
 
-void ntp_RAND_bytes(unsigned char *buf, int num) {
-	int err;
-	err = RAND_bytes(buf, num);
-	if (1 != err) {
+/* Use psuedorandom pool to get entropy from */
+static void ntp_pool_rand_fill(uint8_t *buf, int num) {
+	if (0 > num) {
+		return;
+	}
+	if (1 != RAND_bytes(buf, num)) {
 		msyslog(LOG_ERR, "ERR: RAND_bytes failed");
 		exit(1);
 	}
+}
+
+void ntp_RAND_bytes(unsigned char *buf, int num) {
+	if (0 > num) {
+		return;
+	}
+	if (PRAND_BUF_LEN < num) {  // This should never happen
+		return ntp_pool_rand_fill(buf, num);
+	}
+	if (PRAND_BUF_LEN < num + prand_burned) {
+		ntp_pool_rand_fill(&prand_buffer[0], prand_burned);
+		prand_burned = 0;
+	}
+	memcpy(buf, &prand_buffer[0] + prand_burned, num);
+	prand_burned += num;
 }
 
 void ntp_RAND_priv_bytes(unsigned char *buf, int num) {
@@ -44,6 +70,6 @@ void ntp_RAND_priv_bytes(unsigned char *buf, int num) {
 
 uint32_t ntp_random(void) {
 	uint32_t ret;
-	ntp_RAND_bytes((uint8_t*)&ret, sizeof(uint32_t));
+	ntp_RAND_bytes((uint8_t*)&ret, sizeof(ret));
 	return ret;
 }
