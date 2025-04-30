@@ -1049,9 +1049,9 @@ start_kern_loop(void)
 	clock_ctl.pll_control = true;
 	ZERO(ntv);
 	ntv.modes = MOD_BITS;
-	ntv.status = STA_PLL;
-	ntv.maxerror = sys_maxdisp;
-	ntv.esterror = sys_maxdisp;
+	ntv.status = STA_PLL | STA_UNSYNC;
+	ntv.maxerror = sys_maxdisp * 1e6;
+	ntv.esterror = sys_maxdisp * 1e6;
 	ntv.constant = clkstate.sys_poll;
 	if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
