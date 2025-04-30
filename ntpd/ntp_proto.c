@@ -13,6 +13,7 @@
 #include "ntp_auth.h"
 #include "timespecops.h"
 
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #ifdef HAVE_LIBSCF_H
@@ -457,7 +458,7 @@ static bool check_early_restrictions(
 	int mode = PKT_MODE(rbufp->recv_buffer[0]);
 	return (
 	  (restrict_mask & RES_IGNORE) ||
-	  ((restrict_mask & RES_FLAKE) && (double)random() / RAND_MAX < .1) ||
+	  ((restrict_mask & RES_FLAKE) && (double)ntp_random() / UINT32_MAX < .1) ||
 	  ((restrict_mask & RES_NOQUERY) && (MODE_CONTROL == mode)) ||
 	  ((restrict_mask & RES_NOSERVE) && (MODE_CONTROL != mode)) ||
 	  ((restrict_mask & RES_VERSION) &&
@@ -1259,7 +1260,7 @@ poll_update(
 #endif /* REFCLOCK */
 			/* add a bit of randomess to next polling time
 			 * to disperse traffic */
-			next = ((0x1000UL | (random() & 0x0ff)) <<
+			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<
 			    hpoll) >> 12;
 		next += peer->outdate;
 		if (next > utemp)

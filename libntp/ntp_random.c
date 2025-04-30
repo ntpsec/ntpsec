@@ -39,3 +39,11 @@ void ntp_RAND_priv_bytes(unsigned char *buf, int num) {
 		exit(1);
 	}
 }
+
+/* Return four byes of entropy. This differs from the ~31bits from random() */
+
+uint32_t ntp_random(void) {
+	uint32_t ret;
+	ntp_RAND_bytes((uint8_t*)&ret, sizeof(uint32_t));
+	return ret;
+}

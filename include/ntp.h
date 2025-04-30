@@ -19,6 +19,7 @@
 /* common place to check/crash on unlikely error return */
 void ntp_RAND_bytes(unsigned char *buf, int num);
 void ntp_RAND_priv_bytes(unsigned char *buf, int num);
+uint32_t ntp_random(void);
 
 
 /*

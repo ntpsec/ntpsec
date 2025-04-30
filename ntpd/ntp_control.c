@@ -2725,8 +2725,7 @@ send_random_tag_value(
 	int	noise;
 	char	buf[32];
 
-	/* coverity[DC.WEAK_CRYPTO] */
-	noise = random();
+	noise = ntp_random();
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
 	buf[1] = 'a' + noise % 26;
@@ -2769,8 +2768,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	/* coverity[DC.WEAK_CRYPTO] */
-	noise = (uint32_t)random();
+	noise = (uint32_t)ntp_random();
 	while (remaining > 0) {
 #ifdef USE_RANDOMIZE_RESPONSES
 	 	which = (noise & 7) % COUNTOF(sent);
@@ -3312,8 +3310,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			/* coverity[DC.WEAK_CRYPTO] */
-			noise = (uint32_t)random();
+			noise = (uint32_t)ntp_random();
 			noisebits = 31;
 		}
 #ifdef USE_RANDOMIZE_RESPONSES
@@ -3481,8 +3478,7 @@ send_restrict_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 2) {
-			/* coverity[DC.WEAK_CRYPTO] */
-			noise = (uint32_t)random();
+			noise = (uint32_t)ntp_random();
 			noisebits = 31;
 		}
 #ifdef USE_RANDOMIZE_RESPONSES
