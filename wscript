@@ -52,6 +52,7 @@ Usage: waf <command>
     loccount    Show SLOC count of the source tree
     uninstall   Uninstall the project
 
+Use "waf --help" to get a full list of available commands.
 ''')
 
 
