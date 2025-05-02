@@ -313,7 +313,7 @@ static const struct var sys_var[] = {
   Var_strP("version", RO|DEF, ntpd_version),
 
   Var_dbl("clk_wander", RO|DEF|ToPPM|DBL6, loop_data.clock_stability),
-  Var_special("sys_var_list", RO|DEF, vs_varlist),
+  Var_special("sys_var_list", RO, vs_varlist),
   Var_uint("tai", RO|DEF, sys_tai),
   Var_time("leapsec", RO|DEF|N_LEAP, lsig.ttime),
   Var_time("expire", RO|DEF|N_LEAP, lsig.etime),
