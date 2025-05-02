@@ -397,14 +397,18 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 			break;
 		    case NTS_AEEF:
 			adlength = buf.next-NTP_EX_HDR_LNG-pkt;  /* backup over header */
+			if (NTP_EX_U16_LNG*2 > length)
+				return false;        /* garbage packet */
 			noncelen = next_uint16(&buf);
 			outlen = next_uint16(&buf);
 			if (noncelen&3 || outlen&3)
-				return false;                 /* else round up */
+				return false;        /* else round up */
 			nonce = buf.next;
 			ciphertext = nonce+noncelen;
 			plaintext = ciphertext+CMAC_LENGTH;
-			outlen = buf.left-NONCE_LENGTH-CMAC_LENGTH;
+			if (noncelen+CMAC_LENGTH > length)
+				return false;        /* garbage packet */
+			outlen = buf.left-noncelen-CMAC_LENGTH;
 			//      printf("ECRa: %lu, %d\n", (long unsigned)outlen, noncelen);
 			ok = AES_SIV_Decrypt(wire_ctx,
 					     plaintext, &outlen,
@@ -416,8 +420,8 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 			if (!ok)
 				return false;
 			/* setup to process encrypted headers */
-			buf.next += NONCE_LENGTH+CMAC_LENGTH;
-			buf.left -= NONCE_LENGTH+CMAC_LENGTH;
+			buf.next += noncelen+CMAC_LENGTH;
+			buf.left -= noncelen+CMAC_LENGTH;
 			sawAEEF = true;
 			break;
 		    default:
