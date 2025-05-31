@@ -102,10 +102,10 @@ def queryhost(server, concurrent, timeout=5, port=123, bindaddr=None):
     request = ntp.packet.SyncPacket()
     request.transmit_timestamp = ntp.packet.SyncPacket.posix_to_ntp(
         time.time())
-    packet = request.flatten()
     needgap = (len(iptuples) > 1) and (gap > 0)
     firstloop = True
     for (family, socktype, proto, canonname, sockaddr) in iptuples:
+        packet = request.flatten()
         if needgap and not firstloop:
             time.sleep(gap)
         if firstloop:
