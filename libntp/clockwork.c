@@ -36,11 +36,15 @@
  * ntptime code has a scaling expression in it that implies
  * nanoseconds if that flash bit is on. It is unknown under what
  * circumstances, if any, this was ever correct.
+ *   Linux sets it to 1
+ *   FreeBSD /usr/include/sys/timex.h says
+ *     STA_NANO applies to offset, precision and jitter
+ * It's never used so it doesn't matter.  2025-Jun-08
  */
 int ntp_adjtime_ns(struct timex *ntx)
 {
-#ifdef STA_NANO
 	static bool nanoseconds = false;
+#ifdef STA_NANO
 	static bool initial_call = true;
 	if (initial_call)
 	{
