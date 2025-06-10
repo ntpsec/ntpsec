@@ -46,10 +46,10 @@ void ntp_RAND_bytes(unsigned char *buf, int num) {
 		return ntp_pool_rand_fill(buf, num);
 	}
 	if (PRAND_BUF_LEN < num + prand_burned) {
-		ntp_pool_rand_fill(&prand_buffer[0], prand_burned);
+		ntp_pool_rand_fill(prand_buffer, prand_burned);
 		prand_burned = 0;
 	}
-	memcpy(buf, &prand_buffer[0] + prand_burned, num);
+	memcpy(buf, prand_buffer + prand_burned, num);
 	prand_burned += num;
 }
 
