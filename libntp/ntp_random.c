@@ -39,10 +39,10 @@ static void ntp_pool_rand_fill(uint8_t *buf, int num) {
 }
 
 void ntp_RAND_bytes(unsigned char *buf, int num) {
-	if (0 > num) {
+	if (0 >= num) {
 		return;
 	}
-	if (PRAND_BUF_LEN < num) {  // This should never happen
+	if (PRAND_BUF_LEN <= num) {  // This should never happen
 		return ntp_pool_rand_fill(buf, num);
 	}
 	if (PRAND_BUF_LEN < num + prand_burned) {
