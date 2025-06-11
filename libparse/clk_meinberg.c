@@ -656,15 +656,15 @@ gps_input(
 		get_mbg_header(&datap, &header);
 
 		parseprintf(DD_PARSE, ("gps_input: header: cmd 0x%x, len %d, dcsum 0x%x, hcsum 0x%x\n",
-				       (int)header.cmd, (int)header.len, (int)header.data_csum,
-				       (int)header.hdr_csum));
+			header.cmd, (int)header.len, \
+			header.data_csum, header.hdr_csum));
 
 
 		calc_csum = mbg_csum( (unsigned char *) parseio->parse_dtime.parse_msg + 1, (unsigned short)6 );
 
 		if ( calc_csum != header.hdr_csum ) {
 			parseprintf(DD_PARSE, ("gps_input: header checksum mismatch expected 0x%x, got 0x%x\n",
-					       (int)calc_csum, (int)mbg_csum( (unsigned char *) parseio->parse_dtime.parse_msg, (unsigned short)6 )));
+					       calc_csum, mbg_csum( (unsigned char *) parseio->parse_dtime.parse_msg, (unsigned short)6 )));
 
 			msg_buf->phase = MBG_NONE;  /* back to hunting mode */
 			return PARSE_INP_DATA;      /* invalid header checksum received - pass up for detection */

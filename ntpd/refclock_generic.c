@@ -4926,7 +4926,7 @@ trimbletsip_message(
 
 			printf("TRIMBLE BAD packet, size %u:\n	", size);
 			for (i = 0; i < size; i++) {
-				printf ("%2.2x, ", buffer[i]&0xff);
+				printf ("%2.2x, ", (uint8_t)(buffer[i]&0xff));
 				if (i%16 == 15) printf("\n\t");
 			}
 			printf("\n");
@@ -4950,7 +4950,7 @@ trimbletsip_message(
 			printf("TRIMBLE packet 0x%02x, size %u:\n	",
                                cmd, size);
 			for (i = 0; i < size; i++) {
-				printf ("%2.2x, ", buffer[i]&0xff);
+				printf ("%2.2x, ", (uint8_t)(buffer[i]&0xff));
 				if (i%16 == 15) printf("\n\t");
 			}
 			printf("\n");
