@@ -246,7 +246,7 @@ if __name__ == '__main__':
         elif switch in ("-D", "--set-debug-level"):
             errmsg = "Error: -D parameter '%s' not a number\n"
             debug = ntp.util.safeargcast(val, int, errmsg, usage)
-        elif switch in ("-h", "--help") :
+        elif switch in ("-h", "--help"):
             print(usage)
             raise SystemExit(0)
         elif switch in ("-l", "--logfile"):
@@ -264,10 +264,10 @@ if __name__ == '__main__':
             raise SystemExit(0)
 
     if 0 > debug:
-        # don;t let debug go negative
+        # don't let debug go negative
         debug = 0
     if logname:
-        # always open reequested log
+        # always open requested log
         logfp = open(logname, "a", 1)  # 1 => line buffered
     elif 0 < debug:
         # open default log, only if debugging
@@ -489,7 +489,7 @@ if __name__ == '__main__':
                     elif key == '-':
                         debug -= 1
                         if 0 > debug:
-                            # don;t let debug go negative
+                            # don't let debug go negative
                             debug = 0
                         session.debug = debug
                         peer_report.debug = debug
