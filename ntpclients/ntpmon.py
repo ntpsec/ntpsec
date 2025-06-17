@@ -23,7 +23,7 @@ Any keystroke causes a poll and update. Keystroke commands:
 'w': Toggle wide mode.
 'x': Cleanly terminate the program.
 ' ': Rotate through a/n/o/p/r display modes.
-'+': Increase debugging level.  Output goes to ntpmon.log
+'+': Increase debugging level.  Output goes to logfile (default ntpmon.log).
 '-': Decrease debugging level.
 '?': Display helpscreen.
 '''
@@ -237,6 +237,7 @@ if __name__ == '__main__':
     nyquist = 1
     debug = 0
     logfp = None
+    logname = None
     defaultlog = "ntpmon.log"
 
     for (switch, val) in options:
@@ -245,13 +246,11 @@ if __name__ == '__main__':
         elif switch in ("-D", "--set-debug-level"):
             errmsg = "Error: -D parameter '%s' not a number\n"
             debug = ntp.util.safeargcast(val, int, errmsg, usage)
-        elif switch in ("-h", "--help"):
+        elif switch in ("-h", "--help") :
             print(usage)
             raise SystemExit(0)
         elif switch in ("-l", "--logfile"):
-            if logfp is not None:
-                logfp.close()
-            logfp = open(val, "a", 1)  # 1 => line buffered
+            logname = val
         elif switch in ("-n", "--numeric"):
             showhostnames = 0
         elif switch in ("-s", "--srcname"):
@@ -264,8 +263,18 @@ if __name__ == '__main__':
             print("ntpmon %s" % ntp.util.stdversion())
             raise SystemExit(0)
 
-    if (logfp is None) and (debug > 0):
+    if 0 > debug:
+        # don;t let debug go negative
+        debug = 0
+    if logname:
+        # always open reequested log
+        logfp = open(logname, "a", 1)  # 1 => line buffered
+    elif 0 < debug:
+        # open default log, only if debugging
         logfp = open(defaultlog, "a", 1)
+    else:
+        # fall back to stderr
+        logfp = sys.stderr
 
     poll_interval = 1
     helpmode = selectmode = detailmode = False
@@ -467,7 +476,8 @@ if __name__ == '__main__':
                             selected += len(peers) - 1
                             selected %= len(peers)
                     elif key == '+':
-                        if logfp is None:
+                        if sys.stderr == logfp:
+                            # log to defaultlog
                             logfp = open(defaultlog, "a", 1)
                             session.logfp = logfp
                             peer_report.logfp = logfp
@@ -478,6 +488,9 @@ if __name__ == '__main__':
                         mru_report.debug = debug
                     elif key == '-':
                         debug -= 1
+                        if 0 > debug:
+                            # don;t let debug go negative
+                            debug = 0
                         session.debug = debug
                         peer_report.debug = debug
                         mru_report.debug = debug
