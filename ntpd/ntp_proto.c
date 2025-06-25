@@ -215,7 +215,7 @@ void set_use_stattime(uptime_t stattime) {
 static	void	clock_combine	(peer_select *, int, int);
 static	void	clock_select	(void);
 static	void	clock_update	(struct peer *);
-static	void	fast_xmit	(struct recvbuf *, auth_info*, int);
+static	void	fast_xmit	(struct recvbuf *, int, auth_info*, int);
 static	int	local_refid	(struct peer *);
 static	void	peer_xmit	(struct peer *);
 static	int	peer_unfit	(struct peer *);
@@ -264,7 +264,8 @@ is_packet_not_low_rot(
 	return rbufp->recv_length >= 12 &&
 	    PKT_VERSION(rbufp->recv_buffer[0]) >= NTP_OLDVERSION &&
 	    PKT_VERSION(rbufp->recv_buffer[0]) <= NTP_VERSION &&
-	    ( PKT_MODE(rbufp->recv_buffer[0]) == MODE_CLIENT ||
+	    ( PKT_MODE(rbufp->recv_buffer[0]) == MODE_ACTIVEx ||
+	      PKT_MODE(rbufp->recv_buffer[0]) == MODE_CLIENT ||
 	      PKT_MODE(rbufp->recv_buffer[0]) == MODE_SERVER ||
               PKT_MODE(rbufp->recv_buffer[0]) == MODE_CONTROL);
 }
@@ -659,7 +660,7 @@ receive(
 	struct peer *peer = NULL;
 	unsigned short restrict_mask;
 	auth_info* auth = NULL;  /* !NULL if authenticated */
-	int mode;
+	int mode, xmode;
 
 #ifdef ENABLE_MSSNTP
 	uint8_t zero_key[MSSNTP_QUERY_MAC_LEN];
@@ -814,6 +815,8 @@ receive(
 	}
 
 	switch (mode) {
+	    case MODE_ACTIVEx: /* remote site using "peer" in config file */
+		/* FALLTHROUGH */
 	    case MODE_CLIENT:  /* Request for us as a server. */
 		if (rbufp->extens_present
 #ifndef DISABLE_NTS
@@ -825,7 +828,8 @@ receive(
 			maybe_log_junk("EX-REQ", rbufp);
 			break;
 		}
-		fast_xmit(rbufp, auth, restrict_mask);
+		xmode = (mode == MODE_ACTIVEx) ? MODE_PASSIVEx : MODE_SERVER;
+		fast_xmit(rbufp, xmode, auth, restrict_mask);
 		stat_proto_total.sys_processed++;
 		break;
 	    case MODE_SERVER:  /* Reply to our request to a server. */
@@ -2258,6 +2262,7 @@ leap_smear_add_offs(l_fp *t) {
 static void
 fast_xmit(
 	struct recvbuf *rbufp,	/* receive packet pointer */
+	int	xmode,		/* receive mode */
 	auth_info *auth,	/* !NULL for authentication */
 	int	flags		/* restrict mask */
 	)
@@ -2286,7 +2291,7 @@ fast_xmit(
 	if (flags & RES_KOD) {
 		stat_proto_total.sys_kodsent++;
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
-		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);
+		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
 		xpkt.ppoll = max(rbufp->pkt.ppoll, rstrct.ntp_minpoll);
 		xpkt.precision = rbufp->pkt.precision;
@@ -2322,14 +2327,13 @@ fast_xmit(
 		 * the transmit/receive times.
 		 */
 		/* Note: This returns the same data for all versions.
-		 * Currently, the mode is always Server.
 		 * The version is copied from the request.
 		 * There are minor differences between v3 and v4.
 		 * So far, nobody cares.
 		 * Note: There is significant NTPv1 traffic.  See #707
 		 */
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(xmt_leap,
-		    PKT_VERSION(rbufp->pkt.li_vn_mode), MODE_SERVER);
+		    PKT_VERSION(rbufp->pkt.li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_TO_PKT(sys_vars.sys_stratum);
 		xpkt.ppoll = max(rbufp->pkt.ppoll, rstrct.ntp_minpoll);
 		xpkt.precision = sys_vars.sys_precision;
