@@ -149,7 +149,7 @@ devices to avionics.
 
 NTP time has a 32-bit cycle with an epoch of 1900-01-01T00:00:00.  NTP
 time is unsigned; the cycle is thus twice that from a signed 32-bit
-counter and the era 1 rollover will be on 2036-01-08.  A detailed
+counter and the rollover to era 1 will be on 2036-02-07.  A detailed
 discussion can be found at
 https://www.eecis.udel.edu/~mills/y2k.html[The NTP Era and Era
 Numbering]. NTP time has a subsecond part in units of 2^-32^
