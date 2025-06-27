@@ -477,6 +477,7 @@ peer_refresh_interface(
 	)
 {
 	endpt *	niface;
+	endpt *	piface;
 
 	niface = select_peerinterface(p, &p->srcadr, NULL);
 
@@ -496,7 +497,11 @@ peer_refresh_interface(
 		DPRINT(4, ("<NONE>\n"));
 	}
 
+	piface = p->dstadr;
 	set_peerdstadr(p, niface);
+	if (p->dstadr != NULL && p->dstadr != piface) {
+		peer_clear(p, "XFAC", false);
+	}
 }
 
 
