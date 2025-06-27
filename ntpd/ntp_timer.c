@@ -222,13 +222,28 @@ timer(void)
 	 * than the orphan stratum are available. A server with no other
 	 * synchronization source is an orphan. It shows offset zero and
 	 * reference ID the loopback address.
+	 *
+	 * [bug 3644] If the orphan stratum is >= STRATUM_UNSPEC, we
+	 * have to do it a bit different. 'clock_select()' simply
+	 * tiptoed home, but since we're unsync'd and have no peer, we
+	 * should eventually declare we're out of sync. Otherwise we
+	 * would persistently claim we're good, and we're everything but
+	 * that...
 	 */
-	if (sys_orphan < STRATUM_UNSPEC && sys_vars.sys_peer == NULL &&
-	    current_time > orphwait) {
-		if (sys_vars.sys_leap == LEAP_NOTINSYNC) {
-			set_sys_leap(LEAP_NOWARNING);
+	if (sys_vars.sys_peer == NULL && current_time > orphwait) {
+		if (sys_orphan < STRATUM_UNSPEC) {
+			if (sys_vars.sys_leap == LEAP_NOTINSYNC) {
+				set_sys_leap(LEAP_NOWARNING);
+			}
+			sys_vars.sys_stratum = (uint8_t)sys_orphan;
 		}
-		sys_vars.sys_stratum = (uint8_t)sys_orphan;
+		else {
+			if (sys_vars.sys_leap != LEAP_NOTINSYNC) {
+				set_sys_leap(LEAP_NOTINSYNC);
+				msyslog(LOG_WARNING, "no peer for too long, server running free now");
+			}
+			sys_vars.sys_stratum = STRATUM_UNSPEC;
+		}
 		if (sys_vars.sys_stratum > 1)
 			sys_vars.sys_refid = htonl(LOOPBACKADR);
 		else
