@@ -1574,6 +1574,7 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                 'pngcairo': '.png',
                 'png': '.png',
                 'svg': '.svg',
+                'webp': '.webp',
                }
     if args.terminal in term_map:
         args.img_ext = term_map[args.terminal]
