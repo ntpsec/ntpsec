@@ -48,6 +48,7 @@ import binascii
 import collections
 import csv
 import datetime
+import errno
 import math
 import re
 import os
@@ -448,7 +449,7 @@ def gnuplot(template, outfile=None):
     try:
         rcode = subprocess.call(['gnuplot', tmp_file.name], stdout=out)
     except OSError as e:
-        if e.errno == os.errno.ENOENT:
+        if e.errno == errno.ENOENT:
             # gnuplot not found
             sys.stderr.write("ntpviz: ERROR: gnuplot not found in path\n")
         else:
