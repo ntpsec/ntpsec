@@ -74,8 +74,8 @@ if sys.version_info[0] == 2:
 
     def open(file, mode='r', buffering=-1, encoding=None, errors=None):
         "Redefine open()"
-        return(codecs.open(filename=file, mode=mode, encoding=encoding,
-               errors=errors, buffering=buffering))
+        return (codecs.open(filename=file, mode=mode, encoding=encoding,
+                errors=errors, buffering=buffering))
 
 # believe it or not, Python has no way to make a simple constant!
 MS_PER_S = 1e3          # milliseconds per second
